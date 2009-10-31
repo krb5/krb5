@@ -97,7 +97,7 @@
 
 #define FORWARDMASK 2
 
-#define SLC 3 
+#define SLC 3
 #define SLC_DEFAULT     3
 #define SLC_VALUE       2
 #define SLC_CANTCHANGE  1
@@ -147,7 +147,7 @@
 #define XOPTIONS		255
 
 #define LINEMODE_MODES_SUPPORTED    0x1B
-/* 
+/*
  * set this flag for linemode special functions which are supported by
  * Telnet, even though they are not currently active.  This is to allow
  * the other side to negotiate to a "No Support" state for an option
@@ -155,8 +155,8 @@
  * our "No Support" state to something else ("Can't Change", "Value",
  * whatever)
  */
-#define SLC_SUPPORTED       0x10    
-	
+#define SLC_SUPPORTED       0x10
+
 #define ESCFOUND 5
 #define IACFOUND 6
 #define NEGOTIATE 1

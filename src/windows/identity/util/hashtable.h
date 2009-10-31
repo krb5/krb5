@@ -106,8 +106,8 @@ typedef struct hashtable_t {
     \param[in] delr A del-ref function. Optional; can be NULL.
 
  */
-KHMEXP hashtable * KHMAPI hash_new_hashtable(khm_int32 n, 
-                               hash_function_t hash, 
+KHMEXP hashtable * KHMAPI hash_new_hashtable(khm_int32 n,
+                               hash_function_t hash,
                                comp_function_t comp,
                                add_ref_function_t addr,
                                del_ref_function_t delr);

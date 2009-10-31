@@ -6,23 +6,23 @@
  * may copy or modify Sun RPC without charge, but are not authorized
  * to license or distribute it to anyone else except as part of a product or
  * program developed by the user.
- * 
+ *
  * SUN RPC IS PROVIDED AS IS WITH NO WARRANTIES OF ANY KIND INCLUDING THE
  * WARRANTIES OF DESIGN, MERCHANTIBILITY AND FITNESS FOR A PARTICULAR
  * PURPOSE, OR ARISING FROM A COURSE OF DEALING, USAGE OR TRADE PRACTICE.
- * 
+ *
  * Sun RPC is provided with no support and without any obligation on the
  * part of Sun Microsystems, Inc. to assist in its use, correction,
  * modification or enhancement.
- * 
+ *
  * SUN MICROSYSTEMS, INC. SHALL HAVE NO LIABILITY WITH RESPECT TO THE
  * INFRINGEMENT OF COPYRIGHTS, TRADE SECRETS OR ANY PATENTS BY SUN RPC
  * OR ANY PART THEREOF.
- * 
+ *
  * In no event will Sun Microsystems, Inc. be liable for any lost revenue
  * or profits or other special, indirect and consequential damages, even if
  * Sun has been advised of the possibility of such damages.
- * 
+ *
  * Sun Microsystems, Inc.
  * 2550 Garcia Avenue
  * Mountain View, California  94043
@@ -74,7 +74,7 @@ void
 xdr_free(xdrproc_t proc, void *objp)
 {
 	XDR x;
-	
+
 	x.x_op = XDR_FREE;
 	(*proc)(&x, objp);
 }
@@ -501,7 +501,7 @@ xdr_int32(XDR *xdrs, int32_t *ip)
 	case XDR_ENCODE:
 		VALGRIND_CHECK_DEFINED(*ip);
 		l = *ip;
-		return (xdr_long(xdrs, &l));    
+		return (xdr_long(xdrs, &l));
 
 	case XDR_DECODE:
 		if (!xdr_long(xdrs, &l)) {
@@ -511,7 +511,7 @@ xdr_int32(XDR *xdrs, int32_t *ip)
 		return (TRUE);
 
 	case XDR_FREE:
-		return (TRUE);    
+		return (TRUE);
 	}
 	return (FALSE);
 }
@@ -526,7 +526,7 @@ xdr_u_int32(XDR *xdrs, uint32_t *up)
 	case XDR_ENCODE:
 		VALGRIND_CHECK_DEFINED(*up);
 		ul = *up;
-		return (xdr_u_long(xdrs, &ul));    
+		return (xdr_u_long(xdrs, &ul));
 
 	case XDR_DECODE:
 		if (!xdr_u_long(xdrs, &ul)) {
@@ -536,7 +536,7 @@ xdr_u_int32(XDR *xdrs, uint32_t *up)
 		return (TRUE);
 
 	case XDR_FREE:
-		return (TRUE);    
+		return (TRUE);
 	}
 	return (FALSE);
 }
@@ -661,8 +661,8 @@ xdr_string(XDR *xdrs, char **cpp, u_int maxsize)
 	return (FALSE);
 }
 
-/* 
- * Wrapper for xdr_string that can be called directly from 
+/*
+ * Wrapper for xdr_string that can be called directly from
  * routines like clnt_call
  */
 bool_t

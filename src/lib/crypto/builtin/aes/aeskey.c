@@ -5,28 +5,28 @@
 
  LICENSE TERMS
 
- The free distribution and use of this software in both source and binary 
+ The free distribution and use of this software in both source and binary
  form is allowed (with or without changes) provided that:
 
-   1. distributions of this source code include the above copyright 
+   1. distributions of this source code include the above copyright
       notice, this list of conditions and the following disclaimer;
 
    2. distributions in binary form include the above copyright
       notice, this list of conditions and the following disclaimer
       in the documentation and/or other associated materials;
 
-   3. the copyright holder's name is not used to endorse products 
-      built using this software without specific written permission. 
+   3. the copyright holder's name is not used to endorse products
+      built using this software without specific written permission.
 
  DISCLAIMER
 
  This software is provided 'as is' with no explcit or implied warranties
- in respect of any properties, including, but not limited to, correctness 
+ in respect of any properties, including, but not limited to, correctness
  and fitness for purpose.
  -------------------------------------------------------------------------
  Issue Date: 21/01/2002
 
- This file contains the code for implementing the key schedule for AES 
+ This file contains the code for implementing the key schedule for AES
  (Rijndael) for block and key sizes of 16, 24, and 32 bytes.
 */
 
@@ -34,10 +34,10 @@
 
 #if defined(BLOCK_SIZE) && (BLOCK_SIZE & 7)
 #error An illegal block size has been specified.
-#endif  
+#endif
 
 /* Subroutine to set the block size (if variable) in bytes, legal
-   values being 16, 24 and 32. 
+   values being 16, 24 and 32.
 */
 
 #if !defined(BLOCK_SIZE) && defined(SET_BLOCK_LENGTH)
@@ -48,8 +48,8 @@ aes_rval aes_blk_len(unsigned int blen, aes_ctx cx[1])
     if(!tab_init) gen_tabs();
 #endif
 
-    if((blen & 7) || blen < 16 || blen > 32) 
-    {     
+    if((blen & 7) || blen < 16 || blen > 32)
+    {
         cx->n_blk = 0; return aes_bad;
     }
 
@@ -64,10 +64,10 @@ aes_rval aes_blk_len(unsigned int blen, aes_ctx cx[1])
    This corresponds to bit lengths of 128, 192 and 256 bits, and
    to Nk values of 4, 6 and 8 respectively.
 
-   The following macros implement a single cycle in the key 
-   schedule generation process. The number of cycles needed 
+   The following macros implement a single cycle in the key
+   schedule generation process. The number of cycles needed
    for each cx->n_col and nk value is:
- 
+
     nk =             4  5  6  7  8
     ------------------------------
     cx->n_col = 4   10  9  8  7  7
@@ -110,7 +110,7 @@ aes_rval aes_blk_len(unsigned int blen, aes_ctx cx[1])
 }
 
 aes_rval aes_enc_key(const unsigned char in_key[], unsigned int klen, aes_ctx cx[1])
-{   uint32_t    ss[8]; 
+{   uint32_t    ss[8];
 
 #if !defined(FIXED_TABLES)
     if(!tab_init) gen_tabs();
@@ -121,7 +121,7 @@ aes_rval aes_enc_key(const unsigned char in_key[], unsigned int klen, aes_ctx cx
 #else
     cx->n_blk = BLOCK_SIZE;
 #endif
-    
+
     cx->n_blk = (cx->n_blk & ~3U) | 1;
 
     cx->k_sch[0] = ss[0] = word_in(in_key     );
@@ -133,29 +133,29 @@ aes_rval aes_enc_key(const unsigned char in_key[], unsigned int klen, aes_ctx cx
 
     switch(klen)
     {
-    case 16:    ke4(cx->k_sch, 0); ke4(cx->k_sch, 1); 
+    case 16:    ke4(cx->k_sch, 0); ke4(cx->k_sch, 1);
                 ke4(cx->k_sch, 2); ke4(cx->k_sch, 3);
-                ke4(cx->k_sch, 4); ke4(cx->k_sch, 5); 
+                ke4(cx->k_sch, 4); ke4(cx->k_sch, 5);
                 ke4(cx->k_sch, 6); ke4(cx->k_sch, 7);
-                ke4(cx->k_sch, 8); kel4(cx->k_sch, 9); 
+                ke4(cx->k_sch, 8); kel4(cx->k_sch, 9);
                 cx->n_rnd = 10; break;
     case 24:    cx->k_sch[4] = ss[4] = word_in(in_key + 16);
                 cx->k_sch[5] = ss[5] = word_in(in_key + 20);
-                ke6(cx->k_sch, 0); ke6(cx->k_sch, 1); 
+                ke6(cx->k_sch, 0); ke6(cx->k_sch, 1);
                 ke6(cx->k_sch, 2); ke6(cx->k_sch, 3);
-                ke6(cx->k_sch, 4); ke6(cx->k_sch, 5); 
-                ke6(cx->k_sch, 6); kel6(cx->k_sch, 7); 
+                ke6(cx->k_sch, 4); ke6(cx->k_sch, 5);
+                ke6(cx->k_sch, 6); kel6(cx->k_sch, 7);
                 cx->n_rnd = 12; break;
     case 32:    cx->k_sch[4] = ss[4] = word_in(in_key + 16);
                 cx->k_sch[5] = ss[5] = word_in(in_key + 20);
                 cx->k_sch[6] = ss[6] = word_in(in_key + 24);
                 cx->k_sch[7] = ss[7] = word_in(in_key + 28);
-                ke8(cx->k_sch, 0); ke8(cx->k_sch, 1); 
+                ke8(cx->k_sch, 0); ke8(cx->k_sch, 1);
                 ke8(cx->k_sch, 2); ke8(cx->k_sch, 3);
-                ke8(cx->k_sch, 4); ke8(cx->k_sch, 5); 
-                kel8(cx->k_sch, 6); 
+                ke8(cx->k_sch, 4); ke8(cx->k_sch, 5);
+                kel8(cx->k_sch, 6);
                 cx->n_rnd = 14; break;
-    default:    cx->n_rnd = 0; return aes_bad; 
+    default:    cx->n_rnd = 0; return aes_bad;
     }
 #else
     {   uint32_t i, l;
@@ -179,7 +179,7 @@ aes_rval aes_enc_key(const unsigned char in_key[], unsigned int klen, aes_ctx cx
                     for(i = 0; i < l; ++i)
                         ke8(cx->k_sch,  i);
                     break;
-        default:    cx->n_rnd = 0; return aes_bad; 
+        default:    cx->n_rnd = 0; return aes_bad;
         }
     }
 #endif
@@ -277,7 +277,7 @@ aes_rval aes_enc_key(const unsigned char in_key[], unsigned int klen, aes_ctx cx
 }
 
 aes_rval aes_dec_key(const unsigned char in_key[], unsigned int klen, aes_ctx cx[1])
-{   uint32_t    ss[8]; 
+{   uint32_t    ss[8];
     d_vars
 
 #if !defined(FIXED_TABLES)
@@ -301,20 +301,20 @@ aes_rval aes_dec_key(const unsigned char in_key[], unsigned int klen, aes_ctx cx
 
     switch(klen)
     {
-    case 16:    kdf4(cx->k_sch, 0); kd4(cx->k_sch, 1); 
+    case 16:    kdf4(cx->k_sch, 0); kd4(cx->k_sch, 1);
                 kd4(cx->k_sch, 2); kd4(cx->k_sch, 3);
-                kd4(cx->k_sch, 4); kd4(cx->k_sch, 5); 
+                kd4(cx->k_sch, 4); kd4(cx->k_sch, 5);
                 kd4(cx->k_sch, 6); kd4(cx->k_sch, 7);
-                kd4(cx->k_sch, 8); kdl4(cx->k_sch, 9); 
+                kd4(cx->k_sch, 8); kdl4(cx->k_sch, 9);
                 cx->n_rnd = 10; break;
     case 24:    ss[4] = word_in(in_key + 16);
 		cx->k_sch[4] = ff(ss[4]);
 		ss[5] = word_in(in_key + 20);
                 cx->k_sch[5] = ff(ss[5]);
-                kdf6(cx->k_sch, 0); kd6(cx->k_sch, 1); 
+                kdf6(cx->k_sch, 0); kd6(cx->k_sch, 1);
                 kd6(cx->k_sch, 2); kd6(cx->k_sch, 3);
-                kd6(cx->k_sch, 4); kd6(cx->k_sch, 5); 
-                kd6(cx->k_sch, 6); kdl6(cx->k_sch, 7); 
+                kd6(cx->k_sch, 4); kd6(cx->k_sch, 5);
+                kd6(cx->k_sch, 6); kdl6(cx->k_sch, 7);
                 cx->n_rnd = 12; break;
     case 32:    ss[4] = word_in(in_key + 16);
 		cx->k_sch[4] = ff(ss[4]);
@@ -324,12 +324,12 @@ aes_rval aes_dec_key(const unsigned char in_key[], unsigned int klen, aes_ctx cx
                 cx->k_sch[6] = ff(ss[6]);
 		ss[7] = word_in(in_key + 28);
                 cx->k_sch[7] = ff(ss[7]);
-                kdf8(cx->k_sch, 0); kd8(cx->k_sch, 1); 
+                kdf8(cx->k_sch, 0); kd8(cx->k_sch, 1);
                 kd8(cx->k_sch, 2); kd8(cx->k_sch, 3);
-                kd8(cx->k_sch, 4); kd8(cx->k_sch, 5); 
-                kdl8(cx->k_sch, 6); 
+                kd8(cx->k_sch, 4); kd8(cx->k_sch, 5);
+                kdl8(cx->k_sch, 6);
                 cx->n_rnd = 14; break;
-    default:    cx->n_rnd = 0; return aes_bad; 
+    default:    cx->n_rnd = 0; return aes_bad;
     }
 #else
     {   uint32_t i, l;
@@ -338,7 +338,7 @@ aes_rval aes_dec_key(const unsigned char in_key[], unsigned int klen, aes_ctx cx
 
         switch(klen)
         {
-        case 16: 
+        case 16:
                     for(i = 0; i < l; ++i)
                         ke4(cx->k_sch, i);
                     break;
@@ -354,7 +354,7 @@ aes_rval aes_dec_key(const unsigned char in_key[], unsigned int klen, aes_ctx cx
                     for(i = 0; i < l; ++i)
                         ke8(cx->k_sch,  i);
                     break;
-        default:    cx->n_rnd = 0; return aes_bad; 
+        default:    cx->n_rnd = 0; return aes_bad;
         }
 #if (DEC_ROUND != NO_TABLES)
         for(i = nc; i < nc * cx->n_rnd; ++i)

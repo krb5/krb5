@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * clients/ksu/xmalloc.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Perform simple allocation/copy operations, exiting on failure.
  */
@@ -35,8 +36,8 @@ void *xmalloc (size_t sz)
 {
     void *ret = malloc (sz);
     if (ret == 0 && sz != 0) {
-	perror (prog_name);
-	exit (1);
+        perror (prog_name);
+        exit (1);
     }
     return ret;
 }
@@ -45,8 +46,8 @@ void *xrealloc (void *old, size_t newsz)
 {
     void *ret = realloc (old, newsz);
     if (ret == 0 && newsz != 0) {
-	perror (prog_name);
-	exit (1);
+        perror (prog_name);
+        exit (1);
     }
     return ret;
 }
@@ -55,8 +56,8 @@ void *xcalloc (size_t nelts, size_t eltsz)
 {
     void *ret = calloc (nelts, eltsz);
     if (ret == 0 && nelts != 0 && eltsz != 0) {
-	perror (prog_name);
-	exit (1);
+        perror (prog_name);
+        exit (1);
     }
     return ret;
 }
@@ -76,8 +77,8 @@ char *xasprintf (const char *format, ...)
 
     va_start (args, format);
     if (vasprintf(&out, format, args) < 0) {
-	perror (prog_name);
-	exit (1);
+        perror (prog_name);
+        exit (1);
     }
     va_end(args);
     return out;

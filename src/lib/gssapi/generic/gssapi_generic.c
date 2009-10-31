@@ -152,4 +152,3 @@ GSS_DLLIMP gss_OID GSS_C_NT_EXPORT_NAME         = oids+6;
 gss_OID gss_nt_exported_name                    = oids+6;
 
 GSS_DLLIMP gss_OID GSS_C_INQ_SSPI_SESSION_KEY   = oids+7;
-

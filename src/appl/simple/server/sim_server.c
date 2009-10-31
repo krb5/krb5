@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Usage:
  * sample_server servername
@@ -57,7 +57,7 @@ usage(name)
     char *name;
 {
 	fprintf(stderr, "usage: %s [-p port] [-s service] [-S keytab]\n", name);
-}	
+}
 
 int
 main(argc, argv)
@@ -99,7 +99,7 @@ char *argv[];
 
     /*
      * Parse command line arguments
-     *  
+     *
      */
     opterr = 0;
     while ((ch = getopt(argc, argv, "p:s:S:")) != -1)
@@ -125,7 +125,7 @@ char *argv[];
 	break;
     }
 
-    if ((retval = krb5_sname_to_principal(context, NULL, service, 
+    if ((retval = krb5_sname_to_principal(context, NULL, service,
 					  KRB5_NT_SRV_HST, &sprinc))) {
 	com_err(PROGNAME, retval, "while generating service name %s", service);
 	exit(1);
@@ -145,7 +145,7 @@ char *argv[];
     } else {
 	s_sock.sin_port = htons(port);
     }
-    
+
     if (gethostname(full_hname, sizeof(full_hname)) < 0) {
 	perror("gethostname");
 	exit(1);
@@ -192,7 +192,7 @@ char *argv[];
     packet.data = (krb5_pointer) pktbuf;
 
     /* Check authentication info */
-    if ((retval = krb5_rd_req(context, &auth_context, &packet, 
+    if ((retval = krb5_rd_req(context, &auth_context, &packet,
 			      sprinc, keytab, NULL, &ticket))) {
 	com_err(PROGNAME, retval, "while reading request");
 	exit(1);
@@ -263,13 +263,13 @@ char *argv[];
 
     packet.length = i;
     packet.data = (krb5_pointer) pktbuf;
-    
+
     if ((retval = krb5_rd_priv(context, auth_context, &packet,
 			       &message, NULL))) {
 	com_err(PROGNAME, retval, "while verifying PRIV message");
 	exit(1);
     }
-    printf("Decrypted message is: '%.*s'\n", (int) message.length, 
+    printf("Decrypted message is: '%.*s'\n", (int) message.length,
 	   message.data);
 
     krb5_auth_con_free(context, auth_context);

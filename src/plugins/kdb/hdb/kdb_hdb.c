@@ -173,7 +173,7 @@ kh_db_context_init(krb5_context context,
     GET_PLUGIN_FUNC(libkrb5, "krb5_pac_parse",        heim_pac_parse);
     GET_PLUGIN_FUNC(libkrb5, "krb5_pac_verify",       heim_pac_verify);
     GET_PLUGIN_FUNC(libkrb5, "_krb5_pac_sign",        heim_pac_sign);
-    
+
     if (asprintf(&libhdb, "%s/libhdb%s", libdir, SHLIBEXT) < 0)
         goto cleanup;
 
@@ -1423,4 +1423,3 @@ kdb_vftabl kdb_function_table = {
     kh_dbekd_encrypt_key_data,
     kh_db_invoke,
 };
-

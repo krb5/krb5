@@ -43,7 +43,7 @@ int khm_n_statusbar_parts = sizeof(khm_statusbar_parts) / sizeof(khm_statusbar_p
 
 HWND khm_hwnd_statusbar = NULL;
 
-LRESULT 
+LRESULT
 khm_statusbar_notify(LPNMHDR nmhdr) {
     LPNMMOUSE pnmm;
 
@@ -66,7 +66,7 @@ khm_statusbar_notify(LPNMHDR nmhdr) {
     return FALSE;
 }
 
-void 
+void
 khui_statusbar_set_parts(HWND parent) {
     int i;
     int fillerwidth;
@@ -204,5 +204,3 @@ void khm_statusbar_set_part(int id, HICON icon, wchar_t * text) {
                 idx,
                 (LPARAM) text);
 }
-
-

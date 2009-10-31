@@ -139,4 +139,3 @@ krb5_ldap_set_mkey_list(krb5_context context, krb5_keylist_node *key_list)
     r_params->mkey_list = key_list;
     return 0;
 }
-

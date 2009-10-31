@@ -281,7 +281,7 @@ reqdaemonwnd_proc(HWND hwnd,
 
             dlginfo.size = NETID_DLGINFO_V1_SZ;
             dlginfo.dlgtype = NETID_DLGTYPE_TGT;
-            
+
             if (title)
                 StringCbCopy(dlginfo.in.title, sizeof(dlginfo.in.title),
                              wtitle);
@@ -415,7 +415,7 @@ khm_register_reqdaemonwnd_class(void) {
 
 #ifdef DEBUG
     assert(reqdaemon_atom != 0);
-#endif    
+#endif
 }
 
 void
@@ -441,7 +441,7 @@ khm_init_request_daemon(void) {
 
 #ifdef DEBUG
     assert(reqdaemon_thread != NULL);
-#endif    
+#endif
 }
 
 void

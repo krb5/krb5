@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/os/hostaddr.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * This routine returns a list of krb5 addresses given a hostname.
  *
  */
@@ -34,13 +35,13 @@
 krb5_error_code
 krb5_os_hostaddr(krb5_context context, const char *name, krb5_address ***ret_addrs)
 {
-    krb5_error_code 	retval;
-    krb5_address 	**addrs;
-    int			i, j, r;
+    krb5_error_code     retval;
+    krb5_address        **addrs;
+    int                 i, j, r;
     struct addrinfo hints, *ai, *aip;
 
     if (!name)
-	return KRB5_ERR_BAD_HOSTNAME;
+        return KRB5_ERR_BAD_HOSTNAME;
 
     memset (&hints, 0, sizeof (hints));
     hints.ai_flags = AI_NUMERICHOST;
@@ -52,86 +53,85 @@ krb5_os_hostaddr(krb5_context context, const char *name, krb5_address ***ret_add
 
     r = getaddrinfo (name, 0, &hints, &ai);
     if (r && AI_NUMERICHOST != 0) {
-	hints.ai_flags &= ~AI_NUMERICHOST;
-	r = getaddrinfo (name, 0, &hints, &ai);
+        hints.ai_flags &= ~AI_NUMERICHOST;
+        r = getaddrinfo (name, 0, &hints, &ai);
     }
     if (r)
-	return KRB5_ERR_BAD_HOSTNAME;
+        return KRB5_ERR_BAD_HOSTNAME;
 
     for (i = 0, aip = ai; aip; aip = aip->ai_next) {
-	switch (aip->ai_addr->sa_family) {
-	case AF_INET:
+        switch (aip->ai_addr->sa_family) {
+        case AF_INET:
 #ifdef KRB5_USE_INET6
-	case AF_INET6:
+        case AF_INET6:
 #endif
-	    i++;
-	default:
-	    /* Ignore addresses of unknown families.  */
-	    ;
-	}
+            i++;
+        default:
+            /* Ignore addresses of unknown families.  */
+            ;
+        }
     }
 
     addrs = malloc ((i+1) * sizeof(*addrs));
     if (!addrs)
-	return ENOMEM;
+        return ENOMEM;
 
     for (j = 0; j < i + 1; j++)
-	addrs[j] = 0;
+        addrs[j] = 0;
 
     for (i = 0, aip = ai; aip; aip = aip->ai_next) {
-	void *ptr;
-	size_t addrlen;
-	int atype;
+        void *ptr;
+        size_t addrlen;
+        int atype;
 
-	switch (aip->ai_addr->sa_family) {
-	case AF_INET:
-	    addrlen = sizeof (struct in_addr);
-	    ptr = &((struct sockaddr_in *)aip->ai_addr)->sin_addr;
-	    atype = ADDRTYPE_INET;
-	    break;
+        switch (aip->ai_addr->sa_family) {
+        case AF_INET:
+            addrlen = sizeof (struct in_addr);
+            ptr = &((struct sockaddr_in *)aip->ai_addr)->sin_addr;
+            atype = ADDRTYPE_INET;
+            break;
 #ifdef KRB5_USE_INET6
-	case AF_INET6:
-	    addrlen = sizeof (struct in6_addr);
-	    ptr = &((struct sockaddr_in6 *)aip->ai_addr)->sin6_addr;
-	    atype = ADDRTYPE_INET6;
-	    break;
+        case AF_INET6:
+            addrlen = sizeof (struct in6_addr);
+            ptr = &((struct sockaddr_in6 *)aip->ai_addr)->sin6_addr;
+            atype = ADDRTYPE_INET6;
+            break;
 #endif
-	default:
-	    continue;
-	}
-	addrs[i] = (krb5_address *) malloc(sizeof(krb5_address));
-	if (!addrs[i]) {
-	    retval = ENOMEM;
-	    goto errout;
-	}
-	addrs[i]->magic = KV5M_ADDRESS;
-	addrs[i]->addrtype = atype;
-	addrs[i]->length = addrlen;
-	addrs[i]->contents = malloc(addrs[i]->length);
-	if (!addrs[i]->contents) {
-	    retval = ENOMEM;
-	    goto errout;
-	}
-	memcpy (addrs[i]->contents, ptr, addrs[i]->length);
-	i++;
+        default:
+            continue;
+        }
+        addrs[i] = (krb5_address *) malloc(sizeof(krb5_address));
+        if (!addrs[i]) {
+            retval = ENOMEM;
+            goto errout;
+        }
+        addrs[i]->magic = KV5M_ADDRESS;
+        addrs[i]->addrtype = atype;
+        addrs[i]->length = addrlen;
+        addrs[i]->contents = malloc(addrs[i]->length);
+        if (!addrs[i]->contents) {
+            retval = ENOMEM;
+            goto errout;
+        }
+        memcpy (addrs[i]->contents, ptr, addrs[i]->length);
+        i++;
     }
 
     *ret_addrs = addrs;
     if (ai)
-	freeaddrinfo(ai);
+        freeaddrinfo(ai);
     return 0;
 
 errout:
     if (addrs) {
-	for (i = 0; addrs[i]; i++) {
-	    free (addrs[i]->contents);
-	    free (addrs[i]);
-	}
-	krb5_free_addresses(context, addrs);
+        for (i = 0; addrs[i]; i++) {
+            free (addrs[i]->contents);
+            free (addrs[i]);
+        }
+        krb5_free_addresses(context, addrs);
     }
     if (ai)
-	freeaddrinfo(ai);
+        freeaddrinfo(ai);
     return retval;
-	
-}
 
+}

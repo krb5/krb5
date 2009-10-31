@@ -30,7 +30,7 @@ static krb5_error_code fast_kdc_get_armor_key
      if (retval == 0) {
 	 *armor_key = (krb5_keyblock *) data->data;
 	 data->data = NULL;
-	 get_entry(context, request, client, 
+	 get_entry(context, request, client,
 		   krb5plugin_preauth_free_fast_armor, &data);
      }
      return retval;

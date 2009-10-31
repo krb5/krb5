@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/os/init_ctx.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -42,7 +43,7 @@
 static krb5_error_code
 get_from_windows_dir(
     char **pname
-    )
+)
 {
     UINT size = GetWindowsDirectory(0, 0);
     *pname = malloc(size + strlen(DEFAULT_PROFILE_FILENAME) + 2);
@@ -59,7 +60,7 @@ get_from_windows_dir(
 static krb5_error_code
 get_from_module_dir(
     char **pname
-    )
+)
 {
     const DWORD size = 1024; /* fixed buffer */
     int found = 0;
@@ -85,7 +86,7 @@ get_from_module_dir(
     name[size - 1] = 0;
     found = !_stat(name, &s);
 
- cleanup:
+cleanup:
     if (found)
         *pname = name;
     else
@@ -99,14 +100,14 @@ get_from_module_dir(
  * This will find a profile in the registry.  *pbuffer != 0 if we
  * found something.  Make sure to free(*pbuffer) when done.  It will
  * return an error code if there is an error the user should know
- * about.  We maintain the invariant: return value != 0 => 
+ * about.  We maintain the invariant: return value != 0 =>
  * *pbuffer == 0.
  */
 static krb5_error_code
 get_from_registry(
     char** pbuffer,
     HKEY hBaseKey
-    )
+)
 {
     HKEY hKey = 0;
     LONG rc = 0;
@@ -124,7 +125,7 @@ get_from_registry(
     }
     *pbuffer = 0;
 
-    if ((rc = RegOpenKeyEx(hBaseKey, key_path, 0, KEY_QUERY_VALUE, 
+    if ((rc = RegOpenKeyEx(hBaseKey, key_path, 0, KEY_QUERY_VALUE,
                            &hKey)) != ERROR_SUCCESS) {
         /* not a real error */
         goto cleanup;
@@ -139,7 +140,7 @@ get_from_registry(
         retval = ENOMEM;
         goto cleanup;
     }
-    if ((rc = RegQueryValueEx(hKey, value_name, 0, 0, *pbuffer, &size)) != 
+    if ((rc = RegQueryValueEx(hKey, value_name, 0, 0, *pbuffer, &size)) !=
         ERROR_SUCCESS) {
         /*
          * Let's not call it a real error in case it disappears, but
@@ -149,7 +150,7 @@ get_from_registry(
         *pbuffer = 0;
         goto cleanup;
     }
- cleanup:
+cleanup:
     if (hKey)
         RegCloseKey(hKey);
     if (retval && *pbuffer) {
@@ -169,13 +170,13 @@ free_filespecs(profile_filespec_t *files)
 
     if (files == 0)
         return;
-    
+
     for (cp = files; *cp; cp++)
         free(*cp);
     free(files);
 }
 
-/* This function is needed by KfM's KerberosPreferences API 
+/* This function is needed by KfM's KerberosPreferences API
  * because it needs to be able to specify "secure" */
 krb5_error_code
 os_get_default_config_files(profile_filespec_t **pfiles, krb5_boolean secure)
@@ -215,7 +216,7 @@ os_get_default_config_files(profile_filespec_t **pfiles, krb5_boolean secure)
         return retval;
     if (!name)
         return KRB5_CONFIG_CANTOPEN; /* should never happen */
-    
+
     files = malloc(2 * sizeof(char *));
     if (!files)
         return ENOMEM;
@@ -229,14 +230,14 @@ os_get_default_config_files(profile_filespec_t **pfiles, krb5_boolean secure)
 
 #ifdef USE_KIM
     /* If kim_library_allow_home_directory_access() == FALSE, we are probably
-     *   trying to authenticate to a fileserver for the user's homedir. 
+     *   trying to authenticate to a fileserver for the user's homedir.
      */
     if (!kim_library_allow_home_directory_access ())
         secure = 1;
 #endif
     if (secure) {
         filepath = DEFAULT_SECURE_PROFILE_PATH;
-    } else { 
+    } else {
         filepath = getenv("KRB5_CONFIG");
         if (!filepath) filepath = DEFAULT_PROFILE_PATH;
     }
@@ -327,8 +328,8 @@ os_init_paths(krb5_context ctx, krb5_boolean kdc)
         retval = add_kdc_config_file(&files);
 
     if (!retval) {
-        retval = profile_init((const_profile_filespec_t *) files, 
-                             &ctx->profile);
+        retval = profile_init((const_profile_filespec_t *) files,
+                              &ctx->profile);
 
 #ifdef KRB5_DNS_LOOKUP
         /* if none of the filenames can be opened use an empty profile */
@@ -336,7 +337,7 @@ os_init_paths(krb5_context ctx, krb5_boolean kdc)
             retval = profile_init(NULL, &ctx->profile);
             if (!retval)
                 ctx->profile_in_memory = 1;
-        }   
+        }
 #endif /* KRB5_DNS_LOOKUP */
     }
 
@@ -386,12 +387,12 @@ krb5_os_init_context(krb5_context ctx, krb5_boolean kdc)
      * If there's an error in the profile, return an error.  Just
      * ignoring the error is a Bad Thing (tm).
      */
-     
+
     if (!retval) {
         krb5_cc_set_default_name(ctx, NULL);
 
 #ifdef _WIN32
-        /* We initialize winsock to version 1.1 but 
+        /* We initialize winsock to version 1.1 but
          * we do not care if we succeed or fail.
          */
         wVersionRequested = 0x0101;
@@ -405,14 +406,14 @@ krb5_error_code KRB5_CALLCONV
 krb5_get_profile (krb5_context ctx, profile_t *profile)
 {
     return profile_copy (ctx->profile, profile);
-}    
+}
 
 krb5_error_code
 krb5_set_config_files(krb5_context ctx, const char **filenames)
 {
     krb5_error_code retval = 0;
     profile_t    profile;
-    
+
     retval = profile_init(filenames, &profile);
     if (retval)
         return retval;
@@ -444,10 +445,10 @@ krb5_secure_config_files(krb5_context ctx)
 {
     /* Obsolete interface; always return an error.
      *  This function should be removed next time a major version
-     *  number change happens. 
+     *  number change happens.
      */
     krb5_error_code retval = 0;
-    
+
     if (ctx->profile) {
         profile_release(ctx->profile);
         ctx->profile = 0;
@@ -467,7 +468,7 @@ krb5_os_free_context(krb5_context ctx)
     krb5_os_context os_ctx;
 
     os_ctx = &ctx->os_context;
-    
+
     if (os_ctx->default_ccname) {
         free(os_ctx->default_ccname);
         os_ctx->default_ccname = 0;
@@ -488,6 +489,6 @@ krb5_os_free_context(krb5_context ctx)
     krb5int_close_plugin_dirs (&ctx->libkrb5_plugins);
 
 #ifdef _WIN32
-        WSACleanup();
+    WSACleanup();
 #endif /* _WIN32 */
 }

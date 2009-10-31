@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Implementation of PBKDF2 from RFC 2898.
  * Not currently used; likely to be used when we get around to AES support.
@@ -42,12 +42,11 @@ krb5int_pbkdf2_hmac_sha1 (const krb5_data *out, unsigned long count,
 			  const krb5_data *pass, const krb5_data *salt)
 {
 /*
- * This is an implementation of PKCS#5 v2.0 
+ * This is an implementation of PKCS#5 v2.0
  * Does not return an error
  */
    PKCS5_PBKDF2_HMAC_SHA1(pass->data, pass->length,
                            (unsigned char *)salt->data, salt->length, count,
                            out->length, (unsigned char *)out->data);
-    return 0; 
+    return 0;
 }
-

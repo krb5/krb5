@@ -143,7 +143,7 @@ krb5_ldap_iterate(context, match_expr, func, func_arg)
 {
     krb5_db_entry            entry;
     krb5_principal           principal;
-    char                     **subtree=NULL, *princ_name=NULL, *realm=NULL, **values=NULL, *filter=NULL; 
+    char                     **subtree=NULL, *princ_name=NULL, *realm=NULL, **values=NULL, *filter=NULL;
     unsigned int             tree=0, ntree=1, i=0;
     krb5_error_code          st=0, tempst=0;
     LDAP                     *ld=NULL;
@@ -169,7 +169,7 @@ krb5_ldap_iterate(context, match_expr, func, func_arg)
 	}
     }
 
-    /* 
+    /*
      * If no match_expr then iterate through all krb princs like the db2 plugin
      */
     if (match_expr == NULL)
@@ -179,7 +179,7 @@ krb5_ldap_iterate(context, match_expr, func, func_arg)
 	filter = NULL;
     CHECK_NULL(filter);
 
-    if ((st = krb5_get_subtree_info(ldap_context, &subtree, &ntree)) != 0) 
+    if ((st = krb5_get_subtree_info(ldap_context, &subtree, &ntree)) != 0)
 	goto cleanup;
 
     GET_HANDLE();

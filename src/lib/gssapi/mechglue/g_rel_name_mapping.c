@@ -75,4 +75,3 @@ gss_release_any_name_mapping(OM_uint32 *minor_status,
 
     return status;
 }
-

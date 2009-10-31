@@ -58,7 +58,7 @@ dialog_sync_init(void) {
     }
 }
 
-BOOL 
+BOOL
 khm_cred_begin_dialog(void) {
     BOOL rv;
 
@@ -97,7 +97,7 @@ khm_cred_begin_dialog(void) {
     return rv;
 }
 
-void 
+void
 khm_cred_end_dialog(khui_new_creds * nc) {
     dialog_sync_init();
 
@@ -185,7 +185,7 @@ khm_cred_wait_for_dialog(DWORD timeout, khm_int32 * result,
    credentials operation is triggered, each successive message
    completion notification will be used to dispatch the messages for
    the next step in processing the operation. */
-void KHMAPI 
+void KHMAPI
 kmsg_cred_completion(kmq_message *m)
 {
     khui_new_creds * nc;
@@ -203,7 +203,7 @@ kmsg_cred_completion(kmq_message *m)
     case KMSG_CRED_NEW_CREDS:
         /* Cred types have attached themselves.  Trigger the next
            phase. */
-        kmq_post_message(KMSG_CRED, KMSG_CRED_DIALOG_SETUP, 0, 
+        kmq_post_message(KMSG_CRED, KMSG_CRED_DIALOG_SETUP, 0,
                          m->vparam);
         break;
 
@@ -220,17 +220,17 @@ kmsg_cred_completion(kmq_message *m)
         nc = (khui_new_creds *) m->vparam;
 
         khm_prep_newcredwnd(nc->hwnd);
-            
+
         /* all the controls have been created.  Now initialize them */
         if (nc->n_types > 0) {
-            kmq_post_subs_msg(nc->type_subs, 
-                              nc->n_types, 
-                              KMSG_CRED, 
-                              KMSG_CRED_DIALOG_PRESTART, 
-                              0, 
+            kmq_post_subs_msg(nc->type_subs,
+                              nc->n_types,
+                              KMSG_CRED,
+                              KMSG_CRED_DIALOG_PRESTART,
+                              0,
                               m->vparam);
         } else {
-            PostMessage(nc->hwnd, KHUI_WM_NC_NOTIFY, 
+            PostMessage(nc->hwnd, KHUI_WM_NC_NOTIFY,
                         MAKEWPARAM(0, WMNC_DIALOG_PROCESS_COMPLETE), 0);
         }
         break;
@@ -239,12 +239,12 @@ kmsg_cred_completion(kmq_message *m)
         /* all prestart stuff is done.  Now to activate the dialog */
         nc = (khui_new_creds *) m->vparam;
         khm_show_newcredwnd(nc->hwnd);
-        
+
         kmq_post_subs_msg(nc->type_subs,
                           nc->n_types,
-                          KMSG_CRED, 
-                          KMSG_CRED_DIALOG_START, 
-                          0, 
+                          KMSG_CRED,
+                          KMSG_CRED_DIALOG_START,
+                          0,
                           m->vparam);
         /* at this point, the dialog window takes over.  We let it run
            the show until KMSG_CRED_DIALOG_END is posted by the dialog
@@ -418,10 +418,10 @@ kmsg_cred_completion(kmq_message *m)
         done_with_op:
 
             if (nc->subtype == KMSG_CRED_RENEW_CREDS) {
-                kmq_post_message(KMSG_CRED, KMSG_CRED_END, 0, 
+                kmq_post_message(KMSG_CRED, KMSG_CRED_END, 0,
                                  m->vparam);
             } else {
-                PostMessage(nc->hwnd, KHUI_WM_NC_NOTIFY, 
+                PostMessage(nc->hwnd, KHUI_WM_NC_NOTIFY,
                             MAKEWPARAM(0, WMNC_DIALOG_PROCESS_COMPLETE),
                             0);
             }
@@ -471,12 +471,12 @@ kmsg_cred_completion(kmq_message *m)
     case KMSG_CRED_PP_BEGIN:
         /* all the pages should have been added by now.  Just send out
            the precreate message */
-        kmq_post_message(KMSG_CRED, KMSG_CRED_PP_PRECREATE, 0, 
+        kmq_post_message(KMSG_CRED, KMSG_CRED_PP_PRECREATE, 0,
                          m->vparam);
         break;
 
     case KMSG_CRED_PP_END:
-        kmq_post_message(KMSG_CRED, KMSG_CRED_PP_DESTROY, 0, 
+        kmq_post_message(KMSG_CRED, KMSG_CRED_PP_DESTROY, 0,
                          m->vparam);
         break;
 
@@ -577,18 +577,18 @@ void khm_cred_destroy_creds(khm_boolean sync, khm_boolean quiet)
         wchar_t title[256];
         wchar_t message[256];
 
-        LoadString(khm_hInstance, 
-                   IDS_ALERT_NOSEL_TITLE, 
-                   title, 
+        LoadString(khm_hInstance,
+                   IDS_ALERT_NOSEL_TITLE,
+                   title,
                    ARRAYLENGTH(title));
 
-        LoadString(khm_hInstance, 
-                   IDS_ALERT_NOSEL, 
-                   message, 
+        LoadString(khm_hInstance,
+                   IDS_ALERT_NOSEL,
+                   message,
                    ARRAYLENGTH(message));
 
-        khui_alert_show_simple(title, 
-                               message, 
+        khui_alert_show_simple(title,
+                               message,
                                KHERR_WARNING);
 
         khui_context_release(pctx);
@@ -964,7 +964,7 @@ void khm_cred_obtain_new_creds(wchar_t * title)
         _report_sr0(KHERR_NONE, IDS_CTX_NEW_CREDS);
         _describe();
 
-        kmq_post_message(KMSG_CRED, KMSG_CRED_NEW_CREDS, 0, 
+        kmq_post_message(KMSG_CRED, KMSG_CRED_NEW_CREDS, 0,
                          (void *) nc);
 
         _end_task();
@@ -979,7 +979,7 @@ void khm_cred_obtain_new_creds(wchar_t * title)
 /* this is called by khm_cred_dispatch_process_message and the
    kmsg_cred_completion to initiate and continue checked broadcasts of
    KMSG_CRED_DIALOG_PROCESS messages.
-   
+
    Returns TRUE if more KMSG_CRED_DIALOG_PROCESS messages were
    posted. */
 BOOL khm_cred_dispatch_process_level(khui_new_creds *nc)
@@ -1040,7 +1040,7 @@ BOOL khm_cred_dispatch_process_level(khui_new_creds *nc)
     return cont;
 }
 
-void 
+void
 khm_cred_dispatch_process_message(khui_new_creds *nc)
 {
     khm_size i;
@@ -1085,7 +1085,7 @@ khm_cred_dispatch_process_message(khui_new_creds *nc)
             kcdb_identity_get_name(nc->ctx.identity, wsinsert, &cbsize);
         else if (nc->ctx.scope == KHUI_SCOPE_CREDTYPE) {
             if (nc->ctx.identity != NULL)
-                kcdb_identity_get_name(nc->ctx.identity, wsinsert, 
+                kcdb_identity_get_name(nc->ctx.identity, wsinsert,
                                        &cbsize);
             else
                 kcdb_credtype_get_name(nc->ctx.cred_type, wsinsert,
@@ -1096,7 +1096,7 @@ khm_cred_dispatch_process_message(khui_new_creds *nc)
             StringCbCopy(wsinsert, sizeof(wsinsert), L"(?)");
         }
 
-        _report_sr1(KHERR_NONE, IDS_CTX_PROC_RENEW_CREDS, 
+        _report_sr1(KHERR_NONE, IDS_CTX_PROC_RENEW_CREDS,
                     _cstr(wsinsert));
         _resolve();
     } else if (nc->subtype == KMSG_CRED_PASSWORD) {
@@ -1125,7 +1125,7 @@ khm_cred_dispatch_process_message(khui_new_creds *nc)
     if (nc->subtype == KMSG_CRED_RENEW_CREDS)
         kmq_post_message(KMSG_CRED, KMSG_CRED_END, 0, (void *) nc);
     else
-        PostMessage(nc->hwnd, KHUI_WM_NC_NOTIFY, 
+        PostMessage(nc->hwnd, KHUI_WM_NC_NOTIFY,
                     MAKEWPARAM(0, WMNC_DIALOG_PROCESS_COMPLETE), 0);
 }
 

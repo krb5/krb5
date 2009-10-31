@@ -40,7 +40,7 @@
 #include <openssl/evp.h>
 
 #define RC4_KEY_SIZE 16
-#define RC4_BLOCK_SIZE 1 
+#define RC4_BLOCK_SIZE 1
 
 /* Interface layer to kerb5 crypto layer */
 
@@ -48,7 +48,7 @@
 static krb5_error_code
 k5_arcfour_docrypt(krb5_key, const krb5_data *,
            const krb5_data *, krb5_data *);
-static krb5_error_code 
+static krb5_error_code
 k5_arcfour_free_state ( krb5_data *state);
 static krb5_error_code
 k5_arcfour_init_state (const krb5_keyblock *key,
@@ -160,7 +160,7 @@ k5_arcfour_init_state (const krb5_keyblock *key,
 
 }
 
-/* Since the arcfour cipher is identical going forwards and backwards, 
+/* Since the arcfour cipher is identical going forwards and backwards,
    we just call "docrypt" directly
 */
 const struct krb5_enc_provider krb5int_enc_arcfour = {
@@ -171,7 +171,7 @@ const struct krb5_enc_provider krb5int_enc_arcfour = {
        system, and to attempt to work with the MSFT system forces us
        to 16byte/128bit.  Since there is no parity in the key, the
        byte and length are the same.  */
-    RC4_KEY_SIZE, RC4_KEY_SIZE, 
+    RC4_KEY_SIZE, RC4_KEY_SIZE,
     k5_arcfour_docrypt,
     k5_arcfour_docrypt,
     krb5int_arcfour_make_key,
@@ -180,4 +180,3 @@ const struct krb5_enc_provider krb5int_enc_arcfour = {
     k5_arcfour_docrypt_iov,
     k5_arcfour_docrypt_iov
 };
-

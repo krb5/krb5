@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #include "k5-int.h"
 #include "cleanup.h"
 #include "auth_con.h"
@@ -11,38 +12,38 @@
 /*
  * decrypt the enc_part of a krb5_cred
  */
-static krb5_error_code 
+static krb5_error_code
 decrypt_credencdata(krb5_context context, krb5_cred *pcred,
-		    krb5_key pkey, krb5_cred_enc_part *pcredenc)
+                    krb5_key pkey, krb5_cred_enc_part *pcredenc)
 {
     krb5_cred_enc_part  * ppart = NULL;
-    krb5_error_code 	  retval;
-    krb5_data 		  scratch;
+    krb5_error_code       retval;
+    krb5_data             scratch;
 
     scratch.length = pcred->enc_part.ciphertext.length;
-    if (!(scratch.data = (char *)malloc(scratch.length))) 
-	return ENOMEM;
+    if (!(scratch.data = (char *)malloc(scratch.length)))
+        return ENOMEM;
 
     if (pkey != NULL) {
-	if ((retval = krb5_k_decrypt(context, pkey,
-				     KRB5_KEYUSAGE_KRB_CRED_ENCPART, 0,
-				     &pcred->enc_part, &scratch)))
-	    goto cleanup;
+        if ((retval = krb5_k_decrypt(context, pkey,
+                                     KRB5_KEYUSAGE_KRB_CRED_ENCPART, 0,
+                                     &pcred->enc_part, &scratch)))
+            goto cleanup;
     } else {
-	memcpy(scratch.data, pcred->enc_part.ciphertext.data, scratch.length);
+        memcpy(scratch.data, pcred->enc_part.ciphertext.data, scratch.length);
     }
 
     /*  now decode the decrypted stuff */
     if ((retval = decode_krb5_enc_cred_part(&scratch, &ppart)))
-    	goto cleanup;
+        goto cleanup;
 
     *pcredenc = *ppart;
     retval = 0;
 
 cleanup:
     if (ppart != NULL) {
-	memset(ppart, 0, sizeof(*ppart));
-	free(ppart);
+        memset(ppart, 0, sizeof(*ppart));
+        free(ppart);
     }
     memset(scratch.data, 0, scratch.length);
     free(scratch.data);
@@ -51,40 +52,40 @@ cleanup:
 }
 /*----------------------- krb5_rd_cred_basic -----------------------*/
 
-static krb5_error_code 
+static krb5_error_code
 krb5_rd_cred_basic(krb5_context context, krb5_data *pcreddata,
-		   krb5_key pkey, krb5_replay_data *replaydata,
-		   krb5_creds ***pppcreds)
+                   krb5_key pkey, krb5_replay_data *replaydata,
+                   krb5_creds ***pppcreds)
 {
     krb5_error_code       retval;
-    krb5_cred 		* pcred;
-    krb5_int32 		  ncreds;
-    krb5_int32 		  i = 0;
-    krb5_cred_enc_part 	  encpart;
+    krb5_cred           * pcred;
+    krb5_int32            ncreds;
+    krb5_int32            i = 0;
+    krb5_cred_enc_part    encpart;
 
     /* decode cred message */
     if ((retval = decode_krb5_cred(pcreddata, &pcred)))
-    	return retval;
+        return retval;
 
     memset(&encpart, 0, sizeof(encpart));
 
     if ((retval = decrypt_credencdata(context, pcred, pkey, &encpart)))
-	goto cleanup_cred;
+        goto cleanup_cred;
 
 
     replaydata->timestamp = encpart.timestamp;
     replaydata->usec = encpart.usec;
     replaydata->seq = encpart.nonce;
 
-   /*
-    * Allocate the list of creds.  The memory is allocated so that
-    * krb5_free_tgt_creds can be used to free the list.
-    */
+    /*
+     * Allocate the list of creds.  The memory is allocated so that
+     * krb5_free_tgt_creds can be used to free the list.
+     */
     for (ncreds = 0; pcred->tickets[ncreds]; ncreds++);
-	
-    if ((*pppcreds = 
-        (krb5_creds **)malloc((size_t)(sizeof(krb5_creds *) *
-				       (ncreds + 1)))) == NULL) {
+
+    if ((*pppcreds =
+         (krb5_creds **)malloc((size_t)(sizeof(krb5_creds *) *
+                                        (ncreds + 1)))) == NULL) {
         retval = ENOMEM;
         goto cleanup_cred;
     }
@@ -95,13 +96,13 @@ krb5_rd_cred_basic(krb5_context context, krb5_data *pcreddata,
      * credentials and copy the information.
      */
     while (i < ncreds) {
-        krb5_cred_info 	* pinfo;
-        krb5_creds 	* pcur;
-	krb5_data	* pdata;
+        krb5_cred_info  * pinfo;
+        krb5_creds      * pcur;
+        krb5_data       * pdata;
 
         if ((pcur = (krb5_creds *)calloc(1, sizeof(krb5_creds))) == NULL) {
-	    retval = ENOMEM;
-	    goto cleanup;
+            retval = ENOMEM;
+            goto cleanup;
         }
 
         (*pppcreds)[i] = pcur;
@@ -109,26 +110,26 @@ krb5_rd_cred_basic(krb5_context context, krb5_data *pcreddata,
         pinfo = encpart.ticket_info[i++];
 
         if ((retval = krb5_copy_principal(context, pinfo->client,
-					  &pcur->client)))
-	    goto cleanup;
+                                          &pcur->client)))
+            goto cleanup;
 
         if ((retval = krb5_copy_principal(context, pinfo->server,
-					  &pcur->server)))
-	    goto cleanup;
+                                          &pcur->server)))
+            goto cleanup;
 
-      	if ((retval = krb5_copy_keyblock_contents(context, pinfo->session,
-						  &pcur->keyblock)))
-	    goto cleanup;
+        if ((retval = krb5_copy_keyblock_contents(context, pinfo->session,
+                                                  &pcur->keyblock)))
+            goto cleanup;
 
-        if ((retval = krb5_copy_addresses(context, pinfo->caddrs, 
-					  &pcur->addresses)))
-	    goto cleanup;
+        if ((retval = krb5_copy_addresses(context, pinfo->caddrs,
+                                          &pcur->addresses)))
+            goto cleanup;
 
         if ((retval = encode_krb5_ticket(pcred->tickets[i - 1], &pdata)))
-	    goto cleanup;
+            goto cleanup;
 
-	pcur->ticket = *pdata;
-	free(pdata);
+        pcur->ticket = *pdata;
+        free(pdata);
 
 
         pcur->is_skey = FALSE;
@@ -146,7 +147,7 @@ krb5_rd_cred_basic(krb5_context context, krb5_data *pcreddata,
 
 cleanup:
     if (retval)
-	krb5_free_tgt_creds(context, *pppcreds);
+        krb5_free_tgt_creds(context, *pppcreds);
 
 cleanup_cred:
     krb5_free_cred(context, pcred);
@@ -163,8 +164,8 @@ cleanup_cred:
  */
 krb5_error_code KRB5_CALLCONV
 krb5_rd_cred(krb5_context context, krb5_auth_context auth_context,
-	     krb5_data *pcreddata, krb5_creds ***pppcreds,
-	     krb5_replay_data *outdata)
+             krb5_data *pcreddata, krb5_creds ***pppcreds,
+             krb5_replay_data *outdata)
 {
     krb5_error_code       retval;
     krb5_key              key;
@@ -172,16 +173,16 @@ krb5_rd_cred(krb5_context context, krb5_auth_context auth_context,
 
     /* Get key */
     if ((key = auth_context->recv_subkey) == NULL)
-	key = auth_context->key;
+        key = auth_context->key;
 
     if (((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) ||
-      (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) &&
-      (outdata == NULL))
+         (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) &&
+        (outdata == NULL))
         /* Need a better error */
         return KRB5_RC_REQUIRED;
 
     if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) &&
-      (auth_context->rcache == NULL))
+        (auth_context->rcache == NULL))
         return KRB5_RC_REQUIRED;
 
 
@@ -191,12 +192,12 @@ krb5_rd_cred(krb5_context context, krb5_auth_context auth_context,
      * that.
      */
     if ((retval = krb5_rd_cred_basic(context, pcreddata, key,
-				     &replaydata, pppcreds))) {
-	if ((retval = krb5_rd_cred_basic(context, pcreddata,
-					 auth_context->key,
-					 &replaydata, pppcreds))) {
-	    return retval;
-	}
+                                     &replaydata, pppcreds))) {
+        if ((retval = krb5_rd_cred_basic(context, pcreddata,
+                                         auth_context->key,
+                                         &replaydata, pppcreds))) {
+            return retval;
+        }
     }
 
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) {
@@ -206,7 +207,7 @@ krb5_rd_cred(krb5_context context, krb5_auth_context auth_context,
             goto error;
 
         if ((retval = krb5_gen_replay_name(context, auth_context->remote_addr,
-					   "_forw", &replay.client)))
+                                           "_forw", &replay.client)))
             goto error;
 
         replay.server = "";             /* XXX */
@@ -229,7 +230,7 @@ krb5_rd_cred(krb5_context context, krb5_auth_context auth_context,
     }
 
     if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) ||
-      (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) {
+        (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) {
         outdata->timestamp = replaydata.timestamp;
         outdata->usec = replaydata.usec;
         outdata->seq = replaydata.seq;
@@ -237,9 +238,8 @@ krb5_rd_cred(krb5_context context, krb5_auth_context auth_context,
 
 error:;
     if (retval) {
-    	krb5_free_tgt_creds(context, *pppcreds);
-	*pppcreds = NULL;
+        krb5_free_tgt_creds(context, *pppcreds);
+        *pppcreds = NULL;
     }
     return retval;
 }
-

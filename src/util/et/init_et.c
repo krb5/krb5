@@ -1,6 +1,6 @@
 /*
  * Copyright 1997, 2008 by Massachusetts Institute of Technology
- * 
+ *
  * Copyright 1986, 1987, 1988 by MIT Student Information Processing Board
  *
  * Permission to use, copy, modify, and distribute this software
@@ -69,13 +69,13 @@ extern errcode_t KRB5_CALLCONV et_init(ectx)
 	ctx->tables = 0;
 	ctx->hook_func = 0;
 	ctx->hook_func_data = 0;
-	
+
 	*ectx = ctx;
 	return 0;
 }
 
 extern void KRB5_CALLCONV et_shutdown(ectx)
-	et_ctx ectx;	
+	et_ctx ectx;
 {
 	struct et_list *p, *n;
 
@@ -97,11 +97,11 @@ extern errcode_t KRB5_CALLCONV et_add_error_table(ectx, tbl)
 	e = malloc(sizeof(struct et_list));
 	if (!e)
 		return ENOMEM;
-	
+
 	e->table = tbl;
 	e->next = ectx->tables;
 	ectx->tables = e;
-	
+
 	return 0;
 }
 

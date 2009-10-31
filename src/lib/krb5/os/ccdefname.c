@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/os/ccdefname.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Return default cred. cache name.
  */
@@ -38,50 +39,50 @@
 #if defined(_WIN32)
 static int get_from_registry_indirect(char *name_buf, int name_size)
 {
-	/* If the RegKRB5CCNAME variable is set, it will point to
-	 * the registry key that has the name of the cache to use.
-	 * The Gradient PC-DCE sets the registry key
-	 * [HKEY_CURRENT_USER\Software\Gradient\DCE\Default\KRB5CCNAME]
-	 * to point at the cache file name (including the FILE: prefix).
-	 * By indirecting with the RegKRB5CCNAME entry in kerberos.ini,
-	 * we can accomodate other versions that might set a registry
-	 * variable.
-	 */
-	char newkey[256];
-	    
-	LONG name_buf_size;
-	HKEY hkey;
-	int found = 0;
-	char *cp;
+    /* If the RegKRB5CCNAME variable is set, it will point to
+     * the registry key that has the name of the cache to use.
+     * The Gradient PC-DCE sets the registry key
+     * [HKEY_CURRENT_USER\Software\Gradient\DCE\Default\KRB5CCNAME]
+     * to point at the cache file name (including the FILE: prefix).
+     * By indirecting with the RegKRB5CCNAME entry in kerberos.ini,
+     * we can accomodate other versions that might set a registry
+     * variable.
+     */
+    char newkey[256];
 
-        newkey[0] = 0;
-	GetPrivateProfileString(INI_FILES, "RegKRB5CCNAME", "", 
-				newkey, sizeof(newkey), KERBEROS_INI);
-	if (!newkey[0])
-		return 0;
-	
-        newkey[sizeof(newkey)-1] = 0;
-	cp = strrchr(newkey,'\\');
-	if (cp) {
-		*cp = '\0'; /* split the string */
-		cp++;
-	} else
-		cp = "";
-	
-	if (RegOpenKeyEx(HKEY_CURRENT_USER, newkey, 0,
-			 KEY_QUERY_VALUE, &hkey) != ERROR_SUCCESS)
-		return 0;
-	
-	name_buf_size = name_size;
-	if (RegQueryValueEx(hkey, cp, 0, 0, 
-			    name_buf, &name_buf_size) != ERROR_SUCCESS)
-	{
-		RegCloseKey(hkey);
-		return 0;
-	}
+    LONG name_buf_size;
+    HKEY hkey;
+    int found = 0;
+    char *cp;
 
-	RegCloseKey(hkey);
-	return 1;
+    newkey[0] = 0;
+    GetPrivateProfileString(INI_FILES, "RegKRB5CCNAME", "",
+                            newkey, sizeof(newkey), KERBEROS_INI);
+    if (!newkey[0])
+        return 0;
+
+    newkey[sizeof(newkey)-1] = 0;
+    cp = strrchr(newkey,'\\');
+    if (cp) {
+        *cp = '\0'; /* split the string */
+        cp++;
+    } else
+        cp = "";
+
+    if (RegOpenKeyEx(HKEY_CURRENT_USER, newkey, 0,
+                     KEY_QUERY_VALUE, &hkey) != ERROR_SUCCESS)
+        return 0;
+
+    name_buf_size = name_size;
+    if (RegQueryValueEx(hkey, cp, 0, 0,
+                        name_buf, &name_buf_size) != ERROR_SUCCESS)
+    {
+        RegCloseKey(hkey);
+        return 0;
+    }
+
+    RegCloseKey(hkey);
+    return 1;
 }
 
 /*
@@ -94,19 +95,19 @@ static int get_from_registry_indirect(char *name_buf, int name_size)
 static int
 get_from_registry(
     HKEY hBaseKey,
-    char *name_buf, 
+    char *name_buf,
     int name_size
-    )
+)
 {
     HKEY hKey;
     DWORD name_buf_size = (DWORD)name_size;
     const char *key_path = "Software\\MIT\\Kerberos5";
     const char *value_name = "ccname";
 
-    if (RegOpenKeyEx(hBaseKey, key_path, 0, KEY_QUERY_VALUE, 
+    if (RegOpenKeyEx(hBaseKey, key_path, 0, KEY_QUERY_VALUE,
                      &hKey) != ERROR_SUCCESS)
         return 0;
-    if (RegQueryValueEx(hKey, value_name, 0, 0, 
+    if (RegQueryValueEx(hKey, value_name, 0, 0,
                         name_buf, &name_buf_size) != ERROR_SUCCESS)
     {
         RegCloseKey(hKey);
@@ -123,7 +124,7 @@ try_dir(
     char* dir,
     char* buffer,
     int buf_len
-    )
+)
 {
     struct _stat s;
     if (!dir)
@@ -145,53 +146,53 @@ try_dir(
 #if defined(_WIN32)
 static krb5_error_code get_from_os(char *name_buf, unsigned int name_size)
 {
-	char *prefix = krb5_cc_dfl_ops->prefix;
-        int size;
-        char *p;
-        DWORD gle;
+    char *prefix = krb5_cc_dfl_ops->prefix;
+    int size;
+    char *p;
+    DWORD gle;
 
-	SetLastError(0);
-	GetEnvironmentVariable(KRB5_ENV_CCNAME, name_buf, name_size);
-	gle = GetLastError();
-	if (gle == 0)
-		return 0;
-	else if (gle != ERROR_ENVVAR_NOT_FOUND)
-		return ENOMEM;
+    SetLastError(0);
+    GetEnvironmentVariable(KRB5_ENV_CCNAME, name_buf, name_size);
+    gle = GetLastError();
+    if (gle == 0)
+        return 0;
+    else if (gle != ERROR_ENVVAR_NOT_FOUND)
+        return ENOMEM;
 
-	if (get_from_registry(HKEY_CURRENT_USER,
-                              name_buf, name_size) != 0)
-		return 0;
+    if (get_from_registry(HKEY_CURRENT_USER,
+                          name_buf, name_size) != 0)
+        return 0;
 
-	if (get_from_registry(HKEY_LOCAL_MACHINE,
-                              name_buf, name_size) != 0)
-		return 0;
+    if (get_from_registry(HKEY_LOCAL_MACHINE,
+                          name_buf, name_size) != 0)
+        return 0;
 
-	if (get_from_registry_indirect(name_buf, name_size) != 0)
-		return 0;
+    if (get_from_registry_indirect(name_buf, name_size) != 0)
+        return 0;
 
-        strncpy(name_buf, prefix, name_size - 1);
-        name_buf[name_size - 1] = 0;
-        size = name_size - strlen(prefix);
-        if (size > 0)
-            strcat(name_buf, ":");
-        size--;
-        p = name_buf + name_size - size;
-	if (!strcmp(prefix, "API")) {
-		strncpy(p, "krb5cc", size);
-	} else if (!strcmp(prefix, "FILE") || !strcmp(prefix, "STDIO")) {
-		if (!try_dir(getenv("TEMP"), p, size) &&
-		    !try_dir(getenv("TMP"), p, size))
-		{
-                    int len = GetWindowsDirectory(p, size);
-                    name_buf[name_size - 1] = 0;
-                    if (len < size - sizeof(APPEND_KRB5CC))
-			strcat(p, APPEND_KRB5CC);
-		}
-	} else {
-		strncpy(p, "default_cache_name", size);
-	}
-	name_buf[name_size - 1] = 0;
-	return 0;
+    strncpy(name_buf, prefix, name_size - 1);
+    name_buf[name_size - 1] = 0;
+    size = name_size - strlen(prefix);
+    if (size > 0)
+        strcat(name_buf, ":");
+    size--;
+    p = name_buf + name_size - size;
+    if (!strcmp(prefix, "API")) {
+        strncpy(p, "krb5cc", size);
+    } else if (!strcmp(prefix, "FILE") || !strcmp(prefix, "STDIO")) {
+        if (!try_dir(getenv("TEMP"), p, size) &&
+            !try_dir(getenv("TMP"), p, size))
+        {
+            int len = GetWindowsDirectory(p, size);
+            name_buf[name_size - 1] = 0;
+            if (len < size - sizeof(APPEND_KRB5CC))
+                strcat(p, APPEND_KRB5CC);
+        }
+    } else {
+        strncpy(p, "default_cache_name", size);
+    }
+    name_buf[name_size - 1] = 0;
+    return 0;
 }
 #endif
 
@@ -199,35 +200,35 @@ static krb5_error_code get_from_os(char *name_buf, unsigned int name_size)
 
 static krb5_error_code get_from_os(char *name_buf, unsigned int name_size)
 {
-	krb5_error_code result = 0;
-	cc_context_t cc_context = NULL;
-	cc_string_t default_name = NULL;
+    krb5_error_code result = 0;
+    cc_context_t cc_context = NULL;
+    cc_string_t default_name = NULL;
 
-	cc_int32 ccerr = cc_initialize (&cc_context, ccapi_version_3, NULL, NULL);
-	if (ccerr == ccNoError) {
-		ccerr = cc_context_get_default_ccache_name (cc_context, &default_name);
-	}
-	
-	if (ccerr == ccNoError) {
-		if (strlen (default_name -> data) + 5 > name_size) {
-			result = ENOMEM;
-			goto cleanup;
-		} else {
-		    snprintf (name_buf, name_size, "API:%s",
-			      default_name -> data);
-		}
-	}
-	
+    cc_int32 ccerr = cc_initialize (&cc_context, ccapi_version_3, NULL, NULL);
+    if (ccerr == ccNoError) {
+        ccerr = cc_context_get_default_ccache_name (cc_context, &default_name);
+    }
+
+    if (ccerr == ccNoError) {
+        if (strlen (default_name -> data) + 5 > name_size) {
+            result = ENOMEM;
+            goto cleanup;
+        } else {
+            snprintf (name_buf, name_size, "API:%s",
+                      default_name -> data);
+        }
+    }
+
 cleanup:
-	if (cc_context != NULL) {
-		cc_context_release (cc_context);
-	}
-	
-	if (default_name != NULL) {
-		cc_string_release (default_name);
-	}
-	
-	return result;
+    if (cc_context != NULL) {
+        cc_context_release (cc_context);
+    }
+
+    if (default_name != NULL) {
+        cc_string_release (default_name);
+    }
+
+    return result;
 }
 
 #else
@@ -245,9 +246,9 @@ krb5_cc_set_default_name(krb5_context context, const char *name)
 {
     krb5_error_code err = 0;
     char *new_ccname = NULL;
-    
+
     if (!context || context->magic != KV5M_CONTEXT) { err = KV5M_CONTEXT; }
-    
+
     if (name != NULL) {
         if (!err) {
             /* If the name isn't NULL, make a copy of it */
@@ -255,7 +256,7 @@ krb5_cc_set_default_name(krb5_context context, const char *name)
             if (new_ccname == NULL) { err = ENOMEM; }
         }
     }
-    
+
     if (!err) {
         /* free the old ccname and store the new one */
         krb5_os_context os_ctx = &context->os_context;
@@ -263,42 +264,42 @@ krb5_cc_set_default_name(krb5_context context, const char *name)
         os_ctx->default_ccname = new_ccname;
         new_ccname = NULL;  /* don't free */
     }
-    
+
     return err;
 }
 
-	
+
 const char * KRB5_CALLCONV
 krb5_cc_default_name(krb5_context context)
 {
     krb5_error_code err = 0;
     krb5_os_context os_ctx = NULL;
-    
+
     if (!context || context->magic != KV5M_CONTEXT) { err = KV5M_CONTEXT; }
-    
+
     if (!err) {
         os_ctx = &context->os_context;
-        
+
         if (os_ctx->default_ccname == NULL) {
             /* Default ccache name has not been set yet */
             char *new_ccname = NULL;
             char new_ccbuf[1024];
-            
+
             /* try the environment variable first */
             new_ccname = getenv(KRB5_ENV_CCNAME);
-            
+
             if (new_ccname == NULL) {
                 /* fall back on the default ccache name for the OS */
                 new_ccname = new_ccbuf;
                 err = get_from_os (new_ccbuf, sizeof (new_ccbuf));
             }
-            
+
             if (!err) {
                 err = krb5_cc_set_default_name (context, new_ccname);
             }
         }
     }
-    
+
     return err ? NULL : os_ctx->default_ccname;
 }
 
@@ -314,7 +315,7 @@ krb5int_cc_os_default_name(krb5_context context, char **name)
     *name = NULL;
     tmpname = malloc(BUFSIZ);
     if (tmpname == NULL)
-	return ENOMEM;
+        return ENOMEM;
 
     retval = get_from_os(tmpname, BUFSIZ);
     *name = tmpname;

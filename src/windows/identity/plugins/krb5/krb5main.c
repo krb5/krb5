@@ -245,7 +245,7 @@ KHMEXP_EXP khm_int32 KHMAPI init_module(kmm_module h_module) {
         LoadString(hResModule, IDS_KEY_ENCTYPE_LONG_DESC, lbuf, ARRAYLENGTH(lbuf));
         attrib.short_desc = sbuf;
         attrib.long_desc = lbuf;
-        
+
         rv = kcdb_attrib_register(&attrib, &attr_id_key_enctype);
 
         if(KHM_FAILED(rv))
@@ -271,7 +271,7 @@ KHMEXP_EXP khm_int32 KHMAPI init_module(kmm_module h_module) {
         LoadString(hResModule, IDS_TKT_ENCTYPE_LONG_DESC, lbuf, ARRAYLENGTH(lbuf));
         attrib.short_desc = sbuf;
         attrib.long_desc = lbuf;
-        
+
         rv = kcdb_attrib_register(&attrib, &attr_id_tkt_enctype);
 
         if(KHM_FAILED(rv))
@@ -297,7 +297,7 @@ KHMEXP_EXP khm_int32 KHMAPI init_module(kmm_module h_module) {
         LoadString(hResModule, IDS_ADDR_LIST_LONG_DESC, lbuf, ARRAYLENGTH(lbuf));
         attrib.short_desc = sbuf;
         attrib.long_desc = lbuf;
-        
+
         rv = kcdb_attrib_register(&attrib, &attr_id_addr_list);
 
         if(KHM_FAILED(rv))
@@ -322,7 +322,7 @@ KHMEXP_EXP khm_int32 KHMAPI init_module(kmm_module h_module) {
         LoadString(hResModule, IDS_KRB5_FLAGS_SHORT_DESC, sbuf, ARRAYLENGTH(sbuf));
         attrib.short_desc = sbuf;
         attrib.long_desc = NULL;
-        
+
         rv = kcdb_attrib_register(&attrib, &attr_id_krb5_flags);
 
         if(KHM_FAILED(rv))
@@ -350,7 +350,7 @@ KHMEXP_EXP khm_int32 KHMAPI init_module(kmm_module h_module) {
         LoadString(hResModule, IDS_KRB5_CCNAME_LONG_DESC, lbuf, ARRAYLENGTH(lbuf));
         attrib.short_desc = sbuf;
         attrib.long_desc = lbuf;
-        
+
         rv = kcdb_attrib_register(&attrib, &attr_id_krb5_ccname);
 
         if(KHM_FAILED(rv))

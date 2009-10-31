@@ -5,7 +5,7 @@
 
 /* block cipher interface */
 
-typedef struct 
+typedef struct
 {
     krb5_key key;
 } CIPHER_CTX;

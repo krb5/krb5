@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Implementation of the Microsoft hmac-md5 checksum type.
  * Implemented based on draft-brezak-win2k-krb-rc4-hmac-03
@@ -47,7 +47,7 @@ k5_hmac_md5_hash (krb5_key key, krb5_keyusage usage,
   krb5_data ds, ks_constant, md5tmp;
   krb5_MD5_CTX ctx;
   char t[4];
-  
+
 
   ds.length = key->keyblock.length;
   ds.data = malloc(ds.length);

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/krb/srv_rcache.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Allocate & prepare a default replay cache for a server.
  */
@@ -35,7 +36,7 @@
 #define isvalidrcname(x) ((!ispunct(x))&&isgraph(x))
 krb5_error_code KRB5_CALLCONV
 krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
-		       krb5_rcache *rcptr)
+                       krb5_rcache *rcptr)
 {
     krb5_rcache rcache = 0;
     char *cachename = 0, *cachetype;
@@ -45,22 +46,22 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
 #ifdef HAVE_GETEUID
     unsigned long uid = geteuid();
 #endif
-    
+
     if (piece == NULL)
-	return ENOMEM;
-    
+        return ENOMEM;
+
     cachetype = krb5_rc_default_type(context);
 
     krb5int_buf_init_dynamic(&buf);
     krb5int_buf_add(&buf, cachetype);
     krb5int_buf_add(&buf, ":");
     for (i = 0; i < piece->length; i++) {
-	if (piece->data[i] == '-')
-	    krb5int_buf_add(&buf, "--");
-	else if (!isvalidrcname((int) piece->data[i]))
-	    krb5int_buf_add_fmt(&buf, "-%03o", piece->data[i]);
-	else
-	    krb5int_buf_add_len(&buf, &piece->data[i], 1);
+        if (piece->data[i] == '-')
+            krb5int_buf_add(&buf, "--");
+        else if (!isvalidrcname((int) piece->data[i]))
+            krb5int_buf_add_fmt(&buf, "-%03o", piece->data[i]);
+        else
+            krb5int_buf_add_len(&buf, &piece->data[i], 1);
     }
 #ifdef HAVE_GETEUID
     krb5int_buf_add_fmt(&buf, "_%lu", uid);
@@ -68,16 +69,16 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
 
     cachename = krb5int_buf_data(&buf);
     if (cachename == NULL)
-	return ENOMEM;
+        return ENOMEM;
 
     retval = krb5_rc_resolve_full(context, &rcache, cachename);
     if (retval)
-	goto cleanup;
+        goto cleanup;
 
     retval = krb5_rc_recover_or_initialize(context, rcache,
-					   context->clockskew);
+                                           context->clockskew);
     if (retval)
-	goto cleanup;
+        goto cleanup;
 
     *rcptr = rcache;
     rcache = 0;
@@ -85,8 +86,8 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
 
 cleanup:
     if (rcache)
-	krb5_rc_close(context, rcache);
+        krb5_rc_close(context, rcache);
     if (cachename)
-	free(cachename);
+        free(cachename);
     return retval;
 }

@@ -31,7 +31,7 @@
 /* The routine krb5int_MD5Init initializes the message-digest context
    mdContext. All fields are set to zero.
  */
-void 
+void
 krb5int_MD5Init (krb5_MD5_CTX *mdContext)
 {
     EVP_MD_CTX_init(&mdContext->ossl_md5_ctx);
@@ -57,4 +57,3 @@ krb5int_MD5Final (krb5_MD5_CTX *mdContext)
     EVP_DigestFinal_ex(&mdContext->ossl_md5_ctx, mdContext->digest, NULL);
     EVP_MD_CTX_cleanup(&mdContext->ossl_md5_ctx);
 }
-

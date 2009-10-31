@@ -1,6 +1,6 @@
 /*
  * Copyright 1997,2000,2001,2004,2008 by Massachusetts Institute of Technology
- * 
+ *
  * Copyright 1987, 1988 by MIT Student Information Processing Board
  *
  * Permission to use, copy, modify, and distribute this software
@@ -213,7 +213,7 @@ error_message(long code)
 		divisor = WSABASEERR;
 	}
 #endif
-#ifdef _WIN32	
+#ifdef _WIN32
 	{
 		LPVOID msgbuf;
 

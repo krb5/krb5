@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,21 +22,21 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Private include file for the Data Encryption Standard library.
  */
 
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
  * responsibility of any person or organization contemplating export to
  * obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -47,7 +47,7 @@
  * permission.  FundsXpress makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -112,7 +112,7 @@ KRB5INT_DES_DEPRECATED;
  * have an exact 32-bit int, and nothing should be looking inside a
  * des_key_schedule anyway.
  */
-typedef struct des_ks_struct {  DES_INT32 _[2]; } des_key_schedule[16] 
+typedef struct des_ks_struct {  DES_INT32 _[2]; } des_key_schedule[16]
 KRB5INT_DES_DEPRECATED;
 
 typedef des_cblock mit_des_cblock;
@@ -162,7 +162,7 @@ extern int mit_des_check_key_parity (mit_des_cblock );
 
 /* string2key.c */
 extern krb5_error_code mit_des_string_to_key
-    ( const krb5_encrypt_block *, 
+    ( const krb5_encrypt_block *,
 	       krb5_keyblock *, const krb5_data *, const krb5_data *);
 extern krb5_error_code mit_des_string_to_key_int
 	(krb5_keyblock *, const krb5_data *, const krb5_data *);

@@ -30,11 +30,11 @@
 #include<hashtable.h>
 #include<stdlib.h>
 
-KHMEXP hashtable * KHMAPI hash_new_hashtable(khm_int32 n, 
-                               hash_function_t hash, 
+KHMEXP hashtable * KHMAPI hash_new_hashtable(khm_int32 n,
+                               hash_function_t hash,
                                comp_function_t comp,
                                add_ref_function_t addr,
-                               del_ref_function_t delr) 
+                               del_ref_function_t delr)
 {
     hashtable * h;
 
@@ -160,7 +160,7 @@ KHMEXP khm_int32 hash_string(const void *vs) {
 
     khm_int32 hv = 13331;
     wchar_t * c;
-    
+
     for(c = (wchar_t *) vs; *c; c++) {
         hv = ((hv<<5) + hv) + (khm_int32) *c;
     }

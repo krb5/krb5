@@ -45,19 +45,19 @@ rd_and_store_for_creds(context, auth_context, inbuf, ticket, ccache)
     *ccache  = NULL;
 
     retval = krb5_rd_cred(context, auth_context, inbuf, &creds, NULL);
-    if (retval) 
+    if (retval)
 	return(retval);
 
-    /* Set the KRB5CCNAME ENV variable to keep sessions 
-     * seperate. Use the process id of this process which is 
+    /* Set the KRB5CCNAME ENV variable to keep sessions
+     * seperate. Use the process id of this process which is
      * the rlogind or rshd. Set the environment variable as well.
      */
-  
+
     snprintf(ccname, sizeof(ccname), "FILE:/tmp/krb5cc_p%ld", (long) getpid());
     setenv("KRB5CCNAME", ccname, 1);
-  
+
     retval = krb5_cc_resolve(context, ccname, ccache);
-    if (retval) 
+    if (retval)
 	goto cleanup;
 
     retval = krb5_cc_initialize(context, *ccache, ticket->enc_part2->client);
@@ -65,7 +65,7 @@ rd_and_store_for_creds(context, auth_context, inbuf, ticket, ccache)
 	goto cleanup;
 
     retval = krb5_cc_store_cred(context, *ccache, *creds);
-    if (retval) 
+    if (retval)
 	goto cleanup;
 
 cleanup:

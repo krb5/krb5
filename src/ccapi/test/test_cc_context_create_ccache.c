@@ -7,10 +7,9 @@
 #include "test_ccapi_ccache.h"
 
 int main (int argc, const char * argv[]) {
-    
+
 	cc_int32 err = ccNoError;
 	T_CCAPI_INIT;
 	err = check_cc_context_create_ccache();
     return err;
 }
-	

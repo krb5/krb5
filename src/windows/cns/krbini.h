@@ -33,5 +33,5 @@
 #endif /* KRB5 */
 #define INI_KRB_REALMS  "krb.realms"    /* Location of krb.realms file */
 #define DEF_KRB_REALMS  "krb.realms"    /* Default name for krb.realms file */
-#define INI_RECENT_LOGINS "Recent Logins"    
+#define INI_RECENT_LOGINS "Recent Logins"
 #define INI_LOGIN       "Login"

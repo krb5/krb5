@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Sample Kerberos v5 server.
  *
@@ -69,7 +69,7 @@ usage(name)
 {
 	fprintf(stderr, "usage: %s [-p port] [-s service] [-S keytab]\n",
 		name);
-}	
+}
 
 int
 main(argc, argv)
@@ -110,7 +110,7 @@ main(argc, argv)
 
     /*
      * Parse command line arguments
-     *  
+     *
      */
     opterr = 0;
     while ((ch = getopt(argc, argv, "p:S:s:")) != -1)
@@ -144,17 +144,17 @@ main(argc, argv)
 	    port = atoi(argv[1]);
     }
 
-    retval = krb5_sname_to_principal(context, NULL, service, 
+    retval = krb5_sname_to_principal(context, NULL, service,
 				     KRB5_NT_SRV_HST, &server);
     if (retval) {
 	syslog(LOG_ERR, "while generating service name (%s): %s",
 	       service, error_message(retval));
 	exit(1);
     }
-    
+
     /*
      * If user specified a port, then listen on that port; otherwise,
-     * assume we've been started out of inetd. 
+     * assume we've been started out of inetd.
      */
 
     if (port) {
@@ -200,7 +200,7 @@ main(argc, argv)
     }
 
     retval = krb5_recvauth(context, &auth_context, (krb5_pointer)&sock,
-			   SAMPLE_VERSION, server, 
+			   SAMPLE_VERSION, server,
 			   0,	/* no flags */
 			   keytab,	/* default keytab is NULL */
 			   &ticket);

@@ -88,14 +88,14 @@ typedef struct tag_khui_alert {
                                  ::khui_alert_flags.  Do not modify
                                  directly. */
 
-    kherr_context *     err_context; 
+    kherr_context *     err_context;
                                 /*!< If non-NULL at the time the alert
                                   window is shown, this indicates that
                                   the alert window should provide an
                                   error viewer for the given error
                                   context. */
 
-    kherr_event *       err_event; 
+    kherr_event *       err_event;
                                 /*!< If non-NULL at the time the alert
                                   window is shown, this indicates that
                                   the alert window should provide an
@@ -110,7 +110,7 @@ typedef struct tag_khui_alert {
     khui_action_context ctx;    /*!< Context to which this alert
                                   applies to. */
 
-    khm_int32           response; 
+    khm_int32           response;
                                 /*!< Once the alert is displayed to
                                   the user, when the user clicks one
                                   of the command buttons, the command

@@ -109,7 +109,7 @@ asn1_error_code asn1_decode_checksum_ptr
 asn1_error_code asn1_decode_encryption_key
         (asn1buf *buf, krb5_keyblock *val);
 asn1_error_code asn1_decode_encryption_key_ptr
-	(asn1buf *buf, krb5_keyblock **valptr);
+        (asn1buf *buf, krb5_keyblock **valptr);
 asn1_error_code asn1_decode_encrypted_data
         (asn1buf *buf, krb5_enc_data *val);
 asn1_error_code asn1_decode_ticket_flags
@@ -127,7 +127,7 @@ asn1_error_code asn1_decode_kdc_options
 asn1_error_code asn1_decode_ticket
         (asn1buf *buf, krb5_ticket *val);
 asn1_error_code asn1_decode_ticket_ptr
-	(asn1buf *buf, krb5_ticket **valptr);
+        (asn1buf *buf, krb5_ticket **valptr);
 asn1_error_code asn1_decode_kdc_req
         (asn1buf *buf, krb5_kdc_req *val);
 asn1_error_code asn1_decode_kdc_req_body
@@ -137,7 +137,7 @@ asn1_error_code asn1_decode_krb_safe_body
 asn1_error_code asn1_decode_host_address
         (asn1buf *buf, krb5_address *val);
 asn1_error_code asn1_decode_host_address_ptr
-	(asn1buf *buf, krb5_address **valptr);
+        (asn1buf *buf, krb5_address **valptr);
 asn1_error_code asn1_decode_kdc_rep
         (asn1buf *buf, krb5_kdc_rep *val);
 asn1_error_code asn1_decode_last_req_entry
@@ -155,7 +155,7 @@ asn1_error_code asn1_decode_krb_cred_info_ptr
 asn1_error_code asn1_decode_pa_data
         (asn1buf *buf, krb5_pa_data *val);
 asn1_error_code asn1_decode_pa_data_ptr
-	(asn1buf *buf, krb5_pa_data **valptr);
+        (asn1buf *buf, krb5_pa_data **valptr);
 asn1_error_code asn1_decode_passwdsequence
         (asn1buf *buf, passwd_phrase_element *val);
 asn1_error_code asn1_decode_passwdsequence_ptr

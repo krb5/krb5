@@ -57,7 +57,7 @@
  * other (since we use that fact to compute key lengths).  In the accessor
  * macros below, P means a pointer to the page, I means an index of the
  * particular entry being accessed.
- * 
+ *
  * Hash base page format
  * BYTE ITEM			NBYTES 	TYPE		ACCESSOR MACRO
  * ---- ------------------	------	--------	--------------
@@ -167,7 +167,7 @@ typedef unsigned char  PAGE8;
 #define FREESPACE(P) \
 	((OFFSET((P)) + 1 - PAGE_OVERHEAD - (NUM_ENT((P)) * PAIR_OVERHEAD)))
 
-/* 
+/*
  * Overhead on header pages is just one word -- the length of the
  * header info stored on that page.
  */

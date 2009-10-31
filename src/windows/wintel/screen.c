@@ -87,7 +87,7 @@ GetNewScreen(void)
 }
 
 SCREENLINE *
-ScreenNewLine(void) 
+ScreenNewLine(void)
 {
   SCREENLINE *pScrLine;
 
@@ -185,7 +185,7 @@ InitNewScreen(CONFIG *Config)
   scr->width = Config->width;
   scr->height = Config->height;
   scr->ID = id;
-  scr->x = 0;    
+  scr->x = 0;
   scr->y = 0;
   scr->Oldx = 0;
   scr->Oldy = 0;
@@ -296,19 +296,19 @@ int ScreenScroll(
     pNext = pScrollTop->next;
     pPrev = pScrollTop->prev;
 
-    pPrev->next = pNext;        
+    pPrev->next = pNext;
     pNext->prev = pPrev;
 
     pScrLine = pScrollTop;
     ScreenClearLine(pScr, pScrLine);
   }
   else {
-    pScr->numlines++;                
-    pScrLine = ScreenNewLine(); 
+    pScr->numlines++;
+    pScrLine = ScreenNewLine();
     if (pScrLine == NULL)
       return(0);
     pScr->screen_top = pScrollTop->next;
-  }    
+  }
 
   if (pScrLine == NULL)
     return(0);
@@ -347,7 +347,7 @@ int ScreenScroll(
 
   if (bFullScreen)
     ScrollDC(hDC, 0, -pScr->cyChar, NULL, NULL, NULL, NULL);
-  else 
+  else
     ScrollDC(hDC, 0, -pScr->cyChar, &rc, &rc, NULL, NULL);
 
   PatBlt(hDC, 0, pScr->bottom * pScr->cyChar,
@@ -387,7 +387,7 @@ int DrawTextScreen(
     if (!pScrLine)
       continue;
 
-    if (YPOS >= rcInvalid.top - pScr->cyChar && 
+    if (YPOS >= rcInvalid.top - pScr->cyChar &&
 	YPOS <= rcInvalid.bottom + pScr->cyChar) {
 
       if (y < 0)
@@ -415,12 +415,12 @@ int DrawTextScreen(
 	}
 
 	if (SCR_isrev(pScrLine->attrib[x])) {
-	  SelectObject(hDC, pScr->hSelectedFont);                
+	  SelectObject(hDC, pScr->hSelectedFont);
 	  SetTextColor(hDC, RGB(255, 255, 255));
 	  SetBkColor(hDC, RGB(0, 0, 0));
 	}
 	else if (SCR_isblnk(pScrLine->attrib[x])) {
-	  SelectObject(hDC, pScr->hSelectedFont);                
+	  SelectObject(hDC, pScr->hSelectedFont);
 	  SetTextColor(hDC, RGB(255, 0, 0));
 	  SetBkColor(hDC, RGB(255, 255, 255));
 	}
@@ -446,7 +446,7 @@ int DrawTextScreen(
 	TextOut(hDC, x*pScr->cxChar, y*pScr->cyChar, &pScrLine->text[x], len);
 	x += len;
       }
-    }                
+    }
     pScrLineTmp = pScrLine->next;
     pScrLine = pScrLineTmp;
   }
@@ -638,9 +638,9 @@ long PASCAL ScreenWndProc(
 			      LPARAM lParam)
 {
   MINMAXINFO *lpmmi;
-  SCREEN *pScr;                              
+  SCREEN *pScr;
   HMENU hMenu;
-  PAINTSTRUCT ps;    
+  PAINTSTRUCT ps;
   int x = 0;
   int y = 0;
   int ScrollPos;
@@ -657,7 +657,7 @@ long PASCAL ScreenWndProc(
     pScr = (SCREEN *) GetWindowLong(hWnd, SCREEN_HANDLE);
     assert (pScr != NULL);
 
-    switch (wParam) {               
+    switch (wParam) {
 
     case IDM_EXIT:
       if (MessageBox(hWnd, "Terminate this connection?", "Telnet", MB_OKCANCEL) == IDOK) {
@@ -690,7 +690,7 @@ long PASCAL ScreenWndProc(
     case IDM_COPY:
       Edit_Copy(hWnd);
       hMenu=GetMenu(hWnd);
-      Edit_ClearSelection(pScr);                
+      Edit_ClearSelection(pScr);
       break;
 
     case IDM_PASTE:
@@ -730,7 +730,7 @@ long PASCAL ScreenWndProc(
       CheckScreen(pScr);
       break;
 #endif
-    }        
+    }
 
     break;
 
@@ -860,7 +860,7 @@ long PASCAL ScreenWndProc(
 
   case WM_KEYDOWN:
     if (wParam == VK_INSERT) {
-      if (GetKeyState(VK_SHIFT) < 0) 
+      if (GetKeyState(VK_SHIFT) < 0)
 	PostMessage(hWnd, WM_COMMAND, IDM_PASTE, 0);
       else if (GetKeyState(VK_CONTROL) < 0)
 	PostMessage(hWnd, WM_COMMAND, IDM_COPY, 0);
@@ -933,7 +933,7 @@ long PASCAL ScreenWndProc(
     lpmmi->ptMinTrackSize.y = FRAME_HEIGHT + 4 * pScr->cyChar;
     break;
 
-  case WM_LBUTTONDOWN: 
+  case WM_LBUTTONDOWN:
     if (bDoubleClick)
       Edit_TripleClick(hWnd, lParam);
     else
@@ -972,13 +972,13 @@ long PASCAL ScreenWndProc(
 #if 0
     pScr = (SCREEN *) GetWindowLong(hWnd, SCREEN_HANDLE);
     assert (pScr != NULL);
-    wsprintf(strTmp,"fp->x=%d fp->y=%d text=%s \r\n", 
+    wsprintf(strTmp,"fp->x=%d fp->y=%d text=%s \r\n",
 	     pScr->screen_top->x, pScr->screen_top->y, pScr->screen_top->text);
     OutputDebugString(strTmp);
 #endif
     break;
 
-  case WM_PAINT:        
+  case WM_PAINT:
     pScr = (SCREEN *) GetWindowLong(hWnd, SCREEN_HANDLE);
     assert (pScr != NULL);
     BeginPaint (hWnd, &ps);
@@ -988,7 +988,7 @@ long PASCAL ScreenWndProc(
     else
       OutputDebugString("screen_bottom is NULL.\r\n");
     EndPaint(hWnd, &ps);
-    break;         
+    break;
 
   case WM_CLOSE:
     if (MessageBox(hWnd, "Terminate this connection?", "Telnet", MB_OKCANCEL) == IDOK) {
@@ -996,7 +996,7 @@ long PASCAL ScreenWndProc(
       assert (pScr != NULL);
       SendMessage(pScr->hwndTel, WM_MYSCREENCLOSE, 0, (LPARAM) pScr);
       return (DefWindowProc(hWnd, message, wParam, lParam));
-    }    
+    }
     break;
 
   case WM_DESTROY:

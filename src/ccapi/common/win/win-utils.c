@@ -52,14 +52,14 @@ char* clientEndpoint(const char* UUID) {
     strncat(_clientEndpoint, UUID, UUID_SIZE);
 //    cci_debug_printf("%s returning %s", __FUNCTION__, _clientEndpoint);
     return _clientEndpoint;
-    }       
+    }
 
 char* serverEndpoint(const char* user) {
     char* _serverEndpoint   = (char*)malloc(strlen(user) + strlen(serverPrefix) + 2);
     strcpy(_serverEndpoint, serverPrefix);
     strncat(_serverEndpoint, user, UUID_SIZE);
     return _serverEndpoint;
-    }       
+    }
 
 char* timestamp() {
     SYSTEMTIME  _stime;

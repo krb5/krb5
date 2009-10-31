@@ -5,41 +5,41 @@
 
  LICENSE TERMS
 
- The free distribution and use of this software in both source and binary 
+ The free distribution and use of this software in both source and binary
  form is allowed (with or without changes) provided that:
 
-   1. distributions of this source code include the above copyright 
+   1. distributions of this source code include the above copyright
       notice, this list of conditions and the following disclaimer;
 
    2. distributions in binary form include the above copyright
       notice, this list of conditions and the following disclaimer
       in the documentation and/or other associated materials;
 
-   3. the copyright holder's name is not used to endorse products 
-      built using this software without specific written permission. 
+   3. the copyright holder's name is not used to endorse products
+      built using this software without specific written permission.
 
  DISCLAIMER
 
  This software is provided 'as is' with no explcit or implied warranties
- in respect of any properties, including, but not limited to, correctness 
+ in respect of any properties, including, but not limited to, correctness
  and fitness for purpose.
  -------------------------------------------------------------------------
  Issue Date: 21/01/2002
 
- This file contains the code for implementing the key schedule for AES 
+ This file contains the code for implementing the key schedule for AES
  (Rijndael) for block and key sizes of 16, 20, 24, 28 and 32 bytes.
 */
 
 #include "aesopt.h"
 
 /* Subroutine to set the block size (if variable) in bytes, legal
-   values being 16, 24 and 32. 
+   values being 16, 24 and 32.
 */
 
 #if !defined(BLOCK_SIZE) && defined(SET_BLOCK_LENGTH)
 
 /* Subroutine to set the block size (if variable) in bytes, legal
-   values being 16, 24 and 32. 
+   values being 16, 24 and 32.
 */
 
 aes_rval aes_blk_len(unsigned int blen, aes_ctx cx[1])
@@ -48,8 +48,8 @@ aes_rval aes_blk_len(unsigned int blen, aes_ctx cx[1])
     if(!tab_init) gen_tabs();
 #endif
 
-    if((blen & 3) || blen < 16 || blen > 32) 
-    {     
+    if((blen & 3) || blen < 16 || blen > 32)
+    {
         cx->n_blk = 0; return aes_bad;
     }
 
@@ -64,10 +64,10 @@ aes_rval aes_blk_len(unsigned int blen, aes_ctx cx[1])
    This corresponds to bit lengths of 128, 192 and 256 bits, and
    to Nk values of 4, 6 and 8 respectively.
 
-   The following macros implement a single cycle in the key 
-   schedule generation process. The number of cycles needed 
+   The following macros implement a single cycle in the key
+   schedule generation process. The number of cycles needed
    for each cx->n_blk and nk value is:
- 
+
     nk =             4  5  6  7  8
     ------------------------------
     cx->n_blk = 4   10  9  8  7  7
@@ -78,7 +78,7 @@ aes_rval aes_blk_len(unsigned int blen, aes_ctx cx[1])
 */
 
 /* Initialise the key schedule from the user supplied key. The key
-   length is now specified in bytes - 16, 20, 24, 28 or 32 as 
+   length is now specified in bytes - 16, 20, 24, 28 or 32 as
    appropriate. This corresponds to bit lengths of 128, 160, 192,
    224 and 256 bits, and to Nk values of 4, 5, 6, 7 & 8 respectively.
  */
@@ -133,10 +133,10 @@ switch(nc) \
 
 #endif
 
-/*  The following macros implement a single cycle in the key 
-    schedule generation process. The number of cycles needed 
+/*  The following macros implement a single cycle in the key
+    schedule generation process. The number of cycles needed
     for each cx->n_blk and nk value is:
- 
+
     nk =      4  5  6  7  8
     -----------------------
     cx->n_blk = 4   10  9  8  7  7
@@ -229,30 +229,30 @@ aes_rval aes_enc_key(const unsigned char in_key[], unsigned int klen, aes_ctx cx
     {
     case 4: ks4(0); ks4(1); ks4(2); ks4(3);
             ks4(4); ks4(5); ks4(6); ks4(7);
-            ks4(8); ks4(9); 
+            ks4(8); ks4(9);
             cx->n_rnd = 10; break;
     case 5: cx->k_sch[4] = t = word_in(in_key + 16);
             ks5(0); ks5(1); ks5(2); ks5(3);
-            ks5(4); ks5(5); ks5(6); ks5(7); 
-            ks5(8);  
+            ks5(4); ks5(5); ks5(6); ks5(7);
+            ks5(8);
             cx->n_rnd = 11; break;
     case 6: cx->k_sch[4] = t = word_in(in_key + 16);
             cx->k_sch[5] = u = word_in(in_key + 20);
             ks6(0); ks6(1); ks6(2); ks6(3);
-            ks6(4); ks6(5); ks6(6); ks6(7); 
+            ks6(4); ks6(5); ks6(6); ks6(7);
             cx->n_rnd = 12; break;
     case 7: cx->k_sch[4] = t = word_in(in_key + 16);
             cx->k_sch[5] = u = word_in(in_key + 20);
             cx->k_sch[6] = v = word_in(in_key + 24);
             ks7(0); ks7(1); ks7(2); ks7(3);
-            ks7(4); ks7(5); ks7(6); 
+            ks7(4); ks7(5); ks7(6);
             cx->n_rnd = 13; break;
     case 8: cx->k_sch[4] = t = word_in(in_key + 16);
             cx->k_sch[5] = u = word_in(in_key + 20);
             cx->k_sch[6] = v = word_in(in_key + 24);
             cx->k_sch[7] = w = word_in(in_key + 28);
             ks8(0); ks8(1); ks8(2); ks8(3);
-            ks8(4); ks8(5); ks8(6); 
+            ks8(4); ks8(5); ks8(6);
             cx->n_rnd = 14; break;
     default:cx->n_rnd = 0; return aes_bad;
     }
@@ -326,30 +326,30 @@ aes_rval aes_dec_key(const unsigned char in_key[], unsigned int klen, aes_ctx cx
     {
     case 4: ks4(0); ks4(1); ks4(2); ks4(3);
             ks4(4); ks4(5); ks4(6); ks4(7);
-            ks4(8); ks4(9); 
+            ks4(8); ks4(9);
             cx->n_rnd = 10; break;
     case 5: cx->k_sch[4] = t = word_in(in_key + 16);
             ks5(0); ks5(1); ks5(2); ks5(3);
-            ks5(4); ks5(5); ks5(6); ks5(7); 
-            ks5(8);  
+            ks5(4); ks5(5); ks5(6); ks5(7);
+            ks5(8);
             cx->n_rnd = 11; break;
     case 6: cx->k_sch[4] = t = word_in(in_key + 16);
             cx->k_sch[5] = u = word_in(in_key + 20);
             ks6(0); ks6(1); ks6(2); ks6(3);
-            ks6(4); ks6(5); ks6(6); ks6(7); 
+            ks6(4); ks6(5); ks6(6); ks6(7);
             cx->n_rnd = 12; break;
     case 7: cx->k_sch[4] = t = word_in(in_key + 16);
             cx->k_sch[5] = u = word_in(in_key + 20);
             cx->k_sch[6] = v = word_in(in_key + 24);
             ks7(0); ks7(1); ks7(2); ks7(3);
-            ks7(4); ks7(5); ks7(6); 
+            ks7(4); ks7(5); ks7(6);
             cx->n_rnd = 13; break;
     case 8: cx->k_sch[4] = t = word_in(in_key + 16);
             cx->k_sch[5] = u = word_in(in_key + 20);
             cx->k_sch[6] = v = word_in(in_key + 24);
             cx->k_sch[7] = w = word_in(in_key + 28);
             ks8(0); ks8(1); ks8(2); ks8(3);
-            ks8(4); ks8(5); ks8(6); 
+            ks8(4); ks8(5); ks8(6);
             cx->n_rnd = 14; break;
     default:cx->n_rnd = 0; return aes_bad;
     }

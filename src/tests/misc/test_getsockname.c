@@ -1,6 +1,6 @@
 /*
  * test_getsockname.c
- * 
+ *
  * This routine demonstrates a bug in the socket emulation library of
  * Solaris and other monstrosities that uses STREAMS.  On other
  * machines with a real networking layer, it prints the local
@@ -29,7 +29,7 @@ main(argc, argv)
     struct hostent *host;
     struct sockaddr_in s_sock;		/* server address */
     struct sockaddr_in c_sock;		/* client address */
-    
+
     char *hostname;
 
     if (argc == 2) {
@@ -54,7 +54,7 @@ main(argc, argv)
 #endif
     s_sock.sin_family = AF_INET;
     s_sock.sin_port = htons(5555);
-    
+
     /* Open a socket */
     if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
 	perror("socket");
@@ -69,14 +69,14 @@ main(argc, argv)
 	perror("bind");
 	exit(1);
     }
-	
+
     /* "connect" the datagram socket; this is necessary to get a local address
        properly bound for getsockname() below. */
     if (connect(sock, (struct sockaddr *)&s_sock, sizeof(s_sock)) == -1) {
 	perror("connect");
 	exit(1);
     }
-    
+
     /* Get my address */
     memset(&c_sock, 0, sizeof(c_sock));
     i = sizeof(c_sock);
@@ -86,6 +86,6 @@ main(argc, argv)
     }
 
     printf("My interface address is: %s\n", inet_ntoa(c_sock.sin_addr));
-    
+
     exit(0);
 }

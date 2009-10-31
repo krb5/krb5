@@ -62,7 +62,7 @@ daemon(nochdir, noclose)
 #else
 	{
 		int n;
-	    
+
 		/*
 		 * The open below may hang on pseudo ttys if the person
 		 * who starts named logs out before this point.  Thus,

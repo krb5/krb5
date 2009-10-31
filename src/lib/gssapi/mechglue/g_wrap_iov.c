@@ -2,7 +2,7 @@
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -12,7 +12,7 @@
  * without specific, written prior permission. Sun Microsystems makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * SUN MICROSYSTEMS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL SUN MICROSYSTEMS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -91,10 +91,10 @@ int			iov_count;
      * select the approprate underlying mechanism routine and
      * call it.
      */
-    
+
     ctx = (gss_union_ctx_id_t) context_handle;
     mech = gssint_get_mechanism (ctx->mech_type);
-    
+
     if (mech) {
 	if (mech->gss_wrap_iov) {
 	    status = mech->gss_wrap_iov(
@@ -109,11 +109,11 @@ int			iov_count;
 		map_error(minor_status, mech);
 	} else
 	    status = GSS_S_UNAVAILABLE;
-	
+
 	return(status);
     }
  /* EXPORT DELETE END */
- 
+
     return (GSS_S_BAD_MECH);
 }
 
@@ -149,10 +149,10 @@ int			iov_count;
      * select the approprate underlying mechanism routine and
      * call it.
      */
-    
+
     ctx = (gss_union_ctx_id_t) context_handle;
     mech = gssint_get_mechanism (ctx->mech_type);
-    
+
     if (mech) {
 	if (mech->gss_wrap_iov_length) {
 	    status = mech->gss_wrap_iov_length(
@@ -167,11 +167,11 @@ int			iov_count;
 		map_error(minor_status, mech);
 	} else
 	    status = GSS_S_UNAVAILABLE;
-	
+
 	return(status);
     }
  /* EXPORT DELETE END */
- 
+
     return (GSS_S_BAD_MECH);
 }
 
@@ -204,4 +204,3 @@ int			iov_count;
 
     return status;
 }
-

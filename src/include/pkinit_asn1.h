@@ -28,7 +28,7 @@
  *
  * Created 18 May 2004 by Doug Mitchell.
  */
- 
+
 #ifndef	_PKINIT_ASN1_H_
 #define _PKINIT_ASN1_H_
 
@@ -44,18 +44,18 @@ typedef struct {
     krb5_data	parameters;	/* ASN_ANY, defined by algorithm */
 } krb5int_algorithm_id;
 
-/* 
+/*
  * Encode and decode AuthPack, public key version (no Diffie-Hellman components).
  */
 krb5_error_code krb5int_pkinit_auth_pack_encode(
-    krb5_timestamp		kctime,      
+    krb5_timestamp		kctime,
     krb5_int32			cusec,		    /* microseconds */
     krb5_ui_4			nonce,
     const krb5_checksum		*pa_checksum,
     const krb5int_algorithm_id	*cms_types,	    /* optional */
     krb5_ui_4			num_cms_types,
     krb5_data			*auth_pack);	    /* mallocd and RETURNED */
-    
+
 /* all returned values are optional - pass NULL if you don't want them */
 krb5_error_code krb5int_pkinit_auth_pack_decode(
     const krb5_data	*auth_pack,	    /* DER encoded */
@@ -65,10 +65,10 @@ krb5_error_code krb5int_pkinit_auth_pack_decode(
     krb5_checksum       *pa_checksum,	    /* contents mallocd and RETURNED */
     krb5int_algorithm_id **cms_types,	    /* mallocd and RETURNED */
     krb5_ui_4		*num_cms_types);    /* RETURNED */
-    
-    
+
+
 /*
- * Given DER-encoded issuer and serial number, create an encoded 
+ * Given DER-encoded issuer and serial number, create an encoded
  * IssuerAndSerialNumber.
  */
 krb5_error_code krb5int_pkinit_issuer_serial_encode(
@@ -85,9 +85,9 @@ krb5_error_code krb5int_pkinit_issuer_serial_decode(
     krb5_data       *serial_num);	    /* RETURNED */
 
 /*
- * Top-level encode for PA-PK-AS-REQ.  
+ * Top-level encode for PA-PK-AS-REQ.
  * The signed_auth_pack field is wrapped in an OCTET STRING, content
- * specific tag 0, during encode. 
+ * specific tag 0, during encode.
  */
 krb5_error_code krb5int_pkinit_pa_pk_as_req_encode(
     const krb5_data *signed_auth_pack,	/* DER encoded ContentInfo */
@@ -98,24 +98,24 @@ krb5_error_code krb5int_pkinit_pa_pk_as_req_encode(
     krb5_data       *pa_pk_as_req);	/* mallocd and RETURNED */
 
 /*
- * Top-level decode for PA-PK-AS-REQ. Does not perform cert verification on the 
+ * Top-level decode for PA-PK-AS-REQ. Does not perform cert verification on the
  * ContentInfo; that is returned in BER-encoded form and processed elsewhere.
- * The OCTET STRING wrapping the signed_auth_pack field is removed during the 
+ * The OCTET STRING wrapping the signed_auth_pack field is removed during the
  * decode.
  */
 krb5_error_code krb5int_pkinit_pa_pk_as_req_decode(
     const krb5_data *pa_pk_as_req,
     krb5_data *signed_auth_pack,	/* DER encoded ContentInfo, RETURNED */
-    /* 
-     * Remainder are optionally RETURNED (specify NULL for pointers to 
+    /*
+     * Remainder are optionally RETURNED (specify NULL for pointers to
      * items you're not interested in).
      */
     krb5_ui_4 *num_trusted_CAs,		/* sizeof trusted_CAs */
-    krb5_data **trusted_CAs,		/* mallocd array of DER-encoded TrustedCAs 
+    krb5_data **trusted_CAs,		/* mallocd array of DER-encoded TrustedCAs
 					 *   issuer/serial */
     krb5_data *kdc_cert);		/* DER encoded issuer/serial */
 
-/* 
+/*
  * Encode a ReplyKeyPack. The result is used as the Content of a SignedData.
  */
 krb5_error_code krb5int_pkinit_reply_key_pack_encode(
@@ -123,7 +123,7 @@ krb5_error_code krb5int_pkinit_reply_key_pack_encode(
     const krb5_checksum *checksum,
     krb5_data		*reply_key_pack);   /* mallocd and RETURNED */
 
-/* 
+/*
  * Decode a ReplyKeyPack.
  */
 krb5_error_code krb5int_pkinit_reply_key_pack_decode(
@@ -131,31 +131,31 @@ krb5_error_code krb5int_pkinit_reply_key_pack_decode(
     krb5_keyblock       *key_block,	    /* RETURNED */
     krb5_checksum	*checksum);	    /* contents mallocd and RETURNED */
 
-/* 
+/*
  * Encode a PA-PK-AS-REP.
  * Exactly one of {dh_signed_data, enc_key_pack} is non-NULL on entry;
- * each is a previously encoded item. 
+ * each is a previously encoded item.
  *
  * dh_signed_data, if specified, is an encoded DHRepInfo.
  * enc_key_pack, if specified, is EnvelopedData(signedData(ReplyKeyPack)
  */
 krb5_error_code krb5int_pkinit_pa_pk_as_rep_encode(
-    const krb5_data     *dh_signed_data, 
+    const krb5_data     *dh_signed_data,
     const krb5_data     *enc_key_pack,	    /* EnvelopedData(signedData(ReplyKeyPack) */
     krb5_data		*pa_pk_as_rep);	    /* mallocd and RETURNED */
 
-/* 
+/*
  * Decode a PA-PK-AS-REP.
  * On successful return, exactly one of {dh_signed_data, enc_key_pack}
  * will be non-NULL, each of which is mallocd and must be freed by
- * caller. 
+ * caller.
  *
  * dh_signed_data, if returned, is an encoded DHRepInfo.
  * enc_key_pack, if specified, is EnvelopedData(signedData(ReplyKeyPack)
  */
 krb5_error_code krb5int_pkinit_pa_pk_as_rep_decode(
     const krb5_data     *pa_pk_as_rep,
-    krb5_data		*dh_signed_data, 
+    krb5_data		*dh_signed_data,
     krb5_data		*enc_key_pack);
 
 /*

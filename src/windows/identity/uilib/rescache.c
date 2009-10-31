@@ -32,7 +32,7 @@
 
 hashtable * h_bitmaps;
 
-khm_int32 
+khm_int32
 hash_id(const void *p) {
 #pragma warning(push)
 #pragma warning(disable: 4311)
@@ -40,7 +40,7 @@ hash_id(const void *p) {
 #pragma warning(pop)
 }
 
-khm_int32 
+khm_int32
 comp_id(const void *p1, const void *p2) {
 #pragma warning(push)
 #pragma warning(disable: 4311)
@@ -48,33 +48,33 @@ comp_id(const void *p1, const void *p2) {
 #pragma warning(pop)
 }
 
-void 
+void
 del_ref_object(const void *k, void * data) {
     DeleteObject((HGDIOBJ) data);
 }
 
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_init_rescache(void) {
-    h_bitmaps = hash_new_hashtable(127, hash_id, comp_id, NULL, 
+    h_bitmaps = hash_new_hashtable(127, hash_id, comp_id, NULL,
                                    del_ref_object);
 }
 
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_exit_rescache(void) {
     hash_del_hashtable(h_bitmaps);
 }
 
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_cache_bitmap(UINT id, HBITMAP hbm) {
     hash_add(h_bitmaps, (void *)(size_t) id, (void *) hbm);
 }
 
-KHMEXP HBITMAP KHMAPI 
+KHMEXP HBITMAP KHMAPI
 khui_get_cached_bitmap(UINT id) {
     return (HBITMAP) hash_lookup(h_bitmaps, (void *)(size_t) id);
 }
 
-KHMEXP khui_ilist * KHMAPI 
+KHMEXP khui_ilist * KHMAPI
 khui_create_ilist(int cx, int cy, int n, int ng, int opt) {
     BITMAPV5HEADER head;
     HDC hdc;
@@ -110,7 +110,7 @@ khui_create_ilist(int cx, int cy, int n, int ng, int opt) {
     return il;
 }
 
-KHMEXP BOOL KHMAPI 
+KHMEXP BOOL KHMAPI
 khui_delete_ilist(khui_ilist * il) {
     DeleteObject(il->img);
     DeleteObject(il->mask);
@@ -120,10 +120,10 @@ khui_delete_ilist(khui_ilist * il) {
     return TRUE;
 }
 
-KHMEXP int KHMAPI 
-khui_ilist_add_masked_id(khui_ilist *il, 
-                         HBITMAP hbm, 
-                         COLORREF cbkg, 
+KHMEXP int KHMAPI
+khui_ilist_add_masked_id(khui_ilist *il,
+                         HBITMAP hbm,
+                         COLORREF cbkg,
                          int id) {
     int idx;
 
@@ -135,7 +135,7 @@ khui_ilist_add_masked_id(khui_ilist *il,
     return idx;
 }
 
-KHMEXP int KHMAPI 
+KHMEXP int KHMAPI
 khui_ilist_lookup_id(khui_ilist *il, int id) {
     int i;
 
@@ -147,7 +147,7 @@ khui_ilist_lookup_id(khui_ilist *il, int id) {
     return -1;
 }
 
-KHMEXP int KHMAPI 
+KHMEXP int KHMAPI
 khui_ilist_add_masked(khui_ilist * il, HBITMAP hbm, COLORREF cbkg) {
     HDC dcr,dci,dct,dcb;
     HBITMAP hb_oldb, hb_oldi, hb_oldt;
@@ -194,12 +194,12 @@ khui_ilist_add_masked(khui_ilist * il, HBITMAP hbm, COLORREF cbkg) {
     return i;
 }
 
-KHMEXP void KHMAPI 
-khui_ilist_draw(khui_ilist * il, 
-                int idx, 
-                HDC dc, 
-                int x, 
-                int y, 
+KHMEXP void KHMAPI
+khui_ilist_draw(khui_ilist * il,
+                int idx,
+                HDC dc,
+                int x,
+                int y,
                 int opt) {
     HDC dci;
     HBITMAP hb_oldi;
@@ -220,13 +220,13 @@ khui_ilist_draw(khui_ilist * il,
     DeleteDC(dci);
 }
 
-KHMEXP void KHMAPI 
-khui_ilist_draw_bg(khui_ilist * il, 
-                   int idx, 
-                   HDC dc, 
-                   int x, 
-                   int y, 
-                   int opt, 
+KHMEXP void KHMAPI
+khui_ilist_draw_bg(khui_ilist * il,
+                   int idx,
+                   HDC dc,
+                   int x,
+                   int y,
+                   int opt,
                    COLORREF bgcolor) {
     HDC dcm;
     HBITMAP hb_oldm, hb_mem;
@@ -253,7 +253,7 @@ khui_ilist_draw_bg(khui_ilist * il,
     BitBlt(dc,x,y,il->cx,il->cy,dcm,0,0,SRCCOPY);
 
     SelectObject(dcm, hb_oldm);
-    
+
     DeleteObject(hb_mem);
     DeleteObject(hbr);
 
@@ -261,7 +261,7 @@ khui_ilist_draw_bg(khui_ilist * il,
 }
 
 
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_bitmap_from_hbmp(khui_bitmap * kbm, HBITMAP hbm)
 {
     HDC hdc;

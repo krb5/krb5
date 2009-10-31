@@ -352,7 +352,7 @@ static void login_get_kconf(k)
 	kconf_names[0] = "login";
 	kconf_names[1] = login_conf_set[i].flagname;
 	kconf_names[2] = 0;
-	retval = profile_get_values(k->profile, 
+	retval = profile_get_values(k->profile,
 				    kconf_names, &kconf_val);
 	if (retval) {
 	    /* ignore most (all?) errors */
@@ -445,7 +445,7 @@ void k_init (ttyn)
 {
 #ifdef KRB5_GET_TICKETS
     krb5_error_code retval;
-    
+
     retval = krb5_init_secure_context(&kcontext);
     if (retval) {
 	com_err("login", retval, "while initializing krb5");
@@ -482,7 +482,7 @@ static int k5_get_password (user_pwstring, pwsize)
     unsigned int pwsize;
 {
     krb5_error_code code;
-    char prompt[255];			
+    char prompt[255];
     snprintf(prompt, sizeof(prompt), "Password for %s", username);
 
     /* reduce opportunities to be swapped out */
@@ -521,7 +521,7 @@ static int try_krb5 (me_p, pass)
     if (code) {
 	if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY)
 	    fprintf (stderr,
-		     "%s: Kerberos password incorrect\n", 
+		     "%s: Kerberos password incorrect\n",
 		     username);
 	else
 	    com_err ("login", code,
@@ -749,8 +749,8 @@ int main(argc, argv)
     /*
      * -p is used by getty to tell login not to destroy the environment
      * -r is used by rlogind to cause the autologin protocol;
-     * -f is used to skip a second login authentication 
-     * -F is used to skip a second login authentication, allows login as root 
+     * -f is used to skip a second login authentication
+     * -F is used to skip a second login authentication, allows login as root
      * -e is used to skip a second login authentication, but allows
      * 	login as root.
      * -h is used by other servers to pass the name of the
@@ -835,11 +835,11 @@ int main(argc, argv)
     /* Only do this we we're not using POSIX_TERMIOS */
     (void)ioctl(0, TIOCLSET, (char *)&ioctlval);
 #endif
-	
+
 #ifdef TIOCNXCL
     (void)ioctl(0, TIOCNXCL, (char *)0);
 #endif
-	
+
     ioctlval = fcntl(0, F_GETFL);
 #ifdef O_NONBLOCK
     ioctlval &= ~O_NONBLOCK;
@@ -861,7 +861,7 @@ int main(argc, argv)
 	    term[sizeof(term) - 1] = '\0';
 	}
     }
-	
+
     term_init (rflag || kflag || Kflag || eflag);
 
     for (cnt = getdtablesize(); cnt > 2; cnt--)
@@ -877,7 +877,7 @@ int main(argc, argv)
     else
 	tty = ttyn;
 
-#ifndef LOG_ODELAY /* 4.2 syslog ... */                      
+#ifndef LOG_ODELAY /* 4.2 syslog ... */
     openlog("login", 0);
 #else
     openlog("login", LOG_ODELAY, LOG_AUTH);
@@ -1106,7 +1106,7 @@ int main(argc, argv)
    controlling tty, which is the case (under SunOS at least.) */
 
     {
-	int pid = getpid(); 
+	int pid = getpid();
 	struct sigaction sa2, osa;
 
 	/* this will set the PGID to the PID. */
@@ -1251,14 +1251,14 @@ int main(argc, argv)
 
 #ifdef KRB5_GET_TICKETS
     if (got_v5_tickets) {
-	/* set up credential cache -- obeying KRB5_ENV_CCNAME 
+	/* set up credential cache -- obeying KRB5_ENV_CCNAME
 	   set earlier */
 	/* (KRB5_ENV_CCNAME == "KRB5CCNAME" via osconf.h) */
 	if ((retval = krb5_cc_default(kcontext, &ccache))) {
 	    com_err(argv[0], retval, "while getting default ccache");
 	} else if ((retval = krb5_cc_initialize(kcontext, ccache, me))) {
 	    com_err(argv[0], retval, "when initializing cache");
-	} else if ((retval = krb5_cc_store_cred(kcontext, ccache, 
+	} else if ((retval = krb5_cc_store_cred(kcontext, ccache,
 						&my_creds))) {
 	    com_err(argv[0], retval, "while storing credentials");
 	} else if (xtra_creds &&
@@ -1279,7 +1279,7 @@ int main(argc, argv)
 	    syslog(LOG_ERR,
 		   "%s while re-storing V5 credentials as user",
 		   error_message(retval));
-	    
+
 	}
 	krb5_free_cred_contents(kcontext, &save_v5creds);
     }
@@ -1672,7 +1672,7 @@ void dolastlog(hostname, quiet, tty)
 		printf("Last login: %.*s ", 24-5, (char *)ctime(&lltime));
 
 		if (*ll.ll_host != '\0')
-		    printf("from %.*s\n", (int) sizeof(ll.ll_host), 
+		    printf("from %.*s\n", (int) sizeof(ll.ll_host),
 			   ll.ll_host);
 		else
 		    printf("on %.*s\n", (int) sizeof(ll.ll_line), ll.ll_line);
@@ -1790,7 +1790,7 @@ dofork()
     int syncpipe[2];
     char c;
     int n;
-    
+
 #ifdef _IBMR2
     update_ref_count(1);
 #endif
@@ -1826,7 +1826,7 @@ dofork()
 
     /* Setup stuff?  This would be things we could do in parallel with login */
     (void) chdir("/");	/* Let's not keep the fs busy... */
-    
+
     /* If we're the parent, watch the child until it dies */
 
     while (1) {
@@ -1849,7 +1849,7 @@ dofork()
 	if (pid == child)
 	    break;
     }
-    
+
     /* Cleanup stuff */
     /* Run destroy_tickets to destroy tickets */
     (void) destroy_tickets();		/* If this fails, we lose quietly */
@@ -1873,7 +1873,7 @@ char *strsave(sp)
      char *sp;
 {
     register char *ret;
-    
+
     if ((ret = strdup(sp)) == NULL) {
 	fprintf(stderr, "no memory for saving args\n");
 	exit(1);

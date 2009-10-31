@@ -5,16 +5,16 @@
 int check_constants(void) {
 	BEGIN_TEST("constants");
 	/* API versions */
-	
+
 	check_int(ccapi_version_2, 2);
 	check_int(ccapi_version_3, 3);
 	check_int(ccapi_version_4, 4);
 	check_int(ccapi_version_5, 5);
 	check_int(ccapi_version_6, 6);
-	
+
 	/* Errors */
-	
-	check_int(ccNoError 					  , 0  );	 //   0               
+
+	check_int(ccNoError 					  , 0  );	 //   0
 	check_int(ccIteratorEnd 				  , 201);    // 201
 	check_int(ccErrBadParam 			      , 202);    // 202
 	check_int(ccErrNoMem 					  , 203);    // 203
@@ -45,7 +45,7 @@ int check_constants(void) {
 	check_int(ccErrNotImplemented             , 228);    // 228
 
 	/* Credentials versions */
-	
+
 	check_int(cc_credentials_v4,    1);
 	check_int(cc_credentials_v5,    2);
 	check_int(cc_credentials_v4_v5, (cc_credentials_v4 | cc_credentials_v5));
@@ -58,9 +58,9 @@ int check_constants(void) {
 	check_int(cc_lock_downgrade, 3);
 
     /* Locking Modes */
-  
+
 	check_int(cc_lock_noblock, 0);
 	check_int(cc_lock_block,   1);
-	
+
 	END_TEST_AND_RETURN
 }

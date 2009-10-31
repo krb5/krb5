@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * kdc/replay.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Replay lookaside cache for the KDC, to avoid extra work.
  *
@@ -50,17 +51,17 @@ static int calls = 0;
 static int max_hits_per_entry = 0;
 static int num_entries = 0;
 
-#define STALE_TIME	2*60		/* two minutes */
-#define STALE(ptr) ((abs((ptr)->timein - timenow) >= STALE_TIME) ||	\
-		    ((ptr)->db_age != db_age))
+#define STALE_TIME      2*60            /* two minutes */
+#define STALE(ptr) ((abs((ptr)->timein - timenow) >= STALE_TIME) ||     \
+                    ((ptr)->db_age != db_age))
 
-#define MATCH(ptr) (((ptr)->req_packet->length == inpkt->length) &&	\
-		    !memcmp((ptr)->req_packet->data, inpkt->data,	\
-			    inpkt->length) &&				\
-		    ((ptr)->db_age == db_age))
+#define MATCH(ptr) (((ptr)->req_packet->length == inpkt->length) &&     \
+                    !memcmp((ptr)->req_packet->data, inpkt->data,       \
+                            inpkt->length) &&                           \
+                    ((ptr)->db_age == db_age))
 /* XXX
    Todo:  quench the size of the queue...
- */
+*/
 
 /* return TRUE if outpkt is filled in with a packet to reply with,
    FALSE if the caller should do the work */
@@ -72,9 +73,9 @@ kdc_check_lookaside(krb5_data *inpkt, krb5_data **outpkt)
     register krb5_kdc_replay_ent *eptr, *last, *hold;
     time_t db_age;
 
-    if (krb5_timeofday(kdc_context, &timenow) || 
-	krb5_db_get_age(kdc_context, 0, &db_age))
-	return FALSE;
+    if (krb5_timeofday(kdc_context, &timenow) ||
+        krb5_db_get_age(kdc_context, 0, &db_age))
+        return FALSE;
 
     calls++;
 
@@ -82,34 +83,34 @@ kdc_check_lookaside(krb5_data *inpkt, krb5_data **outpkt)
        stale entries while we're here */
 
     if (root_ptr.next) {
-	for (last = &root_ptr, eptr = root_ptr.next;
-	     eptr;
-	     eptr = eptr->next) {
-	    if (MATCH(eptr)) {
-		eptr->num_hits++;
-		hits++;
+        for (last = &root_ptr, eptr = root_ptr.next;
+             eptr;
+             eptr = eptr->next) {
+            if (MATCH(eptr)) {
+                eptr->num_hits++;
+                hits++;
 
-		if (krb5_copy_data(kdc_context, eptr->reply_packet, outpkt))
-		    return FALSE;
-		else
-		    return TRUE;
-		/* return here, don't bother flushing even if it is stale.
-		   if we just matched, we may get another retransmit... */
-	    }
-	    if (STALE(eptr)) {
-		/* flush it and collect stats */
-		max_hits_per_entry = max(max_hits_per_entry, eptr->num_hits);
-		krb5_free_data(kdc_context, eptr->req_packet);
-		krb5_free_data(kdc_context, eptr->reply_packet);
-		hold = eptr;
-		last->next = eptr->next;
-		eptr = last;
-		free(hold);
-	    } else {
-		/* this isn't it, just move along */
-		last = eptr;
-	    }
-	}
+                if (krb5_copy_data(kdc_context, eptr->reply_packet, outpkt))
+                    return FALSE;
+                else
+                    return TRUE;
+                /* return here, don't bother flushing even if it is stale.
+                   if we just matched, we may get another retransmit... */
+            }
+            if (STALE(eptr)) {
+                /* flush it and collect stats */
+                max_hits_per_entry = max(max_hits_per_entry, eptr->num_hits);
+                krb5_free_data(kdc_context, eptr->req_packet);
+                krb5_free_data(kdc_context, eptr->reply_packet);
+                hold = eptr;
+                last->next = eptr->next;
+                eptr = last;
+                free(hold);
+            } else {
+                /* this isn't it, just move along */
+                last = eptr;
+            }
+        }
     }
     return FALSE;
 }
@@ -120,18 +121,18 @@ kdc_check_lookaside(krb5_data *inpkt, krb5_data **outpkt)
 void
 kdc_insert_lookaside(krb5_data *inpkt, krb5_data *outpkt)
 {
-    register krb5_kdc_replay_ent *eptr;    
+    register krb5_kdc_replay_ent *eptr;
     krb5_int32 timenow;
     time_t db_age;
 
-    if (krb5_timeofday(kdc_context, &timenow) || 
-	krb5_db_get_age(kdc_context, 0, &db_age))
-	return;
+    if (krb5_timeofday(kdc_context, &timenow) ||
+        krb5_db_get_age(kdc_context, 0, &db_age))
+        return;
 
     /* this is a new entry */
     eptr = (krb5_kdc_replay_ent *)calloc(1, sizeof(*eptr));
     if (!eptr)
-	return;
+        return;
     eptr->timein = timenow;
     eptr->db_age = db_age;
     /*
@@ -140,13 +141,13 @@ kdc_insert_lookaside(krb5_data *inpkt, krb5_data *outpkt)
      * ARGH!
      */
     if (krb5_copy_data(kdc_context, inpkt, &eptr->req_packet)) {
-	free(eptr);
-	return;
+        free(eptr);
+        return;
     }
     if (krb5_copy_data(kdc_context, outpkt, &eptr->reply_packet)) {
-	krb5_free_data(kdc_context, eptr->req_packet);
-	free(eptr);
-	return;
+        krb5_free_data(kdc_context, eptr->req_packet);
+        free(eptr);
+        return;
     }
     eptr->next = root_ptr.next;
     root_ptr.next = eptr;
@@ -161,14 +162,14 @@ kdc_free_lookaside(krb5_context kcontext)
     register krb5_kdc_replay_ent *eptr, *last, *hold;
     if (root_ptr.next) {
         for (last = &root_ptr, eptr = root_ptr.next;
-	     eptr; eptr = eptr->next) {
-		krb5_free_data(kcontext, eptr->req_packet);
-		krb5_free_data(kcontext, eptr->reply_packet);
-		hold = eptr;
-		last->next = eptr->next;
-		eptr = last;
-		free(hold);
-	}
+             eptr; eptr = eptr->next) {
+            krb5_free_data(kcontext, eptr->req_packet);
+            krb5_free_data(kcontext, eptr->reply_packet);
+            hold = eptr;
+            last->next = eptr->next;
+            eptr = last;
+            free(hold);
+        }
     }
 }
 

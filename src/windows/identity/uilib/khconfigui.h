@@ -204,7 +204,7 @@ typedef struct tag_khui_config_node_reg {
  */
 #define CFGDLG_WIDTH 255
 
-/*! \brief Height of a configuration dialog in dialog units 
+/*! \brief Height of a configuration dialog in dialog units
 
     \see ::CFGDLG_WIDTH
 */
@@ -231,7 +231,7 @@ typedef struct tag_khui_config_node_reg {
 */
 typedef khm_handle khui_config_node;
 
-/*! \brief Initialization data passed in to a subpanel 
+/*! \brief Initialization data passed in to a subpanel
 
     When creating a subpanel, a pointer to the following strucutred
     will be passed in as the creation parameter for the dialog.
@@ -415,7 +415,7 @@ khui_cfg_get_next(khui_config_node node,
 KHMEXP khm_int32 KHMAPI
 khui_cfg_get_next_release(khui_config_node * node);
 
-/*! \brief Get the name of a configuration node 
+/*! \brief Get the name of a configuration node
 
     Gets the name (not the short description or the long description)
     of the given configuration node.
@@ -464,7 +464,7 @@ khui_cfg_get_param_inst(khui_config_node node,
     This function is used internally by NetIDMgr.  Do not use.
 */
 KHMEXP void KHMAPI
-khui_cfg_set_hwnd_inst(khui_config_node node, 
+khui_cfg_set_hwnd_inst(khui_config_node node,
                        khui_config_node noderef,
                        HWND hwnd);
 
@@ -473,7 +473,7 @@ khui_cfg_set_hwnd_inst(khui_config_node node,
     This function is used internally by NetIDMgr.  Do not use.
 */
 KHMEXP void KHMAPI
-khui_cfg_set_param_inst(khui_config_node node, 
+khui_cfg_set_param_inst(khui_config_node node,
                         khui_config_node noderef,
                         LPARAM param);
 
@@ -581,16 +581,16 @@ khui_cfg_init_dialog_data(HWND hwnd_dlg,
                           khui_config_init_data ** new_data,
                           void ** extra);
 
-/*! \brief Utility function: Retrieves dialog data 
+/*! \brief Utility function: Retrieves dialog data
 
     Retrieves the dialog data previoulsy stored using
     khui_cfg_init_dialog_data().
 
-    \param[in] hwnd_dlg Handle to the dialog box 
+    \param[in] hwnd_dlg Handle to the dialog box
 
     \param[out] data Receives a pointer to the ::khui_config_init_data
         block.
-    
+
     \param[out] extra Receives a pointer to the extra memory
         allocated. Optional (set to NULL if this value is not needed).
 */

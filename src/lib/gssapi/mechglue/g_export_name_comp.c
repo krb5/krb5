@@ -70,4 +70,3 @@ gss_export_name_composite(OM_uint32 *minor_status,
 
     return status;
 }
-

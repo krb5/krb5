@@ -31,7 +31,7 @@
 /* ------------------------------------------------------------------------ */
 
 /* On Windows, a pipe is a struct.  See ccs_win_pipe.h for details.         */
-   
+
 
 /* ------------------------------------------------------------------------ */
 
@@ -43,7 +43,7 @@ cc_int32 ccs_os_pipe_valid (ccs_pipe_t in_pipe) {
 
 cc_int32 ccs_os_pipe_copy (ccs_pipe_t* out_pipe, ccs_pipe_t  in_pipe) {
     return ccs_win_pipe_copy(
-        out_pipe, 
+        out_pipe,
         in_pipe);
     }
 
@@ -61,4 +61,3 @@ cc_int32 ccs_os_pipe_compare (ccs_pipe_t  pipe_1,
 
     return ccs_win_pipe_compare(pipe_1, pipe_2, out_equal);
     }
-

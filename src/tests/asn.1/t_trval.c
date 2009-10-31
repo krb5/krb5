@@ -3,13 +3,13 @@
  *
  * Permission to include this software in the Kerberos V5 distribution
  * was graciously provided by Trusted Information Systems.
- * 
+ *
  * Trusted Information Systems makes no representation about the
  * suitability of this software for any purpose.  It is provided
  * "as is" without express or implied warranty.
- * 
+ *
  * Copyright (C) 1994 Massachusetts Institute of Technology
- * 
+ *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
@@ -28,7 +28,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  */
 
 /* Split out from "#ifdef STANDALONE" code previously in trval.c, so
@@ -67,7 +67,7 @@ int main(argc, argv)
     int optflg = 1;
     FILE *fp;
     int r = 0;
-	
+
     while (--argc > 0) {
 	argv++;
 	if (optflg && *(argv)[0] == '-') {
@@ -102,6 +102,6 @@ int main(argc, argv)
 	}
     }
     if (optflg) r = trval(stdin, stdout);
-	
+
     exit(r);
 }

@@ -77,4 +77,3 @@ gss_map_name_to_any(OM_uint32 *minor_status,
 
     return status;
 }
-

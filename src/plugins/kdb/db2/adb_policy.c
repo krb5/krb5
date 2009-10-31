@@ -36,7 +36,7 @@ static char *rcsid = "$Header$";
 
 /*
  * Function: osa_adb_create_policy
- * 
+ *
  * Purpose: create a policy entry in the policy db.
  *
  * Arguments:
@@ -45,13 +45,13 @@ static char *rcsid = "$Header$";
  *
  * Requires:
  *	entry have a valid name.
- * 
+ *
  * Effects:
  *	creates the entry in the db
  *
  * Modifies:
  *	the policy db.
- * 
+ *
  */
 krb5_error_code
 osa_adb_create_policy(osa_adb_policy_t db, osa_policy_ent_t entry)
@@ -69,7 +69,7 @@ osa_adb_create_policy(osa_adb_policy_t db, osa_policy_ent_t entry)
     }
     dbkey.data = entry->name;
     dbkey.size = (strlen(entry->name) + 1);
-		
+
     switch(db->db->get(db->db, &dbkey, &dbdata, 0)) {
     case 0:
 	 ret = OSA_ADB_DUP;
@@ -110,7 +110,7 @@ error:
 
 /*
  * Function: osa_adb_destroy_policy
- * 
+ *
  * Purpose: destroy a policy entry
  *
  * Arguments:
@@ -126,7 +126,7 @@ error:
  *
  * Modifies:
  *	policy db.
- * 
+ *
  */
 krb5_error_code
 osa_adb_destroy_policy(osa_adb_policy_t db, char *name)
@@ -135,7 +135,7 @@ osa_adb_destroy_policy(osa_adb_policy_t db, char *name)
     int	    status, ret;
 
     OPENLOCK(db, KRB5_DB_LOCKMODE_EXCLUSIVE);
-    
+
     if(name == NULL) {
 	 ret = EINVAL;
 	 goto error;
@@ -167,7 +167,7 @@ error:
 
 /*
  * Function: osa_adb_get_policy
- * 
+ *
  * Purpose: retrieve policy
  *
  * Arguments:
@@ -222,10 +222,10 @@ osa_adb_get_policy(osa_adb_policy_t db, char *name,
 	 ret = ENOMEM;
 	 goto error;
     }
-    memcpy(aligned_data, dbdata.data, dbdata.size);	
+    memcpy(aligned_data, dbdata.data, dbdata.size);
     memset(*entry, 0, sizeof(osa_policy_ent_rec));
     xdrmem_create(&xdrs, aligned_data, dbdata.size, XDR_DECODE);
-    if (!xdr_osa_policy_ent_rec(&xdrs, *entry)) 
+    if (!xdr_osa_policy_ent_rec(&xdrs, *entry))
 	ret =  OSA_ADB_FAILURE;
     else ret = OSA_ADB_OK;
     xdr_destroy(&xdrs);
@@ -238,7 +238,7 @@ error:
 
 /*
  * Function: osa_adb_put_policy
- * 
+ *
  * Purpose: update a policy in the dababase
  *
  * Arguments:
@@ -248,13 +248,13 @@ error:
  *
  * Requires:
  *	[requires]
- * 
+ *
  * Effects:
  *	[effects]
  *
  * Modifies:
  *	[modifies]
- * 
+ *
  */
 krb5_error_code
 osa_adb_put_policy(osa_adb_policy_t db, osa_policy_ent_t entry)
@@ -266,7 +266,7 @@ osa_adb_put_policy(osa_adb_policy_t db, osa_policy_ent_t entry)
     int			ret;
 
     OPENLOCK(db, KRB5_DB_LOCKMODE_EXCLUSIVE);
-    
+
     if(entry->name == NULL) {
 	 ret = EINVAL;
 	 goto error;
@@ -310,7 +310,7 @@ error:
 
 /*
  * Function: osa_adb_iter_policy
- * 
+ *
  * Purpose: iterate over the policy database.
  *
  * Arguments:
@@ -352,7 +352,7 @@ osa_adb_iter_policy(osa_adb_policy_t db, osa_adb_iter_policy_func func,
 	     goto error;
 	}
 	memcpy(aligned_data, dbdata.data, dbdata.size);
-	
+
 	memset(entry, 0, sizeof(osa_policy_ent_rec));
 	xdrmem_create(&xdrs, aligned_data, dbdata.size, XDR_DECODE);
 	if(!xdr_osa_policy_ent_rec(&xdrs, entry)) {
@@ -364,7 +364,7 @@ osa_adb_iter_policy(osa_adb_policy_t db, osa_adb_iter_policy_func func,
 	}
 	(*func)(data, entry);
 	xdr_destroy(&xdrs);
-	free(aligned_data);	
+	free(aligned_data);
 	osa_free_policy_ent(entry);
 	ret = db->db->seq(db->db, &dbkey, &dbdata, R_NEXT);
     }

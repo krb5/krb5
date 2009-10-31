@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/os/timeofday.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,9 +23,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
  *
- * libos: krb5_timeofday function for BSD 4.3 
+ *
+ * libos: krb5_timeofday function for BSD 4.3
  */
 
 
@@ -39,18 +40,18 @@ krb5_timeofday(krb5_context context, register krb5_timestamp *timeret)
     time_t tval;
 
     if (context == NULL)
-	return EINVAL;
+        return EINVAL;
 
     os_ctx = &context->os_context;
     if (os_ctx->os_flags & KRB5_OS_TOFFSET_TIME) {
-	    *timeret = os_ctx->time_offset;
-	    return 0;
+        *timeret = os_ctx->time_offset;
+        return 0;
     }
     tval = time(0);
     if (tval == (time_t) -1)
-	return (krb5_error_code) errno;
+        return (krb5_error_code) errno;
     if (os_ctx->os_flags & KRB5_OS_TOFFSET_VALID)
-	    tval += os_ctx->time_offset;
+        tval += os_ctx->time_offset;
     *timeret = tval;
     return 0;
 }

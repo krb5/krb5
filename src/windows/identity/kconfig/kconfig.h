@@ -33,7 +33,7 @@
 /*! \defgroup kconf NetIDMgr Configuration Provider */
 /*@{*/
 
-/*! \brief Configuration schema descriptor record 
+/*! \brief Configuration schema descriptor record
 
     The schema descriptor is a convenient way to provide a default set
     of configuration options for a part of an application.  It
@@ -94,7 +94,7 @@ typedef struct tag_kconf_schema {
 */
 #define KC_INT32        3
 
-/*! \brief A 64 bit integer 
+/*! \brief A 64 bit integer
 
     Specifies a configuration parameter named \a name which is of this
     type.  Use \a description to provide an optional description of
@@ -104,7 +104,7 @@ typedef struct tag_kconf_schema {
 */
 #define KC_INT64        4
 
-/*! \brief A unicode string 
+/*! \brief A unicode string
 
     Specifies a configuration parameter named \a name which is of this
     type.  Use \a description to provide an optional description of
@@ -116,7 +116,7 @@ typedef struct tag_kconf_schema {
 */
 #define KC_STRING       5
 
-/*! \brief An unparsed binary stream 
+/*! \brief An unparsed binary stream
 
     Specifies a configuration parameter named \a name which is of this
     type.  Use \a description to provide an optional description of
@@ -187,7 +187,7 @@ typedef struct tag_kconf_schema {
  */
 #define KCONF_FLAG_NOPARSENAME   0x00000040
 
-/*! \brief Maximum number of allowed characters (including terminating NULL) in a name 
+/*! \brief Maximum number of allowed characters (including terminating NULL) in a name
 
     \note This is a hard limit in Windows, since we are mapping
         configuration spaces to registry keys.
@@ -233,7 +233,7 @@ typedef struct tag_kconf_schema {
 
     \param[in] parent The parent configuration space.  The path
         specified in \a cspace is relative to the parent.  Set this to
-        NULL to indicate the root configuration space.  
+        NULL to indicate the root configuration space.
 
     \param[in] cspace The configuration path.  This can be up to
         ::KCONF_MAXCCH_PATH characters in length.  Use backslashes to
@@ -253,8 +253,8 @@ typedef struct tag_kconf_schema {
         and settings \a flags to the required flags.
 
 */
-KHMEXP khm_int32 KHMAPI 
-khc_open_space(khm_handle parent, const wchar_t * cspace, khm_int32 flags, 
+KHMEXP khm_int32 KHMAPI
+khc_open_space(khm_handle parent, const wchar_t * cspace, khm_int32 flags,
                khm_handle * result);
 
 /*! \brief Set the shadow space for a configuration handle
@@ -277,12 +277,12 @@ khc_open_space(khm_handle parent, const wchar_t * cspace, khm_int32 flags,
 
     Specify NULL for \a lower to remove any prior shadow.
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khc_shadow_space(khm_handle upper, khm_handle lower);
 
 /*! \brief Close a handle opened with khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khc_close_space(khm_handle conf);
 
 /*! \brief Read a string value from a configuration space
@@ -321,7 +321,7 @@ khc_close_space(khm_handle conf);
 
     \param[in] buf Buffer to copy the string to.  Specify NULL to just
         retrieve the number of required bytes.
-    
+
     \param[in,out] bufsize On entry, specifies the number of bytes of
         space available at the location specified by \a buf.  On exit
         specifies the number of bytes actually copied or the size of
@@ -336,10 +336,10 @@ khc_close_space(khm_handle conf);
 
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI 
-khc_read_string(khm_handle conf, 
-                const wchar_t * value_name, 
-                wchar_t * buf, 
+KHMEXP khm_int32 KHMAPI
+khc_read_string(khm_handle conf,
+                const wchar_t * value_name,
+                wchar_t * buf,
                 khm_size * bufsize);
 
 /*! \brief Read a multi-string value from a configuration space
@@ -386,7 +386,7 @@ khc_read_string(khm_handle conf,
 
     \param[in] buf Buffer to copy the multi-string to.  Specify NULL
         to just retrieve the number of required bytes.
-    
+
     \param[in,out] bufsize On entry, specifies the number of bytes of
         space available at the location specified by \a buf.  On exit
         specifies the number of bytes actually copied or the size of
@@ -401,10 +401,10 @@ khc_read_string(khm_handle conf,
 
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI 
-khc_read_multi_string(khm_handle conf, 
-                      const wchar_t * value_name, 
-                      wchar_t * buf, 
+KHMEXP khm_int32 KHMAPI
+khc_read_multi_string(khm_handle conf,
+                      const wchar_t * value_name,
+                      wchar_t * buf,
                       khm_size * bufsize);
 
 /*! \brief Read a 32 bit integer value from a configuration space
@@ -452,9 +452,9 @@ khc_read_multi_string(khm_handle conf,
     \retval KHM_ERROR_TYPE_MISMATCH The specified value was found but was not of the correct type.
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI 
-khc_read_int32(khm_handle conf, 
-               const wchar_t * value_name, 
+KHMEXP khm_int32 KHMAPI
+khc_read_int32(khm_handle conf,
+               const wchar_t * value_name,
                khm_int32 * buf);
 
 /*! \brief Read a 64 bit integer value from a configuration space
@@ -503,9 +503,9 @@ khc_read_int32(khm_handle conf,
 
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI 
-khc_read_int64(khm_handle conf, 
-               const wchar_t * value_name, 
+KHMEXP khm_int32 KHMAPI
+khc_read_int64(khm_handle conf,
+               const wchar_t * value_name,
                khm_int64 * buf);
 
 /*! \brief Read a binary value from a configuration space
@@ -542,7 +542,7 @@ khc_read_int64(khm_handle conf,
 
     \param[in] buf Buffer to copy the string to.  Specify NULL to just
         retrieve the number of required bytes.
-    
+
     \param[in,out] bufsize On entry, specifies the number of bytes of
         space available at the location specified by \a buf.  On exit
         specifies the number of bytes actually copied or the size of
@@ -554,10 +554,10 @@ khc_read_int64(khm_handle conf,
 
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI 
-khc_read_binary(khm_handle conf, 
-                const wchar_t * value_name, 
-                void * buf, 
+KHMEXP khm_int32 KHMAPI
+khc_read_binary(khm_handle conf,
+                const wchar_t * value_name,
+                void * buf,
                 khm_size * bufsize);
 
 /*! \brief Write a string value to a configuration space
@@ -603,9 +603,9 @@ khc_read_binary(khm_handle conf,
 
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI 
-khc_write_string(khm_handle conf, 
-                 const wchar_t * value_name, 
+KHMEXP khm_int32 KHMAPI
+khc_write_string(khm_handle conf,
+                 const wchar_t * value_name,
                  wchar_t * buf);
 
 /*! \brief Write a multi-string value to a configuration space
@@ -653,9 +653,9 @@ khc_write_string(khm_handle conf,
 
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI 
-khc_write_multi_string(khm_handle conf, 
-                       const wchar_t * value_name, 
+KHMEXP khm_int32 KHMAPI
+khc_write_multi_string(khm_handle conf,
+                       const wchar_t * value_name,
                        wchar_t * buf);
 
 /*! \brief Write a 32 bit integer value to a configuration space
@@ -693,9 +693,9 @@ khc_write_multi_string(khm_handle conf,
 
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI 
-khc_write_int32(khm_handle conf, 
-                const wchar_t * value_name, 
+KHMEXP khm_int32 KHMAPI
+khc_write_int32(khm_handle conf,
+                const wchar_t * value_name,
                 khm_int32 buf);
 
 /*! \brief Write a 64 bit integer value to a configuration space
@@ -733,9 +733,9 @@ khc_write_int32(khm_handle conf,
 
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI 
-khc_write_int64(khm_handle conf, 
-                const wchar_t * value_name, 
+KHMEXP khm_int32 KHMAPI
+khc_write_int64(khm_handle conf,
+                const wchar_t * value_name,
                 khm_int64 buf);
 
 /*! \brief Write a binary value to a configuration space
@@ -768,10 +768,10 @@ khc_write_int64(khm_handle conf,
 
     \see khc_open_space()
 */
-KHMEXP khm_int32 KHMAPI 
-khc_write_binary(khm_handle conf, 
-                 const wchar_t * value_name, 
-                 void * buf, 
+KHMEXP khm_int32 KHMAPI
+khc_write_binary(khm_handle conf,
+                 const wchar_t * value_name,
+                 void * buf,
                  khm_size bufsize);
 
 /*! \brief Get the type of a value in a configuration space
@@ -779,7 +779,7 @@ khc_write_binary(khm_handle conf,
     \return The return value is the type of the specified value, or
         KC_NONE if the value does not exist.
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khc_get_type(khm_handle conf, const wchar_t * value_name);
 
 /*! \brief Check which configuration stores contain a specific value.
@@ -802,7 +802,7 @@ khc_get_type(khm_handle conf, const wchar_t * value_name);
         and ::KCONF_FLAG_SCHEMA indicating which stores contain the
         value.
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khc_value_exists(khm_handle conf, const wchar_t * value);
 
 /*! \brief Remove a value from a configuration space
@@ -857,9 +857,9 @@ khc_remove_value(khm_handle conf, const wchar_t * value_name, khm_int32 flags);
         pointed to by \a buf.  On exit, holds the number of bytes
         copied into the buffer including the NULL terminator.
  */
-KHMEXP khm_int32 KHMAPI 
-khc_get_config_space_name(khm_handle conf, 
-                          wchar_t * buf, 
+KHMEXP khm_int32 KHMAPI
+khc_get_config_space_name(khm_handle conf,
+                          wchar_t * buf,
                           khm_size * bufsize);
 
 /*! \brief Get a handle to the parent space
@@ -870,8 +870,8 @@ khc_get_config_space_name(khm_handle conf,
         call succeeds.  Receives NULL otherwise.  The returned handle
         must be closed using khc_close_space()
  */
-KHMEXP khm_int32 KHMAPI 
-khc_get_config_space_parent(khm_handle conf, 
+KHMEXP khm_int32 KHMAPI
+khc_get_config_space_parent(khm_handle conf,
                             khm_handle * parent);
 
 /*! \brief Load a configuration schema into the specified configuration space
@@ -884,14 +884,14 @@ khc_get_config_space_parent(khm_handle conf,
 
     \see khc_unload_schema()
  */
-KHMEXP khm_int32 KHMAPI 
-khc_load_schema(khm_handle conf, 
+KHMEXP khm_int32 KHMAPI
+khc_load_schema(khm_handle conf,
                 const kconf_schema * schema);
 
 /*! \brief Unload a schema from a configuration space
  */
-KHMEXP khm_int32 KHMAPI 
-khc_unload_schema(khm_handle conf, 
+KHMEXP khm_int32 KHMAPI
+khc_unload_schema(khm_handle conf,
                   const kconf_schema * schema);
 
 /*! \brief Enumerate the subspaces of a configuration space
@@ -941,7 +941,7 @@ khc_unload_schema(khm_handle conf,
 	However, the returned handle has the same domain restrictions
 	as \a conf.
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khc_enum_subspaces(khm_handle conf,
                    khm_handle prev,
                    khm_handle * next);

@@ -582,7 +582,7 @@ fb64_stream_key(key, stp)
  *  INPUT --(--------->(+)+---> DATA
  *          |             |
  *	    +-------------+
- *         
+ *
  *
  * Given:
  *	iV: Initial vector, 64 bits (8 bytes) long.
@@ -643,7 +643,7 @@ cfb64_decrypt(data)
 		des_ecb_encrypt(stp->str_output, b, stp->str_sched, 1);
 		memcpy((void *)stp->str_feed, (void *)b, sizeof(Block));
 		stp->str_index = 1;	/* Next time will be 1 */
-		index = 0;		/* But now use 0 */ 
+		index = 0;		/* But now use 0 */
 	}
 
 	/* On decryption we store (data) which is cypher. */
@@ -716,7 +716,7 @@ ofb64_decrypt(data)
 		des_ecb_encrypt(stp->str_feed, b, stp->str_sched, 1);
 		memcpy((void *)stp->str_feed, (void *)b, sizeof(Block));
 		stp->str_index = 1;	/* Next time will be 1 */
-		index = 0;		/* But now use 0 */ 
+		index = 0;		/* But now use 0 */
 	}
 
 	return(data ^ stp->str_feed[index]);

@@ -169,4 +169,3 @@ kh_hdb_windc_init(krb5_context context,
                   kh_db_context *kh);
 
 #endif /* KRB5_KDB_HDB_H */
-

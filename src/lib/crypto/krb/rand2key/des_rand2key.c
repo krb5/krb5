@@ -51,5 +51,3 @@ krb5int_des_make_key(const krb5_data *randombits, krb5_keyblock *key)
 
     return(0);
 }
-
-

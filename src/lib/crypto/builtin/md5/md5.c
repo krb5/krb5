@@ -106,7 +106,7 @@ static const unsigned char PADDING[64] = {
 /* The routine krb5int_MD5Init initializes the message-digest context
    mdContext. All fields are set to zero.
  */
-void 
+void
 krb5int_MD5Init (krb5_MD5_CTX *mdContext)
 {
   mdContext->i[0] = mdContext->i[1] = (krb5_ui_4)0;

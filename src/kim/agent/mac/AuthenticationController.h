@@ -6,7 +6,7 @@
  * require a specific license from the United States Government.
  * It is the responsibility of any person or organization contemplating
  * export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -30,9 +30,9 @@
 
 @interface AuthenticationController : NSWindowController {
     IPCClient *associatedClient;
-    
+
     IBOutlet KerberosTimeFormatter *lifetimeFormatter;
-    
+
     IBOutlet NSView *containerView;
     IBOutlet NSView *identityView;
     IBOutlet NSView *passwordView;
@@ -46,30 +46,30 @@
     IBOutlet BadgedImageView *samBadge;
     IBOutlet BadgedImageView *changePasswordBadge;
     IBOutlet BadgedImageView *errorBadge;
-    
+
     IBOutlet NSProgressIndicator *enterSpinny;
     IBOutlet NSProgressIndicator *passwordSpinny;
     IBOutlet NSProgressIndicator *samSpinny;
     IBOutlet NSProgressIndicator *changePasswordSpinny;
-    
+
     // Controls that need to be made key
     IBOutlet NSTextField *identityField;
     IBOutlet NSTextField *passwordField;
     IBOutlet NSTextField *samPromptField;
     IBOutlet NSTextField *oldPasswordField;
-    
+
     // Other controls of interest
     IBOutlet NSButton *rememberPasswordInKeychainCheckBox;
-    
+
     IBOutlet NSObjectController *glueController;
 
     IBOutlet NSWindow *ticketOptionsSheet;
     IBOutlet NSObjectController *ticketOptionsController;
     BOOL visibleAsSheet;
-    
+
     IBOutlet NSSlider *validLifetimeSlider;
     IBOutlet NSSlider *renewableLifetimeSlider;
-    
+
     NSMutableArray *favoriteIdentities;
     NSMutableDictionary *favoriteOptions;
 }
@@ -102,11 +102,11 @@
 
 - (IBAction) cancelAuthSheet: (id) sender;
 
-- (void) authSheetDidEnd: (NSWindow *) sheet 
-              returnCode: (int) returnCode 
+- (void) authSheetDidEnd: (NSWindow *) sheet
+              returnCode: (int) returnCode
              contextInfo: (void *) contextInfo;
-- (void) ticketOptionsSheetDidEnd: (NSWindow *) sheet 
-          returnCode: (int) returnCode 
+- (void) ticketOptionsSheetDidEnd: (NSWindow *) sheet
+          returnCode: (int) returnCode
          contextInfo: (void *) contextInfo;
 
 - (IBAction) changePasswordGearAction: (id) sender;

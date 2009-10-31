@@ -199,7 +199,7 @@ get_default_IM()
 {
 	struct utsname name;
 	static char banner[1024];
-	
+
 	if (uname(&name) < 0)
 	    snprintf(banner, sizeof(banner),
 		     "\r\nError getting hostname: %s\r\n",
@@ -399,7 +399,7 @@ main(argc, argv)
 		    {
 			extern krb5_context telnet_context;
 			krb5_error_code retval;
-			
+
 			if (telnet_context == 0) {
 				retval = krb5_init_context(&telnet_context);
 				if (retval) {
@@ -640,7 +640,7 @@ main(argc, argv)
 #endif	/* defined(IPPROTO_IP) && defined(IP_TOS) */
 	net = 0;
 	doit((struct sockaddr *)&from);
-	
+
 	/* NOTREACHED */
 	return 0;
 }  /* end of main */
@@ -765,7 +765,7 @@ getterminaltype(name)
     }
     if (must_encrypt || auth_must_encrypt()) {
 	time_t timeout = time(0) + 60;
-	
+
 	if (my_state_is_dont(TELOPT_ENCRYPT) ||
 	    my_state_is_wont(TELOPT_ENCRYPT) ||
 	    his_state_is_wont(TELOPT_AUTHENTICATION))
@@ -956,7 +956,7 @@ static void doit(who)
 	 * Find an available pty to use.
 	 */
 	pty_init();
-	
+
 
 	if ((retval = pty_getpty(&pty, line, 17)) != 0) {
 		fatal(net, error_message(retval));
@@ -964,7 +964,7 @@ static void doit(who)
 
 #if	defined(_SC_CRAY_SECURE_SYS)
 	/*
-	 *	set ttyp line security label 
+	 *	set ttyp line security label
 	 */
 	if (secflag) {
 		char slave_dev[16];
@@ -1549,7 +1549,7 @@ telnet(f, p, host)
 	(void) signal(SIGCHLD, SIG_DFL);
 	cleanup(0);
 }  /* end of telnet */
-	
+
 #ifndef	TCSIG
 # ifdef	TIOCSIG
 #  define TCSIG TIOCSIG
@@ -1608,9 +1608,9 @@ int readstream(p, ibuf, bufsize)
 
 	case M_IOCTL:
 		ip = (struct iocblk *) (ibuf+1);
-		if (readstream_termio(ip->ioc_cmd, ibuf, 
+		if (readstream_termio(ip->ioc_cmd, ibuf,
 				      &vstop, &vstart, &ixon)) {
-		  if (readstream_termios(ip->ioc_cmd, ibuf, 
+		  if (readstream_termios(ip->ioc_cmd, ibuf,
 					 &vstop, &vstart, &ixon)) {
 		    errno = EAGAIN;
 		    return(-1);

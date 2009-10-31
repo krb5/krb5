@@ -98,4 +98,3 @@ gss_inquire_name(OM_uint32 *minor_status,
 
     return status;
 }
-

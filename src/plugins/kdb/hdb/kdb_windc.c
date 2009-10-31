@@ -370,7 +370,7 @@ kh_db_sign_auth_data(krb5_context context,
                                           &rep->auth_data);
     if (code != 0)
         goto cleanup;
-                                          
+
 cleanup:
     if (req->client == NULL)
         kh_free_Principal(context, client_hprinc);
@@ -612,4 +612,3 @@ kh_hdb_windc_init(krb5_context context,
 
     return code;
 }
-

@@ -13,13 +13,13 @@ int check_cc_ccache_iterator_next(void) {
 	unsigned int i;
 
     BEGIN_TEST("cc_ccache_iterator_next");
-	
+
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
-	
+
 	if (!err) {
 		err = destroy_all_ccaches(context);
 	}
-	
+
 	// iterate with no ccaches
 	if (!err) {
 		err = cc_context_new_ccache_iterator(context, &iterator);
@@ -29,7 +29,7 @@ int check_cc_ccache_iterator_next(void) {
 		cc_ccache_iterator_release(iterator);
 		iterator = NULL;
 	}
-	
+
 	// iterate with one ccache
 	if (!err) {
 		destroy_all_ccaches(context);
@@ -47,14 +47,14 @@ int check_cc_ccache_iterator_next(void) {
 		cc_ccache_iterator_release(iterator);
 		iterator = NULL;
 	}
-	
+
 	// iterate with several ccaches
 	if (!err) {
 		destroy_all_ccaches(context);
 	}
 	for(i = 0; !err && (i < 1000); i++)
 	{
-        if (i%100 == 0) fprintf(stdout, ".");	
+        if (i%100 == 0) fprintf(stdout, ".");
         err = cc_context_create_new_ccache(context, cc_credentials_v5, "foo@BAR.ORG", &ccache);
 		if (ccache) {
 			cc_ccache_release(ccache);
@@ -69,15 +69,15 @@ int check_cc_ccache_iterator_next(void) {
 		cc_ccache_iterator_release(iterator);
 		iterator = NULL;
 	}
-	
+
 
 	if (ccache) { cc_ccache_release(ccache); }
 	if (iterator) { cc_ccache_iterator_release(iterator); }
-	if (context) { 
+	if (context) {
 		destroy_all_ccaches(context);
 		cc_context_release(context);
 	}
-	
+
 	END_TEST_AND_RETURN
 }
 
@@ -87,11 +87,11 @@ cc_int32 check_once_cc_ccache_iterator_next(cc_ccache_iterator_t iterator, cc_ui
 //	BEGIN_CHECK_ONCE(description);
 
 	cc_int32 possible_return_values[6] = {
-		ccNoError, 
-		ccIteratorEnd, 
-		ccErrBadParam, 
-		ccErrNoMem, 
-		ccErrInvalidCCacheIterator, 
+		ccNoError,
+		ccIteratorEnd,
+		ccErrBadParam,
+		ccErrNoMem,
+		ccErrInvalidCCacheIterator,
 		ccErrCCacheNotFound,
 	};
 	#define possible_ret_val_count sizeof(possible_return_values)/sizeof(possible_return_values[0])
@@ -110,15 +110,15 @@ cc_int32 check_once_cc_ccache_iterator_next(cc_ccache_iterator_t iterator, cc_ui
 	if (err == ccIteratorEnd) {
 		err = ccNoError;
 	}
-	
+
 	// check returned error
 	check_err(err, expected_err, possible_return_values);
-	
+
 	check_if(actual_count != expected_count, "iterator didn't iterate over all ccaches");
 
 //	END_CHECK_ONCE;
 
-	return err;	
+	return err;
 }
 
 
@@ -131,15 +131,15 @@ int check_cc_credentials_iterator_next(void) {
 	cc_credentials_union creds_union;
 	cc_credentials_iterator_t iterator = NULL;
 	unsigned int i;
-	
+
 	BEGIN_TEST("cc_credentials_iterator_next");
-		
+
 	err = cc_initialize(&context, ccapi_version_3, NULL, NULL);
-	
+
 	if (!err) {
 		err = destroy_all_ccaches(context);
 	}
-	
+
 	// iterate with no creds
 	if (!err) {
 		err = cc_context_create_new_ccache(context, cc_credentials_v5, "foo@BAR.ORG", &ccache);
@@ -156,7 +156,7 @@ int check_cc_credentials_iterator_next(void) {
 		cc_ccache_release(ccache);
 		ccache = NULL;
 	}
-	
+
 	// iterate with one cred
 	if (!err) {
 		destroy_all_ccaches(context);
@@ -179,14 +179,14 @@ int check_cc_credentials_iterator_next(void) {
 		cc_ccache_release(ccache);
 		ccache = NULL;
 	}
-	
+
 	// iterate with several creds
 	if (!err) {
 		destroy_all_ccaches(context);
 		err = cc_context_create_new_ccache(context, cc_credentials_v5, "foo@BAR.ORG", &ccache);
 	}
 	for(i = 0; !err && (i < 1000); i++) {
-        if (i%100 == 0) fprintf(stdout, ".");	
+        if (i%100 == 0) fprintf(stdout, ".");
 		new_v5_creds_union(&creds_union, "BAR.ORG");
 		err = cc_ccache_store_credentials(ccache, &creds_union);
 		release_v5_creds_union(&creds_union);
@@ -194,15 +194,15 @@ int check_cc_credentials_iterator_next(void) {
 	if (!err) {
 		err = cc_ccache_new_credentials_iterator(ccache, &iterator);
 	}
-	check_once_cc_credentials_iterator_next(iterator, 1000, ccNoError, "iterating over a ccache with 1000 creds");	
+	check_once_cc_credentials_iterator_next(iterator, 1000, ccNoError, "iterating over a ccache with 1000 creds");
 
 	if (ccache) { cc_ccache_release(ccache); }
 	if (iterator) { cc_credentials_iterator_release(iterator); }
-	if (context) { 
+	if (context) {
 		destroy_all_ccaches(context);
 		cc_context_release(context);
 	}
-	
+
 	END_TEST_AND_RETURN
 }
 
@@ -212,10 +212,10 @@ cc_int32 check_once_cc_credentials_iterator_next(cc_credentials_iterator_t itera
 	cc_uint32           actual_count    = 0;
 
 	cc_int32 possible_return_values[5] = {
-		ccNoError, 
-		ccIteratorEnd, 
-		ccErrBadParam, 
-		ccErrNoMem, 
+		ccNoError,
+		ccIteratorEnd,
+		ccErrBadParam,
+		ccErrNoMem,
 		ccErrInvalidCredentialsIterator,
 	};
 
@@ -234,13 +234,13 @@ cc_int32 check_once_cc_credentials_iterator_next(cc_credentials_iterator_t itera
 	if (err == ccIteratorEnd) {
 		err = ccNoError;
 	}
-	
+
 	// check returned error
 	check_err(err, expected_err, possible_return_values);
-	
+
 	check_if(actual_count != expected_count, "iterator didn't iterate over all ccaches");
 
 	END_CHECK_ONCE;
 
-	return err;	
+	return err;
 }

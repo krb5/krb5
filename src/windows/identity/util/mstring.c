@@ -45,7 +45,7 @@ multi_string_init(wchar_t * ms,
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 multi_string_append(wchar_t * ms,
                     khm_size * pcb_ms,
                     const wchar_t * str)
@@ -91,7 +91,7 @@ multi_string_append(wchar_t * ms,
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 multi_string_prepend(wchar_t * ms,
                      khm_size * pcb_ms,
                      const wchar_t * str)
@@ -129,7 +129,7 @@ multi_string_prepend(wchar_t * ms,
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 multi_string_delete(wchar_t * ms,
                     const wchar_t * str,
                     const khm_int32 flags)
@@ -168,7 +168,7 @@ multi_string_delete(wchar_t * ms,
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP wchar_t * KHMAPI 
+KHMEXP wchar_t * KHMAPI
 multi_string_find(const wchar_t * ms,
                   const wchar_t * str,
                   const khm_int32 flags)
@@ -207,7 +207,7 @@ multi_string_find(const wchar_t * ms,
     return NULL;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 multi_string_to_csv(wchar_t * csvbuf,
                     khm_size * pcb_csvbuf,
                     const wchar_t * ms)
@@ -298,7 +298,7 @@ multi_string_to_csv(wchar_t * csvbuf,
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 csv_to_multi_string(wchar_t * ms,
                     khm_size * pcb_ms,
                     const wchar_t * csv)
@@ -389,7 +389,7 @@ csv_to_multi_string(wchar_t * ms,
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP wchar_t * KHMAPI 
+KHMEXP wchar_t * KHMAPI
 multi_string_next(const wchar_t * str)
 {
     size_t cch;
@@ -407,7 +407,7 @@ multi_string_next(const wchar_t * str)
     }
 }
 
-KHMEXP khm_size KHMAPI 
+KHMEXP khm_size KHMAPI
 multi_string_length_n(const wchar_t * str)
 {
     size_t n = 0;
@@ -421,28 +421,28 @@ multi_string_length_n(const wchar_t * str)
     return n;
 }
 
-KHMEXP khm_int32 KHMAPI 
-multi_string_length_cb(const wchar_t * str, 
-                       khm_size max_cb, 
+KHMEXP khm_int32 KHMAPI
+multi_string_length_cb(const wchar_t * str,
+                       khm_size max_cb,
                        khm_size * len_cb)
 {
     khm_size cch;
     khm_int32 rv;
 
     rv = multi_string_length_cch(str, max_cb / sizeof(wchar_t), &cch);
-    
+
     if(KHM_FAILED(rv))
         return rv;
-    
+
     if(len_cb)
         *len_cb = cch * sizeof(wchar_t);
 
     return rv;
 }
 
-KHMEXP khm_int32 KHMAPI 
-multi_string_length_cch(const wchar_t * str, 
-                        khm_size max_cch, 
+KHMEXP khm_int32 KHMAPI
+multi_string_length_cch(const wchar_t * str,
+                        khm_size max_cch,
                         khm_size * len_cch)
 {
     const wchar_t * s;
@@ -471,9 +471,9 @@ multi_string_length_cch(const wchar_t * str,
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
-multi_string_copy_cb(wchar_t * s_dest, 
-                         khm_size max_cb_dest, 
+KHMEXP khm_int32 KHMAPI
+multi_string_copy_cb(wchar_t * s_dest,
+                         khm_size max_cb_dest,
                          const wchar_t * src)
 {
     khm_size cb_dest;
@@ -491,9 +491,9 @@ multi_string_copy_cb(wchar_t * s_dest,
     return rv;
 }
 
-KHMEXP khm_int32 KHMAPI 
-multi_string_copy_cch(wchar_t * s_dest, 
-                      khm_size max_cch_dest, 
+KHMEXP khm_int32 KHMAPI
+multi_string_copy_cch(wchar_t * s_dest,
+                      khm_size max_cch_dest,
                       const wchar_t * src)
 {
     khm_size cch_dest;

@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Program to test the correctness of nfold implementation.
  *
@@ -139,7 +139,7 @@ main(argc, argv)
 
     printf("N-fold\n");
     for (i=0; i<sizeof(nfold_in)/sizeof(char *); i++) {
-	printf("\tInput:\t\"%.*s\"\n", (int) strlen((char *) nfold_in[i]), 
+	printf("\tInput:\t\"%.*s\"\n", (int) strlen((char *) nfold_in[i]),
 	       nfold_in[i]);
 	printf("\t192-Fold:\t");
 	krb5int_nfold(strlen((char *) nfold_in[i])*8, nfold_in[i], 24*8,

@@ -39,7 +39,7 @@ cc_int32 ccs_cache_collection_compare_identifier (ccs_cache_collection_t  in_cac
 
 cc_int32 ccs_cache_collection_changed (ccs_cache_collection_t io_cache_collection);
 
-cc_int32 ccs_cache_collection_set_default_ccache (ccs_cache_collection_t  in_cache_collection, 
+cc_int32 ccs_cache_collection_set_default_ccache (ccs_cache_collection_t  in_cache_collection,
                                                   cci_identifier_t        in_identifier);
 
 cc_int32 ccs_cache_collection_find_ccache (ccs_cache_collection_t  in_cache_collection,

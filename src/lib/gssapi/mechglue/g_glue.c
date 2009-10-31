@@ -2,7 +2,7 @@
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -12,7 +12,7 @@
  * without specific, written prior permission. Sun Microsystems makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * SUN MICROSYSTEMS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL SUN MICROSYSTEMS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -190,7 +190,7 @@ OM_uint32 gssint_get_mech_type_oid(OID, token)
 {
     unsigned char * buffer_ptr;
     int length;
-    
+
     /*
      * This routine reads the prefix of "token" in order to determine
      * its mechanism type. It assumes the encoding suggested in
@@ -213,15 +213,15 @@ OM_uint32 gssint_get_mech_type_oid(OID, token)
      *
      * The routine fills in the OID value and returns an error as necessary.
      */
-    
+
 	if (OID == NULL)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
 	if ((token == NULL) || (token->value == NULL))
 	return (GSS_S_DEFECTIVE_TOKEN);
-    
+
     /* Skip past the APP/Sequnce byte and the token length */
-    
+
     buffer_ptr = (unsigned char *) token->value;
 
     if (*(buffer_ptr++) != 0x60)
@@ -237,10 +237,10 @@ OM_uint32 gssint_get_mech_type_oid(OID, token)
 	    return (GSS_S_DEFECTIVE_TOKEN);
 	buffer_ptr += length & 0x7f;
     }
-    
+
     if (*(buffer_ptr++) != 0x06)
 	return (GSS_S_DEFECTIVE_TOKEN);
-    
+
     OID->length = (OM_uint32) *(buffer_ptr++);
     OID->elements = (void *) buffer_ptr;
     return (GSS_S_COMPLETE);
@@ -329,7 +329,7 @@ import_internal_name_composite(OM_uint32 *minor_status,
 }
 #endif
 
-OM_uint32 gssint_import_internal_name (minor_status, mech_type, union_name, 
+OM_uint32 gssint_import_internal_name (minor_status, mech_type, union_name,
 				internal_name)
 OM_uint32	*minor_status;
 gss_OID		mech_type;
@@ -487,7 +487,7 @@ OM_uint32 gssint_export_internal_name(minor_status, mech_type,
     return (GSS_S_COMPLETE);
 } /*  gssint_export_internal_name */
 
-OM_uint32 gssint_display_internal_name (minor_status, mech_type, internal_name, 
+OM_uint32 gssint_display_internal_name (minor_status, mech_type, internal_name,
 				 external_name, name_type)
 OM_uint32	*minor_status;
 gss_OID		mech_type;
@@ -609,7 +609,7 @@ OM_uint32 gssint_convert_name_to_union_name(minor_status, mech,
 	    major_status = GSS_S_FAILURE;
 	    goto allocation_failure;
     }
-	
+
     major_status = mech->gss_display_name(minor_status,
 					  internal_name,
 					  union_name->external_name,
@@ -710,4 +710,3 @@ gssint_create_copy_buffer(srcBuf, destBuf, addNullChar)
 
     return (GSS_S_COMPLETE);
 } /* ****** gssint_create_copy_buffer  ****** */
-

@@ -15,9 +15,9 @@ private:
     const long            _rpcmsg;
     const long            _sst;
 public:
-    WorkItem(   k5_ipc_stream buf, 
-                WIN_PIPE*     pipe, 
-                const long    type, 
+    WorkItem(   k5_ipc_stream buf,
+                WIN_PIPE*     pipe,
+                const long    type,
                 const long    serverStartTime);
     WorkItem(   const         WorkItem&);
     WorkItem();

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved
  *
@@ -8,32 +9,32 @@
 
 #include <kadm5/admin.h>
 
-#define KADM5_SERVER_HANDLE_MAGIC	0x12345800
+#define KADM5_SERVER_HANDLE_MAGIC       0x12345800
 
-#define GENERIC_CHECK_HANDLE(handle, old_api_version, new_api_version) \
-{ \
-	kadm5_server_handle_t srvr = \
-	     (kadm5_server_handle_t) handle; \
- \
-	if (! srvr) \
-		return KADM5_BAD_SERVER_HANDLE; \
-	if (srvr->magic_number != KADM5_SERVER_HANDLE_MAGIC) \
-		return KADM5_BAD_SERVER_HANDLE; \
-	if ((srvr->struct_version & KADM5_MASK_BITS) != \
-	    KADM5_STRUCT_VERSION_MASK) \
-		return KADM5_BAD_STRUCT_VERSION; \
-	if (srvr->struct_version < KADM5_STRUCT_VERSION_1) \
-		return KADM5_OLD_STRUCT_VERSION; \
-	if (srvr->struct_version > KADM5_STRUCT_VERSION_1) \
-		return KADM5_NEW_STRUCT_VERSION; \
-	if ((srvr->api_version & KADM5_MASK_BITS) != \
-	    KADM5_API_VERSION_MASK) \
-		return KADM5_BAD_API_VERSION; \
-	if (srvr->api_version < KADM5_API_VERSION_2) \
-		return old_api_version; \
-	if (srvr->api_version > KADM5_API_VERSION_3) \
-		return new_api_version; \
-}
+#define GENERIC_CHECK_HANDLE(handle, old_api_version, new_api_version)  \
+    {                                                                   \
+        kadm5_server_handle_t srvr =                                    \
+            (kadm5_server_handle_t) handle;                             \
+                                                                        \
+        if (! srvr)                                                     \
+            return KADM5_BAD_SERVER_HANDLE;                             \
+        if (srvr->magic_number != KADM5_SERVER_HANDLE_MAGIC)            \
+            return KADM5_BAD_SERVER_HANDLE;                             \
+        if ((srvr->struct_version & KADM5_MASK_BITS) !=                 \
+            KADM5_STRUCT_VERSION_MASK)                                  \
+            return KADM5_BAD_STRUCT_VERSION;                            \
+        if (srvr->struct_version < KADM5_STRUCT_VERSION_1)              \
+            return KADM5_OLD_STRUCT_VERSION;                            \
+        if (srvr->struct_version > KADM5_STRUCT_VERSION_1)              \
+            return KADM5_NEW_STRUCT_VERSION;                            \
+        if ((srvr->api_version & KADM5_MASK_BITS) !=                    \
+            KADM5_API_VERSION_MASK)                                     \
+            return KADM5_BAD_API_VERSION;                               \
+        if (srvr->api_version < KADM5_API_VERSION_2)                    \
+            return old_api_version;                                     \
+        if (srvr->api_version > KADM5_API_VERSION_3)                    \
+            return new_api_version;                                     \
+    }
 
 /*
  * _KADM5_CHECK_HANDLE calls the function _kadm5_check_handle and
@@ -53,28 +54,28 @@
  *
  * Got that?
  */
-#define _KADM5_CHECK_HANDLE(handle) \
-{ int ecode; if ((ecode = _kadm5_check_handle((void *)handle))) return ecode;}
+#define _KADM5_CHECK_HANDLE(handle)                                     \
+    { int ecode; if ((ecode = _kadm5_check_handle((void *)handle))) return ecode;}
 
 int         _kadm5_check_handle(void *handle);
 kadm5_ret_t _kadm5_chpass_principal_util(void *server_handle,
-					 void *lhandle,
-					 krb5_principal princ,
-					 char *new_pw, 
-					 char **ret_pw,
-					 char *msg_ret,
-					 unsigned int msg_len);
+                                         void *lhandle,
+                                         krb5_principal princ,
+                                         char *new_pw,
+                                         char **ret_pw,
+                                         char *msg_ret,
+                                         unsigned int msg_len);
 
 /* this is needed by the alt_prof code I stole.  The functions
    maybe shouldn't be named krb5_*, but they are. */
 
 krb5_error_code
 krb5_string_to_keysalts(char *string, const char *tupleseps,
-			const char *ksaltseps, krb5_boolean dups,
-			krb5_key_salt_tuple **ksaltp, krb5_int32 *nksaltp);
+                        const char *ksaltseps, krb5_boolean dups,
+                        krb5_key_salt_tuple **ksaltp, krb5_int32 *nksaltp);
 
 krb5_error_code
 krb5_string_to_flags(char* string, const char* positive, const char* negative,
-		     krb5_flags *flagsp);
+                     krb5_flags *flagsp);
 
 #endif /* __KADM5_ADMIN_INTERNAL_H__ */

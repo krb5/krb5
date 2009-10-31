@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #ifndef KRB5_LIBINIT_H
 #define KRB5_LIBINIT_H
 

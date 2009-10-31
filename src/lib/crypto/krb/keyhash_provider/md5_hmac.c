@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * Implementation of Microsoft KERB_CHECKSUM_MD5_HMAC
  */
 
@@ -62,4 +62,3 @@ const struct krb5_keyhash_provider krb5int_keyhash_md5_hmac = {
   k5_md5_hmac_hash,
   NULL /*checksum  again*/
 };
-

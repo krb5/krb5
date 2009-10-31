@@ -2,7 +2,7 @@
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -12,7 +12,7 @@
  * without specific, written prior permission. Sun Microsystems makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * SUN MICROSYSTEMS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL SUN MICROSYSTEMS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -74,7 +74,7 @@ int *			name_equal;
     gss_union_name_t	union_name1, union_name2;
     gss_mechanism	mech = NULL;
     gss_name_t		internal_name;
-    
+
     major_status = val_comp_name_args(minor_status,
 				      name1, name2, name_equal);
     if (major_status != GSS_S_COMPLETE)
@@ -102,7 +102,7 @@ int *			name_equal;
 	if (!mech->gss_compare_name)
 			return (GSS_S_UNAVAILABLE);
     }
-	
+
     *name_equal = 0;		/* Default to *not* equal.... */
 
     /*
@@ -129,7 +129,7 @@ int *			name_equal;
 
     /*
      * Second case... both names are NOT mechanism specific.
-     * 
+     *
      * All we do here is make sure the two name_types are equal and then
      * that the external_names are equal. Note the we do not take care
      * of the case where two different external names map to the same
@@ -176,7 +176,7 @@ int *			name_equal;
 
     /*
      * Final case... one name is mechanism specific, the other isn't.
-     * 
+     *
      * We attempt to convert the general name to the mechanism type of
      * the mechanism-specific name, and then do the compare.  If we
      * can't import the general name, then we return that the name is
@@ -206,5 +206,5 @@ int *			name_equal;
     gssint_release_internal_name(&temp_minor, union_name1->mech_type,
 				&internal_name);
     return (major_status);
-    
+
 }

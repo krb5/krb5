@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
@@ -23,10 +23,10 @@
 #error I cannot find any regexp functions
 #endif
 #ifdef SOLARIS_REGEXPS
-#include	<regexpr.h>
+#include        <regexpr.h>
 #endif
 #ifdef POSIX_REGEXPS
-#include	<regex.h>
+#include        <regex.h>
 #endif
 
 extern krb5_keyblock master_keyblock; /* current mkey */
@@ -106,7 +106,7 @@ add_new_mkey(krb5_context context, krb5_db_entry *master_entry,
     /* Note, mkey does not have salt */
     /* add new mkey encrypted with itself to mkey princ entry */
     if ((retval = krb5_dbekd_encrypt_key_data(context, new_mkey,
-                                              new_mkey, NULL, 
+                                              new_mkey, NULL,
                                               (int) new_mkey_kvno,
                                               &master_entry->key_data[0]))) {
         return (retval);
@@ -234,7 +234,7 @@ kdb5_add_mkey(int argc, char *argv[])
         case '?':
         default:
             usage();
-            return;
+        return;
         }
     }
 
@@ -244,7 +244,7 @@ kdb5_add_mkey(int argc, char *argv[])
     /* assemble & parse the master key name */
     if ((retval = krb5_db_setup_mkey_name(util_context,
                                           global_params.mkey_name,
-                                          global_params.realm,  
+                                          global_params.realm,
                                           &mkey_fullname, &master_princ))) {
         com_err(progname, retval, "while setting up master key name");
         exit_status++;
@@ -274,7 +274,7 @@ kdb5_add_mkey(int argc, char *argv[])
     }
 
     printf("Creating new master key for master key principal '%s'\n",
-        mkey_fullname);
+           mkey_fullname);
 
     printf("You will be prompted for a new database Master Password.\n");
     printf("It is important that you NOT FORGET this password.\n");
@@ -306,7 +306,7 @@ kdb5_add_mkey(int argc, char *argv[])
         goto cleanup_return;
     }
 
-    retval = krb5_c_string_to_key(util_context, new_master_enctype, 
+    retval = krb5_c_string_to_key(util_context, new_master_enctype,
                                   &pwd, &master_salt, &new_mkeyblock);
     if (retval) {
         com_err(progname, retval, "while transforming master key from password");
@@ -378,7 +378,7 @@ kdb5_use_mkey(int argc, char *argv[])
     krb5_kvno  use_kvno;
     krb5_timestamp now, start_time;
     krb5_actkvno_node *actkvno_list = NULL, *new_actkvno = NULL,
-                      *prev_actkvno, *cur_actkvno;
+        *prev_actkvno, *cur_actkvno;
     krb5_db_entry master_entry;
     int nentries = 0;
     krb5_boolean more = FALSE;
@@ -443,7 +443,7 @@ kdb5_use_mkey(int argc, char *argv[])
     /* assemble & parse the master key name */
     if ((retval = krb5_db_setup_mkey_name(util_context,
                                           global_params.mkey_name,
-                                          global_params.realm,  
+                                          global_params.realm,
                                           &mkey_fullname, &master_princ))) {
         com_err(progname, retval, "while setting up master key name");
         exit_status++;
@@ -609,7 +609,7 @@ kdb5_list_mkeys(int argc, char *argv[])
     /* assemble & parse the master key name */
     if ((retval = krb5_db_setup_mkey_name(util_context,
                                           global_params.mkey_name,
-                                          global_params.realm,  
+                                          global_params.realm,
                                           &mkey_fullname, &master_princ))) {
         com_err(progname, retval, "while setting up master key name");
         exit_status++;
@@ -752,9 +752,9 @@ struct update_enc_mkvno {
  *
  * Arguments:
  *
- *	glob	(r) the shell-style glob (?*[]) to convert
- *	realm	(r) the default realm to append, or NULL
- *	regexp	(w) the ed-style regexp created from glob
+ *      glob    (r) the shell-style glob (?*[]) to convert
+ *      realm   (r) the default realm to append, or NULL
+ *      regexp  (w) the ed-style regexp created from glob
  *
  * Effects:
  *
@@ -765,69 +765,69 @@ struct update_enc_mkvno {
  *
  * Conversion algorithm:
  *
- *	quoted characters are copied quoted
- *	? is converted to .
- *	* is converted to .*
- * 	active characters are quoted: ^, $, .
- *	[ and ] are active but supported and have the same meaning, so
- *		they are copied
- *	other characters are copied
- *	regexp is anchored with ^ and $
+ *      quoted characters are copied quoted
+ *      ? is converted to .
+ *      * is converted to .*
+ *      active characters are quoted: ^, $, .
+ *      [ and ] are active but supported and have the same meaning, so
+ *              they are copied
+ *      other characters are copied
+ *      regexp is anchored with ^ and $
  */
 static int glob_to_regexp(char *glob, char *realm, char **regexp)
 {
-     int append_realm;
-     char *p;
+    int append_realm;
+    char *p;
 
-     /* validate the glob */
-     if (glob[strlen(glob)-1] == '\\')
-	  return EINVAL;
+    /* validate the glob */
+    if (glob[strlen(glob)-1] == '\\')
+        return EINVAL;
 
-     /* A character of glob can turn into two in regexp, plus ^ and $ */
-     /* and trailing null.  If glob has no @, also allocate space for */
-     /* the realm. */
-     append_realm = (realm != NULL) && (strchr(glob, '@') == NULL);
-     p = (char *) malloc(strlen(glob)*2+ 3 + (append_realm ? 3 : 0));
-     if (p == NULL)
-	  return ENOMEM;
-     *regexp = p;
+    /* A character of glob can turn into two in regexp, plus ^ and $ */
+    /* and trailing null.  If glob has no @, also allocate space for */
+    /* the realm. */
+    append_realm = (realm != NULL) && (strchr(glob, '@') == NULL);
+    p = (char *) malloc(strlen(glob)*2+ 3 + (append_realm ? 3 : 0));
+    if (p == NULL)
+        return ENOMEM;
+    *regexp = p;
 
-     *p++ = '^';
-     while (*glob) {
-	  switch (*glob) {
-	  case '?':
-	       *p++ = '.';
-	       break;
-	  case '*':
-	       *p++ = '.';
-	       *p++ = '*';
-	       break;
-	  case '.':
-	  case '^':
-	  case '$':
-	       *p++ = '\\';
-	       *p++ = *glob;
-	       break;
-	  case '\\':
-	       *p++ = '\\';
-	       *p++ = *++glob;
-	       break;
-	  default:
-	       *p++ = *glob;
-	       break;
-	  }
-	  glob++;
-     }
+    *p++ = '^';
+    while (*glob) {
+        switch (*glob) {
+        case '?':
+            *p++ = '.';
+            break;
+        case '*':
+            *p++ = '.';
+            *p++ = '*';
+            break;
+        case '.':
+        case '^':
+        case '$':
+            *p++ = '\\';
+        *p++ = *glob;
+        break;
+        case '\\':
+            *p++ = '\\';
+            *p++ = *++glob;
+            break;
+        default:
+            *p++ = *glob;
+            break;
+        }
+        glob++;
+    }
 
-     if (append_realm) {
-	  *p++ = '@';
-	  *p++ = '.';
-	  *p++ = '*';
-     }
+    if (append_realm) {
+        *p++ = '@';
+        *p++ = '.';
+        *p++ = '*';
+    }
 
-     *p++ = '$';
-     *p++ = '\0';
-     return 0;
+    *p++ = '$';
+    *p++ = '\0';
+    return 0;
 }
 
 static int
@@ -1029,7 +1029,7 @@ kdb5_update_princ_encryption(int argc, char *argv[])
 #ifdef BSD_REGEXPS
         ((msg = (char *) re_comp(regexp)) != NULL)
 #endif
-        ) {
+    ) {
         /* XXX syslog msg or regerr(regerrno) */
         com_err(progname, 0, "error compiling converted regexp '%s'", regexp);
         exit_status++;
@@ -1189,14 +1189,14 @@ kdb5_purge_mkeys(int argc, char *argv[])
         case '?':
         default:
             usage();
-            return;
+        return;
         }
     }
 
     /* assemble & parse the master key name */
     if ((retval = krb5_db_setup_mkey_name(util_context,
                                           global_params.mkey_name,
-                                          global_params.realm,  
+                                          global_params.realm,
                                           &mkey_fullname, &master_princ))) {
         com_err(progname, retval, "while setting up master key name");
         exit_status++;

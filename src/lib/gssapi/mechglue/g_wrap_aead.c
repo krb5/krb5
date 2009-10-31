@@ -2,7 +2,7 @@
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -12,7 +12,7 @@
  * without specific, written prior permission. Sun Microsystems makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * SUN MICROSYSTEMS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL SUN MICROSYSTEMS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -219,7 +219,7 @@ gssint_wrap_aead (gss_mechanism mech,
 
  /* EXPORT DELETE END */
 
-    return status; 
+    return status;
 }
 
 OM_uint32 KRB5_CALLCONV
@@ -264,4 +264,4 @@ gss_buffer_t		output_message_buffer;
 			    conf_req_flag, qop_req,
 			    input_assoc_buffer, input_payload_buffer,
 			    conf_state, output_message_buffer);
-} 
+}

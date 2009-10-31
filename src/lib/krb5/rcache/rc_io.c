@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/rcache/rc_io.c
  *
@@ -262,12 +262,12 @@ krb5_rc_io_open_internal(krb5_context context, krb5_rc_iostuff *d, char *fn,
     /* check if someone was playing with symlinks */
     if ((sb1.st_dev != sb2.st_dev || sb1.st_ino != sb2.st_ino)
         || (sb1.st_mode & S_IFMT) != S_IFREG)
-        {
-            retval = KRB5_RC_IO_PERM;
-            krb5_set_error_message(context, retval,
-                                   "rcache not a file %s", d->fn);
-            goto cleanup;
-        }
+    {
+        retval = KRB5_RC_IO_PERM;
+        krb5_set_error_message(context, retval,
+                               "rcache not a file %s", d->fn);
+        goto cleanup;
+    }
     /* check that non other can read/write/execute the file */
     if (sb1.st_mode & 077) {
         krb5_set_error_message(context, retval, "Insecure file mode "

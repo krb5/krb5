@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/os/full_ipadr.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Take an IP addr & port and generate a full IP address.
  */
@@ -30,7 +31,7 @@
 #include "k5-int.h"
 
 #ifdef HAVE_NETINET_IN_H
-   
+
 #include "os-proto.h"
 #if !defined(_WINSOCKAPI_)
 
@@ -44,12 +45,12 @@ krb5_make_fulladdr(krb5_context context, krb5_address *kaddr, krb5_address *kpor
     krb5_int32 tmp32;
     krb5_int16 tmp16;
 
-    if ((kport == NULL) || (kport == NULL)) 
-	return EINVAL;
+    if ((kport == NULL) || (kport == NULL))
+        return EINVAL;
 
     raddr->length = kaddr->length + kport->length + (4 * sizeof(krb5_int32));
     if (!(raddr->contents = (krb5_octet *)malloc(raddr->length)))
-	return ENOMEM;
+        return ENOMEM;
 
     raddr->addrtype = ADDRTYPE_ADDRPORT;
     marshal = raddr->contents;

@@ -45,27 +45,27 @@ extern "C" {
  */
 krb5_error_code krb5int_pkinit_as_req_create(
     krb5_context		context,
-    krb5_timestamp		kctime,      
+    krb5_timestamp		kctime,
     krb5_int32			cusec,		/* microseconds */
     krb5_ui_4			nonce,
     const krb5_checksum		*cksum,
     krb5_pkinit_signing_cert_t	client_cert,	/* required! */
-    
-    /* 
+
+    /*
      * trusted_CAs correponds to PA-PK-AS-REQ.trustedCertifiers.
-     * Expressed here as an optional list of DER-encoded certs. 
+     * Expressed here as an optional list of DER-encoded certs.
      */
-    const krb5_data		*trusted_CAs,	
+    const krb5_data		*trusted_CAs,
     krb5_ui_4			num_trusted_CAs,
-    
-    /* optional PA-PK-AS-REQ.kdcPkId, expressed here as a 
+
+    /* optional PA-PK-AS-REQ.kdcPkId, expressed here as a
      * DER-encoded cert */
-    const krb5_data		*kdc_cert,	
+    const krb5_data		*kdc_cert,
     krb5_data			*as_req);	/* mallocd and RETURNED */
 
 /*
- * Parse PA-PK-AS-REP message. Optionally evaluates the message's certificate chain. 
- * Optionally returns various components. 
+ * Parse PA-PK-AS-REP message. Optionally evaluates the message's certificate chain.
+ * Optionally returns various components.
  */
 krb5_error_code krb5int_pkinit_as_rep_parse(
     krb5_context		context,
@@ -81,7 +81,7 @@ krb5_error_code krb5int_pkinit_as_rep_parse(
      *
      * signer_cert is the DER-encoded leaf cert from the incoming SignedData.
      * all_certs is an array of all of the certs in the incoming SignedData,
-     *    in full DER-encoded form. 
+     *    in full DER-encoded form.
      */
     krb5_data		    *signer_cert,   /* content mallocd */
     unsigned		    *num_all_certs, /* sizeof *all_certs */

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (c) 2004-2008 Apple Inc.  All Rights Reserved.
  *
@@ -42,41 +43,41 @@ extern "C" {
 
 /*
  * Parse PA-PK-AS-REQ message. Optionally evaluates the message's certificate chain
- * if cert_status is non-NULL. Optionally returns various components. 
+ * if cert_status is non-NULL. Optionally returns various components.
  */
 krb5_error_code krb5int_pkinit_as_req_parse(
-    krb5_context	context,
-    const krb5_data	*as_req,
-    krb5_timestamp      *kctime,	/* optionally RETURNED */
-    krb5_ui_4		*cusec,		/* microseconds, optionally RETURNED */
-    krb5_ui_4		*nonce,		/* optionally RETURNED */
-    krb5_checksum       *pa_cksum,	/* optional, contents mallocd and RETURNED */
+    krb5_context        context,
+    const krb5_data     *as_req,
+    krb5_timestamp      *kctime,        /* optionally RETURNED */
+    krb5_ui_4           *cusec,         /* microseconds, optionally RETURNED */
+    krb5_ui_4           *nonce,         /* optionally RETURNED */
+    krb5_checksum       *pa_cksum,      /* optional, contents mallocd and RETURNED */
     krb5int_cert_sig_status *cert_status,   /* optionally RETURNED */
-    krb5_ui_4		*num_cms_types,	/* optionally RETURNED */
-    krb5int_algorithm_id **cms_types,	/* optionally mallocd and RETURNED */
+    krb5_ui_4           *num_cms_types, /* optionally RETURNED */
+    krb5int_algorithm_id **cms_types,   /* optionally mallocd and RETURNED */
 
     /*
      * Cert fields, all optionally RETURNED.
      *
      * signer_cert is the full X.509 leaf cert from the incoming SignedData.
      * all_certs is an array of all of the certs in the incoming SignedData,
-     *    in full X.509 form. 
+     *    in full X.509 form.
      */
-    krb5_data		*signer_cert,   /* content mallocd */
-    krb5_ui_4		*num_all_certs, /* sizeof *all_certs */
-    krb5_data		**all_certs,    /* krb5_data's and their content mallocd */
-    
+    krb5_data           *signer_cert,   /* content mallocd */
+    krb5_ui_4           *num_all_certs, /* sizeof *all_certs */
+    krb5_data           **all_certs,    /* krb5_data's and their content mallocd */
+
     /*
-     * Array of trustedCertifiers, optionally RETURNED. These are DER-encoded 
-     * issuer/serial numbers. 
+     * Array of trustedCertifiers, optionally RETURNED. These are DER-encoded
+     * issuer/serial numbers.
      */
-    krb5_ui_4		*num_trusted_CAs,   /* sizeof *trustedCAs */
-    krb5_data		**trusted_CAs,      /* krb5_data's and their content mallocd */
-    
+    krb5_ui_4           *num_trusted_CAs,   /* sizeof *trustedCAs */
+    krb5_data           **trusted_CAs,      /* krb5_data's and their content mallocd */
+
     /* KDC cert specified by client as kdcPkId. DER-encoded issuer/serial number. */
-    krb5_data		*kdc_cert);
-    
-    
+    krb5_data           *kdc_cert);
+
+
 /*
  * Create a PA-PK-AS-REP message, public key (no Diffie Hellman) version.
  *
@@ -85,26 +86,26 @@ krb5_error_code krb5int_pkinit_as_req_parse(
  * PA-PK-AS-REP ::= EnvelopedData(SignedData(ReplyKeyPack))
  */
 krb5_error_code krb5int_pkinit_as_rep_create(
-    krb5_context		context,
-    const krb5_keyblock		*key_block,
-    const krb5_checksum		*checksum,		/* checksum of corresponding AS-REQ */
-    krb5_pkinit_signing_cert_t	signer_cert,		/* server's cert */
-    krb5_boolean		include_server_cert,	/* include signer_cert in SignerInfo */
-    const krb5_data		*recipient_cert,	/* client's cert */
-    
-    /* 
-     * These correspond to the same out-parameters from 
-     * krb5int_pkinit_as_req_parse(). All are optional. 
+    krb5_context                context,
+    const krb5_keyblock         *key_block,
+    const krb5_checksum         *checksum,              /* checksum of corresponding AS-REQ */
+    krb5_pkinit_signing_cert_t  signer_cert,            /* server's cert */
+    krb5_boolean                include_server_cert,    /* include signer_cert in SignerInfo */
+    const krb5_data             *recipient_cert,        /* client's cert */
+
+    /*
+     * These correspond to the same out-parameters from
+     * krb5int_pkinit_as_req_parse(). All are optional.
      */
-    krb5_ui_4			num_cms_types,
-    const krb5int_algorithm_id	*cms_types,	
-    krb5_ui_4			num_trusted_CAs,
-    krb5_data			*trusted_CAs,   
-    krb5_data			*kdc_cert,
-    
+    krb5_ui_4                   num_cms_types,
+    const krb5int_algorithm_id  *cms_types,
+    krb5_ui_4                   num_trusted_CAs,
+    krb5_data                   *trusted_CAs,
+    krb5_data                   *kdc_cert,
+
     /* result here, mallocd and RETURNED */
-    krb5_data			*as_rep);
-    
+    krb5_data                   *as_rep);
+
 #ifdef __cplusplus
 }
 #endif

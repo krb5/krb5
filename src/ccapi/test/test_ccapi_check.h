@@ -7,21 +7,21 @@
 #include "test_ccapi_globals.h"
 
 int _check_if(int expression, const char *file, int line, const char *expression_string, const char *format, ...);
-		
+
 #define check_int(a, b) \
 		check_if(a != b, NULL)
 
 /*
  *	if expression evaluates to true, check_if increments the failure_count and prints:
- *	
+ *
  *	check_if(a!=a, NULL);
- *	==> "/path/to/file:line: a!=a" 
- *	
+ *	==> "/path/to/file:line: a!=a"
+ *
  *	check_if(a!=a, "This shouldn't be happening");
  *	==> "/path/to/file:line: This shouldn't be happening"
- *	
+ *
  *	check_if(a!=a, "This has happened %d times now", 3);
- *	==> "/path/to/file:line: This has happened 3 times now"	
+ *	==> "/path/to/file:line: This has happened 3 times now"
 */
 
 #define check_if(expression, format, ...) \

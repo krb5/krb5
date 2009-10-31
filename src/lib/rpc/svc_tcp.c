@@ -6,23 +6,23 @@
  * may copy or modify Sun RPC without charge, but are not authorized
  * to license or distribute it to anyone else except as part of a product or
  * program developed by the user.
- * 
+ *
  * SUN RPC IS PROVIDED AS IS WITH NO WARRANTIES OF ANY KIND INCLUDING THE
  * WARRANTIES OF DESIGN, MERCHANTIBILITY AND FITNESS FOR A PARTICULAR
  * PURPOSE, OR ARISING FROM A COURSE OF DEALING, USAGE OR TRADE PRACTICE.
- * 
+ *
  * Sun RPC is provided with no support and without any obligation on the
  * part of Sun Microsystems, Inc. to assist in its use, correction,
  * modification or enhancement.
- * 
+ *
  * SUN MICROSYSTEMS, INC. SHALL HAVE NO LIABILITY WITH RESPECT TO THE
  * INFRINGEMENT OF COPYRIGHTS, TRADE SECRETS OR ANY PATENTS BY SUN RPC
  * OR ANY PART THEREOF.
- * 
+ *
  * In no event will Sun Microsystems, Inc. be liable for any lost revenue
  * or profits or other special, indirect and consequential damages, even if
  * Sun has been advised of the possibility of such damages.
- * 
+ *
  * Sun Microsystems, Inc.
  * 2550 Garcia Avenue
  * Mountain View, California  94043
@@ -32,7 +32,7 @@ static char sccsid[] = "@(#)svc_tcp.c 1.21 87/08/11 Copyr 1984 Sun Micro";
 #endif
 
 /*
- * svc_tcp.c, Server side for TCP/IP based RPC. 
+ * svc_tcp.c, Server side for TCP/IP based RPC.
  *
  * Copyright (C) 1984, Sun Microsystems, Inc.
  *
@@ -223,7 +223,7 @@ makefd_xprt(
 {
 	register SVCXPRT *xprt;
 	register struct tcp_conn *cd;
- 
+
 #ifdef FD_SETSIZE
 	if (fd >= FD_SETSIZE) {
 		(void) fprintf(stderr, "svc_tcp: makefd_xprt: fd too high\n");
@@ -288,7 +288,7 @@ rendezvous_request(
 	set_cloexec_fd(sock);
 	if (getsockname(sock, (struct sockaddr *) &laddr, &llen) < 0)
 	     return (FALSE);
-	
+
 	/*
 	 * make a new transporter (re-uses xprt)
 	 */
@@ -477,7 +477,7 @@ static bool_t svctcp_reply(
 		(struct tcp_conn *)(xprt->xp_p1);
 	register XDR *xdrs = &(cd->xdrs);
 	register bool_t stat;
-     
+
 	xdrproc_t xdr_results;
 	caddr_t xdr_location;
 	bool_t has_args;
@@ -487,12 +487,12 @@ static bool_t svctcp_reply(
 		has_args = TRUE;
 		xdr_results = msg->acpted_rply.ar_results.proc;
 		xdr_location = msg->acpted_rply.ar_results.where;
-	  
+
 		msg->acpted_rply.ar_results.proc = xdr_void;
 		msg->acpted_rply.ar_results.where = NULL;
 	} else
 		has_args = FALSE;
-     
+
 	xdrs->x_op = XDR_ENCODE;
 	msg->rm_xid = cd->x_id;
 	stat = FALSE;
@@ -530,4 +530,3 @@ static bool_t abortx_freeargs(
 {
 	return abortx();
 }
-

@@ -63,7 +63,7 @@ kcdb_process_attach(HINSTANCE);
 void
 kcdb_process_detach(void);
 
-void 
+void
 kmm_process_attach(HINSTANCE);
 
 void

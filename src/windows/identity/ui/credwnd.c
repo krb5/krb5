@@ -38,16 +38,16 @@ khm_int32 attr_to_action[KCDB_ATTR_MAX_ID + 1];
 static void
 cw_select_row_creds(khui_credwnd_tbl * tbl, int row, int selected);
 
-static void 
+static void
 cw_set_row_context(khui_credwnd_tbl * tbl, int row);
 
 static void
 cw_update_outline(khui_credwnd_tbl * tbl);
 
-static void 
+static void
 cw_update_selection_state(khui_credwnd_tbl * tbl);
 
-static void 
+static void
 cw_select_row(khui_credwnd_tbl * tbl, int row, WPARAM wParam);
 
 
@@ -273,7 +273,7 @@ cw_refresh_attribs(HWND hwnd) {
     }
 }
 
-khm_int32 
+khm_int32
 cw_get_custom_attr_id(wchar_t * s)
 {
     if(!wcscmp(s, CW_CANAME_FLAGS))
@@ -481,7 +481,7 @@ cw_get_theme_color(khm_handle hc, const wchar_t * name, COLORREF ref_color) {
     return cw_mix_colors(ref_color, c, alpha);
 }
 
-void 
+void
 cw_load_view(khui_credwnd_tbl * tbl, wchar_t * view, HWND hwnd) {
     khm_handle hc_cw = NULL;
     khm_handle hc_vs = NULL;
@@ -779,7 +779,7 @@ _skip_col:
         } else {
 #ifdef DEBUG
             assert(FALSE);
-#endif            
+#endif
         }
 
         if (hc_theme)
@@ -1001,7 +1001,7 @@ cw_credset_iter_func(khm_handle cred, void * rock) {
     return KHM_ERROR_SUCCESS;
 }
 
-void 
+void
 cw_update_creds(khui_credwnd_tbl * tbl)
 {
     kcdb_cred_comp_field * fields;
@@ -1043,8 +1043,8 @@ cw_update_creds(khui_credwnd_tbl * tbl)
             if(si < 0 || si >= (int) tbl->n_cols)
             {
                 /* this shouldn't happen */
-                tbl->cols[i].flags &= ~(KHUI_CW_COL_SORT_INC | 
-                                        KHUI_CW_COL_SORT_DEC | 
+                tbl->cols[i].flags &= ~(KHUI_CW_COL_SORT_INC |
+                                        KHUI_CW_COL_SORT_DEC |
                                         KHUI_CW_COL_GROUP);
                 continue;
             }
@@ -1077,8 +1077,8 @@ cw_update_creds(khui_credwnd_tbl * tbl)
     comp_order.nFields = n;
     comp_order.fields = fields;
 
-    kcdb_credset_sort(tbl->credset, 
-                      kcdb_cred_comp_generic, 
+    kcdb_credset_sort(tbl->credset,
+                      kcdb_cred_comp_generic,
                       (void *) &comp_order);
 
     /* also, if new credentials were added, initialize the UI flag
@@ -1091,7 +1091,7 @@ cw_update_creds(khui_credwnd_tbl * tbl)
             if(KHM_FAILED(kcdb_credset_get_cred(tbl->credset,
                                                 (khm_int32) i, &hc)))
                 continue; /* lost a race */
-            if(KHM_FAILED(kcdb_cred_get_attr(hc, khui_cw_flag_id, NULL, 
+            if(KHM_FAILED(kcdb_cred_get_attr(hc, khui_cw_flag_id, NULL,
                                              NULL, NULL))) {
                 flags = 0;
                 kcdb_cred_set_attr(hc, khui_cw_flag_id, &flags, sizeof(flags));
@@ -1116,7 +1116,7 @@ cw_update_creds(khui_credwnd_tbl * tbl)
         PFREE(fields);
 }
 
-void 
+void
 cw_del_outline(khui_credwnd_outline *o) {
     khui_credwnd_outline * c;
     if(!o)
@@ -1147,14 +1147,14 @@ cw_del_outline(khui_credwnd_outline *o) {
     PFREE(o);
 }
 
-khui_credwnd_outline * 
+khui_credwnd_outline *
 cw_new_outline_node(wchar_t * heading) {
     khui_credwnd_outline * o;
     size_t cblen;
 
     o = PMALLOC(sizeof(khui_credwnd_outline));
     ZeroMemory(o, sizeof(khui_credwnd_outline));
-    
+
     if(SUCCEEDED(StringCbLength(heading, KHUI_MAXCB_HEADING, &cblen))) {
         cblen += sizeof(wchar_t);
         o->header = PMALLOC(cblen);
@@ -1167,7 +1167,7 @@ cw_new_outline_node(wchar_t * heading) {
 
 /* buf is a handle to a credential or an identity.  the kcdb_buf_*
    functions work with either. */
-khm_int32 
+khm_int32
 cw_get_buf_exp_flags(khui_credwnd_tbl * tbl, khm_handle buf)
 {
     khm_int32 flags;
@@ -1200,7 +1200,7 @@ cw_get_buf_exp_flags(khui_credwnd_tbl * tbl, khm_handle buf)
     return flags;
 }
 
-VOID CALLBACK 
+VOID CALLBACK
 cw_timer_proc(HWND hwnd,
               UINT uMsg,
               UINT_PTR idEvent,
@@ -1320,10 +1320,10 @@ cw_timer_proc(HWND hwnd,
     }
 }
 
-void 
-cw_set_tbl_row_cred(khui_credwnd_tbl * tbl, 
-                    int row, 
-                    khm_handle cred, 
+void
+cw_set_tbl_row_cred(khui_credwnd_tbl * tbl,
+                    int row,
+                    khm_handle cred,
                     int col)
 {
     FILETIME ft;
@@ -1358,9 +1358,9 @@ cw_set_tbl_row_cred(khui_credwnd_tbl * tbl,
     }
 }
 
-void 
-cw_set_tbl_row_header(khui_credwnd_tbl * tbl, 
-                      int row, int col, 
+void
+cw_set_tbl_row_header(khui_credwnd_tbl * tbl,
+                      int row, int col,
                       khui_credwnd_outline * o)
 {
     if((int) tbl->n_total_rows <= row) {
@@ -1415,7 +1415,7 @@ cw_set_tbl_row_header(khui_credwnd_tbl * tbl,
     }
 }
 
-static int 
+static int
 iwcscmp(const void * p1, const void * p2) {
     const wchar_t * s1 = *(wchar_t **) p1;
     const wchar_t * s2 = *(wchar_t **) p2;
@@ -1425,7 +1425,7 @@ iwcscmp(const void * p1, const void * p2) {
 
 #define MAX_GROUPING 256
 
-static void 
+static void
 cw_update_outline(khui_credwnd_tbl * tbl)
 {
     int i,j,n_rows;
@@ -1511,7 +1511,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
         tbl->rows = PMALLOC(sizeof(khui_credwnd_row) * tbl->n_total_rows);
     } else {
         /* kill any pending timers */
-        for(i=0; i < (int) tbl->n_rows; i++) 
+        for(i=0; i < (int) tbl->n_rows; i++)
             if(tbl->rows[i].flags & KHUI_CW_ROW_TIMERSET) {
                 KillTimer(tbl->hwnd, (UINT_PTR) &(tbl->rows[i]));
                 tbl->rows[i].flags &= ~KHUI_CW_ROW_TIMERSET;
@@ -1577,7 +1577,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
         }
 
         if(ol) {
-            visible = (ol->flags & KHUI_CW_O_VISIBLE) && 
+            visible = (ol->flags & KHUI_CW_O_VISIBLE) &&
                 (ol->flags & KHUI_CW_O_EXPAND);
             selected = !!(ol->flags & KHUI_CW_O_SELECTED);
         } else {
@@ -1595,8 +1595,8 @@ cw_update_outline(khui_credwnd_tbl * tbl)
             cbbuf = sizeof(buf);
             buf[0] = L'\0';
             if(KHM_FAILED
-               (kcdb_cred_get_attr_string(thiscred, 
-                                          tbl->cols[grouping[j]].attr_id, 
+               (kcdb_cred_get_attr_string(thiscred,
+                                          tbl->cols[grouping[j]].attr_id,
                                           buf, &cbbuf, 0))) {
                 cbbuf = sizeof(wchar_t);
                 buf[0] = L'\0';
@@ -1642,7 +1642,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
                     }
                     else
                         ol->data = 0;
-                } else if(tbl->cols[grouping[j]].attr_id == 
+                } else if(tbl->cols[grouping[j]].attr_id ==
                           KCDB_ATTR_TYPE_NAME) {
                     khm_int32 t;
 
@@ -1656,7 +1656,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
                     khm_int32 alt_id;
                     kcdb_attrib * attrib;
 
-                    rv = 
+                    rv =
                         kcdb_attrib_get_info(tbl->cols[grouping[j]].attr_id,
                                              &attrib);
                     assert(KHM_SUCCEEDED(rv));
@@ -1753,7 +1753,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
            grouping[n_grouping - 1] < tbl->n_cols - 1) {
             khm_int32 c_flags;
 
-            cw_set_tbl_row_cred(tbl, n_rows, thiscred, 
+            cw_set_tbl_row_cred(tbl, n_rows, thiscred,
                                 grouping[n_grouping-1]);
 
             flags = cw_get_buf_exp_flags(tbl, thiscred);
@@ -1800,7 +1800,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
 
     /* Add any default identities with no credentials and sticky
        identities that we haven't seen yet */
-    if (n_grouping > 0 && 
+    if (n_grouping > 0 &&
         tbl->cols[grouping[0]].attr_id == KCDB_ATTR_ID_NAME) {
 
         khui_credwnd_outline * o;
@@ -1916,7 +1916,7 @@ cw_update_outline(khui_credwnd_tbl * tbl)
             khm_int32 f_sticky;
             khm_int32 flags;
 
-            if (KHM_FAILED(kcdb_identity_create(idarray[i], 
+            if (KHM_FAILED(kcdb_identity_create(idarray[i],
                                                 KCDB_IDENT_FLAG_CREATE, &h)))
                 continue;
 
@@ -2022,7 +2022,7 @@ _exit:
     }
 }
 
-void 
+void
 cw_unload_view(khui_credwnd_tbl * tbl)
 {
 #define SafeDeleteObject(o) \
@@ -2126,7 +2126,7 @@ cw_unload_view(khui_credwnd_tbl * tbl)
     }
 }
 
-void 
+void
 cw_hditem_from_tbl_col(khui_credwnd_col * col, HDITEM *phi)
 {
     size_t cchsize;
@@ -2205,8 +2205,8 @@ cw_update_header_column_width(khui_credwnd_tbl * tbl, int c) {
 }
 
 /* returns a bitmask indicating which measures were changed */
-int 
-cw_update_extents(khui_credwnd_tbl * tbl, 
+int
+cw_update_extents(khui_credwnd_tbl * tbl,
                   khm_boolean update_scroll) {
     int ext_x = 0;
     int ext_y = 0;
@@ -2356,12 +2356,12 @@ cw_update_extents(khui_credwnd_tbl * tbl,
             tbl->header_height = pw.cy;
 
         SetWindowPos(
-            tbl->hwnd_header, 
-            pw.hwndInsertAfter, 
-            pw.x, 
-            pw.y, 
-            pw.cx, 
-            pw.cy, 
+            tbl->hwnd_header,
+            pw.hwndInsertAfter,
+            pw.x,
+            pw.y,
+            pw.cx,
+            pw.cy,
             pw.flags);
 
         si.cbSize = sizeof(si);
@@ -2384,14 +2384,14 @@ cw_update_extents(khui_credwnd_tbl * tbl,
     return 0;
 }
 
-void 
+void
 cw_insert_header_cols(khui_credwnd_tbl * tbl) {
     HWND hdr;
     HDITEM hi;
     int i;
 
     hdr = tbl->hwnd_header;
-    
+
     for(i=0; i < (int) tbl->n_cols; i++) {
         cw_hditem_from_tbl_col(&(tbl->cols[i]), &hi);
         Header_InsertItem(hdr, 512, &hi);
@@ -2404,11 +2404,11 @@ cw_insert_header_cols(khui_credwnd_tbl * tbl) {
 
 #pragma warning(push)
 #pragma warning(disable: 4701)
-void 
-cw_erase_rect(HDC hdc, 
-              khui_credwnd_tbl * tbl, 
-              RECT * r_wnd, 
-              RECT * r_erase, 
+void
+cw_erase_rect(HDC hdc,
+              khui_credwnd_tbl * tbl,
+              RECT * r_wnd,
+              RECT * r_erase,
               int type)
 {
     RECT rlogo;
@@ -2452,10 +2452,10 @@ cw_erase_rect(HDC hdc,
     } else {
 	HDC hdcb = CreateCompatibleDC(hdc);
         HBITMAP hbmold = SelectObject(hdcb, tbl->kbm_logo_shade.hbmp);
-        
+
         BitBlt(hdc, ri.left, ri.top, ri.right - ri.left, ri.bottom - ri.top,
                hdcb, ri.left - rlogo.left, ri.top - rlogo.top, SRCCOPY);
-            
+
         SelectObject(hdcb, hbmold);
         DeleteDC(hdcb);
 
@@ -2486,10 +2486,10 @@ cw_erase_rect(HDC hdc,
 }
 #pragma warning(pop)
 
-void 
-cw_draw_header(HDC hdc, 
-               khui_credwnd_tbl * tbl, 
-               int row, 
+void
+cw_draw_header(HDC hdc,
+               khui_credwnd_tbl * tbl,
+               int row,
                RECT * r)
 {
     int colattr;
@@ -2502,7 +2502,7 @@ cw_draw_header(HDC hdc,
 
     /* each header consists of a couple of widgets and some text */
     /* we need to figure out the background color first */
-    
+
     cr = &(tbl->rows[row]);
     o = (khui_credwnd_outline *) cr->data;
 
@@ -2528,7 +2528,7 @@ cw_draw_header(HDC hdc,
             else if ((o->flags & CW_EXPSTATE_MASK) == CW_EXPSTATE_WARN)
                 hbr = tbl->hb_hdr_bg_warn_s;
             else if ((colattr == KCDB_ATTR_ID_NAME) && !(o->flags & KHUI_CW_O_EMPTY) &&
-                     cwi && cwi->id_credcount > 0) 
+                     cwi && cwi->id_credcount > 0)
                 hbr = tbl->hb_hdr_bg_cred_s;
             else
                 hbr = tbl->hb_hdr_bg_s;
@@ -2559,7 +2559,7 @@ cw_draw_header(HDC hdc,
 
     if (!(o->flags & KHUI_CW_O_NOOUTLINE) &&
         !(o->flags & KHUI_CW_O_EMPTY)) {
-        if((tbl->mouse_state & CW_MOUSE_WOUTLINE) && 
+        if((tbl->mouse_state & CW_MOUSE_WOUTLINE) &&
            tbl->mouse_row == row) {
             if(o->flags & KHUI_CW_O_EXPAND) {
                 khui_ilist_draw_id(tbl->ilist, IDB_WDG_EXPAND_HI,
@@ -2616,11 +2616,11 @@ cw_draw_header(HDC hdc,
             r->left += cx + KHUI_SMICON_CX / 2;
 
         } else {
-            khui_ilist_draw_id(tbl->ilist, 
+            khui_ilist_draw_id(tbl->ilist,
                                (((o->flags & KHUI_CW_O_EMPTY) ||
                                  cwi == NULL || cwi->id_credcount == 0)?
                                 IDB_ID_DIS_SM:
-                                IDB_ID_SM), 
+                                IDB_ID_SM),
                                hdc,
                                r->left,
                                (r->top + r->bottom - KHUI_SMICON_CY) / 2, 0);
@@ -2653,7 +2653,7 @@ cw_draw_header(HDC hdc,
 
             r->left += size.cx + KHUI_SMICON_CX * 2;
 
-            TextOut(hdc, r->left, r->bottom - tbl->vpad, 
+            TextOut(hdc, r->left, r->bottom - tbl->vpad,
                     defstr, (int) wcslen(defstr));
         }
     } else {
@@ -2782,7 +2782,7 @@ cw_draw_header(HDC hdc,
     }
 }
 
-LRESULT 
+LRESULT
 cw_handle_header_msg(khui_credwnd_tbl * tbl, LPNMHEADER ph) {
     HDITEM hi;
 
@@ -2862,7 +2862,7 @@ cw_handle_header_msg(khui_credwnd_tbl * tbl, LPNMHEADER ph) {
 
             if (drag_end_index <= i)
                 return TRUE;
- 
+
             tcol = tbl->cols[drag_start_index];
             if (drag_end_index < drag_start_index) {
                 MoveMemory(&tbl->cols[drag_end_index + 1],
@@ -3118,7 +3118,7 @@ cw_handle_header_msg(khui_credwnd_tbl * tbl, LPNMHEADER ph) {
     return 0;
 }
 
-LRESULT 
+LRESULT
 cw_wm_create(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     khui_credwnd_tbl * tbl;
@@ -3174,12 +3174,12 @@ cw_wm_create(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         Header_Layout(tbl->hwnd_header, &hdl);
 
         SetWindowPos(
-            tbl->hwnd_header, 
-            pw.hwndInsertAfter, 
-            pw.x, 
-            pw.y, 
-            pw.cx, 
-            pw.cy, 
+            tbl->hwnd_header,
+            pw.hwndInsertAfter,
+            pw.x,
+            pw.y,
+            pw.cx,
+            pw.cy,
             pw.flags | SWP_SHOWWINDOW);
     }
 
@@ -3209,7 +3209,7 @@ cw_wm_destroy(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 }
 
 /* handles WM_PAINT and WM_PRINTCLIENT */
-LRESULT 
+LRESULT
 cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     khui_credwnd_tbl * tbl;
@@ -3488,7 +3488,7 @@ cw_wm_paint(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return TRUE;
 }
 
-LRESULT 
+LRESULT
 cw_wm_size(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     RECT rect;
@@ -3513,7 +3513,7 @@ cw_wm_size(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-LRESULT 
+LRESULT
 cw_wm_notify(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     khui_credwnd_tbl * tbl;
@@ -3537,14 +3537,14 @@ static void cw_pp_precreate(khui_property_sheet * s);
 static void cw_pp_end(khui_property_sheet * s);
 static void cw_pp_destroy(khui_property_sheet *ps);
 
-LRESULT 
+LRESULT
 cw_kmq_wm_dispatch(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     kmq_message * m;
     khm_int32 rv = KHM_ERROR_SUCCESS;
     khui_credwnd_tbl * tbl;
 
-    tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0); 
+    tbl = (khui_credwnd_tbl *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
 
     kmq_wm_begin(lParam, &m);
 
@@ -3589,7 +3589,7 @@ cw_kmq_wm_dispatch(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             InvalidateRect(hwnd, NULL, FALSE);
 
         }
-        else if (m->subtype == KMSG_KCDB_IDENT && 
+        else if (m->subtype == KMSG_KCDB_IDENT &&
                  m->uparam == KCDB_OP_NEW_DEFAULT) {
             wchar_t idname[KCDB_IDENT_MAXCCH_NAME];
             khm_size cb;
@@ -3795,7 +3795,7 @@ cw_kmq_wm_dispatch(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return kmq_wm_end(m, rv);
 }
 
-static void 
+static void
 cw_select_outline_level(khui_credwnd_outline * o,
                         BOOL select)
 {
@@ -3859,7 +3859,7 @@ cw_select_row_creds(khui_credwnd_tbl * tbl, int row, int selected) {
     }
 }
 
-static void 
+static void
 cw_unselect_all(khui_credwnd_tbl * tbl)
 {
     int i;
@@ -3969,7 +3969,7 @@ cw_update_outline_selection_state(khui_credwnd_tbl * tbl,
     }
 }
 
-static void 
+static void
 cw_update_selection_state(khui_credwnd_tbl * tbl)
 {
     int i;
@@ -3990,7 +3990,7 @@ cw_update_selection_state(khui_credwnd_tbl * tbl)
 }
 
 /* Examine the current row and set the UI context */
-static void 
+static void
 cw_set_row_context(khui_credwnd_tbl * tbl, int row)
 {
     khui_credwnd_outline * o;
@@ -4094,11 +4094,11 @@ cw_set_row_context(khui_credwnd_tbl * tbl, int row)
             do {
                 headers[n_headers].attr_id =
                     o->attr_id;
-                if (tbl->cols[o->col].attr_id == 
+                if (tbl->cols[o->col].attr_id ==
                     KCDB_ATTR_ID_NAME) {
                     headers[n_headers].data = &(o->data);
                     headers[n_headers].cb_data = sizeof(khm_handle);
-                } else if (tbl->cols[o->col].attr_id == 
+                } else if (tbl->cols[o->col].attr_id ==
                            KCDB_ATTR_TYPE_NAME) {
                     headers[n_headers].data = &(o->data);
                     headers[n_headers].cb_data = sizeof(khm_int32);
@@ -4155,7 +4155,7 @@ cw_select_all(khui_credwnd_tbl * tbl)
     InvalidateRect(tbl->hwnd, NULL, FALSE);
 }
 
-static void 
+static void
 cw_select_row(khui_credwnd_tbl * tbl, int row, WPARAM wParam)
 {
     int i;
@@ -4290,7 +4290,7 @@ cw_toggle_outline_state(khui_credwnd_tbl * tbl,
 
 LRESULT cw_properties(HWND hwnd);
 
-LRESULT 
+LRESULT
 cw_wm_mouse(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     khui_credwnd_tbl * tbl;
@@ -4356,7 +4356,7 @@ cw_wm_mouse(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             if (!(o->flags & KHUI_CW_O_NOOUTLINE)) {
                 if(x >= 0 && x < KHUI_SMICON_CX) /* hit */ {
                     nm_state |= CW_MOUSE_WOUTLINE | CW_MOUSE_WIDGET;
-                } else if (tbl->cols[tbl->rows[row].col].attr_id == 
+                } else if (tbl->cols[tbl->rows[row].col].attr_id ==
                            KCDB_ATTR_ID_NAME &&
                            col == tbl->rows[row].col &&
                            x >= KHUI_SMICON_CX * 3 / 2 &&
@@ -4391,7 +4391,7 @@ cw_wm_mouse(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         nm_state &= ~CW_MOUSE_WMASK;
     }
 
-    if(!(nm_state & CW_MOUSE_LDOWN) && 
+    if(!(nm_state & CW_MOUSE_LDOWN) &&
        (tbl->mouse_state & CW_MOUSE_LDOWN) &&
        tbl->mouse_row == nm_row) {
 
@@ -4455,7 +4455,7 @@ cw_wm_mouse(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         if(tbl->mouse_state & CW_MOUSE_WOUTLINE) {
             r.left = tbl->cols[tbl->mouse_col].x - tbl->scr_left;
-            r.top = tbl->mouse_row * tbl->cell_height + 
+            r.top = tbl->mouse_row * tbl->cell_height +
                 tbl->header_height - tbl->scr_top;
             r.right = r.left + KHUI_SMICON_CX;
             r.bottom = r.top + tbl->cell_height;
@@ -4472,9 +4472,9 @@ cw_wm_mouse(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 }
 
             } else {
-                r.left = KHUI_SMICON_CX * 3 / 2 + 
+                r.left = KHUI_SMICON_CX * 3 / 2 +
                     tbl->cols[tbl->mouse_col].x - tbl->scr_left;
-                r.top = tbl->mouse_row * tbl->cell_height + 
+                r.top = tbl->mouse_row * tbl->cell_height +
                     tbl->header_height - tbl->scr_top;
                 r.right = r.left + KHUI_SMICON_CX;
                 r.bottom = r.top + tbl->cell_height;
@@ -4494,7 +4494,7 @@ cw_wm_mouse(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         /* same code block as above */
         if(tbl->mouse_state & CW_MOUSE_WOUTLINE) {
             r.left = tbl->cols[tbl->mouse_col].x - tbl->scr_left;
-            r.top = tbl->mouse_row * tbl->cell_height + 
+            r.top = tbl->mouse_row * tbl->cell_height +
                 tbl->header_height - tbl->scr_top;
             r.right = r.left + KHUI_SMICON_CX;
             r.bottom = r.top + tbl->cell_height;
@@ -4511,9 +4511,9 @@ cw_wm_mouse(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 }
 
             } else {
-                r.left = KHUI_SMICON_CX * 3 / 2 + 
+                r.left = KHUI_SMICON_CX * 3 / 2 +
                     tbl->cols[tbl->mouse_col].x - tbl->scr_left;
-                r.top = tbl->mouse_row * tbl->cell_height + 
+                r.top = tbl->mouse_row * tbl->cell_height +
                     tbl->header_height - tbl->scr_top;
                 r.right = r.left + KHUI_SMICON_CX;
                 r.bottom = r.top + tbl->cell_height;
@@ -4543,7 +4543,7 @@ cw_wm_mouse(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-LRESULT 
+LRESULT
 cw_wm_hscroll(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     khui_credwnd_tbl * tbl;
@@ -4618,13 +4618,13 @@ cw_wm_hscroll(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         sr.top = cr.top;
         sr.bottom = lr.top;
         ScrollWindowEx(
-            hwnd, 
-            dx, 
-            0, 
-            &sr, 
-            &sr, 
-            NULL, 
-            NULL, 
+            hwnd,
+            dx,
+            0,
+            &sr,
+            &sr,
+            NULL,
+            NULL,
             SW_INVALIDATE | SW_SCROLLCHILDREN);
     }
 
@@ -4634,13 +4634,13 @@ cw_wm_hscroll(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         sr.top = lr.top;
         sr.bottom = lr.bottom;
         ScrollWindowEx(
-            hwnd, 
-            dx, 
-            0, 
-            &sr, 
-            &sr, 
-            NULL, 
-            NULL, 
+            hwnd,
+            dx,
+            0,
+            &sr,
+            &sr,
+            NULL,
+            NULL,
             SW_INVALIDATE | SW_SCROLLCHILDREN);
     }
 
@@ -4679,13 +4679,13 @@ cw_vscroll_to_pos(HWND hwnd, khui_credwnd_tbl * tbl, int newpos) {
         sr.top = cr.top;
         sr.bottom = cr.bottom;
         ScrollWindowEx(
-            hwnd, 
-            0, 
-            dy, 
-            &sr, 
-            &sr, 
-            NULL, 
-            NULL, 
+            hwnd,
+            0,
+            dy,
+            &sr,
+            &sr,
+            NULL,
+            NULL,
             SW_INVALIDATE);
     }
 
@@ -4695,13 +4695,13 @@ cw_vscroll_to_pos(HWND hwnd, khui_credwnd_tbl * tbl, int newpos) {
         sr.top = cr.top;
         sr.bottom = lr.top;
         ScrollWindowEx(
-            hwnd, 
-            0, 
-            dy, 
-            &sr, 
-            &sr, 
-            NULL, 
-            NULL, 
+            hwnd,
+            0,
+            dy,
+            &sr,
+            &sr,
+            NULL,
+            NULL,
             SW_INVALIDATE);
     }
 
@@ -4710,7 +4710,7 @@ cw_vscroll_to_pos(HWND hwnd, khui_credwnd_tbl * tbl, int newpos) {
     }
 }
 
-LRESULT 
+LRESULT
 cw_wm_vscroll(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     khui_credwnd_tbl * tbl;
@@ -4793,7 +4793,7 @@ cw_ensure_row_visible(HWND hwnd, khui_credwnd_tbl * tbl, int row) {
     cw_vscroll_to_pos(hwnd, tbl, newpos);
 }
 
-static INT_PTR CALLBACK 
+static INT_PTR CALLBACK
 cw_pp_ident_proc(HWND hwnd,
                  UINT uMsg,
                  WPARAM wParam,
@@ -4849,7 +4849,7 @@ cw_pp_ident_proc(HWND hwnd,
         return TRUE;
 
     case WM_COMMAND:
-        s = (khui_property_sheet *) (LONG_PTR) 
+        s = (khui_property_sheet *) (LONG_PTR)
             GetWindowLongPtr(hwnd, DWLP_USER);
         if (s == NULL)
             return 0;
@@ -4909,7 +4909,7 @@ cw_pp_ident_proc(HWND hwnd,
             khm_int32 flags;
 
             lpp = (LPPSHNOTIFY) lParam;
-            s = (khui_property_sheet *) (LONG_PTR) 
+            s = (khui_property_sheet *) (LONG_PTR)
                 GetWindowLongPtr(hwnd, DWLP_USER);
             if (s == NULL)
                 return 0;
@@ -4931,8 +4931,8 @@ cw_pp_ident_proc(HWND hwnd,
             case PSN_RESET:
                 kcdb_identity_get_flags(s->identity, &flags);
 
-                CheckDlgButton(hwnd, 
-                               IDC_PP_IDDEF, 
+                CheckDlgButton(hwnd,
+                               IDC_PP_IDDEF,
                                ((flags & KCDB_IDENT_FLAG_DEFAULT)?BST_CHECKED:
                                 BST_UNCHECKED));
 
@@ -4954,7 +4954,7 @@ cw_pp_ident_proc(HWND hwnd,
     return FALSE;
 }
 
-static INT_PTR CALLBACK 
+static INT_PTR CALLBACK
 cw_pp_cred_proc(HWND hwnd,
                 UINT uMsg,
                 WPARAM wParam,
@@ -4987,7 +4987,7 @@ cw_pp_cred_proc(HWND hwnd,
     return FALSE;
 }
 
-static void 
+static void
 cw_pp_begin(khui_property_sheet * s)
 {
     PROPSHEETPAGE *p;
@@ -5021,7 +5021,7 @@ cw_pp_begin(khui_property_sheet * s)
     }
 }
 
-static void 
+static void
 cw_pp_precreate(khui_property_sheet * s)
 {
     khui_ps_show_sheet(khm_hwnd_main, s);
@@ -5029,7 +5029,7 @@ cw_pp_precreate(khui_property_sheet * s)
     khm_add_property_sheet(s);
 }
 
-static void 
+static void
 cw_pp_end(khui_property_sheet * s)
 {
     khui_property_page * p = NULL;
@@ -5049,7 +5049,7 @@ cw_pp_end(khui_property_sheet * s)
     }
 }
 
-static void 
+static void
 cw_pp_destroy(khui_property_sheet *ps)
 {
     if(ps->ctx.scope == KHUI_SCOPE_CRED) {
@@ -5203,7 +5203,7 @@ cw_properties(HWND hwnd)
     return TRUE;
 }
 
-LRESULT 
+LRESULT
 cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     khui_credwnd_tbl * tbl;
@@ -5212,7 +5212,7 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     if (tbl == NULL)
         return 0;
 
-    if(HIWORD(wParam) == BN_CLICKED && 
+    if(HIWORD(wParam) == BN_CLICKED &&
        LOWORD(wParam) == KHUI_HTWND_CTLID) {
 
         wchar_t wid[256];
@@ -5223,13 +5223,13 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         wid[l->id_len] = 0;
 
         if(!wcscmp(wid, L"NewCreds")) {
-            PostMessage(khm_hwnd_main, WM_COMMAND, 
+            PostMessage(khm_hwnd_main, WM_COMMAND,
                         MAKEWPARAM(KHUI_ACTION_NEW_CRED,0), 0);
         }
         return TRUE;
     }
 
-    switch(LOWORD(wParam)) 
+    switch(LOWORD(wParam))
     {
     case KHUI_PACTION_ENTER:
         /* enter key is a synonym for the default action, on the
@@ -5524,10 +5524,10 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
                 break;
             }
 
-            for(r = tbl->cursor_row; 
+            for(r = tbl->cursor_row;
                 (r >= 0 && !(tbl->rows[r].flags & KHUI_CW_ROW_HEADER));
                 r--);
-            
+
             if(r < 0)
                 break;
 
@@ -5563,7 +5563,7 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             khui_credwnd_outline * o;
             int r;
 
-            if(tbl->cursor_row < 0 || 
+            if(tbl->cursor_row < 0 ||
                tbl->cursor_row >= (int) tbl->n_rows) {
                 cw_select_row(tbl, 0, 0);
                 break;
@@ -5589,7 +5589,7 @@ cw_wm_command(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-LRESULT 
+LRESULT
 cw_wm_contextmenu(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     RECT r;
@@ -5629,7 +5629,7 @@ cw_wm_contextmenu(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         x = r.left;
         y = y + r.top + tbl->header_height - tbl->scr_top;
-        
+
         goto have_row;
     }
 
@@ -5688,18 +5688,18 @@ cw_wm_contextmenu(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 /* copy and paste template */
 #if 0
-LRESULT 
+LRESULT
 cw_wm_msg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 #endif
 
-LRESULT CALLBACK 
+LRESULT CALLBACK
 khm_credwnd_proc(HWND hwnd,
                   UINT uMsg,
                   WPARAM wParam,
-                  LPARAM lParam) 
+                  LPARAM lParam)
 {
     switch(uMsg) {
     case WM_COMMAND:
@@ -5884,7 +5884,7 @@ khm_draw_identity_menu_item(HWND hwnd, LPDRAWITEMSTRUCT lpd, khui_action * act)
     }
 }
 
-void 
+void
 khm_register_credwnd_class(void) {
     WNDCLASSEX wcx;
     kcdb_attrib attrib;
@@ -5920,12 +5920,12 @@ khm_register_credwnd_class(void) {
     khui_cw_flag_id = attr_id;
 }
 
-void 
+void
 khm_unregister_credwnd_class(void) {
     UnregisterClass(MAKEINTATOM(khui_credwnd_cls), khm_hInstance);
 }
 
-HWND 
+HWND
 khm_create_credwnd(HWND parent) {
     RECT r;
     HWND hwnd;

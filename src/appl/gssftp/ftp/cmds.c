@@ -112,7 +112,7 @@ static char *domap (char *);
  *
  * Returns false if no new arguments have been added.
  */
-int 
+int
 another(pargc, pargv, prompt)
 	int *pargc;
 	char ***pargv;
@@ -260,7 +260,7 @@ void setpeer(argc, argv)
 				unix_proxy = 0;
 			else
 				unix_server = 0;
-			if (overbose && 
+			if (overbose &&
 			    !strncmp(reply_string, "215 TOPS20", 10))
 				printf(
 "Remember to set tenex mode when transfering binary files from this machine.\n");
@@ -355,7 +355,7 @@ void setclevel(argc, argv)
 	if (!strcmp(p->p_name, "clear")) {
 		comret = command("CCC");
 		if (comret == COMPLETE)
-			clevel = PROT_C; 
+			clevel = PROT_C;
 		return;
 	}
 	clevel = p->p_level;
@@ -1180,7 +1180,7 @@ void status(argc, argv)
 	}
 	printf("Hash mark printing: %s; Use of PORT cmds: %s\n",
 		onoff(hash), onoff(sendport));
-	printf("Verbose: %s; Bell: %s; Prompting: %s; Globbing: %s\n", 
+	printf("Verbose: %s; Bell: %s; Prompting: %s; Globbing: %s\n",
 		onoff(verbose), onoff(bell), onoff(interactive),
 		onoff(doglob));
 	if (macnum > 0) {
@@ -1275,7 +1275,7 @@ void setprompt()
 /*VARARGS*/
 void setglob()
 {
-	
+
 	doglob = !doglob;
 	printf("Globbing %s.\n", onoff(doglob));
 	code = doglob;
@@ -1601,7 +1601,7 @@ void shell(argc, argv)
 {
 	int pid;
 	sig_t old1, old2;
-	char shellnam[40], *shellprog, *namep; 
+	char shellnam[40], *shellprog, *namep;
 #ifdef WAIT_USES_INT
 	int w_status;
 #else
@@ -1910,7 +1910,7 @@ void disconnect()
 		return;
 	(void) command("QUIT");
 	if (cout) {
-		(void) FCLOSE_SOCKET(cout);	
+		(void) FCLOSE_SOCKET(cout);
 		cout = NULL;
 	}
 	connected = 0;
@@ -2237,7 +2237,7 @@ domap(name)
 				break;
 			case '[':
 LOOP:
-				if (*++cp2 == '$' && isdigit((int) *(cp2+1))) { 
+				if (*++cp2 == '$' && isdigit((int) *(cp2+1))) {
 					if (*++cp2 == '0') {
 						char *cp3 = name;
 
@@ -2256,7 +2256,7 @@ LOOP:
 					}
 				}
 				else {
-					while (*cp2 && *cp2 != ',' && 
+					while (*cp2 && *cp2 != ',' &&
 					    *cp2 != ']') {
 						if (*cp2 == '\\') {
 							cp2++;

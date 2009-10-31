@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/os/port2ip.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Take an ADDRPORT address and split into IP addr & port.
  */
@@ -42,23 +43,23 @@ krb5_unpack_full_ipaddr(krb5_context context, const krb5_address *inaddr, krb5_i
     krb5_ui_4 templength;
 
     if (inaddr->addrtype != ADDRTYPE_ADDRPORT)
-	return KRB5_PROG_ATYPE_NOSUPP;
+        return KRB5_PROG_ATYPE_NOSUPP;
 
     if (inaddr->length != sizeof(smushaddr)+ sizeof(smushport) +
-	2*sizeof(temptype) + 2*sizeof(templength))
-	return KRB5_PROG_ATYPE_NOSUPP;
+        2*sizeof(temptype) + 2*sizeof(templength))
+        return KRB5_PROG_ATYPE_NOSUPP;
 
     marshal = inaddr->contents;
 
     (void) memcpy(&temptype, marshal, sizeof(temptype));
     marshal += sizeof(temptype);
     if (temptype != htons(ADDRTYPE_INET))
-	return KRB5_PROG_ATYPE_NOSUPP;
+        return KRB5_PROG_ATYPE_NOSUPP;
 
     (void) memcpy(&templength, marshal, sizeof(templength));
     marshal += sizeof(templength);
     if (templength != htonl(sizeof(smushaddr)))
-	return KRB5_PROG_ATYPE_NOSUPP;
+        return KRB5_PROG_ATYPE_NOSUPP;
 
     (void) memcpy(&smushaddr, marshal, sizeof(smushaddr));
     /* leave in net order */
@@ -67,12 +68,12 @@ krb5_unpack_full_ipaddr(krb5_context context, const krb5_address *inaddr, krb5_i
     (void) memcpy(&temptype, marshal, sizeof(temptype));
     marshal += sizeof(temptype);
     if (temptype != htons(ADDRTYPE_IPPORT))
-	return KRB5_PROG_ATYPE_NOSUPP;
+        return KRB5_PROG_ATYPE_NOSUPP;
 
     (void) memcpy(&templength, marshal, sizeof(templength));
     marshal += sizeof(templength);
     if (templength != htonl(sizeof(smushport)))
-	return KRB5_PROG_ATYPE_NOSUPP;
+        return KRB5_PROG_ATYPE_NOSUPP;
 
     (void) memcpy(&smushport, marshal, sizeof(smushport));
     /* leave in net order */

@@ -5,23 +5,23 @@
 
  LICENSE TERMS
 
- The free distribution and use of this software in both source and binary 
+ The free distribution and use of this software in both source and binary
  form is allowed (with or without changes) provided that:
 
-   1. distributions of this source code include the above copyright 
+   1. distributions of this source code include the above copyright
       notice, this list of conditions and the following disclaimer;
 
    2. distributions in binary form include the above copyright
       notice, this list of conditions and the following disclaimer
       in the documentation and/or other associated materials;
 
-   3. the copyright holder's name is not used to endorse products 
-      built using this software without specific written permission. 
+   3. the copyright holder's name is not used to endorse products
+      built using this software without specific written permission.
 
  DISCLAIMER
 
  This software is provided 'as is' with no explcit or implied warranties
- in respect of any properties, including, but not limited to, correctness 
+ in respect of any properties, including, but not limited to, correctness
  and fitness for purpose.
  -------------------------------------------------------------------------
  Issue Date: 21/01/2002
@@ -44,7 +44,7 @@
 #define locals(y,x)     x[4],y[4]
 #else
 #define locals(y,x)     x##0,x##1,x##2,x##3,y##0,y##1,y##2,y##3
- /* 
+ /*
    the following defines prevent the compiler requiring the declaration
    of generated but unused variables in the fwd_var and inv_var macros
  */
@@ -77,7 +77,7 @@
 #define b17 unused
 #endif
 #define l_copy(y, x)    s(y,0) = s(x,0); s(y,1) = s(x,1); \
-                        s(y,2) = s(x,2); s(y,3) = s(x,3); s(y,4) = s(x,4); 
+                        s(y,2) = s(x,2); s(y,3) = s(x,3); s(y,4) = s(x,4);
 #define state_in(y,x,k) si(y,x,k,0); si(y,x,k,1); si(y,x,k,2); si(y,x,k,3); si(y,x,k,4)
 #define state_out(y,x)  so(y,x,0); so(y,x,1); so(y,x,2); so(y,x,3); so(y,x,4)
 #define round(rm,y,x,k) rm(y,x,k,0); rm(y,x,k,1); rm(y,x,k,2); rm(y,x,k,3); rm(y,x,k,4)
@@ -212,15 +212,15 @@ switch(nc) \
 #if defined(ENCRYPTION)
 
 /* I am grateful to Frank Yellin for the following construction
-   (and that for decryption) which, given the column (c) of the 
-   output state variable, gives the input state variables which 
+   (and that for decryption) which, given the column (c) of the
+   output state variable, gives the input state variables which
    are needed for each row (r) of the state.
 
-   For the fixed block size options, compilers should reduce these 
-   two expressions to fixed variable references. But for variable 
+   For the fixed block size options, compilers should reduce these
+   two expressions to fixed variable references. But for variable
    block size code conditional clauses will sometimes be returned.
 
-   y = output word, x = input word, r = row, c = column for r = 0, 
+   y = output word, x = input word, r = row, c = column for r = 0,
    1, 2 and 3 = column accessed for row r.
 */
 
@@ -291,7 +291,7 @@ aes_rval aes_enc_blk(const unsigned char in_blk[], unsigned char out_blk[], cons
 
 #if (ENC_UNROLL == FULL)
 
-    state_in((cx->n_rnd & 1 ? b1 : b0), in_blk, kp); 
+    state_in((cx->n_rnd & 1 ? b1 : b0), in_blk, kp);
     kp += (cx->n_rnd - 9) * nc;
 
     switch(cx->n_rnd)
@@ -300,13 +300,13 @@ aes_rval aes_enc_blk(const unsigned char in_blk[], unsigned char out_blk[], cons
     case 13:    round(fwd_rnd,  b0, b1, kp - 3 * nc);
     case 12:    round(fwd_rnd,  b1, b0, kp - 2 * nc);
     case 11:    round(fwd_rnd,  b0, b1, kp -     nc);
-    case 10:    round(fwd_rnd,  b1, b0, kp         );             
+    case 10:    round(fwd_rnd,  b1, b0, kp         );
                 round(fwd_rnd,  b0, b1, kp +     nc);
-                round(fwd_rnd,  b1, b0, kp + 2 * nc); 
+                round(fwd_rnd,  b1, b0, kp + 2 * nc);
                 round(fwd_rnd,  b0, b1, kp + 3 * nc);
-                round(fwd_rnd,  b1, b0, kp + 4 * nc); 
+                round(fwd_rnd,  b1, b0, kp + 4 * nc);
                 round(fwd_rnd,  b0, b1, kp + 5 * nc);
-                round(fwd_rnd,  b1, b0, kp + 6 * nc); 
+                round(fwd_rnd,  b1, b0, kp + 6 * nc);
                 round(fwd_rnd,  b0, b1, kp + 7 * nc);
                 round(fwd_rnd,  b1, b0, kp + 8 * nc);
                 round(fwd_lrnd, b0, b1, kp + 9 * nc);
@@ -314,33 +314,33 @@ aes_rval aes_enc_blk(const unsigned char in_blk[], unsigned char out_blk[], cons
 #else
     {   uint32_t    rnd;
 
-        state_in(b0, in_blk, kp); 
+        state_in(b0, in_blk, kp);
 
 #if (ENC_UNROLL == PARTIAL)
 
         for(rnd = 0; rnd < (cx->n_rnd - 1) >> 1; ++rnd)
         {
             kp += nc;
-            round(fwd_rnd, b1, b0, kp); 
+            round(fwd_rnd, b1, b0, kp);
             kp += nc;
-            round(fwd_rnd, b0, b1, kp); 
+            round(fwd_rnd, b0, b1, kp);
         }
 
-        if(cx->n_rnd & 1) 
+        if(cx->n_rnd & 1)
         {
             l_copy(b1, b0);
         }
         else
         {
             kp += nc;
-            round(fwd_rnd,  b1, b0, kp); 
+            round(fwd_rnd,  b1, b0, kp);
         }
 #else
         for(rnd = 0; rnd < cx->n_rnd - 1; ++rnd)
         {
             kp += nc;
-            round(fwd_rnd, b1, b0, kp); 
-            l_copy(b0, b1); 
+            round(fwd_rnd, b1, b0, kp);
+            l_copy(b0, b1);
         }
 #endif
         kp += nc;
@@ -423,7 +423,7 @@ aes_rval aes_dec_blk(const unsigned char in_blk[], unsigned char out_blk[], cons
 
 #if (DEC_UNROLL == FULL)
 
-    state_in((cx->n_rnd & 1 ? b1 : b0), in_blk, kp); 
+    state_in((cx->n_rnd & 1 ? b1 : b0), in_blk, kp);
     kp = cx->k_sch + 9 * nc;
 
     switch(cx->n_rnd)
@@ -432,13 +432,13 @@ aes_rval aes_dec_blk(const unsigned char in_blk[], unsigned char out_blk[], cons
     case 13:    round(inv_rnd,  b0, b1, kp + 3 * nc);
     case 12:    round(inv_rnd,  b1, b0, kp + 2 * nc);
     case 11:    round(inv_rnd,  b0, b1, kp +     nc);
-    case 10:    round(inv_rnd,  b1, b0, kp         );             
+    case 10:    round(inv_rnd,  b1, b0, kp         );
                 round(inv_rnd,  b0, b1, kp -     nc);
-                round(inv_rnd,  b1, b0, kp - 2 * nc); 
+                round(inv_rnd,  b1, b0, kp - 2 * nc);
                 round(inv_rnd,  b0, b1, kp - 3 * nc);
-                round(inv_rnd,  b1, b0, kp - 4 * nc); 
+                round(inv_rnd,  b1, b0, kp - 4 * nc);
                 round(inv_rnd,  b0, b1, kp - 5 * nc);
-                round(inv_rnd,  b1, b0, kp - 6 * nc); 
+                round(inv_rnd,  b1, b0, kp - 6 * nc);
                 round(inv_rnd,  b0, b1, kp - 7 * nc);
                 round(inv_rnd,  b1, b0, kp - 8 * nc);
                 round(inv_lrnd, b0, b1, kp - 9 * nc);
@@ -446,33 +446,33 @@ aes_rval aes_dec_blk(const unsigned char in_blk[], unsigned char out_blk[], cons
 #else
     {   uint32_t    rnd;
 
-        state_in(b0, in_blk, kp); 
+        state_in(b0, in_blk, kp);
 
 #if (DEC_UNROLL == PARTIAL)
 
         for(rnd = 0; rnd < (cx->n_rnd - 1) >> 1; ++rnd)
         {
             kp -= nc;
-            round(inv_rnd, b1, b0, kp); 
+            round(inv_rnd, b1, b0, kp);
             kp -= nc;
-            round(inv_rnd, b0, b1, kp); 
+            round(inv_rnd, b0, b1, kp);
         }
 
-        if(cx->n_rnd & 1) 
+        if(cx->n_rnd & 1)
         {
             l_copy(b1, b0);
         }
         else
-        {       
+        {
             kp -= nc;
-            round(inv_rnd,  b1, b0, kp); 
+            round(inv_rnd,  b1, b0, kp);
         }
 #else
         for(rnd = 0; rnd < cx->n_rnd - 1; ++rnd)
         {
             kp -= nc;
-            round(inv_rnd, b1, b0, kp); 
-            l_copy(b0, b1); 
+            round(inv_rnd, b1, b0, kp);
+            l_copy(b0, b1);
         }
 #endif
         kp -= nc;

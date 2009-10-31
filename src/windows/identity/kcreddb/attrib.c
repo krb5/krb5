@@ -33,27 +33,27 @@ kcdb_attrib_i ** kcdb_attrib_tbl = NULL;
 kcdb_attrib_i ** kcdb_property_tbl = NULL;
 kcdb_attrib_i * kcdb_attribs = NULL;
 
-void 
+void
 kcdb_attrib_add_ref_func(const void * key, void * va)
 {
     kcdb_attrib_hold((kcdb_attrib_i *) va);
 }
 
-void 
+void
 kcdb_attrib_del_ref_func(const void * key, void * va)
 {
     kcdb_attrib_release((kcdb_attrib_i *) va);
 }
 
-void 
-kcdb_attrib_msg_completion(kmq_message * m) 
+void
+kcdb_attrib_msg_completion(kmq_message * m)
 {
     if(m && m->vparam) {
         kcdb_attrib_release((kcdb_attrib_i *) m->vparam);
     }
 }
 
-khm_int32 
+khm_int32
 kcdb_attrib_hold(kcdb_attrib_i * ai)
 {
     if(!ai)
@@ -65,7 +65,7 @@ kcdb_attrib_hold(kcdb_attrib_i * ai)
     return KHM_ERROR_SUCCESS;
 }
 
-khm_int32 
+khm_int32
 kcdb_attrib_release(kcdb_attrib_i * ai)
 {
     if(!ai)
@@ -77,17 +77,17 @@ kcdb_attrib_release(kcdb_attrib_i * ai)
     return KHM_ERROR_SUCCESS;
 }
 
-void 
+void
 kcdb_attrib_post_message(khm_int32 op, kcdb_attrib_i * ai)
 {
     kcdb_attrib_hold(ai);
     kmq_post_message(KMSG_KCDB, KMSG_KCDB_ATTRIB, op, (void *) ai);
 }
 
-khm_int32 KHMAPI 
-kcdb_attr_sys_cb(khm_handle vcred, 
-                 khm_int32 attr, 
-                 void * buf, 
+khm_int32 KHMAPI
+kcdb_attr_sys_cb(khm_handle vcred,
+                 khm_int32 attr,
+                 void * buf,
                  khm_size * pcb_buf)
 {
     kcdb_cred * c;
@@ -109,7 +109,7 @@ kcdb_attr_sys_cb(khm_handle vcred,
         }
 
     case KCDB_ATTR_ID_NAME:
-        return kcdb_identity_get_name((khm_handle) c->identity, 
+        return kcdb_identity_get_name((khm_handle) c->identity,
                                       (wchar_t *) buf, pcb_buf);
 
     case KCDB_ATTR_TYPE:
@@ -123,7 +123,7 @@ kcdb_attr_sys_cb(khm_handle vcred,
         }
 
     case KCDB_ATTR_TYPE_NAME:
-        return kcdb_credtype_describe(c->type, buf, 
+        return kcdb_credtype_describe(c->type, buf,
                                       pcb_buf, KCDB_TS_SHORT);
 
     case KCDB_ATTR_TIMELEFT:
@@ -148,7 +148,7 @@ kcdb_attr_sys_cb(khm_handle vcred,
                 iftc = FtToInt(&ftc);
 
                 *((FILETIME *) buf) =
-                    IntToFt(FtToInt((FILETIME *) 
+                    IntToFt(FtToInt((FILETIME *)
                                     kcdb_cred_buf_get(c,KCDB_ATTR_EXPIRE))
                             - iftc);
                 *pcb_buf = sizeof(FILETIME);
@@ -210,36 +210,36 @@ kcdb_attr_sys_cb(khm_handle vcred,
     }
 }
 
-void 
+void
 kcdb_attrib_init(void)
 {
     kcdb_attrib attrib;
     wchar_t sbuf[256];
 
     InitializeCriticalSection(&cs_attrib);
-    kcdb_attrib_namemap = 
+    kcdb_attrib_namemap =
         hash_new_hashtable(KCDB_ATTRIB_HASH_SIZE,
                            hash_string,
                            hash_string_comp,
                            kcdb_attrib_add_ref_func,
                            kcdb_attrib_del_ref_func);
 
-    kcdb_attrib_tbl = 
+    kcdb_attrib_tbl =
         PMALLOC(sizeof(kcdb_attrib_i *) * (KCDB_ATTR_MAX_ID + 1));
     assert(kcdb_attrib_tbl != NULL);
-    ZeroMemory(kcdb_attrib_tbl, 
+    ZeroMemory(kcdb_attrib_tbl,
                sizeof(kcdb_attrib_i *) * (KCDB_ATTR_MAX_ID + 1));
 
-    kcdb_property_tbl = 
+    kcdb_property_tbl =
         PMALLOC(sizeof(kcdb_attrib_i *) * KCDB_ATTR_MAX_PROPS);
     assert(kcdb_property_tbl != NULL);
-    ZeroMemory(kcdb_property_tbl, 
+    ZeroMemory(kcdb_property_tbl,
                sizeof(kcdb_attrib_i *) * KCDB_ATTR_MAX_PROPS);
 
     kcdb_attribs = NULL;
 
     /* register standard attributes */
-    
+
     /* Name */
     attrib.id = KCDB_ATTR_NAME;
     attrib.name = KCDB_ATTRNAME_NAME;
@@ -247,9 +247,9 @@ kcdb_attrib_init(void)
     LoadString(hinst_kcreddb, IDS_NAME, sbuf, ARRAYLENGTH(sbuf));
     attrib.short_desc = sbuf;
     attrib.long_desc = NULL;
-    attrib.flags = 
-        KCDB_ATTR_FLAG_REQUIRED | 
-        KCDB_ATTR_FLAG_COMPUTED | 
+    attrib.flags =
+        KCDB_ATTR_FLAG_REQUIRED |
+        KCDB_ATTR_FLAG_COMPUTED |
         KCDB_ATTR_FLAG_SYSTEM;
     attrib.compute_cb = kcdb_attr_sys_cb;
     attrib.compute_min_cbsize = sizeof(wchar_t);
@@ -264,9 +264,9 @@ kcdb_attrib_init(void)
     LoadString(hinst_kcreddb, IDS_IDENTITY, sbuf, ARRAYLENGTH(sbuf));
     attrib.short_desc = sbuf;
     attrib.long_desc = NULL;
-    attrib.flags = 
-        KCDB_ATTR_FLAG_REQUIRED | 
-        KCDB_ATTR_FLAG_COMPUTED | 
+    attrib.flags =
+        KCDB_ATTR_FLAG_REQUIRED |
+        KCDB_ATTR_FLAG_COMPUTED |
         KCDB_ATTR_FLAG_SYSTEM |
         KCDB_ATTR_FLAG_HIDDEN;
     attrib.compute_cb = kcdb_attr_sys_cb;
@@ -283,9 +283,9 @@ kcdb_attrib_init(void)
     LoadString(hinst_kcreddb, IDS_IDENTITY, sbuf, ARRAYLENGTH(sbuf));
     attrib.short_desc = sbuf;
     attrib.long_desc = NULL;
-    attrib.flags = 
-        KCDB_ATTR_FLAG_REQUIRED | 
-        KCDB_ATTR_FLAG_COMPUTED | 
+    attrib.flags =
+        KCDB_ATTR_FLAG_REQUIRED |
+        KCDB_ATTR_FLAG_COMPUTED |
         KCDB_ATTR_FLAG_ALTVIEW |
         KCDB_ATTR_FLAG_SYSTEM;
     attrib.compute_cb = kcdb_attr_sys_cb;
@@ -301,9 +301,9 @@ kcdb_attrib_init(void)
     LoadString(hinst_kcreddb, IDS_TYPE, sbuf, ARRAYLENGTH(sbuf));
     attrib.short_desc = sbuf;
     attrib.long_desc = NULL;
-    attrib.flags = 
-        KCDB_ATTR_FLAG_REQUIRED | 
-        KCDB_ATTR_FLAG_COMPUTED | 
+    attrib.flags =
+        KCDB_ATTR_FLAG_REQUIRED |
+        KCDB_ATTR_FLAG_COMPUTED |
         KCDB_ATTR_FLAG_SYSTEM |
         KCDB_ATTR_FLAG_HIDDEN;
     attrib.compute_cb = kcdb_attr_sys_cb;
@@ -320,8 +320,8 @@ kcdb_attrib_init(void)
     LoadString(hinst_kcreddb, IDS_TYPE, sbuf, ARRAYLENGTH(sbuf));
     attrib.short_desc = sbuf;
     attrib.long_desc = NULL;
-    attrib.flags = 
-        KCDB_ATTR_FLAG_REQUIRED | 
+    attrib.flags =
+        KCDB_ATTR_FLAG_REQUIRED |
         KCDB_ATTR_FLAG_COMPUTED |
         KCDB_ATTR_FLAG_ALTVIEW |
         KCDB_ATTR_FLAG_SYSTEM;
@@ -377,7 +377,7 @@ kcdb_attrib_init(void)
     attrib.id = KCDB_ATTR_RENEW_EXPIRE;
     attrib.name = KCDB_ATTRNAME_RENEW_EXPIRE;
     attrib.type = KCDB_TYPE_DATE;
-    LoadString(hinst_kcreddb, IDS_RENEW_EXPIRES, 
+    LoadString(hinst_kcreddb, IDS_RENEW_EXPIRES,
                sbuf, ARRAYLENGTH(sbuf));
     attrib.short_desc = sbuf;
     attrib.long_desc = NULL;
@@ -411,7 +411,7 @@ kcdb_attrib_init(void)
     attrib.alt_id = KCDB_ATTR_RENEW_EXPIRE;
     attrib.name = KCDB_ATTRNAME_RENEW_TIMELEFT;
     attrib.type = KCDB_TYPE_INTERVAL;
-    LoadString(hinst_kcreddb, 
+    LoadString(hinst_kcreddb,
                IDS_RENEW_TIMELEFT, sbuf, ARRAYLENGTH(sbuf));
     attrib.short_desc = sbuf;
     attrib.long_desc = NULL;
@@ -457,7 +457,7 @@ kcdb_attrib_init(void)
     attrib.id = KCDB_ATTR_RENEW_LIFETIME;
     attrib.name = KCDB_ATTRNAME_RENEW_LIFETIME;
     attrib.type = KCDB_TYPE_INTERVAL;
-    LoadString(hinst_kcreddb, 
+    LoadString(hinst_kcreddb,
                IDS_RENEW_LIFETIME, sbuf, ARRAYLENGTH(sbuf));
     attrib.short_desc = sbuf;
     attrib.long_desc = NULL;
@@ -475,9 +475,9 @@ kcdb_attrib_init(void)
     LoadString(hinst_kcreddb, IDS_FLAGS, sbuf, ARRAYLENGTH(sbuf));
     attrib.short_desc = sbuf;
     attrib.long_desc = NULL;
-    attrib.flags = 
-        KCDB_ATTR_FLAG_REQUIRED | 
-        KCDB_ATTR_FLAG_COMPUTED | 
+    attrib.flags =
+        KCDB_ATTR_FLAG_REQUIRED |
+        KCDB_ATTR_FLAG_COMPUTED |
         KCDB_ATTR_FLAG_SYSTEM |
         KCDB_ATTR_FLAG_HIDDEN;
     attrib.compute_cb = kcdb_attr_sys_cb;
@@ -487,11 +487,11 @@ kcdb_attrib_init(void)
     kcdb_attrib_register(&attrib, NULL);
 }
 
-void 
+void
 kcdb_attrib_exit(void)
 {
     DeleteCriticalSection(&cs_attrib);
-    
+
     if(kcdb_attrib_tbl)
         PFREE(kcdb_attrib_tbl);
 
@@ -499,7 +499,7 @@ kcdb_attrib_exit(void)
         PFREE(kcdb_property_tbl);
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 kcdb_attrib_get_id(const wchar_t *name, khm_int32 * id)
 {
     kcdb_attrib_i * ai;
@@ -520,7 +520,7 @@ kcdb_attrib_get_id(const wchar_t *name, khm_int32 * id)
     }
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 kcdb_attrib_register(const kcdb_attrib * attrib, khm_int32 * new_id)
 {
     kcdb_attrib_i * ai;
@@ -553,7 +553,7 @@ kcdb_attrib_register(const kcdb_attrib * attrib, khm_int32 * new_id)
     } else
         cb_long_desc = 0;
 
-    if((attrib->flags & KCDB_ATTR_FLAG_COMPUTED) && 
+    if((attrib->flags & KCDB_ATTR_FLAG_COMPUTED) &&
         (!attrib->compute_cb ||
         attrib->compute_min_cbsize <= 0 ||
         attrib->compute_max_cbsize < attrib->compute_min_cbsize))
@@ -568,15 +568,15 @@ kcdb_attrib_register(const kcdb_attrib * attrib, khm_int32 * new_id)
 
     EnterCriticalSection(&cs_attrib);
 
-    if(!prop && 
-       (attrib->id < 0 || attrib->id > KCDB_ATTR_MAX_ID)) 
+    if(!prop &&
+       (attrib->id < 0 || attrib->id > KCDB_ATTR_MAX_ID))
     {
         if(KHM_FAILED(kcdb_attrib_next_free_id(&attr_id))) {
             LeaveCriticalSection(&cs_attrib);
             return KHM_ERROR_NO_RESOURCES;
         }
     } else if (prop &&
-               (attrib->id < KCDB_ATTR_MIN_PROP_ID || 
+               (attrib->id < KCDB_ATTR_MIN_PROP_ID ||
                 attrib->id > KCDB_ATTR_MAX_PROP_ID)) {
 
         if(KHM_FAILED(kcdb_attrib_next_free_prop_id(&attr_id))) {
@@ -644,7 +644,7 @@ kcdb_attrib_register(const kcdb_attrib * attrib, khm_int32 * new_id)
 }
 
 KHMEXP khm_int32 KHMAPI kcdb_attrib_get_info(
-    khm_int32 id, 
+    khm_int32 id,
     kcdb_attrib ** attrib)
 {
     kcdb_attrib_i * ai;
@@ -692,9 +692,9 @@ KHMEXP khm_int32 KHMAPI kcdb_attrib_unregister(khm_int32 id)
 }
 
 KHMEXP khm_int32 KHMAPI kcdb_attrib_describe(
-    khm_int32 id, 
-    wchar_t * buffer, 
-    khm_size * cbsize, 
+    khm_int32 id,
+    wchar_t * buffer,
+    khm_size * cbsize,
     khm_int32 flags)
 {
     kcdb_attrib_i * ai;
@@ -708,7 +708,7 @@ KHMEXP khm_int32 KHMAPI kcdb_attrib_describe(
         prop = FALSE;
     else if(id >= KCDB_ATTR_MIN_PROP_ID && id <= KCDB_ATTR_MAX_PROP_ID)
         prop = TRUE;
-    else 
+    else
 	return KHM_ERROR_INVALID_PARAM;
 
     if(prop)
@@ -720,7 +720,7 @@ KHMEXP khm_int32 KHMAPI kcdb_attrib_describe(
         return KHM_ERROR_NOT_FOUND;
 
     if((flags & KCDB_TS_SHORT) &&
-        ai->attr.short_desc) 
+        ai->attr.short_desc)
     {
         if(FAILED(StringCbLength(ai->attr.short_desc, KCDB_MAXCB_SHORT_DESC, &cb_size)))
             return KHM_ERROR_UNKNOWN;

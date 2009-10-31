@@ -202,7 +202,7 @@ __bt_open(fname, flags, mode, openinfo, dflags)
 		default:
 			goto einval;
 		}
-		
+
 		if ((t->bt_fd = open(fname, flags | O_BINARY, mode)) < 0)
 			goto err;
 

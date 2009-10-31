@@ -6,23 +6,23 @@
  * may copy or modify Sun RPC without charge, but are not authorized
  * to license or distribute it to anyone else except as part of a product or
  * program developed by the user.
- * 
+ *
  * SUN RPC IS PROVIDED AS IS WITH NO WARRANTIES OF ANY KIND INCLUDING THE
  * WARRANTIES OF DESIGN, MERCHANTIBILITY AND FITNESS FOR A PARTICULAR
  * PURPOSE, OR ARISING FROM A COURSE OF DEALING, USAGE OR TRADE PRACTICE.
- * 
+ *
  * Sun RPC is provided with no support and without any obligation on the
  * part of Sun Microsystems, Inc. to assist in its use, correction,
  * modification or enhancement.
- * 
+ *
  * SUN MICROSYSTEMS, INC. SHALL HAVE NO LIABILITY WITH RESPECT TO THE
  * INFRINGEMENT OF COPYRIGHTS, TRADE SECRETS OR ANY PATENTS BY SUN RPC
  * OR ANY PART THEREOF.
- * 
+ *
  * In no event will Sun Microsystems, Inc. be liable for any lost revenue
  * or profits or other special, indirect and consequential damages, even if
  * Sun has been advised of the possibility of such damages.
- * 
+ *
  * Sun Microsystems, Inc.
  * 2550 Garcia Avenue
  * Mountain View, California  94043
@@ -82,18 +82,18 @@ typedef struct SVCXPRT {
 	    /* receive incomming requests */
 	    bool_t	(*xp_recv)(struct SVCXPRT *, struct rpc_msg *);
 	    /* get transport status */
-	    enum xprt_stat (*xp_stat)(struct SVCXPRT *); 
+	    enum xprt_stat (*xp_stat)(struct SVCXPRT *);
 	    /* get arguments */
 	    bool_t	(*xp_getargs)(struct SVCXPRT *, xdrproc_t,
 				      void *);
 	    /* send reply */
 	    bool_t	(*xp_reply)(struct SVCXPRT *,
-				    struct rpc_msg *);	 
+				    struct rpc_msg *);
             /* free mem allocated for args */
 	    bool_t	(*xp_freeargs)(struct SVCXPRT *, xdrproc_t,
 				       void *);
 	    /* destroy this struct */
-	    void	(*xp_destroy)(struct SVCXPRT *); 
+	    void	(*xp_destroy)(struct SVCXPRT *);
 	} *xp_ops;
 	int		xp_addrlen;	 /* length of remote address */
 	struct sockaddr_in xp_raddr;	 /* remote address */
@@ -188,7 +188,7 @@ struct svc_req {
  *	rpcprog_t prog;
  *	rpcvers_t vers;
  *	void (*dispatch)();
- *	int protocol;  like IPPROTO_TCP or _UDP; zero means do not register 
+ *	int protocol;  like IPPROTO_TCP or _UDP; zero means do not register
  *
  * registerrpc(prog, vers, proc, routine, inproc, outproc)
  * 	returns 0 upon success, -1 if error.
@@ -241,7 +241,7 @@ extern void	xprt_unregister(SVCXPRT *);
  * Note: do not confuse access-control failure with weak authentication!
  *
  * NB: In pure implementations of rpc, the caller always waits for a reply
- * msg.  This message is sent when svc_sendreply is called.  
+ * msg.  This message is sent when svc_sendreply is called.
  * Therefore pure service implementations should always call
  * svc_sendreply even if the function logically returns void;  use
  * xdr.h - xdr_void for the xdr routine.  HOWEVER, tcp based rpc allows
@@ -275,7 +275,7 @@ extern void	svcerr_systemerr(SVCXPRT *);
 
 /*
  * Global keeper of rpc service descriptors in use
- * dynamic; must be inspected before each call to select 
+ * dynamic; must be inspected before each call to select
  */
 extern int svc_maxfd;
 #ifdef FD_SETSIZE

@@ -193,4 +193,4 @@ typedef struct item_info {
 #define	ITEM_GET_N	4
 
 #define	UNKNOWN		0xffffffff		/* for num_items */
-#define	NO_EXPAND	0xfffffffe 
+#define	NO_EXPAND	0xfffffffe

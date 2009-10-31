@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * kadmin/ktutil/ktutil.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * SS user interface for ktutil.
  */
 
@@ -50,13 +51,13 @@ int main(argc, argv)
     retval = krb5_init_context(&kcontext);
     if (retval) {
         com_err(argv[0], retval, "while initializing krb5");
-	exit(1);
+        exit(1);
     }
     sci_idx = ss_create_invocation("ktutil", "5.0", (char *)NULL,
-				   &ktutil_cmds, &retval);
+                                   &ktutil_cmds, &retval);
     if (retval) {
-	ss_perror(sci_idx, retval, "creating invocation");
-	exit(1);
+        ss_perror(sci_idx, retval, "creating invocation");
+        exit(1);
     }
     retval = ss_listen(sci_idx);
     ktutil_free_kt_list(kcontext, ktlist);
@@ -70,12 +71,12 @@ void ktutil_clear_list(argc, argv)
     krb5_error_code retval;
 
     if (argc != 1) {
-	fprintf(stderr, "%s: invalid arguments\n", argv[0]);
-	return;
+        fprintf(stderr, "%s: invalid arguments\n", argv[0]);
+        return;
     }
     retval = ktutil_free_kt_list(kcontext, ktlist);
     if (retval)
-	com_err(argv[0], retval, "while freeing ktlist");
+        com_err(argv[0], retval, "while freeing ktlist");
     ktlist = NULL;
 }
 
@@ -86,12 +87,12 @@ void ktutil_read_v5(argc, argv)
     krb5_error_code retval;
 
     if (argc != 2) {
-	fprintf(stderr, "%s: must specify keytab to read\n", argv[0]);
-	return;
+        fprintf(stderr, "%s: must specify keytab to read\n", argv[0]);
+        return;
     }
     retval = ktutil_read_keytab(kcontext, argv[1], &ktlist);
     if (retval)
-	com_err(argv[0], retval, "while reading keytab \"%s\"", argv[1]);
+        com_err(argv[0], retval, "while reading keytab \"%s\"", argv[1]);
 }
 
 void ktutil_read_v4(argc, argv)
@@ -101,12 +102,12 @@ void ktutil_read_v4(argc, argv)
     krb5_error_code retval;
 
     if (argc != 2) {
-	fprintf(stderr, "%s: must specify the srvtab to read\n", argv[0]);
-	return;
+        fprintf(stderr, "%s: must specify the srvtab to read\n", argv[0]);
+        return;
     }
     retval = ktutil_read_srvtab(kcontext, argv[1], &ktlist);
     if (retval)
-	com_err(argv[0], retval, "while reading srvtab \"%s\"", argv[1]);
+        com_err(argv[0], retval, "while reading srvtab \"%s\"", argv[1]);
 }
 
 void ktutil_write_v5(argc, argv)
@@ -116,12 +117,12 @@ void ktutil_write_v5(argc, argv)
     krb5_error_code retval;
 
     if (argc != 2) {
-	fprintf(stderr, "%s: must specify keytab to write\n", argv[0]);
-	return;
+        fprintf(stderr, "%s: must specify keytab to write\n", argv[0]);
+        return;
     }
     retval = ktutil_write_keytab(kcontext, ktlist, argv[1]);
     if (retval)
-	com_err(argv[0], retval, "while writing keytab \"%s\"", argv[1]);
+        com_err(argv[0], retval, "while writing keytab \"%s\"", argv[1]);
 }
 
 void ktutil_write_v4(argc, argv)
@@ -139,35 +140,35 @@ void ktutil_add_entry(argc, argv)
     char *princ = NULL;
     char *enctype = NULL;
     krb5_kvno kvno = 0;
-    int use_pass = 0, use_key = 0, i;    
+    int use_pass = 0, use_key = 0, i;
 
     for (i = 1; i < argc; i++) {
-	if ((strlen(argv[i]) == 2) && !strncmp(argv[i], "-p", 2)) {
-	    princ = argv[++i];
-	    continue;
-	}
-	if ((strlen(argv[i]) == 2) && !strncmp(argv[i], "-k", 2)) {
-	    kvno = (krb5_kvno) atoi(argv[++i]);
-	    continue;
-	}
-	if ((strlen(argv[i]) == 2) && !strncmp(argv[i], "-e", 2)) {
-	    enctype = argv[++i];
-	    continue;
-	}
-	if ((strlen(argv[i]) == 9) && !strncmp(argv[i], "-password", 9)) {
-	    use_pass++;
-	    continue;
-	}
-	if ((strlen(argv[i]) == 4) && !strncmp(argv[i], "-key", 4)) {
-	    use_key++;
-	    continue;
-	}
+        if ((strlen(argv[i]) == 2) && !strncmp(argv[i], "-p", 2)) {
+            princ = argv[++i];
+            continue;
+        }
+        if ((strlen(argv[i]) == 2) && !strncmp(argv[i], "-k", 2)) {
+            kvno = (krb5_kvno) atoi(argv[++i]);
+            continue;
+        }
+        if ((strlen(argv[i]) == 2) && !strncmp(argv[i], "-e", 2)) {
+            enctype = argv[++i];
+            continue;
+        }
+        if ((strlen(argv[i]) == 9) && !strncmp(argv[i], "-password", 9)) {
+            use_pass++;
+            continue;
+        }
+        if ((strlen(argv[i]) == 4) && !strncmp(argv[i], "-key", 4)) {
+            use_key++;
+            continue;
+        }
     }
 
     if (argc != 8 || !(princ && kvno && enctype) || (use_pass+use_key != 1)) {
         fprintf(stderr, "usage: %s (-key | -password) -p principal "
-		"-k kvno -e enctype\n", argv[0]);
-	return;
+                "-k kvno -e enctype\n", argv[0]);
+        return;
     }
 
     retval = ktutil_add(kcontext, &ktlist, princ, kvno, enctype, use_pass);
@@ -182,12 +183,12 @@ void ktutil_delete_entry(argc, argv)
     krb5_error_code retval;
 
     if (argc != 2) {
-	fprintf(stderr, "%s: must specify entry to delete\n", argv[0]);
-	return;
+        fprintf(stderr, "%s: must specify entry to delete\n", argv[0]);
+        return;
     }
     retval = ktutil_delete(kcontext, &ktlist, atoi(argv[1]));
     if (retval)
-	com_err(argv[0], retval, "while deleting entry %d", atoi(argv[1]));
+        com_err(argv[0], retval, "while deleting entry %d", atoi(argv[1]));
 }
 
 void ktutil_list(argc, argv)
@@ -201,80 +202,70 @@ void ktutil_list(argc, argv)
     char *pname;
 
     for (i = 1; i < argc; i++) {
-	if ((strlen(argv[i]) == 2) && !strncmp(argv[i], "-t", 2)) {
-	    show_time++;
-	    continue;
-	}
-	if ((strlen(argv[i]) == 2) && !strncmp(argv[i], "-k", 2)) {
-	    show_keys++;
-	    continue;
-	}
-	if ((strlen(argv[i]) == 2) && !strncmp(argv[i], "-e", 2)) {
-	    show_enctype++;
-	    continue;
-	}
+        if ((strlen(argv[i]) == 2) && !strncmp(argv[i], "-t", 2)) {
+            show_time++;
+            continue;
+        }
+        if ((strlen(argv[i]) == 2) && !strncmp(argv[i], "-k", 2)) {
+            show_keys++;
+            continue;
+        }
+        if ((strlen(argv[i]) == 2) && !strncmp(argv[i], "-e", 2)) {
+            show_enctype++;
+            continue;
+        }
 
-	fprintf(stderr, "%s: usage: %s [-t] [-k] [-e]\n", argv[0], argv[0]);
-	return;
+        fprintf(stderr, "%s: usage: %s [-t] [-k] [-e]\n", argv[0], argv[0]);
+        return;
     }
     if (show_time) {
-	printf("slot KVNO Timestamp         Principal\n");
-	printf("---- ---- ----------------- ---------------------------------------------------\n");
+        printf("slot KVNO Timestamp         Principal\n");
+        printf("---- ---- ----------------- ---------------------------------------------------\n");
     } else {
-	printf("slot KVNO Principal\n");
-	printf("---- ---- ---------------------------------------------------------------------\n");
+        printf("slot KVNO Principal\n");
+        printf("---- ---- ---------------------------------------------------------------------\n");
     }
     for (i = 1, lp = ktlist; lp; i++, lp = lp->next) {
-	retval = krb5_unparse_name(kcontext, lp->entry->principal, &pname);
-	if (retval) {
-	    com_err(argv[0], retval, "while unparsing principal name");
-	    return;
-	}
-	printf("%4d %4d ", i, lp->entry->vno);
-	if (show_time) {
-	    char fmtbuf[18];
-	    char fill;
-	    time_t tstamp;
+        retval = krb5_unparse_name(kcontext, lp->entry->principal, &pname);
+        if (retval) {
+            com_err(argv[0], retval, "while unparsing principal name");
+            return;
+        }
+        printf("%4d %4d ", i, lp->entry->vno);
+        if (show_time) {
+            char fmtbuf[18];
+            char fill;
+            time_t tstamp;
 
-	    tstamp = lp->entry->timestamp;
-	    (void) localtime(&tstamp);
-	    lp->entry->timestamp = tstamp;
-	    fill = ' ';
-	    if (!krb5_timestamp_to_sfstring((krb5_timestamp)lp->entry->
-					    	timestamp,
-					    fmtbuf,
-					    sizeof(fmtbuf),
-					    &fill))
-		printf("%s ", fmtbuf);
-	}
-	printf("%40s", pname);
-	if (show_enctype) {
-	    static char buf[256];
-		if ((retval = krb5_enctype_to_string(
-		    lp->entry->key.enctype, buf, 256))) {
-		    com_err(argv[0], retval, "While converting enctype to string");
-		    return;
-		}
-	    printf(" (%s) ", buf);
-	}
-	
-	if (show_keys) {
-	    printf(" (0x");
-	    for (j = 0; j < lp->entry->key.length; j++)
-		printf("%02x", lp->entry->key.contents[j]);
-	    printf(")");
-	}
-	printf("\n");
-	free(pname);
+            tstamp = lp->entry->timestamp;
+            (void) localtime(&tstamp);
+            lp->entry->timestamp = tstamp;
+            fill = ' ';
+            if (!krb5_timestamp_to_sfstring((krb5_timestamp)lp->entry->
+                                            timestamp,
+                                            fmtbuf,
+                                            sizeof(fmtbuf),
+                                            &fill))
+                printf("%s ", fmtbuf);
+        }
+        printf("%40s", pname);
+        if (show_enctype) {
+            static char buf[256];
+            if ((retval = krb5_enctype_to_string(
+                     lp->entry->key.enctype, buf, 256))) {
+                com_err(argv[0], retval, "While converting enctype to string");
+                return;
+            }
+            printf(" (%s) ", buf);
+        }
+
+        if (show_keys) {
+            printf(" (0x");
+            for (j = 0; j < lp->entry->key.length; j++)
+                printf("%02x", lp->entry->key.contents[j]);
+            printf(")");
+        }
+        printf("\n");
+        free(pname);
     }
 }
-
-
-
-
-
-
-
-
-
-

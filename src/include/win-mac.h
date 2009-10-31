@@ -25,8 +25,8 @@
 
 #else /* ! RES_ONLY */
 
-/* To ensure backward compatibility of the ABI use 32-bit time_t on 
- * 32-bit Windows. 
+/* To ensure backward compatibility of the ABI use 32-bit time_t on
+ * 32-bit Windows.
  */
 #ifdef _KRB5_INT_H
 #ifdef KRB5_GENERAL__
@@ -37,7 +37,7 @@
 #error time_t has been defined as a 64-bit integer which is incompatible with Kerberos on this platform.
 #endif /* _TIME_T_DEFINED */
 #define _USE_32BIT_TIME_T
-#endif 
+#endif
 #endif
 
 #define SIZEOF_INT      4
@@ -102,7 +102,7 @@ typedef _W64 int 	 ssize_t;
 
 #define HAVE_NETINET_IN_H
 #define MSDOS_FILESYSTEM
-#define HAVE_STRING_H 
+#define HAVE_STRING_H
 #define HAVE_SRAND
 #define HAVE_ERRNO
 #define HAVE_STRDUP
@@ -154,7 +154,7 @@ typedef _W64 int 	 ssize_t;
 #endif
 #define INI_KRB_REALMS  "krb.realms"    /* Location of krb.realms file */
 #define DEF_KRB_REALMS  "krb.realms"    /* Default name for krb.realms file */
-#define INI_RECENT_LOGINS "Recent Logins"    
+#define INI_RECENT_LOGINS "Recent Logins"
 #define INI_LOGIN       "Login"
 
 #define HAS_VOID_TYPE
@@ -176,7 +176,7 @@ typedef _W64 int 	 ssize_t;
 
 /* Ugly. Microsoft, in stdc mode, doesn't support the low-level i/o
  * routines directly. Rather, they only export the _<function> version.
- * The following defines works around this problem. 
+ * The following defines works around this problem.
  */
 #include <sys\types.h>
 #include <sys\stat.h>

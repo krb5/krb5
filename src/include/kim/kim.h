@@ -6,7 +6,7 @@
  * require a specific license from the United States Government.
  * It is the responsibility of any person or organization contemplating
  * export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -44,68 +44,68 @@ extern "C" {
  *
  * \section introduction Introduction
  *
- * The Kerberos Identity Management API is a high level API for managing the selection 
+ * The Kerberos Identity Management API is a high level API for managing the selection
  * and management of Kerberos credentials.  It is intended for use by applications,
- * credential management applications (eg: kinit, kpasswd, etc) and internally by the 
- * Kerberos libraries.  Under some circumstances client applications may also benefit 
+ * credential management applications (eg: kinit, kpasswd, etc) and internally by the
+ * Kerberos libraries.  Under some circumstances client applications may also benefit
  * from the Kerberos Identity Management API.
  *
  *
  * \section conventions API Conventions
  *
- * Although KIM currently only provides a C API, it attempts to make that API as 
- * object-oriented as possible.  KIM functions are grouped by object and all of the 
- * object types are opaque, including errors.  The reason for this is two-fold.  First,   
- * the KIM API is rather large.  Grouping functions by object allows the API to be  
- * broken up into smaller, more manageable chunks.  Second, providing an object-like C 
+ * Although KIM currently only provides a C API, it attempts to make that API as
+ * object-oriented as possible.  KIM functions are grouped by object and all of the
+ * object types are opaque, including errors.  The reason for this is two-fold.  First,
+ * the KIM API is rather large.  Grouping functions by object allows the API to be
+ * broken up into smaller, more manageable chunks.  Second, providing an object-like C
  * API will make it easier to port to object oriented languages.
  *
- * Because C lacks classes and other object oriented syntax, KIM functions adhere to 
+ * Because C lacks classes and other object oriented syntax, KIM functions adhere to
  * the following naming conventions to make functions easier to identify:
  *
  * \li Functions beginning with \b kim_object_create are constructors for an object of
  * type kim_object.  On success these functions return a newly allocated object which
  * must later be freed by the caller.
- * 
+ *
  * \li Functions of the form \b kim_object_copy are copy constructors.  They instantiate
  * a new object of kim_object from an object of the same type.
- * 
- * \li Functions of the form \b kim_object_free are destructors for objects of type 
- * kim_object.  
+ *
+ * \li Functions of the form \b kim_object_free are destructors for objects of type
+ * kim_object.
  *
  * \li Functions beginning with \b kim_object_get and \b kim_object_set
  * examine and modify properties of objects of type kim_object.
  *
- * \li All KIM APIs except destructors and error management APIs return a 
- * KIM Error object (kim_error_t).  
+ * \li All KIM APIs except destructors and error management APIs return a
+ * KIM Error object (kim_error_t).
  *
  *
  * \section terminology Terminology
  *
  * Kerberos organizes its authentication tokens by client identity (the name of the user)
- * and service identity (the name of a service).  The following terms are used throughout 
+ * and service identity (the name of a service).  The following terms are used throughout
  * this documentation:
  *
- * \li <b>credential</b> - A token which authenticates a client identity to a 
- *                         service identity. 
+ * \li <b>credential</b> - A token which authenticates a client identity to a
+ *                         service identity.
  *
- * \li <b>ccache</b> - Short for "credentials cache".  A set of credentials for a single 
+ * \li <b>ccache</b> - Short for "credentials cache".  A set of credentials for a single
  *                     client identity.
  *
  * \li <b>cache collection</b> - The set of all credential caches.
  *
- * \li <b>default ccache</b> - A credentials cache that the Kerberos libraries will use  
+ * \li <b>default ccache</b> - A credentials cache that the Kerberos libraries will use
  *                             if no ccache is specified by the caller.  Use of the default
- *                             ccache is now discouraged.  Instead applications should use 
+ *                             ccache is now discouraged.  Instead applications should use
  *                             selection hints to choose an appropriate client identity.
  *
  * \section selection_api Client Identity Selection APIs
  *
- * KIM provides high level APIs for applications to select which client identity to 
- * use.  Use of these APIs is intended to replace the traditional "default ccache" 
+ * KIM provides high level APIs for applications to select which client identity to
+ * use.  Use of these APIs is intended to replace the traditional "default ccache"
  * mechanism previously used by Kerberos.
- * 
- * <B>KIM Selection Hints (kim_selection_hints_t)</B> controls options for selecting 
+ *
+ * <B>KIM Selection Hints (kim_selection_hints_t)</B> controls options for selecting
  * a client identity:
  * - \subpage kim_selection_hints_overview
  * - \subpage kim_selection_hints_reference
@@ -117,14 +117,14 @@ extern "C" {
  *
  * \section management_api Credential Management APIs
  *
- * KIM also provides APIs for acquiring new credentials over the network 
+ * KIM also provides APIs for acquiring new credentials over the network
  * by contacting a KDC and for viewing and modifying the existing credentials
  * in the cache collection
  *
  * Whether or not you use the credential or ccache APIs depends on
  * whether you want KIM to store any newly acquired credentials in the
- * cache collection.  KIM ccache APIs always create a ccache in the cache 
- * collection containing newly acquired credentials whereas the KIM 
+ * cache collection.  KIM ccache APIs always create a ccache in the cache
+ * collection containing newly acquired credentials whereas the KIM
  * credential APIs just return a credential object.  In general most
  * callers want to store newly acquired credentials and should use the
  * KIM ccache APIs when acquiring credentials.
@@ -133,14 +133,14 @@ extern "C" {
  * - \subpage kim_ccache_overview
  * - \subpage kim_ccache_reference
  *
- * <B>KIM Credential (kim_credential_t)</B> manipulates credentials: 
+ * <B>KIM Credential (kim_credential_t)</B> manipulates credentials:
  * - \subpage kim_credential_overview
  * - \subpage kim_credential_reference
  *
  * <B>KIM Options (kim_options_t)</B> control options for credential acquisition:
  * - \subpage kim_options_overview
  * - \subpage kim_options_reference
- * 
+ *
  * <B>KIM Preferences (kim_preferences_t)</B> views and edits the current user's preferences:
  * - \subpage kim_preferences_overview
  * - \subpage kim_preferences_reference

@@ -44,7 +44,7 @@
 #define NETID_REALM_SZ          192
 #define NETID_TITLE_SZ          256
 #define NETID_CCACHE_NAME_SZ    264
-  
+
 #define NETID_DLGTYPE_TGT      0
 #define NETID_DLGTYPE_CHPASSWD 1
 typedef struct {
@@ -72,7 +72,7 @@ typedef struct {
     } out;
     // Version 1 of this structure ends here
 } NETID_DLGINFO, *LPNETID_DLGINFO;
-  
+
 #define NETID_DLGINFO_V1_SZ (10 * sizeof(DWORD) \
          + sizeof(WCHAR) * (NETID_TITLE_SZ + \
          2 * NETID_USERNAME_SZ + 2 * NETID_REALM_SZ + \

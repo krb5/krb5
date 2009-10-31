@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/os/def_realm.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * krb5_get_default_realm(), krb5_set_default_realm(),
  * krb5_free_default_realm() functions.
@@ -32,7 +33,7 @@
 #include "os-proto.h"
 #include <stdio.h>
 
-#ifdef KRB5_DNS_LOOKUP             
+#ifdef KRB5_DNS_LOOKUP
 #ifdef WSHELPER
 #include <wshelper.h>
 #else /* WSHELPER */
@@ -58,9 +59,9 @@
  * Retrieves the default realm to be used if no user-specified realm is
  *  available.  [e.g. to interpret a user-typed principal name with the
  *  realm omitted for convenience]
- * 
+ *
  *  returns system errors, NOT_ENOUGH_SPACE, KV5M_CONTEXT
-*/
+ */
 
 /*
  * Implementation:  the default realm is stored in a configuration file,
@@ -74,8 +75,8 @@ krb5_get_default_realm(krb5_context context, char **lrealm)
     char *realm = 0;
     krb5_error_code retval;
 
-    if (!context || (context->magic != KV5M_CONTEXT)) 
-            return KV5M_CONTEXT;
+    if (!context || (context->magic != KV5M_CONTEXT))
+        return KV5M_CONTEXT;
 
     if (!context->default_realm) {
         /*
@@ -98,7 +99,7 @@ krb5_get_default_realm(krb5_context context, char **lrealm)
             }
         }
 #ifndef KRB5_DNS_LOOKUP
-        else 
+        else
             return KRB5_CONFIG_CANTOPEN;
 #else /* KRB5_DNS_LOOKUP */
         if (context->default_realm == 0) {
@@ -121,7 +122,7 @@ krb5_get_default_realm(krb5_context context, char **lrealm)
                 if ( localhost[0] ) {
                     p = localhost;
                     do {
-                        retval = krb5_try_realm_txt_rr("_kerberos", p, 
+                        retval = krb5_try_realm_txt_rr("_kerberos", p,
                                                        &context->default_realm);
                         p = strchr(p,'.');
                         if (p)
@@ -129,10 +130,10 @@ krb5_get_default_realm(krb5_context context, char **lrealm)
                     } while (retval && p && p[0]);
 
                     if (retval)
-                        retval = krb5_try_realm_txt_rr("_kerberos", "", 
+                        retval = krb5_try_realm_txt_rr("_kerberos", "",
                                                        &context->default_realm);
                 } else {
-                    retval = krb5_try_realm_txt_rr("_kerberos", "", 
+                    retval = krb5_try_realm_txt_rr("_kerberos", "",
                                                    &context->default_realm);
                 }
                 if (retval) {
@@ -152,7 +153,7 @@ krb5_get_default_realm(krb5_context context, char **lrealm)
     }
 
     realm = context->default_realm;
-    
+
     if (!(*lrealm = strdup(realm)))
         return ENOMEM;
     return(0);
@@ -161,22 +162,22 @@ krb5_get_default_realm(krb5_context context, char **lrealm)
 krb5_error_code KRB5_CALLCONV
 krb5_set_default_realm(krb5_context context, const char *lrealm)
 {
-    if (!context || (context->magic != KV5M_CONTEXT)) 
-            return KV5M_CONTEXT;
+    if (!context || (context->magic != KV5M_CONTEXT))
+        return KV5M_CONTEXT;
 
     if (context->default_realm) {
-            free(context->default_realm);
-            context->default_realm = 0;
+        free(context->default_realm);
+        context->default_realm = 0;
     }
 
-    /* Allow the user to clear the default realm setting by passing in 
+    /* Allow the user to clear the default realm setting by passing in
        NULL */
     if (!lrealm) return 0;
 
     context->default_realm = strdup(lrealm);
 
     if (!context->default_realm)
-            return ENOMEM;
+        return ENOMEM;
 
     return(0);
 
@@ -201,10 +202,10 @@ krb5int_get_domain_realm_mapping(krb5_context context, const char *host, char **
     if (retval)
         return retval;
     /*
-       Search for the best match for the host or domain.
-       Example: Given a host a.b.c.d, try to match on:
-         1) a.b.c.d  2) .b.c.d.   3) b.c.d  4)  .c.d  5) c.d  6) .d   7) d
-     */
+      Search for the best match for the host or domain.
+      Example: Given a host a.b.c.d, try to match on:
+      1) a.b.c.d  2) .b.c.d.   3) b.c.d  4)  .c.d  5) c.d  6) .d   7) d
+    */
 
     cp = temp_host;
     realm = (char *)NULL;
@@ -216,7 +217,7 @@ krb5int_get_domain_realm_mapping(krb5_context context, const char *host, char **
             return retval;
         if (temp_realm != (char *)NULL)
             break;        /* Match found */
- 
+
         /* Setup for another test */
         if (*cp == '.') {
             cp++;
@@ -244,4 +245,3 @@ krb5int_get_domain_realm_mapping(krb5_context context, const char *host, char **
     *realmsp = retrealms;
     return 0;
 }
-

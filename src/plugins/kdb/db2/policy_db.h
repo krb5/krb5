@@ -63,7 +63,7 @@ typedef struct _osa_adb_db_ent_t {
 /*
  * Return Code (the rest are in adb_err.h)
  */
- 
+
 #define OSA_ADB_OK		0
 
 /*

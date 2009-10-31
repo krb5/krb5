@@ -37,7 +37,7 @@ mit_des_cbc_cksum(const krb5_octet *in, krb5_octet *out,
 		  const krb5_octet *ivec)
 {
     /* Unsupported operation */
-    return KRB5_CRYPTO_INTERNAL; 
+    return KRB5_CRYPTO_INTERNAL;
 }
 
 krb5_error_code
@@ -53,4 +53,3 @@ mit_des_key_sched(mit_des_cblock k, mit_des_key_schedule schedule)
     /* Unsupported operation */
     return KRB5_CRYPTO_INTERNAL;
 }
-

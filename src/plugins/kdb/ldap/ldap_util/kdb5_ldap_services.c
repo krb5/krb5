@@ -509,7 +509,7 @@ void kdb5_ldap_modify_service(argc, argv)
     int argc;
     char *argv[];
 {
-    char *me = progname; 
+    char *me = progname;
     krb5_error_code retval = 0;
     krb5_ldap_service_params *srvparams = NULL;
     krb5_boolean print_usage = FALSE;

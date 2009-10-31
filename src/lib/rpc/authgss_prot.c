@@ -1,12 +1,12 @@
 /*
   authgss_prot.c
-  
+
   Copyright (c) 2000 The Regents of the University of Michigan.
   All rights reserved.
-  
+
   Copyright (c) 2000 Dug Song <dugsong@UMICH.EDU>.
   All rights reserved, all wrongs reversed.
-  
+
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions
   are met:
@@ -98,7 +98,7 @@ xdr_rpc_gss_init_args(XDR *xdrs, gss_buffer_desc *p)
 		  (xdrs->x_op == XDR_ENCODE) ? "encode" : "decode",
 		  (xdr_stat == TRUE) ? "success" : "failure",
 		  p->value, p->length);
-	
+
 	return (xdr_stat);
 }
 
@@ -120,7 +120,7 @@ xdr_rpc_gss_init_res(XDR *xdrs, struct rpc_gss_init_res *p)
 		  p->gr_ctx.value, p->gr_ctx.length,
 		  p->gr_major, p->gr_minor, p->gr_win,
 		  p->gr_token.value, p->gr_token.length);
-	
+
 	return (xdr_stat);
 }
 
@@ -138,7 +138,7 @@ xdr_rpc_gss_wrap_data(XDR *xdrs, xdrproc_t xdr_func, caddr_t xdr_ptr,
 	xdralloc_create(&tmpxdrs, XDR_ENCODE);
 
 	xdr_stat = FALSE;
-	
+
 	/* Marshal rpc_gss_data_t (sequence number + arguments). */
 	if (!xdr_u_int32(&tmpxdrs, &seq) || !(*xdr_func)(&tmpxdrs, xdr_ptr))
 		goto errout;
@@ -161,7 +161,7 @@ xdr_rpc_gss_wrap_data(XDR *xdrs, xdrproc_t xdr_func, caddr_t xdr_ptr,
 		/* Marshal checksum. */
 		xdr_stat = xdr_rpc_gss_buf(xdrs, &wrapbuf, (unsigned int)-1);
 		gss_release_buffer(&min_stat, &wrapbuf);
-	}		
+	}
 	else if (svc == RPCSEC_GSS_SVC_PRIVACY) {
 		/* Encrypt rpc_gss_data_t. */
 		maj_stat = gss_wrap(&min_stat, ctx, TRUE, qop, &databuf,
@@ -194,10 +194,10 @@ xdr_rpc_gss_unwrap_data(XDR *xdrs, xdrproc_t xdr_func, caddr_t xdr_ptr,
 
 	if (xdr_func == xdr_void || xdr_ptr == NULL)
 		return (TRUE);
-	
+
 	memset(&databuf, 0, sizeof(databuf));
 	memset(&wrapbuf, 0, sizeof(wrapbuf));
-	
+
 	if (svc == RPCSEC_GSS_SVC_INTEGRITY) {
 		/* Decode databody_integ. */
 		if (!xdr_rpc_gss_buf(xdrs, &databuf, (unsigned int)-1)) {
@@ -214,7 +214,7 @@ xdr_rpc_gss_unwrap_data(XDR *xdrs, xdrproc_t xdr_func, caddr_t xdr_ptr,
 		maj_stat = gss_verify_mic(&min_stat, ctx, &databuf,
 					  &wrapbuf, &qop_state);
 		gss_release_buffer(&min_stat, &wrapbuf);
-		
+
 		if (maj_stat != GSS_S_COMPLETE || qop_state != qop) {
 			gss_release_buffer(&min_stat, &databuf);
 			log_status("gss_verify_mic", maj_stat, min_stat);
@@ -230,9 +230,9 @@ xdr_rpc_gss_unwrap_data(XDR *xdrs, xdrproc_t xdr_func, caddr_t xdr_ptr,
 		/* Decrypt databody. */
 		maj_stat = gss_unwrap(&min_stat, ctx, &wrapbuf, &databuf,
 				      &conf_state, &qop_state);
-		
+
 		gss_release_buffer(&min_stat, &wrapbuf);
-		
+
 		/* Verify encryption and QOP. */
 		if (maj_stat != GSS_S_COMPLETE || qop_state != qop ||
 			conf_state != TRUE) {
@@ -247,7 +247,7 @@ xdr_rpc_gss_unwrap_data(XDR *xdrs, xdrproc_t xdr_func, caddr_t xdr_ptr,
 		    (*xdr_func)(&tmpxdrs, xdr_ptr));
 	XDR_DESTROY(&tmpxdrs);
 	gss_release_buffer(&min_stat, &databuf);
-	
+
 	/* Verify sequence number. */
 	if (xdr_stat == TRUE && seq_num != seq) {
 		log_debug("wrong sequence number in databody");
@@ -262,7 +262,7 @@ xdr_rpc_gss_data(XDR *xdrs, xdrproc_t xdr_func, caddr_t xdr_ptr,
 		 rpc_gss_svc_t svc, uint32_t seq)
 {
 	switch (xdrs->x_op) {
-		
+
 	case XDR_ENCODE:
 		return (xdr_rpc_gss_wrap_data(xdrs, xdr_func, xdr_ptr,
 					      ctx, qop, svc, seq));
@@ -316,13 +316,13 @@ log_hexdump(const u_char *buf, int len, int offset)
 {
 	u_int i, j, jm;
 	int c;
-	
+
 	fprintf(stderr, "\n");
 	for (i = 0; i < len; i += 0x10) {
 		fprintf(stderr, "  %04x: ", (u_int)(i + offset));
 		jm = len - i;
 		jm = jm > 16 ? 16 : jm;
-		
+
 		for (j = 0; j < jm; j++) {
 			if ((j % 2) == 1)
 				fprintf(stderr, "%02x ", (u_int) buf[i+j]);
@@ -334,7 +334,7 @@ log_hexdump(const u_char *buf, int len, int offset)
 			else fprintf(stderr, "  ");
 		}
 		fprintf(stderr, " ");
-		
+
 		for (j = 0; j < jm; j++) {
 			c = buf[i+j];
 			c = isprint(c) ? c : '.';
@@ -362,5 +362,3 @@ log_hexdump(const u_char *buf, int len, int offset)
 }
 
 #endif
-
-

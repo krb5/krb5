@@ -33,14 +33,14 @@
 
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
  * responsibility of any person or organization contemplating export to
  * obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -51,7 +51,7 @@
  * permission.  FundsXpress makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -139,7 +139,7 @@ char	*auth_type;	/* Authentication succeeded?  If so, what type? */
 
 unsigned int maxbuf, actualbuf;
 unsigned char *ucbuf;
- 
+
 #define DEFINITIONS
 #include "ftp_var.h"
 #include "secure.h"
@@ -234,7 +234,7 @@ hookup(char* host, int port)
 			PERROR_SOCKET((char *) 0);
 			hp->h_addr_list++;
 			memcpy(&hisctladdr.sin_addr,
-			       hp->h_addr_list[0], 
+			       hp->h_addr_list[0],
 			       sizeof(hisctladdr.sin_addr));
 			fprintf(stdout, "Trying %s...\n",
 				inet_ntoa(hisctladdr.sin_addr));
@@ -448,12 +448,12 @@ static int secure_command(char* cmd)
 						 "gss_seal ENC didn't complete":
 						 "gss_seal MIC didn't complete");
 			} else if ((clevel == PROT_P) && !conf_state) {
-				fprintf(stderr, 
+				fprintf(stderr,
 					"GSSAPI didn't encrypt message");
 			} else {
 				if (debug)
 				  fprintf(stderr, "sealed (%s) %lu bytes\n",
-					  clevel==PROT_P?"ENC":"MIC", 
+					  clevel==PROT_P?"ENC":"MIC",
 					  (unsigned long) out_buf.length);
 				length=out_buf.length;
 				memcpy(out, out_buf.value, out_buf.length);
@@ -469,7 +469,7 @@ static int secure_command(char* cmd)
 			return(0);
 		}
 		fprintf(cout, "%s %s", clevel == PROT_P ? "ENC" : "MIC", in);
-		if(debug) 
+		if(debug)
 		  fprintf(stderr, "secure_command(%s)\nencoding %d bytes %s %s\n",
 			  cmd, length, clevel==PROT_P ? "ENC" : "MIC", in);
 	} else	fputs(cmd, cout);
@@ -492,7 +492,7 @@ int command(char *fmt, ...)
 		va_start(ap, fmt);
 		if (strncmp("PASS ", fmt, 5) == 0)
 			printf("PASS XXXX");
-		else 
+		else
 			vfprintf(stdout, fmt, ap);
 		va_end(ap);
 		printf("\n");
@@ -662,7 +662,7 @@ int getreply(int expecteof)
 		    else {
 			int len;
 			kerror = radix_encode((unsigned char *)obuf,
-					      (unsigned char *)ibuf, 
+					      (unsigned char *)ibuf,
 					      &len, 1);
 			if (kerror) {
 			    printf("Can't base 64 decode reply %d (%s)\n\"%s\"\n",
@@ -678,20 +678,20 @@ int getreply(int expecteof)
 				xmit_buf.length = len;
 				/* decrypt/verify the message */
 				conf_state = safe;
-				maj_stat = gss_unseal(&min_stat, gcontext, 
-						      &xmit_buf, &msg_buf, 
+				maj_stat = gss_unseal(&min_stat, gcontext,
+						      &xmit_buf, &msg_buf,
 						      &conf_state, NULL);
 				if (maj_stat != GSS_S_COMPLETE) {
-				  user_gss_error(maj_stat, min_stat, 
+				  user_gss_error(maj_stat, min_stat,
 						 "failed unsealing reply");
 				  n = '5';
 				} else {
 				  if(msg_buf.length < sizeof(ibuf) - 2 - 1) {
-				    memcpy(ibuf, msg_buf.value, 
+				    memcpy(ibuf, msg_buf.value,
 					   msg_buf.length);
 				    memcpy(&ibuf[msg_buf.length], "\r\n", 3);
 				  } else {
-				    user_gss_error(maj_stat, min_stat, 
+				    user_gss_error(maj_stat, min_stat,
 						   "reply was too long");
 				  }
 				  gss_release_buffer(&min_stat,&msg_buf);
@@ -838,7 +838,7 @@ void sendrequest(char *cmd, char *local, char *remote, int printnames)
 			fin = fopen(local, "rt");
 #else /* !_WIN32 */
 		fin = fopen(local, "r");
-#endif /* !_WIN32 */			
+#endif /* !_WIN32 */
 		if (fin == NULL) {
 			fprintf(stderr, "local: %s: %s\n", local,
 				strerror(errno));
@@ -927,7 +927,7 @@ void sendrequest(char *cmd, char *local, char *remote, int printnames)
 		while ((c = read(fileno(fin), buf, sizeof (buf))) > 0) {
 			bytes += c;
 			for (bufp = buf; c > 0; c -= d, bufp += d)
-				if ((d = secure_write(fileno(dout), bufp, 
+				if ((d = secure_write(fileno(dout), bufp,
 						      (unsigned int) c)) <= 0)
 					break;
 			if (hash) {
@@ -937,7 +937,7 @@ void sendrequest(char *cmd, char *local, char *remote, int printnames)
 				}
 				(void) fflush(stdout);
 			}
-			if (d <= 0 ) 
+			if (d <= 0 )
   break;
 		}
 		if (hash && bytes > 0) {
@@ -950,7 +950,7 @@ void sendrequest(char *cmd, char *local, char *remote, int printnames)
 			fprintf(stderr, "local: %s: %s\n", local,
 				strerror(errno));
 		if (d < 0 || (d = secure_flush(fileno(dout))) < 0) {
-			if (d == -1 && errno != EPIPE) 
+			if (d == -1 && errno != EPIPE)
 				perror("netout");
 			bytes = -1;
 		}
@@ -975,7 +975,7 @@ void sendrequest(char *cmd, char *local, char *remote, int printnames)
 	/*		if (c == '\r') {			  	*/
 	/*		(void)	putc('\0', dout);   this violates rfc */
 	/*			bytes++;				*/
-	/*		}                          			*/	
+	/*		}                          			*/
 		}
 		if (hash) {
 			if (bytes < hashbytes)
@@ -1444,7 +1444,7 @@ static int initconn()
 noport:
 	data_addr = myctladdr;
 	if (sendport)
-		data_addr.sin_port = 0;	/* let system pick one */ 
+		data_addr.sin_port = 0;	/* let system pick one */
 	if (data != INVALID_SOCKET)
 		(void) closesocket(data);
 	data = socket(AF_INET, SOCK_STREAM, 0);
@@ -1918,7 +1918,7 @@ int do_auth()
 	  char stbuf[FTP_BUFSIZ];
 	  int comcode, trial;
 	  struct gss_channel_bindings_struct chan;
-	  chan.initiator_addrtype = GSS_C_AF_INET; /* OM_uint32  */ 
+	  chan.initiator_addrtype = GSS_C_AF_INET; /* OM_uint32  */
 	  chan.initiator_address.length = 4;
 	  chan.initiator_address.value = &myctladdr.sin_addr.s_addr;
 	  chan.acceptor_addrtype = GSS_C_AF_INET; /* OM_uint32 */
@@ -1929,9 +1929,9 @@ int do_auth()
 
 	  if (verbose)
 	    printf("GSSAPI accepted as authentication type\n");
-	  
+
 	  /* blob from gss-client */
-	  
+
 	  for (trial = 0; trial < n_gss_trials; trial++) {
 	    /* ftp@hostname first, the host@hostname */
 	    /* the V5 GSSAPI binding canonicalizes this for us... */
@@ -1944,7 +1944,7 @@ int do_auth()
 	    send_tok.length = strlen(stbuf) + 1;
 	    maj_stat = gss_import_name(&min_stat, &send_tok,
 				       gss_nt_service_name, &target_name);
-	    
+
 	    if (maj_stat != GSS_S_COMPLETE) {
 		    user_gss_error(maj_stat, min_stat, "parsing name");
 		    secure_error("name parsed <%s>\n", stbuf);
@@ -1953,7 +1953,7 @@ int do_auth()
 
 	    token_ptr = GSS_C_NO_BUFFER;
 	    gcontext = GSS_C_NO_CONTEXT; /* structure copy */
-	    
+
 	    do {
 	      if (debug)
 		fprintf(stderr, "calling gss_init_sec_context\n");
@@ -1964,7 +1964,7 @@ int do_auth()
 				     target_name,
 				     (gss_OID_desc *)gss_trials[trial].mech_type,
 				     GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG |
-				       (forward ? GSS_C_DELEG_FLAG : 
+				       (forward ? GSS_C_DELEG_FLAG :
 					(unsigned) 0),
 				     0,
 				     &chan,	/* channel bindings */
@@ -1973,7 +1973,7 @@ int do_auth()
 				     &send_tok,
 				     NULL,	/* ignore ret_flags */
 				     NULL);	/* ignore time_rec */
-	      
+
 
 	      if (maj_stat!=GSS_S_COMPLETE && maj_stat!=GSS_S_CONTINUE_NEEDED){
 		if (trial == n_gss_trials-1)
@@ -1981,7 +1981,7 @@ int do_auth()
 		/* could just be that we missed on the service name */
 		goto outer_loop;
 	      }
-	    
+
 	      if (send_tok.length != 0) {
 		int len = send_tok.length;
 		reply_parse = "ADAT="; /* for command() later */
@@ -2105,7 +2105,7 @@ static void abort_remote(FILE *din)
 	(void) secure_command("ABOR");
 	FD_ZERO(&mask);
 	FD_SET(SOCKETNO(fileno(cin)), &mask);
-	if (din) { 
+	if (din) {
 		FD_SET(SOCKETNO(fileno(din)), &mask);
 	}
 	if ((nfnd = empty(&mask, 10)) <= 0) {

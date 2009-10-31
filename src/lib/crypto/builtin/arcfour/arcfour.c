@@ -337,4 +337,3 @@ krb5int_arcfour_decrypt(const struct krb5_enc_provider *enc,
   free(plaintext.data);
   return (ret);
 }
-

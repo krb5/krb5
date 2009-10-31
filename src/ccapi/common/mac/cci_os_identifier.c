@@ -39,42 +39,41 @@ cc_int32 cci_os_identifier_new_uuid (cci_uuid_string_t *out_uuid_string)
     CFStringRef uuid_stringref = NULL;
     CFStringEncoding encoding = kCFStringEncodingUTF8;
     CFIndex length = 0;
-    
+
     if (!out_uuid_string) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         uuid = CFUUIDCreate (kCFAllocatorDefault);
         if (!uuid) { err = cci_check_error (ccErrNoMem); }
     }
-    
+
     if (!err) {
-        uuid_stringref = CFUUIDCreateString (kCFAllocatorDefault, uuid); 
+        uuid_stringref = CFUUIDCreateString (kCFAllocatorDefault, uuid);
         if (!uuid_stringref) { err = cci_check_error (ccErrNoMem); }
     }
-    
+
     if (!err) {
-        length = CFStringGetMaximumSizeForEncoding (CFStringGetLength (uuid_stringref), 
+        length = CFStringGetMaximumSizeForEncoding (CFStringGetLength (uuid_stringref),
                                                     encoding) + 1;
-        
+
         uuid_string = malloc (length);
         if (!uuid_string) { err = cci_check_error (ccErrNoMem); }
     }
-    
+
     if (!err) {
         if (!CFStringGetCString (uuid_stringref, uuid_string, length, encoding)) {
             err = cci_check_error (ccErrNoMem);
-        }        
+        }
     }
-    
+
     if (!err) {
         *out_uuid_string = uuid_string;
         uuid_string = NULL; /* take ownership */
     }
-    
+
     if (uuid_string   ) { free (uuid_string); }
     if (uuid_stringref) { CFRelease (uuid_stringref); }
     if (uuid          ) { CFRelease (uuid); }
-    
+
     return cci_check_error (err);
 }
-

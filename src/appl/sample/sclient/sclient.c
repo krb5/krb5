@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Sample Kerberos v5 client.
  *
@@ -70,12 +70,12 @@ net_read(fd, buf, len)
 	if (cc < 0) {
 	    if (SOCKET_ERRNO == SOCKET_EINTR)
 		continue;
-		
+
 		/* XXX this interface sucks! */
-        errno = SOCKET_ERRNO;    
-               
+        errno = SOCKET_ERRNO;
+
 	    return(cc);		 /* errno is already set */
-	}		
+	}
 	else if (cc == 0) {
 	    return(len2);
 	} else {
@@ -209,7 +209,7 @@ main(int argc, char *argv[])
 			   ccdef, &err_ret, &rep_ret, NULL);
 
     krb5_free_principal(context, server);	/* finished using it */
-    krb5_free_principal(context, client);      
+    krb5_free_principal(context, client);
     krb5_cc_close(context, ccdef);
     if (auth_context) krb5_auth_con_free(context, auth_context);
 

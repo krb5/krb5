@@ -44,7 +44,7 @@ int com_addr(void)
 {
     long ipAddr;
     char loc_addr[ADDR_SZ];
-    CREDENTIALS cred;    
+    CREDENTIALS cred;
     char service[40];
     char instance[40];
     //    char addr[40];
@@ -71,11 +71,11 @@ int com_addr(void)
         break;
     } // while()
     return 0;
-} 
+}
 
 
-long 
-khm_krb4_list_tickets(void) 
+long
+khm_krb4_list_tickets(void)
 {
     char    ptktname[MAX_PATH + 5];
     char    pname[ANAME_SZ];
@@ -103,15 +103,15 @@ khm_krb4_list_tickets(void)
         goto collect;
 
     com_addr();
-    
+
     // Open ticket file
     if ((k_errno = (*ptf_init)((*ptkt_string)(), R_TKT_FIL)))
     {
         goto cleanup;
     }
-    // Close ticket file 
+    // Close ticket file
     (void) (*ptf_close)();
-    
+
     // We must find the realm of the ticket file here before calling
     // tf_init because since the realm of the ticket file is not
     // really stored in the principal section of the file, the
@@ -121,9 +121,9 @@ khm_krb4_list_tickets(void)
     {
         goto cleanup;
     }
-	
-    // Open ticket file 
-    if (k_errno = (*ptf_init)((*ptkt_string)(), R_TKT_FIL)) 
+
+    // Open ticket file
+    if (k_errno = (*ptf_init)((*ptkt_string)(), R_TKT_FIL))
     {
         goto cleanup;
     }
@@ -132,12 +132,12 @@ khm_krb4_list_tickets(void)
 
     open = 1;
 
-    // Get principal name and instance 
-    if ((k_errno = (*ptf_get_pname)(pname)) || (k_errno = (*ptf_get_pinst)(pinst))) 
+    // Get principal name and instance
+    if ((k_errno = (*ptf_get_pname)(pname)) || (k_errno = (*ptf_get_pinst)(pinst)))
     {
         goto cleanup;
     }
-	
+
     // You may think that this is the obvious place to get the
     // realm of the ticket file, but it can't be done here as the
     // routine to do this must open the ticket file.  This is why
@@ -189,7 +189,7 @@ khm_krb4_list_tickets(void)
         return(KSUCCESS);
 
     if (open)
-        (*ptf_close)(); //close ticket file 
+        (*ptf_close)(); //close ticket file
 
     if (k_errno == EOF)
         k_errno = 0;
@@ -211,7 +211,7 @@ khm_krb4_list_tickets(void)
     {
         CHAR message[256];
         CHAR errBuf[256];
-        LPCSTR errText; 
+        LPCSTR errText;
 
         if (!Lerror_message)
             return -1;
@@ -219,7 +219,7 @@ khm_krb4_list_tickets(void)
         errText = err_describe(errBuf, KRBERR(k_errno));
 
         sprintf(message, "%s\n\n%s failed", errText, functionName);
-        MessageBox(NULL, message, "Kerberos Four", 
+        MessageBox(NULL, message, "Kerberos Four",
                    MB_OK | MB_ICONERROR | MB_TASKMODAL | MB_SETFOREGROUND);
     }
 #endif
@@ -234,11 +234,11 @@ khm_krb4_list_tickets(void)
 #define KRBREALM_FILE           "KRBREALM.CON"
 #define KRB5_FILE               "KRB5.INI"
 
-BOOL 
+BOOL
 khm_krb5_get_profile_file(LPSTR confname, UINT szConfname)
 {
     char **configFile = NULL;
-    if (pkrb5_get_default_config_files(&configFile)) 
+    if (pkrb5_get_default_config_files(&configFile))
     {
         GetWindowsDirectoryA(confname,szConfname);
         confname[szConfname-1] = '\0';
@@ -248,15 +248,15 @@ khm_krb5_get_profile_file(LPSTR confname, UINT szConfname)
 
         return FALSE;
     }
-    
+
     *confname = 0;
-    
+
     if (configFile)
     {
         StringCchCopyA(confname, szConfname, *configFile);
-        pkrb5_free_config_files(configFile); 
+        pkrb5_free_config_files(configFile);
     }
-    
+
     if (!*confname)
     {
         GetWindowsDirectoryA(confname,szConfname);
@@ -265,7 +265,7 @@ khm_krb5_get_profile_file(LPSTR confname, UINT szConfname)
         StringCchCatA(confname, szConfname, "\\");
         StringCchCatA(confname, szConfname, KRB5_FILE);
     }
-    
+
     return FALSE;
 }
 
@@ -296,7 +296,7 @@ khm_get_krb4_con_file(LPSTR confname, UINT szConfname)
         }
 
         StringCchCopyA(confname, szConfname, krbConFile);
-    } else if (hKrb4) { 
+    } else if (hKrb4) {
         size_t size = szConfname;
         memset(confname, '\0', szConfname);
         if (!pkrb_get_krbconf2(confname, &size)) {
@@ -316,7 +316,7 @@ readstring(FILE * file, char * buf, int len)
 	int  c,i;
 	memset(buf, '\0', sizeof(buf));
 	for (i=0, c=fgetc(file); c != EOF ; c=fgetc(file), i++)
-	{	
+	{
 		if (i < sizeof(buf)) {
 			if (c == '\n') {
                             buf[i] = '\0';
@@ -346,7 +346,7 @@ readstring(FILE * file, char * buf, int len)
 /*! \internal
     \brief Return a list of configured realms
 
-    The string that is returned is a set of null terminated unicode strings, 
+    The string that is returned is a set of null terminated unicode strings,
     each of which denotes one realm.  The set is terminated by a zero length
     null terminated string.
 
@@ -354,7 +354,7 @@ readstring(FILE * file, char * buf, int len)
 
     \return The string with the list of realms or NULL if the operation fails.
 */
-wchar_t * khm_krb5_get_realm_list(void) 
+wchar_t * khm_krb5_get_realm_list(void)
 {
     wchar_t * rlist = NULL;
 
@@ -383,7 +383,7 @@ wchar_t * khm_krb5_get_realm_list(void)
                 {
                     /* first figure out how much space to allocate */
                     cbsize = 0;
-                    for (cpp = sections; *cpp; cpp++) 
+                    for (cpp = sections; *cpp; cpp++)
                     {
                         cbsize += sizeof(wchar_t) * (strlen(*cpp) + 1);
                     }
@@ -420,7 +420,7 @@ wchar_t * khm_krb5_get_realm_list(void)
         size_t cbsize, t;
         wchar_t * d;
 
-        if (!khm_get_krb4_con_file(krb_conf,sizeof(krb_conf)) && 
+        if (!khm_get_krb4_con_file(krb_conf,sizeof(krb_conf)) &&
 #if _MSC_VER >= 1400
             !fopen_s(&file, krb_conf, "rt")
 #else
@@ -492,7 +492,7 @@ wchar_t * khm_krb5_get_default_realm(void)
 
     pkrb5_init_context(&ctx);
     pkrb5_get_default_realm(ctx,&def);
-    
+
     if (def) {
         cch = strlen(def) + 1;
         realm = PMALLOC(sizeof(wchar_t) * cch);
@@ -570,7 +570,7 @@ khm_krb4_set_def_tkt_string(void) {
 
         UnicodeStrToAnsi(tkt_string, sizeof(tkt_string),
                          wtkt_string);
-        pkrb_set_tkt_string(tkt_string);        
+        pkrb_set_tkt_string(tkt_string);
     }
 }
 
@@ -618,7 +618,7 @@ khm_krb4_changepwd(char * principal,
 
     k_errno = make_temp_cache_v4("_chgpwd");
     if (k_errno) return k_errno;
-    k_errno = pkadm_change_your_password(principal, password, newpassword, 
+    k_errno = pkadm_change_your_password(principal, password, newpassword,
                                          error_str);
     make_temp_cache_v4(0);
     return k_errno;
@@ -674,7 +674,7 @@ khm_krb4_find_tgt(khm_handle credset, khm_handle identity) {
                                           idname,
                                           &cb)))
         return NULL;
-    
+
     t = wcsrchr(idname, L'@');
     if (t == NULL)
         return NULL;
@@ -747,7 +747,7 @@ khm_convert524(khm_handle identity)
                                       NULL))) {
         goto cleanup;
     }
-    
+
     increds.client = me;
     increds.server = server;
     increds.times.endtime = 0;
@@ -814,7 +814,7 @@ khm_convert524(khm_handle identity)
     }
 
     return (code || icode);
-#endif /* NO_KRB5 */    
+#endif /* NO_KRB5 */
 }
 
 long
@@ -862,11 +862,11 @@ khm_krb4_kinit(char * aname,
 
     khm_krb4_set_def_tkt_string();
 
-    err_context = L"fetching ticket";	
-    rc4 = (*pkrb_get_pw_in_tkt)(aname, inst, realm, "krbtgt", realm, 
+    err_context = L"fetching ticket";
+    rc4 = (*pkrb_get_pw_in_tkt)(aname, inst, realm, "krbtgt", realm,
                                 lifetime, password);
 
-    if (rc4) /* XXX: do we want: && (rc != NO_TKT_FIL) as well? */ { 
+    if (rc4) /* XXX: do we want: && (rc != NO_TKT_FIL) as well? */ {
         functionName = L"krb_get_pw_in_tkt()";
         msg = IDS_ERR_PWINTKT;
         goto cleanup;

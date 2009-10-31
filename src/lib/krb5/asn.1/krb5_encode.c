@@ -171,4 +171,3 @@ krb5_error_code encode_krb5_typed_data(const krb5_typed_data **rep, krb5_data **
     sum += length;
     krb5_cleanup();
 }
-

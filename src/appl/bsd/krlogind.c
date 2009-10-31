@@ -21,14 +21,14 @@
 
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
  * responsibility of any person or organization contemplating export to
  * obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -39,7 +39,7 @@
  * permission.  FundsXpress makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -52,7 +52,7 @@ char copyright[] =
 #endif /* not lint */
 
 /* based on @(#)rlogind.c	5.17 (Berkeley) 8/31/88 */
-     
+
      /*
       * remote login server:
       *	remuser\0
@@ -60,45 +60,45 @@ char copyright[] =
       *	terminal info\0
       *	data
       */
-     
+
 /*
- * This is the rlogin daemon. The very basic protocol for checking 
+ * This is the rlogin daemon. The very basic protocol for checking
  * authentication and authorization is:
  * 1) Check authentication.
- * 2) Check authorization via the access-control files: 
+ * 2) Check authorization via the access-control files:
  *    ~/.k5login (using krb5_kuserok) and/or
  * 3) Prompt for password if any checks fail, or if so configured.
- * Allow login if all goes well either by calling the accompanying 
- * login.krb5 or /bin/login, according to the definition of 
+ * Allow login if all goes well either by calling the accompanying
+ * login.krb5 or /bin/login, according to the definition of
  * DO_NOT_USE_K_LOGIN.l
- * 
- * The configuration is done either by command-line arguments passed by 
+ *
+ * The configuration is done either by command-line arguments passed by
  * inetd, or by the name of the daemon. If command-line arguments are
  * present, they  take priority. The options are:
  * -k means trust krb5
  * -p and -P means prompt for password.
- *    If the -P option is passed, then the password is verified in 
+ *    If the -P option is passed, then the password is verified in
  * addition to all other checks. If -p is not passed with -k or -r,
  * and both checks fail, then login permission is denied.
  *    - -e means use encryption.
  *
- *    If no command-line arguments are present, then the presence of the 
- * letters kKrRexpP in the program-name before "logind" determine the 
+ *    If no command-line arguments are present, then the presence of the
+ * letters kKrRexpP in the program-name before "logind" determine the
  * behaviour of the program exactly as with the command-line arguments.
  *
  * If the ruserok check is to be used, then the client should connect
  * from a privileged port, else deny permission.
- */ 
-     
+ */
+
 /* DEFINES:
  *   KERBEROS - Define this if application is to be kerberised.
  *   CRYPT    - Define this if encryption is to be an option.
  *   DO_NOT_USE_K_LOGIN - Define this if you want to use /bin/login
- *              instead  of the accompanying login.krb5. 
+ *              instead  of the accompanying login.krb5.
  *   LOG_ALL_LOGINS - Define this if you want to log all logins.
  *   LOG_OTHER_USERS - Define this if you want to log all principals
  *              that do not map onto the local user.
- *   LOG_REMOTE_REALM - Define this if you want to log all principals from 
+ *   LOG_REMOTE_REALM - Define this if you want to log all principals from
  *              remote realms.
  *       Note:  Root logins are always logged.
  */
@@ -139,14 +139,14 @@ char copyright[] =
 #include <netinet/in.h>
 #include <errno.h>
 #include <pwd.h>
-     
+
 #ifdef HAVE_SYS_LABEL_H
 /* only SunOS 4? */
 #include <sys/label.h>
 #include <sys/audit.h>
 #include <pwdadj.h>
 #endif
-     
+
 #include <signal.h>
 
 #if defined(hpux) || defined(__hpux)
@@ -219,7 +219,7 @@ struct winsize {
     unsigned short ws_xpixel, ws_ypixel;
 };
 #endif /* NO_WINSIZE */
-     
+
 #ifndef roundup
 #define roundup(x,y) ((((x)+(y)-1)/(y))*(y))
 #endif
@@ -227,7 +227,7 @@ struct winsize {
 #include "fake-addrinfo.h"
 
 #ifdef KERBEROS
-     
+
 #include "k5-int.h"
 #include <libpty.h>
 #ifdef HAVE_UTMP_H
@@ -240,7 +240,7 @@ int non_privileged = 0; /* set when connection is seen to be from */
 
 #include "com_err.h"
 #include "defines.h"
-     
+
 #define SECURE_MESSAGE  "This rlogin session is encrypting all data transmissions.\r\n"
 
 krb5_authenticator      *kdata;
@@ -338,21 +338,21 @@ int main(argc, argv)
 #ifdef KERBEROS
     krb5_error_code status;
 #endif
-    
+
     progname = *argv;
-    
+
     pty_init();
-    
+
 #ifndef LOG_NDELAY
 #define LOG_NDELAY 0
 #endif
-    
+
 #ifndef LOG_AUTH /* 4.2 syslog */
     openlog(progname, LOG_PID | LOG_NDELAY);
 #else
     openlog(progname, LOG_PID | LOG_NDELAY, LOG_AUTH);
 #endif /* 4.2 syslog */
-    
+
 #ifdef KERBEROS
     status = krb5_init_context(&bsd_context);
     if (status) {
@@ -361,7 +361,7 @@ int main(argc, argv)
 	    exit(1);
     }
 #endif
-    
+
     /* Analyse parameters. */
     opterr = 0;
     while ((ch = getopt(argc, argv, ARGSTR)) != -1)
@@ -369,7 +369,7 @@ int main(argc, argv)
 #ifdef KERBEROS
 	case 'k':
 	break;
-	
+
       case '5':
 	break;
       case 'c':
@@ -378,7 +378,7 @@ int main(argc, argv)
       case 'i':
 	checksum_ignored = 1;
 	break;
-	
+
 #ifdef CRYPT
 	case 'x':         /* Use encryption. */
 	case 'X':
@@ -442,7 +442,7 @@ int main(argc, argv)
       }
     argc -= optind;
     argv += optind;
-    
+
     fromlen = sizeof (from);
 
     if (debug_port || do_fork) {
@@ -582,10 +582,10 @@ void doit(f, fromp)
 	syslog( LOG_CRIT, "Checksums are required and ignored; these options are mutually exclusive--check the documentation.");
 	fatal(f, "Configuration error: mutually exclusive options specified");
     }
-    
+
     alarm(60);
     read(f, &c, 1);
-    
+
     if (c != 0){
 	exit(1);
     }
@@ -594,7 +594,7 @@ void doit(f, fromp)
     /* Initialize syncpipe */
     if (pipe( syncpipe ) < 0 )
 	fatalperror ( f , "");
-    
+
 
 #ifdef POSIX_SIGNALS
     /* Initialize "sa" structure. */
@@ -608,7 +608,7 @@ void doit(f, fromp)
 	fatal(f, gai_strerror(retval));
     strncpy(rhost_addra, hname, sizeof(rhost_addra));
     rhost_addra[sizeof (rhost_addra) -1] = '\0';
-    
+
     retval = getnameinfo(fromp, socklen(fromp), hname, sizeof(hname), 0, 0, 0);
     if (retval)
 	fatal(f, gai_strerror(retval));
@@ -620,16 +620,16 @@ void doit(f, fromp)
 	/* Not a real problem, we just haven't bothered to update
 	   the port number checking code to handle ipv6.  */
       fatal(f, "Permission denied - Malformed from address\n");
-    
+
     if (fromp->sin_port >= IPPORT_RESERVED ||
 	fromp->sin_port < IPPORT_RESERVED/2)
       fatal(f, "Permission denied - Connection from bad port");
 #endif /* KERBEROS */
-    
+
     /* Set global netf to f now : we may need to drop everything
        in do_krb_login. */
     netf = f;
-    
+
 #if defined(KERBEROS)
     /* All validation, and authorization goes through do_krb_login() */
     do_krb_login(rhost_addra, rhost_name);
@@ -639,18 +639,18 @@ void doit(f, fromp)
     getstr(f, term, sizeof(term), "Terminal type");
     rcmd_stream_init_normal();
 #endif
-    
+
     write(f, "", 1);
     if ((retval = pty_getpty(&p,line, sizeof(line)))) {
 	com_err(progname, retval, "while getting master pty");
 	exit(2);
     }
-    
+
     Pfd = p;
 #ifdef TIOCSWINSZ
     (void) ioctl(p, TIOCSWINSZ, &win);
 #endif
-    
+
 #ifdef POSIX_SIGNALS
     sa.sa_handler = cleanup;
     (void) sigaction(SIGCHLD, &sa, (struct sigaction *)0);
@@ -672,7 +672,7 @@ void doit(f, fromp)
 	    fatal(f, error_message(retval));
 	    exit(1);
 	}
-	
+
 
 #if defined(POSIX_TERMIOS) && !defined(ultrix)
 	tcgetattr(t,&new_termio);
@@ -697,7 +697,7 @@ void doit(f, fromp)
 #endif /* POSIX_TERMIOS */
 
 	pid = 0;			/*reset pid incase exec fails*/
-	    
+
 	/*
 	 **      signal the parent that we have turned off echo
 	 **      on the slave side of the pty ... he's waiting
@@ -709,16 +709,16 @@ void doit(f, fromp)
 	(void) write(syncpipe[1], &c, 1);
 	(void) close(syncpipe[1]);
 	(void) close(syncpipe[0]);
-		
+
 	close(f), close(p);
 	dup2(t, 0), dup2(t, 1), dup2(t, 2);
 	if (t > 2)
 	  close(t);
-	
+
 #if defined(sysvimp)
 	setcompat (COMPAT_CLRPGROUP | (getcompat() & ~COMPAT_BSDTTY));
 #endif
-	
+
 	/* Log access to account */
 	pwd = (struct passwd *) getpwnam(lusername);
 	if (pwd && (pwd->pw_uid == 0)) {
@@ -727,7 +727,7 @@ void doit(f, fromp)
 		     krusername ? krusername : "",
 		     rusername, rhost_addra, rhost_name);
 	    else
-	      syslog(LOG_NOTICE, "ROOT login by %s (%s@%s (%s))", 
+	      syslog(LOG_NOTICE, "ROOT login by %s (%s@%s (%s))",
 		     krusername ? krusername : "",
 		     rusername, rhost_addra, rhost_name);
 	}
@@ -736,8 +736,8 @@ void doit(f, fromp)
 	/* Log if principal is from a remote realm */
         else if (client && !default_realm(client))
 #endif /* LOG_REMOTE_REALM */
-  
-#if defined(LOG_OTHER_USERS) && !defined(LOG_ALL_LOGINS) 
+
+#if defined(LOG_OTHER_USERS) && !defined(LOG_ALL_LOGINS)
 	/* Log if principal name does not map to local username */
         else if (client && !princ_maps_to_lname(client, lusername))
 #endif /* LOG_OTHER_USERS */
@@ -753,11 +753,11 @@ void doit(f, fromp)
 		     "login by %s (%s@%s (%s)) as %s forcing password access",
 		     krusername ? krusername : "", rusername,
 		     rhost_addra, rhost_name, lusername);
-	    else 
+	    else
 	      syslog(LOG_NOTICE,
 		     "login by %s (%s@%s (%s)) as %s",
 		     krusername ? krusername : "", rusername,
-		     rhost_addra, rhost_name, lusername); 
+		     rhost_addra, rhost_name, lusername);
 	}
 #endif /* LOG_REMOTE_REALM || LOG_OTHER_USERS || LOG_ALL_LOGINS */
 #endif /* KERBEROS */
@@ -771,8 +771,8 @@ void doit(f, fromp)
 #endif
 
 #ifdef USE_LOGIN_F
-/* use the vendors login, which has -p and -f. Tested on 
- * AIX 4.1.4 and HPUX 10 
+/* use the vendors login, which has -p and -f. Tested on
+ * AIX 4.1.4 and HPUX 10
  */
     {
         char *cp;
@@ -807,7 +807,7 @@ void doit(f, fromp)
      **      turning off echo on the slave side ...
      **      The master blocks here until it reads a byte.
      */
-    
+
 (void) close(syncpipe[1]);
     if (read(syncpipe[0], &c, 1) != 1) {
 	/*
@@ -818,8 +818,8 @@ void doit(f, fromp)
     }
     close(syncpipe[0]);
 
-    
-#if defined(KERBEROS) 
+
+#if defined(KERBEROS)
     if (do_encrypt) {
 	if (rcmd_stream_write(f, SECURE_MESSAGE, sizeof(SECURE_MESSAGE), 0) < 0){
 	    snprintf(buferror, sizeof(buferror),
@@ -827,7 +827,7 @@ void doit(f, fromp)
 	    fatal(p,buferror);
 	}
     }
-    else 
+    else
       /*
        * if encrypting, don't turn on NBIO, else the read/write routines
        * will fail to work properly
@@ -846,7 +846,7 @@ void doit(f, fromp)
     signal(SIGTSTP, SIG_IGN);
 #endif
 
-    
+
 #if !defined(USE_LOGIN_F)
     /* Pass down rusername and lusername to login. */
     (void) write(p, rusername, strlen(rusername) +1);
@@ -877,7 +877,7 @@ unsigned char	oobdata[] = {TIOCPKT_WINDOW};
 char    oobdata[] = {0};
 #endif
 
-static 
+static
 void sendoob(fd, byte)
      int fd;
      char *byte;
@@ -915,7 +915,7 @@ static int control(pty, cp, n)
 {
     struct winsize w;
     int pgrp, got_pgrp;
-    
+
     if (n < (int) 4+sizeof (w) || cp[2] != 's' || cp[3] != 's')
       return (0);
 #ifdef TIOCSWINSZ
@@ -956,11 +956,11 @@ void protocol(f, p)
     register int tiocpkt_on = 0;
     int on = 1;
 #endif
-    
+
 #if defined(TIOCPKT) && !(defined(__svr4__) || defined(HAVE_STREAMS)) \
 	|| defined(solaris20)
     /* if system has TIOCPKT, try to turn it on. Some drivers
-     * may not support it. Save flag for later. 
+     * may not support it. Save flag for later.
      */
    if ( ioctl(p, TIOCPKT, &on) < 0)
 	tiocpkt_on = 0;
@@ -1016,11 +1016,11 @@ void protocol(f, p)
 		register unsigned char *cp;
 		int n;
 		size_t left;
-		
+
 		if (fcc <= 0)
 		    break;
 		fbp = fibuf;
-		
+
 		for (cp = fibuf; cp < fibuf+fcc-1; cp++) {
 		    if (cp[0] == magic[0] &&
 			cp[1] == magic[1]) {
@@ -1037,7 +1037,7 @@ void protocol(f, p)
 		}
 	    }
 	}
-	
+
 	if (FD_ISSET(p, &obits) && fcc > 0) {
 	    cc = write(p, fbp, fcc);
 	    if (cc > 0) {
@@ -1045,7 +1045,7 @@ void protocol(f, p)
 		fbp += cc;
 	    }
 	}
-	
+
 	if (FD_ISSET(p, &ibits)) {
 	    pcc = read(p, pibuf, sizeof (pibuf));
 	    pbp = pibuf;
@@ -1134,7 +1134,7 @@ void fatal(f, msg)
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
 #endif
-    
+
     buf[0] = '\01';		/* error indicator */
     (void) snprintf(buf + 1, sizeof(buf) - 1, "%s: %s.\r\n", progname, msg);
     if ((f == netf) && (pid > 0))
@@ -1169,7 +1169,7 @@ void fatalperror(f, msg)
      const char *msg;
 {
     char buf[512];
-    
+
     (void) snprintf(buf, sizeof(buf), "%s: %s", msg, error_message(errno));
     fatal(f, buf);
 }
@@ -1199,10 +1199,10 @@ do_krb_login(host_addr, hostname)
 	fatal(netf, "Kerberos authentication failed");
 	return;
     }
-    
+
     /* OK we have authenticated this user - now check authorization. */
     /* The Kerberos authenticated programs must use krb5_kuserok or kuserok*/
-    
+
     /* krb5_kuserok returns 1 if OK */
     if (!client || !krb5_kuserok(bsd_context, client, lusername)) {
 	if (asprintf(&msg_fail,
@@ -1216,7 +1216,7 @@ do_krb_login(host_addr, hostname)
 
     if (checksum_required && !valid_checksum) {
 	syslog(LOG_WARNING, "Client did not supply required checksum--connection rejected.");
-	
+
 	fatal(netf, "You are using an old Kerberos5 without initial connection support; only newer clients are authorized.");
     }
 }
@@ -1231,9 +1231,9 @@ void getstr(fd, buf, cnt, err)
      int cnt;
      char *err;
 {
-    
+
     char c;
-    
+
     do {
 	if (read(fd, &c, 1) != 1) {
 	    exit(1);
@@ -1251,10 +1251,10 @@ void getstr(fd, buf, cnt, err)
 void usage()
 {
 #ifdef KERBEROS
-    syslog(LOG_ERR, 
+    syslog(LOG_ERR,
 	   "usage: klogind [-ePf] [-D port] [-w[ip|maxhostlen[,[no]striplocal]]] or [r/R][k/K][x/e][p/P]logind");
 #else
-    syslog(LOG_ERR, 
+    syslog(LOG_ERR,
 	   "usage: rlogind [-rPf] [-D port] or [r/R][p/P]logind");
 #endif
 }
@@ -1290,7 +1290,7 @@ recvauth(valid_checksum)
     if (getsockname(netf, (struct sockaddr *)&laddr, &len)) {
 	    exit(1);
     }
-	
+
     len = sizeof(peersin);
     if (getpeername(netf, (struct sockaddr *)&peersin, &len)) {
 	syslog(LOG_ERR, "get peer name failed %d", netf);
@@ -1299,7 +1299,7 @@ recvauth(valid_checksum)
 
     if ((status = krb5_auth_con_init(bsd_context, &auth_context)))
         return status;
- 
+
     /* Only need remote address for rd_cred() to verify client */
     if ((status = krb5_auth_con_genaddrs(bsd_context, auth_context, netf,
 		 KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR)))
@@ -1387,7 +1387,7 @@ recvauth(valid_checksum)
       krb5_free_authenticator(bsd_context, authenticator);
     }
 
-    if ((status = krb5_copy_principal(bsd_context, ticket->enc_part2->client, 
+    if ((status = krb5_copy_principal(bsd_context, ticket->enc_part2->client,
 				      &client)))
 	return status;
 
@@ -1415,12 +1415,12 @@ recvauth(valid_checksum)
 
     if ((status = krb5_unparse_name(bsd_context, client, &krusername)))
 	return status;
-    
+
     if ((status = krb5_read_message(bsd_context, (krb5_pointer)&netf, &inbuf)))
 	fatal(netf, "Error reading message");
 
     if ((inbuf.length) && /* Forwarding being done, read creds */
-	(status = rd_and_store_for_creds(bsd_context, auth_context, &inbuf, 
+	(status = rd_and_store_for_creds(bsd_context, auth_context, &inbuf,
 					  ticket, &ccache))) {
          fatal(netf, "Can't get forwarded credentials");
     }

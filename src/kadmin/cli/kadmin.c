@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1994, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -60,22 +60,22 @@ struct pflag {
 };
 
 static struct pflag flags[] = {
-{"allow_postdated",     15,     KRB5_KDB_DISALLOW_POSTDATED,    1 },
-{"allow_forwardable",   17,     KRB5_KDB_DISALLOW_FORWARDABLE,  1 },
-{"allow_tgs_req",       13,     KRB5_KDB_DISALLOW_TGT_BASED,    1 },
-{"allow_renewable",     15,     KRB5_KDB_DISALLOW_RENEWABLE,    1 },
-{"allow_proxiable",     15,     KRB5_KDB_DISALLOW_PROXIABLE,    1 },
-{"allow_dup_skey",      14,     KRB5_KDB_DISALLOW_DUP_SKEY,     1 },
-{"allow_tix",            9,     KRB5_KDB_DISALLOW_ALL_TIX,      1 },
-{"requires_preauth",    16,     KRB5_KDB_REQUIRES_PRE_AUTH,     0 },
-{"requires_hwauth",     15,     KRB5_KDB_REQUIRES_HW_AUTH,      0 },
-{"needchange",          10,     KRB5_KDB_REQUIRES_PWCHANGE,     0 },
-{"allow_svr",            9,     KRB5_KDB_DISALLOW_SVR,          1 },
-{"password_changing_service", 25, KRB5_KDB_PWCHANGE_SERVICE,    0 },
-{"support_desmd5",      14,     KRB5_KDB_SUPPORT_DESMD5,        0 },
-{"ok_as_delegate",      14,     KRB5_KDB_OK_AS_DELEGATE,        0 },
-{"ok_to_auth_as_delegate", 22,  KRB5_KDB_OK_TO_AUTH_AS_DELEGATE, 0 },
-{"no_auth_data_required", 21,   KRB5_KDB_NO_AUTH_DATA_REQUIRED, 0 },
+    {"allow_postdated",     15,     KRB5_KDB_DISALLOW_POSTDATED,    1 },
+    {"allow_forwardable",   17,     KRB5_KDB_DISALLOW_FORWARDABLE,  1 },
+    {"allow_tgs_req",       13,     KRB5_KDB_DISALLOW_TGT_BASED,    1 },
+    {"allow_renewable",     15,     KRB5_KDB_DISALLOW_RENEWABLE,    1 },
+    {"allow_proxiable",     15,     KRB5_KDB_DISALLOW_PROXIABLE,    1 },
+    {"allow_dup_skey",      14,     KRB5_KDB_DISALLOW_DUP_SKEY,     1 },
+    {"allow_tix",            9,     KRB5_KDB_DISALLOW_ALL_TIX,      1 },
+    {"requires_preauth",    16,     KRB5_KDB_REQUIRES_PRE_AUTH,     0 },
+    {"requires_hwauth",     15,     KRB5_KDB_REQUIRES_HW_AUTH,      0 },
+    {"needchange",          10,     KRB5_KDB_REQUIRES_PWCHANGE,     0 },
+    {"allow_svr",            9,     KRB5_KDB_DISALLOW_SVR,          1 },
+    {"password_changing_service", 25, KRB5_KDB_PWCHANGE_SERVICE,    0 },
+    {"support_desmd5",      14,     KRB5_KDB_SUPPORT_DESMD5,        0 },
+    {"ok_as_delegate",      14,     KRB5_KDB_OK_AS_DELEGATE,        0 },
+    {"ok_to_auth_as_delegate", 22,  KRB5_KDB_OK_TO_AUTH_AS_DELEGATE, 0 },
+    {"no_auth_data_required", 21,   KRB5_KDB_NO_AUTH_DATA_REQUIRED, 0 },
 };
 
 static char *prflags[] = {
@@ -1036,7 +1036,7 @@ kadmin_addprinc_usage()
 #if APPLE_PKINIT
             "\t\t[-certhash hash_string]\n"
 #endif /* APPLE_PKINIT */
-            );
+    );
     fprintf(stderr, "\tattributes are:\n");
     fprintf(stderr, "%s%s%s",
             "\t\tallow_postdated allow_forwardable allow_tgs_req allow_renewable\n",
@@ -1061,7 +1061,7 @@ kadmin_modprinc_usage()
             "\t\tok_as_delegate ok_to_auth_as_delegate no_auth_data_required\n"
             "\nwhere,\n\t[-x db_princ_args]* - any number of database specific arguments.\n"
             "\t\t\tLook at each database documentation for supported arguments\n"
-        );
+    );
 }
 
 /* Create a dummy password for old-style (pre-1.8) randkey creation. */
@@ -1111,7 +1111,7 @@ kadmin_addprinc(int argc, char *argv[])
 #if APPLE_PKINIT
     if(cert_hash != NULL) {
         fprintf(stderr,
-              "add_principal: -certhash not allowed; use modify_principal\n");
+                "add_principal: -certhash not allowed; use modify_principal\n");
         goto cleanup;
     }
 #endif /* APPLE_PKINIT */
@@ -1643,9 +1643,9 @@ kadmin_getpol(int argc, char *argv[])
         printf("Maximum password failures before lockout: %lu\n",
                (unsigned long)policy.pw_max_fail);
         printf("Password failure count reset interval: %ld\n",
-                (long)policy.pw_failcnt_interval);
+               (long)policy.pw_failcnt_interval);
         printf("Password lockout duration: %ld\n",
-                (long)policy.pw_lockout_duration);
+               (long)policy.pw_lockout_duration);
     } else {
         printf("\"%s\"\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%lu\t%ld\t%ld\n",
                policy.policy, policy.pw_max_life, policy.pw_min_life,

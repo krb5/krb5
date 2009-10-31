@@ -44,16 +44,16 @@ cc_int32 ccs_os_pipe_compare (ccs_pipe_t  in_pipe,
                               cc_uint32  *out_equal)
 {
     cc_int32 err = ccNoError;
-    
+
     if (!in_pipe           ) { err = cci_check_error (ccErrBadParam); }
     if (!in_compare_to_pipe) { err = cci_check_error (ccErrBadParam); }
     if (!out_equal         ) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         *out_equal = (in_pipe == in_compare_to_pipe);
     }
-    
-    return cci_check_error (err);    
+
+    return cci_check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -62,9 +62,9 @@ cc_int32 ccs_os_pipe_copy (ccs_pipe_t *out_pipe,
 			   ccs_pipe_t  in_pipe)
 {
     cc_int32 err = 0;
-    
+
     *out_pipe = in_pipe;
-    
+
     return cci_check_error (err);
 }
 
@@ -73,9 +73,8 @@ cc_int32 ccs_os_pipe_copy (ccs_pipe_t *out_pipe,
 cc_int32 ccs_os_pipe_release (ccs_pipe_t io_pipe)
 {
     cc_int32 err = 0;
-    
+
     /* Nothing to do here on Mac OS X */
-    
+
     return cci_check_error (err);
 }
-

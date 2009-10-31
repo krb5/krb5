@@ -33,7 +33,7 @@
   Property sheets
 **********************************************************************/
 
-/*! \addtogroup khui 
+/*! \addtogroup khui
 
 @{*/
 
@@ -122,7 +122,7 @@ typedef struct tag_khui_property_page {
 
     \note Only called by the NetIDMgr application.
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_ps_create_sheet(khui_property_sheet ** sheet);
 
 /*! \brief Add a page to a property sheet
@@ -163,7 +163,7 @@ khui_ps_create_sheet(khui_property_sheet ** sheet);
         khui_ps_find_page() to retrieve a pointer to the structure
         later.
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_ps_add_page(khui_property_sheet * sheet,
                  khm_int32 credtype,
                  khm_int32 ordinal,
@@ -181,26 +181,26 @@ khui_ps_find_page(khui_property_sheet * sheet,
 
     \note Only called by the NetIDMgr application
  */
-KHMEXP HWND KHMAPI 
-khui_ps_show_sheet(HWND parent, 
+KHMEXP HWND KHMAPI
+khui_ps_show_sheet(HWND parent,
                    khui_property_sheet * sheet);
 
 /*! \brief Check if the given message belongs to the property sheet
 
     \note Only called by the NetIDMgr application
  */
-KHMEXP LRESULT KHMAPI 
-khui_ps_check_message(khui_property_sheet * sheet, 
+KHMEXP LRESULT KHMAPI
+khui_ps_check_message(khui_property_sheet * sheet,
                       PMSG msg);
 
 /*! \brief Destroy a property sheet and all associated data structures.
 
     \note Only called by the NetIDMgr application.
 */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_ps_destroy_sheet(khui_property_sheet * sheet);
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_property_wnd_set_record(HWND hwnd_pwnd, khm_handle record);
 
 /*!@}*/

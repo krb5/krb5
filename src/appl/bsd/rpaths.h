@@ -28,4 +28,3 @@
 #undef UCB_RSH
 #define UCB_RSH "/usr/bin/remsh"
 #endif
-

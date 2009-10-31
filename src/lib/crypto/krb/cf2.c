@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,8 +22,8 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
- * 
+ *
+ *
  *
  * Implement KRB_FX_CF2 function per
  *draft-ietf-krb-wg-preauth-framework-09.  Take two keys and two
@@ -37,7 +37,7 @@
 
 /*
  * Call the PRF function multiple times with the pepper prefixed with
- * a count byte  to get enough bits of output. 
+ * a count byte  to get enough bits of output.
  */
 static krb5_error_code
 prf_plus(krb5_context context, krb5_keyblock *k, const char *pepper,
@@ -90,7 +90,7 @@ cleanup:
     return retval;
 }
 
-    
+
 krb5_error_code KRB5_CALLCONV
 krb5_c_fx_cf2_simple(krb5_context context,
 		     krb5_keyblock *k1, const char *pepper1,

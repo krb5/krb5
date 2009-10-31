@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/krb/copy_cksum.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * krb5_copy_checksum()
  */
@@ -35,12 +36,12 @@ krb5_copy_checksum(krb5_context context, const krb5_checksum *ckfrom, krb5_check
     krb5_checksum *tempto;
 
     if (!(tempto = (krb5_checksum *)malloc(sizeof(*tempto))))
-	return ENOMEM;
+        return ENOMEM;
     *tempto = *ckfrom;
 
     if (!(tempto->contents = (krb5_octet *)malloc(tempto->length))) {
-	free(tempto);
-	return ENOMEM;
+        free(tempto);
+        return ENOMEM;
     }
     memcpy(tempto->contents, ckfrom->contents, ckfrom->length);
 

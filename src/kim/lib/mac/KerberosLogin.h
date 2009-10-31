@@ -6,7 +6,7 @@
 * require a specific license from the United States Government.
 * It is the responsibility of any person or organization contemplating
 * export to obtain such a license before exporting.
-* 
+*
 * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
 * distribute this software and its documentation for any purpose and
 * without fee is hereby granted, provided that the above copyright
@@ -51,7 +51,7 @@ extern "C" {
 #    pragma pack(push,2)
 #endif
 
-/* 
+/*
  * Kerberos version constants
  */
 enum {
@@ -62,8 +62,8 @@ enum {
 };
 typedef int32_t KLEKerberosVersion;
 
-/* 
- * Dialog identifier constants 
+/*
+ * Dialog identifier constants
  */
 enum {
     loginLibrary_LoginDialog,
@@ -76,35 +76,35 @@ enum {
 typedef int32_t KLEDialogIdentifiers;
 
 
-/* 
- * Option identifier constants 
+/*
+ * Option identifier constants
  */
 enum {
     /* Initial values and ranges */
     loginOption_LoginName                  = 'name',
     loginOption_LoginInstance              = 'inst',
-    
+
     loginOption_RememberPrincipal          = 'prin',
     loginOption_RememberExtras             = 'extr',
-    
+
     loginOption_MinimalTicketLifetime      = '-lif',
     loginOption_MaximalTicketLifetime      = '+lif',
     loginOption_DefaultTicketLifetime      = '0lif',
-    
+
     loginOption_DefaultRenewableTicket     = '0rtx',
     loginOption_MinimalRenewableLifetime   = '-rlf',
     loginOption_MaximalRenewableLifetime   = '+rlf',
     loginOption_DefaultRenewableLifetime   = '0rlf',
-    
+
     loginOption_DefaultForwardableTicket   = '0fwd',
     loginOption_DefaultProxiableTicket     = '0prx',
-    loginOption_DefaultAddresslessTicket   = '0adr'    
+    loginOption_DefaultAddresslessTicket   = '0adr'
 };
 typedef int32_t KLEDefaultLoginOptions;
 
 
-/* 
- * Realm list constants 
+/*
+ * Realm list constants
  */
 enum {
     realmList_Start  = 0,
@@ -115,12 +115,12 @@ typedef int32_t KLERealmListIndexes;
 #define klFirstError 19276
 #define klLastError  19876
 
-/* 
- * Error codes 
+/*
+ * Error codes
  */
 enum {
     klNoErr                             = 0,
-    
+
     /* Parameter errors */
     klParameterErr                      = 19276,
     klBadPrincipalErr,
@@ -129,13 +129,13 @@ enum {
     klInvalidVersionErr,
     klCapsLockErr,
     klBadV5ContextErr,
-    
+
     /* Get/SetKerberosOption errors */
     klBufferTooSmallErr                 = 19376,
     klBufferTooLargeErr,
     klInvalidOptionErr,
     klBadOptionValueErr,
-    
+
     /* Runtime Login errors */
     klUserCanceledErr                   = 19476,
     klMemFullErr,
@@ -152,17 +152,17 @@ enum {
     klCacheDoesNotExistErr,
     klNoHostnameErr,
     klCredentialsNeedValidationErr,
-    
+
     /* Password changing errors */
     klPasswordMismatchErr               = 19576,
     klInsecurePasswordErr,
     klPasswordChangeFailedErr,
-    
+
     /* Login IPC errors */
     klCantContactServerErr              = 19776,
     klCantDisplayUIErr,
     klServerInsecureErr
-    
+
 };
 typedef int32_t KLEStatus;
 
@@ -203,30 +203,30 @@ typedef kim_options KLLoginOptions;
 
 KLStatus KLAcquireTickets (KLPrincipal   inPrincipal,
                            KLPrincipal  *outPrincipal,
-                           char        **outCredCacheName) 
+                           char        **outCredCacheName)
     KERBEROSLOGIN_DEPRECATED;
 
 KLStatus KLAcquireNewTickets (KLPrincipal  inPrincipal,
                               KLPrincipal  *outPrincipal,
-                              char        **outCredCacheName) 
+                              char        **outCredCacheName)
     KERBEROSLOGIN_DEPRECATED;
 
 KLStatus KLAcquireTicketsWithPassword (KLPrincipal      inPrincipal,
                                        KLLoginOptions   inLoginOptions,
                                        const char      *inPassword,
-                                       char           **outCredCacheName) 
+                                       char           **outCredCacheName)
     KERBEROSLOGIN_DEPRECATED;
 
 KLStatus KLAcquireNewTicketsWithPassword (KLPrincipal      inPrincipal,
                                           KLLoginOptions   inLoginOptions,
                                           const char      *inPassword,
-                                          char           **outCredCacheName) 
+                                          char           **outCredCacheName)
     KERBEROSLOGIN_DEPRECATED;
 
-KLStatus KLSetApplicationOptions (const void *inAppOptions) 
+KLStatus KLSetApplicationOptions (const void *inAppOptions)
     KERBEROSLOGIN_DEPRECATED;
 
-KLStatus KLGetApplicationOptions (void *outAppOptions) 
+KLStatus KLGetApplicationOptions (void *outAppOptions)
     KERBEROSLOGIN_DEPRECATED;
 
 

@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,8 +22,8 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
- * 
+ *
+ *
  *
  * Implement EncryptedChallenge fast factor from draft-ietf-krb-wg-preauth-framework
  */
@@ -64,7 +64,7 @@ static krb5_error_code process_preauth
     krb5_keyblock *challenge_key = NULL, *armor_key = NULL;
     krb5_data *etype_data = NULL;
     krb5int_access kaccess;
-    
+
     if (krb5int_accessor(&kaccess, KRB5INT_ACCESS_VERSION) != 0)
         return 0;
     retval = fast_get_armor_key(context, get_data_proc, rock, &armor_key);
@@ -174,10 +174,10 @@ static krb5_error_code process_preauth
                       &etype_data);
     return retval;
 }
-    
-    
-                      
-                      
+
+
+
+
 static krb5_error_code kdc_include_padata
 (krb5_context context,
                  krb5_kdc_req *request,
@@ -222,10 +222,10 @@ static krb5_error_code kdc_verify_preauth
     krb5_data *client_data = NULL;
     krb5_keyblock *challenge_key = NULL;
     int i = 0;
-    
+
     plain.data = NULL;
     if (krb5int_accessor(&kaccess, KRB5INT_ACCESS_VERSION) != 0)
-        return 0; 
+        return 0;
 
     retval = fast_kdc_get_armor_key(context, get_entry_proc, request, client, &armor_key);
     if (retval == 0 &&armor_key == NULL) {
@@ -243,7 +243,7 @@ static krb5_error_code kdc_verify_preauth
             retval = ENOMEM;
     }
     if (retval == 0)
-        retval = get_entry_proc(context, request, client, 
+        retval = get_entry_proc(context, request, client,
                                 krb5plugin_preauth_keys, &client_data);
     if (retval == 0) {
         client_keys = (krb5_keyblock *) client_data->data;
@@ -274,7 +274,7 @@ static krb5_error_code kdc_verify_preauth
         for (j = i+1; client_keys[j].enctype; j++)
             krb5_free_keyblock_contents(context, &client_keys[j]);
     }
-    
+
     }
     if (retval == 0)
         retval = kaccess.decode_enc_ts(&plain, &ts);
@@ -301,7 +301,7 @@ static krb5_error_code kdc_verify_preauth
     }
     if (armor_key)
         krb5_free_keyblock(context, armor_key);
-    if (plain.data) 
+    if (plain.data)
         free(plain.data);
     if (enc)
         kaccess.free_enc_data(context, enc);
@@ -332,7 +332,7 @@ static krb5_error_code kdc_return_preauth
     krb5_data *encoded = NULL;
     krb5_pa_data *pa = NULL;
     krb5int_access kaccess;
-   
+
     if (krb5int_accessor(&kaccess, KRB5INT_ACCESS_VERSION) != 0)
         return 0;
     if (challenge_key == NULL)
@@ -408,4 +408,3 @@ struct krb5plugin_preauth_client_ftable_v1 preauthentication_client_1 = {
     NULL,                    /* try_again function */
     NULL                /* get init creds opt function */
 };
-

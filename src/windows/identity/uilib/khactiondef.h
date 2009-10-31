@@ -73,7 +73,7 @@
 #define KHUI_ACTION_VIEW_ALL_IDS (KHUI_ACTION_BASE + 37)
 /*@}*/
 
-/*! \name Pseudo actions 
+/*! \name Pseudo actions
 
 Pseudo actions do not trigger any specific function, but acts as a
 signal of some generic event which will be interpreted based on

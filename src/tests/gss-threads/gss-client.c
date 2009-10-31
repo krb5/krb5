@@ -1,6 +1,6 @@
 /*
  * Copyright 1994 by OpenVision Technologies, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -10,7 +10,7 @@
  * without specific, written prior permission. OpenVision makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -27,7 +27,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -110,7 +110,7 @@ static int get_server_info(host, port)
 	  fprintf(stderr, "Unknown host: %s\n", host);
 	  return -1;
      }
-     
+
      saddr.sin_family = hp->h_addrtype;
      memcpy(&saddr.sin_addr, hp->h_addr, sizeof(saddr.sin_addr));
      saddr.sin_port = htons(port);
@@ -171,13 +171,13 @@ static int connect_to_server()
  * Returns: 0 on success, -1 on failure
  *
  * Effects:
- * 
+ *
  * service_name is imported as a GSS-API name and a GSS-API context is
  * established with the corresponding service; the service should be
  * listening on the TCP connection s.  The default GSS-API mechanism
  * is used, and mutual authentication and replay detection are
  * requested.
- * 
+ *
  * If successful, the context handle is returned in context.  If
  * unsuccessful, the GSS-API error messages are displayed on stderr
  * and -1 is returned.
@@ -211,7 +211,7 @@ static int client_establish_context(s, service_name, gss_flags, auth_flag,
 	 display_status("parsing name", maj_stat, min_stat);
 	 return -1;
        }
-     
+
        if (!v1_format) {
 	 if (send_token(s, TOKEN_NOOP|TOKEN_CONTEXT_NEXT, empty_token) < 0) {
 	   (void) gss_release_name(&min_stat, &target_name);
@@ -228,13 +228,13 @@ static int client_establish_context(s, service_name, gss_flags, auth_flag,
 	* transmitted to the server; every received token is stored in
 	* recv_tok, which token_ptr is then set to, to be processed by
 	* the next call to gss_init_sec_context.
-	* 
+	*
 	* GSS-API guarantees that send_tok's length will be non-zero
 	* if and only if the server is expecting another token from us,
 	* and that gss_init_sec_context returns GSS_S_CONTINUE_NEEDED if
 	* and only if the server has another token to send us.
 	*/
-     
+
        token_ptr = GSS_C_NO_BUFFER;
        *gss_context = GSS_C_NO_CONTEXT;
 
@@ -273,7 +273,7 @@ static int client_establish_context(s, service_name, gss_flags, auth_flag,
 	   }
 	 }
 	 (void) gss_release_buffer(&min_stat, &send_tok);
- 
+
 	 if (maj_stat!=GSS_S_COMPLETE && maj_stat!=GSS_S_CONTINUE_NEEDED) {
 	      display_status("initializing context", maj_stat,
 			     init_sec_min_stat);
@@ -283,7 +283,7 @@ static int client_establish_context(s, service_name, gss_flags, auth_flag,
 					     GSS_C_NO_BUFFER);
 	      return -1;
 	 }
-	  
+
 	 if (maj_stat == GSS_S_CONTINUE_NEEDED) {
 	   if (verbose)
 	     printf("continue needed...");
@@ -313,7 +313,7 @@ static void read_file(file_name, in_buf)
 {
     int fd, count;
     struct stat stat_buf;
-    
+
     if ((fd = open(file_name, O_RDONLY, 0)) < 0) {
 	perror("open");
 	fprintf(stderr, "Couldn't open file %s\n", file_name);
@@ -371,7 +371,7 @@ static void read_file(file_name, in_buf)
  * Returns: 0 on success, -1 on failure
  *
  * Effects:
- * 
+ *
  * call_server opens a TCP connection to <host:port> and establishes a
  * GSS-API context with service_name over the connection.  It then
  * seals msg in a GSS-API token with gss_wrap, sends it to the server,
@@ -605,7 +605,7 @@ static void parse_oid(char *mechanism, gss_OID *oid)
     char	*mechstr = 0, *cp;
     gss_buffer_desc tok;
     OM_uint32 maj_stat, min_stat;
-    
+
     if (isdigit((int) mechanism[0])) {
 	if (asprintf(&mechstr, "{ %s }", mechanism) < 0) {
 	    fprintf(stderr, "Couldn't allocate mechanism scratch!\n");
@@ -773,13 +773,13 @@ int main(argc, argv)
 	       argc--; argv++;
 	       if (!argc) usage();
 	       mechanism = *argv;
-	   } 
+	   }
 #if defined(_WIN32) || 1
            else if (strcmp(*argv, "-threads") == 0) {
                argc--; argv++;
                if (!argc) usage();
                max_threads = atoi(*argv);
-           } 
+           }
 #endif
            else if (strcmp(*argv, "-d") == 0) {
 	       gss_flags |= GSS_C_DELEG_FLAG;
@@ -871,7 +871,7 @@ int main(argc, argv)
 
     if (oid != GSS_C_NULL_OID)
         (void) gss_release_oid(&min_stat, &oid);
-	 
+
 #ifdef _WIN32
     CleanupHandles();
 #else

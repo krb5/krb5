@@ -1,7 +1,7 @@
 /*
  * pty_make_sane_hostname: Make a sane hostname from an IP address.
  * This returns allocated memory!
- * 
+ *
  * Copyright 1999, 2000, 2001 by the Massachusetts Institute of
  * Technology.
  *
@@ -18,7 +18,7 @@
  * M.I.T. makes no representations about the suitability
  * of this software for any purpose.  It is provided "as is" without
  * express or implied warranty.
- * 
+ *
  */
 #include "com_err.h"
 #include "pty-int.h"

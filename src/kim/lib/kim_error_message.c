@@ -48,13 +48,13 @@ static kim_error kim_error_set_message (kim_error  in_error,
 {
     int lock_err = 0;
     kim_error err = KIM_NO_ERROR;
-    kim_last_error last_error = NULL; 
-    
+    kim_last_error last_error = NULL;
+
     err = lock_err = k5_mutex_lock (&kim_error_lock);
-    
+
     if (!err) {
         last_error = k5_getspecific (K5_KEY_KIM_ERROR_MESSAGE);
-        
+
         if (!last_error) {
             last_error = malloc (sizeof (*last_error));
             if (!last_error) {
@@ -65,15 +65,15 @@ static kim_error kim_error_set_message (kim_error  in_error,
             }
         }
     }
-    
+
     if (!err) {
         strncpy (last_error->message, in_message, sizeof (last_error->message));
         last_error->message[sizeof (last_error->message)-1] = '\0';
         last_error->code = in_error;
     }
-    
+
     if (!lock_err) { k5_mutex_unlock (&kim_error_lock); }
-    
+
     return err;
 }
 
@@ -82,7 +82,7 @@ static kim_error kim_error_set_message (kim_error  in_error,
 static void kim_error_free_message (void *io_error)
 {
     kim_last_error error = io_error;
-    
+
     if (error) {
         if (error->message) {
             free (error->message);
@@ -110,14 +110,14 @@ static kim_error kim_error_remap (kim_error in_error)
     switch (in_error) {
         case KRB5KRB_AP_ERR_BAD_INTEGRITY:
             return KIM_BAD_PASSWORD_ERR;
-            
+
         case KRB5KDC_ERR_PREAUTH_FAILED:
             return KIM_PREAUTH_FAILED_ERR;
-            
+
         case KRB5KRB_AP_ERR_SKEW:
             return KIM_CLOCK_SKEW_ERR;
     }
-    
+
     return in_error;
 }
 
@@ -126,43 +126,43 @@ static kim_error kim_error_remap (kim_error in_error)
 kim_string kim_error_message (kim_error in_error)
 {
     int lock_err = 0;
-    kim_last_error last_error = NULL; 
+    kim_last_error last_error = NULL;
     kim_string message = NULL;
-    
+
     lock_err = k5_mutex_lock (&kim_error_lock);
-    
+
     if (!lock_err) {
         last_error = k5_getspecific (K5_KEY_KIM_ERROR_MESSAGE);
         if (last_error && last_error->code == in_error) {
             message = last_error->message;
          }
     }
-    
+
     if (!lock_err) { k5_mutex_unlock (&kim_error_lock); }
-    
-    return message ? message : error_message (kim_error_remap (in_error));    
+
+    return message ? message : error_message (kim_error_remap (in_error));
 }
 
 #pragma mark -- Generic Functions --
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_error_set_message_for_code (kim_error in_error, 
+kim_error kim_error_set_message_for_code (kim_error in_error,
                                           ...)
 {
     kim_error err = KIM_NO_ERROR;
     va_list args;
-    
+
     va_start (args, in_error);
     err = kim_error_set_message_for_code_va (in_error, args);
     va_end (args);
-    
-    return check_error (err);    
+
+    return check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_error_set_message_for_code_va (kim_error in_code, 
+kim_error kim_error_set_message_for_code_va (kim_error in_code,
                                              va_list   in_args)
 {
     kim_error err = KIM_NO_ERROR;
@@ -170,44 +170,44 @@ kim_error kim_error_set_message_for_code_va (kim_error in_code,
 
     if (!kim_error_is_builtin (code)) {
         kim_string message = NULL;
-        
-        err = kim_string_create_from_format_va_retcode (&message, 
-                                                        error_message (code), 
+
+        err = kim_string_create_from_format_va_retcode (&message,
+                                                        error_message (code),
                                                         in_args);
-        
+
         if (!err) {
             err = kim_error_set_message (code, message);
         }
-        
+
         kim_string_free (&message);
     }
-    
+
     return err ? err : code;
 }
 
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_error_set_message_for_krb5_error (krb5_context    in_context, 
+kim_error kim_error_set_message_for_krb5_error (krb5_context    in_context,
                                                 krb5_error_code in_code)
 {
     kim_error err = KIM_NO_ERROR;
     krb5_error_code code = kim_error_remap (in_code);
-    
+
     if (code != in_code) {
         /* error was remapped to a KIM error */
         err = kim_error_set_message (code, error_message (code));
 
     } else if (!kim_error_is_builtin (code)) {
         const char *message = krb5_get_error_message (in_context, code);
-        
+
         if (message) {
             err = kim_error_set_message (code, message);
-            
+
             krb5_free_error_message (in_context, message);
         }
     }
-    
+
     return err ? err : code;
 }
 
@@ -218,16 +218,16 @@ kim_error kim_error_set_message_for_krb5_error (krb5_context    in_context,
 int kim_error_initialize (void)
 {
     int err = 0;
-    
+
     if (!err) {
 	err = k5_mutex_finish_init (&kim_error_lock);
     }
-    
+
     if (!err) {
-	err = k5_key_register (K5_KEY_KIM_ERROR_MESSAGE, 
+	err = k5_key_register (K5_KEY_KIM_ERROR_MESSAGE,
                                kim_error_free_message);
     }
-    
+
     return err;
 }
 
@@ -238,8 +238,7 @@ void kim_error_terminate (void)
     if (!INITIALIZER_RAN (kim_error_initialize) || PROGRAM_EXITING ()) {
 	return;
     }
-    
+
     k5_key_delete (K5_KEY_KIM_ERROR_MESSAGE);
     k5_mutex_destroy (&kim_error_lock);
 }
-

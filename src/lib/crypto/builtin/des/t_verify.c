@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Program to test the correctness of the DES library
  * implementation.
@@ -33,14 +33,14 @@
 
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
  * responsibility of any person or organization contemplating export to
  * obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -51,7 +51,7 @@
  * permission.  FundsXpress makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -118,7 +118,7 @@ unsigned char mresult[8] = {
     0xa3, 0x80, 0xe0, 0x2a, 0x6b, 0xe5, 0x46, 0x96
 };
 
-    
+
 /*
  * Can also add :
  * plaintext = 0, key = 0, cipher = 0x8ca64de9c1b123a7 (or is it a 1?)
@@ -237,7 +237,7 @@ main(argc,argv)
 	    printf("verify: error in ECB encryption\n");
 	    exit(-1);
 	}
-	else 
+	else
 	    printf("verify: ECB encryption is correct\n\n");
     }
 
@@ -261,7 +261,7 @@ main(argc,argv)
 	    printf("verify: error in ECB encryption\n");
 	    exit(-1);
 	}
-	else 
+	else
 	    printf("verify: ECB encryption is correct\n\n");
     }
 
@@ -277,7 +277,7 @@ main(argc,argv)
     in_length =  strlen((char *)input);
     if ((retval = mit_des_cbc_encrypt((const mit_des_cblock *) input,
 				      (mit_des_cblock *) cipher_text,
-				      (size_t) in_length, 
+				      (size_t) in_length,
 				      sched,
 				      ivec,
 				      MIT_DES_ENCRYPT))) {
@@ -294,7 +294,7 @@ main(argc,argv)
     }
     if ((retval = mit_des_cbc_encrypt((const mit_des_cblock *) cipher_text,
 				      (mit_des_cblock *) clear_text,
-				      (size_t) in_length, 
+				      (size_t) in_length,
 				      sched,
 				      ivec,
 				      MIT_DES_DECRYPT))) {
@@ -307,7 +307,7 @@ main(argc,argv)
 	printf("verify: error in CBC encryption\n");
 	exit(-1);
     }
-    else 
+    else
 	printf("verify: CBC encryption is correct\n\n");
 
     printf("EXAMPLE CBC checksum");
@@ -327,7 +327,7 @@ main(argc,argv)
 	printf("verify: error in CBC cheksum\n");
 	exit(-1);
     }
-    else 
+    else
 	printf("verify: CBC checksum is correct\n\n");
 
     exit(0);

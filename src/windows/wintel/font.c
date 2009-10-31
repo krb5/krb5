@@ -16,7 +16,7 @@ void ProcessFontChange(
   TEXTMETRIC tm;
   char buf[16];
   char szStyle[LF_FACESIZE];
-		
+
   pScr = (SCREEN *) GetWindowLong(hWnd, SCREEN_HANDLE);
   assert(pScr != NULL);
 
@@ -32,7 +32,7 @@ void ProcessFontChange(
   cf.Flags |= CF_FORCEFONTEXIST;
   cf.Flags |= CF_FIXEDPITCHONLY;
   cf.Flags |= CF_NOSIMULATIONS;
- 
+
   if (ChooseFont(&cf)) {
     if (pScr->hSelectedFont)
       DeleteObject(pScr->hSelectedFont);
@@ -47,7 +47,7 @@ void ProcessFontChange(
     pScr->cxChar = tm.tmAveCharWidth;
     pScr->cyChar = tm.tmHeight + tm.tmExternalLeading;
     ReleaseDC(hWnd, hDC);
-    SetWindowPos(hWnd, NULL, 0, 0, pScr->cxChar * pScr->width + 
+    SetWindowPos(hWnd, NULL, 0, 0, pScr->cxChar * pScr->width +
 		 FRAME_WIDTH, pScr->cyChar * pScr->height +
 		 FRAME_HEIGHT, SWP_NOMOVE | SWP_NOZORDER);
 
@@ -78,13 +78,13 @@ void InitializeStruct(
 			   HWND hWnd)
 {
   LPCHOOSEFONT lpFontChunk;
-   
+
   if (wCommDlgType == IDC_FONT) {
     lpFontChunk = (LPCHOOSEFONT) lpStruct;
 
     lpFontChunk->lStructSize = sizeof(CHOOSEFONT);
     lpFontChunk->hwndOwner = hWnd;
-    lpFontChunk->Flags = CF_SCREENFONTS | CF_FIXEDPITCHONLY 
+    lpFontChunk->Flags = CF_SCREENFONTS | CF_FIXEDPITCHONLY
       | CF_INITTOLOGFONTSTRUCT | CF_APPLY;
     lpFontChunk->rgbColors = RGB(0, 0, 255);
     lpFontChunk->lCustData = 0L;

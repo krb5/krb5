@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/krb/ser_addr.c
  *
@@ -33,161 +34,161 @@
 
 /*
  * Routines to deal with externalizing the krb5_address:
- *	krb5_address_size();
- *	krb5_address_externalize();
- *	krb5_address_internalize();
+ *      krb5_address_size();
+ *      krb5_address_externalize();
+ *      krb5_address_internalize();
  */
 static krb5_error_code krb5_address_size
-	(krb5_context, krb5_pointer, size_t *);
+(krb5_context, krb5_pointer, size_t *);
 static krb5_error_code krb5_address_externalize
-	(krb5_context, krb5_pointer, krb5_octet **, size_t *);
+(krb5_context, krb5_pointer, krb5_octet **, size_t *);
 static krb5_error_code krb5_address_internalize
-	(krb5_context,krb5_pointer *, krb5_octet **, size_t *);
+(krb5_context,krb5_pointer *, krb5_octet **, size_t *);
 
 /* Local data */
 static const krb5_ser_entry krb5_address_ser_entry = {
-    KV5M_ADDRESS,			/* Type			*/
-    krb5_address_size,		/* Sizer routine	*/
-    krb5_address_externalize,		/* Externalize routine	*/
-    krb5_address_internalize		/* Internalize routine	*/
+    KV5M_ADDRESS,                       /* Type                 */
+    krb5_address_size,          /* Sizer routine        */
+    krb5_address_externalize,           /* Externalize routine  */
+    krb5_address_internalize            /* Internalize routine  */
 };
 
 /*
- * krb5_address_size()	- Determine the size required to externalize
- *				  the krb5_address.
+ * krb5_address_size()  - Determine the size required to externalize
+ *                                the krb5_address.
  */
 static krb5_error_code
 krb5_address_size(krb5_context kcontext, krb5_pointer arg, size_t *sizep)
 {
-    krb5_error_code	kret;
-    krb5_address	*address;
+    krb5_error_code     kret;
+    krb5_address        *address;
 
     /*
      * krb5_address requires:
-     *	krb5_int32		for KV5M_ADDRESS
-     *	krb5_int32		for addrtype
-     *	krb5_int32		for length
-     *	address->length		for contents
-     *	krb5_int32		for KV5M_ADDRESS
+     *  krb5_int32              for KV5M_ADDRESS
+     *  krb5_int32              for addrtype
+     *  krb5_int32              for length
+     *  address->length         for contents
+     *  krb5_int32              for KV5M_ADDRESS
      */
     kret = EINVAL;
     if ((address = (krb5_address *) arg)) {
-	*sizep += (sizeof(krb5_int32) +
-		   sizeof(krb5_int32) +
-		   sizeof(krb5_int32) +
-		   sizeof(krb5_int32) +
-		   (size_t) address->length);
-	kret = 0;
+        *sizep += (sizeof(krb5_int32) +
+                   sizeof(krb5_int32) +
+                   sizeof(krb5_int32) +
+                   sizeof(krb5_int32) +
+                   (size_t) address->length);
+        kret = 0;
     }
     return(kret);
 }
 
 /*
- * krb5_address_externalize()	- Externalize the krb5_address.
+ * krb5_address_externalize()   - Externalize the krb5_address.
  */
 static krb5_error_code
 krb5_address_externalize(krb5_context kcontext, krb5_pointer arg, krb5_octet **buffer, size_t *lenremain)
 {
-    krb5_error_code	kret;
-    krb5_address	*address;
-    size_t		required;
-    krb5_octet		*bp;
-    size_t		remain;
+    krb5_error_code     kret;
+    krb5_address        *address;
+    size_t              required;
+    krb5_octet          *bp;
+    size_t              remain;
 
     required = 0;
     bp = *buffer;
     remain = *lenremain;
     kret = EINVAL;
     if ((address = (krb5_address *) arg)) {
-	kret = ENOMEM;
-	if (!krb5_address_size(kcontext, arg, &required) &&
-	    (required <= remain)) {
-	    /* Our identifier */
-	    (void) krb5_ser_pack_int32(KV5M_ADDRESS, &bp, &remain);
-		
-	    /* Our addrtype */
-	    (void) krb5_ser_pack_int32((krb5_int32) address->addrtype,
-				       &bp, &remain);
+        kret = ENOMEM;
+        if (!krb5_address_size(kcontext, arg, &required) &&
+            (required <= remain)) {
+            /* Our identifier */
+            (void) krb5_ser_pack_int32(KV5M_ADDRESS, &bp, &remain);
 
-	    /* Our length */
-	    (void) krb5_ser_pack_int32((krb5_int32) address->length,
-				       &bp, &remain);
+            /* Our addrtype */
+            (void) krb5_ser_pack_int32((krb5_int32) address->addrtype,
+                                       &bp, &remain);
 
-	    /* Our contents */
-	    (void) krb5_ser_pack_bytes(address->contents,
-				       (size_t) address->length,
-				       &bp, &remain);
+            /* Our length */
+            (void) krb5_ser_pack_int32((krb5_int32) address->length,
+                                       &bp, &remain);
 
-	    /* Finally, our trailer */
-	    (void) krb5_ser_pack_int32(KV5M_ADDRESS, &bp, &remain);
+            /* Our contents */
+            (void) krb5_ser_pack_bytes(address->contents,
+                                       (size_t) address->length,
+                                       &bp, &remain);
 
-	    kret = 0;
-	    *buffer = bp;
-	    *lenremain = remain;
-	}
+            /* Finally, our trailer */
+            (void) krb5_ser_pack_int32(KV5M_ADDRESS, &bp, &remain);
+
+            kret = 0;
+            *buffer = bp;
+            *lenremain = remain;
+        }
     }
     return(kret);
 }
 
 /*
- * krb5_address_internalize()	- Internalize the krb5_address.
+ * krb5_address_internalize()   - Internalize the krb5_address.
  */
 static krb5_error_code
 krb5_address_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet **buffer, size_t *lenremain)
 {
-    krb5_error_code	kret;
-    krb5_address	*address;
-    krb5_int32		ibuf;
-    krb5_octet		*bp;
-    size_t		remain;
+    krb5_error_code     kret;
+    krb5_address        *address;
+    krb5_int32          ibuf;
+    krb5_octet          *bp;
+    size_t              remain;
 
     bp = *buffer;
     remain = *lenremain;
     kret = EINVAL;
     /* Read our magic number */
     if (krb5_ser_unpack_int32(&ibuf, &bp, &remain))
-	ibuf = 0;
+        ibuf = 0;
     if (ibuf == KV5M_ADDRESS) {
-	kret = ENOMEM;
+        kret = ENOMEM;
 
-	/* Get a address */
-	if ((remain >= (2*sizeof(krb5_int32))) &&
-	    (address = (krb5_address *) calloc(1, sizeof(krb5_address)))) {
+        /* Get a address */
+        if ((remain >= (2*sizeof(krb5_int32))) &&
+            (address = (krb5_address *) calloc(1, sizeof(krb5_address)))) {
 
-	    address->magic = KV5M_ADDRESS;
+            address->magic = KV5M_ADDRESS;
 
-	    /* Get the addrtype */
-	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-	    address->addrtype = (krb5_addrtype) ibuf;
+            /* Get the addrtype */
+            (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+            address->addrtype = (krb5_addrtype) ibuf;
 
-	    /* Get the length */
-	    (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
-	    address->length = (int) ibuf;
+            /* Get the length */
+            (void) krb5_ser_unpack_int32(&ibuf, &bp, &remain);
+            address->length = (int) ibuf;
 
-	    /* Get the string */
-	    if ((address->contents = (krb5_octet *) malloc((size_t) (ibuf))) &&
-		!(kret = krb5_ser_unpack_bytes(address->contents,
-					       (size_t) ibuf,
-					       &bp, &remain))) {
-		/* Get the trailer */
-		if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
-		    ibuf = 0;
+            /* Get the string */
+            if ((address->contents = (krb5_octet *) malloc((size_t) (ibuf))) &&
+                !(kret = krb5_ser_unpack_bytes(address->contents,
+                                               (size_t) ibuf,
+                                               &bp, &remain))) {
+                /* Get the trailer */
+                if ((kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain)))
+                    ibuf = 0;
 
-		if (!kret && (ibuf == KV5M_ADDRESS)) {
-		    address->magic = KV5M_ADDRESS;
-		    *buffer = bp;
-		    *lenremain = remain;
-		    *argp = (krb5_pointer) address;
-		}
-		else
-		    kret = EINVAL;
-	    }
-	    if (kret) {
-		if (address->contents)
-		    free(address->contents);
-		free(address);
-	    }
-	}
+                if (!kret && (ibuf == KV5M_ADDRESS)) {
+                    address->magic = KV5M_ADDRESS;
+                    *buffer = bp;
+                    *lenremain = remain;
+                    *argp = (krb5_pointer) address;
+                }
+                else
+                    kret = EINVAL;
+            }
+            if (kret) {
+                if (address->contents)
+                    free(address->contents);
+                free(address);
+            }
+        }
     }
     return(kret);
 }

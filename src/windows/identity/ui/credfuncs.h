@@ -28,10 +28,10 @@
 #ifndef __KHIMAIRA_CREDFUNCS_H
 #define __KHIMAIRA_CREDFUNCS_H
 
-void KHMAPI 
+void KHMAPI
 kmsg_cred_completion(kmq_message *m);
 
-void 
+void
 khm_cred_destroy_creds(khm_boolean sync,
                        khm_boolean quiet);
 
@@ -41,33 +41,33 @@ khm_cred_destroy_identity(khm_handle identity);
 void
 khm_cred_renew_all_identities(void);
 
-void 
+void
 khm_cred_renew_identity(khm_handle identity);
 
-void 
+void
 khm_cred_renew_cred(khm_handle cred);
 
-void 
+void
 khm_cred_renew_creds(void);
 
-void 
+void
 khm_cred_obtain_new_creds(wchar_t * window_title);
 
 void
 khm_cred_obtain_new_creds_for_ident(khm_handle ident, wchar_t * title);
 
-void 
+void
 khm_cred_set_default(void);
 
 void khm_cred_set_default_identity(khm_handle identity);
 
-void 
+void
 khm_cred_change_password(wchar_t * window_title);
 
-void 
+void
 khm_cred_dispatch_process_message(khui_new_creds *nc);
 
-BOOL 
+BOOL
 khm_cred_dispatch_process_level(khui_new_creds *nc);
 
 BOOL

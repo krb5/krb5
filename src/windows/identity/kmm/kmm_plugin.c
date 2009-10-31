@@ -31,7 +31,7 @@
    if one isn't found, we create an empty one.
 */
 
-kmm_plugin_i * 
+kmm_plugin_i *
 kmmint_get_plugin_i(wchar_t * name)
 {
     kmm_plugin_i * p;
@@ -60,7 +60,7 @@ kmmint_get_plugin_i(wchar_t * name)
     return p;
 }
 
-kmm_plugin_i * 
+kmm_plugin_i *
 kmmint_find_plugin_i(wchar_t * name)
 {
     kmm_plugin_i * p;
@@ -77,12 +77,12 @@ kmmint_find_plugin_i(wchar_t * name)
 }
 
 /* the plugin must be delisted before calling this */
-void 
+void
 kmmint_list_plugin(kmm_plugin_i * p)
 {
     EnterCriticalSection(&cs_kmm);
     if((p->flags & KMM_PLUGIN_FLAG_IN_MODLIST) ||
-        (p->flags & KMM_PLUGIN_FLAG_IN_LIST)) 
+        (p->flags & KMM_PLUGIN_FLAG_IN_LIST))
     {
         RaiseException(2, EXCEPTION_NONCONTINUABLE, 0, NULL);
     }
@@ -91,7 +91,7 @@ kmmint_list_plugin(kmm_plugin_i * p)
     LeaveCriticalSection(&cs_kmm);
 }
 
-void 
+void
 kmmint_delist_plugin(kmm_plugin_i * p)
 {
     EnterCriticalSection(&cs_kmm);
@@ -106,7 +106,7 @@ kmmint_delist_plugin(kmm_plugin_i * p)
     LeaveCriticalSection(&cs_kmm);
 }
 
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_hold_plugin(kmm_plugin p)
 {
     kmm_plugin_i * pi;
@@ -123,7 +123,7 @@ kmm_hold_plugin(kmm_plugin p)
 }
 
 /* called with cs_kmm held */
-void 
+void
 kmmint_free_plugin(kmm_plugin_i * pi)
 {
     int i;
@@ -314,7 +314,7 @@ kmm_get_next_plugin(kmm_plugin p, kmm_plugin * p_next) {
     return rv;
 }
 
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_release_plugin(kmm_plugin p)
 {
     kmm_plugin_i * pi;
@@ -333,7 +333,7 @@ kmm_release_plugin(kmm_plugin p)
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_provide_plugin(kmm_module module, kmm_plugin_reg * plugin)
 {
     kmm_module_i * m;
@@ -348,15 +348,15 @@ kmm_provide_plugin(kmm_module module, kmm_plugin_reg * plugin)
     if(m->state != KMM_MODULE_STATE_INIT)
         return KHM_ERROR_INVALID_OPERATION;
 
-    if(!plugin || 
-       FAILED(StringCbLength(plugin->name, KMM_MAXCB_NAME - sizeof(wchar_t), 
+    if(!plugin ||
+       FAILED(StringCbLength(plugin->name, KMM_MAXCB_NAME - sizeof(wchar_t),
                              &cb_name)) ||
-       (plugin->description && 
-        FAILED(StringCbLength(plugin->description, 
-                              KMM_MAXCB_DESC - sizeof(wchar_t), 
+       (plugin->description &&
+        FAILED(StringCbLength(plugin->description,
+                              KMM_MAXCB_DESC - sizeof(wchar_t),
                               &cb_desc))) ||
-       (plugin->dependencies && 
-        KHM_FAILED(multi_string_length_cb(plugin->dependencies, 
+       (plugin->dependencies &&
+        KHM_FAILED(multi_string_length_cb(plugin->dependencies,
                                           KMM_MAXCB_DEPS, &cb_dep)))) {
         return KHM_ERROR_INVALID_PARAM;
     }
@@ -411,4 +411,3 @@ kmm_provide_plugin(kmm_module module, kmm_plugin_reg * plugin)
     /* leave the plugin held because it is in the module's plugin list */
     return KHM_ERROR_SUCCESS;
 }
-

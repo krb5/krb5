@@ -73,7 +73,7 @@ char copyright[] =
 #define SECURE_MESSAGE "This rsh session is encrypting input/output data transmissions.\r\n"
 
 int	error();
-     
+
 int	options;
 int	rfd2;
 int	nflag;
@@ -104,11 +104,11 @@ void	try_normal(char **);
 #define RLOGIN_PROGRAM UCB_RLOGIN
 #endif  /* KERBEROS */
 #endif /* !RLOGIN_PROGRAM */
-     
+
 #ifndef POSIX_SIGNALS
 #define	mask(s)	(1 << ((s) - 1))
 #endif /* POSIX_SIGNALS */
-     
+
 int
 main(argc, argv0)
      int argc;
@@ -142,12 +142,12 @@ main(argc, argv0)
 
     memset(&defaultservent, 0, sizeof(struct servent));
     if (strrchr(argv[0], '/'))
-      argv[0] = strrchr(argv[0], '/')+1; 
+      argv[0] = strrchr(argv[0], '/')+1;
 
     if ( argc < 2 ) goto usage;
     argc--;
     argv++;
-    
+
   another:
     if (argc > 0 && host == 0 && strncmp(*argv, "-", 1)) {
 	host = *argv;
@@ -316,14 +316,14 @@ main(argc, argv0)
     if(debug_port == 0) {
 #ifdef KERBEROS
       sp = getservbyname("kshell", "tcp");
-#else 
+#else
       sp = getservbyname("shell", "tcp");
 #endif  /* KERBEROS */
       if (sp == 0) {
 #ifdef KERBEROS
 	sp = &defaultservent;
 	sp->s_port = htons(544);
-#else 
+#else
 	fprintf(stderr, "rsh: shell/tcp: unknown service\n");
 	exit(1);
 #endif /* KERBEROS */
@@ -345,7 +345,7 @@ main(argc, argv0)
     if (fflag || Fflag)
       authopts |= OPTS_FORWARD_CREDS;
     if (Fflag)
-      authopts |= OPTS_FORWARDABLE_CREDS;    
+      authopts |= OPTS_FORWARDABLE_CREDS;
 #ifdef HAVE_ISATTY
     suppress = !isatty(fileno(stderr));
 #endif
@@ -391,7 +391,7 @@ main(argc, argv0)
 	write(2,SECURE_MESSAGE, strlen(SECURE_MESSAGE));
     }
 #endif
-    
+
 #else /* !KERBEROS */
     rem = rcmd(&host, debug_port, pwd->pw_name,
 	       user ? user : pwd->pw_name, args, &rfd2);
@@ -461,7 +461,7 @@ main(argc, argv0)
 	char *bp;
 	int wc;
 	fd_set rembits;
-	
+
 	(void) close(rfd2);
       reread:
 	errno = 0;
@@ -493,7 +493,7 @@ main(argc, argv0)
 	goto rewrite;
       done:
 	(void) shutdown(rem, 1);
-#ifdef KERBEROS 
+#ifdef KERBEROS
 	krb5_free_context(bsd_context);
 #endif
 	exit(0);
@@ -538,7 +538,7 @@ main(argc, argv0)
     } while (FD_ISSET(rem, &readfrom) || FD_ISSET(rfd2, &readfrom));
     if (nflag == 0)
       (void) kill(pid, SIGKILL);
-#ifdef KERBEROS 
+#ifdef KERBEROS
     krb5_free_context(bsd_context);
 #endif
     exit(0);
@@ -565,7 +565,7 @@ void try_normal(argv)
      char **argv;
 {
     char *host;
-    
+
 #ifndef KRB5_ATHENA_COMPAT
     if (encrypt_flag)
 	exit(1);
@@ -581,10 +581,10 @@ void try_normal(argv)
       host++;
     else
       host = argv[0];
-    
+
     if (!strcmp(host, "rsh"))
       argv++;
-    
+
     fprintf(stderr,"trying normal rsh (%s)\n",
 	    UCB_RSH);
     fflush(stderr);

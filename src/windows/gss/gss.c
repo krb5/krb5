@@ -6,7 +6,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -50,7 +50,7 @@
 #define INI_MSG	    "Message"					// INI file line label
 #define INI_MECHS	"GSSAPI Mechanisms"			// INI file section
 #define INI_MECH	"Mech"  					// INI file line label
-#define INI_LAST    "GSSAPI Most Recent" 
+#define INI_LAST    "GSSAPI Most Recent"
 #define INI_LAST_HOST "Host"
 #define INI_LAST_PORT "Port"
 #define INI_LAST_SVC  "Service"
@@ -132,7 +132,7 @@ WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int nC
 		       MB_OK | MB_ICONSTOP);
 	    return FALSE;
 	}
-	
+
 	rc = DialogBoxParam (hInstance, "GSSAPIDLG", HWND_DESKTOP, OpenGssapiDlg, 0L);
 	rc = GetLastError();
 
@@ -153,7 +153,7 @@ do_gssapi_test (void) {
 
 	hcursor = SetCursor(LoadCursor(NULL, IDC_WAIT));
 	n = gss (szHost, szService, szMech, szMessage[0] ? szMessage : "Test Gssapi Message", port,
-             verbose, delegate, mutual, replay, sequence, 
+             verbose, delegate, mutual, replay, sequence,
              gssv1, !noauth, !nowrap, !nocrypt, !nomic, ccount, mcount,
              szCCache);
 	SetCursor(hcursor);
@@ -211,7 +211,7 @@ OpenGssapiDlg(
     case WM_HSCROLL:
 		switch (LOWORD(wParam)) {
 		case TB_THUMBTRACK:
-		case TB_THUMBPOSITION: 
+		case TB_THUMBPOSITION:
 			{
 				long pos = HIWORD(wParam); // the position of the slider
 				int  ctrlID = GetDlgCtrlID((HWND)lParam);
@@ -313,7 +313,7 @@ OpenGssapiDlg(
 
 			//EndDialog(hDlg, TRUE);
 			break;
-		
+
         case GSS_NO_AUTH:
             if ( IsDlgButtonChecked(hDlg, GSS_NO_AUTH) ) {
                 // disable the other no_xxx options
@@ -347,7 +347,7 @@ parse_name (char *name) {
 	char *ptr;
 	char seps[] = " ,\t";
 	char tempname[256];
-	
+
 	memset( &tempname[0], '\0', 256 );
 	strcpy( tempname, name);
 	ptr = strtok( tempname, seps);
@@ -394,7 +394,7 @@ static void
 read_saved (void) {
 	int i;					/* Index */
 	char buff[32];
-	
+
 	for (i = 0; MAX_SAVED; ++i) {		/* Read this many entries */
 		wsprintf (buff, INI_HOST "%d", i);
 		GetPrivateProfileString(INI_HOSTS, buff, "", hosts[i], 256, GSSAPI_INI);
@@ -421,47 +421,47 @@ read_saved (void) {
 	}
     GetPrivateProfileString(INI_LAST, INI_LAST_HOST, "", szHost, 256, GSSAPI_INI);
     GetPrivateProfileString(INI_LAST, INI_LAST_PORT, "", buff, 32, GSSAPI_INI);
-    if ( buff[0] )  
+    if ( buff[0] )
         port = atoi(buff);
     GetPrivateProfileString(INI_LAST, INI_LAST_SVC, "", szService, 256, GSSAPI_INI);
     GetPrivateProfileString(INI_LAST, INI_LAST_MSG, "", szMessage, 256, GSSAPI_INI);
     GetPrivateProfileString(INI_LAST, INI_LAST_MECH, "", szMech, 256, GSSAPI_INI);
     GetPrivateProfileString(INI_LAST, INI_LAST_CCACHE, "", szCCache, 256, GSSAPI_INI);
     GetPrivateProfileString(INI_LAST, INI_LAST_DELEGATE, "", buff, 32, GSSAPI_INI);
-    if ( buff[0] )  
+    if ( buff[0] )
         delegate = atoi(buff);
     GetPrivateProfileString(INI_LAST, INI_LAST_MUTUAL, "", buff, 32, GSSAPI_INI);
-    if ( buff[0] )  
+    if ( buff[0] )
         mutual = atoi(buff);
     GetPrivateProfileString(INI_LAST, INI_LAST_REPLAY, "", buff, 32, GSSAPI_INI);
-    if ( buff[0] )  
+    if ( buff[0] )
         replay = atoi(buff);
     GetPrivateProfileString(INI_LAST, INI_LAST_SEQUENCE, "", buff, 32, GSSAPI_INI);
-    if ( buff[0] )  
+    if ( buff[0] )
         sequence = atoi(buff);
     GetPrivateProfileString(INI_LAST, INI_LAST_VERBOSE, "", buff, 32, GSSAPI_INI);
-    if ( buff[0] )  
+    if ( buff[0] )
         verbose = atoi(buff);
     GetPrivateProfileString(INI_LAST, INI_LAST_CCOUNT, "", buff, 32, GSSAPI_INI);
-    if ( buff[0] )  
+    if ( buff[0] )
         ccount = atoi(buff);
     GetPrivateProfileString(INI_LAST, INI_LAST_MCOUNT, "", buff, 32, GSSAPI_INI);
-    if ( buff[0] )  
+    if ( buff[0] )
         mcount = atoi(buff);
     GetPrivateProfileString(INI_LAST, INI_LAST_VER1, "", buff, 32, GSSAPI_INI);
-    if ( buff[0] )  
+    if ( buff[0] )
         gssv1 = atoi(buff);
     GetPrivateProfileString(INI_LAST, INI_LAST_NOAUTH, "", buff, 32, GSSAPI_INI);
-    if ( buff[0] )  
+    if ( buff[0] )
         noauth = atoi(buff);
     GetPrivateProfileString(INI_LAST, INI_LAST_NOWRAP, "", buff, 32, GSSAPI_INI);
-    if ( buff[0] )  
+    if ( buff[0] )
         nowrap = atoi(buff);
     GetPrivateProfileString(INI_LAST, INI_LAST_NOCRYPT, "", buff, 32, GSSAPI_INI);
-    if ( buff[0] )  
+    if ( buff[0] )
         nocrypt = atoi(buff);
     GetPrivateProfileString(INI_LAST, INI_LAST_NOMIC, "", buff, 32, GSSAPI_INI);
-    if ( buff[0] )  
+    if ( buff[0] )
         nomic = atoi(buff);
 }
 
@@ -637,7 +637,7 @@ fill_combo (HWND hDlg) {
         goto skip_ccache;
 
     retval = cc_get_NC_info(cc_ctx, &pNCi);
-    if (retval) 
+    if (retval)
         goto clean_ccache;
 
     for ( i=0; pNCi[i]; i++ ) {

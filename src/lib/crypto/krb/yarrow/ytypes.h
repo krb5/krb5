@@ -10,7 +10,7 @@
 #include <sys/types.h>
 #endif
 
-#define byte unsigned char 
+#define byte unsigned char
 
 #define uint8 unsigned char
 #define int8 signed char

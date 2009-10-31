@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Under U.S. law, this software may not be exported outside the US
  * without license from the U.S. Commerce department.
@@ -76,7 +76,7 @@ mit_des_is_weak_key(mit_des_cblock key)
     const mit_des_cblock *weak_p = weak;
 
     for (i = 0; i < (sizeof(weak)/sizeof(mit_des_cblock)); i++) {
-	if (!memcmp(weak_p++,key,sizeof(mit_des_cblock)))  
+	if (!memcmp(weak_p++,key,sizeof(mit_des_cblock)))
 	    return 1;
     }
     if ( DES_is_weak_key(key) == 1) /* Also OpenSSL's check */
@@ -84,4 +84,3 @@ mit_des_is_weak_key(mit_des_cblock key)
 
     return 0;
 }
-

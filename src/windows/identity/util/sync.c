@@ -39,7 +39,7 @@ KHMEXP void KHMAPI InitializeRwLock(PRWLOCK pLock)
     pLock->locks = 0;
     pLock->status = LOCK_OPEN;
     InitializeCriticalSection(&(pLock->cs));
-    pLock->writewx = CreateEvent(NULL, 
+    pLock->writewx = CreateEvent(NULL,
                                  FALSE, /* Manual reset */
                                  TRUE,  /* Initial state */
                                  NULL);
@@ -95,7 +95,7 @@ KHMEXP void KHMAPI LockReleaseRead(PRWLOCK pLock)
 KHMEXP void KHMAPI LockObtainWrite(PRWLOCK pLock)
 {
     EnterCriticalSection(&(pLock->cs));
-    if(pLock->status == LOCK_WRITING && 
+    if(pLock->status == LOCK_WRITING &&
        pLock->writer == GetCurrentThreadId()) {
         pLock->locks++;
         LeaveCriticalSection(&(pLock->cs));

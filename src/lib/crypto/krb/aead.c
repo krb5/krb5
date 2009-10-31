@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -91,7 +91,7 @@ make_unkeyed_checksum_iov(const struct krb5_hash_provider *hash_provider,
     return ret;
 }
 
-krb5_error_code 
+krb5_error_code
 krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum_type,
 			    krb5_key key,
 			    krb5_keyusage usage,
@@ -382,7 +382,7 @@ krb5int_c_iov_decrypt_stream(const struct krb5_aead_provider *aead,
     iov[i].data.data = stream->data.data;
     iov[i].data.length = header_len;
     i++;
- 
+
     for (j = 0; j < num_data; j++) {
 	if (data[j].flags == KRB5_CRYPTO_TYPE_DATA) {
 	    if (got_data) {
@@ -570,4 +570,3 @@ krb5int_c_encrypt_length_aead_compat(const struct krb5_aead_provider *aead,
 
     *length = header_len + inputlen + padding_len + trailer_len;
 }
-

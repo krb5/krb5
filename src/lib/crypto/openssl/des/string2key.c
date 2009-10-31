@@ -37,7 +37,6 @@ mit_des_string_to_key_int (krb5_keyblock *key,
     if ( key->length <  sizeof(outkey))
         return KRB5_CRYPTO_INTERNAL;
     key->length = sizeof(outkey);
-    memcpy(key->contents, outkey, key->length); 
+    memcpy(key->contents, outkey, key->length);
     return 0;
 }
-

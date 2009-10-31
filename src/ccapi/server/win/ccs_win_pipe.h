@@ -33,16 +33,16 @@
 
 /* ------------------------------------------------------------------------ */
 
-/* On Windows, a pipe is a struct containing a UUID and a handle.  Both the 
-   UUID and handle are supplied by the client.  
-   
-   The UUID is used to build the client's reply endpoint.  
-   
+/* On Windows, a pipe is a struct containing a UUID and a handle.  Both the
+   UUID and handle are supplied by the client.
+
+   The UUID is used to build the client's reply endpoint.
+
    The handle is to the requesting client thread's thread local storage struct,
    so that the client's one and only reply handler can put reply data where
    the requesting thread will be able to see it.
  */
-   
+
 struct ccs_win_pipe_t {
     char*   uuid;
     HANDLE  clientHandle;
@@ -58,7 +58,7 @@ cc_int32    ccs_win_pipe_compare    (const WIN_PIPE* win_pipe_1,
                                      const WIN_PIPE* win_pipe_2,
                                      cc_uint32  *out_equal);
 
-cc_int32    ccs_win_pipe_copy       (WIN_PIPE** out_pipe, 
+cc_int32    ccs_win_pipe_copy       (WIN_PIPE** out_pipe,
                                      const WIN_PIPE* in_pipe);
 
 cc_int32    ccs_win_pipe_valid      (const WIN_PIPE* in_pipe);

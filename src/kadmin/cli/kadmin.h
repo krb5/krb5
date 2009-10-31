@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * kadmin/cli/kadmin.h
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Prototypes for kadmin functions called from SS library.
  */
@@ -67,9 +68,8 @@ extern time_t get_date(char *);
 
 /* Yucky global variables */
 extern krb5_context context;
-extern char *krb5_defkeyname;	 
+extern char *krb5_defkeyname;
 extern char *whoami;
 extern void *handle;
 
 #endif /* __KADMIN_H__ */
-

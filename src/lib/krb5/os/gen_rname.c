@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/os/gen_rname.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * take a port-style address and unique string, and return
  * a replay cache tag string.
@@ -40,13 +41,13 @@ krb5_gen_replay_name(krb5_context context, const krb5_address *address, const ch
 
     len = strlen(uniq) + (address->length * 2) + 1;
     if ((*string = malloc(len)) == NULL)
-	return ENOMEM;
+        return ENOMEM;
 
     snprintf(*string, len, "%s", uniq);
     tmp = *string + strlen(uniq);
     for (i = 0; i < address->length; i++) {
-	snprintf(tmp, len - (tmp-*string), "%.2x", address->contents[i] & 0xff);
-	tmp += 2;
+        snprintf(tmp, len - (tmp-*string), "%.2x", address->contents[i] & 0xff);
+        tmp += 2;
     }
     return 0;
 }

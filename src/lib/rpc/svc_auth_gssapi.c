@@ -162,20 +162,20 @@ enum auth_stat gssrpc__svcauth_gssapi(
      uint32_t seq_num;
 
      PRINTF(("svcauth_gssapi: starting\n"));
-     
+
      /* clean up expired entries */
      clean_client();
 
      /* use AUTH_NONE until there is a client_handle */
      rqst->rq_xprt->xp_auth = &svc_auth_none;
-     
+
      memset(&call_res, 0, sizeof(call_res));
      creds.client_handle.length = 0;
      creds.client_handle.value = NULL;
-     
+
      cred = &msg->rm_call.cb_cred;
      verf = &msg->rm_call.cb_verf;
-     
+
      if (cred->oa_length == 0) {
 	  PRINTF(("svcauth_gssapi: empty creds, failing\n"));
 	  LOG_MISCERR("empty client credentials");
@@ -184,7 +184,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
      }
 
      PRINTF(("svcauth_gssapi: decoding credentials\n"));
-     xdrmem_create(&xdrs, cred->oa_base, cred->oa_length, XDR_DECODE); 
+     xdrmem_create(&xdrs, cred->oa_base, cred->oa_length, XDR_DECODE);
      memset(&creds, 0, sizeof(creds));
      if (! xdr_authgssapi_creds(&xdrs, &creds)) {
 	  PRINTF(("svcauth_gssapi: failed decoding creds\n"));
@@ -217,7 +217,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
 	  }
      }
 #endif
-	  
+
      /*
       * If this is an auth_msg and proc is GSSAPI_INIT, then create a
       * client handle for this client.  Otherwise, look up the
@@ -230,9 +230,9 @@ enum auth_stat gssrpc__svcauth_gssapi(
 	       ret = AUTH_FAILED;
 	       goto error;
 	  }
-	       
+
 	  PRINTF(("svcauth_gssapi: GSSAPI_INIT, creating client.\n"));
-	  
+
 	  client_data = create_client();
 	  if (client_data == NULL) {
 	       PRINTF(("svcauth_gssapi: create_client failed\n"));
@@ -247,8 +247,8 @@ enum auth_stat gssrpc__svcauth_gssapi(
 	       ret = AUTH_FAILED;
 	       goto error;
 	  }
-	  
-	  PRINTF(("svcauth_gssapi: incoming client_handle %d, len %d\n", 
+
+	  PRINTF(("svcauth_gssapi: incoming client_handle %d, len %d\n",
 		  *((uint32_t *) creds.client_handle.value),
 		  (int) creds.client_handle.length));
 
@@ -265,7 +265,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
      /* any response we send will use client_handle, so set it now */
      call_res.client_handle.length = sizeof(client_data->key);
      call_res.client_handle.value = (char *) &client_data->key;
-     
+
      /* mark this call as using AUTH_GSSAPI via client_data's SVCAUTH */
      rqst->rq_xprt->xp_auth = &client_data->svcauth;
 
@@ -304,7 +304,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
 
 	  /*
 	   * Process the call arg version number.
-	   * 
+	   *
 	   * Set the krb5_gss backwards-compatibility mode based on client
 	   * version.  This controls whether the AP_REP message is
 	   * encrypted with the session key (version 2+, correct) or the
@@ -369,7 +369,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
 	   * If accept_sec_context returns something other than
 	   * success and GSS_S_FAILURE, then assume different
 	   * credentials won't help and stop looping.
-	   * 
+	   *
 	   * Note that there are really two cases here: (1) the client
 	   * has a server_creds already, and (2) it does not.  They
 	   * are both written in the same loop so that there is only
@@ -384,7 +384,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
 		    PRINTF(("svcauth_gssapi: trying creds %d\n", i));
 		    server_creds = server_creds_list[i];
 	       }
-	       
+
 	       /* Free previous output_token from loop */
 	       if(i != 0) gss_release_buffer(&minor_stat, &output_token);
 
@@ -428,7 +428,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
 		    break;
 	       }
 	  }
-	  
+
 	  gssstat = call_res.gss_major;
 	  minor_stat = call_res.gss_minor;
 
@@ -448,7 +448,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
 				   call_res.gss_minor,
 				   &rqst->rq_xprt->xp_raddr,
 				   log_badauth_data);
-	       
+
 	       gss_release_buffer(&minor_stat, &output_token);
 	       svc_sendreply(rqst->rq_xprt, xdr_authgssapi_init_res,
 			     (caddr_t) &call_res);
@@ -456,7 +456,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
 	       ret = AUTH_OK;
 	       goto error;
 	  }
-	      
+
 	  if (output_token.length != 0) {
 	       PRINTF(("svcauth_gssapi: got new output token\n"));
 	       GSS_COPY_BUFFER(call_res.token, output_token);
@@ -468,7 +468,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
 			     (time_rec == GSS_C_INDEFINITE ?
 			      INDEF_EXPIRE : time_rec) + time(0));
 
-	       PRINTF(("svcauth_gssapi: context established, isn %d\n", 
+	       PRINTF(("svcauth_gssapi: context established, isn %d\n",
 		       client_data->seq_num));
 
 	       if (auth_gssapi_seal_seq(client_data->context,
@@ -503,17 +503,17 @@ enum auth_stat gssrpc__svcauth_gssapi(
 	  /* check the verifier */
 	  PRINTF(("svcauth_gssapi: checking verifier, len %d\n",
 		  verf->oa_length));
-	  
+
 	  in_buf.length = verf->oa_length;
 	  in_buf.value = verf->oa_base;
-	  
+
 	  if (auth_gssapi_unseal_seq(client_data->context, &in_buf,
 				     &seq_num) == FALSE) {
 	       ret = AUTH_BADVERF;
 	       LOG_MISCERR("internal error unsealing sequence number");
 	       goto error;
 	  }
-	  
+
 	  if (seq_num != client_data->seq_num + 1) {
 	       PRINTF(("svcauth_gssapi: expected isn %d, got %d\n",
 		       client_data->seq_num + 1, seq_num));
@@ -521,12 +521,12 @@ enum auth_stat gssrpc__svcauth_gssapi(
 		    (*log_badverf)(client_data->client_name,
 				   client_data->server_name,
 				   rqst, msg, log_badverf_data);
-	       
+
 	       ret = AUTH_REJECTEDVERF;
 	       goto error;
 	  }
 	  client_data->seq_num++;
-	  
+
 	  PRINTF(("svcauth_gssapi: seq_num %d okay\n", seq_num));
 
 	  /* free previous response verifier, if any */
@@ -534,7 +534,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
 	       gss_release_buffer(&minor_stat, &client_data->prev_verf);
 	       client_data->prev_verf.length = 0;
 	  }
-	  
+
 	  /* prepare response verifier */
 	  seq_num = client_data->seq_num + 1;
 	  if (auth_gssapi_seal_seq(client_data->context, seq_num,
@@ -543,17 +543,17 @@ enum auth_stat gssrpc__svcauth_gssapi(
 	       LOG_MISCERR("internal error sealing sequence number");
 	       goto error;
 	  }
-	  
+
 	  client_data->seq_num++;
-	  
+
 	  PRINTF(("svcauth_gssapi; response seq_num %d\n", seq_num));
-	  
+
 	  rqst->rq_xprt->xp_verf.oa_flavor = AUTH_GSSAPI;
-	  rqst->rq_xprt->xp_verf.oa_base = out_buf.value; 
+	  rqst->rq_xprt->xp_verf.oa_base = out_buf.value;
 	  rqst->rq_xprt->xp_verf.oa_length = out_buf.length;
 
 	  /* save verifier so it can be freed next time */
-	  client_data->prev_verf.value = out_buf.value; 
+	  client_data->prev_verf.value = out_buf.value;
 	  client_data->prev_verf.length = out_buf.length;
 
 	  /*
@@ -590,7 +590,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
 
 		    /* done with call args */
 		    xdr_free(xdr_authgssapi_init_arg, &call_arg);
-		    
+
 		    if (gssstat != GSS_S_COMPLETE) {
 			 AUTH_GSSAPI_DISPLAY_STATUS(("processing token",
 						     gssstat, minor_stat));
@@ -604,7 +604,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
 
 	       case AUTH_GSSAPI_DESTROY:
 		    PRINTF(("svcauth_gssapi: GSSAPI_DESTROY\n"));
-		    
+
 		    PRINTF(("svcauth_gssapi: sending reply\n"));
 		    svc_sendreply(rqst->rq_xprt, xdr_void, NULL);
 		    *no_dispatch = TRUE;
@@ -634,7 +634,7 @@ enum auth_stat gssrpc__svcauth_gssapi(
 		  (int) creds.client_handle.length));
 	  xdr_free(xdr_authgssapi_creds, &creds);
      }
-     
+
      PRINTF(("\n"));
      return AUTH_OK;
 
@@ -644,7 +644,7 @@ error:
 		  (int) creds.client_handle.length));
 	  xdr_free(xdr_authgssapi_creds, &creds);
      }
-     
+
      PRINTF(("\n"));
      return ret;
 }
@@ -664,7 +664,7 @@ static void cleanup(void)
      }
 
      exit(0);
-}     
+}
 
 /*
  * Function: create_client
@@ -675,7 +675,7 @@ static void cleanup(void)
  * Returns: the new client_data structure, or NULL on failure.
  *
  * Effects:
- * 
+ *
  * A new client_data is created and stored in the hash table and
  * b-tree.  A new key that is unique in the current database is
  * chosen; this key should be used as the client's client_handle.
@@ -685,41 +685,41 @@ static svc_auth_gssapi_data *create_client(void)
      client_list *c;
      svc_auth_gssapi_data *client_data;
      static int client_key = 1;
-     
+
      PRINTF(("svcauth_gssapi: empty creds, creating\n"));
 
      client_data = (svc_auth_gssapi_data *) malloc(sizeof(*client_data));
      if (client_data == NULL)
 	  return NULL;
      memset(client_data, 0, sizeof(*client_data));
-     L_PRINTF(2, ("create_client: new client_data = %p\n", 
+     L_PRINTF(2, ("create_client: new client_data = %p\n",
 		  (void *) client_data));
-     
+
      /* set up client data structure */
      client_data->established = 0;
      client_data->context = GSS_C_NO_CONTEXT;
      client_data->expiration = time(0) + INITIATION_TIMEOUT;
-     
+
      /* set up psycho-recursive SVCAUTH hack */
      client_data->svcauth.svc_ah_ops = &svc_auth_gssapi_ops;
      client_data->svcauth.svc_ah_private = (caddr_t) client_data;
 
      client_data->key = client_key++;
-     
+
      c = (client_list *) malloc(sizeof(client_list));
      if (c == NULL)
 	  return NULL;
      c->client = client_data;
      c->next = NULL;
-     
-     
+
+
      if (clients == NULL)
 	  clients = c;
      else {
 	  c->next = clients;
 	  clients = c;
      }
-     
+
      PRINTF(("svcauth_gssapi: new handle %d\n", client_data->key));
      L_PRINTF(2, ("create_client: done\n"));
 
@@ -773,18 +773,18 @@ static svc_auth_gssapi_data *get_client(gss_buffer_t client_handle)
 {
      client_list *c;
      uint32_t handle;
-     
+
      memcpy(&handle, client_handle->value, 4);
-     
+
      L_PRINTF(2, ("get_client: looking for client %d\n", handle));
-     
+
      c = clients;
      while (c) {
 	  if (c->client->key == handle)
 	       return c->client;
 	  c = c->next;
      }
-     
+
      L_PRINTF(2, ("get_client: client_handle lookup failed\n"));
      return NULL;
 }
@@ -825,7 +825,7 @@ static void destroy_client(svc_auth_gssapi_data *client_data)
      if (gssstat != GSS_S_COMPLETE)
 	  AUTH_GSSAPI_DISPLAY_STATUS(("deleting context", gssstat,
 				      minor_stat));
-     
+
      gss_release_buffer(&minor_stat, &out_buf);
      gss_release_name(&minor_stat, &client_data->client_name);
      if (client_data->prev_verf.length != 0)
@@ -854,13 +854,13 @@ static void destroy_client(svc_auth_gssapi_data *client_data)
 	  PRINTF(("destroy_client: client_handle delete failed\n"));
 	  abort();
      }
-     
+
 done:
-     
+
      L_PRINTF(2, ("destroy_client: client %d destroyed\n", client_data->key));
-     
+
      free(client_data);
-     
+
 #if 0 /*ifdef PURIFY*/
      purify_watch_n(client_data, sizeof(*client_data), "rw");
 #endif
@@ -894,10 +894,10 @@ static void clean_client(void)
      c = clients;
      while (c) {
 	  client_data = c->client;
-	  
+
 	  L_PRINTF(2, ("clean_client: client_data = %p\n",
 		       (void *) client_data));
-	  
+
 	  if (client_data->expiration < time(0)) {
 	       PRINTF(("clean_client: client %d expired\n",
 		       client_data->key));
@@ -926,28 +926,28 @@ bool_t svcauth_gssapi_set_names(
      OM_uint32 gssstat, minor_stat;
      gss_buffer_desc in_buf;
      int i;
-     
+
      if (num == 0)
 	  for (; names[num].name != NULL; num++)
 	       ;
 
      server_creds_list = NULL;
      server_name_list = NULL;
-     
+
      server_creds_list = (gss_cred_id_t *) malloc(num*sizeof(gss_cred_id_t));
      if (server_creds_list == NULL)
 	  goto fail;
      server_name_list = (gss_name_t *) malloc(num*sizeof(gss_name_t));
      if (server_name_list == NULL)
 	  goto fail;
-     
+
      for (i = 0; i < num; i++) {
 	  server_name_list[i] = 0;
 	  server_creds_list[i] = 0;
      }
 
      server_creds_count = num;
-     
+
      for (i = 0; i < num; i++) {
 	  in_buf.value = names[i].name;
 	  in_buf.length = strlen(in_buf.value) + 1;
@@ -955,8 +955,8 @@ bool_t svcauth_gssapi_set_names(
 	  PRINTF(("svcauth_gssapi_set_names: importing %s\n", names[i].name));
 
 	  gssstat = gss_import_name(&minor_stat, &in_buf, names[i].type,
-				    &server_name_list[i]); 
-     
+				    &server_name_list[i]);
+
 	  if (gssstat != GSS_S_COMPLETE) {
 	       AUTH_GSSAPI_DISPLAY_STATUS(("importing name", gssstat,
 					   minor_stat));

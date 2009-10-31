@@ -470,7 +470,7 @@ khui_menu_get_size(khui_menu_def * d);
 KHMEXP khui_action_ref *
 khui_menu_get_action(khui_menu_def * d, khm_size idx);
 
-/*! \brief Action scope identifiers 
+/*! \brief Action scope identifiers
 
     The scope identifier is a value which describes the scope of the
     cursor context.  See documentation on individual scope identifiers
@@ -485,7 +485,7 @@ khui_menu_get_action(khui_menu_def * d, khm_size idx);
     selected.
 
     Note that the scope typically only apply to cursor contexts and
-    not the selection context.  Please see 
+    not the selection context.  Please see
     \ref khui_context "UI Contexts" for more information.
 
     \see \ref khui_context "UI Contexts"
@@ -494,11 +494,11 @@ typedef enum tag_khui_scope {
     KHUI_SCOPE_NONE,
     /*!< No context.  Nothing is selected. */
 
-    KHUI_SCOPE_IDENT,     
+    KHUI_SCOPE_IDENT,
     /*!< Identity.  The selection is the entire identity specified in
       the \a identity field of the context. */
 
-    KHUI_SCOPE_CREDTYPE,  
+    KHUI_SCOPE_CREDTYPE,
     /*!< A credentials type.  The selection is an entire credentials
       type.  If \a identity is non-NULL, then the scope is all the
       credentials of type \a cred_type which belong to \a identity.
@@ -627,10 +627,10 @@ typedef struct tag_khui_action_context {
 
     \note This function should only be called from the UI thread.
  */
-KHMEXP void KHMAPI 
-khui_context_set(khui_scope  scope, 
-                 khm_handle  identity, 
-                 khm_int32   cred_type, 
+KHMEXP void KHMAPI
+khui_context_set(khui_scope  scope,
+                 khm_handle  identity,
+                 khm_int32   cred_type,
                  khm_handle  cred,
                  khui_header *headers,
                  khm_size    n_headers,
@@ -685,10 +685,10 @@ khui_context_set(khui_scope  scope,
 
     \note This function should only be called from the UI thread.
  */
-KHMEXP void KHMAPI 
-khui_context_set_ex(khui_scope scope, 
-                    khm_handle identity, 
-                    khm_int32 cred_type, 
+KHMEXP void KHMAPI
+khui_context_set_ex(khui_scope scope,
+                    khm_handle identity,
+                    khm_int32 cred_type,
                     khm_handle cred,
                     khui_header *headers,
                     khm_size n_headers,
@@ -717,7 +717,7 @@ khui_context_set_indirect(khui_action_context * ctx);
     \note The returned context should not be modified prior to calling
     khui_context_release().
 */
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_context_get(khui_action_context * ctx);
 
 /*! \brief Create a new UI context
@@ -745,7 +745,7 @@ khui_context_create(khui_action_context * ctx,
     \note The context should not have been modified between calling
     khui_context_get() and khui_context_release()
  */
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_context_release(khui_action_context * ctx);
 
 /*! \brief Reset the UI context
@@ -753,7 +753,7 @@ khui_context_release(khui_action_context * ctx);
     Nullifies the current UI context and releases any holds obtained
     on objects related to the previous context.
 */
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_context_reset(void);
 
 /*! \brief Refresh context data
@@ -770,7 +770,7 @@ khui_context_reset(void);
     khui_context_refresh() should be called to adjust the state of the
     ::KHUI_ACTION_SET_DEF_ID action.
  */
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_context_refresh(void);
 
 /*! \brief A filter function that filters for credentials in the cursor context

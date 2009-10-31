@@ -35,7 +35,7 @@ typedef enum tag_khui_timer_type {
     KHUI_TTYPE_ID_CRIT,         /* Identity critical */
     KHUI_TTYPE_ID_WARN,         /* Identity warning */
     KHUI_TTYPE_CRED_EXP,        /* Credential expiration */
-    KHUI_TTYPE_CRED_CRIT,       /* Credential critical */ 
+    KHUI_TTYPE_CRED_CRIT,       /* Credential critical */
     KHUI_TTYPE_CRED_WARN,       /* Credential warning */
 
     KHUI_N_TTYPES,              /* Count of the timers that we

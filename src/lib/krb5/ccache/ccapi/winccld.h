@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * winccld.h -- the dynamic loaded version of the ccache DLL
  */
@@ -19,19 +20,19 @@
 
 #ifdef USE_CCAPI_V3
 typedef CCACHE_API cc_int32 (*FP_cc_initialize) (
-        cc_context_t*           outContext,
-        cc_int32                inVersion,
-        cc_int32*               outSupportedVersion,
-        char const**            outVendor);
+    cc_context_t*           outContext,
+    cc_int32                inVersion,
+    cc_int32*               outSupportedVersion,
+    char const**            outVendor);
 #else
-typedef cc_int32 (*FP_cc_initialize)(apiCB**, const cc_int32, 
-			cc_int32*, const char**);     
-typedef cc_int32 (*FP_cc_shutdown)(apiCB**);            
-typedef cc_int32 (*FP_cc_get_change_time)(apiCB*, cc_time_t*);    
+typedef cc_int32 (*FP_cc_initialize)(apiCB**, const cc_int32,
+                                     cc_int32*, const char**);
+typedef cc_int32 (*FP_cc_shutdown)(apiCB**);
+typedef cc_int32 (*FP_cc_get_change_time)(apiCB*, cc_time_t*);
 typedef cc_int32 (*FP_cc_create)(apiCB*, const char*, const char*,
-			const enum cc_cred_vers, const cc_int32, ccache_p**);
+                                 const enum cc_cred_vers, const cc_int32, ccache_p**);
 typedef cc_int32 (*FP_cc_open)(apiCB*, const char*, const enum cc_cred_vers,
-			const cc_int32, ccache_p**);
+                               const cc_int32, ccache_p**);
 typedef cc_int32 (*FP_cc_close)(apiCB*, ccache_p**);
 typedef cc_int32 (*FP_cc_destroy)(apiCB*, ccache_p**);
 typedef cc_int32 (*FP_cc_seq_fetch_NCs)(apiCB*, ccache_p**, ccache_cit**);
@@ -42,21 +43,21 @@ typedef cc_int32 (*FP_cc_get_NC_info)(apiCB*, struct _infoNC***);
 typedef cc_int32 (*FP_cc_free_NC_info)(apiCB*, struct _infoNC***);
 typedef cc_int32 (*FP_cc_get_name)(apiCB*, const ccache_p*, char**);
 typedef cc_int32 (*FP_cc_set_principal)(apiCB*, const ccache_p*,
-			const enum cc_cred_vers, const char*);
+                                        const enum cc_cred_vers, const char*);
 typedef cc_int32 (*FP_cc_get_principal)(apiCB*, ccache_p*, char**);
 typedef cc_int32 (*FP_cc_get_cred_version)(apiCB*, const ccache_p*,
-			enum cc_cred_vers*);
+                                           enum cc_cred_vers*);
 typedef cc_int32 (*FP_cc_lock_request)(apiCB*, const ccache_p*,
-			const cc_int32);
+                                       const cc_int32);
 typedef cc_int32 (*FP_cc_store)(apiCB*, const ccache_p*, const cred_union);
 typedef cc_int32 (*FP_cc_remove_cred)(apiCB*, const ccache_p*,
-			const cred_union);
-typedef cc_int32 (*FP_cc_seq_fetch_creds)(apiCB*, const ccache_p*, 
-			cred_union**, ccache_cit**);
-typedef cc_int32 (*FP_cc_seq_fetch_creds_begin)(apiCB*, const ccache_p*, 
-			ccache_cit**);
-typedef cc_int32 (*FP_cc_seq_fetch_creds_next)(apiCB*, cred_union**, 
-			ccache_cit*);
+                                      const cred_union);
+typedef cc_int32 (*FP_cc_seq_fetch_creds)(apiCB*, const ccache_p*,
+                                          cred_union**, ccache_cit**);
+typedef cc_int32 (*FP_cc_seq_fetch_creds_begin)(apiCB*, const ccache_p*,
+                                                ccache_cit**);
+typedef cc_int32 (*FP_cc_seq_fetch_creds_next)(apiCB*, cred_union**,
+                                               ccache_cit*);
 typedef cc_int32 (*FP_cc_seq_fetch_creds_end)(apiCB*, ccache_cit**);
 typedef cc_int32 (*FP_cc_free_principal)(apiCB*, char**);
 typedef cc_int32 (*FP_cc_free_name)(apiCB*, char** name);

@@ -67,4 +67,3 @@ gss_delete_name_attribute(OM_uint32 *minor_status,
 
     return status;
 }
-

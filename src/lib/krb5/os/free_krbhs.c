@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/os/free_krbhs.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * krb5_free_krbhst() function
  */
@@ -30,8 +31,8 @@
 #include "k5-int.h"
 
 /*
- Frees the storage taken by a host list returned by krb5_get_krbhst.
- */
+  Frees the storage taken by a host list returned by krb5_get_krbhst.
+*/
 
 krb5_error_code
 krb5_free_krbhst(krb5_context context, char *const *hostlist)
@@ -39,9 +40,9 @@ krb5_free_krbhst(krb5_context context, char *const *hostlist)
     register char * const *cp;
 
     if (hostlist == NULL)
-	return 0;
+        return 0;
     for (cp = hostlist; *cp; cp++)
-	free(*cp);
+        free(*cp);
     free((char *)hostlist);
     return 0;
 }

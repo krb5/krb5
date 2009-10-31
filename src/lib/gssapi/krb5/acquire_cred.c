@@ -766,4 +766,3 @@ gss_krb5int_set_cred_rcache(OM_uint32 *minor_status,
    *minor_status = 0;
    return GSS_S_COMPLETE;
 }
-

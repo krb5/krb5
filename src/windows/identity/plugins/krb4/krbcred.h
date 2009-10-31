@@ -106,8 +106,8 @@ extern khm_boolean krb4_initialized;
 extern khm_handle krb4_credset;
 
 /* plugin callbacks */
-khm_int32 KHMAPI 
-krb4_cb(khm_int32 msg_type, khm_int32 msg_subtype, 
+khm_int32 KHMAPI
+krb4_cb(khm_int32 msg_type, khm_int32 msg_subtype,
         khm_ui_4 uparam, void * vparam);
 
 INT_PTR CALLBACK

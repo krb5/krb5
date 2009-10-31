@@ -296,7 +296,7 @@ extern void
     lm_mode (unsigned char *, int, int);
 
 extern void
-    ExitString (char *, int), 
+    ExitString (char *, int),
     Exit (int),
     SetForExit (void),
     EmptyTerminal (void),
@@ -313,7 +313,7 @@ extern void
     slc_end_reply (void);
 
 extern int
-    quit (int, char *[]), 
+    quit (int, char *[]),
     ttyflush (int),
     rlogin_susp (void),
     tn (int, char **),
@@ -325,7 +325,7 @@ extern int
     slc_update (void),
     Scheduler (int),
     SetSockOpt (int, int, int, int),
-    stilloob (void), 
+    stilloob (void),
     telrcv (void),
     telnet_spin (void),
     TerminalWrite (unsigned char *, int),

@@ -404,7 +404,7 @@ krb5_error_code ktest_make_sample_kdc_req_body(krb)
     if (retval) return retval;
     return 0;
 }
-  
+
 krb5_error_code ktest_make_sample_safe(s)
     krb5_safe * s;
 {
@@ -765,7 +765,7 @@ krb5_error_code ktest_make_sample_sam_response(p)
     p->sam_enc_key.kvno = 1942;
     p->sam_enc_nonce_or_ts.ciphertext.data = strdup("nonce or ts");
     if (p->sam_enc_nonce_or_ts.ciphertext.data == NULL) return ENOMEM;
-    p->sam_enc_nonce_or_ts.ciphertext.length = 
+    p->sam_enc_nonce_or_ts.ciphertext.length =
 	strlen(p->sam_enc_nonce_or_ts.ciphertext.data);
     p->sam_enc_nonce_or_ts.enctype = ENCTYPE_DES_CBC_CRC;
     p->sam_enc_nonce_or_ts.kvno = 3382;
@@ -785,7 +785,7 @@ krb5_error_code ktest_make_sample_sam_response_2(p)
     p->sam_track_id.length = strlen(p->sam_track_id.data);
     p->sam_enc_nonce_or_sad.ciphertext.data = strdup("nonce or sad");
     if (p->sam_enc_nonce_or_sad.ciphertext.data == NULL) return ENOMEM;
-    p->sam_enc_nonce_or_sad.ciphertext.length = 
+    p->sam_enc_nonce_or_sad.ciphertext.length =
 	strlen(p->sam_enc_nonce_or_sad.ciphertext.data);
     p->sam_enc_nonce_or_sad.enctype = ENCTYPE_DES_CBC_CRC;
     p->sam_enc_nonce_or_sad.kvno = 3382;
@@ -931,7 +931,7 @@ void ktest_empty_data(d)
 	d->data = NULL;
 	d->length = 0;
     }
-}  
+}
 
 void ktest_destroy_checksum(cs)
     krb5_checksum ** cs;
@@ -1038,7 +1038,7 @@ void ktest_empty_addresses(a)
 
     for (i=0; a[i] != NULL; i++)
 	ktest_destroy_address(&(a[i]));
-}  
+}
 
 void ktest_destroy_addresses(a)
     krb5_address *** a;
@@ -1096,7 +1096,7 @@ void ktest_destroy_ticket(tkt)
     /*  ktest_empty_enc_tkt_part(((*tkt)->enc_part2));*/
     free(*tkt);
     *tkt = NULL;
-}  
+}
 
 void ktest_empty_ticket(tkt)
     krb5_ticket * tkt;
@@ -1107,7 +1107,7 @@ void ktest_empty_ticket(tkt)
     if (tkt->enc_part2) {
 	ktest_destroy_enc_tkt_part(&(tkt->enc_part2));
     }
-}  
+}
 
 void ktest_destroy_enc_data(ed)
     krb5_enc_data * ed;
@@ -1134,7 +1134,7 @@ void ktest_destroy_etype_info(info)
 	ktest_destroy_etype_info_entry(info[i]);
     free(info);
 }
-    
+
 
 void ktest_empty_kdc_req(kr)
     krb5_kdc_req *kr;
@@ -1185,7 +1185,7 @@ void ktest_empty_authenticator(a)
     krb5_authenticator * a;
 {
 
-    if (a->client) 
+    if (a->client)
 	ktest_destroy_principal(&(a->client));
     if (a->checksum)
 	ktest_destroy_checksum(&(a->checksum));
@@ -1201,7 +1201,7 @@ void ktest_empty_enc_tkt_part(etp)
 
     if (etp->session)
 	ktest_destroy_keyblock(&(etp->session));
-    if (etp->client) 
+    if (etp->client)
 	ktest_destroy_principal(&(etp->client));
     if (etp->caddrs)
 	ktest_destroy_addresses(&(etp->caddrs));
@@ -1227,7 +1227,7 @@ void ktest_empty_enc_kdc_rep_part(ekr)
     if (ekr->session)
 	ktest_destroy_keyblock(&(ekr->session));
 
-    if (ekr->server) 
+    if (ekr->server)
 	ktest_destroy_principal(&(ekr->server));
 
     if (ekr->caddrs)
@@ -1275,9 +1275,9 @@ void ktest_destroy_cred_info(ci)
 {
     if ((*ci)->session)
 	ktest_destroy_keyblock(&((*ci)->session));
-    if ((*ci)->client) 
+    if ((*ci)->client)
 	ktest_destroy_principal(&((*ci)->client));
-    if ((*ci)->server) 
+    if ((*ci)->server)
 	ktest_destroy_principal(&((*ci)->server));
     if ((*ci)->caddrs)
 	ktest_destroy_addresses(&((*ci)->caddrs));
@@ -1380,7 +1380,7 @@ void ktest_empty_pwd_data(pd)
 	}
     }
     free(pd->element);
-  
+
 }
 
 void ktest_empty_alt_method(am)

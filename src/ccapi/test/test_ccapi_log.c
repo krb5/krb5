@@ -15,7 +15,7 @@ void _log_error_v(const char *file, int line, const char *format, va_list ap)
 }
 
 void _log_error(const char *file, int line, const char *format, ...)
-{	
+{
 	va_list ap;
 	va_start(ap, format);
 	_log_error_v(file, line, format, ap);
@@ -36,7 +36,7 @@ void test_footer(const char *msg, int err) {
 		}
 		else {
 			fprintf(stdout, "\n*** %d failure%s in %s ***\n", err, (err == 1) ? "" : "s", msg);
-		}		
+		}
 	}
 }
 

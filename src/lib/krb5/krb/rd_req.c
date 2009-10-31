@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/krb/rd_req.c
  *
@@ -47,33 +48,33 @@
 
 krb5_error_code KRB5_CALLCONV
 krb5_rd_req(krb5_context context, krb5_auth_context *auth_context,
-	    const krb5_data *inbuf, krb5_const_principal server,
-	    krb5_keytab keytab, krb5_flags *ap_req_options,
-	    krb5_ticket **ticket)
+            const krb5_data *inbuf, krb5_const_principal server,
+            krb5_keytab keytab, krb5_flags *ap_req_options,
+            krb5_ticket **ticket)
 {
-    krb5_error_code 	  retval;
-    krb5_ap_req 	* request;
-    krb5_auth_context	  new_auth_context;
+    krb5_error_code       retval;
+    krb5_ap_req         * request;
+    krb5_auth_context     new_auth_context;
     krb5_keytab           new_keytab = NULL;
 
     if (!krb5_is_ap_req(inbuf))
-	return KRB5KRB_AP_ERR_MSG_TYPE;
+        return KRB5KRB_AP_ERR_MSG_TYPE;
 #ifndef LEAN_CLIENT
     if ((retval = decode_krb5_ap_req(inbuf, &request))) {
-    	switch (retval) {
-	case KRB5_BADMSGTYPE:
-	    return KRB5KRB_AP_ERR_BADVERSION;
-	default:
-	    return(retval);
-	}
+        switch (retval) {
+        case KRB5_BADMSGTYPE:
+            return KRB5KRB_AP_ERR_BADVERSION;
+        default:
+            return(retval);
+        }
     }
 #endif /* LEAN_CLIENT */
 
     /* Get an auth context if necessary. */
     new_auth_context = NULL;
     if (*auth_context == NULL) {
-	if ((retval = krb5_auth_con_init(context, &new_auth_context)))
-	    goto cleanup_request;
+        if ((retval = krb5_auth_con_init(context, &new_auth_context)))
+            goto cleanup_request;
         *auth_context = new_auth_context;
     }
 
@@ -81,14 +82,14 @@ krb5_rd_req(krb5_context context, krb5_auth_context *auth_context,
 #ifndef LEAN_CLIENT
     /* Get a keytab if necessary. */
     if (keytab == NULL) {
-	if ((retval = krb5_kt_default(context, &new_keytab)))
-	    goto cleanup_auth_context;
-	keytab = new_keytab;
+        if ((retval = krb5_kt_default(context, &new_keytab)))
+            goto cleanup_auth_context;
+        keytab = new_keytab;
     }
 #endif /* LEAN_CLIENT */
 
     retval = krb5_rd_req_decoded(context, auth_context, request, server,
-				 keytab, ap_req_options, ticket);
+                                 keytab, ap_req_options, ticket);
 
 #ifndef LEAN_CLIENT
     if (new_keytab != NULL)
@@ -97,12 +98,11 @@ krb5_rd_req(krb5_context context, krb5_auth_context *auth_context,
 
 cleanup_auth_context:
     if (new_auth_context && retval) {
-	krb5_auth_con_free(context, new_auth_context);
-	*auth_context = NULL;
+        krb5_auth_con_free(context, new_auth_context);
+        *auth_context = NULL;
     }
 
 cleanup_request:
     krb5_free_ap_req(context, request);
     return retval;
 }
-

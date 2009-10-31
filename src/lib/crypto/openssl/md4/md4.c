@@ -48,4 +48,3 @@ krb5int_MD4Final (krb5_MD4_CTX *mdContext)
     EVP_DigestFinal_ex(&mdContext->ossl_md4_ctx, mdContext->digest , NULL);
     EVP_MD_CTX_cleanup(&mdContext->ossl_md4_ctx );
 }
-

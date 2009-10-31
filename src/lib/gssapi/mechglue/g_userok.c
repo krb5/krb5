@@ -111,4 +111,3 @@ gssint_userok(OM_uint32 *minor,
 
 	return (major);
 } /* gss_userok */
-

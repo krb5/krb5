@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #include <assert.h>
 
 #include "autoconf.h"
@@ -41,18 +42,18 @@ int krb5int_lib_init(void)
 
     err = krb5int_rc_finish_init();
     if (err)
-	return err;
+        return err;
 #ifndef LEAN_CLIENT
     err = krb5int_kt_initialize();
     if (err)
-	return err;
+        return err;
 #endif /* LEAN_CLIENT */
     err = krb5int_cc_initialize();
     if (err)
-	return err;
+        return err;
     err = k5_mutex_finish_init(&krb5int_us_time_mutex);
     if (err)
-	return err;
+        return err;
 
     return 0;
 }
@@ -71,9 +72,9 @@ void krb5int_lib_fini(void)
 {
     if (!INITIALIZER_RAN(krb5int_lib_init) || PROGRAM_EXITING()) {
 #ifdef SHOW_INITFINI_FUNCS
-	printf("krb5int_lib_fini: skipping\n");
+        printf("krb5int_lib_fini: skipping\n");
 #endif
-	return;
+        return;
     }
 
 #ifdef SHOW_INITFINI_FUNCS

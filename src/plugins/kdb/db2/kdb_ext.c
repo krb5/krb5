@@ -96,4 +96,3 @@ krb5_db2_invoke(krb5_context context,
 
     return code;
 }
-

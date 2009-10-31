@@ -2,7 +2,7 @@
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -12,7 +12,7 @@
  * without specific, written prior permission. Sun Microsystems makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * SUN MICROSYSTEMS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL SUN MICROSYSTEMS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -140,7 +140,7 @@ OM_uint32 *		time_rec;
 	mech_type = (gss_OID)req_mech_type;
 
     union_name = (gss_union_name_t)target_name;
-    
+
     /*
      * obtain the gss mechanism information for the requested
      * mechanism.  If mech_type is NULL, set it to the resultant
@@ -177,7 +177,7 @@ OM_uint32 *		time_rec;
      * underlying mechanism context handle. Otherwise, cast the
      * value of *context_handle to the union context variable.
      */
-    
+
     if(*context_handle == GSS_C_NO_CONTEXT) {
 	status = GSS_S_FAILURE;
 	union_ctx_id = (gss_union_ctx_id_t)
@@ -195,19 +195,19 @@ OM_uint32 *		time_rec;
 	union_ctx_id->internal_ctx_id = GSS_C_NO_CONTEXT;
     } else
 	union_ctx_id = *context_handle;
-    
-    /* 
+
+    /*
      * get the appropriate cred handle from the union cred struct.
      * defaults to GSS_C_NO_CREDENTIAL if there is no cred, which will
      * use the default credential.
      */
     union_cred = (gss_union_cred_t) claimant_cred_handle;
     input_cred_handle = gssint_get_mechanism_cred(union_cred, mech_type);
-    
+
     /*
-     * now call the approprate underlying mechanism routine 
+     * now call the approprate underlying mechanism routine
      */
-    
+
     status = mech->gss_init_sec_context(
 	minor_status,
 	input_cred_handle,

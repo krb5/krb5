@@ -83,7 +83,7 @@ extern char *malloc();
 #else
 #include <strings.h>
 #endif
- 
+
 #include "encrypt.h"
 #include "auth.h"
 #include "misc.h"
@@ -182,7 +182,7 @@ kerberos5_init(ap, server)
 	int server;
 {
 	krb5_error_code retval;
-	
+
 	if (server)
 		str_data[3] = TELQUAL_REPLY;
 	else
@@ -201,7 +201,7 @@ kerberos5_cleanup()
     krb5_error_code retval;
     krb5_ccache ccache;
     char *ccname;
-    
+
     if (telnet_context == 0)
 	return;
 
@@ -306,7 +306,7 @@ kerberos5_send(ap)
 #ifdef ENCRYPTION
 	ap_opts |= AP_OPTS_USE_SUBKEY;
 #endif	/* ENCRYPTION */
-	    
+
 	if (auth_context) {
 	    krb5_auth_con_free(telnet_context, auth_context);
 	    auth_context = 0;
@@ -318,10 +318,10 @@ kerberos5_send(ap)
 	    }
 	    return(0);
 	}
-	
+
 	krb5_auth_con_setflags(telnet_context, auth_context,
 			       KRB5_AUTH_CONTEXT_RET_TIME);
-	
+
 	type_check[0] = ap->type;
 	type_check[1] = ap->way;
 	check_data.magic = KV5M_DATA;
@@ -366,7 +366,7 @@ kerberos5_send(ap)
 		return(0);
 	}
 
-        if (!auth_sendname((unsigned char *) UserNameRequested, 
+        if (!auth_sendname((unsigned char *) UserNameRequested,
 			   (int) strlen(UserNameRequested))) {
                 if (auth_debug_mode)
                         printf("telnet: Not enough room for user name\r\n");
@@ -415,7 +415,7 @@ kerberos5_is(ap, data, cnt)
 		    r = krb5_auth_con_init(telnet_context, &auth_context);
 		if (!r) {
 		    krb5_rcache rcache;
-		    
+
 		    r = krb5_auth_con_getrcache(telnet_context, auth_context,
 						&rcache);
 		    if (!r && !rcache) {
@@ -434,7 +434,7 @@ kerberos5_is(ap, data, cnt)
 						    auth_context, rcache);
 		}
 		if (!r && telnet_srvtab)
-		    r = krb5_kt_resolve(telnet_context, 
+		    r = krb5_kt_resolve(telnet_context,
 					telnet_srvtab, &keytabid);
 		if (!r)
 		    r = krb5_rd_req(telnet_context, &auth_context, &auth,
@@ -458,10 +458,10 @@ kerberos5_is(ap, data, cnt)
 		}
 		if (krb5_princ_component(telnet_context,ticket->server,0)->length < 256) {
 		    char princ[256];
-		    strncpy(princ,	
+		    strncpy(princ,
 			    krb5_princ_component(telnet_context, ticket->server,0)->data,
 			    krb5_princ_component(telnet_context, ticket->server,0)->length);
-		    princ[krb5_princ_component(telnet_context, 
+		    princ[krb5_princ_component(telnet_context,
 					       ticket->server,0)->length] = '\0';
 		    if (strcmp("host", princ)) {
                         if(strlen(princ) < sizeof(errbuf) - 39) {
@@ -543,8 +543,8 @@ kerberos5_is(ap, data, cnt)
 		    }
 
 		    Data(ap, KRB_RESPONSE, outbuf.data, outbuf.length);
-		} 
-		if (krb5_unparse_name(telnet_context, 
+		}
+		if (krb5_unparse_name(telnet_context,
 				      ticket->enc_part2 ->client,
 				      &name))
 			name = 0;
@@ -555,7 +555,7 @@ kerberos5_is(ap, data, cnt)
 							name ? name : "");
 		}
                 auth_finished(ap, AUTH_USER);
-		
+
 		if (name)
 		    free(name);
 		krb5_auth_con_getrecvsubkey(telnet_context, auth_context,
@@ -572,7 +572,7 @@ kerberos5_is(ap, data, cnt)
 				       ticket->enc_part2->session,
 				       &session_key);
 		}
-		
+
 #ifdef ENCRYPTION
 		skey.type = SK_DES;
 		skey.length = 8;
@@ -584,8 +584,8 @@ kerberos5_is(ap, data, cnt)
 	case KRB_FORWARD:
 		inbuf.length = cnt;
 		inbuf.data = (char *)data;
-		if ((r = krb5_auth_con_genaddrs(telnet_context, auth_context, 
-			net, KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR)) || 
+		if ((r = krb5_auth_con_genaddrs(telnet_context, auth_context,
+			net, KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR)) ||
 		    (r = rd_and_store_for_creds(telnet_context, auth_context,
 			   &inbuf, ticket))) {
 
@@ -599,7 +599,7 @@ kerberos5_is(ap, data, cnt)
 		      printf(
 			"telnetd: Could not read forwarded credentials\r\n");
 		}
-		else 
+		else
 		  Data(ap, KRB_FORWARD_ACCEPT, 0, 0);
 		  if (auth_debug_mode)
 		    printf("telnetd: Forwarded credentials obtained\r\n");
@@ -613,7 +613,7 @@ kerberos5_is(ap, data, cnt)
 		break;
 	}
 	return;
-	
+
     errout:
 	{
 	    char eerrbuf[329];
@@ -745,7 +745,7 @@ kerberos5_status(ap, name, level)
 	}
 
 	if (UserNameRequested &&
-	    krb5_kuserok(telnet_context, ticket->enc_part2->client, 
+	    krb5_kuserok(telnet_context, ticket->enc_part2->client,
 			 UserNameRequested))
 	{
 		return(AUTH_VALID);
@@ -839,14 +839,14 @@ kerberos5_forward(ap)
     forw_creds.data = 0;
 
     if ((r = krb5_cc_default(telnet_context, &ccache))) {
-	if (auth_debug_mode) 
+	if (auth_debug_mode)
 	    printf("Kerberos V5: could not get default ccache - %s\r\n",
 		   error_message(r));
 	return;
     }
 
     if ((r = krb5_cc_get_principal(telnet_context, ccache, &client))) {
-	if (auth_debug_mode) 
+	if (auth_debug_mode)
 	    printf("Kerberos V5: could not get default principal - %s\r\n",
 		   error_message(r));
 	goto cleanup;
@@ -854,7 +854,7 @@ kerberos5_forward(ap)
 
     if ((r = krb5_sname_to_principal(telnet_context, RemoteHostName, "host",
 				     KRB5_NT_SRV_HST, &server))) {
-	if (auth_debug_mode) 
+	if (auth_debug_mode)
 	    printf("Kerberos V5: could not make server principal - %s\r\n",
 		   error_message(r));
 	goto cleanup;
@@ -872,12 +872,12 @@ kerberos5_forward(ap)
 				server, ccache,
 				forward_flags & OPTS_FORWARDABLE_CREDS,
 				&forw_creds))) {
-	if (auth_debug_mode) 
+	if (auth_debug_mode)
 	    printf("Kerberos V5: error getting forwarded creds - %s\r\n",
 	  	   error_message(r));
 	goto cleanup;
     }
-    
+
     /* Send forwarded credentials */
     if (!Data(ap, KRB_FORWARD, forw_creds.data, forw_creds.length)) {
 	if (auth_debug_mode)
@@ -886,7 +886,7 @@ kerberos5_forward(ap)
 	if (auth_debug_mode)
 	    printf("Forwarded local Kerberos V5 credentials to server\r\n");
     }
-    
+
 cleanup:
     if (client)
 	krb5_free_principal(telnet_context, client);

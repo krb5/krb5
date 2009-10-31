@@ -14,20 +14,20 @@ int _check_if(int expression, const char *file, int line, const char *expression
 			_log_error_v(file, line, format, ap);
 			va_end(ap);
 		}
-		
+
 		if (current_test_activity) {
 			fprintf(stdout, " (%s)", current_test_activity);
 		}
 	}
-	
-	return (expression != 0);	
+
+	return (expression != 0);
 }
 
 int array_contains_int(cc_int32 *array, int size, cc_int32 value) {
 	if (array != NULL && size > 0) {
 		int i = 0;
-		while (i < size && array[i] != value) { 
-			i++; 
+		while (i < size && array[i] != value) {
+			i++;
 		}
 		if (i < size) {
 			return 1;

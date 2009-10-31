@@ -1774,7 +1774,7 @@ error_out:
 
 asn1_error_code
 asn1_decode_external_principal_identifier_ptr
-	(asn1buf *buf,
+        (asn1buf *buf,
          krb5_external_principal_identifier **valptr)
 {
     decode_ptr(krb5_external_principal_identifier *,

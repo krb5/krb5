@@ -296,7 +296,7 @@ void k5_ccc_update_data(HWND hwnd, k5_ccc_data * d) {
     /* everything else is controlled by buttons */
 }
 
-INT_PTR CALLBACK 
+INT_PTR CALLBACK
 k5_ccconfig_dlgproc(HWND hwnd,
                     UINT uMsg,
                     WPARAM wParam,
@@ -345,7 +345,7 @@ k5_ccconfig_dlgproc(HWND hwnd,
             ListView_InsertColumn(lv, 0, &lvc);
         }
 
-        SendDlgItemMessage(hwnd, IDC_CFG_FCNAME, EM_SETLIMITTEXT, 
+        SendDlgItemMessage(hwnd, IDC_CFG_FCNAME, EM_SETLIMITTEXT,
                            MAX_PATH - 1, 0);
 
         k5_ccc_update_ui(hwnd, d);
@@ -365,7 +365,7 @@ k5_ccconfig_dlgproc(HWND hwnd,
                 wchar_t cpath[MAX_PATH];
                 khm_size i;
 
-                GetDlgItemText(hwnd, IDC_CFG_FCNAME, 
+                GetDlgItemText(hwnd, IDC_CFG_FCNAME,
                                cpath, ARRAYLENGTH(cpath));
 
                 PathCanonicalize(path, cpath);
@@ -520,7 +520,7 @@ k5_ccconfig_dlgproc(HWND hwnd,
 #endif
 
                 lv_idx = -1;
-                while((lv_idx = ListView_GetNextItem(lv, lv_idx, 
+                while((lv_idx = ListView_GetNextItem(lv, lv_idx,
                                                      LVNI_SELECTED)) != -1) {
                     ListView_GetItemText(lv, lv_idx, 0, buf, ARRAYLENGTH(buf));
                     for (i=0; i < d->work.n_file_ccs; i++) {

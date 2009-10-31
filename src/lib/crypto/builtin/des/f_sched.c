@@ -343,7 +343,7 @@ mit_des_make_key_sched(mit_des_cblock key, mit_des_key_schedule schedule)
 			     | PC2_D[1][((d >> 14) & 0xf) | ((d >> 15) & 0x30)]
 			     | PC2_D[2][((d >>  7) & 0x3f)]
 			     | PC2_D[3][((d      ) & 0x3) | ((d >>  1) & 0x3c)];
-			
+
 			/*
 			 * Make up two words of the key schedule, with a
 			 * byte order which is convenient for the DES

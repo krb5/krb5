@@ -3,7 +3,7 @@
  *
  * This file defines the interface for the functions argv_parse() and
  * argv_free().
- * 
+ *
  ***********************************************************************
  * int argv_parse(char *in_buf, int *ret_argc, char ***ret_argv)
  *
@@ -16,12 +16,12 @@
  * ret_argc and ret_argv, respectively.
  ***********************************************************************
  * extern void argv_free(char **argv);
- * 
+ *
  * This function frees the argument vector created by argv_parse().
  ***********************************************************************
  *
  * Copyright 1999 by Theodore Ts'o.
- * 
+ *
  * Permission to use, copy, modify, and distribute this software for
  * any purpose with or without fee is hereby granted, provided that
  * the above copyright notice and this permission notice appear in all

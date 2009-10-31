@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -106,7 +106,7 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
      * Caller must have provided space for the header, padding
      * and trailer; per RFC 4757 we will arrange it as:
      *
-     *	    Checksum | E(Confounder | Plaintext) 
+     *	    Checksum | E(Confounder | Plaintext)
      */
 
     header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
@@ -246,7 +246,7 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
     trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
     if (trailer != NULL && trailer->data.length != 0)
 	return KRB5_BAD_MSIZE;
-    
+
     ret = alloc_derived_key(enc, &k1, &d1, &key->keyblock);
     if (ret != 0)
 	goto cleanup;
@@ -334,4 +334,3 @@ const struct krb5_aead_provider krb5int_aead_arcfour = {
     krb5int_arcfour_encrypt_iov,
     krb5int_arcfour_decrypt_iov
 };
-

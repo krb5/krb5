@@ -719,4 +719,3 @@ krb5_gss_display_name_ext(OM_uint32 *minor_status,
 {
 }
 #endif
-

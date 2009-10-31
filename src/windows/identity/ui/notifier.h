@@ -39,19 +39,19 @@ enum khm_notif_expstate {
 extern khm_int32 khm_notifier_actions[];
 extern khm_size  n_khm_notifier_actions;
 
-void 
+void
 khm_init_notifier(void);
 
-void 
+void
 khm_exit_notifier(void);
 
-void 
+void
 khm_notify_icon_change(khm_int32 severity);
 
 void
 khm_notify_icon_tooltip(wchar_t * s);
 
-void 
+void
 khm_notify_icon_balloon(khm_int32 severity,
                          wchar_t * title,
                          wchar_t * msg,

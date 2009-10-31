@@ -57,7 +57,7 @@
     Copyright &copy; 2004,2005,2006,2007 Massachusetts Institute of Technology
 
     Copyright &copy; 2005,2006,2007 Secure Endpoints Inc.
- 
+
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
     files (the "Software"), to deal in the Software without
@@ -92,8 +92,8 @@
 
 /*! \page bugs Reporting bugs
 
-    Network Identity Manager bugs can be reported to 
-    <a href="mailto:kfw-bugs@mit.edu">kfw-bugs@mit.edu</a> or 
+    Network Identity Manager bugs can be reported to
+    <a href="mailto:kfw-bugs@mit.edu">kfw-bugs@mit.edu</a> or
     <a href="mailto:netidmgr@secure-endpoints.com">netidmgr@secure-endpoints.com</a>
 
     When reporting bugs, please include as much information as

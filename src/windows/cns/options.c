@@ -76,7 +76,7 @@ opts_initdialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 
   noaddresses = cns_res.noaddresses;
   SendDlgItemMessage(hwnd, IDD_NOADDRESSES, BM_SETCHECK, noaddresses, 0);
- 
+
   return TRUE;
 }
 
@@ -135,7 +135,7 @@ opts_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
 
       code = k5_init_ccache(&cctemp);
       if (code) {                     /* Problem opening new one? */
-	com_err(NULL, code, 
+	com_err(NULL, code,
 		"while changing ccache.\r\nRestoring old ccache.");
       } else {
         strcpy(ccname, newname);

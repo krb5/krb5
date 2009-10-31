@@ -1,23 +1,23 @@
 /****************************************************************************
-  
+
   Program: telnet.c
-  
+
   PURPOSE: Windows networking kernel - Telnet
-  
+
   FUNCTIONS:
-  
+
   WinMain() - calls initialization function, processes message loop
   InitApplication() - initializes window data and registers window
   InitInstance() - saves instance handle and creates main window
   MainWndProc() - processes messages
   About() - processes messages for "About" dialog box
-  
+
   COMMENTS:
-  
+
   Windows can have several copies of your application running at the
   same time.  The variable hInst keeps track of which instance this
   application is so that processing will be to the correct window.
-  
+
   ****************************************************************************/
 
 #include <windows.h>
@@ -36,7 +36,7 @@ static SCREEN *pScr;
 static int debug = 1;
 
 char strTmp[1024];			/* Scratch buffer */
-BOOL bAutoConnection = FALSE; 
+BOOL bAutoConnection = FALSE;
 short port_no = 23;
 char szUserName[64];			/* Used in auth.c */
 char szHostName[64];
@@ -53,22 +53,22 @@ krb5_context k5_context;
 /*
  *
  * FUNCTION: WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
- * 
+ *
  * PURPOSE: calls initialization function, processes message loop
- * 
+ *
  * COMMENTS:
- * 
- * Windows recognizes this function by name as the initial entry point 
- * for the program.  This function calls the application initialization 
- * routine, if no other instance of the program is running, and always 
- * calls the instance initialization routine.  It then executes a message 
- * retrieval and dispatch loop that is the top-level control structure 
- * for the remainder of execution.  The loop is terminated when a WM_QUIT 
- * message is received, at which time this function exits the application 
- * instance by returning the value passed by PostQuitMessage(). 
- * 
- * If this function must abort before entering the message loop, it 
- * returns the conventional value NULL.  
+ *
+ * Windows recognizes this function by name as the initial entry point
+ * for the program.  This function calls the application initialization
+ * routine, if no other instance of the program is running, and always
+ * calls the instance initialization routine.  It then executes a message
+ * retrieval and dispatch loop that is the top-level control structure
+ * for the remainder of execution.  The loop is terminated when a WM_QUIT
+ * message is received, at which time this function exits the application
+ * instance by returning the value passed by PostQuitMessage().
+ *
+ * If this function must abort before entering the message loop, it
+ * returns the conventional value NULL.
  */
 
 int PASCAL
@@ -79,12 +79,12 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdS
   if (!hPrevInstance)
     if (!InitApplication(hInstance))
       return(FALSE);
-  
+
   /*
    * Perform initializations that apply to a specific instance
    */
   bAutoConnection = parse_cmdline(lpCmdLine);
-  
+
   if (!InitInstance(hInstance, nCmdShow))
     return(FALSE);
 
@@ -105,7 +105,7 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdS
     {
 	if (msg.message == WM_QUIT)	// Special case: WM_QUIT -- return
 	    return msg.wParam;		//   the value from PostQuitMessage
-	
+
 	TranslateMessage(&msg);
 	DispatchMessage(&msg);
     }
@@ -116,35 +116,35 @@ WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdS
 
 /*
  * FUNCTION: InitApplication(HINSTANCE)
- * 
+ *
  * PURPOSE: Initializes window data and registers window class
- * 
+ *
  * COMMENTS:
- * 
- * This function is called at initialization time only if no other 
- * instances of the application are running.  This function performs 
- * initialization tasks that can be done once for any number of running 
- * instances.  
- * 
- * In this case, we initialize a window class by filling out a data 
- * structure of type WNDCLASS and calling the Windows RegisterClass() 
- * function.  Since all instances of this application use the same window 
- * class, we only need to do this when the first instance is initialized.  
+ *
+ * This function is called at initialization time only if no other
+ * instances of the application are running.  This function performs
+ * initialization tasks that can be done once for any number of running
+ * instances.
+ *
+ * In this case, we initialize a window class by filling out a data
+ * structure of type WNDCLASS and calling the Windows RegisterClass()
+ * function.  Since all instances of this application use the same window
+ * class, we only need to do this when the first instance is initialized.
  */
 
 BOOL
 InitApplication(HINSTANCE hInstance)
 {
   WNDCLASS  wc;
-  
+
   ScreenInit(hInstance);
-  
+
   /*
    * Fill in window class structure with parameters that describe the
    * main window.
    */
   wc.style = CS_HREDRAW | CS_VREDRAW; /* Class style(s). */
-  wc.lpfnWndProc = MainWndProc;       /* Function to retrieve messages for 
+  wc.lpfnWndProc = MainWndProc;       /* Function to retrieve messages for
 				       * windows of this class.
 				       */
   wc.cbClsExtra = 0;                  /* No per-class extra data. */
@@ -155,24 +155,24 @@ InitApplication(HINSTANCE hInstance)
   wc.hbrBackground = NULL;	      /* GetStockObject(WHITE_BRUSH); */
   wc.lpszMenuName =  NULL; 	      /* Name of menu resource in .RC file. */
   wc.lpszClassName = WINDOW_CLASS;    /* Name used in call to CreateWindow. */
-  
+
   return(RegisterClass(&wc));
 }
 
 
 /*
  * FUNCTION:  InitInstance(HANDLE, int)
- * 
+ *
  * PURPOSE:  Saves instance handle and creates main window
- * 
+ *
  * COMMENTS:
- * 
- * This function is called at initialization time for every instance of 
- * this application.  This function performs initialization tasks that 
- * cannot be shared by multiple instances.  
- * 
- * In this case, we save the instance handle in a static variable and 
- * create and display the main program window.  
+ *
+ * This function is called at initialization time for every instance of
+ * this application.  This function performs initialization tasks that
+ * cannot be shared by multiple instances.
+ *
+ * In this case, we save the instance handle in a static variable and
+ * create and display the main program window.
  */
 BOOL
 InitInstance(HINSTANCE hInstance, int nCmdShow)
@@ -180,15 +180,15 @@ InitInstance(HINSTANCE hInstance, int nCmdShow)
   int xScreen = 0;
   int yScreen = 0;
   WSADATA wsaData;
-  
+
   SetScreenInstance(hInstance);
-  
+
   /*
    * Save the instance handle in static variable, which will be used in
    * many subsequence calls from this application to Windows.
    */
   hInst = hInstance;
-  
+
   /*
    * Create a main window for this application instance.
    */
@@ -207,12 +207,12 @@ InitInstance(HINSTANCE hInstance, int nCmdShow)
 
   if (!hWnd)
     return (FALSE);
-		
+
   if (WSAStartup(0x0101, &wsaData) != 0) {   /* Initialize the network */
     MessageBox(NULL, "Couldn't initialize Winsock!", NULL,
 	       MB_OK | MB_ICONEXCLAMATION);
     return(FALSE);
-  }        	
+  }
 
   if (!OpenTelnetConnection()) {
     WSACleanup();
@@ -242,12 +242,12 @@ LRESULT CALLBACK
 MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
   HGLOBAL hBuffer;
-  LPSTR lpBuffer; 
+  LPSTR lpBuffer;
   int iEvent, cnt, ret;
   char *tmpCommaLoc;
   struct sockaddr_in remote_addr;
   struct hostent *remote_host;
-	
+
   switch (message) {
   case WM_MYSCREENCHANGEBKSP:
     if (!con)
@@ -255,12 +255,12 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     con->backspace = wParam;
     if (con->backspace == VK_BACK) {
       con->ctrl_backspace = 0x7f;
-      WritePrivateProfileString(INI_TELNET, INI_BACKSPACE, 
+      WritePrivateProfileString(INI_TELNET, INI_BACKSPACE,
 				INI_BACKSPACE_BS, TELNET_INI);
     }
     else {
       con->ctrl_backspace = VK_BACK;
-      WritePrivateProfileString(INI_TELNET, INI_BACKSPACE, 
+      WritePrivateProfileString(INI_TELNET, INI_BACKSPACE,
 				INI_BACKSPACE_DEL, TELNET_INI);
     }
     GetPrivateProfileString(INI_HOSTS, INI_HOST "0", "", buf, 128, TELNET_INI);
@@ -323,7 +323,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     }
 #endif
     DestroyWindow(hWnd);
-    break;        
+    break;
 
   case WM_QUERYOPEN:
     return(0);
@@ -339,10 +339,10 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     PostQuitMessage(0);
     break;
 
-  case WM_NETWORKEVENT: 
+  case WM_NETWORKEVENT:
     iEvent = WSAGETSELECTEVENT(lParam);
 
-    switch (iEvent) {    	
+    switch (iEvent) {
 
     case FD_READ:
       if (con == NULL)
@@ -373,10 +373,10 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	break;
       }
       start_negotiation(con->ks);
-      break;		
+      break;
     }
 
-    break;  	        
+    break;
 
   case WM_HOSTNAMEFOUND:
     ret = WSAGETASYNCERROR(lParam);
@@ -408,7 +408,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     wsprintf(buf, "%d", con->width);
     WritePrivateProfileString(INI_TELNET, INI_WIDTH, buf, TELNET_INI);
     break;
-		
+
   default:              		/* Passes it on if unproccessed */
     return(DefWindowProc(hWnd, message, wParam, lParam));
   }
@@ -447,7 +447,7 @@ SaveHostName(char *host, int port)
   comma = NULL;
   for (i = 0; i < 10; i++) {
     wsprintf(buf, INI_HOST "%d", i); /* INI item to fetch */
-    GetPrivateProfileString(INI_HOSTS, buf, "", hostName[i], 
+    GetPrivateProfileString(INI_HOSTS, buf, "", hostName[i],
 			    128, TELNET_INI);
 
     if (!hostName[i][0])
@@ -467,7 +467,7 @@ SaveHostName(char *host, int port)
       bs = 0x7f;
   }
   else {					/* No matching entry */
-    GetPrivateProfileString(INI_TELNET, INI_BACKSPACE, INI_BACKSPACE_BS, 
+    GetPrivateProfileString(INI_TELNET, INI_BACKSPACE, INI_BACKSPACE_BS,
 			    buf, sizeof(buf), TELNET_INI);
     bs = VK_BACK;				/* Default value */
     if (_stricmp(buf, INI_BACKSPACE_DEL) == 0)
@@ -505,7 +505,7 @@ OpenTelnetConnection(void)
   char buf[128];
 
   tmpConfig = calloc(sizeof(CONFIG), 1);
-	
+
   if (bAutoConnection) {
     tmpConfig->title = calloc(lstrlen(szHostName), 1);
     lstrcpy(tmpConfig->title, (char *) szHostName);
@@ -514,7 +514,7 @@ OpenTelnetConnection(void)
     if (nReturn == FALSE)
       return(FALSE);
   }
-					 	
+
   con = (CONNECTION *) GetNewConnection();
   if (con == NULL)
     return(0);
@@ -548,7 +548,7 @@ OpenTelnetConnection(void)
   }
 
   ret = (SOCKET) socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	
+
   if (ret == SOCKET_ERROR) {
     wsprintf(buf, "Socket error on socket = %d!", WSAGetLastError());
     MessageBox(NULL, buf, NULL, MB_OK | MB_ICONEXCLAMATION);
@@ -557,17 +557,17 @@ OpenTelnetConnection(void)
     free(con);
     free(tmpConfig);
     return(-1);
-  } 
-	
+  }
+
   con->socket = ret;
-	
-  sockaddr.sin_family = AF_INET;  
+
+  sockaddr.sin_family = AF_INET;
   sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
   sockaddr.sin_port = htons(0);
-	
-  ret = bind(con->socket, (struct sockaddr *) &sockaddr, 
+
+  ret = bind(con->socket, (struct sockaddr *) &sockaddr,
 	     (int) sizeof(struct sockaddr_in));
-	
+
   if (ret == SOCKET_ERROR) {
     wsprintf(buf, "Socket error on bind!");
     MessageBox(NULL, buf, NULL, MB_OK | MB_ICONEXCLAMATION);
@@ -589,7 +589,7 @@ OpenTelnetConnection(void)
     strcpy(szHostName, ++p);
   }
 
-  WSAAsyncGetHostByName(hWnd, WM_HOSTNAMEFOUND, szHostName, hostdata, 
+  WSAAsyncGetHostByName(hWnd, WM_HOSTNAMEFOUND, szHostName, hostdata,
 			MAXGETHOSTSTRUCT);
 
   ctl.encrypt = auth_encrypt;
@@ -626,7 +626,7 @@ int
 DoDialog(char *szDialog, DLGPROC lpfnDlgProc)
 {
   int nReturn;
-	
+
   nReturn = DialogBox(hInst, szDialog, hWnd, lpfnDlgProc);
   return (nReturn);
 }
@@ -655,31 +655,31 @@ OpenTelnetDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
   char tmpName[128];
   char tmpBuf[80];
   char *tmpCommaLoc;
-	
+
   switch (message) {
   case WM_INITDIALOG:
     hDC = GetDC(hDlg);
     Ext = GetDialogBaseUnits();
     xExt = (190 *LOWORD(Ext)) /4 ;
     yExt = (72 * HIWORD(Ext)) /8 ;
-    GetPrivateProfileString(INI_HOSTS, INI_HOST "0", "", tmpName, 
+    GetPrivateProfileString(INI_HOSTS, INI_HOST "0", "", tmpName,
 			    128, TELNET_INI);
     if (tmpName[0]) {
       tmpCommaLoc = strchr(tmpName, ',');
       if (tmpCommaLoc)
 	*tmpCommaLoc = '\0';
       SetDlgItemText(hDlg, TEL_CONNECT_NAME, tmpName);
-    }	
+    }
     hEdit = GetWindow(GetDlgItem(hDlg, TEL_CONNECT_NAME), GW_CHILD);
     while (TRUE) {
       wsprintf(tmpBuf, INI_HOST "%d", iHostNum++);
-      GetPrivateProfileString(INI_HOSTS, tmpBuf, "", tmpName, 
+      GetPrivateProfileString(INI_HOSTS, tmpBuf, "", tmpName,
 			      128, TELNET_INI);
-      tmpCommaLoc = strchr(tmpName, ',');  
+      tmpCommaLoc = strchr(tmpName, ',');
       if (tmpCommaLoc)
 	*tmpCommaLoc = '\0';
       if (tmpName[0])
-	SendDlgItemMessage(hDlg, TEL_CONNECT_NAME, CB_ADDSTRING, 0, 
+	SendDlgItemMessage(hDlg, TEL_CONNECT_NAME, CB_ADDSTRING, 0,
 			   (LPARAM) ((LPSTR) tmpName));
       else
 	break;
@@ -707,7 +707,7 @@ OpenTelnetDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		 (GetSystemMetrics(SM_CXSCREEN)/2)-(xExt/2),
 		 (GetSystemMetrics(SM_CYSCREEN)/2)-(yExt/2),
 		 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-    ReleaseDC(hDlg, hDC);      
+    ReleaseDC(hDlg, hDC);
     SendMessage(hEdit, WM_USER + 1, 0, 0);
     SendMessage(hDlg, WM_SETFOCUS, 0, 0);
     return (TRUE);
@@ -728,7 +728,7 @@ OpenTelnetDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
       else
 	EnableWindow(GetDlgItem(hDlg, IDC_FORWARDFORWARD), 0);
       break;
-				
+
     case IDC_FORWARDFORWARD:
       forwardable_flag = (BOOL)SendDlgItemMessage(hDlg, IDC_FORWARDFORWARD,
 						  BM_GETCHECK, 0, 0);
@@ -747,7 +747,7 @@ OpenTelnetDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
     case TEL_OK:
       GetDlgItemText(hDlg, TEL_CONNECT_NAME, szConnectName, 256);
-			
+
       n = parse_cmdline (szConnectName);
       if (! n) {
 	MessageBox(hDlg, "You must enter a session name!",
@@ -758,8 +758,8 @@ OpenTelnetDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
       lstrcpy(tmpConfig->title, szConnectName);
       EndDialog(hDlg, TRUE);
       break;
-    }                
-    return (FALSE);                    
+    }
+    return (FALSE);
   }
   return(FALSE);
 }
@@ -773,7 +773,7 @@ OpenTelnetDlg(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
  *		send a buffer of characters to an output socket.  It differs
  *		by retrying endlessly if sending the bytes would cause
  *		the send() to block.  <gnu@cygnus.com> observed EWOULDBLOCK
- *		errors when running using TCP Software's PC/TCP 3.0 stack, 
+ *		errors when running using TCP Software's PC/TCP 3.0 stack,
  *		even when writing as little as 109 bytes into a socket
  *		that had no more than 9 bytes queued for output.  Note also
  *		that a kstream is used during output rather than a socket
@@ -839,9 +839,9 @@ trim(char *s)
 
 
 /*
- * 
+ *
  * Parse_cmdline
- * 
+ *
  * Reads hostname and port number off the command line.
  *
  * Formats: telnet
@@ -855,7 +855,7 @@ BOOL
 parse_cmdline(char *cmdline)
 {
   char *ptr;
-	
+
   *szHostName = '\0';                 /* Nothing yet */
   if (*cmdline == '\0')               /* Empty command line? */
     return(FALSE);
@@ -896,7 +896,7 @@ hexdump(char *msg, unsigned char *st, int cnt)
       if (j == 8)
 	OutputDebugString("| ");
       OutputDebugString(strTmp);
-    }    
+    }
     i += j - 1;
     OutputDebugString("\r\n");
   } /* end for */

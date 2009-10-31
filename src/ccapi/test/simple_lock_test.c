@@ -1,6 +1,6 @@
 /*
     simple_lock_test.c
-    
+
     Initializes two contexts in two different threads and tries to get read locks on both at the same time.
     Hangs at line 24.
 */
@@ -25,7 +25,7 @@
 void *other_thread (void) {
     cc_int32 err;
     cc_context_t context = NULL;
-    
+
     err = cc_initialize(&context, ccapi_version_7, NULL, NULL);
 
     log_error("thread: attempting lock. may hang. err == %d", err);
@@ -57,7 +57,7 @@ int main (int argc, char *argv[]) {
     if (!err) {
         err = cc_context_lock(context, cc_lock_read, cc_lock_noblock);
     }
-    
+
     log_error("main: initialized and read locked context. err == %d", err);
 
 #ifdef TARGET_OS_MAC
@@ -71,9 +71,9 @@ int main (int argc, char *argv[]) {
 #else
 
 #endif
-    
+
     log_error("main: unlocking and releasing context. err == %d", err);
-    
+
     if (context) {
         log_error("main: calling cc_context_unlock");
         cc_context_unlock(context);
@@ -83,7 +83,7 @@ int main (int argc, char *argv[]) {
     }
 
     log_error("main: return. err == %d", err);
-    
+
 #if defined(_WIN32)
     UNREFERENCED_PARAMETER(status);       // no whining!
 #endif

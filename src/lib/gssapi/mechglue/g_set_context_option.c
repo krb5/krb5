@@ -108,4 +108,3 @@ gss_set_sec_context_option (OM_uint32 *minor_status,
 
     return status;
 }
-

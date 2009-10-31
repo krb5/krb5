@@ -6,7 +6,7 @@
  * require a specific license from the United States Government.
  * It is the responsibility of any person or organization contemplating
  * export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -59,11 +59,11 @@
 - (kim_error) handleError: (NSDictionary *) info;
 
 - (void) didCancel;
-- (void) didSelectIdentity: (NSString *) identityString 
-                   options: (NSDictionary *) options 
+- (void) didSelectIdentity: (NSString *) identityString
+                   options: (NSDictionary *) options
        wantsChangePassword: (BOOL) wantsChangePassword;
-- (void) didEnterIdentity: (NSString *) identityString 
-                  options: (NSDictionary *) options 
+- (void) didEnterIdentity: (NSString *) identityString
+                  options: (NSDictionary *) options
       wantsChangePassword: (BOOL) wantsChangePassword;
 - (void) didPromptForAuth: (NSString *) responseString saveResponse: (NSNumber *) saveResponse;
 - (void) didChangePassword: (NSString *) oldPassword

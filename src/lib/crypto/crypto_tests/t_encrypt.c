@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,11 +22,11 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * <<< Description >>>
  */
-/* 
+/*
  * Some black-box tests of crypto systems.  Make sure that we can decrypt things we encrypt, etc.
  */
 
@@ -125,7 +125,7 @@ main ()
 
     enc_out.ciphertext = out;
     enc_out2.ciphertext = out2;
-    /* We use an intermediate `len' because size_t may be different size 
+    /* We use an intermediate `len' because size_t may be different size
        than `int' */
     krb5_c_encrypt_length (context, keyblock->enctype, in.length, &len);
     enc_out.ciphertext.length = len;
@@ -200,7 +200,7 @@ main ()
 	     krb5_c_decrypt_iov(context, keyblock, 7, 0, iov, 5));
 	test("Comparing results",
 	     compare_results(&in, &iov[1].data));
-		       
+
 	/* Try again with opaque-key-using variants. */
 	test("iov encrypting (k)",
 	     krb5_k_encrypt_iov(context, key, 7, 0, iov, 5));
@@ -261,5 +261,3 @@ main ()
   free(check2.data);
   return 0;
 }
-
-	

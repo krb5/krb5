@@ -50,8 +50,8 @@ void ccs_rpc_request(
     cci_debug_printf("%s rpcmsg:%d; UUID:<%s> SST:<%s>", __FUNCTION__, rpcmsg, pszUUID, serverStartTime);
 #endif
     status = (rpcmsg != CCMSG_REQUEST) && (rpcmsg != CCMSG_PING);
-    
-    if (!status) {                         
+
+    if (!status) {
         status = krb5int_ipc_stream_new (&stream);  /* Create a stream for the request data */
         }
 
@@ -59,7 +59,7 @@ void ccs_rpc_request(
         status = krb5int_ipc_stream_write (stream, pbRequest, lenRequest);
         }
 
-    pipe = ccs_win_pipe_new(pszUUID, *p);    
+    pipe = ccs_win_pipe_new(pszUUID, *p);
     worklist_add(rpcmsg, pipe, stream, serverStartTime);
     *return_status = status;
     }
@@ -76,7 +76,7 @@ void ccs_rpc_connect(
 #if 0
     cci_debug_printf("%s; rpcmsg:%d; UUID: <%s>", __FUNCTION__, rpcmsg, pszUUID);
 #endif
-    worklist_add(   rpcmsg, 
+    worklist_add(   rpcmsg,
                     pipe,
                     NULL,               /* No payload with connect request */
                     (const time_t)0 );  /* No server session number with connect request */

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/os/realm_dom.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * krb5_get_realm_domain()
  */
@@ -52,7 +53,7 @@ krb5_get_realm_domain(krb5_context context, const char *realm, char **domain)
     char *temp_domain = 0;
 
     retval = profile_get_string(context->profile, KRB5_CONF_REALMS, realm,
-			       KRB5_CONF_DEFAULT_DOMAIN, realm, &temp_domain);
+                                KRB5_CONF_DEFAULT_DOMAIN, realm, &temp_domain);
     if (!retval && temp_domain)
     {
         *domain = strdup(temp_domain);

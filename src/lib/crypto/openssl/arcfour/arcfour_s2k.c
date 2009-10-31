@@ -19,7 +19,7 @@ krb5int_arcfour_string_to_key(const struct krb5_enc_provider *enc,
 
   if (params != NULL)
       return KRB5_ERR_BAD_S2K_PARAMS;
-  
+
   if (key->length != 16)
     return (KRB5_BAD_MSIZE);
 
@@ -40,7 +40,7 @@ krb5int_arcfour_string_to_key(const struct krb5_enc_provider *enc,
   krb5int_MD4Final(&md4_context);
   memcpy(key->contents, md4_context.digest, 16);
 
-#if 0  
+#if 0
   /* test the string_to_key function */
   printf("Hash=");
   {

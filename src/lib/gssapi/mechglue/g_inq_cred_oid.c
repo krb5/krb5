@@ -53,7 +53,7 @@ static OM_uint32 append_to_buffer_set(OM_uint32 *minor_status,
 
     status = GSS_S_COMPLETE;
 
-    for (i = 0; i < src->count; i++) { 
+    for (i = 0; i < src->count; i++) {
 	status = gss_add_buffer_set_member(minor_status,
 					   &src->elements[i],
 					   dst);
@@ -61,7 +61,7 @@ static OM_uint32 append_to_buffer_set(OM_uint32 *minor_status,
 	    break;
     }
 
-    return status; 
+    return status;
 }
 
 OM_uint32 KRB5_CALLCONV
@@ -121,7 +121,7 @@ gss_inquire_cred_by_oid(OM_uint32 *minor_status,
 	    break;
 	}
 
-	status = append_to_buffer_set(minor_status, &union_set, ret_set);	
+	status = append_to_buffer_set(minor_status, &union_set, ret_set);
 	gss_release_buffer_set(&minor, &ret_set);
 	if (status != GSS_S_COMPLETE)
 	    break;
@@ -134,4 +134,3 @@ gss_inquire_cred_by_oid(OM_uint32 *minor_status,
 
     return status;
 }
-

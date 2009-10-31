@@ -33,14 +33,14 @@
 
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
  * responsibility of any person or organization contemplating export to
  * obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -51,7 +51,7 @@
  * permission.  FundsXpress makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -149,7 +149,7 @@ int fb64_reply (unsigned char *, int, struct fb *);
 static void fb64_session (Session_Key *, int, struct fb *);
 void fb64_stream_key (Block, struct stinfo *);
 int fb64_keyid (int, unsigned char *, int *, struct fb *);
-void fb64_printsub (unsigned char *, int, unsigned char *, int, 
+void fb64_printsub (unsigned char *, int, unsigned char *, int,
 		     unsigned char *);
 
 static void ecb_encrypt(stp, in, out)
@@ -160,7 +160,7 @@ static void ecb_encrypt(stp, in, out)
 	krb5_error_code code;
 	krb5_data din;
 	krb5_enc_data dout;
-	
+
 	din.length = 8;
 	din.data = in;
 
@@ -634,7 +634,7 @@ fb64_stream_key(key, stp)
  *  INPUT --(--------->(+)+---> DATA
  *          |             |
  *	    +-------------+
- *         
+ *
  *
  * Given:
  *	iV: Initial vector, 64 bits (8 bytes) long.
@@ -695,7 +695,7 @@ cfb64_decrypt(data)
 		ecb_encrypt(stp, stp->str_output, b);
 		memcpy(stp->str_feed, b, sizeof(Block));
 		stp->str_index = 1;	/* Next time will be 1 */
-		idx = 0;		/* But now use 0 */ 
+		idx = 0;		/* But now use 0 */
 	}
 
 	/* On decryption we store (data) which is cypher. */
@@ -768,7 +768,7 @@ ofb64_decrypt(data)
 		ecb_encrypt(stp, stp->str_feed, b);
 		memcpy(stp->str_feed, b, sizeof(Block));
 		stp->str_index = 1;	/* Next time will be 1 */
-		idx = 0;		/* But now use 0 */ 
+		idx = 0;		/* But now use 0 */
 	}
 
 	return(data ^ stp->str_feed[idx]);

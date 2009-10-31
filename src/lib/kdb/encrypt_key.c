@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/kdb/encrypt_key.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,21 +23,21 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * krb5_kdb_encrypt_key(), krb5_kdb_decrypt_key functions
  */
 
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
  * responsibility of any person or organization contemplating export to
  * obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -47,7 +48,7 @@
  * permission.  FundsXpress makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -63,37 +64,37 @@
  */
 
 krb5_error_code
-krb5_dbekd_def_encrypt_key_data( krb5_context 		  context,
-				 const krb5_keyblock	* mkey,
-				 const krb5_keyblock 	* dbkey,
-				 const krb5_keysalt	* keysalt,
-				 int			  keyver,
-				 krb5_key_data	        * key_data)
+krb5_dbekd_def_encrypt_key_data( krb5_context             context,
+                                 const krb5_keyblock    * mkey,
+                                 const krb5_keyblock    * dbkey,
+                                 const krb5_keysalt     * keysalt,
+                                 int                      keyver,
+                                 krb5_key_data          * key_data)
 {
-    krb5_error_code 		  retval;
-    krb5_octet			* ptr;
-    size_t			  len;
-    int				  i;
-    krb5_data			  plain;
-    krb5_enc_data		  cipher;
+    krb5_error_code               retval;
+    krb5_octet                  * ptr;
+    size_t                        len;
+    int                           i;
+    krb5_data                     plain;
+    krb5_enc_data                 cipher;
 
     for (i = 0; i < key_data->key_data_ver; i++)
-	if (key_data->key_data_contents[i])
-	    free(key_data->key_data_contents[i]);
+        if (key_data->key_data_contents[i])
+            free(key_data->key_data_contents[i]);
 
     key_data->key_data_ver = 1;
     key_data->key_data_kvno = keyver;
 
-    /* 
-     * The First element of the type/length/contents 
+    /*
+     * The First element of the type/length/contents
      * fields is the key type/length/contents
      */
     if ((retval = krb5_c_encrypt_length(context, mkey->enctype, dbkey->length,
-					&len)))
-	return(retval);
+                                        &len)))
+        return(retval);
 
     if ((ptr = (krb5_octet *) malloc(2 + len)) == NULL)
-	return(ENOMEM);
+        return(ENOMEM);
 
     key_data->key_data_type[0] = dbkey->enctype;
     key_data->key_data_length[0] = 2 + len;
@@ -109,27 +110,27 @@ krb5_dbekd_def_encrypt_key_data( krb5_context 		  context,
     cipher.ciphertext.data = ptr;
 
     if ((retval = krb5_c_encrypt(context, mkey, /* XXX */ 0, 0,
-				 &plain, &cipher))) {
-	free(key_data->key_data_contents[0]);
-	return retval;
+                                 &plain, &cipher))) {
+        free(key_data->key_data_contents[0]);
+        return retval;
     }
 
     /* After key comes the salt in necessary */
     if (keysalt) {
-	if (keysalt->type > 0) {
-	    key_data->key_data_ver++;
-	    key_data->key_data_type[1] = keysalt->type;
-	    if ((key_data->key_data_length[1] = keysalt->data.length) != 0) {
-		key_data->key_data_contents[1] =
-		    (krb5_octet *)malloc(keysalt->data.length);
-		if (key_data->key_data_contents[1] == NULL) {
-		    free(key_data->key_data_contents[0]);
-		    return ENOMEM;
-		}
-		memcpy(key_data->key_data_contents[1], keysalt->data.data,
-		       (size_t) keysalt->data.length);
-	    }
-	}
+        if (keysalt->type > 0) {
+            key_data->key_data_ver++;
+            key_data->key_data_type[1] = keysalt->type;
+            if ((key_data->key_data_length[1] = keysalt->data.length) != 0) {
+                key_data->key_data_contents[1] =
+                    (krb5_octet *)malloc(keysalt->data.length);
+                if (key_data->key_data_contents[1] == NULL) {
+                    free(key_data->key_data_contents[0]);
+                    return ENOMEM;
+                }
+                memcpy(key_data->key_data_contents[1], keysalt->data.data,
+                       (size_t) keysalt->data.length);
+            }
+        }
     }
 
     return retval;

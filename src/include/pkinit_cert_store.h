@@ -28,7 +28,7 @@
  *
  * Created 26 May 2004 by Doug Mitchell at Apple.
  */
- 
+
 #ifndef	_PKINIT_CERT_STORE_H_
 #define _PKINIT_CERT_STORE_H_
 
@@ -50,13 +50,13 @@ typedef void *krb5_pkinit_signing_cert_t;
  */
 typedef void *krb5_pkinit_cert_t;
 
-/* 
- * Opaque reference to a database in which PKINIT-related certificates are stored. 
+/*
+ * Opaque reference to a database in which PKINIT-related certificates are stored.
  */
 typedef void *krb5_pkinit_cert_db_t;
 
 /*
- * Obtain signing cert for specified principal. On successful return, 
+ * Obtain signing cert for specified principal. On successful return,
  * caller must eventually release the cert with krb5_pkinit_release_cert().
  *
  * Returns KRB5_PRINC_NOMATCH if client cert not found.
@@ -64,8 +64,8 @@ typedef void *krb5_pkinit_cert_db_t;
 krb5_error_code krb5_pkinit_get_client_cert(
     const char			*principal,     /* full principal string */
     krb5_pkinit_signing_cert_t	*client_cert);  /* RETURNED */
-    
-/* 
+
+/*
  * Determine if the specified client has a signing cert. Returns TRUE
  * if so, else returns FALSE.
  */
@@ -85,7 +85,7 @@ krb5_error_code krb5_pkinit_set_client_cert(
     const char			*principal,     /* full principal string */
     krb5_pkinit_cert_t	client_cert);
 
-/* 
+/*
  * Obtain a reference to the client's cert database. Specify either principal
  * name or client_cert as obtained from krb5_pkinit_get_client_cert().
  */
@@ -100,10 +100,10 @@ krb5_error_code krb5_pkinit_get_client_cert_db(
  *
  * The client_spec argument is typically provided by the client as kdcPkId.
  *
- * If trusted_CAs and client_spec are NULL, a platform-dependent preferred 
- * KDC signing cert is returned, if one exists. 
+ * If trusted_CAs and client_spec are NULL, a platform-dependent preferred
+ * KDC signing cert is returned, if one exists.
  *
- * On successful return, caller must eventually release the cert with 
+ * On successful return, caller must eventually release the cert with
  * krb5_pkinit_release_cert(). Outside of an unusual test configuration this =
  *
  * Returns KRB5_PRINC_NOMATCH if KDC cert not found.
@@ -115,7 +115,7 @@ krb5_error_code krb5_pkinit_get_kdc_cert(
     krb5_data			*client_spec,	    /* optional */
     krb5_pkinit_signing_cert_t	*kdc_cert);	    /* RETURNED */
 
-/* 
+/*
  * Obtain a reference to the KDC's cert database.
  */
 krb5_error_code krb5_pkinit_get_kdc_cert_db(
@@ -127,27 +127,27 @@ krb5_error_code krb5_pkinit_get_kdc_cert_db(
  */
 extern void krb5_pkinit_release_cert(
     krb5_pkinit_signing_cert_t   cert);
-    
+
 /*
  * Release database references obtained via krb5_pkinit_get_client_cert_db() and
  * krb5_pkinit_get_kdc_cert_db().
  */
 extern void krb5_pkinit_release_cert_db(
     krb5_pkinit_cert_db_t	cert_db);
-    
-/* 
- * Obtain a mallocd C-string representation of a certificate's SHA1 digest. 
- * Only error is a NULL return indicating memory failure. 
+
+/*
+ * Obtain a mallocd C-string representation of a certificate's SHA1 digest.
+ * Only error is a NULL return indicating memory failure.
  * Caller must free the returned string.
  */
 char *krb5_pkinit_cert_hash_str(
     const krb5_data *cert);
-    
-/* 
+
+/*
  * Obtain a client's optional list of trusted KDC CA certs (trustedCertifiers)
- * and/or trusted KDC cert (kdcPkId) for a given client and server. 
- * All returned values are mallocd and must be freed by caller; the contents 
- * of the krb5_datas are DER-encoded certificates. 
+ * and/or trusted KDC cert (kdcPkId) for a given client and server.
+ * All returned values are mallocd and must be freed by caller; the contents
+ * of the krb5_datas are DER-encoded certificates.
  */
 krb5_error_code krb5_pkinit_get_server_certs(
     const char *client_principal,

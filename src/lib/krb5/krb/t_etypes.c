@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * t_etypes.c -- test program for krb5int_parse_enctype_list
  *
@@ -201,4 +201,3 @@ main(int argc, char **argv)
 
     return 0;
 }
-

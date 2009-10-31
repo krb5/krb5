@@ -54,4 +54,3 @@ OM_uint32 KRB5_CALLCONV gss_release_buffer_set
 {
     return generic_gss_release_buffer_set(minor_status, buffer_set);
 }
-

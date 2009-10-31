@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (c) 2003 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
@@ -209,7 +209,7 @@ test_princ(krb5_context context)
                                 &p2);
     if (!ret)
         err(context, ret, "Should have failed to parse %s a "
-                 "short name", princ);
+            "short name", princ);
 
     ret = krb5_parse_name_flags(context, princ_short,
                                 KRB5_PRINCIPAL_PARSE_NO_REALM,
@@ -233,7 +233,7 @@ test_princ(krb5_context context)
                                 &p2);
     if (!ret)
         err(context, ret, "Should have failed to parse %s "
-                 "because it lacked a realm", princ_short);
+            "because it lacked a realm", princ_short);
 
     ret = krb5_parse_name_flags(context, princ,
                                 KRB5_PRINCIPAL_PARSE_REQUIRE_REALM,
@@ -372,7 +372,7 @@ test_enterprise(krb5_context context)
         err(context, ret, "krb5_parse_name_flags");
 
     ret = krb5_unparse_name_flags(context, p, KRB5_PRINCIPAL_UNPARSE_NO_REALM,
-				  &unparsed);
+                                  &unparsed);
     if (ret)
         err(context, ret, "krb5_unparse_name");
 

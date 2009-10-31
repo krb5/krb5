@@ -44,7 +44,7 @@ kherr_serial ctx_serial = 0;
 #ifdef DEBUG
 #define DEBUG_CONTEXT
 
-KHMEXP void 
+KHMEXP void
 kherr_debug_printf(wchar_t * fmt, ...)
 {
     va_list vl;
@@ -57,7 +57,7 @@ kherr_debug_printf(wchar_t * fmt, ...)
 }
 #endif
 
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 kherr_add_ctx_handler(kherr_ctx_handler h,
                       khm_int32 filter,
                       kherr_serial serial)
@@ -114,7 +114,7 @@ kherr_add_ctx_handler(kherr_ctx_handler h,
     LeaveCriticalSection(&cs_error);
 }
 
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 kherr_remove_ctx_handler(kherr_ctx_handler h,
                          kherr_serial serial)
 {
@@ -134,7 +134,7 @@ kherr_remove_ctx_handler(kherr_ctx_handler h,
             ctx_handlers[i] = ctx_handlers[i + 1];
         }
     }
-    
+
     LeaveCriticalSection(&cs_error);
 }
 
@@ -182,7 +182,7 @@ attach_this_thread(void)
     if (t)
         return;
 
-    t = PMALLOC(sizeof(kherr_thread) + 
+    t = PMALLOC(sizeof(kherr_thread) +
                 sizeof(kherr_context *) * THREAD_STACK_SIZE);
     t->nc_ctx = THREAD_STACK_SIZE;
     t->n_ctx = 0;
@@ -247,7 +247,7 @@ push_context(kherr_context * c)
         kherr_thread * nt;
 
         nc_new = t->nc_ctx + THREAD_STACK_SIZE;
-        cb_new = sizeof(kherr_thread) + 
+        cb_new = sizeof(kherr_thread) +
             sizeof(kherr_context *) * nc_new;
 
         nt = PMALLOC(cb_new);
@@ -399,7 +399,7 @@ get_empty_context(void)
     else {
         c = PMALLOC(sizeof(kherr_context));
     }
- 
+
     ZeroMemory(c,sizeof(*c));
     c->severity = KHERR_NONE;
     c->flags = KHERR_CF_UNBOUND;
@@ -409,7 +409,7 @@ get_empty_context(void)
     LPUSH(&ctx_root_list, c);
 
     LeaveCriticalSection(&cs_error);
-   
+
     return c;
 }
 
@@ -497,7 +497,7 @@ pick_err_event(kherr_context * c)
     EnterCriticalSection(&cs_error);
     e = QTOP(c);
     while(e) {
-        if(!(e->flags & KHERR_RF_INERT) && 
+        if(!(e->flags & KHERR_RF_INERT) &&
            s >= e->severity) {
             ce = e;
             s = e->severity;
@@ -589,7 +589,7 @@ resolve_string_resource(kherr_event * e,
 
     if(e->flags & if_flag) {
         if(e->h_module != NULL)
-            chars = LoadString(e->h_module, (UINT)(INT_PTR) *str, 
+            chars = LoadString(e->h_module, (UINT)(INT_PTR) *str,
                                tfmt, ARRAYLENGTH(tbuf));
         if(e->h_module == NULL || chars == 0)
             *str = NULL;
@@ -867,7 +867,7 @@ kherr_reportf_ex(enum kherr_severity severity,
     return e;
 }
 
-KHMEXP kherr_event * KHMAPI 
+KHMEXP kherr_event * KHMAPI
 kherr_report(enum kherr_severity severity,
              const wchar_t * short_desc,
              const wchar_t * facility,
@@ -938,7 +938,7 @@ kherr_report(enum kherr_severity severity,
 }
 
 KHMEXP void KHMAPI
-kherr_suggest(wchar_t * suggestion, 
+kherr_suggest(wchar_t * suggestion,
               enum kherr_suggestion suggestion_id,
               khm_int32 flags)
 {
@@ -1005,7 +1005,7 @@ _exit:
 }
 
 KHMEXP void KHMAPI
-kherr_facility(wchar_t * facility, 
+kherr_facility(wchar_t * facility,
                khm_int32 facility_id)
 {
     kherr_context * c;
@@ -1118,7 +1118,7 @@ kherr_push_context(kherr_context * c)
 }
 
 KHMEXP void KHMAPI
-kherr_push_new_context(khm_int32 flags) 
+kherr_push_new_context(khm_int32 flags)
 {
     kherr_context * p = NULL;
     kherr_context * c;
@@ -1405,8 +1405,8 @@ get_progress(kherr_context * c, khm_ui_4 * pnum, khm_ui_4 * pdenom)
 }
 
 KHMEXP void KHMAPI
-kherr_get_progress_i(kherr_context * c, 
-                     khm_ui_4 * num, 
+kherr_get_progress_i(kherr_context * c,
+                     khm_ui_4 * num,
                      khm_ui_4 * denom)
 {
     if (num == NULL || denom == NULL)
@@ -1577,4 +1577,3 @@ kherr_dup_string(const wchar_t * s)
 
     return _tstr(dest);
 }
-

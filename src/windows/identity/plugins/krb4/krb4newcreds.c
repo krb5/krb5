@@ -188,7 +188,7 @@ void k4_read_identity_data(k4_dlg_data * d) {
                                                    &csp_ident))) {
 
             khc_open_space(csp_ident, CSNAME_KRB4CRED, 0, &csp_k4);
-            
+
             if (csp_k4) {
                 if (KHM_SUCCEEDED(khc_read_int32(csp_k4, L"Krb4NewCreds", &t)))
                     d->k4_enabled = !!t;
@@ -741,7 +741,7 @@ krb4_msg_newcred(khm_int32 msg_type, khm_int32 msg_subtype,
                 /* only supported for new credentials */
                 if (method == K4_METHOD_AUTO ||
                     method == K4_METHOD_PASSWORD) {
-                    
+
                     khm_size n_prompts = 0;
                     khm_size idx;
                     khm_size cb;

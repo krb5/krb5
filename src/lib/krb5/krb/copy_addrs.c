@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/krb/copy_addrs.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * krb5_copy_addresses()
  */
@@ -35,11 +36,11 @@ krb5_copy_addr(krb5_context context, const krb5_address *inad, krb5_address **ou
     krb5_address *tmpad;
 
     if (!(tmpad = (krb5_address *)malloc(sizeof(*tmpad))))
-	return ENOMEM;
+        return ENOMEM;
     *tmpad = *inad;
     if (!(tmpad->contents = (krb5_octet *)malloc(inad->length))) {
-	free(tmpad);
-	return ENOMEM;
+        free(tmpad);
+        return ENOMEM;
     }
     memcpy(tmpad->contents, inad->contents, inad->length);
     *outad = tmpad;
@@ -57,22 +58,22 @@ krb5_copy_addresses(krb5_context context, krb5_address *const *inaddr, krb5_addr
     register unsigned int nelems = 0;
 
     if (!inaddr) {
-	    *outaddr = 0;
-	    return 0;
+        *outaddr = 0;
+        return 0;
     }
-    
+
     while (inaddr[nelems]) nelems++;
 
     /* one more for a null terminated list */
     if (!(tempaddr = (krb5_address **) calloc(nelems+1, sizeof(*tempaddr))))
-	return ENOMEM;
+        return ENOMEM;
 
     for (nelems = 0; inaddr[nelems]; nelems++) {
-	retval = krb5_copy_addr(context, inaddr[nelems], &tempaddr[nelems]);
+        retval = krb5_copy_addr(context, inaddr[nelems], &tempaddr[nelems]);
         if (retval) {
-	    krb5_free_addresses(context, tempaddr);
-	    return retval;
-	}
+            krb5_free_addresses(context, tempaddr);
+            return retval;
+        }
     }
 
     *outaddr = tempaddr;
@@ -88,8 +89,8 @@ krb5_copy_addresses(krb5_context context, krb5_address *const *inaddr, krb5_addr
 krb5_error_code
 krb5_append_addresses(context, inaddr, outaddr)
     krb5_context context;
-	krb5_address * const * inaddr;
-	krb5_address ***outaddr;
+    krb5_address * const * inaddr;
+    krb5_address ***outaddr;
 {
     krb5_error_code retval;
     krb5_address ** tempaddr;
@@ -98,7 +99,7 @@ krb5_append_addresses(context, inaddr, outaddr)
     register int norigelems = 0;
 
     if (!inaddr)
-	return 0;
+        return 0;
 
     tempaddr2 = *outaddr;
 
@@ -106,34 +107,33 @@ krb5_append_addresses(context, inaddr, outaddr)
     while (tempaddr2[norigelems]) norigelems++;
 
     tempaddr = (krb5_address **) realloc((char *)*outaddr,
-		       (nelems + norigelems + 1) * sizeof(*tempaddr));
+                                         (nelems + norigelems + 1) * sizeof(*tempaddr));
     if (!tempaddr)
-	return ENOMEM;
+        return ENOMEM;
 
     /* The old storage has been freed.  */
     *outaddr = tempaddr;
 
 
     for (nelems = 0; inaddr[nelems]; nelems++) {
-	retval = krb5_copy_addr(context, inaddr[nelems],
-				&tempaddr[norigelems + nelems]);
-	if (retval)
-	    goto cleanup;
+        retval = krb5_copy_addr(context, inaddr[nelems],
+                                &tempaddr[norigelems + nelems]);
+        if (retval)
+            goto cleanup;
     }
 
     tempaddr[norigelems + nelems] = 0;
     return 0;
 
-  cleanup:
+cleanup:
     while (--nelems >= 0)
-	krb5_free_address(context, tempaddr[norigelems + nelems]);
+        krb5_free_address(context, tempaddr[norigelems + nelems]);
 
     /* Try to allocate a smaller amount of memory for *outaddr.  */
     tempaddr = (krb5_address **) realloc((char *)tempaddr,
-					 (norigelems + 1) * sizeof(*tempaddr));
+                                         (norigelems + 1) * sizeof(*tempaddr));
     if (tempaddr)
-	*outaddr = tempaddr;
+        *outaddr = tempaddr;
     return retval;
 }
 #endif
-

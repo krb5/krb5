@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #include "autoconf.h"
 #if HAVE_TCL_H
 #include <tcl.h>
@@ -11,11 +12,11 @@
 #if _TCL_MAIN
 int
 main(argc, argv)
-    int argc;			/* Number of command-line arguments. */
-    char **argv;		/* Values of command-line arguments. */
+    int argc;                   /* Number of command-line arguments. */
+    char **argv;                /* Values of command-line arguments. */
 {
     Tcl_Main(argc, argv, Tcl_AppInit);
-    return 0;			/* Needed only to prevent compiler warning. */
+    return 0;                   /* Needed only to prevent compiler warning. */
 }
 #else
 /*
@@ -31,7 +32,7 @@ int *tclDummyMainPtr = (int *) main;
 
 int Tcl_AppInit(Tcl_Interp *interp)
 {
-     Tcl_kadm5_init(interp);
+    Tcl_kadm5_init(interp);
 
-     return(TCL_OK);
+    return(TCL_OK);
 }

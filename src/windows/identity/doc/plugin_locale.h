@@ -74,7 +74,7 @@ See kmm_set_locale_info() and ::kmm_module_locale for more info.
 The module manager searches the array of ::kmm_module_locale objects
 passed into the kmm_set_locale_info() function for one that matches
 the current user locale (as opposed to the current system locale).  A
-record matches the locale if it has the same language ID.  
+record matches the locale if it has the same language ID.
 
 If a match is found, that library is selected.  Otherwise, the list is
 searched for one that is compatible with the current user locale.  A
@@ -105,5 +105,3 @@ the regular WIN32 API.
 - ::kmm_LoadString
 
 */
-
-

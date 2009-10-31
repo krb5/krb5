@@ -171,7 +171,7 @@ typedef struct tag_kmm_plugin_info {
  */
 #define KHM_PITYPE_CRED     1
 
-/*! \brief A identity provider 
+/*! \brief A identity provider
 
     \see \ref pi_pt_cred for more information
  */
@@ -330,14 +330,14 @@ enum KMM_MODULE_STATES {
 
     \note Only called by the NetIDMgr core.
 */
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 kmm_init(void);
 
 /*! \brief Stop the Module Manager
 
     \note Only called by the NetIDMgr core.
 */
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 kmm_exit(void);
 
 /*! \brief Return the plugin handle for the current plugin
@@ -347,7 +347,7 @@ kmm_exit(void);
     kmm_release_plugin().  Returns NULL if the current thread is not
     owned by any plugin.
  */
-KHMEXP kmm_plugin KHMAPI 
+KHMEXP kmm_plugin KHMAPI
 kmm_this_plugin(void);
 
 /*! \brief Return the module handle for the current module
@@ -356,7 +356,7 @@ kmm_this_plugin(void);
     thread.  The returned handle must be released by calling
     kmm_release_module()
 */
-KHMEXP kmm_module KHMAPI 
+KHMEXP kmm_module KHMAPI
 kmm_this_module(void);
 
 /*! \name Flags for kmm_load_module()
@@ -446,22 +446,22 @@ kmm_this_module(void);
     \see \ref pi_fw_pm_load
     \see ::KMM_LM_FLAG_SYNC, ::KMM_LM_FLAG_NOLOAD
 */
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_load_module(wchar_t * modname, khm_int32 flags, kmm_module * result);
 
 /*! \brief Hold a handle to a module
 
     Use kmm_release_module() to release the hold.
 */
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_hold_module(kmm_module module);
 
 /*! \brief Release a handle to a module
 
-    Release a held referece to a module that was returned in a call to 
+    Release a held referece to a module that was returned in a call to
     kmm_load_module().
 */
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_release_module(kmm_module m);
 
 /*! \brief Query the state of a module
@@ -473,7 +473,7 @@ kmm_release_module(kmm_module m);
     \return The return value is one of the ::KMM_MODULE_STATES
         enumerations.
 */
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_get_module_state(kmm_module m);
 
 /*! \brief Unload a module
@@ -483,7 +483,7 @@ kmm_get_module_state(kmm_module m);
 
     \see \ref pi_fw_pm_unload
 */
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_unload_module(kmm_module module);
 
 /*! \brief Loads the default modules as specified in the configuration
@@ -492,7 +492,7 @@ kmm_unload_module(kmm_module module);
     This function dispatches the necessary message for loading these
     modules and reutnrs.
 */
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_load_default_modules(void);
 
 /*! \brief Checks whether there are any pending loads
@@ -511,7 +511,7 @@ kmm_load_pending(void);
     change in ways which are inconsistent from the internal data
     structures that kmm maintains.
  */
-KHMEXP HMODULE     KHMAPI 
+KHMEXP HMODULE     KHMAPI
 kmm_get_hmodule(kmm_module m);
 #endif
 
@@ -521,7 +521,7 @@ kmm_get_hmodule(kmm_module m);
     until the hold is released with a call to kmm_release_plugin().
     No guarantees are made on the handle once the handle is released.
  */
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_hold_plugin(kmm_plugin p);
 
 /*! \brief Release a plugin
@@ -530,7 +530,7 @@ kmm_hold_plugin(kmm_plugin p);
     kmm_hold_plugin().  The plugin handle should no longer be
     considered valied once this is called.
  */
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_release_plugin(kmm_plugin p);
 
 /*! \brief Provide a plugin
@@ -571,14 +571,14 @@ kmm_release_plugin(kmm_plugin p);
 
     \note This can only be called when handing init_module()
 */
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_provide_plugin(kmm_module module, kmm_plugin_reg * plugin);
 
 /*! \brief Query the state of a plugin.
 
     \return One of ::_kmm_plugin_states
 */
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_get_plugin_state(wchar_t * plugin);
 
 /*! \defgroup kmm_reg Registration
@@ -612,7 +612,7 @@ kmm_get_plugin_state(wchar_t * plugin);
     \see khc_open_space()
     \see khc_close_space()
  */
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_get_plugin_config(wchar_t * plugin, khm_int32 flags, khm_handle * result);
 
 /*! \brief Obtain the configuration space for a named module
@@ -633,7 +633,7 @@ kmm_get_plugin_config(wchar_t * plugin, khm_int32 flags, khm_handle * result);
     \see khc_open_space()
     \see khc_close_space()
 */
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_get_module_config(wchar_t * module, khm_int32 flags, khm_handle * result);
 
 /*! \brief Retrieve a handle to the configuration space for plugins
@@ -653,7 +653,7 @@ kmm_get_module_config(wchar_t * module, khm_int32 flags, khm_handle * result);
     \see khc_open_space()
     \see khc_close_space()
  */
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_get_plugins_config(khm_int32 flags, khm_handle * result);
 
 /*! \brief Retrieve the handle to the configuration space for modules
@@ -672,7 +672,7 @@ kmm_get_plugins_config(khm_int32 flags, khm_handle * result);
     \see khc_open_space()
     \see khc_close_space()
  */
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_get_modules_config(khm_int32 flags, khm_handle * result);
 
 /*! \brief Return information about a loaded module
@@ -707,8 +707,8 @@ kmm_get_modules_config(khm_int32 flags, khm_handle * result);
     \retval KHM_ERROR_NOT_FOUND The specified module is not a
         registered module.
  */
-KHMEXP khm_int32   KHMAPI 
-kmm_get_module_info(wchar_t *  module_name, khm_int32 flags, 
+KHMEXP khm_int32   KHMAPI
+kmm_get_module_info(wchar_t *  module_name, khm_int32 flags,
                     kmm_module_info * buffer, khm_size * cb_buffer);
 
 /*! \brief Get information about a module
@@ -765,9 +765,9 @@ kmm_release_module_info_i(kmm_module_info * info);
     \retval KHM_ERROR_NOT_FOUND The specified plugin was not found
         among the registered plugins.
 */
-KHMEXP khm_int32   KHMAPI 
-kmm_get_plugin_info(wchar_t * plugin_name, 
-                    kmm_plugin_info * buffer, 
+KHMEXP khm_int32   KHMAPI
+kmm_get_plugin_info(wchar_t * plugin_name,
+                    kmm_plugin_info * buffer,
                     khm_size * cb_buffer);
 
 /*! \brief Obtain information about a plugin using a plugin handle
@@ -862,7 +862,7 @@ kmm_enable_plugin(kmm_plugin p, khm_boolean enable);
 
     \see kmm_register_module()
  */
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_register_plugin(kmm_plugin_reg * plugin, khm_int32 config_flags);
 
 /*! \brief Register a module
@@ -883,7 +883,7 @@ kmm_register_plugin(kmm_plugin_reg * plugin, khm_int32 config_flags);
         can be used to choose the configuration store in which the
         module registration will be performed.
   */
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_register_module(kmm_module_reg * module, khm_int32 config_flags);
 
 /*! \brief Unregister a plugin
@@ -902,7 +902,7 @@ kmm_register_module(kmm_module_reg * module, khm_int32 config_flags);
         is unloaded and the associated module is either also unloaded
         or in a state where the plugin can be unregistered.
  */
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_unregister_plugin(wchar_t * plugin, khm_int32 config_flags);
 
 /*! \brief Unregister a module
@@ -921,7 +921,7 @@ kmm_unregister_plugin(wchar_t * plugin, khm_int32 config_flags);
         the module.  The caller should make sure that the module is
         unloaded and in a state where it can be unregistered.
  */
-KHMEXP khm_int32   KHMAPI 
+KHMEXP khm_int32   KHMAPI
 kmm_unregister_module(wchar_t * module, khm_int32 config_flags);
 
 /*@}*/ /* kmm_reg */
@@ -982,9 +982,9 @@ typedef struct tag_kmm_module_locale {
 
     \note This can only be called when handing init_module()
 */
-KHMEXP khm_int32   KHMAPI 
-kmm_set_locale_info(kmm_module module, 
-                    kmm_module_locale * locales, 
+KHMEXP khm_int32   KHMAPI
+kmm_set_locale_info(kmm_module module,
+                    kmm_module_locale * locales,
                     khm_int32 n_locales);
 
 #ifdef _WIN32
@@ -994,21 +994,21 @@ kmm_set_locale_info(kmm_module module,
     NetIDMgr allows the specification of an alternate resource library
     that will be used to load localized resources from.  This function
     returns a handle to this library.
-    
+
     While you can use the convenience macros to access resources in a
     localization library using the module handle, it is recommended,
     for performance reasons, to use this function to obtain the handle
     to the resource library and then use that handle in calls to
     LoadString, LoadImage etc. directly.
 */
-KHMEXP HMODULE     KHMAPI 
+KHMEXP HMODULE     KHMAPI
 kmm_get_resource_hmodule(kmm_module m);
 
 /*! \name Convenience Macros
 @{*/
 /*! \brief Convenience macro for using calling LoadAccelerators using a module handle
 
-    \param[in] module A handle to a loaded module.  The corresponding resource 
+    \param[in] module A handle to a loaded module.  The corresponding resource
         module will be located through a call to kmm_get_resource_hmodule()
 */
 #define kmm_LoadAccelerators(module, lpTableName) \
@@ -1016,7 +1016,7 @@ kmm_get_resource_hmodule(kmm_module m);
 
 /*! \brief Convenience macro for using calling LoadBitmap using a module handle
 
-    \param[in] module A handle to a loaded module.  The corresponding resource 
+    \param[in] module A handle to a loaded module.  The corresponding resource
         module will be located through a call to kmm_get_resource_hmodule()
 */
 #define kmm_LoadBitmap(module, lpBitmapName) \
@@ -1024,7 +1024,7 @@ kmm_get_resource_hmodule(kmm_module m);
 
 /*! \brief Convenience macro for using calling LoadImage using a module handle
 
-    \param[in] module A handle to a loaded module.  The corresponding resource 
+    \param[in] module A handle to a loaded module.  The corresponding resource
         module will be located through a call to kmm_get_resource_hmodule()
 */
 #define kmm_LoadImage(module, lpszName, uType, cxDesired, cyDesired, fuLoad) \
@@ -1032,7 +1032,7 @@ kmm_get_resource_hmodule(kmm_module m);
 
 /*! \brief Convenience macro for using calling LoadCursor using a module handle
 
-    \param[in] module A handle to a loaded module.  The corresponding resource 
+    \param[in] module A handle to a loaded module.  The corresponding resource
         module will be located through a call to kmm_get_resource_hmodule()
 */
 #define kmm_LoadCursor(module, lpCursorName) \
@@ -1040,7 +1040,7 @@ kmm_get_resource_hmodule(kmm_module m);
 
 /*! \brief Convenience macro for using calling LoadIcon using a module handle
 
-    \param[in] module A handle to a loaded module.  The corresponding resource 
+    \param[in] module A handle to a loaded module.  The corresponding resource
         module will be located through a call to kmm_get_resource_hmodule()
 */
 #define kmm_LoadIcon(module, lpIconName) \
@@ -1048,7 +1048,7 @@ kmm_get_resource_hmodule(kmm_module m);
 
 /*! \brief Convenience macro for using calling LoadMenu using a module handle
 
-    \param[in] module A handle to a loaded module.  The corresponding resource 
+    \param[in] module A handle to a loaded module.  The corresponding resource
         module will be located through a call to kmm_get_resource_hmodule()
 */
 #define kmm_LoadMenu(module, lpMenuName) \
@@ -1056,7 +1056,7 @@ kmm_get_resource_hmodule(kmm_module m);
 
 /*! \brief Convenience macro for using calling LoadString using a module handle
 
-    \param[in] module A handle to a loaded module.  The corresponding resource 
+    \param[in] module A handle to a loaded module.  The corresponding resource
         module will be located through a call to kmm_get_resource_hmodule()
 */
 #define kmm_LoadString(module, uID, lpBuffer, nBufferMax) \

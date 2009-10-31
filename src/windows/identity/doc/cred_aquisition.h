@@ -212,7 +212,7 @@
 
     For information on how the dialog procedure should be written, see
     \ref cred_acq_dlgproc .
- 
+
 */
 
 /*! \page cred_acq_dlgproc Writing the dialog procedure for a cred type panel

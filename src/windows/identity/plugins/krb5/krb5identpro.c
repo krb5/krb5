@@ -80,9 +80,9 @@ trim_str(wchar_t * s, khm_size cch) {
 }
 
 /* Runs in the UI thread */
-int 
-k5_get_realm_from_nc(khui_new_creds * nc, 
-                     wchar_t * buf, 
+int
+k5_get_realm_from_nc(khui_new_creds * nc,
+                     wchar_t * buf,
                      khm_size cch_buf) {
     k5_new_cred_data * d;
     khm_size s;
@@ -102,7 +102,7 @@ k5_get_realm_from_nc(khui_new_creds * nc,
 
    Runs in the UI thread
 */
-static void 
+static void
 set_identity_from_ui(khui_new_creds * nc,
                      k5_new_cred_data * d) {
     wchar_t un[KCDB_IDENT_MAXCCH_NAME];
@@ -328,13 +328,13 @@ update_crossfeed(khui_new_creds * nc,
 
     SetWindowText(d->hw_username, un);
 
-    return TRUE;    
+    return TRUE;
 }
 
 /* Handle window messages for the identity specifiers
 
    runs in UI thread */
-static LRESULT 
+static LRESULT
 handle_wnd_msg(khui_new_creds * nc,
                HWND hwnd,
                UINT uMsg,
@@ -351,7 +351,7 @@ handle_wnd_msg(khui_new_creds * nc,
             /* the username has changed.  Instead of handling this
                for every keystroke, set a timer that elapses some
                time afterwards and then handle the event. */
-            SetTimer(hwnd, NC_UNCHANGE_TIMER, 
+            SetTimer(hwnd, NC_UNCHANGE_TIMER,
                      NC_UNCHANGE_TIMEOUT, NULL);
             return TRUE;
 
@@ -400,7 +400,7 @@ handle_wnd_msg(khui_new_creds * nc,
 /* UI Callback
 
    runs in UI thread */
-static LRESULT KHMAPI 
+static LRESULT KHMAPI
 ui_cb(khui_new_creds * nc,
       UINT cmd,
       HWND hwnd,
@@ -443,7 +443,7 @@ ui_cb(khui_new_creds * nc,
             nc->ident_aux = (LPARAM) d;
             khui_cw_unlock_nc(nc);
 
-            LoadString(hResModule, IDS_NC_USERNAME, 
+            LoadString(hResModule, IDS_NC_USERNAME,
                        wbuf, ARRAYLENGTH(wbuf));
 
             d->hw_username_label = CreateWindow
@@ -460,7 +460,7 @@ ui_cb(khui_new_creds * nc,
             d->hw_username = CreateWindow
                 (L"COMBOBOX",
                  L"",
-                 CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | 
+                 CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT |
                  WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL,
                  0, 0, 100, 100, /* bogus values */
                  hw_parent,
@@ -501,7 +501,7 @@ ui_cb(khui_new_creds * nc,
             d->hw_realm = CreateWindow
                 (L"COMBOBOX",
                  L"",
-                 CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | 
+                 CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT |
                  WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL,
                  0, 0, 100, 100, /* bogus */
                  hw_parent,
@@ -741,7 +741,7 @@ ui_cb(khui_new_creds * nc,
             khui_cw_lock_nc(nc);
             nc->ident_aux = 0;
             khui_cw_unlock_nc(nc);
-            
+
             /* since we created all the windows as child windows of
                the new creds window, they will be destroyed when that
                window is destroyed. */
@@ -869,7 +869,7 @@ k5_ident_set_default_int(khm_handle def_ident) {
         khm_krb5_cc_name_cmp(reg_ccname, id_ccname)) {
 
         /* we have to write the new value in */
-            
+
         l = RegSetValueEx(hk_ccname, L"ccname", 0, REG_SZ, (BYTE *) id_ccname,
                           (DWORD) cb);
     }
@@ -892,7 +892,7 @@ k5_ident_set_default(khm_int32 msg_type,
                      khm_ui_4 uparam,
                      void * vparam) {
 
-    /* 
+    /*
        Currently, setting the default identity simply sets the
        "ccname" registry value at "Software\MIT\kerberos5".
     */
@@ -1262,7 +1262,7 @@ k5_refresh_default_identity(krb5_context ctx) {
         _reportf(L"Can't open default ccache. code=%d", code);
         goto _nc_cleanup;
     }
-    
+
     code = pkrb5_cc_get_principal(ctx, cc, &princ);
     if (code) {
         /* try to determine the identity from the ccache name */
@@ -1499,10 +1499,10 @@ k5_ident_(khm_int32 msg_type,
 }
 #endif
 
-khm_int32 KHMAPI 
-k5_msg_ident(khm_int32 msg_type, 
-               khm_int32 msg_subtype, 
-               khm_ui_4 uparam, 
+khm_int32 KHMAPI
+k5_msg_ident(khm_int32 msg_type,
+               khm_int32 msg_subtype,
+               khm_ui_4 uparam,
                void * vparam)
 {
     switch(msg_subtype) {
@@ -1654,7 +1654,7 @@ DWORD WINAPI k5_ccname_monitor_thread(LPVOID lpParameter) {
     }
 
     dwSize = sizeof(reg_ccname);
-    
+
     l = RegQueryValueEx(hk_ccname,
                         L"ccname",
                         NULL,
@@ -1701,7 +1701,7 @@ DWORD WINAPI k5_ccname_monitor_thread(LPVOID lpParameter) {
             wchar_t new_ccname[KRB5_MAXCCH_CCNAME];
 
             dwSize = sizeof(new_ccname);
-    
+
             l = RegQueryValueEx(hk_ccname,
                                 L"ccname",
                                 NULL,
@@ -1756,7 +1756,7 @@ k5_msg_system_idpro(khm_int32 msg_type, khm_int32 msg_subtype,
             pkrb5_init_context(&k5_identpro_ctx);
             kcdb_identity_set_type(credtype_id_krb5);
 
-            if (KHM_FAILED(kcdb_type_get_id(TYPENAME_KRB5_PRINC, 
+            if (KHM_FAILED(kcdb_type_get_id(TYPENAME_KRB5_PRINC,
                                             &type_id_krb5_princ))) {
                 kcdb_type dt;
                 kcdb_type * pstr;

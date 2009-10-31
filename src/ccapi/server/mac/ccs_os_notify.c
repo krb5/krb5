@@ -33,22 +33,22 @@
 cc_int32 ccs_os_notify_cache_collection_changed (ccs_cache_collection_t io_cache_collection)
 {
     cc_int32 err = ccNoError;
-    
+
     if (!io_cache_collection) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         CFNotificationCenterRef center = CFNotificationCenterGetDistributedCenter ();
 
-        if (center) { 
+        if (center) {
             CFNotificationCenterPostNotification (center,
                                                   kCCAPICacheCollectionChangedNotification,
                                                   NULL, NULL, TRUE);
         }
     }
-    
-    
-    
-    return cci_check_error (err);    
+
+
+
+    return cci_check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -57,24 +57,24 @@ cc_int32 ccs_os_notify_ccache_changed (ccs_cache_collection_t  io_cache_collecti
                                        const char             *in_ccache_name)
 {
     cc_int32 err = ccNoError;
-    
+
     if (!io_cache_collection) { err = cci_check_error (ccErrBadParam); }
     if (!in_ccache_name     ) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         CFNotificationCenterRef center = CFNotificationCenterGetDistributedCenter ();
         CFStringRef name = CFStringCreateWithCString (kCFAllocatorDefault,
                                                       in_ccache_name,
                                                       kCFStringEncodingUTF8);
-        
-        if (center && name) { 
+
+        if (center && name) {
             CFNotificationCenterPostNotification (center,
                                                   kCCAPICCacheChangedNotification,
                                                   name, NULL, TRUE);
         }
-        
+
         if (name) { CFRelease (name); }
     }
-    
-    return cci_check_error (err);    
+
+    return cci_check_error (err);
 }

@@ -246,7 +246,7 @@ k5db2_dbopen(krb5_db2_context *dbc, char *fname, int flags, int mode, int tempdb
 	errno = ENOMEM;
 	return NULL;
     }
-    
+
 
     hashi.bsize = 4096;
     hashi.cachesize = 0;
@@ -2009,4 +2009,3 @@ errout:
 
     return retval;
 }
-

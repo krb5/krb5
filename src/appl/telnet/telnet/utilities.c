@@ -606,7 +606,7 @@ printsub(direction, pointer, length)
 		    break;
 		}
 		break;
-		
+
 	    case LM_SLC:
 		fprintf(NetTrace, "SLC");
 		for (i = 2; i < length - 2; i += 3) {
@@ -738,7 +738,7 @@ printsub(direction, pointer, length)
 			    fprintf(NetTrace, "\n");
 
 			break;
-				
+
 		    default:
 			fprintf(NetTrace, " %d", pointer[i]);
 			break;

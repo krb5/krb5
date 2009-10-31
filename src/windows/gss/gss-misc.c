@@ -1,6 +1,6 @@
 /*
  * Copyright 1994 by OpenVision Technologies, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -10,7 +10,7 @@
  * without specific, written prior permission. OpenVision makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -27,7 +27,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -155,7 +155,7 @@ int send_token(int s, int flags, gss_buffer_t tok)
         return -1;
     } else if (ret != 4) {
         if (verbose)
-            printf("sending token length: %d of %d bytes written\r\n", 
+            printf("sending token length: %d of %d bytes written\r\n",
                      ret, 4);
         return -1;
     }
@@ -167,7 +167,7 @@ int send_token(int s, int flags, gss_buffer_t tok)
         return -1;
     } else if (ret != tok->length) {
         if (verbose)
-            printf("sending token data: %d of %d bytes written\r\n", 
+            printf("sending token data: %d of %d bytes written\r\n",
                      ret, (int) tok->length);
         return -1;
     }
@@ -189,7 +189,7 @@ int send_token(int s, int flags, gss_buffer_t tok)
  * Returns: 0 on success, -1 on failure
  *
  * Effects:
- * 
+ *
  * recv_token reads the token flags (a single byte, even though
  * they're stored into an integer, then reads the token length (as a
  * network long), allocates memory to hold the data, and then reads
@@ -226,7 +226,7 @@ int recv_token(int s, int * flags, gss_buffer_t tok)
             return -1;
         } else if (ret != 3) {
             if (verbose)
-                printf("reading token length: %d of %d bytes read\r\n", 
+                printf("reading token length: %d of %d bytes read\r\n",
                          ret, 3);
             return -1;
         }
@@ -239,7 +239,7 @@ int recv_token(int s, int * flags, gss_buffer_t tok)
             return -1;
         } else if (ret != 4) {
             if (verbose)
-                printf("reading token length: %d of %d bytes read\r\n", 
+                printf("reading token length: %d of %d bytes read\r\n",
                          ret, 4);
             return -1;
         }
@@ -263,7 +263,7 @@ int recv_token(int s, int * flags, gss_buffer_t tok)
         free(tok->value);
         return -1;
     } else if (ret != tok->length) {
-        printf("sending token data: %d of %d bytes written\r\n", 
+        printf("sending token data: %d of %d bytes written\r\n",
                  ret, (int) tok->length);
         free(tok->value);
         return -1;
@@ -272,7 +272,7 @@ int recv_token(int s, int * flags, gss_buffer_t tok)
     return 0;
 }
 
-void 
+void
 free_token(gss_buffer_t tok)
 {
     if (tok->length <= 0 || tok->value == NULL)
@@ -311,7 +311,7 @@ display_status_1(char *m, OM_uint32 code, int type) {
     OM_uint32 maj_stat, min_stat;
     gss_buffer_desc msg;
     OM_uint32 msg_ctx;
-     
+
     msg_ctx = 0;
     while (1) {
         maj_stat = gss_display_status(&min_stat, code,
@@ -319,11 +319,11 @@ display_status_1(char *m, OM_uint32 code, int type) {
                                       &msg_ctx, &msg);
         if (verbose)
             printf("GSS-API error %s: %s\r\n", m,
-                     (char *)msg.value); 
+                     (char *)msg.value);
         OkMsgBox ("GSS-API error %s: %s\n", m,
             (char *)msg.value);
         (void) gss_release_buffer(&min_stat, &msg);
-	  
+
         if (!msg_ctx)
             break;
     }
@@ -393,11 +393,11 @@ int gettimeofday (struct timeval *tv, void *ignore_tz)
 }
 
 /*+*************************************************************************
-** 
+**
 ** OkMsgBox
-** 
+**
 ** A MessageBox version of printf
-** 
+**
 ***************************************************************************/
 void
 OkMsgBox (char *format, ...) {
@@ -409,11 +409,11 @@ OkMsgBox (char *format, ...) {
     MessageBox(NULL, buf, "", MB_OK);
 }
 /*+*************************************************************************
-** 
+**
 ** My_perror
-** 
+**
 ** A windows conversion of perror displaying the output into a MessageBox.
-** 
+**
 ***************************************************************************/
 void
 my_perror (char *msg) {
@@ -421,9 +421,8 @@ my_perror (char *msg) {
 
     err = strerror (errno);
 
-    if (msg && *msg != '\0') 
+    if (msg && *msg != '\0')
         OkMsgBox ("%s: %s", msg, err);
     else
         MessageBox (NULL, err, "", MB_OK);
 }
-

@@ -47,7 +47,7 @@ debug_check()
   /*   _CrtMemDumpAllObjectsSince( NULL ); */
 
   _CrtMemCheckpoint( &s2 );
-  
+
   if ( _CrtMemDifference( &s3, &s1, &s2 ) )
     _CrtMemDumpStatistics( &s3 );
 
@@ -88,4 +88,3 @@ debug_init()
    SET_CRT_DEBUG_FIELD( _CRTDBG_LEAK_CHECK_DF );
 }
 #endif /* DEBUG */
-

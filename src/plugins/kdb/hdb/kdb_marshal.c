@@ -108,7 +108,7 @@ kh_unmarshal_octet_string(krb5_context context,
     krb5_error_code code;
 
     *out_data = k5alloc(sizeof(krb5_data), &code);
-    if (code != 0) 
+    if (code != 0)
         return code;
 
     code = kh_unmarshal_octet_string_contents(context, in_data, *out_data);
@@ -807,4 +807,3 @@ cleanup:
 
     return code;
 }
-

@@ -147,7 +147,7 @@ static char *SLCflags[]={      /* ascii strings for Linemode SLC flags */
 };
 
 /* Linemode default character for each function */
-static unsigned char LMdefaults[NTELOPTS + 1]={   
+static unsigned char LMdefaults[NTELOPTS + 1]={
   (unsigned char)-1,          /* zero isn't used */
   (unsigned char)-1,          /* we don't support SYNCH */
   3,                          /* ^C is default for BRK */
@@ -197,7 +197,7 @@ void
 start_negotiation(kstream ks)
 {
   char buf[128];
-    
+
   /* Send the initial telnet negotiations */
 #ifdef ENCRYPTION /* XXX */
   if (encrypt_flag)
@@ -220,7 +220,7 @@ start_negotiation(kstream ks)
 
 #ifdef NOT
   /* check whether we are going to be output mapping */
-  if(tw->mapoutput) { 
+  if(tw->mapoutput) {
     netprintf(tw->pnum,"%c%c%c",IAC,DO,TELOPT_BINARY);
     /* set the flag indicating we wanted server to start transmitting binary */
     tw->uwantbinary=1;
@@ -247,7 +247,7 @@ start_negotiation(kstream ks)
 	  teloptions[BINARY]);
   tprintf(cvs,"SEND: %s %s\r\n",telstates[WILL - TELCMD_FIRST],
 	  teloptions[BINARY]);
-#endif      
+#endif
 #endif
 }   /* end start_negotiation() */
 
@@ -269,13 +269,13 @@ parse(CONNECTION *con,unsigned char *st,int cnt)
   unsigned char *mark, *orig;
   char buf[256];
   kstream ks;
-        
+
   ks = con->ks;
-   
+
 #ifdef PRINT_EVERYTHING
   hexdump("Options to process:", st, cnt);
 #endif /* PRINT_EVERYTHING */
-      
+
   orig = st;                /* remember beginning point */
   mark = st + cnt;            /* set to end of input string */
 
@@ -289,7 +289,7 @@ parse(CONNECTION *con,unsigned char *st,int cnt)
    */
   while(st < mark) {
 
-    while(con->telstate != STNORM && st < mark) {   
+    while(con->telstate != STNORM && st < mark) {
       switch(con->telstate) {
       case IACFOUND:              /* telnet option negotiation */
 	if(*st == IAC) {          /* real data=255 */
@@ -306,7 +306,7 @@ parse(CONNECTION *con,unsigned char *st,int cnt)
 #ifdef NEGOTIATEDEBUG
 	wsprintf(buf, "\r\n strange telnet option");
 	OutputDebugString(buf);
-#endif                    
+#endif
 	orig=++st;
 	con->telstate=STNORM;
 	break;
@@ -352,7 +352,7 @@ parse(CONNECTION *con,unsigned char *st,int cnt)
 #ifdef NOT
 	case TELOPT_BINARY:       /* DO: binary transmission */
 	  if(!tw->ibinary) { /* binary */
-	    if(!tw->iwantbinary) { 
+	    if(!tw->iwantbinary) {
 	      netprintf(tw->pnum,"%c%c%c",
 			IAC,WILL,BINARY);
 	      if(tw->condebug>0)
@@ -428,7 +428,7 @@ parse(CONNECTION *con,unsigned char *st,int cnt)
 	   * its default character set
 	   */
 	  netprintf(tw->pnum,"%c%c%c%c",
-		    IAC,SB,TELOPT_LINEMODE,SLC,0,SLC_DEFAULT,0,IAC,SE);  
+		    IAC,SB,TELOPT_LINEMODE,SLC,0,SLC_DEFAULT,0,IAC,SE);
 	  if(tw->condebug>0) {
 	    tprintf(cv,"SEND: %s %s\r\n",
 		    telstates[WILL - TELCMD_FIRST],
@@ -498,7 +498,7 @@ parse(CONNECTION *con,unsigned char *st,int cnt)
 #ifdef NOT
 	case BINARY: /* DONT: check for binary neg. */
 	  if(tw->ibinary) {   /* binary */
-	    if(!tw->iwantbinary) { 
+	    if(!tw->iwantbinary) {
 	      netprintf(tw->pnum,"%c%c%c",IAC,WONT,BINARY);
 	      if(tw->condebug>0)
 		tprintf(cv,"SEND: %s %s\r\n",
@@ -523,13 +523,13 @@ parse(CONNECTION *con,unsigned char *st,int cnt)
 	  break;
 #endif
 	}
-	
+
 	/* all these just fall through to here... */
 
 	con->telstate=STNORM;
 	orig=++st;
 	break;
-	
+
       case WILL:       /* received a telnet WILL option */
 #ifdef NEGOTIATEDEBUG
 	wsprintf(strTmp,"RECV: %s %s\r\n",
@@ -554,7 +554,7 @@ parse(CONNECTION *con,unsigned char *st,int cnt)
 	    tw->ubinary=1;
 	  } /* end if */
 	  else {
-	    if(tw->condebug>0)    
+	    if(tw->condebug>0)
 	      tprintf(cv,"NO REPLY NEEDED: %s %s\r\n",
 		      telstates[DO - TELCMD_FIRST],
 		      teloptions[TELOPT_BINARY]);
@@ -609,7 +609,7 @@ parse(CONNECTION *con,unsigned char *st,int cnt)
 #endif
 	  break;
 #endif
-	  
+
 	default:
 	  wsprintf(buf,"%c%c%c",IAC,DONT,*st);
 	  TelnetSend(ks,buf,lstrlen(buf),0);
@@ -649,7 +649,7 @@ parse(CONNECTION *con,unsigned char *st,int cnt)
 	    tw->mapoutput=0; /* turn output mapping off */
 	  } /* end if */
 	  else {
-	    if(tw->condebug>0) 
+	    if(tw->condebug>0)
 	      tprintf(cv,"NO REPLY NEEDED: %s %s\r\n",
 		      telstates[DONT-TELCMD_FIRST],
 		      teloptions[BINARY]);
@@ -680,7 +680,7 @@ parse(CONNECTION *con,unsigned char *st,int cnt)
 	case TELOPT_ENCRYPT:   /* WONT: don't encrypt our input */
 	  break;
 #endif
-	  
+
 	default:
 	  break;
 	} /* end switch */
@@ -698,7 +698,7 @@ parse(CONNECTION *con,unsigned char *st,int cnt)
 
       case NEGOTIATE:
         /* until we change sub-negotiation states, accumulate bytes */
-	if(con->substate==0) { 
+	if(con->substate==0) {
 	  if(*st==IAC) {  /* check if we found an IAC byte */
 	    if(*(st+1)==IAC) {  /* skip over double IAC's */
 	      st++;
@@ -715,7 +715,7 @@ parse(CONNECTION *con,unsigned char *st,int cnt)
 	else {
 	  con->substate=*st++;
 	  /* check if we've really ended the sub-negotiations */
-	  if(con->substate==SE)    
+	  if(con->substate==SE)
 	    parse_subnegotiat(ks,end_sub);
 
 	  orig=st;
@@ -753,7 +753,7 @@ parse(CONNECTION *con,unsigned char *st,int cnt)
 	st++;
       } /* end while */
 #if 0
-      if(!tw->timing) 
+      if(!tw->timing)
 	parsewrite(tw,orig,st-orig);
 #endif
       orig=st;                /* forget what we have sent already */
@@ -803,8 +803,8 @@ parse_subnegotiat(kstream ks, int end_sub)
 	       "SEND: SB TERMINAL-TYPE IS vt100 \r\n len=%d \r\n",
 	       lstrlen((LPSTR)buf));
       OutputDebugString(strTmp);
-#endif                
-    }    
+#endif
+    }
     break;
 
   case TELOPT_AUTHENTICATION:

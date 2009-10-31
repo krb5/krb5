@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/krb/bld_pr_ext.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Build a principal from a list of lengths and strings
  */
@@ -33,7 +34,7 @@
 
 krb5_error_code KRB5_CALLCONV_C
 krb5_build_principal_ext(krb5_context context,  krb5_principal * princ,
-			 unsigned int rlen, const char * realm, ...)
+                         unsigned int rlen, const char * realm, ...)
 {
     va_list ap;
     int i, count = 0;
@@ -44,8 +45,8 @@ krb5_build_principal_ext(krb5_context context,  krb5_principal * princ,
     va_start(ap, realm);
     /* count up */
     while (va_arg(ap, int) != 0) {
-	(void)va_arg(ap, char *);		/* pass one up */
-	count++;
+        (void)va_arg(ap, char *);               /* pass one up */
+        count++;
     }
     va_end(ap);
 
@@ -54,30 +55,30 @@ krb5_build_principal_ext(krb5_context context,  krb5_principal * princ,
     /* get space for array */
     princ_data = (krb5_data *) malloc(sizeof(krb5_data) * count);
     if (!princ_data)
-	return ENOMEM;
+        return ENOMEM;
     princ_ret = (krb5_principal) malloc(sizeof(krb5_principal_data));
     if (!princ_ret) {
-	free(princ_data);
-	return ENOMEM;
+        free(princ_data);
+        return ENOMEM;
     }
     princ_ret->data = princ_data;
     princ_ret->length = count;
     tmpdata.length = rlen;
     tmpdata.data = (char *) realm;
     if (krb5int_copy_data_contents_add0(context, &tmpdata, &princ_ret->realm) != 0) {
-	free(princ_data);
-	free(princ_ret);
-	return ENOMEM;
-    }	
+        free(princ_data);
+        free(princ_ret);
+        return ENOMEM;
+    }
 
     /* process rest of components */
     va_start(ap, realm);
     for (i = 0; i < count; i++) {
-	tmpdata.length = va_arg(ap, unsigned int);
-	tmpdata.data = va_arg(ap, char *);
-	if (krb5int_copy_data_contents_add0(context, &tmpdata,
-					    &princ_data[i]) != 0)
-	    goto free_out;
+        tmpdata.length = va_arg(ap, unsigned int);
+        tmpdata.data = va_arg(ap, char *);
+        if (krb5int_copy_data_contents_add0(context, &tmpdata,
+                                            &princ_data[i]) != 0)
+            goto free_out;
     }
     va_end(ap);
     *princ = princ_ret;
@@ -86,7 +87,7 @@ krb5_build_principal_ext(krb5_context context,  krb5_principal * princ,
 
 free_out:
     while (--i >= 0)
-	free(princ_data[i].data);
+        free(princ_data[i].data);
     free(princ_data);
     free(princ_ret->realm.data);
     free(princ_ret);

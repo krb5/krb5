@@ -74,7 +74,7 @@ main(argc, argv)
      count = 1026;
      auth_once = 0;
      prot = NULL;
-     
+
      while ((c = getopt(argc, argv, "a:m:os:tu")) != -1) {
 	  switch (c) {
 	  case 'a':
@@ -120,20 +120,20 @@ main(argc, argv)
      default:
 	  usage();
      }
-     
+
      /* client handle to rstat */
      clnt = clnt_create(host, RPC_TEST_PROG, RPC_TEST_VERS_1, prot);
      if (clnt == NULL) {
 	  clnt_pcreateerror(whoami);
 	  exit(1);
      }
-     
+
      clnt->cl_auth = auth_gssapi_create_default(clnt, target);
      if (clnt->cl_auth == NULL) {
 	  clnt_pcreateerror(whoami);
 	  exit(2);
      }
-     
+
      /*
       * Call the echo service multiple times.
       */
@@ -183,7 +183,7 @@ main(argc, argv)
      echo_resp = rpc_test_echo_1(&echo_arg, clnt);
      if (echo_resp == NULL)
 	  clnt_perror(clnt, "Sequence number improperly reset");
-     
+
      /*
       * Now simulate a lost server response, and see if
       * auth_gssapi_refresh recovers.
@@ -193,7 +193,7 @@ main(argc, argv)
      echo_resp = rpc_test_echo_1(&echo_arg, clnt);
      if (echo_resp == NULL)
 	  clnt_perror(clnt, "Auto-resynchronization failed");
-     
+
      /*
       * Now make sure auto-resyncrhonization actually worked
       */
@@ -207,7 +207,7 @@ main(argc, argv)
       * unique.  Create another context from the same credentials; it
       * should have the same expiration time and will cause the server
       * to abort if the clients are not differentiated.
-      * 
+      *
       * Test fix for secure-rpc/586, part 2: btree keys cannot be
       * mutated in place.  To test this: a second client, *with a
       * later expiration time*, must be run.  The second client should
@@ -238,7 +238,7 @@ main(argc, argv)
 	  AUTH_DESTROY(clnt->cl_auth);
 	  clnt->cl_auth = tmp_auth;
      }
-     
+
      /*
       * Try RPC calls with argument/result lengths [0, 1025].  Do
       * this last, since it takes a while..
@@ -258,7 +258,7 @@ main(argc, argv)
 			    "RPC_TEST_LENGTHS call %d response wrong\n", i);
 	       gssrpc_xdr_free(xdr_wrapstring, echo_resp);
 	  }
-	  
+
 	  /* cycle from 1 to 255 */
 	  buf[i] = (i % 255) + 1;
 
@@ -273,4 +273,3 @@ main(argc, argv)
      CLNT_DESTROY(clnt);
      exit(0);
 }
-

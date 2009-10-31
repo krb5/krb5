@@ -11,7 +11,7 @@ krb5_context test_context;
 int error_count = 0;
 
 void krb5_ktest_free_alt_method(krb5_context context, krb5_alt_method *val);
-void krb5_ktest_free_pwd_sequence(krb5_context context, 
+void krb5_ktest_free_pwd_sequence(krb5_context context,
 				  passwd_phrase_element *val);
 void krb5_ktest_free_enc_data(krb5_context context, krb5_enc_data *val);
 
@@ -21,14 +21,14 @@ int main(argc, argv)
 {
     krb5_data code;
     krb5_error_code retval;
-  
+
     retval = krb5_init_context(&test_context);
     if (retval) {
 	com_err(argv[0], retval, "while initializing krb5");
 	exit(1);
     }
     init_access(argv[0]);
-  
+
 
 #define setup(type,typestring,constructor)				\
     type ref, *var;							\
@@ -236,12 +236,12 @@ int main(argc, argv)
 	decode_run("authenticator","(optionals empty)","62 4F 30 4D A0 03 02 01 05 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A4 05 02 03 01 E2 40 A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A",decode_krb5_authenticator,ktest_equal_authenticator,krb5_free_authenticator);
 
 	ktest_destroy_authorization_data(&(ref.authorization_data));
-    
+
 	decode_run("authenticator","(optionals NULL)","62 4F 30 4D A0 03 02 01 05 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A4 05 02 03 01 E2 40 A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A",decode_krb5_authenticator,ktest_equal_authenticator,krb5_free_authenticator);
 
 	ktest_empty_authenticator(&ref);
     }
-  
+
     /****************************************************************/
     /* decode_krb5_ticket */
     {
@@ -320,14 +320,14 @@ int main(argc, argv)
 	decode_run("encryption_key","(enctype = 2147483647)","30 14 A0 06 02 04 7F FF FF FF A1 0A 04 08 31 32 33 34 35 36 37 38",decode_krb5_encryption_key,ktest_equal_encryption_key,krb5_free_keyblock);
 
 	ktest_empty_keyblock(&ref);
-    }  
-  
+    }
+
     /****************************************************************/
     /* decode_krb5_enc_tkt_part */
     {
 	setup(krb5_enc_tkt_part,"krb5_enc_tkt_part",ktest_make_sample_enc_tkt_part);
 	decode_run("enc_tkt_part","","63 82 01 14 30 82 01 10 A0 07 03 05 00 FE DC BA 98 A1 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A3 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A4 2E 30 2C A0 03 02 01 01 A1 25 04 23 45 44 55 2C 4D 49 54 2E 2C 41 54 48 45 4E 41 2E 2C 57 41 53 48 49 4E 47 54 4F 4E 2E 45 44 55 2C 43 53 2E A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A6 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A7 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A8 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A9 20 30 1E 30 0D A0 03 02 01 02 A1 06 04 04 12 D0 00 23 30 0D A0 03 02 01 02 A1 06 04 04 12 D0 00 23 AA 24 30 22 30 0F A0 03 02 01 01 A1 08 04 06 66 6F 6F 62 61 72 30 0F A0 03 02 01 01 A1 08 04 06 66 6F 6F 62 61 72",decode_krb5_enc_tkt_part,ktest_equal_enc_tkt_part,krb5_free_enc_tkt_part);
-  
+
 	/* ref.times.starttime = 0; */
 	ref.times.starttime = ref.times.authtime;
 	ref.times.renew_till = 0;
@@ -338,7 +338,7 @@ int main(argc, argv)
 	/* ISODE version fails on the empty caddrs field */
 	ktest_destroy_addresses(&(ref.caddrs));
 	ktest_destroy_authorization_data(&(ref.authorization_data));
-  
+
 	decode_run("enc_tkt_part","(optionals NULL)","63 81 A5 30 81 A2 A0 07 03 05 00 FE DC BA 98 A1 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A3 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A4 2E 30 2C A0 03 02 01 01 A1 25 04 23 45 44 55 2C 4D 49 54 2E 2C 41 54 48 45 4E 41 2E 2C 57 41 53 48 49 4E 47 54 4F 4E 2E 45 44 55 2C 43 53 2E A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A7 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A",decode_krb5_enc_tkt_part,ktest_equal_enc_tkt_part, krb5_free_enc_tkt_part);
 
 	decode_run("enc_tkt_part","(optionals NULL + bitstring enlarged to 38 bits)","63 81 A6 30 81 A3 A0 08 03 06 02 FE DC BA 98 DC A1 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A3 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A4 2E 30 2C A0 03 02 01 01 A1 25 04 23 45 44 55 2C 4D 49 54 2E 2C 41 54 48 45 4E 41 2E 2C 57 41 53 48 49 4E 47 54 4F 4E 2E 45 44 55 2C 43 53 2E A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A7 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A",decode_krb5_enc_tkt_part,ktest_equal_enc_tkt_part,krb5_free_enc_tkt_part);
@@ -352,26 +352,26 @@ int main(argc, argv)
 	decode_run("enc_tkt_part","(optionals NULL + bitstring reduced to 24 bits)","63 81 A4 30 81 A1 A0 06 03 04 00 FE DC BA A1 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A3 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A4 2E 30 2C A0 03 02 01 01 A1 25 04 23 45 44 55 2C 4D 49 54 2E 2C 41 54 48 45 4E 41 2E 2C 57 41 53 48 49 4E 47 54 4F 4E 2E 45 44 55 2C 43 53 2E A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A7 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A",decode_krb5_enc_tkt_part,ktest_equal_enc_tkt_part,krb5_free_enc_tkt_part);
 
 	ktest_empty_enc_tkt_part(&ref);
-    }  
-  
+    }
+
     /****************************************************************/
     /* decode_krb5_enc_kdc_rep_part */
     {
 	setup(krb5_enc_kdc_rep_part,"krb5_enc_kdc_rep_part",ktest_make_sample_enc_kdc_rep_part);
-  
+
 #ifdef KRB5_GENEROUS_LR_TYPE
 	decode_run("enc_kdc_rep_part","(compat_lr_type)","7A 82 01 10 30 82 01 0C A0 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A1 38 30 36 30 19 A0 04 02 02 00 FB A1 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A 30 19 A0 04 02 02 00 FB A1 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A2 03 02 01 2A A3 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A4 07 03 05 00 FE DC BA 98 A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A6 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A7 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A8 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A9 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 AA 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 AB 20 30 1E 30 0D A0 03 02 01 02 A1 06 04 04 12 D0 00 23 30 0D A0 03 02 01 02 A1 06 04 04 12 D0 00 23",decode_krb5_enc_kdc_rep_part,ktest_equal_enc_kdc_rep_part,krb5_free_enc_kdc_rep_part);
 #endif
-  
+
 	decode_run("enc_kdc_rep_part","","7A 82 01 0E 30 82 01 0A A0 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A1 36 30 34 30 18 A0 03 02 01 FB A1 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A 30 18 A0 03 02 01 FB A1 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A2 03 02 01 2A A3 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A4 07 03 05 00 FE DC BA 98 A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A6 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A7 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A8 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A9 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 AA 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 AB 20 30 1E 30 0D A0 03 02 01 02 A1 06 04 04 12 D0 00 23 30 0D A0 03 02 01 02 A1 06 04 04 12 D0 00 23",decode_krb5_enc_kdc_rep_part,ktest_equal_enc_kdc_rep_part,krb5_free_enc_kdc_rep_part);
-  
+
 	ref.key_exp = 0;
 	/* ref.times.starttime = 0;*/
 	ref.times.starttime = ref.times.authtime;
 	ref.times.renew_till = 0;
 	ref.flags &= ~TKT_FLG_RENEWABLE;
 	ktest_destroy_addresses(&(ref.caddrs));
-  
+
 #ifdef KRB5_GENEROUS_LR_TYPE
 	decode_run("enc_kdc_rep_part","(optionals NULL)(compat lr_type)","7A 81 B4 30 81 B1 A0 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A1 38 30 36 30 19 A0 04 02 02 00 FB A1 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A 30 19 A0 04 02 02 00 FB A1 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A2 03 02 01 2A A4 07 03 05 00 FE 5C BA 98 A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A7 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A9 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 AA 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61",decode_krb5_enc_kdc_rep_part,ktest_equal_enc_kdc_rep_part,krb5_free_enc_kdc_rep_part);
 #endif
@@ -379,7 +379,7 @@ int main(argc, argv)
 	decode_run("enc_kdc_rep_part","(optionals NULL)","7A 81 B2 30 81 AF A0 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A1 36 30 34 30 18 A0 03 02 01 FB A1 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A 30 18 A0 03 02 01 FB A1 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A2 03 02 01 2A A4 07 03 05 00 FE 5C BA 98 A5 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A7 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A9 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 AA 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61",decode_krb5_enc_kdc_rep_part,ktest_equal_enc_kdc_rep_part,krb5_free_enc_kdc_rep_part);
 
 	ktest_empty_enc_kdc_rep_part(&ref);
-    }  
+    }
 
     /****************************************************************/
     /* decode_krb5_as_rep */
@@ -443,8 +443,8 @@ int main(argc, argv)
 	decode_run("as_rep","(optionals NULL)","6B 81 C2 30 81 BF A0 03 02 01 05 A1 03 02 01 0B A3 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A4 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A5 5E 61 5C 30 5A A0 03 02 01 05 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A3 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65 A6 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65",decode_krb5_as_rep,ktest_equal_as_rep,krb5_free_kdc_rep);
 
 	ktest_empty_kdc_rep(&ref);
-    }  
-  
+    }
+
     /****************************************************************/
     /* decode_krb5_tgs_rep */
     {
@@ -457,8 +457,8 @@ int main(argc, argv)
 	decode_run("tgs_rep","(optionals NULL)","6D 81 C2 30 81 BF A0 03 02 01 05 A1 03 02 01 0D A3 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A4 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A5 5E 61 5C 30 5A A0 03 02 01 05 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A3 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65 A6 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65",decode_krb5_tgs_rep,ktest_equal_tgs_rep,krb5_free_kdc_rep);
 
 	ktest_empty_kdc_rep(&ref);
-    }  
-  
+    }
+
     /****************************************************************/
     /* decode_krb5_ap_req */
     {
@@ -466,7 +466,7 @@ int main(argc, argv)
 	decode_run("ap_req","","6E 81 9D 30 81 9A A0 03 02 01 05 A1 03 02 01 0E A2 07 03 05 00 FE DC BA 98 A3 5E 61 5C 30 5A A0 03 02 01 05 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A3 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65 A4 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65",decode_krb5_ap_req,ktest_equal_ap_req,krb5_free_ap_req);
 	ktest_empty_ap_req(&ref);
 
-    }  
+    }
 
     /****************************************************************/
     /* decode_krb5_ap_rep */
@@ -474,7 +474,7 @@ int main(argc, argv)
 	setup(krb5_ap_rep,"krb5_ap_rep",ktest_make_sample_ap_rep);
 	decode_run("ap_rep","","6F 33 30 31 A0 03 02 01 05 A1 03 02 01 0F A2 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65",decode_krb5_ap_rep,ktest_equal_ap_rep,krb5_free_ap_rep);
 	ktest_empty_ap_rep(&ref);
-    }  
+    }
 
     /****************************************************************/
     /* decode_krb5_ap_rep_enc_part */
@@ -482,7 +482,7 @@ int main(argc, argv)
 	setup(krb5_ap_rep_enc_part,"krb5_ap_rep_enc_part",ktest_make_sample_ap_rep_enc_part);
 
 	decode_run("ap_rep_enc_part","","7B 36 30 34 A0 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A1 05 02 03 01 E2 40 A2 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A3 03 02 01 11",decode_krb5_ap_rep_enc_part,ktest_equal_ap_rep_enc_part,krb5_free_ap_rep_enc_part);
-  
+
 	ktest_destroy_keyblock(&(ref.subkey));
 	ref.seq_number = 0;
 	decode_run("ap_rep_enc_part","(optionals NULL)","7B 1C 30 1A A0 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A1 05 02 03 01 E2 40",decode_krb5_ap_rep_enc_part,ktest_equal_ap_rep_enc_part,krb5_free_ap_rep_enc_part);
@@ -504,7 +504,7 @@ int main(argc, argv)
 
 	ktest_empty_ap_rep_enc_part(&ref);
     }
-  
+
     /****************************************************************/
     /* decode_krb5_as_req */
     {
@@ -536,7 +536,7 @@ int main(argc, argv)
 
     }
 
-  
+
     /****************************************************************/
     /* decode_krb5_tgs_req */
     {
@@ -567,7 +567,7 @@ int main(argc, argv)
 
 	ktest_empty_kdc_req(&ref);
     }
-  
+
     /****************************************************************/
     /* decode_krb5_kdc_req_body */
     {
@@ -606,7 +606,7 @@ int main(argc, argv)
 	ktest_empty_kdc_req(&ref);
     }
 
-  
+
     /****************************************************************/
     /* decode_krb5_safe */
     {
@@ -621,7 +621,7 @@ int main(argc, argv)
 
 	ktest_empty_safe(&ref);
     }
-  
+
     /****************************************************************/
     /* decode_krb5_priv */
     {
@@ -629,7 +629,7 @@ int main(argc, argv)
 	decode_run("priv","","75 33 30 31 A0 03 02 01 05 A1 03 02 01 15 A3 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65",decode_krb5_priv,ktest_equal_priv,krb5_free_priv);
 	ktest_empty_priv(&ref);
     }
-  
+
     /****************************************************************/
     /* decode_krb5_enc_priv_part */
     {
@@ -643,7 +643,7 @@ int main(argc, argv)
 	decode_run("enc_priv_part","(optionals NULL)","7C 1F 30 1D A0 0A 04 08 6B 72 62 35 64 61 74 61 A4 0F 30 0D A0 03 02 01 02 A1 06 04 04 12 D0 00 23",decode_krb5_enc_priv_part,ktest_equal_enc_priv_part,krb5_free_priv_enc_part);
 	ktest_empty_priv_enc_part(&ref);
     }
-  
+
     /****************************************************************/
     /* decode_krb5_cred */
     {
@@ -651,7 +651,7 @@ int main(argc, argv)
 	decode_run("cred","","76 81 F6 30 81 F3 A0 03 02 01 05 A1 03 02 01 16 A2 81 BF 30 81 BC 61 5C 30 5A A0 03 02 01 05 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A3 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65 61 5C 30 5A A0 03 02 01 05 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A3 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65 A3 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65",decode_krb5_cred,ktest_equal_cred,krb5_free_cred);
 	ktest_empty_cred(&ref);
     }
-  
+
     /****************************************************************/
     /* decode_krb5_enc_cred_part */
     {
@@ -678,7 +678,7 @@ int main(argc, argv)
 
 	ktest_empty_cred_enc_part(&ref);
     }
-  
+
     /****************************************************************/
     /* decode_krb5_error */
     {
@@ -693,7 +693,7 @@ int main(argc, argv)
 
 	ktest_empty_error(&ref);
     }
-  
+
     /****************************************************************/
     /* decode_krb5_authdata */
     {
@@ -715,7 +715,7 @@ int main(argc, argv)
 	krb5_free_authdata(test_context, var);
 	ktest_destroy_authorization_data(&ref);
     }
-  
+
     /****************************************************************/
     /* decode_pwd_sequence */
     {
@@ -753,7 +753,7 @@ int main(argc, argv)
 	krb5_free_data_contents(test_context, &code);
 	ktest_destroy_pa_data_array(&ref);
     }
-  
+
     /****************************************************************/
     /* decode_krb5_padata_sequence (empty) */
     {
@@ -775,7 +775,7 @@ int main(argc, argv)
 	krb5_free_data_contents(test_context, &code);
 	ktest_destroy_pa_data_array(&ref);
     }
-  
+
     /****************************************************************/
     /* decode_pwd_sequence */
     {
@@ -812,7 +812,7 @@ int main(argc, argv)
 	ktest_destroy_etype_info_entry(ref[2]);      ref[2] = 0;
 	ktest_destroy_etype_info_entry(ref[1]);      ref[1] = 0;
 	krb5_free_data_contents(test_context, &code);
-      
+
 	retval = krb5_data_hex_parse(&code,"30 16 30 14 A0 03 02 01 00 A1 0D 04 0B 4D 6F 72 74 6F 6E 27 73 20 23 30");
 	if (retval) {
 	    com_err("krb5_decode_test", retval,
@@ -825,11 +825,11 @@ int main(argc, argv)
 		    "while decoding etype_info (only one)");
 	}
 	test(ktest_equal_etype_info(ref,var),"etype_info (only one)\n");
-      
+
 	ktest_destroy_etype_info(var);
 	ktest_destroy_etype_info_entry(ref[0]);      ref[0] = 0;
 	krb5_free_data_contents(test_context, &code);
-      
+
 	retval = krb5_data_hex_parse(&code,"30 00");
 	if (retval) {
 	    com_err("krb5_decode_test", retval,
@@ -856,7 +856,7 @@ int main(argc, argv)
 	ref.pausec = 0;
 	decode_run("pa_enc_ts (no usec)","","30 13 A0 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A",decode_krb5_pa_enc_ts,ktest_equal_krb5_pa_enc_ts,krb5_free_pa_enc_ts);
     }
-  
+
     /****************************************************************/
     /* decode_enc_data */
     {
@@ -864,7 +864,7 @@ int main(argc, argv)
 	decode_run("enc_data","","30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65",decode_krb5_enc_data,ktest_equal_enc_data,krb5_ktest_free_enc_data);
 	ktest_destroy_enc_data(&ref);
     }
-  
+
     /****************************************************************/
     /* decode_sam_challenge */
     {
@@ -873,7 +873,7 @@ int main(argc, argv)
 	ktest_empty_sam_challenge(&ref);
 
     }
-  
+
     /****************************************************************/
     /* decode_sam_challenge */
     {
@@ -881,7 +881,7 @@ int main(argc, argv)
 	decode_run("sam_challenge","","30 70 A0 03 02 01 2A A1 07 03 05 00 80 00 00 00 A2 0B 04 09 74 79 70 65 20 6E 61 6D 65 A4 11 04 0F 63 68 61 6C 6C 65 6E 67 65 20 6C 61 62 65 6C A5 10 04 0E 63 68 61 6C 6C 65 6E 67 65 20 69 70 73 65 A6 16 04 14 72 65 73 70 6F 6E 73 65 5F 70 72 6F 6D 70 74 20 69 70 73 65 A8 05 02 03 54 32 10 A9 0F 30 0D A0 03 02 01 01 A1 06 04 04 31 32 33 34",decode_krb5_sam_challenge,ktest_equal_sam_challenge,krb5_free_sam_challenge);
 	ktest_empty_sam_challenge(&ref);
     }
-  
+
     /****************************************************************/
     /* decode_sam_response */
     {
@@ -931,7 +931,7 @@ void krb5_ktest_free_alt_method(krb5_context context, krb5_alt_method *val)
     free(val);
 }
 
-void krb5_ktest_free_pwd_sequence(krb5_context context, 
+void krb5_ktest_free_pwd_sequence(krb5_context context,
 				  passwd_phrase_element *val)
 {
     krb5_free_data(context, val->passwd);

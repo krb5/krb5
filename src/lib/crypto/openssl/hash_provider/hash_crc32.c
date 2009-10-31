@@ -34,7 +34,7 @@ k5_crc32_hash(unsigned int icount, const krb5_data *input,
 {
     unsigned long c, cn;
     unsigned int i;
-    
+
     if (output->length != CRC32_CKSUM_LENGTH)
 	return(KRB5_CRYPTO_INTERNAL);
 

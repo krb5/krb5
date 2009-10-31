@@ -50,7 +50,7 @@ main(argc, argv)
      dbmallopt(MALLOC_REUSE, &arg);
 
      o_size = malloc_inuse(&hist1);
-#endif 
+#endif
 
      /*@+matchanyintegral@*/
      obj = DynCreate(sizeof(char), -8);
@@ -58,7 +58,7 @@ main(argc, argv)
 	  fprintf(stderr, "test: create failed.\n");
 	  exit(1);
      }
-     
+
      if(DynDebug(obj, 1) != DYN_OK) {
 	  fprintf(stderr, "test: setting paranoid failed.\n");
 	  exit(1);
@@ -67,9 +67,9 @@ main(argc, argv)
 	  fprintf(stderr, "test: setting paranoid failed.\n");
 	  exit(1);
      }
-       
 
-     if ((DynGet(obj, -5) != NULL) || 
+
+     if ((DynGet(obj, -5) != NULL) ||
 	 (DynGet(obj, 0) != NULL) || (DynGet(obj, 1000) != NULL)) {
 	  fprintf(stderr, "test: Get did not fail when it should have.\n");
 	  exit(1);
@@ -96,7 +96,7 @@ main(argc, argv)
 	  fprintf(stderr, "test: appending array failed.\n");
 	  exit(1);
      }
-     
+
      if (DynDelete(obj, DynHigh(obj) / 2) != DYN_OK) {
 	  fprintf(stderr, "test: deleting element failed.\n");
 	  exit(1);
@@ -153,17 +153,17 @@ main(argc, argv)
 		   1) != DYN_OK) {
 	  fprintf(stderr, "DynInsert to end failed.\n");
 	  exit(1);
-     }  
+     }
 
      if (DynInsert(obj, 19, insert2, strlen(insert2)) != DYN_OK) {
 	  fprintf(stderr, "DynInsert to middle failed.\n");
 	  exit(1);
      }
-     
+
      if (DynInsert(obj, 0, insert1, strlen(insert1)+1) != DYN_OK) {
 	  fprintf(stderr, "DynInsert to start failed.\n");
 	  exit(1);
-     }	
+     }
 
      data = DynGet(obj, 14 + strlen(insert1) + 1);
      if (data == NULL) {
@@ -194,7 +194,7 @@ main(argc, argv)
 	  malloc_list(2, hist1, hist2);
      }
 #endif
-     
+
      printf("All tests pass\n");
 
      return 0;

@@ -5,48 +5,48 @@
 
  LICENSE TERMS
 
- The free distribution and use of this software in both source and binary 
+ The free distribution and use of this software in both source and binary
  form is allowed (with or without changes) provided that:
 
-   1. distributions of this source code include the above copyright 
+   1. distributions of this source code include the above copyright
       notice, this list of conditions and the following disclaimer;
 
    2. distributions in binary form include the above copyright
       notice, this list of conditions and the following disclaimer
       in the documentation and/or other associated materials;
 
-   3. the copyright holder's name is not used to endorse products 
-      built using this software without specific written permission. 
+   3. the copyright holder's name is not used to endorse products
+      built using this software without specific written permission.
 
  DISCLAIMER
 
  This software is provided 'as is' with no explcit or implied warranties
- in respect of any properties, including, but not limited to, correctness 
+ in respect of any properties, including, but not limited to, correctness
  and fitness for purpose.
  -------------------------------------------------------------------------
  Issue Date: 07/02/2002
 
- This file contains the compilation options for AES (Rijndael) and code 
+ This file contains the compilation options for AES (Rijndael) and code
  that is common across encryption, key scheduling and table generation.
 
 
     OPERATION
- 
+
     These source code files implement the AES algorithm Rijndael designed by
-    Joan Daemen and Vincent Rijmen. The version in aes.c is designed for 
-    block and key sizes of 128, 192 and 256 bits (16, 24 and 32 bytes) while 
-    that in aespp.c provides for block and keys sizes of 128, 160, 192, 224 
-    and 256 bits (16, 20, 24, 28 and 32 bytes).  This file is a common header 
-    file for these two implementations and for aesref.c, which is a reference 
+    Joan Daemen and Vincent Rijmen. The version in aes.c is designed for
+    block and key sizes of 128, 192 and 256 bits (16, 24 and 32 bytes) while
+    that in aespp.c provides for block and keys sizes of 128, 160, 192, 224
+    and 256 bits (16, 20, 24, 28 and 32 bytes).  This file is a common header
+    file for these two implementations and for aesref.c, which is a reference
     implementation.
-    
+
     This version is designed for flexibility and speed using operations on
-    32-bit words rather than operations on bytes.  It provides aes_both fixed 
-    and  dynamic block and key lengths and can also run with either big or 
-    little endian internal byte order (see aes.h).  It inputs block and key 
-    lengths in bytes with the legal values being  16, 24 and 32 for aes.c and 
+    32-bit words rather than operations on bytes.  It provides aes_both fixed
+    and  dynamic block and key lengths and can also run with either big or
+    little endian internal byte order (see aes.h).  It inputs block and key
+    lengths in bytes with the legal values being  16, 24 and 32 for aes.c and
     16, 20, 24, 28 and 32 for aespp.c
- 
+
     THE CIPHER INTERFACE
 
     uint8_t         (an unsigned  8-bit type)
@@ -68,8 +68,8 @@
       aes_rval aes_dec_key(const unsigned char in_key[], unsigned int klen, aes_ctx cx[1]);
       aes_rval aes_dec_blk(const unsigned char in_blk[], unsigned char out_blk[], const aes_ctx cx[1]);
 
-    IMPORTANT NOTE: If you are using this C interface and your compiler does 
-    not set the memory used for objects to zero before use, you will need to 
+    IMPORTANT NOTE: If you are using this C interface and your compiler does
+    not set the memory used for objects to zero before use, you will need to
     ensure that cx.s_flg is set to zero before using these subroutine calls.
 
     C++ aes class subroutines:
@@ -86,21 +86,21 @@
       aes_rval blk(const unsigned char in_blk[], unsigned char out_blk[]);
 
     The block length inputs to set_block and set_key are in numbers of
-    BYTES, not bits.  The calls to subroutines must be made in the above 
+    BYTES, not bits.  The calls to subroutines must be made in the above
     order but multiple calls can be made without repeating earlier calls
     if their parameters have not changed. If the cipher block length is
     variable but set_blk has not been called before cipher operations a
-    value of 16 is assumed (that is, the AES block size). In contrast to 
+    value of 16 is assumed (that is, the AES block size). In contrast to
     earlier versions the block and key length parameters are now checked
-    for correctness and the encryption and decryption routines check to 
+    for correctness and the encryption and decryption routines check to
     ensure that an appropriate key has been set before they are called.
 
-    COMPILATION 
+    COMPILATION
 
     The files used to provide AES (Rijndael) are
 
     a. aes.h for the definitions needed for use in C.
-    b. aescpp.h for the definitions needed for use in C++. 
+    b. aescpp.h for the definitions needed for use in C++.
     c. aesopt.h for setting compilation options (also includes common
        code).
     d. aescrypt.c for encryption and decrytpion, or
@@ -113,7 +113,7 @@
     block and key lengths of 16, 24 and 32 bytes (128, 192 and 256 bits).
     If aescrypp.c and aeskeypp.c are used instead of aescrypt.c and
     aeskey.c respectively, the block and key lengths can then be 16, 20,
-    24, 28 or 32 bytes. However this code has not been optimised to the 
+    24, 28 or 32 bytes. However this code has not been optimised to the
     same extent and is hence slower (esepcially for the AES block size
     of 16 bytes).
 
@@ -124,23 +124,23 @@
     exclude the AES_DLL define in aes.h
 
     To compile AES (Rijndael) in C as a Dynamic Link Library DLL) use
-    aes.h, include the AES_DLL define and compile the DLL.  If using 
+    aes.h, include the AES_DLL define and compile the DLL.  If using
     the test files to test the DLL, exclude aes.c from the test build
-    project and compile it with the same defines as used for the DLL 
+    project and compile it with the same defines as used for the DLL
     (ensure that the DLL path is correct)
 
     CONFIGURATION OPTIONS (here and in aes.h)
 
-    a. define BLOCK_SIZE in aes.h to set the cipher block size (16, 24 
-       or 32 for the standard code, or 16, 20, 24, 28 or 32 for the 
-       extended code) or leave this undefined for dynamically variable 
+    a. define BLOCK_SIZE in aes.h to set the cipher block size (16, 24
+       or 32 for the standard code, or 16, 20, 24, 28 or 32 for the
+       extended code) or leave this undefined for dynamically variable
        block size (this will result in much slower code).
     b. set AES_DLL in aes.h if AES (Rijndael) is to be compiled as a DLL
-    c. You may need to set PLATFORM_BYTE_ORDER to define the byte order. 
+    c. You may need to set PLATFORM_BYTE_ORDER to define the byte order.
     d. If you want the code to run in a specific internal byte order, then
        INTERNAL_BYTE_ORDER must be set accordingly.
     e. set other configuration options decribed below.
-*/ 
+*/
 
 #ifndef _AESOPT_H
 #define _AESOPT_H
@@ -148,7 +148,7 @@
 /*  START OF CONFIGURATION OPTIONS
 
     USE OF DEFINES
-  
+
     Later in this section there are a number of defines that control
     the operation of the code.  In each section, the purpose of each
     define is explained so that the relevant form can be included or
@@ -199,11 +199,11 @@
 
 /*  2. BYTE ORDER IN 32-BIT WORDS
 
-    To obtain the highest speed on processors with 32-bit words, this code 
+    To obtain the highest speed on processors with 32-bit words, this code
     needs to determine the order in which bytes are packed into such words.
-    The following block of code is an attempt to capture the most obvious 
-    ways in which various environemnts specify heir endian definitions. It 
-    may well fail, in which case the definitions will need to be set by 
+    The following block of code is an attempt to capture the most obvious
+    ways in which various environemnts specify heir endian definitions. It
+    may well fail, in which case the definitions will need to be set by
     editing at the points marked **** EDIT HERE IF NECESSARY **** below.
 */
 #define AES_LITTLE_ENDIAN   1234 /* byte 0 is least significant (i386) */
@@ -219,7 +219,7 @@
 #        define PLATFORM_BYTE_ORDER AES_BIG_ENDIAN
 #      endif
 #    endif
-#  elif defined(LITTLE_ENDIAN) && !defined(BIG_ENDIAN) 
+#  elif defined(LITTLE_ENDIAN) && !defined(BIG_ENDIAN)
 #    define PLATFORM_BYTE_ORDER AES_LITTLE_ENDIAN
 #  elif !defined(LITTLE_ENDIAN) && defined(BIG_ENDIAN)
 #    define PLATFORM_BYTE_ORDER AES_BIG_ENDIAN
@@ -233,7 +233,7 @@
 #        define PLATFORM_BYTE_ORDER AES_BIG_ENDIAN
 #      endif
 #    endif
-#  elif defined(_LITTLE_ENDIAN) && !defined(_BIG_ENDIAN) 
+#  elif defined(_LITTLE_ENDIAN) && !defined(_BIG_ENDIAN)
 #    define PLATFORM_BYTE_ORDER AES_LITTLE_ENDIAN
 #  elif !defined(_LITTLE_ENDIAN) && defined(_BIG_ENDIAN)
 #    define PLATFORM_BYTE_ORDER AES_BIG_ENDIAN
@@ -249,8 +249,8 @@
 #endif
 
 /*  3. ASSEMBLER SUPPORT
-    
-    If the assembler code is used for encryption and decryption this file only 
+
+    If the assembler code is used for encryption and decryption this file only
     provides key scheduling so the following defines are used
 */
 #ifdef  AES_ASM
@@ -298,27 +298,27 @@
 
 /*  5. BYTE ORDER WITHIN 32 BIT WORDS
 
-    The fundamental data processing units in Rijndael are 8-bit bytes. The 
-    input, output and key input are all enumerated arrays of bytes in which 
-    bytes are numbered starting at zero and increasing to one less than the 
-    number of bytes in the array in question. This enumeration is only used 
-    for naming bytes and does not imply any adjacency or order relationship 
-    from one byte to another. When these inputs and outputs are considered 
-    as bit sequences, bits 8*n to 8*n+7 of the bit sequence are mapped to 
-    byte[n] with bit 8n+i in the sequence mapped to bit 7-i within the byte. 
-    In this implementation bits are numbered from 0 to 7 starting at the 
+    The fundamental data processing units in Rijndael are 8-bit bytes. The
+    input, output and key input are all enumerated arrays of bytes in which
+    bytes are numbered starting at zero and increasing to one less than the
+    number of bytes in the array in question. This enumeration is only used
+    for naming bytes and does not imply any adjacency or order relationship
+    from one byte to another. When these inputs and outputs are considered
+    as bit sequences, bits 8*n to 8*n+7 of the bit sequence are mapped to
+    byte[n] with bit 8n+i in the sequence mapped to bit 7-i within the byte.
+    In this implementation bits are numbered from 0 to 7 starting at the
     numerically least significant end of each byte (bit n represents 2^n).
 
-    However, Rijndael can be implemented more efficiently using 32-bit 
+    However, Rijndael can be implemented more efficiently using 32-bit
     words by packing bytes into words so that bytes 4*n to 4*n+3 are placed
-    into word[n]. While in principle these bytes can be assembled into words 
-    in any positions, this implementation only supports the two formats in 
+    into word[n]. While in principle these bytes can be assembled into words
+    in any positions, this implementation only supports the two formats in
     which bytes in adjacent positions within words also have adjacent byte
-    numbers. This order is called big-endian if the lowest numbered bytes 
-    in words have the highest numeric significance and little-endian if the 
-    opposite applies. 
-    
-    This code can work in either order irrespective of the order used by the 
+    numbers. This order is called big-endian if the lowest numbered bytes
+    in words have the highest numeric significance and little-endian if the
+    opposite applies.
+
+    This code can work in either order irrespective of the order used by the
     machine on which it runs. Normally the internal byte order will be set
     to the order of the processor on which the code is to be run but this
     define can be used to reverse this in special situations
@@ -331,20 +331,20 @@
 #define INTERNAL_BYTE_ORDER AES_BIG_ENDIAN
 #endif
 
-/*  6. FAST INPUT/OUTPUT OPERATIONS.  
+/*  6. FAST INPUT/OUTPUT OPERATIONS.
 
-    On some machines it is possible to improve speed by transferring the 
-    bytes in the input and output arrays to and from the internal 32-bit 
-    variables by addressing these arrays as if they are arrays of 32-bit 
-    words.  On some machines this will always be possible but there may 
-    be a large performance penalty if the byte arrays are not aligned on 
-    the normal word boundaries. On other machines this technique will 
+    On some machines it is possible to improve speed by transferring the
+    bytes in the input and output arrays to and from the internal 32-bit
+    variables by addressing these arrays as if they are arrays of 32-bit
+    words.  On some machines this will always be possible but there may
+    be a large performance penalty if the byte arrays are not aligned on
+    the normal word boundaries. On other machines this technique will
     lead to memory access errors when such 32-bit word accesses are not
-    properly aligned. The option SAFE_IO avoids such problems but will 
-    often be slower on those machines that support misaligned access 
-    (especially so if care is taken to align the input  and output byte 
-    arrays on 32-bit word boundaries). If SAFE_IO is not defined it is 
-    assumed that access to byte arrays as if they are arrays of 32-bit 
+    properly aligned. The option SAFE_IO avoids such problems but will
+    often be slower on those machines that support misaligned access
+    (especially so if care is taken to align the input  and output byte
+    arrays on 32-bit word boundaries). If SAFE_IO is not defined it is
+    assumed that access to byte arrays as if they are arrays of 32-bit
     words will not cause problems when such accesses are misaligned.
 */
 #if 1
@@ -363,12 +363,12 @@
 /*  7. LOOP UNROLLING
 
     The code for encryption and decrytpion cycles through a number of rounds
-    that can be implemented either in a loop or by expanding the code into a 
+    that can be implemented either in a loop or by expanding the code into a
     long sequence of instructions, the latter producing a larger program but
     one that will often be much faster. The latter is called loop unrolling.
     There are also potential speed advantages in expanding two iterations in
     a loop with half the number of iterations, which is called partial loop
-    unrolling.  The following options allow partial or full loop unrolling 
+    unrolling.  The following options allow partial or full loop unrolling
     to be set independently for encryption and decryption
 */
 #if !defined(CONFIG_SMALL) || defined(CONFIG_SMALL_NO_CRYPTO)
@@ -389,8 +389,8 @@
 
 /*  8. FIXED OR DYNAMIC TABLES
 
-    When this section is included the tables used by the code are compiled 
-    statically into the binary file.  Otherwise they are computed once when 
+    When this section is included the tables used by the code are compiled
+    statically into the binary file.  Otherwise they are computed once when
     the code is first used.
 */
 #if 1
@@ -399,7 +399,7 @@
 
 /*  9. FAST FINITE FIELD OPERATIONS
 
-    If this section is included, tables are used to provide faster finite 
+    If this section is included, tables are used to provide faster finite
     field arithmetic (this has no effect if FIXED_TABLES is defined).
 */
 #if 1
@@ -408,8 +408,8 @@
 
 /*  10. INTERNAL STATE VARIABLE FORMAT
 
-    The internal state of Rijndael is stored in a number of local 32-bit 
-    word varaibles which can be defined either as an array or as individual 
+    The internal state of Rijndael is stored in a number of local 32-bit
+    word varaibles which can be defined either as an array or as individual
     names variables. Include this section if you want to store these local
     varaibles in arrays. Otherwise individual local variables will be used.
 */
@@ -419,10 +419,10 @@
 
 /* In this implementation the columns of the state array are each held in
    32-bit words. The state array can be held in various ways: in an array
-   of words, in a number of individual word variables or in a number of 
+   of words, in a number of individual word variables or in a number of
    processor registers. The following define maps a variable name x and
    a column number c to the way the state array variable is to be held.
-   The first define below maps the state into an array x[c] whereas the 
+   The first define below maps the state into an array x[c] whereas the
    second form maps the state into a number of individual variables x0,
    x1, etc.  Another form could map individual state colums to machine
    register names.
@@ -448,16 +448,16 @@
 
     This cipher proceeds by repeating in a number of cycles known as 'rounds'
     which are implemented by a round function which can optionally be speeded
-    up using tables.  The basic tables are each 256 32-bit words, with either 
+    up using tables.  The basic tables are each 256 32-bit words, with either
     one or four tables being required for each round function depending on
     how much speed is required. The encryption and decryption round functions
     are different and the last encryption and decrytpion round functions are
     different again making four different round functions in all.
 
     This means that:
-      1. Normal encryption and decryption rounds can each use either 0, 1 
+      1. Normal encryption and decryption rounds can each use either 0, 1
          or 4 tables and table spaces of 0, 1024 or 4096 bytes each.
-      2. The last encryption and decryption rounds can also use either 0, 1 
+      2. The last encryption and decryption rounds can also use either 0, 1
          or 4 tables and table spaces of 0, 1024 or 4096 bytes each.
 
     Include or exclude the appropriate definitions below to set the number
@@ -497,7 +497,7 @@
 #endif
 
 /*  The decryption key schedule can be speeded up with tables in the same
-    way that the round functions can.  Include or exclude the following 
+    way that the round functions can.  Include or exclude the following
     defines to set this requirement.
 */
 #if !defined(CONFIG_SMALL) || defined(CONFIG_SMALL_NO_CRYPTO)
@@ -519,7 +519,7 @@
 
 #if defined(BLOCK_SIZE) && ((BLOCK_SIZE & 3) || BLOCK_SIZE < 16 || BLOCK_SIZE > 32)
 #error An illegal block size has been specified.
-#endif  
+#endif
 
 #if !defined(BLOCK_SIZE)
 #define RC_LENGTH    29
@@ -534,7 +534,7 @@
 #define LAST_ENC_ROUND  NO_TABLES
 #elif ENC_ROUND == ONE_TABLE && LAST_ENC_ROUND == FOUR_TABLES
 #undef  LAST_ENC_ROUND
-#define LAST_ENC_ROUND  ONE_TABLE 
+#define LAST_ENC_ROUND  ONE_TABLE
 #endif
 
 #if ENC_ROUND == NO_TABLES && ENC_UNROLL != NONE
@@ -547,7 +547,7 @@
 #define LAST_DEC_ROUND  NO_TABLES
 #elif DEC_ROUND == ONE_TABLE && LAST_DEC_ROUND == FOUR_TABLES
 #undef  LAST_DEC_ROUND
-#define LAST_DEC_ROUND  ONE_TABLE 
+#define LAST_DEC_ROUND  ONE_TABLE
 #endif
 
 #if DEC_ROUND == NO_TABLES && DEC_UNROLL != NONE
@@ -560,7 +560,7 @@
  /*
    upr(x,n):  rotates bytes within words by n positions, moving bytes to
               higher index positions with wrap around into low positions
-   ups(x,n):  moves bytes by n positions to higher index positions in 
+   ups(x,n):  moves bytes by n positions to higher index positions in
               words but without wrap around
    bval(x,n): extracts a byte from a word
  */
@@ -602,7 +602,7 @@
 #if !defined(_MSC_VER)
 #define _lrotl(x,n)     (((x) <<  n) | ((x) >> (32 - n)))
 #endif
-#define bswap_32(x)     ((_lrotl((x),8) & 0x00ff00ff) | (_lrotl((x),24) & 0xff00ff00)) 
+#define bswap_32(x)     ((_lrotl((x),8) & 0x00ff00ff) | (_lrotl((x),24) & 0xff00ff00))
 #endif
 
 #define word_in(x)      bswap_32(*(uint32_t*)(x))
@@ -625,9 +625,9 @@
    give improved performance if a fast 32-bit multiply is not available. Note
    that a temporary variable u needs to be defined where FFmulX is used.
 
-#define FFmulX(x) (u = (x) & m1, u |= (u >> 1), ((x) & m2) << 1) ^ ((u >> 3) | (u >> 6)) 
+#define FFmulX(x) (u = (x) & m1, u |= (u >> 1), ((x) & m2) << 1) ^ ((u >> 3) | (u >> 6))
 #define m4  (0x01010101 * BPOLY)
-#define FFmulX(x) (u = (x) & m1, ((x) & m2) << 1) ^ ((u - (u >> 7)) & m4) 
+#define FFmulX(x) (u = (x) & m1, ((x) & m2) << 1) ^ ((u - (u >> 7)) & m4)
 */
 
 /* Work out which tables are needed for the different options   */

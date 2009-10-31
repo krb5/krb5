@@ -34,10 +34,10 @@ int check_cc_get_name(void);
 cc_int32 check_once_cc_get_name(apiCB *context, ccache_p *ccache, const char *expected_name, cc_int32 expected_err, const char *description);
 
 int check_cc_get_principal(void);
-cc_result check_once_cc_get_principal(apiCB *context, 
-                                      ccache_p *ccache, 
-                                      const char *expected_principal, 
-                                      cc_int32 expected_err, 
+cc_result check_once_cc_get_principal(apiCB *context,
+                                      ccache_p *ccache,
+                                      const char *expected_principal,
+                                      cc_int32 expected_err,
                                       const char *description);
 
 int check_cc_set_principal(void);
@@ -56,18 +56,18 @@ int check_cc_seq_fetch_NCs_next(void);
 cc_result check_once_cc_seq_fetch_NCs_next(apiCB *context, ccache_cit *iterator, cc_uint32 expected_count, cc_result expected_err, const char *description);
 
 int check_cc_get_NC_info(void);
-cc_result check_once_cc_get_NC_info(apiCB *context, 
-                                    const char *expected_name, 
-                                    const char *expected_principal, 
-                                    cc_int32 expected_version, 
-                                    cc_uint32 expected_count, 
-                                    cc_result expected_err, 
+cc_result check_once_cc_get_NC_info(apiCB *context,
+                                    const char *expected_name,
+                                    const char *expected_principal,
+                                    cc_int32 expected_version,
+                                    cc_uint32 expected_count,
+                                    cc_result expected_err,
                                     const char *description);
 
 int check_cc_seq_fetch_creds_begin(void);
 cc_result check_once_cc_seq_fetch_creds_begin(apiCB *context, ccache_p *ccache, ccache_cit **iterator, cc_result expected_err, const char *description);
 
 int check_cc_seq_fetch_creds_next(void);
-cc_result check_once_cc_seq_fetch_creds_next(apiCB *context, ccache_cit *iterator, cc_uint32 expected_count, cc_result expected_err, const char *description);    
+cc_result check_once_cc_seq_fetch_creds_next(apiCB *context, ccache_cit *iterator, cc_uint32 expected_count, cc_result expected_err, const char *description);
 
 #endif /* _TEST_CCAPI_V2_H_ */

@@ -2,7 +2,7 @@
  * Listener loop for subsystem library libss.a.
  *
  *	util/ss/listen.c
- * 
+ *
  * Copyright 1987, 1988 by MIT Student Information Processing Board
  *
  * For copyright information, see copyright.h.
@@ -57,7 +57,7 @@ int ss_listen (sci_idx)
     RETSIGTYPE (*sig_int)(), (*old_sig_cont)();
     int mask;
 #endif
-    
+
     current_info = info = ss_info(sci_idx);
     info->abort = 0;
 
@@ -156,7 +156,7 @@ void ss_abort_subsystem(sci_idx, code)
 {
     ss_info(sci_idx)->abort = 1;
     ss_info(sci_idx)->exit_status = code;
-    
+
 }
 
 void ss_quit(argc, argv, sci_idx, infop)

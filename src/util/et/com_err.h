@@ -26,7 +26,7 @@
 typedef long errcode_t;
 typedef void (*et_old_error_hook_func) (const char *, errcode_t,
 					const char *, va_list ap);
-	
+
 struct error_table {
 	/*@shared@*/ char const * const * msgs;
         long base;

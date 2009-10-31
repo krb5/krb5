@@ -403,7 +403,7 @@ gotiac:			switch (c) {
  * All state defaults are negative, and resp defaults to 0.
  *
  * When initiating a request to change state to new_state:
- * 
+ *
  * if ((want_resp == 0 && new_state == my_state) || want_state == new_state) {
  *	do nothing;
  * } else {
@@ -1121,7 +1121,7 @@ suboption()
 		break;
 
 	sb_auth_complete();
-	
+
 	settimer(tspeedsubopt);
 
 	if (SB_EOF() || SB_GET() != TELQUAL_IS)

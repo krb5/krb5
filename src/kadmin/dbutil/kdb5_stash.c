@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * admin/stash/kdb5_stash.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,21 +23,21 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Store the master database key in a file.
  */
 
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
  * responsibility of any person or organization contemplating export to
  * obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -47,7 +48,7 @@
  * permission.  FundsXpress makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -87,14 +88,14 @@ kdb5_stash(argc, argv)
     retval = kadm5_init_krb5_context(&context);
     if( retval )
     {
-	com_err(progname, retval, "while initializing krb5_context");
-	exit(1);
+        com_err(progname, retval, "while initializing krb5_context");
+        exit(1);
     }
 
     if ((retval = krb5_set_default_realm(context,
-					  util_context->default_realm))) {
-	com_err(progname, retval, "while setting default realm name");
-	exit(1);
+                                         util_context->default_realm))) {
+        com_err(progname, retval, "while setting default realm name");
+        exit(1);
     }
 
     dbname = global_params.dbname;
@@ -104,41 +105,41 @@ kdb5_stash(argc, argv)
 
     optind = 1;
     while ((optchar = getopt(argc, argv, "f:")) != -1) {
-	switch(optchar) {
-	case 'f':
-	    keyfile = optarg;
-	    break;
-	case '?':
-	default:
-	    usage();
-	    return;
-	}
+        switch(optchar) {
+        case 'f':
+            keyfile = optarg;
+            break;
+        case '?':
+        default:
+            usage();
+        return;
+        }
     }
 
     if (!krb5_c_valid_enctype(master_keyblock.enctype)) {
-	char tmp[32];
-	if (krb5_enctype_to_string(master_keyblock.enctype, tmp, sizeof(tmp)))
-	    com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP,
-		    "while setting up enctype %d", master_keyblock.enctype);
-	else
-	    com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP, tmp);
-	exit_status++; return; 
+        char tmp[32];
+        if (krb5_enctype_to_string(master_keyblock.enctype, tmp, sizeof(tmp)))
+            com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP,
+                    "while setting up enctype %d", master_keyblock.enctype);
+        else
+            com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP, tmp);
+        exit_status++; return;
     }
 
     /* assemble & parse the master key name */
-    retval = krb5_db_setup_mkey_name(context, mkey_name, realm, 
-				     &mkey_fullname, &master_princ);
+    retval = krb5_db_setup_mkey_name(context, mkey_name, realm,
+                                     &mkey_fullname, &master_princ);
     if (retval) {
-	com_err(progname, retval, "while setting up master key name");
-	exit_status++; return; 
+        com_err(progname, retval, "while setting up master key name");
+        exit_status++; return;
     }
 
-    retval = krb5_db_open(context, db5util_db_args, 
-			  KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_OTHER);
+    retval = krb5_db_open(context, db5util_db_args,
+                          KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_OTHER);
     if (retval) {
-	com_err(progname, retval, "while initializing the database '%s'",
-		dbname);
-	exit_status++; return; 
+        com_err(progname, retval, "while initializing the database '%s'",
+                dbname);
+        exit_status++; return;
     }
 
     if (global_params.mask & KADM5_CONFIG_KVNO)
@@ -147,45 +148,45 @@ kdb5_stash(argc, argv)
         mkey_kvno = IGNORE_VNO; /* use whatever krb5_db_fetch_mkey finds */
 
     if (!valid_master_key) {
-	/* TRUE here means read the keyboard, but only once */
-	retval = krb5_db_fetch_mkey(context, master_princ,
-				    master_keyblock.enctype,
-				    TRUE, FALSE, (char *) NULL,
-				    &mkey_kvno,
-				    NULL, &master_keyblock);
-	if (retval) {
-	    com_err(progname, retval, "while reading master key");
-	    (void) krb5_db_fini(context);
-	    exit_status++; return; 
-	}
+        /* TRUE here means read the keyboard, but only once */
+        retval = krb5_db_fetch_mkey(context, master_princ,
+                                    master_keyblock.enctype,
+                                    TRUE, FALSE, (char *) NULL,
+                                    &mkey_kvno,
+                                    NULL, &master_keyblock);
+        if (retval) {
+            com_err(progname, retval, "while reading master key");
+            (void) krb5_db_fini(context);
+            exit_status++; return;
+        }
 
-	retval = krb5_db_fetch_mkey_list(context, master_princ,
-					 &master_keyblock, mkey_kvno,
-					 &master_keylist);
-	if (retval) {
-	    com_err(progname, retval, "while getting master key list");
-	    (void) krb5_db_fini(context);
-	    exit_status++; return;
-	}
+        retval = krb5_db_fetch_mkey_list(context, master_princ,
+                                         &master_keyblock, mkey_kvno,
+                                         &master_keylist);
+        if (retval) {
+            com_err(progname, retval, "while getting master key list");
+            (void) krb5_db_fini(context);
+            exit_status++; return;
+        }
     } else {
-	printf("Using existing stashed keys to update stash file.\n");
+        printf("Using existing stashed keys to update stash file.\n");
     }
 
-    retval = krb5_db_store_master_key_list(context, keyfile, master_princ, 
-					   master_keylist, NULL);
+    retval = krb5_db_store_master_key_list(context, keyfile, master_princ,
+                                           master_keylist, NULL);
     if (retval) {
-	com_err(progname, errno, "while storing key");
-	(void) krb5_db_fini(context);
-	exit_status++; return; 
+        com_err(progname, errno, "while storing key");
+        (void) krb5_db_fini(context);
+        exit_status++; return;
     }
 
     retval = krb5_db_fini(context);
     if (retval) {
-	com_err(progname, retval, "closing database '%s'", dbname);
-	exit_status++; return; 
+        com_err(progname, retval, "closing database '%s'", dbname);
+        exit_status++; return;
     }
 
     krb5_free_context(context);
     exit_status = 0;
-    return; 
+    return;
 }

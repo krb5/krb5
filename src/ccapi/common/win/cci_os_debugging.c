@@ -24,7 +24,7 @@
  * or implied warranty.
  */
 
-#include <stdio.h> 
+#include <stdio.h>
 #include <stdarg.h>
 
 #include "cci_os_debugging.h"

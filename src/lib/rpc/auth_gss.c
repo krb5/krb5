@@ -2,7 +2,7 @@
   auth_gss.c
 
   RPCSEC_GSS client routines.
-  
+
   Copyright (c) 2000 The Regents of the University of Michigan.
   All rights reserved.
 
@@ -144,7 +144,7 @@ print_rpc_gss_sec(struct rpc_gss_sec *ptr)
 struct rpc_gss_data {
 	bool_t			 established;	/* context established */
 	bool_t			 inprogress;
-  gss_buffer_desc      gc_wire_verf; /* save GSS_S_COMPLETE NULL RPC verfier 
+  gss_buffer_desc      gc_wire_verf; /* save GSS_S_COMPLETE NULL RPC verfier
                                    * to process at end of context negotiation*/
 	CLIENT			*clnt;		/* client handle */
 	gss_name_t		 name;		/* service name */
@@ -166,9 +166,9 @@ authgss_create(CLIENT *clnt, gss_name_t name, struct rpc_gss_sec *sec)
 	OM_uint32		min_stat = 0;
 
 	log_debug("in authgss_create()");
-	
+
 	memset(&rpc_createerr, 0, sizeof(rpc_createerr));
-	
+
 	if ((auth = calloc(sizeof(*auth), 1)) == NULL) {
 		rpc_createerr.cf_stat = RPC_SYSTEMERROR;
 		rpc_createerr.cf_error.re_errno = ENOMEM;
@@ -200,18 +200,18 @@ authgss_create(CLIENT *clnt, gss_name_t name, struct rpc_gss_sec *sec)
 	gd->gc.gc_v = RPCSEC_GSS_VERSION;
 	gd->gc.gc_proc = RPCSEC_GSS_INIT;
 	gd->gc.gc_svc = gd->sec.svc;
-	
+
 	auth->ah_ops = &authgss_ops;
 	auth->ah_private = (caddr_t)gd;
-	
+
 	save_auth = clnt->cl_auth;
 	clnt->cl_auth = auth;
 
 	if (!authgss_refresh(auth, NULL))
 		auth = NULL;
-	
+
 	clnt->cl_auth = save_auth;
-	
+
 	log_debug("authgss_create returning auth 0x%08x", auth);
 	return (auth);
 }
@@ -225,11 +225,11 @@ authgss_create_default(CLIENT *clnt, char *service, struct rpc_gss_sec *sec)
 	gss_name_t		 name;
 
 	log_debug("in authgss_create_default()");
-	
+
 
 	sname.value = service;
 	sname.length = strlen(service);
-	
+
 	maj_stat = gss_import_name(&min_stat, &sname,
 		(gss_OID)gss_nt_service_name,
 		&name);
@@ -241,10 +241,10 @@ authgss_create_default(CLIENT *clnt, char *service, struct rpc_gss_sec *sec)
 	}
 
 	auth = authgss_create(clnt, name, sec);
-	
+
  	if (name != GSS_C_NO_NAME)
  		gss_release_name(&min_stat, &name);
-	
+
 	log_debug("authgss_create_default returning auth 0x%08x", auth);
 	return (auth);
 }
@@ -287,16 +287,16 @@ authgss_marshal(AUTH *auth, XDR *xdrs)
 	gss_buffer_desc		 rpcbuf, checksum;
 	OM_uint32		 maj_stat, min_stat;
 	bool_t			 xdr_stat;
-	
+
 	log_debug("in authgss_marshal()");
-	
+
 	gd = AUTH_PRIVATE(auth);
 
 	if (gd->established)
 		gd->gc.gc_seq++;
-	
+
 	xdrmem_create(&tmpxdrs, tmp, sizeof(tmp), XDR_ENCODE);
-	
+
 	if (!xdr_rpc_gss_cred(&tmpxdrs, &gd->gc)) {
 		XDR_DESTROY(&tmpxdrs);
 		return (FALSE);
@@ -304,12 +304,12 @@ authgss_marshal(AUTH *auth, XDR *xdrs)
 	auth->ah_cred.oa_flavor = RPCSEC_GSS;
 	auth->ah_cred.oa_base = tmp;
 	auth->ah_cred.oa_length = XDR_GETPOS(&tmpxdrs);
-	
+
 	XDR_DESTROY(&tmpxdrs);
-	
+
 	if (!xdr_opaque_auth(xdrs, &auth->ah_cred))
 		return (FALSE);
-	
+
 	if (gd->gc.gc_proc == RPCSEC_GSS_INIT ||
 	    gd->gc.gc_proc == RPCSEC_GSS_CONTINUE_INIT) {
 		return (xdr_opaque_auth(xdrs, &gssrpc__null_auth));
@@ -318,7 +318,7 @@ authgss_marshal(AUTH *auth, XDR *xdrs)
 	rpcbuf.length = XDR_GETPOS(xdrs);
 	XDR_SETPOS(xdrs, 0);
 	rpcbuf.value = XDR_INLINE(xdrs, (int)rpcbuf.length);
-	
+
 	maj_stat = gss_get_mic(&min_stat, gd->ctx, gd->sec.qop,
 			    &rpcbuf, &checksum);
 
@@ -333,10 +333,10 @@ authgss_marshal(AUTH *auth, XDR *xdrs)
 	auth->ah_verf.oa_flavor = RPCSEC_GSS;
 	auth->ah_verf.oa_base = checksum.value;
 	auth->ah_verf.oa_length = checksum.length;
-	
+
 	xdr_stat = xdr_opaque_auth(xdrs, &auth->ah_verf);
 	gss_release_buffer(&min_stat, &checksum);
-	
+
 	return (xdr_stat);
 }
 
@@ -350,13 +350,13 @@ authgss_validate(AUTH *auth, struct opaque_auth *verf)
 	OM_uint32		 maj_stat, min_stat;
 
 	log_debug("in authgss_validate()");
-	
+
 	gd = AUTH_PRIVATE(auth);
 
 	if (gd->established == FALSE) {
 		/* would like to do this only on NULL rpc - gc->established is good enough.
 		 * save the on the wire verifier to validate last INIT phase packet
-		 * after decode if the major status is GSS_S_COMPLETE 
+		 * after decode if the major status is GSS_S_COMPLETE
 		 */
 		if ((gd->gc_wire_verf.value = mem_alloc(verf->oa_length)) == NULL) {
 			fprintf(stderr, "gss_validate: out of memory\n");
@@ -372,13 +372,13 @@ authgss_validate(AUTH *auth, struct opaque_auth *verf)
 		num = htonl(gd->win);
 	}
 	else num = htonl(gd->gc.gc_seq);
-	
+
 	signbuf.value = &num;
 	signbuf.length = sizeof(num);
-	
+
 	checksum.value = verf->oa_base;
 	checksum.length = verf->oa_length;
-	
+
 	maj_stat = gss_verify_mic(&min_stat, gd->ctx, &signbuf,
 				  &checksum, &qop_state);
 	if (maj_stat != GSS_S_COMPLETE || qop_state != gd->sec.qop) {
@@ -401,16 +401,16 @@ authgss_refresh(AUTH *auth, struct rpc_msg *msg)
 	OM_uint32		 maj_stat, min_stat, call_stat, ret_flags;
 
 	log_debug("in authgss_refresh()");
-	
+
 	gd = AUTH_PRIVATE(auth);
-	
+
 	if (gd->established || gd->inprogress)
 		return (TRUE);
-	
+
 	/* GSS context establishment loop. */
 	memset(&gr, 0, sizeof(gr));
 	recv_tokenp = GSS_C_NO_BUFFER;
-	
+
 #ifdef DEBUG
 	print_rpc_gss_sec(&gd->sec);
 #endif /*DEBUG*/
@@ -424,13 +424,13 @@ authgss_refresh(AUTH *auth, struct rpc_msg *msg)
 						gd->sec.mech,
 						gd->sec.req_flags,
 						0,		/* time req */
-						GSS_C_NO_CHANNEL_BINDINGS, 
+						GSS_C_NO_CHANNEL_BINDINGS,
 						recv_tokenp,
 						NULL,		/* used mech */
 						&send_token,
 						&ret_flags,
 						NULL);		/* time rec */
-		
+
 		log_status("gss_init_sec_context", maj_stat, min_stat);
 		if (recv_tokenp != GSS_C_NO_BUFFER) {
 			gss_release_buffer(&min_stat, &gr.gr_token);
@@ -443,13 +443,13 @@ authgss_refresh(AUTH *auth, struct rpc_msg *msg)
 		}
 		if (send_token.length != 0) {
 			memset(&gr, 0, sizeof(gr));
-			
+
 			call_stat = clnt_call(gd->clnt, NULLPROC,
 					      xdr_rpc_gss_init_args,
 					      &send_token,
 					      xdr_rpc_gss_init_res,
 					      (caddr_t)&gr, AUTH_TIMEOUT);
-			
+
 			gss_release_buffer(&min_stat, &send_token);
 
 			log_debug("authgss_refresh: call_stat=%d", call_stat);
@@ -458,7 +458,7 @@ authgss_refresh(AUTH *auth, struct rpc_msg *msg)
 			    (gr.gr_major != GSS_S_COMPLETE &&
 			     gr.gr_major != GSS_S_CONTINUE_NEEDED))
 				break;
-			
+
 			if (gr.gr_ctx.length != 0) {
 				if (gd->gc.gc_ctx.value)
 					gss_release_buffer(&min_stat,
@@ -472,7 +472,7 @@ authgss_refresh(AUTH *auth, struct rpc_msg *msg)
 			}
 			gd->gc.gc_proc = RPCSEC_GSS_CONTINUE_INIT;
 		}
-		
+
 		/* GSS_S_COMPLETE => check gss header verifier, usually checked in
 		 * gss_validate
 		 */
@@ -516,11 +516,11 @@ authgss_refresh(AUTH *auth, struct rpc_msg *msg)
 		log_debug("authgss_refresh: returning ERROR (gc_proc %d)", gd->gc.gc_proc);
 		if (gr.gr_token.length != 0)
 			gss_release_buffer(&min_stat, &gr.gr_token);
-		
+
 		authgss_destroy(auth);
 		auth = NULL;
 		rpc_createerr.cf_stat = RPC_AUTHERROR;
-		
+
 		return (FALSE);
 	}
 	log_debug("authgss_refresh: returning SUCCESS");
@@ -552,9 +552,9 @@ authgss_destroy_context(AUTH *auth)
 	enum clnt_stat		 callstat;
 
 	log_debug("in authgss_destroy_context()");
-	
+
 	gd = AUTH_PRIVATE(auth);
-	
+
 	if (gd->gc.gc_ctx.length != 0) {
 		if (gd->established) {
 			gd->gc.gc_proc = RPCSEC_GSS_DESTROY;
@@ -584,13 +584,13 @@ authgss_destroy(AUTH *auth)
 {
 	struct rpc_gss_data	*gd;
 	OM_uint32		 min_stat;
-	
+
 	log_debug("in authgss_destroy()");
-	
+
 	gd = AUTH_PRIVATE(auth);
-	
+
 	authgss_destroy_context(auth);
-	
+
 	if (gd->name != GSS_C_NO_NAME)
 		gss_release_name(&min_stat, &gd->name);
 
@@ -604,7 +604,7 @@ authgss_wrap(AUTH *auth, XDR *xdrs, xdrproc_t xdr_func, caddr_t xdr_ptr)
 	struct rpc_gss_data	*gd;
 
 	log_debug("in authgss_wrap()");
-	
+
 	gd = AUTH_PRIVATE(auth);
 
 	if (!gd->established || gd->sec.svc == RPCSEC_GSS_SVC_NONE) {
@@ -621,9 +621,9 @@ authgss_unwrap(AUTH *auth, XDR *xdrs, xdrproc_t xdr_func, caddr_t xdr_ptr)
 	struct rpc_gss_data	*gd;
 
 	log_debug("in authgss_unwrap()");
-	
+
 	gd = AUTH_PRIVATE(auth);
-	
+
 	if (!gd->established || gd->sec.svc == RPCSEC_GSS_SVC_NONE) {
 		return ((*xdr_func)(xdrs, xdr_ptr));
 	}

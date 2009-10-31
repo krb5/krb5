@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * admin/edit/kdb5_edit.h
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,14 +23,14 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  */
 
 #include <kdb_log.h>
 
-#define MAX_HEADER	1024
-#define REALM_SEP	'@'
-#define REALM_SEP_STR	"@"
+#define MAX_HEADER      1024
+#define REALM_SEP       '@'
+#define REALM_SEP_STR   "@"
 
 extern char *progname;
 extern char *Err_no_database;
@@ -52,31 +53,31 @@ extern int add_db_arg(char *arg);
 
 extern void usage(void);
 
-extern void add_key 
-	(char const *, char const *, 
-		   krb5_const_principal, const krb5_keyblock *, 
-		   krb5_kvno, krb5_keysalt *);
+extern void add_key
+(char const *, char const *,
+ krb5_const_principal, const krb5_keyblock *,
+ krb5_kvno, krb5_keysalt *);
 extern int set_dbname_help
-	(char *, char *);
+(char *, char *);
 
 extern char *kdb5_util_Init (int, char **);
 
 extern int quit (void);
 
 extern int check_for_match
-	(char *, int, krb5_db_entry *, int, int);
+(char *, int, krb5_db_entry *, int, int);
 
 extern void parse_token
-	(char *, int *, int *, char *);
+(char *, int *, int *, char *);
 
 extern int create_db_entry (krb5_principal, krb5_db_entry *);
 
 extern int kadm5_create_magic_princs (kadm5_config_params *params,
-						krb5_context context);
+                                      krb5_context context);
 
-extern int process_ov_principal (char *fname, krb5_context kcontext, 
-					   FILE *filep, int verbose, 
-					   int *linenop);
+extern int process_ov_principal (char *fname, krb5_context kcontext,
+                                 FILE *filep, int verbose,
+                                 int *linenop);
 
 extern void load_db (int argc, char **argv);
 extern void dump_db (int argc, char **argv);
@@ -88,7 +89,7 @@ extern void kdb5_use_mkey (int argc, char **argv);
 extern void kdb5_list_mkeys (int argc, char **argv);
 extern void kdb5_update_princ_encryption (int argc, char **argv);
 extern krb5_error_code master_key_convert(krb5_context context,
-					  krb5_db_entry *db_entry);
+                                          krb5_db_entry *db_entry);
 extern void kdb5_purge_mkeys (int argc, char **argv);
 
 extern void update_ok_file (char *file_name);
@@ -101,4 +102,3 @@ extern krb5_error_code add_new_mkey(krb5_context, krb5_db_entry *,
 extern krb5_kvno get_next_kvno(krb5_context, krb5_db_entry *);
 
 void usage (void);
-

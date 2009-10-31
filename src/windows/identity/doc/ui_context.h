@@ -92,7 +92,7 @@
     Next: \ref khui_context_using "Using Contexts"
  */
 
-/*! \page khui_context_using Using Contexts 
+/*! \page khui_context_using Using Contexts
 
     \section khui_context_using_1 Obtaining the context
 

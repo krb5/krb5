@@ -88,7 +88,7 @@ cbc_enc(krb5_key key, const krb5_data *ivec,
                   NULL, key->keyblock.contents, (ivec) ? (unsigned char*)ivec->data : NULL);
 
     if (ret == 1){
-        EVP_CIPHER_CTX_set_padding(&ciph_ctx,0); 
+        EVP_CIPHER_CTX_set_padding(&ciph_ctx,0);
         ret = EVP_EncryptUpdate(&ciph_ctx, tmp_buf, &tmp_len,
                            (unsigned char *)input->data, input->length);
         output->length = tmp_len;
@@ -130,7 +130,7 @@ cbc_decr(krb5_key key, const krb5_data *ivec,
     ret = EVP_DecryptInit_ex(&ciph_ctx, map_mode(key->keyblock.length),
                   NULL, key->keyblock.contents, (ivec) ? (unsigned char*)ivec->data : NULL);
     if (ret == 1) {
-        EVP_CIPHER_CTX_set_padding(&ciph_ctx,0); 
+        EVP_CIPHER_CTX_set_padding(&ciph_ctx,0);
         ret = EVP_EncryptUpdate(&ciph_ctx, tmp_buf, &tmp_len,
                            (unsigned char *)input->data, input->length);
         output->length = tmp_len;
@@ -515,4 +515,3 @@ const struct krb5_enc_provider krb5int_enc_aes256 = {
     krb5int_aes_encrypt_iov,
     krb5int_aes_decrypt_iov
 };
-

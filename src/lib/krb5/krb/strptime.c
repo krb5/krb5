@@ -82,7 +82,7 @@ strptime(buf, fmt, tm)
 			fmt++;
 			continue;
 		}
-				
+
 		if ((c = *fmt++) != '%')
 			goto literal;
 
@@ -107,7 +107,7 @@ literal:
 			LEGAL_ALT(0);
 			alt_format |= ALT_O;
 			goto again;
-			
+
 		/*
 		 * "Complex" conversion rules, implemented through recursion.
 		 */

@@ -75,7 +75,7 @@
 #include <libtelnet/encrypt.h>
 #endif
 
-#if	defined(AUTHENTICATION) || defined(ENCRYPTION) 
+#if	defined(AUTHENTICATION) || defined(ENCRYPTION)
 #include <libtelnet/misc-proto.h>
 #endif	/* defined(AUTHENTICATION) || defined(ENCRYPTION)  */
 
@@ -207,7 +207,7 @@ init_telnet()
     ClearArray(options);
 
     connected = In3270 = ISend = localflow = donebinarytoggle = 0;
-#if	defined(AUTHENTICATION) || defined(ENCRYPTION) 
+#if	defined(AUTHENTICATION) || defined(ENCRYPTION)
     auth_encrypt_connect(connected);
 #endif	/* defined(AUTHENTICATION) || defined(ENCRYPTION)  */
     restartany = -1;
@@ -697,8 +697,8 @@ mklist(buf, name)
 			 */
 			if (n || (cp - cp2 > 41))
 				;
-			else if (name && (strncasecmp(name, cp2, 
-						      (unsigned) (cp-cp2)) 
+			else if (name && (strncasecmp(name, cp2,
+						      (unsigned) (cp-cp2))
 					  == 0))
 				*argv = cp2;
 			else if (is_unique(cp2, argv+1, argvp))
@@ -724,7 +724,7 @@ mklist(buf, name)
 		else if (islower((unsigned char) c))
 			*cp = toupper((unsigned char) c);
 	}
-	
+
 	/*
 	 * Check for an old V6 2 character name.  If the second
 	 * name points to the beginning of the buffer, and is
@@ -1874,7 +1874,7 @@ telrcv()
 	case TS_IAC:
 process_iac:
 	    switch (c) {
-	    
+
 	    case WILL:
 		telrcv_state = TS_WILL;
 		continue;
@@ -2292,10 +2292,10 @@ telnet(user)
     char *user;
 {
     int printed_encrypt = 0;
-    
+
     sys_telnet_init();
 
-#if	defined(AUTHENTICATION) || defined(ENCRYPTION) 
+#if	defined(AUTHENTICATION) || defined(ENCRYPTION)
     {
 	static char local_host[256] = { 0 };
 
@@ -2339,7 +2339,7 @@ telnet(user)
     /*
      * Note: we assume a tie to the authentication option here.  This
      * is necessary so that authentication fails, we don't spin
-     * forever. 
+     * forever.
      */
     if (wantencryption) {
 	extern int auth_has_failed;
@@ -2373,7 +2373,7 @@ telnet(user)
 		    printed_encrypt = 1;
 		    printf("Waiting for encryption to be negotiated...\n");
 		    /*
-		     * Turn on MODE_TRAPSIG and then turn off localchars 
+		     * Turn on MODE_TRAPSIG and then turn off localchars
 		     * so that ^C will cause telnet to exit.
 		     */
 		    TerminalNewMode(getconnmode()|MODE_TRAPSIG);

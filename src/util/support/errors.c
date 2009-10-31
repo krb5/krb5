@@ -69,7 +69,7 @@ krb5int_vset_error_fl (struct errinfo *ep, long code,
     va_list args2;
     char *str = NULL, *str2, *slash;
     const char *loc_fmt = NULL;
-    
+
 #ifdef USE_KIM
     /* Try to localize the format string */
     if (kim_os_string_create_localized(&loc_fmt, fmt) != KIM_NO_ERROR) {
@@ -78,7 +78,7 @@ krb5int_vset_error_fl (struct errinfo *ep, long code,
 #else
     loc_fmt = fmt;
 #endif
-    
+
     /* try vasprintf first */
     va_copy(args2, args);
     if (vasprintf(&str, loc_fmt, args2) < 0) {
@@ -96,21 +96,21 @@ krb5int_vset_error_fl (struct errinfo *ep, long code,
 	    str = str2;
 	}
     }
-    
+
     /* If that failed, try using scratch_buf */
     if (str == NULL) {
         vsnprintf(ep->scratch_buf, sizeof(ep->scratch_buf), loc_fmt, args);
         str = strdup(ep->scratch_buf); /* try allocating again */
     }
-    
+
     /* free old string before setting new one */
     if (ep->msg && ep->msg != ep->scratch_buf) {
 	free ((char *) ep->msg);
 	ep->msg = NULL;
-    }    
+    }
     ep->code = code;
     ep->msg = str ? str : ep->scratch_buf;
-    
+
 #ifdef USE_KIM
     if (loc_fmt != fmt) { kim_string_free(&loc_fmt); }
 #else
@@ -197,7 +197,7 @@ krb5int_get_error (struct errinfo *ep, long code)
 	unlock();
 	goto format_number;
     }
-    
+
     r2 = strdup(r);
     if (r2 == NULL) {
 	strncpy(ep->scratch_buf, r, sizeof(ep->scratch_buf));

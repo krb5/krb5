@@ -123,4 +123,3 @@ OM_uint32 generic_gss_release_buffer_set
 
     return GSS_S_COMPLETE;
 }
-

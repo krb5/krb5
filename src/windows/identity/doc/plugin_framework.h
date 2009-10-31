@@ -177,7 +177,7 @@ following sequence of events occur:
     localized libraries will be loaded. See \ref pi_localization
    </li>
 
-   <li> 
+   <li>
     During processing of init_module(), the module registers all the
     plug-ins that it is implementing by calling kmm_provide_plugin()
     for each.

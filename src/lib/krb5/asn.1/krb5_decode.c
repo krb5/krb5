@@ -1191,7 +1191,7 @@ krb5_error_code decode_krb5_ad_kdcissued
 
     cleanup(free);
 }
-  
+
 #ifndef DISABLE_PKINIT
 krb5_error_code
 decode_krb5_pa_pk_as_req(const krb5_data *code, krb5_pa_pk_as_req **repptr)

@@ -75,7 +75,7 @@ ATOM khui_htwnd_cls;
 struct tx_tbl_t {
     wchar_t *   string;
     LONG        value;
-} 
+}
 
 htw_color_table[] = {
     {L"black", RGB(0,0,0)},
@@ -278,7 +278,7 @@ static wchar_t * skip_ws(wchar_t * s) {
     return s;
 }
 
-/* s points to something like " = \"value\"" 
+/* s points to something like " = \"value\""
    start and len will point to the start and
    length of value.  return value will point to the
    character following the last double quote. */
@@ -332,14 +332,14 @@ We currently support the following tags:
 */
 
 static int htw_parse_tag(
-    wchar_t * start, 
-    wchar_t ** end, 
-    int * align, 
-    khui_htwnd_data * d, 
-    format_stack * s, 
+    wchar_t * start,
+    wchar_t ** end,
+    int * align,
+    khui_htwnd_data * d,
+    format_stack * s,
     PPOINT p_abs,
     PPOINT p_rel,
-    int lh, 
+    int lh,
     BOOL dry_run)
 {
     wchar_t * c;
@@ -454,7 +454,7 @@ static int htw_parse_tag(
         c = wcschr(c, L'>');
         if(!c)
             c = c + wcslen(c);
-        
+
 
         if(align_s)
             *align = table_lookup(htw_align_table, ARRAYLENGTH(htw_align_table), align_s, align_len);
@@ -489,7 +489,7 @@ static int htw_parse_tag(
         *align = ALIGN_CENTER;
         n = 1;
     } else if(!_wcsnicmp(start, L"left", c - start) ||
-        !_wcsnicmp(start, L"p", c - start)) 
+        !_wcsnicmp(start, L"p", c - start))
     {
         c = wcschr(c, L'>');
         if(!c)
@@ -1048,7 +1048,7 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
 
             if(hwnd != (HWND)wParam)
                 break;
-                
+
             d = (khui_htwnd_data *)(LONG_PTR) GetWindowLongPtr(hwnd, 0);
             if (d == NULL)
                 break;
@@ -1221,7 +1221,7 @@ LRESULT CALLBACK khui_htwnd_proc(HWND hwnd,
 
             p.x = GET_X_LPARAM(lParam) + d->scroll_left;
             p.y = GET_Y_LPARAM(lParam) + d->scroll_top;
-                
+
             for(i=0; i<d->n_links; i++) {
                 if(d->links && d->links[i] && PtInRect(&(d->links[i]->r), p))
                     break;

@@ -14,6 +14,6 @@ krb5_data string_list2[3] = {
 };
 
 krb5_data *princ2[] = {&string_list2[0], &string_list2[1], &string_list2[2], 0};
-				   
+
 krb5_last_req_entry lrentries[] = { {32000, 1}, {0, 3}, {10, 2} };
 krb5_last_req_entry *lrfoo1[] = {&lrentries[0], &lrentries[1], &lrentries[2], 0};

@@ -61,7 +61,7 @@ case 7:				/* tgs-req authenticator */
 }
 }
 
-/* RFC 4757 */ 
+/* RFC 4757 */
 krb5_error_code
 krb5int_arcfour_encrypt(const struct krb5_enc_provider *enc,
 		     const struct krb5_hash_provider *hash,
@@ -338,4 +338,3 @@ krb5int_arcfour_decrypt(const struct krb5_enc_provider *enc,
   free(plaintext.data);
   return (ret);
 }
-

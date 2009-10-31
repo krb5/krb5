@@ -1,7 +1,7 @@
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved
  *
- * $Header$ 
+ * $Header$
  */
 
 #if !defined(lint) && !defined(__CODECENTER__)
@@ -29,7 +29,7 @@ krb5_error_code osa_adb_create_db(char *filename, char *lockfilename,
      int lf;
      DB *db;
      BTREEINFO btinfo;
-     
+
      memset(&btinfo, 0, sizeof(btinfo));
      btinfo.flags = 0;
      btinfo.cachesize = 0;
@@ -49,7 +49,7 @@ krb5_error_code osa_adb_create_db(char *filename, char *lockfilename,
      if (lf == -1)
 	  return errno;
      (void) close(lf);
-     
+
      return OSA_ADB_OK;
 }
 
@@ -104,7 +104,7 @@ krb5_error_code osa_adb_rename_db(char *filefrom, char *lockfrom,
 	  (void) osa_adb_fini_db(todb, magic);
 	  return ret;
      }
-	  
+
      (void) osa_adb_fini_db(fromdb, magic);
      (void) osa_adb_fini_db(todb, magic);
      return 0;
@@ -117,7 +117,7 @@ krb5_error_code osa_adb_init_db(osa_adb_db_t *dbp, char *filename,
      static struct _locklist *locklist = NULL;
      struct _locklist *lockp;
      krb5_error_code code;
-     
+
      if (dbp == NULL || filename == NULL)
 	  return EINVAL;
 
@@ -222,7 +222,7 @@ krb5_error_code osa_adb_init_db(osa_adb_db_t *dbp, char *filename,
      db->magic = magic;
 
      *dbp = db;
-     
+
      return OSA_ADB_OK;
 }
 
@@ -255,8 +255,8 @@ krb5_error_code osa_adb_fini_db(osa_adb_db_t db, int magic)
      free(db->filename);
      free(db);
      return OSA_ADB_OK;
-}     
-     
+}
+
 krb5_error_code osa_adb_get_lock(osa_adb_db_t db, int mode)
 {
      int tries, gotlock, perm, krb5_mode, ret = 0;
@@ -314,9 +314,9 @@ krb5_error_code osa_adb_get_lock(osa_adb_db_t db, int mode)
 				KRB5_LOCKMODE_UNLOCK);
 	  return OSA_ADB_NOLOCKFILE;
      }
-     
+
      /* we have the shared/exclusive lock */
-     
+
      if (perm) {
 	  if (unlink(db->lock->filename) < 0) {
 	       /* somehow we can't delete the file, but we already */
@@ -326,7 +326,7 @@ krb5_error_code osa_adb_get_lock(osa_adb_db_t db, int mode)
 	       (void) krb5_lock_file(db->lock->context,
 				     fileno(db->lock->lockfile),
 				     KRB5_LOCKMODE_UNLOCK);
-	       
+
 	       /* maybe we should return CANTLOCK_DB.. but that would */
 	       /* look just like the db was already locked */
 	       return ret;
@@ -336,7 +336,7 @@ krb5_error_code osa_adb_get_lock(osa_adb_db_t db, int mode)
 	  /* now no one else can get one either */
 	  (void) fclose(db->lock->lockfile);
      }
-     
+
      db->lock->lockmode = mode;
      db->lock->lockcnt++;
      return OSA_ADB_OK;
@@ -345,7 +345,7 @@ krb5_error_code osa_adb_get_lock(osa_adb_db_t db, int mode)
 krb5_error_code osa_adb_release_lock(osa_adb_db_t db)
 {
      int ret, fd;
-     
+
      if (!db->lock->lockcnt)		/* lock already unlocked */
 	  return OSA_ADB_NOTLOCKED;
 
@@ -363,7 +363,7 @@ krb5_error_code osa_adb_release_lock(osa_adb_db_t db)
 					  fileno(db->lock->lockfile),
 					  KRB5_LOCKMODE_UNLOCK)))
 	       return ret;
-	  
+
 	  db->lock->lockmode = 0;
      }
      return OSA_ADB_OK;

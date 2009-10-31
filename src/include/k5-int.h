@@ -1,54 +1,54 @@
 /*
  * Copyright (C) 1989,1990,1991,1992,1993,1994,1995,2000,2001, 2003,2006,2007,2008,2009 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
- * 
- * This software is being provided to you, the LICENSEE, by the 
- * Massachusetts Institute of Technology (M.I.T.) under the following 
- * license.  By obtaining, using and/or copying this software, you agree 
- * that you have read, understood, and will comply with these terms and 
- * conditions:  
- * 
+ *
+ * This software is being provided to you, the LICENSEE, by the
+ * Massachusetts Institute of Technology (M.I.T.) under the following
+ * license.  By obtaining, using and/or copying this software, you agree
+ * that you have read, understood, and will comply with these terms and
+ * conditions:
+ *
  * Export of this software from the United States of America may
  * require a specific license from the United States Government.
  * It is the responsibility of any person or organization contemplating
  * export to obtain such a license before exporting.
- * 
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify and distribute 
- * this software and its documentation for any purpose and without fee or 
- * royalty is hereby granted, provided that you agree to comply with the 
- * following copyright notice and statements, including the disclaimer, and 
- * that the same appear on ALL copies of the software and documentation, 
- * including modifications that you make for internal use or for 
+ *
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify and distribute
+ * this software and its documentation for any purpose and without fee or
+ * royalty is hereby granted, provided that you agree to comply with the
+ * following copyright notice and statements, including the disclaimer, and
+ * that the same appear on ALL copies of the software and documentation,
+ * including modifications that you make for internal use or for
  * distribution:
- * 
- * THIS SOFTWARE IS PROVIDED "AS IS", AND M.I.T. MAKES NO REPRESENTATIONS 
- * OR WARRANTIES, EXPRESS OR IMPLIED.  By way of example, but not 
- * limitation, M.I.T. MAKES NO REPRESENTATIONS OR WARRANTIES OF 
- * MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF 
- * THE LICENSED SOFTWARE OR DOCUMENTATION WILL NOT INFRINGE ANY THIRD PARTY 
- * PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.   
- * 
- * The name of the Massachusetts Institute of Technology or M.I.T. may NOT 
- * be used in advertising or publicity pertaining to distribution of the 
- * software.  Title to copyright in this software and any associated 
- * documentation shall at all times remain with M.I.T., and USER agrees to 
+ *
+ * THIS SOFTWARE IS PROVIDED "AS IS", AND M.I.T. MAKES NO REPRESENTATIONS
+ * OR WARRANTIES, EXPRESS OR IMPLIED.  By way of example, but not
+ * limitation, M.I.T. MAKES NO REPRESENTATIONS OR WARRANTIES OF
+ * MERCHANTABILITY OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF
+ * THE LICENSED SOFTWARE OR DOCUMENTATION WILL NOT INFRINGE ANY THIRD PARTY
+ * PATENTS, COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.
+ *
+ * The name of the Massachusetts Institute of Technology or M.I.T. may NOT
+ * be used in advertising or publicity pertaining to distribution of the
+ * software.  Title to copyright in this software and any associated
+ * documentation shall at all times remain with M.I.T., and USER agrees to
  * preserve same.
  *
  * Furthermore if you modify this software you must label
  * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.  
+ * fashion that it might be confused with the original M.I.T. software.
  */
 
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
  * responsibility of any person or organization contemplating export to
  * obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -59,7 +59,7 @@
  * permission.  FundsXpress makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -96,7 +96,7 @@
 #ifndef KRB5_CONFIG__
 #define KRB5_CONFIG__
 
-/* 
+/*
  * Machine-type definitions: PC Clone 386 running Microloss Windows
  */
 
@@ -140,7 +140,7 @@ typedef INT64_TYPE krb5_int64;
 #define	KRB5_KDB_MAX_RLIFE	(60*60*24*7) /* one week */
 #define	KRB5_KDB_EXPIRATION	2145830400 /* Thu Jan  1 00:00:00 2038 UTC */
 
-/* 
+/*
  * Windows requires a different api interface to each function. Here
  * just define it as NULL.
  */
@@ -381,11 +381,11 @@ typedef struct _krb5_etype_info_entry {
     krb5_data s2kparams;
 } krb5_etype_info_entry;
 
-/* 
+/*
  *  This is essentially -1 without sign extension which can screw up
  *  comparisons on 64 bit machines. If the length is this value, then
  *  the salt data is not present. This is to distinguish between not
- *  being set and being of 0 length. 
+ *  being set and being of 0 length.
  */
 #define KRB5_ETYPE_NO_SALT VALID_UINT_BITS
 
@@ -398,7 +398,7 @@ typedef struct _krb5_etype_list {
 } krb5_etype_list;
 
 /*
- * a sam_challenge is returned for alternate preauth 
+ * a sam_challenge is returned for alternate preauth
  */
 /*
           SAMFlags ::= BIT STRING {
@@ -597,9 +597,9 @@ krb5_error_code krb5_os_init_context (krb5_context, krb5_boolean);
 
 void krb5_os_free_context (krb5_context);
 
-/* This function is needed by KfM's KerberosPreferences API 
+/* This function is needed by KfM's KerberosPreferences API
  * because it needs to be able to specify "secure" */
-krb5_error_code os_get_default_config_files 
+krb5_error_code os_get_default_config_files
     (profile_filespec_t **pfiles, krb5_boolean secure);
 
 krb5_error_code krb5_os_hostaddr
@@ -651,7 +651,7 @@ struct krb5_key_st {
 /* new encryption provider api */
 
 struct krb5_enc_provider {
-    /* keybytes is the input size to make_key; 
+    /* keybytes is the input size to make_key;
        keylength is the output size */
     size_t block_size, keybytes, keylength;
 
@@ -817,7 +817,7 @@ zapfree(void *ptr, size_t len)
 krb5_error_code krb5int_des_init_state
 (const krb5_keyblock *key, krb5_keyusage keyusage, krb5_data *new_state);
 
-/* 
+/*
  * normally to free a cipher_state you can just memset the length to zero and
  * free it.
  */
@@ -839,7 +839,7 @@ void  krb5int_c_free_keyblock_contents
 	(krb5_context, krb5_keyblock *);
 krb5_error_code krb5int_c_init_keyblock
 		(krb5_context, krb5_enctype enctype,
-		size_t length, krb5_keyblock **out); 
+		size_t length, krb5_keyblock **out);
 krb5_error_code krb5int_c_copy_keyblock
 (krb5_context context, const krb5_keyblock *from, krb5_keyblock **to);
 krb5_error_code krb5int_c_copy_keyblock_contents
@@ -851,7 +851,7 @@ krb5_error_code krb5int_c_copy_keyblock_contents
 extern void krb5int_prng_cleanup (void);
 
 
-/* 
+/*
  * These declarations are here, so both krb5 and k5crypto
  * can get to them.
  * krb5 needs to get to them so it can  make them available to libgssapi.
@@ -942,10 +942,10 @@ error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
  * (Originally written by Glen Machin at Sandia Labs.)
  */
 /*
- * Sandia National Laboratories also makes no representations about the 
- * suitability of the modifications, or additions to this software for 
+ * Sandia National Laboratories also makes no representations about the
+ * suitability of the modifications, or additions to this software for
  * any purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  */
 #ifndef KRB5_PREAUTH__
 #define KRB5_PREAUTH__
@@ -1079,7 +1079,7 @@ typedef krb5_error_code (*krb5_preauth_obtain_proc)
     (krb5_context,
 		    krb5_pa_data *,
 		    krb5_etype_info,
-		    krb5_keyblock *, 
+		    krb5_keyblock *,
 		    krb5_error_code ( * )(krb5_context,
 					  const krb5_enctype,
 					  krb5_data *,
@@ -1106,7 +1106,7 @@ typedef krb5_error_code (*krb5_preauth_process_proc)
 					  krb5_const_pointer,
 					  krb5_kdc_rep * ),
 		    krb5_keyblock **,
-		    krb5_creds *, 
+		    krb5_creds *,
 		    krb5_int32 *,
 		    krb5_int32 *);
 
@@ -1126,7 +1126,7 @@ krb5_error_code krb5_obtain_padata
 						      krb5_data *,
 						      krb5_const_pointer,
 						      krb5_keyblock **),
-		krb5_const_pointer, 
+		krb5_const_pointer,
 		krb5_creds *,
 		krb5_kdc_req *);
 
@@ -1144,9 +1144,9 @@ krb5_error_code krb5_process_padata
 						      const krb5_keyblock *,
 						      krb5_const_pointer,
 						      krb5_kdc_rep * ),
-		krb5_keyblock **, 	
-		krb5_creds *, 
-		krb5_int32 *);		
+		krb5_keyblock **,
+		krb5_creds *,
+		krb5_int32 *);
 
 krb5_pa_data * krb5int_find_pa_data
 (krb5_context,  krb5_pa_data * const *, krb5_preauthtype);
@@ -1185,7 +1185,7 @@ void krb5_free_etype_info
  * with the new krb5_get_init_creds_opt_alloc() function.
  * KRB5_GET_INIT_CREDS_OPT_SHADOWED is set to indicate that the extended
  * structure is a shadow copy of an original krb5_get_init_creds_opt
- * structure.  
+ * structure.
  * If KRB5_GET_INIT_CREDS_OPT_SHADOWED is set after a call to
  * krb5int_gic_opt_to_opte(), the resulting extended structure should be
  * freed (using krb5_get_init_creds_free).  Otherwise, the original
@@ -1357,7 +1357,7 @@ void KRB5_CALLCONV krb5_free_enc_sam_response_enc_contents
 	(krb5_context, krb5_enc_sam_response_enc * );
 void KRB5_CALLCONV krb5_free_enc_sam_response_enc_2_contents
 	(krb5_context, krb5_enc_sam_response_enc_2 * );
- 
+
 void KRB5_CALLCONV krb5_free_pa_enc_ts
 	(krb5_context, krb5_pa_enc_ts *);
 void KRB5_CALLCONV krb5_free_pa_for_user
@@ -1591,7 +1591,7 @@ void KRB5_CALLCONV krb5_free_priv_enc_part
 
 /* ASN.1 encoding knowledge; KEEP IN SYNC WITH ASN.1 defs! */
 /* here we use some knowledge of ASN.1 encodings */
-/* 
+/*
   Ticket is APPLICATION 1.
   Authenticator is APPLICATION 2.
   AS_REQ is APPLICATION 10.
@@ -1661,11 +1661,11 @@ krb5_error_code encode_krb5_enc_tkt_part
 krb5_error_code encode_krb5_enc_kdc_rep_part
 	(const krb5_enc_kdc_rep_part *rep, krb5_data **code);
 
-/* yes, the translation is identical to that used for KDC__REP */ 
+/* yes, the translation is identical to that used for KDC__REP */
 krb5_error_code encode_krb5_as_rep
 	(const krb5_kdc_rep *rep, krb5_data **code);
 
-/* yes, the translation is identical to that used for KDC__REP */ 
+/* yes, the translation is identical to that used for KDC__REP */
 krb5_error_code encode_krb5_tgs_rep
 	(const krb5_kdc_rep *rep, krb5_data **code);
 
@@ -1848,13 +1848,13 @@ krb5_error_code decode_krb5_sam_response_2
  *************************************************************************/
 
 krb5_error_code krb5_validate_times
-       (krb5_context, 
+       (krb5_context,
 		       krb5_ticket_times *);
 
 /*
    krb5_error_code decode_krb5_structure(const krb5_data *code,
                                          krb5_structure **rep);
-                                         
+
    requires  Expects **rep to not have been allocated;
               a new *rep is allocated regardless of the old value.
    effects   Decodes *code into **rep.
@@ -2165,7 +2165,7 @@ krb5int_generate_and_save_subkey (krb5_context, krb5_auth_context,
 /* set and change password helpers */
 
 krb5_error_code krb5int_mk_chpw_req
-	(krb5_context context, krb5_auth_context auth_context, 
+	(krb5_context context, krb5_auth_context auth_context,
  			krb5_data *ap_req, char *passwd, krb5_data *packet);
 krb5_error_code krb5int_rd_chpw_rep
 	(krb5_context context, krb5_auth_context auth_context,
@@ -2425,7 +2425,7 @@ struct _krb5_cc_ops {
 						   krb5_ccache *);
     krb5_error_code (KRB5_CALLCONV *ptcursor_free)(krb5_context,
 						   krb5_cc_ptcursor *);
-    krb5_error_code (KRB5_CALLCONV *move)(krb5_context, krb5_ccache, 
+    krb5_error_code (KRB5_CALLCONV *move)(krb5_context, krb5_ccache,
 						krb5_ccache);
     krb5_error_code (KRB5_CALLCONV *lastchange)(krb5_context,
 						krb5_ccache, krb5_timestamp *);
@@ -2450,23 +2450,23 @@ typedef struct _krb5_donot_replay {
     krb5_timestamp ctime;
 } krb5_donot_replay;
 
-krb5_error_code krb5_rc_default 
+krb5_error_code krb5_rc_default
 	(krb5_context,
 		krb5_rcache *);
-krb5_error_code krb5_rc_resolve_type 
+krb5_error_code krb5_rc_resolve_type
 	(krb5_context,
 		krb5_rcache *,char *);
-krb5_error_code krb5_rc_resolve_full 
+krb5_error_code krb5_rc_resolve_full
 	(krb5_context,
 		krb5_rcache *,char *);
-char * krb5_rc_get_type 
+char * krb5_rc_get_type
 	(krb5_context,
 		krb5_rcache);
-char * krb5_rc_default_type 
+char * krb5_rc_default_type
 	(krb5_context);
-char * krb5_rc_default_name 
+char * krb5_rc_default_name
 	(krb5_context);
-krb5_error_code krb5_auth_to_rep 
+krb5_error_code krb5_auth_to_rep
 	(krb5_context,
 		krb5_tkt_authent *,
 		krb5_donot_replay *);
@@ -2500,44 +2500,44 @@ typedef struct _krb5_kt_ops {
     krb5_magic magic;
     char *prefix;
     /* routines always present */
-    krb5_error_code (KRB5_CALLCONV *resolve) 
+    krb5_error_code (KRB5_CALLCONV *resolve)
 	(krb5_context,
 		 const char *,
 		 krb5_keytab *);
-    krb5_error_code (KRB5_CALLCONV *get_name) 
+    krb5_error_code (KRB5_CALLCONV *get_name)
 	(krb5_context,
 		 krb5_keytab,
 		 char *,
 		 unsigned int);
-    krb5_error_code (KRB5_CALLCONV *close) 
+    krb5_error_code (KRB5_CALLCONV *close)
 	(krb5_context,
 		 krb5_keytab);
-    krb5_error_code (KRB5_CALLCONV *get) 
+    krb5_error_code (KRB5_CALLCONV *get)
 	(krb5_context,
 		 krb5_keytab,
 		 krb5_const_principal,
 		 krb5_kvno,
 		 krb5_enctype,
 		 krb5_keytab_entry *);
-    krb5_error_code (KRB5_CALLCONV *start_seq_get) 
+    krb5_error_code (KRB5_CALLCONV *start_seq_get)
 	(krb5_context,
 		 krb5_keytab,
-		 krb5_kt_cursor *);	
-    krb5_error_code (KRB5_CALLCONV *get_next) 
+		 krb5_kt_cursor *);
+    krb5_error_code (KRB5_CALLCONV *get_next)
 	(krb5_context,
 		 krb5_keytab,
 		 krb5_keytab_entry *,
 		 krb5_kt_cursor *);
-    krb5_error_code (KRB5_CALLCONV *end_get) 
+    krb5_error_code (KRB5_CALLCONV *end_get)
 	(krb5_context,
 		 krb5_keytab,
 		 krb5_kt_cursor *);
     /* routines to be included on extended version (write routines) */
-    krb5_error_code (KRB5_CALLCONV *add) 
+    krb5_error_code (KRB5_CALLCONV *add)
 	(krb5_context,
 		 krb5_keytab,
 		 krb5_keytab_entry *);
-    krb5_error_code (KRB5_CALLCONV *remove) 
+    krb5_error_code (KRB5_CALLCONV *remove)
 	(krb5_context,
 		 krb5_keytab,
 		  krb5_keytab_entry *);
@@ -2588,13 +2588,13 @@ krb5_error_code KRB5_CALLCONV krb5_random_confounder
 	(size_t, krb5_pointer);
 
 krb5_error_code krb5_encrypt_data
-	(krb5_context context, krb5_keyblock *key, 
-		krb5_pointer ivec, krb5_data *data, 
+	(krb5_context context, krb5_keyblock *key,
+		krb5_pointer ivec, krb5_data *data,
 		krb5_enc_data *enc_data);
 
 krb5_error_code krb5_decrypt_data
-	(krb5_context context, krb5_keyblock *key, 
-		krb5_pointer ivec, krb5_enc_data *data, 
+	(krb5_context context, krb5_keyblock *key,
+		krb5_pointer ivec, krb5_enc_data *data,
 		krb5_data *enc_data);
 
 krb5_error_code
@@ -2639,7 +2639,7 @@ typedef struct
         krb5_int32 etype_count;
 } krb5_etypes_permitted;
 
-krb5_boolean krb5_is_permitted_enctype_ext 
+krb5_boolean krb5_is_permitted_enctype_ext
          ( krb5_context, krb5_etypes_permitted *);
 
 krb5_boolean KRB5_CALLCONV krb5int_c_weak_enctype(krb5_enctype);
@@ -2944,10 +2944,10 @@ void KRB5_CALLCONV krb5_free_realm_string
 
 /* Internal principal function used by KIM to avoid code duplication */
 krb5_error_code KRB5_CALLCONV
-krb5int_build_principal_alloc_va(krb5_context context, 
-                                 krb5_principal *princ, 
-                                 unsigned int rlen, 
-                                 const char *realm, 
+krb5int_build_principal_alloc_va(krb5_context context,
+                                 krb5_principal *princ,
+                                 unsigned int rlen,
+                                 const char *realm,
                                  const char *first,
                                  va_list ap);
 

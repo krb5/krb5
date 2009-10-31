@@ -33,9 +33,9 @@ main(void)
 		returned.data = NULL;
 		if (n == 4627)
 			printf("");
-		if (n % 50 == 0) 
+		if (n % 50 == 0)
 			printf("put n = %d\n", n);
-		if (db->put(db, &key, &value, 0) != 0)	
+		if (db->put(db, &key, &value, 0) != 0)
 			printf("put error, n = %d\n", n);
 		if (db->get(db, &key, &returned, 0) != 0)
 			printf("Immediate get error, n = %d\n", n);
@@ -47,7 +47,7 @@ main(void)
 	}
 
 	for (n = 0; n < 200000; n++) {
-		if (n % 50 == 0) 
+		if (n % 50 == 0)
 			printf("seq n = %d\n", n);
 		if ((db->seq(db, &key, &returned, 0)) != 0)
 			printf("Seq error, n = %d\n", n);
@@ -57,10 +57,10 @@ main(void)
 		for (i = 0; i < 800; i++)
 			if (((int *)returned.data)[i] != 0xDEADBEEF)
 				printf("ERRORRRRRR!!! seq %d\n", n);
-	}		
+	}
 
 	for (n = 0; n < 2000; n++) {
-		if (n % 50 == 0) 
+		if (n % 50 == 0)
 			printf("get n = %d\n", n);
 		if (db->get(db, &key, &returned, 0) != 0)
 			printf("Late get error, n = %d\n", n);
@@ -73,4 +73,3 @@ main(void)
 	free(value.data);
 	return(0);
 }
-

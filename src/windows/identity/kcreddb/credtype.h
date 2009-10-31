@@ -25,7 +25,7 @@
 /* $Id$ */
 
 #ifndef __KHIMAIRA_KCDB_CREDTYPE_H
-#define __KHIMAIRA_KCDB_CREDTYPE_H 
+#define __KHIMAIRA_KCDB_CREDTYPE_H
 
 /* credtype */
 typedef struct kcdb_credtype_i_t {

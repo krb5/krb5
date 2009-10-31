@@ -111,5 +111,3 @@ Since credential managers may receive privileged information, the
 signature requirements for credential managers are specially strict.
 
 */
-
-

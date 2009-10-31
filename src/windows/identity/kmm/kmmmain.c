@@ -57,10 +57,10 @@ KHMEXP void KHMAPI kmm_init(void)
     tls_kmm = TlsAlloc();
 
     hash_plugins = hash_new_hashtable(
-        KMM_HASH_SIZE, 
-        hash_string, 
-        hash_string_comp, 
-        NULL, 
+        KMM_HASH_SIZE,
+        hash_string,
+        hash_string_comp,
+        NULL,
         NULL);
 
     hash_modules = hash_new_hashtable(
@@ -148,7 +148,7 @@ void kmm_dll_exit(void)
     evt_startup = NULL;
 }
 
-void 
+void
 kmm_process_attach(HINSTANCE hinstDLL) {
     kmm_hInstance = hinstDLL;
     kmm_dll_init();
@@ -158,4 +158,3 @@ void
 kmm_process_detach(void) {
     kmm_dll_exit();
 }
-

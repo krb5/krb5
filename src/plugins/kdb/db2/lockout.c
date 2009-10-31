@@ -193,4 +193,3 @@ krb5_db2_lockout_audit(krb5_context context,
 
     return 0;
 }
-

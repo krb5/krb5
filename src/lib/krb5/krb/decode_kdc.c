@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/krb/decode_kdc.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * krb5_decode_kdc_rep() function.
  */
@@ -30,41 +31,40 @@
 #include "k5-int.h"
 
 /*
- Takes a KDC_REP message and decrypts encrypted part using etype and
- *key, putting result in *rep.
- dec_rep->client,ticket,session,last_req,server,caddrs
- are all set to allocated storage which should be freed by the caller
- when finished with the response.
+  Takes a KDC_REP message and decrypts encrypted part using etype and
+  *key, putting result in *rep.
+  dec_rep->client,ticket,session,last_req,server,caddrs
+  are all set to allocated storage which should be freed by the caller
+  when finished with the response.
 
- If the response isn't a KDC_REP (tgs or as), it returns an error from
- the decoding routines.
+  If the response isn't a KDC_REP (tgs or as), it returns an error from
+  the decoding routines.
 
- returns errors from encryption routines, system errors
- */
+  returns errors from encryption routines, system errors
+*/
 
 krb5_error_code
 krb5int_decode_tgs_rep(krb5_context context, krb5_data *enc_rep, const krb5_keyblock *key,
-		       krb5_keyusage usage, krb5_kdc_rep **dec_rep)
+                       krb5_keyusage usage, krb5_kdc_rep **dec_rep)
 {
     krb5_error_code retval;
     krb5_kdc_rep *local_dec_rep;
 
     if (krb5_is_as_rep(enc_rep)) {
-	retval = decode_krb5_as_rep(enc_rep, &local_dec_rep);
+        retval = decode_krb5_as_rep(enc_rep, &local_dec_rep);
     } else if (krb5_is_tgs_rep(enc_rep)) {
-	retval = decode_krb5_tgs_rep(enc_rep, &local_dec_rep);
+        retval = decode_krb5_tgs_rep(enc_rep, &local_dec_rep);
     } else {
-	return KRB5KRB_AP_ERR_MSG_TYPE;
+        return KRB5KRB_AP_ERR_MSG_TYPE;
     }
 
     if (retval)
-	return retval;
+        return retval;
 
     if ((retval = krb5_kdc_rep_decrypt_proc(context, key, &usage,
-					    local_dec_rep))) 
-	krb5_free_kdc_rep(context, local_dec_rep);
+                                            local_dec_rep)))
+        krb5_free_kdc_rep(context, local_dec_rep);
     else
-    	*dec_rep = local_dec_rep;
+        *dec_rep = local_dec_rep;
     return(retval);
 }
-

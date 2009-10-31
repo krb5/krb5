@@ -282,7 +282,7 @@ control(c)
  *	the "send" command.
  *
  */
- 
+
 struct sendlist {
     char	*name;		/* How user refers to it (case independent) */
     char	*help;		/* Help information (0 ==> no help) */
@@ -1931,7 +1931,7 @@ env_is_exported(var)
 		return ep->export;
 	return 0;
 }
-	    
+
 #if defined(OLD_ENVIRON) && defined(ENV_HACK)
 	void
 env_varval(what)
@@ -2398,7 +2398,7 @@ status(argc, argv)
  * Function that gets called when SIGINFO is received.
  */
 #if	defined(CRAY) || (defined(USE_TERMIO) && !defined(SYSV_TERMIO))
-void 
+void
 ayt_status()
 {
     (void) call(status, "status", "notmuch", 0);
@@ -3047,10 +3047,10 @@ cmdrc(m1, m2)
  *	*cpp:	If *cpp was equal to NULL, it will be filled
  *		in with a pointer to our static area that has
  *		the option filled in.  This will be 32bit aligned.
- * 
+ *
  *	*lenp:	This will be filled in with how long the option
  *		pointed to by *cpp is.
- *	
+ *
  */
 static	unsigned long
 sourceroute(arg, cpp, lenp)

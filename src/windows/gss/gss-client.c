@@ -1,6 +1,6 @@
 /*
  * Copyright 1994 by OpenVision Technologies, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -10,7 +10,7 @@
  * without specific, written prior permission. OpenVision makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -27,7 +27,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -81,12 +81,12 @@ static int connect_to_server(host, port)
      struct sockaddr_in saddr;
      struct hostent *hp;
      int s;
-     
+
      if ((hp = gethostbyname(host)) == NULL) {
 	  printf("Unknown host: %s\r\n", host);
 	  return -1;
      }
-     
+
      saddr.sin_family = hp->h_addrtype;
      memcpy((char *)&saddr.sin_addr, hp->h_addr, sizeof(saddr.sin_addr));
      saddr.sin_port = htons(port);
@@ -122,24 +122,24 @@ static int connect_to_server(host, port)
  * Returns: 0 on success, -1 on failure
  *
  * Effects:
- * 
+ *
  * service_name is imported as a GSS-API name and a GSS-API context is
  * established with the corresponding service; the service should be
  * listening on the TCP connection s.  The default GSS-API mechanism
  * is used, and mutual authentication and replay detection are
  * requested.
- * 
+ *
  * If successful, the context handle is returned in context.  If
  * unsuccessful, the GSS-API error messages are displayed on stderr
  * and -1 is returned.
  */
-int client_establish_context( int s, 
+int client_establish_context( int s,
                               char *service_name,
-                              OM_uint32 gss_flags, 
+                              OM_uint32 gss_flags,
                               int auth_flag,
-                              int v1_format, 
-                              gss_OID oid, 
-                              gss_ctx_id_t *gss_context, 
+                              int v1_format,
+                              gss_OID oid,
+                              gss_ctx_id_t *gss_context,
                               OM_uint32 *ret_flags)
 {
     if (auth_flag) {
@@ -160,7 +160,7 @@ int client_establish_context( int s,
             display_status("parsing name", maj_stat, min_stat);
             return -1;
         }
-     
+
         if (!v1_format) {
             if (send_token(s, TOKEN_NOOP|TOKEN_CONTEXT_NEXT, empty_token) < 0) {
                 (void) gss_release_name(&min_stat, &target_name);
@@ -177,7 +177,7 @@ int client_establish_context( int s,
         * transmitted to the server; every received token is stored in
         * recv_tok, which token_ptr is then set to, to be processed by
         * the next call to gss_init_sec_context.
-        * 
+        *
         * GSS-API guarantees that send_tok's length will be non-zero
         * if and only if the server is expecting another token from us,
         * and that gss_init_sec_context returns GSS_S_CONTINUE_NEEDED if
@@ -257,7 +257,7 @@ static void read_file(file_name, in_buf)
 {
     int fd, count;
     struct stat stat_buf;
-    
+
     if ((fd = open(file_name, O_RDONLY, 0)) < 0) {
 	perror("open");
 	printf("Couldn't open file %s\r\n", file_name);
@@ -315,16 +315,16 @@ static void read_file(file_name, in_buf)
  * Returns: 0 on success, -1 on failure
  *
  * Effects:
- * 
+ *
  * call_server opens a TCP connection to <host:port> and establishes a
  * GSS-API context with service_name over the connection.  It then
  * seals msg in a GSS-API token with gss_wrap, sends it to the server,
  * reads back a GSS-API signature block for msg from the server, and
  * verifies it with gss_verify.  -1 is returned if any step fails,
  * otherwise 0 is returned.  */
-int call_server(char *host, u_short port, gss_OID oid, char *service_name, 
+int call_server(char *host, u_short port, gss_OID oid, char *service_name,
                 OM_uint32 gss_flags, int auth_flag,
-		        int wrap_flag, int encrypt_flag, int mic_flag, int v1_format, 
+		        int wrap_flag, int encrypt_flag, int mic_flag, int v1_format,
                 char *msg, int use_file, int mcount)
 {
      gss_ctx_id_t context;
@@ -445,7 +445,7 @@ int call_server(char *host, u_short port, gss_OID oid, char *service_name,
              (void) gss_release_oid_set(&min_stat, &mech_names);
          }
      }
-     
+
      if (use_file) {
          read_file(msg, &in_buf);
      } else {
@@ -542,7 +542,7 @@ static void parse_oid(char *mechanism, gss_OID *oid)
     char	*mechstr = 0, *cp;
     gss_buffer_desc tok;
     OM_uint32 maj_stat, min_stat;
-    
+
     if (isdigit((int) mechanism[0])) {
 	mechstr = malloc(strlen(mechanism)+5);
 	if (!mechstr) {
@@ -568,7 +568,7 @@ static void parse_oid(char *mechanism, gss_OID *oid)
 
 int
 gss (char *server_host, char *service_name, char *mechanism, char *msg, int port,
-     int verbose, int delegate, int mutual, int replay, int sequence, 
+     int verbose, int delegate, int mutual, int replay, int sequence,
      int v1_format, int auth_flag, int wrap_flag,
      int encrypt_flag, int mic_flag, int ccount, int mcount, char *ccache)
 {
@@ -610,6 +610,6 @@ gss (char *server_host, char *service_name, char *mechanism, char *msg, int port
 
     if (oid != GSS_C_NULL_OID)
         (void) gss_release_oid(&min_stat, &oid);
-	 
+
     return rc;
 }

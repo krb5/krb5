@@ -60,27 +60,27 @@ static cc_int32 cci_context_change_time_update_identifier (cci_identifier_t  in_
     cc_uint32 server_ids_match = 0;
     cc_uint32 old_server_running = 0;
     cc_uint32 new_server_running = 0;
-    
+
     if (!in_new_identifier) { err = cci_check_error (err); }
-    
+
     if (!err && !g_change_time_identifer) {
        g_change_time_identifer = cci_identifier_uninitialized;
     }
-    
+
     if (!err) {
         err = cci_identifier_compare_server_id (g_change_time_identifer,
                                                 in_new_identifier,
                                                 &server_ids_match);
     }
-    
+
     if (!err && out_old_server_running) {
         err = cci_identifier_is_initialized (g_change_time_identifer, &old_server_running);
     }
-    
+
     if (!err && out_new_server_running) {
         err = cci_identifier_is_initialized (in_new_identifier, &new_server_running);
     }
-    
+
     if (!err && !server_ids_match) {
         cci_identifier_t new_change_time_identifer = NULL;
 
@@ -94,14 +94,14 @@ static cc_int32 cci_context_change_time_update_identifier (cci_identifier_t  in_
             g_change_time_identifer = new_change_time_identifer;
         }
     }
-    
+
     if (!err) {
         if (out_server_ids_match  ) { *out_server_ids_match = server_ids_match; }
         if (out_old_server_running) { *out_old_server_running = old_server_running; }
         if (out_new_server_running) { *out_new_server_running = new_server_running; }
     }
-    
-    
+
+
     return cci_check_error (err);
 }
 
@@ -114,14 +114,14 @@ static cc_int32 cci_context_change_time_update_identifier (cci_identifier_t  in_
 cc_int32 cci_context_change_time_get (cc_time_t *out_change_time)
 {
     cc_int32 err = ccNoError;
-    
+
     err = k5_mutex_lock (&g_change_time_mutex);
-    
+
     if (!err) {
         *out_change_time = g_change_time + g_change_time_offset;
-        k5_mutex_unlock (&g_change_time_mutex);    
+        k5_mutex_unlock (&g_change_time_mutex);
     }
-    
+
     return err;
 }
 
@@ -132,25 +132,25 @@ cc_int32 cci_context_change_time_update (cci_identifier_t in_identifier,
 {
     cc_int32 err = ccNoError;
     cc_int32 lock_err = err = k5_mutex_lock (&g_change_time_mutex);
-    
+
     if (!err) {
         if (!in_identifier) { err = cci_check_error (err); }
     }
-    
+
     if (!err) {
         if (g_change_time < in_new_change_time) {
             /* Only update if it increases the time.  May be a different server. */
             g_change_time = in_new_change_time;
-            cci_debug_printf ("%s: setting change time to %d", 
+            cci_debug_printf ("%s: setting change time to %d",
                               __FUNCTION__, in_new_change_time);
         }
     }
-    
+
     if (!err) {
         err = cci_context_change_time_update_identifier (in_identifier,
                                                          NULL, NULL, NULL);
     }
-    
+
     if (!lock_err) {
         k5_mutex_unlock (&g_change_time_mutex);
     }
@@ -167,43 +167,43 @@ cc_int32 cci_context_change_time_sync (cci_identifier_t in_new_identifier)
     cc_uint32 server_ids_match = 0;
     cc_uint32 server_was_running = 0;
     cc_uint32 server_is_running = 0;
-    
+
     if (!err) {
         if (!in_new_identifier) { err = cci_check_error (err); }
     }
-    
+
     if (!err) {
         err = cci_context_change_time_update_identifier (in_new_identifier,
                                                          &server_ids_match,
                                                          &server_was_running,
                                                          &server_is_running);
     }
-    
-    if (!err && !server_ids_match) {        
+
+    if (!err && !server_ids_match) {
         /* Increment the change time so callers re-read */
-        g_change_time_offset++; 
-        
+        g_change_time_offset++;
+
         /* If the server died, absorb the offset */
         if (server_was_running && !server_is_running) {
             cc_time_t now = time (NULL);
-            
+
             g_change_time += g_change_time_offset;
             g_change_time_offset = 0;
-            
+
             /* Make sure the change time increases, ideally with the current time */
             g_change_time = (g_change_time < now) ? now : g_change_time;
         }
-        
+
         cci_debug_printf ("%s noticed server changed ("
                           "server_was_running = %d; server_is_running = %d; "
-                          "g_change_time = %d; g_change_time_offset = %d", 
-                          __FUNCTION__, server_was_running, server_is_running, 
-                          g_change_time, g_change_time_offset);            
+                          "g_change_time = %d; g_change_time_offset = %d",
+                          __FUNCTION__, server_was_running, server_is_running,
+                          g_change_time, g_change_time_offset);
     }
-    
+
     if (!lock_err) {
         k5_mutex_unlock (&g_change_time_mutex);
     }
-    
+
     return err;
 }

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/ccache/ccfns.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -44,7 +45,7 @@ krb5_cc_gen_new (krb5_context context, krb5_ccache *cache)
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_initialize(krb5_context context, krb5_ccache cache,
-		   krb5_principal principal)
+                   krb5_principal principal)
 {
     return cache->ops->init(context, cache, principal);
 }
@@ -63,7 +64,7 @@ krb5_cc_close (krb5_context context, krb5_ccache cache)
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_store_cred (krb5_context context, krb5_ccache cache,
-		    krb5_creds *creds)
+                    krb5_creds *creds)
 {
     krb5_error_code ret;
     krb5_ticket *tkt;
@@ -97,17 +98,17 @@ krb5_cc_store_cred (krb5_context context, krb5_ccache cache,
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_retrieve_cred (krb5_context context, krb5_ccache cache,
-		       krb5_flags flags, krb5_creds *mcreds,
-		       krb5_creds *creds)
+                       krb5_flags flags, krb5_creds *mcreds,
+                       krb5_creds *creds)
 {
     krb5_error_code ret;
     krb5_data tmprealm;
 
     ret = cache->ops->retrieve(context, cache, flags, mcreds, creds);
     if (ret != KRB5_CC_NOTFOUND)
-	return ret;
+        return ret;
     if (!krb5_is_referral_realm(&mcreds->server->realm))
-	return ret;
+        return ret;
 
     /*
      * Retry using client's realm if service has referral realm.
@@ -121,35 +122,35 @@ krb5_cc_retrieve_cred (krb5_context context, krb5_ccache cache,
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_get_principal (krb5_context context, krb5_ccache cache,
-		       krb5_principal *principal)
+                       krb5_principal *principal)
 {
     return cache->ops->get_princ(context, cache, principal);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_start_seq_get (krb5_context context, krb5_ccache cache,
-		       krb5_cc_cursor *cursor)
+                       krb5_cc_cursor *cursor)
 {
     return cache->ops->get_first(context, cache, cursor);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_next_cred (krb5_context context, krb5_ccache cache,
-		   krb5_cc_cursor *cursor, krb5_creds *creds)
+                   krb5_cc_cursor *cursor, krb5_creds *creds)
 {
     return cache->ops->get_next(context, cache, cursor, creds);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_end_seq_get (krb5_context context, krb5_ccache cache,
-		     krb5_cc_cursor *cursor)
+                     krb5_cc_cursor *cursor)
 {
     return cache->ops->end_get(context, cache, cursor);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_remove_cred (krb5_context context, krb5_ccache cache, krb5_flags flags,
-		     krb5_creds *creds)
+                     krb5_creds *creds)
 {
     return cache->ops->remove_cred(context, cache, flags, creds);
 }
@@ -173,8 +174,8 @@ krb5_cc_get_type (krb5_context context, krb5_ccache cache)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_cc_last_change_time (krb5_context context, krb5_ccache ccache, 
-            krb5_timestamp *change_time)
+krb5_cc_last_change_time (krb5_context context, krb5_ccache ccache,
+                          krb5_timestamp *change_time)
 {
     return ccache->ops->lastchange(context, ccache, change_time);
 }
@@ -190,4 +191,3 @@ krb5_cc_unlock (krb5_context context, krb5_ccache ccache)
 {
     return ccache->ops->unlock(context, ccache);
 }
-

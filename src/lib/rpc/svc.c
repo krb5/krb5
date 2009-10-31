@@ -6,23 +6,23 @@
  * may copy or modify Sun RPC without charge, but are not authorized
  * to license or distribute it to anyone else except as part of a product or
  * program developed by the user.
- * 
+ *
  * SUN RPC IS PROVIDED AS IS WITH NO WARRANTIES OF ANY KIND INCLUDING THE
  * WARRANTIES OF DESIGN, MERCHANTIBILITY AND FITNESS FOR A PARTICULAR
  * PURPOSE, OR ARISING FROM A COURSE OF DEALING, USAGE OR TRADE PRACTICE.
- * 
+ *
  * Sun RPC is provided with no support and without any obligation on the
  * part of Sun Microsystems, Inc. to assist in its use, correction,
  * modification or enhancement.
- * 
+ *
  * SUN MICROSYSTEMS, INC. SHALL HAVE NO LIABILITY WITH RESPECT TO THE
  * INFRINGEMENT OF COPYRIGHTS, TRADE SECRETS OR ANY PATENTS BY SUN RPC
  * OR ANY PART THEREOF.
- * 
+ *
  * In no event will Sun Microsystems, Inc. be liable for any lost revenue
  * or profits or other special, indirect and consequential damages, even if
  * Sun has been advised of the possibility of such damages.
- * 
+ *
  * Sun Microsystems, Inc.
  * 2550 Garcia Avenue
  * Mountain View, California  94043
@@ -123,11 +123,11 @@ xprt_register(SVCXPRT *xprt)
 }
 
 /*
- * De-activate a transport handle. 
+ * De-activate a transport handle.
  */
 void
 xprt_unregister(SVCXPRT *xprt)
-{ 
+{
 	register int sock = xprt->xp_sock;
 
 #ifdef FD_SETSIZE
@@ -246,15 +246,15 @@ svc_sendreply(
 	xdrproc_t xdr_results,
 	caddr_t xdr_location)
 {
-	struct rpc_msg rply; 
+	struct rpc_msg rply;
 
-	rply.rm_direction = REPLY;  
-	rply.rm_reply.rp_stat = MSG_ACCEPTED; 
-	rply.acpted_rply.ar_verf = xprt->xp_verf; 
+	rply.rm_direction = REPLY;
+	rply.rm_reply.rp_stat = MSG_ACCEPTED;
+	rply.acpted_rply.ar_verf = xprt->xp_verf;
 	rply.acpted_rply.ar_stat = SUCCESS;
 	rply.acpted_rply.ar_results.where = xdr_location;
 	rply.acpted_rply.ar_results.proc = xdr_results;
-	return (SVC_REPLY(xprt, &rply)); 
+	return (SVC_REPLY(xprt, &rply));
 }
 
 /*
@@ -278,13 +278,13 @@ svcerr_noproc(register SVCXPRT *xprt)
 void
 svcerr_decode(register SVCXPRT *xprt)
 {
-	struct rpc_msg rply; 
+	struct rpc_msg rply;
 
-	rply.rm_direction = REPLY; 
-	rply.rm_reply.rp_stat = MSG_ACCEPTED; 
+	rply.rm_direction = REPLY;
+	rply.rm_reply.rp_stat = MSG_ACCEPTED;
 	rply.acpted_rply.ar_verf = xprt->xp_verf;
 	rply.acpted_rply.ar_stat = GARBAGE_ARGS;
-	SVC_REPLY(xprt, &rply); 
+	SVC_REPLY(xprt, &rply);
 }
 
 /*
@@ -293,13 +293,13 @@ svcerr_decode(register SVCXPRT *xprt)
 void
 svcerr_systemerr(register SVCXPRT *xprt)
 {
-	struct rpc_msg rply; 
+	struct rpc_msg rply;
 
-	rply.rm_direction = REPLY; 
-	rply.rm_reply.rp_stat = MSG_ACCEPTED; 
+	rply.rm_direction = REPLY;
+	rply.rm_reply.rp_stat = MSG_ACCEPTED;
 	rply.acpted_rply.ar_verf = xprt->xp_verf;
 	rply.acpted_rply.ar_stat = SYSTEM_ERR;
-	SVC_REPLY(xprt, &rply); 
+	SVC_REPLY(xprt, &rply);
 }
 
 /*
@@ -332,14 +332,14 @@ svcerr_weakauth(SVCXPRT *xprt)
 /*
  * Program unavailable error reply
  */
-void 
+void
 svcerr_noprog(register SVCXPRT *xprt)
 {
-	struct rpc_msg rply;  
+	struct rpc_msg rply;
 
-	rply.rm_direction = REPLY;   
-	rply.rm_reply.rp_stat = MSG_ACCEPTED;  
-	rply.acpted_rply.ar_verf = xprt->xp_verf;  
+	rply.rm_direction = REPLY;
+	rply.rm_reply.rp_stat = MSG_ACCEPTED;
+	rply.acpted_rply.ar_verf = xprt->xp_verf;
 	rply.acpted_rply.ar_stat = PROG_UNAVAIL;
 	SVC_REPLY(xprt, &rply);
 }
@@ -347,7 +347,7 @@ svcerr_noprog(register SVCXPRT *xprt)
 /*
  * Program version mismatch error reply
  */
-void  
+void
 svcerr_progvers(
 	register SVCXPRT *xprt,
 	rpcvers_t low_vers,
@@ -374,9 +374,9 @@ svcerr_progvers(
  * the "raw" parameters (msg.rm_call.cb_cred and msg.rm_call.cb_verf) and
  * the "cooked" credentials (rqst->rq_clntcred).
  * However, this function does not know the structure of the cooked
- * credentials, so it make the following assumptions: 
+ * credentials, so it make the following assumptions:
  *   a) the structure is contiguous (no pointers), and
- *   b) the cred structure size does not exceed RQCRED_SIZE bytes. 
+ *   b) the cred structure size does not exceed RQCRED_SIZE bytes.
  * In all events, all three parameters are freed upon exit from this routine.
  * The storage is trivially management on the call stack in user land, but
  * is mallocated in kernel land.

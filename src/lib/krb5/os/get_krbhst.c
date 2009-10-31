@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/os/get_krbhst.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * krb5_get_krbhst() function.
  */
@@ -32,23 +33,23 @@
 #include <ctype.h>
 
 /*
- Figures out the Kerberos server names for the given realm, filling in a
- pointer to an argv[] style list of names, terminated with a null pointer.
- 
- If the realm is unknown, the filled-in pointer is set to NULL.
+  Figures out the Kerberos server names for the given realm, filling in a
+  pointer to an argv[] style list of names, terminated with a null pointer.
 
- The pointer array and strings pointed to are all in allocated storage,
- and should be freed by the caller when finished.
+  If the realm is unknown, the filled-in pointer is set to NULL.
 
- returns system errors
+  The pointer array and strings pointed to are all in allocated storage,
+  and should be freed by the caller when finished.
+
+  returns system errors
 */
 
 /*
  * Implementation:  the server names for given realms are stored in a
- * configuration file, 
+ * configuration file,
  * named by krb5_config_file;  the first token (on the first line) in
  * this file is taken as the default local realm name.
- * 
+ *
  * Each succeeding line has a realm name as the first token, and a server name
  * as a second token.  Additional tokens may be present on the line, but
  * are ignored by this function.
@@ -60,10 +61,10 @@
 krb5_error_code
 krb5_get_krbhst(krb5_context context, const krb5_data *realm, char ***hostlist)
 {
-    char	**values, **cpp, *cp;
-    const char	*realm_kdc_names[4];
-    krb5_error_code	retval;
-    int	i, count;
+    char        **values, **cpp, *cp;
+    const char  *realm_kdc_names[4];
+    krb5_error_code     retval;
+    int i, count;
     char **rethosts;
 
     rethosts = 0;
@@ -74,30 +75,30 @@ krb5_get_krbhst(krb5_context context, const krb5_data *realm, char ***hostlist)
     realm_kdc_names[3] = 0;
 
     if (context->profile == 0)
-	return KRB5_CONFIG_CANTOPEN;
+        return KRB5_CONFIG_CANTOPEN;
 
     retval = profile_get_values(context->profile, realm_kdc_names, &values);
     if (retval == PROF_NO_SECTION)
-	return KRB5_REALM_UNKNOWN;
+        return KRB5_REALM_UNKNOWN;
     if (retval == PROF_NO_RELATION)
-	return KRB5_CONFIG_BADFORMAT;
+        return KRB5_CONFIG_BADFORMAT;
     if (retval)
-	return retval;
+        return retval;
 
     /*
      * Do cleanup over the list.  We allow for some extra field to be
      * added to the kdc line later (maybe the port number)
      */
     for (cpp = values; *cpp; cpp++) {
-	cp = strchr(*cpp, ' ');
-	if (cp)
-	    *cp = 0;
-	cp = strchr(*cpp, '\t');
-	if (cp)
-	    *cp = 0;
-	cp = strchr(*cpp, ':');
-	if (cp)
-	    *cp = 0;
+        cp = strchr(*cpp, ' ');
+        if (cp)
+            *cp = 0;
+        cp = strchr(*cpp, '\t');
+        if (cp)
+            *cp = 0;
+        cp = strchr(*cpp, ':');
+        if (cp)
+            *cp = 0;
     }
     count = cpp - values;
     rethosts = malloc(sizeof(char *) * (count + 1));
@@ -106,21 +107,21 @@ krb5_get_krbhst(krb5_context context, const krb5_data *realm, char ***hostlist)
         goto cleanup;
     }
     for (i = 0; i < count; i++) {
-	unsigned int len = strlen (values[i]) + 1;
+        unsigned int len = strlen (values[i]) + 1;
         rethosts[i] = malloc(len);
         if (!rethosts[i]) {
             retval = ENOMEM;
             goto cleanup;
         }
-	memcpy (rethosts[i], values[i], len);
+        memcpy (rethosts[i], values[i], len);
     }
     rethosts[count] = 0;
- cleanup:
+cleanup:
     if (retval && rethosts) {
         for (cpp = rethosts; *cpp; cpp++)
             free(*cpp);
         free(rethosts);
-	rethosts = 0;
+        rethosts = 0;
     }
     profile_free_list(values);
     *hostlist = rethosts;

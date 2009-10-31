@@ -85,7 +85,7 @@ krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
 		      const krb5_keyblock *key, unsigned int icount,
 		      const krb5_data *input, krb5_data *output)
 {
-    unsigned int i = 0, md_len = 0; 
+    unsigned int i = 0, md_len = 0;
     unsigned char md[EVP_MAX_MD_SIZE];
     HMAC_CTX c;
     size_t hashsize, blocksize;

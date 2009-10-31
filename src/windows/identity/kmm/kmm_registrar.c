@@ -92,8 +92,8 @@ kmm_load_pending(void) {
 
 /*! \internal
   \brief Message handler for the registrar thread. */
-khm_boolean KHMAPI kmmint_reg_cb(khm_int32 msg_type, 
-                                 khm_int32 msg_sub_type, 
+khm_boolean KHMAPI kmmint_reg_cb(khm_int32 msg_type,
+                                 khm_int32 msg_sub_type,
                                  khm_ui_4 uparam,
                                  void *vparam)
 {
@@ -173,7 +173,7 @@ DWORD WINAPI kmmint_plugin_broker(LPVOID lpParameter)
 
     p->tid_thread = GetCurrentThreadId();
 
-    rv = (*p->p.msg_proc)(KMSG_SYSTEM, KMSG_SYSTEM_INIT, 
+    rv = (*p->p.msg_proc)(KMSG_SYSTEM, KMSG_SYSTEM_INIT,
                           0, (void *) &(p->p));
     _report_mr1(KHERR_INFO, MSG_PB_INIT_RV, _int32(rv));
 
@@ -282,7 +282,7 @@ DWORD WINAPI kmmint_plugin_broker(LPVOID lpParameter)
         p->state = KMM_PLUGIN_STATE_EXITED;
 
     /* the following call will automatically release the plugin */
-    kmq_post_message(KMSG_KMM, KMSG_KMM_I_REG, 
+    kmq_post_message(KMSG_KMM, KMSG_KMM_I_REG,
                      KMM_REG_EXIT_PLUGIN, (void *) p);
 
     TlsSetValue(tls_kmm, (LPVOID) 0);
@@ -353,7 +353,7 @@ void kmmint_init_plugin(kmm_plugin_i * p) {
             p->state = KMM_PLUGIN_STATE_FAIL_NOT_REGISTERED;
             goto _exit;
         }
-        
+
         if(KHM_FAILED(kmm_get_plugin_config(p->p.name, 0, &csp_plugin))) {
             _report_mr0(KHERR_ERROR, MSG_IP_NOT_REGISTERED);
 
@@ -378,18 +378,18 @@ void kmmint_init_plugin(kmm_plugin_i * p) {
 
     p->n_depends = 0;
     p->n_unresolved = 0;
-    
+
     do {
         wchar_t * deps = NULL;
         wchar_t * d;
         khm_size sz = 0;
 
-        if(khc_read_multi_string(csp_plugin, L"Dependencies", 
+        if(khc_read_multi_string(csp_plugin, L"Dependencies",
                                  NULL, &sz) != KHM_ERROR_TOO_LONG)
             break;
 
         deps = PMALLOC(sz);
-        if(KHM_FAILED(khc_read_multi_string(csp_plugin, L"Dependencies", 
+        if(KHM_FAILED(khc_read_multi_string(csp_plugin, L"Dependencies",
                                             deps, &sz))) {
             if(deps)
                 PFREE(deps);
@@ -473,11 +473,11 @@ _exit_post:
     if(csp_plugins != NULL)
         khc_close_space(csp_plugins);
 
-    _report_mr2(KHERR_INFO, MSG_IP_STATE, 
+    _report_mr2(KHERR_INFO, MSG_IP_STATE,
                 _dupstr(p->p.name), _int32(p->state));
 
     _end_task();
-    
+
     return;
 
     /* jump here if an error condition happens before the plugin
@@ -489,7 +489,7 @@ _exit:
     if(csp_plugins != NULL)
         khc_close_space(csp_plugins);
 
-    _report_mr2(KHERR_WARNING, MSG_IP_EXITING, 
+    _report_mr2(KHERR_WARNING, MSG_IP_EXITING,
                 _dupstr(p->p.name), _int32(p->state));
     _end_task();
 
@@ -512,7 +512,7 @@ _exit:
 
   In addition to terminating the thread, and removing p from the
   linked list and hashtable, it also frees up p.
-   
+
   \note Should only be called from the context of the registrar thread. */
 void kmmint_exit_plugin(kmm_plugin_i * p) {
     int np;
@@ -654,7 +654,7 @@ void kmmint_init_module(kmm_module_i * m) {
 
         ct = (FtToInt(&fct) - tm) / 10000000i64;
 
-        if(tm > 0 && 
+        if(tm > 0 &&
            ct > fail_reset_time) {
             i = 0;
             khc_write_int32(csp_mod, L"FailureCount", 0);
@@ -666,7 +666,7 @@ void kmmint_init_module(kmm_module_i * m) {
         /* did we exceed the max failure count?  However, we ignore
            the max failure count if the reason why it didn't load the
            last time was because the module wasn't found. */
-        if(i > max_fail_count && 
+        if(i > max_fail_count &&
            last_reason != KMM_MODULE_STATE_FAIL_NOT_FOUND) {
             /* failed too many times */
             _report_mr0(KHERR_INFO, MSG_IM_MAX_FAIL);
@@ -676,15 +676,15 @@ void kmmint_init_module(kmm_module_i * m) {
         }
     }
 
-    if(khc_read_string(csp_mod, KMM_VALNAME_IMAGEPATH, NULL, &sz) == 
+    if(khc_read_string(csp_mod, KMM_VALNAME_IMAGEPATH, NULL, &sz) ==
        KHM_ERROR_TOO_LONG) {
         if(m->path)
             PFREE(m->path);
         m->path = PMALLOC(sz);
         khc_read_string(csp_mod, KMM_VALNAME_IMAGEPATH, m->path, &sz);
     } else {
-	/* 
-	 * If there is no image path, then the module has not been 
+	/*
+	 * If there is no image path, then the module has not been
 	 * installed.  Do not report an error and bother the user.
 	 *   _report_mr0(KHERR_ERROR, MSG_IM_NOT_REGISTERED);
 	 */
@@ -831,7 +831,7 @@ void kmmint_init_module(kmm_module_i * m) {
     if(csp_mods)
         khc_close_space(csp_mods);
 
-    _report_mr2(KHERR_INFO, MSG_IM_MOD_STATE, 
+    _report_mr2(KHERR_INFO, MSG_IM_MOD_STATE,
                 _dupstr(m->name), _int32(m->state));
 
     kmmint_remove_from_module_queue();
@@ -900,7 +900,7 @@ void kmmint_init_module(kmm_module_i * m) {
 void kmmint_exit_module(kmm_module_i * m) {
     kmm_plugin_i * p;
 
-    /*  Exiting a module happens in two stages.  
+    /*  Exiting a module happens in two stages.
 
         If the module state is running (there are active plugins) then
         those plugins must be exited.  This has to be done from the
@@ -942,7 +942,7 @@ void kmmint_exit_module(kmm_module_i * m) {
                (p->flags & KMM_PLUGIN_FLAG_IN_MODCOUNT)) {
 
                 kmm_hold_plugin(kmm_handle_from_plugin(p));
-                kmq_post_message(KMSG_KMM, KMSG_KMM_I_REG, 
+                kmq_post_message(KMSG_KMM, KMSG_KMM_I_REG,
                                  KMM_REG_EXIT_PLUGIN, (void *) p);
                 np++;
 
@@ -986,8 +986,8 @@ void kmmint_exit_module(kmm_module_i * m) {
         if(m->state > 0)
             m->state = KMM_MODULE_STATE_EXIT;
 
-        p_exit_module = 
-            (exit_module_t) GetProcAddress(m->h_module, 
+        p_exit_module =
+            (exit_module_t) GetProcAddress(m->h_module,
                                            EXP_EXIT_MODULE);
         if(p_exit_module) {
             LeaveCriticalSection(&cs_kmm);

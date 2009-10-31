@@ -140,7 +140,7 @@ debug_event_handler(enum kherr_ctx_event e,
 
 	    kherr_evaluate_event(evt);
 	    FileTimeToSystemTime(&evt->time_ft, &systime);
-	    
+
 	    fprintf(logfile,
 		    "%d[%d](%S)\t",
 		    c->serial,

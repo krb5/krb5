@@ -50,7 +50,7 @@ nc_layout_main_panel(khui_nc_wnd_data * d);
 static void
 nc_layout_new_cred_window(khui_nc_wnd_data * d);
 
-static INT_PTR CALLBACK 
+static INT_PTR CALLBACK
 nc_common_dlg_proc(HWND hwnd,
                    UINT uMsg,
                    WPARAM wParam,
@@ -94,7 +94,7 @@ nc_common_dlg_proc(HWND hwnd,
     case KHUI_WM_NC_NOTIFY:
         {
             khui_nc_wnd_data * d;
-            d = (khui_nc_wnd_data *)(LONG_PTR) 
+            d = (khui_nc_wnd_data *)(LONG_PTR)
                 GetWindowLongPtr(hwnd, DWLP_USER);
             if (d == NULL)
                 break;
@@ -128,7 +128,7 @@ nc_common_dlg_proc(HWND hwnd,
            originated or pertain to the identity selection
            controls. */
         if (d && d->nc && d->nc->ident_cb) {
-            return d->nc->ident_cb(d->nc, WMNC_IDENT_WMSG, hwnd, uMsg, 
+            return d->nc->ident_cb(d->nc, WMNC_IDENT_WMSG, hwnd, uMsg,
                                    wParam, lParam);
         }
     }
@@ -678,7 +678,7 @@ nc_layout_main_panel(khui_nc_wnd_data * d)
                        d->r_credtext.top, /* y */
                        d->r_n_input.right - d->r_n_input.left, /* width */
                        d->r_credtext.bottom - d->r_credtext.top, /* height */
-                       SWP_NOACTIVATE | SWP_NOOWNERZORDER | 
+                       SWP_NOACTIVATE | SWP_NOOWNERZORDER |
                        SWP_NOZORDER | SWP_SHOWWINDOW);
 
         DeferWindowPos(hdwp,
@@ -750,7 +750,7 @@ nc_tab_sort_func(const void * v1, const void * v2)
     }
 }
 
-static void 
+static void
 nc_notify_types(khui_new_creds * c, UINT uMsg,
                 WPARAM wParam, LPARAM lParam, BOOL sync)
 {
@@ -829,8 +829,8 @@ nc_enable_controls(khui_nc_wnd_data * d, khm_boolean enable)
 #define NC_MAXCCH_CREDTEXT 16384
 #define NC_MAXCB_CREDTEXT (NC_MAXCCH_CREDTEXT * sizeof(wchar_t))
 
-static void 
-nc_update_credtext(khui_nc_wnd_data * d) 
+static void
+nc_update_credtext(khui_nc_wnd_data * d)
 {
     wchar_t * ctbuf = NULL;
     wchar_t * buf;
@@ -846,7 +846,7 @@ nc_update_credtext(khui_nc_wnd_data * d)
     LoadString(khm_hInstance, IDS_NC_CREDTEXT_TABS, ctbuf, NC_MAXCCH_CREDTEXT);
     StringCchLength(ctbuf, NC_MAXCCH_CREDTEXT, &cch);
     buf = ctbuf + cch;
-    nc_notify_types(d->nc, KHUI_WM_NC_NOTIFY, 
+    nc_notify_types(d->nc, KHUI_WM_NC_NOTIFY,
                     MAKEWPARAM(0, WMNC_UPDATE_CREDTEXT), (LPARAM) d->nc, TRUE);
 
     /* hopefully all the types have updated their credential texts */
@@ -894,7 +894,7 @@ nc_update_credtext(khui_nc_wnd_data * d)
                    password, we don't expect the identity provider to
                    validate the identity in real time.  As such, we
                    assume that the identity is valid. */
- 
+
                /* identity is valid */
                 if (d->notif_type != NC_NOTIFY_NONE) {
                     nc_notify_clear(d);
@@ -940,7 +940,7 @@ nc_update_credtext(khui_nc_wnd_data * d)
         khm_size cbbuf;
         khm_int32 flags;
 
-        LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_ONE, 
+        LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_ONE,
                    main_fmt, (int) ARRAYLENGTH(main_fmt));
 
         cbbuf = sizeof(id_name);
@@ -949,25 +949,25 @@ nc_update_credtext(khui_nc_wnd_data * d)
         kcdb_identity_get_flags(d->nc->identities[0], &flags);
 
         if (flags & KCDB_IDENT_FLAG_INVALID) {
-            LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_INVALID, 
+            LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_INVALID,
                        id_fmt, (int) ARRAYLENGTH(id_fmt));
         } else if(flags & KCDB_IDENT_FLAG_VALID) {
-            LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_VALID, 
+            LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_VALID,
                        id_fmt, (int) ARRAYLENGTH(id_fmt));
         } else if(flags & KCDB_IDENT_FLAG_UNKNOWN) {
             LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_UNCHECKED,
                        id_fmt, (int) ARRAYLENGTH(id_fmt));
         } else if(d->nc->subtype == KMSG_CRED_NEW_CREDS) {
-            LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_CHECKING, 
+            LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_CHECKING,
                        id_fmt, (int) ARRAYLENGTH(id_fmt));
         } else {
-            LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_UNCHECKED, 
+            LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_UNCHECKED,
                        id_fmt, (int) ARRAYLENGTH(id_fmt));
         }
 
         StringCbPrintf(id_string, sizeof(id_string), id_fmt, id_name);
 
-        StringCbPrintf(buf, NC_MAXCB_CREDTEXT - cch*sizeof(wchar_t), 
+        StringCbPrintf(buf, NC_MAXCB_CREDTEXT - cch*sizeof(wchar_t),
                        main_fmt, id_string);
 
         if (flags & KCDB_IDENT_FLAG_VALID) {
@@ -996,17 +996,17 @@ nc_update_credtext(khui_nc_wnd_data * d)
         wchar_t main_fmt[256];
         khm_size cbbuf;
 
-        LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_MANY, 
+        LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_MANY,
                    main_fmt, (int) ARRAYLENGTH(main_fmt));
 
         /* we are going to concatenate all the identity names into
            a comma separated string */
 
         /* d->nc->n_identities is at least 2 */
-        ids_string = PMALLOC((KCDB_IDENT_MAXCB_NAME + sizeof(id_fmt)) * 
+        ids_string = PMALLOC((KCDB_IDENT_MAXCB_NAME + sizeof(id_fmt)) *
                             (d->nc->n_identities - 1));
-        cb_ids_string = 
-            (KCDB_IDENT_MAXCB_NAME + sizeof(id_fmt)) * 
+        cb_ids_string =
+            (KCDB_IDENT_MAXCB_NAME + sizeof(id_fmt)) *
             (d->nc->n_identities - 1);
 
         assert(ids_string != NULL);
@@ -1028,13 +1028,13 @@ nc_update_credtext(khui_nc_wnd_data * d)
                 kcdb_identity_get_name(d->nc->identities[i], id_name, &cbbuf);
                 kcdb_identity_get_flags(d->nc->identities[i], &flags);
                 if(flags & KCDB_IDENT_FLAG_INVALID) {
-                    LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_INVALID, 
+                    LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_INVALID,
                                id_fmt, (int) ARRAYLENGTH(id_fmt));
                 } else if(flags & KCDB_IDENT_FLAG_VALID) {
-                    LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_VALID, 
+                    LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_VALID,
                                id_fmt, (int) ARRAYLENGTH(id_fmt));
                 } else {
-                    LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_UNCHECKED, 
+                    LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_UNCHECKED,
                                id_fmt, (int) ARRAYLENGTH(id_fmt));
                 }
 
@@ -1046,24 +1046,24 @@ nc_update_credtext(khui_nc_wnd_data * d)
             kcdb_identity_get_name(d->nc->identities[0], id_name, &cbbuf);
             kcdb_identity_get_flags(d->nc->identities[0], &flags);
             if(flags & KCDB_IDENT_FLAG_INVALID) {
-                LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_INVALID, 
+                LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_INVALID,
                            id_fmt, (int) ARRAYLENGTH(id_fmt));
             } else if(flags & KCDB_IDENT_FLAG_VALID) {
-                LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_VALID, 
+                LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_VALID,
                            id_fmt, (int) ARRAYLENGTH(id_fmt));
             } else {
-                LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_UNCHECKED, 
+                LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_UNCHECKED,
                            id_fmt, (int) ARRAYLENGTH(id_fmt));
             }
             StringCbPrintf(id_string, sizeof(id_string), id_fmt, id_name);
 
-            StringCbPrintf(buf, NC_MAXCB_CREDTEXT - cch*sizeof(wchar_t), 
+            StringCbPrintf(buf, NC_MAXCB_CREDTEXT - cch*sizeof(wchar_t),
                            main_fmt, id_string, ids_string);
 
             PFREE(ids_string);
         }
     } else {
-        LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_NONE, 
+        LoadString(khm_hInstance, IDS_NC_CREDTEXT_ID_NONE,
                    buf, (int)(NC_MAXCCH_CREDTEXT - cch));
     }
 
@@ -1078,7 +1078,7 @@ nc_update_credtext(khui_nc_wnd_data * d)
 
         for(i=0; i<d->nc->n_types; i++) {
             if(d->nc->types[i]->credtext != NULL) {
-                StringCbCatEx(buf, cb, 
+                StringCbCatEx(buf, cb,
                               d->nc->types[i]->credtext,
                               &buf, &cb,
                               0);
@@ -1097,7 +1097,7 @@ nc_update_credtext(khui_nc_wnd_data * d)
     if(d->nc->n_identities > 0) {
         khm_int32 flags = 0;
 
-        if(KHM_SUCCEEDED(kcdb_identity_get_flags(d->nc->identities[0], 
+        if(KHM_SUCCEEDED(kcdb_identity_get_flags(d->nc->identities[0],
                                                &flags)) &&
            (flags & KCDB_IDENT_FLAG_VALID)) {
             validId = TRUE;
@@ -1117,7 +1117,7 @@ nc_update_credtext(khui_nc_wnd_data * d)
                 LoadString(khm_hInstance, IDS_WTPOST_PASSWORD,
                            wpostfix, (int) ARRAYLENGTH(wpostfix));
             else
-                LoadString(khm_hInstance, IDS_WTPOST_NEW_CREDS, 
+                LoadString(khm_hInstance, IDS_WTPOST_NEW_CREDS,
                            wpostfix, (int) ARRAYLENGTH(wpostfix));
 
             StringCbCat(wtitle, sizeof(wtitle), wpostfix);
@@ -1130,7 +1130,7 @@ nc_update_credtext(khui_nc_wnd_data * d)
                 LoadString(khm_hInstance, IDS_WT_PASSWORD,
                            wtitle, (int) ARRAYLENGTH(wtitle));
             else
-                LoadString(khm_hInstance, IDS_WT_NEW_CREDS, 
+                LoadString(khm_hInstance, IDS_WT_NEW_CREDS,
                            wtitle, (int) ARRAYLENGTH(wtitle));
 
             SetWindowText(d->nc->hwnd, wtitle);
@@ -1336,7 +1336,7 @@ nc_layout_new_cred_window(khui_nc_wnd_data * ncd) {
 
 #define CW_PARAM DWLP_USER
 
-static LRESULT 
+static LRESULT
 nc_handle_wm_create(HWND hwnd,
                     UINT uMsg,
                     WPARAM wParam,
@@ -1415,7 +1415,7 @@ nc_handle_wm_create(HWND hwnd,
         RECT r_area;
         RECT r_row;
         HWND hw;
-            
+
         /* During the operation of the new credentials window, we will
            need to dynamically change the layout of the controls as a
            result of custom prompting from credentials providers and
@@ -1616,7 +1616,7 @@ nc_handle_wm_create(HWND hwnd,
 
 /* add a control row supplied by an identity provider */
 static void
-nc_add_control_row(khui_nc_wnd_data * d, 
+nc_add_control_row(khui_nc_wnd_data * d,
                    HWND label,
                    HWND input,
                    khui_control_size size)
@@ -1697,7 +1697,7 @@ nc_add_control_row(khui_nc_wnd_data * d,
 }
 
 
-static LRESULT 
+static LRESULT
 nc_handle_wm_destroy(HWND hwnd,
                      UINT uMsg,
                      WPARAM wParam,
@@ -1733,7 +1733,7 @@ nc_handle_wm_destroy(HWND hwnd,
     return TRUE;
 }
 
-static LRESULT 
+static LRESULT
 nc_handle_wm_command(HWND hwnd,
                      UINT uMsg,
                      WPARAM wParam,
@@ -1761,9 +1761,9 @@ nc_handle_wm_command(HWND hwnd,
 
             nc_enable_controls(d, FALSE);
 
-            nc_notify_types(d->nc, 
-                            KHUI_WM_NC_NOTIFY, 
-                            MAKEWPARAM(0,WMNC_DIALOG_PREPROCESS), 
+            nc_notify_types(d->nc,
+                            KHUI_WM_NC_NOTIFY,
+                            MAKEWPARAM(0,WMNC_DIALOG_PREPROCESS),
                             (LPARAM) d->nc,
                             TRUE);
 
@@ -1795,10 +1795,10 @@ nc_handle_wm_command(HWND hwnd,
             return FALSE;
 
         case IDC_NC_BASIC:
-        case IDC_NC_ADVANCED: 
+        case IDC_NC_ADVANCED:
             /* the Options button in the main window was clicked.  we
                respond by expanding the dialog. */
-            PostMessage(hwnd, KHUI_WM_NC_NOTIFY, 
+            PostMessage(hwnd, KHUI_WM_NC_NOTIFY,
                         MAKEWPARAM(0, WMNC_DIALOG_EXPAND), 0);
             return FALSE;
 
@@ -1818,7 +1818,7 @@ nc_handle_wm_command(HWND hwnd,
                 StringCchCopyN(sid, ARRAYLENGTH(sid), l->id, l->id_len);
                 sid[l->id_len] = L'\0'; /* just make sure */
 
-                if(l->param != NULL && 
+                if(l->param != NULL &&
                    l->param_len < ARRAYLENGTH(sparam) &&
                    l->param_len > 0) {
 
@@ -1870,7 +1870,7 @@ nc_handle_wm_command(HWND hwnd,
                     khm_int32 credtype;
                     khui_new_creds_by_type * t;
 
-                    if (KHM_SUCCEEDED(kcdb_credtype_get_id(sparam, 
+                    if (KHM_SUCCEEDED(kcdb_credtype_get_id(sparam,
                                                            &credtype)) &&
                         KHM_SUCCEEDED(khui_cw_find_type(d->nc,
                                                         credtype, &t))) {
@@ -1918,7 +1918,7 @@ static LRESULT nc_handle_wm_moving(HWND hwnd,
     if (d == NULL)
         return FALSE;
 
-    nc_notify_types(d->nc, KHUI_WM_NC_NOTIFY, 
+    nc_notify_types(d->nc, KHUI_WM_NC_NOTIFY,
                     MAKEWPARAM(0, WMNC_DIALOG_MOVE), (LPARAM) d->nc, TRUE);
 
     return FALSE;
@@ -1996,7 +1996,7 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                     d->nc->types[i]->hwnd_panel = NULL;
                 } else {
                     /* Create the dialog panel */
-                    d->nc->types[i]->hwnd_panel = 
+                    d->nc->types[i]->hwnd_panel =
                         CreateDialogParam(d->nc->types[i]->h_module,
                                           d->nc->types[i]->dlg_template,
                                           d->nc->hwnd,
@@ -2035,7 +2035,7 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
 
             tabitem.mask = TCIF_PARAM | TCIF_TEXT;
 
-            LoadString(khm_hInstance, IDS_NC_IDENTITY, 
+            LoadString(khm_hInstance, IDS_NC_IDENTITY,
                        wname, ARRAYLENGTH(wname));
 
             tabitem.pszText = wname;
@@ -2050,9 +2050,9 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
 
                 /* We should sort the tabs first.  See
                    nc_tab_sort_func() for sort criteria. */
-                qsort(d->nc->types, 
-                      d->nc->n_types, 
-                      sizeof(*(d->nc->types)), 
+                qsort(d->nc->types,
+                      d->nc->n_types,
+                      sizeof(*(d->nc->types)),
                       nc_tab_sort_func);
 
                 for(i=0; i < d->nc->n_types;i++) {
@@ -2068,9 +2068,9 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
 
                         if(KHM_FAILED
                            (kcdb_credtype_describe
-                            (d->nc->types[i]->type, 
-                             wname, 
-                             &cbsize, 
+                            (d->nc->types[i]->type,
+                             wname,
+                             &cbsize,
                              KCDB_TS_SHORT))) {
 
 #ifdef DEBUG
@@ -2207,7 +2207,7 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
             }
 
             for(i=0;i<d->nc->n_prompts;i++) {
-                if(!(d->nc->prompts[i]->flags & 
+                if(!(d->nc->prompts[i]->flags &
                      KHUI_NCPROMPT_FLAG_STOCK)) {
                     if(d->nc->prompts[i]->hwnd_static != NULL)
                         DestroyWindow(d->nc->prompts[i]->hwnd_static);
@@ -2251,7 +2251,7 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
 #if 0
             /* special case, we have one prompt and it is a password
                prompt.  very common */
-            if(d->nc->n_prompts == 1 && 
+            if(d->nc->n_prompts == 1 &&
                d->nc->prompts[0]->type == KHUI_NCPROMPT_TYPE_PASSWORD) {
 
                 hw = GetDlgItem(d->dlg_main, IDC_NC_PASSWORD);
@@ -2283,7 +2283,7 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                      d->nc->pname,
                      SS_SUNKEN | WS_CHILD,
                      d->r_area.left, y,
-                     d->r_row.right, 
+                     d->r_row.right,
                      d->r_n_label.bottom - d->r_n_label.top,
                      d->dlg_main,
                      NULL,
@@ -2301,7 +2301,7 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
             }
 
             if (d->nc->banner != NULL) {
-                hw = 
+                hw =
                     CreateWindowEx
                     (0,
                      L"STATIC",
@@ -2334,8 +2334,8 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                 if (d->nc->prompts[i]->prompt != NULL) {
                     SIZE s;
 
-                    GetTextExtentPoint32(hdc, 
-                                         d->nc->prompts[i]->prompt, 
+                    GetTextExtentPoint32(hdc,
+                                         d->nc->prompts[i]->prompt,
                                          (int) wcslen(d->nc->prompts[i]->prompt),
                                          &s);
 
@@ -2352,8 +2352,8 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                 int dy;
 
                 if(d->nc->prompts[i]->prompt != NULL) {
-                    GetTextExtentPoint32(hdc, 
-                                         d->nc->prompts[i]->prompt, 
+                    GetTextExtentPoint32(hdc,
+                                         d->nc->prompts[i]->prompt,
                                          (int) wcslen(d->nc->prompts[i]->prompt),
                                          &s);
                     if(s.cx < d->r_n_label.right - d->r_n_label.left &&
@@ -2372,11 +2372,11 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                         pr.left = 0;
                         pr.right = d->r_row.right;
                         pr.top = 0;
-                        pr.bottom = d->r_n_label.bottom - 
+                        pr.bottom = d->r_n_label.bottom -
                             d->r_n_label.top;
                         CopyRect(&er, &d->r_n_input);
                         OffsetRect(&er, 0, pr.bottom);
-                        dy = er.bottom + (d->r_row.bottom - 
+                        dy = er.bottom + (d->r_row.bottom -
                                           d->r_n_input.bottom);
                     }
                 } else {
@@ -2405,7 +2405,7 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                     assert(hw);
 #endif
 
-                    SendMessage(hw, WM_SETFONT, 
+                    SendMessage(hw, WM_SETFONT,
                                 (WPARAM) hf, (LPARAM) TRUE);
 
                     SetWindowPos(hw, hw_prev,
@@ -2423,11 +2423,11 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                 hw = CreateWindowEx
                     (0,
                      L"EDIT",
-                     (d->nc->prompts[i]->def ? 
+                     (d->nc->prompts[i]->def ?
                       d->nc->prompts[i]->def : L""),
                      WS_CHILD | WS_TABSTOP |
                      WS_BORDER | ES_AUTOHSCROLL |
-                     ((d->nc->prompts[i]->flags & 
+                     ((d->nc->prompts[i]->flags &
                        KHUI_NCPROMPT_FLAG_HIDDEN)? ES_PASSWORD:0),
                      er.left, er.top,
                      er.right - er.left, er.bottom - er.top,
@@ -2440,13 +2440,13 @@ static LRESULT nc_handle_wm_nc_notify(HWND hwnd,
                 assert(hw);
 #endif
 
-                SendMessage(hw, WM_SETFONT, 
+                SendMessage(hw, WM_SETFONT,
                             (WPARAM) hf, (LPARAM) TRUE);
 
                 SetWindowPos(hw, hw_prev,
-                             0, 0, 0, 0, 
-                             SWP_NOACTIVATE | SWP_NOMOVE | 
-                             SWP_NOOWNERZORDER | SWP_NOSIZE | 
+                             0, 0, 0, 0,
+                             SWP_NOACTIVATE | SWP_NOMOVE |
+                             SWP_NOOWNERZORDER | SWP_NOSIZE |
                              SWP_SHOWWINDOW);
 
                 SendMessage(hw, EM_SETLIMITTEXT,
@@ -2984,12 +2984,12 @@ HWND khm_create_newcredwnd(HWND parent, khui_new_creds * c)
 
     if (c->window_title == NULL) {
         if (c->subtype == KMSG_CRED_PASSWORD)
-            LoadString(khm_hInstance, 
+            LoadString(khm_hInstance,
                        IDS_WT_PASSWORD,
                        wtitle,
                        ARRAYLENGTH(wtitle));
         else
-            LoadString(khm_hInstance, 
+            LoadString(khm_hInstance,
                        IDS_WT_NEW_CREDS,
                        wtitle,
                        ARRAYLENGTH(wtitle));
@@ -3022,13 +3022,13 @@ HWND khm_create_newcredwnd(HWND parent, khui_new_creds * c)
 
 void khm_prep_newcredwnd(HWND hwnd)
 {
-    SendMessage(hwnd, KHUI_WM_NC_NOTIFY, 
+    SendMessage(hwnd, KHUI_WM_NC_NOTIFY,
                 MAKEWPARAM(0, WMNC_DIALOG_SETUP), 0);
 }
 
 void khm_show_newcredwnd(HWND hwnd)
 {
     /* add all the panels in and prep UI */
-    PostMessage(hwnd, KHUI_WM_NC_NOTIFY, 
+    PostMessage(hwnd, KHUI_WM_NC_NOTIFY,
                 MAKEWPARAM(0, WMNC_DIALOG_ACTIVATE), 0);
 }

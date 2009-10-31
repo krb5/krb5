@@ -6,23 +6,23 @@
  * may copy or modify Sun RPC without charge, but are not authorized
  * to license or distribute it to anyone else except as part of a product or
  * program developed by the user.
- * 
+ *
  * SUN RPC IS PROVIDED AS IS WITH NO WARRANTIES OF ANY KIND INCLUDING THE
  * WARRANTIES OF DESIGN, MERCHANTIBILITY AND FITNESS FOR A PARTICULAR
  * PURPOSE, OR ARISING FROM A COURSE OF DEALING, USAGE OR TRADE PRACTICE.
- * 
+ *
  * Sun RPC is provided with no support and without any obligation on the
  * part of Sun Microsystems, Inc. to assist in its use, correction,
  * modification or enhancement.
- * 
+ *
  * SUN MICROSYSTEMS, INC. SHALL HAVE NO LIABILITY WITH RESPECT TO THE
  * INFRINGEMENT OF COPYRIGHTS, TRADE SECRETS OR ANY PATENTS BY SUN RPC
  * OR ANY PART THEREOF.
- * 
+ *
  * In no event will Sun Microsystems, Inc. be liable for any lost revenue
  * or profits or other special, indirect and consequential damages, even if
  * Sun has been advised of the possibility of such damages.
- * 
+ *
  * Sun Microsystems, Inc.
  * 2550 Garcia Avenue
  * Mountain View, California  94043
@@ -117,13 +117,13 @@ typedef struct CLIENT {
 	        /* call remote procedure */
 	        enum clnt_stat	(*cl_call)(struct CLIENT *,
 					   rpcproc_t, xdrproc_t, void *,
-					   xdrproc_t, void *, 
-					   struct timeval);	
+					   xdrproc_t, void *,
+					   struct timeval);
                 /* abort a call */
-		void		(*cl_abort)(struct CLIENT *);	
+		void		(*cl_abort)(struct CLIENT *);
                 /* get specific error code */
-		void		(*cl_geterr)(struct CLIENT *, 
-					     struct rpc_err *);	
+		void		(*cl_geterr)(struct CLIENT *,
+					     struct rpc_err *);
                 /* frees results */
 		bool_t		(*cl_freeres)(struct CLIENT *,
 					      xdrproc_t, void *);
@@ -242,7 +242,7 @@ typedef struct CLIENT {
 
 /*
  * Below are the client handle creation routines for the various
- * implementations of client side rpc.  They can return NULL if a 
+ * implementations of client side rpc.  They can return NULL if a
  * creation failure occurs.
  */
 
@@ -310,7 +310,7 @@ char *clnt_spcreateerror(char *);	/* string */
 
 /*
  * Like clnt_perror(), but is more verbose in its output
- */ 
+ */
 void clnt_perrno(enum clnt_stat);	/* stderr */
 
 /*
@@ -319,7 +319,7 @@ void clnt_perrno(enum clnt_stat);	/* stderr */
 void clnt_perror(CLIENT *, char *); 	/* stderr */
 char *clnt_sperror(CLIENT *, char *);	/* string */
 
-/* 
+/*
  * If a creation fails, the following allows the user to figure out why.
  */
 struct rpc_createerr {

@@ -133,7 +133,7 @@ static char *kdcrights_realmcontainer[][2]={
     {"2#subtree#","#krbMKey"},
     {"2#subtree#","#krbUPEnabled"},
     {"2#subtree#","#krbSubTrees"},
-    {"2#subtree#","#krbPrincContainerRef"}, 
+    {"2#subtree#","#krbPrincContainerRef"},
     {"2#subtree#","#krbSearchScope"},
     {"2#subtree#","#krbLdapServers"},
     {"2#subtree#","#krbKdcServers"},
@@ -167,7 +167,7 @@ static char *adminrights_realmcontainer[][2]={
     {"2#subtree#","#krbMKey"},
     {"6#subtree#","#krbUPEnabled"},
     {"2#subtree#","#krbSubTrees"},
-    {"2#subtree#","#krbPrincContainerRef"}, 
+    {"2#subtree#","#krbPrincContainerRef"},
     {"2#subtree#","#krbSearchScope"},
     {"2#subtree#","#krbLdapServers"},
     {"2#subtree#","#krbKdcServers"},
@@ -208,7 +208,7 @@ static char *pwdrights_realmcontainer[][2]={
     {"2#subtree#","#krbMKey"},
     {"2#subtree#","#krbUPEnabled"},
     {"2#subtree#","#krbSubTrees"},
-    {"2#subtree#","#krbPrincContainerRef"}, 
+    {"2#subtree#","#krbPrincContainerRef"},
     {"2#subtree#","#krbSearchScope"},
     {"2#subtree#","#krbLdapServers"},
     {"2#subtree#","#krbKdcServers"},
@@ -271,8 +271,8 @@ krb5_ldap_add_service_rights(context, servicetype, serviceobjdn, realmname, subt
     int                 servicetype;
     char                *serviceobjdn;
     char                *realmname;
-    char                **subtreeparam;                         
-    char                *contref;                         
+    char                **subtreeparam;
+    char                *contref;
     int                 mask;
 {
 
@@ -559,7 +559,7 @@ krb5_ldap_delete_service_rights(context, servicetype, serviceobjdn, realmname, s
     int             servicetype;
     char            *serviceobjdn;
     char            *realmname;
-    char            **subtreeparam; 
+    char            **subtreeparam;
     char            *contref;
     int             mask;
 {
@@ -574,7 +574,7 @@ krb5_ldap_delete_service_rights(context, servicetype, serviceobjdn, realmname, s
     kdb5_dal_handle        *dal_handle=NULL;
     krb5_ldap_context      *ldap_context=NULL;
     krb5_ldap_server_handle *ldap_server_handle=NULL;
-    int                     subtreecount = 0;  
+    int                     subtreecount = 0;
 
     SETUP_CONTEXT();
     GET_HANDLE();

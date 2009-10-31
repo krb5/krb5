@@ -576,7 +576,7 @@ kwin_init_name(HWND hwnd, char *fullname)
 #ifdef KRB5
   krb5_error_code code;
   char *ptr;
-#endif    
+#endif
 
   if (fullname == NULL || fullname[0] == 0) {
 #ifdef KRB4
@@ -590,7 +590,7 @@ kwin_init_name(HWND hwnd, char *fullname)
 
 #ifdef KRB5
     strcpy(name, cns_res.name);
-    
+
     *realm = '\0';
     code = krb5_get_default_realm(k5_context, &ptr);
     if (!code) {
@@ -1046,7 +1046,7 @@ kwin_timer(HWND hwnd, UINT timer_id)
   }
   if (code == 0 || code == KRB5_CC_END)
     krb5_cc_end_seq_get(k5_context, k5_ccache, &cursor);
-    
+
 #endif
 
   if (!expired) {
@@ -1209,7 +1209,7 @@ kwin_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
 
 #ifdef KRB5
     principal = NULL;
-    
+
     /*
      * convert the name + realm into a krb5 principal string and parse it into a principal
      */
@@ -1217,7 +1217,7 @@ kwin_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
     code = krb5_parse_name(k5_context, menuitem, &principal);
     if (code)
       goto errorpoint;
-    
+
     /*
      * set the various ticket options.  First, initialize the structure, then set the ticket
      * to be forwardable if desired, and set the lifetime.
@@ -1227,7 +1227,7 @@ kwin_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
     krb5_get_init_creds_opt_set_tkt_life(&opts, lifetime * 60);
     if (noaddresses) {
 		krb5_get_init_creds_opt_set_address_list(&opts, NULL);
- 	}    
+ 	}
 
     /*
      * get the initial creds using the password and the options we set above
@@ -1235,41 +1235,41 @@ kwin_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
     gd.hinstance = hinstance;
     gd.hwnd = hwnd;
     gd.id = ID_VARDLG;
-    code = krb5_get_init_creds_password(k5_context, &creds, principal, password, 
+    code = krb5_get_init_creds_password(k5_context, &creds, principal, password,
 					gic_prompter, &gd, 0, NULL, &opts);
     if (code)
       goto errorpoint;
-    
+
     /*
      * initialize the credential cache
      */
     code = krb5_cc_initialize(k5_context, k5_ccache, principal);
     if (code)
       goto errorpoint;
-    
+
     /*
      * insert the principal into the cache
      */
     code = krb5_cc_store_cred(k5_context, k5_ccache, &creds);
-    
+
   errorpoint:
-    
+
     if (principal)
       krb5_free_principal(k5_context, principal);
 
     end_blocking_hook();
     SetCursor(hcursor);
     kwin_set_default_focus(hwnd);
-    
+
     if (code) {
       if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY)
-	MessageBox(hwnd, "Password incorrect", NULL, 
+	MessageBox(hwnd, "Password incorrect", NULL,
 		   MB_OK | MB_ICONEXCLAMATION);
-      else 
+      else
 	com_err(NULL, code, "while logging in");
     }
 #endif /* KRB5 */
-    
+
 #ifdef KRB4
     if (krc != KSUCCESS) {
       MessageBox(hwnd, krb_get_err_text(krc),	"",
@@ -1449,7 +1449,7 @@ kwin_paint(HWND hwnd)
       continue;
     expiration = c.times.endtime;
     break;
-                
+
   }
   if (code == 0 || code == KRB5_CC_END)
     krb5_cc_end_seq_get(k5_context, k5_ccache, &cursor);
@@ -1528,7 +1528,7 @@ kwin_wnd_proc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     HANDLE_MSG(hwnd, WM_TIMER, kwin_timer);
 
     HANDLE_MSG(hwnd, WM_PAINT, kwin_paint);
-    
+
   case WM_ERASEBKGND:
     if (!IsIconic(hwnd))
       break;
@@ -1914,7 +1914,7 @@ krb_gethostbyname_wnd_proc(HWND hwnd, UINT message,
     iscompleted = TRUE;
     return 0;
   }
-  
+
   return DefWindowProc(hwnd, message, wParam, lParam);
 }
 
@@ -1935,7 +1935,7 @@ krb_gethostbyname(
   BOOL FARPROC blockinghook;
   WNDCLASS wc;
   static BOOL isregistered;
-  
+
   blockinghook = WSASetBlockingHook(NULL);
   WSASetBlockingHook(blockinghook);
 
@@ -2006,11 +2006,11 @@ k5_dest_tkt(void)
 }
 
 /*
- * 
+ *
  * k5_get_num_cred
- * 
+ *
  * Returns: number of creds in the credential cache, -1 on error
- * 
+ *
  */
 int
 k5_get_num_cred(int verbose)
@@ -2168,19 +2168,19 @@ k5_init_ccache(krb5_ccache *ccache)
 
 
 /*
- * 
+ *
  * Function: Reads the name and realm out of the ccache.
- * 
+ *
  * Parameters:
  *  ccache - credentials cache to get info from
- * 
+ *
  *  name - buffer to hold user name
- * 
+ *
  *  realm - buffer to hold the realm
- * 
- * 
+ *
+ *
  * Returns: TRUE if read names, FALSE if not
- * 
+ *
  */
 int
 k5_name_from_ccache(krb5_ccache k5_ccache)

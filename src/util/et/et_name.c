@@ -1,6 +1,6 @@
 /*
  * Copyright 1997 by Massachusetts Institute of Technology
- * 
+ *
  * Copyright 1987 by MIT Student Information Processing Board
  *
  * Permission to use, copy, modify, and distribute this software

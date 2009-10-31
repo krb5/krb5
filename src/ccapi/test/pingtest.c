@@ -30,9 +30,9 @@ RPC_STATUS send_test(char* endpoint) {
     unsigned char*  pszNetworkAddress   = NULL;
     unsigned char*  pszOptions          = NULL;
     unsigned char*  pszStringBinding    = NULL;
-    unsigned char*  pszUuid             = NULL; 
+    unsigned char*  pszUuid             = NULL;
     RPC_STATUS      status;
- 
+
     status = RpcStringBindingCompose(pszUuid,
                                      (RPC_CSTR)"ncalrpc",
                                      pszNetworkAddress,
@@ -73,7 +73,7 @@ int main(   int argc, char *argv[]) {
     char*           message         = "Hello, RPC!";
 
 
-    if ((dwTlsIndex = TlsAlloc()) == TLS_OUT_OF_INDEXES) return FALSE; 
+    if ((dwTlsIndex = TlsAlloc()) == TLS_OUT_OF_INDEXES) return FALSE;
 
 //    send_test("krbcc.229026.0.ep");
 
@@ -90,14 +90,14 @@ int main(   int argc, char *argv[]) {
         }
 
     if (!err) {
-        err = cci_os_ipc_msg(TRUE, send_stream, CCMSG_PING, &reply_stream); 
+        err = cci_os_ipc_msg(TRUE, send_stream, CCMSG_PING, &reply_stream);
         }
     Sleep(10*1000);
     cci_debug_printf("Try finishing async call.");
 
     Sleep(INFINITE);
     cci_debug_printf("main: return. err == %d", err);
-    
+
     return 0;
     }
 

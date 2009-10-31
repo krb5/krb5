@@ -28,13 +28,13 @@
 
 /* ------------------------------------------------------------------------ */
 
-cc_string_d cci_string_d_initializer = { 
-    NULL, 
-    NULL 
+cc_string_d cci_string_d_initializer = {
+    NULL,
+    NULL
     VECTOR_FUNCTIONS_INITIALIZER };
 
-cc_string_f cci_string_f_initializer = { 
-    ccapi_string_release 
+cc_string_f cci_string_f_initializer = {
+    ccapi_string_release
 };
 
 /* ------------------------------------------------------------------------ */
@@ -44,43 +44,43 @@ cc_int32 cci_string_new (cc_string_t *out_string,
 {
     cc_int32 err = ccNoError;
     cc_string_t string = NULL;
-    
+
     if (!out_string) { err = cci_check_error (ccErrBadParam); }
     if (!in_cstring) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         string = malloc (sizeof (*string));
-        if (string) { 
+        if (string) {
             *string = cci_string_d_initializer;
-        } else { 
-            err = cci_check_error (ccErrNoMem); 
+        } else {
+            err = cci_check_error (ccErrNoMem);
         }
     }
 
     if (!err) {
         string->functions = malloc (sizeof (*string->functions));
-        if (string->functions) { 
+        if (string->functions) {
             *((cc_string_f *) string->functions) = cci_string_f_initializer;
-        } else { 
-            err = cci_check_error (ccErrNoMem); 
+        } else {
+            err = cci_check_error (ccErrNoMem);
         }
     }
-    
+
     if (!err) {
         string->data = strdup (in_cstring);
-        if (!string->data) { 
-            err = cci_check_error (ccErrNoMem); 
+        if (!string->data) {
+            err = cci_check_error (ccErrNoMem);
         }
-        
+
     }
-    
+
     if (!err) {
         *out_string = string;
         string = NULL; /* take ownership */
     }
-    
+
     if (string) { ccapi_string_release (string); }
-    
+
     return cci_check_error (err);
 }
 
@@ -89,14 +89,14 @@ cc_int32 cci_string_new (cc_string_t *out_string,
 cc_int32 ccapi_string_release (cc_string_t in_string)
 {
     cc_int32 err = ccNoError;
-    
+
     if (!in_string) { err = ccErrBadParam; }
-    
+
     if (!err) {
         free ((char *) in_string->data);
         free ((char *) in_string->functions);
         free (in_string);
     }
-    
+
     return err;
 }

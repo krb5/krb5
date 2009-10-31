@@ -206,4 +206,3 @@ struct cmd cmdtab[] = {
 };
 
 int	NCMDS = (sizeof (cmdtab) / sizeof (cmdtab[0])) - 1;
-

@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Test vectors for HMAC-MD5 and HMAC-SHA1 (placeholder only).
  * Tests taken from RFC 2202.
@@ -91,7 +91,7 @@ struct hmac_test {
     const char *hexdigest;
 };
 
-static krb5_error_code hmac1(const struct krb5_hash_provider *h, 
+static krb5_error_code hmac1(const struct krb5_hash_provider *h,
 			     krb5_keyblock *key,
 			     krb5_data *in, krb5_data *out)
 {
@@ -223,7 +223,7 @@ static void test_hmac()
 		0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
 		0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa, 0xaa,
 	    },
-	    73, 
+	    73,
 	    "Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data",
 	    "0x6f630fad67cda0ee1fb1f562db3aa53e"
 	},

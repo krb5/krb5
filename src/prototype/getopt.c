@@ -4,8 +4,8 @@ extern int optind;
 extern char *optarg;
 
 main(argc, argv)
-    int argc;
-    char **argv;
+int argc;
+char **argv;
 {
     int c;
     int errflg = 0;
@@ -13,19 +13,19 @@ main(argc, argv)
     <<<other globals here>>>;
 
     while ((c = getopt(argc, argv, "<<<>>>")) != -1) {
-	switch (c) {
-	    <<<add cases for arguments here>>>;
-	case '?':
-	default:
-	    errflg++;
-	    break;
-	}
+        switch (c) {
+            <<<add cases for arguments here>>>;
+        case '?':
+        default:
+            errflg++;
+        break;
+        }
     }
     if (errflg) {
-	fprintf(stderr, "Usage: %s <<<args>>>", argv[0]);
-	exit(2);
+        fprintf(stderr, "Usage: %s <<<args>>>", argv[0]);
+        exit(2);
     }
     for (; optind < argc; optind++) {
-	<<<process arg optind>>>;
+        <<<process arg optind>>>;
     }
 }

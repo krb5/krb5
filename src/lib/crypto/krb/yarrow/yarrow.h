@@ -135,7 +135,7 @@ int krb5int_yarrow_init( Yarrow_CTX* y, const char *filename );
 
 YARROW_DLL
 int krb5int_yarrow_input( Yarrow_CTX* y, unsigned source_id,
-		  const void* sample, 
+		  const void* sample,
 		  size_t size, size_t entropy_bits );
 
 YARROW_DLL
@@ -149,7 +149,7 @@ YARROW_DLL
 int krb5int_yarrow_new_source( Yarrow_CTX* y, unsigned* source_id );
 
 YARROW_DLL
-int krb5int_yarrow_register_source_estimator( Yarrow_CTX* y, unsigned source_id, 
+int krb5int_yarrow_register_source_estimator( Yarrow_CTX* y, unsigned source_id,
 				      estimator_fn* fptr );
 
 YARROW_DLL

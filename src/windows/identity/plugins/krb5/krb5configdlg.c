@@ -364,7 +364,7 @@ k5_read_config_data(k5_config_data * d) {
         /* now go through each and fish out the kdcs, admin_server
            and master_kdc. */
         for (s=0; sections[s] && sections[s][0]; s++) {
-            const char * sec_kdcs[] = 
+            const char * sec_kdcs[] =
                 { "realms", sections[s], "kdc", NULL };
 
             const char * sec_admin[] =
@@ -562,7 +562,7 @@ k5_write_config_data(k5_config_data * d) {
         applied = TRUE;
     }
 
-    if (!(d->flags & 
+    if (!(d->flags &
           (K5_CDFLAG_MOD_DEF_REALM |
            K5_CDFLAG_MOD_CONF_FILE |
            K5_CDFLAG_MOD_DNS_FALLBACK |
@@ -616,7 +616,7 @@ k5_write_config_data(k5_config_data * d) {
                 s > 0) {
                 char defrealm[K5_MAXCCH_REALM];
 
-                UnicodeStrToAnsi(defrealm, sizeof(defrealm), 
+                UnicodeStrToAnsi(defrealm, sizeof(defrealm),
                                  d->def_realm);
 
                 khm_krb5_set_default_realm(d->def_realm);
@@ -697,7 +697,7 @@ k5_write_config_data(k5_config_data * d) {
             char realm[K5_MAXCCH_REALM];
             char host[K5_MAXCCH_HOST];
 
-            const char * sec_kdcs[] = 
+            const char * sec_kdcs[] =
                 { "realms", realm, "kdc", NULL };
 
             const char * sec_admin[] =
@@ -811,9 +811,9 @@ k5_write_config_data(k5_config_data * d) {
 
                         if (!rv) {
                             if (!strcmp(maprealm, realm)) {
-                                StringCbCopyA(host, sizeof(host), 
+                                StringCbCopyA(host, sizeof(host),
                                               values[v]);
-                                pprofile_clear_relation(profile, 
+                                pprofile_clear_relation(profile,
                                                         sec_domain_map);
                                 applied = TRUE;
                             }
@@ -973,7 +973,7 @@ k5_write_config_data(k5_config_data * d) {
         khui_alert_set_title(alert, title);
         khui_alert_set_message(alert, msg);
         khui_alert_set_suggestion(alert, sugg);
-        
+
         khui_alert_show(alert);
     }
 
@@ -992,7 +992,7 @@ k5_write_config_data(k5_config_data * d) {
 static k5_config_data k5_config_dlg_data;
 static khm_boolean    k5_dlg_data_valid = FALSE;
 
-INT_PTR CALLBACK 
+INT_PTR CALLBACK
 k5_config_dlgproc(HWND hwnd,
                   UINT uMsg,
                   WPARAM wParam,
@@ -1073,7 +1073,7 @@ k5_config_dlgproc(HWND hwnd,
 #endif
             SendMessage(hw, CB_RESETCONTENT, 0, 0);
 
-            for (t=importopts; 
+            for (t=importopts;
                  t && *t && *t != L' ' &&
                      t < importopts + ARRAYLENGTH(importopts);
                  t = multi_string_next(t)) {
@@ -1607,7 +1607,7 @@ k5_delete_realms(HWND hwnd, k5_config_data * d) {
         lvi.iItem = idx;
         lvi.iSubItem = 0;
         lvi.mask = LVIF_PARAM;
-        
+
         ListView_GetItem(hw_rlm, &lvi);
 
         if (lvi.lParam != -1 &&
@@ -1619,7 +1619,7 @@ k5_delete_realms(HWND hwnd, k5_config_data * d) {
 
     if (modified) {
         d->flags |= K5_CDFLAG_MOD_REALMS;
-        
+
         k5_purge_config_data(d, TRUE, TRUE, TRUE);
         k5_update_realms_display(hw_rlm, d);
         k5_update_dmap_display(GetDlgItem(hwnd, IDC_CFG_DMAP), NULL, 0);
@@ -1638,7 +1638,7 @@ k5_delete_servers(HWND hwnd, k5_config_data * d) {
 
     hw_kdc = GetDlgItem(hwnd, IDC_CFG_KDC);
     r = d->c_realm;
-    
+
     idx = -1;
     while((idx = ListView_GetNextItem(hw_kdc, idx,
                                       LVNI_SELECTED))
@@ -1660,7 +1660,7 @@ k5_delete_servers(HWND hwnd, k5_config_data * d) {
     if (modified) {
         d->flags |= K5_CDFLAG_MOD_REALMS;
         d->realms[r].flags |= K5_RDFLAG_MODIFED;
-        
+
         k5_purge_config_data(d, TRUE, TRUE, TRUE);
         k5_update_realms_display(GetDlgItem(hwnd, IDC_CFG_REALMS), d);
         k5_update_kdcs_display(hw_kdc, d, r);
@@ -1687,7 +1687,7 @@ k5_delete_dmap(HWND hwnd, k5_config_data * d) {
         lvi.iItem = idx;
         lvi.iSubItem = 0;
         lvi.mask = LVIF_PARAM;
-        
+
         ListView_GetItem(hw_dmp, &lvi);
 
         if (lvi.lParam != -1 &&
@@ -1700,7 +1700,7 @@ k5_delete_dmap(HWND hwnd, k5_config_data * d) {
     if (modified) {
         d->flags |= K5_CDFLAG_MOD_REALMS;
         k5_purge_config_data(d, FALSE, FALSE, TRUE);
-        
+
         if (!(d->realms[r].flags & K5_RDFLAG_MODIFED)) {
             d->realms[r].flags |= K5_RDFLAG_MODIFED;
 
@@ -1711,7 +1711,7 @@ k5_delete_dmap(HWND hwnd, k5_config_data * d) {
     }
 }
 
-INT_PTR CALLBACK 
+INT_PTR CALLBACK
 k5_realms_dlgproc(HWND hwnd,
                   UINT uMsg,
                   WPARAM wParam,
@@ -1846,7 +1846,7 @@ k5_realms_dlgproc(HWND hwnd,
 
                     SetMenuItemInfo(hm, CMD_DEL_REALM, FALSE, &mii);
                 }
-                
+
             } else if (id == IDC_CFG_KDC) {
                 HWND hw_kdc;
                 int n;
@@ -1883,7 +1883,7 @@ k5_realms_dlgproc(HWND hwnd,
                     mii.fState = MFS_ENABLED;
 
                     SetMenuItemInfo(hm, CMD_DEL_SERVER, FALSE, &mii);
-                    
+
                     mii.fState = MFS_DISABLED;
 
                     SetMenuItemInfo(hm, CMD_MAKE_ADMIN, FALSE, &mii);
@@ -2562,7 +2562,7 @@ k5_realms_dlgproc(HWND hwnd,
 
                 if (ListView_GetSelectedCount(hw_kdc) != 1)
                     return TRUE;
-                
+
                 idx = -1;
                 while ((idx = ListView_GetNextItem(hw_kdc, idx,
                                                    LVNI_SELECTED)) != -1) {
@@ -2613,7 +2613,7 @@ k5_realms_dlgproc(HWND hwnd,
 
                 if (ListView_GetSelectedCount(hw_kdc) != 1)
                     return TRUE;
-                
+
                 idx = -1;
                 while ((idx = ListView_GetNextItem(hw_kdc, idx,
                                                    LVNI_SELECTED)) != -1) {
@@ -2850,7 +2850,7 @@ k5_unregister_config_panels(void) {
 #endif
     }
 
-    if (KHM_SUCCEEDED(khui_cfg_open(node_main, L"KerberosRealms", 
+    if (KHM_SUCCEEDED(khui_cfg_open(node_main, L"KerberosRealms",
                                     &node_realms))) {
         khui_cfg_remove(node_realms);
         khui_cfg_release(node_realms);

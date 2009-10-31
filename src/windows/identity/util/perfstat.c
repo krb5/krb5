@@ -209,7 +209,7 @@ perf_calloc(const char * file, int line, size_t num, size_t size) {
     return ptr;
 }
 
-KHMEXP void * 
+KHMEXP void *
 perf_malloc(const char * file, int line, size_t s) {
     allocation * a;
     void * ptr;

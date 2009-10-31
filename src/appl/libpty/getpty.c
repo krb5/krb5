@@ -3,7 +3,7 @@
  *
  * Copyright 1995, 1996 by the Massachusetts Institute of Technology.
  *
- * 
+ *
  * Permission to use, copy, modify, and distribute this software and
  * its documentation for any purpose and without fee is hereby
  * granted, provided that the above copyright notice appear in all
@@ -17,7 +17,7 @@
  * M.I.T. makes no representations about the suitability
  * of this software for any purpose.  It is provided "as is" without
  * express or implied warranty.
- * 
+ *
  */
 
 #include "com_err.h"
@@ -67,7 +67,7 @@ ptyint_getpty_ext(int *fd, char *slave, int slavelength, int do_grantpt)
     }
     return 0;
 #else /*HAVE__GETPTY*/
-    
+
     *fd = open("/dev/ptym/clone", O_RDWR|O_NDELAY);	/* HPUX*/
 #ifdef HAVE_STREAMS
     if (*fd < 0) *fd = open("/dev/ptmx",O_RDWR|O_NDELAY); /*Solaris*/
@@ -81,7 +81,7 @@ ptyint_getpty_ext(int *fd, char *slave, int slavelength, int do_grantpt)
 	if (do_grantpt)
 	    if (grantpt(*fd) || unlockpt(*fd)) return PTY_GETPTY_STREAMS;
 #endif
-    
+
 #ifdef HAVE_PTSNAME
 	p = ptsname(*fd);
 #else

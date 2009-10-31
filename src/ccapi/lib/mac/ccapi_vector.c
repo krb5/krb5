@@ -173,7 +173,7 @@ cc_int32 __cc_context_open_default_ccache_vector (cc_context_t  in_context,
 cc_int32 __cc_context_create_ccache_vector (cc_context_t  in_context,
                                             const char   *in_name,
                                             cc_uint32     in_cred_vers,
-                                            const char   *in_principal, 
+                                            const char   *in_principal,
                                             cc_ccache_t  *out_ccache)
 {
     cc_int32 err = ccNoError;
@@ -188,7 +188,7 @@ cc_int32 __cc_context_create_ccache_vector (cc_context_t  in_context,
 
 cc_int32 __cc_context_create_default_ccache_vector (cc_context_t  in_context,
                                                     cc_uint32     in_cred_vers,
-                                                    const char   *in_principal, 
+                                                    const char   *in_principal,
                                                     cc_ccache_t  *out_ccache)
 {
     cc_int32 err = ccNoError;
@@ -202,7 +202,7 @@ cc_int32 __cc_context_create_default_ccache_vector (cc_context_t  in_context,
 
 cc_int32 __cc_context_create_new_ccache_vector (cc_context_t in_context,
                                                 cc_uint32    in_cred_vers,
-                                                const char  *in_principal, 
+                                                const char  *in_principal,
                                                 cc_ccache_t *out_ccache)
 {
     cc_int32 err = ccNoError;
@@ -632,7 +632,7 @@ cc_int32 __cc_seq_fetch_NCs_begin_vector (apiCB       *in_context,
 
 cc_int32 __cc_seq_fetch_NCs_next_vector (apiCB       *in_context,
                                          ccache_p   **out_ccache,
-                                         ccache_cit  *in_iterator) 
+                                         ccache_cit  *in_iterator)
 {
     cc_int32 err = ccNoError;
     cci_swap_context_functions (in_context);
@@ -660,7 +660,7 @@ cc_int32 __cc_seq_fetch_NCs_end_vector (apiCB       *in_context,
 
 cc_int32 __cc_get_name_vector (apiCB     *in_context,
                                ccache_p  *in_ccache,
-                               char     **out_name) 
+                               char     **out_name)
 {
     cc_int32 err = ccNoError;
     cci_swap_context_functions (in_context);
@@ -675,7 +675,7 @@ cc_int32 __cc_get_name_vector (apiCB     *in_context,
 
 cc_int32 __cc_get_cred_version_vector (apiCB    *in_context,
                                        ccache_p *in_ccache,
-                                       cc_int32 *out_version) 
+                                       cc_int32 *out_version)
 {
     cc_int32 err = ccNoError;
     cci_swap_context_functions (in_context);
@@ -691,7 +691,7 @@ cc_int32 __cc_get_cred_version_vector (apiCB    *in_context,
 cc_int32 __cc_set_principal_vector (apiCB    *in_context,
                                     ccache_p *io_ccache,
                                     cc_int32  in_version,
-                                    char     *in_principal) 
+                                    char     *in_principal)
 {
     cc_int32 err = ccNoError;
     cci_swap_context_functions (in_context);
@@ -736,7 +736,7 @@ cc_int32 __cc_store_vector (apiCB      *in_context,
 
 cc_int32 __cc_remove_cred_vector (apiCB      *in_context,
                                   ccache_p   *in_ccache,
-                                  cred_union  in_credentials) 
+                                  cred_union  in_credentials)
 {
     cc_int32 err = ccNoError;
     cci_swap_context_functions (in_context);
@@ -751,7 +751,7 @@ cc_int32 __cc_remove_cred_vector (apiCB      *in_context,
 
 cc_int32 __cc_seq_fetch_creds_begin_vector (apiCB           *in_context,
                                             const ccache_p  *in_ccache,
-                                            ccache_cit     **out_iterator) 
+                                            ccache_cit     **out_iterator)
 {
     cc_int32 err = ccNoError;
     cci_swap_context_functions (in_context);
@@ -766,7 +766,7 @@ cc_int32 __cc_seq_fetch_creds_begin_vector (apiCB           *in_context,
 
 cc_int32 __cc_seq_fetch_creds_next_vector (apiCB       *in_context,
                                            cred_union **out_creds,
-                                           ccache_cit  *in_iterator) 
+                                           ccache_cit  *in_iterator)
 {
     cc_int32 err = ccNoError;
     cci_swap_context_functions (in_context);
@@ -780,7 +780,7 @@ cc_int32 __cc_seq_fetch_creds_next_vector (apiCB       *in_context,
 /* ------------------------------------------------------------------------ */
 
 cc_int32 __cc_seq_fetch_creds_end_vector (apiCB       *in_context,
-                                          ccache_cit **io_iterator) 
+                                          ccache_cit **io_iterator)
 {
     cc_int32 err = ccNoError;
     cci_swap_context_functions (in_context);
@@ -793,7 +793,7 @@ cc_int32 __cc_seq_fetch_creds_end_vector (apiCB       *in_context,
 /* ------------------------------------------------------------------------ */
 
 cc_int32 __cc_free_principal_vector (apiCB  *in_context,
-                                     char  **io_principal) 
+                                     char  **io_principal)
 {
     cc_int32 err = ccNoError;
     cci_swap_context_functions (in_context);
@@ -805,7 +805,7 @@ cc_int32 __cc_free_principal_vector (apiCB  *in_context,
 /* ------------------------------------------------------------------------ */
 
 cc_int32 __cc_free_name_vector (apiCB  *in_context,
-                                char  **io_name) 
+                                char  **io_name)
 {
     cc_int32 err = ccNoError;
     cci_swap_context_functions (in_context);

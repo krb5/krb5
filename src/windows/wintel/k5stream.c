@@ -1,9 +1,9 @@
 /*
- * 
+ *
  * K5stream
- * 	
+ *
  * Emulates the kstream package in Kerberos 4
- * 
+ *
  */
 
 #include <stdio.h>
@@ -13,7 +13,7 @@
 #include "k5stream.h"
 #include "auth.h"
 
-int 
+int
 kstream_destroy(kstream ks)
 {
   if (ks != NULL) {
@@ -25,13 +25,13 @@ kstream_destroy(kstream ks)
   return 0;
 }
 
-void 
+void
 kstream_set_buffer_mode(kstream ks, int mode)
 {
 }
 
 
-kstream 
+kstream
 kstream_create_from_fd(int fd,
 		       const struct kstream_crypt_ctl_block *ctl,
 		       kstream_ptr data)
@@ -60,7 +60,7 @@ kstream_create_from_fd(int fd,
   return ks;
 }
 
-int 
+int
 kstream_write(kstream ks, void *p_data, size_t p_len)
 {
   int n;
@@ -80,12 +80,12 @@ kstream_write(kstream ks, void *p_data, size_t p_len)
   }
 
   n = send(ks->fd, p_data, p_len, 0);        /* Write the data */
-    
+
   return n;                                   /* higher layer does retries */
 }
 
 
-int 
+int
 kstream_read(kstream ks, void *p_data, size_t p_len)
 {
   int n;
@@ -113,7 +113,6 @@ kstream_read(kstream ks, void *p_data, size_t p_len)
     hexdump("decrypted data:", p_data, n);
 #endif
   }
-  
+
   return n;                                   /* higher layer does retries */
 }
-

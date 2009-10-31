@@ -49,14 +49,14 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <pwd.h>
-     
+
 #ifdef HAVE_SYS_LABEL_H
 /* only SunOS 4? */
 #include <sys/label.h>
 #include <sys/audit.h>
 #include <pwdadj.h>
 #endif
-     
+
 #include <signal.h>
 
 #ifdef hpux
@@ -80,7 +80,7 @@
 #else
 #include <sgtty.h>
 #endif
-     
+
 #include "port-sockets.h"
 #include <string.h>
 #include <sys/param.h>

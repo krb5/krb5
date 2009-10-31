@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1994 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -7,7 +7,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -21,7 +21,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * ss wrapper for kadmin
  */
@@ -52,12 +52,12 @@ main(int argc, char *argv[])
         exit(1);
     }
     if (request) {
-            code = ss_execute_line(sci_idx, request);
-            if (code != 0) {
-                    ss_perror(sci_idx, code, request);
-                    exit_status++;
-            }
+        code = ss_execute_line(sci_idx, request);
+        if (code != 0) {
+            ss_perror(sci_idx, code, request);
+            exit_status++;
+        }
     } else
-            retval = ss_listen(sci_idx);
+        retval = ss_listen(sci_idx);
     return quit() ? 1 : exit_status;
 }

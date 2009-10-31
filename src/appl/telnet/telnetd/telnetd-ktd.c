@@ -390,7 +390,7 @@ main(argc, argv)
 	secflag = sysconf(_SC_CRAY_SECURE_SYS);
 
 	/*
-	 *      Get socket's security label 
+	 *      Get socket's security label
 	 */
 	if (secflag)  {
 		int sz = sizeof(ss);
@@ -704,13 +704,13 @@ doit(who)
 	 */
 	if ( (retval = pty_getpty(&pty, line, sizeof(line)) < 0 ) {
 	    com_err(retval, "telnetd", "");
-	    
+
 	if (pty < 0)
 		fatal(net, "All network ports in use");
 
 #if	defined(_SC_CRAY_SECURE_SYS)
 	/*
-	 *	set ttyp line security label 
+	 *	set ttyp line security label
 	 */
 	if (secflag) {
 		extern char *myline;
@@ -1278,7 +1278,7 @@ telnet(f, p, host)
 	}
 	cleanup(0);
 }  /* end of telnet */
-	
+
 #ifndef	TCSIG
 # ifdef	TIOCSIG
 #  define TCSIG TIOCSIG
@@ -1354,7 +1354,7 @@ int readstream(p, ibuf, bufsize)
 			tp = (struct termio *) (ibuf+1 + sizeof(struct iocblk));
 			vstop = tp->c_cc[VSTOP];
 			vstart = tp->c_cc[VSTART];
-			ixon = tp->c_iflag & IXON;      
+			ixon = tp->c_iflag & IXON;
 			break;
 		default:
 			errno = EAGAIN;

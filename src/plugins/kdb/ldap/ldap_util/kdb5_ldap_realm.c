@@ -939,7 +939,7 @@ void kdb5_ldap_modify(argc, argv)
     char **newadmindns = NULL;
     char **newpwddns = NULL;
     char **oldsubtrees = NULL;
-    char *oldcontainerref = NULL; 
+    char *oldcontainerref = NULL;
     int rightsmask = 0;
     int subtree_changed = 0;
 #endif
@@ -1558,7 +1558,7 @@ void kdb5_ldap_modify(argc, argv)
 		    }
 		}
             }
-                                                                                                                             
+
             if (subtree_changed && (mask & LDAP_REALM_KDCSERVERS)) {
                 char **newdns = rparams->kdcservers;
 
@@ -1591,7 +1591,7 @@ void kdb5_ldap_modify(argc, argv)
         }
 
         if (subtree_changed || (mask & LDAP_REALM_ADMINSERVERS)) {
-                                                                                                                             
+
             if (!(mask & LDAP_REALM_ADMINSERVERS)) {
                 if (rparams->adminservers != NULL) {
                     char **admindns = rparams->adminservers;
@@ -1692,7 +1692,7 @@ void kdb5_ldap_modify(argc, argv)
 		    }
 		}
             }
-                                                                                                                             
+
             if (subtree_changed && (mask & LDAP_REALM_ADMINSERVERS)) {
                 char **newdns = rparams->adminservers;
 
@@ -1725,7 +1725,7 @@ void kdb5_ldap_modify(argc, argv)
         }
 
         if (subtree_changed || (mask & LDAP_REALM_PASSWDSERVERS)) {
-                                                                                                                             
+
             if (!(mask & LDAP_REALM_PASSWDSERVERS)) {
                 if (rparams->passwdservers != NULL) {
                     char **passwddns = rparams->passwdservers;
@@ -1826,7 +1826,7 @@ void kdb5_ldap_modify(argc, argv)
 		    }
 		}
             }
-                                                                                                                             
+
             if (subtree_changed && (mask & LDAP_REALM_PASSWDSERVERS)) {
                 char **newdns = rparams->passwdservers;
 

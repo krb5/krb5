@@ -96,4 +96,3 @@ krb5_ldap_invoke(krb5_context context,
 
     return code;
 }
-

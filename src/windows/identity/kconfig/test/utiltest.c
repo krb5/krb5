@@ -130,7 +130,7 @@ int ms_append_test(void)
     printf("MS[");
     print_ms(wbuf);
     printf("] + [foo]=[");
-  
+
     cbbuf = sizeof(wbuf);
     code = khc_multi_string_append(wbuf, &cbbuf, L"foo");
 

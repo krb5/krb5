@@ -71,7 +71,7 @@ tninit()
     init_terminal();
 
     init_network();
-    
+
     init_telnet();
 
     init_sys();
@@ -206,7 +206,7 @@ main(argc, argv)
 		case 'f':
 #if defined(AUTHENTICATION) && defined(KRB5) && defined(FORWARD)
 			if (forward_flags & OPTS_FORWARD_CREDS) {
-			    fprintf(stderr, 
+			    fprintf(stderr,
 				    "%s: Only one of -f and -F allowed.\n",
 				    prompt);
 			    usage();
@@ -214,14 +214,14 @@ main(argc, argv)
 			forward_flags |= OPTS_FORWARD_CREDS;
 #else
 			fprintf(stderr,
-			 "%s: Warning: -f ignored, no Kerberos V5 support.\n", 
+			 "%s: Warning: -f ignored, no Kerberos V5 support.\n",
 				prompt);
 #endif
 			break;
 		case 'F':
 #if defined(AUTHENTICATION) && defined(KRB5) && defined(FORWARD)
 			if (forward_flags & OPTS_FORWARD_CREDS) {
-			    fprintf(stderr, 
+			    fprintf(stderr,
 				    "%s: Only one of -f and -F allowed.\n",
 				    prompt);
 			    usage();
@@ -230,7 +230,7 @@ main(argc, argv)
 			forward_flags |= OPTS_FORWARDABLE_CREDS;
 #else
 			fprintf(stderr,
-			 "%s: Warning: -F ignored, no Kerberos V5 support.\n", 
+			 "%s: Warning: -F ignored, no Kerberos V5 support.\n",
 				prompt);
 #endif
 			break;

@@ -1,8 +1,8 @@
 /*
  * pty_update_utmp: Update or create a utmp entry
- * 
+ *
  * Copyright 1995, 2001 by the Massachusetts Institute of Technology.
- * 
+ *
  * Permission to use, copy, modify, and distribute this software and
  * its documentation for any purpose and without fee is hereby
  * granted, provided that the above copyright notice appear in all
@@ -257,7 +257,7 @@
  * In addition to other HP-UX issues, 11.23 includes yet another utmp
  * management interface in utmps.h.  This interface updates a umtpd
  * daemon which then manages local files.  Directly accessing the files
- * through the existing, yet deprecated, utmp.h interface results in 
+ * through the existing, yet deprecated, utmp.h interface results in
  * nothing.
  *
  * Irix 6.x:
@@ -333,7 +333,7 @@
 /*
  * The following grossness exists to avoid duplicating lots of code
  * between the cases where we have an old-style sysV utmp and where we
- * have a modern (Unix98 or XPG4) utmpx, or the new (hp-ux 11.23) utmps.  
+ * have a modern (Unix98 or XPG4) utmpx, or the new (hp-ux 11.23) utmps.
  * See the above history rant for further explanation.
  */
 #if defined(HAVE_SETUTXENT) || defined(HAVE_SETUTENT) || defined(HAVE_SETUTSENT)

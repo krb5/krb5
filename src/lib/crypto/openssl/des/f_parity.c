@@ -45,4 +45,3 @@ mit_des_check_key_parity(mit_des_cblock key)
                 return(0);
     return (1);
 }
-

@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.
  *
@@ -285,11 +285,11 @@ add_principal(void *lhandle, char *keytab_str, krb5_keytab keytab,
         code = kadm5_get_principal_keys(handle, princ, &keys, &nkeys);
     else
 #endif
-    if (keepold || ks_tuple != NULL) {
-        code = kadm5_randkey_principal_3(lhandle, princ, keepold,
-                                         n_ks_tuple, ks_tuple, &keys, &nkeys);
-    } else
-        code = kadm5_randkey_principal(lhandle, princ, &keys, &nkeys);
+        if (keepold || ks_tuple != NULL) {
+            code = kadm5_randkey_principal_3(lhandle, princ, keepold,
+                                             n_ks_tuple, ks_tuple, &keys, &nkeys);
+        } else
+            code = kadm5_randkey_principal(lhandle, princ, &keys, &nkeys);
     if (code != 0) {
         if (code == KADM5_UNK_PRINC) {
             fprintf(stderr, "%s: Principal %s does not exist.\n",

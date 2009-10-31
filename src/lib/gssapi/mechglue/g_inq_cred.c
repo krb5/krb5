@@ -2,7 +2,7 @@
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -12,7 +12,7 @@
  * without specific, written prior permission. Sun Microsystems makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * SUN MICROSYSTEMS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL SUN MICROSYSTEMS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -85,7 +85,7 @@ gss_OID_set *		mechanisms;
 
 	if (!mech->gss_inquire_cred)
 	    return (GSS_S_UNAVAILABLE);
-	
+
 	status = mech->gss_inquire_cred(minor_status,
 					GSS_C_NO_CREDENTIAL,
 					name ? &internal_name : NULL,
@@ -115,33 +115,33 @@ gss_OID_set *		mechanisms;
 	    }
 	}
 	return(GSS_S_COMPLETE);
-    } 
-	
+    }
+
     /* get the cred_handle cast as a union_credentials structure */
-	
+
     union_cred = (gss_union_cred_t) cred_handle;
-    
+
     /*
      * get the information out of the union_cred structure that was
      * placed there during gss_acquire_cred.
      */
-    
+
     if(cred_usage != NULL)
 	*cred_usage = union_cred->auxinfo.cred_usage;
-    
+
     if(lifetime != NULL) {
 	elapsed_time = time(0) - union_cred->auxinfo.creation_time;
 	*lifetime = union_cred->auxinfo.time_rec < elapsed_time ? 0 :
 	union_cred->auxinfo.time_rec - elapsed_time;
     }
-    
+
     /*
      * if name is non_null,
      * call gss_import_name(), giving it the printable name held within
      * union_cred in order to get an internal name to pass back to the
      * caller. If this call fails, return failure to our caller.
      */
-    
+
     if(name != NULL) {
 	if (union_cred->auxinfo.name.length == 0) {
 	    *name = GSS_C_NO_NAME;
@@ -161,7 +161,7 @@ gss_OID_set *		mechanisms;
      * copy the mechanism set in union_cred into an OID set and return in
      * the mechanisms parameter.
      */
-    
+
     if(mechanisms != NULL) {
 	status = GSS_S_FAILURE;
 	*mechanisms = (gss_OID_set) malloc(sizeof(gss_OID_set_desc));
@@ -189,7 +189,7 @@ gss_OID_set *		mechanisms;
 	    (*mechanisms)->count++;
 	}
     }
-    
+
     return(GSS_S_COMPLETE);
 
 error:
@@ -239,7 +239,7 @@ gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
 	return (GSS_S_BAD_MECH);
     if (!mech->gss_inquire_cred_by_mech)
 	return (GSS_S_BAD_BINDINGS);
-     
+
     union_cred = (gss_union_cred_t) cred_handle;
     mech_cred = gssint_get_mechanism_cred(union_cred, mech_type);
 
@@ -253,7 +253,7 @@ gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
 					    name ? &internal_name : NULL,
 					    initiator_lifetime,
 					    acceptor_lifetime, cred_usage);
-	
+
     if (status != GSS_S_COMPLETE) {
 	map_error(minor_status, mech);
 	return (status);
@@ -275,4 +275,3 @@ gss_inquire_cred_by_mech(minor_status, cred_handle, mech_type, name,
 
     return (GSS_S_COMPLETE);
 }
-
