@@ -21,7 +21,8 @@ static const char *const conf_no[] = {
     0,
 };
 
-static int conf_boolean(char *s)
+static int
+conf_boolean(char *s)
 {
     const char * const *p;
     for(p=conf_yes; *p; p++) {
@@ -36,7 +37,8 @@ static int conf_boolean(char *s)
     return 0;
 }
 
-static krb5_error_code appdefault_get(krb5_context context, const char *appname, const krb5_data *realm, const char *option, char **ret_value)
+static krb5_error_code
+appdefault_get(krb5_context context, const char *appname, const krb5_data *realm, const char *option, char **ret_value)
 {
     profile_t profile;
     const char *names[5];

@@ -25,7 +25,8 @@ void test_parse_name (krb5_context, const char *);
 void test_set_realm (krb5_context, const char *, const char *);
 void usage (char *);
 
-void test_string_to_timestamp(krb5_context ctx, char *ktime)
+void
+test_string_to_timestamp(krb5_context ctx, char *ktime)
 {
     krb5_timestamp      timestamp;
     time_t              t;
@@ -40,7 +41,8 @@ void test_string_to_timestamp(krb5_context ctx, char *ktime)
     printf("Parsed time was %s", ctime(&t));
 }
 
-void test_425_conv_principal(krb5_context ctx, char *name, char *inst, char *realm)
+void
+test_425_conv_principal(krb5_context ctx, char *name, char *inst, char *realm)
 {
     krb5_error_code     retval;
     krb5_principal      princ;
@@ -62,7 +64,8 @@ void test_425_conv_principal(krb5_context ctx, char *name, char *inst, char *rea
     krb5_free_principal(ctx, princ);
 }
 
-void test_524_conv_principal(krb5_context ctx, char *name)
+void
+test_524_conv_principal(krb5_context ctx, char *name)
 {
     krb5_principal princ = 0;
     krb5_error_code retval;
@@ -89,7 +92,8 @@ fail:
         krb5_free_principal (ctx, princ);
 }
 
-void test_parse_name(krb5_context ctx, const char *name)
+void
+test_parse_name(krb5_context ctx, const char *name)
 {
     krb5_error_code retval;
     krb5_principal  princ = 0, princ2 = 0;
@@ -124,7 +128,8 @@ fail:
         krb5_free_principal(ctx, princ2);
 }
 
-void test_set_realm(krb5_context ctx, const char *name, const char *realm)
+void
+test_set_realm(krb5_context ctx, const char *name, const char *realm)
 {
     krb5_error_code retval;
     krb5_principal  princ = 0;
@@ -154,7 +159,8 @@ fail:
         krb5_free_principal(ctx, princ);
 }
 
-void usage(char *progname)
+void
+usage(char *progname)
 {
     fprintf(stderr, "%s: Usage: %s 425_conv_principal <name> <inst> <realm\n",
             progname, progname);

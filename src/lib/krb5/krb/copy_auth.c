@@ -195,9 +195,9 @@ struct find_authdata_context {
     size_t length;
 };
 
-static krb5_error_code grow_find_authdata
-(krb5_context context, struct find_authdata_context *fctx,
- krb5_authdata *elem)
+static krb5_error_code
+grow_find_authdata(krb5_context context, struct find_authdata_context *fctx,
+                   krb5_authdata *elem)
 {
     krb5_error_code retval = 0;
     if (fctx->length == fctx->space) {
@@ -221,12 +221,9 @@ static krb5_error_code grow_find_authdata
     return retval;
 }
 
-
-
-
-static krb5_error_code find_authdata_1
-(krb5_context context, krb5_authdata *const *in_authdat, krb5_authdatatype ad_type,
- struct find_authdata_context *fctx)
+static krb5_error_code
+find_authdata_1(krb5_context context, krb5_authdata *const *in_authdat,
+                krb5_authdatatype ad_type, struct find_authdata_context *fctx)
 {
     int i = 0;
     krb5_error_code retval=0;
@@ -254,11 +251,11 @@ static krb5_error_code find_authdata_1
 }
 
 
-krb5_error_code krb5int_find_authdata
-(krb5_context context, krb5_authdata *const * ticket_authdata,
- krb5_authdata * const *ap_req_authdata,
- krb5_authdatatype ad_type,
- krb5_authdata ***results)
+krb5_error_code
+krb5int_find_authdata(krb5_context context,
+                      krb5_authdata *const *ticket_authdata,
+                      krb5_authdata *const *ap_req_authdata,
+                      krb5_authdatatype ad_type, krb5_authdata ***results)
 {
     krb5_error_code retval = 0;
     struct find_authdata_context fctx;

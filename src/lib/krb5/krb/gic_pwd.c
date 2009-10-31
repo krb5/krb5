@@ -407,10 +407,12 @@ cleanup:
 
     return(ret);
 }
-krb5_error_code krb5int_populate_gic_opt (
-    krb5_context context, krb5_gic_opt_ext **opte,
-    krb5_flags options, krb5_address * const *addrs, krb5_enctype *ktypes,
-    krb5_preauthtype *pre_auth_types, krb5_creds *creds)
+
+krb5_error_code
+krb5int_populate_gic_opt(krb5_context context, krb5_gic_opt_ext **opte,
+                         krb5_flags options, krb5_address *const *addrs,
+                         krb5_enctype *ktypes,
+                         krb5_preauthtype *pre_auth_types, krb5_creds *creds)
 {
     int i;
     krb5_int32 starttime;

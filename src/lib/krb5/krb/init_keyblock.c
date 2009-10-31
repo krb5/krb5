@@ -34,9 +34,9 @@
 #include "k5-int.h"
 #include <assert.h>
 
-krb5_error_code KRB5_CALLCONV  krb5_init_keyblock
-(krb5_context context, krb5_enctype enctype,
- size_t length, krb5_keyblock **out)
+krb5_error_code KRB5_CALLCONV
+krb5_init_keyblock(krb5_context context, krb5_enctype enctype,
+                   size_t length, krb5_keyblock **out)
 {
     return krb5int_c_init_keyblock (context, enctype, length, out);
 }

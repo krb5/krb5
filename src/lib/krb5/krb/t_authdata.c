@@ -79,7 +79,8 @@ static void compare_authdata(const krb5_authdata *adc1, krb5_authdata *adc2) {
     assert(memcmp(adc1->contents, adc2->contents, adc1->length) == 0);
 }
 
-int main()
+int
+main()
 {
     krb5_context context;
     krb5_authdata **results;

@@ -53,9 +53,10 @@
 #include "int-proto.h"
 
 
-static krb5_error_code fast_armor_ap_request
-(krb5_context context, struct krb5int_fast_request_state *state,
- krb5_ccache ccache, krb5_data *target_realm)
+static krb5_error_code
+fast_armor_ap_request(krb5_context context,
+                      struct krb5int_fast_request_state *state,
+                      krb5_ccache ccache, krb5_data *target_realm)
 {
     krb5_error_code retval = 0;
     krb5_creds creds, *out_creds = NULL;
@@ -129,10 +130,11 @@ krb5int_fast_prep_req_body(krb5_context context, struct krb5int_fast_request_sta
     return retval;
 }
 
-krb5_error_code krb5int_fast_as_armor
-(krb5_context context, struct krb5int_fast_request_state *state,
- krb5_gic_opt_ext *opte,
- krb5_kdc_req *request)
+krb5_error_code
+krb5int_fast_as_armor(krb5_context context,
+                      struct krb5int_fast_request_state *state,
+                      krb5_gic_opt_ext *opte,
+                      krb5_kdc_req *request)
 {
     krb5_error_code retval = 0;
     krb5_ccache ccache = NULL;
@@ -159,10 +161,12 @@ krb5_error_code krb5int_fast_as_armor
 
 
 krb5_error_code
-krb5int_fast_prep_req (krb5_context context, struct krb5int_fast_request_state *state,
-                       krb5_kdc_req *request,
-                       const krb5_data *to_be_checksummed, kdc_req_encoder_proc encoder,
-                       krb5_data **encoded_request)
+krb5int_fast_prep_req(krb5_context context,
+                      struct krb5int_fast_request_state *state,
+                      krb5_kdc_req *request,
+                      const krb5_data *to_be_checksummed,
+                      kdc_req_encoder_proc encoder,
+                      krb5_data **encoded_request)
 {
     krb5_error_code retval = 0;
     krb5_pa_data *pa_array[2];
@@ -247,10 +251,11 @@ krb5int_fast_prep_req (krb5_context context, struct krb5int_fast_request_state *
     return retval;
 }
 
-static krb5_error_code decrypt_fast_reply
-(krb5_context context, struct krb5int_fast_request_state *state,
- krb5_pa_data **in_padata,
- krb5_fast_response **response)
+static krb5_error_code
+decrypt_fast_reply(krb5_context context,
+                   struct krb5int_fast_request_state *state,
+                   krb5_pa_data **in_padata,
+                   krb5_fast_response **response)
 {
     krb5_error_code retval = 0;
     krb5_data scratch;
@@ -319,8 +324,10 @@ static krb5_error_code decrypt_fast_reply
  * whenever padata  is available (all the time with fast).
  */
 krb5_error_code
-krb5int_fast_process_error(krb5_context context, struct krb5int_fast_request_state *state,
-                           krb5_error **err_replyptr                       , krb5_pa_data ***out_padata,
+krb5int_fast_process_error(krb5_context context,
+                           struct krb5int_fast_request_state *state,
+                           krb5_error **err_replyptr,
+                           krb5_pa_data ***out_padata,
                            krb5_boolean *retry)
 {
     krb5_error_code retval = 0;
@@ -410,10 +417,11 @@ krb5int_fast_process_error(krb5_context context, struct krb5int_fast_request_sta
 }
 
 
-krb5_error_code krb5int_fast_process_response
-(krb5_context context, struct krb5int_fast_request_state *state,
- krb5_kdc_rep *resp,
- krb5_keyblock **strengthen_key)
+krb5_error_code
+krb5int_fast_process_response(krb5_context context,
+                              struct krb5int_fast_request_state *state,
+                              krb5_kdc_rep *resp,
+                              krb5_keyblock **strengthen_key)
 {
     krb5_error_code retval = 0;
     krb5_fast_response *fast_response = NULL;
@@ -460,10 +468,11 @@ krb5_error_code krb5int_fast_process_response
     return retval;
 }
 
-krb5_error_code krb5int_fast_reply_key(krb5_context context,
-                                       krb5_keyblock *strengthen_key,
-                                       krb5_keyblock *existing_key,
-                                       krb5_keyblock *out_key)
+krb5_error_code
+krb5int_fast_reply_key(krb5_context context,
+                       krb5_keyblock *strengthen_key,
+                       krb5_keyblock *existing_key,
+                       krb5_keyblock *out_key)
 {
     krb5_keyblock *key = NULL;
     krb5_error_code retval = 0;
@@ -503,8 +512,9 @@ krb5int_fast_free_state( krb5_context context, struct krb5int_fast_request_state
     free(state);
 }
 
-krb5_pa_data * krb5int_find_pa_data
-(krb5_context context, krb5_pa_data *const *padata, krb5_preauthtype pa_type)
+krb5_pa_data *
+krb5int_find_pa_data(krb5_context context, krb5_pa_data *const *padata,
+                     krb5_preauthtype pa_type)
 {
     krb5_pa_data * const *tmppa;
 

@@ -97,7 +97,8 @@ static krb5_error_code sort_krb5_padata_sequence(krb5_context context,
  * This function performs 32 bit bounded addition so we can generate
  * lifetimes without overflowing krb5_int32
  */
-static krb5_int32 krb5int_addint32 (krb5_int32 x, krb5_int32 y)
+static krb5_int32
+krb5int_addint32 (krb5_int32 x, krb5_int32 y)
 {
     if ((x > 0) && (y > (KRB5_INT32_MAX - x))) {
         /* sum will be be greater than KRB5_INT32_MAX */

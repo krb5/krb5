@@ -624,16 +624,11 @@ padata2data(krb5_pa_data p)
     return d;
 }
 
-static
-krb5_error_code pa_salt(krb5_context context,
-                        krb5_kdc_req *request,
-                        krb5_pa_data *in_padata,
-                        krb5_pa_data **out_padata,
-                        krb5_data *salt, krb5_data *s2kparams,
-                        krb5_enctype *etype,
-                        krb5_keyblock *as_key,
-                        krb5_prompter_fct prompter, void *prompter_data,
-                        krb5_gic_get_as_key_fct gak_fct, void *gak_data)
+static krb5_error_code
+pa_salt(krb5_context context, krb5_kdc_req *request, krb5_pa_data *in_padata,
+        krb5_pa_data **out_padata, krb5_data *salt, krb5_data *s2kparams,
+        krb5_enctype *etype, krb5_keyblock *as_key, krb5_prompter_fct prompter,
+        void *prompter_data, krb5_gic_get_as_key_fct gak_fct, void *gak_data)
 {
     krb5_data tmp;
     krb5_error_code retval;
@@ -650,19 +645,13 @@ krb5_error_code pa_salt(krb5_context context,
     return(0);
 }
 
-static
-krb5_error_code pa_fx_cookie(krb5_context context,
-                             krb5_kdc_req *request,
-                             krb5_pa_data *in_padata,
-                             krb5_pa_data **out_padata,
-                             krb5_data *salt,
-                             krb5_data *s2kparams,
-                             krb5_enctype *etype,
-                             krb5_keyblock *as_key,
-                             krb5_prompter_fct prompter,
-                             void *prompter_data,
-                             krb5_gic_get_as_key_fct gak_fct,
-                             void *gak_data)
+static krb5_error_code
+pa_fx_cookie(krb5_context context, krb5_kdc_req *request,
+             krb5_pa_data *in_padata, krb5_pa_data **out_padata,
+             krb5_data *salt, krb5_data *s2kparams, krb5_enctype *etype,
+             krb5_keyblock *as_key, krb5_prompter_fct prompter,
+             void *prompter_data, krb5_gic_get_as_key_fct gak_fct,
+             void *gak_data)
 {
     krb5_pa_data *pa = calloc(1, sizeof(krb5_pa_data));
     krb5_octet *contents;
@@ -680,19 +669,13 @@ krb5_error_code pa_fx_cookie(krb5_context context,
     return 0;
 }
 
-static
-krb5_error_code pa_enc_timestamp(krb5_context context,
-                                 krb5_kdc_req *request,
-                                 krb5_pa_data *in_padata,
-                                 krb5_pa_data **out_padata,
-                                 krb5_data *salt,
-                                 krb5_data *s2kparams,
-                                 krb5_enctype *etype,
-                                 krb5_keyblock *as_key,
-                                 krb5_prompter_fct prompter,
-                                 void *prompter_data,
-                                 krb5_gic_get_as_key_fct gak_fct,
-                                 void *gak_data)
+static krb5_error_code
+pa_enc_timestamp(krb5_context context, krb5_kdc_req *request,
+                 krb5_pa_data *in_padata, krb5_pa_data **out_padata,
+                 krb5_data *salt, krb5_data *s2kparams, krb5_enctype *etype,
+                 krb5_keyblock *as_key, krb5_prompter_fct prompter,
+                 void *prompter_data, krb5_gic_get_as_key_fct gak_fct,
+                 void *gak_data)
 {
     krb5_error_code ret;
     krb5_pa_enc_ts pa_enc;
@@ -770,8 +753,8 @@ krb5_error_code pa_enc_timestamp(krb5_context context,
     return(0);
 }
 
-static
-char *sam_challenge_banner(krb5_int32 sam_type)
+static char *
+sam_challenge_banner(krb5_int32 sam_type)
 {
     char *label;
 
@@ -820,19 +803,11 @@ char *sam_challenge_banner(krb5_int32 sam_type)
    draft.  This draft cannot be implemented as written.  This code is
    compatible with earlier versions of mit krb5 and cygnus kerbnet. */
 
-static
-krb5_error_code pa_sam(krb5_context context,
-                       krb5_kdc_req *request,
-                       krb5_pa_data *in_padata,
-                       krb5_pa_data **out_padata,
-                       krb5_data *salt,
-                       krb5_data *s2kparams,
-                       krb5_enctype *etype,
-                       krb5_keyblock *as_key,
-                       krb5_prompter_fct prompter,
-                       void *prompter_data,
-                       krb5_gic_get_as_key_fct gak_fct,
-                       void *gak_data)
+static krb5_error_code
+pa_sam(krb5_context context, krb5_kdc_req *request, krb5_pa_data *in_padata,
+       krb5_pa_data **out_padata, krb5_data *salt, krb5_data *s2kparams,
+       krb5_enctype *etype, krb5_keyblock *as_key, krb5_prompter_fct prompter,
+       void *prompter_data, krb5_gic_get_as_key_fct gak_fct, void *gak_data)
 {
     krb5_error_code             ret;
     krb5_data                   tmpsam;
@@ -1380,20 +1355,13 @@ error_out:
 }
 #endif /* APPLE_PKINIT */
 
-static
-krb5_error_code pa_sam_2(krb5_context context,
-                         krb5_kdc_req *request,
-                         krb5_pa_data *in_padata,
-                         krb5_pa_data **out_padata,
-                         krb5_data *salt,
-                         krb5_data *s2kparams,
-                         krb5_enctype *etype,
-                         krb5_keyblock *as_key,
-                         krb5_prompter_fct prompter,
-                         void *prompter_data,
-                         krb5_gic_get_as_key_fct gak_fct,
-                         void *gak_data) {
-
+static krb5_error_code
+pa_sam_2(krb5_context context, krb5_kdc_req *request, krb5_pa_data *in_padata,
+         krb5_pa_data **out_padata, krb5_data *salt, krb5_data *s2kparams,
+         krb5_enctype *etype, krb5_keyblock *as_key,
+         krb5_prompter_fct prompter, void *prompter_data,
+         krb5_gic_get_as_key_fct gak_fct, void *gak_data)
+{
     krb5_error_code retval;
     krb5_sam_challenge_2 *sc2 = NULL;
     krb5_sam_challenge_2_body *sc2b = NULL;
@@ -1707,19 +1675,13 @@ krb5_error_code pa_sam_2(krb5_context context,
     return(0);
 }
 
-static krb5_error_code pa_s4u_x509_user(
-    krb5_context context,
-    krb5_kdc_req *request,
-    krb5_pa_data *in_padata,
-    krb5_pa_data **out_padata,
-    krb5_data *salt,
-    krb5_data *s2kparams,
-    krb5_enctype *etype,
-    krb5_keyblock *as_key,
-    krb5_prompter_fct prompter,
-    void *prompter_data,
-    krb5_gic_get_as_key_fct gak_fct,
-    void *gak_data)
+static krb5_error_code
+pa_s4u_x509_user(krb5_context context, krb5_kdc_req *request,
+                 krb5_pa_data *in_padata, krb5_pa_data **out_padata,
+                 krb5_data *salt, krb5_data *s2kparams, krb5_enctype *etype,
+                 krb5_keyblock *as_key, krb5_prompter_fct prompter,
+                 void *prompter_data, krb5_gic_get_as_key_fct gak_fct,
+                 void *gak_data)
 {
     krb5_s4u_userid *userid = (krb5_s4u_userid *)gak_data; /* XXX private contract */
     krb5_pa_data *s4u_padata;
