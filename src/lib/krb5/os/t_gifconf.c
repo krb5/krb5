@@ -77,7 +77,9 @@
 
 #define INIT 0xc3
 
-int main (void) {
+int
+main(void)
+{
     char buffer[2048];
     int i, sock, t, olen = -9, omod = -9;
     struct ifconf ifc;

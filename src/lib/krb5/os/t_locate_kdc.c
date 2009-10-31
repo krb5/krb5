@@ -21,13 +21,15 @@ const char *prog;
 
 struct addrlist al;
 
-static void kfatal (krb5_error_code err)
+static void
+kfatal (krb5_error_code err)
 {
     com_err (prog, err, "- exiting");
     exit (1);
 }
 
-static const char *stypename (int stype)
+static const char *
+stypename (int stype)
 {
     static char buf[20];
     switch (stype) {
@@ -43,7 +45,8 @@ static const char *stypename (int stype)
     }
 }
 
-static void print_addrs (void)
+static void
+print_addrs (void)
 {
     int i;
 
@@ -67,7 +70,8 @@ static void print_addrs (void)
     }
 }
 
-int main (int argc, char *argv[])
+int
+main (int argc, char *argv[])
 {
     char *p, *realmname;
     krb5_data realm;

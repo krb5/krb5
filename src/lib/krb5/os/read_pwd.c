@@ -92,7 +92,8 @@ typedef struct {
     int  *pwd_size_return;
 } pwd_params;
 
-void center_dialog(HWND hwnd)
+void
+center_dialog(HWND hwnd)
 {
     int scrwidth, scrheight;
     int dlgwidth, dlgheight;

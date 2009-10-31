@@ -156,7 +156,8 @@
 
 void printaddr (struct sockaddr *);
 
-void printaddr (struct sockaddr *sa)
+void
+printaddr(struct sockaddr *sa)
 /*@modifies fileSystem@*/
 {
     char buf[NI_MAXHOST];
@@ -195,7 +196,8 @@ is_loopback_address(struct sockaddr *sa)
 #include <ifaddrs.h>
 
 #ifdef DEBUG
-void printifaddr (struct ifaddrs *ifp)
+void
+printifaddr(struct ifaddrs *ifp)
 {
     printf ("%p={\n", ifp);
 /*  printf ("\tnext=%p\n", ifp->ifa_next); */

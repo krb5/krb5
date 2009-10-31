@@ -95,14 +95,17 @@ krb5_locate_kpasswd(krb5_context context, const krb5_data *realm,
  */
 
 
-static void kpasswd_sendto_msg_cleanup (void* callback_context, krb5_data* message)
+static void
+kpasswd_sendto_msg_cleanup (void* callback_context, krb5_data* message)
 {
     struct sendto_callback_context *ctx = callback_context;
     krb5_free_data_contents(ctx->context, message);
 }
 
 
-static int kpasswd_sendto_msg_callback(struct conn_state *conn, void *callback_context, krb5_data* message)
+static int
+kpasswd_sendto_msg_callback(struct conn_state *conn, void *callback_context,
+                            krb5_data *message)
 {
     krb5_error_code                     code = 0;
     struct sockaddr_storage             local_addr;

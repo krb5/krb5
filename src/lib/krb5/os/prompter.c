@@ -123,7 +123,8 @@ cleanup:
     return errcode;
 }
 
-static krb5_sigtype intrfunc(int sig)
+static krb5_sigtype
+intrfunc(int sig)
 {
     got_int = 1;
 }

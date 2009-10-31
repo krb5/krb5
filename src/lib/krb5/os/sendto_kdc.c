@@ -64,7 +64,8 @@
 int krb5int_debug_sendto_kdc = 0;
 #define debug krb5int_debug_sendto_kdc
 
-static void default_debug_handler (const void *data, size_t len)
+static void
+default_debug_handler (const void *data, size_t len)
 {
 #if 0
     static FILE *logfile;
@@ -83,11 +84,13 @@ static void default_debug_handler (const void *data, size_t len)
 
 void (*krb5int_sendtokdc_debug_handler) (const void *, size_t) = default_debug_handler;
 
-static void put(const void *ptr, size_t len)
+static void
+put(const void *ptr, size_t len)
 {
     (*krb5int_sendtokdc_debug_handler)(ptr, len);
 }
-static void putstr(const char *str)
+static void
+putstr(const char *str)
 {
     put(str, strlen(str));
 }
@@ -500,7 +503,8 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
 
 #include "cm.h"
 
-static int getcurtime (struct timeval *tvp)
+static int
+getcurtime (struct timeval *tvp)
 {
 #ifdef _WIN32
     struct _timeb tb;

@@ -37,7 +37,8 @@
  * Lookup a KDC via DNS SRV records
  */
 
-void krb5int_free_srv_dns_data (struct srv_dns_entry *p)
+void
+krb5int_free_srv_dns_data (struct srv_dns_entry *p)
 {
     struct srv_dns_entry *next;
     while (p) {

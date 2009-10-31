@@ -3,7 +3,8 @@
 
 #include <stdio.h>
 
-void test_realm_iterator(int ctx)
+void
+test_realm_iterator(int ctx)
 {
     krb5_error_code retval;
     char *realm;
@@ -26,7 +27,8 @@ void test_realm_iterator(int ctx)
     }
 }
 
-int main(int argc, char **argv)
+int
+main(int argc, char **argv)
 {
     krb5_context ctx;
     krb5_error_code retval;

@@ -199,9 +199,9 @@ krb5int_dns_nextans(struct krb5int_dns_state *ds,
 /*
  * krb5int_dns_expand - wrapper for dn_expand()
  */
-int krb5int_dns_expand(struct krb5int_dns_state *ds,
-                       const unsigned char *p,
-                       char *buf, int len)
+int
+krb5int_dns_expand(struct krb5int_dns_state *ds, const unsigned char *p,
+                   char *buf, int len)
 {
 
 #if HAVE_NS_NAME_UNCOMPRESS

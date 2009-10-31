@@ -138,7 +138,8 @@ krb5int_free_addrlist (struct addrlist *lp)
 }
 #define free_list krb5int_free_addrlist
 
-static int translate_ai_error (int err)
+static int
+translate_ai_error (int err)
 {
     switch (err) {
     case 0:
@@ -182,7 +183,8 @@ static int translate_ai_error (int err)
 }
 
 #include <stdarg.h>
-static inline void Tprintf(const char *fmt, ...)
+static inline void
+Tprintf(const char *fmt, ...)
 {
 #ifdef TEST
     va_list ap;
@@ -202,8 +204,9 @@ static inline void dprint(const char *fmt, ...) { }
 static inline void print_addrlist(const struct addrlist *a) { }
 #endif
 
-static int add_addrinfo_to_list (struct addrlist *lp, struct addrinfo *a,
-                                 void (*freefn)(void *), void *data)
+static int
+add_addrinfo_to_list(struct addrlist *lp, struct addrinfo *a,
+                     void (*freefn)(void *), void *data)
 {
     int err;
 
@@ -230,7 +233,8 @@ static int add_addrinfo_to_list (struct addrlist *lp, struct addrinfo *a,
 
 #define add_host_to_list krb5int_add_host_to_list
 
-static void call_freeaddrinfo(void *data)
+static void
+call_freeaddrinfo(void *data)
 {
     /* Strict interpretation of the C standard says we can't assume
        that the ABI for f(void*) and f(struct foo *) will be
