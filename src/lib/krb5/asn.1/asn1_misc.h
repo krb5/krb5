@@ -31,8 +31,8 @@
 #include "k5-int.h"
 #include "krbasn1.h"
 
-asn1_error_code asn1_krb5_realm_copy
-        (krb5_principal target, krb5_principal source);
+asn1_error_code asn1_krb5_realm_copy(krb5_principal target,
+                                     krb5_principal source);
 /* requires  target, source, and source->realm are allocated
    effects   Copies source->realm into target->realm.
              Returns ENOMEM if memory is exhausted. */

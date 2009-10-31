@@ -52,19 +52,17 @@ typedef struct {
 asn1_error_code asn1_get_tag_2 (asn1buf *buf, taginfo *tinfo);
 
 #if 0
-asn1_error_code asn1_get_tag_indef
-        (asn1buf *buf,
-                   asn1_class *Class,
-                   asn1_construction *construction,
-                   asn1_tagnum *tagnum,
-                   unsigned int *retlen, int *indef);
+asn1_error_code asn1_get_tag_indef(asn1buf *buf,
+                                   asn1_class *Class,
+                                   asn1_construction *construction,
+                                   asn1_tagnum *tagnum,
+                                   unsigned int *retlen, int *indef);
 
-asn1_error_code asn1_get_tag
-        (asn1buf *buf,
-                   asn1_class *Class,
-                   asn1_construction *construction,
-                   asn1_tagnum *tagnum,
-                   unsigned int *retlen);
+asn1_error_code asn1_get_tag(asn1buf *buf,
+                             asn1_class *Class,
+                             asn1_construction *construction,
+                             asn1_tagnum *tagnum,
+                             unsigned int *retlen);
 /* requires  *buf is allocated
    effects   Decodes the tag in *buf.  If class != NULL, returns
               the class in *Class.  Similarly, the construction,
@@ -75,8 +73,8 @@ asn1_error_code asn1_get_tag
              Returns ASN1_OVERRUN if *buf is exhausted during the parse. */
 #endif
 
-asn1_error_code asn1_get_sequence
-        (asn1buf *buf, unsigned int *retlen, int *indef);
+asn1_error_code asn1_get_sequence(asn1buf *buf, unsigned int *retlen,
+                                  int *indef);
 /* requires  *buf is allocated
    effects   Decodes a tag from *buf and returns ASN1_BAD_ID if it
               doesn't have a sequence ID.  If retlen != NULL, the
