@@ -38,12 +38,14 @@
  *      krb5_rcache_externalize();
  *      krb5_rcache_internalize();
  */
-static krb5_error_code krb5_rcache_size
-(krb5_context, krb5_pointer, size_t *);
-static krb5_error_code krb5_rcache_externalize
-(krb5_context, krb5_pointer, krb5_octet **, size_t *);
-static krb5_error_code krb5_rcache_internalize
-(krb5_context,krb5_pointer *, krb5_octet **, size_t *);
+static krb5_error_code
+krb5_rcache_size(krb5_context, krb5_pointer, size_t *);
+
+static krb5_error_code
+krb5_rcache_externalize(krb5_context, krb5_pointer, krb5_octet **, size_t *);
+
+static krb5_error_code
+krb5_rcache_internalize(krb5_context,krb5_pointer *, krb5_octet **, size_t *);
 
 /*
  * Serialization entry for this type.
