@@ -250,7 +250,8 @@ static const struct field_info enc_kdc_rep_part_fields[] = {
     /* encrypted-pa-data[12]    SEQUENCE OF PA-DATA OPTIONAL */
     FIELDOF_OPT(krb5_enc_kdc_rep_part, ptr_seqof_pa_data, enc_padata, 12, 12),
 };
-static unsigned int optional_enc_kdc_rep_part(const void *p)
+static unsigned int
+optional_enc_kdc_rep_part(const void *p)
 {
     const krb5_enc_kdc_rep_part *val = p;
     unsigned int optional = 0;
@@ -293,7 +294,8 @@ static const struct field_info kdc_req_hack_fields[] = {
     FIELDOF_OPT(struct kdc_req_hack, encrypted_data, v.authorization_data, 10, 10),
     FIELDOF_OPT(struct kdc_req_hack, ptr_seqof_ticket, v.second_ticket, 11, 11),
 };
-static unsigned int optional_kdc_req_hack(const void *p)
+static unsigned int
+optional_kdc_req_hack(const void *p)
 {
     const struct kdc_req_hack *val2 = p;
     const krb5_kdc_req *val = &val2->v;
@@ -356,7 +358,8 @@ static const struct field_info krb_safe_body_fields[] = {
     FIELDOF_NORM(krb5_safe, address_ptr, s_address, 4),
     FIELDOF_OPT(krb5_safe, address_ptr, r_address, 5, 5),
 };
-static unsigned int optional_krb_safe_body(const void *p)
+static unsigned int
+optional_krb_safe_body(const void *p)
 {
     const krb5_safe *val = p;
     unsigned int optional = 0;
@@ -388,7 +391,8 @@ static const struct field_info krb_cred_info_fields[] = {
     FIELDOF_OPT(krb5_cred_info, principal, server, 9, 9),
     FIELDOF_OPT(krb5_cred_info, ptr_seqof_host_addresses, caddrs, 10, 10),
 };
-static unsigned int optional_krb_cred_info(const void *p)
+static unsigned int
+optional_krb_cred_info(const void *p)
 {
     const krb5_cred_info *val = p;
     unsigned int optional = 0;
@@ -495,7 +499,8 @@ static const struct field_info sam_challenge_fields[] = {
     FIELDOF_OPT(krb5_sam_challenge, int32, sam_nonce, 8, 8),
     FIELDOF_OPT(krb5_sam_challenge, checksum, sam_cksum, 9, 9),
 };
-static unsigned int optional_sam_challenge(const void *p)
+static unsigned int
+optional_sam_challenge(const void *p)
 {
     const krb5_sam_challenge *val = p;
     unsigned int optional = 0;
@@ -564,7 +569,8 @@ static const struct field_info sam_challenge_2_body_fields[] = {
     FIELDOF_NORM(krb5_sam_challenge_2_body, int32, sam_nonce, 8),
     FIELDOF_NORM(krb5_sam_challenge_2_body, int32, sam_etype, 9),
 };
-static unsigned int optional_sam_challenge_2_body(const void *p)
+static unsigned int
+optional_sam_challenge_2_body(const void *p)
 {
     const krb5_sam_challenge_2_body *val = p;
     unsigned int optional = 0;
@@ -593,7 +599,8 @@ static const struct field_info enc_sam_response_enc_fields[] = {
     FIELDOF_NORM(krb5_enc_sam_response_enc, int32, sam_usec, 2),
     FIELDOF_OPT(krb5_enc_sam_response_enc, ostring_data, sam_sad, 3, 3),
 };
-static unsigned int optional_enc_sam_response_enc(const void *p)
+static unsigned int
+optional_enc_sam_response_enc(const void *p)
 {
     const krb5_enc_sam_response_enc *val = p;
     unsigned int optional = 0;
@@ -609,7 +616,8 @@ static const struct field_info enc_sam_response_enc_2_fields[] = {
     FIELDOF_NORM(krb5_enc_sam_response_enc_2, int32, sam_nonce, 0),
     FIELDOF_OPT(krb5_enc_sam_response_enc_2, ostring_data, sam_sad, 1, 1),
 };
-static unsigned int optional_enc_sam_response_enc_2(const void *p)
+static unsigned int
+optional_enc_sam_response_enc_2(const void *p)
 {
     const krb5_enc_sam_response_enc_2 *val = p;
     unsigned int optional = 0;
@@ -630,7 +638,8 @@ static const struct field_info sam_response_fields[] = {
     FIELDOF_OPT(krb5_sam_response, int32, sam_nonce, 5, 5),
     FIELDOF_OPT(krb5_sam_response, kerberos_time, sam_patimestamp, 6, 6),
 };
-static unsigned int optional_sam_response(const void *p)
+static unsigned int
+optional_sam_response(const void *p)
 {
     const krb5_sam_response *val = p;
     unsigned int optional = 0;
@@ -655,7 +664,8 @@ static const struct field_info sam_response_2_fields[] = {
     FIELDOF_NORM(krb5_sam_response_2, encrypted_data, sam_enc_nonce_or_sad, 3),
     FIELDOF_NORM(krb5_sam_response_2, int32, sam_nonce, 4),
 };
-static unsigned int optional_sam_response_2(const void *p)
+static unsigned int
+optional_sam_response_2(const void *p)
 {
     const krb5_sam_response_2 *val = p;
     unsigned int optional = 0;
@@ -676,7 +686,8 @@ static const struct field_info predicted_sam_response_fields[] = {
     FIELDOF_NORM(krb5_predicted_sam_response, principal, client, 5),
     FIELDOF_OPT(krb5_predicted_sam_response, ostring_data, msd, 6, 6),
 };
-static unsigned int optional_predicted_sam_response(const void *p)
+static unsigned int
+optional_predicted_sam_response(const void *p)
 {
     const krb5_predicted_sam_response *val = p;
     unsigned int optional = 0;
@@ -710,7 +721,8 @@ static const struct field_info krb5_authenticator_fields[] = {
     /* authorization-data[8]    AuthorizationData OPTIONAL */
     FIELDOF_OPT(krb5_authenticator, auth_data_ptr, authorization_data, 8, 8),
 };
-static unsigned int optional_krb5_authenticator(const void *p)
+static unsigned int
+optional_krb5_authenticator(const void *p)
 {
     const krb5_authenticator *val = p;
     unsigned int optional = 0;
@@ -758,7 +770,8 @@ static const struct field_info enc_tkt_part_fields[] = {
     /* authorization-data[10]   AuthorizationData OPTIONAL */
     FIELDOF_OPT(krb5_enc_tkt_part, auth_data_ptr, authorization_data, 10, 10),
 };
-static unsigned int optional_enc_tkt_part(const void *p)
+static unsigned int
+optional_enc_tkt_part(const void *p)
 {
     const krb5_enc_tkt_part *val = p;
     unsigned int optional = 0;
@@ -792,7 +805,8 @@ static const struct field_info as_rep_fields[] = {
     FIELDOF_NORM(krb5_kdc_rep, ticket_ptr, ticket, 5),
     FIELDOF_NORM(krb5_kdc_rep, encrypted_data, enc_part, 6),
 };
-static unsigned int optional_as_rep(const void *p)
+static unsigned int
+optional_as_rep(const void *p)
 {
     const krb5_kdc_rep *val = p;
     unsigned int optional = 0;
@@ -817,7 +831,8 @@ static const struct field_info tgs_rep_fields[] = {
     FIELDOF_NORM(krb5_kdc_rep, ticket_ptr, ticket, 5),
     FIELDOF_NORM(krb5_kdc_rep, encrypted_data, enc_part, 6),
 };
-static unsigned int optional_tgs_rep(const void *p)
+static unsigned int
+optional_tgs_rep(const void *p)
 {
     const krb5_kdc_rep *val = p;
     unsigned int optional = 0;
@@ -869,7 +884,8 @@ static const struct field_info ap_rep_enc_part_fields[] = {
     /* seq-number[3]    INTEGER OPTIONAL */
     FIELDOF_OPT(krb5_ap_rep_enc_part, uint, seq_number, 3, 3),
 };
-static unsigned int optional_ap_rep_enc_part(const void *p)
+static unsigned int
+optional_ap_rep_enc_part(const void *p)
 {
     const krb5_ap_rep_enc_part *val = p;
     unsigned int optional = 0;
@@ -892,7 +908,8 @@ static const struct field_info as_req_fields[] = {
     FIELDOF_OPT(krb5_kdc_req, ptr_seqof_pa_data, padata, 3, 3),
     FIELDOF_ENCODEAS(krb5_kdc_req, kdc_req_body, 4),
 };
-static unsigned int optional_as_req(const void *p)
+static unsigned int
+optional_as_req(const void *p)
 {
     const krb5_kdc_req *val = p;
     unsigned int optional = 0;
@@ -912,7 +929,8 @@ static const struct field_info tgs_req_fields[] = {
     FIELDOF_OPT(krb5_kdc_req, ptr_seqof_pa_data, padata, 3, 3),
     FIELDOF_ENCODEAS(krb5_kdc_req, kdc_req_body, 4),
 };
-static unsigned int optional_tgs_req(const void *p)
+static unsigned int
+optional_tgs_req(const void *p)
 {
     const krb5_kdc_req *val = p;
     unsigned int optional = 0;
@@ -965,7 +983,8 @@ static const struct field_info priv_enc_part_fields[] = {
     FIELDOF_NORM(krb5_priv_enc_part, address_ptr, s_address, 4),
     FIELDOF_OPT(krb5_priv_enc_part, address_ptr, r_address, 5, 5),
 };
-static unsigned int optional_priv_enc_part(const void *p)
+static unsigned int
+optional_priv_enc_part(const void *p)
 {
     const krb5_priv_enc_part *val = p;
     unsigned int optional = 0;
@@ -1014,7 +1033,8 @@ static const struct field_info enc_cred_part_fields[] = {
     /* r-address[5]     HostAddress OPTIONAL */
     FIELDOF_OPT(krb5_cred_enc_part, address_ptr, r_address, 5, 5),
 };
-static unsigned int optional_enc_cred_part(const void *p)
+static unsigned int
+optional_enc_cred_part(const void *p)
 {
     const krb5_cred_enc_part *val = p;
     unsigned int optional = 0;
@@ -1068,7 +1088,8 @@ static const struct field_info error_fields[] = {
     /* e-data[12]       OCTET STRING OPTIONAL */
     FIELDOF_OPT(krb5_error, ostring_data, e_data, 12, 12),
 };
-static unsigned int optional_error(const void *p)
+static unsigned int
+optional_error(const void *p)
 {
     const krb5_error *val = p;
     unsigned int optional = 0;
@@ -1270,7 +1291,8 @@ static const struct field_info fast_response_fields[] = {
     FIELDOF_NORM(krb5_fast_response, int32, nonce, 3),
 };
 
-static unsigned int fast_response_optional (const void *p)
+static unsigned int
+fast_response_optional (const void *p)
 {
     unsigned int optional = 0;
     const krb5_fast_response *val = p;
@@ -1297,7 +1319,8 @@ static const struct field_info ad_kdcissued_fields[] = {
     FIELDOF_NORM(krb5_ad_kdcissued, auth_data_ptr, elements, 3),
 };
 
-static unsigned int ad_kdcissued_optional(const void *p)
+static unsigned int
+ad_kdcissued_optional(const void *p)
 {
     unsigned int optional = 0;
     const krb5_ad_kdcissued *val = p;
@@ -1506,7 +1529,9 @@ asn1_encode_kerberos_time(asn1buf *buf, const krb5_timestamp val,
 }
 
 /* Now the real PKINIT encoder functions.  */
-asn1_error_code asn1_encode_pk_authenticator(asn1buf *buf, const krb5_pk_authenticator *val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_pk_authenticator(asn1buf *buf, const krb5_pk_authenticator *val,
+                             unsigned int *retlen)
 {
     asn1_setup();
     asn1_addlenfield(val->paChecksum.length, val->paChecksum.contents, 3, asn1_encode_octetstring);
@@ -1518,7 +1543,10 @@ asn1_error_code asn1_encode_pk_authenticator(asn1buf *buf, const krb5_pk_authent
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_pk_authenticator_draft9(asn1buf *buf, const krb5_pk_authenticator_draft9 *val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_pk_authenticator_draft9(asn1buf *buf,
+                                    const krb5_pk_authenticator_draft9 *val,
+                                    unsigned int *retlen)
 {
     asn1_setup();
 
@@ -1533,7 +1561,10 @@ asn1_error_code asn1_encode_pk_authenticator_draft9(asn1buf *buf, const krb5_pk_
 }
 
 
-asn1_error_code asn1_encode_algorithm_identifier(asn1buf *buf, const krb5_algorithm_identifier *val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_algorithm_identifier(asn1buf *buf,
+                                 const krb5_algorithm_identifier *val,
+                                 unsigned int *retlen)
 {
     asn1_setup();
 
@@ -1560,7 +1591,9 @@ asn1_error_code asn1_encode_algorithm_identifier(asn1buf *buf, const krb5_algori
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_subject_pk_info(asn1buf *buf, const krb5_subject_pk_info *val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_subject_pk_info(asn1buf *buf, const krb5_subject_pk_info *val,
+                            unsigned int *retlen)
 {
     asn1_setup();
 
@@ -1600,7 +1633,10 @@ asn1_error_code asn1_encode_subject_pk_info(asn1buf *buf, const krb5_subject_pk_
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_sequence_of_algorithm_identifier(asn1buf *buf, const krb5_algorithm_identifier **val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_sequence_of_algorithm_identifier(
+    asn1buf *buf, const krb5_algorithm_identifier **val,
+    unsigned int *retlen)
 {
     asn1_setup();
     int i;
@@ -1619,7 +1655,9 @@ asn1_error_code asn1_encode_sequence_of_algorithm_identifier(asn1buf *buf, const
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_auth_pack(asn1buf *buf, const krb5_auth_pack *val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_auth_pack(asn1buf *buf, const krb5_auth_pack *val,
+                      unsigned int *retlen)
 {
     asn1_setup();
 
@@ -1635,7 +1673,9 @@ asn1_error_code asn1_encode_auth_pack(asn1buf *buf, const krb5_auth_pack *val, u
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_auth_pack_draft9(asn1buf *buf, const krb5_auth_pack_draft9 *val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_auth_pack_draft9(asn1buf *buf, const krb5_auth_pack_draft9 *val,
+                             unsigned int *retlen)
 {
     asn1_setup();
 
@@ -1647,7 +1687,10 @@ asn1_error_code asn1_encode_auth_pack_draft9(asn1buf *buf, const krb5_auth_pack_
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_external_principal_identifier(asn1buf *buf, const krb5_external_principal_identifier *val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_external_principal_identifier(
+    asn1buf *buf, const krb5_external_principal_identifier *val,
+    unsigned int *retlen)
 {
     asn1_setup();
 
@@ -1668,7 +1711,11 @@ asn1_error_code asn1_encode_external_principal_identifier(asn1buf *buf, const kr
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_sequence_of_external_principal_identifier(asn1buf *buf, const krb5_external_principal_identifier **val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_sequence_of_external_principal_identifier(
+    asn1buf *buf,
+    const krb5_external_principal_identifier **val,
+    unsigned int *retlen)
 {
     asn1_setup();
     int i;
@@ -1687,7 +1734,9 @@ asn1_error_code asn1_encode_sequence_of_external_principal_identifier(asn1buf *b
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_pa_pk_as_req(asn1buf *buf, const krb5_pa_pk_as_req *val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_pa_pk_as_req(asn1buf *buf, const krb5_pa_pk_as_req *val,
+                         unsigned int *retlen)
 {
     asn1_setup();
 
@@ -1703,7 +1752,9 @@ asn1_error_code asn1_encode_pa_pk_as_req(asn1buf *buf, const krb5_pa_pk_as_req *
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_trusted_ca(asn1buf *buf, const krb5_trusted_ca *val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_trusted_ca(asn1buf *buf, const krb5_trusted_ca *val,
+                       unsigned int *retlen)
 {
     asn1_setup();
 
@@ -1724,7 +1775,9 @@ asn1_error_code asn1_encode_trusted_ca(asn1buf *buf, const krb5_trusted_ca *val,
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_sequence_of_trusted_ca(asn1buf *buf, const krb5_trusted_ca **val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_sequence_of_trusted_ca(asn1buf *buf, const krb5_trusted_ca **val,
+                                   unsigned int *retlen)
 {
     asn1_setup();
     int i;
@@ -1742,7 +1795,10 @@ asn1_error_code asn1_encode_sequence_of_trusted_ca(asn1buf *buf, const krb5_trus
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_pa_pk_as_req_draft9(asn1buf *buf, const krb5_pa_pk_as_req_draft9 *val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_pa_pk_as_req_draft9(asn1buf *buf,
+                                const krb5_pa_pk_as_req_draft9 *val,
+                                unsigned int *retlen)
 {
     asn1_setup();
 
@@ -1761,7 +1817,9 @@ asn1_error_code asn1_encode_pa_pk_as_req_draft9(asn1buf *buf, const krb5_pa_pk_a
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_dh_rep_info(asn1buf *buf, const krb5_dh_rep_info *val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_dh_rep_info(asn1buf *buf, const krb5_dh_rep_info *val,
+                        unsigned int *retlen)
 {
     asn1_setup();
 
@@ -1774,7 +1832,9 @@ asn1_error_code asn1_encode_dh_rep_info(asn1buf *buf, const krb5_dh_rep_info *va
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_kdc_dh_key_info(asn1buf *buf, const krb5_kdc_dh_key_info *val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_kdc_dh_key_info(asn1buf *buf, const krb5_kdc_dh_key_info *val,
+                            unsigned int *retlen)
 {
     asn1_setup();
 
@@ -1798,7 +1858,9 @@ asn1_error_code asn1_encode_kdc_dh_key_info(asn1buf *buf, const krb5_kdc_dh_key_
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_reply_key_pack(asn1buf *buf, const krb5_reply_key_pack *val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_reply_key_pack(asn1buf *buf, const krb5_reply_key_pack *val,
+                           unsigned int *retlen)
 {
     asn1_setup();
 
@@ -1809,7 +1871,10 @@ asn1_error_code asn1_encode_reply_key_pack(asn1buf *buf, const krb5_reply_key_pa
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_reply_key_pack_draft9(asn1buf *buf, const krb5_reply_key_pack_draft9 *val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_reply_key_pack_draft9(asn1buf *buf,
+                                  const krb5_reply_key_pack_draft9 *val,
+                                  unsigned int *retlen)
 {
     asn1_setup();
 
@@ -1820,7 +1885,9 @@ asn1_error_code asn1_encode_reply_key_pack_draft9(asn1buf *buf, const krb5_reply
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_pa_pk_as_rep(asn1buf *buf, const krb5_pa_pk_as_rep *val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_pa_pk_as_rep(asn1buf *buf, const krb5_pa_pk_as_rep *val,
+                         unsigned int *retlen)
 {
     asn1_setup();
 
@@ -1839,7 +1906,10 @@ asn1_error_code asn1_encode_pa_pk_as_rep(asn1buf *buf, const krb5_pa_pk_as_rep *
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_pa_pk_as_rep_draft9(asn1buf *buf, const krb5_pa_pk_as_rep_draft9 *val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_pa_pk_as_rep_draft9(asn1buf *buf,
+                                const krb5_pa_pk_as_rep_draft9 *val,
+                                unsigned int *retlen)
 {
     asn1_setup();
 
@@ -1858,7 +1928,10 @@ asn1_error_code asn1_encode_pa_pk_as_rep_draft9(asn1buf *buf, const krb5_pa_pk_a
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_td_trusted_certifiers(asn1buf *buf, const krb5_external_principal_identifier **val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_td_trusted_certifiers(
+    asn1buf *buf, const krb5_external_principal_identifier **val,
+    unsigned int *retlen)
 {
     asn1_setup();
     {
@@ -1873,7 +1946,9 @@ asn1_error_code asn1_encode_td_trusted_certifiers(asn1buf *buf, const krb5_exter
 
 #endif /* DISABLE_PKINIT */
 
-asn1_error_code asn1_encode_sequence_of_typed_data(asn1buf *buf, const krb5_typed_data **val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_sequence_of_typed_data(asn1buf *buf, const krb5_typed_data **val,
+                                   unsigned int *retlen)
 {
     asn1_setup();
     int i;
@@ -1893,7 +1968,9 @@ asn1_error_code asn1_encode_sequence_of_typed_data(asn1buf *buf, const krb5_type
     asn1_cleanup();
 }
 
-asn1_error_code asn1_encode_typed_data(asn1buf *buf, const krb5_typed_data *val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_typed_data(asn1buf *buf, const krb5_typed_data *val,
+                       unsigned int *retlen)
 {
     asn1_setup();
     asn1_addlenfield(val->length, val->data, 1, asn1_encode_octetstring);

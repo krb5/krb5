@@ -57,7 +57,8 @@ if (asn1class != UNIVERSAL || construction != PRIMITIVE || tagnum != type)\
 #define cleanup()\
 return 0
 
-asn1_error_code asn1_decode_integer(asn1buf *buf, long int *val)
+asn1_error_code
+asn1_decode_integer(asn1buf *buf, long int *val)
 {
     setup();
     asn1_octet o;
@@ -82,7 +83,8 @@ asn1_error_code asn1_decode_integer(asn1buf *buf, long int *val)
     cleanup();
 }
 
-asn1_error_code asn1_decode_unsigned_integer(asn1buf *buf, long unsigned int *val)
+asn1_error_code
+asn1_decode_unsigned_integer(asn1buf *buf, long unsigned int *val)
 {
     setup();
     asn1_octet o;
@@ -116,7 +118,8 @@ asn1_error_code asn1_decode_unsigned_integer(asn1buf *buf, long unsigned int *va
  * normal integer conversions do, i.e., would preserve bits on a
  * two's-complement architecture.
  */
-asn1_error_code asn1_decode_maybe_unsigned(asn1buf *buf, unsigned long *val)
+asn1_error_code
+asn1_decode_maybe_unsigned(asn1buf *buf, unsigned long *val)
 {
     setup();
     asn1_octet o;
@@ -150,7 +153,8 @@ asn1_error_code asn1_decode_maybe_unsigned(asn1buf *buf, unsigned long *val)
     cleanup();
 }
 
-asn1_error_code asn1_decode_oid(asn1buf *buf, unsigned int *retlen, asn1_octet **val)
+asn1_error_code
+asn1_decode_oid(asn1buf *buf, unsigned int *retlen, asn1_octet **val)
 {
     setup();
     tag(ASN1_OBJECTIDENTIFIER);
@@ -160,7 +164,8 @@ asn1_error_code asn1_decode_oid(asn1buf *buf, unsigned int *retlen, asn1_octet *
     cleanup();
 }
 
-asn1_error_code asn1_decode_octetstring(asn1buf *buf, unsigned int *retlen, asn1_octet **val)
+asn1_error_code
+asn1_decode_octetstring(asn1buf *buf, unsigned int *retlen, asn1_octet **val)
 {
     setup();
     tag(ASN1_OCTETSTRING);
@@ -170,7 +175,8 @@ asn1_error_code asn1_decode_octetstring(asn1buf *buf, unsigned int *retlen, asn1
     cleanup();
 }
 
-asn1_error_code asn1_decode_charstring(asn1buf *buf, unsigned int *retlen, char **val)
+asn1_error_code
+asn1_decode_charstring(asn1buf *buf, unsigned int *retlen, char **val)
 {
     setup();
     tag(ASN1_OCTETSTRING);
@@ -181,7 +187,8 @@ asn1_error_code asn1_decode_charstring(asn1buf *buf, unsigned int *retlen, char 
 }
 
 
-asn1_error_code asn1_decode_generalstring(asn1buf *buf, unsigned int *retlen, char **val)
+asn1_error_code
+asn1_decode_generalstring(asn1buf *buf, unsigned int *retlen, char **val)
 {
     setup();
     tag(ASN1_GENERALSTRING);
@@ -192,7 +199,8 @@ asn1_error_code asn1_decode_generalstring(asn1buf *buf, unsigned int *retlen, ch
 }
 
 
-asn1_error_code asn1_decode_null(asn1buf *buf)
+asn1_error_code
+asn1_decode_null(asn1buf *buf)
 {
     setup();
     tag(ASN1_NULL);
@@ -200,7 +208,8 @@ asn1_error_code asn1_decode_null(asn1buf *buf)
     cleanup();
 }
 
-asn1_error_code asn1_decode_printablestring(asn1buf *buf, int *retlen, char **val)
+asn1_error_code
+asn1_decode_printablestring(asn1buf *buf, int *retlen, char **val)
 {
     setup();
     tag(ASN1_PRINTABLESTRING);
@@ -210,7 +219,8 @@ asn1_error_code asn1_decode_printablestring(asn1buf *buf, int *retlen, char **va
     cleanup();
 }
 
-asn1_error_code asn1_decode_ia5string(asn1buf *buf, int *retlen, char **val)
+asn1_error_code
+asn1_decode_ia5string(asn1buf *buf, int *retlen, char **val)
 {
     setup();
     tag(ASN1_IA5STRING);
@@ -220,7 +230,8 @@ asn1_error_code asn1_decode_ia5string(asn1buf *buf, int *retlen, char **val)
     cleanup();
 }
 
-asn1_error_code asn1_decode_generaltime(asn1buf *buf, time_t *val)
+asn1_error_code
+asn1_decode_generaltime(asn1buf *buf, time_t *val)
 {
     setup();
     char *s;
@@ -261,7 +272,8 @@ done:
     cleanup();
 }
 
-asn1_error_code asn1_decode_boolean(asn1buf *buf, unsigned *val)
+asn1_error_code
+asn1_decode_boolean(asn1buf *buf, unsigned *val)
 {
     setup();
     asn1_octet bval;

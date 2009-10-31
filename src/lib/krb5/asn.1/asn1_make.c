@@ -27,18 +27,17 @@
 
 #include "asn1_make.h"
 
-asn1_error_code asn1_make_etag(asn1buf *buf, asn1_class asn1class,
-                               asn1_tagnum tagnum, unsigned int in_len,
-                               unsigned int *retlen)
+asn1_error_code
+asn1_make_etag(asn1buf *buf, asn1_class asn1class, asn1_tagnum tagnum,
+               unsigned int in_len, unsigned int *retlen)
 {
     return asn1_make_tag(buf,asn1class,CONSTRUCTED,tagnum,in_len,retlen);
 }
 
-
-asn1_error_code asn1_make_tag(asn1buf *buf, asn1_class asn1class,
-                              asn1_construction construction,
-                              asn1_tagnum tagnum, unsigned int in_len,
-                              unsigned int *retlen)
+asn1_error_code
+asn1_make_tag(asn1buf *buf, asn1_class asn1class,
+              asn1_construction construction, asn1_tagnum tagnum,
+              unsigned int in_len, unsigned int *retlen)
 {
     asn1_error_code retval;
     unsigned int sumlen=0, length;
@@ -56,7 +55,8 @@ asn1_error_code asn1_make_tag(asn1buf *buf, asn1_class asn1class,
     return 0;
 }
 
-asn1_error_code asn1_make_length(asn1buf *buf, const unsigned int in_len, unsigned int *retlen)
+asn1_error_code
+asn1_make_length(asn1buf *buf, const unsigned int in_len, unsigned int *retlen)
 {
     asn1_error_code retval;
 
@@ -82,9 +82,10 @@ asn1_error_code asn1_make_length(asn1buf *buf, const unsigned int in_len, unsign
     return 0;
 }
 
-asn1_error_code asn1_make_id(asn1buf *buf, asn1_class asn1class,
-                             asn1_construction construction,
-                             asn1_tagnum tagnum, unsigned int *retlen)
+asn1_error_code
+asn1_make_id(asn1buf *buf, asn1_class asn1class,
+             asn1_construction construction, asn1_tagnum tagnum,
+             unsigned int *retlen)
 {
     asn1_error_code retval;
 
@@ -117,7 +118,9 @@ asn1_error_code asn1_make_id(asn1buf *buf, asn1_class asn1class,
     return 0;
 }
 
-asn1_error_code asn1_make_sequence(asn1buf *buf, const unsigned int seq_len, unsigned int *retlen)
+asn1_error_code
+asn1_make_sequence(asn1buf *buf, const unsigned int seq_len,
+                   unsigned int *retlen)
 {
     asn1_error_code retval;
     unsigned int len, sum=0;
@@ -133,7 +136,8 @@ asn1_error_code asn1_make_sequence(asn1buf *buf, const unsigned int seq_len, uns
     return 0;
 }
 
-asn1_error_code asn1_make_set(asn1buf *buf, const unsigned int set_len, unsigned int *retlen)
+asn1_error_code
+asn1_make_set(asn1buf *buf, const unsigned int set_len, unsigned int *retlen)
 {
     asn1_error_code retval;
     unsigned int len, sum=0;
@@ -149,7 +153,9 @@ asn1_error_code asn1_make_set(asn1buf *buf, const unsigned int set_len, unsigned
     return 0;
 }
 
-asn1_error_code asn1_make_string(asn1buf *buf, const unsigned int length, const char *string, int *retlen)
+asn1_error_code
+asn1_make_string(asn1buf *buf, const unsigned int length, const char *string,
+                 int *retlen)
 {
     asn1_error_code retval;
 

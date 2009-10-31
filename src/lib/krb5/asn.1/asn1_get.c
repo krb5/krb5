@@ -100,7 +100,8 @@ asn1_get_tag_2(asn1buf *buf, taginfo *t)
     return 0;
 }
 
-asn1_error_code asn1_get_sequence(asn1buf *buf, unsigned int *retlen, int *indef)
+asn1_error_code
+asn1_get_sequence(asn1buf *buf, unsigned int *retlen, int *indef)
 {
     taginfo t;
     asn1_error_code retval;
