@@ -2429,8 +2429,8 @@ krb5_fcc_last_change_time(krb5_context context, krb5_ccache id,
     return kret;
 }
 
-static krb5_error_code KRB5_CALLCONV krb5_fcc_lock(krb5_context context,
-                                                   krb5_ccache id)
+static krb5_error_code KRB5_CALLCONV
+krb5_fcc_lock(krb5_context context, krb5_ccache id)
 {
     krb5_error_code ret = 0;
     krb5_fcc_data *data = (krb5_fcc_data *) id->data;
@@ -2438,8 +2438,8 @@ static krb5_error_code KRB5_CALLCONV krb5_fcc_lock(krb5_context context,
     return ret;
 }
 
-static krb5_error_code KRB5_CALLCONV krb5_fcc_unlock(krb5_context context,
-                                                     krb5_ccache id)
+static krb5_error_code KRB5_CALLCONV
+krb5_fcc_unlock(krb5_context context, krb5_ccache id)
 {
     krb5_error_code ret = 0;
     krb5_fcc_data *data = (krb5_fcc_data *) id->data;

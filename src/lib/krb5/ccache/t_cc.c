@@ -43,7 +43,8 @@ krb5_creds test_creds;
 
 int debug=0;
 
-static void init_structs(void)
+static void
+init_structs(void)
 {
     static int add=0x12345;
 
@@ -82,7 +83,8 @@ static void init_structs(void)
     test_creds.authdata = NULL;
 }
 
-static krb5_error_code init_test_cred(krb5_context context)
+static krb5_error_code
+init_test_cred(krb5_context context)
 {
     krb5_error_code kret;
     unsigned int i;
@@ -165,7 +167,8 @@ cleanup:
     return kret;
 }
 
-static void free_test_cred(krb5_context context)
+static void
+free_test_cred(krb5_context context)
 {
     krb5_free_principal(context, test_creds.client);
 
@@ -199,7 +202,8 @@ static void free_test_cred(krb5_context context)
 #define CHECK_FAIL(experr, kret, msg)           \
     if (experr != kret) { CHECK(kret, msg);}
 
-static void cc_test(krb5_context context, const char *name, krb5_flags flags)
+static void
+cc_test(krb5_context context, const char *name, krb5_flags flags)
 {
     krb5_ccache id, id2;
     krb5_creds creds;
@@ -318,7 +322,8 @@ static void cc_test(krb5_context context, const char *name, krb5_flags flags)
 /*
  * Checks if a credential type is registered with the library
  */
-static int check_registered(krb5_context context, const char *prefix)
+static int
+check_registered(krb5_context context, const char *prefix)
 {
     char name[300];
     krb5_error_code kret;
@@ -345,7 +350,8 @@ static int check_registered(krb5_context context, const char *prefix)
 }
 
 
-static void do_test(krb5_context context, const char *prefix)
+static void
+do_test(krb5_context context, const char *prefix)
 {
     char name[300];
 
@@ -356,7 +362,8 @@ static void do_test(krb5_context context, const char *prefix)
     printf("Test on %s passed\n", name);
 }
 
-static void test_misc(krb5_context context)
+static void
+test_misc(krb5_context context)
 {
     /* Tests for certain error returns */
     krb5_error_code       kret;
@@ -385,7 +392,8 @@ static void test_misc(krb5_context context)
 extern const krb5_cc_ops krb5_mcc_ops;
 extern const krb5_cc_ops krb5_fcc_ops;
 
-int main (void)
+int
+main(void)
 {
     krb5_context context;
     krb5_error_code     kret;

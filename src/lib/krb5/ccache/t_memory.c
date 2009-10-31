@@ -88,7 +88,8 @@ krb5_creds test_creds = {
     },
 };
 
-void init_test_cred()
+void
+init_test_cred()
 {
     test_creds.client = (krb5_principal) malloc(sizeof(krb5_data *)*3);
     test_creds.client[0] = &client1;
@@ -106,7 +107,8 @@ void init_test_cred()
         printf("%s returned %d\n", msg, kret);  \
     };
 
-void mcc_test()
+void
+mcc_test()
 {
     krb5_ccache id;
     krb5_creds creds;

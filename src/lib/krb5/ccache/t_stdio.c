@@ -101,7 +101,8 @@ krb5_creds test_creds = {
     },
 };
 
-void init_test_cred()
+void
+init_test_cred()
 {
     test_creds.client = (krb5_principal) malloc(sizeof(krb5_data *)*3);
     test_creds.client[0] = &client1;
@@ -120,7 +121,8 @@ void init_test_cred()
     } else printf("%s went ok\n", msg);
 
 int flags = 0;
-void scc_test()
+void
+scc_test()
 {
     krb5_ccache id;
     krb5_creds creds;
