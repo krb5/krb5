@@ -562,7 +562,8 @@ obtain_sam_padata(krb5_context context, krb5_pa_data *in_padata, krb5_etype_info
     pa->pa_type = KRB5_PADATA_SAM_RESPONSE;
     pa->length = scratch->length;
     pa->contents = (krb5_octet *) scratch->data;
-    scratch = 0;		/* so we don't free it! */
+    free(scratch);
+    scratch = NULL;
 
     *out_padata = pa;
 
