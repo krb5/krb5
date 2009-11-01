@@ -531,10 +531,10 @@ obtain_sam_padata(krb5_context context, krb5_pa_data *in_padata, krb5_etype_info
 						   &scratch)) != 0)
       goto cleanup;
 
-    if ((retval = krb5_encrypt_data(context,
-				    sam_use_key?sam_use_key:def_enc_key,
-				    0, scratch,
-				    &sam_response.sam_enc_nonce_or_ts)))
+    if ((retval = krb5_encrypt_helper(context,
+				      sam_use_key?sam_use_key:def_enc_key,
+				      0, scratch,
+				      &sam_response.sam_enc_nonce_or_ts)))
       goto cleanup;
 
     krb5_free_data(context, scratch);

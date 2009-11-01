@@ -1010,8 +1010,8 @@ pa_sam(krb5_context context, krb5_kdc_req *request, krb5_pa_data *in_padata,
                                                 &scratch)))
         return(ret);
 
-    ret = krb5_encrypt_data(context, as_key, 0, scratch,
-                            &sam_response.sam_enc_nonce_or_ts);
+    ret = krb5_encrypt_helper(context, as_key, 0, scratch,
+                              &sam_response.sam_enc_nonce_or_ts);
 
     krb5_free_data(context, scratch);
 
