@@ -26,6 +26,24 @@
 
 #include "k5-int.h"
 
+/*
+ * The following functions were removed from the API in krb5 1.3 but
+ * still need to be exported for ABI compatibility.  The other
+ * functions defined in this file are still in the API (and thus
+ * prototyped in krb5.hin) but are deprecated.
+ */
+krb5_boolean KRB5_CALLCONV valid_enctype(krb5_enctype ktype);
+krb5_boolean KRB5_CALLCONV valid_cksumtype(krb5_cksumtype ctype);
+krb5_boolean KRB5_CALLCONV is_coll_proof_cksum(krb5_cksumtype ctype);
+krb5_boolean KRB5_CALLCONV is_keyed_cksum(krb5_cksumtype ctype);
+krb5_error_code KRB5_CALLCONV krb5_random_confounder(size_t, krb5_pointer);
+krb5_error_code krb5_encrypt_data(krb5_context context, krb5_keyblock *key,
+				  krb5_pointer ivec, krb5_data *data,
+				  krb5_enc_data *enc_data);
+krb5_error_code krb5_decrypt_data(krb5_context context, krb5_keyblock *key,
+				  krb5_pointer ivec, krb5_enc_data *data,
+				  krb5_data *enc_data);
+
 krb5_error_code KRB5_CALLCONV
 krb5_encrypt(krb5_context context, krb5_const_pointer inptr,
 	     krb5_pointer outptr, size_t size, krb5_encrypt_block *eblock,
@@ -340,4 +358,28 @@ krb5_error_code krb5_decrypt_data(krb5_context context, krb5_keyblock *key,
 	free(data->data);
 
     return 0;
+}
+
+krb5_boolean KRB5_CALLCONV
+valid_cksumtype(krb5_cksumtype ctype)
+{
+    return krb5_c_valid_cksumtype(ctype);
+}
+
+krb5_boolean KRB5_CALLCONV
+is_keyed_cksum(krb5_cksumtype ctype)
+{
+    return krb5_c_is_keyed_cksum(ctype);
+}
+
+krb5_boolean KRB5_CALLCONV
+is_coll_proof_cksum(krb5_cksumtype ctype)
+{
+    return krb5_c_is_coll_proof_cksum(ctype);
+}
+
+krb5_boolean KRB5_CALLCONV
+valid_enctype(krb5_enctype etype)
+{
+    return krb5_c_valid_enctype(etype);
 }

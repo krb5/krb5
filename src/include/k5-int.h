@@ -2574,29 +2574,6 @@ krb5_error_code KRB5_CALLCONV krb5int_clean_hostname
 		char *,
 		size_t);
 
-/* Use the above four instead.  */
-krb5_boolean KRB5_CALLCONV valid_enctype
-	(krb5_enctype ktype);
-krb5_boolean KRB5_CALLCONV valid_cksumtype
-	(krb5_cksumtype ctype);
-krb5_boolean KRB5_CALLCONV is_coll_proof_cksum
-	(krb5_cksumtype ctype);
-krb5_boolean KRB5_CALLCONV is_keyed_cksum
-	(krb5_cksumtype ctype);
-
-krb5_error_code KRB5_CALLCONV krb5_random_confounder
-	(size_t, krb5_pointer);
-
-krb5_error_code krb5_encrypt_data
-	(krb5_context context, krb5_keyblock *key,
-		krb5_pointer ivec, krb5_data *data,
-		krb5_enc_data *enc_data);
-
-krb5_error_code krb5_decrypt_data
-	(krb5_context context, krb5_keyblock *key,
-		krb5_pointer ivec, krb5_enc_data *data,
-		krb5_data *enc_data);
-
 krb5_error_code
 krb5int_aes_encrypt(krb5_key key, const krb5_data *ivec,
 		    const krb5_data *input, krb5_data *output);

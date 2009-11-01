@@ -44,9 +44,3 @@ krb5_c_is_keyed_cksum(krb5_cksumtype ctype)
     /* Invalid ctype.  This is misleading, but better than dumping core. */
     return FALSE;
 }
-
-krb5_boolean KRB5_CALLCONV
-is_keyed_cksum(krb5_cksumtype ctype)
-{
-    return krb5_c_is_keyed_cksum(ctype);
-}

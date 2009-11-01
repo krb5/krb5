@@ -39,9 +39,3 @@ krb5_c_valid_cksumtype(krb5_cksumtype ctype)
 
     return FALSE;
 }
-
-krb5_boolean KRB5_CALLCONV
-valid_cksumtype(krb5_cksumtype ctype)
-{
-    return krb5_c_valid_cksumtype(ctype);
-}

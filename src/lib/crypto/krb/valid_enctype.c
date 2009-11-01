@@ -34,12 +34,6 @@ krb5_c_valid_enctype(krb5_enctype etype)
 }
 
 krb5_boolean KRB5_CALLCONV
-valid_enctype(krb5_enctype etype)
-{
-    return krb5_c_valid_enctype(etype);
-}
-
-krb5_boolean KRB5_CALLCONV
 krb5int_c_weak_enctype(krb5_enctype etype)
 {
     const struct krb5_keytypes *ktp;

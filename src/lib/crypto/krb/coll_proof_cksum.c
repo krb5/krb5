@@ -42,9 +42,3 @@ krb5_c_is_coll_proof_cksum(krb5_cksumtype ctype)
        old code would have done */
     return FALSE;
 }
-
-krb5_boolean KRB5_CALLCONV
-is_coll_proof_cksum(krb5_cksumtype ctype)
-{
-    return krb5_c_is_coll_proof_cksum(ctype);
-}
