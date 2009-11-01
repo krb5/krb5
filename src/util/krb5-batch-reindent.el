@@ -11,6 +11,35 @@
         (message "Tab found @%s." tab-found)
       (message "No tabs found."))))
 
+(defun whitespace-new ()
+    ;; Sometimes whitespace-cleanup gets its internals confused
+    ;; when whitespace-mode hasn't been activated on the buffer.
+    (let ((whitespace-indent-tabs-mode indent-tabs-mode)
+          (whitespace-style '(empty trailing)))
+      ;; Only clean up tab issues if indent-tabs-mode is explicitly
+      ;; set in the file local variables.
+      (if (local-variable-p 'indent-tabs-mode)
+          (progn
+            (message "Enabling tab cleanups.")
+            (add-to-list 'whitespace-style 'indentation)
+            (add-to-list 'whitespace-style 'space-before-tab)
+            (add-to-list 'whitespace-style 'space-after-tab)))
+;;      (message "indent-tabs-mode=%s" indent-tabs-mode)
+      (message "Cleaning whitespace...")
+      (whitespace-cleanup)))
+
+;; Old style whitespace.el uses different variables.
+(defun whitespace-old ()
+  (let (whitespace-check-indent-whitespace
+        whitespace-check-spacetab-whitespace)
+    (if (local-variable-p 'indent-tabs-mode)
+        (progn
+          (message "Enabling tab cleanups.")
+          (setq whitespace-check-indent-whitespace indent-tabs-mode)
+          (setq whitespace-check-spacetab-whitespace t)))
+    (message "Cleaning whitespace...")
+    (whitespace-cleanup)))
+
 (while command-line-args-left
   (let ((filename (car command-line-args-left))
         ;; No backup files; we have version control.
@@ -30,22 +59,9 @@
     (if (equal c-indentation-style "krb5")
         (c-indent-region (point-min) (point-max)))
 
-    ;; Sometimes whitespace-cleanup gets its internals confused
-    ;; when whitespace-mode hasn't been activated on the buffer.
-    (let ((whitespace-indent-tabs-mode indent-tabs-mode)
-          (whitespace-style '(empty trailing)))
-      ;; Only clean up tab issues if indent-tabs-mode is explicitly
-      ;; set in the file local variables.
-      (if (local-variable-p 'indent-tabs-mode)
-          (progn
-            (message "Enabling tab cleanups.")
-            (add-to-list 'whitespace-style 'indentation)
-            (add-to-list 'whitespace-style 'space-before-tab)
-            (add-to-list 'whitespace-style 'space-after-tab)))
-;;      (message "indent-tabs-mode=%s" indent-tabs-mode)
-      (setq tab-found (search-forward "\t" nil t))
-      (message "Cleaning whitespace...")
-      (whitespace-cleanup))
+    (if (custom-variable-p 'whitespace-style)
+        (whitespace-new)
+      (whitespace-old))
 
     (save-buffer)
     (kill-buffer nil)
