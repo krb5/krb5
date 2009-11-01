@@ -116,7 +116,7 @@ krb5int_vset_error_fl (struct errinfo *ep, long code,
 const char *
 krb5int_get_error (struct errinfo *ep, long code)
 {
-    char *r, *r2;
+    const char *r, *r2;
     if (code == ep->code && ep->msg) {
 	r = strdup(ep->msg);
 	if (r == NULL) {
@@ -153,41 +153,24 @@ krb5int_get_error (struct errinfo *ep, long code)
 	if (code < 0)
 	    goto format_number;
 #ifdef HAVE_STRERROR_R
-	if (strerror_r (code, ep->scratch_buf, sizeof(ep->scratch_buf)) == 0) {
+	if (strerror_r(code, ep->scratch_buf, sizeof(ep->scratch_buf)) == 0) {
 	    char *p = strdup(ep->scratch_buf);
 	    if (p)
 		return p;
 	    return ep->scratch_buf;
 	}
-	/* If strerror_r didn't work with the 1K buffer, we can try a
-	   really big one.  This seems kind of gratuitous though.  */
-#define BIG_ERR_BUFSIZ 8192
-	r = malloc(BIG_ERR_BUFSIZ);
-	if (r) {
-	    if (strerror_r (code, r, BIG_ERR_BUFSIZ) == 0) {
-		r2 = realloc (r, 1 + strlen(r));
-		if (r2)
-		    return r2;
-		return r;
-	    }
-	    free (r);
-	}
 #endif
-	r = strerror (code);
+	r = strerror(code);
 	if (r) {
-	    if (strlen (r) < sizeof (ep->scratch_buf)
-		|| (r2 = strdup (r)) == NULL) {
-		strncpy (ep->scratch_buf, r, sizeof(ep->scratch_buf));
-		return ep->scratch_buf;
-	    } else
-		return r2;
+	    strlcpy(ep->scratch_buf, r, sizeof(ep->scratch_buf));
+	    return ep->scratch_buf;
 	}
     format_number:
 	snprintf (ep->scratch_buf, sizeof(ep->scratch_buf),
 		  _("error %ld"), code);
 	return ep->scratch_buf;
     }
-    r = (char *) fptr(code);
+    r = fptr(code);
     if (r == NULL) {
 	unlock();
 	goto format_number;
@@ -195,7 +178,7 @@ krb5int_get_error (struct errinfo *ep, long code)
 
     r2 = strdup(r);
     if (r2 == NULL) {
-	strncpy(ep->scratch_buf, r, sizeof(ep->scratch_buf));
+	strlcpy(ep->scratch_buf, r, sizeof(ep->scratch_buf));
 	unlock();
 	return ep->scratch_buf;
     } else {
