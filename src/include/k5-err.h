@@ -46,7 +46,7 @@
 
 struct errinfo {
     long code;
-    const char *msg;
+    char *msg;
     char scratch_buf[1024];
 };
 
