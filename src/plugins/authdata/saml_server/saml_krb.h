@@ -186,6 +186,16 @@ saml_krb_verify(krb5_context context,
                 krb5_boolean *pValid,
                 krb5_principal *pMappedPrincipal = NULL);
 
+krb5_error_code
+saml_krb_decode_assertion(krb5_context context,
+                          krb5_data *data,
+                          saml2::Assertion **pAssertion);
+
+krb5_error_code
+saml_krb_decode_assertion(krb5_context context,
+                          krb5_authdata *data,
+                          saml2::Assertion **pAssertion);
+
 /* Helper for transcoding krb5_data objects */
 class auto_ptr_krb5_data {
     MAKE_NONCOPYABLE(auto_ptr_krb5_data);

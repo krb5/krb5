@@ -662,3 +662,59 @@ saml_krb_verify(krb5_context context,
     return 0;
 }
 
+krb5_error_code
+saml_krb_decode_assertion(krb5_context context,
+                          krb5_data *data,
+                          saml2::Assertion **pAssertion)
+{
+    krb5_error_code code;
+    DOMDocument *doc;
+    const XMLObjectBuilder *b;
+    DOMElement *elem;
+    XMLObject *xobj;
+
+    /*
+     * Attempt to parse the assertion.
+     */
+    try {
+        string samlbuf(data->data, data->length);
+        istringstream samlin(samlbuf);
+
+        doc = XMLToolingConfig::getConfig().getParser().parse(samlin);
+        b = XMLObjectBuilder::getDefaultBuilder();
+        elem = doc->getDocumentElement();
+        xobj = b->buildOneFromElement(elem, true);
+#if 0
+        assertion = dynamic_cast<saml2::Assertion*>(xobj);
+        if (assertion == NULL) {
+            fprintf(stderr, "%s\n", typeid(xobj).name());
+            delete xobj;
+            code = ASN1_PARSE_ERROR;
+        }
+#else
+        *pAssertion = (saml2::Assertion*)((void *)xobj);
+        code = 0;
+#endif
+    } catch (exception &e) {
+        code = ASN1_PARSE_ERROR; /* XXX */
+    }
+
+    return code;
+}
+ 
+krb5_error_code
+saml_krb_decode_assertion(krb5_context context,
+                          krb5_authdata *authdata,
+                          saml2::Assertion **pAssertion)
+{
+    krb5_data d;
+
+    if (authdata->ad_type != KRB5_AUTHDATA_SAML)
+        return EINVAL;
+
+    d.data = (char *)authdata->contents;
+    d.length = authdata->length;
+
+    return saml_krb_decode_assertion(context, &d, pAssertion);
+}
+

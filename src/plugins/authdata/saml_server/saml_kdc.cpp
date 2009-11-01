@@ -295,11 +295,6 @@ saml_kdc_get_assertion(krb5_context context,
 {
     krb5_error_code code;
     krb5_authdata **authdata = NULL;
-    DOMDocument *doc;
-    const XMLObjectBuilder *b;
-    DOMElement *elem;
-    XMLObject *xobj;
-    saml2::Assertion *assertion;
     krb5_boolean fromEncPart = FALSE;
 
     *pAssertion = NULL;
@@ -334,33 +329,8 @@ saml_kdc_get_assertion(krb5_context context,
         authdata[1] != NULL)
         return 0;
 
-    /*
-     * Attempt to parse the assertion.
-     */
-    try {
-        string samlbuf((char *)authdata[0]->contents, authdata[0]->length);
-        istringstream samlin(samlbuf);
+    code = saml_krb_decode_assertion(context, authdata[0], pAssertion);
 
-        doc = XMLToolingConfig::getConfig().getParser().parse(samlin);
-        b = XMLObjectBuilder::getDefaultBuilder();
-        elem = doc->getDocumentElement();
-        xobj = b->buildOneFromElement(elem, true);
-#if 0
-        assertion = dynamic_cast<saml2::Assertion*>(xobj);
-        if (assertion == NULL) {
-            fprintf(stderr, "%s\n", typeid(xobj).name());
-            delete xobj;
-            code = ASN1_PARSE_ERROR;
-        }
-#else
-        assertion = (saml2::Assertion*)((void *)xobj);
-#endif
-    } catch (exception &e) {
-        code = ASN1_PARSE_ERROR; /* XXX */
-        assertion = NULL;
-    }
-
-    *pAssertion = assertion;
     *verified = fromEncPart;
 
     return code;
