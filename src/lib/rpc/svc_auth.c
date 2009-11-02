@@ -53,7 +53,7 @@ static char sccsid[] = "@(#)svc_auth.c	2.1 88/08/07 4.0 RPCSRC; from 1.19 87/08/
  */
 
 static struct svcauthsw_type {
-     u_int flavor;
+     enum_t flavor;
      enum auth_stat (*authenticator)(struct svc_req *, struct rpc_msg *,
 				     bool_t *);
 } svcauthsw[] = {

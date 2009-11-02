@@ -104,8 +104,8 @@ _krb5_use_dns_realm(krb5_context context)
 int
 krb5int_grow_addrlist (struct addrlist *lp, int nmore)
 {
-    int i;
-    int newspace = lp->space + nmore;
+    size_t i;
+    size_t newspace = lp->space + nmore;
     size_t newsize = newspace * sizeof (*lp->addrs);
     void *newaddrs;
 
@@ -128,7 +128,7 @@ krb5int_grow_addrlist (struct addrlist *lp, int nmore)
 void
 krb5int_free_addrlist (struct addrlist *lp)
 {
-    int i;
+    size_t i;
     for (i = 0; i < lp->naddrs; i++)
         if (lp->addrs[i].freefn)
             (lp->addrs[i].freefn)(lp->addrs[i].data);
@@ -225,7 +225,7 @@ add_addrinfo_to_list(struct addrlist *lp, struct addrinfo *a,
     lp->addrs[lp->naddrs].freefn = freefn;
     lp->addrs[lp->naddrs].data = data;
     lp->naddrs++;
-    Tprintf ("\tcount is now %d: ", lp->naddrs);
+    Tprintf ("\tcount is now %lu: ", (unsigned long) lp->naddrs);
     print_addrlist(lp);
     Tprintf("\n");
     return 0;
@@ -248,7 +248,7 @@ krb5int_add_host_to_list (struct addrlist *lp, const char *hostname,
                           int socktype, int family)
 {
     struct addrinfo *addrs, *a, *anext, hint;
-    int err;
+    int err, result;
     char portbuf[10], secportbuf[10];
     void (*freefn)(void *);
 
@@ -262,10 +262,12 @@ krb5int_add_host_to_list (struct addrlist *lp, const char *hostname,
 #ifdef AI_NUMERICSERV
     hint.ai_flags = AI_NUMERICSERV;
 #endif
-    if (snprintf(portbuf, sizeof(portbuf), "%d", ntohs(port)) >= sizeof(portbuf))
+    result = snprintf(portbuf, sizeof(portbuf), "%d", ntohs(port));
+    if (SNPRINTF_OVERFLOW(result, sizeof(portbuf)))
         /* XXX */
         return EINVAL;
-    if (snprintf(secportbuf, sizeof(secportbuf), "%d", ntohs(secport)) >= sizeof(secportbuf))
+    result = snprintf(secportbuf, sizeof(secportbuf), "%d", ntohs(secport));
+    if (SNPRINTF_OVERFLOW(result, sizeof(secportbuf)))
         return EINVAL;
     err = getaddrinfo (hostname, portbuf, &hint, &addrs);
     if (err) {
@@ -701,7 +703,8 @@ module_locate_server (krb5_context ctx, const krb5_data *realm,
     Tprintf("stopped with plugin #%d, res=%p\n", i, res);
 
     /* Got something back, yippee.  */
-    Tprintf("now have %d addrs in list %p\n", addrlist->naddrs, addrlist);
+    Tprintf("now have %lu addrs in list %p\n",
+            (unsigned long) addrlist->naddrs, addrlist);
     print_addrlist(addrlist);
     free(realmz);
     krb5int_free_plugin_dir_data (ptrs);

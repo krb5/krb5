@@ -257,7 +257,7 @@ krb5int_debug_fprint (const char *fmt, ...)
 static void
 print_addrlist (const struct addrlist *a)
 {
-    int i;
+    size_t i;
     dprint("%d{", a->naddrs);
     for (i = 0; i < a->naddrs; i++)
         dprint("%s%p=%A", i ? "," : "", (void*)a->addrs[i].ai, a->addrs[i].ai);
@@ -269,7 +269,8 @@ merge_addrlists (struct addrlist *dest, struct addrlist *src)
 {
     /* Wouldn't it be nice if we could filter out duplicates?  The
        alloc/free handling makes that pretty difficult though.  */
-    int err, i;
+    int err;
+    size_t i;
 
     dprint("merging addrlists:\n\tlist1: ");
     for (i = 0; i < dest->naddrs; i++)
@@ -301,7 +302,7 @@ merge_addrlists (struct addrlist *dest, struct addrlist *src)
 static int
 in_addrlist (struct addrinfo *thisaddr, struct addrlist *list)
 {
-    int i;
+    size_t i;
     for (i = 0; i < list->naddrs; i++) {
         if (thisaddr->ai_addrlen == list->addrs[i].ai->ai_addrlen
             && !memcmp(thisaddr->ai_addr, list->addrs[i].ai->ai_addr,
@@ -392,7 +393,7 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
 
     if (tcp_only)
         socktype1 = SOCK_STREAM, socktype2 = 0;
-    else if (message->length <= context->udp_pref_limit)
+    else if (message->length <= (unsigned int) context->udp_pref_limit)
         socktype1 = SOCK_DGRAM, socktype2 = SOCK_STREAM;
     else
         socktype1 = SOCK_STREAM, socktype2 = SOCK_DGRAM;
@@ -743,12 +744,12 @@ start_connection (struct conn_state *state,
 
     if (ai->ai_socktype == SOCK_DGRAM) {
         /* Send it now.  */
-        int ret;
+        ssize_t ret;
         sg_buf *sg = &state->x.out.sgbuf[0];
 
         dprint("sending %d bytes on fd %d\n", SG_LEN(sg), state->fd);
         ret = send(state->fd, SG_BUF(sg), SG_LEN(sg), 0);
-        if (ret != SG_LEN(sg)) {
+        if (ret < 0 || (size_t) ret != SG_LEN(sg)) {
             dperror("sendto");
             (void) closesocket(state->fd);
             state->fd = INVALID_SOCKET;
@@ -798,6 +799,7 @@ maybe_send (struct conn_state *conn,
             krb5_data* callback_buffer)
 {
     sg_buf *sg;
+    ssize_t ret;
 
     dprint("maybe_send(@%p) state=%s type=%s\n", conn,
            state_strings[conn->state],
@@ -822,7 +824,8 @@ maybe_send (struct conn_state *conn,
        retransmit if a previous attempt timed out.  */
     sg = &conn->x.out.sgbuf[0];
     dprint("sending %d bytes on fd %d\n", SG_LEN(sg), conn->fd);
-    if (send(conn->fd, SG_BUF(sg), SG_LEN(sg), 0) != SG_LEN(sg)) {
+    ret = send(conn->fd, SG_BUF(sg), SG_LEN(sg), 0);
+    if (ret < 0 || (size_t) ret != SG_LEN(sg)) {
         dperror("send");
         /* Keep connection alive, we'll try again next pass.
 
@@ -884,7 +887,7 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
                 int ssflags)
 {
     krb5_error_code e = 0;
-    int nwritten, nread;
+    ssize_t nwritten, nread;
 
     if (!(ssflags & (SSF_READ|SSF_WRITE|SSF_EXCEPTION)))
         abort();
@@ -955,11 +958,11 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
         dprint("wrote %d bytes\n", nwritten);
         while (nwritten) {
             sg_buf *sgp = conn->x.out.sgp;
-            if (nwritten < SG_LEN(sgp)) {
-                SG_ADVANCE(sgp, nwritten);
+            if ((size_t) nwritten < SG_LEN(sgp)) {
+                SG_ADVANCE(sgp, (size_t) nwritten);
                 nwritten = 0;
             } else {
-                nwritten -= SG_LEN(conn->x.out.sgp);
+                nwritten -= SG_LEN(sgp);
                 conn->x.out.sgp++;
                 conn->x.out.sg_count--;
                 if (conn->x.out.sg_count == 0 && nwritten != 0)
@@ -1178,13 +1181,12 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
                 int (*msg_handler)(krb5_context, const krb5_data *, void *),
                 void *msg_handler_data)
 {
-    unsigned int i;
     int pass;
     int delay_this_pass = 2;
     krb5_error_code retval;
     struct conn_state *conns = NULL;
     krb5_data *callback_data = NULL;
-    size_t n_conns = 0, host;
+    size_t i, n_conns = 0, host;
     struct select_state *sel_state = NULL;
     struct timeval now;
     int winning_conn = -1, e = 0;

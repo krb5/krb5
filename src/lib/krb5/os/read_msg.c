@@ -46,7 +46,7 @@ krb5_read_message(krb5_context context, krb5_pointer fdp, krb5_data *inbuf)
         return((len2 < 0) ? errno : ECONNABORTED);
     len = ntohl(len);
 
-    if ((len & VALID_UINT_BITS) != len)  /* Overflow size_t??? */
+    if ((len & VALID_UINT_BITS) != (krb5_ui_4) len)  /* Overflow size_t??? */
         return ENOMEM;
 
     inbuf->length = ilen = (int) len;

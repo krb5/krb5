@@ -141,7 +141,7 @@ error_message(long code)
 			goto oops;
 
 		/* This could trip if int is 16 bits.  */
-		if ((unsigned long)(int)code != code)
+		if ((unsigned long)(int)code != (unsigned long)code)
 		    abort ();
 #ifdef HAVE_STRERROR_R
 		cp = get_thread_buffer();

@@ -248,7 +248,8 @@ clnt_broadcast(
 	AUTH *unix_auth = authunix_create_default();
 	XDR xdr_stream;
 	register XDR *xdrs = &xdr_stream;
-	int outlen, inlen, nets;
+	int outlen, nets;
+	ssize_t inlen;
 	GETSOCKNAME_ARG3_TYPE fromlen;
         SOCKET sock;
 	int on = 1;
@@ -381,7 +382,7 @@ clnt_broadcast(
 			stat = RPC_CANTRECV;
 			goto done_broad;
 		}
-		if (inlen < sizeof(uint32_t))
+		if ((size_t)inlen < sizeof(uint32_t))
 			goto recv_again;
 		/*
 		 * see if reply transaction id matches sent id.

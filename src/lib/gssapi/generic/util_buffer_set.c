@@ -98,7 +98,7 @@ OM_uint32 generic_gss_release_buffer_set
 	   (OM_uint32 * minor_status,
 	    gss_buffer_set_t *buffer_set)
 {
-    int i;
+    size_t i;
     OM_uint32 minor;
 
     *minor_status = 0;

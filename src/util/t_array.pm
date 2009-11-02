@@ -67,15 +67,15 @@ static inline long
     return arr->allocated;
 }
 
-static inline long
+static inline unsigned long
 <NAME>_max_size(<NAME> *arr)
 {
     size_t upper_bound;
 
     upper_bound = SIZE_MAX / sizeof(*arr->elts);
-    if (upper_bound > LONG_MAX)
-	upper_bound = LONG_MAX;
-    return (long) upper_bound;
+    if (upper_bound > ULONG_MAX)
+	upper_bound = ULONG_MAX;
+    return (unsigned long) upper_bound;
 }
 
 static inline int
@@ -105,7 +105,7 @@ static inline int
 static inline <TYPE> *
 <NAME>_getaddr (<NAME> *arr, long idx)
 {
-    if (idx < 0 || idx >= arr->allocated)
+    if (idx < 0 || (unsigned long) idx >= arr->allocated)
 	abort();
     return arr->elts + idx;
 }

@@ -127,11 +127,11 @@ krb5int_dns_init(struct krb5int_dns_state **dsp,
         len = res_search(host, ds->nclass, ds->ntype,
                          ds->ansp, ds->ansmax);
 #endif
-        if (len > maxincr) {
+        if ((size_t) len > maxincr) {
             ret = -1;
             goto errout;
         }
-        while (nextincr < len)
+        while (nextincr < (size_t) len)
             nextincr *= 2;
         if (len < 0 || nextincr > maxincr) {
             ret = -1;
@@ -251,7 +251,7 @@ initparse(struct krb5int_dns_state *ds)
     char host[MAXDNAME];
 #endif
 
-    if (ds->anslen < sizeof(HEADER))
+    if ((size_t) ds->anslen < sizeof(HEADER))
         return -1;
 
     hdr = (HEADER *)ds->ansp;

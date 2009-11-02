@@ -462,7 +462,7 @@ int krb5int_yarrow_status( Yarrow_CTX* y, int *num_sources, unsigned *source_id,
     EXCEP_DECL;
     int num = y->slow_k_of_n_thresh;
     int source = -1;
-    int emax = y->slow_thresh;
+    size_t emax = y->slow_thresh;
     size_t entropy = 0;
     unsigned i;
 
@@ -929,7 +929,8 @@ YARROW_DLL
 const char* krb5int_yarrow_str_error( int err )
 {
     err = 1-err;
-    if ( err < 0 || err >= sizeof( yarrow_str_error ) / sizeof( char* ) )
+    if ( err < 0 ||
+	 (unsigned int) err >= sizeof( yarrow_str_error ) / sizeof( char* ) )
     {
 	err = 1-YARROW_FAIL;
     }

@@ -173,7 +173,7 @@ krb5_ccache_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octet **
     kret = krb5_ser_unpack_int32(&ibuf, &bp, &remain);
     if (kret)
         return kret;
-    if (ibuf < 0 || ibuf > remain)
+    if (ibuf < 0 || (krb5_ui_4) ibuf > remain)
         return EINVAL;
 
     /* Allocate and unpack the name. */

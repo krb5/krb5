@@ -294,8 +294,8 @@ typedef struct _krb5_fcc_data {
        We used to have a stdio option, but we get more precise control
        by using the POSIX I/O functions.  */
 #define FCC_BUFSIZ 1024
-    int valid_bytes;
-    int cur_offset;
+    size_t valid_bytes;
+    size_t cur_offset;
     char buf[FCC_BUFSIZ];
 } krb5_fcc_data;
 
@@ -309,7 +309,6 @@ static off_t fcc_lseek(krb5_fcc_data *data, off_t offset, int whence)
     /* If we read some extra data in advance, and then want to know or
        use our "current" position, we need to back up a little.  */
     if (whence == SEEK_CUR && data->valid_bytes) {
-        assert(data->valid_bytes > 0);
         assert(data->cur_offset > 0);
         assert(data->cur_offset <= data->valid_bytes);
         offset -= (data->valid_bytes - data->cur_offset);
@@ -402,7 +401,6 @@ krb5_fcc_read(krb5_context context, krb5_ccache id, krb5_pointer buf, unsigned i
         int nread, e;
         size_t ncopied;
 
-        assert (data->valid_bytes >= 0);
         if (data->valid_bytes > 0)
             assert(data->cur_offset <= data->valid_bytes);
         if (data->valid_bytes == 0
@@ -500,7 +498,7 @@ krb5_fcc_read_principal(krb5_context context, krb5_ccache id, krb5_principal *pr
         return KRB5_CC_NOMEM;
     if (length) {
         size_t msize = length;
-        if (msize != length) {
+        if (msize != (krb5_ui_4) length) {
             free(tmpprinc);
             return KRB5_CC_NOMEM;
         }
@@ -557,7 +555,7 @@ krb5_fcc_read_addrs(krb5_context context, krb5_ccache id, krb5_address ***addrs)
      */
     msize = length;
     msize += 1;
-    if (msize == 0 || msize - 1 != length || length < 0)
+    if (msize == 0 || msize - 1 != (krb5_ui_4) length || length < 0)
         return KRB5_CC_NOMEM;
     *addrs = ALLOC (msize, krb5_address *);
     if (*addrs == NULL)
@@ -613,11 +611,11 @@ krb5_fcc_read_keyblock(krb5_context context, krb5_ccache id, krb5_keyblock *keyb
         return KRB5_CC_NOMEM;
     keyblock->length = int32;
     /* Overflow check.  */
-    if (keyblock->length != int32)
+    if (keyblock->length != (krb5_ui_4) int32)
         return KRB5_CC_NOMEM;
     if ( keyblock->length == 0 )
         return KRB5_OK;
-    keyblock->contents = ALLOC (keyblock->length, krb5_octet);
+    keyblock->contents = malloc(keyblock->length);
     if (keyblock->contents == NULL)
         return KRB5_CC_NOMEM;
 
@@ -650,7 +648,7 @@ krb5_fcc_read_data(krb5_context context, krb5_ccache id, krb5_data *data)
     if (len < 0)
         return KRB5_CC_NOMEM;
     data->length = len;
-    if (data->length != len || data->length + 1 == 0)
+    if (data->length != (krb5_ui_4) len || data->length + 1 == 0)
         return KRB5_CC_NOMEM;
 
     if (data->length == 0) {
@@ -698,7 +696,7 @@ krb5_fcc_read_addr(krb5_context context, krb5_ccache id, krb5_address *addr)
     addr->length = int32;
     /* Length field is "unsigned int", which may be smaller than 32
        bits.  */
-    if (addr->length != int32)
+    if (addr->length != (krb5_ui_4) int32)
         return KRB5_CC_NOMEM;  /* XXX */
 
     if (addr->length == 0)
@@ -828,7 +826,7 @@ krb5_fcc_read_authdata(krb5_context context, krb5_ccache id, krb5_authdata ***a)
      */
     msize = length;
     msize += 1;
-    if (msize == 0 || msize - 1 != length || length < 0)
+    if (msize == 0 || msize - 1 != (krb5_ui_4) length || length < 0)
         return KRB5_CC_NOMEM;
     *a = ALLOC (msize, krb5_authdata *);
     if (*a == NULL)
@@ -877,7 +875,7 @@ krb5_fcc_read_authdatum(krb5_context context, krb5_ccache id, krb5_authdata *a)
     a->length = int32;
     /* Value could have gotten truncated if int is smaller than 32
        bits.  */
-    if (a->length != int32)
+    if (a->length != (krb5_ui_4) int32)
         return KRB5_CC_NOMEM;   /* XXX */
 
     if (a->length == 0 )
@@ -924,7 +922,7 @@ krb5_fcc_write(krb5_context context, krb5_ccache id, krb5_pointer buf, unsigned 
     ret = write(((krb5_fcc_data *)id->data)->file, (char *) buf, len);
     if (ret < 0)
         return krb5_fcc_interpret(context, errno);
-    if (ret != len)
+    if ((unsigned int) ret != len)
         return KRB5_CC_WRITE;
     return KRB5_OK;
 }

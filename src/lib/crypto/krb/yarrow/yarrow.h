@@ -121,8 +121,8 @@ typedef struct
     int slow_k_of_n;
 
     /* current thresholds */
-    int slow_thresh;
-    int fast_thresh;
+    size_t slow_thresh;
+    size_t fast_thresh;
     int slow_k_of_n_thresh;
 } Yarrow_CTX;
 

@@ -620,8 +620,8 @@ struct addrlist {
 	void (*freefn)(void *);
 	void *data;
     } *addrs;
-    int naddrs;
-    int space;
+    size_t naddrs;
+    size_t space;
 };
 #define ADDRLIST_INIT { 0, 0, 0 }
 extern void krb5int_free_addrlist (struct addrlist *);

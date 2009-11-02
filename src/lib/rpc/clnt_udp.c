@@ -237,7 +237,7 @@ clntudp_call(
 	register struct cu_data *cu = (struct cu_data *)cl->cl_private;
 	register XDR *xdrs;
 	register int outlen;
-	register int inlen;
+	register ssize_t inlen;
 	GETSOCKNAME_ARG3_TYPE fromlen; /* Assumes recvfrom uses same type */
 #ifdef FD_SETSIZE
 	fd_set readfds;
@@ -344,7 +344,7 @@ send_again:
 			cu->cu_error.re_errno = errno;
 			return (cu->cu_error.re_status = RPC_CANTRECV);
 		}
-		if (inlen < sizeof(uint32_t))
+		if ((size_t)inlen < sizeof(uint32_t))
 			continue;
 		/* see if reply transaction id matches sent id */
 		if (*((uint32_t *)(void *)(cu->cu_inbuf)) !=

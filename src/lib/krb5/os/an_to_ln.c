@@ -233,7 +233,7 @@ aname_do_match(char *string, char **contextp)
                 if (!regcomp(&match_exp, regexp, REG_EXTENDED) &&
                     !regexec(&match_exp, string, 1, &match_match, 0)) {
                     if ((match_match.rm_so == 0) &&
-                        (match_match.rm_eo == strlen(string)))
+                        ((unsigned int) match_match.rm_eo == strlen(string)))
                         kret = 0;
                 }
                 regfree(&match_exp);

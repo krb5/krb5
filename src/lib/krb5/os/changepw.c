@@ -74,7 +74,7 @@ krb5_locate_kpasswd(krb5_context context, const krb5_data *realm,
         if (!code) {
             /* Success with admin_server but now we need to change the
                port number to use DEFAULT_KPASSWD_PORT and the socktype.  */
-            int i;
+            size_t i;
             for (i=0; i<addrlist->naddrs; i++) {
                 struct addrinfo *a = addrlist->addrs[i].ai;
                 if (a->ai_family == AF_INET)

@@ -15,7 +15,7 @@
 #define HASH_Init(x) shsInit(x)
 #define HASH_Update(x, buf, sz) shsUpdate(x, (const void*)buf, sz)
 #define HASH_Final(x, tdigest)  do { \
-  int loopvar; \
+  size_t loopvar; \
   unsigned char *out2 = (void *)(tdigest); \
   HASH_CTX  *ctx = (x); \
   shsFinal(ctx); \

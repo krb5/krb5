@@ -83,7 +83,7 @@ krb5int_ucstrncasechr(
 {
     c = uctolower(c);
     for (; 0 < n; ++u, --n) {
-	if (uctolower(*u) == c) {
+	if ((krb5_unicode) uctolower(*u) == c) {
 	    return (krb5_unicode *) u;
 	}
     }
