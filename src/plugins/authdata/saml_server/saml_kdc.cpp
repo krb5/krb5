@@ -63,7 +63,8 @@
  *     that we issued the assertion (we can't use the session key because
  *     the ticket containing the session key is not available). For now,
  *     we're not going to support this, although we could with a TGS
- *     signature.
+ *     signature. (Actually, the right way to do this is to have an
+ *     assertion signed with the IdP's shared secret.)
  */
 
 krb5_error_code

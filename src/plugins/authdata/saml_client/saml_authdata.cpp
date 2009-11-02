@@ -272,41 +272,16 @@ saml_import_authdata(krb5_context kcontext,
                      krb5_boolean kdc_issued_flag,
                      krb5_const_principal issuer)
 {
-    krb5_error_code code = 0;
     struct saml_context *sc = (struct saml_context *)request_context;
-    string samlbuf((char *)authdata[0]->contents, authdata[0]->length);
-    istringstream samlin(samlbuf);
-    DOMDocument *doc = NULL;
-    DOMElement *elem = NULL;
-    const XMLObjectBuilder *b;
-    XMLObject *xobj;
 
     if (sc->assertion != NULL) {
         delete sc->assertion;
         sc->assertion = NULL;
     }
+
     sc->verified = FALSE;
 
-    try {
-        doc = XMLToolingConfig::getConfig().getParser().parse(samlin);
-        b = XMLObjectBuilder::getDefaultBuilder();
-        elem = doc->getDocumentElement();
-        xobj = b->buildOneFromElement(elem, true);
-#if 0
-        sc->assertion = dynamic_cast<saml2::Assertion*>(xobj);
-        if (sc->assertion == NULL) {
-            fprintf(stderr, "%s\n", typeid(xobj).name());
-            delete xobj;
-            code = ASN1_PARSE_ERROR;
-        }
-#else
-        sc->assertion = (saml2::Assertion*)((void *)xobj);
-#endif
-    } catch (exception &e) {
-        code = ASN1_PARSE_ERROR; /* XXX */
-    }
-
-    return code;
+    return saml_krb_decode_assertion(kcontext, authdata[0], &sc->assertion);
 }
 
 static void

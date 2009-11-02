@@ -673,6 +673,8 @@ saml_krb_decode_assertion(krb5_context context,
     DOMElement *elem;
     XMLObject *xobj;
 
+    *pAssertion = NULL;
+
     /*
      * Attempt to parse the assertion.
      */
@@ -685,8 +687,8 @@ saml_krb_decode_assertion(krb5_context context,
         elem = doc->getDocumentElement();
         xobj = b->buildOneFromElement(elem, true);
 #if 0
-        assertion = dynamic_cast<saml2::Assertion*>(xobj);
-        if (assertion == NULL) {
+        *pAssertion = dynamic_cast<saml2::Assertion*>(xobj);
+        if (*pAssertion == NULL) {
             fprintf(stderr, "%s\n", typeid(xobj).name());
             delete xobj;
             code = ASN1_PARSE_ERROR;
@@ -707,14 +709,14 @@ saml_krb_decode_assertion(krb5_context context,
                           krb5_authdata *authdata,
                           saml2::Assertion **pAssertion)
 {
-    krb5_data d;
+    krb5_data data;
 
     if (authdata->ad_type != KRB5_AUTHDATA_SAML)
         return EINVAL;
 
-    d.data = (char *)authdata->contents;
-    d.length = authdata->length;
+    data.data = (char *)authdata->contents;
+    data.length = authdata->length;
 
-    return saml_krb_decode_assertion(context, &d, pAssertion);
+    return saml_krb_decode_assertion(context, &data, pAssertion);
 }
 
