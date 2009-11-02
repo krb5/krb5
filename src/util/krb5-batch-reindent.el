@@ -30,13 +30,13 @@
 
 ;; Old style whitespace.el uses different variables.
 (defun whitespace-old ()
-  (let (whitespace-check-indent-whitespace
-        whitespace-check-spacetab-whitespace)
+  (let (whitespace-check-buffer-indent
+        whitespace-check-buffer-spacetab)
     (if (local-variable-p 'indent-tabs-mode)
         (progn
           (message "Enabling tab cleanups.")
-          (setq whitespace-check-indent-whitespace indent-tabs-mode)
-          (setq whitespace-check-spacetab-whitespace t)))
+          (setq whitespace-check-buffer-indent indent-tabs-mode)
+          (setq whitespace-check-buffer-spacetab t)))
     (message "Cleaning whitespace...")
     (whitespace-cleanup)))
 
@@ -59,7 +59,7 @@
     (if (equal c-indentation-style "krb5")
         (c-indent-region (point-min) (point-max)))
 
-    (if (custom-variable-p 'whitespace-style)
+    (if (fboundp 'whitespace-newline-mode)
         (whitespace-new)
       (whitespace-old))
 
