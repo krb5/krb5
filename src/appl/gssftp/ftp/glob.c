@@ -86,12 +86,12 @@ char	*home;
 static	char *strspl (char *, char *), *strend (char *);
 char	**copyblk (char **);
 
-static void acollect (char *), addpath (int), 
-  collect (char *), expand (char *), 
+static void acollect (char *), addpath (int),
+  collect (char *), expand (char *),
   Gcat (char *, char *);
 static void ginit (char **), matchdir (char *),
   rscan (char **, int (*f)()), sort (void);
-static int amatch (char *, char *), 
+static int amatch (char *, char *),
   execbrc (char *, char *), match (char *, char *);
 static int digit (int), letter (int),
   any (int, char *);

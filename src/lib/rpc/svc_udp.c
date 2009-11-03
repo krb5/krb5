@@ -6,23 +6,23 @@
  * may copy or modify Sun RPC without charge, but are not authorized
  * to license or distribute it to anyone else except as part of a product or
  * program developed by the user.
- * 
+ *
  * SUN RPC IS PROVIDED AS IS WITH NO WARRANTIES OF ANY KIND INCLUDING THE
  * WARRANTIES OF DESIGN, MERCHANTIBILITY AND FITNESS FOR A PARTICULAR
  * PURPOSE, OR ARISING FROM A COURSE OF DEALING, USAGE OR TRADE PRACTICE.
- * 
+ *
  * Sun RPC is provided with no support and without any obligation on the
  * part of Sun Microsystems, Inc. to assist in its use, correction,
  * modification or enhancement.
- * 
+ *
  * SUN MICROSYSTEMS, INC. SHALL HAVE NO LIABILITY WITH RESPECT TO THE
  * INFRINGEMENT OF COPYRIGHTS, TRADE SECRETS OR ANY PATENTS BY SUN RPC
  * OR ANY PART THEREOF.
- * 
+ *
  * In no event will Sun Microsystems, Inc. be liable for any lost revenue
  * or profits or other special, indirect and consequential damages, even if
  * Sun has been advised of the possibility of such damages.
- * 
+ *
  * Sun Microsystems, Inc.
  * 2550 Garcia Avenue
  * Mountain View, California  94043
@@ -177,7 +177,7 @@ static enum xprt_stat
 svcudp_stat(SVCXPRT *xprt)
 {
 
-	return (XPRT_IDLE); 
+	return (XPRT_IDLE);
 }
 
 static bool_t
@@ -208,7 +208,7 @@ svcudp_recv(
 	     else
 		  return (FALSE);
 	}
-	
+
 	xprt->xp_addrlen = sizeof(struct sockaddr_in);
 	rlen = recvfrom(xprt->xp_sock, rpc_buffer(xprt), (int) su->su_iosz,
 	    0, (struct sockaddr *)&(xprt->xp_raddr), &(xprt->xp_addrlen));
@@ -239,7 +239,7 @@ static bool_t svcudp_reply(
      register XDR *xdrs = &(su->su_xdrs);
      register int slen;
      register bool_t stat = FALSE;
-     
+
      xdrproc_t xdr_results;
      caddr_t xdr_location;
      bool_t has_args;
@@ -249,12 +249,12 @@ static bool_t svcudp_reply(
 	  has_args = TRUE;
 	  xdr_results = msg->acpted_rply.ar_results.proc;
 	  xdr_location = msg->acpted_rply.ar_results.where;
-	  
+
 	  msg->acpted_rply.ar_results.proc = xdr_void;
 	  msg->acpted_rply.ar_results.where = NULL;
      } else
 	  has_args = FALSE;
-	  
+
      xdrs->x_op = XDR_ENCODE;
      XDR_SETPOS(xdrs, 0);
      msg->rm_xid = su->su_xid;
@@ -337,7 +337,7 @@ svcudp_destroy(register SVCXPRT *xprt)
 	(type *) mem_alloc((unsigned) (sizeof(type) * (size)))
 
 #define BZERO(addr, type, size)	 \
-	memset(addr, 0, sizeof(type) * (int) (size)) 
+	memset(addr, 0, sizeof(type) * (int) (size))
 
 /*
  * An entry in the cache
@@ -360,7 +360,7 @@ struct cache_node {
 	/*
  	 * Next node on the list, if there is a collision
 	 */
-	cache_ptr cache_next;	
+	cache_ptr cache_next;
 };
 
 
@@ -384,11 +384,11 @@ struct udp_cache {
  * the hashing function
  */
 #define CACHE_LOC(transp, xid)	\
- (xid % (SPARSENESS*((struct udp_cache *) su_data(transp)->su_cache)->uc_size))	
+ (xid % (SPARSENESS*((struct udp_cache *) su_data(transp)->su_cache)->uc_size))
 
 
 /*
- * Enable use of the cache. 
+ * Enable use of the cache.
  * Note: there is no disable.
  */
 int
@@ -401,7 +401,7 @@ svcudp_enablecache(
 
 	if (su->su_cache != NULL) {
 		CACHE_PERROR("enablecache: cache already enabled");
-		return(0);	
+		return(0);
 	}
 	uc = ALLOC(struct udp_cache, 1);
 	if (uc == NULL) {
@@ -435,7 +435,7 @@ cache_set(
 	SVCXPRT *xprt,
 	uint32_t replylen)
 {
-	register cache_ptr victim;	
+	register cache_ptr victim;
 	register cache_ptr *vicp;
 	register struct svcudp_data *su = su_data(xprt);
 	struct udp_cache *uc = (struct udp_cache *) su->su_cache;
@@ -449,9 +449,9 @@ cache_set(
 	victim = uc->uc_fifo[uc->uc_nextvictim];
 	if (victim != NULL) {
 		loc = CACHE_LOC(xprt, victim->cache_xid);
-		for (vicp = &uc->uc_entries[loc]; 
-		  *vicp != NULL && *vicp != victim; 
-		  vicp = &(*vicp)->cache_next) 
+		for (vicp = &uc->uc_entries[loc];
+		  *vicp != NULL && *vicp != victim;
+		  vicp = &(*vicp)->cache_next)
 				;
 		if (*vicp == NULL) {
 			CACHE_PERROR("cache_set: victim not found");
@@ -485,7 +485,7 @@ cache_set(
 	victim->cache_prog = uc->uc_prog;
 	victim->cache_addr = uc->uc_addr;
 	loc = CACHE_LOC(xprt, victim->cache_xid);
-	victim->cache_next = uc->uc_entries[loc];	
+	victim->cache_next = uc->uc_entries[loc];
 	uc->uc_entries[loc] = victim;
 	uc->uc_fifo[uc->uc_nextvictim++] = victim;
 	uc->uc_nextvictim %= uc->uc_size;
@@ -531,4 +531,3 @@ cache_get(
 	uc->uc_addr = xprt->xp_raddr;
 	return(0);
 }
-

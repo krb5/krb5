@@ -5,7 +5,7 @@
  * documentation is hereby granted, provided that both the copyright
  * notice and this permission notice appear in all copies of the software,
  * derivative works or modified versions, and any portions thereof.
- * 
+ *
  * NRL ALLOWS FREE USE OF THIS SOFTWARE IN ITS "AS IS" CONDITION AND
  * DISCLAIMS ANY LIABILITY OF ANY KIND FOR ANY DAMAGES WHATSOEVER
  * RESULTING FROM THE USE OF THIS SOFTWARE.
@@ -22,7 +22,7 @@
  * DR is defined as the generate "random" data from a key
  * (defined in crypto draft)
  *
- * DK is defined as the key derivation function (krb5_derive_key())
+ * DK is defined as the key derivation function (krb5int_derive_key())
  *
  * (note: | means "concatenate")
  *
@@ -137,14 +137,14 @@ krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
     /*
      * Concatenate the two keys together, and then run them through
      * n-fold to reduce them to a length appropriate for the random-to-key
-     * operation.  Note here that krb5_nfold() takes sizes in bits, hence
+     * operation.  Note here that krb5int_nfold() takes sizes in bits, hence
      * the multiply by 8.
      */
 
     memcpy(combined, r1, keybytes);
     memcpy(combined + keybytes, r2, keybytes);
 
-    krb5_nfold((keybytes * 2) * 8, combined, keybytes * 8, rnd);
+    krb5int_nfold((keybytes * 2) * 8, combined, keybytes * 8, rnd);
 
     /*
      * Run the "random" bits through random-to-key to produce a encryption
@@ -190,7 +190,7 @@ krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
 	myalloc = TRUE;
     }
 
-    ret = krb5_derive_keyblock(enc, tkey, outkey, &input);
+    ret = krb5int_derive_keyblock(enc, tkey, outkey, &input);
     if (ret) {
 	if (myalloc) {
 	    free(outkey->contents);
@@ -248,7 +248,7 @@ dr(const struct krb5_enc_provider *enc, const krb5_keyblock *inkey,
     if (in_constant->length == inblock.length) {
 	memcpy(inblock.data, in_constant->data, inblock.length);
     } else {
-	krb5_nfold(in_constant->length*8, (unsigned char *) in_constant->data,
+	krb5int_nfold(in_constant->length*8, (unsigned char *) in_constant->data,
 		   inblock.length*8, (unsigned char *) inblock.data);
     }
 
@@ -276,4 +276,3 @@ cleanup:
     krb5_k_free_key(NULL, key);
     return ret;
 }
-

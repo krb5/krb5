@@ -35,7 +35,7 @@
 /*
  * This is a hack needed because the real com_err.h does
  * not define err_func.  We need it in the case where
- * we pull in the real com_err instead of the krb4 
+ * we pull in the real com_err instead of the krb4
  * impostor.
  */
 #ifndef _DCNS_MIT_COM_ERR_H

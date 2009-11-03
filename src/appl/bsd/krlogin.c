@@ -21,14 +21,14 @@
 
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
  * responsibility of any person or organization contemplating export to
  * obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -39,7 +39,7 @@
  * permission.  FundsXpress makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -53,11 +53,11 @@ char copyright[] =
 
 /* based on @(#)rlogin.c	5.12 (Berkeley) 9/19/88 */
 
-     
+
      /*
       * rlogin - remote login
       */
-     
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -86,7 +86,7 @@ char copyright[] =
 #include <signal.h>
 #include <setjmp.h>
 #include <netdb.h>
-     
+
 #ifdef HAVE_SYS_FILIO_H
 /* Solaris needs <sys/filio.h> for FIONREAD */
 #include <sys/filio.h>
@@ -158,7 +158,7 @@ char copyright[] =
 #include <krb5.h>
 #include <com_err.h>
 #include "defines.h"
-     
+
 #define RLOGIN_BUFSIZ 5120
 
 void try_normal();
@@ -319,7 +319,7 @@ struct winsize *wp;
     if ((error = ioctl(0, TIOCGSIZE, &ts)) != 0)
       return (error);
 #endif
-    
+
     wp->ws_row = ts.ts_lines;
     wp->ws_col = ts.ts_cols;
     wp->ws_xpixel = 0;
@@ -535,12 +535,12 @@ main(argc, argv)
 #ifdef KERBEROS
     /*
      * if there is an entry in /etc/services for Kerberos login,
-     * attempt to login with Kerberos. 
+     * attempt to login with Kerberos.
      * If we fail at any step,  use the standard rlogin
      */
       if (encrypt_flag)
 	sp = getservbyname("eklogin","tcp");
-      else 
+      else
 	sp = getservbyname("klogin","tcp");
       if (sp == 0) {
 		sp = &defaultservent;   /* ANL */
@@ -590,7 +590,7 @@ main(argc, argv)
     }
 #endif
     (void) get_window_size(0, &winsize);
-    
+
 #ifdef POSIX_TERMIOS
     tcgetattr(0, &defmodes);
     tcgetattr(0, &ixon_state);
@@ -610,7 +610,7 @@ main(argc, argv)
     sa.sa_flags = 0;
     sa.sa_handler = lostpeer;
     (void) sigaction(SIGPIPE, &sa, (struct sigaction *)0);
-    
+
     (void) sigemptyset(&urgmask);
     (void) sigaddset(&urgmask, SIGUSR1);
     oldmask = &omask;
@@ -667,9 +667,9 @@ main(argc, argv)
 
 	rcmd_stream_init_krb5(key, encrypt_flag, 1, 1, kcmd_proto);
     }
-	
+
     rem = sock;
-    
+
 #else
     rem = rcmd(&host, port,
 	       null_local_username ? "" : pwd->pw_name,
@@ -678,7 +678,7 @@ main(argc, argv)
 
     if (rem < 0)
       exit(1);
-    
+
     if (options & SO_DEBUG &&
 	setsockopt(rem, SOL_SOCKET, SO_DEBUG, (char*)&on, sizeof (on)) < 0)
       perror("rlogin: setsockopt (SO_DEBUG)");
@@ -711,12 +711,12 @@ static int confirm_death ()
     char input;
     int answer;
     if (!confirm) return (1);	/* no confirm, just die */
-    
+
     if (gethostname (hostname, sizeof(hostname)-1) != 0)
       strlcpy (hostname, "???", sizeof(hostname));
     else
       hostname[sizeof(hostname)-1] = '\0';
-    
+
     fprintf (stderr, "\r\nKill session on %s from %s (y/n)?  ",
 	     host, hostname);
     fflush (stderr);
@@ -800,7 +800,7 @@ static void doit(oldmask)
 #else
     struct sgttyb sb;
 #endif
-    
+
     (void) ioctl(0, TIOCGETP, (char *)&sb);
     defflags = sb.sg_flags;
 #ifdef USE_TERMIO
@@ -857,13 +857,13 @@ static void doit(oldmask)
 	prf("\007Connection closed.");
 	exit(3);
     }
-    
+
 #ifdef POSIX_SIGNALS
     /* "sa" has already been initialized above. */
 
     sa.sa_handler = writeroob;
     (void) sigaction(SIGUSR1, &sa, (struct sigaction *)0);
-    
+
     sigprocmask(SIG_SETMASK, oldmask, (sigset_t*)0);
 
     sa.sa_handler = catchild;
@@ -893,7 +893,7 @@ setsignal(sig, act)
 #ifdef POSIX_SIGNALS
     sigset_t omask, igmask;
     struct sigaction sa;
-    
+
     sigemptyset(&igmask);
     sigaddset(&igmask, sig);
     sigprocmask(SIG_BLOCK, &igmask, &omask);
@@ -904,7 +904,7 @@ setsignal(sig, act)
     int omask = sigblock(sigmask(sig));
 #endif
 #endif /* POSIX_SIGNALS */
-    
+
 #ifdef POSIX_SIGNALS
     (void) sigaction(sig, (struct sigaction *)0, &sa);
     if (sa.sa_handler != SIG_IGN) {
@@ -914,7 +914,7 @@ setsignal(sig, act)
 	(void) sigaction(sig, &sa, (struct sigaction *)0);
     }
     sigprocmask(SIG_SETMASK, &omask, (sigset_t*)0);
-#else    
+#else
     if (signal(sig, act) == SIG_IGN)
 	(void) signal(sig, SIG_IGN);
 #ifndef sgi
@@ -935,7 +935,7 @@ done(status)
 #ifndef HAVE_WAITPID
     pid_t w;
 #endif
-    
+
     mode(0);
     if (child > 0) {
 	/* make sure catchild does not snap it up */
@@ -947,7 +947,7 @@ done(status)
 #else
 	(void) signal(SIGCHLD, SIG_DFL);
 #endif
-	
+
 	if (kill(child, SIGKILL) >= 0) {
 #ifdef HAVE_WAITPID
 	    (void) waitpid(child, 0, 0);
@@ -976,7 +976,7 @@ int signo;
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
 #endif
-    
+
     if (dosigwinch == 0) {
 	sendwindow();
 #ifdef POSIX_SIGNALS
@@ -1003,7 +1003,7 @@ int signo;
     union wait status;
 #endif
     int pid;
-    
+
   again:
 #ifdef HAVE_WAITPID
     pid = waitpid(-1, &status, WNOHANG|WUNTRACED);
@@ -1041,10 +1041,10 @@ static void writer()
 		    was encountered */
     char c;
 
-#ifdef ultrix             
+#ifdef ultrix
     fd_set waitread;
     register n;
-    
+
     /* we need to wait until the reader() has set up the terminal, else
        the read() below may block and not unblock when the terminal
        state is reset.
@@ -1067,11 +1067,11 @@ static void writer()
 
     /* This loop works as follows.  Call read_wrapper to get data until
        we would block or until we read a cmdchar at the beginning of a line.
-       If got_esc is false, we just send everything we got back.  If got_esc 
-       is true, we send everything except the cmdchar at the end and look at 
+       If got_esc is false, we just send everything we got back.  If got_esc
+       is true, we send everything except the cmdchar at the end and look at
        the next char.  If its a "." we break out of the loop and terminate.
        If its ^Z or ^Y we call stop with the value of the char and continue.
-       If its none of those, we send the cmdchar and then send the char we 
+       If its none of those, we send the cmdchar and then send the char we
        just read, unless that char is also the cmdchar (in which case we are
        only supposed to send one of them).  When this loop ends, so does the
        program.
@@ -1081,12 +1081,12 @@ static void writer()
 
       /* read until we would block or we get a cmdchar */
       n_read = read_wrapper(0,buf,sizeof(buf),&got_esc);
-  
+
       /* if read returns an error or 0 bytes, just quit */
       if (n_read <= 0) {
 	break;
       }
-      
+
       if (!got_esc) {
 	if (rcmd_stream_write(rem, buf, (unsigned) n_read, 0) == 0) {
 	  prf("line gone");
@@ -1108,22 +1108,22 @@ static void writer()
 	}
 
 #ifdef POSIX_TERMIOS
-	if (c == '.' || c == deftty.c_cc[VEOF]) 
+	if (c == '.' || c == deftty.c_cc[VEOF])
 #else
-	  if (c == '.' || c == deftc.t_eofc) 
+	  if (c == '.' || c == deftc.t_eofc)
 #endif
 	    {
 	      if (confirm_death()) {
 		echo(c);
-		break; 
+		break;
 	      }
 	    }
 
 #ifdef POSIX_TERMIOS
 	if ( (
-	      (c == deftty.c_cc[VSUSP]) 
+	      (c == deftty.c_cc[VSUSP])
 #ifdef VDSUSP
-	      || (c == deftty.c_cc[VDSUSP]) 
+	      || (c == deftty.c_cc[VDSUSP])
 #endif
 	      )
 	     && !no_local_escape) {
@@ -1142,7 +1142,7 @@ static void writer()
 #endif /*TIOCGLTC*/
 #endif
 
-      
+
 	if (c != cmdchar) {
 	  rcmd_stream_write(rem, &cmdchar, 1, 0);
 	}
@@ -1160,15 +1160,15 @@ static void writer()
    copy more than size bytes.  In addition, if it encounters a cmdchar
    at the beginning of a line, it will copy everything up to and including
    the cmdchar, but nothing after that.  In this instance *esc_char is set
-   to true and any remaining data is buffered and copied on a subsequent 
+   to true and any remaining data is buffered and copied on a subsequent
    call.  Otherwise, *esc_char will be set to false and the minimum of size,
    1024, and the number of bytes that can be read without blocking will
-   be copied.  In all cases, a non-negative return value indicates the number 
+   be copied.  In all cases, a non-negative return value indicates the number
    of bytes actually copied and a return value of -1 indicates that there
-   was a read error (other than EINTR) and errno is set appropriately. 
+   was a read error (other than EINTR) and errno is set appropriately.
 */
 
-static int read_wrapper(fd,buf,size,got_esc) 
+static int read_wrapper(fd,buf,size,got_esc)
      int fd;
      char *buf;
      int size;
@@ -1201,7 +1201,7 @@ static int read_wrapper(fd,buf,size,got_esc)
   */
 
   while (data_start+return_length < data_end && return_length < size) {
-    
+
     c = *(data_start+return_length);
     return_length++;
 
@@ -1215,14 +1215,14 @@ static int read_wrapper(fd,buf,size,got_esc)
     bol = (c == deftty.c_cc[VKILL] ||
 	   c == deftty.c_cc[VINTR] ||
 	   c == '\r' || c == '\n');
-	
+
 #else /* !POSIX_TERMIOS */
     bol = c == defkill || c == deftc.t_eofc ||
       c == deftc.t_intrc || c == defltc.t_suspc ||
       c == '\r' || c == '\n';
 #endif
   }
-   
+
   memcpy(buf, data_start, return_length);
   data_start = data_start + return_length;
   return return_length;
@@ -1233,7 +1233,7 @@ static void echo(c)
 {
     char buf[8];
     register char *p = buf;
-    
+
     c &= 0177;
     *p++ = cmdchar;
     if (c < ' ') {
@@ -1257,7 +1257,7 @@ static void stop(cmdc)
 #ifdef POSIX_SIGNALS
     struct sigaction sa;
 #endif
-    
+
     mode(0);
 
 #ifdef POSIX_SIGNALS
@@ -1268,7 +1268,7 @@ static void stop(cmdc)
 #else
     (void) signal(SIGCHLD, SIG_IGN);
 #endif
-    
+
 #ifdef POSIX_TERMIOS
     (void) kill(cmdc == deftty.c_cc[VSUSP] ? 0 : getpid(), SIGTSTP);
 #else
@@ -1282,7 +1282,7 @@ static void stop(cmdc)
 #else
     (void) signal(SIGCHLD, catchild);
 #endif
-    
+
     mode(1);
     sigwinch(SIGWINCH);		/* check for size changes */
 }
@@ -1294,7 +1294,7 @@ krb5_sigtype
 int signo;
 {
     struct winsize ws;
-    
+
     if (dosigwinch && get_window_size(0, &ws) == 0 &&
 	memcmp(&winsize, &ws, sizeof (ws))) {
 	winsize = ws;
@@ -1311,7 +1311,7 @@ static void sendwindow()
 {
     char obuf[4 + sizeof (struct winsize)];
     struct winsize *wp = (struct winsize *)(void *)(obuf+4);
-    
+
     obuf[0] = 0377;
     obuf[1] = 0377;
     obuf[2] = 's';
@@ -1424,7 +1424,7 @@ void oob()
     int atmark, n;
 
     mark = 0;
-    
+
     recv(rem, &mark, 1, MSG_OOB);
 
     if (server_message(mark)) {
@@ -1445,7 +1445,7 @@ void oob()
 /* two control messages are defined:
 
    a double flag byte of 'o' indicates a one-byte message which is
-   identical to what was once carried out of band.  
+   identical to what was once carried out of band.
 
    a double flag byte of 'q' indicates a zero-byte message.  This
    message is interpreted as two \377 data bytes.  This is just a
@@ -1471,9 +1471,9 @@ static int control(cp, n)
 }
 
 /*
- * reader: read from remote: line -> 1 
+ * reader: read from remote: line -> 1
  */
-static int 
+static int
 reader(oldmask)
 #ifdef POSIX_SIGNALS
     sigset_t *oldmask;
@@ -1495,10 +1495,10 @@ reader(oldmask)
     sa.sa_handler = SIG_IGN;
     (void) sigaction(SIGTTOU, &sa, (struct sigaction *)0);
 
-#else    
+#else
     (void) signal(SIGTTOU, SIG_IGN);
 #endif
-    
+
     ppid = getppid();
     FD_ZERO(&readset);
     FD_ZERO(&excset);
@@ -1606,7 +1606,7 @@ int f;
 	/* there's a POSIX way of doing this, but do we need it general? */
 	newtty.c_cc[VLNEXT] = _POSIX_VDISABLE;
 #endif
-		
+
 	newtty.c_lflag &= ~(ICANON|ISIG|ECHO|IEXTEN);
 	newtty.c_iflag &= ~(ISTRIP|INLCR|ICRNL);
 
@@ -1648,10 +1648,10 @@ int f;
     int	lflags;
     (void) ioctl(0, TIOCLGET, (char *)&lflags);
 #endif
-    
+
     (void) ioctl(0, TIOCGETP, (char *)&sb);
     switch (f) {
-	
+
     case 0:
 #ifdef USE_TERMIO
 	/*
@@ -1674,7 +1674,7 @@ int f;
 #endif
 	ltc = &defltc;
 	break;
-	
+
     case 1:
 #ifdef USE_TERMIO
 	/*
@@ -1722,10 +1722,10 @@ int f;
 	tc = &notc;
 	sb.sg_flags &= ~defflags;
 #endif /* USE_TERMIO */
-	
+
 	ltc = &noltc;
 	break;
-	
+
     default:
 	return;
     }
@@ -1758,7 +1758,7 @@ void try_normal(argv)
 #ifdef POSIX_SIGNALS
     sigset_t mask;
 #endif
-    
+
 #ifndef KRB5_ATHENA_COMPAT
     if (encrypt_flag)
       exit(1);
@@ -1766,7 +1766,7 @@ void try_normal(argv)
     fprintf(stderr,"trying normal rlogin (%s)\n",
 	    UCB_RLOGIN);
     fflush(stderr);
-    
+
     nhost = strrchr(argv[0], '/');
     if (nhost)
       nhost++;
@@ -1774,7 +1774,7 @@ void try_normal(argv)
       nhost = argv[0];
     if (!strcmp(nhost, "rlogin") || !strcmp(nhost, "rsh"))
       argv[0] = UCB_RLOGIN;
-    
+
 #ifdef POSIX_SIGNALS
     sigemptyset(&mask);
     sigprocmask(SIG_SETMASK, &mask, NULL);
@@ -1801,7 +1801,7 @@ krb5_sigtype lostpeer(signo)
 #else
     (void) signal(SIGPIPE, SIG_IGN);
 #endif
-    
+
     prf("\007Connection closed.");
     done(1);
 }

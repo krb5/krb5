@@ -156,7 +156,7 @@ LPSTR err_describe(LPSTR buf, size_t len, long code)
         case GT_PW_NULLTKT:  /* 55    Null tkt returned by KDC */
             /* no error msg yet */
             break;
-	  
+
             /* Values returned by send_to_kdc */
         case SKDC_RETRY   :  /* 56    Retry count exceeded */
         case SKDC_CANT    :  /* 57    Can't send request */
@@ -187,9 +187,9 @@ LPSTR err_describe(LPSTR buf, size_t len, long code)
              * message box is too small for VGA screens.
              * It does work well if we only have to support 1024x768
              */
-	
+
             com_err_msg = "You have entered an insecure or weak password.";
-	
+
         default:
             /* no extra error msg */
             break;
@@ -216,11 +216,10 @@ LPSTR err_describe(LPSTR buf, size_t len, long code)
 #endif
              ")", etype, offset
              //")\nPress F1 for help on this error.", etype, offset
-#ifdef DEBUG_COM_ERR 
+#ifdef DEBUG_COM_ERR
              , code
 #endif
         );
-  
+
     return (LPSTR)buf;
 }
-

@@ -1,13 +1,13 @@
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
  * responsibility of any person or organization contemplating export to
  * obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -18,7 +18,7 @@
  * permission.  FundsXpress makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -34,7 +34,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -48,7 +48,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * XXX We need to modify the protocol so that an acknowledge is set
  * after each block, instead after the entire series is sent over.
@@ -344,7 +344,7 @@ retry:
 	    }
 	}
 	if (!debug && iproprole != IPROP_SLAVE)
-		daemon(1, 0);	    
+		daemon(1, 0);
 #ifdef PID_FILE
 	if ((pidfile = fopen(PID_FILE, "w")) != NULL) {
 		fprintf(pidfile, "%d\n", getpid());
@@ -360,7 +360,7 @@ retry:
 	while (1) {
 		int child_pid;
 		int status;
-	    
+
 		memset(&frominet, 0, sizeof(frominet));
 		fromlen = sizeof(frominet);
 		if (debug)
@@ -424,7 +424,7 @@ retry:
 		    close(s);
 		    if (iproprole == IPROP_SLAVE)
 			close(finet);
- 
+
 		    if ((ret = WEXITSTATUS(status)) != 0)
 			return (ret);
 		}
@@ -532,7 +532,7 @@ void doit(fd)
 	omask = umask(077);
 	lock_fd = open(temp_file_name, O_RDWR|O_CREAT, 0600);
 	(void) umask(omask);
-	retval = krb5_lock_file(kpropd_context, lock_fd, 
+	retval = krb5_lock_file(kpropd_context, lock_fd,
 				KRB5_LOCKMODE_EXCLUSIVE|KRB5_LOCKMODE_DONTBLOCK);
 	if (retval) {
 	    com_err(progname, retval, "while trying to lock '%s'",
@@ -571,7 +571,7 @@ void doit(fd)
 	 * recv_database, then close the socket.
 	 */
 	retval = krb5_write_message(kpropd_context, (void *) &fd, &confmsg);
-	if (retval) { 
+	if (retval) {
 		krb5_free_data_contents(kpropd_context, &confmsg);
 		com_err(progname, retval,
 			"while sending # of received bytes");
@@ -583,7 +583,7 @@ void doit(fd)
 			"while trying to close database file");
 		exit(1);
 	}
-	
+
 	exit(0);
 }
 
@@ -669,7 +669,7 @@ krb5_error_code do_iprop(kdb_log_context *log_ctx)
 
 	if (master_svc_princstr == NULL) {
 		if ((retval = kadm5_get_kiprop_host_srv_name(kpropd_context,
-							     def_realm, 
+							     def_realm,
 							     &master_svc_princstr))) {
 			com_err(progname, retval,
 				_("%s: unable to get kiprop host based "
@@ -776,7 +776,7 @@ reinit:
 	 * Reset the handle to the correct type for the RPC call
 	 */
 	handle = server_handle;
-	
+
 	for (;;) {
 		incr_ret = NULL;
 		full_ret = NULL;
@@ -834,7 +834,7 @@ reinit:
 			switch (full_ret->ret) {
 			case UPDATE_OK:
 				backoff_cnt = 0;
-				/* 
+				/*
 				 * We now listen on the kprop port for
 				 * the full dump
 				 */
@@ -1164,7 +1164,7 @@ void PRS(argv)
 				default:
 					usage();
 				}
-				
+
 			}
 		} else
 			/* We don't take any arguments, only options */
@@ -1191,7 +1191,7 @@ void PRS(argv)
 	if (realm) {
 	    retval = krb5_set_principal_realm(kpropd_context, server, realm);
 	    if (retval) {
-	        com_err(progname, errno, 
+	        com_err(progname, errno,
 			"while constructing my service realm");
 		exit(1);
 	    }
@@ -1214,10 +1214,10 @@ void PRS(argv)
 		ulog_set_role(kpropd_context, IPROP_SLAVE);
 
 		if (ulog_map(kpropd_context, params.iprop_logfile,
-			     params.iprop_ulogsize, FKPROPD, db_args)) { 
+			     params.iprop_ulogsize, FKPROPD, db_args)) {
  			com_err(progname, errno,
-			    _("Unable to map log!\n")); 
-			exit(1); 
+			    _("Unable to map log!\n"));
+			exit(1);
 		}
 	}
 	log_ctx = kpropd_context->kdblog_context;
@@ -1282,7 +1282,7 @@ kerberos_authenticate(context, fd, clientp, etype, my_sin)
     	exit(1);
     }
 
-    retval = krb5_auth_con_setflags(context, auth_context, 
+    retval = krb5_auth_con_setflags(context, auth_context,
 				    KRB5_AUTH_CONTEXT_DO_SEQUENCE);
     if (retval) {
 	syslog(LOG_ERR, "Error in krb5_auth_con_setflags: %s",
@@ -1315,7 +1315,7 @@ kerberos_authenticate(context, fd, clientp, etype, my_sin)
 
     retval = krb5_copy_principal(context, ticket->enc_part2->client, clientp);
     if (retval) {
-	syslog(LOG_ERR, "Error in krb5_copy_prinicpal: %s", 
+	syslog(LOG_ERR, "Error in krb5_copy_prinicpal: %s",
 	       error_message(retval));
 	exit(1);
     }
@@ -1357,7 +1357,7 @@ authorized_principal(context, p, auth_etype)
     FILE		*acl_file;
     int			end;
     krb5_enctype	acl_etype;
-    
+
     retval = krb5_unparse_name(context, p, &name);
     if (retval)
 	return FALSE;
@@ -1430,7 +1430,7 @@ recv_database(context, fd, database_fd, confmsg)
 		recv_error(context, &inbuf);
 	retval = krb5_rd_safe(context,auth_context,&inbuf,&outbuf,NULL);
 	if (retval) {
-		send_error(context, fd, retval, 
+		send_error(context, fd, retval,
 			   "while decoding database size");
 		krb5_free_data_contents(context, &inbuf);
 		com_err(progname, retval,
@@ -1447,7 +1447,7 @@ recv_database(context, fd, database_fd, confmsg)
 	 */
 	retval = krb5_auth_con_initivector(context, auth_context);
 	if (retval) {
-	  send_error(context, fd, retval, 
+	  send_error(context, fd, retval,
 		     "failed while initializing i_vector");
 	  com_err(progname, retval, "while initializing i_vector");
 	  exit(1);
@@ -1469,7 +1469,7 @@ recv_database(context, fd, database_fd, confmsg)
 		}
 		if (krb5_is_krb_error(&inbuf))
 			recv_error(context, &inbuf);
-		retval = krb5_rd_priv(context, auth_context, &inbuf, 
+		retval = krb5_rd_priv(context, auth_context, &inbuf,
 				      &outbuf, NULL);
 		if (retval) {
 			snprintf(buf, sizeof(buf),
@@ -1539,12 +1539,12 @@ send_error(context, fd, err_code, err_text)
 	krb5_us_timeofday(context, &error.stime, &error.susec);
 	error.server = server;
 	error.client = client;
-	
+
 	if (err_text)
 		text = err_text;
 	else
 		text = error_message(err_code);
-	
+
 	error.error = err_code - ERROR_TABLE_BASE_krb5;
 	if (error.error > 127) {
 		error.error = KRB_ERR_GENERIC;
@@ -1553,7 +1553,7 @@ send_error(context, fd, err_code, err_text)
 				 error_message(err_code), err_text);
 			text = buf;
 		}
-	} 
+	}
 	error.text.length = strlen(text) + 1;
 	error.text.data = strdup(text);
 	if (error.text.data) {
@@ -1585,7 +1585,7 @@ recv_error(context, inbuf)
 				"Generic remote error: %s\n",
 				error->text.data);
 	} else if (error->error) {
-		com_err(progname, 
+		com_err(progname,
 			(krb5_error_code) error->error + ERROR_TABLE_BASE_krb5,
 			"signaled from server");
 		if (error->text.data)
@@ -1629,8 +1629,8 @@ load_database(context, kdb_util, database_file_name)
 	edit_av[0] = kdb_util;
 	count = 1;
 	if (realm) {
-		edit_av[count++] = "-r";	
-		edit_av[count++] = realm;	
+		edit_av[count++] = "-r";
+		edit_av[count++] = realm;
 	}
 	edit_av[count++] = "load";
 	if (kerb_database) {
@@ -1678,7 +1678,7 @@ load_database(context, kdb_util, database_file_name)
 			exit(1);
 		}
 	}
-	
+
 	error_ret = WEXITSTATUS(waitb);
 	if (error_ret) {
 		com_err(progname, 0, "%s returned a bad exit status (%d)",

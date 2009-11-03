@@ -39,7 +39,7 @@ typedef struct _DynObject {
 #define DYN_NOMEM	-1001
 #define DYN_BADINDEX	-1002
 #define DYN_BADVALUE	-1003
-     
+
 #define DynCreate	gssrpcint_DynCreate
 #define DynDestroy	gssrpcint_DynDestroy
 #define DynRelease	gssrpcint_DynRelease

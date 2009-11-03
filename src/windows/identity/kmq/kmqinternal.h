@@ -212,10 +212,10 @@ void kmqint_attach_this_thread(void);
 void kmqint_detach_this_thread(void);
 
 khm_int32 kmqint_post_message_ex(
-    khm_int32 type, 
-    khm_int32 subtype, 
-    khm_ui_4 uparam, 
-    void * blob, 
+    khm_int32 type,
+    khm_int32 subtype,
+    khm_ui_4 uparam,
+    void * blob,
     kmq_call * call,
     khm_boolean try_send);
 

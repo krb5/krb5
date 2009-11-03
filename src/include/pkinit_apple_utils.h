@@ -28,7 +28,7 @@
  *
  * Created 19 May 2004 by Doug Mitchell.
  */
- 
+
 #ifndef	_PKINIT_APPLE_UTILS_H_
 #define _PKINIT_APPLE_UTILS_H_
 
@@ -70,7 +70,7 @@ CSSM_CL_HANDLE pkiClStartup(void);
  * CSSM_DATA <--> krb5_ui_4
  */
 krb5_error_code pkiDataToInt(
-    const CSSM_DATA *cdata, 
+    const CSSM_DATA *cdata,
     krb5_int32       *i);	/* RETURNED */
 
 krb5_error_code pkiIntToData(
@@ -86,13 +86,13 @@ krb5_error_code pkiDataToKrb5Data(
     unsigned dataLen,
     krb5_data *kd);		/* content mallocd and RETURNED */
 
-/* 
+/*
  * CSSM_DATA <--> krb5_data
  *
  * CSSM_DATA data is managed by a SecAsn1CoderRef; krb5_data.data is mallocd.
  */
 krb5_error_code pkiCssmDataToKrb5Data(
-    const CSSM_DATA *cd, 
+    const CSSM_DATA *cd,
     krb5_data *kd);		/* content mallocd and RETURNED */
 
 
@@ -101,13 +101,13 @@ krb5_error_code pkiKrb5DataToCssm(
     CSSM_DATA       *cdata,     /* allocated in coder space and RETURNED */
     SecAsn1CoderRef coder);
 
-/* 
+/*
  * CFDataRef --> krb5_data, mallocing the destination contents.
  */
 krb5_error_code pkiCfDataToKrb5Data(
     CFDataRef	    cfData,
     krb5_data	    *kd);	/* content mallocd and RETURNED */
-    
+
 /*
  * Non-mallocing conversion between CSSM_DATA and krb5_data
  */
@@ -126,7 +126,7 @@ krb5_boolean pkiCompareCssmData(
     const CSSM_DATA *d1,
     const CSSM_DATA *d2);
 
-/* 
+/*
  * krb5_timestamp <--> a mallocd string in generalized format
  */
 krb5_error_code pkiKrbTimestampToStr(

@@ -38,7 +38,7 @@ typedef struct cci_identifier_d *cci_identifier_t;
 enum cci_msg_id_t {
     /* cc_context_t */
     cci_context_first_msg_id,
-    
+
     cci_context_unused_release_msg_id,  /* Unused. Handle for old clients. */
     cci_context_sync_msg_id,
     cci_context_get_change_time_msg_id,
@@ -52,12 +52,12 @@ enum cci_msg_id_t {
     cci_context_new_ccache_iterator_msg_id,
     cci_context_lock_msg_id,
     cci_context_unlock_msg_id,
-    
+
     cci_context_last_msg_id,
-    
+
     /* cc_ccache_t */
     cci_ccache_first_msg_id,
-    
+
     cci_ccache_destroy_msg_id,
     cci_ccache_set_default_msg_id,
     cci_ccache_get_credentials_version_msg_id,
@@ -76,28 +76,28 @@ enum cci_msg_id_t {
     cci_ccache_get_kdc_time_offset_msg_id,
     cci_ccache_set_kdc_time_offset_msg_id,
     cci_ccache_clear_kdc_time_offset_msg_id,
-    
+
     cci_ccache_last_msg_id,
-    
+
     /* cc_ccache_iterator_t */
     cci_ccache_iterator_first_msg_id,
-    
+
     cci_ccache_iterator_release_msg_id,
     cci_ccache_iterator_next_msg_id,
     cci_ccache_iterator_clone_msg_id,
-    
+
     cci_ccache_iterator_last_msg_id,
-    
+
     /* cc_credentials_iterator_t */
     cci_credentials_iterator_first_msg_id,
-    
+
     cci_credentials_iterator_release_msg_id,
     cci_credentials_iterator_next_msg_id,
     cci_credentials_iterator_clone_msg_id,
-    
+
     cci_credentials_iterator_last_msg_id,
-    
+
     cci_max_msg_id  /* must be last! */
-};                              
+};
 
 #endif /* CCI_TYPES_H */

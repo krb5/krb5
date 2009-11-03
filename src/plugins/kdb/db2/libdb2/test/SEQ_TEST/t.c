@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
- 
+
 void main(int argc, char *argv[]) {
   char id1[] = {"          "}, id2[] = {"          "};
   int i;
@@ -27,13 +27,13 @@ void main(int argc, char *argv[]) {
     printf("\n Open error on test.db %d %s\n",errno,strerror(errno));
     exit(25);
   }
-   
+
   while (fscanf(fin," %10s%10s",id1,id2) > 0) {
     key.size = 11;
     data.size = 11;
     key.data = id1;
     data.data = id2;
-    printf("%10s %10s\n",key.data,data.data); 
+    printf("%10s %10s\n",key.data,data.data);
     if (dbp->put(dbp, &key, &data,R_NOOVERWRITE) != 0) {
       printf("Error writing output\n");
     }
@@ -41,7 +41,7 @@ void main(int argc, char *argv[]) {
   }
   printf("%d Records in\n",out);
   dbp->close(dbp);
-  
+
   if ((dbp = dbopen("test.db", O_RDWR | O_BINARY, 0664
        , DB_BTREE, NULL )) == NULL) {
     printf("\n Error on dbopen %d %s\n",errno,strerror(errno));
@@ -56,7 +56,7 @@ void main(int argc, char *argv[]) {
     strcpy(id2,data.data);
     id2[0] = 'U';
     datao.data=id2;
-    printf("%10s %10s\n",key.data,data.data); 
+    printf("%10s %10s\n",key.data,data.data);
     in++;
     if (in > 10) break;
 #ifdef notdef
@@ -74,11 +74,11 @@ void main(int argc, char *argv[]) {
   printf("%d Records copied\n",in);
   in = 0;
     dbp->seq(dbp, &key, &data,R_FIRST);
-    printf("%10s %10s\n",key.data,data.data); 
+    printf("%10s %10s\n",key.data,data.data);
     in++;
   while (dbp->seq(dbp, &key, &data,R_NEXT) == 0) {
     in++;
-    printf("%10s %10s\n",key.data,data.data); 
+    printf("%10s %10s\n",key.data,data.data);
   }
   printf("%d Records read\n",in);
   dbp->close(dbp);

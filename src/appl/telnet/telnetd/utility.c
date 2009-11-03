@@ -90,7 +90,7 @@ read_again:
     }
 }  /* end of ttloop */
 
-/* 
+/*
  * ttsuck - This is a horrible kludge to deal with a bug in
  * HostExplorer. HostExplorer thinks it knows how to do krb5 auth, but
  * it doesn't really. So if you offer it krb5 as an auth choice before
@@ -872,7 +872,7 @@ printsub(direction, pointer, length)
 		    break;
 		}
 		break;
-		
+
 	    case LM_SLC:
 		netputs("SLC");
 		for (i = 2; i < length - 2; i += 3) {
@@ -1010,7 +1010,7 @@ do {						\
 			netputs("\r\n");
 
 			break;
-				
+
 		    default:
 			netprintf(" %d", pointer[i]);
 			break;
@@ -1103,7 +1103,7 @@ do {						\
 #if	defined(AUTHENTICATION)
 	case TELOPT_AUTHENTICATION:
 	    netputs("AUTHENTICATION");
-	
+
 	    if (length < 2) {
 		netputs(" (empty suboption??\?)");
 		break;
@@ -1127,7 +1127,7 @@ do {						\
 		netputs(((pointer[3] & AUTH_ENCRYPT_MASK) == AUTH_ENCRYPT_ON)
 			? "|ENCRYPT" : "");
 
-		auth_printsub(&pointer[1], length - 1, (unsigned char *)buf, 
+		auth_printsub(&pointer[1], length - 1, (unsigned char *)buf,
 			      sizeof(buf));
 		netputs(buf);
 		break;
@@ -1215,7 +1215,7 @@ do {						\
 		    netprintf("%d (unknown)", pointer[2]);
 		netputs(" ");
 
-		encrypt_printsub(&pointer[1], length - 1, 
+		encrypt_printsub(&pointer[1], length - 1,
 				 (unsigned char *) buf, sizeof(buf));
 		netputs(buf);
 		break;
@@ -1283,7 +1283,7 @@ printdata(tag, ptr, cnt)
 		netputs(": ");
 		for (i = 0; i < 20 && cnt; i++) {
 			netprintf(nfrontp, "%02x", *ptr);
-			nfrontp += strlen(nfrontp); 
+			nfrontp += strlen(nfrontp);
 			if (isprint((int) *ptr)) {
 				xbuf[i] = *ptr;
 			} else {
@@ -1298,6 +1298,6 @@ printdata(tag, ptr, cnt)
 		netputs(" ");
 		netputs(xbuf);
 		netputs("\r\n");
-	} 
+	}
 }
 #endif /* DIAGNOSTICS */

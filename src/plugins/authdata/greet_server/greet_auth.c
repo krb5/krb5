@@ -7,7 +7,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -21,7 +21,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Sample authorization data plugin
  */
@@ -163,7 +163,7 @@ greet_authdata(krb5_context context,
                krb5_db_entry *tgs,
                krb5_keyblock *client_key,
                krb5_keyblock *server_key,
-               krb5_keyblock *tgs_key,
+               krb5_keyblock *krbtgt_key,
                krb5_data *req_pkt,
                krb5_kdc_req *request,
                krb5_const_principal for_user_princ,

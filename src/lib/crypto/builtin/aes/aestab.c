@@ -5,23 +5,23 @@
 
  LICENSE TERMS
 
- The free distribution and use of this software in both source and binary 
+ The free distribution and use of this software in both source and binary
  form is allowed (with or without changes) provided that:
 
-   1. distributions of this source code include the above copyright 
+   1. distributions of this source code include the above copyright
       notice, this list of conditions and the following disclaimer;
 
    2. distributions in binary form include the above copyright
       notice, this list of conditions and the following disclaimer
       in the documentation and/or other associated materials;
 
-   3. the copyright holder's name is not used to endorse products 
-      built using this software without specific written permission. 
+   3. the copyright holder's name is not used to endorse products
+      built using this software without specific written permission.
 
  DISCLAIMER
 
  This software is provided 'as is' with no explcit or implied warranties
- in respect of any properties, including, but not limited to, correctness 
+ in respect of any properties, including, but not limited to, correctness
  and fitness for purpose.
  -------------------------------------------------------------------------
  Issue Date: 07/02/2002
@@ -29,7 +29,7 @@
 
 #include "aesopt.h"
 
-#if defined(FIXED_TABLES) || !defined(FF_TABLES) 
+#if defined(FIXED_TABLES) || !defined(FF_TABLES)
 
 /*  finite field arithmetic operations */
 
@@ -151,7 +151,7 @@
 
 #define h0(x)   (x)
 
-/*  These defines are used to ensure tables are generated in the 
+/*  These defines are used to ensure tables are generated in the
     right format depending on the internal byte order required
 */
 
@@ -209,7 +209,7 @@ const uint8_t inv_s_box[256] = { isb_data(h0) };
 const uint32_t ft_tab[256] = { sb_data(u0) };
 #endif
 #ifdef  FT4_SET
-const uint32_t ft_tab[4][256] = 
+const uint32_t ft_tab[4][256] =
     { {  sb_data(u0) }, {  sb_data(u1) }, {  sb_data(u2) }, {  sb_data(u3) } };
 #endif
 
@@ -217,7 +217,7 @@ const uint32_t ft_tab[4][256] =
 const uint32_t fl_tab[256] = { sb_data(w0) };
 #endif
 #ifdef  FL4_SET
-const uint32_t fl_tab[4][256] = 
+const uint32_t fl_tab[4][256] =
     { {  sb_data(w0) }, {  sb_data(w1) }, {  sb_data(w2) }, {  sb_data(w3) } };
 #endif
 
@@ -233,7 +233,7 @@ const uint32_t it_tab[4][256] =
 const uint32_t il_tab[256] = { isb_data(w0) };
 #endif
 #ifdef  IL4_SET
-const uint32_t il_tab[4][256] = 
+const uint32_t il_tab[4][256] =
     { { isb_data(w0) }, { isb_data(w1) }, { isb_data(w2) }, { isb_data(w3) } };
 #endif
 
@@ -249,7 +249,7 @@ const uint32_t ls_tab[4][256] =
 const uint32_t im_tab[256] = { mm_data(v0) };
 #endif
 #ifdef  IM4_SET
-const uint32_t im_tab[4][256] = 
+const uint32_t im_tab[4][256] =
     { {  mm_data(v0) }, {  mm_data(v1) }, {  mm_data(v2) }, {  mm_data(v3) } };
 #endif
 
@@ -314,8 +314,8 @@ uint32_t im_tab[4][256];
 
 /*  Generate the tables for the dynamic table option
 
-    It will generally be sensible to use tables to compute finite 
-    field multiplies and inverses but where memory is scarse this 
+    It will generally be sensible to use tables to compute finite
+    field multiplies and inverses but where memory is scarse this
     code might sometimes be better. But it only has effect during
     initialisation so its pretty unimportant in overall terms.
 */
@@ -327,7 +327,7 @@ uint32_t im_tab[4][256];
 
 static uint8_t hibit(const uint32_t x)
 {   uint8_t r = (uint8_t)((x >> 1) | (x >> 2));
-    
+
     r |= (r >> 2);
     r |= (r >> 4);
     return (r + 1) >> 1;
@@ -345,14 +345,14 @@ static uint8_t fi(const uint8_t x)
         if(!n1) return v1;
 
         while(n2 >= n1)
-        {   
+        {
             n2 /= n1; p2 ^= p1 * n2; v2 ^= v1 * n2; n2 = hibit(p2);
         }
-        
+
         if(!n2) return v2;
 
         while(n1 >= n2)
-        {   
+        {
             n1 /= n2; p1 ^= p2 * n1; v1 ^= v2 * n1; n1 = hibit(p1);
         }
     }
@@ -392,9 +392,9 @@ void gen_tabs(void)
         root is 0x03, used here to generate the tables
     */
 
-    i = 0; w = 1; 
+    i = 0; w = 1;
     do
-    {   
+    {
         pow[i] = (uint8_t)w;
         pow[i + 255] = (uint8_t)w;
         log[w] = (uint8_t)i++;

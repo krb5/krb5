@@ -17,18 +17,18 @@
  *
  *   EXCEP_OK   - success return value (=1)
  *
- *   EXCEP_FAIL - failure return value (=0), other user exceptions are 
+ *   EXCEP_FAIL - failure return value (=0), other user exceptions are
  *                given negative values (<0)
  *
- *   TRY( x )   - if code returns value <= 0 TRY sets return value to 
- *                that value and goes to function cleanup section 
+ *   TRY( x )   - if code returns value <= 0 TRY sets return value to
+ *                that value and goes to function cleanup section
  *                (CATCH: block).  In the catch block, TRY does not goto
  *                the catch label to avoid loops, and instead
  *                falls through to the next statement.  The
  *                return value is set to the first non success value
  *                returned by a TRY, unless this is overridden by a THROW.
  *
- *   CATCH:     - start of catch block, also switches behavior of 
+ *   CATCH:     - start of catch block, also switches behavior of
  *                TRY and THROW to not goto CATCH: inside the catch
  *                block to avoid loops
  *
@@ -45,40 +45,40 @@
 /* example usage */
 
 /*
- * 
+ *
  * #define EXCEP_OK_COMMENT 2
  * #define EXCEP_NULL_PTR -1
  * #define EXCEP_OUT_OF_MEM -2
- * 
+ *
  * int bar( char *c )
  * {
  *     EXCEP_DECL;
- * 
+ *
  *     if ( !c ) { THROW( EXCEP_NULL_PTR ); }
  *     if ( *c == '\0' ) { THROW( EXCEP_FAIL ); );
  *     if ( *c == '#' ) { SET( EXCEP_COMMENT ); }
  *  CATCH:
  *     EXCEP_RET;
  * }
- * 
+ *
  * int foo( char *c )
  * {
  *     EXCEP_DECL;
  *     int *p = NULL;
- * 
+ *
  *     if ( !c ) { THROW( EXCEP_NULL_PTR ); }
  *     TRY( bar( c ) );
  *     if ( RETURN == EXCEP_COMMENT ) { print( "comment\n" ); }
  *     p = strdup( c );
  *     if ( !p ) { THROW( EXCEP_OUT_OF_MEM ); }
- * 
+ *
  *  CATCH:
  *     if ( p ) { TRY( bar( p ) ); free( p ); }
  *     THROW( EXCEP_BOOL );
  *     if ( EXCEPTION == EXCEP_OK ) { printf( "success\n" ); }
  *     EXCEP_RET;
  * }
- * 
+ *
  */
 
 #define EXCEP_FAIL 0

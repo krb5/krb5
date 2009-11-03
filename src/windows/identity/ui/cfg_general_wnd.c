@@ -364,7 +364,7 @@ khm_cfg_general_proc(HWND hwnd,
                     StringCbPrintf(msg, sizeof(msg), fmt, buf);
 
                     MessageBox(hwnd, title, msg, MB_OK);
-                    
+
                 } else {
                     wchar_t cmdline[550];
                     STARTUPINFO si;

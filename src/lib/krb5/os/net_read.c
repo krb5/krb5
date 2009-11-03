@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/os/net_read.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  */
 
 #include "k5-int.h"
@@ -43,23 +44,23 @@ krb5_net_read(krb5_context context, int fd, register char *buf, register int len
     int cc, len2 = 0;
 
     do {
-	cc = SOCKET_READ((SOCKET)fd, buf, len);
-	if (cc < 0) {
-	    if (SOCKET_ERRNO == SOCKET_EINTR)
-		continue;
-		
-		/* XXX this interface sucks! */
-        errno = SOCKET_ERRNO;    
-               
-	    return(cc);		 /* errno is already set */
-	}		
-	else if (cc == 0) {
-	    return(len2);
-	} else {
-	    buf += cc;
-	    len2 += cc;
-	    len -= cc;
-	}
+        cc = SOCKET_READ((SOCKET)fd, buf, len);
+        if (cc < 0) {
+            if (SOCKET_ERRNO == SOCKET_EINTR)
+                continue;
+
+            /* XXX this interface sucks! */
+            errno = SOCKET_ERRNO;
+
+            return(cc);          /* errno is already set */
+        }
+        else if (cc == 0) {
+            return(len2);
+        } else {
+            buf += cc;
+            len2 += cc;
+            len -= cc;
+        }
     } while (len > 0);
     return(len2);
 }

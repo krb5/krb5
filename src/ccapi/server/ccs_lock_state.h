@@ -29,9 +29,9 @@
 
 #include "ccs_types.h"
 
-cc_int32 ccs_lock_state_new (ccs_lock_state_t *out_lock_state, 
-                             cc_int32          in_invalid_object_err, 
-                             cc_int32          in_pending_lock_err, 
+cc_int32 ccs_lock_state_new (ccs_lock_state_t *out_lock_state,
+                             cc_int32          in_invalid_object_err,
+                             cc_int32          in_pending_lock_err,
                              cc_int32          in_no_lock_err);
 
 cc_int32 ccs_lock_state_release (ccs_lock_state_t io_lock_state);

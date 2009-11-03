@@ -84,7 +84,7 @@ registry_string_get(HKEY hkey, char *sub, char **val)
 		*val = NULL;
 		return -1;
 	}
-	
+
 	return 0;
 }
 
@@ -106,7 +106,7 @@ registry_dword_get(HKEY hkey, char *sub, DWORD *val)
 		*val = 0;
 		return -1;
 	}
-	
+
 	return 0;
 }
 

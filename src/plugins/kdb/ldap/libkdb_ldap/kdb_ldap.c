@@ -105,7 +105,7 @@ krb5_ldap_read_startup_information(krb5_context context)
     kdb5_dal_handle      *dal_handle=NULL;
     krb5_ldap_context    *ldap_context=NULL;
     int                  mask = 0;
-                                                                                                                             
+
     SETUP_CONTEXT();
     if ((retval=krb5_ldap_read_krbcontainer_params(context, &(ldap_context->krbcontainer)))) {
 	prepend_err_str (context, "Unable to read Kerberos container", retval, retval);
@@ -450,7 +450,7 @@ krb5_error_code krb5_ldap_open(krb5_context context,
 	    /* ignore hash argument. Might have been passed from create */
 	    status = EINVAL;
 	    if (opt && !strcmp(opt, "temporary")) {
-		/* 
+		/*
 		 * temporary is passed in when kdb5_util load without -update is done.
 		 * This is unsupported by the LDAP plugin.
 		 */

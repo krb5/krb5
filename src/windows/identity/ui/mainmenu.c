@@ -44,8 +44,8 @@ int il_icon_id[MAX_ILIST];
 void khui_init_menu(void) {
     int i;
 
-    il_icon = khui_create_ilist(ILIST_ICON_X, 
-                                ILIST_ICON_Y, 
+    il_icon = khui_create_ilist(ILIST_ICON_X,
+                                ILIST_ICON_Y,
                                 MAX_ILIST, 5, 0);
     for(i=0;i<MAX_ILIST;i++)
         il_icon_id[i] = -1;
@@ -66,10 +66,10 @@ int khui_get_icon_index(int id) {
             return i;
         }
 
-    hbm = LoadImage(khm_hInstance, 
-                    MAKEINTRESOURCE(id), 
-                    IMAGE_BITMAP, 
-                    ILIST_ICON_X, ILIST_ICON_Y, 
+    hbm = LoadImage(khm_hInstance,
+                    MAKEINTRESOURCE(id),
+                    IMAGE_BITMAP,
+                    ILIST_ICON_X, ILIST_ICON_Y,
                     LR_DEFAULTCOLOR);
     i = khui_ilist_add_masked(il_icon, hbm, KHUI_TOOLBAR_BGCOLOR);
     il_icon_id[i] = id;
@@ -122,7 +122,7 @@ void khm_get_action_tooltip(khm_int32 action, wchar_t * buf, khm_size cb_buf) {
     khui_action_unlock();
 }
 
-void add_action_to_menu(HMENU hm, khui_action * act, 
+void add_action_to_menu(HMENU hm, khui_action * act,
                         int idx, int flags) {
     MENUITEMINFO mii;
     wchar_t buf[MAX_RES_STRING] = L"";
@@ -148,7 +148,7 @@ void add_action_to_menu(HMENU hm, khui_action * act,
         } else {
             khm_get_action_caption(act->cmd, buf, sizeof(buf));
 
-            if(khui_get_cmd_accel_string(act->cmd, accel, 
+            if(khui_get_cmd_accel_string(act->cmd, accel,
                                          ARRAYLENGTH(accel))) {
                 StringCbCat(buf, sizeof(buf), L"\t");
                 StringCbCat(buf, sizeof(buf), accel);
@@ -170,7 +170,7 @@ void add_action_to_menu(HMENU hm, khui_action * act,
             mii.fState = 0;
         }
 
-        if((act->type & KHUI_ACTIONTYPE_TOGGLE) && 
+        if((act->type & KHUI_ACTIONTYPE_TOGGLE) &&
            (act->state & KHUI_ACTIONSTATE_CHECKED)) {
             mii.fMask |= MIIM_STATE;
             mii.fState |= MFS_CHECKED;
@@ -200,7 +200,7 @@ void add_action_to_menu(HMENU hm, khui_action * act,
 
 static void refresh_menu(HMENU hm, khui_menu_def * def);
 
-static int refresh_menu_item(HMENU hm, khui_action * act, 
+static int refresh_menu_item(HMENU hm, khui_action * act,
                              int idx, int flags) {
     MENUITEMINFO mii;
     khui_menu_def * def;
@@ -339,9 +339,9 @@ static void mm_show_panel_def(khui_menu_def * def, LONG x, LONG y)
     if (mm_hot_track)
         mm_begin_hot_track();
 
-    TrackPopupMenuEx(hm, 
-                     TPM_LEFTALIGN | TPM_TOPALIGN | 
-                     TPM_VERPOSANIMATION, 
+    TrackPopupMenuEx(hm,
+                     TPM_LEFTALIGN | TPM_TOPALIGN |
+                     TPM_VERPOSANIMATION,
                      x, y, khm_hwnd_main, NULL);
 
     mm_last_hot_item = -1;
@@ -377,17 +377,17 @@ LRESULT khm_menu_activate(int menu_id) {
         else
             menu_id = 0;
     } else if(menu_id == MENU_ACTIVATE_LEFT) {
-        menu_id = (mm_last_hot_item > 0)? 
-            mm_last_hot_item - 1: 
+        menu_id = (mm_last_hot_item > 0)?
+            mm_last_hot_item - 1:
             ((mm_last_hot_item == 0)? nmm - 1: 0);
     } else if(menu_id == MENU_ACTIVATE_RIGHT) {
-        menu_id = (mm_last_hot_item >=0 && mm_last_hot_item < nmm - 1)? 
-            mm_last_hot_item + 1: 
+        menu_id = (mm_last_hot_item >=0 && mm_last_hot_item < nmm - 1)?
+            mm_last_hot_item + 1:
             0;
     } else if(menu_id == MENU_ACTIVATE_NONE) {
         menu_id = -1;
     }
-    
+
     SendMessage(khui_main_menu_toolbar,
                 TB_SETHOTITEM,
                 menu_id,
@@ -438,7 +438,7 @@ LRESULT khm_menu_draw_item(WPARAM wParam, LPARAM lParam) {
         if(!resid) /* nothing to draw */
             return TRUE;
 
-    
+
         iidx = khui_get_icon_index(resid);
         if(iidx == -1)
             return TRUE;
@@ -448,10 +448,10 @@ LRESULT khm_menu_draw_item(WPARAM wParam, LPARAM lParam) {
         if(lpd->itemState & ODS_HOTLIGHT || lpd->itemState & ODS_SELECTED) {
             style |= ILD_SELECTED;
         }
-    
-        khui_ilist_draw(il_icon, 
-                        iidx, 
-                        lpd->hDC, 
+
+        khui_ilist_draw(il_icon,
+                        iidx,
+                        lpd->hDC,
                         lpd->rcItem.left, lpd->rcItem.top, style);
     }
 
@@ -487,7 +487,7 @@ void khm_track_menu(int menu) {
             mm_last_hot_item = mm_next_hot_item;
             mm_next_hot_item = -1;
 
-            PostMessage(khm_hwnd_main, WM_COMMAND, 
+            PostMessage(khm_hwnd_main, WM_COMMAND,
                         MAKEWPARAM(KHUI_PACTION_MENU,0),
                         MAKELPARAM(mm_last_hot_item,1));
         }
@@ -499,7 +499,7 @@ void khm_menu_track_current(void) {
 }
 
 LRESULT khm_menu_handle_select(WPARAM wParam, LPARAM lParam) {
-    if((HIWORD(wParam) == 0xffff && lParam == 0) || 
+    if((HIWORD(wParam) == 0xffff && lParam == 0) ||
        (HIWORD(wParam) & MF_POPUP)) {
         /* the menu was closed */
         khm_statusbar_set_part(KHUI_SBPART_INFO, NULL, NULL);
@@ -602,8 +602,8 @@ LRESULT khm_menu_notify_main(LPNMHDR notice) {
     case TBN_DROPDOWN:
         khm_track_menu(-1);
         /*
-        khm_menu_show_panel(nmt->iItem, 
-                        r.left + nmt->rcButton.left, 
+        khm_menu_show_panel(nmt->iItem,
+                        r.left + nmt->rcButton.left,
                         r.top + nmt->rcButton.bottom);
         */
         ret = TBDDRET_DEFAULT;
@@ -628,7 +628,7 @@ LRESULT khm_menu_notify_main(LPNMHDR notice) {
                 }
             }
 
-            if (mm_hot_track && 
+            if (mm_hot_track &&
                 new_item != mm_last_hot_item &&
                 new_item != -1 &&
                 mm_last_hot_item != -1) {
@@ -1156,8 +1156,8 @@ void khm_menu_create_main(HWND parent) {
                           ,
                           TOOLBARCLASSNAME,
                           (LPWSTR) NULL,
-                          WS_CHILD | 
-                          CCS_ADJUSTABLE | 
+                          WS_CHILD |
+                          CCS_ADJUSTABLE |
                           TBSTYLE_FLAT |
                           TBSTYLE_AUTOSIZE |
                           TBSTYLE_LIST |
@@ -1183,18 +1183,18 @@ void khm_menu_create_main(HWND parent) {
                 0);
 
     for(i=0; i<nmm; i++) {
-        khui_add_action_to_toolbar(hwtb, 
-                                   khui_find_action(mm[i].action), 
-                                   KHUI_TOOLBAR_ADD_TEXT | 
-                                   KHUI_TOOLBAR_ADD_DROPDOWN | 
-                                   KHUI_TOOLBAR_VARSIZE, 
+        khui_add_action_to_toolbar(hwtb,
+                                   khui_find_action(mm[i].action),
+                                   KHUI_TOOLBAR_ADD_TEXT |
+                                   KHUI_TOOLBAR_ADD_DROPDOWN |
+                                   KHUI_TOOLBAR_VARSIZE,
                                    NULL);
     }
 
     SendMessage(hwtb,
                 TB_AUTOSIZE,
                 0,0);
-    
+
     SendMessage(hwtb,
                 TB_GETMAXSIZE,
                 0,
@@ -1204,15 +1204,15 @@ void khm_menu_create_main(HWND parent) {
 
     rbi.cbSize = sizeof(rbi);
 
-    rbi.fMask = 
+    rbi.fMask =
         RBBIM_ID |
-        RBBIM_STYLE | 
-        RBBIM_CHILD | 
-        RBBIM_CHILDSIZE | 
-        RBBIM_SIZE | 
-        RBBIM_IDEALSIZE; 
+        RBBIM_STYLE |
+        RBBIM_CHILD |
+        RBBIM_CHILDSIZE |
+        RBBIM_SIZE |
+        RBBIM_IDEALSIZE;
 
-    rbi.fStyle = 
+    rbi.fStyle =
         RBBS_USECHEVRON;
 
     rbi.hwndChild = hwtb;

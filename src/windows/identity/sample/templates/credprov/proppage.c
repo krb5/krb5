@@ -56,4 +56,3 @@ pp_cred_dlg_proc(HWND hwnd,
 
     return FALSE;
 }
-

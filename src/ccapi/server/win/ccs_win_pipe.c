@@ -55,7 +55,7 @@ struct ccs_win_pipe_t* ccs_win_pipe_new (const char* uuid, const HANDLE h) {
         if (!uuidCopy)  {err = cci_check_error(ccErrBadParam);}
         strcpy(uuidCopy, uuid);
         }
-    
+
     if (!err) {
         out_pipe = (struct ccs_win_pipe_t*)malloc(sizeof(struct ccs_win_pipe_t));
         if (!out_pipe)  {err = cci_check_error(ccErrBadParam);}
@@ -70,10 +70,10 @@ struct ccs_win_pipe_t* ccs_win_pipe_new (const char* uuid, const HANDLE h) {
 
 /* ------------------------------------------------------------------------ */
 
-cc_int32 ccs_win_pipe_copy (WIN_PIPE** out_pipe, 
+cc_int32 ccs_win_pipe_copy (WIN_PIPE** out_pipe,
                             const WIN_PIPE* in_pipe) {
 
-    *out_pipe = 
+    *out_pipe =
         ccs_win_pipe_new(
             ccs_win_pipe_getUuid  (in_pipe),
             ccs_win_pipe_getHandle(in_pipe) );

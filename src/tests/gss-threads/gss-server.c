@@ -1,6 +1,6 @@
 /*
  * Copyright 1994 by OpenVision Technologies, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -10,7 +10,7 @@
  * without specific, written prior permission. OpenVision makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -27,7 +27,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -116,7 +116,7 @@ static int server_acquire_creds(service_name, server_creds)
 
      name_buf.value = service_name;
      name_buf.length = strlen(name_buf.value) + 1;
-     maj_stat = gss_import_name(&min_stat, &name_buf, 
+     maj_stat = gss_import_name(&min_stat, &name_buf,
 				(gss_OID) gss_nt_service_name, &server_name);
      if (maj_stat != GSS_S_COMPLETE) {
 	  display_status("importing name", maj_stat, min_stat);
@@ -159,7 +159,7 @@ static int server_acquire_creds(service_name, server_creds)
  * in client_name and 0 is returned.  If unsuccessful, an error
  * message is displayed and -1 is returned.
  */
-static int server_establish_context(s, server_creds, context, client_name, 
+static int server_establish_context(s, server_creds, context, client_name,
 				    ret_flags)
      int s;
      gss_cred_id_t server_creds;
@@ -242,7 +242,7 @@ static int server_establish_context(s, server_creds, context, client_name,
 					     GSS_C_NO_BUFFER);
 	      return -1;
 	 }
- 
+
 	 if (verbose && logfile) {
 	   if (maj_stat == GSS_S_CONTINUE_NEEDED)
 	     fprintf(logfile, "continue needed...\n");
@@ -309,7 +309,7 @@ static int create_socket(port)
      struct sockaddr_in saddr;
      int s;
      int on = 1;
-     
+
      saddr.sin_family = AF_INET;
      saddr.sin_port = htons(port);
      saddr.sin_addr.s_addr = INADDR_ANY;
@@ -351,7 +351,7 @@ static int test_import_export_context(context)
 	OM_uint32	min_stat, maj_stat;
 	gss_buffer_desc context_token, copied_token;
 	struct timeval tm1, tm2;
-	
+
 	/*
 	 * Attempt to save and then restore the context.
 	 */
@@ -364,7 +364,7 @@ static int test_import_export_context(context)
 	gettimeofday(&tm2, (struct timezone *)0);
 	if (verbose && logfile)
 		fprintf(logfile, "Exported context: %d bytes, %7.4f seconds\n",
-			(int) context_token.length, 
+			(int) context_token.length,
 			timeval_subtract(&tm2, &tm1));
 	copied_token.length = context_token.length;
 	copied_token.value = malloc(context_token.length);
@@ -400,7 +400,7 @@ static int test_import_export_context(context)
  * 	service_name	(r) the ASCII name of the GSS-API service to
  * 			establish a context as
  *	export		(r) whether to test context exporting
- * 
+ *
  * Returns: -1 on error
  *
  * Effects:
@@ -506,7 +506,7 @@ static int sign_server(s, server_creds, export)
             cp = msg_buf.value;
             if ((isprint((int) cp[0]) || isspace((int) cp[0])) &&
                  (isprint((int) cp[1]) || isspace((int) cp[1]))) {
-                fprintf(logfile, "\"%.*s\"\n", (int) msg_buf.length, 
+                fprintf(logfile, "\"%.*s\"\n", (int) msg_buf.length,
                          (char *) msg_buf.value);
                  } else {
                      fprintf(logfile, "\n");
@@ -674,7 +674,7 @@ worker_bee(void * param)
     struct _work_plan *work = (struct _work_plan *) param;
 
     /* this return value is not checked, because there's
-     * not really anything to do if it fails 
+     * not really anything to do if it fails
      */
     sign_server(work->s, work->server_creds, work->export);
     closesocket(work->s);
@@ -709,13 +709,13 @@ main(argc, argv)
 	       argc--; argv++;
 	       if (!argc) usage();
 	       port = atoi(*argv);
-	  } 
+	  }
 #if defined _WIN32 || 1
           else if (strcmp(*argv, "-threads") == 0) {
               argc--; argv++;
               if (!argc) usage();
               max_threads = atoi(*argv);
-          } 
+          }
 #endif
           else if (strcmp(*argv, "-verbose") == 0) {
 	      verbose = 1;
@@ -769,7 +769,7 @@ main(argc, argv)
 
      if (server_acquire_creds(service_name, &server_creds) < 0)
 	 return -1;
-     
+
      if (do_inetd) {
 	 close(1);
 	 close(2);
@@ -796,13 +796,13 @@ main(argc, argv)
                      perror("accepting connection");
                      continue;
                  }
-                  
+
                  work->server_creds = server_creds;
                  work->export = export;
 
                  if (max_threads == 1) {
                      worker_bee((void *)work);
-                 } 
+                 }
 #if defined _WIN32 || 1
                  else {
                      if ( WaitAndIncrementThreadCounter() ) {

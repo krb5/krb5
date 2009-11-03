@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * kadmin/ktutil/ktutil_funcs.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * Utility functions for ktutil.
  */
 
@@ -42,13 +43,13 @@ krb5_error_code ktutil_free_kt_list(context, list)
     krb5_error_code retval = 0;
 
     for (lp = list; lp;) {
-	retval = krb5_kt_free_entry(context, lp->entry);
-	free(lp->entry);
-	if (retval)
-	    break;
-	prev = lp;
-	lp = lp->next;
-	free(prev);
+        retval = krb5_kt_free_entry(context, lp->entry);
+        free(lp->entry);
+        if (retval)
+            break;
+        prev = lp;
+        lp = lp->next;
+        free(prev);
     }
     return retval;
 }
@@ -66,14 +67,14 @@ krb5_error_code ktutil_delete(context, list, idx)
     int i;
 
     for (lp = *list, i = 1; lp; prev = lp, lp = lp->next, i++) {
-	if (i == idx) {
-	    if (i == 1)
-		*list = lp->next;
-	    else
-		prev->next = lp->next;
-	    lp->next = NULL;
-	    return ktutil_free_kt_list(context, lp);
-	}
+        if (i == idx) {
+            if (i == 1)
+                *list = lp->next;
+            else
+                prev->next = lp->next;
+            lp->next = NULL;
+            return ktutil_free_kt_list(context, lp);
+        }
     }
     return EINVAL;
 }
@@ -85,7 +86,7 @@ krb5_error_code ktutil_delete(context, list, idx)
  * one first.
  */
 krb5_error_code ktutil_add(context, list, princ_str, kvno,
-			   enctype_str, use_pass)
+                           enctype_str, use_pass)
     krb5_context context;
     krb5_kt_list *list;
     char *princ_str;
@@ -117,7 +118,7 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
     if (retval)
         return retval;
     retval = krb5_string_to_enctype(enctype_str, &enctype);
-    if (retval) 
+    if (retval)
         return KRB5_BAD_ENCTYPE;
     retval = krb5_timeofday(context, &now);
     if (retval)
@@ -133,93 +134,93 @@ krb5_error_code ktutil_add(context, list, princ_str, kvno,
     }
     memset(entry, 0, sizeof(*entry));
 
-    if (!lp) {		/* if list is empty, start one */
+    if (!lp) {          /* if list is empty, start one */
         lp = (krb5_kt_list) malloc(sizeof(*lp));
-	if (!lp) {
-	    return ENOMEM;
-	}
+        if (!lp) {
+            return ENOMEM;
+        }
     } else {
         lp->next = (krb5_kt_list) malloc(sizeof(*lp));
-	if (!lp->next) {
-	    return ENOMEM;
-	}
-	prev = lp;
-	lp = lp->next;
-    }          
+        if (!lp->next) {
+            return ENOMEM;
+        }
+        prev = lp;
+        lp = lp->next;
+    }
     lp->next = NULL;
     lp->entry = entry;
 
     if (use_pass) {
         password.length = pwsize;
-	password.data = (char *) malloc(pwsize);
-	if (!password.data) {
-	    retval = ENOMEM;
-	    goto cleanup;
-	}
+        password.data = (char *) malloc(pwsize);
+        if (!password.data) {
+            retval = ENOMEM;
+            goto cleanup;
+        }
 
-	snprintf(promptstr, sizeof(promptstr), "Password for %.1000s",
-		 princ_str);
+        snprintf(promptstr, sizeof(promptstr), "Password for %.1000s",
+                 princ_str);
         retval = krb5_read_password(context, promptstr, NULL, password.data,
-				    &password.length);
-	if (retval)
-	    goto cleanup;
-	retval = krb5_principal2salt(context, princ, &salt);
-	if (retval)
-	    goto cleanup;
-	retval = krb5_c_string_to_key(context, enctype, &password,
-				      &salt, &key);
-	if (retval)
-	    goto cleanup;
-	memset(password.data, 0, password.length);
-	password.length = 0;
-	lp->entry->key = key;
+                                    &password.length);
+        if (retval)
+            goto cleanup;
+        retval = krb5_principal2salt(context, princ, &salt);
+        if (retval)
+            goto cleanup;
+        retval = krb5_c_string_to_key(context, enctype, &password,
+                                      &salt, &key);
+        if (retval)
+            goto cleanup;
+        memset(password.data, 0, password.length);
+        password.length = 0;
+        lp->entry->key = key;
     } else {
         printf("Key for %s (hex): ", princ_str);
-	fgets(buf, BUFSIZ, stdin);
-	/*
-	 * We need to get rid of the trailing '\n' from fgets.
-	 * If we have an even number of hex digits (as we should),
-	 * write a '\0' over the '\n'.  If for some reason we have
-	 * an odd number of hex digits, force an even number of hex
-	 * digits by writing a '0' into the last position (the string
-	 * will still be null-terminated).
-	 */
-	buf[strlen(buf) - 1] = strlen(buf) % 2 ? '\0' : '0';
-	if (strlen(buf) == 0) {
-	    fprintf(stderr, "addent: Error reading key.\n");
-	    retval = 0;
-	    goto cleanup;
-	}
-	
-        lp->entry->key.enctype = enctype;
-	lp->entry->key.contents = (krb5_octet *) malloc((strlen(buf) + 1) / 2);
-	if (!lp->entry->key.contents) {
-	    retval = ENOMEM;
-	    goto cleanup;
-	}
+        fgets(buf, BUFSIZ, stdin);
+        /*
+         * We need to get rid of the trailing '\n' from fgets.
+         * If we have an even number of hex digits (as we should),
+         * write a '\0' over the '\n'.  If for some reason we have
+         * an odd number of hex digits, force an even number of hex
+         * digits by writing a '0' into the last position (the string
+         * will still be null-terminated).
+         */
+        buf[strlen(buf) - 1] = strlen(buf) % 2 ? '\0' : '0';
+        if (strlen(buf) == 0) {
+            fprintf(stderr, "addent: Error reading key.\n");
+            retval = 0;
+            goto cleanup;
+        }
 
-	i = 0;
-	for (cp = buf; *cp; cp += 2) {
-	    if (!isxdigit((int) cp[0]) || !isxdigit((int) cp[1])) {
-	        fprintf(stderr, "addent: Illegal character in key.\n");
-		retval = 0;
-		goto cleanup;
-	    }
-	    sscanf(cp, "%02x", &tmp);
-	    lp->entry->key.contents[i++] = (krb5_octet) tmp;
-	}
-	lp->entry->key.length = i;
+        lp->entry->key.enctype = enctype;
+        lp->entry->key.contents = (krb5_octet *) malloc((strlen(buf) + 1) / 2);
+        if (!lp->entry->key.contents) {
+            retval = ENOMEM;
+            goto cleanup;
+        }
+
+        i = 0;
+        for (cp = buf; *cp; cp += 2) {
+            if (!isxdigit((int) cp[0]) || !isxdigit((int) cp[1])) {
+                fprintf(stderr, "addent: Illegal character in key.\n");
+                retval = 0;
+                goto cleanup;
+            }
+            sscanf(cp, "%02x", &tmp);
+            lp->entry->key.contents[i++] = (krb5_octet) tmp;
+        }
+        lp->entry->key.length = i;
     }
     lp->entry->principal = princ;
     lp->entry->vno = kvno;
     lp->entry->timestamp = now;
 
     if (!*list)
-	*list = lp;
+        *list = lp;
 
     return 0;
 
- cleanup:
+cleanup:
     if (prev)
         prev->next = NULL;
     ktutil_free_kt_list(context, lp);
@@ -242,62 +243,62 @@ krb5_error_code ktutil_read_keytab(context, name, list)
     krb5_error_code retval = 0;
 
     if (*list) {
-	/* point lp at the tail of the list */
-	for (lp = *list; lp->next; lp = lp->next);
-	back = lp;
+        /* point lp at the tail of the list */
+        for (lp = *list; lp->next; lp = lp->next);
+        back = lp;
     }
     retval = krb5_kt_resolve(context, name, &kt);
     if (retval)
-	return retval;
+        return retval;
     retval = krb5_kt_start_seq_get(context, kt, &cursor);
     if (retval)
-	goto close_kt;
+        goto close_kt;
     for (;;) {
-	entry = (krb5_keytab_entry *)malloc(sizeof (krb5_keytab_entry));
-	if (!entry) {
-	    retval = ENOMEM;
-	    break;
-	}
-	memset(entry, 0, sizeof (*entry));
-	retval = krb5_kt_next_entry(context, kt, entry, &cursor);
-	if (retval)
-	    break;
+        entry = (krb5_keytab_entry *)malloc(sizeof (krb5_keytab_entry));
+        if (!entry) {
+            retval = ENOMEM;
+            break;
+        }
+        memset(entry, 0, sizeof (*entry));
+        retval = krb5_kt_next_entry(context, kt, entry, &cursor);
+        if (retval)
+            break;
 
-	if (!lp) {		/* if list is empty, start one */
-	    lp = (krb5_kt_list)malloc(sizeof (*lp));
-	    if (!lp) {
-		retval = ENOMEM;
-		break;
-	    }
-	} else {
-	    lp->next = (krb5_kt_list)malloc(sizeof (*lp));
-	    if (!lp->next) {
-		retval = ENOMEM;
-		break;
-	    }
-	    lp = lp->next;
-	}
-	if (!tail)
-	    tail = lp;
-	lp->next = NULL;
-	lp->entry = entry;
+        if (!lp) {              /* if list is empty, start one */
+            lp = (krb5_kt_list)malloc(sizeof (*lp));
+            if (!lp) {
+                retval = ENOMEM;
+                break;
+            }
+        } else {
+            lp->next = (krb5_kt_list)malloc(sizeof (*lp));
+            if (!lp->next) {
+                retval = ENOMEM;
+                break;
+            }
+            lp = lp->next;
+        }
+        if (!tail)
+            tail = lp;
+        lp->next = NULL;
+        lp->entry = entry;
     }
     if (entry)
-	free(entry);
+        free(entry);
     if (retval) {
-	if (retval == KRB5_KT_END)
-	    retval = 0;
-	else {
-	    ktutil_free_kt_list(context, tail);
-	    tail = NULL;
-	    if (back)
-		back->next = NULL;
-	}
+        if (retval == KRB5_KT_END)
+            retval = 0;
+        else {
+            ktutil_free_kt_list(context, tail);
+            tail = NULL;
+            if (back)
+                back->next = NULL;
+        }
     }
     if (!*list)
-	*list = tail;
+        *list = tail;
     krb5_kt_end_seq_get(context, kt, &cursor);
- close_kt:
+close_kt:
     krb5_kt_close(context, kt);
     return retval;
 }
@@ -318,14 +319,14 @@ krb5_error_code ktutil_write_keytab(context, list, name)
 
     result = snprintf(ktname, sizeof(ktname), "WRFILE:%s", name);
     if (SNPRINTF_OVERFLOW(result, sizeof(ktname)))
-	return ENAMETOOLONG;
+        return ENAMETOOLONG;
     retval = krb5_kt_resolve(context, ktname, &kt);
     if (retval)
-	return retval;
+        return retval;
     for (lp = list; lp; lp = lp->next) {
-	retval = krb5_kt_add_entry(context, kt, lp->entry);
-	if (retval)
-	    break;
+        retval = krb5_kt_add_entry(context, kt, lp->entry);
+        if (retval)
+            break;
     }
     krb5_kt_close(context, kt);
     return retval;
@@ -344,7 +345,7 @@ krb5_error_code ktutil_read_srvtab(context, name, list)
     krb5_error_code result;
 
     if (asprintf(&ktname, "SRVTAB:%s", name) < 0)
-	return ENOMEM;
+        return ENOMEM;
     result = ktutil_read_keytab(context, ktname, list);
     free(ktname);
     return result;

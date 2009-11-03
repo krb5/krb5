@@ -6,7 +6,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -216,7 +216,7 @@ static struct gss_config spnego_mechanism =
 #ifndef LEAN_CLIENT
 	spnego_gss_accept_sec_context,
 #else
-	NULL,				
+	NULL,
 #endif  /* LEAN_CLIENT */
 	NULL,				/* gss_process_context_token */
 	spnego_gss_delete_sec_context,	/* gss_delete_sec_context */
@@ -2571,7 +2571,7 @@ get_available_mechs(OM_uint32 *minor_status,
 	 */
 	if (found > 0 && major_status == GSS_S_COMPLETE && creds != NULL) {
 		major_status = gss_acquire_cred(minor_status,
-						name, GSS_C_INDEFINITE, 
+						name, GSS_C_INDEFINITE,
 						*rmechs, usage, creds,
 						&goodmechs, NULL);
 
@@ -3704,9 +3704,9 @@ is_kerb_mech(gss_OID oid)
 	int answer = 0;
 	OM_uint32 minor;
 	extern const gss_OID_set_desc * const gss_mech_set_krb5_both;
-	
+
 	(void) gss_test_oid_set_member(&minor,
 		oid, (gss_OID_set)gss_mech_set_krb5_both, &answer);
-	
+
 	return (answer);
 }

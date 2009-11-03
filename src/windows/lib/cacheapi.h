@@ -3,34 +3,34 @@
  *
  * Copyright 1997 by the Regents of the University of Michigan
  *
- * This software is being provided to you, the LICENSEE, by the 
- * Regents of the University of Michigan (UM) under the following 
- * license.  By obtaining, using and/or copying this software, you agree 
- * that you have read, understood, and will comply with these terms and 
- * conditions:  
- * 
- * Permission to use, copy, modify and distribute this software and its 
- * documentation for any purpose and without fee or royalty is hereby 
- * granted, provided that you agree to comply with the following copyright 
- * notice and statements, including the disclaimer, and that the same 
- * appear on ALL copies of the software and documentation, including 
+ * This software is being provided to you, the LICENSEE, by the
+ * Regents of the University of Michigan (UM) under the following
+ * license.  By obtaining, using and/or copying this software, you agree
+ * that you have read, understood, and will comply with these terms and
+ * conditions:
+ *
+ * Permission to use, copy, modify and distribute this software and its
+ * documentation for any purpose and without fee or royalty is hereby
+ * granted, provided that you agree to comply with the following copyright
+ * notice and statements, including the disclaimer, and that the same
+ * appear on ALL copies of the software and documentation, including
  * modifications that you make for internal use or for distribution:
- * 
- * Copyright 1997 by the Regents of the University of Michigan.  
- * All rights reserved.  
- * 
- * THIS SOFTWARE IS PROVIDED "AS IS", AND UM MAKES NO REPRESENTATIONS 
- * OR WARRANTIES, EXPRESS OR IMPLIED.  By way of example, but not 
- * limitation, UM MAKES NO REPRESENTATIONS OR WARRANTIES OF MERCHANTABILITY 
- * OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE LICENSED 
- * SOFTWARE OR DOCUMENTATION WILL NOT INFRINGE ANY THIRD PARTY PATENTS, 
- * COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.   
- * 
- * The name of the University of Michigan or UM may NOT be used in 
+ *
+ * Copyright 1997 by the Regents of the University of Michigan.
+ * All rights reserved.
+ *
+ * THIS SOFTWARE IS PROVIDED "AS IS", AND UM MAKES NO REPRESENTATIONS
+ * OR WARRANTIES, EXPRESS OR IMPLIED.  By way of example, but not
+ * limitation, UM MAKES NO REPRESENTATIONS OR WARRANTIES OF MERCHANTABILITY
+ * OR FITNESS FOR ANY PARTICULAR PURPOSE OR THAT THE USE OF THE LICENSED
+ * SOFTWARE OR DOCUMENTATION WILL NOT INFRINGE ANY THIRD PARTY PATENTS,
+ * COPYRIGHTS, TRADEMARKS OR OTHER RIGHTS.
+ *
+ * The name of the University of Michigan or UM may NOT be used in
  * advertising or publicity pertaining to distribution of the software.
- * Title to copyright in this software and any associated documentation 
+ * Title to copyright in this software and any associated documentation
  * shall at all times remain with UM, and USER agrees to preserve same.
- * 
+ *
  * The University of Michigan
  * c/o Steve Rothwell <sgr@umich.edu>
  * 535 W. William Street
@@ -39,7 +39,7 @@
  */
 
 /*
-**  CacheAPI.h 
+**  CacheAPI.h
 **
 **      The externally visible functions and data structures
 **      for the Kerberos Common Cache DLL
@@ -105,11 +105,11 @@ typedef struct opaque_ccache_pointer_type* ccache_p;
 typedef struct opaque_credential_iterator_type* ccache_cit;
 
 #if 0
-enum _cc_data_type { 
+enum _cc_data_type {
     type_ticket = 0,                /* 0 for ticket, second_ticket */
-    /* Ted's draft spec says these are to be 
+    /* Ted's draft spec says these are to be
        "as defined in the Kerberos V5 protocol"
-       all I can find are typdefs, 
+       all I can find are typdefs,
        can't find an enumerated type or #define
     */
     type_address,           /* =  <"as defined in the Kerberos V5 protocol"> */
@@ -122,7 +122,7 @@ enum _cc_data_type {
 typedef struct _cc_data
 {
     cc_uint32       type;		// should be one of _cc_data_type
-    cc_uint32       length; 
+    cc_uint32       length;
     unsigned char*  data;		// the proverbial bag-o-bits
 } cc_data;
 
@@ -219,7 +219,7 @@ extern "C" /* this entire list of functions */
 */
 CCACHE_API
 cc_initialize(
-    apiCB** cc_ctx,           // <  DLL's primary control structure. 
+    apiCB** cc_ctx,           // <  DLL's primary control structure.
                               //    returned here, passed everywhere else
     cc_int32 api_version,     // >  ver supported by caller (use CC_API_VER_1)
     cc_int32*  api_supported, // <  if ~NULL, max ver supported by DLL
@@ -240,7 +240,7 @@ cc_get_change_time(
 
 /*
 ** Named Cache (NC) routines
-**   create, open, close, destroy, get_principal, get_cred_version, & 
+**   create, open, close, destroy, get_principal, get_cred_version, &
 **   lock_request
 **
 ** Multiple NCs are allowed within the main cache.  Each has a Name
@@ -284,13 +284,13 @@ cc_destroy(
 
 CCACHE_API
 cc_seq_fetch_NCs_begin(
-    apiCB* cc_ctx, 
+    apiCB* cc_ctx,
     ccache_cit** itNCs
     );
 
 CCACHE_API
 cc_seq_fetch_NCs_end(
-    apiCB* cc_ctx, 
+    apiCB* cc_ctx,
     ccache_cit** itNCs
     );
 
@@ -305,7 +305,7 @@ CCACHE_API
 cc_seq_fetch_NCs(
     apiCB* cc_ctx,         // >  DLL's primary control structure
     ccache_p** ccache_ptr, // <  NC control structure (free via cc_close())
-    ccache_cit** itNCs     // <> iterator used by DLL, 
+    ccache_cit** itNCs     // <> iterator used by DLL,
                            //    set to NULL before first call
                            //    returned NULL at CC_END
     );
@@ -313,14 +313,14 @@ cc_seq_fetch_NCs(
 CCACHE_API
 cc_get_NC_info(
     apiCB* cc_ctx,          // >  DLL's primary control structure
-    struct _infoNC*** ppNCi // <  (NULL before call) null terminated, 
+    struct _infoNC*** ppNCi // <  (NULL before call) null terminated,
                             //    list of a structs (free via cc_free_infoNC())
     );
 
 CCACHE_API
 cc_free_NC_info(
     apiCB* cc_ctx,
-    struct _infoNC*** ppNCi // <  free list of structs returned by 
+    struct _infoNC*** ppNCi // <  free list of structs returned by
                             //    cc_get_cache_names().  set to NULL on return
     );
 
@@ -332,7 +332,7 @@ CCACHE_API
 cc_get_name(
     apiCB* cc_ctx,              // > DLL's primary control structure
     const ccache_p* ccache_ptr, // > NC control structure
-    char** name                 // < name of NC associated with ccache_ptr 
+    char** name                 // < name of NC associated with ccache_ptr
                                 //   (free via cc_free_name())
     );
 
@@ -343,8 +343,8 @@ cc_set_principal(
     const cc_int32 vers,
     const char* principal           // > name of principal associated with NC
                                     //   Free via cc_free_principal()
-    ); 	
-				  
+    );
+
 CCACHE_API
 cc_get_principal(
     apiCB* cc_ctx,                  // > DLL's primary control structure
@@ -369,14 +369,14 @@ CCACHE_API
 cc_lock_request(
     apiCB* cc_ctx,     	        // > DLL's primary control structure
     const ccache_p* ccache_ptr, // > NC control structure
-    const cc_int32 lock_type    // > one (or combination) of above defined 
+    const cc_int32 lock_type    // > one (or combination) of above defined
                                 //   lock types
     );
 
 
 /*
 ** Credentials routines (work within an NC)
-** store, remove_cred, seq_fetch_creds 
+** store, remove_cred, seq_fetch_creds
 */
 CCACHE_API
 cc_store(
@@ -397,33 +397,33 @@ cc_seq_fetch_creds(
     apiCB* cc_ctx,              // > DLL's primary control structure
     const ccache_p* ccache_ptr, // > NC control structure
     cred_union** creds,         // < filled in by DLL, free via cc_free_creds()
-    ccache_cit** itCreds        // <> iterator used by DLL, set to NULL 
+    ccache_cit** itCreds        // <> iterator used by DLL, set to NULL
                                 //    before first call -- Also NULL for final
                                 //    call if loop ends before CC_END
     );
 
 CCACHE_API
 cc_seq_fetch_creds_begin(
-    apiCB* cc_ctx, 
-    const ccache_p* ccache_ptr, 
+    apiCB* cc_ctx,
+    const ccache_p* ccache_ptr,
     ccache_cit** itCreds
     );
 
 CCACHE_API
 cc_seq_fetch_creds_end(
-    apiCB* cc_ctx, 
+    apiCB* cc_ctx,
     ccache_cit** itCreds
     );
 
 CCACHE_API
 cc_seq_fetch_creds_next(
-    apiCB* cc_ctx, 
-    cred_union** cred, 
+    apiCB* cc_ctx,
+    cred_union** cred,
     ccache_cit* itCreds
     );
 
 /*
-** methods of liberation, 
+** methods of liberation,
 ** or freeing space via the free that goes with the malloc used to get it
 ** It's important to use the free carried in the DLL, not the one supplied
 ** by your compiler vendor.

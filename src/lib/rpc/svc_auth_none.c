@@ -1,6 +1,6 @@
 /*
   svc_auth_none.c
-  
+
   Copyright (c) 2000 The Regents of the University of Michigan.
   All rights reserved.
 
@@ -70,6 +70,6 @@ gssrpc__svcauth_none(struct svc_req *rqst, struct rpc_msg *msg,
 		     bool_t *no_dispatch)
 {
 	rqst->rq_xprt->xp_auth = &svc_auth_none;
-	
+
 	return (AUTH_OK);
 }

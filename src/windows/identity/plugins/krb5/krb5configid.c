@@ -273,7 +273,7 @@ k5_id_write_params(HWND hw, k5_id_dlg_data * d) {
                             KHUI_CNFLAG_APPLIED | KHUI_CNFLAG_MODIFIED);
 }
 
-INT_PTR CALLBACK 
+INT_PTR CALLBACK
 k5_id_tab_dlgproc(HWND hwnd,
                   UINT uMsg,
                   WPARAM wParam,

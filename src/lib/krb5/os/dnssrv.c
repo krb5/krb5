@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/os/dnssrv.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * do DNS SRV RR queries
  */
@@ -36,14 +37,15 @@
  * Lookup a KDC via DNS SRV records
  */
 
-void krb5int_free_srv_dns_data (struct srv_dns_entry *p)
+void
+krb5int_free_srv_dns_data (struct srv_dns_entry *p)
 {
     struct srv_dns_entry *next;
     while (p) {
-	next = p->next;
-	free(p->host);
-	free(p);
-	p = next;
+        next = p->next;
+        free(p->host);
+        free(p);
+        p = next;
     }
 }
 
@@ -55,9 +57,9 @@ void krb5int_free_srv_dns_data (struct srv_dns_entry *p)
 
 krb5_error_code
 krb5int_make_srv_query_realm(const krb5_data *realm,
-			     const char *service,
-			     const char *protocol,
-			     struct srv_dns_entry **answers)
+                             const char *service,
+                             const char *protocol,
+                             struct srv_dns_entry **answers)
 {
     const unsigned char *p = NULL, *base = NULL;
     char host[MAXDNAME];
@@ -81,7 +83,7 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
      */
 
     if (memchr(realm->data, 0, realm->length))
-	return 0;
+        return 0;
     krb5int_buf_init_fixed(&buf, host, sizeof(host));
     krb5int_buf_add_fmt(&buf, "%s.%s.", service, protocol);
     krb5int_buf_add_len(&buf, realm->data, realm->length);
@@ -89,7 +91,7 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
     /* Realm names don't (normally) end with ".", but if the query
        doesn't end with "." and doesn't get an answer as is, the
        resolv code will try appending the local domain.  Since the
-       realm names are absolutes, let's stop that.  
+       realm names are absolutes, let's stop that.
 
        But only if a name has been specified.  If we are performing
        a search on the prefix alone then the intention is to allow
@@ -97,10 +99,10 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
 
     len = krb5int_buf_len(&buf);
     if (len > 0 && host[len - 1] != '.')
-	krb5int_buf_add(&buf, ".");
+        krb5int_buf_add(&buf, ".");
 
     if (krb5int_buf_data(&buf) == NULL)
-	return 0;
+        return 0;
 
 #ifdef TEST
     fprintf (stderr, "sending DNS SRV query for %s\n", host);
@@ -108,75 +110,75 @@ krb5int_make_srv_query_realm(const krb5_data *realm,
 
     size = krb5int_dns_init(&ds, host, C_IN, T_SRV);
     if (size < 0)
-	goto out;
+        goto out;
 
     for (;;) {
-	ret = krb5int_dns_nextans(ds, &base, &rdlen);
-	if (ret < 0 || base == NULL)
-	    goto out;
+        ret = krb5int_dns_nextans(ds, &base, &rdlen);
+        if (ret < 0 || base == NULL)
+            goto out;
 
-	p = base;
+        p = base;
 
-	SAFE_GETUINT16(base, rdlen, p, 2, priority, out);
-	SAFE_GETUINT16(base, rdlen, p, 2, weight, out);
-	SAFE_GETUINT16(base, rdlen, p, 2, port, out);
+        SAFE_GETUINT16(base, rdlen, p, 2, priority, out);
+        SAFE_GETUINT16(base, rdlen, p, 2, weight, out);
+        SAFE_GETUINT16(base, rdlen, p, 2, port, out);
 
-	/*
-	 * RFC 2782 says the target is never compressed in the reply;
-	 * do we believe that?  We need to flatten it anyway, though.
-	 */
-	nlen = krb5int_dns_expand(ds, p, host, sizeof(host));
-	if (nlen < 0 || !INCR_OK(base, rdlen, p, nlen))
-	    goto out;
+        /*
+         * RFC 2782 says the target is never compressed in the reply;
+         * do we believe that?  We need to flatten it anyway, though.
+         */
+        nlen = krb5int_dns_expand(ds, p, host, sizeof(host));
+        if (nlen < 0 || !INCR_OK(base, rdlen, p, nlen))
+            goto out;
 
-	/*
-	 * We got everything!  Insert it into our list, but make sure
-	 * it's in the right order.  Right now we don't do anything
-	 * with the weight field
-	 */
+        /*
+         * We got everything!  Insert it into our list, but make sure
+         * it's in the right order.  Right now we don't do anything
+         * with the weight field
+         */
 
-	srv = (struct srv_dns_entry *) malloc(sizeof(struct srv_dns_entry));
-	if (srv == NULL)
-	    goto out;
-	
-	srv->priority = priority;
-	srv->weight = weight;
-	srv->port = port;
-	/* The returned names are fully qualified.  Don't let the
-	   local resolver code do domain search path stuff.  */
-	if (asprintf(&srv->host, "%s.", host) < 0) {
-	    free(srv);
-	    goto out;
-	}
+        srv = (struct srv_dns_entry *) malloc(sizeof(struct srv_dns_entry));
+        if (srv == NULL)
+            goto out;
 
-	if (head == NULL || head->priority > srv->priority) {
-	    srv->next = head;
-	    head = srv;
-	} else {
-	    /*
-	     * This is confusing.  Only insert an entry into this
-	     * spot if:
-	     * The next person has a higher priority (lower priorities
-	     * are preferred).
-	     * Or
-	     * There is no next entry (we're at the end)
-	     */
-	    for (entry = head; entry != NULL; entry = entry->next) {
-		if ((entry->next &&
-		     entry->next->priority > srv->priority) ||
-		    entry->next == NULL) {
-		    srv->next = entry->next;
-		    entry->next = srv;
-		    break;
-		}
-	    }
-	}
+        srv->priority = priority;
+        srv->weight = weight;
+        srv->port = port;
+        /* The returned names are fully qualified.  Don't let the
+           local resolver code do domain search path stuff.  */
+        if (asprintf(&srv->host, "%s.", host) < 0) {
+            free(srv);
+            goto out;
+        }
+
+        if (head == NULL || head->priority > srv->priority) {
+            srv->next = head;
+            head = srv;
+        } else {
+            /*
+             * This is confusing.  Only insert an entry into this
+             * spot if:
+             * The next person has a higher priority (lower priorities
+             * are preferred).
+             * Or
+             * There is no next entry (we're at the end)
+             */
+            for (entry = head; entry != NULL; entry = entry->next) {
+                if ((entry->next &&
+                     entry->next->priority > srv->priority) ||
+                    entry->next == NULL) {
+                    srv->next = entry->next;
+                    entry->next = srv;
+                    break;
+                }
+            }
+        }
     }
 
 out:
     if (ds != NULL) {
-	krb5int_dns_fini(ds);
-	ds = NULL;
+        krb5int_dns_fini(ds);
+        ds = NULL;
     }
     *answers = head;
     return 0;

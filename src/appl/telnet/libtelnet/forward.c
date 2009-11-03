@@ -21,7 +21,7 @@
 
 
 /* General-purpose forwarding routines. These routines may be put into */
-/* libkrb5.a to allow widespread use */ 
+/* libkrb5.a to allow widespread use */
 
 #if defined(KERBEROS) || defined(KRB5)
 #include <stdio.h>
@@ -29,12 +29,12 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
- 
+
 #include "krb5.h"
 #include <errno.h>
 
 #include "krb5forw.h"
- 
+
 #if defined(NEED_SETENV) || defined(NEED_SETENV_PROTO)
 extern int setenv(char *, char *, int);
 #endif
@@ -63,11 +63,11 @@ rd_and_store_for_creds(context, auth_context, inbuf, ticket)
     if ((retval = krb5_cc_resolve(context, ccname, &ccache)))
 	goto cleanup;
 
-    if ((retval = krb5_cc_initialize(context, ccache, 
+    if ((retval = krb5_cc_initialize(context, ccache,
 				     ticket->enc_part2->client)))
 	goto cleanup;
 
-    if ((retval = krb5_cc_store_cred(context, ccache, *creds))) 
+    if ((retval = krb5_cc_store_cred(context, ccache, *creds)))
 	goto cleanup;
 
 cleanup:

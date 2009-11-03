@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/krb/mk_rep.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * krb5_mk_rep()
  */
@@ -58,81 +59,81 @@
 #include "auth_con.h"
 
 /*
- Formats a KRB_AP_REP message into outbuf.
+  Formats a KRB_AP_REP message into outbuf.
 
- The outbuf buffer storage is allocated, and should be freed by the
- caller when finished.
+  The outbuf buffer storage is allocated, and should be freed by the
+  caller when finished.
 
- returns system errors
+  returns system errors
 */
 
 static krb5_error_code
 k5_mk_rep(krb5_context context, krb5_auth_context auth_context,
-	  krb5_data *outbuf, int dce_style)
+          krb5_data *outbuf, int dce_style)
 {
-    krb5_error_code 	  retval;
+    krb5_error_code       retval;
     krb5_ap_rep_enc_part  repl;
-    krb5_ap_rep 	  reply;
-    krb5_data 		* scratch;
-    krb5_data 		* toutbuf;
+    krb5_ap_rep           reply;
+    krb5_data           * scratch;
+    krb5_data           * toutbuf;
 
     /* Make the reply */
     if (((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) ||
-	(auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) &&
-	(auth_context->local_seq_number == 0)) {
-	if ((retval = krb5_generate_seq_number(context,
-					       &auth_context->key->keyblock,
-					       &auth_context->local_seq_number)))
+         (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) &&
+        (auth_context->local_seq_number == 0)) {
+        if ((retval = krb5_generate_seq_number(context,
+                                               &auth_context->key->keyblock,
+                                               &auth_context->local_seq_number)))
             return(retval);
     }
 
     if (dce_style) {
-	krb5_us_timeofday(context, &repl.ctime, &repl.cusec);
+        krb5_us_timeofday(context, &repl.ctime, &repl.cusec);
     } else {
-	repl.ctime = auth_context->authentp->ctime;    
-	repl.cusec = auth_context->authentp->cusec;    
+        repl.ctime = auth_context->authentp->ctime;
+        repl.cusec = auth_context->authentp->cusec;
     }
 
     if (dce_style)
-	repl.subkey = NULL;
+        repl.subkey = NULL;
     else if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_USE_SUBKEY) {
-	assert(auth_context->negotiated_etype != ENCTYPE_NULL);
+        assert(auth_context->negotiated_etype != ENCTYPE_NULL);
 
-	retval = krb5int_generate_and_save_subkey (context, auth_context,
-						   &auth_context->key->keyblock,
-						   auth_context->negotiated_etype);
-	if (retval)
-	    return retval;
-	repl.subkey = &auth_context->send_subkey->keyblock;
+        retval = krb5int_generate_and_save_subkey (context, auth_context,
+                                                   &auth_context->key->keyblock,
+                                                   auth_context->negotiated_etype);
+        if (retval)
+            return retval;
+        repl.subkey = &auth_context->send_subkey->keyblock;
     } else
-	repl.subkey = auth_context->authentp->subkey;
+        repl.subkey = auth_context->authentp->subkey;
 
     if (dce_style)
-	repl.seq_number = auth_context->remote_seq_number;
+        repl.seq_number = auth_context->remote_seq_number;
     else
-	repl.seq_number = auth_context->local_seq_number;
+        repl.seq_number = auth_context->local_seq_number;
 
     /* encode it before encrypting */
     if ((retval = encode_krb5_ap_rep_enc_part(&repl, &scratch)))
-	return retval;
+        return retval;
 
     if ((retval = krb5_encrypt_keyhelper(context, auth_context->key,
-					 KRB5_KEYUSAGE_AP_REP_ENCPART,
-					 scratch, &reply.enc_part)))
-	goto cleanup_scratch;
+                                         KRB5_KEYUSAGE_AP_REP_ENCPART,
+                                         scratch, &reply.enc_part)))
+        goto cleanup_scratch;
 
     if (!(retval = encode_krb5_ap_rep(&reply, &toutbuf))) {
-	*outbuf = *toutbuf;
-	free(toutbuf);
+        *outbuf = *toutbuf;
+        free(toutbuf);
     }
 
     memset(reply.enc_part.ciphertext.data, 0, reply.enc_part.ciphertext.length);
-    free(reply.enc_part.ciphertext.data); 
-    reply.enc_part.ciphertext.length = 0; 
+    free(reply.enc_part.ciphertext.data);
+    reply.enc_part.ciphertext.length = 0;
     reply.enc_part.ciphertext.data = 0;
 
 cleanup_scratch:
-    memset(scratch->data, 0, scratch->length); 
+    memset(scratch->data, 0, scratch->length);
     krb5_free_data(context, scratch);
 
     return retval;

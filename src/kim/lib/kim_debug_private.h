@@ -8,7 +8,7 @@
  * require a specific license from the United States Government.
  * It is the responsibility of any person or organization contemplating
  * export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -25,13 +25,13 @@
  */
 
 #define kim_debug_printf(format, ...) __kim_debug_printf(__FUNCTION__, format, ## __VA_ARGS__)
-void __kim_debug_printf (kim_string in_function, 
-                         kim_string in_format, 
+void __kim_debug_printf (kim_string in_function,
+                         kim_string in_format,
                          ...);
 
-kim_error _check_error (kim_error  in_err, 
-                        kim_string in_function, 
-                        kim_string in_file, 
+kim_error _check_error (kim_error  in_err,
+                        kim_string in_function,
+                        kim_string in_file,
                         int          in_line);
 #define check_error(err) _check_error(err, __FUNCTION__, __FILE__, __LINE__)
 

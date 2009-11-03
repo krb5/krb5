@@ -50,15 +50,15 @@ struct kim_ui_plugin_context {
 
 static void kim_ui_plugin_context_free (kim_ui_plugin_context *io_context)
 {
-    if (io_context && *io_context) { 
+    if (io_context && *io_context) {
         if ((*io_context)->ftables) {
             krb5int_free_plugin_dir_data ((*io_context)->ftables);
         }
-        if (PLUGIN_DIR_OPEN (&(*io_context)->plugins)) { 
-            krb5int_close_plugin_dirs (&(*io_context)->plugins); 
+        if (PLUGIN_DIR_OPEN (&(*io_context)->plugins)) {
+            krb5int_close_plugin_dirs (&(*io_context)->plugins);
         }
-        if ((*io_context)->kcontext) { 
-            krb5_free_context ((*io_context)->kcontext); 
+        if ((*io_context)->kcontext) {
+            krb5_free_context ((*io_context)->kcontext);
         }
         free (*io_context);
         *io_context = NULL;
@@ -71,31 +71,31 @@ static kim_error kim_ui_plugin_context_allocate (kim_ui_plugin_context *out_cont
 {
     kim_error err = KIM_NO_ERROR;
     kim_ui_plugin_context context = NULL;
-    
+
     if (!err && !out_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
+
     if (!err) {
         context = malloc (sizeof (*context));
         if (!context) { err = KIM_OUT_OF_MEMORY_ERR; }
     }
-    
+
     if (!err) {
         err = krb5_error (NULL, krb5_init_context (&context->kcontext));
     }
-    
+
     if (!err) {
         PLUGIN_DIR_INIT(&context->plugins);
         context->ftable = NULL;
         context->ftables = NULL;
         context->plugin_context = NULL;
-        
+
         *out_context = context;
         context = NULL;
     }
-    
+
     kim_ui_plugin_context_free (&context);
-    
-    return check_error (err);    
+
+    return check_error (err);
 }
 
 #pragma mark -
@@ -106,60 +106,60 @@ kim_error kim_ui_plugin_init (kim_ui_context *io_context)
 {
     kim_error err = KIM_NO_ERROR;
     kim_ui_plugin_context context = NULL;
-    
+
     if (!err && !io_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
+
     if (!err) {
         err = kim_ui_plugin_context_allocate (&context);
     }
-    
+
     if (!err) {
         PLUGIN_DIR_INIT(&context->plugins);
 
         err = krb5_error (context->kcontext,
-                          krb5int_open_plugin_dirs (kim_ui_plugin_dirs, 
-                                                    kim_ui_plugin_files, 
-                                                    &context->plugins, 
+                          krb5int_open_plugin_dirs (kim_ui_plugin_dirs,
+                                                    kim_ui_plugin_files,
+                                                    &context->plugins,
                                                     &context->kcontext->err));
     }
-    
+
     if (!err) {
         err = krb5_error (context->kcontext,
                           krb5int_get_plugin_dir_data (&context->plugins,
                                                        "kim_ui_0",
-                                                       &context->ftables, 
+                                                       &context->ftables,
                                                        &context->kcontext->err));
     }
-    
+
     if (!err && context->ftables) {
         int i;
-        
+
         for (i = 0; context->ftables[i]; i++) {
             struct kim_ui_plugin_ftable_v0 *ftable = context->ftables[i];
             context->plugin_context = NULL;
-            
+
             err = ftable->init (&context->plugin_context);
-            
+
             if (!err) {
                 context->ftable = ftable;
                 break; /* use first plugin that initializes correctly */
             }
-            
+
             err = KIM_NO_ERROR; /* ignore failed plugins */
         }
     }
-    
+
     if (!err && !context->ftable) {
         err = check_error (KRB5_PLUGIN_NO_HANDLE);
     }
-        
+
     if (!err) {
         io_context->tcontext = context;
         context = NULL;
     }
-    
+
     kim_ui_plugin_context_free (&context);
-    
+
     return check_error (err);
 }
 
@@ -171,12 +171,12 @@ kim_error kim_ui_plugin_enter_identity (kim_ui_context *in_context,
                                         kim_boolean    *out_change_password)
 {
     kim_error err = KIM_NO_ERROR;
-    
+
     if (!err && !in_context         ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !io_options         ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_identity       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_change_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
+
     if (!err) {
         kim_ui_plugin_context context = (kim_ui_plugin_context) in_context->tcontext;
 
@@ -185,7 +185,7 @@ kim_error kim_ui_plugin_enter_identity (kim_ui_context *in_context,
                                                out_identity,
                                                out_change_password);
     }
-    
+
     return check_error (err);
 }
 
@@ -197,21 +197,21 @@ kim_error kim_ui_plugin_select_identity (kim_ui_context      *in_context,
                                          kim_boolean         *out_change_password)
 {
     kim_error err = KIM_NO_ERROR;
-    
+
     if (!err && !in_context         ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !io_hints           ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_identity       ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_change_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
+
     if (!err) {
         kim_ui_plugin_context context = (kim_ui_plugin_context) in_context->tcontext;
-        
+
         err = context->ftable->select_identity (context->plugin_context,
-                                                io_hints, 
+                                                io_hints,
                                                 out_identity,
                                                 out_change_password);
     }
-    
+
     return check_error (err);
 }
 
@@ -220,8 +220,8 @@ kim_error kim_ui_plugin_select_identity (kim_ui_context      *in_context,
 kim_error kim_ui_plugin_auth_prompt (kim_ui_context      *in_context,
                                      kim_identity         in_identity,
                                      kim_prompt_type      in_type,
-                                     kim_boolean          in_allow_save_reply, 
-                                     kim_boolean          in_hide_reply, 
+                                     kim_boolean          in_allow_save_reply,
+                                     kim_boolean          in_hide_reply,
                                      kim_string           in_title,
                                      kim_string           in_message,
                                      kim_string           in_description,
@@ -229,17 +229,17 @@ kim_error kim_ui_plugin_auth_prompt (kim_ui_context      *in_context,
                                      kim_boolean         *out_save_reply)
 {
     kim_error err = KIM_NO_ERROR;
-    
+
     if (!err && !in_context ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_identity) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_reply  ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     /* in_title, in_message or in_description may be NULL */
-    
+
     if (!err) {
         kim_ui_plugin_context context = (kim_ui_plugin_context) in_context->tcontext;
-        
+
         err = context->ftable->auth_prompt (context->plugin_context,
-                                            in_identity, 
+                                            in_identity,
                                             in_type,
                                             in_allow_save_reply,
                                             in_hide_reply,
@@ -249,7 +249,7 @@ kim_error kim_ui_plugin_auth_prompt (kim_ui_context      *in_context,
                                             out_reply,
                                             out_save_reply);
     }
-    
+
     return check_error (err);
 }
 
@@ -263,24 +263,24 @@ kim_error kim_ui_plugin_change_password (kim_ui_context  *in_context,
                                          char           **out_verify_password)
 {
     kim_error err = KIM_NO_ERROR;
-    
+
     if (!err && !in_context         ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_identity        ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_old_password   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_new_password   ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !out_verify_password) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
+
     if (!err) {
         kim_ui_plugin_context context = (kim_ui_plugin_context) in_context->tcontext;
-        
+
         err = context->ftable->change_password (context->plugin_context,
-                                                in_identity, 
+                                                in_identity,
                                                 in_old_password_expired,
                                                 out_old_password,
                                                 out_new_password,
                                                 out_verify_password);
     }
-    
+
     return check_error (err);
 }
 
@@ -293,21 +293,21 @@ kim_error kim_ui_plugin_handle_error (kim_ui_context *in_context,
                                       kim_string      in_error_description)
 {
     kim_error err = KIM_NO_ERROR;
-    
+
     if (!err && !in_context          ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_error_message    ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !in_error_description) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
+
     if (!err) {
         kim_ui_plugin_context context = (kim_ui_plugin_context) in_context->tcontext;
-        
+
         err = context->ftable->handle_error (context->plugin_context,
-                                             in_identity, 
+                                             in_identity,
                                              in_error,
                                              in_error_message,
                                              in_error_description);
     }
-    
+
     return check_error (err);
 }
 
@@ -317,14 +317,14 @@ void kim_ui_plugin_free_string (kim_ui_context  *in_context,
                                 char           **io_string)
 {
     kim_error err = KIM_NO_ERROR;
-    
+
     if (!err && !in_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
     if (!err && !io_string ) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
+
     if (!err) {
         kim_ui_plugin_context context = (kim_ui_plugin_context) in_context->tcontext;
-        
-        context->ftable->free_string (context->plugin_context, 
+
+        context->ftable->free_string (context->plugin_context,
                                       io_string);
     }
  }
@@ -334,12 +334,12 @@ void kim_ui_plugin_free_string (kim_ui_context  *in_context,
 kim_error kim_ui_plugin_fini (kim_ui_context *io_context)
 {
     kim_error err = KIM_NO_ERROR;
-    
+
     if (!err && !io_context) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
+
     if (!err) {
         kim_ui_plugin_context context = (kim_ui_plugin_context) io_context->tcontext;
-        
+
         if (context) {
             err = context->ftable->fini (context->plugin_context);
         }
@@ -349,6 +349,6 @@ kim_error kim_ui_plugin_fini (kim_ui_context *io_context)
             io_context->tcontext = NULL;
         }
     }
-    
+
     return check_error (err);
 }

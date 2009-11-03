@@ -72,7 +72,7 @@ char 	utmpf[] = _PATH_UTMP;
 #else
 char	utmpf[] = "/etc/utmp";
 #endif
-  
+
 # ifdef CRAY
 #include <tmpdir.h>
 #include <sys/wait.h>
@@ -96,7 +96,7 @@ extern struct sysv sysv;
 
 #ifdef	STREAMSPTY
 #ifdef HAVE_SAC_H
-#include <sac.h> 
+#include <sac.h>
 #endif
 #include <sys/stropts.h>
 #endif
@@ -115,7 +115,7 @@ extern struct sysv sysv;
 #ifdef HAVE_SYS_TTY_H
 #include <sys/tty.h>
 #endif
-	
+
 #ifdef	t_erase
 #undef	t_erase
 #undef	t_kill
@@ -1076,9 +1076,9 @@ startslave(host, autologin, autoname)
 	register int n;
 #endif	/* NEWINIT */
 
-	if ( pipe(syncpipe) < 0 ) 
+	if ( pipe(syncpipe) < 0 )
 		fatal(net, "failed getting synchronization pipe");
-    
+
 #if	defined(AUTHENTICATION)
 	if (!autoname || !autoname[0])
 		autologin = 0;
@@ -1110,9 +1110,9 @@ startslave(host, autologin, autoname)
 		}
 
 		close(syncpipe[0]);
-		
+
 	} else {
-		
+
 		pty_update_utmp (PTY_LOGIN_PROCESS, getpid(), "LOGIN", line,
 				 host, PTY_TTYSLOT_USABLE);
 		getptyslave();
@@ -1121,7 +1121,7 @@ startslave(host, autologin, autoname)
 		write(syncpipe[1],"y",1);
 		close(syncpipe[0]);
 		close(syncpipe[1]);
-		
+
 		start_login(host, autologin, autoname);
 		/*NOTREACHED*/
 	}
@@ -1275,7 +1275,7 @@ start_login(host, autologin, name)
 	if (bftpd) {
 		argv = addarg(argv, "-e");
 		argv = addarg(argv, BFTPPATH);
-	} else 
+	} else
 #endif
 #if	defined (SecurID)
 	/*
@@ -1431,7 +1431,7 @@ start_login(host, autologin, name)
 /*
  * This code returns a pointer to the first element of the array and
  * expects the same to be called with.
- * Therefore the -1 reference is legal. 
+ * Therefore the -1 reference is legal.
  */
 
 static char **
@@ -1483,12 +1483,7 @@ cleanup(sig)
 #ifdef KRB5
 	kerberos5_cleanup();
 #endif
-    
+
 	(void) shutdown(net, 2);
 	exit(1);
 }
-
-
-
-
-

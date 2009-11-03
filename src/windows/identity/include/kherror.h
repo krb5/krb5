@@ -41,7 +41,7 @@
 
 /*! \brief Range for error codes
 
-    NetIDMgr errors range from \a KHM_ERROR_BASE to 
+    NetIDMgr errors range from \a KHM_ERROR_BASE to
     KHM_ERROR_BASE + KHM_ERROR_RANGE.
 */
 #define KHM_ERROR_RANGE 256L

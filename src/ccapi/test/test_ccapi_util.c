@@ -14,7 +14,7 @@
 cc_int32 destroy_all_ccaches(cc_context_t context) {
 	cc_int32 err = ccNoError;
 	cc_ccache_t ccache = NULL;
-	
+
 	while (!err) {
 		err = cc_context_open_default_ccache(context, &ccache);
 		if (!err) {
@@ -42,9 +42,9 @@ cc_int32 new_v5_creds_union (cc_credentials_union *out_union, const char *realm)
     static int num_runs = 1;
 	char *client = NULL;
 	char *server = NULL;
-	
+
     if (!out_union) { err = ccErrBadParam; }
-    
+
 	if (!err) {
 		v5creds = malloc (sizeof (*v5creds));
 		if (!v5creds) {
@@ -81,22 +81,22 @@ cc_int32 new_v5_creds_union (cc_credentials_union *out_union, const char *realm)
 		v5creds->second_ticket.data = NULL;
 		v5creds->authdata = NULL;
 	}
-	
-	
+
+
     if (!err) {
         cred_union = malloc (sizeof (*cred_union));
-        if (cred_union) { 
+        if (cred_union) {
 			cred_union->version = cc_credentials_v5;
 			cred_union->credentials.credentials_v5 = v5creds;
-        } else { 
-            err = ccErrNoMem; 
+        } else {
+            err = ccErrNoMem;
         }
     }
 	if (!err) {
 		*out_union = *cred_union;
 		cred_union = NULL;
 	}
-    
+
     return err;
 }
 
@@ -105,7 +105,7 @@ cc_int32 new_v5_creds_union (cc_credentials_union *out_union, const char *realm)
 
 void release_v5_creds_union(cc_credentials_union *creds_union) {
 	cc_credentials_v5_t *v5creds = NULL;
-	
+
 	if (creds_union) {
 		if (creds_union->credentials.credentials_v5) {
 			v5creds = creds_union->credentials.credentials_v5;
@@ -115,7 +115,7 @@ void release_v5_creds_union(cc_credentials_union *creds_union) {
 			if (v5creds->ticket.data) { free(v5creds->ticket.data); }
 			if (v5creds->second_ticket.data) { free(v5creds->second_ticket.data); }
 			free(v5creds);
-		}		
+		}
 		//free(creds_union);
 	}
 }
@@ -127,16 +127,16 @@ void release_v5_creds_union(cc_credentials_union *creds_union) {
 
 int compare_v5_creds_unions(const cc_credentials_union *a, const cc_credentials_union *b) {
 	int retval = -1;
-	
-	if (a && 
+
+	if (a &&
 		b &&
 		(a->version == cc_credentials_v5) &&
-		(a->version == b->version) && 
-		(strcmp(a->credentials.credentials_v5->client, b->credentials.credentials_v5->client) == 0) && 
-		(strcmp(a->credentials.credentials_v5->server, b->credentials.credentials_v5->server) == 0)) 
+		(a->version == b->version) &&
+		(strcmp(a->credentials.credentials_v5->client, b->credentials.credentials_v5->client) == 0) &&
+		(strcmp(a->credentials.credentials_v5->server, b->credentials.credentials_v5->server) == 0))
 	{
 		retval = 0;
 	}
-	
+
 	return retval;
 }

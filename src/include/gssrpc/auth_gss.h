@@ -1,9 +1,9 @@
 /*
   auth_gssapi.h
-  
+
   Copyright (c) 2000 The Regents of the University of Michigan.
   All rights reserved.
-  
+
   Copyright (c) 2000 Dug Song <dugsong@UMICH.EDU>.
   All rights reserved, all wrongs reversed.
 
@@ -81,20 +81,20 @@ struct authgss_private_data {
 	uint32_t	pd_seq_win;	/* Sequence window */
 };
 
-/* Krb 5 default mechanism 
+/* Krb 5 default mechanism
 #define KRB5OID  "1.2.840.113554.1.2.2"
 
 gss_OID_desc krb5oid = {
-	20, KRB5OID 
+	20, KRB5OID
 };
  */
 
 /*
-struct rpc_gss_sec krb5mech = { 
+struct rpc_gss_sec krb5mech = {
 	(gss_OID)&krb5oid,
 	GSS_QOP_DEFAULT,
 	RPCSEC_GSS_SVC_NONE
-}; 
+};
 */
 
 /* Credentials. */

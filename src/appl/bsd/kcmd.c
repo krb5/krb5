@@ -21,14 +21,14 @@
 
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
  * responsibility of any person or organization contemplating export to
  * obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -39,14 +39,14 @@
  * permission.  FundsXpress makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 /* derived from @(#)rcmd.c	5.17 (Berkeley) 6/27/88 */
-     
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -63,7 +63,7 @@
 #define _TYPES_
 #endif
 #include <fcntl.h>
-     
+
 #ifndef MAXPATHLEN
 #define MAXPATHLEN 1024
 #endif
@@ -80,7 +80,7 @@
 #define sigmask(m)    (1 << ((m)-1))
 #endif
 #endif
-     
+
 #ifndef roundup
 #define roundup(x,y) ((((x)+(y)-1)/(y))*(y))
 #endif
@@ -110,7 +110,7 @@ char *default_service = "host";
  * Note that the encrypted rlogin packets take the form of a four-byte
  * length followed by encrypted data.  On writing the data out, a significant
  * performance penalty is suffered (at least one RTT per character, two if we
- * are waiting for a shell to echo) by writing the data separately from the 
+ * are waiting for a shell to echo) by writing the data separately from the
  * length.  So, unlike the input buffer, which just contains the output
  * data, the output buffer represents the entire packet.
  */
@@ -132,7 +132,7 @@ static char storage[2*RCMD_BUFSIZ];	 /* storage for the decryption */
 static size_t nstored = 0;
 static char *store_ptr = storage;
 static int twrite(int, char *, size_t, int);
-static int v5_des_read(int, char *, size_t, int), 
+static int v5_des_read(int, char *, size_t, int),
     v5_des_write(int, char *, size_t, int);
 static int do_lencheck;
 
@@ -405,9 +405,9 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     }
     cksumdat.data = cksumbuf;
     cksumdat.length = strlen(cksumbuf);
-	
+
     block_urgent(&oldmask);
-    
+
     if (!laddr) laddr = &local_laddr;
     if (kcmd_connect(&s, &addrfamily, &sockin, *ahost, &host_save, rport, 0, laddr) == -1) {
 	restore_sigs(&oldmask);
@@ -416,7 +416,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     *ahost = host_save;
     /* If no service is given set to the default service */
     if (!service) service = default_service;
-    
+
     if (!(get_cred = (krb5_creds *)calloc(1, sizeof(krb5_creds)))) {
         fprintf(stderr,"kcmd: no memory\n");
         return(-1);
@@ -433,7 +433,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
         status = krb5_set_principal_realm(bsd_context, get_cred->server,
 					  realm);
 	if (status) {
-	  fprintf(stderr, "kcmd: krb5_set_principal_realm failed %s\n", 
+	  fprintf(stderr, "kcmd: krb5_set_principal_realm failed %s\n",
 		  error_message(status));
 	  return(-1);
 	}
@@ -470,12 +470,12 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     authopts &= (~OPTS_FORWARD_CREDS);
     authopts &= (~OPTS_FORWARDABLE_CREDS);
 
-    if (krb5_auth_con_init(bsd_context, &auth_context)) 
+    if (krb5_auth_con_init(bsd_context, &auth_context))
 	goto bad2;
 
     if (krb5_auth_con_set_req_cksumtype(bsd_context, auth_context, CKSUMTYPE_RSA_MD5) !=0 )
 	goto bad2;
-    if (krb5_auth_con_setflags(bsd_context, auth_context, 
+    if (krb5_auth_con_setflags(bsd_context, auth_context,
 			       KRB5_AUTH_CONTEXT_RET_TIME))
 	goto bad2;
 
@@ -523,7 +523,7 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	    if (!suppress_err) {
 		fprintf(stderr, "Server returned error code %d (%s)\n",
 			error->error,
-			error_message(ERROR_TABLE_BASE_krb5 + 
+			error_message(ERROR_TABLE_BASE_krb5 +
 				      (int) error->error));
 		if (error->text.length) {
 		    fprintf(stderr, "Error text sent from server: %s\n",
@@ -533,17 +533,17 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
 	    krb5_free_error(bsd_context, error);
 	    error = 0;
 	}
-    }	
+    }
     if (status) goto bad2;
     if (rep_ret && server_seqno) {
 	*server_seqno = rep_ret->seq_number;
 	krb5_free_ap_rep_enc_part(bsd_context, rep_ret);
     }
-    
+
     (void) write(s, remuser, strlen(remuser)+1);
     (void) write(s, cmd, strlen(cmd)+1);
     (void) write(s, locuser, strlen(locuser)+1);
-    
+
     if (options & OPTS_FORWARD_CREDS) {   /* Forward credentials */
 	status = krb5_fwd_tgt_creds(bsd_context, auth_context,
 				    host_save,
@@ -589,13 +589,13 @@ kcmd(sock, ahost, rport, locuser, remuser, cmd, fd2p, service, realm,
     restore_sigs(&oldmask);
     *sock = s;
     *protonump = protonum;
-    
+
     /* pass back credentials if wanted */
     if (cred) krb5_copy_creds(bsd_context, ret_cred, cred);
     krb5_free_creds(bsd_context, ret_cred);
     if (authconp)
 	*authconp = auth_context;
-    
+
     return (0);
   bad2:
     if (lport)
@@ -723,7 +723,7 @@ void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck, am_client,
 
     use_ivecs = 1;
     switch (in_keyblock->enctype) {
-      /* 
+      /*
        * For the DES-based enctypes and the 3DES enctype we  want to use
        *  a non-zero  IV because that's what we did.  In the future we
        * use different keyusage for each channel and direction and a fresh
@@ -733,7 +733,7 @@ void rcmd_stream_init_krb5(in_keyblock, encrypt_flag, lencheck, am_client,
     case ENCTYPE_DES_CBC_MD4:
     case ENCTYPE_DES_CBC_MD5:
     case ENCTYPE_DES3_CBC_SHA1:
-      
+
       status = krb5_c_block_size(bsd_context, keyblock->enctype,
 				 &blocksize);
       if (status) {
@@ -829,7 +829,7 @@ static int v5_des_read(fd, buf, len, secondary)
     krb5_error_code ret;
     krb5_data plain;
     krb5_enc_data cipher;
-    
+
     if (nstored >= len) {
 	memcpy(buf, store_ptr, len);
 	store_ptr += len;
@@ -991,7 +991,7 @@ strsave(sp)
     const char *sp;
 {
     register char *ret;
-    
+
     if((ret = strdup(sp)) == NULL) {
 	fprintf(stderr, "no memory for saving args\n");
 	exit(1);
@@ -1002,7 +1002,7 @@ strsave(sp)
 
 /* Server side authentication, etc */
 
-int princ_maps_to_lname(principal, luser)	
+int princ_maps_to_lname(principal, luser)
      krb5_principal principal;
      char *luser;
 {
@@ -1020,7 +1020,7 @@ int default_realm(principal)
 {
     char *def_realm;
     int retval;
-    
+
     if ((retval = krb5_get_default_realm(bsd_context, &def_realm))) {
 	return 0;
     }
@@ -1029,7 +1029,7 @@ int default_realm(principal)
 			def_realm)) {
 	free(def_realm);
 	return 0;
-    }	
+    }
     free(def_realm);
     return 1;
 }

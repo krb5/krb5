@@ -28,8 +28,8 @@ static void print_yarrow_status( Yarrow_CTX *y )
 	for ( sid = 0; sid < y->num_sources; sid++ )
 	{
 	    source = &y->source[ sid ];
-	    printf( "#%d=%d/%d, ", sid, source->entropy[pool], 
-		    pool == YARROW_SLOW_POOL ? 
+	    printf( "#%d=%d/%d, ", sid, source->entropy[pool],
+		    pool == YARROW_SLOW_POOL ?
 		    y->slow_thresh : y->fast_thresh );
 	}
     }
@@ -44,8 +44,8 @@ int Instrumented_krb5int_yarrow_input( Yarrow_CTX* y, int sid, void* sample,
 {
     int ret;
 
-    VERBOSE( printf( "krb5int_yarrow_input( #%d, %d bits, %s ) = [", sid, entropy, 
-		     y->source[sid].pool == 
+    VERBOSE( printf( "krb5int_yarrow_input( #%d, %d bits, %s ) = [", sid, entropy,
+		     y->source[sid].pool ==
 		     YARROW_SLOW_POOL ? "slow" : "fast" ); );
     ret = krb5int_yarrow_input( y, sid, sample, size, entropy );
 
@@ -95,15 +95,15 @@ int main( int argc, char* argv[] )
     int done_some_tests = 0;
     int i;
     int ret;
-    
+
     for ( argvp = argv+1, i = 1; i < argc; i++, argvp++ )
     {
 	arg = *argvp;
-	if ( arg[0] == '-' ) 
+	if ( arg[0] == '-' )
 	{
 	    switch ( arg[1] )
 	    {
-	    case 'v': yarrow_verbose = 1; continue; 
+	    case 'v': yarrow_verbose = 1; continue;
 	    default: fprintf( stderr, "usage: test [-v] [[test] ... ]\n" );
 		THROW( YARROW_FAIL );
 	    }
@@ -193,7 +193,7 @@ int test_3( void )
 
     VERBOSE( printf( "\nkrb5int_yarrow_stretch\n\n" ); );
     THROW( YARROW_NOT_IMPL );
-    
+
  CATCH:
     EXCEP_RET;
 }
@@ -232,18 +232,18 @@ int test_4( void )
     VERBOSE( printf( "krb5int_yarrow_new_source() = [%s]\n",
 		     krb5int_yarrow_str_error( ret ) ); );
     if ( ret != YARROW_OK ) { THROW( ret ); }
-  
+
     VERBOSE( printf( "Yarrow_Poll( #%d ) = [", user ); );
     ret = Yarrow_Poll( &yarrow, user );
     VERBOSE( printf( "%s]\n", krb5int_yarrow_str_error( ret ) ); );
 
     ret = krb5int_yarrow_new_source( &yarrow, &mouse );
-    VERBOSE( printf( "krb5int_yarrow_new_source() = [%s]\n", 
+    VERBOSE( printf( "krb5int_yarrow_new_source() = [%s]\n",
 		     krb5int_yarrow_str_error( ret ) ); );
     if ( ret != YARROW_OK ) { THROW( ret ); }
 
     ret = krb5int_yarrow_new_source( &yarrow, &keyboard );
-    VERBOSE( printf( "krb5int_yarrow_new_source() = [%s]\n", 
+    VERBOSE( printf( "krb5int_yarrow_new_source() = [%s]\n",
 		     krb5int_yarrow_str_error( ret ) ); );
     if ( ret != YARROW_OK ) { THROW( ret ); }
 
@@ -255,22 +255,22 @@ int test_4( void )
     ret = krb5int_yarrow_output( &yarrow, random, sizeof( random ) );
     VERBOSE( printf( "%s]\n", krb5int_yarrow_str_error( ret ) ); );
 
-/*   do it twice so that we some slow samples 
+/*   do it twice so that we some slow samples
  *   (first sample goes to fast pool, and then samples alternate)
  */
 
     for ( i = 0; i < 2; i++ )
     {
-	TRY( Instrumented_krb5int_yarrow_input( &yarrow, mouse, mouse_sample, 
+	TRY( Instrumented_krb5int_yarrow_input( &yarrow, mouse, mouse_sample,
 					sizeof( mouse_sample ), 2 ) );
-	
-	TRY( Instrumented_krb5int_yarrow_input( &yarrow, keyboard, keyboard_sample, 
+
+	TRY( Instrumented_krb5int_yarrow_input( &yarrow, keyboard, keyboard_sample,
 					sizeof( keyboard_sample ), 2 ) );
 
-	TRY( Instrumented_krb5int_yarrow_input( &yarrow, user, user_sample, 
+	TRY( Instrumented_krb5int_yarrow_input( &yarrow, user, user_sample,
 					sizeof( user_sample ), 2 ) );
     }
-	
+
 #if defined( YARROW_DEBUG )
     dump_yarrow_state( stdout, &yarrow );
 #endif
@@ -282,8 +282,8 @@ int test_4( void )
 
     for ( i = 0; i < 7; i++ )
     {
-	TRY( Instrumented_krb5int_yarrow_input( &yarrow, user, user_sample, 
-					sizeof( user_sample ), 
+	TRY( Instrumented_krb5int_yarrow_input( &yarrow, user, user_sample,
+					sizeof( user_sample ),
 					sizeof( user_sample ) * 3 ) );
     }
 
@@ -295,8 +295,8 @@ int test_4( void )
 
     for ( i = 0; i < 40; i++ )
     {
-	TRY( Instrumented_krb5int_yarrow_input( &yarrow, mouse, mouse_sample, 
-					sizeof( mouse_sample ), 
+	TRY( Instrumented_krb5int_yarrow_input( &yarrow, mouse, mouse_sample,
+					sizeof( mouse_sample ),
 					sizeof( mouse_sample )*2 ) );
     }
 
@@ -320,20 +320,20 @@ int test_4( void )
 
 	if ( i % 16 == 0 )
 	{
-	    TRY( Instrumented_krb5int_yarrow_input( &yarrow, mouse, junk, 
-					    sizeof( junk ), 
+	    TRY( Instrumented_krb5int_yarrow_input( &yarrow, mouse, junk,
+					    sizeof( junk ),
 					    sizeof( junk ) * 3 ) );
 	}
 	else
 	{
-	    TRY( Instrumented_krb5int_yarrow_input( &yarrow, user, junk, 
-					    sizeof( junk ), 
+	    TRY( Instrumented_krb5int_yarrow_input( &yarrow, user, junk,
+					    sizeof( junk ),
 					    sizeof( junk ) * 3 ) );
 	}
     }
 
     VERBOSE( printf( "\nPrint some random output\n\n" ); );
-    
+
     VERBOSE( printf( "krb5int_yarrow_output( %d ) = [", sizeof( random ) ); );
     ret = krb5int_yarrow_output( &yarrow, random, sizeof( random ) );
     VERBOSE( printf( "%s]\n", krb5int_yarrow_str_error( ret ) ); );
@@ -365,7 +365,7 @@ void hex_print( FILE* f, const char* var, void* data, size_t size )
     size_t i;
     char* p = (char*) data;
     char c, d;
-    
+
     fprintf( f, var );
     fprintf( f, " = " );
     for ( i = 0; i < size; i++ )

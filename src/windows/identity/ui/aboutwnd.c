@@ -54,7 +54,7 @@ about_dlg_proc(HWND hwnd,
             SetDlgItemText(hwnd, IDC_BUILDINFO,
                            TEXT(KH_VERSTR_BUILDINFO_1033));
 
-            hsnap = 
+            hsnap =
                 CreateToolhelp32Snapshot(TH32CS_SNAPMODULE,
                                          0);
 

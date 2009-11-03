@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,15 +22,15 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * A simple program to simulate starting a process from inetd.
  *
- * Unlike a proper inetd situation, environment variables are passed 
+ * Unlike a proper inetd situation, environment variables are passed
  * to the client.
  *
  * usage: t_inetd port program argv0 ...
- *		
+ *
  */
 
 #include "autoconf.h"
@@ -137,4 +137,3 @@ main(argc, argv)
 		fprintf(stderr, "t_inetd: Could not exec %s\n", path);
 	exit(1);
 }
-

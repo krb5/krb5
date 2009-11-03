@@ -1,13 +1,13 @@
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
  * responsibility of any person or organization contemplating export to
  * obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -18,7 +18,7 @@
  * permission.  FundsXpress makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -28,7 +28,7 @@
 #include "old.h"
 
 void
-krb5_old_encrypt_length(const struct krb5_enc_provider *enc,
+krb5int_old_encrypt_length(const struct krb5_enc_provider *enc,
 			const struct krb5_hash_provider *hash,
 			size_t inputlen,
 			size_t *length)
@@ -42,7 +42,7 @@ krb5_old_encrypt_length(const struct krb5_enc_provider *enc,
 }
 
 krb5_error_code
-krb5_old_encrypt(const struct krb5_enc_provider *enc,
+krb5int_old_encrypt(const struct krb5_enc_provider *enc,
 		 const struct krb5_hash_provider *hash,
 		 krb5_key key,
 		 krb5_keyusage usage,
@@ -58,7 +58,7 @@ krb5_old_encrypt(const struct krb5_enc_provider *enc,
     blocksize = enc->block_size;
     hashsize = hash->hashsize;
 
-    krb5_old_encrypt_length(enc, hash, input->length, &enclen);
+    krb5int_old_encrypt_length(enc, hash, input->length, &enclen);
 
     if (output->length < enclen)
 	return(KRB5_BAD_MSIZE);

@@ -1,13 +1,13 @@
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
  * responsibility of any person or organization contemplating export to
  * obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -18,7 +18,7 @@
  * permission.  FundsXpress makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -32,7 +32,7 @@
 #define CONFLENGTH 8
 
 /* Force acceptance of krb5-beta5 md5des checksum for now. */
-#define KRB5_MD5DES_BETA5_COMPAT
+#define KRB5int_MD5DES_BETA5_COMPAT
 
 /* des-cbc(xorkey, conf | rsa-md5(conf | data)) */
 
@@ -60,11 +60,11 @@ k5_md5des_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
 
     /* hash the confounder, then the input data */
 
-    krb5_MD5Init(&ctx);
-    krb5_MD5Update(&ctx, conf, CONFLENGTH);
-    krb5_MD5Update(&ctx, (unsigned char *) input->data, 
+    krb5int_MD5Init(&ctx);
+    krb5int_MD5Update(&ctx, conf, CONFLENGTH);
+    krb5int_MD5Update(&ctx, (unsigned char *) input->data,
 		   (unsigned int) input->length);
-    krb5_MD5Final(&ctx);
+    krb5int_MD5Final(&ctx);
 
     /* construct the buffer to be encrypted */
 
@@ -93,7 +93,7 @@ k5_md5des_verify(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
 	return(KRB5_BAD_KEYSIZE);
 
     if (hash->length != (CONFLENGTH+RSA_MD5_CKSUM_LENGTH)) {
-#ifdef KRB5_MD5DES_BETA5_COMPAT
+#ifdef KRB5int_MD5DES_BETA5_COMPAT
 	if (hash->length != RSA_MD5_CKSUM_LENGTH)
 	    return(KRB5_CRYPTO_INTERNAL);
 	else
@@ -132,13 +132,13 @@ k5_md5des_verify(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
 
     /* hash the confounder, then the input data */
 
-    krb5_MD5Init(&ctx);
+    krb5int_MD5Init(&ctx);
     if (!compathash) {
-	krb5_MD5Update(&ctx, plaintext, CONFLENGTH);
+	krb5int_MD5Update(&ctx, plaintext, CONFLENGTH);
     }
-    krb5_MD5Update(&ctx, (unsigned char *) input->data,
+    krb5int_MD5Update(&ctx, (unsigned char *) input->data,
 		   (unsigned) input->length);
-    krb5_MD5Final(&ctx);
+    krb5int_MD5Final(&ctx);
 
     /* compare the decrypted hash to the computed one */
 
@@ -147,7 +147,7 @@ k5_md5des_verify(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
 	    (memcmp(plaintext+CONFLENGTH, ctx.digest, RSA_MD5_CKSUM_LENGTH)
 	     == 0);
     } else {
-	*valid = 
+	*valid =
 	    (memcmp(plaintext, ctx.digest, RSA_MD5_CKSUM_LENGTH) == 0);
     }
     memset(plaintext, 0, sizeof(plaintext));

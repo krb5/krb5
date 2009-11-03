@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Program to test the correctness of nfold implementation.
  *
@@ -82,7 +82,7 @@ static void rfc_tests ()
     for (i = 0; i < ASIZE (tests); i++) {
 	unsigned char *p = (unsigned char *) tests[i].input;
 	assert (tests[i].n / 8 <= sizeof (outbuf));
-	krb5_nfold (8 * strlen ((char *) p), p, tests[i].n, outbuf);
+	krb5int_nfold (8 * strlen ((char *) p), p, tests[i].n, outbuf);
 	printf ("%d-fold(\"%s\") =\n", tests[i].n, p);
 	printf ("%d-fold(", tests[i].n);
 	printstringhex (p);
@@ -106,7 +106,7 @@ static void fold_kerberos(unsigned int nbytes)
 	abort();
 
     printf("%d-fold(\"kerberos\") =\n\t", nbytes*8);
-    krb5_nfold(64, (unsigned char *) "kerberos", 8*nbytes, cipher_text);
+    krb5int_nfold(64, (unsigned char *) "kerberos", 8*nbytes, cipher_text);
     for (j=0; j<nbytes; j++)
 	printf("%s%02x", (j&3) ? "" : " ", cipher_text[j]);
     printf("\n");
@@ -139,10 +139,10 @@ main(argc, argv)
 
     printf("N-fold\n");
     for (i=0; i<sizeof(nfold_in)/sizeof(char *); i++) {
-	printf("\tInput:\t\"%.*s\"\n", (int) strlen((char *) nfold_in[i]), 
+	printf("\tInput:\t\"%.*s\"\n", (int) strlen((char *) nfold_in[i]),
 	       nfold_in[i]);
 	printf("\t192-Fold:\t");
-	krb5_nfold(strlen((char *) nfold_in[i])*8, nfold_in[i], 24*8, 
+	krb5int_nfold(strlen((char *) nfold_in[i])*8, nfold_in[i], 24*8,
 		   cipher_text);
 	for (j=0; j<24; j++)
 	    printf("%s%02x", (j&3) ? "" : " ", cipher_text[j]);

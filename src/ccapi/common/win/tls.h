@@ -37,7 +37,7 @@
 
 #define UUID_SIZE   128
 
-/* The client code can be run in any client thread.  
+/* The client code can be run in any client thread.
    The thread-specific data is defined here.
  */
 

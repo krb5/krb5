@@ -29,16 +29,16 @@
 
 #include<khdefs.h>
 
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_init_rescache(void);
 
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_exit_rescache(void);
 
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_cache_bitmap(UINT id, HBITMAP hbm);
 
-KHMEXP HBITMAP KHMAPI 
+KHMEXP HBITMAP KHMAPI
 khui_get_cached_bitmap(UINT id);
 
 typedef struct khui_ilist_t {
@@ -58,7 +58,7 @@ typedef struct khui_bitmap_t {
     int cy;
 } khui_bitmap;
 
-KHMEXP void KHMAPI  
+KHMEXP void KHMAPI
 khui_bitmap_from_hbmp(khui_bitmap * kbm, HBITMAP hbm);
 
 KHMEXP void KHMAPI
@@ -68,27 +68,27 @@ KHMEXP void KHMAPI
 khui_draw_bitmap(HDC hdc, int x, int y, khui_bitmap * kbm);
 
 /* image lists */
-KHMEXP khui_ilist * KHMAPI  
+KHMEXP khui_ilist * KHMAPI
 khui_create_ilist(int cx, int cy, int n, int ng, int opt);
 
-KHMEXP BOOL KHMAPI          
+KHMEXP BOOL KHMAPI
 khui_delete_ilist(khui_ilist * il);
 
-KHMEXP int KHMAPI           
+KHMEXP int KHMAPI
 khui_ilist_add_masked(khui_ilist * il, HBITMAP hbm, COLORREF cbkg);
 
-KHMEXP int KHMAPI           
-khui_ilist_add_masked_id(khui_ilist *il, HBITMAP hbm, 
+KHMEXP int KHMAPI
+khui_ilist_add_masked_id(khui_ilist *il, HBITMAP hbm,
                          COLORREF cbkg, int id);
 
-KHMEXP int KHMAPI           
+KHMEXP int KHMAPI
 khui_ilist_lookup_id(khui_ilist *il, int id);
 
-KHMEXP void KHMAPI          
+KHMEXP void KHMAPI
 khui_ilist_draw(khui_ilist * il, int idx, HDC dc, int x, int y, int opt);
 
-KHMEXP void KHMAPI          
-khui_ilist_draw_bg(khui_ilist * il, int idx, HDC dc, int x, int y, 
+KHMEXP void KHMAPI
+khui_ilist_draw_bg(khui_ilist * il, int idx, HDC dc, int x, int y,
                    int opt, COLORREF bgcolor);
 
 #define khui_ilist_draw_id(il, id, dc, x, y, opt) \

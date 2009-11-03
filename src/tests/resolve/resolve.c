@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,14 +22,14 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * A simple program to test the functionality of the resolver library.
- * It simply will try to get the IP address of the host, and then look 
+ * It simply will try to get the IP address of the host, and then look
  * up the name from the address. If the resulting name does not contain the
  * domain name, then the resolve library is broken.
  *
- * Warning: It is possible to fool this program into thinking everything is 
+ * Warning: It is possible to fool this program into thinking everything is
  * alright byt a clever use of /etc/hosts - but this is better than nothing.
  *
  * Usage:
@@ -88,7 +88,7 @@ main(argc, argv)
 	    if ((strcmp(*argv, "--quiet") == 0) ||
 		(strcmp(*argv, "-q") == 0)) {
 		quiet++;
-	    } else 
+	    } else
 		break;
 	    argc--; argv++;
 	}
@@ -101,13 +101,13 @@ main(argc, argv)
 			exit(1);
 		}
 	}
-	
+
 	myname[MAXHOSTNAMELEN] = '\0';	/* for safety */
-	
+
 	/* Look up the address... */
 	if (!quiet)
 	    printf("Hostname:  %s\n", myname);
-	
+
 
 	/* Set the hosts db to close each time - effectively rewinding file */
 	sethostent(0);
@@ -118,11 +118,11 @@ main(argc, argv)
 			myname);
 		exit(2);
 	}
-	
+
 	ptr = host->h_addr_list[0];
 #define UC(a) (((int)a)&0xff)
 	if (!quiet)
-	    printf("Host address: %d.%d.%d.%d\n", 
+	    printf("Host address: %d.%d.%d.%d\n",
 		   UC(ptr[0]), UC(ptr[1]), UC(ptr[2]), UC(ptr[3]));
 
 	memcpy(&addrcopy.s_addr, ptr, 4);
@@ -132,12 +132,12 @@ main(argc, argv)
 		fprintf(stderr, "Error looking up IP address - fatal\n");
 		exit(2);
 	}
-	
+
 	if (quiet)
 	    printf("%s\n", host->h_name);
 	else
 	    printf("FQDN: %s\n", host->h_name);
-	
+
 	/*
 	 * The host name must have at least one '.' in the name, and
 	 * if there is only one '.', it must not be at the end of the
@@ -168,5 +168,3 @@ main(argc, argv)
 	exit(0);
 
 }
-
-

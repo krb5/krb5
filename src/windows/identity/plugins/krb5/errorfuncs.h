@@ -35,7 +35,7 @@
 /*
  * This is a hack needed because the real com_err.h does
  * not define err_func.  We need it in the case where
- * we pull in the real com_err instead of the krb4 
+ * we pull in the real com_err instead of the krb4
  * impostor.
  */
 #ifndef _DCNS_MIT_COM_ERR_H
@@ -54,7 +54,7 @@ typedef LPSTR (*err_func)(int, long);
 #endif
 
 /*! \internal
-    \brief Describe an error 
+    \brief Describe an error
 
     \param[in] code Error code returned by Kerberos
     \param[out] buf Receives the error string
@@ -62,8 +62,8 @@ typedef LPSTR (*err_func)(int, long);
     \param[out] suggestion Message ID of suggestion
     \param[out] suggest_code Suggestion ID
 */
-void khm_err_describe(long code, wchar_t * buf, khm_size cbbuf, 
-                      DWORD * suggestion, 
+void khm_err_describe(long code, wchar_t * buf, khm_size cbbuf,
+                      DWORD * suggestion,
                       kherr_suggestion * suggest_code);
 
 /* */

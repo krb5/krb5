@@ -54,7 +54,7 @@ HWND GetRootParent (HWND Child)
 }
 #endif
 
-void khm_err_describe(long code, wchar_t * buf, khm_size cbbuf, 
+void khm_err_describe(long code, wchar_t * buf, khm_size cbbuf,
                       DWORD * suggestion,
                       kherr_suggestion * suggest_code)
 {
@@ -163,7 +163,7 @@ void khm_err_describe(long code, wchar_t * buf, khm_size cbbuf,
             /* no error msg yet */
             sugg_code = KHERR_SUGGEST_RETRY;
             break;
-	  
+
             /* Values returned by send_to_kdc */
         case SKDC_RETRY   :     /* 56    Retry count exceeded */
         case SKDC_CANT    :     /* 57    Can't send request */
@@ -199,7 +199,7 @@ void khm_err_describe(long code, wchar_t * buf, khm_size cbbuf,
             msg_id = MSG_ERR_INSECURE_PW;
             sugg_code = KHERR_SUGGEST_RETRY;
             break;
-	
+
         default:
             /* no extra error msg */
             break;
@@ -260,18 +260,18 @@ int lsh_com_err_proc (LPSTR whoami, long code,
     HWND hOldFocus;
     char buf[1024], *cp;
     WORD mbformat = MB_OK | MB_ICONEXCLAMATION;
-  
+
     cp = buf;
     memset(buf, '\0', sizeof(buf));
     cp[0] = '\0';
-  
+
     if (code)
     {
         err_describe(buf, code);
         while (*cp)
             cp++;
     }
-  
+
     if (fmt)
     {
         if (fmt[0] == '%' && fmt[1] == 'b')
@@ -289,7 +289,7 @@ int lsh_com_err_proc (LPSTR whoami, long code,
         wvsprintfA((LPSTR)cp, fmt, args);
     }
     hOldFocus = GetFocus();
-    retval = MessageBoxA(/*GetRootParent(hOldFocus)*/NULL, buf, whoami, 
+    retval = MessageBoxA(/*GetRootParent(hOldFocus)*/NULL, buf, whoami,
                         mbformat | MB_ICONHAND | MB_TASKMODAL);
     SetFocus(hOldFocus);
     return retval;

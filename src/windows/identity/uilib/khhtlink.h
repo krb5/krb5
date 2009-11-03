@@ -27,10 +27,10 @@
 #ifndef __KHIMAIRA_KHHTLINK_H
 #define __KHIMAIRA_KHHTLINK_H
 
-/*! \addtogroup khui 
+/*! \addtogroup khui
 @{ */
 
-/*! \defgroup khui_hyperlink Hyperlink 
+/*! \defgroup khui_hyperlink Hyperlink
 @{*/
 
 /*! \brief A hyperlink

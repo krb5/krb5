@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Regression tests for the kerberos library.
  */
@@ -45,7 +45,7 @@ tkt_test_1()
     krb5_address addr_1;
     static krb5_octet ip_addr_1[4] = { 18, 72, 0, 122 };
     char *out;
-    
+
     /*
      * fill in some values on the "in" side of the ticket
      */
@@ -58,13 +58,13 @@ tkt_test_1()
     serv_k.enctype = 1;		/* XXX symbolic constant */
     serv_k.length = 8;		/* XXX symbolic constant */
     serv_k.contents = key_one;
-    
+
     sess_k.enctype = 1;		/* XXX symbolic constant */
     sess_k.length = 8;		/* XXX symbolic constant */
     sess_k.contents = key_two;
 
     tk_in.etype = 1;		/* XXX symbolic constant here */
-    tk_in.skvno = 4;		
+    tk_in.skvno = 4;
 
     tk_in.enc_part2 = &tk_in_enc;
 
@@ -74,7 +74,7 @@ tkt_test_1()
     tk_in_enc.times.authtime = 42;
     tk_in_enc.times.starttime = 43;
     tk_in_enc.times.endtime = 44;
-    
+
     code = krb5_parse_name ("client/test/1@BOGUS.ORG", &tk_in_enc.client);
     if (code != 0) {
 	com_err("tkt_test_1", code, " parsing client principal");
@@ -89,7 +89,7 @@ tkt_test_1()
     addr_list[0] = &addr_1;
     addr_list[1] = 0;
 
-    
+
     tk_in_enc.caddrs = addr_list;
     tk_in_enc.authorization_data = 0;
 
@@ -99,8 +99,8 @@ tkt_test_1()
 	return;
     }
 
-    data = 0;    
-    
+    data = 0;
+
     code = krb5_encode_ticket (&tk_in,  &data);
     if (code != 0) {
 	com_err ("tkt_test_1", code, " encoding ticket");
@@ -136,7 +136,7 @@ tkt_test_1()
     }
     free(out);
     out = 0;
-    
+
     /* decode the ciphertext */
     code = krb5_decrypt_tkt_part (&serv_k, tk_out);
     if (code != 0) {

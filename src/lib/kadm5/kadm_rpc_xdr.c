@@ -64,7 +64,7 @@ bool_t xdr_nullstring(XDR *xdrs, char **objp)
 	       }
 	  }
 	  return (xdr_opaque(xdrs, *objp, size));
-	  
+
      case XDR_ENCODE:
 	  if (size != 0)
 	       return (xdr_opaque(xdrs, *objp, size));
@@ -226,15 +226,15 @@ xdr_krb5_ui_2(XDR *xdrs, krb5_ui_2 *objp)
 static bool_t xdr_krb5_boolean(XDR *xdrs, krb5_boolean *kbool)
 {
 	bool_t val;
-	
+
 	switch (xdrs->x_op) {
 	case XDR_DECODE:
 	     if (!xdr_bool(xdrs, &val))
 		     return FALSE;
-	     
+
 	     *kbool = (val == FALSE) ? FALSE : TRUE;
 	     return TRUE;
-	     
+
 	case XDR_ENCODE:
 	     val = *kbool ? TRUE : FALSE;
 	     return xdr_bool(xdrs, &val);
@@ -242,7 +242,7 @@ static bool_t xdr_krb5_boolean(XDR *xdrs, krb5_boolean *kbool)
 	case XDR_FREE:
 	     return TRUE;
 	}
-	
+
 	return FALSE;
 }
 
@@ -283,13 +283,13 @@ bool_t xdr_krb5_key_data_nocontents(XDR *xdrs, krb5_key_data *objp)
 	  if (!xdr_bytes(xdrs, (char **) &objp->key_data_contents[0],
 			 &tmp, ~0))
 	       return FALSE;
-	  
+
 	  tmp = (unsigned int) objp->key_data_length[1];
 	  if (!xdr_bytes(xdrs, (char **) &objp->key_data_contents[1],
 			 &tmp, ~0))
 	       return FALSE;
      }
-     
+
      return (TRUE);
 }
 
@@ -320,7 +320,7 @@ bool_t xdr_krb5_tl_data(XDR *xdrs, krb5_tl_data **tl_data_head)
 	       tl = tl2;
 	  }
 	  break;
-	  
+
      case XDR_ENCODE:
 	  tl = *tl_data_head;
 	  while (1) {
@@ -394,7 +394,7 @@ _xdr_kadm5_principal_ent_rec(XDR *xdrs, kadm5_principal_ent_rec *objp,
 			     int v)
 {
 	unsigned int n;
-     
+
 	if (!xdr_krb5_principal(xdrs, &objp->principal)) {
 		return (FALSE);
 	}
@@ -625,7 +625,7 @@ xdr_gprincs_arg(XDR *xdrs, gprincs_arg *objp)
 }
 
 bool_t
-xdr_gprincs_ret(XDR *xdrs, gprincs_ret *objp)     
+xdr_gprincs_ret(XDR *xdrs, gprincs_ret *objp)
 {
      if (!xdr_ui_4(xdrs, &objp->api_version)) {
 	  return (FALSE);
@@ -810,7 +810,7 @@ xdr_gprinc_arg(XDR *xdrs, gprinc_arg *objp)
 	if (!xdr_long(xdrs, &objp->mask)) {
 	     return FALSE;
 	}
-	     
+
 	return (TRUE);
 }
 
@@ -920,7 +920,7 @@ xdr_gpols_arg(XDR *xdrs, gpols_arg *objp)
 }
 
 bool_t
-xdr_gpols_ret(XDR *xdrs, gpols_ret *objp)     
+xdr_gpols_ret(XDR *xdrs, gpols_ret *objp)
 {
      if (!xdr_ui_4(xdrs, &objp->api_version)) {
 	  return (FALSE);
@@ -972,7 +972,7 @@ xdr_krb5_principal(XDR *xdrs, krb5_principal *objp)
     switch(xdrs->x_op) {
     case XDR_ENCODE:
 	if (*objp) {
-	     if((ret = krb5_unparse_name(context, *objp, &p)) != 0) 
+	     if((ret = krb5_unparse_name(context, *objp, &p)) != 0)
 		  return FALSE;
 	}
 	if(!xdr_nullstring(xdrs, &p))
@@ -984,7 +984,7 @@ xdr_krb5_principal(XDR *xdrs, krb5_principal *objp)
 	    return FALSE;
 	if (p) {
 	     ret = krb5_parse_name(context, p, &pr);
-	     if(ret != 0) 
+	     if(ret != 0)
 		  return FALSE;
 	     *objp = pr;
 	     free(p);
@@ -992,7 +992,7 @@ xdr_krb5_principal(XDR *xdrs, krb5_principal *objp)
 	     *objp = NULL;
 	break;
     case XDR_FREE:
-	if(*objp != NULL) 
+	if(*objp != NULL)
 	    krb5_free_principal(context, *objp);
 	break;
     }

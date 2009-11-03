@@ -29,9 +29,9 @@
 
 #include "cci_types.h"
 
-cc_int32 _cci_check_error (cc_int32    in_err, 
-                           const char *in_function, 
-                           const char *in_file, 
+cc_int32 _cci_check_error (cc_int32    in_err,
+                           const char *in_function,
+                           const char *in_file,
                            int         in_line);
 #define cci_check_error(err) _cci_check_error(err, __FUNCTION__, __FILE__, __LINE__)
 

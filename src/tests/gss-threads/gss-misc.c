@@ -1,6 +1,6 @@
 /*
  * Copyright 1994 by OpenVision Technologies, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -10,7 +10,7 @@
  * without specific, written prior permission. OpenVision makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -27,7 +27,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -184,8 +184,8 @@ int send_token(s, flags, tok)
 	  return -1;
      } else if (ret != 4) {
 	 if (display_file)
-	     fprintf(display_file, 
-		     "sending token length: %d of %d bytes written\n", 
+	     fprintf(display_file,
+		     "sending token length: %d of %d bytes written\n",
 		     ret, 4);
 	  return -1;
      }
@@ -196,12 +196,12 @@ int send_token(s, flags, tok)
 	  return -1;
      } else if (ret != tok->length) {
 	 if (display_file)
-	     fprintf(display_file, 
-		     "sending token data: %d of %d bytes written\n", 
+	     fprintf(display_file,
+		     "sending token data: %d of %d bytes written\n",
 		     ret, (int) tok->length);
 	 return -1;
      }
-     
+
      return 0;
 }
 
@@ -219,7 +219,7 @@ int send_token(s, flags, tok)
  * Returns: 0 on success, -1 on failure
  *
  * Effects:
- * 
+ *
  * recv_token reads the token flags (a single byte, even though
  * they're stored into an integer, then reads the token length (as a
  * network long), allocates memory to hold the data, and then reads
@@ -257,8 +257,8 @@ int recv_token(s, flags, tok)
 	 return -1;
      } else if (ret != 3) {
 	 if (display_file)
-	     fprintf(display_file, 
-		     "reading token length: %d of %d bytes read\n", 
+	     fprintf(display_file,
+		     "reading token length: %d of %d bytes read\n",
 		     ret, 3);
 	 return -1;
      }
@@ -270,8 +270,8 @@ int recv_token(s, flags, tok)
 	 return -1;
        } else if (ret != 4) {
 	 if (display_file)
-	   fprintf(display_file, 
-		   "reading token length: %d of %d bytes read\n", 
+	   fprintf(display_file,
+		   "reading token length: %d of %d bytes read\n",
 		   ret, 4);
 	 return -1;
        }
@@ -284,7 +284,7 @@ int recv_token(s, flags, tok)
      tok->value = (char *) malloc(tok->length ? tok->length : 1);
      if (tok->length && tok->value == NULL) {
 	 if (display_file)
-	     fprintf(display_file, 
+	     fprintf(display_file,
 		     "Out of memory allocating token data\n");
 	  return -1;
      }
@@ -295,7 +295,7 @@ int recv_token(s, flags, tok)
 	  free(tok->value);
 	  return -1;
      } else if (ret != tok->length) {
-	  fprintf(stderr, "sending token data: %d of %d bytes written\n", 
+	  fprintf(stderr, "sending token data: %d of %d bytes written\n",
 		  ret, (int) tok->length);
 	  free(tok->value);
 	  return -1;
@@ -312,7 +312,7 @@ static void display_status_1(m, code, type)
      OM_uint32 maj_stat, min_stat;
      gss_buffer_desc msg;
      OM_uint32 msg_ctx;
-     
+
      msg_ctx = 0;
      while (1) {
 	  maj_stat = gss_display_status(&min_stat, code,
@@ -320,9 +320,9 @@ static void display_status_1(m, code, type)
 				       &msg_ctx, &msg);
 	  if (display_file)
 	      fprintf(display_file, "GSS-API error %s: %s\n", m,
-		      (char *)msg.value); 
+		      (char *)msg.value);
 	  (void) gss_release_buffer(&min_stat, &msg);
-	  
+
 	  if (!msg_ctx)
 	       break;
      }

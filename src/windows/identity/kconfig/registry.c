@@ -25,4 +25,3 @@
 /* $Id$ */
 
 #include<kconfiginternal.h>
-

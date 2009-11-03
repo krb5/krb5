@@ -2,12 +2,12 @@
  * Copyright (C) 2001, 2002, 2004, 2007, 2008 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
- * 
+ *
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
  * responsibility of any person or organization contemplating export to
  * obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -190,7 +190,7 @@ read_entropy_from_device(krb5_context context, const char *device)
     return (krb5_c_random_add_entropy(context, KRB5_C_RANDSOURCE_OSRAND,
 				      &data) == 0);
 }
-    
+
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_os_entropy(krb5_context context, int strong, int *success)
 {

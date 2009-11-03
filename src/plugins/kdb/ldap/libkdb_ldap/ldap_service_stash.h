@@ -42,14 +42,13 @@ struct data{
 #define ERR_PWD_BAD     3
 #define ERR_PWD_NOT_HEX 4
 
-int 
+int
 dec_password(struct data, struct data *);
 
 krb5_error_code
 krb5_ldap_readpassword(krb5_context, krb5_ldap_context *, unsigned char **);
 
-int 
+int
 tohex(krb5_data, krb5_data *);
 
 #endif
-

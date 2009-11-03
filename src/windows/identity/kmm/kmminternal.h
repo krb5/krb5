@@ -123,7 +123,7 @@ typedef struct kmm_plugin_i_t {
 
     khm_int32   state;
     khm_int32   flags;
-    
+
     int         refcount;
 
     int         n_depends;
@@ -193,9 +193,9 @@ extern kconf_schema schema_kmmconfig[];
 
 /* Registrar */
 
-khm_boolean KHMAPI 
-kmmint_reg_cb(khm_int32 msg_type, 
-              khm_int32 msg_sub_type, 
+khm_boolean KHMAPI
+kmmint_reg_cb(khm_int32 msg_type,
+              khm_int32 msg_sub_type,
               khm_ui_4 uparam,
               void *vparam);
 
@@ -209,35 +209,35 @@ void kmmint_init_module(kmm_module_i * m);
 void kmmint_exit_module(kmm_module_i * m);
 
 /* Modules */
-kmm_module_i * 
+kmm_module_i *
 kmmint_get_module_i(wchar_t * name);
 
-kmm_module_i * 
+kmm_module_i *
 kmmint_find_module_i(wchar_t * name);
 
-void 
+void
 kmmint_free_module(kmm_module_i * m);
 
 khm_int32
 kmmint_read_module_info(kmm_module_i * m);
 
 /* Plugins */
-kmm_plugin_i * 
+kmm_plugin_i *
 kmmint_get_plugin_i(wchar_t * name);
 
-kmm_plugin_i * 
+kmm_plugin_i *
 kmmint_find_plugin_i(wchar_t * name);
 
-void 
+void
 kmmint_free_plugin(kmm_plugin_i * pi);
 
-void 
+void
 kmmint_list_plugin(kmm_plugin_i * p);
 
-void 
+void
 kmmint_delist_plugin(kmm_plugin_i * p);
 
-khm_boolean 
+khm_boolean
 kmmint_load_locale_lib(kmm_module_i * m, kmm_module_locale * l);
 
 #define KMM_CSNAME_ROOT L"PluginManager"

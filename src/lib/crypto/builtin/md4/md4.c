@@ -76,7 +76,7 @@ static const unsigned char PADDING[64] = {
    (a) = ROTATE_LEFT ((a), (s));}
 
 void
-krb5_MD4Init (krb5_MD4_CTX *mdContext)
+krb5int_MD4Init (krb5_MD4_CTX *mdContext)
 {
   mdContext->i[0] = mdContext->i[1] = (krb5_ui_4)0;
 
@@ -89,7 +89,7 @@ krb5_MD4Init (krb5_MD4_CTX *mdContext)
 }
 
 void
-krb5_MD4Update (krb5_MD4_CTX *mdContext, const unsigned char *inBuf, unsigned int inLen)
+krb5int_MD4Update (krb5_MD4_CTX *mdContext, const unsigned char *inBuf, unsigned int inLen)
 {
   krb5_ui_4 in[16];
   int mdi;
@@ -120,7 +120,7 @@ krb5_MD4Update (krb5_MD4_CTX *mdContext, const unsigned char *inBuf, unsigned in
 }
 
 void
-krb5_MD4Final (krb5_MD4_CTX *mdContext)
+krb5int_MD4Final (krb5_MD4_CTX *mdContext)
 {
   krb5_ui_4 in[16];
   int mdi;
@@ -136,7 +136,7 @@ krb5_MD4Final (krb5_MD4_CTX *mdContext)
 
   /* pad out to 56 mod 64 */
   padLen = (mdi < 56) ? (56 - mdi) : (120 - mdi);
-  krb5_MD4Update (mdContext, PADDING, padLen);
+  krb5int_MD4Update (mdContext, PADDING, padLen);
 
   /* append length in bits and transform */
   for (i = 0, ii = 0; i < 14; i++, ii += 4)

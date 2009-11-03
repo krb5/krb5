@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * t_etypes.c -- test program for krb5int_parse_enctype_list
  *
@@ -131,7 +131,8 @@ static struct {
     }
 };
 
-static void show_enctypes(krb5_context ctx, krb5_enctype *list)
+static void
+show_enctypes(krb5_context ctx, krb5_enctype *list)
 {
     unsigned int i;
 
@@ -143,9 +144,9 @@ static void show_enctypes(krb5_context ctx, krb5_enctype *list)
     fprintf(stderr, "\n");
 }
 
-static void compare(krb5_context ctx, krb5_enctype *result,
-                    krb5_enctype *expected, const char *profstr,
-                    krb5_boolean weak)
+static void
+compare(krb5_context ctx, krb5_enctype *result, krb5_enctype *expected,
+        const char *profstr, krb5_boolean weak)
 {
     unsigned int i;
 
@@ -201,4 +202,3 @@ main(int argc, char **argv)
 
     return 0;
 }
-

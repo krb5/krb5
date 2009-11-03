@@ -60,4 +60,3 @@ $(VERSIONEXT): Makefile Makefile.w32
 
 #endif
 <<
-

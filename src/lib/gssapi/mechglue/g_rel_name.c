@@ -2,7 +2,7 @@
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -12,7 +12,7 @@
  * without specific, written prior permission. Sun Microsystems makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * SUN MICROSYSTEMS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL SUN MICROSYSTEMS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -42,11 +42,11 @@ gss_name_t *		input_name;
 
 {
     gss_union_name_t	union_name;
-    
+
     if (minor_status == NULL)
 	return (GSS_S_CALL_INACCESSIBLE_WRITE);
     *minor_status = 0;
-    
+
     /* if input_name is NULL, return error */
     if (input_name == NULL)
 	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME);
@@ -58,7 +58,7 @@ gss_name_t *		input_name;
      * free up the space for the external_name and then
      * free the union_name descriptor
      */
-    
+
     union_name = (gss_union_name_t) *input_name;
     if (GSSINT_CHK_LOOP(union_name))
 	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME);

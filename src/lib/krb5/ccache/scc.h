@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/ccache/stdio/scc.h
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * This file contains constant and function declarations used in the
  * file-based credential cache routines.
@@ -46,14 +47,14 @@
  *
  */
 
-#define KRB5_SCC_FVNO_1   0x0501	/* krb v5, scc v1 */
-#define KRB5_SCC_FVNO_2   0x0502	/* krb v5, scc v2 */
-#define KRB5_SCC_FVNO_3   0x0503	/* krb v5, scc v3 */
-#define KRB5_SCC_FVNO_4   0x0504	/* krb v5, scc v4 */
+#define KRB5_SCC_FVNO_1   0x0501        /* krb v5, scc v1 */
+#define KRB5_SCC_FVNO_2   0x0502        /* krb v5, scc v2 */
+#define KRB5_SCC_FVNO_3   0x0503        /* krb v5, scc v3 */
+#define KRB5_SCC_FVNO_4   0x0504        /* krb v5, scc v4 */
 
-#define	SCC_OPEN_AND_ERASE	1
-#define	SCC_OPEN_RDWR		2
-#define	SCC_OPEN_RDONLY		3
+#define SCC_OPEN_AND_ERASE      1
+#define SCC_OPEN_RDWR           2
+#define SCC_OPEN_RDONLY         3
 
 /* Credential file header tags.
  * The header tags are constructed as:
@@ -63,7 +64,7 @@
  * This format allows for older versions of the fcc processing code to skip
  * past unrecognized tag formats.
  */
-#define SCC_TAG_DELTATIME	1
+#define SCC_TAG_DELTATIME       1
 
 #ifndef TKT_ROOT
 #define TKT_ROOT "/tmp/tkt"
@@ -73,11 +74,11 @@
 #define OPENCLOSE(id) (((krb5_scc_data *)id->data)->flags & KRB5_TC_OPENCLOSE)
 
 typedef struct _krb5_scc_data {
-     char *filename;
-     FILE *file;
-     krb5_flags flags;
-     char stdio_buffer[BUFSIZ];
-     int version;
+    char *filename;
+    FILE *file;
+    krb5_flags flags;
+    char stdio_buffer[BUFSIZ];
+    int version;
 } krb5_scc_data;
 
 /* An off_t can be arbitrarily complex */
@@ -85,17 +86,17 @@ typedef struct _krb5_scc_cursor {
     long pos;
 } krb5_scc_cursor;
 
-#define MAYBE_OPEN(context, ID, MODE) \
-{									\
-    if (OPENCLOSE (ID)) {						\
-	krb5_error_code maybe_open_ret = krb5_scc_open_file (context, ID,MODE);	\
-	if (maybe_open_ret) return maybe_open_ret; } }
+#define MAYBE_OPEN(context, ID, MODE)                                   \
+    {                                                                   \
+        if (OPENCLOSE (ID)) {                                           \
+            krb5_error_code maybe_open_ret = krb5_scc_open_file (context, ID,MODE); \
+            if (maybe_open_ret) return maybe_open_ret; } }
 
-#define MAYBE_CLOSE(context, ID, RET) \
-{									\
-    if (OPENCLOSE (ID)) {						\
-	krb5_error_code maybe_close_ret = krb5_scc_close_file (context, ID);	\
-	if (!(RET)) RET = maybe_close_ret; } }
+#define MAYBE_CLOSE(context, ID, RET)                                   \
+    {                                                                   \
+        if (OPENCLOSE (ID)) {                                           \
+            krb5_error_code maybe_close_ret = krb5_scc_close_file (context, ID); \
+            if (!(RET)) RET = maybe_close_ret; } }
 
 /* DO NOT ADD ANYTHING AFTER THIS #endif */
 #endif /* __KRB5_FILE_CCACHE__ */

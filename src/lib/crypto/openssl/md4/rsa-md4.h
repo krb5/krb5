@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * RSA MD4 header file, with Kerberos/STDC additions.
  */
@@ -87,9 +87,9 @@ typedef struct {
     unsigned char digest[16];    /* actual digest after MD4Final call */
 } krb5_MD4_CTX;
 
-extern void krb5_MD4Init(krb5_MD4_CTX *);
-extern void krb5_MD4Update(krb5_MD4_CTX *, const unsigned char *, unsigned int);
-extern void krb5_MD4Final(krb5_MD4_CTX *);
+extern void krb5int_MD4Init(krb5_MD4_CTX *);
+extern void krb5int_MD4Update(krb5_MD4_CTX *, const unsigned char *, unsigned int);
+extern void krb5int_MD4Final(krb5_MD4_CTX *);
 
 /*
  **********************************************************************

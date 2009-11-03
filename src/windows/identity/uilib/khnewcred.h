@@ -34,7 +34,7 @@
 /*! \addtogroup khui
 @{ */
 
-/*! \defgroup khui_cred Credentials acquisition 
+/*! \defgroup khui_cred Credentials acquisition
 
     Declarations associated with credentials acquisition.
 
@@ -68,7 +68,7 @@
     window as a ::KHUI_WM_NC_NOTIFY message.
 */
 enum khui_wm_nc_notifications {
-    WMNC_DIALOG_EXPAND = 1, 
+    WMNC_DIALOG_EXPAND = 1,
     /*!< The dialog is switching from basic to advanced mode or vice
       versa.
 
@@ -82,7 +82,7 @@ enum khui_wm_nc_notifications {
     WMNC_DIALOG_SETUP,
     /*!< Sent to the new creds window to notify it that the dialog
       should create all the type configuration panels.
-        
+
       Until this message is issued, none of the credentials type
       panels exist.  The credentials type panels will receive
       WM_INITDIALOG etc as per the normal dialog creation process.
@@ -258,7 +258,7 @@ enum khui_wm_nc_notifications {
     /*!< Sent to the new creds window to set custom prompts.
 
       Only sent to the new credentials window. */
-    
+
     WMNC_DIALOG_PREPROCESS,
     /*!< The credentials acquisition process is about to start.
 
@@ -311,7 +311,7 @@ enum khui_wm_nc_notifications {
     the callback.
  */
 enum khui_wm_nc_ident_notify {
-    WMNC_IDENT_INIT,            
+    WMNC_IDENT_INIT,
     /*!< Initialize an identity selector for a new credentials
          dialog. The \a lParam parameter contains a handle to the
          dialog window which will contain the identity selector
@@ -341,7 +341,7 @@ enum khui_wm_nc_ident_notify {
 @{*/
 
 /*! \brief Switch the panel
-    
+
     The \a id attribute of the link specifies the ordinal of the panel
     to switch to.
 */
@@ -465,7 +465,7 @@ typedef struct tag_khui_new_creds {
 /*!\brief No known response */
 #define KHUI_NC_RESPONSE_NONE     0
 
-/*!\brief It is okay to exit the dialog now 
+/*!\brief It is okay to exit the dialog now
 
     This is the default, which is why it has a value of zero.  In
     order to prevent the dialog from exiting, set the
@@ -691,7 +691,7 @@ typedef struct tag_khui_new_creds_by_type {
 /*!\name Flags for khui_new_creds_by_type
 
     Note that KHUI_NC_RESPONSE_SUCCESS, KHUI_NC_RESPONSE_FAILED,
-    KHUI_NC_RESPONSE_PENDING are also stored in the flags. 
+    KHUI_NC_RESPONSE_PENDING are also stored in the flags.
 
 @{*/
 #define KHUI_NCT_FLAG_PROCESSED 1024
@@ -817,7 +817,7 @@ typedef struct tag_khui_control_row {
 
     \see khui_cw_destroy_cred_blob()
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_cw_create_cred_blob(khui_new_creds ** c);
 
 /*! \brief Destroy a ::khui_new_creds object
@@ -831,7 +831,7 @@ khui_cw_create_cred_blob(khui_new_creds ** c);
 
     \see khui_cw_create_cred_blob()
 */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_cw_destroy_cred_blob(khui_new_creds *c);
 
 /*! \brief Lock the new_creds object
@@ -847,17 +847,17 @@ khui_cw_destroy_cred_blob(khui_new_creds *c);
     It is not necessary to lock a new credentials object when
     modifying it using the NetIDMgr API.
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_cw_lock_nc(khui_new_creds * c);
 
 /*! \brief Unlock a new_creds object
 
     \see khui_cw_lock_nc()
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_cw_unlock_nc(khui_new_creds * c);
 
-/*! \brief Add a new panel to a new credentials acquisition window 
+/*! \brief Add a new panel to a new credentials acquisition window
 
     See the description of ::khui_new_cred_panel for information on
     how to populate it to describe a credentials type panel.
@@ -883,16 +883,16 @@ khui_cw_unlock_nc(khui_new_creds * c);
     \see ::khui_new_cred_panel
     \see ::khui_new_creds
 */
-KHMEXP khm_int32 KHMAPI 
-khui_cw_add_type(khui_new_creds * c, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_add_type(khui_new_creds * c,
                  khui_new_creds_by_type * t);
 
 /*! \brief Remove a panel from a new credentials acquisition window
 
     \see khui_cw_add_type()
  */
-KHMEXP khm_int32 KHMAPI 
-khui_cw_del_type(khui_new_creds * c, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_del_type(khui_new_creds * c,
                  khm_int32 type);
 
 /*! \brief Find the panel belonging to a particular credentials type
@@ -902,9 +902,9 @@ khui_cw_del_type(khui_new_creds * c,
 
     \see khui_cw_add_type()
  */
-KHMEXP khm_int32 KHMAPI 
-khui_cw_find_type(khui_new_creds * c, 
-                  khm_int32 type, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_find_type(khui_new_creds * c,
+                  khm_int32 type,
                   khui_new_creds_by_type **t);
 
 /*! \brief Enable/disable a particular credentials type
@@ -914,7 +914,7 @@ khui_cw_find_type(khui_new_creds * c,
     participating in the new credentials acquisition.  However, the
     user will be prevented from interacting with the specific panel.
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_cw_enable_type(khui_new_creds * c,
                     khm_int32 type,
                     khm_boolean enable);
@@ -935,8 +935,8 @@ khui_cw_enable_type(khui_new_creds * c,
     identities associated with the new credentials acquisition dialog
     will also be discarded.
  */
-KHMEXP khm_int32 KHMAPI 
-khui_cw_set_primary_id(khui_new_creds * c, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_set_primary_id(khui_new_creds * c,
                        khm_handle id);
 
 /*! \brief Add an additional identity to the new credentials acquisition
@@ -949,15 +949,15 @@ khui_cw_set_primary_id(khui_new_creds * c,
 
     Calling this function with \a id of NULL does nothing.
 */
-KHMEXP khm_int32 KHMAPI 
-khui_cw_add_identity(khui_new_creds * c, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_add_identity(khui_new_creds * c,
                      khm_handle id);
 
 /*! \brief Clear all custom prompts
 
     Removes all the custom prompts from the new credentials dialog.
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_cw_clear_prompts(khui_new_creds * c);
 
 /*! \brief Synchronize custom prompt values
@@ -967,7 +967,7 @@ khui_cw_clear_prompts(khui_new_creds * c);
     values in the ::khui_new_creds object periodically.  However, the
     values may lose sync intermittently.
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_cw_sync_prompt_values(khui_new_creds * c);
 
 /*! \brief Begin custom prompting
@@ -982,10 +982,10 @@ khui_cw_sync_prompt_values(khui_new_creds * c);
     khui_cw_add_prompt().  The number of promtps that can be added
     will be exactly \a n_prompts.
  */
-KHMEXP khm_int32 KHMAPI 
-khui_cw_begin_custom_prompts(khui_new_creds * c, 
-                             khm_size n_prompts, 
-                             wchar_t * banner, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_begin_custom_prompts(khui_new_creds * c,
+                             khm_size n_prompts,
+                             wchar_t * banner,
                              wchar_t * name);
 
 /*! \brief Add a custom prompt
@@ -1016,11 +1016,11 @@ khui_cw_begin_custom_prompts(khui_new_creds * c,
     \param[in] flags Flags.  Combination of
         ::KHUI_NCPROMPT_FLAG_HIDDEN
  */
-KHMEXP khm_int32 KHMAPI 
-khui_cw_add_prompt(khui_new_creds * c, 
-                   khm_int32 type, 
-                   wchar_t * prompt, 
-                   wchar_t * def, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_add_prompt(khui_new_creds * c,
+                   khm_int32 type,
+                   wchar_t * prompt,
+                   wchar_t * def,
                    khm_int32 flags);
 
 /*! \brief Retrieve a custom prompt
@@ -1029,9 +1029,9 @@ khui_cw_add_prompt(khui_new_creds * c,
     zero-based index of the prompt to retrieve.  The ordering is the
     same as the order in which khui_cw_add_prompt() was called.
  */
-KHMEXP khm_int32 KHMAPI 
-khui_cw_get_prompt(khui_new_creds * c, 
-                   khm_size idx, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_get_prompt(khui_new_creds * c,
+                   khm_size idx,
                    khui_new_creds_prompt ** prompt);
 
 /*! \brief Get the number of custom prompts
@@ -1043,7 +1043,7 @@ khui_cw_get_prompt(khui_new_creds * c,
     be registered (i.e. the \a n_prompts parameter passed to
     khui_cw_begin_custom_prompts()).
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_cw_get_prompt_count(khui_new_creds * c,
                          khm_size * np);
 
@@ -1060,10 +1060,10 @@ khui_cw_get_prompt_count(khui_new_creds * c,
     starting to call khui_cw_get_prompt_value() so that the values
     returned are up-to-date.
  */
-KHMEXP khm_int32 KHMAPI 
-khui_cw_get_prompt_value(khui_new_creds * c, 
-                         khm_size idx, 
-                         wchar_t * buf, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_get_prompt_value(khui_new_creds * c,
+                         khm_size idx,
+                         wchar_t * buf,
                          khm_size *cbbuf);
 
 /*! \brief Set the response for a plugin
@@ -1082,7 +1082,7 @@ khui_cw_get_prompt_value(khui_new_creds * c,
     - ::KHUI_NC_RESPONSE_NOEXIT
     - ::KHUI_NC_RESPONSE_EXIT
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_cw_set_response(khui_new_creds * c,
                      khm_int32 type,
                      khm_int32 response);
@@ -1099,7 +1099,7 @@ khui_cw_set_response(khui_new_creds * c,
     \return TRUE iff the queried type has reported that it successfully
         completed the credentials acquision operation.
  */
-KHMEXP khm_boolean KHMAPI 
+KHMEXP khm_boolean KHMAPI
 khui_cw_type_succeeded(khui_new_creds * c,
                        khm_int32 type);
 

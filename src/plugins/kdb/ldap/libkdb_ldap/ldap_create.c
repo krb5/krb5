@@ -39,7 +39,7 @@
 #include "ldap_krbcontainer.h"
 #include "ldap_err.h"
 
-/* 
+/*
  * ******************************************************************************
  * DAL functions
  * ******************************************************************************
@@ -214,7 +214,7 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
 	/* ignore hash argument. Might have been passed from create */
 	    status = EINVAL;
 	    if (opt && !strcmp(opt, "temporary")) {
-		/* 
+		/*
 		 * temporary is passed in when kdb5_util load without -update is done.
 		 * This is unsupported by the LDAP plugin.
 		 */

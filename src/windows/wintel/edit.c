@@ -28,11 +28,11 @@ void Edit_LbuttonDown(
   assert(pScr != NULL);
 
   hDC = GetDC(hWnd);
-  for (iTmp = 0; iTmp < pScr->width * pScr->height; iTmp++) {        
+  for (iTmp = 0; iTmp < pScr->width * pScr->height; iTmp++) {
     if (cInvertedArray[iTmp]) {
       PatBlt(hDC, iTmp % pScr->width * pScr->cxChar,
 	     (int) (iTmp / pScr->width) * pScr->cyChar,
-	     pScr->cxChar, pScr->cyChar, DSTINVERT);                
+	     pScr->cxChar, pScr->cyChar, DSTINVERT);
       cInvertedArray[iTmp] = 0;
     }
   }
@@ -82,7 +82,7 @@ void Edit_LbuttonUp(
   else {
     hMenu = GetMenu(hWnd);
     EnableMenuItem(hMenu, IDM_COPY, MF_ENABLED);
-  }    
+  }
 
 } /* Edit_LbuttonUp */
 
@@ -113,7 +113,7 @@ void Edit_MouseMove(HWND hWnd, LPARAM lParam){
     iYlocCurr = pScr->height - 1;
   iLocCurr = iXlocCurr + (iYlocCurr * pScr->width);
   if (iLocCurr > iLocStart) {
-    for (iTmp=0; iTmp < iLocStart; iTmp++) {        
+    for (iTmp=0; iTmp < iLocStart; iTmp++) {
       if (cInvertedArray[iTmp]) {
 	PatBlt(hDC, (iTmp % pScr->width) * pScr->cxChar,
 	       (int) (iTmp / pScr->width) * pScr->cyChar,
@@ -134,7 +134,7 @@ void Edit_MouseMove(HWND hWnd, LPARAM lParam){
 	  cInvertedArray[iTmp2 + (pScr->width * iY)] = pScrLine->text[iTmp2];
 	}
       }
-    }            
+    }
     else {
       pScrLine = GetScreenLineFromY(pScr, iY);
 
@@ -164,24 +164,24 @@ void Edit_MouseMove(HWND hWnd, LPARAM lParam){
 	    PatBlt(hDC, iTmp2 * pScr->cxChar, iY2 * pScr->cyChar,
 		   pScr->cxChar, pScr->cyChar, DSTINVERT);
 	    cInvertedArray[iTmp2 + (pScr->width * iY2)] = pScrLine->text[iTmp2];
-	  }    
-	}    
-      }                
+	  }
+	}
+      }
     }
 
-    for (iTmp = iLocCurr; iTmp < pScr->width * pScr->height; iTmp++) {        
+    for (iTmp = iLocCurr; iTmp < pScr->width * pScr->height; iTmp++) {
       if (cInvertedArray[iTmp]) {
 	PatBlt(hDC, (iTmp % pScr->width) * pScr->cxChar, (int) (iTmp / pScr->width) * pScr->cyChar,
-	       pScr->cxChar, pScr->cyChar, DSTINVERT);                
+	       pScr->cxChar, pScr->cyChar, DSTINVERT);
 	cInvertedArray[iTmp] = 0;
       }
     }
   }
   else { /* going backwards */
-    for (iTmp = 0; iTmp < iLocCurr; iTmp++) {        
+    for (iTmp = 0; iTmp < iLocCurr; iTmp++) {
       if (cInvertedArray[iTmp]) {
 	PatBlt(hDC, (iTmp % pScr->width) * pScr->cxChar, (int) (iTmp / pScr->width) * pScr->cyChar,
-	       pScr->cxChar, pScr->cyChar, DSTINVERT);                
+	       pScr->cxChar, pScr->cyChar, DSTINVERT);
 	cInvertedArray[iTmp] = 0;
       }
     }
@@ -198,7 +198,7 @@ void Edit_MouseMove(HWND hWnd, LPARAM lParam){
 	  cInvertedArray[iTmp2 + (pScr->width * iY)] = pScrLine->text[iTmp2];
 	}
       }
-    }            
+    }
     else {
       pScrLine = GetScreenLineFromY(pScr, iY);
       for (iTmp2 = iX; iTmp2 < pScr->width; iTmp2++) {
@@ -206,8 +206,8 @@ void Edit_MouseMove(HWND hWnd, LPARAM lParam){
 	  PatBlt(hDC, iTmp2 * pScr->cxChar, iY * pScr->cyChar,
 		 pScr->cxChar, pScr->cyChar, DSTINVERT);
 	  cInvertedArray[iTmp2 + (pScr->width * iY)] = pScrLine->text[iTmp2];
-	}    
-      }                
+	}
+      }
       for (iTmp = iY + 1; iTmp < iY2; iTmp++) {
 	pScrLine = GetScreenLineFromY(pScr, iTmp);
 	for (iTmp2 = 0; iTmp2 < pScr->width; iTmp2++) {
@@ -225,18 +225,18 @@ void Edit_MouseMove(HWND hWnd, LPARAM lParam){
 	    PatBlt(hDC, iTmp2 * pScr->cxChar, iY2 * pScr->cyChar,
 		   pScr->cxChar, pScr->cyChar, DSTINVERT);
 	    cInvertedArray[iTmp2 + (pScr->width * iY2)] = pScrLine->text[iTmp2];
-	  }    
-	}    
-      }                
-    }    
-    for (iTmp = iLocStart; iTmp < pScr->width * pScr->height; iTmp++) {        
+	  }
+	}
+      }
+    }
+    for (iTmp = iLocStart; iTmp < pScr->width * pScr->height; iTmp++) {
       if (cInvertedArray[iTmp]) {
 	PatBlt(hDC, (iTmp % pScr->width) * pScr->cxChar, (int) (iTmp / pScr->width) * pScr->cyChar,
 	       pScr->cxChar, pScr->cyChar, DSTINVERT);
 	cInvertedArray[iTmp] = 0;
-      }    
+      }
     }
-  }            
+  }
   ReleaseDC(hWnd, hDC);
 } /* Edit_MouseMove */
 
@@ -259,7 +259,7 @@ void Edit_ClearSelection(
   }
   bSelection = FALSE;
   hMenu=GetMenu(pScr->hWnd);
-  EnableMenuItem(hMenu, IDM_COPY, MF_GRAYED);    
+  EnableMenuItem(hMenu, IDM_COPY, MF_GRAYED);
   ReleaseDC(pScr->hWnd, hDC);
 } /* Edit_ClearSelection */
 
@@ -311,7 +311,7 @@ void Edit_Paste(
   static HGLOBAL hMyClipBuffer;
   LPSTR lpClipMemory;
   LPSTR lpMyClipBuffer;
-  SCREEN *pScr;                              
+  SCREEN *pScr;
 
   if (hMyClipBuffer)
     GlobalFree(hMyClipBuffer);
@@ -329,9 +329,9 @@ void Edit_Paste(
   OutputDebugString(lpMyClipBuffer);
 #endif
   PostMessage(pScr->hwndTel, WM_MYSCREENBLOCK, (WPARAM) hMyClipBuffer, (LPARAM) pScr);
-  CloseClipboard();                    
+  CloseClipboard();
   GlobalUnlock(hClipMemory);
-  GlobalUnlock(hMyClipBuffer);    
+  GlobalUnlock(hMyClipBuffer);
 
 } /* Edit_Paste */
 
@@ -352,7 +352,7 @@ void Edit_LbuttonDblclk(
   assert(pScr != NULL);
 
   hDC = GetDC(hWnd);
-  for (iTmp = 0; iTmp < pScr->width * pScr->height; iTmp++) {        
+  for (iTmp = 0; iTmp < pScr->width * pScr->height; iTmp++) {
     if (cInvertedArray[iTmp]) {
       PatBlt(hDC, (iTmp % pScr->width) * pScr->cxChar,
 	     (int) (iTmp / pScr->width) * pScr->cyChar,
@@ -411,13 +411,13 @@ void Edit_TripleClick(
   assert(pScr != NULL);
 
   hDC = GetDC(hWnd);
-  for (iTmp = 0; iTmp < pScr->width * pScr->height; iTmp++) {        
+  for (iTmp = 0; iTmp < pScr->width * pScr->height; iTmp++) {
     if (cInvertedArray[iTmp]) {
       PatBlt(hDC, (iTmp % pScr->width) * pScr->cxChar,
 	     (int) (iTmp / pScr->width) * pScr->cyChar,
 	     pScr->cxChar, pScr->cyChar, DSTINVERT);
       cInvertedArray[iTmp] = 0;
-    }    
+    }
   }
   bSelection = FALSE;
   iYloc = (int) HIWORD(lParam) / pScr->cyChar;

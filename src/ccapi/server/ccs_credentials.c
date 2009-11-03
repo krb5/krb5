@@ -42,44 +42,44 @@ cc_int32 ccs_credentials_new (ccs_credentials_t      *out_credentials,
 {
     cc_int32 err = ccNoError;
     ccs_credentials_t credentials = NULL;
-    
+
     if (!out_credentials) { err = cci_check_error (ccErrBadParam); }
     if (!in_stream      ) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         credentials = malloc (sizeof (*credentials));
-        if (credentials) { 
+        if (credentials) {
             *credentials = ccs_credentials_initializer;
         } else {
-            err = cci_check_error (ccErrNoMem); 
+            err = cci_check_error (ccErrNoMem);
         }
     }
-    
+
     if (!err) {
         err = cci_credentials_union_read (&credentials->cred_union, in_stream);
     }
-    
+
     if (!err && !(credentials->cred_union->version & in_ccache_version)) {
         /* ccache does not have a principal set for this credentials version */
         err = cci_check_error (ccErrBadCredentialsVersion);
     }
-    
+
     if (!err) {
         err = ccs_server_new_identifier (&credentials->identifier);
     }
-    
+
     if (!err) {
         err = ccs_credentials_list_add (io_credentials_list, credentials);
     }
-    
+
     if (!err) {
         *out_credentials = credentials;
         credentials = NULL;
     }
-    
+
     ccs_credentials_release (credentials);
-    
-    return cci_check_error (err);    
+
+    return cci_check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -87,14 +87,14 @@ cc_int32 ccs_credentials_new (ccs_credentials_t      *out_credentials,
 cc_int32 ccs_credentials_release (ccs_credentials_t io_credentials)
 {
     cc_int32 err = ccNoError;
-    
+
     if (!err && io_credentials) {
         cci_credentials_union_release (io_credentials->cred_union);
         cci_identifier_release (io_credentials->identifier);
         free (io_credentials);
     }
-    
-    return cci_check_error (err);    
+
+    return cci_check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -103,19 +103,19 @@ cc_int32 ccs_credentials_write (ccs_credentials_t in_credentials,
                                 k5_ipc_stream      io_stream)
 {
     cc_int32 err = ccNoError;
-    
+
     if (!in_credentials) { err = cci_check_error (ccErrBadParam); }
     if (!io_stream     ) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         err = cci_identifier_write (in_credentials->identifier, io_stream);
     }
-    
+
     if (!err) {
         err = cci_credentials_union_write (in_credentials->cred_union, io_stream);
     }
-    
-    return cci_check_error (err);    
+
+    return cci_check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -125,16 +125,16 @@ cc_int32 ccs_credentials_compare_identifier (ccs_credentials_t  in_credentials,
                                              cc_uint32         *out_equal)
 {
     cc_int32 err = ccNoError;
-    
+
     if (!in_credentials) { err = cci_check_error (ccErrBadParam); }
     if (!in_identifier ) { err = cci_check_error (ccErrBadParam); }
     if (!out_equal     ) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
-        err = cci_identifier_compare (in_credentials->identifier, 
-                                      in_identifier, 
+        err = cci_identifier_compare (in_credentials->identifier,
+                                      in_identifier,
                                       out_equal);
     }
-    
+
     return cci_check_error (err);
 }

@@ -5,23 +5,23 @@
 
  LICENSE TERMS
 
- The free distribution and use of this software in both source and binary 
+ The free distribution and use of this software in both source and binary
  form is allowed (with or without changes) provided that:
 
-   1. distributions of this source code include the above copyright 
+   1. distributions of this source code include the above copyright
       notice, this list of conditions and the following disclaimer;
 
    2. distributions in binary form include the above copyright
       notice, this list of conditions and the following disclaimer
       in the documentation and/or other associated materials;
 
-   3. the copyright holder's name is not used to endorse products 
-      built using this software without specific written permission. 
+   3. the copyright holder's name is not used to endorse products
+      built using this software without specific written permission.
 
  DISCLAIMER
 
  This software is provided 'as is' with no explcit or implied warranties
- in respect of any properties, including, but not limited to, correctness 
+ in respect of any properties, including, but not limited to, correctness
  and fitness for purpose.
  -------------------------------------------------------------------------
  Issue Date: 21/01/2002
@@ -34,9 +34,9 @@
 
 #include "uitypes.h"
 
-/*  BLOCK_SIZE is in BYTES: 16, 24, 32 or undefined for aes.c and 16, 20, 
-    24, 28, 32 or undefined for aespp.c.  When left undefined a slower 
-    version that provides variable block length is compiled.    
+/*  BLOCK_SIZE is in BYTES: 16, 24, 32 or undefined for aes.c and 16, 20,
+    24, 28, 32 or undefined for aespp.c.  When left undefined a slower
+    version that provides variable block length is compiled.
 */
 
 #define BLOCK_SIZE  16

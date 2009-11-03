@@ -46,7 +46,7 @@ set_window_node(HWND hwnd, khui_config_node node) {
 }
 
 static void
-add_subpanels(HWND hwnd, 
+add_subpanels(HWND hwnd,
               khui_config_node ctx_node,
               khui_config_node ref_node) {
 
@@ -128,7 +128,7 @@ add_subpanels(HWND hwnd,
 }
 
 static void
-apply_all(HWND hwnd, 
+apply_all(HWND hwnd,
           HWND hw_tab,
           khui_config_node noderef) {
     TCITEM tci;
@@ -271,7 +271,7 @@ handle_notify(HWND hwnd,
         case TCN_SELCHANGING:
             i = TabCtrl_GetCurSel(lpnm->hwndFrom);
 
-            show_tab_panel(hwnd, 
+            show_tab_panel(hwnd,
                            node,
                            lpnm->hwndFrom,
                            i,
@@ -619,12 +619,12 @@ init_idents_data(void) {
         goto _cleanup;
     }
 
-    cfg_idents.idents = PMALLOC(sizeof(*cfg_idents.idents) * 
+    cfg_idents.idents = PMALLOC(sizeof(*cfg_idents.idents) *
                                cfg_idents.n_idents);
 #ifdef DEBUG
     assert(cfg_idents.idents);
 #endif
-    ZeroMemory(cfg_idents.idents, 
+    ZeroMemory(cfg_idents.idents,
                sizeof(*cfg_idents.idents) * cfg_idents.n_idents);
     cfg_idents.nc_idents = cfg_idents.n_idents;
 
@@ -1067,7 +1067,7 @@ khm_cfg_add_ident_proc(HWND hwnd,
                 break;
             }
             break;
-            
+
         } else if (LOWORD(wParam) == IDCANCEL) {
             EndDialog(hwnd, 1);
         } else {
@@ -1107,9 +1107,9 @@ khm_cfg_ids_tab_proc(HWND hwnd,
             if (cfg_idents.hi_status)
                 goto _done_with_icons;
 
-            cfg_idents.hi_status = 
+            cfg_idents.hi_status =
                 ImageList_Create(GetSystemMetrics(SM_CXSMICON),
-                                 GetSystemMetrics(SM_CYSMICON), 
+                                 GetSystemMetrics(SM_CYSMICON),
                                  ILC_COLOR8 | ILC_MASK,
                                  4,4);
 
@@ -1125,37 +1125,37 @@ khm_cfg_ids_tab_proc(HWND hwnd,
             DestroyIcon(hicon);
 
             hicon = LoadImage(khm_hInstance, MAKEINTRESOURCE(IDI_CFG_DEFAULT),
-                              IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), 
+                              IMAGE_ICON, GetSystemMetrics(SM_CXSMICON),
                               GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 
-            cfg_idents.idx_default = ImageList_AddIcon(cfg_idents.hi_status, 
+            cfg_idents.idx_default = ImageList_AddIcon(cfg_idents.hi_status,
                                                        hicon) + 1;
 
             DestroyIcon(hicon);
 
             hicon = LoadImage(khm_hInstance, MAKEINTRESOURCE(IDI_CFG_MODIFIED),
-                              IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), 
+                              IMAGE_ICON, GetSystemMetrics(SM_CXSMICON),
                               GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 
-            cfg_idents.idx_modified = ImageList_AddIcon(cfg_idents.hi_status, 
+            cfg_idents.idx_modified = ImageList_AddIcon(cfg_idents.hi_status,
                                                         hicon) + 1;
 
             DestroyIcon(hicon);
 
             hicon = LoadImage(khm_hInstance, MAKEINTRESOURCE(IDI_CFG_APPLIED),
-                              IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), 
+                              IMAGE_ICON, GetSystemMetrics(SM_CXSMICON),
                               GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 
-            cfg_idents.idx_applied = ImageList_AddIcon(cfg_idents.hi_status, 
+            cfg_idents.idx_applied = ImageList_AddIcon(cfg_idents.hi_status,
                                                        hicon) + 1;
 
             DestroyIcon(hicon);
 
             hicon = LoadImage(khm_hInstance, MAKEINTRESOURCE(IDI_CFG_DELETED),
-                              IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), 
+                              IMAGE_ICON, GetSystemMetrics(SM_CXSMICON),
                               GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 
-            cfg_idents.idx_deleted = ImageList_AddIcon(cfg_idents.hi_status, 
+            cfg_idents.idx_deleted = ImageList_AddIcon(cfg_idents.hi_status,
                                                        hicon) + 1;
 
             DestroyIcon(hicon);
@@ -1508,7 +1508,7 @@ khm_cfg_id_tab_proc(HWND hwnd,
                         *cont = FALSE;
                 } else {
                     khui_cfg_set_flags_inst(idata, KHUI_CNFLAG_APPLIED,
-                                            KHUI_CNFLAG_APPLIED | 
+                                            KHUI_CNFLAG_APPLIED |
                                             KHUI_CNFLAG_MODIFIED);
                 }
                 break;

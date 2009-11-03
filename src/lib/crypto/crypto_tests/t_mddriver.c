@@ -58,9 +58,9 @@ struct md_test_entry {
 
 #if MD == 4
 #define MD_CTX krb5_MD4_CTX
-#define MDInit krb5_MD4Init
-#define MDUpdate krb5_MD4Update
-#define MDFinal krb5_MD4Final
+#define MDInit krb5int_MD4Init
+#define MDUpdate krb5int_MD4Update
+#define MDFinal krb5int_MD4Final
 
 #define HAVE_TEST_SUITE
 /* Test suite from RFC 1320 */
@@ -94,9 +94,9 @@ struct md_test_entry md_test_suite[] = {
 
 #if MD == 5
 #define MD_CTX krb5_MD5_CTX
-#define MDInit krb5_MD5Init
-#define MDUpdate krb5_MD5Update
-#define MDFinal krb5_MD5Final
+#define MDInit krb5int_MD5Init
+#define MDUpdate krb5int_MD5Update
+#define MDFinal krb5int_MD5Final
 
 #define HAVE_TEST_SUITE
 /* Test suite from RFC 1321 */
@@ -117,7 +117,7 @@ struct md_test_entry md_test_suite[] = {
     { "abcdefghijklmnopqrstuvwxyz",
 	  {0xc3, 0xfc, 0xd3, 0xd7, 0x61, 0x92, 0xe4, 0x00,
 	   0x7d, 0xfb, 0x49, 0x6c, 0xca, 0x67, 0xe1, 0x3b }},
-    { "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 
+    { "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
 	  {0xd1, 0x74, 0xab, 0x98, 0xd2, 0x77, 0xd9, 0xf5,
 	   0xa5, 0x61, 0x1c, 0x2c, 0x9f, 0x41, 0x9d, 0x9f }},
     { "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
@@ -125,7 +125,7 @@ struct md_test_entry md_test_suite[] = {
 	   0xac, 0x49, 0xda, 0x2e, 0x21, 0x07, 0xb6, 0x7a }},
     { 0, {0} }
 };
-	
+
 #endif
 
 /* Main driver.
@@ -185,7 +185,7 @@ static void MDTimeTrial ()
   time_t endTime, startTime;
   unsigned char block[TEST_BLOCK_LEN];
   unsigned int i;
-  
+
   printf("MD%d time trial. Digesting %d %d-byte blocks ...", MD,
   TEST_BLOCK_LEN, TEST_BLOCK_COUNT);
 
@@ -222,7 +222,7 @@ static void MDTestSuite ()
     MD_CTX context;
     struct md_test_entry *entry;
     int	i, num_tests = 0, num_failed = 0;
-    
+
     printf ("MD%d test suite:\n\n", MD);
     for (entry = md_test_suite; entry->string; entry++) {
 	unsigned int len = strlen (entry->string);
@@ -254,7 +254,7 @@ static void MDTestSuite ()
 	exit(0);
     }
 #else
-  
+
     printf ("MD%d test suite:\n", MD);
     MDString ("");
     MDString ("a");

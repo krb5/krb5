@@ -132,7 +132,7 @@ void kmqint_msg_type_create(int t) {
     LeaveCriticalSection(&cs_kmq_types);
 }
 
-KHMEXP khm_int32 KHMAPI kmq_register_type(wchar_t * name, 
+KHMEXP khm_int32 KHMAPI kmq_register_type(wchar_t * name,
                                           khm_int32 * new_id)
 {
     int i;
@@ -154,7 +154,7 @@ KHMEXP khm_int32 KHMAPI kmq_register_type(wchar_t * name,
             /* continue searching since we might find that this type
                is already registered. */
         } else {
-            if(msg_types[i]->name != NULL && 
+            if(msg_types[i]->name != NULL &&
                !wcscmp(msg_types[i]->name, name)) {
 
                 registered = TRUE;
@@ -318,8 +318,8 @@ kmq_msg_subscription * kmqint_msg_type_del_sub_cb(khm_int32 t, kmq_callback_t cb
     s = msg_types[t]->subs;
     while(s) {
         kmq_msg_subscription * n = LNEXT(s);
-        if(s->rcpt_type == KMQ_RCPTTYPE_CB && 
-           s->recipient.cb == cb && 
+        if(s->rcpt_type == KMQ_RCPTTYPE_CB &&
+           s->recipient.cb == cb &&
            s->queue == q) {
             /*TODO: do more here? */
             LDELETE(&msg_types[t]->subs, s);

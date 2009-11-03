@@ -25,7 +25,7 @@ int readstream_termio(cmd, ibuf, vstop, vstart, ixon)
     *vstop = tp->c_cc[VSTOP];
     *vstart = tp->c_cc[VSTART];
 #endif
-    *ixon = tp->c_iflag & IXON;      
+    *ixon = tp->c_iflag & IXON;
     return 0;
   }
   return -1;

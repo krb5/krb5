@@ -41,19 +41,19 @@
 khui_alert * kh_alerts = NULL;
 CRITICAL_SECTION cs_alerts;
 
-void 
+void
 alert_init(void)
 {
     InitializeCriticalSection(&cs_alerts);
 }
 
-void 
+void
 alert_exit(void)
 {
     DeleteCriticalSection(&cs_alerts);
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_alert_create_empty(khui_alert ** result)
 {
     khui_alert * a;
@@ -81,10 +81,10 @@ khui_alert_create_empty(khui_alert ** result)
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
-khui_alert_create_simple(const wchar_t * title, 
-                         const wchar_t * message, 
-                         khm_int32 severity, 
+KHMEXP khm_int32 KHMAPI
+khui_alert_create_simple(const wchar_t * title,
+                         const wchar_t * message,
+                         khm_int32 severity,
                          khui_alert ** result)
 {
     khui_alert * a;
@@ -99,7 +99,7 @@ khui_alert_create_simple(const wchar_t * title,
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_alert_set_title(khui_alert * alert, const wchar_t * title)
 {
     size_t cb = 0;
@@ -107,8 +107,8 @@ khui_alert_set_title(khui_alert * alert, const wchar_t * title)
     assert(alert->magic == KHUI_ALERT_MAGIC);
 
     if(title) {
-        if(FAILED(StringCbLength(title, 
-                                 KHUI_MAXCB_TITLE, 
+        if(FAILED(StringCbLength(title,
+                                 KHUI_MAXCB_TITLE,
                                  &cb))) {
             return KHM_ERROR_INVALID_PARAM;
         }
@@ -132,7 +132,7 @@ khui_alert_set_title(khui_alert * alert, const wchar_t * title)
 }
 
 KHMEXP khm_int32 KHMAPI
-khui_alert_set_flags(khui_alert * alert, khm_int32 mask, khm_int32 flags) 
+khui_alert_set_flags(khui_alert * alert, khm_int32 mask, khm_int32 flags)
 {
     assert(alert->magic == KHUI_ALERT_MAGIC);
 
@@ -140,7 +140,7 @@ khui_alert_set_flags(khui_alert * alert, khm_int32 mask, khm_int32 flags)
         return KHM_ERROR_INVALID_PARAM;
 
     EnterCriticalSection(&cs_alerts);
-    alert->flags = 
+    alert->flags =
         (alert->flags & ~mask) |
         (flags & mask);
     LeaveCriticalSection(&cs_alerts);
@@ -148,7 +148,7 @@ khui_alert_set_flags(khui_alert * alert, khm_int32 mask, khm_int32 flags)
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_alert_set_severity(khui_alert * alert, khm_int32 severity)
 {
 
@@ -160,7 +160,7 @@ khui_alert_set_severity(khui_alert * alert, khm_int32 severity)
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_alert_set_suggestion(khui_alert * alert,
                           const wchar_t * suggestion) {
     size_t cb = 0;
@@ -168,8 +168,8 @@ khui_alert_set_suggestion(khui_alert * alert,
     assert(alert->magic == KHUI_ALERT_MAGIC);
 
     if(suggestion) {
-        if(FAILED(StringCbLength(suggestion, 
-                                 KHUI_MAXCB_MESSAGE - sizeof(wchar_t), 
+        if(FAILED(StringCbLength(suggestion,
+                                 KHUI_MAXCB_MESSAGE - sizeof(wchar_t),
                                  &cb))) {
             return KHM_ERROR_INVALID_PARAM;
         }
@@ -177,7 +177,7 @@ khui_alert_set_suggestion(khui_alert * alert,
     }
 
     EnterCriticalSection(&cs_alerts);
-    if(alert->suggestion && 
+    if(alert->suggestion &&
        (alert->flags & KHUI_ALERT_FLAG_FREE_SUGGEST)) {
 
         PFREE(alert->suggestion);
@@ -196,7 +196,7 @@ khui_alert_set_suggestion(khui_alert * alert,
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_alert_set_message(khui_alert * alert, const wchar_t * message)
 {
     size_t cb = 0;
@@ -204,8 +204,8 @@ khui_alert_set_message(khui_alert * alert, const wchar_t * message)
     assert(alert->magic == KHUI_ALERT_MAGIC);
 
     if(message) {
-        if(FAILED(StringCbLength(message, 
-                                 KHUI_MAXCB_MESSAGE - sizeof(wchar_t), 
+        if(FAILED(StringCbLength(message,
+                                 KHUI_MAXCB_MESSAGE - sizeof(wchar_t),
                                  &cb))) {
             return KHM_ERROR_INVALID_PARAM;
         }
@@ -213,7 +213,7 @@ khui_alert_set_message(khui_alert * alert, const wchar_t * message)
     }
 
     EnterCriticalSection(&cs_alerts);
-    if(alert->message && 
+    if(alert->message &&
        (alert->flags & KHUI_ALERT_FLAG_FREE_MESSAGE)) {
 
         PFREE(alert->message);
@@ -232,7 +232,7 @@ khui_alert_set_message(khui_alert * alert, const wchar_t * message)
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_alert_clear_commands(khui_alert * alert)
 {
     assert(alert->magic == KHUI_ALERT_MAGIC);
@@ -243,7 +243,7 @@ khui_alert_clear_commands(khui_alert * alert)
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_alert_add_command(khui_alert * alert, khm_int32 command_id)
 {
     khm_int32 rv = KHM_ERROR_SUCCESS;
@@ -312,7 +312,7 @@ khui_alert_get_response(khui_alert * alert)
     return response;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_alert_show(khui_alert * alert)
 {
     assert(alert->magic == KHUI_ALERT_MAGIC);
@@ -349,9 +349,9 @@ khui_alert_queue(khui_alert * alert)
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
-khui_alert_show_simple(const wchar_t * title, 
-                       const wchar_t * message, 
+KHMEXP khm_int32 KHMAPI
+khui_alert_show_simple(const wchar_t * title,
+                       const wchar_t * message,
                        khm_int32 severity)
 {
     khui_alert * a = NULL;
@@ -369,8 +369,8 @@ khui_alert_show_simple(const wchar_t * title,
     return rv;
 }
 
-KHMEXP khm_int32 KHMAPI 
-khui_alert_hold(khui_alert * alert) 
+KHMEXP khm_int32 KHMAPI
+khui_alert_hold(khui_alert * alert)
 {
     assert(alert->magic == KHUI_ALERT_MAGIC);
 
@@ -381,7 +381,7 @@ khui_alert_hold(khui_alert * alert)
 }
 
 /* called with cs_alert held */
-static void 
+static void
 free_alert(khui_alert * alert)
 {
     assert(alert->magic == KHUI_ALERT_MAGIC);
@@ -416,8 +416,8 @@ free_alert(khui_alert * alert)
     }
 }
 
-KHMEXP khm_int32 KHMAPI 
-khui_alert_release(khui_alert * alert) 
+KHMEXP khm_int32 KHMAPI
+khui_alert_release(khui_alert * alert)
 {
     assert(alert->magic == KHUI_ALERT_MAGIC);
 

@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,8 +22,8 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
- * 
+ *
+ *
  *
  * This file contains an implementation of the RFC 3961 PRF for
  *simplified profile enctypes.
@@ -41,7 +41,7 @@ krb5int_dk_prf (const struct krb5_enc_provider *enc,
   krb5_data prfconst;
   krb5_key kp = NULL;
   krb5_error_code ret = 0;
-  
+
   prfconst.data = (char *) "prf";
   prfconst.length = 3;
   tmp.length = hash->hashsize;
@@ -50,7 +50,7 @@ krb5int_dk_prf (const struct krb5_enc_provider *enc,
     return ENOMEM;
   hash->hash(1, in, &tmp);
   tmp.length = (tmp.length/enc->block_size)*enc->block_size; /*truncate to block size*/
-  ret = krb5_derive_key(enc, key, &kp, &prfconst);
+  ret = krb5int_derive_key(enc, key, &kp, &prfconst);
   if (ret == 0)
       ret = enc->encrypt(kp, NULL, &tmp, out);
   krb5_k_free_key(NULL, kp);

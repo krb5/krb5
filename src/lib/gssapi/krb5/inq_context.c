@@ -300,4 +300,3 @@ gss_krb5int_extract_authtime_from_sec_context(OM_uint32 *minor_status,
 
     return generic_gss_add_buffer_set_member(minor_status, &rep, data_set);
 }
-

@@ -57,7 +57,7 @@ LRESULT khm_rebar_notify(LPNMHDR lpnm);
 void
 khm_set_dialog_result(HWND hwnd, LRESULT lr);
 
-LRESULT CALLBACK 
+LRESULT CALLBACK
 khm_main_wnd_proc(HWND hwnd,
                   UINT uMsg,
                   WPARAM wParam,

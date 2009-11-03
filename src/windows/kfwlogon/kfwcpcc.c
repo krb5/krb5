@@ -35,5 +35,3 @@ int main(int argc, char *argv[])
 
     return KFW_copy_file_cache_to_api_cache(argv[1]);
 }
-
-

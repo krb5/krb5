@@ -57,7 +57,7 @@ BOOL isNT() {
             bIsNT = FALSE;
             break;
             }
-    
+
         if (!bSupportedVersion) {
             cci_debug_printf("%s Running on an unsupported version of Windows", __FUNCTION__);
             status  = 1;
@@ -104,7 +104,7 @@ HANDLE createThreadEvent(char* uuid, char* suffix) {
         }
 #if 0
     cci_debug_printf("%s event_name:%s", __FUNCTION__, event_name);
-#endif    
+#endif
     if (!status) {
         hEvent = CreateEvent(psa, FALSE, FALSE, event_name);
         if (!hEvent)     status = cci_check_error(GetLastError());
@@ -112,7 +112,7 @@ HANDLE createThreadEvent(char* uuid, char* suffix) {
 
     if (!status) ResetEvent(hEvent);
 
-    
+
     if (event_name) free(event_name);
     if (isNT())     free(sa.lpSecurityDescriptor);
 

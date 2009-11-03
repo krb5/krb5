@@ -47,9 +47,9 @@ char copyright[] =
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
-     
+
 #include <netinet/in.h>
-     
+
 #include <stdio.h>
 #include <signal.h>
 #include <pwd.h>
@@ -71,7 +71,7 @@ char copyright[] =
 #include "defines.h"
 
 #define RCP_BUFSIZ 4096
-     
+
 int sock;
 char *krb_realm = NULL;
 char *krb_cache = NULL;
@@ -86,9 +86,9 @@ char	*strsave();
 #endif
 int	rcmd_stream_write(), rcmd_stream_read();
 void 	usage(void), sink(int, char **),
-    source(int, char **), rsource(char *, struct stat *), verifydir(char *), 
+    source(int, char **), rsource(char *, struct stat *), verifydir(char *),
     answer_auth(char *, char *);
-int	response(void), hosteq(char *, char *), okname(char *), 
+int	response(void), hosteq(char *, char *), okname(char *),
     susystem(char *);
 int	encryptflag = 0;
 
@@ -118,7 +118,7 @@ struct buffer {
 struct buffer *allocbuf(struct buffer *, int, int);
 
 #define	NULLBUF	(struct buffer *) 0
-  
+
 void 	error (char *fmt, ...)
 #if !defined (__cplusplus) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7))
        __attribute__ ((__format__ (__printf__, 1, 2)))
@@ -143,7 +143,7 @@ int main(argc, argv)
 #endif
 #ifdef KERBEROS
     krb5_flags authopts;
-    krb5_error_code status;	
+    krb5_error_code status;
     int euid;
     char **orig_argv = save_argv(argc, argv);
     krb5_auth_context auth_context;
@@ -161,19 +161,19 @@ int main(argc, argv)
 	fprintf(stderr, "who are you?\n");
 	exit(1);
     }
-    
+
     for (argc--, argv++; argc > 0 && **argv == '-'; argc--, argv++) {
 	(*argv)++;
 	while (**argv) switch (*(*argv)++) {
-	    
+
 	  case 'r':
 	    iamrecursive++;
 	    break;
-	    
+
 	  case 'p':		/* preserve mtimes and atimes */
 	    pflag++;
 	    break;
-	    
+
 	  case 'D':
 	    argc--, argv++;
 	    if (argc == 0)
@@ -191,7 +191,7 @@ int main(argc, argv)
 	    break;
 	  case 'k':		/* Change kerberos realm */
 	    argc--, argv++;
-	    if (argc == 0) 
+	    if (argc == 0)
 	      usage();
 	    if(!(krb_realm = strdup(*argv))){
 		fprintf(stderr, "rcp: Cannot malloc.\n");
@@ -200,7 +200,7 @@ int main(argc, argv)
 	    goto next_arg;
 	  case 'c':		/* Change default ccache file */
 	    argc--, argv++;
-	    if (argc == 0) 
+	    if (argc == 0)
 	      usage();
 	    if(!(krb_cache = strdup(*argv))){
 		fprintf(stderr, "rcp: Cannot malloc.\n");
@@ -209,7 +209,7 @@ int main(argc, argv)
 	    goto next_arg;
 	  case 'C':		/* Change default config file */
 	    argc--, argv++;
-	    if (argc == 0) 
+	    if (argc == 0)
 	      usage();
 	    if(!(krb_config = strdup(*argv))){
 		fprintf(stderr, "rcp: Cannot malloc.\n");
@@ -229,7 +229,7 @@ int main(argc, argv)
 	  case 'd':
 	    targetshouldbedirectory = 1;
 	    break;
-	    
+
 	  case 'f':		/* "from" */
 	    iamremote = 1;
 	    rcmd_stream_init_normal();
@@ -241,7 +241,7 @@ int main(argc, argv)
 	    (void) response();
 	    source(--argc, ++argv);
 	    exit(errs);
-	    
+
 	  case 't':		/* "to" */
 	    iamremote = 1;
 	    rcmd_stream_init_normal();
@@ -252,13 +252,13 @@ int main(argc, argv)
 
 	    sink(--argc, ++argv);
 	    exit(errs);
-	    
+
 	  default:
 	    usage();
 	}
       next_arg: ;
     }
-    
+
     if (argc < 2)
       usage();
     if (argc > 2)
@@ -272,7 +272,7 @@ int main(argc, argv)
 #else
       sp = getservbyname("shell", "tcp");
 #endif /* KERBEROS */
-    
+
       if (sp == NULL) {
 #ifdef KERBEROS
 	fprintf(stderr, "rcp: kshell/tcp: unknown service\n");
@@ -289,7 +289,7 @@ int main(argc, argv)
     if (asprintf(&cmd, "%srcp %s%s%s%s%s%s%s%s%s",
 		 encryptflag ? "-x " : "",
 
-		 iamrecursive ? " -r" : "", pflag ? " -p" : "", 
+		 iamrecursive ? " -r" : "", pflag ? " -p" : "",
 		 targetshouldbedirectory ? " -d" : "",
 		 krb_realm != NULL ? " -k " : "",
 		 krb_realm != NULL ? krb_realm : "",
@@ -303,10 +303,10 @@ int main(argc, argv)
 
 #else /* !KERBEROS */
     (void) snprintf(cmd, sizeof(cmdbuf), "rcp%s%s%s",
-		    iamrecursive ? " -r" : "", pflag ? " -p" : "", 
+		    iamrecursive ? " -r" : "", pflag ? " -p" : "",
 		    targetshouldbedirectory ? " -d" : "");
 #endif /* KERBEROS */
-    
+
 #ifdef POSIX_SIGNALS
     (void) sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
@@ -316,19 +316,19 @@ int main(argc, argv)
     (void) signal(SIGPIPE, lostconn);
 #endif
     targ = colon(argv[argc - 1]);
-    
+
     /* Check if target machine is the current machine. */
-    
+
     gethostname(curhost, sizeof(curhost));
     if (targ) {				/* ... to remote */
 	*targ++ = 0;
 	if (hosteq(argv[argc - 1], curhost)) {
-	    
+
 	    /* If so, pretend there wasn't even one given
 	     * check for an argument of just "host:", it
 	     * should become "."
 	     */
-	    
+
 	    if (*targ == 0) {
 		targ = ".";
 		argv[argc - 1] = targ;
@@ -407,7 +407,7 @@ int main(argc, argv)
 				  0,
 				  "host",
 				  krb_realm,
-				  &cred,  
+				  &cred,
 				  0,  /* No seq # */
 				  0,  /* No server seq # */
 				  (struct sockaddr_in *) 0,
@@ -469,9 +469,9 @@ int main(argc, argv)
 	    if (src) {
 		*src++ = 0;
 		if (hosteq(argv[i], curhost)) {
-		    
+
 		    /* If so, pretend src machine never given */
-		    
+
 		    if (*src == 0) {
 			error("rcp: no path given in arg: %s:\n",
 			      argv[i]);
@@ -518,7 +518,7 @@ int main(argc, argv)
 			      0,
 			      "host",
 			      krb_realm,
-			      &cred,  
+			      &cred,
 			      0,  /* No seq # */
 			      0,  /* No server seq # */
 			      (struct sockaddr_in *) 0,
@@ -553,8 +553,8 @@ int main(argc, argv)
 
 		    rcmd_stream_init_krb5(key, encryptflag, 0, 1, kcmd_proto);
 		}
-		rem = sock; 
-				   
+		rem = sock;
+
 		euid = geteuid();
 		if (euid == 0) {
 		    if (setuid(0)) {
@@ -611,7 +611,7 @@ void verifydir(cp)
      char *cp;
 {
     struct stat stb;
-    
+
     if (stat(cp, &stb) >= 0) {
 	if ((stb.st_mode & S_IFMT) == S_IFDIR)
 	  return;
@@ -626,7 +626,7 @@ void verifydir(cp)
 char *colon(cp)
      char *cp;
 {
-    
+
     while (*cp) {
 	if (*cp == ':')
 	  return (cp);
@@ -644,7 +644,7 @@ int okname(cp0)
 {
     register char *cp = cp0;
     register int c;
-    
+
     do {
 	c = *cp;
 	if (c & 0200)
@@ -671,7 +671,7 @@ int susystem(s)
 #else
     register krb5_sigtype (bsd_context, *istat)(), (*qstat)();
 #endif
-    
+
     if ((pid = vfork()) == 0) {
 	execl("/bin/sh", "sh", "-c", s, (char *)0);
 	_exit(127);
@@ -687,7 +687,7 @@ int susystem(s)
     istat = signal(SIGINT, SIG_IGN);
     qstat = signal(SIGQUIT, SIG_IGN);
 #endif
-    
+
 #ifdef HAVE_WAITPID
     w = waitpid(pid, &status, 0);
 #else
@@ -699,11 +699,11 @@ int susystem(s)
 #ifdef POSIX_SIGNALS
     (void) sigaction(SIGINT, &isa, (struct sigaction *)0);
     (void) sigaction(SIGQUIT, &qsa, (struct sigaction *)0);
-#else    
+#else
     (void) signal(SIGINT, istat);
     (void) signal(SIGQUIT, qstat);
 #endif
-    
+
     return (status);
 }
 
@@ -719,7 +719,7 @@ void source(argc, argv)
     unsigned int amt;
     off_t i;
     char buf[RCP_BUFSIZ];
-    
+
     for (x = 0; x < argc; x++) {
 	name = argv[x];
 	if ((f = open(name, 0)) < 0) {
@@ -729,10 +729,10 @@ void source(argc, argv)
 	if (fstat(f, &stb) < 0)
 	  goto notreg;
 	switch (stb.st_mode&S_IFMT) {
-	    
+
 	  case S_IFREG:
 	    break;
-	    
+
 	  case S_IFDIR:
 	    if (iamrecursive) {
 		(void) close(f);
@@ -814,7 +814,7 @@ void rsource(name, statp)
 #endif
     char buf[RCP_BUFSIZ];
     char *bufv[1];
-    
+
     if (d == 0) {
 	error("rcp: %s: %s\n", name, error_message(errno));
 	return;
@@ -866,10 +866,10 @@ int response()
     if (rcmd_stream_read(rem, &resp, 1, 0) != 1)
       lostconn(0);
     switch (resp) {
-	
+
       case 0:				/* ok */
 	return (0);
-	
+
       default:
 	*cp++ = resp;
 	/* fall into... */
@@ -947,7 +947,7 @@ void sink(argc, argv)
 #define atime	tv[0]
 #define mtime	tv[1]
 #define	SCREWUP(str)	{ whopp = str; goto screwup; }
-    
+
     if (!pflag)
       (void) umask(mask);
     if (argc != 1) {
@@ -985,7 +985,7 @@ void sink(argc, argv)
 	    ga();
 	    return;
 	}
-	
+
 #define getnum(t) (t) = 0; while (isdigit((int) *cp)) (t) = (t) * 10 + (*cp++ - '0');
 	if (*cp == 'T') {
 	    setimes++;
@@ -1123,7 +1123,7 @@ void sink(argc, argv)
 	    if (utimes(nambuf, tv) < 0)
 	      error("rcp: can't set times on %s: %s\n",
 		    nambuf, error_message(errno));
-	}				   
+	}
 	if (wrerr)
 	  error("rcp: %s: %s\n", nambuf, error_message(errno));
 	else
@@ -1142,7 +1142,7 @@ struct buffer *allocbuf(bp, fd, blksize)
 {
     struct stat stb;
     int size;
-    
+
     if (fstat(fd, &stb) < 0) {
 	error("rcp: fstat: %s\n", error_message(errno));
 	return (NULLBUF);
@@ -1212,21 +1212,21 @@ int hosteq(h1, h2)
 {
     struct hostent *h_ptr;
     char hname1[256];
-    
+
     if (forcenet)
       return(0);
 
     /* get the official names for the two hosts */
-    
+
     if ((h_ptr = gethostbyname(h1)) == NULL)
       return(0);
     strncpy(hname1, h_ptr->h_name, sizeof (hname1));
     hname1[sizeof (hname1) - 1] = '\0';
     if ((h_ptr = gethostbyname(h2)) == NULL)
       return(0);
-    
+
     /*return if they are equal (strcmp returns 0 for equal - I return 1) */
-    
+
     return(!strcmp(hname1, h_ptr->h_name));
 }
 
@@ -1259,7 +1259,7 @@ char **save_argv(argc, argv)
      char **argv;
 {
     register int i;
-    
+
     char **local_argv = (char **)calloc((unsigned) argc+1,
 					(unsigned) sizeof(char *));
     /* allocate an extra pointer, so that it is initialized to NULL
@@ -1292,7 +1292,7 @@ void
     krb5_ccache cc;
     krb5_error_code status;
     krb5_auth_context auth_context = NULL;
-    
+
     if (config_file) {
     	const char * filenames[2];
     	filenames[1] = NULL;
@@ -1300,17 +1300,17 @@ void
     	if ((status = krb5_set_config_files(bsd_context, filenames)))
 	    exit(1);
     }
-    
+
     memset (&creds, 0, sizeof(creds));
 
     if ((status = krb5_read_message(bsd_context, (krb5_pointer)&rem,
 				    &pname_data)))
 	exit(1);
-    
+
     if ((status = krb5_read_message(bsd_context, (krb5_pointer) &rem,
 				    &creds.second_ticket)))
 	exit(1);
-    
+
     if (ccache_file == NULL) {
     	if ((status = krb5_cc_default(bsd_context, &cc)))
 	    exit(1);
@@ -1328,7 +1328,7 @@ void
 
     krb5_free_data_contents(bsd_context, &pname_data);
 
-    if ((status = krb5_get_credentials(bsd_context, KRB5_GC_USER_USER, cc, 
+    if ((status = krb5_get_credentials(bsd_context, KRB5_GC_USER_USER, cc,
 				       &creds, &new_creds)))
 	exit(1);
 
@@ -1336,16 +1336,16 @@ void
 				       AP_OPTS_USE_SESSION_KEY,
 				       NULL, new_creds, &msg)))
 	exit(1);
-    
+
     if ((status = krb5_write_message(bsd_context, (krb5_pointer) &rem,
 				     &msg))) {
     	krb5_free_data_contents(bsd_context, &msg);
 	exit(1);
     }
-    
+
     rcmd_stream_init_krb5(&new_creds->keyblock, encryptflag, 0, 0,
 			  KCMD_OLD_PROTOCOL);
-    
+
     /* cleanup */
     krb5_free_cred_contents(bsd_context, &creds);
     krb5_free_creds(bsd_context, new_creds);

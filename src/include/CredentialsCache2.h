@@ -25,13 +25,13 @@
  */
 
 /*
- * This is backwards compatibility for CCache API v2 clients to be able to run 
+ * This is backwards compatibility for CCache API v2 clients to be able to run
  * against the CCache API v3 library
  */
- 
+
 #ifndef CCAPI_V2_H
 #define CCAPI_V2_H
- 
+
 #include <CredentialsCache.h>
 
 #if defined(macintosh) || (defined(__MACH__) && defined(__APPLE__))
@@ -53,7 +53,7 @@ extern "C" {
 #if TARGET_OS_MAC
 #pragma pack(push,2)
 #endif
-    
+
 /* Some old types get directly mapped to new types */
 
 typedef cc_context_d apiCB;
@@ -84,17 +84,17 @@ typedef struct cc_credentials_v5_compat {
     cc_data_compat		second_ticket;
     cc_data_compat**	        authdata;
 } cc_credentials_v5_compat;
- 
+
 enum {
     MAX_V4_CRED_LEN = 1250
 };
- 
+
 enum {
     KRB_NAME_SZ = 40,
     KRB_INSTANCE_SZ = 40,
     KRB_REALM_SZ = 40
 };
- 
+
 typedef struct cc_credentials_v4_compat {
     unsigned char	kversion;
     char		principal[KRB_NAME_SZ+1];
@@ -117,7 +117,7 @@ typedef union cred_ptr_union_compat {
     cc_credentials_v4_compat* pV4Cred;
     cc_credentials_v5_compat* pV5Cred;
 } cred_ptr_union_compat;
- 
+
 typedef struct cred_union {
     cc_int32              cred_type;  /* cc_cred_vers */
     cred_ptr_union_compat cred;
@@ -162,7 +162,7 @@ enum {
     CC_ERR_CACHE_RELEASE,
     CC_ERR_CACHE_FULL,
     CC_ERR_CRED_VERSION
-};      
+};
 
 enum {
     CC_CRED_UNKNOWN,
@@ -178,21 +178,21 @@ enum {
     CC_LOCK_NOBLOCK = 16
 };
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_shutdown (apiCB **io_context)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_get_NC_info (apiCB    *in_context,
                 infoNC ***out_info)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_get_change_time (apiCB     *in_context,
                     cc_time_t *out_change_time)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_open (apiCB       *in_context,
          const char  *in_name,
          cc_int32     in_version,
@@ -200,7 +200,7 @@ cc_open (apiCB       *in_context,
          ccache_p   **out_ccache)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_create (apiCB       *in_context,
            const char  *in_name,
            const char  *in_principal,
@@ -209,107 +209,107 @@ cc_create (apiCB       *in_context,
            ccache_p   **out_ccache)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_close (apiCB     *in_context,
           ccache_p **ioCCache)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_destroy (apiCB     *in_context,
             ccache_p **io_ccache)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_seq_fetch_NCs_begin (apiCB       *in_context,
                         ccache_cit **out_nc_iterator)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_seq_fetch_NCs_next (apiCB       *in_context,
                        ccache_p   **out_ccache,
                        ccache_cit  *in_nc_iterator)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_seq_fetch_NCs_end (apiCB       *in_context,
                       ccache_cit **io_nc_iterator)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_get_name (apiCB     *in_context,
              ccache_p  *in_ccache,
              char     **out_name)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_get_cred_version (apiCB    *in_context,
                      ccache_p *in_ccache,
                      cc_int32 *out_version)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_set_principal (apiCB    *in_context,
                   ccache_p *in_ccache,
                   cc_int32  in_version,
                   char     *in_principal)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_get_principal (apiCB     *in_context,
                   ccache_p  *in_ccache,
                   char     **out_principal)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_store (apiCB      *in_context,
           ccache_p   *in_ccache,
           cred_union  in_credentials)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_remove_cred (apiCB      *in_context,
                 ccache_p   *in_ccache,
                 cred_union  in_credentials)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_seq_fetch_creds_begin (apiCB           *in_context,
                           const ccache_p  *in_ccache,
                           ccache_cit     **out_ccache_iterator)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_seq_fetch_creds_next (apiCB       *in_context,
                          cred_union **out_cred_union,
                          ccache_cit  *in_ccache_iterator)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_seq_fetch_creds_end (apiCB       *in_context,
                         ccache_cit **io_ccache_iterator)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_free_principal (apiCB  *in_context,
                    char  **io_principal)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_free_name (apiCB  *in_context,
               char  **io_name)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_free_creds (apiCB       *in_context,
                cred_union **io_cred_union)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_free_NC_info (apiCB    *in_context,
                  infoNC ***io_info)
 CCAPI_DEPRECATED;
 
-CCACHE_API cc_int32 
+CCACHE_API cc_int32
 cc_lock_request (apiCB          *in_context,
                  const ccache_p *in_ccache,
                  const cc_int32  in_lock_type)

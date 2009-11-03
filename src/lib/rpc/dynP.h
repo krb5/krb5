@@ -41,7 +41,7 @@ typedef struct _DynObject DynObjectRecP, *DynObjectP;
 #define _DynResize	gssrpcint_DynResize
 
 /* Internal functions */
-int _DynRealloc (DynObjectP obj, int req), 
+int _DynRealloc (DynObjectP obj, int req),
   _DynResize (DynObjectP obj, int req);
 
 #undef P

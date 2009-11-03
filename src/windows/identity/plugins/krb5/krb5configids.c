@@ -101,7 +101,7 @@ k5_ids_write_params(k5_ids_dlg_data * d) {
    rv = khc_write_int32(csp_params, vn, (khm_int32) po); \
    assert(KHM_SUCCEEDED(rv));       \
   }
-    
+
     WRITEPARAM(d->life,d->tc_life.current, L"DefaultLifetime");
     WRITEPARAM(d->renew_life,d->tc_renew.current, L"DefaultRenewLifetime");
     WRITEPARAM(d->life_max,d->tc_life_max.current, L"MaxLifetime");
@@ -170,7 +170,7 @@ k5_ids_read_params(k5_ids_dlg_data * d) {
     d->tc_renew_max.max = d->tc_renew.max;
 }
 
-INT_PTR CALLBACK 
+INT_PTR CALLBACK
 k5_ids_tab_dlgproc(HWND hwnd,
                   UINT uMsg,
                   WPARAM wParam,
@@ -279,6 +279,3 @@ k5_ids_tab_dlgproc(HWND hwnd,
     }
     return FALSE;
 }
-
-
-

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/krb/copy_creds.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * krb5_copy_cred()
  */
@@ -40,13 +41,13 @@ krb5_copy_creds(krb5_context context, const krb5_creds *incred, krb5_creds **out
     krb5_error_code retval;
 
     if (!(tempcred = (krb5_creds *)malloc(sizeof(*tempcred))))
-	return ENOMEM;
+        return ENOMEM;
 
     retval = krb5int_copy_creds_contents(context, incred, tempcred);
     if (retval)
-	free(tempcred);
+        free(tempcred);
     else
-	*outcred = tempcred;
+        *outcred = tempcred;
     return retval;
 }
 
@@ -58,7 +59,7 @@ krb5_copy_creds(krb5_context context, const krb5_creds *incred, krb5_creds **out
  */
 krb5_error_code
 krb5int_copy_creds_contents(krb5_context context, const krb5_creds *incred,
-			    krb5_creds *tempcred)
+                            krb5_creds *tempcred)
 {
     krb5_error_code retval;
     krb5_data *scratch;
@@ -66,25 +67,25 @@ krb5int_copy_creds_contents(krb5_context context, const krb5_creds *incred,
     *tempcred = *incred;
     retval = krb5_copy_principal(context, incred->client, &tempcred->client);
     if (retval)
-	goto cleanlast;
+        goto cleanlast;
     retval = krb5_copy_principal(context, incred->server, &tempcred->server);
     if (retval)
-	goto cleanclient;
+        goto cleanclient;
     retval = krb5_copy_keyblock_contents(context, &incred->keyblock,
-					 &tempcred->keyblock);
+                                         &tempcred->keyblock);
     if (retval)
-	goto cleanserver;
+        goto cleanserver;
     retval = krb5_copy_addresses(context, incred->addresses, &tempcred->addresses);
     if (retval)
-	goto cleanblock;
+        goto cleanblock;
     retval = krb5_copy_data(context, &incred->ticket, &scratch);
     if (retval)
-	goto cleanaddrs;
+        goto cleanaddrs;
     tempcred->ticket = *scratch;
     free(scratch);
     retval = krb5_copy_data(context, &incred->second_ticket, &scratch);
     if (retval)
-	goto clearticket;
+        goto clearticket;
 
     tempcred->second_ticket = *scratch;
     free(scratch);
@@ -95,22 +96,22 @@ krb5int_copy_creds_contents(krb5_context context, const krb5_creds *incred,
 
     return 0;
 
- clearsecondticket:    
+clearsecondticket:
     memset(tempcred->second_ticket.data,0,tempcred->second_ticket.length);
     free(tempcred->second_ticket.data);
- clearticket:    
+clearticket:
     memset(tempcred->ticket.data,0,tempcred->ticket.length);
     free(tempcred->ticket.data);
- cleanaddrs:
+cleanaddrs:
     krb5_free_addresses(context, tempcred->addresses);
- cleanblock:
+cleanblock:
     free(tempcred->keyblock.contents);
- cleanserver:
+cleanserver:
     krb5_free_principal(context, tempcred->server);
- cleanclient:
+cleanclient:
     krb5_free_principal(context, tempcred->client);
- cleanlast:
-    /* Do not free tempcred - we did not allocate it - its contents are 
+cleanlast:
+    /* Do not free tempcred - we did not allocate it - its contents are
        garbage - but we should not free it */
     return retval;
 }

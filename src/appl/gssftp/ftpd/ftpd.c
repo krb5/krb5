@@ -67,7 +67,7 @@ static char sccsid[] = "@(#)ftpd.c	5.40 (Berkeley) 7/2/91";
 #ifdef HAVE_SHADOW
 #include <shadow.h>
 #endif
-#include <grp.h> 
+#include <grp.h>
 #include <setjmp.h>
 #ifndef POSIX_SETJMP
 #undef sigjmp_buf
@@ -224,11 +224,11 @@ int	swaitmax = SWAITMAX;
 int	swaitint = SWAITINT;
 
 void	lostconn(int), myoob(int);
-FILE	*getdatasock(char *); 
+FILE	*getdatasock(char *);
 #if defined(__STDC__)
-/* 
+/*
  * The following prototypes must be ANSI for systems for which
- * sizeof(off_t) > sizeof(int) to prevent stack overflow problems 
+ * sizeof(off_t) > sizeof(int) to prevent stack overflow problems
  */
 FILE	*dataconn(char *name, off_t size, char *mymode);
 void	send_data(FILE *instr, FILE *outstr, off_t blksize);
@@ -740,7 +740,7 @@ user(name)
 			}
 			snprintf(buf, sizeof(buf),
 				 "GSSAPI user %s is%s authorized as %s",
-				(char *) client_name.value, 
+				(char *) client_name.value,
 				authorized ? "" : " not",
 				name);
 		}
@@ -800,7 +800,7 @@ checkuser(name)
 			     return (1);
 			if (strncmp(line, name, strlen(name)) == 0) {
 			     int i = strlen(name) + 1;
-			     
+
 			     /* Make sure foo doesn't match foobar */
 			     if (line[i] == '\0' || !isspace((int) line[i]))
 			          continue;
@@ -838,7 +838,7 @@ restricted_user(name)
  * Terminate login as previous user, if any, resetting state;
  * used when USER command is given or login fails.
  */
-static void 
+static void
 end_login()
 {
 
@@ -891,7 +891,7 @@ char *name, *passwd;
 	my_creds.server = server;
 	if (krb5_timeofday(kcontext, &now))
 		goto nuke_ccache;
-	my_creds.times.starttime = 0; /* start timer when 
+	my_creds.times.starttime = 0; /* start timer when
 					 request gets to KDC */
 	my_creds.times.endtime = now + 60 * 60 * 10;
 	my_creds.times.renew_till = 0;
@@ -933,7 +933,7 @@ pass(passwd)
 	if (logged_in || askpasswd == 0) {
 	  	reply(503, "Login with USER first.");
 		return;
-	} 
+	}
 
 	if (!guest) {
 	    	/* "ftp" is only account allowed no password */
@@ -1125,7 +1125,7 @@ retrieve(cmd, name)
 				}
 				if (c == '\n')
 					i++;
-			}	
+			}
 		} else if (lseek(fileno(fin), restart_point, L_SET) < 0) {
 			perror_reply(550, name);
 			goto done;
@@ -1184,7 +1184,7 @@ store_file(name, fmode, unique)
 				}
 				if (c == '\n')
 					i++;
-			}	
+			}
 			/*
 			 * We must do this seek to "current" position
 			 * because we are changing from reading to
@@ -1694,7 +1694,7 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 			gss_buffer_desc in_buf, out_buf;
 			OM_uint32 maj_stat, min_stat;
 			int conf_state;
-		
+
 			in_buf.value = in;
 			in_buf.length = strlen(in);
 			maj_stat = gss_seal(&min_stat, gcontext,
@@ -1717,7 +1717,7 @@ reply(n, fmt, p0, p1, p2, p3, p4, p5)
 				secure_error("GSSAPI didn't encrypt message");
 #endif /* 0 */
 			} else {
-				memcpy(out, out_buf.value, 
+				memcpy(out, out_buf.value,
 				       length=out_buf.length);
 				gss_release_buffer(&min_stat, &out_buf);
 			}
@@ -1992,10 +1992,10 @@ myoob(sig)
 	if (strcmp(cp, "STAT") == 0) {
 		if (file_size != (off_t) -1)
 			reply(213, "Status: %lu of %lu bytes transferred",
-			      (unsigned long) byte_count, 
+			      (unsigned long) byte_count,
 			      (unsigned long) file_size);
 		else
-			reply(213, "Status: %lu bytes transferred", 
+			reply(213, "Status: %lu bytes transferred",
 			      (unsigned long) byte_count);
 	}
 }
@@ -2196,7 +2196,7 @@ char *adata;
 			name_buf.length = strlen(name_buf.value) + 1;
 			if (debug)
 				syslog(LOG_INFO, "importing <%s>", service_name);
-			stat_maj = gss_import_name(&stat_min, &name_buf, 
+			stat_maj = gss_import_name(&stat_min, &name_buf,
 						   gss_nt_service_name,
 						   &server_name);
 			if (stat_maj != GSS_S_COMPLETE) {
@@ -2205,7 +2205,7 @@ char *adata;
 				syslog(LOG_ERR, "gssapi error importing name");
 				return 0;
 			}
-			
+
 			acquire_maj = gss_acquire_cred(&acquire_min, server_name, 0,
 						       GSS_C_NULL_OID_SET, GSS_C_ACCEPT,
 						       &server_creds, NULL, NULL);
@@ -2271,7 +2271,7 @@ char *adata;
 			}
 
 			rad_len = out_tok.length;
-			kerror = radix_encode(out_tok.value, gbuf, 
+			kerror = radix_encode(out_tok.value, gbuf,
 					      &rad_len, 0);
 			out_tok.length = rad_len;
 			if (kerror) {
@@ -2301,7 +2301,7 @@ char *adata;
 						    &client_name, &mechid);
 			if (stat_maj != GSS_S_COMPLETE) {
 				/* "If the server rejects the security data (if
-				   a checksum fails, for instance), it should 
+				   a checksum fails, for instance), it should
 				   respond with reply code 535." */
 				reply_gss_error(535, stat_maj, stat_min,
 						"extracting GSSAPI identity name");
@@ -2335,7 +2335,7 @@ char *adata;
 			    else
 			      reply(235, "GSSAPI Authentication succeeded");
 			  }
-				
+
 			return(1);
 		} else if (accept_maj == GSS_S_CONTINUE_NEEDED) {
 			/* If the server accepts the security data, and
@@ -2348,10 +2348,10 @@ char *adata;
 			  (void) gss_release_cred(&stat_min, &deleg_creds);
 			return(0);
 		} else {
-			/* "If the server rejects the security data (if 
-			   a checksum fails, for instance), it should 
+			/* "If the server rejects the security data (if
+			   a checksum fails, for instance), it should
 			   respond with reply code 535." */
-			reply_gss_error(535, stat_maj, stat_min, 
+			reply_gss_error(535, stat_maj, stat_min,
 					"GSSAPI failed processing ADAT");
 			syslog(LOG_ERR, "GSSAPI failed processing ADAT");
 			(void) gss_release_cred(&stat_min, &server_creds);
@@ -2676,12 +2676,12 @@ ftpd_gss_userok(gclient_name, name)
 {
 	int retval = -1;
 	krb5_principal p;
-	
+
 	if (krb5_parse_name(kcontext, gclient_name->value, &p) != 0)
 		return -1;
 	if (krb5_kuserok(kcontext, p, name))
 		retval = 0;
-	else 
+	else
 		retval = 1;
 	krb5_free_principal(kcontext, p);
 	return retval;
@@ -2723,4 +2723,3 @@ cleanup:
 
 
 #endif /* GSSAPI */
-

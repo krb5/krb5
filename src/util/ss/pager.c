@@ -29,10 +29,10 @@ extern char *getenv();
 void ss_page_stdin();
 
 #ifndef NO_FORK
-int ss_pager_create() 
+int ss_pager_create()
 {
 	int filedes[2];
-     
+
 	if (pipe(filedes) != 0)
 		return(-1);
 

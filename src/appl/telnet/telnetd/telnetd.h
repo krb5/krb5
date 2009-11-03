@@ -45,4 +45,3 @@
 
 /* other external variables */
 extern	char **environ;
-

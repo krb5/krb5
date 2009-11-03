@@ -6,7 +6,7 @@ main(int argc, char **argv)
 {
 	int i,j,n;
 	char *pass[8], r;
-	
+
 	n = atoi(argv[1]);
 
 	srandom(101173);
@@ -20,4 +20,3 @@ main(int argc, char **argv)
 		printf("\n");
 	}
 }
-

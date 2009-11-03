@@ -1,4 +1,4 @@
-/* arcfour.c 
+/* arcfour.c
  *
  * Copyright (c) 2000 by Computer Science Laboratory,
  *                       Rensselaer Polytechnic Institute
@@ -18,11 +18,11 @@ static unsigned int k5_arcfour_byte(ArcfourContext *);
 #endif /* gcc inlines*/
 
 /* Initializes the context and sets the key. */
-static krb5_error_code k5_arcfour_init(ArcfourContext *ctx, const unsigned char *key, 
+static krb5_error_code k5_arcfour_init(ArcfourContext *ctx, const unsigned char *key,
 		  unsigned int keylen);
 
 /* Encrypts/decrypts data. */
-static void k5_arcfour_crypt(ArcfourContext *ctx, unsigned char *dest, 
+static void k5_arcfour_crypt(ArcfourContext *ctx, unsigned char *dest,
 		     const unsigned char *src, unsigned int len);
 
 /* Interface layer to kerb5 crypto layer */
@@ -63,7 +63,7 @@ static inline unsigned int k5_arcfour_byte(ArcfourContext * ctx)
   return state[(sx + sy) & 0xff];
 }
 
-static void k5_arcfour_crypt(ArcfourContext *ctx, unsigned char *dest, 
+static void k5_arcfour_crypt(ArcfourContext *ctx, unsigned char *dest,
 		     const unsigned char *src, unsigned int len)
 {
   unsigned int i;
@@ -73,7 +73,7 @@ static void k5_arcfour_crypt(ArcfourContext *ctx, unsigned char *dest,
 
 
 static krb5_error_code
-k5_arcfour_init(ArcfourContext *ctx, const unsigned char *key, 
+k5_arcfour_init(ArcfourContext *ctx, const unsigned char *key,
 		  unsigned int key_len)
 {
   unsigned int t, u;
@@ -153,7 +153,7 @@ k5_arcfour_docrypt(const krb5_keyblock *key, const krb5_data *state,
     memset(arcfour_ctx, 0, sizeof (ArcfourContext));
     free(arcfour_ctx);
   }
-  
+
   return 0;
 }
 
@@ -248,7 +248,7 @@ k5_arcfour_init_state (const krb5_keyblock *key,
   return 0;
 }
 
-/* Since the arcfour cipher is identical going forwards and backwards, 
+/* Since the arcfour cipher is identical going forwards and backwards,
    we just call "docrypt" directly
 */
 const struct krb5_enc_provider krb5int_enc_arcfour = {
@@ -268,4 +268,3 @@ const struct krb5_enc_provider krb5int_enc_arcfour = {
     k5_arcfour_docrypt_iov,
     k5_arcfour_docrypt_iov
 };
-

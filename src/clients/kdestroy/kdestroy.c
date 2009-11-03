@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * clients/kdestroy/kdestroy.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Destroy the contents of your credential cache.
  */
@@ -81,70 +82,70 @@ main(argc, argv)
     progname = GET_PROGNAME(argv[0]);
 
     while ((c = getopt(argc, argv, "54qc:")) != -1) {
-	switch (c) {
-	case 'q':
-	    quiet = 1;
-	    break;	
-	case 'c':
-	    if (cache_name) {
-		fprintf(stderr, "Only one -c option allowed\n");
-		errflg++;
-	    } else {
-		cache_name = optarg;
-	    }
-	    break;
-	case '4':
-	    fprintf(stderr, "Kerberos 4 is no longer supported\n");
-	    exit(3);
-	    break;
-	case '5':
-	    break;
-	case '?':
-	default:
-	    errflg++;
-	    break;
-	}
+        switch (c) {
+        case 'q':
+            quiet = 1;
+            break;
+        case 'c':
+            if (cache_name) {
+                fprintf(stderr, "Only one -c option allowed\n");
+                errflg++;
+            } else {
+                cache_name = optarg;
+            }
+            break;
+        case '4':
+            fprintf(stderr, "Kerberos 4 is no longer supported\n");
+            exit(3);
+            break;
+        case '5':
+            break;
+        case '?':
+        default:
+            errflg++;
+            break;
+        }
     }
 
     if (optind != argc)
-	errflg++;
-    
+        errflg++;
+
     if (errflg) {
-	usage();
+        usage();
     }
 
     retval = krb5_init_context(&kcontext);
     if (retval) {
-	com_err(progname, retval, "while initializing krb5");
-	exit(1);
+        com_err(progname, retval, "while initializing krb5");
+        exit(1);
     }
 
     if (cache_name) {
-	code = krb5_cc_resolve (kcontext, cache_name, &cache);
-	if (code != 0) {
-	    com_err (progname, code, "while resolving %s", cache_name);
-	    exit(1);
-	}
+        code = krb5_cc_resolve (kcontext, cache_name, &cache);
+        if (code != 0) {
+            com_err (progname, code, "while resolving %s", cache_name);
+            exit(1);
+        }
     } else {
-	code = krb5_cc_default(kcontext, &cache);
-	if (code) {
-	    com_err(progname, code, "while getting default ccache");
-	    exit(1);
-	}
+        code = krb5_cc_default(kcontext, &cache);
+        if (code) {
+            com_err(progname, code, "while getting default ccache");
+            exit(1);
+        }
     }
 
     code = krb5_cc_destroy (kcontext, cache);
     if (code != 0) {
-	com_err (progname, code, "while destroying cache");
-	if (code != KRB5_FCC_NOFILE) {
-	    if (quiet)
-		fprintf(stderr, "Ticket cache NOT destroyed!\n");
-	    else {
-		fprintf(stderr, "Ticket cache %cNOT%c destroyed!\n", 
-			BELL_CHAR, BELL_CHAR);
-	    }
-	    errflg = 1;
-	}
+        com_err (progname, code, "while destroying cache");
+        if (code != KRB5_FCC_NOFILE) {
+            if (quiet)
+                fprintf(stderr, "Ticket cache NOT destroyed!\n");
+            else {
+                fprintf(stderr, "Ticket cache %cNOT%c destroyed!\n",
+                        BELL_CHAR, BELL_CHAR);
+            }
+            errflg = 1;
+        }
     }
     return errflg;
 }

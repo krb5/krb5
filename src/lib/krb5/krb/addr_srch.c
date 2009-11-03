@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/krb/addr_srch.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * krb5_address_search()
  */
@@ -35,10 +36,10 @@ address_count(krb5_address *const *addrlist)
     unsigned int i;
 
     if (addrlist == NULL)
-	return 0;
+        return 0;
 
     for (i = 0; addrlist[i]; i++)
-	;
+        ;
 
     return i;
 }
@@ -57,12 +58,12 @@ krb5_address_search(krb5_context context, const krb5_address *addr, krb5_address
      */
     if (address_count(addrlist) == 1 &&
         addrlist[0]->addrtype == ADDRTYPE_NETBIOS)
-	return TRUE;
+        return TRUE;
     if (!addrlist)
-	return TRUE;
+        return TRUE;
     for (; *addrlist; addrlist++) {
-	if (krb5_address_compare(context, addr, *addrlist))
-	    return TRUE;
+        if (krb5_address_compare(context, addr, *addrlist))
+            return TRUE;
     }
     return FALSE;
 }

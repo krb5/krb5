@@ -58,7 +58,7 @@ ss_list_requests(argc, argv, sci_idx, info_ptr)
     sigemptyset(&nmask);
     sigaddset(&nmask, SIGINT);
     sigprocmask(SIG_BLOCK, &nmask, &omask);
-    
+
     nsig.sa_handler = SIG_IGN;
     sigemptyset(&nsig.sa_mask);
     nsig.sa_flags = 0;

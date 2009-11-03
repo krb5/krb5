@@ -1,6 +1,6 @@
 /*
  * Copyright 1997,2000,2001,2004,2008 by Massachusetts Institute of Technology
- * 
+ *
  * Copyright 1987, 1988 by MIT Student Information Processing Board
  *
  * Permission to use, copy, modify, and distribute this software
@@ -141,7 +141,7 @@ error_message(long code)
 			goto oops;
 
 		/* This could trip if int is 16 bits.  */
-		if ((unsigned long)(int)code != code)
+		if ((unsigned long)(int)code != (unsigned long)code)
 		    abort ();
 #ifdef HAVE_STRERROR_R
 		cp = get_thread_buffer();
@@ -213,7 +213,7 @@ error_message(long code)
 		divisor = WSABASEERR;
 	}
 #endif
-#ifdef _WIN32	
+#ifdef _WIN32
 	{
 		LPVOID msgbuf;
 

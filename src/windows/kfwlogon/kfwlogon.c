@@ -77,7 +77,7 @@ DWORD APIENTRY NPGetCaps(DWORD index)
     default:
         return 0;
     }
-}       
+}
 
 
 static BOOL
@@ -91,7 +91,7 @@ UnicodeStringToANSI(UNICODE_STRING uInputString, LPSTR lpszOutputString, int nOu
     if (CodePageInfo.MaxCharSize > 1)
         // Only supporting non-Unicode strings
         return FALSE;
-    
+
     if (uInputString.Buffer && ((LPBYTE) uInputString.Buffer)[1] == '\0')
     {
         // Looks like unicode, better translate it
@@ -134,16 +134,16 @@ is_windows_vista(void)
 
 
 /* Construct a Logon Script that will cause the LogonEventHandler to be executed
- * under in the logon session 
+ * under in the logon session
  */
 
 #define RUNDLL32_CMDLINE "rundll32.exe kfwlogon.dll,LogonEventHandler "
-VOID 
+VOID
 ConfigureLogonScript(LPWSTR *lpLogonScript, char * filename) {
     DWORD dwLogonScriptLen;
     LPWSTR lpScript;
     LPSTR lpTemp;
-    
+
     if (!lpLogonScript)
 	return;
     *lpLogonScript = NULL;
@@ -152,7 +152,7 @@ ConfigureLogonScript(LPWSTR *lpLogonScript, char * filename) {
 	return;
 
     dwLogonScriptLen = strlen(RUNDLL32_CMDLINE) + strlen(filename) + 2;
-    lpTemp = (LPSTR) malloc(dwLogonScriptLen); 
+    lpTemp = (LPSTR) malloc(dwLogonScriptLen);
     if (!lpTemp)
 	return;
 
@@ -208,10 +208,10 @@ DWORD APIENTRY NPLogonNotify(
 
     DebugEvent0("NPLogonNotify start");
 
-    /* Remote Desktop / Terminal Server connections to existing sessions 
+    /* Remote Desktop / Terminal Server connections to existing sessions
      * are interactive logons.  Unfortunately, because the session already
-     * exists the logon script does not get executed and this prevents 
-     * us from being able to execute the rundll32 entrypoint 
+     * exists the logon script does not get executed and this prevents
+     * us from being able to execute the rundll32 entrypoint
      * LogonEventHandlerA which would process the credential cache this
      * routine will produce.  Therefore, we must cleanup orphaned cache
      * files from this routine.  We will take care of it before doing
@@ -228,9 +228,9 @@ DWORD APIENTRY NPLogonNotify(
         DWORD rv;
 
         SetLastError(0);
-	rv = WideCharToMultiByte(CP_UTF8, 0, lpStationName, -1, 
+	rv = WideCharToMultiByte(CP_UTF8, 0, lpStationName, -1,
 			    station, sizeof(station), NULL, NULL);
-        DebugEvent("Skipping NPLogonNotify- LoginId(%d,%d) - Interactive(%d:%s) - gle %d", 
+        DebugEvent("Skipping NPLogonNotify- LoginId(%d,%d) - Interactive(%d:%s) - gle %d",
                     lpLogonId->HighPart, lpLogonId->LowPart, interactive, rv != 0 ? station : "failure", GetLastError());
         return 0;
     } else
@@ -238,15 +238,15 @@ DWORD APIENTRY NPLogonNotify(
 
     /* Initialize Logon Script to none */
     *lpLogonScript=NULL;
-    
+
     /* MSV1_0_INTERACTIVE_LOGON and KERB_INTERACTIVE_LOGON are equivalent for
      * our purposes */
 
-    if ( wcsicmp(lpAuthentInfoType,L"MSV1_0:Interactive") && 
+    if ( wcsicmp(lpAuthentInfoType,L"MSV1_0:Interactive") &&
          wcsicmp(lpAuthentInfoType,L"Kerberos:Interactive") )
     {
 	char msg[64];
-	WideCharToMultiByte(CP_ACP, 0, lpAuthentInfoType, -1, 
+	WideCharToMultiByte(CP_ACP, 0, lpAuthentInfoType, -1,
 			    msg, sizeof(msg), NULL, NULL);
 	msg[sizeof(msg)-1]='\0';
         DebugEvent("NPLogonNotify - Unsupported Authentication Info Type: %s", msg);
@@ -277,9 +277,9 @@ DWORD APIENTRY NPLogonNotify(
 
     code = KFW_get_cred(uname, password, 0, &reason);
     DebugEvent("NPLogonNotify - KFW_get_cred  uname=[%s] code=[%d]",uname, code);
-    
+
     /* remove any kerberos 5 tickets currently held by the SYSTEM account
-     * for this user 
+     * for this user
      */
     if (!code) {
 	char filename[MAX_PATH+1] = "";
@@ -301,7 +301,7 @@ DWORD APIENTRY NPLogonNotify(
         }
 
 	if (_snprintf(filename, sizeof(filename), "%s\\kfwlogon-%x.%x",
-		       filename, lpLogonId->HighPart, lpLogonId->LowPart) < 0) 
+		       filename, lpLogonId->HighPart, lpLogonId->LowPart) < 0)
 	{
 	    code = -1;
 	    goto cleanup;
@@ -328,7 +328,7 @@ DWORD APIENTRY NPLogonNotify(
 	    pReferencedDomainName = (LPTSTR) malloc (dwDomainLen * sizeof(TCHAR));
 	    memset(pReferencedDomainName,0,dwDomainLen * sizeof(TCHAR));
 	}
- 
+
 	//Now get the SID and the domain name
 	if (pUserSid && LookupAccountName( NULL,
 					   acctname,
@@ -336,14 +336,14 @@ DWORD APIENTRY NPLogonNotify(
 					   &dwSidLen,
 					   pReferencedDomainName,
 					   &dwDomainLen,
-					   &eUse)) 
+					   &eUse))
 	{
 	    DebugEvent("LookupAccountName obtained user %s sid in domain %s", acctname, pReferencedDomainName);
 	    code = KFW_set_ccache_dacl_with_user_sid(filename, pUserSid);
 
 #ifdef USE_WINLOGON_EVENT
-	    /* If we are on Vista, setup a LogonScript 
-	     * that will execute the LogonEventHandler entry point via rundll32.exe 
+	    /* If we are on Vista, setup a LogonScript
+	     * that will execute the LogonEventHandler entry point via rundll32.exe
 	     */
 	    if (is_windows_vista()) {
 		ConfigureLogonScript(lpLogonScript, filename);
@@ -356,7 +356,7 @@ DWORD APIENTRY NPLogonNotify(
 	    ConfigureLogonScript(lpLogonScript, filename);
 	    if (*lpLogonScript)
 		    DebugEvent0("LogonScript assigned");
-	    else	
+	    else
 		    DebugEvent0("No Logon Script");
 #endif
 	} else {
@@ -394,7 +394,7 @@ DWORD APIENTRY NPLogonNotify(
 	DebugEvent0("NPLogonNotify success");
 
     return code;
-}       
+}
 
 
 DWORD APIENTRY NPPasswordChangeNotify(
@@ -413,14 +413,14 @@ DWORD APIENTRY NPPasswordChangeNotify(
 #include <Winwlx.h>
 
 #ifdef COMMENT
-typedef struct _WLX_NOTIFICATION_INFO {  
-    ULONG Size;  
-    ULONG Flags;  
-    PWSTR UserName;  
-    PWSTR Domain;  
-    PWSTR WindowStation;  
-    HANDLE hToken;  
-    HDESK hDesktop;  
+typedef struct _WLX_NOTIFICATION_INFO {
+    ULONG Size;
+    ULONG Flags;
+    PWSTR UserName;
+    PWSTR Domain;
+    PWSTR WindowStation;
+    HANDLE hToken;
+    HDESK hDesktop;
     PFNMSGECALLBACK pStatusCallback;
 } WLX_NOTIFICATION_INFO, *PWLX_NOTIFICATION_INFO;
 #endif
@@ -511,9 +511,9 @@ VOID KFW_Logon_Event( PWLX_NOTIFICATION_INFO pInfo )
     }
 
     strcat(filename, "\\");
-    strcat(filename, szLogonId);    
+    strcat(filename, szLogonId);
 
-    hf = CreateFile(filename, FILE_ALL_ACCESS, 0, NULL, OPEN_EXISTING, 
+    hf = CreateFile(filename, FILE_ALL_ACCESS, 0, NULL, OPEN_EXISTING,
 		    FILE_ATTRIBUTE_NORMAL, NULL);
     if (hf == INVALID_HANDLE_VALUE) {
         DebugEvent0("KFW_Logon_Event - file cannot be opened");
@@ -538,9 +538,9 @@ VOID KFW_Logon_Event( PWLX_NOTIFICATION_INFO pInfo )
     }
 
     strcat(newfilename, "\\");
-    strcat(newfilename, szLogonId);    
+    strcat(newfilename, szLogonId);
 
-    if (!MoveFileEx(filename, newfilename, 
+    if (!MoveFileEx(filename, newfilename,
 		     MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)) {
         DebugEvent("KFW_Logon_Event - MoveFileEx failed GLE = 0x%x", GetLastError());
 	return;
@@ -559,7 +559,7 @@ VOID KFW_Logon_Event( PWLX_NOTIFICATION_INFO pInfo )
                              NULL,
                              NULL,
                              &startupinfo,
-                             &procinfo)) 
+                             &procinfo))
     {
 	DebugEvent("KFW_Logon_Event - CommandLine %s", commandline);
 
@@ -578,8 +578,8 @@ VOID KFW_Logon_Event( PWLX_NOTIFICATION_INFO pInfo )
 }
 
 
-/* Documentation on the use of RunDll32 entrypoints can be found 
- * at http://support.microsoft.com/kb/164787 
+/* Documentation on the use of RunDll32 entrypoints can be found
+ * at http://support.microsoft.com/kb/164787
  */
 void CALLBACK
 LogonEventHandlerA(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
@@ -592,7 +592,7 @@ LogonEventHandlerA(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
     DebugEvent0("LogonEventHandler - Start");
 
     /* Validate lpszCmdLine as a file */
-    hf = CreateFile(lpszCmdLine, GENERIC_READ | DELETE, 0, NULL, OPEN_EXISTING, 
+    hf = CreateFile(lpszCmdLine, GENERIC_READ | DELETE, 0, NULL, OPEN_EXISTING,
 		    FILE_ATTRIBUTE_NORMAL, NULL);
     if (hf == INVALID_HANDLE_VALUE) {
         DebugEvent("LogonEventHandler - \"%s\" cannot be opened", lpszCmdLine);
@@ -614,7 +614,7 @@ LogonEventHandlerA(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
 		       NULL,
 		       NULL,
 		       &startupinfo,
-		       &procinfo)) 
+		       &procinfo))
     {
 	DebugEvent("KFW_Logon_Event - CommandLine %s", commandline);
 
@@ -623,7 +623,7 @@ LogonEventHandlerA(HWND hwnd, HINSTANCE hinst, LPSTR lpszCmdLine, int nCmdShow)
 	CloseHandle(procinfo.hThread);
 	CloseHandle(procinfo.hProcess);
     } else {
-	DebugEvent("KFW_Logon_Event - CreateProcessFailed \"%s\" GLE 0x%x", 
+	DebugEvent("KFW_Logon_Event - CreateProcessFailed \"%s\" GLE 0x%x",
                      commandline, GetLastError());
         DebugEvent("KFW_Logon_Event PATH %s", getenv("PATH"));
     }

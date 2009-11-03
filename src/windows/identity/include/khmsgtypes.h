@@ -63,7 +63,7 @@
 #define KMSG_KCDB       2
 
 /*! \brief NetIDMgr Module Manager messages
- 
+
     \see \ref kmq_msg_kmm
 */
 #define KMSG_KMM        3
@@ -122,7 +122,7 @@
 
 /*@}*/
 
-/*! \defgroup kmq_msg_system KMSG_SYSTEM subtypes 
+/*! \defgroup kmq_msg_system KMSG_SYSTEM subtypes
 @{*/
 /*! \brief Generic initialization message
 
@@ -159,7 +159,7 @@
 #define KMSG_SYSTEM_COMPLETION 3
 /*@}*/
 
-/*! \defgroup kmq_msg_kcdb KMSG_KCDB subtypes 
+/*! \defgroup kmq_msg_kcdb KMSG_KCDB subtypes
 @{*/
 #define KMSG_KCDB_IDENT     1
 #define KMSG_KCDB_CREDTYPE  2
@@ -248,7 +248,7 @@
 /*! \defgroup kmq_msg_cred KMSG_CRED subtypes
   @{*/
 /*! \brief Root credential set changed
-    
+
     This message is issued when the root credential set successfully
     collected credentials from another credential set.
 
@@ -553,9 +553,9 @@
  */
 #define IS_CRED_ACQ_MSG(msg) ((msg) >= 16 && (msg) <=31)
 
-/*@}*/ /* /KMSG_CRED subtypes */ 
+/*@}*/ /* /KMSG_CRED subtypes */
 
-/*! \defgroup kmq_msg_alert KMSG_ALERT Subtypes 
+/*! \defgroup kmq_msg_alert KMSG_ALERT Subtypes
   @{*/
 
 /*! \brief Show an alert
@@ -691,7 +691,7 @@
     guaranteed to be in canonical form.  The return value should be
     akin to strcmp().
 
-    Message parameters: 
+    Message parameters:
 
     - \b vparam : A pointer to a ::kcdb_ident_name_xfer structure.
         The \a name_src member points at the first name, and the \a

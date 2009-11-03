@@ -69,4 +69,3 @@ gss_inquire_sec_context_by_oid (OM_uint32 *minor_status,
 
     return GSS_S_BAD_MECH;
 }
-

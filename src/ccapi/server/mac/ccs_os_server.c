@@ -51,8 +51,8 @@ kern_return_t k5_ipc_server_handle_request (mach_port_t    in_connection_port,
                                             mach_port_t    in_reply_port,
                                             k5_ipc_stream  in_request_stream)
 {
-    return cci_check_error (ccs_server_handle_request (in_connection_port, 
-                                                       in_reply_port, 
+    return cci_check_error (ccs_server_handle_request (in_connection_port,
+                                                       in_reply_port,
                                                        in_request_stream));
 }
 
@@ -63,10 +63,10 @@ kern_return_t k5_ipc_server_handle_request (mach_port_t    in_connection_port,
 cc_int32 ccs_os_server_initialize (int argc, const char *argv[])
 {
     cc_int32 err = 0;
-    
+
     openlog (argv[0], LOG_CONS | LOG_PID, LOG_AUTH);
-    syslog (LOG_INFO, "Starting up.");   
-    
+    syslog (LOG_INFO, "Starting up.");
+
     return cci_check_error (err);
 }
 
@@ -75,9 +75,9 @@ cc_int32 ccs_os_server_initialize (int argc, const char *argv[])
 cc_int32 ccs_os_server_cleanup (int argc, const char *argv[])
 {
     cc_int32 err = 0;
-    
+
     syslog (LOG_NOTICE, "Exiting.");
-    
+
     return cci_check_error (err);
 }
 
@@ -93,6 +93,6 @@ cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[])
 cc_int32 ccs_os_server_send_reply (ccs_pipe_t   in_reply_pipe,
                                    k5_ipc_stream in_reply_stream)
 {
-    return cci_check_error (k5_ipc_server_send_reply (in_reply_pipe, 
+    return cci_check_error (k5_ipc_server_send_reply (in_reply_pipe,
                                                       in_reply_stream));
 }

@@ -54,7 +54,7 @@ ADD_UNICODE_STRING(unsigned char *p, const char *s)
 	w = (WORD *)p;
 
 	len = strlen(s) + 1; /* copy the null, too */
-	
+
 	for (i = 0 ; i < len ; i++)
 		*w++ = *s++;
 
@@ -112,7 +112,7 @@ ADD_DLGITEM(unsigned char *dlg, short x, short y, short cx, short cy,
 {
 	unsigned char    *p;
 	DLGITEMTEMPLATE   dit;
-	
+
 	p = dlg;
 
 	dit.style = style;
@@ -429,7 +429,7 @@ vardlg_config(HWND hwnd, WORD width, const char *banner, WORD num_prompts,
  * button is IDCANCEL, as usual.
  *
  * After calling bld_dlg, the banner will have ID "id", and the labels
- * will be "1 + id + i * 2" (i is the entry number, starting with zero) and 
+ * will be "1 + id + i * 2" (i is the entry number, starting with zero) and
  * the entries will be "2 + id + i * 2".
  *
  *	unsigned char *dlg = vardlg_build(minwidth, banner, num_prompts,

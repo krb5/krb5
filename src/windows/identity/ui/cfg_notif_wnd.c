@@ -43,7 +43,7 @@ typedef struct tag_notif_data {
     khui_tracker tc_warn2;
 } notif_data;
 
-static void 
+static void
 read_params(notif_data * d) {
     khm_handle csp_cw;
     khm_int32 rv;
@@ -118,7 +118,7 @@ check_for_modification(notif_data * d) {
         d->tc_warn1.current != t.tc_warn1.current ||
         d->tc_warn2.current != t.tc_warn2.current) {
 
-        khui_cfg_set_flags(d->node, 
+        khui_cfg_set_flags(d->node,
                            KHUI_CNFLAG_MODIFIED,
                            KHUI_CNFLAG_MODIFIED);
 
@@ -160,15 +160,15 @@ write_params(notif_data * d) {
     assert(KHM_SUCCEEDED(rv));
 
 
-    rv = khc_write_int32(csp_cw, L"AutoRenewThreshold", 
+    rv = khc_write_int32(csp_cw, L"AutoRenewThreshold",
                          (khm_int32) d->tc_renew.current);
     assert(KHM_SUCCEEDED(rv));
 
-    rv = khc_write_int32(csp_cw, L"WarnThreshold", 
+    rv = khc_write_int32(csp_cw, L"WarnThreshold",
                          (khm_int32) d->tc_warn1.current);
     assert(KHM_SUCCEEDED(rv));
 
-    rv = khc_write_int32(csp_cw, L"CriticalThreshold", 
+    rv = khc_write_int32(csp_cw, L"CriticalThreshold",
                          (khm_int32) d->tc_warn2.current);
     assert(KHM_SUCCEEDED(rv));
 
@@ -183,15 +183,15 @@ write_params(notif_data * d) {
 
 static void
 refresh_view(HWND hwnd, notif_data * d) {
-    CheckDlgButton(hwnd, IDC_NOTIF_MONITOR, 
+    CheckDlgButton(hwnd, IDC_NOTIF_MONITOR,
                    (d->monitor?BST_CHECKED:BST_UNCHECKED));
-    CheckDlgButton(hwnd, IDC_NOTIF_RENEW, 
+    CheckDlgButton(hwnd, IDC_NOTIF_RENEW,
                    (d->renew?BST_CHECKED:BST_UNCHECKED));
     CheckDlgButton(hwnd, IDC_NOTIF_HALFLIFE,
                    (d->halflife?BST_CHECKED:BST_UNCHECKED));
-    CheckDlgButton(hwnd, IDC_NOTIF_WARN1, 
+    CheckDlgButton(hwnd, IDC_NOTIF_WARN1,
                    (d->warn1?BST_CHECKED:BST_UNCHECKED));
-    CheckDlgButton(hwnd, IDC_NOTIF_WARN2, 
+    CheckDlgButton(hwnd, IDC_NOTIF_WARN2,
                    (d->warn2?BST_CHECKED:BST_UNCHECKED));
     khui_tracker_refresh(&d->tc_renew);
     khui_tracker_refresh(&d->tc_warn1);

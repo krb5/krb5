@@ -34,7 +34,7 @@
 #endif
 
 #ifdef _IBMR2
-/* 3.2.0 */ 
+/* 3.2.0 */
 #define LPATH "/usr/bin:/usr/ucb:/usr/bin/X11"
 #define RPATH "/usr/bin:/usr/ucb:/usr/bin/X11"
 #endif

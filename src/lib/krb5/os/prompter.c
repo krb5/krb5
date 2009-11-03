@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #include "k5-int.h"
 #if !defined(_WIN32) || (defined(_WIN32) && defined(__CYGWIN32__))
 #include <stdio.h>
@@ -17,40 +18,40 @@ typedef struct sigaction osiginfo;
 typedef struct krb5_sigtype (*osiginfo)();
 #endif
 
-static void	catch_signals(osiginfo *);
-static void	restore_signals(osiginfo *);
-static krb5_sigtype	intrfunc(int sig);
+static void     catch_signals(osiginfo *);
+static void     restore_signals(osiginfo *);
+static krb5_sigtype     intrfunc(int sig);
 
-static krb5_error_code	setup_tty(FILE*, int, struct termios *, osiginfo *);
-static krb5_error_code	restore_tty(FILE*, struct termios *, osiginfo *);
+static krb5_error_code  setup_tty(FILE*, int, struct termios *, osiginfo *);
+static krb5_error_code  restore_tty(FILE*, struct termios *, osiginfo *);
 
-static volatile int got_int;	/* should be sig_atomic_t */
+static volatile int got_int;    /* should be sig_atomic_t */
 
 krb5_error_code KRB5_CALLCONV
 krb5_prompter_posix(
-    krb5_context	context,
-    void		*data,
-    const char		*name,
-    const char		*banner,
-    int			num_prompts,
-    krb5_prompt		prompts[])
+    krb5_context        context,
+    void                *data,
+    const char          *name,
+    const char          *banner,
+    int                 num_prompts,
+    krb5_prompt         prompts[])
 {
-    int		fd, i, scratchchar;
-    FILE	*fp;
-    char	*retp;
-    krb5_error_code	errcode;
+    int         fd, i, scratchchar;
+    FILE        *fp;
+    char        *retp;
+    krb5_error_code     errcode;
     struct termios saveparm;
     osiginfo osigint;
 
     errcode = KRB5_LIBOS_CANTREADPWD;
 
     if (name) {
-	fputs(name, stdout);
-	fputs("\n", stdout);
+        fputs(name, stdout);
+        fputs("\n", stdout);
     }
     if (banner) {
-       fputs(banner, stdout);
-       fputs("\n", stdout);
+        fputs(banner, stdout);
+        fputs("\n", stdout);
     }
 
     /*
@@ -59,70 +60,71 @@ krb5_prompter_posix(
     fp = NULL;
     fd = dup(STDIN_FILENO);
     if (fd < 0)
-	return KRB5_LIBOS_CANTREADPWD;
+        return KRB5_LIBOS_CANTREADPWD;
     set_cloexec_fd(fd);
     fp = fdopen(fd, "r");
     if (fp == NULL)
-	goto cleanup;
+        goto cleanup;
     if (setvbuf(fp, NULL, _IONBF, 0))
-	goto cleanup;
+        goto cleanup;
 
     for (i = 0; i < num_prompts; i++) {
-	errcode = KRB5_LIBOS_CANTREADPWD;
-	/* fgets() takes int, but krb5_data.length is unsigned. */
-	if (prompts[i].reply->length > INT_MAX)
-	    goto cleanup;
+        errcode = KRB5_LIBOS_CANTREADPWD;
+        /* fgets() takes int, but krb5_data.length is unsigned. */
+        if (prompts[i].reply->length > INT_MAX)
+            goto cleanup;
 
-	errcode = setup_tty(fp, prompts[i].hidden, &saveparm, &osigint);
-	if (errcode)
-	    break;
+        errcode = setup_tty(fp, prompts[i].hidden, &saveparm, &osigint);
+        if (errcode)
+            break;
 
-	/* put out the prompt */
-	(void)fputs(prompts[i].prompt, stdout);
-	(void)fputs(": ", stdout);
-	(void)fflush(stdout);
-	(void)memset(prompts[i].reply->data, 0, prompts[i].reply->length);
+        /* put out the prompt */
+        (void)fputs(prompts[i].prompt, stdout);
+        (void)fputs(": ", stdout);
+        (void)fflush(stdout);
+        (void)memset(prompts[i].reply->data, 0, prompts[i].reply->length);
 
-	got_int = 0;
-	retp = fgets(prompts[i].reply->data, (int)prompts[i].reply->length,
-		     fp);
-	if (prompts[i].hidden)
-	    putchar('\n');
-	if (retp == NULL) {
-	    if (got_int)
-		errcode = KRB5_LIBOS_PWDINTR;
-	    else
-		errcode = KRB5_LIBOS_CANTREADPWD;
-	    restore_tty(fp, &saveparm, &osigint);
-	    break;
-	}
+        got_int = 0;
+        retp = fgets(prompts[i].reply->data, (int)prompts[i].reply->length,
+                     fp);
+        if (prompts[i].hidden)
+            putchar('\n');
+        if (retp == NULL) {
+            if (got_int)
+                errcode = KRB5_LIBOS_PWDINTR;
+            else
+                errcode = KRB5_LIBOS_CANTREADPWD;
+            restore_tty(fp, &saveparm, &osigint);
+            break;
+        }
 
-	/* replace newline with null */
-	retp = strchr(prompts[i].reply->data, '\n');
-	if (retp != NULL)
-	    *retp = '\0';
-	else {
-	    /* flush rest of input line */
-	    do {
-		scratchchar = getc(fp);
-	    } while (scratchchar != EOF && scratchchar != '\n');
-	}
+        /* replace newline with null */
+        retp = strchr(prompts[i].reply->data, '\n');
+        if (retp != NULL)
+            *retp = '\0';
+        else {
+            /* flush rest of input line */
+            do {
+                scratchchar = getc(fp);
+            } while (scratchchar != EOF && scratchchar != '\n');
+        }
 
-	errcode = restore_tty(fp, &saveparm, &osigint);
-	if (errcode)
-	    break;
-	prompts[i].reply->length = strlen(prompts[i].reply->data);
+        errcode = restore_tty(fp, &saveparm, &osigint);
+        if (errcode)
+            break;
+        prompts[i].reply->length = strlen(prompts[i].reply->data);
     }
 cleanup:
     if (fp != NULL)
-	fclose(fp);
+        fclose(fp);
     else if (fd >= 0)
-	close(fd);
+        close(fd);
 
     return errcode;
 }
 
-static krb5_sigtype intrfunc(int sig)
+static krb5_sigtype
+intrfunc(int sig)
 {
     got_int = 1;
 }
@@ -155,33 +157,33 @@ restore_signals(osiginfo *osigint)
 static krb5_error_code
 setup_tty(FILE *fp, int hidden, struct termios *saveparm, osiginfo *osigint)
 {
-    krb5_error_code	ret;
-    int			fd;
-    struct termios	tparm;
+    krb5_error_code     ret;
+    int                 fd;
+    struct termios      tparm;
 
     ret = KRB5_LIBOS_CANTREADPWD;
     catch_signals(osigint);
     fd = fileno(fp);
     do {
-	if (!isatty(fd)) {
-	    ret = 0;
-	    break;
-	}
-	if (tcgetattr(fd, &tparm) < 0)
-	    break;
-	*saveparm = tparm;
+        if (!isatty(fd)) {
+            ret = 0;
+            break;
+        }
+        if (tcgetattr(fd, &tparm) < 0)
+            break;
+        *saveparm = tparm;
 #ifndef ECHO_PASSWORD
-	if (hidden)
-	    tparm.c_lflag &= ~(ECHO|ECHONL);
+        if (hidden)
+            tparm.c_lflag &= ~(ECHO|ECHONL);
 #endif
-	tparm.c_lflag |= ISIG|ICANON;
-	if (tcsetattr(STDIN_FILENO, TCSANOW, &tparm) < 0)
-	    break;
-	ret = 0;
+        tparm.c_lflag |= ISIG|ICANON;
+        if (tcsetattr(STDIN_FILENO, TCSANOW, &tparm) < 0)
+            break;
+        ret = 0;
     } while (0);
     /* If we're losing, restore signal handlers. */
     if (ret)
-	restore_signals(osigint);
+        restore_signals(osigint);
     return ret;
 }
 
@@ -193,11 +195,11 @@ restore_tty(FILE* fp, struct termios *saveparm, osiginfo *osigint)
     ret = 0;
     fd = fileno(fp);
     if (isatty(fd)) {
-	ret = tcsetattr(fd, TCSANOW, saveparm);
-	if (ret < 0)
-	    ret = KRB5_LIBOS_CANTREADPWD;
-	else
-	    ret = 0;
+        ret = tcsetattr(fd, TCSANOW, saveparm);
+        if (ret < 0)
+            ret = KRB5_LIBOS_CANTREADPWD;
+        else
+            ret = 0;
     }
     restore_signals(osigint);
     return ret;
@@ -211,90 +213,90 @@ restore_tty(FILE* fp, struct termios *saveparm, osiginfo *osigint)
 
 krb5_error_code KRB5_CALLCONV
 krb5_prompter_posix(krb5_context context,
-		    void *data,
-		    const char *name,
-		    const char *banner,
-		    int num_prompts,
-		    krb5_prompt prompts[])
+                    void *data,
+                    const char *name,
+                    const char *banner,
+                    int num_prompts,
+                    krb5_prompt prompts[])
 {
-    HANDLE		handle;
-    DWORD		old_mode, new_mode;
-    char		*ptr;
-    int			scratchchar;
-    krb5_error_code	errcode = 0;
-    int			i;
+    HANDLE              handle;
+    DWORD               old_mode, new_mode;
+    char                *ptr;
+    int                 scratchchar;
+    krb5_error_code     errcode = 0;
+    int                 i;
 
     handle = GetStdHandle(STD_INPUT_HANDLE);
     if (handle == INVALID_HANDLE_VALUE)
-	return ENOTTY;
+        return ENOTTY;
     if (!GetConsoleMode(handle, &old_mode))
-	return ENOTTY;
+        return ENOTTY;
 
     new_mode = old_mode;
     new_mode |=  ( ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT );
     new_mode &= ~( ENABLE_ECHO_INPUT );
 
     if (!SetConsoleMode(handle, new_mode))
-	return ENOTTY;
+        return ENOTTY;
 
     if (!SetConsoleMode(handle, old_mode))
-	return ENOTTY;
+        return ENOTTY;
 
     if (name) {
-	fputs(name, stdout);
-	fputs("\n", stdout);
+        fputs(name, stdout);
+        fputs("\n", stdout);
     }
 
     if (banner) {
-       fputs(banner, stdout);
-       fputs("\n", stdout);
+        fputs(banner, stdout);
+        fputs("\n", stdout);
     }
 
     for (i = 0; i < num_prompts; i++) {
-	if (prompts[i].hidden) {
-	    if (!SetConsoleMode(handle, new_mode)) {
-		errcode = ENOTTY;
-		goto cleanup;
-	    }
-	}
+        if (prompts[i].hidden) {
+            if (!SetConsoleMode(handle, new_mode)) {
+                errcode = ENOTTY;
+                goto cleanup;
+            }
+        }
 
-	fputs(prompts[i].prompt,stdout);
-	fputs(": ", stdout);
-	fflush(stdout);
-	memset(prompts[i].reply->data, 0, prompts[i].reply->length);
+        fputs(prompts[i].prompt,stdout);
+        fputs(": ", stdout);
+        fflush(stdout);
+        memset(prompts[i].reply->data, 0, prompts[i].reply->length);
 
-	if (fgets(prompts[i].reply->data, prompts[i].reply->length, stdin)
-	    == NULL) {
-	    if (prompts[i].hidden)
-		putchar('\n');
-	    errcode = KRB5_LIBOS_CANTREADPWD;
-	    goto cleanup;
-	}
-	if (prompts[i].hidden)
-	    putchar('\n');
-	/* fgets always null-terminates the returned string */
+        if (fgets(prompts[i].reply->data, prompts[i].reply->length, stdin)
+            == NULL) {
+            if (prompts[i].hidden)
+                putchar('\n');
+            errcode = KRB5_LIBOS_CANTREADPWD;
+            goto cleanup;
+        }
+        if (prompts[i].hidden)
+            putchar('\n');
+        /* fgets always null-terminates the returned string */
 
-	/* replace newline with null */
-	if ((ptr = strchr(prompts[i].reply->data, '\n')))
-	    *ptr = '\0';
-	else /* flush rest of input line */
-	    do {
-		scratchchar = getchar();
-	    } while (scratchchar != EOF && scratchchar != '\n');
-    
-	prompts[i].reply->length = strlen(prompts[i].reply->data);
+        /* replace newline with null */
+        if ((ptr = strchr(prompts[i].reply->data, '\n')))
+            *ptr = '\0';
+        else /* flush rest of input line */
+            do {
+                scratchchar = getchar();
+            } while (scratchchar != EOF && scratchchar != '\n');
 
-	if (!SetConsoleMode(handle, old_mode)) {
-	    errcode = ENOTTY;
-	    goto cleanup;
-	}
+        prompts[i].reply->length = strlen(prompts[i].reply->data);
+
+        if (!SetConsoleMode(handle, old_mode)) {
+            errcode = ENOTTY;
+            goto cleanup;
+        }
     }
 
- cleanup:
+cleanup:
     if (errcode) {
-	for (i = 0; i < num_prompts; i++) {
-	    memset(prompts[i].reply->data, 0, prompts[i].reply->length);
-	}
+        for (i = 0; i < num_prompts; i++) {
+            memset(prompts[i].reply->data, 0, prompts[i].reply->length);
+        }
     }
     return errcode;
 }
@@ -303,11 +305,11 @@ krb5_prompter_posix(krb5_context context,
 
 krb5_error_code KRB5_CALLCONV
 krb5_prompter_posix(krb5_context context,
-		    void *data,
-		    const char *name,
-		    const char *banner,
-		    int num_prompts,
-		    krb5_prompt prompts[])
+                    void *data,
+                    const char *name,
+                    const char *banner,
+                    int num_prompts,
+                    krb5_prompt prompts[])
 {
     return(EINVAL);
 }

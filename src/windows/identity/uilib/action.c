@@ -275,12 +275,12 @@ HWND khui_hwnd_main;			/* main window, for notifying
                                            dispatching messages to the
                                            application. */
 
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_init_actions(void) {
     InitializeCriticalSection(&cs_actions);
 }
 
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_exit_actions(void) {
     DeleteCriticalSection(&cs_actions);
 }
@@ -441,7 +441,7 @@ khui_action_delete(khm_int32 action) {
 
 #define MENU_NC_ITEMS 8
 
-KHMEXP khui_menu_def * KHMAPI 
+KHMEXP khui_menu_def * KHMAPI
 khui_menu_create(khm_int32 action)
 {
     khui_menu_def * d;
@@ -512,7 +512,7 @@ khui_action_trigger(khm_int32 action, khui_action_context * ctx) {
     }
 }
 
-KHMEXP khui_menu_def * KHMAPI 
+KHMEXP khui_menu_def * KHMAPI
 khui_menu_dup(khui_menu_def * src)
 {
     khui_menu_def * d;
@@ -541,7 +541,7 @@ khui_menu_dup(khui_menu_def * src)
     return d;
 }
 
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_menu_delete(khui_menu_def * d)
 {
     int i;
@@ -1019,9 +1019,9 @@ khui_create_global_accel_table(void) {
     return ha;
 }
 
-KHMEXP khm_boolean KHMAPI 
-khui_get_cmd_accel_string(khm_int32 cmd, 
-                          wchar_t * buf, 
+KHMEXP khm_boolean KHMAPI
+khui_get_cmd_accel_string(khm_int32 cmd,
+                          wchar_t * buf,
                           khm_size bufsiz) {
     int i;
     khui_accel_def * def;
@@ -1127,9 +1127,9 @@ khui_get_cmd_accel_string(khm_int32 cmd,
             break;
 
         default:
-            if((def->key >= '0' && 
-                def->key <= '9') || 
-               (def->key >= 'A' && 
+            if((def->key >= '0' &&
+                def->key <= '9') ||
+               (def->key >= 'A' &&
                 def->key <= 'Z')) {
                 ap = mbuf;
                 mbuf[0] = (wchar_t) def->key;
@@ -1241,13 +1241,13 @@ khuiint_copy_context(khui_action_context * ctxdest,
             ctxdest->headers[i].attr_id = ctxsrc->headers[i].attr_id;
             ctxdest->headers[i].cb_data = ctxsrc->headers[i].cb_data;
             if (ctxsrc->headers[i].cb_data > 0) {
-                ctxdest->headers[i].data = 
+                ctxdest->headers[i].data =
                     BYTEOFFSET(ctxdest->int_buf,
                                ctxdest->int_cb_used);
                 memcpy(ctxdest->headers[i].data,
                        ctxsrc->headers[i].data,
                        ctxsrc->headers[i].cb_data);
-                ctxdest->int_cb_used += 
+                ctxdest->int_cb_used +=
                     UBOUND32(ctxsrc->headers[i].cb_data);
             } else {
                 ctxdest->headers[i].data = NULL;
@@ -1264,7 +1264,7 @@ khuiint_copy_context(khui_action_context * ctxdest,
 #endif
 
         kcdb_credset_flush(ctxdest->credset);
-        
+
         kcdb_credset_extract_filtered(ctxdest->credset,
                                       ctxsrc->credset,
                                       khuiint_filter_selected,
@@ -1298,7 +1298,7 @@ khuiint_copy_context(khui_action_context * ctxdest,
 #endif
 }
 
-static void 
+static void
 khuiint_context_init(khui_action_context * ctx) {
     ctx->magic = KHUI_ACTION_CONTEXT_MAGIC;
     ctx->scope = KHUI_SCOPE_NONE;
@@ -1319,8 +1319,8 @@ khuiint_context_init(khui_action_context * ctx) {
 khui_action_context khui_ctx = {
     KHUI_ACTION_CONTEXT_MAGIC,
     KHUI_SCOPE_NONE,
-    NULL, 
-    KCDB_CREDTYPE_INVALID, 
+    NULL,
+    KCDB_CREDTYPE_INVALID,
     NULL,
     {
         {KCDB_ATTR_INVALID,NULL,0},
@@ -1402,10 +1402,10 @@ khui_context_create(khui_action_context * ctx,
     khuiint_copy_context(ctx, &tctx);
 }
 
-KHMEXP void KHMAPI 
-khui_context_set(khui_scope scope, 
-                 khm_handle identity, 
-                 khm_int32 cred_type, 
+KHMEXP void KHMAPI
+khui_context_set(khui_scope scope,
+                 khm_handle identity,
+                 khm_int32 cred_type,
                  khm_handle cred,
                  khui_header *headers,
                  khm_size n_headers,
@@ -1422,10 +1422,10 @@ khui_context_set(khui_scope scope,
                         0);
 }
 
-KHMEXP void KHMAPI 
-khui_context_set_ex(khui_scope scope, 
-                    khm_handle identity, 
-                    khm_int32 cred_type, 
+KHMEXP void KHMAPI
+khui_context_set_ex(khui_scope scope,
+                    khm_handle identity,
+                    khm_int32 cred_type,
                     khm_handle cred,
                     khui_header *headers,
                     khm_size n_headers,
@@ -1482,7 +1482,7 @@ khui_context_set_indirect(khui_action_context * ctx)
     LeaveCriticalSection(&cs_actions);
 }
 
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_context_refresh(void) {
     khm_int32 flags;
 
@@ -1515,7 +1515,7 @@ khui_context_refresh(void) {
     kmq_post_message(KMSG_ACT, KMSG_ACT_REFRESH, 0, 0);
 }
 
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_context_get(khui_action_context * ctx)
 {
     EnterCriticalSection(&cs_actions);
@@ -1530,7 +1530,7 @@ khui_context_get(khui_action_context * ctx)
     LeaveCriticalSection(&cs_actions);
 }
 
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_context_release(khui_action_context * ctx)
 {
 #ifdef DEBUG
@@ -1558,7 +1558,7 @@ khui_context_release(khui_action_context * ctx)
 #endif
 }
 
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_context_reset(void)
 {
     EnterCriticalSection(&cs_actions);

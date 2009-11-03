@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/os/free_hstrl.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * krb5_free_host_realm()
  */
@@ -31,8 +32,8 @@
 #include <stdio.h>
 
 /*
- Frees the storage taken by a realm list returned by krb5_get_host_realm.
- */
+  Frees the storage taken by a realm list returned by krb5_get_host_realm.
+*/
 
 krb5_error_code KRB5_CALLCONV
 krb5_free_host_realm(krb5_context context, char *const *realmlist)

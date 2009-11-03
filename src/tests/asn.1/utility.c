@@ -13,7 +13,7 @@ asn1_error_code asn1_krb5_data_unparse(code, s)
     char ** s;
 {
     if (*s != NULL) free(*s);
-  
+
     if (code==NULL) {
 	*s = strdup("<NULL>");
 	if (*s == NULL) return ENOMEM;
@@ -105,7 +105,7 @@ void asn1buf_print(buf)
     char *s=NULL;
     int length;
     int i;
-  
+
     bufcopy.base = bufcopy.next = buf->next;
     bufcopy.bound = buf->bound;
     length = asn1buf_len(&bufcopy);

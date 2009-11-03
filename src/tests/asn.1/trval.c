@@ -3,13 +3,13 @@
  *
  * Permission to include this software in the Kerberos V5 distribution
  * was graciously provided by Trusted Information Systems.
- * 
+ *
  * Trusted Information Systems makes no representation about the
  * suitability of this software for any purpose.  It is provided
  * "as is" without express or implied warranty.
- * 
+ *
  * Copyright (C) 1994 Massachusetts Institute of Technology
- * 
+ *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
@@ -28,7 +28,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  */
 
 /*****************************************************************************
@@ -43,21 +43,21 @@
 
 #define OK 0
 #define NOTOK (-1)
-	
+
 /* IDENTIFIER OCTET = TAG CLASS | FORM OF ENCODING | TAG NUMBER */
-	
+
 /* TAG CLASSES */
 #define ID_CLASS   0xc0		/* bits 8 and 7 */
 #define CLASS_UNIV 0x00		/* 0 = universal */
 #define CLASS_APPL 0x40		/* 1 = application */
 #define CLASS_CONT 0x80		/* 2 = context-specific */
 #define CLASS_PRIV 0xc0		/* 3 = private */
-	
+
 /* FORM OF ENCODING */
 #define ID_FORM   0x20		/* bit 6 */
 #define FORM_PRIM 0x00		/* 0 = primitive */
 #define FORM_CONS 0x20		/* 1 = constructed */
-	
+
 /* TAG NUMBERS */
 #define ID_TAG    0x1f		/* bits 5-1 */
 #define PRIM_BOOL 0x01		/* Boolean */
@@ -84,17 +84,17 @@
 #define DEFN_VISS 0x1a		/* Visible string */
 #define DEFN_GENS 0x1b		/* General string */
 #define DEFN_CHRS 0x1c		/* Character string */
-	
+
 #define	LEN_XTND	0x80	/* long or indefinite form */
 #define	LEN_SMAX	127	/* largest short form */
 #define	LEN_MASK	0x7f	/* mask to get number of bytes in length */
 #define	LEN_INDF	(-1)	/* indefinite length */
 
 #define KRB5	/* Do krb5 application types */
-	
+
 int print_types = 0;
 int print_id_and_len = 1;
-int print_constructed_length = 1;	
+int print_constructed_length = 1;
 int print_primitive_length = 1;
 int print_skip_context = 0;
 int print_skip_tagnum = 1;
@@ -140,7 +140,7 @@ int trval(fin, fout)
     int cc, cc2, n1, n2;
     int r;
     int rlen;
-	
+
     maxlen = BUFSIZ;
     p = (unsigned char *)malloc(maxlen);
     len = 0;
@@ -184,10 +184,10 @@ int trval2(fp, enc, len, lev, rlen)
 	fprintf(fp, "missing id and length octets (%d)\n", len);
 	return(NOTOK);
     }
-	
+
     fprintf(fp, "\n");
     for (l=0; l<lev; l++) fprintf(fp, ".  ");
-	
+
 context_restart:
     eid = enc[0];
     elen = enc[1];
@@ -196,13 +196,13 @@ context_restart:
 	fprintf(fp, "%02x ", eid);
 	fprintf(fp, "%02x ", elen);
     }
-	
+
     if (elen == LEN_XTND) {
 	fprintf(fp,
 		"indefinite length encoding not implemented (0x%02x)\n", elen);
 	return(NOTOK);
     }
-	
+
     xlen = 0;
     if (elen & LEN_XTND) {
 	xlen = elen & LEN_MASK;
@@ -212,12 +212,12 @@ context_restart:
 	}
 	elen = decode_len(fp, enc+2, xlen);
     }
-	
+
     if (elen > len - 2 - xlen) {
 	fprintf(fp, "length too long (%d > %d - 2 - %d)\n", elen, len, xlen);
 	return(NOTOK);
     }
-	
+
     print_tag_type(fp, eid, lev);
 
     if (print_context_shortcut &&
@@ -241,7 +241,7 @@ context_restart:
 	*rlen = 2 + xlen + rlen2 + rlen_ext;
 	break;
     }
-	
+
     return(r);
 }
 
@@ -252,7 +252,7 @@ int decode_len(fp, enc, len)
 {
     int rlen;
     int i;
-	
+
     if (print_id_and_len)
 	fprintf(fp, "%02x ", enc[0]);
     rlen = enc[0];
@@ -367,9 +367,9 @@ int do_prim(fp, tag, enc, len, lev)
 
     if (print_primitive_length)
 	fprintf(fp, "<%d>", len);
-	
+
     width = (80 - (lev * 3) - 8) / 4;
-	
+
     for (n = 0; n < len; n++) {
 	if ((n % width) == 0) {
 	    fprintf(fp, "\n");
@@ -501,30 +501,30 @@ struct typestring_table krb5_fields[] = {
     { 1000, 1, "name-string"},
 
     { 1001, 0, "etype"},	/* Encrypted data */
-    { 1001, 1, "kvno"},	
+    { 1001, 1, "kvno"},
     { 1001, 2, "cipher"},
 
     { 1002, 0, "addr-type"},	/* HostAddress */
-    { 1002, 1, "address"},	
+    { 1002, 1, "address"},
 
     { 1003, 0, "addr-type"},	/* HostAddresses */
-    { 1003, 1, "address"},	
+    { 1003, 1, "address"},
 
     { 1004, 0, "ad-type"},	/* AuthorizationData */
-    { 1004, 1, "ad-data"},	
+    { 1004, 1, "ad-data"},
 
     { 1005, 0, "keytype"},	/* EncryptionKey */
-    { 1005, 1, "keyvalue"},	
+    { 1005, 1, "keyvalue"},
 
     { 1006, 0, "cksumtype"},	/* Checksum */
     { 1006, 1, "checksum"},
 
     { 1007, 0, "kdc-options"},	/* KDC-REQ-BODY */
-    { 1007, 1, "cname", 1000},	
+    { 1007, 1, "cname", 1000},
     { 1007, 2, "realm"},
-    { 1007, 3, "sname", 1000},	
+    { 1007, 3, "sname", 1000},
     { 1007, 4, "from"},
-    { 1007, 5, "till"},	
+    { 1007, 5, "till"},
     { 1007, 6, "rtime"},
     { 1007, 7, "nonce"},
     { 1007, 8, "etype"},
@@ -536,9 +536,9 @@ struct typestring_table krb5_fields[] = {
     { 1008, 2, "pa-data"},
 
     { 1009, 0, "user-data"},	/* KRB-SAFE-BODY */
-    { 1009, 1, "timestamp"},	
+    { 1009, 1, "timestamp"},
     { 1009, 2, "usec"},
-    { 1009, 3, "seq-number"},	
+    { 1009, 3, "seq-number"},
     { 1009, 4, "s-address", 1002},
     { 1009, 5, "r-address", 1002},
 
@@ -546,11 +546,11 @@ struct typestring_table krb5_fields[] = {
     { 1010, 1, "lr-value"},
 
     { 1011, 0, "key", 1005},	/* KRB-CRED-INFO */
-    { 1011, 1, "prealm"},	
+    { 1011, 1, "prealm"},
     { 1011, 2, "pname", 1000},
-    { 1011, 3, "flags"},	
+    { 1011, 3, "flags"},
     { 1011, 4, "authtime"},
-    { 1011, 5, "startime"},	
+    { 1011, 5, "startime"},
     { 1011, 6, "endtime"},
     { 1011, 7, "renew-till"},
     { 1011, 8, "srealm"},
@@ -619,7 +619,7 @@ struct typestring_table krb5_fields[] = {
     { 15, 0, "pvno"},	/* AP-REP */
     { 15, 1, "msg-type"},
     { 15, 2, "enc-part", 1001},
-	
+
     { 20, 0, "pvno"},	/* KRB-SAFE */
     { 20, 1, "msg-type"},
     { 20, 2, "safe-body", 1009},
@@ -646,7 +646,7 @@ struct typestring_table krb5_fields[] = {
     { 25, 9, "srealm"},
     { 25, 10, "sname", 1000},
     { 25, 11, "caddr", 1003},
-	
+
     { 26, 0, "key", 1005},	/* EncTGSRepPart */
     { 26, 1, "last-req", 1010},
     { 26, 2, "nonce"},
@@ -659,7 +659,7 @@ struct typestring_table krb5_fields[] = {
     { 26, 9, "srealm"},
     { 26, 10, "sname", 1000},
     { 26, 11, "caddr", 1003},
-	
+
     { 27, 0, "ctime"},	/* EncApRepPart */
     { 27, 1, "cusec"},
     { 27, 2, "subkey", 1005},
@@ -692,7 +692,7 @@ struct typestring_table krb5_fields[] = {
     { 30, 10, "sname", 1000},
     { 30, 11, "e-text"},
     { 30, 12, "e-data"},
-	
+
     { -1, -1, 0}
 };
 #endif
@@ -707,7 +707,7 @@ void print_tag_type(fp, eid, lev)
     char	*str;
 
     fprintf(fp, "[");
-	
+
     switch(eid & ID_CLASS) {
     case CLASS_UNIV:
 	if (print_types && print_skip_tagnum)
@@ -748,7 +748,7 @@ void print_tag_type(fp, eid, lev)
 	fprintf(fp, "PRIV %d", tag);
 	break;
     }
-	
+
     if (print_types && ((eid & ID_CLASS) == CLASS_UNIV)) {
 	if (do_space)
 	    fputs(" ", fp);
@@ -758,10 +758,9 @@ void print_tag_type(fp, eid, lev)
 	else
 	    fprintf(fp, "UNIV %d???", eid & ID_TAG);
     }
-	
+
     fprintf(fp, "] ");
-	
-}	
+
+}
 
 /*****************************************************************************/
-

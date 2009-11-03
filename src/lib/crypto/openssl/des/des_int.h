@@ -1,14 +1,14 @@
 /*
  * lib/crypto/des/des_int.h
  *
- * Copyright 1987, 1988, 1990, 2002 by the Massachusetts Institute of
+ * Copyright 1987, 1988, 1990, 2002, 2009 by the Massachusetts Institute of
  * Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,21 +22,21 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Private include file for the Data Encryption Standard library.
  */
 
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
  * responsibility of any person or organization contemplating export to
  * obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -47,7 +47,7 @@
  * permission.  FundsXpress makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -112,7 +112,7 @@ KRB5INT_DES_DEPRECATED;
  * have an exact 32-bit int, and nothing should be looking inside a
  * des_key_schedule anyway.
  */
-typedef struct des_ks_struct {  DES_INT32 _[2]; } des_key_schedule[16] 
+typedef struct des_ks_struct {  DES_INT32 _[2]; } des_key_schedule[16]
 KRB5INT_DES_DEPRECATED;
 
 typedef des_cblock mit_des_cblock;
@@ -153,86 +153,22 @@ error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
  * End "mit-des.h"
  */
 
-/* afsstring2key.c */
-extern krb5_error_code mit_afs_string_to_key
-	(krb5_keyblock *keyblock,
-		   const krb5_data *data,
-		   const krb5_data *salt);
-extern char *mit_afs_crypt
-    (const char *pw, const char *salt, char *iobuf);
-
-/* f_cksum.c */
-extern unsigned long mit_des_cbc_cksum
-    (const krb5_octet *, krb5_octet *, unsigned long ,
-     const mit_des_key_schedule, const krb5_octet *);
-
-/* f_ecb.c */
-extern int mit_des_ecb_encrypt
-    (const mit_des_cblock *, mit_des_cblock *, mit_des_key_schedule , int );
-
-/* f_cbc.c */
-extern int mit_des_cbc_encrypt (const mit_des_cblock *in,
-				mit_des_cblock *out,
-				unsigned long length,
-				const mit_des_key_schedule schedule,
-				const mit_des_cblock ivec, int enc);
-    
 #define mit_des_zeroblock krb5int_c_mit_des_zeroblock
 extern const mit_des_cblock mit_des_zeroblock;
-
-/* fin_rndkey.c */
-extern krb5_error_code mit_des_finish_random_key
-    ( const krb5_encrypt_block *,
-		krb5_pointer *);
-
-/* finish_key.c */
-extern krb5_error_code mit_des_finish_key
-    ( krb5_encrypt_block *);
-
-/* init_rkey.c */
-extern krb5_error_code mit_des_init_random_key
-    ( const krb5_encrypt_block *,
-		const krb5_keyblock *,
-		krb5_pointer *);
 
 /* key_parity.c */
 extern void mit_des_fixup_key_parity (mit_des_cblock );
 extern int mit_des_check_key_parity (mit_des_cblock );
 
-/* key_sched.c */
-extern int mit_des_key_sched
-    (mit_des_cblock , mit_des_key_schedule );
-
-/* process_ky.c */
-extern krb5_error_code mit_des_process_key
-    ( krb5_encrypt_block *,  const krb5_keyblock *);
-
-/* random_key.c */
-extern krb5_error_code mit_des_random_key
-    ( const krb5_encrypt_block *, krb5_pointer ,
-                krb5_keyblock **);
-
 /* string2key.c */
 extern krb5_error_code mit_des_string_to_key
-    ( const krb5_encrypt_block *, 
+    ( const krb5_encrypt_block *,
 	       krb5_keyblock *, const krb5_data *, const krb5_data *);
 extern krb5_error_code mit_des_string_to_key_int
 	(krb5_keyblock *, const krb5_data *, const krb5_data *);
 
 /* weak_key.c */
 extern int mit_des_is_weak_key (mit_des_cblock );
-
-/* cmb_keys.c */
-krb5_error_code mit_des_combine_subkeys
-    (const krb5_keyblock *, const krb5_keyblock *,
-	       krb5_keyblock **);
-
-/* f_pcbc.c */
-int mit_des_pcbc_encrypt ();
-
-/* f_sched.c */
-int mit_des_make_key_sched(mit_des_cblock, mit_des_key_schedule);
-
 
 /* misc.c */
 extern void swap_bits (char *);
@@ -249,129 +185,4 @@ extern unsigned long swap_long_bytes_bit_number (unsigned long );
 /* XXX depends on FILE being a #define! */
 extern void test_set (FILE *, const char *, int, const char *, int);
 #endif
-
-/* d3_ecb.c */
-extern int mit_des3_ecb_encrypt
-	(const mit_des_cblock *in,
-		   mit_des_cblock *out,
-		   mit_des_key_schedule sched1,
-		   mit_des_key_schedule sched2,
-		   mit_des_key_schedule sched3,
-		   int enc);
-
-/* d3_cbc.c */
-extern int mit_des3_cbc_encrypt
-	(const mit_des_cblock *in,
-	 mit_des_cblock *out,
-	 unsigned long length,
-	 const mit_des_key_schedule ks1,
-	 const mit_des_key_schedule ks2,
-	 const mit_des_key_schedule ks3,
-	 const mit_des_cblock ivec,
-	 int enc);
-
-void
-krb5int_des3_cbc_encrypt(const mit_des_cblock *in,
-			 mit_des_cblock *out,
-			 unsigned long length,
-			 const mit_des_key_schedule ks1,
-			 const mit_des_key_schedule ks2,
-			 const mit_des_key_schedule ks3,
-			 const mit_des_cblock ivec);
-void
-krb5int_des3_cbc_decrypt(const mit_des_cblock *in,
-			 mit_des_cblock *out,
-			 unsigned long length,
-			 const mit_des_key_schedule ks1,
-			 const mit_des_key_schedule ks2,
-			 const mit_des_key_schedule ks3,
-			 const mit_des_cblock ivec);
-
-void
-krb5int_des3_cbc_encrypt_iov(krb5_crypto_iov *data,
-			     unsigned long num_data,
-			     const mit_des_key_schedule ks1,
-			     const mit_des_key_schedule ks2,
-			     const mit_des_key_schedule ks3,
-			     mit_des_cblock ivec);
-
-void
-krb5int_des3_cbc_decrypt_iov(krb5_crypto_iov *data,
-			     unsigned long num_data,
-			     const mit_des_key_schedule ks1,
-			     const mit_des_key_schedule ks2,
-			     const mit_des_key_schedule ks3,
-			     mit_des_cblock ivec);
-
-#define mit_des3_cbc_encrypt(in,out,length,ks1,ks2,ks3,ivec,enc) \
-    ((enc ? krb5int_des3_cbc_encrypt : krb5int_des3_cbc_decrypt) \
-     (in, out, length, ks1, ks2, ks3, ivec), 0)
-
-void
-krb5int_des_cbc_encrypt(const mit_des_cblock *in,
-			mit_des_cblock *out,
-			unsigned long length,
-			const mit_des_key_schedule schedule,
-			const mit_des_cblock ivec);
-void
-krb5int_des_cbc_decrypt(const mit_des_cblock *in,
-			mit_des_cblock *out,
-			unsigned long length,
-			const mit_des_key_schedule schedule,
-			const mit_des_cblock ivec);
-
-#define mit_des_cbc_encrypt(in,out,length,schedule,ivec,enc) \
-    ((enc ? krb5int_des_cbc_encrypt : krb5int_des_cbc_decrypt) \
-     (in, out, length, schedule, ivec), 0)
-
-void
-krb5int_des_cbc_encrypt_iov(krb5_crypto_iov *data,
-			    unsigned long num_data,
-			    const mit_des_key_schedule schedule,
-			    mit_des_cblock ivec);
-
-void
-krb5int_des_cbc_decrypt_iov(krb5_crypto_iov *data,
-			    unsigned long num_data,
-			    const mit_des_key_schedule schedule,
-			    mit_des_cblock ivec);
-
-/* d3_procky.c */
-extern krb5_error_code mit_des3_process_key
-	(krb5_encrypt_block * eblock,
-		   const krb5_keyblock * keyblock);
-
-/* d3_kysched.c */
-extern int mit_des3_key_sched
-	(mit_des3_cblock key,
-		   mit_des3_key_schedule schedule);
-
-/* d3_str2ky.c */
-extern krb5_error_code mit_des3_string_to_key
-	(const krb5_encrypt_block * eblock,
-		   krb5_keyblock * keyblock,
-		   const krb5_data * data,
-		   const krb5_data * salt);
-
-/* u_nfold.c */
-extern krb5_error_code mit_des_n_fold
-	(const krb5_octet * input,
-		   const size_t in_len,
-		   krb5_octet * output,
-		   const size_t out_len);
-
-/* u_rn_key.c */
-extern int mit_des_is_weak_keyblock
-	(krb5_keyblock *keyblock);
-
-extern void mit_des_fixup_keyblock_parity
-	(krb5_keyblock *keyblock);
-
-extern krb5_error_code mit_des_set_random_generator_seed
-	(const krb5_data * seed,
-		   krb5_pointer random_state);
-
-extern krb5_error_code mit_des_set_random_sequence_number
-	(const krb5_data * sequence,
-		   krb5_pointer random_state);
 #endif	/*DES_INTERNAL_DEFS*/

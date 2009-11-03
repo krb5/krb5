@@ -34,17 +34,17 @@ static  cc_int32 ccs_ccache_iterator_release (ccs_ccache_iterator_t  io_ccache_i
                                               k5_ipc_stream           io_reply_data)
 {
     cc_int32 err = ccNoError;
-    
+
     if (!io_ccache_iterator ) { err = cci_check_error (ccErrBadParam); }
     if (!io_cache_collection) { err = cci_check_error (ccErrBadParam); }
     if (!in_request_data    ) { err = cci_check_error (ccErrBadParam); }
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         err = ccs_ccache_list_iterator_release (io_ccache_iterator);
     }
-    
-    return cci_check_error (err);    
+
+    return cci_check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -56,21 +56,21 @@ static  cc_int32 ccs_ccache_iterator_next (ccs_ccache_iterator_t  io_ccache_iter
 {
     cc_int32 err = ccNoError;
     ccs_ccache_t ccache = NULL;
-    
+
     if (!io_ccache_iterator ) { err = cci_check_error (ccErrBadParam); }
     if (!io_cache_collection) { err = cci_check_error (ccErrBadParam); }
     if (!in_request_data    ) { err = cci_check_error (ccErrBadParam); }
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         err = ccs_ccache_list_iterator_next (io_ccache_iterator, &ccache);
     }
-    
+
     if (!err) {
         err = ccs_ccache_write (ccache, io_reply_data);
     }
-    
-    return cci_check_error (err);    
+
+    return cci_check_error (err);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -82,22 +82,22 @@ static  cc_int32 ccs_ccache_iterator_clone (ccs_ccache_iterator_t  io_ccache_ite
 {
     cc_int32 err = ccNoError;
     ccs_ccache_iterator_t ccache_iterator = NULL;
-    
+
     if (!io_ccache_iterator ) { err = cci_check_error (ccErrBadParam); }
     if (!io_cache_collection) { err = cci_check_error (ccErrBadParam); }
     if (!in_request_data    ) { err = cci_check_error (ccErrBadParam); }
     if (!io_reply_data      ) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         err = ccs_ccache_list_iterator_clone (io_ccache_iterator,
                                               &ccache_iterator);
     }
-    
+
     if (!err) {
         err = ccs_ccache_list_iterator_write (ccache_iterator, io_reply_data);
     }
-        
-    return cci_check_error (err);    
+
+    return cci_check_error (err);
 }
 
 #ifdef TARGET_OS_MAC
@@ -114,45 +114,44 @@ static  cc_int32 ccs_ccache_iterator_clone (ccs_ccache_iterator_t  io_ccache_ite
 {
     cc_int32 err = ccNoError;
     k5_ipc_stream reply_data = NULL;
-    
+
     if (!in_request_data) { err = cci_check_error (ccErrBadParam); }
     if (!out_reply_data ) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         err = krb5int_ipc_stream_new (&reply_data);
     }
-    
+
     if (!err) {
         if (in_request_name == cci_ccache_iterator_release_msg_id) {
             err = ccs_ccache_iterator_release (io_ccache_iterator,
                                                io_cache_collection,
-                                               in_request_data, 
+                                               in_request_data,
                                                reply_data);
-            
+
         } else if (in_request_name == cci_ccache_iterator_next_msg_id) {
             err = ccs_ccache_iterator_next (io_ccache_iterator,
                                             io_cache_collection,
-                                            in_request_data, 
+                                            in_request_data,
                                             reply_data);
-            
+
         } else if (in_request_name == cci_ccache_iterator_clone_msg_id) {
             err = ccs_ccache_iterator_clone (io_ccache_iterator,
                                              io_cache_collection,
-                                             in_request_data, 
+                                             in_request_data,
                                              reply_data);
-            
+
         } else {
             err = ccErrBadInternalMessage;
         }
     }
-    
+
     if (!err) {
         *out_reply_data = reply_data;
         reply_data = NULL; /* take ownership */
     }
-    
+
     krb5int_ipc_stream_release (reply_data);
-    
+
     return cci_check_error (err);
 }
-

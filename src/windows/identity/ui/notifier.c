@@ -62,10 +62,10 @@ typedef struct tag_alerter_wnd_data alerter_wnd_data;
 struct tag_alert_list;
 typedef struct tag_alert_list alert_list;
 
-static khm_int32 
+static khm_int32
 alert_show(khui_alert * a);
 
-static khm_int32 
+static khm_int32
 alert_show_minimized(khui_alert * a);
 
 static khm_int32
@@ -145,7 +145,7 @@ khm_int32    alert_queue_tail = 0;
 /* NOTE: the alert queue functions are unsafe to call from any thread
    other than the UI thread. */
 
-static void 
+static void
 alert_queue_put_alert(khui_alert * a) {
     if (is_alert_queue_full()) return;
     alert_queue[alert_queue_tail++] = a;
@@ -154,7 +154,7 @@ alert_queue_put_alert(khui_alert * a) {
 }
 
 /* the caller needs to release the alert that's returned  */
-static khui_alert * 
+static khui_alert *
 alert_queue_get_alert(void) {
     khui_alert * a;
 
@@ -228,7 +228,7 @@ alert_queue_delete_alert(khui_alert * a) {
 }
 
 /* the caller needs to release the alert that's returned */
-static khui_alert * 
+static khui_alert *
 alert_queue_peek(void) {
     khui_alert * a;
 
@@ -321,7 +321,7 @@ alert_list_destroy(alert_list * alist) {
 #endif
 
 
-static LRESULT CALLBACK 
+static LRESULT CALLBACK
 notifier_wnd_proc(HWND hwnd,
                   UINT uMsg,
                   WPARAM wParam,
@@ -410,7 +410,7 @@ notifier_wnd_proc(HWND hwnd,
         /* wParam is the identifier of the notify icon, but we only
            have one. */
         switch(lParam) {
-        case WM_CONTEXTMENU: 
+        case WM_CONTEXTMENU:
             {
                 POINT pt;
                 int menu_id;
@@ -497,10 +497,10 @@ notifier_wnd_proc(HWND hwnd,
                     !(a->flags & KHUI_ALERT_FLAG_REQUEST_WINDOW) &&
                     a->n_alert_commands > 0) {
                     PostMessage(khm_hwnd_main, WM_COMMAND,
-                                MAKEWPARAM(a->alert_commands[0], 
+                                MAKEWPARAM(a->alert_commands[0],
                                            0),
                                 0);
-                } else if (a->flags & 
+                } else if (a->flags &
                            KHUI_ALERT_FLAG_REQUEST_WINDOW) {
                     khm_show_main_window();
                     alert_show_normal(a);
@@ -545,7 +545,7 @@ notifier_wnd_proc(HWND hwnd,
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-ATOM 
+ATOM
 khm_register_notifier_wnd_class(void)
 {
     WNDCLASSEX wcx;
@@ -1984,7 +1984,7 @@ alert_check_consolidate_window(alerter_wnd_data * d, khui_alert * a) {
     return n_added;
 }
 
-static khm_int32 
+static khm_int32
 alert_show_minimized(khui_alert * a) {
     wchar_t tbuf[64];           /* corresponds to NOTIFYICONDATA::szInfoTitle[] */
     wchar_t mbuf[256];          /* corresponds to NOTIFYICONDATA::szInfo[] */
@@ -2060,7 +2060,7 @@ alert_show_minimized(khui_alert * a) {
     return KHM_ERROR_SUCCESS;
 }
 
-static khm_int32 
+static khm_int32
 alert_show_normal(khui_alert * a) {
     wchar_t buf[256];
     wchar_t * title;
@@ -2069,7 +2069,7 @@ alert_show_normal(khui_alert * a) {
     khui_alert_lock(a);
 
     if(a->title == NULL) {
-        LoadString(khm_hInstance, IDS_ALERT_DEFAULT, 
+        LoadString(khm_hInstance, IDS_ALERT_DEFAULT,
                    buf, ARRAYLENGTH(buf));
         title = buf;
     } else
@@ -2096,7 +2096,7 @@ alert_show_list(alert_list * alist) {
        because the window procedure adds it to the dialog
        list automatically */
 
-    hwa = 
+    hwa =
         CreateWindowEx(ALERT_WINDOW_EX_SYLES,
                        MAKEINTATOM(atom_alerter),
                        alist->title,
@@ -2112,7 +2112,7 @@ alert_show_list(alert_list * alist) {
     return (hwa != NULL);
 }
 
-static khm_int32 
+static khm_int32
 alert_show(khui_alert * a) {
     khm_boolean show_normal = FALSE;
     khm_boolean show_mini = FALSE;
@@ -2309,7 +2309,7 @@ alert_enqueue(khui_alert * a) {
 }
 
 /* the alerter window is actually a dialog */
-static LRESULT CALLBACK 
+static LRESULT CALLBACK
 alerter_wnd_proc(HWND hwnd,
                  UINT uMsg,
                  WPARAM wParam,
@@ -2356,7 +2356,7 @@ alerter_wnd_proc(HWND hwnd,
             //khm_leave_modal();
             khm_del_dialog(hwnd);
 
-            d = (alerter_wnd_data *)(LONG_PTR) 
+            d = (alerter_wnd_data *)(LONG_PTR)
                 GetWindowLongPtr(hwnd, NTF_PARAM);
 
             if (d) {
@@ -2372,7 +2372,7 @@ alerter_wnd_proc(HWND hwnd,
         {
             alerter_wnd_data * d;
 
-            d = (alerter_wnd_data *)(LONG_PTR) 
+            d = (alerter_wnd_data *)(LONG_PTR)
                 GetWindowLongPtr(hwnd, NTF_PARAM);
 
             if(HIWORD(wParam) == BN_CLICKED) {
@@ -2404,7 +2404,7 @@ alerter_wnd_proc(HWND hwnd,
     return DefDlgProc(hwnd, uMsg, wParam, lParam);
 }
 
-static LRESULT CALLBACK 
+static LRESULT CALLBACK
 alert_bin_wnd_proc(HWND hwnd,
                    UINT uMsg,
                    WPARAM wParam,
@@ -2576,8 +2576,8 @@ alert_bin_wnd_proc(HWND hwnd,
                     else
                         iid = OIC_NOTE;
 
-                    hicon = (HICON) LoadImage(NULL, 
-                                              MAKEINTRESOURCE(iid), 
+                    hicon = (HICON) LoadImage(NULL,
+                                              MAKEINTRESOURCE(iid),
                                               IMAGE_ICON,
                                               GetSystemMetrics(SM_CXICON),
                                               GetSystemMetrics(SM_CYICON),
@@ -2850,7 +2850,7 @@ void khm_notify_icon_add(void) {
     Shell_NotifyIcon(NIM_SETVERSION, &ni);
 }
 
-void 
+void
 khm_notify_icon_balloon(khm_int32 severity,
                          wchar_t * title,
                          wchar_t * msg,
@@ -2886,16 +2886,16 @@ khm_notify_icon_balloon(khm_int32 severity,
     if (FAILED(StringCbCopy(ni.szInfo, sizeof(ni.szInfo), msg))) {
         /* too long? */
         StringCchCopyN(ni.szInfo, ARRAYLENGTH(ni.szInfo),
-                       msg, 
+                       msg,
                        ARRAYLENGTH(ni.szInfo) - ARRAYLENGTH(ELLIPSIS));
         StringCchCat(ni.szInfo, ARRAYLENGTH(ni.szInfo),
                      ELLIPSIS);
     }
 
-    if (FAILED(StringCbCopy(ni.szInfoTitle, sizeof(ni.szInfoTitle), 
+    if (FAILED(StringCbCopy(ni.szInfoTitle, sizeof(ni.szInfoTitle),
                             title))) {
         StringCchCopyN(ni.szInfoTitle, ARRAYLENGTH(ni.szInfoTitle),
-                       title, 
+                       title,
                        ARRAYLENGTH(ni.szInfoTitle) - ARRAYLENGTH(ELLIPSIS));
         StringCchCat(ni.szInfoTitle, ARRAYLENGTH(ni.szInfoTitle),
                      ELLIPSIS);
@@ -3051,7 +3051,7 @@ void khm_notify_icon_activate(void) {
             (a->n_alert_commands > 0)) {
 
             PostMessage(khm_hwnd_main, WM_COMMAND,
-                        MAKEWPARAM(a->alert_commands[0], 
+                        MAKEWPARAM(a->alert_commands[0],
                                    0),
                         0);
             alert_done = TRUE;
@@ -3171,4 +3171,3 @@ void khm_exit_notifier(void)
 
     notifier_ready = FALSE;
 }
-

@@ -46,7 +46,7 @@ cns_load_registry(void)
   cns_res.lifetime = DEFAULT_TKT_LIFE * 5;
   cns_res.forwardable = 1;
   cns_res.noaddresses = 0;
-    
+
   for (i = 1 ; i < FILE_MENU_MAX_LOGINS ; i++)
     cns_res.logins[i][0] = '\0';
 
@@ -60,7 +60,7 @@ cns_load_registry(void)
   {
 	char *s;
 	s = krb5_cc_default_name(k5_context);
-	
+
 	strcpy(cns_res.def_ccname, s);
   }
 
@@ -119,7 +119,7 @@ cns_load_registry(void)
 
   if (registry_dword_get(key, "noaddresses", &tdw) == 0)
    	  cns_res.noaddresses = tdw;
- 
+
   if (registry_dword_get(key, "alert", &tdw) == 0)
 	  cns_res.alert = tdw;
 

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved
  *
@@ -28,78 +29,77 @@
 
 /*
  * Function: nstrtok
- * 
+ *
  * Purpose: the same as strtok ... just different. does not deal with
- *	    multiple tokens in row.
+ *          multiple tokens in row.
  *
  * Arguments:
- *	s	    (input) string to scan
- *	delim	    (input) list of delimiters
- * 	<return value> string or null on error.
+ *      s           (input) string to scan
+ *      delim       (input) list of delimiters
+ *      <return value> string or null on error.
  *
  * Requires:
- *	nuttin
- * 
+ *      nuttin
+ *
  * Effects:
- *	sets last to string
+ *      sets last to string
  *
  * Modifies:
- *	last
- * 
+ *      last
+ *
  */
 
 char *
 nstrtok(s, delim)
-	register char *s;
-	register const char *delim;
+    register char *s;
+    register const char *delim;
 {
-	register const char *spanp;
-	register int c, sc;
-	char *tok;
-	static char *last;
+    register const char *spanp;
+    register int c, sc;
+    char *tok;
+    static char *last;
 
 
-	if (s == NULL && (s = last) == NULL)
-		return (NULL);
+    if (s == NULL && (s = last) == NULL)
+        return (NULL);
 
-	/*
-	 * Skip (span) leading delimiters (s += strspn(s, delim), sort of).
-	 */
-#ifdef OLD	 
+    /*
+     * Skip (span) leading delimiters (s += strspn(s, delim), sort of).
+     */
+#ifdef OLD
 cont:
-	c = *s++;
-	for (spanp = delim; (sc = *spanp++) != 0;) {
-		if (c == sc)
-			goto cont;
-	}
+    c = *s++;
+    for (spanp = delim; (sc = *spanp++) != 0;) {
+        if (c == sc)
+            goto cont;
+    }
 
-	if (c == 0) {		/* no non-delimiter characters */
-		last = NULL;
-		return (NULL);
-	}
-	tok = s - 1;
+    if (c == 0) {           /* no non-delimiter characters */
+        last = NULL;
+        return (NULL);
+    }
+    tok = s - 1;
 #else
-	tok = s;
-#endif	
+    tok = s;
+#endif
 
-	/*
-	 * Scan token (scan for delimiters: s += strcspn(s, delim), sort of).
-	 * Note that delim must have one NUL; we stop if we see that, too.
-	 */
-	for (;;) {
-		c = *s++;
-		spanp = delim;
-		do {
-			if ((sc = *spanp++) == c) {
-				if (c == 0)
-					s = NULL;
-				else
-					s[-1] = 0;
-				last = s;
-				return (tok);
-			}
-		} while (sc != 0);
-	}
-	/* NOTREACHED */
+    /*
+     * Scan token (scan for delimiters: s += strcspn(s, delim), sort of).
+     * Note that delim must have one NUL; we stop if we see that, too.
+     */
+    for (;;) {
+        c = *s++;
+        spanp = delim;
+        do {
+            if ((sc = *spanp++) == c) {
+                if (c == 0)
+                    s = NULL;
+                else
+                    s[-1] = 0;
+                last = s;
+                return (tok);
+            }
+        } while (sc != 0);
+    }
+    /* NOTREACHED */
 }
-

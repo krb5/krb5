@@ -34,7 +34,7 @@ ldap_xdr_krb5_ui_2(XDR *xdrs, krb5_ui_2 *objp);
 bool_t
 ldap_xdr_krb5_int16(XDR *xdrs, krb5_int16 *objp);
 
-bool_t 
+bool_t
 ldap_xdr_nullstring(XDR *xdrs, char **objp);
 
 bool_t

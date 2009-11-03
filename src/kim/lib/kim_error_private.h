@@ -29,11 +29,11 @@
 
 #include <kim/kim.h>
 
-kim_error kim_error_set_message_for_code (kim_error in_code, 
+kim_error kim_error_set_message_for_code (kim_error in_code,
                                           ...);
-kim_error kim_error_set_message_for_code_va (kim_error in_code, 
+kim_error kim_error_set_message_for_code_va (kim_error in_code,
                                              va_list   in_args);
-kim_error kim_error_set_message_for_krb5_error (krb5_context    in_context, 
+kim_error kim_error_set_message_for_krb5_error (krb5_context    in_context,
                                                 krb5_error_code in_code);
 
 #define krb5_error(context,code) kim_error_set_message_for_krb5_error(context, code)

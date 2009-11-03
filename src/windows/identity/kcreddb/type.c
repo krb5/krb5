@@ -37,10 +37,10 @@ kcdb_type_i * kcdb_types = NULL;
 #define GENERIC_VOID_STR L"(Void)"
 
 khm_int32 KHMAPI kcdb_type_void_toString(
-    const void * d, 
-    khm_size cbd, 
-    wchar_t * buffer, 
-    khm_size * cb_buf, 
+    const void * d,
+    khm_size cbd,
+    wchar_t * buffer,
+    khm_size * cb_buf,
     khm_int32 flags)
 {
     size_t cbsize;
@@ -98,10 +98,10 @@ khm_int32 KHMAPI kcdb_type_void_dup(
 
 /* String */
 khm_int32 KHMAPI kcdb_type_string_toString(
-    const void * d, 
-    khm_size cbd, 
-    wchar_t * buffer, 
-    khm_size * cb_buf, 
+    const void * d,
+    khm_size cbd,
+    wchar_t * buffer,
+    khm_size * cb_buf,
     khm_int32 flags)
 {
     size_t cbsize;
@@ -189,10 +189,10 @@ khm_int32 KHMAPI kcdb_type_string_dup(
 
 
 khm_int32 KHMAPI kcdb_type_date_toString(
-    const void * d, 
-    khm_size cbd, 
-    wchar_t * buffer, 
-    khm_size * cb_buf, 
+    const void * d,
+    khm_size cbd,
+    wchar_t * buffer,
+    khm_size * cb_buf,
     khm_int32 flags)
 {
     size_t cbsize;
@@ -315,7 +315,7 @@ khm_int32 KHMAPI kcdb_type_date_dup(
 /* returns the number of milliseconds that must elapse away from the
    interval specified in pft for the representation of pft to change
    from whatever it is right now */
-KHMEXP long KHMAPI 
+KHMEXP long KHMAPI
 FtIntervalMsToRepChange(LPFILETIME pft)
 {
     __int64 ms,s,m,h,d;
@@ -324,7 +324,7 @@ FtIntervalMsToRepChange(LPFILETIME pft)
 
     ift = FtToInt(pft);
     ms = ift / 10000i64;
-    
+
     if(ms < 0 || ift == _I64_MAX)
         return -1;
 
@@ -350,7 +350,7 @@ FtIntervalMsToRepChange(LPFILETIME pft)
     return l;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 FtIntervalToString(LPFILETIME data, wchar_t * buffer, khm_size * cb_buf)
 {
     size_t cbsize;
@@ -469,11 +469,11 @@ FtIntervalToString(LPFILETIME data, wchar_t * buffer, khm_size * cb_buf)
     return KHM_ERROR_SUCCESS;
 }
 
-khm_int32 KHMAPI 
-kcdb_type_interval_toString(const void * data, 
-                            khm_size cbd, 
-                            wchar_t * buffer, 
-                            khm_size * cb_buf, 
+khm_int32 KHMAPI
+kcdb_type_interval_toString(const void * data,
+                            khm_size cbd,
+                            wchar_t * buffer,
+                            khm_size * cb_buf,
                             khm_int32 flags)
 {
     return FtIntervalToString((LPFILETIME) data, buffer, cb_buf);
@@ -524,10 +524,10 @@ khm_int32 KHMAPI kcdb_type_interval_dup(
 /* Int32 */
 
 khm_int32 KHMAPI kcdb_type_int32_toString(
-    const void * d, 
-    khm_size cbd, 
-    wchar_t * buffer, 
-    khm_size * cb_buf, 
+    const void * d,
+    khm_size cbd,
+    wchar_t * buffer,
+    khm_size * cb_buf,
     khm_int32 flags)
 {
     size_t cbsize;
@@ -586,10 +586,10 @@ khm_int32 KHMAPI kcdb_type_int32_dup(
 /* Int64 */
 
 khm_int32 KHMAPI kcdb_type_int64_toString(
-    const void * d, 
-    khm_size cbd, 
-    wchar_t * buffer, 
-    khm_size * cb_buf, 
+    const void * d,
+    khm_size cbd,
+    wchar_t * buffer,
+    khm_size * cb_buf,
     khm_int32 flags)
 {
     size_t cbsize;
@@ -650,10 +650,10 @@ khm_int32 KHMAPI kcdb_type_int64_dup(
 #define GENERIC_DATA_STR L"(Data)"
 
 khm_int32 KHMAPI kcdb_type_data_toString(
-    const void * d, 
-    khm_size cbd, 
-    wchar_t * buffer, 
-    khm_size * cb_buf, 
+    const void * d,
+    khm_size cbd,
+    wchar_t * buffer,
+    khm_size * cb_buf,
     khm_int32 flags)
 {
     size_t cbsize;
@@ -729,7 +729,7 @@ khm_int32 KHMAPI kcdb_type_data_dup(
 }
 
 
-void kcdb_type_msg_completion(kmq_message * m) 
+void kcdb_type_msg_completion(kmq_message * m)
 {
     kcdb_type_release((kcdb_type_i *) m->vparam);
 }
@@ -990,11 +990,11 @@ KHMEXP khm_int32 KHMAPI kcdb_type_register(const kcdb_type * type, khm_int32 * n
     size_t cbsize;
     khm_int32 type_id;
 
-    if(!type || 
-        !type->comp || 
-        !type->dup || 
-        !type->isValid || 
-        !type->toString || 
+    if(!type ||
+        !type->comp ||
+        !type->dup ||
+        !type->isValid ||
+        !type->toString ||
         !type->name)
         return KHM_ERROR_INVALID_PARAM;
 
@@ -1084,8 +1084,8 @@ KHMEXP khm_int32 KHMAPI kcdb_type_unregister(khm_int32 id)
         /* we are going to remove t from the hash table.  If no one is holding
             a reference to it, then we can free it (actually, the del_ref code
             will take care of that anyway).  If there is a hold, then it will
-            get freed when they release it. 
-            
+            get freed when they release it.
+
             Actually, the post_message call above pretty much guarantees that
             the type has a hold on it.*/
         t->type.flags |= KCDB_TYPE_FLAG_DELETED;
@@ -1141,7 +1141,7 @@ KHMEXP void KHMAPI TimetToFileTime( time_t t, LPFILETIME pft )
 KHMEXP void KHMAPI TimetToFileTimeInterval(time_t t, LPFILETIME pft)
 {
     LONGLONG ll;
-    
+
     if ( sizeof(time_t) == 4 )
 	ll = Int32x32To64(t, 10000000);
     else {
@@ -1224,11 +1224,11 @@ KHMEXP int KHMAPI AnsiStrToUnicode( wchar_t * wstr, size_t cbwstr, const char * 
 
     nc = strlen(astr);
     if(nc == MultiByteToWideChar(
-        CP_ACP, 
-        0, 
-        astr, 
-        (int) nc, 
-        wstr, 
+        CP_ACP,
+        0,
+        astr,
+        (int) nc,
+        wstr,
         (int)(cbwstr / sizeof(wchar_t) - 1))) {
         wstr[nc] = L'\0';
     } else {
@@ -1253,13 +1253,13 @@ KHMEXP int KHMAPI UnicodeStrToAnsi( char * dest, size_t cbdest, const wchar_t * 
         return 0;
 
     nc = WideCharToMultiByte(
-        CP_ACP, 
-        WC_NO_BEST_FIT_CHARS, 
-        src, 
-        (int) nc, 
-        dest, 
-        (int) cbdest, 
-        NULL, 
+        CP_ACP,
+        WC_NO_BEST_FIT_CHARS,
+        src,
+        (int) nc,
+        dest,
+        (int) cbdest,
+        NULL,
         NULL);
 
     dest[nc] = 0;
@@ -1296,7 +1296,7 @@ int _iv_is_in_spec(wchar_t *s, int n, wchar_t * spec)
         e = wcschr(b, L',');
         if(!e)
             e = b + wcslen(b);
-    
+
         if((e - b) == n  && !_wcsnicmp(b, s, n)) {
             return TRUE;
         }

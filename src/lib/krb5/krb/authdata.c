@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2009 by the Massachusetts Institute of Technology.  All
  * Rights Reserved.
@@ -39,7 +39,7 @@ static const char *objdirs[] = {
 #endif
     LIBDIR "/krb5/plugins/authdata",
     NULL
- }; /* should be a list */
+}; /* should be a list */
 
 /* Internal authdata systems */
 static krb5plugin_authdata_client_ftable_v0 *authdata_systems[] = {
@@ -648,10 +648,10 @@ krb5int_authdata_verify(krb5_context kcontext,
 
         if (authdata == NULL) {
             code = krb5int_find_authdata(kcontext,
-                                        ticket_authdata,
-                                        authen_authdata,
-                                        module->ad_type,
-                                        &authdata);
+                                         ticket_authdata,
+                                         authen_authdata,
+                                         module->ad_type,
+                                         &authdata);
             if (code != 0)
                 break;
         }
@@ -1244,4 +1244,3 @@ krb5_ser_authdata_context_init(krb5_context kcontext)
     return krb5_register_serializer(kcontext,
                                     &krb5_authdata_context_ser_entry);
 }
-

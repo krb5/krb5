@@ -142,11 +142,11 @@ void kcdb_buf_alloc(kcdb_buf * buf, khm_size slot, khm_ui_2 id, khm_size cbsize)
                 buf->cb_used - (f->offset + cbold));
 
             for(i=0; i < (int) buf->n_fields; i++) {
-                if(i != slot && 
+                if(i != slot &&
                     (buf->fields[i].flags & KCDB_CREDF_FLAG_ALLOCD) &&
-                    buf->fields[i].offset > f->offset) 
+                    buf->fields[i].offset > f->offset)
                 {
-                    buf->fields[i].offset = 
+                    buf->fields[i].offset =
                         (khm_ui_4)(((khm_ssize) buf->fields[i].offset) + cbdelta);
                 }
             }
@@ -183,7 +183,7 @@ void kcdb_buf_dup(kcdb_buf * dest, const kcdb_buf * src)
 #if 0
         /* replaced by UBOUNDSS() above */
         (src->cb_used <= kcdb_cred_initial_size)? kcdb_cred_initial_size:
-        kcdb_cred_initial_size + 
+        kcdb_cred_initial_size +
             (((src->cb_used - (kcdb_cred_initial_size + 1)) / kcdb_cred_growth_factor + 1) * kcdb_cred_growth_factor);
 #endif
 
@@ -241,7 +241,7 @@ int kcdb_buf_val_exist(kcdb_buf * buf, khm_size slot)
 
 void * kcdb_buf_get(kcdb_buf * buf, khm_size slot)
 {
-    if(slot >= buf->n_fields || 
+    if(slot >= buf->n_fields ||
         !(buf->fields[slot].flags & KCDB_CREDF_FLAG_ALLOCD))
         return NULL;
     return (((BYTE *) buf->buffer) + buf->fields[slot].offset);
@@ -249,7 +249,7 @@ void * kcdb_buf_get(kcdb_buf * buf, khm_size slot)
 
 khm_size kcdb_buf_size(kcdb_buf * buf, khm_size slot)
 {
-    if(slot >= buf->n_fields || 
+    if(slot >= buf->n_fields ||
         !(buf->fields[slot].flags & KCDB_CREDF_FLAG_ALLOCD))
         return 0;
     return (buf->fields[slot].cbsize);
@@ -257,7 +257,7 @@ khm_size kcdb_buf_size(kcdb_buf * buf, khm_size slot)
 
 void kcdb_buf_set_value_flag(kcdb_buf * buf, khm_size slot)
 {
-    if(slot >= buf->n_fields || 
+    if(slot >= buf->n_fields ||
         !(buf->fields[slot].flags & KCDB_CREDF_FLAG_ALLOCD))
         return;
 
@@ -282,10 +282,10 @@ khm_size kcdb_buf_slot_by_id(kcdb_buf * buf, khm_ui_2 id)
 /* API for accessing generic buffers */
 
 KHMEXP khm_int32 KHMAPI kcdb_buf_get_attr(
-    khm_handle  record, 
-    khm_int32   attr_id, 
-    khm_int32 * attr_type, 
-    void *      buffer, 
+    khm_handle  record,
+    khm_int32   attr_id,
+    khm_int32 * attr_type,
+    void *      buffer,
     khm_size *  pcb_buf)
 {
     if(kcdb_cred_is_active_cred(record))
@@ -388,4 +388,3 @@ KHMEXP khm_int32 KHMAPI kcdb_buf_release(khm_handle record)
     else
         return KHM_ERROR_INVALID_PARAM;
 }
-

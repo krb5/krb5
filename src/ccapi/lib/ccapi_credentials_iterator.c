@@ -41,14 +41,14 @@ typedef struct cci_credentials_iterator_d {
 
 /* ------------------------------------------------------------------------ */
 
-struct cci_credentials_iterator_d cci_credentials_iterator_initializer = { 
-    NULL 
-    VECTOR_FUNCTIONS_INITIALIZER, 
+struct cci_credentials_iterator_d cci_credentials_iterator_initializer = {
+    NULL
+    VECTOR_FUNCTIONS_INITIALIZER,
     NULL,
     0
 };
 
-cc_credentials_iterator_f cci_credentials_iterator_f_initializer = { 
+cc_credentials_iterator_f cci_credentials_iterator_f_initializer = {
     ccapi_credentials_iterator_release,
     ccapi_credentials_iterator_next,
     ccapi_credentials_iterator_clone
@@ -61,39 +61,39 @@ cc_int32 cci_credentials_iterator_new (cc_credentials_iterator_t *out_credential
 {
     cc_int32 err = ccNoError;
     cci_credentials_iterator_t credentials_iterator = NULL;
-    
+
     if (!out_credentials_iterator) { err = cci_check_error (ccErrBadParam); }
     if (!in_identifier           ) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         credentials_iterator = malloc (sizeof (*credentials_iterator));
-        if (credentials_iterator) { 
+        if (credentials_iterator) {
             *credentials_iterator = cci_credentials_iterator_initializer;
-        } else { 
-            err = cci_check_error (ccErrNoMem); 
+        } else {
+            err = cci_check_error (ccErrNoMem);
         }
     }
-    
+
     if (!err) {
         credentials_iterator->functions = malloc (sizeof (*credentials_iterator->functions));
-        if (credentials_iterator->functions) { 
+        if (credentials_iterator->functions) {
             *credentials_iterator->functions = cci_credentials_iterator_f_initializer;
-        } else { 
-            err = cci_check_error (ccErrNoMem); 
+        } else {
+            err = cci_check_error (ccErrNoMem);
         }
     }
-    
+
     if (!err) {
         err = cci_identifier_copy (&credentials_iterator->identifier, in_identifier);
     }
-    
+
     if (!err) {
         *out_credentials_iterator = (cc_credentials_iterator_t) credentials_iterator;
         credentials_iterator = NULL; /* take ownership */
     }
-    
+
     if (credentials_iterator) { ccapi_credentials_iterator_release ((cc_credentials_iterator_t) credentials_iterator); }
-    
+
     return cci_check_error (err);
 }
 
@@ -104,14 +104,14 @@ cc_int32 cci_credentials_iterator_write (cc_credentials_iterator_t in_credential
 {
     cc_int32 err = ccNoError;
     cci_credentials_iterator_t credentials_iterator = (cci_credentials_iterator_t) in_credentials_iterator;
-    
+
     if (!in_credentials_iterator) { err = cci_check_error (ccErrBadParam); }
     if (!in_stream         ) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         err = cci_identifier_write (credentials_iterator->identifier, in_stream);
     }
-    
+
     return cci_check_error (err);
 }
 
@@ -121,16 +121,16 @@ cc_int32 ccapi_credentials_iterator_release (cc_credentials_iterator_t io_creden
 {
     cc_int32 err = ccNoError;
     cci_credentials_iterator_t credentials_iterator = (cci_credentials_iterator_t) io_credentials_iterator;
-    
+
     if (!io_credentials_iterator) { err = ccErrBadParam; }
-    
+
     if (!err) {
         err =  cci_ipc_send (cci_credentials_iterator_release_msg_id,
                              credentials_iterator->identifier,
                              NULL,
                              NULL);
         if (err) {
-            cci_debug_printf ("%s: cci_ipc_send failed with error %d", 
+            cci_debug_printf ("%s: cci_ipc_send failed with error %d",
                              __FUNCTION__, err);
             err = ccNoError;
         }
@@ -141,7 +141,7 @@ cc_int32 ccapi_credentials_iterator_release (cc_credentials_iterator_t io_creden
         cci_identifier_release (credentials_iterator->identifier);
         free (credentials_iterator);
     }
-    
+
     return err;
 }
 
@@ -153,23 +153,23 @@ cc_int32 ccapi_credentials_iterator_next (cc_credentials_iterator_t  in_credenti
     cc_int32 err = ccNoError;
     cci_credentials_iterator_t credentials_iterator = (cci_credentials_iterator_t) in_credentials_iterator;
     k5_ipc_stream reply = NULL;
-    
+
     if (!in_credentials_iterator) { err = cci_check_error (ccErrBadParam); }
     if (!out_credentials        ) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         err =  cci_ipc_send (cci_credentials_iterator_next_msg_id,
                              credentials_iterator->identifier,
                              NULL,
                              &reply);
     }
-    
+
     if (!err) {
         err = cci_credentials_read (out_credentials, reply);
     }
-    
+
     krb5int_ipc_stream_release (reply);
-    
+
     return cci_check_error (err);
 }
 
@@ -182,28 +182,28 @@ cc_int32 ccapi_credentials_iterator_clone (cc_credentials_iterator_t  in_credent
     cci_credentials_iterator_t credentials_iterator = (cci_credentials_iterator_t) in_credentials_iterator;
     k5_ipc_stream reply = NULL;
     cci_identifier_t identifier = NULL;
-        
+
     if (!in_credentials_iterator ) { err = cci_check_error (ccErrBadParam); }
     if (!out_credentials_iterator) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         err =  cci_ipc_send (cci_credentials_iterator_next_msg_id,
                              credentials_iterator->identifier,
                              NULL,
                              &reply);
     }
-    
+
     if (!err) {
         err =  cci_identifier_read (&identifier, reply);
     }
-    
+
     if (!err) {
         err = cci_credentials_iterator_new (out_credentials_iterator, identifier);
     }
-    
+
     krb5int_ipc_stream_release (reply);
     cci_identifier_release (identifier);
-    
+
     return cci_check_error (err);
 }
 
@@ -218,14 +218,14 @@ cc_int32 cci_credentials_iterator_get_compat_version (cc_credentials_iterator_t 
 {
     cc_int32 err = ccNoError;
     cci_credentials_iterator_t credentials_iterator = (cci_credentials_iterator_t) in_credentials_iterator;
-    
+
     if (!in_credentials_iterator) { err = cci_check_error (ccErrBadParam); }
     if (!out_compat_version     ) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         *out_compat_version = credentials_iterator->compat_version;
     }
-    
+
     return cci_check_error (err);
 }
 
@@ -236,12 +236,12 @@ cc_int32 cci_credentials_iterator_set_compat_version (cc_credentials_iterator_t 
 {
     cc_int32 err = ccNoError;
     cci_credentials_iterator_t credentials_iterator = (cci_credentials_iterator_t) io_credentials_iterator;
-    
+
     if (!io_credentials_iterator) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         credentials_iterator->compat_version = in_compat_version;
     }
-    
+
     return cci_check_error (err);
 }

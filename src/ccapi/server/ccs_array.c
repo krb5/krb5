@@ -31,7 +31,7 @@
 
 static cc_int32 ccs_client_object_release (cci_array_object_t io_client)
 {
-    return cci_check_error (ccs_client_release ((ccs_client_t) io_client));    
+    return cci_check_error (ccs_client_release ((ccs_client_t) io_client));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -88,7 +88,7 @@ cc_int32 ccs_client_array_remove (ccs_client_array_t io_array,
 
 static cc_int32 ccs_lock_object_release (cci_array_object_t io_lock)
 {
-    return cci_check_error (ccs_lock_release ((ccs_lock_t) io_lock));    
+    return cci_check_error (ccs_lock_release ((ccs_lock_t) io_lock));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -154,7 +154,7 @@ cc_int32 ccs_lock_array_move (ccs_lock_array_t  io_array,
 
 static cc_int32 ccs_callback_object_release (cci_array_object_t io_callback)
 {
-    return cci_check_error (ccs_callback_release ((ccs_callback_t) io_callback));    
+    return cci_check_error (ccs_callback_release ((ccs_callback_t) io_callback));
 }
 
 /* ------------------------------------------------------------------------ */
@@ -286,7 +286,7 @@ cc_uint64 ccs_iteratorref_array_count (ccs_iteratorref_array_t in_array)
 ccs_generic_list_iterator_t ccs_iteratorref_array_object_at_index (ccs_iteratorref_array_t io_array,
                                                                    cc_uint64               in_position)
 {
-    return (ccs_generic_list_iterator_t) cci_array_object_at_index (io_array, 
+    return (ccs_generic_list_iterator_t) cci_array_object_at_index (io_array,
                                                                     in_position);
 }
 
@@ -296,8 +296,8 @@ cc_int32 ccs_iteratorref_array_insert (ccs_iteratorref_array_t     io_array,
 				       ccs_generic_list_iterator_t in_iterator,
 				       cc_uint64                   in_position)
 {
-    return cci_array_insert (io_array, 
-                             (cci_array_object_t) in_iterator, 
+    return cci_array_insert (io_array,
+                             (cci_array_object_t) in_iterator,
                              in_position);
 }
 

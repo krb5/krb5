@@ -29,7 +29,7 @@
 
 #include "windows.h"
 
-#ifdef __cplusplus    // If used by C++ code, 
+#ifdef __cplusplus    // If used by C++ code,
 extern "C" {          // we need to export the C interface
 #endif
 

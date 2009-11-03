@@ -1,6 +1,6 @@
 /*
  * Copyright 1997 by Massachusetts Institute of Technology
- * 
+ *
  * Copyright 1987, 1988 by MIT Student Information Processing Board
  *
  * Permission to use, copy, modify, and distribute this software
@@ -74,7 +74,7 @@ static void default_com_err_proc (const char *whoami, errcode_t code,
 	    MessageBox ((HWND)NULL, errbuf, "Kerberos", MB_ICONEXCLAMATION);
 
 #else /* !_WIN32 */
-    
+
 	if (whoami) {
 		fputs(whoami, stderr);
 		fputs(": ", stderr);

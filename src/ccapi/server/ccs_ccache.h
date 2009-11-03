@@ -40,7 +40,7 @@ cc_int32 ccs_ccache_reset (ccs_ccache_t            io_ccache,
                            cc_uint32               in_cred_vers,
                            const char             *in_principal);
 
-cc_int32 ccs_ccache_swap_contents (ccs_ccache_t           io_source_ccache, 
+cc_int32 ccs_ccache_swap_contents (ccs_ccache_t           io_source_ccache,
                                    ccs_ccache_t           io_destination_ccache,
 				   ccs_cache_collection_t io_cache_collection);
 

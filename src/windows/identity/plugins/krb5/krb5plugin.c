@@ -51,8 +51,8 @@ krb5_context k5_identpro_ctx = NULL;
 /*  The system message handler.
 
     Runs in the context of the plugin thread */
-khm_int32 KHMAPI 
-k5_msg_system(khm_int32 msg_type, khm_int32 msg_subtype, 
+khm_int32 KHMAPI
+k5_msg_system(khm_int32 msg_type, khm_int32 msg_subtype,
               khm_ui_4 uparam, void * vparam)
 {
     khm_int32 rv = KHM_ERROR_SUCCESS;
@@ -70,7 +70,7 @@ k5_msg_system(khm_int32 msg_type, khm_int32 msg_subtype,
             ct.id = KCDB_CREDTYPE_AUTO;
             ct.name = KRB5_CREDTYPE_NAME;
 
-            if(LoadString(hResModule, IDS_KRB5_SHORT_DESC, 
+            if(LoadString(hResModule, IDS_KRB5_SHORT_DESC,
                           buf, ARRAYLENGTH(buf))) {
                 StringCbLength(buf, KCDB_MAXCB_SHORT_DESC, &cbsize);
                 cbsize += sizeof(wchar_t);
@@ -81,7 +81,7 @@ k5_msg_system(khm_int32 msg_type, khm_int32 msg_subtype,
             /* even though ideally we should be setting limits
                based KCDB_MAXCB_LONG_DESC, our long description
                actually fits nicely in KCDB_MAXCB_SHORT_DESC */
-            if(LoadString(hResModule, IDS_KRB5_LONG_DESC, 
+            if(LoadString(hResModule, IDS_KRB5_LONG_DESC,
                           buf, ARRAYLENGTH(buf))) {
                 StringCbLength(buf, KCDB_MAXCB_SHORT_DESC, &cbsize);
                 cbsize += sizeof(wchar_t);
@@ -191,8 +191,8 @@ k5_msg_kcdb(khm_int32 msg_type, khm_int32 msg_subtype,
 
     Runs in the context of the Krb5 plugin
 */
-khm_int32 KHMAPI 
-k5_msg_cred(khm_int32 msg_type, khm_int32 msg_subtype, 
+khm_int32 KHMAPI
+k5_msg_cred(khm_int32 msg_type, khm_int32 msg_subtype,
             khm_ui_4 uparam, void * vparam)
 {
     khm_int32 rv = KHM_ERROR_SUCCESS;
@@ -237,7 +237,7 @@ k5_msg_cred(khm_int32 msg_type, khm_int32 msg_subtype,
 
     default:
         if(IS_CRED_ACQ_MSG(msg_subtype))
-            return k5_msg_cred_dialog(msg_type, msg_subtype, 
+            return k5_msg_cred_dialog(msg_type, msg_subtype,
                                       uparam, vparam);
     }
 
@@ -249,8 +249,8 @@ k5_msg_cred(khm_int32 msg_type, khm_int32 msg_subtype,
 
     Runs in the context of the Krb5 plugin
 */
-khm_int32 KHMAPI 
-k5_msg_callback(khm_int32 msg_type, khm_int32 msg_subtype, 
+khm_int32 KHMAPI
+k5_msg_callback(khm_int32 msg_type, khm_int32 msg_subtype,
                 khm_ui_4 uparam, void * vparam)
 {
     switch(msg_type) {

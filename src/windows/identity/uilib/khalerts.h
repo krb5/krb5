@@ -66,7 +66,7 @@ typedef struct tag_khui_alert khui_alert;
 
 /*! \brief Flags for an alert */
 enum khui_alert_flags {
-    KHUI_ALERT_FLAG_FREE_STRUCT     =0x00000001, 
+    KHUI_ALERT_FLAG_FREE_STRUCT     =0x00000001,
     /*!< Internal. Free the structure once the alert is done. */
 
     KHUI_ALERT_FLAG_FREE_TITLE      =0x00000002,
@@ -144,7 +144,7 @@ typedef enum tag_khui_alert_types {
     The returned result is a held pointer to a ::khui_alert object.
     Use khui_alert_release() to release the object.
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_alert_create_empty(khui_alert ** result);
 
 /*! \brief Create a simple alert object
@@ -163,33 +163,33 @@ khui_alert_create_empty(khui_alert ** result);
     \param[out] result Receives a held pointer to a ::khui_alert
         object upon successful completion.
  */
-KHMEXP khm_int32 KHMAPI 
-khui_alert_create_simple(const wchar_t * title, 
-                         const wchar_t * message, 
-                         khm_int32 severity, 
+KHMEXP khm_int32 KHMAPI
+khui_alert_create_simple(const wchar_t * title,
+                         const wchar_t * message,
+                         khm_int32 severity,
                          khui_alert ** result);
 
 /*! \brief Set the title of an alert object
 
     The title is limited by ::KHUI_MAXCCH_TITLE.
  */
-KHMEXP khm_int32 KHMAPI 
-khui_alert_set_title(khui_alert * alert, 
+KHMEXP khm_int32 KHMAPI
+khui_alert_set_title(khui_alert * alert,
                      const wchar_t * title);
 
 /*! \brief Set the message of an alert object
 
     The message is limited by ::KHUI_MAXCCH_MESSAGE.
  */
-KHMEXP khm_int32 KHMAPI 
-khui_alert_set_message(khui_alert * alert, 
+KHMEXP khm_int32 KHMAPI
+khui_alert_set_message(khui_alert * alert,
                        const wchar_t * message);
 
-/*! \brief Set the suggestion of an alert object 
+/*! \brief Set the suggestion of an alert object
 
     The suggestion is limited by ::KHUI_MAXCCH_SUGGESTION
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_alert_set_suggestion(khui_alert * alert,
                           const wchar_t * suggestion);
 
@@ -197,8 +197,8 @@ khui_alert_set_suggestion(khui_alert * alert,
 
     The severity value is one of ::tag_kherr_severity
  */
-KHMEXP khm_int32 KHMAPI 
-khui_alert_set_severity(khui_alert * alert, 
+KHMEXP khm_int32 KHMAPI
+khui_alert_set_severity(khui_alert * alert,
                         khm_int32 severity);
 
 /*! \brief Sets the flags of the alert
@@ -215,15 +215,15 @@ khui_alert_set_flags(khui_alert * alert, khm_int32 mask, khm_int32 flags);
 
     \see khui_alert_add_command()
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_alert_clear_commands(khui_alert * alert);
 
 /*! \brief Add a command to an alert object
 
     The command ID should be a valid registered action.
  */
-KHMEXP khm_int32 KHMAPI 
-khui_alert_add_command(khui_alert * alert, 
+KHMEXP khm_int32 KHMAPI
+khui_alert_add_command(khui_alert * alert,
                        khm_int32 command_id);
 
 /*! \brief Set the type of alert
@@ -261,15 +261,15 @@ khui_alert_get_response(khui_alert * alert);
 
     The method used to display the alert is as follows:
 
-    - A balloon alert will be shown if one of the following is true: 
-      - The NetIDMgr application is minimized or in the background.  
-      - ::KHUI_ALERT_FLAG_REQUEST_BALLOON is specified in \a flags.  
+    - A balloon alert will be shown if one of the following is true:
+      - The NetIDMgr application is minimized or in the background.
+      - ::KHUI_ALERT_FLAG_REQUEST_BALLOON is specified in \a flags.
     - Otherwise an alert window will be shown.
 
     If the message, title of the alert is too long to fit in a balloon
     prompt, there's a suggestion or if there are custom commands then
     a placeholder balloon prompt will be shown which when clicked on,
-    shows the actual alert in an alert window.  
+    shows the actual alert in an alert window.
 
     An exception is when ::KHUI_ALERT_FLAG_DEFACTION is specified in
     flags.  In this case instead of a placeholder balloon prompt, one
@@ -312,7 +312,7 @@ khui_alert_get_response(khui_alert * alert);
       retrieved via a call to khui_alert_get_response().
 
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_alert_show(khui_alert * alert);
 
 /*! \brief Display a modal alert
@@ -341,9 +341,9 @@ khui_alert_queue(khui_alert * alert);
 
     \see khui_alert_show()
  */
-KHMEXP khm_int32 KHMAPI 
-khui_alert_show_simple(const wchar_t * title, 
-                       const wchar_t * message, 
+KHMEXP khm_int32 KHMAPI
+khui_alert_show_simple(const wchar_t * title,
+                       const wchar_t * message,
                        khm_int32 severity);
 
 /*! \brief Obtain a hold on the alert
@@ -353,7 +353,7 @@ khui_alert_show_simple(const wchar_t * title,
 
     Use khui_alert_release() to release the hold.
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_alert_hold(khui_alert * alert);
 
 /*! \brief Release the hold on the alert
@@ -362,10 +362,10 @@ khui_alert_hold(khui_alert * alert);
     return a held pointer to an alert or implicitly obtains a hold on
     it need to be undone through a call to khui_alert_release().
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_alert_release(khui_alert * alert);
 
-/*! \brief Lock an alert 
+/*! \brief Lock an alert
 
     Locking an alert disallows any other thread from accessing the
     alert at the same time.  NetIDMgr keeps a global list of all alert
@@ -387,14 +387,14 @@ khui_alert_release(khui_alert * alert);
         require obtaining a lock, as they perform synchronization
         internally.
 */
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_alert_lock(khui_alert * alert);
 
-/*! \brief Unlock an alert 
+/*! \brief Unlock an alert
 
     \see khui_alert_lock()
 */
-KHMEXP void KHMAPI 
+KHMEXP void KHMAPI
 khui_alert_unlock(khui_alert * alert);
 
 /*!@}*/

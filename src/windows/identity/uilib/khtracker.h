@@ -29,7 +29,7 @@
 
 #include<time.h>
 
-/*! \addtogroup khui 
+/*! \addtogroup khui
 
 @{ */
 

@@ -29,7 +29,7 @@
 
 #include "cci_common.h"
 
-/* Used for freeing ccapi context in thread fini calls 
+/* Used for freeing ccapi context in thread fini calls
  * Does not tell the server you are exiting. */
 cc_int32 cci_context_destroy (cc_context_t in_context);
 
@@ -53,17 +53,17 @@ cc_int32 ccapi_context_open_default_ccache (cc_context_t  in_context,
 cc_int32 ccapi_context_create_ccache (cc_context_t  in_context,
                                       const char   *in_name,
                                       cc_uint32     in_cred_vers,
-                                      const char   *in_principal, 
+                                      const char   *in_principal,
                                       cc_ccache_t  *out_ccache);
 
 cc_int32 ccapi_context_create_default_ccache (cc_context_t  in_context,
                                               cc_uint32     in_cred_vers,
-                                              const char   *in_principal, 
+                                              const char   *in_principal,
                                               cc_ccache_t  *out_ccache);
 
 cc_int32 ccapi_context_create_new_ccache (cc_context_t in_context,
                                           cc_uint32    in_cred_vers,
-                                          const char  *in_principal, 
+                                          const char  *in_principal,
                                           cc_ccache_t *out_ccache);
 
 cc_int32 ccapi_context_new_ccache_iterator (cc_context_t          in_context,

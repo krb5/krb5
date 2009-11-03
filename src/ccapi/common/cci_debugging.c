@@ -29,18 +29,18 @@
 
 /* ------------------------------------------------------------------------ */
 
-cc_int32 _cci_check_error (cc_int32    in_error, 
-                           const char *in_function, 
-                           const char *in_file, 
+cc_int32 _cci_check_error (cc_int32    in_error,
+                           const char *in_function,
+                           const char *in_file,
                            int         in_line)
 {
     /* Do not log for flow control errors or when there is no error at all */
     if (in_error != ccNoError && in_error != ccIteratorEnd) {
-        cci_debug_printf ("%s() got %d at %s: %d", in_function, 
+        cci_debug_printf ("%s() got %d at %s: %d", in_function,
                           in_error, in_file, in_line);
     }
-    
-    return in_error;    
+
+    return in_error;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -48,7 +48,7 @@ cc_int32 _cci_check_error (cc_int32    in_error,
 void cci_debug_printf (const char *in_format, ...)
 {
     va_list args;
-    
+
     va_start (args, in_format);
     cci_os_debug_vprintf (in_format, args);
     va_end (args);

@@ -6,7 +6,7 @@
 * require a specific license from the United States Government.
 * It is the responsibility of any person or organization contemplating
 * export to obtain such a license before exporting.
-* 
+*
 * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
 * distribute this software and its documentation for any purpose and
 * without fee is hereby granted, provided that the above copyright
@@ -62,7 +62,7 @@ typedef krb5_error_code (*KLPrompterProcPtr) (krb5_context  context,
 KLStatus __KLSetApplicationPrompter (KLPrompterProcPtr inPrompter);
 
 #endif /* KERBEROSLOGIN_DEPRECATED */
-    
+
 /*****************/
 /*** Functions ***/
 /*****************/
@@ -93,8 +93,8 @@ KLStatus __KLGetTripletFromPrincipal (KLPrincipal         inPrincipal,
 KLStatus __KLCreatePrincipalFromKerberos5Principal (krb5_principal  inPrincipal,
                                                     KLPrincipal    *outPrincipal);
 
-KLStatus __KLGetKerberos5PrincipalFromPrincipal (KLPrincipal     inPrincipal, 
-                                                 krb5_context    inContext, 
+KLStatus __KLGetKerberos5PrincipalFromPrincipal (KLPrincipal     inPrincipal,
+                                                 krb5_context    inContext,
                                                  krb5_principal *outKrb5Principal);
 
 KLStatus __KLGetRealmFromPrincipal (KLPrincipal inPrincipal, char **outRealm);
@@ -120,4 +120,3 @@ KLStatus __KLRemoveKeychainPasswordForPrincipal (KLPrincipal inPrincipal);
 #endif
 
 #endif /* __KERBEROSLOGINPRIVATE__ */
-

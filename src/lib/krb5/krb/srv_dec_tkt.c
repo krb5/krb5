@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/krb/srv_dec_tkt.c
  *
@@ -24,7 +25,7 @@
  * or implied warranty.
  *
  *
- * Server decrypt ticket via keytab or keyblock. 
+ * Server decrypt ticket via keytab or keyblock.
  *
  * Different from krb5_rd_req_decoded. (krb5/src/lib/krb5/krb/rd_req_dec.c)
  *   - No krb5_principal_compare or KRB5KRB_AP_ERR_BADMATCH error.
@@ -33,94 +34,94 @@
  *   - No address checking or KRB5KRB_AP_ERR_BADADDR error.
  *   - No time validation.
  *   - No permitted enctype validation or KRB5_NOPERM_ETYPE error.
- *   - Does not free ticket->enc_part2 on error. 
+ *   - Does not free ticket->enc_part2 on error.
  */
 
 #include <k5-int.h>
 
-#ifndef LEAN_CLIENT 
+#ifndef LEAN_CLIENT
 krb5_error_code KRB5_CALLCONV
 krb5int_server_decrypt_ticket_keyblock(krb5_context context,
-				       const krb5_keyblock *key,
-				       krb5_ticket *ticket)
+                                       const krb5_keyblock *key,
+                                       krb5_ticket *ticket)
 {
     krb5_error_code retval;
     krb5_data *realm;
     krb5_transited *trans;
 
     retval = krb5_decrypt_tkt_part(context, key, ticket);
-    if (retval) 
-	goto done;
+    if (retval)
+        goto done;
 
     trans = &ticket->enc_part2->transited;
     realm = &ticket->enc_part2->client->realm;
     if (trans->tr_contents.data && *trans->tr_contents.data) {
-	retval = krb5_check_transited_list(context, &trans->tr_contents,
-					   realm, &ticket->server->realm);
-	goto done;
+        retval = krb5_check_transited_list(context, &trans->tr_contents,
+                                           realm, &ticket->server->realm);
+        goto done;
     }
 
-    if (ticket->enc_part2->flags & TKT_FLG_INVALID) {	/* ie, KDC_OPT_POSTDATED */
-	retval = KRB5KRB_AP_ERR_TKT_INVALID;
-	goto done;
+    if (ticket->enc_part2->flags & TKT_FLG_INVALID) {   /* ie, KDC_OPT_POSTDATED */
+        retval = KRB5KRB_AP_ERR_TKT_INVALID;
+        goto done;
     }
 
-  done:
+done:
     return retval;
 }
 
 
 krb5_error_code KRB5_CALLCONV
 krb5_server_decrypt_ticket_keytab(krb5_context context,
-				  const krb5_keytab keytab,
-				  krb5_ticket *ticket)
+                                  const krb5_keytab keytab,
+                                  krb5_ticket *ticket)
 {
-    krb5_error_code 	  retval;
-    krb5_keytab_entry 	  ktent;
+    krb5_error_code       retval;
+    krb5_keytab_entry     ktent;
 
     retval = KRB5_KT_NOTFOUND;
 
     if (keytab->ops->start_seq_get == NULL) {
-	retval = krb5_kt_get_entry(context, keytab,
-				   ticket->server,
-				   ticket->enc_part.kvno,
-				   ticket->enc_part.enctype, &ktent);
-	if (retval == 0) {
-	    retval = krb5int_server_decrypt_ticket_keyblock(context, &ktent.key, ticket);
+        retval = krb5_kt_get_entry(context, keytab,
+                                   ticket->server,
+                                   ticket->enc_part.kvno,
+                                   ticket->enc_part.enctype, &ktent);
+        if (retval == 0) {
+            retval = krb5int_server_decrypt_ticket_keyblock(context, &ktent.key, ticket);
 
-	    (void) krb5_free_keytab_entry_contents(context, &ktent);
-	}
+            (void) krb5_free_keytab_entry_contents(context, &ktent);
+        }
     } else {
-	krb5_error_code code;
-	krb5_kt_cursor cursor;
+        krb5_error_code code;
+        krb5_kt_cursor cursor;
 
-	retval = krb5_kt_start_seq_get(context, keytab, &cursor);
-	if (retval != 0)
-	    goto map_error;
+        retval = krb5_kt_start_seq_get(context, keytab, &cursor);
+        if (retval != 0)
+            goto map_error;
 
-	while ((code = krb5_kt_next_entry(context, keytab,
-					  &ktent, &cursor)) == 0) {
-	    if (ktent.key.enctype != ticket->enc_part.enctype)
-		continue;
+        while ((code = krb5_kt_next_entry(context, keytab,
+                                          &ktent, &cursor)) == 0) {
+            if (ktent.key.enctype != ticket->enc_part.enctype)
+                continue;
 
-	    retval = krb5int_server_decrypt_ticket_keyblock(context, &ktent.key, ticket);
-	    if (retval == 0) {
-		krb5_principal tmp;
+            retval = krb5int_server_decrypt_ticket_keyblock(context, &ktent.key, ticket);
+            if (retval == 0) {
+                krb5_principal tmp;
 
-		retval = krb5_copy_principal(context, ktent.principal, &tmp);
-		if (retval == 0) {
-		    krb5_free_principal(context, ticket->server);
-		    ticket->server = tmp;
-		}
-		(void) krb5_free_keytab_entry_contents(context, &ktent);
-		break;
-	    }
-	    (void) krb5_free_keytab_entry_contents(context, &ktent);
-	}
+                retval = krb5_copy_principal(context, ktent.principal, &tmp);
+                if (retval == 0) {
+                    krb5_free_principal(context, ticket->server);
+                    ticket->server = tmp;
+                }
+                (void) krb5_free_keytab_entry_contents(context, &ktent);
+                break;
+            }
+            (void) krb5_free_keytab_entry_contents(context, &ktent);
+        }
 
-	code = krb5_kt_end_seq_get(context, keytab, &cursor);
-	if (code != 0)
-	    retval = code;
+        code = krb5_kt_end_seq_get(context, keytab, &cursor);
+        if (code != 0)
+            retval = code;
     }
 
 map_error:
@@ -128,13 +129,12 @@ map_error:
     case KRB5_KT_KVNONOTFOUND:
     case KRB5_KT_NOTFOUND:
     case KRB5KRB_AP_ERR_BAD_INTEGRITY:
-	retval = KRB5KRB_AP_WRONG_PRINC;
-	break;
+        retval = KRB5KRB_AP_WRONG_PRINC;
+        break;
     default:
-	break;
+        break;
     }
 
     return retval;
 }
 #endif /* LEAN_CLIENT */
-

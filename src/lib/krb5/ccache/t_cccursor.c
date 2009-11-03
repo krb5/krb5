@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/ccache/t_cccursor.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -101,22 +102,22 @@ cr_cache(krb5_context context, const char *ccname, const char *pname)
 
     ret = krb5_cc_resolve(context, ccname, &ccache);
     if (ret)
-	goto errout;
+        goto errout;
     if (pname != NULL) {
-	ret = krb5_parse_name(context, pname, &princ);
-	if (ret)
-	    return ret;
-	ret = krb5_cc_initialize(context, ccache, princ);
-	if (ret)
-	    goto errout;
-	printf("created cache %s with principal %s\n", ccname, pname);
+        ret = krb5_parse_name(context, pname, &princ);
+        if (ret)
+            return ret;
+        ret = krb5_cc_initialize(context, ccache, princ);
+        if (ret)
+            goto errout;
+        printf("created cache %s with principal %s\n", ccname, pname);
     } else
-	printf("created cache %s (uninitialized)\n", ccname);
+        printf("created cache %s (uninitialized)\n", ccname);
 errout:
     if (princ != NULL)
-	krb5_free_principal(context, princ);
+        krb5_free_principal(context, princ);
     if (ccache != NULL)
-	krb5_cc_close(context, ccache);
+        krb5_cc_close(context, ccache);
     return ret;
 }
 
@@ -128,15 +129,15 @@ dest_cache(krb5_context context, const char *ccname, const char *pname)
 
     ret = krb5_cc_resolve(context, ccname, &ccache);
     if (ret)
-	goto errout;
+        goto errout;
     if (pname != NULL) {
-	ret = krb5_cc_destroy(context, ccache);
-	if (ret)
-	    return ret;
-	printf("Destroyed cache %s\n", ccname);
+        ret = krb5_cc_destroy(context, ccache);
+        if (ret)
+            return ret;
+        printf("Destroyed cache %s\n", ccname);
     } else {
-	printf("Closed cache %s (uninitialized)\n", ccname);
-	ret = krb5_cc_close(context, ccache);
+        printf("Closed cache %s (uninitialized)\n", ccname);
+        ret = krb5_cc_close(context, ccache);
     }
 errout:
     return ret;
@@ -147,11 +148,11 @@ do_chk_one(const char *prefix, const char *name, struct chklist *chk)
 {
 
     if (chk->pfx == NULL)
-	return 0;
+        return 0;
     if (strcmp(chk->pfx, prefix) || strcmp(chk->res, name)) {
-	fprintf(stderr, "MATCH FAILED: expected %s:%s\n",
-		chk->pfx, chk->res);
-	return 1;
+        fprintf(stderr, "MATCH FAILED: expected %s:%s\n",
+                chk->pfx, chk->res);
+        return 1;
     }
     return 0;
 }
@@ -175,33 +176,33 @@ do_chk(
     i = 0;
     printf(">>>\n");
     for (i = 0; ; i++) {
-	ret = krb5_cccol_cursor_next(context, cursor, &ccache);
-	if (ret) goto errout;
-	if (ccache == NULL) {
-	    printf("<<< end of list\n");
-	    break;
-	}
-	prefix = krb5_cc_get_type(context, ccache);
-	name = krb5_cc_get_name(context, ccache);
-	printf("cursor: %s:%s\n", prefix, name);
+        ret = krb5_cccol_cursor_next(context, cursor, &ccache);
+        if (ret) goto errout;
+        if (ccache == NULL) {
+            printf("<<< end of list\n");
+            break;
+        }
+        prefix = krb5_cc_get_type(context, ccache);
+        name = krb5_cc_get_name(context, ccache);
+        printf("cursor: %s:%s\n", prefix, name);
 
-	if (i < nmax) {
-	    if (do_chk_one(prefix, name, &chklist[i])) {
-		*good = 0;
-	    }
-	}
-	ret = krb5_cc_close(context, ccache);
-	if (ret) goto errout;
+        if (i < nmax) {
+            if (do_chk_one(prefix, name, &chklist[i])) {
+                *good = 0;
+            }
+        }
+        ret = krb5_cc_close(context, ccache);
+        if (ret) goto errout;
     }
 
     if (i != nmax) {
-	fprintf(stderr, "total ccaches %d != expected ccaches %d\n", i, nmax);
-	*good = 0;
+        fprintf(stderr, "total ccaches %d != expected ccaches %d\n", i, nmax);
+        *good = 0;
     }
 
 errout:
     if (cursor != NULL)
-	krb5_cccol_cursor_free(context, &cursor);
+        krb5_cccol_cursor_free(context, &cursor);
     return ret;
 }
 
@@ -216,8 +217,8 @@ main(int argc, char *argv[])
     if (ret) exit(1);
 
     for (i = 0; i < NCRLIST; i++) {
-	ret = cr_cache(context, crlist[i].ccname, crlist[i].pname);
-	if (ret) goto errout;
+        ret = cr_cache(context, crlist[i].ccname, crlist[i].pname);
+        if (ret) goto errout;
     }
 
 #ifdef HAVE_SETENV
@@ -228,7 +229,7 @@ main(int argc, char *argv[])
     printf("KRB5CCNAME=foo\n");
     ret = do_chk(context, chklist0, NCHKLIST0, &good);
     if (ret)
-	goto errout;
+        goto errout;
 
 #ifdef HAVE_SETENV
     setenv("KRB5CCNAME", "MEMORY:env", 1);
@@ -238,28 +239,28 @@ main(int argc, char *argv[])
     printf("KRB5CCNAME=MEMORY:env\n");
     ret = do_chk(context, chklist1, NCHKLIST1, &good);
     if (ret)
-	goto errout;
+        goto errout;
 
     ret = krb5_cc_set_default_name(context, "MEMORY:env");
     if (ret)
-	goto errout;
+        goto errout;
 
     printf("KRB5CCNAME=MEMORY:env, ccdefname=MEMORY:env\n");
     ret = do_chk(context, chklist2, NCHKLIST2, &good);
     if (ret)
-	goto errout;
+        goto errout;
 
     for (i = 0; i < NCRLIST; i++) {
-	ret = dest_cache(context, crlist[i].ccname, crlist[i].pname);
-	if (ret) goto errout;
+        ret = dest_cache(context, crlist[i].ccname, crlist[i].pname);
+        if (ret) goto errout;
     }
 
 errout:
     krb5_free_context(context);
     if (ret) {
-	com_err("main", ret, "");
-	exit(1);
+        com_err("main", ret, "");
+        exit(1);
     } else {
-	exit(!good);
+        exit(!good);
     }
 }

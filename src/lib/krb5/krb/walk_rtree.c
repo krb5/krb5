@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/krb/walk_rtree.c
  *
@@ -107,19 +108,19 @@ krb5_walk_realm_tree(
     char **capvals;
 
     if (client->data == NULL || server->data == NULL)
-	return KRB5_NO_TKT_IN_RLM;
+        return KRB5_NO_TKT_IN_RLM;
 
     if (client->length == server->length &&
-	memcmp(client->data, server->data, server->length) == 0) {
-	return KRB5_NO_TKT_IN_RLM;
+        memcmp(client->data, server->data, server->length) == 0) {
+        return KRB5_NO_TKT_IN_RLM;
     }
     retval = rtree_capath_vals(context, client, server, &capvals);
     if (retval)
-	return retval;
+        return retval;
 
     if (capvals != NULL) {
-	retval = rtree_capath_tree(context, client, server, capvals, tree);
-	return retval;
+        retval = rtree_capath_tree(context, client, server, capvals, tree);
+        return retval;
     }
 
     retval = rtree_hier_tree(context, client, server, tree, realm_sep);
@@ -148,24 +149,24 @@ krb5_walk_realm_tree(
  *
  * [capaths]
  * ANL.GOV = {
- *		NERSC.GOV = ES.NET
- *		PNL.GOV = ES.NET
- *		ES.NET = .
- *		HAL.COM = K5.MOON
- *		HAL.COM = K5.JUPITER
+ *              NERSC.GOV = ES.NET
+ *              PNL.GOV = ES.NET
+ *              ES.NET = .
+ *              HAL.COM = K5.MOON
+ *              HAL.COM = K5.JUPITER
  * }
  * NERSC.GOV = {
- *		ANL.GOV = ES.NET
+ *              ANL.GOV = ES.NET
  * }
  * PNL.GOV = {
- *		ANL.GOV = ES.NET
+ *              ANL.GOV = ES.NET
  * }
  * ES.NET = {
- *		ANL.GOV = .
+ *              ANL.GOV = .
  * }
  * HAL.COM = {
- *		ANL.GOV = K5.JUPITER
- *		ANL.GOV = K5.MOON
+ *              ANL.GOV = K5.JUPITER
+ *              ANL.GOV = K5.MOON
  * }
  *
  * In the above a "." is used to mean directly connected since the
@@ -202,20 +203,20 @@ rtree_capath_tree(
     *rettree = NULL;
     tree = pprinc = NULL;
     for (nvals = 0; vals[nvals] != NULL; nvals++)
-	;
+        ;
     if (vals[0] != NULL && *vals[0] == '.') {
-	nlinks = 0;
+        nlinks = 0;
     } else {
-	nlinks = nvals;
+        nlinks = nvals;
     }
     nprincs = nlinks + 2;
     tree = calloc(nprincs + 1, sizeof(krb5_principal));
     if (tree == NULL) {
-	retval = ENOMEM;
-	goto error;
+        retval = ENOMEM;
+        goto error;
     }
     for (i = 0; i < nprincs + 1; i++)
-	tree[i] = NULL;
+        tree[i] = NULL;
     /* Invariant: PPRINC points one past end of list. */
     pprinc = &tree[0];
     /* Local TGS name */
@@ -223,11 +224,11 @@ rtree_capath_tree(
     if (retval) goto error;
     srcrealm = *client;
     for (i = 0; i < nlinks; i++) {
-	dstrealm.data = vals[i];
-	dstrealm.length = strcspn(vals[i], "\t ");
-	retval = krb5_tgtname(context, &dstrealm, &srcrealm, pprinc++);
-	if (retval) goto error;
-	srcrealm = dstrealm;
+        dstrealm.data = vals[i];
+        dstrealm.length = strcspn(vals[i], "\t ");
+        retval = krb5_tgtname(context, &dstrealm, &srcrealm, pprinc++);
+        if (retval) goto error;
+        srcrealm = dstrealm;
     }
     retval = krb5_tgtname(context, server, &srcrealm, pprinc++);
     if (retval) goto error;
@@ -236,12 +237,12 @@ rtree_capath_tree(
 error:
     profile_free_list(vals);
     if (retval) {
-	while (pprinc != NULL && pprinc > &tree[0]) {
-	    /* krb5_free_principal() correctly handles null input */
-	    krb5_free_principal(context, *--pprinc);
-	    *pprinc = NULL;
-	}
-	free(tree);
+        while (pprinc != NULL && pprinc > &tree[0]) {
+            /* krb5_free_principal() correctly handles null input */
+            krb5_free_principal(context, *--pprinc);
+            *pprinc = NULL;
+        }
+        free(tree);
     }
     return retval;
 }
@@ -267,15 +268,15 @@ rtree_capath_vals(
 
     clientz = calloc(client->length + 1, 1);
     if (clientz == NULL) {
-	retval = ENOMEM;
-	goto error;
+        retval = ENOMEM;
+        goto error;
     }
     memcpy(clientz, client->data, client->length);
 
     serverz = calloc(server->length + 1, 1);
     if (serverz == NULL) {
-	retval = ENOMEM;
-	goto error;
+        retval = ENOMEM;
+        goto error;
     }
     memcpy(serverz, server->data, server->length);
 
@@ -287,13 +288,13 @@ rtree_capath_vals(
     switch (retval) {
     case PROF_NO_SECTION:
     case PROF_NO_RELATION:
-	/*
-	 * Not found; don't return an error.
-	 */
-	retval = 0;
-	break;
+        /*
+         * Not found; don't return an error.
+         */
+        retval = 0;
+        break;
     default:
-	break;
+        break;
     }
 error:
     free(clientz);
@@ -320,31 +321,31 @@ rtree_hier_tree(
 
     *rettree = NULL;
     retval = rtree_hier_realms(context, client, server,
-			       &realms, &nrealms, sep);
+                               &realms, &nrealms, sep);
     if (retval)
-	return retval;
+        return retval;
     nprincs = nrealms;
     pprinc = tree = calloc(nprincs + 1, sizeof(krb5_principal));
     if (tree == NULL) {
-	retval = ENOMEM;
-	goto error;
+        retval = ENOMEM;
+        goto error;
     }
     for (i = 0; i < nrealms; i++)
-	tree[i] = NULL;
+        tree[i] = NULL;
     srcrealm = client;
     for (i = 0; i < nrealms; i++) {
-	dstrealm = &realms[i];
-	retval = krb5_tgtname(context, dstrealm, srcrealm, pprinc++);
-	if (retval) goto error;
-	srcrealm = dstrealm;
+        dstrealm = &realms[i];
+        retval = krb5_tgtname(context, dstrealm, srcrealm, pprinc++);
+        if (retval) goto error;
+        srcrealm = dstrealm;
     }
     *rettree = tree;
     free_realmlist(context, realms, nrealms);
     return 0;
 error:
     while (pprinc != NULL && pprinc > tree) {
-	krb5_free_principal(context, *--pprinc);
-	*pprinc = NULL;
+        krb5_free_principal(context, *--pprinc);
+        *pprinc = NULL;
     }
     free_realmlist(context, realms, nrealms);
     free(tree);
@@ -389,27 +390,27 @@ rtree_hier_realms(
 
     rp = r = calloc(nctween + nstween, sizeof(krb5_data));
     if (r == NULL) {
-	retval = ENOMEM;
-	goto error;
+        retval = ENOMEM;
+        goto error;
     }
     /* Copy client realm "tweens" forward. */
     for (twp = ctweens; twp < &ctweens[nctween]; twp++) {
-	retval = krb5int_copy_data_contents(context, twp, rp);
-	if (retval) goto error;
-	rp++;
+        retval = krb5int_copy_data_contents(context, twp, rp);
+        if (retval) goto error;
+        rp++;
     }
     /* Copy server realm "tweens" backward. */
     for (twp = &stweens[nstween]; twp-- > stweens;) {
-	retval = krb5int_copy_data_contents(context, twp, rp);
-	if (retval) goto error;
-	rp++;
+        retval = krb5int_copy_data_contents(context, twp, rp);
+        if (retval) goto error;
+        rp++;
     }
 error:
     free(ctweens);
     free(stweens);
     if (retval) {
-	free_realmlist(context, r, rp - r);
-	return retval;
+        free_realmlist(context, r, rp - r);
+        return retval;
     }
     *realms = r;
     *nrealms = rp - r;
@@ -425,7 +426,7 @@ free_realmlist(
     size_t i;
 
     for (i = 0; i < nrealms; i++)
-	krb5_free_data_contents(context, &realms[i]);
+        krb5_free_data_contents(context, &realms[i]);
     free(realms);
 }
 
@@ -457,22 +458,22 @@ rtree_hier_tweens(
     *ntweens = n = 0;
 
     for (lp = p = r; p < &r[rlen]; p++) {
-	if (*p != sep && &p[1] != &r[rlen])
-	    continue;
-	if (lp == rtail && !dotail)
-	    break;
-	ntws = realloc(tws, (n + 1) * sizeof(krb5_data));
-	if (ntws == NULL) {
-	    free(tws);
-	    return ENOMEM;
-	}
-	tws = ntws;
-	tws[n].data = lp;
-	tws[n].length = &r[rlen] - lp;
-	n++;
-	if (lp == rtail)
-	    break;
-	lp = &p[1];
+        if (*p != sep && &p[1] != &r[rlen])
+            continue;
+        if (lp == rtail && !dotail)
+            break;
+        ntws = realloc(tws, (n + 1) * sizeof(krb5_data));
+        if (ntws == NULL) {
+            free(tws);
+            return ENOMEM;
+        }
+        tws = ntws;
+        tws[n].data = lp;
+        tws[n].length = &r[rlen] - lp;
+        n++;
+        if (lp == rtail)
+            break;
+        lp = &p[1];
     }
     *tweens = tws;
     *ntweens = n;
@@ -493,7 +494,7 @@ adjtail(struct hstate *c, struct hstate *s, int sep)
     cp = c->tail;
     sp = s->tail;
     if (cp == NULL || sp == NULL)
-	return;
+        return;
     /*
      * Is it a full component?  Yes, if it's the beginning of the
      * string or there's a separator to the left.
@@ -507,18 +508,18 @@ adjtail(struct hstate *c, struct hstate *s, int sep)
      * If they're both full components, we're done.
      */
     if (cfull && sfull) {
-	return;
+        return;
     } else if (c->dot != NULL && s->dot != NULL) {
-	cp = c->dot + 1;
-	sp = s->dot + 1;
-	/*
-	 * Out of bounds? Can only happen if there are trailing dots.
-	 */
-	if (cp >= &c->str[c->len] || sp >= &s->str[s->len]) {
-	    cp = sp = NULL;
-	}
+        cp = c->dot + 1;
+        sp = s->dot + 1;
+        /*
+         * Out of bounds? Can only happen if there are trailing dots.
+         */
+        if (cp >= &c->str[c->len] || sp >= &s->str[s->len]) {
+            cp = sp = NULL;
+        }
     } else {
-	cp = sp = NULL;
+        cp = sp = NULL;
     }
     c->tail = cp;
     s->tail = sp;
@@ -538,7 +539,7 @@ comtail(struct hstate *c, struct hstate *s, int sep)
     char *cp, *sp, *cdot, *sdot;
 
     if (c->len == 0 || s->len == 0)
-	return;
+        return;
 
     cdot = sdot = NULL;
     /*
@@ -553,26 +554,26 @@ comtail(struct hstate *c, struct hstate *s, int sep)
      * style realm), keep pointers to the latest pair.
      */
     while (cp > c->str && sp > s->str) {
-	if (*--cp != *--sp) {
-	    /*
-	     * Didn't match, so most recent match is one byte to the
-	     * right (or not at all).
-	     */
-	    cp++;
-	    sp++;
-	    break;
-	}
-	/*
-	 * Keep track of matching dots.
-	 */
-	if (*cp == sep) {
-	    cdot = cp;
-	    sdot = sp;
-	}
+        if (*--cp != *--sp) {
+            /*
+             * Didn't match, so most recent match is one byte to the
+             * right (or not at all).
+             */
+            cp++;
+            sp++;
+            break;
+        }
+        /*
+         * Keep track of matching dots.
+         */
+        if (*cp == sep) {
+            cdot = cp;
+            sdot = sp;
+        }
     }
     /* No match found at all. */
     if (cp == &c->str[c->len])
-	return;
+        return;
     c->tail = cp;
     s->tail = sp;
     c->dot = cdot;

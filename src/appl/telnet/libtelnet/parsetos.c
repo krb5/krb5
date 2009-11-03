@@ -1,4 +1,3 @@
-
 /*
  * The routine parsetos() for UNICOS 6.0/6.1, as well as more traditional
  * Unix systems.  This is part of UNICOS 7.0 and later.

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved
  *
@@ -8,170 +9,170 @@
 static char *rcsid = "$Header$";
 #endif
 
-#include	<sys/types.h>
-#include	<kadm5/admin.h>
-#include	"server_internal.h"
-#include	<stdlib.h>
-#include	<string.h>
-#include	<errno.h>
+#include        <sys/types.h>
+#include        <kadm5/admin.h>
+#include        "server_internal.h"
+#include        <stdlib.h>
+#include        <string.h>
+#include        <errno.h>
 
-#define MIN_PW_HISTORY	1
-#define	MIN_PW_CLASSES	1
-#define MAX_PW_CLASSES	5
-#define	MIN_PW_LENGTH	1
+#define MIN_PW_HISTORY  1
+#define MIN_PW_CLASSES  1
+#define MAX_PW_CLASSES  5
+#define MIN_PW_LENGTH   1
 
 /*
  * Function: kadm5_create_policy
- * 
+ *
  * Purpose: Create Policies in the policy DB.
  *
  * Arguments:
- *	entry	(input) The policy entry to be written out to the DB.
- *	mask	(input)	Specifies which fields in entry are to ge written out
- *			and which get default values.
- *	<return value> 0 if successful otherwise an error code is returned.
+ *      entry   (input) The policy entry to be written out to the DB.
+ *      mask    (input) Specifies which fields in entry are to ge written out
+ *                      and which get default values.
+ *      <return value> 0 if successful otherwise an error code is returned.
  *
  * Requires:
- *	Entry must be a valid principal entry, and mask have a valid value.
- * 
+ *      Entry must be a valid principal entry, and mask have a valid value.
+ *
  * Effects:
- *	Verifies that mask does not specify that the refcount should
- *	be set as part of the creation, and calls
- *	kadm5_create_policy_internal.  If the refcount *is*
- *	specified, returns KADM5_BAD_MASK.
+ *      Verifies that mask does not specify that the refcount should
+ *      be set as part of the creation, and calls
+ *      kadm5_create_policy_internal.  If the refcount *is*
+ *      specified, returns KADM5_BAD_MASK.
  */
 
 kadm5_ret_t
 kadm5_create_policy(void *server_handle,
-			 kadm5_policy_ent_t entry, long mask)
+                    kadm5_policy_ent_t entry, long mask)
 {
     CHECK_HANDLE(server_handle);
 
     krb5_clear_error_message(((kadm5_server_handle_t)server_handle)->context);
 
     if (mask & KADM5_REF_COUNT)
-	return KADM5_BAD_MASK;
+        return KADM5_BAD_MASK;
     else
-	return kadm5_create_policy_internal(server_handle, entry, mask);
+        return kadm5_create_policy_internal(server_handle, entry, mask);
 }
 
 /*
  * Function: kadm5_create_policy_internal
- * 
+ *
  * Purpose: Create Policies in the policy DB.
  *
  * Arguments:
- *	entry	(input) The policy entry to be written out to the DB.
- *	mask	(input)	Specifies which fields in entry are to ge written out
- *			and which get default values.
- *	<return value> 0 if successful otherwise an error code is returned.
+ *      entry   (input) The policy entry to be written out to the DB.
+ *      mask    (input) Specifies which fields in entry are to ge written out
+ *                      and which get default values.
+ *      <return value> 0 if successful otherwise an error code is returned.
  *
  * Requires:
- *	Entry must be a valid principal entry, and mask have a valid value.
- * 
+ *      Entry must be a valid principal entry, and mask have a valid value.
+ *
  * Effects:
- *	Writes the data to the database, and does a database sync if
- *	successful.
+ *      Writes the data to the database, and does a database sync if
+ *      successful.
  *
  */
 
 kadm5_ret_t
 kadm5_create_policy_internal(void *server_handle,
-				  kadm5_policy_ent_t entry, long mask)
+                             kadm5_policy_ent_t entry, long mask)
 {
     kadm5_server_handle_t handle = server_handle;
-    osa_policy_ent_rec	pent;
-    int			ret;
-    char		*p;
+    osa_policy_ent_rec  pent;
+    int                 ret;
+    char                *p;
 
     CHECK_HANDLE(server_handle);
 
     if ((entry == (kadm5_policy_ent_t) NULL) || (entry->policy == NULL))
-	return EINVAL;
+        return EINVAL;
     if(strlen(entry->policy) == 0)
-	return KADM5_BAD_POLICY;
+        return KADM5_BAD_POLICY;
     if (!(mask & KADM5_POLICY))
-	return KADM5_BAD_MASK;
-	
+        return KADM5_BAD_MASK;
+
     pent.name = entry->policy;
     p = entry->policy;
     while(*p != '\0') {
-	if(*p < ' ' || *p > '~')
-	    return KADM5_BAD_POLICY;
-	else
-	    p++;
+        if(*p < ' ' || *p > '~')
+            return KADM5_BAD_POLICY;
+        else
+            p++;
     }
     if (!(mask & KADM5_PW_MAX_LIFE))
-	pent.pw_max_life = 0;
+        pent.pw_max_life = 0;
     else
-	pent.pw_max_life = entry->pw_max_life;
+        pent.pw_max_life = entry->pw_max_life;
     if (!(mask & KADM5_PW_MIN_LIFE))
-	pent.pw_min_life = 0;
+        pent.pw_min_life = 0;
     else {
-	if((mask & KADM5_PW_MAX_LIFE)) {
-	    if(entry->pw_min_life > entry->pw_max_life && entry->pw_max_life != 0)
-		return KADM5_BAD_MIN_PASS_LIFE;
-	}
-	pent.pw_min_life = entry->pw_min_life;
+        if((mask & KADM5_PW_MAX_LIFE)) {
+            if(entry->pw_min_life > entry->pw_max_life && entry->pw_max_life != 0)
+                return KADM5_BAD_MIN_PASS_LIFE;
+        }
+        pent.pw_min_life = entry->pw_min_life;
     }
     if (!(mask & KADM5_PW_MIN_LENGTH))
-	pent.pw_min_length = MIN_PW_LENGTH;
+        pent.pw_min_length = MIN_PW_LENGTH;
     else {
-	if(entry->pw_min_length < MIN_PW_LENGTH)
-	    return KADM5_BAD_LENGTH;
-	pent.pw_min_length = entry->pw_min_length;
+        if(entry->pw_min_length < MIN_PW_LENGTH)
+            return KADM5_BAD_LENGTH;
+        pent.pw_min_length = entry->pw_min_length;
     }
     if (!(mask & KADM5_PW_MIN_CLASSES))
-	pent.pw_min_classes = MIN_PW_CLASSES;
+        pent.pw_min_classes = MIN_PW_CLASSES;
     else {
-	if(entry->pw_min_classes > MAX_PW_CLASSES || entry->pw_min_classes < MIN_PW_CLASSES)
-	    return KADM5_BAD_CLASS;
-	pent.pw_min_classes = entry->pw_min_classes;
+        if(entry->pw_min_classes > MAX_PW_CLASSES || entry->pw_min_classes < MIN_PW_CLASSES)
+            return KADM5_BAD_CLASS;
+        pent.pw_min_classes = entry->pw_min_classes;
     }
     if (!(mask & KADM5_PW_HISTORY_NUM))
-	pent.pw_history_num = MIN_PW_HISTORY;
+        pent.pw_history_num = MIN_PW_HISTORY;
     else {
-	if(entry->pw_history_num < MIN_PW_HISTORY)
-	    return KADM5_BAD_HISTORY;
-	else
-	    pent.pw_history_num = entry->pw_history_num;
+        if(entry->pw_history_num < MIN_PW_HISTORY)
+            return KADM5_BAD_HISTORY;
+        else
+            pent.pw_history_num = entry->pw_history_num;
     }
     if (!(mask & KADM5_REF_COUNT))
-	pent.policy_refcnt = 0;
+        pent.policy_refcnt = 0;
     else
-	pent.policy_refcnt = entry->policy_refcnt;
+        pent.policy_refcnt = entry->policy_refcnt;
 
     if (handle->api_version == KADM5_API_VERSION_3) {
-	if (!(mask & KADM5_PW_MAX_FAILURE))
-	    pent.pw_max_fail = 0;
-	else
-	    pent.pw_max_fail = entry->pw_max_fail;
-	if (!(mask & KADM5_PW_FAILURE_COUNT_INTERVAL))
-	    pent.pw_failcnt_interval = 0;
-	else
-	    pent.pw_failcnt_interval = entry->pw_failcnt_interval;
-	if (!(mask & KADM5_PW_LOCKOUT_DURATION))
-	    pent.pw_lockout_duration = 0;
-	else
-	    pent.pw_lockout_duration = entry->pw_lockout_duration;
+        if (!(mask & KADM5_PW_MAX_FAILURE))
+            pent.pw_max_fail = 0;
+        else
+            pent.pw_max_fail = entry->pw_max_fail;
+        if (!(mask & KADM5_PW_FAILURE_COUNT_INTERVAL))
+            pent.pw_failcnt_interval = 0;
+        else
+            pent.pw_failcnt_interval = entry->pw_failcnt_interval;
+        if (!(mask & KADM5_PW_LOCKOUT_DURATION))
+            pent.pw_lockout_duration = 0;
+        else
+            pent.pw_lockout_duration = entry->pw_lockout_duration;
     } else {
-	pent.pw_max_fail = 0;
-	pent.pw_failcnt_interval = 0;
-	pent.pw_lockout_duration = 0;
+        pent.pw_max_fail = 0;
+        pent.pw_failcnt_interval = 0;
+        pent.pw_lockout_duration = 0;
     }
 
     if ((ret = krb5_db_create_policy(handle->context, &pent)))
-	return ret;
+        return ret;
     else
-	return KADM5_OK;
+        return KADM5_OK;
 }
-	  
+
 kadm5_ret_t
 kadm5_delete_policy(void *server_handle, kadm5_policy_t name)
 {
     kadm5_server_handle_t handle = server_handle;
-    osa_policy_ent_t		entry;
-    int				ret;
+    osa_policy_ent_t            entry;
+    int                         ret;
     int                         cnt=1;
 
     CHECK_HANDLE(server_handle);
@@ -179,102 +180,102 @@ kadm5_delete_policy(void *server_handle, kadm5_policy_t name)
     krb5_clear_error_message(handle->context);
 
     if(name == (kadm5_policy_t) NULL)
-	return EINVAL;
+        return EINVAL;
     if(strlen(name) == 0)
-	return KADM5_BAD_POLICY;
+        return KADM5_BAD_POLICY;
     if((ret = krb5_db_get_policy(handle->context, name, &entry,&cnt)))
-	return ret;
+        return ret;
     if( cnt != 1 )
-	return KADM5_UNK_POLICY;
+        return KADM5_UNK_POLICY;
 
     if(entry->policy_refcnt != 0) {
-	krb5_db_free_policy(handle->context, entry);
-	return KADM5_POLICY_REF;
+        krb5_db_free_policy(handle->context, entry);
+        return KADM5_POLICY_REF;
     }
     krb5_db_free_policy(handle->context, entry);
     if ((ret = krb5_db_delete_policy(handle->context, name)))
-	return ret;
+        return ret;
     else
-	return KADM5_OK;
+        return KADM5_OK;
 }
 
 kadm5_ret_t
 kadm5_modify_policy(void *server_handle,
-			 kadm5_policy_ent_t entry, long mask)
+                    kadm5_policy_ent_t entry, long mask)
 {
     CHECK_HANDLE(server_handle);
 
     krb5_clear_error_message(((kadm5_server_handle_t)server_handle)->context);
 
     if (mask & KADM5_REF_COUNT)
-	return KADM5_BAD_MASK;
+        return KADM5_BAD_MASK;
     else
-	return kadm5_modify_policy_internal(server_handle, entry, mask);
+        return kadm5_modify_policy_internal(server_handle, entry, mask);
 }
 
 kadm5_ret_t
 kadm5_modify_policy_internal(void *server_handle,
-				  kadm5_policy_ent_t entry, long mask)
+                             kadm5_policy_ent_t entry, long mask)
 {
     kadm5_server_handle_t handle = server_handle;
-    osa_policy_ent_t	p;
-    int			ret;
+    osa_policy_ent_t    p;
+    int                 ret;
     int                 cnt=1;
 
     CHECK_HANDLE(server_handle);
 
     if((entry == (kadm5_policy_ent_t) NULL) || (entry->policy == NULL))
-	return EINVAL;
+        return EINVAL;
     if(strlen(entry->policy) == 0)
-	return KADM5_BAD_POLICY;
+        return KADM5_BAD_POLICY;
     if((mask & KADM5_POLICY))
-	return KADM5_BAD_MASK;
-		
+        return KADM5_BAD_MASK;
+
     if ((ret = krb5_db_get_policy(handle->context, entry->policy, &p, &cnt)))
-	return ret;
+        return ret;
     if (cnt != 1)
-	return KADM5_UNK_POLICY;
+        return KADM5_UNK_POLICY;
 
     if ((mask & KADM5_PW_MAX_LIFE))
-	p->pw_max_life = entry->pw_max_life;
+        p->pw_max_life = entry->pw_max_life;
     if ((mask & KADM5_PW_MIN_LIFE)) {
-	if(entry->pw_min_life > p->pw_max_life && p->pw_max_life != 0)	{
-	     krb5_db_free_policy(handle->context, p);
-	     return KADM5_BAD_MIN_PASS_LIFE;
-	}
-	p->pw_min_life = entry->pw_min_life;
+        if(entry->pw_min_life > p->pw_max_life && p->pw_max_life != 0)  {
+            krb5_db_free_policy(handle->context, p);
+            return KADM5_BAD_MIN_PASS_LIFE;
+        }
+        p->pw_min_life = entry->pw_min_life;
     }
     if ((mask & KADM5_PW_MIN_LENGTH)) {
-	if(entry->pw_min_length < MIN_PW_LENGTH) {
-	      krb5_db_free_policy(handle->context, p);
-	      return KADM5_BAD_LENGTH;
-	 }
-	p->pw_min_length = entry->pw_min_length;
+        if(entry->pw_min_length < MIN_PW_LENGTH) {
+            krb5_db_free_policy(handle->context, p);
+            return KADM5_BAD_LENGTH;
+        }
+        p->pw_min_length = entry->pw_min_length;
     }
     if ((mask & KADM5_PW_MIN_CLASSES)) {
-	if(entry->pw_min_classes > MAX_PW_CLASSES ||
-	   entry->pw_min_classes < MIN_PW_CLASSES) {
-	     krb5_db_free_policy(handle->context, p);
-	     return KADM5_BAD_CLASS;
-	}
-	p->pw_min_classes = entry->pw_min_classes;
+        if(entry->pw_min_classes > MAX_PW_CLASSES ||
+           entry->pw_min_classes < MIN_PW_CLASSES) {
+            krb5_db_free_policy(handle->context, p);
+            return KADM5_BAD_CLASS;
+        }
+        p->pw_min_classes = entry->pw_min_classes;
     }
     if ((mask & KADM5_PW_HISTORY_NUM)) {
-	if(entry->pw_history_num < MIN_PW_HISTORY) {
-	     krb5_db_free_policy(handle->context, p);
-	     return KADM5_BAD_HISTORY;
-	}
-	p->pw_history_num = entry->pw_history_num;
+        if(entry->pw_history_num < MIN_PW_HISTORY) {
+            krb5_db_free_policy(handle->context, p);
+            return KADM5_BAD_HISTORY;
+        }
+        p->pw_history_num = entry->pw_history_num;
     }
     if ((mask & KADM5_REF_COUNT))
-	p->policy_refcnt = entry->policy_refcnt;
+        p->policy_refcnt = entry->policy_refcnt;
     if (handle->api_version == KADM5_API_VERSION_3) {
-	if ((mask & KADM5_PW_MAX_FAILURE))
-	    p->pw_max_fail = entry->pw_max_fail;
-	if ((mask & KADM5_PW_FAILURE_COUNT_INTERVAL))
-	    p->pw_failcnt_interval = entry->pw_failcnt_interval;
-	if ((mask & KADM5_PW_LOCKOUT_DURATION))
-	    p->pw_lockout_duration = entry->pw_lockout_duration;
+        if ((mask & KADM5_PW_MAX_FAILURE))
+            p->pw_max_fail = entry->pw_max_fail;
+        if ((mask & KADM5_PW_FAILURE_COUNT_INTERVAL))
+            p->pw_failcnt_interval = entry->pw_failcnt_interval;
+        if ((mask & KADM5_PW_LOCKOUT_DURATION))
+            p->pw_lockout_duration = entry->pw_lockout_duration;
     }
     ret = krb5_db_put_policy(handle->context, p);
     krb5_db_free_policy(handle->context, p);
@@ -283,10 +284,10 @@ kadm5_modify_policy_internal(void *server_handle,
 
 kadm5_ret_t
 kadm5_get_policy(void *server_handle, kadm5_policy_t name,
-		 kadm5_policy_ent_t entry) 
+                 kadm5_policy_ent_t entry)
 {
-    osa_policy_ent_t		t;
-    int				ret;
+    osa_policy_ent_t            t;
+    int                         ret;
     kadm5_server_handle_t handle = server_handle;
     int                         cnt=1;
 
@@ -295,18 +296,18 @@ kadm5_get_policy(void *server_handle, kadm5_policy_t name,
     krb5_clear_error_message(handle->context);
 
     if (name == (kadm5_policy_t) NULL)
-	return EINVAL;
+        return EINVAL;
     if(strlen(name) == 0)
-	return KADM5_BAD_POLICY;
+        return KADM5_BAD_POLICY;
     if((ret = krb5_db_get_policy(handle->context, name, &t, &cnt)))
-	return ret;
+        return ret;
 
     if( cnt != 1 )
-	return KADM5_UNK_POLICY;
+        return KADM5_UNK_POLICY;
 
     if ((entry->policy = strdup(t->name)) == NULL) {
-	 krb5_db_free_policy(handle->context, t);
-	 return ENOMEM;
+        krb5_db_free_policy(handle->context, t);
+        return ENOMEM;
     }
     entry->pw_min_life = t->pw_min_life;
     entry->pw_max_life = t->pw_max_life;
@@ -315,9 +316,9 @@ kadm5_get_policy(void *server_handle, kadm5_policy_t name,
     entry->pw_history_num = t->pw_history_num;
     entry->policy_refcnt = t->policy_refcnt;
     if (handle->api_version == KADM5_API_VERSION_3) {
-	entry->pw_max_fail = t->pw_max_fail;
-	entry->pw_failcnt_interval = t->pw_failcnt_interval;
-	entry->pw_lockout_duration = t->pw_lockout_duration;
+        entry->pw_max_fail = t->pw_max_fail;
+        entry->pw_failcnt_interval = t->pw_failcnt_interval;
+        entry->pw_lockout_duration = t->pw_lockout_duration;
     }
     krb5_db_free_policy(handle->context, t);
 

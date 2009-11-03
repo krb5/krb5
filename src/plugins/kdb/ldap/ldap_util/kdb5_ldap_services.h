@@ -66,4 +66,3 @@ extern void kdb5_ldap_view_service(int argc, char **argv);
 extern int  kdb5_ldap_set_service_password(int argc, char **argv);
 extern void kdb5_ldap_set_service_certificate(int argc, char **argv);
 extern void kdb5_ldap_stash_service_password(int argc, char **argv);
-

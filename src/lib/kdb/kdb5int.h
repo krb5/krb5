@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/kdb5/kdb5int.h
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Private header file for the kdb5 library for internal functions
  */
@@ -34,11 +35,11 @@
 
 krb5_error_code
 krb5int_put_principal_no_log(krb5_context kcontext,
-			     krb5_db_entry *entries, int *nentries);
+                             krb5_db_entry *entries, int *nentries);
 
 krb5_error_code
 krb5int_delete_principal_no_log(krb5_context kcontext,
-				krb5_principal search_for,
-				int *nentries);
+                                krb5_principal search_for,
+                                int *nentries);
 
 #endif /* __KDB5INT_H__ */

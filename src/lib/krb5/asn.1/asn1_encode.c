@@ -30,8 +30,8 @@
 #include "asn1_encode.h"
 #include "asn1_make.h"
 
-asn1_error_code asn1_encode_boolean(asn1buf *buf, asn1_intmax val,
-                                    unsigned int *retlen)
+asn1_error_code
+asn1_encode_boolean(asn1buf *buf, asn1_intmax val, unsigned int *retlen)
 {
     asn1_error_code retval;
     unsigned int length = 0;
@@ -52,9 +52,9 @@ asn1_error_code asn1_encode_boolean(asn1buf *buf, asn1_intmax val,
     return 0;
 }
 
-static asn1_error_code asn1_encode_integer_internal(asn1buf *buf,
-                                                    asn1_intmax val,
-                                                    unsigned int *retlen)
+static asn1_error_code
+asn1_encode_integer_internal(asn1buf *buf, asn1_intmax val,
+                             unsigned int *retlen)
 {
     asn1_error_code retval;
     unsigned int length = 0;
@@ -85,8 +85,8 @@ static asn1_error_code asn1_encode_integer_internal(asn1buf *buf,
     return 0;
 }
 
-asn1_error_code asn1_encode_integer(asn1buf * buf, asn1_intmax val,
-                                    unsigned int *retlen)
+asn1_error_code
+asn1_encode_integer(asn1buf * buf, asn1_intmax val, unsigned int *retlen)
 {
     asn1_error_code retval;
     unsigned int length = 0;
@@ -124,8 +124,9 @@ asn1_encode_enumerated(asn1buf * buf, long val,
 }
 #endif
 
-asn1_error_code asn1_encode_unsigned_integer(asn1buf *buf, asn1_uintmax val,
-                                             unsigned int *retlen)
+asn1_error_code
+asn1_encode_unsigned_integer(asn1buf *buf, asn1_uintmax val,
+                             unsigned int *retlen)
 {
     asn1_error_code retval;
     unsigned int length = 0;
@@ -175,17 +176,17 @@ encode_bytestring_with_tag(asn1buf *buf, unsigned int len,
     return 0;
 }
 
-asn1_error_code asn1_encode_oid(asn1buf *buf, unsigned int len,
-                                const asn1_octet *val,
-                                unsigned int *retlen)
+asn1_error_code
+asn1_encode_oid(asn1buf *buf, unsigned int len, const asn1_octet *val,
+                unsigned int *retlen)
 {
     return encode_bytestring_with_tag(buf, len, val, ASN1_OBJECTIDENTIFIER,
                                       retlen);
 }
 
-asn1_error_code asn1_encode_octetstring(asn1buf *buf, unsigned int len,
-                                        const void *val,
-                                        unsigned int *retlen)
+asn1_error_code
+asn1_encode_octetstring(asn1buf *buf, unsigned int len, const void *val,
+                        unsigned int *retlen)
 {
     return encode_bytestring_with_tag(buf, len, val, ASN1_OCTETSTRING,
                                       retlen);
@@ -220,8 +221,8 @@ asn1_error_code asn1_encode_ia5string(asn1buf *buf, unsigned int len,
 }
 #endif
 
-asn1_error_code asn1_encode_generaltime(asn1buf *buf, time_t val,
-                                        unsigned int *retlen)
+asn1_error_code
+asn1_encode_generaltime(asn1buf *buf, time_t val, unsigned int *retlen)
 {
     struct tm *gtime, gtimebuf;
     char s[16], *sp;
@@ -273,17 +274,17 @@ asn1_error_code asn1_encode_generaltime(asn1buf *buf, time_t val,
                                       retlen);
 }
 
-asn1_error_code asn1_encode_generalstring(asn1buf *buf, unsigned int len,
-                                          const void *val,
-                                          unsigned int *retlen)
+asn1_error_code
+asn1_encode_generalstring(asn1buf *buf, unsigned int len, const void *val,
+                          unsigned int *retlen)
 {
     return encode_bytestring_with_tag(buf, len, val, ASN1_GENERALSTRING,
                                       retlen);
 }
 
-asn1_error_code asn1_encode_bitstring(asn1buf *buf, unsigned int len,
-                                      const void *val,
-                                      unsigned int *retlen)
+asn1_error_code
+asn1_encode_bitstring(asn1buf *buf, unsigned int len, const void *val,
+                      unsigned int *retlen)
 {
     asn1_error_code retval;
     unsigned int length;
@@ -299,8 +300,9 @@ asn1_error_code asn1_encode_bitstring(asn1buf *buf, unsigned int len,
     return 0;
 }
 
-asn1_error_code asn1_encode_opaque(asn1buf *buf, unsigned int len,
-                                   const void *val, unsigned int *retlen)
+asn1_error_code
+asn1_encode_opaque(asn1buf *buf, unsigned int len, const void *val,
+                   unsigned int *retlen)
 {
     asn1_error_code retval;
 

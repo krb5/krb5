@@ -235,7 +235,7 @@ client_gic_opt(krb5_context kcontext,
 {
 #ifdef DEBUG
     fprintf(stderr, "(cksum_body) client_gic_opt: received '%s' = '%s'\n",
-	    attr, value); 
+	    attr, value);
 #endif
     return 0;
 }

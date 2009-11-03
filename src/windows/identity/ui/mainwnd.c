@@ -187,7 +187,7 @@ khm_ui_cb(LPARAM lParam) {
 }
 
 
-static void 
+static void
 main_wnd_save_sizepos() {
     RECT r;
     khm_handle csp_cw;
@@ -218,7 +218,7 @@ main_wnd_save_sizepos() {
             khc_write_int32(csp_mw, L"Width", r.right - r.left);
             khc_write_int32(csp_mw, L"Height", r.bottom - r.top);
 
-            if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"Dock", &t)) && 
+            if (KHM_SUCCEEDED(khc_read_int32(csp_mw, L"Dock", &t)) &&
                 t != KHM_DOCK_NONE) {
                 khc_write_int32(csp_mw, L"Dock", KHM_DOCK_AUTO);
             }
@@ -230,11 +230,11 @@ main_wnd_save_sizepos() {
     }
 }
 
-LRESULT CALLBACK 
+LRESULT CALLBACK
 khm_main_wnd_proc(HWND hwnd,
                   UINT uMsg,
                   WPARAM wParam,
-                  LPARAM lParam) 
+                  LPARAM lParam)
 {
     LPNMHDR lpnm;
 
@@ -399,7 +399,7 @@ khm_main_wnd_proc(HWND hwnd,
             /* properties are not handled by the main window.
                Just bounce it to credwnd.  However, use SendMessage
                instead of PostMessage so we don't lose context */
-            return SendMessage(khm_hwnd_main_cred, uMsg, 
+            return SendMessage(khm_hwnd_main_cred, uMsg,
                                wParam, lParam);
 
         case KHUI_ACTION_UICB:
@@ -409,7 +409,7 @@ khm_main_wnd_proc(HWND hwnd,
             /* layout control */
 
         case KHUI_ACTION_VIEW_ALL_IDS:
-            return SendMessage(khm_hwnd_main_cred, uMsg, 
+            return SendMessage(khm_hwnd_main_cred, uMsg,
                                wParam, lParam);
 
         case KHUI_ACTION_LAYOUT_MINI:
@@ -419,11 +419,11 @@ khm_main_wnd_proc(HWND hwnd,
             } else {
                 khm_set_main_window_mode(KHM_MAIN_WND_MINI);
             }
-            return SendMessage(khm_hwnd_main_cred, uMsg, 
+            return SendMessage(khm_hwnd_main_cred, uMsg,
                                wParam, lParam);
 
         case KHUI_ACTION_LAYOUT_RELOAD:
-            return SendMessage(khm_hwnd_main_cred, uMsg, 
+            return SendMessage(khm_hwnd_main_cred, uMsg,
                                wParam, lParam);
 
         case KHUI_ACTION_LAYOUT_ID:
@@ -431,7 +431,7 @@ khm_main_wnd_proc(HWND hwnd,
         case KHUI_ACTION_LAYOUT_LOC:
         case KHUI_ACTION_LAYOUT_CUST:
             khm_set_main_window_mode(KHM_MAIN_WND_NORMAL);
-            return SendMessage(khm_hwnd_main_cred, uMsg, 
+            return SendMessage(khm_hwnd_main_cred, uMsg,
                                wParam, lParam);
 
             /* menu commands */
@@ -490,7 +490,7 @@ khm_main_wnd_proc(HWND hwnd,
 
         case KHUI_PACTION_SELALL:
             /* otherwise fallthrough and bounce to the creds window */
-            return SendMessage(khm_hwnd_main_cred, uMsg, 
+            return SendMessage(khm_hwnd_main_cred, uMsg,
                                wParam, lParam);
 
         default:
@@ -533,7 +533,7 @@ khm_main_wnd_proc(HWND hwnd,
 
     case WM_DRAWITEM:
         /* sent to draw a menu item */
-        if(!wParam) 
+        if(!wParam)
             return khm_menu_draw_item(wParam, lParam);
         break;
 
@@ -543,8 +543,8 @@ khm_main_wnd_proc(HWND hwnd,
         return TRUE;
         break;
 
-    case WM_SIZE: 
-        if(hwnd == khm_hwnd_main && 
+    case WM_SIZE:
+        if(hwnd == khm_hwnd_main &&
            (wParam == SIZE_MAXIMIZED || wParam == SIZE_RESTORED)) {
             int cwidth, cheight;
             RECT r_rebar, r_status;
@@ -556,15 +556,15 @@ khm_main_wnd_proc(HWND hwnd,
             SendMessage(khm_hwnd_rebar, WM_SIZE, 0, 0);
 
             khm_update_statusbar(hwnd);
-            
+
             GetWindowRect(khm_hwnd_rebar, &r_rebar);
             GetWindowRect(khm_hwnd_statusbar, &r_status);
 
             /* the cred window fills the area between the rebar
                and the status bar */
-            MoveWindow(khm_hwnd_main_cred, 0, 
-                       r_rebar.bottom - r_rebar.top, 
-                       r_status.right - r_status.left, 
+            MoveWindow(khm_hwnd_main_cred, 0,
+                       r_rebar.bottom - r_rebar.top,
+                       r_status.right - r_status.left,
                        r_status.top - r_rebar.bottom, TRUE);
 
             SetTimer(hwnd,
@@ -820,7 +820,7 @@ khm_main_wnd_proc(HWND hwnd,
 
             xfer = MapViewOfFile(hmap, FILE_MAP_WRITE, 0, 0,
                                  sizeof(khm_query_app_version));
-            
+
             if (xfer) {
                 khm_process_query_app_ver((khm_query_app_version *) xfer);
 
@@ -835,7 +835,7 @@ khm_main_wnd_proc(HWND hwnd,
     return DefWindowProc(hwnd,uMsg,wParam,lParam);
 }
 
-LRESULT CALLBACK 
+LRESULT CALLBACK
 khm_null_wnd_proc(HWND hwnd,
                   UINT uMsg,
                   WPARAM wParam,
@@ -843,7 +843,7 @@ khm_null_wnd_proc(HWND hwnd,
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 
-LRESULT 
+LRESULT
 khm_rebar_notify(LPNMHDR lpnm) {
     switch(lpnm->code) {
 #if (_WIN32_WINNT >= 0x0501)
@@ -873,20 +873,20 @@ khm_rebar_notify(LPNMHDR lpnm) {
     return 1;
 }
 
-void 
+void
 khm_create_main_window_controls(HWND hwnd_main) {
     REBARINFO rbi;
     HWND hwRebar;
 
     khm_menu_create_main(hwnd_main);
 
-    hwRebar = 
+    hwRebar =
         CreateWindowEx(WS_EX_TOOLWINDOW,
                        REBARCLASSNAME,
                        L"Rebar",
-                       WS_CHILD | 
-                       WS_VISIBLE| 
-                       WS_CLIPSIBLINGS | 
+                       WS_CHILD |
+                       WS_VISIBLE|
+                       WS_CLIPSIBLINGS |
                        WS_CLIPCHILDREN |
                        CCS_NODIVIDER |
                        RBS_VARHEIGHT |
@@ -1116,10 +1116,10 @@ khm_set_main_window_mode(int mode) {
 
     khui_refresh_actions();
 
-    /* 
-     * set the window position before the global khm_main_wnd_mode 
+    /*
+     * set the window position before the global khm_main_wnd_mode
      * is updated.  otherwise, the windows position for the wrong
-     * mode will be set.  Do not set the window position if the 
+     * mode will be set.  Do not set the window position if the
      * main application window has not yet been created.
      */
     if (khm_hwnd_main)
@@ -1148,13 +1148,13 @@ khm_set_main_window_mode(int mode) {
     khm_cred_refresh();
 }
 
-void 
+void
 khm_create_main_window(void) {
     wchar_t buf[1024];
     khm_handle csp_cw = NULL;
     RECT r;
 
-    LoadString(khm_hInstance, IDS_MAIN_WINDOW_TITLE, 
+    LoadString(khm_hInstance, IDS_MAIN_WINDOW_TITLE,
                buf, ARRAYLENGTH(buf));
 
     khm_hwnd_null =
@@ -1185,11 +1185,11 @@ khm_create_main_window(void) {
 
     khm_get_main_window_rect(&r);
 
-    khm_hwnd_main = 
+    khm_hwnd_main =
         CreateWindowEx(WS_EX_OVERLAPPEDWINDOW | WS_EX_APPWINDOW,
                        MAKEINTATOM(khm_main_window_class),
                        buf,
-                       WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | 
+                       WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN |
                        WS_CLIPSIBLINGS,
                        r.left, r.top,
                        r.right - r.left,
@@ -1202,7 +1202,7 @@ khm_create_main_window(void) {
     khui_set_main_window(khm_hwnd_main);
 }
 
-void 
+void
 khm_show_main_window(void) {
 
     if (khm_nCmdShow == SW_RESTORE) {
@@ -1214,11 +1214,11 @@ khm_show_main_window(void) {
     }
     /*
      * We test for the values of khm_nCmdShow that
-     * can be set at process startup.  They will 
-     * only be seen the first time this function is 
+     * can be set at process startup.  They will
+     * only be seen the first time this function is
      * called.  After the first time, the value of
      * khm_nCmdShow will always be SW_RESTORE.
-     * When one of the minimized values is set, 
+     * When one of the minimized values is set,
      * khm_show_main_window() will not be called
      * unless the user initiates a request to show
      * the window.
@@ -1232,7 +1232,7 @@ khm_show_main_window(void) {
 
     ShowWindow(khm_hwnd_main, khm_nCmdShow);
     UpdateWindow(khm_hwnd_main);
-    
+
     khm_cred_refresh();
 
     khm_nCmdShow = SW_RESTORE;
@@ -1257,7 +1257,7 @@ khm_activate_main_window(void) {
     }
 }
 
-void 
+void
 khm_close_main_window(void) {
     khm_handle csp_cw;
     BOOL keep_running = FALSE;
@@ -1266,7 +1266,7 @@ khm_close_main_window(void) {
                                      KHM_PERM_READ, &csp_cw))) {
         khm_int32 t;
 
-        if (KHM_SUCCEEDED(khc_read_int32(csp_cw, L"KeepRunning", 
+        if (KHM_SUCCEEDED(khc_read_int32(csp_cw, L"KeepRunning",
                                          &t))) {
             keep_running = t;
         } else {
@@ -1288,7 +1288,7 @@ khm_close_main_window(void) {
         DestroyWindow(khm_hwnd_main);
 }
 
-void 
+void
 khm_hide_main_window(void) {
     khm_handle csp_notices = NULL;
     khm_int32 show_warning = FALSE;
@@ -1324,12 +1324,12 @@ khm_hide_main_window(void) {
     ShowWindow(khm_hwnd_main, SW_HIDE);
 }
 
-BOOL 
+BOOL
 khm_is_main_window_visible(void) {
     return IsWindowVisible(khm_hwnd_main);
 }
 
-BOOL 
+BOOL
 khm_is_main_window_active(void) {
     if (!IsWindowVisible(khm_hwnd_main))
         return FALSE;
@@ -1338,7 +1338,7 @@ khm_is_main_window_active(void) {
     return khm_is_dialog_active();
 }
 
-void 
+void
 khm_register_main_wnd_class(void) {
     WNDCLASSEX wc;
 
@@ -1373,7 +1373,7 @@ khm_register_main_wnd_class(void) {
     khm_main_window_class = RegisterClassEx(&wc);
 }
 
-void 
+void
 khm_unregister_main_wnd_class(void) {
     UnregisterClass(MAKEINTATOM(khm_main_window_class),khm_hInstance);
     UnregisterClass(MAKEINTATOM(khm_null_window_class),khm_hInstance);

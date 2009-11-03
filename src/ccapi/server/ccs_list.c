@@ -49,7 +49,7 @@ static cc_int32 ccs_cache_collection_list_object_compare_identifier (ccs_list_ob
 
 cc_int32 ccs_cache_collection_list_new (ccs_cache_collection_list_t *out_list)
 {
-    return ccs_list_new (out_list, 
+    return ccs_list_new (out_list,
                          ccErrInvalidContext,
                          ccErrInvalidContext,
                          ccs_cache_collection_list_object_compare_identifier,
@@ -122,7 +122,7 @@ static cc_int32 ccs_ccache_list_object_compare_identifier (ccs_list_object_t  in
 
 cc_int32 ccs_ccache_list_new (ccs_ccache_list_t *out_list)
 {
-    return ccs_list_new (out_list, 
+    return ccs_list_new (out_list,
                          ccErrInvalidCCache,
                          ccErrInvalidCCacheIterator,
                          ccs_ccache_list_object_compare_identifier,
@@ -161,7 +161,7 @@ cc_int32 ccs_ccache_list_find_iterator (ccs_ccache_list_t           in_list,
                                         cci_identifier_t            in_identifier,
                                         ccs_ccache_list_iterator_t *out_list_iterator)
 {
-    return ccs_list_find_iterator (in_list, in_identifier, 
+    return ccs_list_find_iterator (in_list, in_identifier,
                                    (ccs_list_iterator_t *) out_list_iterator);
 }
 
@@ -201,7 +201,7 @@ cc_int32 ccs_ccache_list_release (ccs_ccache_list_t io_list)
 cc_int32 ccs_ccache_list_iterator_write (ccs_ccache_list_iterator_t in_list_iterator,
                                          k5_ipc_stream               in_stream)
 {
-    return ccs_list_iterator_write (in_list_iterator, in_stream);    
+    return ccs_list_iterator_write (in_list_iterator, in_stream);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -253,8 +253,8 @@ static cc_int32 ccs_credentials_list_object_compare_identifier (ccs_list_object_
 
 cc_int32 ccs_credentials_list_new (ccs_credentials_list_t *out_list)
 {
-    return ccs_list_new (out_list, 
-                         ccErrInvalidCredentials, 
+    return ccs_list_new (out_list,
+                         ccErrInvalidCredentials,
                          ccErrInvalidCredentialsIterator,
                          ccs_credentials_list_object_compare_identifier,
                          ccs_credentials_list_object_release);
@@ -292,7 +292,7 @@ cc_int32 ccs_credentials_list_find_iterator (ccs_credentials_list_t           in
                                              cci_identifier_t                 in_identifier,
                                              ccs_credentials_list_iterator_t *out_list_iterator)
 {
-    return ccs_list_find_iterator (in_list, in_identifier, 
+    return ccs_list_find_iterator (in_list, in_identifier,
                                    (ccs_list_iterator_t *) out_list_iterator);
 }
 
@@ -324,7 +324,7 @@ cc_int32 ccs_credentials_list_release (ccs_credentials_list_t io_list)
 cc_int32 ccs_credentials_list_iterator_write (ccs_credentials_list_iterator_t in_list_iterator,
                                               k5_ipc_stream                    in_stream)
 {
-    return ccs_list_iterator_write (in_list_iterator, in_stream);    
+    return ccs_list_iterator_write (in_list_iterator, in_stream);
 }
 
 /* ------------------------------------------------------------------------ */

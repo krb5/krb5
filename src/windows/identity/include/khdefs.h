@@ -120,7 +120,7 @@ typedef __int64    ssize_t;
 typedef _W64 int   ssize_t;
 #endif
 #define _SSIZE_T_DEFINED
-#endif 
+#endif
 
 typedef ssize_t khm_ssize;
 
@@ -135,7 +135,7 @@ typedef unsigned __int64 khm_lparm;
 #error khm_wparm and khm_lparm need to be defined for this platform
 #endif
 
-/*!\def KHMAPI 
+/*!\def KHMAPI
    \brief Calling convention for NetIDMgr exported functions
 
    The caling convention for all NetIDMgr exported functions is \b
@@ -204,7 +204,7 @@ typedef unsigned __int64 khm_lparm;
 
     Returns the smallest integer greater than or equal to the
     parameter that is a multiple of 4.
-    
+
     \note Only use with positive integers. */
 #define UBOUND32(d) ((((d)-1)&~3) + 4)
 

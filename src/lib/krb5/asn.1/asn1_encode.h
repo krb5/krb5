@@ -51,10 +51,10 @@
      asn1_encode_oid
 */
 
-asn1_error_code asn1_encode_boolean
-        (asn1buf *buf, asn1_intmax val, unsigned int *retlen);
-asn1_error_code asn1_encode_integer
-        (asn1buf *buf, asn1_intmax val, unsigned int *retlen);
+asn1_error_code asn1_encode_boolean(asn1buf *buf, asn1_intmax val,
+                                    unsigned int *retlen);
+asn1_error_code asn1_encode_integer(asn1buf *buf, asn1_intmax val,
+                                    unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
    effects   Inserts the encoding of val into *buf and returns
@@ -62,12 +62,11 @@ asn1_error_code asn1_encode_integer
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
-asn1_error_code asn1_encode_enumerated
-(asn1buf *buf, long val, unsigned int *retlen);
+asn1_error_code asn1_encode_enumerated(asn1buf *buf, long val,
+                                       unsigned int *retlen);
 
-asn1_error_code asn1_encode_unsigned_integer
-        (asn1buf *buf, asn1_uintmax val,
-                   unsigned int *retlen);
+asn1_error_code asn1_encode_unsigned_integer(asn1buf *buf, asn1_uintmax val,
+                                             unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
    effects   Inserts the encoding of val into *buf and returns
@@ -75,10 +74,8 @@ asn1_error_code asn1_encode_unsigned_integer
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
-asn1_error_code asn1_encode_octetstring
-        (asn1buf *buf,
-                   unsigned int len, const void *val,
-                   unsigned int *retlen);
+asn1_error_code asn1_encode_octetstring(asn1buf *buf, unsigned int len,
+                                        const void *val, unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
    effects   Inserts the encoding of val into *buf and returns
@@ -87,10 +84,8 @@ asn1_error_code asn1_encode_octetstring
               to expand the buffer. */
 #define asn1_encode_charstring asn1_encode_octetstring
 
-asn1_error_code asn1_encode_oid
-        (asn1buf *buf,
-                   unsigned int len, const asn1_octet *val,
-                   unsigned int *retlen);
+asn1_error_code asn1_encode_oid(asn1buf *buf, unsigned int len,
+                                const asn1_octet *val, unsigned int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
    effects   Inserts the encoding of val into *buf and returns
@@ -98,8 +93,7 @@ asn1_error_code asn1_encode_oid
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
-asn1_error_code asn1_encode_null
-        (asn1buf *buf, int *retlen);
+asn1_error_code asn1_encode_null(asn1buf *buf, int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
    effects   Inserts the encoding of NULL into *buf and returns
@@ -107,10 +101,8 @@ asn1_error_code asn1_encode_null
              Returns ENOMEM to signal an unsuccesful attempt
               to expand the buffer. */
 
-asn1_error_code asn1_encode_printablestring
-        (asn1buf *buf,
-                   unsigned int len, const char *val,
-                   int *retlen);
+asn1_error_code asn1_encode_printablestring (asn1buf *buf, unsigned int len,
+                                             const char *val, int *retlen);
 /* requires  *buf is allocated
    modifies  *buf, *retlen
    effects   Inserts the encoding of val into *buf and returns

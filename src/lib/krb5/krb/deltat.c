@@ -95,14 +95,14 @@ struct param {
 #define MAX_MIN (MAX_TIME / 60)
 #define MIN_MIN (MIN_TIME / 60)
 
-/* An explanation of the tests being performed. 
-   We do not want to overflow a 32 bit integer with out manipulations, 
+/* An explanation of the tests being performed.
+   We do not want to overflow a 32 bit integer with out manipulations,
    even for testing for overflow. Therefore we rely on the following:
 
    The lex parser will not return a number > MAX_TIME (which is out 32
    bit limit).
 
-   Therefore, seconds (s) will require 
+   Therefore, seconds (s) will require
        MIN_TIME < s < MAX_TIME
 
    For subsequent tests, the logic is as follows:
@@ -110,7 +110,7 @@ struct param {
       If A < MAX_TIME and  B < MAX_TIME
 
       If we want to test if A+B < MAX_TIME, there are two cases
-        if (A > 0) 
+        if (A > 0)
          then A + B < MAX_TIME if B < MAX_TIME - A
 	else A + B < MAX_TIME  always.
 
@@ -131,7 +131,7 @@ struct param {
                           res = (a) + (b)
 
 
-#define OUT_D ((struct param *)tmv)->delta 
+#define OUT_D ((struct param *)tmv)->delta
 #define DO(D,H,M,S) \
  { \
      /* Overflow testing - this does not handle negative values well.. */ \
@@ -1420,10 +1420,10 @@ mylex (krb5_int32 *intp, char **pp)
 	/* XXX assumes ASCII */
 	num = c - '0';
 	while (isdigit ((int) *P)) {
-	  if (num > MAX_TIME / 10) 
+	  if (num > MAX_TIME / 10)
 	    return OVERFLOW;
 	    num *= 10;
-	    if (num > MAX_TIME - (*P - '0')) 
+	    if (num > MAX_TIME - (*P - '0'))
 	      return OVERFLOW;
 	    num += *P++ - '0';
 	}
@@ -1451,5 +1451,3 @@ krb5_string_to_deltat(char *string, krb5_deltat *deltatp)
     *deltatp = p.delta;
     return 0;
 }
-
-

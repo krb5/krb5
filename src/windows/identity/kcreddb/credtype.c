@@ -72,8 +72,8 @@ void kcdb_credtype_check_and_delete(khm_int32 id)
     }
 }
 
-KHMEXP khm_int32 KHMAPI 
-kcdb_credtype_register(const kcdb_credtype * type, khm_int32 * new_id) 
+KHMEXP khm_int32 KHMAPI
+kcdb_credtype_register(const kcdb_credtype * type, khm_int32 * new_id)
 {
     khm_int32 id;
     kcdb_credtype_i * ict;
@@ -174,7 +174,7 @@ kcdb_credtype_register(const kcdb_credtype * type, khm_int32 * new_id)
 }
 
 KHMEXP khm_int32 KHMAPI kcdb_credtype_get_info(
-    khm_int32 id, 
+    khm_int32 id,
     kcdb_credtype ** type)
 {
     int found = 0;
@@ -183,8 +183,8 @@ KHMEXP khm_int32 KHMAPI kcdb_credtype_get_info(
         return KHM_ERROR_INVALID_PARAM;
 
     EnterCriticalSection(&cs_credtype);
-    if(kcdb_credtype_tbl[id] && 
-        !(kcdb_credtype_tbl[id]->flags & KCDB_CTI_FLAG_DELETED)) 
+    if(kcdb_credtype_tbl[id] &&
+        !(kcdb_credtype_tbl[id]->flags & KCDB_CTI_FLAG_DELETED))
     {
         found = 1;
         if(type) {
@@ -203,7 +203,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credtype_get_info(
         return KHM_ERROR_NOT_FOUND;
 }
 
-KHMEXP khm_int32 KHMAPI kcdb_credtype_release_info(kcdb_credtype * type) 
+KHMEXP khm_int32 KHMAPI kcdb_credtype_release_info(kcdb_credtype * type)
 {
     kcdb_credtype_i * ict;
 
@@ -214,7 +214,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credtype_release_info(kcdb_credtype * type)
     return kcdb_credtype_release(ict);
 }
 
-KHMEXP khm_int32 KHMAPI kcdb_credtype_unregister(khm_int32 id) 
+KHMEXP khm_int32 KHMAPI kcdb_credtype_unregister(khm_int32 id)
 {
     kcdb_credtype_i * ict;
 
@@ -330,7 +330,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credtype_get_name(
 }
 
 KHMEXP khm_int32 KHMAPI kcdb_credtype_get_id(
-    const wchar_t * name, 
+    const wchar_t * name,
     khm_int32 * id)
 {
     int i;
@@ -353,7 +353,7 @@ KHMEXP khm_int32 KHMAPI kcdb_credtype_get_id(
         return KHM_ERROR_NOT_FOUND;
 }
 
-khm_int32 kcdb_credtype_get_next_free_id(khm_int32 * id) 
+khm_int32 kcdb_credtype_get_next_free_id(khm_int32 * id)
 {
     int i;
 
@@ -374,7 +374,7 @@ khm_int32 kcdb_credtype_get_next_free_id(khm_int32 * id)
 }
 
 khm_int32 kcdb_credtype_hold(kcdb_credtype_i * ict) {
-    
+
     if(!ict)
         return KHM_ERROR_INVALID_PARAM;
 
@@ -385,7 +385,7 @@ khm_int32 kcdb_credtype_hold(kcdb_credtype_i * ict) {
 }
 
 khm_int32 kcdb_credtype_release(kcdb_credtype_i * ict) {
-    
+
     if(!ict)
         return KHM_ERROR_INVALID_PARAM;
 
@@ -396,7 +396,7 @@ khm_int32 kcdb_credtype_release(kcdb_credtype_i * ict) {
     return KHM_ERROR_SUCCESS;
 }
 
-void kcdb_credtype_msg_completion(kmq_message * m) 
+void kcdb_credtype_msg_completion(kmq_message * m)
 {
     kcdb_credtype_release((kcdb_credtype_i *) m->vparam);
 }

@@ -33,7 +33,7 @@
 #include<strsafe.h>
 #include<assert.h>
 
-khm_int32 KHMAPI 
+khm_int32 KHMAPI
 enctype_toString(const void * data, khm_size cbdata,
 		 wchar_t *destbuf, khm_size *pcbdestbuf,
 		 khm_int32 flags)
@@ -214,10 +214,10 @@ addr_list_toString(const void *d, khm_size cb_d,
 }
 
 khm_int32 KHMAPI
-krb5flags_toString(const void *d, 
-		   khm_size cb_d, 
-		   wchar_t *buf, 
-		   khm_size *pcb_buf, 
+krb5flags_toString(const void *d,
+		   khm_size cb_d,
+		   wchar_t *buf,
+		   khm_size *pcb_buf,
 		   khm_int32 f)
 {
     wchar_t sbuf[32];
@@ -348,7 +348,7 @@ one_addr(k5_serial_address *a, wchar_t * buf, khm_size cbbuf)
 #ifdef AF_INET6
         || (a->addrtype == ADDRTYPE_INET6 && a->length == 16)
 #endif
-        ) 
+        )
     {
         int af = AF_INET;
 #ifdef AF_INET6
@@ -404,4 +404,3 @@ one_addr(k5_serial_address *a, wchar_t * buf, khm_size cbbuf)
  _copy_string:
     StringCbCopy(buf, cbbuf, retstr);
 }
-

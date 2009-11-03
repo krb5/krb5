@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/krb/decrypt_tk.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * krb5_decrypt_tkt_part() function.
  */
@@ -30,11 +31,11 @@
 #include "k5-int.h"
 
 /*
- Decrypts dec_ticket->enc_part
- using *srv_key, and places result in dec_ticket->enc_part2.
- The storage of dec_ticket->enc_part2 will be allocated before return.
+  Decrypts dec_ticket->enc_part
+  using *srv_key, and places result in dec_ticket->enc_part2.
+  The storage of dec_ticket->enc_part2 will be allocated before return.
 
- returns errors from encryption routines, system errors
+  returns errors from encryption routines, system errors
 
 */
 
@@ -46,27 +47,27 @@ krb5_decrypt_tkt_part(krb5_context context, const krb5_keyblock *srv_key, regist
     krb5_error_code retval;
 
     if (!krb5_c_valid_enctype(ticket->enc_part.enctype))
-	return KRB5_PROG_ETYPE_NOSUPP;
+        return KRB5_PROG_ETYPE_NOSUPP;
 
     scratch.length = ticket->enc_part.ciphertext.length;
     if (!(scratch.data = malloc(ticket->enc_part.ciphertext.length)))
-	return(ENOMEM);
+        return(ENOMEM);
 
     /* call the encryption routine */
     if ((retval = krb5_c_decrypt(context, srv_key,
-				KRB5_KEYUSAGE_KDC_REP_TICKET, 0,
-				&ticket->enc_part, &scratch))) {
-	free(scratch.data);
-	return retval;
+                                 KRB5_KEYUSAGE_KDC_REP_TICKET, 0,
+                                 &ticket->enc_part, &scratch))) {
+        free(scratch.data);
+        return retval;
     }
 
-#define clean_scratch() {memset(scratch.data, 0, scratch.length); \
-free(scratch.data);}
+#define clean_scratch() {memset(scratch.data, 0, scratch.length);       \
+        free(scratch.data);}
 
     /*  now decode the decrypted stuff */
     retval = decode_krb5_enc_tkt_part(&scratch, &dec_tkt_part);
     if (!retval) {
-	ticket->enc_part2 = dec_tkt_part;
+        ticket->enc_part2 = dec_tkt_part;
     }
     clean_scratch();
     return retval;

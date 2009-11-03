@@ -40,20 +40,20 @@ static inline kim_count kim_string_buflen (kim_string in_string)
 
 /* ------------------------------------------------------------------------ */
 
-kim_error kim_string_create_from_format (kim_string *out_string, 
+kim_error kim_string_create_from_format (kim_string *out_string,
                                          kim_string  in_format,
                                          ...);
 
-kim_error kim_string_create_from_format_va_retcode (kim_string *out_string, 
+kim_error kim_string_create_from_format_va_retcode (kim_string *out_string,
                                                     kim_string  in_format,
                                                     va_list     in_args);
 
-kim_error kim_string_create_from_format_va (kim_string *out_string, 
+kim_error kim_string_create_from_format_va (kim_string *out_string,
                                             kim_string  in_format,
                                             va_list     in_args);
 
-kim_error kim_string_create_from_buffer (kim_string *out_string, 
-                                         const char *in_buffer, 
+kim_error kim_string_create_from_buffer (kim_string *out_string,
+                                         const char *in_buffer,
                                          kim_count   in_length);
 
 /* OS-specific because it should use UTF8-safe sorting where possible */

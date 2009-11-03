@@ -8,7 +8,7 @@
  * require a specific license from the United States Government.
  * It is the responsibility of any person or organization contemplating
  * export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -47,7 +47,7 @@ static int kim_error_init (void)
 {
     add_error_table (&et_KIM_error_table);
 #if KIM_TO_KLL_SHIM
-    add_error_table (&et_KLL_error_table);    
+    add_error_table (&et_KLL_error_table);
 #endif
     return 0;
 }
@@ -93,23 +93,23 @@ MAKE_FINI_FUNCTION(kim_thread_fini);
 static int kim_thread_init (void)
 {
     kim_error err = KIM_NO_ERROR;
-    
+
     if (!err) {
         err = k5_mutex_finish_init (&g_allow_home_directory_access_mutex);
     }
-    
+
     if (!err) {
         err = k5_mutex_finish_init (&g_allow_automatic_prompting_mutex);
     }
-    
+
     if (!err) {
         err = k5_mutex_finish_init (&g_ui_environment_mutex);
     }
-    
+
     if (!err) {
         err = k5_mutex_finish_init (&g_application_name_mutex);
     }
-    
+
     return err;
 }
 
@@ -120,7 +120,7 @@ static void kim_thread_fini (void)
     if (!INITIALIZER_RAN (kim_thread_init) || PROGRAM_EXITING ()) {
 	return;
     }
-    
+
     k5_mutex_destroy (&g_allow_home_directory_access_mutex);
     k5_mutex_destroy (&g_allow_automatic_prompting_mutex);
     k5_mutex_destroy (&g_ui_environment_mutex);
@@ -135,16 +135,16 @@ kim_error kim_library_set_allow_home_directory_access (kim_boolean in_allow_acce
 {
     kim_error err = CALL_INIT_FUNCTION (kim_thread_init);
     kim_error mutex_err = KIM_NO_ERROR;
-    
+
     if (!err) {
         mutex_err = k5_mutex_lock (&g_allow_home_directory_access_mutex);
         if (mutex_err) { err = mutex_err; }
     }
-    
+
     if (!err) {
         g_allow_home_directory_access = in_allow_access;
     }
-    
+
     if (!mutex_err) { k5_mutex_unlock (&g_allow_home_directory_access_mutex); }
     return check_error (err);
 }
@@ -155,18 +155,18 @@ static kim_error kim_library_get_allow_home_directory_access (kim_boolean *out_a
 {
     kim_error err = CALL_INIT_FUNCTION (kim_thread_init);
     kim_error mutex_err = KIM_NO_ERROR;
-    
+
     if (!err && !out_allow_access) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
+
     if (!err) {
         mutex_err = k5_mutex_lock (&g_allow_home_directory_access_mutex);;
         if (mutex_err) { err = mutex_err; }
     }
-    
+
     if (!err) {
         *out_allow_access = g_allow_home_directory_access;
     }
-    
+
     if (!mutex_err) { k5_mutex_unlock (&g_allow_home_directory_access_mutex); }
     return check_error (err);
 }
@@ -177,7 +177,7 @@ kim_boolean kim_library_allow_home_directory_access (void)
 {
     kim_boolean allow_access = FALSE;
     kim_error err = kim_library_get_allow_home_directory_access (&allow_access);
-    
+
     return !err ? allow_access : FALSE;
 }
 
@@ -191,16 +191,16 @@ kim_error kim_library_set_allow_automatic_prompting (kim_boolean in_allow_automa
 {
     kim_error err = CALL_INIT_FUNCTION (kim_thread_init);
     kim_error mutex_err = KIM_NO_ERROR;
-    
+
     if (!err) {
         mutex_err = k5_mutex_lock (&g_allow_automatic_prompting_mutex);
         if (mutex_err) { err = mutex_err; }
     }
-    
+
     if (!err) {
         g_allow_automatic_prompting = in_allow_automatic_prompting;
     }
-    
+
     if (!mutex_err) { k5_mutex_unlock (&g_allow_automatic_prompting_mutex); }
     return check_error (err);
 }
@@ -211,18 +211,18 @@ static kim_error kim_library_get_allow_automatic_prompting (kim_boolean *out_all
 {
     kim_error err = CALL_INIT_FUNCTION (kim_thread_init);
     kim_error mutex_err = KIM_NO_ERROR;
-    
+
     if (!err && !out_allow_automatic_prompting) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
+
     if (!err) {
         mutex_err = k5_mutex_lock (&g_allow_automatic_prompting_mutex);;
         if (mutex_err) { err = mutex_err; }
     }
-    
+
     if (!err) {
         *out_allow_automatic_prompting = g_allow_automatic_prompting;
     }
-    
+
     if (!mutex_err) { k5_mutex_unlock (&g_allow_automatic_prompting_mutex); }
     return check_error (err);
 }
@@ -234,45 +234,45 @@ kim_boolean kim_library_allow_automatic_prompting (void)
     kim_boolean allow_automatic_prompting = TRUE;
     kim_error err = kim_library_get_allow_automatic_prompting (&allow_automatic_prompting);
     if (err) { allow_automatic_prompting = TRUE; }
-    
+
     if (allow_automatic_prompting && getenv ("KERBEROSLOGIN_NEVER_PROMPT")) {
         kim_debug_printf ("KERBEROSLOGIN_NEVER_PROMPT is set.");
         allow_automatic_prompting = FALSE;
     }
-    
+
     if (allow_automatic_prompting && getenv ("KIM_NEVER_PROMPT")) {
         kim_debug_printf ("KIM_NEVER_PROMPT is set.");
         allow_automatic_prompting = FALSE;
     }
-    
+
     if (allow_automatic_prompting && !kim_os_library_caller_uses_gui ()) {
         kim_debug_printf ("Caller is not using gui.");
         allow_automatic_prompting = FALSE;
     }
 
     if (allow_automatic_prompting) {
-        /* Make sure there is at least 1 config file. We don't support DNS 
+        /* Make sure there is at least 1 config file. We don't support DNS
          * domain-realm lookup, so if there is no config, Kerberos won't work. */
-        
+
         kim_boolean kerberos_config_exists = FALSE;
         char **files = NULL;
         profile_t profile = NULL;
-        
+
         if (krb5_get_default_config_files (&files) == 0) {
             if (profile_init ((const_profile_filespec_t *) files, &profile) == 0) {
                 kerberos_config_exists = TRUE;
             }
         }
-        
+
         if (!kerberos_config_exists) {
             kim_debug_printf ("No valid config file.");
             allow_automatic_prompting = FALSE;
         }
-        
+
         if (profile) { profile_abandon (profile); }
-        if (files  ) { krb5_free_config_files (files); }        
+        if (files  ) { krb5_free_config_files (files); }
     }
-    
+
     return allow_automatic_prompting;
 }
 
@@ -284,16 +284,16 @@ kim_error kim_library_set_ui_environment (kim_ui_environment in_ui_environment)
 {
     kim_error err = CALL_INIT_FUNCTION (kim_thread_init);
     kim_error mutex_err = KIM_NO_ERROR;
-    
+
     if (!err) {
         mutex_err = k5_mutex_lock (&g_ui_environment_mutex);
         if (mutex_err) { err = mutex_err; }
     }
-    
+
     if (!err) {
         g_ui_environment = in_ui_environment;
     }
-    
+
     if (!mutex_err) { k5_mutex_unlock (&g_ui_environment_mutex); }
     return check_error (err);
 }
@@ -304,18 +304,18 @@ static kim_error kim_library_get_ui_environment (kim_ui_environment *out_ui_envi
 {
     kim_error err = CALL_INIT_FUNCTION (kim_thread_init);
     kim_error mutex_err = KIM_NO_ERROR;
-    
+
     if (!err && !out_ui_environment) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
+
     if (!err) {
         mutex_err = k5_mutex_lock (&g_ui_environment_mutex);;
         if (mutex_err) { err = mutex_err; }
     }
-    
+
     if (!err) {
         *out_ui_environment = g_ui_environment;
     }
-    
+
     if (!mutex_err) { k5_mutex_unlock (&g_ui_environment_mutex); }
     return check_error (err);
 }
@@ -326,13 +326,13 @@ kim_ui_environment kim_library_ui_environment (void)
 {
     kim_error err = KIM_NO_ERROR;
     kim_ui_environment ui_environment = KIM_UI_ENVIRONMENT_AUTO;
-    
+
     err = kim_library_get_ui_environment (&ui_environment);
-    
+
     if (!err && ui_environment == KIM_UI_ENVIRONMENT_AUTO) {
         ui_environment = kim_os_library_get_ui_environment ();
     }
-    
+
     return !err ? ui_environment : KIM_UI_ENVIRONMENT_NONE;
 }
 
@@ -344,15 +344,15 @@ kim_error kim_library_set_application_name (kim_string in_application_name)
 {
     kim_error err = CALL_INIT_FUNCTION (kim_thread_init);
     kim_error mutex_err = KIM_NO_ERROR;
-    
+
     if (!err) {
         mutex_err = k5_mutex_lock (&g_application_name_mutex);
         if (mutex_err) { err = mutex_err; }
     }
-    
+
     if (!err) {
         kim_string old_application_name = g_application_name;
-        
+
         if (in_application_name) {
             err = kim_string_copy (&g_application_name, in_application_name);
         } else {
@@ -361,7 +361,7 @@ kim_error kim_library_set_application_name (kim_string in_application_name)
 
         if (!err) { kim_string_free (&old_application_name); }
     }
-    
+
     if (!mutex_err) { k5_mutex_unlock (&g_application_name_mutex); }
     return check_error (err);
 }
@@ -373,31 +373,31 @@ kim_error kim_library_get_application_name (kim_string *out_application_name)
     kim_error err = CALL_INIT_FUNCTION (kim_thread_init);
     kim_error mutex_err = KIM_NO_ERROR;
     kim_string application_name = NULL;
-    
+
     if (!err && !out_application_name) { err = check_error (KIM_NULL_PARAMETER_ERR); }
-    
+
     if (!err) {
         mutex_err = k5_mutex_lock (&g_application_name_mutex);
         if (mutex_err) { err = mutex_err; }
     }
-    
+
     if (!err && g_application_name) {
         err = kim_string_copy (&application_name, g_application_name);
     }
-    
+
     if (!mutex_err) { k5_mutex_unlock (&g_application_name_mutex); }
-    
+
     if (!err && !application_name) {
         err = kim_os_library_get_caller_name (&application_name);
     }
-    
+
     if (!err) {
         *out_application_name = application_name;
         application_name = NULL;
-        
+
     }
-    
+
     kim_string_free (&application_name);
-    
+
     return check_error (err);
 }

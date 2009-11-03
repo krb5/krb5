@@ -84,7 +84,7 @@ gss_add_mech_name_type(minor_status, name_type, mech)
     }
     p->name_type = 0;
     p->mech = 0;
-    
+
     major_status = generic_gss_copy_oid(minor_status, name_type,
 					&p->name_type);
     if (major_status) {
@@ -103,7 +103,7 @@ gss_add_mech_name_type(minor_status, name_type, mech)
     name_list = p;
 
     return GSS_S_COMPLETE;
-    
+
 allocation_failure:
     if (p) {
 	if (p->mech)
@@ -114,4 +114,3 @@ allocation_failure:
     }
     return GSS_S_FAILURE;
 }
-

@@ -6,7 +6,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -38,7 +38,7 @@ char * ss_name(sci_idx)
     int sci_idx;
 {
     register ss_data *infop;
-    
+
     infop = ss_info(sci_idx);
     if (infop->current_request == (char const *)NULL) {
 	return strdup(infop->subsystem_name);

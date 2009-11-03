@@ -99,10 +99,10 @@ Data(kstream ks, int type, void *d, int c)
 {
   unsigned char *p = str_data + 4;
   unsigned char *cd = (unsigned char *)d;
-  
+
   if (c == -1)
     c = strlen((char *)cd);
-  
+
   *p++ = AUTHTYPE_KERBEROS_V5;
   *p = AUTH_WHO_CLIENT|AUTH_HOW_MUTUAL;
 #ifdef ENCRYPTION
@@ -144,16 +144,16 @@ static void
 auth_abort(kstream ks, char *errmsg, long r)
 {
   char buf[9];
-  
+
   wsprintf(buf, "%c%c%c%c%c%c%c%c", IAC, SB, TELOPT_AUTHENTICATION,
 	   TELQUAL_IS, AUTHTYPE_NULL,
 	   AUTHTYPE_NULL, IAC, SE);
   TelnetSend(ks, (LPSTR)buf, 8, 0);
-  
+
   if (errmsg != NULL) {
     strTmp[sizeof(strTmp) - 1] = '\0';
     strncpy(strTmp, errmsg, sizeof(strTmp) - 1);
-    
+
     if (r != KSUCCESS) {
       strncat(strTmp, "\n", sizeof(strTmp) - 1 - strlen(strTmp));
 #ifdef KRB4
@@ -163,7 +163,7 @@ auth_abort(kstream ks, char *errmsg, long r)
       lstrcat(strTmp, error_message(r));
 #endif
     }
-    
+
     MessageBox(HWND_DESKTOP, strTmp, "Kerberos authentication failed!",
 	       MB_OK | MB_ICONEXCLAMATION);
   }
@@ -234,7 +234,7 @@ auth_send(kstream ks, unsigned char *parsedat, int end_sub)
 #ifdef KRB4
   r = k4_auth_send(ks);
 #endif /* KRB4 */
-    
+
 #ifdef KRB5
   r = k5_auth_send(ks, auth_how);
 #endif /* KRB5 */
@@ -400,9 +400,9 @@ auth_decrypt(struct kstream_data_block *out,
 
 #ifdef KRB4
 /*
- * 
+ *
  * K4_auth_send - gets authentication bits we need to send to KDC.
- * 
+ *
  * Result is left in auth
  *
  * Returns: 0 on failure, 1 on success
@@ -482,7 +482,7 @@ k4_auth_reply(kstream ks, unsigned char *parsedat, int end_sub)
 
   if (end_sub < 4)
     return KFAILURE;
-		
+
   if (parsedat[2] != KERBEROS_V4)
     return KFAILURE;
 
@@ -552,7 +552,7 @@ k4_auth_reply(kstream ks, unsigned char *parsedat, int end_sub)
 
     return KSUCCESS;
   }
-	
+
   return KFAILURE;
 
 }
@@ -562,18 +562,18 @@ k4_auth_reply(kstream ks, unsigned char *parsedat, int end_sub)
 #ifdef KRB5
 
 /*
- * 
+ *
  * K5_auth_send - gets authentication bits we need to send to KDC.
- * 
+ *
  * Code lifted from telnet sample code in the appl directory.
- *  
+ *
  * Result is left in auth
  *
  * Returns: 0 on failure, 1 on success
- * 
+ *
  */
 
-static int 
+static int
 k5_auth_send(kstream ks, int how)
 {
   krb5_error_code r;
@@ -652,14 +652,14 @@ k5_auth_send(kstream ks, int how)
 
   r = krb5_mk_req_extended(k5_context, &auth_context, ap_opts,
 			   NULL, new_creds, &auth);
-  
+
 #ifdef ENCRYPTION
   krb5_auth_con_getlocalsubkey(k5_context, auth_context, &newkey);
   if (session_key) {
     krb5_free_keyblock(k5_context, session_key);
     session_key = 0;
   }
-  
+
   if (newkey) {
     /*
      * keep the key in our private storage, but don't use it
@@ -682,7 +682,7 @@ k5_auth_send(kstream ks, int how)
 
   krb5_free_cred_contents(k5_context, &creds);
   krb5_free_creds(k5_context, new_creds);
-  
+
   if (r) {
     com_err(NULL, r, "while authorizing.");
     return(0);
@@ -692,11 +692,11 @@ k5_auth_send(kstream ks, int how)
 }
 
 /*
- * 
+ *
  * K5_auth_reply -- checks the reply for mutual authentication.
  *
  * Code lifted from telnet sample code in the appl directory.
- * 
+ *
  */
 static int
 k5_auth_reply(kstream ks, int how, unsigned char *data, int cnt)
@@ -843,14 +843,14 @@ kerberos5_forward(kstream ks)
       com_err(NULL, r, "Kerberos V5: error getting forwarded creds");
       goto cleanup;
     }
-    
+
     /* Send forwarded credentials */
     if (!Data(ks, KRB_FORWARD, forw_creds.data, forw_creds.length)) {
       MessageBox(HWND_DESKTOP,
 		 "Not enough room for authentication data", "",
 		 MB_OK | MB_ICONEXCLAMATION);
     }
-    
+
 cleanup:
     if (client)
       krb5_free_principal(k5_context, client);

@@ -45,9 +45,9 @@ cc_int32 cci_message_new_reply_header (k5_ipc_stream     *out_reply,
 cc_int32 cci_message_read_reply_header (k5_ipc_stream in_reply,
                                         cc_int32     *out_reply_error);
 
-uint32_t krb5int_ipc_stream_read_time (k5_ipc_stream  io_stream, 
+uint32_t krb5int_ipc_stream_read_time (k5_ipc_stream  io_stream,
 				       cc_time_t     *out_time);
-uint32_t krb5int_ipc_stream_write_time (k5_ipc_stream io_stream, 
+uint32_t krb5int_ipc_stream_write_time (k5_ipc_stream io_stream,
 					cc_time_t     in_time);
 
 #endif /* CCI_MESSAGE_H */

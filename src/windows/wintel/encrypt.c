@@ -110,20 +110,20 @@ kstream EncryptKSGlobalHack = NULL;
 
 static long i_support_encrypt =
 	typemask(ENCTYPE_DES_CFB64) | typemask(ENCTYPE_DES_OFB64);
-static long i_support_decrypt = 
+static long i_support_decrypt =
 	typemask(ENCTYPE_DES_CFB64) | typemask(ENCTYPE_DES_OFB64);
 static long i_wont_support_encrypt = 0;
 static long i_wont_support_decrypt = 0;
 #define	I_SUPPORT_ENCRYPT	(i_support_encrypt & ~i_wont_support_encrypt)
 #define	I_SUPPORT_DECRYPT	(i_support_decrypt & ~i_wont_support_decrypt)
-     
+
 static long remote_supports_encrypt = 0;
 static long remote_supports_decrypt = 0;
 
 static Encryptions encryptions[] = {
   { "DES_CFB64",
     ENCTYPE_DES_CFB64,
-    cfb64_encrypt,	
+    cfb64_encrypt,
     cfb64_decrypt,
     cfb64_init,
     cfb64_start,
@@ -134,7 +134,7 @@ static Encryptions encryptions[] = {
     NULL },
   { "DES_OFB64",
     ENCTYPE_DES_OFB64,
-    ofb64_encrypt,	
+    ofb64_encrypt,
     ofb64_decrypt,
     ofb64_init,
     ofb64_start,
@@ -311,7 +311,7 @@ Encryptions *
 finddecryption(int type)
 {
   Encryptions *ep = encryptions;
-  
+
   if (!(I_SUPPORT_DECRYPT & remote_supports_encrypt & typemask(type)))
     return(0);
   while (ep->type && ep->type != type)
@@ -336,18 +336,18 @@ void
 encrypt_init(kstream iks, kstream_ptr data)
 {
   Encryptions *ep = encryptions;
-  
+
   i_support_encrypt = i_support_decrypt = 0;
   remote_supports_encrypt = remote_supports_decrypt = 0;
   encrypt_mode = 0;
   decrypt_mode = 0;
   encrypt_output = NULL;
   decrypt_input = NULL;
-  
+
   str_suplen = 4;
 
   EncryptKSGlobalHack = iks;
-  
+
   while (ep->type) {
 #ifdef DEBUG
 	  if (encrypt_debug_mode) {
@@ -671,7 +671,7 @@ encrypt_request_end()
  * Called when ENCRYPT REQUEST-START is received.  If we receive
  * this before a type is picked, then that indicates that the
  * other side wants us to start encrypting data as soon as we
- * can. 
+ * can.
  */
 void
 encrypt_request_start(data, cnt)
@@ -688,7 +688,7 @@ static unsigned char str_keyid[(MAXKEYLEN*2)+5] = { IAC, SB, TELOPT_ENCRYPT };
 
 void
 encrypt_keyid();
-		
+
 void
 encrypt_enc_keyid(keyid, len)
      unsigned char *keyid;

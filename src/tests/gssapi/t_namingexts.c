@@ -485,4 +485,3 @@ out:
 
     return GSS_ERROR(major) ? 1 : 0;
 }
-

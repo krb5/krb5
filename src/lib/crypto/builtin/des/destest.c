@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Test a DES implementation against known inputs & outputs
  */
@@ -30,14 +30,14 @@
 
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
  * responsibility of any person or organization contemplating export to
  * obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -48,7 +48,7 @@
  * permission.  FundsXpress makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -101,7 +101,7 @@ main(argc, argv)
 			    sched, zeroblock, 1);
 
 	if (memcmp((char *)output2, (char *)output, 8)) {
-	    fprintf(stderr, 
+	    fprintf(stderr,
 		    "DES ENCRYPT ERROR, key %s, text %s, real cipher %s, computed cyphertext %02X%02X%02X%02X%02X%02X%02X%02X\n",
 		    block1, block2, block3,
 		    output2[0],output2[1],output2[2],output2[3],
@@ -116,7 +116,7 @@ main(argc, argv)
 			    sched, zeroblock, 0);
 
 	if (memcmp((char *)output2, (char *)input, 8)) {
-	    fprintf(stderr, 
+	    fprintf(stderr,
 		    "DES DECRYPT ERROR, key %s, text %s, real cipher %s, computed cleartext %02X%02X%02X%02X%02X%02X%02X%02X\n",
 		    block1, block2, block3,
 		    output2[0],output2[1],output2[2],output2[3],
@@ -127,7 +127,7 @@ main(argc, argv)
 	num++;
     }
 
-    if (error) 
+    if (error)
 	printf("destest: failed to pass the test\n");
     else
 	printf("destest: %d tests passed successfully\n", num);
@@ -217,13 +217,13 @@ mit_des_check_key_parity(key)
      register mit_des_cblock key;
 {
     int i;
-    
+
     for (i=0; i<sizeof(mit_des_cblock); i++) {
 	if ((key[i] & 1) == parity_char(0xfe&key[i])) {
 	    printf("warning: bad parity key:");
-	    des_cblock_print_file(key, stdout); 
+	    des_cblock_print_file(key, stdout);
 	    putchar('\n');
-	      
+
 	    return 1;
 	}
     }
@@ -236,11 +236,11 @@ mit_des_fixup_key_parity(key)
      register mit_des_cblock key;
 {
     int i;
-    for (i=0; i<sizeof(mit_des_cblock); i++) 
+    for (i=0; i<sizeof(mit_des_cblock); i++)
       {
 	key[i] &= 0xfe;
 	key[i] |= 1^parity_char(key[i]);
       }
-  
+
     return;
 }

@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Simple UDP-based sample client program.  For demonstration.
  * This program performs no useful function.
@@ -61,7 +61,7 @@ usage(name)
     char *name;
 {
 	fprintf(stderr, "usage: %s [-p port] [-h host] [-m message] [-s service] [host]\n", name);
-}	
+}
 
 int
 main(argc, argv)
@@ -83,7 +83,7 @@ main(argc, argv)
     extern int opterr, optind;
     extern char * optarg;
     int	ch;
-    
+
     short port = 0;
     char *message = MSG;
     char *hostname = 0;
@@ -110,7 +110,7 @@ main(argc, argv)
 
     /*
      * Parse command line arguments
-     *  
+     *
      */
     opterr = 0;
     while ((ch = getopt(argc, argv, "p:m:h:s:")) != -1)
@@ -200,14 +200,14 @@ main(argc, argv)
     }
     memcpy(&c_sock.sin_addr, host->h_addr, sizeof(c_sock.sin_addr));
 #endif
-    
+
 
     /* Bind it to set the address; kernel will fill in port # */
     if (bind(sock, (struct sockaddr *)&c_sock, sizeof(c_sock)) < 0) {
 	com_err(progname, errno, "while binding datagram socket");
 	exit(1);
     }
-	
+
     /* PREPARE KRB_AP_REQ MESSAGE */
 
     inbuf.data = hostname;
@@ -234,8 +234,8 @@ main(argc, argv)
 	exit(1);
     }
     /* Send authentication info to server */
-    if ((i = send(sock, (char *)packet.data, (unsigned) packet.length, 
-		  flags)) < 0) 
+    if ((i = send(sock, (char *)packet.data, (unsigned) packet.length,
+		  flags)) < 0)
 	com_err(progname, errno, "while sending KRB_AP_REQ message");
     printf("Sent authentication data: %d bytes\n", i);
     krb5_free_data_contents(context, &packet);
@@ -275,7 +275,7 @@ main(argc, argv)
 	com_err(progname, retval, "while generating port address");
 	exit(1);
     }
-    
+
     if ((retval = krb5_gen_replay_name(context,portlocal_addr,
 				       "_sim_clt",&cp))) {
 	com_err(progname, retval, "while generating replay cache name");
@@ -303,7 +303,7 @@ main(argc, argv)
     }
 
     /* Send it */
-    if ((i = send(sock, (char *)packet.data, (unsigned) packet.length, 
+    if ((i = send(sock, (char *)packet.data, (unsigned) packet.length,
 		  flags)) < 0)
 	com_err(progname, errno, "while sending SAFE message");
     printf("Sent checksummed message: %d bytes\n", i);
@@ -319,7 +319,7 @@ main(argc, argv)
     }
 
     /* Send it */
-    if ((i = send(sock, (char *)packet.data, (unsigned) packet.length, 
+    if ((i = send(sock, (char *)packet.data, (unsigned) packet.length,
 		  flags)) < 0)
 	com_err(progname, errno, "while sending PRIV message");
     printf("Sent encrypted message: %d bytes\n", i);
@@ -333,6 +333,6 @@ main(argc, argv)
     krb5_auth_con_setrcache(context, auth_context, NULL);
     krb5_auth_con_free(context, auth_context);
     krb5_free_context(context);
-    
+
     exit(0);
 }

@@ -34,35 +34,35 @@ char copyright[] =
       *	command\0
       *	data
       */
-     
+
 /*
- * This is the rshell daemon. The very basic protocol for checking 
+ * This is the rshell daemon. The very basic protocol for checking
  * authentication and authorization is:
  * 1) Check authentication.
  * 2) Check authorization via the access-control files:
  *    ~/.k5login (using krb5_kuserok)
- * Execute command if configured authoriztion checks pass, else deny 
+ * Execute command if configured authoriztion checks pass, else deny
  * permission.
  */
-     
+
 /* DEFINES:
  *   KERBEROS - Define this if application is to be kerberised.
  *   LOG_ALL_LOGINS - Define this if you want to log all logins.
  *   LOG_OTHER_USERS - Define this if you want to log all principals that do
  *              not map onto the local user.
- *   LOG_REMOTE_REALM - Define this if you want to log all principals from 
+ *   LOG_REMOTE_REALM - Define this if you want to log all principals from
  *              remote realms.
  *   LOG_CMD - Define this if you want to log not only the user but also the
  *             command executed. This only decides the type of information
- *             logged. Whether or not to log is still decided by the above 
+ *             logged. Whether or not to log is still decided by the above
  *             three DEFINES.
  *       Note:  Root account access is always logged.
  */
-     
-#define SERVE_NON_KRB     
+
+#define SERVE_NON_KRB
 #define LOG_REMOTE_REALM
 #define LOG_CMD
-   
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -86,10 +86,10 @@ char copyright[] =
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif
-     
+
 #include <netinet/in.h>
 #include <arpa/inet.h>
-     
+
 #include <stdio.h>
 #include <grp.h>
 #include <errno.h>
@@ -98,7 +98,7 @@ char copyright[] =
 #include <string.h>
 #include <libpty.h>
 #include <sys/wait.h>
-     
+
 #ifdef HAVE_SYS_LABEL_H
 /* only SunOS 4? */
 #include <sys/label.h>
@@ -126,13 +126,13 @@ char copyright[] =
 #include <sys/unistd.h>
 #include <path.h>
 #endif /* CRAY */
-     
+
 #include <syslog.h>
 
 #ifdef POSIX_TERMIOS
 #include <termios.h>
 #endif
-     
+
 #ifdef HAVE_SYS_FILIO_H
 /* get FIONBIO from sys/filio.h, so what if it is a compatibility feature */
 #include <sys/filio.h>
@@ -194,12 +194,12 @@ static krb5_error_code recvauth(int netfd, struct sockaddr *peersin,
 #else /* !KERBEROS */
 
 #define ARGSTR	"RD:?"
-     
+
 #endif /* KERBEROS */
 
 static int accept_a_connection (int debug_port, struct sockaddr *from,
 				socklen_t *fromlenp);
-     
+
 #ifndef HAVE_KILLPG
 #define killpg(pid, sig) kill(-(pid), (sig))
 #endif
@@ -226,7 +226,7 @@ void 	error (char *fmt, ...)
 #endif
      ;
 
-void usage(void), getstr(int, char *, int, char *), 
+void usage(void), getstr(int, char *, int, char *),
     doit(int, struct sockaddr *);
 
 #ifndef HAVE_INITGROUPS
@@ -263,10 +263,10 @@ int main(argc, argv)
 #ifdef CRAY
     secflag = sysconf(_SC_CRAY_SECURE_SYS);
 #endif
-    
+
     progname = strrchr (*argv, '/');
     progname = progname ? progname + 1 : *argv;
-    
+
 #ifndef LOG_ODELAY /* 4.2 syslog */
     openlog(progname, LOG_PID);
 #else
@@ -275,7 +275,7 @@ int main(argc, argv)
 #endif
     openlog(progname, LOG_PID | LOG_ODELAY, LOG_AUTH);
 #endif /* 4.2 syslog */
-    
+
 #ifdef KERBEROS
     status = krb5_init_context(&bsd_context);
     if (status) {
@@ -284,7 +284,7 @@ int main(argc, argv)
 	    exit(1);
     }
 #endif
-    
+
     /* Analyze parameters. */
     opterr = 0;
     while ((ch = getopt(argc, argv, ARGSTR)) != -1)
@@ -292,7 +292,7 @@ int main(argc, argv)
 #ifdef KERBEROS
 	case 'k':
 	break;
-	
+
       case '5':
 	break;
       case 'c':
@@ -301,7 +301,7 @@ int main(argc, argv)
       case 'i':
 	checksum_ignored = 1;
 	break;
-	
+
         case 'e':
 	require_encrypt = 1;
 	  break;
@@ -332,7 +332,7 @@ int main(argc, argv)
 		  if(!save_env[num_env++]) {
 			  com_err(progname, ENOMEM, "in saving environment");
 			  exit(2);
-		  }		  
+		  }
 	  } else  {
 		  fprintf(stderr, "%s: Only %d -L arguments allowed\n",
 			  progname, MAXENV);
@@ -376,10 +376,10 @@ int main(argc, argv)
 	usage();
 	exit(1);
     }
-    
+
     argc -= optind;
     argv += optind;
-    
+
     fromlen = sizeof (from);
 
     if (debug_port)
@@ -454,16 +454,16 @@ char	local_port[64+NI_MAXSERV]; /* = "KRB5LOCALPORT=" */
 /* The following include extra space for TZ and MAXENV pointers... */
 #define COMMONVARS homedir, shell, 0/*path*/, username, term
 #ifdef CRAY
-char    *envinit[] = 
+char    *envinit[] =
 {COMMONVARS, "TZ=GMT0", tmpdir, SAVEENVPAD, KRBPAD, ADDRPAD, 0};
 #define TMPDIRENV 6
 char    *getenv();
 #else /* CRAY */
 #ifdef KERBEROS
-char    *envinit[] = 
+char    *envinit[] =
 {COMMONVARS, 0/*tz*/, SAVEENVPAD, KRBPAD, ADDRPAD, 0};
 #else /* KERBEROS */
-char	*envinit[] = 
+char	*envinit[] =
 {COMMONVARS, 0/*tz*/, SAVEENVPAD, ADDRPAD, 0};
 #endif /* KERBEROS */
 #endif /* CRAY */
@@ -486,7 +486,7 @@ int maxlogs;
 #define NCARGS 1024
 #endif
 
-#define NMAX   16 
+#define NMAX   16
 
 int pid;
 char locuser[NMAX+1];
@@ -518,7 +518,7 @@ ignore_signals()
     signal(SIGTERM, SIG_IGN);
     signal(SIGPIPE, SIG_IGN);
     signal(SIGHUP, SIG_IGN);
-    
+
     killpg(pid, SIGTERM);
 #endif
 }
@@ -529,7 +529,7 @@ cleanup(signumber)
 {
     ignore_signals();
     wait(0);
-    
+
     pty_logwtmp(ttyn,"","");
     syslog(LOG_INFO ,"Daemon terminated via signal %d.", signumber);
     if (ccache)
@@ -569,7 +569,7 @@ void doit(f, fromp)
     int packet_level;               /* Packet classification level */
     long packet_compart;            /* Packet compartments */
 #endif  /* CRAY */
-    
+
     int s = -1;
     char hostname[NI_MAXHOST];
     char *sane_host;
@@ -599,8 +599,8 @@ void doit(f, fromp)
 #endif
 #endif
 #endif /* IP_TOS */
-    
-    { 
+
+    {
 	socklen_t sin_len = sizeof (localaddr);
 	if (getsockname(f, (struct sockaddr*)&localaddr, &sin_len) < 0) {
 	    perror("getsockname");
@@ -649,9 +649,9 @@ void doit(f, fromp)
 	}
     }
 #endif /* KERBEROS */
-    
+
 #ifdef CRAY
-    
+
     /* If this is a secure system then get the packet classification
        of f.  ( Note IP_SECURITY is checked in get_packet_classification:
        if it's not set then the user's (root) default
@@ -680,10 +680,10 @@ void doit(f, fromp)
 		exit(1);
 	    }
 	}
-	
+
     }
 #endif /* CRAY */
-    
+
     (void) alarm(60);
     port = 0;
     for (;;) {
@@ -772,7 +772,7 @@ void doit(f, fromp)
     getstr(f, cmdbuf, sizeof(cmdbuf), "command");
     rcmd_stream_init_normal();
 #endif /* KERBEROS */
-    
+
 #ifdef CRAY
     paddr = inet_addr(inet_ntoa(fromp->sin_addr));
     if(secflag){
@@ -788,7 +788,7 @@ void doit(f, fromp)
 	}
     }
 #endif /* CRAY */
-    
+
     pwd = getpwnam(locuser);
     if (pwd == (struct passwd *) 0 ) {
 	syslog(LOG_ERR ,
@@ -798,9 +798,9 @@ void doit(f, fromp)
 	error("Login incorrect.\n");
 	exit(1);
     }
-    
+
 #ifdef CRAY
-    /* Setup job entry, and validate udb entry. 
+    /* Setup job entry, and validate udb entry.
        ( against packet level also ) */
     if ((jid = setjob(pwd->pw_uid, 0)) < 0) {
 	error("Unable to create new job.\n");
@@ -836,7 +836,7 @@ void doit(f, fromp)
     }
 #ifndef NO_UDB
     (void)getsysudb();
-    
+
     if ((ue = getudbnam(pwd->pw_name)) == (struct udb *)NULL) {
 	error("Unable to fetch account id.\n");
 	exit(1);
@@ -883,7 +883,7 @@ void doit(f, fromp)
 				   open so close it here. */
 #endif  /* !NO_UDB */
 #endif /*CRAY*/
-    
+
     /* Setup wtmp entry : we do it here so that if this is a CRAY
        the Process Id is correct and we have not lost our trusted
        privileges. */
@@ -898,13 +898,13 @@ void doit(f, fromp)
     else {
 	pty_logwtmp(ttyn,locuser,sane_host);
     }
-    
+
 #ifdef CRAY
-    
+
     /* If  we are a secure system then we need to get rid of our
        trusted facility, so that MAC on the chdir we work. Before we
        do this make an entry into wtmp, and any other audit recording. */
-    
+
     if (secflag) {
 	if (getusrv(&usrv)){
 	    syslog(LOG_ERR,"Cannot getusrv");
@@ -922,10 +922,10 @@ void doit(f, fromp)
 	    error("Permission denied.\n");
 	    goto signout_please;
 	}
-	
+
 	loglogin(sane_host, SLG_OKLOG, ue->ue_logfails,ue);
-	
-	/*	Setup usrv structure with user udb info and 
+
+	/*	Setup usrv structure with user udb info and
 		packet_level and packet_compart. */
 	usrv.sv_actlvl = packet_level;
 	usrv.sv_actcmp = packet_compart; /*Note get_packet_level sets
@@ -938,7 +938,7 @@ void doit(f, fromp)
 	usrv.sv_valcat = ue->ue_valcat;
 	usrv.sv_savcmp = 0;
 	usrv.sv_savlvl = 0;
-	
+
 	/*
 	 *      Set user values to workstation boundaries
 	 */
@@ -948,12 +948,12 @@ void doit(f, fromp)
 #ifdef MAX
 #undef MAX
 #endif
-	
+
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
-	
+
 	nal_error = 0;
-	
+
 	if (nal.na_sort) {
 	    if ((ue->ue_minlvl > nal.na_smax) ||
 		(ue->ue_maxlvl < nal.na_smin))
@@ -961,14 +961,14 @@ void doit(f, fromp)
 	    else {
 		usrv.sv_minlvl=MAX(ue->ue_minlvl, nal.na_smin);
 		usrv.sv_maxlvl=MIN(ue->ue_maxlvl, nal.na_smax);
-		
+
 #ifndef IP_SECURITY
 
 		if (usrv.sv_actlvl < usrv.sv_minlvl)
 		    usrv.sv_actlvl = usrv.sv_minlvl;
 		if (usrv.sv_actlvl > usrv.sv_maxlvl)
 		  usrv.sv_actlvl = usrv.sv_maxlvl;
-		
+
 #else /*IP_SECURITY*/
 		if (usrv.sv_actlvl < usrv.sv_minlvl)
 		  nal_error++;
@@ -976,7 +976,7 @@ void doit(f, fromp)
 		  nal_error++;
 		if (usrv.sv_actlvl != ue->ue_deflvl)
 		  nal_error++;
-		
+
 		usrv.sv_valcmp = ue->ue_comparts & nal.na_scmp;
 		usrv.sv_actcmp &= nal.na_scmp;
 #endif /*IP_SECURITY*/
@@ -1016,7 +1016,7 @@ void doit(f, fromp)
 #undef  MAX
 	/* Before the setusrv is done then do a sethost for paddr */
 	sethost(paddr);
-	
+
 	if (setusrv(&usrv) == -1) {
 	    loglogin(sane_host, SLG_LVERR, ue->ue_logfails,ue);
 	    error("Permission denied.\n");
@@ -1026,10 +1026,10 @@ void doit(f, fromp)
 	    error("Getusrv Permission denied.\n");
 	    goto signout_please;
 	}
-	
+
     }
 #endif /*CRAY*/
-    
+
     if (chdir(pwd->pw_dir) < 0) {
       if(chdir("/") < 0) {
       	error("No remote directory.\n");
@@ -1066,17 +1066,17 @@ void doit(f, fromp)
 	error("You must use encryption.\n");
 	goto signout_please;
     }
-    
+
     if (pwd->pw_uid && !access(NOLOGIN, F_OK)) {
 	error("Logins currently disabled.\n");
 	goto signout_please;
     }
-    
+
     /* Log access to account */
     pwd = (struct passwd *) getpwnam(locuser);
     if (pwd && (pwd->pw_uid == 0)) {
 #ifdef LOG_CMD
-	syslog(LOG_NOTICE, "Executing %s for principal %s (%s@%s (%s)) as ROOT", 
+	syslog(LOG_NOTICE, "Executing %s for principal %s (%s@%s (%s)) as ROOT",
 	       cmdbuf, kremuser, remuser, hostaddra, hostname);
 #else
 	syslog(LOG_NOTICE ,"Access as ROOT by principal %s (%s@%s (%s))",
@@ -1087,20 +1087,20 @@ void doit(f, fromp)
     /* Log if principal is from a remote realm */
     else if (client && !default_realm(client))
 #endif
-  
-#if defined(KERBEROS) && defined(LOG_OTHER_USERS) && !defined(LOG_ALL_LOGINS) 
+
+#if defined(KERBEROS) && defined(LOG_OTHER_USERS) && !defined(LOG_ALL_LOGINS)
     /* Log if principal name does not map to local username */
     else if (client && !princ_maps_to_lname(client, locuser))
 #endif /* LOG_OTHER_USERS */
-  
+
 #ifdef LOG_ALL_LOGINS /* Log everything */
-    else 
-#endif 
-  
+    else
+#endif
+
 #if defined(LOG_REMOTE_REALM) || defined(LOG_OTHER_USERS) || defined(LOG_ALL_LOGINS)
       {
 #ifdef LOG_CMD
-	  syslog(LOG_NOTICE, "Executing %s for principal %s (%s@%s (%s)) as local user %s", 
+	  syslog(LOG_NOTICE, "Executing %s for principal %s (%s@%s (%s)) as local user %s",
 		 cmdbuf, kremuser, remuser, hostaddra, hostname, locuser);
 #else
 	  syslog(LOG_NOTICE ,"Access as %s by principal %s (%s@%s (%s))",
@@ -1108,9 +1108,9 @@ void doit(f, fromp)
 #endif
       }
 #endif
-    
+
     (void) write(2, "", 1);
-    
+
     if (port||do_encrypt) {
 	if (port&&(pipe(pv) < 0)) {
 	    error("Can't make pipe.\n");
@@ -1139,7 +1139,7 @@ void doit(f, fromp)
 	    (void)sigaction(SIGHUP, &sa, (struct sigaction *)0);
 
 	    sa.sa_handler = SIG_IGN;
-	    /* SIGPIPE is a crutch that we don't need if we check 
+	    /* SIGPIPE is a crutch that we don't need if we check
 	       the exit status of write. */
 	    (void)sigaction(SIGPIPE, &sa, (struct sigaction *)0);
 	    (void)sigaction(SIGCHLD, &sa, (struct sigaction *)0);
@@ -1148,20 +1148,20 @@ void doit(f, fromp)
 	    signal(SIGQUIT, cleanup);
 	    signal(SIGTERM, cleanup);
 	    signal(SIGHUP, cleanup);
-	    /* SIGPIPE is a crutch that we don't need if we check 
+	    /* SIGPIPE is a crutch that we don't need if we check
 	       the exit status of write. */
 	    signal(SIGPIPE, SIG_IGN);
 	    signal(SIGCHLD,SIG_IGN);
 #endif
-	    
+
 	    (void) close(0); (void) close(1); (void) close(2);
 	    if(port)
 		(void) close(pv[1]);
 	    (void) close(pw[1]);
 	    (void) close(px[0]);
-	    
-	    
-	    
+
+
+
 	    FD_ZERO(&readfrom);
 	    FD_SET(f, &readfrom);
 	    maxfd = f;
@@ -1176,7 +1176,7 @@ void doit(f, fromp)
 	    FD_SET(pw[0], &readfrom);
 	    if (pw[0] > maxfd)
 		maxfd = pw[0];
-	    
+
 	    /* read from f, write to px[1] -- child stdin */
 	    /* read from s, signal child */
 	    /* read from pv[0], write to s -- child stderr */
@@ -1246,7 +1246,7 @@ void doit(f, fromp)
 			  (void) close(px[1]);
 			  FD_CLR(f, &readfrom);
 			} else if (wcc != cc) {
-			  syslog(LOG_INFO, "only wrote %d/%d to child", 
+			  syslog(LOG_INFO, "only wrote %d/%d to child",
 				 wcc, cc);
 			}
 		    }
@@ -1293,14 +1293,14 @@ void doit(f, fromp)
 	if(port)
 	    (void) close(pv[1]);
     }
-    
-    /*      We are simply execing a program over rshd : log entry into wtmp, 
+
+    /*      We are simply execing a program over rshd : log entry into wtmp,
 	    as kexe(pid), then finish out the session right after that.
 	    Syslog should have the information as to what was exec'd */
     else {
 	pty_logwtmp(ttyn,"","");
     }
-    
+
     if (*pwd->pw_shell == '\0')
       pwd->pw_shell = "/bin/sh";
     (void) close(f);
@@ -1317,7 +1317,7 @@ void doit(f, fromp)
 #ifdef	HAVE_SETLUID
     /*
      * If we're on a system which keeps track of login uids, then
-     * set the login uid. 
+     * set the login uid.
      */
     if (setluid((uid_t) pwd->pw_uid) < 0) {
 	perror("setluid");
@@ -1404,7 +1404,7 @@ void doit(f, fromp)
 	    char *buf2;
 
 	    if(getenv(save_env[cnt])) {
-		    if (asprintf(&buf2, "%s=%s", save_env[cnt], 
+		    if (asprintf(&buf2, "%s=%s", save_env[cnt],
 				 getenv(save_env[cnt])) >= 0) {
 			    for (i = 0; envinit[i]; i++);
 			    envinit[i] = buf2;
@@ -1415,7 +1415,7 @@ void doit(f, fromp)
     /* XXX - If we do anything else, make sure there is space in the array. */
 
     environ = envinit;
-    
+
 #ifdef KERBEROS
     /* To make Kerberos rcp work correctly, we must ensure that we
        invoke Kerberos rcp on this end, not normal rcp, even if the
@@ -1453,7 +1453,7 @@ void doit(f, fromp)
       cp++;
     else
       cp = pwd->pw_shell;
-    
+
     if (do_encrypt && !strncmp(cmdbuf, "-x ", 3)) {
 	execl(pwd->pw_shell, cp, "-c", (char *)cmdbuf + 3, (char *)NULL);
     }
@@ -1463,7 +1463,7 @@ void doit(f, fromp)
     perror(pwd->pw_shell);
     perror(cp);
     exit(1);
-    
+
   signout_please:
     if (ccache)
 	krb5_cc_destroy(bsd_context, ccache);
@@ -1485,7 +1485,7 @@ error(fmt, va_alist)
 {
     va_list ap;
     char buf[RCMD_BUFSIZ],  *cp = buf;
-    
+
 #ifdef HAVE_STDARG_H
     va_start(ap, fmt);
 #else
@@ -1508,7 +1508,7 @@ void getstr(fd, buf, cnt, err)
     char *err;
 {
     char c;
-    
+
     do {
 	if (read(fd, &c, 1) != 1)
 	  exit(1);
@@ -1526,11 +1526,11 @@ char *makejtmp(uid, gid, jid)
 {
     register char *endc, *tdp = &tmpdir[strlen(tmpdir)];
     register int i;
-    
+
     snprintf(tdp, sizeof(tmpdir) - (tdp - tmpdir), "%s/jtmp.%06d",
 	     JTMPDIR, jid);
     endc = &tmpdir[strlen(tmpdir)];
-    
+
     endc[1] = '\0';
     for (i = 0; i < 26; i++) {
 	endc[0] = 'a' + i;
@@ -1595,7 +1595,7 @@ static int get_packet_classification(fd,useruid,level,comp)
     struct udb *udb;
     int retval;
     int sockoptlen;
-    
+
     retval = 0;
     getsysudb ();
     udb = getudbuid ((int) useruid);
@@ -1631,8 +1631,8 @@ static int get_packet_classification(fd,useruid,level,comp)
 }
 
 #endif /* IP_SECURITY */
-	
-	
+
+
 
 /*
  * Make a security log entry for the login attempt.
@@ -1655,7 +1655,7 @@ loglogin(host, flag, failures, ue)
     char   urec[sizeof(struct slghdr) + sizeof(struct slglogin)];
     struct slghdr   *uhdr = (struct slghdr *)urec;
     struct slglogin *ulogin=(struct slglogin *)&urec[sizeof(struct slghdr)];
-    
+
     strncpy(ulogin->sl_line, ttyn, sizeof(ulogin->sl_line));
     strncpy(ulogin->sl_host, host, sizeof(ulogin->sl_host));
     ulogin->sl_failures = failures;
@@ -1671,7 +1671,7 @@ loglogin(host, flag, failures, ue)
     /*      uhdr->sl_scls = ue->ue_defcls;  enable for integrity policy */
     uhdr->sl_olvl = 0;
     uhdr->sl_len = sizeof(urec);
-    
+
 #ifdef  CRAY2
     slgentry(SLG_LOGN, (word *)urec);
 #else /*        ! CRAY2 */
@@ -1681,7 +1681,7 @@ loglogin(host, flag, failures, ue)
 }
 
 #endif /* CRAY */
-	
+
 
 
 void usage()
@@ -1728,7 +1728,7 @@ recvauth(netfd, peersin, valid_checksum)
     if (getsockname(netfd, (struct sockaddr *)&laddr, &len)) {
 	    exit(1);
     }
-	
+
 #ifdef unicos61
 #define SIZEOF_INADDR  SIZEOF_in_addr
 #else
@@ -1784,7 +1784,7 @@ recvauth(netfd, peersin, valid_checksum)
     getstr(netfd, cmdbuf, sizeof(cmdbuf), "command");
 
     /* Must be V5  */
-	
+
     kcmd_proto = KCMD_UNKNOWN_PROTOCOL;
     if (version.length != 9)
 	fatal (netfd, "bad application version length");
@@ -1795,17 +1795,17 @@ recvauth(netfd, peersin, valid_checksum)
 
     getstr(netfd, remuser, sizeof(locuser), "remuser");
 
-    if ((status = krb5_unparse_name(bsd_context, ticket->enc_part2->client, 
+    if ((status = krb5_unparse_name(bsd_context, ticket->enc_part2->client,
 				    &kremuser)))
 	return status;
-    
-    if ((status = krb5_copy_principal(bsd_context, ticket->enc_part2->client, 
+
+    if ((status = krb5_copy_principal(bsd_context, ticket->enc_part2->client,
 				      &client)))
 	return status;
     if ((status = krb5_auth_con_getauthenticator(bsd_context, auth_context,
 						 &authenticator)))
       return status;
-    
+
     if (authenticator->checksum && !checksum_ignored) {
 	struct sockaddr_storage adr;
 	unsigned int adr_length = sizeof(adr);

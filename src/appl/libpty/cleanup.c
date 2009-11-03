@@ -3,7 +3,7 @@
  *
  * (C)Copyright 1995, 1996 by the Massachusetts Institute of Technology.
  *
- * 
+ *
  * Permission to use, copy, modify, and distribute this software and
  * its documentation for any purpose and without fee is hereby
  * granted, provided that the above copyright notice appear in all
@@ -17,7 +17,7 @@
  * M.I.T. makes no representations about the suitability
  * of this software for any purpose.  It is provided "as is" without
  * express or implied warranty.
- * 
+ *
  */
 
 #include "com_err.h"
@@ -35,10 +35,10 @@ long pty_cleanup (char *slave,
 #ifdef VHANG_LAST
     int retval, fd;
 #endif
-    
+
     if (update_utmp)
 	pty_update_utmp(PTY_DEAD_PROCESS, pid,  "", slave, (char *)0, PTY_UTMP_USERNAME_VALID);
-    
+
     (void)chmod(slave, 0666);
     (void)chown(slave, 0, 0);
 #ifdef HAVE_REVOKE

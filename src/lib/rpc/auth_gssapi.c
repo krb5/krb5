@@ -34,7 +34,7 @@ extern void gssrpcint_printf(const char *format, ...);
 #define L_PRINTF(l, args)
 #define AUTH_GSSAPI_DISPLAY_STATUS(args)
 #endif
-   
+
 static void 	auth_gssapi_nextverf(AUTH *);
 static bool_t 	auth_gssapi_marshall(AUTH *, XDR *);
 static bool_t	auth_gssapi_validate(AUTH *, struct opaque_auth *);
@@ -42,7 +42,7 @@ static bool_t	auth_gssapi_refresh(AUTH *, struct rpc_msg *);
 static bool_t	auth_gssapi_wrap(AUTH *, XDR *, xdrproc_t, caddr_t);
 static bool_t	auth_gssapi_unwrap(AUTH *, XDR *, xdrproc_t, caddr_t);
 static void	auth_gssapi_destroy(AUTH *);
-   
+
 static bool_t	marshall_new_creds(AUTH *, bool_t, gss_buffer_t);
 
 static struct auth_ops auth_gssapi_ops = {
@@ -65,7 +65,7 @@ struct auth_gssapi_data {
      gss_buffer_desc client_handle;
      uint32_t seq_num;
      int def_cred;
-     
+
      /* pre-serialized ah_cred */
      unsigned char cred_buf[MAX_AUTH_BYTES];
      uint32_t cred_len;
@@ -86,11 +86,11 @@ AUTH *auth_gssapi_create_default(CLIENT *clnt, char *service_name)
      OM_uint32 gssstat, minor_stat;
      gss_buffer_desc input_name;
      gss_name_t target_name;
-     
+
      input_name.value = service_name;
      input_name.length = strlen(service_name) + 1;
-     
-     gssstat = gss_import_name(&minor_stat, &input_name, 
+
+     gssstat = gss_import_name(&minor_stat, &input_name,
 			       gss_nt_service_name, &target_name);
      if (gssstat != GSS_S_COMPLETE) {
 	  AUTH_GSSAPI_DISPLAY_STATUS(("parsing name", gssstat,
@@ -99,7 +99,7 @@ AUTH *auth_gssapi_create_default(CLIENT *clnt, char *service_name)
 	  rpc_createerr.cf_error.re_errno = ENOMEM;
 	  return NULL;
      }
-     
+
      auth = auth_gssapi_create(clnt,
 			       &gssstat,
 			       &minor_stat,
@@ -111,7 +111,7 @@ AUTH *auth_gssapi_create_default(CLIENT *clnt, char *service_name)
 			       NULL,
 			       NULL,
 			       NULL);
-     
+
      gss_release_name(&minor_stat, &target_name);
      return auth;
 }
@@ -145,22 +145,22 @@ AUTH *auth_gssapi_create(
      struct timeval timeout;
      int bindings_failed;
      rpcproc_t init_func;
-     
+
      auth_gssapi_init_arg call_arg;
      auth_gssapi_init_res call_res;
      gss_buffer_desc *input_token, isn_buf;
-     
+
      memset(&rpc_createerr, 0, sizeof(rpc_createerr));
-     
+
      /* this timeout is only used if clnt_control(clnt, CLSET_TIMEOUT) */
      /* has not already been called.. therefore, we can just pick */
      /* something reasonable-sounding.. */
      timeout.tv_sec = 30;
      timeout.tv_usec = 0;
-     
+
      auth = NULL;
      pdata = NULL;
-     
+
      /* don't assume the caller will want to change clnt->cl_auth */
      save_auth = clnt->cl_auth;
 
@@ -178,23 +178,23 @@ AUTH *auth_gssapi_create(
      }
      memset(auth, 0, sizeof(*auth));
      memset(pdata, 0, sizeof(*pdata));
-     
+
      auth->ah_ops = &auth_gssapi_ops;
      auth->ah_private = (caddr_t) pdata;
-     
+
      /* initial creds are auth_msg TRUE and no handle */
      marshall_new_creds(auth, TRUE, NULL);
-     
+
      /* initial verifier is empty */
      auth->ah_verf.oa_flavor = AUTH_GSSAPI;
      auth->ah_verf.oa_base = NULL;
      auth->ah_verf.oa_length = 0;
-     
+
      AUTH_PRIVATE(auth)->established = FALSE;
      AUTH_PRIVATE(auth)->clnt = clnt;
      AUTH_PRIVATE(auth)->def_cred = (claimant_cred_handle ==
 				     GSS_C_NO_CREDENTIAL);
-     
+
      clnt->cl_auth = auth;
 
      /* start by trying latest version */
@@ -237,7 +237,7 @@ try_new_version:
 	  bindings.initiator_addrtype = GSS_C_AF_INET;
 	  bindings.initiator_address.length = 4;
 	  bindings.initiator_address.value = &laddr.sin_addr.s_addr;
-	  
+
 	  bindings.acceptor_addrtype = GSS_C_AF_INET;
 	  bindings.acceptor_address.length = 4;
 	  bindings.acceptor_address.value = &raddr.sin_addr.s_addr;
@@ -245,9 +245,9 @@ try_new_version:
      } else {
 	  bindp = NULL;
      }
-     
+
      memset(&call_res, 0, sizeof(call_res));
-     
+
 next_token:
      *gssstat = gss_init_sec_context(minor_stat,
 				     claimant_cred_handle,
@@ -262,16 +262,16 @@ next_token:
 				     &call_arg.token,
 				     ret_flags,
 				     time_rec);
-     
+
      if (*gssstat != GSS_S_COMPLETE && *gssstat != GSS_S_CONTINUE_NEEDED) {
 	  AUTH_GSSAPI_DISPLAY_STATUS(("initializing context", *gssstat,
 				      *minor_stat));
 	  goto cleanup;
      }
-     
+
      /* if we got a token, pass it on */
      if (call_arg.token.length != 0) {
-	  
+
 	  /*
 	   * sanity check: if we received a signed isn in the last
 	   * response then there *cannot* be another token to send
@@ -280,16 +280,16 @@ next_token:
 	       PRINTF(("gssapi_create: unexpected token from init_sec\n"));
 	       goto cleanup;
 	  }
-	  
+
 	  PRINTF(("gssapi_create: calling GSSAPI_INIT (%d)\n", init_func));
-	  
+
 	  memset(&call_res, 0, sizeof(call_res));
 	  callstat = clnt_call(clnt, init_func,
 			       xdr_authgssapi_init_arg, &call_arg,
 			       xdr_authgssapi_init_res, &call_res,
 			       timeout);
 	  gss_release_buffer(minor_stat, &call_arg.token);
-	  
+
 	  if (callstat != RPC_SUCCESS) {
 	       struct rpc_err err;
 
@@ -306,7 +306,7 @@ next_token:
 		    PRINTF(("gssapi_create: GSSAPI_INIT (%d) failed, stat %d\n",
 			    init_func, callstat));
 	       }
-	       
+
 	       goto cleanup;
 	  } else if (call_res.version != call_arg.version &&
 		     !(call_arg.version == 2 && call_res.version == 1)) {
@@ -332,10 +332,10 @@ next_token:
 					   call_res.gss_minor));
 	       goto cleanup;
 	  }
-	  
+
 	  PRINTF(("gssapi_create: GSSAPI_INIT (%d) succeeded\n", init_func));
 	  init_func = AUTH_GSSAPI_CONTINUE_INIT;
-	  
+
 	  /* check for client_handle */
 	  if (AUTH_PRIVATE(auth)->client_handle.length == 0) {
 	       if (call_res.client_handle.length == 0) {
@@ -344,20 +344,20 @@ next_token:
 	       } else {
 		    PRINTF(("gssapi_create: got client_handle %d\n",
 			    *((uint32_t *)call_res.client_handle.value)));
-		    
+
 		    GSS_DUP_BUFFER(AUTH_PRIVATE(auth)->client_handle,
 				   call_res.client_handle);
-		    
+
 		    /* auth_msg is TRUE; there may be more tokens */
 		    marshall_new_creds(auth, TRUE,
-				       &AUTH_PRIVATE(auth)->client_handle); 
+				       &AUTH_PRIVATE(auth)->client_handle);
 	       }
 	  } else if (!GSS_BUFFERS_EQUAL(AUTH_PRIVATE(auth)->client_handle,
 					call_res.client_handle)) {
 	       PRINTF(("gssapi_create: got different client_handle\n"));
 	       goto cleanup;
 	  }
-	  
+
 	  /* check for token */
 	  if (call_res.token.length==0 && *gssstat==GSS_S_CONTINUE_NEEDED) {
 	       PRINTF(("gssapi_create: expected token\n"));
@@ -373,7 +373,7 @@ next_token:
 	       }
 	  }
      }
-     
+
      /* check for isn */
      if (*gssstat == GSS_S_COMPLETE) {
 	  if (call_res.signed_isn.length == 0) {
@@ -381,67 +381,67 @@ next_token:
 	       goto cleanup;
 	  } else {
 	       PRINTF(("gssapi_create: processing signed isn\n"));
-	       
+
 	       /* don't check conf (integ only) or qop (accpet default) */
 	       *gssstat = gss_unseal(minor_stat,
 				     AUTH_PRIVATE(auth)->context,
 				     &call_res.signed_isn,
 				     &isn_buf, NULL, NULL);
-	       
+
 	       if (*gssstat != GSS_S_COMPLETE) {
 		    AUTH_GSSAPI_DISPLAY_STATUS(("unsealing isn",
-						*gssstat, *minor_stat)); 
+						*gssstat, *minor_stat));
 		    goto cleanup;
 	       } else if (isn_buf.length != sizeof(uint32_t)) {
 		    PRINTF(("gssapi_create: gss_unseal gave %d bytes\n",
 			    (int) isn_buf.length));
 		    goto cleanup;
 	       }
-	       
+
 	       AUTH_PRIVATE(auth)->seq_num = (uint32_t)
-		    ntohl(*((uint32_t*)isn_buf.value)); 
+		    ntohl(*((uint32_t*)isn_buf.value));
 	       *gssstat = gss_release_buffer(minor_stat, &isn_buf);
 	       if (*gssstat != GSS_S_COMPLETE) {
 		    AUTH_GSSAPI_DISPLAY_STATUS(("releasing unsealed isn",
 						*gssstat, *minor_stat));
 		    goto cleanup;
 	       }
-	       
+
 	       PRINTF(("gssapi_create: isn is %d\n",
 		       AUTH_PRIVATE(auth)->seq_num));
-	       
+
 	       /* we no longer need these results.. */
 	       xdr_free(xdr_authgssapi_init_res, &call_res);
 	  }
      } else if (call_res.signed_isn.length != 0) {
 	  PRINTF(("gssapi_create: got signed isn, can't check yet\n"));
      }
-     
+
      /* results were okay.. continue if necessary */
      if (*gssstat == GSS_S_CONTINUE_NEEDED) {
 	  PRINTF(("gssapi_create: not done, continuing\n"));
 	  goto next_token;
      }
-     
+
      /*
       * Done!  Context is established, we have client_handle and isn.
       */
      AUTH_PRIVATE(auth)->established = TRUE;
-     
+
      marshall_new_creds(auth, FALSE,
-			&AUTH_PRIVATE(auth)->client_handle); 
-     
+			&AUTH_PRIVATE(auth)->client_handle);
+
      PRINTF(("gssapi_create: done. client_handle %#x, isn %d\n\n",
 	     *((uint32_t *)AUTH_PRIVATE(auth)->client_handle.value),
 	     AUTH_PRIVATE(auth)->seq_num));
-     
+
      /* don't assume the caller will want to change clnt->cl_auth */
      clnt->cl_auth = save_auth;
-     
+
      return auth;
-     
+
      /******************************************************************/
-     
+
 cleanup:
      PRINTF(("gssapi_create: bailing\n\n"));
 
@@ -452,13 +452,13 @@ cleanup:
 	     free(auth);
 	 auth = NULL;
      }
-     
+
      /* don't assume the caller will want to change clnt->cl_auth */
      clnt->cl_auth = save_auth;
-     
+
      if (rpc_createerr.cf_stat == 0)
 	  rpc_createerr.cf_stat = RPC_AUTHERROR;
-     
+
      return auth;
 }
 
@@ -480,7 +480,7 @@ cleanup:
  * Requires: auth must point to a valid GSS-API auth structure, auth_msg
  * must be TRUE or FALSE, client_handle must be a gss_buffer_t with a valid
  * value and length field or NULL.
- * 
+ *
  * Effects: auth->ah_cred is set to the serialized auth_gssapi_creds
  * version 2 structure (stored in the cred_buf field of private data)
  * containing version, auth_msg and client_handle.
@@ -496,11 +496,11 @@ static bool_t marshall_new_creds(
 {
      auth_gssapi_creds creds;
      XDR xdrs;
-     
+
      PRINTF(("marshall_new_creds: starting\n"));
 
      creds.version = 2;
-     
+
      creds.auth_msg = auth_msg;
      if (client_handle)
 	  GSS_COPY_BUFFER(creds.client_handle, *client_handle)
@@ -508,7 +508,7 @@ static bool_t marshall_new_creds(
 	  creds.client_handle.length = 0;
 	  creds.client_handle.value = NULL;
      }
-     
+
      xdrmem_create(&xdrs, (caddr_t) AUTH_PRIVATE(auth)->cred_buf,
 		   MAX_AUTH_BYTES, XDR_ENCODE);
      if (! xdr_authgssapi_creds(&xdrs, &creds)) {
@@ -518,16 +518,16 @@ static bool_t marshall_new_creds(
      }
      AUTH_PRIVATE(auth)->cred_len = xdr_getpos(&xdrs);
      XDR_DESTROY(&xdrs);
-     
+
      PRINTF(("marshall_new_creds: auth_gssapi_creds is %d bytes\n",
 	     AUTH_PRIVATE(auth)->cred_len));
-     
+
      auth->ah_cred.oa_flavor = AUTH_GSSAPI;
      auth->ah_cred.oa_base = (char *) AUTH_PRIVATE(auth)->cred_buf;
      auth->ah_cred.oa_length = AUTH_PRIVATE(auth)->cred_len;
-     
+
      PRINTF(("marshall_new_creds: succeeding\n"));
-     
+
      return TRUE;
 }
 
@@ -556,13 +556,13 @@ static void auth_gssapi_nextverf(AUTH *auth)
  * Returns: boolean indicating success/failure
  *
  * Effects:
- * 
+ *
  * The pre-serialized credentials in cred_buf are serialized.  If the
  * context is established, the sealed sequence number is serialized as
  * the verifier.  If the context is not established, an empty verifier
  * is serialized.  The sequence number is *not* incremented, because
  * this function is called multiple times if retransmission is required.
- * 
+ *
  * If this took all the header fields as arguments, it could sign
  * them.
  */
@@ -573,22 +573,22 @@ static bool_t auth_gssapi_marshall(
      OM_uint32 minor_stat;
      gss_buffer_desc out_buf;
      uint32_t seq_num;
-     
+
      if (AUTH_PRIVATE(auth)->established == TRUE)  {
 	  PRINTF(("gssapi_marshall: starting\n"));
-	  
+
 	  seq_num = AUTH_PRIVATE(auth)->seq_num + 1;
-	  
+
 	  PRINTF(("gssapi_marshall: sending seq_num %d\n", seq_num));
-	  
+
 	  if (auth_gssapi_seal_seq(AUTH_PRIVATE(auth)->context, seq_num,
 				   &out_buf) == FALSE) {
 	       PRINTF(("gssapi_marhshall: seal failed\n"));
 	  }
-	  
+
 	  auth->ah_verf.oa_base = out_buf.value;
 	  auth->ah_verf.oa_length = out_buf.length;
-	  
+
 	  if (! xdr_opaque_auth(xdrs, &auth->ah_cred) ||
 	      ! xdr_opaque_auth(xdrs, &auth->ah_verf)) {
 	       (void) gss_release_buffer(&minor_stat, &out_buf);
@@ -597,16 +597,16 @@ static bool_t auth_gssapi_marshall(
 	  (void) gss_release_buffer(&minor_stat, &out_buf);
      } else {
 	  PRINTF(("gssapi_marshall: not established, sending null verf\n"));
-	  
+
 	  auth->ah_verf.oa_base = NULL;
 	  auth->ah_verf.oa_length = 0;
-	  
+
 	  if (! xdr_opaque_auth(xdrs, &auth->ah_cred) ||
 	      ! xdr_opaque_auth(xdrs, &auth->ah_verf)) {
 	       return FALSE;
 	  }
      }
-     
+
      return TRUE;
 }
 
@@ -623,14 +623,14 @@ static bool_t auth_gssapi_validate(
 {
      gss_buffer_desc in_buf;
      uint32_t seq_num;
-     
+
      if (AUTH_PRIVATE(auth)->established == FALSE) {
 	  PRINTF(("gssapi_validate: not established, noop\n"));
 	  return TRUE;
      }
-     
+
      PRINTF(("gssapi_validate: starting\n"));
-     
+
      in_buf.length = verf->oa_length;
      in_buf.value = verf->oa_base;
      if (auth_gssapi_unseal_seq(AUTH_PRIVATE(auth)->context, &in_buf,
@@ -638,7 +638,7 @@ static bool_t auth_gssapi_validate(
 	  PRINTF(("gssapi_validate: failed unsealing verifier\n"));
 	  return FALSE;
      }
-     
+
      /* we sent seq_num+1, so we should get back seq_num+2 */
      if (AUTH_PRIVATE(auth)->seq_num+2 != seq_num) {
 	  PRINTF(("gssapi_validate: expecting seq_num %d, got %d (%#x)\n",
@@ -646,12 +646,12 @@ static bool_t auth_gssapi_validate(
 	  return FALSE;
      }
      PRINTF(("gssapi_validate: seq_num %d okay\n", seq_num));
-     
+
      /* +1 for successful transmission, +1 for successful validation */
      AUTH_PRIVATE(auth)->seq_num += 2;
-     
+
      PRINTF(("gssapi_validate: succeeding\n"));
-     
+
      return TRUE;
 }
 
@@ -661,7 +661,7 @@ static bool_t auth_gssapi_validate(
  * Purpose: Attempts to resyncrhonize the sequence number.
  *
  * Effects:
- * 
+ *
  * When the server receives a properly authenticated RPC call, it
  * increments the sequence number it is expecting from the client.
  * But if the server's response is lost for any reason, the client
@@ -706,18 +706,18 @@ static void auth_gssapi_destroy(AUTH *auth)
      OM_uint32 gssstat, minor_stat;
      gss_cred_id_t cred;
      int callstat;
-     
+
      if (AUTH_PRIVATE(auth)->client_handle.length == 0) {
 	  PRINTF(("gssapi_destroy: no client_handle, not calling destroy\n"));
 	  goto skip_call;
      }
-     
+
      PRINTF(("gssapi_destroy: marshalling new creds\n"));
      if (!marshall_new_creds(auth, TRUE, &AUTH_PRIVATE(auth)->client_handle)) {
 	  PRINTF(("gssapi_destroy: marshall_new_creds failed\n"));
 	  goto skip_call;
      }
-     
+
      PRINTF(("gssapi_destroy: calling GSSAPI_DESTROY\n"));
      timeout.tv_sec = 1;
      timeout.tv_usec = 0;
@@ -726,7 +726,7 @@ static void auth_gssapi_destroy(AUTH *auth)
      if (callstat != RPC_SUCCESS)
 	  clnt_sperror(AUTH_PRIVATE(auth)->clnt,
 		       "gssapi_destroy: GSSAPI_DESTROY failed");
-     
+
 skip_call:
      PRINTF(("gssapi_destroy: deleting context\n"));
      gssstat = gss_delete_sec_context(&minor_stat,
@@ -742,18 +742,18 @@ skip_call:
 	       AUTH_GSSAPI_DISPLAY_STATUS(("deleting default credential",
 					   gssstat, minor_stat));
      }
-     
+
      if (AUTH_PRIVATE(auth)->client_handle.length != 0)
 	  gss_release_buffer(&minor_stat,
 			     &AUTH_PRIVATE(auth)->client_handle);
-     
+
 #if 0
      PRINTF(("gssapi_destroy: calling GSSAPI_EXIT\n"));
      AUTH_PRIVATE(auth)->established = FALSE;
      callstat = clnt_call(AUTH_PRIVATE(auth)->clnt, AUTH_GSSAPI_EXIT,
 			  xdr_void, NULL, xdr_void, NULL, timeout);
 #endif
-     
+
      free(auth->ah_private);
      free(auth);
      PRINTF(("gssapi_destroy: done\n"));
@@ -774,7 +774,7 @@ static bool_t auth_gssapi_wrap(
      caddr_t xdr_ptr)
 {
      OM_uint32 gssstat, minor_stat;
-     
+
      if (! AUTH_PRIVATE(auth)->established) {
 	  PRINTF(("gssapi_wrap: context not established, noop\n"));
 	  return (*xdr_func)(out_xdrs, xdr_ptr);
@@ -805,7 +805,7 @@ static bool_t auth_gssapi_unwrap(
      caddr_t xdr_ptr)
 {
      OM_uint32 gssstat, minor_stat;
-     
+
      if (! AUTH_PRIVATE(auth)->established) {
 	  PRINTF(("gssapi_unwrap: context not established, noop\n"));
 	  return (*xdr_func)(in_xdrs, xdr_ptr);

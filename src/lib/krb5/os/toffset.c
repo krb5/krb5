@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/os/toffset.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -47,13 +48,13 @@ krb5_set_real_time(krb5_context context, krb5_timestamp seconds, krb5_int32 micr
 
     retval = krb5_crypto_us_timeofday(&sec, &usec);
     if (retval)
-	    return retval;
+        return retval;
 
     os_ctx->time_offset = seconds - sec;
     os_ctx->usec_offset = (microseconds > -1) ? microseconds - usec : 0;
 
     os_ctx->os_flags = ((os_ctx->os_flags & ~KRB5_OS_TOFFSET_TIME) |
-			KRB5_OS_TOFFSET_VALID);
+                        KRB5_OS_TOFFSET_VALID);
     return 0;
 }
 
@@ -62,7 +63,7 @@ krb5_set_real_time(krb5_context context, krb5_timestamp seconds, krb5_int32 micr
  * the seconds and microseconds value as input to this function.  This
  * is useful for running the krb5 routines through test suites
  */
-krb5_error_code 
+krb5_error_code
 krb5_set_debugging_time(krb5_context context, krb5_timestamp seconds, krb5_int32 microseconds)
 {
     krb5_os_context os_ctx = &context->os_context;
@@ -70,7 +71,7 @@ krb5_set_debugging_time(krb5_context context, krb5_timestamp seconds, krb5_int32
     os_ctx->time_offset = seconds;
     os_ctx->usec_offset = microseconds;
     os_ctx->os_flags = ((os_ctx->os_flags & ~KRB5_OS_TOFFSET_VALID) |
-			KRB5_OS_TOFFSET_TIME);
+                        KRB5_OS_TOFFSET_TIME);
     return 0;
 }
 
@@ -78,7 +79,7 @@ krb5_set_debugging_time(krb5_context context, krb5_timestamp seconds, krb5_int32
  * This routine turns off the time correction fields, so that the krb5
  * routines return the "natural" time.
  */
-krb5_error_code 
+krb5_error_code
 krb5_use_natural_time(krb5_context context)
 {
     krb5_os_context os_ctx = &context->os_context;
@@ -97,9 +98,9 @@ krb5_get_time_offsets(krb5_context context, krb5_timestamp *seconds, krb5_int32 
     krb5_os_context os_ctx = &context->os_context;
 
     if (seconds)
-	*seconds = os_ctx->time_offset;
+        *seconds = os_ctx->time_offset;
     if (microseconds)
-	*microseconds = os_ctx->usec_offset;
+        *microseconds = os_ctx->usec_offset;
     return 0;
 }
 
@@ -107,7 +108,7 @@ krb5_get_time_offsets(krb5_context context, krb5_timestamp *seconds, krb5_int32 
 /*
  * This routine sets the time offsets directly.
  */
-krb5_error_code 
+krb5_error_code
 krb5_set_time_offsets(krb5_context context, krb5_timestamp seconds, krb5_int32 microseconds)
 {
     krb5_os_context os_ctx = &context->os_context;
@@ -115,6 +116,6 @@ krb5_set_time_offsets(krb5_context context, krb5_timestamp seconds, krb5_int32 m
     os_ctx->time_offset = seconds;
     os_ctx->usec_offset = microseconds;
     os_ctx->os_flags = ((os_ctx->os_flags & ~KRB5_OS_TOFFSET_TIME) |
-			KRB5_OS_TOFFSET_VALID);
+                        KRB5_OS_TOFFSET_VALID);
     return 0;
 }

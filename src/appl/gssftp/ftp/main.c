@@ -92,7 +92,7 @@ static void cmdscanner (int);
 static char *slurpstring (void);
 
 
-int 
+int
 main(argc, argv)
 	volatile int argc;
 	char **volatile argv;
@@ -285,7 +285,7 @@ tail(filename)
 	char *filename;
 {
 	register char *s;
-	
+
 	while (*filename) {
 		s = strrchr(filename, '/');
 		if (s == NULL)

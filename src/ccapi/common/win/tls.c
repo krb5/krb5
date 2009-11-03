@@ -73,15 +73,15 @@ char*        tspdata_getUUID      (const struct tspdata* p)         {return p->_
 RPC_ASYNC_STATE* tspdata_getRpcAState (const struct tspdata* p)     {return p->_rpcState;}
 
 BOOL WINAPI PutTspData(DWORD dwTlsIndex, struct tspdata* dw) {
-    LPVOID              lpvData; 
-    struct tspdata**    pData;  // The stored memory pointer 
+    LPVOID              lpvData;
+    struct tspdata**    pData;  // The stored memory pointer
 
     // Retrieve a data pointer for the current thread:
-    lpvData = TlsGetValue(dwTlsIndex); 
+    lpvData = TlsGetValue(dwTlsIndex);
 
     // If NULL, allocate memory for the TLS slot for this thread:
     if (lpvData == NULL) {
-        lpvData = (LPVOID) LocalAlloc(LPTR, sizeof(struct tspdata)); 
+        lpvData = (LPVOID) LocalAlloc(LPTR, sizeof(struct tspdata));
         if (lpvData == NULL)                      return FALSE;
         if (!TlsSetValue(dwTlsIndex, lpvData))    return FALSE;
         }
@@ -95,12 +95,10 @@ BOOL WINAPI PutTspData(DWORD dwTlsIndex, struct tspdata* dw) {
     }
 
 BOOL WINAPI GetTspData(DWORD dwTlsIndex, struct tspdata**  pdw) {
-    struct tspdata*  pData;      // The stored memory pointer 
+    struct tspdata*  pData;      // The stored memory pointer
 
-    pData = (struct tspdata*)TlsGetValue(dwTlsIndex); 
+    pData = (struct tspdata*)TlsGetValue(dwTlsIndex);
     if (pData == NULL) return FALSE;
     (*pdw) = pData;
     return TRUE;
     }
-
-

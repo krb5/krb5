@@ -108,4 +108,3 @@ gssint_copy_oid_set(
 {
     return generic_gss_copy_oid_set(minor_status, oidset, new_oidset);
 }
-

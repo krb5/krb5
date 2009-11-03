@@ -271,7 +271,7 @@ pkinit_as_req_create(krb5_context context,
 
 	    /* add List of CMS algorithms */
 	    retval = create_krb5_supportedCMSTypes(context, plgctx->cryptoctx,
-			reqctx->cryptoctx, reqctx->idctx, 
+			reqctx->cryptoctx, reqctx->idctx,
 			&auth_pack->supportedCMSTypes);
 	    if (retval)
 		goto cleanup;
@@ -434,7 +434,7 @@ cleanup:
 	    free(auth_pack9);
 	    break;
     }
-	
+
 
     pkiDebug("pkinit_as_req_create retval=%d\n", (int) retval);
 
@@ -501,7 +501,7 @@ verify_kdc_san(krb5_context context,
     *need_eku_checking = 1;
 
     retval = pkinit_libdefault_strings(context,
-				       krb5_princ_realm(context, kdcprinc), 
+				       krb5_princ_realm(context, kdcprinc),
 				       KRB5_CONF_PKINIT_KDC_HOSTNAME,
 				       &cfghosts);
     if (retval || cfghosts == NULL) {
@@ -595,7 +595,7 @@ out:
 	     __FUNCTION__, retval, *valid_san, *need_eku_checking);
     return retval;
 }
- 
+
 static krb5_error_code
 verify_kdc_eku(krb5_context context,
 	       pkinit_context plgctx,
@@ -719,7 +719,7 @@ pkinit_as_rep_parse(krb5_context context,
     }
 
     if (need_eku_checking) {
-	retval = verify_kdc_eku(context, plgctx, reqctx, 
+	retval = verify_kdc_eku(context, plgctx, reqctx,
 				&valid_eku);
 	if (retval)
 	    goto cleanup;
@@ -729,7 +729,7 @@ pkinit_as_rep_parse(krb5_context context,
 	    retval = KRB5KDC_ERR_INCONSISTENT_KEY_PURPOSE;
 	    goto cleanup;
 	}
-    } else 
+    } else
 	pkiDebug("%s: skipping EKU check\n", __FUNCTION__);
 
     OCTETDATA_TO_KRB5DATA(&dh_data, &k5data);
@@ -863,7 +863,7 @@ cleanup:
     if (key_pack != NULL) {
 	free_krb5_reply_key_pack(&key_pack);
 	free(cksum.contents);
-    } 
+    }
     if (key_pack9 != NULL)
 	free_krb5_reply_key_pack_draft9(&key_pack9);
 
@@ -1146,7 +1146,7 @@ pkinit_client_tryagain(krb5_context context,
 	if (retval)
 	    goto cleanup;
     }
-	
+
     retval = 0;
 cleanup:
     if (krb5_trusted_certifiers != NULL)
@@ -1202,7 +1202,7 @@ pkinit_client_req_init(krb5_context context,
     retval = pkinit_init_req_opts(&reqctx->opts);
     if (retval)
 	goto cleanup;
-	
+
     reqctx->opts->require_eku = plgctx->opts->require_eku;
     reqctx->opts->accept_secondary_eku = plgctx->opts->accept_secondary_eku;
     reqctx->opts->dh_or_rsa = plgctx->opts->dh_or_rsa;
@@ -1365,7 +1365,7 @@ add_string_to_array(krb5_context context, char ***array, const char *addition)
 	free(*array);
     }
     *array = out;
-	
+
     return 0;
 }
 static krb5_error_code

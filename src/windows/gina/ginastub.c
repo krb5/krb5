@@ -1,4 +1,3 @@
-
 /*
   Copyright (c) 1996 Microsoft Corporation
 
@@ -183,7 +182,7 @@ WlxInitialize(
 	PVOID *pWlxContext)
 {
     pWlxFuncs = (PGWLX_DISPATCH_VERSION) pWinlogonFunctions;
-    
+
     return (* GWlxInitialize)(
 	lpWinsta,
 	hWlx,
@@ -214,7 +213,7 @@ WlxLoggedOutSAS(
 	PVOID *pProfile)
 {
     int iRet;
-  
+
     iRet = (* GWlxLoggedOutSAS)(
 	pWlxContext,
 	dwSasType,
@@ -225,16 +224,16 @@ WlxLoggedOutSAS(
 	pMprNotifyInfo,
 	pProfile
 	);
-  
+
     if (iRet == WLX_SAS_ACTION_LOGON) {
 	/* copy pMprNotifyInfo and pLogonSid for later use */
-	
+
 	/* pMprNotifyInfo->pszUserName */
 	/* pMprNotifyInfo->pszDomain */
 	/* pMprNotifyInfo->pszPassword */
 	/* pMprNotifyInfo->pszOldPassword */
     }
-  
+
     return iRet;
 }
 
@@ -296,13 +295,13 @@ WlxIsLogoffOk(
 	)
 {
     BOOL bSuccess;
-  
+
     bSuccess = (* GWlxIsLogoffOk)(pWlxContext);
     if (bSuccess) {
 	/* if it's ok to logoff, finish with the stored credentials */
 	/* and scrub the buffers */
     }
-  
+
     return bSuccess;
 }
 
@@ -337,7 +336,7 @@ BOOL * pSecure
 {
     if (GWlxScreenSaverNotify)
 	return (* GWlxScreenSaverNotify)(pWlxContext, pSecure);
-  
+
     /* if not exported, return something intelligent */
     *pSecure = TRUE;
     return TRUE;

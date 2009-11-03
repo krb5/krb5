@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/krb/gic_keytab.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -23,7 +24,7 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  */
-#ifndef LEAN_CLIENT 
+#ifndef LEAN_CLIENT
 
 #include "k5-int.h"
 
@@ -49,20 +50,20 @@ krb5_get_as_key_keytab(
        a new one. */
 
     if (as_key->length) {
-	if (as_key->enctype == etype)
-	    return(0);
+        if (as_key->enctype == etype)
+            return(0);
 
-	krb5_free_keyblock_contents(context, as_key);
-	as_key->length = 0;
+        krb5_free_keyblock_contents(context, as_key);
+        as_key->length = 0;
     }
 
     if (!krb5_c_valid_enctype(etype))
-	return(KRB5_PROG_ETYPE_NOSUPP);
+        return(KRB5_PROG_ETYPE_NOSUPP);
 
     if ((ret = krb5_kt_get_entry(context, keytab, client,
-				 0, /* don't have vno available */
-				 etype, &kt_ent)))
-	return(ret);
+                                 0, /* don't have vno available */
+                                 etype, &kt_ent)))
+        return(ret);
 
     ret = krb5_copy_keyblock(context, &kt_ent.key, &kt_key);
 
@@ -78,93 +79,93 @@ krb5_get_as_key_keytab(
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_keytab(krb5_context context,
-			   krb5_creds *creds,
-			   krb5_principal client,
-			   krb5_keytab arg_keytab,
-			   krb5_deltat start_time,
-			   char *in_tkt_service,
-			   krb5_get_init_creds_opt *options)
+                           krb5_creds *creds,
+                           krb5_principal client,
+                           krb5_keytab arg_keytab,
+                           krb5_deltat start_time,
+                           char *in_tkt_service,
+                           krb5_get_init_creds_opt *options)
 {
-   krb5_error_code ret, ret2;
-   int use_master;
-   krb5_keytab keytab;
-   krb5_gic_opt_ext *opte = NULL;
+    krb5_error_code ret, ret2;
+    int use_master;
+    krb5_keytab keytab;
+    krb5_gic_opt_ext *opte = NULL;
 
-   if (arg_keytab == NULL) {
-       if ((ret = krb5_kt_default(context, &keytab)))
-	    return ret;
-   } else {
-       keytab = arg_keytab;
-   }
+    if (arg_keytab == NULL) {
+        if ((ret = krb5_kt_default(context, &keytab)))
+            return ret;
+    } else {
+        keytab = arg_keytab;
+    }
 
-   ret = krb5int_gic_opt_to_opte(context, options, &opte, 1,
-				 "krb5_get_init_creds_keytab");
-   if (ret)
-      return ret;
+    ret = krb5int_gic_opt_to_opte(context, options, &opte, 1,
+                                  "krb5_get_init_creds_keytab");
+    if (ret)
+        return ret;
 
-   use_master = 0;
+    use_master = 0;
 
-   /* first try: get the requested tkt from any kdc */
+    /* first try: get the requested tkt from any kdc */
 
-   ret = krb5_get_init_creds(context, creds, client, NULL, NULL,
-			     start_time, in_tkt_service, opte,
-			     krb5_get_as_key_keytab, (void *) keytab,
-			     &use_master,NULL);
+    ret = krb5_get_init_creds(context, creds, client, NULL, NULL,
+                              start_time, in_tkt_service, opte,
+                              krb5_get_as_key_keytab, (void *) keytab,
+                              &use_master,NULL);
 
-   /* check for success */
+    /* check for success */
 
-   if (ret == 0)
-      goto cleanup;
+    if (ret == 0)
+        goto cleanup;
 
-   /* If all the kdc's are unavailable fail */
+    /* If all the kdc's are unavailable fail */
 
-   if ((ret == KRB5_KDC_UNREACH) || (ret == KRB5_REALM_CANT_RESOLVE))
-      goto cleanup;
+    if ((ret == KRB5_KDC_UNREACH) || (ret == KRB5_REALM_CANT_RESOLVE))
+        goto cleanup;
 
-   /* if the reply did not come from the master kdc, try again with
-      the master kdc */
+    /* if the reply did not come from the master kdc, try again with
+       the master kdc */
 
-   if (!use_master) {
-      use_master = 1;
+    if (!use_master) {
+        use_master = 1;
 
-      ret2 = krb5_get_init_creds(context, creds, client, NULL, NULL,
-				 start_time, in_tkt_service, opte,
-				 krb5_get_as_key_keytab, (void *) keytab,
-				 &use_master, NULL);
-      
-      if (ret2 == 0) {
-	 ret = 0;
-	 goto cleanup;
-      }
+        ret2 = krb5_get_init_creds(context, creds, client, NULL, NULL,
+                                   start_time, in_tkt_service, opte,
+                                   krb5_get_as_key_keytab, (void *) keytab,
+                                   &use_master, NULL);
 
-      /* if the master is unreachable, return the error from the
-	 slave we were able to contact */
+        if (ret2 == 0) {
+            ret = 0;
+            goto cleanup;
+        }
 
-      if ((ret2 == KRB5_KDC_UNREACH) ||
-	  (ret2 == KRB5_REALM_CANT_RESOLVE) ||
-	  (ret2 == KRB5_REALM_UNKNOWN))
-	 goto cleanup;
+        /* if the master is unreachable, return the error from the
+           slave we were able to contact */
 
-      ret = ret2;
-   }
+        if ((ret2 == KRB5_KDC_UNREACH) ||
+            (ret2 == KRB5_REALM_CANT_RESOLVE) ||
+            (ret2 == KRB5_REALM_UNKNOWN))
+            goto cleanup;
 
-   /* at this point, we have a response from the master.  Since we don't
-      do any prompting or changing for keytabs, that's it. */
+        ret = ret2;
+    }
+
+    /* at this point, we have a response from the master.  Since we don't
+       do any prompting or changing for keytabs, that's it. */
 
 cleanup:
-   if (opte && krb5_gic_opt_is_shadowed(opte))
-       krb5_get_init_creds_opt_free(context, (krb5_get_init_creds_opt *)opte);
-   if (arg_keytab == NULL)
-       krb5_kt_close(context, keytab);
+    if (opte && krb5_gic_opt_is_shadowed(opte))
+        krb5_get_init_creds_opt_free(context, (krb5_get_init_creds_opt *)opte);
+    if (arg_keytab == NULL)
+        krb5_kt_close(context, keytab);
 
-   return(ret);
+    return(ret);
 }
 krb5_error_code KRB5_CALLCONV
 krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
-			      krb5_address *const *addrs, krb5_enctype *ktypes,
-			      krb5_preauthtype *pre_auth_types,
-			      krb5_keytab arg_keytab, krb5_ccache ccache,
-			      krb5_creds *creds, krb5_kdc_rep **ret_as_reply)
+                            krb5_address *const *addrs, krb5_enctype *ktypes,
+                            krb5_preauthtype *pre_auth_types,
+                            krb5_keytab arg_keytab, krb5_ccache ccache,
+                            krb5_creds *creds, krb5_kdc_rep **ret_as_reply)
 {
     krb5_error_code retval;
     krb5_gic_opt_ext *opte;
@@ -172,49 +173,48 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
     krb5_keytab keytab;
     krb5_principal client_princ, server_princ;
     int use_master = 0;
-    
+
     retval = krb5int_populate_gic_opt(context, &opte,
-				      options, addrs, ktypes,
-				      pre_auth_types, creds);
+                                      options, addrs, ktypes,
+                                      pre_auth_types, creds);
     if (retval)
-	return retval;
+        return retval;
 
     if (arg_keytab == NULL) {
-	retval = krb5_kt_default(context, &keytab);
-	if (retval)
-	    return retval;
+        retval = krb5_kt_default(context, &keytab);
+        if (retval)
+            return retval;
     }
     else keytab = arg_keytab;
-    
+
     retval = krb5_unparse_name( context, creds->server, &server);
     if (retval)
-	goto cleanup;
+        goto cleanup;
     server_princ = creds->server;
     client_princ = creds->client;
     retval = krb5_get_init_creds (context,
-				  creds, creds->client,  
-				  krb5_prompter_posix,  NULL,
-				  0, server, opte,
-				  krb5_get_as_key_keytab, (void *)keytab,
-				  &use_master, ret_as_reply);
+                                  creds, creds->client,
+                                  krb5_prompter_posix,  NULL,
+                                  0, server, opte,
+                                  krb5_get_as_key_keytab, (void *)keytab,
+                                  &use_master, ret_as_reply);
     krb5_free_unparsed_name( context, server);
     krb5_get_init_creds_opt_free(context, (krb5_get_init_creds_opt *)opte);
     if (retval) {
-	goto cleanup;
+        goto cleanup;
     }
     krb5_free_principal(context, creds->server);
     krb5_free_principal(context, creds->client);
-	creds->client = client_princ;
-	creds->server = server_princ;
-	
+    creds->client = client_princ;
+    creds->server = server_princ;
+
     /* store it in the ccache! */
     if (ccache)
-	if ((retval = krb5_cc_store_cred(context, ccache, creds)))
-	    goto cleanup;
- cleanup:    if (arg_keytab == NULL)
-     krb5_kt_close(context, keytab);
+        if ((retval = krb5_cc_store_cred(context, ccache, creds)))
+            goto cleanup;
+cleanup:    if (arg_keytab == NULL)
+        krb5_kt_close(context, keytab);
     return retval;
 }
 
 #endif /* LEAN_CLIENT */
-

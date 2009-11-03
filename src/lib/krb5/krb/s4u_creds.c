@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/krb/s4u_creds.c
  *
@@ -79,7 +79,7 @@ s4u_identify_user(krb5_context context,
 
     if (in_creds->client != NULL &&
         krb5_princ_type(context, in_creds->client) !=
-            KRB5_NT_ENTERPRISE_PRINCIPAL)
+        KRB5_NT_ENTERPRISE_PRINCIPAL)
         /* we already know the realm of the user */
         return krb5_copy_principal(context, in_creds->client, canon_user);
 
@@ -420,7 +420,7 @@ verify_s4u2self_reply(krb5_context context,
     if (not_newer) {
         if (enc_s4u_padata == NULL) {
             if (rep_s4u_user->user_id.options &
-                    KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE) {
+                KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE) {
                 code = KRB5_KDCREP_MODIFIED;
                 goto cleanup;
             }

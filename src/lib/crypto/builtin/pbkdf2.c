@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Implementation of PBKDF2 from RFC 2898.
  */
@@ -223,7 +223,7 @@ hmac_sha1(krb5_key pass, krb5_data *salt, krb5_data *out)
 
     if (debug_hmac)
 	printd(" hmac input", salt);
-    err = krb5_hmac(h, pass, 1, salt, out);
+    err = krb5int_hmac(h, pass, 1, salt, out);
     if (err == 0 && debug_hmac)
 	printd(" hmac output", out);
     return err;

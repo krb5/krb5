@@ -1,6 +1,6 @@
 /*
  * Copyright 1994 by OpenVision Technologies, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -10,7 +10,7 @@
  * without specific, written prior permission. OpenVision makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -27,7 +27,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -223,7 +223,7 @@ send_token(s, flags, tok)
  * Returns: 0 on success, -1 on failure
  *
  * Effects:
- * 
+ *
  * recv_token reads the token flags (a single byte, even though
  * they're stored into an integer, then reads the token length (as a
  * network long), allocates memory to hold the data, and then reads

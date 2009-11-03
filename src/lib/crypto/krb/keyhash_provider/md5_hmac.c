@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * Implementation of Microsoft KERB_CHECKSUM_MD5_HMAC
  */
 
@@ -42,19 +42,19 @@ k5_md5_hmac_hash (krb5_key key, krb5_keyusage usage,
   unsigned char t[4];
   krb5_data ds;
 
-  krb5_MD5Init(&ctx);
+  krb5int_MD5Init(&ctx);
 
   ms_usage = krb5int_arcfour_translate_usage (usage);
   store_32_le(ms_usage, t);
-  krb5_MD5Update(&ctx, t, sizeof(t));
-  krb5_MD5Update(&ctx, (unsigned char *)input->data, input->length);
-  krb5_MD5Final(&ctx);
+  krb5int_MD5Update(&ctx, t, sizeof(t));
+  krb5int_MD5Update(&ctx, (unsigned char *)input->data, input->length);
+  krb5int_MD5Final(&ctx);
 
   ds.magic = KV5M_DATA;
   ds.length = 16;
   ds.data = (char *)ctx.digest;
 
-  return krb5_hmac ( &krb5int_hash_md5, key, 1, &ds, output);
+  return krb5int_hmac ( &krb5int_hash_md5, key, 1, &ds, output);
 }
 
 const struct krb5_keyhash_provider krb5int_keyhash_md5_hmac = {
@@ -62,4 +62,3 @@ const struct krb5_keyhash_provider krb5int_keyhash_md5_hmac = {
   k5_md5_hmac_hash,
   NULL /*checksum  again*/
 };
-

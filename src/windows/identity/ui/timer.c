@@ -57,7 +57,7 @@ CRITICAL_SECTION cs_timers;
 
 #define KHUI_TIMER_ALLOC_INCR 16
 
-void 
+void
 khm_timer_init(void) {
 #ifdef DEBUG
     assert(khui_timers == NULL);
@@ -118,7 +118,7 @@ tmr_fire_timer(void) {
     ZeroMemory(tmr_offset, sizeof(tmr_offset));
 
     for (i=0; i < (int) khui_n_timers; i++) {
-        if (!(khui_timers[i].flags & 
+        if (!(khui_timers[i].flags &
               (KHUI_TE_FLAG_STALE | KHUI_TE_FLAG_EXPIRED)) &&
             khui_timers[i].type != KHUI_TTYPE_ID_MARK &&
             khui_timers[i].expire < curtime + err) {
@@ -157,7 +157,7 @@ tmr_fire_timer(void) {
                         tmr_offset[t] > khui_timers[i].offset)
                         tmr_offset[t] = khui_timers[i].offset;
                     if (next_event == 0 ||
-                        next_event > 
+                        next_event >
                         khui_timers[i].expire + khui_timers[i].offset)
                         next_event = khui_timers[i].expire +
                             khui_timers[i].offset;
@@ -245,7 +245,7 @@ tmr_fire_timer(void) {
                 LoadString(khm_hInstance, IDS_WARN_EXPIRED,
                            wmsg, ARRAYLENGTH(wmsg));
             } else {
-                LoadString(khm_hInstance, IDS_WARN_EXPIRE, 
+                LoadString(khm_hInstance, IDS_WARN_EXPIRE,
                            fmt, ARRAYLENGTH(fmt));
 
                 StringCbPrintf(wmsg, sizeof(wmsg), fmt, wtime);
@@ -279,7 +279,7 @@ tmr_fire_timer(void) {
 
 }
 
-void 
+void
 khm_timer_fire(HWND hwnd) {
     EnterCriticalSection(&cs_timers);
     tmr_fire_timer();
@@ -608,7 +608,7 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
             /* already expired */
             goto _done_with_ident;
 
-        rv = khc_open_space(NULL, L"CredWindow", KHM_PERM_READ, 
+        rv = khc_open_space(NULL, L"CredWindow", KHM_PERM_READ,
                             &csp_cw);
 
         assert(KHM_SUCCEEDED(rv));
@@ -631,7 +631,7 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
             do_warn = t;
 
         rv = khc_read_int32(csp_id, L"AllowCritical", &t);
-        if (KHM_SUCCEEDED(rv)) 
+        if (KHM_SUCCEEDED(rv))
             do_crit = t;
 
         rv = khc_read_int32(csp_id, L"AllowAutoRenew", &t);
@@ -683,7 +683,7 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
                 if (CompareFileTime(&fte, &ft_current) < 0)
                     fte = ft_current;
 
-                tmr_update(ident, KHUI_TTYPE_ID_RENEW, 
+                tmr_update(ident, KHUI_TTYPE_ID_RENEW,
                            FtToInt(&fte), FtToInt(&ft), 0,
                            CompareFileTime(&fte,&ft_creinst) > 0);
                 renew_done = TRUE;
@@ -725,7 +725,7 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
 
         if (monitor && !renew_done) {
             if (CompareFileTime(&ft_expiry, &ft_current) > 0)
-                tmr_update(ident, KHUI_TTYPE_ID_EXP, 
+                tmr_update(ident, KHUI_TTYPE_ID_EXP,
                            FtToInt(&ft_expiry), 0, 0,
                            CompareFileTime(&fte, &ft_creinst) > 0);
         }
@@ -784,7 +784,7 @@ tmr_cred_apply_proc(khm_handle cred, void * rock) {
         fte = IntToFt(FtToInt(&ft_cred_expiry) - khui_timers[idx].offset);
         if (CompareFileTime(&fte, &ft_current) > 0) {
 	    tmr_update(cred, KHUI_TTYPE_CRED_WARN,
-		       FtToInt(&fte), 
+		       FtToInt(&fte),
 		       khui_timers[idx].offset, 0,
 		       CompareFileTime(&fte, &ft_creinst) > 0);
 	    kcdb_cred_hold(cred);
@@ -877,28 +877,28 @@ tmr_purge(void) {
                 {
                     int idx;
 
-                    idx = tmr_find(khui_timers[i].key, 
+                    idx = tmr_find(khui_timers[i].key,
                                    KHUI_TTYPE_ID_CRIT, 0, 0);
-                    assert(idx < 0 || 
-                           (khui_timers[idx].flags & 
+                    assert(idx < 0 ||
+                           (khui_timers[idx].flags &
                             KHUI_TE_FLAG_STALE));
 
-                    idx = tmr_find(khui_timers[i].key, 
+                    idx = tmr_find(khui_timers[i].key,
                                    KHUI_TTYPE_ID_RENEW, 0, 0);
-                    assert(idx < 0 || 
-                           (khui_timers[idx].flags & 
+                    assert(idx < 0 ||
+                           (khui_timers[idx].flags &
                             KHUI_TE_FLAG_STALE));
 
-                    idx = tmr_find(khui_timers[i].key, 
+                    idx = tmr_find(khui_timers[i].key,
                                    KHUI_TTYPE_ID_WARN, 0, 0);
-                    assert(idx < 0 || 
-                           (khui_timers[idx].flags & 
+                    assert(idx < 0 ||
+                           (khui_timers[idx].flags &
                             KHUI_TE_FLAG_STALE));
 
-                    idx = tmr_find(khui_timers[i].key, 
+                    idx = tmr_find(khui_timers[i].key,
                                    KHUI_TTYPE_ID_EXP, 0, 0);
-                    assert(idx < 0 || 
-                           (khui_timers[idx].flags & 
+                    assert(idx < 0 ||
+                           (khui_timers[idx].flags &
                             KHUI_TE_FLAG_STALE));
                 }
 #endif
@@ -920,7 +920,7 @@ tmr_purge(void) {
 
 /* go through all the credentials and set timers as appropriate.  hwnd
    is the window that will receive the timer events.*/
-void 
+void
 khm_timer_refresh(HWND hwnd) {
     int i;
     khm_int64 next_event = 0;

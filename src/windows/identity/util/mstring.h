@@ -66,7 +66,7 @@ multi_string_init(wchar_t * ms,
         longer than KHM_MAXCCH_STRING in characters including the
         terminating NULL.
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 multi_string_prepend(wchar_t * ms,
                      khm_size * pcb_ms,
                      const wchar_t * str);
@@ -97,7 +97,7 @@ multi_string_prepend(wchar_t * ms,
 
     \retval KHM_ERROR_INVALID_PARAM One of more of the parameters were invalid.
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 multi_string_append(wchar_t * ms,
                     khm_size * pcb_ms,
                     const wchar_t * str);
@@ -111,7 +111,7 @@ multi_string_append(wchar_t * ms,
 
     \param[in] ms The multi string to modify.  The length of the multi
         string in characters cannot exceed KHM_MAXCCH_STRING.
- 
+
     \param[in] str The string to search for
 
     \param[in] flags How \a str is to be matched to existing strings
@@ -132,7 +132,7 @@ multi_string_append(wchar_t * ms,
     \note The search for the existing string is done with
         multi_string_find()
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 multi_string_delete(wchar_t * ms,
                     const wchar_t * str,
                     const khm_int32 flags);
@@ -163,7 +163,7 @@ multi_string_delete(wchar_t * ms,
         NULL if no matches were found.
 
  */
-KHMEXP wchar_t * KHMAPI 
+KHMEXP wchar_t * KHMAPI
 multi_string_find(const wchar_t * ms,
                   const wchar_t * str,
                   const khm_int32 flags);
@@ -173,9 +173,9 @@ multi_string_find(const wchar_t * ms,
     Converts a multi string to a comma separated value string based on
     the following rules.
 
-    - Each string in the multi string is treated an individual field 
+    - Each string in the multi string is treated an individual field
 
-    - A field is quoted if it has double quotes or commas 
+    - A field is quoted if it has double quotes or commas
 
     - Double quotes within quoted fields are escaped by two
       consecutive double quotes.
@@ -213,7 +213,7 @@ multi_string_find(const wchar_t * ms,
 
     \see csv_to_multi_string()
 */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 multi_string_to_csv(wchar_t * csvbuf,
                     khm_size * pcb_csvbuf,
                     const wchar_t * ms);
@@ -243,7 +243,7 @@ multi_string_to_csv(wchar_t * csvbuf,
     \retval KHM_ERROR_INVALID_PARAM One or more parameters were invalid.
 
  */
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 csv_to_multi_string(wchar_t * ms,
                     khm_size * pcb_ms,
                     const wchar_t * csv);
@@ -266,7 +266,7 @@ csv_to_multi_string(wchar_t * ms,
     \return A pointer to the start of the next string in the multi
         string or NULL if there is no more strings.
  */
-KHMEXP wchar_t * KHMAPI 
+KHMEXP wchar_t * KHMAPI
 multi_string_next(const wchar_t * str);
 
 /*! \brief Get the length of a multi string in bytes
@@ -285,9 +285,9 @@ multi_string_next(const wchar_t * str);
     \retval KHM_ERROR_TOO_LONG The multi string is longer than \a
         max_cb bytes.
  */
-KHMEXP khm_int32 KHMAPI 
-multi_string_length_cb(const wchar_t * str, 
-                       khm_size max_cb, 
+KHMEXP khm_int32 KHMAPI
+multi_string_length_cb(const wchar_t * str,
+                       khm_size max_cb,
                        khm_size * len_cb);
 
 /*! \brief Get the length of a multi string in characters
@@ -306,14 +306,14 @@ multi_string_length_cb(const wchar_t * str,
     \retval KHM_ERROR_TOO_LONG The multi string is longer than \a
         max_cch characters.
  */
-KHMEXP khm_int32 KHMAPI 
-multi_string_length_cch(const wchar_t * str, 
-                        khm_size max_cch, 
+KHMEXP khm_int32 KHMAPI
+multi_string_length_cch(const wchar_t * str,
+                        khm_size max_cch,
                         khm_size * len_cch);
 
 /*! \brief Get the number of strings in a multi string
  */
-KHMEXP khm_size KHMAPI 
+KHMEXP khm_size KHMAPI
 multi_string_length_n(const wchar_t * str);
 
 /*! \brief Copy a multi string with byte counts
@@ -331,9 +331,9 @@ multi_string_length_n(const wchar_t * str);
     \retval KHM_ERROR_TOO_LONG The size of the destination buffer was
         insufficient.
  */
-KHMEXP khm_int32 KHMAPI 
-multi_string_copy_cb(wchar_t * s_dest, 
-                     khm_size max_cb_dest, 
+KHMEXP khm_int32 KHMAPI
+multi_string_copy_cb(wchar_t * s_dest,
+                     khm_size max_cb_dest,
                      const wchar_t * src);
 
 /*! \brief Copy a multi string with character count
@@ -351,9 +351,9 @@ multi_string_copy_cb(wchar_t * s_dest,
     \retval KHM_ERROR_TOO_LONG The size of the destination buffer was
         insufficient.
  */
-KHMEXP khm_int32 KHMAPI 
-multi_string_copy_cch(wchar_t * s_dest, 
-                      khm_size max_cch_dest, 
+KHMEXP khm_int32 KHMAPI
+multi_string_copy_cch(wchar_t * s_dest,
+                      khm_size max_cch_dest,
                       const wchar_t * src);
 
 /*@}*/

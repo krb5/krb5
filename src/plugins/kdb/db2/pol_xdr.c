@@ -8,11 +8,11 @@
 #endif
 #include <string.h>
 
-static 
+static
 bool_t xdr_nullstring(XDR *xdrs, char **objp)
 {
      u_int size;
-                                                                                                                            
+
      if (xdrs->x_op == XDR_ENCODE) {
           if (*objp == NULL)
                size = 0;
@@ -35,22 +35,22 @@ bool_t xdr_nullstring(XDR *xdrs, char **objp)
                }
           }
           return (xdr_opaque(xdrs, *objp, size));
-                                                                                                                            
+
      case XDR_ENCODE:
           if (size != 0)
                return (xdr_opaque(xdrs, *objp, size));
           return TRUE;
-                                                                                                                            
+
      case XDR_FREE:
           if (*objp != NULL)
                mem_free(*objp, size);
           *objp = NULL;
           return TRUE;
      }
-                                                                                                                            
+
      return FALSE;
 }
-                                                                                                                            
+
 static int
 osa_policy_min_vers(osa_policy_ent_t objp)
 {
@@ -85,7 +85,7 @@ xdr_osa_policy_ent_rec(XDR *xdrs, osa_policy_ent_t objp)
 	      return FALSE;
 	 break;
     }
-    
+
     if(!xdr_nullstring(xdrs, &objp->name))
 	return (FALSE);
     if (!xdr_u_int32(xdrs, &objp->pw_min_life))

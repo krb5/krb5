@@ -1,13 +1,13 @@
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Export of this software from the United States of America may require
  * a specific license from the United States Government.  It is the
  * responsibility of any person or organization contemplating export to
  * obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -18,7 +18,7 @@
  * permission.  FundsXpress makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -52,10 +52,10 @@ k5_descbc_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
 
     /* this has a return value, but it's useless to us */
 
-    mit_des_cbc_cksum((unsigned char *) input->data, 
+    mit_des_cbc_cksum((unsigned char *) input->data,
 		      (unsigned char *) output->data, input->length,
-		      schedule, 
-		      ivec? (const unsigned char *)ivec->data: 
+		      schedule,
+		      ivec? (const unsigned char *)ivec->data:
 		            (const unsigned char *)mit_des_zeroblock);
 
     memset(schedule, 0, sizeof(schedule));

@@ -2,7 +2,7 @@
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -12,7 +12,7 @@
  * without specific, written prior permission. Sun Microsystems makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * SUN MICROSYSTEMS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL SUN MICROSYSTEMS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -44,7 +44,7 @@ gss_cred_id_t *		cred_handle;
     int			j;
     gss_union_cred_t	union_cred;
     gss_mechanism	mech;
-    
+
     if (minor_status == NULL)
 	return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
@@ -52,13 +52,13 @@ gss_cred_id_t *		cred_handle;
 
     if (cred_handle == NULL)
 	return (GSS_S_NO_CRED | GSS_S_CALL_INACCESSIBLE_READ);
-    
+
     /*
-     * Loop through the union_cred struct, selecting the approprate 
+     * Loop through the union_cred struct, selecting the approprate
      * underlying mechanism routine and calling it. At the end,
      * release all of the storage taken by the union_cred struct.
      */
-    
+
     union_cred = (gss_union_cred_t) *cred_handle;
     if (union_cred == (gss_union_cred_t)GSS_C_NO_CREDENTIAL)
 	return (GSS_S_COMPLETE);
@@ -68,7 +68,7 @@ gss_cred_id_t *		cred_handle;
     *cred_handle = NULL;
 
     status = GSS_S_COMPLETE;
-    
+
     for(j=0; j < union_cred->count; j++) {
 
 	mech = gssint_get_mechanism (&union_cred->mechs_array[j]);
@@ -97,6 +97,6 @@ gss_cred_id_t *		cred_handle;
     free(union_cred->cred_array);
     free(union_cred->mechs_array);
     free(union_cred);
-    
+
     return(status);
 }

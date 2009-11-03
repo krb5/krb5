@@ -55,7 +55,7 @@ _utbm_isspace(ucs4_t c, int compress)
               c == 0x2028 || c == 0x2029 || _platform_isspace(c)) ? 1 : 0;
 
     return _platform_isspace(c);
-        
+
 }
 
 /*

@@ -17,7 +17,7 @@
 
 /*
  * k5_change_password
- * 
+ *
  * Use the new functions to change the password.
  */
 krb5_error_code

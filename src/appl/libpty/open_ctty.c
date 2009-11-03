@@ -16,14 +16,14 @@
  * M.I.T. makes no representations about the suitability
  * of this software for any purpose.  It is provided "as is" without
  * express or implied warranty.
- * 
+ *
  */
 
 #include "com_err.h"
 #include "libpty.h"
 #include "pty-int.h"
 
-/* 
+/*
  * This function will be called twice.  The first time it will acquire
  * a controlling terminal from which to vhangup() or revoke() (see
  * comments in open_slave.c); the second time, it will be to open the

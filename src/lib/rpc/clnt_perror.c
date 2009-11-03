@@ -6,23 +6,23 @@
  * may copy or modify Sun RPC without charge, but are not authorized
  * to license or distribute it to anyone else except as part of a product or
  * program developed by the user.
- * 
+ *
  * SUN RPC IS PROVIDED AS IS WITH NO WARRANTIES OF ANY KIND INCLUDING THE
  * WARRANTIES OF DESIGN, MERCHANTIBILITY AND FITNESS FOR A PARTICULAR
  * PURPOSE, OR ARISING FROM A COURSE OF DEALING, USAGE OR TRADE PRACTICE.
- * 
+ *
  * Sun RPC is provided with no support and without any obligation on the
  * part of Sun Microsystems, Inc. to assist in its use, correction,
  * modification or enhancement.
- * 
+ *
  * SUN MICROSYSTEMS, INC. SHALL HAVE NO LIABILITY WITH RESPECT TO THE
  * INFRINGEMENT OF COPYRIGHTS, TRADE SECRETS OR ANY PATENTS BY SUN RPC
  * OR ANY PART THEREOF.
- * 
+ *
  * In no event will Sun Microsystems, Inc. be liable for any lost revenue
  * or profits or other special, indirect and consequential damages, even if
  * Sun has been advised of the possibility of such damages.
- * 
+ *
  * Sun Microsystems, Inc.
  * 2550 Garcia Avenue
  * Mountain View, California  94043
@@ -100,7 +100,7 @@ clnt_sperror(CLIENT *rpch, char *s)
 	case RPC_SUCCESS:
 	case RPC_CANTENCODEARGS:
 	case RPC_CANTDECODERES:
-	case RPC_TIMEDOUT:     
+	case RPC_TIMEDOUT:
 	case RPC_PROGUNAVAIL:
 	case RPC_PROCUNAVAIL:
 	case RPC_CANTDECODEARGS:
@@ -117,7 +117,7 @@ clnt_sperror(CLIENT *rpch, char *s)
 		/* 10 for the string */
 		if (str - bufstart + 10 + strlen(strerror(e.re_errno)) < BUFSIZ)
 		    (void) snprintf(str, strend-str, "; errno = %s",
-				    strerror(e.re_errno)); 
+				    strerror(e.re_errno));
 		str += strlen(str);
 		break;
 
@@ -125,7 +125,7 @@ clnt_sperror(CLIENT *rpch, char *s)
 		/* 33 for the string, 22 for the numbers */
 		if(str - bufstart + 33 + 22 < BUFSIZ)
 		    (void) snprintf(str, strend-str,
-				    "; low version = %lu, high version = %lu", 
+				    "; low version = %lu, high version = %lu",
 				    (u_long) e.re_vers.low,
 				    (u_long) e.re_vers.high);
 		str += strlen(str);
@@ -188,41 +188,41 @@ struct rpc_errtab {
 };
 
 static struct rpc_errtab  rpc_errlist[] = {
-	{ RPC_SUCCESS, 
-		"RPC: Success" }, 
-	{ RPC_CANTENCODEARGS, 
+	{ RPC_SUCCESS,
+		"RPC: Success" },
+	{ RPC_CANTENCODEARGS,
 		"RPC: Can't encode arguments" },
-	{ RPC_CANTDECODERES, 
+	{ RPC_CANTDECODERES,
 		"RPC: Can't decode result" },
-	{ RPC_CANTSEND, 
+	{ RPC_CANTSEND,
 		"RPC: Unable to send" },
-	{ RPC_CANTRECV, 
+	{ RPC_CANTRECV,
 		"RPC: Unable to receive" },
-	{ RPC_TIMEDOUT, 
+	{ RPC_TIMEDOUT,
 		"RPC: Timed out" },
-	{ RPC_VERSMISMATCH, 
+	{ RPC_VERSMISMATCH,
 		"RPC: Incompatible versions of RPC" },
-	{ RPC_AUTHERROR, 
+	{ RPC_AUTHERROR,
 		"RPC: Authentication error" },
-	{ RPC_PROGUNAVAIL, 
+	{ RPC_PROGUNAVAIL,
 		"RPC: Program unavailable" },
-	{ RPC_PROGVERSMISMATCH, 
+	{ RPC_PROGVERSMISMATCH,
 		"RPC: Program/version mismatch" },
-	{ RPC_PROCUNAVAIL, 
+	{ RPC_PROCUNAVAIL,
 		"RPC: Procedure unavailable" },
-	{ RPC_CANTDECODEARGS, 
+	{ RPC_CANTDECODEARGS,
 		"RPC: Server can't decode arguments" },
-	{ RPC_SYSTEMERROR, 
+	{ RPC_SYSTEMERROR,
 		"RPC: Remote system error" },
-	{ RPC_UNKNOWNHOST, 
+	{ RPC_UNKNOWNHOST,
 		"RPC: Unknown host" },
 	{ RPC_UNKNOWNPROTO,
 		"RPC: Unknown protocol" },
-	{ RPC_PMAPFAILURE, 
+	{ RPC_PMAPFAILURE,
 		"RPC: Port mapper failure" },
-	{ RPC_PROGNOTREGISTERED, 
+	{ RPC_PROGNOTREGISTERED,
 		"RPC: Program not registered"},
-	{ RPC_FAILED, 
+	{ RPC_FAILED,
 		"RPC: Failed (unspecified error)"}
 };
 
@@ -313,7 +313,7 @@ clnt_pcreateerror(char *s)
 }
 
 struct auth_errtab {
-	enum auth_stat status;	
+	enum auth_stat status;
 	char *message;
 };
 

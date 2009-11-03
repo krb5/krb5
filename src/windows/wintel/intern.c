@@ -84,16 +84,16 @@ ScreenELO(SCREEN *pScr, int s)
 {
   SCREENLINE *pScrLine;
   RECT rc;
-			
-  if (s < 0) 
+
+  if (s < 0)
     s = pScr->y;
-	
+
   pScrLine = GetScreenLineFromY(pScr,s);
   memset(pScrLine->attrib, ScreenClearAttrib, pScr->width);
   memset(pScrLine->text, ' ', pScr->width);
   rc.left = 0;
   rc.right = pScr->width * pScr->cxChar;
-  rc.top = pScr->cyChar * s;    
+  rc.top = pScr->cyChar * s;
   rc.bottom = pScr->cyChar * (s+1);
   InvalidateRect(pScr->hWnd, &rc, TRUE);
 }
@@ -107,7 +107,7 @@ ScreenEraseScreen(SCREEN *pScr)
   int x2 = pScr->width;
   int y2 = pScr->height;
   int n = -1;
-			
+
   for(i = 0; i < pScr->height; i++)
     ScreenELO(pScr,i);
 
@@ -135,7 +135,7 @@ ScreenTabInit(SCREEN *pScr)
 
   ScreenTabClear(pScr);
 
-  while(x <= pScr->width) { 
+  while(x <= pScr->width) {
     pScr->tabs[x] = 'x';
     x += 8;
   }
@@ -185,10 +185,10 @@ ScreenListMove(SCREENLINE *TD, SCREENLINE *BD, SCREENLINE *TI, SCREENLINE *BI)
   TD->prev = TI;                    /* Place the node in its new home */
   BD->next = BI;
 
-  if (TI != NULL) 
+  if (TI != NULL)
     TI->next = TD;                /* Ditto prev->prev */
 
-  if (BI != NULL) 
+  if (BI != NULL)
     BI->prev = BD;
 }
 
@@ -204,10 +204,10 @@ ScreenDelLines(SCREEN *pScr, int n, int s)
   int idx;
   RECT rc;
   HDC hDC;
-	
+
   pScr->bWrapPending = FALSE;
 
-  if (s < 0) 
+  if (s < 0)
     s = pScr->y;
 
   if (s + n - 1 > pScr->bottom)
@@ -289,13 +289,13 @@ ScreenInsLines(SCREEN *pScr, int n, int s)
   int idx;
   RECT rc;
   HDC hDC;
- 
+
   pScr->bWrapPending = FALSE;
 
   if (s < 0)
     s = pScr->y;
 
-  if (s + n - 1 > pScr->bottom) 
+  if (s + n - 1 > pScr->bottom)
     n = pScr->bottom - s + 1;
 
   /*
@@ -400,7 +400,7 @@ ScreenEraseToEOL(SCREEN *pScr)
   int n = -1;
   SCREENLINE *pScrLine;
   RECT rc;
-		
+
   ScreenWrapNow(pScr, &x1, &y1);
 
   y2 = y1;
@@ -428,7 +428,7 @@ ScreenDelChars(SCREEN *pScr, int n)
   int width;
   SCREENLINE *pScrLine;
   RECT rc;
-	
+
   pScr->bWrapPending = FALSE;
 
   pScrLine = GetScreenLineFromY(pScr, y);
@@ -442,7 +442,7 @@ ScreenDelChars(SCREEN *pScr, int n)
 
   memset(&pScrLine->attrib[pScr->width - n], ScreenClearAttrib, n);
   memset(&pScrLine->text[pScr->width - n], ' ', n);
-	
+
   rc.left = x * pScr->cxChar;
   rc.right = pScr->width * pScr->cxChar;
   rc.top = pScr->cyChar * y;
@@ -459,12 +459,12 @@ ScreenRevIndex(SCREEN *pScr)
 {
   SCREENLINE *pScrLine;
   SCREENLINE *pTopLine;
-	
+
   pScr->bWrapPending = FALSE;
   pScrLine = GetScreenLineFromY(pScr, pScr->y);
   pTopLine = GetScreenLineFromY(pScr, pScr->top);
 
-  if(pScrLine == pTopLine) 
+  if(pScrLine == pTopLine)
     ScreenInsertLine(pScr, pScr->y);
   else
     pScr->y--;
@@ -500,7 +500,7 @@ ScreenEraseLine(SCREEN *pScr, int s)
   int n = -1;
   SCREENLINE *pScrLine;
   RECT rc;
-	
+
   if (s < 0) {
     ScreenWrapNow(pScr, &x1, &y1);
     s = y2 = y1;
@@ -566,7 +566,7 @@ ScreenAlign(SCREEN *pScr)  /* vt100 alignment, fill screen with 'E's */
   int i;
   int j;
   SCREENLINE *pScrLine;
-	
+
   pScrLine = GetScreenLineFromY(pScr, pScr->top);
   ScreenEraseScreen(pScr);
 
@@ -685,7 +685,7 @@ ScreenInsChar(SCREEN *pScr, int x)
   int i;
   SCREENLINE *pScrLine;
   RECT rc;
-		
+
   pScrLine = GetScreenLineFromY(pScr, pScr->y);
   if (pScrLine == NULL)
     return(FALSE);
@@ -732,9 +732,9 @@ ScreenDraw(SCREEN *pScr, int x, int y, int a, int len, char *c)
   SCREENLINE *pScrLine;
   RECT rc;
 
-  pScrLine = GetScreenLineFromY(pScr, y);  
+  pScrLine = GetScreenLineFromY(pScr, y);
   assert(pScrLine != NULL);
-	
+
   for(idx = x; idx < x + len; idx++) {
     pScrLine->text[idx] = c[idx - x];
     pScrLine->attrib[idx - x] = a;

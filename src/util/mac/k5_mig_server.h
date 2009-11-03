@@ -35,8 +35,8 @@ int32_t k5_ipc_server_add_client (mach_port_t in_client_port);
 
 int32_t k5_ipc_server_remove_client (mach_port_t in_client_port);
 
-int32_t k5_ipc_server_handle_request (mach_port_t   in_connection_port, 
-                                      mach_port_t   in_reply_port, 
+int32_t k5_ipc_server_handle_request (mach_port_t   in_connection_port,
+                                      mach_port_t   in_reply_port,
                                       k5_ipc_stream in_request_stream);
 
 /* Server control functions */

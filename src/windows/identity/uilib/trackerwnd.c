@@ -105,8 +105,8 @@ time_t ticks_to_time_t(int ticks, time_t tmin)
 
     NOTE: Runs in the context of the UI thread
 */
-void 
-initialize_tracker(HWND hwnd, 
+void
+initialize_tracker(HWND hwnd,
                    khui_tracker * tc)
 {
     RECT r;
@@ -142,7 +142,7 @@ initialize_tracker(HWND hwnd,
 
    NOTE: Runs in the context of the UI thread
    */
-LRESULT CALLBACK 
+LRESULT CALLBACK
 duration_tracker_proc(HWND hwnd,
                       UINT uMsg,
                       WPARAM wParam,
@@ -184,7 +184,7 @@ duration_tracker_proc(HWND hwnd,
 
             SetTextAlign(hdc, TA_LEFT | TA_TOP | TA_NOUPDATECP);
             TextOut(hdc, tc->lbl_lx, tc->lbl_y, buf, (int) wcslen(buf));
-                
+
             TimetToFileTimeInterval(tc->max, &ft);
             cbbuf = sizeof(buf);
             FtIntervalToString(&ft, buf, &cbbuf);
@@ -195,7 +195,7 @@ duration_tracker_proc(HWND hwnd,
             ((HFONT) SelectObject((hdc), (HGDIOBJ)(HFONT)(hfold)));
 
             ReleaseDC(hwnd, hdc);
-                
+
             return lr;
         }
         break;
@@ -240,9 +240,9 @@ duration_tracker_proc(HWND hwnd,
 
 
 /* Create the subclassed duration slider on behalf of an edit control */
-void 
-create_edit_sliders(HWND hwnd, 
-                       HWND hwnd_dlg, 
+void
+create_edit_sliders(HWND hwnd,
+                       HWND hwnd_dlg,
                        khui_tracker * tc)
 {
     RECT r;
@@ -258,19 +258,19 @@ create_edit_sliders(HWND hwnd,
     rs.right -= rs.left;
     rs.bottom -= rs.top;
 
-    tc->hw_slider = 
+    tc->hw_slider =
         CreateWindowEx(WS_EX_OVERLAPPEDWINDOW,
                        TRACKBAR_CLASS,
                        L"NetIDMgrTimeTickerTrackbar",
                        WS_POPUP | TBS_AUTOTICKS | TBS_BOTTOM |
 #if (_WIN32_IE >= 0x0501)
-                       TBS_DOWNISLEFT | 
+                       TBS_DOWNISLEFT |
 #endif
                        TBS_HORZ | WS_CLIPCHILDREN,
                        r.left,r.bottom,rs.right,rs.bottom,
                        hwnd,
                        NULL,
-                       (HINSTANCE)(DWORD_PTR) 
+                       (HINSTANCE)(DWORD_PTR)
                        GetWindowLongPtr(hwnd, GWLP_HINSTANCE),
                        NULL);
 
@@ -288,7 +288,7 @@ create_edit_sliders(HWND hwnd,
 
     NOTE: Runs in the context of the UI thread
     */
-LRESULT CALLBACK 
+LRESULT CALLBACK
 duration_edit_proc(HWND hwnd,
                    UINT uMsg,
                    WPARAM wParam,
@@ -425,8 +425,8 @@ khui_tracker_install(HWND hwnd_edit, khui_tracker * tc) {
 
 #pragma warning(push)
 #pragma warning(disable: 4244)
-    tc->fn_edit = (WNDPROC)(LONG_PTR) 
-        SetWindowLongPtr(hwnd_edit, GWLP_WNDPROC, 
+    tc->fn_edit = (WNDPROC)(LONG_PTR)
+        SetWindowLongPtr(hwnd_edit, GWLP_WNDPROC,
                          (LONG_PTR) duration_edit_proc);
 #pragma warning(pop)
 }
@@ -439,9 +439,9 @@ khui_tracker_reposition(khui_tracker * tc) {
         GetWindowRect(tc->hw_edit, &r);
         SetWindowPos(tc->hw_slider,
                      NULL,
-                     r.left, r.bottom, 
-                     0, 0, 
-                     SWP_NOOWNERZORDER | SWP_NOSIZE | 
+                     r.left, r.bottom,
+                     0, 0,
+                     SWP_NOOWNERZORDER | SWP_NOSIZE |
                      SWP_NOZORDER | SWP_NOACTIVATE);
     }
 }
@@ -457,7 +457,7 @@ khui_tracker_refresh(khui_tracker * tc) {
         return;
 
     SendMessage(tc->hw_edit,
-                KHUI_WM_NC_NOTIFY, 
+                KHUI_WM_NC_NOTIFY,
                 MAKEWPARAM(0,WMNC_DIALOG_SETUP), 0);
 }
 
@@ -472,6 +472,3 @@ khui_tracker_kill_controls(khui_tracker * tc) {
     tc->fn_edit = NULL;
     tc->fn_tracker = NULL;
 }
-
-
-

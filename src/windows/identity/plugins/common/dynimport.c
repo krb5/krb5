@@ -36,8 +36,8 @@ HINSTANCE hSecur32 = 0;
 HINSTANCE hComErr = 0;
 HINSTANCE hService = 0;
 HINSTANCE hProfile = 0;
-HINSTANCE hPsapi = 0; 
-HINSTANCE hToolHelp32 = 0; 
+HINSTANCE hPsapi = 0;
+HINSTANCE hToolHelp32 = 0;
 HINSTANCE hCCAPI = 0;
 
 DWORD     AfsAvailable = 0;
@@ -158,9 +158,9 @@ DECL_FUNC_PTR(com_err);
 DECL_FUNC_PTR(error_message);
 
 // Profile functions
-DECL_FUNC_PTR(profile_init);    
+DECL_FUNC_PTR(profile_init);
 DECL_FUNC_PTR(profile_flush);
-DECL_FUNC_PTR(profile_release); 
+DECL_FUNC_PTR(profile_release);
 DECL_FUNC_PTR(profile_get_subsection_names);
 DECL_FUNC_PTR(profile_free_list);
 DECL_FUNC_PTR(profile_get_string);
@@ -311,7 +311,7 @@ FUNC_INFO k524_fi[] = {
 FUNC_INFO profile_fi[] = {
     MAKE_FUNC_INFO(profile_init),
     MAKE_FUNC_INFO(profile_flush),
-    MAKE_FUNC_INFO(profile_release), 
+    MAKE_FUNC_INFO(profile_release),
     MAKE_FUNC_INFO(profile_get_subsection_names),
     MAKE_FUNC_INFO(profile_free_list),
     MAKE_FUNC_INFO(profile_get_string),
@@ -428,7 +428,7 @@ khm_int32 init_imports(void) {
         CKRV(TOOLHELPDLL);
 
         hPsapi = 0;
-    }             
+    }
     else if(osvi.dwPlatformId == VER_PLATFORM_WIN32_NT)
     {
         // Windows NT

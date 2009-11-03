@@ -68,9 +68,9 @@ extern unsigned int maxbuf; 	/* maximum output buffer size */
 extern unsigned char *ucbuf;	/* cleartext buffer */
 static unsigned int nout;	/* number of chars in ucbuf,
 				 * pointer into ucbuf */
-static unsigned int smaxbuf;    /* Internal saved value of maxbuf 
+static unsigned int smaxbuf;    /* Internal saved value of maxbuf
 				   in case changes on us */
-static unsigned int smaxqueue;  /* Maximum allowed to queue before 
+static unsigned int smaxqueue;  /* Maximum allowed to queue before
 				   flush buffer. < smaxbuf by fudgefactor */
 
 /* perhaps use these in general, certainly use them for GSSAPI */
@@ -114,7 +114,7 @@ looping_read(fd, buf, len)
 	    if (errno == EINTR)
 		continue;
 	    return(cc);		 /* errno is already set */
-	}		
+	}
 	else if (cc == 0) {
 	    return(len2);
 	} else {
@@ -131,9 +131,9 @@ looping_read(fd, buf, len)
 
 #define ERR	-2
 
-/* 
+/*
  * Given maxbuf as a buffer size, determine how much can we
- * really transfer given the overhead of different algorithms 
+ * really transfer given the overhead of different algorithms
  *
  * Sets smaxbuf and smaxqueue
  */
@@ -147,12 +147,12 @@ static int secure_determine_constants()
     if (strcmp(auth_type, "GSSAPI") == 0) {
 	OM_uint32 maj_stat, min_stat, mlen;
 	OM_uint32 msize = maxbuf;
-	maj_stat = gss_wrap_size_limit(&min_stat, gcontext, 
+	maj_stat = gss_wrap_size_limit(&min_stat, gcontext,
 				       (dlevel == PROT_P),
 				       GSS_C_QOP_DEFAULT,
 				       msize, &mlen);
 	if (maj_stat != GSS_S_COMPLETE) {
-			secure_gss_error(maj_stat, min_stat, 
+			secure_gss_error(maj_stat, min_stat,
 					 "GSSAPI fudge determination");
 			/* Return error how? */
 			return ERR;
@@ -160,7 +160,7 @@ static int secure_determine_constants()
 	smaxqueue = mlen;
     }
 #endif
-    
+
 	return 0;
 }
 
@@ -223,7 +223,7 @@ FILE *stream;
  *	-1  on error (errno set)
  *	-2  on security error
  */
-int 
+int
 secure_write(fd, buf, nbyte)
 int fd;
 unsigned char *buf;
@@ -264,7 +264,7 @@ unsigned int nbyte;
 		gss_buffer_desc in_buf, out_buf;
 		OM_uint32 maj_stat, min_stat;
 		int conf_state;
-		
+
 		in_buf.value = buf;
 		in_buf.length = nbyte;
 		maj_stat = gss_seal(&min_stat, gcontext,
@@ -326,7 +326,7 @@ int fd;
 			return(ERR);
 		}
 		if ((length = (u_long) ntohl(length)) > MAX) {
-			secure_error("Length (%d) of PROT buffer > PBSZ=%u", 
+			secure_error("Length (%d) of PROT buffer > PBSZ=%u",
 				     length, MAX);
 			return(ERR);
 		}
@@ -350,7 +350,7 @@ int fd;
 		  maj_stat = gss_unseal(&min_stat, gcontext, &xmit_buf,
 					&msg_buf, &conf_state, NULL);
 		  if (maj_stat != GSS_S_COMPLETE) {
-		    secure_gss_error(maj_stat, min_stat, 
+		    secure_gss_error(maj_stat, min_stat,
 				     (dlevel == PROT_P)?
 				     "failed unsealing ENC message":
 				     "failed unsealing MIC message");

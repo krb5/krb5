@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 
 	if (mit_specific)
 		add_ignore_list("MIT##");
-		
+
 	if (wflags[0] && (argc > 0))
 		printf("WCONFIG_FLAGS=%s\n", wflags);
 
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 		copy_file (*argv, "win-pre.in");
 
 	copy_file("", "-");
-    
+
 	if (argc > 0)
 		copy_file (*argv, "win-post.in");
 
@@ -164,13 +164,13 @@ void add_ignore_list(char *str)
 	*cpp = str;
 }
 
-		
+
 /*
- * 
+ *
  * Copy_file
- * 
+ *
  * Copies file 'path\fname' to stdout.
- * 
+ *
  */
 static int
 copy_file (char *path, char *fname)
@@ -203,7 +203,7 @@ copy_file (char *path, char *fname)
 		    return 1;
 	    }
     }
-    
+
 
     while (fgets (buf, sizeof(buf), fin) != NULL) { /* Copy file over */
 	    if (buf[0] == '@') {

@@ -1,5 +1,3 @@
-
-
 /* this ALWAYS GENERATED file contains the definitions for the interfaces */
 
 
@@ -9,8 +7,8 @@
 /* Compiler settings for ccapi.idl:
     Oic, W1, Zp8, env=Win32 (32b run)
     protocol : dce , ms_ext, c_ext, oldnames
-    error checks: allocation ref bounds_check enum stub_data 
-    VC __declspec() decoration level: 
+    error checks: allocation ref bounds_check enum stub_data
+    VC __declspec() decoration level:
          __declspec(uuid()), __declspec(selectany), __declspec(novtable)
          DECLSPEC_UUID(), MIDL_INTERFACE()
 */
@@ -34,20 +32,20 @@
 #pragma once
 #endif
 
-/* Forward Declarations */ 
+/* Forward Declarations */
 
 #ifdef __cplusplus
 extern "C"{
-#endif 
+#endif
 
 void * __RPC_USER MIDL_user_allocate(size_t);
-void __RPC_USER MIDL_user_free( void * ); 
+void __RPC_USER MIDL_user_free( void * );
 
 #ifndef __ccapi_INTERFACE_DEFINED__
 #define __ccapi_INTERFACE_DEFINED__
 
 /* interface ccapi */
-/* [implicit_handle][unique][version][uuid] */ 
+/* [implicit_handle][unique][version][uuid] */
 
 typedef /* [context_handle] */ struct opaque_handle_CTX *HCTX;
 
@@ -157,17 +155,17 @@ typedef struct _CRED_UNION
     /* [switch_is] */ CRED_PTR_UNION cred;
     } 	CRED_UNION;
 
-CC_INT32 rcc_initialize( 
+CC_INT32 rcc_initialize(
     /* [out] */ HCTX *pctx);
 
-CC_INT32 rcc_shutdown( 
+CC_INT32 rcc_shutdown(
     /* [out][in] */ HCTX *pctx);
 
-CC_INT32 rcc_get_change_time( 
+CC_INT32 rcc_get_change_time(
     /* [in] */ HCTX ctx,
     /* [out] */ CC_TIME_T *time);
 
-CC_INT32 rcc_create( 
+CC_INT32 rcc_create(
     /* [in] */ HCTX ctx,
     /* [string][in] */ const CC_CHAR *name,
     /* [string][in] */ const CC_CHAR *principal,
@@ -175,85 +173,85 @@ CC_INT32 rcc_create(
     /* [in] */ CC_UINT32 flags,
     /* [out] */ HCACHE *pcache);
 
-CC_INT32 rcc_open( 
+CC_INT32 rcc_open(
     /* [in] */ HCTX ctx,
     /* [string][in] */ const CC_CHAR *name,
     /* [in] */ CC_INT32 vers,
     /* [in] */ CC_UINT32 flags,
     /* [out] */ HCACHE *pcache);
 
-CC_INT32 rcc_close( 
+CC_INT32 rcc_close(
     /* [out][in] */ HCACHE *pcache);
 
-CC_INT32 rcc_destroy( 
+CC_INT32 rcc_destroy(
     /* [out][in] */ HCACHE *pcache);
 
-CC_INT32 rcc_seq_fetch_NCs_begin( 
+CC_INT32 rcc_seq_fetch_NCs_begin(
     /* [in] */ HCTX ctx,
     /* [out] */ HCACHE_ITER *piter);
 
-CC_INT32 rcc_seq_fetch_NCs_end( 
+CC_INT32 rcc_seq_fetch_NCs_end(
     /* [out][in] */ HCACHE_ITER *piter);
 
-CC_INT32 rcc_seq_fetch_NCs_next( 
+CC_INT32 rcc_seq_fetch_NCs_next(
     /* [in] */ HCACHE_ITER iter,
     /* [out] */ HCACHE *pcache);
 
-CC_INT32 rcc_seq_fetch_NCs( 
+CC_INT32 rcc_seq_fetch_NCs(
     /* [in] */ HCTX ctx,
     /* [out][in] */ HCACHE_ITER *piter,
     /* [out] */ HCACHE *pcache);
 
-CC_INT32 rcc_get_NC_info( 
+CC_INT32 rcc_get_NC_info(
     /* [in] */ HCTX ctx,
     /* [out] */ NC_INFO_LIST **info_list);
 
-CC_INT32 rcc_get_name( 
+CC_INT32 rcc_get_name(
     /* [in] */ HCACHE cache,
     /* [string][out] */ CC_CHAR **name);
 
-CC_INT32 rcc_set_principal( 
+CC_INT32 rcc_set_principal(
     /* [in] */ HCACHE cache,
     /* [in] */ CC_INT32 vers,
     /* [string][in] */ const CC_CHAR *principal);
 
-CC_INT32 rcc_get_principal( 
+CC_INT32 rcc_get_principal(
     /* [in] */ HCACHE cache,
     /* [string][out] */ CC_CHAR **principal);
 
-CC_INT32 rcc_get_cred_version( 
+CC_INT32 rcc_get_cred_version(
     /* [in] */ HCACHE cache,
     /* [out] */ CC_INT32 *vers);
 
-CC_INT32 rcc_lock_request( 
+CC_INT32 rcc_lock_request(
     /* [in] */ HCACHE cache,
     /* [in] */ CC_INT32 lock_type);
 
-CC_INT32 rcc_store( 
+CC_INT32 rcc_store(
     /* [in] */ HCACHE cache,
     /* [in] */ CRED_UNION cred);
 
-CC_INT32 rcc_remove_cred( 
+CC_INT32 rcc_remove_cred(
     /* [in] */ HCACHE cache,
     /* [in] */ CRED_UNION cred);
 
-CC_INT32 rcc_seq_fetch_creds( 
+CC_INT32 rcc_seq_fetch_creds(
     /* [in] */ HCACHE cache,
     /* [out][in] */ HCRED_ITER *piter,
     /* [out] */ CRED_UNION **cred);
 
-CC_INT32 rcc_seq_fetch_creds_begin( 
+CC_INT32 rcc_seq_fetch_creds_begin(
     /* [in] */ HCACHE cache,
     /* [out] */ HCRED_ITER *piter);
 
-CC_INT32 rcc_seq_fetch_creds_end( 
+CC_INT32 rcc_seq_fetch_creds_end(
     /* [out][in] */ HCRED_ITER *piter);
 
-CC_INT32 rcc_seq_fetch_creds_next( 
+CC_INT32 rcc_seq_fetch_creds_next(
     /* [in] */ HCRED_ITER iter,
     /* [out] */ CRED_UNION **cred);
 
-CC_UINT32 Connect( 
+CC_UINT32 Connect(
     /* [string][in] */ CC_CHAR *name);
 
 void Shutdown( void);
@@ -280,5 +278,3 @@ void __RPC_USER HCRED_ITER_rundown( HCRED_ITER );
 #endif
 
 #endif
-
-

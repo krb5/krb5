@@ -36,7 +36,7 @@
 /*
  * Copyright (C) 1990 by the Massachusetts Institute of Technology
  *
- * Export of this software from the United States of America may 
+ * Export of this software from the United States of America may
  * require a specific license from the United States Government.
  * It is the responsibility of any person or organization contemplating
  * export to obtain such a license before exporting.
@@ -126,7 +126,7 @@ Authenticator authenticators[] = {
 				kerberos5_reply,
 				kerberos5_status,
 				kerberos5_printsub },
-#endif	
+#endif
 	{ AUTHTYPE_KERBEROS_V5, AUTH_WHO_CLIENT|AUTH_HOW_MUTUAL,
 				kerberos5_init,
 				kerberos5_send,
@@ -399,7 +399,7 @@ void auth_send_retry()
 	static unsigned char str_none[] = { IAC, SB, TELOPT_AUTHENTICATION,
 					    TELQUAL_IS, AUTHTYPE_NULL, 0,
 					    IAC, SE };
-	
+
 	if (Server) {
 		if (auth_debug_mode) {
 			printf(">>>%s: auth_send_retry called!\r\n", Name);
@@ -445,7 +445,7 @@ void auth_send_retry()
 	 *  We requested strong authentication, however no mechanisms worked.
 	 *  Therefore, exit on client end.
 	 */
-	printf("Unable to securely authenticate user ... exit\n"); 
+	printf("Unable to securely authenticate user ... exit\n");
 	exit(0);
 #endif /* KANNAN */
 }

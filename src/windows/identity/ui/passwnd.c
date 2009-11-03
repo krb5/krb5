@@ -4,8 +4,8 @@ static ATOM sAtom = 0;
 static HINSTANCE shInstance = 0;
 
 /* Callback for the MITPasswordControl
-This is a replacement for the normal edit control.  It does not show the 
-annoying password char in the edit box so that the number of chars in the 
+This is a replacement for the normal edit control.  It does not show the
+annoying password char in the edit box so that the number of chars in the
 password are not known.
 */
 
@@ -25,10 +25,10 @@ MITPasswordEditProc(
 {
     static SIZE pwdcharsz;
     BOOL pass_the_buck = FALSE;
-  
+
     if (message > WM_USER && message < 0x7FFF)
         pass_the_buck = TRUE;
-  
+
     switch(message)
     {
     case WM_GETTEXT:
@@ -41,7 +41,7 @@ MITPasswordEditProc(
         HDC hdc;
         PAINTSTRUCT ps;
         RECT r;
-        
+
         hdc = BeginPaint(hWnd, &ps);
         GetClientRect(hWnd, &r);
         Rectangle(hdc, 0, 0, r.right, r.bottom);
@@ -69,7 +69,7 @@ MITPasswordEditProc(
         hdc = GetDC(hWnd);
         GetTextExtentPoint32(hdc, &pwdchar, 1, &pwdcharsz);
         ReleaseDC(hWnd, hdc);
-        
+
         heditchild =
             CreateWindow(L"edit", L"", WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL |
                          ES_LEFT | ES_PASSWORD | WS_TABSTOP,
@@ -82,7 +82,7 @@ MITPasswordEditProc(
     }
     break;
     }
-  
+
     if (pass_the_buck)
         return SendMessage(GetDlgItem(hWnd, 1), message, wParam, lParam);
     return DefWindowProc(hWnd, message, wParam, lParam);
@@ -106,7 +106,7 @@ khm_register_passwnd_class(void)
         wndclass.hbrBackground = (void *)(COLOR_WINDOW + 1);
         wndclass.lpszClassName = MIT_PWD_DLL_CLASS;
         wndclass.hCursor = LoadCursor((HINSTANCE)NULL, IDC_IBEAM);
-    
+
         sAtom = RegisterClass(&wndclass);
     }
 

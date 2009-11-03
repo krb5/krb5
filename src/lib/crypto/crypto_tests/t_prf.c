@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  * This file contains tests for the PRF code in Kerberos.  IT reads an
  * input file, and writes an output file.  It is assumed that the
  * output file will be diffed against expected output to see whether
@@ -55,7 +55,7 @@ int main () {
       input.data = &s[0];
       input.length = strlen(s);
       assert(krb5_c_string_to_key (0, enctype, &input, &input, key) == 0);
-    
+
       if (scanf("%u", &in_length) == EOF)
 	  break;
 
@@ -71,7 +71,7 @@ int main () {
 	  assert (output.data = malloc(prfsz));
 	  output.length = prfsz;
 	  assert (krb5_c_prf(0, key, &input, &output) == 0);
-      
+
 	  free (input.data);
 	  input.data = NULL;
       }

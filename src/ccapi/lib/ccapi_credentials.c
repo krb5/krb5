@@ -41,14 +41,14 @@ typedef struct cci_credentials_d {
 
 /* ------------------------------------------------------------------------ */
 
-struct cci_credentials_d cci_credentials_initializer = { 
-    NULL, 
-    NULL 
-    VECTOR_FUNCTIONS_INITIALIZER, 
+struct cci_credentials_d cci_credentials_initializer = {
+    NULL,
+    NULL
+    VECTOR_FUNCTIONS_INITIALIZER,
     NULL
 };
 
-cc_credentials_f cci_credentials_f_initializer = { 
+cc_credentials_f cci_credentials_f_initializer = {
     ccapi_credentials_release,
     ccapi_credentials_compare
 };
@@ -65,43 +65,43 @@ cc_int32 cci_credentials_read (cc_credentials_t *out_credentials,
 {
     cc_int32 err = ccNoError;
     cci_credentials_t credentials = NULL;
-    
+
     if (!out_credentials) { err = cci_check_error (ccErrBadParam); }
     if (!in_stream      ) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         credentials = malloc (sizeof (*credentials));
-        if (credentials) { 
+        if (credentials) {
             *credentials = cci_credentials_initializer;
-        } else { 
-            err = cci_check_error (ccErrNoMem); 
+        } else {
+            err = cci_check_error (ccErrNoMem);
         }
     }
-    
+
     if (!err) {
         credentials->functions = malloc (sizeof (*credentials->functions));
-        if (credentials->functions) { 
+        if (credentials->functions) {
             *credentials->functions = cci_credentials_f_initializer;
-        } else { 
-            err = cci_check_error (ccErrNoMem); 
+        } else {
+            err = cci_check_error (ccErrNoMem);
         }
     }
-    
+
     if (!err) {
         err = cci_identifier_read (&credentials->identifier, in_stream);
     }
-    
+
     if (!err) {
         err = cci_credentials_union_read (&credentials->data, in_stream);
     }
-    
+
     if (!err) {
         *out_credentials = (cc_credentials_t) credentials;
         credentials = NULL; /* take ownership */
     }
-    
+
     if (credentials) { ccapi_credentials_release ((cc_credentials_t) credentials); }
-    
+
     return cci_check_error (err);
 }
 
@@ -112,14 +112,14 @@ cc_int32 cci_credentials_write (cc_credentials_t in_credentials,
 {
     cc_int32 err = ccNoError;
     cci_credentials_t credentials = (cci_credentials_t) in_credentials;
-    
+
     if (!in_credentials) { err = cci_check_error (ccErrBadParam); }
     if (!in_stream     ) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
         err = cci_identifier_write (credentials->identifier, in_stream);
     }
-    
+
     return cci_check_error (err);
 }
 
@@ -132,17 +132,17 @@ cc_int32 ccapi_credentials_compare (cc_credentials_t  in_credentials,
     cc_int32 err = ccNoError;
     cci_credentials_t credentials = (cci_credentials_t) in_credentials;
     cci_credentials_t compare_to_credentials = (cci_credentials_t) in_compare_to_credentials;
-    
+
     if (!in_credentials           ) { err = cci_check_error (ccErrBadParam); }
     if (!in_compare_to_credentials) { err = cci_check_error (ccErrBadParam); }
     if (!out_equal                ) { err = cci_check_error (ccErrBadParam); }
-    
+
     if (!err) {
-        err = cci_identifier_compare (credentials->identifier, 
+        err = cci_identifier_compare (credentials->identifier,
                                       compare_to_credentials->identifier,
                                       out_equal);
     }
-    
+
     return cci_check_error (err);
 }
 
@@ -152,15 +152,15 @@ cc_int32 ccapi_credentials_release (cc_credentials_t io_credentials)
 {
     cc_int32 err = ccNoError;
     cci_credentials_t credentials = (cci_credentials_t) io_credentials;
-    
+
     if (!io_credentials) { err = ccErrBadParam; }
-    
+
     if (!err) {
         cci_credentials_union_release (credentials->data);
         free ((char *) credentials->functions);
         cci_identifier_release (credentials->identifier);
         free (credentials);
     }
-    
+
     return err;
 }

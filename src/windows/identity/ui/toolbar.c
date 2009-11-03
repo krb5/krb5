@@ -142,17 +142,17 @@ LRESULT khm_toolbar_notify(LPNMHDR notice) {
                 HBITMAP hbmp;
                 RECT r;
 
-                khui_action * act = 
+                khui_action * act =
                     khui_find_action((int) nmcd->nmcd.dwItemSpec);
 
                 if(!act || !act->ib_normal)
                     return CDRF_DODEFAULT;
 
-                if((act->state & KHUI_ACTIONSTATE_DISABLED) && 
+                if((act->state & KHUI_ACTIONSTATE_DISABLED) &&
                    act->ib_disabled) {
                     ibmp = act->ib_disabled;
-                } else if(act->ib_hot && 
-                          ((nmcd->nmcd.uItemState & CDIS_HOT) || 
+                } else if(act->ib_hot &&
+                          ((nmcd->nmcd.uItemState & CDIS_HOT) ||
                            (nmcd->nmcd.uItemState & CDIS_SELECTED))){
                     ibmp = act->ib_hot;
                 } else {
@@ -161,15 +161,15 @@ LRESULT khm_toolbar_notify(LPNMHDR notice) {
 
                 iidx = khui_ilist_lookup_id(ilist_toolbar, ibmp);
                 if(iidx < 0) {
-                    hbmp = LoadImage(khm_hInstance, 
-                                     MAKEINTRESOURCE(ibmp), 
-                                     IMAGE_BITMAP, 
-                                     KHUI_TOOLBAR_IMAGE_WIDTH, 
+                    hbmp = LoadImage(khm_hInstance,
+                                     MAKEINTRESOURCE(ibmp),
+                                     IMAGE_BITMAP,
+                                     KHUI_TOOLBAR_IMAGE_WIDTH,
                                      KHUI_TOOLBAR_IMAGE_HEIGHT, 0);
-                    iidx = 
-                        khui_ilist_add_masked_id(ilist_toolbar, 
-                                                 hbmp, 
-                                                 KHUI_TOOLBAR_BGCOLOR, 
+                    iidx =
+                        khui_ilist_add_masked_id(ilist_toolbar,
+                                                 hbmp,
+                                                 KHUI_TOOLBAR_BGCOLOR,
                                                  ibmp);
                     DeleteObject(hbmp);
                 }
@@ -183,14 +183,14 @@ LRESULT khm_toolbar_notify(LPNMHDR notice) {
                 r.top += ((r.bottom - r.top) -
                           KHUI_TOOLBAR_IMAGE_HEIGHT) / 2;
 #if 0
-                r.left += ((r.right - r.left) - 
+                r.left += ((r.right - r.left) -
                            KHUI_TOOLBAR_IMAGE_WIDTH) / 2;
 #endif
-                khui_ilist_draw(ilist_toolbar, 
-                                iidx, 
-                                nmcd->nmcd.hdc, 
+                khui_ilist_draw(ilist_toolbar,
+                                iidx,
+                                nmcd->nmcd.hdc,
                                 r.left,
-                                r.top, 
+                                r.top,
                                 0);
 
                 return CDRF_DODEFAULT;
@@ -231,15 +231,15 @@ void khui_add_action_to_toolbar(HWND tb, khui_action *a, int opt, HIMAGELIST hiL
 
     if(opt & KHUI_TOOLBAR_ADD_TEXT) {
         int sid = 0;
-        if((opt & KHUI_TOOLBAR_ADD_LONGTEXT) == 
+        if((opt & KHUI_TOOLBAR_ADD_LONGTEXT) ==
            KHUI_TOOLBAR_ADD_LONGTEXT) {
             sid = a->is_tooltip;
         }
         if(!sid)
             sid = a->is_caption;
         if(sid) {
-            LoadString(khm_hInstance, 
-                       sid, 
+            LoadString(khm_hInstance,
+                       sid,
                        buf, ARRAYLENGTH(buf));
             buf[wcslen(buf) + 1] = L'\0';
             idx_caption = (int) SendMessage(tb,
@@ -312,8 +312,8 @@ void khm_update_standard_toolbar(void)
             BOOL enable;
 
             enable = !(act->state & KHUI_ACTIONSTATE_DISABLED);
-            SendMessage(khui_hwnd_standard_toolbar, 
-                        TB_ENABLEBUTTON, 
+            SendMessage(khui_hwnd_standard_toolbar,
+                        TB_ENABLEBUTTON,
                         (WPARAM) act->cmd,
                         MAKELPARAM(enable, 0));
         }
@@ -347,9 +347,9 @@ void khm_create_standard_toolbar(HWND rebar) {
                           (LPWSTR) NULL,
                           WS_CHILD |
                           TBSTYLE_FLAT |
-                          TBSTYLE_AUTOSIZE | 
+                          TBSTYLE_AUTOSIZE |
                           TBSTYLE_TOOLTIPS |
-                          CCS_NORESIZE | 
+                          CCS_NORESIZE |
                           CCS_NOPARENTALIGN |
                           CCS_ADJUSTABLE |
                           CCS_NODIVIDER,
@@ -376,10 +376,10 @@ void khm_create_standard_toolbar(HWND rebar) {
         (int) khui_action_list_length(def->items),
         3);
 
-    hbm_blank = LoadImage(khm_hInstance, 
-                          MAKEINTRESOURCE(IDB_TB_BLANK), 
-                          IMAGE_BITMAP, 
-                          KHUI_TOOLBAR_IMAGE_WIDTH, 
+    hbm_blank = LoadImage(khm_hInstance,
+                          MAKEINTRESOURCE(IDB_TB_BLANK),
+                          IMAGE_BITMAP,
+                          KHUI_TOOLBAR_IMAGE_WIDTH,
                           KHUI_TOOLBAR_IMAGE_HEIGHT, 0);
     idx_blank = ImageList_AddMasked(hiList, hbm_blank, RGB(0,0,0));
 
@@ -412,14 +412,14 @@ void khm_create_standard_toolbar(HWND rebar) {
 
     while(aref && aref->action != KHUI_MENU_END) {
         if(aref->action == KHUI_MENU_SEP) {
-            khui_add_action_to_toolbar(hwtb, 
-                                       NULL, 
-                                       KHUI_TOOLBAR_ADD_SEP, 
+            khui_add_action_to_toolbar(hwtb,
+                                       NULL,
+                                       KHUI_TOOLBAR_ADD_SEP,
                                        hiList);
         } else {
             act = khui_find_action(aref->action);
-            khui_add_action_to_toolbar(hwtb, 
-                                       act, 
+            khui_add_action_to_toolbar(hwtb,
+                                       act,
                                        KHUI_TOOLBAR_ADD_BITMAP |
                                        ((aref->flags & KHUI_ACTIONREF_SUBMENU)?
                                         KHUI_TOOLBAR_ADD_DROPDOWN: 0),
@@ -442,14 +442,14 @@ void khm_create_standard_toolbar(HWND rebar) {
     ZeroMemory(&rbi, sizeof(rbi));
 
     rbi.cbSize = sizeof(rbi);
-    rbi.fMask = 
+    rbi.fMask =
         RBBIM_ID |
-        RBBIM_CHILD | 
-        RBBIM_CHILDSIZE | 
-        RBBIM_IDEALSIZE | 
-        RBBIM_SIZE | 
+        RBBIM_CHILD |
+        RBBIM_CHILDSIZE |
+        RBBIM_IDEALSIZE |
+        RBBIM_SIZE |
         RBBIM_STYLE;
-    rbi.fStyle =  
+    rbi.fStyle =
         RBBS_USECHEVRON |
         RBBS_BREAK;
     rbi.hwndChild = hwtb;

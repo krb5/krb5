@@ -129,9 +129,9 @@ krb5_ldap_bind(ldap_context, ldap_server_handle)
 	/* password based simple bind */
         bv.bv_val = ldap_context->bind_pwd;
         bv.bv_len = strlen(ldap_context->bind_pwd);
-        st = ldap_sasl_bind_s(ldap_server_handle->ldap_handle, 
+        st = ldap_sasl_bind_s(ldap_server_handle->ldap_handle,
                                 ldap_context->bind_dn,
-                                NULL, &bv, NULL, 
+                                NULL, &bv, NULL,
                                 NULL, NULL);
     }
     return st;

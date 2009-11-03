@@ -2,7 +2,7 @@
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -12,7 +12,7 @@
  * without specific, written prior permission. Sun Microsystems makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * SUN MICROSYSTEMS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL SUN MICROSYSTEMS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -149,7 +149,7 @@ gssint_unwrap_aead (gss_mechanism mech,
     } else
 	status = GSS_S_UNAVAILABLE;
  /* EXPORT DELETE END */
-	
+
     return (status);
 }
 
@@ -187,7 +187,7 @@ gss_qop_t		*qop_state;
      */
     ctx = (gss_union_ctx_id_t) context_handle;
     mech = gssint_get_mechanism (ctx->mech_type);
-    
+
     if (!mech)
 	return (GSS_S_BAD_MECH);
 
@@ -195,4 +195,3 @@ gss_qop_t		*qop_state;
 			      input_message_buffer, input_assoc_buffer,
 			      output_payload_buffer, conf_state, qop_state);
 }
-

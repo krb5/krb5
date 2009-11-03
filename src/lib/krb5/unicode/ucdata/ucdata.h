@@ -261,7 +261,7 @@ int uckdecomp(krb5_ui_4 code, krb5_ui_4 *num, krb5_ui_4 **decomp);
  */
 int ucdecomp_hangul(krb5_ui_4 code, krb5_ui_4 *num, krb5_ui_4 decomp[]);
 
-/*  
+/*
  * This routine does canonical decomposition of the string in of length
  * inlen, and returns the decomposed string in out with length outlen.
  * The memory for out is allocated by this routine. It returns the length
@@ -269,14 +269,14 @@ int ucdecomp_hangul(krb5_ui_4 code, krb5_ui_4 *num, krb5_ui_4 decomp[]);
  */
 int uccanondecomp (const krb5_ui_4 *in, int inlen,
 		     krb5_ui_4 **out, int *outlen);
-  
-/*  
+
+/*
  * Equivalent to uccanondecomp() except that it includes compatibility
  * decompositions.
  */
 int uccompatdecomp(const krb5_ui_4 *in, int inlen,
 		     krb5_ui_4 **out, int *outlen);
-  
+
 /**************************************************************************
  *
  * Functions for getting combining classes.

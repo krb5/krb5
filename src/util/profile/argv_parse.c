@@ -1,7 +1,7 @@
 /*
  * argv_parse.c --- utility function for parsing a string into a
  * 	argc, argv array.
- * 
+ *
  * This file defines a function argv_parse() which parsing a
  * passed-in string, handling double quotes and backslashes, and
  * creates an allocated argv vector which can be freed using the
@@ -10,7 +10,7 @@
  * See argv_parse.h for the formal definition of the functions.
  *
  * Copyright 1999 by Theodore Ts'o.
- * 
+ *
  * Permission to use, copy, modify, and distribute this software for
  * any purpose with or without fee is hereby granted, provided that
  * the above copyright notice and this permission notice appear in all

@@ -60,7 +60,8 @@ static const struct field_info krbsalt_fields[] = {
     FIELDOF_OPTSTRINGL(krb5_key_data, octetstring, key_data_contents[1],
                        ui_2, key_data_length[1], 1, 1),
 };
-static unsigned int optional_krbsalt (const void *p)
+static unsigned int
+optional_krbsalt (const void *p)
 {
     const krb5_key_data *k = p;
     unsigned int optional = 0;
@@ -208,7 +209,8 @@ last:
     return ret;
 }
 
-static asn1_error_code asn1_decode_key(asn1buf *buf, krb5_key_data *key)
+static asn1_error_code
+asn1_decode_key(asn1buf *buf, krb5_key_data *key)
 {
     int full_buflen, seqindef;
     unsigned int length;
@@ -290,8 +292,8 @@ last:
     return ret;
 }
 
-krb5_error_code krb5int_ldap_decode_sequence_of_keys (krb5_data *in,
-                                                      ldap_seqof_key_data **rep)
+krb5_error_code
+krb5int_ldap_decode_sequence_of_keys (krb5_data *in, ldap_seqof_key_data **rep)
 {
     ldap_seqof_key_data *repval;
     krb5_key_data **out;

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * kdc/policy.c
  *
@@ -7,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -21,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Policy decision routines for KDC.
  */
@@ -59,30 +60,30 @@
 
 int
 against_local_policy_as(register krb5_kdc_req *request, krb5_db_entry client,
-			krb5_db_entry server, krb5_timestamp kdc_time,
-			const char **status, krb5_data *e_data)
+                        krb5_db_entry server, krb5_timestamp kdc_time,
+                        const char **status, krb5_data *e_data)
 {
-    krb5_error_code		code;
-    kdb_check_policy_as_req	req;
-    kdb_check_policy_as_rep	rep;
-    krb5_data			req_data;
-    krb5_data			rep_data;
+    krb5_error_code             code;
+    kdb_check_policy_as_req     req;
+    kdb_check_policy_as_rep     rep;
+    krb5_data                   req_data;
+    krb5_data                   rep_data;
 
 #if 0
-     /* An AS request must include the addresses field */
+    /* An AS request must include the addresses field */
     if (request->addresses == 0) {
-	*status = "NO ADDRESS";
-	return KRB5KDC_ERR_POLICY;
+        *status = "NO ADDRESS";
+        return KRB5KDC_ERR_POLICY;
     }
 #endif
 
     memset(&req, 0, sizeof(req));
     memset(&rep, 0, sizeof(rep));
 
-    req.request			= request;
-    req.client			= &client;
-    req.server			= &server;
-    req.kdc_time		= kdc_time;
+    req.request                 = request;
+    req.client                  = &client;
+    req.server                  = &server;
+    req.kdc_time                = kdc_time;
 
     req_data.data = (void *)&req;
     req_data.length = sizeof(req);
@@ -91,19 +92,19 @@ against_local_policy_as(register krb5_kdc_req *request, krb5_db_entry client,
     rep_data.length = sizeof(rep);
 
     code = krb5_db_invoke(kdc_context,
-			  KRB5_KDB_METHOD_CHECK_POLICY_AS,
-			  &req_data,
-			  &rep_data);
+                          KRB5_KDB_METHOD_CHECK_POLICY_AS,
+                          &req_data,
+                          &rep_data);
     if (code == KRB5_KDB_DBTYPE_NOSUP)
-	return 0;
+        return 0;
 
     *status = rep.status;
     *e_data = rep.e_data;
 
     if (code != 0) {
-	code -= ERROR_TABLE_BASE_krb5;
-	if (code < 0 || code > 128)
-	    code = KRB_ERR_GENERIC;
+        code -= ERROR_TABLE_BASE_krb5;
+        if (code < 0 || code > 128)
+            code = KRB_ERR_GENERIC;
     }
 
     return code;
@@ -114,33 +115,33 @@ against_local_policy_as(register krb5_kdc_req *request, krb5_db_entry client,
  */
 krb5_error_code
 against_local_policy_tgs(register krb5_kdc_req *request, krb5_db_entry server,
-			 krb5_ticket *ticket, const char **status,
-			 krb5_data *e_data)
+                         krb5_ticket *ticket, const char **status,
+                         krb5_data *e_data)
 {
-    krb5_error_code		code;
-    kdb_check_policy_tgs_req	req;
-    kdb_check_policy_tgs_rep	rep;
-    krb5_data			req_data;
-    krb5_data			rep_data;
+    krb5_error_code             code;
+    kdb_check_policy_tgs_req    req;
+    kdb_check_policy_tgs_rep    rep;
+    krb5_data                   req_data;
+    krb5_data                   rep_data;
 
 #if 0
     /*
      * For example, if your site wants to disallow ticket forwarding,
      * you might do something like this:
      */
-    
+
     if (isflagset(request->kdc_options, KDC_OPT_FORWARDED)) {
-	*status = "FORWARD POLICY";
-	return KRB5KDC_ERR_POLICY;
+        *status = "FORWARD POLICY";
+        return KRB5KDC_ERR_POLICY;
     }
 #endif
 
     memset(&req, 0, sizeof(req));
     memset(&rep, 0, sizeof(rep));
 
-    req.request			= request;
-    req.server			= &server;
-    req.ticket			= ticket;
+    req.request                 = request;
+    req.server                  = &server;
+    req.ticket                  = ticket;
 
     req_data.data = (void *)&req;
     req_data.length = sizeof(req);
@@ -149,21 +150,20 @@ against_local_policy_tgs(register krb5_kdc_req *request, krb5_db_entry server,
     rep_data.length = sizeof(rep);
 
     code = krb5_db_invoke(kdc_context,
-			  KRB5_KDB_METHOD_CHECK_POLICY_TGS,
-			  &req_data,
-			  &rep_data);
+                          KRB5_KDB_METHOD_CHECK_POLICY_TGS,
+                          &req_data,
+                          &rep_data);
     if (code == KRB5_KDB_DBTYPE_NOSUP)
-	return 0;
+        return 0;
 
     *status = rep.status;
     *e_data = rep.e_data;
 
     if (code != 0) {
-	code -= ERROR_TABLE_BASE_krb5;
-	if (code < 0 || code > 128)
-	    code = KRB_ERR_GENERIC;
+        code -= ERROR_TABLE_BASE_krb5;
+        if (code < 0 || code > 128)
+            code = KRB_ERR_GENERIC;
     }
 
     return code;
 }
-

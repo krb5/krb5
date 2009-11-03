@@ -8,7 +8,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * One end of the user-user client-server pair.
  */
@@ -75,12 +75,12 @@ char *argv[];
       int acc;
       struct servent *sp;
       socklen_t namelen = sizeof(f_inaddr);
-      
+
       if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
 	  com_err("uu-server", errno, "creating socket");
 	  exit(3);
       }
-      
+
       l_inaddr.sin_family = AF_INET;
       l_inaddr.sin_addr.s_addr = 0;
       if (!(sp = getservbyname("uu-sample", "tcp"))) {
@@ -145,7 +145,7 @@ char *argv[];
   printf ("uu-server: client ticket is %d bytes.\n",
 	  creds.second_ticket.length);
 
-  retval = krb5_get_credentials(context, KRB5_GC_USER_USER, cc, 
+  retval = krb5_get_credentials(context, KRB5_GC_USER_USER, cc,
 				&creds, &new_creds);
   if (retval) {
       com_err("uu-server", retval, "getting user-user ticket");
@@ -182,8 +182,8 @@ char *argv[];
       com_err("uu-server", retval, "initializing the auth_context flags");
       return 8;
   }
-  
-  retval = 
+
+  retval =
       krb5_auth_con_genaddrs(context, auth_context, sock,
 			     KRB5_AUTH_CONTEXT_GENERATE_LOCAL_FULL_ADDR |
 			     KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR);
@@ -191,10 +191,10 @@ char *argv[];
       com_err("uu-server", retval, "generating addrs for auth_context");
       return 9;
   }
-  
+
 #if 1
-  retval = krb5_mk_req_extended(context, &auth_context, 
-				AP_OPTS_USE_SESSION_KEY, 
+  retval = krb5_mk_req_extended(context, &auth_context,
+				AP_OPTS_USE_SESSION_KEY,
 				NULL, new_creds, &msg);
   if (retval) {
       com_err("uu-server", retval, "making AP_REQ");
@@ -208,12 +208,12 @@ char *argv[];
 #endif
   if (retval)
       goto cl_short_wrt;
-  
+
   free(msg.data);
-  
+
   msgtext.length = 32;
   msgtext.data = "Hello, other end of connection.";
-  
+
   retval = krb5_mk_safe(context, auth_context, &msgtext, &msg, NULL);
   if (retval) {
       com_err("uu-server", retval, "encoding message to client");

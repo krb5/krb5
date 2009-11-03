@@ -1,12 +1,13 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
-  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.
-  * 
-  * $Header$
-  *
-  */
- 
+ * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.
+ *
+ * $Header$
+ *
+ */
+
 #ifndef _OVSEC_ADM_STRINGS_
- 
+
 extern char *str_PARSE_NAME;
 extern char *str_HISTORY_PARSE_NAME;
 extern char *str_ADMIN_PRINC_EXISTS;
@@ -35,5 +36,5 @@ extern char *str_TOO_MANY_ADMIN_PRINC;
 extern char *str_TOO_MANY_CHANGEPW_PRINC;
 extern char *str_TOO_MANY_HIST_PRINC;
 extern char *str_WHILE_DESTROYING_ADMIN_SESSION;
- 
+
 #endif /* _OVSEC_ADM_STRINGS_ */

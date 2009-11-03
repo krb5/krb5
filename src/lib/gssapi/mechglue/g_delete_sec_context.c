@@ -2,7 +2,7 @@
 
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -12,7 +12,7 @@
  * without specific, written prior permission. Sun Microsystems makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * SUN MICROSYSTEMS DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL SUN MICROSYSTEMS BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -61,7 +61,7 @@ val_del_sec_ctx_args(
 }
 
 
-OM_uint32 KRB5_CALLCONV 
+OM_uint32 KRB5_CALLCONV
 gss_delete_sec_context (minor_status,
                         context_handle,
                         output_token)
@@ -82,11 +82,11 @@ gss_buffer_t		output_token;
      * select the approprate underlying mechanism routine and
      * call it.
      */
-    
+
     ctx = (gss_union_ctx_id_t) *context_handle;
     if (GSSINT_CHK_LOOP(ctx))
 	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
-   
+
     status = gssint_delete_internal_sec_context(minor_status,
 						ctx->mech_type,
 						&ctx->internal_ctx_id,

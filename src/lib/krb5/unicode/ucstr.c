@@ -4,13 +4,13 @@
  */
 /*
  * This work is part of OpenLDAP Software <http://www.openldap.org/>.
- * 
+ *
  * Copyright 1998-2008 The OpenLDAP Foundation. All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted only as authorized by the OpenLDAP Public
  * License.
- * 
+ *
  * A copy of this license is available in file LICENSE in the top-level
  * directory of the distribution or, alternatively, at
  * <http://www.OpenLDAP.org/license.html>.
@@ -23,7 +23,7 @@
 
 #include <ctype.h>
 
-int 
+int
 krb5int_ucstrncmp(
 		  const krb5_unicode * u1,
 		  const krb5_unicode * u2,
@@ -40,7 +40,7 @@ krb5int_ucstrncmp(
     return 0;
 }
 
-int 
+int
 krb5int_ucstrncasecmp(
 		      const krb5_unicode * u1,
 		      const krb5_unicode * u2,
@@ -83,7 +83,7 @@ krb5int_ucstrncasechr(
 {
     c = uctolower(c);
     for (; 0 < n; ++u, --n) {
-	if (uctolower(*u) == c) {
+	if ((krb5_unicode) uctolower(*u) == c) {
 	    return (krb5_unicode *) u;
 	}
     }
@@ -91,7 +91,7 @@ krb5int_ucstrncasechr(
     return NULL;
 }
 
-void 
+void
 krb5int_ucstr2upper(
 		    krb5_unicode * u,
 		    size_t n)
@@ -309,7 +309,7 @@ cleanup:
 
 /* compare UTF8-strings, optionally ignore casing */
 /* slow, should be optimized */
-int 
+int
 krb5int_utf8_normcmp(
 		     const krb5_data * data1,
 		     const krb5_data * data2,

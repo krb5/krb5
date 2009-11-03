@@ -13,6 +13,3 @@ krb5int_des3_make_key(const krb5_data *randombits, krb5_keyblock *key);
 
 krb5_error_code
 krb5int_aes_make_key(const krb5_data *randombits, krb5_keyblock *key);
-
-
-

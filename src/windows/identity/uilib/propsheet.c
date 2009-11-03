@@ -44,7 +44,7 @@ ps_exit(void) {
     DeleteCriticalSection(&cs_props);
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_ps_create_sheet(khui_property_sheet ** sheet)
 {
     khui_property_sheet * ps;
@@ -61,7 +61,7 @@ khui_ps_create_sheet(khui_property_sheet ** sheet)
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_ps_add_page(khui_property_sheet * sheet,
                  khm_int32 credtype,
                  khm_int32 ordinal,
@@ -77,7 +77,7 @@ khui_ps_add_page(khui_property_sheet * sheet,
     p->ordinal = ordinal;
     p->p_page = ppage;
 
-    EnterCriticalSection(&cs_props);    
+    EnterCriticalSection(&cs_props);
     QPUT(sheet, p);
     sheet->n_pages++;
     LeaveCriticalSection(&cs_props);
@@ -88,7 +88,7 @@ khui_ps_add_page(khui_property_sheet * sheet,
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_ps_find_page(khui_property_sheet * sheet,
                   khm_int32 credtype,
                   khui_property_page ** page)
@@ -114,7 +114,7 @@ khui_ps_find_page(khui_property_sheet * sheet,
     }
 }
 
-int __cdecl 
+int __cdecl
 ps_order_func(const void *l, const void * r) {
     khui_property_page * lp;
     khui_property_page * rp;
@@ -128,7 +128,7 @@ ps_order_func(const void *l, const void * r) {
         return lp->ordinal - rp->ordinal;
 }
 
-KHMEXP HWND KHMAPI 
+KHMEXP HWND KHMAPI
 khui_ps_show_sheet(HWND parent, khui_property_sheet * s)
 {
     khui_property_page * p;
@@ -188,8 +188,8 @@ khui_ps_show_sheet(HWND parent, khui_property_sheet * s)
     return hw;
 }
 
-KHMEXP LRESULT KHMAPI 
-khui_ps_check_message(khui_property_sheet * sheet, 
+KHMEXP LRESULT KHMAPI
+khui_ps_check_message(khui_property_sheet * sheet,
                       PMSG pmsg)
 {
     LRESULT lr;
@@ -200,7 +200,7 @@ khui_ps_check_message(khui_property_sheet * sheet,
     lr = PropSheet_IsDialogMessage(sheet->hwnd, pmsg);
     if(lr) {
         sheet->hwnd_page = PropSheet_GetCurrentPageHwnd(sheet->hwnd);
-        if(sheet->hwnd_page == NULL && 
+        if(sheet->hwnd_page == NULL &&
            sheet->status == KHUI_PS_STATUS_RUNNING)
 
             sheet->status = KHUI_PS_STATUS_DONE;
@@ -209,7 +209,7 @@ khui_ps_check_message(khui_property_sheet * sheet,
     return lr;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_ps_destroy_sheet(khui_property_sheet * sheet)
 {
     khui_property_page * p;

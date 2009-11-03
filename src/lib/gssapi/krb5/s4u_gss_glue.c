@@ -365,4 +365,3 @@ cleanup:
 
     return major_status;
 }
-

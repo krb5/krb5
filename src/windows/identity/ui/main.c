@@ -177,9 +177,9 @@ khm_cmdline_dlg_proc(HWND hwnd,
         return TRUE;
 
     case WM_CLOSE:
-	
+
 	EndDialog(hwnd, KHM_ERROR_EXIT);
-    	
+
 	return TRUE;
     }
 
@@ -192,7 +192,7 @@ void khm_show_commandline_help(void) {
     hm_richedit = LoadLibrary(L"riched20.dll");
     if (hm_richedit == NULL)
         return;
-    
+
     DialogBox(khm_hInstance, MAKEINTRESOURCE(IDD_CMDLINE),
               NULL, khm_cmdline_dlg_proc);
 
@@ -302,7 +302,7 @@ void khm_register_window_classes(void) {
 
     ZeroMemory(&ics, sizeof(ics));
     ics.dwSize = sizeof(ics);
-    ics.dwICC = 
+    ics.dwICC =
         ICC_COOL_CLASSES |
         ICC_BAR_CLASSES |
         ICC_DATE_CLASSES |
@@ -481,7 +481,7 @@ void khm_del_dialog(HWND dlg) {
         if(khui_dialogs[i].hwnd == dlg)
             break;
     }
-    
+
     if(i < n_khui_dialogs)
         n_khui_dialogs--;
     else
@@ -696,7 +696,7 @@ int khm_compare_version(const khm_version * v1, const khm_version * v2) {
 int WINAPI WinMain(HINSTANCE hInstance,
                    HINSTANCE hPrevInstance,
                    LPSTR lpCmdLine,
-                   int nCmdShow) 
+                   int nCmdShow)
 {
     int rv = 0;
     HANDLE h_appmutex;
@@ -741,7 +741,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
         khm_commctl_version = khm_get_commctl_version(NULL);
 
-        /* we only open a main window if this is the only instance 
+        /* we only open a main window if this is the only instance
            of the application that is running. */
         kmq_init();
         khm_init_gui();
@@ -888,7 +888,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 
             MessageBox(NULL, error_msg, error_title,
                        MB_OK);
-            
+
             goto done_with_remote;
         }
 

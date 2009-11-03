@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/krb/gen_seqnum.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * Routine to automatically generate a starting sequence number.
  * We do this by getting a random key and encrypting something with it,
@@ -53,13 +54,13 @@ krb5_generate_seq_number(krb5_context context, const krb5_keyblock *key, krb5_ui
 
     seed = key2data(*key);
     if ((retval = krb5_c_random_add_entropy(context, KRB5_C_RANDSOURCE_TRUSTEDPARTY, &seed)))
-	return(retval);
+        return(retval);
 
     seed.length = sizeof(*seqno);
     seed.data = (char *) seqno;
     retval = krb5_c_random_make_octets(context, &seed);
     if (retval)
-	return retval;
+        return retval;
     /*
      * Work around implementation incompatibilities by not generating
      * initial sequence numbers greater than 2^30.  Previous MIT
@@ -71,6 +72,6 @@ krb5_generate_seq_number(krb5_context context, const krb5_keyblock *key, krb5_ui
      */
     *seqno &= 0x3fffffff;
     if (*seqno == 0)
-	*seqno = 1;
+        *seqno = 1;
     return 0;
 }

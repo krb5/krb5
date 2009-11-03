@@ -6,7 +6,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -23,7 +23,7 @@
  *
  * Simple test program for testing how GSSAPI import name works.  (May
  * be made into a more full-fledged test program later.)
- * 
+ *
  */
 
 #include <unistd.h>
@@ -71,7 +71,7 @@ static int test_import_name(name)
 		display_status("parsing name", maj_stat, min_stat);
 		return -1;
 	}
-	
+
 	maj_stat = gss_display_name(&min_stat, gss_name, &buffer_name,
 				    &name_oid);
 	if (maj_stat != GSS_S_COMPLETE) {
@@ -99,8 +99,8 @@ static void display_buffer(buffer)
 	gss_buffer_desc buffer;
 {
     char *namebuf;
-    
-    namebuf = malloc(buffer.length+1);    
+
+    namebuf = malloc(buffer.length+1);
     if (!namebuf) {
 	fprintf(stderr, "display_buffer: couldn't allocate buffer!\n");
 	exit(1);
@@ -132,7 +132,7 @@ static void display_status_1(m, code, type)
 #else	/* GSSAPI_V2 */
      int msg_ctx;
 #endif	/* GSSAPI_V2 */
-     
+
      msg_ctx = 0;
      while (1) {
 	  (void) gss_display_status(&min_stat, code,
@@ -140,11 +140,10 @@ static void display_status_1(m, code, type)
 				       &msg_ctx, &msg);
 	  if (display_file)
 	      fprintf(display_file, "GSS-API error %s: %s\n", m,
-		      (char *)msg.value); 
+		      (char *)msg.value);
 	  (void) gss_release_buffer(&min_stat, &msg);
-	  
+
 	  if (!msg_ctx)
 	       break;
      }
 }
-

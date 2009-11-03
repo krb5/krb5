@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #ifndef _KRB5_KDB5_H_
 #define _KRB5_KDB5_H_
 

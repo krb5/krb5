@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/krb/authdata.h
  *
@@ -35,14 +36,13 @@
 /* authdata.c */
 krb5_error_code
 krb5int_authdata_verify(krb5_context context,
-			krb5_authdata_context,
-			krb5_flags usage,
-			const krb5_auth_context *auth_context,
-			const krb5_keyblock *key,
-			const krb5_ap_req *ap_req);
+                        krb5_authdata_context,
+                        krb5_flags usage,
+                        const krb5_auth_context *auth_context,
+                        const krb5_keyblock *key,
+                        const krb5_ap_req *ap_req);
 
 /* pac.c */
 extern krb5plugin_authdata_client_ftable_v0 krb5int_mspac_authdata_client_ftable;
 
 #endif /* !KRB_AUTHDATA_H */
-

@@ -123,7 +123,7 @@ LRESULT CALLBACK khui_property_wnd_proc(
     pw_data * child;
 
     switch(msg) {
-        case WM_CREATE: 
+        case WM_CREATE:
             {
                 CREATESTRUCT * cs;
                 LVCOLUMN lvc;
@@ -140,18 +140,18 @@ LRESULT CALLBACK khui_property_wnd_proc(
 #pragma warning(pop)
 
                 child->hwnd_lv = CreateWindow(
-                    WC_LISTVIEW, 
+                    WC_LISTVIEW,
                     L"",
                     WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL |
                     LVS_REPORT | LVS_SORTASCENDING,
                     0, 0,
                     cs->cx, cs->cy,
-                    hwnd, 
-                    (HMENU) ID_LISTVIEW, 
-                    khm_hInstance, 
+                    hwnd,
+                    (HMENU) ID_LISTVIEW,
+                    khm_hInstance,
                     NULL);
 
-                ListView_SetExtendedListViewStyle(child->hwnd_lv, 
+                ListView_SetExtendedListViewStyle(child->hwnd_lv,
                     LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
                 ZeroMemory(&lvc, sizeof(lvc));

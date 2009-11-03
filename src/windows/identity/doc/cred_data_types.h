@@ -242,7 +242,7 @@
     count.  It can not be assigned \a KCDB_CBSIZE_AUTO even if the data type
     supports it.  The \a pcb_dst parameter is used internally to allocate
     memory for the object.
-    
+
     \subsubsection kcdb_pg_cb_iv isValid
 
     \code

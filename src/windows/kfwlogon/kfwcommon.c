@@ -301,12 +301,12 @@ BOOL IsDebugLogging(void)
     HKEY NPKey;
     DWORD dwDebug = FALSE;
 
-    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, 
-		     "System\\CurrentControlSet\\Services\\MIT Kerberos\\NetworkProvider", 
-		     0, KEY_QUERY_VALUE, &NPKey) == ERROR_SUCCESS) 
+    if (RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+		     "System\\CurrentControlSet\\Services\\MIT Kerberos\\NetworkProvider",
+		     0, KEY_QUERY_VALUE, &NPKey) == ERROR_SUCCESS)
     {
 	LSPsize=sizeof(dwDebug);
-	if (RegQueryValueEx(NPKey, "Debug", NULL, NULL, (LPBYTE)&dwDebug, &LSPsize) != ERROR_SUCCESS) 
+	if (RegQueryValueEx(NPKey, "Debug", NULL, NULL, (LPBYTE)&dwDebug, &LSPsize) != ERROR_SUCCESS)
 	{
 	    dwDebug = FALSE;
 	}
@@ -316,10 +316,10 @@ BOOL IsDebugLogging(void)
     return(dwDebug ? TRUE : FALSE);
 }
 
-void DebugEvent0(char *a) 
+void DebugEvent0(char *a)
 {
     HANDLE h; char *ptbuf[1];
-    
+
     if (IsDebugLogging()) {
 	h = RegisterEventSource(NULL, KFW_LOGON_EVENT_NAME);
 	if (h) {
@@ -331,7 +331,7 @@ void DebugEvent0(char *a)
 }
 
 #define MAXBUF_ 512
-void DebugEvent(char *b,...) 
+void DebugEvent(char *b,...)
 {
     HANDLE h; char *ptbuf[1],buf[MAXBUF_+1];
     va_list marker;
@@ -352,7 +352,7 @@ void DebugEvent(char *b,...)
 
 void
 UnloadFuncs(
-    FUNC_INFO fi[], 
+    FUNC_INFO fi[],
     HINSTANCE h
     )
 {
@@ -365,8 +365,8 @@ UnloadFuncs(
 
 int
 LoadFuncs(
-    const char* dll_name, 
-    FUNC_INFO fi[], 
+    const char* dll_name,
+    FUNC_INFO fi[],
     HINSTANCE* ph,  // [out, optional] - DLL handle
     int* pindex,    // [out, optional] - index of last func loaded (-1 if none)
     int cleanup,    // cleanup function pointers and unload on error
@@ -433,7 +433,7 @@ KFW_initialize(void)
         HANDLE hMutex = NULL;
 
         sprintf(mutexName, "AFS KFW Init pid=%d", getpid());
-        
+
         hMutex = CreateMutex( NULL, TRUE, mutexName );
         if ( GetLastError() == ERROR_ALREADY_EXISTS ) {
             if ( WaitForSingleObject( hMutex, INFINITE ) != WAIT_OBJECT_0 ) {
@@ -480,13 +480,13 @@ KFW_cleanup(void)
 }
 
 
-int 
+int
 KFW_is_available(void)
 {
     KFW_initialize();
-    if ( hKrb5 && hComErr && hService && 
+    if ( hKrb5 && hComErr && hService &&
 #ifdef USE_MS2MIT
-         hSecur32 && 
+         hSecur32 &&
 #endif /* USE_MS2MIT */
          hProfile && hLeash && hCCAPI )
         return TRUE;
@@ -581,16 +581,16 @@ KFW_kinit( krb5_context alt_ctx,
     if ( alt_cc ) {
         cc = alt_cc;
     } else {
-        code = pkrb5_cc_default(ctx, &cc);  
+        code = pkrb5_cc_default(ctx, &cc);
         if (code) goto cleanup;
     }
 
     code = pkrb5_parse_name(ctx, principal_name, &me);
-    if (code) 
+    if (code)
 	goto cleanup;
 
     code = pkrb5_unparse_name(ctx, me, &name);
-    if (code) 
+    if (code)
 	goto cleanup;
 
     if (lifetime == 0)
@@ -664,14 +664,14 @@ KFW_kinit( krb5_context alt_ctx,
 
             netIPAddr = htonl(publicIP);
             memcpy(addrs[i]->contents,&netIPAddr,4);
-        
+
             pkrb5_get_init_creds_opt_set_address_list(&options,addrs);
 
         }
     }
 
-    code = pkrb5_get_init_creds_password(ctx, 
-                                       &my_creds, 
+    code = pkrb5_get_init_creds_password(ctx,
+                                       &my_creds,
                                        me,
                                        password, // password
                                        NULL,     // no prompter
@@ -679,15 +679,15 @@ KFW_kinit( krb5_context alt_ctx,
                                        0, // start time
                                        0, // service name
                                        &options);
-    if (code) 
+    if (code)
 	goto cleanup;
 
     code = pkrb5_cc_initialize(ctx, cc, me);
-    if (code) 
+    if (code)
 	goto cleanup;
 
     code = pkrb5_cc_store_cred(ctx, cc, &my_creds);
-    if (code) 
+    if (code)
 	goto cleanup;
 
  cleanup:
@@ -716,7 +716,7 @@ KFW_kinit( krb5_context alt_ctx,
 
 
 int
-KFW_get_cred( char * username, 
+KFW_get_cred( char * username,
 	      char * password,
 	      int lifetime,
 	      char ** reasonP )
@@ -748,7 +748,7 @@ KFW_get_cred( char * username,
     } else {
 	goto cleanup;
     }
-    
+
     DebugEvent0(realm);
     DebugEvent0(pname);
 
@@ -766,8 +766,8 @@ KFW_get_cred( char * username,
 
     DebugEvent0("got lifetime");
 
-    code = KFW_kinit( ctx, cc, HWND_DESKTOP, 
-		      pname, 
+    code = KFW_kinit( ctx, cc, HWND_DESKTOP,
+		      pname,
 		      password,
 		      lifetime,
 		      pLeash_get_default_forwardable(),
@@ -802,7 +802,7 @@ int KFW_set_ccache_dacl(char *filename, HANDLE hUserToken)
     PTOKEN_USER pTokenUser = NULL;
     DWORD retLen;
     DWORD gle;
-    int ret = 0;  
+    int ret = 0;
 
     if (!filename) {
 	DebugEvent0("KFW_set_ccache_dacl - invalid parms");
@@ -833,13 +833,13 @@ int KFW_set_ccache_dacl(char *filename, HANDLE hUserToken)
 		{
 		    DebugEvent("GetTokenInformation failed: GLE = %lX", GetLastError());
 		}
-	    }		 
+	    }
 	}
 
 	if (pTokenUser) {
 	    UserSIDlength = GetLengthSid(pTokenUser->User.Sid);
 
-	    ccacheACLlength += sizeof(ACCESS_ALLOWED_ACE) + UserSIDlength 
+	    ccacheACLlength += sizeof(ACCESS_ALLOWED_ACE) + UserSIDlength
 		- sizeof(DWORD);
 	}
     }
@@ -862,7 +862,7 @@ int KFW_set_ccache_dacl(char *filename, HANDLE hUserToken)
 	if (!SetNamedSecurityInfo( filename, SE_FILE_OBJECT,
 				   DACL_SECURITY_INFORMATION | PROTECTED_DACL_SECURITY_INFORMATION,
 				   NULL,
-				   NULL, 
+				   NULL,
 				   ccacheACL,
 				   NULL)) {
 	    gle = GetLastError();
@@ -873,7 +873,7 @@ int KFW_set_ccache_dacl(char *filename, HANDLE hUserToken)
 	if (!SetNamedSecurityInfo( filename, SE_FILE_OBJECT,
 				   OWNER_SECURITY_INFORMATION,
 				   pTokenUser->User.Sid,
-				   NULL, 
+				   NULL,
 				   NULL,
 				   NULL)) {
 	    gle = GetLastError();
@@ -885,7 +885,7 @@ int KFW_set_ccache_dacl(char *filename, HANDLE hUserToken)
 	if (!SetNamedSecurityInfo( filename, SE_FILE_OBJECT,
 				   DACL_SECURITY_INFORMATION | PROTECTED_DACL_SECURITY_INFORMATION,
 				   NULL,
-				   NULL, 
+				   NULL,
 				   ccacheACL,
 				   NULL)) {
 	    gle = GetLastError();
@@ -913,7 +913,7 @@ int KFW_set_ccache_dacl_with_user_sid(char *filename, PSID pUserSID)
     PACL ccacheACL = NULL;
     DWORD ccacheACLlength = 0;
     DWORD gle;
-    int ret = 0;  
+    int ret = 0;
 
     if (!filename) {
 	DebugEvent0("KFW_set_ccache_dacl_with_user_sid - invalid parms");
@@ -937,7 +937,7 @@ int KFW_set_ccache_dacl_with_user_sid(char *filename, PSID pUserSID)
     if (pUserSID) {
 	UserSIDlength = GetLengthSid(pUserSID);
 
-	ccacheACLlength += sizeof(ACCESS_ALLOWED_ACE) + UserSIDlength 
+	ccacheACLlength += sizeof(ACCESS_ALLOWED_ACE) + UserSIDlength
 	    - sizeof(DWORD);
     }
 
@@ -959,7 +959,7 @@ int KFW_set_ccache_dacl_with_user_sid(char *filename, PSID pUserSID)
 	if (!SetNamedSecurityInfo( filename, SE_FILE_OBJECT,
 				   DACL_SECURITY_INFORMATION | PROTECTED_DACL_SECURITY_INFORMATION,
 				   NULL,
-				   NULL, 
+				   NULL,
 				   ccacheACL,
 				   NULL)) {
 	    gle = GetLastError();
@@ -970,7 +970,7 @@ int KFW_set_ccache_dacl_with_user_sid(char *filename, PSID pUserSID)
 	if (!SetNamedSecurityInfo( filename, SE_FILE_OBJECT,
 				   OWNER_SECURITY_INFORMATION,
 				   pUserSID,
-				   NULL, 
+				   NULL,
 				   NULL,
 				   NULL)) {
 	    gle = GetLastError();
@@ -982,7 +982,7 @@ int KFW_set_ccache_dacl_with_user_sid(char *filename, PSID pUserSID)
 	if (!SetNamedSecurityInfo( filename, SE_FILE_OBJECT,
 				   DACL_SECURITY_INFORMATION | PROTECTED_DACL_SECURITY_INFORMATION,
 				   NULL,
-				   NULL, 
+				   NULL,
 				   ccacheACL,
 				   NULL)) {
 	    gle = GetLastError();
@@ -1031,7 +1031,7 @@ KFW_copy_cache_to_system_file(const char * user, const char * filename)
     krb5_ccache			cc  = 0;
     krb5_ccache                 ncc = 0;
     PSECURITY_ATTRIBUTES        pSA = NULL;
-    
+
     if (!pkrb5_init_context || !user || !filename)
         return;
 
@@ -1107,7 +1107,7 @@ KFW_copy_file_cache_to_default_cache(char * filename)
 	DebugEvent0("kfwcpcc krb5_cc_resolve failed");
 	goto cleanup;
     }
-    
+
     code = pkrb5_cc_get_principal(ctx, cc, &princ);
     if (code) {
 	DebugEvent0("kfwcpcc krb5_cc_get_principal failed");
@@ -1184,7 +1184,7 @@ KFW_copy_file_cache_to_api_cache(char * filename)
 	DebugEvent0("kfwcpcc krb5_cc_resolve failed");
 	goto cleanup;
     }
-    
+
     code = pkrb5_cc_get_principal(ctx, cc, &princ);
     if (code) {
 	DebugEvent0("kfwcpcc krb5_cc_get_principal failed");
@@ -1244,7 +1244,7 @@ KFW_copy_file_cache_to_api_cache(char * filename)
 }
 
 
-int 
+int
 KFW_destroy_tickets_for_principal(char * user)
 {
     krb5_context		ctx = 0;
@@ -1285,7 +1285,7 @@ KFW_destroy_tickets_for_principal(char * user)
 /* There are scenarios in which an interactive logon will not
  * result in the LogonScript being executed.  This will result
  * in orphaned cache files being left in the Temp directory.
- * This function will search for cache files in the Temp 
+ * This function will search for cache files in the Temp
  * directory and delete any that are older than five minutes.
  */
 void

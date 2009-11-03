@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* SIOCGIFCONF:
 
    The behavior of this ioctl varies across systems.
@@ -76,7 +77,9 @@
 
 #define INIT 0xc3
 
-int main (void) {
+int
+main(void)
+{
     char buffer[2048];
     int i, sock, t, olen = -9, omod = -9;
     struct ifconf ifc;
@@ -84,49 +87,49 @@ int main (void) {
 
     sock = socket (AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
-	perror ("socket");
-	exit (1);
+        perror ("socket");
+        exit (1);
     }
     printf ("sizeof(struct if_req)=%d\n", sizeof (struct ifreq));
     for (t = 0; t < sizeof (buffer); t++) {
-	ifc.ifc_len = t;
-	ifc.ifc_buf = buffer;
-	memset (buffer, INIT, sizeof (buffer));
-	i = ioctl (sock, SIOCGIFCONF, (char *) &ifc);
-	if (i < 0) {
-	    /* Solaris returns "Invalid argument" if the buffer is too
-	       small.  AIX and Linux return no error indication.  */
-	    int e = errno;
-	    snprintf (buffer, sizeof(buffer), "SIOCGIFCONF(%d)", t);
-	    errno = e;
-	    perror (buffer);
-	    if (e == EINVAL)
-		continue;
-	    fprintf (stderr, "exiting on unexpected error\n");
-	    exit (1);
-	}
-	i = sizeof (buffer) - 1;
-	while (buffer[i] == ((char)INIT) && i >= 0)
-	    i--;
-	if (omod != i) {
-	    /* Okay... the gap computed on the *last* iteration is the
-	       largest for that particular size of returned data.
-	       Save it, and then start computing gaps for the next
-	       bigger size of returned data.  If we never get anything
-	       bigger back, we discard the newer value and only keep
-	       LASTGAP because all we care about is how much slop we
-	       need to "prove" that there really weren't any more
-	       entries to be returned.  */
-	    if (gap > lastgap)
-		lastgap = gap;
-	}
-	gap = t - i - 1;
-	if (olen != ifc.ifc_len || omod != i) {
-	    printf ("ifc_len in = %4d, ifc_len out = %4d, last mod = %4d\n",
-		    t, ifc.ifc_len, i);
-	    olen = ifc.ifc_len;
-	    omod = i;
-	}
+        ifc.ifc_len = t;
+        ifc.ifc_buf = buffer;
+        memset (buffer, INIT, sizeof (buffer));
+        i = ioctl (sock, SIOCGIFCONF, (char *) &ifc);
+        if (i < 0) {
+            /* Solaris returns "Invalid argument" if the buffer is too
+               small.  AIX and Linux return no error indication.  */
+            int e = errno;
+            snprintf (buffer, sizeof(buffer), "SIOCGIFCONF(%d)", t);
+            errno = e;
+            perror (buffer);
+            if (e == EINVAL)
+                continue;
+            fprintf (stderr, "exiting on unexpected error\n");
+            exit (1);
+        }
+        i = sizeof (buffer) - 1;
+        while (buffer[i] == ((char)INIT) && i >= 0)
+            i--;
+        if (omod != i) {
+            /* Okay... the gap computed on the *last* iteration is the
+               largest for that particular size of returned data.
+               Save it, and then start computing gaps for the next
+               bigger size of returned data.  If we never get anything
+               bigger back, we discard the newer value and only keep
+               LASTGAP because all we care about is how much slop we
+               need to "prove" that there really weren't any more
+               entries to be returned.  */
+            if (gap > lastgap)
+                lastgap = gap;
+        }
+        gap = t - i - 1;
+        if (olen != ifc.ifc_len || omod != i) {
+            printf ("ifc_len in = %4d, ifc_len out = %4d, last mod = %4d\n",
+                    t, ifc.ifc_len, i);
+            olen = ifc.ifc_len;
+            omod = i;
+        }
     }
     printf ("finished at ifc_len %d\n", t);
     printf ("largest gap = %d\n", lastgap);

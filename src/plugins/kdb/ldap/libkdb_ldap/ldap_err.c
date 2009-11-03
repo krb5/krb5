@@ -13,7 +13,7 @@
 #define LDAP_NAME_ERROR(x) (0)
 #endif
 #endif
- 
+
 #ifndef LDAP_SECURITY_ERROR
 #define LDAP_SECURITY_ERROR(x) (0)
 #endif

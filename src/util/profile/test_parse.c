@@ -32,15 +32,15 @@ int main(argc, argv)
 
 	retval = profile_parse_file(f, &root);
 	if (retval) {
-		printf("profile_parse_file error %s\n", 
+		printf("profile_parse_file error %s\n",
 		       error_message((errcode_t) retval));
 		exit(1);
 	}
 	fclose(f);
-	
+
 	printf("\n\nDebugging dump.\n");
 	profile_write_tree_file(root, stdout);
-	
+
 	retval = profile_verify_node(root);
 	if (retval) {
 		printf("profile_verify_node reported an error: %s\n",

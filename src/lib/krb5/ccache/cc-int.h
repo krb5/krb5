@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/ccache/file/cc-int.h
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * This file contains constant and function declarations used in the
  * file-based credential cache routines.
@@ -71,8 +72,8 @@ typedef struct _k5_cc_mutex {
     krb5_int32 refcount;
 } k5_cc_mutex;
 
-#define K5_CC_MUTEX_PARTIAL_INITIALIZER \
-	{ K5_MUTEX_PARTIAL_INITIALIZER, NULL, 0 }
+#define K5_CC_MUTEX_PARTIAL_INITIALIZER         \
+    { K5_MUTEX_PARTIAL_INITIALIZER, NULL, 0 }
 
 krb5_error_code
 k5_cc_mutex_init(k5_cc_mutex *m);
@@ -80,8 +81,8 @@ k5_cc_mutex_init(k5_cc_mutex *m);
 krb5_error_code
 k5_cc_mutex_finish_init(k5_cc_mutex *m);
 
-#define k5_cc_mutex_destroy(M) \
-k5_mutex_destroy(&(M)->lock);
+#define k5_cc_mutex_destroy(M)                  \
+    k5_mutex_destroy(&(M)->lock);
 
 void
 k5_cc_mutex_assert_locked(krb5_context context, k5_cc_mutex *m);
@@ -101,7 +102,7 @@ extern k5_cc_mutex krb5int_cc_file_mutex;
 
 #ifdef USE_CCAPI_V3
 extern krb5_error_code KRB5_CALLCONV krb5_stdccv3_context_lock
-(krb5_context context); 
+(krb5_context context);
 
 extern krb5_error_code KRB5_CALLCONV krb5_stdccv3_context_unlock
 (krb5_context context);

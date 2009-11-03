@@ -275,4 +275,3 @@ krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle)
     }
     return;
 }
-

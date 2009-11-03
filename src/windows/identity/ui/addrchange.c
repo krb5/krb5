@@ -65,7 +65,7 @@ addr_change_thread(LPVOID dummy) {
             goto _end_thread;
         }
     } while(TRUE);
-    
+
  _end_thread:
     ExitThread(0);
 }

@@ -29,7 +29,7 @@
 #ifndef __KHIMAIRA_KMQ_H__
 #define __KHIMAIRA_KMQ_H__
 
-/*! \defgroup kmq NetIDMgr Message Queue 
+/*! \defgroup kmq NetIDMgr Message Queue
 
     The Network Identity Manager Message Queue handles all the
     messaging within the application and all loaded plug-ins.
@@ -67,9 +67,9 @@ typedef DWORD kmq_timer;
 
     Should return TRUE if the message is properly handled.  Otherwise
     return FALSE */
-typedef khm_int32 (KHMAPI *kmq_callback_t)(khm_int32 msg_type, 
-                                           khm_int32 msg_sub_type, 
-                                           khm_ui_4 uparam, 
+typedef khm_int32 (KHMAPI *kmq_callback_t)(khm_int32 msg_type,
+                                           khm_int32 msg_sub_type,
+                                           khm_ui_4 uparam,
                                            void * vparam);
 
 /* message */
@@ -97,7 +97,7 @@ typedef struct tag_kmq_message {
 
     khm_ui_4 uparam;             /*!< Integer parameter */
     void * vparam;            /*!< Pointer to parameter blob */
-	
+
     khm_int32 nSent;            /*!< Number of instances of message
                                   sent (for broadcast messages) */
 
@@ -393,7 +393,7 @@ KHMEXP khm_int32 KHMAPI kmq_unsubscribe_hwnd(khm_int32 type, HWND hwnd);
         kmq_delete_subscription()
 */
 KHMEXP khm_int32 KHMAPI kmq_create_subscription(
-    kmq_callback_t cb, 
+    kmq_callback_t cb,
     khm_handle * result);
 
 /*! \brief Create an ad-hoc subscription for a window
@@ -422,20 +422,20 @@ KHMEXP khm_int32 KHMAPI kmq_delete_subscription(khm_handle sub);
     specified subscription.
  */
 KHMEXP khm_int32 KHMAPI kmq_post_sub_msg(
-    khm_handle sub, 
-    khm_int32 type, 
-    khm_int32 subtype, 
-    khm_ui_4 uparam, 
+    khm_handle sub,
+    khm_int32 type,
+    khm_int32 subtype,
+    khm_ui_4 uparam,
     void * vparam);
 
 /*! \brief Post a message to a subscription and acquire a handle to the call
  */
 KHMEXP khm_int32 KHMAPI kmq_post_sub_msg_ex(
-    khm_handle sub, 
-    khm_int32 type, 
-    khm_int32 subtype, 
-    khm_ui_4 uparam, 
-    void * vparam, 
+    khm_handle sub,
+    khm_int32 type,
+    khm_int32 subtype,
+    khm_ui_4 uparam,
+    void * vparam,
     kmq_call * call);
 
 /*! \brief Send a synchronous message to a subscription
@@ -444,10 +444,10 @@ KHMEXP khm_int32 KHMAPI kmq_post_sub_msg_ex(
     \retval KHM_ERROR_PARTIAL The call succeeded, but at least one subscriber reported errors
  */
 KHMEXP khm_int32 KHMAPI kmq_send_sub_msg(
-    khm_handle sub, 
-    khm_int32 type, 
-    khm_int32 subtype, 
-    khm_ui_4 uparam, 
+    khm_handle sub,
+    khm_int32 type,
+    khm_int32 subtype,
+    khm_ui_4 uparam,
     void * vparam);
 
 /*! \brief Post a message to a group of subscriptions
@@ -458,11 +458,11 @@ KHMEXP khm_int32 KHMAPI kmq_send_sub_msg(
     be dispatched to all of the subscription points in the array.
  */
 KHMEXP khm_int32 KHMAPI kmq_post_subs_msg(
-    khm_handle * subs, 
-    khm_size  n_subs, 
-    khm_int32 type, 
-    khm_int32 subtype, 
-    khm_ui_4 uparam, 
+    khm_handle * subs,
+    khm_size  n_subs,
+    khm_int32 type,
+    khm_int32 subtype,
+    khm_ui_4 uparam,
     void * vparam);
 
 /*! \brief Post a message to a group of subscriptions and acquire a handle to the call
@@ -477,12 +477,12 @@ KHMEXP khm_int32 KHMAPI kmq_post_subs_msg(
     were made.
 */
 KHMEXP khm_int32 KHMAPI kmq_post_subs_msg_ex(
-    khm_handle * subs, 
-    khm_int32 n_subs, 
-    khm_int32 type, 
-    khm_int32 subtype, 
-    khm_ui_4 uparam, 
-    void * vparam, 
+    khm_handle * subs,
+    khm_int32 n_subs,
+    khm_int32 type,
+    khm_int32 subtype,
+    khm_ui_4 uparam,
+    void * vparam,
     kmq_call * call);
 
 /*! \brief Send a synchronous message to a group of subscriptions
@@ -497,11 +497,11 @@ KHMEXP khm_int32 KHMAPI kmq_post_subs_msg_ex(
     \retval KHM_ERROR_PARTIAL The call succeeded, but at least one subscriber reported errors
 */
 KHMEXP khm_int32 KHMAPI kmq_send_subs_msg(
-    khm_handle *subs, 
+    khm_handle *subs,
     khm_int32 n_subs,
-    khm_int32 type, 
-    khm_int32 subtype, 
-    khm_ui_4 uparam, 
+    khm_int32 type,
+    khm_int32 subtype,
+    khm_ui_4 uparam,
     void * vparam);
 
 /*! \brief Dispatch a message for the current thread.
@@ -530,7 +530,7 @@ KHMEXP khm_int32 KHMAPI kmq_dispatch(kmq_timer timeout);
     The specified message will be posted to all the subscribers of the
     message type.  Then the function will wait for all the subscribers
     to finish processing the message before returning.
-    
+
     \param[in] type The type of the message
     \param[in] subtype The subtype
     \param[in] uparam The khm_ui_4 parameter for the message
@@ -544,16 +544,16 @@ KHMEXP khm_int32 KHMAPI kmq_dispatch(kmq_timer timeout);
     \retval KHM_ERROR_PARTIAL The call succeeded but at least one subscriber returned an error
 */
 KHMEXP khm_int32 KHMAPI kmq_send_message(
-    khm_int32 type, 
-    khm_int32 subtype, 
-    khm_ui_4 uparam, 
+    khm_int32 type,
+    khm_int32 subtype,
+    khm_ui_4 uparam,
     void * blob);
 
 /*! \brief Post a message
 
     The specified message will be posted to all the subscribers of the
     message type.  The function returns immediately.
-    
+
     If you want to be able to wait for all the subscribers to finish
     processing the message, you should use kmq_post_message_ex()
     instead.
@@ -564,9 +564,9 @@ KHMEXP khm_int32 KHMAPI kmq_send_message(
     \param[in] blob The parameter blob for the message
 */
 KHMEXP khm_int32 KHMAPI kmq_post_message(
-    khm_int32 type, 
-    khm_int32 subtype, 
-    khm_ui_4 uparam, 
+    khm_int32 type,
+    khm_int32 subtype,
+    khm_ui_4 uparam,
     void * blob);
 
 /*! \brief Post a message and acquire a handle to the call.
@@ -586,10 +586,10 @@ KHMEXP khm_int32 KHMAPI kmq_post_message(
     \see kmq_free_call()
 */
 KHMEXP khm_int32 KHMAPI kmq_post_message_ex(
-    khm_int32 type, 
-    khm_int32 subtype, 
-    khm_ui_4 uparam, 
-    void * blob, 
+    khm_int32 type,
+    khm_int32 subtype,
+    khm_ui_4 uparam,
+    void * blob,
     kmq_call * call);
 
 /*! \brief Free a handle to a call obtained through kmq_post_message_ex()
@@ -611,7 +611,7 @@ KHMEXP khm_int32 KHMAPI kmq_free_call(kmq_call call);
     \a thread parameter.
     */
 KHMEXP khm_int32 KHMAPI kmq_send_thread_quit_message(
-    kmq_thread_id thread, 
+    kmq_thread_id thread,
     khm_ui_4 uparam);
 
 /*! \brief Post a <KMSG_SYSTEM,KMSG_SYSTEM_EXIT> message to the specified thread.
@@ -622,8 +622,8 @@ KHMEXP khm_int32 KHMAPI kmq_send_thread_quit_message(
     kmq_post_thread_quit_message() will return immediately.
     */
 KHMEXP khm_int32 KHMAPI kmq_post_thread_quit_message(
-    kmq_thread_id thread, 
-    khm_ui_4 uparam, 
+    kmq_thread_id thread,
+    khm_ui_4 uparam,
     kmq_call * call);
 
 KHMEXP khm_int32 KHMAPI kmq_get_next_response(kmq_call call, void ** resp);
@@ -706,7 +706,7 @@ KHMEXP khm_boolean KHMAPI kmq_is_call_aborted(void);
         handler.
 */
 KHMEXP khm_int32 KHMAPI kmq_set_completion_handler(
-    khm_int32 type, 
+    khm_int32 type,
     kmq_msg_completion_handler hander);
 
 /*@}*/

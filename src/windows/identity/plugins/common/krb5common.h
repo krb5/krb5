@@ -32,7 +32,7 @@
 #include<krb5.h>
 
 #ifndef NO_KRB5
-int khm_krb5_error(krb5_error_code rc, LPCSTR FailedFunctionName, 
+int khm_krb5_error(krb5_error_code rc, LPCSTR FailedFunctionName,
                    int FreeContextFlag, krb5_context *ctx,
                    krb5_ccache *cache);
 
@@ -48,8 +48,8 @@ khm_krb5_find_ccache_for_identity(khm_handle ident, krb5_context *pctx,
                                   void * buffer, khm_size * pcbbuf);
 
 khm_int32 KHMAPI
-khm_get_identity_expiration_time(krb5_context ctx, krb5_ccache cc, 
-                                 khm_handle ident, 
+khm_get_identity_expiration_time(krb5_context ctx, krb5_ccache cc,
+                                 khm_handle ident,
                                  krb5_timestamp * pexpiration);
 #endif /* NO_KRB5 */
 

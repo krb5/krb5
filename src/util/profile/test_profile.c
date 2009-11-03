@@ -53,11 +53,11 @@ static void do_batchmode(profile)
 			retval = profile_get_value(profile, names, &value);
 			print_status = PRINT_VALUE;
 		} else if (!strcmp(cmd, "list_sections")) {
-			retval = profile_get_subsection_names(profile, names, 
+			retval = profile_get_subsection_names(profile, names,
 							      &values);
 			print_status = PRINT_VALUES;
 		} else if (!strcmp(cmd, "list_relations")) {
-			retval = profile_get_relation_names(profile, names, 
+			retval = profile_get_relation_names(profile, names,
 							    &values);
 			print_status = PRINT_VALUES;
 		} else if (!strcmp(cmd, "dump")) {
@@ -104,7 +104,7 @@ static void do_batchmode(profile)
 	}
 	profile_release(profile);
 	exit(0);
-	
+
 }
 
 
@@ -119,14 +119,14 @@ int main(argc, argv)
     const char	**names;
     char	*cmd;
     int		print_value = 0;
-    
+
     if (argc < 2) {
 	    fprintf(stderr, "Usage: %s filename [cmd argset]\n", program_name);
 	    exit(1);
     }
 
     initialize_prof_error_table();
-    
+
     retval = profile_init_path(argv[1], &profile);
     if (retval) {
 	com_err(program_name, retval, "while initializing profile");
@@ -165,5 +165,3 @@ int main(argc, argv)
 
     return 0;
 }
-    
-    

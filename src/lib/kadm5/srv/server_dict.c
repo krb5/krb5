@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved
  *
@@ -26,24 +27,24 @@ static char *rcsid = "$Header$";
 #include    "server_internal.h"
 #include    "k5-platform.h"
 
-static char	    **word_list = NULL;	    /* list of word pointers */
-static char	    *word_block = NULL;	    /* actual word data */
-static unsigned int word_count = 0;	    /* number of words */
+static char         **word_list = NULL;     /* list of word pointers */
+static char         *word_block = NULL;     /* actual word data */
+static unsigned int word_count = 0;         /* number of words */
 
 
 /*
  * Function: word_compare
- * 
+ *
  * Purpose: compare two words in the dictionary.
  *
  * Arguments:
- *	w1		(input)	pointer to first word
- *	w2		(input) pointer to second word
- *	<return value>	result of strcmp
+ *      w1              (input) pointer to first word
+ *      w2              (input) pointer to second word
+ *      <return value>  result of strcmp
  *
  * Requires:
- *	w1 and w2 to point to valid memory
- * 
+ *      w1 and w2 to point to valid memory
+ *
  */
 
 static int
@@ -54,81 +55,81 @@ word_compare(const void *s1, const void *s2)
 
 /*
  * Function: init-dict
- * 
+ *
  * Purpose: Initialize in memory word dictionary
  *
  * Arguments:
- *	    none
- *	    <return value> KADM5_OK on success errno on failure;
- * 			   (but success on ENOENT)
+ *          none
+ *          <return value> KADM5_OK on success errno on failure;
+ *                         (but success on ENOENT)
  *
  * Requires:
- *	If WORDFILE exists, it must contain a list of words,
- *	one word per-line.
- * 
+ *      If WORDFILE exists, it must contain a list of words,
+ *      one word per-line.
+ *
  * Effects:
- *	If WORDFILE exists, it is read into memory sorted for future
+ *      If WORDFILE exists, it is read into memory sorted for future
  * use.  If it does not exist, it syslogs an error message and returns
  * success.
  *
  * Modifies:
- *	word_list to point to a chunck of allocated memory containing
- *	pointers to words
- *	word_block to contain the dictionary.
- * 
+ *      word_list to point to a chunck of allocated memory containing
+ *      pointers to words
+ *      word_block to contain the dictionary.
+ *
  */
 
 int init_dict(kadm5_config_params *params)
 {
-    int		    fd,
-		    len,
-		    i;
-    char	    *p,
-		    *t;
+    int             fd,
+        len,
+        i;
+    char            *p,
+        *t;
     struct  stat    sb;
-    
+
     if(word_list != NULL && word_block != NULL)
-	return KADM5_OK;
+        return KADM5_OK;
     if (! (params->mask & KADM5_CONFIG_DICT_FILE)) {
-	 krb5_klog_syslog(LOG_INFO, "No dictionary file specified, continuing "
-		"without one.");
-	 return KADM5_OK;
+        krb5_klog_syslog(LOG_INFO, "No dictionary file specified, continuing "
+                         "without one.");
+        return KADM5_OK;
     }
     if ((fd = open(params->dict_file, O_RDONLY)) == -1) {
-	 if (errno == ENOENT) {
-	      krb5_klog_syslog(LOG_ERR, 
-			       "WARNING!  Cannot find dictionary file %s, "
-			       "continuing without one.", params->dict_file);
-	      return KADM5_OK;
-	 } else
-	      return errno;
+        if (errno == ENOENT) {
+            krb5_klog_syslog(LOG_ERR,
+                             "WARNING!  Cannot find dictionary file %s, "
+                             "continuing without one.", params->dict_file);
+            return KADM5_OK;
+        } else
+            return errno;
     }
     set_cloexec_fd(fd);
     if (fstat(fd, &sb) == -1) {
-	close(fd);
-	return errno;
+        close(fd);
+        return errno;
     }
     if ((word_block = (char *) malloc(sb.st_size + 1)) == NULL)
-	return ENOMEM;
+        return ENOMEM;
     if (read(fd, word_block, sb.st_size) != sb.st_size)
-	return errno;
+        return errno;
     (void) close(fd);
     word_block[sb.st_size] = '\0';
 
     p = word_block;
     len = sb.st_size;
     while(len > 0 && (t = memchr(p, '\n', len)) != NULL) {
-	*t = '\0';
-	len -= t - p + 1;	
-	p = t + 1;
-	word_count++;
+        *t = '\0';
+        len -= t - p + 1;
+        p = t + 1;
+        word_count++;
     }
     if ((word_list = (char **) malloc(word_count * sizeof(char *))) == NULL)
-	return ENOMEM;
+        return ENOMEM;
     p = word_block;
     for (i = 0; i < word_count; i++) {
-	word_list[i] = p;
-	p += strlen(p) + 1;
+        word_list[i] = p;
+        p += strlen(p) + 1;
     }
     qsort(word_list, word_count, sizeof(char *), word_compare);
     return KADM5_OK;
@@ -136,25 +137,25 @@ int init_dict(kadm5_config_params *params)
 
 /*
  * Function: find_word
- * 
+ *
  * Purpose: See if the specified word exists in the in-core dictionary
  *
  * Arguments:
- *	word		(input) word to search for.
- * 	<return value>	WORD_NOT_FOUND if not in dictionary,
- *			KADM5_OK if if found word
- *			errno if init needs to be called and returns an
- *			error
+ *      word            (input) word to search for.
+ *      <return value>  WORD_NOT_FOUND if not in dictionary,
+ *                      KADM5_OK if if found word
+ *                      errno if init needs to be called and returns an
+ *                      error
  *
  * Requires:
- *	word to be a null terminated string.
- *	That word_list and word_block besetup
- * 
+ *      word to be a null terminated string.
+ *      That word_list and word_block besetup
+ *
  * Effects:
- *	finds word in dictionary.
+ *      finds word in dictionary.
  * Modifies:
- *	nothing.
- * 
+ *      nothing.
+ *
  */
 
 int
@@ -162,46 +163,46 @@ find_word(const char *word)
 {
     char    **value;
 
-    if(word_list == NULL || word_block == NULL) 
-	    return WORD_NOT_FOUND;
+    if(word_list == NULL || word_block == NULL)
+        return WORD_NOT_FOUND;
     if ((value = (char **) bsearch(&word, word_list, word_count, sizeof(char *),
-				   word_compare)) == NULL)
-	return WORD_NOT_FOUND;
+                                   word_compare)) == NULL)
+        return WORD_NOT_FOUND;
     else
-	return KADM5_OK;
+        return KADM5_OK;
 }
 
 /*
  * Function: destroy_dict
- * 
+ *
  * Purpose: destroy in-core copy of dictionary.
  *
  * Arguments:
- *	    none
- *	    <return value>  none
+ *          none
+ *          <return value>  none
  * Requires:
- *	    nothing
+ *          nothing
  * Effects:
- *	frees up memory occupied by word_list and word_block
- *	sets count back to 0, and resets the pointers to NULL
+ *      frees up memory occupied by word_list and word_block
+ *      sets count back to 0, and resets the pointers to NULL
  *
  * Modifies:
- *	word_list, word_block, and word_count.
- * 
+ *      word_list, word_block, and word_count.
+ *
  */
 
 void
 destroy_dict(void)
 {
     if(word_list) {
-	free(word_list);
-	word_list = NULL;
+        free(word_list);
+        word_list = NULL;
     }
     if(word_block) {
-	free(word_block);
-	word_block = NULL;
+        free(word_block);
+        word_block = NULL;
     }
     if(word_count)
-	word_count = 0;
+        word_count = 0;
     return;
 }

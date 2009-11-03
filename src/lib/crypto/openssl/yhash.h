@@ -22,9 +22,8 @@
   HASH_CTX  *ctx = (x); \
   shsFinal(ctx); \
   memcpy(out2, ctx->digestBuf, ctx->digestLen); \
-  } while(0) 
+  } while(0)
 
 #define HASH_DIGEST_SIZE SHS_DIGESTSIZE
 
 #endif /* YHASH_H */
-

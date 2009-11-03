@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/krb5/krb/encrypt_tk.c
  *
@@ -8,7 +9,7 @@
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- * 
+ *
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -22,7 +23,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- * 
+ *
  *
  * krb5_encrypt_tkt_part() routine.
  */
@@ -30,15 +31,15 @@
 #include "k5-int.h"
 
 /*
- Takes unencrypted dec_ticket & dec_tkt_part, encrypts with
- dec_ticket->enc_part.etype
- using *srv_key, and places result in dec_ticket->enc_part.
- The string dec_ticket->enc_part.ciphertext will be allocated before
- formatting.
+  Takes unencrypted dec_ticket & dec_tkt_part, encrypts with
+  dec_ticket->enc_part.etype
+  using *srv_key, and places result in dec_ticket->enc_part.
+  The string dec_ticket->enc_part.ciphertext will be allocated before
+  formatting.
 
- returns errors from encryption routines, system errors
+  returns errors from encryption routines, system errors
 
- enc_part->ciphertext.data allocated & filled in with encrypted stuff
+  enc_part->ciphertext.data allocated & filled in with encrypted stuff
 */
 
 krb5_error_code
@@ -50,16 +51,16 @@ krb5_encrypt_tkt_part(krb5_context context, const krb5_keyblock *srv_key, regist
 
     /*  start by encoding the to-be-encrypted part. */
     if ((retval = encode_krb5_enc_tkt_part(dec_tkt_part, &scratch))) {
-	return retval;
+        return retval;
     }
 
 #define cleanup_scratch() { (void) memset(scratch->data, 0, scratch->length); \
-krb5_free_data(context, scratch); }
+        krb5_free_data(context, scratch); }
 
     /* call the encryption routine */
     retval = krb5_encrypt_helper(context, srv_key,
-				 KRB5_KEYUSAGE_KDC_REP_TICKET, scratch,
-				 &dec_ticket->enc_part);
+                                 KRB5_KEYUSAGE_KDC_REP_TICKET, scratch,
+                                 &dec_ticket->enc_part);
 
     cleanup_scratch();
 

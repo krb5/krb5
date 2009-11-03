@@ -284,4 +284,3 @@ int list_modify_int_array(destlist, sourcelist, mode)
 
     return tcount;
 }
-

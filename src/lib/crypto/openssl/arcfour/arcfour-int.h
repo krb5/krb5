@@ -19,8 +19,8 @@ typedef struct
     EVP_CIPHER_CTX  evp_ctx;
     unsigned int x;
     unsigned int y;
-    unsigned char state[256]; 
-   
+    unsigned char state[256];
+
 } ArcfourContext;
 
 typedef struct {

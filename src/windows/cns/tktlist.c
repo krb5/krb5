@@ -153,9 +153,9 @@ ticket_init_list (HWND hwnd)
   }
 
 #endif
-  
+
 #ifdef KRB5
-  
+
   ncred = 0;
   flags = 0;
   if (code = krb5_cc_set_flags(k5_context, k5_ccache, flags)) {
@@ -170,7 +170,7 @@ ticket_init_list (HWND hwnd)
       code = krb5_cc_next_cred(k5_context, k5_ccache, &cursor, &c);
       if (code != 0)
 	break;
-      
+
       ncred++;
       strcpy (buf, "  ");
       strncat(buf, short_date (c.times.starttime - kwin_get_epoch()),
@@ -179,7 +179,7 @@ ticket_init_list (HWND hwnd)
       strncat(buf, short_date (c.times.endtime - kwin_get_epoch()),
 	      sizeof(buf) - 1 - strlen(buf));
       strncat(buf, "      ", sizeof(buf) - 1 - strlen(buf));
-      
+
       /* Add ticket service name and realm */
       code = krb5_unparse_name (k5_context, c.server, &sname);
       if (code) {
@@ -189,22 +189,22 @@ ticket_init_list (HWND hwnd)
       strncat (buf, sname, sizeof(buf) - 1 - strlen(buf));
 
       strncat (buf, flags_string (&c), sizeof(buf) - 1 - strlen(buf)); /* Add flag info */
-      
+
       l = strlen(buf);
       lpinfo = (LPTICKETINFO) malloc(sizeof(TICKETINFO) + l + 1);
       assert(lpinfo != NULL);
-      
+
       if (lpinfo == NULL)
 	return -1;
-      
+
       lpinfo->ticket = TRUE;
       lpinfo->issue_time = c.times.starttime - kwin_get_epoch();
       lpinfo->lifetime = c.times.endtime - c.times.starttime;
       strcpy(lpinfo->buf, buf);
-      
+
       rc = ListBox_AddItemData(hwnd, lpinfo);
       assert(rc >= 0);
-      
+
       if (rc < 0)
 	return -1;
     }
@@ -221,23 +221,23 @@ ticket_init_list (HWND hwnd)
     }
   }
 #endif
-  
+
   if (ncred <= 0) {
     strcpy(buf, " No Tickets");
     lpinfo = (LPTICKETINFO) malloc(sizeof(TICKETINFO) + strlen(buf) + 1);
     assert(lpinfo != NULL);
-    
+
     if (lpinfo == NULL)
       return -1;
-    
+
     lpinfo->ticket = FALSE;
     strcpy (lpinfo->buf, buf);
     rc = ListBox_AddItemData(hwnd, lpinfo);
     assert(rc >= 0);
   }
-  
+
   SetWindowRedraw(hwnd, TRUE);
-  
+
   return ncred;
 }
 
@@ -396,19 +396,19 @@ ticket_drawitem(HWND hwnd, const DRAWITEMSTRUCT *lpdi)
 #ifdef KRB5
 
 /*
- * 
+ *
  * Flags_string
- * 
+ *
  * Return buffer with the current flags for the credential
- * 
+ *
  */
 char *
 flags_string(krb5_creds *cred) {
   static char buf[32];
   int i = 0;
 
-  buf[i++] = ' ';    
-  buf[i++] = '(';    
+  buf[i++] = ' ';
+  buf[i++] = '(';
   if (cred->ticket_flags & TKT_FLG_FORWARDABLE)
     buf[i++] = 'F';
   if (cred->ticket_flags & TKT_FLG_FORWARDED)
@@ -432,7 +432,7 @@ flags_string(krb5_creds *cred) {
   if (cred->ticket_flags & TKT_FLG_PRE_AUTH)
     buf[i++] = 'A';
 
-  buf[i++] = ')';    
+  buf[i++] = ')';
   buf[i] = '\0';
   if (i <= 3)
     buf[0] = '\0';

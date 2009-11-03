@@ -4,7 +4,7 @@ extern long PASCAL ScreenWndProc(HWND,UINT,WPARAM,LPARAM);
 *          Definition of attribute bits in the Virtual Screen
 *
 *          0   -   Bold
-*          1   -   
+*          1   -
 *          2   -
 *          3   -   Underline
 *          4   -   Blink
@@ -81,7 +81,7 @@ typedef struct SCREEN {
 	int DECCKM;         /* Cursor key mode */
 	int DECPAM;         /* keyPad Application mode */
 	int IRM;            /* Insert/Replace mode */
-	int escflg;         /* Current Escape level */      
+	int escflg;         /* Current Escape level */
 	int top;            /* Vertical bounds of screen */
 	int bottom;
 	int parmptr;
@@ -242,7 +242,7 @@ intern.c
 	void ScreenSetOption(
 		SCREEN *pScr,
 		int toggle);
-	
+
 	BOOL ScreenInsChar(
 		SCREEN *pScr,
 		int x);

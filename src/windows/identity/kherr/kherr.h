@@ -54,7 +54,7 @@
 
     If left undefined, the convenience macros will leave the facility
     value undefined.
- */ 
+ */
 #define KHERR_FACILITY NULL
 #endif
 
@@ -177,13 +177,13 @@ typedef struct tag_kherr_event {
     const wchar_t * suggestion; /*!< A suggested way to fix it
 			          (localized,formatted) */
 
-    kherr_severity   severity;  
+    kherr_severity   severity;
                                 /*!< Severity level.  One of the
 				  severity levels listed in
 				  enumeration ::kherr_severity */
     khm_int32   facility_id;    /*!< Left to the application to
 				  interpret */
-    kherr_suggestion suggestion_id; 
+    kherr_suggestion suggestion_id;
                                 /*!< One of the suggestion ID's from
 				  the enumeration
 				  ::kherr_suggestion */
@@ -217,44 +217,44 @@ typedef struct tag_kherr_event {
     is mutually exclusive.
  */
 enum kherr_event_flags {
-    KHERR_RF_CSTR_SHORT_DESC= 0x00000000, 
+    KHERR_RF_CSTR_SHORT_DESC= 0x00000000,
                                 /*!< Short description is a constant
                                   string */
-    KHERR_RF_RES_SHORT_DESC = 0x00000001, 
+    KHERR_RF_RES_SHORT_DESC = 0x00000001,
                                 /*!< Short description is a string
                                   resource */
-    KHERR_RF_MSG_SHORT_DESC = 0x00000002, 
+    KHERR_RF_MSG_SHORT_DESC = 0x00000002,
                                 /*!< Short description is a message
                                   resource */
-    KHERR_RF_FREE_SHORT_DESC= 0x00000004, 
+    KHERR_RF_FREE_SHORT_DESC= 0x00000004,
                                 /*!< Short description is an allocated
                                   string */
     KHERR_RFMASK_SHORT_DESC = 0x00000007,
 
-    KHERR_RF_CSTR_LONG_DESC = 0x00000000, 
+    KHERR_RF_CSTR_LONG_DESC = 0x00000000,
                                 /*!< Long description is a constant
                                   string */
-    KHERR_RF_RES_LONG_DESC  = 0x00000008, 
+    KHERR_RF_RES_LONG_DESC  = 0x00000008,
                                 /*!< Long description is a string
                                   resource */
-    KHERR_RF_MSG_LONG_DESC  = 0x00000010, 
+    KHERR_RF_MSG_LONG_DESC  = 0x00000010,
                                 /*!< Long description is a message
                                   resouce  */
-    KHERR_RF_FREE_LONG_DESC = 0x00000020, 
+    KHERR_RF_FREE_LONG_DESC = 0x00000020,
                                 /*!< Long description is an allocated
                                   string */
     KHERR_RFMASK_LONG_DESC  = 0x00000038,
 
-    KHERR_RF_CSTR_SUGGEST   = 0x00000000, 
+    KHERR_RF_CSTR_SUGGEST   = 0x00000000,
                                 /*!< Suggestion is a constant
                                   string */
-    KHERR_RF_RES_SUGGEST    = 0x00000040, 
+    KHERR_RF_RES_SUGGEST    = 0x00000040,
                                 /*!< Suggestion is a string
                                   resource */
-    KHERR_RF_MSG_SUGGEST    = 0x00000080, 
+    KHERR_RF_MSG_SUGGEST    = 0x00000080,
                                 /*!< Suggestion is a message
                                   resource */
-    KHERR_RF_FREE_SUGGEST   = 0x00000100,  
+    KHERR_RF_FREE_SUGGEST   = 0x00000100,
                                 /*!< Suggestion is an allocated
                                   string */
     KHERR_RFMASK_SUGGEST    = 0x000001C0,
@@ -298,7 +298,7 @@ typedef struct tag_kherr_context {
                                   number as well as the pointer to the
                                   context object. */
 
-    kherr_severity severity;    
+    kherr_severity severity;
 				/*!< Severity level.  One of the
 				  severity levels listed below. This
 				  is the severity level of the context
@@ -406,7 +406,7 @@ enum kherr_ctx_event {
 
     \see kherr_add_ctx_handler()
  */
-typedef void (KHMAPI * kherr_ctx_handler)(enum kherr_ctx_event, 
+typedef void (KHMAPI * kherr_ctx_handler)(enum kherr_ctx_event,
                                          kherr_context *);
 
 /*! \brief Add a context event handler
@@ -468,7 +468,7 @@ typedef void (KHMAPI * kherr_ctx_handler)(enum kherr_ctx_event,
         should be tracked.  If this is zero, all error contexts can
         trigger the handler.
  */
-KHMEXP void KHMAPI kherr_add_ctx_handler(kherr_ctx_handler h, 
+KHMEXP void KHMAPI kherr_add_ctx_handler(kherr_ctx_handler h,
                                          khm_int32 filter,
                                          kherr_serial serial);
 

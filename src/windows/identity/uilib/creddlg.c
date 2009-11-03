@@ -37,7 +37,7 @@ static void cw_free_prompts(khui_new_creds * c);
 
 static void cw_free_prompt(khui_new_creds_prompt * p);
 
-static khui_new_creds_prompt * 
+static khui_new_creds_prompt *
 cw_create_prompt(
     khm_size idx,
     khm_int32 type,
@@ -45,7 +45,7 @@ cw_create_prompt(
     wchar_t * def,
     khm_int32 flags);
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_cw_create_cred_blob(khui_new_creds ** ppnc)
 {
     khui_new_creds * c;
@@ -65,7 +65,7 @@ khui_cw_create_cred_blob(khui_new_creds ** ppnc)
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_cw_destroy_cred_blob(khui_new_creds *c)
 {
     khm_size i;
@@ -102,14 +102,14 @@ khui_cw_destroy_cred_blob(khui_new_creds *c)
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_cw_lock_nc(khui_new_creds * c)
 {
     EnterCriticalSection(&c->cs);
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_cw_unlock_nc(khui_new_creds * c)
 {
     LeaveCriticalSection(&c->cs);
@@ -118,8 +118,8 @@ khui_cw_unlock_nc(khui_new_creds * c)
 
 #define NC_N_IDENTITIES 4
 
-KHMEXP khm_int32 KHMAPI 
-khui_cw_add_identity(khui_new_creds * c, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_add_identity(khui_new_creds * c,
                      khm_handle id)
 {
     if(id == NULL)
@@ -130,17 +130,17 @@ khui_cw_add_identity(khui_new_creds * c,
 
     if(c->identities == NULL) {
         c->nc_identities = NC_N_IDENTITIES;
-        c->identities = PMALLOC(sizeof(*(c->identities)) * 
+        c->identities = PMALLOC(sizeof(*(c->identities)) *
                                c->nc_identities);
         c->n_identities = 0;
     } else if(c->n_identities + 1 > c->nc_identities) {
         khm_handle * ni;
 
-        c->nc_identities = UBOUNDSS(c->n_identities + 1, 
-                                    NC_N_IDENTITIES, 
+        c->nc_identities = UBOUNDSS(c->n_identities + 1,
+                                    NC_N_IDENTITIES,
                                     NC_N_IDENTITIES);
         ni = PMALLOC(sizeof(*(c->identities)) * c->nc_identities);
-        memcpy(ni, c->identities, 
+        memcpy(ni, c->identities,
                sizeof(*(c->identities)) * c->n_identities);
         PFREE(c->identities);
         c->identities = ni;
@@ -153,8 +153,8 @@ khui_cw_add_identity(khui_new_creds * c,
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
-khui_cw_set_primary_id(khui_new_creds * c, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_set_primary_id(khui_new_creds * c,
                        khm_handle id)
 {
     khm_size  i;
@@ -177,14 +177,14 @@ khui_cw_set_primary_id(khui_new_creds * c,
     LeaveCriticalSection(&(c->cs));
     rv = khui_cw_add_identity(c,id);
     if(c->hwnd != NULL) {
-        PostMessage(c->hwnd, KHUI_WM_NC_NOTIFY, 
+        PostMessage(c->hwnd, KHUI_WM_NC_NOTIFY,
                     MAKEWPARAM(0, WMNC_IDENTITY_CHANGE), 0);
     }
     return rv;
 }
 
-KHMEXP khm_int32 KHMAPI 
-khui_cw_add_type(khui_new_creds * c, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_add_type(khui_new_creds * c,
                  khui_new_creds_by_type * t)
 {
     EnterCriticalSection(&c->cs);
@@ -227,8 +227,8 @@ khui_cw_add_type(khui_new_creds * c,
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
-khui_cw_del_type(khui_new_creds * c, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_del_type(khui_new_creds * c,
                  khm_int32 type_id)
 {
     khm_size  i;
@@ -251,9 +251,9 @@ khui_cw_del_type(khui_new_creds * c,
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
-khui_cw_find_type(khui_new_creds * c, 
-                  khm_int32 type, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_find_type(khui_new_creds * c,
+                  khm_int32 type,
                   khui_new_creds_by_type **t)
 {
     khm_size i;
@@ -274,7 +274,7 @@ khui_cw_find_type(khui_new_creds * c,
 }
 
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_cw_enable_type(khui_new_creds * c,
                     khm_int32 type,
                     khm_boolean enable)
@@ -301,7 +301,7 @@ khui_cw_enable_type(khui_new_creds * c,
     return (t)?KHM_ERROR_SUCCESS:KHM_ERROR_NOT_FOUND;
 }
 
-KHMEXP khm_boolean KHMAPI 
+KHMEXP khm_boolean KHMAPI
 khui_cw_type_succeeded(khui_new_creds * c,
                        khm_int32 type)
 {
@@ -319,7 +319,7 @@ khui_cw_type_succeeded(khui_new_creds * c,
     return s;
 }
 
-static khui_new_creds_prompt * 
+static khui_new_creds_prompt *
 cw_create_prompt(khm_size idx,
                  khm_int32 type,
                  wchar_t * prompt,
@@ -360,7 +360,7 @@ cw_create_prompt(khm_size idx,
     return p;
 }
 
-static void 
+static void
 cw_free_prompt(khui_new_creds_prompt * p) {
     size_t cb;
 
@@ -385,7 +385,7 @@ cw_free_prompt(khui_new_creds_prompt * p) {
     PFREE(p);
 }
 
-static void 
+static void
 cw_free_prompts(khui_new_creds * c)
 {
     khm_size i;
@@ -416,13 +416,13 @@ cw_free_prompts(khui_new_creds * c)
     c->n_prompts = 0;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_cw_clear_prompts(khui_new_creds * c)
 {
     /* the WMNC_CLEAR_PROMPT message needs to be sent before freeing
        the prompts, because the prompts structure still holds the
        window handles for the custom prompt controls. */
-    SendMessage(c->hwnd, KHUI_WM_NC_NOTIFY, 
+    SendMessage(c->hwnd, KHUI_WM_NC_NOTIFY,
                 MAKEWPARAM(0,WMNC_CLEAR_PROMPTS), (LPARAM) c);
 
     EnterCriticalSection(&c->cs);
@@ -432,15 +432,15 @@ khui_cw_clear_prompts(khui_new_creds * c)
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
-khui_cw_begin_custom_prompts(khui_new_creds * c, 
-                             khm_size n_prompts, 
-                             wchar_t * banner, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_begin_custom_prompts(khui_new_creds * c,
+                             khm_size n_prompts,
+                             wchar_t * banner,
                              wchar_t * pname)
 {
     size_t cb;
 
-    PostMessage(c->hwnd, KHUI_WM_NC_NOTIFY, 
+    PostMessage(c->hwnd, KHUI_WM_NC_NOTIFY,
                 MAKEWPARAM(0,WMNC_CLEAR_PROMPTS), (LPARAM) c);
 
     EnterCriticalSection(&c->cs);
@@ -449,7 +449,7 @@ khui_cw_begin_custom_prompts(khui_new_creds * c,
 #endif
     cw_free_prompts(c);
 
-    if(SUCCEEDED(StringCbLength(banner, KHUI_MAXCB_BANNER, &cb)) && 
+    if(SUCCEEDED(StringCbLength(banner, KHUI_MAXCB_BANNER, &cb)) &&
        cb > 0) {
         cb += sizeof(wchar_t);
         c->banner = PMALLOC(cb);
@@ -458,7 +458,7 @@ khui_cw_begin_custom_prompts(khui_new_creds * c,
         c->banner = NULL;
     }
 
-    if(SUCCEEDED(StringCbLength(pname, KHUI_MAXCB_PNAME, &cb)) && 
+    if(SUCCEEDED(StringCbLength(pname, KHUI_MAXCB_PNAME, &cb)) &&
        cb > 0) {
 
         cb += sizeof(wchar_t);
@@ -483,7 +483,7 @@ khui_cw_begin_custom_prompts(khui_new_creds * c,
         c->n_prompts = 0;
         c->nc_prompts = 0;
 
-        PostMessage(c->hwnd, KHUI_WM_NC_NOTIFY, 
+        PostMessage(c->hwnd, KHUI_WM_NC_NOTIFY,
                     MAKEWPARAM(0, WMNC_SET_PROMPTS), (LPARAM) c);
     }
 
@@ -492,11 +492,11 @@ khui_cw_begin_custom_prompts(khui_new_creds * c,
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
-khui_cw_add_prompt(khui_new_creds * c, 
-                   khm_int32 type, 
-                   wchar_t * prompt, 
-                   wchar_t * def, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_add_prompt(khui_new_creds * c,
+                   khm_int32 type,
+                   wchar_t * prompt,
+                   wchar_t * def,
                    khm_int32 flags)
 {
     khui_new_creds_prompt * p;
@@ -519,7 +519,7 @@ khui_cw_add_prompt(khui_new_creds * c,
     LeaveCriticalSection(&c->cs);
 
     if(c->n_prompts == c->nc_prompts) {
-        PostMessage(c->hwnd, KHUI_WM_NC_NOTIFY, 
+        PostMessage(c->hwnd, KHUI_WM_NC_NOTIFY,
                     MAKEWPARAM(0, WMNC_SET_PROMPTS), (LPARAM) c);
         /* once we are done adding prompts, switch to the auth
            panel */
@@ -527,8 +527,8 @@ khui_cw_add_prompt(khui_new_creds * c,
         /* Actually, don't. Doing so can mean an unexpected panel
            switch if fiddling on some other panel causes a change in
            custom prompts. */
-        SendMessage(c->hwnd, KHUI_WM_NC_NOTIFY, 
-                    MAKEWPARAM(0, WMNC_DIALOG_SWITCH_PANEL), 
+        SendMessage(c->hwnd, KHUI_WM_NC_NOTIFY,
+                    MAKEWPARAM(0, WMNC_DIALOG_SWITCH_PANEL),
                     (LPARAM) c);
 #endif
     }
@@ -536,7 +536,7 @@ khui_cw_add_prompt(khui_new_creds * c,
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_cw_get_prompt_count(khui_new_creds * c,
                          khm_size * np) {
 
@@ -547,9 +547,9 @@ khui_cw_get_prompt_count(khui_new_creds * c,
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
-khui_cw_get_prompt(khui_new_creds * c, 
-                   khm_size idx, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_get_prompt(khui_new_creds * c,
+                   khm_size idx,
                    khui_new_creds_prompt ** prompt)
 {
     khm_int32 rv;
@@ -599,7 +599,7 @@ khuiint_trim_str(wchar_t * s, khm_size cch) {
         *last_ws = L'\0';
 }
 
-KHMEXP khm_int32 KHMAPI 
+KHMEXP khm_int32 KHMAPI
 khui_cw_sync_prompt_values(khui_new_creds * c)
 {
     khm_size i;
@@ -634,10 +634,10 @@ khui_cw_sync_prompt_values(khui_new_creds * c)
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
-khui_cw_get_prompt_value(khui_new_creds * c, 
-                         khm_size idx, 
-                         wchar_t * buf, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_get_prompt_value(khui_new_creds * c,
+                         khm_size idx,
+                         wchar_t * buf,
                          khm_size *cbbuf)
 {
     khui_new_creds_prompt * p;
@@ -672,9 +672,9 @@ khui_cw_get_prompt_value(khui_new_creds * c,
     return KHM_ERROR_SUCCESS;
 }
 
-KHMEXP khm_int32 KHMAPI 
-khui_cw_set_response(khui_new_creds * c, 
-                     khm_int32 type, 
+KHMEXP khm_int32 KHMAPI
+khui_cw_set_response(khui_new_creds * c,
+                     khm_int32 type,
                      khm_int32 response)
 {
     khui_new_creds_by_type * t = NULL;

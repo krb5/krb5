@@ -2,7 +2,7 @@
  * pty_init_slave: open slave side of terminal, clearing for use.
  *
  * Copyright 1995, 1996 by the Massachusetts Institute of Technology.
- * 
+ *
  * Permission to use, copy, modify, and distribute this software and
  * its documentation for any purpose and without fee is hereby
  * granted, provided that the above copyright notice appear in all
@@ -16,7 +16,7 @@
  * M.I.T. makes no representations about the suitability
  * of this software for any purpose.  It is provided "as is" without
  * express or implied warranty.
- * 
+ *
  */
 
 #include "com_err.h"
@@ -41,7 +41,7 @@ static char *push_list[] = {
   0};
 #endif /*HAVE_STREAMS but not HAVE_LINE_PUSH*/
 
- 
+
 
 long pty_initialize_slave (int fd)
 {
@@ -51,7 +51,7 @@ long pty_initialize_slave (int fd)
     struct sgttyb b;
 #endif /* POSIX_TERMIOS */
     int pid;
-	    
+
 #ifdef HAVE_STREAMS
 #ifdef HAVE_LINE_PUSH
         while (ioctl (fd, I_POP, 0) == 0); /*Clear out any old lined's*/
@@ -87,7 +87,7 @@ long pty_initialize_slave (int fd)
     ioctl(fd, TIOCSPGRP, &pid);
 #endif
 
-    
+
 #if defined(POSIX_TERMIOS) && !defined(ultrix)
 	tcsetpgrp(fd, pid);
 	tcgetattr(fd,&new_termio);
