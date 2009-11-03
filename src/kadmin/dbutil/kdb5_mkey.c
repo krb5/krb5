@@ -234,7 +234,7 @@ kdb5_add_mkey(int argc, char *argv[])
         case '?':
         default:
             usage();
-        return;
+            return;
         }
     }
 
@@ -806,8 +806,8 @@ static int glob_to_regexp(char *glob, char *realm, char **regexp)
         case '^':
         case '$':
             *p++ = '\\';
-        *p++ = *glob;
-        break;
+            *p++ = *glob;
+            break;
         case '\\':
             *p++ = '\\';
             *p++ = *++glob;
@@ -1189,7 +1189,7 @@ kdb5_purge_mkeys(int argc, char *argv[])
         case '?':
         default:
             usage();
-        return;
+            return;
         }
     }
 

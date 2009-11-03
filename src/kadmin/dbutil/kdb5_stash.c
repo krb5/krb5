@@ -112,7 +112,7 @@ kdb5_stash(argc, argv)
         case '?':
         default:
             usage();
-        return;
+            return;
         }
     }
 

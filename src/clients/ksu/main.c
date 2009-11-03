@@ -299,7 +299,7 @@ main (argc, argv)
         case '?':
         default:
             errflg++;
-        break;
+            break;
         }
     }
 
@@ -450,8 +450,8 @@ main (argc, argv)
     }
 
     /*
-       Only when proper authentication and authorization
-       takes place, the target user becomes the owner of the cache.
+      Only when proper authentication and authorization
+      takes place, the target user becomes the owner of the cache.
     */
 
     /* we continue to run as source uid until

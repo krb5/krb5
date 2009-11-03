@@ -187,7 +187,7 @@ void kdb5_create(argc, argv)
         case '?':
         default:
             usage();
-        return;
+            return;
         }
     }
 

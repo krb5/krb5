@@ -103,7 +103,7 @@ main(argc, argv)
         case '?':
         default:
             errflg++;
-        break;
+            break;
         }
     }
 

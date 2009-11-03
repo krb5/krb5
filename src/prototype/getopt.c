@@ -18,7 +18,7 @@ char **argv;
         case '?':
         default:
             errflg++;
-        break;
+            break;
         }
     }
     if (errflg) {

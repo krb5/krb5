@@ -82,8 +82,8 @@ kdb5_destroy(argc, argv)
         case '?':
         default:
             usage();
-        return;
-        /*NOTREACHED*/
+            return;
+            /*NOTREACHED*/
         }
     }
     if (!force) {

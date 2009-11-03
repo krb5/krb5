@@ -107,8 +107,8 @@ copy_component_quoting(char *dest, const krb5_data *src, int flags)
         case COMPONENT_SEP:
         case '\\':
             *q++ = '\\';
-        *q++ = *cp;
-        break;
+            *q++ = *cp;
+            break;
         case '\t':
             *q++ = '\\';
             *q++ = 't';

@@ -730,7 +730,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
         case '?':
         default:
             usage(argv[0]);
-        exit(1);
+            exit(1);
         }
     }
 

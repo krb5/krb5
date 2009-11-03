@@ -107,8 +107,8 @@ static kadm5_ret_t glob_to_regexp(char *glob, char *realm, char **regexp)
         case '^':
         case '$':
             *p++ = '\\';
-        *p++ = *glob;
-        break;
+            *p++ = *glob;
+            break;
         case '\\':
             *p++ = '\\';
             *p++ = *++glob;
