@@ -45,3 +45,11 @@
 ;; Use hack-local-variables-hook because the c-mode hooks run before
 ;; hack-local-variables runs.
 (add-hook 'hack-local-variables-hook 'krb5-c-mode-hook)
+
+;; emacs-23.x has a buggy cc-mode that incorrectly deals with case
+;; labels with character constants.
+(if (and (string-match "^23\." emacs-version)
+         (require 'cc-defs)
+         (string-match "5.31.[0-7]" c-version))
+    (let ((load-path (cons (file-name-directory load-file-name) load-path)))
+      (load "krb5-hack-cc-mode-caselabel")))
