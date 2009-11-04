@@ -1,3 +1,4 @@
+/* -*- mode: c; c-file-style: "bsd"; indent-tabs-mode: t -*- */
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved
  *

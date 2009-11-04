@@ -1,3 +1,4 @@
+/* -*- mode: c; c-file-style: "bsd"; indent-tabs-mode: t -*- */
 #ifndef __KADM_RPC_H__
 #define __KADM_RPC_H__
 
@@ -51,13 +52,13 @@ struct rprinc_arg {
 typedef struct rprinc_arg rprinc_arg;
 
 struct gprincs_arg {
-        krb5_ui_4 api_version;
+	krb5_ui_4 api_version;
 	char *exp;
 };
 typedef struct gprincs_arg gprincs_arg;
 
 struct gprincs_ret {
-        krb5_ui_4 api_version;
+	krb5_ui_4 api_version;
 	kadm5_ret_t code;
 	char **princs;
 	int count;
@@ -84,15 +85,15 @@ typedef struct chpass3_arg chpass3_arg;
 struct setv4key_arg {
 	krb5_ui_4 api_version;
 	krb5_principal princ;
-        krb5_keyblock *keyblock;
+	krb5_keyblock *keyblock;
 };
 typedef struct setv4key_arg setv4key_arg;
 
 struct setkey_arg {
 	krb5_ui_4 api_version;
 	krb5_principal princ;
-        krb5_keyblock *keyblocks;
-        int n_keys;
+	krb5_keyblock *keyblocks;
+	int n_keys;
 };
 typedef struct setkey_arg setkey_arg;
 
@@ -102,8 +103,8 @@ struct setkey3_arg {
 	krb5_boolean keepold;
 	int n_ks_tuple;
 	krb5_key_salt_tuple *ks_tuple;
-        krb5_keyblock *keyblocks;
-        int n_keys;
+	krb5_keyblock *keyblocks;
+	int n_keys;
 };
 typedef struct setkey3_arg setkey3_arg;
 
@@ -179,13 +180,13 @@ struct gpol_ret {
 typedef struct gpol_ret gpol_ret;
 
 struct gpols_arg {
-        krb5_ui_4 api_version;
+	krb5_ui_4 api_version;
 	char *exp;
 };
 typedef struct gpols_arg gpols_arg;
 
 struct gpols_ret {
-        krb5_ui_4 api_version;
+	krb5_ui_4 api_version;
 	kadm5_ret_t code;
 	char **pols;
 	int count;

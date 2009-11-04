@@ -1,3 +1,4 @@
+/* -*- mode: c; c-file-style: "bsd"; indent-tabs-mode: t -*- */
 /*
  * Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.

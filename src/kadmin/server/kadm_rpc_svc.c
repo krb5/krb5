@@ -1,3 +1,4 @@
+/* -*- mode: c; c-file-style: "bsd"; indent-tabs-mode: t -*- */
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.
  *
@@ -36,7 +37,7 @@ static int check_rpcsec_auth(struct svc_req *);
  *	rqstp		    (input) rpc request structure
  *	transp		    (input) rpc transport structure
  *	(input/output)
- * 	<return value>
+ *	<return value>
  *
  * Requires:
  * Effects:

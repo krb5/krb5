@@ -1,3 +1,4 @@
+/* -*- mode: c; c-file-style: "bsd"; indent-tabs-mode: t -*- */
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved
  */
@@ -700,7 +701,7 @@ xdr_setv4key_arg(XDR *xdrs, setv4key_arg *objp)
 	if (!xdr_array(xdrs, (caddr_t *) &objp->keyblock,
 		       &n_keys, ~0,
 		       sizeof(krb5_keyblock), xdr_krb5_keyblock)) {
-	        return (FALSE);
+		return (FALSE);
 	}
 	return (TRUE);
 }
@@ -717,7 +718,7 @@ xdr_setkey_arg(XDR *xdrs, setkey_arg *objp)
 	if (!xdr_array(xdrs, (caddr_t *) &objp->keyblocks,
 		       (unsigned int *) &objp->n_keys, ~0,
 		       sizeof(krb5_keyblock), xdr_krb5_keyblock)) {
-	        return (FALSE);
+		return (FALSE);
 	}
 	return (TRUE);
 }

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-file-style: "bsd"; indent-tabs-mode: t -*- */
 /*	$NetBSD: strptime.c,v 1.18 1999/04/29 02:58:30 tv Exp $	*/
 
 /*-
