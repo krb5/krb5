@@ -658,41 +658,53 @@ coverity prevent cov: Makefiles
 FIND = find
 XARGS = xargs
 EMACS = emacs
+PYTHON = python
+
+BSDFILES = \
+	kadmin/cli/strftime.c \
+	kadmin/server/ipropd_svc.c \
+	kadmin/server/kadm_rpc_svc.c \
+	lib/kadm5/admin_xdr.h \
+	lib/kadm5/clnt/client_rpc.c \
+	lib/kadm5/kadm_rpc.h \
+	lib/kadm5/kadm_rpc_xdr.c \
+	lib/kadm5/srv/adb_xdr.c \
+	lib/krb5/krb/strftime.c \
+	lib/krb5/krb/strptime.c
+
+OTHEREXCLUDES = \
+	lib/krb5/asn.1 \
+	lib/krb5/krb/deltat.c \
+	lib/krb5/krb/preauth.c \
+	lib/krb5/krb/ser_ctx.c \
+	lib/krb5/unicode
+
+EXCLUDES = `for i in $(BSDFILES) $(OTHEREXCLUDES); do echo $$i; done | $(AWK) '{ print "-path", $$1, "-o" }'` -path /dev/null
 
 reindent::
-	$(FIND) $(SRCTOP) \
+	(cd $(SRCTOP) && \
+	$(FIND) . \
 	\( -name '*.[ch]' -o -name '*.hin' -o -name '*.[ch].in' \) \
 	-print0 | $(XARGS) -0 $(EMACS) -q -batch \
-	-l $(SRCTOP)/util/krb5-c-style.el \
-	-l $(SRCTOP)/util/krb5-batch-reindent.el
+	-l util/krb5-c-style.el \
+	-l util/krb5-batch-reindent.el)
 
-mark-cstyle::
+mark-cstyle:: mark-cstyle-krb5 mark-cstyle-bsd
+
+mark-cstyle-krb5::
+	(cd $(SRCTOP) && \
 	$(FIND) \
-	$(SRCTOP)/clients \
-	$(SRCTOP)/lib/kadm5 \
-	$(SRCTOP)/lib/kdb \
-	$(SRCTOP)/lib/krb5 \
-	$(SRCTOP)/kadmin \
-	$(SRCTOP)/kdc \
-	\( \
-	-path $(SRCTOP)/kadmin/cli/strftime.c -o \
-	-path $(SRCTOP)/kadmin/server/ipropd_svc.c -o \
-	-path $(SRCTOP)/kadmin/server/kadm_rpc_svc.c -o \
-	-path $(SRCTOP)/lib/kadm5/admin_xdr.h -o \
-	-path $(SRCTOP)/lib/kadm5/client/client_rpc.c -o \
-	-path $(SRCTOP)/lib/kadm5/kadm_rpc.h -o \
-	-path $(SRCTOP)/lib/kadm5/kadm_rpc_xdr.c -o \
-	-path $(SRCTOP)/lib/kadm5/srv/adm_xdr.c -o \
-	-path $(SRCTOP)/lib/krb5/asn.1 -o \
-	-path $(SRCTOP)/lib/krb5/ccche/cc_file.c -o \
-	-path $(SRCTOP)/lib/krb5/krb/deltat.c -o \
-	-path $(SRCTOP)/lib/krb5/krb/preauth.c -o \
-	-path $(SRCTOP)/lib/krb5/krb/ser_ctx.c -o \
-	-path $(SRCTOP)/lib/krb5/krb/strftime.c -o \
-	-path $(SRCTOP)/lib/krb5/krb/strptime.c -o \
-	-path $(SRCTOP)/lib/krb5/unicode \
-	\) -prune -o \
+	clients \
+	lib/kadm5 \
+	lib/kdb \
+	lib/krb5 \
+	kadmin \
+	kdc \
+	\( $(EXCLUDES) \) -prune -o \
 	-name '*.[ch]' \
-	-print0 | $(XARGS) -0 $(EMACS) -q -batch \
-	-l $(SRCTOP)/util/krb5-c-style.el \
-	-l $(SRCTOP)/util/krb5-mark-cstyle.el -cstyle-krb5
+	-print0 | $(XARGS) -0 $(PYTHON) util/krb5-mark-cstyle.py \
+	--cstyle=krb5)
+
+mark-cstyle-bsd::
+	(cd $(SRCTOP) && \
+	$(PYTHON) util/krb5-mark-cstyle.py --cstyle=bsd $(BSDFILES))
