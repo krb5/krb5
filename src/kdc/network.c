@@ -250,13 +250,18 @@ static SET(struct connection *) connections;
 #define conns           connections.data
 
 /* Set<u_short> udp_port_data, tcp_port_data; */
-static SET(u_short) udp_port_data, tcp_port_data;
+/*
+ * N.B.: The Emacs cc-mode indentation code seems to get confused if
+ * the macro argument here is one word only.  So use "unsigned short"
+ * instead of the "u_short" we were using before.
+ */
+static SET(unsigned short) udp_port_data, tcp_port_data;
 
 #include "cm.h"
 
-                    static struct select_state sstate;
+static struct select_state sstate;
 
-                    static krb5_error_code add_udp_port(int port)
+static krb5_error_code add_udp_port(int port)
 {
     int i;
     void *tmp;

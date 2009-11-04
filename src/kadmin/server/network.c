@@ -260,14 +260,19 @@ static SET(struct connection *) connections;
 #define conns           connections.data
 
 /* Set<u_short> udp_port_data, tcp_port_data; */
-static SET(u_short) udp_port_data, tcp_port_data;
+/*
+ * N.B.: The Emacs cc-mode indentation code seems to get confused if
+ * the macro argument here is one word only.  So use "unsigned short"
+ * instead of the "u_short" we were using before.
+ */
+static SET(unsigned short) udp_port_data, tcp_port_data;
 
-                    struct rpc_svc_data {
-                        u_short port;
-                        u_long prognum;
-                        u_long versnum;
-                        void (*dispatch)();
-                    };
+struct rpc_svc_data {
+    u_short port;
+    u_long prognum;
+    u_long versnum;
+    void (*dispatch)();
+};
 
 static SET(struct rpc_svc_data) rpc_svc_data;
 
