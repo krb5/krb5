@@ -1057,21 +1057,6 @@ build_in_tkt_name(krb5_context context,
     return ret;
 }
 
-/* Decide whether to continue trying AS-REQ preauthentication. */
-static krb5_boolean
-should_continue_preauth(krb5_ui_4 error, int loopcount)
-{
-    /*
-     * Continue on PREAUTH_FAILED only on the first iteration, which
-     * would imply that we did optimistic preauth unsuccessfully.  We
-     * could continue on later iterations if the preauth framework
-     * reliably remembered what mechanisms had been tried, but
-     * currently it does not do so for built-in mechanisms.
-     */
-    return (error == KDC_ERR_PREAUTH_REQUIRED ||
-            (error == KDC_ERR_PREAUTH_FAILED && loopcount == 0));
-}
-
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds(krb5_context context,
                     krb5_creds *creds,
@@ -1429,7 +1414,7 @@ krb5_get_init_creds(krb5_context context,
                                              &out_padata, &retry);
             if (ret !=0)
                 goto cleanup;
-            if (should_continue_preauth(err_reply->error, loopcount) && retry) {
+            if (err_reply->error == KDC_ERR_PREAUTH_REQUIRED && retry) {
                 /* reset the list of preauth types to try */
                 if (preauth_to_use) {
                     krb5_free_pa_data(context, preauth_to_use);
