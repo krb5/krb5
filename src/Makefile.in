@@ -675,8 +675,6 @@ BSDFILES = \
 OTHEREXCLUDES = \
 	lib/krb5/asn.1 \
 	lib/krb5/krb/deltat.c \
-	lib/krb5/krb/preauth.c \
-	lib/krb5/krb/ser_ctx.c \
 	lib/krb5/unicode
 
 EXCLUDES = `for i in $(BSDFILES) $(OTHEREXCLUDES); do echo $$i; done | $(AWK) '{ print "-path", $$1, "-o" }'` -path /dev/null
