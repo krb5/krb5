@@ -2,53 +2,57 @@
 /* Coding Buffer Implementation */
 
 /*
-  Implementation
+ *  Implementation
+ *
+ *    Encoding mode
+ *
+ *    The encoding buffer is filled from bottom (lowest address) to top
+ *    (highest address).  This makes it easier to expand the buffer,
+ *    since realloc preserves the existing portion of the buffer.
+ *
+ *    Note: Since ASN.1 encoding must be done in reverse, this means
+ *    that you can't simply memcpy out the buffer data, since it will be
+ *    backwards.  You need to reverse-iterate through it, instead.
+ *
+ *    ***This decision may have been a mistake.  In practice, the
+ *    implementation will probably be tuned such that reallocation is
+ *    rarely necessary.  Also, the realloc probably has recopy the
+ *    buffer itself, so we don't really gain that much by avoiding an
+ *    explicit copy of the buffer.  --Keep this in mind for future reference.
+ *
+ *
+ *    Decoding mode
+ *
+ *    The decoding buffer is in normal order and is created by wrapping
+ *    an asn1buf around a krb5_data structure.
+ */
 
-    Encoding mode
+/*
+ * Abstraction Function
+ *
+ *   Programs should use just pointers to asn1buf's (e.g. asn1buf *mybuf).
+ *   These pointers must always point to a valid, allocated asn1buf
+ *   structure or be NULL.
+ *
+ *   The contents of the asn1buf represent an octet string.  This string
+ *   begins at base and continues to the octet immediately preceding next.
+ *   If next == base or mybuf == NULL, then the asn1buf represents an empty
+ *   octet string.
+ */
 
-    The encoding buffer is filled from bottom (lowest address) to top
-    (highest address).  This makes it easier to expand the buffer,
-    since realloc preserves the existing portion of the buffer.
-
-    Note: Since ASN.1 encoding must be done in reverse, this means
-    that you can't simply memcpy out the buffer data, since it will be
-    backwards.  You need to reverse-iterate through it, instead.
-
-    ***This decision may have been a mistake.  In practice, the
-    implementation will probably be tuned such that reallocation is
-    rarely necessary.  Also, the realloc probably has recopy the
-    buffer itself, so we don't really gain that much by avoiding an
-    explicit copy of the buffer.  --Keep this in mind for future reference.
-
-
-    Decoding mode
-
-    The decoding buffer is in normal order and is created by wrapping
-    an asn1buf around a krb5_data structure.
-  */
-
-/* Abstraction Function
-
-   Programs should use just pointers to asn1buf's (e.g. asn1buf *mybuf).
-   These pointers must always point to a valid, allocated asn1buf
-   structure or be NULL.
-
-   The contents of the asn1buf represent an octet string.  This string
-   begins at base and continues to the octet immediately preceding next.
-   If next == base or mybuf == NULL, then the asn1buf represents an empty
-   octet string. */
-
-/* Representation Invariant
-
-   Pointers to asn1buf's must always point to a valid, allocated
-   asn1buf structure or be NULL.
-
-   base points to a valid, allocated octet array or is NULL
-   bound, if non-NULL, points to the last valid octet
-   next >= base
-   next <= bound+2  (i.e. next should be able to step just past the bound,
-                     but no further.  (The bound should move out in response
-                     to being crossed by next.)) */
+/*
+ * Representation Invariant
+ *
+ *   Pointers to asn1buf's must always point to a valid, allocated
+ *   asn1buf structure or be NULL.
+ *
+ *   base points to a valid, allocated octet array or is NULL
+ *   bound, if non-NULL, points to the last valid octet
+ *   next >= base
+ *   next <= bound+2  (i.e. next should be able to step just past the bound,
+ *                     but no further.  (The bound should move out in response
+ *                     to being crossed by next.))
+ */
 
 #define ASN1BUF_OMIT_INLINE_FUNCS
 #include "asn1buf.h"
@@ -62,8 +66,10 @@
 #endif
 
 #if !defined(__GNUC__) || defined(CONFIG_SMALL)
-/* Declare private procedures as static if they're not used for inline
-   expansion of other stuff elsewhere.  */
+/*
+ * Declare private procedures as static if they're not used for inline
+ * expansion of other stuff elsewhere.
+ */
 static unsigned int asn1buf_free(const asn1buf *);
 static asn1_error_code asn1buf_ensure_space(asn1buf *, unsigned int);
 static asn1_error_code asn1buf_expand(asn1buf *, unsigned int);
@@ -278,8 +284,11 @@ asn1_error_code asn12krb5_buf(const asn1buf *buf, krb5_data **code)
 
 
 
-/* These parse and unparse procedures should be moved out. They're
-   useful only for debugging and superfluous in the production version. */
+/*
+ * These parse and unparse procedures should be moved out. They're
+ * useful only for debugging and superfluous in the production
+ * version.
+ */
 
 asn1_error_code asn1buf_unparse(const asn1buf *buf, char **s)
 {

@@ -33,37 +33,37 @@
 #include "asn1buf.h"
 
 /*
-**** for simple val's ****
-asn1_error_code asn1_encode_asn1_type(asn1buf *buf,
-                                      const krb5_type val,
-                                      int *retlen);
-   requires  *buf is allocated
-   effects   Inserts the encoding of val into *buf and
-              returns the length of this encoding in *retlen.
-             Returns ASN1_MISSING_FIELD if a required field is empty in val.
-             Returns ENOMEM if memory runs out.
-
-**** for struct val's ****
-asn1_error_code asn1_encode_asn1_type(asn1buf *buf,
-                                      const krb5_type *val,
-                                      int *retlen);
-   requires  *buf is allocated
-   effects   Inserts the encoding of *val into *buf and
-              returns the length of this encoding in *retlen.
-             Returns ASN1_MISSING_FIELD if a required field is empty in val.
-             Returns ENOMEM if memory runs out.
-
-**** for array val's ****
-asn1_error_code asn1_encode_asn1_type(asn1buf *buf,
-                                      const krb5_type **val,
-                                      int *retlen);
-   requires  *buf is allocated, **val != NULL, *val[0] != NULL,
-              **val is a NULL-terminated array of pointers to krb5_type
-   effects   Inserts the encoding of **val into *buf and
-              returns the length of this encoding in *retlen.
-             Returns ASN1_MISSING_FIELD if a required field is empty in val.
-             Returns ENOMEM if memory runs out.
-*/
+ * **** for simple val's ****
+ * asn1_error_code asn1_encode_asn1_type(asn1buf *buf,
+ *                                       const krb5_type val,
+ *                                       int *retlen);
+ *    requires  *buf is allocated
+ *    effects   Inserts the encoding of val into *buf and
+ *               returns the length of this encoding in *retlen.
+ *              Returns ASN1_MISSING_FIELD if a required field is empty in val.
+ *              Returns ENOMEM if memory runs out.
+ *
+ * **** for struct val's ****
+ * asn1_error_code asn1_encode_asn1_type(asn1buf *buf,
+ *                                       const krb5_type *val,
+ *                                       int *retlen);
+ *    requires  *buf is allocated
+ *    effects   Inserts the encoding of *val into *buf and
+ *               returns the length of this encoding in *retlen.
+ *              Returns ASN1_MISSING_FIELD if a required field is empty in val.
+ *              Returns ENOMEM if memory runs out.
+ *
+ * **** for array val's ****
+ * asn1_error_code asn1_encode_asn1_type(asn1buf *buf,
+ *                                       const krb5_type **val,
+ *                                       int *retlen);
+ *    requires  *buf is allocated, **val != NULL, *val[0] != NULL,
+ *               **val is a NULL-terminated array of pointers to krb5_type
+ *    effects   Inserts the encoding of **val into *buf and
+ *               returns the length of this encoding in *retlen.
+ *              Returns ASN1_MISSING_FIELD if a required field is empty in val.
+ *              Returns ENOMEM if memory runs out.
+ */
 
 /* PKINIT */
 

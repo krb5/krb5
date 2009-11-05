@@ -1,34 +1,35 @@
 /* -*- mode: c; indent-tabs-mode: nil -*- */
 /* ... copyright ... */
 
-/* Novell key-format scheme:
-
-   KrbKeySet ::= SEQUENCE {
-   attribute-major-vno       [0] UInt16,
-   attribute-minor-vno       [1] UInt16,
-   kvno                      [2] UInt32,
-   mkvno                     [3] UInt32 OPTIONAL,
-   keys                      [4] SEQUENCE OF KrbKey,
-   ...
-   }
-
-   KrbKey ::= SEQUENCE {
-   salt      [0] KrbSalt OPTIONAL,
-   key       [1] EncryptionKey,
-   s2kparams [2] OCTET STRING OPTIONAL,
-    ...
-   }
-
-   KrbSalt ::= SEQUENCE {
-   type      [0] Int32,
-   salt      [1] OCTET STRING OPTIONAL
-   }
-
-   EncryptionKey ::= SEQUENCE {
-   keytype   [0] Int32,
-   keyvalue  [1] OCTET STRING
-   }
-
+/*
+ * Novell key-format scheme:
+ *
+ * KrbKeySet ::= SEQUENCE {
+ * attribute-major-vno       [0] UInt16,
+ * attribute-minor-vno       [1] UInt16,
+ * kvno                      [2] UInt32,
+ * mkvno                     [3] UInt32 OPTIONAL,
+ * keys                      [4] SEQUENCE OF KrbKey,
+ * ...
+ * }
+ *
+ * KrbKey ::= SEQUENCE {
+ * salt      [0] KrbSalt OPTIONAL,
+ * key       [1] EncryptionKey,
+ * s2kparams [2] OCTET STRING OPTIONAL,
+ *  ...
+ * }
+ *
+ * KrbSalt ::= SEQUENCE {
+ * type      [0] Int32,
+ * salt      [1] OCTET STRING OPTIONAL
+ * }
+ *
+ * EncryptionKey ::= SEQUENCE {
+ * keytype   [0] Int32,
+ * keyvalue  [1] OCTET STRING
+ * }
+ *
  */
 
 #include <k5-int.h>
@@ -47,8 +48,10 @@
 /* Encode the Principal's keys                                          */
 /************************************************************************/
 
-/* Imports from asn1_k_encode.c.
-   XXX Must be manually synchronized for now.  */
+/*
+ * Imports from asn1_k_encode.c.
+ * XXX Must be manually synchronized for now.
+ */
 IMPORT_TYPE(octetstring, unsigned char *);
 IMPORT_TYPE(int32, krb5_int32);
 

@@ -673,7 +673,12 @@ BSDFILES = \
 	lib/krb5/krb/strptime.c
 
 OTHEREXCLUDES = \
-	lib/krb5/asn.1 \
+	lib/krb5/asn.1/asn1_decode.h \
+	lib/krb5/asn.1/asn1_encode.h \
+	lib/krb5/asn.1/asn1_k_encode.c \
+	lib/krb5/asn.1/asn1_make.h \
+	lib/krb5/asn.1/asn1buf.h \
+	lib/krb5/asn.1/krb5_decode.c \
 	lib/krb5/krb/deltat.c \
 	lib/krb5/unicode
 

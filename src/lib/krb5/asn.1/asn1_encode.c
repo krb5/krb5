@@ -312,15 +312,17 @@ asn1_encode_opaque(asn1buf *buf, unsigned int len, const void *val,
     return 0;
 }
 
-/* ASN.1 constructed type encoder engine
-
-   Two entry points here:
-
-   krb5int_asn1_encode_a_thing: Incrementally adds the partial
-   encoding of an object to an already-initialized asn1buf.
-
-   krb5int_asn1_do_full_encode: Returns a completed encoding, in the
-   correct byte order, in an allocated krb5_data.  */
+/*
+ * ASN.1 constructed type encoder engine
+ *
+ * Two entry points here:
+ *
+ * krb5int_asn1_encode_a_thing: Incrementally adds the partial
+ * encoding of an object to an already-initialized asn1buf.
+ *
+ * krb5int_asn1_do_full_encode: Returns a completed encoding, in the
+ * correct byte order, in an allocated krb5_data.
+ */
 
 #ifdef POINTERS_ARE_ALL_THE_SAME
 #define LOADPTR(PTR,TYPE)       \
@@ -458,9 +460,11 @@ encode_a_field(asn1buf *buf, const void *val,
         unsigned int length;
         const struct atype_info *a;
 
-        /* The field holds a pointer to the array of objects.  So the
-           address we compute is a pointer-to-pointer, and that's what
-           field->atype must help us dereference.  */
+        /*
+         * The field holds a pointer to the array of objects.  So the
+         * address we compute is a pointer-to-pointer, and that's what
+         * field->atype must help us dereference.
+         */
         dataptr = (const char *)val + field->dataoff;
         lenptr = (const char *)val + field->lenoff;
         assert(field->atype->type == atype_ptr);
@@ -547,8 +551,10 @@ encode_a_field(asn1buf *buf, const void *val,
             return EINVAL;
         if (dataptr == NULL && slen != 0)
             return ASN1_MISSING_FIELD;
-        /* Currently our string encoders want "unsigned int" for
-           lengths.  */
+        /*
+         * Currently our string encoders want "unsigned int" for
+         * lengths.
+         */
         if (slen != (unsigned int) slen)
             return EINVAL;
         assert(a->enclen != NULL);
@@ -622,8 +628,10 @@ just_encode_sequence(asn1buf *buf, const void *val,
     if (seq->optional)
         optional = seq->optional(val);
     else
-        /* In this case, none of the field descriptors should indicate
-           that we examine any bits of this value.  */
+        /*
+         * In this case, none of the field descriptors should indicate
+         * that we examine any bits of this value.
+         */
         optional = 0;
     {
         unsigned int length;

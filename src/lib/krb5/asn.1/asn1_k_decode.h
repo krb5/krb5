@@ -33,39 +33,57 @@
 #include "asn1buf.h"
 
 /* asn1_error_code asn1_decode_scalar_type(asn1buf *buf, krb5_scalar *val); */
-/* requires  *buf is allocated, *buf's current position points to the
-              beginning of an encoding (<id> <len> <contents>),
-              *val is allocated
-   effects   Decodes the encoding in *buf, returning the result in *val.
-             Returns ASN1_BAD_ID if the encoded id does not
-              indicate the proper type.
-             Returns ASN1_OVERRUN if the encoded length exceeds
-              the bounds of *buf */
+/*
+ * requires  *buf is allocated, *buf's current position points to the
+ *            beginning of an encoding (<id> <len> <contents>),
+ *            *val is allocated
+ *
+ * effects   Decodes the encoding in *buf, returning the result in *val.
+ *
+ *           Returns ASN1_BAD_ID if the encoded id does not indicate
+ *           the proper type.
+ *
+ *           Returns ASN1_OVERRUN if the encoded length exceeds
+ *           the bounds of *buf
+ */
 
 
-/* asn1_error_code asn1_decode_structure_type(asn1buf *buf,
-                                              krb5_structure *val); */
-/* requires  *buf is allocated, *buf's current position points to the
-              beginning of an encoding (<id> <len> <contents>),
-              *val is allocated
-             Assumes that *val is a freshly-allocated structure (i.e.
-              does not attempt to clean up or free *val).
-   effects   Decodes the encoding in *buf, returning the result in *val.
-             Returns ASN1_BAD_ID if the encoded id does not
-              indicate the proper type.
-             Returns ASN1_OVERRUN if the encoded length exceeds
-              the bounds of *buf */
+/*
+ * asn1_error_code asn1_decode_structure_type(asn1buf *buf,
+ *                                            krb5_structure *val);
+ */
+/*
+ * requires  *buf is allocated, *buf's current position points to the
+ *            beginning of an encoding (<id> <len> <contents>),
+ *            *val is allocated
+ *
+ *           Assumes that *val is a freshly-allocated structure (i.e.
+ *            does not attempt to clean up or free *val).
+ * effects   Decodes the encoding in *buf, returning the result in *val.
+ *
+ *           Returns ASN1_BAD_ID if the encoded id does not indicate
+ *           the proper type.
+ *
+ *           Returns ASN1_OVERRUN if the encoded length exceeds the
+ *           bounds of *buf
+ */
 
 /* asn1_error_code asn1_decode_array_type(asn1buf *buf, krb5_scalar ***val); */
-/* requires  *buf is allocated, *buf's current position points to the
-              beginning of an encoding (<id> <len> <contents>)
-             Assumes that *val is empty (i.e. does not attempt to
-              clean up or free *val).
-   effects   Decodes the encoding in *buf, returning the result in *val.
-             Returns ASN1_BAD_ID if the encoded id does not
-              indicate the proper type.
-             Returns ASN1_OVERRUN if the encoded length exceeds
-              the bounds of *buf */
+/*
+ * requires  *buf is allocated, *buf's current position points to the
+ *           beginning of an encoding (<id> <len> <contents>)
+ *
+ *           Assumes that *val is empty (i.e. does not attempt to
+ *           clean up or free *val).
+ *
+ * effects   Decodes the encoding in *buf, returning the result in *val.
+ *
+ *           Returns ASN1_BAD_ID if the encoded id does not indicate
+ *           the proper type.
+ *
+ *           Returns ASN1_OVERRUN if the encoded length exceeds the
+ *           bounds of *buf
+ */
 
 /* scalars */
 asn1_error_code asn1_decode_int(asn1buf *buf, int *val);

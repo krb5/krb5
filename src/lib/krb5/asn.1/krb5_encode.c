@@ -34,11 +34,13 @@
 
 /**************** Macros (these save a lot of typing) ****************/
 
-/* setup() -- create and initialize bookkeeping variables
-     retval: stores error codes returned from subroutines
-     buf: the coding buffer
-     length: length of the most-recently produced encoding
-     sum: cumulative length of the entire encoding */
+/*
+ * setup() -- create and initialize bookkeeping variables
+ *     retval: stores error codes returned from subroutines
+ *     buf: the coding buffer
+ *     length: length of the most-recently produced encoding
+ *     sum: cumulative length of the entire encoding
+ */
 #define krb5_setup()\
   asn1_error_code retval;\
   unsigned int length, sum = 0;\
