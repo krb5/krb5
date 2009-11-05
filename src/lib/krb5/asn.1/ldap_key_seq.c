@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* ... copyright ... */
 
 /*
@@ -113,21 +113,21 @@ MAKE_FULL_ENCODER(krb5int_ldap_encode_sequence_of_keys, ldap_key_seq);
 /* Decode the Principal's keys                                          */
 /************************************************************************/
 
-#define cleanup(err)                                                    \
-        {                                                               \
-                ret = err;                                              \
-                goto last;                                              \
-        }
+#define cleanup(err)                            \
+    {                                           \
+        ret = err;                              \
+        goto last;                              \
+    }
 
-#define checkerr                                                        \
-                if (ret != 0)                                           \
-                        goto last
+#define checkerr                                \
+    if (ret != 0)                               \
+        goto last
 
-#define safe_syncbuf(outer,inner,buflen)                                \
-        if (! ((inner)->next == (inner)->bound + 1 &&                   \
-               (inner)->next == (outer)->next + buflen))                \
-            cleanup (ASN1_BAD_LENGTH);                                  \
-        asn1buf_sync((outer), (inner), 0, 0, 0, 0, 0);
+#define safe_syncbuf(outer,inner,buflen)                \
+    if (! ((inner)->next == (inner)->bound + 1 &&       \
+           (inner)->next == (outer)->next + buflen))    \
+        cleanup (ASN1_BAD_LENGTH);                      \
+    asn1buf_sync((outer), (inner), 0, 0, 0, 0, 0);
 
 static asn1_error_code
 decode_tagged_integer (asn1buf *buf, asn1_tagnum expectedtag, long *val)

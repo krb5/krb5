@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * src/lib/krb5/asn.1/asn1_decode.c
  *
@@ -39,23 +39,23 @@
 #include <time.h>
 #endif
 
-#define setup()\
-asn1_error_code retval;\
-taginfo tinfo
+#define setup()                                 \
+    asn1_error_code retval;                     \
+    taginfo tinfo
 
 #define asn1class       (tinfo.asn1class)
 #define construction    (tinfo.construction)
 #define tagnum          (tinfo.tagnum)
 #define length          (tinfo.length)
 
-#define tag(type)\
-retval = asn1_get_tag_2(buf,&tinfo);\
-if (retval) return retval;\
-if (asn1class != UNIVERSAL || construction != PRIMITIVE || tagnum != type)\
-  return ASN1_BAD_ID
+#define tag(type)                                                       \
+    retval = asn1_get_tag_2(buf,&tinfo);                                \
+    if (retval) return retval;                                          \
+    if (asn1class != UNIVERSAL || construction != PRIMITIVE || tagnum != type) \
+        return ASN1_BAD_ID
 
-#define cleanup()\
-return 0
+#define cleanup()                               \
+    return 0
 
 asn1_error_code
 asn1_decode_integer(asn1buf *buf, long int *val)

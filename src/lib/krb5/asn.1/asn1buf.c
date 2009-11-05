@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* Coding Buffer Implementation */
 
 /*
@@ -75,8 +75,8 @@ static asn1_error_code asn1buf_ensure_space(asn1buf *, unsigned int);
 static asn1_error_code asn1buf_expand(asn1buf *, unsigned int);
 #endif
 
-#define asn1_is_eoc(class, num, indef)  \
-((class) == UNIVERSAL && !(num) && !(indef))
+#define asn1_is_eoc(class, num, indef)                  \
+    ((class) == UNIVERSAL && !(num) && !(indef))
 
 asn1_error_code asn1buf_create(asn1buf **buf)
 {

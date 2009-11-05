@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * src/lib/krb5/asn.1/asn1_k_decode.c
  *
@@ -34,26 +34,26 @@
 
 /* Declare useful decoder variables. */
 #define setup()                                 \
-  asn1_error_code retval;                       \
-  asn1_class asn1class;                         \
-  asn1_construction construction;               \
-  asn1_tagnum tagnum;                           \
-  unsigned int length, taglen
+    asn1_error_code retval;                     \
+    asn1_class asn1class;                       \
+    asn1_construction construction;             \
+    asn1_tagnum tagnum;                         \
+    unsigned int length, taglen
 
 #define unused_var(x) if (0) { x = 0; x = x - x; }
 
 /* This is used for prefetch of next tag in sequence. */
-#define next_tag()                                                              \
-{ taginfo t2;                                                                   \
-  retval = asn1_get_tag_2(&subbuf, &t2);                                        \
-  if (retval) clean_return(retval);                                             \
-  /* Copy out to match previous functionality, until better integrated.  */     \
-  asn1class = t2.asn1class;                                                     \
-  construction = t2.construction;                                               \
-  tagnum = t2.tagnum;                                                           \
-  taglen = t2.length;                                                           \
-  indef = t2.indef;                                                             \
-}
+#define next_tag()                                                      \
+    { taginfo t2;                                                       \
+        retval = asn1_get_tag_2(&subbuf, &t2);                          \
+        if (retval) clean_return(retval);                               \
+        /* Copy out to match previous functionality, until better integrated.  */ \
+        asn1class = t2.asn1class;                                       \
+        construction = t2.construction;                                 \
+        tagnum = t2.tagnum;                                             \
+        taglen = t2.length;                                             \
+        indef = t2.indef;                                               \
+    }
 
 static asn1_error_code
 asn1_get_eoc_tag (asn1buf *buf)
@@ -77,40 +77,40 @@ asn1_get_eoc_tag (asn1buf *buf)
     }
 
 #define alloc_field(var)                        \
-  var = calloc(1, sizeof(*var));                \
-  if ((var) == NULL) clean_return(ENOMEM)
+    var = calloc(1, sizeof(*var));              \
+    if ((var) == NULL) clean_return(ENOMEM)
 
 /*
  * Allocate a principal and initialize enough fields for
  * krb5_free_principal to have defined behavior.
  */
 #define alloc_principal(var)                    \
-  alloc_field(var);                             \
-  var->realm.data = NULL;                       \
-  var->data = NULL
+    alloc_field(var);                           \
+    var->realm.data = NULL;                     \
+    var->data = NULL
 
 /*
  * Allocate a data structure and initialize enough fields for
  * krb5_free_data to have defined behavior.
  */
 #define alloc_data(var)                         \
-  alloc_field(var);                             \
-  var->data = NULL
+    alloc_field(var);                           \
+    var->data = NULL
 
 /* Fetch an expected APPLICATION class tag and verify. */
-#define apptag(tagexpect)                                                               \
-  {                                                                                     \
-      taginfo t1;                                                                       \
-      retval = asn1_get_tag_2(buf, &t1);                                                \
-      if (retval) clean_return(retval);                                                 \
-      if (t1.asn1class != APPLICATION || t1.construction != CONSTRUCTED ||              \
-          t1.tagnum != (tagexpect)) clean_return(ASN1_BAD_ID);                          \
-      /* Copy out to match previous functionality, until better integrated.  */         \
-      asn1class = t1.asn1class;                                                         \
-      construction = t1.construction;                                                   \
-      tagnum = t1.tagnum;                                                               \
-      applen = t1.length;                                                               \
-  }
+#define apptag(tagexpect)                                               \
+    {                                                                   \
+        taginfo t1;                                                     \
+        retval = asn1_get_tag_2(buf, &t1);                              \
+        if (retval) clean_return(retval);                               \
+        if (t1.asn1class != APPLICATION || t1.construction != CONSTRUCTED || \
+            t1.tagnum != (tagexpect)) clean_return(ASN1_BAD_ID);        \
+        /* Copy out to match previous functionality, until better integrated.  */ \
+        asn1class = t1.asn1class;                                       \
+        construction = t1.construction;                                 \
+        tagnum = t1.tagnum;                                             \
+        applen = t1.length;                                             \
+    }
 
 /**** normal fields ****/
 
@@ -122,10 +122,10 @@ asn1_get_eoc_tag (asn1buf *buf)
  * enclosed in a context-specific tag.
  */
 #define get_field_body(var, decoder)            \
-  retval = decoder(&subbuf, &(var));            \
-  if (retval) clean_return(retval);            \
-  if (!taglen && indef) { get_eoc(); }          \
-  next_tag()
+    retval = decoder(&subbuf, &(var));          \
+    if (retval) clean_return(retval);           \
+    if (!taglen && indef) { get_eoc(); }        \
+    next_tag()
 
 /*
  * error_if_bad_tag
@@ -133,8 +133,8 @@ asn1_get_eoc_tag (asn1buf *buf)
  * Checks that the next tag is the expected one; returns with an error
  * if not.
  */
-#define error_if_bad_tag(tagexpect) \
-  if (tagnum != (tagexpect)) { clean_return((tagnum < (tagexpect)) ? ASN1_MISPLACED_FIELD : ASN1_MISSING_FIELD); }
+#define error_if_bad_tag(tagexpect)                                     \
+    if (tagnum != (tagexpect)) { clean_return((tagnum < (tagexpect)) ? ASN1_MISPLACED_FIELD : ASN1_MISSING_FIELD); }
 
 /*
  * get_field
@@ -144,11 +144,11 @@ asn1_get_eoc_tag (asn1buf *buf)
  * verification of tag numbers.
  */
 #define get_field(var, tagexpect, decoder)                              \
-  error_if_bad_tag(tagexpect);                                          \
-  if ((asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)    \
-      && (tagnum || taglen || asn1class != UNIVERSAL))                  \
-    clean_return(ASN1_BAD_ID);                                          \
-  get_field_body(var,decoder)
+    error_if_bad_tag(tagexpect);                                        \
+    if ((asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)  \
+        && (tagnum || taglen || asn1class != UNIVERSAL))                \
+        clean_return(ASN1_BAD_ID);                                      \
+    get_field_body(var,decoder)
 
 /*
  * opt_field
@@ -159,59 +159,59 @@ asn1_get_eoc_tag (asn1buf *buf)
  * values that happen to have the value of OPTVAL.
  */
 #define opt_field(var, tagexpect, decoder, optvalue)                    \
-  if (asn1buf_remains(&subbuf, seqindef)) {                             \
-    if ((asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)  \
-        && (tagnum || taglen || asn1class != UNIVERSAL))                \
-      clean_return(ASN1_BAD_ID);                                        \
-    if (tagnum == (tagexpect)) {                                        \
-      get_field_body(var, decoder);                                     \
-    } else var = optvalue;                                              \
-  }
+    if (asn1buf_remains(&subbuf, seqindef)) {                           \
+        if ((asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED) \
+            && (tagnum || taglen || asn1class != UNIVERSAL))            \
+            clean_return(ASN1_BAD_ID);                                  \
+        if (tagnum == (tagexpect)) {                                    \
+            get_field_body(var, decoder);                               \
+        } else var = optvalue;                                          \
+    }
 
 /**** fields w/ length ****/
 
 /* similar to get_field_body */
 #define get_lenfield_body(len, var, decoder)    \
-  retval = decoder(&subbuf, &(len), &(var));    \
-  if (retval) clean_return(retval);             \
-  if (!taglen && indef) { get_eoc(); }          \
-  next_tag()
+    retval = decoder(&subbuf, &(len), &(var));  \
+    if (retval) clean_return(retval);           \
+    if (!taglen && indef) { get_eoc(); }        \
+    next_tag()
 
 /* similar to get_field_body */
 #define get_lenfield(len, var, tagexpect, decoder)                      \
-  error_if_bad_tag(tagexpect);                                          \
-  if ((asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)    \
-      && (tagnum || taglen || asn1class != UNIVERSAL))                  \
-    clean_return(ASN1_BAD_ID);                                          \
-  get_lenfield_body(len, var, decoder)
+    error_if_bad_tag(tagexpect);                                        \
+    if ((asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)  \
+        && (tagnum || taglen || asn1class != UNIVERSAL))                \
+        clean_return(ASN1_BAD_ID);                                      \
+    get_lenfield_body(len, var, decoder)
 
 /* similar to opt_field */
 #define opt_lenfield(len, var, tagexpect, decoder)      \
-  if (tagnum == (tagexpect)) {                          \
-    get_lenfield_body(len, var, decoder);               \
-  } else { len = 0; var = 0; }
+    if (tagnum == (tagexpect)) {                        \
+        get_lenfield_body(len, var, decoder);           \
+    } else { len = 0; var = 0; }
 
 /*
  * Deal with implicitly tagged fields
  */
-#define get_implicit_octet_string(len, var, tagexpect)              \
-  if (tagnum != (tagexpect)) clean_return(ASN1_MISSING_FIELD);      \
-  if (asn1class != CONTEXT_SPECIFIC || construction != PRIMITIVE)   \
-    clean_return(ASN1_BAD_ID);                                      \
-  retval = asn1buf_remove_octetstring(&subbuf, taglen, &(var));     \
-  if (retval) clean_return(retval);                                 \
-  (len) = taglen;                                                   \
-  next_tag()
+#define get_implicit_octet_string(len, var, tagexpect)                  \
+    if (tagnum != (tagexpect)) clean_return(ASN1_MISSING_FIELD);        \
+    if (asn1class != CONTEXT_SPECIFIC || construction != PRIMITIVE)     \
+        clean_return(ASN1_BAD_ID);                                      \
+    retval = asn1buf_remove_octetstring(&subbuf, taglen, &(var));       \
+    if (retval) clean_return(retval);                                   \
+    (len) = taglen;                                                     \
+    next_tag()
 
-#define opt_implicit_octet_string(len, var, tagexpect)              \
-  if (tagnum == (tagexpect)) {                                      \
-    if (asn1class != CONTEXT_SPECIFIC || construction != PRIMITIVE) \
-        clean_return(ASN1_BAD_ID);                                  \
-    retval = asn1buf_remove_octetstring(&subbuf, taglen, &(var));   \
-    if (retval) clean_return(retval);                               \
-    (len) = taglen;                                                 \
-    next_tag();                                                     \
-  } else { (len) = 0; (var) = NULL; }
+#define opt_implicit_octet_string(len, var, tagexpect)                  \
+    if (tagnum == (tagexpect)) {                                        \
+        if (asn1class != CONTEXT_SPECIFIC || construction != PRIMITIVE) \
+            clean_return(ASN1_BAD_ID);                                  \
+        retval = asn1buf_remove_octetstring(&subbuf, taglen, &(var));   \
+        if (retval) clean_return(retval);                               \
+        (len) = taglen;                                                 \
+        next_tag();                                                     \
+    } else { (len) = 0; (var) = NULL; }
 
 /*
  * begin_structure
@@ -221,14 +221,14 @@ asn1_get_eoc_tag (asn1buf *buf)
  * end_structure().
  */
 #define begin_structure()                                       \
-  asn1buf subbuf;                                               \
-  int seqindef;                                                 \
-  int indef;                                                    \
-  retval = asn1_get_sequence(buf, &length, &seqindef);          \
-  if (retval) clean_return(retval);                             \
-  retval = asn1buf_imbed(&subbuf, buf, length, seqindef);       \
-  if (retval) clean_return(retval);                             \
-  next_tag()
+    asn1buf subbuf;                                             \
+    int seqindef;                                               \
+    int indef;                                                  \
+    retval = asn1_get_sequence(buf, &length, &seqindef);        \
+    if (retval) clean_return(retval);                           \
+    retval = asn1buf_imbed(&subbuf, buf, length, seqindef);     \
+    if (retval) clean_return(retval);                           \
+    next_tag()
 
 /*
  * This is used for structures which have no tagging.
@@ -236,19 +236,19 @@ asn1_get_eoc_tag (asn1buf *buf)
  * is not called.
  */
 #define begin_structure_no_tag()                                \
-  asn1buf subbuf;                                               \
-  int seqindef;                                                 \
-  int indef;                                                    \
-  retval = asn1_get_sequence(buf, &length, &seqindef);          \
-  if (retval) clean_return(retval);                             \
-  retval = asn1buf_imbed(&subbuf, buf, length, seqindef);       \
-  if (retval) clean_return(retval)
+    asn1buf subbuf;                                             \
+    int seqindef;                                               \
+    int indef;                                                  \
+    retval = asn1_get_sequence(buf, &length, &seqindef);        \
+    if (retval) clean_return(retval);                           \
+    retval = asn1buf_imbed(&subbuf, buf, length, seqindef);     \
+    if (retval) clean_return(retval)
 
 /* skip trailing garbage */
 #define end_structure()                                         \
-  retval = asn1buf_sync(buf, &subbuf, asn1class, tagnum,        \
-                        length, indef, seqindef);               \
-  if (retval) clean_return(retval)
+    retval = asn1buf_sync(buf, &subbuf, asn1class, tagnum,      \
+                          length, indef, seqindef);             \
+    if (retval) clean_return(retval)
 
 /*
  * begin_choice
@@ -258,28 +258,28 @@ asn1_get_eoc_tag (asn1buf *buf)
  * end_choice().
  */
 #define begin_choice()                                          \
-  asn1buf subbuf;                                               \
-  int seqindef;                                                 \
-  int indef;                                                    \
-  taginfo t;                                                    \
-  retval = asn1_get_tag_2(buf, &t);                             \
-  if (retval) clean_return(retval);                             \
-  tagnum = t.tagnum;                                            \
-  taglen = t.length;                                            \
-  indef = t.indef;                                              \
-  length = t.length;                                            \
-  seqindef = t.indef;                                           \
-  asn1class = t.asn1class;                                      \
-  construction = t.construction;                                \
-  retval = asn1buf_imbed(&subbuf, buf, length, seqindef);       \
-  if (retval) clean_return(retval)
+    asn1buf subbuf;                                             \
+    int seqindef;                                               \
+    int indef;                                                  \
+    taginfo t;                                                  \
+    retval = asn1_get_tag_2(buf, &t);                           \
+    if (retval) clean_return(retval);                           \
+    tagnum = t.tagnum;                                          \
+    taglen = t.length;                                          \
+    indef = t.indef;                                            \
+    length = t.length;                                          \
+    seqindef = t.indef;                                         \
+    asn1class = t.asn1class;                                    \
+    construction = t.construction;                              \
+    retval = asn1buf_imbed(&subbuf, buf, length, seqindef);     \
+    if (retval) clean_return(retval)
 
 /* skip trailing garbage */
 #define end_choice()                                            \
-  length -= t.length;                                           \
-  retval = asn1buf_sync(buf, &subbuf, t.asn1class, t.tagnum,    \
-                        length, t.indef, seqindef);             \
-  if (retval) clean_return(retval)
+    length -= t.length;                                         \
+    retval = asn1buf_sync(buf, &subbuf, t.asn1class, t.tagnum,  \
+                          length, t.indef, seqindef);           \
+    if (retval) clean_return(retval)
 
 /*
  * sequence_of
@@ -289,12 +289,12 @@ asn1_get_eoc_tag (asn1buf *buf)
  * end_sequence_of().
  */
 #define sequence_of(buf)                        \
-  unsigned int length, taglen;                  \
-  asn1_class asn1class;                         \
-  asn1_construction construction;               \
-  asn1_tagnum tagnum;                           \
-  int indef;                                    \
-  sequence_of_common(buf)
+    unsigned int length, taglen;                \
+    asn1_class asn1class;                       \
+    asn1_construction construction;             \
+    asn1_tagnum tagnum;                         \
+    int indef;                                  \
+    sequence_of_common(buf)
 
 /*
  * sequence_of_no_tagvars
@@ -304,7 +304,7 @@ asn1_get_eoc_tag (asn1buf *buf)
  * than does sequence_of() to avoid shadowing.
  */
 #define sequence_of_no_tagvars(buf)             \
-  sequence_of_common(buf)
+    sequence_of_common(buf)
 
 /*
  * sequence_of_common
@@ -314,12 +314,12 @@ asn1_get_eoc_tag (asn1buf *buf)
  * does not prefetch the next tag.
  */
 #define sequence_of_common(buf)                                 \
-  asn1buf seqbuf;                                               \
-  int seqofindef;                                               \
-  retval = asn1_get_sequence(buf, &length, &seqofindef);        \
-  if (retval) clean_return(retval);                             \
-  retval = asn1buf_imbed(&seqbuf, buf, length, seqofindef);     \
-  if (retval) clean_return(retval)
+    asn1buf seqbuf;                                             \
+    int seqofindef;                                             \
+    retval = asn1_get_sequence(buf, &length, &seqofindef);      \
+    if (retval) clean_return(retval);                           \
+    retval = asn1buf_imbed(&seqbuf, buf, length, seqofindef);   \
+    if (retval) clean_return(retval)
 
 /*
  * end_sequence_of
@@ -327,21 +327,21 @@ asn1_get_eoc_tag (asn1buf *buf)
  * Attempts to fetch an EOC tag, if any, and to sync over trailing
  * garbage, if any.
  */
-#define end_sequence_of(buf)                                                    \
-  {                                                                             \
-      taginfo t4;                                                               \
-      retval = asn1_get_tag_2(&seqbuf, &t4);                                    \
-      if (retval) clean_return(retval);                                         \
-      /* Copy out to match previous functionality, until better integrated.  */ \
-      asn1class = t4.asn1class;                                                 \
-      construction = t4.construction;                                           \
-      tagnum = t4.tagnum;                                                       \
-      taglen = t4.length;                                                       \
-      indef = t4.indef;                                                         \
-  }                                                                             \
-  retval = asn1buf_sync(buf, &seqbuf, asn1class, tagnum,                        \
-                        length, indef, seqofindef);                             \
-  if (retval) clean_return(retval);
+#define end_sequence_of(buf)                                            \
+    {                                                                   \
+        taginfo t4;                                                     \
+        retval = asn1_get_tag_2(&seqbuf, &t4);                          \
+        if (retval) clean_return(retval);                               \
+        /* Copy out to match previous functionality, until better integrated.  */ \
+        asn1class = t4.asn1class;                                       \
+        construction = t4.construction;                                 \
+        tagnum = t4.tagnum;                                             \
+        taglen = t4.length;                                             \
+        indef = t4.indef;                                               \
+    }                                                                   \
+        retval = asn1buf_sync(buf, &seqbuf, asn1class, tagnum,          \
+                              length, indef, seqofindef);               \
+        if (retval) clean_return(retval);
 
 /*
  * end_sequence_of_no_tagvars
@@ -363,7 +363,7 @@ end_sequence_of_no_tagvars_helper(asn1buf *buf, asn1buf *seqbufp,
                           t.length, t.indef, seqofindef);
     return retval;
 }
-#define end_sequence_of_no_tagvars(buf) \
+#define end_sequence_of_no_tagvars(buf)                                 \
     retval = end_sequence_of_no_tagvars_helper(buf, &seqbuf, seqofindef); \
     if (retval) clean_return(retval)
 
@@ -374,20 +374,20 @@ end_sequence_of_no_tagvars_helper(asn1buf *buf, asn1buf *seqbufp,
  * error) or a valid constructed structure, making cleanup easier on
  * callers.
  */
-#define decode_ptr(type, structure_decoder) \
-    type val; \
-    asn1_error_code retval; \
-\
-    *valptr = NULL; \
-    val = calloc(1, sizeof(*val)); \
-    if (!val) \
-        return ENOMEM; \
-    retval = structure_decoder(buf, val); \
-    if (retval) { \
-        free(val); \
-        return retval; \
-    } \
-    *valptr = val; \
+#define decode_ptr(type, structure_decoder)     \
+    type val;                                   \
+    asn1_error_code retval;                     \
+                                                \
+    *valptr = NULL;                             \
+    val = calloc(1, sizeof(*val));              \
+    if (!val)                                   \
+        return ENOMEM;                          \
+    retval = structure_decoder(buf, val);       \
+    if (retval) {                               \
+        free(val);                              \
+        return retval;                          \
+    }                                           \
+    *valptr = val;                              \
     return 0;
 
 /* scalars */
@@ -405,26 +405,26 @@ asn1_decode_kerberos_time(asn1buf *buf, krb5_timestamp *val)
     return 0;
 }
 
-#define integer_convert(fname,ktype)\
-asn1_error_code fname(asn1buf * buf, ktype * val)\
-{\
-  asn1_error_code retval;\
-  long n;\
-  retval = asn1_decode_integer(buf,&n);\
-  if (retval) return retval;\
-  *val = (ktype)n;\
-  return 0;\
-}
-#define unsigned_integer_convert(fname,ktype)\
-asn1_error_code fname(asn1buf * buf, ktype * val)\
-{\
-  asn1_error_code retval;\
-  unsigned long n;\
-  retval = asn1_decode_unsigned_integer(buf,&n);\
-  if (retval) return retval;\
-  *val = (ktype)n;\
-  return 0;\
-}
+#define integer_convert(fname,ktype)                    \
+    asn1_error_code fname(asn1buf * buf, ktype * val)   \
+    {                                                   \
+        asn1_error_code retval;                         \
+        long n;                                         \
+        retval = asn1_decode_integer(buf,&n);           \
+        if (retval) return retval;                      \
+        *val = (ktype)n;                                \
+        return 0;                                       \
+    }
+#define unsigned_integer_convert(fname,ktype)           \
+    asn1_error_code fname(asn1buf * buf, ktype * val)   \
+    {                                                   \
+        asn1_error_code retval;                         \
+        unsigned long n;                                \
+        retval = asn1_decode_unsigned_integer(buf,&n);  \
+        if (retval) return retval;                      \
+        *val = (ktype)n;                                \
+        return 0;                                       \
+    }
 integer_convert(asn1_decode_int,int)
 integer_convert(asn1_decode_int32,krb5_int32)
 integer_convert(asn1_decode_kvno,krb5_kvno)
@@ -915,9 +915,9 @@ error_out:
 
 
 /* arrays */
-#define get_element(element,decoder)\
-retval = decoder(&seqbuf,&element);\
-if (retval) clean_return(retval)
+#define get_element(element,decoder)            \
+    retval = decoder(&seqbuf,&element);         \
+    if (retval) clean_return(retval)
 
 static void *
 array_expand (void *array, int n_elts, size_t elt_size)
@@ -936,44 +936,44 @@ array_expand (void *array, int n_elts, size_t elt_size)
     return realloc(array, new_size);
 }
 
-#define array_append(array,size,element,type)\
-  {\
-    void *new_array = array_expand(*(array), (size)+2, sizeof(type*));\
-    if (new_array == NULL) clean_return(ENOMEM);\
-    *(array) = new_array;\
-    (*(array))[(size)++] = elt;\
-  }
+#define array_append(array,size,element,type)                           \
+    {                                                                   \
+        void *new_array = array_expand(*(array), (size)+2, sizeof(type*)); \
+        if (new_array == NULL) clean_return(ENOMEM);                    \
+        *(array) = new_array;                                           \
+        (*(array))[(size)++] = elt;                                     \
+    }
 
 /*
  * Function body for array decoders.  freefn is expected to look like
  * a krb5_free_ function, so we pass a null first argument.
  */
-#define decode_array_body(type,decoder,freefn)\
-  asn1_error_code retval;\
-  type *elt = NULL, **array;\
-  int size = 0, i; \
-\
-  array = *val = NULL;\
-  { sequence_of(buf);\
-    while (asn1buf_remains(&seqbuf,seqofindef) > 0) {\
-      get_element(elt,decoder);\
-      array_append(&array,size,elt,type);\
-      elt = NULL;\
-    }\
-    if (array == NULL)\
-        array = malloc(sizeof(type*));\
-    array[size] = NULL;\
-    end_sequence_of(buf);\
-  }\
-  *val = array;\
-  return 0;\
-error_out:\
-  if (elt)\
-      freefn(NULL,elt);\
-  for (i = 0; i < size; i++)\
-      freefn(NULL,array[i]);\
-  free(array);\
-  return retval
+#define decode_array_body(type,decoder,freefn)                  \
+    asn1_error_code retval;                                     \
+    type *elt = NULL, **array;                                  \
+    int size = 0, i;                                            \
+                                                                \
+    array = *val = NULL;                                        \
+    { sequence_of(buf);                                         \
+        while (asn1buf_remains(&seqbuf,seqofindef) > 0) {       \
+            get_element(elt,decoder);                           \
+            array_append(&array,size,elt,type);                 \
+            elt = NULL;                                         \
+        }                                                       \
+        if (array == NULL)                                      \
+            array = malloc(sizeof(type*));                      \
+        array[size] = NULL;                                     \
+        end_sequence_of(buf);                                   \
+    }                                                           \
+    *val = array;                                               \
+    return 0;                                                   \
+error_out:                                                      \
+if (elt)                                                        \
+    freefn(NULL,elt);                                           \
+for (i = 0; i < size; i++)                                      \
+    freefn(NULL,array[i]);                                      \
+free(array);                                                    \
+return retval
 
 static void
 free_authdata_elt(void *dummy, krb5_authdata *val)
@@ -1394,10 +1394,10 @@ asn1_decode_sam_flags(asn1buf *buf, krb5_flags *val)
 }
 
 #define opt_string(val,n,fn) opt_lenfield((val).length,(val).data,n,fn)
-#define opt_cksum(var,tagexpect,decoder)\
-if (tagnum == (tagexpect)) {\
-  get_field_body(var,decoder); }\
-else var.length = 0
+#define opt_cksum(var,tagexpect,decoder)        \
+    if (tagnum == (tagexpect)) {                \
+        get_field_body(var,decoder); }          \
+    else var.length = 0
 
 asn1_error_code
 asn1_decode_sam_challenge(asn1buf *buf, krb5_sam_challenge *val)
@@ -1548,15 +1548,15 @@ error_out:
     return retval;
 }
 
-#define opt_encfield(fld,tag,fn) \
-    if (tagnum == tag) { \
-      get_field(fld,tag,fn); } \
-    else {\
-      fld.magic = 0;\
-      fld.enctype = 0;\
-      fld.kvno = 0;\
-      fld.ciphertext.data = NULL;\
-      fld.ciphertext.length = 0;\
+#define opt_encfield(fld,tag,fn)                \
+    if (tagnum == tag) {                        \
+        get_field(fld,tag,fn); }                \
+    else {                                      \
+        fld.magic = 0;                          \
+        fld.enctype = 0;                        \
+        fld.kvno = 0;                           \
+        fld.ciphertext.data = NULL;             \
+        fld.ciphertext.length = 0;              \
     }
 
 asn1_error_code
@@ -1743,13 +1743,13 @@ asn1_decode_fast_armor(asn1buf *buf, krb5_fast_armor *val)
     setup();
     val->armor_value.data = NULL;
     {begin_structure();
-    get_field(val->armor_type, 0, asn1_decode_int32);
-    get_lenfield(val->armor_value.length, val->armor_value.data,
-                 1, asn1_decode_charstring);
-    end_structure();
+        get_field(val->armor_type, 0, asn1_decode_int32);
+        get_lenfield(val->armor_value.length, val->armor_value.data,
+                     1, asn1_decode_charstring);
+        end_structure();
     }
     return 0;
- error_out:
+error_out:
     krb5_free_data_contents( NULL, &val->armor_value);
     return retval;
 }
@@ -1767,16 +1767,16 @@ asn1_decode_fast_finished(asn1buf *buf, krb5_fast_finished *val)
     val->client = NULL;
     val->ticket_checksum.contents = NULL;
     {begin_structure();
-    get_field(val->timestamp, 0, asn1_decode_kerberos_time);
-    get_field(val->usec, 1, asn1_decode_int32);
-    alloc_field(val->client);
-    get_field(val->client, 2, asn1_decode_realm);
-    get_field(val->client, 3, asn1_decode_principal_name);
-    get_field(val->ticket_checksum, 4, asn1_decode_checksum);
-    end_structure();
+        get_field(val->timestamp, 0, asn1_decode_kerberos_time);
+        get_field(val->usec, 1, asn1_decode_int32);
+        alloc_field(val->client);
+        get_field(val->client, 2, asn1_decode_realm);
+        get_field(val->client, 3, asn1_decode_principal_name);
+        get_field(val->ticket_checksum, 4, asn1_decode_checksum);
+        end_structure();
     }
     return 0;
- error_out:
+error_out:
     krb5_free_principal(NULL, val->client);
     krb5_free_checksum_contents( NULL, &val->ticket_checksum);
     return retval;
@@ -1795,14 +1795,14 @@ asn1_decode_ad_kdcissued(asn1buf *buf, krb5_ad_kdcissued *val)
     val->i_principal = NULL;
     val->elements = NULL;
     {begin_structure();
-    get_field(val->ad_checksum, 0, asn1_decode_checksum);
-    if (tagnum == 1) {
-        alloc_principal(val->i_principal);
-        opt_field(val->i_principal, 1, asn1_decode_realm, 0);
-        opt_field(val->i_principal, 2, asn1_decode_principal_name, 0);
-    }
-    get_field(val->elements, 3, asn1_decode_authorization_data);
-    end_structure();
+        get_field(val->ad_checksum, 0, asn1_decode_checksum);
+        if (tagnum == 1) {
+            alloc_principal(val->i_principal);
+            opt_field(val->i_principal, 1, asn1_decode_realm, 0);
+            opt_field(val->i_principal, 2, asn1_decode_principal_name, 0);
+        }
+        get_field(val->elements, 3, asn1_decode_authorization_data);
+        end_structure();
     }
     return 0;
 error_out:

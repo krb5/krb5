@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * src/lib/krb5/asn.1/asn1_get.h
  *
@@ -36,12 +36,12 @@
 
 typedef struct {
 #if 1
-  /*
-   * Smaller run-time storage, and on x86 the compiler can use byte
-   * loads, stores, and compares, but on other platforms the compiler
-   * may need to load and widen before comparing... see how this works
-   * out.
-   */
+    /*
+     * Smaller run-time storage, and on x86 the compiler can use byte
+     * loads, stores, and compares, but on other platforms the compiler
+     * may need to load and widen before comparing... see how this works
+     * out.
+     */
     unsigned int asn1class : 8, construction : 8;
 #else
     asn1_class asn1class;

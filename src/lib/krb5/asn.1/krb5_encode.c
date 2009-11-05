@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * src/lib/krb5/asn.1/krb5_encode.c
  *
@@ -41,28 +41,28 @@
  *     length: length of the most-recently produced encoding
  *     sum: cumulative length of the entire encoding
  */
-#define krb5_setup()\
-  asn1_error_code retval;\
-  unsigned int length, sum = 0;\
-  asn1buf *buf=NULL;\
-  krb5_data *tmpcode;\
-\
-  *code = NULL;\
-\
-  if (rep == NULL) return ASN1_MISSING_FIELD;\
-\
-  retval = asn1buf_create(&buf);\
-  if (retval) return retval
+#define krb5_setup()                            \
+    asn1_error_code retval;                     \
+    unsigned int length, sum = 0;               \
+    asn1buf *buf=NULL;                          \
+    krb5_data *tmpcode;                         \
+                                                \
+    *code = NULL;                               \
+                                                \
+    if (rep == NULL) return ASN1_MISSING_FIELD; \
+                                                \
+    retval = asn1buf_create(&buf);              \
+    if (retval) return retval
 
 /* produce the final output and clean up the workspace */
-#define krb5_cleanup()\
-  retval = asn12krb5_buf(buf,&tmpcode);\
-error:\
-  asn1buf_destroy(&buf);\
-  if (retval)\
-    return retval;\
-  *code = tmpcode;\
-  return 0
+#define krb5_cleanup()                          \
+    retval = asn12krb5_buf(buf,&tmpcode);       \
+error:                                          \
+asn1buf_destroy(&buf);                          \
+if (retval)                                     \
+    return retval;                              \
+*code = tmpcode;                                \
+return 0
 
 #ifndef DISABLE_PKINIT
 krb5_error_code

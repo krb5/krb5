@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * src/lib/krb5/asn.1/asn1_encode.c
  *
@@ -325,10 +325,10 @@ asn1_encode_opaque(asn1buf *buf, unsigned int len, const void *val,
  */
 
 #ifdef POINTERS_ARE_ALL_THE_SAME
-#define LOADPTR(PTR,TYPE)       \
+#define LOADPTR(PTR,TYPE)                                       \
     (assert((TYPE)->loadptr != NULL), (TYPE)->loadptr(PTR))
 #else
-#define LOADPTR(PTR,TYPE)       \
+#define LOADPTR(PTR,TYPE)                       \
     (*(const void *const *)(PTR))
 #endif
 

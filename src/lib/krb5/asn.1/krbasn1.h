@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #ifndef __KRBASN1_H__
 #define __KRBASN1_H__
 
@@ -33,7 +33,7 @@ typedef krb5_error_code asn1_error_code;
 typedef enum { PRIMITIVE = 0x00, CONSTRUCTED = 0x20 } asn1_construction;
 
 typedef enum { UNIVERSAL = 0x00, APPLICATION = 0x40,
-                 CONTEXT_SPECIFIC = 0x80, PRIVATE = 0xC0 } asn1_class;
+               CONTEXT_SPECIFIC = 0x80, PRIVATE = 0xC0 } asn1_class;
 
 typedef INT64_TYPE asn1_intmax;
 typedef UINT64_TYPE asn1_uintmax;
