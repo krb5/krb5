@@ -660,6 +660,14 @@ XARGS = xargs
 EMACS = emacs
 PYTHON = python
 
+INDENTDIRS = \
+	clients \
+	kadmin \
+	kdc \
+	lib/kadm5 \
+	lib/kdb \
+	lib/krb5
+
 BSDFILES = \
 	kadmin/cli/strftime.c \
 	kadmin/server/ipropd_svc.c \
@@ -696,18 +704,11 @@ mark-cstyle:: mark-cstyle-krb5 mark-cstyle-bsd
 
 mark-cstyle-krb5::
 	(cd $(SRCTOP) && \
-	$(FIND) \
-	clients \
-	lib/kadm5 \
-	lib/kdb \
-	lib/krb5 \
-	kadmin \
-	kdc \
-	\( $(EXCLUDES) \) -prune -o \
+	$(FIND) $(INDENTDIRS) \( $(EXCLUDES) \) -prune -o \
 	-name '*.[ch]' \
 	-print0 | $(XARGS) -0 $(PYTHON) util/krb5-mark-cstyle.py \
 	--cstyle=krb5)
 
 mark-cstyle-bsd::
-	(cd $(SRCTOP) && \
-	$(PYTHON) util/krb5-mark-cstyle.py --cstyle=bsd $(BSDFILES))
+	(cd $(SRCTOP) && $(FIND) $(BSDFILES) -print0 | $(XARGS) -0 \
+	$(PYTHON) util/krb5-mark-cstyle.py --cstyle=bsd)
