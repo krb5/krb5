@@ -79,7 +79,7 @@ static void try_one (struct tinfo *t)
     err = krb5_get_server_rcache(ctx, &piece, &my_rcache);
     if (err) {
 	const char *msg = krb5_get_error_message(ctx, err);
-	fprintf(stderr, "%s while initializing replay cache\n", msg);
+	fprintf(stderr, "%s: %s while initializing replay cache\n", prog, msg);
 	krb5_free_error_message(ctx, msg);
 	exit(1);
     }
@@ -125,19 +125,42 @@ int main (int argc, char *argv[])
     int interval = 20 /* 5 * 60 */;
 
     prog = argv[0];
-    unlink("/var/tmp/rc_hello_7882");
-    unlink("/var/tmp/hello_7882");
     n = 2;
     err = krb5_init_context(&ctx);
     if (err) {
 	com_err(prog, err, "initializing context");
 	return 1;
     }
-#ifdef INIT_ONCE
+
+    /*
+     * For consistency, run the tests without an existing replay
+     * cache.  Since there isn't a way to ask the library for the
+     * pathname that would be used for the rcache, we create an rcache
+     * object and then destroy it.
+     */
     err = krb5_get_server_rcache(ctx, &piece, &rcache);
     if (err) {
 	const char *msg = krb5_get_error_message(ctx, err);
 	fprintf(stderr, "%s: %s while initializing replay cache\n", prog, msg);
+	krb5_free_error_message(ctx, msg);
+	return 1;
+    }
+    err = krb5_rc_destroy(ctx, rcache);
+    if (err) {
+	const char *msg = krb5_get_error_message(ctx, err);
+	fprintf(stderr, "%s: %s while destroying old replay cache\n",
+		prog, msg);
+	krb5_free_error_message(ctx, msg);
+	return 1;
+    }
+    rcache = NULL;
+
+#ifdef INIT_ONCE
+    err = krb5_get_server_rcache(ctx, &piece, &rcache);
+    if (err) {
+	const char *msg = krb5_get_error_message(ctx, err);
+	fprintf(stderr, "%s: %s while initializing new replay cache\n",
+		prog, msg);
 	krb5_free_error_message(ctx, msg);
 	return 1;
     }
