@@ -666,7 +666,9 @@ INDENTDIRS = \
 	kdc \
 	lib/kadm5 \
 	lib/kdb \
-	lib/krb5
+	lib/krb5 \
+	prototype \
+	slave
 
 BSDFILES = \
 	kadmin/cli/strftime.c \
@@ -678,7 +680,8 @@ BSDFILES = \
 	lib/kadm5/kadm_rpc_xdr.c \
 	lib/kadm5/srv/adb_xdr.c \
 	lib/krb5/krb/strftime.c \
-	lib/krb5/krb/strptime.c
+	lib/krb5/krb/strptime.c \
+	slave/kpropd_rpc.c
 
 OTHEREXCLUDES = \
 	lib/krb5/asn.1/asn1_decode.h \
@@ -688,7 +691,9 @@ OTHEREXCLUDES = \
 	lib/krb5/asn.1/asn1buf.h \
 	lib/krb5/asn.1/krb5_decode.c \
 	lib/krb5/krb/deltat.c \
-	lib/krb5/unicode
+	lib/krb5/unicode \
+	slave/kprop.c \
+	slave/kpropd.c
 
 EXCLUDES = `for i in $(BSDFILES) $(OTHEREXCLUDES); do echo $$i; done | $(AWK) '{ print "-path", $$1, "-o" }'` -path /dev/null
 
