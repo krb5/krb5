@@ -78,7 +78,9 @@ static void try_one (struct tinfo *t)
 #ifndef INIT_ONCE
     err = krb5_get_server_rcache(ctx, &piece, &my_rcache);
     if (err) {
-	com_err(prog, err, "getting replay cache");
+	const char *msg = krb5_get_error_message(ctx, err);
+	fprintf(stderr, "%s while initializing replay cache\n", msg);
+	krb5_free_error_message(ctx, msg);
 	exit(1);
     }
 #else
@@ -134,7 +136,9 @@ int main (int argc, char *argv[])
 #ifdef INIT_ONCE
     err = krb5_get_server_rcache(ctx, &piece, &rcache);
     if (err) {
-	com_err(prog, err, "getting replay cache");
+	const char *msg = krb5_get_error_message(ctx, err);
+	fprintf(stderr, "%s: %s while initializing replay cache\n", prog, msg);
+	krb5_free_error_message(ctx, msg);
 	return 1;
     }
 #endif
