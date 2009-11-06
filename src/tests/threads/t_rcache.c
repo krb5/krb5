@@ -49,7 +49,9 @@ struct tinfo {
     int idx;
 };
 
-#undef INIT_ONCE
+int init_once = 0;
+int n_threads = 2;
+int interval = 20 /* 5 * 60 */;
 
 static void try_one (struct tinfo *t)
 {
@@ -75,25 +77,23 @@ static void try_one (struct tinfo *t)
 	t->my_cusec++;
     r.ctime = t->my_ctime;
     r.cusec = t->my_cusec;
-#ifndef INIT_ONCE
-    err = krb5_get_server_rcache(ctx, &piece, &my_rcache);
-    if (err) {
-	const char *msg = krb5_get_error_message(ctx, err);
-	fprintf(stderr, "%s: %s while initializing replay cache\n", prog, msg);
-	krb5_free_error_message(ctx, msg);
-	exit(1);
-    }
-#else
-    my_rcache = rcache;
-#endif
+    if (!init_once) {
+	err = krb5_get_server_rcache(ctx, &piece, &my_rcache);
+	if (err) {
+	    const char *msg = krb5_get_error_message(ctx, err);
+	    fprintf(stderr, "%s: %s while initializing replay cache\n", prog, msg);
+	    krb5_free_error_message(ctx, msg);
+	    exit(1);
+	}
+    } else
+	my_rcache = rcache;
     err = krb5_rc_store(ctx, my_rcache, &r);
     if (err) {
 	com_err(prog, err, "storing in replay cache");
 	exit(1);
     }
-#ifndef INIT_ONCE
-    krb5_rc_close(ctx, my_rcache);
-#endif
+    if (!init_once)
+	krb5_rc_close(ctx, my_rcache);
 }
 
 static void *run_a_loop (void *x)
@@ -118,14 +118,52 @@ static void *run_a_loop (void *x)
     return 0;
 }
 
-int main (int argc, char *argv[])
+static void usage(void)
 {
-    int n;
-    krb5_error_code err;
-    int interval = 20 /* 5 * 60 */;
+    fprintf (stderr, "usage: %s [ options ]\n", prog);
+    fprintf (stderr, "options:\n");
+    fprintf (stderr, "\t-1\tcreate one rcache handle for process\n");
+    fprintf (stderr, "\t-t N\tnumber of threads to create\n");
+    fprintf (stderr, "\t-i N\tinterval to run test over, in seconds\n");
+    exit(1);
+}
+
+static const char optstring[] = "1t:i:";
+
+static void process_options (int argc, char *argv[])
+{
+    int c;
 
     prog = argv[0];
-    n = 2;
+    while ((c = getopt(argc, argv, optstring)) != -1) {
+	switch (c) {
+	case '?':
+	case ':':
+	default:
+	    usage ();
+	case '1':
+	    init_once = 1;
+	    break;
+	case 't':
+	    n_threads = atoi (optarg);
+	    if (n_threads < 1 || n_threads > 10000)
+		usage ();
+	    break;
+	case 'i':
+	    interval = atoi (optarg);
+	    if (interval < 2 || n_threads > 100000)
+		usage ();
+	    break;
+	}
+    }
+}
+
+int main (int argc, char *argv[])
+{
+    krb5_error_code err;
+    int i, *ip;
+
+    process_options (argc, argv);
     err = krb5_init_context(&ctx);
     if (err) {
 	com_err(prog, err, "initializing context");
@@ -155,55 +193,44 @@ int main (int argc, char *argv[])
     }
     rcache = NULL;
 
-#ifdef INIT_ONCE
-    err = krb5_get_server_rcache(ctx, &piece, &rcache);
-    if (err) {
-	const char *msg = krb5_get_error_message(ctx, err);
-	fprintf(stderr, "%s: %s while initializing new replay cache\n",
-		prog, msg);
-	krb5_free_error_message(ctx, msg);
-	return 1;
+    if (init_once) {
+	err = krb5_get_server_rcache(ctx, &piece, &rcache);
+	if (err) {
+	    const char *msg = krb5_get_error_message(ctx, err);
+	    fprintf(stderr, "%s: %s while initializing new replay cache\n",
+		    prog, msg);
+	    krb5_free_error_message(ctx, msg);
+	    return 1;
+	}
     }
-#endif
     end_time = time(0) + interval;
-#undef DIRECT
-#ifdef DIRECT
-    {
-	int zero = 0;
-	run_a_loop(&zero);
-    }
-#else
-    {
-	int i, *ip;
 
-	ip = malloc(sizeof(int) * n);
-	if (ip == 0 && n > 0) {
-	    perror("malloc");
+    ip = malloc(sizeof(int) * n_threads);
+    if (ip == 0 && n_threads > 0) {
+	perror("malloc");
+	exit(1);
+    }
+    for (i = 0; i < n_threads; i++)
+	ip[i] = i;
+
+    for (i = 0; i < n_threads; i++) {
+	pthread_t new_thread;
+	int perr;
+	perr = pthread_create(&new_thread, 0, run_a_loop, &ip[i]);
+	if (perr) {
+	    errno = perr;
+	    perror("pthread_create");
 	    exit(1);
 	}
-	for (i = 0; i < n; i++)
-	    ip[i] = i;
-
-	for (i = 0; i < n; i++) {
-	    pthread_t new_thread;
-	    int perr;
-	    perr = pthread_create(&new_thread, 0, run_a_loop, &ip[i]);
-	    if (perr) {
-		errno = perr;
-		perror("pthread_create");
-		exit(1);
-	    }
-	}
-	while (time(0) < end_time + 1)
-	    sleep(1);
-	for (i = 0; i < n; i++)
-	    printf("thread %d total %5d\n", i, ip[i]);
-	free(ip);
     }
-#endif
-#ifdef INIT_ONCE
-    krb5_rc_close(ctx, rcache);
-#endif
+    while (time(0) < end_time + 1)
+	sleep(1);
+    for (i = 0; i < n_threads; i++)
+	printf("thread %d total %5d\n", i, ip[i]);
+    free(ip);
+
+    if (init_once)
+	krb5_rc_close(ctx, rcache);
     krb5_free_context(ctx);
     return 0;
 }
