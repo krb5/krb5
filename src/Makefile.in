@@ -691,9 +691,7 @@ OTHEREXCLUDES = \
 	lib/krb5/asn.1/asn1buf.h \
 	lib/krb5/asn.1/krb5_decode.c \
 	lib/krb5/krb/deltat.c \
-	lib/krb5/unicode \
-	slave/kprop.c \
-	slave/kpropd.c
+	lib/krb5/unicode
 
 EXCLUDES = `for i in $(BSDFILES) $(OTHEREXCLUDES); do echo $$i; done | $(AWK) '{ print "-path", $$1, "-o" }'` -path /dev/null
 
