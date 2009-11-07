@@ -120,8 +120,10 @@ static void *run_a_loop (void *x)
 	t.now = time(0);
 	try_one(&t);
 	t.total++;
-/*	printf("%c", chr); */
+#if 0
+	printf("%c", chr);
 	fflush(stdout);
+#endif
     }
 /*    printf("thread %u total %u\n", (unsigned) ((int *)x-ip), t.total);*/
     *(int*)x = t.total;
@@ -172,6 +174,7 @@ int main (int argc, char *argv[])
 {
     krb5_error_code err;
     int i;
+    unsigned long sum;
 
     process_options (argc, argv);
     err = krb5_init_context(&ctx);
@@ -237,9 +240,15 @@ int main (int argc, char *argv[])
     }
     while (time(0) < end_time + 1)
 	sleep(1);
-    for (i = 0; i < n_threads; i++)
+    sum = 0;
+    for (i = 0; i < n_threads; i++) {
+	sum += ip[i];
 	printf("thread %d total %5d, about %.1f per second\n", i, ip[i],
 	       ((double) ip[i])/interval);
+    }
+    printf("total %lu in %d seconds, avg ~%.1f/sec, ~%.1f/sec/thread\n",
+	   sum, interval,
+	   ((double)sum)/interval, ((double)sum)/interval/n_threads);
     free(ip);
 
     if (init_once)
