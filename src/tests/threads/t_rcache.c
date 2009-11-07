@@ -52,6 +52,16 @@ struct tinfo {
 int init_once = 0;
 int n_threads = 2;
 int interval = 20 /* 5 * 60 */;
+int *ip;
+
+static void wait_for_tick ()
+{
+    time_t now, next;
+    now = time(0);
+    do {
+	next = time(0);
+    } while (now == next);
+}
 
 static void try_one (struct tinfo *t)
 {
@@ -113,7 +123,7 @@ static void *run_a_loop (void *x)
 /*	printf("%c", chr); */
 	fflush(stdout);
     }
-    printf("thread %p total %u\n", &t, t.total);
+/*    printf("thread %u total %u\n", (unsigned) ((int *)x-ip), t.total);*/
     *(int*)x = t.total;
     return 0;
 }
@@ -161,7 +171,7 @@ static void process_options (int argc, char *argv[])
 int main (int argc, char *argv[])
 {
     krb5_error_code err;
-    int i, *ip;
+    int i;
 
     process_options (argc, argv);
     err = krb5_init_context(&ctx);
@@ -203,7 +213,6 @@ int main (int argc, char *argv[])
 	    return 1;
 	}
     }
-    end_time = time(0) + interval;
 
     ip = malloc(sizeof(int) * n_threads);
     if (ip == 0 && n_threads > 0) {
@@ -212,6 +221,9 @@ int main (int argc, char *argv[])
     }
     for (i = 0; i < n_threads; i++)
 	ip[i] = i;
+
+    wait_for_tick ();
+    end_time = time(0) + interval;
 
     for (i = 0; i < n_threads; i++) {
 	pthread_t new_thread;
@@ -226,7 +238,8 @@ int main (int argc, char *argv[])
     while (time(0) < end_time + 1)
 	sleep(1);
     for (i = 0; i < n_threads; i++)
-	printf("thread %d total %5d\n", i, ip[i]);
+	printf("thread %d total %5d, about %.1f per second\n", i, ip[i],
+	       ((double) ip[i])/interval);
     free(ip);
 
     if (init_once)
