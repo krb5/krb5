@@ -1087,7 +1087,7 @@ make_ad_signedpath(krb5_context context,
                           if_relevant,
                           &enc_tkt_reply->authorization_data,
                           FALSE,        /* !copy */
-                          FALSE);        /* !ignore_kdc_issued */
+                          FALSE);       /* !ignore_kdc_issued */
     if (code != 0)
         goto cleanup;
 
