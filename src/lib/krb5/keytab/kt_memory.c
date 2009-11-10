@@ -104,61 +104,45 @@ static k5_mutex_t krb5int_mkt_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
 
 extern const struct _krb5_kt_ops krb5_mkt_ops;
 
-krb5_error_code KRB5_CALLCONV krb5_mkt_resolve
-(krb5_context,
- const char *,
- krb5_keytab *);
+krb5_error_code KRB5_CALLCONV
+krb5_mkt_resolve(krb5_context, const char *, krb5_keytab *);
 
-krb5_error_code KRB5_CALLCONV krb5_mkt_get_name
-(krb5_context,
- krb5_keytab,
- char *,
- unsigned int);
+krb5_error_code KRB5_CALLCONV
+krb5_mkt_get_name(krb5_context, krb5_keytab, char *, unsigned int);
 
-krb5_error_code KRB5_CALLCONV krb5_mkt_close
-(krb5_context,
- krb5_keytab);
+krb5_error_code KRB5_CALLCONV
+krb5_mkt_close(krb5_context, krb5_keytab);
 
-krb5_error_code KRB5_CALLCONV krb5_mkt_get_entry
-(krb5_context,
- krb5_keytab,
- krb5_const_principal,
- krb5_kvno,
- krb5_enctype,
- krb5_keytab_entry *);
+krb5_error_code KRB5_CALLCONV
+krb5_mkt_get_entry(krb5_context, krb5_keytab, krb5_const_principal, krb5_kvno,
+                   krb5_enctype, krb5_keytab_entry *);
 
-krb5_error_code KRB5_CALLCONV krb5_mkt_start_seq_get
-(krb5_context,
- krb5_keytab,
- krb5_kt_cursor *);
+krb5_error_code KRB5_CALLCONV
+krb5_mkt_start_seq_get(krb5_context, krb5_keytab, krb5_kt_cursor *);
 
-krb5_error_code KRB5_CALLCONV krb5_mkt_get_next
-(krb5_context,
- krb5_keytab,
- krb5_keytab_entry *,
- krb5_kt_cursor *);
+krb5_error_code KRB5_CALLCONV
+krb5_mkt_get_next(krb5_context, krb5_keytab, krb5_keytab_entry *,
+                  krb5_kt_cursor *);
 
-krb5_error_code KRB5_CALLCONV krb5_mkt_end_get
-(krb5_context,
- krb5_keytab,
- krb5_kt_cursor *);
+krb5_error_code KRB5_CALLCONV
+krb5_mkt_end_get(krb5_context, krb5_keytab, krb5_kt_cursor *);
 
 /* routines to be included on extended version (write routines) */
-krb5_error_code KRB5_CALLCONV krb5_mkt_add
-(krb5_context,
- krb5_keytab,
- krb5_keytab_entry *);
+krb5_error_code KRB5_CALLCONV
+krb5_mkt_add(krb5_context, krb5_keytab, krb5_keytab_entry *);
 
-krb5_error_code KRB5_CALLCONV krb5_mkt_remove
-(krb5_context,
- krb5_keytab,
- krb5_keytab_entry *);
+krb5_error_code KRB5_CALLCONV
+krb5_mkt_remove(krb5_context, krb5_keytab, krb5_keytab_entry *);
 
-int krb5int_mkt_initialize(void) {
+int
+krb5int_mkt_initialize(void)
+{
     return k5_mutex_finish_init(&krb5int_mkt_mutex);
 }
 
-void krb5int_mkt_finalize(void) {
+void
+krb5int_mkt_finalize(void)
+{
     krb5_mkt_list_node *node, *next_node;
     krb5_mkt_cursor cursor, next_cursor;
 

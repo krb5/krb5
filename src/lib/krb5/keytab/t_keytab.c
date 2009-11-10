@@ -60,7 +60,8 @@ extern const krb5_kt_ops krb5_ktf_writable_ops;
         exit(1);                                        \
     } else if(debug) printf("%s went ok\n", msg);
 
-static void test_misc(krb5_context context)
+static void
+test_misc(krb5_context context)
 {
     /* Tests for certain error returns */
     krb5_error_code       kret;
@@ -92,7 +93,8 @@ static void test_misc(krb5_context context)
     }
 }
 
-static void kt_test(krb5_context context, const char *name)
+static void
+kt_test(krb5_context context, const char *name)
 {
     krb5_error_code kret;
     krb5_keytab kt;
@@ -401,8 +403,8 @@ static void kt_test(krb5_context context, const char *name)
 
 }
 
-static void do_test(krb5_context context, const char *prefix,
-                    krb5_boolean delete)
+static void
+do_test(krb5_context context, const char *prefix, krb5_boolean delete)
 {
     char *name, *filename;
 
@@ -425,7 +427,7 @@ static void do_test(krb5_context context, const char *prefix,
 }
 
 int
-main (void)
+main(void)
 {
     krb5_context context;
     krb5_error_code kret;

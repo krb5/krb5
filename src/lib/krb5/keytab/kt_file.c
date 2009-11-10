@@ -94,104 +94,67 @@ typedef struct _krb5_ktfile_data {
 extern const struct _krb5_kt_ops krb5_ktf_ops;
 extern const struct _krb5_kt_ops krb5_ktf_writable_ops;
 
-static krb5_error_code KRB5_CALLCONV krb5_ktfile_resolve
-(krb5_context,
- const char *,
- krb5_keytab *);
+static krb5_error_code KRB5_CALLCONV
+krb5_ktfile_resolve(krb5_context, const char *, krb5_keytab *);
 
-static krb5_error_code KRB5_CALLCONV krb5_ktfile_wresolve
-(krb5_context,
- const char *,
- krb5_keytab *);
+static krb5_error_code KRB5_CALLCONV
+krb5_ktfile_wresolve(krb5_context, const char *, krb5_keytab *);
 
-static krb5_error_code KRB5_CALLCONV krb5_ktfile_get_name
-(krb5_context,
- krb5_keytab,
- char *,
- unsigned int);
+static krb5_error_code KRB5_CALLCONV
+krb5_ktfile_get_name(krb5_context, krb5_keytab, char *, unsigned int);
 
-static krb5_error_code KRB5_CALLCONV krb5_ktfile_close
-(krb5_context,
- krb5_keytab);
+static krb5_error_code KRB5_CALLCONV
+krb5_ktfile_close(krb5_context, krb5_keytab);
 
-static krb5_error_code KRB5_CALLCONV krb5_ktfile_get_entry
-(krb5_context,
- krb5_keytab,
- krb5_const_principal,
- krb5_kvno,
- krb5_enctype,
- krb5_keytab_entry *);
+static krb5_error_code KRB5_CALLCONV
+krb5_ktfile_get_entry(krb5_context, krb5_keytab, krb5_const_principal,
+                      krb5_kvno, krb5_enctype, krb5_keytab_entry *);
 
-static krb5_error_code KRB5_CALLCONV krb5_ktfile_start_seq_get
-(krb5_context,
- krb5_keytab,
- krb5_kt_cursor *);
+static krb5_error_code KRB5_CALLCONV
+krb5_ktfile_start_seq_get(krb5_context, krb5_keytab, krb5_kt_cursor *);
 
-static krb5_error_code KRB5_CALLCONV krb5_ktfile_get_next
-(krb5_context,
- krb5_keytab,
- krb5_keytab_entry *,
- krb5_kt_cursor *);
+static krb5_error_code KRB5_CALLCONV
+krb5_ktfile_get_next(krb5_context, krb5_keytab, krb5_keytab_entry *,
+                     krb5_kt_cursor *);
 
-static krb5_error_code KRB5_CALLCONV krb5_ktfile_end_get
-(krb5_context,
- krb5_keytab,
- krb5_kt_cursor *);
+static krb5_error_code KRB5_CALLCONV
+krb5_ktfile_end_get(krb5_context, krb5_keytab, krb5_kt_cursor *);
 
 /* routines to be included on extended version (write routines) */
-static krb5_error_code KRB5_CALLCONV krb5_ktfile_add
-(krb5_context,
- krb5_keytab,
- krb5_keytab_entry *);
+static krb5_error_code KRB5_CALLCONV
+krb5_ktfile_add(krb5_context, krb5_keytab, krb5_keytab_entry *);
 
-static krb5_error_code KRB5_CALLCONV krb5_ktfile_remove
-(krb5_context,
- krb5_keytab,
- krb5_keytab_entry *);
+static krb5_error_code KRB5_CALLCONV
+krb5_ktfile_remove(krb5_context, krb5_keytab, krb5_keytab_entry *);
 
-static krb5_error_code krb5_ktfileint_openr
-(krb5_context,
- krb5_keytab);
+static krb5_error_code
+krb5_ktfileint_openr(krb5_context, krb5_keytab);
 
-static krb5_error_code krb5_ktfileint_openw
-(krb5_context,
- krb5_keytab);
+static krb5_error_code
+krb5_ktfileint_openw(krb5_context, krb5_keytab);
 
-static krb5_error_code krb5_ktfileint_close
-(krb5_context,
- krb5_keytab);
+static krb5_error_code
+krb5_ktfileint_close(krb5_context, krb5_keytab);
 
-static krb5_error_code krb5_ktfileint_read_entry
-(krb5_context,
- krb5_keytab,
- krb5_keytab_entry *);
+static krb5_error_code
+krb5_ktfileint_read_entry(krb5_context, krb5_keytab, krb5_keytab_entry *);
 
-static krb5_error_code krb5_ktfileint_write_entry
-(krb5_context,
- krb5_keytab,
- krb5_keytab_entry *);
+static krb5_error_code
+krb5_ktfileint_write_entry(krb5_context, krb5_keytab, krb5_keytab_entry *);
 
-static krb5_error_code krb5_ktfileint_delete_entry
-(krb5_context,
- krb5_keytab,
- krb5_int32);
+static krb5_error_code
+krb5_ktfileint_delete_entry(krb5_context, krb5_keytab, krb5_int32);
 
-static krb5_error_code krb5_ktfileint_internal_read_entry
-(krb5_context,
- krb5_keytab,
- krb5_keytab_entry *,
- krb5_int32 *);
+static krb5_error_code
+krb5_ktfileint_internal_read_entry(krb5_context, krb5_keytab,
+                                   krb5_keytab_entry *, krb5_int32 *);
 
-static krb5_error_code krb5_ktfileint_size_entry
-(krb5_context,
- krb5_keytab_entry *,
- krb5_int32 *);
+static krb5_error_code
+krb5_ktfileint_size_entry(krb5_context, krb5_keytab_entry *, krb5_int32 *);
 
-static krb5_error_code krb5_ktfileint_find_slot
-(krb5_context,
- krb5_keytab,
- krb5_int32 *,
- krb5_int32 *);
+static krb5_error_code
+krb5_ktfileint_find_slot(krb5_context, krb5_keytab, krb5_int32 *,
+                         krb5_int32 *);
 
 
 /*
@@ -563,12 +526,16 @@ static const char ktfile_def_name[] = ".";
  *      krb5_ktf_keytab_externalize();
  *      krb5_ktf_keytab_internalize();
  */
-static krb5_error_code krb5_ktf_keytab_size
-(krb5_context, krb5_pointer, size_t *);
-static krb5_error_code krb5_ktf_keytab_externalize
-(krb5_context, krb5_pointer, krb5_octet **, size_t *);
-static krb5_error_code krb5_ktf_keytab_internalize
-(krb5_context,krb5_pointer *, krb5_octet **, size_t *);
+static krb5_error_code
+krb5_ktf_keytab_size(krb5_context, krb5_pointer, size_t *);
+
+static krb5_error_code
+krb5_ktf_keytab_externalize(krb5_context, krb5_pointer, krb5_octet **,
+                            size_t *);
+
+static krb5_error_code
+krb5_ktf_keytab_internalize(krb5_context,krb5_pointer *, krb5_octet **,
+                            size_t *);
 
 /*
  * Serialization entry for this type.
