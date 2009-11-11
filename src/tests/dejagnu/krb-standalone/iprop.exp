@@ -109,23 +109,23 @@ proc doit { } {
 	    expect -re "Last serial \# : 8"
 	    expect -re "Update Entry"
 	    expect -re "Update serial \# : 1"
-	    expect -re "Attributes changed : 15"
+	    expect -re "Attributes changed : 12"
 	    expect -re "Update Entry"
 	    expect -re "Update serial \# : 2"
 	    expect -re "Attributes changed : 6"
 	    expect -re "Update Entry"
 	    expect -re "Update serial \# : 3"
-	    expect -re "Attributes changed : 15"
+	    expect -re "Attributes changed : 12"
 	    expect -re "Update Entry"
 	    expect -re "Update serial \# : 4"
 	} else {
 	    expect -re "Last serial \# : 7"
 	    expect -re "Update Entry"
 	    expect -re "Update serial \# : 1"
-	    expect -re "Attributes changed : 15"
+	    expect -re "Attributes changed : 12"
 	    expect -re "Update Entry"
 	    expect -re "Update serial \# : 2"
-	    expect -re "Attributes changed : 15"
+	    expect -re "Attributes changed : 12"
 	    expect -re "Update Entry"
 	    expect -re "Update serial \# : 3"
 	}
@@ -137,7 +137,7 @@ proc doit { } {
 		break
 	    }
 	}
-	expect -re "Attributes changed : 15"
+	expect -re "Attributes changed : 12"
 	expect eof
 	pass "kproplog output"
     } foo
