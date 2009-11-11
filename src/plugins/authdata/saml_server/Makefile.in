@@ -24,8 +24,8 @@ SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto -lkdb_ldap $(SUPPORT_LIB) $(LIBS) @LD
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 STOBJLISTS=OBJS.ST
-STLIBOBJS= saml_kdc.o saml_ldap.o saml_util.o
-SRCS=saml_kdc.cpp saml_ldap.cpp saml_util.cpp
+STLIBOBJS= saml_kdc.o saml_ldap.o saml_util.o saml_trust.o
+SRCS=saml_kdc.cpp saml_ldap.cpp saml_util.cpp saml_trust.cpp
 
 all-unix:: all-liblinks
 install-unix:: install-libs
@@ -39,5 +39,5 @@ clean::
 
 # XXX for now
 CC=$(CXX)
-CXXFLAGS=-g
+CXXFLAGS=-g -DGCC_HASCLASSVISIBILITY=1 -fvisibility=default
 

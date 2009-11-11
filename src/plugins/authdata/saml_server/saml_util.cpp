@@ -496,6 +496,7 @@ krb5_error_code
 saml_krb_verify_signature(krb5_context context,
                           Signature *signature,
                           const krb5_keyblock *key,
+                          krb5_const_principal server,
                           unsigned int flags,
                           krb5_boolean bound,
                           krb5_boolean *pValid)
@@ -530,6 +531,8 @@ saml_krb_verify_signature(krb5_context context,
              * Note the verification policy may differ depending on whether
              * we also trust this signer to bind the name.
              */
+            code = saml_krb_verify_trustengine(context, signature, key,
+                                               server, flags, bound, pValid);
         }
     } catch (exception &e) {
         code = KRB5_CRYPTO_INTERNAL;
@@ -616,6 +619,16 @@ saml_krb_verify(krb5_context context,
     if (signature == NULL)
         return 0;
 
+    /*
+     * Verify any signatures present on the assertion.
+     */
+    if ((flags & SAML_KRB_VERIFY_KDC_VOUCHED) == 0) {
+        code = saml_krb_verify_signature(context, signature, key, server,
+                                         flags, bound, &verified);
+        if (code != 0 || verified == FALSE)
+            return KRB5KRB_AP_ERR_MODIFIED;
+    }
+
     if (saml_krb_get_authtime(context, assertion) < authtime)
         return KRB5KDC_ERR_CLIENT_NOTYET;
 
@@ -629,17 +642,7 @@ saml_krb_verify(krb5_context context,
     else if (verified == FALSE)
         return KRB5KDC_ERR_CLIENT_NOT_TRUSTED;
 
-    /*
-     * Verify any signatures present on the assertion.
-     */
-    if ((flags & SAML_KRB_VERIFY_KDC_VOUCHED) != 0) {
-        code = saml_krb_verify_signature(context, signature, key,
-                                         flags, bound, &verified);
-        if (code != 0 || verified == FALSE)
-            return KRB5KRB_AP_ERR_MODIFIED;
-    }
-
-    /*
+   /*
      * Verify that the Recipient in any bearer SubjectConfirmationData
      * matches the service principal.
      */

@@ -1,2 +1,5 @@
 - add string/base64 xsi:type
-
+- add trustengine support
+- test PKI verficiation
+- add secret signing to Shib IdP
+- add OpenSAML dependencies to configure

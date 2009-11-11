@@ -23,9 +23,9 @@ SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(LIBS) $(SAML_LIBS)
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 STOBJLISTS=OBJS.ST
-STLIBOBJS= saml_authdata.o ../saml_server/saml_util.o
+STLIBOBJS= saml_authdata.o ../saml_server/saml_util.o ../saml_server/saml_trust.o
 
-SRCS=	saml_authdata.cpp ../saml_server/saml_util.cpp
+SRCS=	saml_authdata.cpp ../saml_server/saml_util.cpp ../saml_server/saml_trust.cpp
 
 all-unix:: all-liblinks
 install-unix:: install-libs

@@ -75,6 +75,8 @@ using namespace std;
 #define SAML_KRB_USAGE_SESSION_KEY      1   /* derive from session key */
 #define SAML_KRB_USAGE_SERVER_KEY       2   /* derive from server key */
 
+/* saml_util.cpp */
+
 krb5_error_code
 saml_krb_derive_key(krb5_context context,
                     const krb5_keyblock *basekey,
@@ -218,6 +220,17 @@ class auto_ptr_krb5_data {
     private:
         XMLCh *m_buf;
 };
+
+/* saml_trust.cpp */
+
+krb5_error_code
+saml_krb_verify_trustengine(krb5_context context,
+                            Signature *signature,
+                            const krb5_keyblock *key,
+                            krb5_const_principal server,
+                            unsigned int flags,
+                            krb5_boolean bound,
+                            krb5_boolean *pValid);
 
 #endif /* SAML_KRB_H_ */
 
