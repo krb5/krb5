@@ -23,9 +23,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- *
  */
 
 #include <k5-int.h>
@@ -55,11 +52,12 @@ static krb5_error_code armor_ap_request
     krb5_clear_error_message(kdc_context);
     retval = krb5_auth_con_init(kdc_context, &authcontext);
     if (retval == 0)
-        retval = krb5_auth_con_setflags(kdc_context, authcontext, 0); /*disable replay cache*/
+        retval = krb5_auth_con_setflags(kdc_context,
+                                        authcontext, 0); /*disable replay cache*/
     retval = krb5_rd_req(kdc_context, &authcontext,
                          &armor->armor_value, NULL /*server*/,
                          kdc_active_realm->realm_keytab,  NULL, &ticket);
-    if (retval !=0) {
+    if (retval != 0) {
         const char * errmsg = krb5_get_error_message(kdc_context, retval);
         krb5_set_error_message(kdc_context, retval,
                                "%s while handling ap-request armor", errmsg);
@@ -70,19 +68,19 @@ static krb5_error_code armor_ap_request
                                               tgs_server,
                                               ticket->server)) {
             krb5_set_error_message(kdc_context, KRB5KDC_ERR_SERVER_NOMATCH,
-                                   "ap-request armor for something other than  the local TGS");
+                   "ap-request armor for something other than  the local TGS");
             retval = KRB5KDC_ERR_SERVER_NOMATCH;
         }
     }
-    if (retval ==0) {
+    if (retval == 0) {
         retval = krb5_auth_con_getrecvsubkey(kdc_context, authcontext, &subkey);
-        if (retval !=0 || subkey == NULL) {
+        if (retval != 0 || subkey == NULL) {
             krb5_set_error_message(kdc_context, KRB5KDC_ERR_POLICY,
                                    "ap-request armor without subkey");
             retval = KRB5KDC_ERR_POLICY;
         }
     }
-    if (retval==0)
+    if (retval == 0)
         retval = krb5_c_fx_cf2_simple(kdc_context,
                                       subkey, "subkeyarmor",
                                       ticket->enc_part2->session, "ticketarmor",
@@ -96,9 +94,10 @@ static krb5_error_code armor_ap_request
     return retval;
 }
 
-static krb5_error_code encrypt_fast_reply
-(struct kdc_request_state *state,  const krb5_fast_response *response,
- krb5_data **fx_fast_reply)
+static krb5_error_code
+encrypt_fast_reply(struct kdc_request_state *state,
+                   const krb5_fast_response *response,
+                   krb5_data **fx_fast_reply)
 {
     krb5_error_code retval = 0;
     krb5_enc_data encrypted_reply;
@@ -121,11 +120,12 @@ static krb5_error_code encrypt_fast_reply
 }
 
 
-krb5_error_code  kdc_find_fast
-(krb5_kdc_req **requestptr,  krb5_data *checksummed_data,
- krb5_keyblock *tgs_subkey,
- krb5_keyblock *tgs_session,
- struct kdc_request_state *state)
+krb5_error_code
+kdc_find_fast(krb5_kdc_req **requestptr,
+              krb5_data *checksummed_data,
+              krb5_keyblock *tgs_subkey,
+              krb5_keyblock *tgs_session,
+              struct kdc_request_state *state)
 {
     krb5_error_code retval = 0;
     krb5_pa_data *fast_padata, *cookie_padata;
@@ -165,7 +165,7 @@ krb5_error_code  kdc_find_fast
                                               &state->armor_key);
             else {
                 krb5_set_error_message(kdc_context, KRB5KDC_ERR_PREAUTH_FAILED,
-                                       "No armor key but FAST armored request present");
+                              "No armor key but FAST armored request present");
                 retval = KRB5KDC_ERR_PREAUTH_FAILED;
             }
         }
@@ -188,7 +188,8 @@ krb5_error_code  kdc_find_fast
         if (retval == 0)
             retval = krb5_c_verify_checksum(kdc_context, state->armor_key,
                                             KRB5_KEYUSAGE_FAST_REQ_CHKSUM,
-                                            checksummed_data, &fast_armored_req->req_checksum,
+                                            checksummed_data,
+                                            &fast_armored_req->req_checksum,
                                             &cksum_valid);
         if (retval == 0 && !cksum_valid) {
             retval = KRB5KRB_AP_ERR_MODIFIED;
@@ -197,13 +198,16 @@ krb5_error_code  kdc_find_fast
         }
         if (retval == 0) {
             krb5_error_code ret;
-            /* We need to confirm that a keyed checksum is used for the
+            /*
+             * We need to confirm that a keyed checksum is used for the
              * fast_req checksum.  In April 2009, the best way to do this is
              * to try verifying the checksum with a keyblock with an zero
-             * length; if it succeeds, then an unkeyed checksum is used.*/
+             * length; if it succeeds, then an unkeyed checksum is used.
+             */
             ret  = krb5_c_verify_checksum(kdc_context, &empty_keyblock,
                                           KRB5_KEYUSAGE_FAST_REQ_CHKSUM,
-                                          checksummed_data, &fast_armored_req->req_checksum,
+                                          checksummed_data,
+                                          &fast_armored_req->req_checksum,
                                           &cksum_valid);
             if (ret == 0) {
                 retval = KRB5KDC_ERR_POLICY;
@@ -212,11 +216,12 @@ krb5_error_code  kdc_find_fast
             }
         }
         if (retval == 0) {
-            if ((fast_req->fast_options & UNSUPPORTED_CRITICAL_FAST_OPTIONS) !=0)
+            if ((fast_req->fast_options & UNSUPPORTED_CRITICAL_FAST_OPTIONS) != 0)
                 retval = KRB5KDC_ERR_UNKNOWN_CRITICAL_FAST_OPTION;
         }
         if (retval == 0)
-            cookie_padata = find_pa_data(fast_req->req_body->padata, KRB5_PADATA_FX_COOKIE);
+            cookie_padata = find_pa_data(fast_req->req_body->padata,
+                                         KRB5_PADATA_FX_COOKIE);
         if (retval == 0) {
             state->fast_options = fast_req->fast_options;
             if (request->kdc_state == state)
@@ -224,7 +229,6 @@ krb5_error_code  kdc_find_fast
             krb5_free_kdc_req( kdc_context, request);
             *requestptr = fast_req->req_body;
             fast_req->req_body = NULL;
-
         }
     }
     else cookie_padata = find_pa_data(request->padata, KRB5_PADATA_FX_COOKIE);
@@ -240,7 +244,8 @@ krb5_error_code  kdc_find_fast
                 retval = ENOMEM;
                 free(new_padata);
             } else {
-                memcpy(new_padata->contents, cookie_padata->contents, new_padata->length);
+                memcpy(new_padata->contents, cookie_padata->contents,
+                       new_padata->length);
                 state->cookie = new_padata;
             }
         }
@@ -253,7 +258,8 @@ krb5_error_code  kdc_find_fast
 }
 
 
-krb5_error_code kdc_make_rstate(struct kdc_request_state **out)
+krb5_error_code
+kdc_make_rstate(struct kdc_request_state **out)
 {
     struct kdc_request_state *state = malloc( sizeof(struct kdc_request_state));
     if (state == NULL)
@@ -263,8 +269,8 @@ krb5_error_code kdc_make_rstate(struct kdc_request_state **out)
     return 0;
 }
 
-void kdc_free_rstate
-(struct kdc_request_state *s)
+void
+kdc_free_rstate (struct kdc_request_state *s)
 {
     if (s == NULL)
         return;
@@ -279,10 +285,10 @@ void kdc_free_rstate
     free(s);
 }
 
-krb5_error_code kdc_fast_response_handle_padata
-(struct kdc_request_state *state,
- krb5_kdc_req *request,
- krb5_kdc_rep *rep, krb5_enctype enctype)
+krb5_error_code
+kdc_fast_response_handle_padata(struct kdc_request_state *state,
+                                krb5_kdc_req *request,
+                                krb5_kdc_rep *rep, krb5_enctype enctype)
 {
     krb5_error_code retval = 0;
     krb5_fast_finished finish;
@@ -323,10 +329,13 @@ krb5_error_code kdc_fast_response_handle_padata
     if (retval == 0)
         retval = encode_krb5_ticket(rep->ticket, &encoded_ticket);
     if (retval == 0)
-        retval = krb5int_c_mandatory_cksumtype(kdc_context, state->armor_key->enctype, &cksumtype);
+        retval = krb5int_c_mandatory_cksumtype(kdc_context,
+                                               state->armor_key->enctype,
+                                               &cksumtype);
     if (retval == 0)
         retval = krb5_c_make_checksum(kdc_context, cksumtype,
-                                      state->armor_key, KRB5_KEYUSAGE_FAST_FINISHED,
+                                      state->armor_key,
+                                      KRB5_KEYUSAGE_FAST_FINISHED,
                                       encoded_ticket, &finish.ticket_checksum);
     if (retval == 0)
         retval = encrypt_fast_reply(state, &fast_response, &encrypted_reply);
@@ -363,10 +372,11 @@ krb5_error_code kdc_fast_response_handle_padata
  * throw away the e_data in the error (if any); in the non-FAST case
  * we will not use the in_padata.
  */
-krb5_error_code kdc_fast_handle_error
-(krb5_context context, struct kdc_request_state *state,
- krb5_kdc_req *request,
- krb5_pa_data  **in_padata, krb5_error *err)
+krb5_error_code
+kdc_fast_handle_error(krb5_context context,
+                      struct kdc_request_state *state,
+                      krb5_kdc_req *request,
+                      krb5_pa_data  **in_padata, krb5_error *err)
 {
     krb5_error_code retval = 0;
     krb5_fast_response resp;
@@ -441,9 +451,10 @@ krb5_error_code kdc_fast_handle_error
     return retval;
 }
 
-krb5_error_code kdc_fast_handle_reply_key(struct kdc_request_state *state,
-                                          krb5_keyblock *existing_key,
-                                          krb5_keyblock **out_key)
+krb5_error_code
+kdc_fast_handle_reply_key(struct kdc_request_state *state,
+                          krb5_keyblock *existing_key,
+                          krb5_keyblock **out_key)
 {
     krb5_error_code retval = 0;
     if (state->armor_key)
@@ -451,13 +462,15 @@ krb5_error_code kdc_fast_handle_reply_key(struct kdc_request_state *state,
                                       state->strengthen_key, "strengthenkey",
                                       existing_key,
                                       "replykey", out_key);
-    else retval = krb5_copy_keyblock(kdc_context, existing_key, out_key);
+    else
+        retval = krb5_copy_keyblock(kdc_context, existing_key, out_key);
     return retval;
 }
 
 
-krb5_error_code kdc_preauth_get_cookie(struct kdc_request_state *state,
-                                       krb5_pa_data **cookie)
+krb5_error_code
+kdc_preauth_get_cookie(struct kdc_request_state *state,
+                       krb5_pa_data **cookie)
 {
     char *contents;
     krb5_pa_data *pa = NULL;

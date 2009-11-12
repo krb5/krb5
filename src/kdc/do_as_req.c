@@ -83,9 +83,10 @@
 #endif
 #endif /* APPLE_PKINIT */
 
-static krb5_error_code prepare_error_as (struct kdc_request_state *, krb5_kdc_req *, int, krb5_data *,
-                                         krb5_principal, krb5_data **,
-                                         const char *);
+static krb5_error_code
+prepare_error_as(struct kdc_request_state *, krb5_kdc_req *,
+                 int, krb5_data *, krb5_principal, krb5_data **,
+                 const char *);
 
 /*ARGSUSED*/
 krb5_error_code
@@ -148,7 +149,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         status = "Finding req_body";
         goto errout;
     }
-    errcode = kdc_find_fast(&request, &encoded_req_body, NULL /*TGS key*/, NULL, state);
+    errcode = kdc_find_fast(&request, &encoded_req_body,
+                            NULL /*TGS key*/, NULL, state);
     if (errcode) {
         status = "error decoding FAST";
         goto errout;
@@ -309,9 +311,11 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 
     setflag(enc_tkt_reply.flags, TKT_FLG_INITIAL);
 
-    /* It should be noted that local policy may affect the  */
-    /* processing of any of these flags.  For example, some */
-    /* realms may refuse to issue renewable tickets         */
+    /*
+     * It should be noted that local policy may affect the
+     * processing of any of these flags.  For example, some
+     * realms may refuse to issue renewable tickets
+     */
 
     if (isflagset(request->kdc_options, KDC_OPT_FORWARDABLE))
         setflag(enc_tkt_reply.flags, TKT_FLG_FORWARDABLE);
@@ -374,8 +378,10 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     } else
         enc_tkt_reply.times.renew_till = 0; /* XXX */
 
-    /* starttime is optional, and treated as authtime if not present.
-       so we can nuke it if it matches */
+    /*
+     * starttime is optional, and treated as authtime if not present.
+     * so we can nuke it if it matches
+     */
     if (enc_tkt_reply.times.starttime == enc_tkt_reply.times.authtime)
         enc_tkt_reply.times.starttime = 0;
 
@@ -423,9 +429,9 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
      * Find the server key
      */
     if ((errcode = krb5_dbe_find_enctype(kdc_context, &server,
-                                         -1, /* ignore keytype */
-                                         -1,            /* Ignore salttype */
-                                         0,             /* Get highest kvno */
+                                         -1, /* ignore keytype   */
+                                         -1, /* Ignore salttype  */
+                                         0,  /* Get highest kvno */
                                          &server_key))) {
         status = "FINDING_SERVER_KEY";
         goto errout;
@@ -450,10 +456,13 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         }
     }
 
-    /* convert server.key into a real key (it may be encrypted
-       in the database) */
+    /*
+     * Convert server.key into a real key
+     * (it may be encrypted in the database)
+     *
+     *  server_keyblock is later used to generate auth data signatures
+     */
     if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, mkey_ptr,
-                                               /* server_keyblock is later used to generate auth data signatures */
                                                server_key, &server_keyblock,
                                                NULL))) {
         status = "DECRYPT_SERVER_KEY";
@@ -524,7 +533,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     reply_encpart.server = ticket_reply.server;
 
     /* copy the time fields EXCEPT for authtime; it's location
-       is used for ktime */
+     *  is used for ktime
+     */
     reply_encpart.times = enc_tkt_reply.times;
     reply_encpart.times.authtime = authtime = kdc_time;
 
@@ -532,7 +542,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     reply_encpart.enc_padata = NULL;
 
     /* Fetch the padata info to be returned (do this before
-       authdata to handle possible replacement of reply key */
+     *  authdata to handle possible replacement of reply key
+     */
     errcode = return_padata(kdc_context, &client, req_pkt, request,
                             &reply, client_key, &client_keyblock, &pa_context);
     if (errcode) {
@@ -572,13 +583,15 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         goto errout;
     }
 
-    errcode = krb5_encrypt_tkt_part(kdc_context, &server_keyblock, &ticket_reply);
+    errcode = krb5_encrypt_tkt_part(kdc_context, &server_keyblock,
+                                    &ticket_reply);
     if (errcode) {
         status = "ENCRYPTING_TICKET";
         goto errout;
     }
     ticket_reply.enc_part.kvno = server_key->key_data_kvno;
-    errcode = kdc_fast_response_handle_padata(state, request, &reply, client_keyblock.enctype);
+    errcode = kdc_fast_response_handle_padata(state, request, &reply,
+                                              client_keyblock.enctype);
     if (errcode) {
         status = "fast response handling";
         goto errout;
@@ -588,7 +601,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 
     reply.enc_part.enctype = client_keyblock.enctype;
 
-    errcode = kdc_fast_handle_reply_key(state, &client_keyblock, &as_encrypting_key);
+    errcode = kdc_fast_handle_reply_key(state, &client_keyblock,
+                                        &as_encrypting_key);
     if (errcode) {
         status = "generating reply key";
         goto errout;
@@ -642,9 +656,9 @@ egress:
                                    response, status);
         status = 0;
     }
+
     if (emsg)
         krb5_free_error_message(kdc_context, emsg);
-
     if (enc_tkt_reply.authorization_data != NULL)
         krb5_free_authdata(kdc_context, enc_tkt_reply.authorization_data);
     if (server_keyblock.contents != NULL)
@@ -675,11 +689,13 @@ egress:
     request->kdc_state = NULL;
     krb5_free_kdc_req(kdc_context, request);
     assert(did_log != 0);
+
     return errcode;
 }
 
 static krb5_error_code
-prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request, int error, krb5_data *e_data,
+prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request,
+                  int error, krb5_data *e_data,
                   krb5_principal canon_client, krb5_data **response,
                   const char *status)
 {
@@ -726,7 +742,8 @@ prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request, int e
             pa = calloc(size+1, sizeof(*pa));
             if (pa == NULL)
                 retval = ENOMEM;
-            else                for (size = 0; td[size]; size++) {
+            else
+                for (size = 0; td[size]; size++) {
                     krb5_pa_data *pad = malloc(sizeof(krb5_pa_data ));
                     if (pad == NULL) {
                         retval = ENOMEM;
@@ -744,11 +761,13 @@ prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request, int e
                                    request, pa, &errpkt);
     if (retval == 0)
         retval = krb5_mk_error(kdc_context, &errpkt, scratch);
+
     free(errpkt.text.data);
     if (retval)
         free(scratch);
     else
         *response = scratch;
     krb5_free_pa_data(kdc_context, pa);
+
     return retval;
 }
