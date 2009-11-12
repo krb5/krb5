@@ -207,47 +207,56 @@ handle_referral_params(krb5_realm_params *rparams,
             retval = ENOMEM;
     } else {
         if (rparams && rparams->realm_no_host_referral) {
-            if (krb5_match_config_pattern(rparams->realm_no_host_referral, KRB5_CONF_ASTERISK) == TRUE) {
+            if (krb5_match_config_pattern(rparams->realm_no_host_referral,
+                                          KRB5_CONF_ASTERISK) == TRUE) {
                 rdp->realm_no_host_referral = strdup(KRB5_CONF_ASTERISK);
                 if (!rdp->realm_no_host_referral)
                     retval = ENOMEM;
-            } else if  (no_refrls && (asprintf(&(rdp->realm_no_host_referral), "%s%s%s%s%s",
-                                               " ", no_refrls," ",rparams->realm_no_host_referral, " ") < 0))
+            } else if  (no_refrls && (asprintf(&(rdp->realm_no_host_referral),
+                                    "%s%s%s%s%s", " ", no_refrls," ",
+                                    rparams->realm_no_host_referral, " ") < 0))
                 retval = ENOMEM;
             else if (asprintf(&(rdp->realm_no_host_referral),"%s%s%s", " ",
                               rparams->realm_no_host_referral, " ") < 0)
                 retval = ENOMEM;
         } else if( no_refrls != NULL) {
-            if ( asprintf(&(rdp->realm_no_host_referral),"%s%s%s", " ", no_refrls, " ") < 0)
+            if ( asprintf(&(rdp->realm_no_host_referral),
+                         "%s%s%s", " ", no_refrls, " ") < 0)
                 retval = ENOMEM;
         } else
             rdp->realm_no_host_referral = NULL;
     }
 
-    if (rdp->realm_no_host_referral && krb5_match_config_pattern(rdp->realm_no_host_referral, KRB5_CONF_ASTERISK) == TRUE) {
+    if (rdp->realm_no_host_referral &&
+        krb5_match_config_pattern(rdp->realm_no_host_referral,
+                                  KRB5_CONF_ASTERISK) == TRUE) {
         rdp->realm_host_based_services = NULL;
         return 0;
     }
 
-    if (host_based_srvcs && (krb5_match_config_pattern(host_based_srvcs, KRB5_CONF_ASTERISK) == TRUE)) {
+    if (host_based_srvcs &&
+       (krb5_match_config_pattern(host_based_srvcs, KRB5_CONF_ASTERISK) == TRUE)) {
         rdp->realm_host_based_services = strdup(KRB5_CONF_ASTERISK);
         if (!rdp->realm_host_based_services)
             retval = ENOMEM;
     } else {
         if (rparams && rparams->realm_host_based_services) {
-            if (krb5_match_config_pattern(rparams->realm_host_based_services, KRB5_CONF_ASTERISK) == TRUE) {
+            if (krb5_match_config_pattern(rparams->realm_host_based_services,
+                                          KRB5_CONF_ASTERISK) == TRUE) {
                 rdp->realm_host_based_services = strdup(KRB5_CONF_ASTERISK);
                 if (!rdp->realm_host_based_services)
                     retval = ENOMEM;
             } else if (host_based_srvcs) {
                 if (asprintf(&(rdp->realm_host_based_services), "%s%s%s%s%s",
-                             " ", host_based_srvcs," ",rparams->realm_host_based_services, " ") < 0)
+                             " ", host_based_srvcs," ",
+                             rparams->realm_host_based_services, " ") < 0)
                     retval = ENOMEM;
             } else if (asprintf(&(rdp->realm_host_based_services),"%s%s%s", " ",
                                 rparams->realm_host_based_services, " ") < 0)
                 retval = ENOMEM;
         } else if (host_based_srvcs) {
-            if (asprintf(&(rdp->realm_host_based_services),"%s%s%s", " ", host_based_srvcs, " ") < 0)
+            if (asprintf(&(rdp->realm_host_based_services),"%s%s%s", " ",
+                         host_based_srvcs, " ") < 0)
                 retval = ENOMEM;
         } else
             rdp->realm_host_based_services = NULL;
@@ -255,6 +264,7 @@ handle_referral_params(krb5_realm_params *rparams,
 
     return retval;
 }
+
 /*
  * Initialize a realm control structure from the alternate profile or from
  * the specified defaults.
@@ -548,7 +558,7 @@ setup_sam(void)
 void
 usage(char *name)
 {
-    fprintf(stderr, "usage: %s [-x db_args]* [-d dbpathname] [-r dbrealmname]\n\t\t[-R replaycachename] [-m] [-k masterenctype] [-M masterkeyname]\n\t\t[-p port] [-n]\n"
+    fprintf(stderr, "usage: %s [-x db_args]* [-d dbpathname] [-r dbrealmname]\n\t\t[-R replaycachename] [-m] [-k masterenctype] [-M masterkeyname]\n\t\t[-p port] [/]\n"
             "\nwhere,\n\t[-x db_args]* - Any number of database specific arguments.  Look at\n"
             "\t\t\teach database module documentation for supported\n\t\t\targuments\n",
             name);
@@ -593,7 +603,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
         hierarchy[1] = KRB5_CONF_NO_HOST_REFERRAL;
         if (krb5_aprof_get_string_all(aprof, hierarchy, &no_refrls))
             no_refrls = 0;
-        if (!no_refrls || krb5_match_config_pattern(no_refrls, KRB5_CONF_ASTERISK) == FALSE) {
+        if (!no_refrls ||
+            krb5_match_config_pattern(no_refrls, KRB5_CONF_ASTERISK) == FALSE) {
             hierarchy[1] = KRB5_CONF_HOST_BASED_SERVICES;
             if (krb5_aprof_get_string_all(aprof, hierarchy, &host_based_srvcs))
                 host_based_srvcs = 0;
@@ -649,7 +660,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
                                              menctype, default_udp_ports,
                                              default_tcp_ports, manual, db_args,
                                              no_refrls, host_based_srvcs))) {
-                        fprintf(stderr,"%s: cannot initialize realm %s - see log file for details\n",
+                        fprintf(stderr,
+                               "%s: cannot initialize realm %s - see log file for details\n",
                                 argv[0], optarg);
                         exit(1);
                     }
@@ -666,7 +678,9 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
             }
             break;
         case 'd':                       /* pathname for db */
-            /* now db_name is not a seperate argument. It has to be passed as part of the db_args */
+            /* now db_name is not a seperate argument.
+             * It has to be passed as part of the db_args
+             */
             if( db_name == NULL ) {
                 if (asprintf(&db_name, "dbname=%s", optarg) < 0) {
                     fprintf(stderr,
