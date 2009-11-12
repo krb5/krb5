@@ -135,6 +135,7 @@ typedef struct _krb5_authdata_systems {
 #define AUTHDATA_SYSTEM_V2      2
     int         type;
 #define AUTHDATA_FLAG_CRITICAL  0x1
+#define AUTHDATA_FLAG_PRE_PLUGIN 0x2
     int         flags;
     void       *plugin_context;
     init_proc   init;
@@ -150,7 +151,7 @@ static krb5_authdata_systems static_authdata_systems[] = {
         /* Propagate client-submitted authdata */
         "tgs_req",
         AUTHDATA_SYSTEM_V2,
-        AUTHDATA_FLAG_CRITICAL,
+        AUTHDATA_FLAG_CRITICAL | AUTHDATA_FLAG_PRE_PLUGIN,
         NULL,
         NULL,
         NULL,
@@ -263,6 +264,20 @@ load_authdata_plugins(krb5_context context)
 
     k = 0;
 
+    /*
+     * Special case to ensure that handle_request_authdata is
+     * first in the list, to make unenc_authdata available to
+     * plugins.
+     */
+    for (i = 0;
+         i < sizeof(static_authdata_systems) / sizeof(static_authdata_systems[0]);
+         i++) {
+        if ((static_authdata_systems[i].flags & AUTHDATA_FLAG_PRE_PLUGIN) == 0)
+            continue;
+        assert(static_authdata_systems[i].init == NULL);
+        authdata_systems[k++] = static_authdata_systems[i];
+    }
+
     /* Add dynamically loaded V2 plugins */
     if (authdata_plugins_ftables_v2 != NULL) {
         struct krb5plugin_authdata_server_ftable_v2 *ftable;
@@ -339,20 +354,13 @@ load_authdata_plugins(krb5_context context)
         }
     }
 
-    /* Add the locally-supplied mechanisms to the dynamic list first. */
     for (i = 0;
          i < sizeof(static_authdata_systems) / sizeof(static_authdata_systems[0]);
          i++) {
-        authdata_systems[k] = static_authdata_systems[i];
-        /* Try to initialize the authdata system.  If it fails, we'll remove it
-         * from the list of systems we'll be using. */
-        server_init_proc = static_authdata_systems[i].init;
-        if ((server_init_proc != NULL) &&
-            ((*server_init_proc)(context, &authdata_systems[k].plugin_context) != 0)) {
-            memset(&authdata_systems[k], 0, sizeof(authdata_systems[k]));
+        if (static_authdata_systems[i].flags & AUTHDATA_FLAG_PRE_PLUGIN)
             continue;
-        }
-        k++;
+        assert(static_authdata_systems[i].init == NULL);
+        authdata_systems[k++] = static_authdata_systems[i];
     }
 
     n_authdata_systems = k;
