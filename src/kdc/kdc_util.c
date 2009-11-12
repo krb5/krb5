@@ -1770,7 +1770,6 @@ sign_db_authdata (krb5_context context,
     req.authtime                = authtime;
     req.auth_data               = tgs_authdata;
     req.session_key             = session_key;
-    req.krbtgt_key              = krbtgt_key;
     req.krbtgt_key		= krbtgt_key;
 
     req_data.data = (void *)&req;
