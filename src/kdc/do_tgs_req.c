@@ -332,7 +332,7 @@ tgt_again:
     useenctype = 0;
     if (isflagset(request->kdc_options, KDC_OPT_ENC_TKT_IN_SKEY |
                   KDC_OPT_CNAME_IN_ADDL_TKT)) {
-        krb5_keyblock    st_sealing_key;
+        krb5_keyblock  * st_sealing_key;
         krb5_kvno        st_srv_kvno;
         krb5_enctype     etype;
         krb5_db_entry    st_client;
