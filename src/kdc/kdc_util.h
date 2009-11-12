@@ -62,7 +62,7 @@ fetch_last_req_info (krb5_db_entry *, krb5_last_req_entry ***);
 
 krb5_error_code
 kdc_convert_key (krb5_keyblock *, krb5_keyblock *, int);
-krb5_error_codex
+krb5_error_code
 kdc_process_tgs_req (krb5_kdc_req *,
                      const krb5_fulladdr *,
                      krb5_data *,
