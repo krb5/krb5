@@ -1690,6 +1690,28 @@ init_creds_step_reply(krb5_context context,
     } else
         code = -1;
 
+    if (code != 0) {
+        /* if we haven't get gotten a key, get it now */
+        code = (*ctx->gak_fct)(context, ctx->request->client,
+                               ctx->reply->enc_part.enctype,
+                               ctx->prompter, ctx->prompter_data,
+                               &ctx->salt, &ctx->s2kparams,
+                               &as_key, &ctx->gak_data);
+        if (code != 0)
+            goto cleanup;
+
+        code = krb5int_fast_reply_key(context, strengthen_key, &as_key,
+                                      &encrypting_key);
+        if (code != 0)
+            goto cleanup;
+
+        code = decrypt_as_reply(context, NULL, ctx->reply, NULL, NULL,
+                                &encrypting_key, krb5_kdc_rep_decrypt_proc,
+                                NULL);
+        if (code != 0)
+            goto cleanup;
+    }
+
 
     krb5_preauth_request_context_fini(context);
 
