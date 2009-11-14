@@ -27,6 +27,7 @@
 #ifndef LEAN_CLIENT
 
 #include "k5-int.h"
+#include "init_creds_ctx.h"
 
 static krb5_error_code
 krb5_get_as_key_keytab(
@@ -75,6 +76,17 @@ krb5_get_as_key_keytab(
     (void) krb5_kt_free_entry(context, &kt_ent);
 
     return(ret);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_set_keytab(krb5_context context,
+                           krb5_init_creds_context ctx,
+                           krb5_keytab keytab)
+{
+    ctx->gak_fct = krb5_get_as_key_keytab;
+    ctx->gak_data = keytab;
+
+    return 0;
 }
 
 krb5_error_code KRB5_CALLCONV

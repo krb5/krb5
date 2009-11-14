@@ -1089,6 +1089,7 @@ krb5_init_creds_free(krb5_context context,
     free(ctx);
 }
 
+/* Heimdal API */
 krb5_error_code KRB5_CALLCONV
 krb5_init_creds_get(krb5_context context,
                     krb5_init_creds_context ctx)
@@ -1098,6 +1099,7 @@ krb5_init_creds_get(krb5_context context,
     return krb5int_init_creds_get_ext(context, ctx, &use_master);
 }
 
+/* Internal API that may return some additional information */
 krb5_error_code KRB5_CALLCONV
 krb5int_init_creds_get_ext(krb5_context context,
                            krb5_init_creds_context ctx,
@@ -1184,7 +1186,8 @@ krb5_init_creds_get_error(krb5_context context,
     ret->error = ctx->err_reply->error;
 
     if (ctx->err_reply->client != NULL) {
-        code = krb5_copy_principal(context, ctx->err_reply->client, &ret->client);
+        code = krb5_copy_principal(context, ctx->err_reply->client,
+                                   &ret->client);
         if (code != 0)
             goto cleanup;
     }
@@ -1430,34 +1433,6 @@ cleanup:
 
     return code;
 }
-
-#if 0
-krb5_error_code KRB5_CALLCONV
-krb5_init_creds_set_keyblock(krb5_context context,
-                             krb5_init_creds_context ctx,
-                             krb5_keyblock *keyblock)
-{
-    krb5_error_code code;
-    krb5_keyblock *tmp;
-
-    code = krb5_copy_keyblock(context, keyblock, &tmp);
-    if (code != 0)
-        return code;
-
-    krb5_free_keyblock(context, ctx->keyblock);
-    ctx->keyblock = tmp;
-
-    return 0;
-}
-
-krb5_error_code KRB5_CALLCONV
-krb5_init_creds_set_keytab(krb5_context context,
-                           krb5_init_creds_context ctx,
-                           krb5_keytab keytab)
-{
-    return ENOSYS;
-}
-#endif
 
 krb5_error_code KRB5_CALLCONV
 krb5_init_creds_set_service(krb5_context context,
