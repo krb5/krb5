@@ -1066,6 +1066,7 @@ struct _krb5_init_creds_context {
     void *prompter_data;
     krb5_gic_get_as_key_fct gak_fct;
     void *gak_data;
+    krb5_timestamp request_time;
     krb5_deltat start_time;
     krb5_deltat tkt_life;
     krb5_deltat renew_life;
@@ -1712,6 +1713,12 @@ init_creds_step_reply(krb5_context context,
             goto cleanup;
     }
 
+    code = verify_as_reply(context, ctx->request_time,
+                           ctx->request, ctx->reply);
+    if (code != 0)
+        goto cleanup;
+
+
 
     krb5_preauth_request_context_fini(context);
 
@@ -1735,9 +1742,7 @@ init_creds_step_request(krb5_context context,
     krb5_error_code code;
 
     if (ctx->loopcount == 0) {
-        krb5_timestamp time_now;
-
-        code = krb5_timeofday(context, &time_now);
+        code = krb5_timeofday(context, &ctx->request_time);
         if (code != 0)
             goto cleanup;
 
@@ -1754,8 +1759,8 @@ init_creds_step_request(krb5_context context,
         if (code != 0)
             goto cleanup;
 
-        ctx->request->from = krb5int_addint32(time_now, ctx->start_time);
-
+        ctx->request->from = krb5int_addint32(ctx->request_time,
+                                              ctx->start_time);
         if (ctx->renew_life > 0) {
             ctx->request->rtime =
                 krb5int_addint32(ctx->request->from, ctx->renew_life);
