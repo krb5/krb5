@@ -1076,6 +1076,7 @@ struct _krb5_init_creds_context {
     krb5_error *err_reply;
     krb5_creds cred;
     krb5_kdc_req request;
+    krb5_kdc_rep *reply;
     krb5_data *encoded_request_body;
     krb5_data *encoded_previous_request;
     struct krb5int_fast_request_state *fast_state;
@@ -1085,6 +1086,7 @@ struct _krb5_init_creds_context {
     krb5_keyblock as_key;
     krb5_keyblock encrypting_key;
     krb5_enctype etype;
+    krb5_preauth_client_rock get_data_rock;
 };
 
 void KRB5_CALLCONV
@@ -1109,6 +1111,7 @@ krb5_init_creds_free(krb5_context context,
     krb5_free_cred_contents(context, &ctx->cred);
     krb5_free_principal(context, ctx->request.server);
     free(ctx->request.ktype);
+    krb5_free_kdc_rep(context, ctx->reply);
     krb5_free_addresses(context, ctx->request.addresses);
     krb5_free_data(context, ctx->encoded_request_body);
     krb5_free_data(context, ctx->encoded_previous_request);
@@ -1223,6 +1226,10 @@ krb5_init_creds_init(krb5_context context,
     code = krb5int_fast_make_state(context, &ctx->fast_state);
     if (code != 0)
         goto cleanup;
+
+    ctx->get_data_rock.magic = CLIENT_ROCK_MAGIC;
+    ctx->get_data_rock.etype = &ctx->etype;
+    ctx->get_data_rock.fast_state = ctx->fast_state;
 
     /* Initialise request parameters as per krb5_get_init_creds() */
     ctx->request.kdc_options = context->kdc_default_options;
@@ -1472,8 +1479,7 @@ krb5_init_creds_set_as_key_func(krb5_context context,
 static krb5_error_code
 init_creds_validate_reply(krb5_context context,
                           krb5_init_creds_context ctx,
-                          krb5_data *reply,
-                          krb5_kdc_rep **ret_as_reply)
+                          krb5_data *reply)
 {
     krb5_error_code code;
     krb5_error *error = NULL;
@@ -1482,7 +1488,8 @@ init_creds_validate_reply(krb5_context context,
     krb5_free_error(context, ctx->err_reply);
     ctx->err_reply = NULL;
 
-    *ret_as_reply = NULL;
+    krb5_free_kdc_repl(context, ctx->reply);
+    ctx->reply = NULL;
 
     if (krb5_is_krb_error(reply)) {
         code = decode_krb5_error(reply, &error);
@@ -1530,7 +1537,7 @@ init_creds_validate_reply(krb5_context context,
         return KRB5KRB_AP_ERR_MSG_TYPE;
     }
 
-    *ret_as_reply = as_reply;
+    ctx->reply = as_reply;
 
     return 0;
 }
@@ -1543,14 +1550,19 @@ init_creds_step_reply(krb5_context context,
 {
     krb5_error_code code;
     krb5_pa_data **padata = NULL;
+    krb5_pa_data **kdc_padata = NULL;
     krb5_boolean retry = FALSE;
     int canon_flag = 0;
-    krb5_kdc_rep *local_as_reply = NULL;
     krb5_keyblock *strengthen_key = NULL;
-    krb5_enctype etype;
+    krb5_keyblock as_key, encrypting_key;
+
+    as_key.length = 0;
+    as_key.contents = NULL;
+    encrypting_key.length = 0;
+    encrypting_key.contents = NULL;
 
     /* process previous KDC response */
-    code = init_creds_validate_reply(context, ctx, in, &local_as_reply);
+    code = init_creds_validate_reply(context, ctx, in);
     if (code != 0)
         goto cleanup;
 
@@ -1599,7 +1611,7 @@ init_creds_step_reply(krb5_context context,
     }
 
     /* We have a response. Process it. */
-    assert(local_as_reply != NULL);
+    assert(ctx->reply != NULL);
 
     if (ctx->loopcount >= MAX_IN_TKT_LOOPS) {
         code = KRB5_GET_IN_TKT_LOOP;
@@ -1609,22 +1621,41 @@ init_creds_step_reply(krb5_context context,
     /* process any preauth data in the as_reply */
     krb5_clear_preauth_context_use_counts(context);
     code = krb5int_fast_process_response(context, ctx->fast_state,
-                                         local_as_reply, &strengthen_key);
+                                         ctx->reply, &strengthen_key);
     if (code != 0)
         goto cleanup;
 
     code = sort_krb5_padata_sequence(context, &ctx->client->realm,
-                                     local_as_reply->padata);
+                                     ctx->reply->padata);
     if (code != 0)
         goto cleanup;
 
-    etype = local_as_reply->enc_part.enctype;
+    ctx->etype = ctx->reply->enc_part.enctype;
+
+    code = krb5_do_preauth(context,
+                           &ctx->request,
+                           ctx->encoded_request_body,
+                           ctx->encoded_previous_request,
+                           ctx->reply->padata,
+                           &kdc_padata,
+                           &ctx->salt,
+                           &ctx->s2kparams,
+                           &ctx->etype,
+                           &as_key,
+                           ctx->prompter,
+                           ctx->prompter_data,
+                           ctx->gak_fct,
+                           ctx->gak_data,
+                           &ctx->get_data_rock,
+                           ctx->opte);
+    if (code != 0)
+        goto cleanup;
 
     *flags |= KRB5_INIT_CREDS_STEP_FLAG_COMPLETE;
 
 cleanup:
     krb5_free_pa_data(context, padata);
-    krb5_free_kdc_rep(context, local_as_reply);
+    krb5_free_pa_data(context, kdc_padata);
     krb5_free_keyblock(context, strengthen_key);
 
     return code;
@@ -1636,7 +1667,6 @@ init_creds_step_request(krb5_context context,
                         krb5_data *out)
 {
     krb5_error_code code;
-    krb5_preauth_client_rock get_data_rock;
 
     if (ctx->loopcount == 0) {
         krb5_timestamp time_now;
@@ -1680,10 +1710,6 @@ init_creds_step_request(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    get_data_rock.magic = CLIENT_ROCK_MAGIC;
-    get_data_rock.etype = &ctx->etype;
-    get_data_rock.fast_state = ctx->fast_state;
-
     if (ctx->err_reply == NULL) {
         /* either our first attempt, or retrying after PREAUTH_NEEDED */
         code = krb5_do_preauth(context,
@@ -1700,7 +1726,7 @@ init_creds_step_request(krb5_context context,
                                ctx->prompter_data,
                                ctx->gak_fct,
                                ctx->gak_data,
-                               &get_data_rock,
+                               &ctx->get_data_rock,
                                ctx->opte);
         if (code != 0)
             goto cleanup;
@@ -1725,7 +1751,7 @@ init_creds_step_request(krb5_context context,
                                             ctx->prompter_data,
                                             ctx->gak_fct,
                                             ctx->gak_data,
-                                            &get_data_rock,
+                                            &ctx->get_data_rock,
                                             ctx->opte);
         } else {
             /* No preauth supplied, so can't query the plugins. */
