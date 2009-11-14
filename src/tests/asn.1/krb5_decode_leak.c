@@ -704,6 +704,17 @@ main(int argc, char **argv)
                   krb5_free_ad_signedpath);
         ktest_empty_ad_signedpath(&sp);
     }
+    /****************************************************************/
+    /* encode_krb5_iakerb_header */
+    {
+        krb5_iakerb_header ih, *tmp;
+        setup(ih, "iakerb_header",
+              ktest_make_sample_iakerb_header);
+        leak_test(ih, encode_krb5_iakerb_header,
+                  decode_krb5_iakerb_header,
+                  krb5_free_iakerb_header);
+        ktest_empty_iakerb_header(&ih);
+    }
     krb5_free_context(test_context);
     return 0;
 }

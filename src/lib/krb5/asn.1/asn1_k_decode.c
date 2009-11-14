@@ -1896,6 +1896,30 @@ error_out:
     return retval;
 }
 
+asn1_error_code asn1_decode_iakerb_header
+(asn1buf *buf, krb5_iakerb_header *val)
+{
+    setup();
+    val->target_realm.data = NULL;
+    val->target_realm.length = 0;
+    val->cookie = NULL;
+    {
+        begin_structure();
+        get_lenfield(val->target_realm.length, val->target_realm.data,
+                     1, asn1_decode_charstring);
+        if (tagnum == 2) {
+            alloc_data(val->cookie);
+            get_lenfield(val->cookie->length, val->cookie->data,
+                         2, asn1_decode_charstring);
+        }
+    }
+    return 0;
+error_out:
+    krb5_free_data_contents(NULL, &val->target_realm);
+    krb5_free_data(NULL, val->cookie);
+    return retval;
+}
+
 #ifndef DISABLE_PKINIT
 /* PKINIT */
 

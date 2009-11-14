@@ -2525,6 +2525,52 @@ krb5_get_init_creds_keytab
 		char *in_tkt_service,
 		krb5_get_init_creds_opt *k5_gic_options);
 
+struct _krb5_init_creds_context;
+typedef struct _krb5_init_creds_context *krb5_init_creds_context;
+
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_free
+(krb5_context context,
+                krb5_init_creds_context ctx);
+
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_get
+(krb5_context context,
+                krb5_init_creds_context ctx);
+
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_get_error
+(krb5_context context,
+                krb5_error **error);
+
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_init
+(krb5_context context,
+		krb5_principal client,
+		krb5_prompter_fct prompter,
+		void *data,
+		krb5_deltat start_time,
+		krb5_get_init_creds_opt *k5_gic_options,
+		krb5_init_creds_context *ctx);
+
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_set_keytab
+(krb5_context context,
+                krb5_init_creds_context ctx,
+                krb5_keytab keytab);
+
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_set_password
+(krb5_context context,
+                krb5_init_creds_context ctx,
+                const char *password);
+
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_set_service
+(krb5_context context,
+                krb5_init_creds_context ctx,
+                const char *service);
+
 typedef struct _krb5_verify_init_creds_opt {
     krb5_flags flags;
     int ap_req_nofail;

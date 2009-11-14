@@ -915,6 +915,14 @@ int main(argc, argv)
 	ktest_empty_ad_signedpath(&ref);
     }
 
+    /****************************************************************/
+    /* decode_iakerb_header */
+    {
+	setup(krb5_iakerb_header,"krb5_iakerb_header",ktest_make_sample_iakerb_header);
+	decode_run("iakerb_header","","30 18 A1 0A 04 08 6B 72 62 35 64 61 74 61 A2 0A 04 08 6B 72 62 35 64 61 74 61",decode_krb5_iakerb_header,ktest_equal_iakerb_header,krb5_free_iakerb_header);
+	ktest_empty_iakerb_header(&ref);
+    }
+
 #ifdef ENABLE_LDAP
     /* ldap sequence_of_keys */
     {
