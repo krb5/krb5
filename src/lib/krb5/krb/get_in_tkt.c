@@ -1488,7 +1488,7 @@ init_creds_validate_reply(krb5_context context,
     krb5_free_error(context, ctx->err_reply);
     ctx->err_reply = NULL;
 
-    krb5_free_kdc_repl(context, ctx->reply);
+    krb5_free_kdc_rep(context, ctx->reply);
     ctx->reply = NULL;
 
     if (krb5_is_krb_error(reply)) {
