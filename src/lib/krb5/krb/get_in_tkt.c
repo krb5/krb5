@@ -1651,6 +1651,46 @@ init_creds_step_reply(krb5_context context,
     if (code != 0)
         goto cleanup;
 
+    /*
+     * If we haven't gotten a salt from another source yet, set up one
+     * corresponding to the client principal returned by the KDC.  We
+     * could get the same effect by passing local_as_reply->client to
+     * gak_fct below, but that would put the canonicalized client name
+     * in the prompt, which raises issues of needing to sanitize
+     * unprintable characters.  So for now we just let it affect the
+     * salt.  local_as_reply->client will be checked later on in
+     * verify_as_reply.
+     */
+    if (ctx->salt.length == SALT_TYPE_AFS_LENGTH && ctx->salt.data == NULL) {
+        code = krb5_principal2salt(context, ctx->reply->client, &ctx->salt);
+        if (code != 0)
+            goto cleanup;
+    }
+
+    /* XXX For 1.1.1 and prior KDC's, when SAM is used w/ USE_SAD_AS_KEY,
+       the AS_REP comes back encrypted in the user's longterm key
+       instead of in the SAD. If there was a SAM preauth, there
+       will be an as_key here which will be the SAD. If that fails,
+       use the gak_fct to get the password, and try again. */
+
+    /* XXX because etypes are handled poorly (particularly wrt SAM,
+       where the etype is fixed by the kdc), we may want to try
+       decrypt_as_reply twice.  If there's an as_key available, try
+       it.  If decrypting the as_rep fails, or if there isn't an
+       as_key at all yet, then use the gak_fct to get one, and try
+       again.  */
+    if (as_key.length) {
+        code = krb5int_fast_reply_key(context, strengthen_key, &as_key,
+                                     &encrypting_key);
+        if (code != 0)
+            goto cleanup;
+        code = decrypt_as_reply(context, NULL, ctx->reply, NULL, NULL,
+                                &encrypting_key, krb5_kdc_rep_decrypt_proc,
+                                NULL);
+    } else
+        code = -1;
+
+
     krb5_preauth_request_context_fini(context);
 
     *flags |= KRB5_INIT_CREDS_STEP_FLAG_COMPLETE;
