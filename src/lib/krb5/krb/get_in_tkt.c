@@ -1572,9 +1572,7 @@ init_creds_step_reply(krb5_context context,
             code = sort_krb5_padata_sequence(context,
                                              &ctx->client->realm,
                                              ctx->preauth_to_use);
-            if (code != 0)
-                goto cleanup;
-            /* continue to next iteration */
+
         } else if (canon_flag && ctx->err_reply->error == KDC_ERR_WRONG_REALM) {
             if (ctx->err_reply->client == NULL ||
                 !krb5_princ_realm(context, ctx->err_reply->client)->length) {
@@ -1586,19 +1584,25 @@ init_creds_step_reply(krb5_context context,
             code = krb5int_copy_data_contents(context,
                                               &ctx->err_reply->client->realm,
                                               &ctx->client->realm);
-            if (code != 0)
-                goto cleanup;
         } else {
             if (retry) {
-                /* continue to next iteration */
+                code = 0;
             } else {
                 /* error + no hints = give up */
                 code = (krb5_error_code)ctx->err_reply->error +
                        ERROR_TABLE_BASE_krb5;
-                goto cleanup;
             }
         }
     }
+
+    if (ctx->as_rep == NULL) {
+        /* Continue with the next iteration. */
+        goto cleanup;
+    }
+
+    /* We have a response. Process it. */
+
+    *flags |= KRB5_INIT_CREDS_STEP_FLAG_COMPLETE;
 
 cleanup:
     krb5_free_pa_data(context, padata);
