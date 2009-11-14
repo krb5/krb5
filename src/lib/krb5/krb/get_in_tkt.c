@@ -1062,7 +1062,7 @@ build_in_tkt_name(krb5_context context,
 struct _krb5_init_creds_context {
     krb5_gic_opt_ext *opte;
     krb5_principal client;
-    krb5_principal server;
+    char *in_tkt_service;
     krb5_prompter_fct prompter;
     void *prompter_data;
     krb5_gic_get_as_key_fct gak_fct;
@@ -1075,7 +1075,7 @@ struct _krb5_init_creds_context {
     krb5_flags kdc_options;
     char *password;
     krb5_keyblock *keyblock;
-    krb5_error *error;
+    krb5_error *err_reply;
     krb5_kdc_rep *as_rep;
     krb5_creds cred;
     krb5_data *encoded_request_body;
@@ -1105,13 +1105,13 @@ krb5_init_creds_free(krb5_context context,
                                      (krb5_get_init_creds_opt *)ctx->opte);
     }
     krb5_free_principal(context, ctx->client);
-    krb5_free_principal(context, ctx->server);
+    free(ctx->in_tkt_service);
     krb5_free_keyblock(context, ctx->keyblock);
     if (ctx->password != NULL) {
         zap(ctx->password, strlen(ctx->password));
         free(ctx->password);
     }
-    krb5_free_error(context, ctx->error);
+    krb5_free_error(context, ctx->err_reply);
     krb5_free_kdc_rep(context, ctx->as_rep);
     krb5_free_cred_contents(context, &ctx->cred);
     krb5_free_data(context, ctx->encoded_request_body);
@@ -1144,7 +1144,7 @@ krb5_init_creds_get_error(krb5_context context,
 
     *error = NULL;
 
-    if (ctx->error == NULL)
+    if (ctx->err_reply == NULL)
         return 0;
 
     ret = k5alloc(sizeof(*ret), &code);
@@ -1152,28 +1152,28 @@ krb5_init_creds_get_error(krb5_context context,
         goto cleanup;
 
     ret->magic = KV5M_ERROR;
-    ret->ctime = ctx->error->ctime;
-    ret->cusec = ctx->error->cusec;
-    ret->susec = ctx->error->susec;
-    ret->stime = ctx->error->stime;
-    ret->error = ctx->error->error;
+    ret->ctime = ctx->err_reply->ctime;
+    ret->cusec = ctx->err_reply->cusec;
+    ret->susec = ctx->err_reply->susec;
+    ret->stime = ctx->err_reply->stime;
+    ret->error = ctx->err_reply->error;
 
-    if (ctx->error->client != NULL) {
-        code = krb5_copy_principal(context, ctx->error->client, &ret->client);
+    if (ctx->err_reply->client != NULL) {
+        code = krb5_copy_principal(context, ctx->err_reply->client, &ret->client);
         if (code != 0)
             goto cleanup;
     }
 
-    code = krb5_copy_principal(context, ctx->error->server, &ret->server);
+    code = krb5_copy_principal(context, ctx->err_reply->server, &ret->server);
     if (code != 0)
         goto cleanup;
 
-    code = krb5int_copy_data_contents(context, &ctx->error->text,
+    code = krb5int_copy_data_contents(context, &ctx->err_reply->text,
                                       &ret->text);
     if (code != 0)
         goto cleanup;
 
-    code = krb5int_copy_data_contents(context, &ctx->error->e_data,
+    code = krb5int_copy_data_contents(context, &ctx->err_reply->e_data,
                                       &ret->e_data);
     if (code != 0)
         goto cleanup;
@@ -1299,11 +1299,6 @@ krb5_init_creds_init(krb5_context context,
 
     if (ctx->renew_life > 0)
         ctx->kdc_options |= KDC_OPT_RENEWABLE;
-
-    /* server name */
-    code = build_in_tkt_name(context, NULL, ctx->client, &ctx->server);
-    if (code != 0)
-        goto cleanup;
 
     /* enctypes */
     if (opte->flags & KRB5_GET_INIT_CREDS_OPT_ETYPE_LIST) {
@@ -1452,15 +1447,14 @@ krb5_init_creds_set_service(krb5_context context,
                             krb5_init_creds_context ctx,
                             const char *service)
 {
-    krb5_error_code code;
-    krb5_principal server;
+    char *s;
 
-    code = build_in_tkt_name(context, (char *)service, ctx->client, &server);
-    if (code != 0)
-        return code;
+    s = strdup(service);
+    if (s == NULL)
+        return ENOMEM;
 
-    krb5_free_principal(context, ctx->server);
-    ctx->server = server;
+    free(ctx->in_tkt_service);
+    ctx->in_tkt_service = s;
 
     return 0;
 }
@@ -1488,8 +1482,8 @@ init_creds_validate_reply(krb5_context context,
     krb5_error_code code;
     krb5_error *error = NULL;
 
-    krb5_free_error(context, ctx->error);
-    ctx->error = NULL;
+    krb5_free_error(context, ctx->err_reply);
+    ctx->err_reply = NULL;
 
     krb5_free_kdc_rep(context, ctx->as_rep);
     ctx->as_rep = NULL;
@@ -1564,24 +1558,45 @@ init_creds_step_reply(krb5_context context,
     canon_flag = ((ctx->kdc_options & KDC_OPT_CANONICALIZE) != 0) ||
         ctx->client->type == KRB5_NT_ENTERPRISE_PRINCIPAL;
 
-    if (ctx->error != NULL) {
-
+    if (ctx->err_reply != NULL) {
         code = krb5int_fast_process_error(context, ctx->fast_state,
-                                          &ctx->error, &padata, &retry);
+                                          &ctx->err_reply, &padata, &retry);
         if (code != 0)
             goto cleanup;
 
-        if (ctx->error->error == KDC_ERR_PREAUTH_REQUIRED && retry) {
+        if (ctx->err_reply->error == KDC_ERR_PREAUTH_REQUIRED && retry) {
             /* reset the list of preauth types to try */
             krb5_free_pa_data(context, ctx->preauth_to_use);
             ctx->preauth_to_use = padata;
             padata = NULL;
             code = sort_krb5_padata_sequence(context,
-                                             &ctx->server->realm,
+                                             &ctx->client->realm,
                                              ctx->preauth_to_use);
             if (code != 0)
                 goto cleanup;
             /* continue to next iteration */
+        } else if (canon_flag && ctx->err_reply->error == KDC_ERR_WRONG_REALM) {
+            if (ctx->err_reply->client == NULL ||
+                !krb5_princ_realm(context, ctx->err_reply->client)->length) {
+                code = KRB5KDC_ERR_WRONG_REALM;
+                goto cleanup;
+            }
+            /* Rewrite request.client with realm from error reply */
+            krb5_free_data_contents(context, &ctx->client->realm);
+            code = krb5int_copy_data_contents(context,
+                                              &ctx->err_reply->client->realm,
+                                              &ctx->client->realm);
+            if (code != 0)
+                goto cleanup;
+        } else {
+            if (retry) {
+                /* continue to next iteration */
+            } else {
+                /* error + no hints = give up */
+                code = (krb5_error_code)ctx->err_reply->error +
+                       ERROR_TABLE_BASE_krb5;
+                goto cleanup;
+            }
         }
     }
 
@@ -1623,7 +1638,12 @@ init_creds_step_request(krb5_context context,
     }
 
     request.client = ctx->client;
-    request.server = ctx->server;
+
+    code = build_in_tkt_name(context, ctx->in_tkt_service, ctx->client,
+                             &request.server);
+    if (code != 0)
+        goto cleanup;
+
     request.ktype = ctx->etypes;
     request.nktypes = ctx->netypes;
     request.addresses = ctx->addresses;
@@ -1647,7 +1667,7 @@ init_creds_step_request(krb5_context context,
     get_data_rock.etype = &ctx->etype;
     get_data_rock.fast_state = ctx->fast_state;
 
-    if (ctx->error == NULL) {
+    if (ctx->err_reply == NULL) {
         /* either our first attempt, or retrying after PREAUTH_NEEDED */
         code = krb5_do_preauth(context,
                                &request,
@@ -1679,7 +1699,7 @@ init_creds_step_request(krb5_context context,
                                             ctx->encoded_previous_request,
                                             ctx->preauth_to_use,
                                             &request.padata,
-                                            ctx->error,
+                                            ctx->err_reply,
                                             &ctx->salt,
                                             &ctx->s2kparams,
                                             &ctx->etype,
@@ -1696,7 +1716,7 @@ init_creds_step_request(krb5_context context,
         }
         if (code != 0) {
             /* couldn't come up with anything better */
-            code = ctx->error->error + ERROR_TABLE_BASE_krb5;
+            code = ctx->err_reply->error + ERROR_TABLE_BASE_krb5;
             goto cleanup;
         }
     }
@@ -1720,6 +1740,8 @@ init_creds_step_request(krb5_context context,
         goto cleanup;
 
 cleanup:
+    krb5_free_principal(context, request.server);
+
     return code;
 }
 
@@ -1750,8 +1772,8 @@ krb5_init_creds_step(krb5_context context,
     }
 
     if (ctx->loopcount >= MAX_IN_TKT_LOOPS) {
-        code = ctx->error ? ctx->error->error + ERROR_TABLE_BASE_krb5 :
-                            KRB5_GET_IN_TKT_LOOP;
+        code = ctx->err_reply ? ctx->err_reply->error + ERROR_TABLE_BASE_krb5 :
+                                KRB5_GET_IN_TKT_LOOP;
         return code;
     }
 
