@@ -1076,7 +1076,6 @@ struct _krb5_init_creds_context {
     char *password;
     krb5_keyblock *keyblock;
     krb5_error *err_reply;
-    krb5_kdc_rep *as_rep;
     krb5_creds cred;
     krb5_data *encoded_request_body;
     krb5_data *encoded_previous_request;
@@ -1089,7 +1088,6 @@ struct _krb5_init_creds_context {
     krb5_data s2kparams;
     krb5_keyblock as_key;
     krb5_keyblock encrypting_key;
-    krb5_keyblock *strengthen_key;
     krb5_enctype etype;
 };
 
@@ -1112,7 +1110,6 @@ krb5_init_creds_free(krb5_context context,
         free(ctx->password);
     }
     krb5_free_error(context, ctx->err_reply);
-    krb5_free_kdc_rep(context, ctx->as_rep);
     krb5_free_cred_contents(context, &ctx->cred);
     krb5_free_data(context, ctx->encoded_request_body);
     krb5_free_data(context, ctx->encoded_previous_request);
@@ -1124,7 +1121,6 @@ krb5_init_creds_free(krb5_context context,
     krb5_free_data_contents(context, &ctx->s2kparams);
     krb5_free_keyblock_contents(context, &ctx->as_key);
     krb5_free_keyblock_contents(context, &ctx->encrypting_key);
-    krb5_free_keyblock(context, ctx->strengthen_key);
     free(ctx);
 }
 
@@ -1477,16 +1473,16 @@ static krb5_error_code
 init_creds_validate_reply(krb5_context context,
                           krb5_init_creds_context ctx,
                           krb5_data *reply,
-                          unsigned int *flags)
+                          krb5_kdc_rep **ret_as_reply)
 {
     krb5_error_code code;
     krb5_error *error = NULL;
+    krb5_kdc_rep *as_reply = NULL;
 
     krb5_free_error(context, ctx->err_reply);
     ctx->err_reply = NULL;
 
-    krb5_free_kdc_rep(context, ctx->as_rep);
-    ctx->as_rep = NULL;
+    *ret_as_reply = NULL;
 
     if (krb5_is_krb_error(reply)) {
         code = decode_krb5_error(reply, &error);
@@ -1525,15 +1521,16 @@ init_creds_validate_reply(krb5_context context,
     }
 
     /* It must be a KRB_AS_REP message, or an bad returned packet */
-    code = decode_krb5_as_rep(reply, &ctx->as_rep);
+    code = decode_krb5_as_rep(reply, &as_reply);
     if (code != 0)
         return code;
 
-    if (ctx->as_rep->msg_type != KRB5_AS_REP) {
-        krb5_free_kdc_rep(context, ctx->as_rep);
-        ctx->as_rep = NULL;
+    if (as_reply->msg_type != KRB5_AS_REP) {
+        krb5_free_kdc_rep(context, as_reply);
         return KRB5KRB_AP_ERR_MSG_TYPE;
     }
+
+    *ret_as_reply = as_reply;
 
     return 0;
 }
@@ -1548,9 +1545,12 @@ init_creds_step_reply(krb5_context context,
     krb5_pa_data **padata = NULL;
     krb5_boolean retry = FALSE;
     int canon_flag = 0;
+    krb5_kdc_rep *local_as_reply = NULL;
+    krb5_keyblock *strengthen_key = NULL;
+    krb5_enctype etype;
 
     /* process previous KDC response */
-    code = init_creds_validate_reply(context, ctx, in, flags);
+    code = init_creds_validate_reply(context, ctx, in, &local_as_reply);
     if (code != 0)
         goto cleanup;
 
@@ -1596,15 +1596,36 @@ init_creds_step_reply(krb5_context context,
 
         /* Return error code, or continue with next iteration */
         goto cleanup;
-    } else
-        assert(ctx->as_rep != NULL);
+    }
 
     /* We have a response. Process it. */
+    assert(local_as_reply != NULL);
+
+    if (ctx->loopcount >= MAX_IN_TKT_LOOPS) {
+        code = KRB5_GET_IN_TKT_LOOP;
+        goto cleanup;
+    }
+
+    /* process any preauth data in the as_reply */
+    krb5_clear_preauth_context_use_counts(context);
+    code = krb5int_fast_process_response(context, ctx->fast_state,
+                                         local_as_reply, &strengthen_key);
+    if (code != 0)
+        goto cleanup;
+
+    code = sort_krb5_padata_sequence(context, &ctx->client->realm,
+                                     local_as_reply->padata);
+    if (code != 0)
+        goto cleanup;
+
+    etype = local_as_reply->enc_part.enctype;
 
     *flags |= KRB5_INIT_CREDS_STEP_FLAG_COMPLETE;
 
 cleanup:
     krb5_free_pa_data(context, padata);
+    krb5_free_kdc_rep(context, local_as_reply);
+    krb5_free_keyblock(context, strengthen_key);
 
     return code;
 }
@@ -1772,12 +1793,6 @@ krb5_init_creds_step(krb5_context context,
         }
         if (code != 0 || (*flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE))
             return code;
-    }
-
-    if (ctx->loopcount >= MAX_IN_TKT_LOOPS) {
-        code = ctx->err_reply ? ctx->err_reply->error + ERROR_TABLE_BASE_krb5 :
-                                KRB5_GET_IN_TKT_LOOP;
-        return code;
     }
 
     ctx->loopcount++;
