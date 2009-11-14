@@ -27,7 +27,6 @@ struct _krb5_init_creds_context {
     krb5_data salt;
     krb5_data s2kparams;
     krb5_keyblock as_key;
-    krb5_keyblock encrypting_key;
     krb5_enctype etype;
     krb5_preauth_client_rock get_data_rock;
 };

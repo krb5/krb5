@@ -363,6 +363,7 @@ krb5_init_creds_get
 krb5_init_creds_get_creds
 krb5_init_creds_get_error
 krb5_init_creds_init
+krb5_init_creds_set_keytab
 krb5_init_creds_set_password
 krb5_init_creds_set_service
 krb5_init_creds_step

@@ -1070,10 +1070,8 @@ krb5_init_creds_free(krb5_context context,
                                      (krb5_get_init_creds_opt *)ctx->opte);
     }
     free(ctx->in_tkt_service);
-    if (ctx->password.data != NULL) {
-        zap(ctx->password.data, ctx->password.length);
-        krb5_free_data_contents(context, &ctx->password);
-    }
+    zap(ctx->password.data, ctx->password.length);
+    krb5_free_data_contents(context, &ctx->password);
     krb5_free_error(context, ctx->err_reply);
     krb5_free_cred_contents(context, &ctx->cred);
     krb5_free_kdc_req(context, ctx->request);
@@ -1085,7 +1083,6 @@ krb5_init_creds_free(krb5_context context,
     krb5_free_data_contents(context, &ctx->salt);
     krb5_free_data_contents(context, &ctx->s2kparams);
     krb5_free_keyblock_contents(context, &ctx->as_key);
-    krb5_free_keyblock_contents(context, &ctx->encrypting_key);
     free(ctx);
 }
 
@@ -1114,9 +1111,10 @@ krb5int_init_creds_get_ext(krb5_context context,
 
     request.length = 0;
     request.data = NULL;
-
     reply.length = 0;
     reply.data = NULL;
+    realm.length = 0;
+    realm.data = NULL;
 
     if (ctx->reply != NULL) {
         /* we're finished. */
@@ -1483,16 +1481,21 @@ init_creds_validate_reply(krb5_context context,
         if (code != 0)
             return code;
 
-        if (error && error->error == KRB_ERR_RESPONSE_TOO_BIG) {
+        assert(error != NULL);
+
+        if (error->error == KRB_ERR_RESPONSE_TOO_BIG) {
             krb5_free_error(context, error);
             return KRB5KRB_ERR_RESPONSE_TOO_BIG;
+        } else {
+            ctx->err_reply = error;
+            return 0;
         }
     }
 
     /*
      * Check to make sure it isn't a V4 reply.
      */
-    if (!krb5_is_as_rep(reply)) {
+    if (reply->length != 0 && !krb5_is_as_rep(reply)) {
 /* these are in <kerberosIV/prot.h> as well but it isn't worth including. */
 #define V4_KRB_PROT_VERSION     4
 #define V4_AUTH_MSG_ERR_REPLY   (5<<1)
@@ -1541,10 +1544,8 @@ init_creds_step_reply(krb5_context context,
     krb5_boolean retry = FALSE;
     int canon_flag = 0;
     krb5_keyblock *strengthen_key = NULL;
-    krb5_keyblock as_key, encrypting_key;
+    krb5_keyblock encrypting_key;
 
-    as_key.length = 0;
-    as_key.contents = NULL;
     encrypting_key.length = 0;
     encrypting_key.contents = NULL;
 
@@ -1628,7 +1629,7 @@ init_creds_step_reply(krb5_context context,
                            &ctx->salt,
                            &ctx->s2kparams,
                            &ctx->etype,
-                           &as_key,
+                           &ctx->as_key,
                            ctx->prompter,
                            ctx->prompter_data,
                            ctx->gak_fct,
@@ -1666,8 +1667,8 @@ init_creds_step_reply(krb5_context context,
        it.  If decrypting the as_rep fails, or if there isn't an
        as_key at all yet, then use the gak_fct to get one, and try
        again.  */
-    if (as_key.length) {
-        code = krb5int_fast_reply_key(context, strengthen_key, &as_key,
+    if (ctx->as_key.length) {
+        code = krb5int_fast_reply_key(context, strengthen_key, &ctx->as_key,
                                      &encrypting_key);
         if (code != 0)
             goto cleanup;
@@ -1683,11 +1684,11 @@ init_creds_step_reply(krb5_context context,
                                ctx->reply->enc_part.enctype,
                                ctx->prompter, ctx->prompter_data,
                                &ctx->salt, &ctx->s2kparams,
-                               &as_key, &ctx->gak_data);
+                               &ctx->as_key, ctx->gak_data);
         if (code != 0)
             goto cleanup;
 
-        code = krb5int_fast_reply_key(context, strengthen_key, &as_key,
+        code = krb5int_fast_reply_key(context, strengthen_key, &ctx->as_key,
                                       &encrypting_key);
         if (code != 0)
             goto cleanup;
@@ -1719,7 +1720,6 @@ cleanup:
     krb5_free_pa_data(context, padata);
     krb5_free_pa_data(context, kdc_padata);
     krb5_free_keyblock(context, strengthen_key);
-    krb5_free_keyblock_contents(context, &as_key);
     krb5_free_keyblock_contents(context, &encrypting_key);
 
     return code;
@@ -1731,6 +1731,15 @@ init_creds_step_request(krb5_context context,
                         krb5_data *out)
 {
     krb5_error_code code;
+
+    krb5_free_principal(context, ctx->request->server);
+    ctx->request->server = NULL;
+
+    code = build_in_tkt_name(context, ctx->in_tkt_service,
+                             ctx->request->client,
+                             &ctx->request->server);
+    if (code != 0)
+        goto cleanup;
 
     if (ctx->loopcount == 0) {
         code = krb5_timeofday(context, &ctx->request_time);
@@ -1763,14 +1772,6 @@ init_creds_step_request(krb5_context context,
         } else
             ctx->request->rtime = 0;
     }
-
-    krb5_free_principal(context, ctx->request->server);
-    ctx->request->server = NULL;
-
-    code = build_in_tkt_name(context, ctx->in_tkt_service, ctx->request->client,
-                             &ctx->request->server);
-    if (code != 0)
-        goto cleanup;
 
     if (ctx->err_reply == NULL) {
         /* either our first attempt, or retrying after PREAUTH_NEEDED */
@@ -1866,7 +1867,7 @@ krb5_init_creds_step(krb5_context context,
     realm->data = NULL;
     realm->length = 0;
 
-    if (in != NULL) {
+    if (in->length != 0) {
         code = init_creds_step_reply(context, ctx, in, flags);
         if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG) {
             code = krb5int_copy_data_contents(context,
@@ -1876,8 +1877,6 @@ krb5_init_creds_step(krb5_context context,
         if (code != 0 || (*flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE))
             goto cleanup;
     }
-
-    ctx->loopcount++;
 
     code = init_creds_step_request(context, ctx, out);
     if (code != 0)
@@ -1890,6 +1889,8 @@ krb5_init_creds_step(krb5_context context,
                                       realm);
     if (code != 0)
         goto cleanup;
+
+    ctx->loopcount++;
 
 cleanup:
     if (code == KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN) {
