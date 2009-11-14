@@ -1651,6 +1651,8 @@ init_creds_step_reply(krb5_context context,
     if (code != 0)
         goto cleanup;
 
+    krb5_preauth_request_context_fini(context);
+
     *flags |= KRB5_INIT_CREDS_STEP_FLAG_COMPLETE;
 
 cleanup:
@@ -1658,6 +1660,7 @@ cleanup:
     krb5_free_pa_data(context, kdc_padata);
     krb5_free_keyblock(context, strengthen_key);
     krb5_free_keyblock_contents(context, &as_key);
+    krb5_free_keyblock_contents(context, &encrypting_key);
 
     return code;
 }
