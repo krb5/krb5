@@ -2277,7 +2277,7 @@ typedef struct _krb5int_access {
                                        krb5_data **code);
 
     krb5_error_code
-    (*encode_krb5_reply_key_pack)(const krb5_reply_key_
+    (*encode_krb5_reply_key_pack)(const krb5_reply_key_pack *,
                                   krb5_data **code);
 
     krb5_error_code
@@ -2696,7 +2696,7 @@ krb5_error_code krb5int_send_tgs(krb5_context, krb5_flags,
                                                              krb5_keyblock *,
                                                              krb5_kdc_req *,
                                                              void *),
-                                 void *gcvt_data, krb5_response *
+                                 void *gcvt_data, krb5_response *,
                                  krb5_keyblock **subkey);
 /* The subkey field is an output parameter; if a
  * tgs-rep is received then the subkey will be filled
