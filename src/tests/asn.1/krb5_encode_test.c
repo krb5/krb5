@@ -717,6 +717,28 @@ main(argc, argv)
 		   encode_krb5_ad_kdcissued);
 	ktest_empty_ad_kdcissued(&kdci);
     }
+    /****************************************************************/
+    /* encode_krb5_ad_signedpath_data */
+    {
+	krb5_ad_signedpath_data spd;
+	setup(spd,krb5_ad_signedpath_data,"ad_signedpath_data",
+	      ktest_make_sample_ad_signedpath_data);
+	encode_run(spd,krb5_ad_signedpath_data,
+		   "ad_signedpath_data","",
+		   encode_krb5_ad_signedpath_data);
+	ktest_empty_ad_signedpath_data(&spd);
+    }
+    /****************************************************************/
+    /* encode_krb5_ad_signedpath */
+    {
+	krb5_ad_signedpath sp;
+	setup(sp,krb5_ad_signedpath,"ad_signedpath",
+	      ktest_make_sample_ad_signedpath);
+	encode_run(sp,krb5_ad_signedpath,
+		   "ad_signedpath","",
+		   encode_krb5_ad_signedpath);
+	ktest_empty_ad_signedpath(&sp);
+    }
 #ifdef ENABLE_LDAP
     {
 	ldap_seqof_key_data skd;

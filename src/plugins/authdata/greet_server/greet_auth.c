@@ -69,7 +69,7 @@ greet_kdc_verify(krb5_context context,
                                  NULL,
                                  KRB5_AUTHDATA_KDC_ISSUED,
                                  &tgt_authdata);
-    if (code != 0)
+    if (code != 0 || tgt_authdata == NULL)
         return 0;
 
     code = krb5_verify_authdata_kdc_issued(context,
@@ -113,6 +113,7 @@ greet_kdc_sign(krb5_context context,
     krb5_error_code code;
     krb5_authdata ad_datum, *ad_data[2], **kdc_issued = NULL;
     krb5_authdata **if_relevant = NULL;
+    krb5_authdata **tkt_authdata;
 
     ad_datum.ad_type = -42;
     ad_datum.contents = (krb5_octet *)greeting->data;
@@ -138,13 +139,20 @@ greet_kdc_sign(krb5_context context,
         return code;
     }
 
-    /* this isn't very friendly to other plugins... */
-    krb5_free_authdata(context, enc_tkt_reply->authorization_data);
-    enc_tkt_reply->authorization_data = if_relevant;
+    code = krb5_merge_authdata(context,
+                               if_relevant,
+                               enc_tkt_reply->authorization_data,
+                               &tkt_authdata);
+    if (code == 0) {
+        krb5_free_authdata(context, enc_tkt_reply->authorization_data);
+        enc_tkt_reply->authorization_data = tkt_authdata;
+    } else {
+        krb5_free_authdata(context, if_relevant);
+    }
 
     krb5_free_authdata(context, kdc_issued);
 
-    return 0;
+    return code;
 }
 
 static krb5_error_code
@@ -165,17 +173,12 @@ greet_authdata(krb5_context context,
     krb5_error_code code;
     krb5_data *greeting = NULL;
 
-    if (request->msg_type == KRB5_TGS_REQ) {
-        code = greet_kdc_verify(context, enc_tkt_request, &greeting);
-        if (code != 0)
-            return code;
-    }
+    if (request->msg_type != KRB5_TGS_REQ)
+	return 0;
 
-    if (greeting == NULL) {
-        code = greet_hello(context, &greeting);
-        if (code != 0)
-            return code;
-    }
+    code = greet_hello(context, &greeting);
+    if (code != 0)
+        return code;
 
     code = greet_kdc_sign(context, enc_tkt_reply, tgs->princ, greeting);
 

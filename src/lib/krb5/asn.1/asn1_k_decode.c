@@ -1007,6 +1007,45 @@ error_out:
     return retval;
 }
 
+static asn1_error_code asn1_peek_authdata_elt(asn1buf *buf, krb5_authdatatype *val)
+{
+    setup();
+    *val = 0;
+    { begin_structure();
+        get_field(*val, 0, asn1_decode_authdatatype);
+        end_structure();
+    }
+    return 0;
+error_out:
+    return retval;
+}
+
+asn1_error_code asn1_peek_authorization_data
+(asn1buf *buf, unsigned int *num, krb5_authdatatype **val)
+{
+    int size = 0;
+    krb5_authdatatype *array = NULL, *new_array;
+
+    asn1_error_code retval;
+    { sequence_of(buf);
+        while (asn1buf_remains(&seqbuf,seqofindef) > 0) {
+            size++;
+            new_array = realloc(array,size*sizeof(krb5_authdatatype));
+            if (new_array == NULL) clean_return(ENOMEM);
+            array = new_array;
+            retval = asn1_peek_authdata_elt(&seqbuf,&array[size-1]);
+            if (retval) clean_return(retval);
+        }
+        end_sequence_of(buf);
+    }
+    *num = size;
+    *val = array;
+    return 0;
+error_out:
+    free(array);
+    return retval;
+}
+
 asn1_error_code
 asn1_decode_authdata_elt_ptr(asn1buf *buf, krb5_authdata **valptr)
 {
@@ -1809,6 +1848,51 @@ error_out:
     krb5_free_checksum_contents(NULL, &val->ad_checksum);
     krb5_free_principal(NULL, val->i_principal);
     krb5_free_authdata(NULL, val->elements);
+    return retval;
+}
+
+static asn1_error_code asn1_decode_princ_plus_realm
+(asn1buf *buf, krb5_principal *valptr)
+{
+    setup();
+    alloc_principal((*valptr));
+    { begin_structure();
+        get_field((*valptr), 0, asn1_decode_principal_name);
+        get_field((*valptr), 1, asn1_decode_realm);
+        end_structure();
+    }
+    return 0;
+error_out:
+    krb5_free_principal(NULL, *valptr);
+    *valptr = NULL;
+    return retval;
+}
+
+static asn1_error_code asn1_decode_sequence_of_princ_plus_realm
+(asn1buf *buf, krb5_principal **val)
+{
+    decode_array_body(krb5_principal_data,asn1_decode_princ_plus_realm,krb5_free_principal);
+}
+
+asn1_error_code asn1_decode_ad_signedpath
+(asn1buf *buf, krb5_ad_signedpath *val)
+{
+    setup();
+    val->enctype = ENCTYPE_NULL;
+    val->checksum.contents = NULL;
+    val->delegated = NULL;
+    {
+        begin_structure();
+        get_field(val->enctype, 0, asn1_decode_enctype);
+        get_field(val->checksum, 1, asn1_decode_checksum);
+        opt_field(val->delegated, 2, asn1_decode_sequence_of_princ_plus_realm,
+                  NULL);
+        opt_field(val->method_data, 3, asn1_decode_sequence_of_pa_data, NULL);
+        end_structure();
+    }
+    return 0;
+error_out:
+    krb5_free_checksum_contents(NULL, &val->checksum);
     return retval;
 }
 

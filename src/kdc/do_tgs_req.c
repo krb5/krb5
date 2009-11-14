@@ -103,7 +103,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_keyblock encrypting_key;
     int nprincs = 0;
     krb5_boolean more;
-    krb5_timestamp kdc_time, authtime=0;
+    krb5_timestamp kdc_time, authtime = 0;
     krb5_keyblock session_key;
     krb5_timestamp rtime;
     krb5_keyblock *reply_key = NULL;
@@ -116,7 +116,8 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     register int i;
     int firstpass = 1;
     const char        *status = 0;
-    krb5_enc_tkt_part *header_enc_tkt = NULL; /* TG or evidence ticket */
+    krb5_enc_tkt_part *header_enc_tkt = NULL; /* TGT */
+    krb5_enc_tkt_part *subject_tkt = NULL; /* TGT or evidence ticket */
     krb5_db_entry client, krbtgt;
     int c_nprincs = 0, k_nprincs = 0;
     krb5_pa_s4u_x509_user *s4u_x509_user = NULL; /* protocol transition request */
@@ -135,6 +136,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
 
     reply.padata = 0; /* For cleanup handler */
     reply_encpart.enc_padata = 0;
+    e_data.data = NULL;
 
     session_key.contents = NULL;
 
@@ -391,9 +393,6 @@ tgt_again:
 
             assert(krb5_is_tgs_principal(header_ticket->server));
 
-            /* From now on, use evidence ticket as header ticket */
-            header_enc_tkt = request->second_ticket[st_idx]->enc_part2;
-
             assert(c_nprincs == 0); /* assured by kdc_process_s4u2self_req() */
 
             client = st_client;
@@ -425,7 +424,18 @@ tgt_again:
         goto cleanup;
     }
 
-    authtime = header_enc_tkt->times.authtime;
+    /*
+     * subject_tkt will refer to the evidence ticket (for constrained
+     * delegation) or the TGT. The distinction from header_enc_tkt is
+     * necessary because the TGS signature only protects some fields:
+     * the others could be forged by a malicious server.
+     */
+
+    if (isflagset(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION))
+        subject_tkt = request->second_ticket[st_idx]->enc_part2;
+    else
+        subject_tkt = header_enc_tkt;
+    authtime = subject_tkt->times.authtime;
 
     if (is_referral)
         ticket_reply.server = server.princ;
@@ -443,7 +453,7 @@ tgt_again:
      * authtime's value.
      */
     if (!(header_enc_tkt->times.starttime))
-        header_enc_tkt->times.starttime = header_enc_tkt->times.authtime;
+        header_enc_tkt->times.starttime = authtime;
 
     /* don't use new addresses unless forwarded, see below */
 
@@ -584,9 +594,9 @@ tgt_again:
     }
 
     /*
-     * Set authtime to be the same as header_ticket's
+     * Set authtime to be the same as header or evidence ticket's
      */
-    enc_tkt_reply.times.authtime = header_enc_tkt->times.authtime;
+    enc_tkt_reply.times.authtime = authtime;
 
     /*
      * Propagate the preauthentication flags through to the returned ticket.
@@ -606,7 +616,7 @@ tgt_again:
         errcode = krb5_unparse_name(kdc_context, s4u_x509_user->user_id.user,
                                     &s4u_name);
     } else if (isflagset(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION)) {
-        errcode = krb5_unparse_name(kdc_context, header_enc_tkt->client,
+        errcode = krb5_unparse_name(kdc_context, subject_tkt->client,
                                     &s4u_name);
     } else {
         errcode = 0;
@@ -676,15 +686,13 @@ tgt_again:
     if (isflagset(server.attributes, KRB5_KDB_NO_AUTH_DATA_REQUIRED) == 0) {
         /*
          * If we are not doing protocol transition/constrained delegation
-         * and there was no authorization data included, try to lookup
-         * the client principal as it may be mapped to a local account.
+         * try to lookup the client principal so plugins can add additional
+         * authorization information.
          *
          * Always validate authorization data for constrained delegation
          * because we must validate the KDC signatures.
          */
-        if (!isflagset(c_flags, KRB5_KDB_FLAGS_S4U) &&
-            header_enc_tkt->authorization_data == NULL) {
-
+        if (!isflagset(c_flags, KRB5_KDB_FLAGS_S4U)) {
             /* Generate authorization data so we can include it in ticket */
             setflag(c_flags, KRB5_KDB_FLAG_INCLUDE_PAC);
             /* Map principals from foreign (possibly non-AD) realms */
@@ -694,7 +702,7 @@ tgt_again:
 
             c_nprincs = 1;
             errcode = krb5_db_get_principal_ext(kdc_context,
-                                                header_enc_tkt->client,
+                                                subject_tkt->client,
                                                 c_flags,
                                                 &client,
                                                 &c_nprincs,
@@ -720,7 +728,7 @@ tgt_again:
         !isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM))
         enc_tkt_reply.client = s4u_x509_user->user_id.user;
     else
-        enc_tkt_reply.client = header_enc_tkt->client;
+        enc_tkt_reply.client = subject_tkt->client;
 
     enc_tkt_reply.session = &session_key;
     enc_tkt_reply.transited.tr_type = KRB5_DOMAIN_X500_COMPRESS;
@@ -739,7 +747,7 @@ tgt_again:
                               request,
                               s4u_x509_user ?
                               s4u_x509_user->user_id.user : NULL,
-                              header_enc_tkt,
+                              subject_tkt,
                               &enc_tkt_reply);
     if (errcode) {
         krb5_klog_syslog(LOG_INFO, "TGS_REQ : handle_authdata (%d)", errcode);
@@ -913,10 +921,8 @@ tgt_again:
     reply_encpart.session = &session_key;
     reply_encpart.nonce = request->nonce;
 
-    /* copy the time fields EXCEPT for authtime; its location
-       is used for ktime */
+    /* copy the time fields */
     reply_encpart.times = enc_tkt_reply.times;
-    reply_encpart.times.authtime = header_enc_tkt->times.authtime;
 
     /* starttime is optional, and treated as authtime if not present.
        so we can nuke it if it matches */

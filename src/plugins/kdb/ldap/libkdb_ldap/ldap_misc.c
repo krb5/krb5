@@ -2085,6 +2085,43 @@ populate_krb5_db_entry (krb5_context context,
 	}
     }
 
+    /* ALLOWED TO DELEGATE TO */
+    {
+	char **a2d2 = NULL;
+	int i;
+	krb5_tl_data **tlp;
+
+	st = krb5_ldap_get_strings(ld, ent, "krbAllowedToDelegateTo",
+				   &a2d2, &attr_present);
+	if (st != 0)
+	    goto cleanup;
+
+	if (attr_present == TRUE) {
+	    for (tlp = &entry->tl_data; *tlp; tlp = &(*tlp)->tl_data_next)
+		;
+	    for (i = 0; a2d2[i] != NULL; i++) {
+		krb5_tl_data *tl = k5alloc(sizeof(*tl), &st);
+		if (st != 0) {
+		    ldap_value_free(a2d2);
+		    goto cleanup;
+		}
+		tl->tl_data_type = KRB5_TL_CONSTRAINED_DELEGATION_ACL;
+		tl->tl_data_length = strlen(a2d2[i]);
+		tl->tl_data_contents = (krb5_octet *)strdup(a2d2[i]);
+		if (tl->tl_data_contents == NULL) {
+		    st = ENOMEM;
+		    ldap_value_free(a2d2);
+		    free(tl);
+		    goto cleanup;
+		}
+		tl->tl_data_next = NULL;
+		*tlp = tl;
+		tlp = &tl->tl_data_next;
+	    }
+	    ldap_value_free(a2d2);
+	}
+    }
+
     /* KRBOBJECTREFERENCES */
     {
 	int i=0;

@@ -570,6 +570,35 @@ int ktest_equal_ad_kdcissued(ref, var)
     return p;
 }
 
+int ktest_equal_ad_signedpath_data(ref, var)
+    krb5_ad_signedpath_data *ref;
+    krb5_ad_signedpath_data *var;
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p=p&&ptr_equal(client,ktest_equal_principal_data);
+    p=p&&scalar_equal(authtime);
+    p=p&&ptr_equal(delegated,ktest_equal_sequence_of_principal);
+    p=p&&ptr_equal(method_data,ktest_equal_sequence_of_pa_data);
+    p=p&&ptr_equal(authorization_data,ktest_equal_authorization_data);
+    return p;
+}
+
+int ktest_equal_ad_signedpath(ref, var)
+    krb5_ad_signedpath* ref;
+    krb5_ad_signedpath* var;
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p=p&&scalar_equal(enctype);
+    p=p&&struct_equal(checksum,ktest_equal_checksum);
+    p=p&&ptr_equal(delegated,ktest_equal_sequence_of_principal);
+    p=p&&ptr_equal(method_data,ktest_equal_sequence_of_pa_data);
+    return p;
+}
+
 #ifdef ENABLE_LDAP
 static int equal_key_data(ref, var)
     krb5_key_data *ref;
@@ -719,6 +748,13 @@ int ktest_equal_sequence_of_cred_info(ref, var)
     krb5_cred_info ** var;
 {
     array_compare(ktest_equal_cred_info);
+}
+
+int ktest_equal_sequence_of_principal(ref, var)
+    krb5_principal * ref;
+    krb5_principal * var;
+{
+    array_compare(ktest_equal_principal_data);
 }
 
 int ktest_equal_array_of_passwd_phrase_element(ref, var)

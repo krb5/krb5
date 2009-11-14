@@ -647,6 +647,8 @@ krb5_error_code KRB5_CALLCONV
 #define KRB5_KEYUSAGE_PA_S4U_X509_USER_REQUEST	26 /* XXX note conflict with above */
 #define KRB5_KEYUSAGE_PA_S4U_X509_USER_REPLY	27 /* XXX note conflict with above */
 
+#define KRB5_KEYUSAGE_AD_SIGNEDPATH		-21
+
 /* define in draft-ietf-krb-wg-preauth-framework*/
 #define KRB5_KEYUSAGE_FAST_REQ_CHKSUM 50
 #define KRB5_KEYUSAGE_FAST_ENC 51
@@ -1092,6 +1094,7 @@ krb5_error_code KRB5_CALLCONV krb5_verify_checksum
 #define KRB5_AUTHDATA_SESAME	65
 #define KRB5_AUTHDATA_WIN2K_PAC	128
 #define KRB5_AUTHDATA_ETYPE_NEGOTIATION	129	/* RFC 4537 */
+#define KRB5_AUTHDATA_SIGNTICKET	142
 #define KRB5_AUTHDATA_FX_ARMOR 71
 /* password change constants */
 

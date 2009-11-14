@@ -1192,6 +1192,42 @@ krb5_error_code decode_krb5_ad_kdcissued
     cleanup(free);
 }
 
+krb5_error_code decode_krb5_ad_signedpath
+(const krb5_data *code, krb5_ad_signedpath **repptr)
+{
+    setup_buf_only(krb5_ad_signedpath *);
+    alloc_field(rep);
+
+    retval = asn1_decode_ad_signedpath(&buf, rep);
+    if (retval) clean_return(retval);
+
+    cleanup(free);
+}
+
+krb5_error_code
+krb5int_get_authdata_containee_types(krb5_context context,
+                                     const krb5_authdata *authdata,
+                                     unsigned int *num,
+                                     krb5_authdatatype **repptr)
+{
+    krb5_data data, *code = &data;
+
+    data.data = (char *)authdata->contents;
+    data.length = authdata->length;
+
+    *num = 0;
+
+    {
+    setup_buf_only(krb5_authdatatype *);
+
+    retval = asn1_peek_authorization_data(&buf, num, &rep);
+    if (retval) clean_return(retval);
+
+    cleanup_none();
+    }
+    assert(0); /* NOTREACHED */
+}
+
 #ifndef DISABLE_PKINIT
 krb5_error_code
 decode_krb5_pa_pk_as_req(const krb5_data *code, krb5_pa_pk_as_req **repptr)

@@ -61,6 +61,7 @@ char     *principal_attributes[] = { "krbprincipalname",
 				     "krbLastPwdChange",
 				     "krbExtraData",
 				     "krbObjectReferences",
+				     "krbAllowedToDelegateTo",
 				     NULL };
 
 /* Must match KDB_*_ATTR macros in ldap_principal.h.  */

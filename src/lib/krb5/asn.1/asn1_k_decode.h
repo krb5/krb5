@@ -134,6 +134,9 @@ asn1_error_code asn1_decode_last_req_entry_ptr(asn1buf *buf,
 asn1_error_code asn1_decode_authdata_elt(asn1buf *buf, krb5_authdata *val);
 asn1_error_code asn1_decode_authdata_elt_ptr(asn1buf *buf,
                                              krb5_authdata **valptr);
+asn1_error_code asn1_peek_authorization_data(asn1buf *buf,
+                                             unsigned int *num,
+                                             krb5_authdatatype **val);
 asn1_error_code asn1_decode_krb_cred_info(asn1buf *buf, krb5_cred_info *val);
 asn1_error_code asn1_decode_krb_cred_info_ptr(asn1buf *buf,
                                               krb5_cred_info **valptr);
@@ -264,5 +267,8 @@ asn1_error_code asn1_decode_ad_kdcissued(asn1buf *buf, krb5_ad_kdcissued *val);
 
 asn1_error_code asn1_decode_ad_kdcissued_ptr(asn1buf *buf,
                                              krb5_ad_kdcissued **val);
+
+asn1_error_code asn1_decode_ad_signedpath(asn1buf *buf,
+                                          krb5_ad_signedpath *val);
 
 #endif
