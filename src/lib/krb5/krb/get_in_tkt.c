@@ -1593,12 +1593,11 @@ init_creds_step_reply(krb5_context context,
                        ERROR_TABLE_BASE_krb5;
             }
         }
-    }
 
-    if (ctx->as_rep == NULL) {
-        /* Continue with the next iteration. */
+        /* Return error code, or continue with next iteration */
         goto cleanup;
-    }
+    } else
+        assert(ctx->as_rep != NULL);
 
     /* We have a response. Process it. */
 
