@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (c) 2004-2008 Apple Inc.  All Rights Reserved.
  *
@@ -29,7 +30,7 @@
  * Created 26 May 2004 by Doug Mitchell at Apple.
  */
 
-#ifndef	_PKINIT_CERT_STORE_H_
+#ifndef _PKINIT_CERT_STORE_H_
 #define _PKINIT_CERT_STORE_H_
 
 #ifdef  __cplusplus
@@ -62,15 +63,15 @@ typedef void *krb5_pkinit_cert_db_t;
  * Returns KRB5_PRINC_NOMATCH if client cert not found.
  */
 krb5_error_code krb5_pkinit_get_client_cert(
-    const char			*principal,     /* full principal string */
-    krb5_pkinit_signing_cert_t	*client_cert);  /* RETURNED */
+    const char                  *principal,     /* full principal string */
+    krb5_pkinit_signing_cert_t  *client_cert);  /* RETURNED */
 
 /*
  * Determine if the specified client has a signing cert. Returns TRUE
  * if so, else returns FALSE.
  */
 krb5_boolean krb5_pkinit_have_client_cert(
-    const char			*principal);    /* full principal string */
+    const char                  *principal);    /* full principal string */
 
 /*
  * Store the specified certificate (or, more likely, some platform-dependent
@@ -79,20 +80,20 @@ krb5_boolean krb5_pkinit_have_client_cert(
  * in the cert storage.
  */
 krb5_error_code krb5_pkinit_set_client_cert_from_signing_cert(
-    const char			*principal,     /* full principal string */
-    krb5_pkinit_signing_cert_t	client_cert);
+    const char                  *principal,     /* full principal string */
+    krb5_pkinit_signing_cert_t  client_cert);
 krb5_error_code krb5_pkinit_set_client_cert(
-    const char			*principal,     /* full principal string */
-    krb5_pkinit_cert_t	client_cert);
+    const char                  *principal,     /* full principal string */
+    krb5_pkinit_cert_t  client_cert);
 
 /*
  * Obtain a reference to the client's cert database. Specify either principal
  * name or client_cert as obtained from krb5_pkinit_get_client_cert().
  */
 krb5_error_code krb5_pkinit_get_client_cert_db(
-    const char			*principal,	    /* optional, full principal string */
-    krb5_pkinit_signing_cert_t	client_cert,	    /* optional, from krb5_pkinit_get_client_cert() */
-    krb5_pkinit_cert_db_t	*client_cert_db);   /* RETURNED */
+    const char                  *principal,         /* optional, full principal string */
+    krb5_pkinit_signing_cert_t  client_cert,        /* optional, from krb5_pkinit_get_client_cert() */
+    krb5_pkinit_cert_db_t       *client_cert_db);   /* RETURNED */
 
 /*
  * Obtain the KDC signing cert, with optional CA and specific cert specifiers.
@@ -110,16 +111,16 @@ krb5_error_code krb5_pkinit_get_client_cert_db(
  *
  */
 krb5_error_code krb5_pkinit_get_kdc_cert(
-    krb5_ui_4			num_trusted_CAs,    /* sizeof *trusted_CAs */
-    krb5_data			*trusted_CAs,	    /* optional */
-    krb5_data			*client_spec,	    /* optional */
-    krb5_pkinit_signing_cert_t	*kdc_cert);	    /* RETURNED */
+    krb5_ui_4                   num_trusted_CAs,    /* sizeof *trusted_CAs */
+    krb5_data                   *trusted_CAs,       /* optional */
+    krb5_data                   *client_spec,       /* optional */
+    krb5_pkinit_signing_cert_t  *kdc_cert);         /* RETURNED */
 
 /*
  * Obtain a reference to the KDC's cert database.
  */
 krb5_error_code krb5_pkinit_get_kdc_cert_db(
-    krb5_pkinit_cert_db_t	*kdc_cert_db);	/* RETURNED */
+    krb5_pkinit_cert_db_t       *kdc_cert_db);  /* RETURNED */
 
 /*
  * Release certificate references obtained via krb5_pkinit_get_client_cert() and
@@ -133,7 +134,7 @@ extern void krb5_pkinit_release_cert(
  * krb5_pkinit_get_kdc_cert_db().
  */
 extern void krb5_pkinit_release_cert_db(
-    krb5_pkinit_cert_db_t	cert_db);
+    krb5_pkinit_cert_db_t       cert_db);
 
 /*
  * Obtain a mallocd C-string representation of a certificate's SHA1 digest.
@@ -152,9 +153,9 @@ char *krb5_pkinit_cert_hash_str(
 krb5_error_code krb5_pkinit_get_server_certs(
     const char *client_principal,
     const char *server_principal,
-    krb5_data **trusted_CAs,	    /* RETURNED, though return value may be NULL */
-    krb5_ui_4 *num_trusted_CAs,	    /* RETURNED */
-    krb5_data *kdc_cert);	    /* RETURNED, though may be 0/NULL */
+    krb5_data **trusted_CAs,        /* RETURNED, though return value may be NULL */
+    krb5_ui_4 *num_trusted_CAs,     /* RETURNED */
+    krb5_data *kdc_cert);           /* RETURNED, though may be 0/NULL */
 
 #ifdef  __cplusplus
 }

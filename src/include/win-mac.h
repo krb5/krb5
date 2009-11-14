@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * This file is now only used on Windows
  */
@@ -72,10 +73,10 @@
 #ifndef KRB5_SYSTYPES__
 #define KRB5_SYSTYPES__
 #include <sys/types.h>
-typedef unsigned long	 u_long;      /* Not part of sys/types.h on the pc */
-typedef unsigned int	 u_int;
-typedef unsigned short	 u_short;
-typedef unsigned char	 u_char;
+typedef unsigned long    u_long;      /* Not part of sys/types.h on the pc */
+typedef unsigned int     u_int;
+typedef unsigned short   u_short;
+typedef unsigned char    u_char;
 typedef unsigned int     uint32_t;
 typedef int              int32_t;
 #if _INTEGRAL_MAX_BITS >= 64
@@ -87,9 +88,9 @@ typedef __int64          int64_t;
 #undef ssize_t
 #endif
 #ifdef _WIN64
-typedef __int64		 ssize_t;
+typedef __int64          ssize_t;
 #else
-typedef _W64 int 	 ssize_t;
+typedef _W64 int         ssize_t;
 #endif
 #define SSIZE_T_DEFINED
 #endif
@@ -128,7 +129,7 @@ typedef _W64 int 	 ssize_t;
 #ifdef CYGNUS
 #define KERBEROS_HLP    "kerbnet.hlp"
 #else
-#define KERBEROS_HLP	"krb5clnt.hlp"
+#define KERBEROS_HLP    "krb5clnt.hlp"
 #endif
 #define INI_DEFAULTS    "Defaults"
 #define   INI_USER        "User"          /* Default user */
@@ -145,12 +146,12 @@ typedef _W64 int 	 ssize_t;
 #define   INI_KRB_CONF    "krb.conf"     /* Location of krb.conf file */
 #define   DEF_KRB_CONF    "krb.conf"      /* Default name for krb.conf file */
 #else
-#define INI_KRB5_CONF   "krb5.ini"	/* From k5-config.h */
-#define INI_KRB_CONF    INI_KRB5_CONF	/* Location of krb.conf file */
-#define DEF_KRB_CONF    INI_KRB5_CONF	/* Default name for krb.conf file */
+#define INI_KRB5_CONF   "krb5.ini"      /* From k5-config.h */
+#define INI_KRB_CONF    INI_KRB5_CONF   /* Location of krb.conf file */
+#define DEF_KRB_CONF    INI_KRB5_CONF   /* Default name for krb.conf file */
 #define INI_TICKETOPTS  "TicketOptions" /* Ticket options */
 #define   INI_FORWARDABLE  "Forwardable" /* get forwardable tickets */
-#define INI_KRB_CCACHE  "krb5cc"       	/* From k5-config.h */
+#define INI_KRB_CCACHE  "krb5cc"        /* From k5-config.h */
 #endif
 #define INI_KRB_REALMS  "krb.realms"    /* Location of krb.realms file */
 #define DEF_KRB_REALMS  "krb.realms"    /* Default name for krb.realms file */
@@ -207,10 +208,10 @@ typedef _W64 int 	 ssize_t;
 
 HINSTANCE get_lib_instance(void);
 
-#define GETSOCKNAME_ARG2_TYPE	struct sockaddr
-#define GETSOCKNAME_ARG3_TYPE	size_t
-#define GETPEERNAME_ARG2_TYPE	GETSOCKNAME_ARG2_TYPE
-#define GETPEERNAME_ARG3_TYPE	GETSOCKNAME_ARG3_TYPE
+#define GETSOCKNAME_ARG2_TYPE   struct sockaddr
+#define GETSOCKNAME_ARG3_TYPE   size_t
+#define GETPEERNAME_ARG2_TYPE   GETSOCKNAME_ARG2_TYPE
+#define GETPEERNAME_ARG3_TYPE   GETSOCKNAME_ARG3_TYPE
 
 #endif /* !RES_ONLY */
 

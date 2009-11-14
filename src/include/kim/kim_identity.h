@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2005-2006 Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -127,7 +128,7 @@ extern "C" {
  * \brief Create a identity from a string.
  */
 kim_error kim_identity_create_from_string (kim_identity *out_identity,
-                                             kim_string    in_string);
+                                           kim_string    in_string);
 
 /*!
  * \param out_identity     on exit, a new identity object.  Must be freed with kim_identity_free().
@@ -142,9 +143,9 @@ kim_error kim_identity_create_from_string (kim_identity *out_identity,
  * \brief Create a identity from a realm and component strings.
  */
 kim_error kim_identity_create_from_components (kim_identity *out_identity,
-                                                 kim_string    in_realm,
-                                                 kim_string    in_1st_component,
-                                                 ...);
+                                               kim_string    in_realm,
+                                               kim_string    in_1st_component,
+                                               ...);
 
 /*!
  * \param out_identity      on exit, a new identity object which is a copy of \a in_krb5_principal.
@@ -155,8 +156,8 @@ kim_error kim_identity_create_from_components (kim_identity *out_identity,
  * \brief Create an identity object from a krb5_principal.
  */
 kim_error kim_identity_create_from_krb5_principal (kim_identity *out_identity,
-                                                     krb5_context    in_krb5_context,
-                                                     krb5_principal  in_krb5_principal);
+                                                   krb5_context    in_krb5_context,
+                                                   krb5_principal  in_krb5_principal);
 
 /*!
  * \param out_identity  on exit, a new identity object which is a copy of \a in_identity.
@@ -166,7 +167,7 @@ kim_error kim_identity_create_from_krb5_principal (kim_identity *out_identity,
  * \brief Copy an identity object.
  */
 kim_error kim_identity_copy (kim_identity *out_identity,
-                               kim_identity  in_identity);
+                             kim_identity  in_identity);
 
 
 /*!
@@ -180,8 +181,8 @@ kim_error kim_identity_copy (kim_identity *out_identity,
  * \brief Compare identity objects for equivalency.
  */
 kim_error kim_identity_compare (kim_identity    in_identity,
-                                  kim_identity    in_compare_to_identity,
-                                  kim_comparison *out_comparison);
+                                kim_identity    in_compare_to_identity,
+                                kim_comparison *out_comparison);
 /*!
  * \param in_identity  an identity object.
  * \param out_string   on exit, a string representation of \a in_identity.
@@ -191,7 +192,7 @@ kim_error kim_identity_compare (kim_identity    in_identity,
  * \note  Special characters such as '@' and '/' will be escaped with '\'.
  */
 kim_error kim_identity_get_string (kim_identity   in_identity,
-                                     kim_string    *out_string);
+                                   kim_string    *out_string);
 
 
 /*!
@@ -206,7 +207,7 @@ kim_error kim_identity_get_string (kim_identity   in_identity,
  *        The result of this function should \em only be used to display to the user.
  */
 kim_error kim_identity_get_display_string (kim_identity   in_identity,
-                                             kim_string    *out_display_string);
+                                           kim_string    *out_display_string);
 
 /*!
  * \param in_identity     an identity object.
@@ -216,7 +217,7 @@ kim_error kim_identity_get_display_string (kim_identity   in_identity,
  * \brief Get the realm string of an identity.
  */
 kim_error kim_identity_get_realm (kim_identity  in_identity,
-                                    kim_string   *out_realm_string);
+                                  kim_string   *out_realm_string);
 
 /*!
  * \param in_identity             an identity object.
@@ -225,7 +226,7 @@ kim_error kim_identity_get_realm (kim_identity  in_identity,
  * \brief Get the number of components of an identity.
  */
 kim_error kim_identity_get_number_of_components (kim_identity  in_identity,
-                                                   kim_count    *out_number_of_components);
+                                                 kim_count    *out_number_of_components);
 
 /*!
  * \param in_identity          an identity object.
@@ -236,8 +237,8 @@ kim_error kim_identity_get_number_of_components (kim_identity  in_identity,
  * \brief Get the Nth component of an identity.
  */
 kim_error kim_identity_get_component_at_index (kim_identity  in_identity,
-                                                 kim_count     in_index,
-                                                 kim_string   *out_component_string);
+                                               kim_count     in_index,
+                                               kim_string   *out_component_string);
 
 /*!
  * \param in_identity      an identity object.
@@ -259,8 +260,8 @@ kim_error kim_identity_get_components_string (kim_identity  in_identity,
  * \brief Get the krb5_principal representation of an identity.
  */
 kim_error kim_identity_get_krb5_principal (kim_identity  in_identity,
-                                             krb5_context    in_krb5_context,
-                                             krb5_principal *out_krb5_principal);
+                                           krb5_context    in_krb5_context,
+                                           krb5_principal *out_krb5_principal);
 
 /*!
  * \param in_identity  an identity object whose password will be changed.

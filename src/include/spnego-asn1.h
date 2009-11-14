@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * spnego-asn1.h
  *
@@ -38,18 +39,18 @@
 
 /* Context flags recognized by SPNEGO*/
 enum {
-  SPNEGO_DELEG_FLAG = 0x80,
-  SPNEGO_MUTUAL_FLAG = 0x40,
-  SPNEGO_ANON_FLAG=0x20,
-  SPNEGO_CONF_FLAG = 0x10
+    SPNEGO_DELEG_FLAG = 0x80,
+    SPNEGO_MUTUAL_FLAG = 0x40,
+    SPNEGO_ANON_FLAG=0x20,
+    SPNEGO_CONF_FLAG = 0x10
 };
 
 /* Results of a negotiation*/
 enum {
-  SPNEGO_ACCEPT_COMPLETED = 0,
-  SPNEGO_ACCEPT_INCOMPLETE = 1,
-  SPNEGO_REJECT = 2,
-  SPNEGO_UNSPEC_RESULT = 3
+    SPNEGO_ACCEPT_COMPLETED = 0,
+    SPNEGO_ACCEPT_INCOMPLETE = 1,
+    SPNEGO_REJECT = 2,
+    SPNEGO_UNSPEC_RESULT = 3
 };
 
 typedef krb5_data spnego_oid;
@@ -79,7 +80,7 @@ typedef struct _spnego_acceptor_token {
 
 krb5_error_code krb5int_encode_spnego_acceptor_token
 (krb5_context , spnego_acceptor_token *,
-	 krb5_data **);
+ krb5_data **);
 
 krb5_error_code krb5int_encode_spnego_initiator_token
 (krb5_context, spnego_initiator_token *,

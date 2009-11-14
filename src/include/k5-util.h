@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1989-1998,2002 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
@@ -63,25 +64,25 @@
 #ifndef krb5_seteuid
 
 #if defined(HAVE_SETEUID)
-#  define krb5_seteuid(EUID)	(seteuid((uid_t)(EUID)))
+#  define krb5_seteuid(EUID)    (seteuid((uid_t)(EUID)))
 #elif defined(HAVE_SETRESUID)
-#  define krb5_seteuid(EUID)	setresuid(getuid(), (uid_t)(EUID), geteuid())
+#  define krb5_seteuid(EUID)    setresuid(getuid(), (uid_t)(EUID), geteuid())
 #elif defined(HAVE_SETREUID)
-#  define krb5_seteuid(EUID)	setreuid(geteuid(), (uid_t)(EUID))
+#  define krb5_seteuid(EUID)    setreuid(geteuid(), (uid_t)(EUID))
 #else
-   /* You need to add a case to deal with this operating system.*/
-#  define krb5_seteuid(EUID)	(errno = EPERM, -1)
+/* You need to add a case to deal with this operating system.*/
+#  define krb5_seteuid(EUID)    (errno = EPERM, -1)
 #endif
 
 #ifdef HAVE_SETEGID
-#  define krb5_setegid(EGID)	(setegid((gid_t)(EGID)))
+#  define krb5_setegid(EGID)    (setegid((gid_t)(EGID)))
 #elif defined(HAVE_SETRESGID)
-#  define krb5_setegid(EGID)	(setresgid(getgid(), (gid_t)(EGID), getegid()))
+#  define krb5_setegid(EGID)    (setresgid(getgid(), (gid_t)(EGID), getegid()))
 #elif defined(HAVE_SETREGID)
-#  define krb5_setegid(EGID)	(setregid(getegid(), (gid_t)(EGID)))
+#  define krb5_setegid(EGID)    (setregid(getegid(), (gid_t)(EGID)))
 #else
-   /* You need to add a case to deal with this operating system.*/
-#  define krb5_setegid(EGID)	(errno = EPERM, -1)
+/* You need to add a case to deal with this operating system.*/
+#  define krb5_setegid(EGID)    (errno = EPERM, -1)
 #endif
 
 #endif

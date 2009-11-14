@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2005-2006 Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -87,7 +88,7 @@ kim_error kim_string_create_for_last_error (kim_string *out_string,
 
 /*!
  * \param out_string on exit, a new string object which is a copy of \a in_string.
-                     Must be freed with kim_string_free().
+ Must be freed with kim_string_free().
  * \param in_string  the string to copy.
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Copy a string.

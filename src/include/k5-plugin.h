@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 2006 Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -82,7 +83,7 @@
 #define PLUGIN_SYMBOL_NAME(prefix, symbol) symbol
 #endif
 
-struct plugin_file_handle;	/* opaque */
+struct plugin_file_handle;      /* opaque */
 
 struct plugin_dir_handle {
     /* This points to a NULL-terminated list of pointers to plugin_file_handle structs */
@@ -98,28 +99,28 @@ krb5int_close_plugin (struct plugin_file_handle *);
 
 long KRB5_CALLCONV
 krb5int_get_plugin_data (struct plugin_file_handle *, const char *, void **,
-			 struct errinfo *);
+                         struct errinfo *);
 
 long KRB5_CALLCONV
 krb5int_get_plugin_func (struct plugin_file_handle *, const char *,
-			 void (**)(), struct errinfo *);
+                         void (**)(), struct errinfo *);
 
 
 long KRB5_CALLCONV
 krb5int_open_plugin_dirs (const char * const *, const char * const *,
-			  struct plugin_dir_handle *, struct errinfo *);
+                          struct plugin_dir_handle *, struct errinfo *);
 void KRB5_CALLCONV
 krb5int_close_plugin_dirs (struct plugin_dir_handle *);
 
 long KRB5_CALLCONV
 krb5int_get_plugin_dir_data (struct plugin_dir_handle *, const char *,
-			     void ***, struct errinfo *);
+                             void ***, struct errinfo *);
 void KRB5_CALLCONV
 krb5int_free_plugin_dir_data (void **);
 
 long KRB5_CALLCONV
 krb5int_get_plugin_dir_func (struct plugin_dir_handle *, const char *,
-			     void (***)(void), struct errinfo *);
+                             void (***)(void), struct errinfo *);
 void KRB5_CALLCONV
 krb5int_free_plugin_dir_func (void (**)(void));
 

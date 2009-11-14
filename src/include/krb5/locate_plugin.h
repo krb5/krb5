@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * <krb5/locate_plugin.h>
  *
@@ -16,7 +17,7 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.	Furthermore if you modify this software you must label
+ * permission.  Furthermore if you modify this software you must label
  * your software as modified software and not distribute it in such a
  * fashion that it might be confused with the original M.I.T. software.
  * M.I.T. makes no representations about the suitability of
@@ -40,7 +41,7 @@ enum locate_service_type {
 };
 
 typedef struct krb5plugin_service_locate_ftable {
-    int minor_version;		/* currently 0 */
+    int minor_version;          /* currently 0 */
     /* Per-context setup and teardown.  Returned void* blob is
        private to the plugin.  */
     krb5_error_code (*init)(krb5_context, void **);
@@ -51,10 +52,10 @@ typedef struct krb5plugin_service_locate_ftable {
        lookup function should only return an error if it detects a
        problem, not if the callback function tells it to quit.  */
     krb5_error_code (*lookup)(void *,
-			      enum locate_service_type svc, const char *realm,
-			      int socktype, int family,
-			      int (*cbfunc)(void *,int,struct sockaddr *),
-			      void *cbdata);
+                              enum locate_service_type svc, const char *realm,
+                              int socktype, int family,
+                              int (*cbfunc)(void *,int,struct sockaddr *),
+                              void *cbdata);
 } krb5plugin_service_locate_ftable;
 /* extern krb5plugin_service_locate_ftable service_locator; */
 #endif

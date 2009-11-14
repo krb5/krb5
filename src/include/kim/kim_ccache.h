@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2005-2006 Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -286,7 +287,7 @@ kim_error kim_ccache_iterator_create (kim_ccache_iterator *out_ccache_iterator);
  * \brief Get the next ccache in the cache collection.
  */
 kim_error kim_ccache_iterator_next (kim_ccache_iterator  in_ccache_iterator,
-                                      kim_ccache          *out_ccache);
+                                    kim_ccache          *out_ccache);
 
 /*!
  * \param io_ccache_iterator a ccache iterator object to be freed.  Set to NULL on exit.
@@ -303,7 +304,7 @@ void kim_ccache_iterator_free (kim_ccache_iterator *io_ccache_iterator);
 
 /*!
  * \param out_ccache          on exit, a new cache object for a ccache containing a newly acquired
- *      		      initial credential.  Must be freed with kim_ccache_free().
+ *                            initial credential.  Must be freed with kim_ccache_free().
  * \param in_client_identity  a client identity to obtain a credential for.   Specify KIM_IDENTITY_ANY to
  *                            allow the user to choose.
  * \param in_options          options to control credential acquisition.
@@ -318,7 +319,7 @@ kim_error kim_ccache_create_new (kim_ccache          *out_ccache,
 
 /*!
  * \param out_ccache          on exit, a new cache object for a ccache containing a newly acquired
- *      		      initial credential.  Must be freed with kim_ccache_free().
+ *                            initial credential.  Must be freed with kim_ccache_free().
  * \param in_client_identity  a client identity to obtain a credential for.   Specify KIM_IDENTITY_ANY to
  *                            allow the user to choose.
  * \param in_options          options to control credential acquisition.
@@ -387,10 +388,10 @@ kim_error kim_ccache_create_from_client_identity (kim_ccache   *out_ccache,
 
 /*!
  * \param out_ccache      on exit, a new ccache object containing an initial credential
- *      		  for the client identity \a in_identity obtained using in_keytab.
- *      		  Must be freed with kim_ccache_free().
+ *                        for the client identity \a in_identity obtained using in_keytab.
+ *                        Must be freed with kim_ccache_free().
  * \param in_identity     a client identity to obtain a credential for.  Specify NULL for
- *      		  the first client identity in the keytab.
+ *                        the first client identity in the keytab.
  * \param in_options      options to control credential acquisition.
  * \param in_keytab       a path to a keytab.  Specify NULL for the default keytab location.
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
@@ -436,7 +437,7 @@ kim_error kim_ccache_create_from_type_and_name (kim_ccache  *out_ccache,
 
 /*!
  * \param out_ccache      on exit, a new ccache object which is a copy of in_krb5_ccache.
- *      		  Must be freed with kim_ccache_free().
+ *                        Must be freed with kim_ccache_free().
  * \param in_krb5_context the krb5 context used to create \a in_krb5_ccache.
  * \param in_krb5_ccache  a krb5 ccache object.
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
@@ -448,7 +449,7 @@ kim_error kim_ccache_create_from_krb5_ccache (kim_ccache  *out_ccache,
 
 /*!
  * \param out_ccache on exit, the new ccache object which is a copy of in_ccache.
- *      	     Must be freed with kim_ccache_free().
+ *                   Must be freed with kim_ccache_free().
  * \param in_ccache  a ccache object.
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Copy a ccache.
@@ -473,7 +474,7 @@ kim_error kim_ccache_compare (kim_ccache      in_ccache,
  * \param in_ccache        a ccache object.
  * \param in_krb5_context  a krb5 context which will be used to create out_krb5_ccache.
  * \param out_krb5_ccache  on exit, a new krb5 ccache object which is a copy of in_ccache.
- *      		   Must be freed with krb5_cc_close() or krb5_cc_destroy().
+ *                         Must be freed with krb5_cc_close() or krb5_cc_destroy().
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get a krb5 ccache for a ccache.
  */
@@ -503,7 +504,7 @@ kim_error kim_ccache_get_type (kim_ccache  in_ccache,
  * \param in_ccache        a ccache object.
  * \param out_display_name on exit, the type and name of \a in_ccache in a format appropriate for
  *                         display to the user in command line programs.  (ie: "<type>:<name>")
- *      		   Must be freed with kim_string_free().
+ *                         Must be freed with kim_string_free().
  *                         Note: this string can also be passed to krb5_cc_resolve().
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the type and name for a ccache in display format.
@@ -514,7 +515,7 @@ kim_error kim_ccache_get_display_name (kim_ccache  in_ccache,
 /*!
  * \param in_ccache            a ccache object.
  * \param out_client_identity  on exit, an identity object containing the client identity of
- *      		       \a in_ccache. Must be freed with kim_identity_free().
+ *                             \a in_ccache. Must be freed with kim_identity_free().
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the client identity for a ccache.
  */
@@ -524,7 +525,7 @@ kim_error kim_ccache_get_client_identity (kim_ccache    in_ccache,
 /*!
  * \param in_ccache       a ccache object.
  * \param out_credential  on exit, the first valid credential in \a in_ccache.
- *      		  Must be freed with kim_credential_free().  Set to NULL
+ *                        Must be freed with kim_credential_free().  Set to NULL
  *                        if you only want return value, not the actual credential.
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Get the first valid credential in a ccache.

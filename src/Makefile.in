@@ -662,6 +662,7 @@ PYTHON = python
 
 INDENTDIRS = \
 	clients \
+	include \
 	kadmin \
 	kdc \
 	lib/kadm5 \
@@ -684,6 +685,8 @@ BSDFILES = \
 	slave/kpropd_rpc.c
 
 OTHEREXCLUDES = \
+	include/k5-platform.h \
+	include/gssrpc \
 	lib/krb5/asn.1/asn1_decode.h \
 	lib/krb5/asn.1/asn1_encode.h \
 	lib/krb5/asn.1/asn1_k_encode.c \

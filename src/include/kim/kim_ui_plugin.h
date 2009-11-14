@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -60,7 +61,7 @@ enum kim_prompt_type_enum {
 
 
 typedef struct kim_ui_plugin_ftable_v0 {
-    int minor_version;		/* currently 0 */
+    int minor_version;          /* currently 0 */
 
     /* Called before other calls to allow the UI to initialize.
      * Return an error if you can't display your UI in this environment.

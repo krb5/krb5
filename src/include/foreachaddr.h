@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * include/foreachaddr.c
  *
@@ -51,13 +52,13 @@
 
 extern int
 krb5int_foreach_localaddr (/*@null@*/ void *data,
-			   int (*pass1fn) (/*@null@*/ void *,
-					   struct sockaddr *) /*@*/,
-			   /*@null@*/ int (*betweenfn) (/*@null@*/ void *) /*@*/,
-			   /*@null@*/ int (*pass2fn) (/*@null@*/ void *,
-						      struct sockaddr *) /*@*/)
+                           int (*pass1fn) (/*@null@*/ void *,
+                                           struct sockaddr *) /*@*/,
+                           /*@null@*/ int (*betweenfn) (/*@null@*/ void *) /*@*/,
+                           /*@null@*/ int (*pass2fn) (/*@null@*/ void *,
+                                                      struct sockaddr *) /*@*/)
 #if defined(DEBUG) || defined(TEST)
-     /*@modifies fileSystem@*/
+/*@modifies fileSystem@*/
 #endif
     ;
 
