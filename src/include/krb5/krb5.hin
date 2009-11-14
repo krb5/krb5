@@ -648,6 +648,7 @@ krb5_error_code KRB5_CALLCONV
 #define KRB5_KEYUSAGE_PA_S4U_X509_USER_REPLY	27 /* XXX note conflict with above */
 
 #define KRB5_KEYUSAGE_AD_SIGNEDPATH		-21
+#define KRB5_KEYUSAGE_IAKERB_FINISHED           42
 
 /* define in draft-ietf-krb-wg-preauth-framework*/
 #define KRB5_KEYUSAGE_FAST_REQ_CHKSUM 50
@@ -2528,7 +2529,7 @@ krb5_get_init_creds_keytab
 struct _krb5_init_creds_context;
 typedef struct _krb5_init_creds_context *krb5_init_creds_context;
 
-krb5_error_code KRB5_CALLCONV
+void KRB5_CALLCONV
 krb5_init_creds_free
 (krb5_context context,
                 krb5_init_creds_context ctx);
@@ -2539,8 +2540,15 @@ krb5_init_creds_get
                 krb5_init_creds_context ctx);
 
 krb5_error_code KRB5_CALLCONV
+krb5_init_creds_get_creds
+(krb5_context context,
+                krb5_init_creds_context ctx,
+                krb5_creds *creds);
+
+krb5_error_code KRB5_CALLCONV
 krb5_init_creds_get_error
 (krb5_context context,
+                krb5_init_creds_context ctx,
                 krb5_error **error);
 
 krb5_error_code KRB5_CALLCONV
@@ -2550,14 +2558,29 @@ krb5_init_creds_init
 		krb5_prompter_fct prompter,
 		void *data,
 		krb5_deltat start_time,
-		krb5_get_init_creds_opt *k5_gic_options,
+		krb5_get_init_creds_opt *options,
 		krb5_init_creds_context *ctx);
+
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_set_keyblock
+(krb5_context context,
+                krb5_init_creds_context ctx,
+                krb5_keyblock *keyblock);
 
 krb5_error_code KRB5_CALLCONV
 krb5_init_creds_set_keytab
 (krb5_context context,
                 krb5_init_creds_context ctx,
                 krb5_keytab keytab);
+
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_step
+(krb5_context context,
+                krb5_init_creds_context ctx,
+                krb5_data *in,
+                krb5_data *out,
+                krb5_data *realm,
+                unsigned int *flags);
 
 krb5_error_code KRB5_CALLCONV
 krb5_init_creds_set_password
