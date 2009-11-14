@@ -1242,6 +1242,10 @@ krb5_init_creds_init(krb5_context context,
 
     ctx->prompter = prompter;
     ctx->prompter_data = data;
+    ctx->gak_fct = krb5_get_as_key_password;
+    ctx->gak_data = &ctx->password;
+
+    ctx->request_time = 0; /* filled in later */
     ctx->start_time = start_time;
 
     if (options == NULL) {

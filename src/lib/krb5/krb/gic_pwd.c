@@ -3,7 +3,7 @@
 #include "com_err.h"
 #include "init_creds_ctx.h"
 
-static krb5_error_code
+krb5_error_code
 krb5_get_as_key_password(
     krb5_context context,
     krb5_principal client,
@@ -40,7 +40,7 @@ krb5_get_as_key_password(
         }
     }
 
-    if (password->data[0] == '\0') {
+    if (password->length == 0 || password->data[0] == '\0') {
         if (prompter == NULL)
             return(EIO);
 
