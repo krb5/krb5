@@ -60,8 +60,8 @@
 
 #define DEBUG 1
 
-#ifdef DEBUG
-int krb5int_debug_sendto_kdc = 1;
+#undef DEBUG
+int krb5int_debug_sendto_kdc = 0;
 #define debug krb5int_debug_sendto_kdc
 
 static void
