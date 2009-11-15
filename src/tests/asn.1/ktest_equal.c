@@ -611,6 +611,17 @@ int ktest_equal_iakerb_header(ref, var)
     return p;
 }
 
+int ktest_equal_iakerb_finished(ref, var)
+    krb5_iakerb_finished *ref;
+    krb5_iakerb_finished *var;
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p=p&&struct_equal(checksum,ktest_equal_checksum);
+    return p;
+}
+
 #ifdef ENABLE_LDAP
 static int equal_key_data(ref, var)
     krb5_key_data *ref;

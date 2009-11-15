@@ -109,6 +109,9 @@ int ktest_equal_ad_signedpath
 int ktest_equal_iakerb_header
     (krb5_iakerb_header *ref,
 		    krb5_iakerb_header *var);
+int ktest_equal_iakerb_finished
+    (krb5_iakerb_finished *ref,
+		    krb5_iakerb_finished *var);
 
 int ktest_equal_ldap_sequence_of_keys(ldap_seqof_key_data *ref,
 				      ldap_seqof_key_data *var);

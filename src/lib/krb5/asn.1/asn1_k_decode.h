@@ -274,4 +274,7 @@ asn1_error_code asn1_decode_ad_signedpath(asn1buf *buf,
 asn1_error_code asn1_decode_iakerb_header(asn1buf *buf,
                                           krb5_iakerb_header *val);
 
+asn1_error_code asn1_decode_iakerb_finished(asn1buf *buf,
+                                            krb5_iakerb_finished *val);
+
 #endif

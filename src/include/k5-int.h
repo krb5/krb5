@@ -1095,6 +1095,10 @@ typedef struct _krb5_iakerb_header {
     krb5_data *cookie;
 } krb5_iakerb_header;
 
+typedef struct _krb5_iakerb_finished {
+    krb5_checksum checksum;
+} krb5_iakerb_finished;
+
 typedef krb5_error_code (*krb5_preauth_obtain_proc)
     (krb5_context,
 		    krb5_pa_data *,
@@ -1410,6 +1414,8 @@ void KRB5_CALLCONV krb5_free_ad_signedpath
 (krb5_context, krb5_ad_signedpath *);
 void KRB5_CALLCONV krb5_free_iakerb_header
 (krb5_context, krb5_iakerb_header *);
+void KRB5_CALLCONV krb5_free_iakerb_finished
+(krb5_context, krb5_iakerb_finished *);
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "com_err.h"
@@ -1840,6 +1846,8 @@ krb5_error_code encode_krb5_ad_signedpath_data
 (const krb5_ad_signedpath_data *, krb5_data **);
 krb5_error_code encode_krb5_iakerb_header
 (const krb5_iakerb_header *, krb5_data **);
+krb5_error_code encode_krb5_iakerb_finished
+(const krb5_iakerb_finished *, krb5_data **);
 
 /*************************************************************************
  * End of prototypes for krb5_encode.c
@@ -2024,6 +2032,9 @@ krb5_error_code decode_krb5_ad_signedpath
 
 krb5_error_code decode_krb5_iakerb_header
 (const krb5_data *, krb5_iakerb_header **);
+
+krb5_error_code decode_krb5_iakerb_finished
+(const krb5_data *, krb5_iakerb_finished **);
 
 struct _krb5_key_data;		/* kdb.h */
 

@@ -1216,6 +1216,18 @@ krb5_error_code decode_krb5_iakerb_header
     cleanup(free);
 }
 
+krb5_error_code decode_krb5_iakerb_finished
+(const krb5_data *code, krb5_iakerb_finished **repptr)
+{
+    setup_buf_only(krb5_iakerb_finished *);
+    alloc_field(rep);
+
+    retval = asn1_decode_iakerb_finished(&buf, rep);
+    if (retval) clean_return(retval);
+
+    cleanup(free);
+}
+
 krb5_error_code
 krb5int_get_authdata_containee_types(krb5_context context,
                                      const krb5_authdata *authdata,

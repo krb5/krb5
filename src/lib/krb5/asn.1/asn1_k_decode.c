@@ -1912,11 +1912,28 @@ asn1_error_code asn1_decode_iakerb_header
             get_lenfield(val->cookie->length, val->cookie->data,
                          2, asn1_decode_charstring);
         }
+        end_structure();
     }
     return 0;
 error_out:
     krb5_free_data_contents(NULL, &val->target_realm);
     krb5_free_data(NULL, val->cookie);
+    return retval;
+}
+
+asn1_error_code asn1_decode_iakerb_finished
+(asn1buf *buf, krb5_iakerb_finished *val)
+{
+    setup();
+    val->checksum.contents = NULL;
+    {
+        begin_structure();
+        get_field(val->checksum, 1, asn1_decode_checksum);
+        end_structure();
+    }
+    return 0;
+error_out:
+    krb5_free_checksum_contents(NULL, &val->checksum);
     return retval;
 }
 
