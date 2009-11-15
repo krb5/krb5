@@ -393,15 +393,19 @@ kg_process_extension(krb5_context context,
 {
     krb5_error_code code = 0;
 
+    assert(exts != NULL);
+
     switch (ext_type) {
     case KRB5_GSS_EXTS_IAKERB_FINISHED:
-        if (exts == NULL || exts->iakerb_conv == NULL) {
+        if (exts->iakerb.conv == NULL) {
             code = KRB5KRB_AP_ERR_MSG_TYPE; /* XXX */
         } else {
             code = iakerb_verify_finished(context,
                                           auth_context->recv_subkey,
-                                          exts->iakerb_conv,
+                                          exts->iakerb.conv,
                                           ext_data);
+            if (code == 0)
+                exts->iakerb.verified = 1;
         }
         break;
     default:
@@ -838,6 +842,11 @@ kg_accept_krb5(minor_status, context_handle,
                 goto fail;
             }
         }
+    }
+
+    if (exts->iakerb.conv && !exts->iakerb.verified) {
+        major_status = GSS_S_BAD_SIG;
+        goto fail;
     }
 
     /* only DCE_STYLE clients are allowed to send raw AP-REQs */
@@ -1349,6 +1358,10 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
     OM_uint32 *time_rec;
     gss_cred_id_t *delegated_cred_handle;
 {
+    krb5_gss_ctx_ext_rec exts;
+
+    memset(&exts, 0, sizeof(exts));
+
     return krb5_gss_accept_sec_context_ext(minor_status,
                                            context_handle,
                                            verifier_cred_handle,
@@ -1360,6 +1373,6 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
                                            ret_flags,
                                            time_rec,
                                            delegated_cred_handle,
-                                           NULL);
+                                           &exts);
 }
 

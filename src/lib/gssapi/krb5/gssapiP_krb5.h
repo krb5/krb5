@@ -188,7 +188,10 @@ typedef struct _krb5_gss_cred_id_rec {
 } krb5_gss_cred_id_rec, *krb5_gss_cred_id_t;
 
 typedef struct _krb5_gss_ctx_ext_rec {
-    krb5_data *iakerb_conv;
+    struct {
+        krb5_data *conv;
+        int verified;
+    } iakerb;
 } krb5_gss_ctx_ext_rec, *krb5_gss_ctx_ext_t;
 
 typedef struct _krb5_gss_ctx_id_rec {

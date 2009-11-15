@@ -717,7 +717,7 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
         krb5_gss_ctx_ext_rec exts;
 
         memset(&exts, 0, sizeof(exts));
-        exts.iakerb_conv = &ctx->conv;
+        exts.iakerb.conv = &ctx->conv;
 
         major_status = krb5_gss_accept_sec_context_ext(&code,
                                                        &ctx->gssc,
@@ -862,7 +862,7 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
 
         memset(&exts, 0, sizeof(exts));
 
-        exts.iakerb_conv = &ctx->conv;
+        exts.iakerb.conv = &ctx->conv;
 
         k5_mutex_unlock(&kcred->lock);
         credLocked = 0;

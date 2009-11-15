@@ -303,12 +303,13 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
     junk = 0;
 #endif
 
-    if (data->exts &&
-        data->exts->iakerb_conv && data->exts->iakerb_conv->length) {
+    assert(data->exts != NULL);
+
+    if (data->exts->iakerb.conv && data->exts->iakerb.conv->length) {
         assert(auth_context->send_subkey != NULL);
 
         code = iakerb_make_finished(context, auth_context->send_subkey,
-                                    data->exts->iakerb_conv, &finished);
+                                    data->exts->iakerb.conv, &finished);
         if (code != 0)
             goto cleanup;
 
@@ -340,8 +341,7 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
         TWRITE_INT16(ptr, credmsg.length, 0);
         TWRITE_STR(ptr, credmsg.data, credmsg.length);
     }
-    if (data->exts &&
-        data->exts->iakerb_conv && data->exts->iakerb_conv->length) {
+    if (data->exts->iakerb.conv && data->exts->iakerb.conv->length) {
         TWRITE_INT(ptr, KRB5_GSS_EXTS_IAKERB_FINISHED, 1);
         TWRITE_INT(ptr, finished->length, 1);
         TWRITE_STR(ptr, finished->data, finished->length);
@@ -1132,6 +1132,10 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
     OM_uint32 *ret_flags;
     OM_uint32 *time_rec;
 {
+    krb5_gss_ctx_ext_rec exts;
+
+    memset(&exts, 0, sizeof(exts));
+
     return krb5_gss_init_sec_context_ext(minor_status,
                                          claimant_cred_handle,
                                          context_handle,
@@ -1145,6 +1149,6 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
                                          output_token,
                                          ret_flags,
                                          time_rec,
-                                         NULL);
+                                         &exts);
 }
 
