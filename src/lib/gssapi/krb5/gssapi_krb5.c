@@ -697,6 +697,9 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_release_any_name_mapping,
 };
 
+static struct gss_config_ext krb5_mechanism_ext = {
+    krb5_gss_acquire_cred_with_password,
+};
 
 #ifdef _GSS_STATIC_LINK
 #include "mglueP.h"
@@ -706,9 +709,10 @@ static int gss_krb5mechglue_init(void)
 
     memset(&mech_krb5, 0, sizeof(mech_krb5));
     mech_krb5.mech = &krb5_mechanism;
+    mech_krb5.mech_ext = &krb5_mechanism_ext;
+
     mech_krb5.mechNameStr = "kerberos_v5";
     mech_krb5.mech_type = (gss_OID)gss_mech_krb5;
-
     gssint_register_mechinfo(&mech_krb5);
 
     mech_krb5.mechNameStr = "kerberos_v5_old";
@@ -717,6 +721,10 @@ static int gss_krb5mechglue_init(void)
 
     mech_krb5.mechNameStr = "mskrb";
     mech_krb5.mech_type = (gss_OID)gss_mech_krb5_wrong;
+    gssint_register_mechinfo(&mech_krb5);
+
+    mech_krb5.mechNameStr = "iakerb";
+    mech_krb5.mech_type = (gss_OID)gss_mech_iakerb;
     gssint_register_mechinfo(&mech_krb5);
 
     return 0;

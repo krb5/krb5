@@ -339,7 +339,7 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
 
 static krb5_error_code
 make_ap_req_v1(context, ctx, cred, k_cred, ad_context,
-               chan_bindings, mech_type, token)
+               chan_bindings, mech_type, token, exts)
     krb5_context context;
     krb5_gss_ctx_id_rec *ctx;
     krb5_gss_cred_id_t cred;
@@ -348,6 +348,7 @@ make_ap_req_v1(context, ctx, cred, k_cred, ad_context,
     gss_channel_bindings_t chan_bindings;
     gss_OID mech_type;
     gss_buffer_t token;
+    krb5_gss_ctx_ext_t exts;
 {
     krb5_flags mk_req_flags = 0;
     krb5_error_code code;
@@ -474,7 +475,8 @@ kg_new_connection(
     OM_uint32 *ret_flags,
     OM_uint32 *time_rec,
     krb5_context context,
-    int default_mech)
+    int default_mech,
+    krb5_gss_ctx_ext_t exts)
 {
     OM_uint32 major_status;
     krb5_error_code code;
@@ -592,7 +594,7 @@ kg_new_connection(
         if ((code = make_ap_req_v1(context, ctx,
                                    cred, k_cred, ctx->here->ad_context,
                                    input_chan_bindings,
-                                   mech_type, &token))) {
+                                   mech_type, &token, exts))) {
             if ((code == KRB5_FCC_NOFILE) || (code == KRB5_CC_NOTFOUND) ||
                 (code == KG_EMPTY_CCACHE))
                 major_status = GSS_S_NO_CRED;
@@ -703,7 +705,8 @@ mutual_auth(
     gss_buffer_t output_token,
     OM_uint32 *ret_flags,
     OM_uint32 *time_rec,
-    krb5_context context)
+    krb5_context context,
+    krb5_gss_ctx_ext_t exts)
 {
     OM_uint32 major_status;
     unsigned char *ptr;
@@ -878,24 +881,21 @@ fail:
 }
 
 OM_uint32
-krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
-                          context_handle, target_name, mech_type,
-                          req_flags, time_req, input_chan_bindings,
-                          input_token, actual_mech_type, output_token,
-                          ret_flags, time_rec)
-    OM_uint32 *minor_status;
-    gss_cred_id_t claimant_cred_handle;
-    gss_ctx_id_t *context_handle;
-    gss_name_t target_name;
-    gss_OID mech_type;
-    OM_uint32 req_flags;
-    OM_uint32 time_req;
-    gss_channel_bindings_t input_chan_bindings;
-    gss_buffer_t input_token;
-    gss_OID *actual_mech_type;
-    gss_buffer_t output_token;
-    OM_uint32 *ret_flags;
-    OM_uint32 *time_rec;
+krb5_gss_init_sec_context_ext(
+    OM_uint32 *minor_status,
+    gss_cred_id_t claimant_cred_handle,
+    gss_ctx_id_t *context_handle,
+    gss_name_t target_name,
+    gss_OID mech_type,
+    OM_uint32 req_flags,
+    OM_uint32 time_req,
+    gss_channel_bindings_t input_chan_bindings,
+    gss_buffer_t input_token,
+    gss_OID *actual_mech_type,
+    gss_buffer_t output_token,
+    OM_uint32 *ret_flags,
+    OM_uint32 *time_rec,
+    krb5_gss_ctx_ext_t exts)
 {
     krb5_context context;
     krb5_gss_cred_id_t cred;
@@ -1010,7 +1010,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
                                         time_req, input_chan_bindings,
                                         input_token, actual_mech_type,
                                         output_token, ret_flags, time_rec,
-                                        context, default_mech);
+                                        context, default_mech, exts);
         k5_mutex_unlock(&cred->lock);
         if (*context_handle == GSS_C_NO_CONTEXT) {
             save_error_info (*minor_status, context);
@@ -1025,7 +1025,7 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
                                    time_req, input_chan_bindings,
                                    input_token, actual_mech_type,
                                    output_token, ret_flags, time_rec,
-                                   context);
+                                   context, exts);
         /* If context_handle is now NO_CONTEXT, mutual_auth called
            delete_sec_context, which would've zapped the krb5 context
            too.  */
@@ -1090,3 +1090,40 @@ krb5int_gss_use_kdc_context(OM_uint32 *minor_status,
     return GSS_S_COMPLETE;
 }
 #endif
+
+OM_uint32
+krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
+                          context_handle, target_name, mech_type,
+                          req_flags, time_req, input_chan_bindings,
+                          input_token, actual_mech_type, output_token,
+                          ret_flags, time_rec)
+    OM_uint32 *minor_status;
+    gss_cred_id_t claimant_cred_handle;
+    gss_ctx_id_t *context_handle;
+    gss_name_t target_name;
+    gss_OID mech_type;
+    OM_uint32 req_flags;
+    OM_uint32 time_req;
+    gss_channel_bindings_t input_chan_bindings;
+    gss_buffer_t input_token;
+    gss_OID *actual_mech_type;
+    gss_buffer_t output_token;
+    OM_uint32 *ret_flags;
+    OM_uint32 *time_rec;
+{
+    return krb5_gss_init_sec_context_ext(minor_status,
+                                         claimant_cred_handle,
+                                         context_handle,
+                                         target_name,
+                                         mech_type,
+                                         req_flags,
+                                         time_req,
+                                         input_chan_bindings,
+                                         input_token,
+                                         actual_mech_type,
+                                         output_token,
+                                         ret_flags,
+                                         time_rec,
+                                         NULL);
+}
+
