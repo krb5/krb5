@@ -38,6 +38,8 @@ struct _iakerb_ctx_id_rec {
     krb5_context k5c;
     krb5_init_creds_context icc;
     krb5_data conv;
+    gss_ctx_id_t gssc;
+    unsigned int complete;
 };
 
 typedef struct _iakerb_ctx_id_rec iakerb_ctx_id_rec;
@@ -46,9 +48,12 @@ typedef iakerb_ctx_id_rec *iakerb_ctx_id_t;
 static void
 iakerb_release_context(iakerb_ctx_id_t ctx)
 {
+    OM_uint32 tmp;
+
     if (ctx == NULL)
         return;
 
+    krb5_gss_delete_sec_context(&tmp, &ctx->gssc, NULL);
     krb5_init_creds_free(ctx->k5c, ctx->icc);
     krb5_free_data_contents(ctx->k5c, &ctx->conv);
     krb5_free_context(ctx->k5c);
@@ -194,18 +199,15 @@ static krb5_error_code
 iakerb_initiator_step(iakerb_ctx_id_t ctx,
                       krb5_gss_cred_id_t cred,
                       const gss_buffer_t input_token,
-                      gss_buffer_t output_token,
-                      int *continueNeeded)
+                      gss_buffer_t output_token)
 {
     krb5_error_code code;
     krb5_data in, out, realm;
-    unsigned int flags = 0;
     unsigned int bodysize;
     unsigned char *ptr;
     krb5_iakerb_header *iah = NULL;
     OM_uint32 tmp;
 
-    *continueNeeded = 0;
     output_token->length = 0;
     output_token->value = NULL;
 
@@ -247,11 +249,11 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
                                 &in,
                                 &out,
                                 &realm,
-                                &flags);
+                                &ctx->complete);
     if (code != 0)
         goto cleanup;
 
-    if (flags) {
+    if (ctx->complete) {
         /* finished */
         krb5_creds creds;
 
@@ -275,7 +277,6 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
                                  output_token);
         if (code != 0)
             goto cleanup;
-        *continueNeeded = 1;
     }
 
     /* Save the token for generating a future checksum */
@@ -405,7 +406,6 @@ iakerb_init_sec_context(OM_uint32 *minor_status,
     iakerb_ctx_id_t ctx;
     krb5_gss_cred_id_t kcred;
     int credLocked = 0;
-    int continueNeeded = 0;
 
     if (*context_handle == GSS_C_NO_CONTEXT) {
         code = iakerb_alloc_context(&ctx);
@@ -440,28 +440,53 @@ iakerb_init_sec_context(OM_uint32 *minor_status,
             goto cleanup;
     }
 
-    code = iakerb_initiator_step(ctx,
-                                 kcred,
-                                 input_token,
-                                 output_token,
-                                 &continueNeeded);
-    if (code != 0)
-        goto cleanup;
-
-    major_status = GSS_S_CONTINUE_NEEDED;
-
-    if (!continueNeeded) {
-        /* Now, handover to native krb5 mech. */
+    if (ctx->complete == 0) {
+        code = iakerb_initiator_step(ctx,
+                                     kcred,
+                                     input_token,
+                                     output_token);
+        if (code != 0)
+            goto cleanup;
     }
 
-    if (*context_handle == GSS_C_NO_CONTEXT)
-        *context_handle = (gss_ctx_id_t)ctx;
-    if (actual_mech_type != NULL)
-        *actual_mech_type = (gss_OID)gss_mech_krb5;
-    if (ret_flags != NULL)
-        *ret_flags = 0;
-    if (time_rec != NULL)
-        *time_rec = 0;
+    if (ctx->complete) {
+        krb5_gss_ctx_ext_rec exts;
+
+        exts.iakerb_conv = &ctx->conv;
+
+        k5_mutex_unlock(&kcred->lock);
+        credLocked = 0;
+
+        major_status = krb5_gss_init_sec_context_ext(&code,
+                                                     claimant_cred_handle,
+                                                     &ctx->gssc,
+                                                     target_name,
+                                                     (gss_OID)gss_mech_krb5,
+                                                     req_flags,
+                                                     time_req,
+                                                     input_chan_bindings,
+                                                     GSS_C_NO_BUFFER,
+                                                     actual_mech_type,
+                                                     output_token,
+                                                     ret_flags,
+                                                     time_rec,
+                                                     &exts);
+        if (major_status == GSS_S_COMPLETE) {
+            *context_handle = ctx->gssc;
+            ctx->gssc = NULL;
+            iakerb_release_context(ctx);
+        }
+    } else {
+        if (*context_handle == GSS_C_NO_CONTEXT)
+                *context_handle = (gss_ctx_id_t)ctx;
+        if (actual_mech_type != NULL)
+            *actual_mech_type = (gss_OID)gss_mech_iakerb;
+        if (ret_flags != NULL)
+            *ret_flags = 0;
+        if (time_rec != NULL)
+            *time_rec = 0;
+        major_status = GSS_S_CONTINUE_NEEDED;
+    }
 
 cleanup:
     if (credLocked)
