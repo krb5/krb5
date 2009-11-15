@@ -90,4 +90,6 @@ error_code KV5M_FAST_ARMORED_REQ, "Bad magic number for fast armored request"
 error_code KV5M_FAST_REQ, "Bad magic number for FAST request"
 error_code KV5M_FAST_RESPONSE, "Bad magic number for FAST response"
 error_code KV5M_AUTHDATA_CONTEXT,  "Bad magic number for krb5_authdata_context"
+error_code KV5M_GSS_KRB5_CONTEXT,   "Bad magic number for GSSAPI krb5 context"
+error_code KV5M_GSS_IAKERB_CONTEXT, "Bad magic number for GSSAPI iakerb context"
 end

@@ -192,6 +192,7 @@ typedef struct _krb5_gss_ctx_ext_rec {
 } krb5_gss_ctx_ext_rec, *krb5_gss_ctx_ext_t;
 
 typedef struct _krb5_gss_ctx_id_rec {
+    krb5_magic magic;
     unsigned int initiate : 1;   /* nonzero if initiating, zero if accepting */
     unsigned int established : 1;
     unsigned int big_endian : 1;

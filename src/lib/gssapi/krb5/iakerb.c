@@ -35,6 +35,7 @@
  */
 
 struct _iakerb_ctx_id_rec {
+    krb5_magic magic;
     krb5_context k5c;
     krb5_init_creds_context icc;
     krb5_data conv;
@@ -340,10 +341,13 @@ iakerb_alloc_context(iakerb_ctx_id_t *pctx)
     ctx = k5alloc(sizeof(*ctx), &code);
     if (ctx == NULL)
         goto cleanup;
+    ctx->magic = KV5M_GSS_IAKERB_CONTEXT;
 
     code = krb5_gss_init_context(&ctx->k5c);
     if (code != 0)
         goto cleanup;
+
+    ctx->gssc = GSS_C_NO_CONTEXT;
 
     *pctx = ctx;
 
@@ -359,16 +363,26 @@ iakerb_delete_sec_context(OM_uint32 *minor_status,
                           gss_ctx_id_t *context_handle,
                           gss_buffer_t output_token)
 {
-    if (*context_handle != GSS_C_NO_CONTEXT) {
-        iakerb_release_context((iakerb_ctx_id_t)*context_handle);
-        *context_handle = GSS_C_NO_CONTEXT;
-    }
+    OM_uint32 major_status = GSS_S_COMPLETE;
 
     output_token->length = 0;
     output_token->value = NULL;
-
     *minor_status = 0;
-    return GSS_S_COMPLETE;
+
+    if (*context_handle != GSS_C_NO_CONTEXT) {
+        iakerb_ctx_id_t iakerb_ctx = (iakerb_ctx_id_t)*context_handle;
+
+        if (iakerb_ctx->magic == KV5M_GSS_IAKERB_CONTEXT) {
+            iakerb_release_context(iakerb_ctx);
+            *context_handle = GSS_C_NO_CONTEXT;
+        } else {
+            major_status = krb5_gss_delete_sec_context(minor_status,
+                                                       context_handle,
+                                                       output_token);
+        }
+    }
+
+    return major_status;
 }
 
 OM_uint32
@@ -406,8 +420,9 @@ iakerb_init_sec_context(OM_uint32 *minor_status,
     iakerb_ctx_id_t ctx;
     krb5_gss_cred_id_t kcred;
     int credLocked = 0;
+    int initialContextToken = (*context_handle == GSS_C_NO_CONTEXT);
 
-    if (*context_handle == GSS_C_NO_CONTEXT) {
+    if (initialContextToken) {
         code = iakerb_alloc_context(&ctx);
         if (code != 0)
             goto cleanup;
@@ -434,7 +449,7 @@ iakerb_init_sec_context(OM_uint32 *minor_status,
         goto cleanup;
     }
 
-    if (*context_handle == GSS_C_NO_CONTEXT) {
+    if (initialContextToken) {
         code = iakerb_init_creds_ctx(ctx, kcred, (krb5_gss_name_t)target_name);
         if (code != 0)
             goto cleanup;
@@ -452,10 +467,14 @@ iakerb_init_sec_context(OM_uint32 *minor_status,
     if (ctx->complete) {
         krb5_gss_ctx_ext_rec exts;
 
+        memset(&exts, 0, sizeof(exts));
         exts.iakerb_conv = &ctx->conv;
 
         k5_mutex_unlock(&kcred->lock);
         credLocked = 0;
+
+        if (ctx->gssc == GSS_C_NO_CONTEXT)
+            input_token = GSS_C_NO_BUFFER;
 
         major_status = krb5_gss_init_sec_context_ext(&code,
                                                      claimant_cred_handle,
@@ -465,7 +484,7 @@ iakerb_init_sec_context(OM_uint32 *minor_status,
                                                      req_flags,
                                                      time_req,
                                                      input_chan_bindings,
-                                                     GSS_C_NO_BUFFER,
+                                                     input_token,
                                                      actual_mech_type,
                                                      output_token,
                                                      ret_flags,
@@ -477,8 +496,8 @@ iakerb_init_sec_context(OM_uint32 *minor_status,
             iakerb_release_context(ctx);
         }
     } else {
-        if (*context_handle == GSS_C_NO_CONTEXT)
-                *context_handle = (gss_ctx_id_t)ctx;
+        if (initialContextToken)
+            *context_handle = (gss_ctx_id_t)ctx;
         if (actual_mech_type != NULL)
             *actual_mech_type = (gss_OID)gss_mech_iakerb;
         if (ret_flags != NULL)
@@ -491,7 +510,7 @@ iakerb_init_sec_context(OM_uint32 *minor_status,
 cleanup:
     if (credLocked)
         k5_mutex_unlock(&kcred->lock);
-    if (*context_handle == GSS_C_NO_CONTEXT && ctx != NULL)
+    if (initialContextToken && ctx != NULL)
         iakerb_release_context(ctx);
 
     *minor_status = code;
