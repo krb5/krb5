@@ -57,6 +57,7 @@
 #include <ctype.h>
 
 #include <gssapi/gssapi_generic.h>
+#include <gssapi/gssapi_krb5.h>
 #include "gss-misc.h"
 
 #ifdef HAVE_STRING_H
@@ -74,7 +75,8 @@ usage()
 #endif
     fprintf(stderr, "\n");
     fprintf(stderr,
-	    "       [-inetd] [-export] [-logfile file] service_name\n");
+	    "       [-inetd] [-export] [-logfile file] [-keytab keytab]\n"
+            "       service_name\n");
     exit(1);
 }
 
@@ -697,6 +699,15 @@ main(argc, argv)
 		    exit(1);
 		}
 	    }
+        } else if (strcmp(*argv, "-keytab") == 0) {
+            argc--;
+            argv++;
+            if (!argc)
+                usage();
+            if (krb5_gss_register_acceptor_identity(*argv)) {
+                fprintf(stderr, "failed to register keytab\n");
+                exit(1);
+            }
 	} else
 	    break;
 	argc--;

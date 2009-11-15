@@ -63,6 +63,8 @@
 #endif
 
 #include <gssapi/gssapi_generic.h>
+#include <gssapi/gssapi_krb5.h>
+#include <gssapi/gssapi_ext.h>
 #include "gss-misc.h"
 
 static int verbose = 1;
@@ -71,7 +73,7 @@ static void
 usage()
 {
     fprintf(stderr, "Usage: gss-client [-port port] [-mech mechanism] [-d]\n");
-    fprintf(stderr, "       [-seq] [-noreplay] [-nomutual]");
+    fprintf(stderr, "       [-seq] [-noreplay] [-nomutual] [-user user] [-pass pw]");
 #ifdef _WIN32
     fprintf(stderr, " [-threads num]");
 #endif
@@ -162,13 +164,16 @@ connect_to_server(host, port)
  */
 static int
 client_establish_context(s, service_name, gss_flags, auth_flag,
-			 v1_format, oid, gss_context, ret_flags)
+			 v1_format, oid, username, password,
+                         gss_context, ret_flags)
     int     s;
     char   *service_name;
     gss_OID oid;
     OM_uint32 gss_flags;
     int     auth_flag;
     int     v1_format;
+    char    *username;
+    char    *password;
     gss_ctx_id_t *gss_context;
     OM_uint32 *ret_flags;
 {
@@ -177,6 +182,52 @@ client_establish_context(s, service_name, gss_flags, auth_flag,
 	gss_name_t target_name;
 	OM_uint32 maj_stat, min_stat, init_sec_min_stat;
 	int     token_flags;
+        gss_cred_id_t cred = GSS_C_NO_CREDENTIAL;
+        gss_name_t gss_username = GSS_C_NO_NAME;
+        gss_OID_set_desc mechs, *mechsp = GSS_C_NO_OID_SET;
+
+        if (oid != GSS_C_NO_OID) {
+            mechs.elements = oid;
+            mechs.count = 1;
+            mechsp = &mechs;
+        }
+
+        if (username != NULL) {
+            send_tok.value = username;
+            send_tok.length = strlen(username);
+
+            maj_stat = gss_import_name(&min_stat, &send_tok,
+				       (gss_OID) gss_nt_user_name,
+				       &gss_username);
+            if (maj_stat != GSS_S_COMPLETE) {
+	        display_status("parsing client name", maj_stat, min_stat);
+	        return -1;
+            }
+        }
+
+        if (password != NULL) {
+            gss_buffer_desc pwbuf;
+
+            pwbuf.value = password;
+            pwbuf.length = strlen(password);
+
+            maj_stat = gss_acquire_cred_with_password(&min_stat,
+                                                      gss_username,
+                                                      &pwbuf, 0,
+                                                      mechsp, GSS_C_INITIATE,
+                                                      &cred, NULL, NULL);
+        } else if (gss_username != GSS_C_NO_NAME) {
+            maj_stat = gss_acquire_cred(&min_stat,
+                                        gss_username, 0,
+                                        mechsp, GSS_C_INITIATE,
+                                        &cred, NULL, NULL);
+        }
+        if (maj_stat != GSS_S_COMPLETE) {
+            display_status("acquiring creds", maj_stat, min_stat);
+            gss_release_name(&min_stat, &gss_username);
+            return -1;
+        }
+        gss_release_name(&min_stat, &gss_username);
 
 	/*
 	 * Import the name into target_name.  Use send_tok to save
@@ -220,7 +271,7 @@ client_establish_context(s, service_name, gss_flags, auth_flag,
 	*gss_context = GSS_C_NO_CONTEXT;
 
 	do {
-	    maj_stat = gss_init_sec_context(&init_sec_min_stat, GSS_C_NO_CREDENTIAL, gss_context, target_name, oid, gss_flags, 0, NULL,	/* no channel bindings */
+	    maj_stat = gss_init_sec_context(&init_sec_min_stat, cred, gss_context, target_name, oid, gss_flags, 0, NULL,	/* no channel bindings */
 					    token_ptr, NULL,	/* ignore mech type */
 					    &send_tok, ret_flags, NULL);	/* ignore time_rec */
 
@@ -264,6 +315,7 @@ client_establish_context(s, service_name, gss_flags, auth_flag,
 		printf("\n");
 	} while (maj_stat == GSS_S_CONTINUE_NEEDED);
 
+        (void) gss_release_cred(&min_stat, &cred);
 	(void) gss_release_name(&min_stat, &target_name);
     } else {
 	if (send_token(s, TOKEN_NOOP, empty_token) < 0)
@@ -348,7 +400,7 @@ read_file(file_name, in_buf)
 static int
 call_server(host, port, oid, service_name, gss_flags, auth_flag,
 	    wrap_flag, encrypt_flag, mic_flag, v1_format, msg, use_file,
-	    mcount)
+	    mcount, username, password)
     char   *host;
     u_short port;
     gss_OID oid;
@@ -359,6 +411,8 @@ call_server(host, port, oid, service_name, gss_flags, auth_flag,
     char   *msg;
     int     use_file;
     int     mcount;
+    char    *username;
+    char    *password;
 {
     gss_ctx_id_t context;
     gss_buffer_desc in_buf, out_buf;
@@ -384,7 +438,8 @@ call_server(host, port, oid, service_name, gss_flags, auth_flag,
 
     /* Establish context */
     if (client_establish_context(s, service_name, gss_flags, auth_flag,
-				 v1_format, oid, &context, &ret_flags) < 0) {
+				 v1_format, oid, username, password,
+                                 &context, &ret_flags) < 0) {
 	(void) close(s);
 	return -1;
     }
@@ -667,13 +722,15 @@ static OM_uint32 min_stat;
 static gss_OID oid = GSS_C_NULL_OID;
 static int mcount = 1, ccount = 1;
 static int auth_flag, wrap_flag, encrypt_flag, mic_flag, v1_format;
+static char *username = NULL;
+static char *password = NULL;
 
 static void
 worker_bee(void *unused)
 {
     if (call_server(server_host, port, oid, service_name,
 		    gss_flags, auth_flag, wrap_flag, encrypt_flag, mic_flag,
-		    v1_format, msg, use_file, mcount) < 0)
+		    v1_format, msg, use_file, mcount, username, password) < 0)
 	exit(1);
 
 #ifdef _WIN32
@@ -709,17 +766,29 @@ main(argc, argv)
 	    if (!argc)
 		usage();
 	    mechanism = *argv;
-	}
+        } else if (strcmp(*argv, "-user") == 0) {
+	    argc--;
+	    argv++;
+	    if (!argc)
+		usage();
+	    username = *argv;
+        } else if (strcmp(*argv, "-pass") == 0) {
+	    argc--;
+	    argv++;
+	    if (!argc)
+		usage();
+	    password = *argv;
+	} else if (strcmp(*argv, "-iakerb") == 0) {
+            mechanism = "{ 1 3 6 1 5 2 5 }";
 #ifdef _WIN32
-	else if (strcmp(*argv, "-threads") == 0) {
+	} else if (strcmp(*argv, "-threads") == 0) {
 	    argc--;
 	    argv++;
 	    if (!argc)
 		usage();
 	    max_threads = atoi(*argv);
-	}
 #endif
-	else if (strcmp(*argv, "-d") == 0) {
+	} else if (strcmp(*argv, "-d") == 0) {
 	    gss_flags |= GSS_C_DELEG_FLAG;
 	} else if (strcmp(*argv, "-seq") == 0) {
 	    gss_flags |= GSS_C_SEQUENCE_FLAG;
