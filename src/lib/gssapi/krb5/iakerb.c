@@ -252,10 +252,11 @@ iakerb_make_token(iakerb_ctx_id_t ctx,
         token->value = k5alloc(tokenSize, &code);
         if (code != 0)
             goto cleanup;
+        token->length = tokenSize;
+
         q = token->value;
         g_make_token_header(gss_mech_iakerb, data->length, &q, -1);
         memcpy(q, data->data, data->length);
-        token->length = tokenSize + data->length;
     } else {
         token->value = data->data;
         token->length = data->length;
@@ -462,6 +463,8 @@ iakerb_init_creds_ctx(iakerb_ctx_id_t ctx,
         code = EINVAL;
         goto cleanup;
     }
+
+    assert(cred->name != NULL);
 
     code = krb5_init_creds_init(ctx->k5c,
                                 cred->name->princ,

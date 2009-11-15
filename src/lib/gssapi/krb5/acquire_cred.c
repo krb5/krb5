@@ -548,11 +548,13 @@ acquire_cred(minor_status, desired_name, password, time_req,
             krb5_free_context(context);
             return(GSS_S_BAD_MECH);
         }
-        if (iakerb && cred_usage != GSS_C_INITIATE) {
-            *minor_status = G_BAD_USAGE;
-            krb5_free_context(context);
-            return GSS_S_FAILURE;
-        }
+    }
+
+    if (iakerb &&
+        (cred_usage != GSS_C_INITIATE || desired_name == GSS_C_NO_NAME)) {
+        *minor_status = G_BAD_USAGE;
+        krb5_free_context(context);
+        return GSS_S_FAILURE;
     }
 
     /* create the gss cred structure */
@@ -569,6 +571,7 @@ acquire_cred(minor_status, desired_name, password, time_req,
     cred->name = NULL;
     cred->prerfc_mech = (req_old != 0);
     cred->rfc_mech = (req_new != 0);
+    cred->iakerb = iakerb;
     cred->default_identity = (desired_name == GSS_C_NO_NAME);
 
 #ifndef LEAN_CLIENT
@@ -610,7 +613,7 @@ acquire_cred(minor_status, desired_name, password, time_req,
     /* this will fill in cred->name if it wasn't set above, and
        the desired_name is not specified */
 
-    if ((iakerb == 0 && cred_usage == GSS_C_INITIATE) ||
+    if ((cred->iakerb == 0 && cred_usage == GSS_C_INITIATE) ||
         (cred_usage == GSS_C_BOTH)) {
         if ((ret =
              acquire_init_cred(context, minor_status,
@@ -619,7 +622,7 @@ acquire_cred(minor_status, desired_name, password, time_req,
             != GSS_S_COMPLETE) {
             goto error_out;
         }
-    } else if (iakerb) {
+    } else if (cred->iakerb) {
         /* save the password for later. */
         krb5_data data;
 
