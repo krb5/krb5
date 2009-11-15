@@ -327,6 +327,9 @@ send_again:
     } else if (code != 0)
         goto cleanup;
 
+    if (krb5_is_as_rep(&reply))
+        ctx->complete = 1;
+
     code = iakerb_make_token(ctx, &realm, NULL, &reply,
                              0, output_token);
     if (code != 0)
@@ -549,6 +552,42 @@ iakerb_accept_sec_context(OM_uint32 *minor_status,
             goto cleanup;
     } else
         ctx = (iakerb_ctx_id_t)*context_handle;
+
+    if (ctx->complete) {
+        major_status = krb5_gss_accept_sec_context(&code,
+                                                   &ctx->gssc,
+                                                   verifier_cred_handle,
+                                                   input_token,
+                                                   input_chan_bindings,
+                                                   src_name,
+                                                   mech_type,
+                                                   output_token,
+                                                   ret_flags,
+                                                   time_rec,
+                                                   delegated_cred_handle);
+        if (major_status == GSS_S_COMPLETE) {
+            *context_handle = ctx->gssc;
+            ctx->gssc = NULL;
+            iakerb_release_context(ctx);
+        }
+    } else {
+        code = iakerb_acceptor_step(ctx, initialContextToken,
+                                    input_token, output_token);
+        if (code == (OM_uint32)KRB5_BAD_MSIZE)
+            major_status = GSS_S_DEFECTIVE_TOKEN;
+        if (code != 0)
+            goto cleanup;
+        if (src_name != NULL)
+            *src_name = GSS_C_NO_NAME;
+        if (mech_type != NULL)
+            *mech_type = (gss_OID)gss_mech_iakerb;
+        if (ret_flags != NULL)
+            *ret_flags = 0;
+        if (time_rec != NULL)
+            *time_rec = 0;
+        if (delegated_cred_handle != NULL)
+            *delegated_cred_handle = GSS_C_NO_CREDENTIAL;
+    }
 
 cleanup:
     if (initialContextToken && ctx != NULL)
