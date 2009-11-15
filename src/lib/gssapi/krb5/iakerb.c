@@ -75,6 +75,9 @@ iakerb_make_finished(krb5_context context,
 
     memset(&iaf, 0, sizeof(iaf));
 
+    if (key == NULL)
+        return KRB5KDC_ERR_NULL_KEY;
+
     code = krb5int_c_mandatory_cksumtype(context,
                                          krb5_k_key_enctype(context, key),
                                          &cksumtype);
@@ -103,6 +106,9 @@ iakerb_verify_finished(krb5_context context,
     krb5_error_code code;
     krb5_iakerb_finished *iaf;
     krb5_boolean valid = FALSE;
+
+    if (key == NULL)
+        return KRB5KDC_ERR_NULL_KEY;
 
     code = decode_krb5_iakerb_finished(finished, &iaf);
     if (code != 0)
