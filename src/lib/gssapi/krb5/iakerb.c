@@ -129,6 +129,66 @@ iakerb_save_token(iakerb_ctx_id_t ctx, const gss_buffer_t token)
 }
 
 static krb5_error_code
+iakerb_parse_token(iakerb_ctx_id_t ctx,
+                   int initialContextToken,
+                   const gss_buffer_t token,
+                   krb5_data *realm,
+                   krb5_data **cookie,
+                   krb5_data *request)
+{
+    krb5_error_code code;
+    krb5_iakerb_header *iah = NULL;
+    unsigned int bodysize;
+    unsigned char *ptr;
+    int flags = 0;
+    krb5_data data;
+
+    if (token == GSS_C_NO_BUFFER || token->length == 0) {
+        code = G_BAD_TOK_HEADER;
+        goto cleanup;
+    }
+
+    if (initialContextToken)
+        flags |= G_VFY_TOKEN_HDR_WRAPPER_REQUIRED;
+
+    code = g_verify_token_header(gss_mech_iakerb,
+                                 &bodysize, &ptr,
+                                 IAKERB_TOK_PROXY,
+                                 token->length, flags);
+    if (code != 0)
+        goto cleanup;
+
+    data.data = (char *)ptr;
+    data.length = der_read_length(&ptr, &bodysize);
+    if (data.length < 0) {
+        code = G_BAD_TOK_HEADER;
+        goto cleanup;
+    }
+
+    code = decode_krb5_iakerb_header(&data, &iah);
+    if (code != 0)
+        goto cleanup;
+
+    if (realm != NULL) {
+        *realm = iah->target_realm;
+        iah->target_realm.data = NULL;
+    }
+
+    if (cookie != NULL) {
+        *cookie = iah->cookie;
+        iah->cookie = NULL;
+    }
+
+    request->data = ptr;
+    request->length = bodysize;
+
+cleanup:
+    krb5_free_iakerb_header(ctx->k5c, iah);
+
+    return code;
+}
+
+static krb5_error_code
 iakerb_make_token(iakerb_ctx_id_t ctx,
                   krb5_data *realm,
                   krb5_data *cookie,
@@ -197,53 +257,85 @@ cleanup:
 }
 
 static krb5_error_code
+iakerb_acceptor_step(iakerb_ctx_id_t ctx,
+                     int initialContextToken,
+                     const gss_buffer_t input_token,
+                     gss_buffer_t output_token)
+{
+    krb5_error_code code;
+    krb5_data request, reply, realm;
+    unsigned int bodysize;
+    unsigned char *ptr;
+    krb5_iakerb_header *iah = NULL;
+    OM_uint32 tmp;
+    int responseTooBig = 0;
+
+    output_token->length = 0;
+    output_token->value = NULL;
+
+    request.data = NULL;
+    request.length = 0;
+    reply.data = NULL;
+    reply.length = 0;
+    realm.data = NULL;
+    realm.length = 0;
+
+    code = iakerb_parse_token(ctx,
+                              initialContextToken,
+                              input_token,
+                              &realm,
+                              NULL,
+                              &request);
+    if (code != 0)
+        goto cleanup;
+
+
+cleanup:
+    if (code != 0)
+        gss_release_buffer(&tmp, output_token);
+    /* request is a pointer into input_token, no need to free */
+    krb5_free_data_contents(ctx->k5c, &realm);
+    krb5_free_data_contents(ctx->k5c, &reply);
+
+    return code;
+}
+
+static krb5_error_code
 iakerb_initiator_step(iakerb_ctx_id_t ctx,
                       krb5_gss_cred_id_t cred,
                       const gss_buffer_t input_token,
                       gss_buffer_t output_token)
 {
     krb5_error_code code;
-    krb5_data in, out, realm;
+    krb5_data in, out, realm, *cookie = NULL;
     unsigned int bodysize;
     unsigned char *ptr;
-    krb5_iakerb_header *iah = NULL;
     OM_uint32 tmp;
+    int initialContextToken = (input_token == GSS_C_NO_BUFFER);
 
     output_token->length = 0;
     output_token->value = NULL;
 
-    if (input_token != GSS_C_NO_BUFFER) {
-        code = g_verify_token_header(gss_mech_iakerb,
-                                     &bodysize, &ptr, IAKERB_TOK_PROXY,
-                                     input_token->length, 0);
-        if (code != 0)
-            goto cleanup;
+    in.data = NULL;
+    in.length = 0;
+    out.data = NULL;
+    out.length = 0;
+    realm.data = NULL;
+    realm.length = 0;
 
-        /* Now, ptr points into the IAKERB-HEADER. Decode that. */
-        in.data = (char *)ptr;
-        in.length = der_read_length(&ptr, &bodysize);
-        if (in.length < 0) {
-            code = G_BAD_TOK_HEADER;
-            goto cleanup;
-        }
-
-        code = decode_krb5_iakerb_header(&in, &iah);
-        if (code != 0)
-            goto cleanup;
-
-        /* Now, ptr points into the Kerberos message. */
-        in.data = (char *)ptr;
-        in.length = bodysize;
-    } else {
+    if (initialContextToken) {
         in.data = NULL;
         in.length = 0;
+    } else {
+        code = iakerb_parse_token(ctx,
+                                  0,
+                                  input_token,
+                                  NULL,
+                                  &cookie,
+                                  &in);
+        if (code != 0)
+            goto cleanup;
     }
-
-    out.length = 0;
-    out.data = NULL;
-
-    realm.length = 0;
-    realm.data = NULL;
 
     code = krb5_init_creds_step(ctx->k5c,
                                 ctx->icc,
@@ -273,7 +365,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
         }
         krb5_free_cred_contents(ctx->k5c, &creds);
     } else {
-        code = iakerb_make_token(ctx, &realm, iah ? iah->cookie : NULL, &out,
+        code = iakerb_make_token(ctx, &realm, cookie, &out,
                                  (input_token == GSS_C_NO_BUFFER),
                                  output_token);
         if (code != 0)
@@ -288,7 +380,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
 cleanup:
     if (code != 0)
         gss_release_buffer(&tmp, output_token);
-    krb5_free_iakerb_header(ctx->k5c, iah);
+    krb5_free_data(ctx->k5c, cookie);
     krb5_free_data_contents(ctx->k5c, &out);
     krb5_free_data_contents(ctx->k5c, &realm);
 
@@ -387,7 +479,7 @@ iakerb_delete_sec_context(OM_uint32 *minor_status,
 
 OM_uint32
 iakerb_accept_sec_context(OM_uint32 *minor_status,
-                          gss_ctx_id_t *context_handler,
+                          gss_ctx_id_t *context_handle,
                           gss_cred_id_t verifier_cred_handle,
                           gss_buffer_t input_token,
                           gss_channel_bindings_t input_chan_bindings,
@@ -398,6 +490,24 @@ iakerb_accept_sec_context(OM_uint32 *minor_status,
                           OM_uint32 *time_rec,
                           gss_cred_id_t *delegated_cred_handle)
 {
+    OM_uint32 major_status = GSS_S_FAILURE;
+    OM_uint32 code;
+    iakerb_ctx_id_t ctx;
+    int initialContextToken = (*context_handle == GSS_C_NO_CONTEXT);
+
+    if (initialContextToken) {
+        code = iakerb_alloc_context(&ctx);
+        if (code != 0)
+            goto cleanup;
+    } else
+        ctx = (iakerb_ctx_id_t)*context_handle;
+
+cleanup:
+    if (initialContextToken && ctx != NULL)
+        iakerb_release_context(ctx);
+
+    *minor_status = code;
+    return major_status;
 }
 
 OM_uint32
@@ -460,6 +570,8 @@ iakerb_init_sec_context(OM_uint32 *minor_status,
                                      kcred,
                                      input_token,
                                      output_token);
+        if (code == G_BAD_TOK_HEADER)
+            major_status = GSS_S_DEFECTIVE_TOKEN;
         if (code != 0)
             goto cleanup;
     }
