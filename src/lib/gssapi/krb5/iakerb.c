@@ -52,6 +52,9 @@ struct _iakerb_ctx_id_rec {
 typedef struct _iakerb_ctx_id_rec iakerb_ctx_id_rec;
 typedef iakerb_ctx_id_rec *iakerb_ctx_id_t;
 
+/*
+ * Release an IAKERB context
+ */
 static void
 iakerb_release_context(iakerb_ctx_id_t ctx)
 {
@@ -109,7 +112,7 @@ iakerb_make_finished(krb5_context context,
 }
 
 /*
- * Verify a IAKERB-FINISHED structure submitted by the initiator.
+ * Verify a IAKERB-FINISHED structure submitted by the initiator
  */
 krb5_error_code
 iakerb_verify_finished(krb5_context context,
@@ -570,10 +573,16 @@ cleanup:
     return code;
 }
 
+/*
+ * Determine if IAKERB is required or not. If we already have
+ * a credential for the target service, then there is no point
+ * acquiring another one.
+ */
 static krb5_error_code
 iakerb_required_p(iakerb_ctx_id_t ctx,
                   krb5_gss_cred_id_t cred,
                   krb5_gss_name_t target,
+                  OM_uint32 time_req,
                   krb5_boolean *required)
 {
     krb5_creds in_creds, *out_creds = NULL;
@@ -582,8 +591,19 @@ iakerb_required_p(iakerb_ctx_id_t ctx,
     *required = FALSE;
 
     memset(&in_creds, 0, sizeof(in_creds));
+
     in_creds.client = cred->name->princ;
     in_creds.server = target->princ;
+
+    if (time_req != 0 && time_req != GSS_C_INDEFINITE) {
+        krb5_timestamp now;
+
+        code = krb5_timeofday(ctx->k5c, &now);
+        if (code != 0)
+            return code;
+
+        in_creds.times.endtime = now + time_req;
+    }
 
     code = krb5_get_credentials(ctx->k5c, KRB5_GC_CACHED,
                                 cred->ccache,
@@ -809,7 +829,7 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
     if (initialContextToken) {
         krb5_boolean doit;
 
-        code = iakerb_required_p(ctx, kcred, kname, &doit);
+        code = iakerb_required_p(ctx, kcred, kname, time_req, &doit);
         if (code == 0) {
             if (doit)
                 code = iakerb_init_creds_ctx(ctx, kcred, kname);
