@@ -1573,6 +1573,9 @@ init_creds_step_reply(krb5_context context,
             krb5_free_pa_data(context, ctx->preauth_to_use);
             ctx->preauth_to_use = padata;
             padata = NULL;
+            /* this will trigger a new call to krb5_do_preauth() */
+            krb5_free_error(context, ctx->err_reply);
+            ctx->err_reply = NULL;
             code = sort_krb5_padata_sequence(context,
                                              &ctx->request->client->realm,
                                              ctx->preauth_to_use);
