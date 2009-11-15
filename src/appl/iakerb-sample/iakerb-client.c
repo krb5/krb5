@@ -63,7 +63,7 @@
 #endif
 
 #include <gssapi/gssapi_generic.h>
-#include "gss-misc.h"
+#include "iakerb-misc.h"
 
 static int verbose = 1;
 

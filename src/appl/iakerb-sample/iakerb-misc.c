@@ -73,7 +73,7 @@ static char *rcsid = "$Header$";
 #endif
 
 #include <gssapi/gssapi_generic.h>
-#include "gss-misc.h"
+#include "iakerb-misc.h"
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>

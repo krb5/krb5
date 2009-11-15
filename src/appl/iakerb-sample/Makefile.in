@@ -1,22 +1,22 @@
 thisconfigdir=../..
-myfulldir=appl/gss-sample
-mydir=appl/gss-sample
+myfulldir=appl/iakerb-sample
+mydir=appl/iakerb-sample
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DUSE_AUTOCONF_H -DGSSAPI_V2
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-SRCS= $(srcdir)/gss-client.c $(srcdir)/gss-misc.c $(srcdir)/gss-server.c
+SRCS= $(srcdir)/iakerb-client.c $(srcdir)/iakerb-misc.c $(srcdir)/iakerb-server.c
 
-OBJS= gss-client.o gss-misc.o gss-server.o
+OBJS= iakerb-client.o iakerb-misc.o iakerb-server.o
 
-all-unix:: gss-server gss-client
+all-unix:: iakerb-server iakerb-client
 
 ##WIN32##VERSIONRC = $(BUILDTOP)\windows\version.rc
 ##WIN32##RCFLAGS=$(CPPFLAGS) -I$(SRCTOP) -D_WIN32 -DRES_ONLY
 
-##WIN32##GSSCLIENT=$(OUTPRE)gss-client.exe
-##WIN32##GSSSERVER=$(OUTPRE)gss-server.exe
+##WIN32##GSSCLIENT=$(OUTPRE)iakerb-client.exe
+##WIN32##GSSSERVER=$(OUTPRE)iakerb-server.exe
 
 ##WIN32##CLIENTRES=$(GSSCLIENT:.exe=.res)
 ##WIN32##SERVERRES=$(GSSSERVER:.exe=.res)
@@ -27,25 +27,25 @@ all-unix:: gss-server gss-client
 ##WIN32##        $(RC) $(RCFLAGS) -DGSS_SERVER_APP -fo $@ -r $**
 
 
-##WIN32##all-windows:: $(OUTPRE)gss-server.exe $(OUTPRE)gss-client.exe
+##WIN32##all-windows:: $(OUTPRE)iakerb-server.exe $(OUTPRE)iakerb-client.exe
 
-gss-server: gss-server.o gss-misc.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o gss-server gss-server.o gss-misc.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
+iakerb-server: iakerb-server.o iakerb-misc.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o iakerb-server iakerb-server.o iakerb-misc.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
 
-gss-client: gss-client.o gss-misc.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o gss-client gss-client.o gss-misc.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
+iakerb-client: iakerb-client.o iakerb-misc.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o iakerb-client iakerb-client.o iakerb-misc.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
 
-##WIN32##$(GSSSERVER): $(OUTPRE)gss-server.obj $(OUTPRE)gss-misc.obj $(GLIB) $(KLIB) $(SERVERRES)
+##WIN32##$(GSSSERVER): $(OUTPRE)iakerb-server.obj $(OUTPRE)iakerb-misc.obj $(GLIB) $(KLIB) $(SERVERRES)
 ##WIN32##	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib $(SCLIB)
 ##WIN32##	$(_VC_MANIFEST_EMBED_EXE)
 
-##WIN32##$(GSSCLIENT): $(OUTPRE)gss-client.obj $(OUTPRE)gss-misc.obj $(GLIB) $(KLIB) $(CLIENTRES)
+##WIN32##$(GSSCLIENT): $(OUTPRE)iakerb-client.obj $(OUTPRE)iakerb-misc.obj $(GLIB) $(KLIB) $(CLIENTRES)
 ##WIN32##	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib $(SCLIB)
 ##WIN32##	$(_VC_MANIFEST_EMBED_EXE)
 
 clean-unix::
-	$(RM) gss-server gss-client
+	$(RM) iakerb-server iakerb-client
 
 install-unix::
-	$(INSTALL_PROGRAM) gss-client $(DESTDIR)$(CLIENT_BINDIR)/gss-client
-	$(INSTALL_PROGRAM) gss-server $(DESTDIR)$(SERVER_BINDIR)/gss-server
+	$(INSTALL_PROGRAM) iakerb-client $(DESTDIR)$(CLIENT_BINDIR)/iakerb-client
+	$(INSTALL_PROGRAM) iakerb-server $(DESTDIR)$(SERVER_BINDIR)/iakerb-server

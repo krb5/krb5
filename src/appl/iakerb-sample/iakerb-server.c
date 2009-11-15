@@ -57,7 +57,7 @@
 #include <ctype.h>
 
 #include <gssapi/gssapi_generic.h>
-#include "gss-misc.h"
+#include "iakerb-misc.h"
 
 #ifdef HAVE_STRING_H
 #include <string.h>
