@@ -221,7 +221,8 @@ client_establish_context(s, service_name, gss_flags, auth_flag,
                                         gss_username, 0,
                                         mechsp, GSS_C_INITIATE,
                                         &cred, NULL, NULL);
-        }
+        } else
+            maj_stat = GSS_S_COMPLETE;
         if (maj_stat != GSS_S_COMPLETE) {
             display_status("acquiring creds", maj_stat, min_stat);
             gss_release_name(&min_stat, &gss_username);
