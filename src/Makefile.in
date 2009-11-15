@@ -685,6 +685,7 @@ BSDFILES = \
 	slave/kpropd_rpc.c
 
 OTHEREXCLUDES = \
+	include/iprop.h \
 	include/k5-platform.h \
 	include/gssrpc \
 	lib/krb5/asn.1/asn1_decode.h \
