@@ -54,7 +54,8 @@ iakerb_release_context(iakerb_ctx_id_t ctx)
     if (ctx == NULL)
         return;
 
-    krb5_gss_delete_sec_context(&tmp, &ctx->gssc, NULL);
+    if (ctx->gssc != GSS_C_NO_CONTEXT)
+        krb5_gss_delete_sec_context(&tmp, &ctx->gssc, NULL);
     krb5_init_creds_free(ctx->k5c, ctx->icc);
     krb5_free_data_contents(ctx->k5c, &ctx->conv);
     krb5_free_context(ctx->k5c);
@@ -163,6 +164,8 @@ iakerb_parse_token(iakerb_ctx_id_t ctx,
     if (initialContextToken)
         flags |= G_VFY_TOKEN_HDR_WRAPPER_REQUIRED;
 
+    ptr = token->value;
+
     code = g_verify_token_header(gss_mech_iakerb,
                                  &bodysize, &ptr,
                                  IAKERB_TOK_PROXY,
@@ -212,6 +215,8 @@ iakerb_make_token(iakerb_ctx_id_t ctx,
     krb5_iakerb_header iah;
     krb5_data *data = NULL;
     char *p;
+    unsigned int tokenSize;
+    unsigned char *q;
 
     token->value = NULL;
     token->length = 0;
@@ -228,40 +233,36 @@ iakerb_make_token(iakerb_ctx_id_t ctx,
         goto cleanup;
 
     /*
-     * Add the TOK_ID to the beginning of the header and the
-     * Kerberos request to the end.
+     * Concatenate Kerberos request.
      */
-    p = realloc(data->data, 2 + data->length + request->length);
+    p = realloc(data->data, data->length + request->length);
     if (p == NULL) {
         code = ENOMEM;
         goto cleanup;
     }
-
-    memmove(p + 2, data->data, data->length);
-    memcpy(p + 2 + data->length, request->data, request->length);
-    store_16_be(IAKERB_TOK_PROXY, p);
-
-    data->length += 2 /* TOK_ID */ + request->length;
     data->data = p;
 
-    if (initialContextToken) {
-        unsigned int tokenSize;
-        unsigned char *q;
+    memcpy(data->data + data->length, request->data, request->length);
+    data->length += request->length;
 
+    if (initialContextToken)
         tokenSize = g_token_size(gss_mech_iakerb, data->length);
-        token->value = k5alloc(tokenSize, &code);
-        if (code != 0)
-            goto cleanup;
-        token->length = tokenSize;
+    else
+        tokenSize = 2;
 
-        q = token->value;
-        g_make_token_header(gss_mech_iakerb, data->length, &q, -1);
-        memcpy(q, data->data, data->length);
+    token->value = q = k5alloc(tokenSize, &code);
+    if (code != 0)
+        goto cleanup;
+    token->length = tokenSize;
+
+    if (initialContextToken) {
+        g_make_token_header(gss_mech_iakerb, data->length, &q,
+                            IAKERB_TOK_PROXY);
     } else {
-        token->value = data->data;
-        token->length = data->length;
-        data->data = NULL; /* do not double-free */
+        store_16_be(IAKERB_TOK_PROXY, q);
+        q += 2;
     }
+    memcpy(q, data->data, data->length);
 
 cleanup:
     krb5_free_data(ctx->k5c, data);
