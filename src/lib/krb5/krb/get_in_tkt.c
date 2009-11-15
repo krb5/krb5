@@ -1453,18 +1453,6 @@ krb5_init_creds_set_service(krb5_context context,
     return 0;
 }
 
-krb5_error_code KRB5_CALLCONV
-krb5int_init_creds_set_as_key_func(krb5_context context,
-                                   krb5_init_creds_context ctx,
-                                   krb5_gic_get_as_key_fct gak_fct,
-                                   void *gak_data)
-{
-    ctx->gak_fct = gak_fct;
-    ctx->gak_data = gak_data;
-
-    return 0;
-}
-
 static krb5_error_code
 init_creds_validate_reply(krb5_context context,
                           krb5_init_creds_context ctx,
@@ -1942,10 +1930,8 @@ krb5_get_init_creds(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    code = krb5int_init_creds_set_as_key_func(context, ctx,
-                                              gak_fct, gak_data);
-    if (code != 0)
-        goto cleanup;
+    ctx->gak_fct = gak_fct;
+    ctx->gak_data = gak_data;
 
     code = krb5int_init_creds_get_ext(context, ctx, use_master);
     if (code != 0)

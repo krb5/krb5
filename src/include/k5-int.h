@@ -3069,12 +3069,6 @@ krb5_error_code krb5int_parse_enctype_list(krb5_context context, char *profstr,
 					   krb5_enctype *default_list,
 					   krb5_enctype **result);
 
-krb5_error_code KRB5_CALLCONV
-krb5int_init_creds_set_as_key_func(krb5_context context,
-                                   krb5_init_creds_context ctx,
-                                   krb5_gic_get_as_key_fct gak_fct,
-                                   void *gak_data);
-
 #ifdef DEBUG_ERROR_LOCATIONS
 #define krb5_set_error_message(ctx, code, ...) \
     krb5_set_error_message_fl(ctx, code, __FILE__, __LINE__, __VA_ARGS__)

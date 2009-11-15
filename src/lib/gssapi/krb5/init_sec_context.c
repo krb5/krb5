@@ -534,7 +534,7 @@ kg_new_connection(
 
     /* fill in the ctx */
     memset(ctx, 0, sizeof(krb5_gss_ctx_id_rec));
-    ctx->magic = KV5M_GSS_KRB5_CONTEXT;
+    ctx->magic = KG_CONTEXT;
     ctx_free = ctx;
     if ((code = krb5_auth_con_init(context, &ctx->auth_context)))
         goto fail;

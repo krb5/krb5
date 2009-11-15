@@ -43,9 +43,9 @@ struct _iakerb_ctx_id_rec {
     krb5_data conv;
     gss_ctx_id_t gssc;
     enum {
-        IAKERB_AS_REQ,
-        IAKERB_TGS_REQ,
-        IAKERB_AP_REQ
+        IAKERB_AS_REQ,      /* acquiring ticket with initial creds */
+        IAKERB_TGS_REQ,     /* acquiring ticket with TGT */
+        IAKERB_AP_REQ       /* hand-off to normal GSS AP-REQ exchange */
     } state;
 };
 
@@ -68,6 +68,10 @@ iakerb_release_context(iakerb_ctx_id_t ctx)
     free(ctx);
 }
 
+/*
+ * Create a IAKERB-FINISHED structure containing a checksum of
+ * the entire IAKERB exchange.
+ */
 krb5_error_code
 iakerb_make_finished(krb5_context context,
                      krb5_key key,
@@ -104,6 +108,9 @@ iakerb_make_finished(krb5_context context,
     return code;
 }
 
+/*
+ * Verify a IAKERB-FINISHED structure submitted by the initiator.
+ */
 krb5_error_code
 iakerb_verify_finished(krb5_context context,
                        krb5_key key,
@@ -131,6 +138,9 @@ iakerb_verify_finished(krb5_context context,
     return code;
 }
 
+/*
+ * Save a token for future checksumming.
+ */
 static krb5_error_code
 iakerb_save_token(iakerb_ctx_id_t ctx, const gss_buffer_t token)
 {
@@ -147,6 +157,9 @@ iakerb_save_token(iakerb_ctx_id_t ctx, const gss_buffer_t token)
     return 0;
 }
 
+/*
+ * Parse a token into IAKERB-HEADER and KRB-KDC-REQ/REP
+ */
 static krb5_error_code
 iakerb_parse_token(iakerb_ctx_id_t ctx,
                    int initialContextToken,
@@ -223,6 +236,9 @@ cleanup:
     return code;
 }
 
+/*
+ * Create a token from IAKERB-HEADER and KRB-KDC-REQ/REP
+ */
 static krb5_error_code
 iakerb_make_token(iakerb_ctx_id_t ctx,
                   krb5_data *realm,
@@ -293,6 +309,12 @@ cleanup:
     return code;
 }
 
+/*
+ * Parse the IAKERB token in input_token and send the contained KDC
+ * request to the KDC for the realm.
+ *
+ * Wrap the KDC reply in output_token.
+ */
 static krb5_error_code
 iakerb_acceptor_step(iakerb_ctx_id_t ctx,
                      int initialContextToken,
@@ -386,6 +408,12 @@ cleanup:
     return code;
 }
 
+/*
+ * Parse the IAKERB token in input_token and process the KDC
+ * response.
+ *
+ * Emit the next KDC request, if any, in output_token.
+ */
 static krb5_error_code
 iakerb_initiator_step(iakerb_ctx_id_t ctx,
                       krb5_gss_cred_id_t cred,
@@ -486,6 +514,9 @@ cleanup:
     return code;
 }
 
+/*
+ * Initialise the krb5_init_creds context for the IAKERB context
+ */
 static krb5_error_code
 iakerb_init_creds_ctx(iakerb_ctx_id_t ctx,
                       krb5_gss_cred_id_t cred,
@@ -539,6 +570,9 @@ cleanup:
     return code;
 }
 
+/*
+ * Allocate and initialise an IAKERB context
+ */
 static krb5_error_code
 iakerb_alloc_context(iakerb_ctx_id_t *pctx)
 {
@@ -550,7 +584,7 @@ iakerb_alloc_context(iakerb_ctx_id_t *pctx)
     ctx = k5alloc(sizeof(*ctx), &code);
     if (ctx == NULL)
         goto cleanup;
-    ctx->magic = KV5M_GSS_IAKERB_CONTEXT;
+    ctx->magic = KG_IAKERB_CONTEXT;
 
     code = krb5_gss_init_context(&ctx->k5c);
     if (code != 0)
@@ -568,6 +602,10 @@ cleanup:
     return code;
 }
 
+/*
+ * Delete an IAKERB context. This can also accept Kerberos context
+ * handles. The heuristic is similar to SPNEGO's delete_sec_context.
+ */
 OM_uint32
 iakerb_gss_delete_sec_context(OM_uint32 *minor_status,
                               gss_ctx_id_t *context_handle,
@@ -585,10 +623,12 @@ iakerb_gss_delete_sec_context(OM_uint32 *minor_status,
     if (*context_handle != GSS_C_NO_CONTEXT) {
         iakerb_ctx_id_t iakerb_ctx = (iakerb_ctx_id_t)*context_handle;
 
-        if (iakerb_ctx->magic == KV5M_GSS_IAKERB_CONTEXT) {
+        if (iakerb_ctx->magic == KG_IAKERB_CONTEXT) {
             iakerb_release_context(iakerb_ctx);
             *context_handle = GSS_C_NO_CONTEXT;
         } else {
+            assert(iakerb_ctx->magic == KG_CONTEXT);
+
             major_status = krb5_gss_delete_sec_context(minor_status,
                                                        context_handle,
                                                        output_token);
@@ -598,6 +638,9 @@ iakerb_gss_delete_sec_context(OM_uint32 *minor_status,
     return major_status;
 }
 
+/*
+ *
+ */
 OM_uint32
 iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
                               gss_ctx_id_t *context_handle,
@@ -735,7 +778,7 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
             goto cleanup;
     }
 
-    if (ctx->state == IAKERB_AS_REQ) {
+    if (ctx->state < IAKERB_AP_REQ) {
         code = iakerb_initiator_step(ctx,
                                      kcred,
                                      input_token,
