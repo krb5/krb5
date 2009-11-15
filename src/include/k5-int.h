@@ -583,8 +583,6 @@ krb5_error_code krb5_free_krbhst(krb5_context, char * const * );
 krb5_error_code krb5_create_secure_file(krb5_context, const char * pathname);
 krb5_error_code krb5_sync_disk_file(krb5_context, FILE *fp);
 
-krb5_error_code krb5int_get_fq_local_hostname(char *, size_t);
-
 krb5_error_code krb5int_init_context_kdc(krb5_context *);
 
 krb5_error_code krb5_os_init_context(krb5_context, krb5_boolean);

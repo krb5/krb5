@@ -74,6 +74,8 @@ krb5int_sendto(krb5_context context, const krb5_data *message,
                int (*msg_handler)(krb5_context, const krb5_data *, void *),
                void *msg_handler_data);
 
+krb5_error_code krb5int_get_fq_local_hostname(char *, size_t);
+
 /* The io vector is *not* const here, unlike writev()!  */
 int krb5int_net_writev (krb5_context, int, sg_buf *, int);
 
