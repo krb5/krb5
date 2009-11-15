@@ -570,6 +570,33 @@ cleanup:
     return code;
 }
 
+static krb5_error_code
+iakerb_required_p(iakerb_ctx_id_t ctx,
+                  krb5_gss_cred_id_t cred,
+                  krb5_gss_name_t target,
+                  krb5_boolean *required)
+{
+    krb5_creds in_creds, *out_creds = NULL;
+    krb5_error_code code;
+
+    *required = FALSE;
+
+    memset(&in_creds, 0, sizeof(in_creds));
+    in_creds.client = cred->name->princ;
+    in_creds.server = target->princ;
+
+    code = krb5_get_credentials(ctx->k5c, KRB5_GC_CACHED,
+                                cred->ccache,
+                                &in_creds, &out_creds);
+    if (code == KRB5_CC_NOTFOUND) {
+        *required = TRUE;
+        code = 0;
+    } else if (code == 0)
+        krb5_free_creds(ctx->k5c, out_creds);
+
+    return code;
+}
+
 /*
  * Allocate and initialise an IAKERB context
  */
@@ -714,8 +741,10 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
     }
 
 cleanup:
-    if (initialContextToken && ctx != NULL)
+    if (initialContextToken && GSS_ERROR(major_status)) {
         iakerb_release_context(ctx);
+        *context_handle = GSS_C_NO_CONTEXT;
+    }
 
     *minor_status = code;
     return major_status;
@@ -737,26 +766,31 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
                             OM_uint32 *time_rec)
 {
     OM_uint32 major_status = GSS_S_FAILURE;
-    OM_uint32 code;
+    krb5_error_code code;
     iakerb_ctx_id_t ctx;
     krb5_gss_cred_id_t kcred;
+    krb5_gss_name_t kname;
     int credLocked = 0;
     int initialContextToken = (*context_handle == GSS_C_NO_CONTEXT);
 
     if (initialContextToken) {
         code = iakerb_alloc_context(&ctx);
-        if (code != 0)
+        if (code != 0) {
+            *minor_status = code;
             goto cleanup;
+        }
     } else
         ctx = (iakerb_ctx_id_t)*context_handle;
 
     if (!kg_validate_name(target_name)) {
-        code = G_VALIDATE_FAILED;
+        *minor_status = G_VALIDATE_FAILED;
         major_status = GSS_S_CALL_BAD_STRUCTURE | GSS_S_BAD_NAME;
         goto cleanup;
     }
 
-    major_status = krb5_gss_validate_cred_1(&code,
+    kname = (krb5_gss_name_t)target_name;
+
+    major_status = krb5_gss_validate_cred_1(minor_status,
                                             claimant_cred_handle,
                                             ctx->k5c);
     if (GSS_ERROR(major_status))
@@ -773,26 +807,41 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
     major_status = GSS_S_FAILURE;
 
     if (initialContextToken) {
-        code = iakerb_init_creds_ctx(ctx, kcred, (krb5_gss_name_t)target_name);
-        if (code != 0)
+        krb5_boolean doit;
+
+        code = iakerb_required_p(ctx, kcred, kname, &doit);
+        if (code == 0) {
+            if (doit)
+                code = iakerb_init_creds_ctx(ctx, kcred, kname);
+            else
+                ctx->state = IAKERB_AP_REQ; /* skip to normal Kerberos */
+        }
+        if (code != 0) {
+            *minor_status = code;
             goto cleanup;
+        }
+        *context_handle = (gss_ctx_id_t)ctx;
     }
 
     if (ctx->state < IAKERB_AP_REQ) {
+        /* We need to do IAKERB. */
         code = iakerb_initiator_step(ctx,
                                      kcred,
                                      input_token,
                                      output_token);
-        if (code == (OM_uint32)KRB5_BAD_MSIZE)
+        if (code == KRB5_BAD_MSIZE)
             major_status = GSS_S_DEFECTIVE_TOKEN;
-        if (code != 0)
+        if (code != 0) {
+            *minor_status = code;
             goto cleanup;
+        }
     }
 
     if (ctx->state == IAKERB_AP_REQ) {
         krb5_gss_ctx_ext_rec exts;
 
         memset(&exts, 0, sizeof(exts));
+
         exts.iakerb_conv = &ctx->conv;
 
         k5_mutex_unlock(&kcred->lock);
@@ -801,7 +850,9 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
         if (ctx->gssc == GSS_C_NO_CONTEXT)
             input_token = GSS_C_NO_BUFFER;
 
-        major_status = krb5_gss_init_sec_context_ext(&code,
+        /* IAKERB is finished, or we skipped to Kerberos directly. */
+
+        major_status = krb5_gss_init_sec_context_ext(minor_status,
                                                      claimant_cred_handle,
                                                      &ctx->gssc,
                                                      target_name,
@@ -821,10 +872,6 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
             iakerb_release_context(ctx);
         }
     } else {
-        if (initialContextToken) {
-            *context_handle = (gss_ctx_id_t)ctx;
-            ctx = NULL;
-        }
         if (actual_mech_type != NULL)
             *actual_mech_type = (gss_OID)gss_mech_iakerb;
         if (ret_flags != NULL)
@@ -837,10 +884,11 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
 cleanup:
     if (credLocked)
         k5_mutex_unlock(&kcred->lock);
-    if (initialContextToken && ctx != NULL)
+    if (initialContextToken && GSS_ERROR(major_status)) {
         iakerb_release_context(ctx);
+        *context_handle = GSS_C_NO_CONTEXT;
+    }
 
-    *minor_status = code;
     return major_status;
 }
 

@@ -228,7 +228,6 @@ acquire_init_cred(krb5_context context,
     krb5_error_code code;
     krb5_ccache ccache;
     krb5_principal princ = NULL, tmp_princ;
-    krb5_flags flags;
     krb5_cc_cursor cur;
     krb5_creds creds;
     int got_endtime;
@@ -336,17 +335,9 @@ acquire_init_cred(krb5_context context,
     }
 
     /* turn off OPENCLOSE mode while extensive frobbing is going on */
-    flags = 0;           /* turns off OPENCLOSE mode */
-    if (!cred->iakerb &&
-        (code = krb5_cc_set_flags(context, ccache, flags))) {
-        (void)krb5_cc_close(context, ccache);
-        *minor_status = code;
-        return(GSS_S_CRED_UNAVAIL);
-    }
-
-    /* get out the principal name and see if it matches */
-    code = krb5_cc_get_principal(context, ccache, &princ);
-    if (code == KRB5_FCC_NOFILE && password != NULL && desired_name != NULL ) {
+    code = krb5_cc_set_flags(context, ccache, 0);
+    if (code == KRB5_FCC_NOFILE &&
+        password != GSS_C_NO_BUFFER && desired_name != NULL) {
         /* Well, we can create a memory ccache. */
         code = krb5_cc_new_unique(context, "MEMORY", NULL, &ccache);
         if (code == 0)
@@ -355,12 +346,19 @@ acquire_init_cred(krb5_context context,
     if (code != 0) {
         (void)krb5_cc_close(context, ccache);
         *minor_status = code;
+        return(GSS_S_CRED_UNAVAIL);
+    }
+
+    /* get out the principal name and see if it matches */
+    code = krb5_cc_get_principal(context, ccache, &princ);
+    if (code != 0) {
+        (void)krb5_cc_close(context, ccache);
+        *minor_status = code;
         return(GSS_S_FAILURE);
     }
 
     if (desired_name != (krb5_gss_name_t)NULL) {
-        if (princ != NULL &&
-            !krb5_principal_compare(context, princ, desired_name->princ)) {
+        if (!krb5_principal_compare(context, princ, desired_name->princ)) {
             (void)krb5_free_principal(context, princ);
             (void)krb5_cc_close(context, ccache);
             *minor_status = KG_CCACHE_NOMATCH;
@@ -382,10 +380,20 @@ acquire_init_cred(krb5_context context,
     if (cred->iakerb) {
         krb5_data data;
 
+        assert(password != GSS_C_NO_BUFFER);
+
         data.length = password->length;
         data.data = (char *)password->value;
 
+        /* stash the password for later */
         code = krb5int_copy_data_contents_add0(context, &data, &cred->password);
+        if (code != 0) {
+            *minor_status = code;
+            return GSS_S_FAILURE;
+        }
+
+        /* restore the OPENCLOSE flag */
+        code = krb5_cc_set_flags(context, ccache, KRB5_TC_OPENCLOSE);
         if (code != 0) {
             *minor_status = code;
             return GSS_S_FAILURE;
@@ -438,7 +446,7 @@ acquire_init_cred(krb5_context context,
     }
     krb5_free_principal(context, tmp_princ);
 
-    if (code == KRB5_CC_END && !got_endtime && password->length) {
+    if (code == KRB5_CC_END && !got_endtime && password != GSS_C_NO_BUFFER) {
         krb5_error_code code2;
 
         code2 = krb5_get_init_creds_password(context,
@@ -451,7 +459,7 @@ acquire_init_cred(krb5_context context,
                                              NULL,
                                              NULL);
         if (code2 == 0) {
-            code2 = krb5_cc_store_cred(context, cred->ccache, &creds);
+            code2 = krb5_cc_store_cred(context, ccache, &creds);
             if (code2 == 0) {
                 cred->tgt_expire = creds.times.endtime;
                 got_endtime = 1;
@@ -480,8 +488,7 @@ acquire_init_cred(krb5_context context,
             *minor_status = code;
             return(GSS_S_FAILURE);
         }
-        flags = KRB5_TC_OPENCLOSE;        /* turns on OPENCLOSE mode */
-        if ((code = krb5_cc_set_flags(context, ccache, flags))) {
+        if ((code = krb5_cc_set_flags(context, ccache, KRB5_TC_OPENCLOSE))) {
             (void)krb5_cc_close(context, ccache);
             *minor_status = code;
             return(GSS_S_FAILURE);
@@ -544,8 +551,7 @@ acquire_cred(minor_status, desired_name, password, time_req,
         goto krb_error_out;
     }
 
-    if (iakerb &&
-        (cred_usage != GSS_C_INITIATE /*|| desired_name == GSS_C_NO_NAME*/)) {
+    if (iakerb && (password == GSS_C_NO_BUFFER || cred_usage == GSS_C_BOTH)) {
         code = G_BAD_USAGE;
         goto krb_error_out;
     }
