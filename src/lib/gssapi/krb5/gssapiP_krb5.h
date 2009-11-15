@@ -1155,4 +1155,6 @@ iakerb_verify_finished(krb5_context context,
                        const krb5_data *conv,
                        const krb5_data *finished);
 
+#define KRB5_GSS_EXTS_IAKERB_FINISHED 1
+
 #endif /* _GSSAPIP_KRB5_H_ */

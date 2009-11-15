@@ -232,6 +232,7 @@ struct gss_checksum_data {
     krb5_gss_cred_id_t cred;
     krb5_checksum md5;
     krb5_data checksum_data;
+    krb5_gss_ctx_ext_t exts;
 };
 
 #ifdef CFX_EXERCISE
@@ -247,6 +248,8 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
     struct gss_checksum_data *data = cksum_data;
     krb5_data credmsg;
     unsigned int junk;
+    krb5_data *finished = NULL;
+    krb5_keyblock *subkey = NULL;
 
     data->checksum_data.data = 0;
     credmsg.data = 0;
@@ -279,8 +282,8 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
             data->checksum_data.length = 24;
         } else {
             if (credmsg.length+28 > KRB5_INT16_MAX) {
-                krb5_free_data_contents(context, &credmsg);
-                return(KRB5KRB_ERR_FIELD_TOOLONG);
+                code = KRB5KRB_ERR_FIELD_TOOLONG;
+                goto cleanup;
             }
 
             data->checksum_data.length = 28+credmsg.length;
@@ -302,6 +305,26 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
     junk = 0;
 #endif
 
+    if (data->exts && data->exts->iakerb_conv) {
+        krb5_cksumtype cksumtype;
+
+        code = krb5_auth_con_getsendsubkey(context, auth_context, &subkey);
+        if (code != 0)
+            goto cleanup;
+
+        code = krb5int_c_mandatory_cksumtype(context, subkey->enctype,
+                                             &cksumtype);
+        if (code != 0)
+            goto cleanup;
+
+        code = iakerb_make_finished(context, cksumtype, subkey,
+                                    data->exts->iakerb_conv, &finished);
+        if (code != 0)
+            goto cleanup;
+
+        data->checksum_data.length += 8 + finished->length;
+    }
+
     data->checksum_data.length += junk;
 
     /* now allocate a buffer to hold the checksum data and
@@ -309,9 +332,8 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
 
     if ((data->checksum_data.data =
          (char *) xmalloc(data->checksum_data.length)) == NULL) {
-        if (credmsg.data)
-            krb5_free_data_contents(context, &credmsg);
-        return(ENOMEM);
+        code = ENOMEM;
+        goto cleanup;
     }
 
     ptr = (unsigned char *)data->checksum_data.data;
@@ -327,14 +349,21 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
         TWRITE_INT16(ptr, KRB5_GSS_FOR_CREDS_OPTION, 0);
         TWRITE_INT16(ptr, credmsg.length, 0);
         TWRITE_STR(ptr, credmsg.data, credmsg.length);
-
-        /* free credmsg data */
-        krb5_free_data_contents(context, &credmsg);
+    }
+    if (data->exts && data->exts->iakerb_conv) {
+        TWRITE_INT(ptr, KRB5_GSS_EXTS_IAKERB_FINISHED, 1);
+        TWRITE_INT(ptr, finished->length, 1);
+        TWRITE_STR(ptr, finished->data, finished->length);
     }
     if (junk)
         memset(ptr, 'i', junk);
     *out = &data->checksum_data;
-    return 0;
+    code = 0;
+cleanup:
+    krb5_free_data_contents(context, &credmsg);
+    krb5_free_keyblock(context, subkey);
+    krb5_free_data(context, finished);
+    return code;
 }
 
 static krb5_error_code
@@ -374,6 +403,7 @@ make_ap_req_v1(context, ctx, cred, k_cred, ad_context,
     cksum_struct.ctx = ctx;
     cksum_struct.cred = cred;
     cksum_struct.checksum_data.data = NULL;
+    cksum_struct.exts = exts;
     switch (k_cred->keyblock.enctype) {
     case ENCTYPE_DES_CBC_CRC:
     case ENCTYPE_DES_CBC_MD4:
