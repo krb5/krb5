@@ -104,7 +104,7 @@
 #include <memory.h>
 #endif
 #include <assert.h>
-
+#include "../../krb5/krb/auth_con.h" /* XXX */
 
 #ifdef CFX_EXERCISE
 #define CFX_ACCEPTOR_SUBKEY (time(0) & 1)
@@ -382,6 +382,33 @@ kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
    *minor_status = code;
 
    return major_status;
+}
+
+static krb5_error_code
+kg_process_extension(krb5_context context,
+                     krb5_auth_context auth_context,
+                     int ext_type,
+                     krb5_data *ext_data,
+                     krb5_gss_ctx_ext_t exts)
+{
+    krb5_error_code code = 0;
+
+    switch (ext_type) {
+    case KRB5_GSS_EXTS_IAKERB_FINISHED:
+        if (exts == NULL || exts->iakerb_conv == NULL) {
+            code = KRB5KRB_AP_ERR_MSG_TYPE; /* XXX */
+        } else {
+            code = iakerb_verify_finished(context,
+                                          auth_context->recv_subkey,
+                                          exts->iakerb_conv,
+                                          ext_data);
+        }
+        break;
+    default:
+        break;
+    }
+
+    return code;
 }
 
 static OM_uint32
@@ -745,16 +772,11 @@ kg_accept_krb5(minor_status, context_handle,
 
         /* if the checksum length > 24, there are options to process */
 
-        if(authdat->checksum->length > 24 && (gss_flags & GSS_C_DELEG_FLAG)) {
-
-            i = authdat->checksum->length - 24;
-
+        i = authdat->checksum->length - 24;
+        if (i && (gss_flags & GSS_C_DELEG_FLAG)) {
             if (i >= 4) {
-
                 TREAD_INT16(ptr, option_id, bigend);
-
                 TREAD_INT16(ptr, option.length, bigend);
-
                 i -= 4;
 
                 if (i < option.length || option.length < 0) {
@@ -788,34 +810,33 @@ kg_accept_krb5(minor_status, context_handle,
 
             } /* if i >= 4 */
             /* ignore any additional trailing data, for now */
-#ifdef CFX_EXERCISE
-            {
-                FILE *f = fopen("/tmp/gsslog", "a");
-                if (f) {
-                    fprintf(f,
-                            "initial context token with delegation, %d extra bytes\n",
-                            i);
-                    fclose(f);
-                }
+        }
+        while (i > 0) {
+            /* Process Type-Length-Data options */
+            if (i < 8) {
+                code = KG_BAD_LENGTH;
+                major_status = GSS_S_FAILURE;
+                goto fail;
             }
-#endif
-        } else {
-#ifdef CFX_EXERCISE
-            {
-                FILE *f = fopen("/tmp/gsslog", "a");
-                if (f) {
-                    if (gss_flags & GSS_C_DELEG_FLAG)
-                        fprintf(f,
-                                "initial context token, delegation flag but too small\n");
-                    else
-                        /* no deleg flag, length might still be too big */
-                        fprintf(f,
-                                "initial context token, %d extra bytes\n",
-                                authdat->checksum->length - 24);
-                    fclose(f);
-                }
+            TREAD_INT(ptr, option_id, 1);
+            TREAD_INT(ptr, option.length, 1);
+            i -= 8;
+            if (i < option.length) {
+                code = KG_BAD_LENGTH;
+                major_status = GSS_S_FAILURE;
+                goto fail;
             }
-#endif
+            TREAD_STR(ptr, ptr2, option.length);
+            option.data = (char *)ptr2;
+
+            i -= option.length;
+
+            code = kg_process_extension(context, auth_context,
+                                        option_id, &option, exts);
+            if (code != 0) {
+                major_status = GSS_S_FAILURE;
+                goto fail;
+            }
         }
     }
 
