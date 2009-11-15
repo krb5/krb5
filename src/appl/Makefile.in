@@ -4,5 +4,5 @@ mydir=appl
 BUILDTOP=$(REL)..
 
 SUBDIRS= sample simple user_user gss-sample \
-	libpty bsd gssftp telnet iakerb-sample
+	libpty bsd gssftp telnet
 
