@@ -294,18 +294,6 @@ cleanup:
 }
 
 static krb5_error_code
-iakerb_initiator_handover(iakerb_ctx_id_t ctx,
-                          gss_ctx_id_t *context_handle)
-{
-    krb5_gss_ctx_id_t kctx;
-    krb5_error_code code;
-
-
-
-    return code;
-}
-
-static krb5_error_code
 iakerb_init_creds_ctx(iakerb_ctx_id_t ctx,
                       krb5_gss_cred_id_t cred,
                       krb5_gss_name_t target)
@@ -447,7 +435,7 @@ iakerb_init_sec_context(OM_uint32 *minor_status,
     }
 
     if (*context_handle == GSS_C_NO_CONTEXT) {
-        code = iakerb_init_creds_ctx(ctx, kcred, target_name);
+        code = iakerb_init_creds_ctx(ctx, kcred, (krb5_gss_name_t)target_name);
         if (code != 0)
             goto cleanup;
     }
@@ -469,7 +457,7 @@ iakerb_init_sec_context(OM_uint32 *minor_status,
     if (*context_handle == GSS_C_NO_CONTEXT)
         *context_handle = (gss_ctx_id_t)ctx;
     if (actual_mech_type != NULL)
-        *actual_mech_type = gss_mech_krb5;
+        *actual_mech_type = (gss_OID)gss_mech_krb5;
     if (ret_flags != NULL)
         *ret_flags = 0;
     if (time_rec != NULL)
