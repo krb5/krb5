@@ -476,7 +476,7 @@ acquire_init_cred(krb5_context context,
 static OM_uint32
 acquire_cred(minor_status, desired_name, password, time_req,
              desired_mechs, cred_usage, output_cred_handle,
-             actual_mechs, time_rec)
+             actual_mechs, time_rec, iakerb)
     OM_uint32 *minor_status;
     const gss_name_t desired_name;
     const gss_buffer_t password;
@@ -486,12 +486,13 @@ acquire_cred(minor_status, desired_name, password, time_req,
     gss_cred_id_t *output_cred_handle;
     gss_OID_set *actual_mechs;
     OM_uint32 *time_rec;
+    int iakerb;
 {
     krb5_context context = NULL;
     size_t i;
     krb5_gss_cred_id_t cred = NULL;
     gss_OID_set ret_mechs = GSS_C_NO_OID_SET;
-    int req_old, req_new, iakerb = 0;
+    int req_old, req_new;
     OM_uint32 ret;
     krb5_error_code code;
 
@@ -540,8 +541,6 @@ acquire_cred(minor_status, desired_name, password, time_req,
                 req_old++;
             if (g_OID_equal(gss_mech_krb5, &(desired_mechs->elements[i])))
                 req_new++;
-            if (g_OID_equal(gss_mech_iakerb, &(desired_mechs->elements[i])))
-                iakerb++;
         }
 
         if (!req_old && !req_new) {
@@ -782,7 +781,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
     return acquire_cred(minor_status, desired_name, GSS_C_NO_BUFFER,
                         time_req, desired_mechs,
                         cred_usage, output_cred_handle, actual_mechs,
-                        time_rec);
+                        time_rec, 0);
 }
 
 OM_uint32
@@ -799,6 +798,23 @@ krb5_gss_acquire_cred_with_password(OM_uint32 *minor_status,
     return acquire_cred(minor_status, desired_name, password,
                         time_req, desired_mechs,
                         cred_usage, output_cred_handle, actual_mechs,
-                        time_rec);
+                        time_rec, 0);
+}
+
+OM_uint32
+iakerb_gss_acquire_cred_with_password(OM_uint32 *minor_status,
+                                      const gss_name_t desired_name,
+                                      const gss_buffer_t password,
+                                      OM_uint32 time_req,
+                                      const gss_OID_set desired_mechs,
+                                      int cred_usage,
+                                      gss_cred_id_t *output_cred_handle,
+                                      gss_OID_set *actual_mechs,
+                                      OM_uint32 *time_rec)
+{
+    return acquire_cred(minor_status, desired_name, password,
+                        time_req, desired_mechs,
+                        cred_usage, output_cred_handle, actual_mechs,
+                        time_rec, 1);
 }
 

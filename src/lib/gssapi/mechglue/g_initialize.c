@@ -609,6 +609,10 @@ releaseMechInfo(gss_mech_info *pCf)
 		memset(cf->mech, 0, sizeof(*cf->mech));
 		free(cf->mech);
 	}
+	if (cf->mech_ext != NULL) {
+		memset(cf->mech_ext, 0, sizeof(*cf->mech_ext));
+		free(cf->mech_ext);
+	}
 	if (cf->dl_handle != NULL)
 		krb5int_close_plugin(cf->dl_handle);
 
@@ -645,6 +649,16 @@ gssint_register_mechinfo(gss_mech_info template)
 	new_cf->priority = template->priority;
 	new_cf->freeMech = 1;
 	new_cf->next = NULL;
+
+	if (template->mech_ext != NULL) {
+		new_cf->mech_ext = (gss_mechanism_ext)calloc(1,
+						sizeof(struct gss_config_ext));
+		if (new_cf->mech_ext == NULL) {
+			releaseMechInfo(&new_cf);
+			return ENOMEM;
+		}
+		*new_cf->mech_ext = *template->mech_ext;
+	}
 
 	if (template->kmodName != NULL) {
 		new_cf->kmodName = strdup(template->kmodName);

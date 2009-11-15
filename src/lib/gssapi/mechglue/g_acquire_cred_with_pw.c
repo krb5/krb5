@@ -354,7 +354,7 @@ gss_add_cred_with_password(minor_status, input_cred_handle,
 	return GSS_S_BAD_MECH;
 
     mech_ext = gssint_get_mechanism_ext(desired_mech);
-    if (!mech_ext->gssspi_acquire_cred_with_password)
+    if (!mech_ext || !mech_ext->gssspi_acquire_cred_with_password)
 	return GSS_S_UNAVAILABLE;
 
     if (input_cred_handle == GSS_C_NO_CREDENTIAL) {

@@ -531,6 +531,18 @@ krb5_gss_acquire_cred_with_password(
     gss_OID_set *actual_mechs,
     OM_uint32 *time_rec);
 
+OM_uint32
+iakerb_gss_acquire_cred_with_password(
+    OM_uint32 *minor_status,
+    const gss_name_t desired_name,
+    const gss_buffer_t password,
+    OM_uint32 time_req,
+    const gss_OID_set desired_mechs,
+    int cred_usage,
+    gss_cred_id_t *output_cred_handle,
+    gss_OID_set *actual_mechs,
+    OM_uint32 *time_rec);
+
 OM_uint32 krb5_gss_release_cred
 (OM_uint32*,       /* minor_status */
  gss_cred_id_t*    /* cred_handle */
@@ -1127,37 +1139,37 @@ extern void krb5_gss_delete_error_info(void *p);
 /* IAKERB */
 
 OM_uint32
-iakerb_init_sec_context(OM_uint32 *minor_status,
-                        gss_cred_id_t claimant_cred_handle,
-                        gss_ctx_id_t *context_handle,
-                        gss_name_t target_name,
-                        gss_OID mech_type,
-                        OM_uint32 req_flags,
-                        OM_uint32 time_req,
-                        gss_channel_bindings_t input_chan_bindings,
-                        gss_buffer_t input_token,
-                        gss_OID *actual_mech_type,
-                        gss_buffer_t output_token,
-                        OM_uint32 *ret_flags,
-                        OM_uint32 *time_rec);
+iakerb_gss_init_sec_context(OM_uint32 *minor_status,
+                            gss_cred_id_t claimant_cred_handle,
+                            gss_ctx_id_t *context_handle,
+                            gss_name_t target_name,
+                            gss_OID mech_type,
+                            OM_uint32 req_flags,
+                            OM_uint32 time_req,
+                            gss_channel_bindings_t input_chan_bindings,
+                            gss_buffer_t input_token,
+                            gss_OID *actual_mech_type,
+                            gss_buffer_t output_token,
+                            OM_uint32 *ret_flags,
+                            OM_uint32 *time_rec);
 
 OM_uint32
-iakerb_accept_sec_context(OM_uint32 *minor_status,
-                          gss_ctx_id_t *context_handler,
-                          gss_cred_id_t verifier_cred_handle,
-                          gss_buffer_t input_token,
-                          gss_channel_bindings_t input_chan_bindings,
-                          gss_name_t *src_name,
-                          gss_OID *mech_type,
-                          gss_buffer_t output_token,
-                          OM_uint32 *ret_flags,
-                          OM_uint32 *time_rec,
-                          gss_cred_id_t *delegated_cred_handle);
+iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
+                              gss_ctx_id_t *context_handler,
+                              gss_cred_id_t verifier_cred_handle,
+                              gss_buffer_t input_token,
+                              gss_channel_bindings_t input_chan_bindings,
+                              gss_name_t *src_name,
+                              gss_OID *mech_type,
+                              gss_buffer_t output_token,
+                              OM_uint32 *ret_flags,
+                              OM_uint32 *time_rec,
+                              gss_cred_id_t *delegated_cred_handle);
 
 OM_uint32
-iakerb_delete_sec_context(OM_uint32 *minor_status,
-                          gss_ctx_id_t *context_handle,
-                          gss_buffer_t output_token);
+iakerb_gss_delete_sec_context(OM_uint32 *minor_status,
+                              gss_ctx_id_t *context_handle,
+                              gss_buffer_t output_token);
 
 krb5_error_code
 iakerb_make_finished(krb5_context context,

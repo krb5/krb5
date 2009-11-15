@@ -697,8 +697,14 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_release_any_name_mapping,
 };
 
+#if 0
 static struct gss_config_ext krb5_mechanism_ext = {
     krb5_gss_acquire_cred_with_password,
+};
+#endif
+
+static struct gss_config_ext iakerb_mechanism_ext = {
+    iakerb_gss_acquire_cred_with_password,
 };
 
 #ifdef _GSS_STATIC_LINK
@@ -709,7 +715,9 @@ static int gss_krb5mechglue_init(void)
 
     memset(&mech_krb5, 0, sizeof(mech_krb5));
     mech_krb5.mech = &krb5_mechanism;
+#if 0
     mech_krb5.mech_ext = &krb5_mechanism_ext;
+#endif
 
     mech_krb5.mechNameStr = "kerberos_v5";
     mech_krb5.mech_type = (gss_OID)gss_mech_krb5;
@@ -727,15 +735,15 @@ static int gss_krb5mechglue_init(void)
         struct gss_mech_config mech_iakerb;
         struct gss_config iakerb_mechanism = krb5_mechanism;
 
-        iakerb_mechanism.gss_accept_sec_context = iakerb_accept_sec_context;
-        iakerb_mechanism.gss_init_sec_context = iakerb_init_sec_context;
-        iakerb_mechanism.gss_delete_sec_context = iakerb_delete_sec_context;
+        iakerb_mechanism.gss_accept_sec_context = iakerb_gss_accept_sec_context;
+        iakerb_mechanism.gss_init_sec_context = iakerb_gss_init_sec_context;
+        iakerb_mechanism.gss_delete_sec_context = iakerb_gss_delete_sec_context;
 
         memset(&mech_iakerb, 0, sizeof(mech_iakerb));
         mech_iakerb.mechNameStr = "iakerb";
         mech_iakerb.mech = &iakerb_mechanism;
-        mech_iakerb.mech_ext = &krb5_mechanism_ext;
-        mech_krb5.mech_type = (gss_OID)gss_mech_iakerb;
+        mech_iakerb.mech_ext = &iakerb_mechanism_ext;
+        mech_iakerb.mech_type = (gss_OID)gss_mech_iakerb;
         gssint_register_mechinfo(&mech_iakerb);
     }
 
