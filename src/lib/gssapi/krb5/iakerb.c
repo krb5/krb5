@@ -63,19 +63,25 @@ iakerb_release_context(iakerb_ctx_id_t ctx)
 
 krb5_error_code
 iakerb_make_finished(krb5_context context,
-                     krb5_cksumtype cksumtype,
-                     const krb5_keyblock *key,
+                     krb5_key key,
                      const krb5_data *conv,
                      krb5_data **finished)
 {
     krb5_error_code code;
+    krb5_cksumtype cksumtype;
     krb5_iakerb_finished iaf;
 
     *finished = NULL;
 
     memset(&iaf, 0, sizeof(iaf));
 
-    code = krb5_c_make_checksum(context, cksumtype,
+    code = krb5int_c_mandatory_cksumtype(context,
+                                         krb5_k_key_enctype(context, key),
+                                         &cksumtype);
+    if (code != 0)
+        return code;
+
+    code = krb5_k_make_checksum(context, cksumtype,
                                 key, KRB5_KEYUSAGE_IAKERB_FINISHED,
                                 conv, &iaf.checksum);
     if (code != 0)
@@ -90,7 +96,7 @@ iakerb_make_finished(krb5_context context,
 
 krb5_error_code
 iakerb_verify_finished(krb5_context context,
-                       const krb5_keyblock *key,
+                       krb5_key key,
                        const krb5_data *conv,
                        const krb5_data *finished)
 {
@@ -102,7 +108,7 @@ iakerb_verify_finished(krb5_context context,
     if (code != 0)
         return code;
 
-    code = krb5_c_verify_checksum(context, key, KRB5_KEYUSAGE_IAKERB_FINISHED,
+    code = krb5_k_verify_checksum(context, key, KRB5_KEYUSAGE_IAKERB_FINISHED,
                                   conv, &iaf->checksum, &valid);
     if (code == 0 && valid == FALSE)
         code = KRB5KRB_AP_ERR_BAD_INTEGRITY;
@@ -554,17 +560,23 @@ iakerb_accept_sec_context(OM_uint32 *minor_status,
         ctx = (iakerb_ctx_id_t)*context_handle;
 
     if (ctx->complete) {
-        major_status = krb5_gss_accept_sec_context(&code,
-                                                   &ctx->gssc,
-                                                   verifier_cred_handle,
-                                                   input_token,
-                                                   input_chan_bindings,
-                                                   src_name,
-                                                   mech_type,
-                                                   output_token,
-                                                   ret_flags,
-                                                   time_rec,
-                                                   delegated_cred_handle);
+        krb5_gss_ctx_ext_rec exts;
+
+        memset(&exts, 0, sizeof(exts));
+        exts.iakerb_conv = &ctx->conv;
+
+        major_status = krb5_gss_accept_sec_context_ext(&code,
+                                                       &ctx->gssc,
+                                                       verifier_cred_handle,
+                                                       input_token,
+                                                       input_chan_bindings,
+                                                       src_name,
+                                                       mech_type,
+                                                       output_token,
+                                                       ret_flags,
+                                                       time_rec,
+                                                       delegated_cred_handle,
+                                                       &exts);
         if (major_status == GSS_S_COMPLETE) {
             *context_handle = ctx->gssc;
             ctx->gssc = NULL;

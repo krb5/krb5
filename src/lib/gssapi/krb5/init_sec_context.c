@@ -235,9 +235,8 @@ struct gss_checksum_data {
     krb5_gss_ctx_ext_t exts;
 };
 
-#ifdef CFX_EXERCISE
 #include "../../krb5/krb/auth_con.h"
-#endif
+
 static krb5_error_code KRB5_CALLCONV
 make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
                    void *cksum_data, krb5_data **out)
@@ -249,7 +248,6 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
     krb5_data credmsg;
     unsigned int junk;
     krb5_data *finished = NULL;
-    krb5_keyblock *subkey = NULL;
 
     data->checksum_data.data = 0;
     credmsg.data = 0;
@@ -306,18 +304,7 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
 #endif
 
     if (data->exts && data->exts->iakerb_conv) {
-        krb5_cksumtype cksumtype;
-
-        code = krb5_auth_con_getsendsubkey(context, auth_context, &subkey);
-        if (code != 0)
-            goto cleanup;
-
-        code = krb5int_c_mandatory_cksumtype(context, subkey->enctype,
-                                             &cksumtype);
-        if (code != 0)
-            goto cleanup;
-
-        code = iakerb_make_finished(context, cksumtype, subkey,
+        code = iakerb_make_finished(context, auth_context->send_subkey,
                                     data->exts->iakerb_conv, &finished);
         if (code != 0)
             goto cleanup;
@@ -361,7 +348,6 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
     code = 0;
 cleanup:
     krb5_free_data_contents(context, &credmsg);
-    krb5_free_keyblock(context, subkey);
     krb5_free_data(context, finished);
     return code;
 }

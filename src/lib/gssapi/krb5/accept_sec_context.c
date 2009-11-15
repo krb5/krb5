@@ -389,7 +389,7 @@ kg_accept_krb5(minor_status, context_handle,
               verifier_cred_handle, input_token,
               input_chan_bindings, src_name, mech_type,
               output_token, ret_flags, time_rec,
-              delegated_cred_handle)
+              delegated_cred_handle, exts)
     OM_uint32 *minor_status;
     gss_ctx_id_t *context_handle;
     gss_cred_id_t verifier_cred_handle;
@@ -401,6 +401,7 @@ kg_accept_krb5(minor_status, context_handle,
     OM_uint32 *ret_flags;
     OM_uint32 *time_rec;
     gss_cred_id_t *delegated_cred_handle;
+    krb5_gss_ctx_ext_t exts;
 {
     krb5_context context;
     unsigned char *ptr, *ptr2;
@@ -1266,22 +1267,19 @@ done:
 #endif /* LEAN_CLIENT */
 
 OM_uint32
-krb5_gss_accept_sec_context(minor_status, context_handle,
-                            verifier_cred_handle, input_token,
-                            input_chan_bindings, src_name, mech_type,
-                            output_token, ret_flags, time_rec,
-                            delegated_cred_handle)
-    OM_uint32 *minor_status;
-    gss_ctx_id_t *context_handle;
-    gss_cred_id_t verifier_cred_handle;
-    gss_buffer_t input_token;
-    gss_channel_bindings_t input_chan_bindings;
-    gss_name_t *src_name;
-    gss_OID *mech_type;
-    gss_buffer_t output_token;
-    OM_uint32 *ret_flags;
-    OM_uint32 *time_rec;
-    gss_cred_id_t *delegated_cred_handle;
+krb5_gss_accept_sec_context_ext(
+    OM_uint32 *minor_status,
+    gss_ctx_id_t *context_handle,
+    gss_cred_id_t verifier_cred_handle,
+    gss_buffer_t input_token,
+    gss_channel_bindings_t input_chan_bindings,
+    gss_name_t *src_name,
+    gss_OID *mech_type,
+    gss_buffer_t output_token,
+    OM_uint32 *ret_flags,
+    OM_uint32 *time_rec,
+    gss_cred_id_t *delegated_cred_handle,
+    krb5_gss_ctx_ext_t exts)
 {
     krb5_gss_ctx_id_rec *ctx = (krb5_gss_ctx_id_rec *)*context_handle;
 
@@ -1309,5 +1307,38 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
                          verifier_cred_handle, input_token,
                          input_chan_bindings, src_name, mech_type,
                          output_token, ret_flags, time_rec,
-                         delegated_cred_handle);
+                         delegated_cred_handle, exts);
 }
+
+OM_uint32
+krb5_gss_accept_sec_context(minor_status, context_handle,
+                            verifier_cred_handle, input_token,
+                            input_chan_bindings, src_name, mech_type,
+                            output_token, ret_flags, time_rec,
+                            delegated_cred_handle)
+    OM_uint32 *minor_status;
+    gss_ctx_id_t *context_handle;
+    gss_cred_id_t verifier_cred_handle;
+    gss_buffer_t input_token;
+    gss_channel_bindings_t input_chan_bindings;
+    gss_name_t *src_name;
+    gss_OID *mech_type;
+    gss_buffer_t output_token;
+    OM_uint32 *ret_flags;
+    OM_uint32 *time_rec;
+    gss_cred_id_t *delegated_cred_handle;
+{
+    return krb5_gss_accept_sec_context_ext(minor_status,
+                                           context_handle,
+                                           verifier_cred_handle,
+                                           input_token,
+                                           input_chan_bindings,
+                                           src_name,
+                                           mech_type,
+                                           output_token,
+                                           ret_flags,
+                                           time_rec,
+                                           delegated_cred_handle,
+                                           NULL);
+}
+

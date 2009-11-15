@@ -586,6 +586,22 @@ OM_uint32 krb5_gss_accept_sec_context
  OM_uint32*,       /* time_rec */
  gss_cred_id_t*    /* delegated_cred_handle */
 );
+
+OM_uint32 krb5_gss_accept_sec_context_ext
+(OM_uint32*,       /* minor_status */
+ gss_ctx_id_t*,    /* context_handle */
+ gss_cred_id_t,    /* verifier_cred_handle */
+ gss_buffer_t,     /* input_token_buffer */
+ gss_channel_bindings_t,
+ /* input_chan_bindings */
+ gss_name_t*,      /* src_name */
+ gss_OID*,         /* mech_type */
+ gss_buffer_t,     /* output_token */
+ OM_uint32*,       /* ret_flags */
+ OM_uint32*,       /* time_rec */
+ gss_cred_id_t*,   /* delegated_cred_handle */
+ krb5_gss_ctx_ext_t/*exts */
+);
 #endif /* LEAN_CLIENT */
 
 OM_uint32 krb5_gss_process_context_token
@@ -1145,14 +1161,13 @@ iakerb_delete_sec_context(OM_uint32 *minor_status,
 
 krb5_error_code
 iakerb_make_finished(krb5_context context,
-                     krb5_cksumtype cksumtype,
-                     const krb5_keyblock *key,
+                     krb5_key key,
                      const krb5_data *conv,
                      krb5_data **finished);
 
 krb5_error_code
 iakerb_verify_finished(krb5_context context,
-                       const krb5_keyblock *key,
+                       krb5_key key,
                        const krb5_data *conv,
                        const krb5_data *finished);
 
