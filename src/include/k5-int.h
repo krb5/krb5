@@ -578,17 +578,6 @@ krb5_error_code krb5_unlock_file(krb5_context, int);
 krb5_error_code krb5_sendto_kdc(krb5_context, const krb5_data *,
                                 const krb5_data *, krb5_data *, int *, int);
 
-krb5_error_code
-krb5int_sendto(krb5_context context, const krb5_data *message,
-               const struct addrlist *addrs,
-               struct sendto_callback_info* callback_info,
-               krb5_data *reply, struct sockaddr *localaddr,
-               socklen_t *localaddrlen,
-               struct sockaddr *remoteaddr, socklen_t *remoteaddrlen,
-               int *addr_used,
-               int (*msg_handler)(krb5_context, const krb5_data *, void *),
-               void *msg_handler_data);
-
 krb5_error_code krb5_get_krbhst(krb5_context, const krb5_data *, char *** );
 krb5_error_code krb5_free_krbhst(krb5_context, char * const * );
 krb5_error_code krb5_create_secure_file(krb5_context, const char * pathname);
