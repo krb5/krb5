@@ -144,7 +144,7 @@ iakerb_parse_token(iakerb_ctx_id_t ctx,
     krb5_data data;
 
     if (token == GSS_C_NO_BUFFER || token->length == 0) {
-        code = G_BAD_TOK_HEADER;
+        code = KRB5_BAD_MSIZE;
         goto cleanup;
     }
 
@@ -161,7 +161,7 @@ iakerb_parse_token(iakerb_ctx_id_t ctx,
     data.data = (char *)ptr;
     data.length = der_read_length(&ptr, &bodysize);
     if (data.length < 0) {
-        code = G_BAD_TOK_HEADER;
+        code = KRB5_BAD_MSIZE;
         goto cleanup;
     }
 
@@ -179,7 +179,7 @@ iakerb_parse_token(iakerb_ctx_id_t ctx,
         iah->cookie = NULL;
     }
 
-    request->data = ptr;
+    request->data = (char *)ptr;
     request->length = bodysize;
 
 cleanup:
@@ -264,11 +264,8 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx,
 {
     krb5_error_code code;
     krb5_data request, reply, realm;
-    unsigned int bodysize;
-    unsigned char *ptr;
-    krb5_iakerb_header *iah = NULL;
     OM_uint32 tmp;
-    int responseTooBig = 0;
+    int tcpOnly = 0, useMaster = 0;
 
     output_token->length = 0;
     output_token->value = NULL;
@@ -289,6 +286,55 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx,
     if (code != 0)
         goto cleanup;
 
+    if (realm.length == 0 || request.length == 0) {
+        code = KRB5_BAD_MSIZE;
+        goto cleanup;
+    }
+
+    code = iakerb_save_token(ctx, input_token);
+    if (code != 0)
+        goto cleanup;
+
+send_again:
+    code = krb5_sendto_kdc(ctx->k5c, &request, &realm,
+                           &reply, &useMaster, tcpOnly);
+    if (code == KRB5_KDC_UNREACH || code == KRB5_REALM_UNKNOWN) {
+        krb5_error error;
+
+        memset(&error, 0, sizeof(error));
+        if (code == KRB5_KDC_UNREACH)
+            error.error = KRB_AP_ERR_IAKERB_KDC_NO_RESPONSE;
+        else if (code == KRB5_REALM_UNKNOWN)
+            error.error = KRB_AP_ERR_IAKERB_KDC_NOT_FOUND;
+
+        code = krb5_mk_error(ctx->k5c, &error, &reply);
+        if (code != 0)
+            goto cleanup;
+    } else if (code == 0 && krb5_is_krb_error(&reply)) {
+        krb5_error *error;
+
+        code = decode_krb5_error(&reply, &error);
+        if (code != 0)
+            goto cleanup;
+
+        if (error && error->error == KRB_ERR_RESPONSE_TOO_BIG &&
+            tcpOnly == 0) {
+            tcpOnly = 1;
+            krb5_free_error(ctx->k5c, error);
+            krb5_free_data_contents(ctx->k5c, &reply);
+            goto send_again;
+        }
+    } else if (code != 0)
+        goto cleanup;
+
+    code = iakerb_make_token(ctx, &realm, NULL, &reply,
+                             0, output_token);
+    if (code != 0)
+        goto cleanup;
+
+    code = iakerb_save_token(ctx, output_token);
+    if (code != 0)
+        goto cleanup;
 
 cleanup:
     if (code != 0)
@@ -308,8 +354,6 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
 {
     krb5_error_code code;
     krb5_data in, out, realm, *cookie = NULL;
-    unsigned int bodysize;
-    unsigned char *ptr;
     OM_uint32 tmp;
     int initialContextToken = (input_token == GSS_C_NO_BUFFER);
 
@@ -333,6 +377,10 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
                                   NULL,
                                   &cookie,
                                   &in);
+        if (code != 0)
+            goto cleanup;
+
+        code = iakerb_save_token(ctx, input_token);
         if (code != 0)
             goto cleanup;
     }
@@ -570,7 +618,7 @@ iakerb_init_sec_context(OM_uint32 *minor_status,
                                      kcred,
                                      input_token,
                                      output_token);
-        if (code == G_BAD_TOK_HEADER)
+        if (code == (OM_uint32)KRB5_BAD_MSIZE)
             major_status = GSS_S_DEFECTIVE_TOKEN;
         if (code != 0)
             goto cleanup;
