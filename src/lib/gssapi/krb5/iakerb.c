@@ -36,17 +36,19 @@
 
 extern int gssint_get_der_length(unsigned char **, OM_uint32, unsigned int*);
 
+enum iakerb_state {
+    IAKERB_AS_REQ,      /* acquiring ticket with initial creds */
+    IAKERB_TGS_REQ,     /* acquiring ticket with TGT */
+    IAKERB_AP_REQ       /* hand-off to normal GSS AP-REQ exchange */
+};
+
 struct _iakerb_ctx_id_rec {
     krb5_magic magic;
     krb5_context k5c;
     krb5_init_creds_context icc;
     krb5_data conv;
     gss_ctx_id_t gssc;
-    enum {
-        IAKERB_AS_REQ,      /* acquiring ticket with initial creds */
-        IAKERB_TGS_REQ,     /* acquiring ticket with TGT */
-        IAKERB_AP_REQ       /* hand-off to normal GSS AP-REQ exchange */
-    } state;
+    enum iakerb_state state;
 };
 
 typedef struct _iakerb_ctx_id_rec iakerb_ctx_id_rec;
@@ -574,21 +576,20 @@ cleanup:
 }
 
 /*
- * Determine if IAKERB is required or not. If we already have
- * a credential for the target service, then there is no point
- * acquiring another one.
+ * Determine the starting IAKERB state for a context. If we already
+ * have a ticket, we may not need to do IAKERB at all.
  */
 static krb5_error_code
-iakerb_required_p(iakerb_ctx_id_t ctx,
-                  krb5_gss_cred_id_t cred,
-                  krb5_gss_name_t target,
-                  OM_uint32 time_req,
-                  krb5_boolean *required)
+iakerb_get_initial_state(iakerb_ctx_id_t ctx,
+                         krb5_gss_cred_id_t cred,
+                         krb5_gss_name_t target,
+                         OM_uint32 time_req,
+                         enum iakerb_state *state)
 {
     krb5_creds in_creds, *out_creds = NULL;
     krb5_error_code code;
 
-    *required = FALSE;
+    *state = IAKERB_AS_REQ;
 
     memset(&in_creds, 0, sizeof(in_creds));
 
@@ -609,10 +610,12 @@ iakerb_required_p(iakerb_ctx_id_t ctx,
                                 cred->ccache,
                                 &in_creds, &out_creds);
     if (code == KRB5_CC_NOTFOUND) {
-        *required = TRUE;
+        /* Here would go code to look for a TGT in the client's realm */
         code = 0;
-    } else if (code == 0)
+    } else if (code == 0) {
+        *state = IAKERB_AP_REQ;
         krb5_free_creds(ctx->k5c, out_creds);
+    }
 
     return code;
 }
@@ -827,14 +830,16 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
     major_status = GSS_S_FAILURE;
 
     if (initialContextToken) {
-        krb5_boolean doit;
-
-        code = iakerb_required_p(ctx, kcred, kname, time_req, &doit);
+        code = iakerb_get_initial_state(ctx, kcred, kname, time_req,
+                                        &ctx->state);
         if (code == 0) {
-            if (doit)
+            switch (ctx->state) {
+            case IAKERB_AS_REQ:
                 code = iakerb_init_creds_ctx(ctx, kcred, kname);
-            else
-                ctx->state = IAKERB_AP_REQ; /* skip to normal Kerberos */
+                break;
+            default:
+                break;
+            }
         }
         if (code != 0) {
             *minor_status = code;
@@ -843,7 +848,7 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
         *context_handle = (gss_ctx_id_t)ctx;
     }
 
-    if (ctx->state < IAKERB_AP_REQ) {
+    if (ctx->state != IAKERB_AP_REQ) {
         /* We need to do IAKERB. */
         code = iakerb_initiator_step(ctx,
                                      kcred,
