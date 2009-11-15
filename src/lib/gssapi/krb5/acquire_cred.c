@@ -227,7 +227,7 @@ acquire_init_cred(krb5_context context,
 {
     krb5_error_code code;
     krb5_ccache ccache;
-    krb5_principal princ, tmp_princ;
+    krb5_principal princ = NULL, tmp_princ;
     krb5_flags flags;
     krb5_cc_cursor cur;
     krb5_creds creds;
@@ -337,21 +337,30 @@ acquire_init_cred(krb5_context context,
 
     /* turn off OPENCLOSE mode while extensive frobbing is going on */
     flags = 0;           /* turns off OPENCLOSE mode */
-    if ((code = krb5_cc_set_flags(context, ccache, flags))) {
+    if (!cred->iakerb &&
+        (code = krb5_cc_set_flags(context, ccache, flags))) {
         (void)krb5_cc_close(context, ccache);
         *minor_status = code;
         return(GSS_S_CRED_UNAVAIL);
     }
 
     /* get out the principal name and see if it matches */
-    if ((code = krb5_cc_get_principal(context, ccache, &princ))) {
+    code = krb5_cc_get_principal(context, ccache, &princ);
+    if (code == KRB5_FCC_NOFILE && password != NULL && desired_name != NULL ) {
+        /* Well, we can create a memory ccache. */
+        code = krb5_cc_new_unique(context, "MEMORY", NULL, &ccache);
+        if (code == 0)
+            code = krb5_cc_initialize(context, ccache, desired_name->princ);
+    }
+    if (code != 0) {
         (void)krb5_cc_close(context, ccache);
         *minor_status = code;
         return(GSS_S_FAILURE);
     }
 
     if (desired_name != (krb5_gss_name_t)NULL) {
-        if (! krb5_principal_compare(context, princ, desired_name->princ)) {
+        if (princ != NULL &&
+            !krb5_principal_compare(context, princ, desired_name->princ)) {
             (void)krb5_free_principal(context, princ);
             (void)krb5_cc_close(context, ccache);
             *minor_status = KG_CCACHE_NOMATCH;

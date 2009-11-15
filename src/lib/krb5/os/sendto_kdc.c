@@ -58,10 +58,10 @@
 #define DEFAULT_UDP_PREF_LIMIT   1465
 #define HARD_UDP_LIMIT          32700 /* could probably do 64K-epsilon ? */
 
-#undef DEBUG
+#define DEBUG 1
 
 #ifdef DEBUG
-int krb5int_debug_sendto_kdc = 0;
+int krb5int_debug_sendto_kdc = 1;
 #define debug krb5int_debug_sendto_kdc
 
 static void

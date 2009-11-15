@@ -1112,7 +1112,7 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	appl
 	appl/sample appl/sample/sclient appl/sample/sserver
 	appl/simple appl/simple/client appl/simple/server
-	appl/gss-sample appl/user_user appl/iakerb-sample
+	appl/gss-sample appl/user_user
 
 	tests tests/resolve tests/asn.1 tests/create tests/hammer
 	tests/verify tests/gssapi tests/dejagnu tests/threads tests/shlib

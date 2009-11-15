@@ -477,7 +477,7 @@ iakerb_init_creds_ctx(iakerb_ctx_id_t ctx,
                       krb5_gss_name_t target)
 {
     krb5_error_code code;
-    krb5_get_init_creds_opt *opts = NULL;
+    char *spn = NULL;
 
     if (cred->iakerb == 0 || cred->password.data == NULL) {
         code = EINVAL;
@@ -485,14 +485,30 @@ iakerb_init_creds_ctx(iakerb_ctx_id_t ctx,
     }
 
     assert(cred->name != NULL);
+    assert(cred->name->princ != NULL);
+    assert(target->princ != NULL);
+
+    /* Right now, no support for getting TGTs, so realms must match */
+    if (!krb5_realm_compare(ctx->k5c, cred->name->princ, target->princ)) {
+        code = KRB5_IN_TKT_REALM_MISMATCH;
+        goto cleanup;
+    }
 
     code = krb5_init_creds_init(ctx->k5c,
                                 cred->name->princ,
-                                NULL,
-                                NULL,
-                                0,
-                                opts,
+                                NULL,   /* prompter */
+                                NULL,   /* data */
+                                0,      /* start_time */
+                                NULL,   /* opts */
                                 &ctx->icc);
+    if (code != 0)
+        goto cleanup;
+
+    code = krb5_unparse_name(ctx->k5c, target->princ, &spn);
+    if (code != 0)
+        goto cleanup;
+
+    code = krb5_init_creds_set_service(ctx->k5c, ctx->icc, spn);
     if (code != 0)
         goto cleanup;
 
@@ -503,7 +519,7 @@ iakerb_init_creds_ctx(iakerb_ctx_id_t ctx,
         goto cleanup;
 
 cleanup:
-    krb5_get_init_creds_opt_free(ctx->k5c, opts);
+    krb5_free_unparsed_name(ctx->k5c, spn);
 
     return code;
 }

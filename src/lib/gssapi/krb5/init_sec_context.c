@@ -304,6 +304,8 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
 #endif
 
     if (data->exts && data->exts->iakerb_conv) {
+        assert(auth_context->send_subkey != NULL);
+
         code = iakerb_make_finished(context, auth_context->send_subkey,
                                     data->exts->iakerb_conv, &finished);
         if (code != 0)

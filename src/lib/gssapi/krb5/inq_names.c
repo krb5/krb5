@@ -44,7 +44,8 @@ krb5_gss_inquire_names_for_mech(minor_status, mechanism, name_types)
      */
     if ((mechanism != GSS_C_NULL_OID) &&
         !g_OID_equal(gss_mech_krb5, mechanism) &&
-        !g_OID_equal(gss_mech_krb5_old, mechanism)) {
+        !g_OID_equal(gss_mech_krb5_old, mechanism) &&
+        !g_OID_equal(gss_mech_iakerb, mechanism)) {
         *minor_status = 0;
         return(GSS_S_BAD_MECH);
     }
