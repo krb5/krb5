@@ -34,6 +34,8 @@
  * IAKERB implementation
  */
 
+extern int gssint_get_der_length(unsigned char **, OM_uint32, unsigned int*);
+
 struct _iakerb_ctx_id_rec {
     krb5_magic magic;
     krb5_context k5c;
@@ -151,7 +153,8 @@ iakerb_parse_token(iakerb_ctx_id_t ctx,
 {
     krb5_error_code code;
     krb5_iakerb_header *iah = NULL;
-    unsigned int bodysize;
+    unsigned int bodysize, lenlen;
+    int length;
     unsigned char *ptr;
     int flags = 0;
     krb5_data data;
@@ -174,11 +177,21 @@ iakerb_parse_token(iakerb_ctx_id_t ctx,
         goto cleanup;
 
     data.data = (char *)ptr;
-    data.length = der_read_length(&ptr, &bodysize);
-    if (data.length < 0) {
+
+    if (bodysize-- == 0 || *ptr++ != 0x30 /* SEQUENCE */) {
+        code = ASN1_BAD_ID;
+        goto cleanup;
+    }
+
+    length = gssint_get_der_length(&ptr, bodysize, &lenlen);
+    if (length < 0 || bodysize - lenlen < (unsigned int)length) {
         code = KRB5_BAD_MSIZE;
         goto cleanup;
     }
+    data.length = 1 /* SEQUENCE */ + lenlen + length;
+
+    ptr += length;
+    bodysize -= (lenlen + length);
 
     code = decode_krb5_iakerb_header(&data, &iah);
     if (code != 0)
@@ -196,6 +209,9 @@ iakerb_parse_token(iakerb_ctx_id_t ctx,
 
     request->data = (char *)ptr;
     request->length = bodysize;
+
+    assert(request->data + request->length ==
+           (char *)token->value + token->length);
 
 cleanup:
     krb5_free_iakerb_header(ctx->k5c, iah);
@@ -248,7 +264,7 @@ iakerb_make_token(iakerb_ctx_id_t ctx,
     if (initialContextToken)
         tokenSize = g_token_size(gss_mech_iakerb, data->length);
     else
-        tokenSize = 2;
+        tokenSize = 2 + data->length;
 
     token->value = q = k5alloc(tokenSize, &code);
     if (code != 0)
@@ -263,6 +279,9 @@ iakerb_make_token(iakerb_ctx_id_t ctx,
         q += 2;
     }
     memcpy(q, data->data, data->length);
+    q += data->length;
+
+    assert(q == (unsigned char *)token->value + token->length);
 
 cleanup:
     krb5_free_data(ctx->k5c, data);
@@ -524,8 +543,11 @@ iakerb_gss_delete_sec_context(OM_uint32 *minor_status,
 {
     OM_uint32 major_status = GSS_S_COMPLETE;
 
-    output_token->length = 0;
-    output_token->value = NULL;
+    if (output_token != GSS_C_NO_BUFFER) {
+        output_token->length = 0;
+        output_token->value = NULL;
+    }
+
     *minor_status = 0;
 
     if (*context_handle != GSS_C_NO_CONTEXT) {
@@ -599,6 +621,10 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
             major_status = GSS_S_DEFECTIVE_TOKEN;
         if (code != 0)
             goto cleanup;
+        if (initialContextToken) {
+            *context_handle = (gss_ctx_id_t)ctx;
+            ctx = NULL;
+        }
         if (src_name != NULL)
             *src_name = GSS_C_NO_NAME;
         if (mech_type != NULL)
@@ -609,6 +635,7 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
             *time_rec = 0;
         if (delegated_cred_handle != NULL)
             *delegated_cred_handle = GSS_C_NO_CREDENTIAL;
+        major_status = GSS_S_CONTINUE_NEEDED;
     }
 
 cleanup:
@@ -668,6 +695,8 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
         goto cleanup;
     }
 
+    major_status = GSS_S_FAILURE;
+
     if (initialContextToken) {
         code = iakerb_init_creds_ctx(ctx, kcred, (krb5_gss_name_t)target_name);
         if (code != 0)
@@ -717,8 +746,10 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
             iakerb_release_context(ctx);
         }
     } else {
-        if (initialContextToken)
+        if (initialContextToken) {
             *context_handle = (gss_ctx_id_t)ctx;
+            ctx = NULL;
+        }
         if (actual_mech_type != NULL)
             *actual_mech_type = (gss_OID)gss_mech_iakerb;
         if (ret_flags != NULL)

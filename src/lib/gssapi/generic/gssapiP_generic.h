@@ -294,6 +294,4 @@ OM_uint32 generic_gss_copy_oid_set
             const gss_OID_set_desc *, /* const oidset*/
             gss_OID_set * /*new_oidset*/);
 
-int der_read_length(unsigned char **buf, int *bufsize);
-
 #endif /* _GSSAPIP_GENERIC_H_ */

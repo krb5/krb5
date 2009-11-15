@@ -100,7 +100,7 @@ der_write_length(unsigned char **buf, int length)
 /* returns decoded length, or < 0 on failure.  Advances buf and
    decrements bufsize */
 
-int
+static int
 der_read_length(unsigned char **buf, int *bufsize)
 {
     unsigned char sf;
