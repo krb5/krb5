@@ -483,7 +483,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
             krb5_creds creds;
 
             memset(&creds, 0, sizeof(creds));
-            assert(cred->iakerb);
+            assert(cred->iakerb_mech);
 
             code = krb5_init_creds_get_creds(ctx->k5c, ctx->u.icc, &creds);
             if (code != 0)
@@ -544,7 +544,7 @@ iakerb_init_creds_ctx(iakerb_ctx_id_t ctx,
     krb5_get_init_creds_opt opts;
     char *spn = NULL;
 
-    if (cred->iakerb == 0 || cred->password.data == NULL) {
+    if (cred->iakerb_mech == 0 || cred->password.data == NULL) {
         code = EINVAL;
         goto cleanup;
     }
@@ -842,7 +842,7 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
     credLocked = 1;
 
     kcred = (krb5_gss_cred_id_t)claimant_cred_handle;
-    if (kcred->iakerb == 0) {
+    if (kcred->iakerb_mech == 0) {
         major_status = GSS_S_DEFECTIVE_CREDENTIAL;
         goto cleanup;
     }
@@ -888,6 +888,9 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
         memset(&exts, 0, sizeof(exts));
 
         exts.iakerb.conv = &ctx->conv;
+
+        /* Mark cred as usable for Kerberos mechanism */
+        kcred->rfc_mech = 1;
 
         k5_mutex_unlock(&kcred->lock);
         credLocked = 0;

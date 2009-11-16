@@ -377,7 +377,7 @@ acquire_init_cred(krb5_context context,
         }
     }
 
-    if (cred->iakerb) {
+    if (cred->iakerb_mech) {
         krb5_data data;
 
         assert(password != GSS_C_NO_BUFFER);
@@ -506,7 +506,7 @@ acquire_init_cred(krb5_context context,
 static OM_uint32
 acquire_cred(minor_status, desired_name, password, time_req,
              desired_mechs, cred_usage, output_cred_handle,
-             actual_mechs, time_rec, iakerb)
+             actual_mechs, time_rec, req_iakerb)
     OM_uint32 *minor_status;
     const gss_name_t desired_name;
     const gss_buffer_t password;
@@ -516,7 +516,7 @@ acquire_cred(minor_status, desired_name, password, time_req,
     gss_cred_id_t *output_cred_handle;
     gss_OID_set *actual_mechs;
     OM_uint32 *time_rec;
-    int iakerb;
+    int req_iakerb;
 {
     krb5_context context = NULL;
     size_t i;
@@ -551,7 +551,8 @@ acquire_cred(minor_status, desired_name, password, time_req,
         goto krb_error_out;
     }
 
-    if (iakerb && (password == GSS_C_NO_BUFFER || cred_usage == GSS_C_BOTH)) {
+    if (req_iakerb &&
+        (password == GSS_C_NO_BUFFER || cred_usage == GSS_C_BOTH)) {
         code = G_BAD_USAGE;
         goto krb_error_out;
     }
@@ -586,9 +587,9 @@ acquire_cred(minor_status, desired_name, password, time_req,
 
     cred->usage = cred_usage;
     cred->name = NULL;
-    cred->prerfc_mech = (req_old != 0);
-    cred->rfc_mech = (req_new != 0);
-    cred->iakerb = iakerb;
+    cred->prerfc_mech = (req_old != 0) && (req_iakerb == 0);
+    cred->rfc_mech = (req_new != 0) && (req_iakerb == 0);
+    cred->iakerb_mech = req_iakerb;
     cred->default_identity = (desired_name == GSS_C_NO_NAME);
 
 #ifndef LEAN_CLIENT
@@ -677,6 +678,10 @@ acquire_cred(minor_status, desired_name, password, time_req,
             (cred->rfc_mech &&
              GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
                                                             gss_mech_krb5,
+                                                            &ret_mechs))) ||
+            (cred->iakerb_mech &&
+             GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
+                                                            gss_mech_iakerb,
                                                             &ret_mechs)))) {
             goto error_out;
         }

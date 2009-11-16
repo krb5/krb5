@@ -145,7 +145,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
     /* check that desired_mech isn't already in the credential */
 
     if ((g_OID_equal(desired_mech, gss_mech_krb5_old) && cred->prerfc_mech) ||
-        (g_OID_equal(desired_mech, gss_mech_krb5) && cred->rfc_mech)) {
+        (g_OID_equal(desired_mech, gss_mech_krb5) && cred->rfc_mech) ||
+        (g_OID_equal(desired_mech, gss_mech_iakerb) && cred->iakerb_mech)) {
         *minor_status = 0;
         krb5_free_context(context);
         return(GSS_S_DUPLICATE_ELEMENT);
@@ -197,6 +198,7 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
         new_cred->usage = cred_usage;
         new_cred->prerfc_mech = cred->prerfc_mech;
         new_cred->rfc_mech = cred->rfc_mech;
+        new_cred->iakerb_mech = cred->iakerb_mech;
         new_cred->tgt_expire = cred->tgt_expire;
 
         if (cred->name)
@@ -359,6 +361,8 @@ krb5_gss_add_cred(minor_status, input_cred_handle,
         cred->prerfc_mech = 1;
     else if (g_OID_equal(desired_mech, gss_mech_krb5))
         cred->rfc_mech = 1;
+    else if (g_OID_equal(desired_mech, gss_mech_iakerb))
+        cred->iakerb_mech = 1;
 
     /* set the outputs */
 

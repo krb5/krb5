@@ -707,6 +707,27 @@ static struct gss_config_ext iakerb_mechanism_ext = {
 
 #ifdef _GSS_STATIC_LINK
 #include "mglueP.h"
+static int gss_iakerbmechglue_init(void)
+{
+    struct gss_mech_config mech_iakerb;
+    struct gss_config iakerb_mechanism = krb5_mechanism;
+
+    /* IAKERB mechanism mirrors krb5, but with different context SPIs */
+    iakerb_mechanism.gss_accept_sec_context = iakerb_gss_accept_sec_context;
+    iakerb_mechanism.gss_init_sec_context   = iakerb_gss_init_sec_context;
+    iakerb_mechanism.gss_delete_sec_context = iakerb_gss_delete_sec_context;
+
+    memset(&mech_iakerb, 0, sizeof(mech_iakerb));
+    mech_iakerb.mech = &iakerb_mechanism;
+    mech_iakerb.mech_ext = &iakerb_mechanism_ext;
+
+    mech_iakerb.mechNameStr = "iakerb";
+    mech_iakerb.mech_type = (gss_OID)gss_mech_iakerb;
+    gssint_register_mechinfo(&mech_iakerb);
+
+    return 0;
+}
+
 static int gss_krb5mechglue_init(void)
 {
     struct gss_mech_config mech_krb5;
@@ -726,23 +747,6 @@ static int gss_krb5mechglue_init(void)
     mech_krb5.mechNameStr = "mskrb";
     mech_krb5.mech_type = (gss_OID)gss_mech_krb5_wrong;
     gssint_register_mechinfo(&mech_krb5);
-
-    {
-        /* IAKERB mechanism mirrors krb5, but with different context SPIs */
-        struct gss_mech_config mech_iakerb;
-        struct gss_config iakerb_mechanism = krb5_mechanism;
-
-        iakerb_mechanism.gss_accept_sec_context = iakerb_gss_accept_sec_context;
-        iakerb_mechanism.gss_init_sec_context   = iakerb_gss_init_sec_context;
-        iakerb_mechanism.gss_delete_sec_context = iakerb_gss_delete_sec_context;
-
-        memset(&mech_iakerb, 0, sizeof(mech_iakerb));
-        mech_iakerb.mechNameStr = "iakerb";
-        mech_iakerb.mech = &iakerb_mechanism;
-        mech_iakerb.mech_ext = &iakerb_mechanism_ext;
-        mech_iakerb.mech_type = (gss_OID)gss_mech_iakerb;
-        gssint_register_mechinfo(&mech_iakerb);
-    }
 
     return 0;
 }
@@ -792,6 +796,13 @@ int gss_krb5int_lib_init(void)
 #endif
 #ifdef _GSS_STATIC_LINK
     err = gss_krb5mechglue_init();
+    if (err)
+        return err;
+    /*
+     * Move this above the call to gss_krb5mechglue_init() if you want
+     * to negotiate IAKERB as a default mechanism through SPNEGO.
+     */
+    err = gss_iakerbmechglue_init();
     if (err)
         return err;
 #endif
