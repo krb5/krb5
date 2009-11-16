@@ -576,7 +576,8 @@ try_kdc_request(krb5_context context,
     ctx->tgtq.is_skey = FALSE;
     ctx->tgtq.ticket_flags = ts->cur_tgt->ticket_flags;
 
-    ctx->realm = &ctx->tgtq.server->realm;
+    assert(ts->cur_tgt != NULL);
+    ctx->realm = &ts->cur_tgt->server->realm;
 
     retval = krb5_make_tgs_request(context, ts->cur_tgt,
                                    FLAGS2OPTS(ts->cur_tgt->ticket_flags),
@@ -713,7 +714,9 @@ next_closest_tgt_reply(krb5_context context,
                        krb5_data *rep)
 {
     krb5_error_code retval;
+#if 0
     struct tr_state *ts = TR_STATE(ctx);
+#endif
 
     assert(ctx->out_cred == NULL);
 
@@ -951,7 +954,8 @@ chase_offpath_request(krb5_context context,
     if (retval)
         goto cleanup;
 
-    ctx->realm = &ctx->tgtq.server->realm;
+    assert(ts->cur_tgt != NULL);
+    ctx->realm = &ts->cur_tgt->server->realm;
 
     retval = krb5_make_tgs_request(context, ts->cur_tgt,
                                    FLAGS2OPTS(ctx->tgtptr->ticket_flags),
@@ -1318,7 +1322,8 @@ tkt_creds_step_request_referral_tgt(krb5_context context,
         goto cleanup;
     }
 
-    ctx->realm = &ctx->in_cred.server->realm;
+    assert(ctx->tgtptr != NULL);
+    ctx->realm = &ctx->server->realm;
 
     code = krb5_make_tgs_request(context,
                                  ctx->tgtptr,
@@ -1345,6 +1350,8 @@ tkt_creds_step_reply_referral_tgt(krb5_context context,
 {
     krb5_error_code code;
     unsigned int i;
+
+    assert(ctx->subkey);
 
     code = krb5_process_tgs_response(context,
                                      rep,
@@ -1431,10 +1438,23 @@ tkt_creds_step_reply_referral_tgt(krb5_context context,
             krb5_free_cred_contents(context, ctx->tgtptr);
         ctx->tgtptr = ctx->out_cred;
 
-        code = krb5_copy_authdata(context, ctx->in_cred.authdata,
-                                  &ctx->out_cred->authdata);
+        /* avoid copying authdata multiple times */
+        ctx->out_cred->authdata = ctx->in_cred.authdata;
+        ctx->in_cred.authdata = NULL;
+
+        /* Save pointer to tgt in referral_tgts */
+        ctx->referral_tgts[ctx->referral_count] = ctx->out_cred;
+        ctx->out_cred = NULL;
+
+        /* Copy krbtgt realm to server principal */
+        krb5_free_data_contents(context, &ctx->server->realm);
+        code = krb5int_copy_data_contents(context,
+                                          &ctx->tgtptr->server->data[1],
+                                          &ctx->server->realm);
         if (code != 0)
             goto cleanup;
+
+        /* Future work: rewrite SPN in padata */
 
         ctx->state = TKT_CREDS_REFERRAL_TGT;
     } else {
@@ -1544,8 +1564,7 @@ tkt_creds_step_request_fallback_final_tkt(krb5_context context,
     krb5_error_code code;
 
     assert(ctx->tgtptr);
-
-    ctx->realm = &ctx->in_cred.server->realm;
+    ctx->realm = &ctx->server->realm;
 
     code = krb5_make_tgs_request(context,
                                  ctx->tgtptr,
