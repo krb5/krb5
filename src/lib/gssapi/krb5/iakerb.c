@@ -889,8 +889,9 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
 
         exts.iakerb.conv = &ctx->conv;
 
-        /* Mark cred as usable for Kerberos mechanism */
-        kcred->rfc_mech = 1;
+        /* Ensure cred is marked as usable for Kerberos mechanism */
+        if (kcred->iakerb_mech && !kcred->rfc_mech && !kcred->prerfc_mech)
+            kcred->rfc_mech = 1;
 
         k5_mutex_unlock(&kcred->lock);
         credLocked = 0;
