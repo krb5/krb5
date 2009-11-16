@@ -338,7 +338,7 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx,
     krb5_error_code code;
     krb5_data request, reply, realm;
     OM_uint32 tmp;
-    int tcpOnly = 0, useMaster = 0;
+    int tcpOnly = 0, useMaster;
 
     output_token->length = 0;
     output_token->value = NULL;
@@ -369,6 +369,7 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx,
         goto cleanup;
 
 send_again:
+    useMaster = 0;
     code = krb5_sendto_kdc(ctx->k5c, &request, &realm,
                            &reply, &useMaster, tcpOnly);
     if (code == KRB5_KDC_UNREACH || code == KRB5_REALM_UNKNOWN) {
