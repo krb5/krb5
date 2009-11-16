@@ -983,6 +983,7 @@ chase_offpath_reply(krb5_context context,
                              ctx->referral_count);
     if (retval)
         goto cleanup;
+    assert(ctx->referral_count < KRB5_REFERRAL_MAXHOPS - 1);
     ctx->referral_tgts[ctx->referral_count++] = nxt_tgt;
     ctx->tgtptr = nxt_tgt;
     nxt_tgt = NULL;
@@ -1320,8 +1321,6 @@ tkt_creds_step_reply_referral_tgt(krb5_context context,
     krb5_error_code code;
     unsigned int i;
 
-    ctx->referral_count++;
-
     code = krb5_process_tgs_response(context,
                                      rep,
                                      ctx->tgtptr,
@@ -1374,6 +1373,7 @@ tkt_creds_step_reply_referral_tgt(krb5_context context,
         DUMP_PRINC("gc_from_kdc credential received",
                    ctx->out_cred->server);
 
+        assert(ctx->referral_count < KRB5_REFERRAL_MAXHOPS);
         if (ctx->referral_count == 0)
             r1 = &ctx->tgtptr->server->data[1];
         else
@@ -1677,6 +1677,8 @@ tkt_creds_step_reply(krb5_context context,
         }
     }
 
+    ctx->referral_count++;
+
 cleanup:
     context->use_conf_ktypes = ctx->use_conf_ktypes;
 
@@ -1729,13 +1731,16 @@ krb5_tkt_creds_step(krb5_context context,
     if (code != 0)
         goto cleanup;
 
+copy_realm:
     assert(ctx->server != NULL);
 
-    code = krb5int_copy_data_contents(context,
-                                      &ctx->server->realm,
-                                      realm);
-    if (code != 0)
+    code2 = krb5int_copy_data_contents(context,
+                                       &ctx->server->realm,
+                                       realm);
+    if (code2 != 0) {
+        code = code2;
         goto cleanup;
+    }
 
 cleanup:
     return code;
