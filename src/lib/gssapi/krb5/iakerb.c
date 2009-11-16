@@ -840,12 +840,7 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
         goto cleanup;
 
     credLocked = 1;
-
     kcred = (krb5_gss_cred_id_t)claimant_cred_handle;
-    if (kcred->iakerb_mech == 0) {
-        major_status = GSS_S_DEFECTIVE_CREDENTIAL;
-        goto cleanup;
-    }
 
     major_status = GSS_S_FAILURE;
 
