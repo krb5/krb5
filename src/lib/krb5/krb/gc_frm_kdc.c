@@ -94,6 +94,7 @@ struct _krb5_tkt_creds_context {
     krb5_ccache ccache;
     krb5_creds in_cred;
     krb5_creds tgtq;
+    krb5_data *realm;
     krb5_principal client;
     krb5_principal server;
     krb5_creds *out_cred;
@@ -575,6 +576,8 @@ try_kdc_request(krb5_context context,
     ctx->tgtq.is_skey = FALSE;
     ctx->tgtq.ticket_flags = ts->cur_tgt->ticket_flags;
 
+    ctx->realm = &ctx->tgtq.server->realm;
+
     retval = krb5_make_tgs_request(context, ts->cur_tgt,
                                    FLAGS2OPTS(ts->cur_tgt->ticket_flags),
                                    ts->cur_tgt->addresses, NULL,
@@ -674,12 +677,13 @@ next_closest_tgt_request(krb5_context context,
 
     retval = 0;
 
+    assert(ctx->tgtq.server == NULL);
+
     if (ts->nxt_kdc == NULL)
         ts->nxt_kdc = ts->lst_kdc;
     else if (ts->nxt_kdc == ts->cur_kdc)
         return 0;
 
-    krb5_free_cred_contents(context, &ctx->tgtq);
     retval = kdc_mcred(context, ctx, ctx->client, &ctx->tgtq);
     if (retval)
         goto cleanup;
@@ -687,14 +691,17 @@ next_closest_tgt_request(krb5_context context,
     /* Don't waste time retrying ccache for direct path. */
     if (ts->cur_kdc != ts->kdc_list || ts->nxt_kdc != ts->lst_kdc) {
         retval = try_ccache(context, ctx, &ctx->tgtq);
-        if (retval == 0 || HARD_CC_ERR(retval))
-            return retval;
+        if (retval == 0 || HARD_CC_ERR(retval)) {
+            if (retval == 0)
+                ctx->state++;
+            goto cleanup;
+        }
     }
 
     /* Not in the ccache, so talk to a KDC. */
     retval = try_kdc_request(context, ctx, req);
     if (retval != 0)
-        return retval;
+        goto cleanup;
 
 cleanup:
     return retval;
@@ -708,9 +715,13 @@ next_closest_tgt_reply(krb5_context context,
     krb5_error_code retval;
     struct tr_state *ts = TR_STATE(ctx);
 
+    assert(ctx->out_cred == NULL);
+
     retval = try_kdc_reply(context, ctx, rep);
+#if 0
     if (retval == 0)
         ts->nxt_kdc--;
+#endif
 
     return retval;
 }
@@ -814,6 +825,7 @@ do_traversal_request(krb5_context context,
     struct tr_state *ts = TR_STATE(ctx);
 
     if (ts->kdc_list == NULL) {
+        /* Initial state */
         init_cc_tgts(context, ctx);
 
         retval = init_rtree(context, ctx);
@@ -828,10 +840,13 @@ do_traversal_request(krb5_context context,
         ts->nxt_kdc = NULL;
     }
 
-    if (ts->cur_kdc == NULL || ts->cur_kdc >= ts->lst_kdc)
+    if (ts->cur_kdc == NULL || ts->cur_kdc >= ts->lst_kdc) {
+        /* termination condition */
+        ctx->state++;
         goto cleanup;
+    }
 
-    if (ctx->tgtptr_isoffpath) {
+    if (ts->offpath_tgt != NULL) {
         retval = chase_offpath_request(context, ctx, req);
     } else {
         retval = next_closest_tgt_request(context, ctx, req);
@@ -848,18 +863,20 @@ do_traversal_reply(krb5_context context,
 {
     krb5_error_code retval;
     struct tr_state *ts = TR_STATE(ctx);
-    int done = 0;
 
-    if (ctx->tgtptr_isoffpath) {
+    assert(ctx->out_cred == NULL);
+
+    if (ts->offpath_tgt != NULL) {
         retval = chase_offpath_reply(context, ctx, rep);
         if (retval != 0)
-            goto cleanup;
-        done = 1;
+            return retval;
+
+        /* this is a termination condition */
+        goto success;
     } else {
         retval = next_closest_tgt_reply(context, ctx, rep);
         if (retval != 0)
-            goto cleanup;
-        ctx->tgtptr_isoffpath = (ts->offpath_tgt != NULL);
+            return retval;
     }
 
     assert(ts->cur_kdc != ts->nxt_kdc);
@@ -867,24 +884,25 @@ do_traversal_reply(krb5_context context,
     ts->cur_kdc = ts->nxt_kdc;
     ts->cur_tgt = ts->nxt_tgt;
 
-    if (NXT_TGT_IS_CACHED(ts)) {
-        assert(ts->offpath_tgt == NULL);
-        ctx->cc_tgt = *ts->cur_cc_tgt;
-        ctx->tgtptr = ts->cur_tgt;
-        MARK_CUR_CC_TGT_CLEAN(ts);
-    } else if (ts->offpath_tgt != NULL){
-        ctx->tgtptr = ts->offpath_tgt;
-    } else {
-        /* CUR_TGT is somewhere in KDC_TGTS; no need to copy. */
-        ctx->tgtptr = ts->nxt_tgt;
-    }
+    if (ts->cur_kdc == ts->lst_kdc) {
+success:
+        if (NXT_TGT_IS_CACHED(ts)) {
+            assert(ts->offpath_tgt == NULL);
+            ctx->cc_tgt = *ts->cur_cc_tgt;
+            ctx->tgtptr = ts->cur_tgt;
+            MARK_CUR_CC_TGT_CLEAN(ts);
+        } else if (ts->offpath_tgt != NULL){
+            ctx->tgtptr = ts->offpath_tgt;
+        } else {
+            /* CUR_TGT is somewhere in KDC_TGTS; no need to copy. */
+            ctx->tgtptr = ts->nxt_tgt;
+        }
+        ctx->tgtptr_isoffpath = (ts->offpath_tgt != NULL);
 
-    if (done) {
         ctx->state++;
         ctx->referral_count = 0;
     }
 
-cleanup:
    return retval;
 }
 
@@ -911,22 +929,29 @@ chase_offpath_request(krb5_context context,
     krb5_data *rdst = krb5_princ_realm(context, ctx->server);
     krb5_data *rsrc;
 
-    if (ctx->tgtptr == NULL)
-        ctx->tgtptr = ts->offpath_tgt;
-    rsrc = krb5_princ_component(context, ctx->tgtptr->server, 1);
-
+    if (ctx->tgtptr == NULL) {
+        ts->cur_tgt = ts->offpath_tgt;
+        ctx->referral_count = 0;
+    }
     if (ctx->referral_count >= KRB5_REFERRAL_MAXHOPS) {
+        /* termination condition */
         retval = KRB5_KDCREP_MODIFIED;
         goto cleanup;
     }
 
-    krb5_free_cred_contents(context, &ctx->tgtq);
+    rsrc = krb5_princ_component(context, ctx->tgtptr->server, 1);
+
+    assert(ctx->tgtq.server == NULL);
+
     retval = krb5_tgtname(context, rdst, rsrc, &ctx->tgtq.server);
     if (retval)
         goto cleanup;
+
     retval = krb5_copy_principal(context, ctx->client, &ctx->tgtq.client);
     if (retval)
         goto cleanup;
+
+    ctx->realm = &ctx->tgtq.server->realm;
 
     retval = krb5_make_tgs_request(context, ts->cur_tgt,
                                    FLAGS2OPTS(ctx->tgtptr->ticket_flags),
@@ -937,9 +962,6 @@ chase_offpath_request(krb5_context context,
         goto cleanup;
 
 cleanup:
-    if (retval)
-        krb5_free_cred_contents(context, &ctx->tgtq);
-
     return retval;
 }
 
@@ -1205,7 +1227,6 @@ tkt_creds_step_request_initial_tgt(krb5_context context,
     DUMP_PRINC("tkt_creds_step_request_initial_tgt: server",
                ctx->in_cred.server);
 
-    assert(ctx->tgtq.client == NULL);
     assert(ctx->tgtq.server == NULL);
 
     code = tgt_mcred(context, ctx->client, ctx->server,
@@ -1225,6 +1246,8 @@ tkt_creds_step_request_initial_tgt(krb5_context context,
     } else {
         ctx->tgtptr_isoffpath = 0;
         ctx->otgtptr = NULL;
+
+        krb5_free_cred_contents(context, &ctx->tgtq);
 
         code = do_traversal_request(context, ctx, req);
         if (code != 0)
@@ -1295,6 +1318,8 @@ tkt_creds_step_request_referral_tgt(krb5_context context,
         goto cleanup;
     }
 
+    ctx->realm = &ctx->in_cred.server->realm;
+
     code = krb5_make_tgs_request(context,
                                  ctx->tgtptr,
                                  tkt_creds_kdcopt(ctx),
@@ -1337,8 +1362,9 @@ tkt_creds_step_reply_referral_tgt(krb5_context context,
         if (ctx->referral_count == 0) {
             /* Fall through to non-referral case */
             ctx->state = TKT_CREDS_FALLBACK_INITIAL_TGT;
-            return 0;
+            code = 0;
         }
+        goto cleanup;
     }
 
     /*
@@ -1519,6 +1545,8 @@ tkt_creds_step_request_fallback_final_tkt(krb5_context context,
 
     assert(ctx->tgtptr);
 
+    ctx->realm = &ctx->in_cred.server->realm;
+
     code = krb5_make_tgs_request(context,
                                  ctx->tgtptr,
                                  tkt_creds_kdcopt(ctx),
@@ -1577,8 +1605,7 @@ tkt_creds_step_request_complete(krb5_context context,
      * local KDC.)  This is part of cleanup because useful received TGTs
      * should be cached even if the main request resulted in failure.
      */
-
-    if (!ctx->tgts && ctx->referral_tgts[0]) {
+    if (ctx->tgts != NULL && ctx->referral_tgts[0] == NULL) {
         /* Allocate returnable TGT list. */
         ctx->tgts = calloc(2, sizeof (krb5_creds *));
         if (ctx->tgts == NULL) {
@@ -1605,12 +1632,12 @@ tkt_creds_step_request(krb5_context context,
 
     context->use_conf_ktypes = 1;
 
-    krb5_free_cred_contents(context, &ctx->tgtq);
-
-    krb5_free_keyblock(context, ctx->subkey);
-    ctx->subkey = NULL;
-
     do {
+        krb5_free_cred_contents(context, &ctx->tgtq);
+
+        krb5_free_keyblock(context, ctx->subkey);
+        ctx->subkey = NULL;
+
         switch ((state = ctx->state)) {
         case TKT_CREDS_INITIAL_TGT:
             code = tkt_creds_step_request_initial_tgt(context, ctx, req);
@@ -1650,12 +1677,12 @@ tkt_creds_step_reply(krb5_context context,
 
     context->use_conf_ktypes = 1;
 
-    krb5_free_creds(context, ctx->out_cred);
-    ctx->out_cred = NULL;
-
-    assert(ctx->subkey);
-
     {
+        krb5_free_creds(context, ctx->out_cred);
+        ctx->out_cred = NULL;
+
+        assert(ctx->subkey);
+
         switch (ctx->state) {
         case TKT_CREDS_INITIAL_TGT:
             code = tkt_creds_step_reply_initial_tgt(context, ctx, rep);
@@ -1711,6 +1738,7 @@ krb5_tkt_creds_step(krb5_context context,
                                                out);
             if (code2 != 0)
                 code = code2;
+            goto copy_realm;
         }
         if (code != 0)
             goto cleanup;
@@ -1723,6 +1751,8 @@ krb5_tkt_creds_step(krb5_context context,
     if (ctx->state == TKT_CREDS_COMPLETE) {
         *flags = 1;
         goto cleanup;
+    } else {
+        assert(out->length);
     }
 
     code = krb5int_copy_data_contents(context,
@@ -1732,11 +1762,9 @@ krb5_tkt_creds_step(krb5_context context,
         goto cleanup;
 
 copy_realm:
-    assert(ctx->server != NULL);
+    assert(ctx->realm && ctx->realm->length);
 
-    code2 = krb5int_copy_data_contents(context,
-                                       &ctx->server->realm,
-                                       realm);
+    code2 = krb5int_copy_data_contents(context, ctx->realm, realm);
     if (code2 != 0) {
         code = code2;
         goto cleanup;
@@ -1801,10 +1829,12 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
     *out_cred = ctx->out_cred;
     ctx->out_cred = NULL;
 
-    *tgts = ctx->tgts;
-    ctx->tgts = NULL;
-
 cleanup:
+    if (ctx != NULL) {
+        *tgts = ctx->tgts;
+        ctx->tgts = NULL;
+    }
+
     krb5_tkt_creds_free(context, ctx);
 
     return code;

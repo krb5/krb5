@@ -377,10 +377,11 @@ krb5_process_tgs_response(krb5_context context,
         goto cleanup;
 
 cleanup:
-
-    memset(dec_rep->enc_part2->session->contents, 0,
-           dec_rep->enc_part2->session->length);
-    krb5_free_kdc_rep(context, dec_rep);
+    if (dec_rep != NULL) {
+        memset(dec_rep->enc_part2->session->contents, 0,
+               dec_rep->enc_part2->session->length);
+        krb5_free_kdc_rep(context, dec_rep);
+    }
 
     return retval;
 }
