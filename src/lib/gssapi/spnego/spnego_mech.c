@@ -836,7 +836,7 @@ init_ctx_call_init(OM_uint32 *minor_status,
 		 * we're done unless a MIC needs to be
 		 * generated/handled.
 		 */
-		if (*send_token == CONT_TOKEN_SEND &&
+		if (mechtok_in->length != 0 &&
 		    mechtok_out->length == 0 &&
 		    (!sc->mic_reqd ||
 		     !(sc->ctx_flags & GSS_C_INTEG_FLAG))) {
@@ -858,7 +858,8 @@ init_ctx_call_init(OM_uint32 *minor_status,
 			*send_token = ERROR_TOKEN_SEND;
 		}
 		*negState = REJECT;
-	}
+	} else if (*send_token == NO_TOKEN_SEND)
+		*send_token = CONT_TOKEN_SEND;
 	return ret;
 }
 
