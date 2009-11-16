@@ -31,6 +31,8 @@
  * along the way.
  */
 
+#define DEBUG_GC_FRM_KDC 1
+
 #include "k5-int.h"
 #include <stdio.h>
 #include "int-proto.h"
@@ -1145,8 +1147,10 @@ krb5_tkt_creds_free(krb5_context context,
 
     /* Free referral TGTs list. */
     for (i = 0; i < KRB5_REFERRAL_MAXHOPS; i++) {
-        if (ctx->referral_tgts[i])
+        if (ctx->referral_tgts[i] != NULL) {
             krb5_free_creds(context, ctx->referral_tgts[i]);
+            ctx->referral_tgts[i] = NULL;
+        }
     }
 
     clean_cc_tgts(context, ctx);
@@ -1407,10 +1411,13 @@ tkt_creds_step_reply_referral_tgt(krb5_context context,
                    ctx->out_cred->server);
 
         assert(ctx->referral_count < KRB5_REFERRAL_MAXHOPS);
-        if (ctx->referral_count == 0)
+        if (ctx->referral_count == 0) {
+            assert(ctx->tgtptr->server != NULL);
             r1 = &ctx->tgtptr->server->data[1];
-        else
-            r1 = &ctx->referral_tgts[ctx->referral_count-1]->server->data[1];
+        } else {
+            assert(ctx->referral_tgts[ctx->referral_count - 1] != NULL);
+            r1 = &ctx->referral_tgts[ctx->referral_count -1 ]->server->data[1];
+        }
 
         r2 = &ctx->out_cred->server->data[1];
         if (data_eq(*r1, *r2)) {
@@ -1443,7 +1450,7 @@ tkt_creds_step_reply_referral_tgt(krb5_context context,
         ctx->in_cred.authdata = NULL;
 
         /* Save pointer to tgt in referral_tgts */
-        ctx->referral_tgts[ctx->referral_count] = ctx->out_cred;
+        ctx->referral_tgts[ctx->referral_count++] = ctx->out_cred;
         ctx->out_cred = NULL;
 
         /* Copy krbtgt realm to server principal */
@@ -1462,6 +1469,7 @@ tkt_creds_step_reply_referral_tgt(krb5_context context,
         krb5_free_creds(context, ctx->out_cred);
         ctx->out_cred = NULL;
         ctx->state = TKT_CREDS_FALLBACK_INITIAL_TGT;
+        ctx->referral_count = 0;
     }
 
 cleanup:
@@ -1723,8 +1731,6 @@ tkt_creds_step_reply(krb5_context context,
         }
     }
 
-    ctx->referral_count++;
-
 cleanup:
     context->use_conf_ktypes = ctx->use_conf_ktypes;
 
@@ -1770,9 +1776,9 @@ krb5_tkt_creds_step(krb5_context context,
     if (ctx->state == TKT_CREDS_COMPLETE) {
         *flags = 1;
         goto cleanup;
-    } else {
-        assert(out->length);
     }
+
+    assert(out->length != 0);
 
     code = krb5int_copy_data_contents(context,
                                       out,
