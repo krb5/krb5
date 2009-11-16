@@ -2711,6 +2711,51 @@ krb5_error_code krb5_get_cred_via_tkt
 		   krb5_creds *,
 		   krb5_creds **);
 
+/* IAKERB helpers */
+struct _krb5_tkt_creds_context;
+typedef struct _krb5_tkt_creds_context *krb5_tkt_creds_context;
+
+#define KRB5_TKT_CREDS_STEP_FLAG_COMPLETE   0x1
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_init
+(krb5_context,
+        krb5_ccache,
+        krb5_creds *,
+        int kdcopt,
+        krb5_tkt_creds_context *);
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_get_tgts
+(krb5_context,
+        krb5_tkt_creds_context,
+        krb5_creds ***);
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_get_creds
+(krb5_context,
+        krb5_tkt_creds_context,
+        krb5_creds *);
+
+void KRB5_CALLCONV
+krb5_tkt_creds_free
+(krb5_context,
+        krb5_tkt_creds_context);
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_get
+(krb5_context,
+        krb5_tkt_creds_context);
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_step
+(krb5_context context,
+        krb5_tkt_creds_context,
+        krb5_data *,
+        krb5_data *,
+        krb5_data *,
+        unsigned int *);
+
 krb5_error_code KRB5_CALLCONV krb5_copy_addr
 	(krb5_context,
 		const krb5_address *,
