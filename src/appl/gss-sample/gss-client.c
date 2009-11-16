@@ -781,6 +781,10 @@ main(argc, argv)
 	    password = *argv;
 	} else if (strcmp(*argv, "-iakerb") == 0) {
             mechanism = "{ 1 3 6 1 5 2 5 }";
+	} else if (strcmp(*argv, "-spnego") == 0) {
+            mechanism = "{ 1 3 6 1 5 5 2 }";
+	} else if (strcmp(*argv, "-krb5") == 0) {
+            mechanism = "{ 1 3 5 1 5 2 }";
 #ifdef _WIN32
 	} else if (strcmp(*argv, "-threads") == 0) {
 	    argc--;
