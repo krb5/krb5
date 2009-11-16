@@ -1874,8 +1874,11 @@ krb5_init_creds_step(krb5_context context,
             code2 = krb5int_copy_data_contents(context,
                                                ctx->encoded_previous_request,
                                                out);
-            if (code2 != 0)
+            if (code2 != 0) {
                 code = code2;
+                goto cleanup;
+            }
+            goto copy_realm;
         }
         if (code != 0 || (*flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE))
             goto cleanup;
@@ -1885,13 +1888,16 @@ krb5_init_creds_step(krb5_context context,
     if (code != 0)
         goto cleanup;
 
+copy_realm:
     assert(ctx->request->server != NULL);
 
-    code = krb5int_copy_data_contents(context,
-                                      &ctx->request->server->realm,
-                                      realm);
-    if (code != 0)
+    code2 = krb5int_copy_data_contents(context,
+                                       &ctx->request->server->realm,
+                                       realm);
+    if (code2 != 0) {
+        code = code2;
         goto cleanup;
+    }
 
     ctx->loopcount++;
 
