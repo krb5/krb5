@@ -114,11 +114,11 @@ krb5_error_code pkiCfDataToKrb5Data(
  */
 #define PKI_CSSM_TO_KRB_DATA(cd, kd)            \
     (kd)->data = (char *)(cd)->Data;            \
-        (kd)->length = (cd)->Length;
+    (kd)->length = (cd)->Length;
 
 #define PKI_KRB_TO_CSSM_DATA(kd, cd)            \
     (cd)->Data = (uint8 *)(kd)->data;           \
-        (cd)->Length = (kd)->length;
+    (cd)->Length = (kd)->length;
 
 /*
  * Compare to CSSM_DATAs. Return TRUE if they're the same else FALSE.

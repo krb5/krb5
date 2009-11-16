@@ -380,12 +380,12 @@ tgt_again:
         if (isflagset(request->kdc_options, KDC_OPT_CNAME_IN_ADDL_TKT)) {
             /* Do constrained delegation protocol and authorization checks */
             errcode = kdc_process_s4u2proxy_req(kdc_context,
-                                  request,
-                                  request->second_ticket[st_idx]->enc_part2,
-                                  &st_client,
-                                  header_ticket->enc_part2->client,
-                                  request->server,
-                                  &status);
+                                                request,
+                                                request->second_ticket[st_idx]->enc_part2,
+                                                &st_client,
+                                                header_ticket->enc_part2->client,
+                                                request->server,
+                                                &status);
             if (errcode)
                 goto cleanup;
 
@@ -648,7 +648,7 @@ tgt_again:
             /* try refreshing master key list */
             /* XXX it would nice if we had the mkvno here for optimization */
             if (krb5_db_fetch_mkey_list(kdc_context, master_princ,
-                                   &master_keyblock, 0, &tmp_mkey_list) == 0) {
+                                        &master_keyblock, 0, &tmp_mkey_list) == 0) {
                 krb5_dbe_free_key_list(kdc_context, master_keylist);
                 master_keylist = tmp_mkey_list;
                 if ((errcode = krb5_dbe_find_mkey(kdc_context, master_keylist,
@@ -816,9 +816,9 @@ tgt_again:
         char *tdots;
 
         errcode = kdc_check_transited_list (kdc_context,
-                        &enc_tkt_reply.transited.tr_contents,
-                        krb5_princ_realm (kdc_context, header_enc_tkt->client),
-                        krb5_princ_realm (kdc_context, request->server));
+                                            &enc_tkt_reply.transited.tr_contents,
+                                            krb5_princ_realm (kdc_context, header_enc_tkt->client),
+                                            krb5_princ_realm (kdc_context, request->server));
         tlen = enc_tkt_reply.transited.tr_contents.length;
         tdots = tlen > 125 ? "..." : "";
         tlen = tlen > 125 ? 125 : tlen;
@@ -943,13 +943,13 @@ tgt_again:
     reply.enc_part.enctype = subkey ? subkey->enctype :
         header_ticket->enc_part2->session->enctype;
     errcode  = kdc_fast_response_handle_padata(state, request, &reply,
-                  subkey ? subkey->enctype : header_ticket->enc_part2->session->enctype);
+                                               subkey ? subkey->enctype : header_ticket->enc_part2->session->enctype);
     if (errcode !=0 ) {
         status = "Preparing FAST padata";
         goto cleanup;
     }
     errcode =kdc_fast_handle_reply_key(state,
-                  subkey?subkey:header_ticket->enc_part2->session, &reply_key);
+                                       subkey?subkey:header_ticket->enc_part2->session, &reply_key);
     if (errcode) {
         status  = "generating reply key";
         goto cleanup;
@@ -1116,9 +1116,9 @@ find_alternate_tgs(krb5_kdc_req *request, krb5_db_entry *server,
      * the principal.
      */
     if ((retval = krb5_walk_realm_tree(kdc_context,
-                         krb5_princ_realm(kdc_context, request->server),
-                         krb5_princ_component(kdc_context, request->server, 1),
-                         &plist, KRB5_REALM_BRANCH_CHAR)))
+                                       krb5_princ_realm(kdc_context, request->server),
+                                       krb5_princ_component(kdc_context, request->server, 1),
+                                       &plist, KRB5_REALM_BRANCH_CHAR)))
         return;
 
     /* move to the end */

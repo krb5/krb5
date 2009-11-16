@@ -213,15 +213,15 @@ handle_referral_params(krb5_realm_params *rparams,
                 if (!rdp->realm_no_host_referral)
                     retval = ENOMEM;
             } else if  (no_refrls && (asprintf(&(rdp->realm_no_host_referral),
-                                    "%s%s%s%s%s", " ", no_refrls," ",
-                                    rparams->realm_no_host_referral, " ") < 0))
+                                               "%s%s%s%s%s", " ", no_refrls," ",
+                                               rparams->realm_no_host_referral, " ") < 0))
                 retval = ENOMEM;
             else if (asprintf(&(rdp->realm_no_host_referral),"%s%s%s", " ",
                               rparams->realm_no_host_referral, " ") < 0)
                 retval = ENOMEM;
         } else if( no_refrls != NULL) {
             if ( asprintf(&(rdp->realm_no_host_referral),
-                         "%s%s%s", " ", no_refrls, " ") < 0)
+                          "%s%s%s", " ", no_refrls, " ") < 0)
                 retval = ENOMEM;
         } else
             rdp->realm_no_host_referral = NULL;
@@ -235,7 +235,7 @@ handle_referral_params(krb5_realm_params *rparams,
     }
 
     if (host_based_srvcs &&
-       (krb5_match_config_pattern(host_based_srvcs, KRB5_CONF_ASTERISK) == TRUE)) {
+        (krb5_match_config_pattern(host_based_srvcs, KRB5_CONF_ASTERISK) == TRUE)) {
         rdp->realm_host_based_services = strdup(KRB5_CONF_ASTERISK);
         if (!rdp->realm_host_based_services)
             retval = ENOMEM;
@@ -661,7 +661,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
                                              default_tcp_ports, manual, db_args,
                                              no_refrls, host_based_srvcs))) {
                         fprintf(stderr,
-                               "%s: cannot initialize realm %s - see log file for details\n",
+                                "%s: cannot initialize realm %s - see log file for details\n",
                                 argv[0], optarg);
                         exit(1);
                     }

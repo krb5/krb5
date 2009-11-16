@@ -500,14 +500,14 @@ load_preauth_plugins(krb5_context context)
                     if (server_init_proc != NULL) {
                         krb5_error_code initerr;
                         initerr = (*server_init_proc)(context, &plugin_context,
-                                               (const char **)kdc_realm_names);
+                                                      (const char **)kdc_realm_names);
                         if (initerr) {
                             const char *emsg;
                             emsg = krb5_get_error_message(context, initerr);
                             if (emsg) {
                                 krb5_klog_syslog(LOG_ERR,
-                                          "preauth %s failed to initialize: %s",
-                                          ftable->name, emsg);
+                                                 "preauth %s failed to initialize: %s",
+                                                 ftable->name, emsg);
                                 krb5_free_error_message(context, emsg);
                             }
                             memset(&preauth_systems[k], 0,
@@ -521,7 +521,7 @@ load_preauth_plugins(krb5_context context)
                 preauth_systems[k].type = ftable->pa_type_list[j];
                 if (ftable->flags_proc != NULL)
                     preauth_systems[k].flags = ftable->flags_proc(context,
-                                                     preauth_systems[k].type);
+                                                                  preauth_systems[k].type);
                 else
                     preauth_systems[k].flags = 0;
                 preauth_systems[k].plugin_context = plugin_context;
@@ -557,7 +557,7 @@ unload_preauth_plugins(krb5_context context)
         for (i = 0; i < n_preauth_systems; i++) {
             if (preauth_systems[i].fini != NULL) {
                 (*preauth_systems[i].fini)(context,
-                                      preauth_systems[i].plugin_context);
+                                           preauth_systems[i].plugin_context);
             }
             memset(&preauth_systems[i], 0, sizeof(preauth_systems[i]));
         }
@@ -952,12 +952,12 @@ const char *missing_required_preauth(krb5_db_entry *client,
 
 #ifdef DEBUG
     krb5_klog_syslog (
-      LOG_DEBUG,
-      "client needs %spreauth, %shw preauth; request has %spreauth, %shw preauth",
-      isflagset (client->attributes, KRB5_KDB_REQUIRES_PRE_AUTH) ? "" : "no ",
-      isflagset (client->attributes, KRB5_KDB_REQUIRES_HW_AUTH) ? "" : "no ",
-      isflagset (enc_tkt_reply->flags, TKT_FLG_PRE_AUTH) ? "" : "no ",
-      isflagset (enc_tkt_reply->flags, TKT_FLG_HW_AUTH) ? "" : "no ");
+        LOG_DEBUG,
+        "client needs %spreauth, %shw preauth; request has %spreauth, %shw preauth",
+        isflagset (client->attributes, KRB5_KDB_REQUIRES_PRE_AUTH) ? "" : "no ",
+        isflagset (client->attributes, KRB5_KDB_REQUIRES_HW_AUTH) ? "" : "no ",
+        isflagset (enc_tkt_reply->flags, TKT_FLG_PRE_AUTH) ? "" : "no ",
+        isflagset (enc_tkt_reply->flags, TKT_FLG_HW_AUTH) ? "" : "no ");
 #endif
 
     if (isflagset(client->attributes, KRB5_KDB_REQUIRES_PRE_AUTH) &&
@@ -1370,7 +1370,7 @@ cleanup:
 
 static krb5_boolean
 request_contains_enctype(krb5_context context,  const krb5_kdc_req *request,
-                          krb5_enctype enctype)
+                         krb5_enctype enctype)
 {
     int i;
     for (i =0; i < request->nktypes; i++)
@@ -2891,15 +2891,15 @@ static krb5_error_code return_pkinit_response(
      * We've already verified; just obtain the fields we need to create a response
      */
     krtn = krb5int_pkinit_as_req_parse(context,
-                         &pa_data,
-                         NULL, NULL, &nonce,     /* ctime, cusec, nonce */
-                         NULL, NULL,             /* pa_cksum, cert_status */
-                         &num_cms_types, &cms_types,
-                         &client_cert,   /* signer_cert: we encrypt for this */
-                         /* remaining fields unused (for now) */
-                         NULL, NULL,     /* num_all_certs, all_certs */
-                         &num_trusted_CAs, &trusted_CAs,
-                         &kdc_cert);
+                                       &pa_data,
+                                       NULL, NULL, &nonce,     /* ctime, cusec, nonce */
+                                       NULL, NULL,             /* pa_cksum, cert_status */
+                                       &num_cms_types, &cms_types,
+                                       &client_cert,   /* signer_cert: we encrypt for this */
+                                       /* remaining fields unused (for now) */
+                                       NULL, NULL,     /* num_all_certs, all_certs */
+                                       &num_trusted_CAs, &trusted_CAs,
+                                       &kdc_cert);
     if(krtn) {
         kdcPkinitDebug("pa_pk_as_req_parse returned %d; PKINIT aborting.\n",
                        (int)krtn);
@@ -2964,7 +2964,7 @@ static krb5_error_code return_pkinit_response(
                                         &pa_data);
     if(krtn) {
         kdcPkinitDebug("pa_pk_as_rep_create returned %d; PKINIT aborting.\n",
-                      (int)krtn);
+                       (int)krtn);
         goto cleanup;
     }
 
