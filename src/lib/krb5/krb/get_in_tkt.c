@@ -1844,6 +1844,12 @@ cleanup:
     return code;
 }
 
+/*
+ * Do next step of credentials acquisition.
+ *
+ * On success returns 0 or KRB5KRB_ERR_RESPONSE_TOO_BIG if the request
+ * should be sent with TCP.
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_init_creds_step(krb5_context context,
                      krb5_init_creds_context ctx,
@@ -1852,7 +1858,7 @@ krb5_init_creds_step(krb5_context context,
                      krb5_data *realm,
                      unsigned int *flags)
 {
-    krb5_error_code code;
+    krb5_error_code code, code2;
 
     *flags = 0;
 
@@ -1865,9 +1871,11 @@ krb5_init_creds_step(krb5_context context,
     if (in->length != 0) {
         code = init_creds_step_reply(context, ctx, in, flags);
         if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG) {
-            code = krb5int_copy_data_contents(context,
-                                              ctx->encoded_previous_request,
-                                              out);
+            code2 = krb5int_copy_data_contents(context,
+                                               ctx->encoded_previous_request,
+                                               out);
+            if (code2 != 0)
+                code = code2;
         }
         if (code != 0 || (*flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE))
             goto cleanup;
