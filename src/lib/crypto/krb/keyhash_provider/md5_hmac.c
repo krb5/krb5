@@ -60,6 +60,6 @@ k5_md5_hmac_hash (krb5_key key, krb5_keyusage usage,
 const struct krb5_keyhash_provider krb5int_keyhash_md5_hmac = {
   16,
   k5_md5_hmac_hash,
-  NULL /*checksum  again*/
+  NULL, /*checksum  again*/
   NULL, NULL
 };
