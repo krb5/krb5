@@ -43,14 +43,14 @@ enum iakerb_state {
 };
 
 struct _iakerb_ctx_id_rec {
-    krb5_magic magic;
+    krb5_magic magic;                   /* KG_IAKERB_CONTEXT */
     krb5_context k5c;
-    enum iakerb_state state;
+    enum iakerb_state state;            /* discriminant for union below */
     union {
         krb5_init_creds_context icc;    /* IAKERB_AS_REQ */
         gss_ctx_id_t gssc;              /* IAKERB_AP_REQ */
     } u;
-    krb5_data conv;
+    krb5_data conv;                     /* conversation for checksumming */
 };
 
 typedef struct _iakerb_ctx_id_rec iakerb_ctx_id_rec;
