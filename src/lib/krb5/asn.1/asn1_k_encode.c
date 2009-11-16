@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * src/lib/krb5/asn.1/asn1_k_encode.c
  *
@@ -30,43 +30,47 @@
 #include "asn1_encode.h"
 #include <assert.h>
 
-/* helper macros
+/*
+ * helper macros
+ *
+ * These are mostly only needed for PKINIT, but there are three
+ * basic-krb5 encoders not converted yet.
+ */
 
-   These are mostly only needed for PKINIT, but there are three
-   basic-krb5 encoders not converted yet.  */
-
-/* setup() -- create and initialize bookkeeping variables
-     retval: stores error codes returned from subroutines
-     length: length of the most-recently produced encoding
-     sum: cumulative length of the entire encoding */
-#define asn1_setup()\
-  asn1_error_code retval;\
-  unsigned int sum=0
+/*
+ * setup() -- create and initialize bookkeeping variables
+ *   retval: stores error codes returned from subroutines
+ *   length: length of the most-recently produced encoding
+ *   sum: cumulative length of the entire encoding
+ */
+#define asn1_setup()                            \
+    asn1_error_code retval;                     \
+    unsigned int sum=0
 
 /* form a sequence (by adding a sequence header to the current encoding) */
-#define asn1_makeseq()\
-{ unsigned int length;\
-  retval = asn1_make_sequence(buf,sum,&length);\
-  if (retval) {\
-    return retval; }\
-  sum += length; }
+#define asn1_makeseq()                                  \
+    { unsigned int length;                              \
+        retval = asn1_make_sequence(buf,sum,&length);   \
+        if (retval) {                                   \
+            return retval; }                            \
+        sum += length; }
 
 /* produce the final output and clean up the workspace */
-#define asn1_cleanup()\
-  *retlen = sum;\
-  return 0
+#define asn1_cleanup()                          \
+    *retlen = sum;                              \
+    return 0
 
 /* asn1_addfield -- add a field, or component, to the encoding */
-#define asn1_addfield(value,tag,encoder)\
-{ unsigned int length; \
-  retval = encoder(buf,value,&length);  \
-  if (retval) {\
-    return retval; }\
-  sum += length;\
-  retval = asn1_make_etag(buf,CONTEXT_SPECIFIC,tag,length,&length);\
-  if (retval) {\
-    return retval; }\
-  sum += length; }
+#define asn1_addfield(value,tag,encoder)                                \
+    { unsigned int length;                                              \
+        retval = encoder(buf,value,&length);                            \
+        if (retval) {                                                   \
+            return retval; }                                            \
+        sum += length;                                                  \
+        retval = asn1_make_etag(buf,CONTEXT_SPECIFIC,tag,length,&length); \
+        if (retval) {                                                   \
+            return retval; }                                            \
+        sum += length; }
 
 DEFINTTYPE(int32, krb5_int32);
 DEFPTRTYPE(int32_ptr, int32);
@@ -101,8 +105,10 @@ static const struct field_info princname_fields[] = {
     FIELDOF_NORM(krb5_principal_data, int32, type, 0),
     FIELDOF_SEQOF_INT32(krb5_principal_data, gstring_data_ptr, data, length, 1),
 };
-/* krb5_principal is a typedef for krb5_principal_data*, so this is
-   effectively "encode_principal_data_at" with an address arg.  */
+/*
+ * krb5_principal is a typedef for krb5_principal_data*, so this is
+ * effectively "encode_principal_data_at" with an address arg.
+ */
 DEFSEQTYPE(principal_data, krb5_principal_data, princname_fields, 0);
 DEFPTRTYPE(principal, principal_data);
 
@@ -146,9 +152,11 @@ static const struct field_info encrypted_data_fields[] = {
 DEFSEQTYPE(encrypted_data, krb5_enc_data, encrypted_data_fields,
            optional_encrypted_data);
 
-/* The encode_bitstring function wants an array of bytes (since PKINIT
-   may provide something that isn't 32 bits), but krb5_flags is stored
-   as a 32-bit integer in host order.  */
+/*
+ * The encode_bitstring function wants an array of bytes (since PKINIT
+ * may provide something that isn't 32 bits), but krb5_flags is stored
+ * as a 32-bit integer in host order.
+ */
 static asn1_error_code
 asn1_encode_krb5_flags_at(asn1buf *buf, const krb5_flags *val,
                           unsigned int *retlen)
@@ -271,10 +279,12 @@ optional_enc_kdc_rep_part(const void *p)
 DEFSEQTYPE(enc_kdc_rep_part, krb5_enc_kdc_rep_part, enc_kdc_rep_part_fields,
            optional_enc_kdc_rep_part);
 
-/* Yuck!  Eventually push this *up* above the encoder API and make the
-   rest of the library put the realm name in one consistent place.  At
-   the same time, might as well add the msg-type field and encode both
-   AS-REQ and TGS-REQ through the same descriptor.  */
+/*
+ * Yuck!  Eventually push this *up* above the encoder API and make the
+ * rest of the library put the realm name in one consistent place.  At
+ * the same time, might as well add the msg-type field and encode both
+ * AS-REQ and TGS-REQ through the same descriptor.
+ */
 struct kdc_req_hack {
     krb5_kdc_req v;
     krb5_data *server_realm;
@@ -1304,7 +1314,7 @@ fast_response_optional (const void *p)
 DEFSEQTYPE( fast_response, krb5_fast_response, fast_response_fields, fast_response_optional);
 
 static const struct field_info fast_rep_fields[] = {
-  FIELDOF_ENCODEAS(krb5_enc_data, encrypted_data, 0),
+    FIELDOF_ENCODEAS(krb5_enc_data, encrypted_data, 0),
 };
 DEFSEQTYPE(fast_rep, krb5_enc_data, fast_rep_fields, 0);
 
@@ -1468,102 +1478,120 @@ MAKE_FULL_ENCODER(encode_krb5_ad_signedpath, ad_signedpath);
  * PKINIT
  */
 
-/* This code hasn't been converted to use the above framework yet,
-   because we currently have no test cases to validate the new
-   version.  It *also* appears that some of the encodings may disagree
-   with the specifications, but that's a separate problem.  */
+/*
+ * This code hasn't been converted to use the above framework yet,
+ * because we currently have no test cases to validate the new
+ * version.  It *also* appears that some of the encodings may disagree
+ * with the specifications, but that's a separate problem.
+ */
 
 /**** asn1 macros ****/
 #if 0
-   How to write an asn1 encoder function using these macros:
+How to write an asn1 encoder function using these macros:
 
-   asn1_error_code asn1_encode_krb5_substructure(asn1buf *buf,
-                                                 const krb5_type *val,
-                                                 int *retlen)
-   {
-     asn1_setup();
+asn1_error_code asn1_encode_krb5_substructure(asn1buf *buf,
+                                              const krb5_type *val,
+                                              int *retlen)
+{
+    asn1_setup();
 
-     asn1_addfield(val->last_field, n, asn1_type);
-     asn1_addfield(rep->next_to_last_field, n-1, asn1_type);
-     ...
+    asn1_addfield(val->last_field, n, asn1_type);
+    asn1_addfield(rep->next_to_last_field, n-1, asn1_type);
+    ...
 
-     /* for OPTIONAL fields */
-     if (rep->field_i == should_not_be_omitted)
-       asn1_addfield(rep->field_i, i, asn1_type);
+        /* for OPTIONAL fields */
+        if (rep->field_i == should_not_be_omitted)
+            asn1_addfield(rep->field_i, i, asn1_type);
 
-     /* for string fields (these encoders take an additional argument,
-        the length of the string) */
-     addlenfield(rep->field_length, rep->field, i-1, asn1_type);
+        /*
+         * for string fields (these encoders take an additional argument,
+         * the length of the string)
+         */
+        addlenfield(rep->field_length, rep->field, i-1, asn1_type);
 
-     /* if you really have to do things yourself... */
-     retval = asn1_encode_asn1_type(buf,rep->field,&length);
-     if (retval) return retval;
-     sum += length;
-     retval = asn1_make_etag(buf, CONTEXT_SPECIFIC, tag_number, length,
-                             &length);
-     if (retval) return retval;
-     sum += length;
+        /* if you really have to do things yourself... */
+        retval = asn1_encode_asn1_type(buf,rep->field,&length);
+        if (retval) return retval;
+        sum += length;
+        retval = asn1_make_etag(buf, CONTEXT_SPECIFIC, tag_number, length,
+                                &length);
+        if (retval) return retval;
+        sum += length;
 
-     ...
-     asn1_addfield(rep->second_field, 1, asn1_type);
-     asn1_addfield(rep->first_field, 0, asn1_type);
-     asn1_makeseq();
+        ...
+            asn1_addfield(rep->second_field, 1, asn1_type);
+            asn1_addfield(rep->first_field, 0, asn1_type);
+            asn1_makeseq();
 
-     asn1_cleanup();
-   }
+            asn1_cleanup();
+}
 #endif
 
 /* asn1_addlenfield -- add a field whose length must be separately specified */
-#define asn1_addlenfield(len,value,tag,encoder)\
-{ unsigned int length; \
-  retval = encoder(buf,len,value,&length);      \
-  if (retval) {\
-    return retval; }\
-  sum += length;\
-  retval = asn1_make_etag(buf,CONTEXT_SPECIFIC,tag,length,&length);\
-  if (retval) {\
-    return retval; }\
-  sum += length; }
+#define asn1_addlenfield(len, value, tag, encoder)      \
+    {                                                   \
+        unsigned int length;                            \
+        retval = encoder(buf, len, value, &length);     \
+        if (retval) {                                   \
+            return retval; }                            \
+        sum += length;                                  \
+        retval = asn1_make_etag(buf, CONTEXT_SPECIFIC,  \
+                                tag, length, &length);  \
+        if (retval) {                                   \
+            return retval; }                            \
+        sum += length;                                  \
+    }
 
-/* asn1_addfield_implicit -- add an implicitly tagged field, or component, to the encoding */
-#define asn1_addfield_implicit(value,tag,encoder)\
-{ unsigned int length;\
-  retval = encoder(buf,value,&length);\
-  if (retval) {\
-    return retval; }\
-  sum += length;\
-  retval = asn1_make_tag(buf,CONTEXT_SPECIFIC,PRIMITIVE,tag,length,&length); \
-  if (retval) {\
-    return retval; }\
-  sum += length; }
+/*
+ * asn1_addfield_implicit -- add an implicitly tagged field, or component,
+ * to the encoding
+ */
+#define asn1_addfield_implicit(value,tag,encoder)               \
+    { unsigned int length;                                      \
+        retval = encoder(buf,value,&length);                    \
+        if (retval) {                                           \
+            return retval; }                                    \
+        sum += length;                                          \
+        retval = asn1_make_tag(buf, CONTEXT_SPECIFIC,PRIMITIVE, \
+                               tag, length, &length);           \
+        if (retval) {                                           \
+            return retval; }                                    \
+        sum += length; }
 
-/* asn1_insert_implicit_octetstring -- add an octet string with implicit tagging */
-#define asn1_insert_implicit_octetstring(len,value,tag)\
-{ unsigned int length;\
-  retval = asn1buf_insert_octetstring(buf,len,value);\
-  if (retval) {\
-    return retval; }\
-  sum += len;\
-  retval = asn1_make_tag(buf,CONTEXT_SPECIFIC,PRIMITIVE,tag,len,&length); \
-  if (retval) {\
-    return retval; }\
-  sum += length; }
+/*
+ * asn1_insert_implicit_octetstring -- add an octet string with implicit
+ * tagging
+ */
+#define asn1_insert_implicit_octetstring(len,value,tag)                 \
+    { unsigned int length;                                              \
+        retval = asn1buf_insert_octetstring(buf,len,value);             \
+        if (retval) {                                                   \
+            return retval; }                                            \
+        sum += len;                                                     \
+        retval = asn1_make_tag(buf, CONTEXT_SPECIFIC, PRIMITIVE,        \
+                               tag, len, &length);                      \
+        if (retval) {                                                   \
+            return retval; }                                            \
+        sum += length; }
 
 /* asn1_insert_implicit_bitstring -- add a bitstring with implicit tagging */
 /* needs "length" declared in enclosing context */
-#define asn1_insert_implicit_bitstring(len,value,tag)\
-{ retval = asn1buf_insert_octetstring(buf,len,value); \
-  if (retval) {\
-    return retval; }\
-  sum += len;\
-  retval = asn1buf_insert_octet(buf, 0);\
-  if (retval) {\
-    return retval; }\
-  sum++;\
-  retval = asn1_make_tag(buf,UNIVERSAL,PRIMITIVE,tag,len+1,&length); \
-  if (retval) {\
-    return retval; }\
-  sum += length; }
+#define asn1_insert_implicit_bitstring(len, value, tag)         \
+    {                                                           \
+        retval = asn1buf_insert_octetstring(buf, len, value);   \
+        if (retval) {                                           \
+            return retval; }                                    \
+        sum += len;                                             \
+        retval = asn1buf_insert_octet(buf, 0);                  \
+        if (retval) {                                           \
+            return retval; }                                    \
+        sum++;                                                  \
+        retval = asn1_make_tag(buf, UNIVERSAL, PRIMITIVE,       \
+                               tag, len + 1, &length);          \
+        if (retval) {                                           \
+            return retval; }                                    \
+        sum += length;                                          \
+    }
 
 #ifndef DISABLE_PKINIT
 

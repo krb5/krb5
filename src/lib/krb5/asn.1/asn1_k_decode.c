@@ -1007,7 +1007,8 @@ error_out:
     return retval;
 }
 
-static asn1_error_code asn1_peek_authdata_elt(asn1buf *buf, krb5_authdatatype *val)
+static asn1_error_code
+asn1_peek_authdata_elt(asn1buf *buf, krb5_authdatatype *val)
 {
     setup();
     *val = 0;
@@ -1020,8 +1021,9 @@ error_out:
     return retval;
 }
 
-asn1_error_code asn1_peek_authorization_data
-(asn1buf *buf, unsigned int *num, krb5_authdatatype **val)
+asn1_error_code
+asn1_peek_authorization_data(asn1buf *buf, unsigned int *num,
+                             krb5_authdatatype **val)
 {
     int size = 0;
     krb5_authdatatype *array = NULL, *new_array;
@@ -1868,14 +1870,14 @@ error_out:
     return retval;
 }
 
-static asn1_error_code asn1_decode_sequence_of_princ_plus_realm
-(asn1buf *buf, krb5_principal **val)
+static asn1_error_code
+asn1_decode_sequence_of_princ_plus_realm(asn1buf *buf, krb5_principal **val)
 {
     decode_array_body(krb5_principal_data,asn1_decode_princ_plus_realm,krb5_free_principal);
 }
 
-asn1_error_code asn1_decode_ad_signedpath
-(asn1buf *buf, krb5_ad_signedpath *val)
+asn1_error_code
+asn1_decode_ad_signedpath(asn1buf *buf, krb5_ad_signedpath *val)
 {
     setup();
     val->enctype = ENCTYPE_NULL;
@@ -1926,7 +1928,8 @@ error_out:
     return retval;
 }
 
-asn1_error_code asn1_decode_external_principal_identifier_ptr(
+asn1_error_code
+asn1_decode_external_principal_identifier_ptr(
     asn1buf *buf,
     krb5_external_principal_identifier **valptr)
 {
