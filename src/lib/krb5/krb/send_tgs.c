@@ -29,6 +29,7 @@
  */
 
 #include "k5-int.h"
+#include "int-proto.h"
 
 /*
   Constructs a TGS request

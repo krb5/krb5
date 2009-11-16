@@ -2672,27 +2672,6 @@ krb5_error_code krb5_set_config_files(krb5_context, const char **);
 krb5_error_code KRB5_CALLCONV krb5_get_default_config_files(char ***filenames);
 
 void KRB5_CALLCONV krb5_free_config_files(char **filenames);
-krb5_error_code krb5int_send_tgs(krb5_context, krb5_flags,
-                                 const krb5_ticket_times *,
-                                 const krb5_enctype *,
-                                 krb5_const_principal, krb5_address *const *,
-                                 krb5_authdata *const *,
-                                 krb5_pa_data *const *, const krb5_data *,
-                                 krb5_creds *,
-                                 krb5_error_code (*gcvt_fct)(krb5_context,
-                                                             krb5_keyblock *,
-                                                             krb5_kdc_req *,
-                                                             void *),
-                                 void *gcvt_data, krb5_response *,
-                                 krb5_keyblock **subkey);
-/* The subkey field is an output parameter; if a
- * tgs-rep is received then the subkey will be filled
- * in with the subkey needed to decrypt the TGS
- * response. Otherwise it will be set to null.
- */
-krb5_error_code krb5int_decode_tgs_rep(krb5_context, krb5_data *,
-                                       const krb5_keyblock *, krb5_keyusage,
-                                       krb5_kdc_rep ** );
 
 krb5_error_code krb5int_find_authdata(krb5_context context,
                                       krb5_authdata *const *ticket_authdata,
