@@ -403,11 +403,6 @@ send_again:
     } else if (code != 0)
         goto cleanup;
 
-    if (krb5_is_as_rep(&reply))
-        ctx->state = IAKERB_TGS_REQ;
-    else if (krb5_is_tgs_rep(&reply))
-        ctx->state = IAKERB_AP_REQ;
-
     code = iakerb_make_token(ctx, &realm, NULL, &reply,
                              0, output_token);
     if (code != 0)
@@ -752,8 +747,6 @@ iakerb_alloc_context(iakerb_ctx_id_t *pctx)
     if (code != 0)
         goto cleanup;
 
-    ctx->state = IAKERB_AS_REQ;
-
     *pctx = ctx;
 
 cleanup:
@@ -799,6 +792,21 @@ iakerb_gss_delete_sec_context(OM_uint32 *minor_status,
     return major_status;
 }
 
+static krb5_boolean
+iakerb_is_iakerb_token(const gss_buffer_t token)
+{
+    krb5_error_code code;
+    unsigned int bodysize = token->length;
+    unsigned char *ptr = token->value;
+
+    code = g_verify_token_header(gss_mech_iakerb,
+                                 &bodysize, &ptr,
+                                 IAKERB_TOK_PROXY,
+                                 token->length, 0);
+
+    return (code == 0);
+}
+
 /*
  *
  */
@@ -824,10 +832,33 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
         code = iakerb_alloc_context(&ctx);
         if (code != 0)
             goto cleanup;
+
     } else
         ctx = (iakerb_ctx_id_t)*context_handle;
 
-    if (ctx->state == IAKERB_AP_REQ) {
+    if (iakerb_is_iakerb_token(input_token)) {
+        code = iakerb_acceptor_step(ctx, initialContextToken,
+                                    input_token, output_token);
+        if (code == (OM_uint32)KRB5_BAD_MSIZE)
+            major_status = GSS_S_DEFECTIVE_TOKEN;
+        if (code != 0)
+            goto cleanup;
+        if (initialContextToken) {
+            *context_handle = (gss_ctx_id_t)ctx;
+            ctx = NULL;
+        }
+        if (src_name != NULL)
+            *src_name = GSS_C_NO_NAME;
+        if (mech_type != NULL)
+            *mech_type = (gss_OID)gss_mech_iakerb;
+        if (ret_flags != NULL)
+            *ret_flags = 0;
+        if (time_rec != NULL)
+            *time_rec = 0;
+        if (delegated_cred_handle != NULL)
+            *delegated_cred_handle = GSS_C_NO_CREDENTIAL;
+        major_status = GSS_S_CONTINUE_NEEDED;
+    } else {
         krb5_gss_ctx_ext_rec exts;
 
         memset(&exts, 0, sizeof(exts));
@@ -850,28 +881,6 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
             ctx->u.gssc = NULL;
             iakerb_release_context(ctx);
         }
-    } else {
-        code = iakerb_acceptor_step(ctx, initialContextToken,
-                                    input_token, output_token);
-        if (code == (OM_uint32)KRB5_BAD_MSIZE)
-            major_status = GSS_S_DEFECTIVE_TOKEN;
-        if (code != 0)
-            goto cleanup;
-        if (initialContextToken) {
-            *context_handle = (gss_ctx_id_t)ctx;
-            ctx = NULL;
-        }
-        if (src_name != NULL)
-            *src_name = GSS_C_NO_NAME;
-        if (mech_type != NULL)
-            *mech_type = (gss_OID)gss_mech_iakerb;
-        if (ret_flags != NULL)
-            *ret_flags = 0;
-        if (time_rec != NULL)
-            *time_rec = 0;
-        if (delegated_cred_handle != NULL)
-            *delegated_cred_handle = GSS_C_NO_CREDENTIAL;
-        major_status = GSS_S_CONTINUE_NEEDED;
     }
 
 cleanup:
