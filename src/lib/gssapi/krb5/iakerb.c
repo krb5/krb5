@@ -606,19 +606,9 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
 
         if (flags != 0) {
             /* finished */
-            krb5_creds creds;
-
-            memset(&creds, 0, sizeof(creds));
-            code = krb5_tkt_creds_get_creds(ctx->k5c, ctx->u.tcc, &creds);
+            code = krb5_tkt_creds_store_creds(ctx->k5c, ctx->u.tcc, NULL);
             if (code != 0)
                 goto cleanup;
-
-            code = krb5_cc_store_cred(ctx->k5c, cred->ccache, &creds);
-            if (code != 0) {
-                krb5_free_cred_contents(ctx->k5c, &creds);
-                goto cleanup;
-            }
-            krb5_free_cred_contents(ctx->k5c, &creds);
 
             krb5_tkt_creds_free(ctx->k5c, ctx->u.tcc);
             ctx->u.tcc = NULL;

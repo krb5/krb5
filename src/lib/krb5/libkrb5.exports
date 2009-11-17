@@ -547,6 +547,7 @@ krb5_tkt_creds_free
 krb5_tkt_creds_get_creds
 krb5_tkt_creds_init
 krb5_tkt_creds_step
+krb5_tkt_creds_store_creds
 krb5_timeofday
 krb5_timestamp_to_sfstring
 krb5_timestamp_to_string

@@ -2756,6 +2756,12 @@ krb5_tkt_creds_step
         krb5_data *,
         unsigned int *);
 
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_store_creds
+(krb5_context,
+        krb5_tkt_creds_context,
+        krb5_ccache);
+
 krb5_error_code KRB5_CALLCONV krb5_copy_addr
 	(krb5_context,
 		const krb5_address *,
