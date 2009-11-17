@@ -89,6 +89,12 @@ enum krb5_tkt_creds_state {
     TKT_CREDS_COMPLETE                  /* Final state */
 };
 
+#define TKT_CREDS_ADVANCE_STATE(ctx, msg)    \
+    do {                                \
+        (ctx)->state++;                 \
+        (ctx)->referral_count = 0;      \
+    } while (0)
+
 /*
  * Asynchronous API request/response state
  */
@@ -778,7 +784,7 @@ next_closest_tgt_request(krb5_context context,
     if (ts->cur_kdc != ts->kdc_list || ts->nxt_kdc != ts->lst_kdc) {
         retval = try_ccache(context, ctx, &ctx->tgtq);
         if (retval == 0) {
-            ctx->state++;
+            TKT_CREDS_ADVANCE_STATE(ctx, "next_closest_tgt_request");
             return 0;
         } else if (HARD_CC_ERR(retval)) {
             return retval;
@@ -926,7 +932,7 @@ do_traversal_request(krb5_context context,
 
     if (ts->cur_kdc == NULL || ts->cur_kdc >= ts->lst_kdc) {
         /* termination condition */
-        ctx->state++;
+        TKT_CREDS_ADVANCE_STATE(ctx, "do_traversal_request");
         goto cleanup;
     }
 
@@ -982,8 +988,7 @@ success:
         }
         ctx->tgtptr_isoffpath = (ts->offpath_tgt != NULL);
 
-        ctx->state++;
-        ctx->referral_count = 0;
+        TKT_CREDS_ADVANCE_STATE(ctx, "do_traversal_reply");
 
         if (ts->ntgts != 0) {
             assert(ctx->tgts == NULL);
@@ -1313,7 +1318,7 @@ tkt_creds_request_initial_tgt(krb5_context context,
     code = krb5_cc_retrieve_cred(context, ctx->ccache, RETR_FLAGS,
                                  &ctx->tgtq, &ctx->cc_tgt);
     if (code == 0) {
-        ctx->state++;
+        TKT_CREDS_ADVANCE_STATE(ctx, "tkt_creds_request_initial_tgt");
         ctx->tgtptr = &ctx->cc_tgt;
         goto cleanup;
     } else if (HARD_CC_ERR(code)) {
