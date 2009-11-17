@@ -1189,6 +1189,11 @@ krb5_tkt_creds_init(krb5_context context,
     krb5_error_code code;
     krb5_tkt_creds_context ctx = NULL;
 
+    if (creds->client == NULL || creds->server == NULL) {
+        code = EINVAL;
+        goto cleanup;
+    }
+
     ctx = k5alloc(sizeof(*ctx), &code);
     if (code != 0)
         goto cleanup;
@@ -1200,11 +1205,10 @@ krb5_tkt_creds_init(krb5_context context,
     ctx->ccache = ccache; /* XXX */
 
     ctx->use_conf_ktypes = context->use_conf_ktypes;
+    ctx->client = ctx->in_cred.client;
+    ctx->server = ctx->in_cred.server;
 
-    assert(ctx->in_cred.client);
-    assert(ctx->in_cred.server);
-
-    if (krb5_is_referral_realm(&ctx->in_cred.server->realm)) {
+    if (krb5_is_referral_realm(&ctx->server->realm)) {
         /* Use the client realm. */
         DPRINTF(("krb5_tkt_creds_init: no server realm supplied, "
                  "using client realm\n"));
@@ -1217,9 +1221,6 @@ krb5_tkt_creds_init(krb5_context context,
     }
 
     /* The rest must be done by krb5_tkt_creds_step() */
-
-    ctx->client = ctx->in_cred.client;
-    ctx->server = ctx->in_cred.server;
 
     *pctx = ctx;
 
@@ -1342,8 +1343,7 @@ tkt_creds_request_initial_tgt(krb5_context context,
 {
     krb5_error_code code;
 
-    DUMP_PRINC("tkt_creds_request_initial_tgt: server",
-               ctx->in_cred.server);
+    DUMP_PRINC("tkt_creds_request_initial_tgt: server", ctx->server);
 
     assert(ctx->tgtq.server == NULL);
 
@@ -1464,8 +1464,7 @@ tkt_creds_reply_referral_tgt(krb5_context context,
     /*
      * Referral request succeeded; let's see what it is
      */
-    if (krb5_principal_compare(context, ctx->in_cred.server,
-                               ctx->out_cred->server)) {
+    if (krb5_principal_compare(context, ctx->server, ctx->out_cred->server)) {
         DPRINTF(("gc_from_kdc: request generated ticket "
                  "for requested server principal\n"));
         DUMP_PRINC("gc_from_kdc final referred reply",
@@ -1577,7 +1576,7 @@ tkt_creds_request_fallback_initial_tgt(krb5_context context,
      * conventional path.
      */
 
-    if (krb5_is_referral_realm(&ctx->in_cred.server->realm)) {
+    if (krb5_is_referral_realm(&ctx->server->realm)) {
         if (ctx->server->length >= 2) {
             code = krb5_get_fallback_host_realm(context,
                                                 &ctx->server->data[1],
