@@ -223,18 +223,18 @@ krb5_make_tgs_request(krb5_context context,
 }
 
 krb5_error_code
-krb5_process_tgs_response(krb5_context context,
-                          krb5_data *response_data,
-                          krb5_creds *tkt,
-                          krb5_flags kdcoptions,
-                          krb5_address *const *address,
-                          krb5_pa_data **in_padata,
-                          krb5_creds *in_cred,
-                          krb5_timestamp timestamp,
-                          krb5_keyblock *subkey,
-                          krb5_pa_data ***out_padata,
-                          krb5_pa_data ***out_enc_padata,
-                          krb5_creds **out_cred)
+krb5_process_tgs_reply(krb5_context context,
+                       krb5_data *response_data,
+                       krb5_creds *tkt,
+                       krb5_flags kdcoptions,
+                       krb5_address *const *address,
+                       krb5_pa_data **in_padata,
+                       krb5_creds *in_cred,
+                       krb5_timestamp timestamp,
+                       krb5_keyblock *subkey,
+                       krb5_pa_data ***out_padata,
+                       krb5_pa_data ***out_enc_padata,
+                       krb5_creds **out_cred)
 {
     krb5_error_code retval;
     krb5_kdc_rep *dec_rep = NULL;
@@ -450,12 +450,12 @@ send_again:
     } else
         goto cleanup;
 
-    retval = krb5_process_tgs_response(context, &response_data,
-                                       tkt, kdcoptions, address,
-                                       in_padata, in_cred,
-                                       timestamp, subkey,
-                                       out_padata,
-                                       out_enc_padata, out_cred);
+    retval = krb5_process_tgs_reply(context, &response_data,
+                                    tkt, kdcoptions, address,
+                                    in_padata, in_cred,
+                                    timestamp, subkey,
+                                    out_padata,
+                                    out_enc_padata, out_cred);
     if (retval != 0)
         goto cleanup;
 
