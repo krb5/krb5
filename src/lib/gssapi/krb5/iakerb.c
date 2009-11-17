@@ -595,7 +595,6 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
                                    &flags);
         if (code != 0)
             goto cleanup;
-
         if (flags != 0) {
             code = krb5_tkt_creds_store_creds(ctx->k5c, ctx->u.tcc, NULL);
             if (code != 0)
