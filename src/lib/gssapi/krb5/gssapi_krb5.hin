@@ -75,6 +75,7 @@ GSS_DLLIMP extern const gss_OID_desc * const GSS_KRB5_NT_PRINCIPAL_NAME;
 GSS_DLLIMP extern const gss_OID_desc * const gss_mech_krb5;
 GSS_DLLIMP extern const gss_OID_desc * const gss_mech_krb5_old;
 GSS_DLLIMP extern const gss_OID_desc * const gss_mech_krb5_wrong;
+GSS_DLLIMP extern const gss_OID_desc * const gss_mech_iakerb;
 GSS_DLLIMP extern const gss_OID_set_desc * const gss_mech_set_krb5;
 GSS_DLLIMP extern const gss_OID_set_desc * const gss_mech_set_krb5_old;
 GSS_DLLIMP extern const gss_OID_set_desc * const gss_mech_set_krb5_both;
