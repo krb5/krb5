@@ -999,9 +999,9 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
         if (actual_mech_type != NULL)
             *actual_mech_type = (gss_OID)gss_mech_iakerb;
         if (ret_flags != NULL)
-            *ret_flags = req_flags;
+            *ret_flags = 0;
         if (time_rec != NULL)
-            *time_rec = time_req;
+            *time_rec = 0;
         major_status = GSS_S_CONTINUE_NEEDED;
     }
 
