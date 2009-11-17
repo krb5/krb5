@@ -28,7 +28,8 @@
  * krb5_tkt_creds_step() and related functions:
  *
  * Get credentials from some KDC somewhere, possibly accumulating TGTs
- * along the way.
+ * along the way. This is asychronous version of the API in gc_frm_kdc.c.
+ * It requires that the KDC support cross-realm referrals.
  */
 
 #include "k5-int.h"
@@ -38,9 +39,6 @@
 #define KRB5_TKT_CREDS_STEP_FLAG_COMPLETE       0x1
 #define KRB5_TKT_CREDS_STEP_FLAG_CTX_KTYPES     0x2
 
-/*
- * Asynchronous API request/response state
- */
 struct _krb5_tkt_creds_context {
     krb5_ccache ccache;
     krb5_creds in_cred;
@@ -61,32 +59,11 @@ struct _krb5_tkt_creds_context {
     krb5_data encoded_previous_request;
 
     krb5_creds *out_cred;
-    krb5_creds **tgts;
 };
-
-#ifdef DEBUG_REFERRALS
-
-#define DPRINTF(x) printf x
-#define DFPRINTF(x) fprintf x
-#define DUMP_PRINC(x, y) krb5int_dbgref_dump_principal((x), (y))
-
-#else
-
-#define DPRINTF(x)
-#define DFPRINTF(x)
-#define DUMP_PRINC(x, y)
-
-#endif
 
 /* Convert ticket flags to necessary KDC options */
 #define FLAGS2OPTS(flags) (flags & KDC_TKT_COMMON_MASK)
 
-/*
- * tkt_make_tgs_request()
- *
- * wrapper around krb5int_make_tgs_request() that updates realm and
- * performs some additional validation
- */
 static krb5_error_code
 tkt_make_tgs_request(krb5_context context,
                      krb5_tkt_creds_context ctx,
@@ -112,12 +89,6 @@ tkt_make_tgs_request(krb5_context context,
     return code;
 }
 
-/*
- * tkt_process_tgs_reply()
- *
- * wrapper around krb5int_process_tgs_reply() that uses context
- * information and performs some additional validation
- */
 static krb5_error_code
 tkt_process_tgs_reply(krb5_context context,
                       krb5_tkt_creds_context ctx,
@@ -127,8 +98,6 @@ tkt_process_tgs_reply(krb5_context context,
                       krb5_creds **out_cred)
 {
     krb5_error_code code;
-
-    assert(*out_cred == NULL);
 
     code = krb5int_process_tgs_reply(context,
                                     rep,
@@ -220,20 +189,17 @@ krb5_tkt_creds_store_creds(krb5_context context,
                            krb5_tkt_creds_context ctx,
                            krb5_ccache ccache)
 {
-    krb5_creds **tgt;
-
     if ((ctx->flags & KRB5_TKT_CREDS_STEP_FLAG_COMPLETE) == 0)
         return EINVAL;
 
     if (ccache == NULL)
         ccache = ctx->ccache;
 
-    if (ctx->tgts != NULL) {
-        for (tgt = ctx->tgts; *tgt; tgt++)
-            krb5_cc_store_cred(context, ctx->ccache, *tgt);
-    }
+    /* Only store the referral from our local KDC */
+    if (ctx->referral_tgts[0] != NULL)
+        krb5_cc_store_cred(context, ccache, ctx->referral_tgts[0]);
 
-    return krb5_cc_store_cred(context, ctx->ccache, ctx->out_cred);
+    return krb5_cc_store_cred(context, ccache, ctx->out_cred);
 }
 
 void KRB5_CALLCONV
@@ -248,7 +214,6 @@ krb5_tkt_creds_free(krb5_context context,
     krb5_free_principal(context, ctx->req_server);
     krb5_free_cred_contents(context, &ctx->in_cred);
     krb5_free_creds(context, ctx->out_cred);
-    krb5_free_tgt_creds(context, ctx->tgts);
     krb5_free_data_contents(context, &ctx->encoded_previous_request);
     krb5_free_keyblock(context, ctx->subkey);
 
@@ -264,9 +229,9 @@ krb5_tkt_creds_free(krb5_context context,
 }
 
 static krb5_error_code
-tkt_creds_request_referral_tgt(krb5_context context,
-                               krb5_tkt_creds_context ctx,
-                               krb5_data *req)
+tkt_creds_step_request(krb5_context context,
+                       krb5_tkt_creds_context ctx,
+                       krb5_data *req)
 {
     krb5_error_code code;
 
@@ -290,59 +255,28 @@ tkt_creds_request_referral_tgt(krb5_context context,
         ctx->kdcopt |= KDC_OPT_ENC_TKT_IN_SKEY;
     }
 
+    if ((ctx->flags & KRB5_TKT_CREDS_STEP_FLAG_CTX_KTYPES) == 0)
+        context->use_conf_ktypes = 1;
+
     code = tkt_make_tgs_request(context, ctx, ctx->tgtptr,
                                 &ctx->in_cred, req);
-    if (code != 0)
-        return code;
 
-    return 0;
-}
-
-static krb5_error_code
-tkt_creds_complete(krb5_context context, krb5_tkt_creds_context ctx)
-{
-    krb5_error_code code = 0;
-
-    assert(ctx->out_cred != NULL);
-
-    /* Only cache referral from local KDC. */
-    if (ctx->referral_tgts[0] != NULL) {
-        /* Allocate returnable TGT list. */
-        ctx->tgts = k5alloc(2 * sizeof (krb5_creds *), &code);
-        if (code != 0)
-            return code;
-
-        code = krb5_copy_creds(context, ctx->referral_tgts[0], &ctx->tgts[0]);
-        if (code != 0)
-            return code;
-    }
-
-    DUMP_PRINC("krb5_tkt_creds_step: final server after reversion",
-               ctx->server);
-
-    krb5_free_principal(context, ctx->out_cred->server);
-    ctx->out_cred->server = ctx->req_server;
-    ctx->req_server = NULL;
-
-    if (ctx->in_cred.authdata != NULL) {
-        code = krb5_copy_authdata(context, ctx->in_cred.authdata,
-                                  &ctx->out_cred->authdata);
-    }
-
-    if (code == 0)
-        ctx->flags |= KRB5_TKT_CREDS_STEP_FLAG_COMPLETE;
+    context->use_conf_ktypes = ctx->default_use_conf_ktypes;
 
     return code;
 }
 
 static krb5_error_code
-tkt_creds_reply_referral_tgt(krb5_context context,
-                             krb5_tkt_creds_context ctx,
-                             krb5_data *rep)
+tkt_creds_step_reply(krb5_context context,
+                     krb5_tkt_creds_context ctx,
+                     krb5_data *rep)
 {
     krb5_error_code code;
     unsigned int i;
     krb5_boolean got_tkt = FALSE;
+
+    krb5_free_creds(context, ctx->out_cred);
+    ctx->out_cred = NULL;
 
     code = tkt_process_tgs_reply(context, ctx, rep, ctx->tgtptr,
                                  &ctx->in_cred, &ctx->out_cred);
@@ -353,11 +287,6 @@ tkt_creds_reply_referral_tgt(krb5_context context,
      * Referral request succeeded; let's see what it is
      */
     if (krb5_principal_compare(context, ctx->server, ctx->out_cred->server)) {
-        DPRINTF(("krb5_tkt_creds_step: request generated ticket "
-                 "for requested server principal\n"));
-        DUMP_PRINC("krb5_tkt_creds_step final referred reply",
-                   ctx->server);
-
         /*
          * Check if the return enctype is one that we requested if
          * needed.
@@ -378,10 +307,6 @@ tkt_creds_reply_referral_tgt(krb5_context context,
     } else if (IS_TGS_PRINC(context, ctx->out_cred->server)) {
         krb5_data *r1, *r2;
 
-        DPRINTF(("krb5_tkt_creds_step: request generated referral tgt\n"));
-        DUMP_PRINC("krb5_tkt_creds_step credential received",
-                   ctx->out_cred->server);
-
         if (ctx->referral_count == 0)
             r1 = &ctx->tgtptr->server->data[1];
         else
@@ -389,8 +314,6 @@ tkt_creds_reply_referral_tgt(krb5_context context,
 
         r2 = &ctx->out_cred->server->data[1];
         if (data_eq(*r1, *r2)) {
-            DPRINTF(("krb5_tkt_creds_step: referred back to "
-                     "previous realm; loop\n"));
             code = KRB5_KDC_UNREACH;
             goto cleanup;
         }
@@ -400,10 +323,6 @@ tkt_creds_reply_referral_tgt(krb5_context context,
             if (krb5_principal_compare(context,
                                        ctx->out_cred->server,
                                        ctx->referral_tgts[i]->server)) {
-                DFPRINTF((stderr,
-                          "krb5_get_cred_from_kdc_opt: "
-                          "referral routing loop - "
-                          "got referral back to hop #%d\n", i));
                 code = KRB5_KDC_UNREACH;
                 goto cleanup;
             }
@@ -423,44 +342,20 @@ tkt_creds_reply_referral_tgt(krb5_context context,
 
     assert(ctx->tgtptr == NULL || code == 0);
 
-    if (got_tkt)
-        code = tkt_creds_complete(context, ctx);
+    if (code == 0 && got_tkt == TRUE) {
+        krb5_free_principal(context, ctx->out_cred->server);
+        ctx->out_cred->server = ctx->req_server;
+        ctx->req_server = NULL;
 
-cleanup:
-    return code;
-}
+        if (ctx->in_cred.authdata != NULL) {
+            code = krb5_copy_authdata(context, ctx->in_cred.authdata,
+                                      &ctx->out_cred->authdata);
+        }
 
-static krb5_error_code
-tkt_creds_step_request(krb5_context context,
-                       krb5_tkt_creds_context ctx,
-                       krb5_data *req)
-{
-    krb5_error_code code;
-
-    if ((ctx->flags & KRB5_TKT_CREDS_STEP_FLAG_CTX_KTYPES) == 0)
-        context->use_conf_ktypes = 1;
-
-    code = tkt_creds_request_referral_tgt(context, ctx, req);
-
-    context->use_conf_ktypes = ctx->default_use_conf_ktypes;
-
-    return code;
-}
-
-static krb5_error_code
-tkt_creds_step_reply(krb5_context context,
-                     krb5_tkt_creds_context ctx,
-                     krb5_data *rep)
-{
-    krb5_error_code code;
-
-    if (ctx->out_cred != NULL) {
-        krb5_free_creds(context, ctx->out_cred);
-        ctx->out_cred = NULL;
+        ctx->flags |= KRB5_TKT_CREDS_STEP_FLAG_COMPLETE;
     }
 
-    code = tkt_creds_reply_referral_tgt(context, ctx, rep);
-
+cleanup:
     return code;
 }
 
