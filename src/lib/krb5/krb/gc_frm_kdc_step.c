@@ -54,6 +54,7 @@ struct _krb5_tkt_creds_context {
     krb5_creds *referral_tgts[KRB5_REFERRAL_MAXHOPS];
     krb5_boolean default_use_conf_ktypes;
     krb5_timestamp timestamp;
+    krb5_int32 nonce;
     int kdcopt;
     krb5_keyblock *subkey;
     krb5_data encoded_previous_request;
@@ -84,8 +85,8 @@ tkt_make_tgs_request(krb5_context context,
 
     code = krb5int_make_tgs_request(context, tgt, ctx->kdcopt,
                                    tgt->addresses, NULL,
-                                   in_cred, NULL, NULL,
-                                   req, &ctx->timestamp, &ctx->subkey);
+                                   in_cred, NULL, NULL, req,
+                                   &ctx->timestamp, &ctx->nonce, &ctx->subkey);
     return code;
 }
 
@@ -107,6 +108,7 @@ tkt_process_tgs_reply(krb5_context context,
                                     NULL,
                                     in_cred,
                                     ctx->timestamp,
+                                    ctx->nonce,
                                     ctx->subkey,
                                     NULL,
                                     NULL,

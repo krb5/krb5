@@ -103,6 +103,7 @@ krb5int_make_tgs_request_ext(krb5_context context,
                              void *pacb_data,
                              krb5_data *request_data,
                              krb5_timestamp *timestamp,
+                             krb5_int32 *nonce,
                              krb5_keyblock **subkey);
 
 krb5_error_code
@@ -119,6 +120,7 @@ krb5int_make_tgs_request(krb5_context context,
                          void *pacb_data,
                          krb5_data *request_data,
                          krb5_timestamp *timestamp,
+                         krb5_int32 *nonce,
                          krb5_keyblock **subkey);
 
 krb5_error_code
@@ -130,6 +132,7 @@ krb5int_process_tgs_reply(krb5_context context,
                           krb5_pa_data **in_padata,
                           krb5_creds *in_cred,
                           krb5_timestamp timestamp,
+                          krb5_int32 nonce,
                           krb5_keyblock *subkey,
                           krb5_pa_data ***out_padata,
                           krb5_pa_data ***out_enc_padata,

@@ -180,6 +180,7 @@ krb5int_make_tgs_request(krb5_context context,
                          void *pacb_data,
                          krb5_data *request_data,
                          krb5_timestamp *timestamp,
+                         krb5_int32 *nonce,
                          krb5_keyblock **subkey)
 {
     krb5_error_code retval;
@@ -217,7 +218,7 @@ krb5int_make_tgs_request(krb5_context context,
                                             &in_cred->second_ticket : 0,
                                           tkt, pacb_fct, pacb_data,
                                           request_data,
-                                          timestamp, subkey);
+                                          timestamp, nonce, subkey);
     if (enctypes != NULL)
         free(enctypes);
 
@@ -233,6 +234,7 @@ krb5int_process_tgs_reply(krb5_context context,
                           krb5_pa_data **in_padata,
                           krb5_creds *in_cred,
                           krb5_timestamp timestamp,
+                          krb5_int32 nonce,
                           krb5_keyblock *subkey,
                           krb5_pa_data ***out_padata,
                           krb5_pa_data ***out_enc_padata,
@@ -331,7 +333,7 @@ krb5int_process_tgs_reply(krb5_context context,
     if (retval == 0)
         retval = check_reply_server(context, kdcoptions, in_cred, dec_rep);
 
-    if (dec_rep->enc_part2->nonce != (krb5_int32)timestamp)
+    if (dec_rep->enc_part2->nonce != nonce)
         retval = KRB5_KDCREP_MODIFIED;
 
     if ((kdcoptions & KDC_OPT_POSTDATED) &&
@@ -407,6 +409,7 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
     krb5_data request_data;
     krb5_data response_data;
     krb5_timestamp timestamp;
+    krb5_int32 nonce;
     krb5_keyblock *subkey = NULL;
     int tcp_only = 0, use_master = 0;
 
@@ -424,7 +427,8 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
     retval = krb5int_make_tgs_request(context, tkt, kdcoptions,
                                       address, in_padata, in_cred,
                                       pacb_fct, pacb_data,
-                                      &request_data, &timestamp, &subkey);
+                                      &request_data, &timestamp, &nonce,
+                                      &subkey);
     if (retval != 0)
         goto cleanup;
 
@@ -455,7 +459,7 @@ send_again:
     retval = krb5int_process_tgs_reply(context, &response_data,
                                        tkt, kdcoptions, address,
                                        in_padata, in_cred,
-                                       timestamp, subkey,
+                                       timestamp, nonce, subkey,
                                        out_padata,
                                        out_enc_padata, out_cred);
     if (retval != 0)

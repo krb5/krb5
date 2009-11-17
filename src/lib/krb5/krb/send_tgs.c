@@ -167,6 +167,7 @@ krb5int_make_tgs_request_ext(krb5_context context,
                              void *pacb_data,
                              krb5_data *request_data,
                              krb5_timestamp *timestamp,
+                             krb5_int32 *nonce,
                              krb5_keyblock **subkey)
 {
     krb5_error_code retval;
@@ -201,7 +202,7 @@ krb5int_make_tgs_request_ext(krb5_context context,
     if ((retval = krb5_timeofday(context, &time_now)))
         return(retval);
     /* XXX we know they are the same size... */
-    tgsreq.nonce = (krb5_int32)time_now;
+    *nonce = tgsreq.nonce = (krb5_int32)time_now;
     *timestamp = time_now;
 
     tgsreq.addresses = (krb5_address **) addrs;
@@ -382,6 +383,7 @@ krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,
     krb5_data scratch;
     int tcp_only = 0, use_master;
     krb5_timestamp now;
+    krb5_int32 nonce;
 
     rep->message_type = KRB5_ERROR;
 
@@ -390,11 +392,11 @@ krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,
                                           authorization_data, padata,
                                           second_ticket, in_cred,
                                           pacb_fct, pacb_data, &scratch, &now,
-                                          subkey);
+                                          &nonce, subkey);
     if (retval != 0)
         return retval;
 
-    rep->expected_nonce = (krb5_int32)now;
+    rep->expected_nonce = nonce;
     rep->request_time = now;
 
 send_again:
