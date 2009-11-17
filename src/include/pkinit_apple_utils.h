@@ -113,12 +113,16 @@ krb5_error_code pkiCfDataToKrb5Data(
  * Non-mallocing conversion between CSSM_DATA and krb5_data
  */
 #define PKI_CSSM_TO_KRB_DATA(cd, kd)            \
-    (kd)->data = (char *)(cd)->Data;            \
-    (kd)->length = (cd)->Length;
+    do {                                        \
+        (kd)->data = (char *)(cd)->Data;        \
+        (kd)->length = (cd)->Length;            \
+    } while (0)
 
 #define PKI_KRB_TO_CSSM_DATA(kd, cd)            \
-    (cd)->Data = (uint8 *)(kd)->data;           \
-    (cd)->Length = (kd)->length;
+    do {                                        \
+        (cd)->Data = (uint8 *)(kd)->data;       \
+        (cd)->Length = (kd)->length;            \
+    } while (0)
 
 /*
  * Compare to CSSM_DATAs. Return TRUE if they're the same else FALSE.
