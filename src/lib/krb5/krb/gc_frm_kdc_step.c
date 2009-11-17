@@ -25,7 +25,7 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  *
- * krb5_get_cred_from_kdc() and related functions:
+ * krb5_tkt_creds_step() and related functions:
  *
  * Get credentials from some KDC somewhere, possibly accumulating TGTs
  * along the way.
@@ -250,6 +250,9 @@ krb5_tkt_creds_store_creds(krb5_context context,
                            krb5_ccache ccache)
 {
     krb5_creds **tgt;
+
+    if ((ctx->flags & KRB5_TKT_CREDS_STEP_FLAG_COMPLETE) == 0)
+        return EINVAL;
 
     if (ccache == NULL)
         ccache = ctx->ccache;
