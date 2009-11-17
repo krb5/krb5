@@ -126,10 +126,6 @@ tkt_make_tgs_request(krb5_context context,
 {
     krb5_error_code code;
 
-    assert(tgt != NULL);
-    assert(req != NULL && req->length == 0 && req->data == NULL);
-    assert(in_cred != NULL && in_cred->server != NULL);
-
     /* These flags are always included */
     kdcopt |= FLAGS2OPTS(tgt->ticket_flags);
 
@@ -200,9 +196,6 @@ krb5_tkt_creds_init(krb5_context context,
     krb5_error_code code;
     krb5_tkt_creds_context ctx = NULL;
     krb5_creds tgtq;
-
-    assert(creds->client != NULL);
-    assert(creds->server != NULL);
 
     memset(&tgtq, 0, sizeof(tgtq));
 
@@ -403,8 +396,6 @@ tkt_creds_reply_referral_tgt(krb5_context context,
 {
     krb5_error_code code;
     unsigned int i;
-
-    assert(ctx->subkey != NULL);
 
     code = tkt_process_tgs_reply(context, ctx, rep, ctx->tgtptr,
                                  tkt_creds_kdcopt(ctx), &ctx->in_cred,
