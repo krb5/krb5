@@ -42,6 +42,7 @@
  * Asynchronous API request/response state
  */
 struct _krb5_tkt_creds_context {
+    unsigned int flags;
     krb5_ccache ccache;
     krb5_creds in_cred;
     krb5_principal client;
@@ -58,7 +59,6 @@ struct _krb5_tkt_creds_context {
     krb5_timestamp timestamp;
     krb5_keyblock *subkey;
     krb5_data encoded_previous_request;
-    int complete;
 };
 
 #ifdef DEBUG_REFERRALS
@@ -125,13 +125,8 @@ tkt_make_tgs_request(krb5_context context,
     krb5_error_code code;
 
     assert(tgt != NULL);
-
-    assert(req != NULL);
-    assert(req->length == 0);
-    assert(req->data == NULL);
-
-    assert(in_cred != NULL);
-    assert(in_cred->server != NULL);
+    assert(req != NULL && req->length == 0 && req->data == NULL);
+    assert(in_cred != NULL && in_cred->server != NULL);
 
     /* These flags are always included */
     kdcopt |= FLAGS2OPTS(tgt->ticket_flags);
@@ -165,6 +160,8 @@ tkt_process_tgs_reply(krb5_context context,
                       krb5_creds **out_cred)
 {
     krb5_error_code code;
+
+    assert(*out_cred == NULL);
 
     /* These flags are always included */
     kdcopt |= FLAGS2OPTS(tgt->ticket_flags);
@@ -258,7 +255,7 @@ krb5_tkt_creds_get_creds(krb5_context context,
                          krb5_tkt_creds_context ctx,
                          krb5_creds *creds)
 {
-    if (ctx->complete == 0)
+    if ((ctx->flags & KRB5_TKT_CREDS_STEP_FLAG_COMPLETE) == 0)
         return EINVAL;
 
     return krb5int_copy_creds_contents(context, ctx->out_cred, creds);
@@ -361,7 +358,7 @@ tkt_creds_complete(krb5_context context, krb5_tkt_creds_context ctx)
 {
     krb5_error_code code = 0;
 
-    assert(ctx->out_cred);
+    assert(ctx->out_cred != NULL);
 
     /*
      * Deal with ccache TGT management: If tgts has been set from
@@ -384,7 +381,8 @@ tkt_creds_complete(krb5_context context, krb5_tkt_creds_context ctx)
             goto cleanup;
     }
 
-    DUMP_PRINC("tkt_creds_complete: final server after reversion", ctx->server);
+    DUMP_PRINC("krb5_tkt_creds_step: final server after reversion",
+               ctx->server);
 
     krb5_free_principal(context, ctx->out_cred->server);
     ctx->out_cred->server = ctx->req_server;
@@ -396,7 +394,7 @@ tkt_creds_complete(krb5_context context, krb5_tkt_creds_context ctx)
     if (code != 0)
         goto cleanup;
 
-    ctx->complete = 1;
+    ctx->flags |= KRB5_TKT_CREDS_STEP_FLAG_COMPLETE;
 
 cleanup:
     return code;
@@ -410,7 +408,7 @@ tkt_creds_reply_referral_tgt(krb5_context context,
     krb5_error_code code;
     unsigned int i;
 
-    assert(ctx->subkey);
+    assert(ctx->subkey != NULL);
 
     code = tkt_process_tgs_reply(context, ctx, rep, ctx->tgtptr,
                                  tkt_creds_kdcopt(ctx), &ctx->in_cred,
@@ -522,7 +520,10 @@ tkt_creds_step_reply(krb5_context context,
 
     context->use_conf_ktypes = 1;
 
-    assert(ctx->out_cred == NULL);
+    if (ctx->out_cred != NULL) {
+        krb5_free_creds(context, ctx->out_cred);
+        ctx->out_cred = NULL;
+    }
 
     code = tkt_creds_reply_referral_tgt(context, ctx, rep);
 
@@ -549,6 +550,9 @@ krb5_tkt_creds_step(krb5_context context,
     realm->data = NULL;
     realm->length = 0;
 
+    if (ctx->flags & KRB5_TKT_CREDS_STEP_FLAG_COMPLETE)
+        goto cleanup;
+
     if (in != NULL && in->length != 0) {
         code = tkt_creds_step_reply(context, ctx, in);
         if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG) {
@@ -559,13 +563,8 @@ krb5_tkt_creds_step(krb5_context context,
                 code = code2;
             goto copy_realm;
         }
-        if (code != 0)
+        if (code != 0 || (ctx->flags & KRB5_TKT_CREDS_STEP_FLAG_COMPLETE))
             goto cleanup;
-    }
-
-    if (ctx->complete) {
-        *flags = 1;
-        goto cleanup;
     }
 
     code = tkt_creds_step_request(context, ctx, out);
@@ -588,6 +587,8 @@ copy_realm:
     }
 
 cleanup:
+    *flags = ctx->flags;
+
     return code;
 }
 
