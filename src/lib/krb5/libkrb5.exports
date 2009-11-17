@@ -544,7 +544,6 @@ krb5_string_to_timestamp
 krb5_sync_disk_file
 krb5_tgtname
 krb5_tkt_creds_free
-krb5_tkt_creds_get
 krb5_tkt_creds_get_creds
 krb5_tkt_creds_init
 krb5_tkt_creds_step
