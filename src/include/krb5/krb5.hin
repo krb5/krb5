@@ -2344,12 +2344,6 @@ krb5_tkt_creds_init
         krb5_tkt_creds_context *);
 
 krb5_error_code KRB5_CALLCONV
-krb5_tkt_creds_get_tgts
-(krb5_context,
-        krb5_tkt_creds_context,
-        krb5_creds ***);
-
-krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_get_creds
 (krb5_context,
         krb5_tkt_creds_context,
@@ -2357,11 +2351,6 @@ krb5_tkt_creds_get_creds
 
 void KRB5_CALLCONV
 krb5_tkt_creds_free
-(krb5_context,
-        krb5_tkt_creds_context);
-
-krb5_error_code KRB5_CALLCONV
-krb5_tkt_creds_get
 (krb5_context,
         krb5_tkt_creds_context);
 
