@@ -362,21 +362,10 @@ tkt_creds_request_referral_tgt(krb5_context context,
 {
     krb5_error_code code;
 
-    /*
-     * Try requesting a service ticket from our local KDC with referrals
-     * turned on.  If the first referral succeeds, follow a referral-only
-     * path, otherwise fall back to old-style assumptions.
-     */
-    /*
-     * Save TGTPTR because we rewrite it in the referral loop, and
-     * we might need to explicitly free it later.
-     */
-    if (ctx->referral_count >= KRB5_REFERRAL_MAXHOPS) {
-        code = KRB5_GET_IN_TKT_LOOP; /* XXX */
-        goto cleanup;
-    }
+    if (ctx->referral_count >= KRB5_REFERRAL_MAXHOPS)
+        return KRB5_GET_IN_TKT_LOOP; /* XXX */
 
-    assert(ctx->tgtptr);
+    assert(ctx->tgtptr != NULL);
 
     /* Copy krbtgt realm to server principal */
     krb5_free_data_contents(context, &ctx->server->realm);
@@ -384,16 +373,15 @@ tkt_creds_request_referral_tgt(krb5_context context,
                                       &ctx->tgtptr->server->data[1],
                                       &ctx->server->realm);
     if (code != 0)
-        goto cleanup;
+        return code;
 
     code = tkt_make_tgs_request(context, ctx, ctx->tgtptr,
                                 tkt_creds_kdcopt(ctx),
                                 &ctx->in_cred, req);
     if (code != 0)
-        goto cleanup;
+        return code;
 
-cleanup:
-    return code;
+    return 0;
 }
 
 static krb5_error_code
@@ -411,7 +399,9 @@ tkt_creds_complete(krb5_context context, krb5_tkt_creds_context ctx)
      * local KDC.)  This is part of cleanup because useful received TGTs
      * should be cached even if the main request resulted in failure.
      */
-    if (ctx->tgts == NULL && ctx->referral_tgts[0] != NULL) {
+    assert(ctx->tgts == NULL);
+
+    if (ctx->referral_tgts[0] != NULL) {
         /* Allocate returnable TGT list. */
         ctx->tgts = k5alloc(2 * sizeof (krb5_creds *), &code);
         if (code != 0)
@@ -439,7 +429,6 @@ tkt_creds_complete(krb5_context context, krb5_tkt_creds_context ctx)
 cleanup:
     return code;
 }
-
 
 static krb5_error_code
 tkt_creds_reply_referral_tgt(krb5_context context,
@@ -563,8 +552,7 @@ tkt_creds_reply(krb5_context context,
 
     context->use_conf_ktypes = 1;
 
-    krb5_free_creds(context, ctx->out_cred);
-    ctx->out_cred = NULL;
+    assert(ctx->out_cred == NULL);
 
     code = tkt_creds_reply_referral_tgt(context, ctx, rep);
 
