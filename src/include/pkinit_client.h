@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (c) 2004-2008 Apple Inc.  All Rights Reserved.
  *
@@ -44,37 +45,37 @@ extern "C" {
  * Create a PA-PK-AS-REQ message.
  */
 krb5_error_code krb5int_pkinit_as_req_create(
-    krb5_context		context,
-    krb5_timestamp		kctime,
-    krb5_int32			cusec,		/* microseconds */
-    krb5_ui_4			nonce,
-    const krb5_checksum		*cksum,
-    krb5_pkinit_signing_cert_t	client_cert,	/* required! */
+    krb5_context                context,
+    krb5_timestamp              kctime,
+    krb5_int32                  cusec,          /* microseconds */
+    krb5_ui_4                   nonce,
+    const krb5_checksum         *cksum,
+    krb5_pkinit_signing_cert_t  client_cert,    /* required! */
 
     /*
      * trusted_CAs correponds to PA-PK-AS-REQ.trustedCertifiers.
      * Expressed here as an optional list of DER-encoded certs.
      */
-    const krb5_data		*trusted_CAs,
-    krb5_ui_4			num_trusted_CAs,
+    const krb5_data             *trusted_CAs,
+    krb5_ui_4                   num_trusted_CAs,
 
     /* optional PA-PK-AS-REQ.kdcPkId, expressed here as a
      * DER-encoded cert */
-    const krb5_data		*kdc_cert,
-    krb5_data			*as_req);	/* mallocd and RETURNED */
+    const krb5_data             *kdc_cert,
+    krb5_data                   *as_req);       /* mallocd and RETURNED */
 
 /*
  * Parse PA-PK-AS-REP message. Optionally evaluates the message's certificate chain.
  * Optionally returns various components.
  */
 krb5_error_code krb5int_pkinit_as_rep_parse(
-    krb5_context		context,
-    const krb5_data		*as_rep,
-    krb5_pkinit_signing_cert_t   client_cert,	/* required for decryption */
-    krb5_keyblock		*key_block,     /* RETURNED */
-    krb5_checksum		*checksum,	/* checksum of corresponding AS-REQ */
-						/*   contents mallocd and RETURNED */
-    krb5int_cert_sig_status	*cert_status,   /* RETURNED */
+    krb5_context                context,
+    const krb5_data             *as_rep,
+    krb5_pkinit_signing_cert_t   client_cert,   /* required for decryption */
+    krb5_keyblock               *key_block,     /* RETURNED */
+    krb5_checksum               *checksum,      /* checksum of corresponding AS-REQ */
+                                                /*   contents mallocd and RETURNED */
+    krb5int_cert_sig_status     *cert_status,   /* RETURNED */
 
     /*
      * Cert fields, all optionally RETURNED.
@@ -83,9 +84,9 @@ krb5_error_code krb5int_pkinit_as_rep_parse(
      * all_certs is an array of all of the certs in the incoming SignedData,
      *    in full DER-encoded form.
      */
-    krb5_data		    *signer_cert,   /* content mallocd */
-    unsigned		    *num_all_certs, /* sizeof *all_certs */
-    krb5_data		    **all_certs);   /* krb5_data's and their content mallocd */
+    krb5_data               *signer_cert,   /* content mallocd */
+    unsigned                *num_all_certs, /* sizeof *all_certs */
+    krb5_data               **all_certs);   /* krb5_data's and their content mallocd */
 
 #ifdef __cplusplus
 }

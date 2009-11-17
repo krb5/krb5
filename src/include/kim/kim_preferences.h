@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2005-2006 Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -162,7 +163,7 @@ kim_error kim_preferences_create (kim_preferences *out_preferences);
  * \brief Copy a preferences object.
  */
 kim_error kim_preferences_copy (kim_preferences *out_preferences,
-                                  kim_preferences  in_preferences);
+                                kim_preferences  in_preferences);
 
 /*!
  * \param io_preferences a preferences object to modify.
@@ -172,7 +173,7 @@ kim_error kim_preferences_copy (kim_preferences *out_preferences,
  * \sa kim_preferences_get_options()
  */
 kim_error kim_preferences_set_options (kim_preferences io_preferences,
-                                         kim_options     in_options);
+                                       kim_options     in_options);
 
 /*!
  * \param in_preferences a preferences object.
@@ -184,7 +185,7 @@ kim_error kim_preferences_set_options (kim_preferences io_preferences,
  * \sa kim_preferences_set_options()
  */
 kim_error kim_preferences_get_options (kim_preferences  in_preferences,
-                                         kim_options     *out_options);
+                                       kim_options     *out_options);
 
 /*!
  * \param io_preferences      a preferences object to modify.
@@ -195,7 +196,7 @@ kim_error kim_preferences_get_options (kim_preferences  in_preferences,
  * \sa kim_preferences_get_remember_options()
  */
 kim_error kim_preferences_set_remember_options (kim_preferences io_preferences,
-                                                  kim_boolean     in_remember_options);
+                                                kim_boolean     in_remember_options);
 
 /*!
  * \param in_preferences       a preferences object.
@@ -206,7 +207,7 @@ kim_error kim_preferences_set_remember_options (kim_preferences io_preferences,
  * \sa kim_preferences_set_remember_options()
  */
 kim_error kim_preferences_get_remember_options (kim_preferences  in_preferences,
-                                                  kim_boolean     *out_remember_options);
+                                                kim_boolean     *out_remember_options);
 
 /*!
  * \param io_preferences      a preferences object to modify.
@@ -216,7 +217,7 @@ kim_error kim_preferences_get_remember_options (kim_preferences  in_preferences,
  * \sa kim_preferences_get_client_identity()
  */
 kim_error kim_preferences_set_client_identity (kim_preferences io_preferences,
-                                                 kim_identity    in_client_identity);
+                                               kim_identity    in_client_identity);
 
 /*!
  * \param in_preferences       a preferences object.
@@ -227,7 +228,7 @@ kim_error kim_preferences_set_client_identity (kim_preferences io_preferences,
  * \sa kim_preferences_set_client_identity()
  */
 kim_error kim_preferences_get_client_identity (kim_preferences  in_preferences,
-                                                 kim_identity    *out_client_identity);
+                                               kim_identity    *out_client_identity);
 
 /*!
  * \param io_preferences               a preferences object to modify.
@@ -238,7 +239,7 @@ kim_error kim_preferences_get_client_identity (kim_preferences  in_preferences,
  * \sa kim_preferences_get_remember_client_identity()
  */
 kim_error kim_preferences_set_remember_client_identity (kim_preferences io_preferences,
-                                                          kim_boolean     in_remember_client_identity);
+                                                        kim_boolean     in_remember_client_identity);
 
 /*!
  * \param in_preferences                a preferences object.
@@ -249,7 +250,7 @@ kim_error kim_preferences_set_remember_client_identity (kim_preferences io_prefe
  * \sa kim_preferences_set_remember_client_identity()
  */
 kim_error kim_preferences_get_remember_client_identity (kim_preferences  in_preferences,
-                                                          kim_boolean     *out_remember_client_identity);
+                                                        kim_boolean     *out_remember_client_identity);
 
 /*!
  * \param io_preferences       a preferences object to modify.
@@ -260,7 +261,7 @@ kim_error kim_preferences_get_remember_client_identity (kim_preferences  in_pref
  * \sa kim_preferences_get_minimum_lifetime()
  */
 kim_error kim_preferences_set_minimum_lifetime (kim_preferences io_preferences,
-                                                  kim_lifetime    in_minimum_lifetime);
+                                                kim_lifetime    in_minimum_lifetime);
 
 /*!
  * \param in_preferences        a preferences object.
@@ -271,7 +272,7 @@ kim_error kim_preferences_set_minimum_lifetime (kim_preferences io_preferences,
  * \sa kim_preferences_set_minimum_lifetime()
  */
 kim_error kim_preferences_get_minimum_lifetime (kim_preferences  in_preferences,
-                                                  kim_lifetime    *out_minimum_lifetime);
+                                                kim_lifetime    *out_minimum_lifetime);
 
 /*!
  * \param io_preferences       a preferences object to modify.
@@ -282,7 +283,7 @@ kim_error kim_preferences_get_minimum_lifetime (kim_preferences  in_preferences,
  * \sa kim_preferences_get_maximum_lifetime()
  */
 kim_error kim_preferences_set_maximum_lifetime (kim_preferences io_preferences,
-                                                  kim_lifetime    in_maximum_lifetime);
+                                                kim_lifetime    in_maximum_lifetime);
 
 /*!
  * \param in_preferences        a preferences object.
@@ -293,7 +294,7 @@ kim_error kim_preferences_set_maximum_lifetime (kim_preferences io_preferences,
  * \sa kim_preferences_set_maximum_lifetime()
  */
 kim_error kim_preferences_get_maximum_lifetime (kim_preferences  in_preferences,
-                                                  kim_lifetime    *out_maximum_lifetime);
+                                                kim_lifetime    *out_maximum_lifetime);
 
 /*!
  * \param io_preferences               a preferences object to modify.
@@ -305,7 +306,7 @@ kim_error kim_preferences_get_maximum_lifetime (kim_preferences  in_preferences,
  * \sa kim_preferences_get_minimum_renewal_lifetime()
  */
 kim_error kim_preferences_set_minimum_renewal_lifetime (kim_preferences io_preferences,
-                                                          kim_lifetime    in_minimum_renewal_lifetime);
+                                                        kim_lifetime    in_minimum_renewal_lifetime);
 
 /*!
  * \param in_preferences                a preferences object.
@@ -316,7 +317,7 @@ kim_error kim_preferences_set_minimum_renewal_lifetime (kim_preferences io_prefe
  * \sa kim_preferences_set_minimum_renewal_lifetime()
  */
 kim_error kim_preferences_get_minimum_renewal_lifetime (kim_preferences  in_preferences,
-                                                          kim_lifetime    *out_minimum_renewal_lifetime);
+                                                        kim_lifetime    *out_minimum_renewal_lifetime);
 
 /*!
  * \param io_preferences               a preferences object to modify.
@@ -328,7 +329,7 @@ kim_error kim_preferences_get_minimum_renewal_lifetime (kim_preferences  in_pref
  * \sa kim_preferences_get_minimum_renewal_lifetime()
  */
 kim_error kim_preferences_set_maximum_renewal_lifetime (kim_preferences io_preferences,
-                                                          kim_lifetime    in_maximum_renewal_lifetime);
+                                                        kim_lifetime    in_maximum_renewal_lifetime);
 
 /*!
  * \param in_preferences                a preferences object.
@@ -339,7 +340,7 @@ kim_error kim_preferences_set_maximum_renewal_lifetime (kim_preferences io_prefe
  * \sa kim_preferences_set_minimum_renewal_lifetime()
  */
 kim_error kim_preferences_get_maximum_renewal_lifetime (kim_preferences  in_preferences,
-                                                          kim_lifetime    *out_maximum_renewal_lifetime);
+                                                        kim_lifetime    *out_maximum_renewal_lifetime);
 
 /*!
  * \param in_preferences           a preferences object.

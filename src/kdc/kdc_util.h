@@ -45,14 +45,14 @@ krb5_boolean is_local_principal(krb5_const_principal princ1);
 krb5_boolean krb5_is_tgs_principal (krb5_const_principal);
 krb5_error_code
 add_to_transited (krb5_data *,
-                                  krb5_data *,
-                                  krb5_principal,
-                                  krb5_principal,
-                                  krb5_principal);
+                  krb5_data *,
+                  krb5_principal,
+                  krb5_principal,
+                  krb5_principal);
 krb5_error_code
 compress_transited (krb5_data *,
-                                    krb5_principal,
-                                    krb5_data *);
+                    krb5_principal,
+                    krb5_data *);
 krb5_error_code
 concat_authorization_data (krb5_authdata **,
                            krb5_authdata **,
@@ -127,19 +127,19 @@ rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep);
 /* do_as_req.c */
 krb5_error_code
 process_as_req (krb5_kdc_req *, krb5_data *,
-                                const krb5_fulladdr *,
-                                krb5_data ** );
+                const krb5_fulladdr *,
+                krb5_data ** );
 
 /* do_tgs_req.c */
 krb5_error_code
 process_tgs_req (krb5_data *,
-                                 const krb5_fulladdr *,
-                                 krb5_data ** );
+                 const krb5_fulladdr *,
+                 krb5_data ** );
 /* dispatch.c */
 krb5_error_code
 dispatch (krb5_data *,
-                          const krb5_fulladdr *,
-                          krb5_data **);
+          const krb5_fulladdr *,
+          krb5_data **);
 
 /* main.c */
 krb5_error_code kdc_initialize_rcache (krb5_context, char *);
@@ -157,13 +157,13 @@ krb5_error_code closedown_network (void);
 /* policy.c */
 int
 against_local_policy_as (krb5_kdc_req *, krb5_db_entry,
-                             krb5_db_entry, krb5_timestamp,
-                             const char **, krb5_data *);
+                         krb5_db_entry, krb5_timestamp,
+                         const char **, krb5_data *);
 
 int
 against_local_policy_tgs (krb5_kdc_req *, krb5_db_entry,
-                              krb5_ticket *, const char **,
-                              krb5_data *);
+                          krb5_ticket *, const char **,
+                          krb5_data *);
 
 /* kdc_preauth.c */
 krb5_boolean
@@ -171,13 +171,13 @@ enctype_requires_etype_info_2(krb5_enctype enctype);
 
 const char *
 missing_required_preauth (krb5_db_entry *client,
-                                       krb5_db_entry *server,
-                                       krb5_enc_tkt_part *enc_tkt_reply);
+                          krb5_db_entry *server,
+                          krb5_enc_tkt_part *enc_tkt_reply);
 void
 get_preauth_hint_list (krb5_kdc_req * request,
-                            krb5_db_entry *client,
-                            krb5_db_entry *server,
-                            krb5_data *e_data);
+                       krb5_db_entry *client,
+                       krb5_db_entry *server,
+                       krb5_data *e_data);
 krb5_error_code
 load_preauth_plugins(krb5_context context);
 krb5_error_code

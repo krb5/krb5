@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2005-2006 Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -251,7 +252,7 @@ extern "C" {
  * \brief Create a new selection hints object.
  */
 kim_error kim_selection_hints_create (kim_selection_hints *out_selection_hints,
-                                        kim_string           in_application_identifier);
+                                      kim_string           in_application_identifier);
 
 /*!
  * \param out_selection_hints on exit, a new selection hints object which is a copy of in_selection_hints.
@@ -261,7 +262,7 @@ kim_error kim_selection_hints_create (kim_selection_hints *out_selection_hints,
  * \brief Copy a selection hints object.
  */
 kim_error kim_selection_hints_copy (kim_selection_hints *out_selection_hints,
-                                      kim_selection_hints  in_selection_hints);
+                                    kim_selection_hints  in_selection_hints);
 
 /*!
  * \param io_selection_hints    a selection hints object to modify.
@@ -303,7 +304,7 @@ kim_error kim_selection_hints_get_hint (kim_selection_hints  in_selection_hints,
  * \sa kim_selection_hints_get_explanation()
  */
 kim_error kim_selection_hints_set_explanation (kim_selection_hints io_selection_hints,
-                                                 kim_string          in_explanation);
+                                               kim_string          in_explanation);
 
 /*!
  * \param in_selection_hints   a selection hints object.
@@ -315,7 +316,7 @@ kim_error kim_selection_hints_set_explanation (kim_selection_hints io_selection_
  * \sa kim_selection_hints_set_explanation()
  */
 kim_error kim_selection_hints_get_explanation (kim_selection_hints  in_selection_hints,
-                                                 kim_string          *out_explanation);
+                                               kim_string          *out_explanation);
 
 
 /*!
@@ -326,7 +327,7 @@ kim_error kim_selection_hints_get_explanation (kim_selection_hints  in_selection
  * \sa kim_selection_hints_get_options()
  */
 kim_error kim_selection_hints_set_options (kim_selection_hints io_selection_hints,
-                                             kim_options         in_options);
+                                           kim_options         in_options);
 
 /*!
  * \param in_selection_hints a selection hints object.
@@ -338,7 +339,7 @@ kim_error kim_selection_hints_set_options (kim_selection_hints io_selection_hint
  * \sa kim_selection_hints_set_options()
  */
 kim_error kim_selection_hints_get_options (kim_selection_hints  in_selection_hints,
-                                             kim_options         *out_options);
+                                           kim_options         *out_options);
 
 /*!
  * \param in_selection_hints        a selection hints object to modify
@@ -350,7 +351,7 @@ kim_error kim_selection_hints_get_options (kim_selection_hints  in_selection_hin
  * \sa kim_selection_hints_get_allow_user_interaction
  */
 kim_error kim_selection_hints_set_allow_user_interaction (kim_selection_hints in_selection_hints,
-                                                            kim_boolean         in_allow_user_interaction);
+                                                          kim_boolean         in_allow_user_interaction);
 
 /*!
  * \param in_selection_hints         a selection hints object to modify
@@ -363,7 +364,7 @@ kim_error kim_selection_hints_set_allow_user_interaction (kim_selection_hints in
  * \sa kim_selection_hints_set_allow_user_interaction
  */
 kim_error kim_selection_hints_get_allow_user_interaction (kim_selection_hints  in_selection_hints,
-                                                            kim_boolean         *out_allow_user_interaction);
+                                                          kim_boolean         *out_allow_user_interaction);
 
 /*!
  * \param in_selection_hints    a selection hints object to modify
@@ -375,7 +376,7 @@ kim_error kim_selection_hints_get_allow_user_interaction (kim_selection_hints  i
  * \sa kim_selection_hints_get_remember_identity
  */
 kim_error kim_selection_hints_set_remember_identity (kim_selection_hints in_selection_hints,
-                                                       kim_boolean         in_remember_identity);
+                                                     kim_boolean         in_remember_identity);
 
 /*!
  * \param in_selection_hints     a selection hints object to modify
@@ -387,7 +388,7 @@ kim_error kim_selection_hints_set_remember_identity (kim_selection_hints in_sele
  * \sa kim_selection_hints_set_remember_identity
  */
 kim_error kim_selection_hints_get_remember_identity (kim_selection_hints  in_selection_hints,
-                                                       kim_boolean         *out_remember_identity);
+                                                     kim_boolean         *out_remember_identity);
 
 /*!
  * \param in_selection_hints the selection hints to add to the cache.
@@ -401,7 +402,7 @@ kim_error kim_selection_hints_get_remember_identity (kim_selection_hints  in_sel
  */
 
 kim_error kim_selection_hints_get_identity (kim_selection_hints in_selection_hints,
-                                              kim_identity        *out_identity);
+                                            kim_identity        *out_identity);
 
 /*!
  * \param in_selection_hints the selection hints to add to the cache.
@@ -412,7 +413,7 @@ kim_error kim_selection_hints_get_identity (kim_selection_hints in_selection_hin
  */
 
 kim_error kim_selection_hints_remember_identity (kim_selection_hints in_selection_hints,
-                                                   kim_identity        in_identity);
+                                                 kim_identity        in_identity);
 
 /*!
  * \param in_selection_hints the selection hints to remove from the cache.

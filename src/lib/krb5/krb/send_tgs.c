@@ -29,6 +29,7 @@
  */
 
 #include "k5-int.h"
+#include "int-proto.h"
 
 /*
   Constructs a TGS request
@@ -384,11 +385,12 @@ krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,
 
     rep->message_type = KRB5_ERROR;
 
-    retval = krb5int_make_tgs_request(context, kdcoptions, timestruct, ktypes,
-                                      sname, addrs, authorization_data,
-                                      padata, second_ticket, in_cred,
-                                      pacb_fct, pacb_data, &scratch, &now,
-                                      subkey);
+    retval = krb5int_make_tgs_request_ext(context, kdcoptions, timestruct,
+                                          ktypes, sname, addrs,
+                                          authorization_data, padata,
+                                          second_ticket, in_cred,
+                                          pacb_fct, pacb_data, &scratch, &now,
+                                          subkey);
     if (retval != 0)
         return retval;
 

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * $Header$
  *
@@ -57,7 +58,7 @@ extern "C" {
 #endif
 
 #if defined(_WIN32)
-#define CCACHE_API 	__declspec(dllexport)
+#define CCACHE_API      __declspec(dllexport)
 
 #if _INTEGRAL_MAX_BITS >= 64 && _MSC_VER >= 1500 && !defined(_WIN64) && !defined(_USE_32BIT_TIME_T)
 #if defined(_TIME_T_DEFINED) || defined(_INC_IO) || defined(_INC_TIME) || defined(_INC_WCHAR)
@@ -268,7 +269,7 @@ enum {
     ccErrInvalidCCache,  /*!< CCache is invalid (e.g., it was released or destroyed). */
 
     /* 206 */
-    ccErrInvalidString,	 /*!< String is invalid (e.g., it was released). */
+    ccErrInvalidString,  /*!< String is invalid (e.g., it was released). */
     ccErrInvalidCredentials,  /*!< Credentials are invalid (e.g., they were released), or they have a bad version. */
     ccErrInvalidCCacheIterator,  /*!< CCache iterator is invalid (e.g., it was released). */
     ccErrInvalidCredentialsIterator,  /*!< Credentials iterator is invalid (e.g., it was released). */
@@ -282,7 +283,7 @@ enum {
     ccErrContextUnlocked,  /*!< Context is not locked by the caller. */
 
     /* 216 */
-    ccErrCCacheLocked,	 /*!< CCache is already locked. */
+    ccErrCCacheLocked,   /*!< CCache is already locked. */
     ccErrCCacheUnlocked,  /*!< CCache is not locked by the caller. */
     ccErrBadLockType,  /*!< Bad lock type. */
     ccErrNeverDefault,  /*!< CCache was never default. */
@@ -359,7 +360,7 @@ enum cc_lock_modes {
 enum {
     /* Make sure all of these are multiples of four (for alignment sanity) */
     cc_v4_name_size     = 40,
-    cc_v4_instance_size	= 40,
+    cc_v4_instance_size = 40,
     cc_v4_realm_size    = 40,
     cc_v4_ticket_size   = 1254,
     cc_v4_key_size      = 8
@@ -552,11 +553,11 @@ typedef struct cc_credentials_v4_t cc_credentials_v4_t;
  */
 struct cc_data {
     /*! The type of the data as defined by the krb5_data structure. */
-    cc_uint32			type;
+    cc_uint32                   type;
     /*! The length of \a data. */
-    cc_uint32			length;
+    cc_uint32                   length;
     /*! The data buffer. */
-    void*			data;
+    void*                       data;
 };
 typedef struct cc_data cc_data;
 
@@ -599,14 +600,14 @@ typedef struct cc_credentials_v5_t cc_credentials_v5_t;
 
 struct cc_credentials_union {
     /*! The credentials version of this credentials object. */
-    cc_uint32			version;
+    cc_uint32                   version;
     /*! The credentials. */
     union {
-	/*! If \a version is #cc_credentials_v4, a pointer to a cc_credentials_v4_t. */
-        cc_credentials_v4_t*	credentials_v4;
-	/*! If \a version is #cc_credentials_v5, a pointer to a cc_credentials_v5_t. */
-        cc_credentials_v5_t*	credentials_v5;
-    }				credentials;
+        /*! If \a version is #cc_credentials_v4, a pointer to a cc_credentials_v4_t. */
+        cc_credentials_v4_t*    credentials_v4;
+        /*! If \a version is #cc_credentials_v5, a pointer to a cc_credentials_v5_t. */
+        cc_credentials_v5_t*    credentials_v5;
+    }                           credentials;
 };
 typedef struct cc_credentials_union cc_credentials_union;
 
@@ -756,224 +757,224 @@ struct cc_context_f {
                              const char   *in_name,
                              cc_ccache_t  *out_ccache);
 
-     /*!
-      * \param in_context the context object for the cache collection.
-      * \param out_ccache on exit, a ccache object for the default ccache
-      * \return On success, #ccNoError.  If no default ccache exists,
-      * #ccErrCCacheNotFound. On failure, an error code representing the failure.
-      * \brief \b cc_context_open_default_ccache(): Open the default ccache.
-      *
-      * Opens the default ccache. It returns a reference to the ccache in *ccache.
-      *
-      * This function performs the same function as calling
-      * cc_context_get_default_ccache_name followed by cc_context_open_ccache,
-      * but it performs it atomically.
-      */
+    /*!
+     * \param in_context the context object for the cache collection.
+     * \param out_ccache on exit, a ccache object for the default ccache
+     * \return On success, #ccNoError.  If no default ccache exists,
+     * #ccErrCCacheNotFound. On failure, an error code representing the failure.
+     * \brief \b cc_context_open_default_ccache(): Open the default ccache.
+     *
+     * Opens the default ccache. It returns a reference to the ccache in *ccache.
+     *
+     * This function performs the same function as calling
+     * cc_context_get_default_ccache_name followed by cc_context_open_ccache,
+     * but it performs it atomically.
+     */
     cc_int32 (*open_default_ccache) (cc_context_t  in_context,
                                      cc_ccache_t  *out_ccache);
 
-     /*!
-      * \param in_context the context object for the cache collection.
-      * \param in_name the name of the new ccache to create
-      * \param in_cred_vers the version of the credentials the new ccache will hold
-      * \param in_principal the client principal of the credentials the new ccache will hold
-      * \param out_ccache on exit, a ccache object for the newly created ccache
-      * \return On success, #ccNoError.  On failure, an error code representing the failure.
-      * \brief \b cc_context_create_ccache(): Create a new ccache.
-      *
-      * Create a new credentials cache. The ccache is uniquely identified by its name.
-      * The principal given is also associated with the ccache and the credentials
-      * version specified. A NULL name is not allowed (and ccErrBadName is returned
-      * if one is passed in). Only cc_credentials_v4 and cc_credentials_v5 are valid
-      * input values for cred_vers. If you want to create a new ccache that will hold
-      * both versions of credentials, call cc_context_create_ccache() with one version,
-      * and then cc_ccache_set_principal() with the other version.
-      *
-      * If you want to create a new ccache (with a unique name), you should use
-      * cc_context_create_new_ccache() instead. If you want to create or reinitialize
-      * the default cache, you should use cc_context_create_default_ccache().
-      *
-      * If name is non-NULL and there is already a ccache named name:
-      *
-      * \li the credentials in the ccache whose version is cred_vers are removed
-      * \li the principal (of the existing ccache) associated with cred_vers is set to principal
-      * \li a handle for the existing ccache is returned and all existing handles for the ccache remain valid
-      *
-      * If no ccache named name already exists:
-      *
-      * \li a new empty ccache is created
-      * \li the principal of the new ccache associated with cred_vers is set to principal
-      * \li a handle for the new ccache is returned
-      *
-      * For a new ccache, the name should be any unique string. The name is not
-      * intended to be presented to users.
-      *
-      * If the created ccache is the first ccache in the collection, it is made
-      * the default ccache. Note that normally it is undesirable to create the first
-      * ccache with a name different from the default ccache name (as returned by
-      * cc_context_get_default_ccache_name()); see the description of
-      * cc_context_get_default_ccache_name() for details.
-      *
-      * The principal should be a C string containing an unparsed Kerberos principal
-      * in the format of the appropriate Kerberos version, i.e. \verbatim foo.bar/@BAZ
-      * \endverbatim for Kerberos v4 and \verbatim foo/bar/@BAZ \endverbatim
-      * for Kerberos v5.
-      */
-     cc_int32 (*create_ccache) (cc_context_t  in_context,
+    /*!
+     * \param in_context the context object for the cache collection.
+     * \param in_name the name of the new ccache to create
+     * \param in_cred_vers the version of the credentials the new ccache will hold
+     * \param in_principal the client principal of the credentials the new ccache will hold
+     * \param out_ccache on exit, a ccache object for the newly created ccache
+     * \return On success, #ccNoError.  On failure, an error code representing the failure.
+     * \brief \b cc_context_create_ccache(): Create a new ccache.
+     *
+     * Create a new credentials cache. The ccache is uniquely identified by its name.
+     * The principal given is also associated with the ccache and the credentials
+     * version specified. A NULL name is not allowed (and ccErrBadName is returned
+     * if one is passed in). Only cc_credentials_v4 and cc_credentials_v5 are valid
+     * input values for cred_vers. If you want to create a new ccache that will hold
+     * both versions of credentials, call cc_context_create_ccache() with one version,
+     * and then cc_ccache_set_principal() with the other version.
+     *
+     * If you want to create a new ccache (with a unique name), you should use
+     * cc_context_create_new_ccache() instead. If you want to create or reinitialize
+     * the default cache, you should use cc_context_create_default_ccache().
+     *
+     * If name is non-NULL and there is already a ccache named name:
+     *
+     * \li the credentials in the ccache whose version is cred_vers are removed
+     * \li the principal (of the existing ccache) associated with cred_vers is set to principal
+     * \li a handle for the existing ccache is returned and all existing handles for the ccache remain valid
+     *
+     * If no ccache named name already exists:
+     *
+     * \li a new empty ccache is created
+     * \li the principal of the new ccache associated with cred_vers is set to principal
+     * \li a handle for the new ccache is returned
+     *
+     * For a new ccache, the name should be any unique string. The name is not
+     * intended to be presented to users.
+     *
+     * If the created ccache is the first ccache in the collection, it is made
+     * the default ccache. Note that normally it is undesirable to create the first
+     * ccache with a name different from the default ccache name (as returned by
+     * cc_context_get_default_ccache_name()); see the description of
+     * cc_context_get_default_ccache_name() for details.
+     *
+     * The principal should be a C string containing an unparsed Kerberos principal
+     * in the format of the appropriate Kerberos version, i.e. \verbatim foo.bar/@BAZ
+     * \endverbatim for Kerberos v4 and \verbatim foo/bar/@BAZ \endverbatim
+     * for Kerberos v5.
+     */
+    cc_int32 (*create_ccache) (cc_context_t  in_context,
                                const char   *in_name,
                                cc_uint32     in_cred_vers,
                                const char   *in_principal,
                                cc_ccache_t  *out_ccache);
 
-     /*!
-      * \param in_context the context object for the cache collection.
-      * \param in_cred_vers the version of the credentials the new default ccache will hold
-      * \param in_principal the client principal of the credentials the new default ccache will hold
-      * \param out_ccache on exit, a ccache object for the newly created default ccache
-      * \return On success, #ccNoError.  On failure, an error code representing the failure.
-      * \brief \b cc_context_create_default_ccache(): Create a new default ccache.
-      *
-      * Create the default credentials cache. The behavior of this function is
-      * similar to that of cc_create_ccache(). If there is a default ccache
-      * (which is always the case except when there are no ccaches at all in
-      * the collection), it is initialized with the specified credentials version
-      * and principal, as per cc_create_ccache(); otherwise, a new ccache is
-      * created, and its name is the name returned by
-      * cc_context_get_default_ccache_name().
-      */
-     cc_int32 (*create_default_ccache) (cc_context_t  in_context,
+    /*!
+     * \param in_context the context object for the cache collection.
+     * \param in_cred_vers the version of the credentials the new default ccache will hold
+     * \param in_principal the client principal of the credentials the new default ccache will hold
+     * \param out_ccache on exit, a ccache object for the newly created default ccache
+     * \return On success, #ccNoError.  On failure, an error code representing the failure.
+     * \brief \b cc_context_create_default_ccache(): Create a new default ccache.
+     *
+     * Create the default credentials cache. The behavior of this function is
+     * similar to that of cc_create_ccache(). If there is a default ccache
+     * (which is always the case except when there are no ccaches at all in
+     * the collection), it is initialized with the specified credentials version
+     * and principal, as per cc_create_ccache(); otherwise, a new ccache is
+     * created, and its name is the name returned by
+     * cc_context_get_default_ccache_name().
+     */
+    cc_int32 (*create_default_ccache) (cc_context_t  in_context,
                                        cc_uint32     in_cred_vers,
                                        const char   *in_principal,
                                        cc_ccache_t  *out_ccache);
 
-     /*!
-      * \param in_context the context object for the cache collection.
-      * \param in_cred_vers the version of the credentials the new ccache will hold
-      * \param in_principal the client principal of the credentials the new ccache will hold
-      * \param out_ccache on exit, a ccache object for the newly created ccache
-      * \return On success, #ccNoError.  On failure, an error code representing the failure.
-      * \brief \b cc_context_create_new_ccache(): Create a new uniquely named ccache.
-      *
-      * Create a new unique credentials cache. The behavior of this function
-      * is similar to that of cc_create_ccache(). If there are no ccaches, and
-      * therefore no default ccache, the new ccache is created with the default
-      * ccache name as would be returned by get_default_ccache_name(). If there
-      * are some ccaches, and therefore there is a default ccache, the new ccache
-      * is created with a new unique name. Clearly, this function never reinitializes
-      * a ccache, since it always uses a unique name.
-      */
-     cc_int32 (*create_new_ccache) (cc_context_t in_context,
+    /*!
+     * \param in_context the context object for the cache collection.
+     * \param in_cred_vers the version of the credentials the new ccache will hold
+     * \param in_principal the client principal of the credentials the new ccache will hold
+     * \param out_ccache on exit, a ccache object for the newly created ccache
+     * \return On success, #ccNoError.  On failure, an error code representing the failure.
+     * \brief \b cc_context_create_new_ccache(): Create a new uniquely named ccache.
+     *
+     * Create a new unique credentials cache. The behavior of this function
+     * is similar to that of cc_create_ccache(). If there are no ccaches, and
+     * therefore no default ccache, the new ccache is created with the default
+     * ccache name as would be returned by get_default_ccache_name(). If there
+     * are some ccaches, and therefore there is a default ccache, the new ccache
+     * is created with a new unique name. Clearly, this function never reinitializes
+     * a ccache, since it always uses a unique name.
+     */
+    cc_int32 (*create_new_ccache) (cc_context_t in_context,
                                    cc_uint32    in_cred_vers,
                                    const char  *in_principal,
                                    cc_ccache_t *out_ccache);
 
-     /*!
-      * \param in_context the context object for the cache collection.
-      * \param out_iterator on exit, a ccache iterator object for the ccache collection.
-      * \return On success, #ccNoError.  On failure, an error code representing the failure.
-      * \brief \b cc_context_new_ccache_iterator(): Get an iterator for the cache collection.
-      *
-      * Used to allocate memory and initialize iterator. Successive calls to iterator's
-      * next() function will return ccaches in the collection.
-      *
-      * If changes are made to the collection while an iterator is being used
-      * on it, the iterator must return at least the intersection, and at most
-      * the union, of the set of ccaches that were present when the iteration
-      * began and the set of ccaches that are present when it ends.
-      */
-     cc_int32 (*new_ccache_iterator) (cc_context_t          in_context,
+    /*!
+     * \param in_context the context object for the cache collection.
+     * \param out_iterator on exit, a ccache iterator object for the ccache collection.
+     * \return On success, #ccNoError.  On failure, an error code representing the failure.
+     * \brief \b cc_context_new_ccache_iterator(): Get an iterator for the cache collection.
+     *
+     * Used to allocate memory and initialize iterator. Successive calls to iterator's
+     * next() function will return ccaches in the collection.
+     *
+     * If changes are made to the collection while an iterator is being used
+     * on it, the iterator must return at least the intersection, and at most
+     * the union, of the set of ccaches that were present when the iteration
+     * began and the set of ccaches that are present when it ends.
+     */
+    cc_int32 (*new_ccache_iterator) (cc_context_t          in_context,
                                      cc_ccache_iterator_t *out_iterator);
 
-     /*!
-      * \param in_context the context object for the cache collection.
-      * \param in_lock_type the type of lock to obtain.
-      * \param in_block whether or not the function should block if the lock cannot be obtained immediately.
-      * \return On success, #ccNoError.  On failure, an error code representing the failure.
-      * \brief \b cc_context_lock(): Lock the cache collection.
-      *
-      * Attempts to acquire an advisory lock for the ccache collection. Allowed values
-      * for lock_type are:
-      *
-      * \li cc_lock_read: a read lock.
-      * \li cc_lock_write: a write lock
-      * \li cc_lock_upgrade: upgrade an already-obtained read lock to a write lock
-      * \li cc_lock_downgrade: downgrade an already-obtained write lock to a read lock
-      *
-      * If block is cc_lock_block, lock() will not return until the lock is acquired.
-      * If block is cc_lock_noblock, lock() will return immediately, either acquiring
-      * the lock and returning ccNoError, or failing to acquire the lock and returning
-      * an error explaining why.
-      *
-      * Locks apply only to the list of ccaches, not the contents of those ccaches.  To
-      * prevent callers participating in the advisory locking from changing the credentials
-      * in a cache you must also lock that ccache with cc_ccache_lock().  This is so
-      * that you can get the list of ccaches without preventing applications from
-      * simultaneously obtaining service tickets.
-      *
-      * To avoid having to deal with differences between thread semantics on different
-      * platforms, locks are granted per context, rather than per thread or per process.
-      * That means that different threads of execution have to acquire separate contexts
-      * in order to be able to synchronize with each other.
-      *
-      * The lock should be unlocked by using cc_context_unlock().
-      *
-      * \note All locks are advisory.  For example, callers which do not call
-      * cc_context_lock() and cc_context_unlock() will not be prevented from writing
-      * to the cache collection when you have a read lock.  This is because the CCAPI
-      * locking was added after the first release and thus adding mandatory locks would
-      * have changed the user experience and performance of existing applications.
-      */
-     cc_int32 (*lock) (cc_context_t in_context,
+    /*!
+     * \param in_context the context object for the cache collection.
+     * \param in_lock_type the type of lock to obtain.
+     * \param in_block whether or not the function should block if the lock cannot be obtained immediately.
+     * \return On success, #ccNoError.  On failure, an error code representing the failure.
+     * \brief \b cc_context_lock(): Lock the cache collection.
+     *
+     * Attempts to acquire an advisory lock for the ccache collection. Allowed values
+     * for lock_type are:
+     *
+     * \li cc_lock_read: a read lock.
+     * \li cc_lock_write: a write lock
+     * \li cc_lock_upgrade: upgrade an already-obtained read lock to a write lock
+     * \li cc_lock_downgrade: downgrade an already-obtained write lock to a read lock
+     *
+     * If block is cc_lock_block, lock() will not return until the lock is acquired.
+     * If block is cc_lock_noblock, lock() will return immediately, either acquiring
+     * the lock and returning ccNoError, or failing to acquire the lock and returning
+     * an error explaining why.
+     *
+     * Locks apply only to the list of ccaches, not the contents of those ccaches.  To
+     * prevent callers participating in the advisory locking from changing the credentials
+     * in a cache you must also lock that ccache with cc_ccache_lock().  This is so
+     * that you can get the list of ccaches without preventing applications from
+     * simultaneously obtaining service tickets.
+     *
+     * To avoid having to deal with differences between thread semantics on different
+     * platforms, locks are granted per context, rather than per thread or per process.
+     * That means that different threads of execution have to acquire separate contexts
+     * in order to be able to synchronize with each other.
+     *
+     * The lock should be unlocked by using cc_context_unlock().
+     *
+     * \note All locks are advisory.  For example, callers which do not call
+     * cc_context_lock() and cc_context_unlock() will not be prevented from writing
+     * to the cache collection when you have a read lock.  This is because the CCAPI
+     * locking was added after the first release and thus adding mandatory locks would
+     * have changed the user experience and performance of existing applications.
+     */
+    cc_int32 (*lock) (cc_context_t in_context,
                       cc_uint32    in_lock_type,
                       cc_uint32    in_block);
 
-     /*!
-      * \param in_context the context object for the cache collection.
-      * \return On success, #ccNoError.  On failure, an error code representing the failure.
-      * \brief \b cc_context_unlock(): Unlock the cache collection.
-      */
-     cc_int32 (*unlock) (cc_context_t in_cc_context);
+    /*!
+     * \param in_context the context object for the cache collection.
+     * \return On success, #ccNoError.  On failure, an error code representing the failure.
+     * \brief \b cc_context_unlock(): Unlock the cache collection.
+     */
+    cc_int32 (*unlock) (cc_context_t in_cc_context);
 
-     /*!
-      * \param in_context a context object.
-      * \param in_compare_to_context a context object to compare with \a in_context.
-      * \param out_equal on exit, whether or not the two contexts refer to the same cache collection.
-      * \return On success, #ccNoError.  On failure, an error code representing the failure.
-      * \brief \b cc_context_compare(): Compare two context objects.
-      */
-     cc_int32 (*compare) (cc_context_t  in_cc_context,
-			  cc_context_t  in_compare_to_context,
-			  cc_uint32    *out_equal);
+    /*!
+     * \param in_context a context object.
+     * \param in_compare_to_context a context object to compare with \a in_context.
+     * \param out_equal on exit, whether or not the two contexts refer to the same cache collection.
+     * \return On success, #ccNoError.  On failure, an error code representing the failure.
+     * \brief \b cc_context_compare(): Compare two context objects.
+     */
+    cc_int32 (*compare) (cc_context_t  in_cc_context,
+                         cc_context_t  in_compare_to_context,
+                         cc_uint32    *out_equal);
 
-     /*!
-      * \param in_context a context object.
-      * \return On success, #ccNoError.  On failure, an error code representing the failure.
-      * \brief \b cc_context_wait_for_change(): Wait for the next change in the cache collection.
-      *
-      * This function blocks until the next change is made to the cache collection
-      * ccache collection. By repeatedly calling cc_context_wait_for_change() from
-      * a worker thread the caller can effectively receive callbacks whenever the
-      * cache collection changes.  This is considerably more efficient than polling
-      * with cc_context_get_change_time().
-      *
-      * cc_context_wait_for_change() will return whenever:
-      *
-      * \li a ccache is created
-      * \li a ccache is destroyed
-      * \li a credential is stored
-      * \li a credential is removed
-      * \li a ccache principal is changed
-      * \li the default ccache is changed
-      *
-      * \note In order to make sure that the caller doesn't miss any changes,
-      * cc_context_wait_for_change() always returns immediately after the first time it
-      * is called on a new context object. Callers must use the same context object
-      * for successive calls to cc_context_wait_for_change() rather than creating a new
-      * context for every call.
-      *
-      * \sa get_change_time
-      */
-     cc_int32 (*wait_for_change) (cc_context_t in_cc_context);
+    /*!
+     * \param in_context a context object.
+     * \return On success, #ccNoError.  On failure, an error code representing the failure.
+     * \brief \b cc_context_wait_for_change(): Wait for the next change in the cache collection.
+     *
+     * This function blocks until the next change is made to the cache collection
+     * ccache collection. By repeatedly calling cc_context_wait_for_change() from
+     * a worker thread the caller can effectively receive callbacks whenever the
+     * cache collection changes.  This is considerably more efficient than polling
+     * with cc_context_get_change_time().
+     *
+     * cc_context_wait_for_change() will return whenever:
+     *
+     * \li a ccache is created
+     * \li a ccache is destroyed
+     * \li a credential is stored
+     * \li a credential is removed
+     * \li a ccache principal is changed
+     * \li the default ccache is changed
+     *
+     * \note In order to make sure that the caller doesn't miss any changes,
+     * cc_context_wait_for_change() always returns immediately after the first time it
+     * is called on a new context object. Callers must use the same context object
+     * for successive calls to cc_context_wait_for_change() rather than creating a new
+     * context for every call.
+     *
+     * \sa get_change_time
+     */
+    cc_int32 (*wait_for_change) (cc_context_t in_cc_context);
 };
 
 /*!
@@ -1462,136 +1463,136 @@ CCACHE_API cc_int32 cc_initialize (cc_context_t  *out_context,
  * @{ */
 
 /*! Helper macro for cc_context_f release() */
-#define		cc_context_release(context) \
-			((context) -> functions -> release (context))
+#define         cc_context_release(context)             \
+    ((context) -> functions -> release (context))
 /*! Helper macro for cc_context_f get_change_time() */
-#define		cc_context_get_change_time(context, change_time) \
-			((context) -> functions -> get_change_time (context, change_time))
+#define         cc_context_get_change_time(context, change_time)        \
+    ((context) -> functions -> get_change_time (context, change_time))
 /*! Helper macro for cc_context_f get_default_ccache_name() */
-#define		cc_context_get_default_ccache_name(context, name) \
-			((context) -> functions -> get_default_ccache_name (context, name))
+#define         cc_context_get_default_ccache_name(context, name)       \
+    ((context) -> functions -> get_default_ccache_name (context, name))
 /*! Helper macro for cc_context_f open_ccache() */
-#define		cc_context_open_ccache(context, name, ccache) \
-			((context) -> functions -> open_ccache (context, name, ccache))
+#define         cc_context_open_ccache(context, name, ccache)           \
+    ((context) -> functions -> open_ccache (context, name, ccache))
 /*! Helper macro for cc_context_f open_default_ccache() */
-#define		cc_context_open_default_ccache(context, ccache) \
-			((context) -> functions -> open_default_ccache (context, ccache))
+#define         cc_context_open_default_ccache(context, ccache)         \
+    ((context) -> functions -> open_default_ccache (context, ccache))
 /*! Helper macro for cc_context_f create_ccache() */
-#define		cc_context_create_ccache(context, name, version, principal, ccache) \
-			((context) -> functions -> create_ccache (context, name, version, principal, ccache))
+#define         cc_context_create_ccache(context, name, version, principal, ccache) \
+    ((context) -> functions -> create_ccache (context, name, version, principal, ccache))
 /*! Helper macro for cc_context_f create_default_ccache() */
-#define		cc_context_create_default_ccache(context, version, principal, ccache) \
-			((context) -> functions -> create_default_ccache (context, version, principal, ccache))
+#define         cc_context_create_default_ccache(context, version, principal, ccache) \
+    ((context) -> functions -> create_default_ccache (context, version, principal, ccache))
 /*! Helper macro for cc_context_f create_new_ccache() */
-#define		cc_context_create_new_ccache(context, version, principal, ccache) \
-			((context) -> functions -> create_new_ccache (context, version, principal, ccache))
+#define         cc_context_create_new_ccache(context, version, principal, ccache) \
+    ((context) -> functions -> create_new_ccache (context, version, principal, ccache))
 /*! Helper macro for cc_context_f new_ccache_iterator() */
-#define		cc_context_new_ccache_iterator(context, iterator) \
-			((context) -> functions -> new_ccache_iterator (context, iterator))
+#define         cc_context_new_ccache_iterator(context, iterator)       \
+    ((context) -> functions -> new_ccache_iterator (context, iterator))
 /*! Helper macro for cc_context_f lock() */
-#define		cc_context_lock(context, type, block) \
-			((context) -> functions -> lock (context, type, block))
+#define         cc_context_lock(context, type, block)           \
+    ((context) -> functions -> lock (context, type, block))
 /*! Helper macro for cc_context_f unlock() */
-#define		cc_context_unlock(context) \
-			((context) -> functions -> unlock (context))
+#define         cc_context_unlock(context)              \
+    ((context) -> functions -> unlock (context))
 /*! Helper macro for cc_context_f compare() */
-#define		cc_context_compare(context, compare_to, equal) \
-			((context) -> functions -> compare (context, compare_to, equal))
+#define         cc_context_compare(context, compare_to, equal)          \
+    ((context) -> functions -> compare (context, compare_to, equal))
 /*! Helper macro for cc_context_f wait_for_change() */
-#define		cc_context_wait_for_change(context) \
-			((context) -> functions -> wait_for_change (context))
+#define         cc_context_wait_for_change(context)             \
+    ((context) -> functions -> wait_for_change (context))
 
 /*! Helper macro for cc_ccache_f release() */
-#define		cc_ccache_release(ccache) \
-			((ccache) -> functions -> release (ccache))
+#define         cc_ccache_release(ccache)       \
+    ((ccache) -> functions -> release (ccache))
 /*! Helper macro for cc_ccache_f destroy() */
-#define		cc_ccache_destroy(ccache) \
-			((ccache) -> functions -> destroy (ccache))
+#define         cc_ccache_destroy(ccache)       \
+    ((ccache) -> functions -> destroy (ccache))
 /*! Helper macro for cc_ccache_f set_default() */
-#define		cc_ccache_set_default(ccache) \
-			((ccache) -> functions -> set_default (ccache))
+#define         cc_ccache_set_default(ccache)           \
+    ((ccache) -> functions -> set_default (ccache))
 /*! Helper macro for cc_ccache_f get_credentials_version() */
-#define		cc_ccache_get_credentials_version(ccache, version) \
-			((ccache) -> functions -> get_credentials_version (ccache, version))
+#define         cc_ccache_get_credentials_version(ccache, version)      \
+    ((ccache) -> functions -> get_credentials_version (ccache, version))
 /*! Helper macro for cc_ccache_f get_name() */
-#define		cc_ccache_get_name(ccache, name) \
-			((ccache) -> functions -> get_name (ccache, name))
+#define         cc_ccache_get_name(ccache, name)        \
+    ((ccache) -> functions -> get_name (ccache, name))
 /*! Helper macro for cc_ccache_f get_principal() */
-#define		cc_ccache_get_principal(ccache, version, principal) \
-			((ccache) -> functions -> get_principal (ccache, version, principal))
+#define         cc_ccache_get_principal(ccache, version, principal)     \
+    ((ccache) -> functions -> get_principal (ccache, version, principal))
 /*! Helper macro for cc_ccache_f set_principal() */
-#define		cc_ccache_set_principal(ccache, version, principal) \
-			((ccache) -> functions -> set_principal (ccache, version, principal))
+#define         cc_ccache_set_principal(ccache, version, principal)     \
+    ((ccache) -> functions -> set_principal (ccache, version, principal))
 /*! Helper macro for cc_ccache_f store_credentials() */
-#define		cc_ccache_store_credentials(ccache, credentials) \
-			((ccache) -> functions -> store_credentials (ccache, credentials))
+#define         cc_ccache_store_credentials(ccache, credentials)        \
+    ((ccache) -> functions -> store_credentials (ccache, credentials))
 /*! Helper macro for cc_ccache_f remove_credentials() */
-#define		cc_ccache_remove_credentials(ccache, credentials) \
-			((ccache) -> functions -> remove_credentials (ccache, credentials))
+#define         cc_ccache_remove_credentials(ccache, credentials)       \
+    ((ccache) -> functions -> remove_credentials (ccache, credentials))
 /*! Helper macro for cc_ccache_f new_credentials_iterator() */
-#define		cc_ccache_new_credentials_iterator(ccache, iterator) \
-			((ccache) -> functions -> new_credentials_iterator (ccache, iterator))
+#define         cc_ccache_new_credentials_iterator(ccache, iterator)    \
+    ((ccache) -> functions -> new_credentials_iterator (ccache, iterator))
 /*! Helper macro for cc_ccache_f lock() */
-#define		cc_ccache_lock(ccache, type, block) \
-			((ccache) -> functions -> lock (ccache, type, block))
+#define         cc_ccache_lock(ccache, type, block)             \
+    ((ccache) -> functions -> lock (ccache, type, block))
 /*! Helper macro for cc_ccache_f unlock() */
-#define		cc_ccache_unlock(ccache) \
-			((ccache) -> functions -> unlock (ccache))
+#define         cc_ccache_unlock(ccache)        \
+    ((ccache) -> functions -> unlock (ccache))
 /*! Helper macro for cc_ccache_f get_last_default_time() */
-#define		cc_ccache_get_last_default_time(ccache, last_default_time) \
-			((ccache) -> functions -> get_last_default_time (ccache, last_default_time))
+#define         cc_ccache_get_last_default_time(ccache, last_default_time) \
+    ((ccache) -> functions -> get_last_default_time (ccache, last_default_time))
 /*! Helper macro for cc_ccache_f get_change_time() */
-#define		cc_ccache_get_change_time(ccache, change_time) \
-			((ccache) -> functions -> get_change_time (ccache, change_time))
+#define         cc_ccache_get_change_time(ccache, change_time)          \
+    ((ccache) -> functions -> get_change_time (ccache, change_time))
 /*! Helper macro for cc_ccache_f move() */
-#define		cc_ccache_move(source, destination) \
-			((source) -> functions -> move (source, destination))
+#define         cc_ccache_move(source, destination)             \
+    ((source) -> functions -> move (source, destination))
 /*! Helper macro for cc_ccache_f compare() */
-#define		cc_ccache_compare(ccache, compare_to, equal) \
-			((ccache) -> functions -> compare (ccache, compare_to, equal))
+#define         cc_ccache_compare(ccache, compare_to, equal)            \
+    ((ccache) -> functions -> compare (ccache, compare_to, equal))
 /*! Helper macro for cc_ccache_f get_kdc_time_offset() */
-#define		cc_ccache_get_kdc_time_offset(ccache, version, time_offset) \
-                        ((ccache) -> functions -> get_kdc_time_offset (ccache, version, time_offset))
+#define         cc_ccache_get_kdc_time_offset(ccache, version, time_offset) \
+    ((ccache) -> functions -> get_kdc_time_offset (ccache, version, time_offset))
 /*! Helper macro for cc_ccache_f set_kdc_time_offset() */
-#define		cc_ccache_set_kdc_time_offset(ccache, version, time_offset) \
-                        ((ccache) -> functions -> set_kdc_time_offset (ccache, version, time_offset))
+#define         cc_ccache_set_kdc_time_offset(ccache, version, time_offset) \
+    ((ccache) -> functions -> set_kdc_time_offset (ccache, version, time_offset))
 /*! Helper macro for cc_ccache_f clear_kdc_time_offset() */
-#define		cc_ccache_clear_kdc_time_offset(ccache, version) \
-                        ((ccache) -> functions -> clear_kdc_time_offset (ccache, version))
+#define         cc_ccache_clear_kdc_time_offset(ccache, version)        \
+    ((ccache) -> functions -> clear_kdc_time_offset (ccache, version))
 /*! Helper macro for cc_ccache_f wait_for_change() */
-#define		cc_ccache_wait_for_change(ccache) \
-                        ((ccache) -> functions -> wait_for_change (ccache))
+#define         cc_ccache_wait_for_change(ccache)       \
+    ((ccache) -> functions -> wait_for_change (ccache))
 
 /*! Helper macro for cc_string_f release() */
-#define		cc_string_release(string) \
-			((string) -> functions -> release (string))
+#define         cc_string_release(string)       \
+    ((string) -> functions -> release (string))
 
 /*! Helper macro for cc_credentials_f release() */
-#define		cc_credentials_release(credentials) \
-			((credentials) -> functions -> release (credentials))
+#define         cc_credentials_release(credentials)             \
+    ((credentials) -> functions -> release (credentials))
 /*! Helper macro for cc_credentials_f compare() */
-#define		cc_credentials_compare(credentials, compare_to, equal) \
-			((credentials) -> functions -> compare (credentials, compare_to, equal))
+#define         cc_credentials_compare(credentials, compare_to, equal)  \
+    ((credentials) -> functions -> compare (credentials, compare_to, equal))
 
 /*! Helper macro for cc_ccache_iterator_f release() */
-#define		cc_ccache_iterator_release(iterator) \
-			((iterator) -> functions -> release (iterator))
+#define         cc_ccache_iterator_release(iterator)    \
+    ((iterator) -> functions -> release (iterator))
 /*! Helper macro for cc_ccache_iterator_f next() */
-#define		cc_ccache_iterator_next(iterator, ccache) \
-			((iterator) -> functions -> next (iterator, ccache))
+#define         cc_ccache_iterator_next(iterator, ccache)       \
+    ((iterator) -> functions -> next (iterator, ccache))
 /*! Helper macro for cc_ccache_iterator_f clone() */
-#define		cc_ccache_iterator_clone(iterator, new_iterator) \
-			((iterator) -> functions -> clone (iterator, new_iterator))
+#define         cc_ccache_iterator_clone(iterator, new_iterator)        \
+    ((iterator) -> functions -> clone (iterator, new_iterator))
 
 /*! Helper macro for cc_credentials_iterator_f release() */
-#define		cc_credentials_iterator_release(iterator) \
-			((iterator) -> functions -> release (iterator))
+#define         cc_credentials_iterator_release(iterator)       \
+    ((iterator) -> functions -> release (iterator))
 /*! Helper macro for cc_credentials_iterator_f next() */
-#define		cc_credentials_iterator_next(iterator, credentials) \
-			((iterator) -> functions -> next (iterator, credentials))
+#define         cc_credentials_iterator_next(iterator, credentials)     \
+    ((iterator) -> functions -> next (iterator, credentials))
 /*! Helper macro for cc_credentials_iterator_f clone() */
-#define		cc_credentials_iterator_clone(iterator, new_iterator) \
-			((iterator) -> functions -> clone (iterator, new_iterator))
+#define         cc_credentials_iterator_clone(iterator, new_iterator)   \
+    ((iterator) -> functions -> clone (iterator, new_iterator))
 /*!@}*/
 
 #if TARGET_OS_MAC

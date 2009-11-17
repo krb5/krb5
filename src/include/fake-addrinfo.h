@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 2001,2002,2003,2004 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
@@ -77,25 +78,25 @@
 /* To do, maybe:
 
    + For AIX 4.3.3, using the RFC 2133 definition: Implement
-     AI_NUMERICHOST.  It's not defined in the header file.
+   AI_NUMERICHOST.  It's not defined in the header file.
 
-     For certain (old?) versions of GNU libc, AI_NUMERICHOST is
-     defined but not implemented.
+   For certain (old?) versions of GNU libc, AI_NUMERICHOST is
+   defined but not implemented.
 
    + Use gethostbyname2, inet_aton and other IPv6 or thread-safe
-     functions if available.  But, see
-     http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=135182 for one
-     gethostbyname2 problem on Linux.  And besides, if a platform is
-     supporting IPv6 at all, they really should be doing getaddrinfo
-     by now.
+   functions if available.  But, see
+   http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=135182 for one
+   gethostbyname2 problem on Linux.  And besides, if a platform is
+   supporting IPv6 at all, they really should be doing getaddrinfo
+   by now.
 
    + inet_ntop, inet_pton
 
    + Conditionally export/import the function definitions, so a
-     library can have a single copy instead of multiple.
+   library can have a single copy instead of multiple.
 
    + Upgrade host requirements to include working implementations of
-     these functions, and throw all this away.  Pleeease?  :-)  */
+   these functions, and throw all this away.  Pleeease?  :-)  */
 
 #ifndef FAI_DEFINED
 #define FAI_DEFINED
@@ -105,37 +106,37 @@
 #if !defined (HAVE_GETADDRINFO)
 
 #undef  addrinfo
-#define addrinfo	my_fake_addrinfo
+#define addrinfo        my_fake_addrinfo
 
 struct addrinfo {
-    int ai_family;		/* PF_foo */
-    int ai_socktype;		/* SOCK_foo */
-    int ai_protocol;		/* 0, IPPROTO_foo */
-    int ai_flags;		/* AI_PASSIVE etc */
-    size_t ai_addrlen;		/* real length of socket address */
-    char *ai_canonname;		/* canonical name of host */
-    struct sockaddr *ai_addr;	/* pointer to variable-size address */
-    struct addrinfo *ai_next;	/* next in linked list */
+    int ai_family;              /* PF_foo */
+    int ai_socktype;            /* SOCK_foo */
+    int ai_protocol;            /* 0, IPPROTO_foo */
+    int ai_flags;               /* AI_PASSIVE etc */
+    size_t ai_addrlen;          /* real length of socket address */
+    char *ai_canonname;         /* canonical name of host */
+    struct sockaddr *ai_addr;   /* pointer to variable-size address */
+    struct addrinfo *ai_next;   /* next in linked list */
 };
 
-#undef	AI_PASSIVE
-#define	AI_PASSIVE	0x01
-#undef	AI_CANONNAME
-#define	AI_CANONNAME	0x02
-#undef	AI_NUMERICHOST
-#define	AI_NUMERICHOST	0x04
+#undef  AI_PASSIVE
+#define AI_PASSIVE      0x01
+#undef  AI_CANONNAME
+#define AI_CANONNAME    0x02
+#undef  AI_NUMERICHOST
+#define AI_NUMERICHOST  0x04
 /* RFC 2553 says these are part of the interface for getipnodebyname,
    not for getaddrinfo.  RFC 3493 says they're part of the interface
    for getaddrinfo, and getipnodeby* are deprecated.  Our fake
    getaddrinfo implementation here does IPv4 only anyways.  */
-#undef	AI_V4MAPPED
-#define	AI_V4MAPPED	0
-#undef	AI_ADDRCONFIG
-#define	AI_ADDRCONFIG	0
-#undef	AI_ALL
-#define	AI_ALL		0
-#undef	AI_DEFAULT
-#define	AI_DEFAULT	(AI_V4MAPPED|AI_ADDRCONFIG)
+#undef  AI_V4MAPPED
+#define AI_V4MAPPED     0
+#undef  AI_ADDRCONFIG
+#define AI_ADDRCONFIG   0
+#undef  AI_ALL
+#define AI_ALL          0
+#undef  AI_DEFAULT
+#define AI_DEFAULT      (AI_V4MAPPED|AI_ADDRCONFIG)
 
 #ifndef NI_MAXHOST
 #define NI_MAXHOST 1025
@@ -144,40 +145,40 @@ struct addrinfo {
 #define NI_MAXSERV 32
 #endif
 
-#undef	NI_NUMERICHOST
-#define NI_NUMERICHOST	0x01
-#undef	NI_NUMERICSERV
-#define NI_NUMERICSERV	0x02
-#undef	NI_NAMEREQD
-#define NI_NAMEREQD	0x04
-#undef	NI_DGRAM
-#define NI_DGRAM	0x08
-#undef	NI_NOFQDN
-#define NI_NOFQDN	0x10
+#undef  NI_NUMERICHOST
+#define NI_NUMERICHOST  0x01
+#undef  NI_NUMERICSERV
+#define NI_NUMERICSERV  0x02
+#undef  NI_NAMEREQD
+#define NI_NAMEREQD     0x04
+#undef  NI_DGRAM
+#define NI_DGRAM        0x08
+#undef  NI_NOFQDN
+#define NI_NOFQDN       0x10
 
 
 #undef  EAI_ADDRFAMILY
-#define EAI_ADDRFAMILY	1
+#define EAI_ADDRFAMILY  1
 #undef  EAI_AGAIN
-#define EAI_AGAIN	2
+#define EAI_AGAIN       2
 #undef  EAI_BADFLAGS
-#define EAI_BADFLAGS	3
+#define EAI_BADFLAGS    3
 #undef  EAI_FAIL
-#define EAI_FAIL	4
+#define EAI_FAIL        4
 #undef  EAI_FAMILY
-#define EAI_FAMILY	5
+#define EAI_FAMILY      5
 #undef  EAI_MEMORY
-#define EAI_MEMORY	6
+#define EAI_MEMORY      6
 #undef  EAI_NODATA
-#define EAI_NODATA	7
+#define EAI_NODATA      7
 #undef  EAI_NONAME
-#define EAI_NONAME	8
+#define EAI_NONAME      8
 #undef  EAI_SERVICE
-#define EAI_SERVICE	9
+#define EAI_SERVICE     9
 #undef  EAI_SOCKTYPE
-#define EAI_SOCKTYPE	10
+#define EAI_SOCKTYPE    10
 #undef  EAI_SYSTEM
-#define EAI_SYSTEM	11
+#define EAI_SYSTEM      11
 
 #endif /* ! HAVE_GETADDRINFO */
 
@@ -211,16 +212,16 @@ extern const struct in6_addr krb5int_in6addr_any;
 
 /* Call out to stuff defined in libkrb5support.  */
 extern int krb5int_getaddrinfo (const char *node, const char *service,
-				const struct addrinfo *hints,
-				struct addrinfo **aip);
+                                const struct addrinfo *hints,
+                                struct addrinfo **aip);
 extern void krb5int_freeaddrinfo (struct addrinfo *ai);
 extern const char *krb5int_gai_strerror(int err);
 extern int krb5int_getnameinfo (const struct sockaddr *sa, socklen_t salen,
-				char *hbuf, size_t hbuflen,
-				char *sbuf, size_t sbuflen,
-				int flags);
+                                char *hbuf, size_t hbuflen,
+                                char *sbuf, size_t sbuflen,
+                                int flags);
 #ifndef IMPLEMENT_FAKE_GETADDRINFO
-#undef	getaddrinfo
+#undef  getaddrinfo
 #define getaddrinfo krb5int_getaddrinfo
 #undef  freeaddrinfo
 #define freeaddrinfo krb5int_freeaddrinfo

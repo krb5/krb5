@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2005-2006 Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -498,7 +499,7 @@ kim_error kim_credential_get_options (kim_credential  in_credential,
  * \param in_credential       a credential object.
  * \param in_client_identity  a client identity.
  * \param out_ccache          on exit, a ccache object containing \a in_credential with the client
- *      		      identity \a in_client_identity.  Must be freed with kim_ccache_free().
+ *                            identity \a in_client_identity.  Must be freed with kim_ccache_free().
  *                            Specify NULL if you don't want this return value.
  * \return On success, #KIM_NO_ERROR.  On failure, an error code representing the failure.
  * \brief Store a credential in a ccache in the cache collection.

@@ -68,7 +68,7 @@ static krb5_error_code armor_ap_request
                                               tgs_server,
                                               ticket->server)) {
             krb5_set_error_message(kdc_context, KRB5KDC_ERR_SERVER_NOMATCH,
-                   "ap-request armor for something other than  the local TGS");
+                                   "ap-request armor for something other than  the local TGS");
             retval = KRB5KDC_ERR_SERVER_NOMATCH;
         }
     }
@@ -165,7 +165,7 @@ kdc_find_fast(krb5_kdc_req **requestptr,
                                               &state->armor_key);
             else {
                 krb5_set_error_message(kdc_context, KRB5KDC_ERR_PREAUTH_FAILED,
-                              "No armor key but FAST armored request present");
+                                       "No armor key but FAST armored request present");
                 retval = KRB5KDC_ERR_PREAUTH_FAILED;
             }
         }

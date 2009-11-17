@@ -47,58 +47,57 @@ static const char *objdirs[] = { LIBDIR "/krb5/plugins/authdata", NULL };
 #endif
 
 /* MIT Kerberos 1.6 (V0) authdata plugin callback */
-typedef krb5_error_code (*authdata_proc_0)
-    (krb5_context, krb5_db_entry *client,
-     krb5_data *req_pkt,
-     krb5_kdc_req *request,
-     krb5_enc_tkt_part * enc_tkt_reply);
+typedef krb5_error_code (*authdata_proc_0)(
+    krb5_context,
+    krb5_db_entry *client,
+    krb5_data *req_pkt,
+    krb5_kdc_req *request,
+    krb5_enc_tkt_part * enc_tkt_reply);
 /* MIT Kerberos 1.8 (V2) authdata plugin callback */
-typedef krb5_error_code (*authdata_proc_2)
-    (krb5_context, unsigned int flags,
-     krb5_db_entry *client, krb5_db_entry *server,
-     krb5_db_entry *krbtgt,
-     krb5_keyblock *client_key,
-     krb5_keyblock *server_key,
-     krb5_keyblock *krbtgt_key,
-     krb5_data *req_pkt,
-     krb5_kdc_req *request,
-     krb5_const_principal for_user_princ,
-     krb5_enc_tkt_part *enc_tkt_request,
-     krb5_enc_tkt_part *enc_tkt_reply);
-typedef krb5_error_code (*init_proc)
-    (krb5_context, void **);
-typedef void (*fini_proc)
-    (krb5_context, void *);
+typedef krb5_error_code (*authdata_proc_2)(
+    krb5_context, unsigned int flags,
+    krb5_db_entry *client, krb5_db_entry *server,
+    krb5_db_entry *krbtgt,
+    krb5_keyblock *client_key,
+    krb5_keyblock *server_key,
+    krb5_keyblock *krbtgt_key,
+    krb5_data *req_pkt,
+    krb5_kdc_req *request,
+    krb5_const_principal for_user_princ,
+    krb5_enc_tkt_part *enc_tkt_request,
+    krb5_enc_tkt_part *enc_tkt_reply);
+typedef krb5_error_code (*init_proc)(krb5_context, void **);
+typedef void (*fini_proc)(krb5_context, void *);
 
-static krb5_error_code handle_request_authdata
-    (krb5_context context,
-     unsigned int flags,
-     krb5_db_entry *client,
-     krb5_db_entry *server,
-     krb5_db_entry *krbtgt,
-     krb5_keyblock *client_key,
-     krb5_keyblock *server_key,
-     krb5_keyblock *krbtgt_key,
-     krb5_data *req_pkt,
-     krb5_kdc_req *request,
-     krb5_const_principal for_user_princ,
-     krb5_enc_tkt_part *enc_tkt_request,
-     krb5_enc_tkt_part *enc_tkt_reply);
+static krb5_error_code handle_request_authdata(
+    krb5_context context,
+    unsigned int flags,
+    krb5_db_entry *client,
+    krb5_db_entry *server,
+    krb5_db_entry *krbtgt,
+    krb5_keyblock *client_key,
+    krb5_keyblock *server_key,
+    krb5_keyblock *krbtgt_key,
+    krb5_data *req_pkt,
+    krb5_kdc_req *request,
+    krb5_const_principal for_user_princ,
+    krb5_enc_tkt_part *enc_tkt_request,
+    krb5_enc_tkt_part *enc_tkt_reply);
 
-static krb5_error_code handle_tgt_authdata
-    (krb5_context context,
-     unsigned int flags,
-     krb5_db_entry *client,
-     krb5_db_entry *server,
-     krb5_db_entry *krbtgt,
-     krb5_keyblock *client_key,
-     krb5_keyblock *server_key,
-     krb5_keyblock *krbtgt_key,
-     krb5_data *req_pkt,
-     krb5_kdc_req *request,
-     krb5_const_principal for_user_princ,
-     krb5_enc_tkt_part *enc_tkt_request,
-     krb5_enc_tkt_part *enc_tkt_reply);
+static krb5_error_code handle_tgt_authdata(
+    krb5_context context,
+    unsigned int flags,
+    krb5_db_entry *client,
+    krb5_db_entry *server,
+    krb5_db_entry *krbtgt,
+    krb5_keyblock *client_key,
+    krb5_keyblock *server_key,
+    krb5_keyblock *krbtgt_key,
+    krb5_data *req_pkt,
+    krb5_kdc_req *request,
+    krb5_const_principal for_user_princ,
+    krb5_enc_tkt_part *enc_tkt_request,
+    krb5_enc_tkt_part *enc_tkt_reply);
 
 static krb5_error_code
 handle_kdb_authdata(krb5_context context, unsigned int flags,

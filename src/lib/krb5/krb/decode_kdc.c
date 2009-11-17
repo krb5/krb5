@@ -29,6 +29,7 @@
  */
 
 #include "k5-int.h"
+#include "int-proto.h"
 
 /*
   Takes a KDC_REP message and decrypts encrypted part using etype and

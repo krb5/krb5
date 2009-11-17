@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 2008 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
@@ -111,11 +112,11 @@ void krb5int_ucstr2upper(
     krb5_unicode *,
     size_t);
 
-#define KRB5_UTF8_NOCASEFOLD	0x0U
-#define KRB5_UTF8_CASEFOLD	0x1U
-#define KRB5_UTF8_ARG1NFC	0x2U
-#define KRB5_UTF8_ARG2NFC	0x4U
-#define KRB5_UTF8_APPROX	0x8U
+#define KRB5_UTF8_NOCASEFOLD    0x0U
+#define KRB5_UTF8_CASEFOLD      0x1U
+#define KRB5_UTF8_ARG1NFC       0x2U
+#define KRB5_UTF8_ARG2NFC       0x4U
+#define KRB5_UTF8_APPROX        0x8U
 
 krb5_error_code krb5int_utf8_normalize(
     krb5_data *,
