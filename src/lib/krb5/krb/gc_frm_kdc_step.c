@@ -53,6 +53,7 @@ struct _krb5_tkt_creds_context {
     krb5_creds *out_cred;
     krb5_creds **tgts;
     int kdcopt;
+    int req_kdcopt;
     unsigned int referral_count;
     krb5_creds cc_tgt;
     krb5_creds *tgtptr;
@@ -120,22 +121,21 @@ static krb5_error_code
 tkt_make_tgs_request(krb5_context context,
                      krb5_tkt_creds_context ctx,
                      krb5_creds *tgt,
-                     krb5_flags kdcopt,
                      krb5_creds *in_cred,
                      krb5_data *req)
 {
     krb5_error_code code;
 
     /* These flags are always included */
-    kdcopt |= FLAGS2OPTS(tgt->ticket_flags);
+    ctx->kdcopt |= FLAGS2OPTS(tgt->ticket_flags);
 
-    if ((kdcopt & KDC_OPT_ENC_TKT_IN_SKEY) == 0)
+    if ((ctx->kdcopt & KDC_OPT_ENC_TKT_IN_SKEY) == 0)
         in_cred->is_skey = FALSE;
 
     if (!krb5_c_valid_enctype(tgt->keyblock.enctype))
         return KRB5_PROG_ETYPE_NOSUPP;
 
-    code = krb5_make_tgs_request(context, tgt, kdcopt,
+    code = krb5_make_tgs_request(context, tgt, ctx->kdcopt,
                                  tgt->addresses, NULL,
                                  in_cred, NULL, NULL,
                                  req, &ctx->timestamp, &ctx->subkey);
@@ -153,7 +153,6 @@ tkt_process_tgs_reply(krb5_context context,
                       krb5_tkt_creds_context ctx,
                       krb5_data *rep,
                       krb5_creds *tgt,
-                      krb5_flags kdcopt,
                       krb5_creds *in_cred,
                       krb5_creds **out_cred)
 {
@@ -161,16 +160,10 @@ tkt_process_tgs_reply(krb5_context context,
 
     assert(*out_cred == NULL);
 
-    /* These flags are always included */
-    kdcopt |= FLAGS2OPTS(tgt->ticket_flags);
-
-    if ((kdcopt & KDC_OPT_ENC_TKT_IN_SKEY) == 0)
-        in_cred->is_skey = FALSE;
-
     code = krb5_process_tgs_reply(context,
                                   rep,
                                   tgt,
-                                  kdcopt,
+                                  ctx->kdcopt,
                                   tgt->addresses,
                                   NULL,
                                   in_cred,
@@ -209,6 +202,7 @@ krb5_tkt_creds_init(krb5_context context,
 
     ctx->ccache = ccache; /* XXX */
 
+    ctx->req_kdcopt = kdcopt;
     ctx->use_conf_ktypes = context->use_conf_ktypes;
     ctx->client = ctx->in_cred.client;
     ctx->server = ctx->in_cred.server;
@@ -295,24 +289,6 @@ krb5_tkt_creds_free(krb5_context context,
     free(ctx);
 }
 
-/*
- * Determine KDC options to use based on context options
- */
-static krb5_flags
-tkt_creds_kdcopt(krb5_tkt_creds_context ctx)
-{
-    krb5_flags kdcopt = ctx->kdcopt;
-
-    kdcopt |= KDC_OPT_CANONICALIZE;
-
-    if (ctx->in_cred.second_ticket.length != 0 &&
-        (kdcopt & KDC_OPT_CNAME_IN_ADDL_TKT) == 0) {
-        kdcopt |= KDC_OPT_ENC_TKT_IN_SKEY;
-    }
-
-    return kdcopt;
-}
-
 static krb5_error_code
 tkt_creds_request_referral_tgt(krb5_context context,
                                krb5_tkt_creds_context ctx,
@@ -333,8 +309,14 @@ tkt_creds_request_referral_tgt(krb5_context context,
     if (code != 0)
         return code;
 
+    ctx->kdcopt = ctx->req_kdcopt | KDC_OPT_CANONICALIZE;
+
+    if (ctx->in_cred.second_ticket.length != 0 &&
+        (ctx->kdcopt & KDC_OPT_CNAME_IN_ADDL_TKT) == 0) {
+        ctx->kdcopt |= KDC_OPT_ENC_TKT_IN_SKEY;
+    }
+
     code = tkt_make_tgs_request(context, ctx, ctx->tgtptr,
-                                tkt_creds_kdcopt(ctx),
                                 &ctx->in_cred, req);
     if (code != 0)
         return code;
@@ -398,8 +380,7 @@ tkt_creds_reply_referral_tgt(krb5_context context,
     unsigned int i;
 
     code = tkt_process_tgs_reply(context, ctx, rep, ctx->tgtptr,
-                                 tkt_creds_kdcopt(ctx), &ctx->in_cred,
-                                 &ctx->out_cred);
+                                 &ctx->in_cred, &ctx->out_cred);
     if (code != 0)
         return code;
 
