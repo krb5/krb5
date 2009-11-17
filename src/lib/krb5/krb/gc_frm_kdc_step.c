@@ -31,9 +31,6 @@
  * along the way.
  */
 
-#define DEBUG_GC_FRM_KDC 1
-#define DEBUG_REFERRALS 1
-
 #include "k5-int.h"
 #include <stdio.h>
 #include "int-proto.h"
@@ -44,24 +41,26 @@
  * Asynchronous API request/response state
  */
 struct _krb5_tkt_creds_context {
-    unsigned int flags;
     krb5_ccache ccache;
     krb5_creds in_cred;
     krb5_principal client;
     krb5_principal server;
     krb5_principal req_server;
-    krb5_creds *out_cred;
-    krb5_creds **tgts;
-    int kdcopt;
     int req_kdcopt;
-    unsigned int referral_count;
+
+    unsigned int flags;
     krb5_creds cc_tgt;
     krb5_creds *tgtptr;
+    unsigned int referral_count;
     krb5_creds *referral_tgts[KRB5_REFERRAL_MAXHOPS];
     krb5_boolean use_conf_ktypes;
     krb5_timestamp timestamp;
+    int kdcopt;
     krb5_keyblock *subkey;
     krb5_data encoded_previous_request;
+
+    krb5_creds *out_cred;
+    krb5_creds **tgts;
 };
 
 #ifdef DEBUG_REFERRALS
@@ -69,28 +68,6 @@ struct _krb5_tkt_creds_context {
 #define DPRINTF(x) printf x
 #define DFPRINTF(x) fprintf x
 #define DUMP_PRINC(x, y) krb5int_dbgref_dump_principal((x), (y))
-
-void
-krb5int_dbgref_dump_principal(char *msg, krb5_principal princ)
-{
-    krb5_context context = NULL;
-    krb5_error_code code;
-    char *s = NULL;
-
-    code = krb5_init_context(&context);
-    if (code != 0)
-        goto cleanup;
-
-    code = krb5_unparse_name(context, princ, &s);
-    if (code != 0)
-        goto cleanup;
-
-    fprintf(stderr, "%s: %s\n", msg, s);
-
-cleanup:
-    krb5_free_unparsed_name(context, s);
-    krb5_free_context(context);
-}
 
 #else
 
@@ -104,17 +81,9 @@ cleanup:
 #define FLAGS2OPTS(flags) (flags & KDC_TKT_COMMON_MASK)
 
 /*
- * Flags for ccache lookups of cross-realm TGTs.
- *
- * A cross-realm TGT may be issued by some other intermediate realm's
- * KDC, so we use KRB5_TC_MATCH_SRV_NAMEONLY.
- */
-#define RETR_FLAGS (KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES)
-
-/*
  * tkt_make_tgs_request()
  *
- * wrapper around krb5_make_tgs_request() that updates realm and
+ * wrapper around krb5int_make_tgs_request() that updates realm and
  * performs some additional validation
  */
 static krb5_error_code
@@ -135,17 +104,17 @@ tkt_make_tgs_request(krb5_context context,
     if (!krb5_c_valid_enctype(tgt->keyblock.enctype))
         return KRB5_PROG_ETYPE_NOSUPP;
 
-    code = krb5_make_tgs_request(context, tgt, ctx->kdcopt,
-                                 tgt->addresses, NULL,
-                                 in_cred, NULL, NULL,
-                                 req, &ctx->timestamp, &ctx->subkey);
+    code = krb5int_make_tgs_request(context, tgt, ctx->kdcopt,
+                                   tgt->addresses, NULL,
+                                   in_cred, NULL, NULL,
+                                   req, &ctx->timestamp, &ctx->subkey);
     return code;
 }
 
 /*
  * tkt_process_tgs_reply()
  *
- * wrapper around krb5_process_tgs_reply() that uses context
+ * wrapper around krb5int_process_tgs_reply() that uses context
  * information and performs some additional validation
  */
 static krb5_error_code
@@ -160,18 +129,18 @@ tkt_process_tgs_reply(krb5_context context,
 
     assert(*out_cred == NULL);
 
-    code = krb5_process_tgs_reply(context,
-                                  rep,
-                                  tgt,
-                                  ctx->kdcopt,
-                                  tgt->addresses,
-                                  NULL,
-                                  in_cred,
-                                  ctx->timestamp,
-                                  ctx->subkey,
-                                  NULL,
-                                  NULL,
-                                  out_cred);
+    code = krb5int_process_tgs_reply(context,
+                                    rep,
+                                    tgt,
+                                    ctx->kdcopt,
+                                    tgt->addresses,
+                                    NULL,
+                                    in_cred,
+                                    ctx->timestamp,
+                                    ctx->subkey,
+                                    NULL,
+                                    NULL,
+                                    out_cred);
 
     return code;
 }
@@ -189,6 +158,7 @@ krb5_tkt_creds_init(krb5_context context,
     krb5_error_code code;
     krb5_tkt_creds_context ctx = NULL;
     krb5_creds tgtq;
+    krb5_flags flags = KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES;
 
     memset(&tgtq, 0, sizeof(tgtq));
 
@@ -216,7 +186,7 @@ krb5_tkt_creds_init(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    code = krb5_cc_retrieve_cred(context, ctx->ccache, RETR_FLAGS,
+    code = krb5_cc_retrieve_cred(context, ctx->ccache, flags,
                                  &tgtq, &ctx->cc_tgt);
     if (code != 0)
         goto cleanup;
@@ -348,11 +318,11 @@ tkt_creds_complete(krb5_context context, krb5_tkt_creds_context ctx)
         /* Allocate returnable TGT list. */
         ctx->tgts = k5alloc(2 * sizeof (krb5_creds *), &code);
         if (code != 0)
-            goto cleanup;
+            return code;
 
         code = krb5_copy_creds(context, ctx->referral_tgts[0], &ctx->tgts[0]);
         if (code != 0)
-            goto cleanup;
+            return code;
     }
 
     DUMP_PRINC("krb5_tkt_creds_step: final server after reversion",
@@ -362,15 +332,14 @@ tkt_creds_complete(krb5_context context, krb5_tkt_creds_context ctx)
     ctx->out_cred->server = ctx->req_server;
     ctx->req_server = NULL;
 
-    assert(ctx->out_cred->authdata == NULL);
-    code = krb5_copy_authdata(context, ctx->in_cred.authdata,
-                              &ctx->out_cred->authdata);
-    if (code != 0)
-        goto cleanup;
+    if (ctx->in_cred.authdata != NULL) {
+        code = krb5_copy_authdata(context, ctx->in_cred.authdata,
+                                  &ctx->out_cred->authdata);
+    }
 
-    ctx->flags |= KRB5_TKT_CREDS_STEP_FLAG_COMPLETE;
+    if (code == 0)
+        ctx->flags |= KRB5_TKT_CREDS_STEP_FLAG_COMPLETE;
 
-cleanup:
     return code;
 }
 
@@ -403,12 +372,12 @@ tkt_creds_reply_referral_tgt(krb5_context context,
          * needed.
          */
         if (ctx->use_conf_ktypes || context->tgs_etypes == NULL) {
-            complete = 1;
+            complete++;
         } else {
             for (i = 0; context->tgs_etypes[i] != ENCTYPE_NULL; i++) {
                 if (ctx->out_cred->keyblock.enctype == context->tgs_etypes[i]) {
                     /* Found an allowable etype, so we're done */
-                    complete = 1;
+                    complete++;
                     break;
                 }
             }
@@ -417,6 +386,7 @@ tkt_creds_reply_referral_tgt(krb5_context context,
         if (complete != 0)
             return tkt_creds_complete(context, ctx);
 
+        /* Try again, but with context key types. */
         ctx->flags |= KRB5_TKT_CREDS_STEP_FLAG_CTX_KTYPES;
     } else if (IS_TGS_PRINC(context, ctx->out_cred->server)) {
         krb5_data *r1, *r2;

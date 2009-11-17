@@ -167,20 +167,20 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 }
 
 krb5_error_code
-krb5_make_tgs_request(krb5_context context,
-                      krb5_creds *tkt,
-                      krb5_flags kdcoptions,
-                      krb5_address *const *address,
-                      krb5_pa_data **in_padata,
-                      krb5_creds *in_cred,
-                      krb5_error_code (*pacb_fct)(krb5_context,
-                                                  krb5_keyblock *,
-                                                  krb5_kdc_req *,
-                                                  void *),
-                      void *pacb_data,
-                      krb5_data *request_data,
-                      krb5_timestamp *timestamp,
-                      krb5_keyblock **subkey)
+krb5int_make_tgs_request(krb5_context context,
+                         krb5_creds *tkt,
+                         krb5_flags kdcoptions,
+                         krb5_address *const *address,
+                         krb5_pa_data **in_padata,
+                         krb5_creds *in_cred,
+                         krb5_error_code (*pacb_fct)(krb5_context,
+                                                     krb5_keyblock *,
+                                                     krb5_kdc_req *,
+                                                     void *),
+                         void *pacb_data,
+                         krb5_data *request_data,
+                         krb5_timestamp *timestamp,
+                         krb5_keyblock **subkey)
 {
     krb5_error_code retval;
     krb5_enctype *enctypes = NULL;
@@ -210,12 +210,14 @@ krb5_make_tgs_request(krb5_context context,
         enctypes[1] = 0;
     }
 
-    retval = krb5int_make_tgs_request(context, kdcoptions, &in_cred->times,
-                                      enctypes, in_cred->server, address,
-                                      in_cred->authdata, in_padata,
-                                      second_tkt ? &in_cred->second_ticket : 0,
-                                      tkt, pacb_fct, pacb_data, request_data,
-                                      timestamp, subkey);
+    retval = krb5int_make_tgs_request_ext(context, kdcoptions, &in_cred->times,
+                                          enctypes, in_cred->server, address,
+                                          in_cred->authdata, in_padata,
+                                          second_tkt ?
+                                            &in_cred->second_ticket : 0,
+                                          tkt, pacb_fct, pacb_data,
+                                          request_data,
+                                          timestamp, subkey);
     if (enctypes != NULL)
         free(enctypes);
 
@@ -223,18 +225,18 @@ krb5_make_tgs_request(krb5_context context,
 }
 
 krb5_error_code
-krb5_process_tgs_reply(krb5_context context,
-                       krb5_data *response_data,
-                       krb5_creds *tkt,
-                       krb5_flags kdcoptions,
-                       krb5_address *const *address,
-                       krb5_pa_data **in_padata,
-                       krb5_creds *in_cred,
-                       krb5_timestamp timestamp,
-                       krb5_keyblock *subkey,
-                       krb5_pa_data ***out_padata,
-                       krb5_pa_data ***out_enc_padata,
-                       krb5_creds **out_cred)
+krb5int_process_tgs_reply(krb5_context context,
+                          krb5_data *response_data,
+                          krb5_creds *tkt,
+                          krb5_flags kdcoptions,
+                          krb5_address *const *address,
+                          krb5_pa_data **in_padata,
+                          krb5_creds *in_cred,
+                          krb5_timestamp timestamp,
+                          krb5_keyblock *subkey,
+                          krb5_pa_data ***out_padata,
+                          krb5_pa_data ***out_enc_padata,
+                          krb5_creds **out_cred)
 {
     krb5_error_code retval;
     krb5_kdc_rep *dec_rep = NULL;
@@ -419,10 +421,10 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
     krb5int_dbgref_dump_principal("krb5_get_cred_via_tkt TGT in use", tkt->server);
 #endif
 
-    retval = krb5_make_tgs_request(context, tkt, kdcoptions,
-                                   address, in_padata, in_cred,
-                                   pacb_fct, pacb_data,
-                                   &request_data, &timestamp, &subkey);
+    retval = krb5int_make_tgs_request(context, tkt, kdcoptions,
+                                      address, in_padata, in_cred,
+                                      pacb_fct, pacb_data,
+                                      &request_data, &timestamp, &subkey);
     if (retval != 0)
         goto cleanup;
 
@@ -450,12 +452,12 @@ send_again:
     } else
         goto cleanup;
 
-    retval = krb5_process_tgs_reply(context, &response_data,
-                                    tkt, kdcoptions, address,
-                                    in_padata, in_cred,
-                                    timestamp, subkey,
-                                    out_padata,
-                                    out_enc_padata, out_cred);
+    retval = krb5int_process_tgs_reply(context, &response_data,
+                                       tkt, kdcoptions, address,
+                                       in_padata, in_cred,
+                                       timestamp, subkey,
+                                       out_padata,
+                                       out_enc_padata, out_cred);
     if (retval != 0)
         goto cleanup;
 

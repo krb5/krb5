@@ -373,7 +373,7 @@ krb5int_fast_process_error(krb5_context context,
          * ever changed then this will need to be a copy not a cast.
          */
         if (retval == 0)
-            retval = encode_krb5_typed_data( (krb5_typed_data **) fast_response->padata,
+            retval = encode_krb5_typed_data( (const krb5_typed_data **)fast_response->padata,
                                              &encoded_td);
         if (retval == 0) {
             fx_error->e_data = *encoded_td;

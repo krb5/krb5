@@ -149,24 +149,24 @@ cleanup:
  */
 
 krb5_error_code
-krb5int_make_tgs_request(krb5_context context,
-                         krb5_flags kdcoptions,
-                         const krb5_ticket_times *timestruct,
-                         const krb5_enctype *ktypes,
-                         krb5_const_principal sname,
-                         krb5_address *const *addrs,
-                         krb5_authdata *const *authorization_data,
-                         krb5_pa_data *const *padata,
-                         const krb5_data *second_ticket,
-                         krb5_creds *in_cred,
-                         krb5_error_code (*pacb_fct)(krb5_context,
-                                                     krb5_keyblock *,
-                                                     krb5_kdc_req *,
-                                                     void *),
-                         void *pacb_data,
-                         krb5_data *request_data,
-                         krb5_timestamp *timestamp,
-                         krb5_keyblock **subkey)
+krb5int_make_tgs_request_ext(krb5_context context,
+                             krb5_flags kdcoptions,
+                             const krb5_ticket_times *timestruct,
+                             const krb5_enctype *ktypes,
+                             krb5_const_principal sname,
+                             krb5_address *const *addrs,
+                             krb5_authdata *const *authorization_data,
+                             krb5_pa_data *const *padata,
+                             const krb5_data *second_ticket,
+                             krb5_creds *in_cred,
+                             krb5_error_code (*pacb_fct)(krb5_context,
+                                                         krb5_keyblock *,
+                                                         krb5_kdc_req *,
+                                                         void *),
+                             void *pacb_data,
+                             krb5_data *request_data,
+                             krb5_timestamp *timestamp,
+                             krb5_keyblock **subkey)
 {
     krb5_error_code retval;
     krb5_kdc_req tgsreq;
