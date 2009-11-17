@@ -1021,8 +1021,13 @@ do_traversal_reply(krb5_context context,
             return retval;
     }
 
-    ts->cur_kdc = ts->nxt_kdc;
-    ts->cur_tgt = ts->nxt_tgt;
+    if (offpath == 0) {
+#if 0
+        assert(ts->cur_kdc != ts->nxt_kdc);
+#endif
+        ts->cur_kdc = ts->nxt_kdc;
+        ts->cur_tgt = ts->nxt_tgt;
+    }
 
     if (NXT_TGT_IS_CACHED(ts)) {
         assert(ts->offpath_tgt == NULL);
