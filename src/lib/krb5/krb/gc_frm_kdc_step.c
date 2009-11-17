@@ -332,7 +332,7 @@ tkt_creds_request_referral_tgt(krb5_context context,
     krb5_error_code code;
 
     if (ctx->referral_count >= KRB5_REFERRAL_MAXHOPS)
-        return KRB5_GET_IN_TKT_LOOP; /* XXX */
+        return KRB5_KDC_UNREACH;
 
     assert(ctx->tgtptr != NULL);
 
@@ -462,7 +462,7 @@ tkt_creds_reply_referral_tgt(krb5_context context,
         if (data_eq(*r1, *r2)) {
             DPRINTF(("krb5_tkt_creds_step: referred back to "
                      "previous realm; loop\n"));
-            return KRB5_GET_IN_TKT_LOOP;
+            return KRB5_KDC_UNREACH;
         }
         /* Check for referral routing loop. */
         for (i = 0; i < ctx->referral_count; i++) {
