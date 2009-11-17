@@ -818,6 +818,12 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
         ctx = (iakerb_ctx_id_t)*context_handle;
 
     if (iakerb_is_iakerb_token(input_token)) {
+        if (ctx->u.gssc != GSS_C_NO_CONTEXT) {
+            /* We shouldn't get an IAKERB token now. */
+            code = G_WRONG_TOKID;
+            major_status = GSS_S_DEFECTIVE_TOKEN;
+            goto cleanup;
+        }
         code = iakerb_acceptor_step(ctx, initialContextToken,
                                     input_token, output_token);
         if (code == (OM_uint32)KRB5_BAD_MSIZE)
