@@ -38,6 +38,8 @@
 #include <stdio.h>
 #include "int-proto.h"
 
+#define KRB5_TKT_CREDS_STEP_FLAG_CTX_KTYPES     0x2
+
 /*
  * Asynchronous API request/response state
  */
@@ -181,12 +183,6 @@ tkt_process_tgs_reply(krb5_context context,
                                   NULL,
                                   NULL,
                                   out_cred);
-
-#ifdef DEBUG_GC_FRM_KDC
-    if (code != 0)
-        fprintf(stderr, "tkt_process_tgs_reply: %s\n",
-                krb5_get_error_message(context, code));
-#endif
 
     return code;
 }
@@ -426,6 +422,7 @@ tkt_creds_reply_referral_tgt(krb5_context context,
                  "for requested server principal\n"));
         DUMP_PRINC("krb5_tkt_creds_step final referred reply",
                    ctx->server);
+
         /*
          * Check if the return enctype is one that we requested if
          * needed.
@@ -445,7 +442,7 @@ tkt_creds_reply_referral_tgt(krb5_context context,
         if (complete != 0)
             return tkt_creds_complete(context, ctx);
 
-        context->use_conf_ktypes = ctx->use_conf_ktypes;
+        ctx->flags |= KRB5_TKT_CREDS_STEP_FLAG_CTX_KTYPES;
     } else if (IS_TGS_PRINC(context, ctx->out_cred->server)) {
         krb5_data *r1, *r2;
 
@@ -502,7 +499,8 @@ tkt_creds_step_request(krb5_context context,
 {
     krb5_error_code code;
 
-    context->use_conf_ktypes = 1;
+    if ((ctx->flags & KRB5_TKT_CREDS_STEP_FLAG_CTX_KTYPES) == 0)
+        context->use_conf_ktypes = 1;
 
     code = tkt_creds_request_referral_tgt(context, ctx, req);
 
@@ -518,16 +516,12 @@ tkt_creds_step_reply(krb5_context context,
 {
     krb5_error_code code;
 
-    context->use_conf_ktypes = 1;
-
     if (ctx->out_cred != NULL) {
         krb5_free_creds(context, ctx->out_cred);
         ctx->out_cred = NULL;
     }
 
     code = tkt_creds_reply_referral_tgt(context, ctx, rep);
-
-    context->use_conf_ktypes = ctx->use_conf_ktypes;
 
     return code;
 }
@@ -587,7 +581,7 @@ copy_realm:
     }
 
 cleanup:
-    *flags = ctx->flags;
+    *flags = (ctx->flags & KRB5_TKT_CREDS_STEP_FLAG_COMPLETE);
 
     return code;
 }
