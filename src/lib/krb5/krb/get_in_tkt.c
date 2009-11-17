@@ -1160,6 +1160,14 @@ krb5_init_creds_get_creds(krb5_context context,
 }
 
 krb5_error_code KRB5_CALLCONV
+krb5_init_creds_store_creds(krb5_context context,
+                            krb5_init_creds_context ctx,
+                            krb5_ccache ccache)
+{
+    return krb5_cc_store_cred(context, ccache, &ctx->cred);
+}
+
+krb5_error_code KRB5_CALLCONV
 krb5_init_creds_get_error(krb5_context context,
                           krb5_init_creds_context ctx,
                           krb5_error **error)

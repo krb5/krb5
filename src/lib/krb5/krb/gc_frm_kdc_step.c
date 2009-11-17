@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include "int-proto.h"
 
+#define KRB5_TKT_CREDS_STEP_FLAG_COMPLETE       0x1
 #define KRB5_TKT_CREDS_STEP_FLAG_CTX_KTYPES     0x2
 
 /*
@@ -53,7 +54,7 @@ struct _krb5_tkt_creds_context {
     krb5_creds *tgtptr;
     unsigned int referral_count;
     krb5_creds *referral_tgts[KRB5_REFERRAL_MAXHOPS];
-    krb5_boolean use_conf_ktypes;
+    krb5_boolean default_use_conf_ktypes;
     krb5_timestamp timestamp;
     int kdcopt;
     krb5_keyblock *subkey;
@@ -173,7 +174,7 @@ krb5_tkt_creds_init(krb5_context context,
     ctx->ccache = ccache; /* XXX */
 
     ctx->req_kdcopt = kdcopt;
-    ctx->use_conf_ktypes = context->use_conf_ktypes;
+    ctx->default_use_conf_ktypes = context->use_conf_ktypes;
     ctx->client = ctx->in_cred.client;
     ctx->server = ctx->in_cred.server;
 
@@ -304,16 +305,7 @@ tkt_creds_complete(krb5_context context, krb5_tkt_creds_context ctx)
 
     assert(ctx->out_cred != NULL);
 
-    /*
-     * Deal with ccache TGT management: If tgts has been set from
-     * initial non-referral TGT discovery, leave it alone.  Otherwise, if
-     * referral_tgts[0] exists return it as the only entry in tgts.
-     * (Further referrals are never cached, only the referral from the
-     * local KDC.)  This is part of cleanup because useful received TGTs
-     * should be cached even if the main request resulted in failure.
-     */
-    assert(ctx->tgts == NULL);
-
+    /* Only cache referral from local KDC. */
     if (ctx->referral_tgts[0] != NULL) {
         /* Allocate returnable TGT list. */
         ctx->tgts = k5alloc(2 * sizeof (krb5_creds *), &code);
@@ -350,18 +342,17 @@ tkt_creds_reply_referral_tgt(krb5_context context,
 {
     krb5_error_code code;
     unsigned int i;
+    krb5_boolean got_tkt = FALSE;
 
     code = tkt_process_tgs_reply(context, ctx, rep, ctx->tgtptr,
                                  &ctx->in_cred, &ctx->out_cred);
     if (code != 0)
-        return code;
+        goto cleanup;
 
     /*
      * Referral request succeeded; let's see what it is
      */
     if (krb5_principal_compare(context, ctx->server, ctx->out_cred->server)) {
-        int complete = 0;
-
         DPRINTF(("krb5_tkt_creds_step: request generated ticket "
                  "for requested server principal\n"));
         DUMP_PRINC("krb5_tkt_creds_step final referred reply",
@@ -371,23 +362,19 @@ tkt_creds_reply_referral_tgt(krb5_context context,
          * Check if the return enctype is one that we requested if
          * needed.
          */
-        if (ctx->use_conf_ktypes || context->tgs_etypes == NULL) {
-            complete++;
-        } else {
+        if (ctx->default_use_conf_ktypes || context->tgs_etypes == NULL)
+            got_tkt = TRUE;
+        else
             for (i = 0; context->tgs_etypes[i] != ENCTYPE_NULL; i++) {
                 if (ctx->out_cred->keyblock.enctype == context->tgs_etypes[i]) {
                     /* Found an allowable etype, so we're done */
-                    complete++;
+                    got_tkt = TRUE;
                     break;
                 }
             }
-        }
 
-        if (complete != 0)
-            return tkt_creds_complete(context, ctx);
-
-        /* Try again, but with context key types. */
-        ctx->flags |= KRB5_TKT_CREDS_STEP_FLAG_CTX_KTYPES;
+        if (got_tkt == FALSE)
+            ctx->flags |= KRB5_TKT_CREDS_STEP_FLAG_CTX_KTYPES; /* try again */
     } else if (IS_TGS_PRINC(context, ctx->out_cred->server)) {
         krb5_data *r1, *r2;
 
@@ -404,8 +391,10 @@ tkt_creds_reply_referral_tgt(krb5_context context,
         if (data_eq(*r1, *r2)) {
             DPRINTF(("krb5_tkt_creds_step: referred back to "
                      "previous realm; loop\n"));
-            return KRB5_KDC_UNREACH;
+            code = KRB5_KDC_UNREACH;
+            goto cleanup;
         }
+
         /* Check for referral routing loop. */
         for (i = 0; i < ctx->referral_count; i++) {
             if (krb5_principal_compare(context,
@@ -415,17 +404,17 @@ tkt_creds_reply_referral_tgt(krb5_context context,
                           "krb5_get_cred_from_kdc_opt: "
                           "referral routing loop - "
                           "got referral back to hop #%d\n", i));
-                return KRB5_KDC_UNREACH;
+                code = KRB5_KDC_UNREACH;
+                goto cleanup;
             }
         }
         /* Point current tgt pointer at newly-received TGT. */
         ctx->tgtptr = ctx->out_cred;
 
-        /* avoid propagating authdata multiple times */
+        /* avoid multiple copies of authdata */
         ctx->out_cred->authdata = ctx->in_cred.authdata;
         ctx->in_cred.authdata = NULL;
 
-        /* Save pointer to tgt in referral_tgts */
         ctx->referral_tgts[ctx->referral_count++] = ctx->out_cred;
         ctx->out_cred = NULL;
     } else {
@@ -434,6 +423,10 @@ tkt_creds_reply_referral_tgt(krb5_context context,
 
     assert(ctx->tgtptr == NULL || code == 0);
 
+    if (got_tkt)
+        code = tkt_creds_complete(context, ctx);
+
+cleanup:
     return code;
 }
 
@@ -449,7 +442,7 @@ tkt_creds_step_request(krb5_context context,
 
     code = tkt_creds_request_referral_tgt(context, ctx, req);
 
-    context->use_conf_ktypes = ctx->use_conf_ktypes;
+    context->use_conf_ktypes = ctx->default_use_conf_ktypes;
 
     return code;
 }

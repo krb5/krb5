@@ -2594,6 +2594,60 @@ krb5_init_creds_set_service
                 krb5_init_creds_context ctx,
                 const char *service);
 
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_store_creds
+(krb5_context context,
+                krb5_init_creds_context ctx,
+                krb5_ccache ccache);
+
+struct _krb5_tkt_creds_context;
+typedef struct _krb5_tkt_creds_context *krb5_tkt_creds_context;
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_init
+(krb5_context,
+        krb5_ccache,
+        krb5_creds *,
+        int kdcopt,
+        krb5_tkt_creds_context *);
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_get_tgts
+(krb5_context,
+        krb5_tkt_creds_context,
+        krb5_creds ***);
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_get_creds
+(krb5_context,
+        krb5_tkt_creds_context,
+        krb5_creds *);
+
+void KRB5_CALLCONV
+krb5_tkt_creds_free
+(krb5_context,
+        krb5_tkt_creds_context);
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_get
+(krb5_context,
+        krb5_tkt_creds_context);
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_step
+(krb5_context context,
+        krb5_tkt_creds_context,
+        krb5_data *,
+        krb5_data *,
+        krb5_data *,
+        unsigned int *);
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_store_creds
+(krb5_context,
+        krb5_tkt_creds_context,
+        krb5_ccache);
+
 typedef struct _krb5_verify_init_creds_opt {
     krb5_flags flags;
     int ap_req_nofail;

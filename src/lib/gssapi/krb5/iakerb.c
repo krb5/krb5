@@ -465,6 +465,9 @@ cleanup:
     return code;
 }
 
+/*
+ * Initialise the krb5_tkt_creds context for the IAKERB context
+ */
 static krb5_error_code
 iakerb_tkt_creds_ctx(iakerb_ctx_id_t ctx,
                      krb5_gss_cred_id_t cred,
@@ -492,7 +495,8 @@ iakerb_tkt_creds_ctx(iakerb_ctx_id_t ctx,
         creds.times.endtime = now + time_req;
     }
 
-    code = krb5_tkt_creds_init(ctx->k5c, cred->ccache, &creds, 0, &ctx->u.tcc);
+    code = krb5_tkt_creds_init(ctx->k5c, cred->ccache,
+                               &creds, 0, &ctx->u.tcc);
     if (code != 0)
         goto cleanup;
 
@@ -565,22 +569,10 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
         if (code != 0)
             goto cleanup;
         if (flags != 0) {
-            /* finished */
-            krb5_creds creds;
-
-            memset(&creds, 0, sizeof(creds));
-            assert(cred->iakerb_mech);
-
-            code = krb5_init_creds_get_creds(ctx->k5c, ctx->u.icc, &creds);
+            code = krb5_init_creds_store_creds(ctx->k5c, ctx->u.icc,
+                                               cred->ccache);
             if (code != 0)
                 goto cleanup;
-
-            code = krb5_cc_store_cred(ctx->k5c, cred->ccache, &creds);
-            if (code != 0) {
-                krb5_free_cred_contents(ctx->k5c, &creds);
-                goto cleanup;
-            }
-            krb5_free_cred_contents(ctx->k5c, &creds);
 
             krb5_init_creds_free(ctx->k5c, ctx->u.icc);
             ctx->u.icc = NULL;
@@ -605,7 +597,6 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
             goto cleanup;
 
         if (flags != 0) {
-            /* finished */
             code = krb5_tkt_creds_store_creds(ctx->k5c, ctx->u.tcc, NULL);
             if (code != 0)
                 goto cleanup;
@@ -620,7 +611,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
         break;
     }
 
-    if (out.length) {
+    if (out.length != 0) {
         assert(ctx->state != IAKERB_AP_REQ);
 
         code = iakerb_make_token(ctx, &realm, cookie, &out,
