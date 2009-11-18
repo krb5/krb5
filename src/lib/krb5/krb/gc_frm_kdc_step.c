@@ -180,19 +180,28 @@ krb5_tkt_creds_get_creds(krb5_context context,
                          krb5_tkt_creds_context ctx,
                          krb5_creds *creds)
 {
-    if ((ctx->flags & KRB5_TKT_CREDS_STEP_FLAG_COMPLETE) == 0)
-        return EINVAL;
+    krb5_error_code code;
 
-    return krb5int_copy_creds_contents(context, ctx->out_cred, creds);
+    if (ctx->flags & KRB5_TKT_CREDS_STEP_FLAG_COMPLETE)
+        code = krb5int_copy_creds_contents(context, ctx->out_cred, creds);
+    else
+        code = KRB5_NO_TKT_SUPPLIED;
+
+    return code;
 }
 
+/*
+ * Store credentials in credentials cache. If ccache is NULL, the
+ * credentials cache associated with the context is used. This can
+ * be called on an incomplete context, in which case the referral
+ * TGT only will be stored.
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_store_creds(krb5_context context,
                            krb5_tkt_creds_context ctx,
                            krb5_ccache ccache)
 {
-    if ((ctx->flags & KRB5_TKT_CREDS_STEP_FLAG_COMPLETE) == 0)
-        return EINVAL;
+    krb5_error_code code;
 
     if (ccache == NULL)
         ccache = ctx->ccache;
@@ -201,7 +210,12 @@ krb5_tkt_creds_store_creds(krb5_context context,
     if (ctx->referral_tgts[0] != NULL)
         krb5_cc_store_cred(context, ccache, ctx->referral_tgts[0]);
 
-    return krb5_cc_store_cred(context, ccache, ctx->out_cred);
+    if (ctx->flags & KRB5_TKT_CREDS_STEP_FLAG_COMPLETE)
+        code = krb5_cc_store_cred(context, ccache, ctx->out_cred);
+    else
+        code = KRB5_NO_TKT_SUPPLIED;
+
+    return code;
 }
 
 void KRB5_CALLCONV
