@@ -83,28 +83,20 @@ typedef struct _restriction {
     char                *policy;
 } restriction_t;
 
-krb5_error_code kadm5int_acl_init
-(krb5_context,
- int,
- char *);
-void kadm5int_acl_finish
-(krb5_context,
- int);
-krb5_boolean kadm5int_acl_check
-(krb5_context,
- gss_name_t,
- krb5_int32,
- krb5_principal,
- restriction_t **);
-krb5_boolean kadm5int_acl_check_krb
-(krb5_context,
- krb5_const_principal,
- krb5_int32,
- krb5_const_principal,
- restriction_t **);
-krb5_error_code kadm5int_acl_impose_restrictions
-(krb5_context,
- kadm5_principal_ent_rec *,
- long *,
- restriction_t *);
+krb5_error_code kadm5int_acl_init(krb5_context, int, char *);
+void kadm5int_acl_finish(krb5_context, int);
+krb5_boolean kadm5int_acl_check(krb5_context,
+                                gss_name_t,
+                                krb5_int32,
+                                krb5_principal,
+                                restriction_t **);
+krb5_boolean kadm5int_acl_check_krb(krb5_context,
+                                    krb5_const_principal,
+                                    krb5_int32,
+                                    krb5_const_principal,
+                                    restriction_t **);
+krb5_error_code kadm5int_acl_impose_restrictions(krb5_context,
+                                                 kadm5_principal_ent_rec *,
+                                                 long *,
+                                                 restriction_t *);
 #endif  /* SERVER_ACL_H__ */
