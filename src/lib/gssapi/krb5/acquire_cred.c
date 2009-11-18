@@ -232,6 +232,7 @@ acquire_init_cred(krb5_context context,
     krb5_creds creds;
     int got_endtime;
     int caller_provided_ccache_name = 0;
+    krb5_data password_data;
 
     cred->ccache = NULL;
 
@@ -334,6 +335,11 @@ acquire_init_cred(krb5_context context,
         }
     }
 
+    if (password != GSS_C_NO_BUFFER) {
+        password_data.length = password->length;
+        password_data.data = (char *)password->value;
+    }
+
     /* turn off OPENCLOSE mode while extensive frobbing is going on */
     code = krb5_cc_set_flags(context, ccache, 0);
     if (code == KRB5_FCC_NOFILE &&
@@ -378,15 +384,11 @@ acquire_init_cred(krb5_context context,
     }
 
     if (cred->iakerb_mech) {
-        krb5_data data;
-
         assert(password != GSS_C_NO_BUFFER);
 
-        data.length = password->length;
-        data.data = (char *)password->value;
-
         /* stash the password for later */
-        code = krb5int_copy_data_contents_add0(context, &data, &cred->password);
+        code = krb5int_copy_data_contents_add0(context, &password_data,
+                                               &cred->password);
         if (code != 0) {
             *minor_status = code;
             return GSS_S_FAILURE;
@@ -448,16 +450,23 @@ acquire_init_cred(krb5_context context,
 
     if (code == KRB5_CC_END && !got_endtime && password != GSS_C_NO_BUFFER) {
         krb5_error_code code2;
+        krb5_data password_data0;
 
-        code2 = krb5_get_init_creds_password(context,
-                                             &creds,
-                                             princ,
-                                             (char *)password->value, /* XXX */
-                                             NULL,
-                                             NULL,
-                                             0,
-                                             NULL,
-                                             NULL);
+        code2 = krb5int_copy_data_contents_add0(context, &password_data,
+                                                &password_data0);
+        if (code2 == 0) {
+            code2 = krb5_get_init_creds_password(context,
+                                                 &creds,
+                                                 princ,
+                                                 password_data0.data,
+                                                 NULL,
+                                                 NULL,
+                                                 0,
+                                                 NULL,
+                                                 NULL);
+            zap(password_data0.data, password_data0.length);
+            krb5_free_data_contents(context, &password_data0);
+        }
         if (code2 == 0) {
             code2 = krb5_cc_store_cred(context, ccache, &creds);
             if (code2 == 0) {
