@@ -614,8 +614,11 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
                                    &out,
                                    &realm,
                                    &flags);
-        if (code != 0)
+        if (code != 0) {
+            /* we failed, but store any referrals in our ccache */
+            krb5_tkt_creds_store_creds(ctx->k5c, ctx->u.tcc, NULL);
             goto cleanup;
+        }
         if (flags != 0) {
             code = krb5_tkt_creds_store_creds(ctx->k5c, ctx->u.tcc, NULL);
             if (code != 0)
