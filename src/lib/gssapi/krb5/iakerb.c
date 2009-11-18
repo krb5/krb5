@@ -52,7 +52,10 @@ struct _iakerb_ctx_id_rec {
         gss_ctx_id_t gssc;              /* IAKERB_AP_REQ */
     } u;
     krb5_data conv;                     /* conversation for checksumming */
+    unsigned int count;                 /* number of round trips */
 };
+
+#define IAKERB_MAX_HOPS ( 16 /* MAX_IN_TKT_LOOPS */ + KRB5_REFERRAL_MAXHOPS )
 
 typedef struct _iakerb_ctx_id_rec iakerb_ctx_id_rec;
 typedef iakerb_ctx_id_rec *iakerb_ctx_id_t;
@@ -352,6 +355,11 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx,
     realm.data = NULL;
     realm.length = 0;
 
+    if (ctx->count >= IAKERB_MAX_HOPS) {
+        code = KRB5_KDC_UNREACH;
+        goto cleanup;
+    }
+
     code = iakerb_parse_token(ctx,
                               initialContextToken,
                               input_token,
@@ -411,6 +419,8 @@ send_again:
     code = iakerb_save_token(ctx, output_token);
     if (code != 0)
         goto cleanup;
+
+    ctx->count++;
 
 cleanup:
     if (code != 0)
@@ -722,6 +732,7 @@ iakerb_alloc_context(iakerb_ctx_id_t *pctx)
         goto cleanup;
     ctx->magic = KG_IAKERB_CONTEXT;
     ctx->state = IAKERB_AS_REQ;
+    ctx->count = 0;
 
     code = krb5_gss_init_context(&ctx->k5c);
     if (code != 0)
