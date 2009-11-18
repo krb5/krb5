@@ -505,12 +505,23 @@ iakerb_tkt_creds_ctx(iakerb_ctx_id_t ctx,
         creds.times.endtime = now + time_req;
     }
 
+    if (cred->name->ad_context != NULL) {
+        code = krb5_authdata_export_authdata(ctx->k5c,
+                                             cred->name->ad_context,
+                                             AD_USAGE_TGS_REQ,
+                                             &creds.authdata);
+        if (code != 0)
+            goto cleanup;
+    }
+
     code = krb5_tkt_creds_init(ctx->k5c, cred->ccache,
                                &creds, 0, &ctx->u.tcc);
     if (code != 0)
         goto cleanup;
 
 cleanup:
+    krb5_free_authdata(ctx->k5c, creds.authdata);
+
     return code;
 }
 
@@ -664,12 +675,21 @@ iakerb_get_initial_state(iakerb_ctx_id_t ctx,
     in_creds.client = cred->name->princ;
     in_creds.server = target->princ;
 
+    if (cred->name->ad_context != NULL) {
+        code = krb5_authdata_export_authdata(ctx->k5c,
+                                             cred->name->ad_context,
+                                             AD_USAGE_TGS_REQ,
+                                             &in_creds.authdata);
+        if (code != 0)
+            goto cleanup;
+    }
+
     if (time_req != 0 && time_req != GSS_C_INDEFINITE) {
         krb5_timestamp now;
 
         code = krb5_timeofday(ctx->k5c, &now);
         if (code != 0)
-            return code;
+            goto cleanup;
 
         in_creds.times.endtime = now + time_req;
     }
@@ -682,7 +702,6 @@ iakerb_get_initial_state(iakerb_ctx_id_t ctx,
         krb5_data *realm = krb5_princ_realm(ctx->k5c, in_creds.client);
 
         /* If we have a TGT for the client realm, can proceed to TGS-REQ. */
-
         code = krb5_build_principal_ext(ctx->k5c,
                                         &tgs,
                                         realm->length,
@@ -693,7 +712,7 @@ iakerb_get_initial_state(iakerb_ctx_id_t ctx,
                                         realm->data,
                                         NULL);
         if (code != 0)
-            return code;
+            goto cleanup;
 
         in_creds.server = tgs;
 
@@ -712,6 +731,9 @@ iakerb_get_initial_state(iakerb_ctx_id_t ctx,
         *state = IAKERB_AP_REQ;
         krb5_free_creds(ctx->k5c, out_creds);
     }
+
+cleanup:
+    krb5_free_authdata(ctx->k5c, in_creds.authdata);
 
     return code;
 }
@@ -985,7 +1007,6 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
             input_token = GSS_C_NO_BUFFER;
 
         /* IAKERB is finished, or we skipped to Kerberos directly. */
-
         major_status = krb5_gss_init_sec_context_ext(minor_status,
                                                      claimant_cred_handle,
                                                      &ctx->u.gssc,
