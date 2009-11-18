@@ -647,6 +647,8 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
         code = iakerb_save_token(ctx, output_token);
         if (code != 0)
             goto cleanup;
+
+        ctx->count++;
     }
 
 cleanup:
