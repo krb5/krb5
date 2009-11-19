@@ -218,6 +218,19 @@ krb5_tkt_creds_store_creds(krb5_context context,
     return code;
 }
 
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_get_times(krb5_context context,
+                         krb5_tkt_creds_context ctx,
+                         krb5_ticket_times *times)
+{
+    if ((ctx->flags & KRB5_TKT_CREDS_STEP_FLAG_COMPLETE) == 0)
+        return KRB5_NO_TKT_SUPPLIED;
+
+    *times = ctx->out_cred->times;
+
+    return 0;
+}
+
 void KRB5_CALLCONV
 krb5_tkt_creds_free(krb5_context context,
                     krb5_tkt_creds_context ctx)

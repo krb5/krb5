@@ -2332,6 +2332,12 @@ krb5_init_creds_store_creds
                 krb5_init_creds_context ctx,
                 krb5_ccache ccache);
 
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_get_times
+(krb5_context context,
+                krb5_init_creds_context ctx,
+                krb5_ticket_times *times);
+
 struct _krb5_tkt_creds_context;
 typedef struct _krb5_tkt_creds_context *krb5_tkt_creds_context;
 
@@ -2368,6 +2374,12 @@ krb5_tkt_creds_store_creds
 (krb5_context,
         krb5_tkt_creds_context,
         krb5_ccache);
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_get_times
+(krb5_context,
+        krb5_tkt_creds_context,
+        krb5_ticket_times *times);
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_keytab(krb5_context context, krb5_creds *creds,

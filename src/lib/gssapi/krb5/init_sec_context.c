@@ -309,7 +309,7 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
 
     assert(data->exts != NULL);
 
-    if (data->exts->iakerb.conv && data->exts->iakerb.conv->length) {
+    if (data->exts->iakerb.conv) {
         assert(auth_context->send_subkey != NULL);
 
         code = iakerb_make_finished(context, auth_context->send_subkey,
@@ -345,7 +345,7 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
         TWRITE_INT16(ptr, credmsg.length, 0);
         TWRITE_STR(ptr, credmsg.data, credmsg.length);
     }
-    if (data->exts->iakerb.conv && data->exts->iakerb.conv->length) {
+    if (data->exts->iakerb.conv) {
         TWRITE_INT(ptr, KRB5_GSS_EXTS_IAKERB_FINISHED, 1);
         TWRITE_INT(ptr, finished->length, 1);
         TWRITE_STR(ptr, finished->data, finished->length);

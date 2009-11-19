@@ -365,6 +365,7 @@ krb5_init_creds_free
 krb5_init_creds_get
 krb5_init_creds_get_creds
 krb5_init_creds_get_error
+krb5_init_creds_get_times
 krb5_init_creds_init
 krb5_init_creds_set_keytab
 krb5_init_creds_set_password
@@ -546,6 +547,7 @@ krb5_sync_disk_file
 krb5_tgtname
 krb5_tkt_creds_free
 krb5_tkt_creds_get_creds
+krb5_tkt_creds_get_times
 krb5_tkt_creds_init
 krb5_tkt_creds_step
 krb5_tkt_creds_store_creds

@@ -544,6 +544,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
     OM_uint32 tmp;
     int initialContextToken = (input_token == GSS_C_NO_BUFFER);
     unsigned int flags = 0;
+    krb5_ticket_times times;
 
     output_token->length = 0;
     output_token->value = NULL;
@@ -595,6 +596,9 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
             if (code != 0)
                 goto cleanup;
 
+            krb5_init_creds_get_times(ctx->k5c, ctx->u.icc, &times);
+            cred->tgt_expire = times.endtime;
+
             krb5_init_creds_free(ctx->k5c, ctx->u.icc);
             ctx->u.icc = NULL;
 
@@ -623,6 +627,9 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
             code = krb5_tkt_creds_store_creds(ctx->k5c, ctx->u.tcc, NULL);
             if (code != 0)
                 goto cleanup;
+
+            krb5_tkt_creds_get_times(ctx->k5c, ctx->u.tcc, &times);
+            cred->tgt_expire = times.endtime;
 
             krb5_tkt_creds_free(ctx->k5c, ctx->u.tcc);
             ctx->u.tcc = NULL;
@@ -825,6 +832,15 @@ iakerb_is_iakerb_token(const gss_buffer_t token)
     return (code == 0);
 }
 
+static void
+iakerb_make_exts(iakerb_ctx_id_t ctx, krb5_gss_ctx_ext_rec *exts)
+{
+    memset(exts, 0, sizeof(*exts));
+
+    if (ctx->conv.length != 0)
+        exts->iakerb.conv = &ctx->conv;
+}
+
 /*
  *
  */
@@ -885,8 +901,7 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
     } else {
         krb5_gss_ctx_ext_rec exts;
 
-        memset(&exts, 0, sizeof(exts));
-        exts.iakerb.conv = &ctx->conv;
+        iakerb_make_exts(ctx, &exts);
 
         major_status = krb5_gss_accept_sec_context_ext(&code,
                                                        &ctx->u.gssc,
@@ -997,16 +1012,14 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
     if (ctx->state == IAKERB_AP_REQ) {
         krb5_gss_ctx_ext_rec exts;
 
-        memset(&exts, 0, sizeof(exts));
-
-        exts.iakerb.conv = &ctx->conv;
-
         /* Ensure cred is marked as usable for Kerberos mechanism */
         if (kcred->iakerb_mech)
             kcred->rfc_mech = 1;
 
         k5_mutex_unlock(&kcred->lock);
         credLocked = 0;
+
+        iakerb_make_exts(ctx, &exts);
 
         if (ctx->u.gssc == GSS_C_NO_CONTEXT)
             input_token = GSS_C_NO_BUFFER;
