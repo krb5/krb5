@@ -1604,11 +1604,6 @@ init_creds_step_reply(krb5_context context,
     /* We have a response. Process it. */
     assert(ctx->reply != NULL);
 
-    if (ctx->loopcount >= MAX_IN_TKT_LOOPS) {
-        code = KRB5_GET_IN_TKT_LOOP;
-        goto cleanup;
-    }
-
     /* process any preauth data in the as_reply */
     krb5_clear_preauth_context_use_counts(context);
     code = krb5int_fast_process_response(context, ctx->fast_state,
@@ -1774,6 +1769,9 @@ init_creds_step_request(krb5_context context,
             ctx->request->kdc_options &= ~(KDC_OPT_RENEWABLE_OK);
         } else
             ctx->request->rtime = 0;
+    } else if (ctx->loopcount >= MAX_IN_TKT_LOOPS) {
+        code = KRB5_GET_IN_TKT_LOOP;
+        goto cleanup;
     }
 
     if (ctx->err_reply == NULL) {
