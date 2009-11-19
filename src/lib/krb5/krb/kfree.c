@@ -925,4 +925,5 @@ krb5_free_ad_signedpath(krb5_context context, krb5_ad_signedpath *val)
         free(val->delegated);
     }
     krb5_free_pa_data(context, val->method_data);
+    free(val);
 }
