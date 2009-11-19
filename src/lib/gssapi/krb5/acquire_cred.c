@@ -363,7 +363,7 @@ acquire_init_cred(krb5_context context,
         return(GSS_S_FAILURE);
     }
 
-    if (desired_name != (krb5_gss_name_t)NULL) {
+    if (desired_name != NULL) {
         if (!krb5_principal_compare(context, princ, desired_name->princ)) {
             (void)krb5_free_principal(context, princ);
             (void)krb5_cc_close(context, ccache);
@@ -381,6 +381,7 @@ acquire_init_cred(krb5_context context,
             *minor_status = code;
             return(GSS_S_FAILURE);
         }
+        /* princ is now owned by output_name, it need not be freed here */
     }
 
     if (cred->iakerb_mech) {
@@ -390,6 +391,7 @@ acquire_init_cred(krb5_context context,
         code = krb5int_copy_data_contents_add0(context, &password_data,
                                                &cred->password);
         if (code != 0) {
+            (void)krb5_cc_close(context, ccache);
             *minor_status = code;
             return GSS_S_FAILURE;
         }
@@ -397,6 +399,7 @@ acquire_init_cred(krb5_context context,
         /* restore the OPENCLOSE flag */
         code = krb5_cc_set_flags(context, ccache, KRB5_TC_OPENCLOSE);
         if (code != 0) {
+            (void)krb5_cc_close(context, ccache);
             *minor_status = code;
             return GSS_S_FAILURE;
         }
@@ -422,7 +425,7 @@ acquire_init_cred(krb5_context context,
     code = krb5_build_principal_ext(context, &tmp_princ,
                                     krb5_princ_realm(context, princ)->length,
                                     krb5_princ_realm(context, princ)->data,
-                                    6, "krbtgt",
+                                    KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,
                                     krb5_princ_realm(context, princ)->length,
                                     krb5_princ_realm(context, princ)->data,
                                     0);
