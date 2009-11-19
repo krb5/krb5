@@ -2695,10 +2695,6 @@ krb5_error_code krb5_walk_realm_tree(krb5_context, const krb5_data *,
                                      const krb5_data *, krb5_principal **,
                                      int);
 
-krb5_error_code KRB5_CALLCONV
-krb5_auth_con_set_req_cksumtype(krb5_context, krb5_auth_context,
-                                krb5_cksumtype);
-
 krb5_error_code
 krb5_auth_con_set_safe_cksumtype(krb5_context, krb5_auth_context,
                                  krb5_cksumtype);

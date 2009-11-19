@@ -2054,6 +2054,10 @@ krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getauthenticator(krb5_context, krb5_auth_context,
                                krb5_authenticator **);
 
+krb5_error_code KRB5_CALLCONV
+krb5_auth_con_set_req_cksumtype(krb5_context, krb5_auth_context,
+                                krb5_cksumtype);
+
 #define KRB5_REALM_BRANCH_CHAR '.'
 
 /*
