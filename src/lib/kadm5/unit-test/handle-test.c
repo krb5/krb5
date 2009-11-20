@@ -7,8 +7,12 @@
 #include <sys/file.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#ifdef CLIENT_TEST
 #include <kadm5/client_internal.h>
-
+#else
+#include <kadm5/server_internal.h>
+#include <kadm5/admin.h>
+#endif
 
 int main(int argc, char *argv[])
 {

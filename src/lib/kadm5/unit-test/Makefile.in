@@ -23,9 +23,12 @@ destroy-test: destroy-test.o $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o destroy-test destroy-test.o \
 		$(KADMCLNT_LIBS) $(KRB5_BASE_LIBS)
 
-client-handle-test: handle-test.o $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o client-handle-test handle-test.o \
+client-handle-test: client-handle-test.o $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o client-handle-test client-handle-test.o \
 		$(KADMCLNT_LIBS) $(KRB5_BASE_LIBS)
+
+client-handle-test.o: handle-test.c
+	$(CC) $(ALL_CFLAGS) -DCLIENT_TEST -o client-handle-test.o -c $(srcdir)/handle-test.c
 
 client-iter-test: iter-test.o $(KADMLCNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o client-iter-test iter-test.o \
@@ -128,7 +131,7 @@ unit-test-server-body: site.exp test-handle-server lock-test
 clean::
 	$(RM) init-test client_init.o init-test.o
 	$(RM) destroy-test destroy-test.o
-	$(RM) client-handle-test handle-test.o
+	$(RM) client-handle-test handle-test.o client-handle-test.o
 	$(RM) client-iter-test iter-test.o
 	$(RM) randkey-test randkey-test.o
 	$(RM) server-handle-test handle-test.o
