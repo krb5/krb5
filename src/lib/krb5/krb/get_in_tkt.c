@@ -1726,6 +1726,9 @@ init_creds_step_reply(krb5_context context,
             code = krb5int_copy_data_contents(context,
                                               &ctx->err_reply->client->realm,
                                               &ctx->request->client->realm);
+            /* this will trigger a new call to krb5_do_preauth() */
+            krb5_free_error(context, ctx->err_reply);
+            ctx->err_reply = NULL;
         } else {
             if (retry) {
                 code = 0;
