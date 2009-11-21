@@ -308,6 +308,8 @@ static kadm5_ret_t _kadm5_init_any(krb5_context context, char *client_name,
     else
         iprop_enable = 0;
 
+    free(iprop_svc);
+
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = hp->h_addrtype;
     (void) memcpy(&addr.sin_addr, hp->h_addr, sizeof(addr.sin_addr));
