@@ -828,7 +828,7 @@ make_ad_signedpath_data(krb5_context context,
 
     if (i != 0) {
         sign_authdata = k5alloc((i + 1) * sizeof(krb5_authdata *), &code);
-        if (code != 0)
+        if (sign_authdata == NULL)
             return code;
 
         for (i = 0, j = 0; authdata[i] != NULL; i++) {
