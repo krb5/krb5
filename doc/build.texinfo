@@ -73,15 +73,10 @@ source code for building @value{PRODUCT} on Windows (see windows/README)
 @node The appl Directory, The clients Directory, Organization of the Source Directory, Organization of the Source Directory
 @subsection The appl Directory
 
-The Kerberos release provides certain UNIX utilities, modified to use
-Kerberos authentication.  In the @i{appl/bsd} directory are the
-Berkeley utilities @i{login}, @i{rlogin}, @i{rsh}, and @i{rcp}, as well as
-the associated daemons @i{kshd} and @i{klogind}.  The @i{login} program
-obtains ticket-granting tickets for users upon login; the other utilities
-provide authenticated Unix network services.
-
-The @i{appl} directory also contains Kerberized telnet and ftp programs,
-as well as sample Kerberos application client and server programs.
+The @i{appl} directory contains sample Kerberos application client and
+server programs.  In previous releases, it contained Kerberized versions
+of remote access daemons, but those have now been moved to a separate
+project.
 
 @node The clients Directory, The gen-manpages Directory, The appl Directory, Organization of the Source Directory
 @subsection The clients Directory
@@ -397,12 +392,13 @@ tell it the location of the Tcl configuration script.  (See
 @xref{Options to Configure}.)
 
 @item
-You have to run @samp{make install} before running @samp{make check}, or
-the test suite will often pick up the installed version of Kerberos
-rather than the newly built one.  You can install into a prefix that
-isn't in the system library search path, though.  This theoretically
-could be fixed with the appropriate environment variable magic in the
-test suite, but hasn't been yet.
+On some operating systems, you have to run @samp{make install} before
+running @samp{make check}, or the test suite will pick up installed
+versions of Kerberos libraries rather than the newly built ones.  You
+can install into a prefix that isn't in the system library search path,
+though.  Alternatively, you can configure with @code{--disable-rpath},
+which renders the build tree less suitable for installation, but allows
+testing without interference from previously installed libraries.
 
 @item
 In order to test the RPC layer, the local system has to be running the
@@ -424,26 +420,6 @@ than the normal built-in tests as they setup test servers and test
 client/server activities. 
 
 DejaGnu may be found wherever GNU software is archived.  
-
-Most of the tests are setup to run as a non-privileged user.  For some
-of the krb-root tests to work properly, either (a) the user running the
-tests must not have a .k5login file in the home directory or (b) the
-.k5login file must contain an entry for @code{<username>@@KRBTEST.COM}.
-There are two series of tests (@samp{rlogind} and @samp{telnetd}) which
-require the ability to @samp{rlogin} as root to the local
-machine. Admittedly, this does require the use of a @file{.rhosts} file
-or some authenticated means. @footnote{If you are fortunate enough to
-have a previous version of Kerberos V5 or V4 installed, and the Kerberos
-rlogin is first in your path, you can setup @file{.k5login} or
-@file{.klogin} respectively to allow you access.}
-
-If you cannot obtain root access to your machine, all the other tests
-will still run. Note however, with DejaGnu 1.2, the "untested testcases"
-will cause the testsuite to exit with a non-zero exit status which
-@samp{make} will consider a failure of the testing process. Do not worry
-about this, as these tests are the last run when @samp{make check} is
-executed from the top level of the build tree.  This problem does not
-exist with DejaGnu 1.3.
 
 @node The KADM5 Tests,  , The DejaGnu Tests, Testing the Build
 @subsection The KADM5 Tests
