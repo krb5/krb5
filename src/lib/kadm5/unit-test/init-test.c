@@ -23,14 +23,17 @@ int main()
     ret = kadm5_init(context, "admin", "admin", NULL, &params,
                      KADM5_STRUCT_VERSION, KADM5_API_VERSION_3, NULL,
                      &server_handle);
-    if (ret == KADM5_RPC_ERROR)
+    if (ret == KADM5_RPC_ERROR) {
+        krb5_free_context(context);
         exit(0);
+    }
     else if (ret != 0) {
         com_err("init-test", ret, "while initializing without auth");
         exit(1);
     } else {
         fprintf(stderr, "Unexpected success while initializing without auth!\n");
         (void) kadm5_destroy(server_handle);
+        krb5_free_context(context);
         exit(1);
     }
 }
