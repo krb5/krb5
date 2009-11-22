@@ -752,19 +752,18 @@ krb5int_hmac_iov_keyblock(const struct krb5_hash_provider *hash,
 krb5_error_code krb5int_pbkdf2_hmac_sha1(const krb5_data *, unsigned long,
                                          const krb5_data *, const krb5_data *);
 
-/* Make this a function eventually?  */
+/* Attempt to zero memory in a way that compilers won't optimize out. */
 #ifdef _WIN32
-# define krb5int_zap_data(ptr, len) SecureZeroMemory(ptr, len)
+# define zap(ptr, len) SecureZeroMemory(ptr, len)
 #elif defined(__GNUC__)
-static inline void krb5int_zap_data(void *ptr, size_t len)
+static inline void zap(void *ptr, size_t len)
 {
     memset(ptr, 0, len);
     asm volatile ("" : : "g" (ptr), "g" (len));
 }
 #else
-# define krb5int_zap_data(ptr, len) memset((volatile void *)ptr, 0, len)
+# define zap(ptr, len) memset((void *)(volatile void *)ptr, 0, len)
 #endif /* WIN32 */
-#define zap(p,l) krb5int_zap_data(p,l)
 
 /* Convenience function: zap and free ptr if it is non-NULL. */
 static inline void
