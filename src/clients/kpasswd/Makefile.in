@@ -1,5 +1,3 @@
-thisconfigdir=../..
-myfulldir=clients/kpasswd
 mydir=clients/kpasswd
 BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -18,7 +16,7 @@ kpasswd.o:	$(srcdir)/kpasswd.c
 ksetpwd.o:	$(srcdir)/ksetpwd.c
 
 ##WIN32##VERSIONRC = $(BUILDTOP)\windows\version.rc
-##WIN32##RCFLAGS=$(CPPFLAGS) -I$(SRCTOP) -D_WIN32 -DRES_ONLY
+##WIN32##RCFLAGS=$(CPPFLAGS) -I$(top_srcdir) -D_WIN32 -DRES_ONLY
 
 ##WIN32##KPWD=$(OUTPRE)kpasswd.exe
 

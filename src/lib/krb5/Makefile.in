@@ -1,5 +1,3 @@
-thisconfigdir=../..
-myfulldir=lib/krb5
 mydir=lib/krb5
 BUILDTOP=$(REL)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/ccache -I$(srcdir)/keytab -I$(srcdir)/rcache -I$(srcdir)/os -I$(srcdir)/unicode

@@ -1,6 +1,4 @@
-thisconfigdir=..
 mydir=tests
-myfulldir=tests
 BUILDTOP=$(REL)..
 SUBDIRS = resolve asn.1 create hammer verify gssapi dejagnu shlib \
 	gss-threads misc mkeystash_compat
@@ -30,7 +28,7 @@ kdc.conf: Makefile
 	@echo "}" >> kdc.conf
 
 krb5.conf: Makefile
-	cat $(SRCTOP)/config-files/krb5.conf > krb5.new
+	cat $(top_srcdir)/config-files/krb5.conf > krb5.new
 	echo "[dbmodules]" >> krb5.new
 	echo " db_module_dir = `pwd`/../util/fakedest$(KRB5_DB_MODULE_DIR)" >> krb5.new
 	mv krb5.new krb5.conf

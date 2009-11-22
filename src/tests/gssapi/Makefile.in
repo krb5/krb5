@@ -1,5 +1,3 @@
-thisconfigdir=../..
-myfulldir=tests/gssapi
 mydir=tests/gssapi
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DUSE_AUTOCONF_H

@@ -1,5 +1,3 @@
-thisconfigdir=../../../..
-myfulldir=lib/crypto/openssl/arcfour
 mydir=lib/crypto/openssl/arcfour
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../md4  -I$(srcdir)/../../krb

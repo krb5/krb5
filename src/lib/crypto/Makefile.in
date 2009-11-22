@@ -1,5 +1,3 @@
-thisconfigdir=../..
-myfulldir=lib/crypto
 mydir=lib/crypto
 BUILDTOP=$(REL)..$(S)..
 SUBDIRS= krb @CRYPTO_IMPL@ crypto_tests

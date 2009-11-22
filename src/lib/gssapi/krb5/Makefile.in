@@ -1,5 +1,3 @@
-thisconfigdir=../../..
-myfulldir=lib/gssapi/krb5
 mydir=lib/gssapi/krb5
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/.. -I../generic -I$(srcdir)/../generic -I../mechglue -I$(srcdir)/../mechglue
@@ -224,8 +222,10 @@ $(GSSAPI_KRB5_HDR): gssapi_krb5.h
 all-unix:: $(SRCS) $(HDRS) $(GSSAPI_KRB5_HDR) includes
 all-unix:: all-libobjs
 
-error_map.h: $(SRCTOP)/util/gen-map.pl $(SRCTOP)/util/ktemplate.pm Makefile
-	$(PERL) -I$(SRCTOP)/util $(SRCTOP)/util/gen-map.pl -oerror_map.new \
+error_map.h: $(top_srcdir)/util/gen-map.pl \
+		$(top_srcdir)/util/ktemplate.pm Makefile
+	$(PERL) -I$(top_srcdir)/util $(top_srcdir)/util/gen-map.pl \
+		-oerror_map.new \
 		NAME=gsserrmap \
 		KEY=OM_uint32 \
 		VALUE="char *" \

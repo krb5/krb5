@@ -1,5 +1,3 @@
-thisconfigdir=../../../..
-myfulldir=lib/crypto/builtin/md5
 mydir=lib/crypto/builtin/md5
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 DEFS=

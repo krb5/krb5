@@ -9,4 +9,4 @@ $(OUTPRE)gss-misc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   gss-misc.c gss-misc.h
 $(OUTPRE)gss-server.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
-  $(SRCTOP)/include/port-sockets.h gss-misc.h gss-server.c
+  $(top_srcdir)/include/port-sockets.h gss-misc.h gss-server.c

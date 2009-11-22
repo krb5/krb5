@@ -153,8 +153,8 @@ install-profiled:
 	$(INSTALL_DATA) lib$(LIBBASE)$(PFLIBEXT) $(DESTDIR)$(KRB5_LIBDIR)
 	$(RANLIB) $(DESTDIR)$(KRB5_LIBDIR)/lib$(LIBBASE)$(PFLIBEXT)
 
-Makefile: $(SRCTOP)/config/lib.in
-$(thisconfigdir)/config.status: $(SRCTOP)/config/shlib.conf
+Makefile: $(top_srcdir)/config/lib.in
+$(BUILDTOP)/config.status: $(top_srcdir)/config/shlib.conf
 
 # Use the following if links need to be made to $(TOPLIBD):
 # all-unix:: all-liblinks

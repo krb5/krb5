@@ -1,5 +1,3 @@
-thisconfigdir=../..
-myfulldir=tests/resolve
 mydir=tests/resolve
 BUILDTOP=$(REL)..$(S)..
 RUN_SETUP = @KRB5_RUN_ENV@

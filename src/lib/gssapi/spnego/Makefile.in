@@ -1,5 +1,3 @@
-thisconfigdir=../../..
-myfulldir=lib/gssapi/spnego
 mydir=lib/gssapi/spnego
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/.. -I../generic -I$(srcdir)/../generic -I../mechglue -I$(srcdir)/../mechglue

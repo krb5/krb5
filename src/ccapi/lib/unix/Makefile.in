@@ -1,5 +1,3 @@
-thisconfigdir=../../..
-myfulldir=ccapi/lib/unix
 mydir=ccapi/lib/unix
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES= -I$(srcdir)/.. -I$(srcdir)/../../common

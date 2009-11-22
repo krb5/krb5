@@ -87,10 +87,10 @@ depend-dependencies:
 # NOTE: This will also generate spurious $(OUTPRE) and $(OBJEXT)
 # references in rules for non-library objects in a directory where
 # library objects happen to be built.  It's mostly harmless.
-.depend: .d $(SRCTOP)/util/depfix.pl
+.depend: .d $(top_srcdir)/util/depfix.pl
 	x=`$(CC) -print-libgcc-file-name` ; \
-	perl $(SRCTOP)/util/depfix.pl \
-		'$(SRCTOP)' '$(myfulldir)' '$(srcdir)' '$(BUILDTOP)' "$$x" '$(STLIBOBJS)' \
+	perl $(top_srcdir)/util/depfix.pl '$(top_srcdir)' '$(mydir)' \
+		'$(srcdir)' '$(BUILDTOP)' "$$x" '$(STLIBOBJS)' \
 		< .d > .depend
 
 # Temporarily keep the rule for removing the dependency line eater
@@ -102,10 +102,11 @@ depend-update-makefile: .depend depend-recurse
 	else \
 		echo "# No dependencies here." > $(srcdir)/deps.new ; \
 	fi
-	$(SRCTOP)/config/move-if-changed $(srcdir)/deps.new $(srcdir)/deps
+	$(top_srcdir)/config/move-if-changed $(srcdir)/deps.new $(srcdir)/deps
 	sed -e '/^# +++ Dependency line eater +++/,$$d' \
 		< $(srcdir)/Makefile.in > $(srcdir)/Makefile.in.new
-	$(SRCTOP)/config/move-if-changed $(srcdir)/Makefile.in.new $(srcdir)/Makefile.in
+	$(top_srcdir)/config/move-if-changed $(srcdir)/Makefile.in.new \
+		$(srcdir)/Makefile.in
 
 DEPTARGETS = .depend .d .dtmp $(DEP_VERIFY)
 DEPTARGETS_CLEAN = .depend .d .dtmp $(DEPTARGETS_@srcdir@_@CONFIG_RELTOPDIR@)
@@ -122,7 +123,7 @@ undepend-postrecurse: undepend-recurse
 			> $(srcdir)/Makefile.in.new ;\
 		echo "# +++ Dependency line eater +++" >> $(srcdir)/Makefile.in.new ;\
 		echo "# (dependencies temporarily removed)" >> $(srcdir)/Makefile.in.new ;\
-		$(SRCTOP)/config/move-if-changed $(srcdir)/Makefile.in.new $(srcdir)/Makefile.in;\
+		$(top_srcdir)/config/move-if-changed $(srcdir)/Makefile.in.new $(srcdir)/Makefile.in;\
 	else :; fi
 
 #
@@ -133,7 +134,7 @@ clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) $(OBJS) $(DEPTARGETS_CLEAN) $(EXTRA_FILES) et-[ch]-*.et et-[ch]-*.[ch]
-	-$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
+	-$(RM) -r $(top_srcdir)/autom4te.cache
 
 clean-windows::
 	$(RM) *.$(OBJEXT)
@@ -150,24 +151,23 @@ distclean-postrecurse: distclean-nuke-configure-state
 
 Makefiles-prerecurse: Makefile
 
-# thisconfigdir = relative path from this Makefile to config.status
-# mydir = relative path from config.status to this Makefile
-Makefile: $(srcdir)/Makefile.in $(srcdir)/deps $(thisconfigdir)/config.status \
-		$(SRCTOP)/config/pre.in $(SRCTOP)/config/post.in
-	cd $(thisconfigdir) && $(SHELL) config.status $(mydir)/Makefile
-$(thisconfigdir)/config.status: $(srcdir)/$(thisconfigdir)/configure
-	cd $(thisconfigdir) && $(SHELL) config.status --recheck
+# mydir = relative path from top to this Makefile
+Makefile: $(srcdir)/Makefile.in $(srcdir)/deps $(BUILDTOP)/config.status \
+		$(top_srcdir)/config/pre.in $(top_srcdir)/config/post.in
+	cd $(BUILDTOP) && $(SHELL) config.status $(mydir)/Makefile
+$(BUILDTOP)/config.status: $(top_srcdir)/configure
+	cd $(BUILDTOP) && $(SHELL) config.status --recheck
 # autom4te.cache supposedly improves performance with multiple runs, but
 # it breaks across versions, and around MIT we've got plenty of version
 # mixing.  So nuke it.
-$(srcdir)/$(thisconfigdir)/configure: @MAINT@ \
-		$(srcdir)/$(thisconfigdir)/configure.in \
-		$(SRCTOP)/patchlevel.h \
-		$(SRCTOP)/aclocal.m4
-	-$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
-	cd $(srcdir)/$(thisconfigdir) && \
+$(top_srcdir)/configure: @MAINT@ \
+		$(top_srcdir)/configure.in \
+		$(top_srcdir)/patchlevel.h \
+		$(top_srcdir)/aclocal.m4
+	-$(RM) -r $(top_srcdir)/autom4te.cache
+	cd $(top_srcdir) && \
 		$(AUTOCONF) --include=$(CONFIG_RELTOPDIR) $(AUTOCONFFLAGS)
-	-$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
+	-$(RM) -r $(top_srcdir)/autom4te.cache
 
 RECURSE_TARGETS=all-recurse clean-recurse distclean-recurse install-recurse \
 	generate-files-mac-recurse \

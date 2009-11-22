@@ -1,5 +1,3 @@
-thisconfigdir=..
-myfulldir=appl
 mydir=appl
 BUILDTOP=$(REL)..
 

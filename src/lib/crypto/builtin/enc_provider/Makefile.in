@@ -1,5 +1,3 @@
-thisconfigdir=../../../..
-myfulldir=lib/crypto/builtin/enc_provider
 mydir=lib/crypto/builtin/enc_provider
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../des 	\

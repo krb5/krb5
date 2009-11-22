@@ -1,5 +1,3 @@
-thisconfigdir=../..
-myfulldir=ccapi/lib
 mydir=ccapi/lib
 BUILDTOP=$(REL)..$(S)..
 SUBDIRS=unix

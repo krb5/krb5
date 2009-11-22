@@ -1,5 +1,3 @@
-thisconfigdir=./..
-myfulldir=gen-manpages
 mydir=gen-manpages
 BUILDTOP=$(REL)..
 all::

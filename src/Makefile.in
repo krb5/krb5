@@ -1,7 +1,5 @@
 datadir=@datadir@
 
-thisconfigdir=.
-myfulldir=.
 mydir=.
 # Don't build sample by default, and definitely don't install them
 # for production use:
@@ -39,7 +37,7 @@ update-autoconf-h:
 
 ##DOS##!if 0
 # This makefile doesn't use lib.in, but we still need shlib.conf here.
-config.status: $(SRCTOP)/config/shlib.conf
+config.status: $(top_srcdir)/config/shlib.conf
 ##DOS##!endif
 
 all-windows:: maybe-awk Makefile-windows
@@ -616,8 +614,8 @@ install-unix::
 		$(DESTDIR)$(CLIENT_BINDIR)/krb5-config
 	$(INSTALL_DATA) $(srcdir)/krb5-config.M $(DESTDIR)$(CLIENT_MANDIR)/krb5-config.1
 
-krb5-config: $(srcdir)/krb5-config.in $(thisconfigdir)/config.status
-	cd $(thisconfigdir) && $(SHELL) config.status krb5-config
+krb5-config: $(srcdir)/krb5-config.in config.status
+	$(SHELL) config.status krb5-config
 
 # Test to ensure that krb5-config does not spit out things like
 # $(PURE) or $(LDFLAGS) in case someone changes config/shlib.conf
@@ -642,7 +640,7 @@ COV_ANALYSES=
 COV_TEMPDIR=	cov-temp
 # Sources modeling some functions or macros confusing Prevent.
 COV_MODELS=\
-	$(SRCTOP)/util/coverity-models/threads.c
+	$(top_srcdir)/util/coverity-models/threads.c
 
 # Depend on Makefiles to ensure that (in maintainer mode) the configure
 # scripts won't get rerun under cov-build.
@@ -694,7 +692,7 @@ OTHEREXCLUDES = \
 EXCLUDES = `for i in $(BSDFILES) $(OTHEREXCLUDES); do echo $$i; done | $(AWK) '{ print "-path", $$1, "-o" }'` -path /dev/null
 
 reindent::
-	(cd $(SRCTOP) && \
+	(cd $(top_srcdir) && \
 	$(FIND) . \
 	\( -name '*.[ch]' -o -name '*.hin' -o -name '*.[ch].in' \) \
 	-print0 | $(XARGS) -0 $(EMACS) -q -batch \
@@ -704,12 +702,12 @@ reindent::
 mark-cstyle:: mark-cstyle-krb5 mark-cstyle-bsd
 
 mark-cstyle-krb5::
-	(cd $(SRCTOP) && \
+	(cd $(top_srcdir) && \
 	$(FIND) $(INDENTDIRS) \( $(EXCLUDES) \) -prune -o \
 	-name '*.[ch]' \
 	-print0 | $(XARGS) -0 $(PYTHON) util/krb5-mark-cstyle.py \
 	--cstyle=krb5)
 
 mark-cstyle-bsd::
-	(cd $(SRCTOP) && $(FIND) $(BSDFILES) -print0 | $(XARGS) -0 \
+	(cd $(top_srcdir) && $(FIND) $(BSDFILES) -print0 | $(XARGS) -0 \
 	$(PYTHON) util/krb5-mark-cstyle.py --cstyle=bsd)

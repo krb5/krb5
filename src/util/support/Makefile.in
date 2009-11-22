@@ -1,5 +1,3 @@
-thisconfigdir=../..
-myfulldir=util/support
 mydir=util/support
 BUILDTOP=$(REL)..$(S)..
 RELDIR=../util/support
@@ -121,7 +119,7 @@ install-unix:: install-libs
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 ##DOS##!if 0
-$(BUILDTOP)/include/autoconf.h: $(SRCTOP)/include/autoconf.h.in
+$(BUILDTOP)/include/autoconf.h: $(top_srcdir)/include/autoconf.h.in
 	(cd $(BUILDTOP)/include; $(MAKE) autoconf.h)
 ##DOS##!endif
 

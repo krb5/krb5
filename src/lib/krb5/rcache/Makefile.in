@@ -1,5 +1,3 @@
-thisconfigdir=../../..
-myfulldir=lib/krb5/rcache
 mydir=lib/krb5/rcache
 BUILDTOP=$(REL)..$(S)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
