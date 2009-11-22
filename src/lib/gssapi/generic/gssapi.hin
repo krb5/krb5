@@ -780,6 +780,21 @@ gss_canonicalize_name(
     const gss_OID,      /* mech_type */
     gss_name_t *);      /* output_name */
 
+/* RFC 4401 */
+
+#define GSS_C_PRF_KEY_FULL      0
+#define GSS_C_PRF_KEY_PARTIAL   1
+
+OM_uint32 KRB5_CALLCONV
+gss_pseudo_random(
+    OM_uint32 *,        /* minor_status */
+    gss_ctx_id_t,       /* context */
+    int,                /* prf_key */
+    const gss_buffer_t, /* prf_in */
+    ssize_t,            /* desired_output_len */
+    gss_buffer_t);      /* prf_out */
+
+
 #if TARGET_OS_MAC
 #    pragma pack(pop)
 #endif

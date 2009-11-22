@@ -68,6 +68,7 @@ gss_nt_service_name_v2
 gss_nt_string_uid_name
 gss_nt_user_name
 gss_oid_to_str
+gss_pseudo_random
 gss_process_context_token
 gss_release_any_name_mapping
 gss_release_buffer_set
