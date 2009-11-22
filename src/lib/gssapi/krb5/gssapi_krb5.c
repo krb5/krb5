@@ -624,6 +624,66 @@ krb5_gssspi_mech_invoke (OM_uint32 *minor_status,
     return GSS_S_UNAVAILABLE;
 }
 
+/*
+ * gss_context_query_attributes() methods
+ */
+static struct {
+    gss_OID_desc oid;
+    OM_uint32 (*func)(OM_uint32 *, const gss_ctx_id_t, const gss_OID, void *, size_t);
+} krb5_gss_context_query_attributes_ops[] = {
+    {
+        {GSS_KRB5_CONTEXT_ATTR_STREAM_SIZES_LENGTH, GSS_KRB5_CONTEXT_ATTR_STREAM_SIZES},
+        gss_krb5int_context_query_stream_sizes
+    },
+};
+
+static OM_uint32
+krb5_gss_context_query_attributes(OM_uint32 *minor_status,
+                                  const gss_ctx_id_t context_handle,
+                                  const gss_OID desired_object,
+                                  void *data,
+                                  size_t len)
+{
+    krb5_gss_ctx_id_rec *ctx;
+    size_t i;
+
+    if (minor_status == NULL)
+        return GSS_S_CALL_INACCESSIBLE_WRITE;
+
+    *minor_status = 0;
+
+    if (desired_object == GSS_C_NO_OID)
+        return GSS_S_CALL_INACCESSIBLE_READ;
+
+    if (data == NULL)
+        return GSS_S_CALL_INACCESSIBLE_WRITE;
+
+    memset(data, 0, len);
+
+    if (!kg_validate_ctx_id(context_handle))
+        return GSS_S_NO_CONTEXT;
+
+    ctx = (krb5_gss_ctx_id_rec *) context_handle;
+
+    if (!ctx->established)
+        return GSS_S_NO_CONTEXT;
+
+    for (i = 0; i < sizeof(krb5_gss_context_query_attributes_ops)/
+                    sizeof(krb5_gss_context_query_attributes_ops[0]); i++) {
+        if (g_OID_prefix_equal(desired_object, &krb5_gss_context_query_attributes_ops[i].oid)) {
+            return (*krb5_gss_context_query_attributes_ops[i].func)(minor_status,
+                                                                    context_handle,
+                                                                    desired_object,
+                                                                    data,
+                                                                    len);
+        }
+    }
+
+    *minor_status = EINVAL;
+
+    return GSS_S_UNAVAILABLE;
+}
+
 static struct gss_config krb5_mechanism = {
     { GSS_MECH_KRB5_OID_LENGTH, GSS_MECH_KRB5_OID },
     NULL,
@@ -694,6 +754,7 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_map_name_to_any,
     krb5_gss_release_any_name_mapping,
     krb5_gss_pseudo_random,
+    krb5_gss_context_query_attributes,
 };
 
 

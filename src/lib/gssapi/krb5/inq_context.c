@@ -300,3 +300,51 @@ gss_krb5int_extract_authtime_from_sec_context(OM_uint32 *minor_status,
 
     return generic_gss_add_buffer_set_member(minor_status, &rep, data_set);
 }
+
+OM_uint32
+gss_krb5int_context_query_stream_sizes(OM_uint32 *minor_status,
+                                       const gss_ctx_id_t context_handle,
+                                       const gss_OID desired_oid,
+                                       void *data,
+                                       size_t len)
+{
+    const krb5_gss_ctx_id_t ctx = (const krb5_gss_ctx_id_t)context_handle;
+    gss_context_stream_sizes *sizes = (gss_context_stream_sizes *)data;
+    gss_iov_buffer_desc iov[4];
+    OM_uint32 major_status;
+    OM_uint32 max_input_size;
+
+    if (len != sizeof(*sizes)) {
+        *minor_status = EINVAL;
+        return GSS_S_FAILURE;
+    }
+
+    iov[0].type = GSS_IOV_BUFFER_TYPE_HEADER;
+    iov[1].type = GSS_IOV_BUFFER_TYPE_TRAILER;
+    iov[2].type = GSS_IOV_BUFFER_TYPE_DATA;
+    iov[2].buffer.length = 1;
+    iov[2].buffer.value = "";
+    iov[3].type = GSS_IOV_BUFFER_TYPE_PADDING;
+
+    major_status = kg_seal_iov_length(minor_status, context_handle,
+                                      1, GSS_C_QOP_DEFAULT, NULL,
+                                      iov, sizeof(iov));
+    if (GSS_ERROR(major_status))
+        return major_status;
+
+    sizes->header = iov[0].buffer.length;
+    sizes->trailer = iov[1].buffer.length;
+    sizes->buffers = 0;
+    sizes->blocksize = 1 + iov[3].buffer.length;
+
+    major_status = krb5_gss_wrap_size_limit(minor_status, context_handle,
+                                            1, GSS_C_QOP_DEFAULT,
+                                            (OM_uint32)-1, &max_input_size);
+    if (GSS_ERROR(major_status))
+        return major_status;
+
+    sizes->max_msg_size = max_input_size;
+
+    return GSS_S_COMPLETE;
+}
+
