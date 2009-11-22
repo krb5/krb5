@@ -174,6 +174,7 @@ static kadm5_ret_t _kadm5_init_any(krb5_context context, char *client_name,
     int iprop_enable = 0;
     char full_svcname[BUFSIZ];
     char *realm;
+    krb5_ccache ccache;
 
     kadm5_server_handle_t handle;
     kadm5_config_params params_local;
@@ -390,12 +391,19 @@ error:
      * error" before the block of code at the top of the function
      * that allocates and initializes "handle".
      */
+    if (handle->destroy_cache && handle->cache_name) {
+        if (krb5_cc_resolve(handle->context,
+                            handle->cache_name, &ccache) == 0)
+            (void) krb5_cc_destroy (handle->context, ccache);
+    }
     if (handle->cache_name)
         free(handle->cache_name);
     if(handle->clnt && handle->clnt->cl_auth)
         AUTH_DESTROY(handle->clnt->cl_auth);
     if(handle->clnt)
         clnt_destroy(handle->clnt);
+
+    kadm5_free_config_params(handle->context, &handle->params);
 
 cleanup:
     if (code)
