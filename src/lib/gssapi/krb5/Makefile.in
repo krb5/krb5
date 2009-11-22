@@ -81,6 +81,7 @@ SRCS = \
 	$(srcdir)/ser_sctx.c \
 	$(srcdir)/set_ccache.c \
 	$(srcdir)/sign.c \
+	$(srcdir)/store_cred.c \
 	$(srcdir)/unseal.c \
 	$(srcdir)/util_cksum.c \
 	$(srcdir)/util_crypt.c \
@@ -134,6 +135,7 @@ OBJS = \
 	$(OUTPRE)ser_sctx.$(OBJEXT) \
 	$(OUTPRE)set_ccache.$(OBJEXT) \
 	$(OUTPRE)sign.$(OBJEXT) \
+	$(OUTPRE)store_cred.$(OBJEXT) \
 	$(OUTPRE)unseal.$(OBJEXT) \
 	$(OUTPRE)util_cksum.$(OBJEXT) \
 	$(OUTPRE)util_crypt.$(OBJEXT) \
@@ -190,6 +192,7 @@ STLIBOBJS = \
 	ser_sctx.o \
 	set_ccache.o \
 	sign.o \
+	store_cred.o \
 	unseal.o \
 	util_cksum.o \
 	util_crypt.o \
