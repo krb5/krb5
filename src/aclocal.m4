@@ -456,50 +456,6 @@ if test $krb5_cv_inet6 = yes || test "$krb5_cv_inet6_with_dinet6" = yes; then
 fi
 ])dnl
 dnl
-dnl Generic File existence tests
-dnl 
-dnl K5_AC_CHECK_FILE(FILE, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
-dnl
-AC_DEFUN(K5_AC_CHECK_FILE,
-[AC_REQUIRE([AC_PROG_CC])dnl
-dnl Do the transliteration at runtime so arg 1 can be a shell variable.
-ac_safe=`echo "$1" | sed 'y%./+-%__p_%'`
-AC_MSG_CHECKING([for $1])
-AC_CACHE_VAL(ac_cv_file_$ac_safe,
-[if test "$cross_compiling" = yes; then
-  errprint(__file__:__line__: warning: Cannot check for file existence when cross compiling
-)dnl
-  AC_MSG_ERROR(Cannot check for file existence when cross compiling)
-else
-  if test -r $1; then
-    eval "ac_cv_file_$ac_safe=yes"
-  else
-    eval "ac_cv_file_$ac_safe=no"
-  fi
-fi])dnl
-if eval "test \"`echo '$ac_cv_file_'$ac_safe`\" = yes"; then
-  AC_MSG_RESULT(yes)
-  ifelse([$2], , :, [$2])
-else
-  AC_MSG_RESULT(no)
-ifelse([$3], , , [$3
-np])dnl
-fi
-])
-dnl
-dnl K5_AC_CHECK_FILES(FILE... [, ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
-dnl
-AC_DEFUN(K5_AC_CHECK_FILES,
-[AC_REQUIRE([AC_PROG_CC])dnl
-for ac_file in $1
-do
-K5_AC_CHECK_FILE($ac_file,
-[changequote(, )dnl
-  ac_tr_file=HAVE`echo $ac_file | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
-changequote([, ])dnl
-  AC_DEFINE_UNQUOTED($ac_tr_file) $2], $3)dnl
-done
-])
 AC_DEFUN(KRB5_AC_CHECK_FOR_CFLAGS,[
 AC_BEFORE([$0],[AC_PROG_CC])
 AC_BEFORE([$0],[AC_PROG_CXX])
@@ -738,31 +694,6 @@ AC_CHECK_MEMBER(struct sockaddr.sa_len,
   AC_DEFINE(HAVE_SA_LEN,1,[Define if struct sockaddr contains sa_len])
 ,,[#include <sys/types.h>
 #include <sys/socket.h>])])
-dnl
-dnl
-dnl CHECK_UTMP: check utmp structure and functions
-dnl
-AC_DEFUN(CHECK_UTMP,[
-AC_CHECK_MEMBERS([struct utmp.ut_pid, struct utmp.ut_type, struct utmp.ut_host, struct utmp.ut_exit],,,
-[#include <sys/types.h>
-#include <utmp.h>])
-
-# Define the names actually used in the krb5 code currently:
-if test $ac_cv_member_struct_utmp_ut_pid = no; then
-  AC_DEFINE(NO_UT_PID,1,[Define if ut_pid field not found])
-fi
-if test $ac_cv_member_struct_utmp_ut_type = no; then
-  AC_DEFINE(NO_UT_TYPE,1,[Define if ut_type field not found])
-fi
-if test $ac_cv_member_struct_utmp_ut_host = no; then
-  AC_DEFINE(NO_UT_HOST,1,[Define if ut_host field not found])
-fi
-if test $ac_cv_member_struct_utmp_ut_exit = no; then
-  AC_DEFINE(NO_UT_EXIT,1,[Define if ut_exit field not found])
-fi
-
-AC_CHECK_FUNCS(setutent setutxent updwtmp updwtmpx)
-])dnl
 dnl
 dnl WITH_NETLIB
 dnl 
@@ -1725,18 +1656,6 @@ fi])
 dnl
 dnl
 m4_include(config/ac-archive/acx_pthread.m4)
-#
-# KRB5_AC_LIBUTIL
-#
-# Check for libutil, for NetBSD, et al.; needed for openpty() and
-# logwtmp() on some platforms.
-#
-AC_DEFUN([KRB5_AC_LIBUTIL],
-	[AC_CHECK_LIB(util, main,
-		[AC_DEFINE(HAVE_LIBUTIL,1,[Define if util library is available with openpty, logwtmp, etc])
-  UTIL_LIB=-lutil])dnl
-AC_SUBST(UTIL_LIB)
-])
 dnl
 dnl
 dnl
