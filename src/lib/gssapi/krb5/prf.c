@@ -50,11 +50,6 @@ krb5_gss_pseudo_random(OM_uint32 *minor_status,
     krb5_data t, ns;
     unsigned char *p;
 
-    t.length = 0;
-    t.data = NULL;
-    ns.length = 0;
-    ns.data = NULL;
-
     prf_out->length = 0;
     prf_out->value = NULL;
 
@@ -62,6 +57,12 @@ krb5_gss_pseudo_random(OM_uint32 *minor_status,
         *minor_status = G_VALIDATE_FAILED;
         return GSS_S_NO_CONTEXT;
     }
+
+    t.length = 0;
+    t.data = NULL;
+
+    ns.length = 0;
+    ns.data = NULL;
 
     ctx = (krb5_gss_ctx_id_t)context;
 
@@ -90,6 +91,7 @@ krb5_gss_pseudo_random(OM_uint32 *minor_status,
         code = KG_INPUT_TOO_LONG;
         goto cleanup;
     }
+    prf_out->length = desired_output_len;
 
     code = krb5_c_prf_length(ctx->k5_context,
                              krb5_k_key_enctype(ctx->k5_context, key),
@@ -108,6 +110,11 @@ krb5_gss_pseudo_random(OM_uint32 *minor_status,
         goto cleanup;
     }
 
+    t.length = prflen;
+    t.data = k5alloc(t.length, &code);
+    if (t.data == NULL)
+        goto cleanup;
+
     memcpy(ns.data + 4, prf_in->value, prf_in->length);
     i = 0;
     p = (unsigned char *)prf_out->value;
@@ -123,8 +130,6 @@ krb5_gss_pseudo_random(OM_uint32 *minor_status,
         p += t.length;
         desired_output_len -= t.length;
         i++;
-
-        krb5_free_data_contents(ctx->k5_context, &t);
     }
 
 cleanup:
