@@ -740,23 +740,15 @@ host/@value{KDCSLAVE2}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}
 @end smallexample
  
 @need 1000
-Then, add the following lines to @code{/etc/inetd.conf} file on each KDC
-(the line beginnng with @result{} is a continuation of the previous
-line):
+Then, add the following line to @code{/etc/inetd.conf} file on each KDC:
 
 @smallexample
 @group
 krb5_prop stream tcp nowait root @value{ROOTDIR}/sbin/kpropd kpropd
-eklogin   stream tcp nowait root @value{ROOTDIR}/sbin/klogind 
-@result{} klogind -k -c -e
 @end group
 @end smallexample
 
 @noindent
-The first line sets up the @code{kpropd} database propagation daemon.
-The second line sets up the @code{eklogin} daemon, allowing
-Kerberos-authenticated, encrypted rlogin to the KDC.
-
 You also need to add the following lines to @code{/etc/services} on each
 KDC:
 
@@ -767,7 +759,6 @@ kerberos        88/tcp      kdc       # Kerberos authentication (tcp)
 krb5_prop       754/tcp               # Kerberos slave propagation
 kerberos-adm    749/tcp               # Kerberos 5 admin/changepw (tcp)
 kerberos-adm    749/udp               # Kerberos 5 admin/changepw (udp)
-eklogin         2105/tcp              # Kerberos encrypted rlogin
 @end group
 @end smallexample
 
@@ -907,46 +898,6 @@ host, with limited access.  If your KDC is also a file server, FTP
 server, Web server, or even just a client machine, someone who obtained
 root access through a security hole in any of those areas could gain
 access to the Kerberos database.
-
-@need 4700
-@value{COMPANY} recommends that your KDCs use the following
-@code{/etc/inetd.conf} file.  (Note:  each line beginning with @result{}
-is a continuation of the previous line.):
-
-@smallexample
-@group
-#
-# Configuration file for inetd(1M).  See inetd.conf(4).
-#
-# To re-configure the running inetd process, edit this file, then
-# send the inetd process a SIGHUP.
-#
-# Syntax for socket-based Internet services:
-#  <service_name> <socket_type> <proto> <flags> <user> 
-@result{} <server_pathname> <args>
-#
-# Syntax for TLI-based Internet services:
-#
-#  <service_name> tli <proto> <flags> <user> <server_pathname> <args>
-#
-# Ftp and telnet are standard Internet services.
-#
-# This machine is a secure Kerberos Key Distribution Center (KDC).  
-# Services are limited.
-#
-#
-# Time service is used for clock synchronization.
-#
-time    stream  tcp     nowait  root    internal
-time    dgram   udp     wait    root    internal
-#
-# Limited Kerberos services
-#
-krb5_prop stream tcp nowait root @value{ROOTDIR}/sbin/kpropd  kpropd
-eklogin   stream tcp nowait root @value{ROOTDIR}/sbin/klogind 
-@result{} klogind -5 -c -e
-@end group
-@end smallexample
 
 @node Switching Master and Slave KDCs, Incremental Database Propagation, Limit Access to the KDCs, Installing KDCs
 @subsection Switching Master and Slave KDCs
@@ -1140,17 +1091,9 @@ installation of the KDCs.
 @node Client Programs, Client Machine Configuration Files, Installing and Configuring UNIX Client Machines, Installing and Configuring UNIX Client Machines
 @subsection Client Programs
 
-The Kerberized client programs are @code{login.krb5}, @code{rlogin},
-@code{telnet}, @code{ftp}, @code{rcp}, @code{rsh}, @code{kinit},
-@code{klist}, @code{kdestroy}, @code{kpasswd}, @code{ksu}, and
-@code{krb524init}.  All of these programs are in the directory
-@code{@value{ROOTDIR}/bin}, except for @code{login.krb5} which is in
-@code{@value{ROOTDIR}/sbin}.
-
-You will probably want to have your users put @code{@value{ROOTDIR}/bin}
-ahead of @code{/bin} and @code{/usr/bin} in their paths, so they will by
-default get the @value{PRODUCT} versions of @code{rlogin},
-@code{telnet}, @code{ftp}, @code{rcp}, and @code{rsh}.
+The Kerberized client programs are @code{kinit}, @code{klist},
+@code{kdestroy}, @code{kpasswd}, and @code{ksu}.  All of these programs
+are in the directory @code{@value{ROOTDIR}/bin}.
 
 @value{COMPANY} recommends that you use @code{login.krb5} in place of
 @code{/bin/login} to give your users a single-sign-on system.  You will
@@ -1158,14 +1101,9 @@ need to make sure your users know to use their Kerberos passwords when
 they log in.
 
 You will also need to educate your users to use the ticket management
-programs @code{kinit},
-@c @code{krb524init}, 
-@code{klist}, @code{kdestroy}, and to use the Kerberos programs
-@c @code{pfrom},
-@code{ksu}, and @code{kpasswd} in place of their non-Kerberos
-counterparts
-@c @code{from}
-@code{su}, @code{passwd}, and @code{rdist}.
+programs @code{kinit}, @code{klist}, @code{kdestroy}, and to use the
+Kerberos programs @code{ksu} and @code{kpasswd} in place of their
+non-Kerberos counterparts @code{su} and @code{passwd}.
 
 @node Client Machine Configuration Files,  , Client Programs, Installing and Configuring UNIX Client Machines
 @subsection Client Machine Configuration Files
@@ -1183,13 +1121,9 @@ to just insert the following code:
 @group
 kerberos      @value{DefaultPort}/udp    kdc    # Kerberos V5 KDC
 kerberos      @value{DefaultPort}/tcp    kdc    # Kerberos V5 KDC
-klogin        @value{DefaultKloginPort}/tcp          # Kerberos authenticated rlogin
-kshell        @value{DefaultKshellPort}/tcp   cmd    # and remote shell
 kerberos-adm  @value{DefaultKadmindPort}/tcp          # Kerberos 5 admin/changepw
 kerberos-adm  @value{DefaultKadmindPort}/udp          # Kerberos 5 admin/changepw
 krb5_prop     @value{DefaultKrbPropPort}/tcp          # Kerberos slave propagation
-@c kpop          1109/tcp         # Pop with Kerberos
-eklogin       @value{DefaultEkloginPort}/tcp         # Kerberos auth. & encrypted rlogin
 krb524        @value{DefaultKrb524Port}/tcp         # Kerberos 5 to 4 ticket translator
 @end group
 @end smallexample
@@ -1299,77 +1233,11 @@ installed, you can run an insecure server, and still take advantage of
 @value{PRODUCT}'s single sign-on capability.
 
 @menu
-* Server Programs::             
-* Server Configuration Files::  
 * The Keytab File::             
 * Some Advice about Secure Hosts::  
 @end menu
 
-@node Server Programs, Server Configuration Files, UNIX Application Servers, UNIX Application Servers
-@subsection Server Programs
-
-Just as @value{PRODUCT} provided its own Kerberos-enhanced versions of
-client UNIX network programs, @value{PRODUCT} also provides
-Kerberos-enhanced versions of server UNIX network daemons.  These are
-@code{ftpd}, @code{klogind}, @code{kshd}, and @code{telnetd}.
-@c @code{popper}, 
-These programs are installed in the directory
-@code{@value{ROOTDIR}/sbin}.  You may want to add this directory to
-root's path.
-
-@node Server Configuration Files, The Keytab File, Server Programs, UNIX Application Servers
-@subsection Server Configuration Files
-
-For a @emph{secure} server, make the following changes to
-@code{/etc/inetd.conf}:
-
-Find and comment out any lines for the services @code{ftp},
-@code{telnet}, @code{shell}, @code{login}, and @code{exec}.
-
-@need 1800
-Add the following lines.  (Note:  each line beginning with @result{} is
-a continuation of the previous line.)
-
-@smallexample
-@group
-klogin  stream  tcp  nowait  root  @value{ROOTDIR}/sbin/klogind
-@result{} klogind -k -c
-eklogin stream  tcp  nowait  root  @value{ROOTDIR}/sbin/klogind
-@result{} klogind -k -c -e
-kshell  stream  tcp  nowait  root  @value{ROOTDIR}/sbin/kshd
-@result{} kshd -k -c -A
-ftp     stream  tcp  nowait  root  @value{ROOTDIR}/sbin/ftpd
-@result{} ftpd -a
-telnet  stream  tcp  nowait  root  @value{ROOTDIR}/sbin/telnetd
-@result{} telnetd -a valid
-@end group
-@end smallexample
-
-For an @emph{insecure} server, make the following changes instead to
-@code{/etc/inetd.conf}:
-
-@need 1800
-Find and comment out any lines for the services @code{ftp} and
-@code{telnet}.
-
-Add the following lines.  (Note:  each line beginning with @result{} is
-a continuation of the previous line.)
-@smallexample
-@group
-klogin  stream  tcp  nowait  root  @value{ROOTDIR}/sbin/klogind
-@result{} klogind -k -c
-eklogin stream  tcp  nowait  root  @value{ROOTDIR}/sbin/klogind
-@result{} klogind -k -c -e
-kshell  stream  tcp  nowait  root  @value{ROOTDIR}/sbin/kshd
-@result{} kshd -k -c -A
-ftp     stream  tcp  nowait  root  @value{ROOTDIR}/sbin/ftpd
-@result{} ftpd
-telnet  stream  tcp  nowait  root  @value{ROOTDIR}/sbin/telnetd
-@result{} telnetd -a none
-@end group
-@end smallexample
-
-@node The Keytab File, Some Advice about Secure Hosts, Server Configuration Files, UNIX Application Servers
+@node The Keytab File, Some Advice about Secure Hosts, UNIX Application Servers, UNIX Application Servers
 @subsection The Keytab File
 
 All Kerberos server machines need a @dfn{keytab} file, called
@@ -1419,9 +1287,7 @@ kadmin5:} quit
 
 If you generate the keytab file on another host, you need to get a copy
 of the keytab file onto the destination host (@code{trillium}, in the
-above example) without sending it unencrypted over the network.  If you
-have installed the @value{PRODUCT} client programs, you can use
-encrypted @code{rcp}.
+above example) without sending it unencrypted over the network.
 
 @node Some Advice about Secure Hosts,  , The Keytab File, UNIX Application Servers
 @subsection Some Advice about Secure Hosts
@@ -1433,21 +1299,12 @@ to try to include an exhaustive list of countermeasures for every
 possible attack, but it is worth noting some of the larger holes and how
 to close them.
 
-As stated earlier in this section, @value{COMPANY} recommends that on a
-secure host, you disable the standard @code{ftp}, @code{login},
-@code{telnet}, @code{shell}, and @code{exec} services in
-@code{/etc/inetd.conf}.  We also recommend that secure hosts have an empty
-@code{/etc/hosts.equiv} file and that there not be a @code{.rhosts} file
-in @code{root}'s home directory.  You can grant Kerberos-authenticated
-root access to specific Kerberos principals by placing those principals
-in the file @code{.k5login} in root's home directory.
-
 We recommend that backups of secure machines exclude the keytab file
 (@code{/etc/krb5.keytab}).  If this is not possible, the backups should
 at least be done locally, rather than over a network, and the backup
 tapes should be physically secured.
 
-Finally, the keytab file and any programs run by root, including the
+The keytab file and any programs run by root, including the
 @value{PRODUCT} binaries, should be kept on local disk.  The keytab file
 should be readable only by root.
 
