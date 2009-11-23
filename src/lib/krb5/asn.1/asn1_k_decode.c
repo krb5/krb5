@@ -658,6 +658,7 @@ asn1_decode_enc_kdc_rep_part(asn1buf *buf, krb5_enc_kdc_rep_part *val)
     val->last_req = NULL;
     val->server = NULL;
     val->caddrs = NULL;
+    val->enc_padata = NULL;
     { begin_structure();
         get_field(val->session,0,asn1_decode_encryption_key_ptr);
         get_field(val->last_req,1,asn1_decode_last_req);
