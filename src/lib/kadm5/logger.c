@@ -668,8 +668,11 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
         log_control.log_whoami = strdup(whoami);
         log_control.log_hostname = (char *) malloc(MAXHOSTNAMELEN + 1);
         if (log_control.log_hostname) {
-            gethostname(log_control.log_hostname, MAXHOSTNAMELEN);
-            log_control.log_hostname[MAXHOSTNAMELEN] = '\0';
+            if (gethostname(log_control.log_hostname, MAXHOSTNAMELEN) == -1) {
+                free(log_control.log_hostname);
+                log_control.log_hostname = NULL;
+            } else
+                log_control.log_hostname[MAXHOSTNAMELEN] = '\0';
         }
 #ifdef  HAVE_OPENLOG
         if (do_openlog) {
