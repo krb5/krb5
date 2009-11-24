@@ -1611,8 +1611,23 @@ krb5_get_init_creds(krb5_context context,
         goto cleanup;
 
     /* success */
-
     ret = 0;
+    if (options&&options->opt_private->out_ccache) {
+        krb5_ccache out_ccache = options->opt_private->out_ccache;
+        ret = krb5_cc_initialize(context, out_ccache, creds->client);
+        if (ret != 0)
+            goto cc_cleanup;
+        ret = krb5_cc_store_cred(context, out_ccache, creds);
+    cc_cleanup:
+        if (ret !=0) {
+            const char *msg;
+            msg = krb5_get_error_message(context, ret);
+            krb5_set_error_message(context, ret, "%s while storing credentials", msg);
+            krb5_free_error_message(context, msg);
+        }
+    }
+
+
 
 cleanup:
     if (ret != 0) {
