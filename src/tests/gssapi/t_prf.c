@@ -403,6 +403,20 @@ int main(int argc, char *argv[])
         goto out;
     }
 
+    /* Try to store it in default ccache */
+    major = gss_store_cred(&minor,
+                           user_cred_handle,
+                           GSS_C_INITIATE,
+                           &mechs.elements[0],
+                           1,
+                           1,
+                           NULL,
+                           NULL);
+    if (GSS_ERROR(major)) {
+        displayStatus("gss_store_cred", major, minor);
+        goto out;
+    }
+
     major = initAcceptSecContext(&minor,
                                  user_cred_handle,
                                  impersonator_cred_handle,
