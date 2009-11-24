@@ -103,7 +103,7 @@ static krb5_error_code request_enc_pa_rep(krb5_pa_data ***padptr)
         return ENOMEM;
     pa->contents = NULL;
     pa->length = 0;
-    pa->pa_type = 149;
+    pa->pa_type = KRB5_ENCPADATA_REQ_ENC_PA_REP;
     pad[size] = pa;
     *padptr = pad;
     return 0;
@@ -1354,7 +1354,6 @@ krb5_get_init_creds(krb5_context context,
         goto cleanup;
     /* give the preauth plugins a chance to prep the request body */
     krb5_preauth_prepare_request(context, options, &request);
-    ret = request_enc_pa_rep(&request.padata);
     ret = krb5int_fast_prep_req_body(context, fast_state,
                                      &request, &encoded_request_body);
     if (ret)
@@ -1421,6 +1420,7 @@ krb5_get_init_creds(krb5_context context,
             krb5_free_data(context, encoded_previous_request);
             encoded_previous_request = NULL;
         }
+        ret = request_enc_pa_rep(&request.padata);
         if (ret)
             goto cleanup;
         ret = krb5int_fast_prep_req(context, fast_state,
