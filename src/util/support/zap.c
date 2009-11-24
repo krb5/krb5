@@ -1,9 +1,9 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
 /*
  * zap.c
  *
- * Copyright 2008 Massachusetts Institute of Technology.
+ * Copyright 2009 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
