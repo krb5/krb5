@@ -77,6 +77,7 @@ typedef struct gss_cred_id_struct {
 } gss_union_cred_desc, *gss_union_cred_t;
 
 typedef	OM_uint32	    (*gss_acquire_cred_with_password_sfct)(
+		    void *,		/* context */
 		    OM_uint32 *,	/* minor_status */
 		    const gss_name_t,	/* desired_name */
 		    const gss_buffer_t, /* password */
@@ -576,7 +577,7 @@ typedef struct gss_config {
 
 /* This structure MUST NOT be used by any code outside libgss */
 typedef struct gss_config_ext {
-    gss_acquire_cred_with_password_sfct	gssspi_acquire_cred_with_password;
+    gss_acquire_cred_with_password_sfct	gss_acquire_cred_with_password;
 } *gss_mechanism_ext;
 
 /*

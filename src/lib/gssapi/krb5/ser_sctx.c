@@ -610,7 +610,6 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
              xmalloc(sizeof(krb5_gss_ctx_id_rec)))) {
             memset(ctx, 0, sizeof(krb5_gss_ctx_id_rec));
 
-            ctx->magic = ibuf;
             ctx->k5_context = kcontext;
 
             /* Get static data */
