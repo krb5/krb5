@@ -752,13 +752,41 @@ krb5int_hmac_iov_keyblock(const struct krb5_hash_provider *hash,
 krb5_error_code krb5int_pbkdf2_hmac_sha1(const krb5_data *, unsigned long,
                                          const krb5_data *, const krb5_data *);
 
-/* Attempt to zero memory in a way that compilers won't optimize out. */
+/*
+ * Attempt to zero memory in a way that compilers won't optimize out.
+ *
+ * This mechanism should work even for heap storage about to be freed,
+ * or automatic storage right before we return from a function.
+ *
+ * Then, even if we leak uninitialized memory someplace, or UNIX
+ * "core" files get created with world-read access, some of the most
+ * sensitive data in the process memory will already be safely wiped.
+ *
+ * We're not going so far -- yet -- as to try to protect key data that
+ * may have been written into swap space....
+ */
 #ifdef _WIN32
 # define zap(ptr, len) SecureZeroMemory(ptr, len)
 #elif defined(__GNUC__)
 static inline void zap(void *ptr, size_t len)
 {
     memset(ptr, 0, len);
+    /*
+     * Some versions of gcc have gotten clever enough to eliminate a
+     * memset call right before the block in question is released.
+     * This (empty) asm requires it to assume that we're doing
+     * something interesting with the stored (zero) value, so the
+     * memset can't be eliminated.
+     *
+     * An optimizer that looks at assembly or object code may not be
+     * fooled, and may still cause the memset to go away.  Address
+     * that problem if and when we encounter it.
+     *
+     * This also may not be enough if free() does something
+     * interesting like purge memory locations from a write-back cache
+     * that hasn't written back the zero bytes yet.  A memory barrier
+     * instruction would help in that case.
+     */
     asm volatile ("" : : "g" (ptr), "g" (len));
 }
 #else
