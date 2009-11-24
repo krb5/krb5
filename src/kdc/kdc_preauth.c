@@ -3066,6 +3066,7 @@ include_pac_p(krb5_context context, krb5_kdc_req *request)
 krb5_error_code
 return_enc_padata(krb5_context context,
                   krb5_data *req_pkt, krb5_kdc_req *request,
+                  krb5_keyblock *reply_key,
                   krb5_db_entry *server,
                          krb5_enc_kdc_rep_part *reply_encpart)
 {
@@ -3081,13 +3082,10 @@ return_enc_padata(krb5_context context,
     if (reply_encpart->enc_padata == NULL) {
         return ENOMEM;
     }
-
-
     tl_data.tl_data_type = KRB5_TL_SVR_REFERRAL_DATA;
-
     code = krb5_dbe_lookup_tl_data(context, server, &tl_data);
     if (code || tl_data.tl_data_length == 0)
-        return 0; /* no server referrals to return */
+        goto negotiate; /* no server referrals to return */
 
     pa_data = (krb5_pa_data *)malloc(sizeof(*pa_data));
     if (pa_data == NULL)
@@ -3105,8 +3103,9 @@ return_enc_padata(krb5_context context,
 
     reply_encpart->enc_padata[idx++] = pa_data;
     reply_encpart->enc_padata[1] = NULL;
-
-    return 0;
+negotiate:
+    return kdc_handle_protected_negotiation(req_pkt, request, reply_key,
+                                            reply_encpart->enc_padata, &idx);
 }
 
 #if 0

@@ -53,6 +53,7 @@ encode_krb5_as_rep
 encode_krb5_as_req
 encode_krb5_authdata
 encode_krb5_authenticator
+encode_krb5_checksum
 encode_krb5_cred
 encode_krb5_enc_cred_part
 encode_krb5_enc_data
