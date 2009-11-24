@@ -280,13 +280,14 @@ krb5_cc_set_config (krb5_context context, krb5_ccache id,
 {
     krb5_error_code ret;
     krb5_creds cred;
+    memset(&cred, 0, sizeof(cred));
 
     ret = build_conf_principals(context, id, principal, key, &cred);
     if (ret)
         goto out;
 
     ret = krb5_cc_remove_cred(context, id, 0, &cred);
-    if (ret && ret != KRB5_CC_NOTFOUND)
+    if (ret && ret != KRB5_CC_NOTFOUND && ret != KRB5_CC_NOSUPP)
         goto out;
 
     cred.ticket.data = malloc(data->length);
