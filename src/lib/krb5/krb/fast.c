@@ -533,7 +533,7 @@ krb5int_find_pa_data(krb5_context context, krb5_pa_data *const *padata,
 krb5_error_code krb5int_fast_verify_nego
 (krb5_context context, struct krb5int_fast_request_state *state,
  krb5_kdc_rep *rep, krb5_data *request,
- krb5_keyblock *decrypting_key)
+ krb5_keyblock *decrypting_key, krb5_boolean *fast_avail)
 {
     krb5_error_code retval = 0;
     krb5_checksum *checksum = NULL;
@@ -559,8 +559,9 @@ krb5_error_code krb5int_fast_verify_nego
         if (retval == 0) {
             pa = krb5int_find_pa_data(context, rep->enc_part2->enc_padata,
                                       KRB5_PADATA_FX_FAST);
-            /*if (pa)
-              printf("FAST enabled on KDC\n");*/
+            if (pa)
+                *fast_avail = 1;
+            else *fast_avail = 0;
         }
     }
     if (checksum)

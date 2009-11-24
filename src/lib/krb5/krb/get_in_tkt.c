@@ -1116,6 +1116,7 @@ krb5_get_init_creds(krb5_context context,
     int canon_flag = 0;
     krb5_principal_data referred_client;
     krb5_boolean retry = 0;
+    krb5_boolean fast_avail = 0; /*The KDC for this realm supports fast; output of negotiation*/
     struct krb5int_fast_request_state *fast_state = NULL;
     krb5_pa_data **out_padata = NULL;
 
@@ -1595,7 +1596,7 @@ krb5_get_init_creds(krb5_context context,
     }
     ret = krb5int_fast_verify_nego(context, fast_state,
                                    local_as_reply, encoded_previous_request,
-                                   &encrypting_key);
+                                   &encrypting_key, &fast_avail);
     if (ret)
         goto cleanup;
     if ((ret = verify_as_reply(context, time_now, &request, local_as_reply)))
@@ -1614,11 +1615,20 @@ krb5_get_init_creds(krb5_context context,
     ret = 0;
     if (options&&options->opt_private->out_ccache) {
         krb5_ccache out_ccache = options->opt_private->out_ccache;
+        krb5_data config_data;
         ret = krb5_cc_initialize(context, out_ccache, creds->client);
         if (ret != 0)
             goto cc_cleanup;
         ret = krb5_cc_store_cred(context, out_ccache, creds);
-    cc_cleanup:
+        if (ret != 0)
+            goto cc_cleanup;
+        if (fast_avail) {
+            config_data.data = "yes";
+            config_data.length = strlen(config_data.data);
+            ret = krb5_cc_set_config(context, out_ccache, creds->server,
+                                 KRB5_CCCONF_FAST_AVAIL, &config_data);
+        }
+        cc_cleanup:
         if (ret !=0) {
             const char *msg;
             msg = krb5_get_error_message(context, ret);

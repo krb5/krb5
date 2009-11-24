@@ -82,7 +82,8 @@ krb5_error_code krb5int_fast_reply_key(krb5_context context,
 krb5_error_code krb5int_fast_verify_nego
 (krb5_context context, struct krb5int_fast_request_state *state,
  krb5_kdc_rep *rep, krb5_data *request,
- krb5_keyblock *decrypting_key);
+ krb5_keyblock *decrypting_key, krb5_boolean *fast_avail);
+
 
 
 
