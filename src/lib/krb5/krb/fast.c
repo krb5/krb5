@@ -529,9 +529,6 @@ krb5int_find_pa_data(krb5_context context, krb5_pa_data *const *padata,
     return *tmppa;
 }
 
-#define TKT_FLG_ENC_PA_REP 0x10000
-#define KRB5_KEYUSAGE_AS_REQ 56
-#define KRB5_ENCPADATA_REQ_ENC_PA_REP 149
 
 krb5_error_code krb5int_fast_verify_nego
 (krb5_context context, struct krb5int_fast_request_state *state,
