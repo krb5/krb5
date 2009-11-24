@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/kdb/kdb_ldap/ldap_fetch_mkey.c
  *
@@ -36,10 +37,7 @@
  */
 
 krb5_error_code
-krb5_ldap_get_mkey (context, key)
-    krb5_context               context;
-    krb5_keyblock              **key;
-
+krb5_ldap_get_mkey(krb5_context context, krb5_keyblock **key)
 {
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
@@ -51,7 +49,7 @@ krb5_ldap_get_mkey (context, key)
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
 
     if (ldap_context == NULL || ldap_context->lrparams == NULL)
-	return KRB5_KDB_DBNOTINITED;
+        return KRB5_KDB_DBNOTINITED;
 
     *key = &ldap_context->lrparams->mkey;
     return 0;
@@ -63,10 +61,7 @@ krb5_ldap_get_mkey (context, key)
  */
 
 krb5_error_code
-krb5_ldap_set_mkey (context, pwd, key)
-    krb5_context                context;
-    char                        *pwd;
-    krb5_keyblock               *key;
+krb5_ldap_set_mkey(krb5_context context, char *pwd, krb5_keyblock *key)
 {
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
@@ -79,13 +74,13 @@ krb5_ldap_set_mkey (context, pwd, key)
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
 
     if (ldap_context == NULL || ldap_context->lrparams == NULL)
-	return KRB5_KDB_DBNOTINITED;
+        return KRB5_KDB_DBNOTINITED;
 
     r_params = ldap_context->lrparams;
 
     if (r_params->mkey.contents) {
-	free (r_params->mkey.contents);
-	r_params->mkey.contents=NULL;
+        free (r_params->mkey.contents);
+        r_params->mkey.contents=NULL;
     }
 
     r_params->mkey.magic = key->magic;
@@ -93,15 +88,14 @@ krb5_ldap_set_mkey (context, pwd, key)
     r_params->mkey.length = key->length;
     r_params->mkey.contents = malloc(key->length);
     if (r_params->mkey.contents == NULL)
-	return ENOMEM;
+        return ENOMEM;
 
     memcpy(r_params->mkey.contents, key->contents, key->length);
     return 0;
 }
 
 krb5_error_code
-krb5_ldap_get_mkey_list (krb5_context context, krb5_keylist_node **key_list)
-
+krb5_ldap_get_mkey_list(krb5_context context, krb5_keylist_node **key_list)
 {
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_context           *ldap_context=NULL;
@@ -113,7 +107,7 @@ krb5_ldap_get_mkey_list (krb5_context context, krb5_keylist_node **key_list)
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
 
     if (ldap_context == NULL || ldap_context->lrparams == NULL)
-	return KRB5_KDB_DBNOTINITED;
+        return KRB5_KDB_DBNOTINITED;
 
     *key_list = ldap_context->lrparams->mkey_list;
     return 0;
@@ -133,7 +127,7 @@ krb5_ldap_set_mkey_list(krb5_context context, krb5_keylist_node *key_list)
     ldap_context = (krb5_ldap_context *) dal_handle->db_context;
 
     if (ldap_context == NULL || ldap_context->lrparams == NULL)
-	return KRB5_KDB_DBNOTINITED;
+        return KRB5_KDB_DBNOTINITED;
 
     r_params = ldap_context->lrparams;
     r_params->mkey_list = key_list;

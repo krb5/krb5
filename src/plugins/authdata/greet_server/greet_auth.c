@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * plugins/authdata/greet_server/
  *
@@ -174,7 +175,7 @@ greet_authdata(krb5_context context,
     krb5_data *greeting = NULL;
 
     if (request->msg_type != KRB5_TGS_REQ)
-	return 0;
+        return 0;
 
     code = greet_hello(context, &greeting);
     if (code != 0)

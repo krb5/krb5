@@ -667,6 +667,7 @@ INDENTDIRS = \
 	lib/kadm5 \
 	lib/kdb \
 	lib/krb5 \
+	plugins \
 	prototype \
 	slave
 
@@ -688,7 +689,16 @@ OTHEREXCLUDES = \
 	include/k5-platform.h \
 	include/gssrpc \
 	lib/krb5/krb/deltat.c \
-	lib/krb5/unicode
+	lib/krb5/unicode \
+	plugins/kdb/db2/libdb2 \
+	plugins/kdb/db2/pol_xdr.c \
+	plugins/kdb/hdb/hdb.h \
+	plugins/kdb/hdb/hdb_asn1.h \
+	plugins/kdb/hdb/hdb_err.h \
+	plugins/kdb/hdb/windc_plugin.h \
+	plugins/kdb/ldap/libkdb_ldap/princ_xdr.c \
+	plugins/kdb/ldap/libkdb_ldap/princ_xdr.h \
+	plugins/preauth/pkinit
 
 EXCLUDES = `for i in $(BSDFILES) $(OTHEREXCLUDES); do echo $$i; done | $(AWK) '{ print "-path", $$1, "-o" }'` -path /dev/null
 

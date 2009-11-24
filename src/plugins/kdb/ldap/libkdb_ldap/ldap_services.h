@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/kdb/kdb_ldap/ldap_services.h
  *
@@ -55,43 +56,46 @@
 #define SERVICE_PROTOCOL_TYPE_TCP     "1"
 
 typedef struct _krb5_ldap_service_params {
-        char            *servicedn;
-        int             servicetype;
-        int             krbserviceflags;
-        char            **krbhostservers;
-        char            **krbrealmreferences;
-        krb5_tl_data    *tl_data;
+    char            *servicedn;
+    int             servicetype;
+    int             krbserviceflags;
+    char            **krbhostservers;
+    char            **krbrealmreferences;
+    krb5_tl_data    *tl_data;
 } krb5_ldap_service_params;
 
 #ifdef HAVE_EDIRECTORY
 
 krb5_error_code
-krb5_ldap_read_service( krb5_context, char *, krb5_ldap_service_params **, int *);
+krb5_ldap_read_service(krb5_context, char *, krb5_ldap_service_params **,
+                       int *);
 
 krb5_error_code
-krb5_ldap_create_service( krb5_context, krb5_ldap_service_params *,int);
+krb5_ldap_create_service(krb5_context, krb5_ldap_service_params *, int);
 
 krb5_error_code
-krb5_ldap_modify_service( krb5_context, krb5_ldap_service_params *, int);
+krb5_ldap_modify_service(krb5_context, krb5_ldap_service_params *, int);
 
 krb5_error_code
-krb5_ldap_delete_service( krb5_context, krb5_ldap_service_params *, char *);
+krb5_ldap_delete_service(krb5_context, krb5_ldap_service_params *, char *);
 
 krb5_error_code
-krb5_ldap_list_services( krb5_context, char *, char ***);
+krb5_ldap_list_services(krb5_context, char *, char ***);
 
 krb5_error_code
-krb5_ldap_free_service( krb5_context, krb5_ldap_service_params *);
+krb5_ldap_free_service(krb5_context, krb5_ldap_service_params *);
 
 
 krb5_error_code
-krb5_ldap_set_service_passwd( krb5_context, char *, char *);
+krb5_ldap_set_service_passwd(krb5_context, char *, char *);
 
 krb5_error_code
-krb5_ldap_add_service_rights( krb5_context, int, char *, char *, char **, char *, int);
+krb5_ldap_add_service_rights(krb5_context, int, char *, char *, char **,
+                             char *, int);
 
 krb5_error_code
-krb5_ldap_delete_service_rights( krb5_context, int, char *, char *, char **, char *, int);
+krb5_ldap_delete_service_rights(krb5_context, int, char *, char *, char **,
+                                char *, int);
 #endif
 
 #endif

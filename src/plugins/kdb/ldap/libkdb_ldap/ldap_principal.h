@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/kdb/kdb_ldap/ldap_principal.h
  *
@@ -35,20 +36,20 @@
 
 #define  KEYHEADER  12
 
-#define  NOOFKEYS(ptr) 		((ptr[10]<<8) | ptr[11])
+#define  NOOFKEYS(ptr)          ((ptr[10]<<8) | ptr[11])
 
-#define  PRINCIPALLEN(ptr) 	((ptr[0]<<8) | ptr[1])
-#define  PRINCIPALNAME(ptr) 	(ptr + KEYHEADER + (NOOFKEYS(ptr) *8))
+#define  PRINCIPALLEN(ptr)      ((ptr[0]<<8) | ptr[1])
+#define  PRINCIPALNAME(ptr)     (ptr + KEYHEADER + (NOOFKEYS(ptr) *8))
 
-#define  KEYBODY(ptr)		PRINCIPALNAME(ptr) + PRINCIPALLEN(ptr)
+#define  KEYBODY(ptr)           PRINCIPALNAME(ptr) + PRINCIPALLEN(ptr)
 
-#define  PKEYVER(ptr) 		((ptr[2]<<8) | ptr[3])
-#define  MKEYVER(ptr) 		((ptr[4]<<8) | ptr[5])
+#define  PKEYVER(ptr)           ((ptr[2]<<8) | ptr[3])
+#define  MKEYVER(ptr)           ((ptr[4]<<8) | ptr[5])
 
-#define  KEYTYPE(ptr,j) 	((ptr[KEYHEADER+(j*8)]<<8) | ptr[KEYHEADER+1+(j*8)])
-#define  KEYLENGTH(ptr,j) 	((ptr[KEYHEADER+2+(j*8)]<<8) | ptr[KEYHEADER+3+(j*8)])
-#define  SALTTYPE(ptr,j) 	((ptr[KEYHEADER+4+(j*8)]<<8) | ptr[KEYHEADER+5+(j*8)])
-#define  SALTLENGTH(ptr,j) 	((ptr[KEYHEADER+6+(j*8)]<<8) | ptr[KEYHEADER+7+(j*8)])
+#define  KEYTYPE(ptr,j)         ((ptr[KEYHEADER+(j*8)]<<8) | ptr[KEYHEADER+1+(j*8)])
+#define  KEYLENGTH(ptr,j)       ((ptr[KEYHEADER+2+(j*8)]<<8) | ptr[KEYHEADER+3+(j*8)])
+#define  SALTTYPE(ptr,j)        ((ptr[KEYHEADER+4+(j*8)]<<8) | ptr[KEYHEADER+5+(j*8)])
+#define  SALTLENGTH(ptr,j)      ((ptr[KEYHEADER+6+(j*8)]<<8) | ptr[KEYHEADER+7+(j*8)])
 
 #define MAX_KEY_LENGTH         1024
 #define CONTAINERDN_ARG        "containerdn"
@@ -57,7 +58,7 @@
 #define LINKDN_ARG             "linkdn"
 
 /* #define FILTER   "(&(objectclass=krbprincipalaux)(krbprincipalname=" */
- #define FILTER   "(&(|(objectclass=krbprincipalaux)(objectclass=krbprincipal))(krbprincipalname="
+#define FILTER   "(&(|(objectclass=krbprincipalaux)(objectclass=krbprincipal))(krbprincipalname="
 
 #define  KDB_USER_PRINCIPAL    0x01
 #define  KDB_SERVICE_PRINCIPAL 0x02
@@ -88,7 +89,7 @@
  * and krb5_ldap_put_principal(). If present, it means that the
  * krbPwdMaxFailure attribute should be incremented by one.
  */
-#define KADM5_FAIL_AUTH_COUNT_INCREMENT	     0x080000 /* KADM5_CPW_FUNCTION */
+#define KADM5_FAIL_AUTH_COUNT_INCREMENT      0x080000 /* KADM5_CPW_FUNCTION */
 
 extern struct timeval timeout;
 extern char *policyclass[];
@@ -98,7 +99,7 @@ krb5_ldap_put_principal(krb5_context, krb5_db_entry *, int *, char **);
 
 krb5_error_code
 krb5_ldap_get_principal(krb5_context , krb5_const_principal ,
-                        unsigned int, krb5_db_entry *,int *, krb5_boolean *);
+                        unsigned int, krb5_db_entry *, int *, krb5_boolean *);
 
 krb5_error_code
 krb5_ldap_delete_principal(krb5_context, krb5_const_principal, int *);
@@ -107,7 +108,8 @@ krb5_error_code
 krb5_ldap_free_principal(krb5_context, krb5_db_entry *, int );
 
 krb5_error_code
-krb5_ldap_iterate(krb5_context, char *, krb5_error_code (*) (krb5_pointer, krb5_db_entry *),
+krb5_ldap_iterate(krb5_context, char *,
+                  krb5_error_code (*)(krb5_pointer, krb5_db_entry *),
                   krb5_pointer/*, int */);
 
 void
@@ -121,11 +123,12 @@ krb5_ldap_parse_principal_name(char *, char **);
 
 krb5_error_code
 krb5_decode_krbsecretkey(krb5_context, krb5_db_entry *, struct berval **,
-                        krb5_tl_data *, krb5_kvno *);
+                         krb5_tl_data *, krb5_kvno *);
 
 krb5_error_code
 berval2tl_data(struct berval *in, krb5_tl_data **out);
 
 krb5_error_code
-krb5_read_tkt_policy (krb5_context, krb5_ldap_context *, krb5_db_entry *, char *);
+krb5_read_tkt_policy(krb5_context, krb5_ldap_context *, krb5_db_entry *,
+                     char *);
 #endif
