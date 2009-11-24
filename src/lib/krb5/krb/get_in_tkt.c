@@ -82,9 +82,33 @@ typedef krb5_error_code (*git_key_proc) (krb5_context,
                                          krb5_keyblock **);
 
 typedef krb5_error_code (*git_decrypt_proc) (krb5_context,
+
                                              const krb5_keyblock *,
                                              krb5_const_pointer,
                                              krb5_kdc_rep * );
+static krb5_error_code request_enc_pa_rep(krb5_pa_data ***padptr)
+{
+    size_t size = 0;
+    krb5_pa_data **pad = *padptr;
+    krb5_pa_data *pa= NULL;
+    if (pad)
+        for (size=0; pad[size]; size++);
+    pad = realloc(pad, sizeof(*pad)*(size+2));
+
+    if (pad == NULL)
+        return ENOMEM;
+    pad[size+1] = NULL;
+    pa = malloc(sizeof(krb5_pa_data));
+    if (pa == NULL)
+        return ENOMEM;
+    pa->contents = NULL;
+    pa->length = 0;
+    pa->pa_type = 149;
+    pad[size] = pa;
+    *padptr = pad;
+    return 0;
+}
+
 
 static krb5_error_code make_preauth_list (krb5_context,
                                           krb5_preauthtype *,
@@ -1330,6 +1354,7 @@ krb5_get_init_creds(krb5_context context,
         goto cleanup;
     /* give the preauth plugins a chance to prep the request body */
     krb5_preauth_prepare_request(context, options, &request);
+    ret = request_enc_pa_rep(&request.padata);
     ret = krb5int_fast_prep_req_body(context, fast_state,
                                      &request, &encoded_request_body);
     if (ret)
@@ -1396,6 +1421,8 @@ krb5_get_init_creds(krb5_context context,
             krb5_free_data(context, encoded_previous_request);
             encoded_previous_request = NULL;
         }
+        if (ret)
+            goto cleanup;
         ret = krb5int_fast_prep_req(context, fast_state,
                                     &request, encoded_request_body,
                                     encode_krb5_as_req, &encoded_previous_request);
@@ -1566,7 +1593,11 @@ krb5_get_init_creds(krb5_context context,
                                     NULL)))
             goto cleanup;
     }
-
+    ret = krb5int_fast_verify_nego(context, fast_state,
+                                   local_as_reply, encoded_previous_request,
+                                   &encrypting_key);
+    if (ret)
+        goto cleanup;
     if ((ret = verify_as_reply(context, time_now, &request, local_as_reply)))
         goto cleanup;
 
