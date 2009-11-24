@@ -250,9 +250,10 @@ krb5_boolean
 include_pac_p(krb5_context context, krb5_kdc_req *request);
 
 krb5_error_code
-return_svr_referral_data (krb5_context context,
-                          krb5_db_entry *server,
-                          krb5_enc_kdc_rep_part *reply_encpart);
+return_enc_padata(krb5_context context,
+                  krb5_data *req_pkt, krb5_kdc_req *request,
+                  krb5_db_entry *server,
+                  krb5_enc_kdc_rep_part *reply_encpart);
 
 krb5_error_code
 sign_db_authdata (krb5_context context,
