@@ -144,6 +144,7 @@ krb5int_fast_as_armor(krb5_context context,
     krb5_clear_error_message(context);
     target_realm = krb5_princ_realm(context, request->server);
     if (opte->opt_private->fast_ccache_name) {
+        state->fast_state_flags |= KRB5INT_FAST_ARMOR_AVAIL;
         retval = krb5_cc_resolve(context, opte->opt_private->fast_ccache_name,
                                  &ccache);
         if (retval == 0)
@@ -155,11 +156,13 @@ krb5int_fast_as_armor(krb5_context context,
                                         target_principal, KRB5_CCCONF_FAST_AVAIL,
                                         &config_data);
             if ((retval == 0) && config_data.data )
-                opte->opt_private->fast_flags |= KRB5_FAST_REQUIRED;
+                state->fast_state_flags |= KRB5INT_FAST_DO_FAST;
             krb5_free_data_contents(context, &config_data);
             retval = 0;
         }
-        if (retval==0 && (opte->opt_private->fast_flags &KRB5_FAST_REQUIRED))
+        if (opte->opt_private->fast_flags& KRB5_FAST_REQUIRED)
+            state->fast_state_flags |= KRB5INT_FAST_DO_FAST;
+        if (retval==0 && (state->fast_state_flags & KRB5INT_FAST_DO_FAST))
             retval = fast_armor_ap_request(context, state, ccache,
 target_principal);
         if (retval != 0) {
@@ -586,4 +589,15 @@ krb5_error_code krb5int_fast_verify_nego
     if (checksum)
         krb5_free_checksum(context, checksum);
     return retval;
+}
+krb5_boolean krb5int_upgrade_to_fast_p
+(krb5_context context, struct krb5int_fast_request_state *state, krb5_pa_data **padata)
+{
+    if (! (state->fast_state_flags & KRB5INT_FAST_ARMOR_AVAIL))
+        return 0;
+    if (krb5int_find_pa_data(context, padata, KRB5_PADATA_FX_FAST) != NULL) {
+        state->fast_state_flags |= KRB5INT_FAST_DO_FAST;
+        return 1;
+    }
+    return 0;
 }

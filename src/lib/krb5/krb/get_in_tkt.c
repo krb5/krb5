@@ -1116,7 +1116,11 @@ krb5_get_init_creds(krb5_context context,
     int canon_flag = 0;
     krb5_principal_data referred_client;
     krb5_boolean retry = 0;
-    krb5_boolean fast_avail = 0; /*The KDC for this realm supports fast; output of negotiation*/
+    krb5_boolean enc_pa_rep_permitted = 1;
+    krb5_boolean fast_avail = 0; /*The KDC for this realm supports fast; output
+                                  * of negotiation*/
+    krb5_boolean sent_nontrivial_preauth = 0;
+    krb5_boolean have_restarted = 0;
     struct krb5int_fast_request_state *fast_state = NULL;
     krb5_pa_data **out_padata = NULL;
 
@@ -1272,9 +1276,6 @@ krb5_get_init_creds(krb5_context context,
                                  request.client, &request.server)))
         goto cleanup;
 
-    krb5_preauth_request_context_init(context);
-
-
     if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_ETYPE_LIST)) {
         request.ktype = options->etype_list;
         request.nktypes = options->etype_list_length;
@@ -1310,12 +1311,6 @@ krb5_get_init_creds(krb5_context context,
 
     /* set up the other state.  */
 
-    if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_PREAUTH_LIST)) {
-        if ((ret = make_preauth_list(context, options->preauth_list,
-                                     options->preauth_list_length,
-                                     &preauth_to_use)))
-            goto cleanup;
-    }
 
     /* the salt is allocated from somewhere, unless it is from the caller,
        then it is a reference */
@@ -1326,46 +1321,90 @@ krb5_get_init_creds(krb5_context context,
         salt.length = SALT_TYPE_AFS_LENGTH;
         salt.data = NULL;
     }
-
-
-    /* set the request nonce */
-    if ((ret = krb5_timeofday(context, &time_now)))
-        goto cleanup;
-    /*
-     * XXX we know they are the same size... and we should do
-     * something better than just the current time
-     */
-    {
-        unsigned char random_buf[4];
-        krb5_data random_data;
-
-        random_data.length = 4;
-        random_data.data = (char *)random_buf;
-        if (krb5_c_random_make_octets(context, &random_data) == 0)
-            /* See RT ticket 3196 at MIT.  If we set the high bit, we
-               may have compatibility problems with Heimdal, because
-               we (incorrectly) encode this value as signed.  */
-            request.nonce = 0x7fffffff & load_32_n(random_buf);
-        else
-            /* XXX  Yuck.  Old version.  */
-            request.nonce = (krb5_int32) time_now;
-    }
-    ret = krb5int_fast_as_armor(context, fast_state, options, &request);
-    if (ret != 0)
-        goto cleanup;
-    /* give the preauth plugins a chance to prep the request body */
-    krb5_preauth_prepare_request(context, options, &request);
-    ret = krb5int_fast_prep_req_body(context, fast_state,
-                                     &request, &encoded_request_body);
-    if (ret)
-        goto cleanup;
-
     get_data_rock.magic = CLIENT_ROCK_MAGIC;
     get_data_rock.etype = &etype;
     get_data_rock.fast_state = fast_state;
 
     /* now, loop processing preauth data and talking to the kdc */
+    /* The control flow is complicated.  In order to switch from non-FAST mode
+     * to FAST mode, we need to reset our pre-authentication state.  FAST
+     * negotiation attempts to make sure we rarely have to do this.  When FAST
+     * negotiation is working, we record whether FAST is available when we
+     * obtain an armor ticket; if so, we start out with FAST enabled .  There
+     * are two complicated situations.
+     *
+     * First, if we get a PREAUTH_REQUIRED error including PADATA_FX_FAST back from
+     * a KDC in a case where we were not expecting to use FAST, and we have an
+     * armor ticket available, then we want to use  FAST.   That involves
+     * clearing out the pre-auth state, reinitializing the plugins and trying
+     * again with an armor key.
+     *
+     * Secondly, using the negotiation can cause problems with some older
+     * KDCs.  Negotiation involves including a special padata item.  Some KDCs,
+     * including MIT prior to 1.7, will return PREAUTH_FAILED rather than
+     * PREAUTH_REQUIRED in pre-authentication is required and unknown padata are
+     * included in the request.  To make matters worse, these KDCs typically do
+     * not include a list of padata in PREAUTH_FAILED errors.  So, if we get
+     * PREAUTH_FAILED and we generated no pre-authentication other than the
+     * negotiation then we want to retry without negotiation.  In this case it
+     * is probably also desirable to retry  with the preauth plugin state cleared.
+     *
+     * In all these cases we should not start over more than once.  Control
+     *  flow is managed  by several variables.
+     *
+     *  sent_nontrivial_preauth: if true, we sent preauth other than
+     * negotiation; no restart on PREAUTH_FAILED
+     *
+     *                          KRB5INT_FAST_ARMOR_AVAIL: fast_state_flag
+     *  if desired we could generate armor; if not set, then we can't use FAST
+     *  even if the KDC wants to.
+     *
+     *  have_restarted: true if we've already restarted
+     */
     for (loopcount = 0; loopcount < MAX_IN_TKT_LOOPS; loopcount++) {
+    start_of_loop: if (loopcount == 0) {
+        krb5_preauth_request_context_init(context);
+            if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_PREAUTH_LIST)) {
+                if ((ret = make_preauth_list(context, options->preauth_list,
+                                             options->preauth_list_length,
+                                             &preauth_to_use)))
+                    goto cleanup;
+            }
+
+
+            /* set the request nonce */
+            if ((ret = krb5_timeofday(context, &time_now)))
+                goto cleanup;
+            /*
+             * XXX we know they are the same size... and we should do
+             * something better than just the current time
+             */
+            {
+                unsigned char random_buf[4];
+                krb5_data random_data;
+
+                random_data.length = 4;
+                random_data.data = (char *)random_buf;
+                if (krb5_c_random_make_octets(context, &random_data) == 0)
+                    /* See RT ticket 3196 at MIT.  If we set the high bit, we
+                       may have compatibility problems with Heimdal, because
+                       we (incorrectly) encode this value as signed.  */
+                    request.nonce = 0x7fffffff & load_32_n(random_buf);
+                else
+                    /* XXX  Yuck.  Old version.  */
+                    request.nonce = (krb5_int32) time_now;
+            }
+            ret = krb5int_fast_as_armor(context, fast_state, options, &request);
+            if (ret != 0)
+                goto cleanup;
+            /* give the preauth plugins a chance to prep the request body */
+            krb5_preauth_prepare_request(context, options, &request);
+            ret = krb5int_fast_prep_req_body(context, fast_state,
+                                             &request, &encoded_request_body);
+            if (ret)
+                goto cleanup;
+        }
+
         if (request.padata) {
             krb5_free_pa_data(context, request.padata);
             request.padata = NULL;
@@ -1421,7 +1460,10 @@ krb5_get_init_creds(krb5_context context,
             krb5_free_data(context, encoded_previous_request);
             encoded_previous_request = NULL;
         }
-        ret = request_enc_pa_rep(&request.padata);
+        if (request.padata)
+            sent_nontrivial_preauth = 1;
+        if (enc_pa_rep_permitted)
+            ret = request_enc_pa_rep(&request.padata);
         if (ret)
             goto cleanup;
         ret = krb5int_fast_prep_req(context, fast_state,
@@ -1438,10 +1480,27 @@ krb5_get_init_creds(krb5_context context,
             goto cleanup;
 
         if (err_reply) {
+            krb5_boolean upgrade_to_fast;
             ret = krb5int_fast_process_error(context, fast_state, &err_reply,
                                              &out_padata, &retry);
-            if (ret !=0)
+                        if (ret !=0)
                 goto cleanup;
+                        upgrade_to_fast  = krb5int_upgrade_to_fast_p(context, fast_state, out_padata);
+            if ((loopcount == 0) &&(!have_restarted) && (
+                    upgrade_to_fast
+                 || (err_reply->error == KDC_ERR_PREAUTH_FAILED && (!sent_nontrivial_preauth)))) {
+                loopcount = 0;
+                krb5_preauth_request_context_fini(context);
+                have_restarted = 1;
+                if (!upgrade_to_fast)
+                    enc_pa_rep_permitted = 0;
+                krb5_free_error(context, err_reply);
+                err_reply = 0;
+                if (preauth_to_use)
+                    krb5_free_pa_data(context, preauth_to_use);
+                preauth_to_use = NULL;
+                goto start_of_loop;
+                                }
             if (err_reply->error == KDC_ERR_PREAUTH_REQUIRED && retry) {
                 /* reset the list of preauth types to try */
                 if (preauth_to_use) {

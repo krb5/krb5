@@ -41,6 +41,9 @@ struct krb5int_fast_request_state {
     krb5_ui_4 fast_options;
     krb5_int32 nonce;
 };
+#define KRB5INT_FAST_DO_FAST (1l<<0) /*perform FAST*/
+#define KRB5INT_FAST_ARMOR_AVAIL (1l<<1)
+
 
 krb5_error_code
 krb5int_fast_prep_req_body(krb5_context context, struct krb5int_fast_request_state *state,
@@ -83,6 +86,9 @@ krb5_error_code krb5int_fast_verify_nego
 (krb5_context context, struct krb5int_fast_request_state *state,
  krb5_kdc_rep *rep, krb5_data *request,
  krb5_keyblock *decrypting_key, krb5_boolean *fast_avail);
+
+krb5_boolean krb5int_upgrade_to_fast_p
+(krb5_context context, struct krb5int_fast_request_state *state, krb5_pa_data **padata);
 
 
 
