@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * appl/simple/server/sim_server.c
  *
@@ -53,33 +54,30 @@
 #define PROGNAME argv[0]
 
 static void
-usage(name)
-    char *name;
+usage(char *name)
 {
-	fprintf(stderr, "usage: %s [-p port] [-s service] [-S keytab]\n", name);
+    fprintf(stderr, "usage: %s [-p port] [-s service] [-S keytab]\n", name);
 }
 
 int
-main(argc, argv)
-int argc;
-char *argv[];
+main(int argc, char *argv[])
 {
     int sock, i;
     unsigned int len;
-    int flags = 0;			/* for recvfrom() */
+    int flags = 0;                      /* for recvfrom() */
     int on = 1;
     struct servent *serv;
     struct hostent *host;
-    struct sockaddr_in s_sock;		/* server's address */
-    struct sockaddr_in c_sock;		/* client's address */
+    struct sockaddr_in s_sock;          /* server's address */
+    struct sockaddr_in c_sock;          /* client's address */
     char full_hname[MAXHOSTNAMELEN];
     char *cp;
     extern int opterr, optind;
     extern char * optarg;
-    int	ch;
+    int ch;
 
-    short port = 0;		/* If user specifies port */
-    krb5_keytab keytab = NULL;	/* Allow specification on command line */
+    short port = 0;             /* If user specifies port */
+    krb5_keytab keytab = NULL;  /* Allow specification on command line */
     char *service = SIMPLE_SERVICE;
 
     krb5_error_code retval;
@@ -93,8 +91,8 @@ char *argv[];
 
     retval = krb5_init_context(&context);
     if (retval) {
-	    com_err(argv[0], retval, "while initializing krb5");
-	    exit(1);
+        com_err(argv[0], retval, "while initializing krb5");
+        exit(1);
     }
 
     /*
@@ -102,33 +100,34 @@ char *argv[];
      *
      */
     opterr = 0;
-    while ((ch = getopt(argc, argv, "p:s:S:")) != -1)
-    switch (ch) {
-    case 'p':
-	port = atoi(optarg);
-	break;
-    case 's':
-	service = optarg;
-	break;
-    case 'S':
-	if ((retval = krb5_kt_resolve(context, optarg, &keytab))) {
-	    com_err(PROGNAME, retval,
-		    "while resolving keytab file %s", optarg);
-	    exit(2);
-	}
-	break;
+    while ((ch = getopt(argc, argv, "p:s:S:")) != -1) {
+        switch (ch) {
+        case 'p':
+            port = atoi(optarg);
+            break;
+        case 's':
+            service = optarg;
+            break;
+        case 'S':
+            if ((retval = krb5_kt_resolve(context, optarg, &keytab))) {
+                com_err(PROGNAME, retval,
+                        "while resolving keytab file %s", optarg);
+                exit(2);
+            }
+            break;
 
-    case '?':
-    default:
-	usage(PROGNAME);
-	exit(1);
-	break;
+        case '?':
+        default:
+            usage(PROGNAME);
+            exit(1);
+            break;
+        }
     }
 
     if ((retval = krb5_sname_to_principal(context, NULL, service,
-					  KRB5_NT_SRV_HST, &sprinc))) {
-	com_err(PROGNAME, retval, "while generating service name %s", service);
-	exit(1);
+                                          KRB5_NT_SRV_HST, &sprinc))) {
+        com_err(PROGNAME, retval, "while generating service name %s", service);
+        exit(1);
     }
 
     /* Set up server address */
@@ -136,41 +135,41 @@ char *argv[];
     s_sock.sin_family = AF_INET;
 
     if (port == 0) {
-	/* Look up service */
-	if ((serv = getservbyname(SIMPLE_PORT, "udp")) == NULL) {
-	    fprintf(stderr, "service unknown: %s/udp\n", SIMPLE_PORT);
-	    exit(1);
-	}
-	s_sock.sin_port = serv->s_port;
+        /* Look up service */
+        if ((serv = getservbyname(SIMPLE_PORT, "udp")) == NULL) {
+            fprintf(stderr, "service unknown: %s/udp\n", SIMPLE_PORT);
+            exit(1);
+        }
+        s_sock.sin_port = serv->s_port;
     } else {
-	s_sock.sin_port = htons(port);
+        s_sock.sin_port = htons(port);
     }
 
     if (gethostname(full_hname, sizeof(full_hname)) < 0) {
-	perror("gethostname");
-	exit(1);
+        perror("gethostname");
+        exit(1);
     }
 
     if ((host = gethostbyname(full_hname)) == (struct hostent *)0) {
-	fprintf(stderr, "%s: host unknown\n", full_hname);
-	exit(1);
+        fprintf(stderr, "%s: host unknown\n", full_hname);
+        exit(1);
     }
     memcpy(&s_sock.sin_addr, host->h_addr, sizeof(s_sock.sin_addr));
 
     /* Open socket */
     if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-	perror("opening datagram socket");
-	exit(1);
+        perror("opening datagram socket");
+        exit(1);
     }
 
-     /* Let the socket be reused right away */
-     (void) setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&on,
-		       sizeof(on));
+    /* Let the socket be reused right away */
+    (void) setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&on,
+                      sizeof(on));
 
     /* Bind the socket */
     if (bind(sock, (struct sockaddr *)&s_sock, sizeof(s_sock))) {
-	perror("binding datagram socket");
-	exit(1);
+        perror("binding datagram socket");
+        exit(1);
     }
 
 #ifdef DEBUG
@@ -182,9 +181,9 @@ char *argv[];
     /* use "recvfrom" so we know client's address */
     len = sizeof(struct sockaddr_in);
     if ((i = recvfrom(sock, (char *)pktbuf, sizeof(pktbuf), flags,
-		 (struct sockaddr *)&c_sock, &len)) < 0) {
-	perror("receiving datagram");
-	exit(1);
+                      (struct sockaddr *)&c_sock, &len)) < 0) {
+        perror("receiving datagram");
+        exit(1);
     }
 
     printf("Received %d bytes\n", i);
@@ -193,14 +192,14 @@ char *argv[];
 
     /* Check authentication info */
     if ((retval = krb5_rd_req(context, &auth_context, &packet,
-			      sprinc, keytab, NULL, &ticket))) {
-	com_err(PROGNAME, retval, "while reading request");
-	exit(1);
+                              sprinc, keytab, NULL, &ticket))) {
+        com_err(PROGNAME, retval, "while reading request");
+        exit(1);
     }
     if ((retval = krb5_unparse_name(context, ticket->enc_part2->client,
-				    &cp))) {
-	com_err(PROGNAME, retval, "while unparsing client name");
-	exit(1);
+                                    &cp))) {
+        com_err(PROGNAME, retval, "while unparsing client name");
+        exit(1);
     }
     printf("Got authentication info from %s\n", cp);
     free(cp);
@@ -210,8 +209,8 @@ char *argv[];
     addr.length = sizeof(c_sock.sin_addr);
     addr.contents = (krb5_octet *)&c_sock.sin_addr;
     if ((retval = krb5_auth_con_setaddrs(context, auth_context,
-					 NULL, &addr))) {
-	com_err(PROGNAME, retval, "while setting foreign addr");
+                                         NULL, &addr))) {
+        com_err(PROGNAME, retval, "while setting foreign addr");
         exit(1);
     }
 
@@ -219,8 +218,8 @@ char *argv[];
     addr.length = sizeof(c_sock.sin_port);
     addr.contents = (krb5_octet *)&c_sock.sin_port;
     if ((retval = krb5_auth_con_setports(context, auth_context,
-					 NULL, &addr))) {
-	com_err(PROGNAME, retval, "while setting foreign port");
+                                         NULL, &addr))) {
+        com_err(PROGNAME, retval, "while setting foreign port");
         exit(1);
     }
 
@@ -229,9 +228,9 @@ char *argv[];
     /* use "recvfrom" so we know client's address */
     len = sizeof(struct sockaddr_in);
     if ((i = recvfrom(sock, (char *)pktbuf, sizeof(pktbuf), flags,
-		 (struct sockaddr *)&c_sock, &len)) < 0) {
-	perror("receiving datagram");
-	exit(1);
+                      (struct sockaddr *)&c_sock, &len)) < 0) {
+        perror("receiving datagram");
+        exit(1);
     }
 #ifdef DEBUG
     printf("&c_sock.sin_addr is %s\n", inet_ntoa(c_sock.sin_addr));
@@ -242,9 +241,9 @@ char *argv[];
     packet.data = (krb5_pointer) pktbuf;
 
     if ((retval = krb5_rd_safe(context, auth_context, &packet,
-			       &message, NULL))) {
-	com_err(PROGNAME, retval, "while verifying SAFE message");
-	exit(1);
+                               &message, NULL))) {
+        com_err(PROGNAME, retval, "while verifying SAFE message");
+        exit(1);
     }
     printf("Safe message is: '%.*s'\n", (int) message.length, message.data);
 
@@ -255,9 +254,9 @@ char *argv[];
     /* use "recvfrom" so we know client's address */
     len = sizeof(struct sockaddr_in);
     if ((i = recvfrom(sock, (char *)pktbuf, sizeof(pktbuf), flags,
-		      (struct sockaddr *)&c_sock, &len)) < 0) {
-	perror("receiving datagram");
-	exit(1);
+                      (struct sockaddr *)&c_sock, &len)) < 0) {
+        perror("receiving datagram");
+        exit(1);
     }
     printf("Received %d bytes\n", i);
 
@@ -265,12 +264,12 @@ char *argv[];
     packet.data = (krb5_pointer) pktbuf;
 
     if ((retval = krb5_rd_priv(context, auth_context, &packet,
-			       &message, NULL))) {
-	com_err(PROGNAME, retval, "while verifying PRIV message");
-	exit(1);
+                               &message, NULL))) {
+        com_err(PROGNAME, retval, "while verifying PRIV message");
+        exit(1);
     }
     printf("Decrypted message is: '%.*s'\n", (int) message.length,
-	   message.data);
+           message.data);
 
     krb5_auth_con_free(context, auth_context);
     krb5_free_context(context);

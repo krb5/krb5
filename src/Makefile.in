@@ -659,6 +659,7 @@ EMACS = emacs
 PYTHON = python
 
 INDENTDIRS = \
+	appl \
 	clients \
 	include \
 	kadmin \
