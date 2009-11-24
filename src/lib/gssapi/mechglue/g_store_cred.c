@@ -63,7 +63,7 @@ OM_uint32 gss_store_cred(minor_status,
 			cred_usage_stored)
 
 OM_uint32		*minor_status;
-const gss_cred_id_t	 input_cred_handle;
+gss_cred_id_t	         input_cred_handle;
 gss_cred_usage_t	 cred_usage;
 const gss_OID		 desired_mech;
 OM_uint32		 overwrite_cred;

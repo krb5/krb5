@@ -84,6 +84,7 @@ gss_seal
 gss_set_name_attribute
 gss_set_sec_context_option
 gss_sign
+gss_store_cred
 gss_str_to_oid
 gss_test_oid_set_member
 gss_unseal
