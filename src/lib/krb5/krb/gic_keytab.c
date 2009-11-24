@@ -29,16 +29,15 @@
 #include "k5-int.h"
 
 static krb5_error_code
-krb5_get_as_key_keytab(
-    krb5_context context,
-    krb5_principal client,
-    krb5_enctype etype,
-    krb5_prompter_fct prompter,
-    void *prompter_data,
-    krb5_data *salt,
-    krb5_data *params,
-    krb5_keyblock *as_key,
-    void *gak_data)
+get_as_key_keytab(krb5_context context,
+                  krb5_principal client,
+                  krb5_enctype etype,
+                  krb5_prompter_fct prompter,
+                  void *prompter_data,
+                  krb5_data *salt,
+                  krb5_data *params,
+                  krb5_keyblock *as_key,
+                  void *gak_data)
 {
     krb5_keytab keytab = (krb5_keytab) gak_data;
     krb5_error_code ret;
@@ -109,7 +108,7 @@ krb5_get_init_creds_keytab(krb5_context context,
 
     ret = krb5_get_init_creds(context, creds, client, NULL, NULL,
                               start_time, in_tkt_service, opte,
-                              krb5_get_as_key_keytab, (void *) keytab,
+                              get_as_key_keytab, (void *) keytab,
                               &use_master,NULL);
 
     /* check for success */
@@ -130,7 +129,7 @@ krb5_get_init_creds_keytab(krb5_context context,
 
         ret2 = krb5_get_init_creds(context, creds, client, NULL, NULL,
                                    start_time, in_tkt_service, opte,
-                                   krb5_get_as_key_keytab, (void *) keytab,
+                                   get_as_key_keytab, (void *) keytab,
                                    &use_master, NULL);
 
         if (ret2 == 0) {
@@ -196,7 +195,7 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
                                   creds, creds->client,
                                   krb5_prompter_posix,  NULL,
                                   0, server, opte,
-                                  krb5_get_as_key_keytab, (void *)keytab,
+                                  get_as_key_keytab, (void *)keytab,
                                   &use_master, ret_as_reply);
     krb5_free_unparsed_name( context, server);
     krb5_get_init_creds_opt_free(context, (krb5_get_init_creds_opt *)opte);
