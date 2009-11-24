@@ -2338,49 +2338,6 @@ krb5_init_creds_get_times
                 krb5_init_creds_context ctx,
                 krb5_ticket_times *times);
 
-struct _krb5_tkt_creds_context;
-typedef struct _krb5_tkt_creds_context *krb5_tkt_creds_context;
-
-krb5_error_code KRB5_CALLCONV
-krb5_tkt_creds_init
-(krb5_context,
-        krb5_ccache,
-        krb5_creds *,
-        int kdcopt,
-        krb5_tkt_creds_context *);
-
-krb5_error_code KRB5_CALLCONV
-krb5_tkt_creds_get_creds
-(krb5_context,
-        krb5_tkt_creds_context,
-        krb5_creds *);
-
-void KRB5_CALLCONV
-krb5_tkt_creds_free
-(krb5_context,
-        krb5_tkt_creds_context);
-
-krb5_error_code KRB5_CALLCONV
-krb5_tkt_creds_step
-(krb5_context context,
-        krb5_tkt_creds_context,
-        krb5_data *,
-        krb5_data *,
-        krb5_data *,
-        unsigned int *);
-
-krb5_error_code KRB5_CALLCONV
-krb5_tkt_creds_store_creds
-(krb5_context,
-        krb5_tkt_creds_context,
-        krb5_ccache);
-
-krb5_error_code KRB5_CALLCONV
-krb5_tkt_creds_get_times
-(krb5_context,
-        krb5_tkt_creds_context,
-        krb5_ticket_times *times);
-
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_keytab(krb5_context context, krb5_creds *creds,
                            krb5_principal client, krb5_keytab arg_keytab,
