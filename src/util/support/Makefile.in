@@ -62,6 +62,7 @@ STLIBOBJS= \
 	fake-addrinfo.o \
 	utf8.o \
 	utf8_conv.o \
+	zap.o \
 	$(IPC_ST_OBJ) \
 	$(STRLCPY_ST_OBJ) \
 	$(PRINTF_ST_OBJ) \
@@ -77,6 +78,7 @@ LIBOBJS= \
 	$(OUTPRE)fake-addrinfo.$(OBJEXT) \
 	$(OUTPRE)utf8.$(OBJEXT) \
 	$(OUTPRE)utf8_conv.$(OBJEXT) \
+	$(OUTPRE)zap.$(OBJEXT) \
 	$(IPC_OBJ) \
 	$(STRLCPY_OBJ) \
 	$(PRINTF_OBJ) \
@@ -101,7 +103,8 @@ SRCS=\
 	$(srcdir)/printf.c \
 	$(srcdir)/mkstemp.c \
 	$(srcdir)/t_k5buf.c \
-	$(srcdir)/t_unal.c 
+	$(srcdir)/t_unal.c \
+	$(srcdir)/zap.c
 
 SHLIB_EXPDEPS =
 # Add -lm if dumping thread stats, for sqrt.

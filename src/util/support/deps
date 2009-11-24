@@ -47,3 +47,6 @@ t_k5buf.so t_k5buf.po $(OUTPRE)t_k5buf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
 t_unal.so t_unal.po $(OUTPRE)t_unal.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   t_unal.c
+zap.so zap.po $(OUTPRE)zap.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
+  zap.c

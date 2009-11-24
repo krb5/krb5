@@ -790,8 +790,9 @@ static inline void zap(void *ptr, size_t len)
     asm volatile ("" : : "g" (ptr), "g" (len));
 }
 #else
-# define zap(ptr, len) memset((void *)(volatile void *)ptr, 0, len)
-#endif /* WIN32 */
+/* Use a function from libkrb5support to defeat inlining. */
+# define zap(ptr, len) krb5int_zap(ptr, len)
+#endif
 
 /* Convenience function: zap and free ptr if it is non-NULL. */
 static inline void

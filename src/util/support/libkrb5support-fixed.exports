@@ -48,3 +48,4 @@ krb5int_utf8_to_ucs4
 krb5int_utf8_lentab
 krb5int_utf8_mintab
 krb5int_utf8_next
+krb5int_zap
