@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -31,16 +32,16 @@
 #include <string.h>
 #include <errno.h>
 
-OM_uint32 generic_gss_create_empty_buffer_set
-	   (OM_uint32 * minor_status,
-	    gss_buffer_set_t *buffer_set)
+OM_uint32
+generic_gss_create_empty_buffer_set(OM_uint32 * minor_status,
+                                    gss_buffer_set_t *buffer_set)
 {
     gss_buffer_set_t set;
 
     set = (gss_buffer_set_desc *) malloc(sizeof(*set));
     if (set == GSS_C_NO_BUFFER_SET) {
-	*minor_status = ENOMEM;
-	return GSS_S_FAILURE;
+        *minor_status = ENOMEM;
+        return GSS_S_FAILURE;
     }
 
     set->count = 0;
@@ -52,38 +53,38 @@ OM_uint32 generic_gss_create_empty_buffer_set
     return GSS_S_COMPLETE;
 }
 
-OM_uint32 generic_gss_add_buffer_set_member
-	   (OM_uint32 * minor_status,
-	    const gss_buffer_t member_buffer,
-	    gss_buffer_set_t *buffer_set)
+OM_uint32
+generic_gss_add_buffer_set_member(OM_uint32 * minor_status,
+                                  const gss_buffer_t member_buffer,
+                                  gss_buffer_set_t *buffer_set)
 {
     gss_buffer_set_t set;
     gss_buffer_t p;
     OM_uint32 ret;
 
     if (*buffer_set == GSS_C_NO_BUFFER_SET) {
-	ret = generic_gss_create_empty_buffer_set(minor_status,
-						  buffer_set);
-	if (ret) {
-	    return ret;
-	}
+        ret = generic_gss_create_empty_buffer_set(minor_status,
+                                                  buffer_set);
+        if (ret) {
+            return ret;
+        }
     }
 
     set = *buffer_set;
     set->elements = (gss_buffer_desc *)realloc(set->elements,
-					       (set->count + 1) *
-						sizeof(gss_buffer_desc));
+                                               (set->count + 1) *
+                                               sizeof(gss_buffer_desc));
     if (set->elements == NULL) {
-	*minor_status = ENOMEM;
-	return GSS_S_FAILURE;
+        *minor_status = ENOMEM;
+        return GSS_S_FAILURE;
     }
 
     p = &set->elements[set->count];
 
     p->value = malloc(member_buffer->length);
     if (p->value == NULL) {
-	*minor_status = ENOMEM;
-	return GSS_S_FAILURE;
+        *minor_status = ENOMEM;
+        return GSS_S_FAILURE;
     }
     memcpy(p->value, member_buffer->value, member_buffer->length);
     p->length = member_buffer->length;
@@ -94,9 +95,9 @@ OM_uint32 generic_gss_add_buffer_set_member
     return GSS_S_COMPLETE;
 }
 
-OM_uint32 generic_gss_release_buffer_set
-	   (OM_uint32 * minor_status,
-	    gss_buffer_set_t *buffer_set)
+OM_uint32
+generic_gss_release_buffer_set(OM_uint32 * minor_status,
+                               gss_buffer_set_t *buffer_set)
 {
     size_t i;
     OM_uint32 minor;
@@ -104,16 +105,16 @@ OM_uint32 generic_gss_release_buffer_set
     *minor_status = 0;
 
     if (*buffer_set == GSS_C_NO_BUFFER_SET) {
-	return GSS_S_COMPLETE;
+        return GSS_S_COMPLETE;
     }
 
     for (i = 0; i < (*buffer_set)->count; i++) {
-	generic_gss_release_buffer(&minor, &((*buffer_set)->elements[i]));
+        generic_gss_release_buffer(&minor, &((*buffer_set)->elements[i]));
     }
 
     if ((*buffer_set)->elements != NULL) {
-	free((*buffer_set)->elements);
-	(*buffer_set)->elements = NULL;
+        free((*buffer_set)->elements);
+        (*buffer_set)->elements = NULL;
     }
 
     (*buffer_set)->count = 0;
