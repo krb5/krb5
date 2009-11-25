@@ -338,9 +338,8 @@ krb5_db2_db_init(krb5_context context)
     if ((retval = krb5_db2_db_get_age(context, NULL, &db_ctx->db_lf_time)))
         goto err_out;
 
-    snprintf(policy_db_name, sizeof(policy_db_name),
-             db_ctx->tempdb ? "%s~.kadm5" : "%s.kadm5",
-             db_ctx->db_name);
+    snprintf(policy_db_name, sizeof(policy_db_name), "%s%s.kadm5",
+             db_ctx->db_name, db_ctx->tempdb ? "~" : "");
     snprintf(policy_lock_name, sizeof(policy_lock_name),
              "%s.lock", policy_db_name);
 
