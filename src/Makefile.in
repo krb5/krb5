@@ -698,7 +698,11 @@ OTHEREXCLUDES = \
 	plugins/kdb/hdb/windc_plugin.h \
 	plugins/kdb/ldap/libkdb_ldap/princ_xdr.c \
 	plugins/kdb/ldap/libkdb_ldap/princ_xdr.h \
-	plugins/preauth/pkinit
+	plugins/preauth/pkinit/pkcs11.h \
+	plugins/preauth/pkinit/pkinit_accessor.h \
+	plugins/preauth/pkinit/pkinit_crypto.h \
+	plugins/preauth/pkinit/pkinit.h \
+	plugins/preauth/pkinit/pkinit_crypto_openssl.h
 
 EXCLUDES = `for i in $(BSDFILES) $(OTHEREXCLUDES); do echo $$i; done | $(AWK) '{ print "-path", $$1, "-o" }'` -path /dev/null
 

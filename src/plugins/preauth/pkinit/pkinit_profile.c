@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * COPYRIGHT (C) 2006,2007
  * THE REGENTS OF THE UNIVERSITY OF MICHIGAN
@@ -65,13 +66,13 @@ _krb5_conf_boolean(const char *s)
     const char *const *p;
 
     for(p=conf_yes; *p; p++) {
-	if (strcasecmp(*p,s) == 0)
-	    return 1;
+        if (strcasecmp(*p,s) == 0)
+            return 1;
     }
 
     for(p=conf_no; *p; p++) {
-	if (strcasecmp(*p,s) == 0)
-	    return 0;
+        if (strcasecmp(*p,s) == 0)
+            return 0;
     }
 
     /* Default to "no" */
@@ -92,7 +93,7 @@ _krb5_conf_boolean(const char *s)
  */
 krb5_error_code
 pkinit_kdcdefault_strings(krb5_context context, const char *realmname,
-			  const char *option, char ***ret_value)
+                          const char *option, char ***ret_value)
 {
     profile_t profile = NULL;
     const char *names[5];
@@ -100,34 +101,34 @@ pkinit_kdcdefault_strings(krb5_context context, const char *realmname,
     krb5_error_code retval;
 
     if (context == NULL)
-	return KV5M_CONTEXT;
+        return KV5M_CONTEXT;
 
     profile = context->profile;
 
     if (realmname != NULL) {
-	/*
-	 * Try number one:
-	 *
-	 * [realms]
-	 *	    REALM = {
-	 *		option = <value>
-	 *	    }
-	 */
+        /*
+         * Try number one:
+         *
+         * [realms]
+         *          REALM = {
+         *              option = <value>
+         *          }
+         */
 
-	names[0] = KRB5_CONF_REALMS;
-	names[1] = realmname;
-	names[2] = option;
-	names[3] = 0;
-	retval = profile_get_values(profile, names, &values);
-	if (retval == 0 && values != NULL)
-	    goto goodbye;
+        names[0] = KRB5_CONF_REALMS;
+        names[1] = realmname;
+        names[2] = option;
+        names[3] = 0;
+        retval = profile_get_values(profile, names, &values);
+        if (retval == 0 && values != NULL)
+            goto goodbye;
     }
 
     /*
      * Try number two:
      *
      * [kdcdefaults]
-     *	    option = <value>
+     *      option = <value>
      */
 
     names[0] = KRB5_CONF_KDCDEFAULTS;
@@ -135,11 +136,11 @@ pkinit_kdcdefault_strings(krb5_context context, const char *realmname,
     names[2] = 0;
     retval = profile_get_values(profile, names, &values);
     if (retval == 0 && values != NULL)
-	goto goodbye;
+        goto goodbye;
 
 goodbye:
     if (values == NULL)
-	retval = ENOENT;
+        retval = ENOENT;
 
     *ret_value = values;
 
@@ -149,21 +150,21 @@ goodbye:
 
 krb5_error_code
 pkinit_kdcdefault_string(krb5_context context, const char *realmname,
-			 const char *option, char **ret_value)
+                         const char *option, char **ret_value)
 {
     krb5_error_code retval;
     char **values = NULL;
 
     retval = pkinit_kdcdefault_strings(context, realmname, option, &values);
     if (retval)
-	return retval;
+        return retval;
 
     if (values[0] == NULL) {
-	retval = ENOENT;
+        retval = ENOENT;
     } else {
-	*ret_value = strdup(values[0]);
-	if (*ret_value == NULL)
-	    retval = ENOMEM;
+        *ret_value = strdup(values[0]);
+        if (*ret_value == NULL)
+            retval = ENOMEM;
     }
 
     profile_free_list(values);
@@ -172,7 +173,7 @@ pkinit_kdcdefault_string(krb5_context context, const char *realmname,
 
 krb5_error_code
 pkinit_kdcdefault_boolean(krb5_context context, const char *realmname,
-			  const char *option, int default_value, int *ret_value)
+                          const char *option, int default_value, int *ret_value)
 {
     char *string = NULL;
     krb5_error_code retval;
@@ -180,17 +181,17 @@ pkinit_kdcdefault_boolean(krb5_context context, const char *realmname,
     retval = pkinit_kdcdefault_string(context, realmname, option, &string);
 
     if (retval == 0) {
-	*ret_value = _krb5_conf_boolean(string);
-	free(string);
+        *ret_value = _krb5_conf_boolean(string);
+        free(string);
     } else
-	*ret_value = default_value;
+        *ret_value = default_value;
 
     return 0;
 }
 
 krb5_error_code
 pkinit_kdcdefault_integer(krb5_context context, const char *realmname,
-			  const char *option, int default_value, int *ret_value)
+                          const char *option, int default_value, int *ret_value)
 {
     char *string = NULL;
     krb5_error_code retval;
@@ -198,16 +199,16 @@ pkinit_kdcdefault_integer(krb5_context context, const char *realmname,
     retval = pkinit_kdcdefault_string(context, realmname, option, &string);
 
     if (retval == 0) {
-	char *endptr;
-	long l;
-	l = strtol(string, &endptr, 0);
-	if (endptr == string)
-	    *ret_value = default_value;
-	else
-	    *ret_value = l;
-	free(string);
+        char *endptr;
+        long l;
+        l = strtol(string, &endptr, 0);
+        if (endptr == string)
+            *ret_value = default_value;
+        else
+            *ret_value = l;
+        free(string);
     } else
-	*ret_value = default_value;
+        *ret_value = default_value;
 
     return 0;
 }
@@ -224,7 +225,7 @@ pkinit_kdcdefault_integer(krb5_context context, const char *realmname,
 
 krb5_error_code
 pkinit_libdefault_strings(krb5_context context, const krb5_data *realm,
-			  const char *option, char ***ret_value)
+                          const char *option, char ***ret_value)
 {
     profile_t profile;
     const char *names[5];
@@ -233,60 +234,60 @@ pkinit_libdefault_strings(krb5_context context, const krb5_data *realm,
     char realmstr[1024];
 
     if (realm != NULL && realm->length > sizeof(realmstr)-1)
-	return EINVAL;
+        return EINVAL;
 
     if (realm != NULL) {
-	strncpy(realmstr, realm->data, realm->length);
-	realmstr[realm->length] = '\0';
+        strncpy(realmstr, realm->data, realm->length);
+        realmstr[realm->length] = '\0';
     }
 
     if (!context || (context->magic != KV5M_CONTEXT))
-	return KV5M_CONTEXT;
+        return KV5M_CONTEXT;
 
     profile = context->profile;
 
 
     if (realm != NULL) {
-	/*
-	 * Try number one:
-	 *
-	 * [libdefaults]
-	 *	  REALM = {
-	 *		  option = <value>
-	 *	  }
-	 */
+        /*
+         * Try number one:
+         *
+         * [libdefaults]
+         *        REALM = {
+         *                option = <value>
+         *        }
+         */
 
-	names[0] = KRB5_CONF_LIBDEFAULTS;
-	names[1] = realmstr;
-	names[2] = option;
-	names[3] = 0;
-	retval = profile_get_values(profile, names, &values);
-	if (retval == 0 && values != NULL && values[0] != NULL)
-	    goto goodbye;
+        names[0] = KRB5_CONF_LIBDEFAULTS;
+        names[1] = realmstr;
+        names[2] = option;
+        names[3] = 0;
+        retval = profile_get_values(profile, names, &values);
+        if (retval == 0 && values != NULL && values[0] != NULL)
+            goto goodbye;
 
-	/*
-	 * Try number two:
-	 *
-	 * [realms]
-	 *	REALM = {
-	 *		option = <value>
-	 *	}
-	 */
+        /*
+         * Try number two:
+         *
+         * [realms]
+         *      REALM = {
+         *              option = <value>
+         *      }
+         */
 
-	names[0] = KRB5_CONF_REALMS;
-	names[1] = realmstr;
-	names[2] = option;
-	names[3] = 0;
-	retval = profile_get_values(profile, names, &values);
-	if (retval == 0 && values != NULL && values[0] != NULL)
-	    goto goodbye;
+        names[0] = KRB5_CONF_REALMS;
+        names[1] = realmstr;
+        names[2] = option;
+        names[3] = 0;
+        retval = profile_get_values(profile, names, &values);
+        if (retval == 0 && values != NULL && values[0] != NULL)
+            goto goodbye;
     }
 
     /*
      * Try number three:
      *
      * [libdefaults]
-     *	      option = <value>
+     *        option = <value>
      */
 
     names[0] = KRB5_CONF_LIBDEFAULTS;
@@ -294,11 +295,11 @@ pkinit_libdefault_strings(krb5_context context, const krb5_data *realm,
     names[2] = 0;
     retval = profile_get_values(profile, names, &values);
     if (retval == 0 && values != NULL && values[0] != NULL)
-	goto goodbye;
+        goto goodbye;
 
 goodbye:
     if (values == NULL)
-	return ENOENT;
+        return ENOENT;
 
     *ret_value = values;
 
@@ -307,21 +308,21 @@ goodbye:
 
 krb5_error_code
 pkinit_libdefault_string(krb5_context context, const krb5_data *realm,
-			 const char *option, char **ret_value)
+                         const char *option, char **ret_value)
 {
     krb5_error_code retval;
     char **values = NULL;
 
     retval = pkinit_libdefault_strings(context, realm, option, &values);
     if (retval)
-	return retval;
+        return retval;
 
     if (values[0] == NULL) {
-	retval = ENOENT;
+        retval = ENOENT;
     } else {
-	*ret_value = strdup(values[0]);
-	if (*ret_value == NULL)
-	    retval = ENOMEM;
+        *ret_value = strdup(values[0]);
+        if (*ret_value == NULL)
+            retval = ENOMEM;
     }
 
     profile_free_list(values);
@@ -330,27 +331,8 @@ pkinit_libdefault_string(krb5_context context, const krb5_data *realm,
 
 krb5_error_code
 pkinit_libdefault_boolean(krb5_context context, const krb5_data *realm,
-			  const char *option, int default_value,
-			  int *ret_value)
-{
-    char *string = NULL;
-    krb5_error_code retval;
-
-    retval = pkinit_libdefault_string(context, realm, option, &string);
-
-   if (retval == 0) {
-	*ret_value = _krb5_conf_boolean(string);
-	free(string);
-    } else
-	*ret_value = default_value;
-
-    return 0;
-}
-
-krb5_error_code
-pkinit_libdefault_integer(krb5_context context, const krb5_data *realm,
-			  const char *option, int default_value,
-			  int *ret_value)
+                          const char *option, int default_value,
+                          int *ret_value)
 {
     char *string = NULL;
     krb5_error_code retval;
@@ -358,14 +340,33 @@ pkinit_libdefault_integer(krb5_context context, const krb5_data *realm,
     retval = pkinit_libdefault_string(context, realm, option, &string);
 
     if (retval == 0) {
-	char *endptr;
-	long l;
-	l = strtol(string, &endptr, 0);
-	if (endptr == string)
-	    *ret_value = default_value;
-	else
-	    *ret_value = l;
-	free(string);
+        *ret_value = _krb5_conf_boolean(string);
+        free(string);
+    } else
+        *ret_value = default_value;
+
+    return 0;
+}
+
+krb5_error_code
+pkinit_libdefault_integer(krb5_context context, const krb5_data *realm,
+                          const char *option, int default_value,
+                          int *ret_value)
+{
+    char *string = NULL;
+    krb5_error_code retval;
+
+    retval = pkinit_libdefault_string(context, realm, option, &string);
+
+    if (retval == 0) {
+        char *endptr;
+        long l;
+        l = strtol(string, &endptr, 0);
+        if (endptr == string)
+            *ret_value = default_value;
+        else
+            *ret_value = l;
+        free(string);
     }
 
     return retval;
