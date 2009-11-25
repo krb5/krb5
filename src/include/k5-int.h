@@ -1242,15 +1242,15 @@ typedef krb5_error_code
                            krb5_keyblock *as_key, void *gak_data);
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_init_creds(krb5_context context, krb5_creds *creds,
-                    krb5_principal client, krb5_prompter_fct prompter,
-                    void *prompter_data, krb5_deltat start_time,
-                    char *in_tkt_service, krb5_gic_opt_ext *gic_options,
-                    krb5_gic_get_as_key_fct gak, void *gak_data,
-                    int *master, krb5_kdc_rep **as_reply);
+krb5int_get_init_creds(krb5_context context, krb5_creds *creds,
+                       krb5_principal client, krb5_prompter_fct prompter,
+                       void *prompter_data, krb5_deltat start_time,
+                       char *in_tkt_service, krb5_get_init_creds_opt *options,
+                       krb5_gic_get_as_key_fct gak, void *gak_data,
+                       int *master, krb5_kdc_rep **as_reply);
 
 krb5_error_code
-krb5int_populate_gic_opt (krb5_context, krb5_gic_opt_ext **,
+krb5int_populate_gic_opt (krb5_context, krb5_get_init_creds_opt **,
                           krb5_flags options, krb5_address *const *addrs,
                           krb5_enctype *ktypes,
                           krb5_preauthtype *pre_auth_types, krb5_creds *creds);

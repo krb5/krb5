@@ -323,7 +323,6 @@ krb5_get_in_tkt
 krb5_get_in_tkt_with_keytab
 krb5_get_in_tkt_with_password
 krb5_get_in_tkt_with_skey
-krb5_get_init_creds
 krb5_get_init_creds_keytab
 krb5_get_init_creds_opt_alloc
 krb5_get_init_creds_opt_free

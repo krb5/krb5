@@ -1058,18 +1058,18 @@ build_in_tkt_name(krb5_context context,
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_init_creds(krb5_context context,
-                    krb5_creds *creds,
-                    krb5_principal client,
-                    krb5_prompter_fct prompter,
-                    void *prompter_data,
-                    krb5_deltat start_time,
-                    char *in_tkt_service,
-                    krb5_gic_opt_ext *options,
-                    krb5_gic_get_as_key_fct gak_fct,
-                    void *gak_data,
-                    int  *use_master,
-                    krb5_kdc_rep **as_reply)
+krb5int_get_init_creds(krb5_context context,
+                       krb5_creds *creds,
+                       krb5_principal client,
+                       krb5_prompter_fct prompter,
+                       void *prompter_data,
+                       krb5_deltat start_time,
+                       char *in_tkt_service,
+                       krb5_get_init_creds_opt *opts,
+                       krb5_gic_get_as_key_fct gak_fct,
+                       void *gak_data,
+                       int  *use_master,
+                       krb5_kdc_rep **as_reply)
 {
     krb5_error_code ret;
     krb5_kdc_req request;
@@ -1094,7 +1094,7 @@ krb5_get_init_creds(krb5_context context,
     krb5_boolean retry = 0;
     struct krb5int_fast_request_state *fast_state = NULL;
     krb5_pa_data **out_padata = NULL;
-
+    krb5_gic_opt_ext *options = NULL;
 
     /* initialize everything which will be freed at cleanup */
 
@@ -1126,6 +1126,11 @@ krb5_get_init_creds(krb5_context context,
     referred_client.realm.data = NULL;
     referred_client.realm.length = 0;
     ret = krb5int_fast_make_state(context, &fast_state);
+    if (ret)
+        goto cleanup;
+
+    ret = krb5int_gic_opt_to_opte(context, opts, &options, 1,
+                                  "krb5int_get_init_creds");
     if (ret)
         goto cleanup;
 
@@ -1644,6 +1649,10 @@ cleanup:
         krb5_free_kdc_rep(context, local_as_reply);
     if (referred_client.realm.data)
         krb5_free_data_contents(context, &referred_client.realm);
+    if (krb5_gic_opt_is_shadowed(options)) {
+        krb5_get_init_creds_opt_free(context,
+                                     (krb5_get_init_creds_opt *)options);
+    }
 
     return(ret);
 }
