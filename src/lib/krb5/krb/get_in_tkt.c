@@ -34,6 +34,7 @@
 #include "int-proto.h"
 #include "os-proto.h"
 #include "fast.h"
+#include "init_creds_ctx.h"
 
 #if APPLE_PKINIT
 #define     IN_TKT_DEBUG    0
@@ -1057,462 +1058,729 @@ build_in_tkt_name(krb5_context context,
     return ret;
 }
 
-krb5_error_code KRB5_CALLCONV
-krb5int_get_init_creds(krb5_context context,
-                       krb5_creds *creds,
-                       krb5_principal client,
-                       krb5_prompter_fct prompter,
-                       void *prompter_data,
-                       krb5_deltat start_time,
-                       char *in_tkt_service,
-                       krb5_get_init_creds_opt *opts,
-                       krb5_gic_get_as_key_fct gak_fct,
-                       void *gak_data,
-                       int  *use_master,
-                       krb5_kdc_rep **as_reply)
+void KRB5_CALLCONV
+krb5_init_creds_free(krb5_context context,
+                     krb5_init_creds_context ctx)
 {
-    krb5_error_code ret;
-    krb5_kdc_req request;
-    krb5_data *encoded_request_body, *encoded_previous_request;
-    krb5_pa_data **preauth_to_use, **kdc_padata;
-    int tempint;
-    char *tempstr;
-    krb5_deltat tkt_life;
-    krb5_deltat renew_life;
-    int loopcount;
-    krb5_data salt;
-    krb5_data s2kparams;
-    krb5_keyblock as_key, encrypting_key;
-    krb5_keyblock *strengthen_key = NULL;
-    krb5_error *err_reply;
-    krb5_kdc_rep *local_as_reply;
-    krb5_timestamp time_now;
-    krb5_enctype etype = 0;
-    krb5_preauth_client_rock get_data_rock;
-    int canon_flag = 0;
-    krb5_principal_data referred_client;
-    krb5_boolean retry = 0;
-    struct krb5int_fast_request_state *fast_state = NULL;
-    krb5_pa_data **out_padata = NULL;
-    krb5_gic_opt_ext *options = NULL;
+    if (ctx == NULL)
+        return;
 
-    /* initialize everything which will be freed at cleanup */
+    if (ctx->opte != NULL && krb5_gic_opt_is_shadowed(ctx->opte)) {
+        krb5_get_init_creds_opt_free(context,
+                                     (krb5_get_init_creds_opt *)ctx->opte);
+    }
+    free(ctx->in_tkt_service);
+    zap(ctx->password.data, ctx->password.length);
+    krb5_free_data_contents(context, &ctx->password);
+    krb5_free_error(context, ctx->err_reply);
+    krb5_free_cred_contents(context, &ctx->cred);
+    krb5_free_kdc_req(context, ctx->request);
+    krb5_free_kdc_rep(context, ctx->reply);
+    krb5_free_data(context, ctx->encoded_request_body);
+    krb5_free_data(context, ctx->encoded_previous_request);
+    krb5int_fast_free_state(context, ctx->fast_state);
+    krb5_free_pa_data(context, ctx->preauth_to_use);
+    krb5_free_data_contents(context, &ctx->salt);
+    krb5_free_data_contents(context, &ctx->s2kparams);
+    krb5_free_keyblock_contents(context, &ctx->as_key);
+    free(ctx);
+}
 
-    s2kparams.data = NULL;
-    s2kparams.length = 0;
-    request.server = NULL;
-    request.ktype = NULL;
-    request.addresses = NULL;
-    request.padata = NULL;
-    encoded_request_body = NULL;
-    encoded_previous_request = NULL;
-    preauth_to_use = NULL;
-    kdc_padata = NULL;
-    as_key.length = 0;
-    encrypting_key.length = 0;
-    encrypting_key.contents = NULL;
-    salt.length = 0;
-    salt.data = NULL;
+static krb5_error_code
+init_creds_get(krb5_context context,
+               krb5_init_creds_context ctx,
+               int *use_master)
+{
+    krb5_error_code code;
+    krb5_data request;
+    krb5_data reply;
+    krb5_data realm;
+    unsigned int flags = 0;
+    int tcp_only = 0;
 
-    local_as_reply = 0;
-#if APPLE_PKINIT
-    inTktDebug("krb5_get_init_creds top\n");
-#endif /* APPLE_PKINIT */
+    request.length = 0;
+    request.data = NULL;
+    reply.length = 0;
+    reply.data = NULL;
+    realm.length = 0;
+    realm.data = NULL;
 
-    err_reply = NULL;
+    for (;;) {
+        code = krb5_init_creds_step(context,
+                                    ctx,
+                                    &reply,
+                                    &request,
+                                    &realm,
+                                    &flags);
+        if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG && !tcp_only)
+            tcp_only = 1;
+        else if (code != 0 || (flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE))
+            break;
 
-    /* referred_client is used to rewrite the client realm for referrals */
-    referred_client = *client;
-    referred_client.realm.data = NULL;
-    referred_client.realm.length = 0;
-    ret = krb5int_fast_make_state(context, &fast_state);
-    if (ret)
+        krb5_free_data_contents(context, &reply);
+
+        code = krb5_sendto_kdc(context, &request, &realm,
+                               &reply, use_master, tcp_only);
+        if (code != 0)
+            break;
+
+        krb5_free_data_contents(context, &request);
+        krb5_free_data_contents(context, &realm);
+    }
+
+    krb5_free_data_contents(context, &request);
+    krb5_free_data_contents(context, &reply);
+    krb5_free_data_contents(context, &realm);
+
+    return code;
+}
+
+/* Heimdal API */
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_get(krb5_context context,
+                    krb5_init_creds_context ctx)
+{
+    int use_master = 0;
+
+    return init_creds_get(context, ctx, &use_master);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_get_creds(krb5_context context,
+                          krb5_init_creds_context ctx,
+                          krb5_creds *creds)
+{
+    if ((ctx->flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE) == 0)
+        return KRB5_NO_TKT_SUPPLIED;
+
+    return krb5int_copy_creds_contents(context, &ctx->cred, creds);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_store_creds(krb5_context context,
+                            krb5_init_creds_context ctx,
+                            krb5_ccache ccache)
+{
+    if ((ctx->flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE) == 0)
+        return KRB5_NO_TKT_SUPPLIED;
+
+    return krb5_cc_store_cred(context, ccache, &ctx->cred);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_get_times(krb5_context context,
+                          krb5_init_creds_context ctx,
+                          krb5_ticket_times *times)
+{
+    if ((ctx->flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE) == 0)
+        return KRB5_NO_TKT_SUPPLIED;
+
+    *times = ctx->cred.times;
+
+    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_get_error(krb5_context context,
+                          krb5_init_creds_context ctx,
+                          krb5_error **error)
+{
+    krb5_error_code code;
+    krb5_error *ret = NULL;
+
+    *error = NULL;
+
+    if (ctx->err_reply == NULL)
+        return 0;
+
+    ret = k5alloc(sizeof(*ret), &code);
+    if (code != 0)
         goto cleanup;
 
-    ret = krb5int_gic_opt_to_opte(context, opts, &options, 1,
-                                  "krb5int_get_init_creds");
-    if (ret)
+    ret->magic = KV5M_ERROR;
+    ret->ctime = ctx->err_reply->ctime;
+    ret->cusec = ctx->err_reply->cusec;
+    ret->susec = ctx->err_reply->susec;
+    ret->stime = ctx->err_reply->stime;
+    ret->error = ctx->err_reply->error;
+
+    if (ctx->err_reply->client != NULL) {
+        code = krb5_copy_principal(context, ctx->err_reply->client,
+                                   &ret->client);
+        if (code != 0)
+            goto cleanup;
+    }
+
+    code = krb5_copy_principal(context, ctx->err_reply->server, &ret->server);
+    if (code != 0)
         goto cleanup;
 
-    /*
-     * Set up the basic request structure
-     */
-    request.magic = KV5M_KDC_REQ;
-    request.msg_type = KRB5_AS_REQ;
+    code = krb5int_copy_data_contents(context, &ctx->err_reply->text,
+                                      &ret->text);
+    if (code != 0)
+        goto cleanup;
 
-    /* request.nonce is filled in when we send a request to the kdc */
-    request.nonce = 0;
+    code = krb5int_copy_data_contents(context, &ctx->err_reply->e_data,
+                                      &ret->e_data);
+    if (code != 0)
+        goto cleanup;
 
-    /* request.padata is filled in later */
+    *error = ret;
 
-    request.kdc_options = context->kdc_default_options;
+cleanup:
+    if (code != 0)
+        krb5_free_error(context, ret);
 
-    /* forwardable */
+    return code;
+}
 
-    if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_FORWARDABLE))
-        tempint = options->forwardable;
-    else if ((ret = krb5_libdefault_boolean(context, &client->realm,
-                                            KRB5_CONF_FORWARDABLE, &tempint)) == 0)
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_init(krb5_context context,
+                     krb5_principal client,
+                     krb5_prompter_fct prompter,
+                     void *data,
+                     krb5_deltat start_time,
+                     krb5_get_init_creds_opt *options,
+                     krb5_init_creds_context *pctx)
+{
+    krb5_error_code code;
+    krb5_init_creds_context ctx;
+    int tmp;
+    char *str = NULL;
+    krb5_gic_opt_ext *opte;
+
+    ctx = k5alloc(sizeof(*ctx), &code);
+    if (code != 0)
+        goto cleanup;
+
+    ctx->request = k5alloc(sizeof(krb5_kdc_req), &code);
+    if (code != 0)
+        goto cleanup;
+
+    code = krb5_copy_principal(context, client, &ctx->request->client);
+    if (code != 0)
+        goto cleanup;
+
+    ctx->prompter = prompter;
+    ctx->prompter_data = data;
+    ctx->gak_fct = krb5_get_as_key_password;
+    ctx->gak_data = &ctx->password;
+
+    ctx->request_time = 0; /* filled in later */
+    ctx->start_time = start_time;
+
+    if (options == NULL) {
+        code = krb5_get_init_creds_opt_alloc(context, &options);
+        if (code != 0)
+            goto cleanup;
+    }
+
+    code = krb5int_gic_opt_to_opte(context, options,
+                                   &ctx->opte, 1, "krb5_init_creds_init");
+    if (code != 0)
+        goto cleanup;
+
+    opte = ctx->opte;
+
+    code = krb5int_fast_make_state(context, &ctx->fast_state);
+    if (code != 0)
+        goto cleanup;
+
+    ctx->get_data_rock.magic = CLIENT_ROCK_MAGIC;
+    ctx->get_data_rock.etype = &ctx->etype;
+    ctx->get_data_rock.fast_state = ctx->fast_state;
+
+    /* Initialise request parameters as per krb5_get_init_creds() */
+    ctx->request->kdc_options = context->kdc_default_options;
+
+    /* forwaradble */
+    if (opte->flags & KRB5_GET_INIT_CREDS_OPT_FORWARDABLE)
+        tmp = opte->forwardable;
+    else if (krb5_libdefault_boolean(context, &ctx->request->client->realm,
+                                     KRB5_CONF_FORWARDABLE, &tmp) == 0)
         ;
     else
-        tempint = 0;
-    if (tempint)
-        request.kdc_options |= KDC_OPT_FORWARDABLE;
+        tmp = 0;
+    if (tmp)
+        ctx->request->kdc_options |= KDC_OPT_FORWARDABLE;
 
     /* proxiable */
-
-    if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_PROXIABLE))
-        tempint = options->proxiable;
-    else if ((ret = krb5_libdefault_boolean(context, &client->realm,
-                                            KRB5_CONF_PROXIABLE, &tempint)) == 0)
+    if (opte->flags & KRB5_GET_INIT_CREDS_OPT_PROXIABLE)
+        tmp = opte->proxiable;
+    else if (krb5_libdefault_boolean(context, &ctx->request->client->realm,
+                                     KRB5_CONF_PROXIABLE, &tmp) == 0)
         ;
     else
-        tempint = 0;
-    if (tempint)
-        request.kdc_options |= KDC_OPT_PROXIABLE;
+        tmp = 0;
+    if (tmp)
+        ctx->request->kdc_options |= KDC_OPT_PROXIABLE;
 
     /* canonicalize */
-    if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_CANONICALIZE))
-        tempint = 1;
-    else if ((ret = krb5_libdefault_boolean(context, &client->realm,
-                                            KRB5_CONF_CANONICALIZE, &tempint)) == 0)
+    if (opte->flags & KRB5_GET_INIT_CREDS_OPT_CANONICALIZE)
+        tmp = 1;
+    else if (krb5_libdefault_boolean(context, &ctx->request->client->realm,
+                                     KRB5_CONF_CANONICALIZE, &tmp) == 0)
         ;
     else
-        tempint = 0;
-    if (tempint)
-        request.kdc_options |= KDC_OPT_CANONICALIZE;
+        tmp = 0;
+    if (tmp)
+        ctx->request->kdc_options |= KDC_OPT_CANONICALIZE;
 
     /* allow_postdate */
-
-    if (start_time > 0)
-        request.kdc_options |= (KDC_OPT_ALLOW_POSTDATE|KDC_OPT_POSTDATED);
+    if (ctx->start_time > 0)
+        ctx->request->kdc_options |= KDC_OPT_ALLOW_POSTDATE | KDC_OPT_POSTDATED;
 
     /* ticket lifetime */
-
-    if ((ret = krb5_timeofday(context, &request.from)))
-        goto cleanup;
-    request.from = krb5int_addint32(request.from, start_time);
-
-    if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_TKT_LIFE)) {
-        tkt_life = options->tkt_life;
-    } else if ((ret = krb5_libdefault_string(context, &client->realm,
-                                             KRB5_CONF_TICKET_LIFETIME, &tempstr))
-               == 0) {
-        ret = krb5_string_to_deltat(tempstr, &tkt_life);
-        free(tempstr);
-        if (ret) {
+    if (opte->flags & KRB5_GET_INIT_CREDS_OPT_TKT_LIFE)
+        ctx->tkt_life = options->tkt_life;
+    else if (krb5_libdefault_string(context, &ctx->request->client->realm,
+                                    KRB5_CONF_TICKET_LIFETIME, &str) == 0) {
+        code = krb5_string_to_deltat(str, &ctx->tkt_life);
+        if (code != 0)
             goto cleanup;
-        }
-    } else {
-        /* this used to be hardcoded in kinit.c */
-        tkt_life = 24*60*60;
-    }
-    request.till = krb5int_addint32(request.from, tkt_life);
+        free(str);
+        str = NULL;
+    } else
+        ctx->tkt_life = 24 * 60 * 60; /* previously hardcoded in kinit */
 
     /* renewable lifetime */
-
-    if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_RENEW_LIFE)) {
-        renew_life = options->renew_life;
-    } else if ((ret = krb5_libdefault_string(context, &client->realm,
-                                             KRB5_CONF_RENEW_LIFETIME, &tempstr))
-               == 0) {
-        ret = krb5_string_to_deltat(tempstr, &renew_life);
-        free(tempstr);
-        if (ret) {
+    if (opte->flags & KRB5_GET_INIT_CREDS_OPT_RENEW_LIFE)
+        ctx->renew_life = options->renew_life;
+    else if (krb5_libdefault_string(context, &ctx->request->client->realm,
+                                    KRB5_CONF_RENEW_LIFETIME, &str) == 0) {
+        code = krb5_string_to_deltat(str, &ctx->renew_life);
+        if (code != 0)
             goto cleanup;
-        }
-    } else {
-        renew_life = 0;
-    }
-    if (renew_life > 0)
-        request.kdc_options |= KDC_OPT_RENEWABLE;
+        free(str);
+        str = NULL;
+    } else
+        ctx->renew_life = 0;
 
-    if (renew_life > 0) {
-        request.rtime = krb5int_addint32(request.from, renew_life);
-        if (request.rtime < request.till) {
-            /* don't ask for a smaller renewable time than the lifetime */
-            request.rtime = request.till;
-        }
-        /* we are already asking for renewable tickets so strip this option */
-        request.kdc_options &= ~(KDC_OPT_RENEWABLE_OK);
-    } else {
-        request.rtime = 0;
-    }
+    if (ctx->renew_life > 0)
+        ctx->request->kdc_options |= KDC_OPT_RENEWABLE;
 
-    /* client */
-
-    request.client = client;
-
-    /* per referrals draft, enterprise principals imply canonicalization */
-    canon_flag = ((request.kdc_options & KDC_OPT_CANONICALIZE) != 0) ||
-        client->type == KRB5_NT_ENTERPRISE_PRINCIPAL;
-
-    /* service */
-    if ((ret = build_in_tkt_name(context, in_tkt_service,
-                                 request.client, &request.server)))
-        goto cleanup;
-
-    krb5_preauth_request_context_init(context);
-
-
-    if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_ETYPE_LIST)) {
-        request.ktype = options->etype_list;
-        request.nktypes = options->etype_list_length;
-    } else if ((ret = krb5_get_default_in_tkt_ktypes(context,
-                                                     &request.ktype)) == 0) {
-        for (request.nktypes = 0;
-             request.ktype[request.nktypes];
-             request.nktypes++)
+    /* enctypes */
+    if (opte->flags & KRB5_GET_INIT_CREDS_OPT_ETYPE_LIST) {
+        ctx->request->ktype =
+            k5alloc((opte->etype_list_length * sizeof(krb5_enctype)),
+                    &code);
+        if (code != 0)
+            goto cleanup;
+        ctx->request->nktypes = opte->etype_list_length;
+        memcpy(ctx->request->ktype, opte->etype_list,
+               ctx->request->nktypes * sizeof(krb5_enctype));
+    } else if (krb5_get_default_in_tkt_ktypes(context,
+                                              &ctx->request->ktype) == 0) {
+        for (ctx->request->nktypes = 0;
+             ctx->request->ktype[ctx->request->nktypes] != ENCTYPE_NULL;
+             ctx->request->nktypes++)
             ;
     } else {
-        /* there isn't any useful default here.  ret is set from above */
+        /* there isn't any useful default here. */
+        code = KRB5_CONFIG_ETYPE_NOSUPP;
         goto cleanup;
     }
 
-    if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_ADDRESS_LIST)) {
-        request.addresses = options->address_list;
-    }
-    /* it would be nice if this parsed out an address list, but
-       that would be work. */
-    else if (((ret = krb5_libdefault_boolean(context, &client->realm,
-                                             KRB5_CONF_NOADDRESSES, &tempint)) != 0)
-             || (tempint == 1)) {
-        ;
+    /* addresess */
+    if (opte->flags & KRB5_GET_INIT_CREDS_OPT_ADDRESS_LIST) {
+        code = krb5_copy_addresses(context, opte->address_list,
+                                   &ctx->request->addresses);
+        if (code != 0)
+            goto cleanup;
+    } else if (krb5_libdefault_boolean(context, &ctx->request->client->realm,
+                                     KRB5_CONF_NOADDRESSES, &tmp) != 0
+             || tmp) {
+        ctx->request->addresses = NULL;
     } else {
-        if ((ret = krb5_os_localaddr(context, &request.addresses)))
+        code = krb5_os_localaddr(context, &ctx->request->addresses);
+        if (code != 0)
             goto cleanup;
     }
 
-    request.authorization_data.ciphertext.length = 0;
-    request.authorization_data.ciphertext.data = 0;
-    request.unenc_authdata = 0;
-    request.second_ticket = 0;
+    /* initial preauth state */
+    krb5_preauth_request_context_init(context);
 
-    /* set up the other state.  */
-
-    if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_PREAUTH_LIST)) {
-        if ((ret = make_preauth_list(context, options->preauth_list,
-                                     options->preauth_list_length,
-                                     &preauth_to_use)))
+    if (opte->flags & KRB5_GET_INIT_CREDS_OPT_PREAUTH_LIST) {
+        code = make_preauth_list(context,
+                                 opte->preauth_list,
+                                 opte->preauth_list_length,
+                                 &ctx->preauth_to_use);
+        if (code != 0)
             goto cleanup;
     }
 
-    /* the salt is allocated from somewhere, unless it is from the caller,
-       then it is a reference */
-
-    if (options && (options->flags & KRB5_GET_INIT_CREDS_OPT_SALT)) {
-        salt = *options->salt;
+    if (opte->flags & KRB5_GET_INIT_CREDS_OPT_SALT) {
+        code = krb5int_copy_data_contents(context, opte->salt, &ctx->salt);
+        if (code != 0)
+            goto cleanup;
     } else {
-        salt.length = SALT_TYPE_AFS_LENGTH;
-        salt.data = NULL;
+        ctx->salt.length = SALT_TYPE_AFS_LENGTH;
+        ctx->salt.data = NULL;
     }
 
-
-    /* set the request nonce */
-    if ((ret = krb5_timeofday(context, &time_now)))
-        goto cleanup;
-    /*
-     * XXX we know they are the same size... and we should do
-     * something better than just the current time
-     */
+    /* nonce */
     {
         unsigned char random_buf[4];
         krb5_data random_data;
 
-        random_data.length = 4;
+        random_data.length = sizeof(random_buf);
         random_data.data = (char *)random_buf;
+
+        /*
+         * See RT ticket 3196 at MIT.  If we set the high bit, we
+         * may have compatibility problems with Heimdal, because
+         * we (incorrectly) encode this value as signed.
+         */
         if (krb5_c_random_make_octets(context, &random_data) == 0)
-            /* See RT ticket 3196 at MIT.  If we set the high bit, we
-               may have compatibility problems with Heimdal, because
-               we (incorrectly) encode this value as signed.  */
-            request.nonce = 0x7fffffff & load_32_n(random_buf);
-        else
-            /* XXX  Yuck.  Old version.  */
-            request.nonce = (krb5_int32) time_now;
-    }
-    ret = krb5int_fast_as_armor(context, fast_state, options, &request);
-    if (ret != 0)
-        goto cleanup;
-    /* give the preauth plugins a chance to prep the request body */
-    krb5_preauth_prepare_request(context, options, &request);
-    ret = krb5int_fast_prep_req_body(context, fast_state,
-                                     &request, &encoded_request_body);
-    if (ret)
-        goto cleanup;
+            ctx->request->nonce = 0x7fffffff & load_32_n(random_buf);
+        else {
+            krb5_timestamp now;
 
-    get_data_rock.magic = CLIENT_ROCK_MAGIC;
-    get_data_rock.etype = &etype;
-    get_data_rock.fast_state = fast_state;
-
-    /* now, loop processing preauth data and talking to the kdc */
-    for (loopcount = 0; loopcount < MAX_IN_TKT_LOOPS; loopcount++) {
-        if (request.padata) {
-            krb5_free_pa_data(context, request.padata);
-            request.padata = NULL;
-        }
-        if (!err_reply) {
-            /* either our first attempt, or retrying after PREAUTH_NEEDED */
-            if ((ret = krb5_do_preauth(context,
-                                       &request,
-                                       encoded_request_body,
-                                       encoded_previous_request,
-                                       preauth_to_use, &request.padata,
-                                       &salt, &s2kparams, &etype, &as_key,
-                                       prompter, prompter_data,
-                                       gak_fct, gak_data,
-                                       &get_data_rock, options)))
+            code = krb5_timeofday(context, &now);
+            if (code != 0)
                 goto cleanup;
-            if (out_padata) {
-                krb5_free_pa_data(context, out_padata);
-                out_padata = NULL;
-            }
+
+            ctx->request->nonce = (krb5_int32)now;
+        }
+    }
+
+    ctx->loopcount = 0;
+
+    *pctx = ctx;
+
+cleanup:
+    if (code != 0)
+        krb5_init_creds_free(context, ctx);
+    if (str != NULL)
+        free(str);
+
+    return code;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_set_service(krb5_context context,
+                            krb5_init_creds_context ctx,
+                            const char *service)
+{
+    char *s;
+
+    s = strdup(service);
+    if (s == NULL)
+        return ENOMEM;
+
+    free(ctx->in_tkt_service);
+    ctx->in_tkt_service = s;
+
+    return 0;
+}
+
+static krb5_error_code
+init_creds_validate_reply(krb5_context context,
+                          krb5_init_creds_context ctx,
+                          krb5_data *reply)
+{
+    krb5_error_code code;
+    krb5_error *error = NULL;
+    krb5_kdc_rep *as_reply = NULL;
+
+    krb5_free_error(context, ctx->err_reply);
+    ctx->err_reply = NULL;
+
+    krb5_free_kdc_rep(context, ctx->reply);
+    ctx->reply = NULL;
+
+    if (krb5_is_krb_error(reply)) {
+        code = decode_krb5_error(reply, &error);
+        if (code != 0)
+            return code;
+
+        assert(error != NULL);
+
+        if (error->error == KRB_ERR_RESPONSE_TOO_BIG) {
+            krb5_free_error(context, error);
+            return KRB5KRB_ERR_RESPONSE_TOO_BIG;
         } else {
-            if (preauth_to_use != NULL) {
-                /*
-                 * Retry after an error other than PREAUTH_NEEDED,
-                 * using e-data to figure out what to change.
-                 */
-                ret = krb5_do_preauth_tryagain(context,
-                                               &request,
-                                               encoded_request_body,
-                                               encoded_previous_request,
-                                               preauth_to_use, &request.padata,
-                                               err_reply,
-                                               &salt, &s2kparams, &etype,
-                                               &as_key,
-                                               prompter, prompter_data,
-                                               gak_fct, gak_data,
-                                               &get_data_rock, options);
-            } else {
-                /* No preauth supplied, so can't query the plug-ins. */
-                ret = KRB5KRB_ERR_GENERIC;
-            }
-            if (ret) {
-                /* couldn't come up with anything better */
-                ret = err_reply->error + ERROR_TABLE_BASE_krb5;
-            }
-            krb5_free_error(context, err_reply);
-            err_reply = NULL;
-            if (ret)
-                goto cleanup;
-        }
-
-        if (encoded_previous_request != NULL) {
-            krb5_free_data(context, encoded_previous_request);
-            encoded_previous_request = NULL;
-        }
-        ret = krb5int_fast_prep_req(context, fast_state,
-                                    &request, encoded_request_body,
-                                    encode_krb5_as_req, &encoded_previous_request);
-        if (ret)
-            goto cleanup;
-
-        err_reply = 0;
-        local_as_reply = 0;
-        if ((ret = send_as_request(context, encoded_previous_request,
-                                   krb5_princ_realm(context, request.client), &err_reply,
-                                   &local_as_reply, use_master)))
-            goto cleanup;
-
-        if (err_reply) {
-            ret = krb5int_fast_process_error(context, fast_state, &err_reply,
-                                             &out_padata, &retry);
-            if (ret !=0)
-                goto cleanup;
-            if (err_reply->error == KDC_ERR_PREAUTH_REQUIRED && retry) {
-                /* reset the list of preauth types to try */
-                if (preauth_to_use) {
-                    krb5_free_pa_data(context, preauth_to_use);
-                    preauth_to_use = NULL;
-                }
-                preauth_to_use = out_padata;
-                out_padata = NULL;
-                krb5_free_error(context, err_reply);
-                err_reply = NULL;
-                ret = sort_krb5_padata_sequence(context,
-                                                &request.server->realm,
-                                                preauth_to_use);
-                if (ret)
-                    goto cleanup;
-                /* continue to next iteration */
-            } else if (canon_flag && err_reply->error == KDC_ERR_WRONG_REALM) {
-                if (err_reply->client == NULL ||
-                    err_reply->client->realm.length == 0) {
-                    ret = KRB5KDC_ERR_WRONG_REALM;
-                    krb5_free_error(context, err_reply);
-                    goto cleanup;
-                }
-                /* Rewrite request.client with realm from error reply */
-                if (referred_client.realm.data) {
-                    krb5_free_data_contents(context, &referred_client.realm);
-                    referred_client.realm.data = NULL;
-                }
-                ret = krb5int_copy_data_contents(context,
-                                                 &err_reply->client->realm,
-                                                 &referred_client.realm);
-                krb5_free_error(context, err_reply);
-                err_reply = NULL;
-                if (ret)
-                    goto cleanup;
-                request.client = &referred_client;
-
-                krb5_free_principal(context, request.server);
-                request.server = NULL;
-
-                ret = build_in_tkt_name(context, in_tkt_service,
-                                        request.client, &request.server);
-                if (ret)
-                    goto cleanup;
-            } else {
-                if (retry)  {
-                    /* continue to next iteration */
-                } else {
-                    /* error + no hints = give up */
-                    ret = (krb5_error_code) err_reply->error
-                        + ERROR_TABLE_BASE_krb5;
-                    krb5_free_error(context, err_reply);
-                    goto cleanup;
-                }
-            }
-        } else if (local_as_reply) {
-            break;
-        } else {
-            ret = KRB5KRB_AP_ERR_MSG_TYPE;
-            goto cleanup;
+            ctx->err_reply = error;
+            return 0;
         }
     }
 
-#if APPLE_PKINIT
-    inTktDebug("krb5_get_init_creds done with send_as_request loop lc %d\n",
-               (int)loopcount);
-#endif /* APPLE_PKINIT */
-    if (loopcount == MAX_IN_TKT_LOOPS) {
-        ret = KRB5_GET_IN_TKT_LOOP;
+    /*
+     * Check to make sure it isn't a V4 reply.
+     */
+    if (reply->length != 0 && !krb5_is_as_rep(reply)) {
+/* these are in <kerberosIV/prot.h> as well but it isn't worth including. */
+#define V4_KRB_PROT_VERSION     4
+#define V4_AUTH_MSG_ERR_REPLY   (5<<1)
+        /* check here for V4 reply */
+        unsigned int t_switch;
+
+        /* From v4 g_in_tkt.c: This used to be
+           switch (pkt_msg_type(rpkt) & ~1) {
+           but SCO 3.2v4 cc compiled that incorrectly.  */
+        t_switch = reply->data[1];
+        t_switch &= ~1;
+
+        if (t_switch == V4_AUTH_MSG_ERR_REPLY
+            && reply->data[0] == V4_KRB_PROT_VERSION) {
+            code = KRB5KRB_AP_ERR_V4_REPLY;
+        } else {
+            code = KRB5KRB_AP_ERR_MSG_TYPE;
+        }
+        return code;
+    }
+
+    /* It must be a KRB_AS_REP message, or an bad returned packet */
+    code = decode_krb5_as_rep(reply, &as_reply);
+    if (code != 0)
+        return code;
+
+    if (as_reply->msg_type != KRB5_AS_REP) {
+        krb5_free_kdc_rep(context, as_reply);
+        return KRB5KRB_AP_ERR_MSG_TYPE;
+    }
+
+    ctx->reply = as_reply;
+
+    return 0;
+}
+
+static krb5_error_code
+init_creds_step_request(krb5_context context,
+                        krb5_init_creds_context ctx,
+                        krb5_data *out)
+{
+    krb5_error_code code;
+
+    krb5_free_principal(context, ctx->request->server);
+    ctx->request->server = NULL;
+
+    code = build_in_tkt_name(context, ctx->in_tkt_service,
+                             ctx->request->client,
+                             &ctx->request->server);
+    if (code != 0)
+        goto cleanup;
+
+    if (ctx->loopcount == 0) {
+        code = krb5_timeofday(context, &ctx->request_time);
+        if (code != 0)
+            goto cleanup;
+
+        code = krb5int_fast_as_armor(context, ctx->fast_state,
+                                     ctx->opte, ctx->request);
+        if (code != 0)
+            goto cleanup;
+
+        /* give the preauth plugins a chance to prep the request body */
+        krb5_preauth_prepare_request(context, ctx->opte, ctx->request);
+        code = krb5int_fast_prep_req_body(context, ctx->fast_state,
+                                          ctx->request,
+                                          &ctx->encoded_request_body);
+        if (code != 0)
+            goto cleanup;
+
+        ctx->request->from = krb5int_addint32(ctx->request_time,
+                                              ctx->start_time);
+        ctx->request->till = krb5int_addint32(ctx->request->from,
+                                              ctx->tkt_life);
+
+        if (ctx->renew_life > 0) {
+            ctx->request->rtime =
+                krb5int_addint32(ctx->request->from, ctx->renew_life);
+            if (ctx->request->rtime < ctx->request->till) {
+                /* don't ask for a smaller renewable time than the lifetime */
+                ctx->request->rtime = ctx->request->till;
+            }
+            ctx->request->kdc_options &= ~(KDC_OPT_RENEWABLE_OK);
+        } else
+            ctx->request->rtime = 0;
+    } else if (ctx->loopcount >= MAX_IN_TKT_LOOPS) {
+        code = KRB5_GET_IN_TKT_LOOP;
         goto cleanup;
     }
+
+    if (ctx->err_reply == NULL) {
+        /* either our first attempt, or retrying after PREAUTH_NEEDED */
+        code = krb5_do_preauth(context,
+                               ctx->request,
+                               ctx->encoded_request_body,
+                               ctx->encoded_previous_request,
+                               ctx->preauth_to_use,
+                               &ctx->request->padata,
+                               &ctx->salt,
+                               &ctx->s2kparams,
+                               &ctx->etype,
+                               &ctx->as_key,
+                               ctx->prompter,
+                               ctx->prompter_data,
+                               ctx->gak_fct,
+                               ctx->gak_data,
+                               &ctx->get_data_rock,
+                               ctx->opte);
+        if (code != 0)
+            goto cleanup;
+    } else {
+        if (ctx->preauth_to_use != NULL) {
+            /*
+             * Retry after an error other than PREAUTH_NEEDED,
+             * using e-data to figure out what to change.
+             */
+            code = krb5_do_preauth_tryagain(context,
+                                            ctx->request,
+                                            ctx->encoded_request_body,
+                                            ctx->encoded_previous_request,
+                                            ctx->preauth_to_use,
+                                            &ctx->request->padata,
+                                            ctx->err_reply,
+                                            &ctx->salt,
+                                            &ctx->s2kparams,
+                                            &ctx->etype,
+                                            &ctx->as_key,
+                                            ctx->prompter,
+                                            ctx->prompter_data,
+                                            ctx->gak_fct,
+                                            ctx->gak_data,
+                                            &ctx->get_data_rock,
+                                            ctx->opte);
+        } else {
+            /* No preauth supplied, so can't query the plugins. */
+            code = KRB5KRB_ERR_GENERIC;
+        }
+        if (code != 0) {
+            /* couldn't come up with anything better */
+            code = ctx->err_reply->error + ERROR_TABLE_BASE_krb5;
+            goto cleanup;
+        }
+    }
+
+    if (ctx->encoded_previous_request != NULL) {
+        krb5_free_data(context, ctx->encoded_previous_request);
+        ctx->encoded_previous_request = NULL;
+    }
+
+    code = krb5int_fast_prep_req(context, ctx->fast_state,
+                                 ctx->request, ctx->encoded_request_body,
+                                 encode_krb5_as_req,
+                                 &ctx->encoded_previous_request);
+    if (code != 0)
+        goto cleanup;
+
+    code = krb5int_copy_data_contents(context,
+                                      ctx->encoded_previous_request,
+                                      out);
+    if (code != 0)
+        goto cleanup;
+
+cleanup:
+    return code;
+}
+
+static krb5_error_code
+init_creds_step_reply(krb5_context context,
+                      krb5_init_creds_context ctx,
+                      krb5_data *in)
+{
+    krb5_error_code code;
+    krb5_pa_data **padata = NULL;
+    krb5_pa_data **kdc_padata = NULL;
+    krb5_boolean retry = FALSE;
+    int canon_flag = 0;
+    krb5_keyblock *strengthen_key = NULL;
+    krb5_keyblock encrypting_key;
+
+    encrypting_key.length = 0;
+    encrypting_key.contents = NULL;
+
+    /* process previous KDC response */
+    code = init_creds_validate_reply(context, ctx, in);
+    if (code != 0)
+        goto cleanup;
+
+    /* per referrals draft, enterprise principals imply canonicalization */
+    canon_flag = ((ctx->request->kdc_options & KDC_OPT_CANONICALIZE) != 0) ||
+        ctx->request->client->type == KRB5_NT_ENTERPRISE_PRINCIPAL;
+
+    if (ctx->err_reply != NULL) {
+        code = krb5int_fast_process_error(context, ctx->fast_state,
+                                          &ctx->err_reply, &padata, &retry);
+        if (code != 0)
+            goto cleanup;
+
+        if (ctx->err_reply->error == KDC_ERR_PREAUTH_REQUIRED && retry) {
+            /* reset the list of preauth types to try */
+            krb5_free_pa_data(context, ctx->preauth_to_use);
+            ctx->preauth_to_use = padata;
+            padata = NULL;
+            /* this will trigger a new call to krb5_do_preauth() */
+            krb5_free_error(context, ctx->err_reply);
+            ctx->err_reply = NULL;
+            code = sort_krb5_padata_sequence(context,
+                                             &ctx->request->client->realm,
+                                             ctx->preauth_to_use);
+
+        } else if (canon_flag && ctx->err_reply->error == KDC_ERR_WRONG_REALM) {
+            if (ctx->err_reply->client == NULL ||
+                !krb5_princ_realm(context, ctx->err_reply->client)->length) {
+                code = KRB5KDC_ERR_WRONG_REALM;
+                goto cleanup;
+            }
+            /* Rewrite request.client with realm from error reply */
+            krb5_free_data_contents(context, &ctx->request->client->realm);
+            code = krb5int_copy_data_contents(context,
+                                              &ctx->err_reply->client->realm,
+                                              &ctx->request->client->realm);
+            /* this will trigger a new call to krb5_do_preauth() */
+            krb5_free_error(context, ctx->err_reply);
+            ctx->err_reply = NULL;
+        } else {
+            if (retry) {
+                code = 0;
+            } else {
+                /* error + no hints = give up */
+                code = (krb5_error_code)ctx->err_reply->error +
+                       ERROR_TABLE_BASE_krb5;
+            }
+        }
+
+        /* Return error code, or continue with next iteration */
+        goto cleanup;
+    }
+
+    /* We have a response. Process it. */
+    assert(ctx->reply != NULL);
 
     /* process any preauth data in the as_reply */
     krb5_clear_preauth_context_use_counts(context);
-    ret = krb5int_fast_process_response(context, fast_state,
-                                        local_as_reply, &strengthen_key);
-    if (ret)
+    code = krb5int_fast_process_response(context, ctx->fast_state,
+                                         ctx->reply, &strengthen_key);
+    if (code != 0)
         goto cleanup;
-    if ((ret = sort_krb5_padata_sequence(context, &request.server->realm,
-                                         local_as_reply->padata)))
+
+    code = sort_krb5_padata_sequence(context, &ctx->request->client->realm,
+                                     ctx->reply->padata);
+    if (code != 0)
         goto cleanup;
-    etype = local_as_reply->enc_part.enctype;
-    if ((ret = krb5_do_preauth(context,
-                               &request,
-                               encoded_request_body, encoded_previous_request,
-                               local_as_reply->padata, &kdc_padata,
-                               &salt, &s2kparams, &etype, &as_key, prompter,
-                               prompter_data, gak_fct, gak_data,
-                               &get_data_rock, options))) {
-#if APPLE_PKINIT
-        inTktDebug("krb5_get_init_creds krb5_do_preauth returned %d\n", (int)ret);
-#endif /* APPLE_PKINIT */
+
+    ctx->etype = ctx->reply->enc_part.enctype;
+
+    code = krb5_do_preauth(context,
+                           ctx->request,
+                           ctx->encoded_request_body,
+                           ctx->encoded_previous_request,
+                           ctx->reply->padata,
+                           &kdc_padata,
+                           &ctx->salt,
+                           &ctx->s2kparams,
+                           &ctx->etype,
+                           &ctx->as_key,
+                           ctx->prompter,
+                           ctx->prompter_data,
+                           ctx->gak_fct,
+                           ctx->gak_data,
+                           &ctx->get_data_rock,
+                           ctx->opte);
+    if (code != 0)
         goto cleanup;
-    }
 
     /*
      * If we haven't gotten a salt from another source yet, set up one
@@ -1524,9 +1792,9 @@ krb5int_get_init_creds(krb5_context context,
      * salt.  local_as_reply->client will be checked later on in
      * verify_as_reply.
      */
-    if (salt.length == SALT_TYPE_AFS_LENGTH && salt.data == NULL) {
-        ret = krb5_principal2salt(context, local_as_reply->client, &salt);
-        if (ret)
+    if (ctx->salt.length == SALT_TYPE_AFS_LENGTH && ctx->salt.data == NULL) {
+        code = krb5_principal2salt(context, ctx->reply->client, &ctx->salt);
+        if (code != 0)
             goto cleanup;
     }
 
@@ -1542,117 +1810,196 @@ krb5int_get_init_creds(krb5_context context,
        it.  If decrypting the as_rep fails, or if there isn't an
        as_key at all yet, then use the gak_fct to get one, and try
        again.  */
-    if (as_key.length) {
-        ret = krb5int_fast_reply_key(context, strengthen_key, &as_key,
+    if (ctx->as_key.length) {
+        code = krb5int_fast_reply_key(context, strengthen_key, &ctx->as_key,
                                      &encrypting_key);
-        if (ret)
+        if (code != 0)
             goto cleanup;
-        ret = decrypt_as_reply(context, NULL, local_as_reply, NULL,
-                               NULL, &encrypting_key, krb5_kdc_rep_decrypt_proc,
-                               NULL);
+        code = decrypt_as_reply(context, NULL, ctx->reply, NULL, NULL,
+                                &encrypting_key, krb5_kdc_rep_decrypt_proc,
+                                NULL);
     } else
-        ret = -1;
+        code = -1;
 
-    if (ret) {
+    if (code != 0) {
         /* if we haven't get gotten a key, get it now */
-
-        if ((ret = ((*gak_fct)(context, request.client,
-                               local_as_reply->enc_part.enctype,
-                               prompter, prompter_data, &salt, &s2kparams,
-                               &as_key, gak_data))))
+        code = (*ctx->gak_fct)(context, ctx->request->client,
+                               ctx->reply->enc_part.enctype,
+                               ctx->prompter, ctx->prompter_data,
+                               &ctx->salt, &ctx->s2kparams,
+                               &ctx->as_key, ctx->gak_data);
+        if (code != 0)
             goto cleanup;
 
-        ret = krb5int_fast_reply_key(context, strengthen_key, &as_key,
-                                     &encrypting_key);
-        if (ret)
+        code = krb5int_fast_reply_key(context, strengthen_key, &ctx->as_key,
+                                      &encrypting_key);
+        if (code != 0)
             goto cleanup;
-        if ((ret = decrypt_as_reply(context, NULL, local_as_reply, NULL,
-                                    NULL, &encrypting_key, krb5_kdc_rep_decrypt_proc,
-                                    NULL)))
+
+        code = decrypt_as_reply(context, NULL, ctx->reply, NULL, NULL,
+                                &encrypting_key, krb5_kdc_rep_decrypt_proc,
+                                NULL);
+        if (code != 0)
             goto cleanup;
     }
 
-    if ((ret = verify_as_reply(context, time_now, &request, local_as_reply)))
+    code = verify_as_reply(context, ctx->request_time,
+                           ctx->request, ctx->reply);
+    if (code != 0)
         goto cleanup;
 
-    /* XXX this should be inside stash_as_reply, but as long as
-       get_in_tkt is still around using that arg as an in/out, I can't
-       do that */
-    memset(creds, 0, sizeof(*creds));
-
-    if ((ret = stash_as_reply(context, time_now, &request, local_as_reply,
-                              creds, NULL)))
+    code = stash_as_reply(context, ctx->request_time, ctx->request,
+                          ctx->reply, &ctx->cred, NULL);
+    if (code != 0)
         goto cleanup;
+
+    krb5_preauth_request_context_fini(context);
 
     /* success */
-
-    ret = 0;
+    code = 0;
+    ctx->flags |= KRB5_INIT_CREDS_STEP_FLAG_COMPLETE;
 
 cleanup:
-    if (ret != 0) {
-        char *client_name;
-        /* See if we can produce a more detailed error message.  */
-        switch (ret) {
-        case KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN:
-            client_name = NULL;
-            if (krb5_unparse_name(context, client, &client_name) == 0) {
-                krb5_set_error_message(context, ret,
-                                       "Client '%s' not found in Kerberos database",
-                                       client_name);
-                free(client_name);
-            }
-            break;
-        default:
-            break;
-        }
-    }
-    krb5_preauth_request_context_fini(context);
+    krb5_free_pa_data(context, padata);
+    krb5_free_pa_data(context, kdc_padata);
     krb5_free_keyblock(context, strengthen_key);
-    if (encrypting_key.contents)
-        krb5_free_keyblock_contents(context, &encrypting_key);
-    if (fast_state)
-        krb5int_fast_free_state(context, fast_state);
-    if (out_padata)
-        krb5_free_pa_data(context, out_padata);
-    if (encoded_previous_request != NULL) {
-        krb5_free_data(context, encoded_previous_request);
-        encoded_previous_request = NULL;
-    }
-    if (encoded_request_body != NULL) {
-        krb5_free_data(context, encoded_request_body);
-        encoded_request_body = NULL;
-    }
-    if (request.server)
-        krb5_free_principal(context, request.server);
-    if (request.ktype &&
-        (!(options && (options->flags & KRB5_GET_INIT_CREDS_OPT_ETYPE_LIST))))
-        free(request.ktype);
-    if (request.addresses &&
-        (!(options &&
-           (options->flags & KRB5_GET_INIT_CREDS_OPT_ADDRESS_LIST))))
-        krb5_free_addresses(context, request.addresses);
-    if (preauth_to_use)
-        krb5_free_pa_data(context, preauth_to_use);
-    if (kdc_padata)
-        krb5_free_pa_data(context, kdc_padata);
-    if (request.padata)
-        krb5_free_pa_data(context, request.padata);
-    if (as_key.length)
-        krb5_free_keyblock_contents(context, &as_key);
-    if (salt.data &&
-        (!(options && (options->flags & KRB5_GET_INIT_CREDS_OPT_SALT))))
-        free(salt.data);
-    krb5_free_data_contents(context, &s2kparams);
-    if (as_reply)
-        *as_reply = local_as_reply;
-    else if (local_as_reply)
-        krb5_free_kdc_rep(context, local_as_reply);
-    if (referred_client.realm.data)
-        krb5_free_data_contents(context, &referred_client.realm);
-    if (krb5_gic_opt_is_shadowed(options)) {
-        krb5_get_init_creds_opt_free(context,
-                                     (krb5_get_init_creds_opt *)options);
+    krb5_free_keyblock_contents(context, &encrypting_key);
+
+    return code;
+}
+
+/*
+ * Do next step of credentials acquisition.
+ *
+ * On success returns 0 or KRB5KRB_ERR_RESPONSE_TOO_BIG if the request
+ * should be sent with TCP.
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_init_creds_step(krb5_context context,
+                     krb5_init_creds_context ctx,
+                     krb5_data *in,
+                     krb5_data *out,
+                     krb5_data *realm,
+                     unsigned int *flags)
+{
+    krb5_error_code code, code2;
+
+    *flags = 0;
+
+    out->data = NULL;
+    out->length = 0;
+
+    realm->data = NULL;
+    realm->length = 0;
+
+    if (ctx->flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE)
+        goto cleanup;
+
+    if (in->length != 0) {
+        code = init_creds_step_reply(context, ctx, in);
+        if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG) {
+            code2 = krb5int_copy_data_contents(context,
+                                               ctx->encoded_previous_request,
+                                               out);
+            if (code2 != 0) {
+                code = code2;
+                goto cleanup;
+            }
+            goto copy_realm;
+        }
+        if (code != 0 || (ctx->flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE))
+            goto cleanup;
     }
 
-    return(ret);
+    code = init_creds_step_request(context, ctx, out);
+    if (code != 0)
+        goto cleanup;
+
+    /* Only a new request increments the loop count, not a TCP retry */
+    ctx->loopcount++;
+
+copy_realm:
+    assert(ctx->request->server != NULL);
+
+    code2 = krb5int_copy_data_contents(context,
+                                       &ctx->request->server->realm,
+                                       realm);
+    if (code2 != 0) {
+        code = code2;
+        goto cleanup;
+    }
+
+cleanup:
+    if (code == KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN) {
+        char *client_name;
+
+        /* See if we can produce a more detailed error message */
+        code2 = krb5_unparse_name(context, ctx->request->client, &client_name);
+        if (code2 == 0) {
+            krb5_set_error_message(context, code,
+                                   "Client '%s' not found in Kerberos database",
+                                   client_name);
+            krb5_free_unparsed_name(context, client_name);
+        }
+    }
+
+    *flags = (ctx->flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE);
+
+    return code;
 }
+
+krb5_error_code KRB5_CALLCONV
+krb5int_get_init_creds(krb5_context context,
+                       krb5_creds *creds,
+                       krb5_principal client,
+                       krb5_prompter_fct prompter,
+                       void *prompter_data,
+                       krb5_deltat start_time,
+                       char *in_tkt_service,
+                       krb5_get_init_creds_opt *options,
+                       krb5_gic_get_as_key_fct gak_fct,
+                       void *gak_data,
+                       int  *use_master,
+                       krb5_kdc_rep **as_reply)
+{
+    krb5_error_code code;
+    krb5_init_creds_context ctx = NULL;
+
+    code = krb5_init_creds_init(context,
+                                client,
+                                prompter,
+                                prompter_data,
+                                start_time,
+                                options,
+                                &ctx);
+    if (code != 0)
+        goto cleanup;
+
+    ctx->gak_fct = gak_fct;
+    ctx->gak_data = gak_data;
+
+    if (in_tkt_service) {
+        code = krb5_init_creds_set_service(context, ctx, in_tkt_service);
+        if (code != 0)
+            goto cleanup;
+    }
+
+    code = init_creds_get(context, ctx, use_master);
+    if (code != 0)
+        goto cleanup;
+
+    code = krb5_init_creds_get_creds(context, ctx, creds);
+    if (code != 0)
+        goto cleanup;
+
+    if (as_reply != NULL) {
+        *as_reply = ctx->reply;
+        ctx->reply = NULL;
+    }
+
+cleanup:
+    krb5_init_creds_free(context, ctx);
+
+    return code;
+}
+

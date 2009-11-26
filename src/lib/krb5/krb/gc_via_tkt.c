@@ -167,33 +167,29 @@ krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
 }
 
 krb5_error_code
-krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
-                           krb5_flags kdcoptions, krb5_address *const *address,
-                           krb5_pa_data **in_padata,
-                           krb5_creds *in_cred,
-                           krb5_error_code (*pacb_fct)(krb5_context,
-                                                       krb5_keyblock *,
-                                                       krb5_kdc_req *,
-                                                       void *),
-                           void *pacb_data,
-                           krb5_pa_data ***out_padata,
-                           krb5_pa_data ***out_enc_padata,
-                           krb5_creds **out_cred,
-                           krb5_keyblock **out_subkey)
+krb5int_make_tgs_request(krb5_context context,
+                         krb5_creds *tkt,
+                         krb5_flags kdcoptions,
+                         krb5_address *const *address,
+                         krb5_pa_data **in_padata,
+                         krb5_creds *in_cred,
+                         krb5_error_code (*pacb_fct)(krb5_context,
+                                                     krb5_keyblock *,
+                                                     krb5_kdc_req *,
+                                                     void *),
+                         void *pacb_data,
+                         krb5_data *request_data,
+                         krb5_timestamp *timestamp,
+                         krb5_int32 *nonce,
+                         krb5_keyblock **subkey)
 {
     krb5_error_code retval;
-    krb5_kdc_rep *dec_rep;
-    krb5_error *err_reply;
-    krb5_response tgsrep;
-    krb5_enctype *enctypes = 0;
-    krb5_keyblock *subkey = NULL;
-    krb5_boolean s4u2self = FALSE, second_tkt;
+    krb5_enctype *enctypes = NULL;
+    krb5_boolean second_tkt;
 
-#ifdef DEBUG_REFERRALS
-    printf("krb5_get_cred_via_tkt starting; referral flag is %s\n", kdcoptions&KDC_OPT_CANONICALIZE?"on":"off");
-    krb5int_dbgref_dump_principal("krb5_get_cred_via_tkt requested ticket", in_cred->server);
-    krb5int_dbgref_dump_principal("krb5_get_cred_via_tkt TGT in use", tkt->server);
-#endif
+    request_data->data = NULL;
+    *timestamp = 0;
+    *subkey = NULL;
 
     /* tkt->client must be equal to in_cred->client */
     if (!krb5_principal_compare(context, tkt->client, in_cred->client))
@@ -202,74 +198,64 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
     if (!tkt->ticket.length)
         return KRB5_NO_TKT_SUPPLIED;
 
-    second_tkt = ((kdcoptions & (KDC_OPT_ENC_TKT_IN_SKEY | KDC_OPT_CNAME_IN_ADDL_TKT)) != 0);
-
+    second_tkt = ((kdcoptions & (KDC_OPT_ENC_TKT_IN_SKEY |
+                                 KDC_OPT_CNAME_IN_ADDL_TKT)) != 0);
     if (second_tkt && !in_cred->second_ticket.length)
-        return(KRB5_NO_2ND_TKT);
-
-    s4u2self = krb5int_find_pa_data(context, in_padata, KRB5_PADATA_S4U_X509_USER) ||
-        krb5int_find_pa_data(context, in_padata, KRB5_PADATA_FOR_USER);
-
-    /* check if we have the right TGT                    */
-    /* tkt->server must be equal to                      */
-    /* krbtgt/realmof(cred->server)@realmof(tgt->server) */
-/*
-  {
-  krb5_principal tempprinc;
-  if (retval = krb5_tgtname(context,
-  krb5_princ_realm(context, in_cred->server),
-  krb5_princ_realm(context, tkt->server), &tempprinc))
-  return(retval);
-
-  if (!krb5_principal_compare(context, tempprinc, tkt->server)) {
-  krb5_free_principal(context, tempprinc);
-  return (KRB5_PRINC_NOMATCH);
-  }
-  krb5_free_principal(context, tempprinc);
-  }
-*/
+        return KRB5_NO_2ND_TKT;
 
     if (in_cred->keyblock.enctype) {
-        enctypes = (krb5_enctype *) malloc(sizeof(krb5_enctype)*2);
-        if (!enctypes)
+        enctypes = (krb5_enctype *)malloc(sizeof(krb5_enctype)*2);
+        if (enctypes == NULL)
             return ENOMEM;
         enctypes[0] = in_cred->keyblock.enctype;
         enctypes[1] = 0;
     }
 
-    retval = krb5int_send_tgs(context, kdcoptions, &in_cred->times, enctypes,
-                              in_cred->server, address, in_cred->authdata,
-                              in_padata,
-                              second_tkt ? &in_cred->second_ticket : NULL,
-                              tkt, pacb_fct, pacb_data, &tgsrep, &subkey);
-    if (enctypes)
+    retval = krb5int_make_tgs_request_ext(context, kdcoptions, &in_cred->times,
+                                          enctypes, in_cred->server, address,
+                                          in_cred->authdata, in_padata,
+                                          second_tkt ?
+                                            &in_cred->second_ticket : 0,
+                                          tkt, pacb_fct, pacb_data,
+                                          request_data,
+                                          timestamp, nonce, subkey);
+    if (enctypes != NULL)
         free(enctypes);
-    if (retval) {
-#ifdef DEBUG_REFERRALS
-        printf("krb5_get_cred_via_tkt ending early after send_tgs with: %s\n",
-               error_message(retval));
-#endif
-        return retval;
-    }
 
-    switch (tgsrep.message_type) {
-    case KRB5_TGS_REP:
-        break;
-    case KRB5_ERROR:
-    default:
-        if (krb5_is_krb_error(&tgsrep.response))
-            retval = decode_krb5_error(&tgsrep.response, &err_reply);
-        else
-            retval = KRB5KRB_AP_ERR_MSG_TYPE;
+    return retval;
+}
 
-        if (retval)                     /* neither proper reply nor error! */
-            goto error_4;
+krb5_error_code
+krb5int_process_tgs_reply(krb5_context context,
+                          krb5_data *response_data,
+                          krb5_creds *tkt,
+                          krb5_flags kdcoptions,
+                          krb5_address *const *address,
+                          krb5_pa_data **in_padata,
+                          krb5_creds *in_cred,
+                          krb5_timestamp timestamp,
+                          krb5_int32 nonce,
+                          krb5_keyblock *subkey,
+                          krb5_pa_data ***out_padata,
+                          krb5_pa_data ***out_enc_padata,
+                          krb5_creds **out_cred)
+{
+    krb5_error_code retval;
+    krb5_kdc_rep *dec_rep = NULL;
+    krb5_error *err_reply = NULL;
+    krb5_boolean s4u2self;
 
+    s4u2self = krb5int_find_pa_data(context, in_padata,
+                                    KRB5_PADATA_S4U_X509_USER) ||
+               krb5int_find_pa_data(context, in_padata,
+                                    KRB5_PADATA_FOR_USER);
+
+    if (krb5_is_krb_error(response_data)) {
+        retval = decode_krb5_error(response_data, &err_reply);
+        if (retval != 0)
+            goto cleanup;
         retval = (krb5_error_code) err_reply->error + ERROR_TABLE_BASE_krb5;
         if (err_reply->text.length > 0) {
-#if 0
-            const char *m;
-#endif
             switch (err_reply->error) {
             case KRB_ERR_GENERIC:
                 krb5_set_error_message(context, retval,
@@ -280,7 +266,8 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
             case KDC_ERR_S_PRINCIPAL_UNKNOWN:
             {
                 char *s_name;
-                if (krb5_unparse_name(context, in_cred->server, &s_name) == 0) {
+                if (err_reply->server &&
+                    krb5_unparse_name(context, err_reply->server, &s_name) == 0) {
                     krb5_set_error_message(context, retval,
                                            "Server %s not found in Kerberos database",
                                            s_name);
@@ -291,45 +278,33 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
                     krb5_clear_error_message(context);
             }
             break;
-            default:
-#if 0 /* We should stop the KDC from sending back this text, because
-         if the local language doesn't match the KDC's language, we'd
-         just wind up printing out the error message in two languages.
-         Well, when we get some localization.  Which is already
-         happening in KfM.  */
-                m = error_message(retval);
-                /* Special case: MIT KDC may return this same string
-                   in the e-text field.  */
-                if (strlen (m) == err_reply->text.length-1
-                    && !strcmp(m, err_reply->text.data))
-                    break;
-                krb5_set_error_message(context, retval,
-                                       "%s (KDC supplied additional data: %s)",
-                                       m, err_reply->text.data);
-#endif
-                break;
             }
         }
-
         krb5_free_error(context, err_reply);
-        goto error_4;
+        goto cleanup;
+     } else if (!krb5_is_tgs_rep(response_data)) {
+        retval = KRB5KRB_AP_ERR_MSG_TYPE;
+        goto cleanup;
     }
 
     /* Unfortunately, Heimdal at least up through 1.2  encrypts using
        the session key not the subsession key.  So we try both. */
-    if ((retval = krb5int_decode_tgs_rep(context, &tgsrep.response,
-                                         subkey,
-                                         KRB5_KEYUSAGE_TGS_REP_ENCPART_SUBKEY, &dec_rep))) {
-        if ((krb5int_decode_tgs_rep(context, &tgsrep.response,
+    retval = krb5int_decode_tgs_rep(context, response_data,
+                                    subkey,
+                                    KRB5_KEYUSAGE_TGS_REP_ENCPART_SUBKEY,
+                                    &dec_rep);
+    if (retval) {
+        if ((krb5int_decode_tgs_rep(context, response_data,
                                     &tkt->keyblock,
                                     KRB5_KEYUSAGE_TGS_REP_ENCPART_SESSKEY, &dec_rep)) == 0)
             retval = 0;
-        else goto error_4;
+        else
+            goto cleanup;
     }
 
     if (dec_rep->msg_type != KRB5_TGS_REP) {
         retval = KRB5KRB_AP_ERR_MSG_TYPE;
-        goto error_3;
+        goto cleanup;
     }
 
     /*
@@ -358,7 +333,7 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
     if (retval == 0)
         retval = check_reply_server(context, kdcoptions, in_cred, dec_rep);
 
-    if (dec_rep->enc_part2->nonce != tgsrep.expected_nonce)
+    if (dec_rep->enc_part2->nonce != nonce)
         retval = KRB5_KDCREP_MODIFIED;
 
     if ((kdcoptions & KDC_OPT_POSTDATED) &&
@@ -382,13 +357,13 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
         retval = KRB5_KDCREP_MODIFIED;
 
     if (retval != 0)
-        goto error_3;
+        goto cleanup;
 
     if (!in_cred->times.starttime &&
         !in_clock_skew(dec_rep->enc_part2->times.starttime,
-                       tgsrep.request_time)) {
+                       timestamp)) {
         retval = KRB5_KDCREP_SKEW;
-        goto error_3;
+        goto cleanup;
     }
 
     if (out_padata != NULL) {
@@ -401,9 +376,103 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
     }
 
     retval = krb5_kdcrep2creds(context, dec_rep, address,
-                               &in_cred->second_ticket,  out_cred);
+                               &in_cred->second_ticket, out_cred);
+    if (retval != 0)
+        goto cleanup;
 
-error_3:;
+cleanup:
+    if (dec_rep != NULL) {
+        memset(dec_rep->enc_part2->session->contents, 0,
+               dec_rep->enc_part2->session->length);
+        krb5_free_kdc_rep(context, dec_rep);
+    }
+
+    return retval;
+}
+
+krb5_error_code
+krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
+                           krb5_flags kdcoptions, krb5_address *const *address,
+                           krb5_pa_data **in_padata,
+                           krb5_creds *in_cred,
+                           krb5_error_code (*pacb_fct)(krb5_context,
+                                                       krb5_keyblock *,
+                                                       krb5_kdc_req *,
+                                                       void *),
+                           void *pacb_data,
+                           krb5_pa_data ***out_padata,
+                           krb5_pa_data ***out_enc_padata,
+                           krb5_creds **out_cred,
+                           krb5_keyblock **out_subkey)
+{
+    krb5_error_code retval;
+    krb5_data request_data;
+    krb5_data response_data;
+    krb5_timestamp timestamp;
+    krb5_int32 nonce;
+    krb5_keyblock *subkey = NULL;
+    int tcp_only = 0, use_master = 0;
+
+    request_data.data = NULL;
+    request_data.length = 0;
+    response_data.data = NULL;
+    response_data.length = 0;
+
+#ifdef DEBUG_REFERRALS
+    printf("krb5_get_cred_via_tkt starting; referral flag is %s\n", kdcoptions&KDC_OPT_CANONICALIZE?"on":"off");
+    krb5int_dbgref_dump_principal("krb5_get_cred_via_tkt requested ticket", in_cred->server);
+    krb5int_dbgref_dump_principal("krb5_get_cred_via_tkt TGT in use", tkt->server);
+#endif
+
+    retval = krb5int_make_tgs_request(context, tkt, kdcoptions,
+                                      address, in_padata, in_cred,
+                                      pacb_fct, pacb_data,
+                                      &request_data, &timestamp, &nonce,
+                                      &subkey);
+    if (retval != 0)
+        goto cleanup;
+
+send_again:
+    use_master = 0;
+    retval = krb5_sendto_kdc(context, &request_data,
+                             krb5_princ_realm(context, in_cred->server),
+                             &response_data, &use_master, tcp_only);
+    if (retval == 0) {
+        if (krb5_is_krb_error(&response_data)) {
+            if (!tcp_only) {
+                krb5_error *err_reply;
+                retval = decode_krb5_error(&response_data, &err_reply);
+                if (retval != 0)
+                    goto cleanup;
+                if (err_reply->error == KRB_ERR_RESPONSE_TOO_BIG) {
+                    tcp_only = 1;
+                    krb5_free_error(context, err_reply);
+                    krb5_free_data_contents(context, &response_data);
+                    goto send_again;
+                }
+                krb5_free_error(context, err_reply);
+            }
+        }
+    } else
+        goto cleanup;
+
+    retval = krb5int_process_tgs_reply(context, &response_data,
+                                       tkt, kdcoptions, address,
+                                       in_padata, in_cred,
+                                       timestamp, nonce, subkey,
+                                       out_padata,
+                                       out_enc_padata, out_cred);
+    if (retval != 0)
+        goto cleanup;
+
+cleanup:
+#ifdef DEBUG_REFERRALS
+    printf("krb5_get_cred_via_tkt ending; %s\n", retval?error_message(retval):"no error");
+#endif
+
+    krb5_free_data_contents(context, &request_data);
+    krb5_free_data_contents(context, &response_data);
+
     if (subkey != NULL) {
         if (retval == 0 && out_subkey != NULL)
             *out_subkey = subkey;
@@ -411,14 +480,5 @@ error_3:;
             krb5_free_keyblock(context, subkey);
     }
 
-    memset(dec_rep->enc_part2->session->contents, 0,
-           dec_rep->enc_part2->session->length);
-    krb5_free_kdc_rep(context, dec_rep);
-
-error_4:;
-    free(tgsrep.response.data);
-#ifdef DEBUG_REFERRALS
-    printf("krb5_get_cred_via_tkt ending; %s\n", retval?error_message(retval):"no error");
-#endif
     return retval;
 }

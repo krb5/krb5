@@ -181,17 +181,7 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
                                                &(*auth_context)->local_seq_number)))
             goto cleanup;
 
-
     /* generate subkey if needed */
-    if (!in_data &&(*auth_context)->checksum_func) {
-        retval = (*auth_context)->checksum_func( context,
-                                                 *auth_context,
-                                                 (*auth_context)->checksum_func_data,
-                                                 &in_data);
-        if (retval)
-            goto cleanup;
-    }
-
     if ((ap_req_options & AP_OPTS_USE_SUBKEY)&&(!(*auth_context)->send_subkey)) {
         retval = krb5int_generate_and_save_subkey (context, *auth_context,
                                                    &in_creds->keyblock,
@@ -201,8 +191,16 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
     }
 
 
-    if (in_data) {
+    if (!in_data && (*auth_context)->checksum_func) {
+        retval = (*auth_context)->checksum_func( context,
+                                                 *auth_context,
+                                                 (*auth_context)->checksum_func_data,
+                                                 &in_data);
+        if (retval)
+            goto cleanup;
+    }
 
+    if (in_data) {
         if ((*auth_context)->req_cksumtype == 0x8003) {
             /* XXX Special hack for GSSAPI */
             checksum.checksum_type = 0x8003;
