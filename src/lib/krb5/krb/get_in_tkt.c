@@ -1882,7 +1882,7 @@ krb5_init_creds_step(krb5_context context,
                      krb5_data *realm,
                      unsigned int *flags)
 {
-    krb5_error_code code, code2;
+    krb5_error_code code = 0, code2;
 
     *flags = 0;
 
