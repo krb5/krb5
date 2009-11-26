@@ -976,6 +976,8 @@ extern int krb5int_mkstemp(char *);
 #define mkstemp krb5int_mkstemp
 #endif
 
+extern void krb5int_zap(void *ptr, size_t len);
+
 /* Fudge for future adoption of gettext or the like.  */
 #ifndef _
 #define _(X) (X)

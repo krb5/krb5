@@ -1,5 +1,3 @@
-thisconfigdir=..
-myfulldir=slave
 mydir=slave
 BUILDTOP=$(REL)..
 PROG_LIBPATH=-L$(TOPLIBD)

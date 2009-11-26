@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * kadmin/ldap_util/kdb5_ldap_util.h
  */
@@ -71,10 +72,10 @@ extern void db_usage(int);
 /* Following are the bitmaps that indicate which of the options among -D, -w, -h, -p & -t
  * were specified on the command line.
  */
-#define CMD_LDAP_D	0x1     /* set if -D option is specified */
-#define CMD_LDAP_W	0x2     /* set if -w option is specified */
-#define CMD_LDAP_H	0x4     /* set if -h option is specified */
-#define CMD_LDAP_P	0x8     /* set if -p option is specified */
+#define CMD_LDAP_D      0x1     /* set if -D option is specified */
+#define CMD_LDAP_W      0x2     /* set if -w option is specified */
+#define CMD_LDAP_H      0x4     /* set if -h option is specified */
+#define CMD_LDAP_P      0x8     /* set if -p option is specified */
 
 #define MAX_PASSWD_LEN          1024
 #define MAX_PASSWD_PROMPT_LEN   276     /* max_dn_size(=256) + strlen("Password for \" \"")=20 */

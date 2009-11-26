@@ -1,9 +1,7 @@
-thisconfigdir=../../../..
-myfulldir=plugins/kdb/ldap/libkdb_ldap
 mydir=plugins/kdb/ldap/libkdb_ldap
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
-KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
+KRB5_CONFIG_SETUP = KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf ; export KRB5_CONFIG ;
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 # Lots of ugliness here because of duplicated symbol names.
@@ -18,7 +16,7 @@ DEFINES = \
 	-Dkrb5_dbe_update_tl_data=kdb_ldap_dbe_update_tl_data
 DEFS=
 
-LOCALINCLUDES = -I$(SRCTOP)/lib/kdb -I$(SRCTOP)/lib/krb5/asn.1
+LOCALINCLUDES = -I$(top_srcdir)/lib/kdb -I$(top_srcdir)/lib/krb5/asn.1
 
 LIBBASE=kdb_ldap
 LIBMAJOR=1

@@ -1,8 +1,6 @@
 # Makefile for the KFW Network Provider
 #
 
-thisconfigdir=./..
-myfulldir=windows/nplogon
 mydir=.
 BUILDTOP=$(REL)..$(S)..
 DEFINES = 
@@ -15,7 +13,7 @@ PROG_LIBPATH=-L$(TOPLIBD) -L$(KRB5_LIBDIR)
 SYSLIBS = kernel32.lib user32.lib advapi32.lib wsock32.lib secur32.lib userenv.lib
 
 VERSIONRC = $(BUILDTOP)\windows\version.rc
-RCFLAGS=$(CPPFLAGS) -I$(SRCTOP) -D_WIN32 -DRES_ONLY
+RCFLAGS=$(CPPFLAGS) -I$(top_srcdir) -D_WIN32 -DRES_ONLY
 
 KFWLOGON=$(OUTPRE)kfwlogon.dll
 KFWCPCC=$(OUTPRE)kfwcpcc.exe

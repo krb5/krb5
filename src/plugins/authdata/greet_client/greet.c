@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * plugins/authdata/greet_client/
  *
@@ -242,10 +243,10 @@ greet_set_attribute(krb5_context kcontext,
 
 static krb5_error_code
 greet_delete_attribute(krb5_context kcontext,
-                        krb5_authdata_context context,
-                        void *plugin_context,
-                        void *request_context,
-                        const krb5_data *attribute)
+                       krb5_authdata_context context,
+                       void *plugin_context,
+                       void *request_context,
+                       const krb5_data *attribute)
 {
     struct greet_context *greet = (struct greet_context *)request_context;
 
@@ -265,8 +266,8 @@ greet_size(krb5_context kcontext,
     struct greet_context *greet = (struct greet_context *)request_context;
 
     *sizep += sizeof(krb5_int32) +
-              greet->greeting.length +
-              sizeof(krb5_int32);
+        greet->greeting.length +
+        sizeof(krb5_int32);
 
     return 0;
 }

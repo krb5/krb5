@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/kdb/kdb_ldap/ldap_misc.h
  *
@@ -144,11 +145,11 @@ krb5_ldap_get_db_opt(char *, char **, char **);
 
 krb5_error_code
 populate_krb5_db_entry(krb5_context context,
-    krb5_ldap_context *ldap_context,
-    LDAP *ld,
-    LDAPMessage *ent,
-    krb5_const_principal princ,
-    krb5_db_entry *entry);
+                       krb5_ldap_context *ldap_context,
+                       LDAP *ld,
+                       LDAPMessage *ent,
+                       krb5_const_principal princ,
+                       krb5_db_entry *entry);
 
 int kldap_ensure_initialized (void);
 

@@ -1,5 +1,3 @@
-thisconfigdir=../../../..
-myfulldir=lib/crypto/krb/crc32
 mydir=lib/crypto/krb/crc32
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 DEFS=

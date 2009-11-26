@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * plugins/kdb/hdb/kdb_hdb.c
  *
@@ -153,11 +153,11 @@ kh_db_context_init(krb5_context context,
         goto cleanup;
     }
 
-#define GET_PLUGIN_FUNC(_lib, _sym, _member)     do { \
-    code = krb5int_get_plugin_func(kh->_lib, _sym, \
-                                   (void (**)())&kh->_member, &errinfo); \
-    if (code != 0) \
-        goto cleanup; \
+#define GET_PLUGIN_FUNC(_lib, _sym, _member)     do {                   \
+        code = krb5int_get_plugin_func(kh->_lib, _sym,                  \
+                                       (void (**)())&kh->_member, &errinfo); \
+        if (code != 0)                                                  \
+            goto cleanup;                                               \
     } while (0)
 
     /* libkrb5 */
@@ -568,8 +568,8 @@ kh_db_get_age(krb5_context context,
 
 static krb5_error_code
 kh_db_set_option(krb5_context context,
-                  int option,
-                  void *value)
+                 int option,
+                 void *value)
 {
     return KRB5_KDB_DBTYPE_NOSUP;
 }

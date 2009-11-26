@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/kdb/kdb_ldap/ldap_create.c
  *
@@ -50,7 +51,7 @@
  * the specified attributes.
  */
 krb5_error_code
-krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
+krb5_ldap_create(krb5_context context, char *conf_section, char **db_args)
 {
     krb5_error_code status = 0;
     char  **t_ptr = db_args;
@@ -71,8 +72,8 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
 
     ldap_context = malloc(sizeof(krb5_ldap_context));
     if (ldap_context == NULL) {
-	status = ENOMEM;
-	goto cleanup;
+        status = ENOMEM;
+        goto cleanup;
     }
     memset(ldap_context, 0, sizeof(*ldap_context));
 
@@ -80,158 +81,158 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
 
     /* populate ldap_context with ldap specific options */
     while (t_ptr && *t_ptr) {
-	char *opt = NULL, *val = NULL;
+        char *opt = NULL, *val = NULL;
 
-	if ((status = krb5_ldap_get_db_opt(*t_ptr, &opt, &val)) != 0) {
-	    goto cleanup;
-	}
-	if (opt && !strcmp(opt, "binddn")) {
-	    if (ldap_context->bind_dn) {
-		free (opt);
-		free (val);
-		status = EINVAL;
-		krb5_set_error_message (context, status, "'binddn' missing");
-		goto cleanup;
-	    }
-	    if (val == NULL) {
-		status = EINVAL;
-		krb5_set_error_message (context, status, "'binddn' value missing");
-		free(opt);
-		goto cleanup;
-	    }
-	    ldap_context->bind_dn = strdup(val);
-	    if (ldap_context->bind_dn == NULL) {
-		free (opt);
-		free (val);
-		status = ENOMEM;
-		goto cleanup;
-	    }
-	} else if (opt && !strcmp(opt, "nconns")) {
-	    if (ldap_context->max_server_conns) {
-		free (opt);
-		free (val);
-		status = EINVAL;
-		krb5_set_error_message (context, status, "'nconns' missing");
-		goto cleanup;
-	    }
-	    if (val == NULL) {
-		status = EINVAL;
-		krb5_set_error_message (context, status, "'nconns' value missing");
-		free(opt);
-		goto cleanup;
-	    }
-	    ldap_context->max_server_conns = atoi(val) ? atoi(val) : DEFAULT_CONNS_PER_SERVER;
-	} else if (opt && !strcmp(opt, "bindpwd")) {
-	    if (ldap_context->bind_pwd) {
-		free (opt);
-		free (val);
-		status = EINVAL;
-		krb5_set_error_message (context, status, "'bindpwd' missing");
-		goto cleanup;
-	    }
-	    if (val == NULL) {
-		status = EINVAL;
-		krb5_set_error_message (context, status, "'bindpwd' value missing");
-		free(opt);
-		goto cleanup;
-	    }
-	    ldap_context->bind_pwd = strdup(val);
-	    if (ldap_context->bind_pwd == NULL) {
-		free (opt);
-		free (val);
-		status = ENOMEM;
-		goto cleanup;
-	    }
-	} else if (opt && !strcmp(opt, "host")) {
-	    if (val == NULL) {
-		status = EINVAL;
-		krb5_set_error_message (context, status, "'host' value missing");
-		free(opt);
-		goto cleanup;
-	    }
-	    if (ldap_context->server_info_list == NULL)
-		ldap_context->server_info_list =
-		    (krb5_ldap_server_info **) calloc(SERV_COUNT+1, sizeof(krb5_ldap_server_info *));
+        if ((status = krb5_ldap_get_db_opt(*t_ptr, &opt, &val)) != 0) {
+            goto cleanup;
+        }
+        if (opt && !strcmp(opt, "binddn")) {
+            if (ldap_context->bind_dn) {
+                free (opt);
+                free (val);
+                status = EINVAL;
+                krb5_set_error_message (context, status, "'binddn' missing");
+                goto cleanup;
+            }
+            if (val == NULL) {
+                status = EINVAL;
+                krb5_set_error_message (context, status, "'binddn' value missing");
+                free(opt);
+                goto cleanup;
+            }
+            ldap_context->bind_dn = strdup(val);
+            if (ldap_context->bind_dn == NULL) {
+                free (opt);
+                free (val);
+                status = ENOMEM;
+                goto cleanup;
+            }
+        } else if (opt && !strcmp(opt, "nconns")) {
+            if (ldap_context->max_server_conns) {
+                free (opt);
+                free (val);
+                status = EINVAL;
+                krb5_set_error_message (context, status, "'nconns' missing");
+                goto cleanup;
+            }
+            if (val == NULL) {
+                status = EINVAL;
+                krb5_set_error_message (context, status, "'nconns' value missing");
+                free(opt);
+                goto cleanup;
+            }
+            ldap_context->max_server_conns = atoi(val) ? atoi(val) : DEFAULT_CONNS_PER_SERVER;
+        } else if (opt && !strcmp(opt, "bindpwd")) {
+            if (ldap_context->bind_pwd) {
+                free (opt);
+                free (val);
+                status = EINVAL;
+                krb5_set_error_message (context, status, "'bindpwd' missing");
+                goto cleanup;
+            }
+            if (val == NULL) {
+                status = EINVAL;
+                krb5_set_error_message (context, status, "'bindpwd' value missing");
+                free(opt);
+                goto cleanup;
+            }
+            ldap_context->bind_pwd = strdup(val);
+            if (ldap_context->bind_pwd == NULL) {
+                free (opt);
+                free (val);
+                status = ENOMEM;
+                goto cleanup;
+            }
+        } else if (opt && !strcmp(opt, "host")) {
+            if (val == NULL) {
+                status = EINVAL;
+                krb5_set_error_message (context, status, "'host' value missing");
+                free(opt);
+                goto cleanup;
+            }
+            if (ldap_context->server_info_list == NULL)
+                ldap_context->server_info_list =
+                    (krb5_ldap_server_info **) calloc(SERV_COUNT+1, sizeof(krb5_ldap_server_info *));
 
-	    if (ldap_context->server_info_list == NULL) {
-		free (opt);
-		free (val);
-		status = ENOMEM;
-		goto cleanup;
-	    }
+            if (ldap_context->server_info_list == NULL) {
+                free (opt);
+                free (val);
+                status = ENOMEM;
+                goto cleanup;
+            }
 
-	    ldap_context->server_info_list[srv_cnt] =
-		(krb5_ldap_server_info *) calloc(1, sizeof(krb5_ldap_server_info));
-	    if (ldap_context->server_info_list[srv_cnt] == NULL) {
-		free (opt);
-		free (val);
-		status = ENOMEM;
-		goto cleanup;
-	    }
+            ldap_context->server_info_list[srv_cnt] =
+                (krb5_ldap_server_info *) calloc(1, sizeof(krb5_ldap_server_info));
+            if (ldap_context->server_info_list[srv_cnt] == NULL) {
+                free (opt);
+                free (val);
+                status = ENOMEM;
+                goto cleanup;
+            }
 
-	    ldap_context->server_info_list[srv_cnt]->server_status = NOTSET;
+            ldap_context->server_info_list[srv_cnt]->server_status = NOTSET;
 
-	    ldap_context->server_info_list[srv_cnt]->server_name = strdup(val);
-	    if (ldap_context->server_info_list[srv_cnt]->server_name == NULL) {
-		free (opt);
-		free (val);
-		status = ENOMEM;
-		goto cleanup;
-	    }
+            ldap_context->server_info_list[srv_cnt]->server_name = strdup(val);
+            if (ldap_context->server_info_list[srv_cnt]->server_name == NULL) {
+                free (opt);
+                free (val);
+                status = ENOMEM;
+                goto cleanup;
+            }
 
-	    srv_cnt++;
+            srv_cnt++;
 #ifdef HAVE_EDIRECTORY
-	} else if (opt && !strcmp(opt, "cert")) {
-	    if (val == NULL) {
-		status = EINVAL;
-		krb5_set_error_message (context, status, "'cert' value missing");
-		free(opt);
-		goto cleanup;
-	    }
+        } else if (opt && !strcmp(opt, "cert")) {
+            if (val == NULL) {
+                status = EINVAL;
+                krb5_set_error_message (context, status, "'cert' value missing");
+                free(opt);
+                goto cleanup;
+            }
 
-	    if (ldap_context->root_certificate_file == NULL) {
-		ldap_context->root_certificate_file = strdup(val);
-		if (ldap_context->root_certificate_file == NULL) {
-		    free (opt);
-		    free (val);
-		    status = ENOMEM;
-		    goto cleanup;
-		}
-	    } else {
-		char *newstr;
+            if (ldap_context->root_certificate_file == NULL) {
+                ldap_context->root_certificate_file = strdup(val);
+                if (ldap_context->root_certificate_file == NULL) {
+                    free (opt);
+                    free (val);
+                    status = ENOMEM;
+                    goto cleanup;
+                }
+            } else {
+                char *newstr;
 
-		if (asprintf(&newstr, "%s %s",
-			     ldap_context->root_certificate_file, val) < 0) {
-		    free (opt);
-		    free (val);
-		    status = ENOMEM;
-		    goto cleanup;
-		}
-		ldap_context->root_certificate_file = newstr;
-	    }
+                if (asprintf(&newstr, "%s %s",
+                             ldap_context->root_certificate_file, val) < 0) {
+                    free (opt);
+                    free (val);
+                    status = ENOMEM;
+                    goto cleanup;
+                }
+                ldap_context->root_certificate_file = newstr;
+            }
 #endif
-	} else {
-	/* ignore hash argument. Might have been passed from create */
-	    status = EINVAL;
-	    if (opt && !strcmp(opt, "temporary")) {
-		/*
-		 * temporary is passed in when kdb5_util load without -update is done.
-		 * This is unsupported by the LDAP plugin.
-		 */
-		krb5_set_error_message (context, status,
-		    "creation of LDAP entries aborted, plugin requires -update argument");
-	    } else {
-		krb5_set_error_message (context, status, "unknown option \'%s\'",
-					opt?opt:val);
-	    }
-	    free(opt);
-	    free(val);
-	    goto cleanup;
-	}
+        } else {
+            /* ignore hash argument. Might have been passed from create */
+            status = EINVAL;
+            if (opt && !strcmp(opt, "temporary")) {
+                /*
+                 * temporary is passed in when kdb5_util load without -update is done.
+                 * This is unsupported by the LDAP plugin.
+                 */
+                krb5_set_error_message (context, status,
+                                        "creation of LDAP entries aborted, plugin requires -update argument");
+            } else {
+                krb5_set_error_message (context, status, "unknown option \'%s\'",
+                                        opt?opt:val);
+            }
+            free(opt);
+            free(val);
+            goto cleanup;
+        }
 
-	free(opt);
-	free(val);
-	t_ptr++;
+        free(opt);
+        free(val);
+        t_ptr++;
     }
 
     dal_handle = context->dal_handle;
@@ -239,121 +240,121 @@ krb5_ldap_create (krb5_context context, char *conf_section, char **db_args)
 
     status = krb5_ldap_read_server_params(context, conf_section, KRB5_KDB_SRV_TYPE_ADMIN);
     if (status) {
-	dal_handle->db_context = NULL;
-	prepend_err_str (context, "Error reading LDAP server params: ", status, status);
-	goto cleanup;
+        dal_handle->db_context = NULL;
+        prepend_err_str (context, "Error reading LDAP server params: ", status, status);
+        goto cleanup;
     }
     status = krb5_ldap_db_init(context, ldap_context);
     if (status) {
-	goto cleanup;
+        goto cleanup;
     }
 
     /* read the kerberos container */
     if ((status = krb5_ldap_read_krbcontainer_params(context,
-			    &(ldap_context->krbcontainer))) == KRB5_KDB_NOENTRY) {
+                                                     &(ldap_context->krbcontainer))) == KRB5_KDB_NOENTRY) {
 
-	/* Read the kerberos container location from configuration file */
-	if (ldap_context->conf_section) {
-	    if ((status = profile_get_string(context->profile,
-					   KDB_MODULE_SECTION, ldap_context->conf_section,
-					   "ldap_kerberos_container_dn", NULL,
-					   &kparams.DN)) != 0) {
-		goto cleanup;
-	    }
-	}
-	if (kparams.DN == NULL) {
-	    if ((status = profile_get_string(context->profile,
-					   KDB_MODULE_DEF_SECTION,
-					   "ldap_kerberos_container_dn", NULL,
-					   NULL, &kparams.DN)) != 0) {
-		goto cleanup;
-	    }
-	}
+        /* Read the kerberos container location from configuration file */
+        if (ldap_context->conf_section) {
+            if ((status = profile_get_string(context->profile,
+                                             KDB_MODULE_SECTION, ldap_context->conf_section,
+                                             "ldap_kerberos_container_dn", NULL,
+                                             &kparams.DN)) != 0) {
+                goto cleanup;
+            }
+        }
+        if (kparams.DN == NULL) {
+            if ((status = profile_get_string(context->profile,
+                                             KDB_MODULE_DEF_SECTION,
+                                             "ldap_kerberos_container_dn", NULL,
+                                             NULL, &kparams.DN)) != 0) {
+                goto cleanup;
+            }
+        }
 
-	/* create the kerberos container */
-	status = krb5_ldap_create_krbcontainer(context,
-					       ((kparams.DN != NULL) ? &kparams : NULL));
-	if (status)
-	    goto cleanup;
+        /* create the kerberos container */
+        status = krb5_ldap_create_krbcontainer(context,
+                                               ((kparams.DN != NULL) ? &kparams : NULL));
+        if (status)
+            goto cleanup;
 
-	krbcontainer_obj_created = TRUE;
+        krbcontainer_obj_created = TRUE;
 
-	status = krb5_ldap_read_krbcontainer_params(context,
-						    &(ldap_context->krbcontainer));
-	if (status)
-	    goto cleanup;
+        status = krb5_ldap_read_krbcontainer_params(context,
+                                                    &(ldap_context->krbcontainer));
+        if (status)
+            goto cleanup;
 
     } else if (status) {
-	goto cleanup;
+        goto cleanup;
     }
 
     rparams = (krb5_ldap_realm_params *) malloc(sizeof(krb5_ldap_realm_params));
     if (rparams == NULL) {
-	status = ENOMEM;
-	goto cleanup;
+        status = ENOMEM;
+        goto cleanup;
     }
     memset(rparams, 0, sizeof(*rparams));
     rparams->realm_name = strdup(context->default_realm);
     if (rparams->realm_name == NULL) {
-	status = ENOMEM;
-	goto cleanup;
+        status = ENOMEM;
+        goto cleanup;
     }
 
     if ((status = krb5_ldap_create_realm(context, rparams, mask)))
-	goto cleanup;
+        goto cleanup;
 
     /* We just created the Realm container. Here starts our transaction tracking */
     realm_obj_created = TRUE;
 
     /* verify realm object */
     if ((status = krb5_ldap_read_realm_params(context,
-					      rparams->realm_name,
-					      &(ldap_context->lrparams),
-					      &mask)))
-	goto cleanup;
+                                              rparams->realm_name,
+                                              &(ldap_context->lrparams),
+                                              &mask)))
+        goto cleanup;
 
 #ifdef HAVE_EDIRECTORY
     if ((mask & LDAP_REALM_KDCSERVERS) || (mask & LDAP_REALM_ADMINSERVERS) ||
-	(mask & LDAP_REALM_PASSWDSERVERS)) {
+        (mask & LDAP_REALM_PASSWDSERVERS)) {
 
-	rightsmask =0;
-	rightsmask |= LDAP_REALM_RIGHTS;
-	rightsmask |= LDAP_SUBTREE_RIGHTS;
-	if ((rparams != NULL) && (rparams->kdcservers != NULL)) {
-	    for (i=0; (rparams->kdcservers[i] != NULL); i++) {
-		if ((status=krb5_ldap_add_service_rights(context,
-				     LDAP_KDC_SERVICE, rparams->kdcservers[i],
-				     rparams->realm_name, rparams->subtree, rparams->containerref, rightsmask)) != 0) {
-		    goto cleanup;
-		}
-	    }
-	}
+        rightsmask =0;
+        rightsmask |= LDAP_REALM_RIGHTS;
+        rightsmask |= LDAP_SUBTREE_RIGHTS;
+        if ((rparams != NULL) && (rparams->kdcservers != NULL)) {
+            for (i=0; (rparams->kdcservers[i] != NULL); i++) {
+                if ((status=krb5_ldap_add_service_rights(context,
+                                                         LDAP_KDC_SERVICE, rparams->kdcservers[i],
+                                                         rparams->realm_name, rparams->subtree, rparams->containerref, rightsmask)) != 0) {
+                    goto cleanup;
+                }
+            }
+        }
 
-	rightsmask = 0;
-	rightsmask |= LDAP_REALM_RIGHTS;
-	rightsmask |= LDAP_SUBTREE_RIGHTS;
-	if ((rparams != NULL) && (rparams->adminservers != NULL)) {
-	    for (i=0; (rparams->adminservers[i] != NULL); i++) {
-		if ((status=krb5_ldap_add_service_rights(context,
-				     LDAP_ADMIN_SERVICE, rparams->adminservers[i],
-				     rparams->realm_name, rparams->subtree, rparams->containerref, rightsmask)) != 0) {
-		    goto cleanup;
-		}
-	    }
-	}
+        rightsmask = 0;
+        rightsmask |= LDAP_REALM_RIGHTS;
+        rightsmask |= LDAP_SUBTREE_RIGHTS;
+        if ((rparams != NULL) && (rparams->adminservers != NULL)) {
+            for (i=0; (rparams->adminservers[i] != NULL); i++) {
+                if ((status=krb5_ldap_add_service_rights(context,
+                                                         LDAP_ADMIN_SERVICE, rparams->adminservers[i],
+                                                         rparams->realm_name, rparams->subtree, rparams->containerref, rightsmask)) != 0) {
+                    goto cleanup;
+                }
+            }
+        }
 
-	rightsmask = 0;
-	rightsmask |= LDAP_REALM_RIGHTS;
-	rightsmask |= LDAP_SUBTREE_RIGHTS;
-	if ((rparams != NULL) && (rparams->passwdservers != NULL)) {
-	    for (i=0; (rparams->passwdservers[i] != NULL); i++) {
-		if ((status=krb5_ldap_add_service_rights(context,
-				     LDAP_PASSWD_SERVICE, rparams->passwdservers[i],
-				     rparams->realm_name, rparams->subtree, rparams->containerref, rightsmask)) != 0) {
-		    goto cleanup;
-		}
-	    }
-	}
+        rightsmask = 0;
+        rightsmask |= LDAP_REALM_RIGHTS;
+        rightsmask |= LDAP_SUBTREE_RIGHTS;
+        if ((rparams != NULL) && (rparams->passwdservers != NULL)) {
+            for (i=0; (rparams->passwdservers[i] != NULL); i++) {
+                if ((status=krb5_ldap_add_service_rights(context,
+                                                         LDAP_PASSWD_SERVICE, rparams->passwdservers[i],
+                                                         rparams->realm_name, rparams->subtree, rparams->containerref, rightsmask)) != 0) {
+                    goto cleanup;
+                }
+            }
+        }
     }
 #endif
 
@@ -361,19 +362,19 @@ cleanup:
 
     /* If the krbcontainer/realm creation is not complete, do the roll-back here */
     if ((krbcontainer_obj_created) && (!realm_obj_created)) {
-	int rc;
-	rc = krb5_ldap_delete_krbcontainer(context,
-		    ((kparams.DN != NULL) ? &kparams : NULL));
-	krb5_set_error_message(context, rc,
-	    "could not complete roll-back, error deleting Kerberos Container");
+        int rc;
+        rc = krb5_ldap_delete_krbcontainer(context,
+                                           ((kparams.DN != NULL) ? &kparams : NULL));
+        krb5_set_error_message(context, rc,
+                               "could not complete roll-back, error deleting Kerberos Container");
     }
 
     /* should call krb5_ldap_free_krbcontainer_params() but can't */
     if (kparams.DN != NULL)
-	krb5_xfree(kparams.DN);
+        krb5_xfree(kparams.DN);
 
     if (rparams)
-	krb5_ldap_free_realm_params(rparams);
+        krb5_ldap_free_realm_params(rparams);
 
     return(status);
 }

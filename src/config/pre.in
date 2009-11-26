@@ -138,7 +138,6 @@ S=/
 
 #
 srcdir = @srcdir@
-SRCTOP = @srcdir@/$(BUILDTOP)
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@
 CONFIG_RELTOPDIR = @CONFIG_RELTOPDIR@
@@ -175,7 +174,7 @@ CC = @CC@
 CXX = @CXX@
 LD = $(PURE) @LD@
 DEPLIBS = @DEPLIBS@
-KRB_INCLUDES = -I$(BUILDTOP)/include -I$(SRCTOP)/include
+KRB_INCLUDES = -I$(BUILDTOP)/include -I$(top_srcdir)/include
 LDFLAGS = @LDFLAGS@
 LD_UNRESOLVED_PREFIX = @LD_UNRESOLVED_PREFIX@
 LD_SHLIBDIR_PREFIX = @LD_SHLIBDIR_PREFIX@
@@ -229,7 +228,7 @@ KRB5_INCSUBDIRS = \
 # XXX check which of these are actually used!
 #
 TESTDIR		= $(BUILDTOP)/kadmin/testing
-STESTDIR	= $(SRCTOP)/kadmin/testing
+STESTDIR	= $(top_srcdir)/kadmin/testing
 COMPARE_DUMP	= $(TESTDIR)/scripts/compare_dump.pl
 INITDB		= $(STESTDIR)/scripts/init_db
 MAKE_KEYTAB	= $(TESTDIR)/scripts/make-host-keytab.pl
@@ -273,7 +272,7 @@ AUTOCONF = autoconf
 AUTOCONFFLAGS =
 AUTOHEADER = autoheader
 AUTOHEADERFLAGS =
-MOVEIFCHANGED = $(SRCTOP)/config/move-if-changed
+MOVEIFCHANGED = $(top_srcdir)/config/move-if-changed
 
 SHEXT = @SHEXT@
 STEXT=@STEXT@
@@ -413,7 +412,7 @@ TCL_INCLUDES	= @TCL_INCLUDES@
 ### /* these are invoked as $(...) foo.et, which works, but could be better */
 COMPILE_ET= $(COMPILE_ET-@COM_ERR_VERSION@)
 COMPILE_ET-sys= compile_et
-COMPILE_ET-k5= $(BUILDTOP)/util/et/compile_et -d $(SRCTOP)/util/et
+COMPILE_ET-k5= $(BUILDTOP)/util/et/compile_et -d $(top_srcdir)/util/et
 
 .SUFFIXES:  .h .c .et .ct
 
@@ -563,7 +562,7 @@ VALGRIND=
 # Need absolute paths here because under kshd or ftpd we may run programs
 # while in other directories.
 VALGRIND_LOGDIR = `cd $(BUILDTOP)&&pwd`
-VALGRIND1 = valgrind --tool=memcheck --log-file=$(VALGRIND_LOGDIR)/vg --trace-children=yes -v --leak-check=yes --suppressions=`cd $(SRCTOP)&&pwd`/util/valgrind-suppressions
+VALGRIND1 = valgrind --tool=memcheck --log-file=$(VALGRIND_LOGDIR)/vg --trace-children=yes -v --leak-check=yes --suppressions=`cd $(top_srcdir)&&pwd`/util/valgrind-suppressions
 
 ##
 ## end of pre.in

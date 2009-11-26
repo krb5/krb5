@@ -1,5 +1,3 @@
-thisconfigdir=../../../../..
-myfulldir=plugins/kdb/db2/libdb2/hash
 mydir=plugins/kdb/db2/libdb2/hash
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
 STLIBOBJS=	hash.o hash_bigkey.o hash_debug.o hash_func.o hash_log2.o \

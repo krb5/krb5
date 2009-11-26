@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * COPYRIGHT (C) 2007
  * THE REGENTS OF THE UNIVERSITY OF MICHIGAN
@@ -44,11 +45,11 @@ free_list(char **list)
     int i;
 
     if (list == NULL)
-	return;
+        return;
 
     for (i = 0; list[i] != NULL; i++)
-	free(list[i]);
-     free(list);
+        free(list[i]);
+    free(list);
 }
 
 static krb5_error_code
@@ -58,22 +59,22 @@ copy_list(char ***dst, char **src)
     char **newlist;
 
     if (dst == NULL)
-	return EINVAL;
+        return EINVAL;
     *dst = NULL;
 
     if (src == NULL)
-	return 0;
+        return 0;
 
     for (i = 0; src[i] != NULL; i++);
 
     newlist = calloc(1, (i + 1) * sizeof(*newlist));
     if (newlist == NULL)
-	return ENOMEM;
+        return ENOMEM;
 
     for (i = 0; src[i] != NULL; i++) {
-	newlist[i] = strdup(src[i]);
-	if (newlist[i] == NULL)
-	    goto cleanup;
+        newlist[i] = strdup(src[i]);
+        if (newlist[i] == NULL)
+            goto cleanup;
     }
     newlist[i] = NULL;
     *dst = newlist;
@@ -115,7 +116,7 @@ pkinit_init_identity_opts(pkinit_identity_opts **idopts)
     *idopts = NULL;
     opts = calloc(1, sizeof(pkinit_identity_opts));
     if (opts == NULL)
-	return ENOMEM;
+        return ENOMEM;
 
     opts->identity = NULL;
     opts->anchors = NULL;
@@ -141,7 +142,7 @@ pkinit_init_identity_opts(pkinit_identity_opts **idopts)
 
 krb5_error_code
 pkinit_dup_identity_opts(pkinit_identity_opts *src_opts,
-			 pkinit_identity_opts **dest_opts)
+                         pkinit_identity_opts **dest_opts)
 {
     pkinit_identity_opts *newopts;
     krb5_error_code retval;
@@ -149,71 +150,71 @@ pkinit_dup_identity_opts(pkinit_identity_opts *src_opts,
     *dest_opts = NULL;
     retval = pkinit_init_identity_opts(&newopts);
     if (retval)
-	return retval;
+        return retval;
 
     retval = ENOMEM;
 
     if (src_opts->identity != NULL) {
-	newopts->identity = strdup(src_opts->identity);
-	if (newopts->identity == NULL)
-	    goto cleanup;
+        newopts->identity = strdup(src_opts->identity);
+        if (newopts->identity == NULL)
+            goto cleanup;
     }
 
     retval = copy_list(&newopts->anchors, src_opts->anchors);
     if (retval)
-	goto cleanup;
+        goto cleanup;
 
     retval = copy_list(&newopts->intermediates,src_opts->intermediates);
     if (retval)
-	goto cleanup;
+        goto cleanup;
 
     retval = copy_list(&newopts->crls, src_opts->crls);
     if (retval)
-	goto cleanup;
+        goto cleanup;
 
     if (src_opts->ocsp != NULL) {
-	newopts->ocsp = strdup(src_opts->ocsp);
-	if (newopts->ocsp == NULL)
-	    goto cleanup;
+        newopts->ocsp = strdup(src_opts->ocsp);
+        if (newopts->ocsp == NULL)
+            goto cleanup;
     }
 
     if (src_opts->cert_filename != NULL) {
-	newopts->cert_filename = strdup(src_opts->cert_filename);
-	if (newopts->cert_filename == NULL)
-	    goto cleanup;
+        newopts->cert_filename = strdup(src_opts->cert_filename);
+        if (newopts->cert_filename == NULL)
+            goto cleanup;
     }
 
     if (src_opts->key_filename != NULL) {
-	newopts->key_filename = strdup(src_opts->key_filename);
-	if (newopts->key_filename == NULL)
-	    goto cleanup;
+        newopts->key_filename = strdup(src_opts->key_filename);
+        if (newopts->key_filename == NULL)
+            goto cleanup;
     }
 
 #ifndef WITHOUT_PKCS11
     if (src_opts->p11_module_name != NULL) {
-	newopts->p11_module_name = strdup(src_opts->p11_module_name);
-	if (newopts->p11_module_name == NULL)
-	    goto cleanup;
+        newopts->p11_module_name = strdup(src_opts->p11_module_name);
+        if (newopts->p11_module_name == NULL)
+            goto cleanup;
     }
 
     newopts->slotid = src_opts->slotid;
 
     if (src_opts->token_label != NULL) {
-	newopts->token_label = strdup(src_opts->token_label);
-	if (newopts->token_label == NULL)
-	    goto cleanup;
+        newopts->token_label = strdup(src_opts->token_label);
+        if (newopts->token_label == NULL)
+            goto cleanup;
     }
 
     if (src_opts->cert_id_string != NULL) {
-	newopts->cert_id_string = strdup(src_opts->cert_id_string);
-	if (newopts->cert_id_string == NULL)
-	    goto cleanup;
+        newopts->cert_id_string = strdup(src_opts->cert_id_string);
+        if (newopts->cert_id_string == NULL)
+            goto cleanup;
     }
 
     if (src_opts->cert_label != NULL) {
-	newopts->cert_label = strdup(src_opts->cert_label);
-	if (newopts->cert_label == NULL)
-	    goto cleanup;
+        newopts->cert_label = strdup(src_opts->cert_label);
+        if (newopts->cert_label == NULL)
+            goto cleanup;
     }
 #endif
 
@@ -229,10 +230,10 @@ void
 pkinit_fini_identity_opts(pkinit_identity_opts *idopts)
 {
     if (idopts == NULL)
-	return;
+        return;
 
     if (idopts->identity != NULL)
-	free(idopts->identity);
+        free(idopts->identity);
     free_list(idopts->anchors);
     free_list(idopts->intermediates);
     free_list(idopts->crls);
@@ -252,64 +253,64 @@ pkinit_fini_identity_opts(pkinit_identity_opts *idopts)
 #ifndef WITHOUT_PKCS11
 static krb5_error_code
 parse_pkcs11_options(krb5_context context,
-		     pkinit_identity_opts *idopts,
-		     const char *residual)
+                     pkinit_identity_opts *idopts,
+                     const char *residual)
 {
     char *s, *cp, *vp, *save;
     krb5_error_code retval = ENOMEM;
 
     if (residual == NULL || residual[0] == '\0')
-	return 0;
+        return 0;
 
     /* Split string into attr=value substrings */
     s = strdup(residual);
     if (s == NULL)
-	return retval;
+        return retval;
 
     for (cp = strtok_r(s, ":", &save); cp; cp = strtok_r(NULL, ":", &save)) {
-	vp = strchr(cp, '=');
+        vp = strchr(cp, '=');
 
-	/* If there is no "=", this is a pkcs11 module name */
-	if (vp == NULL) {
-	    free(idopts->p11_module_name);
-	    idopts->p11_module_name = strdup(cp);
-	    if (idopts->p11_module_name == NULL)
-		goto cleanup;
-	    continue;
-	}
-	*vp++ = '\0';
-	if (!strcmp(cp, "module_name")) {
-	    free(idopts->p11_module_name);
-	    idopts->p11_module_name = strdup(vp);
-	    if (idopts->p11_module_name == NULL)
-		goto cleanup;
-	} else if (!strcmp(cp, "slotid")) {
-	    long slotid = strtol(vp, NULL, 10);
-	    if ((slotid == LONG_MIN || slotid == LONG_MAX) && errno != 0) {
-		retval = EINVAL;
-		goto cleanup;
-	    }
-	    if ((long) (int) slotid != slotid) {
-		retval = EINVAL;
-		goto cleanup;
-	    }
-	    idopts->slotid = slotid;
-	} else if (!strcmp(cp, "token")) {
-	    free(idopts->token_label);
-	    idopts->token_label = strdup(vp);
-	    if (idopts->token_label == NULL)
-		goto cleanup;
-	} else if (!strcmp(cp, "certid")) {
-	    free(idopts->cert_id_string);
-	    idopts->cert_id_string = strdup(vp);
-	    if (idopts->cert_id_string == NULL)
-		goto cleanup;
-	} else if (!strcmp(cp, "certlabel")) {
-	    free(idopts->cert_label);
-	    idopts->cert_label = strdup(vp);
-	    if (idopts->cert_label == NULL)
-		goto cleanup;
-	}
+        /* If there is no "=", this is a pkcs11 module name */
+        if (vp == NULL) {
+            free(idopts->p11_module_name);
+            idopts->p11_module_name = strdup(cp);
+            if (idopts->p11_module_name == NULL)
+                goto cleanup;
+            continue;
+        }
+        *vp++ = '\0';
+        if (!strcmp(cp, "module_name")) {
+            free(idopts->p11_module_name);
+            idopts->p11_module_name = strdup(vp);
+            if (idopts->p11_module_name == NULL)
+                goto cleanup;
+        } else if (!strcmp(cp, "slotid")) {
+            long slotid = strtol(vp, NULL, 10);
+            if ((slotid == LONG_MIN || slotid == LONG_MAX) && errno != 0) {
+                retval = EINVAL;
+                goto cleanup;
+            }
+            if ((long) (int) slotid != slotid) {
+                retval = EINVAL;
+                goto cleanup;
+            }
+            idopts->slotid = slotid;
+        } else if (!strcmp(cp, "token")) {
+            free(idopts->token_label);
+            idopts->token_label = strdup(vp);
+            if (idopts->token_label == NULL)
+                goto cleanup;
+        } else if (!strcmp(cp, "certid")) {
+            free(idopts->cert_id_string);
+            idopts->cert_id_string = strdup(vp);
+            if (idopts->cert_id_string == NULL)
+                goto cleanup;
+        } else if (!strcmp(cp, "certlabel")) {
+            free(idopts->cert_label);
+            idopts->cert_label = strdup(vp);
+            if (idopts->cert_label == NULL)
+                goto cleanup;
+        }
     }
     retval = 0;
 cleanup:
@@ -320,29 +321,29 @@ cleanup:
 
 static krb5_error_code
 parse_fs_options(krb5_context context,
-		 pkinit_identity_opts *idopts,
-		 const char *residual)
+                 pkinit_identity_opts *idopts,
+                 const char *residual)
 {
     char *certname, *keyname, *save;
     krb5_error_code retval = ENOMEM;
 
     if (residual == NULL || residual[0] == '\0')
-	return 0;
+        return 0;
 
     certname = strdup(residual);
     if (certname == NULL)
-	goto cleanup;
+        goto cleanup;
 
     certname = strtok_r(certname, ",", &save);
     keyname = strtok_r(NULL, ",", &save);
 
     idopts->cert_filename = strdup(certname);
     if (idopts->cert_filename == NULL)
-	goto cleanup;
+        goto cleanup;
 
     idopts->key_filename = strdup(keyname ? keyname : certname);
     if (idopts->key_filename == NULL)
-	goto cleanup;
+        goto cleanup;
 
     retval = 0;
 cleanup:
@@ -352,25 +353,25 @@ cleanup:
 
 static krb5_error_code
 parse_pkcs12_options(krb5_context context,
-		     pkinit_identity_opts *idopts,
-		     const char *residual)
+                     pkinit_identity_opts *idopts,
+                     const char *residual)
 {
     krb5_error_code retval = ENOMEM;
 
     if (residual == NULL || residual[0] == '\0')
-	return 0;
+        return 0;
 
     idopts->cert_filename = strdup(residual);
     if (idopts->cert_filename == NULL)
-	goto cleanup;
+        goto cleanup;
 
     idopts->key_filename = strdup(residual);
     if (idopts->key_filename == NULL)
-	goto cleanup;
+        goto cleanup;
 
     pkiDebug("%s: cert_filename '%s' key_filename '%s'\n",
-	     __FUNCTION__, idopts->cert_filename,
-	     idopts->key_filename);
+             __FUNCTION__, idopts->cert_filename,
+             idopts->key_filename);
     retval = 0;
 cleanup:
     return retval;
@@ -378,134 +379,134 @@ cleanup:
 
 static krb5_error_code
 process_option_identity(krb5_context context,
-			pkinit_plg_crypto_context plg_cryptoctx,
-			pkinit_req_crypto_context req_cryptoctx,
-			pkinit_identity_opts *idopts,
-			pkinit_identity_crypto_context id_cryptoctx,
-			const char *value)
+                        pkinit_plg_crypto_context plg_cryptoctx,
+                        pkinit_req_crypto_context req_cryptoctx,
+                        pkinit_identity_opts *idopts,
+                        pkinit_identity_crypto_context id_cryptoctx,
+                        const char *value)
 {
     const char *residual;
     int idtype;
     krb5_error_code retval = 0;
 
     pkiDebug("%s: processing value '%s'\n",
-	     __FUNCTION__, value ? value : "NULL");
+             __FUNCTION__, value ? value : "NULL");
     if (value == NULL)
-	return EINVAL;
+        return EINVAL;
 
     residual = strchr(value, ':');
     if (residual != NULL) {
-	unsigned int typelen;
-	residual++; /* skip past colon */
-	typelen = residual - value;
-	if (strncmp(value, "FILE:", typelen) == 0) {
-	    idtype = IDTYPE_FILE;
+        unsigned int typelen;
+        residual++; /* skip past colon */
+        typelen = residual - value;
+        if (strncmp(value, "FILE:", typelen) == 0) {
+            idtype = IDTYPE_FILE;
 #ifndef WITHOUT_PKCS11
-	} else if (strncmp(value, "PKCS11:", typelen) == 0) {
-	    idtype = IDTYPE_PKCS11;
+        } else if (strncmp(value, "PKCS11:", typelen) == 0) {
+            idtype = IDTYPE_PKCS11;
 #endif
-	} else if (strncmp(value, "PKCS12:", typelen) == 0) {
-	    idtype = IDTYPE_PKCS12;
-	} else if (strncmp(value, "DIR:", typelen) == 0) {
-	    idtype = IDTYPE_DIR;
-	} else if (strncmp(value, "ENV:", typelen) == 0) {
-	    idtype = IDTYPE_ENVVAR;
-	} else {
-	    pkiDebug("%s: Unsupported type while processing '%s'\n",
-		     __FUNCTION__, value);
-	    krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
-				   "Unsupported type while processing '%s'\n",
-				   value);
-	    return KRB5_PREAUTH_FAILED;
-	}
+        } else if (strncmp(value, "PKCS12:", typelen) == 0) {
+            idtype = IDTYPE_PKCS12;
+        } else if (strncmp(value, "DIR:", typelen) == 0) {
+            idtype = IDTYPE_DIR;
+        } else if (strncmp(value, "ENV:", typelen) == 0) {
+            idtype = IDTYPE_ENVVAR;
+        } else {
+            pkiDebug("%s: Unsupported type while processing '%s'\n",
+                     __FUNCTION__, value);
+            krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
+                                   "Unsupported type while processing '%s'\n",
+                                   value);
+            return KRB5_PREAUTH_FAILED;
+        }
     } else {
-	idtype = IDTYPE_FILE;
-	residual = value;
+        idtype = IDTYPE_FILE;
+        residual = value;
     }
 
     idopts->idtype = idtype;
     pkiDebug("%s: idtype is %s\n", __FUNCTION__, idtype2string(idopts->idtype));
     switch (idtype) {
     case IDTYPE_ENVVAR:
-	return process_option_identity(context, plg_cryptoctx, req_cryptoctx,
-				       idopts, id_cryptoctx, getenv(residual));
-	break;
+        return process_option_identity(context, plg_cryptoctx, req_cryptoctx,
+                                       idopts, id_cryptoctx, getenv(residual));
+        break;
     case IDTYPE_FILE:
-	retval = parse_fs_options(context, idopts, residual);
-	break;
+        retval = parse_fs_options(context, idopts, residual);
+        break;
     case IDTYPE_PKCS12:
-	retval = parse_pkcs12_options(context, idopts, residual);
-	break;
+        retval = parse_pkcs12_options(context, idopts, residual);
+        break;
 #ifndef WITHOUT_PKCS11
     case IDTYPE_PKCS11:
-	retval = parse_pkcs11_options(context, idopts, residual);
-	break;
+        retval = parse_pkcs11_options(context, idopts, residual);
+        break;
 #endif
     case IDTYPE_DIR:
-	idopts->cert_filename = strdup(residual);
-	if (idopts->cert_filename == NULL)
-	    retval = ENOMEM;
-	break;
+        idopts->cert_filename = strdup(residual);
+        if (idopts->cert_filename == NULL)
+            retval = ENOMEM;
+        break;
     default:
-	krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
-			       "Internal error parsing X509_user_identity\n");
-	retval = EINVAL;
-	break;
+        krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
+                               "Internal error parsing X509_user_identity\n");
+        retval = EINVAL;
+        break;
     }
     return retval;
 }
 
 static krb5_error_code
 process_option_ca_crl(krb5_context context,
-		      pkinit_plg_crypto_context plg_cryptoctx,
-		      pkinit_req_crypto_context req_cryptoctx,
-		      pkinit_identity_opts *idopts,
-		      pkinit_identity_crypto_context id_cryptoctx,
-		      const char *value,
-		      int catype)
+                      pkinit_plg_crypto_context plg_cryptoctx,
+                      pkinit_req_crypto_context req_cryptoctx,
+                      pkinit_identity_opts *idopts,
+                      pkinit_identity_crypto_context id_cryptoctx,
+                      const char *value,
+                      int catype)
 {
     char *residual;
     unsigned int typelen;
     int idtype;
 
     pkiDebug("%s: processing catype %s, value '%s'\n",
-	     __FUNCTION__, catype2string(catype), value);
+             __FUNCTION__, catype2string(catype), value);
     residual = strchr(value, ':');
     if (residual == NULL) {
-	pkiDebug("No type given for '%s'\n", value);
-	return EINVAL;
+        pkiDebug("No type given for '%s'\n", value);
+        return EINVAL;
     }
     residual++; /* skip past colon */
     typelen = residual - value;
     if (strncmp(value, "FILE:", typelen) == 0) {
-	idtype = IDTYPE_FILE;
+        idtype = IDTYPE_FILE;
     } else if (strncmp(value, "DIR:", typelen) == 0) {
-	idtype = IDTYPE_DIR;
+        idtype = IDTYPE_DIR;
     } else {
-	return ENOTSUP;
+        return ENOTSUP;
     }
     return crypto_load_cas_and_crls(context,
-				    plg_cryptoctx,
-				    req_cryptoctx,
-				    idopts, id_cryptoctx,
-				    idtype, catype, residual);
+                                    plg_cryptoctx,
+                                    req_cryptoctx,
+                                    idopts, id_cryptoctx,
+                                    idtype, catype, residual);
 }
 
 krb5_error_code
 pkinit_identity_initialize(krb5_context context,
-			   pkinit_plg_crypto_context plg_cryptoctx,
-			   pkinit_req_crypto_context req_cryptoctx,
-			   pkinit_identity_opts *idopts,
-			   pkinit_identity_crypto_context id_cryptoctx,
-			   int do_matching,
-			   krb5_principal princ)
+                           pkinit_plg_crypto_context plg_cryptoctx,
+                           pkinit_req_crypto_context req_cryptoctx,
+                           pkinit_identity_opts *idopts,
+                           pkinit_identity_crypto_context id_cryptoctx,
+                           int do_matching,
+                           krb5_principal princ)
 {
     krb5_error_code retval = EINVAL;
     int i;
 
     pkiDebug("%s: %p %p %p\n", __FUNCTION__, context, idopts, id_cryptoctx);
     if (idopts == NULL || id_cryptoctx == NULL)
-	goto errout;
+        goto errout;
 
     /*
      * If identity was specified, use that.  (For the kdc, this
@@ -516,80 +517,80 @@ pkinit_identity_initialize(krb5_context context,
      * in the config file.
      */
     if (idopts->identity != NULL) {
-	retval = process_option_identity(context, plg_cryptoctx, req_cryptoctx,
-					 idopts, id_cryptoctx,
-					 idopts->identity);
+        retval = process_option_identity(context, plg_cryptoctx, req_cryptoctx,
+                                         idopts, id_cryptoctx,
+                                         idopts->identity);
     } else if (idopts->identity_alt != NULL) {
-	for (i = 0; retval != 0 && idopts->identity_alt[i] != NULL; i++)
-	    retval = process_option_identity(context, plg_cryptoctx,
-					     req_cryptoctx, idopts,
-					     id_cryptoctx,
-					     idopts->identity_alt[i]);
+        for (i = 0; retval != 0 && idopts->identity_alt[i] != NULL; i++)
+            retval = process_option_identity(context, plg_cryptoctx,
+                                             req_cryptoctx, idopts,
+                                             id_cryptoctx,
+                                             idopts->identity_alt[i]);
     } else {
-	pkiDebug("%s: no user identity options specified\n", __FUNCTION__);
-	goto errout;
+        pkiDebug("%s: no user identity options specified\n", __FUNCTION__);
+        goto errout;
     }
     if (retval)
-	goto errout;
+        goto errout;
 
     retval = crypto_load_certs(context, plg_cryptoctx, req_cryptoctx,
-			       idopts, id_cryptoctx, princ);
+                               idopts, id_cryptoctx, princ);
     if (retval)
-	goto errout;
+        goto errout;
 
     if (do_matching) {
-	retval = pkinit_cert_matching(context, plg_cryptoctx, req_cryptoctx,
-				      id_cryptoctx, princ);
-	if (retval) {
-	    pkiDebug("%s: No matching certificate found\n", __FUNCTION__);
-	    crypto_free_cert_info(context, plg_cryptoctx, req_cryptoctx,
-				  id_cryptoctx);
-	    goto errout;
-	}
+        retval = pkinit_cert_matching(context, plg_cryptoctx, req_cryptoctx,
+                                      id_cryptoctx, princ);
+        if (retval) {
+            pkiDebug("%s: No matching certificate found\n", __FUNCTION__);
+            crypto_free_cert_info(context, plg_cryptoctx, req_cryptoctx,
+                                  id_cryptoctx);
+            goto errout;
+        }
     } else {
-	/* Tell crypto code to use the "default" */
-	retval = crypto_cert_select_default(context, plg_cryptoctx,
-					    req_cryptoctx, id_cryptoctx);
-	if (retval) {
-	    pkiDebug("%s: Failed while selecting default certificate\n",
-		     __FUNCTION__);
-	    crypto_free_cert_info(context, plg_cryptoctx, req_cryptoctx,
-				  id_cryptoctx);
-	    goto errout;
-	}
+        /* Tell crypto code to use the "default" */
+        retval = crypto_cert_select_default(context, plg_cryptoctx,
+                                            req_cryptoctx, id_cryptoctx);
+        if (retval) {
+            pkiDebug("%s: Failed while selecting default certificate\n",
+                     __FUNCTION__);
+            crypto_free_cert_info(context, plg_cryptoctx, req_cryptoctx,
+                                  id_cryptoctx);
+            goto errout;
+        }
     }
 
     retval = crypto_free_cert_info(context, plg_cryptoctx, req_cryptoctx,
-				   id_cryptoctx);
+                                   id_cryptoctx);
     if (retval)
-	    goto errout;
+        goto errout;
 
     for (i = 0; idopts->anchors != NULL && idopts->anchors[i] != NULL; i++) {
-	retval = process_option_ca_crl(context, plg_cryptoctx, req_cryptoctx,
-				       idopts, id_cryptoctx,
-				       idopts->anchors[i], CATYPE_ANCHORS);
-	if (retval)
-	    goto errout;
+        retval = process_option_ca_crl(context, plg_cryptoctx, req_cryptoctx,
+                                       idopts, id_cryptoctx,
+                                       idopts->anchors[i], CATYPE_ANCHORS);
+        if (retval)
+            goto errout;
     }
     for (i = 0; idopts->intermediates != NULL
-		&& idopts->intermediates[i] != NULL; i++) {
-	retval = process_option_ca_crl(context, plg_cryptoctx, req_cryptoctx,
-				       idopts, id_cryptoctx,
-				       idopts->intermediates[i],
-				       CATYPE_INTERMEDIATES);
-	if (retval)
-	    goto errout;
+             && idopts->intermediates[i] != NULL; i++) {
+        retval = process_option_ca_crl(context, plg_cryptoctx, req_cryptoctx,
+                                       idopts, id_cryptoctx,
+                                       idopts->intermediates[i],
+                                       CATYPE_INTERMEDIATES);
+        if (retval)
+            goto errout;
     }
     for (i = 0; idopts->crls != NULL && idopts->crls[i] != NULL; i++) {
-	retval = process_option_ca_crl(context, plg_cryptoctx, req_cryptoctx,
-				       idopts, id_cryptoctx, idopts->crls[i],
-				       CATYPE_CRLS);
-	if (retval)
-	    goto errout;
+        retval = process_option_ca_crl(context, plg_cryptoctx, req_cryptoctx,
+                                       idopts, id_cryptoctx, idopts->crls[i],
+                                       CATYPE_CRLS);
+        if (retval)
+            goto errout;
     }
     if (idopts->ocsp != NULL) {
-	retval = ENOTSUP;
-	goto errout;
+        retval = ENOTSUP;
+        goto errout;
     }
 
 errout:

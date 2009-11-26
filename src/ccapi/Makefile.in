@@ -1,5 +1,3 @@
-thisconfigdir=..
-myfulldir=ccapi
 mydir=ccapi
 BUILDTOP=$(REL)..
 

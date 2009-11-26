@@ -1,5 +1,3 @@
-thisconfigdir=../../..
-myfulldir=lib/crypto/crypto_tests
 mydir=lib/crypto/crypto_tests
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../krb -I$(srcdir)/../@CRYPTO_IMPL@/enc_provider 		\

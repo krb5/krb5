@@ -1,5 +1,3 @@
-thisconfigdir=./..
-myfulldir=util
 mydir=util
 ##WIN32###Windows NMAKE doesn't like @ in make variable names, and on
 ##WIN32### Windows we don't do the @FOO@ substitutions we do with UNIX

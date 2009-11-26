@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/kdb/kdb_ldap/ldap_krbcontainer.h
  *
@@ -31,30 +32,32 @@
 #ifndef _LDAP_KRBCONTAINER_H_
 #define _LDAP_KRBCONTAINER_H_ 1
 
-#define MAX_KRB_CONTAINER_LEN	256
+#define MAX_KRB_CONTAINER_LEN   256
 
 /* kerberos container structure */
 
 typedef struct _krb5_ldap_krbcontainer_params {
-  char            *parent;
-  char            *DN;
-  char            *policyreference;
-  krb5_int32      max_life;
-  krb5_int32      max_renewable_life;
-  krb5_int32      tktflags;
+    char            *parent;
+    char            *DN;
+    char            *policyreference;
+    krb5_int32      max_life;
+    krb5_int32      max_renewable_life;
+    krb5_int32      tktflags;
 } krb5_ldap_krbcontainer_params;
 
 void
 krb5_ldap_free_krbcontainer_params(krb5_ldap_krbcontainer_params *);
 
 krb5_error_code
-krb5_ldap_read_krbcontainer_params(krb5_context , krb5_ldap_krbcontainer_params **);
+krb5_ldap_read_krbcontainer_params(krb5_context,
+                                   krb5_ldap_krbcontainer_params **);
 
 krb5_error_code
-krb5_ldap_create_krbcontainer(krb5_context, const krb5_ldap_krbcontainer_params *);
+krb5_ldap_create_krbcontainer(krb5_context,
+                              const krb5_ldap_krbcontainer_params *);
 
 krb5_error_code
 krb5_ldap_delete_krbcontainer(krb5_context,
-    const krb5_ldap_krbcontainer_params *);
+                              const krb5_ldap_krbcontainer_params *);
 
 #endif

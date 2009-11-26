@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * plugins/locate/python/py-locate.c
  *
@@ -72,26 +73,26 @@
 #error "Where's the Python header file?"
 #endif
 #include <errno.h>
-#include "k5-platform.h"	/* for init/fini macros */
+#include "k5-platform.h"        /* for init/fini macros */
 #include "fake-addrinfo.h"
 
 #include <krb5/locate_plugin.h>
 
-#define LIBDIR			"/tmp" /* should be imported from configure */
-#define SCRIPT_PATH		LIBDIR "/krb5/locate-service.py"
-#define LOOKUP_FUNC_NAME	"locate"
+#define LIBDIR                  "/tmp" /* should be imported from configure */
+#define SCRIPT_PATH             LIBDIR "/krb5/locate-service.py"
+#define LOOKUP_FUNC_NAME        "locate"
 
 static PyObject *locatefn;
 
 MAKE_INIT_FUNCTION(my_init);
 MAKE_FINI_FUNCTION(my_fini);
 
-#define F	(strchr(__FILE__, '/') ? 1 + strrchr(__FILE__, '/') : __FILE__)
+#define F       (strchr(__FILE__, '/') ? 1 + strrchr(__FILE__, '/') : __FILE__)
 
-static krb5_context sctx;	/* XXX ugly hack! */
+static krb5_context sctx;       /* XXX ugly hack! */
 
 int
-my_init (void)
+my_init(void)
 {
     PyObject *mainmodule;
     FILE *f;
@@ -100,11 +101,11 @@ my_init (void)
 //    fprintf(stderr, "trying to load %s\n", SCRIPT_PATH);
     f = fopen(SCRIPT_PATH, "r");
     if (f == NULL) {
-	if (sctx)
-	    krb5_set_error_message(sctx, -1,
-				   "couldn't open Python script %s (%s)",
-				   SCRIPT_PATH, strerror(errno));
-	return -1;
+        if (sctx)
+            krb5_set_error_message(sctx, -1,
+                                   "couldn't open Python script %s (%s)",
+                                   SCRIPT_PATH, strerror(errno));
+        return -1;
     }
     set_cloexec_file(f);
     PyRun_SimpleFile (f, SCRIPT_PATH);
@@ -115,29 +116,29 @@ my_init (void)
     if (PyErr_Occurred()) { fprintf(stderr,"%s:%d: python error\n", F, __LINE__); PyErr_Print(); return -1; }
     /* Don't DECREF mainmodule, it's sometimes causing crashes.  */
     if (locatefn == 0)
-	return -1;
+        return -1;
     if (!PyCallable_Check (locatefn)) {
-	Py_DECREF (locatefn);
-	locatefn = 0;
-	return -1;
+        Py_DECREF (locatefn);
+        locatefn = 0;
+        return -1;
     }
     if (PyErr_Occurred()) { fprintf(stderr,"%s:%d: python error\n", F, __LINE__); PyErr_Print(); return -1; }
     return 0;
 }
 
 void
-my_fini (void)
+my_fini(void)
 {
 //    fprintf(stderr, "%s:%d: Python module finalization\n", F, __LINE__);
     if (! INITIALIZER_RAN (my_init))
-	return;
+        return;
     Py_DECREF (locatefn);
     locatefn = 0;
     Py_Finalize ();
 }
 
 static krb5_error_code
-ctxinit (krb5_context ctx, void **blobptr)
+ctxinit(krb5_context ctx, void **blobptr)
 {
     /* If we wanted to create a separate Python interpreter instance,
        look up the pathname of the script in the config file used for
@@ -150,7 +151,7 @@ ctxinit (krb5_context ctx, void **blobptr)
 }
 
 static void
-ctxfini (void *blob)
+ctxfini(void *blob)
 {
 }
 
@@ -170,9 +171,9 @@ ctxfini (void *blob)
    isn't going to be very useful to the caller.)  */
 
 static krb5_error_code
-lookup (void *blob, enum locate_service_type svc, const char *realm,
-	int socktype, int family,
-	int (*cbfunc)(void *, int, struct sockaddr *), void *cbdata)
+lookup(void *blob, enum locate_service_type svc, const char *realm,
+       int socktype, int family,
+       int (*cbfunc)(void *, int, struct sockaddr *), void *cbdata)
 {
     PyObject *py_result, *svcarg, *realmarg, *arglist;
     int listsize, i, x;
@@ -180,17 +181,17 @@ lookup (void *blob, enum locate_service_type svc, const char *realm,
     int thissocktype;
 
 //    fprintf(stderr, "%s:%d: lookup(%d,%s,%d,%d)\n", F, __LINE__,
-//	    svc, realm, socktype, family);
-    sctx = blob;		/* XXX: Not thread safe!  */
+//          svc, realm, socktype, family);
+    sctx = blob;                /* XXX: Not thread safe!  */
     i = CALL_INIT_FUNCTION (my_init);
     if (i) {
 #if 0
-	fprintf(stderr, "%s:%d: module initialization failed\n", F, __LINE__);
+        fprintf(stderr, "%s:%d: module initialization failed\n", F, __LINE__);
 #endif
-	return i;
+        return i;
     }
     if (locatefn == 0)
-	return KRB5_PLUGIN_NO_HANDLE;
+        return KRB5_PLUGIN_NO_HANDLE;
     svcarg = PyInt_FromLong (svc);
     /* error? */
     realmarg = PyString_FromString ((char *) realm);
@@ -207,24 +208,24 @@ lookup (void *blob, enum locate_service_type svc, const char *realm,
     py_result = PyObject_CallObject (locatefn, arglist);
     Py_DECREF (arglist);
     if (PyErr_Occurred()) {
-	fprintf(stderr,"%s:%d: python error\n", F, __LINE__);
-	PyErr_Print();
-	krb5_set_error_message(blob, -1,
-			       "Python evaluation error, see stderr");
-	return -1;
+        fprintf(stderr,"%s:%d: python error\n", F, __LINE__);
+        PyErr_Print();
+        krb5_set_error_message(blob, -1,
+                               "Python evaluation error, see stderr");
+        return -1;
     }
     if (py_result == 0) {
-	fprintf(stderr, "%s:%d: returned null object\n", F, __LINE__);
-	return -1;
+        fprintf(stderr, "%s:%d: returned null object\n", F, __LINE__);
+        return -1;
     }
     if (py_result == Py_False)
-	return KRB5_PLUGIN_NO_HANDLE;
+        return KRB5_PLUGIN_NO_HANDLE;
     if (! PyList_Check (py_result)) {
-	Py_DECREF (py_result);
-	fprintf(stderr, "%s:%d: returned non-list, non-False\n", F, __LINE__);
-	krb5_set_error_message(blob, -1,
-			       "Python script error -- returned non-list, non-False result");
-	return -1;
+        Py_DECREF (py_result);
+        fprintf(stderr, "%s:%d: returned non-list, non-False\n", F, __LINE__);
+        krb5_set_error_message(blob, -1,
+                               "Python script error -- returned non-list, non-False result");
+        return -1;
     }
     listsize = PyList_Size (py_result);
     /* allocate */
@@ -232,83 +233,83 @@ lookup (void *blob, enum locate_service_type svc, const char *realm,
     aihints.ai_flags = AI_NUMERICHOST;
     aihints.ai_family = family;
     for (i = 0; i < listsize; i++) {
-	PyObject *answer, *field;
-	char *hoststr, *portstr, portbuf[3*sizeof(long) + 4];
-	int cbret;
+        PyObject *answer, *field;
+        char *hoststr, *portstr, portbuf[3*sizeof(long) + 4];
+        int cbret;
 
-	answer = PyList_GetItem (py_result, i);
-	if (! PyTuple_Check (answer)) {
-	    krb5_set_error_message(blob, -1,
-				   "Python script error -- returned item %d not a tuple", i);
-	    /* leak?  */
-	    return -1;
-	}
-	if (PyTuple_Size (answer) != 3) {
-	    krb5_set_error_message(blob, -1,
-				   "Python script error -- returned tuple %d size %d should be 3",
-				   i, PyTuple_Size (answer));
-	    /* leak?  */
-	    return -1;
-	}
-	field = PyTuple_GetItem (answer, 0);
-	if (! PyString_Check (field)) {
-	    /* leak?  */
-	    krb5_set_error_message(blob, -1,
-				   "Python script error -- first component of tuple %d is not a string",
-				   i);
-	    return -1;
-	}
-	hoststr = PyString_AsString (field);
-	field = PyTuple_GetItem (answer, 1);
-	if (PyString_Check (field)) {
-	    portstr = PyString_AsString (field);
-	} else if (PyInt_Check (field)) {
-	    snprintf(portbuf, sizeof(portbuf), "%ld", PyInt_AsLong (field));
-	    portstr = portbuf;
-	} else {
-	    krb5_set_error_message(blob, -1,
-				   "Python script error -- second component of tuple %d neither a string nor an integer",
-				   i);
-	    /* leak?  */
-	    return -1;
-	}
-	field = PyTuple_GetItem (answer, 2);
-	if (! PyInt_Check (field)) {
-	    krb5_set_error_message(blob, -1,
-				   "Python script error -- third component of tuple %d not an integer",
-				   i);
-	    /* leak?  */
-	    return -1;
-	}
-	thissocktype = PyInt_AsLong (field);
-	switch (thissocktype) {
-	case SOCK_STREAM:
-	case SOCK_DGRAM:
-	    /* okay */
-	    if (socktype != 0 && socktype != thissocktype) {
-		krb5_set_error_message(blob, -1,
-				       "Python script error -- tuple %d has socket type %d, should only have %d",
-				       i, thissocktype, socktype);
-		/* leak?  */
-		return -1;
-	    }
-	    break;
-	default:
-	    /* 0 is not acceptable */
-	    krb5_set_error_message(blob, -1,
-				   "Python script error -- tuple %d has invalid socket type %d",
-				   i, thissocktype);
-	    /* leak?  */
-	    return -1;
-	}
-	aihints.ai_socktype = thissocktype;
-	x = getaddrinfo (hoststr, portstr, &aihints, &airesult);
-	if (x != 0)
-	    continue;
-	cbret = cbfunc(cbdata, airesult->ai_socktype, airesult->ai_addr);
-	freeaddrinfo(airesult);
-	if (cbret != 0)
-	    break;
+        answer = PyList_GetItem (py_result, i);
+        if (! PyTuple_Check (answer)) {
+            krb5_set_error_message(blob, -1,
+                                   "Python script error -- returned item %d not a tuple", i);
+            /* leak?  */
+            return -1;
+        }
+        if (PyTuple_Size (answer) != 3) {
+            krb5_set_error_message(blob, -1,
+                                   "Python script error -- returned tuple %d size %d should be 3",
+                                   i, PyTuple_Size (answer));
+            /* leak?  */
+            return -1;
+        }
+        field = PyTuple_GetItem (answer, 0);
+        if (! PyString_Check (field)) {
+            /* leak?  */
+            krb5_set_error_message(blob, -1,
+                                   "Python script error -- first component of tuple %d is not a string",
+                                   i);
+            return -1;
+        }
+        hoststr = PyString_AsString (field);
+        field = PyTuple_GetItem (answer, 1);
+        if (PyString_Check (field)) {
+            portstr = PyString_AsString (field);
+        } else if (PyInt_Check (field)) {
+            snprintf(portbuf, sizeof(portbuf), "%ld", PyInt_AsLong (field));
+            portstr = portbuf;
+        } else {
+            krb5_set_error_message(blob, -1,
+                                   "Python script error -- second component of tuple %d neither a string nor an integer",
+                                   i);
+            /* leak?  */
+            return -1;
+        }
+        field = PyTuple_GetItem (answer, 2);
+        if (! PyInt_Check (field)) {
+            krb5_set_error_message(blob, -1,
+                                   "Python script error -- third component of tuple %d not an integer",
+                                   i);
+            /* leak?  */
+            return -1;
+        }
+        thissocktype = PyInt_AsLong (field);
+        switch (thissocktype) {
+        case SOCK_STREAM:
+        case SOCK_DGRAM:
+            /* okay */
+            if (socktype != 0 && socktype != thissocktype) {
+                krb5_set_error_message(blob, -1,
+                                       "Python script error -- tuple %d has socket type %d, should only have %d",
+                                       i, thissocktype, socktype);
+                /* leak?  */
+                return -1;
+            }
+            break;
+        default:
+            /* 0 is not acceptable */
+            krb5_set_error_message(blob, -1,
+                                   "Python script error -- tuple %d has invalid socket type %d",
+                                   i, thissocktype);
+            /* leak?  */
+            return -1;
+        }
+        aihints.ai_socktype = thissocktype;
+        x = getaddrinfo (hoststr, portstr, &aihints, &airesult);
+        if (x != 0)
+            continue;
+        cbret = cbfunc(cbdata, airesult->ai_socktype, airesult->ai_addr);
+        freeaddrinfo(airesult);
+        if (cbret != 0)
+            break;
     }
     Py_DECREF (py_result);
     return 0;

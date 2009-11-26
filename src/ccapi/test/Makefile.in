@@ -1,5 +1,3 @@
-thisconfigdir=..$(S)..
-myfulldir=ccapi$(S)test
 mydir=ccapi$(S)test
 BUILDTOP=..$(S)..
 CCAPI=$(BUILDTOP)$(S)CCAPI

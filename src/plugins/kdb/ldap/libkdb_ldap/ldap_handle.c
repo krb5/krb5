@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/kdb/kdb_ldap/ldap_handle.c
  *
@@ -43,45 +44,44 @@
  */
 
 static krb5_error_code
-krb5_update_server_info(ldap_server_handle, server_info)
-    krb5_ldap_server_handle    *ldap_server_handle;
-    krb5_ldap_server_info      *server_info;
+krb5_update_server_info(krb5_ldap_server_handle *ldap_server_handle,
+                        krb5_ldap_server_info *server_info)
 {
     krb5_error_code            st=0;
     struct timeval             ztime={0, 0};
     LDAPMessage                *result=NULL;
 
     if (ldap_server_handle == NULL || server_info == NULL)
-	return -1;
+        return -1;
 
     while (st == 0) {
-	st = ldap_result(ldap_server_handle->ldap_handle, ldap_server_handle->msgid,
-			 LDAP_MSG_ALL, &ztime, &result);
-	switch (st) {
-	case -1:
-	    server_info->server_status = OFF;
-	    time(&server_info->downtime);
-	    break;
+        st = ldap_result(ldap_server_handle->ldap_handle, ldap_server_handle->msgid,
+                         LDAP_MSG_ALL, &ztime, &result);
+        switch (st) {
+        case -1:
+            server_info->server_status = OFF;
+            time(&server_info->downtime);
+            break;
 
-	case 0:
-	    continue;
-	    break;
+        case 0:
+            continue;
+            break;
 
-	case LDAP_RES_BIND:
-	    if ((st=ldap_result2error(ldap_server_handle->ldap_handle, result, 1)) == LDAP_SUCCESS) {
-		server_info->server_status = ON;
-	    } else {
-		/* ?? */	krb5_set_error_message(0, 0, "%s", ldap_err2string(st));
-		server_info->server_status = OFF;
-		time(&server_info->downtime);
-	    }
-	    ldap_msgfree(result);
-	    break;
-	default:
-	    ldap_msgfree(result);
-	    continue;
-	    break;
-	}
+        case LDAP_RES_BIND:
+            if ((st=ldap_result2error(ldap_server_handle->ldap_handle, result, 1)) == LDAP_SUCCESS) {
+                server_info->server_status = ON;
+            } else {
+                /* ?? */        krb5_set_error_message(0, 0, "%s", ldap_err2string(st));
+                server_info->server_status = OFF;
+                time(&server_info->downtime);
+            }
+            ldap_msgfree(result);
+            break;
+        default:
+            ldap_msgfree(result);
+            continue;
+            break;
+        }
     }
     ldap_server_handle->server_info_update_pending = FALSE;
     return 0;
@@ -94,35 +94,34 @@ krb5_update_server_info(ldap_server_handle, server_info)
  */
 
 static krb5_ldap_server_handle *
-krb5_get_ldap_handle(ldap_context)
-    krb5_ldap_context          *ldap_context;
+krb5_get_ldap_handle(krb5_ldap_context *ldap_context)
 {
     krb5_ldap_server_handle    *ldap_server_handle=NULL;
     krb5_ldap_server_info      *ldap_server_info=NULL;
     int                        cnt=0;
 
     while (ldap_context->server_info_list[cnt] != NULL) {
-	ldap_server_info = ldap_context->server_info_list[cnt];
-	if (ldap_server_info->server_status != OFF) {
-	    if (ldap_server_info->ldap_server_handles != NULL) {
-		ldap_server_handle = ldap_server_info->ldap_server_handles;
-		ldap_server_info->ldap_server_handles = ldap_server_handle->next;
-		break;
+        ldap_server_info = ldap_context->server_info_list[cnt];
+        if (ldap_server_info->server_status != OFF) {
+            if (ldap_server_info->ldap_server_handles != NULL) {
+                ldap_server_handle = ldap_server_info->ldap_server_handles;
+                ldap_server_info->ldap_server_handles = ldap_server_handle->next;
+                break;
 #ifdef ASYNC_BIND
-		if (ldap_server_handle->server_info_update_pending == TRUE) {
-		    krb5_update_server_info(context, ldap_server_handle,
-					    ldap_server_info);
-		}
+                if (ldap_server_handle->server_info_update_pending == TRUE) {
+                    krb5_update_server_info(context, ldap_server_handle,
+                                            ldap_server_info);
+                }
 
-		if (ldap_server_info->server_status == ON) {
-		    ldap_server_info->ldap_server_handles = ldap_server_handle->next;
-		    break;
-		} else
-		    ldap_server_handle = NULL;
+                if (ldap_server_info->server_status == ON) {
+                    ldap_server_info->ldap_server_handles = ldap_server_handle->next;
+                    break;
+                } else
+                    ldap_server_handle = NULL;
 #endif
-	    }
-	}
-	++cnt;
+            }
+        }
+        ++cnt;
     }
     return ldap_server_handle;
 }
@@ -135,14 +134,13 @@ krb5_get_ldap_handle(ldap_context)
  */
 
 static krb5_ldap_server_handle *
-krb5_retry_get_ldap_handle(ldap_context, st)
-    krb5_ldap_context          *ldap_context;
-    krb5_error_code            *st;
+krb5_retry_get_ldap_handle(krb5_ldap_context *ldap_context,
+                           krb5_error_code *st)
 {
     krb5_ldap_server_handle    *ldap_server_handle=NULL;
 
     if ((*st=krb5_ldap_db_single_init(ldap_context)) != 0)
-	return NULL;
+        return NULL;
 
     ldap_server_handle = krb5_get_ldap_handle(ldap_context);
     return ldap_server_handle;
@@ -155,12 +153,11 @@ krb5_retry_get_ldap_handle(ldap_context, st)
  */
 
 static krb5_error_code
-krb5_put_ldap_handle(ldap_server_handle)
-    krb5_ldap_server_handle    *ldap_server_handle;
+krb5_put_ldap_handle(krb5_ldap_server_handle *ldap_server_handle)
 {
 
     if (ldap_server_handle == NULL)
-	return 0;
+        return 0;
 
     ldap_server_handle->next = ldap_server_handle->server_info->ldap_server_handles;
     ldap_server_handle->server_info->ldap_server_handles = ldap_server_handle;
@@ -174,13 +171,12 @@ krb5_put_ldap_handle(ldap_server_handle)
  */
 
 krb5_error_code
-krb5_update_ldap_handle(ldap_server_handle, server_info)
-    krb5_ldap_server_handle    *ldap_server_handle;
-    krb5_ldap_server_info      *server_info;
+krb5_update_ldap_handle(krb5_ldap_server_handle *ldap_server_handle,
+                        krb5_ldap_server_info *server_info)
 {
 
     if (ldap_server_handle == NULL || server_info == NULL)
-	return 0;
+        return 0;
 
     ldap_server_handle->next = server_info->ldap_server_handles;
     server_info->ldap_server_handles = ldap_server_handle;
@@ -195,17 +191,16 @@ krb5_update_ldap_handle(ldap_server_handle, server_info)
  */
 
 static krb5_error_code
-krb5_ldap_cleanup_handles(ldap_server_info)
-    krb5_ldap_server_info      *ldap_server_info;
+krb5_ldap_cleanup_handles(krb5_ldap_server_info *ldap_server_info)
 {
     krb5_ldap_server_handle    *ldap_server_handle = NULL;
 
     while (ldap_server_info->ldap_server_handles != NULL) {
-	ldap_server_handle = ldap_server_info->ldap_server_handles;
-	ldap_server_info->ldap_server_handles = ldap_server_handle->next;
-	/* ldap_unbind_s(ldap_server_handle); */
-	free (ldap_server_handle);
-	ldap_server_handle = NULL;
+        ldap_server_handle = ldap_server_info->ldap_server_handles;
+        ldap_server_info->ldap_server_handles = ldap_server_handle->next;
+        /* ldap_unbind_s(ldap_server_handle); */
+        free (ldap_server_handle);
+        ldap_server_handle = NULL;
     }
     return 0;
 }
@@ -215,9 +210,9 @@ krb5_ldap_cleanup_handles(ldap_server_info)
  */
 
 krb5_error_code
-krb5_ldap_request_handle_from_pool(ldap_context, ldap_server_handle)
-    krb5_ldap_context          *ldap_context;
-    krb5_ldap_server_handle    **ldap_server_handle;
+krb5_ldap_request_handle_from_pool(krb5_ldap_context *ldap_context,
+                                   krb5_ldap_server_handle **
+                                   ldap_server_handle)
 {
     krb5_error_code            st=0;
 
@@ -225,9 +220,9 @@ krb5_ldap_request_handle_from_pool(ldap_context, ldap_server_handle)
 
     st = HNDL_LOCK(ldap_context);
     if (st)
-	return st;
+        return st;
     if (((*ldap_server_handle)=krb5_get_ldap_handle(ldap_context)) == NULL)
-	(*ldap_server_handle)=krb5_retry_get_ldap_handle(ldap_context, &st);
+        (*ldap_server_handle)=krb5_retry_get_ldap_handle(ldap_context, &st);
     HNDL_UNLOCK(ldap_context);
     return st;
 }
@@ -238,22 +233,22 @@ krb5_ldap_request_handle_from_pool(ldap_context, ldap_server_handle)
  */
 
 krb5_error_code
-krb5_ldap_request_next_handle_from_pool(ldap_context, ldap_server_handle)
-    krb5_ldap_context          *ldap_context;
-    krb5_ldap_server_handle    **ldap_server_handle;
+krb5_ldap_request_next_handle_from_pool(krb5_ldap_context *ldap_context,
+                                        krb5_ldap_server_handle **
+                                        ldap_server_handle)
 {
     krb5_error_code            st=0;
 
     st = HNDL_LOCK(ldap_context);
     if (st)
-	return st;
+        return st;
     (*ldap_server_handle)->server_info->server_status = OFF;
     time(&(*ldap_server_handle)->server_info->downtime);
     krb5_put_ldap_handle(*ldap_server_handle);
     krb5_ldap_cleanup_handles((*ldap_server_handle)->server_info);
 
     if (((*ldap_server_handle)=krb5_get_ldap_handle(ldap_context)) == NULL)
-	(*ldap_server_handle)=krb5_retry_get_ldap_handle(ldap_context, &st);
+        (*ldap_server_handle)=krb5_retry_get_ldap_handle(ldap_context, &st);
     HNDL_UNLOCK(ldap_context);
     return st;
 }
@@ -263,15 +258,14 @@ krb5_ldap_request_next_handle_from_pool(ldap_context, ldap_server_handle)
  */
 
 void
-krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle)
-    krb5_ldap_context          *ldap_context;
-    krb5_ldap_server_handle    *ldap_server_handle;
+krb5_ldap_put_handle_to_pool(krb5_ldap_context *ldap_context,
+                             krb5_ldap_server_handle *ldap_server_handle)
 {
     if (ldap_server_handle != NULL) {
-	if (HNDL_LOCK(ldap_context) == 0) {
-	    krb5_put_ldap_handle(ldap_server_handle);
-	    HNDL_UNLOCK(ldap_context);
-	}
+        if (HNDL_LOCK(ldap_context) == 0) {
+            krb5_put_ldap_handle(ldap_server_handle);
+            HNDL_UNLOCK(ldap_context);
+        }
     }
     return;
 }

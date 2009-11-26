@@ -756,19 +756,47 @@ krb5int_hmac_iov_keyblock(const struct krb5_hash_provider *hash,
 krb5_error_code krb5int_pbkdf2_hmac_sha1(const krb5_data *, unsigned long,
                                          const krb5_data *, const krb5_data *);
 
-/* Make this a function eventually?  */
+/*
+ * Attempt to zero memory in a way that compilers won't optimize out.
+ *
+ * This mechanism should work even for heap storage about to be freed,
+ * or automatic storage right before we return from a function.
+ *
+ * Then, even if we leak uninitialized memory someplace, or UNIX
+ * "core" files get created with world-read access, some of the most
+ * sensitive data in the process memory will already be safely wiped.
+ *
+ * We're not going so far -- yet -- as to try to protect key data that
+ * may have been written into swap space....
+ */
 #ifdef _WIN32
-# define krb5int_zap_data(ptr, len) SecureZeroMemory(ptr, len)
+# define zap(ptr, len) SecureZeroMemory(ptr, len)
 #elif defined(__GNUC__)
-static inline void krb5int_zap_data(void *ptr, size_t len)
+static inline void zap(void *ptr, size_t len)
 {
     memset(ptr, 0, len);
+    /*
+     * Some versions of gcc have gotten clever enough to eliminate a
+     * memset call right before the block in question is released.
+     * This (empty) asm requires it to assume that we're doing
+     * something interesting with the stored (zero) value, so the
+     * memset can't be eliminated.
+     *
+     * An optimizer that looks at assembly or object code may not be
+     * fooled, and may still cause the memset to go away.  Address
+     * that problem if and when we encounter it.
+     *
+     * This also may not be enough if free() does something
+     * interesting like purge memory locations from a write-back cache
+     * that hasn't written back the zero bytes yet.  A memory barrier
+     * instruction would help in that case.
+     */
     asm volatile ("" : : "g" (ptr), "g" (len));
 }
 #else
-# define krb5int_zap_data(ptr, len) memset((volatile void *)ptr, 0, len)
-#endif /* WIN32 */
-#define zap(p,l) krb5int_zap_data(p,l)
+/* Use a function from libkrb5support to defeat inlining. */
+# define zap(ptr, len) krb5int_zap(ptr, len)
+#endif
 
 /* Convenience function: zap and free ptr if it is non-NULL. */
 static inline void
@@ -1227,15 +1255,15 @@ typedef krb5_error_code
                            krb5_keyblock *as_key, void *gak_data);
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_init_creds(krb5_context context, krb5_creds *creds,
-                    krb5_principal client, krb5_prompter_fct prompter,
-                    void *prompter_data, krb5_deltat start_time,
-                    char *in_tkt_service, krb5_gic_opt_ext *gic_options,
-                    krb5_gic_get_as_key_fct gak, void *gak_data,
-                    int *master, krb5_kdc_rep **as_reply);
+krb5int_get_init_creds(krb5_context context, krb5_creds *creds,
+                       krb5_principal client, krb5_prompter_fct prompter,
+                       void *prompter_data, krb5_deltat start_time,
+                       char *in_tkt_service, krb5_get_init_creds_opt *options,
+                       krb5_gic_get_as_key_fct gak, void *gak_data,
+                       int *master, krb5_kdc_rep **as_reply);
 
 krb5_error_code
-krb5int_populate_gic_opt (krb5_context, krb5_gic_opt_ext **,
+krb5int_populate_gic_opt (krb5_context, krb5_get_init_creds_opt **,
                           krb5_flags options, krb5_address *const *addrs,
                           krb5_enctype *ktypes,
                           krb5_preauthtype *pre_auth_types, krb5_creds *creds);
@@ -2721,10 +2749,6 @@ krb5_cc_register(krb5_context, const krb5_cc_ops *, krb5_boolean );
 krb5_error_code krb5_walk_realm_tree(krb5_context, const krb5_data *,
                                      const krb5_data *, krb5_principal **,
                                      int);
-
-krb5_error_code KRB5_CALLCONV
-krb5_auth_con_set_req_cksumtype(krb5_context, krb5_auth_context,
-                                krb5_cksumtype);
 
 krb5_error_code
 krb5_auth_con_set_safe_cksumtype(krb5_context, krb5_auth_context,

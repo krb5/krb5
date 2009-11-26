@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * kadmin/ldap_util/kdb5_ldap_realm.h
  */
@@ -29,13 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define BUFF_LEN 		64      /* Max len of enctype string */
-#define MAX_PRINC_SIZE 		256
+#define BUFF_LEN                64      /* Max len of enctype string */
+#define MAX_PRINC_SIZE          256
 
 enum ap_op {
-    NULL_KEY,	/* setup null keys */
-    MASTER_KEY,	/* use master key as new key */
-    TGT_KEY	/* special handling for tgt key */
+    NULL_KEY,   /* setup null keys */
+    MASTER_KEY, /* use master key as new key */
+    TGT_KEY     /* special handling for tgt key */
 };
 
 struct realm_info {
@@ -49,13 +50,13 @@ struct realm_info {
 };
 
 struct iterate_args {
-    krb5_context	ctx;
-    struct realm_info	*rblock;
-    krb5_db_entry	*dbentp;
+    krb5_context        ctx;
+    struct realm_info   *rblock;
+    krb5_db_entry       *dbentp;
 };
 
-extern void kdb5_ldap_create (int argc, char **argv);
-extern void kdb5_ldap_destroy (int argc, char **argv);
-extern void kdb5_ldap_modify (int argc, char **argv);
-extern void kdb5_ldap_view (int argc, char **argv);
-extern void kdb5_ldap_list (int argc, char **argv);
+extern void kdb5_ldap_create(int argc, char **argv);
+extern void kdb5_ldap_destroy(int argc, char **argv);
+extern void kdb5_ldap_modify(int argc, char **argv);
+extern void kdb5_ldap_view(int argc, char **argv);
+extern void kdb5_ldap_list(int argc, char **argv);

@@ -1,9 +1,7 @@
-thisconfigdir=../../..
-myfulldir=plugins/authdata/greet_client
 mydir=plugins/authdata/greet_client
 BUILDTOP=$(REL)..$(S)..$(S)..
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
-KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
+KRB5_CONFIG_SETUP = KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf ; export KRB5_CONFIG ;
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 MODULE_INSTALL_DIR = $(KRB5_AD_MODULE_DIR)

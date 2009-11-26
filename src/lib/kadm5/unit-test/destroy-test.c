@@ -43,5 +43,6 @@ int main()
         }
         free(cp);
     }
+    krb5_free_context(context);
     exit(0);
 }

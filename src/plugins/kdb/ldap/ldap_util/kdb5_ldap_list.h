@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * kadmin/ldap_util/kdb5_ldap_list.h
  */
@@ -30,12 +31,12 @@
  */
 
 
-#define MAX_LIST_ENTRIES	64
-#define END_OF_LIST		-1      /* End of List */
-#define LIST_DELIMITER		":"     /* List entry separator */
-#define LIST_MODE_ADD 		0x701   /* Add to the List */
-#define LIST_MODE_DELETE 	0x702   /* Delete from the list */
-#define MAX_LEN_LIST_ENTRY 	512     /* Max len of an entry */
+#define MAX_LIST_ENTRIES        64
+#define END_OF_LIST             -1      /* End of List */
+#define LIST_DELIMITER          ":"     /* List entry separator */
+#define LIST_MODE_ADD           0x701   /* Add to the List */
+#define LIST_MODE_DELETE        0x702   /* Delete from the list */
+#define MAX_LEN_LIST_ENTRY      512     /* Max len of an entry */
 
 extern krb5_error_code krb5_parse_list(char *buffer, char *delimiter, char **list);
 extern void krb5_free_list_entries(char **list);

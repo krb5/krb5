@@ -1,5 +1,3 @@
-thisconfigdir=../..
-myfulldir=tests/shlib
 mydir=tests/shlib
 BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)

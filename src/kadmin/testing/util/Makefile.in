@@ -1,5 +1,3 @@
-thisconfigdir=../../..
-myfulldir=kadmin/testing/util
 mydir=kadmin/testing/util
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = $(TCL_INCLUDES) -I$(BUILDTOP)/lib/kdb/

@@ -1,7 +1,5 @@
 # Derived from appl/gss-sample, January 2005.
 
-thisconfigdir=../..
-myfulldir=tests/gss-threads
 mydir=tests/gss-threads
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DUSE_AUTOCONF_H -DGSSAPI_V2

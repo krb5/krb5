@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * COPYRIGHT (C) 2006,2007
  * THE REGENTS OF THE UNIVERSITY OF MICHIGAN
@@ -43,7 +44,7 @@
 #define FAKECERT
 
 const krb5_octet_data
-	dh_oid = { 0, 7, (unsigned char *)"\x2A\x86\x48\xce\x3e\x02\x01" };
+dh_oid = { 0, 7, (unsigned char *)"\x2A\x86\x48\xce\x3e\x02\x01" };
 
 
 krb5_error_code
@@ -55,7 +56,7 @@ pkinit_init_req_opts(pkinit_req_opts **reqopts)
     *reqopts = NULL;
     opts = calloc(1, sizeof(*opts));
     if (opts == NULL)
-	return retval;
+        return retval;
 
     opts->require_eku = 1;
     opts->accept_secondary_eku = 0;
@@ -87,7 +88,7 @@ pkinit_init_plg_opts(pkinit_plg_opts **plgopts)
     *plgopts = NULL;
     opts = calloc(1, sizeof(pkinit_plg_opts));
     if (opts == NULL)
-	return retval;
+        return retval;
 
     opts->require_eku = 1;
     opts->accept_secondary_eku = 0;
@@ -115,7 +116,7 @@ free_krb5_pa_pk_as_req(krb5_pa_pk_as_req **in)
     if (*in == NULL) return;
     free((*in)->signedAuthPack.data);
     if ((*in)->trustedCertifiers != NULL)
-	free_krb5_external_principal_identifier(&(*in)->trustedCertifiers);
+        free_krb5_external_principal_identifier(&(*in)->trustedCertifiers);
     free((*in)->kdcPkId.data);
     free(*in);
 }
@@ -128,7 +129,7 @@ free_krb5_pa_pk_as_req_draft9(krb5_pa_pk_as_req_draft9 **in)
     free((*in)->kdcCert.data);
     free((*in)->encryptionCert.data);
     if ((*in)->trustedCertifiers != NULL)
-	free_krb5_trusted_ca(&(*in)->trustedCertifiers);
+        free_krb5_trusted_ca(&(*in)->trustedCertifiers);
     free(*in);
 }
 
@@ -154,20 +155,20 @@ free_krb5_auth_pack(krb5_auth_pack **in)
 {
     if ((*in) == NULL) return;
     if ((*in)->clientPublicValue != NULL) {
-	free((*in)->clientPublicValue->algorithm.algorithm.data);
-	free((*in)->clientPublicValue->algorithm.parameters.data);
-	free((*in)->clientPublicValue->subjectPublicKey.data);
-	free((*in)->clientPublicValue);
+        free((*in)->clientPublicValue->algorithm.algorithm.data);
+        free((*in)->clientPublicValue->algorithm.parameters.data);
+        free((*in)->clientPublicValue->subjectPublicKey.data);
+        free((*in)->clientPublicValue);
     }
     free((*in)->pkAuthenticator.paChecksum.contents);
     if ((*in)->supportedCMSTypes != NULL)
-	free_krb5_algorithm_identifiers(&((*in)->supportedCMSTypes));
+        free_krb5_algorithm_identifiers(&((*in)->supportedCMSTypes));
     free(*in);
 }
 
 void
 free_krb5_auth_pack_draft9(krb5_context context,
-				krb5_auth_pack_draft9 **in)
+                           krb5_auth_pack_draft9 **in)
 {
     if ((*in) == NULL) return;
     krb5_free_principal(context, (*in)->pkAuthenticator.kdcName);
@@ -179,14 +180,14 @@ free_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in)
 {
     if (*in == NULL) return;
     switch ((*in)->choice) {
-	case choice_pa_pk_as_rep_dhInfo:
-	    free((*in)->u.dh_Info.dhSignedData.data);
-	    break;
-	case choice_pa_pk_as_rep_encKeyPack:
-	    free((*in)->u.encKeyPack.data);
-	    break;
-	default:
-	    break;
+    case choice_pa_pk_as_rep_dhInfo:
+        free((*in)->u.dh_Info.dhSignedData.data);
+        break;
+    case choice_pa_pk_as_rep_encKeyPack:
+        free((*in)->u.encKeyPack.data);
+        break;
+    default:
+        break;
     }
     free(*in);
 }
@@ -205,11 +206,11 @@ free_krb5_external_principal_identifier(krb5_external_principal_identifier ***in
     int i = 0;
     if (*in == NULL) return;
     while ((*in)[i] != NULL) {
-	free((*in)[i]->subjectName.data);
-	free((*in)[i]->issuerAndSerialNumber.data);
-	free((*in)[i]->subjectKeyIdentifier.data);
-	free((*in)[i]);
-	i++;
+        free((*in)[i]->subjectName.data);
+        free((*in)[i]->issuerAndSerialNumber.data);
+        free((*in)[i]->subjectKeyIdentifier.data);
+        free((*in)[i]);
+        i++;
     }
     free(*in);
 }
@@ -220,20 +221,20 @@ free_krb5_trusted_ca(krb5_trusted_ca ***in)
     int i = 0;
     if (*in == NULL) return;
     while ((*in)[i] != NULL) {
-	switch((*in)[i]->choice) {
-	    case choice_trusted_cas_principalName:
-		break;
-	    case choice_trusted_cas_caName:
-		free((*in)[i]->u.caName.data);
-		break;
-	    case choice_trusted_cas_issuerAndSerial:
-		free((*in)[i]->u.issuerAndSerial.data);
-		break;
-	    case choice_trusted_cas_UNKNOWN:
-		break;
-	}
-	free((*in)[i]);
-	i++;
+        switch((*in)[i]->choice) {
+        case choice_trusted_cas_principalName:
+            break;
+        case choice_trusted_cas_caName:
+            free((*in)[i]->u.caName.data);
+            break;
+        case choice_trusted_cas_issuerAndSerial:
+            free((*in)[i]->u.issuerAndSerial.data);
+            break;
+        case choice_trusted_cas_UNKNOWN:
+            break;
+        }
+        free((*in)[i]);
+        i++;
     }
     free(*in);
 }
@@ -244,9 +245,9 @@ free_krb5_typed_data(krb5_typed_data ***in)
     int i = 0;
     if (*in == NULL) return;
     while ((*in)[i] != NULL) {
-	free((*in)[i]->data);
-	free((*in)[i]);
-	i++;
+        free((*in)[i]->data);
+        free((*in)[i]);
+        i++;
     }
     free(*in);
 }
@@ -255,7 +256,7 @@ void
 free_krb5_algorithm_identifier(krb5_algorithm_identifier *in)
 {
     if (in == NULL)
-	return;
+        return;
     free(in->algorithm.data);
     free(in->parameters.data);
     free(in);
@@ -266,9 +267,9 @@ free_krb5_algorithm_identifiers(krb5_algorithm_identifier ***in)
 {
     int i;
     if (in == NULL || *in == NULL)
-	return;
+        return;
     for (i = 0; (*in)[i] != NULL; i++) {
-	free_krb5_algorithm_identifier((*in)[i]);
+        free_krb5_algorithm_identifier((*in)[i]);
     }
     free(*in);
 }
@@ -405,15 +406,15 @@ krb5_error_code
 pkinit_copy_krb5_octet_data(krb5_octet_data *dst, const krb5_octet_data *src)
 {
     if (dst == NULL || src == NULL)
-	return EINVAL;
+        return EINVAL;
     if (src->data == NULL) {
-	dst->data = NULL;
-	dst->length = 0;
-	return 0;
+        dst->data = NULL;
+        dst->length = 0;
+        return 0;
     }
     dst->data = malloc(src->length);
     if (dst->data == NULL)
-	return ENOMEM;
+        return ENOMEM;
     memcpy(dst->data, src->data, src->length);
     dst->length = src->length;
     return 0;
@@ -425,10 +426,10 @@ print_buffer(unsigned char *buf, unsigned int len)
 {
     int i = 0;
     if (len <= 0)
-	return;
+        return;
 
     for (i = 0; i < len; i++)
-	pkiDebug("%02x ", buf[i]);
+        pkiDebug("%02x ", buf[i]);
     pkiDebug("\n");
 }
 
@@ -439,15 +440,15 @@ print_buffer_bin(unsigned char *buf, unsigned int len, char *filename)
     int i = 0;
 
     if (len <= 0 || filename == NULL)
-	return;
+        return;
 
     if ((f = fopen(filename, "w")) == NULL)
-	return;
+        return;
 
     set_cloexec_file(f);
 
     for (i = 0; i < len; i++)
-	fputc(buf[i], f);
+        fputc(buf[i], f);
 
     fclose(f);
 }

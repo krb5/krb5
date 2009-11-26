@@ -66,7 +66,6 @@ s4u_identify_user(krb5_context context,
     krb5_creds creds;
     int use_master = 0;
     krb5_get_init_creds_opt *opts = NULL;
-    krb5_gic_opt_ext *opte = NULL;
     krb5_principal_data client_data;
     krb5_principal client;
     krb5_s4u_userid userid;
@@ -98,10 +97,6 @@ s4u_identify_user(krb5_context context,
     krb5_get_init_creds_opt_set_proxiable(opts, 0);
     krb5_get_init_creds_opt_set_canonicalize(opts, 1);
     krb5_get_init_creds_opt_set_preauth_list(opts, ptypes, 1);
-    code = krb5int_gic_opt_to_opte(context, opts, &opte,
-                                   0, "s4u_identify_user");
-    if (code != 0)
-        goto cleanup;
 
     if (in_creds->client != NULL)
         client = in_creds->client;
@@ -115,10 +110,10 @@ s4u_identify_user(krb5_context context,
         client = &client_data;
     }
 
-    code = krb5_get_init_creds(context, &creds, client,
-                               NULL, NULL, 0, NULL, opte,
-                               krb5_get_as_key_noop, &userid,
-                               &use_master, NULL);
+    code = krb5int_get_init_creds(context, &creds, client,
+                                  NULL, NULL, 0, NULL, opts,
+                                  krb5_get_as_key_noop, &userid,
+                                  &use_master, NULL);
     if (code == 0 ||
         code == KDC_ERR_PREAUTH_REQUIRED ||
         code == KDC_ERR_PREAUTH_FAILED) {

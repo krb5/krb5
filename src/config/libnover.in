@@ -111,8 +111,8 @@ install-plugin:
 	$(RM) $(DESTDIR)$(MODULE_INSTALL_DIR)/$(LIBBASE)$(DYNOBJEXT)
 	$(INSTALL_SHLIB) $(LIBBASE)$(DYNOBJEXT) $(DESTDIR)$(MODULE_INSTALL_DIR)
 
-Makefile: $(SRCTOP)/config/libnover.in
-$(thisconfigdir)/config.status: $(SRCTOP)/config/shlib.conf
+Makefile: $(top_srcdir)/config/libnover.in
+$(BUILDTOP)/config.status: $(top_srcdir)/config/shlib.conf
 
 # Use the following if links need to be made to $(TOPLIBD):
 # all-unix:: all-liblinks

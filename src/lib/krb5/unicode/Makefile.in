@@ -1,5 +1,3 @@
-thisconfigdir=../../..
-myfulldir=lib/krb5/unicode
 mydir=lib/krb5/unicode
 BUILDTOP=$(REL)..$(S)..$(S)..
 KRB5_RUN_ENV = @KRB5_RUN_ENV@

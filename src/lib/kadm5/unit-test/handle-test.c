@@ -7,8 +7,12 @@
 #include <sys/file.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#ifdef CLIENT_TEST
 #include <kadm5/client_internal.h>
-
+#else
+#include <kadm5/server_internal.h>
+#include <kadm5/admin.h>
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -17,7 +21,8 @@ int main(int argc, char *argv[])
     kadm5_server_handle_t handle;
     kadm5_server_handle_rec orig_handle;
     kadm5_policy_ent_rec       pol;
-    kadm5_principal_ent_t      princ;
+    kadm5_principal_ent_t    princ;
+    kadm5_principal_ent_rec  kprinc;
     krb5_keyblock      *key;
     krb5_principal     tprinc;
     krb5_context       context;
@@ -36,7 +41,7 @@ int main(int argc, char *argv[])
     orig_handle = *handle;
     handle->magic_number = KADM5_STRUCT_VERSION;
     krb5_parse_name(context, "testuser", &tprinc);
-    ret = kadm5_get_principal(server_handle, tprinc, &princ,
+    ret = kadm5_get_principal(server_handle, tprinc, &kprinc,
                               KADM5_PRINCIPAL_NORMAL_MASK);
     if(ret != KADM5_BAD_SERVER_HANDLE) {
         fprintf(stderr, "%s -- returned -- %s\n", "get-principal",
@@ -51,6 +56,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    princ = &kprinc;
     ret = kadm5_create_principal(server_handle, princ, KADM5_PRINCIPAL, "pass");
     if(ret != KADM5_BAD_SERVER_HANDLE) {
         fprintf(stderr, "%s -- returned -- %s\n", "create-principal",
@@ -128,5 +134,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    krb5_free_principal(context, tprinc);
+    krb5_free_context(context);
     exit(0);
 }

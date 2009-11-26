@@ -1,5 +1,3 @@
-thisconfigdir=../../../../..
-myfulldir=plugins/kdb/db2/libdb2/btree
 mydir=plugins/kdb/db2/libdb2/btree
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
 STLIBOBJS=	bt_close.o bt_conv.o bt_debug.o bt_delete.o bt_get.o \

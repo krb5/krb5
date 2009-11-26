@@ -1,5 +1,3 @@
-thisconfigdir=../../..
-myfulldir=ccapi/server/unix
 mydir=ccapi/server/unix
 BUILDTOP=$(REL)..$(S)..$(S)..
 

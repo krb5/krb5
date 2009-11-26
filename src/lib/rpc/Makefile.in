@@ -1,5 +1,3 @@
-thisconfigdir=../..
-myfulldir=lib/rpc
 mydir=lib/rpc
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DGSSAPI_KRB5 -DDEBUG_GSSAPI=0 -DGSSRPC__IMPL
@@ -226,8 +224,8 @@ do-dyn-lclint::
 	$(LCLINT) $(LCLINTOPTS) $(LOCALINCLUDES) $(DEFS) dyn.c dyntest.c
 
 $(BUILDTOP)/include/gssrpc/types.h: types.stamp
-types.stamp: $(SRCTOP)/include/gssrpc/types.hin $(thisconfigdir)/config.status
-	cd $(thisconfigdir) && $(SHELL) config.status include/gssrpc/types.h
+types.stamp: $(top_srcdir)/include/gssrpc/types.hin $(BUILDTOP)/config.status
+	cd $(BUILDTOP) && $(SHELL) config.status include/gssrpc/types.h
 	touch types.stamp
 
 clean-unix::

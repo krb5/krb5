@@ -1581,6 +1581,9 @@ init_creds_step_request(krb5_context context,
 
         ctx->request->from = krb5int_addint32(ctx->request_time,
                                               ctx->start_time);
+        ctx->request->till = krb5int_addint32(ctx->request->from,
+                                              ctx->tkt_life);
+
         if (ctx->renew_life > 0) {
             ctx->request->rtime =
                 krb5int_addint32(ctx->request->from, ctx->renew_life);
@@ -1946,18 +1949,18 @@ cleanup:
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_init_creds(krb5_context context,
-                    krb5_creds *creds,
-                    krb5_principal client,
-                    krb5_prompter_fct prompter,
-                    void *prompter_data,
-                    krb5_deltat start_time,
-                    char *in_tkt_service,
-                    krb5_gic_opt_ext *options,
-                    krb5_gic_get_as_key_fct gak_fct,
-                    void *gak_data,
-                    int  *use_master,
-                    krb5_kdc_rep **as_reply)
+krb5int_get_init_creds(krb5_context context,
+                       krb5_creds *creds,
+                       krb5_principal client,
+                       krb5_prompter_fct prompter,
+                       void *prompter_data,
+                       krb5_deltat start_time,
+                       char *in_tkt_service,
+                       krb5_get_init_creds_opt *options,
+                       krb5_gic_get_as_key_fct gak_fct,
+                       void *gak_data,
+                       int  *use_master,
+                       krb5_kdc_rep **as_reply)
 {
     krb5_error_code code;
     krb5_init_creds_context ctx = NULL;
@@ -1967,13 +1970,19 @@ krb5_get_init_creds(krb5_context context,
                                 prompter,
                                 prompter_data,
                                 start_time,
-                                (krb5_get_init_creds_opt *)options,
+                                options,
                                 &ctx);
     if (code != 0)
         goto cleanup;
 
     ctx->gak_fct = gak_fct;
     ctx->gak_data = gak_data;
+
+    if (in_tkt_service) {
+        code = krb5_init_creds_set_service(context, ctx, in_tkt_service);
+        if (code != 0)
+            goto cleanup;
+    }
 
     code = init_creds_get(context, ctx, use_master);
     if (code != 0)

@@ -32,22 +32,19 @@
 #define KRB5_LIBOS_INT_PROTO__
 
 struct addrlist;
-krb5_error_code krb5_locate_kdc
-(krb5_context, const krb5_data *, struct addrlist *, int, int, int);
+krb5_error_code krb5_locate_kdc(krb5_context, const krb5_data *,
+                                struct addrlist *, int, int, int);
 
 #ifdef HAVE_NETINET_IN_H
-krb5_error_code krb5_unpack_full_ipaddr
-(krb5_context,
- const krb5_address *,
- krb5_int32 *,
- krb5_int16 *);
+krb5_error_code krb5_unpack_full_ipaddr(krb5_context,
+                                        const krb5_address *,
+                                        krb5_int32 *,
+                                        krb5_int16 *);
 
-krb5_error_code krb5_make_full_ipaddr
-(krb5_context,
- krb5_int32,
- int,                     /* unsigned short promotes to signed
-                             int */
- krb5_address **);
+krb5_error_code krb5_make_full_ipaddr(krb5_context,
+                                      krb5_int32,
+                                      int,   /* unsigned short promotes to signed int */
+                                      krb5_address **);
 
 #endif /* HAVE_NETINET_IN_H */
 
@@ -63,16 +60,15 @@ int _krb5_use_dns_realm (krb5_context);
 int _krb5_use_dns_kdc (krb5_context);
 int _krb5_conf_boolean (const char *);
 
-krb5_error_code
-krb5int_sendto(krb5_context context, const krb5_data *message,
-               const struct addrlist *addrs,
-               struct sendto_callback_info* callback_info,
-               krb5_data *reply, struct sockaddr *localaddr,
-               socklen_t *localaddrlen,
-               struct sockaddr *remoteaddr, socklen_t *remoteaddrlen,
-               int *addr_used,
-               int (*msg_handler)(krb5_context, const krb5_data *, void *),
-               void *msg_handler_data);
+krb5_error_code krb5int_sendto(krb5_context context, const krb5_data *message,
+                               const struct addrlist *addrs,
+                               struct sendto_callback_info* callback_info,
+                               krb5_data *reply, struct sockaddr *localaddr,
+                               socklen_t *localaddrlen,
+                               struct sockaddr *remoteaddr, socklen_t *remoteaddrlen,
+                               int *addr_used,
+                               int (*msg_handler)(krb5_context, const krb5_data *, void *),
+                               void *msg_handler_data);
 
 krb5_error_code krb5int_get_fq_local_hostname(char *, size_t);
 
