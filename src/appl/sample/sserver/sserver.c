@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * appl/sample/sserver/sserver.c
  *
@@ -64,24 +65,21 @@ extern krb5_deltat krb5_clockskew;
 #define DEBUG
 
 static void
-usage(name)
-    char *name;
+usage(char *name)
 {
-	fprintf(stderr, "usage: %s [-p port] [-s service] [-S keytab]\n",
-		name);
+    fprintf(stderr, "usage: %s [-p port] [-s service] [-S keytab]\n",
+            name);
 }
 
 int
-main(argc, argv)
-    int argc;
-    char *argv[];
+main(int argc, char *argv[])
 {
     krb5_context context;
     krb5_auth_context auth_context = NULL;
     krb5_ticket * ticket;
     struct sockaddr_in peername;
     GETPEERNAME_ARG3_TYPE  namelen = sizeof(peername);
-    int sock = -1;			/* incoming connection fd */
+    int sock = -1;                      /* incoming connection fd */
     krb5_data recv_data;
     short xmitlen;
     krb5_error_code retval;
@@ -89,11 +87,11 @@ main(argc, argv)
     char repbuf[BUFSIZ];
     char *cname;
     char *service = SAMPLE_SERVICE;
-    short port = 0;		/* If user specifies port */
+    short port = 0;             /* If user specifies port */
     extern int opterr, optind;
     extern char * optarg;
     int ch;
-    krb5_keytab keytab = NULL;	/* Allow specification on command line */
+    krb5_keytab keytab = NULL;  /* Allow specification on command line */
     char *progname;
     int on = 1;
 
@@ -101,8 +99,8 @@ main(argc, argv)
 
     retval = krb5_init_context(&context);
     if (retval) {
-	    com_err(argv[0], retval, "while initializing krb5");
-	    exit(1);
+        com_err(argv[0], retval, "while initializing krb5");
+        exit(1);
     }
 
     /* open a log connection */
@@ -113,27 +111,28 @@ main(argc, argv)
      *
      */
     opterr = 0;
-    while ((ch = getopt(argc, argv, "p:S:s:")) != -1)
-    switch (ch) {
-    case 'p':
-	port = atoi(optarg);
-	break;
-    case 's':
-	service = optarg;
-	break;
-    case 'S':
-	if ((retval = krb5_kt_resolve(context, optarg, &keytab))) {
-	    com_err(progname, retval,
-		    "while resolving keytab file %s", optarg);
-	    exit(2);
-	}
-	break;
+    while ((ch = getopt(argc, argv, "p:S:s:")) != -1) {
+        switch (ch) {
+        case 'p':
+            port = atoi(optarg);
+            break;
+        case 's':
+            service = optarg;
+            break;
+        case 'S':
+            if ((retval = krb5_kt_resolve(context, optarg, &keytab))) {
+                com_err(progname, retval,
+                        "while resolving keytab file %s", optarg);
+                exit(2);
+            }
+            break;
 
-      case '?':
-    default:
-	usage(progname);
-	exit(1);
-	break;
+        case '?':
+        default:
+            usage(progname);
+            exit(1);
+            break;
+        }
     }
 
     argc -= optind;
@@ -141,15 +140,15 @@ main(argc, argv)
 
     /* Backwards compatibility, allow port to be specified at end */
     if (argc > 1) {
-	    port = atoi(argv[1]);
+        port = atoi(argv[1]);
     }
 
     retval = krb5_sname_to_principal(context, NULL, service,
-				     KRB5_NT_SRV_HST, &server);
+                                     KRB5_NT_SRV_HST, &server);
     if (retval) {
-	syslog(LOG_ERR, "while generating service name (%s): %s",
-	       service, error_message(retval));
-	exit(1);
+        syslog(LOG_ERR, "while generating service name (%s): %s",
+               service, error_message(retval));
+        exit(1);
     }
 
     /*
@@ -158,86 +157,86 @@ main(argc, argv)
      */
 
     if (port) {
-	int acc;
-	struct sockaddr_in sockin;
+        int acc;
+        struct sockaddr_in sockin;
 
-	if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-	    syslog(LOG_ERR, "socket: %m");
-	    exit(3);
-	}
-	/* Let the socket be reused right away */
-	(void) setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&on,
-			  sizeof(on));
+        if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+            syslog(LOG_ERR, "socket: %m");
+            exit(3);
+        }
+        /* Let the socket be reused right away */
+        (void) setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&on,
+                          sizeof(on));
 
-	sockin.sin_family = AF_INET;
-	sockin.sin_addr.s_addr = 0;
-	sockin.sin_port = htons(port);
-	if (bind(sock, (struct sockaddr *) &sockin, sizeof(sockin))) {
-	    syslog(LOG_ERR, "bind: %m");
-	    exit(3);
-	}
-	if (listen(sock, 1) == -1) {
-	    syslog(LOG_ERR, "listen: %m");
-	    exit(3);
-	}
-	if ((acc = accept(sock, (struct sockaddr *)&peername, &namelen)) == -1){
-	    syslog(LOG_ERR, "accept: %m");
-	    exit(3);
-	}
-	dup2(acc, 0);
-	close(sock);
-	sock = 0;
+        sockin.sin_family = AF_INET;
+        sockin.sin_addr.s_addr = 0;
+        sockin.sin_port = htons(port);
+        if (bind(sock, (struct sockaddr *) &sockin, sizeof(sockin))) {
+            syslog(LOG_ERR, "bind: %m");
+            exit(3);
+        }
+        if (listen(sock, 1) == -1) {
+            syslog(LOG_ERR, "listen: %m");
+            exit(3);
+        }
+        if ((acc = accept(sock, (struct sockaddr *)&peername, &namelen)) == -1){
+            syslog(LOG_ERR, "accept: %m");
+            exit(3);
+        }
+        dup2(acc, 0);
+        close(sock);
+        sock = 0;
     } else {
-	/*
-	 * To verify authenticity, we need to know the address of the
-	 * client.
-	 */
-	if (getpeername(0, (struct sockaddr *)&peername, &namelen) < 0) {
-	    syslog(LOG_ERR, "getpeername: %m");
-	    exit(1);
-	}
-	sock = 0;
+        /*
+         * To verify authenticity, we need to know the address of the
+         * client.
+         */
+        if (getpeername(0, (struct sockaddr *)&peername, &namelen) < 0) {
+            syslog(LOG_ERR, "getpeername: %m");
+            exit(1);
+        }
+        sock = 0;
     }
 
     retval = krb5_recvauth(context, &auth_context, (krb5_pointer)&sock,
-			   SAMPLE_VERSION, server,
-			   0,	/* no flags */
-			   keytab,	/* default keytab is NULL */
-			   &ticket);
+                           SAMPLE_VERSION, server,
+                           0,   /* no flags */
+                           keytab,      /* default keytab is NULL */
+                           &ticket);
     if (retval) {
-	syslog(LOG_ERR, "recvauth failed--%s", error_message(retval));
-	exit(1);
+        syslog(LOG_ERR, "recvauth failed--%s", error_message(retval));
+        exit(1);
     }
 
     /* Get client name */
     repbuf[sizeof(repbuf) - 1] = '\0';
     retval = krb5_unparse_name(context, ticket->enc_part2->client, &cname);
     if (retval){
-	syslog(LOG_ERR, "unparse failed: %s", error_message(retval));
-	strncpy(repbuf, "You are <unparse error>\n", sizeof(repbuf) - 1);
+        syslog(LOG_ERR, "unparse failed: %s", error_message(retval));
+        strncpy(repbuf, "You are <unparse error>\n", sizeof(repbuf) - 1);
     } else {
-	strncpy(repbuf, "You are ", sizeof(repbuf) - 1);
-	strncat(repbuf, cname, sizeof(repbuf) - 1 - strlen(repbuf));
-	strncat(repbuf, "\n", sizeof(repbuf) - 1 - strlen(repbuf));
-	free(cname);
+        strncpy(repbuf, "You are ", sizeof(repbuf) - 1);
+        strncat(repbuf, cname, sizeof(repbuf) - 1 - strlen(repbuf));
+        strncat(repbuf, "\n", sizeof(repbuf) - 1 - strlen(repbuf));
+        free(cname);
     }
     xmitlen = htons(strlen(repbuf));
     recv_data.length = strlen(repbuf);
     recv_data.data = repbuf;
     if ((retval = krb5_net_write(context, 0, (char *)&xmitlen,
-				 sizeof(xmitlen))) < 0) {
-	syslog(LOG_ERR, "%m: while writing len to client");
-	exit(1);
+                                 sizeof(xmitlen))) < 0) {
+        syslog(LOG_ERR, "%m: while writing len to client");
+        exit(1);
     }
     if ((retval = krb5_net_write(context, 0, (char *)recv_data.data,
-				 recv_data.length)) < 0) {
-	syslog(LOG_ERR, "%m: while writing data to client");
-	exit(1);
+                                 recv_data.length)) < 0) {
+        syslog(LOG_ERR, "%m: while writing data to client");
+        exit(1);
     }
 
     krb5_free_ticket(context, ticket);
     if(keytab)
-      krb5_kt_close(context, keytab);
+        krb5_kt_close(context, keytab);
     krb5_free_principal(context, server);
     krb5_auth_con_free(context, auth_context);
     krb5_free_context(context);

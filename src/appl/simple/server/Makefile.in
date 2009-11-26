@@ -1,5 +1,3 @@
-thisconfigdir=../../..
-myfulldir=appl/simple/server
 mydir=appl/simple/server
 BUILDTOP=$(REL)..$(S)..$(S)..
 
