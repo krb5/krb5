@@ -761,6 +761,18 @@ main(argc, argv)
             if (!argc)
                 usage();
             mechanism = *argv;
+        } else if (strcmp(*argv, "-user") == 0) {
+            argc--;
+            argv++;
+            if (!argc)
+                usage();
+            username = *argv;
+        } else if (strcmp(*argv, "-pass") == 0) {
+            argc--;
+            argv++;
+            if (!argc)
+                usage();
+            password = *argv;
         } else if (strcmp(*argv, "-iakerb") == 0) {
             mechanism = "{ 1 3 6 1 5 2 5 }";
         } else if (strcmp(*argv, "-spnego") == 0) {
