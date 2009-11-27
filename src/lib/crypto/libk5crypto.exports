@@ -80,6 +80,7 @@ krb5_k_key_enctype
 krb5_k_key_keyblock
 krb5_k_make_checksum
 krb5_k_make_checksum_iov
+krb5_k_prf
 krb5_k_verify_checksum
 krb5_k_verify_checksum_iov
 krb5int_keyhash_md4des
