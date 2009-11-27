@@ -23,7 +23,7 @@ STOBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST @CRYPTO_IMPL@/enc_provider/OBJS.ST	\
 	krb/prf/OBJS.ST krb/rand2key/OBJS.ST 		 			\
 	krb/old/OBJS.ST krb/raw/OBJS.ST krb/yarrow/OBJS.ST 			\
 	@CRYPTO_IMPL@/md4/OBJS.ST @CRYPTO_IMPL@/md5/OBJS.ST @CRYPTO_IMPL@/sha1/OBJS.ST 		\
-	@CRYPTO_IMPL@/arcfour/OBJS.ST  @CRYPTO_IMPL@/aes/OBJS.ST @CRYPTO_IMPL@/des/OBJS.ST	\
+	krb/arcfour/OBJS.ST  @CRYPTO_IMPL@/aes/OBJS.ST @CRYPTO_IMPL@/des/OBJS.ST	\
 	krb/OBJS.ST  @CRYPTO_IMPL@/OBJS.ST
 
 SUBDIROBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST @CRYPTO_IMPL@/enc_provider/OBJS.ST 	\
@@ -31,7 +31,7 @@ SUBDIROBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST @CRYPTO_IMPL@/enc_provider/OBJS.
 	krb/prf/OBJS.ST krb/rand2key/OBJS.ST 		 			\
 	krb/old/OBJS.ST krb/raw/OBJS.ST  krb/yarrow/OBJS.ST 			\
 	@CRYPTO_IMPL@/md4/OBJS.ST @CRYPTO_IMPL@/md5/OBJS.ST	@CRYPTO_IMPL@/sha1/OBJS.ST 		\
-	@CRYPTO_IMPL@/arcfour/OBJS.ST @CRYPTO_IMPL@/aes/OBJS.ST @CRYPTO_IMPL@/des/OBJS.ST		\
+	krb/arcfour/OBJS.ST @CRYPTO_IMPL@/aes/OBJS.ST @CRYPTO_IMPL@/des/OBJS.ST		\
 	krb/OBJS.ST @CRYPTO_IMPL@/OBJS.ST
 
 # No dependencies.  Record places to find this shared object if the target

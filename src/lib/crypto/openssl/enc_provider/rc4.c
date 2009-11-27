@@ -39,6 +39,20 @@
 #include <rand2key.h>
 #include <openssl/evp.h>
 
+typedef struct
+{
+    EVP_CIPHER_CTX  evp_ctx;
+    unsigned int x;
+    unsigned int y;
+    unsigned char state[256];
+
+} ArcfourContext;
+
+typedef struct {
+    int initialized;
+    ArcfourContext ctx;
+} ArcFourCipherState;
+
 #define RC4_KEY_SIZE 16
 #define RC4_BLOCK_SIZE 1
 

@@ -1,13 +1,13 @@
 mydir=lib/crypto/krb
 BUILDTOP=$(REL)..$(S)..$(S)..
-SUBDIRS= crc32 dk keyhash_provider \
+SUBDIRS= arcfour crc32 dk keyhash_provider \
 	prf rand2key old raw yarrow 
 LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/../@CRYPTO_IMPL@/enc_provider -I$(srcdir)/dk	\
 		-I$(srcdir)/../@CRYPTO_IMPL@/hash_provider -I$(srcdir)/keyhash_provider	\
 		-I$(srcdir)/prf -I$(srcdir)/rand2key		 			\
 		-I$(srcdir)/old -I$(srcdir)/raw -I$(srcdir)/yarrow 			\
 		-I$(srcdir)/../@CRYPTO_IMPL@/ -I$(srcdir)/../@CRYPTO_IMPL@/des		\
-		-I$(srcdir)/../@CRYPTO_IMPL@/aes -I$(srcdir)/../@CRYPTO_IMPL@/arcfour 	\
+		-I$(srcdir)/../@CRYPTO_IMPL@/aes -I$(srcdir)/arcfour 	\
 		-I$(srcdir)/../@CRYPTO_IMPL@/sha1 -I$(srcdir)/../@CRYPTO_IMPL@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -151,12 +151,12 @@ SRCS=\
 	$(srcdir)/verify_checksum.c	\
 	$(srcdir)/verify_checksum_iov.c
 
-STOBJLISTS=crc32/OBJS.ST  dk/OBJS.ST 			 	\
+STOBJLISTS=arcfour/OBJS.ST crc32/OBJS.ST dk/OBJS.ST		\
 	keyhash_provider/OBJS.ST 			 	\
 	prf/OBJS.ST rand2key/OBJS.ST 			 	\
 	old/OBJS.ST raw/OBJS.ST  yarrow/OBJS.ST  OBJS.ST
 
-SUBDIROBJLISTS=crc32/OBJS.ST  dk/OBJS.ST 		 	\
+SUBDIROBJLISTS=arcfour/OBJS.ST crc32/OBJS.ST dk/OBJS.ST		\
 	keyhash_provider/OBJS.ST 			 	\
 	prf/OBJS.ST rand2key/OBJS.ST 			 	\
 	old/OBJS.ST raw/OBJS.ST  yarrow/OBJS.ST 
@@ -171,7 +171,10 @@ depend:: $(SRCS)
 clean-unix:: clean-libobjs
 
 all-windows::
-	cd crc32
+	cd arcfour
+	@echo Making in crypto\arcfour
+	$(MAKE) -$(MFLAGS)
+	cd ..\crc32
 	@echo Making in crypto\crc32
 	$(MAKE) -$(MFLAGS)
 	cd ..\dk
@@ -198,7 +201,10 @@ all-windows::
 	cd ..
 
 clean-windows::
-	cd crc32
+	cd arcfour
+	@echo Making in clean crypto\arcfour
+	$(MAKE) -$(MFLAGS) clean
+	cd ..\crc32
 	@echo Making in clean crypto\crc32
 	$(MAKE) -$(MFLAGS) clean
 	cd ..\dk
@@ -225,7 +231,10 @@ clean-windows::
 	cd ..
 
 check-windows::
-	cd crc32
+	cd arcfour
+	@echo Making in check crypto\arcfour
+	$(MAKE) -$(MFLAGS) check
+	cd ..\crc32
 	@echo Making in check crypto\crc32
 	$(MAKE) -$(MFLAGS) check
 	cd ..\dk

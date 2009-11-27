@@ -1,6 +1,7 @@
-mydir=lib/crypto/openssl/arcfour
+mydir=lib/crypto/krb/arcfour
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../md4  -I$(srcdir)/../../krb
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../@CRYPTO_IMPL@ \
+	-I$(srcdir)/../../@CRYPTO_IMPL@/md4
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
@@ -9,7 +10,6 @@ DEFS=
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
-
 
 STLIBOBJS=\
 	arcfour.o	\
