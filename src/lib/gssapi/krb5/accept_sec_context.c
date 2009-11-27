@@ -437,7 +437,6 @@ kg_accept_krb5(minor_status, context_handle,
     int no_encap = 0;
     krb5_flags ap_req_options = 0;
     krb5_enctype negotiated_etype;
-    krb5_keyblock *keyblock = NULL;
     krb5_authdata_context ad_context = NULL;
 
     code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
@@ -611,10 +610,10 @@ kg_accept_krb5(minor_status, context_handle,
    if (authdat->checksum->checksum_type != CKSUMTYPE_KG_CB) {
       /* Samba does not send 0x8003 GSS-API checksums */
       krb5_boolean valid;
-      krb5_keyblock *subkey;
+      krb5_key subkey;
       krb5_data zero;
 
-      code = krb5_auth_con_getkey(context, auth_context, &subkey);
+      code = krb5_auth_con_getkey_k(context, auth_context, &subkey);
       if (code) {
          major_status = GSS_S_FAILURE;
          goto fail;
@@ -623,23 +622,21 @@ kg_accept_krb5(minor_status, context_handle,
       zero.length = 0;
       zero.data = "";
 
-      code = krb5_c_verify_checksum(context,
+      code = krb5_k_verify_checksum(context,
                                     subkey,
                                     KRB5_KEYUSAGE_AP_REQ_AUTH_CKSUM,
                                     &zero,
                                     authdat->checksum,
                                     &valid);
+      krb5_k_free_key(context, subkey);
       if (code || !valid) {
           major_status = GSS_S_BAD_SIG;
-          krb5_free_keyblock(context, subkey);
           goto fail;
       }
 
       gss_flags = GSS_C_MUTUAL_FLAG | GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG;
       bigend = 0;
       decode_req_message = 0;
-
-      krb5_free_keyblock(context, subkey);
    } else {
         /* gss krb5 v1 */
 
@@ -883,32 +880,27 @@ kg_accept_krb5(minor_status, context_handle,
     authdat->client = NULL;
     krb5_auth_con_set_authdata_context(context, auth_context, NULL);
 
-    if ((code = krb5_auth_con_getrecvsubkey(context, auth_context,
-                                            &keyblock))) {
+    if ((code = krb5_auth_con_getrecvsubkey_k(context, auth_context,
+                                              &ctx->subkey))) {
         major_status = GSS_S_FAILURE;
         goto fail;
     }
 
     /* use the session key if the subkey isn't present */
 
-    if (keyblock == NULL) {
-        if ((code = krb5_auth_con_getkey(context, auth_context, &keyblock))) {
+    if (ctx->subkey == NULL) {
+        if ((code = krb5_auth_con_getkey_k(context, auth_context,
+                                           &ctx->subkey))) {
             major_status = GSS_S_FAILURE;
             goto fail;
         }
     }
 
-    if (keyblock == NULL) {
+    if (ctx->subkey == NULL) {
         /* this isn't a very good error, but it's not clear to me this
            can actually happen */
         major_status = GSS_S_FAILURE;
         code = KRB5KDC_ERR_NULL_KEY;
-        goto fail;
-    }
-
-    code = krb5_k_create_key(context, keyblock, &ctx->subkey);
-    if (code) {
-        major_status = GSS_S_FAILURE;
         goto fail;
     }
 
@@ -1038,20 +1030,13 @@ kg_accept_krb5(minor_status, context_handle,
         if (cfx_generate_subkey) {
             /* Get the new acceptor subkey.  With the code above, there
                should always be one if we make it to this point.  */
-            code = krb5_auth_con_getsendsubkey(context, auth_context,
-                                               &keyblock);
-            if (code != 0) {
-                major_status = GSS_S_FAILURE;
-                goto fail;
-            }
-            code = krb5_k_create_key(context, keyblock, &ctx->acceptor_subkey);
+            code = krb5_auth_con_getsendsubkey_k(context, auth_context,
+                                                 &ctx->acceptor_subkey);
             if (code != 0) {
                 major_status = GSS_S_FAILURE;
                 goto fail;
             }
             ctx->have_acceptor_subkey = 1;
-            krb5_free_keyblock(context, keyblock);
-            keyblock = NULL;
 
             code = kg_setup_keys(context, ctx, ctx->acceptor_subkey,
                                  &ctx->acceptor_subkey_cksumtype);
@@ -1163,8 +1148,6 @@ fail:
         xfree(reqcksum.contents);
     if (ap_rep.data)
         krb5_free_data_contents(context, &ap_rep);
-    if (keyblock)
-        krb5_free_keyblock(context, keyblock);
     if (major_status == GSS_S_COMPLETE ||
         (major_status == GSS_S_CONTINUE_NEEDED && code != KRB5KRB_AP_ERR_MSG_TYPE)) {
         ctx->k5_context = context;

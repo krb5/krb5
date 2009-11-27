@@ -2014,10 +2014,19 @@ krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getkey(krb5_context, krb5_auth_context, krb5_keyblock **);
 
 krb5_error_code KRB5_CALLCONV
+krb5_auth_con_getkey_k(krb5_context, krb5_auth_context, krb5_key *);
+
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getsendsubkey(krb5_context, krb5_auth_context, krb5_keyblock **);
 
 krb5_error_code KRB5_CALLCONV
+krb5_auth_con_getsendsubkey_k(krb5_context, krb5_auth_context, krb5_key *);
+
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getrecvsubkey(krb5_context, krb5_auth_context, krb5_keyblock **);
+
+krb5_error_code KRB5_CALLCONV
+krb5_auth_con_getrecvsubkey_k(krb5_context, krb5_auth_context, krb5_key *);
 
 krb5_error_code KRB5_CALLCONV
 krb5_auth_con_setsendsubkey(krb5_context, krb5_auth_context, krb5_keyblock *);
