@@ -367,7 +367,8 @@ send_tgs_error_1:;
 
 krb5_error_code
 krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,
-                 const krb5_ticket_times *timestruct, const krb5_enctype *ktypes,
+                 const krb5_ticket_times *timestruct,
+                 const krb5_enctype *ktypes,
                  krb5_const_principal sname, krb5_address *const *addrs,
                  krb5_authdata *const *authorization_data,
                  krb5_pa_data *const *padata, const krb5_data *second_ticket,
@@ -377,63 +378,63 @@ krb5int_send_tgs(krb5_context context, krb5_flags kdcoptions,
                                              krb5_kdc_req *,
                                              void *),
                  void *pacb_data,
-                 krb5_response *rep, krb5_keyblock **subkey)
+                 krb5_response *rep, krb5_keyblock **subkey_out)
 {
     krb5_error_code retval;
-    krb5_data scratch;
+    krb5_data request;
     int tcp_only = 0, use_master;
     krb5_timestamp now;
     krb5_int32 nonce;
+    krb5_keyblock *subkey;
+    krb5_error *err_reply = NULL;
+    krb5_ui_4 err;
 
+    *subkey_out = NULL;
     rep->message_type = KRB5_ERROR;
 
     retval = krb5int_make_tgs_request_ext(context, kdcoptions, timestruct,
                                           ktypes, sname, addrs,
                                           authorization_data, padata,
                                           second_ticket, in_cred,
-                                          pacb_fct, pacb_data, &scratch, &now,
-                                          &nonce, subkey);
+                                          pacb_fct, pacb_data, &request, &now,
+                                          &nonce, &subkey);
     if (retval != 0)
         return retval;
 
     rep->expected_nonce = nonce;
     rep->request_time = now;
 
-send_again:
-    use_master = 0;
-    retval = krb5_sendto_kdc(context, &scratch,
-                             krb5_princ_realm(context, sname),
-                             &rep->response, &use_master, tcp_only);
-    if (retval == 0) {
-        if (krb5_is_krb_error(&rep->response)) {
-            if (!tcp_only) {
-                krb5_error *err_reply;
-                retval = decode_krb5_error(&rep->response, &err_reply);
-                if (retval)
-                    goto send_tgs_error_3;
-                if (err_reply->error == KRB_ERR_RESPONSE_TOO_BIG) {
-                    tcp_only = 1;
-                    krb5_free_error(context, err_reply);
-                    free(rep->response.data);
-                    rep->response.data = NULL;
-                    goto send_again;
-                }
-                krb5_free_error(context, err_reply);
-            send_tgs_error_3:
-                ;
-            }
-            rep->message_type = KRB5_ERROR;
-        } else if (krb5_is_tgs_rep(&rep->response)) {
+    for (tcp_only = 0; tcp_only <= 1; tcp_only++) {
+        use_master = 0;
+        retval = krb5_sendto_kdc(context, &request,
+                                 krb5_princ_realm(context, sname),
+                                 &rep->response, &use_master, tcp_only);
+        if (retval != 0)
+            break;
+
+        if (krb5_is_tgs_rep(&rep->response)) {
+            /* Successful response; set the output subkey. */
             rep->message_type = KRB5_TGS_REP;
-        } else /* XXX: assume it's an error */
-            rep->message_type = KRB5_ERROR;
+            *subkey_out = subkey;
+            subkey = NULL;
+            break;
+        } else if (krb5_is_krb_error(&rep->response) && !tcp_only) {
+            /* Decode the error response to extract the code. */
+            retval = decode_krb5_error(&rep->response, &err_reply);
+            err = (retval == 0) ? err_reply->error : 0;
+            krb5_free_error(context, err_reply);
+            if (err == KRB_ERR_RESPONSE_TOO_BIG) {
+                /* Try again with TCP. */
+                krb5_free_data_contents(context, &rep->response);
+                continue;
+            }
+        }
+        /* Unexpected message type, or an error other than RESPONSE_TOO_BIG. */
+        rep->message_type = KRB5_ERROR;
+        break;
     }
 
-    if (rep->message_type != KRB5_TGS_REP && *subkey){
-        krb5_free_keyblock(context, *subkey);
-        *subkey = NULL;
-    }
-    krb5_free_data_contents(context, &scratch);
-
+    krb5_free_data_contents(context, &request);
+    krb5_free_keyblock(context, subkey);
     return retval;
 }
