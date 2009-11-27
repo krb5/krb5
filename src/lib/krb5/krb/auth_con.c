@@ -176,6 +176,15 @@ krb5_auth_con_getkey(krb5_context context, krb5_auth_context auth_context, krb5_
 }
 
 krb5_error_code KRB5_CALLCONV
+krb5_auth_con_getkey_k(krb5_context context, krb5_auth_context auth_context,
+                       krb5_key *key)
+{
+    krb5_k_reference_key(context, auth_context->key);
+    *key = auth_context->key;
+    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getlocalsubkey(krb5_context context, krb5_auth_context auth_context, krb5_keyblock **keyblock)
 {
     return krb5_auth_con_getsendsubkey(context, auth_context, keyblock);
@@ -221,11 +230,29 @@ krb5_auth_con_getsendsubkey(krb5_context ctx, krb5_auth_context ac, krb5_keybloc
 }
 
 krb5_error_code KRB5_CALLCONV
+krb5_auth_con_getsendsubkey_k(krb5_context ctx, krb5_auth_context ac,
+                              krb5_key *key)
+{
+    krb5_k_reference_key(ctx, ac->send_subkey);
+    *key = ac->send_subkey;
+    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getrecvsubkey(krb5_context ctx, krb5_auth_context ac, krb5_keyblock **keyblock)
 {
     if (ac->recv_subkey != NULL)
         return krb5_k_key_keyblock(ctx, ac->recv_subkey, keyblock);
     *keyblock = NULL;
+    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_auth_con_getrecvsubkey_k(krb5_context ctx, krb5_auth_context ac,
+                              krb5_key *key)
+{
+    krb5_k_reference_key(ctx, ac->recv_subkey);
+    *key = ac->recv_subkey;
     return 0;
 }
 

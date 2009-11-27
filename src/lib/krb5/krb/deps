@@ -407,7 +407,7 @@ get_in_tkt.so get_in_tkt.po $(OUTPRE)get_in_tkt.$(OBJEXT): \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/locate_plugin.h \
   $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
   $(top_srcdir)/include/socket-utils.h fast.h get_in_tkt.c \
-  int-proto.h
+  init_creds_ctx.h int-proto.h
 gic_keytab.so gic_keytab.po $(OUTPRE)gic_keytab.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -418,7 +418,7 @@ gic_keytab.so gic_keytab.po $(OUTPRE)gic_keytab.$(OBJEXT): \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  gic_keytab.c
+  gic_keytab.c init_creds_ctx.h
 gic_opt.so gic_opt.po $(OUTPRE)gic_opt.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
@@ -438,7 +438,7 @@ gic_pwd.so gic_pwd.po $(OUTPRE)gic_pwd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/krb5.h \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/locate_plugin.h \
   $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h gic_pwd.c
+  $(top_srcdir)/include/socket-utils.h gic_pwd.c init_creds_ctx.h
 in_tkt_sky.so in_tkt_sky.po $(OUTPRE)in_tkt_sky.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \

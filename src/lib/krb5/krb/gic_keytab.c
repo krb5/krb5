@@ -186,7 +186,7 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
     if (arg_keytab == NULL) {
         retval = krb5_kt_default(context, &keytab);
         if (retval)
-            return retval;
+            goto cleanup;
     }
     else keytab = arg_keytab;
 
@@ -201,7 +201,6 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
                                     get_as_key_keytab, (void *)keytab,
                                     &use_master, ret_as_reply);
     krb5_free_unparsed_name( context, server);
-    krb5_get_init_creds_opt_free(context, opts);
     if (retval) {
         goto cleanup;
     }
@@ -214,7 +213,9 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
     if (ccache)
         if ((retval = krb5_cc_store_cred(context, ccache, creds)))
             goto cleanup;
-cleanup:    if (arg_keytab == NULL)
+cleanup:
+    krb5_get_init_creds_opt_free(context, opts);
+    if (arg_keytab == NULL)
         krb5_kt_close(context, keytab);
     return retval;
 }

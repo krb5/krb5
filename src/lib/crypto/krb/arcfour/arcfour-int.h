@@ -10,23 +10,8 @@ of RSA Data Security)
 #define ARCFOUR_INT_H
 
 #include "arcfour.h"
-#include <openssl/evp.h>
 
 #define CONFOUNDERLENGTH 8
-
-typedef struct
-{
-    EVP_CIPHER_CTX  evp_ctx;
-    unsigned int x;
-    unsigned int y;
-    unsigned char state[256];
-
-} ArcfourContext;
-
-typedef struct {
-    int initialized;
-    ArcfourContext ctx;
-} ArcFourCipherState;
 
 krb5_keyusage krb5int_arcfour_translate_usage(krb5_keyusage usage);
 

@@ -62,7 +62,8 @@ cleanup:
 void KRB5_CALLCONV
 krb5_k_reference_key(krb5_context context, krb5_key key)
 {
-    key->refcount++;
+    if (key)
+	key->refcount++;
 }
 
 /* Free the memory used by a krb5_key. */

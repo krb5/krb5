@@ -38,6 +38,30 @@
 
 extern struct krb5_enc_provider krb5int_enc_des;
 
+/* Derive a key by XOR with 0xF0 bytes. */
+static krb5_error_code
+mk_xorkey(krb5_key origkey, krb5_key *xorkey)
+{
+    krb5_error_code retval = 0;
+    unsigned char xorbytes[8];
+    krb5_keyblock xorkeyblock;
+    size_t i = 0;
+
+    if (origkey->keyblock.length != sizeof(xorbytes))
+	return KRB5_CRYPTO_INTERNAL;
+    memcpy(xorbytes, origkey->keyblock.contents, sizeof(xorbytes));
+    for (i = 0; i < sizeof(xorbytes); i++)
+	xorbytes[i] ^= 0xf0;
+
+    /* Do a shallow copy here. */
+    xorkeyblock = origkey->keyblock;
+    xorkeyblock.contents = xorbytes;
+
+    retval = krb5_k_create_key(0, &xorkeyblock, xorkey);
+    zap(xorbytes, sizeof(xorbytes));
+    return retval;
+}
+
 static krb5_error_code
 k5_md5des_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
 	       const krb5_data *input, krb5_data *output)
@@ -46,6 +70,7 @@ k5_md5des_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
     krb5_data data;
     krb5_MD5_CTX ctx;
     unsigned char conf[CONFLENGTH];
+    krb5_key xorkey = NULL;
     struct krb5_enc_provider *enc = &krb5int_enc_des;
 
     if (output->length != (CONFLENGTH+RSA_MD5_CKSUM_LENGTH))
@@ -57,6 +82,10 @@ k5_md5des_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
     data.data = (char *) conf;
     if ((ret = krb5_c_random_make_octets(/* XXX */ 0, &data)))
 	return(ret);
+
+    ret = mk_xorkey(key, &xorkey);
+    if (ret)
+	return ret;
 
     /* hash the confounder, then the input data */
 
@@ -71,7 +100,9 @@ k5_md5des_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
     memcpy(output->data, conf, CONFLENGTH);
     memcpy(output->data+CONFLENGTH, ctx.digest, RSA_MD5_CKSUM_LENGTH);
 
-    ret = enc->encrypt(key, NULL, output, output);
+    ret = enc->encrypt(xorkey, NULL, output, output);
+
+    krb5_k_free_key(NULL, xorkey);
 
     return ret;
 
@@ -85,9 +116,13 @@ k5_md5des_verify(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
     krb5_error_code ret;
     krb5_MD5_CTX ctx;
     unsigned char plaintext[CONFLENGTH+RSA_MD5_CKSUM_LENGTH];
+    krb5_key xorkey = NULL;
     int compathash = 0;
     struct krb5_enc_provider *enc = &krb5int_enc_des;
     krb5_data output, iv;
+
+    iv.data = NULL;
+    iv.length = 0;
 
     if (key->keyblock.length != 8)
 	return(KRB5_BAD_KEYSIZE);
@@ -109,20 +144,23 @@ k5_md5des_verify(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
         iv.length = key->keyblock.length;
         if (key->keyblock.contents)
             memcpy(iv.data, key->keyblock.contents, key->keyblock.length);
+    } else {
+	ret = mk_xorkey(key, &xorkey);
+	if (ret)
+	  return ret;
     }
 
     /* decrypt it */
-    output.data = plaintext;
+    output.data = (char *)plaintext;
     output.length = hash->length;
 
     if (!compathash) {
-        ret = enc->decrypt(key, NULL, hash, &output);
+        ret = enc->decrypt(xorkey, NULL, hash, &output);
+	krb5_k_free_key(NULL, xorkey);
     } else {
         ret = enc->decrypt(key, &iv, hash, &output);
-    }
-
-    if (compathash && iv.data) {
-        free (iv.data);
+	zap(iv.data, iv.length);
+        free(iv.data);
     }
 
     if (ret) return(ret);

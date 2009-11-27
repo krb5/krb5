@@ -7,10 +7,21 @@
  */
 
 #include "k5-int.h"
-#include "arcfour-int.h"
 #include "enc_provider.h"
 #include <aead.h>
 #include <rand2key.h>
+
+typedef struct
+{
+   unsigned int x;
+   unsigned int y;
+   unsigned char state[256];
+} ArcfourContext;
+
+typedef struct {
+  int initialized;
+  ArcfourContext ctx;
+} ArcFourCipherState;
 
 /* gets the next byte from the PRNG */
 #if ((__GNUC__ >= 2) )
