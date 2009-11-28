@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -30,41 +31,41 @@
 
 krb5_error_code KRB5_CALLCONV
 krb5_k_decrypt(krb5_context context, krb5_key key,
-	       krb5_keyusage usage, const krb5_data *ivec,
-	       const krb5_enc_data *input, krb5_data *output)
+               krb5_keyusage usage, const krb5_data *ivec,
+               const krb5_enc_data *input, krb5_data *output)
 {
     const struct krb5_keytypes *ktp;
 
     ktp = find_enctype(key->keyblock.enctype);
     if (ktp == NULL)
-	return KRB5_BAD_ENCTYPE;
+        return KRB5_BAD_ENCTYPE;
 
     if (input->enctype != ENCTYPE_UNKNOWN && ktp->etype != input->enctype)
-	return KRB5_BAD_ENCTYPE;
+        return KRB5_BAD_ENCTYPE;
 
     if (ktp->decrypt == NULL) {
-	assert(ktp->aead != NULL);
+        assert(ktp->aead != NULL);
 
-	return krb5int_c_decrypt_aead_compat(ktp->aead, ktp->enc, ktp->hash,
-					     key, usage, ivec,
-					     &input->ciphertext, output);
+        return krb5int_c_decrypt_aead_compat(ktp->aead, ktp->enc, ktp->hash,
+                                             key, usage, ivec,
+                                             &input->ciphertext, output);
     }
 
     return (*ktp->decrypt)(ktp->enc, ktp->hash, key, usage, ivec,
-			   &input->ciphertext, output);
+                           &input->ciphertext, output);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_decrypt(krb5_context context, const krb5_keyblock *keyblock,
-	       krb5_keyusage usage, const krb5_data *ivec,
-	       const krb5_enc_data *input, krb5_data *output)
+               krb5_keyusage usage, const krb5_data *ivec,
+               const krb5_enc_data *input, krb5_data *output)
 {
     krb5_key key;
     krb5_error_code ret;
 
     ret = krb5_k_create_key(context, keyblock, &key);
     if (ret != 0)
-	return ret;
+        return ret;
     ret = krb5_k_decrypt(context, key, usage, ivec, input, output);
     krb5_k_free_key(context, key);
     return ret;

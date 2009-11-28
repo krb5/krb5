@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -31,77 +32,77 @@
 
 static krb5_error_code
 validate_and_schedule(krb5_key key, const krb5_data *ivec,
-		      const krb5_data *input, const krb5_data *output,
-		      mit_des3_key_schedule *schedule)
+                      const krb5_data *input, const krb5_data *output,
+                      mit_des3_key_schedule *schedule)
 {
     /* key->keyblock.enctype was checked by the caller */
 
     if (key->keyblock.length != 24)
-	return(KRB5_BAD_KEYSIZE);
+        return(KRB5_BAD_KEYSIZE);
     if ((input->length%8) != 0)
-	return(KRB5_BAD_MSIZE);
+        return(KRB5_BAD_MSIZE);
     if (ivec && (ivec->length != 8))
-	return(KRB5_BAD_MSIZE);
+        return(KRB5_BAD_MSIZE);
     if (input->length != output->length)
-	return(KRB5_BAD_MSIZE);
+        return(KRB5_BAD_MSIZE);
 
     switch (mit_des3_key_sched(*(mit_des3_cblock *)key->keyblock.contents,
-			       *schedule)) {
+                               *schedule)) {
     case -1:
-	return(KRB5DES_BAD_KEYPAR);
+        return(KRB5DES_BAD_KEYPAR);
     case -2:
-	return(KRB5DES_WEAK_KEY);
+        return(KRB5DES_WEAK_KEY);
     }
     return 0;
 }
 
 static krb5_error_code
 validate_and_schedule_iov(krb5_key key, const krb5_data *ivec,
-			  const krb5_crypto_iov *data, size_t num_data,
-			  mit_des3_key_schedule *schedule)
+                          const krb5_crypto_iov *data, size_t num_data,
+                          mit_des3_key_schedule *schedule)
 {
     size_t i, input_length;
 
     for (i = 0, input_length = 0; i < num_data; i++) {
-	const krb5_crypto_iov *iov = &data[i];
+        const krb5_crypto_iov *iov = &data[i];
 
-	if (ENCRYPT_IOV(iov))
-	    input_length += iov->data.length;
+        if (ENCRYPT_IOV(iov))
+            input_length += iov->data.length;
     }
 
     if (key->keyblock.length != 24)
-	return(KRB5_BAD_KEYSIZE);
+        return(KRB5_BAD_KEYSIZE);
     if ((input_length%8) != 0)
-	return(KRB5_BAD_MSIZE);
+        return(KRB5_BAD_MSIZE);
     if (ivec && (ivec->length != 8))
-	return(KRB5_BAD_MSIZE);
+        return(KRB5_BAD_MSIZE);
 
     switch (mit_des3_key_sched(*(mit_des3_cblock *)key->keyblock.contents,
-			       *schedule)) {
+                               *schedule)) {
     case -1:
-	return(KRB5DES_BAD_KEYPAR);
+        return(KRB5DES_BAD_KEYPAR);
     case -2:
-	return(KRB5DES_WEAK_KEY);
+        return(KRB5DES_WEAK_KEY);
     }
     return 0;
 }
 
 static krb5_error_code
 k5_des3_encrypt(krb5_key key, const krb5_data *ivec,
-		const krb5_data *input, krb5_data *output)
+                const krb5_data *input, krb5_data *output)
 {
     mit_des3_key_schedule schedule;
     krb5_error_code err;
 
     err = validate_and_schedule(key, ivec, input, output, &schedule);
     if (err)
-	return err;
+        return err;
 
     /* this has a return value, but the code always returns zero */
     krb5int_des3_cbc_encrypt((krb5_pointer) input->data,
-			     (krb5_pointer) output->data, input->length,
-			     schedule[0], schedule[1], schedule[2],
-			     ivec?(const unsigned char *) ivec->data:(const unsigned char *)mit_des_zeroblock);
+                             (krb5_pointer) output->data, input->length,
+                             schedule[0], schedule[1], schedule[2],
+                             ivec?(const unsigned char *) ivec->data:(const unsigned char *)mit_des_zeroblock);
 
     zap(schedule, sizeof(schedule));
 
@@ -110,20 +111,20 @@ k5_des3_encrypt(krb5_key key, const krb5_data *ivec,
 
 static krb5_error_code
 k5_des3_decrypt(krb5_key key, const krb5_data *ivec,
-		const krb5_data *input, krb5_data *output)
+                const krb5_data *input, krb5_data *output)
 {
     mit_des3_key_schedule schedule;
     krb5_error_code err;
 
     err = validate_and_schedule(key, ivec, input, output, &schedule);
     if (err)
-	return err;
+        return err;
 
     /* this has a return value, but the code always returns zero */
     krb5int_des3_cbc_decrypt((krb5_pointer) input->data,
-			     (krb5_pointer) output->data, input->length,
-			     schedule[0], schedule[1], schedule[2],
-			     ivec?(const unsigned char *) ivec->data:(const unsigned char *)mit_des_zeroblock);
+                             (krb5_pointer) output->data, input->length,
+                             schedule[0], schedule[1], schedule[2],
+                             ivec?(const unsigned char *) ivec->data:(const unsigned char *)mit_des_zeroblock);
 
     zap(schedule, sizeof(schedule));
 
@@ -132,21 +133,21 @@ k5_des3_decrypt(krb5_key key, const krb5_data *ivec,
 
 static krb5_error_code
 k5_des3_encrypt_iov(krb5_key key,
-		    const krb5_data *ivec,
-		    krb5_crypto_iov *data,
-		    size_t num_data)
+                    const krb5_data *ivec,
+                    krb5_crypto_iov *data,
+                    size_t num_data)
 {
     mit_des3_key_schedule schedule;
     krb5_error_code err;
 
     err = validate_and_schedule_iov(key, ivec, data, num_data, &schedule);
     if (err)
-	return err;
+        return err;
 
     /* this has a return value, but the code always returns zero */
     krb5int_des3_cbc_encrypt_iov(data, num_data,
-			     schedule[0], schedule[1], schedule[2],
-			     ivec != NULL ? (unsigned char *) ivec->data : NULL);
+                                 schedule[0], schedule[1], schedule[2],
+                                 ivec != NULL ? (unsigned char *) ivec->data : NULL);
 
     zap(schedule, sizeof(schedule));
 
@@ -155,21 +156,21 @@ k5_des3_encrypt_iov(krb5_key key,
 
 static krb5_error_code
 k5_des3_decrypt_iov(krb5_key key,
-		    const krb5_data *ivec,
-		    krb5_crypto_iov *data,
-		    size_t num_data)
+                    const krb5_data *ivec,
+                    krb5_crypto_iov *data,
+                    size_t num_data)
 {
     mit_des3_key_schedule schedule;
     krb5_error_code err;
 
     err = validate_and_schedule_iov(key, ivec, data, num_data, &schedule);
     if (err)
-	return err;
+        return err;
 
     /* this has a return value, but the code always returns zero */
     krb5int_des3_cbc_decrypt_iov(data, num_data,
-				 schedule[0], schedule[1], schedule[2],
-				 ivec != NULL ? (unsigned char *) ivec->data : NULL);
+                                 schedule[0], schedule[1], schedule[2],
+                                 ivec != NULL ? (unsigned char *) ivec->data : NULL);
 
     zap(schedule, sizeof(schedule));
 

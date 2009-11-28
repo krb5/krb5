@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -33,12 +34,12 @@ krb5_cksumtype_to_string(krb5_cksumtype cksumtype, char *buffer, size_t buflen)
     unsigned int i;
 
     for (i = 0; i < krb5int_cksumtypes_length; i++) {
-	if (krb5int_cksumtypes_list[i].ctype == cksumtype) {
-	    if (strlcpy(buffer, krb5int_cksumtypes_list[i].out_string,
-			buflen) >= buflen)
-		return ENOMEM;
-	    return 0;
-	}
+        if (krb5int_cksumtypes_list[i].ctype == cksumtype) {
+            if (strlcpy(buffer, krb5int_cksumtypes_list[i].out_string,
+                        buflen) >= buflen)
+                return ENOMEM;
+            return 0;
+        }
     }
 
     return EINVAL;

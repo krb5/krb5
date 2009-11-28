@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/openssl/des/weak_key.c
  *
@@ -76,11 +77,11 @@ mit_des_is_weak_key(mit_des_cblock key)
     const mit_des_cblock *weak_p = weak;
 
     for (i = 0; i < (sizeof(weak)/sizeof(mit_des_cblock)); i++) {
-	if (!memcmp(weak_p++,key,sizeof(mit_des_cblock)))
-	    return 1;
+        if (!memcmp(weak_p++,key,sizeof(mit_des_cblock)))
+            return 1;
     }
     if ( DES_is_weak_key(key) == 1) /* Also OpenSSL's check */
-	    return 1;
+        return 1;
 
     return 0;
 }

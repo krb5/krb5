@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -29,9 +30,9 @@
 
 void
 krb5int_old_encrypt_length(const struct krb5_enc_provider *enc,
-			const struct krb5_hash_provider *hash,
-			size_t inputlen,
-			size_t *length)
+                           const struct krb5_hash_provider *hash,
+                           size_t inputlen,
+                           size_t *length)
 {
     size_t blocksize, hashsize;
 
@@ -43,12 +44,12 @@ krb5int_old_encrypt_length(const struct krb5_enc_provider *enc,
 
 krb5_error_code
 krb5int_old_encrypt(const struct krb5_enc_provider *enc,
-		 const struct krb5_hash_provider *hash,
-		 krb5_key key,
-		 krb5_keyusage usage,
-		 const krb5_data *ivec,
-		 const krb5_data *input,
-		 krb5_data *output)
+                    const struct krb5_hash_provider *hash,
+                    krb5_key key,
+                    krb5_keyusage usage,
+                    const krb5_data *ivec,
+                    const krb5_data *input,
+                    krb5_data *output)
 {
     krb5_error_code ret;
     size_t blocksize, hashsize, enclen;
@@ -61,7 +62,7 @@ krb5int_old_encrypt(const struct krb5_enc_provider *enc,
     krb5int_old_encrypt_length(enc, hash, input->length, &enclen);
 
     if (output->length < enclen)
-	return(KRB5_BAD_MSIZE);
+        return(KRB5_BAD_MSIZE);
 
     output->length = enclen;
 
@@ -73,7 +74,7 @@ krb5int_old_encrypt(const struct krb5_enc_provider *enc,
     datain.data = output->data;
 
     if ((ret = krb5_c_random_make_octets(/* XXX */ 0, &datain)))
-	return(ret);
+        return(ret);
     memcpy(output->data+blocksize+hashsize, input->data, input->length);
 
     /* compute the checksum */
@@ -82,29 +83,29 @@ krb5int_old_encrypt(const struct krb5_enc_provider *enc,
     datain.data = output->data+blocksize;
 
     if ((ret = ((*(hash->hash))(1, output, &datain))))
-	goto cleanup;
+        goto cleanup;
 
     /* encrypt it */
 
     /* XXX this is gross, but I don't have much choice */
     if ((key->keyblock.enctype == ENCTYPE_DES_CBC_CRC) && (ivec == 0)) {
-	crcivec.length = key->keyblock.length;
-	crcivec.data = (char *) key->keyblock.contents;
-	ivec = &crcivec;
-	real_ivec = 0;
+        crcivec.length = key->keyblock.length;
+        crcivec.data = (char *) key->keyblock.contents;
+        ivec = &crcivec;
+        real_ivec = 0;
     } else
-	real_ivec = 1;
+        real_ivec = 1;
 
     if ((ret = ((*(enc->encrypt))(key, ivec, output, output))))
-	goto cleanup;
+        goto cleanup;
 
     /* update ivec */
     if (real_ivec && ivec != NULL && ivec->length == blocksize)
-	memcpy(ivec->data, output->data + output->length - blocksize,
-	       blocksize);
+        memcpy(ivec->data, output->data + output->length - blocksize,
+               blocksize);
 cleanup:
     if (ret)
-	memset(output->data, 0, output->length);
+        memset(output->data, 0, output->length);
 
     return(ret);
 }

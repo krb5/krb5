@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* lib/crypto/openssl/hmac.c
  *
  * Copyright (C) 2009 by the Massachusetts Institute of Technology.
@@ -82,8 +83,8 @@ map_digest(const struct krb5_hash_provider *hash)
 
 krb5_error_code
 krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
-		      const krb5_keyblock *key, unsigned int icount,
-		      const krb5_data *input, krb5_data *output)
+                      const krb5_keyblock *key, unsigned int icount,
+                      const krb5_data *input, krb5_data *output)
 {
     unsigned int i = 0, md_len = 0;
     unsigned char md[EVP_MAX_MD_SIZE];
@@ -162,16 +163,16 @@ krb5int_hmac_iov_keyblock(const struct krb5_hash_provider *hash,
 
 krb5_error_code
 krb5int_hmac(const struct krb5_hash_provider *hash, krb5_key key,
-         unsigned int icount, const krb5_data *input, krb5_data *output)
+             unsigned int icount, const krb5_data *input, krb5_data *output)
 {
     return krb5int_hmac_keyblock(hash, &key->keyblock, icount, input, output);
 }
 
 krb5_error_code
 krb5int_hmac_iov(const struct krb5_hash_provider *hash, krb5_key key,
-                const krb5_crypto_iov *data, size_t num_data,
-                krb5_data *output)
+                 const krb5_crypto_iov *data, size_t num_data,
+                 krb5_data *output)
 {
     return krb5int_hmac_iov_keyblock(hash, &key->keyblock, data, num_data,
-                                    output);
+                                     output);
 }

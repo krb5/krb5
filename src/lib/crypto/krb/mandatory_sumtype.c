@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 2003 by the Massachusetts Institute of Technology.
  * All rights reserved.
@@ -27,13 +28,13 @@
 
 krb5_error_code
 krb5int_c_mandatory_cksumtype(krb5_context ctx, krb5_enctype etype,
-			      krb5_cksumtype *cksumtype)
+                              krb5_cksumtype *cksumtype)
 {
     const struct krb5_keytypes *ktp;
 
     ktp = find_enctype(etype);
     if (ktp == NULL)
-	return KRB5_BAD_ENCTYPE;
+        return KRB5_BAD_ENCTYPE;
     *cksumtype = ktp->required_ctype;
     return 0;
 }

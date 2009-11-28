@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/t_cf2.c
  *
@@ -42,47 +43,47 @@
 #include <string.h>
 
 int main () {
-  char pepper1[1024], pepper2[1024];
-  krb5_keyblock *k1 = NULL, *k2 = NULL, *out = NULL;
-  krb5_data s2k;
-  unsigned int i;
-  while (1) {
-    krb5_enctype enctype;
-    char s[1025];
+    char pepper1[1024], pepper2[1024];
+    krb5_keyblock *k1 = NULL, *k2 = NULL, *out = NULL;
+    krb5_data s2k;
+    unsigned int i;
+    while (1) {
+        krb5_enctype enctype;
+        char s[1025];
 
-    if (scanf( "%d", &enctype) == EOF)
-      break;
-    if (scanf("%1024s", &s[0]) == EOF)
-      break;
-    assert (krb5_init_keyblock(0, enctype, 0, &k1) == 0);
-    s2k.data = &s[0];
-    s2k.length = strlen(s);
-    assert(krb5_c_string_to_key (0, enctype, &s2k, &s2k, k1) == 0);
-    if (scanf("%1024s", &s[0]) == EOF)
-      break;
-    assert (krb5_init_keyblock(0, enctype, 0, &k2) == 0);
-    s2k.data = &s[0];
-    s2k.length = strlen(s);
-    assert(krb5_c_string_to_key (0, enctype, &s2k, &s2k, k2) == 0);
-    if (scanf("%1024s %1024s", pepper1, pepper2) == EOF)
-      break;
-    assert(krb5_c_fx_cf2_simple(0, k1, pepper1,
-				k2, pepper2, &out) ==0);
-    i = out->length;
-    for (; i > 0; i--) {
-      printf ("%02x",
-	      (unsigned int) ((unsigned char) out->contents[out->length-i]));
+        if (scanf( "%d", &enctype) == EOF)
+            break;
+        if (scanf("%1024s", &s[0]) == EOF)
+            break;
+        assert (krb5_init_keyblock(0, enctype, 0, &k1) == 0);
+        s2k.data = &s[0];
+        s2k.length = strlen(s);
+        assert(krb5_c_string_to_key (0, enctype, &s2k, &s2k, k1) == 0);
+        if (scanf("%1024s", &s[0]) == EOF)
+            break;
+        assert (krb5_init_keyblock(0, enctype, 0, &k2) == 0);
+        s2k.data = &s[0];
+        s2k.length = strlen(s);
+        assert(krb5_c_string_to_key (0, enctype, &s2k, &s2k, k2) == 0);
+        if (scanf("%1024s %1024s", pepper1, pepper2) == EOF)
+            break;
+        assert(krb5_c_fx_cf2_simple(0, k1, pepper1,
+                                    k2, pepper2, &out) ==0);
+        i = out->length;
+        for (; i > 0; i--) {
+            printf ("%02x",
+                    (unsigned int) ((unsigned char) out->contents[out->length-i]));
+        }
+        printf ("\n");
+
+        krb5_free_keyblock(0,out);
+        out = NULL;
+
+        krb5_free_keyblock(0, k1);
+        k1 = NULL;
+        krb5_free_keyblock(0, k2);
+        k2 =  NULL;
     }
-    printf ("\n");
 
-    krb5_free_keyblock(0,out);
-    out = NULL;
-
-    krb5_free_keyblock(0, k1);
-    k1 = NULL;
-    krb5_free_keyblock(0, k2);
-    k2 =  NULL;
-  }
-
-  return (0);
+    return (0);
 }

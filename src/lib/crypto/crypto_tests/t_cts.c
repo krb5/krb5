@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/vectors.c
  *
@@ -45,7 +46,7 @@ const char *whoami;
 static void printhex (size_t len, const char *p)
 {
     while (len--)
-	printf ("%02x", 0xff & *p++);
+        printf ("%02x", 0xff & *p++);
 }
 
 static void printstringhex (const char *p) { printhex (strlen (p), p); }
@@ -68,9 +69,9 @@ keyToData (krb5_keyblock *k, krb5_data *d)
 
 void check_error (int r, int line) {
     if (r != 0) {
-	fprintf (stderr, "%s:%d: %s\n", __FILE__, line,
-		 error_message (r));
-	exit (1);
+        fprintf (stderr, "%s:%d: %s\n", __FILE__, line,
+                 error_message (r));
+        exit (1);
     }
 }
 #define CHECK check_error(r, __LINE__)
@@ -86,17 +87,17 @@ static void printd (const char *descr, krb5_data *d) {
     printf("%s:", descr);
 
     for (i = 0; i < d->length; i += r) {
-	printf("\n  %04x: ", i);
-	for (j = i; j < i + r && j < d->length; j++)
-	    printf(" %02x", 0xff & d->data[j]);
+        printf("\n  %04x: ", i);
+        for (j = i; j < i + r && j < d->length; j++)
+            printf(" %02x", 0xff & d->data[j]);
 #ifdef SHOW_TEXT
-	for (; j < i + r; j++)
-	    printf("   ");
-	printf("   ");
-	for (j = i; j < i + r && j < d->length; j++) {
-	    int c = 0xff & d->data[j];
-	    printf("%c", isprint(c) ? c : '.');
-	}
+        for (; j < i + r; j++)
+            printf("   ");
+        printf("   ");
+        for (j = i; j < i + r && j < d->length; j++) {
+            int c = 0xff & d->data[j];
+            printf("%c", isprint(c) ? c : '.');
+        }
 #endif
     }
     printf("\n");
@@ -111,7 +112,7 @@ static void printk(const char *descr, krb5_keyblock *k) {
 static void test_cts()
 {
     static const char input[4*16] =
-	"I would like the General Gau's Chicken, please, and wonton soup.";
+        "I would like the General Gau's Chicken, please, and wonton soup.";
     static const unsigned char aeskey[16] = "chicken teriyaki";
     static const int lengths[] = { 17, 31, 32, 47, 48, 64 };
 
@@ -133,41 +134,41 @@ static void test_cts()
 
     err = krb5_k_create_key(NULL, &keyblock, &key);
     if (err) {
-	printf("error %ld from krb5_k_create_key\n", (long)err);
-	exit(1);
+        printf("error %ld from krb5_k_create_key\n", (long)err);
+        exit(1);
     }
 
     memset(enciv.data, 0, 16);
     printk("AES 128-bit key", &keyblock);
     for (i = 0; i < sizeof(lengths)/sizeof(lengths[0]); i++) {
-    memset(enciv.data, 0, 16);
-    memset(deciv.data, 0, 16);
+        memset(enciv.data, 0, 16);
+        memset(deciv.data, 0, 16);
 
-	printf("\n");
-	in.length = out.length = lengths[i];
-	printd("IV", &enciv);
-	err = krb5int_aes_encrypt(key, &enciv, &in, &out);
-	if (err) {
-	    printf("error %ld from krb5int_aes_encrypt\n", (long)err);
-	    exit(1);
-	}
-	printd("Input", &in);
-	printd("Output", &out);
-	printd("Next IV", &enciv);
-	out2.length = out.length;
-	err = krb5int_aes_decrypt(key, &deciv, &out, &out2);
-	if (err) {
-	    printf("error %ld from krb5int_aes_decrypt\n", (long)err);
-	    exit(1);
-	}
-	if (!data_eq(out2, in)) {
-	    printd("Decryption result DOESN'T MATCH", &out2);
-	    exit(1);
-	}
-	if (memcmp(enciv.data, deciv.data, 16)) {
-	    printd("Decryption IV result DOESN'T MATCH", &deciv);
-	    exit(1);
-	}
+        printf("\n");
+        in.length = out.length = lengths[i];
+        printd("IV", &enciv);
+        err = krb5int_aes_encrypt(key, &enciv, &in, &out);
+        if (err) {
+            printf("error %ld from krb5int_aes_encrypt\n", (long)err);
+            exit(1);
+        }
+        printd("Input", &in);
+        printd("Output", &out);
+        printd("Next IV", &enciv);
+        out2.length = out.length;
+        err = krb5int_aes_decrypt(key, &deciv, &out, &out2);
+        if (err) {
+            printf("error %ld from krb5int_aes_decrypt\n", (long)err);
+            exit(1);
+        }
+        if (!data_eq(out2, in)) {
+            printd("Decryption result DOESN'T MATCH", &out2);
+            exit(1);
+        }
+        if (memcmp(enciv.data, deciv.data, 16)) {
+            printd("Decryption IV result DOESN'T MATCH", &deciv);
+            exit(1);
+        }
     }
     krb5_k_free_key(NULL, key);
 }

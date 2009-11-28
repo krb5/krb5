@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* lib/crypto/openssl/enc_provider/des3.c
  *
  * Copyright (C) 2009 by the Massachusetts Institute of Technology.
@@ -59,47 +60,47 @@
 
 static krb5_error_code
 validate(krb5_key key, const krb5_data *ivec,
-		      const krb5_data *input, const krb5_data *output)
+         const krb5_data *input, const krb5_data *output)
 {
     /* key->keyblock.enctype was checked by the caller */
 
     if (key->keyblock.length != KRB5_MIT_DES3_KEYSIZE)
-	return(KRB5_BAD_KEYSIZE);
+        return(KRB5_BAD_KEYSIZE);
     if ((input->length%DES_BLOCK_SIZE) != 0)
-	return(KRB5_BAD_MSIZE);
+        return(KRB5_BAD_MSIZE);
     if (ivec && (ivec->length != 8))
-	return(KRB5_BAD_MSIZE);
+        return(KRB5_BAD_MSIZE);
     if (input->length != output->length)
-	return(KRB5_BAD_MSIZE);
+        return(KRB5_BAD_MSIZE);
 
     return 0;
 }
 
 static krb5_error_code
 validate_iov(krb5_key key, const krb5_data *ivec,
-			  const krb5_crypto_iov *data, size_t num_data)
+             const krb5_crypto_iov *data, size_t num_data)
 {
     size_t i, input_length;
 
     for (i = 0, input_length = 0; i < num_data; i++) {
-	const krb5_crypto_iov *iov = &data[i];
-	if (ENCRYPT_IOV(iov))
-	    input_length += iov->data.length;
+        const krb5_crypto_iov *iov = &data[i];
+        if (ENCRYPT_IOV(iov))
+            input_length += iov->data.length;
     }
 
     if (key->keyblock.length != KRB5_MIT_DES3_KEYSIZE)
-	return(KRB5_BAD_KEYSIZE);
+        return(KRB5_BAD_KEYSIZE);
     if ((input_length%DES_BLOCK_SIZE) != 0)
-	return(KRB5_BAD_MSIZE);
+        return(KRB5_BAD_MSIZE);
     if (ivec && (ivec->length != 8))
-	return(KRB5_BAD_MSIZE);
+        return(KRB5_BAD_MSIZE);
 
     return 0;
 }
 
 static krb5_error_code
 k5_des3_encrypt(krb5_key key, const krb5_data *ivec,
-		const krb5_data *input, krb5_data *output)
+                const krb5_data *input, krb5_data *output)
 {
     int              ret = 0, tmp_len = 0;
     unsigned int     tmp_buf_len = 0;
@@ -108,7 +109,7 @@ k5_des3_encrypt(krb5_key key, const krb5_data *ivec,
 
     ret = validate(key, ivec, input, output);
     if (ret)
-	return ret;
+        return ret;
 
     tmp_buf_len = output->length * 2;
     tmp_buf = OPENSSL_malloc(tmp_buf_len);
@@ -148,7 +149,7 @@ k5_des3_encrypt(krb5_key key, const krb5_data *ivec,
 
 static krb5_error_code
 k5_des3_decrypt(krb5_key key, const krb5_data *ivec,
-		const krb5_data *input, krb5_data *output)
+                const krb5_data *input, krb5_data *output)
 {
     int              ret = 0, tmp_len = 0;
     unsigned int     tmp_buf_len = 0;
@@ -157,7 +158,7 @@ k5_des3_decrypt(krb5_key key, const krb5_data *ivec,
 
     ret = validate(key, ivec, input, output);
     if (ret)
-	return ret;
+        return ret;
 
 
     tmp_buf_len = output->length;
@@ -197,9 +198,9 @@ k5_des3_decrypt(krb5_key key, const krb5_data *ivec,
 
 static krb5_error_code
 k5_des3_encrypt_iov(krb5_key key,
-		    const krb5_data *ivec,
-		    krb5_crypto_iov *data,
-		    size_t num_data)
+                    const krb5_data *ivec,
+                    krb5_crypto_iov *data,
+                    size_t num_data)
 {
     int                    ret = 0;
     int                    tmp_len = MIT_DES_BLOCK_LENGTH;
@@ -258,7 +259,7 @@ k5_des3_encrypt_iov(krb5_key key,
 
     if(ret) {
         /*if (ivec != NULL && ivec->data)
-            memcpy(ivec->data, oblock, MIT_DES_BLOCK_LENGTH); */
+          memcpy(ivec->data, oblock, MIT_DES_BLOCK_LENGTH); */
         ret = EVP_EncryptFinal_ex(&ciph_ctx, oblock+input_pos.data_pos, &tmp_len);
     }
 
@@ -276,9 +277,9 @@ k5_des3_encrypt_iov(krb5_key key,
 
 static krb5_error_code
 k5_des3_decrypt_iov(krb5_key key,
-		    const krb5_data *ivec,
-		    krb5_crypto_iov *data,
-		    size_t num_data)
+                    const krb5_data *ivec,
+                    krb5_crypto_iov *data,
+                    size_t num_data)
 {
     int                    ret = 0;
     int                    tmp_len = MIT_DES_BLOCK_LENGTH;
@@ -337,7 +338,7 @@ k5_des3_decrypt_iov(krb5_key key,
 
     if(ret) {
         /*if (ivec != NULL && ivec->data)
-            memcpy(ivec->data, oblock, MIT_DES_BLOCK_LENGTH); */
+          memcpy(ivec->data, oblock, MIT_DES_BLOCK_LENGTH); */
         ret = EVP_DecryptFinal_ex(&ciph_ctx,
                                   oblock + input_pos.data_pos, &tmp_len);
     }

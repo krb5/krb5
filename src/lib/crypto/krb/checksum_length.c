@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -29,24 +30,24 @@
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_checksum_length(krb5_context context, krb5_cksumtype cksumtype,
-		       size_t *length)
+                       size_t *length)
 {
     unsigned int i;
 
     for (i=0; i<krb5int_cksumtypes_length; i++) {
-	if (krb5int_cksumtypes_list[i].ctype == cksumtype)
-	    break;
+        if (krb5int_cksumtypes_list[i].ctype == cksumtype)
+            break;
     }
 
     if (i == krb5int_cksumtypes_length)
-	return KRB5_BAD_ENCTYPE;
+        return KRB5_BAD_ENCTYPE;
 
     if (krb5int_cksumtypes_list[i].keyhash)
-	*length = krb5int_cksumtypes_list[i].keyhash->hashsize;
+        *length = krb5int_cksumtypes_list[i].keyhash->hashsize;
     else if (krb5int_cksumtypes_list[i].trunc_size)
-	*length = krb5int_cksumtypes_list[i].trunc_size;
+        *length = krb5int_cksumtypes_list[i].trunc_size;
     else
-	*length = krb5int_cksumtypes_list[i].hash->hashsize;
+        *length = krb5int_cksumtypes_list[i].hash->hashsize;
 
     return 0;
 }

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -31,28 +32,28 @@
 /* XXX */
 extern krb5_error_code mit_des_string_to_key_int
 (krb5_keyblock * keyblock,
-		 const krb5_data * data,
-		 const krb5_data * salt);
+ const krb5_data * data,
+ const krb5_data * salt);
 
 krb5_error_code
 krb5int_des_string_to_key(const struct krb5_enc_provider *enc,
-			  const krb5_data *string,
-			  const krb5_data *salt, const krb5_data *parm,
-			  krb5_keyblock *key)
+                          const krb5_data *string,
+                          const krb5_data *salt, const krb5_data *parm,
+                          krb5_keyblock *key)
 {
     int type;
     if (parm ) {
-	if (parm->length != 1)
-	    return KRB5_ERR_BAD_S2K_PARAMS;
-	type = parm->data[0];
+        if (parm->length != 1)
+            return KRB5_ERR_BAD_S2K_PARAMS;
+        type = parm->data[0];
     }
     else type = 0;
     switch(type) {
     case 0:
-    return(mit_des_string_to_key_int(key, string, salt));
+        return(mit_des_string_to_key_int(key, string, salt));
     case 1:
-	return mit_afs_string_to_key(key, string, salt);
+        return mit_afs_string_to_key(key, string, salt);
     default:
-	return KRB5_ERR_BAD_S2K_PARAMS;
+        return KRB5_ERR_BAD_S2K_PARAMS;
     }
 }

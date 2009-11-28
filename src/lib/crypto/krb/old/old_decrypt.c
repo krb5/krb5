@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -29,12 +30,12 @@
 
 krb5_error_code
 krb5int_old_decrypt(const struct krb5_enc_provider *enc,
-		 const struct krb5_hash_provider *hash,
-		 krb5_key key,
-		 krb5_keyusage usage,
-		 const krb5_data *ivec,
-		 const krb5_data *input,
-		 krb5_data *arg_output)
+                    const struct krb5_hash_provider *hash,
+                    krb5_key key,
+                    krb5_keyusage usage,
+                    const krb5_data *ivec,
+                    const krb5_data *input,
+                    krb5_data *arg_output)
 {
     krb5_error_code ret;
     size_t blocksize, hashsize, plainsize;
@@ -48,53 +49,53 @@ krb5int_old_decrypt(const struct krb5_enc_provider *enc,
     plainsize = input->length - blocksize - hashsize;
 
     if (arg_output->length < plainsize)
-	return(KRB5_BAD_MSIZE);
+        return(KRB5_BAD_MSIZE);
 
     /* if there's enough space to work in the app buffer, use it,
        otherwise allocate our own */
 
     if ((cksumdata = (unsigned char *) malloc(hashsize)) == NULL)
-	return(ENOMEM);
+        return(ENOMEM);
 
     if (arg_output->length < input->length) {
-	output.length = input->length;
+        output.length = input->length;
 
-	if ((output.data = (char *) malloc(output.length)) == NULL) {
-	    free(cksumdata);
-	    return(ENOMEM);
-	}
+        if ((output.data = (char *) malloc(output.length)) == NULL) {
+            free(cksumdata);
+            return(ENOMEM);
+        }
 
-	alloced = 1;
+        alloced = 1;
     } else {
-	output.length = input->length;
+        output.length = input->length;
 
-	output.data = arg_output->data;
+        output.data = arg_output->data;
 
-	alloced = 0;
+        alloced = 0;
     }
 
     /* decrypt it */
 
     /* save last ciphertext block in case we decrypt in place */
     if (ivec != NULL && ivec->length == blocksize) {
-	cn = malloc(blocksize);
-	if (cn == NULL) {
-	    ret = ENOMEM;
-	    goto cleanup;
-	}
-	memcpy(cn, input->data + input->length - blocksize, blocksize);
+        cn = malloc(blocksize);
+        if (cn == NULL) {
+            ret = ENOMEM;
+            goto cleanup;
+        }
+        memcpy(cn, input->data + input->length - blocksize, blocksize);
     } else
-	cn = NULL;
+        cn = NULL;
 
     /* XXX this is gross, but I don't have much choice */
     if ((key->keyblock.enctype == ENCTYPE_DES_CBC_CRC) && (ivec == 0)) {
-	crcivec.length = key->keyblock.length;
-	crcivec.data = (char *) key->keyblock.contents;
-	ivec = &crcivec;
+        crcivec.length = key->keyblock.length;
+        crcivec.data = (char *) key->keyblock.contents;
+        ivec = &crcivec;
     }
 
     if ((ret = ((*(enc->decrypt))(key, ivec, input, &output))))
-	goto cleanup;
+        goto cleanup;
 
     /* verify the checksum */
 
@@ -105,38 +106,38 @@ krb5int_old_decrypt(const struct krb5_enc_provider *enc,
     cksum.data = output.data+blocksize;
 
     if ((ret = ((*(hash->hash))(1, &output, &cksum))))
-	goto cleanup;
+        goto cleanup;
 
     if (memcmp(cksum.data, cksumdata, cksum.length) != 0) {
-	ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
-	goto cleanup;
+        ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
+        goto cleanup;
     }
 
     /* copy the plaintext around */
 
     if (alloced) {
-	memcpy(arg_output->data, output.data+blocksize+hashsize,
-	       plainsize);
+        memcpy(arg_output->data, output.data+blocksize+hashsize,
+               plainsize);
     } else {
-	memmove(arg_output->data, arg_output->data+blocksize+hashsize,
-		plainsize);
+        memmove(arg_output->data, arg_output->data+blocksize+hashsize,
+                plainsize);
     }
     arg_output->length = plainsize;
 
     /* update ivec */
     if (cn != NULL)
-	memcpy(ivec->data, cn, blocksize);
+        memcpy(ivec->data, cn, blocksize);
 
     ret = 0;
 
 cleanup:
     if (alloced) {
-	memset(output.data, 0, output.length);
-	free(output.data);
+        memset(output.data, 0, output.length);
+        free(output.data);
     }
 
     if (cn != NULL)
-	free(cn);
+        free(cn);
     memset(cksumdata, 0, hashsize);
     free(cksumdata);
     return(ret);

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/krb/prf/prf_int.h
  *
@@ -36,8 +37,8 @@ krb5int_arcfour_prf(const struct krb5_enc_provider *enc,
 
 krb5_error_code
 krb5int_des_prf (const struct krb5_enc_provider *enc,
-                const struct krb5_hash_provider *hash,
-                krb5_key key, const krb5_data *in, krb5_data *out);
+                 const struct krb5_hash_provider *hash,
+                 krb5_key key, const krb5_data *in, krb5_data *out);
 
 krb5_error_code
 krb5int_dk_prf(const struct krb5_enc_provider *enc,

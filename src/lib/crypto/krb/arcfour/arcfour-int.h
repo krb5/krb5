@@ -1,9 +1,10 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
 
-ARCFOUR cipher (based on a cipher posted on the Usenet in Spring-95).
-This cipher is widely believed and has been tested to be equivalent
-with the RC4 cipher from RSA Data Security, Inc.  (RC4 is a trademark
-of RSA Data Security)
+  ARCFOUR cipher (based on a cipher posted on the Usenet in Spring-95).
+  This cipher is widely believed and has been tested to be equivalent
+  with the RC4 cipher from RSA Data Security, Inc.  (RC4 is a trademark
+  of RSA Data Security)
 
 */
 #ifndef ARCFOUR_INT_H

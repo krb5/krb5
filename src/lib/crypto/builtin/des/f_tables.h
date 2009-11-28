@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/des/f_tables.h
  *
@@ -28,10 +29,10 @@
 
 /*
  * des_tables.h - declarations to import the DES tables, used internally
- *		  by some of the library routines.
+ *                by some of the library routines.
  */
-#ifndef	__DES_TABLES_H__
-#define	__DES_TABLES_H__	/* nothing */
+#ifndef __DES_TABLES_H__
+#define __DES_TABLES_H__        /* nothing */
 
 #include "k5-platform.h"
 /*
@@ -45,14 +46,14 @@ extern const unsigned DES_INT32 des_SP_table[8][64];
 /*
  * Use standard shortforms to reference these to save typing
  */
-#define	IP	des_IP_table
-#define	FP	des_FP_table
-#define	SP	des_SP_table
+#define IP      des_IP_table
+#define FP      des_FP_table
+#define SP      des_SP_table
 
 #ifdef DEBUG
-#define	DEB(foofraw)	printf foofraw
+#define DEB(foofraw)    printf foofraw
 #else
-#define	DEB(foofraw)	/* nothing */
+#define DEB(foofraw)    /* nothing */
 #endif
 
 /*
@@ -89,39 +90,39 @@ extern const unsigned DES_INT32 des_SP_table[8][64];
  *
  * When using this, the inner loop of the DES function might look like:
  *
- *	for (i = 0; i < 8; i++) {
- *		DES_SP_{EN,DE}CRYPT_ROUND(left, right, temp, kp);
- *		DES_SP_{EN,DE}CRYPT_ROUND(right, left, temp, kp);
- *	}
+ *      for (i = 0; i < 8; i++) {
+ *              DES_SP_{EN,DE}CRYPT_ROUND(left, right, temp, kp);
+ *              DES_SP_{EN,DE}CRYPT_ROUND(right, left, temp, kp);
+ *      }
  *
  * Note the trick above.  You are supposed to do 16 rounds, swapping
  * left and right at the end of each round.  By doing two rounds at
  * a time and swapping left and right in the code we can avoid the
  * swaps altogether.
  */
-#define	DES_SP_ENCRYPT_ROUND(left, right, temp, kp) \
-	(temp) = (((right) >> 11) | ((right) << 21)) ^ *(kp)++; \
-	(left) ^= SP[0][((temp) >> 24) & 0x3f] \
-		| SP[1][((temp) >> 16) & 0x3f] \
-		| SP[2][((temp) >>  8) & 0x3f] \
-		| SP[3][((temp)      ) & 0x3f]; \
-	(temp) = (((right) >> 23) | ((right) << 9)) ^ *(kp)++; \
-	(left) ^= SP[4][((temp) >> 24) & 0x3f] \
-		| SP[5][((temp) >> 16) & 0x3f] \
-		| SP[6][((temp) >>  8) & 0x3f] \
-		| SP[7][((temp)      ) & 0x3f]
+#define DES_SP_ENCRYPT_ROUND(left, right, temp, kp)                     \
+    (temp) = (((right) >> 11) | ((right) << 21)) ^ *(kp)++;             \
+           (left) ^= SP[0][((temp) >> 24) & 0x3f]                       \
+        | SP[1][((temp) >> 16) & 0x3f]                                  \
+        | SP[2][((temp) >>  8) & 0x3f]                                  \
+        | SP[3][((temp)      ) & 0x3f];                                 \
+           (temp) = (((right) >> 23) | ((right) << 9)) ^ *(kp)++;       \
+           (left) ^= SP[4][((temp) >> 24) & 0x3f]                       \
+        | SP[5][((temp) >> 16) & 0x3f]                                  \
+        | SP[6][((temp) >>  8) & 0x3f]                                  \
+        | SP[7][((temp)      ) & 0x3f]
 
-#define	DES_SP_DECRYPT_ROUND(left, right, temp, kp) \
-	(temp) = (((right) >> 23) | ((right) << 9)) ^ *(--(kp)); \
-	(left) ^= SP[7][((temp)      ) & 0x3f] \
-		| SP[6][((temp) >>  8) & 0x3f] \
-		| SP[5][((temp) >> 16) & 0x3f] \
-		| SP[4][((temp) >> 24) & 0x3f]; \
-	(temp) = (((right) >> 11) | ((right) << 21)) ^ *(--(kp)); \
-	(left) ^= SP[3][((temp)      ) & 0x3f] \
-		| SP[2][((temp) >>  8) & 0x3f] \
-		| SP[1][((temp) >> 16) & 0x3f] \
-		| SP[0][((temp) >> 24) & 0x3f]
+#define DES_SP_DECRYPT_ROUND(left, right, temp, kp)                     \
+    (temp) = (((right) >> 23) | ((right) << 9)) ^ *(--(kp));            \
+           (left) ^= SP[7][((temp)      ) & 0x3f]                       \
+        | SP[6][((temp) >>  8) & 0x3f]                                  \
+        | SP[5][((temp) >> 16) & 0x3f]                                  \
+        | SP[4][((temp) >> 24) & 0x3f];                                 \
+           (temp) = (((right) >> 11) | ((right) << 21)) ^ *(--(kp));    \
+           (left) ^= SP[3][((temp)      ) & 0x3f]                       \
+        | SP[2][((temp) >>  8) & 0x3f]                                  \
+        | SP[1][((temp) >> 16) & 0x3f]                                  \
+        | SP[0][((temp) >> 24) & 0x3f]
 
 /*
  * Macros to help deal with the initial permutation table.  Note
@@ -140,11 +141,11 @@ extern const unsigned DES_INT32 des_SP_table[8][64];
  * the Macintosh MPW 3.2 C compiler which loses the unsignedness and
  * propagates the high-order bit in the shift.
  */
-#define	DES_IP_LEFT_BITS(left, right) \
-	((((left) & 0x55555555) << 1) | ((right) & 0x55555555))
-#define	DES_IP_RIGHT_BITS(left, right) \
-	(((left) & 0xaaaaaaaa) | \
-		( ( (unsigned DES_INT32) ((right) & 0xaaaaaaaa) ) >> 1))
+#define DES_IP_LEFT_BITS(left, right)                           \
+    ((((left) & 0x55555555) << 1) | ((right) & 0x55555555))
+#define DES_IP_RIGHT_BITS(left, right)                          \
+    (((left) & 0xaaaaaaaa) |                                    \
+     ( ( (unsigned DES_INT32) ((right) & 0xaaaaaaaa) ) >> 1))
 
 /*
  * The following macro does an in-place initial permutation given
@@ -154,17 +155,17 @@ extern const unsigned DES_INT32 des_SP_table[8][64];
  * are dealing with.  If you use this, though, try to make left,
  * right and temp register unsigned DES_INT32s.
  */
-#define	DES_INITIAL_PERM(left, right, temp) \
-	(temp) = DES_IP_RIGHT_BITS((left), (right)); \
-	(right) = DES_IP_LEFT_BITS((left), (right)); \
-	(left) = IP[((right) >> 24) & 0xff] \
-	       | (IP[((right) >> 16) & 0xff] << 1) \
-	       | (IP[((right) >>  8) & 0xff] << 2) \
-	       | (IP[(right) & 0xff] << 3); \
-	(right) = IP[((temp) >> 24) & 0xff] \
-		| (IP[((temp) >> 16) & 0xff] << 1) \
-		| (IP[((temp) >>  8) & 0xff] << 2) \
-		| (IP[(temp) & 0xff] << 3)
+#define DES_INITIAL_PERM(left, right, temp)             \
+    (temp) = DES_IP_RIGHT_BITS((left), (right));        \
+           (right) = DES_IP_LEFT_BITS((left), (right)); \
+           (left) = IP[((right) >> 24) & 0xff]          \
+        | (IP[((right) >> 16) & 0xff] << 1)             \
+        | (IP[((right) >>  8) & 0xff] << 2)             \
+        | (IP[(right) & 0xff] << 3);                    \
+           (right) = IP[((temp) >> 24) & 0xff]          \
+        | (IP[((temp) >> 16) & 0xff] << 1)              \
+        | (IP[((temp) >>  8) & 0xff] << 2)              \
+        | (IP[(temp) & 0xff] << 3)
 
 /*
  * Now the final permutation stuff.  The same comments apply to
@@ -175,11 +176,11 @@ extern const unsigned DES_INT32 des_SP_table[8][64];
  * the Macintosh MPW 3.2 C compiler which loses the unsignedness and
  * propagates the high-order bit in the shift.
  */
-#define DES_FP_LEFT_BITS(left, right) \
-	((((left) & 0x0f0f0f0f) << 4) | ((right) & 0x0f0f0f0f))
-#define	DES_FP_RIGHT_BITS(left, right) \
-	(((left) & 0xf0f0f0f0) | \
-		( ( (unsigned DES_INT32) ((right) & 0xf0f0f0f0) ) >> 4))
+#define DES_FP_LEFT_BITS(left, right)                           \
+    ((((left) & 0x0f0f0f0f) << 4) | ((right) & 0x0f0f0f0f))
+#define DES_FP_RIGHT_BITS(left, right)                          \
+    (((left) & 0xf0f0f0f0) |                                    \
+     ( ( (unsigned DES_INT32) ((right) & 0xf0f0f0f0) ) >> 4))
 
 
 /*
@@ -189,17 +190,17 @@ extern const unsigned DES_INT32 des_SP_table[8][64];
  * swapping internally, which is why left and right are confused
  * at the beginning.
  */
-#define DES_FINAL_PERM(left, right, temp) \
-	(temp) = DES_FP_RIGHT_BITS((right), (left)); \
-	(right) = DES_FP_LEFT_BITS((right), (left)); \
-	(left) = (FP[((right) >> 24) & 0xff] << 6) \
-	       | (FP[((right) >> 16) & 0xff] << 4) \
-	       | (FP[((right) >>  8) & 0xff] << 2) \
-	       |  FP[(right) & 0xff]; \
-	(right) = (FP[((temp) >> 24) & 0xff] << 6) \
-		| (FP[((temp) >> 16) & 0xff] << 4) \
-		| (FP[((temp) >>  8) & 0xff] << 2) \
-		|  FP[temp & 0xff]
+#define DES_FINAL_PERM(left, right, temp)               \
+    (temp) = DES_FP_RIGHT_BITS((right), (left));        \
+           (right) = DES_FP_LEFT_BITS((right), (left)); \
+           (left) = (FP[((right) >> 24) & 0xff] << 6)   \
+        | (FP[((right) >> 16) & 0xff] << 4)             \
+        | (FP[((right) >>  8) & 0xff] << 2)             \
+        |  FP[(right) & 0xff];                          \
+           (right) = (FP[((temp) >> 24) & 0xff] << 6)   \
+        | (FP[((temp) >> 16) & 0xff] << 4)              \
+        | (FP[((temp) >>  8) & 0xff] << 2)              \
+        |  FP[temp & 0xff]
 
 
 /*
@@ -220,44 +221,44 @@ extern const unsigned DES_INT32 des_SP_table[8][64];
  * at each stage of the encryption, so that by comparing the output to
  * a known good machine, the location of the first error can be found.
  */
-#define	DES_DO_ENCRYPT_1(left, right, kp) \
-	do { \
-		register int i; \
-		register unsigned DES_INT32 temp1; \
-		DEB (("do_encrypt %8lX %8lX \n", left, right)); \
-		DES_INITIAL_PERM((left), (right), (temp1)); \
-		DEB (("  after IP %8lX %8lX\n", left, right)); \
-		for (i = 0; i < 8; i++) { \
-			DES_SP_ENCRYPT_ROUND((left), (right), (temp1), (kp)); \
-			DEB (("  round %2d %8lX %8lX \n", i*2, left, right)); \
-			DES_SP_ENCRYPT_ROUND((right), (left), (temp1), (kp)); \
-			DEB (("  round %2d %8lX %8lX \n", 1+i*2, left, right)); \
-		} \
-		DES_FINAL_PERM((left), (right), (temp1)); \
-		(kp) -= (2 * 16); \
-		DEB (("  after FP %8lX %8lX \n", left, right)); \
-	} while (0)
+#define DES_DO_ENCRYPT_1(left, right, kp)                               \
+    do {                                                                \
+        register int i;                                                 \
+        register unsigned DES_INT32 temp1;                              \
+        DEB (("do_encrypt %8lX %8lX \n", left, right));                 \
+        DES_INITIAL_PERM((left), (right), (temp1));                     \
+        DEB (("  after IP %8lX %8lX\n", left, right));                  \
+        for (i = 0; i < 8; i++) {                                       \
+            DES_SP_ENCRYPT_ROUND((left), (right), (temp1), (kp));       \
+            DEB (("  round %2d %8lX %8lX \n", i*2, left, right));       \
+            DES_SP_ENCRYPT_ROUND((right), (left), (temp1), (kp));       \
+            DEB (("  round %2d %8lX %8lX \n", 1+i*2, left, right));     \
+        }                                                               \
+        DES_FINAL_PERM((left), (right), (temp1));                       \
+        (kp) -= (2 * 16);                                               \
+        DEB (("  after FP %8lX %8lX \n", left, right));                 \
+    } while (0)
 
-#define	DES_DO_DECRYPT_1(left, right, kp) \
-	do { \
-		register int i; \
-		register unsigned DES_INT32 temp2; \
-		DES_INITIAL_PERM((left), (right), (temp2)); \
-		(kp) += (2 * 16); \
-		for (i = 0; i < 8; i++) { \
-			DES_SP_DECRYPT_ROUND((left), (right), (temp2), (kp)); \
-			DES_SP_DECRYPT_ROUND((right), (left), (temp2), (kp)); \
-		} \
-		DES_FINAL_PERM((left), (right), (temp2)); \
-	} while (0)
+#define DES_DO_DECRYPT_1(left, right, kp)                               \
+    do {                                                                \
+        register int i;                                                 \
+        register unsigned DES_INT32 temp2;                              \
+        DES_INITIAL_PERM((left), (right), (temp2));                     \
+        (kp) += (2 * 16);                                               \
+        for (i = 0; i < 8; i++) {                                       \
+            DES_SP_DECRYPT_ROUND((left), (right), (temp2), (kp));       \
+            DES_SP_DECRYPT_ROUND((right), (left), (temp2), (kp));       \
+        }                                                               \
+        DES_FINAL_PERM((left), (right), (temp2));                       \
+    } while (0)
 
 #if defined(CONFIG_SMALL) && !defined(CONFIG_SMALL_NO_CRYPTO)
 extern void krb5int_des_do_encrypt_2(unsigned DES_INT32 *l,
-				     unsigned DES_INT32 *r,
-				     const unsigned DES_INT32 *k);
+                                     unsigned DES_INT32 *r,
+                                     const unsigned DES_INT32 *k);
 extern void krb5int_des_do_decrypt_2(unsigned DES_INT32 *l,
-				     unsigned DES_INT32 *r,
-				     const unsigned DES_INT32 *k);
+                                     unsigned DES_INT32 *r,
+                                     const unsigned DES_INT32 *k);
 #define DES_DO_ENCRYPT(L,R,K) krb5int_des_do_encrypt_2(&(L), &(R), (K))
 #define DES_DO_DECRYPT(L,R,K) krb5int_des_do_decrypt_2(&(L), &(R), (K))
 #else
@@ -269,11 +270,11 @@ extern void krb5int_des_do_decrypt_2(unsigned DES_INT32 *l,
  * These are handy dandy utility thingies for straightening out bytes.
  * Included here because they're used a couple of places.
  */
-#define	GET_HALF_BLOCK(lr, ip)	((lr) = load_32_be(ip), (ip) += 4)
-#define PUT_HALF_BLOCK(lr, op)	(store_32_be(lr, op), (op) += 4)
+#define GET_HALF_BLOCK(lr, ip)  ((lr) = load_32_be(ip), (ip) += 4)
+#define PUT_HALF_BLOCK(lr, op)  (store_32_be(lr, op), (op) += 4)
 
 /* Shorthand that we'll need in several places, for creating values that
    really can hold 32 bits regardless of the prevailing int size.  */
-#define FF_UINT32	((unsigned DES_INT32) 0xFF)
+#define FF_UINT32       ((unsigned DES_INT32) 0xFF)
 
-#endif	/* __DES_TABLES_H__ */
+#endif  /* __DES_TABLES_H__ */

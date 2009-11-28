@@ -664,6 +664,7 @@ INDENTDIRS = \
 	include \
 	kadmin \
 	kdc \
+	lib/crypto \
 	lib/kadm5 \
 	lib/kdb \
 	lib/krb5 \
@@ -688,6 +689,7 @@ OTHEREXCLUDES = \
 	include/iprop.h \
 	include/k5-platform.h \
 	include/gssrpc \
+	lib/crypto/builtin/aes \
 	lib/krb5/krb/deltat.c \
 	lib/krb5/unicode \
 	plugins/kdb/db2/libdb2 \

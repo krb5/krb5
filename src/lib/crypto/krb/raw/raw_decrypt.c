@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -29,10 +30,10 @@
 
 krb5_error_code
 krb5int_raw_decrypt(const struct krb5_enc_provider *enc,
-		 const struct krb5_hash_provider *hash,
-		 krb5_key key, krb5_keyusage usage,
-		 const krb5_data *ivec, const krb5_data *input,
-		 krb5_data *output)
+                    const struct krb5_hash_provider *hash,
+                    krb5_key key, krb5_keyusage usage,
+                    const krb5_data *ivec, const krb5_data *input,
+                    krb5_data *output)
 {
     return((*(enc->decrypt))(key, ivec, input, output));
 }

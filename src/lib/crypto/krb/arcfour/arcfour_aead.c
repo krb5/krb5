@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/arcfour/arcfour_aead.c
  *
@@ -34,27 +35,27 @@
 
 static krb5_error_code
 krb5int_arcfour_crypto_length(const struct krb5_aead_provider *aead,
-			      const struct krb5_enc_provider *enc,
-			      const struct krb5_hash_provider *hash,
-			      krb5_cryptotype type,
-			      unsigned int *length)
+                              const struct krb5_enc_provider *enc,
+                              const struct krb5_hash_provider *hash,
+                              krb5_cryptotype type,
+                              unsigned int *length)
 {
     switch (type) {
     case KRB5_CRYPTO_TYPE_HEADER:
-	*length = hash->hashsize + CONFOUNDERLENGTH;
-	break;
+        *length = hash->hashsize + CONFOUNDERLENGTH;
+        break;
     case KRB5_CRYPTO_TYPE_PADDING:
-	*length = 0;
-	break;
+        *length = 0;
+        break;
     case KRB5_CRYPTO_TYPE_TRAILER:
-	*length = 0;
-	break;
+        *length = 0;
+        break;
     case KRB5_CRYPTO_TYPE_CHECKSUM:
-	*length = hash->hashsize;
-	break;
+        *length = hash->hashsize;
+        break;
     default:
-	assert(0 && "invalid cryptotype passed to krb5int_arcfour_crypto_length");
-	break;
+        assert(0 && "invalid cryptotype passed to krb5int_arcfour_crypto_length");
+        break;
     }
 
     return 0;
@@ -62,14 +63,14 @@ krb5int_arcfour_crypto_length(const struct krb5_aead_provider *aead,
 
 static krb5_error_code
 alloc_derived_key(const struct krb5_enc_provider *enc,
-		  krb5_keyblock *dst,
-		  krb5_data *data,
-		  const krb5_keyblock *src)
+                  krb5_keyblock *dst,
+                  krb5_data *data,
+                  const krb5_keyblock *src)
 {
     data->length = enc->keybytes;
     data->data = malloc(data->length);
     if (data->data == NULL)
-	return ENOMEM;
+        return ENOMEM;
 
     *dst = *src;
     dst->length = data->length;
@@ -80,13 +81,13 @@ alloc_derived_key(const struct krb5_enc_provider *enc,
 
 static krb5_error_code
 krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
-			    const struct krb5_enc_provider *enc,
-			    const struct krb5_hash_provider *hash,
-			    krb5_key key,
-			    krb5_keyusage usage,
-			    const krb5_data *ivec,
-			    krb5_crypto_iov *data,
-			    size_t num_data)
+                            const struct krb5_enc_provider *enc,
+                            const struct krb5_hash_provider *hash,
+                            krb5_key key,
+                            krb5_keyusage usage,
+                            const krb5_data *ivec,
+                            krb5_crypto_iov *data,
+                            size_t num_data)
 {
     krb5_error_code ret;
     krb5_crypto_iov *header, *trailer;
@@ -106,38 +107,38 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
      * Caller must have provided space for the header, padding
      * and trailer; per RFC 4757 we will arrange it as:
      *
-     *	    Checksum | E(Confounder | Plaintext)
+     *      Checksum | E(Confounder | Plaintext)
      */
 
     header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
     if (header == NULL ||
-	header->data.length < hash->hashsize + CONFOUNDERLENGTH)
-	return KRB5_BAD_MSIZE;
+        header->data.length < hash->hashsize + CONFOUNDERLENGTH)
+        return KRB5_BAD_MSIZE;
 
     header_data = header->data;
 
     /* Trailer may be absent */
     trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
     if (trailer != NULL)
-	trailer->data.length = 0;
+        trailer->data.length = 0;
 
     /* Ensure that there is no padding */
     for (i = 0; i < num_data; i++) {
-	if (data[i].flags == KRB5_CRYPTO_TYPE_PADDING)
-	    data[i].data.length = 0;
+        if (data[i].flags == KRB5_CRYPTO_TYPE_PADDING)
+            data[i].data.length = 0;
     }
 
     ret = alloc_derived_key(enc, &k1, &d1, &key->keyblock);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     ret = alloc_derived_key(enc, &k2, &d2, &key->keyblock);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     ret = alloc_derived_key(enc, &k3, &d3, &key->keyblock);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     /* Begin the encryption, compute K1 */
     salt.data = salt_data;
@@ -146,20 +147,20 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
     ms_usage = krb5int_arcfour_translate_usage(usage);
 
     if (key->keyblock.enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
-	strncpy(salt.data, krb5int_arcfour_l40, salt.length);
-	store_32_le(ms_usage, salt.data + 10);
+        strncpy(salt.data, krb5int_arcfour_l40, salt.length);
+        store_32_le(ms_usage, salt.data + 10);
     } else {
-	salt.length = 4;
-	store_32_le(ms_usage, salt.data);
+        salt.length = 4;
+        store_32_le(ms_usage, salt.data);
     }
     ret = krb5int_hmac(hash, key, 1, &salt, &d1);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     memcpy(k2.contents, k1.contents, k2.length);
 
     if (key->keyblock.enctype == ENCTYPE_ARCFOUR_HMAC_EXP)
-	memset(k1.contents + 7, 0xAB, 9);
+        memset(k1.contents + 7, 0xAB, 9);
 
     header->data.length = hash->hashsize + CONFOUNDERLENGTH;
 
@@ -168,7 +169,7 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
 
     ret = krb5_c_random_make_octets(0, &confounder);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     checksum.data = header->data.data;
     checksum.length = hash->hashsize;
@@ -179,34 +180,34 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
 
     ret = krb5int_hmac_iov_keyblock(hash, &k2, data, num_data, &checksum);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     ret = krb5int_hmac_keyblock(hash, &k1, 1, &checksum, &d3);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     ret = krb5_k_create_key(NULL, &k3, &k3key);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     ret = enc->encrypt_iov(k3key, ivec, data, num_data);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
 cleanup:
     header->data = header_data; /* restore header pointers */
 
     if (d1.data != NULL) {
-	memset(d1.data, 0, d1.length);
-	free(d1.data);
+        memset(d1.data, 0, d1.length);
+        free(d1.data);
     }
     if (d2.data != NULL) {
-	memset(d2.data, 0, d2.length);
-	free(d2.data);
+        memset(d2.data, 0, d2.length);
+        free(d2.data);
     }
     if (d3.data != NULL) {
-	memset(d3.data, 0, d3.length);
-	free(d3.data);
+        memset(d3.data, 0, d3.length);
+        free(d3.data);
     }
 
     krb5_k_free_key(NULL, k3key);
@@ -215,13 +216,13 @@ cleanup:
 
 static krb5_error_code
 krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
-			    const struct krb5_enc_provider *enc,
-			    const struct krb5_hash_provider *hash,
-			    krb5_key key,
-			    krb5_keyusage usage,
-			    const krb5_data *ivec,
-			    krb5_crypto_iov *data,
-			    size_t num_data)
+                            const struct krb5_enc_provider *enc,
+                            const struct krb5_hash_provider *hash,
+                            krb5_key key,
+                            krb5_keyusage usage,
+                            const krb5_data *ivec,
+                            krb5_crypto_iov *data,
+                            size_t num_data)
 {
     krb5_error_code ret;
     krb5_crypto_iov *header, *trailer;
@@ -239,25 +240,25 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
     header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
     if (header == NULL ||
         header->data.length != hash->hashsize + CONFOUNDERLENGTH)
-	return KRB5_BAD_MSIZE;
+        return KRB5_BAD_MSIZE;
 
     header_data = header->data;
 
     trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
     if (trailer != NULL && trailer->data.length != 0)
-	return KRB5_BAD_MSIZE;
+        return KRB5_BAD_MSIZE;
 
     ret = alloc_derived_key(enc, &k1, &d1, &key->keyblock);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     ret = alloc_derived_key(enc, &k2, &d2, &key->keyblock);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     ret = alloc_derived_key(enc, &k3, &d3, &key->keyblock);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     /* Begin the decryption, compute K1 */
     salt.data = salt_data;
@@ -266,20 +267,20 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
     ms_usage = krb5int_arcfour_translate_usage(usage);
 
     if (key->keyblock.enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
-	strncpy(salt.data, krb5int_arcfour_l40, salt.length);
-	store_32_le(ms_usage, (unsigned char *)salt.data + 10);
+        strncpy(salt.data, krb5int_arcfour_l40, salt.length);
+        store_32_le(ms_usage, (unsigned char *)salt.data + 10);
     } else {
-	salt.length = 4;
-	store_32_le(ms_usage, (unsigned char *)salt.data);
+        salt.length = 4;
+        store_32_le(ms_usage, (unsigned char *)salt.data);
     }
     ret = krb5int_hmac(hash, key, 1, &salt, &d1);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     memcpy(k2.contents, k1.contents, k2.length);
 
     if (key->keyblock.enctype == ENCTYPE_ARCFOUR_HMAC_EXP)
-	memset(k1.contents + 7, 0xAB, 9);
+        memset(k1.contents + 7, 0xAB, 9);
 
     checksum.data = header->data.data;
     checksum.length = hash->hashsize;
@@ -290,39 +291,39 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
 
     ret = krb5int_hmac_keyblock(hash, &k1, 1, &checksum, &d3);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     ret = krb5_k_create_key(NULL, &k3, &k3key);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     ret = enc->decrypt_iov(k3key, ivec, data, num_data);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     ret = krb5int_hmac_iov_keyblock(hash, &k2, data, num_data, &d1);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     if (memcmp(checksum.data, d1.data, hash->hashsize) != 0) {
-	ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
-	goto cleanup;
+        ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
+        goto cleanup;
     }
 
 cleanup:
     header->data = header_data; /* restore header pointers */
 
     if (d1.data != NULL) {
-	memset(d1.data, 0, d1.length);
-	free(d1.data);
+        memset(d1.data, 0, d1.length);
+        free(d1.data);
     }
     if (d2.data != NULL) {
-	memset(d2.data, 0, d2.length);
-	free(d2.data);
+        memset(d2.data, 0, d2.length);
+        free(d2.data);
     }
     if (d3.data != NULL) {
-	memset(d3.data, 0, d3.length);
-	free(d3.data);
+        memset(d3.data, 0, d3.length);
+        free(d3.data);
     }
 
     krb5_k_free_key(NULL, k3key);

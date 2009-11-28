@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -33,9 +34,9 @@ krb5_c_is_coll_proof_cksum(krb5_cksumtype ctype)
     unsigned int i;
 
     for (i = 0; i < krb5int_cksumtypes_length; i++) {
-	if (krb5int_cksumtypes_list[i].ctype == ctype)
-	    return((krb5int_cksumtypes_list[i].flags &
-		    KRB5_CKSUMFLAG_NOT_COLL_PROOF) ? FALSE : TRUE);
+        if (krb5int_cksumtypes_list[i].ctype == ctype)
+            return((krb5int_cksumtypes_list[i].flags &
+                    KRB5_CKSUMFLAG_NOT_COLL_PROOF) ? FALSE : TRUE);
     }
 
     /* ick, but it's better than coredumping, which is what the

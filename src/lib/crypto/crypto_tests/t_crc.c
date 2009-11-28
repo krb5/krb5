@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/crc32/t_crc.c
  *
@@ -36,9 +37,9 @@
 #define HEX 1
 #define STR 2
 struct crc_trial {
-    int		type;
-    char	*data;
-    unsigned long	sum;
+    int         type;
+    char        *data;
+    unsigned long       sum;
 };
 
 struct crc_trial trials[] = {
@@ -115,42 +116,42 @@ timetest(unsigned int nblk, unsigned int blksiz)
 
     block = malloc(blksiz * nblk);
     if (block == NULL)
-	exit(1);
+        exit(1);
     for (i = 0; i < blksiz * nblk; i++)
-	block[i] = i % 256;
+        block[i] = i % 256;
     times(&before);
     for (i = 0; i < nblk; i++) {
-	mit_crc32(block + i * blksiz, blksiz, &cksum);
+        mit_crc32(block + i * blksiz, blksiz, &cksum);
     }
 
     times(&after);
     printf("shift-8 implementation, %d blocks of %d bytes:\n",
-	   nblk, blksiz);
+           nblk, blksiz);
     printf("\tu=%ld s=%ld cu=%ld cs=%ld\n",
-	   (long)(after.tms_utime - before.tms_utime),
-	   (long)(after.tms_stime - before.tms_stime),
-	   (long)(after.tms_cutime - before.tms_cutime),
-	   (long)(after.tms_cstime - before.tms_cstime));
+           (long)(after.tms_utime - before.tms_utime),
+           (long)(after.tms_stime - before.tms_stime),
+           (long)(after.tms_cutime - before.tms_cutime),
+           (long)(after.tms_cstime - before.tms_cstime));
 
 #ifdef CRC32_SHIFT4
     times(&before);
     for (i = 0; i < nblk; i++) {
-	mit_crc32_shift4(block + i * blksiz, blksiz, &cksum);
+        mit_crc32_shift4(block + i * blksiz, blksiz, &cksum);
     }
     times(&after);
     printf("shift-4 implementation, %d blocks of %d bytes:\n",
-	   nblk, blksiz);
+           nblk, blksiz);
     printf("\tu=%ld s=%ld cu=%ld cs=%ld\n",
-	   (long)(after.tms_utime - before.tms_utime),
-	   (long)(after.tms_stime - before.tms_stime),
-	   (long)(after.tms_cutime - before.tms_cutime),
-	   (long)(after.tms_cstime - before.tms_cstime));
+           (long)(after.tms_utime - before.tms_utime),
+           (long)(after.tms_stime - before.tms_stime),
+           (long)(after.tms_cutime - before.tms_cutime),
+           (long)(after.tms_cstime - before.tms_cstime));
 #endif
     free(block);
 }
 
 static void gethexstr(char *data, size_t *outlen, unsigned char *outbuf,
-		      size_t buflen)
+                      size_t buflen)
 {
     size_t inlen;
     char *cp, buf[3];
@@ -159,12 +160,12 @@ static void gethexstr(char *data, size_t *outlen, unsigned char *outbuf,
     inlen = strlen(data);
     *outlen = 0;
     for (cp = data; cp - data < inlen; cp += 2) {
-	strncpy(buf, cp, 2);
-	buf[2] = '\0';
-	n = strtol(buf, NULL, 16);
-	outbuf[(*outlen)++] = n;
-	if (*outlen > buflen)
-	    break;
+        strncpy(buf, cp, 2);
+        buf[2] = '\0';
+        n = strtol(buf, NULL, 16);
+        outbuf[(*outlen)++] = n;
+        if (*outlen > buflen)
+            break;
     }
 }
 
@@ -179,26 +180,26 @@ verify(void)
     char *typestr;
 
     for (i = 0; i < NTRIALS; i++) {
-	trial = trials[i];
-	switch (trial.type) {
-	case STR:
-	    len = strlen(trial.data);
-	    typestr = "STR";
-	    mit_crc32(trial.data, len, &cksum);
-	    break;
-	case HEX:
-	    typestr = "HEX";
-	    gethexstr(trial.data, &len, buf, 4);
-	    mit_crc32(buf, len, &cksum);
-	    break;
-	default:
-	    typestr = "BOGUS";
-	    fprintf(stderr, "bad trial type %d\n", trial.type);
-	    exit(1);
-	}
-	printf("%s: %s \"%s\" = 0x%08lx\n",
-	       (trial.sum == cksum) ? "OK" : "***BAD***",
-	       typestr, trial.data, cksum);
+        trial = trials[i];
+        switch (trial.type) {
+        case STR:
+            len = strlen(trial.data);
+            typestr = "STR";
+            mit_crc32(trial.data, len, &cksum);
+            break;
+        case HEX:
+            typestr = "HEX";
+            gethexstr(trial.data, &len, buf, 4);
+            mit_crc32(buf, len, &cksum);
+            break;
+        default:
+            typestr = "BOGUS";
+            fprintf(stderr, "bad trial type %d\n", trial.type);
+            exit(1);
+        }
+        printf("%s: %s \"%s\" = 0x%08lx\n",
+               (trial.sum == cksum) ? "OK" : "***BAD***",
+               typestr, trial.data, cksum);
     }
 }
 

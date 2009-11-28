@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -30,33 +31,33 @@
 
 static krb5_error_code
 k5_descbc_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
-	       const krb5_data *input, krb5_data *output)
+               const krb5_data *input, krb5_data *output)
 {
     mit_des_key_schedule schedule;
 
     if (key->keyblock.length != 8)
-	return(KRB5_BAD_KEYSIZE);
+        return(KRB5_BAD_KEYSIZE);
     if ((input->length%8) != 0)
-	return(KRB5_BAD_MSIZE);
+        return(KRB5_BAD_MSIZE);
     if (ivec && (ivec->length != 8))
-	return(KRB5_CRYPTO_INTERNAL);
+        return(KRB5_CRYPTO_INTERNAL);
     if (output->length != 8)
-	return(KRB5_CRYPTO_INTERNAL);
+        return(KRB5_CRYPTO_INTERNAL);
 
     switch (mit_des_key_sched(key->keyblock.contents, schedule)) {
     case -1:
-	return(KRB5DES_BAD_KEYPAR);
+        return(KRB5DES_BAD_KEYPAR);
     case -2:
-	return(KRB5DES_WEAK_KEY);
+        return(KRB5DES_WEAK_KEY);
     }
 
     /* this has a return value, but it's useless to us */
 
     mit_des_cbc_cksum((unsigned char *) input->data,
-		      (unsigned char *) output->data, input->length,
-		      schedule,
-		      ivec? (const unsigned char *)ivec->data:
-		            (const unsigned char *)mit_des_zeroblock);
+                      (unsigned char *) output->data, input->length,
+                      schedule,
+                      ivec? (const unsigned char *)ivec->data:
+                      (const unsigned char *)mit_des_zeroblock);
 
     memset(schedule, 0, sizeof(schedule));
 

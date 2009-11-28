@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/krb/rand2key/des_rand2key.c
  *
@@ -32,9 +33,9 @@ krb5_error_code
 krb5int_des_make_key(const krb5_data *randombits, krb5_keyblock *key)
 {
     if (key->length != KRB5_MIT_DES_KEYSIZE)
-    return(KRB5_BAD_KEYSIZE);
+        return(KRB5_BAD_KEYSIZE);
     if (randombits->length != 7)
-    return(KRB5_CRYPTO_INTERNAL);
+        return(KRB5_CRYPTO_INTERNAL);
 
     key->magic = KV5M_KEYBLOCK;
 
@@ -43,9 +44,9 @@ krb5int_des_make_key(const krb5_data *randombits, krb5_keyblock *key)
 
     memcpy(key->contents, randombits->data, randombits->length);
     key->contents[7] = (((key->contents[0]&1)<<1) | ((key->contents[1]&1)<<2) |
-            ((key->contents[2]&1)<<3) | ((key->contents[3]&1)<<4) |
-            ((key->contents[4]&1)<<5) | ((key->contents[5]&1)<<6) |
-            ((key->contents[6]&1)<<7));
+                        ((key->contents[2]&1)<<3) | ((key->contents[3]&1)<<4) |
+                        ((key->contents[4]&1)<<5) | ((key->contents[5]&1)<<6) |
+                        ((key->contents[6]&1)<<7));
 
     mit_des_fixup_key_parity(key->contents);
 

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -29,8 +30,8 @@
 
 void
 krb5_raw_encrypt_length(const struct krb5_enc_provider *enc,
-			const struct krb5_hash_provider *hash,
-			size_t inputlen, size_t *length)
+                        const struct krb5_hash_provider *hash,
+                        size_t inputlen, size_t *length)
 {
     size_t blocksize;
 
@@ -41,10 +42,10 @@ krb5_raw_encrypt_length(const struct krb5_enc_provider *enc,
 
 krb5_error_code
 krb5int_raw_encrypt(const struct krb5_enc_provider *enc,
-		 const struct krb5_hash_provider *hash,
-		 krb5_key key, krb5_keyusage usage,
-		 const krb5_data *ivec, const krb5_data *input,
-		 krb5_data *output)
+                    const struct krb5_hash_provider *hash,
+                    krb5_key key, krb5_keyusage usage,
+                    const krb5_data *ivec, const krb5_data *input,
+                    krb5_data *output)
 {
     return((*(enc->encrypt))(key, ivec, input, output));
 }

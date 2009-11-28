@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/make_checksum_iov.c
  *
@@ -30,11 +31,11 @@
 
 krb5_error_code KRB5_CALLCONV
 krb5_k_make_checksum_iov(krb5_context context,
-			 krb5_cksumtype cksumtype,
-			 krb5_key key,
-			 krb5_keyusage usage,
-			 krb5_crypto_iov *data,
-			 size_t num_data)
+                         krb5_cksumtype cksumtype,
+                         krb5_key key,
+                         krb5_keyusage usage,
+                         krb5_crypto_iov *data,
+                         size_t num_data)
 {
     unsigned int i;
     size_t cksumlen;
@@ -44,37 +45,37 @@ krb5_k_make_checksum_iov(krb5_context context,
     const struct krb5_cksumtypes *ctp;
 
     for (i = 0; i < krb5int_cksumtypes_length; i++) {
-	if (krb5int_cksumtypes_list[i].ctype == cksumtype)
-	    break;
+        if (krb5int_cksumtypes_list[i].ctype == cksumtype)
+            break;
     }
     if (i == krb5int_cksumtypes_length)
-	return KRB5_BAD_ENCTYPE;
+        return KRB5_BAD_ENCTYPE;
     ctp = &krb5int_cksumtypes_list[i];
 
     if (ctp->keyhash != NULL)
-	cksum_data.length = ctp->keyhash->hashsize;
+        cksum_data.length = ctp->keyhash->hashsize;
     else
-	cksum_data.length = ctp->hash->hashsize;
+        cksum_data.length = ctp->hash->hashsize;
 
     if (ctp->trunc_size != 0)
-	cksumlen = ctp->trunc_size;
+        cksumlen = ctp->trunc_size;
     else
-	cksumlen = cksum_data.length;
+        cksumlen = cksum_data.length;
 
     checksum = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_CHECKSUM);
     if (checksum == NULL || checksum->data.length < cksumlen)
-	return(KRB5_BAD_MSIZE);
+        return(KRB5_BAD_MSIZE);
 
     cksum_data.data = malloc(cksum_data.length);
     if (cksum_data.data == NULL)
-	return(ENOMEM);
+        return(ENOMEM);
 
     ret = krb5int_c_make_checksum_iov(&krb5int_cksumtypes_list[i],
-				      key, usage, data, num_data,
-				      &cksum_data);
+                                      key, usage, data, num_data,
+                                      &cksum_data);
     if (ret == 0) {
-	memcpy(checksum->data.data, cksum_data.data, cksumlen);
-	checksum->data.length = cksumlen;
+        memcpy(checksum->data.data, cksum_data.data, cksumlen);
+        checksum->data.length = cksumlen;
     }
 
     free(cksum_data.data);
@@ -84,20 +85,20 @@ krb5_k_make_checksum_iov(krb5_context context,
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_make_checksum_iov(krb5_context context,
-			 krb5_cksumtype cksumtype,
-			 const krb5_keyblock *keyblock,
-			 krb5_keyusage usage,
-			 krb5_crypto_iov *data,
-			 size_t num_data)
+                         krb5_cksumtype cksumtype,
+                         const krb5_keyblock *keyblock,
+                         krb5_keyusage usage,
+                         krb5_crypto_iov *data,
+                         size_t num_data)
 {
     krb5_key key;
     krb5_error_code ret;
 
     ret = krb5_k_create_key(context, keyblock, &key);
     if (ret != 0)
-	return ret;
+        return ret;
     ret = krb5_k_make_checksum_iov(context, cksumtype, key, usage,
-				   data, num_data);
+                                   data, num_data);
     krb5_k_free_key(context, key);
     return ret;
 }

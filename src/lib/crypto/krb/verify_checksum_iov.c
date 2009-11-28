@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/verify_checksum_iov.c
  *
@@ -30,12 +31,12 @@
 
 krb5_error_code KRB5_CALLCONV
 krb5_k_verify_checksum_iov(krb5_context context,
-			   krb5_cksumtype checksum_type,
-			   krb5_key key,
-			   krb5_keyusage usage,
-			   const krb5_crypto_iov *data,
-			   size_t num_data,
-			   krb5_boolean *valid)
+                           krb5_cksumtype checksum_type,
+                           krb5_key key,
+                           krb5_keyusage usage,
+                           const krb5_crypto_iov *data,
+                           size_t num_data,
+                           krb5_boolean *valid)
 {
     unsigned int i;
     const struct krb5_cksumtypes *ctp;
@@ -45,51 +46,51 @@ krb5_k_verify_checksum_iov(krb5_context context,
     krb5_crypto_iov *checksum;
 
     for (i = 0; i < krb5int_cksumtypes_length; i++) {
-	if (krb5int_cksumtypes_list[i].ctype == checksum_type)
-	    break;
+        if (krb5int_cksumtypes_list[i].ctype == checksum_type)
+            break;
     }
     if (i == krb5int_cksumtypes_length)
-	return KRB5_BAD_ENCTYPE;
+        return KRB5_BAD_ENCTYPE;
     ctp = &krb5int_cksumtypes_list[i];
 
     checksum = krb5int_c_locate_iov((krb5_crypto_iov *)data, num_data,
-				    KRB5_CRYPTO_TYPE_CHECKSUM);
+                                    KRB5_CRYPTO_TYPE_CHECKSUM);
     if (checksum == NULL)
-	return(KRB5_BAD_MSIZE);
+        return(KRB5_BAD_MSIZE);
 
     /* If there's actually a verify function, call it. */
     if (ctp->keyhash && ctp->keyhash->verify_iov) {
-	return (*ctp->keyhash->verify_iov)(key, usage, 0, data, num_data,
-					   &checksum->data, valid);
+        return (*ctp->keyhash->verify_iov)(key, usage, 0, data, num_data,
+                                           &checksum->data, valid);
     }
 
     /* Otherwise, make the checksum again, and compare. */
     if (ctp->keyhash != NULL)
-	computed.length = ctp->keyhash->hashsize;
+        computed.length = ctp->keyhash->hashsize;
     else
-	computed.length = ctp->hash->hashsize;
+        computed.length = ctp->hash->hashsize;
 
     if (ctp->trunc_size != 0)
-	cksumlen = ctp->trunc_size;
+        cksumlen = ctp->trunc_size;
     else
-	cksumlen = computed.length;
+        cksumlen = computed.length;
 
     if (checksum->data.length != cksumlen)
-	return KRB5_BAD_MSIZE;
+        return KRB5_BAD_MSIZE;
 
     computed.data = malloc(computed.length);
     if (computed.data == NULL)
-	return ENOMEM;
+        return ENOMEM;
 
     ret = krb5int_c_make_checksum_iov(&krb5int_cksumtypes_list[i], key, usage,
-				      data, num_data, &computed);
+                                      data, num_data, &computed);
     if (ret) {
-	free(computed.data);
-	return ret;
+        free(computed.data);
+        return ret;
     }
 
     *valid = (computed.length == cksumlen) &&
-	     (memcmp(computed.data, checksum->data.data, cksumlen) == 0);
+        (memcmp(computed.data, checksum->data.data, cksumlen) == 0);
 
     free(computed.data);
     return 0;
@@ -97,21 +98,21 @@ krb5_k_verify_checksum_iov(krb5_context context,
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_verify_checksum_iov(krb5_context context,
-			   krb5_cksumtype checksum_type,
-			   const krb5_keyblock *keyblock,
-			   krb5_keyusage usage,
-			   const krb5_crypto_iov *data,
-			   size_t num_data,
-			   krb5_boolean *valid)
+                           krb5_cksumtype checksum_type,
+                           const krb5_keyblock *keyblock,
+                           krb5_keyusage usage,
+                           const krb5_crypto_iov *data,
+                           size_t num_data,
+                           krb5_boolean *valid)
 {
     krb5_key key;
     krb5_error_code ret;
 
     ret = krb5_k_create_key(context, keyblock, &key);
     if (ret != 0)
-	return ret;
+        return ret;
     ret = krb5_k_verify_checksum_iov(context, checksum_type, key, usage, data,
-				     num_data, valid);
+                                     num_data, valid);
     krb5_k_free_key(context, key);
     return ret;
 }

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -30,21 +31,21 @@
 
 static krb5_error_code
 k5_sha1_hash(unsigned int icount, const krb5_data *input,
-	     krb5_data *output)
+             krb5_data *output)
 {
     SHS_INFO ctx;
     unsigned int i;
 
     if (output->length != SHS_DIGESTSIZE)
-	return(KRB5_CRYPTO_INTERNAL);
+        return(KRB5_CRYPTO_INTERNAL);
 
     shsInit(&ctx);
     for (i=0; i<icount; i++)
-	shsUpdate(&ctx, (unsigned char *) input[i].data, input[i].length);
+        shsUpdate(&ctx, (unsigned char *) input[i].data, input[i].length);
     shsFinal(&ctx);
 
     for (i=0; i<(sizeof(ctx.digest)/sizeof(ctx.digest[0])); i++) {
-	store_32_be(ctx.digest[i], &output->data[i*4]);
+        store_32_be(ctx.digest[i], &output->data[i*4]);
     }
 
     return(0);

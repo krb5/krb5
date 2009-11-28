@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/keyhash_provider/md5_hmac.c
  *
@@ -34,32 +35,32 @@
 
 static  krb5_error_code
 k5_md5_hmac_hash (krb5_key key, krb5_keyusage usage,
-		  const krb5_data *iv,
-		  const krb5_data *input, krb5_data *output)
+                  const krb5_data *iv,
+                  const krb5_data *input, krb5_data *output)
 {
-  krb5_keyusage ms_usage;
-  krb5_MD5_CTX ctx;
-  unsigned char t[4];
-  krb5_data ds;
+    krb5_keyusage ms_usage;
+    krb5_MD5_CTX ctx;
+    unsigned char t[4];
+    krb5_data ds;
 
-  krb5int_MD5Init(&ctx);
+    krb5int_MD5Init(&ctx);
 
-  ms_usage = krb5int_arcfour_translate_usage (usage);
-  store_32_le(ms_usage, t);
-  krb5int_MD5Update(&ctx, t, sizeof(t));
-  krb5int_MD5Update(&ctx, (unsigned char *)input->data, input->length);
-  krb5int_MD5Final(&ctx);
+    ms_usage = krb5int_arcfour_translate_usage (usage);
+    store_32_le(ms_usage, t);
+    krb5int_MD5Update(&ctx, t, sizeof(t));
+    krb5int_MD5Update(&ctx, (unsigned char *)input->data, input->length);
+    krb5int_MD5Final(&ctx);
 
-  ds.magic = KV5M_DATA;
-  ds.length = 16;
-  ds.data = (char *)ctx.digest;
+    ds.magic = KV5M_DATA;
+    ds.length = 16;
+    ds.data = (char *)ctx.digest;
 
-  return krb5int_hmac ( &krb5int_hash_md5, key, 1, &ds, output);
+    return krb5int_hmac ( &krb5int_hash_md5, key, 1, &ds, output);
 }
 
 const struct krb5_keyhash_provider krb5int_keyhash_md5_hmac = {
-  16,
-  k5_md5_hmac_hash,
-  NULL, /*checksum  again*/
-  NULL, NULL
+    16,
+    k5_md5_hmac_hash,
+    NULL, /*checksum  again*/
+    NULL, NULL
 };

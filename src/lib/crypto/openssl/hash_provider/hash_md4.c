@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -30,17 +31,17 @@
 
 static krb5_error_code
 k5_md4_hash(unsigned int icount, const krb5_data *input,
-	    krb5_data *output)
+            krb5_data *output)
 {
     krb5_MD4_CTX ctx;
     unsigned int i;
 
     if (output->length != RSA_MD4_CKSUM_LENGTH)
-	return(KRB5_CRYPTO_INTERNAL);
+        return(KRB5_CRYPTO_INTERNAL);
 
     krb5int_MD4Init(&ctx);
     for (i=0; i<icount; i++)
-	krb5int_MD4Update(&ctx, (unsigned char *) input[i].data, input[i].length);
+        krb5int_MD4Update(&ctx, (unsigned char *) input[i].data, input[i].length);
     krb5int_MD4Final(&ctx);
 
     memcpy(output->data, ctx.digest, RSA_MD4_CKSUM_LENGTH);

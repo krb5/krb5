@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -60,8 +61,8 @@ struct krb5_cksumtypes {
     unsigned int trunc_size;
 };
 
-#define KRB5_CKSUMFLAG_DERIVE		0x0001
-#define KRB5_CKSUMFLAG_NOT_COLL_PROOF	0x0002
+#define KRB5_CKSUMFLAG_DERIVE           0x0001
+#define KRB5_CKSUMFLAG_NOT_COLL_PROOF   0x0002
 
 extern const struct krb5_cksumtypes krb5int_cksumtypes_list[];
 extern const unsigned int krb5int_cksumtypes_length;

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/des/verify.c
  *
@@ -27,8 +28,8 @@
  * Program to test the correctness of the DES library
  * implementation.
  *
- * exit returns	 0 ==> success
- * 		-1 ==> error
+ * exit returns  0 ==> success
+ *              -1 ==> error
  */
 
 /*
@@ -140,35 +141,35 @@ main(argc,argv)
     /* Set screen window buffer to infinite size -- MS default is tiny.  */
     _wsetscreenbuf (fileno (stdout), _WINBUFINF);
 #endif
-    progname=argv[0];		/* salt away invoking program */
+    progname=argv[0];           /* salt away invoking program */
 
     while (--argc > 0 && (*++argv)[0] == '-')
-	for (i=1; argv[0][i] != '\0'; i++) {
-	    switch (argv[0][i]) {
+        for (i=1; argv[0][i] != '\0'; i++) {
+            switch (argv[0][i]) {
 
-		/* debug flag */
-	    case 'd':
-		mit_des_debug=3;
-		continue;
+                /* debug flag */
+            case 'd':
+                mit_des_debug=3;
+                continue;
 
-	    case 'z':
-		zflag = 1;
-		continue;
+            case 'z':
+                zflag = 1;
+                continue;
 
-	    case 'm':
-		mflag = 1;
-		continue;
+            case 'm':
+                mflag = 1;
+                continue;
 
-	    default:
-		printf("%s: illegal flag \"%c\" ",
-		       progname,argv[0][i]);
-		exit(1);
-	    }
-	};
+            default:
+                printf("%s: illegal flag \"%c\" ",
+                       progname,argv[0][i]);
+                exit(1);
+            }
+        };
 
     if (argc) {
-	fprintf(stderr, "Usage: %s [-dmz]\n", progname);
-	exit(1);
+        fprintf(stderr, "Usage: %s [-dmz]\n", progname);
+        exit(1);
     }
 
     /* do some initialisation */
@@ -177,92 +178,92 @@ main(argc,argv)
 
     /* ECB zero text zero key */
     if (zflag) {
-	input = zero_text;
-	mit_des_key_sched(zero_key, sched);
-	printf("plaintext = key = 0, cipher = 0x8ca64de9c1b123a7\n");
-	do_encrypt(input,cipher_text);
-	printf("\tcipher  = (low to high bytes)\n\t\t");
-	for (j = 0; j<=7; j++)
-	    printf("%02x ",cipher_text[j]);
-	printf("\n");
-	do_decrypt(output,cipher_text);
-	if ( memcmp((char *)cipher_text, (char *)zresult, 8) ) {
-	    printf("verify: error in zero key test\n");
-	    exit(-1);
-	}
+        input = zero_text;
+        mit_des_key_sched(zero_key, sched);
+        printf("plaintext = key = 0, cipher = 0x8ca64de9c1b123a7\n");
+        do_encrypt(input,cipher_text);
+        printf("\tcipher  = (low to high bytes)\n\t\t");
+        for (j = 0; j<=7; j++)
+            printf("%02x ",cipher_text[j]);
+        printf("\n");
+        do_decrypt(output,cipher_text);
+        if ( memcmp((char *)cipher_text, (char *)zresult, 8) ) {
+            printf("verify: error in zero key test\n");
+            exit(-1);
+        }
 
-	exit(0);
+        exit(0);
     }
 
     if (mflag) {
-	input = msb_text;
-	mit_des_key_sched(key3, sched);
-	printf("plaintext = 0x00 00 00 00 00 00 00 40, ");
-	printf("key = 0x80 01 01 01 01 01 01 01\n");
-	printf("	cipher = 0xa380e02a6be54696\n");
-	do_encrypt(input,cipher_text);
-	printf("\tcipher  = (low to high bytes)\n\t\t");
-	for (j = 0; j<=7; j++) {
-	    printf("%02x ",cipher_text[j]);
-	}
-	printf("\n");
-	do_decrypt(output,cipher_text);
-	if ( memcmp((char *)cipher_text, (char *)mresult, 8) ) {
-	    printf("verify: error in msb test\n");
-	    exit(-1);
-	}
-	exit(0);
+        input = msb_text;
+        mit_des_key_sched(key3, sched);
+        printf("plaintext = 0x00 00 00 00 00 00 00 40, ");
+        printf("key = 0x80 01 01 01 01 01 01 01\n");
+        printf("        cipher = 0xa380e02a6be54696\n");
+        do_encrypt(input,cipher_text);
+        printf("\tcipher  = (low to high bytes)\n\t\t");
+        for (j = 0; j<=7; j++) {
+            printf("%02x ",cipher_text[j]);
+        }
+        printf("\n");
+        do_decrypt(output,cipher_text);
+        if ( memcmp((char *)cipher_text, (char *)mresult, 8) ) {
+            printf("verify: error in msb test\n");
+            exit(-1);
+        }
+        exit(0);
     }
 
     /* ECB mode Davies and Price */
     {
-	input = zero_text;
-	mit_des_key_sched(key2, sched);
-	printf("Examples per FIPS publication 81, keys ivs and cipher\n");
-	printf("in hex.  These are the correct answers, see below for\n");
-	printf("the actual answers.\n\n");
-	printf("Examples per Davies and Price.\n\n");
-	printf("EXAMPLE ECB\tkey = 08192a3b4c5d6e7f\n");
-	printf("\tclear = 0\n");
-	printf("\tcipher = 25 dd ac 3e 96 17 64 67\n");
-	printf("ACTUAL ECB\n");
-	printf("\tclear \"%s\"\n", input);
-	do_encrypt(input,cipher_text);
-	printf("\tcipher  = (low to high bytes)\n\t\t");
-	for (j = 0; j<=7; j++)
-	    printf("%02x ",cipher_text[j]);
-	printf("\n\n");
-	do_decrypt(output,cipher_text);
-	if ( memcmp((char *)cipher_text, (char *)cipher1, 8) ) {
-	    printf("verify: error in ECB encryption\n");
-	    exit(-1);
-	}
-	else
-	    printf("verify: ECB encryption is correct\n\n");
+        input = zero_text;
+        mit_des_key_sched(key2, sched);
+        printf("Examples per FIPS publication 81, keys ivs and cipher\n");
+        printf("in hex.  These are the correct answers, see below for\n");
+        printf("the actual answers.\n\n");
+        printf("Examples per Davies and Price.\n\n");
+        printf("EXAMPLE ECB\tkey = 08192a3b4c5d6e7f\n");
+        printf("\tclear = 0\n");
+        printf("\tcipher = 25 dd ac 3e 96 17 64 67\n");
+        printf("ACTUAL ECB\n");
+        printf("\tclear \"%s\"\n", input);
+        do_encrypt(input,cipher_text);
+        printf("\tcipher  = (low to high bytes)\n\t\t");
+        for (j = 0; j<=7; j++)
+            printf("%02x ",cipher_text[j]);
+        printf("\n\n");
+        do_decrypt(output,cipher_text);
+        if ( memcmp((char *)cipher_text, (char *)cipher1, 8) ) {
+            printf("verify: error in ECB encryption\n");
+            exit(-1);
+        }
+        else
+            printf("verify: ECB encryption is correct\n\n");
     }
 
     /* ECB mode */
     {
-	mit_des_key_sched(default_key, sched);
-	input = clear_text;
-	ivec = default_ivec;
-	printf("EXAMPLE ECB\tkey = 0123456789abcdef\n");
-	printf("\tclear = \"Now is the time for all \"\n");
-	printf("\tcipher = 3f a4 0e 8a 98 4d 48 15 ...\n");
-	printf("ACTUAL ECB\n\tclear \"%s\"",input);
-	do_encrypt(input,cipher_text);
-	printf("\n\tcipher	= (low to high bytes)\n\t\t");
-	for (j = 0; j<=7; j++) {
-	    printf("%02x ",cipher_text[j]);
-	}
-	printf("\n\n");
-	do_decrypt(output,cipher_text);
-	if ( memcmp((char *)cipher_text, (char *)cipher2, 8) ) {
-	    printf("verify: error in ECB encryption\n");
-	    exit(-1);
-	}
-	else
-	    printf("verify: ECB encryption is correct\n\n");
+        mit_des_key_sched(default_key, sched);
+        input = clear_text;
+        ivec = default_ivec;
+        printf("EXAMPLE ECB\tkey = 0123456789abcdef\n");
+        printf("\tclear = \"Now is the time for all \"\n");
+        printf("\tcipher = 3f a4 0e 8a 98 4d 48 15 ...\n");
+        printf("ACTUAL ECB\n\tclear \"%s\"",input);
+        do_encrypt(input,cipher_text);
+        printf("\n\tcipher      = (low to high bytes)\n\t\t");
+        for (j = 0; j<=7; j++) {
+            printf("%02x ",cipher_text[j]);
+        }
+        printf("\n\n");
+        do_decrypt(output,cipher_text);
+        if ( memcmp((char *)cipher_text, (char *)cipher2, 8) ) {
+            printf("verify: error in ECB encryption\n");
+            exit(-1);
+        }
+        else
+            printf("verify: ECB encryption is correct\n\n");
     }
 
     /* CBC mode */
@@ -276,39 +277,39 @@ main(argc,argv)
     printf("ACTUAL CBC\n\tclear \"%s\"\n",input);
     in_length =  strlen((char *)input);
     if ((retval = mit_des_cbc_encrypt((const mit_des_cblock *) input,
-				      (mit_des_cblock *) cipher_text,
-				      (size_t) in_length,
-				      sched,
-				      ivec,
-				      MIT_DES_ENCRYPT))) {
-	com_err("des verify", retval, "can't encrypt");
-	exit(-1);
+                                      (mit_des_cblock *) cipher_text,
+                                      (size_t) in_length,
+                                      sched,
+                                      ivec,
+                                      MIT_DES_ENCRYPT))) {
+        com_err("des verify", retval, "can't encrypt");
+        exit(-1);
     }
     printf("\tciphertext = (low to high bytes)\n");
     for (i = 0; i <= 2; i++) {
-	printf("\t\t");
-	for (j = 0; j <= 7; j++) {
-	    printf("%02x ",cipher_text[i*8+j]);
-	}
-	printf("\n");
+        printf("\t\t");
+        for (j = 0; j <= 7; j++) {
+            printf("%02x ",cipher_text[i*8+j]);
+        }
+        printf("\n");
     }
     if ((retval = mit_des_cbc_encrypt((const mit_des_cblock *) cipher_text,
-				      (mit_des_cblock *) clear_text,
-				      (size_t) in_length,
-				      sched,
-				      ivec,
-				      MIT_DES_DECRYPT))) {
-	com_err("des verify", retval, "can't decrypt");
-	exit(-1);
+                                      (mit_des_cblock *) clear_text,
+                                      (size_t) in_length,
+                                      sched,
+                                      ivec,
+                                      MIT_DES_DECRYPT))) {
+        com_err("des verify", retval, "can't decrypt");
+        exit(-1);
     }
     printf("\tdecrypted clear_text = \"%s\"\n",clear_text);
 
     if ( memcmp((char *)cipher_text, (char *)cipher3, in_length) ) {
-	printf("verify: error in CBC encryption\n");
-	exit(-1);
+        printf("verify: error in CBC encryption\n");
+        exit(-1);
     }
     else
-	printf("verify: CBC encryption is correct\n\n");
+        printf("verify: CBC encryption is correct\n\n");
 
     printf("EXAMPLE CBC checksum");
     printf("\tkey =  0123456789abcdef\tiv =  1234567890abcdef\n");
@@ -317,18 +318,18 @@ main(argc,argv)
     printf("or some part thereof\n");
     input = clear_text2;
     mit_des_cbc_cksum(input,cipher_text, strlen((char *)input),
-		      sched,ivec);
+                      sched,ivec);
     printf("ACTUAL CBC checksum\n");
     printf("\t\tencrypted cksum = (low to high bytes)\n\t\t");
     for (j = 0; j<=7; j++)
-	printf("%02x ",cipher_text[j]);
+        printf("%02x ",cipher_text[j]);
     printf("\n\n");
     if ( memcmp((char *)cipher_text, (char *)checksum, 8) ) {
-	printf("verify: error in CBC cheksum\n");
-	exit(-1);
+        printf("verify: error in CBC cheksum\n");
+        exit(-1);
     }
     else
-	printf("verify: CBC checksum is correct\n\n");
+        printf("verify: CBC checksum is correct\n\n");
 
     exit(0);
 }
@@ -341,18 +342,18 @@ flip(array)
     register int old,new,i,j;
     /* flips the bit order within each byte from 0 lsb to 0 msb */
     for (i = 0; i<=7; i++) {
-	old = *array;
-	new = 0;
-	for (j = 0; j<=7; j++) {
-	    if (old & 01)
-		new = new | 01;
-	    if (j < 7) {
-		old = old >> 1;
-		new = new << 1;
-	    }
-	}
-	*array = new;
-	array++;
+        old = *array;
+        new = 0;
+        for (j = 0; j<=7; j++) {
+            if (old & 01)
+                new = new | 01;
+            if (j < 7) {
+                old = old >> 1;
+                new = new << 1;
+            }
+        }
+        *array = new;
+        array++;
     }
 }
 #endif
@@ -364,20 +365,20 @@ do_encrypt(in,out)
 {
     int i, j;
     for (i =1; i<=nflag; i++) {
-	mit_des_cbc_encrypt((const mit_des_cblock *)in,
-			    (mit_des_cblock *)out,
-			    8,
-			    sched,
-			    zero_text,
-			    MIT_DES_ENCRYPT);
-	if (mit_des_debug) {
-	    printf("\nclear %s\n",in);
-	    for (j = 0; j<=7; j++)
-		printf("%02X ",in[j] & 0xff);
-	    printf("\tcipher ");
-	    for (j = 0; j<=7; j++)
-		printf("%02X ",out[j] & 0xff);
-	}
+        mit_des_cbc_encrypt((const mit_des_cblock *)in,
+                            (mit_des_cblock *)out,
+                            8,
+                            sched,
+                            zero_text,
+                            MIT_DES_ENCRYPT);
+        if (mit_des_debug) {
+            printf("\nclear %s\n",in);
+            for (j = 0; j<=7; j++)
+                printf("%02X ",in[j] & 0xff);
+            printf("\tcipher ");
+            for (j = 0; j<=7; j++)
+                printf("%02X ",out[j] & 0xff);
+        }
     }
 }
 
@@ -389,20 +390,20 @@ do_decrypt(in,out)
 {
     int i, j;
     for (i =1; i<=nflag; i++) {
-	mit_des_cbc_encrypt((const mit_des_cblock *)out,
-			    (mit_des_cblock *)in,
-			    8,
-			    sched,
-			    zero_text,
-			    MIT_DES_DECRYPT);
-	if (mit_des_debug) {
-	    printf("clear %s\n",in);
-	    for (j = 0; j<=7; j++)
-		printf("%02X ",in[j] & 0xff);
-	    printf("\tcipher ");
-	    for (j = 0; j<=7; j++)
-		printf("%02X ",out[j] & 0xff);
-	}
+        mit_des_cbc_encrypt((const mit_des_cblock *)out,
+                            (mit_des_cblock *)in,
+                            8,
+                            sched,
+                            zero_text,
+                            MIT_DES_DECRYPT);
+        if (mit_des_debug) {
+            printf("clear %s\n",in);
+            for (j = 0; j<=7; j++)
+                printf("%02X ",in[j] & 0xff);
+            printf("\tcipher ");
+            for (j = 0; j<=7; j++)
+                printf("%02X ",out[j] & 0xff);
+        }
     }
 }
 
@@ -414,5 +415,5 @@ int
 mit_des_is_weak_key(key)
     mit_des_cblock key;
 {
-    return 0;				/* fake it out for testing */
+    return 0;                           /* fake it out for testing */
 }

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/yarrow/ycipher.c
  *
@@ -38,49 +39,49 @@ krb5int_yarrow_cipher_init
 (CIPHER_CTX *ctx,
  unsigned const char * key)
 {
-  size_t keybytes, keylength;
-  const struct krb5_enc_provider *enc = &yarrow_enc_provider;
-  krb5_error_code ret;
-  krb5_data randombits;
-  krb5_keyblock keyblock;
+    size_t keybytes, keylength;
+    const struct krb5_enc_provider *enc = &yarrow_enc_provider;
+    krb5_error_code ret;
+    krb5_data randombits;
+    krb5_keyblock keyblock;
 
-  keybytes = enc->keybytes;
-  keylength = enc->keylength;
-  assert (keybytes == CIPHER_KEY_SIZE);
-  krb5_k_free_key(NULL, ctx->key);
-  ctx->key = NULL;
-  keyblock.contents = malloc(keylength);
-  keyblock.length = keylength;
-  if (keyblock.contents == NULL)
-    return (YARROW_NOMEM);
-  randombits.data = (char *) key;
-  randombits.length = keybytes;
-  ret = enc->make_key(&randombits, &keyblock);
-  if (ret != 0)
-      goto cleanup;
-  ret = krb5_k_create_key(NULL, &keyblock, &ctx->key);
+    keybytes = enc->keybytes;
+    keylength = enc->keylength;
+    assert (keybytes == CIPHER_KEY_SIZE);
+    krb5_k_free_key(NULL, ctx->key);
+    ctx->key = NULL;
+    keyblock.contents = malloc(keylength);
+    keyblock.length = keylength;
+    if (keyblock.contents == NULL)
+        return (YARROW_NOMEM);
+    randombits.data = (char *) key;
+    randombits.length = keybytes;
+    ret = enc->make_key(&randombits, &keyblock);
+    if (ret != 0)
+        goto cleanup;
+    ret = krb5_k_create_key(NULL, &keyblock, &ctx->key);
 cleanup:
-  free(keyblock.contents);
-  if (ret)
-    return YARROW_FAIL;
-  return YARROW_OK;
+    free(keyblock.contents);
+    if (ret)
+        return YARROW_FAIL;
+    return YARROW_OK;
 }
 
 int krb5int_yarrow_cipher_encrypt_block
 (CIPHER_CTX *ctx, const unsigned char *in,
  unsigned char *out)
 {
-  krb5_error_code ret;
-  krb5_data ind, outd;
-  const struct krb5_enc_provider *enc = &yarrow_enc_provider;
-  ind.data = (char *) in;
-  ind.length = CIPHER_BLOCK_SIZE;
-  outd.data = (char *) out;
-  outd.length = CIPHER_BLOCK_SIZE;
-  ret = enc->encrypt(ctx->key, 0, &ind, &outd);
-  if (ret)
-    return YARROW_FAIL;
-  return YARROW_OK;
+    krb5_error_code ret;
+    krb5_data ind, outd;
+    const struct krb5_enc_provider *enc = &yarrow_enc_provider;
+    ind.data = (char *) in;
+    ind.length = CIPHER_BLOCK_SIZE;
+    outd.data = (char *) out;
+    outd.length = CIPHER_BLOCK_SIZE;
+    ret = enc->encrypt(ctx->key, 0, &ind, &outd);
+    if (ret)
+        return YARROW_FAIL;
+    return YARROW_OK;
 }
 
 void
@@ -88,6 +89,6 @@ krb5int_yarrow_cipher_final
 (CIPHER_CTX *ctx)
 
 {
-  krb5_k_free_key(NULL, ctx->key);
-  ctx->key = NULL;
+    krb5_k_free_key(NULL, ctx->key);
+    ctx->key = NULL;
 }

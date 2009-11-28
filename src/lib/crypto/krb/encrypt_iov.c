@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/encrypt_iov.c
  *
@@ -29,38 +30,38 @@
 
 krb5_error_code KRB5_CALLCONV
 krb5_k_encrypt_iov(krb5_context context,
-		   krb5_key key,
-		   krb5_keyusage usage,
-		   const krb5_data *cipher_state,
-		   krb5_crypto_iov *data,
-		   size_t num_data)
+                   krb5_key key,
+                   krb5_keyusage usage,
+                   const krb5_data *cipher_state,
+                   krb5_crypto_iov *data,
+                   size_t num_data)
 {
     const struct krb5_keytypes *ktp;
 
     ktp = find_enctype(key->keyblock.enctype);
     if (ktp == NULL || ktp->aead == NULL)
-	return KRB5_BAD_ENCTYPE;
+        return KRB5_BAD_ENCTYPE;
 
     return (*ktp->aead->encrypt_iov)(ktp->aead, ktp->enc, ktp->hash,
-				     key, usage, cipher_state, data, num_data);
+                                     key, usage, cipher_state, data, num_data);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_encrypt_iov(krb5_context context,
-		   const krb5_keyblock *keyblock,
-		   krb5_keyusage usage,
-		   const krb5_data *cipher_state,
-		   krb5_crypto_iov *data,
-		   size_t num_data)
+                   const krb5_keyblock *keyblock,
+                   krb5_keyusage usage,
+                   const krb5_data *cipher_state,
+                   krb5_crypto_iov *data,
+                   size_t num_data)
 {
     krb5_key key;
     krb5_error_code ret;
 
     ret = krb5_k_create_key(context, keyblock, &key);
     if (ret != 0)
-	return ret;
+        return ret;
     ret = krb5_k_encrypt_iov(context, key, usage, cipher_state, data,
-			     num_data);
+                             num_data);
     krb5_k_free_key(context, key);
     return ret;
 }

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -29,27 +30,27 @@
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_string_to_key_with_params(krb5_context context,
-				 krb5_enctype enctype,
-				 const krb5_data *string,
-				 const krb5_data *salt,
-				 const krb5_data *params,
-				 krb5_keyblock *key);
+                                 krb5_enctype enctype,
+                                 const krb5_data *string,
+                                 const krb5_data *salt,
+                                 const krb5_data *params,
+                                 krb5_keyblock *key);
 
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_string_to_key(krb5_context context, krb5_enctype enctype,
-		     const krb5_data *string, const krb5_data *salt,
-		     krb5_keyblock *key)
+                     const krb5_data *string, const krb5_data *salt,
+                     krb5_keyblock *key)
 {
     return krb5_c_string_to_key_with_params(context, enctype, string, salt,
-					    NULL, key);
+                                            NULL, key);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_string_to_key_with_params(krb5_context context, krb5_enctype enctype,
-				 const krb5_data *string,
-				 const krb5_data *salt,
-				 const krb5_data *params, krb5_keyblock *key)
+                                 const krb5_data *string,
+                                 const krb5_data *salt,
+                                 const krb5_data *params, krb5_keyblock *key)
 {
     krb5_error_code ret;
     const struct krb5_keytypes *ktp;
@@ -57,7 +58,7 @@ krb5_c_string_to_key_with_params(krb5_context context, krb5_enctype enctype,
 
     ktp = find_enctype(enctype);
     if (ktp == NULL)
-	return KRB5_BAD_ENCTYPE;
+        return KRB5_BAD_ENCTYPE;
     keylength = ktp->enc->keylength;
 
     /*
@@ -66,19 +67,19 @@ krb5_c_string_to_key_with_params(krb5_context context, krb5_enctype enctype,
      * deal with this.  Using s2kparams would be a much better solution.
      */
     if (salt && salt->length == SALT_TYPE_AFS_LENGTH) {
-	switch (enctype) {
-	case ENCTYPE_DES_CBC_CRC:
-	case ENCTYPE_DES_CBC_MD4:
-	case ENCTYPE_DES_CBC_MD5:
-	    break;
-	default:
-	    return KRB5_CRYPTO_INTERNAL;
-	}
+        switch (enctype) {
+        case ENCTYPE_DES_CBC_CRC:
+        case ENCTYPE_DES_CBC_MD4:
+        case ENCTYPE_DES_CBC_MD5:
+            break;
+        default:
+            return KRB5_CRYPTO_INTERNAL;
+        }
     }
 
     key->contents = malloc(keylength);
     if (key->contents == NULL)
-	return ENOMEM;
+        return ENOMEM;
 
     key->magic = KV5M_KEYBLOCK;
     key->enctype = enctype;
@@ -86,9 +87,9 @@ krb5_c_string_to_key_with_params(krb5_context context, krb5_enctype enctype,
 
     ret = (*ktp->str2key)(ktp->enc, string, salt, params, key);
     if (ret) {
-	zapfree(key->contents, keylength);
-	key->length = 0;
-	key->contents = NULL;
+        zapfree(key->contents, keylength);
+        key->length = 0;
+        key->contents = NULL;
     }
 
     return ret;

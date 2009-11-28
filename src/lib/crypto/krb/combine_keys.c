@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (c) 2002 Naval Research Laboratory (NRL/CCS)
  *
@@ -32,7 +33,7 @@
  * R2 = DR(Key2, n-fold(Key1)) [ Output is length of Key2 ]
  *
  * rnd = n-fold(R1 | R2) [ Note: output size of nfold must be appropriately
- *			   sized for random-to-key function ]
+ *                         sized for random-to-key function ]
  * tkey = random-to-key(rnd)
  * Combine-Key(Key1, Key2) = DK(tkey, CombineConstant)
  *
@@ -47,8 +48,8 @@
 #include "dk.h"
 
 static krb5_error_code dr(const struct krb5_enc_provider *enc,
-			  const krb5_keyblock *inkey, unsigned char *outdata,
-			  const krb5_data *in_constant);
+                          const krb5_keyblock *inkey, unsigned char *outdata,
+                          const krb5_data *in_constant);
 
 /*
  * We only support this combine_keys algorithm for des and 3des keys.
@@ -64,15 +65,15 @@ enctype_ok(krb5_enctype e)
     case ENCTYPE_DES_CBC_MD4:
     case ENCTYPE_DES_CBC_MD5:
     case ENCTYPE_DES3_CBC_SHA1:
-	return TRUE;
+        return TRUE;
     default:
-	return FALSE;
+        return FALSE;
     }
 }
 
 krb5_error_code
 krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
-		       krb5_keyblock *key2, krb5_keyblock *outkey)
+                       krb5_keyblock *key2, krb5_keyblock *outkey)
 {
     unsigned char *r1 = NULL, *r2 = NULL, *combined = NULL, *rnd = NULL;
     unsigned char *output = NULL;
@@ -86,15 +87,15 @@ krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
     krb5_boolean myalloc = FALSE;
 
     if (!enctype_ok(key1->enctype) || !enctype_ok(key2->enctype))
-	return KRB5_CRYPTO_INTERNAL;
+        return KRB5_CRYPTO_INTERNAL;
 
     if (key1->length != key2->length || key1->enctype != key2->enctype)
-	return KRB5_CRYPTO_INTERNAL;
+        return KRB5_CRYPTO_INTERNAL;
 
     /* Find our encryption algorithm. */
     ktp = find_enctype(key1->enctype);
     if (ktp == NULL)
-	return KRB5_BAD_ENCTYPE;
+        return KRB5_BAD_ENCTYPE;
     enc = ktp->enc;
 
     keybytes = enc->keybytes;
@@ -103,19 +104,19 @@ krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
     /* Allocate and set up buffers. */
     r1 = k5alloc(keybytes, &ret);
     if (ret)
-	goto cleanup;
+        goto cleanup;
     r2 = k5alloc(keybytes, &ret);
     if (ret)
-	goto cleanup;
+        goto cleanup;
     rnd = k5alloc(keybytes, &ret);
     if (ret)
-	goto cleanup;
+        goto cleanup;
     combined = k5alloc(keybytes * 2, &ret);
     if (ret)
-	goto cleanup;
+        goto cleanup;
     output = k5alloc(keylength, &ret);
     if (ret)
-	goto cleanup;
+        goto cleanup;
 
     /*
      * Get R1 and R2 (by running the input keys through the DR algorithm.
@@ -126,13 +127,13 @@ krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
     input.data = (char *) key2->contents;
     ret = dr(enc, key1, r1, &input);
     if (ret)
-	goto cleanup;
+        goto cleanup;
 
     input.length = key1->length;
     input.data = (char *) key1->contents;
     ret = dr(enc, key2, r2, &input);
     if (ret)
-	goto cleanup;
+        goto cleanup;
 
     /*
      * Concatenate the two keys together, and then run them through
@@ -158,11 +159,11 @@ krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
 
     ret = (*enc->make_key)(&randbits, &tkeyblock);
     if (ret)
-	goto cleanup;
+        goto cleanup;
 
     ret = krb5_k_create_key(NULL, &tkeyblock, &tkey);
     if (ret)
-	goto cleanup;
+        goto cleanup;
 
     /*
      * Run through derive-key one more time to produce the final key.
@@ -182,21 +183,21 @@ krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
      */
 
     if (outkey->length == 0 || outkey->contents == NULL) {
-	outkey->contents = k5alloc(keylength, &ret);
-	if (ret)
-	    goto cleanup;
-	outkey->length = keylength;
-	outkey->enctype = key1->enctype;
-	myalloc = TRUE;
+        outkey->contents = k5alloc(keylength, &ret);
+        if (ret)
+            goto cleanup;
+        outkey->length = keylength;
+        outkey->enctype = key1->enctype;
+        myalloc = TRUE;
     }
 
     ret = krb5int_derive_keyblock(enc, tkey, outkey, &input);
     if (ret) {
-	if (myalloc) {
-	    free(outkey->contents);
-	    outkey->contents = NULL;
-	}
-	goto cleanup;
+        if (myalloc) {
+            free(outkey->contents);
+            outkey->contents = NULL;
+        }
+        goto cleanup;
     }
 
 cleanup:
@@ -229,13 +230,13 @@ dr(const struct krb5_enc_provider *enc, const krb5_keyblock *inkey,
     /* Allocate and set up buffers. */
     inblockdata = k5alloc(blocksize, &ret);
     if (ret)
-	goto cleanup;
+        goto cleanup;
     outblockdata = k5alloc(blocksize, &ret);
     if (ret)
-	goto cleanup;
+        goto cleanup;
     ret = krb5_k_create_key(NULL, inkey, &key);
     if (ret)
-	goto cleanup;
+        goto cleanup;
 
     inblock.data = (char *) inblockdata;
     inblock.length = blocksize;
@@ -246,28 +247,28 @@ dr(const struct krb5_enc_provider *enc, const krb5_keyblock *inkey,
     /* initialize the input block */
 
     if (in_constant->length == inblock.length) {
-	memcpy(inblock.data, in_constant->data, inblock.length);
+        memcpy(inblock.data, in_constant->data, inblock.length);
     } else {
-	krb5int_nfold(in_constant->length*8, (unsigned char *) in_constant->data,
-		   inblock.length*8, (unsigned char *) inblock.data);
+        krb5int_nfold(in_constant->length*8, (unsigned char *) in_constant->data,
+                      inblock.length*8, (unsigned char *) inblock.data);
     }
 
     /* loop encrypting the blocks until enough key bytes are generated */
 
     n = 0;
     while (n < keybytes) {
-	ret = (*enc->encrypt)(key, 0, &inblock, &outblock);
-	if (ret)
-	    goto cleanup;
+        ret = (*enc->encrypt)(key, 0, &inblock, &outblock);
+        if (ret)
+            goto cleanup;
 
-	if ((keybytes - n) <= outblock.length) {
-	    memcpy(out + n, outblock.data, (keybytes - n));
-	    break;
-	}
+        if ((keybytes - n) <= outblock.length) {
+            memcpy(out + n, outblock.data, (keybytes - n));
+            break;
+        }
 
-	memcpy(out + n, outblock.data, outblock.length);
-	memcpy(inblock.data, outblock.data, outblock.length);
-	n += outblock.length;
+        memcpy(out + n, outblock.data, outblock.length);
+        memcpy(inblock.data, outblock.data, outblock.length);
+        n += outblock.length;
     }
 
 cleanup:

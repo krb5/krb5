@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 2008 by the Massachusetts Institute of Technology.
  * Copyright 1995 by Richard P. Basch.  All Rights Reserved.
@@ -27,9 +28,9 @@
 
 void
 krb5int_des_cbc_encrypt_iov(krb5_crypto_iov *data,
-			    unsigned long num_data,
-			    const mit_des_key_schedule schedule,
-			    mit_des_cblock ivec)
+                            unsigned long num_data,
+                            const mit_des_key_schedule schedule,
+                            mit_des_cblock ivec)
 {
     unsigned DES_INT32 left, right;
     const unsigned DES_INT32 *kp;
@@ -52,9 +53,9 @@ krb5int_des_cbc_encrypt_iov(krb5_crypto_iov *data,
      * vector.
      */
     if (ivec != NULL)
-	ip = ivec;
+        ip = ivec;
     else
-	ip = mit_des_zeroblock;
+        ip = mit_des_zeroblock;
     GET_HALF_BLOCK(left, ip);
     GET_HALF_BLOCK(right, ip);
 
@@ -63,45 +64,45 @@ krb5int_des_cbc_encrypt_iov(krb5_crypto_iov *data,
      * at a time.
      */
     for (;;) {
-	unsigned DES_INT32 temp;
+        unsigned DES_INT32 temp;
 
-	ip = iblock;
-	op = oblock;
+        ip = iblock;
+        op = oblock;
 
-	if (!krb5int_c_iov_get_block(iblock, MIT_DES_BLOCK_LENGTH, data, num_data, &input_pos))
-	    break;
+        if (!krb5int_c_iov_get_block(iblock, MIT_DES_BLOCK_LENGTH, data, num_data, &input_pos))
+            break;
 
-	if (input_pos.iov_pos == num_data)
-	    break;
+        if (input_pos.iov_pos == num_data)
+            break;
 
-	GET_HALF_BLOCK(temp, ip);
-	left  ^= temp;
-	GET_HALF_BLOCK(temp, ip);
-	right ^= temp;
+        GET_HALF_BLOCK(temp, ip);
+        left  ^= temp;
+        GET_HALF_BLOCK(temp, ip);
+        right ^= temp;
 
-	/*
-	 * Encrypt what we have
-	 */
-	DES_DO_ENCRYPT(left, right, kp);
+        /*
+         * Encrypt what we have
+         */
+        DES_DO_ENCRYPT(left, right, kp);
 
-	/*
-	 * Copy the results out
-	 */
-	PUT_HALF_BLOCK(left, op);
-	PUT_HALF_BLOCK(right, op);
+        /*
+         * Copy the results out
+         */
+        PUT_HALF_BLOCK(left, op);
+        PUT_HALF_BLOCK(right, op);
 
-	krb5int_c_iov_put_block(data, num_data, oblock, MIT_DES_BLOCK_LENGTH, &output_pos);
+        krb5int_c_iov_put_block(data, num_data, oblock, MIT_DES_BLOCK_LENGTH, &output_pos);
     }
 
     if (ivec != NULL)
-	memcpy(ivec, oblock, MIT_DES_BLOCK_LENGTH);
+        memcpy(ivec, oblock, MIT_DES_BLOCK_LENGTH);
 }
 
 void
 krb5int_des_cbc_decrypt_iov(krb5_crypto_iov *data,
-			    unsigned long num_data,
-			    const mit_des_key_schedule schedule,
-			    mit_des_cblock ivec)
+                            unsigned long num_data,
+                            const mit_des_key_schedule schedule,
+                            mit_des_cblock ivec)
 {
     unsigned DES_INT32 left, right;
     const unsigned DES_INT32 *kp;
@@ -128,15 +129,15 @@ krb5int_des_cbc_decrypt_iov(krb5_crypto_iov *data,
      */
 
     if (num_data == 0)
-	return;
+        return;
 
     /*
      * Prime the old cipher with ivec.
      */
     if (ivec != NULL)
-	ip = ivec;
+        ip = ivec;
     else
-	ip = mit_des_zeroblock;
+        ip = mit_des_zeroblock;
     GET_HALF_BLOCK(ocipherl, ip);
     GET_HALF_BLOCK(ocipherr, ip);
 
@@ -144,49 +145,49 @@ krb5int_des_cbc_decrypt_iov(krb5_crypto_iov *data,
      * Now do this in earnest until we run out of length.
      */
     for (;;) {
-	/*
-	 * Read a block from the input into left and
-	 * right.  Save this cipher block for later.
-	 */
+        /*
+         * Read a block from the input into left and
+         * right.  Save this cipher block for later.
+         */
 
-	if (!krb5int_c_iov_get_block(iblock, MIT_DES_BLOCK_LENGTH, data, num_data, &input_pos))
-	    break;
+        if (!krb5int_c_iov_get_block(iblock, MIT_DES_BLOCK_LENGTH, data, num_data, &input_pos))
+            break;
 
-	if (input_pos.iov_pos == num_data)
-	    break;
+        if (input_pos.iov_pos == num_data)
+            break;
 
-	ip = iblock;
-	op = oblock;
+        ip = iblock;
+        op = oblock;
 
-	GET_HALF_BLOCK(left, ip);
-	GET_HALF_BLOCK(right, ip);
-	cipherl = left;
-	cipherr = right;
+        GET_HALF_BLOCK(left, ip);
+        GET_HALF_BLOCK(right, ip);
+        cipherl = left;
+        cipherr = right;
 
-	/*
-	 * Decrypt this.
-	 */
-	DES_DO_DECRYPT(left, right, kp);
+        /*
+         * Decrypt this.
+         */
+        DES_DO_DECRYPT(left, right, kp);
 
-	/*
-	 * Xor with the old cipher to get plain
-	 * text.  Output 8 or less bytes of this.
-	 */
-	left ^= ocipherl;
-	right ^= ocipherr;
+        /*
+         * Xor with the old cipher to get plain
+         * text.  Output 8 or less bytes of this.
+         */
+        left ^= ocipherl;
+        right ^= ocipherr;
 
-	PUT_HALF_BLOCK(left, op);
-	PUT_HALF_BLOCK(right, op);
+        PUT_HALF_BLOCK(left, op);
+        PUT_HALF_BLOCK(right, op);
 
-	/*
-	 * Save current cipher block here
-	 */
-	ocipherl = cipherl;
-	ocipherr = cipherr;
+        /*
+         * Save current cipher block here
+         */
+        ocipherl = cipherl;
+        ocipherr = cipherr;
 
-	krb5int_c_iov_put_block(data, num_data, oblock, MIT_DES_BLOCK_LENGTH, &output_pos);
+        krb5int_c_iov_put_block(data, num_data, oblock, MIT_DES_BLOCK_LENGTH, &output_pos);
     }
 
     if (ivec != NULL)
-	memcpy(ivec, oblock, MIT_DES_BLOCK_LENGTH);
+        memcpy(ivec, oblock, MIT_DES_BLOCK_LENGTH);
 }

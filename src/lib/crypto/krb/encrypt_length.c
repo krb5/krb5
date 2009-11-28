@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -30,21 +31,21 @@
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_encrypt_length(krb5_context context, krb5_enctype enctype,
-		      size_t inputlen, size_t *length)
+                      size_t inputlen, size_t *length)
 {
     const struct krb5_keytypes *ktp;
 
     ktp = find_enctype(enctype);
     if (ktp == NULL)
-	return KRB5_BAD_ENCTYPE;
+        return KRB5_BAD_ENCTYPE;
 
     if (ktp->encrypt_len == NULL) {
-	assert(ktp->aead != NULL);
+        assert(ktp->aead != NULL);
 
-	krb5int_c_encrypt_length_aead_compat(ktp->aead, ktp->enc, ktp->hash,
-					     inputlen, length);
+        krb5int_c_encrypt_length_aead_compat(ktp->aead, ktp->enc, ktp->hash,
+                                             inputlen, length);
     } else {
-	(*ktp->encrypt_len)(ktp->enc, ktp->hash, inputlen, length);
+        (*ktp->encrypt_len)(ktp->enc, ktp->hash, inputlen, length);
     }
 
     return 0;

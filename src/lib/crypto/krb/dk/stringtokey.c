@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -31,8 +32,8 @@ static const unsigned char kerberos[] = "kerberos";
 
 krb5_error_code
 krb5int_dk_string_to_key(const struct krb5_enc_provider *enc,
-			 const krb5_data *string, const krb5_data *salt,
-			 const krb5_data *parms, krb5_keyblock *keyblock)
+                         const krb5_data *string, const krb5_data *salt,
+                         const krb5_data *parms, krb5_keyblock *keyblock)
 {
     krb5_error_code ret;
     size_t keybytes, keylength, concatlen;
@@ -50,19 +51,19 @@ krb5int_dk_string_to_key(const struct krb5_enc_provider *enc,
 
     concat = k5alloc(concatlen, &ret);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
     foldstring = k5alloc(keybytes, &ret);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
     foldkeydata = k5alloc(keylength, &ret);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     /* construct input string ( = string + salt), fold it, make_key it */
 
     memcpy(concat, string->data, string->length);
     if (salt)
-	memcpy(concat + string->length, salt->data, salt->length);
+        memcpy(concat + string->length, salt->data, salt->length);
 
     krb5int_nfold(concatlen*8, concat, keybytes*8, foldstring);
 
@@ -73,11 +74,11 @@ krb5int_dk_string_to_key(const struct krb5_enc_provider *enc,
 
     ret = (*enc->make_key)(&indata, &foldkeyblock);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     ret = krb5_k_create_key(NULL, &foldkeyblock, &foldkey);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     /* now derive the key from this one */
 
@@ -86,7 +87,7 @@ krb5int_dk_string_to_key(const struct krb5_enc_provider *enc,
 
     ret = krb5int_derive_keyblock(enc, foldkey, keyblock, &indata);
     if (ret != 0)
-	memset(keyblock->contents, 0, keyblock->length);
+        memset(keyblock->contents, 0, keyblock->length);
 
 cleanup:
     zapfree(concat, concatlen);

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/pbkdf2.c
  *
@@ -48,13 +49,13 @@
  */
 
 typedef krb5_error_code (*prf_func)(krb5_key pass, krb5_data *salt,
-				    krb5_data *out);
+                                    krb5_data *out);
 
 /* Not exported, for now.  */
 static krb5_error_code
 krb5int_pbkdf2 (prf_func prf, size_t hlen, krb5_key pass,
-		const krb5_data *salt, unsigned long count,
-		const krb5_data *output);
+                const krb5_data *salt, unsigned long count,
+                const krb5_data *output);
 
 static int debug_hmac = 0;
 
@@ -65,16 +66,16 @@ static void printd (const char *descr, krb5_data *d) {
     printf("%s:", descr);
 
     for (i = 0; i < d->length; i += r) {
-	printf("\n  %04x: ", i);
-	for (j = i; j < i + r && j < d->length; j++)
-	    printf(" %02x", 0xff & d->data[j]);
-	for (; j < i + r; j++)
-	    printf("   ");
-	printf("   ");
-	for (j = i; j < i + r && j < d->length; j++) {
-	    int c = 0xff & d->data[j];
-	    printf("%c", isprint(c) ? c : '.');
-	}
+        printf("\n  %04x: ", i);
+        for (j = i; j < i + r && j < d->length; j++)
+            printf(" %02x", 0xff & d->data[j]);
+        for (; j < i + r; j++)
+            printf("   ");
+        printf("   ");
+        for (j = i; j < i + r && j < d->length; j++) {
+            int c = 0xff & d->data[j];
+            printf("%c", isprint(c) ? c : '.');
+        }
     }
     printf("\n");
 }
@@ -92,7 +93,7 @@ F(char *output, char *u_tmp1, char *u_tmp2, prf_func prf, size_t hlen,
 
 #if 0
     printf("F(i=%d, count=%lu, pass=%d:%s)\n", i, count,
-	   pass->length, pass->data);
+           pass->length, pass->data);
 #endif
 
     /* Compute U_1.  */
@@ -117,7 +118,7 @@ F(char *output, char *u_tmp1, char *u_tmp2, prf_func prf, size_t hlen,
 #endif
     err = (*prf)(pass, &sdata, &out);
     if (err)
-	return err;
+        return err;
 #if 0
     printd("F: prf return value", &out);
 #endif
@@ -127,23 +128,23 @@ F(char *output, char *u_tmp1, char *u_tmp2, prf_func prf, size_t hlen,
     sdata.length = hlen;
     for (j = 2; j <= count; j++) {
 #if 0
-	printf("F: computing hmac #%d (U_%d)\n", j, j);
+        printf("F: computing hmac #%d (U_%d)\n", j, j);
 #endif
-	memcpy(u_tmp2, u_tmp1, hlen);
-	err = (*prf)(pass, &sdata, &out);
-	if (err)
-	    return err;
+        memcpy(u_tmp2, u_tmp1, hlen);
+        err = (*prf)(pass, &sdata, &out);
+        if (err)
+            return err;
 #if 0
-	printd("F: prf return value", &out);
+        printd("F: prf return value", &out);
 #endif
-	/* And xor them together.  */
-	for (k = 0; k < hlen; k++)
-	    output[k] ^= u_tmp1[k];
+        /* And xor them together.  */
+        for (k = 0; k < hlen; k++)
+            output[k] ^= u_tmp1[k];
 #if 0
-	printf("F: xor result:\n");
-	for (k = 0; k < hlen; k++)
-	    printf(" %02x", 0xff & output[k]);
-	printf("\n");
+        printf("F: xor result:\n");
+        for (k = 0; k < hlen; k++)
+            printf(" %02x", 0xff & output[k]);
+        printf("\n");
 #endif
     }
     return 0;
@@ -151,58 +152,58 @@ F(char *output, char *u_tmp1, char *u_tmp2, prf_func prf, size_t hlen,
 
 static krb5_error_code
 krb5int_pbkdf2 (prf_func prf, size_t hlen, krb5_key pass,
-		const krb5_data *salt, unsigned long count,
-		const krb5_data *output)
+                const krb5_data *salt, unsigned long count,
+                const krb5_data *output)
 {
     int l, r, i;
     char *utmp1, *utmp2;
-    char utmp3[20];		/* XXX length shouldn't be hardcoded! */
+    char utmp3[20];             /* XXX length shouldn't be hardcoded! */
 
     if (output->length == 0 || hlen == 0)
-	abort();
+        abort();
     /* Step 1 & 2.  */
     if (output->length / hlen > 0xffffffff)
-	abort();
+        abort();
     /* Step 2.  */
     l = (output->length + hlen - 1) / hlen;
     r = output->length - (l - 1) * hlen;
 
     utmp1 = /*output + dklen; */ malloc(hlen);
     if (utmp1 == NULL)
-	return ENOMEM;
+        return ENOMEM;
     utmp2 = /*utmp1 + hlen; */ malloc(salt->length + 4 + hlen);
     if (utmp2 == NULL) {
-	free(utmp1);
-	return ENOMEM;
+        free(utmp1);
+        return ENOMEM;
     }
 
     /* Step 3.  */
     for (i = 1; i <= l; i++) {
 #if 0
-	int j;
+        int j;
 #endif
-	krb5_error_code err;
-	char *out;
+        krb5_error_code err;
+        char *out;
 
-	if (i == l)
-	    out = utmp3;
-	else
-	    out = output->data + (i-1) * hlen;
-	err = F(out, utmp1, utmp2, prf, hlen, pass, salt, count, i);
-	if (err) {
-	    free(utmp1);
-	    free(utmp2);
-	    return err;
-	}
-	if (i == l)
-	    memcpy(output->data + (i-1) * hlen, utmp3,
-		   output->length - (i-1) * hlen);
+        if (i == l)
+            out = utmp3;
+        else
+            out = output->data + (i-1) * hlen;
+        err = F(out, utmp1, utmp2, prf, hlen, pass, salt, count, i);
+        if (err) {
+            free(utmp1);
+            free(utmp2);
+            return err;
+        }
+        if (i == l)
+            memcpy(output->data + (i-1) * hlen, utmp3,
+                   output->length - (i-1) * hlen);
 
 #if 0
-	printf("after F(%d), @%p:\n", i, output->data);
-	for (j = (i-1) * hlen; j < i * hlen; j++)
-	    printf(" %02x", 0xff & output->data[j]);
-	printf ("\n");
+        printf("after F(%d), @%p:\n", i, output->data);
+        for (j = (i-1) * hlen; j < i * hlen; j++)
+            printf(" %02x", 0xff & output->data[j]);
+        printf ("\n");
 #endif
     }
     free(utmp1);
@@ -222,16 +223,16 @@ hmac_sha1(krb5_key pass, krb5_data *salt, krb5_data *out)
     krb5_error_code err;
 
     if (debug_hmac)
-	printd(" hmac input", salt);
+        printd(" hmac input", salt);
     err = krb5int_hmac(h, pass, 1, salt, out);
     if (err == 0 && debug_hmac)
-	printd(" hmac output", out);
+        printd(" hmac output", out);
     return err;
 }
 
 krb5_error_code
 krb5int_pbkdf2_hmac_sha1 (const krb5_data *out, unsigned long count,
-			  const krb5_data *pass, const krb5_data *salt)
+                          const krb5_data *pass, const krb5_data *salt)
 {
     const struct krb5_hash_provider *h = &krb5int_hash_sha1;
     krb5_keyblock keyblock;
@@ -242,21 +243,21 @@ krb5int_pbkdf2_hmac_sha1 (const krb5_data *out, unsigned long count,
 
     assert(h->hashsize <= sizeof(tmp));
     if (pass->length > h->blocksize) {
-	d.data = tmp;
-	d.length = h->hashsize;
-	err = h->hash (1, pass, &d);
-	if (err)
-	    return err;
-	keyblock.length = d.length;
-	keyblock.contents = (krb5_octet *) d.data;
+        d.data = tmp;
+        d.length = h->hashsize;
+        err = h->hash (1, pass, &d);
+        if (err)
+            return err;
+        keyblock.length = d.length;
+        keyblock.contents = (krb5_octet *) d.data;
     } else {
-	keyblock.length = pass->length;
-	keyblock.contents = (krb5_octet *) pass->data;
+        keyblock.length = pass->length;
+        keyblock.contents = (krb5_octet *) pass->data;
     }
 
     err = krb5_k_create_key(NULL, &keyblock, &key);
     if (err)
-	return err;
+        return err;
 
     err = krb5int_pbkdf2(hmac_sha1, 20, key, salt, count, out);
     krb5_k_free_key(NULL, key);

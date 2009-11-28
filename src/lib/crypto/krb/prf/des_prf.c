@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/krb/prf//des_prf.c
  *
@@ -30,24 +31,24 @@
  */
 
 #include "prf_int.h"
-//#include <hash_provider/hash_provider.h>		/* XXX is this ok? */
+//#include <hash_provider/hash_provider.h>              /* XXX is this ok? */
 
 krb5_error_code
 krb5int_des_prf (const struct krb5_enc_provider *enc,
-		const struct krb5_hash_provider *hash,
-		krb5_key key, const krb5_data *in, krb5_data *out)
+                 const struct krb5_hash_provider *hash,
+                 krb5_key key, const krb5_data *in, krb5_data *out)
 {
-  krb5_data tmp;
-  krb5_error_code ret = 0;
+    krb5_data tmp;
+    krb5_error_code ret = 0;
 
-  hash = &krb5int_hash_md5;		/* MD5 is always used. */
-  tmp.length = hash->hashsize;
-  tmp.data = malloc(hash->hashsize);
-  if (tmp.data == NULL)
-    return ENOMEM;
-  ret = hash->hash(1, in, &tmp);
-  if (ret == 0)
-      ret = enc->encrypt(key, NULL, &tmp, out);
-  free(tmp.data);
-  return ret;
+    hash = &krb5int_hash_md5;             /* MD5 is always used. */
+    tmp.length = hash->hashsize;
+    tmp.data = malloc(hash->hashsize);
+    if (tmp.data == NULL)
+        return ENOMEM;
+    ret = hash->hash(1, in, &tmp);
+    if (ret == 0)
+        ret = enc->encrypt(key, NULL, &tmp, out);
+    free(tmp.data);
+    return ret;
 }

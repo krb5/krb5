@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * include/krb5/crc-32.h
  *
@@ -57,15 +58,15 @@
 #ifndef KRB5_CRC32__
 #define KRB5_CRC32__
 
-#define CRC32_CKSUM_LENGTH	4
+#define CRC32_CKSUM_LENGTH      4
 
 void
 mit_crc32 (krb5_pointer in, size_t in_length, unsigned long *c);
 
 #ifdef CRC32_SHIFT4
 void mit_crc32_shift4(krb5_pointer /* in */,
-		      size_t /* in_length */,
-		      unsigned long * /* cksum */);
+                      size_t /* in_length */,
+                      unsigned long * /* cksum */);
 #endif
 
 #endif /* KRB5_CRC32__ */

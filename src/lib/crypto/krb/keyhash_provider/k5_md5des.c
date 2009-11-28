@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -48,10 +49,10 @@ mk_xorkey(krb5_key origkey, krb5_key *xorkey)
     size_t i = 0;
 
     if (origkey->keyblock.length != sizeof(xorbytes))
-	return KRB5_CRYPTO_INTERNAL;
+        return KRB5_CRYPTO_INTERNAL;
     memcpy(xorbytes, origkey->keyblock.contents, sizeof(xorbytes));
     for (i = 0; i < sizeof(xorbytes); i++)
-	xorbytes[i] ^= 0xf0;
+        xorbytes[i] ^= 0xf0;
 
     /* Do a shallow copy here. */
     xorkeyblock = origkey->keyblock;
@@ -64,7 +65,7 @@ mk_xorkey(krb5_key origkey, krb5_key *xorkey)
 
 static krb5_error_code
 k5_md5des_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
-	       const krb5_data *input, krb5_data *output)
+               const krb5_data *input, krb5_data *output)
 {
     krb5_error_code ret;
     krb5_data data;
@@ -74,25 +75,25 @@ k5_md5des_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
     struct krb5_enc_provider *enc = &krb5int_enc_des;
 
     if (output->length != (CONFLENGTH+RSA_MD5_CKSUM_LENGTH))
-	return(KRB5_CRYPTO_INTERNAL);
+        return(KRB5_CRYPTO_INTERNAL);
 
     /* create the confouder */
 
     data.length = CONFLENGTH;
     data.data = (char *) conf;
     if ((ret = krb5_c_random_make_octets(/* XXX */ 0, &data)))
-	return(ret);
+        return(ret);
 
     ret = mk_xorkey(key, &xorkey);
     if (ret)
-	return ret;
+        return ret;
 
     /* hash the confounder, then the input data */
 
     krb5int_MD5Init(&ctx);
     krb5int_MD5Update(&ctx, conf, CONFLENGTH);
     krb5int_MD5Update(&ctx, (unsigned char *) input->data,
-		   (unsigned int) input->length);
+                      (unsigned int) input->length);
     krb5int_MD5Final(&ctx);
 
     /* construct the buffer to be encrypted */
@@ -110,8 +111,8 @@ k5_md5des_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
 
 static krb5_error_code
 k5_md5des_verify(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
-		 const krb5_data *input, const krb5_data *hash,
-		 krb5_boolean *valid)
+                 const krb5_data *input, const krb5_data *hash,
+                 krb5_boolean *valid)
 {
     krb5_error_code ret;
     krb5_MD5_CTX ctx;
@@ -125,16 +126,16 @@ k5_md5des_verify(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
     iv.length = 0;
 
     if (key->keyblock.length != 8)
-	return(KRB5_BAD_KEYSIZE);
+        return(KRB5_BAD_KEYSIZE);
 
     if (hash->length != (CONFLENGTH+RSA_MD5_CKSUM_LENGTH)) {
 #ifdef KRB5int_MD5DES_BETA5_COMPAT
-	if (hash->length != RSA_MD5_CKSUM_LENGTH)
-	    return(KRB5_CRYPTO_INTERNAL);
-	else
-	    compathash = 1;
+        if (hash->length != RSA_MD5_CKSUM_LENGTH)
+            return(KRB5_CRYPTO_INTERNAL);
+        else
+            compathash = 1;
 #else
-	return(KRB5_CRYPTO_INTERNAL);
+        return(KRB5_CRYPTO_INTERNAL);
 #endif
     }
 
@@ -145,9 +146,9 @@ k5_md5des_verify(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
         if (key->keyblock.contents)
             memcpy(iv.data, key->keyblock.contents, key->keyblock.length);
     } else {
-	ret = mk_xorkey(key, &xorkey);
-	if (ret)
-	  return ret;
+        ret = mk_xorkey(key, &xorkey);
+        if (ret)
+            return ret;
     }
 
     /* decrypt it */
@@ -156,10 +157,10 @@ k5_md5des_verify(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
 
     if (!compathash) {
         ret = enc->decrypt(xorkey, NULL, hash, &output);
-	krb5_k_free_key(NULL, xorkey);
+        krb5_k_free_key(NULL, xorkey);
     } else {
         ret = enc->decrypt(key, &iv, hash, &output);
-	zap(iv.data, iv.length);
+        zap(iv.data, iv.length);
         free(iv.data);
     }
 
@@ -172,21 +173,21 @@ k5_md5des_verify(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
 
     krb5int_MD5Init(&ctx);
     if (!compathash) {
-	krb5int_MD5Update(&ctx, plaintext, CONFLENGTH);
+        krb5int_MD5Update(&ctx, plaintext, CONFLENGTH);
     }
     krb5int_MD5Update(&ctx, (unsigned char *) input->data,
-		   (unsigned) input->length);
+                      (unsigned) input->length);
     krb5int_MD5Final(&ctx);
 
     /* compare the decrypted hash to the computed one */
 
     if (!compathash) {
-	*valid =
-	    (memcmp(plaintext+CONFLENGTH, ctx.digest, RSA_MD5_CKSUM_LENGTH)
-	     == 0);
+        *valid =
+            (memcmp(plaintext+CONFLENGTH, ctx.digest, RSA_MD5_CKSUM_LENGTH)
+             == 0);
     } else {
-	*valid =
-	    (memcmp(plaintext, ctx.digest, RSA_MD5_CKSUM_LENGTH) == 0);
+        *valid =
+            (memcmp(plaintext, ctx.digest, RSA_MD5_CKSUM_LENGTH) == 0);
     }
     memset(plaintext, 0, sizeof(plaintext));
 

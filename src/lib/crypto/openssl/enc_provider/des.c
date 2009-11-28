@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* lib/crypto/openssl/enc_provider/des.c
  *
  * Copyright (C) 2009 by the Massachusetts Institute of Technology.
@@ -60,7 +61,7 @@
 
 static krb5_error_code
 validate(krb5_key key, const krb5_data *ivec,
-                      const krb5_data *input, const krb5_data *output)
+         const krb5_data *input, const krb5_data *output)
 {
     /* key->keyblock.enctype was checked by the caller */
     if (key->keyblock.length != KRB5_MIT_DES_KEYSIZE)
@@ -77,7 +78,7 @@ validate(krb5_key key, const krb5_data *ivec,
 
 static krb5_error_code
 validate_iov(krb5_key key, const krb5_data *ivec,
-                          const krb5_crypto_iov *data, size_t num_data)
+             const krb5_crypto_iov *data, size_t num_data)
 {
     size_t i, input_length;
 
@@ -99,7 +100,7 @@ validate_iov(krb5_key key, const krb5_data *ivec,
 
 static krb5_error_code
 k5_des_encrypt(krb5_key key, const krb5_data *ivec,
-           const krb5_data *input, krb5_data *output)
+               const krb5_data *input, krb5_data *output)
 {
     int              ret = 0, tmp_len = 0;
     unsigned int     tmp_buf_len = 0;
@@ -148,7 +149,7 @@ k5_des_encrypt(krb5_key key, const krb5_data *ivec,
 
 static krb5_error_code
 k5_des_decrypt(krb5_key key, const krb5_data *ivec,
-           const krb5_data *input, krb5_data *output)
+               const krb5_data *input, krb5_data *output)
 {
     /* key->keyblock.enctype was checked by the caller */
     int              ret = 0, tmp_len = 0;
@@ -194,9 +195,9 @@ k5_des_decrypt(krb5_key key, const krb5_data *ivec,
 
 static krb5_error_code
 k5_des_encrypt_iov(krb5_key key,
-            const krb5_data *ivec,
-            krb5_crypto_iov *data,
-            size_t num_data)
+                   const krb5_data *ivec,
+                   krb5_crypto_iov *data,
+                   size_t num_data)
 {
     int             ret = 0, tmp_len = MIT_DES_BLOCK_LENGTH;
     int             oblock_len = MIT_DES_BLOCK_LENGTH * num_data;
@@ -268,9 +269,9 @@ k5_des_encrypt_iov(krb5_key key,
 
 static krb5_error_code
 k5_des_decrypt_iov(krb5_key key,
-           const krb5_data *ivec,
-           krb5_crypto_iov *data,
-           size_t num_data)
+                   const krb5_data *ivec,
+                   krb5_crypto_iov *data,
+                   size_t num_data)
 {
     int                    ret = 0;
     int                    tmp_len = MIT_DES_BLOCK_LENGTH;

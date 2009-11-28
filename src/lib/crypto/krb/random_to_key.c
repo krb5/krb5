@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * COPYRIGHT (c) 2006
  * The Regents of the University of Michigan
@@ -38,27 +39,27 @@
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_to_key(krb5_context context, krb5_enctype enctype,
-		     krb5_data *random_data, krb5_keyblock *random_key)
+                     krb5_data *random_data, krb5_keyblock *random_key)
 {
     krb5_error_code ret;
     const struct krb5_keytypes *ktp;
     const struct krb5_enc_provider *enc;
 
     if (random_data == NULL || random_key == NULL ||
-	random_key->contents == NULL)
-	return EINVAL;
+        random_key->contents == NULL)
+        return EINVAL;
 
     ktp = find_enctype(enctype);
     if (ktp == NULL)
-	return KRB5_BAD_ENCTYPE;
+        return KRB5_BAD_ENCTYPE;
     enc = ktp->enc;
 
     if (random_key->length != enc->keylength)
-	return KRB5_BAD_KEYSIZE;
+        return KRB5_BAD_KEYSIZE;
 
     ret = (*enc->make_key)(random_data, random_key);
     if (ret)
-	memset(random_key->contents, 0, random_key->length);
+        memset(random_key->contents, 0, random_key->length);
 
     return ret;
 }

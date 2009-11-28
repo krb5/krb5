@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/prf.c
  *
@@ -44,14 +45,14 @@ krb5_c_prf_length(krb5_context context, krb5_enctype enctype, size_t *len)
     assert(len);
     ktp = find_enctype(enctype);
     if (ktp == NULL)
-	return KRB5_BAD_ENCTYPE;
+        return KRB5_BAD_ENCTYPE;
     *len = ktp->prf_length;
     return 0;
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_k_prf(krb5_context context, krb5_key key,
-	   krb5_data *input, krb5_data *output)
+           krb5_data *input, krb5_data *output)
 {
     const struct krb5_keytypes *ktp;
     krb5_error_code ret;
@@ -61,27 +62,27 @@ krb5_k_prf(krb5_context context, krb5_key key,
 
     ktp = find_enctype(key->keyblock.enctype);
     if (ktp == NULL)
-	return KRB5_BAD_ENCTYPE;
+        return KRB5_BAD_ENCTYPE;
     if (ktp->prf == NULL)
-	return KRB5_CRYPTO_INTERNAL;
+        return KRB5_CRYPTO_INTERNAL;
 
     output->magic = KV5M_DATA;
     if (ktp->prf_length != output->length)
-	return KRB5_CRYPTO_INTERNAL;
+        return KRB5_CRYPTO_INTERNAL;
     ret = (*ktp->prf)(ktp->enc, ktp->hash, key, input, output);
     return ret;
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_prf(krb5_context context, const krb5_keyblock *keyblock,
-	   krb5_data *input, krb5_data *output)
+           krb5_data *input, krb5_data *output)
 {
     krb5_key key;
     krb5_error_code ret;
 
     ret = krb5_k_create_key(context, keyblock, &key);
     if (ret != 0)
-	return ret;
+        return ret;
     ret = krb5_k_prf(context, key, input, output);
     krb5_k_free_key(context, key);
     return ret;

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 2009 by the Massachusetts Institute of Technology.
  * All rights reserved.
@@ -35,7 +36,7 @@
 /* Create a krb5_key from the enctype and key data in a keyblock. */
 krb5_error_code KRB5_CALLCONV
 krb5_k_create_key(krb5_context context, const krb5_keyblock *key_data,
-		  krb5_key *out)
+                  krb5_key *out)
 {
     krb5_key key = NULL;
     krb5_error_code code;
@@ -44,10 +45,10 @@ krb5_k_create_key(krb5_context context, const krb5_keyblock *key_data,
 
     key = malloc(sizeof(*key));
     if (key == NULL)
-	return ENOMEM;
+        return ENOMEM;
     code = krb5int_c_copy_keyblock_contents(context, key_data, &key->keyblock);
     if (code)
-	goto cleanup;
+        goto cleanup;
 
     key->refcount = 1;
     key->derived = NULL;
@@ -63,7 +64,7 @@ void KRB5_CALLCONV
 krb5_k_reference_key(krb5_context context, krb5_key key)
 {
     if (key)
-	key->refcount++;
+        key->refcount++;
 }
 
 /* Free the memory used by a krb5_key. */
@@ -73,14 +74,14 @@ krb5_k_free_key(krb5_context context, krb5_key key)
     struct derived_key *dk;
 
     if (key == NULL || --key->refcount > 0)
-	return;
+        return;
 
     /* Free the derived key cache. */
     while ((dk = key->derived) != NULL) {
-	key->derived = dk->next;
-	free(dk->constant.data);
-	krb5_k_free_key(context, dk->dkey);
-	free(dk);
+        key->derived = dk->next;
+        free(dk->constant.data);
+        krb5_k_free_key(context, dk->dkey);
+        free(dk);
     }
     krb5int_c_free_keyblock_contents(context, &key->keyblock);
     free(key);
@@ -89,7 +90,7 @@ krb5_k_free_key(krb5_context context, krb5_key key)
 /* Retrieve a copy of the keyblock from a krb5_key. */
 krb5_error_code KRB5_CALLCONV
 krb5_k_key_keyblock(krb5_context context, krb5_key key,
-		    krb5_keyblock **key_data)
+                    krb5_keyblock **key_data)
 {
     return krb5int_c_copy_keyblock(context, &key->keyblock, key_data);
 }

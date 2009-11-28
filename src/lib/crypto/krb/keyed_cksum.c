@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -34,11 +35,11 @@ krb5_c_is_keyed_cksum(krb5_cksumtype ctype)
     const struct krb5_cksumtypes *ctp;
 
     for (i = 0; i < krb5int_cksumtypes_length; i++) {
-	ctp = &krb5int_cksumtypes_list[i];
-	if (ctp->ctype == ctype) {
-	    return (ctp->keyhash != NULL ||
-		    (ctp->flags & KRB5_CKSUMFLAG_DERIVE));
-	}
+        ctp = &krb5int_cksumtypes_list[i];
+        if (ctp->ctype == ctype) {
+            return (ctp->keyhash != NULL ||
+                    (ctp->flags & KRB5_CKSUMFLAG_DERIVE));
+        }
     }
 
     /* Invalid ctype.  This is misleading, but better than dumping core. */
