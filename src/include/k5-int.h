@@ -2837,6 +2837,19 @@ string2data(char *str)
     return make_data(str, strlen(str));
 }
 
+static inline krb5_error_code
+alloc_data(krb5_data *data, unsigned int len)
+{
+    char *ptr = (char *) calloc(len, 1);
+
+    if (ptr == NULL)
+        return ENOMEM;
+    data->magic = KV5M_DATA;
+    data->data = ptr;
+    data->length = len;
+    return 0;
+}
+
 static inline int
 data_eq_string (krb5_data d, char *s)
 {
