@@ -29,6 +29,7 @@
 #include "k5-int.h"
 #include "arcfour.h"
 #include "arcfour-int.h"
+#include "hash_provider/hash_provider.h"
 #include "aead.h"
 
 /* AEAD */
@@ -265,3 +266,48 @@ const struct krb5_aead_provider krb5int_aead_arcfour = {
     krb5int_arcfour_encrypt_iov,
     krb5int_arcfour_decrypt_iov
 };
+
+krb5_error_code
+krb5int_arcfour_gsscrypt_iov(const krb5_keyblock *keyblock,
+                             krb5_keyusage usage, const krb5_data *kd_data,
+                             krb5_crypto_iov *data, size_t num_data)
+{
+    const struct krb5_enc_provider *enc = &krb5int_enc_arcfour;
+    const struct krb5_hash_provider *hash = &krb5int_hash_md5;
+    krb5_keyblock *usage_keyblock = NULL, *enc_keyblock = NULL;
+    krb5_key enc_key;
+    krb5_error_code ret;
+
+    ret = krb5int_c_init_keyblock(NULL, keyblock->enctype, enc->keybytes,
+                                  &usage_keyblock);
+    if (ret != 0)
+        goto cleanup;
+    ret = krb5int_c_init_keyblock(NULL, keyblock->enctype, enc->keybytes,
+                                  &enc_keyblock);
+    if (ret != 0)
+        goto cleanup;
+
+    /* Derive a usage key from the session key and usage. */
+    ret = krb5int_arcfour_usage_key(enc, hash, keyblock, usage,
+                                    usage_keyblock);
+    if (ret != 0)
+        goto cleanup;
+
+    /* Derive the encryption key from the usage key and kd_data. */
+    ret = krb5int_arcfour_enc_key(enc, hash, usage_keyblock, kd_data,
+                                  enc_keyblock);
+    if (ret != 0)
+        goto cleanup;
+
+    /* Encrypt or decrypt (encrypt_iov works for both) the input. */
+    ret = krb5_k_create_key(NULL, enc_keyblock, &enc_key);
+    if (ret != 0)
+        goto cleanup;
+    ret = (*enc->encrypt_iov)(enc_key, 0, data, num_data);
+    krb5_k_free_key(NULL, enc_key);
+
+cleanup:
+    krb5int_c_free_keyblock(NULL, usage_keyblock);
+    krb5int_c_free_keyblock(NULL, enc_keyblock);
+    return ret;
+}

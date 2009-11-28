@@ -31,7 +31,7 @@
  */
 
 #include "prf_int.h"
-//#include <hash_provider/hash_provider.h>              /* XXX is this ok? */
+#include "hash_provider/hash_provider.h"
 
 krb5_error_code
 krb5int_des_prf (const struct krb5_enc_provider *enc,

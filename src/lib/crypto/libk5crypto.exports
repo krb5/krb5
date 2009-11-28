@@ -65,7 +65,6 @@ krb5int_c_free_keyblock_contents
 krb5int_c_free_keyblock
 krb5int_c_init_keyblock
 krb5int_hash_md5
-krb5int_hmac_keyblock
 krb5int_enc_arcfour
 krb5int_hmac
 mit_des_fixup_key_parity
@@ -96,3 +95,5 @@ krb5int_MD5Update
 krb5int_MD5Final
 krb5int_aes_decrypt
 krb5int_enc_des3
+krb5int_arcfour_gsscrypt
+krb5int_arcfour_gsscrypt_iov

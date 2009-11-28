@@ -299,14 +299,14 @@ krb5_error_code kg_encrypt_iov (krb5_context context,
                                 int iov_count);
 
 krb5_error_code
-kg_arcfour_docrypt (const krb5_keyblock *longterm_key , int ms_usage,
+kg_arcfour_docrypt (const krb5_keyblock *keyblock, int usage,
                     const unsigned char *kd_data, size_t kd_data_len,
                     const unsigned char *input_buf, size_t input_len,
                     unsigned char *output_buf);
 
 krb5_error_code
 kg_arcfour_docrypt_iov (krb5_context context,
-                        const krb5_keyblock *longterm_key , int ms_usage,
+                        const krb5_keyblock *keyblock, int usage,
                         const unsigned char *kd_data, size_t kd_data_len,
                         gss_iov_buffer_desc *iov,
                         int iov_count);

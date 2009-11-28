@@ -70,7 +70,7 @@ krb5int_arcfour_usage_key(const struct krb5_enc_provider *enc,
     return krb5int_hmac_keyblock(hash, session_keyblock, 1, &salt, &out_data);
 }
 
-/* Derive an encryption key from a usage key and checksum. */
+/* Derive an encryption key from a usage key and (typically) checksum. */
 krb5_error_code
 krb5int_arcfour_enc_key(const struct krb5_enc_provider *enc,
                         const struct krb5_hash_provider *hash,
@@ -262,5 +262,51 @@ cleanup:
     krb5int_c_free_keyblock(NULL, enc_keyblock);
     zapfree(plaintext.data, plaintext.length);
     zapfree(comp_checksum.data, comp_checksum.length);
+    return ret;
+}
+
+/* Encrypt or decrypt data for a GSSAPI token. */
+krb5_error_code
+krb5int_arcfour_gsscrypt(const krb5_keyblock *keyblock, krb5_keyusage usage,
+                         const krb5_data *kd_data, const krb5_data *input,
+                         krb5_data *output)
+{
+    const struct krb5_enc_provider *enc = &krb5int_enc_arcfour;
+    const struct krb5_hash_provider *hash = &krb5int_hash_md5;
+    krb5_keyblock *usage_keyblock = NULL, *enc_keyblock = NULL;
+    krb5_key enc_key;
+    krb5_error_code ret;
+
+    ret = krb5int_c_init_keyblock(NULL, keyblock->enctype, enc->keybytes,
+                                  &usage_keyblock);
+    if (ret != 0)
+        goto cleanup;
+    ret = krb5int_c_init_keyblock(NULL, keyblock->enctype, enc->keybytes,
+                                  &enc_keyblock);
+    if (ret != 0)
+        goto cleanup;
+
+    /* Derive a usage key from the session key and usage. */
+    ret = krb5int_arcfour_usage_key(enc, hash, keyblock, usage,
+                                    usage_keyblock);
+    if (ret != 0)
+        goto cleanup;
+
+    /* Derive the encryption key from the usage key and kd_data. */
+    ret = krb5int_arcfour_enc_key(enc, hash, usage_keyblock, kd_data,
+                                  enc_keyblock);
+    if (ret != 0)
+        goto cleanup;
+
+    /* Encrypt or decrypt (encrypt works for both) the input. */
+    ret = krb5_k_create_key(NULL, enc_keyblock, &enc_key);
+    if (ret != 0)
+        goto cleanup;
+    ret = (*enc->encrypt)(enc_key, 0, input, output);
+    krb5_k_free_key(NULL, enc_key);
+
+cleanup:
+    krb5int_c_free_keyblock(NULL, usage_keyblock);
+    krb5int_c_free_keyblock(NULL, enc_keyblock);
     return ret;
 }

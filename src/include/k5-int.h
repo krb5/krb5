@@ -752,6 +752,18 @@ krb5int_hmac_iov_keyblock(const struct krb5_hash_provider *hash,
 krb5_error_code krb5int_pbkdf2_hmac_sha1(const krb5_data *, unsigned long,
                                          const krb5_data *, const krb5_data *);
 
+/* These crypto functions are used by GSSAPI via the accessor. */
+
+krb5_error_code
+krb5int_arcfour_gsscrypt(const krb5_keyblock *keyblock, krb5_keyusage usage,
+                         const krb5_data *kd_data, const krb5_data *input,
+                         krb5_data *output);
+
+krb5_error_code
+krb5int_arcfour_gsscrypt_iov(const krb5_keyblock *keyblock,
+                             krb5_keyusage usage, const krb5_data *kd_data,
+                             krb5_crypto_iov *data, size_t num_data);
+
 /*
  * Attempt to zero memory in a way that compilers won't optimize out.
  *
@@ -841,15 +853,6 @@ krb5_error_code krb5int_c_copy_keyblock_contents(krb5_context context,
  * Internal - for cleanup.
  */
 extern void krb5int_prng_cleanup(void);
-
-
-/*
- * These declarations are here, so both krb5 and k5crypto
- * can get to them.
- * krb5 needs to get to them so it can  make them available to libgssapi.
- */
-extern const struct krb5_enc_provider krb5int_enc_arcfour;
-extern const struct krb5_hash_provider krb5int_hash_md5;
 
 
 #ifdef KRB5_OLD_CRYPTO
@@ -2192,19 +2195,24 @@ void krb5int_free_srv_dns_data(struct srv_dns_entry *);
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 15
+#define KRB5INT_ACCESS_STRUCT_VERSION 16
 
 #ifndef ANAME_SZ
 struct ktext;                   /* from krb.h, for krb524 support */
 #endif
 typedef struct _krb5int_access {
     /* crypto stuff */
-    const struct krb5_hash_provider *md5_hash_provider;
-    const struct krb5_enc_provider *arcfour_enc_provider;
-    krb5_error_code (*hmac)(const struct krb5_hash_provider *hash,
-                            const krb5_keyblock *key,
-                            unsigned int icount, const krb5_data *input,
-                            krb5_data *output);
+    krb5_error_code (*arcfour_gsscrypt)(const krb5_keyblock *keyblock,
+                                        krb5_keyusage usage,
+                                        const krb5_data *kd_data,
+                                        const krb5_data *input,
+                                        krb5_data *output);
+    krb5_error_code (*arcfour_gsscrypt_iov)(const krb5_keyblock *keyblock,
+                                            krb5_keyusage usage,
+                                            const krb5_data *kd_data,
+                                            krb5_crypto_iov *data,
+                                            size_t num_data);
+
     krb5_error_code (*auth_con_get_subkey_enctype)(krb5_context,
                                                    krb5_auth_context,
                                                    krb5_enctype *);

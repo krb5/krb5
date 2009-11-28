@@ -282,73 +282,21 @@ kg_decrypt(krb5_context context, krb5_key key, int usage, krb5_pointer iv,
 }
 
 krb5_error_code
-kg_arcfour_docrypt(const krb5_keyblock *longterm_key , int ms_usage,
+kg_arcfour_docrypt(const krb5_keyblock *keyblock, int usage,
                    const unsigned char *kd_data, size_t kd_data_len,
                    const unsigned char *input_buf, size_t input_len,
                    unsigned char *output_buf)
 {
     krb5_error_code code;
-    krb5_data input, output;
+    krb5_data kd = make_data((char *) kd_data, kd_data_len);
+    krb5_data input = make_data((char *) input_buf, input_len);
+    krb5_data output = make_data(output_buf, input_len);
     krb5int_access kaccess;
-    krb5_key key;
-    krb5_keyblock seq_enc_key, usage_key;
-    unsigned char t[14];
-    size_t i = 0;
-    int exportable = (longterm_key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP);
 
-    usage_key.length = longterm_key->length;
-    usage_key.contents = malloc(usage_key.length);
-    if (usage_key.contents == NULL)
-        return (ENOMEM);
-    seq_enc_key.length = longterm_key->length;
-    seq_enc_key.contents = malloc(seq_enc_key.length);
-    if (seq_enc_key.contents == NULL) {
-        free ((void *) usage_key.contents);
-        return (ENOMEM);
-    }
-    code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
+    code = krb5int_accessor(&kaccess, KRB5INT_ACCESS_VERSION);
     if (code)
-        goto cleanup_arcfour;
-
-    if (exportable) {
-        memcpy(t, kg_arcfour_l40, sizeof(kg_arcfour_l40));
-        i += sizeof(kg_arcfour_l40);
-    }
-    store_32_le(ms_usage, &t[i]);
-    i += 4;
-    input.data = (void *) &t;
-    input.length = i;
-    output.data = (void *) usage_key.contents;
-    output.length = usage_key.length;
-    code = (*kaccess.hmac)(kaccess.md5_hash_provider, longterm_key, 1,
-                           &input, &output);
-    if (code)
-        goto cleanup_arcfour;
-    if (exportable)
-        memset(usage_key.contents + 7, 0xab, 9);
-
-    input.data = ( void *) kd_data;
-    input.length = kd_data_len;
-    output.data = (void *) seq_enc_key.contents;
-    code = (*kaccess.hmac)(kaccess.md5_hash_provider, &usage_key, 1,
-                           &input, &output);
-    if (code)
-        goto cleanup_arcfour;
-    input.data = ( void * ) input_buf;
-    input.length = input_len;
-    output.data = (void * ) output_buf;
-    output.length = input_len;
-    code = krb5_k_create_key(NULL, &seq_enc_key, &key);
-    if (code)
-        goto cleanup_arcfour;
-    code = (*kaccess.arcfour_enc_provider->encrypt)(key, 0, &input, &output);
-    krb5_k_free_key(NULL, key);
-cleanup_arcfour:
-    memset (seq_enc_key.contents, 0, seq_enc_key.length);
-    memset (usage_key.contents, 0, usage_key.length);
-    free (usage_key.contents);
-    free (seq_enc_key.contents);
-    return (code);
+        return code;
+    return (*kaccess.arcfour_gsscrypt)(keyblock, usage, &kd, &input, &output);
 }
 
 /* AEAD */
@@ -626,81 +574,29 @@ kg_decrypt_iov(krb5_context context, int proto, int dce_style, size_t ec,
 }
 
 krb5_error_code
-kg_arcfour_docrypt_iov(krb5_context context,
-                       const krb5_keyblock *longterm_key, int ms_usage,
-                       const unsigned char *kd_data, size_t kd_data_len,
-                       gss_iov_buffer_desc *iov, int iov_count)
+kg_arcfour_docrypt_iov(krb5_context context, const krb5_keyblock *keyblock,
+                       int usage, const unsigned char *kd_data,
+                       size_t kd_data_len, gss_iov_buffer_desc *iov,
+                       int iov_count)
 {
     krb5_error_code code;
-    krb5_data input, output;
+    krb5_data kd = make_data((char *) kd_data, kd_data_len);
     krb5int_access kaccess;
-    krb5_key key;
-    krb5_keyblock seq_enc_key, usage_key;
-    unsigned char t[14];
-    size_t i = 0;
-    int exportable = (longterm_key->enctype == ENCTYPE_ARCFOUR_HMAC_EXP);
     krb5_crypto_iov *kiov = NULL;
     size_t kiov_count = 0;
 
-    usage_key.length = longterm_key->length;
-    usage_key.contents = malloc(usage_key.length);
-    if (usage_key.contents == NULL)
-        return (ENOMEM);
-    seq_enc_key.length = longterm_key->length;
-    seq_enc_key.contents = malloc(seq_enc_key.length);
-    if (seq_enc_key.contents == NULL) {
-        free ((void *) usage_key.contents);
-        return (ENOMEM);
-    }
     code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
     if (code)
-        goto cleanup_arcfour;
-
-    if (exportable) {
-        memcpy(t, kg_arcfour_l40, sizeof(kg_arcfour_l40));
-        i += sizeof(kg_arcfour_l40);
-    }
-    store_32_le(ms_usage, &t[i]);
-    i += 4;
-    input.data = (void *) &t;
-    input.length = i;
-    output.data = (void *) usage_key.contents;
-    output.length = usage_key.length;
-    code = (*kaccess.hmac)(kaccess.md5_hash_provider, longterm_key, 1,
-                           &input, &output);
-    if (code)
-        goto cleanup_arcfour;
-    if (exportable)
-        memset(usage_key.contents + 7, 0xab, 9);
-
-    input.data = ( void *) kd_data;
-    input.length = kd_data_len;
-    output.data = (void *) seq_enc_key.contents;
-    code = (*kaccess.hmac)(kaccess.md5_hash_provider, &usage_key, 1,
-                           &input, &output);
-    if (code)
-        goto cleanup_arcfour;
-
+        return code;
     code = kg_translate_iov(context, 0 /* proto */, 0 /* dce_style */,
-                            0 /* ec */, 0 /* rrc */, longterm_key->enctype,
+                            0 /* ec */, 0 /* rrc */, keyblock->enctype,
                             iov, iov_count, &kiov, &kiov_count);
     if (code)
-        goto cleanup_arcfour;
-
-    code = krb5_k_create_key(context, &seq_enc_key, &key);
-    if (code)
-        goto cleanup_arcfour;
-    code = (*kaccess.arcfour_enc_provider->encrypt_iov)(key, 0, kiov,
-                                                        kiov_count);
-    krb5_k_free_key(context, key);
-cleanup_arcfour:
-    memset (seq_enc_key.contents, 0, seq_enc_key.length);
-    memset (usage_key.contents, 0, usage_key.length);
-    free (usage_key.contents);
-    free (seq_enc_key.contents);
-    if (kiov != NULL)
-        free(kiov);
-    return (code);
+        return code;
+    code = (*kaccess.arcfour_gsscrypt_iov)(keyblock, usage, &kd,
+                                           kiov, kiov_count);
+    free(kiov);
+    return code;
 }
 
 krb5_cryptotype
