@@ -104,7 +104,6 @@
 #include <memory.h>
 #endif
 #include <assert.h>
-#include "../../krb5/krb/auth_con.h" /* XXX */
 
 #ifdef CFX_EXERCISE
 #define CFX_ACCEPTOR_SUBKEY (time(0) & 1)
@@ -400,12 +399,18 @@ kg_process_extension(krb5_context context,
         if (exts->iakerb.conv == NULL) {
             code = KRB5KRB_AP_ERR_MSG_TYPE; /* XXX */
         } else {
-            code = iakerb_verify_finished(context,
-                                          auth_context->recv_subkey,
-                                          exts->iakerb.conv,
+            krb5_key key;
+
+            code = krb5_auth_con_getrecvsubkey_k(context, auth_context, &key);
+            if (code != 0)
+                break;
+
+            code = iakerb_verify_finished(context, key, exts->iakerb.conv,
                                           ext_data);
             if (code == 0)
                 exts->iakerb.verified = 1;
+
+            krb5_k_free_key(context, key);
         }
         break;
     default:

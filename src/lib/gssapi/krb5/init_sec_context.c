@@ -239,8 +239,6 @@ struct gss_checksum_data {
     krb5_gss_ctx_ext_t exts;
 };
 
-#include "../../krb5/krb/auth_con.h"
-
 static krb5_error_code KRB5_CALLCONV
 make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
                    void *cksum_data, krb5_data **out)
@@ -310,13 +308,20 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
     assert(data->exts != NULL);
 
     if (data->exts->iakerb.conv) {
-        assert(auth_context->send_subkey != NULL);
+        krb5_key key;
 
-        code = iakerb_make_finished(context, auth_context->send_subkey,
-                                    data->exts->iakerb.conv, &finished);
+        code = krb5_auth_con_getsendsubkey_k(context, auth_context, &key);
         if (code != 0)
             goto cleanup;
 
+        code = iakerb_make_finished(context, key, data->exts->iakerb.conv,
+                                    &finished);
+        if (code != 0) {
+            krb5_k_free_key(context, key);
+            goto cleanup;
+        }
+
+        krb5_k_free_key(context, key);
         data->checksum_data.length += 8 + finished->length;
     }
 
