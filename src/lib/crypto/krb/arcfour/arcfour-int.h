@@ -14,8 +14,20 @@
 
 #define CONFOUNDERLENGTH 8
 
-krb5_keyusage krb5int_arcfour_translate_usage(krb5_keyusage usage);
+krb5_keyusage
+krb5int_arcfour_translate_usage(krb5_keyusage usage);
 
-extern const char *const krb5int_arcfour_l40;
+krb5_error_code
+krb5int_arcfour_usage_key(const struct krb5_enc_provider *enc,
+                          const struct krb5_hash_provider *hash,
+                          const krb5_keyblock *session_keyblock,
+                          krb5_keyusage usage,
+                          krb5_keyblock *out);
+
+krb5_error_code
+krb5int_arcfour_enc_key(const struct krb5_enc_provider *enc,
+                        const struct krb5_hash_provider *hash,
+                        const krb5_keyblock *usage_keyblock,
+                        const krb5_data *checksum, krb5_keyblock *out);
 
 #endif /* ARCFOUR_INT_H */

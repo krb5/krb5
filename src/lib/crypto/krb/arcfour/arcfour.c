@@ -11,55 +11,87 @@
 #include "arcfour-int.h"
 #include "hash_provider/hash_provider.h"
 
-const char *const krb5int_arcfour_l40 = "fortybits";
+const char *const l40 = "fortybits";
 
 void
 krb5int_arcfour_encrypt_length(const struct krb5_enc_provider *enc,
                                const struct krb5_hash_provider *hash,
                                size_t inputlen, size_t *length)
 {
-    size_t blocksize, hashsize;
-
-    blocksize = enc->block_size;
-    hashsize = hash->hashsize;
-
     /* checksum + (confounder + inputlen, in even blocksize) */
-    *length = hashsize + krb5_roundup(8 + inputlen, blocksize);
+    *length = hash->hashsize + krb5_roundup(8 + inputlen, enc->block_size);
 }
 
 krb5_keyusage
 krb5int_arcfour_translate_usage(krb5_keyusage usage)
 {
     switch (usage) {
-    case 1:                       /* AS-REQ PA-ENC-TIMESTAMP padata timestamp,  */
-        return 1;
-    case 2:                       /* ticket from kdc */
-        return 2;
-    case 3:                       /* as-rep encrypted part */
-        return 8;
-    case 4:                       /* tgs-req authz data */
-        return 4;
-    case 5:                       /* tgs-req authz data in subkey */
-        return 5;
-    case 6:                       /* tgs-req authenticator cksum */
-        return 6;
-    case 7:                         /* tgs-req authenticator */
-        return 7;
-    case 8:
-        return 8;
-    case 9:                       /* tgs-rep encrypted with subkey */
-        return 9;
-    case 10:                      /* ap-rep authentication cksum */
-        return 10;                  /* xxx  Microsoft never uses this*/
-    case 11:                      /* app-req authenticator */
-        return 11;
-    case 12:                      /* app-rep encrypted part */
-        return 12;
-    case 23: /* sign wrap token*/
-        return 13;
-    default:
-        return usage;
+    case 1:  return 1;   /* AS-REQ PA-ENC-TIMESTAMP padata timestamp,  */
+    case 2:  return 2;   /* ticket from kdc */
+    case 3:  return 8;   /* as-rep encrypted part */
+    case 4:  return 4;   /* tgs-req authz data */
+    case 5:  return 5;   /* tgs-req authz data in subkey */
+    case 6:  return 6;   /* tgs-req authenticator cksum */
+    case 7:  return 7;   /* tgs-req authenticator */
+    case 8:  return 8;
+    case 9:  return 9;   /* tgs-rep encrypted with subkey */
+    case 10: return 10;  /* ap-rep authentication cksum (never used by MS) */
+    case 11: return 11;  /* app-req authenticator */
+    case 12: return 12;  /* app-rep encrypted part */
+    case 23: return 13;  /* sign wrap token*/
+    default: return usage;
     }
+}
+
+/* Derive a usage key from a session key and krb5 usage constant. */
+krb5_error_code
+krb5int_arcfour_usage_key(const struct krb5_enc_provider *enc,
+                          const struct krb5_hash_provider *hash,
+                          const krb5_keyblock *session_keyblock,
+                          krb5_keyusage usage,
+                          krb5_keyblock *out)
+{
+    char salt_buf[14];
+    krb5_data out_data = make_data(out->contents, out->length);
+    krb5_data salt = make_data(salt_buf, sizeof(salt_buf));
+    krb5_keyusage ms_usage;
+
+    /* Generate the salt. */
+    ms_usage = krb5int_arcfour_translate_usage(usage);
+    if (session_keyblock->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
+        strncpy(salt_buf, l40, sizeof(salt_buf));
+        store_32_le(ms_usage, salt_buf + 10);
+    } else {
+        salt.length=4;
+        store_32_le(ms_usage, salt_buf);
+    }
+
+    /* Compute HMAC(key, salt) to produce the usage key. */
+    return krb5int_hmac_keyblock(hash, session_keyblock, 1, &salt, &out_data);
+}
+
+/* Derive an encryption key from a usage key and checksum. */
+krb5_error_code
+krb5int_arcfour_enc_key(const struct krb5_enc_provider *enc,
+                        const struct krb5_hash_provider *hash,
+                        const krb5_keyblock *usage_keyblock,
+                        const krb5_data *checksum, krb5_keyblock *out)
+{
+    krb5_keyblock *trunc_keyblock = NULL;
+    krb5_data out_data = make_data(out->contents, out->length);
+    krb5_error_code ret;
+
+    /* Copy usage_keyblock to trunc_keyblock and truncate if exportable. */
+    ret = krb5int_c_copy_keyblock(NULL, usage_keyblock, &trunc_keyblock);
+    if (ret != 0)
+        return ret;
+    if (trunc_keyblock->enctype == ENCTYPE_ARCFOUR_HMAC_EXP)
+        memset(trunc_keyblock->contents + 7, 0xab, 9);
+
+    /* Compute HMAC(trunc_key, checksum) to produce the encryption key. */
+    ret = krb5int_hmac_keyblock(hash, trunc_keyblock, 1, checksum, &out_data);
+    krb5int_c_free_keyblock(NULL, trunc_keyblock);
+    return ret;
 }
 
 krb5_error_code
@@ -69,129 +101,75 @@ krb5int_arcfour_encrypt(const struct krb5_enc_provider *enc,
                         const krb5_data *ivec, const krb5_data *input,
                         krb5_data *output)
 {
-    krb5_keyblock k1, k2, k3;
-    krb5_key k3key = NULL;
-    krb5_data d1, d2, d3, salt, plaintext, checksum, ciphertext, confounder;
-    krb5_keyusage ms_usage;
-    size_t keylength, keybytes, blocksize, hashsize;
+    krb5_keyblock *usage_keyblock = NULL, *enc_keyblock = NULL;
+    krb5_key enc_key;
+    krb5_data plaintext = empty_data();
+    krb5_data checksum, ciphertext, confounder;
     krb5_error_code ret;
+    unsigned int plainlen;
 
-    blocksize = enc->block_size;
-    keybytes = enc->keybytes;
-    keylength = enc->keylength;
-    hashsize = hash->hashsize;
+    /* Allocate buffers. */
+    plainlen = krb5_roundup(input->length + CONFOUNDERLENGTH, enc->block_size);
+    ret = alloc_data(&plaintext, plainlen);
+    if (ret != 0)
+        goto cleanup;
+    ret = krb5int_c_init_keyblock(NULL, key->keyblock.enctype, enc->keybytes,
+                                  &usage_keyblock);
+    if (ret != 0)
+        goto cleanup;
+    ret = krb5int_c_init_keyblock(NULL, key->keyblock.enctype, enc->keybytes,
+                                  &enc_keyblock);
+    if (ret != 0)
+        goto cleanup;
 
-    d1.length=keybytes;
-    d1.data=malloc(d1.length);
-    if (d1.data == NULL)
-        return (ENOMEM);
-    k1 = key->keyblock;
-    k1.length=d1.length;
-    k1.contents= (void *) d1.data;
+    /* Set up subsets of output and plaintext. */
+    checksum = make_data(output->data, hash->hashsize);
+    ciphertext = make_data(output->data + hash->hashsize, plainlen);
+    confounder = make_data(plaintext.data, CONFOUNDERLENGTH);
 
-    d2.length=keybytes;
-    d2.data=malloc(d2.length);
-    if (d2.data == NULL) {
-        free(d1.data);
-        return (ENOMEM);
-    }
-    k2 = key->keyblock;
-    k2.length=d2.length;
-    k2.contents=(void *) d2.data;
+    /* Derive a usage key from the session key and usage. */
+    ret = krb5int_arcfour_usage_key(enc, hash, &key->keyblock, usage,
+                                    usage_keyblock);
+    if (ret != 0)
+        goto cleanup;
 
-    d3.length=keybytes;
-    d3.data=malloc(d3.length);
-    if (d3.data == NULL) {
-        free(d1.data);
-        free(d2.data);
-        return (ENOMEM);
-    }
-    k3 = key->keyblock;
-    k3.length=d3.length;
-    k3.contents= (void *) d3.data;
-
-    salt.length=14;
-    salt.data=malloc(salt.length);
-    if (salt.data == NULL) {
-        free(d1.data);
-        free(d2.data);
-        free(d3.data);
-        return (ENOMEM);
-    }
-
-    /* is "input" already blocksize aligned?  if it is, then we need this
-       step, otherwise we do not */
-    plaintext.length=krb5_roundup(input->length+CONFOUNDERLENGTH,blocksize);
-    plaintext.data=malloc(plaintext.length);
-    if (plaintext.data == NULL) {
-        free(d1.data);
-        free(d2.data);
-        free(d3.data);
-        free(salt.data);
-        return(ENOMEM);
-    }
-
-    /* setup convienient pointers into the allocated data */
-    checksum.length=hashsize;
-    checksum.data=output->data;
-    ciphertext.length=krb5_roundup(input->length+CONFOUNDERLENGTH,blocksize);
-    ciphertext.data=output->data+hashsize;
-    confounder.length=CONFOUNDERLENGTH;
-    confounder.data=plaintext.data;
-    output->length = plaintext.length+hashsize;
-
-    /* begin the encryption, computer K1 */
-    ms_usage=krb5int_arcfour_translate_usage(usage);
-    if (key->keyblock.enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
-        strncpy(salt.data, krb5int_arcfour_l40, salt.length);
-        store_32_le(ms_usage, salt.data+10);
-    } else {
-        salt.length=4;
-        store_32_le(ms_usage, salt.data);
-    }
-    krb5int_hmac(hash, key, 1, &salt, &d1);
-
-    memcpy(k2.contents, k1.contents, k2.length);
-
-    if (key->keyblock.enctype==ENCTYPE_ARCFOUR_HMAC_EXP)
-        memset(k1.contents+7, 0xab, 9);
-
-    ret=krb5_c_random_make_octets(/* XXX */ 0, &confounder);
-    memcpy(plaintext.data+confounder.length, input->data, input->length);
+    /* Compose a confounder with the input data to form the plaintext. */
+    ret = krb5_c_random_make_octets(NULL, &confounder);
+    memcpy(plaintext.data + confounder.length, input->data, input->length);
     if (ret)
         goto cleanup;
 
-    ret = krb5int_hmac_keyblock(hash, &k2, 1, &plaintext, &checksum);
+    /* Compute HMAC(usage key, plaintext) to get the checksum. */
+    ret = krb5int_hmac_keyblock(hash, usage_keyblock, 1, &plaintext,
+                                &checksum);
     if (ret)
         goto cleanup;
 
-    ret = krb5int_hmac_keyblock(hash, &k1, 1, &checksum, &d3);
+    /* Derive the encryption key from the usage key and checksum. */
+    ret = krb5int_arcfour_enc_key(enc, hash, usage_keyblock, &checksum,
+                                  enc_keyblock);
     if (ret)
         goto cleanup;
 
-    ret = krb5_k_create_key(NULL, &k3, &k3key);
+    /* Encrypt the plaintext. */
+    ret = krb5_k_create_key(NULL, enc_keyblock, &enc_key);
+    if (ret)
+        goto cleanup;
+    ret = (*enc->encrypt)(enc_key, ivec, &plaintext, &ciphertext);
+    krb5_k_free_key(NULL, enc_key);
     if (ret)
         goto cleanup;
 
-    ret=(*(enc->encrypt))(k3key, ivec, &plaintext, &ciphertext);
+    output->length = plaintext.length + hash->hashsize;
+    return 0;
 
 cleanup:
-    memset(d1.data, 0, d1.length);
-    memset(d2.data, 0, d2.length);
-    memset(d3.data, 0, d3.length);
-    memset(salt.data, 0, salt.length);
-    memset(plaintext.data, 0, plaintext.length);
-
-    free(d1.data);
-    free(d2.data);
-    free(d3.data);
-    free(salt.data);
-    free(plaintext.data);
-    krb5_k_free_key(NULL, k3key);
-    return (ret);
+    krb5int_c_free_keyblock(NULL, usage_keyblock);
+    krb5int_c_free_keyblock(NULL, enc_keyblock);
+    zapfree(plaintext.data, plaintext.length);
+    return ret;
 }
 
-/* This is the arcfour-hmac decryption routine */
 krb5_error_code
 krb5int_arcfour_decrypt(const struct krb5_enc_provider *enc,
                         const struct krb5_hash_provider *hash,
@@ -199,110 +177,64 @@ krb5int_arcfour_decrypt(const struct krb5_enc_provider *enc,
                         const krb5_data *ivec, const krb5_data *input,
                         krb5_data *output)
 {
-    krb5_keyblock k1,k2,k3;
-    krb5_key k3key;
-    krb5_data d1,d2,d3,salt,ciphertext,plaintext,checksum;
-    krb5_keyusage ms_usage;
-    size_t keybytes, keylength, hashsize, blocksize;
+    krb5_keyblock *usage_keyblock = NULL, *enc_keyblock = NULL;
+    krb5_data plaintext = empty_data(), comp_checksum = empty_data();
+    krb5_data checksum, ciphertext;
+    krb5_key enc_key;
     krb5_error_code ret;
 
-    blocksize = enc->block_size;
-    keybytes = enc->keybytes;
-    keylength = enc->keylength;
-    hashsize = hash->hashsize;
+    /* Set up subsets of input. */
+    checksum = make_data(input->data, hash->hashsize);
+    ciphertext = make_data(input->data + hash->hashsize,
+                           input->length - hash->hashsize);
 
-    d1.length=keybytes;
-    d1.data=malloc(d1.length);
-    if (d1.data == NULL)
-        return (ENOMEM);
-    k1 = key->keyblock;
-    k1.length=d1.length;
-    k1.contents= (void *) d1.data;
+    /* Allocate buffers. */
+    ret = alloc_data(&plaintext, ciphertext.length);
+    if (ret != 0)
+        goto cleanup;
+    ret = alloc_data(&comp_checksum, hash->hashsize);
+    if (ret != 0)
+        goto cleanup;
+    ret = krb5int_c_init_keyblock(NULL, key->keyblock.enctype, enc->keybytes,
+                                  &usage_keyblock);
+    if (ret != 0)
+        goto cleanup;
+    ret = krb5int_c_init_keyblock(NULL, key->keyblock.enctype, enc->keybytes,
+                                  &enc_keyblock);
+    if (ret != 0)
+        goto cleanup;
 
-    d2.length=keybytes;
-    d2.data=malloc(d2.length);
-    if (d2.data == NULL) {
-        free(d1.data);
-        return (ENOMEM);
-    }
-    k2 = key->keyblock;
-    k2.length=d2.length;
-    k2.contents= (void *) d2.data;
-
-    d3.length=keybytes;
-    d3.data=malloc(d3.length);
-    if  (d3.data == NULL) {
-        free(d1.data);
-        free(d2.data);
-        return (ENOMEM);
-    }
-    k3 = key->keyblock;
-    k3.length=d3.length;
-    k3.contents= (void *) d3.data;
-
-    salt.length=14;
-    salt.data=malloc(salt.length);
-    if(salt.data==NULL) {
-        free(d1.data);
-        free(d2.data);
-        free(d3.data);
-        return (ENOMEM);
-    }
-
-    ciphertext.length=input->length-hashsize;
-    ciphertext.data=input->data+hashsize;
-    plaintext.length=ciphertext.length;
-    plaintext.data=malloc(plaintext.length);
-    if (plaintext.data == NULL) {
-        free(d1.data);
-        free(d2.data);
-        free(d3.data);
-        free(salt.data);
-        return (ENOMEM);
-    }
-
-    checksum.length=hashsize;
-    checksum.data=input->data;
-
-    ms_usage=krb5int_arcfour_translate_usage(usage);
-
-    /* We may have to try two ms_usage values; see below. */
+    /* We may have to try two usage values; see below. */
     do {
-        /* compute the salt */
-        if (key->keyblock.enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
-            strncpy(salt.data, krb5int_arcfour_l40, salt.length);
-            store_32_le(ms_usage, salt.data + 10);
-        } else {
-            salt.length = 4;
-            store_32_le(ms_usage, salt.data);
-        }
-        ret = krb5int_hmac(hash, key, 1, &salt, &d1);
+        /* Derive a usage key from the session key and usage. */
+        ret = krb5int_arcfour_usage_key(enc, hash, &key->keyblock, usage,
+                                        usage_keyblock);
+        if (ret != 0)
+            goto cleanup;
+
+        /* Derive the encryption key from the usage key and checksum. */
+        ret = krb5int_arcfour_enc_key(enc, hash, usage_keyblock, &checksum,
+                                      enc_keyblock);
         if (ret)
             goto cleanup;
 
-        memcpy(k2.contents, k1.contents, k2.length);
-
-        if (key->keyblock.enctype == ENCTYPE_ARCFOUR_HMAC_EXP)
-            memset(k1.contents + 7, 0xab, 9);
-
-        ret = krb5int_hmac_keyblock(hash, &k1, 1, &checksum, &d3);
+        /* Decrypt the ciphertext. */
+        ret = krb5_k_create_key(NULL, enc_keyblock, &enc_key);
+        if (ret)
+            goto cleanup;
+        ret = (*enc->decrypt)(enc_key, ivec, &ciphertext, &plaintext);
+        krb5_k_free_key(NULL, enc_key);
         if (ret)
             goto cleanup;
 
-        ret = krb5_k_create_key(NULL, &k3, &k3key);
-        if (ret)
-            goto cleanup;
-        ret = (*(enc->decrypt))(k3key, ivec, &ciphertext, &plaintext);
-        krb5_k_free_key(NULL, k3key);
-        if (ret)
-            goto cleanup;
-
-        ret = krb5int_hmac_keyblock(hash, &k2, 1, &plaintext, &d1);
+        /* Compute HMAC(usage key, plaintext) to get the checksum. */
+        ret = krb5int_hmac_keyblock(hash, usage_keyblock, 1, &plaintext,
+                                    &comp_checksum);
         if (ret)
             goto cleanup;
 
-        if (memcmp(checksum.data, d1.data, hashsize) != 0) {
-            if (ms_usage == 9) {
+        if (memcmp(checksum.data, comp_checksum.data, hash->hashsize) != 0) {
+            if (usage == 9) {
                 /*
                  * RFC 4757 specifies usage 8 for TGS-REP encrypted
                  * parts encrypted in a subkey, but the value used by MS
@@ -310,7 +242,7 @@ krb5int_arcfour_decrypt(const struct krb5_enc_provider *enc,
                  * back to 8 on failure in case we are communicating
                  * with a KDC using the value from the RFC.
                  */
-                ms_usage = 8;
+                usage = 8;
                 continue;
             }
             ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
@@ -320,21 +252,15 @@ krb5int_arcfour_decrypt(const struct krb5_enc_provider *enc,
         break;
     } while (1);
 
-    memcpy(output->data, plaintext.data+CONFOUNDERLENGTH,
-           (plaintext.length-CONFOUNDERLENGTH));
-    output->length=plaintext.length-CONFOUNDERLENGTH;
+    /* Remove the confounder from the plaintext to get the output. */
+    memcpy(output->data, plaintext.data + CONFOUNDERLENGTH,
+           plaintext.length - CONFOUNDERLENGTH);
+    output->length = plaintext.length - CONFOUNDERLENGTH;
 
 cleanup:
-    memset(d1.data, 0, d1.length);
-    memset(d2.data, 0, d2.length);
-    memset(d3.data, 0, d2.length);
-    memset(salt.data, 0, salt.length);
-    memset(plaintext.data, 0, plaintext.length);
-
-    free(d1.data);
-    free(d2.data);
-    free(d3.data);
-    free(salt.data);
-    free(plaintext.data);
-    return (ret);
+    krb5int_c_free_keyblock(NULL, usage_keyblock);
+    krb5int_c_free_keyblock(NULL, enc_keyblock);
+    zapfree(plaintext.data, plaintext.length);
+    zapfree(comp_checksum.data, comp_checksum.length);
+    return ret;
 }
