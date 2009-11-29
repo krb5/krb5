@@ -100,29 +100,31 @@ extern const unsigned DES_INT32 des_SP_table[8][64];
  * a time and swapping left and right in the code we can avoid the
  * swaps altogether.
  */
-#define DES_SP_ENCRYPT_ROUND(left, right, temp, kp)                     \
-    (temp) = (((right) >> 11) | ((right) << 21)) ^ *(kp)++;             \
-           (left) ^= SP[0][((temp) >> 24) & 0x3f]                       \
-        | SP[1][((temp) >> 16) & 0x3f]                                  \
-        | SP[2][((temp) >>  8) & 0x3f]                                  \
-        | SP[3][((temp)      ) & 0x3f];                                 \
-           (temp) = (((right) >> 23) | ((right) << 9)) ^ *(kp)++;       \
-           (left) ^= SP[4][((temp) >> 24) & 0x3f]                       \
-        | SP[5][((temp) >> 16) & 0x3f]                                  \
-        | SP[6][((temp) >>  8) & 0x3f]                                  \
-        | SP[7][((temp)      ) & 0x3f]
+#define DES_SP_ENCRYPT_ROUND(left, right, temp, kp) do {                \
+        (temp) = (((right) >> 11) | ((right) << 21)) ^ *(kp)++;         \
+        (left) ^= SP[0][((temp) >> 24) & 0x3f]                          \
+            | SP[1][((temp) >> 16) & 0x3f]                              \
+            | SP[2][((temp) >>  8) & 0x3f]                              \
+            | SP[3][((temp)      ) & 0x3f];                             \
+        (temp) = (((right) >> 23) | ((right) << 9)) ^ *(kp)++;          \
+        (left) ^= SP[4][((temp) >> 24) & 0x3f]                          \
+            | SP[5][((temp) >> 16) & 0x3f]                              \
+            | SP[6][((temp) >>  8) & 0x3f]                              \
+            | SP[7][((temp)      ) & 0x3f];                             \
+    } while(0);
 
-#define DES_SP_DECRYPT_ROUND(left, right, temp, kp)                     \
-    (temp) = (((right) >> 23) | ((right) << 9)) ^ *(--(kp));            \
-           (left) ^= SP[7][((temp)      ) & 0x3f]                       \
-        | SP[6][((temp) >>  8) & 0x3f]                                  \
-        | SP[5][((temp) >> 16) & 0x3f]                                  \
-        | SP[4][((temp) >> 24) & 0x3f];                                 \
-           (temp) = (((right) >> 11) | ((right) << 21)) ^ *(--(kp));    \
-           (left) ^= SP[3][((temp)      ) & 0x3f]                       \
-        | SP[2][((temp) >>  8) & 0x3f]                                  \
-        | SP[1][((temp) >> 16) & 0x3f]                                  \
-        | SP[0][((temp) >> 24) & 0x3f]
+#define DES_SP_DECRYPT_ROUND(left, right, temp, kp) do {                \
+        (temp) = (((right) >> 23) | ((right) << 9)) ^ *(--(kp));        \
+        (left) ^= SP[7][((temp)      ) & 0x3f]                          \
+            | SP[6][((temp) >>  8) & 0x3f]                              \
+            | SP[5][((temp) >> 16) & 0x3f]                              \
+            | SP[4][((temp) >> 24) & 0x3f];                             \
+        (temp) = (((right) >> 11) | ((right) << 21)) ^ *(--(kp));       \
+        (left) ^= SP[3][((temp)      ) & 0x3f]                          \
+            | SP[2][((temp) >>  8) & 0x3f]                              \
+            | SP[1][((temp) >> 16) & 0x3f]                              \
+            | SP[0][((temp) >> 24) & 0x3f];                             \
+    } while (0);
 
 /*
  * Macros to help deal with the initial permutation table.  Note
@@ -155,17 +157,18 @@ extern const unsigned DES_INT32 des_SP_table[8][64];
  * are dealing with.  If you use this, though, try to make left,
  * right and temp register unsigned DES_INT32s.
  */
-#define DES_INITIAL_PERM(left, right, temp)             \
-    (temp) = DES_IP_RIGHT_BITS((left), (right));        \
-           (right) = DES_IP_LEFT_BITS((left), (right)); \
-           (left) = IP[((right) >> 24) & 0xff]          \
-        | (IP[((right) >> 16) & 0xff] << 1)             \
-        | (IP[((right) >>  8) & 0xff] << 2)             \
-        | (IP[(right) & 0xff] << 3);                    \
-           (right) = IP[((temp) >> 24) & 0xff]          \
-        | (IP[((temp) >> 16) & 0xff] << 1)              \
-        | (IP[((temp) >>  8) & 0xff] << 2)              \
-        | (IP[(temp) & 0xff] << 3)
+#define DES_INITIAL_PERM(left, right, temp) do {        \
+        (temp) = DES_IP_RIGHT_BITS((left), (right));    \
+        (right) = DES_IP_LEFT_BITS((left), (right));    \
+        (left) = IP[((right) >> 24) & 0xff]             \
+            | (IP[((right) >> 16) & 0xff] << 1)         \
+            | (IP[((right) >>  8) & 0xff] << 2)         \
+            | (IP[(right) & 0xff] << 3);                \
+        (right) = IP[((temp) >> 24) & 0xff]             \
+            | (IP[((temp) >> 16) & 0xff] << 1)          \
+            | (IP[((temp) >>  8) & 0xff] << 2)          \
+            | (IP[(temp) & 0xff] << 3);                 \
+    } while(0);
 
 /*
  * Now the final permutation stuff.  The same comments apply to
@@ -190,17 +193,18 @@ extern const unsigned DES_INT32 des_SP_table[8][64];
  * swapping internally, which is why left and right are confused
  * at the beginning.
  */
-#define DES_FINAL_PERM(left, right, temp)               \
-    (temp) = DES_FP_RIGHT_BITS((right), (left));        \
-           (right) = DES_FP_LEFT_BITS((right), (left)); \
-           (left) = (FP[((right) >> 24) & 0xff] << 6)   \
-        | (FP[((right) >> 16) & 0xff] << 4)             \
-        | (FP[((right) >>  8) & 0xff] << 2)             \
-        |  FP[(right) & 0xff];                          \
-           (right) = (FP[((temp) >> 24) & 0xff] << 6)   \
-        | (FP[((temp) >> 16) & 0xff] << 4)              \
-        | (FP[((temp) >>  8) & 0xff] << 2)              \
-        |  FP[temp & 0xff]
+#define DES_FINAL_PERM(left, right, temp) do {          \
+        (temp) = DES_FP_RIGHT_BITS((right), (left));    \
+        (right) = DES_FP_LEFT_BITS((right), (left));    \
+        (left) = (FP[((right) >> 24) & 0xff] << 6)      \
+            | (FP[((right) >> 16) & 0xff] << 4)         \
+            | (FP[((right) >>  8) & 0xff] << 2)         \
+            |  FP[(right) & 0xff];                      \
+        (right) = (FP[((temp) >> 24) & 0xff] << 6)      \
+            | (FP[((temp) >> 16) & 0xff] << 4)          \
+            | (FP[((temp) >>  8) & 0xff] << 2)          \
+            |  FP[temp & 0xff];                         \
+    } while(0);
 
 
 /*
