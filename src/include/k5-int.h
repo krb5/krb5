@@ -756,13 +756,8 @@ krb5_error_code krb5int_pbkdf2_hmac_sha1(const krb5_data *, unsigned long,
 
 krb5_error_code
 krb5int_arcfour_gsscrypt(const krb5_keyblock *keyblock, krb5_keyusage usage,
-                         const krb5_data *kd_data, const krb5_data *input,
-                         krb5_data *output);
-
-krb5_error_code
-krb5int_arcfour_gsscrypt_iov(const krb5_keyblock *keyblock,
-                             krb5_keyusage usage, const krb5_data *kd_data,
-                             krb5_crypto_iov *data, size_t num_data);
+                         const krb5_data *kd_data, krb5_crypto_iov *data,
+                         size_t num_data);
 
 /*
  * Attempt to zero memory in a way that compilers won't optimize out.
@@ -2205,13 +2200,8 @@ typedef struct _krb5int_access {
     krb5_error_code (*arcfour_gsscrypt)(const krb5_keyblock *keyblock,
                                         krb5_keyusage usage,
                                         const krb5_data *kd_data,
-                                        const krb5_data *input,
-                                        krb5_data *output);
-    krb5_error_code (*arcfour_gsscrypt_iov)(const krb5_keyblock *keyblock,
-                                            krb5_keyusage usage,
-                                            const krb5_data *kd_data,
-                                            krb5_crypto_iov *data,
-                                            size_t num_data);
+                                        krb5_crypto_iov *data,
+                                        size_t num_data);
 
     krb5_error_code (*auth_con_get_subkey_enctype)(krb5_context,
                                                    krb5_auth_context,

@@ -268,9 +268,9 @@ const struct krb5_aead_provider krb5int_aead_arcfour = {
 };
 
 krb5_error_code
-krb5int_arcfour_gsscrypt_iov(const krb5_keyblock *keyblock,
-                             krb5_keyusage usage, const krb5_data *kd_data,
-                             krb5_crypto_iov *data, size_t num_data)
+krb5int_arcfour_gsscrypt(const krb5_keyblock *keyblock, krb5_keyusage usage,
+                         const krb5_data *kd_data, krb5_crypto_iov *data,
+                         size_t num_data)
 {
     const struct krb5_enc_provider *enc = &krb5int_enc_arcfour;
     const struct krb5_hash_provider *hash = &krb5int_hash_md5;

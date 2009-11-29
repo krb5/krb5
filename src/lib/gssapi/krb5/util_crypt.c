@@ -289,14 +289,16 @@ kg_arcfour_docrypt(const krb5_keyblock *keyblock, int usage,
 {
     krb5_error_code code;
     krb5_data kd = make_data((char *) kd_data, kd_data_len);
-    krb5_data input = make_data((char *) input_buf, input_len);
-    krb5_data output = make_data(output_buf, input_len);
+    krb5_crypto_iov kiov;
     krb5int_access kaccess;
 
     code = krb5int_accessor(&kaccess, KRB5INT_ACCESS_VERSION);
     if (code)
         return code;
-    return (*kaccess.arcfour_gsscrypt)(keyblock, usage, &kd, &input, &output);
+    memcpy(output_buf, input_buf, input_len);
+    kiov.flags = KRB5_CRYPTO_TYPE_DATA;
+    kiov.data = make_data(output_buf, input_len);
+    return (*kaccess.arcfour_gsscrypt)(keyblock, usage, &kd, &kiov, 1);
 }
 
 /* AEAD */
@@ -593,8 +595,7 @@ kg_arcfour_docrypt_iov(krb5_context context, const krb5_keyblock *keyblock,
                             iov, iov_count, &kiov, &kiov_count);
     if (code)
         return code;
-    code = (*kaccess.arcfour_gsscrypt_iov)(keyblock, usage, &kd,
-                                           kiov, kiov_count);
+    code = (*kaccess.arcfour_gsscrypt)(keyblock, usage, &kd, kiov, kiov_count);
     free(kiov);
     return code;
 }

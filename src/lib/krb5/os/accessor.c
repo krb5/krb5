@@ -53,7 +53,6 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
             krb5int_access internals_temp;
 #endif
             S (arcfour_gsscrypt, krb5int_arcfour_gsscrypt),
-            S (arcfour_gsscrypt_iov, krb5int_arcfour_gsscrypt_iov),
             S (free_addrlist, krb5int_free_addrlist),
             S (auth_con_get_subkey_enctype, krb5_auth_con_get_subkey_enctype),
             S (sendto_udp, &krb5int_sendto),
