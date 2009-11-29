@@ -11,7 +11,7 @@
 #include "arcfour-int.h"
 #include "hash_provider/hash_provider.h"
 
-const char *const l40 = "fortybits";
+const char l40[] = "fortybits";
 
 void
 krb5int_arcfour_encrypt_length(const struct krb5_enc_provider *enc,
@@ -59,7 +59,7 @@ krb5int_arcfour_usage_key(const struct krb5_enc_provider *enc,
     /* Generate the salt. */
     ms_usage = krb5int_arcfour_translate_usage(usage);
     if (session_keyblock->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
-        strncpy(salt_buf, l40, sizeof(salt_buf));
+        memcpy(salt_buf, l40, 10);
         store_32_le(ms_usage, salt_buf + 10);
     } else {
         salt.length=4;
@@ -160,8 +160,7 @@ krb5int_arcfour_encrypt(const struct krb5_enc_provider *enc,
     if (ret)
         goto cleanup;
 
-    output->length = plaintext.length + hash->hashsize;
-    return 0;
+    output->length = plainlen + hash->hashsize;
 
 cleanup:
     krb5int_c_free_keyblock(NULL, usage_keyblock);
