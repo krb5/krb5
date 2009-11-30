@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * test_getsockname.c
  *
@@ -27,22 +28,22 @@ main(argc, argv)
     int sock;
     GETSOCKNAME_ARG3_TYPE i;
     struct hostent *host;
-    struct sockaddr_in s_sock;		/* server address */
-    struct sockaddr_in c_sock;		/* client address */
+    struct sockaddr_in s_sock;          /* server address */
+    struct sockaddr_in c_sock;          /* client address */
 
     char *hostname;
 
     if (argc == 2) {
-	hostname = argv[1];
+        hostname = argv[1];
     } else {
-	fprintf(stderr, "Usage: %s hostname\n", argv[0]);
-	exit(1);
+        fprintf(stderr, "Usage: %s hostname\n", argv[0]);
+        exit(1);
     }
 
     /* Look up server host */
     if ((host = gethostbyname(hostname)) == (struct hostent *) 0) {
-	fprintf(stderr, "%s: unknown host\n", hostname);
-	exit(1);
+        fprintf(stderr, "%s: unknown host\n", hostname);
+        exit(1);
     }
 
     /* Set server's address */
@@ -57,8 +58,8 @@ main(argc, argv)
 
     /* Open a socket */
     if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-	perror("socket");
-	exit(1);
+        perror("socket");
+        exit(1);
     }
 
     memset(&c_sock, 0, sizeof(c_sock));
@@ -66,23 +67,23 @@ main(argc, argv)
 
     /* Bind it to set the address; kernel will fill in port # */
     if (bind(sock, (struct sockaddr *)&c_sock, sizeof(c_sock)) < 0) {
-	perror("bind");
-	exit(1);
+        perror("bind");
+        exit(1);
     }
 
     /* "connect" the datagram socket; this is necessary to get a local address
        properly bound for getsockname() below. */
     if (connect(sock, (struct sockaddr *)&s_sock, sizeof(s_sock)) == -1) {
-	perror("connect");
-	exit(1);
+        perror("connect");
+        exit(1);
     }
 
     /* Get my address */
     memset(&c_sock, 0, sizeof(c_sock));
     i = sizeof(c_sock);
     if (getsockname(sock, (struct sockaddr *)&c_sock, &i) < 0) {
-	perror("getsockname");
-	exit(1);
+        perror("getsockname");
+        exit(1);
     }
 
     printf("My interface address is: %s\n", inet_ntoa(c_sock.sin_addr));

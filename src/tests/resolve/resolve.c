@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * test/resolve/resolve.c
  *
@@ -74,97 +75,97 @@ char *strchr();
 
 int
 main(argc, argv)
-     int argc;
-     char **argv;
+    int argc;
+    char **argv;
 {
-	char myname[MAXHOSTNAMELEN+1];
-	char *ptr;
-	struct in_addr addrcopy;
-	struct hostent *host;
-	int quiet = 0;
+    char myname[MAXHOSTNAMELEN+1];
+    char *ptr;
+    struct in_addr addrcopy;
+    struct hostent *host;
+    int quiet = 0;
 
-	argc--; argv++;
-	while (argc) {
-	    if ((strcmp(*argv, "--quiet") == 0) ||
-		(strcmp(*argv, "-q") == 0)) {
-		quiet++;
-	    } else
-		break;
-	    argc--; argv++;
-	}
+    argc--; argv++;
+    while (argc) {
+        if ((strcmp(*argv, "--quiet") == 0) ||
+            (strcmp(*argv, "-q") == 0)) {
+            quiet++;
+        } else
+            break;
+        argc--; argv++;
+    }
 
-	if (argc >= 1) {
-		strncpy(myname, *argv, MAXHOSTNAMELEN);
-	} else {
-		if(gethostname(myname, MAXHOSTNAMELEN)) {
-			perror("gethostname failure");
-			exit(1);
-		}
-	}
+    if (argc >= 1) {
+        strncpy(myname, *argv, MAXHOSTNAMELEN);
+    } else {
+        if(gethostname(myname, MAXHOSTNAMELEN)) {
+            perror("gethostname failure");
+            exit(1);
+        }
+    }
 
-	myname[MAXHOSTNAMELEN] = '\0';	/* for safety */
+    myname[MAXHOSTNAMELEN] = '\0';  /* for safety */
 
-	/* Look up the address... */
-	if (!quiet)
-	    printf("Hostname:  %s\n", myname);
+    /* Look up the address... */
+    if (!quiet)
+        printf("Hostname:  %s\n", myname);
 
 
-	/* Set the hosts db to close each time - effectively rewinding file */
-	sethostent(0);
+    /* Set the hosts db to close each time - effectively rewinding file */
+    sethostent(0);
 
-	if((host = gethostbyname (myname)) == NULL) {
-		fprintf(stderr,
-			"Could not look up address for hostname '%s' - fatal\n",
-			myname);
-		exit(2);
-	}
+    if((host = gethostbyname (myname)) == NULL) {
+        fprintf(stderr,
+                "Could not look up address for hostname '%s' - fatal\n",
+                myname);
+        exit(2);
+    }
 
-	ptr = host->h_addr_list[0];
+    ptr = host->h_addr_list[0];
 #define UC(a) (((int)a)&0xff)
-	if (!quiet)
-	    printf("Host address: %d.%d.%d.%d\n",
-		   UC(ptr[0]), UC(ptr[1]), UC(ptr[2]), UC(ptr[3]));
+    if (!quiet)
+        printf("Host address: %d.%d.%d.%d\n",
+               UC(ptr[0]), UC(ptr[1]), UC(ptr[2]), UC(ptr[3]));
 
-	memcpy(&addrcopy.s_addr, ptr, 4);
+    memcpy(&addrcopy.s_addr, ptr, 4);
 
-	/* Convert back to full name */
-	if((host = gethostbyaddr(&addrcopy.s_addr, 4, AF_INET)) == NULL) {
-		fprintf(stderr, "Error looking up IP address - fatal\n");
-		exit(2);
-	}
+    /* Convert back to full name */
+    if((host = gethostbyaddr(&addrcopy.s_addr, 4, AF_INET)) == NULL) {
+        fprintf(stderr, "Error looking up IP address - fatal\n");
+        exit(2);
+    }
 
-	if (quiet)
-	    printf("%s\n", host->h_name);
-	else
-	    printf("FQDN: %s\n", host->h_name);
+    if (quiet)
+        printf("%s\n", host->h_name);
+    else
+        printf("FQDN: %s\n", host->h_name);
 
-	/*
-	 * The host name must have at least one '.' in the name, and
-	 * if there is only one '.', it must not be at the end of the
-	 * string.  (i.e., "foo." is not a FQDN)
-	 */
-	ptr = strchr(host->h_name, '.');
-	if (ptr == NULL || ptr[1] == '\0') {
-		fprintf(stderr,
-			"\nResolve library did not return a "
-			"fully qualified domain name.\n\n"
-			"If you are using /etc/hosts before DNS, "
-			"e.g. \"files\" is listed first\n"
-			"for \"hosts:\" in nsswitch.conf, ensure that "
-			"you have listed the FQDN\n"
-			"as the first name for the local host.\n\n"
-			"If this does not correct the problem, "
-			"you may have to reconfigure the kerberos\n"
-			"distribution to select a "
-			"different set of libraries using \n"
-			"--with-netlib[=libs]\n");
-		exit(3);
-	}
+    /*
+     * The host name must have at least one '.' in the name, and
+     * if there is only one '.', it must not be at the end of the
+     * string.  (i.e., "foo." is not a FQDN)
+     */
+    ptr = strchr(host->h_name, '.');
+    if (ptr == NULL || ptr[1] == '\0') {
+        fprintf(stderr,
+                "\nResolve library did not return a "
+                "fully qualified domain name.\n\n"
+                "If you are using /etc/hosts before DNS, "
+                "e.g. \"files\" is listed first\n"
+                "for \"hosts:\" in nsswitch.conf, ensure that "
+                "you have listed the FQDN\n"
+                "as the first name for the local host.\n\n"
+                "If this does not correct the problem, "
+                "you may have to reconfigure the kerberos\n"
+                "distribution to select a "
+                "different set of libraries using \n"
+                "--with-netlib[=libs]\n");
+        exit(3);
+    }
 
-	if (!quiet)
-	    printf("Resolve library appears to have passed the test\n");
+    if (!quiet)
+        printf("Resolve library appears to have passed the test\n");
 
-	/* All ok */
-	exit(0);
+    /* All ok */
+    exit(0);
 
 }

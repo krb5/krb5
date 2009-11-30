@@ -671,6 +671,7 @@ INDENTDIRS = \
 	plugins \
 	prototype \
 	slave \
+	tests \
 	util/support
 
 BSDFILES = \
@@ -707,7 +708,13 @@ OTHEREXCLUDES = \
 	plugins/preauth/pkinit/pkinit_accessor.h \
 	plugins/preauth/pkinit/pkinit_crypto.h \
 	plugins/preauth/pkinit/pkinit.h \
-	plugins/preauth/pkinit/pkinit_crypto_openssl.h
+	plugins/preauth/pkinit/pkinit_crypto_openssl.h \
+	tests/asn.1/ktest.h \
+	tests/asn.1/ktest_equal.h \
+	tests/asn.1/utility.h \
+	tests/gss-threads/gss-misc.c \
+	tests/gss-threads/gss-misc.h \
+	tests/hammer/kdc5_hammer.c
 
 EXCLUDES = `for i in $(BSDFILES) $(OTHEREXCLUDES); do echo $$i; done | $(AWK) '{ print "-path", $$1, "-o" }'` -path /dev/null
 
