@@ -54,11 +54,11 @@ krb5int_c_locate_iov(krb5_crypto_iov *data,
     return iov;
 }
 
-static krb5_error_code
-make_unkeyed_checksum_iov(const struct krb5_hash_provider *hash_provider,
-                          const krb5_crypto_iov *data,
-                          size_t num_data,
-                          krb5_data *output)
+/* Glue the IOV interface to the hash provider's old list-of-buffers. */
+krb5_error_code
+krb5int_hash_iov(const struct krb5_hash_provider *hash_provider,
+                 const krb5_crypto_iov *data, size_t num_data,
+                 krb5_data *output)
 {
     krb5_data *sign_data;
     size_t num_sign_data;
@@ -125,8 +125,7 @@ krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum_type,
                                            key, usage, data, num_data,
                                            cksum_data);
     } else {
-        ret = make_unkeyed_checksum_iov(cksum_type->hash, data, num_data,
-                                        cksum_data);
+        ret = krb5int_hash_iov(cksum_type->hash, data, num_data, cksum_data);
     }
 
     if (ret == 0) {
@@ -432,8 +431,21 @@ krb5int_c_padding_length(const struct krb5_aead_provider *aead,
                          size_t data_length,
                          unsigned int *pad_length)
 {
-    unsigned int padding;
+    unsigned int header, padding;
     krb5_error_code ret;
+
+    /*
+     * Add in the header length since the header is encrypted along with the
+     * data.  (arcfour violates this assumption since not all of the header is
+     * encrypted, but that's okay since it has no padding.  If there is ever an
+     * enctype using a similar token format and a block cipher, we will have to
+     * move this logic into an enctype-dependent function.)
+     */
+    ret = (*aead->crypto_length)(aead, enc, hash, KRB5_CRYPTO_TYPE_HEADER,
+                                 &header);
+    if (ret != 0)
+        return ret;
+    data_length += header;
 
     ret = (*aead->crypto_length)(aead, enc, hash, KRB5_CRYPTO_TYPE_PADDING,
                                  &padding);

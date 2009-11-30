@@ -52,7 +52,7 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_des_string_to_key,
       krb5int_des_prf,
       CKSUMTYPE_RSA_MD5,
-      NULL, /*AEAD*/
+      &krb5int_aead_old,
       ETYPE_WEAK },
     { ENCTYPE_DES_CBC_MD4,
       "des-cbc-md4", { 0 }, "DES cbc mode with RSA-MD4",
@@ -62,7 +62,7 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_des_string_to_key,
       krb5int_des_prf,
       CKSUMTYPE_RSA_MD4,
-      NULL, /*AEAD*/
+      &krb5int_aead_old,
       ETYPE_WEAK },
     { ENCTYPE_DES_CBC_MD5,
       "des-cbc-md5", { "des" }, "DES cbc mode with RSA-MD5",
@@ -72,7 +72,7 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_des_string_to_key,
       krb5int_des_prf,
       CKSUMTYPE_RSA_MD5,
-      NULL, /*AEAD*/
+      &krb5int_aead_old,
       ETYPE_WEAK },
     { ENCTYPE_DES_CBC_RAW,
       "des-cbc-raw", { 0 }, "DES cbc mode raw",
@@ -115,7 +115,7 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_dk_string_to_key,
       NULL, /*PRF*/
       0,
-      NULL,
+      &krb5int_aead_old,
       ETYPE_WEAK },
     { ENCTYPE_ARCFOUR_HMAC,
       "arcfour-hmac", { "rc4-hmac", "arcfour-hmac-md5" },
