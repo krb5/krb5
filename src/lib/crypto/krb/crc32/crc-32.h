@@ -60,6 +60,7 @@
 
 #define CRC32_CKSUM_LENGTH      4
 
+/* c is in-out to allow chaining; initialize to 0. */
 void
 mit_crc32 (krb5_pointer in, size_t in_length, unsigned long *c);
 

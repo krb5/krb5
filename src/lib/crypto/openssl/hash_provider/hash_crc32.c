@@ -33,17 +33,15 @@ static krb5_error_code
 k5_crc32_hash(unsigned int icount, const krb5_data *input,
               krb5_data *output)
 {
-    unsigned long c, cn;
+    unsigned long c;
     unsigned int i;
 
     if (output->length != CRC32_CKSUM_LENGTH)
         return(KRB5_CRYPTO_INTERNAL);
 
     c = 0;
-    for (i=0; i<icount; i++) {
-        mit_crc32(input[i].data, input[i].length, &cn);
-        c ^= cn;
-    }
+    for (i=0; i<icount; i++)
+        mit_crc32(input[i].data, input[i].length, &c);
 
     store_32_le(c, output->data);
     return(0);

@@ -151,7 +151,7 @@ void
 mit_crc32(krb5_pointer in, size_t in_length, unsigned long *cksum)
 {
     register u_char *data;
-    register u_long c = 0;
+    register u_long c = *cksum;
     register int idx;
     size_t i;
 
@@ -178,7 +178,7 @@ void
 mit_crc32_shift4(krb5_pointer in, size_t in_length, unsigned long *cksum)
 {
     register unsigned char *data, b;
-    register unsigned long c = 0;
+    register unsigned long c = *cksum;
     size_t i;
 
     data = (u_char *)in;

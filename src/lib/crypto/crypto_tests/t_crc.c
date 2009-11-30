@@ -121,6 +121,7 @@ timetest(unsigned int nblk, unsigned int blksiz)
         block[i] = i % 256;
     times(&before);
     for (i = 0; i < nblk; i++) {
+        cksum = 0;
         mit_crc32(block + i * blksiz, blksiz, &cksum);
     }
 
@@ -136,6 +137,7 @@ timetest(unsigned int nblk, unsigned int blksiz)
 #ifdef CRC32_SHIFT4
     times(&before);
     for (i = 0; i < nblk; i++) {
+        cksum = 0;
         mit_crc32_shift4(block + i * blksiz, blksiz, &cksum);
     }
     times(&after);
@@ -185,11 +187,13 @@ verify(void)
         case STR:
             len = strlen(trial.data);
             typestr = "STR";
+            cksum = 0;
             mit_crc32(trial.data, len, &cksum);
             break;
         case HEX:
             typestr = "HEX";
             gethexstr(trial.data, &len, buf, 4);
+            cksum = 0;
             mit_crc32(buf, len, &cksum);
             break;
         default:
