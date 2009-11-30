@@ -245,10 +245,9 @@ krb5_cc_resolve (krb5_context context, const char *name, krb5_ccache *cache)
  * prefix string.
  */
 static krb5_error_code
-krb5int_cc_getops(
-    krb5_context context,
-    const char *pfx,
-    const krb5_cc_ops **ops)
+krb5int_cc_getops(krb5_context context,
+                  const char *pfx,
+                  const krb5_cc_ops **ops)
 {
     krb5_error_code err;
     struct krb5_cc_typelist *tlist;
@@ -331,10 +330,9 @@ errout:
 }
 
 krb5_error_code
-krb5int_cc_typecursor_next(
-    krb5_context context,
-    krb5_cc_typecursor t,
-    const krb5_cc_ops **ops)
+krb5int_cc_typecursor_next(krb5_context context,
+                           krb5_cc_typecursor t,
+                           const krb5_cc_ops **ops)
 {
     krb5_error_code err = 0;
 
@@ -364,7 +362,7 @@ krb5int_cc_typecursor_free(krb5_context context, krb5_cc_typecursor *t)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_cc_move (krb5_context context, krb5_ccache src, krb5_ccache dst)
+krb5_cc_move(krb5_context context, krb5_ccache src, krb5_ccache dst)
 {
     krb5_error_code ret = 0;
     krb5_principal princ = NULL;

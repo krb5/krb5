@@ -65,9 +65,8 @@ static krb5_error_code
 cccol_pertype_next(krb5_context, krb5_cccol_cursor, krb5_ccache *);
 
 krb5_error_code KRB5_CALLCONV
-krb5_cccol_cursor_new(
-    krb5_context context,
-    krb5_cccol_cursor *cursor)
+krb5_cccol_cursor_new(krb5_context context,
+                      krb5_cccol_cursor *cursor)
 {
     krb5_error_code ret = 0;
     krb5_cccol_cursor n = NULL;
@@ -111,10 +110,9 @@ errout:
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_cccol_cursor_next(
-    krb5_context context,
-    krb5_cccol_cursor cursor,
-    krb5_ccache *ccache)
+krb5_cccol_cursor_next(krb5_context context,
+                       krb5_cccol_cursor cursor,
+                       krb5_ccache *ccache)
 {
     krb5_error_code ret = 0;
     char *name;
@@ -173,9 +171,8 @@ errout:
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_cccol_cursor_free(
-    krb5_context context,
-    krb5_cccol_cursor *cursor)
+krb5_cccol_cursor_free(krb5_context context,
+                       krb5_cccol_cursor *cursor)
 {
     krb5_cccol_cursor c = *cursor;
     int i;
@@ -200,9 +197,8 @@ krb5_cccol_cursor_free(
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_cccol_last_change_time(
-    krb5_context context,
-    krb5_timestamp *change_time)
+krb5_cccol_last_change_time(krb5_context context,
+                            krb5_timestamp *change_time)
 {
     krb5_error_code ret = 0;
     krb5_cccol_cursor c = NULL;
@@ -240,10 +236,9 @@ krb5_cccol_last_change_time(
  * higher-priority defaults.
  */
 static int
-cccol_already(
-    krb5_context context,
-    krb5_cccol_cursor c,
-    krb5_ccache *ccache)
+cccol_already(krb5_context context,
+              krb5_cccol_cursor c,
+              krb5_ccache *ccache)
 {
     const char *name = NULL, *prefix = NULL;
     int i;
@@ -270,10 +265,9 @@ cccol_already(
  * Compare {prefix, name} against a cc_fullname.
  */
 static int
-cccol_cmpname(
-    const char *prefix,
-    const char *name,
-    struct cc_fullname *fullname)
+cccol_cmpname(const char *prefix,
+              const char *name,
+              struct cc_fullname *fullname)
 {
     if (fullname->pfx == NULL || fullname->res == NULL)
         return 0;
@@ -292,11 +286,10 @@ cccol_cmpname(
  * name we're given.
  */
 static krb5_error_code
-cccol_do_resolve(
-    krb5_context context,
-    krb5_cccol_cursor cursor,
-    const char *name,
-    krb5_ccache *ccache)
+cccol_do_resolve(krb5_context context,
+                 krb5_cccol_cursor cursor,
+                 const char *name,
+                 krb5_ccache *ccache)
 {
     krb5_error_code ret = 0;
     struct cc_fullname *fullname;
@@ -321,10 +314,9 @@ cccol_do_resolve(
  * ccache list of the current backend is exhausted.
  */
 static krb5_error_code
-cccol_pertype_next(
-    krb5_context context,
-    krb5_cccol_cursor cursor,
-    krb5_ccache *ccache)
+cccol_pertype_next(krb5_context context,
+                   krb5_cccol_cursor cursor,
+                   krb5_ccache *ccache)
 {
     krb5_error_code ret = 0;
 
