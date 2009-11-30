@@ -204,12 +204,6 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
     unsigned int hmacsize = 0;
     unsigned char *cksum = NULL;
 
-    if (krb5int_c_locate_iov(data, num_data,
-                             KRB5_CRYPTO_TYPE_STREAM) != NULL) {
-        return krb5int_c_iov_decrypt_stream(aead, enc, hash, key,
-                                            usage, ivec, data, num_data);
-    }
-
     /* E(Confounder | Plaintext | Pad) | Checksum */
 
     ret = aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_PADDING,
