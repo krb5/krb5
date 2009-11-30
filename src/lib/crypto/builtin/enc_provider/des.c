@@ -101,7 +101,7 @@ k5_des_docrypt_iov(krb5_key key, const krb5_data *ivec,
     for (i = 0; i < num_data; i++) {
         const krb5_crypto_iov *iov = &data[i];
 
-        if (ENCRYPT_DATA_IOV(iov))
+        if (ENCRYPT_IOV(iov))
             input_length += iov->data.length;
     }
 
