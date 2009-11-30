@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 2004 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
@@ -39,62 +40,65 @@
  * fashion that it might be confused with the original M.I.T. software.
  */
 
-/* Approach overview:
-
-   If a system version is available but buggy, save handles to it,
-   redefine the names to refer to static functions defined here, and
-   in those functions, call the system versions and fix up the
-   returned data.  Use the native data structures and flag values.
-
-   If no system version exists, use gethostby* and fake it.  Define
-   the data structures and flag values locally.
-
-
-   On Mac OS X, getaddrinfo results aren't cached (though
-   gethostbyname results are), so we need to build a cache here.  Now
-   things are getting really messy.  Because the cache is in use, we
-   use getservbyname, and throw away thread safety.  (Not that the
-   cache is thread safe, but when we get locking support, that'll be
-   dealt with.)  This code needs tearing down and rebuilding, soon.
-
-
-   Note that recent Windows developers' code has an interesting hack:
-   When you include the right header files, with the right set of
-   macros indicating system versions, you'll get an inline function
-   that looks for getaddrinfo (or whatever) in the system library, and
-   calls it if it's there.  If it's not there, it fakes it with
-   gethostby* calls.
-
-   We're taking a simpler approach: A system provides these routines or
-   it does not.
-
-   Someday, we may want to take into account different versions (say,
-   different revs of GNU libc) where some are broken in one way, and
-   some work or are broken in another way.  Cross that bridge when we
-   come to it.  */
+/*
+ * Approach overview:
+ *
+ * If a system version is available but buggy, save handles to it,
+ * redefine the names to refer to static functions defined here, and
+ * in those functions, call the system versions and fix up the
+ * returned data.  Use the native data structures and flag values.
+ *
+ * If no system version exists, use gethostby* and fake it.  Define
+ * the data structures and flag values locally.
+ *
+ *
+ * On Mac OS X, getaddrinfo results aren't cached (though
+ * gethostbyname results are), so we need to build a cache here.  Now
+ * things are getting really messy.  Because the cache is in use, we
+ * use getservbyname, and throw away thread safety.  (Not that the
+ * cache is thread safe, but when we get locking support, that'll be
+ * dealt with.)  This code needs tearing down and rebuilding, soon.
+ *
+ *
+ * Note that recent Windows developers' code has an interesting hack:
+ * When you include the right header files, with the right set of
+ * macros indicating system versions, you'll get an inline function
+ * that looks for getaddrinfo (or whatever) in the system library, and
+ * calls it if it's there.  If it's not there, it fakes it with
+ * gethostby* calls.
+ *
+ * We're taking a simpler approach: A system provides these routines or
+ * it does not.
+ *
+ * Someday, we may want to take into account different versions (say,
+ * different revs of GNU libc) where some are broken in one way, and
+ * some work or are broken in another way.  Cross that bridge when we
+ * come to it.
+ */
 
 /* To do, maybe:
-
-   + For AIX 4.3.3, using the RFC 2133 definition: Implement
-     AI_NUMERICHOST.  It's not defined in the header file.
-
-     For certain (old?) versions of GNU libc, AI_NUMERICHOST is
-     defined but not implemented.
-
-   + Use gethostbyname2, inet_aton and other IPv6 or thread-safe
-     functions if available.  But, see
-     http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=135182 for one
-     gethostbyname2 problem on Linux.  And besides, if a platform is
-     supporting IPv6 at all, they really should be doing getaddrinfo
-     by now.
-
-   + inet_ntop, inet_pton
-
-   + Conditionally export/import the function definitions, so a
-     library can have a single copy instead of multiple.
-
-   + Upgrade host requirements to include working implementations of
-     these functions, and throw all this away.  Pleeease?  :-)  */
+ *
+ * + For AIX 4.3.3, using the RFC 2133 definition: Implement
+ *   AI_NUMERICHOST.  It's not defined in the header file.
+ *
+ *   For certain (old?) versions of GNU libc, AI_NUMERICHOST is
+ *   defined but not implemented.
+ *
+ * + Use gethostbyname2, inet_aton and other IPv6 or thread-safe
+ *   functions if available.  But, see
+ *   http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=135182 for one
+ *   gethostbyname2 problem on Linux.  And besides, if a platform is
+ *   supporting IPv6 at all, they really should be doing getaddrinfo
+ *   by now.
+ *
+ * + inet_ntop, inet_pton
+ *
+ * + Conditionally export/import the function definitions, so a
+ *   library can have a single copy instead of multiple.
+ *
+ * + Upgrade host requirements to include working implementations of
+ *   these functions, and throw all this away.  Pleeease?  :-)
+ */
 
 #include "port-sockets.h"
 #include "socket-utils.h"

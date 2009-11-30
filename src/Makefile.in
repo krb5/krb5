@@ -670,7 +670,8 @@ INDENTDIRS = \
 	lib/krb5 \
 	plugins \
 	prototype \
-	slave
+	slave \
+	util/support
 
 BSDFILES = \
 	kadmin/cli/strftime.c \
@@ -683,7 +684,9 @@ BSDFILES = \
 	lib/kadm5/srv/adb_xdr.c \
 	lib/krb5/krb/strftime.c \
 	lib/krb5/krb/strptime.c \
-	slave/kpropd_rpc.c
+	slave/kpropd_rpc.c \
+	util/support/mkstemp.c \
+	util/support/strlcpy.c
 
 OTHEREXCLUDES = \
 	include/iprop.h \

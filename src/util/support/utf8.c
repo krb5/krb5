@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * util/support/utf8.c
  *
@@ -60,7 +61,7 @@ size_t krb5int_utf8_bytes(const char *p)
     size_t bytes;
 
     for (bytes = 0; p[bytes]; bytes++)
-	;
+        ;
 
     return bytes;
 }
@@ -71,7 +72,7 @@ size_t krb5int_utf8_chars(const char *p)
     size_t chars = 0;
 
     for ( ; *p ; KRB5_UTF8_INCR(p))
-	chars++;
+        chars++;
 
     return chars;
 }
@@ -83,7 +84,7 @@ size_t krb5int_utf8c_chars(const char *p, size_t length)
     const char *end = p + length;
 
     for ( ; p < end; KRB5_UTF8_INCR(p))
-	chars++;
+        chars++;
 
     return chars;
 }
@@ -110,7 +111,7 @@ const char krb5int_utf8_lentab[] = {
 int krb5int_utf8_charlen(const char *p)
 {
     if (!(*p & 0x80))
-	return 1;
+        return 1;
 
     return krb5int_utf8_lentab[*(const unsigned char *)p ^ 0x80];
 }
@@ -152,8 +153,8 @@ int krb5int_utf8_charlen2(const char *p)
     int i = KRB5_UTF8_CHARLEN(p);
 
     if (i > 2) {
-	if (!(krb5int_utf8_mintab[*p & 0x1f] & p[1]))
-	    i = 0;
+        if (!(krb5int_utf8_mintab[*p & 0x1f] & p[1]))
+            i = 0;
     }
 
     return i;
@@ -169,22 +170,22 @@ int krb5int_utf8_to_ucs4(const char *p, krb5_ucs4 *out)
     krb5_ucs4 ch;
     int len, i;
     static unsigned char mask[] = {
-	0, 0x7f, 0x1f, 0x0f, 0x07, 0x03, 0x01 };
+        0, 0x7f, 0x1f, 0x0f, 0x07, 0x03, 0x01 };
 
     *out = 0;
     len = KRB5_UTF8_CHARLEN2(p, len);
 
     if (len == 0)
-	return -1;
+        return -1;
 
     ch = c[0] & mask[len];
 
     for (i = 1; i < len; i++) {
-	if ((c[i] & 0xc0) != 0x80)
-	    return -1;
+        if ((c[i] & 0xc0) != 0x80)
+            return -1;
 
-	ch <<= 6;
-	ch |= c[i] & 0x3f;
+        ch <<= 6;
+        ch |= c[i] & 0x3f;
     }
 
     *out = ch;
@@ -197,7 +198,7 @@ int krb5int_utf8_to_ucs2(const char *p, krb5_ucs2 *out)
 
     *out = 0;
     if (krb5int_utf8_to_ucs4(p, &ch) == -1 || ch > 0xFFFF)
-	return -1;
+        return -1;
     *out = (krb5_ucs2) ch;
     return 0;
 }
@@ -210,45 +211,45 @@ size_t krb5int_ucs4_to_utf8(krb5_ucs4 c, char *buf)
 
     /* not a valid Unicode character */
     if (c < 0)
-	return 0;
+        return 0;
 
     /* Just return length, don't convert */
     if (buf == NULL) {
-	if (c < 0x80) return 1;
-	else if (c < 0x800) return 2;
-	else if (c < 0x10000) return 3;
-	else if (c < 0x200000) return 4;
-	else if (c < 0x4000000) return 5;
-	else return 6;
+        if (c < 0x80) return 1;
+        else if (c < 0x800) return 2;
+        else if (c < 0x10000) return 3;
+        else if (c < 0x200000) return 4;
+        else if (c < 0x4000000) return 5;
+        else return 6;
     }
 
     if (c < 0x80) {
-	p[len++] = c;
+        p[len++] = c;
     } else if (c < 0x800) {
-	p[len++] = 0xc0 | ( c >> 6 );
-	p[len++] = 0x80 | ( c & 0x3f );
+        p[len++] = 0xc0 | ( c >> 6 );
+        p[len++] = 0x80 | ( c & 0x3f );
     } else if (c < 0x10000) {
-	p[len++] = 0xe0 | ( c >> 12 );
-	p[len++] = 0x80 | ( (c >> 6) & 0x3f );
-	p[len++] = 0x80 | ( c & 0x3f );
+        p[len++] = 0xe0 | ( c >> 12 );
+        p[len++] = 0x80 | ( (c >> 6) & 0x3f );
+        p[len++] = 0x80 | ( c & 0x3f );
     } else if (c < 0x200000) {
-	p[len++] = 0xf0 | ( c >> 18 );
-	p[len++] = 0x80 | ( (c >> 12) & 0x3f );
-	p[len++] = 0x80 | ( (c >> 6) & 0x3f );
-	p[len++] = 0x80 | ( c & 0x3f );
+        p[len++] = 0xf0 | ( c >> 18 );
+        p[len++] = 0x80 | ( (c >> 12) & 0x3f );
+        p[len++] = 0x80 | ( (c >> 6) & 0x3f );
+        p[len++] = 0x80 | ( c & 0x3f );
     } else if (c < 0x4000000) {
-	p[len++] = 0xf8 | ( c >> 24 );
-	p[len++] = 0x80 | ( (c >> 18) & 0x3f );
-	p[len++] = 0x80 | ( (c >> 12) & 0x3f );
-	p[len++] = 0x80 | ( (c >> 6) & 0x3f );
-	p[len++] = 0x80 | ( c & 0x3f );
+        p[len++] = 0xf8 | ( c >> 24 );
+        p[len++] = 0x80 | ( (c >> 18) & 0x3f );
+        p[len++] = 0x80 | ( (c >> 12) & 0x3f );
+        p[len++] = 0x80 | ( (c >> 6) & 0x3f );
+        p[len++] = 0x80 | ( c & 0x3f );
     } else /* if( c < 0x80000000 ) */ {
-	p[len++] = 0xfc | ( c >> 30 );
-	p[len++] = 0x80 | ( (c >> 24) & 0x3f );
-	p[len++] = 0x80 | ( (c >> 18) & 0x3f );
-	p[len++] = 0x80 | ( (c >> 12) & 0x3f );
-	p[len++] = 0x80 | ( (c >> 6) & 0x3f );
-	p[len++] = 0x80 | ( c & 0x3f );
+        p[len++] = 0xfc | ( c >> 30 );
+        p[len++] = 0x80 | ( (c >> 24) & 0x3f );
+        p[len++] = 0x80 | ( (c >> 18) & 0x3f );
+        p[len++] = 0x80 | ( (c >> 12) & 0x3f );
+        p[len++] = 0x80 | ( (c >> 6) & 0x3f );
+        p[len++] = 0x80 | ( c & 0x3f );
     }
 
     return len;
@@ -259,9 +260,9 @@ size_t krb5int_ucs2_to_utf8(krb5_ucs2 c, char *buf)
     return krb5int_ucs4_to_utf8((krb5_ucs4)c, buf);
 }
 
-#define KRB5_UCS_UTF8LEN(c)	\
-    c < 0 ? 0 : (c < 0x80 ? 1 : (c < 0x800 ? 2 : (c < 0x10000 ? 3 : \
-    (c < 0x200000 ? 4 : (c < 0x4000000 ? 5 : 6)))))
+#define KRB5_UCS_UTF8LEN(c)                                             \
+    c < 0 ? 0 : (c < 0x80 ? 1 : (c < 0x800 ? 2 : (c < 0x10000 ? 3 :     \
+                                                  (c < 0x200000 ? 4 : (c < 0x4000000 ? 5 : 6)))))
 
 /*
  * Advance to the next UTF-8 character
@@ -278,13 +279,13 @@ char *krb5int_utf8_next(const char *p)
     const unsigned char *u = (const unsigned char *) p;
 
     if (KRB5_UTF8_ISASCII(u)) {
-	return (char *) &p[1];
+        return (char *) &p[1];
     }
 
     for (i = 1; i < 6; i++) {
-	if ((u[i] & 0xc0) != 0x80) {
-	    return (char *) &p[i];
-	}
+        if ((u[i] & 0xc0) != 0x80) {
+            return (char *) &p[i];
+        }
     }
 
     return (char *) &p[i];
@@ -305,9 +306,9 @@ char *krb5int_utf8_prev(const char *p)
     const unsigned char *u = (const unsigned char *) p;
 
     for (i = -1; i>-6 ; i--) {
-	if ((u[i] & 0xc0 ) != 0x80) {
-	    return (char *) &p[i];
-	}
+        if ((u[i] & 0xc0 ) != 0x80) {
+            return (char *) &p[i];
+        }
     }
 
     return (char *) &p[i];
@@ -331,14 +332,14 @@ int krb5int_utf8_copy(char* dst, const char *src)
     dst[0] = src[0];
 
     if (KRB5_UTF8_ISASCII(u)) {
-	return 1;
+        return 1;
     }
 
     for (i=1; i<6; i++) {
-	if ((u[i] & 0xc0) != 0x80) {
-	    return i;
-	}
-	dst[i] = src[i];
+        if ((u[i] & 0xc0) != 0x80) {
+            return i;
+        }
+        dst[i] = src[i];
     }
 
     return i;
@@ -362,7 +363,7 @@ int krb5int_utf8_isdigit(const char * p)
     unsigned c = * (const unsigned char *) p;
 
     if (!KRB5_ASCII(c))
-	return 0;
+        return 0;
 
     return KRB5_DIGIT( c );
 }
@@ -372,7 +373,7 @@ int krb5int_utf8_isxdigit(const char * p)
     unsigned c = * (const unsigned char *) p;
 
     if (!KRB5_ASCII(c))
-	return 0;
+        return 0;
 
     return KRB5_HEX(c);
 }
@@ -382,7 +383,7 @@ int krb5int_utf8_isspace(const char * p)
     unsigned c = * (const unsigned char *) p;
 
     if (!KRB5_ASCII(c))
-	return 0;
+        return 0;
 
     switch(c) {
     case ' ':
@@ -391,7 +392,7 @@ int krb5int_utf8_isspace(const char * p)
     case '\r':
     case '\v':
     case '\f':
-	return 1;
+        return 1;
     }
 
     return 0;
@@ -406,7 +407,7 @@ int krb5int_utf8_isalpha(const char * p)
     unsigned c = * (const unsigned char *) p;
 
     if (!KRB5_ASCII(c))
-	return 0;
+        return 0;
 
     return KRB5_ALPHA(c);
 }
@@ -416,7 +417,7 @@ int krb5int_utf8_isalnum(const char * p)
     unsigned c = * (const unsigned char *) p;
 
     if (!KRB5_ASCII(c))
-	return 0;
+        return 0;
 
     return KRB5_ALNUM(c);
 }
@@ -427,7 +428,7 @@ int krb5int_utf8_islower(const char * p)
     unsigned c = * (const unsigned char *) p;
 
     if (!KRB5_ASCII(c))
-	return 0;
+        return 0;
 
     return KRB5_LOWER(c);
 }
@@ -437,7 +438,7 @@ int krb5int_utf8_isupper(const char * p)
     unsigned c = * (const unsigned char *) p;
 
     if (!KRB5_ASCII(c))
-	return 0;
+        return 0;
 
     return KRB5_UPPER(c);
 }
@@ -455,10 +456,10 @@ char *krb5int_utf8_strchr(const char *str, const char *chr)
     krb5_ucs4 chs, ch;
 
     if (krb5int_utf8_to_ucs4(chr, &ch) == -1)
-	return NULL;
+        return NULL;
     for ( ; *str != '\0'; KRB5_UTF8_INCR(str)) {
-	if (krb5int_utf8_to_ucs4(str, &chs) == 0 && chs == ch)
-	    return (char *)str;
+        if (krb5int_utf8_to_ucs4(str, &chs) == 0 && chs == ch)
+            return (char *)str;
     }
 
     return NULL;
@@ -471,11 +472,11 @@ size_t krb5int_utf8_strcspn(const char *str, const char *set)
     krb5_ucs4 chstr, chset;
 
     for (cstr = str; *cstr != '\0'; KRB5_UTF8_INCR(cstr)) {
-	for (cset = set; *cset != '\0'; KRB5_UTF8_INCR(cset)) {
-	    if (krb5int_utf8_to_ucs4(cstr, &chstr) == 0
-		&& krb5int_utf8_to_ucs4(cset, &chset) == 0 && chstr == chset)
-		return cstr - str;
-	}
+        for (cset = set; *cset != '\0'; KRB5_UTF8_INCR(cset)) {
+            if (krb5int_utf8_to_ucs4(cstr, &chstr) == 0
+                && krb5int_utf8_to_ucs4(cset, &chset) == 0 && chstr == chset)
+                return cstr - str;
+        }
     }
 
     return cstr - str;
@@ -488,13 +489,13 @@ size_t krb5int_utf8_strspn(const char *str, const char *set)
     krb5_ucs4 chstr, chset;
 
     for (cstr = str; *cstr != '\0'; KRB5_UTF8_INCR(cstr)) {
-	for (cset = set; ; KRB5_UTF8_INCR(cset)) {
-	    if (*cset == '\0')
-		return cstr - str;
-	    if (krb5int_utf8_to_ucs4(cstr, &chstr) == 0
-		&& krb5int_utf8_to_ucs4(cset, &chset) == 0 && chstr == chset)
-		break;
-	}
+        for (cset = set; ; KRB5_UTF8_INCR(cset)) {
+            if (*cset == '\0')
+                return cstr - str;
+            if (krb5int_utf8_to_ucs4(cstr, &chstr) == 0
+                && krb5int_utf8_to_ucs4(cset, &chset) == 0 && chstr == chset)
+                break;
+        }
     }
 
     return cstr - str;
@@ -507,11 +508,11 @@ char *krb5int_utf8_strpbrk(const char *str, const char *set)
     krb5_ucs4 chstr, chset;
 
     for ( ; *str != '\0'; KRB5_UTF8_INCR(str)) {
-	for (cset = set; *cset != '\0'; KRB5_UTF8_INCR(cset)) {
-	    if (krb5int_utf8_to_ucs4(str, &chstr) == 0
-		&& krb5int_utf8_to_ucs4(cset, &chset) == 0 && chstr == chset)
-		return (char *)str;
-	}
+        for (cset = set; *cset != '\0'; KRB5_UTF8_INCR(cset)) {
+            if (krb5int_utf8_to_ucs4(str, &chstr) == 0
+                && krb5int_utf8_to_ucs4(cset, &chset) == 0 && chstr == chset)
+                return (char *)str;
+        }
     }
 
     return NULL;
@@ -524,23 +525,23 @@ char *krb5int_utf8_strtok(char *str, const char *sep, char **last)
     char *end;
 
     if (last == NULL)
-	return NULL;
+        return NULL;
 
     begin = str ? str : *last;
 
     begin += krb5int_utf8_strspn(begin, sep);
 
     if (*begin == '\0') {
-	*last = NULL;
-	return NULL;
+        *last = NULL;
+        return NULL;
     }
 
     end = &begin[krb5int_utf8_strcspn(begin, sep)];
 
     if (*end != '\0') {
-	char *next = KRB5_UTF8_NEXT(end);
-	*end = '\0';
-	end = next;
+        char *next = KRB5_UTF8_NEXT(end);
+        *end = '\0';
+        end = next;
     }
 
     *last = end;
