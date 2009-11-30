@@ -32,10 +32,10 @@
 
 static krb5_error_code
 krb5int_old_crypto_length(const struct krb5_aead_provider *aead,
-			  const struct krb5_enc_provider *enc,
-			  const struct krb5_hash_provider *hash,
-			  krb5_cryptotype type,
-			  unsigned int *length)
+                          const struct krb5_enc_provider *enc,
+                          const struct krb5_hash_provider *hash,
+                          krb5_cryptotype type,
+                          unsigned int *length)
 {
     switch (type) {
     case KRB5_CRYPTO_TYPE_HEADER:
