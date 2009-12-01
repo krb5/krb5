@@ -62,6 +62,23 @@ krb5int_arcfour_crypto_length(const struct krb5_aead_provider *aead,
     return 0;
 }
 
+/* Encrypt or decrypt using a keyblock. */
+static krb5_error_code
+keyblock_crypt(const struct krb5_enc_provider *enc, krb5_keyblock *keyblock,
+               const krb5_data *ivec, krb5_crypto_iov *data, size_t num_data)
+{
+    krb5_error_code ret;
+    krb5_key key;
+
+    ret = krb5_k_create_key(NULL, keyblock, &key);
+    if (ret != 0)
+        return ret;
+    /* Works for encryption or decryption since arcfour is a stream cipher. */
+    ret = enc->encrypt_iov(key, ivec, data, num_data);
+    krb5_k_free_key(NULL, key);
+    return ret;
+}
+
 static krb5_error_code
 krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
                             const struct krb5_enc_provider *enc,
@@ -75,7 +92,6 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
     krb5_error_code ret;
     krb5_crypto_iov *header, *trailer;
     krb5_keyblock *usage_keyblock = NULL, *enc_keyblock = NULL;
-    krb5_key enc_key;
     krb5_data checksum, confounder, header_data;
     size_t i;
 
@@ -144,13 +160,7 @@ krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
     if (ret)
         goto cleanup;
 
-    ret = krb5_k_create_key(NULL, enc_keyblock, &enc_key);
-    if (ret != 0)
-        goto cleanup;
-    ret = enc->encrypt_iov(enc_key, ivec, data, num_data);
-    krb5_k_free_key(NULL, enc_key);
-    if (ret != 0)
-        goto cleanup;
+    ret = keyblock_crypt(enc, enc_keyblock, ivec, data, num_data);
 
 cleanup:
     header->data = header_data; /* Restore header pointers. */
@@ -172,7 +182,6 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
     krb5_error_code ret;
     krb5_crypto_iov *header, *trailer;
     krb5_keyblock *usage_keyblock = NULL, *enc_keyblock = NULL;
-    krb5_key enc_key;
     krb5_data checksum, header_data, comp_checksum = empty_data();
 
     header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
@@ -220,11 +229,7 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
             goto cleanup;
 
         /* Decrypt the ciphertext. */
-        ret = krb5_k_create_key(NULL, enc_keyblock, &enc_key);
-        if (ret != 0)
-            goto cleanup;
-        ret = enc->decrypt_iov(enc_key, ivec, data, num_data);
-        krb5_k_free_key(NULL, enc_key);
+        ret = keyblock_crypt(enc, enc_keyblock, ivec, data, num_data);
         if (ret != 0)
             goto cleanup;
 
@@ -237,12 +242,16 @@ krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
         if (memcmp(checksum.data, comp_checksum.data, hash->hashsize) != 0) {
             if (usage == 9) {
                 /*
-                 * RFC 4757 specifies usage 8 for TGS-REP encrypted
-                 * parts encrypted in a subkey, but the value used by MS
-                 * is actually 9.  We now use 9 to start with, but fall
-                 * back to 8 on failure in case we are communicating
-                 * with a KDC using the value from the RFC.
+                 * RFC 4757 specifies usage 8 for TGS-REP encrypted parts
+                 * encrypted in a subkey, but the value used by MS is actually
+                 * 9.  We now use 9 to start with, but fall back to 8 on
+                 * failure in case we are communicating with a KDC using the
+                 * value from the RFC.  ivec is always NULL in this case.
+                 * We need to re-encrypt the data in the wrong key first.
                  */
+                ret = keyblock_crypt(enc, enc_keyblock, NULL, data, num_data);
+                if (ret != 0)
+                    goto cleanup;
                 usage = 8;
                 continue;
             }
@@ -275,7 +284,6 @@ krb5int_arcfour_gsscrypt(const krb5_keyblock *keyblock, krb5_keyusage usage,
     const struct krb5_enc_provider *enc = &krb5int_enc_arcfour;
     const struct krb5_hash_provider *hash = &krb5int_hash_md5;
     krb5_keyblock *usage_keyblock = NULL, *enc_keyblock = NULL;
-    krb5_key enc_key;
     krb5_error_code ret;
 
     ret = krb5int_c_init_keyblock(NULL, keyblock->enctype, enc->keybytes,
@@ -300,11 +308,7 @@ krb5int_arcfour_gsscrypt(const krb5_keyblock *keyblock, krb5_keyusage usage,
         goto cleanup;
 
     /* Encrypt or decrypt (encrypt_iov works for both) the input. */
-    ret = krb5_k_create_key(NULL, enc_keyblock, &enc_key);
-    if (ret != 0)
-        goto cleanup;
-    ret = (*enc->encrypt_iov)(enc_key, 0, data, num_data);
-    krb5_k_free_key(NULL, enc_key);
+    ret = keyblock_crypt(enc, enc_keyblock, 0, data, num_data);
 
 cleanup:
     krb5int_c_free_keyblock(NULL, usage_keyblock);
