@@ -530,38 +530,56 @@ krb5int_c_decrypt_aead_compat(const struct krb5_aead_provider *aead,
                               const krb5_data *ivec, const krb5_data *input,
                               krb5_data *output)
 {
-    krb5_crypto_iov iov[2];
+    krb5_crypto_iov iov[4];
     krb5_error_code ret;
+    unsigned int header_len = 0, trailer_len = 0, plain_len;
+    char *scratch = NULL;
 
-    iov[0].flags = KRB5_CRYPTO_TYPE_STREAM;
-    iov[0].data.data = malloc(input->length);
-    if (iov[0].data.data == NULL)
-        return ENOMEM;
+    ret = (*aead->crypto_length)(aead, enc, hash, KRB5_CRYPTO_TYPE_HEADER,
+                                 &header_len);
+    if (ret != 0)
+        return ret;
 
-    memcpy(iov[0].data.data, input->data, input->length);
-    iov[0].data.length = input->length;
+    ret = (*aead->crypto_length)(aead, enc, hash, KRB5_CRYPTO_TYPE_TRAILER,
+                                 &trailer_len);
+    if (ret != 0)
+        return ret;
+
+    if (input->length < header_len + trailer_len)
+        return KRB5_BAD_MSIZE;
+    plain_len = input->length - header_len - trailer_len;
+    if (output->length < input->length - header_len - trailer_len)
+        return KRB5_BAD_MSIZE;
+
+    scratch = k5alloc(header_len + trailer_len, &ret);
+    if (scratch == NULL)
+        return ret;
+
+    iov[0].flags = KRB5_CRYPTO_TYPE_HEADER;
+    iov[0].data = make_data(scratch, header_len);
+    memcpy(iov[0].data.data, input->data, header_len);
 
     iov[1].flags = KRB5_CRYPTO_TYPE_DATA;
-    iov[1].data.data = NULL;
-    iov[1].data.length = 0;
+    iov[1].data = make_data(output->data, plain_len);
+    memcpy(iov[1].data.data, input->data + header_len, input->length);
 
-    ret = krb5int_c_iov_decrypt_stream(aead, enc, hash, key,
-                                       usage, ivec,
-                                       iov, sizeof(iov)/sizeof(iov[0]));
+    /* Use empty padding since tokens don't indicate the padding length. */
+    iov[2].flags = KRB5_CRYPTO_TYPE_PADDING;
+    iov[2].data = empty_data();
+
+    iov[3].flags = KRB5_CRYPTO_TYPE_TRAILER;
+    iov[3].data = make_data(scratch + header_len, trailer_len);
+    memcpy(iov[3].data.data, input->data + header_len + plain_len,
+           trailer_len);
+
+    ret = (*aead->decrypt_iov)(aead, enc, hash, key, usage, ivec,
+                               iov, sizeof(iov) / sizeof(iov[0]));
     if (ret != 0)
-        goto cleanup;
+        zap(output->data, plain_len);
+    else
+        output->length = plain_len;
 
-    if (output->length < iov[1].data.length) {
-        ret = KRB5_BAD_MSIZE;
-        goto cleanup;
-    }
-
-    memcpy(output->data, iov[1].data.data, iov[1].data.length);
-    output->length = iov[1].data.length;
-
-cleanup:
-    zapfree(iov[0].data.data, iov[0].data.length);
-
+    zapfree(scratch, header_len + trailer_len);
     return ret;
 }
 
