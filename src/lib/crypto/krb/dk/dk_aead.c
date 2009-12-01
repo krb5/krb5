@@ -216,20 +216,15 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
     if (ret != 0)
         return ret;
 
-    for (i = 0; i < num_data; i++) {
-        const krb5_crypto_iov *iov = &data[i];
+    if (blocksize != 0) {
+        /* Check that the input data is correctly padded. */
+        for (i = 0; i < num_data; i++) {
+            const krb5_crypto_iov *iov = &data[i];
 
-        if (ENCRYPT_DATA_IOV(iov))
-            cipherlen += iov->data.length;
-    }
-
-    if (blocksize == 0) {
-        /* Check for correct input length in CTS mode */
-        if (enc->block_size != 0 && cipherlen < enc->block_size)
-            return KRB5_BAD_MSIZE;
-    } else {
-        /* Check that the input data is correctly padded */
-        if ((cipherlen % blocksize) != 0)
+            if (ENCRYPT_DATA_IOV(iov))
+                cipherlen += iov->data.length;
+        }
+        if (cipherlen % blocksize != 0)
             return KRB5_BAD_MSIZE;
     }
 
