@@ -182,10 +182,6 @@ static krb5_error_code get_credentials(context, cred, server, now,
     in_creds.authdata = NULL;
     in_creds.keyblock.enctype = 0;
 
-    /* Don't go out over the network if we used IAKERB */
-    if (cred->iakerb_mech)
-        flags |= KRB5_GC_CACHED;
-
     /*
      * cred->name is immutable, so there is no need to acquire
      * cred->name->lock.
@@ -199,8 +195,36 @@ static krb5_error_code get_credentials(context, cred, server, now,
             goto cleanup;
     }
 
+    /* Don't go out over the network if we used IAKERB */
+    if (cred->iakerb_mech)
+        flags |= KRB5_GC_CACHED;
+
     code = krb5_get_credentials(context, flags, cred->ccache,
                                 &in_creds, out_creds);
+    if (code == KRB5_NO_TKT_IN_RLM && cred->password.data != NULL) {
+        krb5_creds tgt_creds;
+
+        memset(&tgt_creds, 0, sizeof(tgt_creds));
+
+        code = krb5_get_init_creds_password(context, &tgt_creds,
+                                            in_creds.client,
+                                            cred->password.data,
+                                            NULL, NULL,
+                                            0, NULL, NULL);
+        if (code)
+            goto cleanup;
+
+        code = krb5_cc_store_cred(context, cred->ccache, &tgt_creds);
+        if (code) {
+            krb5_free_cred_contents(context, &tgt_creds);
+            goto cleanup;
+        }
+        cred->tgt_expire = tgt_creds.times.endtime;
+        krb5_free_cred_contents(context, &tgt_creds);
+
+        code = krb5_get_credentials(context, flags, cred->ccache,
+                                    &in_creds, out_creds);
+    }
     if (code)
         goto cleanup;
 
