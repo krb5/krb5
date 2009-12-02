@@ -3064,16 +3064,24 @@ include_pac_p(krb5_context context, krb5_kdc_req *request)
 }
 
 krb5_error_code
-return_svr_referral_data(krb5_context context,
-                         krb5_db_entry *server,
+return_enc_padata(krb5_context context,
+                  krb5_data *req_pkt, krb5_kdc_req *request,
+                  krb5_db_entry *server,
                          krb5_enc_kdc_rep_part *reply_encpart)
 {
     krb5_error_code             code;
     krb5_tl_data                tl_data;
     krb5_pa_data                *pa_data;
+    int idx = 0;
 
-    /* This should be initialized and only used for Win2K compat */
+    /* This should be initialized and only used for Win2K compat  and other
+     * specific standardized uses such as  FAST negotiation.*/
     assert(reply_encpart->enc_padata == NULL);
+    reply_encpart->enc_padata = (krb5_pa_data **)calloc(4, sizeof(krb5_pa_data *));
+    if (reply_encpart->enc_padata == NULL) {
+        return ENOMEM;
+    }
+
 
     tl_data.tl_data_type = KRB5_TL_SVR_REFERRAL_DATA;
 
@@ -3084,7 +3092,6 @@ return_svr_referral_data(krb5_context context,
     pa_data = (krb5_pa_data *)malloc(sizeof(*pa_data));
     if (pa_data == NULL)
         return ENOMEM;
-
     pa_data->magic = KV5M_PA_DATA;
     pa_data->pa_type = KRB5_PADATA_SVR_REFERRAL_INFO;
     pa_data->length = tl_data.tl_data_length;
@@ -3095,14 +3102,8 @@ return_svr_referral_data(krb5_context context,
     }
     memcpy(pa_data->contents, tl_data.tl_data_contents, tl_data.tl_data_length);
 
-    reply_encpart->enc_padata = (krb5_pa_data **)calloc(2, sizeof(krb5_pa_data *));
-    if (reply_encpart->enc_padata == NULL) {
-        free(pa_data->contents);
-        free(pa_data);
-        return ENOMEM;
-    }
 
-    reply_encpart->enc_padata[0] = pa_data;
+    reply_encpart->enc_padata[idx++] = pa_data;
     reply_encpart->enc_padata[1] = NULL;
 
     return 0;

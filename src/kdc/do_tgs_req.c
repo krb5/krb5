@@ -454,6 +454,7 @@ tgt_again:
      */
     if (!(header_enc_tkt->times.starttime))
         header_enc_tkt->times.starttime = authtime;
+    setflag(enc_tkt_reply.flags, TKT_FLG_ENC_PA_REP);
 
     /* don't use new addresses unless forwarded, see below */
 
@@ -756,7 +757,7 @@ tgt_again:
     }
 
     if (is_referral && isflagset(s_flags, KRB5_KDB_FLAG_CANONICALIZE)) {
-        errcode = return_svr_referral_data(kdc_context,
+        errcode = return_enc_padata(kdc_context, pkt, request,
                                            &server, &reply_encpart);
         if (errcode) {
             status = "KDC_RETURN_ENC_PADATA";
