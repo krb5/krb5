@@ -49,4 +49,3 @@ krb5_get_as_key_password(krb5_context context,
                          void *gak_data);
 
 #endif /* !KRB5_INIT_CREDS_CONTEXT */
-
