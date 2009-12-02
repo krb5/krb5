@@ -56,7 +56,7 @@
 static krb5_error_code
 fast_armor_ap_request(krb5_context context,
                       struct krb5int_fast_request_state *state,
-                      krb5_ccache ccache, krb5_data *target_realm)
+                      krb5_ccache ccache, krb5_principal  target_principal)
 {
     krb5_error_code retval = 0;
     krb5_creds creds, *out_creds = NULL;
@@ -66,9 +66,8 @@ fast_armor_ap_request(krb5_context context,
     krb5_keyblock *subkey = NULL, *armor_key = NULL;
     encoded_authenticator.data = NULL;
     memset(&creds, 0, sizeof(creds));
-    retval = krb5_tgtname(context, target_realm, target_realm, &creds.server);
-    if (retval ==0)
-        retval = krb5_cc_get_principal(context, ccache, &creds.client);
+    creds.server = target_principal;
+    retval = krb5_cc_get_principal(context, ccache, &creds.client);
     if (retval == 0)
         retval = krb5_get_credentials(context, 0, ccache,  &creds, &out_creds);
     if (retval == 0)
@@ -98,6 +97,8 @@ fast_armor_ap_request(krb5_context context,
     krb5_free_keyblock(context, subkey);
     if (out_creds)
         krb5_free_creds(context, out_creds);
+    /*target_principal is owned by caller*/
+    creds.server = NULL;
     krb5_free_cred_contents(context, &creds);
     if (encoded_authenticator.data)
         krb5_free_data_contents(context, &encoded_authenticator);
@@ -138,13 +139,29 @@ krb5int_fast_as_armor(krb5_context context,
 {
     krb5_error_code retval = 0;
     krb5_ccache ccache = NULL;
+    krb5_principal target_principal = NULL;
+    krb5_data *target_realm;
     krb5_clear_error_message(context);
+    target_realm = krb5_princ_realm(context, request->server);
     if (opte->opt_private->fast_ccache_name) {
         retval = krb5_cc_resolve(context, opte->opt_private->fast_ccache_name,
                                  &ccache);
-        if (retval==0)
+        if (retval == 0)
+            retval = krb5_tgtname(context, target_realm, target_realm, &target_principal);
+        if (retval == 0) {
+            krb5_data config_data;
+            config_data.data = NULL;
+            retval = krb5_cc_get_config(context, ccache,
+                                        target_principal, KRB5_CCCONF_FAST_AVAIL,
+                                        &config_data);
+            if ((retval == 0) && config_data.data )
+                opte->opt_private->fast_flags |= KRB5_FAST_REQUIRED;
+            krb5_free_data_contents(context, &config_data);
+            retval = 0;
+        }
+        if (retval==0 && (opte->opt_private->fast_flags &KRB5_FAST_REQUIRED))
             retval = fast_armor_ap_request(context, state, ccache,
-                                           krb5_princ_realm(context, request->server));
+target_principal);
         if (retval != 0) {
             const char * errmsg;
             errmsg = krb5_get_error_message(context, retval);
@@ -156,6 +173,8 @@ krb5int_fast_as_armor(krb5_context context,
     }
     if (ccache)
         krb5_cc_close(context, ccache);
+    if (target_principal)
+        krb5_free_principal(context, target_principal);
     return retval;
 }
 

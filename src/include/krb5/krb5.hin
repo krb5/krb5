@@ -2301,6 +2301,9 @@ krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_opt_get_fast_flags
 (krb5_context context, krb5_get_init_creds_opt *opt, krb5_flags *out_flags);
 
+/* Fast flags*/
+#define KRB5_FAST_REQUIRED 1l<<0 /*!< Require KDC to support FAST*/
+
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_password(krb5_context context, krb5_creds *creds,
                              krb5_principal client, char *password,
