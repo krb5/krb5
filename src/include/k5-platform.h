@@ -713,6 +713,35 @@ load_64_le (const void *cvp)
 #endif
 }
 
+static inline void
+store_16_n (unsigned int val, void *vp)
+{
+#ifdef _WIN32
+    unsigned __int16 n;
+#else
+    uint16_t n;
+#endif
+    n = val;
+    memcpy(vp, &n, 2);
+}
+static inline void
+store_32_n (unsigned int val, void *vp)
+{
+#ifdef _WIN32
+    unsigned __int32 n;
+#else
+    uint32_t n;
+#endif
+    n = val;
+    memcpy(vp, &n, 4);
+}
+static inline void
+store_64_n (UINT64_TYPE val, void *vp)
+{
+    UINT64_TYPE n;
+    n = val;
+    memcpy(vp, &n, 8);
+}
 static inline unsigned short
 load_16_n (const void *p)
 {
