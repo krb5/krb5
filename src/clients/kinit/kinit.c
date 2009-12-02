@@ -629,6 +629,9 @@ k5_kinit(opts, k5)
             goto cleanup;
         }
     }
+    code = krb5_get_init_creds_opt_set_out_ccache(k5->ctx, options, k5->cc);
+    if (code)
+        goto cleanup;
 
     switch (opts->action) {
     case INIT_PW:
@@ -678,20 +681,21 @@ k5_kinit(opts, k5)
         goto cleanup;
     }
 
-    code = krb5_cc_initialize(k5->ctx, k5->cc,
-                              opts->canonicalize ? my_creds.client : k5->me);
-    if (code) {
-        com_err(progname, code, "when initializing cache %s",
-                opts->k5_cache_name?opts->k5_cache_name:"");
-        goto cleanup;
-    }
+    if ((opts->action != INIT_PW) && (opts->action != INIT_KT)) {
+        code = krb5_cc_initialize(k5->ctx, k5->cc,
+                                  opts->canonicalize ? my_creds.client : k5->me);
+        if (code) {
+            com_err(progname, code, "when initializing cache %s",
+                    opts->k5_cache_name?opts->k5_cache_name:"");
+            goto cleanup;
+        }
 
-    code = krb5_cc_store_cred(k5->ctx, k5->cc, &my_creds);
-    if (code) {
-        com_err(progname, code, "while storing credentials");
-        goto cleanup;
+        code = krb5_cc_store_cred(k5->ctx, k5->cc, &my_creds);
+        if (code) {
+            com_err(progname, code, "while storing credentials");
+            goto cleanup;
+        }
     }
-
     notix = 0;
 
 cleanup:
