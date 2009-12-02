@@ -2651,3 +2651,62 @@ kdc_get_ticket_endtime(krb5_context context,
 
     *out_endtime = starttime + life;
 }
+
+/**
+ * Handle protected negotiation of FAST using enc_padata
+ * - If ENCPADATA_REQ_ENC_PA_REP is present, then:
+ * - Return ENCPADATA_REQ_ENC_PA_REP with checksum of AS-REQ from client
+ * - Include PADATA_FX_FAST in the enc_padata to indicate FAST
+ * @pre @c out_enc_padata has space for at least two more padata
+ * @param index in/out index into @c out_enc_padata for next item
+ */
+krb5_error_code
+kdc_handle_protected_negotiation( krb5_data *req_pkt, krb5_kdc_req *request,
+                                  const krb5_keyblock *reply_key, krb5_pa_data **out_enc_padata, int *idx)
+{
+    krb5_error_code retval = 0;
+    krb5_checksum checksum;
+    krb5_data *out = NULL;
+    krb5_pa_data *pa;
+    assert(out_enc_padata != NULL);
+    pa = krb5int_find_pa_data(kdc_context, request->padata, KRB5_ENCPADATA_REQ_ENC_PA_REP);
+    if (pa == NULL)
+        return 0;
+    checksum.contents = NULL;
+    pa = malloc(sizeof(krb5_pa_data));
+    if (pa == NULL)
+        return ENOMEM;
+    pa->magic = KV5M_PA_DATA;
+    pa->pa_type = KRB5_ENCPADATA_REQ_ENC_PA_REP;
+    retval = krb5_c_make_checksum(kdc_context,0, reply_key, KRB5_KEYUSAGE_AS_REQ,
+                                  req_pkt, &checksum);
+    if (retval != 0)
+        goto cleanup;
+    retval = encode_krb5_checksum(&checksum, &out);
+    if (retval != 0)
+        goto cleanup;
+    pa->contents = (krb5_octet *) out->data;
+    pa->length = out->length;
+    out_enc_padata[(*idx)++] = pa;
+    pa = NULL;
+    out->data = NULL;
+    pa = malloc(sizeof(krb5_pa_data));
+    if (pa == NULL) {
+        retval = ENOMEM;
+        goto cleanup;
+    }
+    pa->magic = KV5M_PA_DATA;
+    pa->pa_type = KRB5_PADATA_FX_FAST;
+    pa->length = 0;
+    pa->contents = NULL;
+    out_enc_padata[(*idx)++] = pa;
+    pa = NULL;
+cleanup:
+    if (checksum.contents)
+        krb5_free_checksum_contents(kdc_context, &checksum);
+    if (out != NULL)
+        krb5_free_data(kdc_context, out);
+    if (pa != NULL)
+        free(pa);
+    return retval;
+}

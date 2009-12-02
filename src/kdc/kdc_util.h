@@ -252,6 +252,7 @@ include_pac_p(krb5_context context, krb5_kdc_req *request);
 krb5_error_code
 return_enc_padata(krb5_context context,
                   krb5_data *req_pkt, krb5_kdc_req *request,
+                  krb5_keyblock *reply_key,
                   krb5_db_entry *server,
                   krb5_enc_kdc_rep_part *reply_encpart);
 
@@ -393,7 +394,10 @@ krb5_error_code kdc_fast_handle_reply_key(struct kdc_request_state *state,
 
 krb5_error_code kdc_preauth_get_cookie(struct kdc_request_state *state,
                                        krb5_pa_data **cookie);
-
+krb5_error_code
+kdc_handle_protected_negotiation( krb5_data *req_pkt, krb5_kdc_req *request,
+                                  const krb5_keyblock *reply_key,
+                                  krb5_pa_data **out_enc_padata, int *idx);
 
 
 
