@@ -1424,6 +1424,8 @@ MAKE_FULL_ENCODER(encode_krb5_safe_with_body, krb5_safe_with_body);
 
 MAKE_FULL_ENCODER(encode_krb5_priv, krb5_priv);
 MAKE_FULL_ENCODER(encode_krb5_enc_priv_part, priv_enc_part);
+MAKE_FULL_ENCODER(encode_krb5_checksum, checksum);
+
 MAKE_FULL_ENCODER(encode_krb5_cred, krb5_cred);
 MAKE_FULL_ENCODER(encode_krb5_enc_cred_part, enc_cred_part);
 MAKE_FULL_ENCODER(encode_krb5_error, krb5_error);

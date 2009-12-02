@@ -1679,6 +1679,8 @@ encode_krb5_enc_priv_part(const krb5_priv_enc_part *rep, krb5_data **code);
 
 krb5_error_code
 encode_krb5_cred(const krb5_cred *rep, krb5_data **code);
+krb5_error_code
+encode_krb5_checksum(const krb5_checksum *, krb5_data **);
 
 krb5_error_code
 encode_krb5_enc_cred_part(const krb5_cred_enc_part *rep, krb5_data **code);
@@ -1907,6 +1909,8 @@ decode_krb5_priv(const krb5_data *output, krb5_priv **rep);
 
 krb5_error_code
 decode_krb5_enc_priv_part(const krb5_data *output, krb5_priv_enc_part **rep);
+krb5_error_code
+decode_krb5_checksum(const krb5_data *, krb5_checksum **);
 
 krb5_error_code
 decode_krb5_cred(const krb5_data *output, krb5_cred **rep);
