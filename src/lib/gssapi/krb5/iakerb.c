@@ -682,6 +682,11 @@ iakerb_get_initial_state(iakerb_ctx_id_t ctx,
     krb5_creds in_creds, *out_creds = NULL;
     krb5_error_code code;
 
+    if (cred == NULL || cred->iakerb_mech == 0) {
+        *state = IAKERB_AP_REQ;
+        return 0;
+    }
+
     memset(&in_creds, 0, sizeof(in_creds));
 
     in_creds.client = cred->name->princ;
@@ -972,14 +977,17 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
 
     kname = (krb5_gss_name_t)target_name;
 
-    major_status = krb5_gss_validate_cred_1(minor_status,
-                                            claimant_cred_handle,
-                                            ctx->k5c);
-    if (GSS_ERROR(major_status))
-        goto cleanup;
+    if (claimant_cred_handle != GSS_C_NO_CREDENTIAL) {
+        major_status = krb5_gss_validate_cred_1(minor_status,
+                                                claimant_cred_handle,
+                                                ctx->k5c);
+        if (GSS_ERROR(major_status))
+            goto cleanup;
 
-    credLocked = 1;
-    kcred = (krb5_gss_cred_id_t)claimant_cred_handle;
+        credLocked = 1;
+        kcred = (krb5_gss_cred_id_t)claimant_cred_handle;
+    } else
+        kcred = NULL;
 
     major_status = GSS_S_FAILURE;
 
@@ -1013,11 +1021,13 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
         krb5_gss_ctx_ext_rec exts;
 
         /* Ensure cred is marked as usable for Kerberos mechanism */
-        if (kcred->iakerb_mech)
-            kcred->rfc_mech = 1;
+        if (kcred != NULL) {
+            if (kcred->iakerb_mech)
+                kcred->rfc_mech = 1;
 
-        k5_mutex_unlock(&kcred->lock);
-        credLocked = 0;
+            k5_mutex_unlock(&kcred->lock);
+            credLocked = 0;
+        }
 
         iakerb_make_exts(ctx, &exts);
 
