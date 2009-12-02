@@ -284,7 +284,7 @@ void do_keytab(name)
         if (show_keys) {
             printf(" (0x");
             {
-                int i;
+                unsigned int i;
                 for (i = 0; i < entry.key.length; i++)
                     printf("%02x", entry.key.contents[i]);
             }
