@@ -1552,7 +1552,8 @@ krb5_init_creds_set_service(krb5_context context,
     free(ctx->in_tkt_service);
     ctx->in_tkt_service = s;
 
-    return 0;
+    krb5_preauth_request_context_fini(context);
+    return restart_init_creds_loop(context, ctx, NULL);
 }
 
 static krb5_error_code
