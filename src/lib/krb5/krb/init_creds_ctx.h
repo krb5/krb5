@@ -30,6 +30,9 @@ struct _krb5_init_creds_context {
     krb5_keyblock as_key;
     krb5_enctype etype;
     krb5_preauth_client_rock get_data_rock;
+    krb5_boolean enc_pa_rep_permitted;
+    krb5_boolean have_restarted;
+    krb5_boolean sent_nontrivial_preauth;
 };
 
 #define KRB5_INIT_CREDS_STEP_FLAG_COMPLETE          0x1
