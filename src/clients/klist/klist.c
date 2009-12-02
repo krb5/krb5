@@ -382,6 +382,8 @@ void do_ccache(name)
         exit(1);
     }
     while (!(code = krb5_cc_next_cred(kcontext, cache, &cur, &creds))) {
+        if (krb5_is_config_principal(kcontext, creds.server))
+            continue;
         if (status_only) {
             if (exit_status && creds.server->length == 2 &&
                 strcmp(creds.server->realm.data, princ->realm.data) == 0 &&

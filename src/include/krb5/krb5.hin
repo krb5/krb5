@@ -1835,6 +1835,20 @@ krb5_cc_default(krb5_context, krb5_ccache *);
 krb5_error_code KRB5_CALLCONV
 krb5_cc_copy_creds(krb5_context context, krb5_ccache incc, krb5_ccache outcc);
 
+krb5_error_code KRB5_CALLCONV
+krb5_cc_get_config(krb5_context, krb5_ccache,
+                   krb5_const_principal,
+                   const char *, krb5_data *);
+
+krb5_error_code KRB5_CALLCONV
+krb5_cc_set_config(krb5_context, krb5_ccache,
+                   krb5_const_principal,
+                   const char *, krb5_data *);
+
+krb5_boolean KRB5_CALLCONV
+krb5_is_config_principal(krb5_context,
+                         krb5_const_principal);
+
 /* krb5_free.c */
 void KRB5_CALLCONV krb5_free_principal(krb5_context, krb5_principal );
 void KRB5_CALLCONV krb5_free_authenticator(krb5_context,
