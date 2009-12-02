@@ -214,17 +214,17 @@ krb5int_aes_encrypt_iov(krb5_key key,
         IOV_BLOCK_STATE_INIT(&output_pos);
 
         for (blockno = 0; blockno < nblocks - 2; blockno++) {
-            unsigned char blockN[BLOCK_SIZE];
+            unsigned char blockN[BLOCK_SIZE], *block;
 
-            krb5int_c_iov_get_block(blockN, BLOCK_SIZE, data, num_data,
-                                    &input_pos);
-            xorblock(tmp, blockN);
-            enc(tmp2, tmp, &ctx);
-            krb5int_c_iov_put_block(data, num_data, tmp2, BLOCK_SIZE,
-                                    &output_pos);
+            block = iov_next_block(blockN, BLOCK_SIZE, data, num_data,
+                                   &input_pos);
+            xorblock(tmp, block);
+            enc(block, tmp, &ctx);
+            iov_store_block(data, num_data, block, blockN, BLOCK_SIZE,
+                            &output_pos);
 
             /* Set up for next block.  */
-            memcpy(tmp, tmp2, BLOCK_SIZE);
+            memcpy(tmp, block, BLOCK_SIZE);
         }
 
         /* Do final CTS step for last two blocks (the second of which
@@ -304,15 +304,16 @@ krb5int_aes_decrypt_iov(krb5_key key,
         IOV_BLOCK_STATE_INIT(&output_pos);
 
         for (blockno = 0; blockno < nblocks - 2; blockno++) {
-            unsigned char blockN[BLOCK_SIZE];
+            unsigned char blockN[BLOCK_SIZE], *block;
 
-            krb5int_c_iov_get_block(blockN, BLOCK_SIZE, data, num_data,
-                                    &input_pos);
-            dec(tmp2, blockN, &ctx);
-            xorblock(tmp2, tmp);
-            krb5int_c_iov_put_block(data, num_data, tmp2, BLOCK_SIZE,
-                                    &output_pos);
-            memcpy(tmp, blockN, BLOCK_SIZE);
+            block = iov_next_block(blockN, BLOCK_SIZE, data, num_data,
+                                   &input_pos);
+            memcpy(tmp2, block, BLOCK_SIZE);
+            dec(block, block, &ctx);
+            xorblock(block, tmp);
+            memcpy(tmp, tmp2, BLOCK_SIZE);
+            iov_store_block(data, num_data, block, blockN, BLOCK_SIZE,
+                            &output_pos);
         }
 
         /* Do last two blocks, the second of which (next-to-last block

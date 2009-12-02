@@ -274,6 +274,8 @@ krb5int_c_iov_get_block(unsigned char *block,
     }
 
     iov_state->iov_pos = i;
+    if (i == num_data)
+        return FALSE;
 
     if (j != block_size)
         memset(block + j, 0, block_size - j);
@@ -282,7 +284,7 @@ krb5int_c_iov_get_block(unsigned char *block,
     dump_block("get_block", i, j, block, block_size);
 #endif
 
-    return (iov_state->iov_pos < num_data);
+    return TRUE;
 }
 
 krb5_boolean
