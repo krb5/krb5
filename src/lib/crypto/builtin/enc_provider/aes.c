@@ -51,8 +51,24 @@ static void
 xorblock(unsigned char *out, const unsigned char *in)
 {
     int z;
-    for (z = 0; z < BLOCK_SIZE; z++)
-        out[z] ^= in[z];
+    for (z = 0; z < BLOCK_SIZE/4; z++) {
+        unsigned char *outptr = &out[z*4];
+        unsigned char *inptr = &in[z*4];
+        /* Use unaligned accesses.  On x86, this will probably still
+           be faster than multiple byte accesses for unaligned data,
+           and for aligned data should be far better.  (One test
+           indicated about 2.4% faster encryption for 1024-byte
+           messages.)
+
+           If some other CPU has really slow unaligned-word or byte
+           accesses, perhaps this function (or the load/store
+           helpers?) should test for alignment first.
+
+           If byte accesses are faster than unaligned words, we may
+           need to conditionalize on CPU type, as that may be hard to
+           determine automatically.  */
+        store_32_n (load_32_n(outptr) ^ load_32_n(inptr), outptr);
+    }
 }
 
 krb5_error_code
