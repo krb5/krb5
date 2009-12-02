@@ -128,7 +128,7 @@ kdc_find_fast(krb5_kdc_req **requestptr,
               struct kdc_request_state *state)
 {
     krb5_error_code retval = 0;
-    krb5_pa_data *fast_padata, *cookie_padata;
+    krb5_pa_data *fast_padata, *cookie_padata = NULL;
     krb5_data scratch;
     krb5_fast_req * fast_req = NULL;
     krb5_kdc_req *request = *requestptr;
