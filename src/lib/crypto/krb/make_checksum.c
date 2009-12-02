@@ -30,6 +30,8 @@
 #include "etypes.h"
 #include "dk.h"
 
+/* A 0 checksum type means use the mandatory checksum*/
+
 krb5_error_code KRB5_CALLCONV
 krb5_k_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
                      krb5_key key, krb5_keyusage usage,
@@ -43,6 +45,12 @@ krb5_k_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
     krb5_octet *trunc;
     krb5_error_code ret;
     size_t cksumlen;
+
+    if (cksumtype == 0) {
+        ret = krb5int_c_mandatory_cksumtype(context, krb5_k_key_enctype(context, key), &cksumtype);
+        if (ret != 0)
+            return ret;
+    }
 
     for (i = 0; i < krb5int_cksumtypes_length; i++) {
         if (krb5int_cksumtypes_list[i].ctype == cksumtype)
@@ -58,6 +66,7 @@ krb5_k_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
         cksumlen = ctp->hash->hashsize;
 
     cksum->length = cksumlen;
+    cksum->checksum_type = cksumtype;
     cksum->contents = malloc(cksum->length);
     if (cksum->contents == NULL)
         return ENOMEM;
