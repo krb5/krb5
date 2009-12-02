@@ -561,7 +561,7 @@ krb5int_c_decrypt_aead_compat(const struct krb5_aead_provider *aead,
 
     iov[1].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[1].data = make_data(output->data, plain_len);
-    memcpy(iov[1].data.data, input->data + header_len, input->length);
+    memcpy(iov[1].data.data, input->data + header_len, plain_len);
 
     /* Use empty padding since tokens don't indicate the padding length. */
     iov[2].flags = KRB5_CRYPTO_TYPE_PADDING;
