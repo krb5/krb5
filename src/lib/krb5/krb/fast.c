@@ -528,3 +528,45 @@ krb5int_find_pa_data(krb5_context context, krb5_pa_data *const *padata,
 
     return *tmppa;
 }
+
+#define TKT_FLG_ENC_PA_REP 0x10000
+#define KRB5_KEYUSAGE_AS_REQ 56
+#define KRB5_ENCPADATA_REQ_ENC_PA_REP 149
+
+krb5_error_code krb5int_fast_verify_nego
+(krb5_context context, struct krb5int_fast_request_state *state,
+ krb5_kdc_rep *rep, krb5_data *request,
+ krb5_keyblock *decrypting_key)
+{
+    krb5_error_code retval = 0;
+    krb5_checksum *checksum = NULL;
+    krb5_pa_data *pa;
+    krb5_data scratch;
+    krb5_boolean valid;
+    if (rep->enc_part2->flags& TKT_FLG_ENC_PA_REP) {
+        pa = krb5int_find_pa_data(context, rep->enc_part2->enc_padata,
+                                  KRB5_ENCPADATA_REQ_ENC_PA_REP);
+        if (pa == NULL)
+            retval = KRB5_KDCREP_MODIFIED;
+        else {
+            scratch.data = (char *) pa->contents;
+            scratch.length = pa->length;
+        }
+        if (retval == 0)
+            retval = decode_krb5_checksum(&scratch, &checksum);
+        if (retval == 0)
+            retval =krb5_c_verify_checksum(context, decrypting_key, KRB5_KEYUSAGE_AS_REQ,
+                                           request, checksum, &valid);
+        if (retval == 0 &&valid == 0)
+            retval = KRB5_KDCREP_MODIFIED;
+        if (retval == 0) {
+            pa = krb5int_find_pa_data(context, rep->enc_part2->enc_padata,
+                                      KRB5_PADATA_FX_FAST);
+            /*if (pa)
+              printf("FAST enabled on KDC\n");*/
+        }
+    }
+    if (checksum)
+        krb5_free_checksum(context, checksum);
+    return retval;
+}
