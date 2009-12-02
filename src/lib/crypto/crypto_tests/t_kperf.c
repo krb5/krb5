@@ -94,6 +94,14 @@ main(int argc, char **argv)
     sum.length = cklen;
     sum.contents = calloc(1, cklen);
 
+    /*
+     * Decrypting typically involves copying the output after checking the
+     * hash, so we need to create a valid ciphertext to correctly measure its
+     * performance.
+     */
+    if (op == 'd')
+        krb5_c_encrypt(NULL, &kblock, 0, NULL, &block, &outblock);
+
     for (i = 0; i < num_blocks; i++) {
         if (intf == 'c') {
             if (op == 'e')
