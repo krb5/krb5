@@ -1146,12 +1146,14 @@ static void init_addr(krb5_fulladdr *faddr, struct sockaddr *sa)
     }
 }
 
-/* This holds whatever additional information might be needed to
-   properly send back to the client from the correct local address.
-
-   In this case, we only need one datum so far: On Mac OS X, the
-   kernel doesn't seem to like sending from link-local addresses
-   unless we specify the correct interface.  */
+/*
+ * This holds whatever additional information might be needed to
+ * properly send back to the client from the correct local address.
+ *
+ * In this case, we only need one datum so far: On Mac OS X, the
+ * kernel doesn't seem to like sending from link-local addresses
+ * unless we specify the correct interface.
+ */
 
 union aux_addressing_info {
     int ipv6_ifindex;
@@ -1308,12 +1310,14 @@ send_to_from(int s, void *buf, size_t len, int flags,
             struct in6_pktinfo *p = (struct in6_pktinfo *)CMSG_DATA(cmsgptr);
             const struct sockaddr_in6 *from6 = (const struct sockaddr_in6 *)from;
             p->ipi6_addr = from6->sin6_addr;
-            /* Because of the possibility of asymmetric routing, we
-               normally don't want to specify an interface.  However,
-               Mac OS X doesn't like sending from a link-local address
-               (which can come up in testing at least, if you wind up
-               with a "foo.local" name) unless we do specify the
-               interface.  */
+            /*
+             * Because of the possibility of asymmetric routing, we
+             * normally don't want to specify an interface.  However,
+             * Mac OS X doesn't like sending from a link-local address
+             * (which can come up in testing at least, if you wind up
+             * with a "foo.local" name) unless we do specify the
+             * interface.
+             */
             if (IN6_IS_ADDR_LINKLOCAL(&from6->sin6_addr))
                 p->ipi6_ifindex = auxaddr->ipv6_ifindex;
             /* otherwise, already zero */
@@ -1460,8 +1464,10 @@ static void process_packet(void *handle,
                       (struct sockaddr *)&daddr, daddr_len,
                       &auxaddr);
     if (cc == -1) {
-        /* Note that the local address (daddr*) has no port number
-           info associated with it.  */
+        /*
+         * Note that the local address (daddr*) has no port number
+         * info associated with it.
+         */
         char saddrbuf[NI_MAXHOST], sportbuf[NI_MAXSERV];
         char daddrbuf[NI_MAXHOST];
         int e = errno;
