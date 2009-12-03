@@ -31,7 +31,7 @@
  * domain name, then the resolve library is broken.
  *
  * Warning: It is possible to fool this program into thinking everything is
- * alright byt a clever use of /etc/hosts - but this is better than nothing.
+ * alright by a clever use of /etc/hosts - but this is better than nothing.
  *
  * Usage:
  *   resolve [hostname]
@@ -79,7 +79,7 @@ main(argc, argv)
     char **argv;
 {
     char myname[MAXHOSTNAMELEN+1];
-    char *ptr;
+    char *ptr, *fqdn;
     struct in_addr addrcopy;
     struct hostent *host;
     int quiet = 0;
@@ -120,6 +120,12 @@ main(argc, argv)
         exit(2);
     }
 
+    fqdn = strdup(host->h_name);
+    if (fqdn == NULL) {
+        perror("strdup");
+        exit(2);
+    }
+
     ptr = host->h_addr_list[0];
 #define UC(a) (((int)a)&0xff)
     if (!quiet)
@@ -129,22 +135,29 @@ main(argc, argv)
     memcpy(&addrcopy.s_addr, ptr, 4);
 
     /* Convert back to full name */
-    if((host = gethostbyaddr(&addrcopy.s_addr, 4, AF_INET)) == NULL) {
-        fprintf(stderr, "Error looking up IP address - fatal\n");
-        exit(2);
+    if ((host = gethostbyaddr(&addrcopy.s_addr, 4, AF_INET)) == NULL) {
+        if (!quiet)
+            fprintf(stderr, "Error looking up IP address\n");
+    } else {
+        free(fqdn);
+        fqdn = strdup(host->h_name);
+        if (fqdn == NULL) {
+            perror("strdup");
+            exit (2);
+        }
     }
 
     if (quiet)
-        printf("%s\n", host->h_name);
+        printf("%s\n", fqdn);
     else
-        printf("FQDN: %s\n", host->h_name);
+        printf("FQDN: %s\n", fqdn);
 
     /*
      * The host name must have at least one '.' in the name, and
      * if there is only one '.', it must not be at the end of the
      * string.  (i.e., "foo." is not a FQDN)
      */
-    ptr = strchr(host->h_name, '.');
+    ptr = strchr(fqdn, '.');
     if (ptr == NULL || ptr[1] == '\0') {
         fprintf(stderr,
                 "\nResolve library did not return a "

@@ -6,13 +6,12 @@ if ($#ARGV == -1) {
     $hostname = $ARGV[0];
 }
 
-if (! (($type,$addr) = (gethostbyname($hostname))[2,4])) {
+if (! (($name,$type,$addr) = (gethostbyname($hostname))[0,2,4])) {
     print STDERR "No such host: $hostname\n";
     exit(1);
 }
 if (! ($qualname = (gethostbyaddr($addr,$type))[0])) {
-    print STDERR "No address information for host $hostname\n";
-    exit(1);
+    $qualname = $name;
 }
 
 $qualname =~ tr/A-Z/a-z/;	# lowercase our name for keytab use.

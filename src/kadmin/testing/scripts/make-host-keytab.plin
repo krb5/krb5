@@ -54,8 +54,8 @@ chop ($canonhost = `hostname`);
 
 ($canonhost,$aliases,$addrtype,$length,@addrs) = gethostbyname($canonhost);
 die "couldn't get canonical hostname\n" if !($canonhost && @addrs);
-($canonhost) = gethostbyaddr($addrs[0],$addrtype);
-die "couldn't get canonical hostname\n" if (!$canonhost);
+($canonhost2) = gethostbyaddr($addrs[0],$addrtype);
+if ($canonhost2) { $canonhost = $canonhost2; }
 
 for (@princs) {
     s/xCANONHOSTx/$canonhost/g;
