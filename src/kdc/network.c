@@ -1003,10 +1003,22 @@ static void init_addr(krb5_fulladdr *faddr, struct sockaddr *sa)
     }
 }
 
+/* This holds whatever additional information might be needed to
+   properly send back to the client from the correct local address.
+
+   In this case, we only need one datum so far: On Mac OS X, the
+   kernel doesn't seem to like sending from link-local addresses
+   unless we specify the correct interface.  */
+
+union aux_addressing_info {
+    int ipv6_ifindex;
+};
+
 static int
 recv_from_to(int s, void *buf, size_t len, int flags,
              struct sockaddr *from, socklen_t *fromlen,
-             struct sockaddr *to, socklen_t *tolen)
+             struct sockaddr *to, socklen_t *tolen,
+             union aux_addressing_info *auxaddr)
 {
 #if (!defined(IP_PKTINFO) && !defined(IPV6_PKTINFO)) || !defined(CMSG_SPACE)
     if (to && tolen) {
@@ -1075,6 +1087,7 @@ recv_from_to(int s, void *buf, size_t len, int flags,
                 ((struct sockaddr_in6 *)to)->sin6_addr = pktinfo->ipi6_addr;
                 ((struct sockaddr_in6 *)to)->sin6_family = AF_INET6;
                 *tolen = sizeof(struct sockaddr_in6);
+                auxaddr->ipv6_ifindex = pktinfo->ipi6_ifindex;
                 return r;
             }
 #endif
@@ -1090,7 +1103,8 @@ recv_from_to(int s, void *buf, size_t len, int flags,
 static int
 send_to_from(int s, void *buf, size_t len, int flags,
              const struct sockaddr *to, socklen_t tolen,
-             const struct sockaddr *from, socklen_t fromlen)
+             const struct sockaddr *from, socklen_t fromlen,
+             union aux_addressing_info *auxaddr)
 {
 #if (!defined(IP_PKTINFO) && !defined(IPV6_PKTINFO)) || !defined(CMSG_SPACE)
     return sendto(s, buf, len, flags, to, tolen);
@@ -1150,6 +1164,15 @@ send_to_from(int s, void *buf, size_t len, int flags,
             struct in6_pktinfo *p = (struct in6_pktinfo *)CMSG_DATA(cmsgptr);
             const struct sockaddr_in6 *from6 = (const struct sockaddr_in6 *)from;
             p->ipi6_addr = from6->sin6_addr;
+            /* Because of the possibility of asymmetric routing, we
+               normally don't want to specify an interface.  However,
+               Mac OS X doesn't like sending from a link-local address
+               (which can come up in testing at least, if you wind up
+               with a "foo.local" name) unless we do specify the
+               interface.  */
+            if (IN6_IS_ADDR_LINKLOCAL(&from6->sin6_addr))
+                p->ipi6_ifindex = auxaddr->ipv6_ifindex;
+            /* otherwise, already zero */
         }
         msg.msg_controllen = CMSG_SPACE(sizeof(struct in6_pktinfo));
         break;
@@ -1206,13 +1229,16 @@ static void process_packet(struct connection *conn, int selflags)
     krb5_data *response;
     char pktbuf[MAX_DGRAM_SIZE];
     int port_fd = conn->fd;
+    union aux_addressing_info auxaddr;
 
     response = NULL;
     saddr_len = sizeof(saddr);
     daddr_len = sizeof(daddr);
+    memset(&auxaddr, 0, sizeof(auxaddr));
     cc = recv_from_to(port_fd, pktbuf, sizeof(pktbuf), 0,
                       (struct sockaddr *)&saddr, &saddr_len,
-                      (struct sockaddr *)&daddr, &daddr_len);
+                      (struct sockaddr *)&daddr, &daddr_len,
+                      &auxaddr);
     if (cc == -1) {
         if (errno != EINTR
             /* This is how Linux indicates that a previous
@@ -1259,16 +1285,28 @@ static void process_packet(struct connection *conn, int selflags)
     }
     cc = send_to_from(port_fd, response->data, (socklen_t) response->length, 0,
                       (struct sockaddr *)&saddr, saddr_len,
-                      (struct sockaddr *)&daddr, daddr_len);
+                      (struct sockaddr *)&daddr, daddr_len,
+                      &auxaddr);
     if (cc == -1) {
-        char addrbuf[46];
+        /* Note that the local address (daddr*) has no port number
+           info associated with it.  */
+        char saddrbuf[NI_MAXHOST], sportbuf[NI_MAXSERV];
+        char daddrbuf[NI_MAXHOST];
+        int e = errno;
         krb5_free_data(kdc_context, response);
-        if (inet_ntop(((struct sockaddr *)&saddr)->sa_family,
-                      addr.contents, addrbuf, sizeof(addrbuf)) == 0) {
-            strlcpy(addrbuf, "?", sizeof(addrbuf));
+        if (getnameinfo((struct sockaddr *)&daddr, daddr_len,
+                        daddrbuf, sizeof(daddrbuf), 0, 0,
+                        NI_NUMERICHOST) != 0) {
+            strlcpy(daddrbuf, "?", sizeof(daddrbuf));
         }
-        kdc_err(NULL, errno, "while sending reply to %s/%d",
-                addrbuf, faddr.port);
+        if (getnameinfo((struct sockaddr *)&saddr, saddr_len,
+                        saddrbuf, sizeof(saddrbuf), sportbuf, sizeof(sportbuf),
+                        NI_NUMERICHOST|NI_NUMERICSERV) != 0) {
+            strlcpy(saddrbuf, "?", sizeof(saddrbuf));
+            strlcpy(sportbuf, "?", sizeof(sportbuf));
+        }
+        kdc_err(NULL, e, "while sending reply to %s/%s from %s",
+                saddrbuf, sportbuf, daddrbuf);
         return;
     }
     if (cc != response->length) {
