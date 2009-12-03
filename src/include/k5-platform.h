@@ -713,54 +713,43 @@ load_64_le (const void *cvp)
 #endif
 }
 
+#ifdef _WIN32
+#define UINT16_TYPE unsigned __int16
+#define UINT32_TYPE unsigned __int32
+#else
+#define UINT16_TYPE uint16_t
+#define UINT32_TYPE uint32_t
+#endif
+
 static inline void
 store_16_n (unsigned int val, void *vp)
 {
-#ifdef _WIN32
-    unsigned __int16 n;
-#else
-    uint16_t n;
-#endif
-    n = val;
+    UINT16_TYPE n = val;
     memcpy(vp, &n, 2);
 }
 static inline void
 store_32_n (unsigned int val, void *vp)
 {
-#ifdef _WIN32
-    unsigned __int32 n;
-#else
-    uint32_t n;
-#endif
-    n = val;
+    UINT32_TYPE n = val;
     memcpy(vp, &n, 4);
 }
 static inline void
 store_64_n (UINT64_TYPE val, void *vp)
 {
-    UINT64_TYPE n;
-    n = val;
+    UINT64_TYPE n = val;
     memcpy(vp, &n, 8);
 }
 static inline unsigned short
 load_16_n (const void *p)
 {
-#ifdef _WIN32
-    unsigned __int16 n;
-#else
-    uint16_t n;
-#endif
+    UINT16_TYPE n;
     memcpy(&n, p, 2);
     return n;
 }
 static inline unsigned int
 load_32_n (const void *p)
 {
-#ifdef _WIN32
-    unsigned __int32 n;
-#else
-    uint32_t n;
-#endif
+    UINT32_TYPE n;
     memcpy(&n, p, 4);
     return n;
 }
@@ -771,6 +760,8 @@ load_64_n (const void *p)
     memcpy(&n, p, 8);
     return n;
 }
+#undef UINT16_TYPE
+#undef UINT32_TYPE
 
 /* Assume for simplicity that these swaps are identical.  */
 static inline UINT64_TYPE
