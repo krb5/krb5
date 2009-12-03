@@ -86,11 +86,13 @@ krb5_k_verify_checksum_iov
 krb5int_keyhash_md4des
 krb5int_keyhash_md5des
 mit_crc32
+krb5int_aes_encrypt
 krb5int_MD4Init
 krb5int_MD4Update
 krb5int_MD4Final
 krb5int_MD5Init
 krb5int_MD5Update
 krb5int_MD5Final
+krb5int_aes_decrypt
 krb5int_enc_des3
 krb5int_arcfour_gsscrypt

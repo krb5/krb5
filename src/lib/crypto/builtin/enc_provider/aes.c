@@ -72,9 +72,130 @@ xorblock(unsigned char *out, const unsigned char *in)
     }
 }
 
+krb5_error_code
+krb5int_aes_encrypt(krb5_key key, const krb5_data *ivec,
+                    const krb5_data *input, krb5_data *output)
+{
+    aes_ctx ctx;
+    unsigned char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE], tmp3[BLOCK_SIZE];
+    int nblocks = 0, blockno;
+    const unsigned char *idata = (const unsigned char *) input->data;
+    unsigned char *odata = (unsigned char *) output->data;
+
+/*    CHECK_SIZES; */
+
+    if (aes_enc_key(key->keyblock.contents, key->keyblock.length,
+                    &ctx) != aes_good)
+        abort();
+
+    if (ivec)
+        memcpy(tmp, ivec->data, BLOCK_SIZE);
+    else
+        memset(tmp, 0, BLOCK_SIZE);
+
+    nblocks = (input->length + BLOCK_SIZE - 1) / BLOCK_SIZE;
+
+    if (nblocks == 1) {
+        /* XXX Used for DK function.  */
+        enc(odata, idata, &ctx);
+    } else {
+        unsigned int nleft;
+
+        for (blockno = 0; blockno < nblocks - 2; blockno++) {
+            xorblock(tmp, idata + blockno * BLOCK_SIZE);
+            enc(tmp2, tmp, &ctx);
+            memcpy(odata + blockno * BLOCK_SIZE, tmp2, BLOCK_SIZE);
+
+            /* Set up for next block.  */
+            memcpy(tmp, tmp2, BLOCK_SIZE);
+        }
+        /* Do final CTS step for last two blocks (the second of which
+           may or may not be incomplete).  */
+        xorblock(tmp, idata + (nblocks - 2) * BLOCK_SIZE);
+        enc(tmp2, tmp, &ctx);
+        nleft = input->length - (nblocks - 1) * BLOCK_SIZE;
+        memcpy(odata + (nblocks - 1) * BLOCK_SIZE, tmp2, nleft);
+        memcpy(tmp, tmp2, BLOCK_SIZE);
+
+        memset(tmp3, 0, sizeof(tmp3));
+        memcpy(tmp3, idata + (nblocks - 1) * BLOCK_SIZE, nleft);
+        xorblock(tmp, tmp3);
+        enc(tmp2, tmp, &ctx);
+        memcpy(odata + (nblocks - 2) * BLOCK_SIZE, tmp2, BLOCK_SIZE);
+        if (ivec)
+            memcpy(ivec->data, tmp2, BLOCK_SIZE);
+    }
+
+    return 0;
+}
+
+krb5_error_code
+krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec,
+                    const krb5_data *input, krb5_data *output)
+{
+    aes_ctx ctx;
+    unsigned char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE], tmp3[BLOCK_SIZE];
+    int nblocks = 0, blockno;
+    const unsigned char *idata = (const unsigned char *) input->data;
+    unsigned char *odata = (unsigned char *) output->data;
+
+    CHECK_SIZES;
+
+    if (aes_dec_key(key->keyblock.contents, key->keyblock.length,
+                    &ctx) != aes_good)
+        abort();
+
+    if (ivec)
+        memcpy(tmp, ivec->data, BLOCK_SIZE);
+    else
+        memset(tmp, 0, BLOCK_SIZE);
+
+    nblocks = (input->length + BLOCK_SIZE - 1) / BLOCK_SIZE;
+
+    if (nblocks == 1) {
+        if (input->length < BLOCK_SIZE)
+            abort();
+        dec(odata, idata, &ctx);
+    } else {
+
+        for (blockno = 0; blockno < nblocks - 2; blockno++) {
+            dec(tmp2, idata + blockno * BLOCK_SIZE, &ctx);
+            xorblock(tmp2, tmp);
+            memcpy(odata + blockno * BLOCK_SIZE, tmp2, BLOCK_SIZE);
+            memcpy(tmp, idata + blockno * BLOCK_SIZE, BLOCK_SIZE);
+        }
+        /* Do last two blocks, the second of which (next-to-last block
+           of plaintext) may be incomplete.  */
+        dec(tmp2, idata + (nblocks - 2) * BLOCK_SIZE, &ctx);
+        /* Set tmp3 to last ciphertext block, padded.  */
+        memset(tmp3, 0, sizeof(tmp3));
+        memcpy(tmp3, idata + (nblocks - 1) * BLOCK_SIZE,
+               input->length - (nblocks - 1) * BLOCK_SIZE);
+        /* Set tmp2 to last (possibly partial) plaintext block, and
+           save it.  */
+        xorblock(tmp2, tmp3);
+        memcpy(odata + (nblocks - 1) * BLOCK_SIZE, tmp2,
+               input->length - (nblocks - 1) * BLOCK_SIZE);
+        /* Maybe keep the trailing part, and copy in the last
+           ciphertext block.  */
+        memcpy(tmp2, tmp3, input->length - (nblocks - 1) * BLOCK_SIZE);
+        /* Decrypt, to get next to last plaintext block xor previous
+           ciphertext.  */
+        dec(tmp3, tmp2, &ctx);
+        xorblock(tmp3, tmp);
+        memcpy(odata + (nblocks - 2) * BLOCK_SIZE, tmp3, BLOCK_SIZE);
+        if (ivec)
+            memcpy(ivec->data, idata + (nblocks - 2) * BLOCK_SIZE, BLOCK_SIZE);
+    }
+
+    return 0;
+}
+
 static krb5_error_code
-aes_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
-            size_t num_data)
+krb5int_aes_encrypt_iov(krb5_key key,
+                        const krb5_data *ivec,
+                        krb5_crypto_iov *data,
+                        size_t num_data)
 {
     aes_ctx ctx;
     unsigned char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE];
@@ -158,8 +279,10 @@ aes_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 }
 
 static krb5_error_code
-aes_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
-            size_t num_data)
+krb5int_aes_decrypt_iov(krb5_key key,
+                        const krb5_data *ivec,
+                        krb5_crypto_iov *data,
+                        size_t num_data)
 {
     aes_ctx ctx;
     unsigned char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE], tmp3[BLOCK_SIZE];
@@ -249,8 +372,8 @@ aes_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 }
 
 static krb5_error_code
-aes_init_state(const krb5_keyblock *key, krb5_keyusage usage,
-               krb5_data *state)
+krb5int_aes_init_state (const krb5_keyblock *key, krb5_keyusage usage,
+                        krb5_data *state)
 {
     state->length = 16;
     state->data = malloc(16);
@@ -263,19 +386,23 @@ aes_init_state(const krb5_keyblock *key, krb5_keyusage usage,
 const struct krb5_enc_provider krb5int_enc_aes128 = {
     16,
     16, 16,
-    aes_encrypt,
-    aes_decrypt,
+    krb5int_aes_encrypt,
+    krb5int_aes_decrypt,
     krb5int_aes_make_key,
-    aes_init_state,
+    krb5int_aes_init_state,
     krb5int_default_free_state,
+    krb5int_aes_encrypt_iov,
+    krb5int_aes_decrypt_iov
 };
 
 const struct krb5_enc_provider krb5int_enc_aes256 = {
     16,
     32, 32,
-    aes_encrypt,
-    aes_decrypt,
+    krb5int_aes_encrypt,
+    krb5int_aes_decrypt,
     krb5int_aes_make_key,
-    aes_init_state,
+    krb5int_aes_init_state,
     krb5int_default_free_state,
+    krb5int_aes_encrypt_iov,
+    krb5int_aes_decrypt_iov
 };
