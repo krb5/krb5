@@ -34,7 +34,6 @@ krb5_c_crypto_length(krb5_context context, krb5_enctype enctype,
                      krb5_cryptotype type, unsigned int *size)
 {
     const struct krb5_keytypes *ktp;
-    krb5_error_code ret = 0;
 
     ktp = find_enctype(enctype);
     if (ktp == NULL)
@@ -55,11 +54,10 @@ krb5_c_crypto_length(krb5_context context, krb5_enctype enctype,
         *size = ktp->crypto_length(ktp, type);
         break;
     default:
-        ret = EINVAL;
-        break;
+        return EINVAL;
     }
 
-    return ret;
+    return 0;
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -80,7 +78,6 @@ krb5_error_code KRB5_CALLCONV
 krb5_c_crypto_length_iov(krb5_context context, krb5_enctype enctype,
                          krb5_crypto_iov *data, size_t num_data)
 {
-    krb5_error_code ret = 0;
     size_t i;
     const struct krb5_keytypes *ktp;
     unsigned int data_length = 0, pad_length;
@@ -118,13 +115,7 @@ krb5_c_crypto_length_iov(krb5_context context, krb5_enctype enctype,
         default:
             break;
         }
-
-        if (ret != 0)
-            break;
     }
-
-    if (ret != 0)
-        return ret;
 
     pad_length = krb5int_c_padding_length(ktp, data_length);
     if (pad_length != 0 && padding == NULL)
