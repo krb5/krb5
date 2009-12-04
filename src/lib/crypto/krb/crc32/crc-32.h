@@ -64,10 +64,4 @@
 void
 mit_crc32 (krb5_pointer in, size_t in_length, unsigned long *c);
 
-#ifdef CRC32_SHIFT4
-void mit_crc32_shift4(krb5_pointer /* in */,
-                      size_t /* in_length */,
-                      unsigned long * /* cksum */);
-#endif
-
 #endif /* KRB5_CRC32__ */

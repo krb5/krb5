@@ -134,21 +134,6 @@ timetest(unsigned int nblk, unsigned int blksiz)
            (long)(after.tms_cutime - before.tms_cutime),
            (long)(after.tms_cstime - before.tms_cstime));
 
-#ifdef CRC32_SHIFT4
-    times(&before);
-    for (i = 0; i < nblk; i++) {
-        cksum = 0;
-        mit_crc32_shift4(block + i * blksiz, blksiz, &cksum);
-    }
-    times(&after);
-    printf("shift-4 implementation, %d blocks of %d bytes:\n",
-           nblk, blksiz);
-    printf("\tu=%ld s=%ld cu=%ld cs=%ld\n",
-           (long)(after.tms_utime - before.tms_utime),
-           (long)(after.tms_stime - before.tms_stime),
-           (long)(after.tms_cutime - before.tms_cutime),
-           (long)(after.tms_cstime - before.tms_cstime));
-#endif
     free(block);
 }
 
