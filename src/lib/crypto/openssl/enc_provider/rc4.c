@@ -61,9 +61,6 @@ typedef struct {
 
 /* prototypes */
 static krb5_error_code
-k5_arcfour_docrypt(krb5_key, const krb5_data *,
-                   const krb5_data *, krb5_data *);
-static krb5_error_code
 k5_arcfour_free_state ( krb5_data *state);
 static krb5_error_code
 k5_arcfour_init_state (const krb5_keyblock *key,
@@ -73,51 +70,10 @@ k5_arcfour_init_state (const krb5_keyblock *key,
  * this impliments the cipher
  */
 
-/* In-place rc4 crypto */
-static krb5_error_code
-k5_arcfour_docrypt(krb5_key key, const krb5_data *state,
-                   const krb5_data *input, krb5_data *output)
-{
-    int ret = 0, tmp_len = 0;
-    unsigned char   *tmp_buf = NULL;
-    EVP_CIPHER_CTX  ciph_ctx;
-
-    if (key->keyblock.length != RC4_KEY_SIZE)
-        return(KRB5_BAD_KEYSIZE);
-
-    if (input->length != output->length)
-        return(KRB5_BAD_MSIZE);
-
-    EVP_CIPHER_CTX_init(&ciph_ctx);
-
-    ret = EVP_EncryptInit_ex(&ciph_ctx, EVP_rc4(), NULL, key->keyblock.contents, NULL);
-    if (ret) {
-        tmp_buf=(unsigned char *)output->data;
-        ret = EVP_EncryptUpdate(&ciph_ctx, tmp_buf,  &tmp_len,
-                                (unsigned char *)input->data, input->length);
-        output->length = tmp_len;
-    }
-    if (ret) {
-        tmp_buf += tmp_len;
-        ret = EVP_EncryptFinal_ex(&ciph_ctx, tmp_buf, &tmp_len);
-    }
-
-    EVP_CIPHER_CTX_cleanup(&ciph_ctx);
-
-    if (ret != 1)
-        return KRB5_CRYPTO_INTERNAL;
-
-    output->length += tmp_len;
-
-    return 0;
-}
-
 /* In-place IOV crypto */
 static krb5_error_code
-k5_arcfour_docrypt_iov(krb5_key key,
-                       const krb5_data *state,
-                       krb5_crypto_iov *data,
-                       size_t num_data)
+k5_arcfour_docrypt(krb5_key key,const krb5_data *state, krb5_crypto_iov *data,
+                   size_t num_data)
 {
     size_t i;
     int ret = 0, tmp_len = 0;
@@ -191,7 +147,5 @@ const struct krb5_enc_provider krb5int_enc_arcfour = {
     k5_arcfour_docrypt,
     krb5int_arcfour_make_key,
     k5_arcfour_init_state, /*xxx not implemented */
-    k5_arcfour_free_state, /*xxx not implemented */
-    k5_arcfour_docrypt_iov,
-    k5_arcfour_docrypt_iov
+    k5_arcfour_free_state  /*xxx not implemented */
 };

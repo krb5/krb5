@@ -37,25 +37,24 @@ static char plain[16], cipher[16], zero[16];
 
 static krb5_keyblock enc_key;
 static krb5_data ivec;
-static krb5_data in, out;
 static void init()
 {
     enc_key.contents = key;
     enc_key.length = 16;
     ivec.data = zero;
     ivec.length = 16;
-    in.data = plain;
-    in.length = 16;
-    out.data = cipher;
-    out.length = 16;
 }
 static void enc()
 {
-    krb5_key key;
+    krb5_key k;
+    krb5_crypto_iov iov;
 
-    krb5_k_create_key(NULL, &enc_key, &key);
-    krb5int_aes_encrypt(key, &ivec, &in, &out);
-    krb5_k_free_key(NULL, key);
+    memcpy(cipher, plain, 16);
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    iov.data = make_data(cipher, 16);
+    krb5_k_create_key(NULL, &enc_key, &k);
+    krb5int_aes_encrypt(k, &ivec, &iov, 1);
+    krb5_k_free_key(NULL, k);
 }
 
 static void hexdump(const char *label, const char *cp, int len)

@@ -192,9 +192,8 @@ enctype_to_string.so enctype_to_string.po $(OUTPRE)enctype_to_string.$(OBJEXT): 
   enctype_to_string.c etypes.h
 etypes.so etypes.po $(OUTPRE)etypes.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes_s2k.h \
-  $(srcdir)/../builtin/des/des_int.h $(srcdir)/../builtin/enc_provider/enc_provider.h \
-  $(srcdir)/../builtin/hash_provider/hash_provider.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/des/des_int.h \
+  $(srcdir)/../builtin/enc_provider/enc_provider.h $(srcdir)/../builtin/hash_provider/hash_provider.h \
   $(srcdir)/arcfour/arcfour.h $(srcdir)/dk/dk.h $(srcdir)/old/old.h \
   $(srcdir)/prf/prf_int.h $(srcdir)/raw/raw.h $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
@@ -280,7 +279,7 @@ make_checksum_iov.so make_checksum_iov.po $(OUTPRE)make_checksum_iov.$(OBJEXT): 
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  aead.h cksumtypes.h make_checksum_iov.c
+  aead.h cksumtypes.h etypes.h make_checksum_iov.c
 make_random_key.so make_random_key.po $(OUTPRE)make_random_key.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -454,4 +453,4 @@ verify_checksum_iov.so verify_checksum_iov.po $(OUTPRE)verify_checksum_iov.$(OBJ
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  aead.h cksumtypes.h verify_checksum_iov.c
+  aead.h cksumtypes.h etypes.h verify_checksum_iov.c

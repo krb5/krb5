@@ -32,8 +32,7 @@
 #include "aead.h"
 
 krb5_crypto_iov *
-krb5int_c_locate_iov(krb5_crypto_iov *data,
-                     size_t num_data,
+krb5int_c_locate_iov(krb5_crypto_iov *data, size_t num_data,
                      krb5_cryptotype type)
 {
     size_t i;
@@ -337,17 +336,12 @@ krb5int_c_iov_put_block(const krb5_crypto_iov *data,
 }
 
 krb5_error_code
-krb5int_c_iov_decrypt_stream(const struct krb5_aead_provider *aead,
-                             const struct krb5_enc_provider *enc,
-                             const struct krb5_hash_provider *hash,
-                             krb5_key key,
-                             krb5_keyusage keyusage,
-                             const krb5_data *ivec,
-                             krb5_crypto_iov *data,
-                             size_t num_data)
+krb5int_c_iov_decrypt_stream(const struct krb5_keytypes *ktp, krb5_key key,
+                             krb5_keyusage keyusage, const krb5_data *ivec,
+                             krb5_crypto_iov *data, size_t num_data)
 {
     krb5_error_code ret;
-    unsigned int header_len, trailer_len, padding_len;
+    unsigned int header_len, trailer_len;
     krb5_crypto_iov *iov;
     krb5_crypto_iov *stream;
     size_t i, j;
@@ -356,20 +350,8 @@ krb5int_c_iov_decrypt_stream(const struct krb5_aead_provider *aead,
     stream = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_STREAM);
     assert(stream != NULL);
 
-    ret = (*aead->crypto_length)(aead, enc, hash, KRB5_CRYPTO_TYPE_HEADER,
-                                 &header_len);
-    if (ret != 0)
-        return ret;
-
-    ret = (*aead->crypto_length)(aead, enc, hash, KRB5_CRYPTO_TYPE_TRAILER,
-                                 &trailer_len);
-    if (ret != 0)
-        return ret;
-
-    ret = (*aead->crypto_length)(aead, enc, hash, KRB5_CRYPTO_TYPE_PADDING,
-                                 &padding_len);
-    if (ret != 0)
-        return ret;
+    header_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_HEADER);
+    trailer_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_TRAILER);
 
     if (stream->data.length < header_len + trailer_len)
         return KRB5_BAD_MSIZE;
@@ -381,8 +363,7 @@ krb5int_c_iov_decrypt_stream(const struct krb5_aead_provider *aead,
     i = 0;
 
     iov[i].flags = KRB5_CRYPTO_TYPE_HEADER; /* takes place of STREAM */
-    iov[i].data.data = stream->data.data;
-    iov[i].data.length = header_len;
+    iov[i].data = make_data(stream->data.data, header_len);
     i++;
 
     for (j = 0; j < num_data; j++) {
@@ -403,38 +384,27 @@ krb5int_c_iov_decrypt_stream(const struct krb5_aead_provider *aead,
             iov[i++] = data[j];
     }
 
-    /*
-     * XXX not self-describing with respect to length, this is the best
-     * we can do.
-     */
+    /* Use empty padding since tokens don't indicate the padding length. */
     iov[i].flags = KRB5_CRYPTO_TYPE_PADDING;
-    iov[i].data.data = NULL;
-    iov[i].data.length = 0;
+    iov[i].data = empty_data();
     i++;
 
     iov[i].flags = KRB5_CRYPTO_TYPE_TRAILER;
-    iov[i].data.data = stream->data.data + stream->data.length - trailer_len;
-    iov[i].data.length = trailer_len;
+    iov[i].data = make_data(stream->data.data + stream->data.length -
+                            trailer_len, trailer_len);
     i++;
 
     assert(i <= num_data + 2);
 
-    ret = (*aead->decrypt_iov)(aead, enc, hash, key, keyusage, ivec, iov, i);
-
+    ret = ktp->decrypt(ktp, key, keyusage, ivec, iov, i);
     free(iov);
-
     return ret;
 }
 
-krb5_error_code
-krb5int_c_padding_length(const struct krb5_aead_provider *aead,
-                         const struct krb5_enc_provider *enc,
-                         const struct krb5_hash_provider *hash,
-                         size_t data_length,
-                         unsigned int *pad_length)
+unsigned int
+krb5int_c_padding_length(const struct krb5_keytypes *ktp, size_t data_length)
 {
     unsigned int header, padding;
-    krb5_error_code ret;
 
     /*
      * Add in the header length since the header is encrypted along with the
@@ -443,163 +413,12 @@ krb5int_c_padding_length(const struct krb5_aead_provider *aead,
      * enctype using a similar token format and a block cipher, we will have to
      * move this logic into an enctype-dependent function.)
      */
-    ret = (*aead->crypto_length)(aead, enc, hash, KRB5_CRYPTO_TYPE_HEADER,
-                                 &header);
-    if (ret != 0)
-        return ret;
+    header = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_HEADER);
     data_length += header;
 
-    ret = (*aead->crypto_length)(aead, enc, hash, KRB5_CRYPTO_TYPE_PADDING,
-                                 &padding);
-    if (ret != 0)
-        return ret;
-
+    padding = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_PADDING);
     if (padding == 0 || (data_length % padding) == 0)
-        *pad_length = 0;
+        return 0;
     else
-        *pad_length = padding - (data_length % padding);
-
-    return 0;
-}
-
-krb5_error_code
-krb5int_c_encrypt_aead_compat(const struct krb5_aead_provider *aead,
-                              const struct krb5_enc_provider *enc,
-                              const struct krb5_hash_provider *hash,
-                              krb5_key key, krb5_keyusage usage,
-                              const krb5_data *ivec, const krb5_data *input,
-                              krb5_data *output)
-{
-    krb5_crypto_iov iov[4];
-    krb5_error_code ret;
-    unsigned int header_len = 0;
-    unsigned int padding_len = 0;
-    unsigned int trailer_len = 0;
-
-    ret = (*aead->crypto_length)(aead, enc, hash, KRB5_CRYPTO_TYPE_HEADER,
-                                 &header_len);
-    if (ret != 0)
-        return ret;
-
-    ret = krb5int_c_padding_length(aead, enc, hash, input->length,
-                                   &padding_len);
-    if (ret != 0)
-        return ret;
-
-    ret = (*aead->crypto_length)(aead, enc, hash, KRB5_CRYPTO_TYPE_TRAILER,
-                                 &trailer_len);
-    if (ret != 0)
-        return ret;
-
-    if (output->length <
-        header_len + input->length + padding_len + trailer_len)
-        return KRB5_BAD_MSIZE;
-
-    iov[0].flags = KRB5_CRYPTO_TYPE_HEADER;
-    iov[0].data.data = output->data;
-    iov[0].data.length = header_len;
-
-    iov[1].flags = KRB5_CRYPTO_TYPE_DATA;
-    iov[1].data.data = iov[0].data.data + iov[0].data.length;
-    iov[1].data.length = input->length;
-    memcpy(iov[1].data.data, input->data, input->length);
-
-    iov[2].flags = KRB5_CRYPTO_TYPE_PADDING;
-    iov[2].data.data = iov[1].data.data + iov[1].data.length;
-    iov[2].data.length = padding_len;
-
-    iov[3].flags = KRB5_CRYPTO_TYPE_TRAILER;
-    iov[3].data.data = iov[2].data.data + iov[2].data.length;
-    iov[3].data.length = trailer_len;
-
-    ret = (*aead->encrypt_iov)(aead, enc, hash, key, usage, ivec,
-                               iov, sizeof(iov) / sizeof(iov[0]));
-
-    if (ret != 0)
-        zap(iov[1].data.data, iov[1].data.length);
-
-    output->length = iov[0].data.length + iov[1].data.length +
-        iov[2].data.length + iov[3].data.length;
-
-    return ret;
-}
-
-krb5_error_code
-krb5int_c_decrypt_aead_compat(const struct krb5_aead_provider *aead,
-                              const struct krb5_enc_provider *enc,
-                              const struct krb5_hash_provider *hash,
-                              krb5_key key, krb5_keyusage usage,
-                              const krb5_data *ivec, const krb5_data *input,
-                              krb5_data *output)
-{
-    krb5_crypto_iov iov[4];
-    krb5_error_code ret;
-    unsigned int header_len = 0, trailer_len = 0, plain_len;
-    char *scratch = NULL;
-
-    ret = (*aead->crypto_length)(aead, enc, hash, KRB5_CRYPTO_TYPE_HEADER,
-                                 &header_len);
-    if (ret != 0)
-        return ret;
-
-    ret = (*aead->crypto_length)(aead, enc, hash, KRB5_CRYPTO_TYPE_TRAILER,
-                                 &trailer_len);
-    if (ret != 0)
-        return ret;
-
-    if (input->length < header_len + trailer_len)
-        return KRB5_BAD_MSIZE;
-    plain_len = input->length - header_len - trailer_len;
-    if (output->length < input->length - header_len - trailer_len)
-        return KRB5_BAD_MSIZE;
-
-    scratch = k5alloc(header_len + trailer_len, &ret);
-    if (scratch == NULL)
-        return ret;
-
-    iov[0].flags = KRB5_CRYPTO_TYPE_HEADER;
-    iov[0].data = make_data(scratch, header_len);
-    memcpy(iov[0].data.data, input->data, header_len);
-
-    iov[1].flags = KRB5_CRYPTO_TYPE_DATA;
-    iov[1].data = make_data(output->data, plain_len);
-    memcpy(iov[1].data.data, input->data + header_len, plain_len);
-
-    /* Use empty padding since tokens don't indicate the padding length. */
-    iov[2].flags = KRB5_CRYPTO_TYPE_PADDING;
-    iov[2].data = empty_data();
-
-    iov[3].flags = KRB5_CRYPTO_TYPE_TRAILER;
-    iov[3].data = make_data(scratch + header_len, trailer_len);
-    memcpy(iov[3].data.data, input->data + header_len + plain_len,
-           trailer_len);
-
-    ret = (*aead->decrypt_iov)(aead, enc, hash, key, usage, ivec,
-                               iov, sizeof(iov) / sizeof(iov[0]));
-    if (ret != 0)
-        zap(output->data, plain_len);
-    else
-        output->length = plain_len;
-
-    zapfree(scratch, header_len + trailer_len);
-    return ret;
-}
-
-void
-krb5int_c_encrypt_length_aead_compat(const struct krb5_aead_provider *aead,
-                                     const struct krb5_enc_provider *enc,
-                                     const struct krb5_hash_provider *hash,
-                                     size_t inputlen, size_t *length)
-{
-    unsigned int header_len = 0;
-    unsigned int padding_len = 0;
-    unsigned int trailer_len = 0;
-
-    (*aead->crypto_length)(aead, enc, hash, KRB5_CRYPTO_TYPE_HEADER,
-                           &header_len);
-    krb5int_c_padding_length(aead, enc, hash, inputlen, &padding_len);
-    (*aead->crypto_length)(aead, enc, hash, KRB5_CRYPTO_TYPE_TRAILER,
-                           &trailer_len);
-
-    *length = header_len + inputlen + padding_len + trailer_len;
+        return padding - (data_length % padding);
 }

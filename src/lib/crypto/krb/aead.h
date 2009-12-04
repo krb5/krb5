@@ -27,6 +27,7 @@
 
 #include "k5-int.h"
 #include "cksumtypes.h"
+#include "etypes.h"
 
 /* AEAD helpers */
 
@@ -90,43 +91,12 @@ krb5int_c_iov_put_block(const krb5_crypto_iov *data,
                         struct iov_block_state *iov_state);
 
 krb5_error_code
-krb5int_c_iov_decrypt_stream(const struct krb5_aead_provider *aead,
-                             const struct krb5_enc_provider *enc,
-                             const struct krb5_hash_provider *hash,
-                             krb5_key key,
-                             krb5_keyusage keyusage,
-                             const krb5_data *ivec,
-                             krb5_crypto_iov *data,
-                             size_t num_data);
+krb5int_c_iov_decrypt_stream(const struct krb5_keytypes *ktp, krb5_key key,
+                             krb5_keyusage keyusage, const krb5_data *ivec,
+                             krb5_crypto_iov *data, size_t num_data);
 
-krb5_error_code
-krb5int_c_decrypt_aead_compat(const struct krb5_aead_provider *aead,
-                              const struct krb5_enc_provider *enc,
-                              const struct krb5_hash_provider *hash,
-                              krb5_key key, krb5_keyusage usage,
-                              const krb5_data *ivec, const krb5_data *input,
-                              krb5_data *output);
-
-krb5_error_code
-krb5int_c_encrypt_aead_compat(const struct krb5_aead_provider *aead,
-                              const struct krb5_enc_provider *enc,
-                              const struct krb5_hash_provider *hash,
-                              krb5_key key, krb5_keyusage usage,
-                              const krb5_data *ivec, const krb5_data *input,
-                              krb5_data *output);
-
-void
-krb5int_c_encrypt_length_aead_compat(const struct krb5_aead_provider *aead,
-                                     const struct krb5_enc_provider *enc,
-                                     const struct krb5_hash_provider *hash,
-                                     size_t inputlen, size_t *length);
-
-krb5_error_code
-krb5int_c_padding_length(const struct krb5_aead_provider *aead,
-                         const struct krb5_enc_provider *enc,
-                         const struct krb5_hash_provider *hash,
-                         size_t data_length,
-                         unsigned int *pad_length);
+unsigned int
+krb5int_c_padding_length(const struct krb5_keytypes *ktp, size_t data_length);
 
 /*
  * Returns an alias into the current buffer if the next block is fully

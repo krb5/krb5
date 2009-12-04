@@ -9,7 +9,7 @@
 #endif
 
 krb5_error_code
-krb5int_arcfour_string_to_key(const struct krb5_enc_provider *enc,
+krb5int_arcfour_string_to_key(const struct krb5_keytypes *ktp,
                               const krb5_data *string, const krb5_data *salt,
                               const krb5_data *params, krb5_keyblock *key)
 {

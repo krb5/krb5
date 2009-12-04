@@ -34,63 +34,60 @@
 
 /* AEAD */
 
-static krb5_error_code
-krb5int_dk_crypto_length(const struct krb5_aead_provider *aead,
-                         const struct krb5_enc_provider *enc,
-                         const struct krb5_hash_provider *hash,
-                         krb5_cryptotype type,
-                         unsigned int *length)
+unsigned int
+krb5int_dk_crypto_length(const struct krb5_keytypes *ktp, krb5_cryptotype type)
 {
     switch (type) {
     case KRB5_CRYPTO_TYPE_HEADER:
     case KRB5_CRYPTO_TYPE_PADDING:
-        *length = enc->block_size;
-        break;
+        return ktp->enc->block_size;
     case KRB5_CRYPTO_TYPE_TRAILER:
     case KRB5_CRYPTO_TYPE_CHECKSUM:
-        *length = hash->hashsize;
-        break;
+        return ktp->hash->hashsize;
     default:
         assert(0 && "invalid cryptotype passed to krb5int_dk_crypto_length");
-        break;
+        return 0;
     }
-
-    return 0;
 }
 
-static krb5_error_code
-krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
-                       const struct krb5_enc_provider *enc,
-                       const struct krb5_hash_provider *hash,
-                       krb5_key key,
-                       krb5_keyusage usage,
-                       const krb5_data *ivec,
-                       krb5_crypto_iov *data,
-                       size_t num_data)
+unsigned int
+krb5int_aes_crypto_length(const struct krb5_keytypes *ktp,
+                          krb5_cryptotype type)
 {
+    switch (type) {
+    case KRB5_CRYPTO_TYPE_HEADER:
+        return ktp->enc->block_size;
+    case KRB5_CRYPTO_TYPE_PADDING:
+        return 0;
+    case KRB5_CRYPTO_TYPE_TRAILER:
+    case KRB5_CRYPTO_TYPE_CHECKSUM:
+        return 96 / 8;
+    default:
+        assert(0 && "invalid cryptotype passed to krb5int_aes_crypto_length");
+        return 0;
+    }
+}
+
+krb5_error_code
+krb5int_dk_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
+                   krb5_keyusage usage, const krb5_data *ivec,
+                   krb5_crypto_iov *data, size_t num_data)
+{
+    const struct krb5_enc_provider *enc = ktp->enc;
+    const struct krb5_hash_provider *hash = ktp->hash;
     krb5_error_code ret;
     unsigned char constantdata[K5CLENGTH];
     krb5_data d1, d2;
     krb5_crypto_iov *header, *trailer, *padding;
     krb5_key ke = NULL, ki = NULL;
     size_t i;
-    unsigned int blocksize = 0;
-    unsigned int plainlen = 0;
-    unsigned int hmacsize = 0;
-    unsigned int padsize = 0;
+    unsigned int blocksize, hmacsize, plainlen = 0, padsize = 0;
     unsigned char *cksum = NULL;
 
     /* E(Confounder | Plaintext | Pad) | Checksum */
 
-    ret = aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_PADDING,
-                              &blocksize);
-    if (ret != 0)
-        return ret;
-
-    ret = aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_TRAILER,
-                              &hmacsize);
-    if (ret != 0)
-        return ret;
+    blocksize = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_PADDING);
+    hmacsize = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_TRAILER);
 
     for (i = 0; i < num_data; i++) {
         krb5_crypto_iov *iov = &data[i];
@@ -164,9 +161,7 @@ krb5int_dk_encrypt_iov(const struct krb5_aead_provider *aead,
         goto cleanup;
 
     /* Encrypt the plaintext (header | data | padding) */
-    assert(enc->encrypt_iov != NULL);
-
-    ret = (*enc->encrypt_iov)(ke, ivec, data, num_data); /* updates ivec */
+    ret = enc->encrypt(ke, ivec, data, num_data);
     if (ret != 0)
         goto cleanup;
 
@@ -183,38 +178,27 @@ cleanup:
     return ret;
 }
 
-static krb5_error_code
-krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
-                       const struct krb5_enc_provider *enc,
-                       const struct krb5_hash_provider *hash,
-                       krb5_key key,
-                       krb5_keyusage usage,
-                       const krb5_data *ivec,
-                       krb5_crypto_iov *data,
-                       size_t num_data)
+krb5_error_code
+krb5int_dk_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
+                   krb5_keyusage usage, const krb5_data *ivec,
+                   krb5_crypto_iov *data, size_t num_data)
 {
+    const struct krb5_enc_provider *enc = ktp->enc;
+    const struct krb5_hash_provider *hash = ktp->hash;
     krb5_error_code ret;
     unsigned char constantdata[K5CLENGTH];
     krb5_data d1;
     krb5_crypto_iov *header, *trailer;
     krb5_key ke = NULL, ki = NULL;
     size_t i;
-    unsigned int blocksize = 0; /* enc block size, not confounder len */
-    unsigned int cipherlen = 0;
-    unsigned int hmacsize = 0;
+    unsigned int blocksize; /* enc block size, not confounder len */
+    unsigned int hmacsize, cipherlen = 0;
     unsigned char *cksum = NULL;
 
     /* E(Confounder | Plaintext | Pad) | Checksum */
 
-    ret = aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_PADDING,
-                              &blocksize);
-    if (ret != 0)
-        return ret;
-
-    ret = aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_TRAILER,
-                              &hmacsize);
-    if (ret != 0)
-        return ret;
+    blocksize = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_PADDING);
+    hmacsize = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_TRAILER);
 
     if (blocksize != 0) {
         /* Check that the input data is correctly padded. */
@@ -262,9 +246,7 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
         goto cleanup;
 
     /* Decrypt the plaintext (header | data | padding). */
-    assert(enc->decrypt_iov != NULL);
-
-    ret = (*enc->decrypt_iov)(ke, ivec, data, num_data); /* updates ivec */
+    ret = enc->decrypt(ke, ivec, data, num_data);
     if (ret != 0)
         goto cleanup;
 
@@ -288,41 +270,3 @@ cleanup:
     free(cksum);
     return ret;
 }
-
-const struct krb5_aead_provider krb5int_aead_dk = {
-    krb5int_dk_crypto_length,
-    krb5int_dk_encrypt_iov,
-    krb5int_dk_decrypt_iov
-};
-
-static krb5_error_code
-krb5int_aes_crypto_length(const struct krb5_aead_provider *aead,
-                          const struct krb5_enc_provider *enc,
-                          const struct krb5_hash_provider *hash,
-                          krb5_cryptotype type,
-                          unsigned int *length)
-{
-    switch (type) {
-    case KRB5_CRYPTO_TYPE_HEADER:
-        *length = enc->block_size;
-        break;
-    case KRB5_CRYPTO_TYPE_PADDING:
-        *length = 0;
-        break;
-    case KRB5_CRYPTO_TYPE_TRAILER:
-    case KRB5_CRYPTO_TYPE_CHECKSUM:
-        *length = 96 / 8;
-        break;
-    default:
-        assert(0 && "invalid cryptotype passed to krb5int_aes_crypto_length");
-        break;
-    }
-
-    return 0;
-}
-
-const struct krb5_aead_provider krb5int_aead_aes = {
-    krb5int_aes_crypto_length,
-    krb5int_dk_encrypt_iov,
-    krb5int_dk_decrypt_iov
-};

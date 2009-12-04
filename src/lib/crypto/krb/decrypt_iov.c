@@ -30,37 +30,29 @@
 #include "aead.h"
 
 krb5_error_code KRB5_CALLCONV
-krb5_k_decrypt_iov(krb5_context context,
-                   krb5_key key,
-                   krb5_keyusage usage,
-                   const krb5_data *cipher_state,
-                   krb5_crypto_iov *data,
+krb5_k_decrypt_iov(krb5_context context, krb5_key key, krb5_keyusage usage,
+                   const krb5_data *cipher_state, krb5_crypto_iov *data,
                    size_t num_data)
 {
     const struct krb5_keytypes *ktp;
 
     ktp = find_enctype(key->keyblock.enctype);
-    if (ktp == NULL || ktp->aead == NULL)
+    if (ktp == NULL)
         return KRB5_BAD_ENCTYPE;
 
     if (krb5int_c_locate_iov(data, num_data,
                              KRB5_CRYPTO_TYPE_STREAM) != NULL) {
-        return krb5int_c_iov_decrypt_stream(ktp->aead, ktp->enc, ktp->hash,
-                                            key, usage, cipher_state, data,
-                                            num_data);
+        return krb5int_c_iov_decrypt_stream(ktp, key, usage, cipher_state,
+                                            data, num_data);
     }
 
-    return (*ktp->aead->decrypt_iov)(ktp->aead, ktp->enc, ktp->hash, key,
-                                     usage, cipher_state, data, num_data);
+    return ktp->decrypt(ktp, key, usage, cipher_state, data, num_data);
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_decrypt_iov(krb5_context context,
-                   const krb5_keyblock *keyblock,
-                   krb5_keyusage usage,
-                   const krb5_data *cipher_state,
-                   krb5_crypto_iov *data,
-                   size_t num_data)
+krb5_c_decrypt_iov(krb5_context context, const krb5_keyblock *keyblock,
+                   krb5_keyusage usage, const krb5_data *cipher_state,
+                   krb5_crypto_iov *data, size_t num_data)
 {
     krb5_key key;
     krb5_error_code ret;

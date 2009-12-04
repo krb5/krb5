@@ -34,28 +34,25 @@ krb5_c_crypto_length(krb5_context context, krb5_enctype enctype,
                      krb5_cryptotype type, unsigned int *size)
 {
     const struct krb5_keytypes *ktp;
-    krb5_error_code ret;
+    krb5_error_code ret = 0;
 
     ktp = find_enctype(enctype);
-    if (ktp == NULL || ktp->aead == NULL)
+    if (ktp == NULL)
         return KRB5_BAD_ENCTYPE;
 
     switch (type) {
     case KRB5_CRYPTO_TYPE_EMPTY:
     case KRB5_CRYPTO_TYPE_SIGN_ONLY:
         *size = 0;
-        ret = 0;
         break;
     case KRB5_CRYPTO_TYPE_DATA:
         *size = (size_t)~0; /* match Heimdal */
-        ret = 0;
         break;
     case KRB5_CRYPTO_TYPE_HEADER:
     case KRB5_CRYPTO_TYPE_PADDING:
     case KRB5_CRYPTO_TYPE_TRAILER:
     case KRB5_CRYPTO_TYPE_CHECKSUM:
-        ret = (*ktp->aead->crypto_length)(ktp->aead, ktp->enc, ktp->hash,
-                                          type, size);
+        *size = ktp->crypto_length(ktp, type);
         break;
     default:
         ret = EINVAL;
@@ -72,11 +69,11 @@ krb5_c_padding_length(krb5_context context, krb5_enctype enctype,
     const struct krb5_keytypes *ktp;
 
     ktp = find_enctype(enctype);
-    if (ktp == NULL || ktp->aead == NULL)
+    if (ktp == NULL)
         return KRB5_BAD_ENCTYPE;
 
-    return krb5int_c_padding_length(ktp->aead, ktp->enc, ktp->hash,
-                                    data_length, pad_length);
+    *pad_length = krb5int_c_padding_length(ktp, data_length);
+    return 0;
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -95,7 +92,7 @@ krb5_c_crypto_length_iov(krb5_context context, krb5_enctype enctype,
      */
 
     ktp = find_enctype(enctype);
-    if (ktp == NULL || ktp->aead == NULL)
+    if (ktp == NULL)
         return KRB5_BAD_ENCTYPE;
 
     for (i = 0; i < num_data; i++) {
@@ -114,8 +111,7 @@ krb5_c_crypto_length_iov(krb5_context context, krb5_enctype enctype,
         case KRB5_CRYPTO_TYPE_HEADER:
         case KRB5_CRYPTO_TYPE_TRAILER:
         case KRB5_CRYPTO_TYPE_CHECKSUM:
-            ret = (*ktp->aead->crypto_length)(ktp->aead, ktp->enc, ktp->hash,
-                                              iov->flags, &iov->data.length);
+            iov->data.length = ktp->crypto_length(ktp, iov->flags);
             break;
         case KRB5_CRYPTO_TYPE_EMPTY:
         case KRB5_CRYPTO_TYPE_SIGN_ONLY:
@@ -130,11 +126,7 @@ krb5_c_crypto_length_iov(krb5_context context, krb5_enctype enctype,
     if (ret != 0)
         return ret;
 
-    ret = krb5int_c_padding_length(ktp->aead, ktp->enc, ktp->hash,
-                                   data_length, &pad_length);
-    if (ret != 0)
-        return ret;
-
+    pad_length = krb5int_c_padding_length(ktp, data_length);
     if (pad_length != 0 && padding == NULL)
         return EINVAL;
 

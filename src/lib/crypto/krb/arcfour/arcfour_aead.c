@@ -34,32 +34,23 @@
 
 /* AEAD */
 
-static krb5_error_code
-krb5int_arcfour_crypto_length(const struct krb5_aead_provider *aead,
-                              const struct krb5_enc_provider *enc,
-                              const struct krb5_hash_provider *hash,
-                              krb5_cryptotype type,
-                              unsigned int *length)
+unsigned int
+krb5int_arcfour_crypto_length(const struct krb5_keytypes *ktp,
+                              krb5_cryptotype type)
 {
     switch (type) {
     case KRB5_CRYPTO_TYPE_HEADER:
-        *length = hash->hashsize + CONFOUNDERLENGTH;
-        break;
+        return ktp->hash->hashsize + CONFOUNDERLENGTH;
     case KRB5_CRYPTO_TYPE_PADDING:
-        *length = 0;
-        break;
     case KRB5_CRYPTO_TYPE_TRAILER:
-        *length = 0;
-        break;
+        return 0;
     case KRB5_CRYPTO_TYPE_CHECKSUM:
-        *length = hash->hashsize;
-        break;
+        return ktp->hash->hashsize;
     default:
-        assert(0 && "invalid cryptotype passed to krb5int_arcfour_crypto_length");
-        break;
+        assert(0 &&
+               "invalid cryptotype passed to krb5int_arcfour_crypto_length");
+        return 0;
     }
-
-    return 0;
 }
 
 /* Encrypt or decrypt using a keyblock. */
@@ -74,21 +65,18 @@ keyblock_crypt(const struct krb5_enc_provider *enc, krb5_keyblock *keyblock,
     if (ret != 0)
         return ret;
     /* Works for encryption or decryption since arcfour is a stream cipher. */
-    ret = enc->encrypt_iov(key, ivec, data, num_data);
+    ret = enc->encrypt(key, ivec, data, num_data);
     krb5_k_free_key(NULL, key);
     return ret;
 }
 
-static krb5_error_code
-krb5int_arcfour_encrypt_iov(const struct krb5_aead_provider *aead,
-                            const struct krb5_enc_provider *enc,
-                            const struct krb5_hash_provider *hash,
-                            krb5_key key,
-                            krb5_keyusage usage,
-                            const krb5_data *ivec,
-                            krb5_crypto_iov *data,
-                            size_t num_data)
+krb5_error_code
+krb5int_arcfour_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
+                        krb5_keyusage usage, const krb5_data *ivec,
+                        krb5_crypto_iov *data, size_t num_data)
 {
+    const struct krb5_enc_provider *enc = ktp->enc;
+    const struct krb5_hash_provider *hash = ktp->hash;
     krb5_error_code ret;
     krb5_crypto_iov *header, *trailer;
     krb5_keyblock *usage_keyblock = NULL, *enc_keyblock = NULL;
@@ -169,16 +157,13 @@ cleanup:
     return ret;
 }
 
-static krb5_error_code
-krb5int_arcfour_decrypt_iov(const struct krb5_aead_provider *aead,
-                            const struct krb5_enc_provider *enc,
-                            const struct krb5_hash_provider *hash,
-                            krb5_key key,
-                            krb5_keyusage usage,
-                            const krb5_data *ivec,
-                            krb5_crypto_iov *data,
-                            size_t num_data)
+krb5_error_code
+krb5int_arcfour_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
+                        krb5_keyusage usage, const krb5_data *ivec,
+                        krb5_crypto_iov *data, size_t num_data)
 {
+    const struct krb5_enc_provider *enc = ktp->enc;
+    const struct krb5_hash_provider *hash = ktp->hash;
     krb5_error_code ret;
     krb5_crypto_iov *header, *trailer;
     krb5_keyblock *usage_keyblock = NULL, *enc_keyblock = NULL;
@@ -269,12 +254,6 @@ cleanup:
     zapfree(comp_checksum.data, comp_checksum.length);
     return ret;
 }
-
-const struct krb5_aead_provider krb5int_aead_arcfour = {
-    krb5int_arcfour_crypto_length,
-    krb5int_arcfour_encrypt_iov,
-    krb5int_arcfour_decrypt_iov
-};
 
 krb5_error_code
 krb5int_arcfour_gsscrypt(const krb5_keyblock *keyblock, krb5_keyusage usage,

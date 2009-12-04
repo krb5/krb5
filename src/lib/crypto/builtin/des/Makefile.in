@@ -14,11 +14,9 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 STLIBOBJS=\
 	afsstring2key.o	\
-	d3_cbc.o	\
 	d3_aead.o	\
 	d3_kysched.o	\
 	f_aead.o 	\
-	f_cbc.o 	\
 	f_cksum.o	\
 	f_parity.o 	\
 	f_sched.o 	\
@@ -28,11 +26,9 @@ STLIBOBJS=\
 	weak_key.o
 
 OBJS=	$(OUTPRE)afsstring2key.$(OBJEXT)	\
-	$(OUTPRE)d3_cbc.$(OBJEXT)	\
 	$(OUTPRE)d3_aead.$(OBJEXT)	\
 	$(OUTPRE)d3_kysched.$(OBJEXT)	\
 	$(OUTPRE)f_aead.$(OBJEXT) 	\
-	$(OUTPRE)f_cbc.$(OBJEXT) 	\
 	$(OUTPRE)f_cksum.$(OBJEXT)	\
 	$(OUTPRE)f_parity.$(OBJEXT) 	\
 	$(OUTPRE)f_sched.$(OBJEXT) 	\
@@ -42,11 +38,9 @@ OBJS=	$(OUTPRE)afsstring2key.$(OBJEXT)	\
 	$(OUTPRE)weak_key.$(OBJEXT)
 
 SRCS=	$(srcdir)/afsstring2key.c	\
-	$(srcdir)/d3_cbc.c	\
 	$(srcdir)/d3_aead.c	\
 	$(srcdir)/d3_kysched.c	\
 	$(srcdir)/f_aead.c	\
-	$(srcdir)/f_cbc.c	\
 	$(srcdir)/f_cksum.c	\
 	$(srcdir)/f_parity.c	\
 	$(srcdir)/f_sched.c	\
@@ -55,7 +49,7 @@ SRCS=	$(srcdir)/afsstring2key.c	\
 	$(srcdir)/weak_key.c	\
 	$(srcdir)/string2key.c
 
-EXTRADEPSRCS = $(SRCDIR)destest.c
+EXTRADEPSRCS = $(srcdir)/destest.c $(srcdir)/f_cbc.c $(srcdir)/t_verify.c
 
 ##DOS##LIBOBJS = $(OBJS)
 

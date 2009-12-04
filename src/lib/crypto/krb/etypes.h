@@ -25,32 +25,30 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#ifndef ETYPES_H
+#define ETYPES_H
+
 #include "k5-int.h"
 
-typedef void (*krb5_encrypt_length_func)(const struct krb5_enc_provider *enc,
-                                         const struct krb5_hash_provider *hash,
-                                         size_t inputlen, size_t *length);
+struct krb5_keytypes;
 
-typedef krb5_error_code (*krb5_crypt_func)(const struct krb5_enc_provider *enc,
-                                           const struct
-                                           krb5_hash_provider *hash,
-                                           krb5_key key,
-                                           krb5_keyusage keyusage,
-                                           const krb5_data *ivec,
-                                           const krb5_data *input,
-                                           krb5_data *output);
+typedef unsigned int (*crypto_length_func)(const struct krb5_keytypes *ktp,
+                                           krb5_cryptotype type);
 
-typedef krb5_error_code (*krb5_str2key_func)(const struct
-                                             krb5_enc_provider *enc,
-                                             const krb5_data *string,
-                                             const krb5_data *salt,
-                                             const krb5_data *parm,
-                                             krb5_keyblock *key);
+typedef krb5_error_code (*crypt_func)(const struct krb5_keytypes *ktp,
+                                      krb5_key key, krb5_keyusage keyusage,
+                                      const krb5_data *ivec,
+                                      krb5_crypto_iov *data, size_t num_data);
 
-typedef krb5_error_code (*krb5_prf_func)(const struct krb5_enc_provider *enc,
-                                         const struct krb5_hash_provider *hash,
-                                         krb5_key key,
-                                         const krb5_data *in, krb5_data *out);
+typedef krb5_error_code (*str2key_func)(const struct krb5_keytypes *ktp,
+                                        const krb5_data *string,
+                                        const krb5_data *salt,
+                                        const krb5_data *parm,
+                                        krb5_keyblock *key);
+
+typedef krb5_error_code (*prf_func)(const struct krb5_keytypes *ktp,
+                                    krb5_key key,
+                                    const krb5_data *in, krb5_data *out);
 
 struct krb5_keytypes {
     krb5_enctype etype;
@@ -60,13 +58,12 @@ struct krb5_keytypes {
     const struct krb5_enc_provider *enc;
     const struct krb5_hash_provider *hash;
     size_t prf_length;
-    krb5_encrypt_length_func encrypt_len;
-    krb5_crypt_func encrypt;
-    krb5_crypt_func decrypt;
-    krb5_str2key_func str2key;
-    krb5_prf_func prf;
+    crypto_length_func crypto_length;
+    crypt_func encrypt;
+    crypt_func decrypt;
+    str2key_func str2key;
+    prf_func prf;
     krb5_cksumtype required_ctype;
-    const struct krb5_aead_provider *aead;
     krb5_flags flags;
 };
 
@@ -89,3 +86,5 @@ find_enctype(krb5_enctype enctype)
         return NULL;
     return &krb5int_enctypes_list[i];
 }
+
+#endif

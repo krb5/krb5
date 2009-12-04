@@ -35,9 +35,7 @@
 #include "assert.h"
 
 int
-krb5int_yarrow_cipher_init
-(CIPHER_CTX *ctx,
- unsigned const char * key)
+krb5int_yarrow_cipher_init(CIPHER_CTX *ctx, unsigned const char * key)
 {
     size_t keybytes, keylength;
     const struct krb5_enc_provider *enc = &yarrow_enc_provider;
@@ -67,27 +65,23 @@ cleanup:
     return YARROW_OK;
 }
 
-int krb5int_yarrow_cipher_encrypt_block
-(CIPHER_CTX *ctx, const unsigned char *in,
- unsigned char *out)
+int krb5int_yarrow_cipher_encrypt_block(CIPHER_CTX *ctx,
+                                        const unsigned char *in,
+                                        unsigned char *out)
 {
     krb5_error_code ret;
-    krb5_data ind, outd;
+    krb5_crypto_iov iov;
     const struct krb5_enc_provider *enc = &yarrow_enc_provider;
-    ind.data = (char *) in;
-    ind.length = CIPHER_BLOCK_SIZE;
-    outd.data = (char *) out;
-    outd.length = CIPHER_BLOCK_SIZE;
-    ret = enc->encrypt(ctx->key, 0, &ind, &outd);
-    if (ret)
-        return YARROW_FAIL;
-    return YARROW_OK;
+
+    memcpy(out, in, CIPHER_BLOCK_SIZE);
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    iov.data = make_data(out, CIPHER_BLOCK_SIZE);
+    ret = enc->encrypt(ctx->key, 0, &iov, 1);
+    return (ret == 0) ? YARROW_OK : YARROW_FAIL;
 }
 
 void
-krb5int_yarrow_cipher_final
-(CIPHER_CTX *ctx)
-
+krb5int_yarrow_cipher_final(CIPHER_CTX *ctx)
 {
     krb5_k_free_key(NULL, ctx->key);
     ctx->key = NULL;

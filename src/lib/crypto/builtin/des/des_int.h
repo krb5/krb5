@@ -165,15 +165,11 @@ unsigned long mit_des_cbc_cksum(const krb5_octet *, krb5_octet *,
                                 unsigned long, const mit_des_key_schedule,
                                 const krb5_octet *);
 
-/* f_ecb.c */
-int mit_des_ecb_encrypt(const mit_des_cblock *, mit_des_cblock *,
-                        mit_des_key_schedule, int );
-
-/* f_cbc.c */
-int mit_des_cbc_encrypt(const mit_des_cblock *in, mit_des_cblock *out,
-                        unsigned long length,
-                        const mit_des_key_schedule schedule,
-                        const mit_des_cblock ivec, int enc);
+/* f_cbc.c (used by test programs) */
+int
+mit_des_cbc_encrypt(const mit_des_cblock *in, mit_des_cblock *out,
+                    unsigned long length, const mit_des_key_schedule schedule,
+                    const mit_des_cblock ivec, int enc);
 
 #define mit_des_zeroblock krb5int_c_mit_des_zeroblock
 extern const mit_des_cblock mit_des_zeroblock;
@@ -243,85 +239,29 @@ extern unsigned long swap_long_bytes_bit_number(unsigned long);
 extern void test_set(FILE *, const char *, int, const char *, int);
 #endif
 
-/* d3_ecb.c */
-extern int mit_des3_ecb_encrypt(const mit_des_cblock *in, mit_des_cblock *out,
-                                mit_des_key_schedule sched1,
-                                mit_des_key_schedule sched2,
-                                mit_des_key_schedule sched3, int enc);
-
-/* d3_cbc.c */
-extern int mit_des3_cbc_encrypt(const mit_des_cblock *in, mit_des_cblock *out,
-                                unsigned long length,
-                                const mit_des_key_schedule ks1,
-                                const mit_des_key_schedule ks2,
-                                const mit_des_key_schedule ks3,
-                                const mit_des_cblock ivec, int enc);
-
 void
-krb5int_des3_cbc_encrypt(const mit_des_cblock *in,
-                         mit_des_cblock *out,
-                         unsigned long length,
+krb5int_des3_cbc_encrypt(krb5_crypto_iov *data, unsigned long num_data,
                          const mit_des_key_schedule ks1,
                          const mit_des_key_schedule ks2,
                          const mit_des_key_schedule ks3,
-                         const mit_des_cblock ivec);
+                         mit_des_cblock ivec);
+
 void
-krb5int_des3_cbc_decrypt(const mit_des_cblock *in,
-                         mit_des_cblock *out,
-                         unsigned long length,
+krb5int_des3_cbc_decrypt(krb5_crypto_iov *data, unsigned long num_data,
                          const mit_des_key_schedule ks1,
                          const mit_des_key_schedule ks2,
                          const mit_des_key_schedule ks3,
-                         const mit_des_cblock ivec);
+                         mit_des_cblock ivec);
 
 void
-krb5int_des3_cbc_encrypt_iov(krb5_crypto_iov *data,
-                             unsigned long num_data,
-                             const mit_des_key_schedule ks1,
-                             const mit_des_key_schedule ks2,
-                             const mit_des_key_schedule ks3,
-                             mit_des_cblock ivec);
-
-void
-krb5int_des3_cbc_decrypt_iov(krb5_crypto_iov *data,
-                             unsigned long num_data,
-                             const mit_des_key_schedule ks1,
-                             const mit_des_key_schedule ks2,
-                             const mit_des_key_schedule ks3,
-                             mit_des_cblock ivec);
-
-#define mit_des3_cbc_encrypt(in,out,length,ks1,ks2,ks3,ivec,enc)        \
-    ((enc ? krb5int_des3_cbc_encrypt : krb5int_des3_cbc_decrypt)        \
-     (in, out, length, ks1, ks2, ks3, ivec), 0)
-
-void
-krb5int_des_cbc_encrypt(const mit_des_cblock *in,
-                        mit_des_cblock *out,
-                        unsigned long length,
+krb5int_des_cbc_encrypt(krb5_crypto_iov *data, unsigned long num_data,
                         const mit_des_key_schedule schedule,
-                        const mit_des_cblock ivec);
+                        mit_des_cblock ivec);
+
 void
-krb5int_des_cbc_decrypt(const mit_des_cblock *in,
-                        mit_des_cblock *out,
-                        unsigned long length,
+krb5int_des_cbc_decrypt(krb5_crypto_iov *data, unsigned long num_data,
                         const mit_des_key_schedule schedule,
-                        const mit_des_cblock ivec);
-
-#define mit_des_cbc_encrypt(in,out,length,schedule,ivec,enc)    \
-    ((enc ? krb5int_des_cbc_encrypt : krb5int_des_cbc_decrypt)  \
-     (in, out, length, schedule, ivec), 0)
-
-void
-krb5int_des_cbc_encrypt_iov(krb5_crypto_iov *data,
-                            unsigned long num_data,
-                            const mit_des_key_schedule schedule,
-                            mit_des_cblock ivec);
-
-void
-krb5int_des_cbc_decrypt_iov(krb5_crypto_iov *data,
-                            unsigned long num_data,
-                            const mit_des_key_schedule schedule,
-                            mit_des_cblock ivec);
+                        mit_des_cblock ivec);
 
 /* d3_procky.c */
 krb5_error_code mit_des3_process_key(krb5_encrypt_block *eblock,

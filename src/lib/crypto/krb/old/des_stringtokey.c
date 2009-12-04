@@ -36,13 +36,12 @@ extern krb5_error_code mit_des_string_to_key_int
  const krb5_data * salt);
 
 krb5_error_code
-krb5int_des_string_to_key(const struct krb5_enc_provider *enc,
-                          const krb5_data *string,
-                          const krb5_data *salt, const krb5_data *parm,
-                          krb5_keyblock *key)
+krb5int_des_string_to_key(const struct krb5_keytypes *ktp,
+                          const krb5_data *string, const krb5_data *salt,
+                          const krb5_data *parm, krb5_keyblock *key)
 {
     int type;
-    if (parm ) {
+    if (parm) {
         if (parm->length != 1)
             return KRB5_ERR_BAD_S2K_PARAMS;
         type = parm->data[0];

@@ -30,47 +30,28 @@
 #include "raw.h"
 #include "aead.h"
 
-/* AEAD */
-
-static krb5_error_code
-krb5int_raw_crypto_length(const struct krb5_aead_provider *aead,
-                          const struct krb5_enc_provider *enc,
-                          const struct krb5_hash_provider *hash,
-                          krb5_cryptotype type,
-                          unsigned int *length)
+unsigned int
+krb5int_raw_crypto_length(const struct krb5_keytypes *ktp,
+                          krb5_cryptotype type)
 {
     switch (type) {
     case KRB5_CRYPTO_TYPE_PADDING:
-        *length = enc->block_size;
-        break;
+        return ktp->enc->block_size;
     default:
-        *length = 0;
-        break;
+        return 0;
     }
-
-    return 0;
 }
 
-static krb5_error_code
-krb5int_raw_encrypt_iov(const struct krb5_aead_provider *aead,
-                        const struct krb5_enc_provider *enc,
-                        const struct krb5_hash_provider *hash,
-                        krb5_key key,
-                        krb5_keyusage usage,
-                        const krb5_data *ivec,
-                        krb5_crypto_iov *data,
-                        size_t num_data)
+krb5_error_code
+krb5int_raw_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
+                    krb5_keyusage usage, const krb5_data *ivec,
+                    krb5_crypto_iov *data, size_t num_data)
 {
-    krb5_error_code ret;
     krb5_crypto_iov *padding;
     size_t i;
-    unsigned int blocksize = 0;
-    unsigned int plainlen = 0;
-    unsigned int padsize = 0;
+    unsigned int blocksize, plainlen = 0, padsize = 0;
 
-    ret = aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_PADDING, &blocksize);
-    if (ret != 0)
-        return ret;
+    blocksize = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_PADDING);
 
     for (i = 0; i < num_data; i++) {
         krb5_crypto_iov *iov = &data[i];
@@ -94,33 +75,21 @@ krb5int_raw_encrypt_iov(const struct krb5_aead_provider *aead,
         padding->data.length = padsize;
     }
 
-    assert(enc->encrypt_iov != NULL);
-
-    ret = enc->encrypt_iov(key, ivec, data, num_data); /* will update ivec */
-
-    return ret;
+    return ktp->enc->encrypt(key, ivec, data, num_data);
 }
 
-static krb5_error_code
-krb5int_raw_decrypt_iov(const struct krb5_aead_provider *aead,
-                        const struct krb5_enc_provider *enc,
-                        const struct krb5_hash_provider *hash,
-                        krb5_key key,
-                        krb5_keyusage usage,
-                        const krb5_data *ivec,
-                        krb5_crypto_iov *data,
-                        size_t num_data)
+krb5_error_code
+krb5int_raw_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
+                    krb5_keyusage usage, const krb5_data *ivec,
+                    krb5_crypto_iov *data, size_t num_data)
 {
-    krb5_error_code ret;
     size_t i;
-    unsigned int blocksize = 0; /* careful, this is enc block size not confounder len */
+    unsigned int blocksize = 0; /* enc block size, not confounder len */
     unsigned int cipherlen = 0;
 
     /* E(Confounder | Plaintext | Pad) | Checksum */
 
-    ret = aead->crypto_length(aead, enc, hash, KRB5_CRYPTO_TYPE_PADDING, &blocksize);
-    if (ret != 0)
-        return ret;
+    blocksize = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_PADDING);
 
     for (i = 0; i < num_data; i++) {
         const krb5_crypto_iov *iov = &data[i];
@@ -131,28 +100,13 @@ krb5int_raw_decrypt_iov(const struct krb5_aead_provider *aead,
 
     if (blocksize == 0) {
         /* Check for correct input length in CTS mode */
-        if (enc->block_size != 0 && cipherlen < enc->block_size)
+        if (ktp->enc->block_size != 0 && cipherlen < ktp->enc->block_size)
             return KRB5_BAD_MSIZE;
     } else {
         /* Check that the input data is correctly padded */
-        if ((cipherlen % blocksize) != 0)
+        if (cipherlen % blocksize != 0)
             return KRB5_BAD_MSIZE;
     }
 
-    /* Validate header and trailer lengths */
-
-    /* derive the keys */
-
-    /* decrypt the plaintext (header | data | padding) */
-    assert(enc->decrypt_iov != NULL);
-
-    ret = enc->decrypt_iov(key, ivec, data, num_data); /* will update ivec */
-
-    return ret;
+    return ktp->enc->decrypt(key, ivec, data, num_data);
 }
-
-const struct krb5_aead_provider krb5int_aead_raw = {
-    krb5int_raw_crypto_length,
-    krb5int_raw_encrypt_iov,
-    krb5int_raw_decrypt_iov
-};

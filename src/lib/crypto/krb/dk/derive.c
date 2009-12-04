@@ -79,6 +79,57 @@ cleanup:
     return ENOMEM;
 }
 
+krb5_error_code
+krb5int_derive_random(const struct krb5_enc_provider *enc,
+                      krb5_key inkey, krb5_data *outrnd,
+                      const krb5_data *in_constant)
+{
+    size_t blocksize, keybytes, n;
+    krb5_crypto_iov iov;
+    krb5_error_code ret;
+
+    blocksize = enc->block_size;
+    keybytes = enc->keybytes;
+
+    if (inkey->keyblock.length != enc->keylength || outrnd->length != keybytes)
+        return KRB5_CRYPTO_INTERNAL;
+
+    /* Allocate encryption data buffer. */
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    ret = alloc_data(&iov.data, blocksize);
+    if (ret)
+        return ret;
+
+    /* Initialize the input block. */
+    if (in_constant->length == blocksize) {
+        memcpy(iov.data.data, in_constant->data, blocksize);
+    } else {
+        krb5int_nfold(in_constant->length * 8,
+                      (unsigned char *) in_constant->data,
+                      blocksize * 8, (unsigned char *) iov.data.data);
+    }
+
+    /* Loop encrypting the blocks until enough key bytes are generated. */
+    n = 0;
+    while (n < keybytes) {
+        ret = enc->encrypt(inkey, 0, &iov, 1);
+        if (ret)
+            goto cleanup;
+
+        if ((keybytes - n) <= blocksize) {
+            memcpy(outrnd->data + n, iov.data.data, (keybytes - n));
+            break;
+        }
+
+        memcpy(outrnd->data + n, iov.data.data, blocksize);
+        n += blocksize;
+    }
+
+cleanup:
+    zapfree(iov.data.data, blocksize);
+    return ret;
+}
+
 /*
  * Compute a derived key into the keyblock outkey.  This variation on
  * krb5int_derive_key does not cache the result, as it is only used
@@ -90,75 +141,24 @@ krb5int_derive_keyblock(const struct krb5_enc_provider *enc,
                         krb5_key inkey, krb5_keyblock *outkey,
                         const krb5_data *in_constant)
 {
-    size_t blocksize, keybytes, n;
-    unsigned char *inblockdata = NULL, *outblockdata = NULL, *rawkey = NULL;
-    krb5_data inblock, outblock;
     krb5_error_code ret;
+    krb5_data rawkey = empty_data();
 
-    blocksize = enc->block_size;
-    keybytes = enc->keybytes;
-
-    if (inkey->keyblock.length != enc->keylength ||
-        outkey->length != enc->keylength)
-        return KRB5_CRYPTO_INTERNAL;
-
-    /* Allocate and set up buffers. */
-    inblockdata = k5alloc(blocksize, &ret);
-    if (ret)
-        goto cleanup;
-    outblockdata = k5alloc(blocksize, &ret);
-    if (ret)
-        goto cleanup;
-    rawkey = k5alloc(keybytes, &ret);
+    /* Allocate a buffer for the raw key bytes. */
+    ret = alloc_data(&rawkey, enc->keybytes);
     if (ret)
         goto cleanup;
 
-    inblock.data = (char *) inblockdata;
-    inblock.length = blocksize;
-
-    outblock.data = (char *) outblockdata;
-    outblock.length = blocksize;
-
-    /* Initialize the input block. */
-
-    if (in_constant->length == inblock.length) {
-        memcpy(inblock.data, in_constant->data, inblock.length);
-    } else {
-        krb5int_nfold(in_constant->length*8, (unsigned char *) in_constant->data,
-                      inblock.length*8, (unsigned char *) inblock.data);
-    }
-
-    /* Loop encrypting the blocks until enough key bytes are generated */
-
-    n = 0;
-    while (n < keybytes) {
-        ret = (*enc->encrypt)(inkey, 0, &inblock, &outblock);
-        if (ret)
-            goto cleanup;
-
-        if ((keybytes - n) <= outblock.length) {
-            memcpy(rawkey + n, outblock.data, (keybytes - n));
-            break;
-        }
-
-        memcpy(rawkey+n, outblock.data, outblock.length);
-        memcpy(inblock.data, outblock.data, outblock.length);
-        n += outblock.length;
-    }
-
-    /* postprocess the key */
-
-    inblock.data = (char *) rawkey;
-    inblock.length = keybytes;
-
-    ret = (*enc->make_key)(&inblock, outkey);
+    /* Derive pseudo-random data for the key bytes. */
+    ret = krb5int_derive_random(enc, inkey, &rawkey, in_constant);
     if (ret)
         goto cleanup;
+
+    /* Postprocess the key. */
+    ret = enc->make_key(&rawkey, outkey);
 
 cleanup:
-    zapfree(inblockdata, blocksize);
-    zapfree(outblockdata, blocksize);
-    zapfree(rawkey, keybytes);
+    zapfree(rawkey.data, enc->keybytes);
     return ret;
 }
 
@@ -198,74 +198,5 @@ krb5int_derive_key(const struct krb5_enc_provider *enc,
 
 cleanup:
     zapfree(keyblock.contents, keyblock.length);
-    return ret;
-}
-
-krb5_error_code
-krb5int_derive_random(const struct krb5_enc_provider *enc,
-                      krb5_key inkey, krb5_data *outrnd,
-                      const krb5_data *in_constant)
-{
-    size_t blocksize, keybytes, n;
-    unsigned char *inblockdata = NULL, *outblockdata = NULL, *rawkey = NULL;
-    krb5_data inblock, outblock;
-    krb5_error_code ret;
-
-    blocksize = enc->block_size;
-    keybytes = enc->keybytes;
-
-    if (inkey->keyblock.length != enc->keylength || outrnd->length != keybytes)
-        return KRB5_CRYPTO_INTERNAL;
-
-    /* Allocate and set up buffers. */
-
-    inblockdata = k5alloc(blocksize, &ret);
-    if (ret)
-        goto cleanup;
-    outblockdata = k5alloc(blocksize, &ret);
-    if (ret)
-        goto cleanup;
-    rawkey = k5alloc(keybytes, &ret);
-    if (ret)
-        goto cleanup;
-
-    inblock.data = (char *) inblockdata;
-    inblock.length = blocksize;
-
-    outblock.data = (char *) outblockdata;
-    outblock.length = blocksize;
-
-    /* Initialize the input block. */
-    if (in_constant->length == inblock.length) {
-        memcpy(inblock.data, in_constant->data, inblock.length);
-    } else {
-        krb5int_nfold(in_constant->length*8, (unsigned char *) in_constant->data,
-                      inblock.length*8, (unsigned char *) inblock.data);
-    }
-
-    /* Loop encrypting the blocks until enough key bytes are generated. */
-    n = 0;
-    while (n < keybytes) {
-        ret = (*enc->encrypt)(inkey, 0, &inblock, &outblock);
-        if (ret)
-            goto cleanup;
-
-        if ((keybytes - n) <= outblock.length) {
-            memcpy(rawkey + n, outblock.data, (keybytes - n));
-            break;
-        }
-
-        memcpy(rawkey+n, outblock.data, outblock.length);
-        memcpy(inblock.data, outblock.data, outblock.length);
-        n += outblock.length;
-    }
-
-    /* Postprocess the key. */
-    memcpy(outrnd->data, rawkey, keybytes);
-
-cleanup:
-    zapfree(inblockdata, blocksize);
-    zapfree(outblockdata, blocksize);
-    zapfree(rawkey, keybytes);
     return ret;
 }

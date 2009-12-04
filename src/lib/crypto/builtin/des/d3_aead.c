@@ -27,12 +27,11 @@
 #include "aead.h"
 
 void
-krb5int_des3_cbc_encrypt_iov(krb5_crypto_iov *data,
-                             unsigned long num_data,
-                             const mit_des_key_schedule ks1,
-                             const mit_des_key_schedule ks2,
-                             const mit_des_key_schedule ks3,
-                             mit_des_cblock ivec)
+krb5int_des3_cbc_encrypt(krb5_crypto_iov *data, unsigned long num_data,
+                         const mit_des_key_schedule ks1,
+                         const mit_des_key_schedule ks2,
+                         const mit_des_key_schedule ks3,
+                         mit_des_cblock ivec)
 {
     unsigned DES_INT32 left, right;
     const unsigned DES_INT32 *kp1, *kp2, *kp3;
@@ -89,12 +88,11 @@ krb5int_des3_cbc_encrypt_iov(krb5_crypto_iov *data,
 }
 
 void
-krb5int_des3_cbc_decrypt_iov(krb5_crypto_iov *data,
-                             unsigned long num_data,
-                             const mit_des_key_schedule ks1,
-                             const mit_des_key_schedule ks2,
-                             const mit_des_key_schedule ks3,
-                             mit_des_cblock ivec)
+krb5int_des3_cbc_decrypt(krb5_crypto_iov *data, unsigned long num_data,
+                         const mit_des_key_schedule ks1,
+                         const mit_des_key_schedule ks2,
+                         const mit_des_key_schedule ks3,
+                         mit_des_cblock ivec)
 {
     unsigned DES_INT32 left, right;
     const unsigned DES_INT32 *kp1, *kp2, *kp3;

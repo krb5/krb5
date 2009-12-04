@@ -85,7 +85,7 @@ krb5_c_string_to_key_with_params(krb5_context context, krb5_enctype enctype,
     key->enctype = enctype;
     key->length = keylength;
 
-    ret = (*ktp->str2key)(ktp->enc, string, salt, params, key);
+    ret = (*ktp->str2key)(ktp, string, salt, params, key);
     if (ret) {
         zapfree(key->contents, keylength);
         key->length = 0;

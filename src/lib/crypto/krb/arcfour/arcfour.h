@@ -2,39 +2,30 @@
 #ifndef ARCFOUR_H
 #define ARCFOUR_H
 
-extern void
-krb5int_arcfour_encrypt_length(const struct krb5_enc_provider *,
-                               const struct krb5_hash_provider *,
-                               size_t,
-                               size_t *);
+#include "etypes.h"
 
-extern krb5_error_code
-krb5int_arcfour_encrypt(const struct krb5_enc_provider *,
-                        const struct krb5_hash_provider *,
-                        krb5_key,
-                        krb5_keyusage,
-                        const krb5_data *,
-                        const krb5_data *,
-                        krb5_data *);
+unsigned int
+krb5int_arcfour_crypto_length(const struct krb5_keytypes *ktp,
+                              krb5_cryptotype type);
 
-extern krb5_error_code
-krb5int_arcfour_decrypt(const struct krb5_enc_provider *,
-                        const struct krb5_hash_provider *,
-                        krb5_key,
-                        krb5_keyusage,
-                        const krb5_data *,
-                        const krb5_data *,
-                        krb5_data *);
+krb5_error_code
+krb5int_arcfour_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
+                        krb5_keyusage usage, const krb5_data *ivec,
+                        krb5_crypto_iov *data, size_t num_data);
+
+krb5_error_code
+krb5int_arcfour_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
+                        krb5_keyusage usage, const krb5_data *ivec,
+                        krb5_crypto_iov *data, size_t num_data);
 
 extern krb5_error_code
 krb5int_arcfour_string_to_key(
-    const struct krb5_enc_provider *,
+    const struct krb5_keytypes *,
     const krb5_data *,
     const krb5_data *,
     const krb5_data *,
     krb5_keyblock *);
 
 extern const struct krb5_enc_provider krb5int_enc_arcfour;
-extern const struct krb5_aead_provider krb5int_aead_arcfour;
 
 #endif /* ARCFOUR_H */

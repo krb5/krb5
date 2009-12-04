@@ -72,6 +72,7 @@ k5_md4des_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
     krb5_MD4_CTX ctx;
     unsigned char conf[CONFLENGTH];
     krb5_key xorkey = NULL;
+    krb5_crypto_iov iov;
     struct krb5_enc_provider *enc = &krb5int_enc_des;
 
     if (output->length != (CONFLENGTH+RSA_MD4_CKSUM_LENGTH))
@@ -101,7 +102,9 @@ k5_md4des_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
     memcpy(output->data, conf, CONFLENGTH);
     memcpy(output->data+CONFLENGTH, ctx.digest, RSA_MD4_CKSUM_LENGTH);
 
-    ret = enc->encrypt(xorkey, NULL, output, output);
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    iov.data = *output;
+    ret = enc->encrypt(xorkey, NULL, &iov, 1);
 
     krb5_k_free_key(NULL, xorkey);
 
@@ -120,7 +123,8 @@ k5_md4des_verify(krb5_key key, krb5_keyusage usage,
     krb5_key xorkey = NULL;
     int compathash = 0;
     struct krb5_enc_provider *enc = &krb5int_enc_des;
-    krb5_data output, iv;
+    krb5_data iv;
+    krb5_crypto_iov iov;
 
     iv.data = NULL;
     iv.length = 0;
@@ -152,22 +156,20 @@ k5_md4des_verify(krb5_key key, krb5_keyusage usage,
     }
 
     /* decrypt it */
-    output.data = (char *)plaintext;
-    output.length = hash->length;
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    iov.data = make_data(plaintext, hash->length);
+    memcpy(plaintext, hash->data, hash->length);
 
-    if (!compathash) {
-        ret = enc->decrypt(xorkey, NULL, hash, &output);
-        krb5_k_free_key(NULL, xorkey);
+    if (compathash) {
+        ret = enc->decrypt(key, &iv, &iov, 1);
+        zapfree(iv.data, iv.length);
     } else {
-        ret = enc->decrypt(key, &iv, hash, &output);
-        zap(iv.data, iv.length);
-        free(iv.data);
+        ret = enc->decrypt(xorkey, NULL, &iov, 1);
+        krb5_k_free_key(NULL, xorkey);
     }
 
-    if (ret) return(ret);
-
-    if (output.length > CONFLENGTH+RSA_MD4_CKSUM_LENGTH)
-        return KRB5_CRYPTO_INTERNAL;
+    if (ret)
+        return ret;
 
     /* hash the confounder, then the input data */
 

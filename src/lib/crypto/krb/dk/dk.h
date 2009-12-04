@@ -26,55 +26,35 @@
  */
 
 #include "k5-int.h"
+#include "etypes.h"
 
-void
-krb5int_dk_encrypt_length(const struct krb5_enc_provider *enc,
-                          const struct krb5_hash_provider *hash,
-                          size_t input, size_t *length);
+unsigned int
+krb5int_dk_crypto_length(const struct krb5_keytypes *ktp,
+                         krb5_cryptotype type);
 
-krb5_error_code
-krb5int_dk_encrypt(const struct krb5_enc_provider *enc,
-                   const struct krb5_hash_provider *hash,
-                   krb5_key key, krb5_keyusage usage,
-                   const krb5_data *ivec,
-                   const krb5_data *input, krb5_data *output);
-
-void
-krb5int_aes_encrypt_length(const struct krb5_enc_provider *enc,
-                           const struct krb5_hash_provider *hash,
-                           size_t input, size_t *length);
+unsigned int
+krb5int_aes_crypto_length(const struct krb5_keytypes *ktp,
+                          krb5_cryptotype type);
 
 krb5_error_code
-krb5int_aes_dk_encrypt(const struct krb5_enc_provider *enc,
-                       const struct krb5_hash_provider *hash,
-                       krb5_key key,
-                       krb5_keyusage usage,
-                       const krb5_data *ivec,
-                       const krb5_data *input,
-                       krb5_data *output);
+krb5int_dk_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
+                   krb5_keyusage usage, const krb5_data *ivec,
+                   krb5_crypto_iov *data, size_t num_data);
 
 krb5_error_code
-krb5int_dk_decrypt(const struct krb5_enc_provider *enc,
-                   const struct krb5_hash_provider *hash,
-                   krb5_key key, krb5_keyusage usage,
-                   const krb5_data *ivec, const krb5_data *input,
-                   krb5_data *arg_output);
+krb5int_dk_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
+                   krb5_keyusage usage, const krb5_data *ivec,
+                   krb5_crypto_iov *data, size_t num_data);
 
 krb5_error_code
-krb5int_aes_dk_decrypt(const struct krb5_enc_provider *enc,
-                       const struct krb5_hash_provider *hash,
-                       krb5_key key,
-                       krb5_keyusage usage,
-                       const krb5_data *ivec,
-                       const krb5_data *input,
-                       krb5_data *arg_output);
+krb5int_dk_string_to_key(const struct krb5_keytypes *enc,
+                         const krb5_data *string, const krb5_data *salt,
+                         const krb5_data *params, krb5_keyblock *key);
 
 krb5_error_code
-krb5int_dk_string_to_key(const struct krb5_enc_provider *enc,
-                         const krb5_data *string,
-                         const krb5_data *salt,
-                         const krb5_data *params,
-                         krb5_keyblock *key);
+krb5int_aes_string_to_key(const struct krb5_keytypes *enc,
+                          const krb5_data *string, const krb5_data *salt,
+                          const krb5_data *params, krb5_keyblock *key);
 
 krb5_error_code
 krb5int_derive_keyblock(const struct krb5_enc_provider *enc,
@@ -105,8 +85,3 @@ krb5_error_code
 krb5int_derive_random(const struct krb5_enc_provider *enc,
                       krb5_key inkey, krb5_data *outrnd,
                       const krb5_data *in_constant);
-
-/* AEAD */
-
-extern const struct krb5_aead_provider krb5int_aead_dk;
-extern const struct krb5_aead_provider krb5int_aead_aes;

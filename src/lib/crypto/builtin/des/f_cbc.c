@@ -24,7 +24,8 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  *
- * DES implementation donated by Dennis Ferguson
+ * CBC functions; used only by the test programs at this time.  (krb5 uses the
+ * functions in f_aead.c instead.)
  */
 
 /*
@@ -58,28 +59,10 @@
 
 const mit_des_cblock mit_des_zeroblock /* = all zero */;
 
-#undef mit_des_cbc_encrypt
-int
-mit_des_cbc_encrypt(const mit_des_cblock *in, mit_des_cblock *out,
-                    unsigned long length, const mit_des_key_schedule schedule,
-                    const mit_des_cblock ivec, int enc)
-{
-    /*
-     * Deal with encryption and decryption separately.
-     */
-    if (enc)
-        krb5int_des_cbc_encrypt(in, out, length, schedule, ivec);
-    else
-        krb5int_des_cbc_decrypt(in, out, length, schedule, ivec);
-    return 0;
-}
-
-void
-krb5int_des_cbc_encrypt(const mit_des_cblock *in,
-                        mit_des_cblock *out,
-                        unsigned long length,
-                        const mit_des_key_schedule schedule,
-                        const mit_des_cblock ivec)
+static void
+des_cbc_encrypt(const mit_des_cblock *in, mit_des_cblock *out,
+                unsigned long length, const mit_des_key_schedule schedule,
+                const mit_des_cblock ivec)
 {
     unsigned DES_INT32 left, right;
     const unsigned DES_INT32 *kp;
@@ -158,12 +141,10 @@ krb5int_des_cbc_encrypt(const mit_des_cblock *in,
     }
 }
 
-void
-krb5int_des_cbc_decrypt(const mit_des_cblock *in,
-                        mit_des_cblock *out,
-                        unsigned long length,
-                        const mit_des_key_schedule schedule,
-                        const mit_des_cblock ivec)
+static void
+des_cbc_decrypt(const mit_des_cblock *in, mit_des_cblock *out,
+                unsigned long length, const mit_des_key_schedule schedule,
+                const mit_des_cblock ivec)
 {
     unsigned DES_INT32 left, right;
     const unsigned DES_INT32 *kp;
@@ -258,18 +239,17 @@ krb5int_des_cbc_decrypt(const mit_des_cblock *in,
     }
 }
 
-#if defined(CONFIG_SMALL) && !defined(CONFIG_SMALL_NO_CRYPTO)
-void krb5int_des_do_encrypt_2 (unsigned DES_INT32 *left,
-                               unsigned DES_INT32 *right,
-                               const unsigned DES_INT32 *kp)
+int
+mit_des_cbc_encrypt(const mit_des_cblock *in, mit_des_cblock *out,
+                    unsigned long length, const mit_des_key_schedule schedule,
+                    const mit_des_cblock ivec, int enc)
 {
-    DES_DO_ENCRYPT_1 (*left, *right, kp);
+    /*
+     * Deal with encryption and decryption separately.
+     */
+    if (enc)
+        des_cbc_encrypt(in, out, length, schedule, ivec);
+    else
+        des_cbc_decrypt(in, out, length, schedule, ivec);
+    return 0;
 }
-
-void krb5int_des_do_decrypt_2 (unsigned DES_INT32 *left,
-                               unsigned DES_INT32 *right,
-                               const unsigned DES_INT32 *kp)
-{
-    DES_DO_DECRYPT_1 (*left, *right, kp);
-}
-#endif

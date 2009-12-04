@@ -69,7 +69,7 @@ krb5_k_prf(krb5_context context, krb5_key key,
     output->magic = KV5M_DATA;
     if (ktp->prf_length != output->length)
         return KRB5_CRYPTO_INTERNAL;
-    ret = (*ktp->prf)(ktp->enc, ktp->hash, key, input, output);
+    ret = ktp->prf(ktp, key, input, output);
     return ret;
 }
 

@@ -26,11 +26,12 @@
 #include "f_tables.h"
 #include "aead.h"
 
+const mit_des_cblock mit_des_zeroblock /* = all zero */;
+
 void
-krb5int_des_cbc_encrypt_iov(krb5_crypto_iov *data,
-                            unsigned long num_data,
-                            const mit_des_key_schedule schedule,
-                            mit_des_cblock ivec)
+krb5int_des_cbc_encrypt(krb5_crypto_iov *data, unsigned long num_data,
+                        const mit_des_key_schedule schedule,
+                        mit_des_cblock ivec)
 {
     unsigned DES_INT32 left, right;
     const unsigned DES_INT32 *kp;
@@ -83,10 +84,9 @@ krb5int_des_cbc_encrypt_iov(krb5_crypto_iov *data,
 }
 
 void
-krb5int_des_cbc_decrypt_iov(krb5_crypto_iov *data,
-                            unsigned long num_data,
-                            const mit_des_key_schedule schedule,
-                            mit_des_cblock ivec)
+krb5int_des_cbc_decrypt(krb5_crypto_iov *data, unsigned long num_data,
+                        const mit_des_key_schedule schedule,
+                        mit_des_cblock ivec)
 {
     unsigned DES_INT32 left, right;
     const unsigned DES_INT32 *kp;
@@ -151,3 +151,19 @@ krb5int_des_cbc_decrypt_iov(krb5_crypto_iov *data,
         PUT_HALF_BLOCK(ocipherr, ptr);
     }
 }
+
+#if defined(CONFIG_SMALL) && !defined(CONFIG_SMALL_NO_CRYPTO)
+void krb5int_des_do_encrypt_2 (unsigned DES_INT32 *left,
+                               unsigned DES_INT32 *right,
+                               const unsigned DES_INT32 *kp)
+{
+    DES_DO_ENCRYPT_1 (*left, *right, kp);
+}
+
+void krb5int_des_do_decrypt_2 (unsigned DES_INT32 *left,
+                               unsigned DES_INT32 *right,
+                               const unsigned DES_INT32 *kp)
+{
+    DES_DO_DECRYPT_1 (*left, *right, kp);
+}
+#endif

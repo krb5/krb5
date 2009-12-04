@@ -39,11 +39,6 @@ static krb5_error_code k5_arcfour_init(ArcfourContext *ctx, const unsigned char 
 static void k5_arcfour_crypt(ArcfourContext *ctx, unsigned char *dest,
                              const unsigned char *src, unsigned int len);
 
-/* Interface layer to kerb5 crypto layer */
-static krb5_error_code
-k5_arcfour_docrypt(krb5_key, const krb5_data *,
-                   const krb5_data *, krb5_data *);
-
 static const unsigned char arcfour_weakkey1[] = {0x00, 0x00, 0xfd};
 static const unsigned char arcfour_weakkey2[] = {0x03, 0xfd, 0xfc};
 static const struct {
@@ -123,58 +118,9 @@ k5_arcfour_init(ArcfourContext *ctx, const unsigned char *key,
 }
 
 
-/* The workhorse of the arcfour system, this impliments the cipher */
 static krb5_error_code
-k5_arcfour_docrypt(krb5_key key, const krb5_data *state,
-                   const krb5_data *input, krb5_data *output)
-{
-    ArcfourContext *arcfour_ctx;
-    ArcFourCipherState *cipher_state;
-    int ret;
-
-    if (key->keyblock.length != 16)
-        return(KRB5_BAD_KEYSIZE);
-    if (state && (state->length != sizeof (ArcFourCipherState)))
-        return(KRB5_BAD_MSIZE);
-    if (input->length != output->length)
-        return(KRB5_BAD_MSIZE);
-
-    if (state) {
-        cipher_state = (ArcFourCipherState *) state->data;
-        arcfour_ctx=&cipher_state->ctx;
-        if (cipher_state->initialized == 0) {
-            if ((ret=k5_arcfour_init(arcfour_ctx, key->keyblock.contents,
-                                     key->keyblock.length))) {
-                return ret;
-            }
-            cipher_state->initialized = 1;
-        }
-        k5_arcfour_crypt(arcfour_ctx, (unsigned char *) output->data, (const unsigned char *) input->data, input->length);
-    }
-    else {
-        arcfour_ctx=malloc(sizeof (ArcfourContext));
-        if (arcfour_ctx == NULL)
-            return ENOMEM;
-        if ((ret=k5_arcfour_init(arcfour_ctx, key->keyblock.contents,
-                                 key->keyblock.length))) {
-            free(arcfour_ctx);
-            return (ret);
-        }
-        k5_arcfour_crypt(arcfour_ctx, (unsigned char * ) output->data,
-                         (const unsigned char * ) input->data, input->length);
-        memset(arcfour_ctx, 0, sizeof (ArcfourContext));
-        free(arcfour_ctx);
-    }
-
-    return 0;
-}
-
-/* In-place encryption */
-static krb5_error_code
-k5_arcfour_docrypt_iov(krb5_key key,
-                       const krb5_data *state,
-                       krb5_crypto_iov *data,
-                       size_t num_data)
+k5_arcfour_docrypt(krb5_key key, const krb5_data *state, krb5_crypto_iov *data,
+                   size_t num_data)
 {
     ArcfourContext *arcfour_ctx = NULL;
     ArcFourCipherState *cipher_state = NULL;
@@ -262,7 +208,5 @@ const struct krb5_enc_provider krb5int_enc_arcfour = {
     k5_arcfour_docrypt,
     krb5int_arcfour_make_key,
     k5_arcfour_init_state, /*xxx not implemented yet*/
-    krb5int_default_free_state,
-    k5_arcfour_docrypt_iov,
-    k5_arcfour_docrypt_iov
+    krb5int_default_free_state
 };

@@ -210,70 +210,19 @@ cleanup:
     return ret;
 }
 
-/*
- * Our DR function; mostly taken from derive.c
- */
-
+/* Our DR function, a simple wrapper around krb5int_derive_random(). */
 static krb5_error_code
 dr(const struct krb5_enc_provider *enc, const krb5_keyblock *inkey,
    unsigned char *out, const krb5_data *in_constant)
 {
-    size_t blocksize, keybytes, n;
-    unsigned char *inblockdata = NULL, *outblockdata = NULL;
-    krb5_data inblock, outblock;
-    krb5_error_code ret;
+    krb5_data outdata = make_data(out, enc->keybytes);
     krb5_key key = NULL;
+    krb5_error_code ret;
 
-    blocksize = enc->block_size;
-    keybytes = enc->keybytes;
-
-    /* Allocate and set up buffers. */
-    inblockdata = k5alloc(blocksize, &ret);
-    if (ret)
-        goto cleanup;
-    outblockdata = k5alloc(blocksize, &ret);
-    if (ret)
-        goto cleanup;
     ret = krb5_k_create_key(NULL, inkey, &key);
-    if (ret)
-        goto cleanup;
-
-    inblock.data = (char *) inblockdata;
-    inblock.length = blocksize;
-
-    outblock.data = (char *) outblockdata;
-    outblock.length = blocksize;
-
-    /* initialize the input block */
-
-    if (in_constant->length == inblock.length) {
-        memcpy(inblock.data, in_constant->data, inblock.length);
-    } else {
-        krb5int_nfold(in_constant->length*8, (unsigned char *) in_constant->data,
-                      inblock.length*8, (unsigned char *) inblock.data);
-    }
-
-    /* loop encrypting the blocks until enough key bytes are generated */
-
-    n = 0;
-    while (n < keybytes) {
-        ret = (*enc->encrypt)(key, 0, &inblock, &outblock);
-        if (ret)
-            goto cleanup;
-
-        if ((keybytes - n) <= outblock.length) {
-            memcpy(out + n, outblock.data, (keybytes - n));
-            break;
-        }
-
-        memcpy(out + n, outblock.data, outblock.length);
-        memcpy(inblock.data, outblock.data, outblock.length);
-        n += outblock.length;
-    }
-
-cleanup:
-    zapfree(inblockdata, blocksize);
-    zapfree(outblockdata, blocksize);
+    if (ret != 0)
+        return ret;
+    ret = krb5int_derive_random(enc, key, &outdata, in_constant);
     krb5_k_free_key(NULL, key);
     return ret;
 }

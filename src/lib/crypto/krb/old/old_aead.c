@@ -30,42 +30,32 @@
 #include "old.h"
 #include "aead.h"
 
-static krb5_error_code
-krb5int_old_crypto_length(const struct krb5_aead_provider *aead,
-                          const struct krb5_enc_provider *enc,
-                          const struct krb5_hash_provider *hash,
-                          krb5_cryptotype type,
-                          unsigned int *length)
+unsigned int
+krb5int_old_crypto_length(const struct krb5_keytypes *ktp,
+                          krb5_cryptotype type)
 {
     switch (type) {
     case KRB5_CRYPTO_TYPE_HEADER:
-        *length = enc->block_size + hash->hashsize;
-        break;
+        return ktp->enc->block_size + ktp->hash->hashsize;
     case KRB5_CRYPTO_TYPE_PADDING:
-        *length = enc->block_size;
-        break;
+        return ktp->enc->block_size;
     case KRB5_CRYPTO_TYPE_TRAILER:
-        *length = 0;
-        break;
+        return 0;
     case KRB5_CRYPTO_TYPE_CHECKSUM:
-        *length = hash->hashsize;
-        break;
+        return ktp->hash->hashsize;
     default:
         assert(0 && "invalid cryptotype passed to krb5int_old_crypto_length");
-        break;
+        return 0;
     }
-
-    return 0;
 }
 
-static krb5_error_code
-krb5int_old_encrypt_iov(const struct krb5_aead_provider *aead,
-                        const struct krb5_enc_provider *enc,
-                        const struct krb5_hash_provider *hash,
-                        krb5_key key, krb5_keyusage usage,
-                        const krb5_data *ivec, krb5_crypto_iov *data,
-                        size_t num_data)
+krb5_error_code
+krb5int_old_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
+                    krb5_keyusage usage, const krb5_data *ivec,
+                    krb5_crypto_iov *data, size_t num_data)
 {
+    const struct krb5_enc_provider *enc = ktp->enc;
+    const struct krb5_hash_provider *hash = ktp->hash;
     krb5_error_code ret;
     krb5_crypto_iov *header, *trailer, *padding;
     krb5_data checksum, confounder, crcivec = empty_data();
@@ -122,7 +112,7 @@ krb5int_old_encrypt_iov(const struct krb5_aead_provider *aead,
         ivec = &crcivec;
     }
 
-    ret = enc->encrypt_iov(key, ivec, data, num_data);
+    ret = enc->encrypt(key, ivec, data, num_data);
     if (ret != 0)
         goto cleanup;
 
@@ -131,14 +121,13 @@ cleanup:
     return ret;
 }
 
-static krb5_error_code
-krb5int_old_decrypt_iov(const struct krb5_aead_provider *aead,
-                        const struct krb5_enc_provider *enc,
-                        const struct krb5_hash_provider *hash,
-                        krb5_key key, krb5_keyusage usage,
-                        const krb5_data *ivec, krb5_crypto_iov *data,
-                        size_t num_data)
+krb5_error_code
+krb5int_old_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
+                    krb5_keyusage usage, const krb5_data *ivec,
+                    krb5_crypto_iov *data, size_t num_data)
 {
+    const struct krb5_enc_provider *enc = ktp->enc;
+    const struct krb5_hash_provider *hash = ktp->hash;
     krb5_error_code ret;
     krb5_crypto_iov *header, *trailer;
     krb5_data checksum, crcivec = empty_data();
@@ -173,7 +162,7 @@ krb5int_old_decrypt_iov(const struct krb5_aead_provider *aead,
     }
 
     /* Decrypt the ciphertext. */
-    ret = enc->decrypt_iov(key, ivec, data, num_data);
+    ret = enc->decrypt(key, ivec, data, num_data);
     if (ret != 0)
         goto cleanup;
 
@@ -201,9 +190,3 @@ cleanup:
     zapfree(saved_checksum, hash->hashsize);
     return ret;
 }
-
-const struct krb5_aead_provider krb5int_aead_old = {
-    krb5int_old_crypto_length,
-    krb5int_old_encrypt_iov,
-    krb5int_old_decrypt_iov
-};
