@@ -2811,7 +2811,8 @@ string2data(char *str)
 static inline krb5_error_code
 alloc_data(krb5_data *data, unsigned int len)
 {
-    char *ptr = (char *) calloc(len, 1);
+    /* Allocate at least one byte since zero-byte allocs may return NULL. */
+    char *ptr = (char *) calloc((len > 0) ? len : 1, 1);
 
     if (ptr == NULL)
         return ENOMEM;
@@ -2837,11 +2838,12 @@ authdata_eq(krb5_authdata a1, krb5_authdata a2)
 
 /* Allocate zeroed memory; set *code to 0 on success or ENOMEM on failure. */
 static inline void *
-k5alloc(size_t size, krb5_error_code *code)
+k5alloc(size_t len, krb5_error_code *code)
 {
     void *ptr;
 
-    ptr = calloc(size, 1);
+    /* Allocate at least one byte since zero-byte allocs may return NULL. */
+    ptr = calloc((len > 0) ? len : 1, 1);
     *code = (ptr == NULL) ? ENOMEM : 0;
     return ptr;
 }
