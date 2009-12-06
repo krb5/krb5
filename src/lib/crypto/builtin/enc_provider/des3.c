@@ -32,34 +32,8 @@
 
 static krb5_error_code
 validate_and_schedule(krb5_key key, const krb5_data *ivec,
-                      const krb5_data *input, const krb5_data *output,
+                      const krb5_crypto_iov *data, size_t num_data,
                       mit_des3_key_schedule *schedule)
-{
-    /* key->keyblock.enctype was checked by the caller */
-
-    if (key->keyblock.length != 24)
-        return(KRB5_BAD_KEYSIZE);
-    if ((input->length%8) != 0)
-        return(KRB5_BAD_MSIZE);
-    if (ivec && (ivec->length != 8))
-        return(KRB5_BAD_MSIZE);
-    if (input->length != output->length)
-        return(KRB5_BAD_MSIZE);
-
-    switch (mit_des3_key_sched(*(mit_des3_cblock *)key->keyblock.contents,
-                               *schedule)) {
-    case -1:
-        return(KRB5DES_BAD_KEYPAR);
-    case -2:
-        return(KRB5DES_WEAK_KEY);
-    }
-    return 0;
-}
-
-static krb5_error_code
-validate_and_schedule_iov(krb5_key key, const krb5_data *ivec,
-                          const krb5_crypto_iov *data, size_t num_data,
-                          mit_des3_key_schedule *schedule)
 {
     size_t i, input_length;
 
@@ -94,7 +68,7 @@ k5_des3_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
     mit_des3_key_schedule schedule;
     krb5_error_code err;
 
-    err = validate_and_schedule_iov(key, ivec, data, num_data, &schedule);
+    err = validate_and_schedule(key, ivec, data, num_data, &schedule);
     if (err)
         return err;
 
@@ -116,7 +90,7 @@ k5_des3_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
     mit_des3_key_schedule schedule;
     krb5_error_code err;
 
-    err = validate_and_schedule_iov(key, ivec, data, num_data, &schedule);
+    err = validate_and_schedule(key, ivec, data, num_data, &schedule);
     if (err)
         return err;
 
