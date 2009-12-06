@@ -675,20 +675,17 @@ struct krb5_keyhash_provider {
     size_t hashsize;
 
     krb5_error_code (*hash)(krb5_key key, krb5_keyusage keyusage,
-                            const krb5_data *ivec, const krb5_data *input,
-                            krb5_data *output);
+                            const krb5_data *input, krb5_data *output);
 
     krb5_error_code (*verify)(krb5_key key, krb5_keyusage keyusage,
-                              const krb5_data *ivec, const krb5_data *input,
-                              const krb5_data *hash, krb5_boolean *valid);
+                              const krb5_data *input, const krb5_data *hash,
+                              krb5_boolean *valid);
 
     krb5_error_code (*hash_iov)(krb5_key key, krb5_keyusage keyusage,
-                                const krb5_data *ivec,
                                 const krb5_crypto_iov *data, size_t num_data,
                                 krb5_data *output);
 
     krb5_error_code (*verify_iov)(krb5_key key, krb5_keyusage keyusage,
-                                  const krb5_data *ivec,
                                   const krb5_crypto_iov *data,
                                   size_t num_data, const krb5_data *hash,
                                   krb5_boolean *valid);

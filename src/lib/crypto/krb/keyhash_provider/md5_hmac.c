@@ -34,8 +34,8 @@
 #include "hash_provider.h"
 
 static  krb5_error_code
-k5_md5_hmac_hash(krb5_key key, krb5_keyusage usage, const krb5_data *iv,
-                 const krb5_data *input, krb5_data *output)
+k5_md5_hmac_hash(krb5_key key, krb5_keyusage usage, const krb5_data *input,
+                 krb5_data *output)
 {
     krb5_keyusage ms_usage;
     krb5_MD5_CTX ctx;

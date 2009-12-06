@@ -60,7 +60,7 @@ krb5_k_verify_checksum_iov(krb5_context context,
 
     /* If there's actually a verify function, call it. */
     if (ctp->keyhash && ctp->keyhash->verify_iov) {
-        return (*ctp->keyhash->verify_iov)(key, usage, 0, data, num_data,
+        return (*ctp->keyhash->verify_iov)(key, usage, data, num_data,
                                            &checksum->data, valid);
     }
 

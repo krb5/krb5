@@ -82,9 +82,9 @@ krb5_k_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
         keyhash = ctp->keyhash;
         if (keyhash->hash == NULL) {
             assert(keyhash->hash_iov != NULL);
-            ret = (*keyhash->hash_iov)(key, usage, 0, &iov, 1, &data);
+            ret = (*keyhash->hash_iov)(key, usage, &iov, 1, &data);
         } else {
-            ret = (*keyhash->hash)(key, usage, 0, input, &data);
+            ret = (*keyhash->hash)(key, usage, input, &data);
         }
     } else if (ctp->flags & KRB5_CKSUMFLAG_DERIVE) {
         ret = krb5int_dk_make_checksum(ctp->hash, key, usage, &iov, 1, &data);

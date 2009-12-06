@@ -127,13 +127,13 @@ main(argc, argv)
         plaintext.length = strlen(argv[msgindex]);
         plaintext.data = argv[msgindex];
 
-        if ((kret = (*(khp.hash))(key, 0, 0, &plaintext, &newstyle_checksum))) {
+        if ((kret = (*(khp.hash))(key, 0, &plaintext, &newstyle_checksum))) {
             printf("krb5_calculate_checksum choked with %d\n", kret);
             break;
         }
         print_checksum("correct", MD, argv[msgindex], &newstyle_checksum);
 
-        if ((kret = (*(khp.verify))(key, 0, 0, &plaintext, &newstyle_checksum,
+        if ((kret = (*(khp.verify))(key, 0, &plaintext, &newstyle_checksum,
                                     &valid))) {
             printf("verify on new checksum choked with %d\n", kret);
             break;
@@ -146,7 +146,7 @@ main(argc, argv)
         printf("Verify succeeded for \"%s\"\n", argv[msgindex]);
 
         newstyle_checksum.data[0]++;
-        if ((kret = (*(khp.verify))(key, 0, 0, &plaintext, &newstyle_checksum,
+        if ((kret = (*(khp.verify))(key, 0, &plaintext, &newstyle_checksum,
                                     &valid))) {
             printf("verify on new checksum choked with %d\n", kret);
             break;
@@ -163,7 +163,7 @@ main(argc, argv)
             kret = 1;
             break;
         }
-        if ((kret = (*(khp.verify))(key, 0, 0, &plaintext, &knowncksum_dat,
+        if ((kret = (*(khp.verify))(key, 0, &plaintext, &knowncksum_dat,
                                     &valid))) {
             printf("verify on known checksum choked with %d\n", kret);
             break;

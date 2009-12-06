@@ -63,10 +63,9 @@ krb5_k_verify_checksum(krb5_context context, krb5_key key,
             iov[0].data.data = data->data;
             iov[0].data.length = data->length;
 
-            return (*keyhash->verify_iov)(key, usage, 0, iov, 1, &indata,
-                                          valid);
+            return (*keyhash->verify_iov)(key, usage, iov, 1, &indata, valid);
         } else if (keyhash->verify != NULL) {
-            return (*keyhash->verify)(key, usage, 0, data, &indata, valid);
+            return (*keyhash->verify)(key, usage, data, &indata, valid);
         }
     }
 

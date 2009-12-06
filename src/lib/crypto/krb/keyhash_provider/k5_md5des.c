@@ -64,8 +64,8 @@ mk_xorkey(krb5_key origkey, krb5_key *xorkey)
 }
 
 static krb5_error_code
-k5_md5des_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
-               const krb5_data *input, krb5_data *output)
+k5_md5des_hash(krb5_key key, krb5_keyusage usage, const krb5_data *input,
+               krb5_data *output)
 {
     krb5_error_code ret;
     krb5_data data;
@@ -113,9 +113,8 @@ k5_md5des_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
 }
 
 static krb5_error_code
-k5_md5des_verify(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
-                 const krb5_data *input, const krb5_data *hash,
-                 krb5_boolean *valid)
+k5_md5des_verify(krb5_key key, krb5_keyusage usage, const krb5_data *input,
+                 const krb5_data *hash, krb5_boolean *valid)
 {
     krb5_error_code ret;
     krb5_MD5_CTX ctx;

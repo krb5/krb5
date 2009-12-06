@@ -30,8 +30,8 @@
 #include "keyhash_provider.h"
 
 static krb5_error_code
-k5_descbc_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
-               const krb5_data *input, krb5_data *output)
+k5_descbc_hash(krb5_key key, krb5_keyusage usage, const krb5_data *input,
+               krb5_data *output)
 {
     mit_des_key_schedule schedule;
 
@@ -39,8 +39,6 @@ k5_descbc_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
         return(KRB5_BAD_KEYSIZE);
     if ((input->length%8) != 0)
         return(KRB5_BAD_MSIZE);
-    if (ivec && (ivec->length != 8))
-        return(KRB5_CRYPTO_INTERNAL);
     if (output->length != 8)
         return(KRB5_CRYPTO_INTERNAL);
 
@@ -56,7 +54,6 @@ k5_descbc_hash(krb5_key key, krb5_keyusage usage, const krb5_data *ivec,
     mit_des_cbc_cksum((unsigned char *) input->data,
                       (unsigned char *) output->data, input->length,
                       schedule,
-                      ivec? (const unsigned char *)ivec->data:
                       (const unsigned char *)mit_des_zeroblock);
 
     memset(schedule, 0, sizeof(schedule));

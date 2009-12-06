@@ -37,8 +37,8 @@
 #include "../aead.h"
 
 static  krb5_error_code
-k5_hmac_md5_hash(krb5_key key, krb5_keyusage usage, const krb5_data *iv,
-                 const krb5_data *input, krb5_data *output)
+k5_hmac_md5_hash(krb5_key key, krb5_keyusage usage, const krb5_data *input,
+                 krb5_data *output)
 {
     krb5_keyusage ms_usage;
     krb5_error_code ret;
@@ -80,7 +80,7 @@ cleanup:
 }
 
 static  krb5_error_code
-k5_hmac_md5_hash_iov(krb5_key key, krb5_keyusage usage, const krb5_data *iv,
+k5_hmac_md5_hash_iov(krb5_key key, krb5_keyusage usage,
                      const krb5_crypto_iov *data, size_t num_data,
                      krb5_data *output)
 {
