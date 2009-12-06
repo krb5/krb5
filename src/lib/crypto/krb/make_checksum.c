@@ -39,10 +39,14 @@ krb5_k_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
     const struct krb5_cksumtypes *ctp;
     const struct krb5_keytypes *ktp1, *ktp2;
     const struct krb5_keyhash_provider *keyhash;
+    krb5_crypto_iov iov;
     krb5_data data;
     krb5_octet *trunc;
     krb5_error_code ret;
     size_t cksumlen;
+
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    iov.data = *input;
 
     for (i = 0; i < krb5int_cksumtypes_length; i++) {
         if (krb5int_cksumtypes_list[i].ctype == cksumtype)
@@ -62,8 +66,7 @@ krb5_k_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
     if (cksum->contents == NULL)
         return ENOMEM;
 
-    data.length = cksum->length;
-    data.data = (char *) cksum->contents;
+    data = make_data(cksum->contents, cksum->length);
 
     if (ctp->keyhash) {
         /* check if key is compatible */
@@ -78,23 +81,16 @@ krb5_k_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
 
         keyhash = ctp->keyhash;
         if (keyhash->hash == NULL) {
-            krb5_crypto_iov iov[1];
-
-            iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
-            iov[0].data.data = input->data;
-            iov[0].data.length = input->length;
-
             assert(keyhash->hash_iov != NULL);
-
-            ret = (*keyhash->hash_iov)(key, usage, 0, iov, 1, &data);
+            ret = (*keyhash->hash_iov)(key, usage, 0, &iov, 1, &data);
         } else {
             ret = (*keyhash->hash)(key, usage, 0, input, &data);
         }
     } else if (ctp->flags & KRB5_CKSUMFLAG_DERIVE) {
-        ret = krb5int_dk_make_checksum(ctp->hash, key, usage, input, &data);
+        ret = krb5int_dk_make_checksum(ctp->hash, key, usage, &iov, 1, &data);
     } else {
         /* No key is used. */
-        ret = (*ctp->hash->hash)(1, input, &data);
+        ret = ctp->hash->hash(&iov, 1, &data);
     }
 
     if (!ret) {

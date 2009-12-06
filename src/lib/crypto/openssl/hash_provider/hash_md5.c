@@ -28,10 +28,10 @@
 #include "k5-int.h"
 #include "rsa-md5.h"
 #include "hash_provider.h"
+#include "aead.h"
 
 static krb5_error_code
-k5_md5_hash(unsigned int icount, const krb5_data *input,
-            krb5_data *output)
+k5_md5_hash(const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
 {
     krb5_MD5_CTX ctx;
     unsigned int i;
@@ -40,8 +40,14 @@ k5_md5_hash(unsigned int icount, const krb5_data *input,
         return(KRB5_CRYPTO_INTERNAL);
 
     krb5int_MD5Init(&ctx);
-    for (i=0; i<icount; i++)
-        krb5int_MD5Update(&ctx, (unsigned char *) input[i].data, input[i].length);
+    for (i = 0; i < num_data; i++) {
+        const krb5_crypto_iov *iov = &data[i];
+
+        if (SIGN_IOV(iov)) {
+            krb5int_MD5Update(&ctx, (unsigned char *) iov->data.data,
+                              iov->data.length);
+        }
+    }
     krb5int_MD5Final(&ctx);
 
     memcpy(output->data, ctx.digest, RSA_MD5_CKSUM_LENGTH);

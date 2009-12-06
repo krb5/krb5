@@ -100,6 +100,8 @@ static krb5_error_code hmac1(const struct krb5_hash_provider *h,
     size_t blocksize, hashsize;
     krb5_error_code err;
     krb5_key k;
+    krb5_crypto_iov iov;
+    krb5_data d;
 
     printk(" test key", key);
     blocksize = h->blocksize;
@@ -107,23 +109,23 @@ static krb5_error_code hmac1(const struct krb5_hash_provider *h,
     if (hashsize > sizeof(tmp))
         abort();
     if (key->length > blocksize) {
-        krb5_data d, d2;
-        d.data = (char *) key->contents;
-        d.length = key->length;
-        d2.data = tmp;
-        d2.length = hashsize;
-        err = h->hash (1, &d, &d2);
+        iov.flags = KRB5_CRYPTO_TYPE_DATA;
+        iov.data = make_data(key->contents, key->length);
+        d = make_data(tmp, hashsize);
+        err = h->hash(&iov, 1, &d);
         if (err) {
             com_err(whoami, err, "hashing key before calling hmac");
             exit(1);
         }
-        key->length = d2.length;
-        key->contents = (krb5_octet *) d2.data;
+        key->length = d.length;
+        key->contents = (krb5_octet *) d.data;
         printk(" pre-hashed key", key);
     }
     printd(" hmac input", in);
     krb5_k_create_key(NULL, key, &k);
-    err = krb5int_hmac(h, k, 1, in, out);
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    iov.data = *in;
+    err = krb5int_hmac(h, k, &iov, 1, out);
     krb5_k_free_key(NULL, k);
     if (err == 0)
         printd(" hmac output", out);

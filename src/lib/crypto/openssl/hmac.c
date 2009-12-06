@@ -83,8 +83,9 @@ map_digest(const struct krb5_hash_provider *hash)
 
 krb5_error_code
 krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
-                      const krb5_keyblock *key, unsigned int icount,
-                      const krb5_data *input, krb5_data *output)
+                      const krb5_keyblock *keyblock,
+                      const krb5_crypto_iov *data, size_t num_data,
+                      krb5_data *output)
 {
     unsigned int i = 0, md_len = 0;
     unsigned char md[EVP_MAX_MD_SIZE];
@@ -94,22 +95,21 @@ krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
     hashsize = hash->hashsize;
     blocksize = hash->blocksize;
 
-    if (key->length > blocksize)
+    if (keyblock->length > blocksize)
         return(KRB5_CRYPTO_INTERNAL);
     if (output->length < hashsize)
         return(KRB5_BAD_MSIZE);
-    /* if this isn't > 0, then there won't be enough space in this
-       array to compute the outer hash */
-    if (icount == 0)
-        return(KRB5_CRYPTO_INTERNAL);
 
     if (!map_digest(hash))
         return(KRB5_CRYPTO_INTERNAL); // unsupported alg
 
     HMAC_CTX_init(&c);
-    HMAC_Init(&c, key->contents, key->length, map_digest(hash));
-    for ( i = 0; i < icount; i++ ) {
-        HMAC_Update(&c,(const unsigned char*)input[i].data, input[i].length);
+    HMAC_Init(&c, keyblock->contents, keyblock->length, map_digest(hash));
+    for (i = 0; i < num_data; i++) {
+        krb5_crypto_iov *iov = &data[i];
+
+        if (SIGN_IOV(iov))
+            HMAC_Update(&c, (unsigned char*) iov->data.data, iov->data.length);
     }
     HMAC_Final(&c,(unsigned char *)md, &md_len);
     if ( md_len <= output->length) {
@@ -123,56 +123,9 @@ krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
 }
 
 krb5_error_code
-krb5int_hmac_iov_keyblock(const struct krb5_hash_provider *hash,
-                          const krb5_keyblock *key,
-                          const krb5_crypto_iov *data, size_t num_data,
-                          krb5_data *output)
-{
-    krb5_data *sign_data;
-    size_t num_sign_data;
-    krb5_error_code ret;
-    size_t i, j;
-
-    /* Create a checksum over all the data to be signed */
-    for (i = 0, num_sign_data = 0; i < num_data; i++) {
-        const krb5_crypto_iov *iov = &data[i];
-
-        if (SIGN_IOV(iov))
-            num_sign_data++;
-    }
-
-    /* XXX cleanup to avoid alloc */
-    sign_data = (krb5_data *)calloc(num_sign_data, sizeof(krb5_data));
-    if (sign_data == NULL)
-        return ENOMEM;
-
-    for (i = 0, j = 0; i < num_data; i++) {
-        const krb5_crypto_iov *iov = &data[i];
-
-        if (SIGN_IOV(iov))
-            sign_data[j++] = iov->data;
-    }
-
-    /* caller must store checksum in iov as it may be TYPE_TRAILER or TYPE_CHECKSUM */
-    ret = krb5int_hmac_keyblock(hash, key, num_sign_data, sign_data, output);
-
-    free(sign_data);
-
-    return ret;
-}
-
-krb5_error_code
 krb5int_hmac(const struct krb5_hash_provider *hash, krb5_key key,
-             unsigned int icount, const krb5_data *input, krb5_data *output)
+             const krb5_crypto_iov *data, size_t num_data,
+             krb5_data *output)
 {
-    return krb5int_hmac_keyblock(hash, &key->keyblock, icount, input, output);
-}
-
-krb5_error_code
-krb5int_hmac_iov(const struct krb5_hash_provider *hash, krb5_key key,
-                 const krb5_crypto_iov *data, size_t num_data,
-                 krb5_data *output)
-{
-    return krb5int_hmac_iov_keyblock(hash, &key->keyblock, data, num_data,
-                                     output);
+    return krb5int_hmac_keyblock(hash, &key->keyblock, data, num_data, output);
 }

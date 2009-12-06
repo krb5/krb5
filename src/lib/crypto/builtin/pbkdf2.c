@@ -221,31 +221,36 @@ hmac_sha1(krb5_key pass, krb5_data *salt, krb5_data *out)
 {
     const struct krb5_hash_provider *h = &krb5int_hash_sha1;
     krb5_error_code err;
+    krb5_crypto_iov iov;
 
     if (debug_hmac)
         printd(" hmac input", salt);
-    err = krb5int_hmac(h, pass, 1, salt, out);
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    iov.data = *salt;
+    err = krb5int_hmac(h, pass, &iov, 1, out);
     if (err == 0 && debug_hmac)
         printd(" hmac output", out);
     return err;
 }
 
 krb5_error_code
-krb5int_pbkdf2_hmac_sha1 (const krb5_data *out, unsigned long count,
-                          const krb5_data *pass, const krb5_data *salt)
+krb5int_pbkdf2_hmac_sha1(const krb5_data *out, unsigned long count,
+                         const krb5_data *pass, const krb5_data *salt)
 {
     const struct krb5_hash_provider *h = &krb5int_hash_sha1;
     krb5_keyblock keyblock;
     krb5_key key;
     char tmp[40];
     krb5_data d;
+    krb5_crypto_iov iov;
     krb5_error_code err;
 
     assert(h->hashsize <= sizeof(tmp));
     if (pass->length > h->blocksize) {
-        d.data = tmp;
-        d.length = h->hashsize;
-        err = h->hash (1, pass, &d);
+        d = make_data(tmp, h->hashsize);
+        iov.flags = KRB5_CRYPTO_TYPE_DATA;
+        iov.data = *pass;
+        err = h->hash(&iov, 1, &d);
         if (err)
             return err;
         keyblock.length = d.length;

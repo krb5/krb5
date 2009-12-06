@@ -1,7 +1,7 @@
 mydir=lib/crypto/builtin/hash_provider
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../../krb/crc32 -I$(srcdir)/../md4 \
-	-I$(srcdir)/../md5 -I$(srcdir)/../sha1
+	-I$(srcdir)/../md5 -I$(srcdir)/../sha1 -I$(srcdir)/../../krb
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..

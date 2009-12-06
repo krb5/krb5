@@ -53,44 +53,6 @@ krb5int_c_locate_iov(krb5_crypto_iov *data, size_t num_data,
     return iov;
 }
 
-/* Glue the IOV interface to the hash provider's old list-of-buffers. */
-krb5_error_code
-krb5int_hash_iov(const struct krb5_hash_provider *hash_provider,
-                 const krb5_crypto_iov *data, size_t num_data,
-                 krb5_data *output)
-{
-    krb5_data *sign_data;
-    size_t num_sign_data;
-    krb5_error_code ret;
-    size_t i, j;
-
-    /* Create a checksum over all the data to be signed */
-    for (i = 0, num_sign_data = 0; i < num_data; i++) {
-        const krb5_crypto_iov *iov = &data[i];
-
-        if (SIGN_IOV(iov))
-            num_sign_data++;
-    }
-
-    /* XXX cleanup to avoid alloc. */
-    sign_data = calloc(num_sign_data, sizeof(krb5_data));
-    if (sign_data == NULL)
-        return ENOMEM;
-
-    for (i = 0, j = 0; i < num_data; i++) {
-        const krb5_crypto_iov *iov = &data[i];
-
-        if (SIGN_IOV(iov))
-            sign_data[j++] = iov->data;
-    }
-
-    ret = (*hash_provider->hash)(num_sign_data, sign_data, output);
-
-    free(sign_data);
-
-    return ret;
-}
-
 krb5_error_code
 krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum_type,
                             krb5_key key,
@@ -117,14 +79,13 @@ krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum_type,
         if (cksum_type->keyhash->hash_iov == NULL)
             return KRB5_BAD_ENCTYPE;
 
-        ret = (*cksum_type->keyhash->hash_iov)(key, usage, 0, data, num_data,
-                                               cksum_data);
+        ret = cksum_type->keyhash->hash_iov(key, usage, 0, data, num_data,
+                                            cksum_data);
     } else if (cksum_type->flags & KRB5_CKSUMFLAG_DERIVE) {
-        ret = krb5int_dk_make_checksum_iov(cksum_type->hash,
-                                           key, usage, data, num_data,
-                                           cksum_data);
+        ret = krb5int_dk_make_checksum(cksum_type->hash, key, usage, data,
+                                       num_data, cksum_data);
     } else {
-        ret = krb5int_hash_iov(cksum_type->hash, data, num_data, cksum_data);
+        ret = cksum_type->hash->hash(data, num_data, cksum_data);
     }
 
     if (ret == 0) {

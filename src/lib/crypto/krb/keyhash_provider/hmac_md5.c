@@ -37,116 +37,94 @@
 #include "../aead.h"
 
 static  krb5_error_code
-k5_hmac_md5_hash (krb5_key key, krb5_keyusage usage,
-                  const krb5_data *iv,
-                  const krb5_data *input, krb5_data *output)
+k5_hmac_md5_hash(krb5_key key, krb5_keyusage usage, const krb5_data *iv,
+                 const krb5_data *input, krb5_data *output)
 {
     krb5_keyusage ms_usage;
     krb5_error_code ret;
-    krb5_keyblock keyblock;
-    krb5_key ks = NULL;
-    krb5_data ds, ks_constant, md5tmp;
+    krb5_keyblock ks;
+    krb5_crypto_iov iov;
+    krb5_data ds;
     krb5_MD5_CTX ctx;
     char t[4];
 
+    ret = alloc_data(&ds, key->keyblock.length);
+    if (ret != 0)
+        return ret;
 
-    ds.length = key->keyblock.length;
-    ds.data = malloc(ds.length);
-    if (ds.data == NULL)
-        return ENOMEM;
-
-    ks_constant.data = "signaturekey";
-    ks_constant.length = strlen(ks_constant.data)+1; /* Including null*/
-
-    ret = krb5int_hmac( &krb5int_hash_md5, key, 1,
-                        &ks_constant, &ds);
+    /* Compute HMAC(key, "signaturekey\0") to produce the signing key ks. */
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    iov.data = make_data("signaturekey", 13);
+    ret = krb5int_hmac(&krb5int_hash_md5, key, &iov, 1, &ds);
     if (ret)
         goto cleanup;
+    ks.length = key->keyblock.length;
+    ks.contents = (krb5_octet *) ds.data;
 
-    keyblock.length = key->keyblock.length;
-    keyblock.contents = (void *) ds.data;
-    ret = krb5_k_create_key(NULL, &keyblock, &ks);
-    if (ret)
-        goto cleanup;
-
-    krb5int_MD5Init (&ctx);
-    ms_usage = krb5int_arcfour_translate_usage (usage);
+    /* Compute the MD5 value of the input. */
+    krb5int_MD5Init(&ctx);
+    ms_usage = krb5int_arcfour_translate_usage(usage);
     store_32_le(ms_usage, t);
-    krb5int_MD5Update (&ctx, (unsigned char * ) &t, 4);
-    krb5int_MD5Update (&ctx, (unsigned char *) input-> data,
-                       (unsigned int) input->length );
+    krb5int_MD5Update(&ctx, (unsigned char *) &t, 4);
+    krb5int_MD5Update(&ctx, (unsigned char *) input->data, input->length);
     krb5int_MD5Final(&ctx);
-    md5tmp.data = (void *) ctx.digest;
-    md5tmp.length = 16;
 
-    ret = krb5int_hmac ( &krb5int_hash_md5, ks, 1, &md5tmp,
-                         output);
+    /* Compute HMAC(ks, md5value). */
+    iov.data = make_data(ctx.digest, 16);
+    ret = krb5int_hmac_keyblock(&krb5int_hash_md5, &ks, &iov, 1, output);
 
 cleanup:
     memset(&ctx, 0, sizeof(ctx));
     zapfree(ds.data, ds.length);
-    krb5_k_free_key(NULL, ks);
     return ret;
 }
 
 static  krb5_error_code
-k5_hmac_md5_hash_iov (krb5_key key, krb5_keyusage usage,
-                      const krb5_data *iv,
-                      const krb5_crypto_iov *data, size_t num_data,
-                      krb5_data *output)
+k5_hmac_md5_hash_iov(krb5_key key, krb5_keyusage usage, const krb5_data *iv,
+                     const krb5_crypto_iov *data, size_t num_data,
+                     krb5_data *output)
 {
     krb5_keyusage ms_usage;
     krb5_error_code ret;
-    krb5_keyblock keyblock;
-    krb5_key ks = NULL;
-    krb5_data ds, ks_constant, md5tmp;
+    krb5_keyblock ks;
+    krb5_crypto_iov iov;
+    krb5_data ds;
     krb5_MD5_CTX ctx;
     char t[4];
     size_t i;
 
-    keyblock.contents = NULL;
-    keyblock.length = 0;
+    ret = alloc_data(&ds, key->keyblock.length);
+    if (ret != 0)
+        return ret;
 
-    ds.length = key->keyblock.length;
-    ds.data = malloc(ds.length);
-    if (ds.data == NULL)
-        return ENOMEM;
-
-    ks_constant.data = "signaturekey";
-    ks_constant.length = strlen(ks_constant.data)+1; /* Including null*/
-
-    ret = krb5int_hmac( &krb5int_hash_md5, key, 1,
-                        &ks_constant, &ds);
+    /* Compute HMAC(key, "signaturekey\0") to produce the signing key ks. */
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    iov.data = make_data("signaturekey", 13);
+    ret = krb5int_hmac(&krb5int_hash_md5, key, &iov, 1, &ds);
     if (ret)
         goto cleanup;
+    ks.length = key->keyblock.length;
+    ks.contents = (krb5_octet *) ds.data;
 
-    keyblock.length = key->keyblock.length;
-    keyblock.contents = (void *) ds.data;
-    ret = krb5_k_create_key(NULL, &keyblock, &ks);
-    if (ret)
-        goto cleanup;
-
-    krb5int_MD5Init (&ctx);
-    ms_usage = krb5int_arcfour_translate_usage (usage);
+    /* Compute the MD5 value of the input. */
+    krb5int_MD5Init(&ctx);
+    ms_usage = krb5int_arcfour_translate_usage(usage);
     store_32_le(ms_usage, t);
-    krb5int_MD5Update (&ctx, (unsigned char * ) &t, 4);
+    krb5int_MD5Update(&ctx, (unsigned char *) &t, 4);
     for (i = 0; i < num_data; i++) {
-        const krb5_crypto_iov *iov = &data[i];
-
-        if (SIGN_IOV(iov))
-            krb5int_MD5Update (&ctx, (unsigned char *)iov->data.data,
-                               (unsigned int)iov->data.length);
+        if (SIGN_IOV(&data[i]))
+            krb5int_MD5Update(&ctx, (unsigned char *) data[i].data.data,
+                              data[i].data.length);
     }
     krb5int_MD5Final(&ctx);
-    md5tmp.data = (void *) ctx.digest;
-    md5tmp.length = 16;
-    ret = krb5int_hmac ( &krb5int_hash_md5, ks, 1, &md5tmp,
-                         output);
+
+    /* Compute HMAC(ks, md5value). */
+    iov.data = make_data(ctx.digest, 16);
+    ret = krb5int_hmac_keyblock(&krb5int_hash_md5, &ks, &iov, 1, output);
 
 cleanup:
     memset(&ctx, 0, sizeof(ctx));
-    zapfree(keyblock.contents, keyblock.length);
-    krb5_k_free_key(NULL, ks);
+    zapfree(ds.data, ds.length);
     return ret;
 }
 

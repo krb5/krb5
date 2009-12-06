@@ -667,8 +667,7 @@ struct krb5_hash_provider {
     char hash_name[8];
     size_t hashsize, blocksize;
 
-    /* this takes multiple inputs to avoid lots of copying. */
-    krb5_error_code (*hash)(unsigned int icount, const krb5_data *input,
+    krb5_error_code (*hash)(const krb5_crypto_iov *data, size_t num_data,
                             krb5_data *output);
 };
 
@@ -703,23 +702,14 @@ void krb5int_nfold(unsigned int inbits, const unsigned char *in,
                    unsigned int outbits, unsigned char *out);
 
 krb5_error_code krb5int_hmac(const struct krb5_hash_provider *hash,
-                             krb5_key key, unsigned int icount,
-                             const krb5_data *input, krb5_data *output);
-
-krb5_error_code krb5int_hmac_iov(const struct krb5_hash_provider *hash,
-                                 krb5_key key, const krb5_crypto_iov *data,
-                                 size_t num_data, krb5_data *output);
+                             krb5_key key, const krb5_crypto_iov *data,
+                             size_t num_data, krb5_data *output);
 
 krb5_error_code
 krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
-                      const krb5_keyblock *key, unsigned int icount,
-                      const krb5_data *input, krb5_data *output);
-
-krb5_error_code
-krb5int_hmac_iov_keyblock(const struct krb5_hash_provider *hash,
-                          const krb5_keyblock *key,
-                          const krb5_crypto_iov *data, size_t num_data,
-                          krb5_data *output);
+                      const krb5_keyblock *keyblock,
+                      const krb5_crypto_iov *data, size_t num_data,
+                      krb5_data *output);
 
 krb5_error_code krb5int_pbkdf2_hmac_sha1(const krb5_data *, unsigned long,
                                          const krb5_data *, const krb5_data *);

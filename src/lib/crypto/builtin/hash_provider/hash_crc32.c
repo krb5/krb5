@@ -28,23 +28,27 @@
 #include "k5-int.h"
 #include "crc-32.h"
 #include "hash_provider.h"
+#include "aead.h"
 
 static krb5_error_code
-k5_crc32_hash(unsigned int icount, const krb5_data *input,
-              krb5_data *output)
+k5_crc32_hash(const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
 {
     unsigned long c;
     unsigned int i;
 
     if (output->length != CRC32_CKSUM_LENGTH)
-        return(KRB5_CRYPTO_INTERNAL);
+        return KRB5_CRYPTO_INTERNAL;
 
     c = 0;
-    for (i=0; i<icount; i++)
-        mit_crc32(input[i].data, input[i].length, &c);
+    for (i = 0; i < num_data; i++) {
+        const krb5_crypto_iov *iov = &data[i];
+
+        if (SIGN_IOV(iov))
+            mit_crc32(iov->data.data, iov->data.length, &c);
+    }
 
     store_32_le(c, output->data);
-    return(0);
+    return 0;
 }
 
 const struct krb5_hash_provider krb5int_hash_crc32 = {

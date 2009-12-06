@@ -101,7 +101,7 @@ krb5int_old_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
     memset(checksum.data, 0, hash->hashsize);
 
     /* Checksum the plaintext with zeroed checksum and padding. */
-    ret = krb5int_hash_iov(hash, data, num_data, &checksum);
+    ret = hash->hash(data, num_data, &checksum);
     if (ret != 0)
         goto cleanup;
 
@@ -179,7 +179,7 @@ krb5int_old_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
      * back into the plaintext field we just zeroed out.  Then compare it to
      * the saved checksum.
      */
-    ret = krb5int_hash_iov(hash, data, num_data, &checksum);
+    ret = hash->hash(data, num_data, &checksum);
     if (memcmp(checksum.data, saved_checksum, checksum.length) != 0) {
         ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
         goto cleanup;

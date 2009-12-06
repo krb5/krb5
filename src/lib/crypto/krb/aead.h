@@ -37,11 +37,6 @@ krb5int_c_locate_iov(krb5_crypto_iov *data,
                      krb5_cryptotype type);
 
 krb5_error_code
-krb5int_hash_iov(const struct krb5_hash_provider *hash_provider,
-                 const krb5_crypto_iov *data, size_t num_data,
-                 krb5_data *output);
-
-krb5_error_code
 krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum,
                             krb5_key key,
                             krb5_keyusage usage,

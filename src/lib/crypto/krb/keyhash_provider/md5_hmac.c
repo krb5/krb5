@@ -34,28 +34,25 @@
 #include "hash_provider.h"
 
 static  krb5_error_code
-k5_md5_hmac_hash (krb5_key key, krb5_keyusage usage,
-                  const krb5_data *iv,
-                  const krb5_data *input, krb5_data *output)
+k5_md5_hmac_hash(krb5_key key, krb5_keyusage usage, const krb5_data *iv,
+                 const krb5_data *input, krb5_data *output)
 {
     krb5_keyusage ms_usage;
     krb5_MD5_CTX ctx;
     unsigned char t[4];
-    krb5_data ds;
+    krb5_crypto_iov iov;
 
     krb5int_MD5Init(&ctx);
 
-    ms_usage = krb5int_arcfour_translate_usage (usage);
+    ms_usage = krb5int_arcfour_translate_usage(usage);
     store_32_le(ms_usage, t);
     krb5int_MD5Update(&ctx, t, sizeof(t));
     krb5int_MD5Update(&ctx, (unsigned char *)input->data, input->length);
     krb5int_MD5Final(&ctx);
 
-    ds.magic = KV5M_DATA;
-    ds.length = 16;
-    ds.data = (char *)ctx.digest;
-
-    return krb5int_hmac ( &krb5int_hash_md5, key, 1, &ds, output);
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    iov.data = make_data(ctx.digest, 16);
+    return krb5int_hmac(&krb5int_hash_md5, key, &iov, 1, output);
 }
 
 const struct krb5_keyhash_provider krb5int_keyhash_md5_hmac = {

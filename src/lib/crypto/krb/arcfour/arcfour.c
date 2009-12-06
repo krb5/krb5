@@ -43,8 +43,9 @@ krb5int_arcfour_usage_key(const struct krb5_enc_provider *enc,
                           krb5_keyblock *out)
 {
     char salt_buf[14];
+    unsigned int salt_len;
     krb5_data out_data = make_data(out->contents, out->length);
-    krb5_data salt = make_data(salt_buf, sizeof(salt_buf));
+    krb5_crypto_iov iov;
     krb5_keyusage ms_usage;
 
     /* Generate the salt. */
@@ -52,13 +53,16 @@ krb5int_arcfour_usage_key(const struct krb5_enc_provider *enc,
     if (session_keyblock->enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
         memcpy(salt_buf, l40, 10);
         store_32_le(ms_usage, salt_buf + 10);
+        salt_len = 14;
     } else {
-        salt.length=4;
         store_32_le(ms_usage, salt_buf);
+        salt_len = 4;
     }
 
     /* Compute HMAC(key, salt) to produce the usage key. */
-    return krb5int_hmac_keyblock(hash, session_keyblock, 1, &salt, &out_data);
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    iov.data = make_data(salt_buf, salt_len);
+    return krb5int_hmac_keyblock(hash, session_keyblock, &iov, 1, &out_data);
 }
 
 /* Derive an encryption key from a usage key and (typically) checksum. */
@@ -70,6 +74,7 @@ krb5int_arcfour_enc_key(const struct krb5_enc_provider *enc,
 {
     krb5_keyblock *trunc_keyblock = NULL;
     krb5_data out_data = make_data(out->contents, out->length);
+    krb5_crypto_iov iov;
     krb5_error_code ret;
 
     /* Copy usage_keyblock to trunc_keyblock and truncate if exportable. */
@@ -80,7 +85,9 @@ krb5int_arcfour_enc_key(const struct krb5_enc_provider *enc,
         memset(trunc_keyblock->contents + 7, 0xab, 9);
 
     /* Compute HMAC(trunc_key, checksum) to produce the encryption key. */
-    ret = krb5int_hmac_keyblock(hash, trunc_keyblock, 1, checksum, &out_data);
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    iov.data = *checksum;
+    ret = krb5int_hmac_keyblock(hash, trunc_keyblock, &iov, 1, &out_data);
     krb5int_c_free_keyblock(NULL, trunc_keyblock);
     return ret;
 }

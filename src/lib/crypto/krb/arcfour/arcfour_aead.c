@@ -137,8 +137,8 @@ krb5int_arcfour_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
     header->data.data += hash->hashsize;
 
     /* Compute the checksum using the usage key. */
-    ret = krb5int_hmac_iov_keyblock(hash, usage_keyblock, data, num_data,
-                                    &checksum);
+    ret = krb5int_hmac_keyblock(hash, usage_keyblock, data, num_data,
+                                &checksum);
     if (ret != 0)
         goto cleanup;
 
@@ -219,8 +219,8 @@ krb5int_arcfour_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
             goto cleanup;
 
         /* Compute HMAC(usage key, plaintext) to get the checksum. */
-        ret = krb5int_hmac_iov_keyblock(hash, usage_keyblock, data, num_data,
-                                        &comp_checksum);
+        ret = krb5int_hmac_keyblock(hash, usage_keyblock, data, num_data,
+                                    &comp_checksum);
         if (ret != 0)
             goto cleanup;
 

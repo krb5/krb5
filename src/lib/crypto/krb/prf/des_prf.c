@@ -41,12 +41,14 @@ krb5int_des_prf(const struct krb5_keytypes *ktp, krb5_key key,
     krb5_crypto_iov iov;
     krb5_error_code ret;
 
+    /* Compute a hash of the input, storing into the output buffer. */
     iov.flags = KRB5_CRYPTO_TYPE_DATA;
-    iov.data = *out;
-
-    /* Hash the input into the output buffer, then encrypt it in place. */
-    ret = hash->hash(1, in, out);
+    iov.data = *in;
+    ret = hash->hash(&iov, 1, out);
     if (ret != 0)
         return ret;
+
+    /* Encrypt the hash in place. */
+    iov.data = *out;
     return ktp->enc->encrypt(key, NULL, &iov, 1);
 }
