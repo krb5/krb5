@@ -56,7 +56,7 @@ krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
 {
     unsigned char *xorkey = NULL, *ihash = NULL;
     unsigned int i;
-    krb5_crypto_iov *ihash_iov, ohash_iov[2];
+    krb5_crypto_iov *ihash_iov = NULL, ohash_iov[2];
     krb5_data hashout;
     krb5_error_code ret;
 
