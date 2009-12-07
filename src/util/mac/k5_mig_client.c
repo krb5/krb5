@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * $Header$
  *
@@ -54,8 +55,8 @@ typedef struct k5_ipc_service_port {
 /* global service ports and mutex to protect it */
 static k5_mutex_t g_service_ports_mutex = K5_MUTEX_PARTIAL_INITIALIZER;
 static k5_ipc_service_port g_service_ports[KIPC_SERVICE_COUNT] = {
-{ "edu.mit.Kerberos.CCacheServer", MACH_PORT_NULL },
-{ "edu.mit.Kerberos.KerberosAgent", MACH_PORT_NULL } };
+    { "edu.mit.Kerberos.CCacheServer", MACH_PORT_NULL },
+    { "edu.mit.Kerberos.KerberosAgent", MACH_PORT_NULL } };
 
 /* ------------------------------------------------------------------------ */
 
@@ -77,8 +78,8 @@ typedef struct k5_ipc_connection_info {
 
 /* initializer for k5_ipc_request_port to fill in server names in TLS */
 static const char *k5_ipc_known_services[KIPC_SERVICE_COUNT] = {
-"edu.mit.Kerberos.CCacheServer",
-"edu.mit.Kerberos.KerberosAgent" };
+    "edu.mit.Kerberos.CCacheServer",
+    "edu.mit.Kerberos.KerberosAgent" };
 
 /* ------------------------------------------------------------------------ */
 
@@ -326,11 +327,11 @@ kern_return_t k5_ipc_client_reply (mach_port_t             in_reply_port,
     if (!err) {
         if (in_inl_replyCnt) {
             err = krb5int_ipc_stream_write (cinfo->reply_stream,
-					    in_inl_reply, in_inl_replyCnt);
+                                            in_inl_reply, in_inl_replyCnt);
 
         } else if (in_ool_replyCnt) {
             err = krb5int_ipc_stream_write (cinfo->reply_stream,
-					    in_ool_reply, in_ool_replyCnt);
+                                            in_ool_reply, in_ool_replyCnt);
 
         } else {
             err = EINVAL;
@@ -466,7 +467,7 @@ int32_t k5_ipc_send_request (const char    *in_service_id,
             done = 1;
 
             /* Because we use ",dealloc" ool_request will be freed by mach.
-            * Don't double free it. */
+             * Don't double free it. */
             ool_request = NULL;
             ool_request_length = 0;
         }

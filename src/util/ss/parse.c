@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -49,8 +50,8 @@ enum parse_mode { WHITESPACE, TOKEN, QUOTED_STRING };
  *              Series of pointers to parsed tokens in the original string.
  */
 
-#define NEW_ARGV(old,n) (char **)realloc((char *)old,\
-					 (unsigned)(n+2)*sizeof(char*))
+#define NEW_ARGV(old,n) (char **)realloc((char *)old,                   \
+                                         (unsigned)(n+2)*sizeof(char*))
 
 char **ss_parse (sci_idx, line_ptr, argc_ptr)
     int sci_idx;
@@ -64,106 +65,106 @@ char **ss_parse (sci_idx, line_ptr, argc_ptr)
 
     argv = (char **) malloc (sizeof(char *));
     if (argv == (char **)NULL) {
-	ss_error(sci_idx, errno, "Can't allocate storage");
-	*argc_ptr = 0;
-	return(argv);
+        ss_error(sci_idx, errno, "Can't allocate storage");
+        *argc_ptr = 0;
+        return(argv);
     }
     *argv = (char *)NULL;
 
     argc = 0;
 
-    parse_mode = WHITESPACE;	/* flushing whitespace */
-    cp = line_ptr;		/* cp is for output */
+    parse_mode = WHITESPACE;    /* flushing whitespace */
+    cp = line_ptr;              /* cp is for output */
     while (1) {
 #ifdef DEBUG
-	{
-	    printf ("character `%c', mode %d\n", *line_ptr, parse_mode);
-	}
+        {
+            printf ("character `%c', mode %d\n", *line_ptr, parse_mode);
+        }
 #endif
-	while (parse_mode == WHITESPACE) {
-	    if (*line_ptr == '\0')
-		goto end_of_line;
-	    if (*line_ptr == ' ' || *line_ptr == '\t') {
-		line_ptr++;
-		continue;
-	    }
-	    if (*line_ptr == '"') {
-		/* go to quoted-string mode */
-		parse_mode = QUOTED_STRING;
-		cp = line_ptr++;
-		newargv = NEW_ARGV (argv, argc);
-		if (newargv == NULL) {
-		out_of_mem_in_argv:
-		    free(argv);
-		    ss_error(sci_idx, errno, "Can't allocate storage");
-		    *argc_ptr = 0;
-		    return NULL;
-		}
-		argv = newargv;
-		argv[argc++] = cp;
-		argv[argc] = NULL;
-	    }
-	    else {
-		/* random-token mode */
-		parse_mode = TOKEN;
-		cp = line_ptr;
-		newargv = NEW_ARGV (argv, argc);
-		if (newargv == NULL)
-		    goto out_of_mem_in_argv;
-		argv = newargv;
-		argv[argc++] = line_ptr;
-		argv[argc] = NULL;
-	    }
-	}
-	while (parse_mode == TOKEN) {
-	    if (*line_ptr == '\0') {
-		*cp++ = '\0';
-		goto end_of_line;
-	    }
-	    else if (*line_ptr == ' ' || *line_ptr == '\t') {
-		*cp++ = '\0';
-		line_ptr++;
-		parse_mode = WHITESPACE;
-	    }
-	    else if (*line_ptr == '"') {
-		line_ptr++;
-		parse_mode = QUOTED_STRING;
-	    }
-	    else {
-		*cp++ = *line_ptr++;
-	    }
-	}
-	while (parse_mode == QUOTED_STRING) {
-	    if (*line_ptr == '\0') {
-		ss_error (sci_idx, 0,
-			  "Unbalanced quotes in command line");
-		free (argv);
-		*argc_ptr = 0;
-		return NULL;
-	    }
-	    else if (*line_ptr == '"') {
-		if (*++line_ptr == '"') {
-		    *cp++ = '"';
-		    line_ptr++;
-		}
-		else {
-		    parse_mode = TOKEN;
-		}
-	    }
-	    else {
-		*cp++ = *line_ptr++;
-	    }
-	}
+        while (parse_mode == WHITESPACE) {
+            if (*line_ptr == '\0')
+                goto end_of_line;
+            if (*line_ptr == ' ' || *line_ptr == '\t') {
+                line_ptr++;
+                continue;
+            }
+            if (*line_ptr == '"') {
+                /* go to quoted-string mode */
+                parse_mode = QUOTED_STRING;
+                cp = line_ptr++;
+                newargv = NEW_ARGV (argv, argc);
+                if (newargv == NULL) {
+                out_of_mem_in_argv:
+                    free(argv);
+                    ss_error(sci_idx, errno, "Can't allocate storage");
+                    *argc_ptr = 0;
+                    return NULL;
+                }
+                argv = newargv;
+                argv[argc++] = cp;
+                argv[argc] = NULL;
+            }
+            else {
+                /* random-token mode */
+                parse_mode = TOKEN;
+                cp = line_ptr;
+                newargv = NEW_ARGV (argv, argc);
+                if (newargv == NULL)
+                    goto out_of_mem_in_argv;
+                argv = newargv;
+                argv[argc++] = line_ptr;
+                argv[argc] = NULL;
+            }
+        }
+        while (parse_mode == TOKEN) {
+            if (*line_ptr == '\0') {
+                *cp++ = '\0';
+                goto end_of_line;
+            }
+            else if (*line_ptr == ' ' || *line_ptr == '\t') {
+                *cp++ = '\0';
+                line_ptr++;
+                parse_mode = WHITESPACE;
+            }
+            else if (*line_ptr == '"') {
+                line_ptr++;
+                parse_mode = QUOTED_STRING;
+            }
+            else {
+                *cp++ = *line_ptr++;
+            }
+        }
+        while (parse_mode == QUOTED_STRING) {
+            if (*line_ptr == '\0') {
+                ss_error (sci_idx, 0,
+                          "Unbalanced quotes in command line");
+                free (argv);
+                *argc_ptr = 0;
+                return NULL;
+            }
+            else if (*line_ptr == '"') {
+                if (*++line_ptr == '"') {
+                    *cp++ = '"';
+                    line_ptr++;
+                }
+                else {
+                    parse_mode = TOKEN;
+                }
+            }
+            else {
+                *cp++ = *line_ptr++;
+            }
+        }
     }
 end_of_line:
     *argc_ptr = argc;
 #ifdef DEBUG
     {
-	int i;
-	printf ("argc = %d\n", argc);
-	for (i = 0; i <= argc; i++)
-	    printf ("\targv[%2d] = `%s'\n", i,
-		    argv[i] ? argv[i] : "<NULL>");
+        int i;
+        printf ("argc = %d\n", argc);
+        for (i = 0; i <= argc; i++)
+            printf ("\targv[%2d] = `%s'\n", i,
+                    argv[i] ? argv[i] : "<NULL>");
     }
 #endif
     return(argv);

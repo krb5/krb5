@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * $Header$
  *
@@ -189,7 +190,7 @@ static kern_return_t k5_ipc_server_get_lookup_and_service_names (char **out_look
 
     if (!err) {
         len = CFStringGetMaximumSizeForEncoding (CFStringGetLength (id_string),
-                                                    kCFStringEncodingUTF8) + 1;
+                                                 kCFStringEncodingUTF8) + 1;
     }
 
     if (!err) {

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -5,7 +6,7 @@
 #include "et1.h"
 #include "et2.h"
 
-int misc_err, known_err;	/* known_err is err in whether or not
+int misc_err, known_err;        /* known_err is err in whether or not
                                    table is 'known' to library */
 int fail;
 
@@ -17,38 +18,38 @@ try_one (errcode_t code, int known, int table, int msgno)
 
     snprintf (buffy, sizeof(buffy), "error table %d message %d", table, msgno);
     if (0 == strcmp (buffy, msg)) {
-	if (!known) {
-	    known_err++;
-	}
-	return;
+        if (!known) {
+            known_err++;
+        }
+        return;
     }
     snprintf (buffy, sizeof(buffy), "Unknown code et%d %d", table, msgno);
     if (!strcmp (buffy, msg)) {
-	if (known)
-	    known_err++;
-	return;
+        if (known)
+            known_err++;
+        return;
     }
     printf ("error code %ld got unrecognized message '%s',\n"
-	    "should have been table %d message %d\n",
-	    (long) code, msg, table, msgno);
+            "should have been table %d message %d\n",
+            (long) code, msg, table, msgno);
     misc_err++;
 }
 
 static void
 try_table (int table, int known, int lineno,
-	   errcode_t c0, errcode_t c1, errcode_t c2)
+           errcode_t c0, errcode_t c1, errcode_t c2)
 {
     try_one (c0, known, table, 0);
     try_one (c1, known, table, 1);
     try_one (c2, known, table, 2);
     if (misc_err != 0 || known_err != 0) {
-	fail++;
-	if (known_err)
-	    printf ("table list error from line %d, table %d\n", lineno,
-		    table);
-	if (misc_err)
-	    printf ("misc errors from line %d table %d\n", lineno, table);
-	misc_err = known_err = 0;
+        fail++;
+        if (known_err)
+            printf ("table list error from line %d, table %d\n", lineno,
+                    table);
+        if (misc_err)
+            printf ("misc errors from line %d table %d\n", lineno, table);
+        misc_err = known_err = 0;
     }
 }
 
@@ -127,13 +128,13 @@ int main (/*@unused@*/ int argc, /*@unused@*/ char *argv[])
 
     err = pthread_create(&t, 0, run, 0);
     if (err) {
-	fprintf(stderr, "pthread_create error: %s\n", strerror(err));
-	exit(1);
+        fprintf(stderr, "pthread_create error: %s\n", strerror(err));
+        exit(1);
     }
     err = pthread_join(t, &t_retval);
     if (err) {
-	fprintf(stderr, "pthread_join error: %s\n", strerror(err));
-	exit(1);
+        fprintf(stderr, "pthread_join error: %s\n", strerror(err));
+        exit(1);
     }
     return fail;
 #else

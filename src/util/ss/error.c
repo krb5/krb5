@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -41,13 +42,13 @@ char * ss_name(sci_idx)
 
     infop = ss_info(sci_idx);
     if (infop->current_request == (char const *)NULL) {
-	return strdup(infop->subsystem_name);
+        return strdup(infop->subsystem_name);
     } else {
-	char *ret_val;
-	if (asprintf(&ret_val, "%s (%s)",
-		     infop->subsystem_name, infop->current_request) < 0)
-	    return NULL;
-	return ret_val;
+        char *ret_val;
+        if (asprintf(&ret_val, "%s (%s)",
+                     infop->subsystem_name, infop->current_request) < 0)
+            return NULL;
+        return ret_val;
     }
 }
 

@@ -672,7 +672,7 @@ INDENTDIRS = \
 	prototype \
 	slave \
 	tests \
-	util/support
+	util
 
 BSDFILES = \
 	kadmin/cli/strftime.c \
@@ -687,7 +687,10 @@ BSDFILES = \
 	lib/krb5/krb/strptime.c \
 	slave/kpropd_rpc.c \
 	util/support/mkstemp.c \
-	util/support/strlcpy.c
+	util/support/strlcpy.c \
+	util/windows/getopt.c \
+	util/windows/getopt.h \
+	util/windows/getopt_long.c
 
 OTHEREXCLUDES = \
 	include/iprop.h \
@@ -714,7 +717,11 @@ OTHEREXCLUDES = \
 	tests/asn.1/utility.h \
 	tests/gss-threads/gss-misc.c \
 	tests/gss-threads/gss-misc.h \
-	tests/hammer/kdc5_hammer.c
+	tests/hammer/kdc5_hammer.c \
+	util/et/com_err.h \
+	util/profile/prof_int.h \
+	util/profile/profile.hin \
+	util/profile/profile_tcl.c
 
 EXCLUDES = `for i in $(BSDFILES) $(OTHEREXCLUDES); do echo $$i; done | $(AWK) '{ print "-path", $$1, "-o" }'` -path /dev/null
 
