@@ -664,6 +664,7 @@ INDENTDIRS = \
 	include \
 	kadmin \
 	kdc \
+	lib/apputils \
 	lib/crypto \
 	lib/kadm5 \
 	lib/kdb \
@@ -678,6 +679,7 @@ BSDFILES = \
 	kadmin/cli/strftime.c \
 	kadmin/server/ipropd_svc.c \
 	kadmin/server/kadm_rpc_svc.c \
+	lib/apputils/daemon.c \
 	lib/kadm5/admin_xdr.h \
 	lib/kadm5/clnt/client_rpc.c \
 	lib/kadm5/kadm_rpc.h \
@@ -696,6 +698,7 @@ OTHEREXCLUDES = \
 	include/iprop.h \
 	include/k5-platform.h \
 	include/gssrpc \
+	lib/apputils/dummy.c \
 	lib/crypto/builtin/aes \
 	lib/krb5/krb/deltat.c \
 	lib/krb5/unicode \
