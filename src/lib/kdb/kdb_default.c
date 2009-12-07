@@ -98,7 +98,7 @@ krb5_dbe_def_search_enctype(kcontext, dbentp, start, ktype, stype, kvno, kdatap)
         }
 
 
-        if (ktype > 0) {
+        if (ktype != -1) {
             if ((ret = krb5_c_enctype_compare(kcontext, (krb5_enctype) ktype,
                                               dbentp->key_data[i].key_data_type[0],
                                               &similar)))
@@ -106,7 +106,7 @@ krb5_dbe_def_search_enctype(kcontext, dbentp, start, ktype, stype, kvno, kdatap)
                 return(ret);
         }
 
-        if (((ktype <= 0) || similar) &&
+        if (((ktype == -1) || similar) &&
             ((db_stype == stype) || (stype < 0))) {
             if (kvno >= 0) {
                 if (kvno == dbentp->key_data[i].key_data_kvno) {
