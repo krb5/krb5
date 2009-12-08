@@ -28,8 +28,13 @@
 #include "k5-int.h"
 #include "keyhash_provider.h"
 #include "hash_provider.h"
+#include "enc_provider/enc_provider.h"
+#include "../etypes.h"
 #include "../aes/aes.h"
 #include "../aead.h"
+#include "../dk/dk.h"
+
+#define K5CLENGTH 5 /* 32 bit net byte order integer + one byte seed */
 
 static void xorblock(unsigned char *out, unsigned const char *in)
 {
@@ -38,18 +43,45 @@ static void xorblock(unsigned char *out, unsigned const char *in)
 	out[z] ^= in[z];
 }
 
-static  krb5_error_code
+static krb5_error_code
 k5_aescbc_hash_iov (krb5_key key, krb5_keyusage usage,
 		    const krb5_data *iv,
 		    const krb5_crypto_iov *data, size_t num_data,
 		    krb5_data *output)
 {
+    unsigned char constantdata[K5CLENGTH];
+    krb5_error_code ret;
+    krb5_data d1;
+    krb5_key kc;
+    int i;
     aes_ctx ctx;
     unsigned char blockY[BLOCK_SIZE];
     struct iov_block_state iov_state;
 
     if (output->length < BLOCK_SIZE)
 	return KRB5_BAD_MSIZE;
+
+    d1.data = (char *)constantdata;
+    d1.length = K5CLENGTH;
+
+    d1.data[0] = (usage >> 24) & 0xFF;
+    d1.data[1] = (usage >> 16) & 0xFF;
+    d1.data[2] = (usage >> 8 ) & 0xFF;
+    d1.data[3] = (usage      ) & 0xFF;
+
+    d1.data[4] = 0xCC;
+
+    for (i = 0, kc = NULL; i < krb5_enctypes_length; i++) {
+        if (krb5_enctypes_list[i].etype == krb5_k_key_enctype(NULL, key)) {
+            ret = krb5_derive_key(krb5_enctypes_list[i].enc, key, &kc, &d1);
+            if (ret != 0)
+                return ret;
+            break;
+        }
+    }
+
+    if (kc == NULL)
+        abort();
 
     if (aes_enc_key(key->keyblock.contents,
 		    key->keyblock.length, &ctx) != aes_good)
@@ -85,10 +117,12 @@ k5_aescbc_hash_iov (krb5_key key, krb5_keyusage usage,
     output->length = BLOCK_SIZE;
     memcpy(output->data, blockY, BLOCK_SIZE);
 
+    krb5_k_free_key(NULL, kc);
+
     return 0;
 }
 
-static  krb5_error_code
+static krb5_error_code
 k5_aescbc_hash (krb5_key key, krb5_keyusage usage,
 		const krb5_data *iv,
 		const krb5_data *input, krb5_data *output)

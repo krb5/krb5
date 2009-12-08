@@ -380,7 +380,7 @@ krb5int_ccm_encrypt_iov(const struct krb5_aead_provider *aead,
 	goto cleanup;
     }
 
-    ret = krb5int_c_make_checksum_iov(keyhash, kc, usage, sign_data, num_sign_data, &cksum);
+    ret = krb5int_c_make_checksum_iov(keyhash, key, usage, sign_data, num_sign_data, &cksum);
     if (ret != 0)
 	goto cleanup;
 
@@ -576,7 +576,7 @@ krb5int_ccm_decrypt_iov(const struct krb5_aead_provider *aead,
 	    sign_data[num_sign_data++] = data[i];
     }
 
-    ret = krb5int_c_make_checksum_iov(keyhash, kc, usage, sign_data, num_sign_data, &cksum);
+    ret = krb5int_c_make_checksum_iov(keyhash, key, usage, sign_data, num_sign_data, &cksum);
     if (ret != 0)
 	goto cleanup;
 
