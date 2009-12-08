@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1993 by OpenVision Technologies, Inc.
  *
@@ -38,8 +38,8 @@
 #define GSSAPIGENERIC_END_DECLS
 #endif
 
-#define GSS_EMPTY_BUFFER(buf)   ((buf) == NULL ||\
-        (buf)->value == NULL || (buf)->length == 0)
+#define GSS_EMPTY_BUFFER(buf)   ((buf) == NULL ||                       \
+                                 (buf)->value == NULL || (buf)->length == 0)
 
 GSSAPIGENERIC_BEGIN_DECLS
 

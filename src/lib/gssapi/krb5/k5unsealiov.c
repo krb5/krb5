@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/gssapi/krb5/k5unsealiov.c
  *
@@ -551,7 +551,7 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 
         ttrailer->buffer.length = ec + (conf_req_flag ? 16 : 0 /* E(Header) */) + k5_trailerlen;
         ttrailer->buffer.value = (unsigned char *)stream->buffer.value +
-                                 stream->buffer.length - ttrailer->buffer.length;
+            stream->buffer.length - ttrailer->buffer.length;
         break;
     }
     case KG_TOK_MIC_MSG:
@@ -586,8 +586,8 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 
     /* validate lengths */
     if (stream->buffer.length < theader->buffer.length +
-                                tpadding->buffer.length +
-                                ttrailer->buffer.length)
+        tpadding->buffer.length +
+        ttrailer->buffer.length)
     {
         code = (OM_uint32)KRB5_BAD_MSIZE;
         major_status = GSS_S_DEFECTIVE_TOKEN;
@@ -596,7 +596,7 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
 
     /* setup data */
     tdata->buffer.length = stream->buffer.length - ttrailer->buffer.length -
-                           tpadding->buffer.length - theader->buffer.length;
+        tpadding->buffer.length - theader->buffer.length;
 
     assert(data != NULL);
 

@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  *  Copyright 1990,1994 by the Massachusetts Institute of Technology.
  *  All Rights Reserved.

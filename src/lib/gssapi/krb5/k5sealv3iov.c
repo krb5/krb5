@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/gssapi/krb5/k5sealv3iov.c
  *
@@ -363,7 +363,7 @@ gss_krb5int_unseal_v3_iov(krb5_context context,
 
         code = krb5_c_crypto_length(context, key->keyblock.enctype,
                                     conf_flag ? KRB5_CRYPTO_TYPE_TRAILER :
-                                                KRB5_CRYPTO_TYPE_CHECKSUM,
+                                    KRB5_CRYPTO_TYPE_CHECKSUM,
                                     &k5_trailerlen);
         if (code != 0) {
             *minor_status = code;

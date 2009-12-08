@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2009  by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -103,7 +103,7 @@ static int
 kg_is_initiator_cred(krb5_gss_cred_id_t cred)
 {
     return (cred->usage == GSS_C_INITIATE || cred->usage == GSS_C_BOTH) &&
-           (cred->ccache != NULL);
+        (cred->ccache != NULL);
 }
 
 static OM_uint32
@@ -311,7 +311,7 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
 
     code = krb5_cc_initialize(context, cred->ccache,
                               cred->proxy_cred ? impersonator_cred->name->princ :
-                                    subject_creds->client);
+                              subject_creds->client);
     if (code != 0)
         goto cleanup;
 

@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2000, 2007, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -724,45 +724,45 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
 
 OM_uint32
 gss_krb5int_set_cred_rcache(OM_uint32 *minor_status,
-    gss_cred_id_t cred_handle,
-    const gss_OID desired_oid,
-    const gss_buffer_t value)
+                            gss_cred_id_t cred_handle,
+                            const gss_OID desired_oid,
+                            const gss_buffer_t value)
 {
-   krb5_gss_cred_id_t cred;
-   krb5_error_code code;
-   krb5_context context;
-   krb5_rcache rcache;
+    krb5_gss_cred_id_t cred;
+    krb5_error_code code;
+    krb5_context context;
+    krb5_rcache rcache;
 
-   assert(value->length == sizeof(rcache));
+    assert(value->length == sizeof(rcache));
 
-   if (value->length != sizeof(rcache))
-      return GSS_S_FAILURE;
+    if (value->length != sizeof(rcache))
+        return GSS_S_FAILURE;
 
-   rcache = (krb5_rcache)value->value;
+    rcache = (krb5_rcache)value->value;
 
-   if (cred_handle == GSS_C_NO_CREDENTIAL)
-      return GSS_S_NO_CRED;
+    if (cred_handle == GSS_C_NO_CREDENTIAL)
+        return GSS_S_NO_CRED;
 
-   cred = (krb5_gss_cred_id_t)cred_handle;
+    cred = (krb5_gss_cred_id_t)cred_handle;
 
-   code = krb5_gss_init_context(&context);
-   if (code) {
-       *minor_status = code;
-       return GSS_S_FAILURE;
-   }
-   if (cred->rcache != NULL) {
-      code = krb5_rc_close(context, cred->rcache);
-      if (code) {
-         *minor_status = code;
-         krb5_free_context(context);
-         return GSS_S_FAILURE;
-      }
-   }
+    code = krb5_gss_init_context(&context);
+    if (code) {
+        *minor_status = code;
+        return GSS_S_FAILURE;
+    }
+    if (cred->rcache != NULL) {
+        code = krb5_rc_close(context, cred->rcache);
+        if (code) {
+            *minor_status = code;
+            krb5_free_context(context);
+            return GSS_S_FAILURE;
+        }
+    }
 
-   cred->rcache = rcache;
+    cred->rcache = rcache;
 
-   krb5_free_context(context);
+    krb5_free_context(context);
 
-   *minor_status = 0;
-   return GSS_S_COMPLETE;
+    *minor_status = 0;
+    return GSS_S_COMPLETE;
 }

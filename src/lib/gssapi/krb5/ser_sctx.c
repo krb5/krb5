@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/gssapi/krb5/ser_sctx.c
  *
@@ -364,7 +364,7 @@ kg_ctx_size(kcontext, arg, sizep)
                                         &required);
             }
         }
-            *sizep += required;
+        *sizep += required;
     }
     return(kret);
 }
@@ -665,8 +665,8 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
             /* Now get substructure data */
             kret = krb5_internalize_opaque(kcontext,
                                            KV5M_PRINCIPAL,
-                                            (krb5_pointer *) &princ,
-                                            &bp, &remain);
+                                           (krb5_pointer *) &princ,
+                                           &bp, &remain);
             if (kret == 0) {
                 kret = kg_init_name(kcontext, princ, NULL,
                                     KG_INIT_NAME_NO_COPY, &ctx->here);

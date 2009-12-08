@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/gssapi/krb5/k5sealv3.c
  *
@@ -178,7 +178,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
 #ifdef CFX_EXERCISE
         rrc = rand() & 0xffff;
         if (gss_krb5int_rotate_left(outbuf+16, bufsize-16,
-                        (bufsize-16) - (rrc % (bufsize - 16))))
+                                    (bufsize-16) - (rrc % (bufsize - 16))))
             store_16_be(rrc, outbuf+6);
         /* If the rotate fails, don't worry about it.  */
 #endif
@@ -267,7 +267,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
             rrc = rand() & 0xffff;
             /* If the rotate fails, don't worry about it.  */
             if (gss_krb5int_rotate_left(outbuf+16, bufsize-16,
-                            (bufsize-16) - (rrc % (bufsize - 16))))
+                                        (bufsize-16) - (rrc % (bufsize - 16))))
                 store_16_be(rrc, outbuf+6);
 #endif
             /* Fix up EC field.  */
@@ -352,19 +352,19 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 
     /* Two things to note here.
 
-    First, we can't really enforce the use of the acceptor's subkey,
-    if we're the acceptor; the initiator may have sent messages
-    before getting the subkey.  We could probably enforce it if
-    we're the initiator.
+       First, we can't really enforce the use of the acceptor's subkey,
+       if we're the acceptor; the initiator may have sent messages
+       before getting the subkey.  We could probably enforce it if
+       we're the initiator.
 
-    Second, if someone tweaks the code to not set the flag telling
-    the krb5 library to generate a new subkey in the AP-REP
-    message, the MIT library may include a subkey anyways --
-    namely, a copy of the AP-REQ subkey, if it was provided.  So
-    the initiator may think we wanted a subkey, and set the flag,
-    even though we weren't trying to set the subkey.  The "other"
-    key, the one not asserted by the acceptor, will have the same
-    value in that case, though, so we can just ignore the flag.  */
+       Second, if someone tweaks the code to not set the flag telling
+       the krb5 library to generate a new subkey in the AP-REP
+       message, the MIT library may include a subkey anyways --
+       namely, a copy of the AP-REQ subkey, if it was provided.  So
+       the initiator may think we wanted a subkey, and set the flag,
+       even though we weren't trying to set the subkey.  The "other"
+       key, the one not asserted by the acceptor, will have the same
+       value in that case, though, so we can just ignore the flag.  */
     if (ctx->have_acceptor_subkey && (ptr[2] & FLAG_ACCEPTOR_SUBKEY)) {
         key = ctx->acceptor_subkey;
         cksumtype = ctx->acceptor_subkey_cksumtype;
@@ -396,8 +396,8 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
                 *conf_state = 1;
             /* Do we have no decrypt_size function?
 
-            For all current cryptosystems, the ciphertext size will
-            be larger than the plaintext size.  */
+               For all current cryptosystems, the ciphertext size will
+               be larger than the plaintext size.  */
             cipher.enctype = key->keyblock.enctype;
             cipher.ciphertext.length = bodysize - 16;
             cipher.ciphertext.data = (char *)ptr + 16;

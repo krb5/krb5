@@ -666,6 +666,7 @@ INDENTDIRS = \
 	kdc \
 	lib/apputils \
 	lib/crypto \
+	lib/gssapi \
 	lib/kadm5 \
 	lib/kdb \
 	lib/krb5 \
@@ -700,6 +701,11 @@ OTHEREXCLUDES = \
 	include/gssrpc \
 	lib/apputils/dummy.c \
 	lib/crypto/builtin/aes \
+	lib/gssapi/generic/gssapiP_generic.h \
+	lib/gssapi/generic/gssapi_ext.h \
+	lib/gssapi/krb5/gssapiP_krb5.h \
+	lib/gssapi/mechglue \
+	lib/gssapi/spnego \
 	lib/krb5/krb/deltat.c \
 	lib/krb5/unicode \
 	plugins/kdb/db2/libdb2 \
