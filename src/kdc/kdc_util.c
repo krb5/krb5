@@ -2661,15 +2661,17 @@ kdc_get_ticket_endtime(krb5_context context,
  * @param index in/out index into @c out_enc_padata for next item
  */
 krb5_error_code
-kdc_handle_protected_negotiation( krb5_data *req_pkt, krb5_kdc_req *request,
-                                  const krb5_keyblock *reply_key, krb5_pa_data **out_enc_padata, int *idx)
+kdc_handle_protected_negotiation(krb5_data *req_pkt, krb5_kdc_req *request,
+                                 const krb5_keyblock *reply_key,
+                                 krb5_pa_data **out_enc_padata, int *idx)
 {
     krb5_error_code retval = 0;
     krb5_checksum checksum;
     krb5_data *out = NULL;
     krb5_pa_data *pa;
     assert(out_enc_padata != NULL);
-    pa = krb5int_find_pa_data(kdc_context, request->padata, KRB5_ENCPADATA_REQ_ENC_PA_REP);
+    pa = krb5int_find_pa_data(kdc_context, request->padata,
+                              KRB5_ENCPADATA_REQ_ENC_PA_REP);
     if (pa == NULL)
         return 0;
     checksum.contents = NULL;
@@ -2678,8 +2680,8 @@ kdc_handle_protected_negotiation( krb5_data *req_pkt, krb5_kdc_req *request,
         return ENOMEM;
     pa->magic = KV5M_PA_DATA;
     pa->pa_type = KRB5_ENCPADATA_REQ_ENC_PA_REP;
-    retval = krb5_c_make_checksum(kdc_context,0, reply_key, KRB5_KEYUSAGE_AS_REQ,
-                                  req_pkt, &checksum);
+    retval = krb5_c_make_checksum(kdc_context,0, reply_key,
+                                  KRB5_KEYUSAGE_AS_REQ, req_pkt, &checksum);
     if (retval != 0)
         goto cleanup;
     retval = encode_krb5_checksum(&checksum, &out);

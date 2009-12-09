@@ -702,7 +702,8 @@ error_out:
     return retval;
 }
 
-krb5_error_code decode_krb5_checksum(const krb5_data *code, krb5_checksum **repptr)
+krb5_error_code
+decode_krb5_checksum(const krb5_data *code, krb5_checksum **repptr)
 {
     setup_buf_only(krb5_checksum *);
     alloc_field(rep);

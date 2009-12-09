@@ -3064,24 +3064,21 @@ include_pac_p(krb5_context context, krb5_kdc_req *request)
 }
 
 krb5_error_code
-return_enc_padata(krb5_context context,
-                  krb5_data *req_pkt, krb5_kdc_req *request,
-                  krb5_keyblock *reply_key,
-                  krb5_db_entry *server,
-                         krb5_enc_kdc_rep_part *reply_encpart)
+return_enc_padata(krb5_context context, krb5_data *req_pkt,
+                  krb5_kdc_req *request, krb5_keyblock *reply_key,
+                  krb5_db_entry *server, krb5_enc_kdc_rep_part *reply_encpart)
 {
     krb5_error_code             code;
     krb5_tl_data                tl_data;
     krb5_pa_data                *pa_data;
     int idx = 0;
 
-    /* This should be initialized and only used for Win2K compat  and other
-     * specific standardized uses such as  FAST negotiation.*/
+    /* This should be initialized and only used for Win2K compat and other
+     * specific standardized uses such as FAST negotiation. */
     assert(reply_encpart->enc_padata == NULL);
-    reply_encpart->enc_padata = (krb5_pa_data **)calloc(4, sizeof(krb5_pa_data *));
-    if (reply_encpart->enc_padata == NULL) {
+    reply_encpart->enc_padata = calloc(4, sizeof(krb5_pa_data *));
+    if (reply_encpart->enc_padata == NULL)
         return ENOMEM;
-    }
     tl_data.tl_data_type = KRB5_TL_SVR_REFERRAL_DATA;
     code = krb5_dbe_lookup_tl_data(context, server, &tl_data);
     if (code || tl_data.tl_data_length == 0)

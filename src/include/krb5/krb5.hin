@@ -930,7 +930,7 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 #define TKT_FLG_TRANSIT_POLICY_CHECKED  0x00080000
 #define TKT_FLG_OK_AS_DELEGATE          0x00040000
 #define TKT_FLG_ANONYMOUS               0x00020000
-#define TKT_FLG_ENC_PA_REP 0x10000
+#define TKT_FLG_ENC_PA_REP              0x00010000
 /* #define      TKT_FLG_RESERVED        0x00008000 */
 /* #define      TKT_FLG_RESERVED        0x00004000 */
 /* #define      TKT_FLG_RESERVED        0x00002000 */
@@ -1034,7 +1034,6 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 #define KRB5_PADATA_FX_ERROR 137
 #define KRB5_PADATA_ENCRYPTED_CHALLENGE 138
 #define KRB5_ENCPADATA_REQ_ENC_PA_REP 149
-
 
 #define KRB5_SAM_USE_SAD_AS_KEY         0x80000000
 #define KRB5_SAM_SEND_ENCRYPTED_SAD     0x40000000
@@ -2271,35 +2270,43 @@ krb5_get_init_creds_opt_set_pa(krb5_context context,
                                krb5_get_init_creds_opt *opt, const char *attr,
                                const char *value);
 
+/**
+ * This API sets a ccache name that will contain some TGT on calls to
+ * t_init_creds functions.  If set, this ccache will be used for FAST
+ * (draft-ietf-krb-wg-preauth-framework) to protect the AS-REQ from observation
+ * and active attack.  If the fast_ccache_name is set, then FAST may be
+ * required by the client library.  In this and future versions, FAST will be
+ * used if available; krb5_get_init_creds_opt_set_fast_flags() may be used to
+ * require that the request fail is FAST is unavailable.  In MIT Kerberos 1.7
+ * setting the fast ccache at all required that FAST be present or the request
+ * would fail.
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_opt_set_fast_ccache_name(krb5_context context,
-/**This API sets a ccache name that will contain some TGT on calls to
-     get_init_creds functions.  If set, this ccache will be used for FAST
-     (draft-ietf-krb-wg-preauth-framework) to protect the AS-REQ from
-     observation and active attack.  If the fast_ccache_name is set, then FAST
-     may be required by the client library.  In this and future versions, FAST
-     will be used if available; krb5_get_init_creds_opt_set_fast_flags() may be
-     used to require that the request fail is FAST is unavailable.  In MIT
-     Kerberos 1.7 setting the fast ccache at all required that FAST be present
-     or the request would fail.*/
                                              krb5_get_init_creds_opt *opt,
                                              const char *fast_ccache_name);
 
-/**Set a ccache where resulting credentials will be stored.  If set, then the
+/**
+ * Set a ccache where resulting credentials will be stored.  If set, then the
  * krb5_get_init_creds family of APIs will write out credentials to the given
  * ccache.  Setting an output ccache is desirable both because it simplifies
  * calling code and because it permits the krb5_get_init_creds APIs to write
  * out configuration information about the realm to the ccache.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_get_init_creds_opt_set_out_ccache
-(krb5_context context, krb5_get_init_creds_opt *opt, krb5_ccache ccache);
+krb5_get_init_creds_opt_set_out_ccache(krb5_context context,
+                                       krb5_get_init_creds_opt *opt,
+                                       krb5_ccache ccache);
+
 krb5_error_code KRB5_CALLCONV
-krb5_get_init_creds_opt_set_fast_flags
-(krb5_context context, krb5_get_init_creds_opt *opt, krb5_flags flags);
+krb5_get_init_creds_opt_set_fast_flags(krb5_context context,
+                                       krb5_get_init_creds_opt *opt,
+                                       krb5_flags flags);
+
 krb5_error_code KRB5_CALLCONV
-krb5_get_init_creds_opt_get_fast_flags
-(krb5_context context, krb5_get_init_creds_opt *opt, krb5_flags *out_flags);
+krb5_get_init_creds_opt_get_fast_flags(krb5_context context,
+                                       krb5_get_init_creds_opt *opt,
+                                       krb5_flags *out_flags);
 
 /* Fast flags*/
 #define KRB5_FAST_REQUIRED 1l<<0 /*!< Require KDC to support FAST*/

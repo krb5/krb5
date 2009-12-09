@@ -682,8 +682,8 @@ k5_kinit(opts, k5)
     }
 
     if ((opts->action != INIT_PW) && (opts->action != INIT_KT)) {
-        code = krb5_cc_initialize(k5->ctx, k5->cc,
-                                  opts->canonicalize ? my_creds.client : k5->me);
+        code = krb5_cc_initialize(k5->ctx, k5->cc, opts->canonicalize ?
+                                  my_creds.client : k5->me);
         if (code) {
             com_err(progname, code, "when initializing cache %s",
                     opts->k5_cache_name?opts->k5_cache_name:"");

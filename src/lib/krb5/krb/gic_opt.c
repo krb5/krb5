@@ -490,8 +490,9 @@ krb5_error_code KRB5_CALLCONV krb5_get_init_creds_opt_set_fast_ccache_name
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_init_creds_opt_set_out_ccache
-(krb5_context context, krb5_get_init_creds_opt *opt, krb5_ccache ccache)
+krb5_get_init_creds_opt_set_out_ccache(krb5_context context,
+                                       krb5_get_init_creds_opt *opt,
+                                       krb5_ccache ccache)
 {
     krb5_error_code retval = 0;
     krb5_gic_opt_ext *opte;
@@ -510,8 +511,9 @@ krb5_get_init_creds_opt_set_out_ccache
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_init_creds_opt_set_fast_flags
-(krb5_context context, krb5_get_init_creds_opt *opt, krb5_flags flags)
+krb5_get_init_creds_opt_set_fast_flags(krb5_context context,
+                                       krb5_get_init_creds_opt *opt,
+                                       krb5_flags flags)
 {
     krb5_error_code retval = 0;
     krb5_gic_opt_ext *opte;
@@ -525,8 +527,9 @@ krb5_get_init_creds_opt_set_fast_flags
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_init_creds_opt_get_fast_flags
-(krb5_context context, krb5_get_init_creds_opt *opt, krb5_flags *out_flags)
+krb5_get_init_creds_opt_get_fast_flags(krb5_context context,
+                                       krb5_get_init_creds_opt *opt,
+                                       krb5_flags *out_flags)
 {
     krb5_error_code retval = 0;
     krb5_gic_opt_ext *opte;
