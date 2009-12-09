@@ -55,3 +55,18 @@ krb5_timeofday(krb5_context context, register krb5_timestamp *timeret)
     *timeret = tval;
     return 0;
 }
+
+krb5_error_code
+krb5int_check_clockskew(krb5_context context, krb5_timestamp date)
+{
+    krb5_timestamp currenttime;
+    krb5_error_code retval;
+
+    retval = krb5_timeofday(context, &currenttime);
+    if (retval)
+        return retval;
+    if (!(labs((date)-currenttime) < context->clockskew))
+        return KRB5KRB_AP_ERR_SKEW;
+
+    return 0;
+}
