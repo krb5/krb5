@@ -31,17 +31,10 @@
 krb5_boolean KRB5_CALLCONV
 krb5_c_is_keyed_cksum(krb5_cksumtype ctype)
 {
-    unsigned int i;
     const struct krb5_cksumtypes *ctp;
 
-    for (i = 0; i < krb5int_cksumtypes_length; i++) {
-        ctp = &krb5int_cksumtypes_list[i];
-        if (ctp->ctype == ctype) {
-            return (ctp->keyhash != NULL ||
-                    (ctp->flags & KRB5_CKSUMFLAG_DERIVE));
-        }
-    }
-
-    /* Invalid ctype.  This is misleading, but better than dumping core. */
-    return FALSE;
+    ctp = find_cksumtype(ctype);
+    if (ctp == NULL)
+        return FALSE;
+    return !(ctp->flags & CKSUM_UNKEYED);
 }

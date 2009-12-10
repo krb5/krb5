@@ -36,17 +36,6 @@ krb5int_c_locate_iov(krb5_crypto_iov *data,
                      size_t num_data,
                      krb5_cryptotype type);
 
-krb5_error_code
-krb5int_c_make_checksum_iov(const struct krb5_cksumtypes *cksum,
-                            krb5_key key,
-                            krb5_keyusage usage,
-                            const krb5_crypto_iov *data,
-                            size_t num_data,
-                            krb5_data *cksum_data);
-
-const struct krb5_cksumtypes *
-krb5int_c_find_checksum_type(krb5_cksumtype cksumtype);
-
 #define ENCRYPT_CONF_IOV(_iov)  ((_iov)->flags == KRB5_CRYPTO_TYPE_HEADER)
 
 #define ENCRYPT_DATA_IOV(_iov)  ((_iov)->flags == KRB5_CRYPTO_TYPE_DATA || \

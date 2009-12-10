@@ -1,9 +1,9 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * lib/crypto/keyhash_provider/md5_hmac.c
+ * lib/crypto/krb/checksum/cbc.c
  *
- * Copyright 2001, 2009 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright (C) 2009 by the Massachusetts Institute of Technology.
+ * All rights reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -24,40 +24,20 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  *
- * Implementation of Microsoft KERB_CHECKSUM_MD5_HMAC
+ * CBC checksum, which computes the ivec resulting from CBC encryption of the
+ * input.
  */
 
 #include "k5-int.h"
-#include "keyhash_provider.h"
-#include "arcfour-int.h"
-#include "rsa-md5.h"
-#include "hash_provider.h"
+#include "cksumtypes.h"
 
-static  krb5_error_code
-k5_md5_hmac_hash(krb5_key key, krb5_keyusage usage, const krb5_data *input,
-                 krb5_data *output)
+krb5_error_code
+krb5int_cbc_checksum(const struct krb5_cksumtypes *ctp,
+                     krb5_key key, krb5_keyusage usage,
+                     const krb5_crypto_iov *data, size_t num_data,
+                     krb5_data *output)
 {
-    krb5_keyusage ms_usage;
-    krb5_MD5_CTX ctx;
-    unsigned char t[4];
-    krb5_crypto_iov iov;
-
-    krb5int_MD5Init(&ctx);
-
-    ms_usage = krb5int_arcfour_translate_usage(usage);
-    store_32_le(ms_usage, t);
-    krb5int_MD5Update(&ctx, t, sizeof(t));
-    krb5int_MD5Update(&ctx, (unsigned char *)input->data, input->length);
-    krb5int_MD5Final(&ctx);
-
-    iov.flags = KRB5_CRYPTO_TYPE_DATA;
-    iov.data = make_data(ctx.digest, 16);
-    return krb5int_hmac(&krb5int_hash_md5, key, &iov, 1, output);
+    if (ctp->enc->cbc_mac == NULL)
+        return KRB5_CRYPTO_INTERNAL;
+    return ctp->enc->cbc_mac(key, data, num_data, NULL, output);
 }
-
-const struct krb5_keyhash_provider krb5int_keyhash_md5_hmac = {
-    16,
-    k5_md5_hmac_hash,
-    NULL, /*checksum  again*/
-    NULL, NULL
-};

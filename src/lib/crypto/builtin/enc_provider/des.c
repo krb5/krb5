@@ -31,32 +31,24 @@
 #include <aead.h>
 #include <rand2key.h>
 
-
 static krb5_error_code
-k5_des_docrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
-               size_t num_data, int enc)
+validate_and_schedule(krb5_key key, const krb5_data *ivec,
+                      const krb5_crypto_iov *data, size_t num_data,
+                      mit_des_key_schedule schedule)
 {
-    mit_des_key_schedule schedule;
-    size_t input_length = 0;
-    unsigned int i;
-    unsigned char *ivecbytes;
+    size_t i, input_length;
 
-    /* key->keyblock.enctype was checked by the caller */
-
-    if (key->keyblock.length != 8)
-        return(KRB5_BAD_KEYSIZE);
-
-    for (i = 0; i < num_data; i++) {
+    for (i = 0, input_length = 0; i < num_data; i++) {
         const krb5_crypto_iov *iov = &data[i];
 
         if (ENCRYPT_IOV(iov))
             input_length += iov->data.length;
     }
 
-    if ((input_length % 8) != 0)
-        return(KRB5_BAD_MSIZE);
-    if (ivec && (ivec->length != 8))
-        return(KRB5_BAD_MSIZE);
+    if (key->keyblock.length != 8)
+        return KRB5_BAD_KEYSIZE;
+    if (input_length % 8 != 0 || (ivec != NULL && ivec->length != 8))
+        return KRB5_BAD_MSIZE;
 
     switch (mit_des_key_sched(key->keyblock.contents, schedule)) {
     case -1:
@@ -64,38 +56,75 @@ k5_des_docrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
     case -2:
         return(KRB5DES_WEAK_KEY);
     }
-
-    /* this has a return value, but the code always returns zero */
-    ivecbytes = ivec ? (unsigned char *) ivec->data : NULL;
-    if (enc)
-        krb5int_des_cbc_encrypt(data, num_data, schedule, ivecbytes);
-    else
-        krb5int_des_cbc_decrypt(data, num_data, schedule, ivecbytes);
-
-    memset(schedule, 0, sizeof(schedule));
-
-    return(0);
+    return 0;
 }
 
 static krb5_error_code
-k5_des_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
-               size_t num_data)
+des_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
+            size_t num_data)
 {
-    return k5_des_docrypt(key, ivec, data, num_data, 1);
+    mit_des_key_schedule schedule;
+    krb5_error_code err;
+
+    err = validate_and_schedule(key, ivec, data, num_data, schedule);
+    if (err)
+        return err;
+
+    krb5int_des_cbc_encrypt(data, num_data, schedule,
+                            ivec != NULL ? (unsigned char *) ivec->data :
+                            NULL);
+
+    zap(schedule, sizeof(schedule));
+    return 0;
 }
 
 static krb5_error_code
-k5_des_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
-               size_t num_data)
+des_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
+            size_t num_data)
 {
-    return k5_des_docrypt(key, ivec, data, num_data, 0);
+    mit_des_key_schedule schedule;
+    krb5_error_code err;
+
+    err = validate_and_schedule(key, ivec, data, num_data, schedule);
+    if (err)
+        return err;
+
+    krb5int_des_cbc_decrypt(data, num_data, schedule,
+                            ivec != NULL ? (unsigned char *) ivec->data :
+                            NULL);
+
+    zap(schedule, sizeof(schedule));
+    return 0;
+}
+
+static krb5_error_code
+des_cbc_mac(krb5_key key, const krb5_crypto_iov *data, size_t num_data,
+            const krb5_data *ivec, krb5_data *output)
+{
+    mit_des_key_schedule schedule;
+    krb5_error_code err;
+
+    err = validate_and_schedule(key, ivec, data, num_data, schedule);
+    if (err)
+        return err;
+
+    if (output->length != 8)
+        return KRB5_CRYPTO_INTERNAL;
+
+    krb5int_des_cbc_mac(data, num_data, schedule,
+                        ivec != NULL ? (unsigned char *) ivec->data : NULL,
+                        (unsigned char *) output->data);
+
+    zap(schedule, sizeof(schedule));
+    return 0;
 }
 
 const struct krb5_enc_provider krb5int_enc_des = {
     8,
     7, 8,
-    k5_des_encrypt,
-    k5_des_decrypt,
+    des_encrypt,
+    des_decrypt,
+    des_cbc_mac,
     krb5int_des_make_key,
     krb5int_des_init_state,
     krb5int_default_free_state

@@ -33,7 +33,7 @@ checksum_length.so checksum_length.po $(OUTPRE)checksum_length.$(OBJEXT): \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  checksum_length.c cksumtypes.h
+  checksum_length.c cksumtypes.h etypes.h
 cksumtype_to_string.so cksumtype_to_string.po $(OUTPRE)cksumtype_to_string.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -44,19 +44,20 @@ cksumtype_to_string.so cksumtype_to_string.po $(OUTPRE)cksumtype_to_string.$(OBJ
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  cksumtype_to_string.c cksumtypes.h
+  cksumtype_to_string.c cksumtypes.h etypes.h
 cksumtypes.so cksumtypes.po $(OUTPRE)cksumtypes.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/hash_provider/hash_provider.h \
-  $(srcdir)/keyhash_provider/keyhash_provider.h $(top_srcdir)/include/k5-buf.h \
-  $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
-  $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
-  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
-  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/locate_plugin.h \
-  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h cksumtypes.c cksumtypes.h
+  $(COM_ERR_DEPS) $(srcdir)/../builtin/enc_provider/enc_provider.h \
+  $(srcdir)/../builtin/hash_provider/hash_provider.h \
+  $(srcdir)/dk/dk.h $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
+  $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
+  $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
+  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
+  $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
+  cksumtypes.c cksumtypes.h etypes.h
 coll_proof_cksum.so coll_proof_cksum.po $(OUTPRE)coll_proof_cksum.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -67,7 +68,7 @@ coll_proof_cksum.so coll_proof_cksum.po $(OUTPRE)coll_proof_cksum.$(OBJEXT): \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  cksumtypes.h coll_proof_cksum.c
+  cksumtypes.h coll_proof_cksum.c etypes.h
 combine_keys.so combine_keys.po $(OUTPRE)combine_keys.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -234,7 +235,7 @@ keyed_cksum.so keyed_cksum.po $(OUTPRE)keyed_cksum.$(OBJEXT): \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  cksumtypes.h keyed_cksum.c
+  cksumtypes.h etypes.h keyed_cksum.c
 keyed_checksum_types.so keyed_checksum_types.po $(OUTPRE)keyed_checksum_types.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -387,7 +388,7 @@ string_to_cksumtype.so string_to_cksumtype.po $(OUTPRE)string_to_cksumtype.$(OBJ
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  cksumtypes.h string_to_cksumtype.c
+  cksumtypes.h etypes.h string_to_cksumtype.c
 string_to_enctype.so string_to_enctype.po $(OUTPRE)string_to_enctype.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -420,7 +421,7 @@ valid_cksumtype.so valid_cksumtype.po $(OUTPRE)valid_cksumtype.$(OBJEXT): \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  cksumtypes.h valid_cksumtype.c
+  cksumtypes.h etypes.h valid_cksumtype.c
 valid_enctype.so valid_enctype.po $(OUTPRE)valid_enctype.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -442,7 +443,7 @@ verify_checksum.so verify_checksum.po $(OUTPRE)verify_checksum.$(OBJEXT): \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  cksumtypes.h verify_checksum.c
+  cksumtypes.h etypes.h verify_checksum.c
 verify_checksum_iov.so verify_checksum_iov.po $(OUTPRE)verify_checksum_iov.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \

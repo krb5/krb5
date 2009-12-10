@@ -19,7 +19,7 @@ LIBFINIFUNC=cryptoint_cleanup_library
 RELDIR=crypto
 
 STOBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST @CRYPTO_IMPL@/enc_provider/OBJS.ST	\
-	@CRYPTO_IMPL@/hash_provider/OBJS.ST krb/keyhash_provider/OBJS.ST  		\
+	@CRYPTO_IMPL@/hash_provider/OBJS.ST krb/checksum/OBJS.ST  		\
 	krb/prf/OBJS.ST krb/rand2key/OBJS.ST 		 			\
 	krb/old/OBJS.ST krb/raw/OBJS.ST krb/yarrow/OBJS.ST 			\
 	@CRYPTO_IMPL@/md4/OBJS.ST @CRYPTO_IMPL@/md5/OBJS.ST @CRYPTO_IMPL@/sha1/OBJS.ST 		\
@@ -27,7 +27,7 @@ STOBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST @CRYPTO_IMPL@/enc_provider/OBJS.ST	\
 	krb/OBJS.ST  @CRYPTO_IMPL@/OBJS.ST
 
 SUBDIROBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST @CRYPTO_IMPL@/enc_provider/OBJS.ST 	\
-	@CRYPTO_IMPL@/hash_provider/OBJS.ST krb/keyhash_provider/OBJS.ST 		\
+	@CRYPTO_IMPL@/hash_provider/OBJS.ST krb/checksum/OBJS.ST 		\
 	krb/prf/OBJS.ST krb/rand2key/OBJS.ST 		 			\
 	krb/old/OBJS.ST krb/raw/OBJS.ST  krb/yarrow/OBJS.ST 			\
 	@CRYPTO_IMPL@/md4/OBJS.ST @CRYPTO_IMPL@/md5/OBJS.ST	@CRYPTO_IMPL@/sha1/OBJS.ST 		\

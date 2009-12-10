@@ -33,58 +33,39 @@ krb5_k_verify_checksum(krb5_context context, krb5_key key,
                        krb5_keyusage usage, const krb5_data *data,
                        const krb5_checksum *cksum, krb5_boolean *valid)
 {
-    unsigned int i;
     const struct krb5_cksumtypes *ctp;
-    const struct krb5_keyhash_provider *keyhash;
-    size_t hashsize;
+    krb5_crypto_iov iov;
     krb5_error_code ret;
-    krb5_data indata;
+    krb5_data cksum_data;
     krb5_checksum computed;
 
-    for (i=0; i<krb5int_cksumtypes_length; i++) {
-        if (krb5int_cksumtypes_list[i].ctype == cksum->checksum_type)
-            break;
-    }
-    if (i == krb5int_cksumtypes_length)
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    iov.data = *data;
+
+    ctp = find_cksumtype(cksum->checksum_type);
+    if (ctp == NULL)
         return KRB5_BAD_ENCTYPE;
-    ctp = &krb5int_cksumtypes_list[i];
 
-    indata.length = cksum->length;
-    indata.data = (char *) cksum->contents;
-
-    /* If there's actually a verify function, call it. */
-    if (ctp->keyhash) {
-        keyhash = ctp->keyhash;
-
-        if (keyhash->verify == NULL && keyhash->verify_iov != NULL) {
-            krb5_crypto_iov iov[1];
-
-            iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
-            iov[0].data.data = data->data;
-            iov[0].data.length = data->length;
-
-            return (*keyhash->verify_iov)(key, usage, iov, 1, &indata, valid);
-        } else if (keyhash->verify != NULL) {
-            return (*keyhash->verify)(key, usage, data, &indata, valid);
-        }
-    }
-
-    /* Otherwise, make the checksum again, and compare. */
-    ret = krb5_c_checksum_length(context, cksum->checksum_type, &hashsize);
-    if (ret)
+    ret = verify_key(ctp, key);
+    if (ret != 0)
         return ret;
 
-    if (cksum->length != hashsize)
-        return KRB5_BAD_MSIZE;
+    /* If there's actually a verify function, call it. */
+    cksum_data = make_data(cksum->contents, cksum->length);
+    if (ctp->verify != NULL)
+        return ctp->verify(ctp, key, usage, &iov, 1, &cksum_data, valid);
 
-    computed.length = hashsize;
+    /* Otherwise, make the checksum again, and compare. */
+    if (cksum->length != ctp->output_size)
+        return KRB5_BAD_MSIZE;
 
     ret = krb5_k_make_checksum(context, cksum->checksum_type, key, usage,
                                data, &computed);
     if (ret)
         return ret;
 
-    *valid = (memcmp(computed.contents, cksum->contents, hashsize) == 0);
+    *valid = (memcmp(computed.contents, cksum->contents,
+                     ctp->output_size) == 0);
 
     free(computed.contents);
     return 0;

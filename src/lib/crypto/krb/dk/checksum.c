@@ -28,15 +28,15 @@
 #include "k5-int.h"
 #include "etypes.h"
 #include "dk.h"
-#include "aead.h"
+#include "cksumtypes.h"
 
 #define K5CLENGTH 5 /* 32 bit net byte order integer + one byte seed */
 
 krb5_error_code
-krb5int_dk_make_checksum(const struct krb5_hash_provider *hash,
-                         krb5_key key, krb5_keyusage usage,
-                         const krb5_crypto_iov *data, size_t num_data,
-                         krb5_data *output)
+krb5int_dk_checksum(const struct krb5_cksumtypes *ctp,
+                    krb5_key key, krb5_keyusage usage,
+                    const krb5_crypto_iov *data, size_t num_data,
+                    krb5_data *output)
 {
     const struct krb5_keytypes *ktp;
     const struct krb5_enc_provider *enc;
@@ -45,32 +45,24 @@ krb5int_dk_make_checksum(const struct krb5_hash_provider *hash,
     krb5_data datain;
     krb5_key kc;
 
+    /* Use the key's enctype (more flexible than setting an enctype in ctp). */
     ktp = find_enctype(key->keyblock.enctype);
     if (ktp == NULL)
         return KRB5_BAD_ENCTYPE;
     enc = ktp->enc;
-
-    /*
-     * key->length will be tested in enc->encrypt.
-     * output->length will be tested in krb5int_hmac.
-     */
+    if (key->keyblock.length != enc->keylength)
+        return KRB5_BAD_KEYSIZE;
 
     /* Derive the key. */
-
-    datain.data = (char *) constantdata;
-    datain.length = K5CLENGTH;
-
+    datain = make_data(constantdata, K5CLENGTH);
     store_32_be(usage, constantdata);
-
-    datain.data[4] = (char) 0x99;
-
+    constantdata[4] = (char) 0x99;
     ret = krb5int_derive_key(enc, key, &kc, &datain);
     if (ret)
         return ret;
 
     /* Hash the data. */
-
-    ret = krb5int_hmac(hash, kc, data, num_data, output);
+    ret = krb5int_hmac(ctp->hash, kc, data, num_data, output);
     if (ret)
         memset(output->data, 0, output->length);
 

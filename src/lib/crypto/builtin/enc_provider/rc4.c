@@ -206,6 +206,7 @@ const struct krb5_enc_provider krb5int_enc_arcfour = {
     16, 16,
     k5_arcfour_docrypt,
     k5_arcfour_docrypt,
+    NULL,
     krb5int_arcfour_make_key,
     k5_arcfour_init_state, /*xxx not implemented yet*/
     krb5int_default_free_state

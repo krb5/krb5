@@ -152,6 +152,54 @@ krb5int_des_cbc_decrypt(krb5_crypto_iov *data, unsigned long num_data,
     }
 }
 
+void
+krb5int_des_cbc_mac(const krb5_crypto_iov *data, unsigned long num_data,
+                    const mit_des_key_schedule schedule, mit_des_cblock ivec,
+                    mit_des_cblock out)
+{
+    unsigned DES_INT32 left, right;
+    const unsigned DES_INT32 *kp;
+    const unsigned char *ip;
+    struct iov_block_state input_pos;
+    unsigned char storage[MIT_DES_BLOCK_LENGTH], *block = NULL, *ptr;
+
+    IOV_BLOCK_STATE_INIT(&input_pos);
+    input_pos.include_sign_only = 1;
+
+    /* Get key pointer here.  This won't need to be reinitialized. */
+    kp = (const unsigned DES_INT32 *)schedule;
+
+    /* Initialize left and right with the contents of the initial vector. */
+    ip = (ivec != NULL) ? ivec : mit_des_zeroblock;
+    GET_HALF_BLOCK(left, ip);
+    GET_HALF_BLOCK(right, ip);
+
+    /* Work the length down 8 bytes at a time. */
+    for (;;) {
+        unsigned DES_INT32 temp;
+
+        ptr = iov_next_block(storage, MIT_DES_BLOCK_LENGTH, data, num_data,
+                             &input_pos);
+        if (ptr == NULL)
+            break;
+        block = ptr;
+
+        /* Decompose this block and xor it with the previous ciphertext. */
+        GET_HALF_BLOCK(temp, ptr);
+        left  ^= temp;
+        GET_HALF_BLOCK(temp, ptr);
+        right ^= temp;
+
+        /* Encrypt what we have. */
+        DES_DO_ENCRYPT(left, right, kp);
+    }
+
+    /* Output the final ciphertext block. */
+    ptr = out;
+    PUT_HALF_BLOCK(left, ptr);
+    PUT_HALF_BLOCK(right, ptr);
+}
+
 #if defined(CONFIG_SMALL) && !defined(CONFIG_SMALL_NO_CRYPTO)
 void krb5int_des_do_encrypt_2 (unsigned DES_INT32 *left,
                                unsigned DES_INT32 *right,

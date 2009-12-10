@@ -26,67 +26,85 @@
  */
 
 #include "k5-int.h"
+#include "enc_provider.h"
 #include "hash_provider.h"
-#include "keyhash_provider.h"
+#include "dk.h"
 #include "cksumtypes.h"
 
 const struct krb5_cksumtypes krb5int_cksumtypes_list[] = {
-    { CKSUMTYPE_CRC32, KRB5_CKSUMFLAG_NOT_COLL_PROOF,
+    { CKSUMTYPE_CRC32,
       "crc32", { 0 }, "CRC-32",
-      0, NULL,
-      &krb5int_hash_crc32 },
+      NULL, &krb5int_hash_crc32,
+      krb5int_unkeyed_checksum, NULL,
+      4, 4, CKSUM_UNKEYED | CKSUM_NOT_COLL_PROOF },
 
-    { CKSUMTYPE_RSA_MD4, 0,
+    { CKSUMTYPE_RSA_MD4,
       "md4", { 0 }, "RSA-MD4",
-      0, NULL,
-      &krb5int_hash_md4 },
-    { CKSUMTYPE_RSA_MD4_DES, 0,
+      NULL, &krb5int_hash_md4,
+      krb5int_unkeyed_checksum, NULL,
+      16, 16, CKSUM_UNKEYED },
+
+    { CKSUMTYPE_RSA_MD4_DES,
       "md4-des", { 0 }, "RSA-MD4 with DES cbc mode",
-      ENCTYPE_DES_CBC_CRC, &krb5int_keyhash_md4des,
-      NULL },
+      &krb5int_enc_des, &krb5int_hash_md4,
+      krb5int_confounder_checksum, krb5int_confounder_verify,
+      24, 24, 0 },
 
-    { CKSUMTYPE_DESCBC, 0,
+    { CKSUMTYPE_DESCBC,
       "des-cbc", { 0 }, "DES cbc mode",
-      ENCTYPE_DES_CBC_CRC, &krb5int_keyhash_descbc,
-      NULL },
+      &krb5int_enc_des, NULL,
+      krb5int_cbc_checksum, NULL,
+      8, 8, 0 },
 
-    { CKSUMTYPE_RSA_MD5, 0,
+    { CKSUMTYPE_RSA_MD5,
       "md5", { 0 }, "RSA-MD5",
-      0, NULL,
-      &krb5int_hash_md5 },
-    { CKSUMTYPE_RSA_MD5_DES, 0,
+      NULL, &krb5int_hash_md5,
+      krb5int_unkeyed_checksum, NULL,
+      16, 16, CKSUM_UNKEYED },
+
+    { CKSUMTYPE_RSA_MD5_DES,
       "md5-des", { 0 }, "RSA-MD5 with DES cbc mode",
-      ENCTYPE_DES_CBC_CRC, &krb5int_keyhash_md5des,
-      NULL },
+      &krb5int_enc_des, &krb5int_hash_md5,
+      krb5int_confounder_checksum, krb5int_confounder_verify,
+      24, 24, 0 },
 
-    { CKSUMTYPE_NIST_SHA, 0,
+    { CKSUMTYPE_NIST_SHA,
       "sha", { 0 }, "NIST-SHA",
-      0, NULL,
-      &krb5int_hash_sha1 },
+      NULL, &krb5int_hash_sha1,
+      krb5int_unkeyed_checksum, NULL,
+      20, 20, CKSUM_UNKEYED },
 
-    { CKSUMTYPE_HMAC_SHA1_DES3, KRB5_CKSUMFLAG_DERIVE,
+    { CKSUMTYPE_HMAC_SHA1_DES3,
       "hmac-sha1-des3", { "hmac-sha1-des3-kd" }, "HMAC-SHA1 DES3 key",
-      0, NULL,
-      &krb5int_hash_sha1 },
-    { CKSUMTYPE_HMAC_MD5_ARCFOUR, 0,
+      NULL, &krb5int_hash_sha1,
+      krb5int_dk_checksum, NULL,
+      20, 20, 0 },
+
+    { CKSUMTYPE_HMAC_MD5_ARCFOUR,
       "hmac-md5-rc4", { "hmac-md5-enc", "hmac-md5-earcfour" },
       "Microsoft HMAC MD5 (RC4 key)",
-      ENCTYPE_ARCFOUR_HMAC, &krb5int_keyhash_hmac_md5,
-      NULL },
+      &krb5int_enc_arcfour, &krb5int_hash_md5,
+      krb5int_hmacmd5_checksum, NULL,
+      16, 16, 0 },
 
-    { CKSUMTYPE_HMAC_SHA1_96_AES128, KRB5_CKSUMFLAG_DERIVE,
+    { CKSUMTYPE_HMAC_SHA1_96_AES128,
       "hmac-sha1-96-aes128", { 0 }, "HMAC-SHA1 AES128 key",
-      0, NULL,
-      &krb5int_hash_sha1, 12 },
-    { CKSUMTYPE_HMAC_SHA1_96_AES256, KRB5_CKSUMFLAG_DERIVE,
+      NULL, &krb5int_hash_sha1,
+      krb5int_dk_checksum, NULL,
+      20, 12, 0 },
+
+    { CKSUMTYPE_HMAC_SHA1_96_AES256,
       "hmac-sha1-96-aes256", { 0 }, "HMAC-SHA1 AES256 key",
-      0, NULL,
-      &krb5int_hash_sha1, 12 },
-    { CKSUMTYPE_MD5_HMAC_ARCFOUR, 0,
+      NULL, &krb5int_hash_sha1,
+      krb5int_dk_checksum, NULL,
+      20, 12, 0 },
+
+    { CKSUMTYPE_MD5_HMAC_ARCFOUR,
       "md5-hmac-rc4", { 0 }, "Microsoft MD5 HMAC (RC4 key)",
-      ENCTYPE_ARCFOUR_HMAC, &krb5int_keyhash_md5_hmac,
-      NULL }
+      &krb5int_enc_arcfour, &krb5int_hash_md5,
+      krb5int_hmacmd5_checksum, NULL,
+      16, 16, 0 },
 };
 
-const unsigned int krb5int_cksumtypes_length =
+const size_t krb5int_cksumtypes_length =
     sizeof(krb5int_cksumtypes_list) / sizeof(struct krb5_cksumtypes);

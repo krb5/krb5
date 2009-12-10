@@ -653,6 +653,11 @@ struct krb5_enc_provider {
     krb5_error_code (*decrypt)(krb5_key key, const krb5_data *cipher_state,
                                krb5_crypto_iov *data, size_t num_data);
 
+    /* May be NULL if the cipher is not used for a cbc-mac checksum. */
+    krb5_error_code (*cbc_mac)(krb5_key key, const krb5_crypto_iov *data,
+                               size_t num_data, const krb5_data *ivec,
+                               krb5_data *output);
+
     krb5_error_code (*make_key)(const krb5_data *randombits,
                                 krb5_keyblock *key);
 
@@ -669,26 +674,6 @@ struct krb5_hash_provider {
 
     krb5_error_code (*hash)(const krb5_crypto_iov *data, size_t num_data,
                             krb5_data *output);
-};
-
-struct krb5_keyhash_provider {
-    size_t hashsize;
-
-    krb5_error_code (*hash)(krb5_key key, krb5_keyusage keyusage,
-                            const krb5_data *input, krb5_data *output);
-
-    krb5_error_code (*verify)(krb5_key key, krb5_keyusage keyusage,
-                              const krb5_data *input, const krb5_data *hash,
-                              krb5_boolean *valid);
-
-    krb5_error_code (*hash_iov)(krb5_key key, krb5_keyusage keyusage,
-                                const krb5_crypto_iov *data, size_t num_data,
-                                krb5_data *output);
-
-    krb5_error_code (*verify_iov)(krb5_key key, krb5_keyusage keyusage,
-                                  const krb5_crypto_iov *data,
-                                  size_t num_data, const krb5_data *hash,
-                                  krb5_boolean *valid);
 };
 
 /*

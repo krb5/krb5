@@ -31,16 +31,13 @@
 krb5_error_code KRB5_CALLCONV
 krb5_cksumtype_to_string(krb5_cksumtype cksumtype, char *buffer, size_t buflen)
 {
-    unsigned int i;
+    const struct krb5_cksumtypes *ctp;
 
-    for (i = 0; i < krb5int_cksumtypes_length; i++) {
-        if (krb5int_cksumtypes_list[i].ctype == cksumtype) {
-            if (strlcpy(buffer, krb5int_cksumtypes_list[i].out_string,
-                        buflen) >= buflen)
-                return ENOMEM;
-            return 0;
-        }
-    }
+    ctp = find_cksumtype(cksumtype);
+    if (ctp == NULL)
+        return KRB5_BAD_ENCTYPE;
 
-    return EINVAL;
+    if (strlcpy(buffer, ctp->out_string, buflen) >= buflen)
+        return ENOMEM;
+    return 0;
 }

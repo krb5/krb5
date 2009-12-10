@@ -263,6 +263,11 @@ krb5int_des_cbc_decrypt(krb5_crypto_iov *data, unsigned long num_data,
                         const mit_des_key_schedule schedule,
                         mit_des_cblock ivec);
 
+void
+krb5int_des_cbc_mac(const krb5_crypto_iov *data, unsigned long num_data,
+                    const mit_des_key_schedule schedule, mit_des_cblock ivec,
+                    mit_des_cblock out);
+
 /* d3_procky.c */
 krb5_error_code mit_des3_process_key(krb5_encrypt_block *eblock,
                                      const krb5_keyblock *keyblock);

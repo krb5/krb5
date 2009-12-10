@@ -27,6 +27,7 @@
 
 #include "k5-int.h"
 #include "etypes.h"
+#include "cksumtypes.h"
 
 unsigned int
 krb5int_dk_crypto_length(const struct krb5_keytypes *ktp,
@@ -69,10 +70,10 @@ krb5int_derive_key(const struct krb5_enc_provider *enc,
                    const krb5_data *in_constant);
 
 krb5_error_code
-krb5int_dk_make_checksum(const struct krb5_hash_provider *hash,
-                         krb5_key key, krb5_keyusage usage,
-                         const krb5_crypto_iov *data, size_t num_data,
-                         krb5_data *output);
+krb5int_dk_checksum(const struct krb5_cksumtypes *ctp,
+                    krb5_key key, krb5_keyusage usage,
+                    const krb5_crypto_iov *data, size_t num_data,
+                    krb5_data *output);
 
 krb5_error_code
 krb5int_derive_random(const struct krb5_enc_provider *enc,

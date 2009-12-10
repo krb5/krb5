@@ -37,50 +37,37 @@ krb5_k_make_checksum_iov(krb5_context context,
                          krb5_crypto_iov *data,
                          size_t num_data)
 {
-    unsigned int i;
-    size_t cksumlen;
     krb5_error_code ret;
     krb5_data cksum_data;
     krb5_crypto_iov *checksum;
     const struct krb5_cksumtypes *ctp;
 
-    for (i = 0; i < krb5int_cksumtypes_length; i++) {
-        if (krb5int_cksumtypes_list[i].ctype == cksumtype)
-            break;
-    }
-    if (i == krb5int_cksumtypes_length)
+    ctp = find_cksumtype(cksumtype);
+    if (ctp == NULL)
         return KRB5_BAD_ENCTYPE;
-    ctp = &krb5int_cksumtypes_list[i];
 
-    if (ctp->keyhash != NULL)
-        cksum_data.length = ctp->keyhash->hashsize;
-    else
-        cksum_data.length = ctp->hash->hashsize;
-
-    if (ctp->trunc_size != 0)
-        cksumlen = ctp->trunc_size;
-    else
-        cksumlen = cksum_data.length;
+    ret = verify_key(ctp, key);
+    if (ret != 0)
+        return ret;
 
     checksum = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_CHECKSUM);
-    if (checksum == NULL || checksum->data.length < cksumlen)
+    if (checksum == NULL || checksum->data.length < ctp->output_size)
         return(KRB5_BAD_MSIZE);
 
-    cksum_data.data = malloc(cksum_data.length);
-    if (cksum_data.data == NULL)
-        return(ENOMEM);
+    ret = alloc_data(&cksum_data, ctp->compute_size);
+    if (ret != 0)
+        return ret;
 
-    ret = krb5int_c_make_checksum_iov(&krb5int_cksumtypes_list[i],
-                                      key, usage, data, num_data,
-                                      &cksum_data);
-    if (ret == 0) {
-        memcpy(checksum->data.data, cksum_data.data, cksumlen);
-        checksum->data.length = cksumlen;
-    }
+    ret = ctp->checksum(ctp, key, usage, data, num_data, &cksum_data);
+    if (ret != 0)
+        goto cleanup;
 
-    free(cksum_data.data);
+    memcpy(checksum->data.data, cksum_data.data, ctp->output_size);
+    checksum->data.length = ctp->output_size;
 
-    return(ret);
+cleanup:
+    zapfree(cksum_data.data, ctp->compute_size);
+    return ret;
 }
 
 krb5_error_code KRB5_CALLCONV

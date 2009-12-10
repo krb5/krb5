@@ -285,7 +285,7 @@ krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec,
     if (nblocks == 1) {
         if (input_length != BLOCK_SIZE)
             return KRB5_BAD_MSIZE;
-        ret = cbc_enc(key, ivec, data, num_data);
+        ret = cbc_decr(key, ivec, data, num_data);
     } else if (nblocks > 1) {
         ret = cts_decr(key, ivec, data, num_data, input_length);
     }
@@ -309,6 +309,7 @@ const struct krb5_enc_provider krb5int_enc_aes128 = {
     16, 16,
     krb5int_aes_encrypt,
     krb5int_aes_decrypt,
+    NULL,
     krb5int_aes_make_key,
     krb5int_aes_init_state,
     krb5int_default_free_state
@@ -319,6 +320,7 @@ const struct krb5_enc_provider krb5int_enc_aes256 = {
     32, 32,
     krb5int_aes_encrypt,
     krb5int_aes_decrypt,
+    NULL,
     krb5int_aes_make_key,
     krb5int_aes_init_state,
     krb5int_default_free_state

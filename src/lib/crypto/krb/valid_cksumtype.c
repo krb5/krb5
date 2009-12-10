@@ -31,12 +31,10 @@
 krb5_boolean KRB5_CALLCONV
 krb5_c_valid_cksumtype(krb5_cksumtype ctype)
 {
-    unsigned int i;
+    const struct krb5_cksumtypes *ctp;
 
-    for (i = 0; i < krb5int_cksumtypes_length; i++) {
-        if (krb5int_cksumtypes_list[i].ctype == ctype)
-            return TRUE;
-    }
-
-    return FALSE;
+    ctp = find_cksumtype(ctype);
+    if (ctp == NULL)
+        return FALSE;
+    return TRUE;
 }

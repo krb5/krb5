@@ -38,62 +38,42 @@ krb5_k_verify_checksum_iov(krb5_context context,
                            size_t num_data,
                            krb5_boolean *valid)
 {
-    unsigned int i;
     const struct krb5_cksumtypes *ctp;
-    size_t cksumlen;
     krb5_error_code ret;
     krb5_data computed;
     krb5_crypto_iov *checksum;
 
-    for (i = 0; i < krb5int_cksumtypes_length; i++) {
-        if (krb5int_cksumtypes_list[i].ctype == checksum_type)
-            break;
-    }
-    if (i == krb5int_cksumtypes_length)
+    ctp = find_cksumtype(checksum_type);
+    if (ctp == NULL)
         return KRB5_BAD_ENCTYPE;
-    ctp = &krb5int_cksumtypes_list[i];
+
+    ret = verify_key(ctp, key);
+    if (ret != 0)
+        return ret;
 
     checksum = krb5int_c_locate_iov((krb5_crypto_iov *)data, num_data,
                                     KRB5_CRYPTO_TYPE_CHECKSUM);
-    if (checksum == NULL)
-        return(KRB5_BAD_MSIZE);
-
-    /* If there's actually a verify function, call it. */
-    if (ctp->keyhash && ctp->keyhash->verify_iov) {
-        return (*ctp->keyhash->verify_iov)(key, usage, data, num_data,
-                                           &checksum->data, valid);
-    }
-
-    /* Otherwise, make the checksum again, and compare. */
-    if (ctp->keyhash != NULL)
-        computed.length = ctp->keyhash->hashsize;
-    else
-        computed.length = ctp->hash->hashsize;
-
-    if (ctp->trunc_size != 0)
-        cksumlen = ctp->trunc_size;
-    else
-        cksumlen = computed.length;
-
-    if (checksum->data.length != cksumlen)
+    if (checksum == NULL || checksum->data.length != ctp->output_size)
         return KRB5_BAD_MSIZE;
 
-    computed.data = malloc(computed.length);
-    if (computed.data == NULL)
-        return ENOMEM;
-
-    ret = krb5int_c_make_checksum_iov(&krb5int_cksumtypes_list[i], key, usage,
-                                      data, num_data, &computed);
-    if (ret) {
-        free(computed.data);
-        return ret;
+    /* If there's actually a verify function, call it. */
+    if (ctp->verify != NULL) {
+        return ctp->verify(ctp, key, usage, data, num_data, &checksum->data,
+                           valid);
     }
 
-    *valid = (computed.length == cksumlen) &&
-        (memcmp(computed.data, checksum->data.data, cksumlen) == 0);
+    ret = alloc_data(&computed, ctp->compute_size);
+    if (ret != 0)
+        return ret;
 
-    free(computed.data);
-    return 0;
+    ret = ctp->checksum(ctp, key, usage, data, num_data, &computed);
+    if (ret == 0) {
+        *valid = (memcmp(computed.data, checksum->data.data,
+                         ctp->output_size) == 0);
+    }
+
+    zapfree(computed.data, ctp->compute_size);
+    return ret;
 }
 
 krb5_error_code KRB5_CALLCONV

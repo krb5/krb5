@@ -83,8 +83,6 @@ krb5_k_prf
 krb5_k_reference_key
 krb5_k_verify_checksum
 krb5_k_verify_checksum_iov
-krb5int_keyhash_md4des
-krb5int_keyhash_md5des
 mit_crc32
 krb5int_aes_encrypt
 krb5int_MD4Init
