@@ -69,6 +69,7 @@ krb5int_confounder_checksum(const struct krb5_cksumtypes *ctp,
     krb5_crypto_iov *hash_iov, iov;
     size_t blocksize = ctp->enc->block_size, hashsize = ctp->hash->hashsize;
 
+    /* Partition the output buffer into confounder and hash. */
     conf = make_data(output->data, blocksize);
     hashval = make_data(output->data + blocksize, hashsize);
 
@@ -92,7 +93,7 @@ krb5int_confounder_checksum(const struct krb5_cksumtypes *ctp,
     if (ret != 0)
 	goto cleanup;
 
-    /* Encrypt the confounder and hash value. */
+    /* Confounder and hash are in output buffer; encrypt them in place. */
     iov.flags = KRB5_CRYPTO_TYPE_DATA;
     iov.data = *output;
     ret = ctp->enc->encrypt(xorkey, NULL, &iov, 1);
