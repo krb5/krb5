@@ -45,7 +45,7 @@ mk_xorkey(krb5_key origkey, krb5_key *xorkey)
     if (xorbytes == NULL)
 	return ENOMEM;
     memcpy(xorbytes, origkey->keyblock.contents, origkey->keyblock.length);
-    for (i = 0; i < sizeof(xorbytes); i++)
+    for (i = 0; i < origkey->keyblock.length; i++)
         xorbytes[i] ^= 0xf0;
 
     /* Do a shallow copy here. */
