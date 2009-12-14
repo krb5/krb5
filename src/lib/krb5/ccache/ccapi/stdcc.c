@@ -805,7 +805,7 @@ krb5_stdccv3_get_flags (krb5_context context,
 krb5_error_code KRB5_CALLCONV
 krb5_stdccv3_remove (krb5_context context,
                      krb5_ccache id,
-                     krb5_flags flags,
+                     krb5_flags whichfields,
                      krb5_creds *in_creds)
 {
     krb5_error_code err = 0;
@@ -836,7 +836,10 @@ krb5_stdccv3_remove (krb5_context context,
                                                    credentials->data, &creds);
 
             if (!err) {
-                found = krb5_creds_compare (context, in_creds, &creds);
+                found = krb5int_cc_creds_match_request(context,
+                                                       whichfields,
+                                                       in_creds,
+                                                       &creds);
                 krb5_free_cred_contents (context, &creds);
             }
 

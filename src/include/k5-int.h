@@ -257,6 +257,7 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_V4_INSTANCE_CONVERT         "v4_instance_convert"
 #define KRB5_CONF_V4_REALM                    "v4_realm"
 #define KRB5_CONF_ASTERISK                    "*"
+#define KRB5_CONF_FAST_AVAIL                  "fast_avail"
 
 /* Error codes used in KRB_ERROR protocol messages.
    Return values of library routines are based on a different error table
@@ -1129,6 +1130,8 @@ typedef struct _krb5_gic_opt_private {
     int num_preauth_data;
     krb5_gic_opt_pa_data *preauth_data;
     char * fast_ccache_name;
+    krb5_ccache out_ccache;
+    krb5_flags fast_flags;
 } krb5_gic_opt_private;
 
 /*
@@ -1623,6 +1626,8 @@ encode_krb5_enc_priv_part(const krb5_priv_enc_part *rep, krb5_data **code);
 
 krb5_error_code
 encode_krb5_cred(const krb5_cred *rep, krb5_data **code);
+krb5_error_code
+encode_krb5_checksum(const krb5_checksum *, krb5_data **);
 
 krb5_error_code
 encode_krb5_enc_cred_part(const krb5_cred_enc_part *rep, krb5_data **code);
@@ -1851,6 +1856,8 @@ decode_krb5_priv(const krb5_data *output, krb5_priv **rep);
 
 krb5_error_code
 decode_krb5_enc_priv_part(const krb5_data *output, krb5_priv_enc_part **rep);
+krb5_error_code
+decode_krb5_checksum(const krb5_data *, krb5_checksum **);
 
 krb5_error_code
 decode_krb5_cred(const krb5_data *output, krb5_cred **rep);

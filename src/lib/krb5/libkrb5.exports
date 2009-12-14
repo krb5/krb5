@@ -53,6 +53,7 @@ encode_krb5_as_rep
 encode_krb5_as_req
 encode_krb5_authdata
 encode_krb5_authenticator
+encode_krb5_checksum
 encode_krb5_cred
 encode_krb5_enc_cred_part
 encode_krb5_enc_data
@@ -171,6 +172,7 @@ krb5_cc_dfl_ops
 krb5_cc_end_seq_get
 krb5_cc_file_ops
 krb5_cc_gen_new
+krb5_cc_get_config
 krb5_cc_get_name
 krb5_cc_get_principal
 krb5_cc_get_type
@@ -182,6 +184,7 @@ krb5_cc_remove_cred
 krb5_cc_resolve
 krb5_cc_retrieve_cred
 krb5_cc_retrieve_cred_default
+krb5_cc_set_config
 krb5_cc_set_default_name
 krb5_cc_set_flags
 krb5_cc_start_seq_get
@@ -330,6 +333,7 @@ krb5_get_init_creds_keytab
 krb5_get_init_creds_opt_alloc
 krb5_get_init_creds_opt_free
 krb5_get_init_creds_opt_free_pa
+krb5_get_init_creds_opt_get_fast_flags
 krb5_get_init_creds_opt_get_pa
 krb5_get_init_creds_opt_init
 krb5_get_init_creds_opt_set_address_list
@@ -337,7 +341,9 @@ krb5_get_init_creds_opt_set_canonicalize
 krb5_get_init_creds_opt_set_change_password_prompt
 krb5_get_init_creds_opt_set_etype_list
 krb5_get_init_creds_opt_set_fast_ccache_name
+krb5_get_init_creds_opt_set_fast_flags
 krb5_get_init_creds_opt_set_forwardable
+krb5_get_init_creds_opt_set_out_ccache
 krb5_get_init_creds_opt_set_pa
 krb5_get_init_creds_opt_set_preauth_list
 krb5_get_init_creds_opt_set_proxiable
@@ -371,6 +377,7 @@ krb5_init_creds_store_creds
 krb5_init_keyblock
 krb5_init_secure_context
 krb5_internalize_opaque
+krb5_is_config_principal
 krb5_is_permitted_enctype
 krb5_is_referral_realm
 krb5_is_thread_safe

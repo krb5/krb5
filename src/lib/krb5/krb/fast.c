@@ -56,7 +56,7 @@
 static krb5_error_code
 fast_armor_ap_request(krb5_context context,
                       struct krb5int_fast_request_state *state,
-                      krb5_ccache ccache, krb5_data *target_realm)
+                      krb5_ccache ccache, krb5_principal target_principal)
 {
     krb5_error_code retval = 0;
     krb5_creds creds, *out_creds = NULL;
@@ -66,9 +66,8 @@ fast_armor_ap_request(krb5_context context,
     krb5_keyblock *subkey = NULL, *armor_key = NULL;
     encoded_authenticator.data = NULL;
     memset(&creds, 0, sizeof(creds));
-    retval = krb5_tgtname(context, target_realm, target_realm, &creds.server);
-    if (retval ==0)
-        retval = krb5_cc_get_principal(context, ccache, &creds.client);
+    creds.server = target_principal;
+    retval = krb5_cc_get_principal(context, ccache, &creds.client);
     if (retval == 0)
         retval = krb5_get_credentials(context, 0, ccache,  &creds, &out_creds);
     if (retval == 0)
@@ -98,6 +97,8 @@ fast_armor_ap_request(krb5_context context,
     krb5_free_keyblock(context, subkey);
     if (out_creds)
         krb5_free_creds(context, out_creds);
+    /* target_principal is owned by caller. */
+    creds.server = NULL;
     krb5_free_cred_contents(context, &creds);
     if (encoded_authenticator.data)
         krb5_free_data_contents(context, &encoded_authenticator);
@@ -138,13 +139,34 @@ krb5int_fast_as_armor(krb5_context context,
 {
     krb5_error_code retval = 0;
     krb5_ccache ccache = NULL;
+    krb5_principal target_principal = NULL;
+    krb5_data *target_realm;
     krb5_clear_error_message(context);
+    target_realm = krb5_princ_realm(context, request->server);
     if (opte->opt_private->fast_ccache_name) {
+        state->fast_state_flags |= KRB5INT_FAST_ARMOR_AVAIL;
         retval = krb5_cc_resolve(context, opte->opt_private->fast_ccache_name,
                                  &ccache);
-        if (retval==0)
+        if (retval == 0) {
+            retval = krb5_tgtname(context, target_realm, target_realm,
+                                  &target_principal);
+        }
+        if (retval == 0) {
+            krb5_data config_data;
+            config_data.data = NULL;
+            retval = krb5_cc_get_config(context, ccache, target_principal,
+                                        KRB5_CONF_FAST_AVAIL, &config_data);
+            if ((retval == 0) && config_data.data )
+                state->fast_state_flags |= KRB5INT_FAST_DO_FAST;
+            krb5_free_data_contents(context, &config_data);
+            retval = 0;
+        }
+        if (opte->opt_private->fast_flags& KRB5_FAST_REQUIRED)
+            state->fast_state_flags |= KRB5INT_FAST_DO_FAST;
+        if (retval == 0 && (state->fast_state_flags & KRB5INT_FAST_DO_FAST)) {
             retval = fast_armor_ap_request(context, state, ccache,
-                                           krb5_princ_realm(context, request->server));
+                                           target_principal);
+        }
         if (retval != 0) {
             const char * errmsg;
             errmsg = krb5_get_error_message(context, retval);
@@ -156,6 +178,8 @@ krb5int_fast_as_armor(krb5_context context,
     }
     if (ccache)
         krb5_cc_close(context, ccache);
+    if (target_principal)
+        krb5_free_principal(context, target_principal);
     return retval;
 }
 
@@ -527,4 +551,62 @@ krb5int_find_pa_data(krb5_context context, krb5_pa_data *const *padata,
     }
 
     return *tmppa;
+}
+
+
+krb5_error_code
+krb5int_fast_verify_nego(krb5_context context,
+                         struct krb5int_fast_request_state *state,
+                         krb5_kdc_rep *rep, krb5_data *request,
+                         krb5_keyblock *decrypting_key,
+                         krb5_boolean *fast_avail)
+{
+    krb5_error_code retval = 0;
+    krb5_checksum *checksum = NULL;
+    krb5_pa_data *pa;
+    krb5_data scratch;
+    krb5_boolean valid;
+
+    if (rep->enc_part2->flags& TKT_FLG_ENC_PA_REP) {
+        pa = krb5int_find_pa_data(context, rep->enc_part2->enc_padata,
+                                  KRB5_ENCPADATA_REQ_ENC_PA_REP);
+        if (pa == NULL)
+            retval = KRB5_KDCREP_MODIFIED;
+        else {
+            scratch.data = (char *) pa->contents;
+            scratch.length = pa->length;
+        }
+        if (retval == 0)
+            retval = decode_krb5_checksum(&scratch, &checksum);
+        if (retval == 0)
+            retval = krb5_c_verify_checksum(context, decrypting_key,
+                                            KRB5_KEYUSAGE_AS_REQ,
+                                            request, checksum, &valid);
+        if (retval == 0 &&valid == 0)
+            retval = KRB5_KDCREP_MODIFIED;
+        if (retval == 0) {
+            pa = krb5int_find_pa_data(context, rep->enc_part2->enc_padata,
+                                      KRB5_PADATA_FX_FAST);
+            *fast_avail = (pa != NULL);
+        }
+    }
+    if (checksum)
+        krb5_free_checksum(context, checksum);
+    return retval;
+}
+
+krb5_boolean
+krb5int_upgrade_to_fast_p(krb5_context context,
+                          struct krb5int_fast_request_state *state,
+                          krb5_pa_data **padata)
+{
+    if (state->armor_key != NULL)
+        return 0; /*already using FAST*/
+    if (!(state->fast_state_flags & KRB5INT_FAST_ARMOR_AVAIL))
+        return 0;
+    if (krb5int_find_pa_data(context, padata, KRB5_PADATA_FX_FAST) != NULL) {
+        state->fast_state_flags |= KRB5INT_FAST_DO_FAST;
+        return 1;
+    }
+    return 0;
 }
