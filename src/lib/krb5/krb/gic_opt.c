@@ -149,8 +149,10 @@ krb5int_gic_opte_private_free(krb5_context context, krb5_gic_opt_ext *opte)
         free_gic_opt_ext_preauth_data(context, opte);
     if (opte->opt_private->fast_ccache_name)
         free(opte->opt_private->fast_ccache_name);
+#if 0
     if (opte->opt_private->out_ccache)
         krb5_cc_close(context, opte->opt_private->out_ccache);
+#endif
     free(opte->opt_private);
     opte->opt_private = NULL;
     return 0;
@@ -496,18 +498,28 @@ krb5_get_init_creds_opt_set_out_ccache(krb5_context context,
 {
     krb5_error_code retval = 0;
     krb5_gic_opt_ext *opte;
+    const char *name, *prefix;
+    char *ccname;
 
     retval = krb5int_gic_opt_to_opte(context, opt, &opte, 0,
                                      "krb5_get_init_creds_opt_set_out_ccache");
     if (retval)
         return retval;
+
     if (opte->opt_private->out_ccache) {
-        krb5_cc_close(context,  opte->opt_private->out_ccache);
+        krb5_cc_close(context, opte->opt_private->out_ccache);
         opte->opt_private->out_ccache = NULL;
     }
-    retval = krb5_cc_resolve(context, krb5_cc_get_name(context, ccache),
-                            &opte->opt_private->out_ccache);
-        return retval;
+
+    prefix = krb5_cc_get_type(context, ccache);
+    name = krb5_cc_get_name(context, ccache);
+    if (asprintf(&ccname, "%s:%s", prefix, name) < 0)
+        return ENOMEM;
+
+    retval = krb5_cc_resolve(context, ccname, &opte->opt_private->out_ccache);
+    free(ccname);
+
+    return retval;
 }
 
 krb5_error_code KRB5_CALLCONV
