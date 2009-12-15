@@ -42,7 +42,9 @@
 #endif /* ECHO_PASSWORD */
 
 krb5_error_code
-krb5_read_password(krb5_context context, const char *prompt, const char *prompt2, char *return_pwd, unsigned int *size_return)
+krb5_read_password(krb5_context context,
+                   const char *prompt, const char *prompt2,
+                   char *return_pwd, unsigned int *size_return)
 {
     krb5_data reply_data;
     krb5_prompt k5prompt;
@@ -117,12 +119,11 @@ center_dialog(HWND hwnd)
 
 #ifdef _WIN32
 static krb5_error_code
-read_console_password(
-    krb5_context        context,
-    const char          * prompt,
-    const char          * prompt2,
-    char                * password,
-    int                 * pwsize)
+read_console_password(krb5_context        context,
+                      const char          * prompt,
+                      const char          * prompt2,
+                      char                * password,
+                      int                 * pwsize)
 {
     HANDLE              handle;
     DWORD               old_mode, new_mode;
