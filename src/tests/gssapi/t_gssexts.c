@@ -278,24 +278,6 @@ initAcceptSecContext(OM_uint32 *minor,
         testPrf(minor, initiator_context, acceptor_context, GSS_C_PRF_KEY_PARTIAL);
     }
 
-    {
-        gss_context_stream_sizes sizes;
-
-        major = gss_context_query_attributes(minor, acceptor_context,
-                                             GSS_C_ATTR_STREAM_SIZES,
-                                             &sizes, sizeof(sizes));
-        if (major == GSS_S_COMPLETE) {
-            printf("\nContext attributes:\n");
-            printf("-----------------------------------\n\n");
-            printf("Header length:    %ld\n", sizes.header);
-            printf("Trailer length:   %ld\n", sizes.trailer);
-            printf("Maximum msg size: %ld\n", sizes.max_msg_size);
-            printf("Extra buffers:    %ld\n", sizes.buffers);
-            printf("Block size:       %ld\n", sizes.blocksize);
-        } else
-            displayStatus("gss_context_query_attributes", major, *minor);
-    }
-
     (void) gss_release_name(&tmp_minor, &source_name);
     (void) gss_delete_sec_context(&tmp_minor, &acceptor_context, NULL);
     (void) gss_delete_sec_context(minor, &initiator_context, NULL);
