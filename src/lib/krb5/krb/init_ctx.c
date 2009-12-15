@@ -61,10 +61,6 @@
 #include "../krb5_libinit.h"
 #endif
 
-/* This must be the largest enctype value defined in krb5.h, plus the number of
- * enctypes with negative numbers. */
-#define MAX_ENCTYPE ENCTYPE_ARCFOUR_HMAC_EXP
-
 /* The des-mdX entries are last for now, because it's easy to
    configure KDCs to issue TGTs with des-mdX keys and then not accept
    them.  This'll be fixed, but for better compatibility, let's prefer
@@ -348,33 +344,50 @@ krb5_set_default_tgs_ktypes(krb5_context context, const krb5_enctype *etypes)
 }
 
 /*
- * Add etype to, or remove etype from, list (of size MAX_ENCTYPE + 1)
- * which has *count entries.  Filter out weak enctypes if allow_weak
- * is false.
+ * Add etype to, or remove etype from, the zero-terminated list *list_ptr,
+ * reallocating if the list size changes.  Filter out weak enctypes if
+ * allow_weak is false.  If memory allocation fails, set *list_ptr to NULL and
+ * do nothing for subsequent operations.
  */
 static void
 mod_list(krb5_enctype etype, krb5_boolean add, krb5_boolean allow_weak,
-         krb5_enctype *list, unsigned int *count)
+         krb5_enctype **list_ptr)
 {
-    unsigned int i;
+    size_t i;
+    krb5_enctype *list = *list_ptr;
 
-    assert(etype <= MAX_ENCTYPE);
-    if (!allow_weak && krb5int_c_weak_enctype(etype))
+    /* Stop now if a previous allocation failed or the enctype is filtered. */
+    if (list == NULL || (!allow_weak && krb5int_c_weak_enctype(etype)))
         return;
-    for (i = 0; i < *count; i++) {
-        if (list[i] == etype) {
-            if (!add) {
-                for (; i < *count - 1; i++)
-                    list[i] = list[i + 1];
-                (*count)--;
-            }
-            return;
+    if (add) {
+        /* Count entries; do nothing if etype is a duplicate. */
+        for (i = 0; list[i] != 0; i++) {
+            if (list[i] == etype)
+                return;
+        }
+        /* Make room for the new entry and add it. */
+        list = realloc(list, (i + 2) * sizeof(krb5_enctype));
+        if (list != NULL) {
+            list[i] = etype;
+            list[i + 1] = 0;
+        }
+    } else {
+        /* Look for etype in the list. */
+        for (i = 0; list[i] != 0; i++) {
+            if (list[i] != etype)
+                continue;
+            /* Perform removal. */
+            for (; list[i + 1] != 0; i++)
+                list[i] = list[i + 1];
+            list[i] = 0;
+            list = realloc(list, (i + 1) * sizeof(krb5_enctype));
+            break;
         }
     }
-    if (add) {
-        assert(*count < MAX_ENCTYPE);
-        list[(*count)++] = etype;
-    }
+    /* Update *list_ptr, freeing the old value if realloc failed. */
+    if (list == NULL)
+        free(*list_ptr);
+    *list_ptr = list;
 }
 
 /*
@@ -387,10 +400,15 @@ krb5int_parse_enctype_list(krb5_context context, char *profstr,
 {
     char *token, *delim = " \t\r\n,", *save = NULL;
     krb5_boolean sel, weak = context->allow_weak_crypto;
-    krb5_enctype etype, list[MAX_ENCTYPE];
-    unsigned int i, count = 0;
+    krb5_enctype etype, *list;
+    unsigned int i;
 
     *result = NULL;
+
+    /* Set up an empty list.  Allocation failure is detected at the end. */
+    list = malloc(sizeof(krb5_enctype));
+    if (list != NULL)
+        list[0] = 0;
 
     /* Walk through the words in profstr. */
     for (token = strtok_r(profstr, delim, &save); token;
@@ -403,26 +421,28 @@ krb5int_parse_enctype_list(krb5_context context, char *profstr,
         if (strcasecmp(token, "DEFAULT") == 0) {
             /* Set all enctypes in the default list. */
             for (i = 0; default_list[i]; i++)
-                mod_list(default_list[i], sel, weak, list, &count);
+                mod_list(default_list[i], sel, weak, &list);
         } else if (strcasecmp(token, "des") == 0) {
-            mod_list(ENCTYPE_DES_CBC_CRC, sel, weak, list, &count);
-            mod_list(ENCTYPE_DES_CBC_MD5, sel, weak, list, &count);
-            mod_list(ENCTYPE_DES_CBC_MD4, sel, weak, list, &count);
+            mod_list(ENCTYPE_DES_CBC_CRC, sel, weak, &list);
+            mod_list(ENCTYPE_DES_CBC_MD5, sel, weak, &list);
+            mod_list(ENCTYPE_DES_CBC_MD4, sel, weak, &list);
         } else if (strcasecmp(token, "des3") == 0) {
-            mod_list(ENCTYPE_DES3_CBC_SHA1, sel, weak, list, &count);
+            mod_list(ENCTYPE_DES3_CBC_SHA1, sel, weak, &list);
         } else if (strcasecmp(token, "aes") == 0) {
-            mod_list(ENCTYPE_AES256_CTS_HMAC_SHA1_96, sel, weak, list, &count);
-            mod_list(ENCTYPE_AES128_CTS_HMAC_SHA1_96, sel, weak, list, &count);
+            mod_list(ENCTYPE_AES256_CTS_HMAC_SHA1_96, sel, weak, &list);
+            mod_list(ENCTYPE_AES128_CTS_HMAC_SHA1_96, sel, weak, &list);
         } else if (strcasecmp(token, "rc4") == 0) {
-            mod_list(ENCTYPE_ARCFOUR_HMAC, sel, weak, list, &count);
+            mod_list(ENCTYPE_ARCFOUR_HMAC, sel, weak, &list);
         } else if (krb5_string_to_enctype(token, &etype) == 0) {
             /* Set a specific enctype. */
-            mod_list(etype, sel, weak, list, &count);
+            mod_list(etype, sel, weak, &list);
         }
     }
 
-    list[count] = 0;
-    return copy_enctypes(context, list, result);
+    if (list == NULL)
+        return ENOMEM;
+    *result = list;
+    return 0;
 }
 
 /*
