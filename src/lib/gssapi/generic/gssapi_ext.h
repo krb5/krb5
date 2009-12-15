@@ -264,15 +264,6 @@ typedef struct gss_context_stream_sizes_struct {
 
 GSS_DLLIMP extern gss_OID GSS_C_ATTR_STREAM_SIZES;
 
-OM_uint32 KRB5_CALLCONV gss_context_query_attributes
-(
-    OM_uint32 *,        /* minor_status */
-    const gss_ctx_id_t, /* context_handle */
-    const gss_OID,      /* attribute */
-    void *,             /* data */
-    size_t              /* len */
-);
-
 /*
  * Protocol transition
  */

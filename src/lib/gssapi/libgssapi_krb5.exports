@@ -18,7 +18,6 @@ gss_add_oid_set_member
 gss_canonicalize_name
 gss_compare_name
 gss_complete_auth_token
-gss_context_query_attributes
 gss_context_time
 gss_create_empty_buffer_set
 gss_create_empty_oid_set

@@ -1052,16 +1052,6 @@ gss_krb5int_extract_authtime_from_sec_context(OM_uint32 *,
                                               const gss_OID,
                                               gss_buffer_set_t *);
 
-#define GSS_KRB5_CONTEXT_ATTR_STREAM_SIZES_LENGTH   10
-#define GSS_KRB5_CONTEXT_ATTR_STREAM_SIZES          "\x2a\x86\x48\x86\xf7\x12\x01\x02\x01\x03"
-
-OM_uint32
-gss_krb5int_context_query_stream_sizes(OM_uint32 *minor_status,
-                                       const gss_ctx_id_t context_handle,
-                                       const gss_OID desired_oid,
-                                       void *data,
-                                       size_t len);
-
 #ifdef _GSS_STATIC_LINK
 int gss_krb5int_lib_init(void);
 void gss_krb5int_lib_fini(void);

@@ -530,16 +530,6 @@ spnego_gss_pseudo_random
 	gss_buffer_t prf_out
 );
 
-OM_uint32
-spnego_gss_context_query_attributes
-(
-	OM_uint32 *minor_status,
-	const gss_ctx_id_t context_handle,
-	const gss_OID desired_object,
-	void *data,
-	size_t length
-);
-
 #ifdef	__cplusplus
 }
 #endif

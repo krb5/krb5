@@ -269,7 +269,6 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_map_name_to_any,
 	spnego_gss_release_any_name_mapping,
 	spnego_gss_pseudo_random,
-	spnego_gss_context_query_attributes,
 };
 
 #ifdef _GSS_STATIC_LINK
@@ -2504,24 +2503,6 @@ spnego_gss_pseudo_random(OM_uint32 *minor_status,
                                 prf_out);
         return (ret);
 }
-
-OM_uint32
-spnego_gss_context_query_attributes(
-		OM_uint32 *minor_status,
-		const gss_ctx_id_t context_handle,
-		const gss_OID desired_object,
-		void *data,
-		size_t length)
-{
-	OM_uint32 ret;
-	ret = gss_context_query_attributes(minor_status,
-			    context_handle,
-			    desired_object,
-			    data,
-			    length);
-	return (ret);
-}
-
 
 /*
  * We will release everything but the ctx_handle so that it

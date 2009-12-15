@@ -583,15 +583,6 @@ typedef struct gss_config {
             gss_buffer_t                /* prf_out */
         /* */);
 
-	OM_uint32       (*gss_context_query_attributes)
-    	(
-    	    OM_uint32 *,	/* minor_status */
-    	    const gss_ctx_id_t, /* context_handle */
-    	    const gss_OID,      /* OID */
-    	    void *,             /* data */
-    	    size_t              /* length */
-        /* */ );
-
 } *gss_mechanism;
 
 /* This structure MUST NOT be used by any code outside libgss */
