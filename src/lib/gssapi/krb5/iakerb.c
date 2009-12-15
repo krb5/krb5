@@ -53,6 +53,7 @@ struct _iakerb_ctx_id_rec {
     } u;
     krb5_data conv;                     /* conversation for checksumming */
     unsigned int count;                 /* number of round trips */
+    krb5_get_init_creds_opt *gic_opts;
 };
 
 #define IAKERB_MAX_HOPS ( 16 /* MAX_IN_TKT_LOOPS */ + KRB5_REFERRAL_MAXHOPS )
@@ -83,6 +84,7 @@ iakerb_release_context(iakerb_ctx_id_t ctx)
         break;
     }
     krb5_free_data_contents(ctx->k5c, &ctx->conv);
+    krb5_get_init_creds_opt_free(ctx->k5c, ctx->gic_opts);
     krb5_free_context(ctx->k5c);
     free(ctx);
 }
@@ -441,7 +443,6 @@ iakerb_init_creds_ctx(iakerb_ctx_id_t ctx,
                       OM_uint32 time_req)
 {
     krb5_error_code code;
-    krb5_get_init_creds_opt opts;
 
     if (cred->iakerb_mech == 0 || cred->password.data == NULL) {
         code = EINVAL;
@@ -451,16 +452,24 @@ iakerb_init_creds_ctx(iakerb_ctx_id_t ctx,
     assert(cred->name != NULL);
     assert(cred->name->princ != NULL);
 
-    krb5_get_init_creds_opt_init(&opts);
+    code = krb5_get_init_creds_opt_alloc(ctx->k5c, &ctx->gic_opts);
+    if (code != 0)
+        goto cleanup;
+
     if (time_req != 0 && time_req != GSS_C_INDEFINITE)
-        krb5_get_init_creds_opt_set_tkt_life(&opts, time_req);
+        krb5_get_init_creds_opt_set_tkt_life(ctx->gic_opts, time_req);
+
+    code = krb5_get_init_creds_opt_set_out_ccache(ctx->k5c, ctx->gic_opts,
+                                                  cred->ccache);
+    if (code != 0)
+        goto cleanup;
 
     code = krb5_init_creds_init(ctx->k5c,
                                 cred->name->princ,
                                 NULL,   /* prompter */
                                 NULL,   /* data */
                                 0,      /* start_time */
-                                &opts,
+                                ctx->gic_opts,
                                 &ctx->u.icc);
     if (code != 0)
         goto cleanup;
@@ -591,11 +600,6 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
         if (code != 0)
             goto cleanup;
         if (flags != 0) {
-            code = krb5_init_creds_store_creds(ctx->k5c, ctx->u.icc,
-                                               cred->ccache);
-            if (code != 0)
-                goto cleanup;
-
             krb5_init_creds_get_times(ctx->k5c, ctx->u.icc, &times);
             cred->tgt_expire = times.endtime;
 
