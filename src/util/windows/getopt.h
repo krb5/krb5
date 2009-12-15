@@ -1,3 +1,4 @@
+/* -*- mode: c; c-file-style: "bsd"; indent-tabs-mode: t -*- */
 #ifndef __GETOPT_H__
 #define __GETOPT_H__
 

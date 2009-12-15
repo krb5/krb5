@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -30,24 +31,24 @@
 #endif
 
 /*
-n-fold(k-bits):
-  l = lcm(n,k)
-  r = l/k
-  s = k-bits | k-bits rot 13 | k-bits rot 13*2 | ... | k-bits rot 13*(r-1)
-  compute the 1's complement sum:
-	n-fold = s[0..n-1]+s[n..2n-1]+s[2n..3n-1]+..+s[(k-1)*n..k*n-1]
-*/
+ * n-fold(k-bits):
+ * l = lcm(n,k)
+ * r = l/k
+ * s = k-bits | k-bits rot 13 | k-bits rot 13*2 | ... | k-bits rot 13*(r-1)
+ * compute the 1's complement sum:
+ * n-fold = s[0..n-1]+s[n..2n-1]+s[2n..3n-1]+..+s[(k-1)*n..k*n-1]
+ */
 
 /* representation: msb first, assume n and k are multiples of 8, and
-   that k>=16.  this is the case of all the cryptosystems which are
-   likely to be used.  this function can be replaced if that
-   assumption ever fails.  */
+ * that k>=16.  this is the case of all the cryptosystems which are
+ * likely to be used.  this function can be replaced if that
+ * assumption ever fails.  */
 
 /* input length is in bits */
 
 void
 krb5int_nfold(unsigned int inbits, const unsigned char *in, unsigned int outbits,
-	   unsigned char *out)
+              unsigned char *out)
 {
     int a,b,c,lcm;
     int byte, i, msbit;
@@ -64,9 +65,9 @@ krb5int_nfold(unsigned int inbits, const unsigned char *in, unsigned int outbits
     b = inbits;
 
     while(b != 0) {
-	c = b;
-	b = a%b;
-	a = c;
+        c = b;
+        b = a%b;
+        a = c;
     }
 
     lcm = outbits*inbits/a;
@@ -79,51 +80,51 @@ krb5int_nfold(unsigned int inbits, const unsigned char *in, unsigned int outbits
     /* this will end up cycling through k lcm(k,n)/k times, which
        is correct */
     for (i=lcm-1; i>=0; i--) {
-	/* compute the msbit in k which gets added into this byte */
-	msbit = (/* first, start with the msbit in the first, unrotated
-		    byte */
-		 ((inbits<<3)-1)
-		 /* then, for each byte, shift to the right for each
-		    repetition */
-		 +(((inbits<<3)+13)*(i/inbits))
-		 /* last, pick out the correct byte within that
-		    shifted repetition */
-		 +((inbits-(i%inbits))<<3)
-		 )%(inbits<<3);
+        /* compute the msbit in k which gets added into this byte */
+        msbit = (/* first, start with the msbit in the first, unrotated
+                    byte */
+            ((inbits<<3)-1)
+            /* then, for each byte, shift to the right for each
+               repetition */
+            +(((inbits<<3)+13)*(i/inbits))
+            /* last, pick out the correct byte within that
+               shifted repetition */
+            +((inbits-(i%inbits))<<3)
+        )%(inbits<<3);
 
-	/* pull out the byte value itself */
-	byte += (((in[((inbits-1)-(msbit>>3))%inbits]<<8)|
-		  (in[((inbits)-(msbit>>3))%inbits]))
-		 >>((msbit&7)+1))&0xff;
+        /* pull out the byte value itself */
+        byte += (((in[((inbits-1)-(msbit>>3))%inbits]<<8)|
+                  (in[((inbits)-(msbit>>3))%inbits]))
+                 >>((msbit&7)+1))&0xff;
 
-	/* do the addition */
-	byte += out[i%outbits];
-	out[i%outbits] = byte&0xff;
+        /* do the addition */
+        byte += out[i%outbits];
+        out[i%outbits] = byte&0xff;
 
 #if 0
-	printf("msbit[%d] = %d\tbyte = %02x\tsum = %03x\n", i, msbit,
-	       (((in[((inbits-1)-(msbit>>3))%inbits]<<8)|
-		 (in[((inbits)-(msbit>>3))%inbits]))
-		>>((msbit&7)+1))&0xff, byte);
+        printf("msbit[%d] = %d\tbyte = %02x\tsum = %03x\n", i, msbit,
+               (((in[((inbits-1)-(msbit>>3))%inbits]<<8)|
+                 (in[((inbits)-(msbit>>3))%inbits]))
+                >>((msbit&7)+1))&0xff, byte);
 #endif
 
-	/* keep around the carry bit, if any */
-	byte >>= 8;
+        /* keep around the carry bit, if any */
+        byte >>= 8;
 
 #if 0
-	printf("carry=%d\n", byte);
+        printf("carry=%d\n", byte);
 #endif
     }
 
     /* if there's a carry bit left over, add it back in */
     if (byte) {
-	for (i=outbits-1; i>=0; i--) {
-	    /* do the addition */
-	    byte += out[i];
-	    out[i] = byte&0xff;
+        for (i=outbits-1; i>=0; i--) {
+            /* do the addition */
+            byte += out[i];
+            out[i] = byte&0xff;
 
-	    /* keep around the carry bit, if any */
-	    byte >>= 8;
-	}
+            /* keep around the carry bit, if any */
+            byte >>= 8;
+        }
     }
 }

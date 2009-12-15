@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -29,44 +30,46 @@
 #include "cksumtypes.h"
 
 static krb5_boolean
-etype_match(krb5_enctype e1, krb5_enctype e2)
+is_keyed_for(const struct krb5_cksumtypes *ctp,
+             const struct krb5_keytypes *ktp)
 {
-    const struct krb5_keytypes *ktp1, *ktp2;
-
-    ktp1 = find_enctype(e1);
-    ktp2 = find_enctype(e2);
-    return (ktp1 != NULL && ktp2 != NULL && ktp1->enc == ktp2->enc);
+    if (ctp->flags & CKSUM_UNKEYED)
+        return FALSE;
+    return (!ctp->enc || ktp->enc == ctp->enc);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_keyed_checksum_types(krb5_context context, krb5_enctype enctype,
-			    unsigned int *count, krb5_cksumtype **cksumtypes)
+                            unsigned int *count, krb5_cksumtype **cksumtypes)
 {
     unsigned int i, c, nctypes;
     krb5_cksumtype *ctypes;
-    const struct krb5_cksumtypes *ct;
+    const struct krb5_cksumtypes *ctp;
+    const struct krb5_keytypes *ktp;
 
     *count = 0;
     *cksumtypes = NULL;
 
+    ktp = find_enctype(enctype);
+    if (ktp == NULL)
+        return KRB5_BAD_ENCTYPE;
+
     nctypes = 0;
     for (i = 0; i < krb5int_cksumtypes_length; i++) {
-	ct = &krb5int_cksumtypes_list[i];
-	if ((ct->keyhash && etype_match(ct->keyed_etype, enctype)) ||
-	    (ct->flags & KRB5_CKSUMFLAG_DERIVE))
-	    nctypes++;
+        ctp = &krb5int_cksumtypes_list[i];
+        if (is_keyed_for(ctp, ktp))
+            nctypes++;
     }
 
     ctypes = malloc(nctypes * sizeof(krb5_cksumtype));
     if (ctypes == NULL)
-	return ENOMEM;
+        return ENOMEM;
 
     c = 0;
     for (i = 0; i < krb5int_cksumtypes_length; i++) {
-	ct = &krb5int_cksumtypes_list[i];
-	if ((ct->keyhash && etype_match(ct->keyed_etype, enctype)) ||
-	    (ct->flags & KRB5_CKSUMFLAG_DERIVE))
-	    ctypes[c++] = krb5int_cksumtypes_list[i].ctype;
+        ctp = &krb5int_cksumtypes_list[i];
+        if (is_keyed_for(ctp, ktp))
+            ctypes[c++] = ctp->ctype;
     }
 
     *count = nctypes;

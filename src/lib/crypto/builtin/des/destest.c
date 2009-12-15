@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/des/destest.c
  *
@@ -87,71 +88,71 @@ main(argc, argv)
     int error = 0;
 
     while (scanf("%16s %16s %16s", block1, block2, block3) == 3) {
-	convert(block1, key);
-	convert(block2, input);
-	convert(block3, output);
+        convert(block1, key);
+        convert(block2, input);
+        convert(block3, output);
 
-	retval = mit_des_key_sched(key, sched);
-	if (retval) {
-	    fprintf(stderr, "des test: can't process key: %d\n", retval);
-	    fprintf(stderr, "des test: %s %s %s\n", block1, block2, block3);
+        retval = mit_des_key_sched(key, sched);
+        if (retval) {
+            fprintf(stderr, "des test: can't process key: %d\n", retval);
+            fprintf(stderr, "des test: %s %s %s\n", block1, block2, block3);
             exit(1);
         }
-	mit_des_cbc_encrypt((const mit_des_cblock *) input, output2, 8,
-			    sched, zeroblock, 1);
+        mit_des_cbc_encrypt((const mit_des_cblock *) input, output2, 8,
+                            sched, zeroblock, 1);
 
-	if (memcmp((char *)output2, (char *)output, 8)) {
-	    fprintf(stderr,
-		    "DES ENCRYPT ERROR, key %s, text %s, real cipher %s, computed cyphertext %02X%02X%02X%02X%02X%02X%02X%02X\n",
-		    block1, block2, block3,
-		    output2[0],output2[1],output2[2],output2[3],
-		    output2[4],output2[5],output2[6],output2[7]);
-	    error++;
-	}
+        if (memcmp((char *)output2, (char *)output, 8)) {
+            fprintf(stderr,
+                    "DES ENCRYPT ERROR, key %s, text %s, real cipher %s, computed cyphertext %02X%02X%02X%02X%02X%02X%02X%02X\n",
+                    block1, block2, block3,
+                    output2[0],output2[1],output2[2],output2[3],
+                    output2[4],output2[5],output2[6],output2[7]);
+            error++;
+        }
 
-	/*
-	 * Now try decrypting....
-	 */
-	mit_des_cbc_encrypt((const mit_des_cblock *) output, output2, 8,
-			    sched, zeroblock, 0);
+        /*
+         * Now try decrypting....
+         */
+        mit_des_cbc_encrypt((const mit_des_cblock *) output, output2, 8,
+                            sched, zeroblock, 0);
 
-	if (memcmp((char *)output2, (char *)input, 8)) {
-	    fprintf(stderr,
-		    "DES DECRYPT ERROR, key %s, text %s, real cipher %s, computed cleartext %02X%02X%02X%02X%02X%02X%02X%02X\n",
-		    block1, block2, block3,
-		    output2[0],output2[1],output2[2],output2[3],
-		    output2[4],output2[5],output2[6],output2[7]);
-	    error++;
-	}
+        if (memcmp((char *)output2, (char *)input, 8)) {
+            fprintf(stderr,
+                    "DES DECRYPT ERROR, key %s, text %s, real cipher %s, computed cleartext %02X%02X%02X%02X%02X%02X%02X%02X\n",
+                    block1, block2, block3,
+                    output2[0],output2[1],output2[2],output2[3],
+                    output2[4],output2[5],output2[6],output2[7]);
+            error++;
+        }
 
-	num++;
+        num++;
     }
 
     if (error)
-	printf("destest: failed to pass the test\n");
+        printf("destest: failed to pass the test\n");
     else
-	printf("destest: %d tests passed successfully\n", num);
+        printf("destest: %d tests passed successfully\n", num);
 
     exit( (error > 256 && error % 256) ? 1 : error);
 }
 
 int value[128] = {
--1, -1, -1, -1, -1, -1, -1, -1,
--1, -1, -1, -1, -1, -1, -1, -1,
--1, -1, -1, -1, -1, -1, -1, -1,
--1, -1, -1, -1, -1, -1, -1, -1,
--1, -1, -1, -1, -1, -1, -1, -1,
--1, -1, -1, -1, -1, -1, -1, -1,
-0, 1, 2, 3, 4, 5, 6, 7,
-8, 9, -1, -1, -1, -1, -1, -1,
--1, 10, 11, 12, 13, 14, 15, -1,
--1, -1, -1, -1, -1, -1, -1, -1,
--1, -1, -1, -1, -1, -1, -1, -1,
--1, -1, -1, -1, -1, -1, -1, -1,
--1, -1, -1, -1, -1, -1, -1, -1,
--1, -1, -1, -1, -1, -1, -1, -1,
--1, -1, -1, -1, -1, -1, -1, -1,
--1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    0, 1, 2, 3, 4, 5, 6, 7,
+    8, 9, -1, -1, -1, -1, -1, -1,
+    -1, 10, 11, 12, 13, 14, 15, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1,
 };
 
 void
@@ -161,13 +162,13 @@ convert(text, cblock)
 {
     register int i;
     for (i = 0; i < 8; i++) {
-	if (text[i*2] < 0 || text[i*2] >= 128)
-	    abort ();
-	if (value[(int) text[i*2]] == -1 || value[(int) text[i*2+1]] == -1) {
-	    printf("Bad value byte %d in %s\n", i, text);
-	    exit(1);
-	}
-	cblock[i] = 16*value[(int) text[i*2]] + value[(int) text[i*2+1]];
+        if (text[i*2] < 0 || text[i*2] >= 128)
+            abort ();
+        if (value[(int) text[i*2]] == -1 || value[(int) text[i*2+1]] == -1) {
+            printf("Bad value byte %d in %s\n", i, text);
+            exit(1);
+        }
+        cblock[i] = 16*value[(int) text[i*2]] + value[(int) text[i*2+1]];
     }
     return;
 }
@@ -182,7 +183,7 @@ int
 mit_des_is_weak_key(key)
     mit_des_cblock key;
 {
-    return 0;				/* fake it out for testing */
+    return 0;                           /* fake it out for testing */
 }
 
 void
@@ -214,18 +215,18 @@ des_cblock_print_file(x, fp)
  */
 int
 mit_des_check_key_parity(key)
-     register mit_des_cblock key;
+    register mit_des_cblock key;
 {
     int i;
 
     for (i=0; i<sizeof(mit_des_cblock); i++) {
-	if ((key[i] & 1) == parity_char(0xfe&key[i])) {
-	    printf("warning: bad parity key:");
-	    des_cblock_print_file(key, stdout);
-	    putchar('\n');
+        if ((key[i] & 1) == parity_char(0xfe&key[i])) {
+            printf("warning: bad parity key:");
+            des_cblock_print_file(key, stdout);
+            putchar('\n');
 
-	    return 1;
-	}
+            return 1;
+        }
     }
 
     return(1);
@@ -233,14 +234,14 @@ mit_des_check_key_parity(key)
 
 void
 mit_des_fixup_key_parity(key)
-     register mit_des_cblock key;
+    register mit_des_cblock key;
 {
     int i;
     for (i=0; i<sizeof(mit_des_cblock); i++)
-      {
-	key[i] &= 0xfe;
-	key[i] |= 1^parity_char(key[i]);
-      }
+    {
+        key[i] &= 0xfe;
+        key[i] |= 1^parity_char(key[i]);
+    }
 
     return;
 }

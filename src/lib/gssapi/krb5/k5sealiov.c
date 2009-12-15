@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/gssapi/krb5/k5sealiov.c
  *
@@ -336,9 +336,9 @@ kg_seal_iov(OM_uint32 *minor_status,
     return (ctx->krb_times.endtime < now) ? GSS_S_CONTEXT_EXPIRED : GSS_S_COMPLETE;
 }
 
-#define INIT_IOV_DATA(_iov)     do { (_iov)->buffer.value = NULL; \
-                                     (_iov)->buffer.length = 0; } \
-                                while (0)
+#define INIT_IOV_DATA(_iov)     do { (_iov)->buffer.value = NULL;       \
+        (_iov)->buffer.length = 0; }                                    \
+    while (0)
 
 OM_uint32
 kg_seal_iov_length(OM_uint32 *minor_status,
@@ -418,7 +418,7 @@ kg_seal_iov_length(OM_uint32 *minor_status,
 
         code = krb5_c_crypto_length(context, enctype,
                                     conf_req_flag ?
-                                        KRB5_CRYPTO_TYPE_TRAILER : KRB5_CRYPTO_TYPE_CHECKSUM,
+                                    KRB5_CRYPTO_TYPE_TRAILER : KRB5_CRYPTO_TYPE_CHECKSUM,
                                     &k5_trailerlen);
         if (code != 0) {
             *minor_status = code;

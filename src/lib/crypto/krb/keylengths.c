@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * COPYRIGHT (c) 2006
  * The Regents of the University of Michigan
@@ -37,21 +38,21 @@
  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_keylengths(krb5_context context, krb5_enctype enctype,
-		  size_t *keybytes, size_t *keylength)
+                  size_t *keybytes, size_t *keylength)
 {
     const struct krb5_keytypes *ktp;
 
     if (keybytes == NULL && keylength == NULL)
-	return EINVAL;
+        return EINVAL;
 
     ktp = find_enctype(enctype);
     if (ktp == NULL)
-	return KRB5_BAD_ENCTYPE;
+        return KRB5_BAD_ENCTYPE;
 
     if (keybytes)
-	*keybytes = ktp->enc->keybytes;
+        *keybytes = ktp->enc->keybytes;
     if (keylength)
-	*keylength = ktp->enc->keylength;
+        *keylength = ktp->enc->keylength;
 
     return 0;
 }

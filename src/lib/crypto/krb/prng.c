@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 2001, 2002, 2004, 2007, 2008 by the Massachusetts Institute of Technology.
  * All rights reserved.
@@ -42,17 +43,17 @@ entropy_estimate(unsigned int randsource, size_t length)
 {
     switch (randsource) {
     case KRB5_C_RANDSOURCE_OLDAPI:
-	return 4 * length;
+        return 4 * length;
     case KRB5_C_RANDSOURCE_OSRAND:
-	return 8 * length;
+        return 8 * length;
     case KRB5_C_RANDSOURCE_TRUSTEDPARTY:
-	return 4 * length;
+        return 4 * length;
     case KRB5_C_RANDSOURCE_TIMING:
-	return 2;
+        return 2;
     case KRB5_C_RANDSOURCE_EXTERNAL_PROTOCOL:
-	return 0;
+        return 0;
     default:
-	abort();
+        abort();
     }
     return 0;
 }
@@ -64,16 +65,16 @@ int krb5int_prng_init(void)
 
     yerr = k5_mutex_finish_init(&yarrow_lock);
     if (yerr)
-	return yerr;
+        return yerr;
 
     yerr = krb5int_yarrow_init (&y_ctx, NULL);
     if (yerr != YARROW_OK && yerr != YARROW_NOT_SEEDED)
-	return KRB5_CRYPTO_INTERNAL;
+        return KRB5_CRYPTO_INTERNAL;
 
     for (i=0; i < KRB5_C_RANDSOURCE_MAX; i++ ) {
-	if (krb5int_yarrow_new_source(&y_ctx, &source_id) != YARROW_OK)
-	    return KRB5_CRYPTO_INTERNAL;
-	assert (source_id == i);
+        if (krb5int_yarrow_new_source(&y_ctx, &source_id) != YARROW_OK)
+            return KRB5_CRYPTO_INTERNAL;
+        assert (source_id == i);
     }
 
     return 0;
@@ -81,20 +82,20 @@ int krb5int_prng_init(void)
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_add_entropy(krb5_context context, unsigned int randsource,
-			  const krb5_data *data)
+                          const krb5_data *data)
 {
     int yerr;
 
     /* Make sure the mutex got initialized.  */
     yerr = krb5int_crypto_init();
     if (yerr)
-	return yerr;
+        return yerr;
     /* Now, finally, feed in the data.  */
     yerr = krb5int_yarrow_input(&y_ctx, randsource,
-				data->data, data->length,
-				entropy_estimate(randsource, data->length));
+                                data->data, data->length,
+                                entropy_estimate(randsource, data->length));
     if (yerr != YARROW_OK)
-	return KRB5_CRYPTO_INTERNAL;
+        return KRB5_CRYPTO_INTERNAL;
     return 0;
 }
 
@@ -110,12 +111,12 @@ krb5_c_random_make_octets(krb5_context context, krb5_data *data)
     int yerr;
     yerr = krb5int_yarrow_output(&y_ctx, data->data, data->length);
     if (yerr == YARROW_NOT_SEEDED) {
-	yerr = krb5int_yarrow_reseed(&y_ctx, YARROW_SLOW_POOL);
-	if (yerr == YARROW_OK)
-	    yerr = krb5int_yarrow_output(&y_ctx, data->data, data->length);
+        yerr = krb5int_yarrow_reseed(&y_ctx, YARROW_SLOW_POOL);
+        if (yerr == YARROW_OK)
+            yerr = krb5int_yarrow_output(&y_ctx, data->data, data->length);
     }
     if (yerr != YARROW_OK)
-      return KRB5_CRYPTO_INTERNAL;
+        return KRB5_CRYPTO_INTERNAL;
     return 0;
 }
 
@@ -137,7 +138,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_c_random_os_entropy(krb5_context context, int strong, int *success)
 {
     if (success)
-	*success = 0;
+        *success = 0;
     return 0;
 }
 
@@ -167,28 +168,28 @@ read_entropy_from_device(krb5_context context, const char *device)
 
     fd = open (device, O_RDONLY);
     if (fd == -1)
-	return 0;
+        return 0;
     set_cloexec_fd(fd);
     if (fstat(fd, &sb) == -1 || S_ISREG(sb.st_mode)) {
-	close(fd);
-	return 0;
+        close(fd);
+        return 0;
     }
 
     for (bp = buf, left = sizeof(buf); left > 0;) {
-	ssize_t count;
-	count = read(fd, bp, (unsigned) left);
-	if (count <= 0) {
-	    close(fd);
-	    return 0;
-	}
-	left -= count;
-	bp += count;
+        ssize_t count;
+        count = read(fd, bp, (unsigned) left);
+        if (count <= 0) {
+            close(fd);
+            return 0;
+        }
+        left -= count;
+        bp += count;
     }
     close(fd);
     data.length = sizeof (buf);
     data.data = (char *) buf;
     return (krb5_c_random_add_entropy(context, KRB5_C_RANDSOURCE_OSRAND,
-				      &data) == 0);
+                                      &data) == 0);
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -203,11 +204,11 @@ krb5_c_random_os_entropy(krb5_context context, int strong, int *success)
        we have both /dev/random and /dev/urandom.  We want the strong
        data included in the reseed so we get it first.*/
     if (strong) {
-	if (read_entropy_from_device(context, "/dev/random"))
-	    *oursuccess = 1;
+        if (read_entropy_from_device(context, "/dev/random"))
+            *oursuccess = 1;
     }
     if (read_entropy_from_device(context, "/dev/urandom"))
-	*oursuccess = 1;
+        *oursuccess = 1;
     return 0;
 }
 

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/aes/aes-test.c
  *
@@ -36,25 +37,24 @@ static char plain[16], cipher[16], zero[16];
 
 static krb5_keyblock enc_key;
 static krb5_data ivec;
-static krb5_data in, out;
 static void init()
 {
     enc_key.contents = key;
     enc_key.length = 16;
     ivec.data = zero;
     ivec.length = 16;
-    in.data = plain;
-    in.length = 16;
-    out.data = cipher;
-    out.length = 16;
 }
 static void enc()
 {
-    krb5_key key;
+    krb5_key k;
+    krb5_crypto_iov iov;
 
-    krb5_k_create_key(NULL, &enc_key, &key);
-    krb5int_aes_encrypt(key, &ivec, &in, &out);
-    krb5_k_free_key(NULL, key);
+    memcpy(cipher, plain, 16);
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    iov.data = make_data(cipher, 16);
+    krb5_k_create_key(NULL, &enc_key, &k);
+    krb5int_aes_encrypt(k, &ivec, &iov, 1);
+    krb5_k_free_key(NULL, k);
 }
 
 static void hexdump(const char *label, const char *cp, int len)
@@ -83,12 +83,12 @@ static void vk_test_1(int len)
     memset(plain, 0, sizeof(plain));
     hexdump("PT", plain, 16);
     for (i = 0; i < len * 8; i++) {
-	memset(key, 0, len);
-	set_bit(key, i);
-	printf("\nI=%d\n", i+1);
-	hexdump("KEY", key, len);
-	enc();
-	hexdump("CT", cipher, 16);
+        memset(key, 0, len);
+        set_bit(key, i);
+        printf("\nI=%d\n", i+1);
+        hexdump("KEY", key, len);
+        enc();
+        hexdump("CT", cipher, 16);
     }
     printf("\n==========\n");
 }
@@ -108,12 +108,12 @@ static void vt_test_1(int len)
     memset(key, 0, len);
     hexdump("KEY", key, len);
     for (i = 0; i < 16 * 8; i++) {
-	memset(plain, 0, sizeof(plain));
-	set_bit(plain, i);
-	printf("\nI=%d\n", i+1);
-	hexdump("PT", plain, 16);
-	enc();
-	hexdump("CT", cipher, 16);
+        memset(plain, 0, sizeof(plain));
+        set_bit(plain, i);
+        printf("\nI=%d\n", i+1);
+        hexdump("PT", plain, 16);
+        enc();
+        hexdump("CT", cipher, 16);
     }
     printf("\n==========\n");
 }
@@ -127,16 +127,16 @@ static void vt_test()
 int main (int argc, char *argv[])
 {
     if (argc > 2 || (argc == 2 && strcmp(argv[1], "-k"))) {
-	fprintf(stderr,
-		"usage:\t%s -k\tfor variable-key tests\n"
-		"   or:\t%s   \tfor variable-plaintext tests\n",
-		argv[0], argv[0]);
-	return 1;
+        fprintf(stderr,
+                "usage:\t%s -k\tfor variable-key tests\n"
+                "   or:\t%s   \tfor variable-plaintext tests\n",
+                argv[0], argv[0]);
+        return 1;
     }
     init();
     if (argc == 2)
-	vk_test();
+        vk_test();
     else
-	vt_test();
+        vt_test();
     return 0;
 }

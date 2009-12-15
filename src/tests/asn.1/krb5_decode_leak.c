@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * This program is intended to help detect memory leaks in the ASN.1
  * decoder functions by exercising their failure paths.  The setup
@@ -50,12 +50,12 @@ main(int argc, char **argv)
     }
     init_access(argv[0]);
 
-#define setup(value, typestring, constructor) \
-    retval = constructor(&(value)); \
-    if (retval) { \
-        com_err("krb5_decode_leak", retval, "while making sample %s", \
-                typestring); \
-        exit(1); \
+#define setup(value, typestring, constructor)                           \
+    retval = constructor(&(value));                                     \
+    if (retval) {                                                       \
+        com_err("krb5_decode_leak", retval, "while making sample %s",   \
+                typestring);                                            \
+        exit(1);                                                        \
     }
 
 #define encode_run(value,type,typestring,description,encoder)
@@ -69,19 +69,19 @@ main(int argc, char **argv)
      * sure to define a pointer named "tmp" of the correct type in the
      * enclosing block.
      */
-#define leak_test(value, encoder, decoder, freefn) \
-    retval = encoder(&(value),&(code)); \
-    if (retval) { \
-        com_err("krb5_decode_leak", retval, "while encoding"); \
-        exit(1); \
-    } \
-    for (i = 0; i < code->length; i++) { \
-        code->data[i] = (char)~((unsigned char)code->data[i]); \
-        retval = decoder(code, &tmp); \
-        code->data[i] = (char)~((unsigned char)code->data[i]); \
-        if (retval == 0) \
-            freefn(test_context, tmp); \
-    } \
+#define leak_test(value, encoder, decoder, freefn)              \
+    retval = encoder(&(value),&(code));                         \
+    if (retval) {                                               \
+        com_err("krb5_decode_leak", retval, "while encoding");  \
+        exit(1);                                                \
+    }                                                           \
+    for (i = 0; i < code->length; i++) {                        \
+        code->data[i] = (char)~((unsigned char)code->data[i]);  \
+        retval = decoder(code, &tmp);                           \
+        code->data[i] = (char)~((unsigned char)code->data[i]);  \
+        if (retval == 0)                                        \
+            freefn(test_context, tmp);                          \
+    }                                                           \
     krb5_free_data(test_context, code);
 
     /****************************************************************/
@@ -636,8 +636,8 @@ main(int argc, char **argv)
                   krb5_free_predicted_sam_response);
         ktest_empty_predicted_sam_response(&sam_ch);
     }
-  /****************************************************************/
-  /* encode_krb5_sam_response_2 */
+    /****************************************************************/
+    /* encode_krb5_sam_response_2 */
     {
         krb5_sam_response_2 sam_ch2, *tmp;
 

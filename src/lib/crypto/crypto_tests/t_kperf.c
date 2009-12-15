@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/crypto_tests/t_kperf.c
  *
@@ -93,6 +93,14 @@ main(int argc, char **argv)
     sum.checksum_type = cktype;
     sum.length = cklen;
     sum.contents = calloc(1, cklen);
+
+    /*
+     * Decrypting typically involves copying the output after checking the
+     * hash, so we need to create a valid ciphertext to correctly measure its
+     * performance.
+     */
+    if (op == 'd')
+        krb5_c_encrypt(NULL, &kblock, 0, NULL, &block, &outblock);
 
     for (i = 0; i < num_blocks; i++) {
         if (intf == 'c') {

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/t_nfold.c
  *
@@ -26,8 +27,8 @@
  *
  * Program to test the correctness of nfold implementation.
  *
- * exit returns	 0 ==> success
- * 		-1 ==> error
+ * exit returns  0 ==> success
+ *              -1 ==> error
  */
 
 #include <stdio.h>
@@ -41,7 +42,7 @@
 static void printhex (size_t len, const unsigned char *p)
 {
     while (len--)
-	printf ("%02x", 0xff & *p++);
+        printf ("%02x", 0xff & *p++);
 }
 
 static void printstringhex (const unsigned char *p) {
@@ -52,48 +53,48 @@ static void rfc_tests ()
 {
     int i;
     struct {
-	char *input;
-	unsigned int n;
-	unsigned char exp[192/8];
+        char *input;
+        unsigned int n;
+        unsigned char exp[192/8];
     } tests[] = {
-	{ "012345", 64,
-	  { 0xbe,0x07,0x26,0x31,0x27,0x6b,0x19,0x55, }
-	},
-	{ "password", 56,
-	  { 0x78,0xa0,0x7b,0x6c,0xaf,0x85,0xfa, }
-	},
-	{ "Rough Consensus, and Running Code", 64,
-	  { 0xbb,0x6e,0xd3,0x08,0x70,0xb7,0xf0,0xe0, }
-	},
-	{ "password", 168,
-	  { 0x59,0xe4,0xa8,0xca,0x7c,0x03,0x85,0xc3,
-	    0xc3,0x7b,0x3f,0x6d,0x20,0x00,0x24,0x7c,
-	    0xb6,0xe6,0xbd,0x5b,0x3e, }
-	},
-	{ "MASSACHVSETTS INSTITVTE OF TECHNOLOGY", 192,
-	  { 0xdb,0x3b,0x0d,0x8f,0x0b,0x06,0x1e,0x60,
-	    0x32,0x82,0xb3,0x08,0xa5,0x08,0x41,0x22,
-	    0x9a,0xd7,0x98,0xfa,0xb9,0x54,0x0c,0x1b, }
-	},
+        { "012345", 64,
+          { 0xbe,0x07,0x26,0x31,0x27,0x6b,0x19,0x55, }
+        },
+        { "password", 56,
+          { 0x78,0xa0,0x7b,0x6c,0xaf,0x85,0xfa, }
+        },
+        { "Rough Consensus, and Running Code", 64,
+          { 0xbb,0x6e,0xd3,0x08,0x70,0xb7,0xf0,0xe0, }
+        },
+        { "password", 168,
+          { 0x59,0xe4,0xa8,0xca,0x7c,0x03,0x85,0xc3,
+            0xc3,0x7b,0x3f,0x6d,0x20,0x00,0x24,0x7c,
+            0xb6,0xe6,0xbd,0x5b,0x3e, }
+        },
+        { "MASSACHVSETTS INSTITVTE OF TECHNOLOGY", 192,
+          { 0xdb,0x3b,0x0d,0x8f,0x0b,0x06,0x1e,0x60,
+            0x32,0x82,0xb3,0x08,0xa5,0x08,0x41,0x22,
+            0x9a,0xd7,0x98,0xfa,0xb9,0x54,0x0c,0x1b, }
+        },
     };
     unsigned char outbuf[192/8];
 
     printf ("RFC tests:\n");
     for (i = 0; i < ASIZE (tests); i++) {
-	unsigned char *p = (unsigned char *) tests[i].input;
-	assert (tests[i].n / 8 <= sizeof (outbuf));
-	krb5int_nfold (8 * strlen ((char *) p), p, tests[i].n, outbuf);
-	printf ("%d-fold(\"%s\") =\n", tests[i].n, p);
-	printf ("%d-fold(", tests[i].n);
-	printstringhex (p);
-	printf (") =\n\t");
-	printhex (tests[i].n / 8, outbuf);
-	printf ("\n\n");
-	if (memcmp (outbuf, tests[i].exp, tests[i].n/8) != 0) {
-	    printf ("wrong value! expected:\n\t");
-	    printhex (tests[i].n / 8, tests[i].exp);
-	    exit (1);
-	}
+        unsigned char *p = (unsigned char *) tests[i].input;
+        assert (tests[i].n / 8 <= sizeof (outbuf));
+        krb5int_nfold (8 * strlen ((char *) p), p, tests[i].n, outbuf);
+        printf ("%d-fold(\"%s\") =\n", tests[i].n, p);
+        printf ("%d-fold(", tests[i].n);
+        printstringhex (p);
+        printf (") =\n\t");
+        printhex (tests[i].n / 8, outbuf);
+        printf ("\n\n");
+        if (memcmp (outbuf, tests[i].exp, tests[i].n/8) != 0) {
+            printf ("wrong value! expected:\n\t");
+            printhex (tests[i].n / 8, tests[i].exp);
+            exit (1);
+        }
     }
 }
 
@@ -103,12 +104,12 @@ static void fold_kerberos(unsigned int nbytes)
     int j;
 
     if (nbytes > 300)
-	abort();
+        abort();
 
     printf("%d-fold(\"kerberos\") =\n\t", nbytes*8);
     krb5int_nfold(64, (unsigned char *) "kerberos", 8*nbytes, cipher_text);
     for (j=0; j<nbytes; j++)
-	printf("%s%02x", (j&3) ? "" : " ", cipher_text[j]);
+        printf("%s%02x", (j&3) ? "" : " ", cipher_text[j]);
     printf("\n");
 }
 
@@ -131,26 +132,26 @@ unsigned char nfold_192[4][24] = {
 
 int
 main(argc, argv)
-     int argc;
-     char *argv[];
+    int argc;
+    char *argv[];
 {
     unsigned char cipher_text[64];
     int i, j;
 
     printf("N-fold\n");
     for (i=0; i<sizeof(nfold_in)/sizeof(char *); i++) {
-	printf("\tInput:\t\"%.*s\"\n", (int) strlen((char *) nfold_in[i]),
-	       nfold_in[i]);
-	printf("\t192-Fold:\t");
-	krb5int_nfold(strlen((char *) nfold_in[i])*8, nfold_in[i], 24*8,
-		   cipher_text);
-	for (j=0; j<24; j++)
-	    printf("%s%02x", (j&3) ? "" : " ", cipher_text[j]);
-	printf("\n");
-	if (memcmp(cipher_text, nfold_192[i], 24)) {
-	    printf("verify: error in n-fold\n");
-	    exit(-1);
-	};
+        printf("\tInput:\t\"%.*s\"\n", (int) strlen((char *) nfold_in[i]),
+               nfold_in[i]);
+        printf("\t192-Fold:\t");
+        krb5int_nfold(strlen((char *) nfold_in[i])*8, nfold_in[i], 24*8,
+                      cipher_text);
+        for (j=0; j<24; j++)
+            printf("%s%02x", (j&3) ? "" : " ", cipher_text[j]);
+        printf("\n");
+        if (memcmp(cipher_text, nfold_192[i], 24)) {
+            printf("verify: error in n-fold\n");
+            exit(-1);
+        };
     }
     rfc_tests ();
 

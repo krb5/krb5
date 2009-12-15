@@ -1,5 +1,6 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- *	lib/crypto/openssl/md4/md4.c
+ *      lib/crypto/openssl/md4/md4.c
  *
  * Copyright (C) 2009 by the Massachusetts Institute of Technology.
  * All rights reserved.

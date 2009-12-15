@@ -1,4 +1,4 @@
-/* -*- Mode: C; c-file-style: "bsd" -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
 #ifndef YARROW_H
 #define YARROW_H
@@ -135,12 +135,12 @@ int krb5int_yarrow_init( Yarrow_CTX* y, const char *filename );
 
 YARROW_DLL
 int krb5int_yarrow_input( Yarrow_CTX* y, unsigned source_id,
-		  const void* sample,
-		  size_t size, size_t entropy_bits );
+                          const void* sample,
+                          size_t size, size_t entropy_bits );
 
 YARROW_DLL
 int krb5int_yarrow_status( Yarrow_CTX* y, int *num_sources, unsigned *source_id,
-		   size_t *entropy_bits, size_t *entropy_max );
+                           size_t *entropy_bits, size_t *entropy_max );
 
 YARROW_DLL
 int krb5int_yarrow_output( Yarrow_CTX* y, void* out, size_t size );
@@ -150,7 +150,7 @@ int krb5int_yarrow_new_source( Yarrow_CTX* y, unsigned* source_id );
 
 YARROW_DLL
 int krb5int_yarrow_register_source_estimator( Yarrow_CTX* y, unsigned source_id,
-				      estimator_fn* fptr );
+                                              estimator_fn* fptr );
 
 YARROW_DLL
 int krb5int_yarrow_stretch( const byte* m, size_t size, byte* out, size_t out_size );

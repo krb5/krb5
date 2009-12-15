@@ -183,7 +183,7 @@ AC_SUBST(EXTRA_SUPPORT_SYMS)
 
 AC_HEADER_STDARG
 DECLARE_SYS_ERRLIST
-AC_CHECK_HEADERS(unistd.h paths.h regex.h regexpr.h fcntl.h memory.h ifaddrs.h sys/filio.h sched.h byteswap.h machine/endian.h machine/byte_order.h sys/bswap.h endian.h pwd.h arpa/inet.h alloca.h dlfcn.h limits.h pthread.h semaphore.h krb_db.h kdc.h)
+AC_CHECK_HEADERS(unistd.h paths.h regex.h regexpr.h fcntl.h memory.h ifaddrs.h sys/filio.h byteswap.h machine/endian.h machine/byte_order.h sys/bswap.h endian.h pwd.h arpa/inet.h alloca.h dlfcn.h limits.h pthread.h semaphore.h)
 AC_CHECK_HEADER(regexp.h, [], [],
 [#define INIT char *sp = instring;
 #define GETC() (*sp++)
@@ -1060,7 +1060,7 @@ V5_AC_OUTPUT_MAKEFILE(.
 
 	lib/crypto lib/crypto/krb lib/crypto/krb/crc32 lib/crypto/$CRYPTO_IMPL/des
 	lib/crypto/krb/dk lib/crypto/$CRYPTO_IMPL/enc_provider
-	lib/crypto/$CRYPTO_IMPL/hash_provider lib/crypto/krb/keyhash_provider
+	lib/crypto/$CRYPTO_IMPL/hash_provider lib/crypto/krb/checksum
 	lib/crypto/krb/prf lib/crypto/krb/rand2key
 	lib/crypto/$CRYPTO_IMPL lib/crypto/$CRYPTO_IMPL/md4 lib/crypto/$CRYPTO_IMPL/md5
 	lib/crypto/krb/old lib/crypto/krb/raw lib/crypto/$CRYPTO_IMPL/sha1

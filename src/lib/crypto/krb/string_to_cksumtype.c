@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -35,21 +36,21 @@ krb5_string_to_cksumtype(char *string, krb5_cksumtype *cksumtypep)
     const struct krb5_cksumtypes *ctp;
 
     for (i=0; i<krb5int_cksumtypes_length; i++) {
-	ctp = &krb5int_cksumtypes_list[i];
-	if (strcasecmp(ctp->name, string) == 0) {
-	    *cksumtypep = ctp->ctype;
-	    return 0;
-	}
+        ctp = &krb5int_cksumtypes_list[i];
+        if (strcasecmp(ctp->name, string) == 0) {
+            *cksumtypep = ctp->ctype;
+            return 0;
+        }
 #define MAX_ALIASES (sizeof(ctp->aliases) / sizeof(ctp->aliases[0]))
-	for (j = 0; j < MAX_ALIASES; j++) {
-	    alias = ctp->aliases[j];
-	    if (alias == NULL)
-		break;
-	    if (strcasecmp(alias, string) == 0) {
-		*cksumtypep = ctp->ctype;
-		return 0;
-	    }
-	}
+        for (j = 0; j < MAX_ALIASES; j++) {
+            alias = ctp->aliases[j];
+            if (alias == NULL)
+                break;
+            if (strcasecmp(alias, string) == 0) {
+                *cksumtypep = ctp->ctype;
+                return 0;
+            }
+        }
     }
 
     return EINVAL;

@@ -95,7 +95,7 @@ depend-dependencies:
 # until we're sure we've gotten everything converted and excised the
 # old stuff from Makefile.in files.
 depend-update-makefile: .depend depend-recurse
-	if test -n "$(SRCS)" ; then \
+	if test "$(ALL_DEP_SRCS)" != " " ; then \
 		$(CP) .depend $(srcdir)/deps.new ; \
 	else \
 		echo "# No dependencies here." > $(srcdir)/deps.new ; \

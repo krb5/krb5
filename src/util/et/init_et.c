@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1997, 2008 by Massachusetts Institute of Technology
  *
@@ -43,11 +44,11 @@ int init_error_table(msgs, base, count)
     struct foobar * new_et;
 
     if (!base || !count || !msgs)
-	return 0;
+        return 0;
 
     new_et = (struct foobar *) malloc(sizeof(struct foobar));
     if (!new_et)
-	return ENOMEM;	/* oops */
+        return ENOMEM;  /* oops */
     new_et->etl.table = &new_et->et;
     new_et->et.msgs = msgs;
     new_et->et.base = base;
@@ -59,50 +60,50 @@ int init_error_table(msgs, base, count)
 }
 
 extern errcode_t KRB5_CALLCONV et_init(ectx)
-	et_ctx *ectx;
+    et_ctx *ectx;
 {
-	struct et_context *ctx;
+    struct et_context *ctx;
 
-	ctx = malloc(sizeof(struct et_context));
-	if (!ctx)
-		return ENOMEM;
-	ctx->tables = 0;
-	ctx->hook_func = 0;
-	ctx->hook_func_data = 0;
+    ctx = malloc(sizeof(struct et_context));
+    if (!ctx)
+        return ENOMEM;
+    ctx->tables = 0;
+    ctx->hook_func = 0;
+    ctx->hook_func_data = 0;
 
-	*ectx = ctx;
-	return 0;
+    *ectx = ctx;
+    return 0;
 }
 
 extern void KRB5_CALLCONV et_shutdown(ectx)
-	et_ctx ectx;
+    et_ctx ectx;
 {
-	struct et_list *p, *n;
+    struct et_list *p, *n;
 
-	p = ectx->tables;
-	while (p) {
-		n = p->next;
-		free(p);
-		p = n;
-	}
-	free(ectx);
+    p = ectx->tables;
+    while (p) {
+        n = p->next;
+        free(p);
+        p = n;
+    }
+    free(ectx);
 }
 
 extern errcode_t KRB5_CALLCONV et_add_error_table(ectx, tbl)
-	et_ctx ectx;
-	struct error_table *tbl;
+    et_ctx ectx;
+    struct error_table *tbl;
 {
-	struct et_list *e;
+    struct et_list *e;
 
-	e = malloc(sizeof(struct et_list));
-	if (!e)
-		return ENOMEM;
+    e = malloc(sizeof(struct et_list));
+    if (!e)
+        return ENOMEM;
 
-	e->table = tbl;
-	e->next = ectx->tables;
-	ectx->tables = e;
+    e->table = tbl;
+    e->next = ectx->tables;
+    ectx->tables = e;
 
-	return 0;
+    return 0;
 }
 
 #endif

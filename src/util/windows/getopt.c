@@ -1,3 +1,4 @@
+/* -*- mode: c; c-file-style: "bsd"; indent-tabs-mode: t -*- */
 /*	$NetBSD: getopt.c,v 1.16 1999/12/02 13:15:56 kleink Exp $	*/
 
 /*
@@ -92,7 +93,7 @@ getopt(nargc, nargv, ostr)
 	static char *__progname = 0;
 	static char *place = EMSG;		/* option letter processing */
 	char *oli;				/* option letter list index */
-        __progname = __progname?__progname:_progname(*nargv);
+	__progname = __progname?__progname:_progname(*nargv);
 
 	_DIAGASSERT(nargv != NULL);
 	_DIAGASSERT(ostr != NULL);

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * prof_FSp_glue.c --- Deprecated FSSpec functions.  Mac-only.
  */
@@ -13,8 +14,8 @@ long KRB5_CALLCONV FSp_profile_init_path (const FSSpec* files, profile_t *ret_pr
 
 errcode_t KRB5_CALLCONV
 FSp_profile_init(files, ret_profile)
-	const FSSpec* files;
-	profile_t *ret_profile;
+    const FSSpec* files;
+    profile_t *ret_profile;
 {
     unsigned int        fileCount = 0;
     const FSSpec       *nextSpec;
@@ -84,8 +85,8 @@ FSp_profile_init(files, ret_profile)
 
 errcode_t KRB5_CALLCONV
 FSp_profile_init_path(files, ret_profile)
-	const FSSpec* files;
-	profile_t *ret_profile;
+    const FSSpec* files;
+    profile_t *ret_profile;
 {
     return FSp_profile_init (files, ret_profile);
 }

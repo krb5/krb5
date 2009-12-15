@@ -139,7 +139,7 @@ clean::
 		t_cksum.o t_cksum \
 		t_crc.o t_crc t_cts.o t_cts \
 		t_mddriver4.o t_mddriver4 t_mddriver.o t_mddriver \
-		t_cksum4 t_cksum4.o t_cksum5 t_cksum5.o \
+		t_cksum4 t_cksum4.o t_cksum5 t_cksum5.o t_kperf.o t_kperf \
 		t_mddriver$(EXEEXT) $(OUTPRE)t_mddriver.$(OBJEXT)
 
 	-$(RM) t_prng.output

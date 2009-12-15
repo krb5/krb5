@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1987, 1988, 1989 by Massachusetts Institute of Technology
  *
@@ -67,14 +68,14 @@ static int check_request_table (rqtbl, argc, argv, sci_idx)
     info->argc = argc;
     info->argv = argv;
     for (i = 0; (request = get_request(rqtbl, i))->command_names; i++) {
-	for (name = request->command_names; *name; name++)
-	    if (!strcmp(*name, string)) {
-		info->current_request = request->command_names[0];
-		(request->function)(argc, (const char *const *) argv,
-				    sci_idx,info->info_ptr);
-		info->current_request = (char *)NULL;
-		return(0);
-	    }
+        for (name = request->command_names; *name; name++)
+            if (!strcmp(*name, string)) {
+                info->current_request = request->command_names[0];
+                (request->function)(argc, (const char *const *) argv,
+                                    sci_idx,info->info_ptr);
+                info->current_request = (char *)NULL;
+                return(0);
+            }
     }
     return(SS_ET_COMMAND_NOT_FOUND);
 }
@@ -121,36 +122,36 @@ static int really_execute_command (sci_idx, argc, argv)
  * ss_execute_command(sci_idx, argv)
  *
  * Function:
- *	Executes a parsed command list within the subsystem.
+ *      Executes a parsed command list within the subsystem.
  * Arguments:
- *	sci_idx (int)
- *		ss-internal index for subsystem control info structure
- *	argv (char *[])
- *		parsed argument list
+ *      sci_idx (int)
+ *              ss-internal index for subsystem control info structure
+ *      argv (char *[])
+ *              parsed argument list
  * Returns:
- *	(int)
- *		Zero if successful, ss_et_command_not_found otherwise.
+ *      (int)
+ *              Zero if successful, ss_et_command_not_found otherwise.
  * Notes:
  */
 
 int
 ss_execute_command(sci_idx, argv)
-	int sci_idx;
-	register char *argv[];
+    int sci_idx;
+    register char *argv[];
 {
-        register unsigned int i, argc;
-	char **argp;
-	int ret;
+    register unsigned int i, argc;
+    char **argp;
+    int ret;
 
-	argc = 0;
-	for (argp = argv; *argp; argp++)
-		argc++;
-	argp = (char **)malloc((argc+1)*sizeof(char *));
-	for (i = 0; i <= argc; i++)
-		argp[i] = argv[i];
-	ret = really_execute_command(sci_idx, argc, &argp);
-	free(argp);
-	return(ret);
+    argc = 0;
+    for (argp = argv; *argp; argp++)
+        argc++;
+    argp = (char **)malloc((argc+1)*sizeof(char *));
+    for (i = 0; i <= argc; i++)
+        argp[i] = argv[i];
+    ret = really_execute_command(sci_idx, argc, &argp);
+    free(argp);
+    return(ret);
 }
 
 /*
@@ -165,7 +166,7 @@ ss_execute_command(sci_idx, argv)
  *              Pointer to command line to be parsed.
  * Returns:
  *      (int)
- *      	Error code.
+ *              Error code.
  * Notes:
  */
 
@@ -187,7 +188,7 @@ int ss_execute_line (sci_idx, line_ptr)
         else {
             line_ptr++;
             system(line_ptr);
-	    return 0;
+            return 0;
         }
     }
 

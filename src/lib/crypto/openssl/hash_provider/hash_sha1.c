@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* lib/crypto/openssl/hash/yhash.h
  *
  * Copyright (C) 1998 by the FundsXpress, INC.
@@ -28,20 +29,26 @@
 #include "k5-int.h"
 #include "shs.h"
 #include "hash_provider.h"
+#include "aead.h"
 
 static krb5_error_code
-k5_sha1_hash(unsigned int icount, const krb5_data *input,
-	     krb5_data *output)
+k5_sha1_hash(const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
 {
     SHS_INFO ctx;
     unsigned int i;
 
     if (output->length != SHS_DIGESTSIZE)
-	return(KRB5_CRYPTO_INTERNAL);
+        return(KRB5_CRYPTO_INTERNAL);
 
     shsInit(&ctx);
-    for (i=0; i<icount; i++)
-	shsUpdate(&ctx, (unsigned char *) input[i].data, input[i].length);
+    for (i = 0; i < num_data; i++) {
+        const krb5_crypto_iov *iov = &data[i];
+
+        if (SIGN_IOV(iov)) {
+            shsUpdate(&ctx, (unsigned char *) iov->data.data,
+                      iov->data.length);
+        }
+    }
     shsFinal(&ctx);
 
     if (ctx.digestLen > 0 && ctx.digestLen <= output->length){

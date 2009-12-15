@@ -61,7 +61,8 @@
 #include "../krb5_libinit.h"
 #endif
 
-/* This must be the largest enctype value defined in krb5.h. */
+/* This must be the largest enctype value defined in krb5.h, plus the number of
+ * enctypes with negative numbers. */
 #define MAX_ENCTYPE ENCTYPE_ARCFOUR_HMAC_EXP
 
 /* The des-mdX entries are last for now, because it's easy to
@@ -357,7 +358,7 @@ mod_list(krb5_enctype etype, krb5_boolean add, krb5_boolean allow_weak,
 {
     unsigned int i;
 
-    assert(etype > 0 && etype <= MAX_ENCTYPE);
+    assert(etype <= MAX_ENCTYPE);
     if (!allow_weak && krb5int_c_weak_enctype(etype))
         return;
     for (i = 0; i < *count; i++) {

@@ -1,3 +1,7 @@
+# Nothing here!  But we can't remove this directory as the build
+# system currently assumes that all modules have the same directory
+# structure.
+
 mydir=lib/crypto/openssl/aes
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../krb/dk  -I$(srcdir)/../../../../include
@@ -10,14 +14,11 @@ DEFS=
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-STLIBOBJS=\
-	aes_s2k.o
+STLIBOBJS=
 
-OBJS=\
-	$(OUTPRE)aes_s2k.$(OBJEXT)
+OBJS=
 
-SRCS=\
-	$(srcdir)/aes_s2k.c
+SRCS=
 
 
 ##DOS##LIBOBJS = $(OBJS)

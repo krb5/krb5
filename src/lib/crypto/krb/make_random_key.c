@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -29,7 +30,7 @@
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_make_random_key(krb5_context context, krb5_enctype enctype,
-		       krb5_keyblock *random_key)
+                       krb5_keyblock *random_key)
 {
     krb5_error_code ret;
     const struct krb5_keytypes *ktp;
@@ -40,7 +41,7 @@ krb5_c_make_random_key(krb5_context context, krb5_enctype enctype,
 
     ktp = find_enctype(enctype);
     if (ktp == NULL)
-	return KRB5_BAD_ENCTYPE;
+        return KRB5_BAD_ENCTYPE;
     enc = ktp->enc;
 
     keybytes = enc->keybytes;
@@ -48,17 +49,17 @@ krb5_c_make_random_key(krb5_context context, krb5_enctype enctype,
 
     bytes = k5alloc(keybytes, &ret);
     if (ret)
-	return ret;
+        return ret;
     random_key->contents = k5alloc(keylength, &ret);
     if (ret)
-	goto cleanup;
+        goto cleanup;
 
     random_data.data = (char *) bytes;
     random_data.length = keybytes;
 
     ret = krb5_c_random_make_octets(context, &random_data);
     if (ret)
-	goto cleanup;
+        goto cleanup;
 
     random_key->magic = KV5M_KEYBLOCK;
     random_key->enctype = enctype;
@@ -68,8 +69,8 @@ krb5_c_make_random_key(krb5_context context, krb5_enctype enctype,
 
 cleanup:
     if (ret) {
-	zapfree(random_key->contents, keylength);
-	random_key->contents = NULL;
+        zapfree(random_key->contents, keylength);
+        random_key->contents = NULL;
     }
     zapfree(bytes, keybytes);
     return ret;

@@ -1,4 +1,4 @@
-/* -*- Mode: C; c-file-style: "bsd" -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
 #ifndef YLOCK_H
 #define YLOCK_H
@@ -17,7 +17,7 @@ static int UNLOCK( void ) {  return (YARROW_OK); }
 #else
 #include "k5-thread.h"
 extern k5_mutex_t krb5int_yarrow_lock;
-#define LOCK()	(k5_mutex_lock(&krb5int_yarrow_lock) ? YARROW_LOCKING : YARROW_OK)
+#define LOCK()  (k5_mutex_lock(&krb5int_yarrow_lock) ? YARROW_LOCKING : YARROW_OK)
 #define UNLOCK() (k5_mutex_unlock(&krb5int_yarrow_lock) ? YARROW_LOCKING : YARROW_OK)
 #endif
 

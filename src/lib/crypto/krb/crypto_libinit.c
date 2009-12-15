@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #include <assert.h>
 #include "k5-int.h"
 
@@ -28,6 +29,6 @@ int krb5int_crypto_init(void)
 void cryptoint_cleanup_library (void)
 {
     if (!INITIALIZER_RAN(cryptoint_initialize_library))
-	return;
+        return;
     krb5int_prng_cleanup ();
 }

@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1993 by OpenVision Technologies, Inc.
  *
@@ -308,9 +308,9 @@ kg_set_ccache_name (OM_uint32 *minor_status, const char *name)
     return GSS_S_COMPLETE;
 }
 
-#define g_OID_prefix_equal(o1, o2) \
-        (((o1)->length >= (o2)->length) && \
-        (memcmp((o1)->elements, (o2)->elements, (o2)->length) == 0))
+#define g_OID_prefix_equal(o1, o2)                                      \
+    (((o1)->length >= (o2)->length) &&                                  \
+     (memcmp((o1)->elements, (o2)->elements, (o2)->length) == 0))
 
 /*
  * gss_inquire_sec_context_by_oid() methods
@@ -372,7 +372,7 @@ krb5_gss_inquire_sec_context_by_oid (OM_uint32 *minor_status,
         return GSS_S_NO_CONTEXT;
 
     for (i = 0; i < sizeof(krb5_gss_inquire_sec_context_by_oid_ops)/
-                    sizeof(krb5_gss_inquire_sec_context_by_oid_ops[0]); i++) {
+             sizeof(krb5_gss_inquire_sec_context_by_oid_ops[0]); i++) {
         if (g_OID_prefix_equal(desired_object, &krb5_gss_inquire_sec_context_by_oid_ops[i].oid)) {
             return (*krb5_gss_inquire_sec_context_by_oid_ops[i].func)(minor_status,
                                                                       context_handle,
@@ -434,7 +434,7 @@ krb5_gss_inquire_cred_by_oid(OM_uint32 *minor_status,
 
 #if 0
     for (i = 0; i < sizeof(krb5_gss_inquire_cred_by_oid_ops)/
-                    sizeof(krb5_gss_inquire_cred_by_oid_ops[0]); i++) {
+             sizeof(krb5_gss_inquire_cred_by_oid_ops[0]); i++) {
         if (g_OID_prefix_equal(desired_object, &krb5_gss_inquire_cred_by_oid_ops[i].oid)) {
             return (*krb5_gss_inquire_cred_by_oid_ops[i].func)(minor_status,
                                                                cred_handle,
@@ -490,7 +490,7 @@ krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
 
 #if 0
     for (i = 0; i < sizeof(krb5_gss_set_sec_context_option_ops)/
-                    sizeof(krb5_gss_set_sec_context_option_ops[0]); i++) {
+             sizeof(krb5_gss_set_sec_context_option_ops[0]); i++) {
         if (g_OID_prefix_equal(desired_object, &krb5_gss_set_sec_context_option_ops[i].oid)) {
             return (*krb5_gss_set_sec_context_option_ops[i].func)(minor_status,
                                                                   context_handle,
@@ -553,7 +553,7 @@ krb5_gssspi_set_cred_option(OM_uint32 *minor_status,
         return major_status;
 
     for (i = 0; i < sizeof(krb5_gssspi_set_cred_option_ops)/
-                    sizeof(krb5_gssspi_set_cred_option_ops[0]); i++) {
+             sizeof(krb5_gssspi_set_cred_option_ops[0]); i++) {
         if (g_OID_prefix_equal(desired_object, &krb5_gssspi_set_cred_option_ops[i].oid)) {
             return (*krb5_gssspi_set_cred_option_ops[i].func)(minor_status,
                                                               cred_handle,
@@ -612,7 +612,7 @@ krb5_gssspi_mech_invoke (OM_uint32 *minor_status,
         return GSS_S_CALL_INACCESSIBLE_READ;
 
     for (i = 0; i < sizeof(krb5_gssspi_mech_invoke_ops)/
-                    sizeof(krb5_gssspi_mech_invoke_ops[0]); i++) {
+             sizeof(krb5_gssspi_mech_invoke_ops[0]); i++) {
         if (g_OID_prefix_equal(desired_object, &krb5_gssspi_mech_invoke_ops[i].oid)) {
             return (*krb5_gssspi_mech_invoke_ops[i].func)(minor_status,
                                                           desired_mech,

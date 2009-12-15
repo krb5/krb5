@@ -664,17 +664,23 @@ INDENTDIRS = \
 	include \
 	kadmin \
 	kdc \
+	lib/apputils \
+	lib/crypto \
+	lib/gssapi \
 	lib/kadm5 \
 	lib/kdb \
 	lib/krb5 \
 	plugins \
 	prototype \
-	slave
+	slave \
+	tests \
+	util
 
 BSDFILES = \
 	kadmin/cli/strftime.c \
 	kadmin/server/ipropd_svc.c \
 	kadmin/server/kadm_rpc_svc.c \
+	lib/apputils/daemon.c \
 	lib/kadm5/admin_xdr.h \
 	lib/kadm5/clnt/client_rpc.c \
 	lib/kadm5/kadm_rpc.h \
@@ -682,12 +688,24 @@ BSDFILES = \
 	lib/kadm5/srv/adb_xdr.c \
 	lib/krb5/krb/strftime.c \
 	lib/krb5/krb/strptime.c \
-	slave/kpropd_rpc.c
+	slave/kpropd_rpc.c \
+	util/support/mkstemp.c \
+	util/support/strlcpy.c \
+	util/windows/getopt.c \
+	util/windows/getopt.h \
+	util/windows/getopt_long.c
 
 OTHEREXCLUDES = \
 	include/iprop.h \
 	include/k5-platform.h \
 	include/gssrpc \
+	lib/apputils/dummy.c \
+	lib/crypto/builtin/aes \
+	lib/gssapi/generic/gssapiP_generic.h \
+	lib/gssapi/generic/gssapi_ext.h \
+	lib/gssapi/krb5/gssapiP_krb5.h \
+	lib/gssapi/mechglue \
+	lib/gssapi/spnego \
 	lib/krb5/krb/deltat.c \
 	lib/krb5/unicode \
 	plugins/kdb/db2/libdb2 \
@@ -702,7 +720,17 @@ OTHEREXCLUDES = \
 	plugins/preauth/pkinit/pkinit_accessor.h \
 	plugins/preauth/pkinit/pkinit_crypto.h \
 	plugins/preauth/pkinit/pkinit.h \
-	plugins/preauth/pkinit/pkinit_crypto_openssl.h
+	plugins/preauth/pkinit/pkinit_crypto_openssl.h \
+	tests/asn.1/ktest.h \
+	tests/asn.1/ktest_equal.h \
+	tests/asn.1/utility.h \
+	tests/gss-threads/gss-misc.c \
+	tests/gss-threads/gss-misc.h \
+	tests/hammer/kdc5_hammer.c \
+	util/et/com_err.h \
+	util/profile/prof_int.h \
+	util/profile/profile.hin \
+	util/profile/profile_tcl.c
 
 EXCLUDES = `for i in $(BSDFILES) $(OTHEREXCLUDES); do echo $$i; done | $(AWK) '{ print "-path", $$1, "-o" }'` -path /dev/null
 

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1997 by Massachusetts Institute of Technology
  *
@@ -23,34 +24,34 @@
 #include "error_table.h"
 
 static const char char_set[] =
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
 
 const char *
 error_table_name_r (unsigned long num,
-		    /*@out@*/ /*@returned@*/ char *outbuf)
-     /*@modifies outbuf@*/
+                    /*@out@*/ /*@returned@*/ char *outbuf)
+/*@modifies outbuf@*/
 {
-	long ch;
-	int i;
-	/*@out@*/ char *p;
+    long ch;
+    int i;
+    /*@out@*/ char *p;
 
-	p = outbuf;
-	num >>= ERRCODE_RANGE;
+    p = outbuf;
+    num >>= ERRCODE_RANGE;
 
-	for (i = 3; i >= 0; i--) {
-		ch = (num >> BITS_PER_CHAR * i) & ((1 << BITS_PER_CHAR) - 1);
-		if (ch != 0)
-			*p++ = char_set[ch-1];
-	}
-	*p = '\0';
-	return(outbuf);
+    for (i = 3; i >= 0; i--) {
+        ch = (num >> BITS_PER_CHAR * i) & ((1 << BITS_PER_CHAR) - 1);
+        if (ch != 0)
+            *p++ = char_set[ch-1];
+    }
+    *p = '\0';
+    return(outbuf);
 }
 
 /*@observer@*/
 const char * error_table_name(unsigned long num)
-     /*@modifies internalState@*/
+/*@modifies internalState@*/
 {
-	static char buf[6];
+    static char buf[6];
 
-	return error_table_name_r(num, buf);
+    return error_table_name_r(num, buf);
 }

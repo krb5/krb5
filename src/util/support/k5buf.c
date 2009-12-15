@@ -1,5 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
-
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * k5buf.c
  *
@@ -34,15 +33,16 @@
 #include "k5buf-int.h"
 #include <assert.h>
 
-/* Structure invariants:
-
-   buftype is BUFTYPE_FIXED, BUFTYPE_DYNAMIC, or BUFTYPE_ERROR
-   if buftype is not BUFTYPE_ERROR:
-     space > 0
-     space <= floor(SIZE_MAX / 2) (to fit within ssize_t)
-     len < space
-     data[len] = '\0'
-*/
+/*
+ * Structure invariants:
+ *
+ * buftype is BUFTYPE_FIXED, BUFTYPE_DYNAMIC, or BUFTYPE_ERROR
+ * if buftype is not BUFTYPE_ERROR:
+ *   space > 0
+ *   space <= floor(SIZE_MAX / 2) (to fit within ssize_t)
+ *   len < space
+ *   data[len] = '\0'
+ */
 
 /* Make sure there is room for LEN more characters in BUF, in addition
    to the null terminator and what's already in there.  Return true on
@@ -71,7 +71,7 @@ static int ensure_space(struct k5buf *buf, size_t len)
     buf->space = new_space;
     return 1;
 
- error_exit:
+error_exit:
     if (buf->buftype == BUFTYPE_DYNAMIC) {
         free(buf->data);
         buf->data = NULL;

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 2008 by the Massachusetts Institute of Technology.
  * Copyright 1995 by Richard P. Basch.  All Rights Reserved.
@@ -25,100 +26,80 @@
 #include "f_tables.h"
 #include "aead.h"
 
+const mit_des_cblock mit_des_zeroblock /* = all zero */;
+
 void
-krb5int_des_cbc_encrypt_iov(krb5_crypto_iov *data,
-			    unsigned long num_data,
-			    const mit_des_key_schedule schedule,
-			    mit_des_cblock ivec)
+krb5int_des_cbc_encrypt(krb5_crypto_iov *data, unsigned long num_data,
+                        const mit_des_key_schedule schedule,
+                        mit_des_cblock ivec)
 {
     unsigned DES_INT32 left, right;
     const unsigned DES_INT32 *kp;
     const unsigned char *ip;
-    unsigned char *op;
     struct iov_block_state input_pos, output_pos;
-    unsigned char iblock[MIT_DES_BLOCK_LENGTH];
-    unsigned char oblock[MIT_DES_BLOCK_LENGTH];
+    unsigned char storage[MIT_DES_BLOCK_LENGTH], *block = NULL, *ptr;
 
     IOV_BLOCK_STATE_INIT(&input_pos);
     IOV_BLOCK_STATE_INIT(&output_pos);
 
-    /*
-     * Get key pointer here.  This won't need to be reinitialized
-     */
+    /* Get key pointer here.  This won't need to be reinitialized. */
     kp = (const unsigned DES_INT32 *)schedule;
 
-    /*
-     * Initialize left and right with the contents of the initial
-     * vector.
-     */
-    if (ivec != NULL)
-	ip = ivec;
-    else
-	ip = mit_des_zeroblock;
+    /* Initialize left and right with the contents of the initial vector. */
+    ip = (ivec != NULL) ? ivec : mit_des_zeroblock;
     GET_HALF_BLOCK(left, ip);
     GET_HALF_BLOCK(right, ip);
 
-    /*
-     * Suitably initialized, now work the length down 8 bytes
-     * at a time.
-     */
+    /* Work the length down 8 bytes at a time. */
     for (;;) {
-	unsigned DES_INT32 temp;
+        unsigned DES_INT32 temp;
 
-	ip = iblock;
-	op = oblock;
+        ptr = iov_next_block(storage, MIT_DES_BLOCK_LENGTH, data, num_data,
+                             &input_pos);
+        if (ptr == NULL)
+            break;
+        block = ptr;
 
-	if (!krb5int_c_iov_get_block(iblock, MIT_DES_BLOCK_LENGTH, data, num_data, &input_pos))
-	    break;
+        /* Decompose this block and xor it with the previous ciphertext. */
+        GET_HALF_BLOCK(temp, ptr);
+        left  ^= temp;
+        GET_HALF_BLOCK(temp, ptr);
+        right ^= temp;
 
-	if (input_pos.iov_pos == num_data)
-	    break;
+        /* Encrypt what we have and store back into block. */
+        DES_DO_ENCRYPT(left, right, kp);
+        ptr = block;
+        PUT_HALF_BLOCK(left, ptr);
+        PUT_HALF_BLOCK(right, ptr);
 
-	GET_HALF_BLOCK(temp, ip);
-	left  ^= temp;
-	GET_HALF_BLOCK(temp, ip);
-	right ^= temp;
-
-	/*
-	 * Encrypt what we have
-	 */
-	DES_DO_ENCRYPT(left, right, kp);
-
-	/*
-	 * Copy the results out
-	 */
-	PUT_HALF_BLOCK(left, op);
-	PUT_HALF_BLOCK(right, op);
-
-	krb5int_c_iov_put_block(data, num_data, oblock, MIT_DES_BLOCK_LENGTH, &output_pos);
+        iov_store_block(data, num_data, block, storage, MIT_DES_BLOCK_LENGTH,
+                        &output_pos);
     }
 
-    if (ivec != NULL)
-	memcpy(ivec, oblock, MIT_DES_BLOCK_LENGTH);
+    if (ivec != NULL && block != NULL) {
+        ptr = ivec;
+        PUT_HALF_BLOCK(left, ptr);
+        PUT_HALF_BLOCK(right, ptr);
+    }
 }
 
 void
-krb5int_des_cbc_decrypt_iov(krb5_crypto_iov *data,
-			    unsigned long num_data,
-			    const mit_des_key_schedule schedule,
-			    mit_des_cblock ivec)
+krb5int_des_cbc_decrypt(krb5_crypto_iov *data, unsigned long num_data,
+                        const mit_des_key_schedule schedule,
+                        mit_des_cblock ivec)
 {
     unsigned DES_INT32 left, right;
     const unsigned DES_INT32 *kp;
     const unsigned char *ip;
     unsigned DES_INT32 ocipherl, ocipherr;
     unsigned DES_INT32 cipherl, cipherr;
-    unsigned char *op;
     struct iov_block_state input_pos, output_pos;
-    unsigned char iblock[MIT_DES_BLOCK_LENGTH];
-    unsigned char oblock[MIT_DES_BLOCK_LENGTH];
+    unsigned char storage[MIT_DES_BLOCK_LENGTH], *block = NULL, *ptr;
 
     IOV_BLOCK_STATE_INIT(&input_pos);
     IOV_BLOCK_STATE_INIT(&output_pos);
 
-    /*
-     * Get key pointer here.  This won't need to be reinitialized
-     */
+    /* Get key pointer here.  This won't need to be reinitialized. */
     kp = (const unsigned DES_INT32 *)schedule;
 
     /*
@@ -127,66 +108,110 @@ krb5int_des_cbc_decrypt_iov(krb5_crypto_iov *data,
      * Should think about this a little more...
      */
 
-    if (num_data == 0)
-	return;
-
-    /*
-     * Prime the old cipher with ivec.
-     */
-    if (ivec != NULL)
-	ip = ivec;
-    else
-	ip = mit_des_zeroblock;
+    /* Prime the old cipher with ivec. */
+    ip = (ivec != NULL) ? ivec : mit_des_zeroblock;
     GET_HALF_BLOCK(ocipherl, ip);
     GET_HALF_BLOCK(ocipherr, ip);
 
-    /*
-     * Now do this in earnest until we run out of length.
-     */
+    /* Work the length down 8 bytes at a time. */
     for (;;) {
-	/*
-	 * Read a block from the input into left and
-	 * right.  Save this cipher block for later.
-	 */
+        ptr = iov_next_block(storage, MIT_DES_BLOCK_LENGTH, data, num_data,
+                             &input_pos);
+        if (ptr == NULL)
+            break;
+        block = ptr;
 
-	if (!krb5int_c_iov_get_block(iblock, MIT_DES_BLOCK_LENGTH, data, num_data, &input_pos))
-	    break;
+        /* Split this block into left and right. */
+        GET_HALF_BLOCK(left, ptr);
+        GET_HALF_BLOCK(right, ptr);
+        cipherl = left;
+        cipherr = right;
 
-	if (input_pos.iov_pos == num_data)
-	    break;
+        /* Decrypt and xor with the old cipher to get plain text. */
+        DES_DO_DECRYPT(left, right, kp);
+        left ^= ocipherl;
+        right ^= ocipherr;
 
-	ip = iblock;
-	op = oblock;
+        /* Store the encrypted halves back into block. */
+        ptr = block;
+        PUT_HALF_BLOCK(left, ptr);
+        PUT_HALF_BLOCK(right, ptr);
 
-	GET_HALF_BLOCK(left, ip);
-	GET_HALF_BLOCK(right, ip);
-	cipherl = left;
-	cipherr = right;
+        /* Save current cipher block halves. */
+        ocipherl = cipherl;
+        ocipherr = cipherr;
 
-	/*
-	 * Decrypt this.
-	 */
-	DES_DO_DECRYPT(left, right, kp);
-
-	/*
-	 * Xor with the old cipher to get plain
-	 * text.  Output 8 or less bytes of this.
-	 */
-	left ^= ocipherl;
-	right ^= ocipherr;
-
-	PUT_HALF_BLOCK(left, op);
-	PUT_HALF_BLOCK(right, op);
-
-	/*
-	 * Save current cipher block here
-	 */
-	ocipherl = cipherl;
-	ocipherr = cipherr;
-
-	krb5int_c_iov_put_block(data, num_data, oblock, MIT_DES_BLOCK_LENGTH, &output_pos);
+        iov_store_block(data, num_data, block, storage, MIT_DES_BLOCK_LENGTH,
+                        &output_pos);
     }
 
-    if (ivec != NULL)
-	memcpy(ivec, oblock, MIT_DES_BLOCK_LENGTH);
+    if (ivec != NULL && block != NULL) {
+        ptr = ivec;
+        PUT_HALF_BLOCK(ocipherl, ptr);
+        PUT_HALF_BLOCK(ocipherr, ptr);
+    }
 }
+
+void
+krb5int_des_cbc_mac(const krb5_crypto_iov *data, unsigned long num_data,
+                    const mit_des_key_schedule schedule, mit_des_cblock ivec,
+                    mit_des_cblock out)
+{
+    unsigned DES_INT32 left, right;
+    const unsigned DES_INT32 *kp;
+    const unsigned char *ip;
+    struct iov_block_state input_pos;
+    unsigned char storage[MIT_DES_BLOCK_LENGTH], *block = NULL, *ptr;
+
+    IOV_BLOCK_STATE_INIT(&input_pos);
+    input_pos.include_sign_only = 1;
+
+    /* Get key pointer here.  This won't need to be reinitialized. */
+    kp = (const unsigned DES_INT32 *)schedule;
+
+    /* Initialize left and right with the contents of the initial vector. */
+    ip = (ivec != NULL) ? ivec : mit_des_zeroblock;
+    GET_HALF_BLOCK(left, ip);
+    GET_HALF_BLOCK(right, ip);
+
+    /* Work the length down 8 bytes at a time. */
+    for (;;) {
+        unsigned DES_INT32 temp;
+
+        ptr = iov_next_block(storage, MIT_DES_BLOCK_LENGTH, data, num_data,
+                             &input_pos);
+        if (ptr == NULL)
+            break;
+        block = ptr;
+
+        /* Decompose this block and xor it with the previous ciphertext. */
+        GET_HALF_BLOCK(temp, ptr);
+        left  ^= temp;
+        GET_HALF_BLOCK(temp, ptr);
+        right ^= temp;
+
+        /* Encrypt what we have. */
+        DES_DO_ENCRYPT(left, right, kp);
+    }
+
+    /* Output the final ciphertext block. */
+    ptr = out;
+    PUT_HALF_BLOCK(left, ptr);
+    PUT_HALF_BLOCK(right, ptr);
+}
+
+#if defined(CONFIG_SMALL) && !defined(CONFIG_SMALL_NO_CRYPTO)
+void krb5int_des_do_encrypt_2 (unsigned DES_INT32 *left,
+                               unsigned DES_INT32 *right,
+                               const unsigned DES_INT32 *kp)
+{
+    DES_DO_ENCRYPT_1 (*left, *right, kp);
+}
+
+void krb5int_des_do_decrypt_2 (unsigned DES_INT32 *left,
+                               unsigned DES_INT32 *right,
+                               const unsigned DES_INT32 *kp)
+{
+    DES_DO_DECRYPT_1 (*left, *right, kp);
+}
+#endif

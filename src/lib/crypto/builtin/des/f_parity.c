@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * These routines check and fix parity of encryption keys for the DES
  * algorithm.
@@ -25,10 +26,10 @@ mit_des_fixup_key_parity(mit_des_cblock key)
 {
     unsigned int i;
     for (i=0; i<sizeof(mit_des_cblock); i++)
-      {
-	key[i] &= 0xfe;
-	key[i] |= 1^parity_char(key[i]);
-      }
+    {
+        key[i] &= 0xfe;
+        key[i] |= 1^parity_char(key[i]);
+    }
 
     return;
 }
@@ -44,12 +45,12 @@ mit_des_check_key_parity(mit_des_cblock key)
     unsigned int i;
 
     for (i=0; i<sizeof(mit_des_cblock); i++)
-      {
-	if((key[i] & 1) == parity_char(0xfe&key[i]))
-	  {
-	    return 0;
-	  }
-      }
+    {
+        if((key[i] & 1) == parity_char(0xfe&key[i]))
+        {
+            return 0;
+        }
+    }
 
     return(1);
 }

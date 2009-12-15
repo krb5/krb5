@@ -13,20 +13,17 @@ PROG_RPATH=$(KRB5_LIBDIR)
 STLIBOBJS=\
 	aescrypt.o	\
 	aestab.o	\
-	aeskey.o	\
-	aes_s2k.o
+	aeskey.o
 
 OBJS=\
 	$(OUTPRE)aescrypt.$(OBJEXT)	\
 	$(OUTPRE)aestab.$(OBJEXT)	\
-	$(OUTPRE)aeskey.$(OBJEXT)	\
-	$(OUTPRE)aes_s2k.$(OBJEXT)
+	$(OUTPRE)aeskey.$(OBJEXT)
 
 SRCS=\
 	$(srcdir)/aescrypt.c	\
 	$(srcdir)/aestab.c	\
 	$(srcdir)/aeskey.c	\
-	$(srcdir)/aes_s2k.c
 
 GEN_OBJS=\
 	$(OUTPRE)aescrypt.$(OBJEXT)	\

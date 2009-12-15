@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * util/support/plugins.c
  *
@@ -269,7 +270,7 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
                 const char *e = dlerror();
                 Tprintf ("dlopen(%s): %s\n", filepath, e);
                 err = ENOENT; /* XXX */
-		krb5int_set_error (ep, err, "%s", e);
+                krb5int_set_error (ep, err, "%s", e);
             }
         }
 
@@ -322,7 +323,7 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
 static long
 krb5int_get_plugin_sym (struct plugin_file_handle *h,
                         const char *csymname, int isfunc, void **ptr,
-			struct errinfo *ep)
+                        struct errinfo *ep)
 {
     long err = 0;
     void *sym = NULL;
@@ -330,13 +331,13 @@ krb5int_get_plugin_sym (struct plugin_file_handle *h,
 #if USE_DLOPEN
     if (!err && !sym && (h->dlhandle != NULL)) {
         /* XXX Do we need to add a leading "_" to the symbol name on any
-        modern platforms?  */
+           modern platforms?  */
         sym = dlsym (h->dlhandle, csymname);
         if (sym == NULL) {
             const char *e = dlerror (); /* XXX copy and save away */
             Tprintf ("dlsym(%s): %s\n", csymname, e);
             err = ENOENT; /* XXX */
-	    krb5int_set_error(ep, err, "%s", e);
+            krb5int_set_error(ep, err, "%s", e);
         }
     }
 #endif
@@ -362,9 +363,9 @@ krb5int_get_plugin_sym (struct plugin_file_handle *h,
                               (LPTSTR) &lpMsgBuf,
                               0, NULL )) {
 
-                 fprintf (stderr, "unable to get dll symbol, %s\n", (LPCTSTR)lpMsgBuf);
-                 LocalFree(lpMsgBuf);
-             }
+                fprintf (stderr, "unable to get dll symbol, %s\n", (LPCTSTR)lpMsgBuf);
+                LocalFree(lpMsgBuf);
+            }
         }
     }
 #endif
@@ -382,14 +383,14 @@ krb5int_get_plugin_sym (struct plugin_file_handle *h,
 
 long KRB5_CALLCONV
 krb5int_get_plugin_data (struct plugin_file_handle *h, const char *csymname,
-			 void **ptr, struct errinfo *ep)
+                         void **ptr, struct errinfo *ep)
 {
     return krb5int_get_plugin_sym (h, csymname, 0, ptr, ep);
 }
 
 long KRB5_CALLCONV
 krb5int_get_plugin_func (struct plugin_file_handle *h, const char *csymname,
-			 void (**ptr)(), struct errinfo *ep)
+                         void (**ptr)(), struct errinfo *ep)
 {
     void *dptr = NULL;
     long err = krb5int_get_plugin_sym (h, csymname, 1, &dptr, ep);
@@ -434,10 +435,10 @@ krb5int_close_plugin (struct plugin_file_handle *h)
 
 
 #ifdef HAVE_STRERROR_R
-#define ERRSTR(ERR, BUF) \
+#define ERRSTR(ERR, BUF)                                                \
     (strerror_r (ERR, BUF, sizeof(BUF)) == 0 ? BUF : strerror (ERR))
 #else
-#define ERRSTR(ERR, BUF) \
+#define ERRSTR(ERR, BUF)                        \
     (strerror (ERR))
 #endif
 
@@ -466,7 +467,7 @@ krb5int_plugin_file_handle_array_add (struct plugin_file_handle ***harray, size_
     } else {
         newharray[newcount - 1] = p;
         newharray[newcount] = NULL;
-	*count = newcount;
+        *count = newcount;
         *harray = newharray;
     }
 
@@ -531,11 +532,11 @@ krb5int_get_plugin_filenames (const char * const *filebases, char ***filenames)
         size_t j;
         for (i = 0; !err && filebases[i]; i++) {
             for (j = 0; !err && fileexts[j]; j++) {
-		if (asprintf(&tempnames[(i*exts_count)+j], "%s%s",
+                if (asprintf(&tempnames[(i*exts_count)+j], "%s%s",
                              filebases[i], fileexts[j]) < 0) {
-		    tempnames[(i*exts_count)+j] = NULL;
-		    err = ENOMEM;
-		}
+                    tempnames[(i*exts_count)+j] = NULL;
+                    err = ENOMEM;
+                }
             }
         }
         tempnames[bases_count * exts_count] = NULL; /* NUL-terminate */
@@ -559,7 +560,7 @@ krb5int_get_plugin_filenames (const char * const *filebases, char ***filenames)
 long KRB5_CALLCONV
 krb5int_open_plugin_dirs (const char * const *dirnames,
                           const char * const *filebases,
-			  struct plugin_dir_handle *dirhandle,
+                          struct plugin_dir_handle *dirhandle,
                           struct errinfo *ep)
 {
     long err = 0;
@@ -573,7 +574,7 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
     }
 
     if (!err && (filebases != NULL)) {
-	err = krb5int_get_plugin_filenames (filebases, &filenames);
+        err = krb5int_get_plugin_filenames (filebases, &filenames);
     }
 
     for (i = 0; !err && dirnames[i] != NULL; i++) {
@@ -583,26 +584,26 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
 
             for (j = 0; !err && filenames[j] != NULL; j++) {
                 struct plugin_file_handle *handle = NULL;
-		char *filepath = NULL;
+                char *filepath = NULL;
 
-		if (!err) {
-		    if (asprintf(&filepath, "%s/%s", dirnames[i], filenames[j]) < 0) {
-			filepath = NULL;
-			err = ENOMEM;
-		    }
-		}
+                if (!err) {
+                    if (asprintf(&filepath, "%s/%s", dirnames[i], filenames[j]) < 0) {
+                        filepath = NULL;
+                        err = ENOMEM;
+                    }
+                }
 
                 if (krb5int_open_plugin (filepath, &handle, ep) == 0) {
                     err = krb5int_plugin_file_handle_array_add (&h, &count, handle);
                     if (!err) { handle = NULL; }  /* h takes ownership */
                 }
 
-		if (filepath != NULL) { free (filepath); }
-		if (handle   != NULL) { krb5int_close_plugin (handle); }
+                if (filepath != NULL) { free (filepath); }
+                if (handle   != NULL) { krb5int_close_plugin (handle); }
             }
         } else {
             /* load all plugins in each directory */
-	    DIR *dir = opendir (dirnames[i]);
+            DIR *dir = opendir (dirnames[i]);
 
             while (dir != NULL && !err) {
                 struct dirent *d = NULL;
@@ -617,13 +618,13 @@ krb5int_open_plugin_dirs (const char * const *dirnames,
                     continue;
                 }
 
-		if (!err) {
+                if (!err) {
                     int len = NAMELEN (d);
-		    if (asprintf(&filepath, "%s/%*s", dirnames[i], len, d->d_name) < 0) {
-			filepath = NULL;
-			err = ENOMEM;
-		    }
-		}
+                    if (asprintf(&filepath, "%s/%*s", dirnames[i], len, d->d_name) < 0) {
+                        filepath = NULL;
+                        err = ENOMEM;
+                    }
+                }
 
                 if (!err) {
                     if (krb5int_open_plugin (filepath, &handle, ep) == 0) {
@@ -677,9 +678,9 @@ krb5int_free_plugin_dir_data (void **ptrs)
 
 long KRB5_CALLCONV
 krb5int_get_plugin_dir_data (struct plugin_dir_handle *dirhandle,
-			     const char *symname,
-			     void ***ptrs,
-			     struct errinfo *ep)
+                             const char *symname,
+                             void ***ptrs,
+                             struct errinfo *ep)
 {
     long err = 0;
     void **p = NULL;
@@ -736,16 +737,16 @@ krb5int_free_plugin_dir_func (void (**ptrs)(void))
 
 long KRB5_CALLCONV
 krb5int_get_plugin_dir_func (struct plugin_dir_handle *dirhandle,
-			     const char *symname,
-			     void (***ptrs)(void),
-			     struct errinfo *ep)
+                             const char *symname,
+                             void (***ptrs)(void),
+                             struct errinfo *ep)
 {
     long err = 0;
     void (**p)() = NULL;
     size_t count = 0;
 
     /* XXX Do we need to add a leading "_" to the symbol name on any
-        modern platforms?  */
+       modern platforms?  */
 
     Tprintf("get_plugin_data_sym(%s)\n", symname);
 

@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1993 by OpenVision Technologies, Inc.
  *
@@ -336,10 +336,10 @@ kg_seal(minor_status, context_handle, conf_req_flag, qop_req,
 
     /* Only default qop or matching established cryptosystem is allowed.
 
-    There are NO EXTENSIONS to this set for AES and friends!  The
-    new spec says "just use 0".  The old spec plus extensions would
-    actually allow for certain non-zero values.  Fix this to handle
-    them later.  */
+       There are NO EXTENSIONS to this set for AES and friends!  The
+       new spec says "just use 0".  The old spec plus extensions would
+       actually allow for certain non-zero values.  Fix this to handle
+       them later.  */
     if (qop_req != 0) {
         *minor_status = (OM_uint32) G_UNKNOWN_QOP;
         return GSS_S_FAILURE;

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* foo */
 #include <stdio.h>
 #include <string.h>
@@ -50,23 +51,23 @@ static void do_close_1(void *libhandle, int line);
 #define HORIZ 25
 
 static void *do_open_1(const char *libname, const char *rev,
-		       int lazy, int line)
+                       int lazy, int line)
 {
     void *p;
     char *namebuf;
     int r;
 
     if (verbose)
-	printf("from line %d: do_open(%s)...%*s", line, libname,
-	       HORIZ-strlen(libname), "");
+        printf("from line %d: do_open(%s)...%*s", line, libname,
+               HORIZ-strlen(libname), "");
 #ifdef _AIX
     r = asprintf(&namebuf, "lib%s%s", libname, SHLIB_SUFFIX);
 #else
     r = asprintf(&namebuf, "lib%s%s(shr.o.%s)", libname, SHLIB_SUFFIX, rev);
 #endif
     if (r < 0) {
-	perror("asprintf");
-	exit(1);
+        perror("asprintf");
+        exit(1);
     }
 
 #ifndef RTLD_MEMBER
@@ -74,12 +75,12 @@ static void *do_open_1(const char *libname, const char *rev,
 #endif
     p = dlopen(namebuf, (lazy ? RTLD_LAZY : RTLD_NOW) | RTLD_MEMBER);
     if (p == 0) {
-	fprintf(stderr, "dlopen of %s failed: %s\n", namebuf, dlerror());
-	exit(1);
+        fprintf(stderr, "dlopen of %s failed: %s\n", namebuf, dlerror());
+        exit(1);
     }
     free(namebuf);
     if (verbose)
-	printf("done: %p\n", p);
+        printf("done: %p\n", p);
     return p;
 }
 
@@ -92,33 +93,33 @@ static void *get_sym_1(void *libhandle, const char *symname, int line)
     assert(strlen(SYM_PREFIX) == 0);
 
     if (verbose)
-	printf("from line %d: get_sym(%s)...%*s", line, symname,
-	       HORIZ-strlen(symname), "");
+        printf("from line %d: get_sym(%s)...%*s", line, symname,
+               HORIZ-strlen(symname), "");
 
     s = dlsym(libhandle, symname);
     if (s == 0) {
-	fprintf(stderr, "symbol %s not found\n", symname);
-	exit(1);
+        fprintf(stderr, "symbol %s not found\n", symname);
+        exit(1);
     }
     if (verbose)
-	printf("done: %p\n", s);
+        printf("done: %p\n", s);
     return s;
 }
 
 static void do_close_1(void *libhandle, int line)
 {
     if (verbose) {
-	char pbuf[3*sizeof(libhandle)+4];
-	snprintf(pbuf, sizeof(pbuf), "%p", libhandle);
-	printf("from line %d: do_close(%s)...%*s", line, pbuf,
-	       HORIZ-1-strlen(pbuf), "");
+        char pbuf[3*sizeof(libhandle)+4];
+        snprintf(pbuf, sizeof(pbuf), "%p", libhandle);
+        printf("from line %d: do_close(%s)...%*s", line, pbuf,
+               HORIZ-1-strlen(pbuf), "");
     }
     if (dlclose(libhandle) != 0) {
-	fprintf(stderr, "dlclose failed: %s\n", dlerror());
-	exit(1);
+        fprintf(stderr, "dlclose failed: %s\n", dlerror());
+        exit(1);
     }
     if (verbose)
-	printf("done\n");
+        printf("done\n");
 }
 
 #elif defined _WIN32
@@ -183,28 +184,28 @@ int main()
     celib2 = do_open("com_err", "3.0", 0);
     do_close(celib2);
     {
-	typedef krb5_error_code KRB5_CALLCONV (*ict)(krb5_context *);
-	typedef void KRB5_CALLCONV (*fct)(krb5_context);
+        typedef krb5_error_code KRB5_CALLCONV (*ict)(krb5_context *);
+        typedef void KRB5_CALLCONV (*fct)(krb5_context);
 
-	ict init_context = (ict) get_sym(k5lib, "krb5_init_context");
-	fct free_context = (fct) get_sym(k5lib, "krb5_free_context");
-	krb5_context ctx;
-	krb5_error_code err;
+        ict init_context = (ict) get_sym(k5lib, "krb5_init_context");
+        fct free_context = (fct) get_sym(k5lib, "krb5_free_context");
+        krb5_context ctx;
+        krb5_error_code err;
 
 #define CALLING(S) (verbose ? printf("at   line %d: calling %s...%*s", __LINE__, #S, (int)(HORIZ+1-strlen(#S)), "") : 0)
 #define DONE() (verbose ? printf("done\n") : 0)
 
-	CALLING(krb5_init_context);
-	err = init_context(&ctx);
-	DONE();
-	if (err) {
-	    fprintf(stderr, "error 0x%lx initializing context\n",
-		    (unsigned long) err);
-	    exit(1);
-	}
-	CALLING(krb5_free_context);
-	free_context(ctx);
-	DONE();
+        CALLING(krb5_init_context);
+        err = init_context(&ctx);
+        DONE();
+        if (err) {
+            fprintf(stderr, "error 0x%lx initializing context\n",
+                    (unsigned long) err);
+            exit(1);
+        }
+        CALLING(krb5_free_context);
+        free_context(ctx);
+        DONE();
     }
     celib2 = do_open("com_err", "3.0", 0);
     do_close(celib);
@@ -215,73 +216,73 @@ int main()
     /* Test gssapi_krb5 without having loaded anything else.  */
     gsslib = do_open("gssapi_krb5", "2.2", 1);
     {
-	OM_uint32 KRB5_CALLCONV (*init_sec_context)(OM_uint32 *, gss_cred_id_t,
-						    gss_ctx_id_t *, gss_name_t,
-						    gss_OID,
-						    OM_uint32, OM_uint32,
-						    gss_channel_bindings_t,
-						    gss_buffer_t, gss_OID *,
-						    gss_buffer_t,
-						    OM_uint32 *, OM_uint32 *)
-	    = get_gfun(gsslib, "gss_init_sec_context");
-	OM_uint32 KRB5_CALLCONV (*import_name)(OM_uint32 *, gss_buffer_t,
-					       gss_OID, gss_name_t *)
-	    = get_gfun(gsslib, "gss_import_name");
-	OM_uint32 KRB5_CALLCONV (*release_buffer)(OM_uint32 *, gss_buffer_t)
-	    = get_gfun(gsslib, "gss_release_buffer");
-	OM_uint32 KRB5_CALLCONV (*release_name)(OM_uint32 *, gss_name_t *)
-	    = get_gfun(gsslib, "gss_release_name");
-	OM_uint32 KRB5_CALLCONV (*delete_sec_context)(OM_uint32 *,
-						      gss_ctx_id_t *,
-						      gss_buffer_t)
-	    = get_gfun(gsslib, "gss_delete_sec_context");
+        OM_uint32 KRB5_CALLCONV (*init_sec_context)(OM_uint32 *, gss_cred_id_t,
+                                                    gss_ctx_id_t *, gss_name_t,
+                                                    gss_OID,
+                                                    OM_uint32, OM_uint32,
+                                                    gss_channel_bindings_t,
+                                                    gss_buffer_t, gss_OID *,
+                                                    gss_buffer_t,
+                                                    OM_uint32 *, OM_uint32 *)
+            = get_gfun(gsslib, "gss_init_sec_context");
+        OM_uint32 KRB5_CALLCONV (*import_name)(OM_uint32 *, gss_buffer_t,
+                                               gss_OID, gss_name_t *)
+            = get_gfun(gsslib, "gss_import_name");
+        OM_uint32 KRB5_CALLCONV (*release_buffer)(OM_uint32 *, gss_buffer_t)
+            = get_gfun(gsslib, "gss_release_buffer");
+        OM_uint32 KRB5_CALLCONV (*release_name)(OM_uint32 *, gss_name_t *)
+            = get_gfun(gsslib, "gss_release_name");
+        OM_uint32 KRB5_CALLCONV (*delete_sec_context)(OM_uint32 *,
+                                                      gss_ctx_id_t *,
+                                                      gss_buffer_t)
+            = get_gfun(gsslib, "gss_delete_sec_context");
 
-	OM_uint32 gmaj, gmin;
-	OM_uint32 retflags;
-	gss_ctx_id_t gctx = GSS_C_NO_CONTEXT;
-	gss_buffer_desc token;
-	gss_name_t target;
-	static gss_buffer_desc target_name_buf = {
-	    9, "x@mit.edu"
-	};
-	static gss_OID_desc service_name = {
-	    10, "\x2a\x86\x48\x86\xf7\x12\x01\x02\x01\x04"
-	};
+        OM_uint32 gmaj, gmin;
+        OM_uint32 retflags;
+        gss_ctx_id_t gctx = GSS_C_NO_CONTEXT;
+        gss_buffer_desc token;
+        gss_name_t target;
+        static gss_buffer_desc target_name_buf = {
+            9, "x@mit.edu"
+        };
+        static gss_OID_desc service_name = {
+            10, "\x2a\x86\x48\x86\xf7\x12\x01\x02\x01\x04"
+        };
 
-	CALLING(gss_import_name);
-	gmaj = import_name(&gmin, &target_name_buf, &service_name, &target);
-	DONE();
-	if (gmaj != GSS_S_COMPLETE) {
-	    fprintf(stderr,
-		    "import_name reports error major 0x%lx minor 0x%lx(%ld)\n",
-		    (unsigned long) gmaj, (unsigned long) gmin,
-		    (signed long) gmin);
-	    exit(1);
-	}
-	/* This will probably get different errors, depending on
-	   whether we have tickets at the time.  Doesn't matter much,
-	   we're ignoring the error and testing whether we're doing
-	   cleanup properly.  (Though the internal cleanup needed in
-	   the two cases might be different.)  */
-	CALLING(gss_init_sec_context);
-	gmaj = init_sec_context(&gmin, GSS_C_NO_CREDENTIAL, &gctx, target,
-				GSS_C_NULL_OID, 0, 0, NULL, GSS_C_NO_BUFFER,
-				NULL, &token, &retflags, NULL);
-	DONE();
-	/* Ignore success/failure indication.  */
-	if (token.length) {
-	    CALLING(gss_release_buffer);
-	    release_buffer(&gmin, &token);
-	    DONE();
-	}
-	CALLING(gss_release_name);
-	release_name(&gmin, &target);
-	DONE();
-	if (gctx != GSS_C_NO_CONTEXT) {
-	    CALLING(gss_delete_sec_context);
-	    delete_sec_context(&gmin, gctx, GSS_C_NO_BUFFER);
-	    DONE();
-	}
+        CALLING(gss_import_name);
+        gmaj = import_name(&gmin, &target_name_buf, &service_name, &target);
+        DONE();
+        if (gmaj != GSS_S_COMPLETE) {
+            fprintf(stderr,
+                    "import_name reports error major 0x%lx minor 0x%lx(%ld)\n",
+                    (unsigned long) gmaj, (unsigned long) gmin,
+                    (signed long) gmin);
+            exit(1);
+        }
+        /* This will probably get different errors, depending on
+           whether we have tickets at the time.  Doesn't matter much,
+           we're ignoring the error and testing whether we're doing
+           cleanup properly.  (Though the internal cleanup needed in
+           the two cases might be different.)  */
+        CALLING(gss_init_sec_context);
+        gmaj = init_sec_context(&gmin, GSS_C_NO_CREDENTIAL, &gctx, target,
+                                GSS_C_NULL_OID, 0, 0, NULL, GSS_C_NO_BUFFER,
+                                NULL, &token, &retflags, NULL);
+        DONE();
+        /* Ignore success/failure indication.  */
+        if (token.length) {
+            CALLING(gss_release_buffer);
+            release_buffer(&gmin, &token);
+            DONE();
+        }
+        CALLING(gss_release_name);
+        release_name(&gmin, &target);
+        DONE();
+        if (gctx != GSS_C_NO_CONTEXT) {
+            CALLING(gss_delete_sec_context);
+            delete_sec_context(&gmin, gctx, GSS_C_NO_BUFFER);
+            DONE();
+        }
     }
     do_close(gsslib);
 
@@ -290,73 +291,73 @@ int main()
     celib = do_open("com_err", "3.0", 1);
     gsslib = do_open("gssapi_krb5", "2.2", 1);
     {
-	OM_uint32 KRB5_CALLCONV (*init_sec_context)(OM_uint32 *, gss_cred_id_t,
-						    gss_ctx_id_t *, gss_name_t,
-						    gss_OID,
-						    OM_uint32, OM_uint32,
-						    gss_channel_bindings_t,
-						    gss_buffer_t, gss_OID *,
-						    gss_buffer_t,
-						    OM_uint32 *, OM_uint32 *)
-	    = get_gfun(gsslib, "gss_init_sec_context");
-	OM_uint32 KRB5_CALLCONV (*import_name)(OM_uint32 *, gss_buffer_t,
-					       gss_OID, gss_name_t *)
-	    = get_gfun(gsslib, "gss_import_name");
-	OM_uint32 KRB5_CALLCONV (*release_buffer)(OM_uint32 *, gss_buffer_t)
-	    = get_gfun(gsslib, "gss_release_buffer");
-	OM_uint32 KRB5_CALLCONV (*release_name)(OM_uint32 *, gss_name_t *)
-	    = get_gfun(gsslib, "gss_release_name");
-	OM_uint32 KRB5_CALLCONV (*delete_sec_context)(OM_uint32 *,
-						      gss_ctx_id_t *,
-						      gss_buffer_t)
-	    = get_gfun(gsslib, "gss_delete_sec_context");
+        OM_uint32 KRB5_CALLCONV (*init_sec_context)(OM_uint32 *, gss_cred_id_t,
+                                                    gss_ctx_id_t *, gss_name_t,
+                                                    gss_OID,
+                                                    OM_uint32, OM_uint32,
+                                                    gss_channel_bindings_t,
+                                                    gss_buffer_t, gss_OID *,
+                                                    gss_buffer_t,
+                                                    OM_uint32 *, OM_uint32 *)
+            = get_gfun(gsslib, "gss_init_sec_context");
+        OM_uint32 KRB5_CALLCONV (*import_name)(OM_uint32 *, gss_buffer_t,
+                                               gss_OID, gss_name_t *)
+            = get_gfun(gsslib, "gss_import_name");
+        OM_uint32 KRB5_CALLCONV (*release_buffer)(OM_uint32 *, gss_buffer_t)
+            = get_gfun(gsslib, "gss_release_buffer");
+        OM_uint32 KRB5_CALLCONV (*release_name)(OM_uint32 *, gss_name_t *)
+            = get_gfun(gsslib, "gss_release_name");
+        OM_uint32 KRB5_CALLCONV (*delete_sec_context)(OM_uint32 *,
+                                                      gss_ctx_id_t *,
+                                                      gss_buffer_t)
+            = get_gfun(gsslib, "gss_delete_sec_context");
 
-	OM_uint32 gmaj, gmin;
-	OM_uint32 retflags;
-	gss_ctx_id_t gctx = GSS_C_NO_CONTEXT;
-	gss_buffer_desc token;
-	gss_name_t target;
-	static gss_buffer_desc target_name_buf = {
-	    9, "x@mit.edu"
-	};
-	static gss_OID_desc service_name = {
-	    10, "\x2a\x86\x48\x86\xf7\x12\x01\x02\x01\x04"
-	};
+        OM_uint32 gmaj, gmin;
+        OM_uint32 retflags;
+        gss_ctx_id_t gctx = GSS_C_NO_CONTEXT;
+        gss_buffer_desc token;
+        gss_name_t target;
+        static gss_buffer_desc target_name_buf = {
+            9, "x@mit.edu"
+        };
+        static gss_OID_desc service_name = {
+            10, "\x2a\x86\x48\x86\xf7\x12\x01\x02\x01\x04"
+        };
 
-	CALLING(gss_import_name);
-	gmaj = import_name(&gmin, &target_name_buf, &service_name, &target);
-	DONE();
-	if (gmaj != GSS_S_COMPLETE) {
-	    fprintf(stderr,
-		    "import_name reports error major 0x%lx minor 0x%lx(%ld)\n",
-		    (unsigned long) gmaj, (unsigned long) gmin,
-		    (signed long) gmin);
-	    exit(1);
-	}
-	/* This will probably get different errors, depending on
-	   whether we have tickets at the time.  Doesn't matter much,
-	   we're ignoring the error and testing whether we're doing
-	   cleanup properly.  (Though the internal cleanup needed in
-	   the two cases might be different.)  */
-	CALLING(gss_init_sec_context);
-	gmaj = init_sec_context(&gmin, GSS_C_NO_CREDENTIAL, &gctx, target,
-				GSS_C_NULL_OID, 0, 0, NULL, GSS_C_NO_BUFFER,
-				NULL, &token, &retflags, NULL);
-	DONE();
-	/* Ignore success/failure indication.  */
-	if (token.length) {
-	    CALLING(gss_release_buffer);
-	    release_buffer(&gmin, &token);
-	    DONE();
-	}
-	CALLING(gss_release_name);
-	release_name(&gmin, &target);
-	DONE();
-	if (gctx != GSS_C_NO_CONTEXT) {
-	    CALLING(gss_delete_sec_context);
-	    delete_sec_context(&gmin, gctx, GSS_C_NO_BUFFER);
-	    DONE();
-	}
+        CALLING(gss_import_name);
+        gmaj = import_name(&gmin, &target_name_buf, &service_name, &target);
+        DONE();
+        if (gmaj != GSS_S_COMPLETE) {
+            fprintf(stderr,
+                    "import_name reports error major 0x%lx minor 0x%lx(%ld)\n",
+                    (unsigned long) gmaj, (unsigned long) gmin,
+                    (signed long) gmin);
+            exit(1);
+        }
+        /* This will probably get different errors, depending on
+           whether we have tickets at the time.  Doesn't matter much,
+           we're ignoring the error and testing whether we're doing
+           cleanup properly.  (Though the internal cleanup needed in
+           the two cases might be different.)  */
+        CALLING(gss_init_sec_context);
+        gmaj = init_sec_context(&gmin, GSS_C_NO_CREDENTIAL, &gctx, target,
+                                GSS_C_NULL_OID, 0, 0, NULL, GSS_C_NO_BUFFER,
+                                NULL, &token, &retflags, NULL);
+        DONE();
+        /* Ignore success/failure indication.  */
+        if (token.length) {
+            CALLING(gss_release_buffer);
+            release_buffer(&gmin, &token);
+            DONE();
+        }
+        CALLING(gss_release_name);
+        release_name(&gmin, &target);
+        DONE();
+        if (gctx != GSS_C_NO_CONTEXT) {
+            CALLING(gss_delete_sec_context);
+            delete_sec_context(&gmin, gctx, GSS_C_NO_BUFFER);
+            DONE();
+        }
     }
     do_close(celib);
     do_close(gsslib);

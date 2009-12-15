@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/openssl/des/string2key.c
  *
@@ -30,7 +31,7 @@
 
 krb5_error_code
 mit_des_string_to_key_int (krb5_keyblock *key,
-			   const krb5_data *pw, const krb5_data *salt)
+                           const krb5_data *pw, const krb5_data *salt)
 {
     DES_cblock outkey;
     DES_string_to_key(pw->data, &outkey);

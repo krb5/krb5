@@ -325,11 +325,11 @@ asn1_encode_opaque(asn1buf *buf, unsigned int len, const void *val,
  */
 
 #ifdef POINTERS_ARE_ALL_THE_SAME
-#define LOADPTR(PTR,TYPE)                                       \
-    (assert((TYPE)->loadptr != NULL), (TYPE)->loadptr(PTR))
-#else
 #define LOADPTR(PTR,TYPE)                       \
     (*(const void *const *)(PTR))
+#else
+#define LOADPTR(PTR,TYPE)                                       \
+    (assert((TYPE)->loadptr != NULL), (TYPE)->loadptr(PTR))
 #endif
 
 static int
