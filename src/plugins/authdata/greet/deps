@@ -2,5 +2,5 @@
 # Generated makefile dependencies follow.
 #
 greet_auth.so greet_auth.po $(OUTPRE)greet_auth.$(OBJEXT): \
-  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5/authdata_plugin.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/include/krb5/authdata_plugin.h \
   greet_auth.c

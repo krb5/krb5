@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * plugins/kdb/hdb/kdb_hdb.c
  *
@@ -74,10 +74,10 @@ typedef struct _kh_db_context {
     void *windc_ctx;
 } kh_db_context;
 
-#define KH_DB_CONTEXT(_context)    \
+#define KH_DB_CONTEXT(_context)                                 \
     ((kh_db_context *)(_context)->dal_handle->db_context)
 
-#define KH_DB_ENTRY(_entry)         \
+#define KH_DB_ENTRY(_entry)                     \
     ((hdb_entry_ex *)(_entry)->e_data)
 
 /* kdb_hdb.c */
@@ -111,10 +111,10 @@ kh_hdb_free_entry(krb5_context context,
 
 /* kdb_marshal.c */
 
-#define KH_MARSHAL_KEY(_kkey, _hkey)        do {        \
-    (_hkey)->keytype            = (_kkey)->enctype;     \
-    (_hkey)->keyvalue.data      = (_kkey)->contents;    \
-    (_hkey)->keyvalue.length    = (_kkey)->length;      \
+#define KH_MARSHAL_KEY(_kkey, _hkey)        do {                \
+        (_hkey)->keytype            = (_kkey)->enctype;         \
+        (_hkey)->keyvalue.data      = (_kkey)->contents;        \
+        (_hkey)->keyvalue.length    = (_kkey)->length;          \
     } while (0)
 
 krb5_error_code

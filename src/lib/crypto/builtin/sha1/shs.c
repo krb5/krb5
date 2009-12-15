@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #include "shs.h"
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -39,7 +40,7 @@
    80-word expanded input array W, where the first 16 are copies of the input
    data, and the remaining 64 are defined by
 
-        W[ i ] = W[ i - 16 ] ^ W[ i - 14 ] ^ W[ i - 8 ] ^ W[ i - 3 ]
+   W[ i ] = W[ i - 16 ] ^ W[ i - 14 ] ^ W[ i - 8 ] ^ W[ i - 3 ]
 
    This implementation generates these values on the fly in a circular
    buffer - thanks to Colin Plumb, colin@nyx10.cs.du.edu for this
@@ -51,27 +52,27 @@
 
 #ifdef NEW_SHS
 #define expand(W,i) ( W[ i & 15 ] = ROTL( 1, ( W[ i & 15 ] ^ W[ (i - 14) & 15 ] ^ \
-                                                 W[ (i - 8) & 15 ] ^ W[ (i - 3) & 15 ] )))
+                                               W[ (i - 8) & 15 ] ^ W[ (i - 3) & 15 ] )))
 #else
-#define expand(W,i) ( W[ i & 15 ] ^= W[ (i - 14) & 15 ] ^ \
-		      W[ (i - 8) & 15 ] ^ W[ (i - 3) & 15 ] )
+#define expand(W,i) ( W[ i & 15 ] ^= W[ (i - 14) & 15 ] ^       \
+                      W[ (i - 8) & 15 ] ^ W[ (i - 3) & 15 ] )
 #endif /* NEW_SHS */
 
 /* The prototype SHS sub-round.  The fundamental sub-round is:
 
-        a' = e + ROTL( 5, a ) + f( b, c, d ) + k + data;
-        b' = a;
-        c' = ROTL( 30, b );
-        d' = c;
-        e' = d;
+   a' = e + ROTL( 5, a ) + f( b, c, d ) + k + data;
+   b' = a;
+   c' = ROTL( 30, b );
+   d' = c;
+   e' = d;
 
    but this is implemented by unrolling the loop 5 times and renaming the
    variables ( e, a, b, c, d ) = ( a', b', c', d', e' ) each iteration.
    This code is then replicated 20 times for each of the 4 functions, using
    the next 20 values from the W[] array each time */
 
-#define subRound(a, b, c, d, e, f, k, data) \
-    ( e += ROTL( 5, a ) + f( b, c, d ) + k + data, \
+#define subRound(a, b, c, d, e, f, k, data)             \
+    ( e += ROTL( 5, a ) + f( b, c, d ) + k + data,      \
       e &= 0xffffffff, b = ROTL( 30, b ) )
 
 /* Initialize the SHS values */
@@ -115,25 +116,25 @@ void SHSTransform(SHS_LONG *digest, const SHS_LONG *data)
 #if defined(CONFIG_SMALL) && !defined(CONFIG_SMALL_NO_CRYPTO)
 
     {
-	int i;
-	SHS_LONG temp;
-	for (i = 0; i < 20; i++) {
-	    SHS_LONG x = (i < 16) ? eData[i] : expand(eData, i);
-	    subRound(A, B, C, D, E, f1, K1, x);
-	    temp = E, E = D, D = C, C = B, B = A, A = temp;
-	}
-	for (i = 20; i < 40; i++) {
-	    subRound(A, B, C, D, E, f2, K2, expand(eData, i));
-	    temp = E, E = D, D = C, C = B, B = A, A = temp;
-	}
-	for (i = 40; i < 60; i++) {
-	    subRound(A, B, C, D, E, f3, K3, expand(eData, i));
-	    temp = E, E = D, D = C, C = B, B = A, A = temp;
-	}
-	for (i = 60; i < 80; i++) {
-	    subRound(A, B, C, D, E, f4, K4, expand(eData, i));
-	    temp = E, E = D, D = C, C = B, B = A, A = temp;
-	}
+        int i;
+        SHS_LONG temp;
+        for (i = 0; i < 20; i++) {
+            SHS_LONG x = (i < 16) ? eData[i] : expand(eData, i);
+            subRound(A, B, C, D, E, f1, K1, x);
+            temp = E, E = D, D = C, C = B, B = A, A = temp;
+        }
+        for (i = 20; i < 40; i++) {
+            subRound(A, B, C, D, E, f2, K2, expand(eData, i));
+            temp = E, E = D, D = C, C = B, B = A, A = temp;
+        }
+        for (i = 40; i < 60; i++) {
+            subRound(A, B, C, D, E, f3, K3, expand(eData, i));
+            temp = E, E = D, D = C, C = B, B = A, A = temp;
+        }
+        for (i = 60; i < 80; i++) {
+            subRound(A, B, C, D, E, f4, K4, expand(eData, i));
+            temp = E, E = D, D = C, C = B, B = A, A = temp;
+        }
     }
 
 #else
@@ -251,7 +252,7 @@ void shsUpdate(SHS_INFO *shsInfo, const SHS_BYTE *buffer, unsigned int count)
     tmp = shsInfo->countLo;
     shsInfo->countLo = tmp + (((SHS_LONG) count) << 3 );
     if ((shsInfo->countLo &= 0xffffffff) < tmp)
-        shsInfo->countHi++;	/* Carry from low to high */
+        shsInfo->countHi++;     /* Carry from low to high */
     shsInfo->countHi += count >> 29;
 
     /* Get count of bytes already in data */
@@ -259,72 +260,72 @@ void shsUpdate(SHS_INFO *shsInfo, const SHS_BYTE *buffer, unsigned int count)
 
     /* Handle any leading odd-sized chunks */
     if (dataCount) {
-	lp = shsInfo->data + dataCount / 4;
-	dataCount = SHS_DATASIZE - dataCount;
-	canfill = (count >= dataCount);
+        lp = shsInfo->data + dataCount / 4;
+        dataCount = SHS_DATASIZE - dataCount;
+        canfill = (count >= dataCount);
 
-	if (dataCount % 4) {
-	    /* Fill out a full 32 bit word first if needed -- this
-	       is not very efficient (computed shift amount),
-	       but it shouldn't happen often. */
-	    while (dataCount % 4 && count > 0) {
-		*lp |= (SHS_LONG) *buffer++ << ((--dataCount % 4) * 8);
-		count--;
-	    }
-	    lp++;
-	}
-	while (lp < shsInfo->data + 16) {
-	    if (count < 4) {
-		*lp = 0;
-		switch (count % 4) {
-		case 3:
-		    *lp |= (SHS_LONG) buffer[2] << 8;
-		case 2:
-		    *lp |= (SHS_LONG) buffer[1] << 16;
-		case 1:
-		    *lp |= (SHS_LONG) buffer[0] << 24;
-		}
-		count = 0;
-		break;		/* out of while loop */
-	    }
-	    *lp++ = load_32_be(buffer);
-	    buffer += 4;
-	    count -= 4;
-	}
-	if (canfill) {
-	    SHSTransform(shsInfo->digest, shsInfo->data);
-	}
+        if (dataCount % 4) {
+            /* Fill out a full 32 bit word first if needed -- this
+               is not very efficient (computed shift amount),
+               but it shouldn't happen often. */
+            while (dataCount % 4 && count > 0) {
+                *lp |= (SHS_LONG) *buffer++ << ((--dataCount % 4) * 8);
+                count--;
+            }
+            lp++;
+        }
+        while (lp < shsInfo->data + 16) {
+            if (count < 4) {
+                *lp = 0;
+                switch (count % 4) {
+                case 3:
+                    *lp |= (SHS_LONG) buffer[2] << 8;
+                case 2:
+                    *lp |= (SHS_LONG) buffer[1] << 16;
+                case 1:
+                    *lp |= (SHS_LONG) buffer[0] << 24;
+                }
+                count = 0;
+                break;          /* out of while loop */
+            }
+            *lp++ = load_32_be(buffer);
+            buffer += 4;
+            count -= 4;
+        }
+        if (canfill) {
+            SHSTransform(shsInfo->digest, shsInfo->data);
+        }
     }
 
     /* Process data in SHS_DATASIZE chunks */
     while (count >= SHS_DATASIZE) {
-	lp = shsInfo->data;
-	while (lp < shsInfo->data + 16) {
-	    *lp++ = load_32_be(buffer);
-	    buffer += 4;
-	}
-	SHSTransform(shsInfo->digest, shsInfo->data);
-	count -= SHS_DATASIZE;
+        lp = shsInfo->data;
+        while (lp < shsInfo->data + 16) {
+            *lp++ = load_32_be(buffer);
+            buffer += 4;
+        }
+        SHSTransform(shsInfo->digest, shsInfo->data);
+        count -= SHS_DATASIZE;
     }
 
     if (count > 0) {
-	lp = shsInfo->data;
-	while (count > 4) {
-	    *lp++ = load_32_be(buffer);
-	    buffer += 4;
-	    count -= 4;
-	}
-	*lp = 0;
-	switch (count % 4) {
-	case 0:
-	    *lp |= ((SHS_LONG) buffer[3]);
-	case 3:
-	    *lp |= ((SHS_LONG) buffer[2]) << 8;
-	case 2:
-	    *lp |= ((SHS_LONG) buffer[1]) << 16;
-	case 1:
-	    *lp |= ((SHS_LONG) buffer[0]) << 24;
-	}
+        lp = shsInfo->data;
+        while (count > 4) {
+            *lp++ = load_32_be(buffer);
+            buffer += 4;
+            count -= 4;
+        }
+        *lp = 0;
+        switch (count % 4) {
+        case 0:
+            *lp |= ((SHS_LONG) buffer[3]);
+        case 3:
+            *lp |= ((SHS_LONG) buffer[2]) << 8;
+        case 2:
+            *lp |= ((SHS_LONG) buffer[1]) << 16;
+        case 1:
+            *lp |= ((SHS_LONG) buffer[0]) << 24;
+        }
     }
 }
 
@@ -345,16 +346,16 @@ void shsFinal(SHS_INFO *shsInfo)
     lp = shsInfo->data + count / 4;
     switch (count % 4) {
     case 3:
-	*lp++ |= (SHS_LONG) 0x80;
-	break;
+        *lp++ |= (SHS_LONG) 0x80;
+        break;
     case 2:
-	*lp++ |= (SHS_LONG) 0x80 << 8;
-	break;
+        *lp++ |= (SHS_LONG) 0x80 << 8;
+        break;
     case 1:
-	*lp++ |= (SHS_LONG) 0x80 << 16;
-	break;
+        *lp++ |= (SHS_LONG) 0x80 << 16;
+        break;
     case 0:
-	*lp++ = (SHS_LONG) 0x80 << 24;
+        *lp++ = (SHS_LONG) 0x80 << 24;
     }
 
     /* at this point, lp can point *past* shsInfo->data.  If it points
@@ -363,16 +364,16 @@ void shsFinal(SHS_INFO *shsInfo)
        enough room for length words */
 
     if (lp == shsInfo->data + 15)
-	*lp++ = 0;
+        *lp++ = 0;
 
     if (lp == shsInfo->data + 16) {
-	SHSTransform(shsInfo->digest, shsInfo->data);
-	lp = shsInfo->data;
+        SHSTransform(shsInfo->digest, shsInfo->data);
+        lp = shsInfo->data;
     }
 
     /* Pad out to 56 bytes */
     while (lp < shsInfo->data + 14)
-	*lp++ = 0;
+        *lp++ = 0;
 
     /* Append length in bits and transform */
     *lp++ = shsInfo->countHi;

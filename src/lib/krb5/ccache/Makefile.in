@@ -1,5 +1,3 @@
-thisconfigdir=../../..
-myfulldir=lib/krb5/ccache
 mydir=lib/krb5/ccache
 BUILDTOP=$(REL)..$(S)..$(S)..
 SUBDIRS = # ccapi
@@ -11,7 +9,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 LOCALINCLUDES = -I$(srcdir)$(S)ccapi $(WIN_INCLUDES)
 
-##DOS##WIN_INCLUDES = -I$(SRCTOP)\windows\lib
+##DOS##WIN_INCLUDES = -I$(top_srcdir)\windows\lib
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=ccache
@@ -109,7 +107,7 @@ check-unix:: t_cc t_cccursor
 clean-unix::
 	$(RM) t_cc t_cc.o t_cccursor t_cccursor.o
 
-##WIN32## $(OUTPRE)cc_mslsa.$(OBJEXT): cc_mslsa.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS)
+##WIN32## $(OUTPRE)cc_mslsa.$(OBJEXT): cc_mslsa.c $(top_srcdir)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS)
 
 @libobj_frag@
 

@@ -1,5 +1,3 @@
-thisconfigdir=../..
-myfulldir=lib/kadm5
 mydir=lib/kadm5
 BUILDTOP=$(REL)..$(S)..
 SUBDIRS = clnt srv unit-test

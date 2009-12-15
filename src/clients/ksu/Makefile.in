@@ -1,5 +1,3 @@
-thisconfigdir=../..
-myfulldir=clients/ksu
 mydir=clients/ksu
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DGET_TGT_VIA_PASSWD -DPRINC_LOOK_AHEAD -DCMD_PATH='"/bin /local/bin"'

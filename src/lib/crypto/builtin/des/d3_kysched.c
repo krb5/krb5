@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1995 by Richard P. Basch.  All Rights Reserved.
  * Copyright 1995 by Lehman Brothers, Inc.  All Rights Reserved.
@@ -30,20 +31,20 @@ mit_des3_key_sched(mit_des3_cblock k, mit_des3_key_schedule schedule)
     mit_des_make_key_sched(k[1],schedule[1]);
     mit_des_make_key_sched(k[2],schedule[2]);
 
-    if (!mit_des_check_key_parity(k[0]))	/* bad parity --> return -1 */
-	return(-1);
+    if (!mit_des_check_key_parity(k[0]))        /* bad parity --> return -1 */
+        return(-1);
     if (mit_des_is_weak_key(k[0]))
-	return(-2);
+        return(-2);
 
     if (!mit_des_check_key_parity(k[1]))
-	return(-1);
+        return(-1);
     if (mit_des_is_weak_key(k[1]))
-	return(-2);
+        return(-2);
 
     if (!mit_des_check_key_parity(k[2]))
-	return(-1);
+        return(-1);
     if (mit_des_is_weak_key(k[2]))
-	return(-2);
+        return(-2);
 
     /* if key was good, return 0 */
     return 0;

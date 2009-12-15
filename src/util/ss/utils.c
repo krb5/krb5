@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1987, 1988 by MIT Student Information Processing Board
  *
@@ -6,7 +7,7 @@
 
 #include <string.h>
 #include "copyright.h"
-#include "ss_internal.h"	/* includes stdio and string */
+#include "ss_internal.h"        /* includes stdio and string */
 
 extern FILE *output_file;
 
@@ -60,50 +61,50 @@ char * generate_rqte(func_name, info_string, cmds, options)
     var_name = generate_cmds_string(cmds);
     generate_function_definition(func_name);
     asprintf(&string, "    { %s,\n      %s,\n      %s,\n      %d },\n",
-	     var_name, func_name, info_string, options);
+             var_name, func_name, info_string, options);
     return(string);
 }
 
 char *
 gensym(name)
-	char *name;
+    char *name;
 {
-	char *symbol;
+    char *symbol;
 
-	gensym_n++;
-	asprintf(&symbol, "%s%05ld", name, gensym_n);
-	return(symbol);
+    gensym_n++;
+    asprintf(&symbol, "%s%05ld", name, gensym_n);
+    return(symbol);
 }
 
 /* concatenate three strings and return the result */
 char *str_concat3(a, b, c)
-	register char *a, *b, *c;
+    register char *a, *b, *c;
 {
-	char *result;
+    char *result;
 
-	asprintf(&result, "%s%s%s", a, c, b);
-	return(result);
+    asprintf(&result, "%s%s%s", a, c, b);
+    return(result);
 }
 
 /* return copy of string enclosed in double-quotes */
 char *quote(string)
-	register char *string;
+    register char *string;
 {
-	register char *result;
+    register char *result;
 
-	asprintf(&result, "\"%s\"", string);
-	return(result);
+    asprintf(&result, "\"%s\"", string);
+    return(result);
 }
 
 #ifndef HAVE_STRDUP
 /* make duplicate of string and return pointer */
 char *strdup(s)
-	register char *s;
+    register char *s;
 {
-	register int len = strlen(s) + 1;
-	register char *new;
-	new = malloc(len);
-	strncpy(new, s, len);
-	return(new);
+    register int len = strlen(s) + 1;
+    register char *new;
+    new = malloc(len);
+    strncpy(new, s, len);
+    return(new);
 }
 #endif

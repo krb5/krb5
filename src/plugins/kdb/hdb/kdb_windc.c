@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * plugins/kdb/hdb/kdb_windc.c
  *
@@ -311,7 +311,7 @@ kh_db_sign_auth_data(krb5_context context,
 
         code = kh_windc_pac_verify(context, kh, client_hprinc,
                                    req->client ?
-                                        KH_DB_ENTRY(req->client) : NULL,
+                                   KH_DB_ENTRY(req->client) : NULL,
                                    KH_DB_ENTRY(req->server),
                                    &hpac);
         if (code != 0)

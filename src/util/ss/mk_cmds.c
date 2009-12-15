@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * make_commands.c
  *
@@ -37,26 +38,26 @@ int main(argc, argv)
     char *path, *p, *q;
 
     if (argc != 2) {
-	fputs("Usage: ", stderr);
-	fputs(argv[0], stderr);
-	fputs("cmdtbl.ct\n", stderr);
-	exit(1);
+        fputs("Usage: ", stderr);
+        fputs(argv[0], stderr);
+        fputs("cmdtbl.ct\n", stderr);
+        exit(1);
     }
 
     path = malloc(strlen(argv[1])+4); /* extra space to add ".ct" */
     strcpy(path, argv[1]);
     p = strrchr(path, '/');
     if (p == (char *)NULL)
-	p = path;
+        p = path;
     else
-	p++;
+        p++;
     p = strrchr(p, '.');
     if (p == (char *)NULL || strcmp(p, ".ct"))
-	strcat(path, ".ct");
+        strcat(path, ".ct");
     yyin = fopen(path, "r");
     if (!yyin) {
-	perror(path);
-	exit(1);
+        perror(path);
+        exit(1);
     }
 
     p = strrchr(path, '.');
@@ -69,8 +70,8 @@ int main(argc, argv)
 
     output_file = fopen(c_file, "w+");
     if (!output_file) {
-	perror(c_file);
-	exit(1);
+        perror(c_file);
+        exit(1);
     }
 
     fputs("/* ", output_file);
@@ -83,20 +84,20 @@ int main(argc, argv)
     /* parse it */
     result = yyparse();
     /* put file descriptors back where they belong */
-    fclose(yyin);		/* bye bye input file */
-    fclose(output_file);	/* bye bye output file */
+    fclose(yyin);               /* bye bye input file */
+    fclose(output_file);        /* bye bye output file */
 
     return result;
 }
 
 yyerror(s)
-    char *s;
+char *s;
 {
     fputs(s, stderr);
 #ifdef NO_YYLINENO
     fprintf(stderr, "\nLast token was '%s'\n", last_token);
 #else
     fprintf(stderr, "\nLine %d; last token was '%s'\n",
-	    yylineno, last_token);
+            yylineno, last_token);
 #endif
 }

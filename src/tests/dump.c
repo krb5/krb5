@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * tests/dump.c
  *
@@ -36,8 +37,8 @@ void dump_data (data)
     unsigned char *ptr = (unsigned char *)data->data;
     int i;
     for (i=0; i<data->length; i++) {
-	fprintf(stderr, "%02x ", ptr[i]);
-	if ((i % 16) == 15) fprintf(stderr, "\n");
+        fprintf(stderr, "%02x ", ptr[i]);
+        if ((i % 16) == 15) fprintf(stderr, "\n");
     }
     fprintf(stderr, "\n");
 }

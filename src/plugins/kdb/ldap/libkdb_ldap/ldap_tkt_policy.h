@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/kdb/kdb_ldap/ldap_tkt_policy.h
  *
@@ -40,12 +41,12 @@
 /* policy object structure */
 
 typedef struct _krb5_ldap_policy_params {
-  char                  *policy;
-  long                  mask;
-  long                  maxtktlife;
-  long                  maxrenewlife;
-  long                  tktflags;
-  krb5_tl_data          *tl_data;
+    char                  *policy;
+    long                  mask;
+    long                  maxtktlife;
+    long                  maxrenewlife;
+    long                  tktflags;
+    krb5_tl_data          *tl_data;
 }krb5_ldap_policy_params;
 
 krb5_error_code
@@ -70,6 +71,6 @@ krb5_error_code
 krb5_ldap_free_policy(krb5_context, krb5_ldap_policy_params *);
 
 krb5_error_code
-krb5_ldap_change_count(krb5_context ,char * , int);
+krb5_ldap_change_count(krb5_context, char *, int);
 
 #endif

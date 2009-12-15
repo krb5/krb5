@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1987, 1988 by MIT Student Information Processing Board
  *
@@ -29,7 +30,7 @@ typedef void * pointer;
 #define LOCAL_FREE(x)
 extern pointer alloca (unsigned);
 #else
-#if defined(__HIGHC__)	/* Barf! */
+#if defined(__HIGHC__)  /* Barf! */
 pragma on(alloca);
 #define LOCAL_ALLOC(x) alloca(x)
 #define LOCAL_FREE(x)
@@ -40,13 +41,13 @@ extern pointer alloca (unsigned);
 #define LOCAL_FREE(x) free(x)
 #endif
 #endif
-#endif				/* LOCAL_ALLOC stuff */
+#endif                          /* LOCAL_ALLOC stuff */
 
 typedef char BOOL;
 
 typedef struct _ss_abbrev_entry {
-    char *name;			/* abbrev name */
-    char **abbrev;		/* new tokens to insert */
+    char *name;                 /* abbrev name */
+    char **abbrev;              /* new tokens to insert */
     unsigned int beginning_of_line : 1;
 } ss_abbrev_entry;
 
@@ -60,36 +61,36 @@ typedef struct {
     ss_abbrev_list abbrevs[127];
 } ss_abbrev_info;
 
-typedef struct _ss_data {	/* init values */
+typedef struct _ss_data {       /* init values */
     /* this subsystem */
     char *subsystem_name;
     char *subsystem_version;
     /* current request info */
     int argc;
-    char **argv;		/* arg list */
+    char **argv;                /* arg list */
     char const *current_request; /* primary name */
     /* info directory for 'help' */
     char **info_dirs;
     /* to be extracted by subroutines */
-    pointer info_ptr;		/* (void *) NULL */
+    pointer info_ptr;           /* (void *) NULL */
     /* for ss_listen processing */
     char *prompt;
     ss_request_table **rqt_tables;
     ss_abbrev_info *abbrev_info;
     struct {
-	unsigned int  escape_disabled : 1,
-		      abbrevs_disabled : 1;
+        unsigned int  escape_disabled : 1,
+            abbrevs_disabled : 1;
     } flags;
     /* to get out */
-    int abort;			/* exit subsystem */
+    int abort;                  /* exit subsystem */
     int exit_status;
 } ss_data;
 
 #define CURRENT_SS_VERSION 1
 
-#define	ss_info(sci_idx)	(_ss_table[sci_idx])
-#define	ss_current_request(sci_idx,code_ptr)	\
-     (*code_ptr=0,ss_info(sci_idx)->current_request)
+#define ss_info(sci_idx)        (_ss_table[sci_idx])
+#define ss_current_request(sci_idx,code_ptr)            \
+    (*code_ptr=0,ss_info(sci_idx)->current_request)
 void ss_unknown_function();
 void ss_delete_info_dir();
 char **ss_parse (int, char *, int *);

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/kdb/kdb_ldap/kdb_ldap.h
  *
@@ -78,21 +79,21 @@ extern struct timeval timelimit;
 #define CHECK_STATUS               1
 
 #define SETUP_CONTEXT() if (context == NULL || context->dal_handle == NULL \
-            || context->dal_handle->db_context == NULL) { \
-        return EINVAL; \
-    } \
-    dal_handle = context->dal_handle; \
-    ldap_context = (krb5_ldap_context *) dal_handle->db_context; \
+                            || context->dal_handle->db_context == NULL) { \
+        return EINVAL;                                                  \
+    }                                                                   \
+    dal_handle = context->dal_handle;                                   \
+    ldap_context = (krb5_ldap_context *) dal_handle->db_context;        \
     if (ldap_context == NULL || ldap_context->server_info_list == NULL) \
         return KRB5_KDB_DBNOTINITED;
 
-#define GET_HANDLE()  ld = NULL; \
+#define GET_HANDLE()  ld = NULL;                                        \
     st = krb5_ldap_request_handle_from_pool(ldap_context, &ldap_server_handle); \
-    if (st != 0) { \
+    if (st != 0) {                                                      \
         prepend_err_str(context, "LDAP handle unavailable: ", KRB5_KDB_ACCESS_ERROR, st); \
-        st = KRB5_KDB_ACCESS_ERROR; \
-        goto cleanup; \
-    } \
+        st = KRB5_KDB_ACCESS_ERROR;                                     \
+        goto cleanup;                                                   \
+    }                                                                   \
     ld = ldap_server_handle->ldap_handle;
 
 extern int set_ldap_error (krb5_context ctx, int st, int op);
@@ -100,44 +101,44 @@ extern void prepend_err_str (krb5_context ctx, const char *s, krb5_error_code er
 
 #define LDAP_SEARCH(base, scope, filter, attrs)   LDAP_SEARCH_1(base, scope, filter, attrs, CHECK_STATUS)
 
-#define LDAP_SEARCH_1(base, scope, filter, attrs, status_check)        \
-      do { \
-	  st = ldap_search_ext_s(ld, base, scope, filter, attrs, 0, NULL, NULL, &timelimit, LDAP_NO_LIMIT, &result); \
-	  if (translate_ldap_error(st, OP_SEARCH) == KRB5_KDB_ACCESS_ERROR) { \
-              tempst = krb5_ldap_rebind(ldap_context, &ldap_server_handle); \
-	      if (ldap_server_handle) \
-		  ld = ldap_server_handle->ldap_handle; \
-	  } \
-      }while (translate_ldap_error(st, OP_SEARCH) == KRB5_KDB_ACCESS_ERROR && tempst == 0); \
-      \
-      if (status_check != IGNORE_STATUS) { \
-        if (tempst != 0) { \
+#define LDAP_SEARCH_1(base, scope, filter, attrs, status_check)         \
+    do {                                                                \
+        st = ldap_search_ext_s(ld, base, scope, filter, attrs, 0, NULL, NULL, &timelimit, LDAP_NO_LIMIT, &result); \
+        if (translate_ldap_error(st, OP_SEARCH) == KRB5_KDB_ACCESS_ERROR) { \
+            tempst = krb5_ldap_rebind(ldap_context, &ldap_server_handle); \
+            if (ldap_server_handle)                                     \
+                ld = ldap_server_handle->ldap_handle;                   \
+        }                                                               \
+    }while (translate_ldap_error(st, OP_SEARCH) == KRB5_KDB_ACCESS_ERROR && tempst == 0); \
+                                                                        \
+    if (status_check != IGNORE_STATUS) {                                \
+        if (tempst != 0) {                                              \
             prepend_err_str(context, "LDAP handle unavailable: ", KRB5_KDB_ACCESS_ERROR, st); \
-            st = KRB5_KDB_ACCESS_ERROR; \
-            goto cleanup; \
-        } \
-        if (st != LDAP_SUCCESS) { \
-	     st = set_ldap_error(context, st, OP_SEARCH); \
-	     goto cleanup; \
-        } \
-      }
+            st = KRB5_KDB_ACCESS_ERROR;                                 \
+            goto cleanup;                                               \
+        }                                                               \
+        if (st != LDAP_SUCCESS) {                                       \
+            st = set_ldap_error(context, st, OP_SEARCH);                \
+            goto cleanup;                                               \
+        }                                                               \
+    }
 
 
-#define CHECK_CLASS_VALIDITY(st, mask, str) \
-	if (st != 0 || mask == 0) { \
-	    if (st == 0 && mask == 0) { \
-	       st = set_ldap_error(context, LDAP_OBJECT_CLASS_VIOLATION, OP_SEARCH); \
-	    } \
-	    prepend_err_str(context, str, st, st); \
-	    goto cleanup; \
-	 }
+#define CHECK_CLASS_VALIDITY(st, mask, str)                             \
+    if (st != 0 || mask == 0) {                                         \
+        if (st == 0 && mask == 0) {                                     \
+            st = set_ldap_error(context, LDAP_OBJECT_CLASS_VIOLATION, OP_SEARCH); \
+        }                                                               \
+        prepend_err_str(context, str, st, st);                          \
+        goto cleanup;                                                   \
+    }
 
-#define CHECK_NULL(ptr) if (ptr == NULL) { \
-                            st = ENOMEM; \
-                            goto cleanup; \
-                        }
+#define CHECK_NULL(ptr) if (ptr == NULL) {      \
+        st = ENOMEM;                            \
+        goto cleanup;                           \
+    }
 
-#define  STORE16_INT(ptr, val)	store_16_be(val, ptr)
+#define  STORE16_INT(ptr, val)  store_16_be(val, ptr)
 #define  STORE32_INT(ptr, val)  store_32_be(val, ptr)
 #define UNSTORE16_INT(ptr, val) (val = load_16_be(ptr))
 #define UNSTORE32_INT(ptr, val) (val = load_32_be(ptr))
@@ -157,10 +158,10 @@ extern void prepend_err_str (krb5_context ctx, const char *s, krb5_error_code er
 #define KDB_TL_LINKDN             0x07
 
 
-#define CHECK_LDAP_HANDLE(lcontext)     if (!(ldap_context \
-					      && ldap_context->server_info_list)) { \
-					  return KRB5_KDB_DBNOTINITED; \
-					}
+#define CHECK_LDAP_HANDLE(lcontext)     if (!(ldap_context              \
+                                              && ldap_context->server_info_list)) { \
+        return KRB5_KDB_DBNOTINITED;                                    \
+    }
 
 #define HNDL_LOCK(lcontext) k5_mutex_lock(&lcontext->hndl_lock)
 #define HNDL_UNLOCK(lcontext) k5_mutex_unlock(&lcontext->hndl_lock)
@@ -188,16 +189,16 @@ typedef struct  _krb5_ldap_server_handle {
 } krb5_ldap_server_handle;
 
 struct _krb5_ldap_server_info {
-    krb5_ldap_server_type	 server_type;
+    krb5_ldap_server_type        server_type;
     krb5_ldap_server_status      server_status;
     krb5_ui_4                    num_conns;
     krb5_ldap_server_handle      *ldap_server_handles;
     time_t                       downtime;
-    char			*server_name;
+    char                        *server_name;
 #ifdef HAVE_EDIRECTORY
-    char			*root_certificate_file;
+    char                        *root_certificate_file;
 #endif
-    int				 modify_increment;
+    int                          modify_increment;
     struct _krb5_ldap_server_info *next;
 };
 
@@ -207,33 +208,33 @@ struct _krb5_ldap_server_info {
 typedef enum {SERVICE_DN_TYPE_SERVER, SERVICE_DN_TYPE_CLIENT} krb5_ldap_servicetype;
 
 typedef struct _krb5_ldap_context {
-  krb5_ldap_servicetype         service_type;
-  krb5_ldap_server_info         **server_info_list;
-  krb5_ui_4                     max_server_conns;
-  char                          *conf_section;
-  char 		                *bind_dn;
-  char                          *bind_pwd;
-  char 		                *service_password_file;
-  char 		                *root_certificate_file;
-  char                          *service_cert_path;
-  char                          *service_cert_pass;
-  krb5_ldap_certificates        **certificates;
-  krb5_ui_4                     cert_count; /* certificate count */
-  k5_mutex_t                    hndl_lock;
-  krb5_ldap_krbcontainer_params *krbcontainer;
-  krb5_ldap_realm_params        *lrparams;
-  krb5_context                  kcontext;   /* to set the error code and message */
+    krb5_ldap_servicetype         service_type;
+    krb5_ldap_server_info         **server_info_list;
+    krb5_ui_4                     max_server_conns;
+    char                          *conf_section;
+    char                          *bind_dn;
+    char                          *bind_pwd;
+    char                          *service_password_file;
+    char                          *root_certificate_file;
+    char                          *service_cert_path;
+    char                          *service_cert_pass;
+    krb5_ldap_certificates        **certificates;
+    krb5_ui_4                     cert_count; /* certificate count */
+    k5_mutex_t                    hndl_lock;
+    krb5_ldap_krbcontainer_params *krbcontainer;
+    krb5_ldap_realm_params        *lrparams;
+    krb5_context                  kcontext;   /* to set the error code and message */
 } krb5_ldap_context;
 
 
 typedef struct {
-  int           nkey;
-  struct berval **keys;
+    int           nkey;
+    struct berval **keys;
 }KEY;
 
-#define k5ldap_inited(c) (c && c->db_context \
-                         && ((kdb5_dal_handle*)c->db_context)->db_context \
-                         && ((krb5_ldap_context *) ((kdb5_dal_handle*)c->db_context)->db_context))
+#define k5ldap_inited(c) (c && c->db_context                            \
+                          && ((kdb5_dal_handle*)c->db_context)->db_context \
+                          && ((krb5_ldap_context *) ((kdb5_dal_handle*)c->db_context)->db_context))
 
 
 /* misc functions */
@@ -278,8 +279,8 @@ krb5_ldap_create(krb5_context , char *, char **);
 
 krb5_error_code
 krb5_ldap_open( krb5_context , char *,
-		char **db_args,
-		int mode );
+                char **db_args,
+                int mode );
 krb5_error_code
 krb5_ldap_close( krb5_context );
 

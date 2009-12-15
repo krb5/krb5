@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* #ident  "@(#)gss_release_oid_set.c 1.12     95/08/23 SMI" */
 
 /*

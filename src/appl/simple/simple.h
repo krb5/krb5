@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * appl/simple/simple.h
  *
@@ -28,5 +29,5 @@
  * server & client applications.
  */
 
-#define SIMPLE_SERVICE	"sample"
-#define SIMPLE_PORT	"sample"
+#define SIMPLE_SERVICE  "sample"
+#define SIMPLE_PORT     "sample"

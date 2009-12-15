@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/des/f_cksum.c
  *
@@ -49,88 +50,88 @@
 
 unsigned long
 mit_des_cbc_cksum(const krb5_octet *in, krb5_octet *out,
-		  unsigned long length, const mit_des_key_schedule schedule,
-		  const krb5_octet *ivec)
+                  unsigned long length, const mit_des_key_schedule schedule,
+                  const krb5_octet *ivec)
 {
-	unsigned DES_INT32 left, right;
-	const unsigned DES_INT32 *kp;
-	const unsigned char *ip;
-	unsigned char *op;
-	register DES_INT32 len;
+    unsigned DES_INT32 left, right;
+    const unsigned DES_INT32 *kp;
+    const unsigned char *ip;
+    unsigned char *op;
+    register DES_INT32 len;
 
-	/*
-	 * Initialize left and right with the contents of the initial
-	 * vector.
-	 */
-	ip = ivec;
-	GET_HALF_BLOCK(left, ip);
-	GET_HALF_BLOCK(right, ip);
+    /*
+     * Initialize left and right with the contents of the initial
+     * vector.
+     */
+    ip = ivec;
+    GET_HALF_BLOCK(left, ip);
+    GET_HALF_BLOCK(right, ip);
 
-	/*
-	 * Suitably initialized, now work the length down 8 bytes
-	 * at a time.
-	 */
-	ip = in;
-	len = length;
-	while (len > 0) {
-		/*
-		 * Get more input, xor it in.  If the length is
-		 * greater than or equal to 8 this is straight
-		 * forward.  Otherwise we have to fart around.
-		 */
-		if (len >= 8) {
-			unsigned DES_INT32 temp;
-			GET_HALF_BLOCK(temp, ip);
-			left  ^= temp;
-			GET_HALF_BLOCK(temp, ip);
-			right ^= temp;
-			len -= 8;
-		} else {
-			/*
-			 * Oh, shoot.  We need to pad the
-			 * end with zeroes.  Work backwards
-			 * to do this.
-			 */
-			ip += (int) len;
-			switch(len) {
-			case 7:
-				right ^= (*(--ip) & FF_UINT32) <<  8;
-			case 6:
-				right ^= (*(--ip) & FF_UINT32) << 16;
-			case 5:
-				right ^= (*(--ip) & FF_UINT32) << 24;
-			case 4:
-				left  ^=  *(--ip) & FF_UINT32;
-			case 3:
-				left  ^= (*(--ip) & FF_UINT32) <<  8;
-			case 2:
-				left  ^= (*(--ip) & FF_UINT32) << 16;
-			case 1:
-				left  ^= (*(--ip) & FF_UINT32) << 24;
-				break;
-			}
-			len = 0;
-		}
+    /*
+     * Suitably initialized, now work the length down 8 bytes
+     * at a time.
+     */
+    ip = in;
+    len = length;
+    while (len > 0) {
+        /*
+         * Get more input, xor it in.  If the length is
+         * greater than or equal to 8 this is straight
+         * forward.  Otherwise we have to fart around.
+         */
+        if (len >= 8) {
+            unsigned DES_INT32 temp;
+            GET_HALF_BLOCK(temp, ip);
+            left  ^= temp;
+            GET_HALF_BLOCK(temp, ip);
+            right ^= temp;
+            len -= 8;
+        } else {
+            /*
+             * Oh, shoot.  We need to pad the
+             * end with zeroes.  Work backwards
+             * to do this.
+             */
+            ip += (int) len;
+            switch(len) {
+            case 7:
+                right ^= (*(--ip) & FF_UINT32) <<  8;
+            case 6:
+                right ^= (*(--ip) & FF_UINT32) << 16;
+            case 5:
+                right ^= (*(--ip) & FF_UINT32) << 24;
+            case 4:
+                left  ^=  *(--ip) & FF_UINT32;
+            case 3:
+                left  ^= (*(--ip) & FF_UINT32) <<  8;
+            case 2:
+                left  ^= (*(--ip) & FF_UINT32) << 16;
+            case 1:
+                left  ^= (*(--ip) & FF_UINT32) << 24;
+                break;
+            }
+            len = 0;
+        }
 
-		/*
-		 * Encrypt what we have
-		 */
-		kp = (const unsigned DES_INT32 *)schedule;
-		DES_DO_ENCRYPT(left, right, kp);
-	}
+        /*
+         * Encrypt what we have
+         */
+        kp = (const unsigned DES_INT32 *)schedule;
+        DES_DO_ENCRYPT(left, right, kp);
+    }
 
-	/*
-	 * Done.  Left and right have the checksum.  Put it into
-	 * the output.
-	 */
-	op = out;
-	PUT_HALF_BLOCK(left, op);
-	PUT_HALF_BLOCK(right, op);
+    /*
+     * Done.  Left and right have the checksum.  Put it into
+     * the output.
+     */
+    op = out;
+    PUT_HALF_BLOCK(left, op);
+    PUT_HALF_BLOCK(right, op);
 
-	/*
-	 * Return right.  I'll bet the MIT code returns this
-	 * inconsistantly (with the low order byte of the checksum
-	 * not always in the low order byte of the DES_INT32).  We won't.
-	 */
-	return right & 0xFFFFFFFFUL;
+    /*
+     * Return right.  I'll bet the MIT code returns this
+     * inconsistantly (with the low order byte of the checksum
+     * not always in the low order byte of the DES_INT32).  We won't.
+     */
+    return right & 0xFFFFFFFFUL;
 }

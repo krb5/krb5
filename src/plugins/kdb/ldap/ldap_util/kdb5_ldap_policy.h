@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * kadmin/ldap_util/kdb5_ldap_policy.h
  */

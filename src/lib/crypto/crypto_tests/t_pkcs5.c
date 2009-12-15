@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/t_pkcs5.c
  *
@@ -37,7 +38,7 @@
 static void printhex (size_t len, const char *p)
 {
     while (len--)
-	printf (" %02X", 0xff & *p++);
+        printf (" %02X", 0xff & *p++);
 }
 
 static void printdata (krb5_data *d) {
@@ -53,20 +54,20 @@ static void test_pbkdf2_rfc3211()
 
     /* RFC 3211 test cases.  */
     static const struct {
-	const char *pass;
-	const char *salt;
-	unsigned int count;
-	size_t len;
-	const unsigned char expected[24];
+        const char *pass;
+        const char *salt;
+        unsigned int count;
+        size_t len;
+        const unsigned char expected[24];
     } t[] = {
-	{ "password", "\x12\x34\x56\x78\x78\x56\x34\x12", 5, 8,
-	  { 0xD1, 0xDA, 0xA7, 0x86, 0x15, 0xF2, 0x87, 0xE6 } },
-	{ "All n-entities must communicate with other "
-	  "n-entities via n-1 entiteeheehees",
-	  "\x12\x34\x56\x78\x78\x56\x34\x12", 500, 24,
-	  { 0x6A, 0x89, 0x70, 0xBF, 0x68, 0xC9, 0x2C, 0xAE,
-	    0xA8, 0x4A, 0x8D, 0xF2, 0x85, 0x10, 0x85, 0x86,
-	    0x07, 0x12, 0x63, 0x80, 0xCC, 0x47, 0xAB, 0x2D } },
+        { "password", "\x12\x34\x56\x78\x78\x56\x34\x12", 5, 8,
+          { 0xD1, 0xDA, 0xA7, 0x86, 0x15, 0xF2, 0x87, 0xE6 } },
+        { "All n-entities must communicate with other "
+          "n-entities via n-1 entiteeheehees",
+          "\x12\x34\x56\x78\x78\x56\x34\x12", 500, 24,
+          { 0x6A, 0x89, 0x70, 0xBF, 0x68, 0xC9, 0x2C, 0xAE,
+            0xA8, 0x4A, 0x8D, 0xF2, 0x85, 0x10, 0x85, 0x86,
+            0x07, 0x12, 0x63, 0x80, 0xCC, 0x47, 0xAB, 0x2D } },
     };
 
     d.data = x;
@@ -74,27 +75,27 @@ static void test_pbkdf2_rfc3211()
 
     for (i = 0; i < sizeof(t)/sizeof(t[0]); i++) {
 
-	printf("pkbdf2(iter_count=%d, dklen=%d (%d bytes), salt=12 34 56 78 78 56 34 12,\n"
-	       "       pass=%s):\n  ->",
-	       t[i].count, t[i].len * 8, t[i].len, t[i].pass);
+        printf("pkbdf2(iter_count=%d, dklen=%d (%d bytes), salt=12 34 56 78 78 56 34 12,\n"
+               "       pass=%s):\n  ->",
+               t[i].count, t[i].len * 8, t[i].len, t[i].pass);
 
-	d.length = t[i].len;
-	pass.data = t[i].pass;
-	pass.length = strlen(pass.data);
-	salt.data = t[i].salt;
-	salt.length = strlen(salt.data);
-	err = krb5int_pbkdf2_hmac_sha1 (&d, t[i].count, &pass, &salt);
-	if (err) {
-	    printf("error in computing pbkdf2: %s\n", error_message(err));
-	    exit(1);
-	}
-	printdata(&d);
-	if (!memcmp(x, t[i].expected, t[i].len))
-	    printf("\nTest passed.\n\n");
-	else {
-	    printf("\n*** CHECK FAILED!\n");
-	    exit(1);
-	}
+        d.length = t[i].len;
+        pass.data = t[i].pass;
+        pass.length = strlen(pass.data);
+        salt.data = t[i].salt;
+        salt.length = strlen(salt.data);
+        err = krb5int_pbkdf2_hmac_sha1 (&d, t[i].count, &pass, &salt);
+        if (err) {
+            printf("error in computing pbkdf2: %s\n", error_message(err));
+            exit(1);
+        }
+        printdata(&d);
+        if (!memcmp(x, t[i].expected, t[i].len))
+            printf("\nTest passed.\n\n");
+        else {
+            printf("\n*** CHECK FAILED!\n");
+            exit(1);
+        }
     }
 }
 

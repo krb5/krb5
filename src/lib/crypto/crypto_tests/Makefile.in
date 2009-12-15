@@ -1,5 +1,3 @@
-thisconfigdir=../../..
-myfulldir=lib/crypto/crypto_tests
 mydir=lib/crypto/crypto_tests
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../krb -I$(srcdir)/../@CRYPTO_IMPL@/enc_provider 		\
@@ -39,6 +37,9 @@ EXTRADEPSRCS=\
 
 ##DOS##LIBOBJS = $(OBJS)
 
+# NOTE: The t_cksum known checksum values are primarily for regression
+# testing.  They are not derived a priori, but are known to produce
+# checksums that interoperate.
 check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac \
 		t_cksum4 t_cksum5 \
 		aes-test  \
@@ -51,8 +52,8 @@ check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac \
 	$(RUN_SETUP) $(VALGRIND) ./t_hmac
 	$(RUN_SETUP) $(VALGRIND) ./t_prf <$(srcdir)/t_prf.in >t_prf.output
 	diff t_prf.output $(srcdir)/t_prf.expected
-	$(RUN_SETUP) $(VALGRIND) ./t_cksum4 "this is a test"
-	$(RUN_SETUP) $(VALGRIND) ./t_cksum5 "this is a test"
+	$(RUN_SETUP) $(VALGRIND) ./t_cksum4 "this is a test" e3f76a07f3401e3536b43a3f54226c39422c35682c354835
+	$(RUN_SETUP) $(VALGRIND) ./t_cksum5 "this is a test" e3f76a07f3401e351143ee6f4c09be1edb4264d55015db53
 	$(RUN_SETUP) $(VALGRIND) ./t_crc
 	$(RUN_SETUP) $(VALGRIND) ./t_cts
 	$(RUN_SETUP) $(VALGRIND) ./aes-test -k > vk.txt
@@ -138,7 +139,7 @@ clean::
 		t_cksum.o t_cksum \
 		t_crc.o t_crc t_cts.o t_cts \
 		t_mddriver4.o t_mddriver4 t_mddriver.o t_mddriver \
-		t_cksum4 t_cksum4.o t_cksum5 t_cksum5.o \
+		t_cksum4 t_cksum4.o t_cksum5 t_cksum5.o t_kperf.o t_kperf \
 		t_mddriver$(EXEEXT) $(OUTPRE)t_mddriver.$(OBJEXT)
 
 	-$(RM) t_prng.output

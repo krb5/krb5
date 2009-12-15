@@ -1,11 +1,9 @@
-thisconfigdir=../../..
-myfulldir=lib/krb5/krb
 mydir=lib/krb5/krb
 BUILDTOP=$(REL)..$(S)..$(S)..
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
-LOCALINCLUDES = -I$(srcdir)/../os -I$(SRCTOP)
+LOCALINCLUDES = -I$(srcdir)/../os -I$(top_srcdir)
 DEFS=-DLIBDIR=\"$(KRB5_LIBDIR)\"
 
 ##DOS##BUILDTOP = ..\..\..

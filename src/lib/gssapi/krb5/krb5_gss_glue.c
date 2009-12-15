@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1993 by OpenVision Technologies, Inc.
  *
@@ -55,10 +55,9 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32 KRB5_CALLCONV
-gss_krb5_get_tkt_flags(
-    OM_uint32 *minor_status,
-    gss_ctx_id_t context_handle,
-    krb5_flags *ticket_flags)
+gss_krb5_get_tkt_flags(OM_uint32 *minor_status,
+                       gss_ctx_id_t context_handle,
+                       krb5_flags *ticket_flags)
 {
     static const gss_OID_desc req_oid = {
         GSS_KRB5_GET_TKT_FLAGS_OID_LENGTH,
@@ -93,10 +92,9 @@ gss_krb5_get_tkt_flags(
 }
 
 OM_uint32 KRB5_CALLCONV
-gss_krb5_copy_ccache(
-    OM_uint32 *minor_status,
-    gss_cred_id_t cred_handle,
-    krb5_ccache out_ccache)
+gss_krb5_copy_ccache(OM_uint32 *minor_status,
+                     gss_cred_id_t cred_handle,
+                     krb5_ccache out_ccache)
 {
     static const gss_OID_desc req_oid = {
         GSS_KRB5_COPY_CCACHE_OID_LENGTH,
@@ -119,11 +117,10 @@ gss_krb5_copy_ccache(
 }
 
 OM_uint32 KRB5_CALLCONV
-gss_krb5_export_lucid_sec_context(
-    OM_uint32 *minor_status,
-    gss_ctx_id_t *context_handle,
-    OM_uint32 version,
-    void **kctx)
+gss_krb5_export_lucid_sec_context(OM_uint32 *minor_status,
+                                  gss_ctx_id_t *context_handle,
+                                  OM_uint32 version,
+                                  void **kctx)
 {
     unsigned char oid_buf[GSS_KRB5_EXPORT_LUCID_SEC_CONTEXT_OID_LENGTH + 6];
     gss_OID_desc req_oid;
@@ -174,11 +171,10 @@ gss_krb5_export_lucid_sec_context(
 }
 
 OM_uint32 KRB5_CALLCONV
-gss_krb5_set_allowable_enctypes(
-    OM_uint32 *minor_status,
-    gss_cred_id_t cred,
-    OM_uint32 num_ktypes,
-    krb5_enctype *ktypes)
+gss_krb5_set_allowable_enctypes(OM_uint32 *minor_status,
+                                gss_cred_id_t cred,
+                                OM_uint32 num_ktypes,
+                                krb5_enctype *ktypes)
 {
     static const gss_OID_desc req_oid = {
         GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID_LENGTH,
@@ -202,10 +198,9 @@ gss_krb5_set_allowable_enctypes(
 }
 
 OM_uint32 KRB5_CALLCONV
-gss_krb5_ccache_name(
-    OM_uint32 *minor_status,
-    const char *name,
-    const char **out_name)
+gss_krb5_ccache_name(OM_uint32 *minor_status,
+                     const char *name,
+                     const char **out_name)
 {
     static const gss_OID_desc req_oid = {
         GSS_KRB5_CCACHE_NAME_OID_LENGTH,
@@ -229,9 +224,7 @@ gss_krb5_ccache_name(
 }
 
 OM_uint32 KRB5_CALLCONV
-gss_krb5_free_lucid_sec_context(
-    OM_uint32 *minor_status,
-    void *kctx)
+gss_krb5_free_lucid_sec_context(OM_uint32 *minor_status, void *kctx)
 {
     static const gss_OID_desc req_oid = {
         GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID_LENGTH,
@@ -306,11 +299,10 @@ krb5_gss_use_kdc_context(void)
  * into a gss_name_t.
  */
 OM_uint32 KRB5_CALLCONV
-gsskrb5_extract_authz_data_from_sec_context(
-    OM_uint32 *minor_status,
-    gss_ctx_id_t context_handle,
-    int ad_type,
-    gss_buffer_t ad_data)
+gsskrb5_extract_authz_data_from_sec_context(OM_uint32 *minor_status,
+                                            gss_ctx_id_t context_handle,
+                                            int ad_type,
+                                            gss_buffer_t ad_data)
 {
     gss_OID_desc req_oid;
     unsigned char oid_buf[GSS_KRB5_EXTRACT_AUTHZ_DATA_FROM_SEC_CONTEXT_OID_LENGTH + 6];
@@ -358,10 +350,9 @@ gsskrb5_extract_authz_data_from_sec_context(
 }
 
 OM_uint32 KRB5_CALLCONV
-gss_krb5_set_cred_rcache(
-    OM_uint32 *minor_status,
-    gss_cred_id_t cred,
-    krb5_rcache rcache)
+gss_krb5_set_cred_rcache(OM_uint32 *minor_status,
+                         gss_cred_id_t cred,
+                         krb5_rcache rcache)
 {
     static const gss_OID_desc req_oid = {
         GSS_KRB5_SET_CRED_RCACHE_OID_LENGTH,

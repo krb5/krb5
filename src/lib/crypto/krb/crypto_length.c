@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/crypto_length.c
  *
@@ -30,59 +31,53 @@
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_crypto_length(krb5_context context, krb5_enctype enctype,
-		     krb5_cryptotype type, unsigned int *size)
+                     krb5_cryptotype type, unsigned int *size)
 {
     const struct krb5_keytypes *ktp;
-    krb5_error_code ret;
 
     ktp = find_enctype(enctype);
-    if (ktp == NULL || ktp->aead == NULL)
-	return KRB5_BAD_ENCTYPE;
+    if (ktp == NULL)
+        return KRB5_BAD_ENCTYPE;
 
     switch (type) {
     case KRB5_CRYPTO_TYPE_EMPTY:
     case KRB5_CRYPTO_TYPE_SIGN_ONLY:
-	*size = 0;
-	ret = 0;
-	break;
+        *size = 0;
+        break;
     case KRB5_CRYPTO_TYPE_DATA:
-	*size = (size_t)~0; /* match Heimdal */
-	ret = 0;
-	break;
+        *size = (size_t)~0; /* match Heimdal */
+        break;
     case KRB5_CRYPTO_TYPE_HEADER:
     case KRB5_CRYPTO_TYPE_PADDING:
     case KRB5_CRYPTO_TYPE_TRAILER:
     case KRB5_CRYPTO_TYPE_CHECKSUM:
-	ret = (*ktp->aead->crypto_length)(ktp->aead, ktp->enc, ktp->hash,
-					  type, size);
-	break;
+        *size = ktp->crypto_length(ktp, type);
+        break;
     default:
-	ret = EINVAL;
-	break;
+        return EINVAL;
     }
 
-    return ret;
+    return 0;
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_padding_length(krb5_context context, krb5_enctype enctype,
-		      size_t data_length, unsigned int *pad_length)
+                      size_t data_length, unsigned int *pad_length)
 {
     const struct krb5_keytypes *ktp;
 
     ktp = find_enctype(enctype);
-    if (ktp == NULL || ktp->aead == NULL)
-	return KRB5_BAD_ENCTYPE;
+    if (ktp == NULL)
+        return KRB5_BAD_ENCTYPE;
 
-    return krb5int_c_padding_length(ktp->aead, ktp->enc, ktp->hash,
-				    data_length, pad_length);
+    *pad_length = krb5int_c_padding_length(ktp, data_length);
+    return 0;
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_crypto_length_iov(krb5_context context, krb5_enctype enctype,
-			 krb5_crypto_iov *data, size_t num_data)
+                         krb5_crypto_iov *data, size_t num_data)
 {
-    krb5_error_code ret = 0;
     size_t i;
     const struct krb5_keytypes *ktp;
     unsigned int data_length = 0, pad_length;
@@ -94,51 +89,40 @@ krb5_c_crypto_length_iov(krb5_context context, krb5_enctype enctype,
      */
 
     ktp = find_enctype(enctype);
-    if (ktp == NULL || ktp->aead == NULL)
-	return KRB5_BAD_ENCTYPE;
+    if (ktp == NULL)
+        return KRB5_BAD_ENCTYPE;
 
     for (i = 0; i < num_data; i++) {
-	krb5_crypto_iov *iov = &data[i];
+        krb5_crypto_iov *iov = &data[i];
 
-	switch (iov->flags) {
-	case KRB5_CRYPTO_TYPE_DATA:
-	    data_length += iov->data.length;
-	    break;
-	case KRB5_CRYPTO_TYPE_PADDING:
-	    if (padding != NULL)
-		return EINVAL;
+        switch (iov->flags) {
+        case KRB5_CRYPTO_TYPE_DATA:
+            data_length += iov->data.length;
+            break;
+        case KRB5_CRYPTO_TYPE_PADDING:
+            if (padding != NULL)
+                return EINVAL;
 
-	    padding = iov;
-	    break;
-	case KRB5_CRYPTO_TYPE_HEADER:
-	case KRB5_CRYPTO_TYPE_TRAILER:
-	case KRB5_CRYPTO_TYPE_CHECKSUM:
-	    ret = (*ktp->aead->crypto_length)(ktp->aead, ktp->enc, ktp->hash,
-					      iov->flags, &iov->data.length);
-	    break;
-	case KRB5_CRYPTO_TYPE_EMPTY:
-	case KRB5_CRYPTO_TYPE_SIGN_ONLY:
-	default:
-	    break;
-	}
-
-	if (ret != 0)
-	    break;
+            padding = iov;
+            break;
+        case KRB5_CRYPTO_TYPE_HEADER:
+        case KRB5_CRYPTO_TYPE_TRAILER:
+        case KRB5_CRYPTO_TYPE_CHECKSUM:
+            iov->data.length = ktp->crypto_length(ktp, iov->flags);
+            break;
+        case KRB5_CRYPTO_TYPE_EMPTY:
+        case KRB5_CRYPTO_TYPE_SIGN_ONLY:
+        default:
+            break;
+        }
     }
 
-    if (ret != 0)
-	return ret;
-
-    ret = krb5int_c_padding_length(ktp->aead, ktp->enc, ktp->hash,
-				   data_length, &pad_length);
-    if (ret != 0)
-	return ret;
-
+    pad_length = krb5int_c_padding_length(ktp, data_length);
     if (pad_length != 0 && padding == NULL)
-	return EINVAL;
+        return EINVAL;
 
     if (padding != NULL)
-	padding->data.length = pad_length;
+        padding->data.length = pad_length;
 
     return 0;
 }

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/des/key_sched.c
  *
@@ -50,11 +51,11 @@ mit_des_key_sched(mit_des_cblock k, mit_des_key_schedule schedule)
 {
     mit_des_make_key_sched(k,schedule);
 
-    if (!mit_des_check_key_parity(k))	/* bad parity --> return -1 */
-	return(-1);
+    if (!mit_des_check_key_parity(k))   /* bad parity --> return -1 */
+        return(-1);
 
     if (mit_des_is_weak_key(k))
-	return(-2);
+        return(-2);
 
     /* if key was good, return 0 */
     return 0;

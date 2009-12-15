@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * plugins/kdb/hdb/kdb_marshal.c
  *
@@ -69,8 +69,8 @@ kh_free_HostAddresses(krb5_context context,
 #if 0
 static krb5_error_code
 kh_marshal_octet_string(krb5_context context,
-                         const krb5_data *in_data,
-                         heim_octet_string *out_data)
+                        const krb5_data *in_data,
+                        heim_octet_string *out_data)
 {
     out_data->data = malloc(in_data->length);
     if (out_data->data == NULL)
@@ -198,7 +198,7 @@ kh_marshal_Principal(krb5_context context,
     }
     for (i = 0; i < kprinc->length; i++) {
         code = kh_marshal_general_string(context, &kprinc->data[i],
-                                          &hprinc->name.name_string.val[i]);
+                                         &hprinc->name.name_string.val[i]);
         if (code != 0) {
             kh_free_Principal(context, hprinc);
             return code;
@@ -778,7 +778,7 @@ kh_unmarshal_hdb_entry(krb5_context context,
 
     code = kh_unmarshal_Event(context,
                               hentry->modified_by ? hentry->modified_by :
-                                                    &hentry->created_by,
+                              &hentry->created_by,
                               kentry);
     if (code != 0)
         goto cleanup;

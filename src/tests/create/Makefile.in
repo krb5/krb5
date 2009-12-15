@@ -1,5 +1,3 @@
-thisconfigdir=../..
-myfulldir=tests/create
 mydir=tests/create
 BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)

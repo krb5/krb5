@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -29,14 +30,14 @@
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_enctype_compare(krb5_context context, krb5_enctype e1, krb5_enctype e2,
-		       krb5_boolean *similar)
+                       krb5_boolean *similar)
 {
     const struct krb5_keytypes *ktp1, *ktp2;
 
     ktp1 = find_enctype(e1);
     ktp2 = find_enctype(e2);
     if (ktp1 == NULL || ktp2 == NULL)
-	return KRB5_BAD_ENCTYPE;
+        return KRB5_BAD_ENCTYPE;
 
     *similar = (ktp1->enc == ktp2->enc && ktp1->str2key == ktp2->str2key);
     return 0;

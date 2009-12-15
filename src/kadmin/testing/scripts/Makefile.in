@@ -1,5 +1,3 @@
-thisconfigdir=../../..
-myfulldir=kadmin/testing/scripts
 mydir=kadmin/testing/scripts
 BUILDTOP=$(REL)..$(S)..$(S)..
 PERL_PATH=@PERL_PATH@
@@ -14,9 +12,9 @@ all:: env-setup.sh $(GEN_SCRIPTS)
 # Should only rebuild env_setup.sh here (use CONFIG_FILES=), but the weird krb5
 # makefile post-processing is unconditional and would trash the makefile.
 env-setup.sh: env-setup.stamp
-env-setup.stamp: $(srcdir)/env-setup.shin $(thisconfigdir)/config.status \
+env-setup.stamp: $(srcdir)/env-setup.shin $(BUILDTOP)/config.status \
 		Makefile 
-	cd $(thisconfigdir) && \
+	cd $(BUILDTOP) && \
 		CONFIG_FILES=$(mydir)/env-setup.sh:$(mydir)/env-setup.shin $(SHELL) \
 		config.status
 	chmod +x env-setup.sh

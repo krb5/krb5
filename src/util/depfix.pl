@@ -27,36 +27,28 @@ eval 'exec perl -S $0 ${1+"$@"}'
   if 0;
 $0 =~ s/^.*?(\w+)[\.\w+]*$/$1/;
 
-# Input: srctop thisdir srcdir buildtop libgccfilename stlibobjs
+# Input: srctop thisdir srcdir buildtop stlibobjs
 
 # Notes: myrelativedir is something like "lib/krb5/asn.1" or ".".
 # stlibobjs will usually be empty, or include spaces.
 
 # A typical set of inputs, produced with srcdir=.. at top level:
 #
-# SRCTOP = ../../../util/et/../..
+# top_srcdir = ../../../util/et/../..
 # thisdir = util/et
 # srcdir = ../../../util/et
 # BUILDTOP = ../..
-# libgcc file name = /usr/lib/gcc-lib/i386-redhat-linux/3.2.3/libgcc.a
 # STLIBOBJS = error_message.o et_name.o com_err.o
 
-my($SRCTOP,$thisdir,$srcdir,$BUILDTOP,$libgccpath,$STLIBOBJS) = @ARGV;
+my($top_srcdir,$thisdir,$srcdir,$BUILDTOP,$STLIBOBJS) = @ARGV;
 
 if (0) {
-    print STDERR "SRCTOP = $SRCTOP\n";
+    print STDERR "top_srcdir = $top_srcdir\n";
     print STDERR "BUILDTOP = $BUILDTOP\n";
     print STDERR "STLIBOBJS = $STLIBOBJS\n";
 }
 
-$libgccincdir = $libgccpath;
-$libgccincdir =~ s,libgcc\.[^ ]*$,include,;
-$libgccincdir = quotemeta($libgccincdir);
 #$srcdirpat = quotemeta($srcdir);
-
-# Tweak here if you need to ignore additional directories.
-#my(@ignoredirs) = ( $libgccincdir, "/var/raeburn/openldap/Install/include" );
-my(@ignoredirs) = ( $libgccincdir );
 
 my($extrasuffixes) = ($STLIBOBJS ne "");
 
@@ -100,31 +92,25 @@ sub do_subs {
     } else {
 	s,^([a-zA-Z0-9_\-]*)\.o:,\$(OUTPRE)$1.\$(OBJEXT):,;
     }
-    # Drop GCC include files, they're basically system headers.
-    my ($x);
-    foreach $x (@ignoredirs) {
-	s,$x/[^ ]* ,,g;
-	s,$x/[^ ]*$,,g;
-    }
-    # Recognize $(SRCTOP) and variants.
-    my($srct) = $SRCTOP . "/";
-    $_ = strrep(" $srct", " \$(SRCTOP)/", $_);
-#    s, $pat, \$(SRCTOP)/,go;
+    # Recognize $(top_srcdir) and variants.
+    my($srct) = $top_srcdir . "/";
+    $_ = strrep(" $srct", " \$(top_srcdir)/", $_);
+#    s, $pat, \$(top_srcdir)/,go;
     while ($srct =~ m,/[a-z][a-zA-Z0-9_.\-]*/\.\./,) {
 	$srct =~ s,/[a-z][a-zA-Z0-9_.\-]*/\.\./,/,;
-	$_ = strrep(" $srct", " \$(SRCTOP)/", $_);
+	$_ = strrep(" $srct", " \$(top_srcdir)/", $_);
     }
     # Now try to produce pathnames relative to $(srcdir).
     if ($thisdir eq ".") {
 	# blah
     } else {
-	my($pat) = " \$(SRCTOP)/$thisdir/";
+	my($pat) = " \$(top_srcdir)/$thisdir/";
 	my($out) = " \$(srcdir)/";
 	$_ = strrep($pat, $out, $_);
 	while ($pat =~ m,/[a-z][a-zA-Z0-9_.\-]*/$,) {
 	    $pat =~ s,/[a-z][a-zA-Z0-9_.\-]*/$,/,;
 	    $out .= "../";
-	    if ($pat ne " \$(SRCTOP)/") {
+	    if ($pat ne " \$(top_srcdir)/") {
 		$_ = strrep($pat, $out, $_);
 	    }
 	}
@@ -140,14 +126,8 @@ sub do_subs_2 {
     s/$/ /;
     # Remove excess spaces.
     s/  */ /g;
-    # Delete Tcl-specific headers.
-    s;/[^ ]*/tcl\.h ;;g;
-    s;/[^ ]*/tclDecls\.h ;;g;
-    s;/[^ ]*/tclPlatDecls\.h ;;g;
-    # Delete system-specific or compiler-specific files.
-    s;/os/usr/include/[^ ]* ;;g;
-    s;/usr/include/[^ ]* ;;g;
-    s;/usr/lib/[^ ]* ;;g;
+    # Delete headers external to the source and build tree.
+    s; /[^ ]*;;g;
     # Remove foo/../ sequences.
     while (m/\/[a-z][a-z0-9_.\-]*\/\.\.\//) {
 	s//\//g;

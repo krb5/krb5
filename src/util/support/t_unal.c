@@ -1,11 +1,12 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #undef NDEBUG
 #include <assert.h>
 #include "k5-platform.h"
 
 int main ()
 {
-     /* Test some low-level assumptions the Kerberos code depends
-        on.  */
+    /* Test some low-level assumptions the Kerberos code depends
+       on.  */
 
     union {
         UINT64_TYPE n64;

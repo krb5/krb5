@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1993 by OpenVision Technologies, Inc.
  *
@@ -133,8 +133,8 @@ g_order_check(void **vqueue, gssint_uint64 seqnum)
     seqnum -= q->firstnum;
     /* If we're only doing 32-bit values, adjust for that again.
 
-    Note that this will probably be the wrong thing to if we get
-    2**32 messages sent with 32-bit sequence numbers.  */
+       Note that this will probably be the wrong thing to if we get
+       2**32 messages sent with 32-bit sequence numbers.  */
     seqnum &= q->mask;
 
     /* rule 1: expected sequence number */
@@ -160,16 +160,16 @@ g_order_check(void **vqueue, gssint_uint64 seqnum)
     if ((seqnum < QELEM(q,q->start)) &&
         /* Is top bit of whatever width we're using set?
 
-        We used to check for greater than or equal to firstnum, but
-        (1) we've since switched to compute values relative to
-        firstnum, so the lowest we can have is 0, and (2) the effect
-        of the original scheme was highly dependent on whether
-        firstnum was close to either side of 0.  (Consider
-        firstnum==0xFFFFFFFE and we miss three packets; the next
-        packet is *new* but would look old.)
+           We used to check for greater than or equal to firstnum, but
+           (1) we've since switched to compute values relative to
+           firstnum, so the lowest we can have is 0, and (2) the effect
+           of the original scheme was highly dependent on whether
+           firstnum was close to either side of 0.  (Consider
+           firstnum==0xFFFFFFFE and we miss three packets; the next
+           packet is *new* but would look old.)
 
-        This check should give us 2**31 or 2**63 messages "new", and
-        just as many "old".  That's not quite right either.  */
+           This check should give us 2**31 or 2**63 messages "new", and
+           just as many "old".  That's not quite right either.  */
         (seqnum & (1 + (q->mask >> 1)))
     ) {
         if (q->do_replay && !q->do_sequence)

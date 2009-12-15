@@ -1,5 +1,3 @@
-thisconfigdir=../../../..
-myfulldir=lib/crypto/builtin/sha1
 mydir=lib/crypto/builtin/sha1
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 DEFS=

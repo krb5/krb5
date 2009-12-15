@@ -1,5 +1,3 @@
-thisconfigdir=../../..
-myfulldir=lib/gssapi/generic
 mydir=lib/gssapi/generic
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/..
@@ -122,18 +120,20 @@ $(OBJS): $(EXPORTED_HEADERS) $(ETHDRS)
 all-unix:: $(EXPORTED_HEADERS) $(ETHDRS) $(HDRS)
 all-unix:: all-libobjs
 
-errmap.h: $(SRCTOP)/util/gen.pl $(SRCTOP)/util/t_array.pm \
-		$(SRCTOP)/util/t_bimap.pm
-	$(PERL) -w -I$(SRCTOP)/util $(SRCTOP)/util/gen.pl bimap errmap.h \
+errmap.h: $(top_srcdir)/util/gen.pl $(top_srcdir)/util/t_array.pm \
+		$(top_srcdir)/util/t_bimap.pm
+	$(PERL) -w -I$(top_srcdir)/util $(top_srcdir)/util/gen.pl bimap \
+		errmap.h \
 		NAME=mecherrmap LEFT=OM_uint32 RIGHT="struct mecherror" \
 		LEFTPRINT=print_OM_uint32 RIGHTPRINT=mecherror_print \
 		LEFTCMP=cmp_OM_uint32 RIGHTCMP=mecherror_cmp
 
-maptest.h: $(SRCTOP)/util/gen.pl $(SRCTOP)/util/t_array.pm \
-		$(SRCTOP)/util/t_bimap.pm
-	$(PERL) -w -I$(SRCTOP)/util $(SRCTOP)/util/gen.pl bimap maptest.h \
-		NAME=foo LEFT=int RIGHT=elt LEFTPRINT=intprt RIGHTPRINT=eltprt \
-		LEFTCMP=intcmp RIGHTCMP=eltcmp
+maptest.h: $(top_srcdir)/util/gen.pl $(top_srcdir)/util/t_array.pm \
+		$(top_srcdir)/util/t_bimap.pm
+	$(PERL) -w -I$(top_srcdir)/util $(top_srcdir)/util/gen.pl bimap \
+		maptest.h \
+		NAME=foo LEFT=int RIGHT=elt LEFTPRINT=intprt \
+		RIGHTPRINT=eltprt LEFTCMP=intcmp RIGHTCMP=eltcmp
 maptest.o: maptest.c maptest.h
 maptest: maptest.o
 	$(CC_LINK) -o maptest maptest.o

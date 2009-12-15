@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1987, 1988 by MIT Student Information Processing Board
  *
@@ -68,7 +69,7 @@ ss_list_requests(argc, argv, sci_idx, info_ptr)
     func = signal(SIGINT, SIG_IGN);
 #endif
 
-    fd = ss_pager_create();	/* FD_CLOEXEC set */
+    fd = ss_pager_create();     /* FD_CLOEXEC set */
     output = fdopen(fd, "w");
 
 #ifdef POSIX_SIGNALS
@@ -78,7 +79,7 @@ ss_list_requests(argc, argv, sci_idx, info_ptr)
 #endif
 
     fprintf (output, "Available %s requests:\n\n",
-	     ss_info (sci_idx) -> subsystem_name);
+             ss_info (sci_idx) -> subsystem_name);
 
     for (table = ss_info(sci_idx)->rqt_tables; *table; table++) {
         entry = (*table)->requests;

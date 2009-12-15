@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/crc32/crc.c
  *
@@ -144,49 +145,23 @@ static u_long const crc_table[256] = {
     0xbad03605, 0xcdd70693, 0x54de5729, 0x23d967bf,
     0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94,
     0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d
-    };
+};
 
 void
 mit_crc32(krb5_pointer in, size_t in_length, unsigned long *cksum)
 {
     register u_char *data;
-    register u_long c = 0;
+    register u_long c = *cksum;
     register int idx;
     size_t i;
 
     data = (u_char *)in;
     for (i = 0; i < in_length; i++) {
-	idx = (int) (data[i] ^ c);
-	idx &= 0xff;
-	c >>= 8;
-	c ^= crc_table[idx];
+        idx = (int) (data[i] ^ c);
+        idx &= 0xff;
+        c >>= 8;
+        c ^= crc_table[idx];
     }
 
     *cksum = c;
 }
-
-#ifdef CRC32_SHIFT4
-static unsigned long const tbl4[16] = {
-    0x00000000, 0x1db71064, 0x3b6e20c8, 0x26d930ac,
-    0x76dc4190, 0x6b6b51f4, 0x4db26158, 0x5005713c,
-    0xedb88320, 0xf00f9344, 0xd6d6a3e8, 0xcb61b38c,
-    0x9b64c2b0, 0x86d3d2d4, 0xa00ae278, 0xbdbdf21c
-};
-
-void
-mit_crc32_shift4(krb5_pointer in, size_t in_length, unsigned long *cksum)
-{
-    register unsigned char *data, b;
-    register unsigned long c = 0;
-    size_t i;
-
-    data = (u_char *)in;
-    for (i = 0; i < in_length; i++) {
-	b = data[i];
-	c = (c >> 4) ^ tbl4[(b ^ c) & 0x0f];
-	b >>= 4;
-	c = (c >> 4) ^ tbl4[(b ^ c) & 0x0f];
-    }
-    *cksum = c;
-}
-#endif

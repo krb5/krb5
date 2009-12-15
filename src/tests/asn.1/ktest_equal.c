@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #include <stdlib.h>
 #include <stdio.h>
 #include "ktest_equal.h"
@@ -5,17 +6,17 @@
 #define FALSE 0
 #define TRUE 1
 
-#define struct_equal(field,comparator)		\
+#define struct_equal(field,comparator)          \
     comparator(&(ref->field),&(var->field))
 
-#define ptr_equal(field,comparator)		\
+#define ptr_equal(field,comparator)             \
     comparator(ref->field,var->field)
 
-#define scalar_equal(field)			\
+#define scalar_equal(field)                     \
     ((ref->field) == (var->field))
 
-#define len_equal(length,field,comparator)		\
-    ((ref->length == var->length) &&			\
+#define len_equal(length,field,comparator)              \
+    ((ref->length == var->length) &&                    \
      comparator(ref->length,ref->field,var->field))
 
 int ktest_equal_authenticator(ref, var)
@@ -42,8 +43,8 @@ int ktest_equal_principal_data(ref, var)
     if (ref==var) return TRUE;
     else if (ref == NULL || var == NULL) return FALSE;
     return(struct_equal(realm,ktest_equal_data) &&
-	   len_equal(length,data,ktest_equal_array_of_data) &&
-	   scalar_equal(type));
+           len_equal(length,data,ktest_equal_array_of_data) &&
+           scalar_equal(type));
 }
 
 int ktest_equal_authdata(ref, var)
@@ -53,7 +54,7 @@ int ktest_equal_authdata(ref, var)
     if (ref==var) return TRUE;
     else if (ref == NULL || var == NULL) return FALSE;
     return(scalar_equal(ad_type) &&
-	   len_equal(length,contents,ktest_equal_array_of_octet));
+           len_equal(length,contents,ktest_equal_array_of_octet));
 }
 
 int ktest_equal_checksum(ref, var)
@@ -470,11 +471,11 @@ int ktest_equal_krb5_alt_method(ref, var)
     krb5_alt_method *var;
 {
     if (ref->method != var->method)
-	return FALSE;
+        return FALSE;
     if (ref->length != var->length)
-	return FALSE;
+        return FALSE;
     if (memcmp(ref->data, var->data, ref->length) != 0)
-	return FALSE;
+        return FALSE;
     return TRUE;
 }
 
@@ -483,12 +484,12 @@ int ktest_equal_krb5_etype_info_entry(ref, var)
     krb5_etype_info_entry *var;
 {
     if (ref->etype != var->etype)
-	return FALSE;
+        return FALSE;
     if (ref->length != var->length)
-	return FALSE;
+        return FALSE;
     if (ref->length > 0 && ref->length != KRB5_ETYPE_NO_SALT)
-    	if (memcmp(ref->salt, var->salt, ref->length) != 0)
-	    return FALSE;
+        if (memcmp(ref->salt, var->salt, ref->length) != 0)
+            return FALSE;
     return TRUE;
 }
 
@@ -612,16 +613,16 @@ static int equal_key_data(ref, var)
     p=p&&scalar_equal(key_data_type[0]);
     p=p&&scalar_equal(key_data_type[1]);
     p=p&&len_equal(key_data_length[0],key_data_contents[0],
-		   ktest_equal_array_of_octet);
+                   ktest_equal_array_of_octet);
     p=p&&len_equal(key_data_length[1],key_data_contents[1],
-		   ktest_equal_array_of_octet);
+                   ktest_equal_array_of_octet);
     return p;
 }
 static int equal_key_data_array(int n, krb5_key_data *ref, krb5_key_data *val)
 {
     int i, p=TRUE;
     for (i = 0; i < n; i++) {
-	p=p&&equal_key_data(ref+i, val+i);
+        p=p&&equal_key_data(ref+i, val+i);
     }
     return p;
 }
@@ -650,7 +651,7 @@ int ktest_equal_array_of_data(length, ref, var)
     if (ref==var) return TRUE;
     else if (ref == NULL || var == NULL) return FALSE;
     for (i=0; i<(length); i++) {
-	p = p && ktest_equal_data(&(ref[i]),&(var[i]));
+        p = p && ktest_equal_data(&(ref[i]),&(var[i]));
     }
     return p;
 }
@@ -665,7 +666,7 @@ int ktest_equal_array_of_octet(length, ref, var)
     if (ref==var) return TRUE;
     else if (ref == NULL || var == NULL) return FALSE;
     for (i=0; i<length; i++)
-	p = p && (ref[i] == var[i]);
+        p = p && (ref[i] == var[i]);
     return p;
 }
 
@@ -679,7 +680,7 @@ int ktest_equal_array_of_char(length, ref, var)
     if (ref==var) return TRUE;
     else if (ref == NULL || var == NULL) return FALSE;
     for (i=0; i<length; i++)
-	p = p && (ref[i] == var[i]);
+        p = p && (ref[i] == var[i]);
     return p;
 }
 
@@ -693,19 +694,19 @@ int ktest_equal_array_of_enctype(length, ref, var)
     if (ref==var) return TRUE;
     else if (ref == NULL || var == NULL) return FALSE;
     for (i=0; i<length; i++)
-	p = p && (ref[i] == var[i]);
+        p = p && (ref[i] == var[i]);
     return p;
 }
 
-#define array_compare(comparator)			\
-    int i,p=TRUE;					\
-    if (ref==var) return TRUE;				\
-    if (!ref || !ref[0])				\
-	return (!var || !var[0]);			\
-    if (!var || !var[0]) return FALSE;			\
-    for (i=0; ref[i] != NULL && var[i] != NULL; i++)	\
-	p = p && comparator(ref[i],var[i]);		\
-    if (ref[i] == NULL && var[i] == NULL) return p;	\
+#define array_compare(comparator)                       \
+    int i,p=TRUE;                                       \
+    if (ref==var) return TRUE;                          \
+    if (!ref || !ref[0])                                \
+        return (!var || !var[0]);                       \
+    if (!var || !var[0]) return FALSE;                  \
+    for (i=0; ref[i] != NULL && var[i] != NULL; i++)    \
+        p = p && comparator(ref[i],var[i]);             \
+    if (ref[i] == NULL && var[i] == NULL) return p;     \
     else return FALSE
 
 int ktest_equal_authorization_data(ref, var)

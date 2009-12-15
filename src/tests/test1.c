@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * tests/test1.c
  *
@@ -51,19 +52,19 @@ tkt_test_1()
      */
     code = krb5_parse_name ("server/test/1@BOGUS.ORG", &tk_in.server);
     if (code != 0) {
-	com_err("tkt_test_1", code, " parsing server principal");
-	return;
+        com_err("tkt_test_1", code, " parsing server principal");
+        return;
     }
 
-    serv_k.enctype = 1;		/* XXX symbolic constant */
-    serv_k.length = 8;		/* XXX symbolic constant */
+    serv_k.enctype = 1;         /* XXX symbolic constant */
+    serv_k.length = 8;          /* XXX symbolic constant */
     serv_k.contents = key_one;
 
-    sess_k.enctype = 1;		/* XXX symbolic constant */
-    sess_k.length = 8;		/* XXX symbolic constant */
+    sess_k.enctype = 1;         /* XXX symbolic constant */
+    sess_k.length = 8;          /* XXX symbolic constant */
     sess_k.contents = key_two;
 
-    tk_in.etype = 1;		/* XXX symbolic constant here */
+    tk_in.etype = 1;            /* XXX symbolic constant here */
     tk_in.skvno = 4;
 
     tk_in.enc_part2 = &tk_in_enc;
@@ -77,8 +78,8 @@ tkt_test_1()
 
     code = krb5_parse_name ("client/test/1@BOGUS.ORG", &tk_in_enc.client);
     if (code != 0) {
-	com_err("tkt_test_1", code, " parsing client principal");
-	return;
+        com_err("tkt_test_1", code, " parsing client principal");
+        return;
     }
     tk_in_enc.transited.length = 0;
 
@@ -95,16 +96,16 @@ tkt_test_1()
 
     code = krb5_encrypt_tkt_part(&serv_k, &tk_in);
     if (code != 0) {
-	com_err ("tkt_test_1", code, " encrypting ticket");
-	return;
+        com_err ("tkt_test_1", code, " encrypting ticket");
+        return;
     }
 
     data = 0;
 
     code = krb5_encode_ticket (&tk_in,  &data);
     if (code != 0) {
-	com_err ("tkt_test_1", code, " encoding ticket");
-	return;
+        com_err ("tkt_test_1", code, " encoding ticket");
+        return;
     }
 
     dump_data(data);
@@ -112,27 +113,27 @@ tkt_test_1()
     tk_out = 0;
     code = krb5_decode_ticket (data, &tk_out);
     if (code != 0) {
-	com_err ("tkt_test_1", code, "decoding ticket");
-	return;
+        com_err ("tkt_test_1", code, "decoding ticket");
+        return;
     }
     /* check the plaintext values */
     if (tk_out->etype != 1) {
-	com_err ("tkt_test_1", 0, "wrong etype");
-	return;
+        com_err ("tkt_test_1", 0, "wrong etype");
+        return;
     }
     if (tk_out->skvno != 4) {
-	com_err ("tkt_test_1", 0, "wrong kvno");
-	return;
+        com_err ("tkt_test_1", 0, "wrong kvno");
+        return;
     }
 
     code = krb5_unparse_name(tk_out->server, &out);
     if (code != 0) {
-	com_err ("tkt_test_1", code, "couldn't unparse server principal");
-	return;
+        com_err ("tkt_test_1", code, "couldn't unparse server principal");
+        return;
     }
     if (strcmp (out, "server/test/1@BOGUS.ORG") != 0) {
-	com_err("tkt_test_1", 0, "wrong server principal");
-	return;
+        com_err("tkt_test_1", 0, "wrong server principal");
+        return;
     }
     free(out);
     out = 0;
@@ -140,45 +141,45 @@ tkt_test_1()
     /* decode the ciphertext */
     code = krb5_decrypt_tkt_part (&serv_k, tk_out);
     if (code != 0) {
-	com_err ("tkt_test_1", code, "while decrypting ticket");
-	return;
+        com_err ("tkt_test_1", code, "while decrypting ticket");
+        return;
     }
 
     /* check the contents */
     if (tk_out->enc_part2->flags != 0x11) {
-	com_err("tkt_test_1", 0, "wrong flags");
-	return;
+        com_err("tkt_test_1", 0, "wrong flags");
+        return;
     }
 
     nsess = tk_out->enc_part2->session;
 
     if (nsess->enctype != 1) {
-	com_err("tkt_test_1", 0, "wrong session key type");
-	return;
+        com_err("tkt_test_1", 0, "wrong session key type");
+        return;
     }
     if (nsess->length != 8) {
-	com_err("tkt_test_1", 0, "wrong session key length");
-	return;
+        com_err("tkt_test_1", 0, "wrong session key length");
+        return;
     }
     if (memcmp(nsess->contents, key_two, 8) != 0) {
-	com_err("tkt_test_1", 0, "wrong session key contents");
-	return;
+        com_err("tkt_test_1", 0, "wrong session key contents");
+        return;
     }
 
     code = krb5_unparse_name(tk_out->enc_part2->client, &out);
     if (code != 0) {
-	com_err ("tkt_test_1", code, "couldn't unparse client principal");
-	return;
+        com_err ("tkt_test_1", code, "couldn't unparse client principal");
+        return;
     }
     if (strcmp (out, "client/test/1@BOGUS.ORG") != 0) {
-	com_err("tkt_test_1", 0, "wrong client principal");
-	return;
+        com_err("tkt_test_1", 0, "wrong client principal");
+        return;
     }
     free(out);
     out = 0;
     if (tk_out->enc_part2->transited.length != 0) {
-	com_err("tkt_test_1", 0, "wrong transited length");
-	return;
+        com_err("tkt_test_1", 0, "wrong transited length");
+        return;
     }
     /* XXX should check address here, too */
     /* XXX should check times here */

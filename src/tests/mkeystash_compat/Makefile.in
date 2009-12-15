@@ -1,6 +1,4 @@
-thisconfigdir=../..
 mydir=tests/mkeystash_compat
-myfulldir=tests/mkeystash_compat
 BUILDTOP=$(REL)..$(S)..
 
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf
@@ -31,7 +29,7 @@ kdc.conf: Makefile
 	@echo "}" >> kdc.conf
 
 krb5.conf: Makefile
-	cat $(SRCTOP)/config-files/krb5.conf > krb5.new
+	cat $(top_srcdir)/config-files/krb5.conf > krb5.new
 	echo "[dbmodules]" >> krb5.new
 	echo " db_module_dir = $(BUILDTOP)/util/fakedest$(KRB5_DB_MODULE_DIR)" >> krb5.new
 	mv krb5.new krb5.conf

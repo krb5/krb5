@@ -2,7 +2,7 @@
 # Generated makefile dependencies follow.
 #
 $(OUTPRE)klist.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/fake-addrinfo.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(SRCTOP)/include/krb5.h $(SRCTOP)/include/port-sockets.h \
-  $(SRCTOP)/include/socket-utils.h klist.c
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/include/fake-addrinfo.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
+  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/port-sockets.h \
+  $(top_srcdir)/include/socket-utils.h klist.c

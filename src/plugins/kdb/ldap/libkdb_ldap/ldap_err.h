@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #define OP_INIT 1
 #define OP_BIND 2
 #define OP_UNBIND 3

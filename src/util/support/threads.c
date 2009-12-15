@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * util/support/threads.c
  *
@@ -55,7 +56,7 @@ int krb5int_pthread_loaded (void)
 static DWORD tls_idx;
 static CRITICAL_SECTION key_lock;
 struct tsd_block {
-  void *values[K5_KEY_MAX];
+    void *values[K5_KEY_MAX];
 };
 static void (*destructors[K5_KEY_MAX])(void *);
 static unsigned char destructors_set[K5_KEY_MAX];
@@ -69,17 +70,17 @@ void krb5int_thread_detach_hook (void)
 
     err = CALL_INIT_FUNCTION(krb5int_thread_support_init);
     if (err)
-	return;
+        return;
 
     t = TlsGetValue(tls_idx);
     if (t == NULL)
-	return;
+        return;
     for (i = 0; i < K5_KEY_MAX; i++) {
-	if (destructors_set[i] && destructors[i] && t->values[i]) {
-	    void *v = t->values[i];
-	    t->values[i] = 0;
-	    (*destructors[i])(v);
-	}
+        if (destructors_set[i] && destructors[i] && t->values[i]) {
+            void *v = t->values[i];
+            t->values[i] = 0;
+            (*destructors[i])(v);
+        }
     }
 }
 
@@ -124,44 +125,44 @@ static volatile int flag_pthread_loaded = -1;
 static void loaded_test_aux(void)
 {
     if (flag_pthread_loaded == -1)
-	flag_pthread_loaded = 1;
+        flag_pthread_loaded = 1;
     else
-	/* Could we have been called twice?  */
-	flag_pthread_loaded = 0;
+        /* Could we have been called twice?  */
+        flag_pthread_loaded = 0;
 }
 static pthread_once_t loaded_test_once = PTHREAD_ONCE_INIT;
 int krb5int_pthread_loaded (void)
 {
     int x = flag_pthread_loaded;
     if (x != -1)
-	return x;
+        return x;
     if (&pthread_getspecific == 0
-	|| &pthread_setspecific == 0
-	|| &pthread_key_create == 0
-	|| &pthread_key_delete == 0
-	|| &pthread_once == 0
-	|| &pthread_mutex_lock == 0
-	|| &pthread_mutex_unlock == 0
-	|| &pthread_mutex_destroy == 0
-	|| &pthread_mutex_init == 0
-	|| &pthread_self == 0
-	|| &pthread_equal == 0
-	/* Any program that's really multithreaded will have to be
-	   able to create threads.  */
-	|| &pthread_create == 0
-	|| &pthread_join == 0
-	/* Okay, all the interesting functions -- or stubs for them --
-	   seem to be present.  If we call pthread_once, does it
-	   actually seem to cause the indicated function to get called
-	   exactly one time?  */
-	|| pthread_once(&loaded_test_once, loaded_test_aux) != 0
-	|| pthread_once(&loaded_test_once, loaded_test_aux) != 0
-	/* This catches cases where pthread_once does nothing, and
-	   never causes the function to get called.  That's a pretty
-	   clear violation of the POSIX spec, but hey, it happens.  */
-	|| flag_pthread_loaded < 0) {
-	flag_pthread_loaded = 0;
-	return 0;
+        || &pthread_setspecific == 0
+        || &pthread_key_create == 0
+        || &pthread_key_delete == 0
+        || &pthread_once == 0
+        || &pthread_mutex_lock == 0
+        || &pthread_mutex_unlock == 0
+        || &pthread_mutex_destroy == 0
+        || &pthread_mutex_init == 0
+        || &pthread_self == 0
+        || &pthread_equal == 0
+        /* Any program that's really multithreaded will have to be
+           able to create threads.  */
+        || &pthread_create == 0
+        || &pthread_join == 0
+        /* Okay, all the interesting functions -- or stubs for them --
+           seem to be present.  If we call pthread_once, does it
+           actually seem to cause the indicated function to get called
+           exactly one time?  */
+        || pthread_once(&loaded_test_once, loaded_test_aux) != 0
+        || pthread_once(&loaded_test_once, loaded_test_aux) != 0
+        /* This catches cases where pthread_once does nothing, and
+           never causes the function to get called.  That's a pretty
+           clear violation of the POSIX spec, but hey, it happens.  */
+        || flag_pthread_loaded < 0) {
+        flag_pthread_loaded = 0;
+        return 0;
     }
     /* If we wanted to be super-paranoid, we could try testing whether
        pthread_get/setspecific work, too.  I don't know -- so far --
@@ -169,13 +170,13 @@ int krb5int_pthread_loaded (void)
     return flag_pthread_loaded;
 }
 static struct tsd_block tsd_if_single;
-# define GET_NO_PTHREAD_TSD()	(&tsd_if_single)
+# define GET_NO_PTHREAD_TSD()   (&tsd_if_single)
 #else
 int krb5int_pthread_loaded (void)
 {
     return 1;
 }
-# define GET_NO_PTHREAD_TSD()	(abort(),(struct tsd_block *)0)
+# define GET_NO_PTHREAD_TSD()   (abort(),(struct tsd_block *)0)
 #endif
 
 static pthread_key_t key;
@@ -189,12 +190,12 @@ static void thread_termination (void *tptr)
         struct tsd_block *t = tptr;
 
         /* Make multiple passes in case, for example, a libkrb5 cleanup
-            function wants to print out an error message, which causes
-            com_err to allocate a thread-specific buffer, after we just
-            freed up the old one.
+           function wants to print out an error message, which causes
+           com_err to allocate a thread-specific buffer, after we just
+           freed up the old one.
 
-            Shouldn't actually happen, if we're careful, but check just in
-            case.  */
+           Shouldn't actually happen, if we're careful, but check just in
+           case.  */
 
         pass = 0;
         none_found = 0;
@@ -211,7 +212,7 @@ static void thread_termination (void *tptr)
         }
         free (t);
         err = k5_mutex_unlock(&key_lock);
-   }
+    }
 
     /* remove thread from global linked list */
 }
@@ -225,7 +226,7 @@ void *k5_getspecific (k5_key_t keynum)
 
     err = CALL_INIT_FUNCTION(krb5int_thread_support_init);
     if (err)
-	return NULL;
+        return NULL;
 
     assert(keynum >= 0 && keynum < K5_KEY_MAX);
     assert(destructors_set[keynum] == 1);
@@ -241,14 +242,14 @@ void *k5_getspecific (k5_key_t keynum)
 #else /* POSIX */
 
     if (K5_PTHREADS_LOADED)
-	t = pthread_getspecific(key);
+        t = pthread_getspecific(key);
     else
-	t = GET_NO_PTHREAD_TSD();
+        t = GET_NO_PTHREAD_TSD();
 
 #endif
 
     if (t == NULL)
-	return NULL;
+        return NULL;
     return t->values[keynum];
 }
 
@@ -259,7 +260,7 @@ int k5_setspecific (k5_key_t keynum, void *value)
 
     err = CALL_INIT_FUNCTION(krb5int_thread_support_init);
     if (err)
-	return err;
+        return err;
 
     assert(keynum >= 0 && keynum < K5_KEY_MAX);
     assert(destructors_set[keynum] == 1);
@@ -272,42 +273,42 @@ int k5_setspecific (k5_key_t keynum, void *value)
 
     t = TlsGetValue(tls_idx);
     if (t == NULL) {
-	int i;
-	t = malloc(sizeof(*t));
-	if (t == NULL)
-	    return ENOMEM;
-	for (i = 0; i < K5_KEY_MAX; i++)
-	    t->values[i] = 0;
-	/* add to global linked list */
-	/*	t->next = 0; */
-	err = TlsSetValue(tls_idx, t);
-	if (!err) {
-	    free(t);
-	    return GetLastError();
-	}
+        int i;
+        t = malloc(sizeof(*t));
+        if (t == NULL)
+            return ENOMEM;
+        for (i = 0; i < K5_KEY_MAX; i++)
+            t->values[i] = 0;
+        /* add to global linked list */
+        /*      t->next = 0; */
+        err = TlsSetValue(tls_idx, t);
+        if (!err) {
+            free(t);
+            return GetLastError();
+        }
     }
 
 #else /* POSIX */
 
     if (K5_PTHREADS_LOADED) {
-	t = pthread_getspecific(key);
-	if (t == NULL) {
-	    int i;
-	    t = malloc(sizeof(*t));
-	    if (t == NULL)
-		return ENOMEM;
-	    for (i = 0; i < K5_KEY_MAX; i++)
-		t->values[i] = 0;
-	    /* add to global linked list */
-	    t->next = 0;
-	    err = pthread_setspecific(key, t);
-	    if (err) {
-		free(t);
-		return err;
-	    }
-	}
+        t = pthread_getspecific(key);
+        if (t == NULL) {
+            int i;
+            t = malloc(sizeof(*t));
+            if (t == NULL)
+                return ENOMEM;
+            for (i = 0; i < K5_KEY_MAX; i++)
+                t->values[i] = 0;
+            /* add to global linked list */
+            t->next = 0;
+            err = pthread_setspecific(key, t);
+            if (err) {
+                free(t);
+                return err;
+            }
+        }
     } else {
-	t = GET_NO_PTHREAD_TSD();
+        t = GET_NO_PTHREAD_TSD();
     }
 
 #endif
@@ -322,7 +323,7 @@ int k5_key_register (k5_key_t keynum, void (*destructor)(void *))
 
     err = CALL_INIT_FUNCTION(krb5int_thread_support_init);
     if (err)
-	return err;
+        return err;
 
     assert(keynum >= 0 && keynum < K5_KEY_MAX);
 
@@ -347,10 +348,10 @@ int k5_key_register (k5_key_t keynum, void (*destructor)(void *))
 
     err = k5_mutex_lock(&key_lock);
     if (err == 0) {
-	assert(destructors_set[keynum] == 0);
-	destructors_set[keynum] = 1;
-	destructors[keynum] = destructor;
-	err = k5_mutex_unlock(&key_lock);
+        assert(destructors_set[keynum] == 0);
+        destructors_set[keynum] = 1;
+        destructors[keynum] = destructor;
+        err = k5_mutex_unlock(&key_lock);
     }
 
 #endif
@@ -365,7 +366,7 @@ int k5_key_delete (k5_key_t keynum)
 
     assert(destructors_set[keynum] == 1);
     if (destructors[keynum] && tsd_no_threads.values[keynum])
-	(*destructors[keynum])(tsd_no_threads.values[keynum]);
+        (*destructors[keynum])(tsd_no_threads.values[keynum]);
     destructors[keynum] = 0;
     tsd_no_threads.values[keynum] = 0;
     destructors_set[keynum] = 0;
@@ -385,19 +386,19 @@ int k5_key_delete (k5_key_t keynum)
 #else /* POSIX */
 
     {
-	int err;
+        int err;
 
-	/* XXX RESOURCE LEAK:
+        /* XXX RESOURCE LEAK:
 
-	   Need to destroy the allocated objects first!  */
+           Need to destroy the allocated objects first!  */
 
-	err = k5_mutex_lock(&key_lock);
-	if (err == 0) {
-	    assert(destructors_set[keynum] == 1);
-	    destructors_set[keynum] = 0;
-	    destructors[keynum] = NULL;
-	    k5_mutex_unlock(&key_lock);
-	}
+        err = k5_mutex_lock(&key_lock);
+        if (err == 0) {
+            assert(destructors_set[keynum] == 1);
+            destructors_set[keynum] = 0;
+            destructors[keynum] = NULL;
+            k5_mutex_unlock(&key_lock);
+        }
     }
 
 #endif
@@ -434,22 +435,22 @@ int krb5int_thread_support_init (void)
 
     err = k5_mutex_finish_init(&key_lock);
     if (err)
-	return err;
+        return err;
     if (K5_PTHREADS_LOADED) {
-	err = pthread_key_create(&key, thread_termination);
-	if (err)
-	    return err;
+        err = pthread_key_create(&key, thread_termination);
+        if (err)
+            return err;
     }
 
 #endif
 
     err = krb5int_init_fac();
     if (err)
-	return err;
+        return err;
 
     err = krb5int_err_init();
     if (err)
-	return err;
+        return err;
 
     return 0;
 }
@@ -457,7 +458,7 @@ int krb5int_thread_support_init (void)
 void krb5int_thread_support_fini (void)
 {
     if (! INITIALIZER_RAN (krb5int_thread_support_init))
-	return;
+        return;
 
 #ifdef SHOW_INITFINI_FUNCS
     printf("krb5int_thread_support_fini\n");
@@ -476,9 +477,9 @@ void krb5int_thread_support_fini (void)
 #else /* POSIX */
 
     if (! INITIALIZER_RAN(krb5int_thread_support_init))
-	return;
+        return;
     if (K5_PTHREADS_LOADED)
-	pthread_key_delete(key);
+        pthread_key_delete(key);
     /* ... delete stuff ... */
     k5_mutex_destroy(&key_lock);
 
@@ -497,11 +498,11 @@ krb5int_mutex_alloc (k5_mutex_t **m)
 
     ptr = malloc (sizeof (k5_mutex_t));
     if (ptr == NULL)
-	return ENOMEM;
+        return ENOMEM;
     err = k5_mutex_init (ptr);
     if (err) {
-	free (ptr);
-	return err;
+        free (ptr);
+        return err;
     }
     *m = ptr;
     return 0;

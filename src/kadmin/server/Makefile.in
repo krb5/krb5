@@ -1,13 +1,11 @@
-thisconfigdir=../..
-myfulldir=kadmin/server
 mydir=kadmin/server
 BUILDTOP=$(REL)..$(S)..
 KDB_DEP_LIB=$(DL_LIB) $(THREAD_LINKOPTS)
 DEFS=
 
-LOCALINCLUDES = -I$(SRCTOP)/lib/gssapi/generic -I$(SRCTOP)/lib/gssapi/krb5 \
-	-I$(BUILDTOP)/lib/gssapi/generic -I$(BUILDTOP)/lib/gssapi/krb5 \
-	-I$(SRCTOP)/lib/kadm5/srv
+LOCALINCLUDES = -I$(top_srcdir)/lib/gssapi/generic \
+	-I$(top_srcdir)/lib/gssapi/krb5 -I$(BUILDTOP)/lib/gssapi/generic \
+	-I$(BUILDTOP)/lib/gssapi/krb5 -I$(top_srcdir)/lib/kadm5/srv
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

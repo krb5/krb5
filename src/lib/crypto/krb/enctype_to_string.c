@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -34,8 +35,8 @@ krb5_enctype_to_string(krb5_enctype enctype, char *buffer, size_t buflen)
 
     ktp = find_enctype(enctype);
     if (ktp == NULL)
-	return EINVAL;
+        return EINVAL;
     if (strlcpy(buffer, ktp->out_string, buflen) >= buflen)
-	return ENOMEM;
+        return ENOMEM;
     return 0;
 }

@@ -58,8 +58,8 @@ struct sendto_callback_context {
  */
 
 static krb5_error_code
-krb5_locate_kpasswd(krb5_context context, const krb5_data *realm,
-                    struct addrlist *addrlist, krb5_boolean useTcp)
+locate_kpasswd(krb5_context context, const krb5_data *realm,
+               struct addrlist *addrlist, krb5_boolean useTcp)
 {
     krb5_error_code code;
     int sockType = (useTcp ? SOCK_STREAM : SOCK_DGRAM);
@@ -99,12 +99,14 @@ static void
 kpasswd_sendto_msg_cleanup (void* callback_context, krb5_data* message)
 {
     struct sendto_callback_context *ctx = callback_context;
+
     krb5_free_data_contents(ctx->context, message);
 }
 
 
 static int
-kpasswd_sendto_msg_callback(struct conn_state *conn, void *callback_context,
+kpasswd_sendto_msg_callback(struct conn_state *conn,
+                            void *callback_context,
                             krb5_data *message)
 {
     krb5_error_code                     code = 0;
@@ -195,15 +197,18 @@ cleanup:
 
 /*
 ** The logic for setting and changing a password is mostly the same
-** krb5_change_set_password handles both cases
+** change_set_password handles both cases
 **      if set_password_for is NULL, then a password change is performed,
 **  otherwise, the password is set for the principal indicated in set_password_for
 */
-static krb5_error_code KRB5_CALLCONV
-krb5_change_set_password(krb5_context context, krb5_creds *creds, char *newpw,
-                         krb5_principal set_password_for,
-                         int *result_code, krb5_data *result_code_string,
-                         krb5_data *result_string)
+static krb5_error_code
+change_set_password(krb5_context context,
+                    krb5_creds *creds,
+                    char *newpw,
+                    krb5_principal set_password_for,
+                    int *result_code,
+                    krb5_data *result_code_string,
+                    krb5_data *result_string)
 {
     krb5_data                   chpw_rep;
     krb5_address                remote_kaddr;
@@ -240,10 +245,10 @@ krb5_change_set_password(krb5_context context, krb5_creds *creds, char *newpw,
     callback_ctx.local_seq_num = callback_ctx.auth_context->local_seq_number;
 
     do {
-        if ((code = krb5_locate_kpasswd(callback_ctx.context,
-                                        krb5_princ_realm(callback_ctx.context,
-                                                         creds->server),
-                                        &al, useTcp)))
+        if ((code = locate_kpasswd(callback_ctx.context,
+                                   krb5_princ_realm(callback_ctx.context,
+                                                    creds->server),
+                                   &al, useTcp)))
             break;
 
         addrlen = sizeof(remote_addr);
@@ -350,10 +355,15 @@ cleanup:
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_change_password(krb5_context context, krb5_creds *creds, char *newpw, int *result_code, krb5_data *result_code_string, krb5_data *result_string)
+krb5_change_password(krb5_context context,
+                     krb5_creds *creds,
+                     char *newpw,
+                     int *result_code,
+                     krb5_data *result_code_string,
+                     krb5_data *result_string)
 {
-    return krb5_change_set_password(
-        context, creds, newpw, NULL, result_code, result_code_string, result_string );
+    return change_set_password(context, creds, newpw, NULL,
+                               result_code, result_code_string, result_string );
 }
 
 /*
@@ -362,25 +372,27 @@ krb5_change_password(krb5_context context, krb5_creds *creds, char *newpw, int *
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_set_password(
-    krb5_context context,
-    krb5_creds *creds,
-    char *newpw,
-    krb5_principal change_password_for,
-    int *result_code, krb5_data *result_code_string, krb5_data *result_string
+krb5_set_password(krb5_context context,
+                  krb5_creds *creds,
+                  char *newpw,
+                  krb5_principal change_password_for,
+                  int *result_code,
+                  krb5_data *result_code_string,
+                  krb5_data *result_string
 )
 {
-    return krb5_change_set_password(
-        context, creds, newpw, change_password_for, result_code, result_code_string, result_string );
+    return change_set_password(context, creds, newpw, change_password_for,
+                               result_code, result_code_string, result_string );
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_set_password_using_ccache(
-    krb5_context context,
-    krb5_ccache ccache,
-    char *newpw,
-    krb5_principal change_password_for,
-    int *result_code, krb5_data *result_code_string, krb5_data *result_string
+krb5_set_password_using_ccache(krb5_context context,
+                               krb5_ccache ccache,
+                               char *newpw,
+                               krb5_principal change_password_for,
+                               int *result_code,
+                               krb5_data *result_code_string,
+                               krb5_data *result_string
 )
 {
     krb5_creds          creds;

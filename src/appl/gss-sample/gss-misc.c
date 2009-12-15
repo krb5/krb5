@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1994 by OpenVision Technologies, Inc.
  *
@@ -95,14 +96,14 @@ write_all(int fildes, char *buf, unsigned int nbyte)
     char   *ptr;
 
     for (ptr = buf; nbyte; ptr += ret, nbyte -= ret) {
-	ret = send(fildes, ptr, nbyte, 0);
-	if (ret < 0) {
-	    if (errno == EINTR)
-		continue;
-	    return (ret);
-	} else if (ret == 0) {
-	    return (ptr - buf);
-	}
+        ret = send(fildes, ptr, nbyte, 0);
+        if (ret < 0) {
+            if (errno == EINTR)
+                continue;
+            return (ret);
+        } else if (ret == 0) {
+            return (ptr - buf);
+        }
     }
 
     return (ptr - buf);
@@ -122,17 +123,17 @@ read_all(int fildes, char *buf, unsigned int nbyte)
     tv.tv_usec = 0;
 
     for (ptr = buf; nbyte; ptr += ret, nbyte -= ret) {
-	if (select(FD_SETSIZE, &rfds, NULL, NULL, &tv) <= 0
-	    || !FD_ISSET(fildes, &rfds))
-	    return (ptr - buf);
-	ret = recv(fildes, ptr, nbyte, 0);
-	if (ret < 0) {
-	    if (errno == EINTR)
-		continue;
-	    return (ret);
-	} else if (ret == 0) {
-	    return (ptr - buf);
-	}
+        if (select(FD_SETSIZE, &rfds, NULL, NULL, &tv) <= 0
+            || !FD_ISSET(fildes, &rfds))
+            return (ptr - buf);
+        ret = recv(fildes, ptr, nbyte, 0);
+        if (ret < 0) {
+            if (errno == EINTR)
+                continue;
+            return (ret);
+        } else if (ret == 0) {
+            return (ptr - buf);
+        }
     }
 
     return (ptr - buf);
@@ -145,9 +146,9 @@ read_all(int fildes, char *buf, unsigned int nbyte)
  *
  * Arguments:
  *
- * 	s		(r) an open file descriptor
- *	flags		(r) the flags to write
- * 	tok		(r) the token to write
+ *      s               (r) an open file descriptor
+ *      flags           (r) the flags to write
+ *      tok             (r) the token to write
  *
  * Returns: 0 on success, -1 on failure
  *
@@ -170,14 +171,14 @@ send_token(s, flags, tok)
     unsigned char lenbuf[4];
 
     if (char_flags) {
-	ret = write_all(s, (char *) &char_flags, 1);
-	if (ret != 1) {
-	    perror("sending token flags");
-	    return -1;
-	}
+        ret = write_all(s, (char *) &char_flags, 1);
+        if (ret != 1) {
+            perror("sending token flags");
+            return -1;
+        }
     }
     if (tok->length > 0xffffffffUL)
-	abort();
+        abort();
     lenbuf[0] = (tok->length >> 24) & 0xff;
     lenbuf[1] = (tok->length >> 16) & 0xff;
     lenbuf[2] = (tok->length >> 8) & 0xff;
@@ -185,25 +186,25 @@ send_token(s, flags, tok)
 
     ret = write_all(s, lenbuf, 4);
     if (ret < 0) {
-	perror("sending token length");
-	return -1;
+        perror("sending token length");
+        return -1;
     } else if (ret != 4) {
-	if (display_file)
-	    fprintf(display_file,
-		    "sending token length: %d of %d bytes written\n", ret, 4);
-	return -1;
+        if (display_file)
+            fprintf(display_file,
+                    "sending token length: %d of %d bytes written\n", ret, 4);
+        return -1;
     }
 
     ret = write_all(s, tok->value, tok->length);
     if (ret < 0) {
-	perror("sending token data");
-	return -1;
+        perror("sending token data");
+        return -1;
     } else if (ret != tok->length) {
-	if (display_file)
-	    fprintf(display_file,
-		    "sending token data: %d of %d bytes written\n",
-		    ret, (int) tok->length);
-	return -1;
+        if (display_file)
+            fprintf(display_file,
+                    "sending token data: %d of %d bytes written\n",
+                    ret, (int) tok->length);
+        return -1;
     }
 
     return 0;
@@ -216,9 +217,9 @@ send_token(s, flags, tok)
  *
  * Arguments:
  *
- * 	s		(r) an open file descriptor
- *	flags		(w) the read flags
- * 	tok		(w) the read token
+ *      s               (r) an open file descriptor
+ *      flags           (w) the read flags
+ *      tok             (w) the read token
  *
  * Returns: 0 on success, -1 on failure
  *
@@ -244,62 +245,62 @@ recv_token(s, flags, tok)
 
     ret = read_all(s, (char *) &char_flags, 1);
     if (ret < 0) {
-	perror("reading token flags");
-	return -1;
+        perror("reading token flags");
+        return -1;
     } else if (!ret) {
-	if (display_file)
-	    fputs("reading token flags: 0 bytes read\n", display_file);
-	return -1;
+        if (display_file)
+            fputs("reading token flags: 0 bytes read\n", display_file);
+        return -1;
     } else {
-	*flags = (int) char_flags;
+        *flags = (int) char_flags;
     }
 
     if (char_flags == 0) {
-	lenbuf[0] = 0;
-	ret = read_all(s, &lenbuf[1], 3);
-	if (ret < 0) {
-	    perror("reading token length");
-	    return -1;
-	} else if (ret != 3) {
-	    if (display_file)
-		fprintf(display_file,
-			"reading token length: %d of %d bytes read\n", ret, 3);
-	    return -1;
-	}
+        lenbuf[0] = 0;
+        ret = read_all(s, &lenbuf[1], 3);
+        if (ret < 0) {
+            perror("reading token length");
+            return -1;
+        } else if (ret != 3) {
+            if (display_file)
+                fprintf(display_file,
+                        "reading token length: %d of %d bytes read\n", ret, 3);
+            return -1;
+        }
     } else {
-	ret = read_all(s, lenbuf, 4);
-	if (ret < 0) {
-	    perror("reading token length");
-	    return -1;
-	} else if (ret != 4) {
-	    if (display_file)
-		fprintf(display_file,
-			"reading token length: %d of %d bytes read\n", ret, 4);
-	    return -1;
-	}
+        ret = read_all(s, lenbuf, 4);
+        if (ret < 0) {
+            perror("reading token length");
+            return -1;
+        } else if (ret != 4) {
+            if (display_file)
+                fprintf(display_file,
+                        "reading token length: %d of %d bytes read\n", ret, 4);
+            return -1;
+        }
     }
 
     tok->length = ((lenbuf[0] << 24)
-		   | (lenbuf[1] << 16)
-		   | (lenbuf[2] << 8)
-		   | lenbuf[3]);
+                   | (lenbuf[1] << 16)
+                   | (lenbuf[2] << 8)
+                   | lenbuf[3]);
     tok->value = (char *) malloc(tok->length ? tok->length : 1);
     if (tok->length && tok->value == NULL) {
-	if (display_file)
-	    fprintf(display_file, "Out of memory allocating token data\n");
-	return -1;
+        if (display_file)
+            fprintf(display_file, "Out of memory allocating token data\n");
+        return -1;
     }
 
     ret = read_all(s, (char *) tok->value, tok->length);
     if (ret < 0) {
-	perror("reading token data");
-	free(tok->value);
-	return -1;
+        perror("reading token data");
+        free(tok->value);
+        return -1;
     } else if (ret != tok->length) {
-	fprintf(stderr, "sending token data: %d of %d bytes written\n",
-		ret, (int) tok->length);
-	free(tok->value);
-	return -1;
+        fprintf(stderr, "sending token data: %d of %d bytes written\n",
+                ret, (int) tok->length);
+        free(tok->value);
+        return -1;
     }
 
     return 0;
@@ -317,15 +318,15 @@ display_status_1(m, code, type)
 
     msg_ctx = 0;
     while (1) {
-	maj_stat = gss_display_status(&min_stat, code,
-				      type, GSS_C_NULL_OID, &msg_ctx, &msg);
-	if (display_file)
-	    fprintf(display_file, "GSS-API error %s: %s\n", m,
-		    (char *) msg.value);
-	(void) gss_release_buffer(&min_stat, &msg);
+        maj_stat = gss_display_status(&min_stat, code,
+                                      type, GSS_C_NULL_OID, &msg_ctx, &msg);
+        if (display_file)
+            fprintf(display_file, "GSS-API error %s: %s\n", m,
+                    (char *) msg.value);
+        (void) gss_release_buffer(&min_stat, &msg);
 
-	if (!msg_ctx)
-	    break;
+        if (!msg_ctx)
+            break;
     }
 }
 
@@ -336,9 +337,9 @@ display_status_1(m, code, type)
  *
  * Arguments:
  *
- * 	msg		a string to be displayed with the message
- * 	maj_stat	the GSS-API major status code
- * 	min_stat	the GSS-API minor status code
+ *      msg             a string to be displayed with the message
+ *      maj_stat        the GSS-API major status code
+ *      min_stat        the GSS-API minor status code
  *
  * Effects:
  *
@@ -360,11 +361,11 @@ display_status(msg, maj_stat, min_stat)
  * Function: display_ctx_flags
  *
  * Purpose: displays the flags returned by context initation in
- *	    a human-readable form
+ *          a human-readable form
  *
  * Arguments:
  *
- * 	int		ret_flags
+ *      int             ret_flags
  *
  * Effects:
  *
@@ -377,17 +378,17 @@ display_ctx_flags(flags)
     OM_uint32 flags;
 {
     if (flags & GSS_C_DELEG_FLAG)
-	fprintf(display_file, "context flag: GSS_C_DELEG_FLAG\n");
+        fprintf(display_file, "context flag: GSS_C_DELEG_FLAG\n");
     if (flags & GSS_C_MUTUAL_FLAG)
-	fprintf(display_file, "context flag: GSS_C_MUTUAL_FLAG\n");
+        fprintf(display_file, "context flag: GSS_C_MUTUAL_FLAG\n");
     if (flags & GSS_C_REPLAY_FLAG)
-	fprintf(display_file, "context flag: GSS_C_REPLAY_FLAG\n");
+        fprintf(display_file, "context flag: GSS_C_REPLAY_FLAG\n");
     if (flags & GSS_C_SEQUENCE_FLAG)
-	fprintf(display_file, "context flag: GSS_C_SEQUENCE_FLAG\n");
+        fprintf(display_file, "context flag: GSS_C_SEQUENCE_FLAG\n");
     if (flags & GSS_C_CONF_FLAG)
-	fprintf(display_file, "context flag: GSS_C_CONF_FLAG \n");
+        fprintf(display_file, "context flag: GSS_C_CONF_FLAG \n");
     if (flags & GSS_C_INTEG_FLAG)
-	fprintf(display_file, "context flag: GSS_C_INTEG_FLAG \n");
+        fprintf(display_file, "context flag: GSS_C_INTEG_FLAG \n");
 }
 
 void
@@ -398,12 +399,12 @@ print_token(tok)
     unsigned char *p = tok->value;
 
     if (!display_file)
-	return;
+        return;
     for (i = 0; i < tok->length; i++, p++) {
-	fprintf(display_file, "%02x ", *p);
-	if ((i % 16) == 15) {
-	    fprintf(display_file, "\n");
-	}
+        fprintf(display_file, "%02x ", *p);
+        if ((i % 16) == 15) {
+            fprintf(display_file, "\n");
+        }
     }
     fprintf(display_file, "\n");
     fflush(display_file);
@@ -420,8 +421,8 @@ gettimeofday(struct timeval *tv, void *ignore_tz)
     _tzset();
     _ftime(&tb);
     if (tv) {
-	tv->tv_sec = tb.time;
-	tv->tv_usec = tb.millitm * 1000;
+        tv->tv_sec = tb.time;
+        tv->tv_usec = tb.millitm * 1000;
     }
     return 0;
 }

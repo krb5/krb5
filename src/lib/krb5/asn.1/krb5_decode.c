@@ -703,6 +703,16 @@ error_out:
 }
 
 krb5_error_code
+decode_krb5_checksum(const krb5_data *code, krb5_checksum **repptr)
+{
+    setup_buf_only(krb5_checksum *);
+    alloc_field(rep);
+    retval = asn1_decode_checksum(&buf, rep);
+    if (retval) clean_return(retval);
+    cleanup(free);
+}
+
+krb5_error_code
 decode_krb5_cred(const krb5_data *code, krb5_cred **repptr)
 {
     setup(krb5_cred *);

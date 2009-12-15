@@ -1,5 +1,4 @@
-/* #pragma ident	"@(#)g_seal.c	1.19	98/04/21 SMI" */
-
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
  *
@@ -29,72 +28,63 @@
 #include "mglueP.h"
 
 static OM_uint32
-val_wrap_args(
-    OM_uint32 *minor_status,
-    gss_ctx_id_t context_handle,
-    int conf_req_flag,
-    gss_qop_t qop_req,
-    gss_buffer_t input_message_buffer,
-    int *conf_state,
-    gss_buffer_t output_message_buffer)
+val_wrap_args(OM_uint32 *minor_status,
+              gss_ctx_id_t context_handle,
+              int conf_req_flag,
+              gss_qop_t qop_req,
+              gss_buffer_t input_message_buffer,
+              int *conf_state,
+              gss_buffer_t output_message_buffer)
 {
-
     /* Initialize outputs. */
 
     if (minor_status != NULL)
-	*minor_status = 0;
+        *minor_status = 0;
 
     if (output_message_buffer != GSS_C_NO_BUFFER) {
-	output_message_buffer->length = 0;
-	output_message_buffer->value = NULL;
+        output_message_buffer->length = 0;
+        output_message_buffer->value = NULL;
     }
 
     /* Validate arguments. */
 
     if (minor_status == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+        return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
     if (context_handle == GSS_C_NO_CONTEXT)
-	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
+        return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
 
     if (input_message_buffer == GSS_C_NO_BUFFER)
-	return (GSS_S_CALL_INACCESSIBLE_READ);
+        return (GSS_S_CALL_INACCESSIBLE_READ);
 
     if (output_message_buffer == GSS_C_NO_BUFFER)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+        return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
     return (GSS_S_COMPLETE);
 }
 
 OM_uint32 KRB5_CALLCONV
-gss_wrap (minor_status,
-          context_handle,
-          conf_req_flag,
-          qop_req,
-          input_message_buffer,
-          conf_state,
-          output_message_buffer)
-
-OM_uint32 *		minor_status;
-gss_ctx_id_t		context_handle;
-int			conf_req_flag;
-gss_qop_t		qop_req;
-gss_buffer_t		input_message_buffer;
-int *			conf_state;
-gss_buffer_t		output_message_buffer;
+gss_wrap( OM_uint32 *minor_status,
+          gss_ctx_id_t context_handle,
+          int conf_req_flag,
+          gss_qop_t qop_req,
+          gss_buffer_t input_message_buffer,
+          int *conf_state,
+          gss_buffer_t output_message_buffer)
 {
- /* EXPORT DELETE START */
 
-    OM_uint32		status;
-    gss_union_ctx_id_t	ctx;
-    gss_mechanism	mech;
+    /* EXPORT DELETE START */
+
+    OM_uint32           status;
+    gss_union_ctx_id_t  ctx;
+    gss_mechanism       mech;
 
     status = val_wrap_args(minor_status, context_handle,
-			   conf_req_flag, qop_req,
-			   input_message_buffer, conf_state,
-			   output_message_buffer);
+                           conf_req_flag, qop_req,
+                           input_message_buffer, conf_state,
+                           output_message_buffer);
     if (status != GSS_S_COMPLETE)
-	return (status);
+        return (status);
 
     /*
      * select the approprate underlying mechanism routine and
@@ -105,60 +95,51 @@ gss_buffer_t		output_message_buffer;
     mech = gssint_get_mechanism (ctx->mech_type);
 
     if (mech) {
-	if (mech->gss_wrap) {
-	    status = mech->gss_wrap(
-				    minor_status,
-				    ctx->internal_ctx_id,
-				    conf_req_flag,
-				    qop_req,
-				    input_message_buffer,
-				    conf_state,
-				    output_message_buffer);
-	    if (status != GSS_S_COMPLETE)
-		map_error(minor_status, mech);
-	} else if (mech->gss_wrap_aead ||
-		   (mech->gss_wrap_iov && mech->gss_wrap_iov_length)) {
-	    status = gssint_wrap_aead(mech,
-				      minor_status,
-				      ctx,
-				      conf_req_flag,
-				      (gss_qop_t)qop_req,
-				      GSS_C_NO_BUFFER,
-				      input_message_buffer,
-				      conf_state,
-				      output_message_buffer);
-	} else
-	    status = GSS_S_UNAVAILABLE;
+        if (mech->gss_wrap) {
+            status = mech->gss_wrap(minor_status,
+                                    ctx->internal_ctx_id,
+                                    conf_req_flag,
+                                    qop_req,
+                                    input_message_buffer,
+                                    conf_state,
+                                    output_message_buffer);
+            if (status != GSS_S_COMPLETE)
+                map_error(minor_status, mech);
+        } else if (mech->gss_wrap_aead ||
+                   (mech->gss_wrap_iov && mech->gss_wrap_iov_length)) {
+            status = gssint_wrap_aead(mech,
+                                      minor_status,
+                                      ctx,
+                                      conf_req_flag,
+                                      (gss_qop_t)qop_req,
+                                      GSS_C_NO_BUFFER,
+                                      input_message_buffer,
+                                      conf_state,
+                                      output_message_buffer);
+        } else
+            status = GSS_S_UNAVAILABLE;
 
-	return(status);
+        return(status);
     }
- /* EXPORT DELETE END */
+    /* EXPORT DELETE END */
 
     return (GSS_S_BAD_MECH);
 }
 
 OM_uint32 KRB5_CALLCONV
-gss_seal (minor_status,
-          context_handle,
-          conf_req_flag,
-          qop_req,
-          input_message_buffer,
-          conf_state,
-          output_message_buffer)
-
-OM_uint32 *		minor_status;
-gss_ctx_id_t		context_handle;
-int			conf_req_flag;
-int			qop_req;
-gss_buffer_t		input_message_buffer;
-int *			conf_state;
-gss_buffer_t		output_message_buffer;
-
+gss_seal(OM_uint32 *minor_status,
+         gss_ctx_id_t context_handle,
+         int conf_req_flag,
+         int qop_req,
+         gss_buffer_t input_message_buffer,
+         int *conf_state,
+         gss_buffer_t output_message_buffer)
 {
+
     return gss_wrap(minor_status, context_handle,
-		    conf_req_flag, (gss_qop_t) qop_req,
-		    input_message_buffer, conf_state,
-		    output_message_buffer);
+                    conf_req_flag, (gss_qop_t) qop_req,
+                    input_message_buffer, conf_state,
+                    output_message_buffer);
 }
 
 /*
@@ -168,16 +149,16 @@ gss_buffer_t		output_message_buffer;
  */
 static OM_uint32
 gssint_wrap_size_limit_iov_shim(gss_mechanism mech,
-				OM_uint32 *minor_status,
-				gss_ctx_id_t context_handle,
-				int conf_req_flag,
-				gss_qop_t qop_req,
-				OM_uint32 req_output_size,
-				OM_uint32 *max_input_size)
+                                OM_uint32 *minor_status,
+                                gss_ctx_id_t context_handle,
+                                int conf_req_flag,
+                                gss_qop_t qop_req,
+                                OM_uint32 req_output_size,
+                                OM_uint32 *max_input_size)
 {
-    gss_iov_buffer_desc	iov[4];
-    OM_uint32		status;
-    OM_uint32		ohlen;
+    gss_iov_buffer_desc iov[4];
+    OM_uint32           status;
+    OM_uint32           ohlen;
 
     iov[0].type = GSS_IOV_BUFFER_TYPE_HEADER;
     iov[0].buffer.value = NULL;
@@ -198,20 +179,20 @@ gssint_wrap_size_limit_iov_shim(gss_mechanism mech,
     assert(mech->gss_wrap_iov_length);
 
     status = mech->gss_wrap_iov_length(minor_status, context_handle,
-				       conf_req_flag, qop_req,
-				       NULL, iov,
-				       sizeof(iov)/sizeof(iov[0]));
+                                       conf_req_flag, qop_req,
+                                       NULL, iov,
+                                       sizeof(iov)/sizeof(iov[0]));
     if (status != GSS_S_COMPLETE) {
-	map_error(minor_status, mech);
-	return status;
+        map_error(minor_status, mech);
+        return status;
     }
 
     ohlen = iov[0].buffer.length + iov[3].buffer.length;
 
     if (iov[2].buffer.length == 0 && ohlen < req_output_size)
-	*max_input_size = req_output_size - ohlen;
+        *max_input_size = req_output_size - ohlen;
     else
-	*max_input_size = 0;
+        *max_input_size = 0;
 
     return GSS_S_COMPLETE;
 }
@@ -220,28 +201,24 @@ gssint_wrap_size_limit_iov_shim(gss_mechanism mech,
  * New for V2
  */
 OM_uint32 KRB5_CALLCONV
-gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
-		    qop_req, req_output_size, max_input_size)
-    OM_uint32		*minor_status;
-    gss_ctx_id_t	context_handle;
-    int			conf_req_flag;
-    gss_qop_t		qop_req;
-    OM_uint32		req_output_size;
-    OM_uint32		*max_input_size;
+gss_wrap_size_limit(OM_uint32  *minor_status,
+                    gss_ctx_id_t context_handle,
+                    int conf_req_flag,
+                    gss_qop_t qop_req, OM_uint32 req_output_size, OM_uint32 *max_input_size)
 {
-    gss_union_ctx_id_t	ctx;
-    gss_mechanism	mech;
-    OM_uint32		major_status;
+    gss_union_ctx_id_t  ctx;
+    gss_mechanism       mech;
+    OM_uint32           major_status;
 
     if (minor_status == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+        return (GSS_S_CALL_INACCESSIBLE_WRITE);
     *minor_status = 0;
 
     if (context_handle == GSS_C_NO_CONTEXT)
-	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
+        return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_NO_CONTEXT);
 
     if (max_input_size == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_WRITE);
+        return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
     /*
      * select the approprate underlying mechanism routine and
@@ -252,21 +229,21 @@ gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
     mech = gssint_get_mechanism (ctx->mech_type);
 
     if (!mech)
-	return (GSS_S_BAD_MECH);
+        return (GSS_S_BAD_MECH);
 
     if (mech->gss_wrap_size_limit)
-	major_status = mech->gss_wrap_size_limit(minor_status,
-						 ctx->internal_ctx_id,
-						 conf_req_flag, qop_req,
-						 req_output_size, max_input_size);
+        major_status = mech->gss_wrap_size_limit(minor_status,
+                                                 ctx->internal_ctx_id,
+                                                 conf_req_flag, qop_req,
+                                                 req_output_size, max_input_size);
     else if (mech->gss_wrap_iov_length)
-	major_status = gssint_wrap_size_limit_iov_shim(mech, minor_status,
-						       ctx->internal_ctx_id,
-						       conf_req_flag, qop_req,
-						       req_output_size, max_input_size);
+        major_status = gssint_wrap_size_limit_iov_shim(mech, minor_status,
+                                                       ctx->internal_ctx_id,
+                                                       conf_req_flag, qop_req,
+                                                       req_output_size, max_input_size);
     else
-	major_status = GSS_S_UNAVAILABLE;
+        major_status = GSS_S_UNAVAILABLE;
     if (major_status != GSS_S_COMPLETE)
-	map_error(minor_status, mech);
+        map_error(minor_status, mech);
     return major_status;
 }

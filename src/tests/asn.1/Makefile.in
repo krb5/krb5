@@ -1,5 +1,3 @@
-thisconfigdir=../..
-myfulldir=tests/asn.1
 mydir=tests/asn.1
 BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -40,12 +38,12 @@ check:: check-encode check-encode-trval check-decode check-leak
 # Does not actually test for leaks unless using valgrind or a similar
 # tool, but does exercise a bunch of code.
 check-leak: krb5_decode_leak
-	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
+	KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf ; \
 		export KRB5_CONFIG ;\
 		$(RUN_SETUP) $(VALGRIND) ./krb5_decode_leak
 
 check-decode: krb5_decode_test
-	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
+	KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf ; \
 		export KRB5_CONFIG ;\
 		$(RUN_SETUP) $(VALGRIND) ./krb5_decode_test
 
@@ -64,13 +62,13 @@ expected_trval.out: trval_reference.out ldap_trval.out
 	fi
 
 check-encode: krb5_encode_test expected_encode.out
-	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
+	KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf ; \
 		export KRB5_CONFIG ;\
 		$(RUN_SETUP) $(VALGRIND) ./krb5_encode_test > test.out
 	cmp test.out expected_encode.out
 
 check-encode-trval: krb5_encode_test expected_trval.out
-	KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; \
+	KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf ; \
 		export KRB5_CONFIG ;\
 		$(RUN_SETUP) $(VALGRIND) ./krb5_encode_test -t > trval.out
 	cmp trval.out expected_trval.out

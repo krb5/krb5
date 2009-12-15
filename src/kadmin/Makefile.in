@@ -1,5 +1,3 @@
-thisconfigdir=..
-myfulldir=kadmin
 mydir=kadmin
 BUILDTOP=$(REL)..
 SUBDIRS = cli dbutil ktutil server testing

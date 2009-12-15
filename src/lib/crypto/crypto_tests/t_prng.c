@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/t_prng.c
  *
@@ -41,47 +42,47 @@
 #include <assert.h>
 
 int main () {
-  krb5_error_code ret;
-  krb5_data input, output;
-  unsigned int source_id, seed_length;
-  unsigned int i;
-  while (1) {
+    krb5_error_code ret;
+    krb5_data input, output;
+    unsigned int source_id, seed_length;
+    unsigned int i;
+    while (1) {
         /* Read source*/
-    if (scanf ("%u", &source_id ) == EOF )
-      break;
+        if (scanf ("%u", &source_id ) == EOF )
+            break;
         /* Read seed length*/
-    if (scanf ("%u", &seed_length) == EOF)
-      break;
-    if (seed_length ) {
-      unsigned int lc;
-      assert ((input.data = malloc(seed_length)) != NULL);
-      for (lc = seed_length; lc > 0; lc--) {
-	scanf ("%2x",  &i);
-	input.data[seed_length-lc] = (unsigned) (i&0xff);
-      }
-      input.length = seed_length;
-      assert (krb5_c_random_add_entropy (0, source_id, &input) == 0);
-      free (input.data);
-      input.data = NULL;
+        if (scanf ("%u", &seed_length) == EOF)
+            break;
+        if (seed_length ) {
+            unsigned int lc;
+            assert ((input.data = malloc(seed_length)) != NULL);
+            for (lc = seed_length; lc > 0; lc--) {
+                scanf ("%2x",  &i);
+                input.data[seed_length-lc] = (unsigned) (i&0xff);
+            }
+            input.length = seed_length;
+            assert (krb5_c_random_add_entropy (0, source_id, &input) == 0);
+            free (input.data);
+            input.data = NULL;
+        }
+        if (scanf ("%u", &i) == EOF)
+            break;
+        if (i) {
+            assert ((output.data = malloc (i)) != NULL);
+            output.length = i;
+            ret = krb5_c_random_make_octets (0, &output);
+            if (ret)
+                printf ("failed\n");
+            else {
+                for (; i > 0; i--) {
+                    printf ("%02x",
+                            (unsigned int) ((unsigned char ) output.data[output.length-i]));
+                }
+                printf ("\n");
+            }
+            free (output.data);
+            output.data = NULL;
+        }
     }
-    if (scanf ("%u", &i) == EOF)
-      break;
-    if (i) {
-      assert ((output.data = malloc (i)) != NULL);
-      output.length = i;
-      ret = krb5_c_random_make_octets (0, &output);
-      if (ret)
-	printf ("failed\n");
-      else {
-	for (; i > 0; i--) {
-	  printf ("%02x",
-		  (unsigned int) ((unsigned char ) output.data[output.length-i]));
-	}
-	printf ("\n");
-      }
-      free (output.data);
-      output.data = NULL;
-    }
-  }
-  return (0);
+    return (0);
 }

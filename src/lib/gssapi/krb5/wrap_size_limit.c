@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2000 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -118,7 +118,7 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
             krb5_enctype enctype;
 
             key = ctx->have_acceptor_subkey ? ctx->acceptor_subkey
-                                            : ctx->subkey;
+                : ctx->subkey;
             enctype = key->keyblock.enctype;
 
             while (sz > 0 && krb5_encrypt_size(sz, enctype) + 16 > req_output_size)
@@ -142,7 +142,7 @@ krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
             size_t cksumsize;
 
             cksumtype = ctx->have_acceptor_subkey ? ctx->acceptor_subkey_cksumtype
-                                                  : ctx->cksumtype;
+                : ctx->cksumtype;
 
             err = krb5_c_checksum_length(ctx->k5_context, cksumtype, &cksumsize);
             if (err) {

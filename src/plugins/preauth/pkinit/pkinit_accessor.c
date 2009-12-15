@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * COPYRIGHT (C) 2006,2007
  * THE REGENTS OF THE UNIVERSITY OF MICHIGAN
@@ -31,13 +32,13 @@
 #include <k5-int.h>
 #include "pkinit_accessor.h"
 
-#define DEF_FUNC_PTRS(type) \
-krb5_error_code (*k5int_encode_##type)(const type *, krb5_data **); \
-krb5_error_code (*k5int_decode_##type)(const krb5_data *, type **)
+#define DEF_FUNC_PTRS(type)                                             \
+    krb5_error_code (*k5int_encode_##type)(const type *, krb5_data **); \
+    krb5_error_code (*k5int_decode_##type)(const krb5_data *, type **)
 
-#define DEF_FUNC_PTRS_ARRAY(type) \
-krb5_error_code (*k5int_encode_##type)(const type **, krb5_data **); \
-krb5_error_code (*k5int_decode_##type)(const krb5_data *, type ***)
+#define DEF_FUNC_PTRS_ARRAY(type)                                       \
+    krb5_error_code (*k5int_encode_##type)(const type **, krb5_data **); \
+    krb5_error_code (*k5int_decode_##type)(const krb5_data *, type ***)
 
 DEF_FUNC_PTRS(krb5_auth_pack);
 DEF_FUNC_PTRS(krb5_auth_pack_draft9);
@@ -51,29 +52,39 @@ DEF_FUNC_PTRS(krb5_reply_key_pack_draft9);
 DEF_FUNC_PTRS_ARRAY(krb5_typed_data);
 
 /* special cases... */
-krb5_error_code (*k5int_decode_krb5_principal_name)
-	(const krb5_data *, krb5_principal_data **);
+krb5_error_code
+(*k5int_decode_krb5_principal_name)(const krb5_data *, krb5_principal_data **);
 
-krb5_error_code (*k5int_encode_krb5_td_dh_parameters)
-	(const krb5_algorithm_identifier **, krb5_data **code);
-krb5_error_code (*k5int_decode_krb5_td_dh_parameters)
-	(const krb5_data *, krb5_algorithm_identifier ***);
+krb5_error_code
+(*k5int_encode_krb5_td_dh_parameters)(const krb5_algorithm_identifier **,
+                                      krb5_data **code);
+krb5_error_code
+(*k5int_decode_krb5_td_dh_parameters)(const krb5_data *,
+                                      krb5_algorithm_identifier ***);
 
-krb5_error_code (*k5int_encode_krb5_td_trusted_certifiers)
-	(const krb5_external_principal_identifier **, krb5_data **code);
-krb5_error_code (*k5int_decode_krb5_td_trusted_certifiers)
-	(const krb5_data *, krb5_external_principal_identifier ***);
+krb5_error_code
+(*k5int_encode_krb5_td_trusted_certifiers)
+(const krb5_external_principal_identifier **, krb5_data **code);
 
-krb5_error_code (*k5int_decode_krb5_as_req)
-	(const krb5_data *output, krb5_kdc_req **rep);
-krb5_error_code (*k5int_encode_krb5_kdc_req_body)
-	(const krb5_kdc_req *rep, krb5_data **code);
-void KRB5_CALLCONV (*k5int_krb5_free_kdc_req)
-	(krb5_context, krb5_kdc_req * );
-void (*k5int_set_prompt_types)
-	(krb5_context, krb5_prompt_type *);
-krb5_error_code (*k5int_encode_krb5_authdata_elt)
-	(const krb5_authdata *rep, krb5_data **code);
+krb5_error_code
+(*k5int_decode_krb5_td_trusted_certifiers)
+(const krb5_data *,
+ krb5_external_principal_identifier ***);
+
+krb5_error_code
+(*k5int_decode_krb5_as_req)(const krb5_data *output, krb5_kdc_req **rep);
+
+krb5_error_code
+(*k5int_encode_krb5_kdc_req_body)(const krb5_kdc_req *rep, krb5_data **code);
+
+void KRB5_CALLCONV
+(*k5int_krb5_free_kdc_req)(krb5_context, krb5_kdc_req * );
+
+void
+(*k5int_set_prompt_types)(krb5_context, krb5_prompt_type *);
+
+krb5_error_code
+(*k5int_encode_krb5_authdata_elt)(const krb5_authdata *rep, krb5_data **code);
 
 
 
@@ -89,10 +100,10 @@ pkinit_accessor_init(void)
 
     retval = krb5int_accessor(&k5int, KRB5INT_ACCESS_VERSION);
     if (retval)
-	return retval;
-#define SET_PTRS(type) \
-k5int_encode_##type = k5int.encode_##type; \
-k5int_decode_##type = k5int.decode_##type;
+        return retval;
+#define SET_PTRS(type)                          \
+    k5int_encode_##type = k5int.encode_##type;  \
+    k5int_decode_##type = k5int.decode_##type;
 
     SET_PTRS(krb5_auth_pack);
     SET_PTRS(krb5_auth_pack_draft9);

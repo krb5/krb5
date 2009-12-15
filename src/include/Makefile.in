@@ -1,5 +1,3 @@
-thisconfigdir=..
-myfulldir=include
 mydir=include
 BUILDTOP=$(REL)..
 KRB5RCTMPDIR= @KRB5_RCTMPDIR@
@@ -34,11 +32,11 @@ all-windows:: autoconf.h $(BUILT_HEADERS) verify-calling-conventions-krb5
 all-unix:: @MAINT@ verify-calling-conventions-krb5
 
 $(srcdir)/autoconf.h.in: @MAINT@ $(srcdir)/autoconf.stmp
-$(srcdir)/autoconf.stmp: $(srcdir)/$(thisconfigdir)/configure.in $(SRCTOP)/aclocal.m4
-	$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
-	cd $(srcdir)/$(thisconfigdir) && $(AUTOHEADER) --include=$(CONFIG_RELTOPDIR) $(AUTOHEADERFLAGS)
+$(srcdir)/autoconf.stmp: $(top_srcdir)/configure.in $(top_srcdir)/aclocal.m4
+	$(RM) -r $(top_srcdir)/autom4te.cache
+	cd $(top_srcdir) && $(AUTOHEADER) --include=$(CONFIG_RELTOPDIR) $(AUTOHEADERFLAGS)
 	touch $(srcdir)/autoconf.stmp
-	$(RM) -r $(srcdir)/$(thisconfigdir)/autom4te.cache
+	$(RM) -r $(top_srcdir)/autom4te.cache
 
 ##DOS##autoconf.h: win-mac.h
 ##DOS##	$(CP) win-mac.h $@
@@ -49,8 +47,8 @@ $(srcdir)/autoconf.stmp: $(srcdir)/$(thisconfigdir)/configure.in $(SRCTOP)/acloc
 ##DOS##!if 0
 # config.status will now update autoconf.stamp itself.
 autoconf.h: autoconf.stamp
-autoconf.stamp: $(srcdir)/autoconf.h.in $(thisconfigdir)/config.status
-	(cd $(thisconfigdir) && $(SHELL) config.status $(mydir)/autoconf.h)
+autoconf.stamp: $(srcdir)/autoconf.h.in $(BUILDTOP)/config.status
+	(cd $(BUILDTOP) && $(SHELL) config.status $(mydir)/autoconf.h)
 
 SYSCONFDIR = @sysconfdir@
 LOCALSTATEDIR = @localstatedir@
@@ -92,7 +90,7 @@ krb5.stamp: $(srcdir)/krb5/krb5.hin $(K5_ET_HEADERS)
 	touch krb5.stamp
 
 verify-calling-conventions-krb5: private-and-public-decls
-	$(PERL) -w $(SRCTOP)/util/def-check.pl private-and-public-decls $(SRCTOP)/lib/krb5_32.def
+	$(PERL) -w $(top_srcdir)/util/def-check.pl private-and-public-decls $(top_srcdir)/lib/krb5_32.def
 
 ##DOS##!if 0
 HEADERS_TO_CHECK = krb5/krb5.h $(srcdir)/k5-int.h $(srcdir)/krb5/preauth_plugin.h

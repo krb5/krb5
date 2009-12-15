@@ -27,18 +27,18 @@
 #ifndef LEAN_CLIENT
 
 #include "k5-int.h"
+#include "init_creds_ctx.h"
 
 static krb5_error_code
-krb5_get_as_key_keytab(
-    krb5_context context,
-    krb5_principal client,
-    krb5_enctype etype,
-    krb5_prompter_fct prompter,
-    void *prompter_data,
-    krb5_data *salt,
-    krb5_data *params,
-    krb5_keyblock *as_key,
-    void *gak_data)
+get_as_key_keytab(krb5_context context,
+                  krb5_principal client,
+                  krb5_enctype etype,
+                  krb5_prompter_fct prompter,
+                  void *prompter_data,
+                  krb5_data *salt,
+                  krb5_data *params,
+                  krb5_keyblock *as_key,
+                  void *gak_data)
 {
     krb5_keytab keytab = (krb5_keytab) gak_data;
     krb5_error_code ret;
@@ -78,6 +78,17 @@ krb5_get_as_key_keytab(
 }
 
 krb5_error_code KRB5_CALLCONV
+krb5_init_creds_set_keytab(krb5_context context,
+                           krb5_init_creds_context ctx,
+                           krb5_keytab keytab)
+{
+    ctx->gak_fct = get_as_key_keytab;
+    ctx->gak_data = keytab;
+
+    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_keytab(krb5_context context,
                            krb5_creds *creds,
                            krb5_principal client,
@@ -89,7 +100,6 @@ krb5_get_init_creds_keytab(krb5_context context,
     krb5_error_code ret, ret2;
     int use_master;
     krb5_keytab keytab;
-    krb5_gic_opt_ext *opte = NULL;
 
     if (arg_keytab == NULL) {
         if ((ret = krb5_kt_default(context, &keytab)))
@@ -98,19 +108,14 @@ krb5_get_init_creds_keytab(krb5_context context,
         keytab = arg_keytab;
     }
 
-    ret = krb5int_gic_opt_to_opte(context, options, &opte, 1,
-                                  "krb5_get_init_creds_keytab");
-    if (ret)
-        return ret;
-
     use_master = 0;
 
     /* first try: get the requested tkt from any kdc */
 
-    ret = krb5_get_init_creds(context, creds, client, NULL, NULL,
-                              start_time, in_tkt_service, opte,
-                              krb5_get_as_key_keytab, (void *) keytab,
-                              &use_master,NULL);
+    ret = krb5int_get_init_creds(context, creds, client, NULL, NULL,
+                                 start_time, in_tkt_service, options,
+                                 get_as_key_keytab, (void *) keytab,
+                                 &use_master,NULL);
 
     /* check for success */
 
@@ -128,10 +133,10 @@ krb5_get_init_creds_keytab(krb5_context context,
     if (!use_master) {
         use_master = 1;
 
-        ret2 = krb5_get_init_creds(context, creds, client, NULL, NULL,
-                                   start_time, in_tkt_service, opte,
-                                   krb5_get_as_key_keytab, (void *) keytab,
-                                   &use_master, NULL);
+        ret2 = krb5int_get_init_creds(context, creds, client, NULL, NULL,
+                                      start_time, in_tkt_service, options,
+                                      get_as_key_keytab, (void *) keytab,
+                                      &use_master, NULL);
 
         if (ret2 == 0) {
             ret = 0;
@@ -153,8 +158,6 @@ krb5_get_init_creds_keytab(krb5_context context,
        do any prompting or changing for keytabs, that's it. */
 
 cleanup:
-    if (opte && krb5_gic_opt_is_shadowed(opte))
-        krb5_get_init_creds_opt_free(context, (krb5_get_init_creds_opt *)opte);
     if (arg_keytab == NULL)
         krb5_kt_close(context, keytab);
 
@@ -168,13 +171,13 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
                             krb5_creds *creds, krb5_kdc_rep **ret_as_reply)
 {
     krb5_error_code retval;
-    krb5_gic_opt_ext *opte;
+    krb5_get_init_creds_opt *opts;
     char * server = NULL;
     krb5_keytab keytab;
     krb5_principal client_princ, server_princ;
     int use_master = 0;
 
-    retval = krb5int_populate_gic_opt(context, &opte,
+    retval = krb5int_populate_gic_opt(context, &opts,
                                       options, addrs, ktypes,
                                       pre_auth_types, creds);
     if (retval)
@@ -183,7 +186,7 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
     if (arg_keytab == NULL) {
         retval = krb5_kt_default(context, &keytab);
         if (retval)
-            return retval;
+            goto cleanup;
     }
     else keytab = arg_keytab;
 
@@ -192,14 +195,12 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
         goto cleanup;
     server_princ = creds->server;
     client_princ = creds->client;
-    retval = krb5_get_init_creds (context,
-                                  creds, creds->client,
-                                  krb5_prompter_posix,  NULL,
-                                  0, server, opte,
-                                  krb5_get_as_key_keytab, (void *)keytab,
-                                  &use_master, ret_as_reply);
+    retval = krb5int_get_init_creds(context, creds, creds->client,
+                                    krb5_prompter_posix,  NULL,
+                                    0, server, opts,
+                                    get_as_key_keytab, (void *)keytab,
+                                    &use_master, ret_as_reply);
     krb5_free_unparsed_name( context, server);
-    krb5_get_init_creds_opt_free(context, (krb5_get_init_creds_opt *)opte);
     if (retval) {
         goto cleanup;
     }
@@ -212,7 +213,9 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
     if (ccache)
         if ((retval = krb5_cc_store_cred(context, ccache, creds)))
             goto cleanup;
-cleanup:    if (arg_keytab == NULL)
+cleanup:
+    krb5_get_init_creds_opt_free(context, opts);
+    if (arg_keytab == NULL)
         krb5_kt_close(context, keytab);
     return retval;
 }

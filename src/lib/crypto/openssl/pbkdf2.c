@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/openssl/pbkdf2.c
  *
@@ -39,13 +40,13 @@
 
 krb5_error_code
 krb5int_pbkdf2_hmac_sha1 (const krb5_data *out, unsigned long count,
-			  const krb5_data *pass, const krb5_data *salt)
+                          const krb5_data *pass, const krb5_data *salt)
 {
 /*
  * This is an implementation of PKCS#5 v2.0
  * Does not return an error
  */
-   PKCS5_PBKDF2_HMAC_SHA1(pass->data, pass->length,
+    PKCS5_PBKDF2_HMAC_SHA1(pass->data, pass->length,
                            (unsigned char *)salt->data, salt->length, count,
                            out->length, (unsigned char *)out->data);
     return 0;

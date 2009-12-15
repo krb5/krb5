@@ -191,3 +191,162 @@ krb5_cc_unlock (krb5_context context, krb5_ccache ccache)
 {
     return ccache->ops->unlock(context, ccache);
 }
+
+static const char conf_realm[] = "X-CACHECONF:";
+static const char conf_name[] = "krb5_ccache_conf_data";
+
+static krb5_error_code
+build_conf_principals (krb5_context context, krb5_ccache id,
+                       krb5_const_principal principal,
+                       const char *name, krb5_creds *cred)
+{
+    krb5_principal client;
+    krb5_error_code ret;
+    char *pname = NULL;
+
+    memset(cred, 0, sizeof(*cred));
+
+    ret = krb5_cc_get_principal(context, id, &client);
+    if (ret)
+        return ret;
+
+    if (principal) {
+        ret = krb5_unparse_name(context, principal, &pname);
+        if (ret)
+            return ret;
+    }
+
+    ret = krb5_build_principal(context, &cred->server,
+                               sizeof(conf_realm) - 1, conf_realm,
+                               conf_name, name, pname, (char *)NULL);
+    free(pname);
+    if (ret) {
+        krb5_free_principal(context, client);
+        return ret;
+    }
+    ret = krb5_copy_principal(context, client, &cred->client);
+    krb5_free_principal(context, client);
+    return ret;
+}
+
+/*!
+ * \param context a Keberos context
+ * \param principal principal to check if it a configuration principal
+ *
+ * \brief Return TRUE (non zero) if the principal is a configuration
+ *        principal (generated part of krb5_cc_set_config()). Returns
+ *        FALSE (zero) if not a configuration principal.
+ *
+ */
+
+krb5_boolean KRB5_CALLCONV
+krb5_is_config_principal (krb5_context context,
+                          krb5_const_principal principal)
+{
+    const krb5_data *realm;
+
+    realm = krb5_princ_realm(context, principal);
+
+    if (realm->length != sizeof(conf_realm) - 1 ||
+        memcmp(realm->data, conf_realm, sizeof(conf_realm) - 1) != 0)
+        return FALSE;
+
+    if (principal->length == 0 ||
+        principal->data[0].length != (sizeof(conf_name) - 1) ||
+        memcmp(principal->data[0].data, conf_name, sizeof(conf_name) - 1) != 0)
+        return FALSE;
+
+    return TRUE;
+}
+
+/*!
+ * \param context a Keberos context
+ * \param id the credential cache to store the data for
+ * \param principal configuration for a specific principal, if
+ * NULL, global for the whole cache.
+ * \param key name under which the configuraion is stored.
+ * \param data data to store
+ *
+ * \brief Store some configuration for the credential cache in the
+ *        cache.  Existing configuration under the same key is
+ *        over-written.
+ *
+ */
+
+krb5_error_code KRB5_CALLCONV
+krb5_cc_set_config (krb5_context context, krb5_ccache id,
+                    krb5_const_principal principal,
+                    const char *key, krb5_data *data)
+{
+    krb5_error_code ret;
+    krb5_creds cred;
+    memset(&cred, 0, sizeof(cred));
+
+    ret = build_conf_principals(context, id, principal, key, &cred);
+    if (ret)
+        goto out;
+
+    ret = krb5_cc_remove_cred(context, id, 0, &cred);
+    if (ret && ret != KRB5_CC_NOTFOUND && ret != KRB5_CC_NOSUPP)
+        goto out;
+
+    cred.ticket.data = malloc(data->length);
+    if (cred.ticket.data == NULL) {
+        krb5_set_error_message(context, ENOMEM, "malloc: out of memory");
+        return ENOMEM;
+    }
+    cred.ticket.length = data->length;
+    memcpy(cred.ticket.data, data->data, data->length);
+
+    ret = krb5_cc_store_cred(context, id, &cred);
+
+out:
+    krb5_free_cred_contents(context, &cred);
+    return ret;
+}
+
+/*!
+ * \param context a Keberos context
+ * \param id the credential cache to store the data for
+ * \param principal configuration for a specific principal, if
+ *        NULL, global for the whole cache.
+ * \param key name under which the configuraion is stored.
+ * \param data data to fetched, free with krb5_data_free()
+ *
+ * \brief Get some configuration for the credential cache in the cache.
+ */
+
+
+krb5_error_code KRB5_CALLCONV
+krb5_cc_get_config (krb5_context context, krb5_ccache id,
+                    krb5_const_principal principal,
+                    const char *key, krb5_data *data)
+{
+    krb5_creds mcred, cred;
+    krb5_error_code ret;
+
+    memset(&cred, 0, sizeof(cred));
+    memset(data, 0, sizeof(*data));
+
+    ret = build_conf_principals(context, id, principal, key, &mcred);
+    if (ret)
+        goto out;
+
+    ret = krb5_cc_retrieve_cred(context, id, 0, &mcred, &cred);
+    if (ret)
+        goto out;
+
+    data->data = malloc(cred.ticket.length);
+    if (data->data == NULL) {
+        ret = ENOMEM;
+        krb5_set_error_message(context, ENOMEM, "malloc: out of memory");
+        goto out;
+    }
+    data->length = cred.ticket.length;
+    memcpy(data->data, cred.ticket.data, data->length);
+
+out:
+    krb5_free_cred_contents(context, &cred);
+    krb5_free_cred_contents(context, &mcred);
+    return ret;
+}

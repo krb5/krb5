@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/state.c
  *
@@ -37,24 +38,24 @@
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_init_state (krb5_context context, const krb5_keyblock *key,
-		   krb5_keyusage keyusage, krb5_data *new_state)
+                   krb5_keyusage keyusage, krb5_data *new_state)
 {
     const struct krb5_keytypes *ktp;
 
     ktp = find_enctype(key->enctype);
     if (ktp == NULL)
-	return KRB5_BAD_ENCTYPE;
+        return KRB5_BAD_ENCTYPE;
     return ktp->enc->init_state(key, keyusage, new_state);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_free_state(krb5_context context, const krb5_keyblock *key,
-		  krb5_data *state)
+                  krb5_data *state)
 {
     const struct krb5_keytypes *ktp;
 
     ktp = find_enctype(key->enctype);
     if (ktp == NULL)
-	return KRB5_BAD_ENCTYPE;
+        return KRB5_BAD_ENCTYPE;
     return ktp->enc->free_state(state);
 }

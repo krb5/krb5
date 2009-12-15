@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/kdb/kdb_ldap/ldap_realm.h
  *
@@ -43,7 +44,7 @@
 #define LDAP_REALM_MAXTICKETLIFE      0x0100
 #define LDAP_REALM_MAXRENEWLIFE       0x0200
 #define LDAP_REALM_KRBTICKETFLAGS     0x0400
-#define LDAP_REALM_CONTREF  	      0x0800
+#define LDAP_REALM_CONTREF            0x0800
 
 extern char *policy_attributes[];
 
@@ -52,24 +53,24 @@ extern char *realm_attributes[];
 /* realm container structure */
 
 typedef struct _krb5_ldap_realm_params {
-  char          *realmdn;
-  char          *realm_name;
-  char          **subtree;
-  char		*containerref;
-  char          *policyreference;
-  int           search_scope;
-  int           upenabled;
-  int 		subtreecount;
-  krb5_int32    max_life;
-  krb5_int32    max_renewable_life;
-  krb5_int32    tktflags;
-  char          **kdcservers;
-  char          **adminservers;
-  char          **passwdservers;
-  krb5_tl_data  *tl_data;
-  krb5_keyblock mkey;
-  krb5_keylist_node *mkey_list; /* all master keys in use for the realm */
-  long          mask;
+    char          *realmdn;
+    char          *realm_name;
+    char          **subtree;
+    char          *containerref;
+    char          *policyreference;
+    int           search_scope;
+    int           upenabled;
+    int           subtreecount;
+    krb5_int32    max_life;
+    krb5_int32    max_renewable_life;
+    krb5_int32    tktflags;
+    char          **kdcservers;
+    char          **adminservers;
+    char          **passwdservers;
+    krb5_tl_data  *tl_data;
+    krb5_keyblock mkey;
+    krb5_keylist_node *mkey_list; /* all master keys in use for the realm */
+    long          mask;
 } krb5_ldap_realm_params;
 
 
@@ -86,7 +87,8 @@ krb5_error_code
 krb5_ldap_create_realm(krb5_context, krb5_ldap_realm_params *, int);
 
 krb5_error_code
-krb5_ldap_read_realm_params(krb5_context , char *, krb5_ldap_realm_params **, int *);
+krb5_ldap_read_realm_params(krb5_context, char *, krb5_ldap_realm_params **,
+                            int *);
 
 void
 krb5_ldap_free_realm_params(krb5_ldap_realm_params *);

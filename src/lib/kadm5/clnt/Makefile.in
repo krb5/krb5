@@ -1,5 +1,3 @@
-thisconfigdir=../../..
-myfulldir=lib/kadm5/clnt
 mydir=lib/kadm5/clnt
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(BUILDTOP)/include/kadm5

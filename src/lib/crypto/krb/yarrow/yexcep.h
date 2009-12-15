@@ -1,4 +1,4 @@
-/* -*- Mode: C; c-file-style: "bsd" -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
 #ifndef YEXCEP_H
 #define YEXCEP_H
@@ -85,16 +85,16 @@
 #define EXCEP_OK 1
 #define EXCEP_DECL int _thr = 0, _ret2 = 0, _ret = _ret2+EXCEP_OK
 
-#define THROW( x ) \
-    do { \
-        _ret = (x); \
-        if( !_thr ) { goto _catch; } \
+#define THROW( x )                              \
+    do {                                        \
+        _ret = (x);                             \
+        if( !_thr ) { goto _catch; }            \
     } while ( 0 )
 
-#define TRY( x ) \
-    do { \
-        _ret2 = (x); \
-        if ( _ret > 0 && _ret2 <= 0 ) { THROW( _ret2 ); } \
+#define TRY( x )                                                \
+    do {                                                        \
+        _ret2 = (x);                                            \
+        if ( _ret > 0 && _ret2 <= 0 ) { THROW( _ret2 ); }       \
     } while ( 0 )
 
 #define SET( x ) (_ret = (x))

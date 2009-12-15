@@ -1,5 +1,3 @@
-thisconfigdir=../../../..
-myfulldir=lib/crypto/krb/prf
 mydir=lib/crypto/krb/prf
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/.. 		\

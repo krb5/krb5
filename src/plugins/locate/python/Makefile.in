@@ -1,5 +1,3 @@
-thisconfigdir=../../..
-myfulldir=plugins/locate/python
 mydir=plugins/locate/python
 BUILDTOP=$(REL)..$(S)..$(S)..
 

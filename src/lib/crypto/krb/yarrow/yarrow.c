@@ -1,4 +1,4 @@
-/* -*- Mode: C; c-file-style: "bsd" -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 
 /*
  * Yarrow - Cryptographic Pseudo-Random Number Generator
@@ -106,11 +106,11 @@ static void krb5int_yarrow_init_Limits(Yarrow_CTX* y)
     limit = min(tmp1, tmp2);
     if (limit < COUNTER_MAX)
     {
-	y->gates_limit = limit;
+        y->gates_limit = limit;
     }
     else
     {
-	y->gates_limit = COUNTER_MAX;
+        y->gates_limit = COUNTER_MAX;
     }
 }
 
@@ -122,8 +122,8 @@ static int yarrow_reseed_locked( Yarrow_CTX* y, int pool );
 
 static int
 yarrow_input_locked( Yarrow_CTX* y, unsigned source_id,
-		     const void *sample,
-		     size_t size, size_t entropy_bits );
+                     const void *sample,
+                     size_t size, size_t entropy_bits );
 
 static int Yarrow_detect_fork(Yarrow_CTX *y)
 {
@@ -132,21 +132,21 @@ static int Yarrow_detect_fork(Yarrow_CTX *y)
 
     /* this does not work for multi-threaded apps if threads have different
      * pids */
-       newpid = getpid();
+    newpid = getpid();
     if ( y->pid != newpid )
     {
-	/* we input the pid twice, so it will get into the fast pool at least once
-	 * Then we reseed.  This doesn't really increase entropy, but does make the
-	 * streams distinct assuming we already have good entropy*/
-	y->pid = newpid;
-	TRY (yarrow_input_locked (y, 0, &newpid,
-				  sizeof (newpid), 0));
-	TRY (yarrow_input_locked (y, 0, &newpid,
-				  sizeof (newpid), 0));
-	TRY (yarrow_reseed_locked (y, YARROW_FAST_POOL));
+        /* we input the pid twice, so it will get into the fast pool at least once
+         * Then we reseed.  This doesn't really increase entropy, but does make the
+         * streams distinct assuming we already have good entropy*/
+        y->pid = newpid;
+        TRY (yarrow_input_locked (y, 0, &newpid,
+                                  sizeof (newpid), 0));
+        TRY (yarrow_input_locked (y, 0, &newpid,
+                                  sizeof (newpid), 0));
+        TRY (yarrow_reseed_locked (y, YARROW_FAST_POOL));
     }
 
- CATCH:
+CATCH:
     EXCEP_RET;
 }
 
@@ -215,41 +215,41 @@ int krb5int_yarrow_init(Yarrow_CTX* y, const char *filename)
 #if defined( YARROW_SAVE_STATE )
     if ( y->entropyfile != NULL )
     {
-	int ret = Yarrow_Load_State( y );
-	if ( ret != YARROW_OK && ret != YARROW_NO_STATE )
-	{
-	    THROW( ret );
-	}
+        int ret = Yarrow_Load_State( y );
+        if ( ret != YARROW_OK && ret != YARROW_NO_STATE )
+        {
+            THROW( ret );
+        }
 
-	/*  if load suceeded then write new state back immediately
-	 */
+        /*  if load suceeded then write new state back immediately
+         */
 
-	/*  Also check that it's not already saved, because the reseed in
-	 *  Yarrow_Load_State may trigger a save
-	 */
+        /*  Also check that it's not already saved, because the reseed in
+         *  Yarrow_Load_State may trigger a save
+         */
 
-	if ( ret == YARROW_OK && !y->saved )
-	{
-	    TRY( Yarrow_Save_State( y ) );
-	}
+        if ( ret == YARROW_OK && !y->saved )
+        {
+            TRY( Yarrow_Save_State( y ) );
+        }
     }
 #endif
 
     if ( !y->seeded )
     {
-	THROW( YARROW_NOT_SEEDED );
+        THROW( YARROW_NOT_SEEDED );
     }
 
- CATCH:
+CATCH:
     if ( locked ) { TRY( UNLOCK() ); }
     EXCEP_RET;
 }
 
 static
 int yarrow_input_maybe_locking( Yarrow_CTX* y, unsigned source_id,
-				const void* sample,
-				size_t size, size_t entropy_bits,
-				int do_lock )
+                                const void* sample,
+                                size_t size, size_t entropy_bits,
+                                int do_lock )
 {
     EXCEP_DECL;
     int ret;
@@ -259,8 +259,8 @@ int yarrow_input_maybe_locking( Yarrow_CTX* y, unsigned source_id,
     size_t estimate;
 
     if (do_lock) {
-	    TRY( LOCK() );
-	    locked = 1;
+        TRY( LOCK() );
+        locked = 1;
     }
     k5_assert_locked(&krb5int_yarrow_lock);
 
@@ -272,7 +272,7 @@ int yarrow_input_maybe_locking( Yarrow_CTX* y, unsigned source_id,
 
     if(source->pool != YARROW_FAST_POOL && source->pool != YARROW_SLOW_POOL)
     {
-	THROW( YARROW_BAD_SOURCE );
+        THROW( YARROW_BAD_SOURCE );
     }
 
     /* hash in the sample */
@@ -282,78 +282,78 @@ int yarrow_input_maybe_locking( Yarrow_CTX* y, unsigned source_id,
     /* only update entropy estimate if pool is not full */
 
     if ( (source->pool == YARROW_FAST_POOL &&
-	  source->entropy[source->pool] < y->fast_thresh) ||
-	 (source->pool == YARROW_SLOW_POOL &&
-	  source->entropy[source->pool] < y->slow_thresh) )
+          source->entropy[source->pool] < y->fast_thresh) ||
+         (source->pool == YARROW_SLOW_POOL &&
+          source->entropy[source->pool] < y->slow_thresh) )
     {
-	new_entropy = min(entropy_bits, size * 8 * YARROW_ENTROPY_MULTIPLIER);
-	if (source->estimator)
-	{
-	    estimate = source->estimator(sample, size);
-	    new_entropy = min(new_entropy, estimate);
-	}
-	source->entropy[source->pool] += new_entropy;
-	if ( source->entropy[source->pool] > YARROW_POOL_SIZE )
-	{
-	    source->entropy[source->pool] = YARROW_POOL_SIZE;
-	}
+        new_entropy = min(entropy_bits, size * 8 * YARROW_ENTROPY_MULTIPLIER);
+        if (source->estimator)
+        {
+            estimate = source->estimator(sample, size);
+            new_entropy = min(new_entropy, estimate);
+        }
+        source->entropy[source->pool] += new_entropy;
+        if ( source->entropy[source->pool] > YARROW_POOL_SIZE )
+        {
+            source->entropy[source->pool] = YARROW_POOL_SIZE;
+        }
 
-	if (source->pool == YARROW_FAST_POOL)
-	{
-	    if (source->entropy[YARROW_FAST_POOL] >= y->fast_thresh)
-	    {
-		ret = yarrow_reseed_locked(y, YARROW_FAST_POOL);
-		if ( ret != YARROW_OK && ret != YARROW_NOT_SEEDED )
-		{
-		    THROW( ret );
-		}
-	    }
-	}
-	else
-	{
-	    if (!source->reached_slow_thresh &&
-		source->entropy[YARROW_SLOW_POOL] >= y->slow_thresh)
-	    {
-		source->reached_slow_thresh = 1;
-		y->slow_k_of_n++;
-		if (y->slow_k_of_n >= y->slow_k_of_n_thresh)
-		{
-		    y->slow_k_of_n = 0;
-		    ret = yarrow_reseed_locked(y, YARROW_SLOW_POOL);
-		    if ( ret != YARROW_OK && ret != YARROW_NOT_SEEDED )
-		    {
-			THROW( ret );
-		    }
-		}
-	    }
-	}
+        if (source->pool == YARROW_FAST_POOL)
+        {
+            if (source->entropy[YARROW_FAST_POOL] >= y->fast_thresh)
+            {
+                ret = yarrow_reseed_locked(y, YARROW_FAST_POOL);
+                if ( ret != YARROW_OK && ret != YARROW_NOT_SEEDED )
+                {
+                    THROW( ret );
+                }
+            }
+        }
+        else
+        {
+            if (!source->reached_slow_thresh &&
+                source->entropy[YARROW_SLOW_POOL] >= y->slow_thresh)
+            {
+                source->reached_slow_thresh = 1;
+                y->slow_k_of_n++;
+                if (y->slow_k_of_n >= y->slow_k_of_n_thresh)
+                {
+                    y->slow_k_of_n = 0;
+                    ret = yarrow_reseed_locked(y, YARROW_SLOW_POOL);
+                    if ( ret != YARROW_OK && ret != YARROW_NOT_SEEDED )
+                    {
+                        THROW( ret );
+                    }
+                }
+            }
+        }
     }
 
     /* put samples in alternate pools */
 
     source->pool = (source->pool + 1) % 2;
 
- CATCH:
+CATCH:
     if ( locked ) { TRY( UNLOCK() ); }
     EXCEP_RET;
 }
 
 YARROW_DLL
 int krb5int_yarrow_input( Yarrow_CTX* y, unsigned source_id,
-		  const void* sample,
-		  size_t size, size_t entropy_bits )
+                          const void* sample,
+                          size_t size, size_t entropy_bits )
 {
     return yarrow_input_maybe_locking(y, source_id, sample, size,
-				      entropy_bits, 1);
+                                      entropy_bits, 1);
 }
 
 static int
 yarrow_input_locked( Yarrow_CTX* y, unsigned source_id,
-		     const void *sample,
-		     size_t size, size_t entropy_bits )
+                     const void *sample,
+                     size_t size, size_t entropy_bits )
 {
     return yarrow_input_maybe_locking(y, source_id, sample, size,
-				      entropy_bits, 0);
+                                      entropy_bits, 0);
 }
 
 YARROW_DLL
@@ -370,7 +370,7 @@ int krb5int_yarrow_new_source(Yarrow_CTX* y, unsigned* source_id)
 
     if (y->num_sources + 1 > YARROW_MAX_SOURCES)
     {
-	THROW( YARROW_TOO_MANY_SOURCES );
+        THROW( YARROW_TOO_MANY_SOURCES );
     }
 
     *source_id = y->num_sources;
@@ -390,7 +390,7 @@ CATCH:
 }
 
 int krb5int_yarrow_register_source_estimator(Yarrow_CTX* y, unsigned source_id,
-                                     estimator_fn* fptr)
+                                             estimator_fn* fptr)
 {
     EXCEP_DECL;
     Source* source;
@@ -402,7 +402,7 @@ int krb5int_yarrow_register_source_estimator(Yarrow_CTX* y, unsigned source_id,
 
     source->estimator = fptr;
 
- CATCH:
+CATCH:
     EXCEP_RET;
 }
 
@@ -419,22 +419,22 @@ static int krb5int_yarrow_output_Block( Yarrow_CTX* y, void* out )
     y->out_count++;
     if (y->out_count >= y->Pg)
     {
-	y->out_count = 0;
-	TRY( yarrow_gate_locked( y ) );
+        y->out_count = 0;
+        TRY( yarrow_gate_locked( y ) );
 
-	/* require new seed after reaching gates_limit */
+        /* require new seed after reaching gates_limit */
 
-	y->gate_count++;
-	if ( y->gate_count >= y->gates_limit )
-	{
-	    y->gate_count = 0;
+        y->gate_count++;
+        if ( y->gate_count >= y->gates_limit )
+        {
+            y->gate_count = 0;
 
-	    /* not defined whether to do slow or fast reseed */
+            /* not defined whether to do slow or fast reseed */
 
-	    TRACE( printf( "OUTPUT LIMIT REACHED," ); );
+            TRACE( printf( "OUTPUT LIMIT REACHED," ); );
 
-	    TRY( yarrow_reseed_locked( y, YARROW_SLOW_POOL ) );
-	}
+            TRY( yarrow_reseed_locked( y, YARROW_SLOW_POOL ) );
+        }
     }
 
     /* C <- (C + 1) mod 2^n */
@@ -451,13 +451,13 @@ static int krb5int_yarrow_output_Block( Yarrow_CTX* y, void* out )
     hex_print( stdout, "output: K", y->K, CIPHER_KEY_SIZE );
     hex_print( stdout, "output: O", out, CIPHER_BLOCK_SIZE );
 #endif
- CATCH:
+CATCH:
     EXCEP_RET;
 }
 
 YARROW_DLL
 int krb5int_yarrow_status( Yarrow_CTX* y, int *num_sources, unsigned *source_id,
-		   size_t *entropy_bits, size_t *entropy_max )
+                           size_t *entropy_bits, size_t *entropy_max )
 {
     EXCEP_DECL;
     int num = y->slow_k_of_n_thresh;
@@ -476,22 +476,22 @@ int krb5int_yarrow_status( Yarrow_CTX* y, int *num_sources, unsigned *source_id,
 
     if (y->seeded)
     {
-	if (num_sources) { *num_sources = 0; }
-	if (entropy_bits) { *entropy_bits = emax; }
-	THROW( YARROW_OK );
+        if (num_sources) { *num_sources = 0; }
+        if (entropy_bits) { *entropy_bits = emax; }
+        THROW( YARROW_OK );
     }
 
     for (i = 0; i < y->num_sources; i++)
     {
-	if (y->source[i].entropy[YARROW_SLOW_POOL] >= y->slow_thresh)
-	{
-	    num--;
-	}
-	else if (y->source[i].entropy[YARROW_SLOW_POOL] > entropy)
-	{
-	    source = i;
-	    entropy = y->source[i].entropy[YARROW_SLOW_POOL];
-	}
+        if (y->source[i].entropy[YARROW_SLOW_POOL] >= y->slow_thresh)
+        {
+            num--;
+        }
+        else if (y->source[i].entropy[YARROW_SLOW_POOL] > entropy)
+        {
+            source = i;
+            entropy = y->source[i].entropy[YARROW_SLOW_POOL];
+        }
     }
 
     if (num_sources) { *num_sources = num; }
@@ -499,7 +499,7 @@ int krb5int_yarrow_status( Yarrow_CTX* y, int *num_sources, unsigned *source_id,
     if (entropy_bits) { *entropy_bits = entropy; }
     THROW( YARROW_NOT_SEEDED );
 
- CATCH:
+CATCH:
     EXCEP_RET;
 }
 
@@ -534,28 +534,28 @@ int yarrow_output_locked( Yarrow_CTX* y, void* out, size_t size )
 
     if (y->out_left > 0)
     {
-	use = min(left, y->out_left);
-	mem_copy(outp, y->out + CIPHER_BLOCK_SIZE - y->out_left, use);
-	left -= use;
-	y->out_left -= use;
-	outp += use;
+        use = min(left, y->out_left);
+        mem_copy(outp, y->out + CIPHER_BLOCK_SIZE - y->out_left, use);
+        left -= use;
+        y->out_left -= use;
+        outp += use;
     }
 
     for ( ;
-	  left >= CIPHER_BLOCK_SIZE;
-	  left -= CIPHER_BLOCK_SIZE, outp += CIPHER_BLOCK_SIZE)
+          left >= CIPHER_BLOCK_SIZE;
+          left -= CIPHER_BLOCK_SIZE, outp += CIPHER_BLOCK_SIZE)
     {
-	TRY( krb5int_yarrow_output_Block(y, outp) );
+        TRY( krb5int_yarrow_output_Block(y, outp) );
     }
 
     if (left > 0)
     {
-	TRY( krb5int_yarrow_output_Block(y, y->out) );
-	mem_copy(outp, y->out, left);
-	y->out_left = CIPHER_BLOCK_SIZE - left;
+        TRY( krb5int_yarrow_output_Block(y, y->out) );
+        mem_copy(outp, y->out, left);
+        y->out_left = CIPHER_BLOCK_SIZE - left;
     }
 
- CATCH:
+CATCH:
     EXCEP_RET;
 }
 
@@ -577,7 +577,7 @@ static int yarrow_gate_locked(Yarrow_CTX* y)
 
     TRY (krb5int_yarrow_cipher_init(&y->cipher, y->K));
 
- CATCH:
+CATCH:
     TRACE( printf( "]," ); );
     mem_zero(new_K, sizeof(new_K));
     EXCEP_RET;
@@ -601,7 +601,7 @@ int krb5int_yarrow_gate(Yarrow_CTX* y)
 
     TRY (krb5int_yarrow_cipher_init(&y->cipher, y->K));
 
- CATCH:
+CATCH:
     TRACE( printf( "]," ); );
     mem_zero(new_K, sizeof(new_K));
     EXCEP_RET;
@@ -617,24 +617,24 @@ static int Yarrow_Load_State( Yarrow_CTX *y )
 
     if ( y->entropyfile )
     {
-	TRY( STATE_Load(y->entropyfile, &state) );
-	TRACE( printf( "LOAD STATE," ); );
+        TRY( STATE_Load(y->entropyfile, &state) );
+        TRACE( printf( "LOAD STATE," ); );
 
 #if defined( YARROW_DEBUG )
-	hex_print( stderr, "state.load", state.seed, sizeof(state.seed));
+        hex_print( stderr, "state.load", state.seed, sizeof(state.seed));
 #endif
 
-	/* what to do here is not defined by the Yarrow paper */
-	/* this is a place holder until we get some clarification */
+        /* what to do here is not defined by the Yarrow paper */
+        /* this is a place holder until we get some clarification */
 
-	HASH_Update( &y->pool[YARROW_FAST_POOL],
-		     state.seed, sizeof(state.seed) );
+        HASH_Update( &y->pool[YARROW_FAST_POOL],
+                     state.seed, sizeof(state.seed) );
 
-	Yarrow_Make_Seeded( y );
+        Yarrow_Make_Seeded( y );
 
-	TRY( krb5int_yarrow_reseed(y, YARROW_FAST_POOL) );
+        TRY( krb5int_yarrow_reseed(y, YARROW_FAST_POOL) );
     }
- CATCH:
+CATCH:
     mem_zero(state.seed, sizeof(state.seed));
     EXCEP_RET;
 }
@@ -648,16 +648,16 @@ static int Yarrow_Save_State( Yarrow_CTX *y )
 
     if ( y->entropyfile && y->seeded )
     {
-	TRACE( printf( "SAVE STATE[" ); );
-	TRY( krb5int_yarrow_output( y, state.seed, sizeof(state.seed) ) );
-	TRY( STATE_Save(y->entropyfile, &state) );
+        TRACE( printf( "SAVE STATE[" ); );
+        TRY( krb5int_yarrow_output( y, state.seed, sizeof(state.seed) ) );
+        TRY( STATE_Save(y->entropyfile, &state) );
     }
     y->saved = 1;
 # if defined(YARROW_DEBUG)
     hex_print(stdout, "state.save", state.seed, sizeof(state.seed));
 # endif
 
- CATCH:
+CATCH:
     TRACE( printf( "]," ); );
     mem_zero(state.seed, sizeof(state.seed));
     EXCEP_RET;
@@ -683,33 +683,33 @@ static int yarrow_reseed_locked(Yarrow_CTX* y, int pool)
     slow_pool = &y->pool[YARROW_SLOW_POOL];
     if( pool != YARROW_FAST_POOL && pool != YARROW_SLOW_POOL )
     {
-	THROW( YARROW_BAD_ARG );
+        THROW( YARROW_BAD_ARG );
     }
 
     TRACE( printf( "%s RESEED,",
-		   pool == YARROW_SLOW_POOL ? "SLOW" : "FAST" ); );
+                   pool == YARROW_SLOW_POOL ? "SLOW" : "FAST" ); );
 
     if (pool == YARROW_SLOW_POOL)
     {
-	/* SLOW RESEED */
+        /* SLOW RESEED */
 
-	/* feed hash of slow pool into the fast pool */
+        /* feed hash of slow pool into the fast pool */
 
 
-	HASH_Final(slow_pool, digest);
+        HASH_Final(slow_pool, digest);
 
-	/*  Each pool contains the running hash of all inputs fed into it
-	 *  since it was last used to carry out a reseed -- this implies
-	 *  that the pool must be reinitialized after a reseed
-	 */
+        /*  Each pool contains the running hash of all inputs fed into it
+         *  since it was last used to carry out a reseed -- this implies
+         *  that the pool must be reinitialized after a reseed
+         */
 
-	HASH_Init(slow_pool);    /* reinitialize slow pool */
-	HASH_Update(fast_pool, digest, sizeof(digest));
+        HASH_Init(slow_pool);    /* reinitialize slow pool */
+        HASH_Update(fast_pool, digest, sizeof(digest));
 
-	if (y->seeded == 0)
-	{
-	    Yarrow_Make_Seeded( y );
-	}
+        if (y->seeded == 0)
+        {
+            Yarrow_Make_Seeded( y );
+        }
     }
 
     /* step 1. v_0 <- hash of all inputs into fast pool */
@@ -727,14 +727,14 @@ static int yarrow_reseed_locked(Yarrow_CTX* y, int pool)
 
     for ( i = 0; i < y->Pt[pool]; i++ )
     {
-	HASH_Init(&hash);
-	HASH_Update(&hash, v_i, sizeof(v_i));
-	HASH_Update(&hash, v_0, sizeof(v_0));
-	big_endian_int32 = make_big_endian32(0); /* MS word */
-	HASH_Update(&hash, &big_endian_int32, sizeof(krb5_ui_4));
-	big_endian_int32 = make_big_endian32(i & 0xFFFFFFFF); /* LS word */
-	HASH_Update(&hash, &big_endian_int32, sizeof(krb5_ui_4));
-	HASH_Final(&hash, &v_i);
+        HASH_Init(&hash);
+        HASH_Update(&hash, v_i, sizeof(v_i));
+        HASH_Update(&hash, v_0, sizeof(v_0));
+        big_endian_int32 = make_big_endian32(0); /* MS word */
+        HASH_Update(&hash, &big_endian_int32, sizeof(krb5_ui_4));
+        big_endian_int32 = make_big_endian32(i & 0xFFFFFFFF); /* LS word */
+        HASH_Update(&hash, &big_endian_int32, sizeof(krb5_ui_4));
+        HASH_Final(&hash, &v_i);
     }
 
     /* step3. K = h'(h(v_Pt|K)) */
@@ -781,15 +781,15 @@ static int yarrow_reseed_locked(Yarrow_CTX* y, int pool)
 
     for (i = 0; i < y->num_sources; i++)
     {
-	y->source[i].entropy[pool] = 0;
-	if (pool == YARROW_SLOW_POOL)
-	{
-    /*   if this is a slow reseed, reset the fast pool entropy
-     *   accumulator also
-     */
-	    y->source[i].entropy[YARROW_FAST_POOL] = 0;
-	    y->source[i].reached_slow_thresh = 0;
-	}
+        y->source[i].entropy[pool] = 0;
+        if (pool == YARROW_SLOW_POOL)
+        {
+            /*   if this is a slow reseed, reset the fast pool entropy
+             *   accumulator also
+             */
+            y->source[i].entropy[YARROW_FAST_POOL] = 0;
+            y->source[i].reached_slow_thresh = 0;
+        }
     }
 
     /*  step 7. If a seed file is in use, the next 2k bits of output
@@ -799,11 +799,11 @@ static int yarrow_reseed_locked(Yarrow_CTX* y, int pool)
 #if defined( YARROW_SAVE_STATE )
     if ( y->seeded && y->entropyfile )
     {
-	TRY( Yarrow_Save_State( y ) );
+        TRY( Yarrow_Save_State( y ) );
     }
 #endif
 
- CATCH:
+CATCH:
     /*   step 6. Wipe the memory of all intermediate values
      *
      */
@@ -817,11 +817,11 @@ static int yarrow_reseed_locked(Yarrow_CTX* y, int pool)
 }
 int krb5int_yarrow_reseed(Yarrow_CTX* y, int pool)
 {
-	int r;
-	LOCK();
-	r = yarrow_reseed_locked(y, pool);
-	UNLOCK();
-	return r;
+    int r;
+    LOCK();
+    r = yarrow_reseed_locked(y, pool);
+    UNLOCK();
+    return r;
 }
 
 int krb5int_yarrow_stretch(const byte* m, size_t size, byte* out, size_t out_size)
@@ -836,7 +836,7 @@ int krb5int_yarrow_stretch(const byte* m, size_t size, byte* out, size_t out_siz
 
     if (m == NULL || size == 0 || out == NULL || out_size == 0)
     {
-	THROW( YARROW_BAD_ARG );
+        THROW( YARROW_BAD_ARG );
     }
 
     /*
@@ -859,28 +859,28 @@ int krb5int_yarrow_stretch(const byte* m, size_t size, byte* out, size_t out_siz
 
     HASH_Init(&hash);
     for ( ;
-	  left > 0;
-	  left -= HASH_DIGEST_SIZE)
+          left > 0;
+          left -= HASH_DIGEST_SIZE)
     {
-	HASH_Update(&hash, s_i, use);
+        HASH_Update(&hash, s_i, use);
 
-	/* have to save hash state to one side as HASH_final changes state */
+        /* have to save hash state to one side as HASH_final changes state */
 
-	mem_copy(&save, &hash, sizeof(hash));
-	HASH_Final(&hash, digest);
+        mem_copy(&save, &hash, sizeof(hash));
+        HASH_Final(&hash, digest);
 
-	use = min(HASH_DIGEST_SIZE, left);
-	mem_copy(outp, digest, use);
+        use = min(HASH_DIGEST_SIZE, left);
+        mem_copy(outp, digest, use);
 
-	/* put state back for next time */
+        /* put state back for next time */
 
-	mem_copy(&hash, &save, sizeof(hash));
+        mem_copy(&hash, &save, sizeof(hash));
 
-	s_i = outp;            /* retain pointer to s_i */
-	outp += use;
+        s_i = outp;            /* retain pointer to s_i */
+        outp += use;
     }
 
- CATCH:
+CATCH:
     mem_zero(&hash, sizeof(hash));
     mem_zero(digest, sizeof(digest));
 
@@ -894,7 +894,7 @@ static void block_increment(void* block, const int sz)
 
     for (i = sz-1; (++b[i]) == 0 && i > 0; i--)
     {
-	; /* nothing */
+        ; /* nothing */
     }
 }
 
@@ -911,15 +911,15 @@ int krb5int_yarrow_final(Yarrow_CTX* y)
 #if defined( YARROW_SAVE_STATE )
     if ( y->seeded && y->entropyfile )
     {
-	TRY( Yarrow_Save_State( y ) );
+        TRY( Yarrow_Save_State( y ) );
     }
 #endif
 
- CATCH:
+CATCH:
     if ( y )
     {
-	krb5int_yarrow_cipher_final(&y->cipher);
-	mem_zero( y, sizeof(Yarrow_CTX) );
+        krb5int_yarrow_cipher_final(&y->cipher);
+        mem_zero( y, sizeof(Yarrow_CTX) );
     }
     if ( locked ) { TRY( UNLOCK() ); }
     EXCEP_RET;
@@ -930,9 +930,9 @@ const char* krb5int_yarrow_str_error( int err )
 {
     err = 1-err;
     if ( err < 0 ||
-	 (unsigned int) err >= sizeof( yarrow_str_error ) / sizeof( char* ) )
+         (unsigned int) err >= sizeof( yarrow_str_error ) / sizeof( char* ) )
     {
-	err = 1-YARROW_FAIL;
+        err = 1-YARROW_FAIL;
     }
     return yarrow_str_error[ err ];
 }
@@ -949,9 +949,9 @@ static void hex_print(FILE* f, const char* var, void* data, size_t size)
     fprintf(f, " = ");
     for (i = 0; i < size; i++)
     {
-	c = conv[(p[i] >> 4) & 0xf];
-	d = conv[p[i] & 0xf];
-	fprintf(f, "%c%c", c, d);
+        c = conv[(p[i] >> 4) & 0xf];
+        d = conv[p[i] & 0xf];
+        fprintf(f, "%c%c", c, d);
     }
     fprintf(f, "\n");
 }

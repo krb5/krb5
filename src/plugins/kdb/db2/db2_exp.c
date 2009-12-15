@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2006 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -23,14 +24,14 @@
  */
 
 /**********************************************************************
-*
-*	C %name:		db2_exp.c %
-*	Instance:		idc_sec_2
-*	Description:
-*	%created_by:	spradeep %
-*	%date_created:	Tue Apr  5 11:44:00 2005 %
-*
-**********************************************************************/
+ *
+ *       C %name:                db2_exp.c %
+ *       Instance:               idc_sec_2
+ *       Description:
+ *       %created_by:    spradeep %
+ *       %date_created:  Tue Apr  5 11:44:00 2005 %
+ *
+ **********************************************************************/
 #ifndef lint
 static char *_csrc = "@(#) %filespec: db2_exp.c~5 %  (%full_filespec: db2_exp.c~5:csrc:idc_sec#2 %)";
 #endif
@@ -61,148 +62,148 @@ static char *_csrc = "@(#) %filespec: db2_exp.c~5 %  (%full_filespec: db2_exp.c~
 
 k5_mutex_t *krb5_db2_mutex;
 
-#define WRAP(NAME,TYPE,ARGLIST,ARGNAMES,ERROR_RESULT)	\
-	static TYPE wrap_##NAME ARGLIST			\
-	{						\
-	    TYPE result;				\
-	    int code = k5_mutex_lock (krb5_db2_mutex);	\
-	    if (code) { return ERROR_RESULT; }		\
-	    result = NAME ARGNAMES;			\
-	    k5_mutex_unlock (krb5_db2_mutex);		\
-	    return result;				\
-	}						\
-	/* hack: decl to allow a following ";" */	\
-	static TYPE wrap_##NAME ()
+#define WRAP(NAME,TYPE,ARGLIST,ARGNAMES,ERROR_RESULT)   \
+    static TYPE wrap_##NAME ARGLIST                     \
+    {                                                   \
+        TYPE result;                                    \
+        int code = k5_mutex_lock (krb5_db2_mutex);      \
+        if (code) { return ERROR_RESULT; }              \
+        result = NAME ARGNAMES;                         \
+        k5_mutex_unlock (krb5_db2_mutex);               \
+        return result;                                  \
+    }                                                   \
+    /* hack: decl to allow a following ";" */           \
+    static TYPE wrap_##NAME ()
 
 /* Two special cases: void (can't assign result), and krb5_error_code
    (return error from locking code).  */
 
-#define WRAP_VOID(NAME,ARGLIST,ARGNAMES)		\
-	static void wrap_##NAME ARGLIST			\
-	{						\
-	    int code = k5_mutex_lock (krb5_db2_mutex);	\
-	    if (code) { return; }			\
-	    NAME ARGNAMES;				\
-	    k5_mutex_unlock (krb5_db2_mutex);		\
-	}						\
-	/* hack: decl to allow a following ";" */	\
-	static void wrap_##NAME ()
+#define WRAP_VOID(NAME,ARGLIST,ARGNAMES)                \
+    static void wrap_##NAME ARGLIST                     \
+    {                                                   \
+        int code = k5_mutex_lock (krb5_db2_mutex);      \
+        if (code) { return; }                           \
+        NAME ARGNAMES;                                  \
+        k5_mutex_unlock (krb5_db2_mutex);               \
+    }                                                   \
+    /* hack: decl to allow a following ";" */           \
+    static void wrap_##NAME ()
 
-#define WRAP_K(NAME,ARGLIST,ARGNAMES)			\
-	WRAP(NAME,krb5_error_code,ARGLIST,ARGNAMES,code)
+#define WRAP_K(NAME,ARGLIST,ARGNAMES)                   \
+    WRAP(NAME,krb5_error_code,ARGLIST,ARGNAMES,code)
 
 WRAP_K (krb5_db2_open,
-	( krb5_context kcontext,
-	  char *conf_section,
-	  char **db_args,
-	  int mode ),
-	(kcontext, conf_section, db_args, mode));
+        ( krb5_context kcontext,
+          char *conf_section,
+          char **db_args,
+          int mode ),
+        (kcontext, conf_section, db_args, mode));
 WRAP_K (krb5_db2_db_fini, (krb5_context ctx), (ctx));
 WRAP_K (krb5_db2_create,
-	( krb5_context kcontext, char *conf_section, char **db_args ),
-	(kcontext, conf_section, db_args));
+        ( krb5_context kcontext, char *conf_section, char **db_args ),
+        (kcontext, conf_section, db_args));
 WRAP_K (krb5_db2_destroy,
-	( krb5_context kcontext, char *conf_section, char **db_args ),
-	(kcontext, conf_section, db_args));
+        ( krb5_context kcontext, char *conf_section, char **db_args ),
+        (kcontext, conf_section, db_args));
 WRAP_K (krb5_db2_db_get_age,
-	(krb5_context ctx,
-		   char *s,
-	 time_t *t),
-	(ctx, s, t));
+        (krb5_context ctx,
+         char *s,
+         time_t *t),
+        (ctx, s, t));
 WRAP_K (krb5_db2_db_set_option,
-	( krb5_context kcontext,
-	  int option,
-	  void *value ),
-	(kcontext, option, value));
+        ( krb5_context kcontext,
+          int option,
+          void *value ),
+        (kcontext, option, value));
 
 WRAP_K (krb5_db2_db_lock,
-	( krb5_context 	  context,
-	  int 	 	  in_mode),
-	(context, in_mode));
+        ( krb5_context    context,
+          int             in_mode),
+        (context, in_mode));
 WRAP_K (krb5_db2_db_unlock, (krb5_context ctx), (ctx));
 
 WRAP_K (krb5_db2_db_get_principal,
-	(krb5_context ctx,
-		   krb5_const_principal p,
-		   unsigned int flags,
-		   krb5_db_entry *d,
-		   int * i,
-	 krb5_boolean *b),
-	(ctx, p, d, i, b));
+        (krb5_context ctx,
+         krb5_const_principal p,
+         unsigned int flags,
+         krb5_db_entry *d,
+         int * i,
+         krb5_boolean *b),
+        (ctx, p, d, i, b));
 WRAP_K (krb5_db2_db_free_principal,
-	(krb5_context ctx,
-		   krb5_db_entry *d,
-	 int i),
-	(ctx, d, i));
+        (krb5_context ctx,
+         krb5_db_entry *d,
+         int i),
+        (ctx, d, i));
 WRAP_K (krb5_db2_db_put_principal,
-	(krb5_context ctx,
-	 krb5_db_entry *d,
-	 int *i,
-	 char **db_args),
-	(ctx, d, i, db_args));
+        (krb5_context ctx,
+         krb5_db_entry *d,
+         int *i,
+         char **db_args),
+        (ctx, d, i, db_args));
 WRAP_K (krb5_db2_db_delete_principal,
-	(krb5_context context,
-	 krb5_const_principal searchfor,
-	 int *nentries),
-	(context, searchfor, nentries));
+        (krb5_context context,
+         krb5_const_principal searchfor,
+         int *nentries),
+        (context, searchfor, nentries));
 
 WRAP_K (krb5_db2_db_iterate,
-	(krb5_context ctx, char *s,
-	 krb5_error_code (*f) (krb5_pointer,
-			      krb5_db_entry *),
-	 krb5_pointer p),
-	(ctx, s, f, p));
+        (krb5_context ctx, char *s,
+         krb5_error_code (*f) (krb5_pointer,
+                               krb5_db_entry *),
+         krb5_pointer p),
+        (ctx, s, f, p));
 
 WRAP_K (krb5_db2_create_policy,
-	(krb5_context context, osa_policy_ent_t entry),
-	(context, entry));
+        (krb5_context context, osa_policy_ent_t entry),
+        (context, entry));
 WRAP_K (krb5_db2_get_policy,
-	( krb5_context kcontext,
-	  char *name,
-	  osa_policy_ent_t *policy,
-	  int *cnt),
-	(kcontext, name, policy, cnt));
+        ( krb5_context kcontext,
+          char *name,
+          osa_policy_ent_t *policy,
+          int *cnt),
+        (kcontext, name, policy, cnt));
 WRAP_K (krb5_db2_put_policy,
-	( krb5_context kcontext, osa_policy_ent_t policy ),
-	(kcontext, policy));
+        ( krb5_context kcontext, osa_policy_ent_t policy ),
+        (kcontext, policy));
 WRAP_K (krb5_db2_iter_policy,
-	( krb5_context kcontext,
-	  char *match_entry,
-	  osa_adb_iter_policy_func func,
-	  void *data ),
-	(kcontext, match_entry, func, data));
+        ( krb5_context kcontext,
+          char *match_entry,
+          osa_adb_iter_policy_func func,
+          void *data ),
+        (kcontext, match_entry, func, data));
 WRAP_K (krb5_db2_delete_policy,
-	( krb5_context kcontext, char *policy ),
-	(kcontext, policy));
+        ( krb5_context kcontext, char *policy ),
+        (kcontext, policy));
 WRAP_VOID (krb5_db2_free_policy,
-	   ( krb5_context kcontext, osa_policy_ent_t entry ),
-	   (kcontext, entry));
+           ( krb5_context kcontext, osa_policy_ent_t entry ),
+           (kcontext, entry));
 
 WRAP_K (krb5_db2_set_master_key_ext,
-	( krb5_context kcontext, char *pwd, krb5_keyblock *key),
-	(kcontext, pwd, key));
+        ( krb5_context kcontext, char *pwd, krb5_keyblock *key),
+        (kcontext, pwd, key));
 WRAP_K (krb5_db2_db_get_mkey,
-	( krb5_context context, krb5_keyblock **key),
-	(context, key));
+        ( krb5_context context, krb5_keyblock **key),
+        (context, key));
 
 WRAP_K (krb5_db2_db_set_mkey_list,
-	( krb5_context kcontext, krb5_keylist_node *keylist),
-	(kcontext, keylist));
+        ( krb5_context kcontext, krb5_keylist_node *keylist),
+        (kcontext, keylist));
 
 WRAP_K (krb5_db2_db_get_mkey_list,
-	( krb5_context context, krb5_keylist_node **keylist),
-	(context, keylist));
+        ( krb5_context context, krb5_keylist_node **keylist),
+        (context, keylist));
 
 WRAP_K (krb5_db2_promote_db,
-	( krb5_context kcontext, char *conf_section, char **db_args ),
-	(kcontext, conf_section, db_args));
+        ( krb5_context kcontext, char *conf_section, char **db_args ),
+        (kcontext, conf_section, db_args));
 
 WRAP_K (krb5_db2_invoke,
-	(krb5_context kcontext,
-	 unsigned int method,
-	 const krb5_data *request,
-	 krb5_data *response),
-	(kcontext, method, request, response));
+        (krb5_context kcontext,
+         unsigned int method,
+         const krb5_data *request,
+         krb5_data *response),
+        (kcontext, method, request, response));
 
 static krb5_error_code
 hack_init ()
@@ -210,7 +211,7 @@ hack_init ()
     krb5_error_code c;
     c = krb5int_mutex_alloc (&krb5_db2_mutex);
     if (c)
-	return c;
+        return c;
     return krb5_db2_lib_init ();
 }
 
@@ -228,41 +229,41 @@ hack_cleanup (void)
  */
 
 kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_db2, kdb_function_table) = {
-  1,                                      /* major version number 1 */
-  0,                                      /* minor version number 0 */
-  /* init_library */			       hack_init,
-  /* fini_library */			       hack_cleanup,
-  /* init_module */			       wrap_krb5_db2_open,
-  /* fini_module */			       wrap_krb5_db2_db_fini,
-  /* db_create */			       wrap_krb5_db2_create,
-  /* db_destroy */			       wrap_krb5_db2_destroy,
-  /* db_get_age */                             wrap_krb5_db2_db_get_age,
-  /* db_set_option */			       wrap_krb5_db2_db_set_option,
-  /* db_lock */				       wrap_krb5_db2_db_lock,
-  /* db_unlock */			       wrap_krb5_db2_db_unlock,
-  /* db_get_principal */		       wrap_krb5_db2_db_get_principal,
-  /* db_free_principal */		       wrap_krb5_db2_db_free_principal,
-  /* db_put_principal */		       wrap_krb5_db2_db_put_principal,
-  /* db_delete_principal */		       wrap_krb5_db2_db_delete_principal,
-  /* db_iterate */			       wrap_krb5_db2_db_iterate,
-  /* db_create_policy */                       wrap_krb5_db2_create_policy,
-  /* db_get_policy */                          wrap_krb5_db2_get_policy,
-  /* db_put_policy */                          wrap_krb5_db2_put_policy,
-  /* db_iter_policy */                         wrap_krb5_db2_iter_policy,
-  /* db_delete_policy */                       wrap_krb5_db2_delete_policy,
-  /* db_free_policy */                         wrap_krb5_db2_free_policy,
-  /* db_supported_realms */		       NULL,
-  /* db_free_supported_realms */	       NULL,
-  /* errcode_2_string */                       NULL,
-  /* release_errcode_string */		       NULL,
-  /* db_alloc */                               krb5_db2_alloc,
-  /* db_free */                                krb5_db2_free,
-  /* set_master_key */			       wrap_krb5_db2_set_master_key_ext,
-  /* get_master_key */			       wrap_krb5_db2_db_get_mkey,
-  /* set_master_key_list */		       wrap_krb5_db2_db_set_mkey_list,
-  /* get_master_key_list */	    	       wrap_krb5_db2_db_get_mkey_list,
-  /* blah blah blah */ 0,0,0,0,0,0,0,0,
-  /* promote_db */			       wrap_krb5_db2_promote_db,
-  0, 0,
-  /* invoke */				       wrap_krb5_db2_invoke
+    1,                                      /* major version number 1 */
+    0,                                      /* minor version number 0 */
+    /* init_library */                           hack_init,
+    /* fini_library */                           hack_cleanup,
+    /* init_module */                            wrap_krb5_db2_open,
+    /* fini_module */                            wrap_krb5_db2_db_fini,
+    /* db_create */                              wrap_krb5_db2_create,
+    /* db_destroy */                             wrap_krb5_db2_destroy,
+    /* db_get_age */                             wrap_krb5_db2_db_get_age,
+    /* db_set_option */                          wrap_krb5_db2_db_set_option,
+    /* db_lock */                                wrap_krb5_db2_db_lock,
+    /* db_unlock */                              wrap_krb5_db2_db_unlock,
+    /* db_get_principal */                       wrap_krb5_db2_db_get_principal,
+    /* db_free_principal */                      wrap_krb5_db2_db_free_principal,
+    /* db_put_principal */                       wrap_krb5_db2_db_put_principal,
+    /* db_delete_principal */                    wrap_krb5_db2_db_delete_principal,
+    /* db_iterate */                             wrap_krb5_db2_db_iterate,
+    /* db_create_policy */                       wrap_krb5_db2_create_policy,
+    /* db_get_policy */                          wrap_krb5_db2_get_policy,
+    /* db_put_policy */                          wrap_krb5_db2_put_policy,
+    /* db_iter_policy */                         wrap_krb5_db2_iter_policy,
+    /* db_delete_policy */                       wrap_krb5_db2_delete_policy,
+    /* db_free_policy */                         wrap_krb5_db2_free_policy,
+    /* db_supported_realms */                    NULL,
+    /* db_free_supported_realms */               NULL,
+    /* errcode_2_string */                       NULL,
+    /* release_errcode_string */                 NULL,
+    /* db_alloc */                               krb5_db2_alloc,
+    /* db_free */                                krb5_db2_free,
+    /* set_master_key */                         wrap_krb5_db2_set_master_key_ext,
+    /* get_master_key */                         wrap_krb5_db2_db_get_mkey,
+    /* set_master_key_list */                    wrap_krb5_db2_db_set_mkey_list,
+    /* get_master_key_list */                    wrap_krb5_db2_db_get_mkey_list,
+    /* blah blah blah */ 0,0,0,0,0,0,0,0,
+    /* promote_db */                             wrap_krb5_db2_promote_db,
+    0, 0,
+    /* invoke */                                 wrap_krb5_db2_invoke
 };

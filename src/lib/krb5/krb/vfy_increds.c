@@ -3,7 +3,8 @@
 #include "int-proto.h"
 
 static krb5_error_code
-krb5_cc_copy_creds_except(krb5_context context, krb5_ccache incc, krb5_ccache outcc, krb5_principal princ)
+copy_creds_except(krb5_context context, krb5_ccache incc,
+                  krb5_ccache outcc, krb5_principal princ)
 {
     krb5_error_code code;
     krb5_flags flags;
@@ -117,8 +118,7 @@ krb5_verify_init_creds(krb5_context context,
         } else if (krb5_libdefault_boolean(context,
                                            &creds->client->realm,
                                            KRB5_CONF_VERIFY_AP_REQ_NOFAIL,
-                                           &nofail)
-                   == 0) {
+                                           &nofail) == 0) {
             if (nofail)
                 goto cleanup;
         }
@@ -129,8 +129,9 @@ krb5_verify_init_creds(krb5_context context,
 
     krb5_kt_free_entry(context, &kte);
 
-    /* If the creds are for the server principal, we're set, just do
-       a mk_req.  Otherwise, do a get_credentials first. */
+    /* If the creds are for the server principal, we're set, just do a mk_req.
+     * Otherwise, do a get_credentials first.
+     */
 
     if (krb5_principal_compare(context, server, creds->server)) {
         /* make an ap_req */
@@ -199,21 +200,22 @@ krb5_verify_init_creds(krb5_context context,
 
             if ((ret = krb5_cc_resolve(context, "MEMORY:rd_req2", &retcc)) ||
                 (ret = krb5_cc_initialize(context, retcc, creds->client)) ||
-                (ret = krb5_cc_copy_creds_except(context, ccache, retcc,
-                                                 creds->server))) {
+                (ret = copy_creds_except(context, ccache, retcc,
+                                         creds->server))) {
                 if (retcc)
                     krb5_cc_destroy(context, retcc);
             } else {
                 *ccache_arg = retcc;
             }
         } else {
-            ret = krb5_cc_copy_creds_except(context, ccache, *ccache_arg,
-                                            server);
+            ret = copy_creds_except(context, ccache, *ccache_arg,
+                                    server);
         }
     }
 
-    /* if any of the above paths returned an errors, then ret is set
-       accordingly.  either that, or it's zero, which is fine, too */
+    /* if any of the above paths returned an errors, then ret is set accordingly.
+     * Either that, or it's zero, which is fine, too
+     */
 
 cleanup:
     if ( server)

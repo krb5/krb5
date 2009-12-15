@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2000, 2002, 2003, 2007, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -152,8 +152,8 @@ static krb5_error_code get_credentials(context, cred, server, now,
         krb5_creds mcreds;
 
         flags |= KRB5_GC_CANONICALIZE |
-                 KRB5_GC_NO_STORE |
-                 KRB5_GC_CONSTRAINED_DELEGATION;
+            KRB5_GC_NO_STORE |
+            KRB5_GC_CONSTRAINED_DELEGATION;
 
         memset(&mcreds, 0, sizeof(mcreds));
 
@@ -765,9 +765,9 @@ mutual_auth(
         ap_rep.length = input_token->length;
         ap_rep.data = (char *)input_token->value;
     } else if (g_verify_token_header(ctx->mech_used,
-                              &(ap_rep.length),
-                              &ptr, KG_TOK_CTX_AP_REP,
-                              input_token->length, 1)) {
+                                     &(ap_rep.length),
+                                     &ptr, KG_TOK_CTX_AP_REP,
+                                     input_token->length, 1)) {
         if (g_verify_token_header((gss_OID) ctx->mech_used,
                                   &(ap_rep.length),
                                   &ptr, KG_TOK_CTX_ERROR,
@@ -1006,11 +1006,11 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
     /*SUPPRESS 29*/
     if (*context_handle == GSS_C_NO_CONTEXT) {
         major_status = kg_new_connection(minor_status, cred, context_handle,
-                                        target_name, mech_type, req_flags,
-                                        time_req, input_chan_bindings,
-                                        input_token, actual_mech_type,
-                                        output_token, ret_flags, time_rec,
-                                        context, default_mech);
+                                         target_name, mech_type, req_flags,
+                                         time_req, input_chan_bindings,
+                                         input_token, actual_mech_type,
+                                         output_token, ret_flags, time_rec,
+                                         context, default_mech);
         k5_mutex_unlock(&cred->lock);
         if (*context_handle == GSS_C_NO_CONTEXT) {
             save_error_info (*minor_status, context);

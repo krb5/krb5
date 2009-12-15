@@ -1,5 +1,3 @@
-thisconfigdir=./..
-myfulldir=config-files
 mydir=config-files
 BUILDTOP=$(REL)..
 all::

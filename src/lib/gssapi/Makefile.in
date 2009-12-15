@@ -1,5 +1,3 @@
-thisconfigdir=../..
-myfulldir=lib/gssapi
 mydir=lib/gssapi
 BUILDTOP=$(REL)..$(S)..
 SUBDIRS= generic krb5 spnego mechglue
@@ -56,7 +54,7 @@ merged-gssapi-header.h: $(EXPORTED_HEADERS)
 	cat $(EXPORTED_HEADERS) > merged.tmp
 	$(MV) merged.tmp merged-gssapi-header.h
 verify-calling-conventions-gssapi: merged-gssapi-header.h
-	$(PERL) -w $(SRCTOP)/util/def-check.pl merged-gssapi-header.h $(srcdir)/../gssapi32.def
+	$(PERL) -w $(top_srcdir)/util/def-check.pl merged-gssapi-header.h $(srcdir)/../gssapi32.def
 
 all-windows::
 	cd generic

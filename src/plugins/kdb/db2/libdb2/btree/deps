@@ -22,9 +22,9 @@ bt_get.so bt_get.po $(OUTPRE)bt_get.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(srcdir)/../include/db-queue.h $(srcdir)/../mpool/mpool.h \
   bt_get.c btree.h extern.h
 bt_open.so bt_open.po $(OUTPRE)bt_open.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(DB_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
-  $(srcdir)/../include/config.h $(srcdir)/../include/db-int.h \
+  $(DB_DEPS) $(srcdir)/../include/config.h $(srcdir)/../include/db-int.h \
   $(srcdir)/../include/db-queue.h $(srcdir)/../mpool/mpool.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   bt_open.c btree.h extern.h
 bt_overflow.so bt_overflow.po $(OUTPRE)bt_overflow.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(DB_DEPS) $(srcdir)/../include/config.h \

@@ -229,7 +229,7 @@ find_authdata_1(krb5_context context, krb5_authdata *const *in_authdat,
     int i = 0;
     krb5_error_code retval = 0;
 
-    for (i = 0; in_authdat[i]; i++) {
+    for (i = 0; in_authdat[i] && retval == 0; i++) {
         krb5_authdata *ad = in_authdat[i];
         krb5_authdata **decoded_container;
 

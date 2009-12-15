@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -29,62 +30,42 @@
 
 krb5_error_code KRB5_CALLCONV
 krb5_k_verify_checksum(krb5_context context, krb5_key key,
-		       krb5_keyusage usage, const krb5_data *data,
-		       const krb5_checksum *cksum, krb5_boolean *valid)
+                       krb5_keyusage usage, const krb5_data *data,
+                       const krb5_checksum *cksum, krb5_boolean *valid)
 {
-    unsigned int i;
     const struct krb5_cksumtypes *ctp;
-    const struct krb5_keyhash_provider *keyhash;
-    size_t hashsize;
+    krb5_crypto_iov iov;
     krb5_error_code ret;
-    krb5_data indata;
+    krb5_data cksum_data;
     krb5_checksum computed;
 
-    for (i=0; i<krb5int_cksumtypes_length; i++) {
-	if (krb5int_cksumtypes_list[i].ctype == cksum->checksum_type)
-	    break;
-    }
-    if (i == krb5int_cksumtypes_length)
-	return KRB5_BAD_ENCTYPE;
-    ctp = &krb5int_cksumtypes_list[i];
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    iov.data = *data;
 
-    indata.length = cksum->length;
-    indata.data = (char *) cksum->contents;
+    ctp = find_cksumtype(cksum->checksum_type);
+    if (ctp == NULL)
+        return KRB5_BAD_ENCTYPE;
+
+    ret = verify_key(ctp, key);
+    if (ret != 0)
+        return ret;
 
     /* If there's actually a verify function, call it. */
-    if (ctp->keyhash) {
-	keyhash = ctp->keyhash;
-
-	if (keyhash->verify == NULL && keyhash->verify_iov != NULL) {
-	    krb5_crypto_iov iov[1];
-
-	    iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
-	    iov[0].data.data = data->data;
-	    iov[0].data.length = data->length;
-
-	    return (*keyhash->verify_iov)(key, usage, 0, iov, 1, &indata,
-					  valid);
-	} else if (keyhash->verify != NULL) {
-	    return (*keyhash->verify)(key, usage, 0, data, &indata, valid);
-	}
-    }
+    cksum_data = make_data(cksum->contents, cksum->length);
+    if (ctp->verify != NULL)
+        return ctp->verify(ctp, key, usage, &iov, 1, &cksum_data, valid);
 
     /* Otherwise, make the checksum again, and compare. */
-    ret = krb5_c_checksum_length(context, cksum->checksum_type, &hashsize);
-    if (ret)
-	return ret;
-
-    if (cksum->length != hashsize)
-	return KRB5_BAD_MSIZE;
-
-    computed.length = hashsize;
+    if (cksum->length != ctp->output_size)
+        return KRB5_BAD_MSIZE;
 
     ret = krb5_k_make_checksum(context, cksum->checksum_type, key, usage,
-			       data, &computed);
+                               data, &computed);
     if (ret)
-	return ret;
+        return ret;
 
-    *valid = (memcmp(computed.contents, cksum->contents, hashsize) == 0);
+    *valid = (memcmp(computed.contents, cksum->contents,
+                     ctp->output_size) == 0);
 
     free(computed.contents);
     return 0;
@@ -92,16 +73,16 @@ krb5_k_verify_checksum(krb5_context context, krb5_key key,
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_verify_checksum(krb5_context context, const krb5_keyblock *keyblock,
-		       krb5_keyusage usage, const krb5_data *data,
-		       const krb5_checksum *cksum, krb5_boolean *valid)
+                       krb5_keyusage usage, const krb5_data *data,
+                       const krb5_checksum *cksum, krb5_boolean *valid)
 {
     krb5_key key = NULL;
     krb5_error_code ret;
 
     if (keyblock != NULL) {
-	ret = krb5_k_create_key(context, keyblock, &key);
-	if (ret != 0)
-	    return ret;
+        ret = krb5_k_create_key(context, keyblock, &key);
+        if (ret != 0)
+            return ret;
     }
     ret = krb5_k_verify_checksum(context, key, usage, data, cksum, valid);
     krb5_k_free_key(context, key);

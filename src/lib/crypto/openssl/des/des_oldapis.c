@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/openssl/des/des_oldapis.c
  *
@@ -33,8 +34,8 @@ const mit_des_cblock mit_des_zeroblock /* = all zero */;
 
 unsigned long
 mit_des_cbc_cksum(const krb5_octet *in, krb5_octet *out,
-		  unsigned long length, const mit_des_key_schedule schedule,
-		  const krb5_octet *ivec)
+                  unsigned long length, const mit_des_key_schedule schedule,
+                  const krb5_octet *ivec)
 {
     /* Unsupported operation */
     return KRB5_CRYPTO_INTERNAL;

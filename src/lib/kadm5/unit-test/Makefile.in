@@ -1,5 +1,3 @@
-thisconfigdir=../../..
-myfulldir=lib/kadm5/unit-test
 mydir=lib/kadm5/unit-test
 BUILDTOP=$(REL)..$(S)..$(S)..
 DEFINES =

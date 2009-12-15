@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/keyblocks.c
  *
@@ -35,7 +36,7 @@
 
 krb5_error_code
 krb5int_c_init_keyblock(krb5_context context, krb5_enctype enctype,
-			size_t length, krb5_keyblock **out)
+                        size_t length, krb5_keyblock **out)
 {
     krb5_keyblock *kb;
 
@@ -44,18 +45,18 @@ krb5int_c_init_keyblock(krb5_context context, krb5_enctype enctype,
 
     kb = malloc(sizeof(krb5_keyblock));
     if (kb == NULL)
-	return ENOMEM;
+        return ENOMEM;
     kb->magic = KV5M_KEYBLOCK;
     kb->enctype = enctype;
     kb->length = length;
     if (length) {
-	kb->contents = malloc(length);
-	if (!kb->contents) {
-	    free(kb);
-	    return ENOMEM;
-	}
+        kb->contents = malloc(length);
+        if (!kb->contents) {
+            free(kb);
+            return ENOMEM;
+        }
     } else {
-	kb->contents = NULL;
+        kb->contents = NULL;
     }
 
     *out = kb;
@@ -73,14 +74,14 @@ void
 krb5int_c_free_keyblock_contents(krb5_context context, krb5_keyblock *key)
 {
     if (key && key->contents) {
-	zapfree(key->contents, key->length);
-	key->contents = NULL;
+        zapfree(key->contents, key->length);
+        key->contents = NULL;
     }
 }
 
 krb5_error_code
 krb5int_c_copy_keyblock(krb5_context context, const krb5_keyblock *from,
-			krb5_keyblock **to)
+                        krb5_keyblock **to)
 {
     krb5_keyblock *new_key;
     krb5_error_code code;
@@ -88,11 +89,11 @@ krb5int_c_copy_keyblock(krb5_context context, const krb5_keyblock *from,
     *to = NULL;
     new_key = malloc(sizeof(*new_key));
     if (!new_key)
-	return ENOMEM;
+        return ENOMEM;
     code = krb5int_c_copy_keyblock_contents(context, from, new_key);
     if (code) {
-	free(new_key);
-	return code;
+        free(new_key);
+        return code;
     }
     *to = new_key;
     return 0;
@@ -100,7 +101,7 @@ krb5int_c_copy_keyblock(krb5_context context, const krb5_keyblock *from,
 
 krb5_error_code
 krb5int_c_copy_keyblock_contents(krb5_context context,
-				 const krb5_keyblock *from, krb5_keyblock *to)
+                                 const krb5_keyblock *from, krb5_keyblock *to)
 {
     *to = *from;
     if (to->length) {

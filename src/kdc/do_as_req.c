@@ -310,6 +310,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     enc_tkt_reply.times.authtime = authtime;
 
     setflag(enc_tkt_reply.flags, TKT_FLG_INITIAL);
+    setflag(enc_tkt_reply.flags, TKT_FLG_ENC_PA_REP);
 
     /*
      * It should be noted that local policy may affect the
@@ -556,12 +557,6 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
                reply.client->realm.data, reply.client->data->data);
 #endif /* APPLE_PKINIT */
 
-    errcode = return_svr_referral_data(kdc_context,
-                                       &server, &reply_encpart);
-    if (errcode) {
-        status = "KDC_RETURN_ENC_PADATA";
-        goto errout;
-    }
 
 
     errcode = handle_authdata(kdc_context,
@@ -607,6 +602,13 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         status = "generating reply key";
         goto errout;
     }
+    errcode = return_enc_padata(kdc_context, req_pkt, request,
+                                as_encrypting_key, &server, &reply_encpart);
+    if (errcode) {
+        status = "KDC_RETURN_ENC_PADATA";
+        goto errout;
+    }
+
     errcode = krb5_encode_kdc_rep(kdc_context, KRB5_AS_REP, &reply_encpart,
                                   0, as_encrypting_key,  &reply, response);
     reply.enc_part.kvno = client_key->key_data_kvno;

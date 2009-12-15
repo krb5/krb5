@@ -1,5 +1,3 @@
-thisconfigdir=../..
-myfulldir=appl/user_user
 mydir=appl/user_user
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DDEBUG

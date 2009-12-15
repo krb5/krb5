@@ -2,9 +2,9 @@
 # Generated makefile dependencies follow.
 #
 ccs_array.so ccs_array.po $(OUTPRE)ccs_array.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/CredentialsCache.h \
-  $(SRCTOP)/include/CredentialsCache2.h $(SRCTOP)/include/k5-ipc_stream.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(top_srcdir)/include/CredentialsCache.h \
+  $(top_srcdir)/include/CredentialsCache2.h $(top_srcdir)/include/k5-ipc_stream.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   $(srcdir)/../common/cci_array_internal.h $(srcdir)/../common/cci_common.h \
   $(srcdir)/../common/cci_cred_union.h $(srcdir)/../common/cci_debugging.h \
   $(srcdir)/../common/cci_identifier.h $(srcdir)/../common/cci_message.h \
@@ -14,9 +14,9 @@ ccs_array.so ccs_array.po $(OUTPRE)ccs_array.$(OBJEXT): \
   ccs_credentials_iterator.h ccs_list.h ccs_lock.h ccs_lock_state.h \
   ccs_pipe.h ccs_server.h ccs_types.h
 ccs_cache_collection.so ccs_cache_collection.po $(OUTPRE)ccs_cache_collection.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/CredentialsCache.h \
-  $(SRCTOP)/include/CredentialsCache2.h $(SRCTOP)/include/k5-ipc_stream.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(top_srcdir)/include/CredentialsCache.h \
+  $(top_srcdir)/include/CredentialsCache2.h $(top_srcdir)/include/k5-ipc_stream.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   $(srcdir)/../common/cci_common.h $(srcdir)/../common/cci_cred_union.h \
   $(srcdir)/../common/cci_debugging.h $(srcdir)/../common/cci_identifier.h \
   $(srcdir)/../common/cci_message.h $(srcdir)/../common/cci_types.h \
@@ -26,9 +26,9 @@ ccs_cache_collection.so ccs_cache_collection.po $(OUTPRE)ccs_cache_collection.$(
   ccs_list.h ccs_lock.h ccs_lock_state.h ccs_os_notify.h \
   ccs_pipe.h ccs_server.h ccs_types.h
 ccs_callback.so ccs_callback.po $(OUTPRE)ccs_callback.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/CredentialsCache.h \
-  $(SRCTOP)/include/CredentialsCache2.h $(SRCTOP)/include/k5-ipc_stream.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(top_srcdir)/include/CredentialsCache.h \
+  $(top_srcdir)/include/CredentialsCache2.h $(top_srcdir)/include/k5-ipc_stream.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   $(srcdir)/../common/cci_common.h $(srcdir)/../common/cci_cred_union.h \
   $(srcdir)/../common/cci_debugging.h $(srcdir)/../common/cci_identifier.h \
   $(srcdir)/../common/cci_message.h $(srcdir)/../common/cci_types.h \
@@ -38,9 +38,9 @@ ccs_callback.so ccs_callback.po $(OUTPRE)ccs_callback.$(OBJEXT): \
   ccs_lock.h ccs_lock_state.h ccs_pipe.h ccs_server.h \
   ccs_types.h
 ccs_ccache.so ccs_ccache.po $(OUTPRE)ccs_ccache.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/CredentialsCache.h \
-  $(SRCTOP)/include/CredentialsCache2.h $(SRCTOP)/include/k5-ipc_stream.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(top_srcdir)/include/CredentialsCache.h \
+  $(top_srcdir)/include/CredentialsCache2.h $(top_srcdir)/include/k5-ipc_stream.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   $(srcdir)/../common/cci_common.h $(srcdir)/../common/cci_cred_union.h \
   $(srcdir)/../common/cci_debugging.h $(srcdir)/../common/cci_identifier.h \
   $(srcdir)/../common/cci_message.h $(srcdir)/../common/cci_types.h \
@@ -50,9 +50,9 @@ ccs_ccache.so ccs_ccache.po $(OUTPRE)ccs_ccache.$(OBJEXT): \
   ccs_lock.h ccs_lock_state.h ccs_os_notify.h ccs_pipe.h \
   ccs_server.h ccs_types.h
 ccs_ccache_iterator.so ccs_ccache_iterator.po $(OUTPRE)ccs_ccache_iterator.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/CredentialsCache.h \
-  $(SRCTOP)/include/CredentialsCache2.h $(SRCTOP)/include/k5-ipc_stream.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(top_srcdir)/include/CredentialsCache.h \
+  $(top_srcdir)/include/CredentialsCache2.h $(top_srcdir)/include/k5-ipc_stream.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   $(srcdir)/../common/cci_common.h $(srcdir)/../common/cci_cred_union.h \
   $(srcdir)/../common/cci_debugging.h $(srcdir)/../common/cci_identifier.h \
   $(srcdir)/../common/cci_message.h $(srcdir)/../common/cci_types.h \
@@ -62,9 +62,9 @@ ccs_ccache_iterator.so ccs_ccache_iterator.po $(OUTPRE)ccs_ccache_iterator.$(OBJ
   ccs_list.h ccs_lock.h ccs_lock_state.h ccs_pipe.h ccs_server.h \
   ccs_types.h
 ccs_client.so ccs_client.po $(OUTPRE)ccs_client.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/CredentialsCache.h \
-  $(SRCTOP)/include/CredentialsCache2.h $(SRCTOP)/include/k5-ipc_stream.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(top_srcdir)/include/CredentialsCache.h \
+  $(top_srcdir)/include/CredentialsCache2.h $(top_srcdir)/include/k5-ipc_stream.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   $(srcdir)/../common/cci_common.h $(srcdir)/../common/cci_cred_union.h \
   $(srcdir)/../common/cci_debugging.h $(srcdir)/../common/cci_identifier.h \
   $(srcdir)/../common/cci_message.h $(srcdir)/../common/cci_types.h \
@@ -74,9 +74,9 @@ ccs_client.so ccs_client.po $(OUTPRE)ccs_client.$(OBJEXT): \
   ccs_lock.h ccs_lock_state.h ccs_pipe.h ccs_server.h \
   ccs_types.h
 ccs_credentials.so ccs_credentials.po $(OUTPRE)ccs_credentials.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/CredentialsCache.h \
-  $(SRCTOP)/include/CredentialsCache2.h $(SRCTOP)/include/k5-ipc_stream.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(top_srcdir)/include/CredentialsCache.h \
+  $(top_srcdir)/include/CredentialsCache2.h $(top_srcdir)/include/k5-ipc_stream.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   $(srcdir)/../common/cci_common.h $(srcdir)/../common/cci_cred_union.h \
   $(srcdir)/../common/cci_debugging.h $(srcdir)/../common/cci_identifier.h \
   $(srcdir)/../common/cci_message.h $(srcdir)/../common/cci_types.h \
@@ -87,9 +87,9 @@ ccs_credentials.so ccs_credentials.po $(OUTPRE)ccs_credentials.$(OBJEXT): \
   ccs_types.h
 ccs_credentials_iterator.so ccs_credentials_iterator.po \
   $(OUTPRE)ccs_credentials_iterator.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
-  $(COM_ERR_DEPS) $(SRCTOP)/include/CredentialsCache.h \
-  $(SRCTOP)/include/CredentialsCache2.h $(SRCTOP)/include/k5-ipc_stream.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/CredentialsCache.h \
+  $(top_srcdir)/include/CredentialsCache2.h $(top_srcdir)/include/k5-ipc_stream.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   $(srcdir)/../common/cci_common.h $(srcdir)/../common/cci_cred_union.h \
   $(srcdir)/../common/cci_debugging.h $(srcdir)/../common/cci_identifier.h \
   $(srcdir)/../common/cci_message.h $(srcdir)/../common/cci_types.h \
@@ -99,9 +99,9 @@ ccs_credentials_iterator.so ccs_credentials_iterator.po \
   ccs_list.h ccs_lock.h ccs_lock_state.h ccs_pipe.h ccs_server.h \
   ccs_types.h
 ccs_list.so ccs_list.po $(OUTPRE)ccs_list.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/CredentialsCache.h \
-  $(SRCTOP)/include/CredentialsCache2.h $(SRCTOP)/include/k5-ipc_stream.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(top_srcdir)/include/CredentialsCache.h \
+  $(top_srcdir)/include/CredentialsCache2.h $(top_srcdir)/include/k5-ipc_stream.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   $(srcdir)/../common/cci_array_internal.h $(srcdir)/../common/cci_common.h \
   $(srcdir)/../common/cci_cred_union.h $(srcdir)/../common/cci_debugging.h \
   $(srcdir)/../common/cci_identifier.h $(srcdir)/../common/cci_message.h \
@@ -111,9 +111,9 @@ ccs_list.so ccs_list.po $(OUTPRE)ccs_list.$(OBJEXT): \
   ccs_list.c ccs_list.h ccs_list_internal.h ccs_lock.h \
   ccs_lock_state.h ccs_pipe.h ccs_server.h ccs_types.h
 ccs_list_internal.so ccs_list_internal.po $(OUTPRE)ccs_list_internal.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/CredentialsCache.h \
-  $(SRCTOP)/include/CredentialsCache2.h $(SRCTOP)/include/k5-ipc_stream.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(top_srcdir)/include/CredentialsCache.h \
+  $(top_srcdir)/include/CredentialsCache2.h $(top_srcdir)/include/k5-ipc_stream.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   $(srcdir)/../common/cci_array_internal.h $(srcdir)/../common/cci_common.h \
   $(srcdir)/../common/cci_cred_union.h $(srcdir)/../common/cci_debugging.h \
   $(srcdir)/../common/cci_identifier.h $(srcdir)/../common/cci_message.h \
@@ -124,9 +124,9 @@ ccs_list_internal.so ccs_list_internal.po $(OUTPRE)ccs_list_internal.$(OBJEXT): 
   ccs_lock.h ccs_lock_state.h ccs_pipe.h ccs_server.h \
   ccs_types.h
 ccs_lock.so ccs_lock.po $(OUTPRE)ccs_lock.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/CredentialsCache.h \
-  $(SRCTOP)/include/CredentialsCache2.h $(SRCTOP)/include/k5-ipc_stream.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(top_srcdir)/include/CredentialsCache.h \
+  $(top_srcdir)/include/CredentialsCache2.h $(top_srcdir)/include/k5-ipc_stream.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   $(srcdir)/../common/cci_common.h $(srcdir)/../common/cci_cred_union.h \
   $(srcdir)/../common/cci_debugging.h $(srcdir)/../common/cci_identifier.h \
   $(srcdir)/../common/cci_message.h $(srcdir)/../common/cci_types.h \
@@ -135,9 +135,9 @@ ccs_lock.so ccs_lock.po $(OUTPRE)ccs_lock.$(OBJEXT): \
   ccs_credentials_iterator.h ccs_list.h ccs_lock.c ccs_lock.h \
   ccs_lock_state.h ccs_pipe.h ccs_server.h ccs_types.h
 ccs_lock_state.so ccs_lock_state.po $(OUTPRE)ccs_lock_state.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/CredentialsCache.h \
-  $(SRCTOP)/include/CredentialsCache2.h $(SRCTOP)/include/k5-ipc_stream.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(top_srcdir)/include/CredentialsCache.h \
+  $(top_srcdir)/include/CredentialsCache2.h $(top_srcdir)/include/k5-ipc_stream.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   $(srcdir)/../common/cci_common.h $(srcdir)/../common/cci_cred_union.h \
   $(srcdir)/../common/cci_debugging.h $(srcdir)/../common/cci_identifier.h \
   $(srcdir)/../common/cci_message.h $(srcdir)/../common/cci_types.h \
@@ -146,9 +146,9 @@ ccs_lock_state.so ccs_lock_state.po $(OUTPRE)ccs_lock_state.$(OBJEXT): \
   ccs_credentials_iterator.h ccs_list.h ccs_lock.h ccs_lock_state.c \
   ccs_lock_state.h ccs_pipe.h ccs_server.h ccs_types.h
 ccs_pipe.so ccs_pipe.po $(OUTPRE)ccs_pipe.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/CredentialsCache.h \
-  $(SRCTOP)/include/CredentialsCache2.h $(SRCTOP)/include/k5-ipc_stream.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(top_srcdir)/include/CredentialsCache.h \
+  $(top_srcdir)/include/CredentialsCache2.h $(top_srcdir)/include/k5-ipc_stream.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   $(srcdir)/../common/cci_common.h $(srcdir)/../common/cci_cred_union.h \
   $(srcdir)/../common/cci_debugging.h $(srcdir)/../common/cci_identifier.h \
   $(srcdir)/../common/cci_message.h $(srcdir)/../common/cci_types.h \
@@ -157,9 +157,9 @@ ccs_pipe.so ccs_pipe.po $(OUTPRE)ccs_pipe.$(OBJEXT): \
   ccs_credentials_iterator.h ccs_list.h ccs_lock.h ccs_lock_state.h \
   ccs_os_pipe.h ccs_pipe.c ccs_pipe.h ccs_server.h ccs_types.h
 ccs_server.so ccs_server.po $(OUTPRE)ccs_server.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(SRCTOP)/include/CredentialsCache.h \
-  $(SRCTOP)/include/CredentialsCache2.h $(SRCTOP)/include/k5-ipc_stream.h \
-  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(BUILDTOP)/include/autoconf.h $(COM_ERR_DEPS) $(top_srcdir)/include/CredentialsCache.h \
+  $(top_srcdir)/include/CredentialsCache2.h $(top_srcdir)/include/k5-ipc_stream.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   $(srcdir)/../common/cci_common.h $(srcdir)/../common/cci_cred_union.h \
   $(srcdir)/../common/cci_debugging.h $(srcdir)/../common/cci_identifier.h \
   $(srcdir)/../common/cci_message.h $(srcdir)/../common/cci_types.h \

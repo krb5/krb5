@@ -1,5 +1,3 @@
-thisconfigdir=../../../../..
-myfulldir=plugins/kdb/db2/libdb2/recno
 mydir=plugins/kdb/db2/libdb2/recno
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
 STLIBOBJS=	rec_close.o rec_delete.o rec_get.o rec_open.o rec_put.o \

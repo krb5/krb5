@@ -62,9 +62,9 @@
  *  returns system errors, encryption errors, replay errors
  */
 
-static krb5_error_code decrypt_authenticator
-(krb5_context, const krb5_ap_req *, krb5_authenticator **,
- int);
+static krb5_error_code
+decrypt_authenticator(krb5_context, const krb5_ap_req *,
+                      krb5_authenticator **, int);
 static krb5_error_code
 decode_etype_list(krb5_context context,
                   const krb5_authenticator *authp,
@@ -79,24 +79,10 @@ negotiate_etype(krb5_context context,
                 int permitted_etypes_len,
                 krb5_enctype *negotiated_etype);
 
-krb5_error_code
-krb5int_check_clockskew(krb5_context context, krb5_timestamp date)
-{
-    krb5_timestamp currenttime;
-    krb5_error_code retval;
-
-    retval = krb5_timeofday(context, &currenttime);
-    if (retval)
-        return retval;
-    if (!(labs((date)-currenttime) < context->clockskew))
-        return KRB5KRB_AP_ERR_SKEW;
-    return 0;
-}
-
 static krb5_error_code
-krb5_rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
-                             krb5_const_principal server, krb5_keytab keytab,
-                             krb5_keyblock *key)
+rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
+                        krb5_const_principal server, krb5_keytab keytab,
+                        krb5_keyblock *key)
 {
     krb5_error_code       retval;
     krb5_keytab_entry     ktent;
@@ -209,19 +195,19 @@ debug_log_authz_data(const char *which, krb5_authdata **a)
 #endif
 
 static krb5_error_code
-krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
-                        const krb5_ap_req *req, krb5_const_principal server,
-                        krb5_keytab keytab, krb5_flags *ap_req_options,
-                        krb5_ticket **ticket, int check_valid_flag)
+rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
+                   const krb5_ap_req *req, krb5_const_principal server,
+                   krb5_keytab keytab, krb5_flags *ap_req_options,
+                   krb5_ticket **ticket, int check_valid_flag)
 {
     krb5_error_code       retval = 0;
-    krb5_principal_data princ_data;
+    krb5_principal_data   princ_data;
     krb5_enctype         *desired_etypes = NULL;
     int                   desired_etypes_len = 0;
     int                   rfc4537_etypes_len = 0;
     krb5_enctype         *permitted_etypes = NULL;
     int                   permitted_etypes_len = 0;
-    krb5_keyblock        decrypt_key;
+    krb5_keyblock         decrypt_key;
 
     decrypt_key.enctype = ENCTYPE_NULL;
     decrypt_key.contents = NULL;
@@ -255,9 +241,9 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
         krb5_k_free_key(context, (*auth_context)->key);
         (*auth_context)->key = NULL;
     } else {
-        if ((retval = krb5_rd_req_decrypt_tkt_part(context, req,
-                                                   server, keytab,
-                                                   check_valid_flag ? &decrypt_key : NULL)))
+        if ((retval = rd_req_decrypt_tkt_part(context, req,
+                                              server, keytab,
+                                              check_valid_flag ? &decrypt_key : NULL)))
             goto cleanup;
     }
 
@@ -291,8 +277,7 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
         && ((*auth_context)->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME)
         && server) {
         if ((retval = krb5_get_server_rcache(context,
-                                             krb5_princ_component(context,
-                                                                  server,0),
+                                             krb5_princ_component(context,server,0),
                                              &(*auth_context)->rcache)))
             goto cleanup;
     }
@@ -353,8 +338,7 @@ krb5_rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
         if (trans->tr_contents.data && trans->tr_contents.data[0]) {
             retval = krb5_check_transited_list(context, &(trans->tr_contents),
                                                realm,
-                                               krb5_princ_realm (context,
-                                                                 server));
+                                               krb5_princ_realm (context,server));
         }
     }
 
@@ -568,10 +552,10 @@ krb5_rd_req_decoded(krb5_context context, krb5_auth_context *auth_context,
                     krb5_ticket **ticket)
 {
     krb5_error_code retval;
-    retval = krb5_rd_req_decoded_opt(context, auth_context,
-                                     req, server, keytab,
-                                     ap_req_options, ticket,
-                                     1); /* check_valid_flag */
+    retval = rd_req_decoded_opt(context, auth_context,
+                                req, server, keytab,
+                                ap_req_options, ticket,
+                                1); /* check_valid_flag */
     return retval;
 }
 
@@ -583,10 +567,10 @@ krb5_rd_req_decoded_anyflag(krb5_context context,
                             krb5_flags *ap_req_options, krb5_ticket **ticket)
 {
     krb5_error_code retval;
-    retval = krb5_rd_req_decoded_opt(context, auth_context,
-                                     req, server, keytab,
-                                     ap_req_options, ticket,
-                                     0); /* don't check_valid_flag */
+    retval = rd_req_decoded_opt(context, auth_context,
+                                req, server, keytab,
+                                ap_req_options, ticket,
+                                0); /* don't check_valid_flag */
     return retval;
 }
 

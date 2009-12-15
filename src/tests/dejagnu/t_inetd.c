@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * tests/dejagnu/t_inetd.c
  *
@@ -60,8 +61,8 @@ char *progname;
 
 static void usage()
 {
-	fprintf(stderr, "%s: port program argv0 argv1 ...\n", progname);
-	exit(1);
+    fprintf(stderr, "%s: port program argv0 argv1 ...\n", progname);
+    exit(1);
 }
 
 int
@@ -69,71 +70,71 @@ main(argc, argv)
     int argc;
     char **argv;
 {
-	unsigned short port;
-	char *path;
-	int sock, acc;
-	int one = 1;
-	struct sockaddr_in l_inaddr, f_inaddr;	/* local, foreign address */
-	int namelen = sizeof(f_inaddr);
+    unsigned short port;
+    char *path;
+    int sock, acc;
+    int one = 1;
+    struct sockaddr_in l_inaddr, f_inaddr;  /* local, foreign address */
+    int namelen = sizeof(f_inaddr);
 #ifdef POSIX_SIGNALS
-	struct sigaction csig;
+    struct sigaction csig;
 #endif
 
-	progname = argv[0];
+    progname = argv[0];
 
-	if(argc <= 3) usage();
+    if(argc <= 3) usage();
 
-	if(atoi(argv[1]) == 0) usage();
+    if(atoi(argv[1]) == 0) usage();
 
-	port = htons(atoi(argv[1]));
-	path = argv[2];
+    port = htons(atoi(argv[1]));
+    path = argv[2];
 
-	if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-	    com_err(progname, errno, "creating socket");
-	    exit(3);
-	}
+    if ((sock = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+        com_err(progname, errno, "creating socket");
+        exit(3);
+    }
 
-	(void) setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&one,
-			  sizeof (one));
+    (void) setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&one,
+                      sizeof (one));
 
-	l_inaddr.sin_family = AF_INET;
-	l_inaddr.sin_addr.s_addr = 0;
-	l_inaddr.sin_port = port;
+    l_inaddr.sin_family = AF_INET;
+    l_inaddr.sin_addr.s_addr = 0;
+    l_inaddr.sin_port = port;
 
-	if (bind(sock, (struct sockaddr *)&l_inaddr, sizeof(l_inaddr))) {
-	    com_err(progname, errno, "binding socket");
-	    exit(3);
-	}
+    if (bind(sock, (struct sockaddr *)&l_inaddr, sizeof(l_inaddr))) {
+        com_err(progname, errno, "binding socket");
+        exit(3);
+    }
 
-	if (listen(sock, 1) == -1) {
-	    com_err(progname, errno, "listening");
-	    exit(3);
-	}
+    if (listen(sock, 1) == -1) {
+        com_err(progname, errno, "listening");
+        exit(3);
+    }
 
-	printf("Ready!\n");
-	if ((acc = accept(sock, (struct sockaddr *)&f_inaddr,
-			  &namelen)) == -1) {
-	    com_err(progname, errno, "accepting");
-	    exit(3);
-	}
+    printf("Ready!\n");
+    if ((acc = accept(sock, (struct sockaddr *)&f_inaddr,
+                      &namelen)) == -1) {
+        com_err(progname, errno, "accepting");
+        exit(3);
+    }
 
-	dup2(acc, 0);
-	dup2(acc, 1);
-	dup2(acc, 2);
-	close(sock);
-	sock = 0;
+    dup2(acc, 0);
+    dup2(acc, 1);
+    dup2(acc, 2);
+    close(sock);
+    sock = 0;
 
-	/* Don't wait for a child signal... Otherwise dejagnu gets confused */
+    /* Don't wait for a child signal... Otherwise dejagnu gets confused */
 #ifdef POSIX_SIGNALS
-	csig.sa_handler = (RETSIGTYPE (*)())0;
-	sigemptyset(&csig.sa_mask);
-	csig.sa_flags = 0;
-	sigaction(SIGCHLD, &csig, (struct sigaction *)0);
+    csig.sa_handler = (RETSIGTYPE (*)())0;
+    sigemptyset(&csig.sa_mask);
+    csig.sa_flags = 0;
+    sigaction(SIGCHLD, &csig, (struct sigaction *)0);
 #else
-	signal(SIGCHLD, SIG_IGN);
+    signal(SIGCHLD, SIG_IGN);
 #endif
 
-	if(execv(path, &argv[3]))
-		fprintf(stderr, "t_inetd: Could not exec %s\n", path);
-	exit(1);
+    if(execv(path, &argv[3]))
+        fprintf(stderr, "t_inetd: Could not exec %s\n", path);
+    exit(1);
 }

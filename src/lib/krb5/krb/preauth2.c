@@ -526,25 +526,25 @@ krb5_preauth_prepare_request(krb5_context kcontext,
  * hasn't had a chance to run yet (INFO modules don't count, because as a rule
  * they don't generate preauth data), and run it. */
 static krb5_error_code
-krb5_run_preauth_plugins(krb5_context kcontext,
-                         int module_required_flags,
-                         krb5_kdc_req *request,
-                         krb5_data *encoded_request_body,
-                         krb5_data *encoded_previous_request,
-                         krb5_pa_data *in_padata,
-                         krb5_prompter_fct prompter,
-                         void *prompter_data,
-                         preauth_get_as_key_proc gak_fct,
-                         krb5_data *salt,
-                         krb5_data *s2kparams,
-                         void *gak_data,
-                         krb5_preauth_client_rock *get_data_rock,
-                         krb5_keyblock *as_key,
-                         krb5_pa_data ***out_pa_list,
-                         int *out_pa_list_size,
-                         int *module_ret,
-                         int *module_flags,
-                         krb5_gic_opt_ext *opte)
+run_preauth_plugins(krb5_context kcontext,
+                    int module_required_flags,
+                    krb5_kdc_req *request,
+                    krb5_data *encoded_request_body,
+                    krb5_data *encoded_previous_request,
+                    krb5_pa_data *in_padata,
+                    krb5_prompter_fct prompter,
+                    void *prompter_data,
+                    preauth_get_as_key_proc gak_fct,
+                    krb5_data *salt,
+                    krb5_data *s2kparams,
+                    void *gak_data,
+                    krb5_preauth_client_rock *get_data_rock,
+                    krb5_keyblock *as_key,
+                    krb5_pa_data ***out_pa_list,
+                    int *out_pa_list_size,
+                    int *module_ret,
+                    int *module_flags,
+                    krb5_gic_opt_ext *opte)
 {
     int i;
     krb5_pa_data **out_pa_data;
@@ -1052,19 +1052,19 @@ pa_sam(krb5_context context, krb5_kdc_req *request, krb5_pa_data *in_padata,
 #define kdcPkinitDebug(args...)
 #endif
 
-static krb5_error_code pa_pkinit_gen_req(
-    krb5_context context,
-    krb5_kdc_req *request,
-    krb5_pa_data *in_padata,
-    krb5_pa_data **out_padata,
-    krb5_data *salt,
-    krb5_data *s2kparams,
-    krb5_enctype *etype,
-    krb5_keyblock *as_key,
-    krb5_prompter_fct prompter,
-    void *prompter_data,
-    krb5_gic_get_as_key_fct gak_fct,
-    void *gak_data)
+static krb5_error_code
+pa_pkinit_gen_req(krb5_context context,
+                  krb5_kdc_req *request,
+                  krb5_pa_data *in_padata,
+                  krb5_pa_data **out_padata,
+                  krb5_data *salt,
+                  krb5_data *s2kparams,
+                  krb5_enctype *etype,
+                  krb5_keyblock *as_key,
+                  krb5_prompter_fct prompter,
+                  void *prompter_data,
+                  krb5_gic_get_as_key_fct gak_fct,
+                  void *gak_data)
 {
     krb5_error_code             krtn;
     krb5_data                   out_data = {0, 0, NULL};
@@ -1196,10 +1196,10 @@ cleanup:
  * the KDC certificate as valid if its hash matches the
  * realm.
  */
-static krb5_boolean local_kdc_cert_match(
-    krb5_context context,
-    krb5_data *signer_cert,
-    krb5_principal client)
+static krb5_boolean
+local_kdc_cert_match(krb5_context context,
+                     krb5_data *signer_cert,
+                     krb5_principal client)
 {
     static const char lkdcprefix[] = "LKDC:SHA1.";
     krb5_boolean match = FALSE;
@@ -1226,19 +1226,19 @@ static krb5_boolean local_kdc_cert_match(
     return match;
 }
 
-static krb5_error_code pa_pkinit_parse_rep(
-    krb5_context context,
-    krb5_kdc_req *request,
-    krb5_pa_data *in_padata,
-    krb5_pa_data **out_padata,
-    krb5_data *salt,
-    krb5_data *s2kparams,
-    krb5_enctype *etype,
-    krb5_keyblock *as_key,
-    krb5_prompter_fct prompter,
-    void *prompter_data,
-    krb5_gic_get_as_key_fct gak_fct,
-    void *gak_data)
+static krb5_error_code
+pa_pkinit_parse_rep(krb5_context context,
+                    krb5_kdc_req *request,
+                    krb5_pa_data *in_padata,
+                    krb5_pa_data **out_padata,
+                    krb5_data *salt,
+                    krb5_data *s2kparams,
+                    krb5_enctype *etype,
+                    krb5_keyblock *as_key,
+                    krb5_prompter_fct prompter,
+                    void *prompter_data,
+                    krb5_gic_get_as_key_fct gak_fct,
+                    void *gak_data)
 {
     krb5int_cert_sig_status     sig_status = (krb5int_cert_sig_status)-999;
     krb5_error_code             krtn;
@@ -2055,24 +2055,24 @@ krb5_do_preauth(krb5_context context,
                     fprintf (stderr, "trying modules for pa_type %d, flag %d\n",
                              in_padata[i]->pa_type, paorder[h]);
 #endif
-                    ret = krb5_run_preauth_plugins(context,
-                                                   paorder[h],
-                                                   request,
-                                                   encoded_request_body,
-                                                   encoded_previous_request,
-                                                   in_padata[i],
-                                                   prompter,
-                                                   prompter_data,
-                                                   gak_fct,
-                                                   salt, s2kparams,
-                                                   gak_data,
-                                                   get_data_rock,
-                                                   as_key,
-                                                   &out_pa_list,
-                                                   &out_pa_list_size,
-                                                   &module_ret,
-                                                   &module_flags,
-                                                   opte);
+                    ret = run_preauth_plugins(context,
+                                              paorder[h],
+                                              request,
+                                              encoded_request_body,
+                                              encoded_previous_request,
+                                              in_padata[i],
+                                              prompter,
+                                              prompter_data,
+                                              gak_fct,
+                                              salt, s2kparams,
+                                              gak_data,
+                                              get_data_rock,
+                                              as_key,
+                                              &out_pa_list,
+                                              &out_pa_list_size,
+                                              &module_ret,
+                                              &module_flags,
+                                              opte);
                     if (ret == 0) {
                         if (module_ret == 0) {
                             if (paorder[h] == PA_REAL) {

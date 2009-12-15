@@ -1,0 +1,32 @@
+mydir=lib/crypto/krb/checksum
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../arcfour
+DEFS=
+
+##DOS##BUILDTOP = ..\..\..\..
+##DOS##PREFIXDIR=checksum
+##DOS##OBJFILE=..\$(OUTPRE)cksum.lst
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+STLIBOBJS= cbc.o confounder.o hmac_md5.o unkeyed.o
+
+OBJS=	$(OUTPRE)cbc.$(OBJEXT) $(OUTPRE)confounder.$(OBJEXT) \
+	$(OUTPRE)hmac_md5.$(OBJEXT) $(OUTPRE)unkeyed.$(OBJEXT)
+
+SRCS=	$(srcdir)/cbc.c $(srcdir)/confounder.c $(srcdir)/hmac_md5.c \
+	$(srcdir)/unkeyed.c
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs
+
+includes:: depend
+
+depend:: $(SRCS)
+
+clean-unix:: clean-libobjs
+
+@libobj_frag@
+

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-file-style: "bsd"; indent-tabs-mode: t -*- */
 #include "k5-platform.h"
 
 /* Provide strlcpy and strlcat for platforms that don't have them. */

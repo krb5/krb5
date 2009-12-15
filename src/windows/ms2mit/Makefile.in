@@ -2,15 +2,13 @@
 # Works for k5 release only.
 #
 
-thisconfigdir=./..
-myfulldir=windows/ms2mit
 mydir=.
 BUILDTOP=$(REL)..$(S)..
 DEFINES = 
 PROG_LIBPATH=-L$(TOPLIBD) -L$(KRB5_LIBDIR)
 
 VERSIONRC = $(BUILDTOP)\windows\version.rc
-RCFLAGS=$(CPPFLAGS) -I$(SRCTOP) -D_WIN32 -DRES_ONLY
+RCFLAGS=$(CPPFLAGS) -I$(top_srcdir) -D_WIN32 -DRES_ONLY
 
 MS2MIT=$(OUTPRE)ms2mit.exe
 MIT2MS=$(OUTPRE)mit2ms.exe

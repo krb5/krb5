@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 2001 by the Massachusetts Institute of Technology.
  * All rights reserved.
@@ -34,27 +35,27 @@
 krb5_error_code krb5int_des_init_state
 (const krb5_keyblock *key, krb5_keyusage usage, krb5_data *new_state )
 {
-  new_state->length = 8;
-  new_state->data = (void *) malloc(8);
-  if (new_state->data) {
-    memset (new_state->data, 0, new_state->length);
-    /* We need to copy in the key for des-cbc-cr--ick, but that's how it works*/
-    if (key->enctype == ENCTYPE_DES_CBC_CRC) {
-      memcpy (new_state->data, key->contents, new_state->length);
-  }
-  } else {
-    return ENOMEM;
-  }
-  return 0;
+    new_state->length = 8;
+    new_state->data = (void *) malloc(8);
+    if (new_state->data) {
+        memset (new_state->data, 0, new_state->length);
+        /* We need to copy in the key for des-cbc-cr--ick, but that's how it works*/
+        if (key->enctype == ENCTYPE_DES_CBC_CRC) {
+            memcpy (new_state->data, key->contents, new_state->length);
+        }
+    } else {
+        return ENOMEM;
+    }
+    return 0;
 }
 
 krb5_error_code krb5int_default_free_state
 (krb5_data *state)
 {
-  if (state->data) {
-    free (state->data);
-    state-> data = NULL;
-    state->length = 0;
-  }
-  return 0;
+    if (state->data) {
+        free (state->data);
+        state-> data = NULL;
+        state->length = 0;
+    }
+    return 0;
 }

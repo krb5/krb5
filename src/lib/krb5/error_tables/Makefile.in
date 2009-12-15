@@ -1,5 +1,3 @@
-thisconfigdir=../../..
-myfulldir=lib/krb5/error_tables
 mydir=lib/krb5/error_tables
 BUILDTOP=$(REL)..$(S)..$(S)..
 DEFS=
@@ -10,6 +8,7 @@ DEFS=
 
 THDRDIR=$(BUILDTOP)$(S)include
 EHDRDIR=$(BUILDTOP)$(S)include
+ETDIR=$(top_srcdir)$(S)util$(S)et
 
 STLIBOBJS= asn1_err.o kdb5_err.o krb5_err.o \
       kv5m_err.o krb524_err.o
@@ -28,16 +27,16 @@ all-libobjs: $(HDRS)
 includes: $(HDRS)
 
 awk-windows:
-	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=asn1_err.h asn1_err.et
-	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=kdb5_err.h kdb5_err.et
-	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=krb5_err.h krb5_err.et
-	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=kv5m_err.h kv5m_err.et
-	$(AWK) -f $(SRCTOP)/util/et/et_h.awk outfile=krb524_err.h krb524_err.et
-	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=asn1_err.c asn1_err.et
-	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=kdb5_err.c kdb5_err.et
-	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=krb5_err.c krb5_err.et
-	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=kv5m_err.c kv5m_err.et
-	$(AWK) -f $(SRCTOP)/util/et/et_c.awk outfile=krb524_err.c krb524_err.et
+	$(AWK) -f $(ETDIR)/et_h.awk outfile=asn1_err.h asn1_err.et
+	$(AWK) -f $(ETDIR)/et_h.awk outfile=kdb5_err.h kdb5_err.et
+	$(AWK) -f $(ETDIR)/et_h.awk outfile=krb5_err.h krb5_err.et
+	$(AWK) -f $(ETDIR)/et_h.awk outfile=kv5m_err.h kv5m_err.et
+	$(AWK) -f $(ETDIR)/et_h.awk outfile=krb524_err.h krb524_err.et
+	$(AWK) -f $(ETDIR)/et_c.awk outfile=asn1_err.c asn1_err.et
+	$(AWK) -f $(ETDIR)/et_c.awk outfile=kdb5_err.c kdb5_err.et
+	$(AWK) -f $(ETDIR)/et_c.awk outfile=krb5_err.c krb5_err.et
+	$(AWK) -f $(ETDIR)/et_c.awk outfile=kv5m_err.c kv5m_err.et
+	$(AWK) -f $(ETDIR)/et_c.awk outfile=krb524_err.c krb524_err.et
 	if exist asn1_err.h copy asn1_err.h "$(EHDRDIR)"
 	if exist kdb5_err.h copy kdb5_err.h "$(EHDRDIR)"
 	if exist krb5_err.h copy krb5_err.h "$(EHDRDIR)"

@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/openssl/des/f_parity.c
  *
@@ -30,7 +31,7 @@
 void
 mit_des_fixup_key_parity(mit_des_cblock key)
 {
-   DES_set_odd_parity(key);
+    DES_set_odd_parity(key);
 }
 
 /*
@@ -42,6 +43,6 @@ int
 mit_des_check_key_parity(mit_des_cblock key)
 {
     if (!DES_check_key_parity(key))
-                return(0);
+        return(0);
     return (1);
 }

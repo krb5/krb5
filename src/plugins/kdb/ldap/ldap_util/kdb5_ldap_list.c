@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * kadmin/ldap_util/kdb5_ldap_list.c
  */
@@ -39,15 +40,16 @@
 /*
  * Counts the number of entries in the given array of strings
  */
-int list_count_str_array(char **list)
+int
+list_count_str_array(char **list)
 {
     int i = 0;
 
     if (list == NULL)
-	return 0;
+        return 0;
 
     for (i = 0; *list != NULL; list++) {
-	i++;
+        i++;
     }
 
     return i;
@@ -57,15 +59,16 @@ int list_count_str_array(char **list)
 /*
  * Counts the number of entries in the given array of integers
  */
-int list_count_int_array(int *list)
+int
+list_count_int_array(int *list)
 {
     int i = 0;
 
     if (list == NULL)
-	return 0;
+        return 0;
 
     for (i = 0; *list != END_OF_LIST; list++) {
-	i++;
+        i++;
     }
 
     return i;
@@ -75,14 +78,14 @@ int list_count_int_array(int *list)
 /*
  * Frees the entries in a given list and not the list pointer
  */
-void krb5_free_list_entries(list)
-    char **list;
+void
+krb5_free_list_entries(char **list)
 {
     if (list == NULL)
-	return;
+        return;
     for (; *list != NULL; list++) {
-	free(*list);
-	*list = NULL;
+        free(*list);
+        *list = NULL;
     }
 
     return;
@@ -94,10 +97,7 @@ void krb5_free_list_entries(list)
  * and return the result as a list
  */
 krb5_error_code
-krb5_parse_list(buffer, delimiter, list)
-    char *buffer;
-    char *delimiter;
-    char **list;
+krb5_parse_list(char *buffer, char *delimiter, char **list)
 {
     char *str = NULL;
     char *token = NULL;
@@ -107,40 +107,39 @@ krb5_parse_list(buffer, delimiter, list)
     int count = 0;
 
     if ((buffer == NULL) || (list == NULL) || (delimiter == NULL)) {
-	return EINVAL;
+        return EINVAL;
     }
 
     str = strdup(buffer);
     if (str == NULL)
-	return ENOMEM;
+        return ENOMEM;
 
     token = strtok_r(str, delimiter, &ptrptr);
     for (count = 1; ((token != NULL) && (count < MAX_LIST_ENTRIES));
-	 plist++, count++) {
-	*plist = strdup(token);
-	if (*plist == NULL) {
-	    retval = ENOMEM;
-	    goto cleanup;
-	}
-	token = strtok_r(NULL, delimiter, &ptrptr);
+         plist++, count++) {
+        *plist = strdup(token);
+        if (*plist == NULL) {
+            retval = ENOMEM;
+            goto cleanup;
+        }
+        token = strtok_r(NULL, delimiter, &ptrptr);
     }
     *plist = NULL;
 
 cleanup:
     if (str) {
-	free(str);
-	str = NULL;
+        free(str);
+        str = NULL;
     }
     if (retval)
-	krb5_free_list_entries(list);
+        krb5_free_list_entries(list);
 
     return retval;
 }
 
 
-int compare_int(m1, m2)
-    const void *m1;
-    const void *m2;
+int
+compare_int(const void *m1, const void *m2)
 {
     int mi1 = *(const int *)m1;
     int mi2 = *(const int *)m2;
@@ -154,10 +153,8 @@ int compare_int(m1, m2)
  * entries present in the source list, depending on the mode
  * (ADD or DELETE).
  */
-void list_modify_str_array(destlist, sourcelist, mode)
-    char ***destlist;
-    const char **sourcelist;
-    int mode;
+void
+list_modify_str_array(char ***destlist, const char **sourcelist, int mode)
 {
     char **dlist = NULL, **tmplist = NULL;
     const char **slist = NULL;
@@ -165,52 +162,52 @@ void list_modify_str_array(destlist, sourcelist, mode)
     int found = 0;
 
     if ((destlist == NULL) || (*destlist == NULL) || (sourcelist == NULL))
-	return;
+        return;
 
     /* We need to add every entry present in the source list to
      * the destination list */
     if (mode == LIST_MODE_ADD) {
-	/* Traverse throught the end of destlist for appending */
-	for (dlist = *destlist, dcount = 0; *dlist != NULL;
-	     dlist++, dcount++) {
-	    ;   /* NULL statement */
-	}
-	/* Count the number of entries in the source list */
-	for (slist = sourcelist, scount = 0; *slist != NULL;
-	     slist++, scount++) {
-	    ;   /* NULL statement */
-	}
-	/* Reset the slist pointer to the start of source list */
-	slist = sourcelist;
+        /* Traverse throught the end of destlist for appending */
+        for (dlist = *destlist, dcount = 0; *dlist != NULL;
+             dlist++, dcount++) {
+            ;   /* NULL statement */
+        }
+        /* Count the number of entries in the source list */
+        for (slist = sourcelist, scount = 0; *slist != NULL;
+             slist++, scount++) {
+            ;   /* NULL statement */
+        }
+        /* Reset the slist pointer to the start of source list */
+        slist = sourcelist;
 
-	/* Now append the source list to the existing destlist */
-	if ((dcount + scount) < MAX_LIST_ENTRIES)
-	    copycount = scount;
-	else
-	    /* Leave the last entry for list terminator(=NULL) */
-	    copycount = (MAX_LIST_ENTRIES -1) - dcount;
+        /* Now append the source list to the existing destlist */
+        if ((dcount + scount) < MAX_LIST_ENTRIES)
+            copycount = scount;
+        else
+            /* Leave the last entry for list terminator(=NULL) */
+            copycount = (MAX_LIST_ENTRIES -1) - dcount;
 
-	memcpy(dlist, slist, (sizeof(char *) * copycount));
-	dlist += copycount;
-	*dlist = NULL;
+        memcpy(dlist, slist, (sizeof(char *) * copycount));
+        dlist += copycount;
+        *dlist = NULL;
     } else if (mode == LIST_MODE_DELETE) {
-	/* We need to delete every entry present in the source list
-	 * from the destination list */
-	for (slist = sourcelist; *slist != NULL; slist++) {
-	    for (dlist = *destlist; *dlist != NULL; dlist++) {
-		found = 0; /* value not found */
-		/* DN is case insensitive string */
-		if (strcasecmp(*dlist, *slist) == 0) {
-		    found = 1;
-		    free(*dlist);
-		    /* Advance the rest of the entries by one */
-		    for (tmplist = dlist; *tmplist != NULL; tmplist++) {
-			*tmplist = *(tmplist+1);
-		    }
-		    break;
-		}
-	    }
-	}
+        /* We need to delete every entry present in the source list
+         * from the destination list */
+        for (slist = sourcelist; *slist != NULL; slist++) {
+            for (dlist = *destlist; *dlist != NULL; dlist++) {
+                found = 0; /* value not found */
+                /* DN is case insensitive string */
+                if (strcasecmp(*dlist, *slist) == 0) {
+                    found = 1;
+                    free(*dlist);
+                    /* Advance the rest of the entries by one */
+                    for (tmplist = dlist; *tmplist != NULL; tmplist++) {
+                        *tmplist = *(tmplist+1);
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     return;
@@ -222,10 +219,8 @@ void list_modify_str_array(destlist, sourcelist, mode)
  * entries present in the source list, depending on the mode
  * (ADD or DELETE). where the list is array of integers.
  */
-int list_modify_int_array(destlist, sourcelist, mode)
-    int *destlist;
-    const int *sourcelist;
-    int mode;
+int
+list_modify_int_array(int *destlist, const int *sourcelist, int mode)
 {
     int *dlist = NULL, *tmplist = NULL;
     const int *slist = NULL;
@@ -233,53 +228,53 @@ int list_modify_int_array(destlist, sourcelist, mode)
     int tcount = 0;
 
     if ((destlist == NULL) || (sourcelist == NULL))
-	return 0;
+        return 0;
 
     /* We need to add every entry present in the source list to the
      * destination list */
     if (mode == LIST_MODE_ADD) {
-	/* Traverse throught the end of destlist for appending */
-	for (dlist = destlist, dcount = 0; *dlist != END_OF_LIST;
-	     dlist++, dcount++)
-	    ;   /* NULL statement */
+        /* Traverse throught the end of destlist for appending */
+        for (dlist = destlist, dcount = 0; *dlist != END_OF_LIST;
+             dlist++, dcount++)
+            ;   /* NULL statement */
 
-	/* Count the number of entries in the source list */
-	for (slist = sourcelist, scount = 0; *slist != END_OF_LIST;
-	     slist++, scount++)
-	    ;   /* NULL statement */
+        /* Count the number of entries in the source list */
+        for (slist = sourcelist, scount = 0; *slist != END_OF_LIST;
+             slist++, scount++)
+            ;   /* NULL statement */
 
-	/* Reset the slist pointer to the start of source list */
-	slist = sourcelist;
+        /* Reset the slist pointer to the start of source list */
+        slist = sourcelist;
 
-	/* Now append the source list to the existing destlist */
-	if ((dcount + scount) < MAX_LIST_ENTRIES)
-	    copycount = scount;
-	else
-	    /* Leave the last entry for list terminator(=NULL) */
-	    copycount = (MAX_LIST_ENTRIES -1) - dcount;
+        /* Now append the source list to the existing destlist */
+        if ((dcount + scount) < MAX_LIST_ENTRIES)
+            copycount = scount;
+        else
+            /* Leave the last entry for list terminator(=NULL) */
+            copycount = (MAX_LIST_ENTRIES -1) - dcount;
 
-	memcpy(dlist, slist, (sizeof(int) * copycount));
-	dlist += copycount;
-	*dlist = END_OF_LIST;
-	tcount = dcount + copycount;
+        memcpy(dlist, slist, (sizeof(int) * copycount));
+        dlist += copycount;
+        *dlist = END_OF_LIST;
+        tcount = dcount + copycount;
     } else if (mode == LIST_MODE_DELETE) {
-	/* We need to delete every entry present in the source list from
-	 * the destination list */
-	for (slist = sourcelist; *slist != END_OF_LIST; slist++) {
-	    for (dlist = destlist; *dlist != END_OF_LIST; dlist++) {
-		if (*dlist == *slist) {
-		    /* Advance the rest of the entries by one */
-		    for (tmplist = dlist; *tmplist != END_OF_LIST; tmplist++) {
-			*tmplist = *(tmplist+1);
-		    }
-		    break;
-		}
-	    }
-	}
-	/* count the number of entries */
-	for (dlist = destlist, tcount = 0; *dlist != END_OF_LIST; dlist++) {
-	    tcount++;
-	}
+        /* We need to delete every entry present in the source list from
+         * the destination list */
+        for (slist = sourcelist; *slist != END_OF_LIST; slist++) {
+            for (dlist = destlist; *dlist != END_OF_LIST; dlist++) {
+                if (*dlist == *slist) {
+                    /* Advance the rest of the entries by one */
+                    for (tmplist = dlist; *tmplist != END_OF_LIST; tmplist++) {
+                        *tmplist = *(tmplist+1);
+                    }
+                    break;
+                }
+            }
+        }
+        /* count the number of entries */
+        for (dlist = destlist, tcount = 0; *dlist != END_OF_LIST; dlist++) {
+            tcount++;
+        }
     }
 
     return tcount;

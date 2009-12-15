@@ -409,13 +409,25 @@ test8()
 {
 	echo "Test 8: btree: repeated small key, big data pairs"
 	rm -f $TMP1
+	# /bin/csh is no longer ubiquitous - find a substitute
+	# The test stores contents of a known file
+	tfile=""
+	for tp in /bin/csh /bin/ls /usr/bin/ls /bin/cat /usr/bin/cat; do
+	    if [ "x$tfile" = "x" -a -f $tp ]; then
+		tfile=$tp
+	    fi
+	done
+	if [ "x$tfile" = "x" ]; then
+	    echo "No suitable file for testing purposes"
+	    exit 1
+	fi
 	echo "" | 
 	awk 'BEGIN {
 		for (i = 1; i <= 10; ++i) {
 			printf("p\nkkey1\nD/bin/sh\n");
-			printf("p\nkkey2\nD/bin/csh\n");
+			printf("p\nkkey2\nD'$tfile'\n");
 			if (i % 8 == 0) {
-				printf("c\nkkey2\nD/bin/csh\n");
+				printf("c\nkkey2\nD'$tfile'\n");
 				printf("c\nkkey1\nD/bin/sh\n");
 				printf("e\t%d of 10 (comparison)\n", i);
 			} else
