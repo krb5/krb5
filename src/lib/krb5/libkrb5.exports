@@ -373,7 +373,6 @@ krb5_init_creds_set_keytab
 krb5_init_creds_set_password
 krb5_init_creds_set_service
 krb5_init_creds_step
-krb5_init_creds_store_creds
 krb5_init_keyblock
 krb5_init_secure_context
 krb5_internalize_opaque
