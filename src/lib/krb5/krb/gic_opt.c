@@ -470,8 +470,11 @@ krb5_get_init_creds_opt_free_pa(krb5_context context,
     }
     free(preauth_data);
 }
-krb5_error_code KRB5_CALLCONV krb5_get_init_creds_opt_set_fast_ccache_name
-(krb5_context context, krb5_get_init_creds_opt *opt, const char *ccache_name)
+
+krb5_error_code KRB5_CALLCONV
+krb5_get_init_creds_opt_set_fast_ccache_name(krb5_context context,
+                                             krb5_get_init_creds_opt *opt,
+                                             const char *ccache_name)
 {
     krb5_error_code retval = 0;
     krb5_gic_opt_ext *opte;
@@ -502,12 +505,12 @@ krb5_get_init_creds_opt_set_out_ccache(krb5_context context,
     if (retval)
         return retval;
     if (opte->opt_private->out_ccache) {
-        krb5_cc_close(context,  opte->opt_private->out_ccache);
+        krb5_cc_close(context, opte->opt_private->out_ccache);
         opte->opt_private->out_ccache = NULL;
     }
     retval = krb5_cc_resolve(context, krb5_cc_get_name(context, ccache),
-                            &opte->opt_private->out_ccache);
-        return retval;
+                             &opte->opt_private->out_ccache);
+    return retval;
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -523,7 +526,7 @@ krb5_get_init_creds_opt_set_fast_flags(krb5_context context,
     if (retval)
         return retval;
     opte->opt_private->fast_flags = flags;
-        return retval;
+    return retval;
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -533,6 +536,7 @@ krb5_get_init_creds_opt_get_fast_flags(krb5_context context,
 {
     krb5_error_code retval = 0;
     krb5_gic_opt_ext *opte;
+
     if (out_flags == NULL)
         return EINVAL;
     *out_flags = 0;
@@ -541,6 +545,6 @@ krb5_get_init_creds_opt_get_fast_flags(krb5_context context,
     if (retval)
         return retval;
     *out_flags = opte->opt_private->fast_flags;
-        return retval;
+    return retval;
 }
 
