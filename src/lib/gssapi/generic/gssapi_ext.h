@@ -254,16 +254,6 @@ OM_uint32 KRB5_CALLCONV gss_release_iov_buffer
     gss_iov_buffer_desc *, /* iov */
     int);		/* iov_count */
 
-typedef struct gss_context_stream_sizes_struct {
-    size_t header;
-    size_t trailer;
-    size_t max_msg_size;
-    size_t buffers;
-    size_t blocksize;
-} gss_context_stream_sizes;
-
-GSS_DLLIMP extern gss_OID GSS_C_ATTR_STREAM_SIZES;
-
 /*
  * Protocol transition
  */
