@@ -126,8 +126,8 @@ copy_initiator_creds(OM_uint32 *minor_status,
 cleanup:
     if (kcred != NULL)
         k5_mutex_unlock(&kcred->lock);
-
-    krb5_cc_close(context, ccache);
+    if (ccache != NULL)
+        krb5_cc_close(context, ccache);
     krb5_free_context(context);
 
     return major_status;
