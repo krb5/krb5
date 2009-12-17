@@ -68,6 +68,7 @@ gss_nt_service_name_v2
 gss_nt_string_uid_name
 gss_nt_user_name
 gss_oid_to_str
+gss_pseudo_random
 gss_process_context_token
 gss_release_any_name_mapping
 gss_release_buffer_set
@@ -81,6 +82,7 @@ gss_seal
 gss_set_name_attribute
 gss_set_sec_context_option
 gss_sign
+gss_store_cred
 gss_str_to_oid
 gss_test_oid_set_member
 gss_unseal

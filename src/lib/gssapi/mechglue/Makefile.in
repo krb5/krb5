@@ -43,6 +43,7 @@ SRCS = \
 	$(srcdir)/g_mech_invoke.c \
 	$(srcdir)/g_mechname.c \
 	$(srcdir)/g_oid_ops.c \
+	$(srcdir)/g_prf.c \
 	$(srcdir)/g_process_context.c \
 	$(srcdir)/g_rel_buffer.c \
 	$(srcdir)/g_rel_cred.c \
@@ -96,6 +97,7 @@ OBJS = \
 	$(OUTPRE)g_mech_invoke.$(OBJEXT) \
 	$(OUTPRE)g_mechname.$(OBJEXT) \
 	$(OUTPRE)g_oid_ops.$(OBJEXT) \
+	$(OUTPRE)g_prf.$(OBJEXT) \
 	$(OUTPRE)g_process_context.$(OBJEXT) \
 	$(OUTPRE)g_rel_buffer.$(OBJEXT) \
 	$(OUTPRE)g_rel_cred.$(OBJEXT) \
@@ -149,6 +151,7 @@ STLIBOBJS = \
 	g_mech_invoke.o \
 	g_mechname.o \
 	g_oid_ops.o \
+	g_prf.o \
 	g_process_context.o \
 	g_rel_buffer.o \
 	g_rel_cred.o \

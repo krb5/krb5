@@ -773,6 +773,8 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_export_name_composite);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_map_name_to_any);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_release_any_name_mapping);
+        /* RFC 4401 (introduced in 1.8) */
+	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_pseudo_random);
 
 	assert(mech_type != GSS_C_NO_OID);
 

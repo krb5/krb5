@@ -4,19 +4,21 @@ DEFINES = -DUSE_AUTOCONF_H
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-SRCS= $(srcdir)/t_imp_name.c $(srcdir)/t_s4u.c $(srcdir)/t_namingexts.c
+SRCS= $(srcdir)/t_imp_name.c $(srcdir)/t_s4u.c $(srcdir)/t_namingexts.c $(srcdir)/t_gssexts.c
 
-OBJS= t_imp_name.o t_s4u.o t_namingexts.o
+OBJS= t_imp_name.o t_s4u.o t_namingexts.o t_gssexts.o
 
-all:: t_imp_name t_s4u t_namingexts
+all:: t_imp_name t_s4u t_namingexts t_gssexts
 
 t_imp_name: t_imp_name.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_imp_name t_imp_name.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
-t_namingexts: t_namingexts.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_namingexts t_namingexts.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
 t_s4u: t_s4u.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_s4u t_s4u.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
+t_namingexts: t_namingexts.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_namingexts t_namingexts.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
+t_gssexts: t_gssexts.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_gssexts t_gssexts.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
 
 clean::
-	$(RM) t_imp_name t_s4u t_namingexts
+	$(RM) t_imp_name t_s4u t_namingexts t_gssexts
 

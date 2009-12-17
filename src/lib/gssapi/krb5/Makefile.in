@@ -68,6 +68,7 @@ SRCS = \
 	$(srcdir)/krb5_gss_glue.c \
 	$(srcdir)/lucid_context.c \
 	$(srcdir)/naming_exts.c \
+	$(srcdir)/prf.c \
 	$(srcdir)/process_context_token.c \
 	$(srcdir)/rel_cred.c \
 	$(srcdir)/rel_oid.c \
@@ -78,6 +79,7 @@ SRCS = \
 	$(srcdir)/ser_sctx.c \
 	$(srcdir)/set_ccache.c \
 	$(srcdir)/sign.c \
+	$(srcdir)/store_cred.c \
 	$(srcdir)/unseal.c \
 	$(srcdir)/util_cksum.c \
 	$(srcdir)/util_crypt.c \
@@ -120,6 +122,7 @@ OBJS = \
 	$(OUTPRE)krb5_gss_glue.$(OBJEXT) \
 	$(OUTPRE)lucid_context.$(OBJEXT) \
 	$(OUTPRE)naming_exts.$(OBJEXT) \
+	$(OUTPRE)prf.$(OBJEXT) \
 	$(OUTPRE)process_context_token.$(OBJEXT) \
 	$(OUTPRE)rel_cred.$(OBJEXT) \
 	$(OUTPRE)rel_oid.$(OBJEXT) \
@@ -130,6 +133,7 @@ OBJS = \
 	$(OUTPRE)ser_sctx.$(OBJEXT) \
 	$(OUTPRE)set_ccache.$(OBJEXT) \
 	$(OUTPRE)sign.$(OBJEXT) \
+	$(OUTPRE)store_cred.$(OBJEXT) \
 	$(OUTPRE)unseal.$(OBJEXT) \
 	$(OUTPRE)util_cksum.$(OBJEXT) \
 	$(OUTPRE)util_crypt.$(OBJEXT) \
@@ -175,6 +179,7 @@ STLIBOBJS = \
 	krb5_gss_glue.o \
 	lucid_context.o \
 	naming_exts.o \
+	prf.o \
 	process_context_token.o \
 	rel_cred.o \
 	rel_oid.o \
@@ -185,6 +190,7 @@ STLIBOBJS = \
 	ser_sctx.o \
 	set_ccache.o \
 	sign.o \
+	store_cred.o \
 	unseal.o \
 	util_cksum.o \
 	util_crypt.o \

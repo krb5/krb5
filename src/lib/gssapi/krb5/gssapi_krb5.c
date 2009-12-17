@@ -671,7 +671,7 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_internal_release_oid,
     krb5_gss_wrap_size_limit,
     krb5_gss_export_name,
-    NULL,                        /* store_cred */
+    krb5_gss_store_cred,
     krb5_gss_inquire_sec_context_by_oid,
     krb5_gss_inquire_cred_by_oid,
     krb5_gss_set_sec_context_option,
@@ -693,6 +693,7 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_export_name_composite,
     krb5_gss_map_name_to_any,
     krb5_gss_release_any_name_mapping,
+    krb5_gss_pseudo_random,
 };
 
 
