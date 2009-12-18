@@ -149,10 +149,8 @@ krb5int_gic_opte_private_free(krb5_context context, krb5_gic_opt_ext *opte)
         free_gic_opt_ext_preauth_data(context, opte);
     if (opte->opt_private->fast_ccache_name)
         free(opte->opt_private->fast_ccache_name);
-#if 0
     if (opte->opt_private->out_ccache)
         krb5_cc_close(context, opte->opt_private->out_ccache);
-#endif
     free(opte->opt_private);
     opte->opt_private = NULL;
     return 0;
