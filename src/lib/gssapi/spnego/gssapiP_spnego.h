@@ -352,6 +352,15 @@ spnego_gss_inquire_cred_by_oid
 );
 
 OM_uint32
+spnego_gss_set_cred_option
+(
+	OM_uint32 *minor_status,
+	gss_cred_id_t cred_handle,
+	const gss_OID desired_object,
+	const gss_buffer_t value
+);
+
+OM_uint32
 spnego_gss_set_sec_context_option
 (
 	OM_uint32 *minor_status,

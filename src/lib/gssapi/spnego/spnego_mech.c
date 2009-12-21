@@ -250,7 +250,7 @@ static struct gss_config spnego_mechanism =
  	spnego_gss_inquire_sec_context_by_oid, /* gss_inquire_sec_context_by_oid */
  	spnego_gss_inquire_cred_by_oid,	/* gss_inquire_cred_by_oid */
  	spnego_gss_set_sec_context_option, /* gss_set_sec_context_option */
- 	NULL,				/* gssspi_set_cred_option */
+	spnego_gss_set_cred_option,	/* gssspi_set_cred_option */
  	NULL,				/* gssspi_mech_invoke */
 	spnego_gss_wrap_aead,
 	spnego_gss_unwrap_aead,
@@ -2183,6 +2183,21 @@ spnego_gss_inquire_cred_by_oid(
 				cred_handle,
 				desired_object,
 				data_set);
+	return (ret);
+}
+
+OM_uint32
+spnego_gss_set_cred_option(
+		OM_uint32 *minor_status,
+		gss_cred_id_t cred_handle,
+		const gss_OID desired_object,
+		const gss_buffer_t value)
+{
+	OM_uint32 ret;
+	ret = gssspi_set_cred_option(minor_status,
+				     cred_handle,
+				     desired_object,
+				     value);
 	return (ret);
 }
 
