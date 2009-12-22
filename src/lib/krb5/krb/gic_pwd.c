@@ -4,16 +4,15 @@
 #include "init_creds_ctx.h"
 
 krb5_error_code
-krb5_get_as_key_password(
-    krb5_context context,
-    krb5_principal client,
-    krb5_enctype etype,
-    krb5_prompter_fct prompter,
-    void *prompter_data,
-    krb5_data *salt,
-    krb5_data *params,
-    krb5_keyblock *as_key,
-    void *gak_data)
+krb5_get_as_key_password(krb5_context context,
+                         krb5_principal client,
+                         krb5_enctype etype,
+                         krb5_prompter_fct prompter,
+                         void *prompter_data,
+                         krb5_data *salt,
+                         krb5_data *params,
+                         krb5_keyblock *as_key,
+                         void *gak_data)
 {
     krb5_data *password;
     krb5_error_code ret;

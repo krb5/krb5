@@ -31,7 +31,8 @@
 #include "k5-int.h"
 
 static krb5_error_code
-krb5_copy_enc_tkt_part(krb5_context context, const krb5_enc_tkt_part *partfrom, krb5_enc_tkt_part **partto)
+copy_enc_tkt_part(krb5_context context, const krb5_enc_tkt_part *partfrom,
+                  krb5_enc_tkt_part **partto)
 {
     krb5_error_code retval;
     krb5_enc_tkt_part *tempto;
@@ -115,7 +116,7 @@ krb5_copy_ticket(krb5_context context, const krb5_ticket *from, krb5_ticket **pt
     }
     tempto->enc_part.ciphertext = *scratch;
     free(scratch);
-    retval = krb5_copy_enc_tkt_part(context, from->enc_part2, &tempto->enc_part2);
+    retval = copy_enc_tkt_part(context, from->enc_part2, &tempto->enc_part2);
     if (retval) {
         free(tempto->enc_part.ciphertext.data);
         krb5_free_principal(context, tempto->server);

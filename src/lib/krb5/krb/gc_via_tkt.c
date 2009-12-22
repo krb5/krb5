@@ -33,7 +33,8 @@
 #include "int-proto.h"
 
 static krb5_error_code
-krb5_kdcrep2creds(krb5_context context, krb5_kdc_rep *pkdcrep, krb5_address *const *address, krb5_data *psectkt, krb5_creds **ppcreds)
+kdcrep2creds(krb5_context context, krb5_kdc_rep *pkdcrep, krb5_address *const *address,
+             krb5_data *psectkt, krb5_creds **ppcreds)
 {
     krb5_error_code retval;
     krb5_data *pdata;
@@ -156,9 +157,9 @@ tgt_is_local_realm(krb5_creds *tgt)
 }
 
 krb5_error_code
-krb5_get_cred_via_tkt (krb5_context context, krb5_creds *tkt,
-                       krb5_flags kdcoptions, krb5_address *const *address,
-                       krb5_creds *in_cred, krb5_creds **out_cred)
+krb5_get_cred_via_tkt(krb5_context context, krb5_creds *tkt,
+                      krb5_flags kdcoptions, krb5_address *const *address,
+                      krb5_creds *in_cred, krb5_creds **out_cred)
 {
     return krb5_get_cred_via_tkt_ext (context, tkt,
                                       kdcoptions, address,
@@ -215,7 +216,7 @@ krb5int_make_tgs_request(krb5_context context,
                                           enctypes, in_cred->server, address,
                                           in_cred->authdata, in_padata,
                                           second_tkt ?
-                                            &in_cred->second_ticket : 0,
+                                          &in_cred->second_ticket : 0,
                                           tkt, pacb_fct, pacb_data,
                                           request_data,
                                           timestamp, nonce, subkey);
@@ -247,8 +248,8 @@ krb5int_process_tgs_reply(krb5_context context,
 
     s4u2self = krb5int_find_pa_data(context, in_padata,
                                     KRB5_PADATA_S4U_X509_USER) ||
-               krb5int_find_pa_data(context, in_padata,
-                                    KRB5_PADATA_FOR_USER);
+        krb5int_find_pa_data(context, in_padata,
+                             KRB5_PADATA_FOR_USER);
 
     if (krb5_is_krb_error(response_data)) {
         retval = decode_krb5_error(response_data, &err_reply);
@@ -282,7 +283,7 @@ krb5int_process_tgs_reply(krb5_context context,
         }
         krb5_free_error(context, err_reply);
         goto cleanup;
-     } else if (!krb5_is_tgs_rep(response_data)) {
+    } else if (!krb5_is_tgs_rep(response_data)) {
         retval = KRB5KRB_AP_ERR_MSG_TYPE;
         goto cleanup;
     }
@@ -375,8 +376,8 @@ krb5int_process_tgs_reply(krb5_context context,
         dec_rep->enc_part2->enc_padata = NULL;
     }
 
-    retval = krb5_kdcrep2creds(context, dec_rep, address,
-                               &in_cred->second_ticket, out_cred);
+    retval = kdcrep2creds(context, dec_rep, address,
+                          &in_cred->second_ticket, out_cred);
     if (retval != 0)
         goto cleanup;
 
@@ -391,19 +392,19 @@ cleanup:
 }
 
 krb5_error_code
-krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
-                           krb5_flags kdcoptions, krb5_address *const *address,
-                           krb5_pa_data **in_padata,
-                           krb5_creds *in_cred,
-                           krb5_error_code (*pacb_fct)(krb5_context,
-                                                       krb5_keyblock *,
-                                                       krb5_kdc_req *,
-                                                       void *),
-                           void *pacb_data,
-                           krb5_pa_data ***out_padata,
-                           krb5_pa_data ***out_enc_padata,
-                           krb5_creds **out_cred,
-                           krb5_keyblock **out_subkey)
+krb5_get_cred_via_tkt_ext(krb5_context context, krb5_creds *tkt,
+                          krb5_flags kdcoptions, krb5_address *const *address,
+                          krb5_pa_data **in_padata,
+                          krb5_creds *in_cred,
+                          krb5_error_code (*pacb_fct)(krb5_context,
+                                                      krb5_keyblock *,
+                                                      krb5_kdc_req *,
+                                                      void *),
+                          void *pacb_data,
+                          krb5_pa_data ***out_padata,
+                          krb5_pa_data ***out_enc_padata,
+                          krb5_creds **out_cred,
+                          krb5_keyblock **out_subkey)
 {
     krb5_error_code retval;
     krb5_data request_data;

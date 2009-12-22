@@ -547,4 +547,3 @@ krb5_get_init_creds_opt_get_fast_flags(krb5_context context,
     *out_flags = opte->opt_private->fast_flags;
     return retval;
 }
-

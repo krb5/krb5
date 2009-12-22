@@ -58,7 +58,8 @@
 #include "k5-int.h"
 
 static krb5_error_code
-krb5_copy_authdatum(krb5_context context, const krb5_authdata *inad, krb5_authdata **outad)
+copy_authdatum(krb5_context context,
+               const krb5_authdata *inad, krb5_authdata **outad)
 {
     krb5_authdata *tmpad;
 
@@ -78,7 +79,9 @@ krb5_copy_authdatum(krb5_context context, const krb5_authdata *inad, krb5_authda
  * Copy an authdata array, with fresh allocation.
  */
 krb5_error_code KRB5_CALLCONV
-krb5_merge_authdata(krb5_context context, krb5_authdata *const *inauthdat1, krb5_authdata * const *inauthdat2,
+krb5_merge_authdata(krb5_context context,
+                    krb5_authdata *const *inauthdat1,
+                    krb5_authdata * const *inauthdat2,
                     krb5_authdata ***outauthdat)
 {
     krb5_error_code retval;
@@ -103,8 +106,8 @@ krb5_merge_authdata(krb5_context context, krb5_authdata *const *inauthdat1, krb5
 
     if (inauthdat1) {
         for (nelems = 0; inauthdat1[nelems]; nelems++) {
-            retval = krb5_copy_authdatum(context, inauthdat1[nelems],
-                                         &tempauthdat[nelems]);
+            retval = copy_authdatum(context, inauthdat1[nelems],
+                                    &tempauthdat[nelems]);
             if (retval) {
                 krb5_free_authdata(context, tempauthdat);
                 return retval;
@@ -114,8 +117,8 @@ krb5_merge_authdata(krb5_context context, krb5_authdata *const *inauthdat1, krb5
 
     if (inauthdat2) {
         for (nelems2 = 0; inauthdat2[nelems2]; nelems2++) {
-            retval = krb5_copy_authdatum(context, inauthdat2[nelems2],
-                                         &tempauthdat[nelems++]);
+            retval = copy_authdatum(context, inauthdat2[nelems2],
+                                    &tempauthdat[nelems++]);
             if (retval) {
                 krb5_free_authdata(context, tempauthdat);
                 return retval;
@@ -203,7 +206,8 @@ grow_find_authdata(krb5_context context, struct find_authdata_context *fctx,
     if (fctx->length == fctx->space) {
         krb5_authdata **new;
         if (fctx->space >= 256) {
-            krb5_set_error_message(context, ERANGE, "More than 256 authdata matched a query");
+            krb5_set_error_message(context, ERANGE,
+                                   "More than 256 authdata matched a query");
             return ERANGE;
         }
         new       = realloc(fctx->out,
@@ -214,8 +218,8 @@ grow_find_authdata(krb5_context context, struct find_authdata_context *fctx,
         fctx->space *=2;
     }
     fctx->out[fctx->length+1] = NULL;
-    retval = krb5_copy_authdatum(context, elem,
-                                 &fctx->out[fctx->length]);
+    retval = copy_authdatum(context, elem,
+                            &fctx->out[fctx->length]);
     if (retval == 0)
         fctx->length++;
     return retval;

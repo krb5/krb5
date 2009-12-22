@@ -72,19 +72,19 @@ make_etype_list(krb5_context context,
                 krb5_authdata ***authdata);
 
 static krb5_error_code
-krb5_generate_authenticator (krb5_context,
-                             krb5_authenticator *, krb5_principal,
-                             krb5_checksum *, krb5_key,
-                             krb5_ui_4, krb5_authdata **,
-                             krb5_authdata_context ad_context,
-                             krb5_enctype *desired_etypes,
-                             krb5_enctype tkt_enctype);
+generate_authenticator(krb5_context,
+                       krb5_authenticator *, krb5_principal,
+                       krb5_checksum *, krb5_key,
+                       krb5_ui_4, krb5_authdata **,
+                       krb5_authdata_context ad_context,
+                       krb5_enctype *desired_etypes,
+                       krb5_enctype tkt_enctype);
 
 krb5_error_code
-krb5int_generate_and_save_subkey (krb5_context context,
-                                  krb5_auth_context auth_context,
-                                  krb5_keyblock *keyblock,
-                                  krb5_enctype enctype)
+krb5int_generate_and_save_subkey(krb5_context context,
+                                 krb5_auth_context auth_context,
+                                 krb5_keyblock *keyblock,
+                                 krb5_enctype enctype)
 {
     /* Provide some more fodder for random number code.
        This isn't strong cryptographically; the point here is not
@@ -242,15 +242,15 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
             desired_etypes = (*auth_context)->permitted_etypes;
     }
 
-    if ((retval = krb5_generate_authenticator(context,
-                                              (*auth_context)->authentp,
-                                              in_creds->client, checksump,
-                                              (*auth_context)->send_subkey,
-                                              (*auth_context)->local_seq_number,
-                                              in_creds->authdata,
-                                              (*auth_context)->ad_context,
-                                              desired_etypes,
-                                              in_creds->keyblock.enctype)))
+    if ((retval = generate_authenticator(context,
+                                         (*auth_context)->authentp,
+                                         in_creds->client, checksump,
+                                         (*auth_context)->send_subkey,
+                                         (*auth_context)->local_seq_number,
+                                         in_creds->authdata,
+                                         (*auth_context)->ad_context,
+                                         desired_etypes,
+                                         in_creds->keyblock.enctype)))
         goto cleanup_cksum;
 
     /* encode the authenticator */
@@ -301,13 +301,13 @@ cleanup:
 }
 
 static krb5_error_code
-krb5_generate_authenticator(krb5_context context, krb5_authenticator *authent,
-                            krb5_principal client, krb5_checksum *cksum,
-                            krb5_key key, krb5_ui_4 seq_number,
-                            krb5_authdata **authorization,
-                            krb5_authdata_context ad_context,
-                            krb5_enctype *desired_etypes,
-                            krb5_enctype tkt_enctype)
+generate_authenticator(krb5_context context, krb5_authenticator *authent,
+                       krb5_principal client, krb5_checksum *cksum,
+                       krb5_key key, krb5_ui_4 seq_number,
+                       krb5_authdata **authorization,
+                       krb5_authdata_context ad_context,
+                       krb5_enctype *desired_etypes,
+                       krb5_enctype tkt_enctype)
 {
     krb5_error_code retval;
     krb5_authdata **ext_authdata = NULL;

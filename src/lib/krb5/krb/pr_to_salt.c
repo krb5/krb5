@@ -30,14 +30,17 @@
 
 #include "k5-int.h"
 
-static krb5_error_code krb5_principal2salt_internal
-(krb5_context, krb5_const_principal, krb5_data *ret, int);
+static krb5_error_code
+principal2salt_internal(krb5_context, krb5_const_principal,
+                        krb5_data *ret, int);
 
 /*
  * Convert a krb5_principal into the default salt for that principal.
  */
 static krb5_error_code
-krb5_principal2salt_internal(krb5_context context, register krb5_const_principal pr, krb5_data *ret, int use_realm)
+principal2salt_internal(krb5_context context,
+                        register krb5_const_principal pr,
+                        krb5_data *ret, int use_realm)
 {
     unsigned int size = 0, offset=0;
     krb5_int32 nelem;
@@ -75,13 +78,15 @@ krb5_principal2salt_internal(krb5_context context, register krb5_const_principal
 }
 
 krb5_error_code
-krb5_principal2salt(krb5_context context, register krb5_const_principal pr, krb5_data *ret)
+krb5_principal2salt(krb5_context context,
+                    register krb5_const_principal pr, krb5_data *ret)
 {
-    return krb5_principal2salt_internal(context, pr, ret, 1);
+    return principal2salt_internal(context, pr, ret, 1);
 }
 
 krb5_error_code
-krb5_principal2salt_norealm(krb5_context context, register krb5_const_principal pr, krb5_data *ret)
+krb5_principal2salt_norealm(krb5_context context,
+                            register krb5_const_principal pr, krb5_data *ret)
 {
-    return krb5_principal2salt_internal(context, pr, ret, 0);
+    return principal2salt_internal(context, pr, ret, 0);
 }

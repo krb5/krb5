@@ -33,10 +33,10 @@
 #include "auth_con.h"
 
 static krb5_error_code
-krb5_mk_priv_basic(krb5_context context, const krb5_data *userdata,
-                   krb5_key key, krb5_replay_data *replaydata,
-                   krb5_address *local_addr, krb5_address *remote_addr,
-                   krb5_pointer i_vector, krb5_data *outbuf)
+mk_priv_basic(krb5_context context, const krb5_data *userdata,
+              krb5_key key, krb5_replay_data *replaydata,
+              krb5_address *local_addr, krb5_address *remote_addr,
+              krb5_pointer i_vector, krb5_data *outbuf)
 {
     krb5_enctype        enctype = krb5_k_key_enctype(context, key);
     krb5_error_code     retval;
@@ -193,9 +193,9 @@ krb5_mk_priv(krb5_context context, krb5_auth_context auth_context,
             }
         }
 
-        if ((retval = krb5_mk_priv_basic(context, userdata, key, &replaydata,
-                                         plocal_fulladdr, premote_fulladdr,
-                                         auth_context->i_vector, outbuf))) {
+        if ((retval = mk_priv_basic(context, userdata, key, &replaydata,
+                                    plocal_fulladdr, premote_fulladdr,
+                                    auth_context->i_vector, outbuf))) {
             CLEANUP_DONE();
             goto error;
         }
