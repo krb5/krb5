@@ -305,13 +305,12 @@ verify_as_reply(krb5_context            context,
      */
     canon_req = ((request->kdc_options & KDC_OPT_CANONICALIZE) != 0) ||
         (krb5_princ_type(context, request->client) == KRB5_NT_ENTERPRISE_PRINCIPAL)
-        || (krb5_principal_compare_any_realm(context, request->client,
-                                             krb5_anonymous_principal()));
+        || (request->kdc_options & KDC_OPT_REQUEST_ANONYMOUS);
     if (canon_req) {
         canon_ok = IS_TGS_PRINC(context, request->server) &&
             IS_TGS_PRINC(context, as_reply->enc_part2->server);
         if ((!canon_ok ) && (request->kdc_options &KDC_OPT_REQUEST_ANONYMOUS))
-            canon_ok = krb5_principal_compare(context, as_reply->client,
+            canon_ok = krb5_principal_compare_any_realm(context, as_reply->client,
                                               krb5_anonymous_principal());
     } else
         canon_ok = 0;
@@ -1535,6 +1534,26 @@ krb5_init_creds_init(krb5_context context,
     }
 
     /*Anonymous*/
+    if(opte->flags & KRB5_GET_INIT_CREDS_OPT_ANONYMOUS) {
+        ctx->request->kdc_options |= KDC_OPT_REQUEST_ANONYMOUS;
+        /*Remap @REALM to WELLKNOWN/ANONYMOUS@REALM*/
+        if (client->length == 1 && client->data[0].length ==0) {
+            krb5_principal new_client;
+            code = krb5_build_principal_ext(context, &new_client, client->realm.length,
+                                           client->realm.data,
+                                           strlen(KRB5_WELLKNOWN_NAMESTR),
+                                           KRB5_WELLKNOWN_NAMESTR,
+                                           strlen(KRB5_ANONYMOUS_PRINCSTR),
+                                           KRB5_ANONYMOUS_PRINCSTR,
+                                           0);
+            if (code)
+                goto cleanup;
+            krb5_free_principal(context, ctx->request->client);
+            ctx->request->client = new_client;
+                    krb5_princ_type(context, ctx->request->client) = KRB5_NT_WELLKNOWN;
+        }
+    }
+    /*We will also handle anonymous if the input principal is the anonymous principal*/
     if (krb5_principal_compare_any_realm(context, ctx->request->client,
                                          krb5_anonymous_principal())) {
         ctx->request->kdc_options |= KDC_OPT_REQUEST_ANONYMOUS;

@@ -2204,6 +2204,7 @@ typedef struct _krb5_get_init_creds_opt {
 #define KRB5_GET_INIT_CREDS_OPT_SALT            0x0080
 #define KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT   0x0100
 #define KRB5_GET_INIT_CREDS_OPT_CANONICALIZE    0x0200
+#define KRB5_GET_INIT_CREDS_OPT_ANONYMOUS 0x0400
 
 
 krb5_error_code KRB5_CALLCONV
@@ -2236,6 +2237,20 @@ krb5_get_init_creds_opt_set_proxiable(krb5_get_init_creds_opt *opt,
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_set_canonicalize(krb5_get_init_creds_opt *opt,
                                          int canonicalize);
+
+/**
+ * Request anonymous credentials from the KDC.  If the  client name looks like
+ * "@REALM" (an empty principal name), then fully anonymous credentials are
+ * requested.  If the client name looks like "name@REALM," then credentials
+ * tied to a specific realm are requested.
+ *
+ * Credentials tied to a specific realm are not supported in this version.
+ *
+ * Note that anonymous credentials are only a request; clients must verify that
+ * credentials are anonymous if that is a requirement.
+ */
+krb5_get_init_creds_opt_set_anonymous(krb5_get_init_creds_opt *opt,
+                                      int anonymous);
 
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_set_etype_list(krb5_get_init_creds_opt *opt,

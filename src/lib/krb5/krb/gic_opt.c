@@ -53,6 +53,15 @@ krb5_get_init_creds_opt_set_canonicalize(krb5_get_init_creds_opt *opt, int canon
 }
 
 void KRB5_CALLCONV
+krb5_get_init_creds_opt_set_anonymous (krb5_get_init_creds_opt *opt,
+                                       int anonymous)
+{
+    if (anonymous)
+        opt->flags |= KRB5_GET_INIT_CREDS_OPT_ANONYMOUS;
+    else opt->flags &= ~KRB5_GET_INIT_CREDS_OPT_ANONYMOUS;
+}
+
+void KRB5_CALLCONV
 krb5_get_init_creds_opt_set_etype_list(krb5_get_init_creds_opt *opt, krb5_enctype *etype_list, int etype_list_length)
 {
     opt->flags |= KRB5_GET_INIT_CREDS_OPT_ETYPE_LIST;
