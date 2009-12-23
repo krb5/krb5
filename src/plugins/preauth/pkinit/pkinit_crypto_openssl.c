@@ -1120,8 +1120,9 @@ cms_signeddata_verify(krb5_context context,
                       unsigned char **data,
                       unsigned int *data_len,
                       unsigned char **authz_data,
-                      unsigned int *authz_data_len)
-{
+                      unsigned int *authz_data_len,
+                      int *is_signed)
+    {
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
     PKCS7 *p7 = NULL;
     BIO *out = NULL;
@@ -1146,7 +1147,8 @@ cms_signeddata_verify(krb5_context context,
     print_buffer_bin(signed_data, signed_data_len,
                      "/tmp/client_received_pkcs7_signeddata");
 #endif
-
+    if (is_signed)
+        *is_signed = 1;
     /* Do this early enough to create the shadow OID for pkcs7-data if needed */
     oid = pkinit_pkcs7type2oid(plgctx, cms_msg_type);
     if (oid == NULL)
@@ -1162,12 +1164,32 @@ cms_signeddata_verify(krb5_context context,
         goto cleanup;
     }
 
-    /* verify that the received message is PKCS7 SignedData message */
-    if (OBJ_obj2nid(p7->type) != NID_pkcs7_signed) {
-        pkiDebug("Expected id-signedData PKCS7 msg (received type = %d)\n",
-                 OBJ_obj2nid(p7->type));
-        krb5_set_error_message(context, retval, "wrong oid\n");
-        goto cleanup;
+/*Handle the case in pkinit anonymous where  we get unsigned data.*/
+    if (is_signed && !OBJ_cmp( p7->type, oid)) {
+        unsigned char *d;
+        *is_signed = 0;
+        if (p7->d.other->type != V_ASN1_OCTET_STRING) {
+            retval = KRB5KDC_ERR_PREAUTH_FAILED;
+            krb5_set_error_message(context, KRB5KDC_ERR_PREAUTH_FAILED, "Invalid pkinit packet: octet string expected");
+            goto cleanup;
+        }
+        *data_len = ASN1_STRING_length(p7->d.other->value.octet_string);
+        d = malloc(*data_len);
+        if (d == NULL) {
+            retval = ENOMEM;
+            goto cleanup;
+        }
+        memcpy(d, ASN1_STRING_data(p7->d.other->value.octet_string),
+               *data_len);
+        *data = d;
+        goto out;
+    } else     /* verify that the received message is PKCS7 SignedData message */
+        if (OBJ_obj2nid(p7->type) != NID_pkcs7_signed) {
+
+            pkiDebug("Expected id-signedData PKCS7 msg (received type = %d)\n",
+                     OBJ_obj2nid(p7->type));
+            krb5_set_error_message(context, retval, "wrong oid\n");
+            goto cleanup;
     }
 
     /* setup to verify X509 certificate used to sign PKCS7 message */
@@ -1370,7 +1392,6 @@ cms_signeddata_verify(krb5_context context,
     for (size = 0;;) {
         int remain;
         retval = ENOMEM;
-
         if ((*data = realloc(*data, size + 1024 * 10)) == NULL)
             goto cleanup;
         remain = BIO_read(out, &((*data)[size]), 1024 * 10);
@@ -1703,7 +1724,7 @@ cms_envelopeddata_verify(krb5_context context,
                                    id_cryptoctx, msg_type,
                                    require_crl_checking,
                                    vfy_buf, vfy_buf_len,
-                                   data, data_len, NULL, NULL);
+                                   data, data_len, NULL, NULL, NULL);
 
     if (!retval)
         pkiDebug("PKCS7 Verification Success\n");

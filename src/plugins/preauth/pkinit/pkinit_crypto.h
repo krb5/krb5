@@ -181,8 +181,9 @@ krb5_error_code cms_signeddata_verify
 		    receives required authorization data that
 		    contains the verified certificate chain
 		    (only used by the KDC) */
-	unsigned int *authz_data_len);			/* OUT
-		    receives length of authz_data */
+	 unsigned int *authz_data_len,			/* OUT
+							   receives length of authz_data */
+	 int *is_signed /*out: is message signed*/);
 
 /*
  * this function creates a CMS message where eContentType is EnvelopedData

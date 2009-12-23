@@ -314,6 +314,7 @@ pkinit_server_verify_padata(krb5_context context,
     krb5_authdata **my_authz_data = NULL, *pkinit_authz_data = NULL;
     krb5_kdc_req *tmp_as_req = NULL;
     krb5_data k5data;
+    int is_signed = 1;
     krb5_keyblock *armor_key;
 
     pkiDebug("pkinit_verify_padata: entered!\n");
@@ -367,7 +368,7 @@ pkinit_server_verify_padata(krb5_context context,
                                        plgctx->opts->require_crl_checking,
                                        reqp->signedAuthPack.data, reqp->signedAuthPack.length,
                                        &authp_data.data, &authp_data.length, &krb5_authz.data,
-                                       &krb5_authz.length);
+                                       &krb5_authz.length, &is_signed);
         break;
     case KRB5_PADATA_PK_AS_REP_OLD:
     case KRB5_PADATA_PK_AS_REQ_OLD:
@@ -389,7 +390,7 @@ pkinit_server_verify_padata(krb5_context context,
                                        plgctx->opts->require_crl_checking,
                                        reqp9->signedAuthPack.data, reqp9->signedAuthPack.length,
                                        &authp_data.data, &authp_data.length, &krb5_authz.data,
-                                       &krb5_authz.length);
+                                       &krb5_authz.length, NULL);
         break;
     default:
         pkiDebug("unrecognized pa_type = %d\n", data->pa_type);
@@ -400,28 +401,35 @@ pkinit_server_verify_padata(krb5_context context,
         pkiDebug("pkcs7_signeddata_verify failed\n");
         goto cleanup;
     }
+    if (is_signed) {
 
-    retval = verify_client_san(context, plgctx, reqctx, request->client,
-                               &valid_san);
-    if (retval)
-        goto cleanup;
-    if (!valid_san) {
-        pkiDebug("%s: did not find an acceptable SAN in user certificate\n",
-                 __FUNCTION__);
-        retval = KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
-        goto cleanup;
+        retval = verify_client_san(context, plgctx, reqctx, request->client,
+                                   &valid_san);
+        if (retval)
+            goto cleanup;
+        if (!valid_san) {
+            pkiDebug("%s: did not find an acceptable SAN in user certificate\n",
+                     __FUNCTION__);
+            retval = KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
+            goto cleanup;
+        }
+        retval = verify_client_eku(context, plgctx, reqctx, &valid_eku);
+        if (retval)
+            goto cleanup;
+
+        if (!valid_eku) {
+            pkiDebug("%s: did not find an acceptable EKU in user certificate\n",
+                     __FUNCTION__);
+            retval = KRB5KDC_ERR_INCONSISTENT_KEY_PURPOSE;
+            goto cleanup;
+        }
+    } else { /*!is_signed*/
+        if (!krb5_principal_compare( context, request->client, krb5_anonymous_principal())) {
+            retval = KRB5KDC_ERR_PREAUTH_FAILED;
+            krb5_set_error_message(context, retval, "Pkinit request not signed, but client not anonymous.");
+            goto cleanup;
+        }
     }
-    retval = verify_client_eku(context, plgctx, reqctx, &valid_eku);
-    if (retval)
-        goto cleanup;
-
-    if (!valid_eku) {
-        pkiDebug("%s: did not find an acceptable EKU in user certificate\n",
-                 __FUNCTION__);
-        retval = KRB5KDC_ERR_INCONSISTENT_KEY_PURPOSE;
-        goto cleanup;
-    }
-
 #ifdef DEBUG_ASN1
     print_buffer_bin(authp_data.data, authp_data.length, "/tmp/kdc_auth_pack");
 #endif
@@ -446,6 +454,11 @@ pkinit_server_verify_padata(krb5_context context,
                 pkiDebug("bad dh parameters\n");
                 goto cleanup;
             }
+        } else if (!is_signed) {
+            /*Anonymous pkinit requires DH*/
+            retval = KRB5KDC_ERR_PREAUTH_FAILED;
+            krb5_set_error_message(context, retval, "Anonymous pkinit without DH public value not supported.");
+            goto cleanup;
         }
         /*
          * The KDC may have modified the request after decoding it.
