@@ -34,6 +34,8 @@ krb5_gss_display_name(minor_status, input_name, output_name_buffer,
     krb5_context context;
     krb5_error_code code;
     char *str;
+    krb5_gss_name_t k5name = (krb5_gss_name_t) input_name;
+    gss_OID nametype = (gss_OID) gss_nt_krb5_name;
 
     code = krb5_gss_init_context(&context);
     if (code) {
@@ -48,6 +50,11 @@ krb5_gss_display_name(minor_status, input_name, output_name_buffer,
         *minor_status = (OM_uint32) G_VALIDATE_FAILED;
         krb5_free_context(context);
         return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
+    }
+    if (krb5_princ_type(context, k5name->princ) == KRB5_NT_WELLKNOWN) {
+        if (krb5_principal_compare(context, k5name->princ,
+                                   krb5_anonymous_principal()))
+            nametype = GSS_C_NT_ANONYMOUS;
     }
 
     if ((code = krb5_unparse_name(context,
@@ -72,6 +79,6 @@ krb5_gss_display_name(minor_status, input_name, output_name_buffer,
 
     *minor_status = 0;
     if (output_name_type)
-        *output_name_type = (gss_OID) gss_nt_krb5_name;
+        *output_name_type = (gss_OID) nametype;
     return(GSS_S_COMPLETE);
 }
