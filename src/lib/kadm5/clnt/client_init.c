@@ -343,7 +343,8 @@ static kadm5_ret_t _kadm5_init_any(krb5_context context, char *client_name,
      * The RPC connection is open; establish the GSS-API
      * authentication context.
      */
-    code = kadm5_setup_gss(handle, params_in, client_name, full_svcname);
+    code = kadm5_setup_gss(handle, params_in, (init_type == INIT_CREDS)?client_name:NULL,
+                           full_svcname);
     if (code)
         goto error;
 
@@ -490,7 +491,7 @@ kadm5_get_init_creds(kadm5_server_handle_t handle,
                           full_svcname, full_svcname_len);
     if ((code == KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN
          || code == KRB5_CC_NOTFOUND) && svcname_in == NULL) {
-        /* Retry with old host-independent service princpal. */
+        /* Retry with old host-independent service principal. */
         code = kadm5_gic_iter(handle, init_type, ccache,
                               client, pass,
                               KADM5_ADMIN_SERVICE, realm,
@@ -525,7 +526,7 @@ kadm5_gic_iter(kadm5_server_handle_t handle,
     kadm5_ret_t code;
     krb5_context ctx;
     krb5_keytab kt;
-    krb5_get_init_creds_opt opt;
+    krb5_get_init_creds_opt *opt = NULL;
     krb5_creds mcreds, outcreds;
     int n;
 
@@ -540,29 +541,30 @@ kadm5_gic_iter(kadm5_server_handle_t handle,
     if (realm) {
         n = snprintf(full_svcname, full_svcname_len, "%s@%s",
                      svcname, realm);
-        if (n < 0 || n >= full_svcname_len)
+        if (n < 0 || n >= (int) full_svcname_len)
             goto error;
     } else {
         /* krb5_princ_realm(client) is not null terminated */
         n = snprintf(full_svcname, full_svcname_len, "%s@%.*s",
                      svcname, krb5_princ_realm(ctx, client)->length,
                      krb5_princ_realm(ctx, client)->data);
-        if (n < 0 || n >= full_svcname_len)
+        if (n < 0 || n >= (int) full_svcname_len)
             goto error;
     }
 
     /* Credentials for kadmin don't need to be forwardable or proxiable. */
     if (init_type != INIT_CREDS) {
-        krb5_get_init_creds_opt_init(&opt);
-        krb5_get_init_creds_opt_set_forwardable(&opt, 0);
-        krb5_get_init_creds_opt_set_proxiable(&opt, 0);
-    }
+        code = krb5_get_init_creds_opt_alloc(ctx, &opt);
+        krb5_get_init_creds_opt_set_forwardable(opt, 0);
+        krb5_get_init_creds_opt_set_proxiable(opt, 0);
+        krb5_get_init_creds_opt_set_out_ccache(ctx, opt, ccache);
+            }
 
     if (init_type == INIT_PASS) {
         code = krb5_get_init_creds_password(ctx, &outcreds, client, pass,
                                             krb5_prompter_posix,
                                             NULL, 0,
-                                            full_svcname, &opt);
+                                            full_svcname, opt);
         if (code)
             goto error;
     } else if (init_type == INIT_SKEY) {
@@ -572,7 +574,7 @@ kadm5_gic_iter(kadm5_server_handle_t handle,
                 goto error;
         }
         code = krb5_get_init_creds_keytab(ctx, &outcreds, client, kt,
-                                          0, full_svcname, &opt);
+                                          0, full_svcname, opt);
         if (pass)
             krb5_kt_close(ctx, kt);
         if (code)
@@ -588,14 +590,10 @@ kadm5_gic_iter(kadm5_server_handle_t handle,
         if (code)
             goto error;
     }
-    if (init_type != INIT_CREDS) {
-        /* Caller has initialized ccache. */
-        code = krb5_cc_store_cred(ctx, ccache, &outcreds);
-        if (code)
-            goto error;
-    }
 error:
     krb5_free_cred_contents(ctx, &outcreds);
+    if (opt)
+        krb5_get_init_creds_opt_free(ctx, opt);
     return code;
 }
 
@@ -644,10 +642,13 @@ kadm5_setup_gss(kadm5_server_handle_t handle,
         goto error;
     }
 
-    buf.value = client_name;
-    buf.length = strlen((char *)buf.value) + 1;
+    if (client_name) {
+        buf.value = client_name;
+        buf.length = strlen((char *)buf.value) + 1;
     gssstat = gss_import_name(&minor_stat, &buf,
                               (gss_OID) gss_nt_krb5_name, &gss_client);
+    } else gss_client = GSS_C_NO_NAME;
+
     if (gssstat != GSS_S_COMPLETE) {
         code = KADM5_GSS_ERROR;
         goto error;
