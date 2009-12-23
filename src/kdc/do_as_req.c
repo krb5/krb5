@@ -405,6 +405,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
             status = "Copying anonymous principal";
             goto errout;
         }
+        enc_tkt_reply.client = request->client;
     }
     /*
      * Check the preauthentication if it is there.
