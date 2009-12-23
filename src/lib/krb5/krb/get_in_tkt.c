@@ -304,7 +304,9 @@ verify_as_reply(krb5_context            context,
      * principal) and we requested (and received) a TGT.
      */
     canon_req = ((request->kdc_options & KDC_OPT_CANONICALIZE) != 0) ||
-        (krb5_princ_type(context, request->client) == KRB5_NT_ENTERPRISE_PRINCIPAL);
+        (krb5_princ_type(context, request->client) == KRB5_NT_ENTERPRISE_PRINCIPAL)
+        || (krb5_principal_compare_any_realm(context, request->client,
+                                             krb5_anonymous_principal()));
     if (canon_req) {
         canon_ok = IS_TGS_PRINC(context, request->server) &&
             IS_TGS_PRINC(context, as_reply->enc_part2->server);
@@ -1529,6 +1531,12 @@ krb5_init_creds_init(krb5_context context,
         ctx->salt.data = NULL;
     }
 
+    /*Anonymous*/
+    if (krb5_principal_compare_any_realm(context, ctx->request->client,
+                                         krb5_anonymous_principal())) {
+        ctx->request->kdc_options |= KDC_OPT_REQUEST_ANONYMOUS;
+        krb5_princ_type(context, ctx->request->client) = KRB5_NT_WELLKNOWN;
+    }
     code = restart_init_creds_loop(context, ctx, NULL);
 
     *pctx = ctx;
