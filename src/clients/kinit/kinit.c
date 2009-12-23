@@ -106,6 +106,7 @@ struct k_opts
 
     int forwardable;
     int proxiable;
+    int anonymous;
     int addresses;
 
     int not_forwardable;
@@ -189,6 +190,7 @@ usage()
             USAGE_BREAK_LONG
             "[-p | -P" USAGE_LONG_PROXIABLE "] "
             USAGE_BREAK_LONG
+            "-n"
             "[-a | -A" USAGE_LONG_ADDRESSES "] "
             USAGE_BREAK_LONG
             "[-C" USAGE_LONG_CANONICALIZE "] "
@@ -214,6 +216,7 @@ usage()
     fprintf(stderr, "\t-F not forwardable\n");
     fprintf(stderr, "\t-p proxiable\n");
     fprintf(stderr, "\t-P not proxiable\n");
+    fprintf(stderr, "\t -n anonymous\n");
     fprintf(stderr, "\t-a include addresses\n");
     fprintf(stderr, "\t-A do not include addresses\n");
     fprintf(stderr, "\t-v validate\n");
@@ -282,7 +285,7 @@ parse_options(argc, argv, opts)
     int errflg = 0;
     int i;
 
-    while ((i = GETOPT(argc, argv, "r:fpFP54aAVl:s:c:kt:T:RS:vX:CE"))
+    while ((i = GETOPT(argc, argv, "r:fpFPn54aAVl:s:c:kt:T:RS:vX:CE"))
            != -1) {
         switch (i) {
         case 'V':
@@ -315,6 +318,9 @@ parse_options(argc, argv, opts)
             break;
         case 'P':
             opts->not_proxiable = 1;
+            break;
+        case 'n':
+            opts->anonymous = 1;
             break;
         case 'a':
             opts->addresses = 1;
@@ -461,17 +467,31 @@ k5_begin(opts, k5)
 
     if (opts->principal_name)
     {
-        /* Use specified name */
-        if ((code = krb5_parse_name_flags(k5->ctx, opts->principal_name,
-                                          flags, &k5->me))) {
-            com_err(progname, code, "when parsing name %s",
-                    opts->principal_name);
-            return 0;
+        if (opts->anonymous) {
+            code = krb5_build_principal_ext(k5->ctx, &k5->me, strlen(opts->principal_name),
+                                            opts->principal_name,
+                                            9, "WELLKNOWN", 9, "ANONYMOUS", 0);
+            if (code) {
+                com_err(progname, code, "while setting up anonymous principal");
+                return 0;
+            }
+        } else {
+            /* Use specified name */
+            if ((code = krb5_parse_name_flags(k5->ctx, opts->principal_name,
+                                              flags, &k5->me))) {
+                com_err(progname, code, "when parsing name %s",
+                        opts->principal_name);
+                return 0;
+            }
         }
     }
     else
     {
         /* No principal name specified */
+        if (opts->anonymous) {
+            fprintf(stderr, "%s: please specify realm for anonymous authentication\n", progname);
+            return 0;
+        }
         if (opts->action == INIT_KT) {
             /* Use the default host/service name */
             code = krb5_sname_to_principal(k5->ctx, NULL, NULL,
