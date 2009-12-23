@@ -846,10 +846,9 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 /* #define      KDC_OPT_RESERVED        0x00100000 */
 /* #define      KDC_OPT_RESERVED        0x00080000 */
 /* #define      KDC_OPT_RESERVED        0x00040000 */
-#define KDC_OPT_REQUEST_ANONYMOUS       0x00020000
 #define KDC_OPT_CNAME_IN_ADDL_TKT       0x00020000
 #define KDC_OPT_CANONICALIZE            0x00010000
-/* #define      KDC_OPT_RESERVED        0x00008000 */
+#define KDC_OPT_REQUEST_ANONYMOUS       0x000080000
 /* #define      KDC_OPT_RESERVED        0x00004000 */
 /* #define      KDC_OPT_RESERVED        0x00002000 */
 /* #define      KDC_OPT_RESERVED        0x00001000 */
@@ -937,9 +936,8 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 #define TKT_FLG_HW_AUTH                 0x00100000
 #define TKT_FLG_TRANSIT_POLICY_CHECKED  0x00080000
 #define TKT_FLG_OK_AS_DELEGATE          0x00040000
-#define TKT_FLG_ANONYMOUS               0x00020000
 #define TKT_FLG_ENC_PA_REP              0x00010000
-/* #define      TKT_FLG_RESERVED        0x00008000 */
+ #define      TKT_FLG_ANONYMOUS        0x00008000
 /* #define      TKT_FLG_RESERVED        0x00004000 */
 /* #define      TKT_FLG_RESERVED        0x00002000 */
 /* #define      TKT_FLG_RESERVED        0x00001000 */
