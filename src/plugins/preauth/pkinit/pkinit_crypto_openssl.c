@@ -821,7 +821,11 @@ cms_signeddata_create(krb5_context context,
     X509 *cert = NULL;
     ASN1_OBJECT *oid = NULL;
 
-    /* start creating PKCS7 data */
+    if (id_cryptoctx->my_certs == NULL) {
+        krb5_set_error_message(context, EINVAL, "cms_signdata_create called with no certificates");
+        return EINVAL;
+    }
+/* start creating PKCS7 data */
     if ((p7 = PKCS7_new()) == NULL)
         goto cleanup;
     p7->type = OBJ_nid2obj(NID_pkcs7_signed);

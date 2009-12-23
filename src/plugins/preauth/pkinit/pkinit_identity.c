@@ -505,65 +505,67 @@ pkinit_identity_initialize(krb5_context context,
     int i;
 
     pkiDebug("%s: %p %p %p\n", __FUNCTION__, context, idopts, id_cryptoctx);
-    if (idopts == NULL || id_cryptoctx == NULL)
-        goto errout;
+    if (!krb5_principal_compare (context, princ, krb5_anonymous_principal())) {
+        if (idopts == NULL || id_cryptoctx == NULL)
+            goto errout;
 
-    /*
-     * If identity was specified, use that.  (For the kdc, this
-     * is specified as pkinit_identity in the kdc.conf.  For users,
-     * this is specified on the command line via X509_user_identity.)
-     * If a user did not specify identity on the command line,
-     * then we will try alternatives which may have been specified
-     * in the config file.
-     */
-    if (idopts->identity != NULL) {
-        retval = process_option_identity(context, plg_cryptoctx, req_cryptoctx,
-                                         idopts, id_cryptoctx,
-                                         idopts->identity);
-    } else if (idopts->identity_alt != NULL) {
-        for (i = 0; retval != 0 && idopts->identity_alt[i] != NULL; i++)
-            retval = process_option_identity(context, plg_cryptoctx,
-                                             req_cryptoctx, idopts,
-                                             id_cryptoctx,
-                                             idopts->identity_alt[i]);
-    } else {
-        pkiDebug("%s: no user identity options specified\n", __FUNCTION__);
-        goto errout;
-    }
-    if (retval)
-        goto errout;
-
-    retval = crypto_load_certs(context, plg_cryptoctx, req_cryptoctx,
-                               idopts, id_cryptoctx, princ);
-    if (retval)
-        goto errout;
-
-    if (do_matching) {
-        retval = pkinit_cert_matching(context, plg_cryptoctx, req_cryptoctx,
-                                      id_cryptoctx, princ);
-        if (retval) {
-            pkiDebug("%s: No matching certificate found\n", __FUNCTION__);
-            crypto_free_cert_info(context, plg_cryptoctx, req_cryptoctx,
-                                  id_cryptoctx);
+        /*
+         * If identity was specified, use that.  (For the kdc, this
+         * is specified as pkinit_identity in the kdc.conf.  For users,
+         * this is specified on the command line via X509_user_identity.)
+         * If a user did not specify identity on the command line,
+         * then we will try alternatives which may have been specified
+         * in the config file.
+         */
+        if (idopts->identity != NULL) {
+            retval = process_option_identity(context, plg_cryptoctx, req_cryptoctx,
+                                             idopts, id_cryptoctx,
+                                             idopts->identity);
+        } else if (idopts->identity_alt != NULL) {
+            for (i = 0; retval != 0 && idopts->identity_alt[i] != NULL; i++)
+                retval = process_option_identity(context, plg_cryptoctx,
+                                                 req_cryptoctx, idopts,
+                                                 id_cryptoctx,
+                                                 idopts->identity_alt[i]);
+        } else {
+            pkiDebug("%s: no user identity options specified\n", __FUNCTION__);
             goto errout;
         }
-    } else {
-        /* Tell crypto code to use the "default" */
-        retval = crypto_cert_select_default(context, plg_cryptoctx,
-                                            req_cryptoctx, id_cryptoctx);
-        if (retval) {
-            pkiDebug("%s: Failed while selecting default certificate\n",
-                     __FUNCTION__);
-            crypto_free_cert_info(context, plg_cryptoctx, req_cryptoctx,
-                                  id_cryptoctx);
+        if (retval)
             goto errout;
-        }
-    }
 
-    retval = crypto_free_cert_info(context, plg_cryptoctx, req_cryptoctx,
-                                   id_cryptoctx);
-    if (retval)
-        goto errout;
+        retval = crypto_load_certs(context, plg_cryptoctx, req_cryptoctx,
+                                   idopts, id_cryptoctx, princ);
+        if (retval)
+            goto errout;
+
+        if (do_matching) {
+            retval = pkinit_cert_matching(context, plg_cryptoctx, req_cryptoctx,
+                                          id_cryptoctx, princ);
+            if (retval) {
+                pkiDebug("%s: No matching certificate found\n", __FUNCTION__);
+                crypto_free_cert_info(context, plg_cryptoctx, req_cryptoctx,
+                                      id_cryptoctx);
+                goto errout;
+            }
+        } else {
+            /* Tell crypto code to use the "default" */
+            retval = crypto_cert_select_default(context, plg_cryptoctx,
+                                                req_cryptoctx, id_cryptoctx);
+            if (retval) {
+                pkiDebug("%s: Failed while selecting default certificate\n",
+                         __FUNCTION__);
+                crypto_free_cert_info(context, plg_cryptoctx, req_cryptoctx,
+                                      id_cryptoctx);
+                goto errout;
+            }
+        }
+
+        retval = crypto_free_cert_info(context, plg_cryptoctx, req_cryptoctx,
+                                       id_cryptoctx);
+        if (retval)
+            goto errout;
+    } /*not anonymous principal*/
 
     for (i = 0; idopts->anchors != NULL && idopts->anchors[i] != NULL; i++) {
         retval = process_option_ca_crl(context, plg_cryptoctx, req_cryptoctx,
