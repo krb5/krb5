@@ -128,6 +128,7 @@ typedef struct _krb5_authdata_systems {
     int         type;
 #define AUTHDATA_FLAG_CRITICAL  0x1
 #define AUTHDATA_FLAG_PRE_PLUGIN 0x2
+#define AUTHDATA_FLAG_ANONYMOUS 0x4 /*Use this plugin even for anonymous tickets*/
     int         flags;
     void       *plugin_context;
     init_proc   init;
@@ -143,7 +144,7 @@ static krb5_authdata_systems static_authdata_systems[] = {
         /* Propagate client-submitted authdata */
         "tgs_req",
         AUTHDATA_SYSTEM_V2,
-        AUTHDATA_FLAG_CRITICAL | AUTHDATA_FLAG_PRE_PLUGIN,
+        AUTHDATA_FLAG_CRITICAL | AUTHDATA_FLAG_PRE_PLUGIN|AUTHDATA_FLAG_ANONYMOUS,
         NULL,
         NULL,
         NULL,
@@ -153,7 +154,7 @@ static krb5_authdata_systems static_authdata_systems[] = {
         /* Propagate TGT authdata */
         "tgt",
         AUTHDATA_SYSTEM_V2,
-        AUTHDATA_FLAG_CRITICAL,
+        AUTHDATA_FLAG_CRITICAL|AUTHDATA_FLAG_ANONYMOUS,
         NULL,
         NULL,
         NULL,
@@ -765,6 +766,9 @@ handle_authdata (krb5_context context,
 
     for (i = 0; i < n_authdata_systems; i++) {
         const krb5_authdata_systems *asys = &authdata_systems[i];
+        if (isflagset(enc_tkt_reply->flags, TKT_FLG_ANONYMOUS) &&
+            !isflagset(asys->flags, AUTHDATA_FLAG_ANONYMOUS))
+            continue;
 
         switch (asys->type) {
         case AUTHDATA_SYSTEM_V0:
