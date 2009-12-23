@@ -848,7 +848,7 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 /* #define      KDC_OPT_RESERVED        0x00040000 */
 #define KDC_OPT_CNAME_IN_ADDL_TKT       0x00020000
 #define KDC_OPT_CANONICALIZE            0x00010000
-#define KDC_OPT_REQUEST_ANONYMOUS       0x000080000
+#define KDC_OPT_REQUEST_ANONYMOUS       0x00008000
 /* #define      KDC_OPT_RESERVED        0x00004000 */
 /* #define      KDC_OPT_RESERVED        0x00002000 */
 /* #define      KDC_OPT_RESERVED        0x00001000 */
