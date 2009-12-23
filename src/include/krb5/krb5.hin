@@ -638,7 +638,7 @@ krb5_c_keyed_checksum_types(krb5_context context, krb5_enctype enctype,
 #define KRB5_KEYUSAGE_PA_S4U_X509_USER_REPLY    27 /* XXX note conflict with above */
 
 #define KRB5_KEYUSAGE_AD_SIGNEDPATH             -21
-
+#define KRB5_KEYUSAGE_PA_PKINIT_KX 44
 /* define in draft-ietf-krb-wg-preauth-framework*/
 #define KRB5_KEYUSAGE_FAST_REQ_CHKSUM 50
 #define KRB5_KEYUSAGE_FAST_ENC 51
@@ -1041,6 +1041,7 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 #define KRB5_PADATA_FX_FAST  136
 #define KRB5_PADATA_FX_ERROR 137
 #define KRB5_PADATA_ENCRYPTED_CHALLENGE 138
+#define KRB5_PADATA_PKINIT_KX 147
 #define KRB5_ENCPADATA_REQ_ENC_PA_REP 149
 
 #define KRB5_SAM_USE_SAD_AS_KEY         0x80000000

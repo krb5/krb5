@@ -283,6 +283,71 @@ cleanup:
     return (retval);
 }
 
+/**
+ * Fully anonymous replies include a pa_pkinit_kx padata type including the KDC
+ * contribution key.  This routine confirms that the session key is of the
+ * right form for fully anonymous requests.  It is here rather than in the
+ * preauth code because the session key cannot be verified until the AS reply
+ * is decrypted and the preauth code all runs before the AS reply is decrypted.
+ */
+static krb5_error_code
+verify_anonymous( krb5_context context, krb5_kdc_req *request,
+                  krb5_kdc_rep *reply, krb5_keyblock *as_key)
+{
+    krb5_error_code ret = 0;
+    krb5_pa_data *pa;
+    krb5_data scratch;
+    krb5_keyblock *kdc_key = NULL, *expected = NULL;
+    krb5_enc_data *enc = NULL;
+    krb5_keyblock *session = reply->enc_part2->session;
+    if (!krb5_principal_compare_any_realm(context, request->client,
+                                          krb5_anonymous_principal()))
+        return 0; /*Only applies to fully anonymous*/
+    pa = krb5int_find_pa_data(context, reply->padata, KRB5_PADATA_PKINIT_KX);
+    if (pa == NULL)
+        goto verification_error;
+    scratch.length = pa->length;
+    scratch.data = (char  *) pa->contents;
+    ret = decode_krb5_enc_data( &scratch, &enc);
+    if (ret)
+        goto cleanup;
+    scratch.data = k5alloc(enc->ciphertext.length, &ret);
+    if (ret)
+        goto cleanup;
+    scratch.length = enc->ciphertext.length;
+    ret = krb5_c_decrypt(context, as_key, KRB5_KEYUSAGE_PA_PKINIT_KX,
+                         NULL /*cipherstate*/, enc, &scratch);
+    if (ret) {
+        free( scratch.data);
+        goto cleanup;
+    }
+    ret = decode_krb5_encryption_key( &scratch, &kdc_key);
+    zap(scratch.data, scratch.length);
+    free(scratch.data);
+    if (ret)
+        goto cleanup;
+    ret = krb5_c_fx_cf2_simple( context, kdc_key, "PKINIT",
+                                as_key, "KEYEXCHANGE", &expected);
+    if (ret)
+        goto cleanup;
+    if ((expected->enctype != session->enctype)
+        || (expected->length != session->length)
+        || (memcmp(expected->contents, session->contents, expected->length) != 0))
+        goto verification_error;
+cleanup:
+    if (kdc_key)
+        krb5_free_keyblock(context, kdc_key);
+    if (expected)
+        krb5_free_keyblock(context, expected);
+    if (enc)
+        krb5_free_enc_data(context, enc);
+    return ret;
+verification_error:
+    ret = KRB5_KDCREP_MODIFIED;
+    krb5_set_error_message(context, ret, "Reply has wrong form of session key for anonymous request");
+    goto cleanup;
+}
+
 static krb5_error_code
 verify_as_reply(krb5_context            context,
                 krb5_timestamp          time_now,
@@ -1993,6 +2058,10 @@ init_creds_step_reply(krb5_context context,
     code = verify_as_reply(context, ctx->request_time,
                            ctx->request, ctx->reply);
     if (code != 0)
+        goto cleanup;
+    code = verify_anonymous( context, ctx->request, ctx->reply,
+                             &encrypting_key);
+    if (code)
         goto cleanup;
 
     code = stash_as_reply(context, ctx->request_time, ctx->request,
