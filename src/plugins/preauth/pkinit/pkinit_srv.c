@@ -300,7 +300,6 @@ pkinit_server_verify_padata(krb5_context context,
 {
     krb5_error_code retval = 0;
     krb5_octet_data authp_data = {0, 0, NULL}, krb5_authz = {0, 0, NULL};
-    krb5_data *encoded_pkinit_authz_data = NULL;
     krb5_pa_pk_as_req *reqp = NULL;
     krb5_pa_pk_as_req_draft9 *reqp9 = NULL;
     krb5_auth_pack *auth_pack = NULL;
@@ -311,7 +310,6 @@ pkinit_server_verify_padata(krb5_context context,
     krb5_checksum cksum = {0, 0, 0, NULL};
     krb5_data *der_req = NULL;
     int valid_eku = 0, valid_san = 0;
-    krb5_authdata **my_authz_data = NULL, *pkinit_authz_data = NULL;
     krb5_kdc_req *tmp_as_req = NULL;
     krb5_data k5data;
     int is_signed = 1;
@@ -594,6 +592,67 @@ cleanup:
 
     return retval;
 }
+static krb5_error_code
+return_pkinit_kx( krb5_context context, krb5_kdc_req *request, krb5_kdc_rep *reply,
+                  krb5_keyblock *encrypting_key,
+                  krb5_pa_data **out_padata)
+{
+    krb5_error_code ret = 0;
+    krb5_keyblock *session = reply->ticket->enc_part2->session;
+    krb5_keyblock *new_session = NULL;
+    krb5_pa_data *pa = NULL;
+    krb5_enc_data enc;
+    krb5_data *scratch = NULL;
+        *out_padata = NULL;
+        enc.ciphertext.data = NULL;
+        if (!krb5_principal_compare(context, request->client,
+                                    krb5_anonymous_principal()))
+            return 0;
+        /*
+            *The KDC contribution key needs to be a fresh key of an
+            *enctype supported by the client and server. The existing
+            *session key meets these requirements so we use itt.
+            */
+        ret = krb5_c_fx_cf2_simple(context, session, "PKINIT",
+                            encrypting_key, "KEYEXCHANGE",
+                            &new_session);
+        if (ret)
+            goto cleanup;
+        ret = encode_krb5_encryption_key( session, &scratch);
+        if (ret)
+            goto cleanup;
+        ret = krb5_encrypt_helper( context, encrypting_key, KRB5_KEYUSAGE_PA_PKINIT_KX,
+                                   scratch, &enc);
+        if (ret)
+            goto cleanup;
+        memset(scratch->data, 0, scratch->length);
+        krb5_free_data(context, scratch);
+        scratch = NULL;
+        ret = encode_krb5_enc_data(&enc, &scratch);
+        if (ret)
+            goto cleanup;
+        pa = malloc(sizeof(krb5_pa_data));
+        if (pa == NULL) {
+            ret = ENOMEM;
+            goto cleanup;
+        }
+        if (ret)
+            goto cleanup;
+        pa->pa_type = KRB5_PADATA_PKINIT_KX;
+        pa->length = scratch->length;
+        pa->contents = (krb5_octet *) scratch->data;
+        *out_padata = pa;
+        scratch->data = NULL;
+        memset(session->contents, 0, session->length);
+        krb5_free_keyblock_contents(context, session);
+        *session = *new_session;
+        new_session->contents = NULL;
+cleanup:
+        krb5_free_data_contents(context, &enc.ciphertext);
+        krb5_free_keyblock(context, new_session);
+        krb5_free_data(context, scratch);
+        return ret;
+}
 
 static krb5_error_code
 pkinit_server_return_padata(krb5_context context,
@@ -640,6 +699,9 @@ pkinit_server_return_padata(krb5_context context,
     int fixed_keypack = 0;
 
     *send_pa = NULL;
+    if (padata->pa_type == KRB5_PADATA_PKINIT_KX)
+        return return_pkinit_kx(context, request, reply,
+                                encrypting_key, send_pa);
     if (padata == NULL || padata->length <= 0 || padata->contents == NULL)
         return 0;
 
@@ -997,6 +1059,8 @@ cleanup:
 static int
 pkinit_server_get_flags(krb5_context kcontext, krb5_preauthtype patype)
 {
+    if (patype == KRB5_PADATA_PKINIT_KX)
+        return PA_PSEUDO;
     return PA_SUFFICIENT | PA_REPLACES_KEY;
 }
 
@@ -1004,6 +1068,7 @@ static krb5_preauthtype supported_server_pa_types[] = {
     KRB5_PADATA_PK_AS_REQ,
     KRB5_PADATA_PK_AS_REQ_OLD,
     KRB5_PADATA_PK_AS_REP_OLD,
+    KRB5_PADATA_PKINIT_KX,
     0
 };
 
