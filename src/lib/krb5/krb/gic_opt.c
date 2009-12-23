@@ -149,8 +149,6 @@ krb5int_gic_opte_private_free(krb5_context context, krb5_gic_opt_ext *opte)
         free_gic_opt_ext_preauth_data(context, opte);
     if (opte->opt_private->fast_ccache_name)
         free(opte->opt_private->fast_ccache_name);
-    if (opte->opt_private->out_ccache)
-        krb5_cc_close(context, opte->opt_private->out_ccache);
     free(opte->opt_private);
     opte->opt_private = NULL;
     return 0;
@@ -501,13 +499,8 @@ krb5_get_init_creds_opt_set_out_ccache(krb5_context context,
                                      "krb5_get_init_creds_opt_set_out_ccache");
     if (retval)
         return retval;
-    if (opte->opt_private->out_ccache) {
-        krb5_cc_close(context,  opte->opt_private->out_ccache);
-        opte->opt_private->out_ccache = NULL;
-    }
-    retval = krb5_cc_resolve(context, krb5_cc_get_name(context, ccache),
-                            &opte->opt_private->out_ccache);
-        return retval;
+    opte->opt_private->out_ccache = ccache;
+    return 0;
 }
 
 krb5_error_code KRB5_CALLCONV
