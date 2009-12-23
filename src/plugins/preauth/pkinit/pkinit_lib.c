@@ -424,7 +424,7 @@ pkinit_copy_krb5_octet_data(krb5_octet_data *dst, const krb5_octet_data *src)
 void
 print_buffer(unsigned char *buf, unsigned int len)
 {
-    int i = 0;
+    unsigned  i = 0;
     if (len <= 0)
         return;
 
@@ -437,7 +437,7 @@ void
 print_buffer_bin(unsigned char *buf, unsigned int len, char *filename)
 {
     FILE *f = NULL;
-    int i = 0;
+    unsigned int i = 0;
 
     if (len <= 0 || filename == NULL)
         return;

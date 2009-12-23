@@ -751,7 +751,7 @@ cms_signeddata_create(krb5_context context,
         X509_STORE_CTX certctx;
         STACK_OF(X509) *certstack = NULL;
         char buf[DN_BUF_LEN];
-        int i = 0, size = 0;
+        unsigned int i = 0, size = 0;
 
         if ((certstore = X509_STORE_new()) == NULL)
             goto cleanup;
@@ -1043,7 +1043,8 @@ cms_signeddata_verify(krb5_context context,
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
     PKCS7 *p7 = NULL;
     BIO *out = NULL;
-    int flags = PKCS7_NOVERIFY, i = 0;
+    int flags = PKCS7_NOVERIFY;
+    unsigned int i = 0;
     unsigned int vflags = 0, size = 0;
     const unsigned char *p = signed_data;
     STACK_OF(PKCS7_SIGNER_INFO) *si_sk = NULL;
@@ -1285,13 +1286,16 @@ cms_signeddata_verify(krb5_context context,
 
     /* transfer the data from PKCS7 message into return buffer */
     for (size = 0;;) {
+        int remain;
+        retval = ENOMEM;
+
         if ((*data = realloc(*data, size + 1024 * 10)) == NULL)
             goto cleanup;
-        i = BIO_read(out, &((*data)[size]), 1024 * 10);
-        if (i <= 0)
+        remain = BIO_read(out, &((*data)[size]), 1024 * 10);
+        if (remain <= 0)
             break;
         else
-            size += i;
+            size += remain;
     }
     *data_len = size;
 
@@ -1655,7 +1659,7 @@ crypto_retrieve_X509_sans(krb5_context context,
     krb5_principal *princs = NULL;
     krb5_principal *upns = NULL;
     unsigned char **dnss = NULL;
-    int i, num_found = 0;
+    unsigned int i, num_found = 0;
 
     if (princs_ret == NULL && upn_ret == NULL && dns_ret == NULL) {
         pkiDebug("%s: nowhere to return any values!\n", __FUNCTION__);
@@ -3220,7 +3224,7 @@ static krb5_error_code
 pkinit_open_session(krb5_context context,
                     pkinit_identity_crypto_context cctx)
 {
-    int i, r;
+    CK_ULONG i, r;
     unsigned char *cp;
     CK_ULONG count = 0;
     CK_SLOT_ID_PTR slotlist;
@@ -3414,7 +3418,7 @@ pkinit_C_Decrypt(pkinit_identity_crypto_context id_cryptoctx,
     rv = id_cryptoctx->p11->C_Decrypt(id_cryptoctx->session, pEncryptedData,
                                       ulEncryptedDataLen, pData, pulDataLen);
     if (rv == CKR_OK) {
-        pkiDebug("pData %x *pulDataLen %d\n", (int) pData, (int) *pulDataLen);
+        pkiDebug("pData %x *pulDataLen %d\n", (unsigned int) pData, (int) *pulDataLen);
     }
     return rv;
 }
@@ -4451,7 +4455,7 @@ X509_NAME_oneline_ex(X509_NAME * a,
 
     out = BIO_new(BIO_s_mem ());
     if (X509_NAME_print_ex(out, a, 0, flag) > 0) {
-        if (buf != NULL && *size > (int) BIO_number_written(out)) {
+        if (buf != NULL && (int)(*size) >  BIO_number_written(out)) {
             memset(buf, 0, *size);
             BIO_read(out, buf, (int) BIO_number_written(out));
         }
@@ -5459,7 +5463,7 @@ pkcs7_dataDecode(krb5_context context,
     if (EVP_CIPHER_asn1_to_param(evp_ctx,enc_alg->parameter) < 0)
         goto cleanup;
 
-    if (jj != EVP_CIPHER_CTX_key_length(evp_ctx)) {
+    if ((unsigned) jj != EVP_CIPHER_CTX_key_length(evp_ctx)) {
         /* Some S/MIME clients don't use the same key
          * and effective key length. The key length is
          * determined by the size of the decrypted RSA key.

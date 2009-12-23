@@ -1238,7 +1238,7 @@ pkinit_server_plugin_init(krb5_context context, void **blob,
 {
     krb5_error_code retval = ENOMEM;
     pkinit_kdc_context plgctx, *realm_contexts = NULL;
-    int i, j;
+    size_t  i, j;
     size_t numrealms;
 
     retval = pkinit_accessor_init();
