@@ -389,6 +389,22 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     enc_tkt_reply.caddrs = request->addresses;
     enc_tkt_reply.authorization_data = 0;
 
+    /* If anonymous requests are being used, adjust the realm of the client principal*/
+    if (request->kdc_options & KDC_OPT_REQUEST_ANONYMOUS) {
+        if (!krb5_principal_compare_any_realm(kdc_context, request->client,
+                                              krb5_anonymous_principal())) {
+            errcode = KRB5KDC_ERR_BADOPTION;
+            status = "Anonymous requested but anonymous principal not used.";
+            goto errout;
+        }
+        krb5_free_principal(kdc_context, request->client);
+        errcode = krb5_copy_principal(kdc_context, krb5_anonymous_principal(),
+                                      &request->client);
+        if (errcode) {
+            status = "Copying anonymous principal";
+            goto errout;
+        }
+    }
     /*
      * Check the preauthentication if it is there.
      */
