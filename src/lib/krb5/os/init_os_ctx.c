@@ -402,12 +402,6 @@ krb5_os_init_context(krb5_context ctx, krb5_boolean kdc)
     return retval;
 }
 
-krb5_error_code KRB5_CALLCONV
-krb5_get_profile (krb5_context ctx, profile_t *profile)
-{
-    return profile_copy (ctx->profile, profile);
-}
-
 krb5_error_code
 krb5_set_config_files(krb5_context ctx, const char **filenames)
 {

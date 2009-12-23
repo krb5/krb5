@@ -80,48 +80,6 @@ generate_authenticator(krb5_context,
                        krb5_enctype *desired_etypes,
                        krb5_enctype tkt_enctype);
 
-krb5_error_code
-krb5int_generate_and_save_subkey(krb5_context context,
-                                 krb5_auth_context auth_context,
-                                 krb5_keyblock *keyblock,
-                                 krb5_enctype enctype)
-{
-    /* Provide some more fodder for random number code.
-       This isn't strong cryptographically; the point here is not
-       to guarantee randomness, but to make it less likely that multiple
-       sessions could pick the same subkey.  */
-    struct {
-        krb5_int32 sec, usec;
-    } rnd_data;
-    krb5_data d;
-    krb5_error_code retval;
-    krb5_keyblock *kb = NULL;
-
-    if (krb5_crypto_us_timeofday(&rnd_data.sec, &rnd_data.usec) == 0) {
-        d.length = sizeof(rnd_data);
-        d.data = (char *) &rnd_data;
-        krb5_c_random_add_entropy(context, KRB5_C_RANDSOURCE_TIMING, &d);
-    }
-
-    retval = krb5_generate_subkey_extended(context, keyblock, enctype, &kb);
-    if (retval)
-        return retval;
-    retval = krb5_auth_con_setsendsubkey(context, auth_context, kb);
-    if (retval)
-        goto cleanup;
-    retval = krb5_auth_con_setrecvsubkey(context, auth_context, kb);
-    if (retval)
-        goto cleanup;
-
-cleanup:
-    if (retval) {
-        (void) krb5_auth_con_setsendsubkey(context, auth_context, NULL);
-        (void) krb5_auth_con_setrecvsubkey(context, auth_context, NULL);
-    }
-    krb5_free_keyblock(context, kb);
-    return retval;
-}
-
 krb5_error_code KRB5_CALLCONV
 krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
                      krb5_flags ap_req_options, krb5_data *in_data,

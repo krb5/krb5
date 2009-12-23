@@ -46,6 +46,7 @@ STLIBOBJS= \
 	gc_via_tkt.o	\
 	gen_seqnum.o	\
 	gen_subkey.o	\
+	gen_save_subkey.o	\
 	get_creds.o	\
 	get_in_tkt.o	\
 	gic_keytab.o	\
@@ -57,6 +58,7 @@ STLIBOBJS= \
 	kdc_rep_dc.o	\
 	kerrs.o		\
 	kfree.o		\
+	libdef_parse.o	\
 	mk_cred.o	\
 	mk_error.o	\
 	mk_priv.o	\
@@ -136,6 +138,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)gc_via_tkt.$(OBJEXT)	\
 	$(OUTPRE)gen_seqnum.$(OBJEXT)	\
 	$(OUTPRE)gen_subkey.$(OBJEXT)	\
+	$(OUTPRE)gen_save_subkey.$(OBJEXT)	\
 	$(OUTPRE)get_creds.$(OBJEXT)	\
 	$(OUTPRE)get_in_tkt.$(OBJEXT)	\
 	$(OUTPRE)gic_keytab.$(OBJEXT)	\
@@ -145,8 +148,9 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)init_ctx.$(OBJEXT)	\
 	$(OUTPRE)init_keyblock.$(OBJEXT) \
 	$(OUTPRE)kdc_rep_dc.$(OBJEXT)	\
-	$(OUTPRE)kerrs.$(OBJEXT)		\
+	$(OUTPRE)kerrs.$(OBJEXT)	\
 	$(OUTPRE)kfree.$(OBJEXT)	\
+	$(OUTPRE)libdef_parse.$(OBJEXT)	\
 	$(OUTPRE)mk_cred.$(OBJEXT)	\
 	$(OUTPRE)mk_error.$(OBJEXT)	\
 	$(OUTPRE)mk_priv.$(OBJEXT)	\
@@ -227,6 +231,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/gc_via_tkt.c	\
 	$(srcdir)/gen_seqnum.c	\
 	$(srcdir)/gen_subkey.c	\
+	$(srcdir)/gen_save_subkey.c	\
 	$(srcdir)/get_creds.c	\
 	$(srcdir)/get_in_tkt.c	\
 	$(srcdir)/gic_keytab.c	\
@@ -238,6 +243,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/kdc_rep_dc.c	\
 	$(srcdir)/kerrs.c	\
 	$(srcdir)/kfree.c	\
+	$(srcdir)/libdef_parse.c \
 	$(srcdir)/mk_cred.c	\
 	$(srcdir)/mk_error.c	\
 	$(srcdir)/mk_priv.c	\

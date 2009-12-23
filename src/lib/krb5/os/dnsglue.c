@@ -2,7 +2,7 @@
 /*
  * lib/krb5/os/dnsglue.c
  *
- * Copyright 2004 by the Massachusetts Institute of Technology.
+ * Copyright 2004, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -332,5 +332,77 @@ out:
 }
 
 #endif
+
+/*
+ * Try to look up a TXT record pointing to a Kerberos realm
+ */
+
+krb5_error_code
+krb5_try_realm_txt_rr(const char *prefix, const char *name, char **realm)
+{
+    krb5_error_code retval = KRB5_ERR_HOST_REALM_UNKNOWN;
+    const unsigned char *p, *base;
+    char host[MAXDNAME];
+    int ret, rdlen, len;
+    struct krb5int_dns_state *ds = NULL;
+    struct k5buf buf;
+
+    /*
+     * Form our query, and send it via DNS
+     */
+
+    krb5int_buf_init_fixed(&buf, host, sizeof(host));
+    if (name == NULL || name[0] == '\0') {
+        krb5int_buf_add(&buf, prefix);
+    } else {
+        krb5int_buf_add_fmt(&buf, "%s.%s", prefix, name);
+
+        /* Realm names don't (normally) end with ".", but if the query
+           doesn't end with "." and doesn't get an answer as is, the
+           resolv code will try appending the local domain.  Since the
+           realm names are absolutes, let's stop that.
+
+           But only if a name has been specified.  If we are performing
+           a search on the prefix alone then the intention is to allow
+           the local domain or domain search lists to be expanded.
+        */
+
+        len = krb5int_buf_len(&buf);
+        if (len > 0 && host[len - 1] != '.')
+            krb5int_buf_add(&buf, ".");
+    }
+    if (krb5int_buf_data(&buf) == NULL)
+        return KRB5_ERR_HOST_REALM_UNKNOWN;
+    ret = krb5int_dns_init(&ds, host, C_IN, T_TXT);
+    if (ret < 0)
+        goto errout;
+
+    ret = krb5int_dns_nextans(ds, &base, &rdlen);
+    if (ret < 0 || base == NULL)
+        goto errout;
+
+    p = base;
+    if (!INCR_OK(base, rdlen, p, 1))
+        goto errout;
+    len = *p++;
+    *realm = malloc((size_t)len + 1);
+    if (*realm == NULL) {
+        retval = ENOMEM;
+        goto errout;
+    }
+    strncpy(*realm, (const char *)p, (size_t)len);
+    (*realm)[len] = '\0';
+    /* Avoid a common error. */
+    if ( (*realm)[len-1] == '.' )
+        (*realm)[len-1] = '\0';
+    retval = 0;
+
+errout:
+    if (ds != NULL) {
+        krb5int_dns_fini(ds);
+        ds = NULL;
+    }
+    return retval;
+}
 
 #endif /* KRB5_DNS_LOOKUP */

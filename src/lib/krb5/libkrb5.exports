@@ -401,7 +401,6 @@ krb5_ktf_ops
 krb5_ktf_writable_ops
 krb5_kts_ops
 krb5_kuserok
-krb5_libdefault_boolean
 krb5_locate_kdc
 krb5_lock_file
 krb5_make_authdata_kdc_issued

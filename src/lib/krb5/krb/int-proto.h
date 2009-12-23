@@ -37,8 +37,12 @@ krb5_tgtname(krb5_context context, const krb5_data *, const krb5_data *,
              krb5_principal *);
 
 krb5_error_code
-krb5_libdefault_boolean(krb5_context, const krb5_data *, const char *,
-                        int *);
+krb5int_libdefault_boolean(krb5_context, const krb5_data *, const char *,
+                           int *);
+krb5_error_code
+krb5int_libdefault_string(krb5_context context, const krb5_data *realm,
+                          const char *option, char **ret_value);
+
 
 krb5_error_code krb5_ser_authdata_init (krb5_context);
 krb5_error_code krb5_ser_address_init (krb5_context);

@@ -839,130 +839,6 @@ cleanup:
     return (retval);
 }
 
-/* begin libdefaults parsing code.  This should almost certainly move
-   somewhere else, but I don't know where the correct somewhere else
-   is yet. */
-
-/* XXX Duplicating this is annoying; try to work on a better way.*/
-static const char *const conf_yes[] = {
-    "y", "yes", "true", "t", "1", "on",
-    0,
-};
-
-static const char *const conf_no[] = {
-    "n", "no", "false", "nil", "0", "off",
-    0,
-};
-
-int
-_krb5_conf_boolean(const char *s)
-{
-    const char *const *p;
-
-    for(p=conf_yes; *p; p++) {
-        if (!strcasecmp(*p,s))
-            return 1;
-    }
-
-    for(p=conf_no; *p; p++) {
-        if (!strcasecmp(*p,s))
-            return 0;
-    }
-
-    /* Default to "no" */
-    return 0;
-}
-
-static krb5_error_code
-krb5_libdefault_string(krb5_context context, const krb5_data *realm,
-                       const char *option, char **ret_value)
-{
-    profile_t profile;
-    const char *names[5];
-    char **nameval = NULL;
-    krb5_error_code retval;
-    char realmstr[1024];
-
-    if (realm->length > sizeof(realmstr)-1)
-        return(EINVAL);
-
-    strncpy(realmstr, realm->data, realm->length);
-    realmstr[realm->length] = '\0';
-
-    if (!context || (context->magic != KV5M_CONTEXT))
-        return KV5M_CONTEXT;
-
-    profile = context->profile;
-
-    names[0] = KRB5_CONF_LIBDEFAULTS;
-
-    /*
-     * Try number one:
-     *
-     * [libdefaults]
-     *          REALM = {
-     *                  option = <boolean>
-     *          }
-     */
-
-    names[1] = realmstr;
-    names[2] = option;
-    names[3] = 0;
-    retval = profile_get_values(profile, names, &nameval);
-    if (retval == 0 && nameval && nameval[0])
-        goto goodbye;
-
-    /*
-     * Try number two:
-     *
-     * [libdefaults]
-     *          option = <boolean>
-     */
-
-    names[1] = option;
-    names[2] = 0;
-    retval = profile_get_values(profile, names, &nameval);
-    if (retval == 0 && nameval && nameval[0])
-        goto goodbye;
-
-goodbye:
-    if (!nameval)
-        return(ENOENT);
-
-    if (!nameval[0]) {
-        retval = ENOENT;
-    } else {
-        *ret_value = strdup(nameval[0]);
-        if (!*ret_value)
-            retval = ENOMEM;
-    }
-
-    profile_free_list(nameval);
-
-    return retval;
-}
-
-/* not static so verify_init_creds() can call it */
-/* as well as the DNS code */
-
-krb5_error_code
-krb5_libdefault_boolean(krb5_context context, const krb5_data *realm,
-                        const char *option, int *ret_value)
-{
-    char *string = NULL;
-    krb5_error_code retval;
-
-    retval = krb5_libdefault_string(context, realm, option, &string);
-
-    if (retval)
-        return(retval);
-
-    *ret_value = _krb5_conf_boolean(string);
-    free(string);
-
-    return(0);
-}
-
 /* Sort a pa_data sequence so that types named in the "preferred_preauth_types"
  * libdefaults entry are listed before any others. */
 static krb5_error_code
@@ -981,8 +857,8 @@ sort_krb5_padata_sequence(krb5_context context, krb5_data *realm,
         return 0;
     }
 
-    ret = krb5_libdefault_string(context, realm, KRB5_CONF_PREFERRED_PREAUTH_TYPES,
-                                 &preauth_types);
+    ret = krb5int_libdefault_string(context, realm, KRB5_CONF_PREFERRED_PREAUTH_TYPES,
+                                    &preauth_types);
     if ((ret != 0) || (preauth_types == NULL)) {
         /* Try to use PKINIT first. */
         preauth_types = "17, 16, 15, 14";
@@ -1408,8 +1284,8 @@ krb5_init_creds_init(krb5_context context,
     /* forwaradble */
     if (opte->flags & KRB5_GET_INIT_CREDS_OPT_FORWARDABLE)
         tmp = opte->forwardable;
-    else if (krb5_libdefault_boolean(context, &ctx->request->client->realm,
-                                     KRB5_CONF_FORWARDABLE, &tmp) == 0)
+    else if (krb5int_libdefault_boolean(context, &ctx->request->client->realm,
+                                        KRB5_CONF_FORWARDABLE, &tmp) == 0)
         ;
     else
         tmp = 0;
@@ -1419,8 +1295,8 @@ krb5_init_creds_init(krb5_context context,
     /* proxiable */
     if (opte->flags & KRB5_GET_INIT_CREDS_OPT_PROXIABLE)
         tmp = opte->proxiable;
-    else if (krb5_libdefault_boolean(context, &ctx->request->client->realm,
-                                     KRB5_CONF_PROXIABLE, &tmp) == 0)
+    else if (krb5int_libdefault_boolean(context, &ctx->request->client->realm,
+                                        KRB5_CONF_PROXIABLE, &tmp) == 0)
         ;
     else
         tmp = 0;
@@ -1430,8 +1306,8 @@ krb5_init_creds_init(krb5_context context,
     /* canonicalize */
     if (opte->flags & KRB5_GET_INIT_CREDS_OPT_CANONICALIZE)
         tmp = 1;
-    else if (krb5_libdefault_boolean(context, &ctx->request->client->realm,
-                                     KRB5_CONF_CANONICALIZE, &tmp) == 0)
+    else if (krb5int_libdefault_boolean(context, &ctx->request->client->realm,
+                                        KRB5_CONF_CANONICALIZE, &tmp) == 0)
         ;
     else
         tmp = 0;
@@ -1445,8 +1321,8 @@ krb5_init_creds_init(krb5_context context,
     /* ticket lifetime */
     if (opte->flags & KRB5_GET_INIT_CREDS_OPT_TKT_LIFE)
         ctx->tkt_life = options->tkt_life;
-    else if (krb5_libdefault_string(context, &ctx->request->client->realm,
-                                    KRB5_CONF_TICKET_LIFETIME, &str) == 0) {
+    else if (krb5int_libdefault_string(context, &ctx->request->client->realm,
+                                       KRB5_CONF_TICKET_LIFETIME, &str) == 0) {
         code = krb5_string_to_deltat(str, &ctx->tkt_life);
         if (code != 0)
             goto cleanup;
@@ -1458,8 +1334,8 @@ krb5_init_creds_init(krb5_context context,
     /* renewable lifetime */
     if (opte->flags & KRB5_GET_INIT_CREDS_OPT_RENEW_LIFE)
         ctx->renew_life = options->renew_life;
-    else if (krb5_libdefault_string(context, &ctx->request->client->realm,
-                                    KRB5_CONF_RENEW_LIFETIME, &str) == 0) {
+    else if (krb5int_libdefault_string(context, &ctx->request->client->realm,
+                                       KRB5_CONF_RENEW_LIFETIME, &str) == 0) {
         code = krb5_string_to_deltat(str, &ctx->renew_life);
         if (code != 0)
             goto cleanup;
@@ -1499,8 +1375,8 @@ krb5_init_creds_init(krb5_context context,
                                    &ctx->request->addresses);
         if (code != 0)
             goto cleanup;
-    } else if (krb5_libdefault_boolean(context, &ctx->request->client->realm,
-                                       KRB5_CONF_NOADDRESSES, &tmp) != 0
+    } else if (krb5int_libdefault_boolean(context, &ctx->request->client->realm,
+                                          KRB5_CONF_NOADDRESSES, &tmp) != 0
                || tmp) {
         ctx->request->addresses = NULL;
     } else {
@@ -2131,4 +2007,53 @@ cleanup:
     krb5_init_creds_free(context, ctx);
 
     return code;
+}
+
+krb5_error_code
+krb5int_populate_gic_opt(krb5_context context, krb5_get_init_creds_opt **out,
+                         krb5_flags options, krb5_address *const *addrs,
+                         krb5_enctype *ktypes,
+                         krb5_preauthtype *pre_auth_types, krb5_creds *creds)
+{
+    int i;
+    krb5_int32 starttime;
+    krb5_get_init_creds_opt *opt;
+    krb5_error_code retval;
+
+    *out = NULL;
+    retval = krb5_get_init_creds_opt_alloc(context, &opt);
+    if (retval)
+        return(retval);
+
+    if (addrs)
+        krb5_get_init_creds_opt_set_address_list(opt, (krb5_address **) addrs);
+    if (ktypes) {
+        for (i=0; ktypes[i]; i++);
+        if (i)
+            krb5_get_init_creds_opt_set_etype_list(opt, ktypes, i);
+    }
+    if (pre_auth_types) {
+        for (i=0; pre_auth_types[i]; i++);
+        if (i)
+            krb5_get_init_creds_opt_set_preauth_list(opt, pre_auth_types, i);
+    }
+    if (options&KDC_OPT_FORWARDABLE)
+        krb5_get_init_creds_opt_set_forwardable(opt, 1);
+    else krb5_get_init_creds_opt_set_forwardable(opt, 0);
+    if (options&KDC_OPT_PROXIABLE)
+        krb5_get_init_creds_opt_set_proxiable(opt, 1);
+    else krb5_get_init_creds_opt_set_proxiable(opt, 0);
+    if (creds && creds->times.endtime) {
+        retval = krb5_timeofday(context, &starttime);
+        if (retval)
+            goto cleanup;
+        if (creds->times.starttime) starttime = creds->times.starttime;
+        krb5_get_init_creds_opt_set_tkt_life(opt, creds->times.endtime - starttime);
+    }
+    *out = opt;
+    return 0;
+
+cleanup:
+    krb5_get_init_creds_opt_free(context, opt);
+    return retval;
 }

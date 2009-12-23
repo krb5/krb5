@@ -647,3 +647,9 @@ errout:
     }
     return ret;
 }
+
+krb5_error_code KRB5_CALLCONV
+krb5_get_profile (krb5_context ctx, profile_t *profile)
+{
+    return profile_copy (ctx->profile, profile);
+}
