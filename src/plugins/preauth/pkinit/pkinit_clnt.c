@@ -649,6 +649,7 @@ pkinit_as_rep_parse(krb5_context context,
                     krb5_data *encoded_request)
 {
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
+    krb5_principal kdc_princ = NULL;
     krb5_pa_pk_as_rep *kdc_reply = NULL;
     krb5_kdc_dh_key_info *kdc_dh = NULL;
     krb5_reply_key_pack *key_pack = NULL;
@@ -709,8 +710,16 @@ pkinit_as_rep_parse(krb5_context context,
         retval = -1;
         goto cleanup;
     }
-
-    retval = verify_kdc_san(context, plgctx, reqctx, request->server,
+    retval = krb5_build_principal_ext(context, &kdc_princ,
+                                      request->server->realm.length,
+                                      request->server->realm.data,
+                                      strlen(KRB5_TGS_NAME), KRB5_TGS_NAME,
+                                      request->server->realm.length,
+                                      request->server->realm.data,
+                                      0);
+    if (retval)
+        goto cleanup;
+    retval = verify_kdc_san(context, plgctx, reqctx, kdc_princ,
                             &valid_san, &need_eku_checking);
     if (retval)
         goto cleanup;
@@ -859,6 +868,7 @@ pkinit_as_rep_parse(krb5_context context,
 
 cleanup:
     free(dh_data.data);
+    krb5_free_principal(context, kdc_princ);
     free(client_key);
     free_krb5_kdc_dh_key_info(&kdc_dh);
     free_krb5_pa_pk_as_rep(&kdc_reply);
