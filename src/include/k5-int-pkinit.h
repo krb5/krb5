@@ -283,4 +283,15 @@ decode_krb5_td_dh_parameters(const krb5_data *, krb5_algorithm_identifier ***);
 
 void krb5_free_typed_data(krb5_context, krb5_typed_data **);
 
+krb5_error_code
+encode_krb5_enc_data(const krb5_enc_data *, krb5_data **);
+
+krb5_error_code
+encode_krb5_encryption_key(const krb5_keyblock *rep, krb5_data **code);
+
+krb5_error_code
+krb5_encrypt_helper(krb5_context context, const krb5_keyblock *key,
+                    krb5_keyusage keyusage, const krb5_data *plain,
+                    krb5_enc_data *cipher);
+
 #endif /* _KRB5_INT_PKINIT_H */
