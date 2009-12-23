@@ -310,6 +310,9 @@ verify_as_reply(krb5_context            context,
     if (canon_req) {
         canon_ok = IS_TGS_PRINC(context, request->server) &&
             IS_TGS_PRINC(context, as_reply->enc_part2->server);
+        if ((!canon_ok ) && (request->kdc_options &KDC_OPT_REQUEST_ANONYMOUS))
+            canon_ok = krb5_principal_compare(context, as_reply->client,
+                                              krb5_anonymous_principal());
     } else
         canon_ok = 0;
 
