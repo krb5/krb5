@@ -113,6 +113,16 @@ void pkinit_fini_req_crypto(pkinit_req_crypto_context);
 
 krb5_error_code pkinit_init_identity_crypto(pkinit_identity_crypto_context *);
 void pkinit_fini_identity_crypto(pkinit_identity_crypto_context);
+/**Create a pkinit ContentInfo*/
+krb5_error_code cms_contentinfo_create
+	(krb5_context context,				/* IN */
+	pkinit_plg_crypto_context plg_cryptoctx,	/* IN */
+	pkinit_req_crypto_context req_cryptoctx,	/* IN */
+	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
+	int cms_msg_type,
+	 unsigned char *in_data, unsigned int in_length,
+	 unsigned char **out_data, unsigned int *out_data_len);
+
 
 /*
  * this function creates a CMS message where eContentType is SignedData
