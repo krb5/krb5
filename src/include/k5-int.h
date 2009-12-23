@@ -1532,7 +1532,7 @@ void KRB5_CALLCONV krb5_free_priv_enc_part(krb5_context, krb5_priv_enc_part *);
 /* allow either constructed or primitive encoding, so check for bit 6
    set or reset */
 #define krb5int_is_app_tag(dat,tag)                     \
-    ((dat) && (dat)->length &&                          \
+    ((dat != NULL) && (dat)->length &&                          \
      ((((dat)->data[0] & ~0x20) == ((tag) | 0x40))))
 #define krb5_is_krb_ticket(dat)               krb5int_is_app_tag(dat, 1)
 #define krb5_is_krb_authenticator(dat)        krb5int_is_app_tag(dat, 2)
