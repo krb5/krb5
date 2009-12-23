@@ -470,7 +470,9 @@ k5_begin(opts, k5)
         if (opts->anonymous) {
             code = krb5_build_principal_ext(k5->ctx, &k5->me, strlen(opts->principal_name),
                                             opts->principal_name,
-                                            9, "WELLKNOWN", 9, "ANONYMOUS", 0);
+                                            strlen(KRB5_WELLKNOWN_NAMESTR), KRB5_WELLKNOWN_NAMESTR,
+                                            strlen(KRB5_ANONYMOUS_PRINCSTR),
+                                            KRB5_ANONYMOUS_PRINCSTR, 0);
             if (code) {
                 com_err(progname, code, "while setting up anonymous principal");
                 return 0;
