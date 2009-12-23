@@ -505,7 +505,7 @@ pkinit_identity_initialize(krb5_context context,
     int i;
 
     pkiDebug("%s: %p %p %p\n", __FUNCTION__, context, idopts, id_cryptoctx);
-    if (princ && !krb5_principal_compare_any_realm (context, princ, krb5_anonymous_principal())) {
+    if (!(princ && krb5_principal_compare_any_realm (context, princ, krb5_anonymous_principal()))) {
         if (idopts == NULL || id_cryptoctx == NULL)
             goto errout;
 
