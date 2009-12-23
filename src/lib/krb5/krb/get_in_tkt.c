@@ -1047,47 +1047,37 @@ build_in_tkt_name(krb5_context context,
     *server = NULL;
 
     if (in_tkt_service) {
+        /* this is ugly, because so are the data structures involved.  I'm
+           in the library, so I'm going to manipulate the data structures
+           directly, otherwise, it will be worse. */
 
         if ((ret = krb5_parse_name(context, in_tkt_service, server)))
             return ret;
 
-        /* stuff the client realm into the server principal. unless using anonymous
+        /* stuff the client realm into the server principal.
            realloc if necessary */
-        if (!krb5_principal_compare( context, client, krb5_anonymous_principal())) {
-            if ((*server)->realm.length < client->realm.length) {
-                char *p = realloc((*server)->realm.data,
-                                  client->realm.length);
-                if (p == NULL) {
-                    krb5_free_principal(context, *server);
-                    *server = NULL;
-                    return ENOMEM;
-                }
-                (*server)->realm.data = p;
+        if ((*server)->realm.length < client->realm.length) {
+            char *p = realloc((*server)->realm.data,
+                              client->realm.length);
+            if (p == NULL) {
+                krb5_free_principal(context, *server);
+                *server = NULL;
+                return ENOMEM;
             }
+            (*server)->realm.data = p;
+        }
 
-            (*server)->realm.length = client->realm.length;
-            memcpy((*server)->realm.data, client->realm.data, client->realm.length);
-        }
+        (*server)->realm.length = client->realm.length;
+        memcpy((*server)->realm.data, client->realm.data, client->realm.length);
     } else {
-        krb5_data realm = (krb5_data ) client->realm;
-        char *free_realm = NULL;
-        if (krb5_principal_compare(context, client, krb5_anonymous_principal())) {
-            ret = krb5_get_default_realm( context, &free_realm);
-            if (ret != 0)
-                return ret;
-            realm.data = free_realm;
-            realm.length = strlen(free_realm);
-        }
         ret = krb5_build_principal_ext(context, server,
-                                       realm.length,
-                                       realm.data,
+                                       client->realm.length,
+                                       client->realm.data,
                                        KRB5_TGS_NAME_SIZE,
                                        KRB5_TGS_NAME,
-                                       realm.length,
-                                       realm.data,
+                                       client->realm.length,
+                                       client->realm.data,
                                        0);
-        if (free_realm)
-            krb5_free_default_realm( context, free_realm);
     }
     return ret;
 }
