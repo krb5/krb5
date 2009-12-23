@@ -261,6 +261,7 @@ typedef krb5_principal_data * krb5_principal;
 #define KRB5_NT_SMTP_NAME               7
 /* Windows 2000 UPN */
 #define KRB5_NT_ENTERPRISE_PRINCIPAL    10
+#define KRB5_NT_WELLKNOWN 11
 /* Windows 2000 UPN and SID */
 #define KRB5_NT_MS_PRINCIPAL            -128
 /* NT 4 style name */
@@ -292,6 +293,13 @@ typedef const krb5_principal_data *krb5_const_principal;
  * Referral-specific functions.
  */
 krb5_boolean KRB5_CALLCONV krb5_is_referral_realm(const krb5_data *);
+
+/*Both these functions return constant storage that must not be freed*/
+
+const krb5_data *KRB5_CALLCONV
+krb5_anonymous_realm(void);
+krb5_const_principal KRB5_CALLCONV
+krb5_anonymous_principal(void);
 
 /*
  * end "base-defs.h"

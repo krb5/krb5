@@ -187,3 +187,33 @@ krb5_build_principal(krb5_context context,
 
     return retval;
 }
+
+/*Anonymous and well known principals*/
+static const char anon_realm_str[]
+= "WELLKNOWN:ANONYMOUS";
+static const krb5_data anon_realm_data = {
+    KV5M_DATA, sizeof(anon_realm_str)-1,
+    (char *) anon_realm_str};
+static const char wellknown_str[] = "WELLKNOWN";
+static const char anon_str[] = "ANONYMOUS";
+static const krb5_data anon_princ_data[] = {
+    {KV5M_DATA, sizeof(wellknown_str)-1, (char *) wellknown_str},
+    {KV5M_DATA, sizeof(anon_str)-1, (char *)anon_str}
+};
+
+const krb5_principal_data anon_princ = {
+    KV5M_PRINCIPAL,
+    {KV5M_DATA, sizeof(anon_realm_str)-1, (char *) anon_realm_str},
+    (krb5_data *) anon_princ_data, 2, KRB5_NT_WELLKNOWN
+};
+
+const krb5_data * KRB5_CALLCONV
+krb5_anonymous_realm()
+{
+    return &anon_realm_data;
+}
+krb5_const_principal KRB5_CALLCONV
+krb5_anonymous_principal()
+{
+    return &anon_princ;
+}
