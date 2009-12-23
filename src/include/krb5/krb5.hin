@@ -2249,6 +2249,7 @@ krb5_get_init_creds_opt_set_canonicalize(krb5_get_init_creds_opt *opt,
  * Note that anonymous credentials are only a request; clients must verify that
  * credentials are anonymous if that is a requirement.
  */
+void KRB5_CALLCONV
 krb5_get_init_creds_opt_set_anonymous(krb5_get_init_creds_opt *opt,
                                       int anonymous);
 
