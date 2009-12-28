@@ -334,7 +334,6 @@ SUPPORT_DEPLIB	= $(TOPLIBD)/lib$(SUPPORT_LIBNAME)$(DEPLIBEXT)
 SS_DEPLIB	= $(SS_DEPLIB-@SS_VERSION@)
 SS_DEPLIB-k5	= $(TOPLIBD)/libss.a
 SS_DEPLIB-sys	=
-PTY_DEPLIB	= $(TOPLIBD)/libpty.a
 APPUTILS_DEPLIB	= $(TOPLIBD)/libapputils.a
 
 KRB5_BASE_DEPLIBS	= $(KRB5_DEPLIB) $(CRYPTO_DEPLIB) $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
@@ -388,9 +387,6 @@ KADM_COMM_LIBS	= $(GSSRPC_LIBS)
 # need fixing if ever used on Mac OS X!
 KADMSRV_LIBS	= -lkadm5srv $(HESIOD_LIBS) $(KDB5_LIBS) $(KADM_COMM_LIBS)
 KADMCLNT_LIBS	= -lkadm5clnt $(KADM_COMM_LIBS)
-
-# need fixing if ever used on Mac OS X!
-PTY_LIB		= -lpty
 
 # libutil for NetBSD, et al. for openpty(), etc.
 UTIL_LIB	= @UTIL_LIB@
