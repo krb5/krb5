@@ -525,7 +525,7 @@ krb5_get_init_creds_opt_set_fast_flags(krb5_context context,
     if (retval)
         return retval;
     opte->opt_private->fast_flags = flags;
-        return retval;
+    return retval;
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -543,6 +543,5 @@ krb5_get_init_creds_opt_get_fast_flags(krb5_context context,
     if (retval)
         return retval;
     *out_flags = opte->opt_private->fast_flags;
-        return retval;
+    return retval;
 }
-

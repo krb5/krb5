@@ -130,12 +130,12 @@ kadm5_ret_t kadm5_init_with_password(krb5_context context, char *client_name,
 }
 
 kadm5_ret_t kadm5_init_anonymous(krb5_context context, char *client_name,
-                                     char *service_name,
-                                     kadm5_config_params *params,
-                                     krb5_ui_4 struct_version,
-                                     krb5_ui_4 api_version,
-                                     char **db_args,
-                                     void **server_handle)
+                                 char *service_name,
+                                 kadm5_config_params *params,
+                                 krb5_ui_4 struct_version,
+                                 krb5_ui_4 api_version,
+                                 char **db_args,
+                                 void **server_handle)
 {
     return _kadm5_init_any(context, client_name, INIT_ANONYMOUS, NULL, NULL,
                            service_name, params, struct_version,
@@ -573,7 +573,7 @@ kadm5_gic_iter(kadm5_server_handle_t handle,
         krb5_get_init_creds_opt_set_out_ccache(ctx, opt, ccache);
         if (init_type == INIT_ANONYMOUS)
             krb5_get_init_creds_opt_set_anonymous(opt, 1);
-            }
+    }
 
     if (init_type == INIT_PASS || init_type == INIT_ANONYMOUS) {
         code = krb5_get_init_creds_password(ctx, &outcreds, client, pass,
@@ -660,8 +660,8 @@ kadm5_setup_gss(kadm5_server_handle_t handle,
     if (client_name) {
         buf.value = client_name;
         buf.length = strlen((char *)buf.value) + 1;
-    gssstat = gss_import_name(&minor_stat, &buf,
-                              (gss_OID) gss_nt_krb5_name, &gss_client);
+        gssstat = gss_import_name(&minor_stat, &buf,
+                                  (gss_OID) gss_nt_krb5_name, &gss_client);
     } else gss_client = GSS_C_NO_NAME;
 
     if (gssstat != GSS_S_COMPLETE) {

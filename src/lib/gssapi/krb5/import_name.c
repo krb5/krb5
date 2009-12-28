@@ -161,7 +161,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
             krb5_free_context(context);
             *minor_status = code;
             return GSS_S_FAILURE;
-            }
+        }
     }
     else {
 #ifndef NO_PASSWORD

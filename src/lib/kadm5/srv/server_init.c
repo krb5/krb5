@@ -105,12 +105,12 @@ kadm5_ret_t kadm5_init_with_password(krb5_context context, char *client_name,
 }
 
 kadm5_ret_t kadm5_init_anonymous(krb5_context context, char *client_name,
- char *service_name,
-                                     kadm5_config_params *params,
-                                     krb5_ui_4 struct_version,
-                                     krb5_ui_4 api_version,
-                                     char **db_args,
-                                     void **server_handle)
+                                 char *service_name,
+                                 kadm5_config_params *params,
+                                 krb5_ui_4 struct_version,
+                                 krb5_ui_4 api_version,
+                                 char **db_args,
+                                 void **server_handle)
 {
     return kadm5_init(context, client_name, NULL, service_name, params,
                       struct_version, api_version, db_args,

@@ -1122,7 +1122,7 @@ cms_signeddata_verify(krb5_context context,
                       unsigned char **authz_data,
                       unsigned int *authz_data_len,
                       int *is_signed)
-    {
+{
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
     PKCS7 *p7 = NULL;
     BIO *out = NULL;
@@ -1190,7 +1190,7 @@ cms_signeddata_verify(krb5_context context,
                      OBJ_obj2nid(p7->type));
             krb5_set_error_message(context, retval, "wrong oid\n");
             goto cleanup;
-    }
+        }
 
     /* setup to verify X509 certificate used to sign PKCS7 message */
     if (!(store = X509_STORE_new()))

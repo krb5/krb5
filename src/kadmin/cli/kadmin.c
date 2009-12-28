@@ -299,7 +299,7 @@ kadmin_startup(int argc, char *argv[])
         case 'n':
             use_anonymous++;
             break;
-                    case 't':
+        case 't':
             keytab_name = optarg;
             break;
         case 'w':
@@ -496,8 +496,8 @@ kadmin_startup(int argc, char *argv[])
         printf("Authenticating as principal %s with password; anonymous requested.\n",
                princstr);
         retval = kadm5_init_anonymous(context, princstr, svcname, &params,
-                                       KADM5_STRUCT_VERSION,
-                                       KADM5_API_VERSION_3, db_args, &handle);
+                                      KADM5_STRUCT_VERSION,
+                                      KADM5_API_VERSION_3, db_args, &handle);
     } else if (use_keytab) {
         if (keytab_name)
             printf("Authenticating as principal %s with keytab %s.\n",

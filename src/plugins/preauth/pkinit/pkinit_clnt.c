@@ -353,10 +353,10 @@ pkinit_as_req_create(krb5_context context,
                                             reqctx->cryptoctx, reqctx->idctx, CMS_SIGN_CLIENT,
                                             (unsigned char *)coded_auth_pack->data, coded_auth_pack->length,
                                             &req->signedAuthPack.data, &req->signedAuthPack.length);
-            else         retval = cms_signeddata_create(context, plgctx->cryptoctx,
-                                                        reqctx->cryptoctx, reqctx->idctx, CMS_SIGN_CLIENT, 1,
-                                                        (unsigned char *)coded_auth_pack->data, coded_auth_pack->length,
-                                                        &req->signedAuthPack.data, &req->signedAuthPack.length);
+        else         retval = cms_signeddata_create(context, plgctx->cryptoctx,
+                                                    reqctx->cryptoctx, reqctx->idctx, CMS_SIGN_CLIENT, 1,
+                                                    (unsigned char *)coded_auth_pack->data, coded_auth_pack->length,
+                                                    &req->signedAuthPack.data, &req->signedAuthPack.length);
 #ifdef DEBUG_ASN1
         print_buffer_bin((unsigned char *)req->signedAuthPack.data,
                          req->signedAuthPack.length,
