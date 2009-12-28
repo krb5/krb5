@@ -54,6 +54,7 @@
  */
 
 #include "k5-int.h"
+#include "prof_int.h"        /* XXX for profile_copy, not public yet */
 #include <ctype.h>
 #include "brand.c"
 /* There has to be a better way for windows... */
