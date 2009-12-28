@@ -329,9 +329,9 @@ krb5_check_transited_list (krb5_context ctx, const krb5_data *trans_in,
     if (trans.length == 0)
         return 0;
     anonymous = krb5_anonymous_realm();
-    if (crealm->length == anonymous->length
-        && (memcmp(crealm->data, anonymous->data, anonymous->length) == 0))
-        return 0; /*Nothing to check for anonymous*/
+    if (crealm->length == anonymous->length &&
+        (memcmp(crealm->data, anonymous->data, anonymous->length) == 0))
+        return 0; /* Nothing to check for anonymous */
 
     r = krb5_walk_realm_tree (ctx, crealm, srealm, &cdata.tgs,
                               KRB5_REALM_BRANCH_CHAR);

@@ -156,7 +156,8 @@ krb5_gss_import_name(minor_status, input_name_buffer,
         }
     } else if ((input_name_type != NULL) &&
                g_OID_equal(input_name_type, GSS_C_NT_ANONYMOUS)) {
-        code = krb5_copy_principal(context, krb5_anonymous_principal(), &princ);
+        code = krb5_copy_principal(context, krb5_anonymous_principal(),
+                                   &princ);
         if (code != 0) {
             krb5_free_context(context);
             *minor_status = code;

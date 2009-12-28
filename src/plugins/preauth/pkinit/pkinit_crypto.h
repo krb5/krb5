@@ -120,9 +120,8 @@ krb5_error_code cms_contentinfo_create
 	pkinit_req_crypto_context req_cryptoctx,	/* IN */
 	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
 	int cms_msg_type,
-	 unsigned char *in_data, unsigned int in_length,
-	 unsigned char **out_data, unsigned int *out_data_len);
-
+	unsigned char *in_data, unsigned int in_length,
+	unsigned char **out_data, unsigned int *out_data_len);
 
 /*
  * this function creates a CMS message where eContentType is SignedData
@@ -181,9 +180,10 @@ krb5_error_code cms_signeddata_verify
 		    receives required authorization data that
 		    contains the verified certificate chain
 		    (only used by the KDC) */
-	 unsigned int *authz_data_len,			/* OUT
-							   receives length of authz_data */
-	 int *is_signed /*out: is message signed*/);
+	unsigned int *authz_data_len,			/* OUT
+		    receives length of authz_data */
+	int *is_signed);                                /* OUT
+		    receives whether message is signed */
 
 /*
  * this function creates a CMS message where eContentType is EnvelopedData

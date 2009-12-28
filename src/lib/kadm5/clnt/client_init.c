@@ -59,7 +59,7 @@
 
 #define ADM_CCACHE  "/tmp/ovsec_adm.XXXXXX"
 
-enum init_type { INIT_PASS, INIT_SKEY, INIT_CREDS , INIT_ANONYMOUS};
+enum init_type { INIT_PASS, INIT_SKEY, INIT_CREDS, INIT_ANONYMOUS };
 
 static kadm5_ret_t _kadm5_init_any(krb5_context context,
                                    char *client_name,
@@ -356,7 +356,8 @@ static kadm5_ret_t _kadm5_init_any(krb5_context context, char *client_name,
      * The RPC connection is open; establish the GSS-API
      * authentication context.
      */
-    code = kadm5_setup_gss(handle, params_in, (init_type == INIT_CREDS)?client_name:NULL,
+    code = kadm5_setup_gss(handle, params_in,
+                           (init_type == INIT_CREDS) ? client_name : NULL,
                            full_svcname);
     if (code)
         goto error;

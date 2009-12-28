@@ -270,7 +270,8 @@ kadmin_startup(int argc, char *argv[])
         exit(1);
     }
 
-    while ((optchar = getopt(argc, argv, "x:r:p:knq:w:d:s:mc:t:e:ON")) != EOF) {
+    while ((optchar = getopt(argc, argv,
+                             "x:r:p:knq:w:d:s:mc:t:e:ON")) != EOF) {
         switch (optchar) {
         case 'x':
             db_args_size++;
@@ -352,9 +353,9 @@ kadmin_startup(int argc, char *argv[])
         }
     }
     if ((ccache_name && use_keytab) ||
-        (keytab_name && !use_keytab)
-        || (ccache_name && use_anonymous)
-        || (use_anonymous &&use_keytab))
+        (keytab_name && !use_keytab) ||
+        (ccache_name && use_anonymous) ||
+        (use_anonymous && use_keytab))
         usage();
 
     if (def_realm == NULL && krb5_get_default_realm(context, &def_realm)) {
@@ -492,9 +493,9 @@ kadmin_startup(int argc, char *argv[])
         retval = kadm5_init_with_creds(context, princstr, cc, svcname, &params,
                                        KADM5_STRUCT_VERSION,
                                        KADM5_API_VERSION_3, db_args, &handle);
-    } else if ( use_anonymous) {
-        printf("Authenticating as principal %s with password; anonymous requested.\n",
-               princstr);
+    } else if (use_anonymous) {
+        printf("Authenticating as principal %s with password; "
+               "anonymous requested.\n", princstr);
         retval = kadm5_init_anonymous(context, princstr, svcname, &params,
                                       KADM5_STRUCT_VERSION,
                                       KADM5_API_VERSION_3, db_args, &handle);

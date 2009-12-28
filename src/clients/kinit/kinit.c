@@ -190,7 +190,7 @@ usage()
             USAGE_BREAK_LONG
             "[-p | -P" USAGE_LONG_PROXIABLE "] "
             USAGE_BREAK_LONG
-            "-n"
+            "-n "
             "[-a | -A" USAGE_LONG_ADDRESSES "] "
             USAGE_BREAK_LONG
             "[-C" USAGE_LONG_CANONICALIZE "] "
@@ -216,7 +216,7 @@ usage()
     fprintf(stderr, "\t-F not forwardable\n");
     fprintf(stderr, "\t-p proxiable\n");
     fprintf(stderr, "\t-P not proxiable\n");
-    fprintf(stderr, "\t -n anonymous\n");
+    fprintf(stderr, "\t-n anonymous\n");
     fprintf(stderr, "\t-a include addresses\n");
     fprintf(stderr, "\t-A do not include addresses\n");
     fprintf(stderr, "\t-v validate\n");
@@ -487,10 +487,12 @@ k5_begin(opts, k5)
             }
             code = krb5_build_principal_ext(k5->ctx, &k5->me,
                                             strlen(defrealm), defrealm,
-                                            strlen(KRB5_WELLKNOWN_NAMESTR), KRB5_WELLKNOWN_NAMESTR,
-                                            strlen(KRB5_ANONYMOUS_PRINCSTR), KRB5_ANONYMOUS_PRINCSTR,
+                                            strlen(KRB5_WELLKNOWN_NAMESTR),
+                                            KRB5_WELLKNOWN_NAMESTR,
+                                            strlen(KRB5_ANONYMOUS_PRINCSTR),
+                                            KRB5_ANONYMOUS_PRINCSTR,
                                             0);
-            krb5_free_default_realm( k5->ctx, defrealm);
+            krb5_free_default_realm(k5->ctx, defrealm);
             if (code) {
                 com_err(progname, code, "while building principal");
                 return 0;
@@ -507,29 +509,27 @@ k5_begin(opts, k5)
                 }
                 if (k5->me->realm.data[0] == 0) {
                     code = krb5_unparse_name(k5->ctx, k5->me, &k5->name);
-                    if (code == 0)
+                    if (code == 0) {
                         com_err(progname, KRB5_ERR_HOST_REALM_UNKNOWN,
                                 "(principal %s)", k5->name);
-                    else
+                    } else {
                         com_err(progname, KRB5_ERR_HOST_REALM_UNKNOWN,
                                 "for local services");
+                    }
                     return 0;
                 }
             } else {
                 /* Get default principal from cache if one exists */
                 code = krb5_cc_get_principal(k5->ctx, k5->cc,
                                              &k5->me);
-                if (code)
-                {
+                if (code) {
                     char *name = get_name_from_os();
-                    if (!name)
-                    {
+                    if (!name) {
                         fprintf(stderr, "Unable to identify user\n");
                         return 0;
                     }
                     if ((code = krb5_parse_name_flags(k5->ctx, name,
-                                                      flags, &k5->me)))
-                    {
+                                                      flags, &k5->me))) {
                         com_err(progname, code, "when parsing name %s",
                                 name);
                         return 0;

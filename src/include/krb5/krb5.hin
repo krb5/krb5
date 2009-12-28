@@ -261,8 +261,9 @@ typedef krb5_principal_data * krb5_principal;
 #define KRB5_NT_SMTP_NAME               7
 /* Windows 2000 UPN */
 #define KRB5_NT_ENTERPRISE_PRINCIPAL    10
-#define KRB5_NT_WELLKNOWN 11
-#define KRB5_WELLKNOWN_NAMESTR "WELLKNOWN" /*first component of NT_WELLKNOWN principals*/
+#define KRB5_NT_WELLKNOWN               11
+/* First component of NT_WELLKNOWN principals */
+#define KRB5_WELLKNOWN_NAMESTR          "WELLKNOWN"
 /* Windows 2000 UPN and SID */
 #define KRB5_NT_MS_PRINCIPAL            -128
 /* NT 4 style name */
@@ -295,14 +296,12 @@ typedef const krb5_principal_data *krb5_const_principal;
  */
 krb5_boolean KRB5_CALLCONV krb5_is_referral_realm(const krb5_data *);
 
-/*Both these functions return constant storage that must not be freed*/
+/* Both these functions return constant storage that must not be freed. */
+const krb5_data *KRB5_CALLCONV krb5_anonymous_realm(void);
+krb5_const_principal KRB5_CALLCONV krb5_anonymous_principal(void);
 
-const krb5_data *KRB5_CALLCONV
-krb5_anonymous_realm(void);
-krb5_const_principal KRB5_CALLCONV
-krb5_anonymous_principal(void);
 #define KRB5_ANONYMOUS_REALMSTR "WELLKNOWN:ANONYMOUS"
-#define KRB5_ANONYMOUS_PRINCSTR "ANONYMOUS" /*wellknown name type*/
+#define KRB5_ANONYMOUS_PRINCSTR "ANONYMOUS" /* wellknown name type */
 /*
  * end "base-defs.h"
  */
@@ -638,7 +637,7 @@ krb5_c_keyed_checksum_types(krb5_context context, krb5_enctype enctype,
 #define KRB5_KEYUSAGE_PA_S4U_X509_USER_REPLY    27 /* XXX note conflict with above */
 
 #define KRB5_KEYUSAGE_AD_SIGNEDPATH             -21
-#define KRB5_KEYUSAGE_PA_PKINIT_KX 44
+#define KRB5_KEYUSAGE_PA_PKINIT_KX              44
 /* define in draft-ietf-krb-wg-preauth-framework*/
 #define KRB5_KEYUSAGE_FAST_REQ_CHKSUM 50
 #define KRB5_KEYUSAGE_FAST_ENC 51
@@ -939,7 +938,7 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 #define TKT_FLG_TRANSIT_POLICY_CHECKED  0x00080000
 #define TKT_FLG_OK_AS_DELEGATE          0x00040000
 #define TKT_FLG_ENC_PA_REP              0x00010000
-#define      TKT_FLG_ANONYMOUS        0x00008000
+#define TKT_FLG_ANONYMOUS               0x00008000
 /* #define      TKT_FLG_RESERVED        0x00004000 */
 /* #define      TKT_FLG_RESERVED        0x00002000 */
 /* #define      TKT_FLG_RESERVED        0x00001000 */

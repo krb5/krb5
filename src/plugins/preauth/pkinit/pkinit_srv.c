@@ -406,8 +406,8 @@ pkinit_server_verify_padata(krb5_context context,
         if (retval)
             goto cleanup;
         if (!valid_san) {
-            pkiDebug("%s: did not find an acceptable SAN in user certificate\n",
-                     __FUNCTION__);
+            pkiDebug("%s: did not find an acceptable SAN in user "
+                     "certificate\n", __FUNCTION__);
             retval = KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
             goto cleanup;
         }
@@ -416,15 +416,17 @@ pkinit_server_verify_padata(krb5_context context,
             goto cleanup;
 
         if (!valid_eku) {
-            pkiDebug("%s: did not find an acceptable EKU in user certificate\n",
-                     __FUNCTION__);
+            pkiDebug("%s: did not find an acceptable EKU in user "
+                     "certificate\n", __FUNCTION__);
             retval = KRB5KDC_ERR_INCONSISTENT_KEY_PURPOSE;
             goto cleanup;
         }
-    } else { /*!is_signed*/
-        if (!krb5_principal_compare( context, request->client, krb5_anonymous_principal())) {
+    } else { /* !is_signed */
+        if (!krb5_principal_compare(context, request->client,
+                                    krb5_anonymous_principal())) {
             retval = KRB5KDC_ERR_PREAUTH_FAILED;
-            krb5_set_error_message(context, retval, "Pkinit request not signed, but client not anonymous.");
+            krb5_set_error_message(context, retval, "Pkinit request not "
+                                   "signed, but client not anonymous.");
             goto cleanup;
         }
     }
@@ -545,13 +547,13 @@ pkinit_server_verify_padata(krb5_context context,
         break;
     }
 
+    /*
+     * This code used to generate ad-initial-verified-cas authorization data.
+     * However that has been removed until the ad-kdc-issued discussion can
+     * happen in the working group.  Dec 2009
+     */
     /* return authorization data to be included in the ticket */
     switch ((int)data->pa_type) {
-/*
- * This code used to generate ad-initial-verified-cas authorization data.
- * However that has been removed until the ad-kdc-issued discussion can happen
- * in the working group.  Dec 2009
- */
     default:
         *authz_data = NULL;
     }
@@ -593,9 +595,9 @@ cleanup:
     return retval;
 }
 static krb5_error_code
-return_pkinit_kx( krb5_context context, krb5_kdc_req *request, krb5_kdc_rep *reply,
-                  krb5_keyblock *encrypting_key,
-                  krb5_pa_data **out_padata)
+return_pkinit_kx(krb5_context context, krb5_kdc_req *request,
+                 krb5_kdc_rep *reply, krb5_keyblock *encrypting_key,
+                 krb5_pa_data **out_padata)
 {
     krb5_error_code ret = 0;
     krb5_keyblock *session = reply->ticket->enc_part2->session;
@@ -603,15 +605,16 @@ return_pkinit_kx( krb5_context context, krb5_kdc_req *request, krb5_kdc_rep *rep
     krb5_pa_data *pa = NULL;
     krb5_enc_data enc;
     krb5_data *scratch = NULL;
+
     *out_padata = NULL;
     enc.ciphertext.data = NULL;
     if (!krb5_principal_compare(context, request->client,
                                 krb5_anonymous_principal()))
         return 0;
     /*
-     *The KDC contribution key needs to be a fresh key of an
-     *enctype supported by the client and server. The existing
-     *session key meets these requirements so we use itt.
+     * The KDC contribution key needs to be a fresh key of an enctype supported
+     * by the client and server. The existing session key meets these
+     * requirements so we use it.
      */
     ret = krb5_c_fx_cf2_simple(context, session, "PKINIT",
                                encrypting_key, "KEYEXCHANGE",
@@ -621,8 +624,8 @@ return_pkinit_kx( krb5_context context, krb5_kdc_req *request, krb5_kdc_rep *rep
     ret = encode_krb5_encryption_key( session, &scratch);
     if (ret)
         goto cleanup;
-    ret = krb5_encrypt_helper( context, encrypting_key, KRB5_KEYUSAGE_PA_PKINIT_KX,
-                               scratch, &enc);
+    ret = krb5_encrypt_helper(context, encrypting_key,
+                              KRB5_KEYUSAGE_PA_PKINIT_KX, scratch, &enc);
     if (ret)
         goto cleanup;
     memset(scratch->data, 0, scratch->length);
@@ -699,9 +702,10 @@ pkinit_server_return_padata(krb5_context context,
     int fixed_keypack = 0;
 
     *send_pa = NULL;
-    if (padata->pa_type == KRB5_PADATA_PKINIT_KX)
+    if (padata->pa_type == KRB5_PADATA_PKINIT_KX) {
         return return_pkinit_kx(context, request, reply,
                                 encrypting_key, send_pa);
+    }
     if (padata == NULL || padata->length <= 0 || padata->contents == NULL)
         return 0;
 

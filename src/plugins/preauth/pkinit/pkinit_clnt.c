@@ -346,17 +346,26 @@ pkinit_as_req_create(krb5_context context,
             retval = ENOMEM;
             goto cleanup;
         }
-        /*For the new protocol, we support anonymous*/
+        /* For the new protocol, we support anonymous. */
         if (krb5_principal_compare_any_realm(context, client,
-                                             krb5_anonymous_principal()))
+                                             krb5_anonymous_principal())) {
             retval = cms_contentinfo_create(context, plgctx->cryptoctx,
-                                            reqctx->cryptoctx, reqctx->idctx, CMS_SIGN_CLIENT,
-                                            (unsigned char *)coded_auth_pack->data, coded_auth_pack->length,
-                                            &req->signedAuthPack.data, &req->signedAuthPack.length);
-        else         retval = cms_signeddata_create(context, plgctx->cryptoctx,
-                                                    reqctx->cryptoctx, reqctx->idctx, CMS_SIGN_CLIENT, 1,
-                                                    (unsigned char *)coded_auth_pack->data, coded_auth_pack->length,
-                                                    &req->signedAuthPack.data, &req->signedAuthPack.length);
+                                            reqctx->cryptoctx, reqctx->idctx,
+                                            CMS_SIGN_CLIENT, (unsigned char *)
+                                            coded_auth_pack->data,
+                                            coded_auth_pack->length,
+                                            &req->signedAuthPack.data,
+                                            &req->signedAuthPack.length);
+        } else {
+            retval = cms_signeddata_create(context, plgctx->cryptoctx,
+                                           reqctx->cryptoctx, reqctx->idctx,
+                                           CMS_SIGN_CLIENT, 1,
+                                           (unsigned char *)
+                                           coded_auth_pack->data,
+                                           coded_auth_pack->length,
+                                           &req->signedAuthPack.data,
+                                           &req->signedAuthPack.length);
+        }
 #ifdef DEBUG_ASN1
         print_buffer_bin((unsigned char *)req->signedAuthPack.data,
                          req->signedAuthPack.length,
@@ -687,7 +696,8 @@ pkinit_as_rep_parse(krb5_context context,
                                             reqctx->opts->require_crl_checking,
                                             kdc_reply->u.dh_Info.dhSignedData.data,
                                             kdc_reply->u.dh_Info.dhSignedData.length,
-                                            &dh_data.data, &dh_data.length, NULL, NULL, NULL)) != 0) {
+                                            &dh_data.data, &dh_data.length,
+                                            NULL, NULL, NULL)) != 0) {
             pkiDebug("failed to verify pkcs7 signed data\n");
             goto cleanup;
         }

@@ -518,15 +518,16 @@ pkinit_identity_initialize(krb5_context context,
          * in the config file.
          */
         if (idopts->identity != NULL) {
-            retval = process_option_identity(context, plg_cryptoctx, req_cryptoctx,
-                                             idopts, id_cryptoctx,
-                                             idopts->identity);
+            retval = process_option_identity(context, plg_cryptoctx,
+                                             req_cryptoctx, idopts,
+                                             id_cryptoctx, idopts->identity);
         } else if (idopts->identity_alt != NULL) {
-            for (i = 0; retval != 0 && idopts->identity_alt[i] != NULL; i++)
+            for (i = 0; retval != 0 && idopts->identity_alt[i] != NULL; i++) {
                 retval = process_option_identity(context, plg_cryptoctx,
                                                  req_cryptoctx, idopts,
                                                  id_cryptoctx,
                                                  idopts->identity_alt[i]);
+            }
         } else {
             pkiDebug("%s: no user identity options specified\n", __FUNCTION__);
             goto errout;
@@ -540,8 +541,8 @@ pkinit_identity_initialize(krb5_context context,
             goto errout;
 
         if (do_matching) {
-            retval = pkinit_cert_matching(context, plg_cryptoctx, req_cryptoctx,
-                                          id_cryptoctx, princ);
+            retval = pkinit_cert_matching(context, plg_cryptoctx,
+                                          req_cryptoctx, id_cryptoctx, princ);
             if (retval) {
                 pkiDebug("%s: No matching certificate found\n", __FUNCTION__);
                 crypto_free_cert_info(context, plg_cryptoctx, req_cryptoctx,
@@ -565,7 +566,7 @@ pkinit_identity_initialize(krb5_context context,
                                        id_cryptoctx);
         if (retval)
             goto errout;
-    } /*not anonymous principal*/
+    } /* Not anonymous principal */
 
     for (i = 0; idopts->anchors != NULL && idopts->anchors[i] != NULL; i++) {
         retval = process_option_ca_crl(context, plg_cryptoctx, req_cryptoctx,

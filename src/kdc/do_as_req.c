@@ -389,7 +389,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     enc_tkt_reply.caddrs = request->addresses;
     enc_tkt_reply.authorization_data = 0;
 
-    /* If anonymous requests are being used, adjust the realm of the client principal*/
+    /* If anonymous requests are being used, adjust the realm of the client
+     * principal. */
     if (isflagset(request->kdc_options, KDC_OPT_REQUEST_ANONYMOUS)) {
         if (!krb5_principal_compare_any_realm(kdc_context, request->client,
                                               krb5_anonymous_principal())) {
