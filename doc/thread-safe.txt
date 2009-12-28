@@ -1,3 +1,5 @@
+[May be out of date.  Last significant update: Jan 2005.]
+
 In general, it's assumed that the library initialization function (if
 initialization isn't delayed) and the library finalization function
 are run in some thread-safe fashion, with no other parts of the
@@ -224,16 +226,6 @@ Needs work: check various objects for thread safety
 
 ----------------
 
-libkrb4
-libdes425
-
-I don't think we're likely to bother with these.
-
-Part of the krb4 API requires keeping some internal storage across
-calls.
-
-----------------
-
 libgssrpc
 
 New version is in place.  Ignore it for now?
@@ -250,7 +242,6 @@ multiprocessor systems.
 ----------------
 
 libapputils
-libpty
 libss
 
 Used by single-threaded programs only (but see above re KDC).  Don't
