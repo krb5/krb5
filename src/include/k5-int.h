@@ -242,6 +242,7 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_MAX_RENEWABLE_LIFE          "max_renewable_life"
 #define KRB5_CONF_NOADDRESSES                 "noaddresses"
 #define KRB5_CONF_PERMITTED_ENCTYPES          "permitted_enctypes"
+#define KRB5_CONF_PREAUTH_MODULE_DIR          "preauth_module_dir"
 #define KRB5_CONF_PREFERRED_PREAUTH_TYPES     "preferred_preauth_types"
 #define KRB5_CONF_PROXIABLE                   "proxiable"
 #define KRB5_CONF_RDNS                        "rdns"

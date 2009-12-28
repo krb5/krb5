@@ -45,7 +45,9 @@
 #endif
 
 #if TARGET_OS_MAC
-static const char *objdirs[] = { KRB5_PLUGIN_BUNDLE_DIR, LIBDIR "/krb5/plugins/preauth", NULL }; /* should be a list */
+static const char *objdirs[] = { KRB5_PLUGIN_BUNDLE_DIR,
+                                 LIBDIR "/krb5/plugins/preauth",
+                                 NULL };
 #else
 static const char *objdirs[] = { LIBDIR "/krb5/plugins/preauth", NULL };
 #endif
@@ -67,6 +69,50 @@ typedef struct _pa_types_t {
     pa_function fct;
     int flags;
 } pa_types_t;
+
+/* Open plugin directories for preauth modules. */
+static krb5_error_code
+open_preauth_plugin_dirs(krb5_context kcontext)
+{
+    static const char *path[] = {
+        KRB5_CONF_LIBDEFAULTS, KRB5_CONF_PREAUTH_MODULE_DIR, NULL,
+    };
+    char **profpath = NULL;
+    const char **plugindirs = NULL;
+    size_t nprofdirs, nobjdirs;
+    krb5_error_code retval;
+
+    /* Fetch the list of paths specified in the profile, if any. */
+    retval = profile_get_values(kcontext->profile, path, &profpath);
+    if (retval != 0 && retval != PROF_NO_RELATION)
+        return retval;
+
+    /* Count the number of profile dirs. */
+    nprofdirs = 0;
+    if (profpath) {
+        while (profpath[nprofdirs] != NULL)
+            nprofdirs++;
+    }
+
+    nobjdirs = sizeof(objdirs) / sizeof(*objdirs);
+    plugindirs = k5alloc((nprofdirs + nobjdirs) * sizeof(char *), &retval);
+    if (retval != 0)
+        goto cleanup;
+
+    /* Concatenate the profile and hardcoded directory lists. */
+    if (profpath)
+        memcpy(plugindirs, profpath, nprofdirs * sizeof(char *));
+    memcpy(plugindirs + nprofdirs, objdirs, nobjdirs * sizeof(char *));
+
+    retval = krb5int_open_plugin_dirs(plugindirs, NULL,
+                                      &kcontext->preauth_plugins,
+                                      &kcontext->err);
+
+cleanup:
+    profile_free_list(profpath);
+    free(plugindirs);
+    return retval;
+}
 
 /* Create the per-krb5_context context. This means loading the modules
  * if we haven't done that yet (applications which never obtain initial
@@ -90,11 +136,8 @@ krb5_init_preauth_context(krb5_context kcontext)
 
     /* load the plugins for the current context */
     if (PLUGIN_DIR_OPEN(&kcontext->preauth_plugins) == 0) {
-        if (krb5int_open_plugin_dirs(objdirs, NULL,
-                                     &kcontext->preauth_plugins,
-                                     &kcontext->err) != 0) {
+        if (open_preauth_plugin_dirs(kcontext) != 0)
             return;
-        }
     }
 
     /* pull out the module function tables for all of the modules */
