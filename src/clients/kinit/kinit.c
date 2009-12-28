@@ -106,6 +106,7 @@ struct k_opts
 
     int forwardable;
     int proxiable;
+    int anonymous;
     int addresses;
 
     int not_forwardable;
@@ -189,6 +190,7 @@ usage()
             USAGE_BREAK_LONG
             "[-p | -P" USAGE_LONG_PROXIABLE "] "
             USAGE_BREAK_LONG
+            "-n"
             "[-a | -A" USAGE_LONG_ADDRESSES "] "
             USAGE_BREAK_LONG
             "[-C" USAGE_LONG_CANONICALIZE "] "
@@ -214,6 +216,7 @@ usage()
     fprintf(stderr, "\t-F not forwardable\n");
     fprintf(stderr, "\t-p proxiable\n");
     fprintf(stderr, "\t-P not proxiable\n");
+    fprintf(stderr, "\t -n anonymous\n");
     fprintf(stderr, "\t-a include addresses\n");
     fprintf(stderr, "\t-A do not include addresses\n");
     fprintf(stderr, "\t-v validate\n");
@@ -282,7 +285,7 @@ parse_options(argc, argv, opts)
     int errflg = 0;
     int i;
 
-    while ((i = GETOPT(argc, argv, "r:fpFP54aAVl:s:c:kt:T:RS:vX:CE"))
+    while ((i = GETOPT(argc, argv, "r:fpFPn54aAVl:s:c:kt:T:RS:vX:CE"))
            != -1) {
         switch (i) {
         case 'V':
@@ -315,6 +318,9 @@ parse_options(argc, argv, opts)
             break;
         case 'P':
             opts->not_proxiable = 1;
+            break;
+        case 'n':
+            opts->anonymous = 1;
             break;
         case 'a':
             opts->addresses = 1;
@@ -472,43 +478,62 @@ k5_begin(opts, k5)
     else
     {
         /* No principal name specified */
-        if (opts->action == INIT_KT) {
-            /* Use the default host/service name */
-            code = krb5_sname_to_principal(k5->ctx, NULL, NULL,
-                                           KRB5_NT_SRV_HST, &k5->me);
+        if (opts->anonymous) {
+            char *defrealm;
+            code = krb5_get_default_realm(k5->ctx, &defrealm);
             if (code) {
-                com_err(progname, code,
-                        "when creating default server principal name");
+                com_err(progname, code, "while getting default realm");
                 return 0;
             }
-            if (k5->me->realm.data[0] == 0) {
-                code = krb5_unparse_name(k5->ctx, k5->me, &k5->name);
-                if (code == 0)
-                    com_err(progname, KRB5_ERR_HOST_REALM_UNKNOWN,
-                            "(principal %s)", k5->name);
-                else
-                    com_err(progname, KRB5_ERR_HOST_REALM_UNKNOWN,
-                            "for local services");
+            code = krb5_build_principal_ext(k5->ctx, &k5->me,
+                                            strlen(defrealm), defrealm,
+                                            strlen(KRB5_WELLKNOWN_NAMESTR), KRB5_WELLKNOWN_NAMESTR,
+                                            strlen(KRB5_ANONYMOUS_PRINCSTR), KRB5_ANONYMOUS_PRINCSTR,
+                                            0);
+            krb5_free_default_realm( k5->ctx, defrealm);
+            if (code) {
+                com_err(progname, code, "while building principal");
                 return 0;
             }
         } else {
-            /* Get default principal from cache if one exists */
-            code = krb5_cc_get_principal(k5->ctx, k5->cc,
-                                         &k5->me);
-            if (code)
-            {
-                char *name = get_name_from_os();
-                if (!name)
-                {
-                    fprintf(stderr, "Unable to identify user\n");
+            if (opts->action == INIT_KT) {
+                /* Use the default host/service name */
+                code = krb5_sname_to_principal(k5->ctx, NULL, NULL,
+                                               KRB5_NT_SRV_HST, &k5->me);
+                if (code) {
+                    com_err(progname, code,
+                            "when creating default server principal name");
                     return 0;
                 }
-                if ((code = krb5_parse_name_flags(k5->ctx, name,
-                                                  flags, &k5->me)))
-                {
-                    com_err(progname, code, "when parsing name %s",
-                            name);
+                if (k5->me->realm.data[0] == 0) {
+                    code = krb5_unparse_name(k5->ctx, k5->me, &k5->name);
+                    if (code == 0)
+                        com_err(progname, KRB5_ERR_HOST_REALM_UNKNOWN,
+                                "(principal %s)", k5->name);
+                    else
+                        com_err(progname, KRB5_ERR_HOST_REALM_UNKNOWN,
+                                "for local services");
                     return 0;
+                }
+            } else {
+                /* Get default principal from cache if one exists */
+                code = krb5_cc_get_principal(k5->ctx, k5->cc,
+                                             &k5->me);
+                if (code)
+                {
+                    char *name = get_name_from_os();
+                    if (!name)
+                    {
+                        fprintf(stderr, "Unable to identify user\n");
+                        return 0;
+                    }
+                    if ((code = krb5_parse_name_flags(k5->ctx, name,
+                                                      flags, &k5->me)))
+                    {
+                        com_err(progname, code, "when parsing name %s",
+                                name);
+                        return 0;
+                    }
                 }
             }
         }
@@ -593,6 +618,8 @@ k5_kinit(opts, k5)
         krb5_get_init_creds_opt_set_proxiable(options, 0);
     if (opts->canonicalize)
         krb5_get_init_creds_opt_set_canonicalize(options, 1);
+    if (opts->anonymous)
+        krb5_get_init_creds_opt_set_anonymous(options, 1);
     if (opts->addresses)
     {
         krb5_address **addresses = NULL;

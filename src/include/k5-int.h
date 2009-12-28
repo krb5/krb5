@@ -807,11 +807,6 @@ krb5_error_code krb5_crypto_us_timeofday(krb5_int32 *, krb5_int32 *);
 /* this helper fct is in libkrb5, but it makes sense declared here. */
 
 krb5_error_code
-krb5_encrypt_helper(krb5_context context, const krb5_keyblock *key,
-                    krb5_keyusage keyusage, const krb5_data *plain,
-                    krb5_enc_data *cipher);
-
-krb5_error_code
 krb5_encrypt_keyhelper(krb5_context context, krb5_key key,
                        krb5_keyusage keyusage, const krb5_data *plain,
                        krb5_enc_data *cipher);
@@ -1532,7 +1527,7 @@ void KRB5_CALLCONV krb5_free_priv_enc_part(krb5_context, krb5_priv_enc_part *);
 /* allow either constructed or primitive encoding, so check for bit 6
    set or reset */
 #define krb5int_is_app_tag(dat,tag)                     \
-    ((dat) && (dat)->length &&                          \
+    ((dat != NULL) && (dat)->length &&                  \
      ((((dat)->data[0] & ~0x20) == ((tag) | 0x40))))
 #define krb5_is_krb_ticket(dat)               krb5int_is_app_tag(dat, 1)
 #define krb5_is_krb_authenticator(dat)        krb5int_is_app_tag(dat, 2)
@@ -1570,9 +1565,6 @@ encode_krb5_authenticator(const krb5_authenticator *rep, krb5_data **code);
 
 krb5_error_code
 encode_krb5_ticket(const krb5_ticket *rep, krb5_data **code);
-
-krb5_error_code
-encode_krb5_encryption_key(const krb5_keyblock *rep, krb5_data **code);
 
 krb5_error_code
 encode_krb5_enc_tkt_part(const krb5_enc_tkt_part *rep, krb5_data **code);
@@ -1658,9 +1650,6 @@ encode_krb5_etype_info(krb5_etype_info_entry *const *, krb5_data **code);
 
 krb5_error_code
 encode_krb5_etype_info2(krb5_etype_info_entry *const *, krb5_data **code);
-
-krb5_error_code
-encode_krb5_enc_data(const krb5_enc_data *, krb5_data **);
 
 krb5_error_code
 encode_krb5_pa_enc_ts(const krb5_pa_enc_ts *, krb5_data **);

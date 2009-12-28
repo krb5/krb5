@@ -593,7 +593,8 @@ tgt_again:
     } else {
         enc_tkt_reply.times.renew_till = 0;
     }
-
+    if (isflagset(header_enc_tkt->flags, TKT_FLG_ANONYMOUS))
+        setflag(enc_tkt_reply.flags, TKT_FLG_ANONYMOUS);
     /*
      * Set authtime to be the same as header or evidence ticket's
      */

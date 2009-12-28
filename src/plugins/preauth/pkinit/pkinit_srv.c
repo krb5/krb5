@@ -300,7 +300,6 @@ pkinit_server_verify_padata(krb5_context context,
 {
     krb5_error_code retval = 0;
     krb5_octet_data authp_data = {0, 0, NULL}, krb5_authz = {0, 0, NULL};
-    krb5_data *encoded_pkinit_authz_data = NULL;
     krb5_pa_pk_as_req *reqp = NULL;
     krb5_pa_pk_as_req_draft9 *reqp9 = NULL;
     krb5_auth_pack *auth_pack = NULL;
@@ -311,9 +310,9 @@ pkinit_server_verify_padata(krb5_context context,
     krb5_checksum cksum = {0, 0, 0, NULL};
     krb5_data *der_req = NULL;
     int valid_eku = 0, valid_san = 0;
-    krb5_authdata **my_authz_data = NULL, *pkinit_authz_data = NULL;
     krb5_kdc_req *tmp_as_req = NULL;
     krb5_data k5data;
+    int is_signed = 1;
     krb5_keyblock *armor_key;
 
     pkiDebug("pkinit_verify_padata: entered!\n");
@@ -367,7 +366,7 @@ pkinit_server_verify_padata(krb5_context context,
                                        plgctx->opts->require_crl_checking,
                                        reqp->signedAuthPack.data, reqp->signedAuthPack.length,
                                        &authp_data.data, &authp_data.length, &krb5_authz.data,
-                                       &krb5_authz.length);
+                                       &krb5_authz.length, &is_signed);
         break;
     case KRB5_PADATA_PK_AS_REP_OLD:
     case KRB5_PADATA_PK_AS_REQ_OLD:
@@ -389,7 +388,7 @@ pkinit_server_verify_padata(krb5_context context,
                                        plgctx->opts->require_crl_checking,
                                        reqp9->signedAuthPack.data, reqp9->signedAuthPack.length,
                                        &authp_data.data, &authp_data.length, &krb5_authz.data,
-                                       &krb5_authz.length);
+                                       &krb5_authz.length, NULL);
         break;
     default:
         pkiDebug("unrecognized pa_type = %d\n", data->pa_type);
@@ -400,28 +399,35 @@ pkinit_server_verify_padata(krb5_context context,
         pkiDebug("pkcs7_signeddata_verify failed\n");
         goto cleanup;
     }
+    if (is_signed) {
 
-    retval = verify_client_san(context, plgctx, reqctx, request->client,
-                               &valid_san);
-    if (retval)
-        goto cleanup;
-    if (!valid_san) {
-        pkiDebug("%s: did not find an acceptable SAN in user certificate\n",
-                 __FUNCTION__);
-        retval = KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
-        goto cleanup;
+        retval = verify_client_san(context, plgctx, reqctx, request->client,
+                                   &valid_san);
+        if (retval)
+            goto cleanup;
+        if (!valid_san) {
+            pkiDebug("%s: did not find an acceptable SAN in user certificate\n",
+                     __FUNCTION__);
+            retval = KRB5KDC_ERR_CLIENT_NAME_MISMATCH;
+            goto cleanup;
+        }
+        retval = verify_client_eku(context, plgctx, reqctx, &valid_eku);
+        if (retval)
+            goto cleanup;
+
+        if (!valid_eku) {
+            pkiDebug("%s: did not find an acceptable EKU in user certificate\n",
+                     __FUNCTION__);
+            retval = KRB5KDC_ERR_INCONSISTENT_KEY_PURPOSE;
+            goto cleanup;
+        }
+    } else { /*!is_signed*/
+        if (!krb5_principal_compare( context, request->client, krb5_anonymous_principal())) {
+            retval = KRB5KDC_ERR_PREAUTH_FAILED;
+            krb5_set_error_message(context, retval, "Pkinit request not signed, but client not anonymous.");
+            goto cleanup;
+        }
     }
-    retval = verify_client_eku(context, plgctx, reqctx, &valid_eku);
-    if (retval)
-        goto cleanup;
-
-    if (!valid_eku) {
-        pkiDebug("%s: did not find an acceptable EKU in user certificate\n",
-                 __FUNCTION__);
-        retval = KRB5KDC_ERR_INCONSISTENT_KEY_PURPOSE;
-        goto cleanup;
-    }
-
 #ifdef DEBUG_ASN1
     print_buffer_bin(authp_data.data, authp_data.length, "/tmp/kdc_auth_pack");
 #endif
@@ -446,6 +452,11 @@ pkinit_server_verify_padata(krb5_context context,
                 pkiDebug("bad dh parameters\n");
                 goto cleanup;
             }
+        } else if (!is_signed) {
+            /*Anonymous pkinit requires DH*/
+            retval = KRB5KDC_ERR_PREAUTH_FAILED;
+            krb5_set_error_message(context, retval, "Anonymous pkinit without DH public value not supported.");
+            goto cleanup;
         }
         /*
          * The KDC may have modified the request after decoding it.
@@ -536,64 +547,11 @@ pkinit_server_verify_padata(krb5_context context,
 
     /* return authorization data to be included in the ticket */
     switch ((int)data->pa_type) {
-    case KRB5_PADATA_PK_AS_REQ:
-        my_authz_data = malloc(2 * sizeof(*my_authz_data));
-        if (my_authz_data == NULL) {
-            retval = ENOMEM;
-            pkiDebug("Couldn't allocate krb5_authdata ptr array\n");
-            goto cleanup;
-        }
-        my_authz_data[1] = NULL;
-        my_authz_data[0] = malloc(sizeof(krb5_authdata));
-        if (my_authz_data[0] == NULL) {
-            retval = ENOMEM;
-            pkiDebug("Couldn't allocate krb5_authdata\n");
-            free(my_authz_data);
-            goto cleanup;
-        }
-        /* AD-INITIAL-VERIFIED-CAS must be wrapped in AD-IF-RELEVANT */
-        my_authz_data[0]->magic = KV5M_AUTHDATA;
-        my_authz_data[0]->ad_type = KRB5_AUTHDATA_IF_RELEVANT;
-
-        /* create an internal AD-INITIAL-VERIFIED-CAS data */
-        pkinit_authz_data = malloc(sizeof(krb5_authdata));
-        if (pkinit_authz_data == NULL) {
-            retval = ENOMEM;
-            pkiDebug("Couldn't allocate krb5_authdata\n");
-            free(my_authz_data[0]);
-            free(my_authz_data);
-            goto cleanup;
-        }
-        pkinit_authz_data->ad_type = KRB5_AUTHDATA_INITIAL_VERIFIED_CAS;
-        /* content of this ad-type contains the certification
-           path with which the client certificate was validated
-        */
-        pkinit_authz_data->contents = krb5_authz.data;
-        pkinit_authz_data->length = krb5_authz.length;
-        retval = k5int_encode_krb5_authdata_elt(pkinit_authz_data,
-                                                &encoded_pkinit_authz_data);
-#ifdef DEBUG_ASN1
-        print_buffer_bin((unsigned char *)encoded_pkinit_authz_data->data,
-                         encoded_pkinit_authz_data->length,
-                         "/tmp/kdc_pkinit_authz_data");
-#endif
-        free(pkinit_authz_data);
-        if (retval) {
-            pkiDebug("k5int_encode_krb5_authdata_elt failed\n");
-            free(my_authz_data[0]);
-            free(my_authz_data);
-            goto cleanup;
-        }
-
-        my_authz_data[0]->contents =
-            (krb5_octet *) encoded_pkinit_authz_data->data;
-        my_authz_data[0]->length = encoded_pkinit_authz_data->length;
-        *authz_data = my_authz_data;
-        pkiDebug("Returning %d bytes of authorization data\n",
-                 krb5_authz.length);
-        encoded_pkinit_authz_data->data = NULL; /* Don't free during cleanup*/
-        free(encoded_pkinit_authz_data);
-        break;
+/*
+ * This code used to generate ad-initial-verified-cas authorization data.
+ * However that has been removed until the ad-kdc-issued discussion can happen
+ * in the working group.  Dec 2009
+ */
     default:
         *authz_data = NULL;
     }
@@ -633,6 +591,67 @@ cleanup:
         free_krb5_auth_pack_draft9(context, &auth_pack9);
 
     return retval;
+}
+static krb5_error_code
+return_pkinit_kx( krb5_context context, krb5_kdc_req *request, krb5_kdc_rep *reply,
+                  krb5_keyblock *encrypting_key,
+                  krb5_pa_data **out_padata)
+{
+    krb5_error_code ret = 0;
+    krb5_keyblock *session = reply->ticket->enc_part2->session;
+    krb5_keyblock *new_session = NULL;
+    krb5_pa_data *pa = NULL;
+    krb5_enc_data enc;
+    krb5_data *scratch = NULL;
+    *out_padata = NULL;
+    enc.ciphertext.data = NULL;
+    if (!krb5_principal_compare(context, request->client,
+                                krb5_anonymous_principal()))
+        return 0;
+    /*
+     *The KDC contribution key needs to be a fresh key of an
+     *enctype supported by the client and server. The existing
+     *session key meets these requirements so we use itt.
+     */
+    ret = krb5_c_fx_cf2_simple(context, session, "PKINIT",
+                               encrypting_key, "KEYEXCHANGE",
+                               &new_session);
+    if (ret)
+        goto cleanup;
+    ret = encode_krb5_encryption_key( session, &scratch);
+    if (ret)
+        goto cleanup;
+    ret = krb5_encrypt_helper( context, encrypting_key, KRB5_KEYUSAGE_PA_PKINIT_KX,
+                               scratch, &enc);
+    if (ret)
+        goto cleanup;
+    memset(scratch->data, 0, scratch->length);
+    krb5_free_data(context, scratch);
+    scratch = NULL;
+    ret = encode_krb5_enc_data(&enc, &scratch);
+    if (ret)
+        goto cleanup;
+    pa = malloc(sizeof(krb5_pa_data));
+    if (pa == NULL) {
+        ret = ENOMEM;
+        goto cleanup;
+    }
+    if (ret)
+        goto cleanup;
+    pa->pa_type = KRB5_PADATA_PKINIT_KX;
+    pa->length = scratch->length;
+    pa->contents = (krb5_octet *) scratch->data;
+    *out_padata = pa;
+    scratch->data = NULL;
+    memset(session->contents, 0, session->length);
+    krb5_free_keyblock_contents(context, session);
+    *session = *new_session;
+    new_session->contents = NULL;
+cleanup:
+    krb5_free_data_contents(context, &enc.ciphertext);
+    krb5_free_keyblock(context, new_session);
+    krb5_free_data(context, scratch);
+    return ret;
 }
 
 static krb5_error_code
@@ -680,6 +699,9 @@ pkinit_server_return_padata(krb5_context context,
     int fixed_keypack = 0;
 
     *send_pa = NULL;
+    if (padata->pa_type == KRB5_PADATA_PKINIT_KX)
+        return return_pkinit_kx(context, request, reply,
+                                encrypting_key, send_pa);
     if (padata == NULL || padata->length <= 0 || padata->contents == NULL)
         return 0;
 
@@ -1037,6 +1059,8 @@ cleanup:
 static int
 pkinit_server_get_flags(krb5_context kcontext, krb5_preauthtype patype)
 {
+    if (patype == KRB5_PADATA_PKINIT_KX)
+        return PA_PSEUDO;
     return PA_SUFFICIENT | PA_REPLACES_KEY;
 }
 
@@ -1044,6 +1068,7 @@ static krb5_preauthtype supported_server_pa_types[] = {
     KRB5_PADATA_PK_AS_REQ,
     KRB5_PADATA_PK_AS_REQ_OLD,
     KRB5_PADATA_PK_AS_REP_OLD,
+    KRB5_PADATA_PKINIT_KX,
     0
 };
 
@@ -1238,7 +1263,7 @@ pkinit_server_plugin_init(krb5_context context, void **blob,
 {
     krb5_error_code retval = ENOMEM;
     pkinit_kdc_context plgctx, *realm_contexts = NULL;
-    int i, j;
+    size_t  i, j;
     size_t numrealms;
 
     retval = pkinit_accessor_init();

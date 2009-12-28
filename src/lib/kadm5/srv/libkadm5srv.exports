@@ -40,6 +40,7 @@ kadm5_get_principal_keys
 kadm5_get_principals
 kadm5_get_privs
 kadm5_init
+kadm5_init_anonymous
 kadm5_init_krb5_context
 kadm5_init_with_creds
 kadm5_init_with_password

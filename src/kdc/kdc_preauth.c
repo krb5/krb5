@@ -1275,6 +1275,7 @@ return_padata(krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
     krb5_pa_data **             send_pa_list;
     krb5_pa_data **             send_pa;
     krb5_pa_data *              pa = 0;
+    krb5_pa_data null_item;
     krb5_preauth_systems *      ap;
     int *                       pa_order;
     int *                       pa_type;
@@ -1308,7 +1309,8 @@ return_padata(krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
         return retval;
     }
     key_modified = FALSE;
-
+    null_item.contents = NULL;
+    null_item.length = NULL;
     send_pa = send_pa_list;
     *send_pa = 0;
 
@@ -1330,7 +1332,8 @@ return_padata(krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
             continue;
         if (find_pa_context(ap, *padata_context, &pa_context))
             continue;
-        pa = 0;
+        pa = &null_item;
+        null_item.pa_type = ap->type;
         if (request->padata) {
             for (padata = request->padata; *padata; padata++) {
                 if ((*padata)->pa_type == ap->type) {
@@ -1900,7 +1903,7 @@ return_sam_data(krb5_context context, krb5_pa_data *in_padata,
     krb5_sam_response           *sr = 0;
     krb5_predicted_sam_response *psr = 0;
 
-    if (in_padata == 0)
+    if (in_padata->contents == 0)
         return 0;
 
     /*

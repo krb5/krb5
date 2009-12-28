@@ -691,6 +691,102 @@ pkinit_identity_set_prompter(pkinit_identity_crypto_context id_cryptoctx,
     return 0;
 }
 
+/*helper function for creating pkinit ContentInfo*/
+static krb5_error_code create_contentinfo
+(krb5_context context, pkinit_plg_crypto_context plg_crypto_context,
+ ASN1_OBJECT *oid,
+ unsigned char *data, size_t data_len,
+ PKCS7 **out_p7)
+{
+    krb5_error_code retval = EINVAL;
+    PKCS7 *inner_p7;
+    ASN1_TYPE *pkinit_data = NULL;
+    *out_p7 = NULL;
+    if ((inner_p7 = PKCS7_new()) == NULL)
+        goto cleanup;
+    if ((pkinit_data = ASN1_TYPE_new()) == NULL)
+        goto cleanup;
+    pkinit_data->type = V_ASN1_OCTET_STRING;
+    if ((pkinit_data->value.octet_string = ASN1_OCTET_STRING_new()) == NULL)
+        goto cleanup;
+    if (!ASN1_OCTET_STRING_set(pkinit_data->value.octet_string, (unsigned char *) data,
+                               data_len)) {
+        unsigned long err = ERR_peek_error();
+        retval = KRB5KDC_ERR_PREAUTH_FAILED;
+        krb5_set_error_message(context, retval, "%s\n",
+                               ERR_error_string(err, NULL));
+        pkiDebug("failed to add pkcs7 data\n");
+        goto cleanup;
+    }
+    if (!PKCS7_set0_type_other(inner_p7, OBJ_obj2nid(oid), pkinit_data))
+        goto cleanup;
+    retval = 0;
+    *out_p7 = inner_p7;
+    inner_p7 = NULL;
+    pkinit_data = NULL;
+cleanup:
+    if (inner_p7)
+        PKCS7_free(inner_p7);
+    if (pkinit_data)
+        ASN1_TYPE_free(pkinit_data);
+    return retval;
+}
+
+krb5_error_code cms_contentinfo_create
+(krb5_context context,                          /* IN */
+ pkinit_plg_crypto_context plg_cryptoctx,       /* IN */
+ pkinit_req_crypto_context req_cryptoctx,       /* IN */
+ pkinit_identity_crypto_context id_cryptoctx,   /* IN */
+ int cms_msg_type,
+ unsigned char *data, unsigned int data_len,
+ unsigned char **out_data, unsigned int *out_data_len)
+{
+    krb5_error_code retval = ENOMEM;
+    ASN1_OBJECT *oid = NULL;
+    PKCS7 *p7 = NULL;
+    unsigned char *p;
+    /* pick the correct oid for the eContentInfo */
+    oid = pkinit_pkcs7type2oid(plg_cryptoctx, cms_msg_type);
+    if (oid == NULL)
+        goto cleanup;
+    retval = create_contentinfo(context, plg_cryptoctx, oid,
+                                data, data_len, &p7);
+    if (retval != 0)
+        goto cleanup;
+    *out_data_len = i2d_PKCS7(p7, NULL);
+    if (!(*out_data_len)) {
+        unsigned long err = ERR_peek_error();
+        retval = KRB5KDC_ERR_PREAUTH_FAILED;
+        krb5_set_error_message(context, retval, "%s\n",
+                               ERR_error_string(err, NULL));
+        pkiDebug("failed to der encode pkcs7\n");
+        goto cleanup;
+    }
+    retval = ENOMEM;
+    if ((p = *out_data = malloc(*out_data_len)) == NULL)
+        goto cleanup;
+
+    /* DER encode PKCS7 data */
+    retval = i2d_PKCS7(p7, &p);
+    if (!retval) {
+        unsigned long err = ERR_peek_error();
+        retval = KRB5KDC_ERR_PREAUTH_FAILED;
+        krb5_set_error_message(context, retval, "%s\n",
+                               ERR_error_string(err, NULL));
+        pkiDebug("failed to der encode pkcs7\n");
+        goto cleanup;
+    }
+    retval = 0;
+cleanup:
+    if (p7)
+        PKCS7_free(p7);
+    if (oid)
+        ASN1_OBJECT_free(oid);
+    return retval;
+}
+
+
+
 krb5_error_code
 cms_signeddata_create(krb5_context context,
                       pkinit_plg_crypto_context plg_cryptoctx,
@@ -708,7 +804,6 @@ cms_signeddata_create(krb5_context context,
     PKCS7_SIGNED *p7s = NULL;
     PKCS7_SIGNER_INFO *p7si = NULL;
     unsigned char *p;
-    ASN1_TYPE *pkinit_data = NULL;
     STACK_OF(X509) * cert_stack = NULL;
     ASN1_OCTET_STRING *digest_attr = NULL;
     EVP_MD_CTX ctx, ctx2;
@@ -726,7 +821,11 @@ cms_signeddata_create(krb5_context context,
     X509 *cert = NULL;
     ASN1_OBJECT *oid = NULL;
 
-    /* start creating PKCS7 data */
+    if (id_cryptoctx->my_certs == NULL) {
+        krb5_set_error_message(context, EINVAL, "cms_signdata_create called with no certificates");
+        return EINVAL;
+    }
+/* start creating PKCS7 data */
     if ((p7 = PKCS7_new()) == NULL)
         goto cleanup;
     p7->type = OBJ_nid2obj(NID_pkcs7_signed);
@@ -751,7 +850,7 @@ cms_signeddata_create(krb5_context context,
         X509_STORE_CTX certctx;
         STACK_OF(X509) *certstack = NULL;
         char buf[DN_BUF_LEN];
-        int i = 0, size = 0;
+        unsigned int i = 0, size = 0;
 
         if ((certstore = X509_STORE_new()) == NULL)
             goto cleanup;
@@ -939,26 +1038,8 @@ cms_signeddata_create(krb5_context context,
         goto cleanup2;
 
     /* start on adding data to the pkcs7 signed */
-    if ((inner_p7 = PKCS7_new()) == NULL)
-        goto cleanup2;
-    if ((pkinit_data = ASN1_TYPE_new()) == NULL)
-        goto cleanup2;
-    pkinit_data->type = V_ASN1_OCTET_STRING;
-    if ((pkinit_data->value.octet_string = ASN1_OCTET_STRING_new()) == NULL)
-        goto cleanup2;
-    if (!ASN1_OCTET_STRING_set(pkinit_data->value.octet_string, data,
-                               (int)data_len)) {
-        unsigned long err = ERR_peek_error();
-        retval = KRB5KDC_ERR_PREAUTH_FAILED;
-        krb5_set_error_message(context, retval, "%s\n",
-                               ERR_error_string(err, NULL));
-        pkiDebug("failed to add pkcs7 data\n");
-        goto cleanup2;
-    }
-
-    if (!PKCS7_set0_type_other(inner_p7, OBJ_obj2nid(oid), pkinit_data))
-        goto cleanup2;
-
+    retval = create_contentinfo(context, plg_cryptoctx, oid,
+                                data, data_len, &inner_p7);
     if (p7s->contents != NULL)
         PKCS7_free(p7s->contents);
     p7s->contents = inner_p7;
@@ -972,6 +1053,7 @@ cms_signeddata_create(krb5_context context,
         pkiDebug("failed to der encode pkcs7\n");
         goto cleanup2;
     }
+    retval = ENOMEM;
     if ((p = *signed_data = malloc(*signed_data_len)) == NULL)
         goto cleanup2;
 
@@ -1038,12 +1120,14 @@ cms_signeddata_verify(krb5_context context,
                       unsigned char **data,
                       unsigned int *data_len,
                       unsigned char **authz_data,
-                      unsigned int *authz_data_len)
+                      unsigned int *authz_data_len,
+                      int *is_signed)
 {
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
     PKCS7 *p7 = NULL;
     BIO *out = NULL;
-    int flags = PKCS7_NOVERIFY, i = 0;
+    int flags = PKCS7_NOVERIFY;
+    unsigned int i = 0;
     unsigned int vflags = 0, size = 0;
     const unsigned char *p = signed_data;
     STACK_OF(PKCS7_SIGNER_INFO) *si_sk = NULL;
@@ -1063,7 +1147,8 @@ cms_signeddata_verify(krb5_context context,
     print_buffer_bin(signed_data, signed_data_len,
                      "/tmp/client_received_pkcs7_signeddata");
 #endif
-
+    if (is_signed)
+        *is_signed = 1;
     /* Do this early enough to create the shadow OID for pkcs7-data if needed */
     oid = pkinit_pkcs7type2oid(plgctx, cms_msg_type);
     if (oid == NULL)
@@ -1079,13 +1164,33 @@ cms_signeddata_verify(krb5_context context,
         goto cleanup;
     }
 
-    /* verify that the received message is PKCS7 SignedData message */
-    if (OBJ_obj2nid(p7->type) != NID_pkcs7_signed) {
-        pkiDebug("Expected id-signedData PKCS7 msg (received type = %d)\n",
-                 OBJ_obj2nid(p7->type));
-        krb5_set_error_message(context, retval, "wrong oid\n");
-        goto cleanup;
-    }
+/*Handle the case in pkinit anonymous where  we get unsigned data.*/
+    if (is_signed && !OBJ_cmp( p7->type, oid)) {
+        unsigned char *d;
+        *is_signed = 0;
+        if (p7->d.other->type != V_ASN1_OCTET_STRING) {
+            retval = KRB5KDC_ERR_PREAUTH_FAILED;
+            krb5_set_error_message(context, KRB5KDC_ERR_PREAUTH_FAILED, "Invalid pkinit packet: octet string expected");
+            goto cleanup;
+        }
+        *data_len = ASN1_STRING_length(p7->d.other->value.octet_string);
+        d = malloc(*data_len);
+        if (d == NULL) {
+            retval = ENOMEM;
+            goto cleanup;
+        }
+        memcpy(d, ASN1_STRING_data(p7->d.other->value.octet_string),
+               *data_len);
+        *data = d;
+        goto out;
+    } else     /* verify that the received message is PKCS7 SignedData message */
+        if (OBJ_obj2nid(p7->type) != NID_pkcs7_signed) {
+
+            pkiDebug("Expected id-signedData PKCS7 msg (received type = %d)\n",
+                     OBJ_obj2nid(p7->type));
+            krb5_set_error_message(context, retval, "wrong oid\n");
+            goto cleanup;
+        }
 
     /* setup to verify X509 certificate used to sign PKCS7 message */
     if (!(store = X509_STORE_new()))
@@ -1285,13 +1390,15 @@ cms_signeddata_verify(krb5_context context,
 
     /* transfer the data from PKCS7 message into return buffer */
     for (size = 0;;) {
+        int remain;
+        retval = ENOMEM;
         if ((*data = realloc(*data, size + 1024 * 10)) == NULL)
             goto cleanup;
-        i = BIO_read(out, &((*data)[size]), 1024 * 10);
-        if (i <= 0)
+        remain = BIO_read(out, &((*data)[size]), 1024 * 10);
+        if (remain <= 0)
             break;
         else
-            size += i;
+            size += remain;
     }
     *data_len = size;
 
@@ -1617,7 +1724,7 @@ cms_envelopeddata_verify(krb5_context context,
                                    id_cryptoctx, msg_type,
                                    require_crl_checking,
                                    vfy_buf, vfy_buf_len,
-                                   data, data_len, NULL, NULL);
+                                   data, data_len, NULL, NULL, NULL);
 
     if (!retval)
         pkiDebug("PKCS7 Verification Success\n");
@@ -1655,7 +1762,7 @@ crypto_retrieve_X509_sans(krb5_context context,
     krb5_principal *princs = NULL;
     krb5_principal *upns = NULL;
     unsigned char **dnss = NULL;
-    int i, num_found = 0;
+    unsigned int i, num_found = 0;
 
     if (princs_ret == NULL && upn_ret == NULL && dns_ret == NULL) {
         pkiDebug("%s: nowhere to return any values!\n", __FUNCTION__);
@@ -3220,7 +3327,7 @@ static krb5_error_code
 pkinit_open_session(krb5_context context,
                     pkinit_identity_crypto_context cctx)
 {
-    int i, r;
+    CK_ULONG i, r;
     unsigned char *cp;
     CK_ULONG count = 0;
     CK_SLOT_ID_PTR slotlist;
@@ -3414,7 +3521,7 @@ pkinit_C_Decrypt(pkinit_identity_crypto_context id_cryptoctx,
     rv = id_cryptoctx->p11->C_Decrypt(id_cryptoctx->session, pEncryptedData,
                                       ulEncryptedDataLen, pData, pulDataLen);
     if (rv == CKR_OK) {
-        pkiDebug("pData %x *pulDataLen %d\n", (int) pData, (int) *pulDataLen);
+        pkiDebug("pData %x *pulDataLen %d\n", (unsigned int) pData, (int) *pulDataLen);
     }
     return rv;
 }
@@ -4451,7 +4558,7 @@ X509_NAME_oneline_ex(X509_NAME * a,
 
     out = BIO_new(BIO_s_mem ());
     if (X509_NAME_print_ex(out, a, 0, flag) > 0) {
-        if (buf != NULL && *size > (int) BIO_number_written(out)) {
+        if (buf != NULL && (int)(*size) >  BIO_number_written(out)) {
             memset(buf, 0, *size);
             BIO_read(out, buf, (int) BIO_number_written(out));
         }
@@ -5459,7 +5566,7 @@ pkcs7_dataDecode(krb5_context context,
     if (EVP_CIPHER_asn1_to_param(evp_ctx,enc_alg->parameter) < 0)
         goto cleanup;
 
-    if (jj != EVP_CIPHER_CTX_key_length(evp_ctx)) {
+    if ((unsigned) jj != EVP_CIPHER_CTX_key_length(evp_ctx)) {
         /* Some S/MIME clients don't use the same key
          * and effective key length. The key length is
          * determined by the size of the decrypted RSA key.

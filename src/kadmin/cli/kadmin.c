@@ -119,7 +119,7 @@ usage()
 {
     fprintf(stderr,
             "Usage: %s [-r realm] [-p principal] [-q query] [clnt|local args]\n"
-            "\tclnt args: [-s admin_server[:port]] [[-c ccache]|[-k [-t keytab]]]\n"
+            "\tclnt args: [-s admin_server[:port]] [[-c ccache]|[-k [-t keytab]]]|[-n]\n"
             "\tlocal args: [-x db_args]* [-d dbname] [-e \"enc:salt ...\"] [-m]\n"
             "where,\n\t[-x db_args]* - any number of database specific arguments.\n"
             "\t\t\tLook at each database documentation for supported arguments\n",
@@ -238,7 +238,7 @@ kadmin_startup(int argc, char *argv[])
     char *princstr = NULL, *keytab_name = NULL, *query = NULL;
     char *password = NULL;
     char *luser, *canon, *cp;
-    int optchar, freeprinc = 0, use_keytab = 0;
+    int optchar, freeprinc = 0, use_keytab = 0, use_anonymous = 0;
     struct passwd *pw;
     kadm5_ret_t retval;
     krb5_ccache cc;
@@ -270,7 +270,7 @@ kadmin_startup(int argc, char *argv[])
         exit(1);
     }
 
-    while ((optchar = getopt(argc, argv, "x:r:p:kq:w:d:s:mc:t:e:ON")) != EOF) {
+    while ((optchar = getopt(argc, argv, "x:r:p:knq:w:d:s:mc:t:e:ON")) != EOF) {
         switch (optchar) {
         case 'x':
             db_args_size++;
@@ -295,6 +295,9 @@ kadmin_startup(int argc, char *argv[])
             break;
         case 'k':
             use_keytab++;
+            break;
+        case 'n':
+            use_anonymous++;
             break;
         case 't':
             keytab_name = optarg;
@@ -349,7 +352,9 @@ kadmin_startup(int argc, char *argv[])
         }
     }
     if ((ccache_name && use_keytab) ||
-        (keytab_name && !use_keytab))
+        (keytab_name && !use_keytab)
+        || (ccache_name && use_anonymous)
+        || (use_anonymous &&use_keytab))
         usage();
 
     if (def_realm == NULL && krb5_get_default_realm(context, &def_realm)) {
@@ -487,6 +492,12 @@ kadmin_startup(int argc, char *argv[])
         retval = kadm5_init_with_creds(context, princstr, cc, svcname, &params,
                                        KADM5_STRUCT_VERSION,
                                        KADM5_API_VERSION_3, db_args, &handle);
+    } else if ( use_anonymous) {
+        printf("Authenticating as principal %s with password; anonymous requested.\n",
+               princstr);
+        retval = kadm5_init_anonymous(context, princstr, svcname, &params,
+                                      KADM5_STRUCT_VERSION,
+                                      KADM5_API_VERSION_3, db_args, &handle);
     } else if (use_keytab) {
         if (keytab_name)
             printf("Authenticating as principal %s with keytab %s.\n",
