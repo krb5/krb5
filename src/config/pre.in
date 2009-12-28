@@ -564,6 +564,13 @@ VALGRIND=
 VALGRIND_LOGDIR = `cd $(BUILDTOP)&&pwd`
 VALGRIND1 = valgrind --tool=memcheck --log-file=$(VALGRIND_LOGDIR)/vg --trace-children=yes -v --leak-check=yes --suppressions=`cd $(top_srcdir)&&pwd`/util/valgrind-suppressions
 
+# Set OFFLINE=yes to disable tests that assume network connectivity.
+# (Specifically, this concerns the ability to fetch DNS data for
+# mit.edu, to verify that SRV queries are working.)  Note that other
+# tests still assume that the local hostname can be resolved into
+# something that looks like an FQDN, with an IPv4 address.
+OFFLINE=no
+
 ##
 ## end of pre.in
 ############################################################

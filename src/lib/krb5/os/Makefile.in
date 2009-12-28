@@ -201,7 +201,11 @@ check-unix:: $(TEST_PROGS)
 	cmp test.out $(srcdir)/ref_std_conf.out
 	$(RM) test.out
 	KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\
-	$(KRB5_RUN_ENV) $(VALGRIND) ./t_locate_kdc ATHENA.MIT.EDU
+	if test "$(OFFLINE)" != yes; then \
+	  $(KRB5_RUN_ENV) $(VALGRIND) ./t_locate_kdc ATHENA.MIT.EDU; \
+	else \
+	  echo SKIPPING t_locate_kdc TEST WHILE OFFLINE; \
+	fi
 
 #
 # Do some aname-to-lname testing.
