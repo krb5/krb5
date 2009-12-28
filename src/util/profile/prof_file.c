@@ -185,7 +185,6 @@ profile_make_prf_data(const char *filename)
     assert(fcopy == d->filespec);
     strlcpy(fcopy, filename, flen + 1);
     d->refcount = 1;
-    d->comment = NULL;
     d->magic = PROF_MAGIC_FILE_DATA;
     d->root = NULL;
     d->next = NULL;
@@ -340,10 +339,6 @@ errcode_t profile_update_file_data_locked(prf_data_t data)
     if (data->root) {
         profile_free_node(data->root);
         data->root = 0;
-    }
-    if (data->comment) {
-        free(data->comment);
-        data->comment = 0;
     }
 #else
     /*
@@ -590,8 +585,6 @@ static void profile_free_file_data(prf_data_t data)
     }
     if (data->root)
         profile_free_node(data->root);
-    if (data->comment)
-        free(data->comment);
     data->magic = 0;
     k5_mutex_destroy(&data->lock);
     free(data);

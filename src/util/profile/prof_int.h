@@ -35,7 +35,6 @@ struct _prf_data_t {
 	unsigned long	frac_ts;   /* fractional part of timestamp, if any */
 	int		flags;	/* r/w, dirty */
 	int		upd_serial; /* incremented when data changes */
-	char		*comment;
 
 	size_t		fslen;
 
