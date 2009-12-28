@@ -86,7 +86,7 @@ On Tru64 we also link against the thread library always.
 
 For now, the basic model is:
 
-  If weak references supported, use them.
+  If weak references are supported, use them.
   Else, assume support is present; if that means explicitly pulling in
   the thread library, so be it.
 
