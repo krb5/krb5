@@ -31,6 +31,7 @@
 
 #include "k5-int.h"
 #include "os-proto.h"
+#include "prof_int.h"        /* XXX for profile_copy, not public yet */
 
 #ifdef USE_KIM
 #include "kim_library_private.h"
@@ -399,6 +400,12 @@ krb5_os_init_context(krb5_context ctx, krb5_boolean kdc)
 #endif /* _WIN32 */
     }
     return retval;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_get_profile (krb5_context ctx, profile_t *profile)
+{
+    return profile_copy (ctx->profile, profile);
 }
 
 krb5_error_code

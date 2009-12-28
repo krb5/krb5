@@ -54,7 +54,6 @@
  */
 
 #include "k5-int.h"
-#include "prof_int.h"        /* XXX for profile_copy, not public yet */
 #include <ctype.h>
 #include "brand.c"
 /* There has to be a better way for windows... */
@@ -647,10 +646,4 @@ errout:
         *nctx_out = nctx;
     }
     return ret;
-}
-
-krb5_error_code KRB5_CALLCONV
-krb5_get_profile (krb5_context ctx, profile_t *profile)
-{
-    return profile_copy (ctx->profile, profile);
 }
