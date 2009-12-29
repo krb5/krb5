@@ -39,8 +39,7 @@ STLIBOBJS=\
 	encrypt.o		\
 	encrypt_iov.o		\
 	encrypt_length.o	\
-	enctype_compare.o	\
-	enctype_to_string.o	\
+	enctype_util.o		\
 	etypes.o		\
 	key.o			\
 	keyblocks.o 		\
@@ -58,10 +57,8 @@ STLIBOBJS=\
 	random_to_key.o		\
 	state.o 		\
 	string_to_cksumtype.o	\
-	string_to_enctype.o	\
 	string_to_key.o		\
 	valid_cksumtype.o	\
-	valid_enctype.o		\
 	verify_checksum.o	\
 	verify_checksum_iov.o
 
@@ -82,8 +79,7 @@ OBJS=\
 	$(OUTPRE)encrypt.$(OBJEXT)		\
 	$(OUTPRE)encrypt_iov.$(OBJEXT)		\
 	$(OUTPRE)encrypt_length.$(OBJEXT)	\
-	$(OUTPRE)enctype_compare.$(OBJEXT)	\
-	$(OUTPRE)enctype_to_string.$(OBJEXT)	\
+	$(OUTPRE)enctype_util.$(OBJEXT)	\
 	$(OUTPRE)etypes.$(OBJEXT)		\
 	$(OUTPRE)key.$(OBJECT)			\
 	$(OUTPRE)keyblocks.$(OBJEXT) 		\
@@ -101,10 +97,7 @@ OBJS=\
 	$(OUTPRE)random_to_key.$(OBJEXT)	\
 	$(OUTPRE)state.$(OBJEXT) 		\
 	$(OUTPRE)string_to_cksumtype.$(OBJEXT)	\
-	$(OUTPRE)string_to_enctype.$(OBJEXT)	\
-	$(OUTPRE)string_to_key.$(OBJEXT)	\
 	$(OUTPRE)valid_cksumtype.$(OBJEXT)	\
-	$(OUTPRE)valid_enctype.$(OBJEXT)	\
 	$(OUTPRE)verify_checksum.$(OBJEXT)	\
 	$(OUTPRE)verify_checksum_iov.$(OBJEXT)
 
@@ -124,8 +117,7 @@ SRCS=\
 	$(srcdir)/encrypt.c		\
 	$(srcdir)/encrypt_iov.c		\
 	$(srcdir)/encrypt_length.c	\
-	$(srcdir)/enctype_compare.c	\
-	$(srcdir)/enctype_to_string.c	\
+	$(srcdir)/enctype_util.c	\
 	$(srcdir)/etypes.c		\
 	$(srcdir)/key.c			\
 	$(srcdir)/keyblocks.c 		\
@@ -144,10 +136,8 @@ SRCS=\
 	$(srcdir)/random_to_key.c	\
 	$(srcdir)/state.c 		\
 	$(srcdir)/string_to_cksumtype.c	\
-	$(srcdir)/string_to_enctype.c	\
 	$(srcdir)/string_to_key.c	\
 	$(srcdir)/valid_cksumtype.c	\
-	$(srcdir)/valid_enctype.c	\
 	$(srcdir)/verify_checksum.c	\
 	$(srcdir)/verify_checksum_iov.c
 

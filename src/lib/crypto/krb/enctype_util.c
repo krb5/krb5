@@ -1,5 +1,7 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
+ * lib/crypto/krb/enctype_util.c
+ *
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
  * All rights reserved.
@@ -23,10 +25,47 @@
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ *
+ * krb5int_c_valid_enctype()
+ * krb5int_c_weak_enctype()
+ * krb5_c_enctype_compare()
+ * krb5_string_to_enctype()
+ * krb5_enctype_to_string()
  */
 
 #include "k5-int.h"
 #include "etypes.h"
+
+krb5_boolean KRB5_CALLCONV
+krb5_c_valid_enctype(krb5_enctype etype)
+{
+    return (find_enctype(etype) != NULL);
+}
+
+krb5_boolean KRB5_CALLCONV
+krb5int_c_weak_enctype(krb5_enctype etype)
+{
+    const struct krb5_keytypes *ktp;
+
+    ktp = find_enctype(etype);
+    return (ktp != NULL && (ktp->flags & ETYPE_WEAK) != 0);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_c_enctype_compare(krb5_context context, krb5_enctype e1, krb5_enctype e2,
+                       krb5_boolean *similar)
+{
+    const struct krb5_keytypes *ktp1, *ktp2;
+
+    ktp1 = find_enctype(e1);
+    ktp2 = find_enctype(e2);
+    if (ktp1 == NULL || ktp2 == NULL)
+        return KRB5_BAD_ENCTYPE;
+
+    *similar = (ktp1->enc == ktp2->enc && ktp1->str2key == ktp2->str2key);
+    return 0;
+}
 
 krb5_error_code KRB5_CALLCONV
 krb5_string_to_enctype(char *string, krb5_enctype *enctypep)
@@ -55,4 +94,17 @@ krb5_string_to_enctype(char *string, krb5_enctype *enctypep)
     }
 
     return EINVAL;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_enctype_to_string(krb5_enctype enctype, char *buffer, size_t buflen)
+{
+    const struct krb5_keytypes *ktp;
+
+    ktp = find_enctype(enctype);
+    if (ktp == NULL)
+        return EINVAL;
+    if (strlcpy(buffer, ktp->out_string, buflen) >= buflen)
+        return ENOMEM;
+    return 0;
 }
