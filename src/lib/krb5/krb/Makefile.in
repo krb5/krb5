@@ -37,6 +37,7 @@ STLIBOBJS= \
 	decrypt_tk.o	\
 	deltat.o	\
         enc_helper.o	\
+        enc_keyhelper.o	\
 	encode_kdc.o	\
 	encrypt_tk.o	\
 	fast.o \
@@ -129,6 +130,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)decrypt_tk.$(OBJEXT)	\
 	$(OUTPRE)deltat.$(OBJEXT)	\
         $(OUTPRE)enc_helper.$(OBJEXT)	\
+        $(OUTPRE)enc_keyhelper.$(OBJEXT)	\
 	$(OUTPRE)encode_kdc.$(OBJEXT)	\
 	$(OUTPRE)encrypt_tk.$(OBJEXT)	\
 	$(OUTPRE)fast.$(OBJEXT) \
@@ -222,6 +224,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/decrypt_tk.c	\
 	$(srcdir)/deltat.c	\
 	$(srcdir)/enc_helper.c	\
+	$(srcdir)/enc_keyhelper.c	\
 	$(srcdir)/encode_kdc.c	\
 	$(srcdir)/encrypt_tk.c	\
 	$(srcdir)/fast.c \
