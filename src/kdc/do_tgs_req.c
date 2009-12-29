@@ -1251,7 +1251,7 @@ prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ)
             free(temp_buf);
             if (retval) {
                 /* no match found */
-                kdc_err(kdc_context, retval, 0);
+                kdc_err(kdc_context, retval, "unable to find realm of host");
                 goto cleanup;
             }
             if (realms == 0) {

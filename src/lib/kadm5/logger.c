@@ -189,6 +189,9 @@ klog_com_err_proc(const char *whoami, long int code, const char *format, va_list
     char        *cp;
     char        *syslogp;
 
+    if (whoami == NULL || format == NULL)
+        return;
+
     /* Make the header */
     snprintf(outbuf, sizeof(outbuf), "%s: ", whoami);
     /*
