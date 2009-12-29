@@ -55,6 +55,7 @@ STLIBOBJS= \
 	gic_pwd.o	\
 	in_tkt_sky.o	\
 	init_ctx.o	\
+	copy_ctx.o	\
 	init_keyblock.o \
 	kdc_rep_dc.o	\
 	kerrs.o		\
@@ -148,6 +149,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)gic_pwd.$(OBJEXT)	\
 	$(OUTPRE)in_tkt_sky.$(OBJEXT)	\
 	$(OUTPRE)init_ctx.$(OBJEXT)	\
+	$(OUTPRE)copy_ctx.$(OBJEXT)	\
 	$(OUTPRE)init_keyblock.$(OBJEXT) \
 	$(OUTPRE)kdc_rep_dc.$(OBJEXT)	\
 	$(OUTPRE)kerrs.$(OBJEXT)	\
@@ -242,6 +244,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/gic_pwd.c	\
 	$(srcdir)/in_tkt_sky.c	\
 	$(srcdir)/init_ctx.c	\
+	$(srcdir)/copy_ctx.c	\
 	$(srcdir)/init_keyblock.c \
 	$(srcdir)/kdc_rep_dc.c	\
 	$(srcdir)/kerrs.c	\
