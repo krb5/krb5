@@ -639,8 +639,6 @@ return_pkinit_kx(krb5_context context, krb5_kdc_req *request,
         ret = ENOMEM;
         goto cleanup;
     }
-    if (ret)
-        goto cleanup;
     pa->pa_type = KRB5_PADATA_PKINIT_KX;
     pa->length = scratch->length;
     pa->contents = (krb5_octet *) scratch->data;
