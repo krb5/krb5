@@ -2106,6 +2106,9 @@ struct srv_dns_entry {
     char *host;
 };
 #ifdef KRB5_DNS_LOOKUP
+
+#define MAX_DNS_NAMELEN (15*(MAXHOSTNAMELEN + 1)+1)
+
 krb5_error_code
 krb5int_make_srv_query_realm(const krb5_data *realm,
                              const char *service,

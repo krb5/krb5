@@ -398,7 +398,9 @@ krb5_error_code
 kdc_handle_protected_negotiation( krb5_data *req_pkt, krb5_kdc_req *request,
                                   const krb5_keyblock *reply_key,
                                   krb5_pa_data **out_enc_padata, int *idx);
-
+krb5_error_code
+krb5int_get_domain_realm_mapping(krb5_context context,
+                                 const char *host, char ***realmsp);
 
 
 #define isflagset(flagfield, flag) (flagfield & (flag))

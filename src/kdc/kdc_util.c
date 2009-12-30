@@ -182,7 +182,8 @@ is_local_principal(krb5_const_principal princ1)
  * Returns TRUE if the kerberos principal is the name of a Kerberos ticket
  * service.
  */
-krb5_boolean krb5_is_tgs_principal(krb5_const_principal principal)
+krb5_boolean
+krb5_is_tgs_principal(krb5_const_principal principal)
 {
     if ((krb5_princ_size(kdc_context, principal) > 0) &&
         data_eq_string (*krb5_princ_component(kdc_context, principal, 0),
@@ -2711,4 +2712,63 @@ cleanup:
     if (pa != NULL)
         free(pa);
     return retval;
+}
+
+
+krb5_error_code
+krb5int_get_domain_realm_mapping(krb5_context context,
+                                 const char *host, char ***realmsp)
+{
+    char **retrealms;
+    char *realm, *cp, *temp_realm;
+    krb5_error_code retval;
+    char temp_host[MAX_DNS_NAMELEN+1];
+
+    /* do sanity check and lower-case */
+    retval = krb5int_clean_hostname(context, host, temp_host, sizeof temp_host);
+    if (retval)
+        return retval;
+    /*
+      Search for the best match for the host or domain.
+      Example: Given a host a.b.c.d, try to match on:
+      1) a.b.c.d  2) .b.c.d.   3) b.c.d  4)  .c.d  5) c.d  6) .d   7) d
+    */
+
+    cp = temp_host;
+    realm = (char *)NULL;
+    temp_realm = 0;
+    while (cp ) {
+        retval = profile_get_string(context->profile, KRB5_CONF_DOMAIN_REALM, cp,
+                                    0, (char *)NULL, &temp_realm);
+        if (retval)
+            return retval;
+        if (temp_realm != (char *)NULL)
+            break;        /* Match found */
+
+        /* Setup for another test */
+        if (*cp == '.') {
+            cp++;
+        } else {
+            cp = strchr(cp, '.');
+        }
+    }
+    if (temp_realm != (char*)NULL) {
+        realm = strdup(temp_realm);
+        profile_release_string(temp_realm);
+        if (!realm) {
+            return ENOMEM;
+        }
+    }
+    retrealms = (char **)calloc(2, sizeof(*retrealms));
+    if (!retrealms) {
+        if (realm != (char *)NULL)
+            free(realm);
+        return ENOMEM;
+    }
+
+    retrealms[0] = realm;
+    retrealms[1] = 0;
+
+    *realmsp = retrealms;
+    return 0;
 }

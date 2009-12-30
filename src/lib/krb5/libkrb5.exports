@@ -572,6 +572,7 @@ krb5_write_message
 krb5int_accessor
 krb5int_cc_default
 krb5int_cleanup_library
+krb5int_clean_hostname
 krb5int_cm_call_select
 krb5int_copy_data_contents_add0
 krb5int_find_authdata
@@ -580,7 +581,6 @@ krb5int_foreach_localaddr
 krb5int_free_addrlist
 krb5int_free_data_list
 krb5int_get_authdata_containee_types
-krb5int_get_domain_realm_mapping
 krb5int_init_context_kdc
 krb5int_initialize_library
 krb5int_pac_sign
