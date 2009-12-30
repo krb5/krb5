@@ -160,13 +160,6 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
 
     ctx->profile_secure = secure;
 
-    /* Set the default encryption types, possible defined in krb5/conf */
-    if ((retval = krb5_set_default_in_tkt_ktypes(ctx, NULL)))
-        goto cleanup;
-
-    if ((retval = krb5_set_default_tgs_ktypes(ctx, NULL)))
-        goto cleanup;
-
     if ((retval = krb5_os_init_context(ctx, kdc)))
         goto cleanup;
 
