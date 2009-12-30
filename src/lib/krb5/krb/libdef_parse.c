@@ -30,6 +30,8 @@
  */
 #include "k5-int.h"
 #include "int-proto.h"
+/* For _krb5_conf_boolean prototype */
+#include "os-proto.h"
 
 static const char *const conf_yes[] = {
     "y", "yes", "true", "t", "1", "on",
