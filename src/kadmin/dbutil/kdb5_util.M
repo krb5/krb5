@@ -1,6 +1,6 @@
 .TH KDB5_UTIL 8
 .SH NAME
-kdb5_util \- Kerberos database maintainance utility
+kdb5_util \- Kerberos database maintenance utility
 .SH SYNOPSIS
 .B kdb5_util
 [\fB\-r\fP\ \fIrealm\fP] [\fB\-d\fP\ \fIdbname\fP]
@@ -12,7 +12,7 @@ kdb5_util \- Kerberos database maintainance utility
 .I [command_options]
 .SH DESCRIPTION
 .B kdb5_util
-allows an administrator to perform low-level maintainance procedures on
+allows an administrator to perform low-level maintenance procedures on
 the Kerberos and KADM5 database.  Databases can be created, destroyed,
 and dumped to and loaded from
 .SM ASCII
@@ -21,7 +21,7 @@ files.  Additionally,
 can create a Kerberos master key stash file.
 .B kdb5_util
 subsumes the functionality of and makes obsolete the previous database
-maintainance programs
+maintenance programs
 .BR kdb5_create ,
 .BR kdb5_edit ,
 .BR kdb5_destroy ,

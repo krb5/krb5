@@ -140,7 +140,7 @@ returned by the KDC and in order to correct for an inaccurate system
 clock.  This corrective factor is only used by the Kerberos library.
 
 .IP kdc_req_checksum_type
-For compatability with DCE security servers which do not support the
+For compatibility with DCE security servers which do not support the
 default CKSUMTYPE_RSA_MD5 used by this version of Kerberos. Use a value
 of 2 to use the CKSUMTYPE_RSA_MD4 instead. This applies to DCE 1.1 and
 earlier.  This value is only used for DES keys; other keys use the
@@ -188,7 +188,7 @@ of the preceding options are specified, this option has no effect.
 .IP realm_try_domains
 Indicate whether a host's domain components should be used to
 determine the Kerberos realm of the host.  The value of this variable
-is an integer: -1 means not to search, 0 means to try the host's
+is an integer: \-1 means not to search, 0 means to try the host's
 domain itself, 1 means to also try the domain's immediate parent, and
 so forth.  The library's usual mechanism for locating Kerberos realms
 is used to determine whether a domain is a valid realm--which may

@@ -104,7 +104,7 @@ The
 .B \-k
 .I keytype
 option specifies the key type of the master key to be entered manually
-as a password when -m is given; the default is "des-cbc-crc".
+as a password when \-m is given; the default is "des\-cbc\-crc".
 .PP
 The
 .B \-M

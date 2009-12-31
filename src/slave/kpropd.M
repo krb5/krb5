@@ -76,7 +76,7 @@ this:
 
 kprop	stream	tcp	nowait	root	/usr/local/sbin/kpropd	kpropd
 
-However, kpropd can also run as a standalone deamon, if the
+However, kpropd can also run as a standalone daemon, if the
 .B \-S
 option is turned on.  This is done for debugging purposes, or if for
 some reason the system administrator just doesn't want to run it out of
