@@ -966,8 +966,8 @@ done:
                 _("while closing default ccache"));
         exit(1);
     }
-    if (def_realm)
-        free(def_realm);
+    if (def_realm && kpropd_context)
+        krb5_free_default_realm(kpropd_context, def_realm);
     if (server_handle)
         kadm5_destroy((void *)server_handle);
     if (kpropd_context)
