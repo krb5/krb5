@@ -3728,7 +3728,7 @@ decode_data(unsigned char **out_data, unsigned int *out_data_len,
     if (buf == NULL)
         goto cleanup;
 
-#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+#if OPENSSL_VERSION_NUMBER >= 0x00909000L
     retval = EVP_PKEY_decrypt_old(buf, data, (int)data_len, pkey);
 #else
     retval = EVP_PKEY_decrypt(buf, data, (int)data_len, pkey);
