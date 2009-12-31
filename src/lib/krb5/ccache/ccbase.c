@@ -454,14 +454,14 @@ k5_cc_mutex_lock(krb5_context context, k5_cc_mutex *m)
 {
     krb5_error_code ret = 0;
 
-    // not locked or already locked by another context
+    /* not locked or already locked by another context */
     if (m->owner != context) {
-        // acquire lock, blocking until available
+        /* acquire lock, blocking until available */
         ret = k5_mutex_lock(&m->lock);
         m->owner = context;
         m->refcount = 1;
     }
-    // already locked by this context, just increase refcount
+    /* already locked by this context, just increase refcount */
     else {
         m->refcount++;
     }
@@ -562,7 +562,7 @@ krb5_cccol_unlock(krb5_context context)
         return ret;
     }
 
-    // unlock each type in the opposite order
+    /* unlock each type in the opposite order */
 #ifdef USE_KEYRING_CCACHE
     k5_cc_mutex_assert_locked(context, &krb5int_krcc_mutex);
     k5_cc_mutex_unlock(context, &krb5int_krcc_mutex);
@@ -601,7 +601,7 @@ k5_cccol_force_unlock()
         return ret;
     }
 
-    // unlock each type in the opposite order
+    /* unlock each type in the opposite order */
 #ifdef USE_KEYRING_CCACHE
     k5_cc_mutex_force_unlock(&krb5int_krcc_mutex);
 #endif
