@@ -274,5 +274,6 @@ main (int argc, char *argv[])
             100 * total / wallclock / n_threads);
     printf ("Total CPU use per iteration per thread: %Lfms\n",
             1000 * total / n_threads / iter_count);
+    free(tinfo);
     return 0;
 }
