@@ -368,7 +368,7 @@ void kdc_free_rstate (struct kdc_request_state *s);
 /* FAST*/
 enum krb5_fast_kdc_flags {
     KRB5_FAST_REPLY_KEY_USED = 0x1,
-    KRB5_FAST_REPLY_KEY_REPLACED = 0x02,
+    KRB5_FAST_REPLY_KEY_REPLACED = 0x02
 };
 
 krb5_error_code
