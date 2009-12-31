@@ -67,7 +67,8 @@ keyToData (krb5_keyblock *k, krb5_data *d)
     d->data = k->contents;
 }
 
-void check_error (int r, int line) {
+static void
+check_error (int r, int line) {
     if (r != 0) {
         fprintf (stderr, "%s:%d: %s\n", __FILE__, line,
                  error_message (r));
