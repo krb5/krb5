@@ -115,7 +115,7 @@ krb5_error_code krb5int_confounder_verify(const struct krb5_cksumtypes *ctp,
     unsigned char *plaintext = NULL;
     krb5_key xorkey = NULL;
     krb5_data computed = empty_data();
-    krb5_crypto_iov *hash_iov, iov;
+    krb5_crypto_iov *hash_iov = NULL, iov;
     size_t blocksize = ctp->enc->block_size, hashsize = ctp->hash->hashsize;
 
     plaintext = k5alloc(input->length, &ret);
