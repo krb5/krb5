@@ -139,7 +139,7 @@ enum krb5plugin_preauth_client_request_type {
      * acceptable to set data to NULL and free the keyblock using
      * krb5_free_keyblock; in that case, this frees the krb5_data
      * only.*/
-    krb5plugin_preauth_client_free_fast_armor = 4,
+    krb5plugin_preauth_client_free_fast_armor = 4
 };
 typedef krb5_error_code
 (*preauth_get_client_data_proc)(krb5_context,
@@ -346,7 +346,7 @@ enum krb5plugin_preauth_entry_request_type {
     /* Frees a fast armor key; it is acceptable to set data to NULL
        and free the keyblock using krb5_free_keyblock; in that  case,
        this function simply frees the data*/
-    krb5plugin_preauth_free_fast_armor = 6,
+    krb5plugin_preauth_free_fast_armor = 6
 };
 
 typedef krb5_error_code
