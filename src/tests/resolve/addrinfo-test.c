@@ -292,7 +292,7 @@ int main (int argc, char *argv[])
         }
         printf("%p:\n"
                "\tfamily = %s\tproto = %-4s\tsocktype = %s\n",
-               ap2, familyname(ap2->ai_family),
+               (void *) ap2, familyname(ap2->ai_family),
                protoname (ap2->ai_protocol),
                socktypename (ap2->ai_socktype));
         if (ap2->ai_canonname) {
