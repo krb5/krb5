@@ -77,18 +77,18 @@
 extern int daemon(int, int);
 #endif
 
-void usage (char *);
+static void usage (char *);
 
-krb5_sigtype request_exit (int);
-krb5_sigtype request_hup  (int);
+static krb5_sigtype request_exit (int);
+static krb5_sigtype request_hup  (int);
 
-void setup_signal_handlers (void);
+static void setup_signal_handlers (void);
 
-krb5_error_code setup_sam (void);
+static krb5_error_code setup_sam (void);
 
-void initialize_realms (krb5_context, int, char **);
+static void initialize_realms (krb5_context, int, char **);
 
-void finish_realms (void);
+static void finish_realms (void);
 
 static int nofork = 0;
 static const char *pid_file = NULL;
@@ -504,7 +504,7 @@ whoops:
     return(kret);
 }
 
-krb5_sigtype
+static krb5_sigtype
 request_exit(int signo)
 {
     signal_requests_exit = 1;
@@ -516,7 +516,7 @@ request_exit(int signo)
 #endif
 }
 
-krb5_sigtype
+static krb5_sigtype
 request_hup(int signo)
 {
     signal_requests_hup = 1;
@@ -528,7 +528,7 @@ request_hup(int signo)
 #endif
 }
 
-void
+static void
 setup_signal_handlers(void)
 {
 #ifdef POSIX_SIGNALS
@@ -551,13 +551,13 @@ setup_signal_handlers(void)
     return;
 }
 
-krb5_error_code
+static krb5_error_code
 setup_sam(void)
 {
     return krb5_c_make_random_key(kdc_context, ENCTYPE_DES_CBC_MD5, &psr_key);
 }
 
-void
+static void
 usage(char *name)
 {
     fprintf(stderr, "usage: %s [-x db_args]* [-d dbpathname] [-r dbrealmname]\n\t\t[-R replaycachename] [-m] [-k masterenctype] [-M masterkeyname]\n\t\t[-p port] [-P pid_file] [/]\n"
@@ -567,8 +567,8 @@ usage(char *name)
     return;
 }
 
-char               **db_args      = NULL;
-void
+
+static void
 initialize_realms(krb5_context kcontext, int argc, char **argv)
 {
     int                 c;
@@ -587,6 +587,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
     char                *no_refrls = NULL;
     char                *host_based_srvcs = NULL;
     int                  db_args_size = 0;
+    char                **db_args = NULL;
 
     extern char *optarg;
 
@@ -822,7 +823,7 @@ write_pid_file(const char *path)
     return 0;
 }
 
-void
+static void
 finish_realms()
 {
     int i;
