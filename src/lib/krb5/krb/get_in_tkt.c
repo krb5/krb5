@@ -720,13 +720,8 @@ krb5_get_in_tkt(krb5_context context,
     request.nonce = time_now;
 #endif /* APPLE_PKINIT */
 
-    request.ktype = malloc (sizeof(get_in_tkt_enctypes));
-    if (request.ktype == NULL) {
-        retval = ENOMEM;
-        goto cleanup;
-    }
-    memcpy(request.ktype, get_in_tkt_enctypes, sizeof(get_in_tkt_enctypes));
-    for (request.nktypes = 0;request.ktype[request.nktypes];request.nktypes++);
+    retval = krb5int_copy_etypes(get_in_tkt_enctypes, &request.ktype);
+    request.nktypes = krb5int_count_etypes(request.ktype);
     if (ktypes) {
         int i, req, next = 0;
         for (req = 0; ktypes[req]; req++) {
@@ -1433,10 +1428,7 @@ krb5_init_creds_init(krb5_context context,
                ctx->request->nktypes * sizeof(krb5_enctype));
     } else if (krb5_get_default_in_tkt_ktypes(context,
                                               &ctx->request->ktype) == 0) {
-        for (ctx->request->nktypes = 0;
-             ctx->request->ktype[ctx->request->nktypes] != ENCTYPE_NULL;
-             ctx->request->nktypes++)
-            ;
+        ctx->request->nktypes = krb5int_count_etypes(ctx->request->ktype);
     } else {
         /* there isn't any useful default here. */
         code = KRB5_CONFIG_ETYPE_NOSUPP;
@@ -2134,7 +2126,7 @@ krb5int_populate_gic_opt(krb5_context context, krb5_get_init_creds_opt **out,
     if (addrs)
         krb5_get_init_creds_opt_set_address_list(opt, (krb5_address **) addrs);
     if (ktypes) {
-        for (i=0; ktypes[i]; i++);
+        i = krb5int_count_etypes(ktypes);
         if (i)
             krb5_get_init_creds_opt_set_etype_list(opt, ktypes, i);
     }

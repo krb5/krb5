@@ -54,25 +54,8 @@
  */
 
 #include "k5-int.h"
+#include "int-proto.h"
 #include <ctype.h>
-
-/* Copy the zero-terminated enctype list old_list into *new_list. */
-static krb5_error_code
-copy_enctypes(krb5_context context, const krb5_enctype *old_list,
-              krb5_enctype **new_list)
-{
-    unsigned int count;
-    krb5_enctype *list;
-
-    *new_list = NULL;
-    for (count = 0; old_list[count]; count++);
-    list = malloc(sizeof(krb5_enctype) * (count + 1));
-    if (list == NULL)
-        return ENOMEM;
-    memcpy(list, old_list, sizeof(krb5_enctype) * (count + 1));
-    *new_list = list;
-    return 0;
-}
 
 krb5_error_code KRB5_CALLCONV
 krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
@@ -109,10 +92,10 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
 
     memset(&nctx->err, 0, sizeof(nctx->err));
 
-    ret = copy_enctypes(nctx, ctx->in_tkt_etypes, &nctx->in_tkt_etypes);
+    ret = krb5int_copy_etypes(ctx->in_tkt_etypes, &nctx->in_tkt_etypes);
     if (ret)
         goto errout;
-    ret = copy_enctypes(nctx, ctx->tgs_etypes, &nctx->tgs_etypes);
+    ret = krb5int_copy_etypes(ctx->tgs_etypes, &nctx->tgs_etypes);
     if (ret)
         goto errout;
 

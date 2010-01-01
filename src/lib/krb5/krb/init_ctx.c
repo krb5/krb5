@@ -54,6 +54,7 @@
  */
 
 #include "k5-int.h"
+#include "int-proto.h"
 #include <ctype.h>
 #include "brand.c"
 /* There has to be a better way for windows... */
@@ -267,24 +268,6 @@ krb5_free_context(krb5_context ctx)
     free(ctx);
 }
 
-/* Copy the zero-terminated enctype list old_list into *new_list. */
-static krb5_error_code
-copy_enctypes(krb5_context context, const krb5_enctype *old_list,
-              krb5_enctype **new_list)
-{
-    unsigned int count;
-    krb5_enctype *list;
-
-    *new_list = NULL;
-    for (count = 0; old_list[count]; count++);
-    list = malloc(sizeof(krb5_enctype) * (count + 1));
-    if (list == NULL)
-        return ENOMEM;
-    memcpy(list, old_list, sizeof(krb5_enctype) * (count + 1));
-    *new_list = list;
-    return 0;
-}
-
 /*
  * Set the desired default ktypes, making sure they are valid.
  */
@@ -304,7 +287,7 @@ set_default_etype_var(krb5_context context, const krb5_enctype *etypes,
                 return KRB5_PROG_ETYPE_NOSUPP;
         }
 
-        code = copy_enctypes(context, etypes, &list);
+        code = krb5int_copy_etypes(etypes, &list);
         if (code)
             return code;
     } else {
@@ -459,7 +442,7 @@ get_profile_etype_list(krb5_context context, krb5_enctype **etypes_ptr,
 
     if (ctx_list) {
         /* Use application defaults. */
-        code = copy_enctypes(context, ctx_list, &etypes);
+        code = krb5int_copy_etypes(ctx_list, &etypes);
         if (code)
             return code;
     } else {

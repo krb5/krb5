@@ -1,5 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #include "k5-int.h"
+#include "int-proto.h"
 #include "auth_con.h"
 
 static krb5_boolean chk_heimdal_seqnum(krb5_ui_4, krb5_ui_4);
@@ -355,53 +356,31 @@ krb5_auth_con_getrcache(krb5_context context, krb5_auth_context auth_context, kr
 }
 
 krb5_error_code
-krb5_auth_con_setpermetypes(krb5_context context, krb5_auth_context auth_context, const krb5_enctype *permetypes)
+krb5_auth_con_setpermetypes(krb5_context context,
+                            krb5_auth_context auth_context,
+                            const krb5_enctype *permetypes)
 {
-    krb5_enctype        * newpe;
-    int i;
+    krb5_enctype *newpe;
+    krb5_error_code ret;
 
-    for (i=0; permetypes[i]; i++)
-        ;
-    i++; /* include the zero */
+    ret = krb5int_copy_etypes(permetypes, &newpe);
+    if (ret != 0)
+        return ret;
 
-    if ((newpe = (krb5_enctype *) malloc(i*sizeof(krb5_enctype)))
-        == NULL)
-        return(ENOMEM);
-
-    if (auth_context->permitted_etypes)
-        free(auth_context->permitted_etypes);
-
+    free(auth_context->permitted_etypes);
     auth_context->permitted_etypes = newpe;
-
-    memcpy(newpe, permetypes, i*sizeof(krb5_enctype));
-
     return 0;
 }
 
 krb5_error_code
-krb5_auth_con_getpermetypes(krb5_context context, krb5_auth_context auth_context, krb5_enctype **permetypes)
+krb5_auth_con_getpermetypes(krb5_context context,
+                            krb5_auth_context auth_context,
+                            krb5_enctype **permetypes)
 {
-    krb5_enctype        * newpe;
-    int i;
-
-    if (! auth_context->permitted_etypes) {
-        *permetypes = NULL;
-        return(0);
-    }
-
-    for (i=0; auth_context->permitted_etypes[i]; i++)
-        ;
-    i++; /* include the zero */
-
-    if ((newpe = (krb5_enctype *) malloc(i*sizeof(krb5_enctype)))
-        == NULL)
-        return(ENOMEM);
-
-    *permetypes = newpe;
-
-    memcpy(newpe, auth_context->permitted_etypes, i*sizeof(krb5_enctype));
-
-    return(0);
+    *permetypes = NULL;
+    if (auth_context->permitted_etypes == NULL)
+        return 0;
+    return krb5int_copy_etypes(auth_context->permitted_etypes, permetypes);
 }
 
 krb5_error_code KRB5_CALLCONV

@@ -40,6 +40,7 @@ STLIBOBJS= \
         enc_keyhelper.o	\
 	encode_kdc.o	\
 	encrypt_tk.o	\
+	etype_list.o	\
 	fast.o \
 	free_rtree.o	\
 	fwd_tgt.o	\
@@ -134,6 +135,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
         $(OUTPRE)enc_keyhelper.$(OBJEXT)	\
 	$(OUTPRE)encode_kdc.$(OBJEXT)	\
 	$(OUTPRE)encrypt_tk.$(OBJEXT)	\
+	$(OUTPRE)etype_list.$(OBJEXT)	\
 	$(OUTPRE)fast.$(OBJEXT) \
 	$(OUTPRE)free_rtree.$(OBJEXT)	\
 	$(OUTPRE)fwd_tgt.$(OBJEXT)	\
@@ -229,6 +231,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/enc_keyhelper.c	\
 	$(srcdir)/encode_kdc.c	\
 	$(srcdir)/encrypt_tk.c	\
+	$(srcdir)/etype_list.c	\
 	$(srcdir)/fast.c \
 	$(srcdir)/free_rtree.c	\
 	$(srcdir)/fwd_tgt.c	\
@@ -325,7 +328,8 @@ T_WALK_RTREE_OBJS= t_walk_rtree.o walk_rtree.o tgtname.o unparse.o \
 T_KERB_OBJS= t_kerb.o conv_princ.o unparse.o set_realm.o str_conv.o
 
 T_SER_OBJS= t_ser.o ser_actx.o ser_adata.o ser_addr.o ser_auth.o ser_cksum.o \
-	ser_ctx.o ser_key.o ser_princ.o serialize.o authdata.o pac.o copy_data.o
+	ser_ctx.o ser_key.o ser_princ.o serialize.o authdata.o pac.o \
+	copy_data.o etype_list.o
 
 T_DELTAT_OBJS= t_deltat.o deltat.o
 
@@ -333,7 +337,7 @@ T_PAC_OBJS= t_pac.o pac.o copy_data.o
 
 T_PRINC_OBJS= t_princ.o parse.o unparse.o
 
-T_ETYPES_OBJS= t_etypes.o init_ctx.o
+T_ETYPES_OBJS= t_etypes.o init_ctx.o etype_list.o
 
 t_walk_rtree: $(T_WALK_RTREE_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_walk_rtree $(T_WALK_RTREE_OBJS) $(KRB5_BASE_LIBS)

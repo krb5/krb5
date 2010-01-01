@@ -31,6 +31,7 @@
  *                krb5_os_context structures.
  */
 #include "k5-int.h"
+#include "int-proto.h"
 
 /*
  * Routines to deal with externalizing the krb5_context:
@@ -102,15 +103,10 @@ static const krb5_ser_entry krb5_profile_ser_entry = {
 };
 #endif /* LEAN_CLIENT */
 
-static unsigned int
+static inline unsigned int
 etypes_len(krb5_enctype *list)
 {
-    unsigned int i;
-
-    if (list == NULL)
-        return 0;
-    for (i = 0; list[i]; i++);
-    return i;
+    return (list == NULL) ? 0 : krb5int_count_etypes(list);
 }
 
 /*
