@@ -147,7 +147,11 @@ krb5_error_code kdc_initialize_rcache (krb5_context, char *);
 krb5_error_code
 setup_server_realm (krb5_principal);
 void
-kdc_err(krb5_context call_context, errcode_t code, const char *fmt, ...);
+kdc_err(krb5_context call_context, errcode_t code, const char *fmt, ...)
+#if !defined(__cplusplus) && (__GNUC__ > 2)
+    __attribute__((__format__(__printf__, 3, 4)))
+#endif
+;
 
 /* network.c */
 krb5_error_code listen_and_process (void);
