@@ -30,6 +30,7 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
+#include    <errno.h>
 #include    <stdio.h>
 #include    <signal.h>
 #include    <syslog.h>
@@ -134,6 +135,7 @@ static void usage()
             "[-passwordserver] "
 #endif
             "[-port port-number]\n"
+            "\t\t[-P pid_file]\n"
             "\nwhere,\n\t[-x db_args]* - any number of database specific arguments.\n"
             "\t\t\tLook at each database documentation for supported arguments\n"
     );
@@ -191,6 +193,36 @@ static void display_status_1(m, code, type)
     }
 }
 
+/*
+ * Function: write_pid_file
+ *
+ * Purpose: writes the current process PID to a file
+ *
+ * Arguments:
+ *
+ *      pid_file        path to output file
+ *      <return value>  0 on success, error code on failure
+ *
+ * Effects:
+ *
+ * The current process PID, obtained from getpid(), is written to the path
+ * given in pid_file, overwriting the existing contents if the file already
+ * exists.  The PID will be followed by a newline.
+ */
+static int
+write_pid_file(const char *pid_file)
+{
+    FILE *file;
+    unsigned long pid;
+
+    file = fopen(pid_file, "w");
+    if (file == NULL)
+        return errno;
+    pid = (unsigned long) getpid();
+    if (fprintf(file, "%ld\n", pid) < 0 || fclose(file) == EOF)
+        return errno;
+    return 0;
+}
 
 /* XXX yuck.  the signal handlers need this */
 static krb5_context context;
@@ -216,6 +248,7 @@ int main(int argc, char *argv[])
     char *errmsg;
     int i;
     int strong_random = 1;
+    const char *pid_file = NULL;
 
     kdb_log_context *log_ctx;
 
@@ -286,6 +319,11 @@ int main(int argc, char *argv[])
                 usage();
             params.kadmind_port = atoi(*argv);
             params.mask |= KADM5_CONFIG_KADMIND_PORT;
+        } else if (strcmp(*argv, "-P") == 0) {
+            argc--; argv++;
+            if (!argc)
+                usage();
+            pid_file = *argv;
         } else if (strcmp(*argv, "-W") == 0) {
             strong_random = 0;
         } else
@@ -467,6 +505,18 @@ kterr:
         kadm5_destroy(global_server_handle);
         krb5_klog_close(context);
         exit(1);
+    }
+    if (pid_file != NULL) {
+        ret = write_pid_file(pid_file);
+        if (ret) {
+            errmsg = krb5_get_error_message(context, ret);
+            krb5_klog_syslog(LOG_ERR, "Cannot create PID file %s: %s",
+                             pid_file, errmsg);
+            svcauth_gssapi_unset_names();
+            kadm5_destroy(global_server_handle);
+            krb5_klog_close(context);
+            exit(1);
+        }
     }
 
     krb5_klog_syslog(LOG_INFO, "Seeding random number generator");

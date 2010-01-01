@@ -59,6 +59,7 @@
 #include <signal.h>
 #include <errno.h>
 #include <netdb.h>
+#include <unistd.h>
 
 #include "k5-int.h"
 #include "com_err.h"
@@ -90,6 +91,7 @@ void initialize_realms (krb5_context, int, char **);
 void finish_realms (void);
 
 static int nofork = 0;
+static const char *pid_file = NULL;
 static int rkey_init_done = 0;
 
 #ifdef POSIX_SIGNALS
@@ -558,7 +560,7 @@ setup_sam(void)
 void
 usage(char *name)
 {
-    fprintf(stderr, "usage: %s [-x db_args]* [-d dbpathname] [-r dbrealmname]\n\t\t[-R replaycachename] [-m] [-k masterenctype] [-M masterkeyname]\n\t\t[-p port] [/]\n"
+    fprintf(stderr, "usage: %s [-x db_args]* [-d dbpathname] [-r dbrealmname]\n\t\t[-R replaycachename] [-m] [-k masterenctype] [-M masterkeyname]\n\t\t[-p port] [-P pid_file] [/]\n"
             "\nwhere,\n\t[-x db_args]* - Any number of database specific arguments.  Look at\n"
             "\t\t\teach database module documentation for supported\n\t\t\targuments\n",
             name);
@@ -634,7 +636,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
      * Loop through the option list.  Each time we encounter a realm name,
      * use the previously scanned options to fill in for defaults.
      */
-    while ((c = getopt(argc, argv, "x:r:d:mM:k:R:e:p:s:n4:X3")) != -1) {
+    while ((c = getopt(argc, argv, "x:r:d:mM:k:R:e:P:p:s:n4:X3")) != -1) {
         switch(c) {
         case 'x':
             db_args_size++;
@@ -723,6 +725,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
         case 'R':
             rcname = optarg;
             break;
+        case 'P':
+            pid_file = optarg;
         case 'p':
             if (default_udp_ports)
                 free(default_udp_ports);
@@ -801,6 +805,21 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
         free(no_refrls);
 
     return;
+}
+
+static krb5_error_code
+write_pid_file(const char *path)
+{
+    FILE *file;
+    unsigned long pid;
+
+    file = fopen(path, "w");
+    if (file == NULL)
+        return errno;
+    pid = (unsigned long) getpid();
+    if (fprintf(file, "%ld\n", pid) < 0 || fclose(file) == EOF)
+        return errno;
+    return 0;
 }
 
 void
@@ -904,6 +923,14 @@ int main(int argc, char **argv)
         kdc_err(kcontext, errno, "while detaching from tty");
         finish_realms();
         return 1;
+    }
+    if (pid_file != NULL) {
+        retval = write_pid_file(pid_file);
+        if (retval) {
+            kdc_err(kcontext, retval, "while creating PID file");
+            finish_realms();
+            return 1;
+        }
     }
     krb5_klog_syslog(LOG_INFO, "commencing operation");
     if (nofork)

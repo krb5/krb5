@@ -5,6 +5,7 @@ kadmind \- KADM5 administration server
 .B kadmind
 [\fB\-x\fP \fIdb_args\fP] [\fB-r\fP \fIrealm\fP] [\fB\-m\fP] [\fB\-nofork\fP] [\fB\-port\fP
 \fIport-number\fP]
+    [\fB\-P\fP \fIpid_file\fP]
 .SH DESCRIPTION
 This command starts the KADM5 administration server.  If the database is db2, 
 the administration server runs on the master Kerberos server, which stores the KDC
@@ -122,6 +123,14 @@ specifies the port on which the administration server listens for
 connections.  The default is is controlled by the 
 .I kadmind_port
 configuration variable (see below).
+.TP
+\fB\-P\fP \fIpid_file\fP
+specifies the file to which the PID of
+.B kadmind
+process should be written to after it starts up.  This can be used to
+identify whether
+.B kadmind
+is still running and to allow init scripts to stop the correct process.
 .SH CONFIGURATION VALUES
 .PP
 In addition to the relations defined in kdc.conf(5), kadmind
