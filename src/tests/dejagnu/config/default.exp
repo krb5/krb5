@@ -1701,6 +1701,8 @@ proc start_kerberos_daemons { standalone } {
     # The same thing is done a little later for the kadmind
     set kdc_lfile $tmppwd/kdc.log
     set kadmind_lfile $tmppwd/kadmind5.log
+    set kdc_pidfile $tmppwd/kdc.pid
+    set kadmind_pidfile $tmppwd/kadmind.pid
 
     if ![start_tail $kdc_lfile tailf_spawn_id tailf_pid krb5kdc $standalone] {
 	return 0
@@ -1708,7 +1710,9 @@ proc start_kerberos_daemons { standalone } {
 
     envstack_push
     setup_kerberos_env kdc
-    spawn $KRB5KDC -r $REALMNAME -n full
+    # Nuke pid file - to test if setup
+    file delete $kdc_pidfile
+    spawn $KRB5KDC -r $REALMNAME -n full -P $kdc_pidfile
     envstack_pop
     set kdc_pid [exp_pid]
     set kdc_spawn_id $spawn_id
@@ -1751,6 +1755,20 @@ proc start_kerberos_daemons { standalone } {
     expect -i $tailf_spawn_id eof
     wait -i $tailf_spawn_id
 
+    if (![file exists $kdc_pidfile]) {
+	fail "krb5kdc pidfile"
+	stop_kerberos_daemons
+	return 0
+    }
+    set f [open $kdc_pidfile "r"]
+    if {[gets $f foundpid] < 0 || ![string equal $kdc_pid $foundpid]} {
+	fail "krb5kdc pid file contents"
+	close $f
+	stop_kerberos_daemons
+	return 0
+    }
+    close $f
+
     if {$standalone} {
 	pass "krb5kdc"
     }
@@ -1777,7 +1795,8 @@ proc start_kerberos_daemons { standalone } {
     # removed when this is fixed
     envstack_push
     setup_kerberos_env kdc
-    spawn $BINSH -c "exec $KADMIND -r $REALMNAME -W -nofork 2>>$kadmind_lfile"
+    file delete $kadmind_pidfile
+    spawn $BINSH -c "exec $KADMIND -r $REALMNAME -W -nofork -P $kadmind_pidfile 2>>$kadmind_lfile"
     envstack_pop
     set kadmind_pid [exp_pid]
     set kadmind_spawn_id $spawn_id
@@ -1841,6 +1860,20 @@ proc start_kerberos_daemons { standalone } {
     exec kill $tailf_pid
     expect -i $tailf_spawn_id eof
     wait -i $tailf_spawn_id
+
+    if (![file exists $kadmind_pidfile]) {
+	fail "kadmind pidfile"
+	stop_kerberos_daemons
+	return 0
+    }
+    set f [open $kadmind_pidfile "r"]
+    if {[gets $f foundpid] < 0 || ![string equal $kadmind_pid $foundpid]} {
+	fail "kadmind pid file contents"
+	close $f
+	stop_kerberos_daemons
+	return 0
+    }
+    close $f
 
     if {$standalone} {
 	pass "kadmind"
