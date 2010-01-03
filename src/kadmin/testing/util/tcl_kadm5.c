@@ -849,7 +849,7 @@ static int parse_key_data(Tcl_Interp *interp, const char *list,
                           krb5_key_data **key_data,
                           int n_key_data)
 {
-    const char **argv;
+    const char **argv = NULL;
     int argc, retcode;
 
     *key_data = NULL;
@@ -889,7 +889,7 @@ static int parse_tl_data(Tcl_Interp *interp, const char *list,
                          int n_tl_data)
 {
     krb5_tl_data *tl, *tl2;
-    const char **argv, **argv1 = NULL;
+    const char **argv = NULL, **argv1 = NULL;
     int i, tmp, argc, argc1, retcode;
 
     *tlp = NULL;
