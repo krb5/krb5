@@ -465,7 +465,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
     krb5_context context;
     size_t i;
     krb5_gss_cred_id_t cred;
-    gss_OID_set ret_mechs;
+    gss_OID_set ret_mechs = NULL;
     int req_old, req_new;
     OM_uint32 ret;
     krb5_error_code code;
@@ -693,8 +693,10 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
     /* intern the credential handle */
 
     if (! kg_save_cred_id((gss_cred_id_t) cred)) {
-        free(ret_mechs->elements);
-        free(ret_mechs);
+        if (ret_mechs) {
+            free(ret_mechs->elements);
+            free(ret_mechs);
+        }
         if (cred->ccache)
             (void)krb5_cc_close(context, cred->ccache);
 #ifndef LEAN_CLIENT
