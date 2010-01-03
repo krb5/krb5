@@ -846,6 +846,30 @@ static void process_routing_update(struct connection *conn, int selflags)
         case RTM_IFINFO:
         case RTM_OLDADD:
         case RTM_OLDDEL:
+            /*
+             * Some flags indicate routing table updates that don't
+             * indicate local address changes.  They may come from
+             * redirects, or ARP, etc.
+             *
+             * This set of symbols is just an initial guess based on
+             * some messages observed in real life; working out which
+             * other flags also indicate messages we should ignore,
+             * and which flags are portable to all system and thus
+             * don't need to be conditionalized, is left as a future
+             * exercise.
+             */
+#ifdef RTF_DYNAMIC
+            if (rtm.rtm_flags & RTF_DYNAMIC)
+                break;
+#endif
+#ifdef RTF_CLONED
+            if (rtm.rtm_flags & RTF_CLONED)
+                break;
+#endif
+#ifdef RTF_LLINFO
+            if (rtm.rtm_flags & RTF_LLINFO)
+                break;
+#endif
 #if 0
             krb5_klog_syslog(LOG_DEBUG,
                              "network reconfiguration message (%s) received",
