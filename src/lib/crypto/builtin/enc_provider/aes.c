@@ -193,7 +193,7 @@ krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
     nblocks = (input_length + BLOCK_SIZE - 1) / BLOCK_SIZE;
     if (nblocks == 1) {
         krb5int_c_iov_get_block(tmp, BLOCK_SIZE, data, num_data, &input_pos);
-        enc(tmp2, tmp, &ctx);
+        dec(tmp2, tmp, &ctx);
         krb5int_c_iov_put_block(data, num_data, tmp2, BLOCK_SIZE, &output_pos);
     } else if (nblocks > 1) {
         unsigned char blockN2[BLOCK_SIZE];   /* second last */
