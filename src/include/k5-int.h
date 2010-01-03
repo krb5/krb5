@@ -640,6 +640,16 @@ struct krb5_key_st {
     krb5_keyblock keyblock;
     int refcount;
     struct derived_key *derived;
+    /*
+     * Cache of data private to the cipher implementation, which we
+     * don't want to have to recompute for every operation.  This may
+     * include key schedules, iteration counts, etc.
+     *
+     * The cipher implementation is responsible for setting this up
+     * whenever needed, and the enc_provider key_cleanup method must
+     * then be provided to dispose of it.
+     */
+    void *cache;
 };
 
 /* new encryption provider api */
@@ -668,6 +678,8 @@ struct krb5_enc_provider {
                                   krb5_data *out_state);
     krb5_error_code (*free_state)(krb5_data *state);
 
+    /* May be NULL if there is no key-derived data cached.  */
+    void (*key_cleanup)(krb5_key key);
 };
 
 struct krb5_hash_provider {

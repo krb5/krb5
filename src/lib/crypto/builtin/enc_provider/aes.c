@@ -33,6 +33,18 @@
 
 #define CHECK_SIZES 0
 
+/*
+ * Private per-key data to cache after first generation.  We don't
+ * want to mess with the imported AES implementation too much, so
+ * we'll just use two copies of its context, one for encryption and
+ * one for decryption, and use the #rounds field as a flag for whether
+ * we've initialized each half.
+ */
+struct aes_key_info_cache {
+    aes_ctx enc_ctx, dec_ctx;
+};
+#define CACHE(X) ((struct aes_key_info_cache *)((X)->cache))
+
 static inline void
 enc(unsigned char *out, const unsigned char *in, aes_ctx *ctx)
 {
@@ -76,16 +88,23 @@ krb5_error_code
 krb5int_aes_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
                     size_t num_data)
 {
-    aes_ctx ctx;
     unsigned char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE];
     int nblocks = 0, blockno;
     size_t input_length, i;
     struct iov_block_state input_pos, output_pos;
 
-    if (aes_enc_key(key->keyblock.contents, key->keyblock.length, &ctx)
-        != aes_good)
-        abort();
-
+    if (key->cache == NULL) {
+        key->cache = malloc(sizeof(struct aes_key_info_cache));
+        if (key->cache == NULL)
+            return ENOMEM;
+        CACHE(key)->enc_ctx.n_rnd = CACHE(key)->dec_ctx.n_rnd = 0;
+    }
+    if (CACHE(key)->enc_ctx.n_rnd == 0) {
+        if (aes_enc_key(key->keyblock.contents, key->keyblock.length,
+                        &CACHE(key)->enc_ctx)
+            != aes_good)
+            abort();
+    }
     if (ivec != NULL)
         memcpy(tmp, ivec->data, BLOCK_SIZE);
     else
@@ -104,7 +123,7 @@ krb5int_aes_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
     nblocks = (input_length + BLOCK_SIZE - 1) / BLOCK_SIZE;
     if (nblocks == 1) {
         krb5int_c_iov_get_block(tmp, BLOCK_SIZE, data, num_data, &input_pos);
-        enc(tmp2, tmp, &ctx);
+        enc(tmp2, tmp, &CACHE(key)->enc_ctx);
         krb5int_c_iov_put_block(data, num_data, tmp2, BLOCK_SIZE, &output_pos);
     } else if (nblocks > 1) {
         unsigned char blockN2[BLOCK_SIZE];   /* second last */
@@ -116,7 +135,7 @@ krb5int_aes_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
             block = iov_next_block(blockN, BLOCK_SIZE, data, num_data,
                                    &input_pos);
             xorblock(tmp, block);
-            enc(block, tmp, &ctx);
+            enc(block, tmp, &CACHE(key)->enc_ctx);
             iov_store_block(data, num_data, block, blockN, BLOCK_SIZE,
                             &output_pos);
 
@@ -136,13 +155,13 @@ krb5int_aes_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 
         /* Encrypt second last block */
         xorblock(tmp, blockN2);
-        enc(tmp2, tmp, &ctx);
+        enc(tmp2, tmp, &CACHE(key)->enc_ctx);
         memcpy(blockN2, tmp2, BLOCK_SIZE); /* blockN2 now contains first block */
         memcpy(tmp, tmp2, BLOCK_SIZE);
 
         /* Encrypt last block */
         xorblock(tmp, blockN1);
-        enc(tmp2, tmp, &ctx);
+        enc(tmp2, tmp, &CACHE(key)->enc_ctx);
         memcpy(blockN1, tmp2, BLOCK_SIZE);
 
         /* Put the last two blocks back into the iovec (reverse order) */
@@ -162,7 +181,6 @@ krb5_error_code
 krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
                     size_t num_data)
 {
-    aes_ctx ctx;
     unsigned char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE], tmp3[BLOCK_SIZE];
     int nblocks = 0, blockno;
     unsigned int i;
@@ -171,9 +189,17 @@ krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 
     CHECK_SIZES;
 
-    if (aes_dec_key(key->keyblock.contents, key->keyblock.length,
-                    &ctx) != aes_good)
-        abort();
+    if (key->cache == NULL) {
+        key->cache = malloc(sizeof(struct aes_key_info_cache));
+        if (key->cache == NULL)
+            return ENOMEM;
+        CACHE(key)->enc_ctx.n_rnd = CACHE(key)->dec_ctx.n_rnd = 0;
+    }
+    if (CACHE(key)->dec_ctx.n_rnd == 0) {
+        if (aes_dec_key(key->keyblock.contents, key->keyblock.length,
+                        &CACHE(key)->dec_ctx) != aes_good)
+            abort();
+    }
 
     if (ivec != NULL)
         memcpy(tmp, ivec->data, BLOCK_SIZE);
@@ -193,7 +219,7 @@ krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
     nblocks = (input_length + BLOCK_SIZE - 1) / BLOCK_SIZE;
     if (nblocks == 1) {
         krb5int_c_iov_get_block(tmp, BLOCK_SIZE, data, num_data, &input_pos);
-        dec(tmp2, tmp, &ctx);
+        dec(tmp2, tmp, &CACHE(key)->dec_ctx);
         krb5int_c_iov_put_block(data, num_data, tmp2, BLOCK_SIZE, &output_pos);
     } else if (nblocks > 1) {
         unsigned char blockN2[BLOCK_SIZE];   /* second last */
@@ -205,7 +231,7 @@ krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
             block = iov_next_block(blockN, BLOCK_SIZE, data, num_data,
                                    &input_pos);
             memcpy(tmp2, block, BLOCK_SIZE);
-            dec(block, block, &ctx);
+            dec(block, block, &CACHE(key)->dec_ctx);
             xorblock(block, tmp);
             memcpy(tmp, tmp2, BLOCK_SIZE);
             iov_store_block(data, num_data, block, blockN, BLOCK_SIZE,
@@ -226,7 +252,7 @@ krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
             memcpy(ivec->data, blockN2, BLOCK_SIZE);
 
         /* Decrypt second last block */
-        dec(tmp2, blockN2, &ctx);
+        dec(tmp2, blockN2, &CACHE(key)->dec_ctx);
         /* Set tmp2 to last (possibly partial) plaintext block, and
            save it.  */
         xorblock(tmp2, blockN1);
@@ -236,7 +262,7 @@ krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
            ciphertext block.  */
         input_length %= BLOCK_SIZE;
         memcpy(tmp2, blockN1, input_length ? input_length : BLOCK_SIZE);
-        dec(tmp3, tmp2, &ctx);
+        dec(tmp3, tmp2, &CACHE(key)->dec_ctx);
         xorblock(tmp3, tmp);
         memcpy(blockN1, tmp3, BLOCK_SIZE);
 
@@ -262,6 +288,12 @@ aes_init_state(const krb5_keyblock *key, krb5_keyusage usage,
     return 0;
 }
 
+static void
+aes_key_cleanup(krb5_key key)
+{
+    zapfree(key->cache, sizeof(struct aes_key_info_cache));
+}
+
 const struct krb5_enc_provider krb5int_enc_aes128 = {
     16,
     16, 16,
@@ -271,6 +303,7 @@ const struct krb5_enc_provider krb5int_enc_aes128 = {
     krb5int_aes_make_key,
     aes_init_state,
     krb5int_default_free_state,
+    aes_key_cleanup
 };
 
 const struct krb5_enc_provider krb5int_enc_aes256 = {
@@ -281,5 +314,6 @@ const struct krb5_enc_provider krb5int_enc_aes256 = {
     NULL,
     krb5int_aes_make_key,
     aes_init_state,
-    krb5int_default_free_state
+    krb5int_default_free_state,
+    aes_key_cleanup
 };
