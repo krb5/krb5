@@ -690,7 +690,7 @@ fillit(f, num, c)
     unsigned int        num;
     int                 c;
 {
-    int i;
+    unsigned int i;
 
     for (i=0; i<num; i++)
         fputc(c, f);

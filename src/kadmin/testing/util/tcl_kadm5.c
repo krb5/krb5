@@ -1543,7 +1543,8 @@ static Tcl_DString *unparse_keyblocks(krb5_keyblock *keyblocks, int num_keys)
 {
     Tcl_DString *str;
     Tcl_DString *keytype;
-    int i, j;
+    unsigned int i;
+    int j;
 
     if (! (str = malloc(sizeof(*str)))) {
         fprintf(stderr, "Out of memory!\n");

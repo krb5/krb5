@@ -395,7 +395,7 @@ void
 print_token(tok)
     gss_buffer_t tok;
 {
-    int     i;
+    unsigned int   i;
     unsigned char *p = tok->value;
 
     if (!display_file)
