@@ -1712,7 +1712,7 @@ proc start_kerberos_daemons { standalone } {
     setup_kerberos_env kdc
     # Nuke pid file - to test if setup
     file delete $kdc_pidfile
-    spawn $KRB5KDC -r $REALMNAME -n full -P $kdc_pidfile
+    spawn $KRB5KDC -r $REALMNAME -n -P $kdc_pidfile
     envstack_pop
     set kdc_pid [exp_pid]
     set kdc_spawn_id $spawn_id
