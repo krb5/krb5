@@ -272,6 +272,13 @@ g_oid_ops.so g_oid_ops.po $(OUTPRE)g_oid_ops.$(OBJEXT): \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   ../generic/gssapi_err_generic.h g_oid_ops.c mechglue.h \
   mglueP.h
+g_prf.so g_prf.po $(OUTPRE)g_prf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_ext.h \
+  $(COM_ERR_DEPS) $(srcdir)/../generic/gssapiP_generic.h \
+  $(srcdir)/../generic/gssapi_ext.h $(srcdir)/../generic/gssapi_generic.h \
+  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-platform.h \
+  $(top_srcdir)/include/k5-thread.h ../generic/gssapi_err_generic.h \
+  g_prf.c mechglue.h mglueP.h
 g_process_context.so g_process_context.po $(OUTPRE)g_process_context.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_ext.h $(COM_ERR_DEPS) \
