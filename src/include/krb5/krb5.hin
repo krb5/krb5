@@ -1816,6 +1816,11 @@ krb5_kt_default(krb5_context, krb5_keytab * );
 krb5_error_code KRB5_CALLCONV
 krb5_free_keytab_entry_contents(krb5_context, krb5_keytab_entry *);
 
+/* use krb5_free_keytab_entry_contents instead; this does the same thing but is
+ * misnamed and retained for backward compatability.*/
+krb5_error_code KRB5_CALLCONV krb5_kt_free_entry(krb5_context,
+                                                 krb5_keytab_entry * );
+
 /* remove and add are functions, so that they can return NOWRITE
    if not a writable keytab */
 krb5_error_code KRB5_CALLCONV

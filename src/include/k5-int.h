@@ -2607,10 +2607,6 @@ krb5_error_code krb5_generate_seq_number(krb5_context, const krb5_keyblock *,
 krb5_error_code KRB5_CALLCONV krb5_kt_register(krb5_context,
                                                const struct _krb5_kt_ops *);
 
-/* use krb5_free_keytab_entry_contents instead */
-krb5_error_code KRB5_CALLCONV krb5_kt_free_entry(krb5_context,
-                                                 krb5_keytab_entry * );
-
 krb5_error_code krb5_principal2salt_norealm(krb5_context, krb5_const_principal,
                                             krb5_data *);
 
