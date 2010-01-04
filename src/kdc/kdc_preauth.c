@@ -389,6 +389,49 @@ static krb5_preauth_systems *preauth_systems;
 static int n_preauth_systems;
 static struct plugin_dir_handle preauth_plugins;
 
+/* Open plugin directories for preauth modules. */
+static krb5_error_code
+open_preauth_plugin_dirs(krb5_context kcontext)
+{
+    static const char *path[] = {
+        KRB5_CONF_LIBDEFAULTS, KRB5_CONF_PREAUTH_MODULE_DIR, NULL,
+    };
+    char **profpath = NULL;
+    const char **plugindirs = NULL;
+    size_t nprofdirs, nobjdirs;
+    krb5_error_code retval;
+
+    /* Fetch the list of paths specified in the profile, if any. */
+    retval = profile_get_values(kcontext->profile, path, &profpath);
+    if (retval != 0 && retval != PROF_NO_RELATION)
+        return retval;
+
+    /* Count the number of profile dirs. */
+    nprofdirs = 0;
+    if (profpath) {
+        while (profpath[nprofdirs] != NULL)
+            nprofdirs++;
+    }
+
+    nobjdirs = sizeof(objdirs) / sizeof(*objdirs);
+    plugindirs = k5alloc((nprofdirs + nobjdirs) * sizeof(char *), &retval);
+    if (retval != 0)
+        goto cleanup;
+
+    /* Concatenate the profile and hardcoded directory lists. */
+    if (profpath)
+        memcpy(plugindirs, profpath, nprofdirs * sizeof(char *));
+    memcpy(plugindirs + nprofdirs, objdirs, nobjdirs * sizeof(char *));
+
+    retval = krb5int_open_plugin_dirs(plugindirs, NULL, &preauth_plugins,
+                                      &kcontext->err);
+
+cleanup:
+    profile_free_list(profpath);
+    free(plugindirs);
+    return retval;
+}
+
 krb5_error_code
 load_preauth_plugins(krb5_context context)
 {
@@ -402,10 +445,8 @@ load_preauth_plugins(krb5_context context)
     /* Attempt to load all of the preauth plugins we can find. */
     PLUGIN_DIR_INIT(&preauth_plugins);
     if (PLUGIN_DIR_OPEN(&preauth_plugins) == 0) {
-        if (krb5int_open_plugin_dirs(objdirs, NULL,
-                                     &preauth_plugins, &context->err) != 0) {
+        if (open_preauth_plugin_dirs(context) != 0)
             return KRB5_PLUGIN_NO_HANDLE;
-        }
     }
 
     /* Get the method tables provided by the loaded plugins. */
