@@ -39,6 +39,7 @@ kinit \- obtain and cache Kerberos ticket-granting ticket
 [\fB\-E\fP]
 [\fB\-v\fP] [\fB\-R\fP]
 [\fB\-k\fP [\fB\-t\fP \fIkeytab_file\fP]] [\fB\-c\fP \fIcache_name\fP]
+[\fB\-n\fP]
 [\fB\-S\fP \fIservice_name\fP][\fB\-T\fP \fIarmor_ccache\fP]
 [\fB\-X\fP \fIattribute\fP[=\fIvalue\fP]]
 [\fIprincipal\fP]
@@ -137,6 +138,26 @@ the
 .B \-t
 .I keytab_file
 option; otherwise the default name and location will be used.
+.TP
+\fB-n\fP
+Requests anonymous processing.  Two types of anonymous principals are
+supported.  For fully anonymous Kerberos, configure pkinit on the KDC
+and configure
+.I pkinit_anchors
+in the client's krb5.conf.  Then use the
+.B -n
+option with a principal of the form
+.I @REALM
+(an empty principal name followed by the at-sign and a realm name).
+If permitted by the KDC, an anonymous ticket will be returned.
+A second form of anonymous tickets is supported; these realm-exposed
+tickets hide the identity of the client but not the client's realm.
+For this mode, use
+.B kinit -n
+with a normal principal name.  If supported by the KDC, the principal
+(but not realm) will be replaced by the anonymous principal.
+As of release 1.8, the MIT Kerberos KDC only supports fully anonymous
+operation.
 .TP
 \fB\-T\fP \fIarmor_ccache\fP
 Specifies the name of a credential cache that already contains a

@@ -9,7 +9,7 @@ kadmin \- Kerberos V5 database administration program
 [\fB\-r\fP \fIrealm\fP] [\fB\-p\fP \fIprincipal\fP] [\fB\-q\fP \fIquery\fP]
 .br
 [[\fB-c\fP \fIcache_name\fP] | [\fB-k\fP [\fB-t\fP
-\fIkeytab\fP]]] [\fB\-w\fP \fIpassword\fP] [\fB\-s\fP
+\fIkeytab\fP]] | \fB-n\fP] [\fB\-w\fP \fIpassword\fP] [\fB\-s\fP
 \fIadmin_server\fP[\fI:port\fP]
 .TP "\w'.B kadmin.local\ 'u"
 .B kadmin.local
@@ -114,6 +114,25 @@ Use
 to decrypt the KDC response.  This can only be used with the
 .B \-k
 option.
+\fB-n\fP
+Requests anonymous processing.  Two types of anonymous principals are
+supported.  For fully anonymous Kerberos, configure pkinit on the KDC
+and configure
+.I pkinit_anchors
+in the client's krb5.conf.  Then use the
+.B -n
+option with a principal of the form
+.I @REALM
+(an empty principal name followed by the at-sign and a realm name).
+If permitted by the KDC, an anonymous ticket will be returned.
+A second form of anonymous tickets is supported; these realm-exposed
+tickets hide the identity of the client but not the client's realm.
+For this mode, use
+.B kinit -n
+with a normal principal name.  If supported by the KDC, the principal
+(but not realm) will be replaced by the anonymous principal.
+As of release 1.8, the MIT Kerberos KDC only supports fully anonymous
+operation.
 .TP
 \fB\-c\fP \fIcredentials_cache\fP
 Use
