@@ -704,7 +704,7 @@ pkinit_server_return_padata(krb5_context context,
         return return_pkinit_kx(context, request, reply,
                                 encrypting_key, send_pa);
     }
-    if (padata == NULL || padata->length <= 0 || padata->contents == NULL)
+    if (padata->length <= 0 || padata->contents == NULL)
         return 0;
 
     if (pa_request_context == NULL || *pa_request_context == NULL) {
