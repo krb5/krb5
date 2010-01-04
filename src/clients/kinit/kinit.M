@@ -140,9 +140,11 @@ option; otherwise the default name and location will be used.
 .TP
 \fB\-T\fP \fIarmor_ccache\fP
 Specifies the name of a credential cache that already contains a
-ticket.  This ccache will be used to armor the request.  Ideally, an
-attacker should have to attack both the armor ticket and the key of
-the principal.
+ticket.  If supported by the KDC, This ccache will be used to armor
+the request so that an attacker would have to know both the key of the
+armor ticket and the key of the principal used for authentication in
+order to attack the request. Armoring also makes sure that the
+response from the KDC is not modified in transit.
 .TP
 \fB\-c\fP \fIcache_name\fP
 use
