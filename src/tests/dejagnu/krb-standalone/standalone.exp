@@ -204,6 +204,16 @@ proc doit { } {
 	return
     }
 
+# Get a ticket to later use with FAST
+    if ![kinit krbtest/fast adminpass$KEY 1] {
+	return
+    }
+
+    # Use fast to get a ticket
+    if ![kinit_fast krbtest/fast adminpass$KEY 1] {
+	return
+    }
+
     # Destroy the ticket.
     spawn $KDESTROY -5
     if ![check_exit_status "kdestroy"] {

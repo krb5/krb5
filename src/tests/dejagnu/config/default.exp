@@ -1339,6 +1339,16 @@ proc setup_kerberos_db { standalone } {
 	    "Principal or policy already exists while creating*" { }
 	}
 	expect "kadmin.local: "
+	send "ank +requires_preauth krbtest/fast@$REALMNAME\r"
+	expect "Enter password for principal \"krbtest/fast@$REALMNAME\":"
+	send "adminpass$KEY\r"
+	expect "Re-enter password for principal \"krbtest/fast@$REALMNAME\":"
+	send "adminpass$KEY\r"
+	expect {
+	    "Principal \"krbtest/fast@$REALMNAME\" created" { }
+	    "Principal or policy already exists while creating*" { }
+	}
+	expect "kadmin.local: "
 	send "quit\r"
 	expect eof
 	catch expect_after
@@ -2164,6 +2174,41 @@ proc kinit { name pass standalone } {
 	# we should but another option to this proc. --proven
 	#
     spawn $KINIT -5 -f $name@$REALMNAME
+    expect {
+	"Password for $name@$REALMNAME:" {
+	    verbose "kinit started"
+	}
+	timeout {
+	    fail "kinit"
+	    return 0
+	}
+	eof {
+	    fail "kinit"
+	    return 0
+	}
+    }
+    send "$pass\r"
+    expect eof
+    if ![check_exit_status kinit] {
+	return 0
+    }
+
+    if {$standalone} {
+	pass "kinit"
+    }
+
+    return 1
+}
+# Retrieve a ticket using FAST armor
+proc kinit_fast { name pass standalone } {
+    global REALMNAME
+    global KINIT
+    global spawn_id
+    global env
+
+    # Use kinit to get a ticket.
+	#
+    spawn $KINIT -5 -f -T $env(KRB5CCNAME) $name@$REALMNAME
     expect {
 	"Password for $name@$REALMNAME:" {
 	    verbose "kinit started"
