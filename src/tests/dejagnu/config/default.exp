@@ -18,7 +18,6 @@ set env(TERM) dumb
 set des3_krbtgt 0
 set tgt_support_desmd5 0
 set supported_enctypes "des-cbc-crc:normal"
-set kdc_supported_enctypes "des-cbc-crc:normal"
 
 # The names of the individual passes must be unique; lots of things
 # depend on it.  The PASSES variable may not contain comments; only
@@ -148,7 +147,6 @@ set passes {
 	mode=udp
 	des3_krbtgt=0
 	{supported_enctypes=des-cbc-crc:normal}
-	{kdc_supported_enctypes=des-cbc-crc:normal}
 	{dummy=[verbose -log "DES TGT, DES enctype"]}
     }
     {
@@ -156,7 +154,6 @@ set passes {
 	mode=udp
 	des3_krbtgt=1
 	{supported_enctypes=des-cbc-crc:normal}
-	{kdc_supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal}
 	{dummy=[verbose -log "DES3 TGT, DES enctype"]}
     }
     {
@@ -164,7 +161,6 @@ set passes {
 	mode=udp
 	des3_krbtgt=1
 	{supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal}
-	{kdc_supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal}
 	{dummy=[verbose -log "DES3 TGT, DES3 + DES enctypes"]}
     }
     {
@@ -172,7 +168,6 @@ set passes {
 	mode=udp
 	des3_krbtgt=0
 	{supported_enctypes=aes256-cts-hmac-sha1-96:normal des-cbc-crc:normal}
-	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal des-cbc-crc:normal}
 	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96 des-cbc-crc}
 	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96 des-cbc-crc}
 	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96 des-cbc-crc}
@@ -184,7 +179,6 @@ set passes {
 	mode=udp
 	des3_krbtgt=0
 	{supported_enctypes=aes256-cts-hmac-sha1-96:normal des3-cbc-sha1:normal des-cbc-crc:normal}
-	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal des3-cbc-sha1:normal des-cbc-crc:normal}
 	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
 	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
 	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
@@ -196,7 +190,6 @@ set passes {
 	mode=udp
 	des3_krbtgt=1
 	{supported_enctypes=aes256-cts-hmac-sha1-96:normal des3-cbc-sha1:normal des-cbc-crc:normal}
-	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal des3-cbc-sha1:normal des-cbc-crc:normal}
 	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
 	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
 	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
@@ -208,7 +201,6 @@ set passes {
 	mode=udp
 	des3_krbtgt=0
 	{supported_enctypes=des-cbc-crc:v4}
-	{kdc_supported_enctypes=des-cbc-crc:v4}
 	{default_tkt_enctypes(client)=des-cbc-crc}
 	{dummy=[verbose -log "DES TGT, DES-CRC enctype, V4 salt"]}
     }
@@ -217,7 +209,6 @@ set passes {
 	mode=udp
 	des3_krbtgt=0
 	{supported_enctypes=des-cbc-md5:v4 des-cbc-crc:v4}
-	{kdc_supported_enctypes=des-cbc-md5:v4 des-cbc-crc:v4}
 	{default_tkt_enctypes(client)=des-cbc-md5 des-cbc-crc}
 	{dummy=[verbose -log "DES TGT, DES-MD5 and -CRC enctypes, V4 salt"]}
     }
@@ -226,9 +217,6 @@ set passes {
 	mode=udp
 	des3_krbtgt=1
 	{supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal \
-		des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm \
-		des-cbc-md4:normal}
-	{kdc_supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal \
 		des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm \
 		des-cbc-md4:normal}
 	{dummy=[verbose -log "DES3 TGT, many DES3 + DES enctypes"]}
@@ -242,7 +230,6 @@ set passes {
 	{default_tgs_enctypes(client)=des-cbc-md5 des-cbc-md4 des-cbc-crc}
 	{default_tkt_enctypes(client)=des-cbc-md5 des-cbc-md4 des-cbc-crc}
 	{supported_enctypes=des-cbc-crc:normal}
-	{kdc_supported_enctypes=des-cbc-crc:normal}
 	{master_key_type=des-cbc-crc}
 	{dummy=[verbose -log \
 		"DES TGT, KDC permitting only des-cbc-crc"]}
@@ -255,7 +242,6 @@ set passes {
 	{default_tgs_enctypes(client)=des-cbc-crc}
 	{default_tkt_enctypes(client)=des-cbc-crc}
 	{supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal}
-	{kdc_supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal}
 	{master_key_type=des-cbc-crc}
 	{dummy=[verbose -log \
 		"DES3 TGT, KDC permitting only des-cbc-crc"]}
@@ -292,7 +278,6 @@ set unused_passes {
 	des3_krbtgt=0
 	tgt_support_desmd5=1
 	supported_enctypes=des-cbc-crc:normal
-	kdc_supported_enctypes=des-cbc-crc:normal
 	{permitted_enctypes(kdc)=des-cbc-md5 des-cbc-md4 des-cbc-crc}
 	{permitted_enctypes(client)=des-cbc-md5 des-cbc-md4 des-cbc-crc}
 	{dummy=[verbose -log "DES TGT, SUPPORTS_DESMD5"]}
@@ -305,7 +290,6 @@ set unused_passes {
 	{default_tgs_enctypes(client)=des-cbc-crc}
 	{default_tkt_enctypes(client)=des-cbc-crc}
 	{supported_enctypes=des-cbc-crc:normal}
-	{kdc_supported_enctypes=des-cbc-crc:normal}
 	{master_key_type=des-cbc-crc}
 	{dummy=[verbose -log \
 		"DES TGT, SUPPORTS_DESMD5, KDC permitting only des-cbc-crc"]}
@@ -318,7 +302,6 @@ set unused_passes {
 	{default_tgs_enctypes(client)=des-cbc-crc des-cbc-md4}
 	{default_tkt_enctypes(client)=des-cbc-md4}
 	{supported_enctypes=des-cbc-crc:normal}
-	{kdc_supported_enctypes=des-cbc-crc:normal}
 	{dummy=[verbose -log \
 		"DES TGT, DES enctype, KDC permitting only des-cbc-crc, client requests des-cbc-md4 session key"]}
     }
@@ -332,11 +315,6 @@ set unused_passes {
 	des-cbc-md5:normal des-cbc-md4:normal des-cbc-crc:normal \
 	des-cbc-md5:v4 des-cbc-md4:v4 des-cbc-crc:v4 \
 	}
-	{kdc_supported_enctypes=\
-	des3-cbc-sha1:normal des3-cbc-sha1:none \
-	des-cbc-md5:normal des-cbc-md4:normal des-cbc-crc:normal \
-	des-cbc-md5:v4 des-cbc-md4:v4 des-cbc-crc:v4 \
-	}
 	{dummy=[verbose -log "DES3 TGT, default enctypes"]}
     }
     {
@@ -344,7 +322,6 @@ set unused_passes {
 	mode=tcp
 	des3_krbtgt=0
 	{supported_enctypes=aes256-cts-hmac-sha1-96:normal}
-	{kdc_supported_enctypes=aes256-cts-hmac-sha1-96:normal}
 	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96}
 	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96}
 	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96}
@@ -353,7 +330,6 @@ set unused_passes {
     }
 }
 #	{supported_enctypes=des-cbc-md5:normal des-cbc-crc:normal twofish256-hmac-sha1:normal }
-#	{kdc_supported_enctypes= des-cbc-md5:normal des-cbc-crc:normal twofish256-hmac-sha1:normal}
 
 # This shouldn't be necessary on dejagnu-1.4 and later, but 1.3 seems
 # to need it because its runtest.exp doesn't deal with PASS at all.
@@ -811,7 +787,6 @@ proc setup_kerberos_files { } {
     global domain
     global tmppwd
     global supported_enctypes
-    global kdc_supported_enctypes
     global last_passname_conf
     global multipass_name
     global master_key_type
@@ -855,7 +830,6 @@ proc setup_kerberos_files { } {
 	puts $conffile "		master_key_type = $master_key_type"
 	puts $conffile "		master_key_name = master/key"
 	puts $conffile "		supported_enctypes = $supported_enctypes"
-	puts $conffile "		kdc_supported_enctypes = $kdc_supported_enctypes"
 	if { $mode == "tcp" } {
 	    puts $conffile "		kdc_ports = [expr 3 + $portbase]"
 	    puts $conffile "		kdc_tcp_ports = [expr 1 + $portbase],[expr 3 + $portbase]"
@@ -906,7 +880,6 @@ proc setup_kerberos_files { } {
 	puts $conffile "		master_key_type = $master_key_type"
 	puts $conffile "		master_key_name = master/key"
 	puts $conffile "		supported_enctypes = $supported_enctypes"
-	puts $conffile "		kdc_supported_enctypes = $kdc_supported_enctypes"
 	if { $mode == "tcp" } {
 	    puts $conffile "		kdc_ports = [expr 3 + $portbase]"
 	    puts $conffile "		kdc_tcp_ports = [expr 1 + $portbase],[expr 3 + $portbase]"

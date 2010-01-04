@@ -246,9 +246,6 @@ master.  Default is "2m" (that is, two minutes).
 list of key:salt strings that specifies the default key/salt
 combinations of principals for this realm
 
-.IP kdc_supported_enctypes
-specifies the permitted key-salt combinations of principals for this realm
-
 .IP reject_bad_transit
 this
 .B boolean
