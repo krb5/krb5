@@ -2,7 +2,7 @@
 /*
  * lib/krb5/os/hst_realm.c
  *
- * Copyright 1990,1991,2002,2008 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2002,2008,2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -26,6 +26,9 @@
  *
  *
  * krb5_get_host_realm()
+ * krb5_get_fallback_host_realm()
+ * krb5int_clean_hostname()
+ * krb5_free_host_realm()
  */
 
 
@@ -94,7 +97,7 @@ domain_heuristic(krb5_context context, const char *domain,
 krb5_error_code krb5int_translate_gai_error (int);
 
 static krb5_error_code
-krb5int_get_fq_hostname (char *buf, size_t bufsize, const char *name)
+get_fq_hostname(char *buf, size_t bufsize, const char *name)
 {
     struct addrinfo *ai, hints;
     int err;
@@ -116,13 +119,13 @@ krb5int_get_fq_hostname (char *buf, size_t bufsize, const char *name)
    Always return a null-terminated string.
    Might return an error if gethostname fails.  */
 krb5_error_code
-krb5int_get_fq_local_hostname (char *buf, size_t bufsiz)
+krb5int_get_fq_local_hostname(char *buf, size_t bufsiz)
 {
     buf[0] = 0;
     if (gethostname (buf, bufsiz) == -1)
         return SOCKET_ERRNO;
     buf[bufsiz - 1] = 0;
-    return krb5int_get_fq_hostname (buf, bufsiz, buf);
+    return get_fq_hostname (buf, bufsiz, buf);
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -266,7 +269,8 @@ krb5int_translate_gai_error (int num)
  */
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata, char ***realmsp)
+krb5_get_fallback_host_realm(krb5_context context,
+                             krb5_data *hdata, char ***realmsp)
 {
     char **retrealms;
     char *realm, *cp;
@@ -368,7 +372,8 @@ krb5_get_fallback_host_realm(krb5_context context, krb5_data *hdata, char ***rea
  * to do basic sanity checks on supplied hostname.
  */
 krb5_error_code KRB5_CALLCONV
-krb5int_clean_hostname(krb5_context context, const char *host, char *local_host, size_t lhsize)
+krb5int_clean_hostname(krb5_context context,
+                       const char *host, char *local_host, size_t lhsize)
 {
     char *cp;
     krb5_error_code retval;
@@ -491,4 +496,15 @@ domain_heuristic(krb5_context context, const char *domain,
 cleanup:
     free(fqdn);
     return retval;
+}
+
+/*
+ * Frees the storage taken by a realm list returned by krb5_get_host_realm.
+ */
+
+krb5_error_code KRB5_CALLCONV
+krb5_free_host_realm(krb5_context context, char *const *realmlist)
+{
+    /* same format, so why duplicate code? */
+    return krb5_free_krbhst(context, realmlist);
 }

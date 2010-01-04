@@ -42,7 +42,6 @@ STLIBOBJS= \
 	encrypt_tk.o	\
 	etype_list.o	\
 	fast.o \
-	free_rtree.o	\
 	fwd_tgt.o	\
 	gc_frm_kdc.o	\
 	gc_via_tkt.o	\
@@ -137,7 +136,6 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)encrypt_tk.$(OBJEXT)	\
 	$(OUTPRE)etype_list.$(OBJEXT)	\
 	$(OUTPRE)fast.$(OBJEXT) \
-	$(OUTPRE)free_rtree.$(OBJEXT)	\
 	$(OUTPRE)fwd_tgt.$(OBJEXT)	\
 	$(OUTPRE)gc_frm_kdc.$(OBJEXT)	\
 	$(OUTPRE)gc_via_tkt.$(OBJEXT)	\
@@ -233,7 +231,6 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/encrypt_tk.c	\
 	$(srcdir)/etype_list.c	\
 	$(srcdir)/fast.c \
-	$(srcdir)/free_rtree.c	\
 	$(srcdir)/fwd_tgt.c	\
 	$(srcdir)/gc_frm_kdc.c	\
 	$(srcdir)/gc_via_tkt.c	\
@@ -323,7 +320,7 @@ clean-unix:: clean-libobjs
 COMERRLIB=$(TOPLIBD)/libcom_err.a
 
 T_WALK_RTREE_OBJS= t_walk_rtree.o walk_rtree.o tgtname.o unparse.o \
-	free_rtree.o bld_pr_ext.o copy_data.o
+	bld_pr_ext.o copy_data.o
 
 T_KERB_OBJS= t_kerb.o conv_princ.o unparse.o set_realm.o str_conv.o
 

@@ -25,6 +25,7 @@
  * or implied warranty.
  *
  * krb5_walk_realm_tree()
+ * krb5_free_realm_tree()
  *
  * internal function, used by krb5_get_cred_from_kdc()
  */
@@ -44,51 +45,45 @@ struct hstate {
 };
 
 static krb5_error_code
-rtree_capath_tree(
-    krb5_context context,
-    const krb5_data *client,
-    const krb5_data *server,
-    char **vals,
-    krb5_principal **tree);
+rtree_capath_tree(krb5_context context,
+                  const krb5_data *client,
+                  const krb5_data *server,
+                  char **vals,
+                  krb5_principal **tree);
 
 static krb5_error_code
-rtree_capath_vals(
-    krb5_context context,
-    const krb5_data *client,
-    const krb5_data *server,
-    char ***vals);
+rtree_capath_vals(krb5_context context,
+                  const krb5_data *client,
+                  const krb5_data *server,
+                  char ***vals);
 
 static krb5_error_code
-rtree_hier_tree(
-    krb5_context context,
-    const krb5_data *client,
-    const krb5_data *server,
-    krb5_principal **rettree,
-    int sep);
+rtree_hier_tree(krb5_context context,
+                const krb5_data *client,
+                const krb5_data *server,
+                krb5_principal **rettree,
+                int sep);
 
 static krb5_error_code
-rtree_hier_realms(
-    krb5_context context,
-    const krb5_data *client,
-    const krb5_data *server,
-    krb5_data **realms,
-    size_t *nrealms,
-    int sep);
+rtree_hier_realms(krb5_context context,
+                  const krb5_data *client,
+                  const krb5_data *server,
+                  krb5_data **realms,
+                  size_t *nrealms,
+                  int sep);
 
 static void
-free_realmlist(
-    krb5_context context,
-    krb5_data *realms,
-    size_t nrealms);
+free_realmlist(krb5_context context,
+               krb5_data *realms,
+               size_t nrealms);
 
 static krb5_error_code
-rtree_hier_tweens(
-    krb5_context context,
-    struct hstate *realm,
-    krb5_data **tweens,
-    size_t *ntweens,
-    int dotail,
-    int sep);
+rtree_hier_tweens(krb5_context context,
+                  struct hstate *realm,
+                  krb5_data **tweens,
+                  size_t *ntweens,
+                  int dotail,
+                  int sep);
 
 static void
 adjtail(struct hstate *c, struct hstate *s, int sep);
@@ -97,12 +92,11 @@ static void
 comtail(struct hstate *c, struct hstate *s, int sep);
 
 krb5_error_code
-krb5_walk_realm_tree(
-    krb5_context context,
-    const krb5_data *client,
-    const krb5_data *server,
-    krb5_principal **tree,
-    int realm_sep)
+krb5_walk_realm_tree( krb5_context context,
+                      const krb5_data *client,
+                      const krb5_data *server,
+                      krb5_principal **tree,
+                      int realm_sep)
 {
     krb5_error_code retval = 0;
     char **capvals;
@@ -188,12 +182,11 @@ krb5_walk_realm_tree(
  * walk_rtree_capath_vals().
  */
 static krb5_error_code
-rtree_capath_tree(
-    krb5_context context,
-    const krb5_data *client,
-    const krb5_data *server,
-    char **vals,
-    krb5_principal **rettree)
+rtree_capath_tree(krb5_context context,
+                  const krb5_data *client,
+                  const krb5_data *server,
+                  char **vals,
+                  krb5_principal **rettree)
 {
     krb5_error_code retval = 0;
     unsigned int nvals, nlinks, nprincs, i;
@@ -253,11 +246,10 @@ error:
  * by not finding anything.
  */
 static krb5_error_code
-rtree_capath_vals(
-    krb5_context context,
-    const krb5_data *client,
-    const krb5_data *server,
-    char ***vals)
+rtree_capath_vals(krb5_context context,
+                  const krb5_data *client,
+                  const krb5_data *server,
+                  char ***vals)
 {
     krb5_error_code retval = 0;
     /* null-terminated realm names */
@@ -306,12 +298,11 @@ error:
  * Build tree by hierarchical traversal.
  */
 static krb5_error_code
-rtree_hier_tree(
-    krb5_context context,
-    const krb5_data *client,
-    const krb5_data *server,
-    krb5_principal **rettree,
-    int sep)
+rtree_hier_tree(krb5_context context,
+                const krb5_data *client,
+                const krb5_data *server,
+                krb5_principal **rettree,
+                int sep)
 {
     krb5_error_code retval;
     krb5_data *realms;
@@ -356,13 +347,12 @@ error:
  * Construct list of realms between client and server.
  */
 static krb5_error_code
-rtree_hier_realms(
-    krb5_context context,
-    const krb5_data *client,
-    const krb5_data *server,
-    krb5_data **realms,
-    size_t *nrealms,
-    int sep)
+rtree_hier_realms(krb5_context context,
+                  const krb5_data *client,
+                  const krb5_data *server,
+                  krb5_data **realms,
+                  size_t *nrealms,
+                  int sep)
 {
     krb5_error_code retval;
     struct hstate c, s;
@@ -418,10 +408,9 @@ error:
 }
 
 static void
-free_realmlist(
-    krb5_context context,
-    krb5_data *realms,
-    size_t nrealms)
+free_realmlist(krb5_context context,
+               krb5_data *realms,
+               size_t nrealms)
 {
     size_t i;
 
@@ -439,13 +428,12 @@ free_realmlist(
  * make copies as needed and not call krb5_free_data_contents, etc.
  */
 static krb5_error_code
-rtree_hier_tweens(
-    krb5_context context,
-    struct hstate *realm,
-    krb5_data **tweens,
-    size_t *ntweens,
-    int dotail,
-    int sep)
+rtree_hier_tweens(krb5_context context,
+                  struct hstate *realm,
+                  krb5_data **tweens,
+                  size_t *ntweens,
+                  int dotail,
+                  int sep)
 {
     char *p, *r, *rtail, *lp;
     size_t rlen, n;
@@ -578,4 +566,17 @@ comtail(struct hstate *c, struct hstate *s, int sep)
     s->tail = sp;
     c->dot = cdot;
     s->dot = sdot;
+}
+
+void
+krb5_free_realm_tree(krb5_context context, krb5_principal *realms)
+{
+    register krb5_principal *nrealms = realms;
+    if (realms == NULL)
+        return;
+    while (*nrealms) {
+        krb5_free_principal(context, *nrealms);
+        nrealms++;
+    }
+    free(realms);
 }

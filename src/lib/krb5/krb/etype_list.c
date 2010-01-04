@@ -56,4 +56,3 @@ krb5int_copy_etypes(const krb5_enctype *old_list, krb5_enctype **new_list)
     *new_list = list;
     return 0;
 }
-

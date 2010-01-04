@@ -21,7 +21,6 @@ STLIBOBJS= \
 	dnsglue.o	\
 	dnssrv.o	\
 	free_krbhs.o	\
-	free_hstrl.o	\
 	full_ipadr.o	\
 	get_krbhst.o	\
 	gen_port.o	\
@@ -65,7 +64,6 @@ OBJS= \
 	$(OUTPRE)dnsglue.$(OBJEXT)	\
 	$(OUTPRE)dnssrv.$(OBJEXT)	\
 	$(OUTPRE)free_krbhs.$(OBJEXT)	\
-	$(OUTPRE)free_hstrl.$(OBJEXT)	\
 	$(OUTPRE)full_ipadr.$(OBJEXT)	\
 	$(OUTPRE)get_krbhst.$(OBJEXT)	\
 	$(OUTPRE)gen_port.$(OBJEXT)	\
@@ -109,7 +107,6 @@ SRCS= \
 	$(srcdir)/dnsglue.c	\
 	$(srcdir)/dnssrv.c	\
 	$(srcdir)/free_krbhs.c	\
-	$(srcdir)/free_hstrl.c	\
 	$(srcdir)/full_ipadr.c	\
 	$(srcdir)/get_krbhst.c	\
 	$(srcdir)/gen_port.c	\
