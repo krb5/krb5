@@ -112,6 +112,7 @@ fake-install:
 	(w=`pwd`; cd util && $(MAKE) install DESTDIR="$$w/util/fakedest")
 	(w=`pwd`; cd lib && $(MAKE) install DESTDIR="$$w/util/fakedest")
 	(w=`pwd`; cd plugins/kdb/db2 && $(MAKE) install DESTDIR="$$w/util/fakedest")
+	(w=`pwd`; cd plugins/preauth/encrypted_challenge && $(MAKE) install DESTDIR="$$w/util/fakedest")
 	if test -r plugins/preauth/pkinit/Makefile; then \
 	  (w=`pwd`; cd plugins/preauth/pkinit && $(MAKE) install DESTDIR="$$w/util/fakedest"); \
 	fi
