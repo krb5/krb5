@@ -1730,6 +1730,19 @@ negotiation_requests_restart(krb5_context context, krb5_init_creds_context ctx,
     return 0;
 }
 
+/* Ensure that the reply enctype was among the requested enctypes. */
+static krb5_error_code
+check_reply_enctype(krb5_init_creds_context ctx)
+{
+    int i;
+
+    for (i = 0; i < ctx->request->nktypes; i++) {
+        if (ctx->request->ktype[i] == ctx->reply->enc_part.enctype)
+            return 0;
+    }
+    return KRB5_CONFIG_ETYPE_NOSUPP;
+}
+
 static krb5_error_code
 init_creds_step_reply(krb5_context context,
                       krb5_init_creds_context ctx,
@@ -1819,6 +1832,11 @@ init_creds_step_reply(krb5_context context,
 
     /* We have a response. Process it. */
     assert(ctx->reply != NULL);
+
+    /* Check for replies (likely forged) with unasked-for enctypes. */
+    code = check_reply_enctype(ctx);
+    if (code != 0)
+        goto cleanup;
 
     /* process any preauth data in the as_reply */
     krb5_clear_preauth_context_use_counts(context);
