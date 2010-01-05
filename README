@@ -1,4 +1,4 @@
-                   Kerberos Version 5, Release 1.7
+                   Kerberos Version 5, Release 1.8
 
                             Release Notes
                         The MIT Kerberos Team
@@ -7,20 +7,20 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.7.tar.gz.  Instructions on how to extract the entire
+krb5-1.8.tar.gz.  Instructions on how to extract the entire
 distribution follow.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
-        gtar zxpf krb5-1.7.tar.gz
+        gtar zxpf krb5-1.8.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
-        gzcat krb5-1.7.tar.gz | tar xpf -
+        gzcat krb5-1.8.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into krb5-1.7/src and
-the documentation into krb5-1.7/doc.
+Both of these methods will extract the sources into krb5-1.8/src and
+the documentation into krb5-1.8/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -63,61 +63,21 @@ DES transition
 --------------
 
 The Data Encryption Standard (DES) is widely recognized as weak.  The
-krb5-1.7 release will contain measures to encourage sites to migrate
-away from using single-DES cryptosystems.  Among these is a
-configuration variable that enables "weak" enctypes, but will default
-to "false" in the future.  Depending on the outcome of ongoing
-discussion on krbdev@mit.edu, this default could change prior to the
-final release of krb5-1.7.
+krb5-1.7 release contains measures to encourage sites to migrate away
+from using single-DES cryptosystems.  Among these is a configuration
+variable that enables "weak" enctypes, which defaults to "false"
+beginning with krb5-1.8.
 
-Additional measures to ease the transition away from DES are planned
-for the final krb5-1.7 release.
-
-Major changes in 1.7
+Major changes in 1.8
 --------------------
 
-* Remove support for version 4 of the Kerberos protocol (krb4).
-
-* New libdefaults configuration variable "allow_weak_crypto".  NOTE:
-  Currently defaults to "false", but may default to "true" in a future
-  release.  Setting this variable to "false" will have the effect of
-  removing weak enctypes (currently defined to be all single-DES
-  enctypes) from permitted_enctypes, default_tkt_enctypes, and
-  default_tgs_enctypes.
-
-* Client library now follows client principal referrals, for
-  compatibility with Windows.
-
-* KDC can issue realm referrals for service principals based on domain
-  names.
-
-* Encryption algorithm negotiation (RFC 4537).
-
-* In the replay cache, use a hash over the complete ciphertext to
-  avoid false-positive replay indications.
-
-* Microsoft GSS_WrapEX, implemented using the gss_iov API, which is
-  similar to the equivalent SSPI functionality.
-
-* DCE RPC, including three-leg GSS context setup and unencapsulated
-  GSS tokens.
-
-* NTLM recognition support in GSS-API, to facilitate dropping in an
-  NTLM implementation.
-
-* KDC support for principal aliases, if the back end supports them.
-
-* Microsoft set/change password (RFC 3244) protocol in kadmind.
-
-* Master key rollover support.
-
-Changes by ticket ID
---------------------
+krb5-1.8 changes by ticket ID
+-----------------------------
 
 Copyright and Other Legal Notices
 ---------------------------------
 
-Copyright (C) 1985-2009 by the Massachusetts Institute of Technology.
+Copyright (C) 1985-2010 by the Massachusetts Institute of Technology.
 
 All rights reserved.
 
@@ -664,17 +624,8 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Acknowledgements
-----------------
-
-Thanks to Red Hat for donating the pre-authentication plug-in
-framework.
-
-Thanks to Novell for donating the KDB abstraction layer and the LDAP
-database plug-in.
-
-Thanks to Sun Microsystems for donating their implementations of
-mechglue, SPNEGO, and incremental propagation.
+Acknowledgements for krb5-1.8
+-----------------------------
 
 Thanks to the members of the Kerberos V5 development team at MIT, both
 past and present: Danilo Almeida, Jeffrey Altman, Justin Anderson,
