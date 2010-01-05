@@ -77,7 +77,7 @@
 #define DEFAULT_KDB_LIB_PATH    { "@MODULEDIR/kdb", NULL }
 #endif
 
-#define DEFAULT_KDC_ENCTYPE     ENCTYPE_DES3_CBC_SHA1
+#define DEFAULT_KDC_ENCTYPE     ENCTYPE_AES256_CTS_HMAC_SHA1_96
 #define KDCRCACHE               "dfl:krb5kdc_rcache"
 
 #define KDC_PORTNAME            "kerberos" /* for /etc/services or equiv. */

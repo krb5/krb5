@@ -25,6 +25,7 @@ kdc.conf: Makefile
 	rm -rf kdc.conf
 	@echo "[realms]" > kdc.conf
 	@echo "$(TEST_REALM) = {" >> kdc.conf
+	@echo "  master_key_type = des3-cbc-sha1" >> kdc.conf
 	@echo "  key_stash_file = `pwd`/stash_file" >> kdc.conf
 	@echo "}" >> kdc.conf
 

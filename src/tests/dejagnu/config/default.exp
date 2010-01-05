@@ -17,7 +17,6 @@ set env(TERM) dumb
 
 set des3_krbtgt 0
 set tgt_support_desmd5 0
-set supported_enctypes "des-cbc-crc:normal"
 
 # The names of the individual passes must be unique; lots of things
 # depend on it.  The PASSES variable may not contain comments; only
@@ -164,7 +163,7 @@ set passes {
 	{dummy=[verbose -log "DES3 TGT, DES3 + DES enctypes"]}
     }
     {
-	aes
+	aes-des
 	mode=udp
 	des3_krbtgt=0
 	{supported_enctypes=aes256-cts-hmac-sha1-96:normal des-cbc-crc:normal}
@@ -175,6 +174,21 @@ set passes {
 	{dummy=[verbose -log "AES + DES enctypes"]}
     }
     {
+	aes-only
+	mode=udp
+	des3_krbtgt=0
+	{supported_enctypes=aes256-cts-hmac-sha1-96:normal}
+	{permitted_enctypes(kdc)=aes256-cts-hmac-sha1-96}
+	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96}
+	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96}
+	{allow_weak_crypto(kdc)=false}
+	{allow_weak_crypto(slave)=false}
+	{allow_weak_crypto(client)=false}
+	{allow_weak_crypto(server)=false}
+	{master_key_type=aes256-cts-hmac-sha1-96}
+	{dummy=[verbose -log "AES enctypes"]}
+    }
+    {
 	aes-des3
 	mode=udp
 	des3_krbtgt=0
@@ -183,10 +197,10 @@ set passes {
 	{permitted_enctypes(client)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
 	{permitted_enctypes(server)=aes256-cts-hmac-sha1-96 des3-cbc-sha1 des-cbc-crc}
 	{master_key_type=aes256-cts-hmac-sha1-96}
-	{dummy=[verbose -log "AES + DES enctypes"]}
+	{dummy=[verbose -log "AES + DES3 + DES enctypes"]}
     }
     {
-	des3-aes
+	aes-des3tgt
 	mode=udp
 	des3_krbtgt=1
 	{supported_enctypes=aes256-cts-hmac-sha1-96:normal des3-cbc-sha1:normal des-cbc-crc:normal}
@@ -213,13 +227,14 @@ set passes {
 	{dummy=[verbose -log "DES TGT, DES-MD5 and -CRC enctypes, V4 salt"]}
     }
     {
-	all-des-des3-enctypes
+	all-enctypes
 	mode=udp
-	des3_krbtgt=1
-	{supported_enctypes=des3-cbc-sha1:normal des-cbc-crc:normal \
-		des-cbc-md5:normal des-cbc-crc:v4 des-cbc-md5:norealm \
-		des-cbc-md4:normal}
-	{dummy=[verbose -log "DES3 TGT, many DES3 + DES enctypes"]}
+	des3_krbtgt=0
+	{allow_weak_crypto(kdc)=false}
+	{allow_weak_crypto(slave)=false}
+	{allow_weak_crypto(client)=false}
+	{allow_weak_crypto(server)=false}
+	{dummy=[verbose -log "all default enctypes"]}
     }
     {
 	des.no-kdc-md5
@@ -806,9 +821,6 @@ proc setup_kerberos_files { } {
     # Create a kdc.conf file.
     if { ![file exists $tmppwd/kdc.conf] \
 	    || $last_passname_conf != $multipass_name } {
-	if ![info exists master_key_type] {
-	    set master_key_type des-cbc-md5
-	}
 	set conffile [open $tmppwd/kdc.conf w]
 	puts $conffile "\[kdcdefaults\]"
 	puts $conffile "	kdc_ports = $portbase,[expr 1 + $portbase],[expr 2 + $portbase]"
@@ -827,9 +839,13 @@ proc setup_kerberos_files { } {
 	puts $conffile "		kpasswd_port = [expr 5 + $portbase]"
 	puts $conffile "		max_life = 1:00:00"
 	puts $conffile "		max_renewable_life = 3:00:00"
-	puts $conffile "		master_key_type = $master_key_type"
+	if [info exists master_key_type] {
+	    puts $conffile "		master_key_type = $master_key_type"
+	}
 	puts $conffile "		master_key_name = master/key"
-	puts $conffile "		supported_enctypes = $supported_enctypes"
+	if [info exists supported_enctypes] {
+	    puts $conffile "		supported_enctypes = $supported_enctypes"
+	}
 	if { $mode == "tcp" } {
 	    puts $conffile "		kdc_ports = [expr 3 + $portbase]"
 	    puts $conffile "		kdc_tcp_ports = [expr 1 + $portbase],[expr 3 + $portbase]"
@@ -856,9 +872,6 @@ proc setup_kerberos_files { } {
     # KDC processes).
     if { ![file exists $tmppwd/slave.conf] \
 	    || $last_passname_conf != $multipass_name } {
-	if ![info exists master_key_type] {
-	    set master_key_type des-cbc-md5
-	}
 	set conffile [open $tmppwd/slave.conf w]
 	puts $conffile "\[kdcdefaults\]"
 	puts $conffile "	kdc_ports = $portbase,[expr 1 + $portbase],[expr 2 + $portbase]"
@@ -877,9 +890,13 @@ proc setup_kerberos_files { } {
 	puts $conffile "		kpasswd_port = [expr 5 + $portbase]"
 	puts $conffile "		max_life = 1:00:00"
 	puts $conffile "		max_renewable_life = 3:00:00"
-	puts $conffile "		master_key_type = $master_key_type"
+	if [info exists master_key_type] {
+	    puts $conffile "		master_key_type = $master_key_type"
+	}
 	puts $conffile "		master_key_name = master/key"
-	puts $conffile "		supported_enctypes = $supported_enctypes"
+	if [info exists supported_enctypes] {
+	    puts $conffile "		supported_enctypes = $supported_enctypes"
+	}
 	if { $mode == "tcp" } {
 	    puts $conffile "		kdc_ports = [expr 3 + $portbase]"
 	    puts $conffile "		kdc_tcp_ports = [expr 1 + $portbase],[expr 3 + $portbase]"
@@ -938,6 +955,7 @@ proc setup_krb5_conf { {type client} } {
     global default_tgs_enctypes
     global default_tkt_enctypes
     global permitted_enctypes
+    global allow_weak_crypto
     global mode
     global portbase
     global KRB5_DB_MODULE_DIR
@@ -950,7 +968,11 @@ proc setup_krb5_conf { {type client} } {
 	puts $conffile "\[libdefaults\]"
 	puts $conffile "	default_realm = $REALMNAME"
 	puts $conffile "	dns_lookup_kdc = false"
-	puts $conffile "	allow_weak_crypto = true"
+	if [info exists allow_weak_crypto($type)] {
+	    puts $conffile "	allow_weak_crypto = $allow_weak_crypto($type)"
+	} else {
+	    puts $conffile "	allow_weak_crypto = true"
+	}
 	if [info exists default_tgs_enctypes($type)] {
 	    puts $conffile \
 		    "	default_tgs_enctypes = $default_tgs_enctypes($type)"
@@ -2425,7 +2447,7 @@ proc v4_compatible_enctype {} {
     global supported_enctypes
     global KRBIV
 
-    if ![info exists KRBIV] {
+    if ![info exists KRBIV] || ![info exists supported_enctypes] {
 	return 0;
     }
 

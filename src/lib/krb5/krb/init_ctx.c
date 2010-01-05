@@ -165,7 +165,7 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
         goto cleanup;
 
     retval = profile_get_boolean(ctx->profile, KRB5_CONF_LIBDEFAULTS,
-                                 KRB5_CONF_ALLOW_WEAK_CRYPTO, NULL, 1, &tmp);
+                                 KRB5_CONF_ALLOW_WEAK_CRYPTO, NULL, 0, &tmp);
     if (retval)
         goto cleanup;
     ctx->allow_weak_crypto = tmp;

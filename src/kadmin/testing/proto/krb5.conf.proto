@@ -2,7 +2,6 @@
 	default_realm = __REALM__
 	default_keytab_name = FILE:__K5ROOT__/v5srvtab
 	dns_fallback = no
-	allow_weak_crypto = true
 
 [realms]
 	__REALM__ = {

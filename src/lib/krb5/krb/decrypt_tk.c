@@ -49,6 +49,9 @@ krb5_decrypt_tkt_part(krb5_context context, const krb5_keyblock *srv_key, regist
     if (!krb5_c_valid_enctype(ticket->enc_part.enctype))
         return KRB5_PROG_ETYPE_NOSUPP;
 
+    if (!krb5_is_permitted_enctype(context, ticket->enc_part.enctype))
+        return KRB5_NOPERM_ETYPE;
+
     scratch.length = ticket->enc_part.ciphertext.length;
     if (!(scratch.data = malloc(ticket->enc_part.ciphertext.length)))
         return(ENOMEM);
