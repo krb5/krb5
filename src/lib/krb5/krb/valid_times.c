@@ -25,7 +25,7 @@
  * or implied warranty.
  *
  *
- * krb5_validate_times()
+ * krb5int_validate_times()
  */
 
 #include "k5-int.h"
@@ -36,7 +36,7 @@
  */
 
 krb5_error_code
-krb5_validate_times(krb5_context context, krb5_ticket_times *times)
+krb5int_validate_times(krb5_context context, krb5_ticket_times *times)
 {
     krb5_timestamp          currenttime, starttime;
     krb5_error_code         retval;

@@ -371,7 +371,7 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
             goto cleanup;
     }
 
-    retval = krb5_validate_times(context, &req->ticket->enc_part2->times);
+    retval = krb5int_validate_times(context, &req->ticket->enc_part2->times);
     if (retval != 0)
         goto cleanup;
 
