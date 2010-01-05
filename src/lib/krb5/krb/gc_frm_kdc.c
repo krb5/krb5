@@ -293,7 +293,7 @@ tr_dbg_rtree(struct tr_state *ts, const char *prog, krb5_principal princ)
  * krbtgt/realm_of(DST)@realm_of(SRC) as the server principal.  Zeroes
  * MCREDS first, does not allocate MCREDS, and cleans MCREDS on
  * failure.  The peculiar ordering of DST and SRC args is for
- * consistency with krb5_tgtname().
+ * consistency with krb5int_tgtname().
  */
 static krb5_error_code
 tgt_mcred(krb5_context ctx, krb5_principal client,
@@ -309,7 +309,7 @@ tgt_mcred(krb5_context ctx, krb5_principal client,
     if (retval)
         goto cleanup;
 
-    retval = krb5_tgtname(ctx, krb5_princ_realm(ctx, dst),
+    retval = krb5int_tgtname(ctx, krb5_princ_realm(ctx, dst),
                           krb5_princ_realm(ctx, src), &mcreds->server);
     if (retval)
         goto cleanup;
@@ -547,7 +547,7 @@ kdc_mcred(struct tr_state *ts, krb5_principal client, krb5_creds *mcreds)
     if (retval)
         goto cleanup;
 
-    retval = krb5_tgtname(ts->ctx, rdst, rsrc, &mcreds->server);
+    retval = krb5int_tgtname(ts->ctx, rdst, rsrc, &mcreds->server);
     if (retval)
         goto cleanup;
 
@@ -801,7 +801,7 @@ chase_offpath(struct tr_state *ts,
         nxt_tgt = NULL;
         memset(&mcred, 0, sizeof(mcred));
         rsrc = krb5_princ_component(ts->ctx, cur_tgt->server, 1);
-        retval = krb5_tgtname(ts->ctx, rdst, rsrc, &mcred.server);
+        retval = krb5int_tgtname(ts->ctx, rdst, rsrc, &mcred.server);
         if (retval)
             goto cleanup;
         mcred.client = client;

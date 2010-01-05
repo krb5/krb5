@@ -548,7 +548,7 @@ krb5_string_to_deltat
 krb5_string_to_salttype
 krb5_string_to_timestamp
 krb5_sync_disk_file
-krb5_tgtname
+krb5int_tgtname
 krb5_timeofday
 krb5_timestamp_to_sfstring
 krb5_timestamp_to_string

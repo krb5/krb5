@@ -213,17 +213,17 @@ rtree_capath_tree(krb5_context context,
     /* Invariant: PPRINC points one past end of list. */
     pprinc = &tree[0];
     /* Local TGS name */
-    retval = krb5_tgtname(context, client, client, pprinc++);
+    retval = krb5int_tgtname(context, client, client, pprinc++);
     if (retval) goto error;
     srcrealm = *client;
     for (i = 0; i < nlinks; i++) {
         dstrealm.data = vals[i];
         dstrealm.length = strcspn(vals[i], "\t ");
-        retval = krb5_tgtname(context, &dstrealm, &srcrealm, pprinc++);
+        retval = krb5int_tgtname(context, &dstrealm, &srcrealm, pprinc++);
         if (retval) goto error;
         srcrealm = dstrealm;
     }
-    retval = krb5_tgtname(context, server, &srcrealm, pprinc++);
+    retval = krb5int_tgtname(context, server, &srcrealm, pprinc++);
     if (retval) goto error;
     *rettree = tree;
 
@@ -326,7 +326,7 @@ rtree_hier_tree(krb5_context context,
     srcrealm = client;
     for (i = 0; i < nrealms; i++) {
         dstrealm = &realms[i];
-        retval = krb5_tgtname(context, dstrealm, srcrealm, pprinc++);
+        retval = krb5int_tgtname(context, dstrealm, srcrealm, pprinc++);
         if (retval) goto error;
         srcrealm = dstrealm;
     }

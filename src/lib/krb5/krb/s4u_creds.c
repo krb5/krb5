@@ -506,7 +506,7 @@ krb5_get_self_cred_from_kdc(krb5_context context,
     s4u_user.user_id.options = KRB5_S4U_OPTS_USE_REPLY_KEY_USAGE;
 
     /* First, acquire a TGT to the user's realm. */
-    code = krb5_tgtname(context, user_realm,
+    code = krb5int_tgtname(context, user_realm,
                         krb5_princ_realm(context, in_creds->server), &tgs);
     if (code != 0)
         goto cleanup;

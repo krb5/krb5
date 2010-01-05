@@ -33,7 +33,7 @@
 #define KRB5_INT_FUNC_PROTO__
 
 krb5_error_code
-krb5_tgtname(krb5_context context, const krb5_data *, const krb5_data *,
+krb5int_tgtname(krb5_context context, const krb5_data *, const krb5_data *,
              krb5_principal *);
 
 krb5_error_code
