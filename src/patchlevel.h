@@ -51,8 +51,8 @@
  * organization.
  */
 #define KRB5_MAJOR_RELEASE 1
-#define KRB5_MINOR_RELEASE 8
+#define KRB5_MINOR_RELEASE 9
 #define KRB5_PATCHLEVEL 0
 #define KRB5_RELTAIL "prerelease"
 /* #undef KRB5_RELDATE */
-#define KRB5_RELTAG "branches/krb5-1-8"
+#define KRB5_RELTAG "trunk"

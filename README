@@ -1,4 +1,4 @@
-                   Kerberos Version 5, Release 1.8
+                   Kerberos Version 5, Release 1.9
 
                             Release Notes
                         The MIT Kerberos Team
@@ -7,20 +7,20 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.8.tar.gz.  Instructions on how to extract the entire
+krb5-1.9.tar.gz.  Instructions on how to extract the entire
 distribution follow.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
-        gtar zxpf krb5-1.8.tar.gz
+        gtar zxpf krb5-1.9.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
-        gzcat krb5-1.8.tar.gz | tar xpf -
+        gzcat krb5-1.9.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into krb5-1.8/src and
-the documentation into krb5-1.8/doc.
+Both of these methods will extract the sources into krb5-1.9/src and
+the documentation into krb5-1.9/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -68,10 +68,10 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
-Major changes in 1.8
+Major changes in 1.9
 --------------------
 
-krb5-1.8 changes by ticket ID
+krb5-1.9 changes by ticket ID
 -----------------------------
 
 Copyright and Other Legal Notices
@@ -624,7 +624,7 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-Acknowledgements for krb5-1.8
+Acknowledgements for krb5-1.9
 -----------------------------
 
 Thanks to the members of the Kerberos V5 development team at MIT, both
