@@ -17,6 +17,8 @@ STLIBOBJS= \
 	appdefault.o	\
 	auth_con.o	\
 	authdata.o	\
+	authdata_enc.o	\
+	authdata_dec.o	\
 	bld_pr_ext.o	\
 	bld_princ.o	\
 	chk_trans.o	\
@@ -111,6 +113,8 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)appdefault.$(OBJEXT)	\
 	$(OUTPRE)auth_con.$(OBJEXT)	\
 	$(OUTPRE)authdata.$(OBJEXT)	\
+	$(OUTPRE)authdata_enc.$(OBJEXT)	\
+	$(OUTPRE)authdata_dec.$(OBJEXT)	\
 	$(OUTPRE)bld_pr_ext.$(OBJEXT)	\
 	$(OUTPRE)bld_princ.$(OBJEXT)	\
 	$(OUTPRE)chk_trans.$(OBJEXT)	\
@@ -205,6 +209,8 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/appdefault.c	\
 	$(srcdir)/auth_con.c	\
 	$(srcdir)/authdata.c	\
+	$(srcdir)/authdata_enc.c	\
+	$(srcdir)/authdata_dec.c	\
 	$(srcdir)/bld_pr_ext.c	\
 	$(srcdir)/bld_princ.c	\
 	$(srcdir)/brand.c	\

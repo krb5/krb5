@@ -134,20 +134,6 @@ krb5_free_authenticator_contents(krb5_context context, krb5_authenticator *val)
 }
 
 void KRB5_CALLCONV
-krb5_free_authdata(krb5_context context, krb5_authdata **val)
-{
-    register krb5_authdata **temp;
-
-    if (val == NULL)
-        return;
-    for (temp = val; *temp; temp++) {
-        free((*temp)->contents);
-        free(*temp);
-    }
-    free(val);
-}
-
-void KRB5_CALLCONV
 krb5_free_authenticator(krb5_context context, krb5_authenticator *val)
 {
     if (val == NULL)

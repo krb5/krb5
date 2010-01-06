@@ -1244,3 +1244,35 @@ krb5_ser_authdata_context_init(krb5_context kcontext)
     return krb5_register_serializer(kcontext,
                                     &krb5_authdata_context_ser_entry);
 }
+
+krb5_error_code
+krb5int_copy_authdatum(krb5_context context,
+               const krb5_authdata *inad, krb5_authdata **outad)
+{
+    krb5_authdata *tmpad;
+
+    if (!(tmpad = (krb5_authdata *)malloc(sizeof(*tmpad))))
+        return ENOMEM;
+    *tmpad = *inad;
+    if (!(tmpad->contents = (krb5_octet *)malloc(inad->length))) {
+        free(tmpad);
+        return ENOMEM;
+    }
+    memcpy(tmpad->contents, inad->contents, inad->length);
+    *outad = tmpad;
+    return 0;
+}
+
+void KRB5_CALLCONV
+krb5_free_authdata(krb5_context context, krb5_authdata **val)
+{
+    register krb5_authdata **temp;
+
+    if (val == NULL)
+        return;
+    for (temp = val; *temp; temp++) {
+        free((*temp)->contents);
+        free(*temp);
+    }
+    free(val);
+}

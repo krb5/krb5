@@ -172,4 +172,7 @@ krb5_error_code krb5int_copy_etypes(const krb5_enctype *old_list,
 krb5_error_code
 krb5int_validate_times(krb5_context, krb5_ticket_times *);
 
+krb5_error_code
+krb5int_copy_authdatum(krb5_context, const krb5_authdata *, krb5_authdata **);
+
 #endif /* KRB5_INT_FUNC_PROTO__ */
