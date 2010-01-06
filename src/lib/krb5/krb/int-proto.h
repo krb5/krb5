@@ -169,4 +169,7 @@ size_t krb5int_count_etypes(const krb5_enctype *list);
 krb5_error_code krb5int_copy_etypes(const krb5_enctype *old_list,
                                     krb5_enctype **new_list);
 
+krb5_error_code
+krb5int_validate_times(krb5_context, krb5_ticket_times *);
+
 #endif /* KRB5_INT_FUNC_PROTO__ */

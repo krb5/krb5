@@ -561,7 +561,6 @@ krb5_unparse_name_flags
 krb5_unparse_name_flags_ext
 krb5_us_timeofday
 krb5_use_natural_time
-krb5int_validate_times
 krb5_verify_authdata_kdc_issued
 krb5_verify_init_creds
 krb5_verify_init_creds_opt_init

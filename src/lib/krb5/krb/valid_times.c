@@ -29,6 +29,7 @@
  */
 
 #include "k5-int.h"
+#include "int-proto.h"
 
 /*
  * This is an internal routine which validates the krb5_timestamps

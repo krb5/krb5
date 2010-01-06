@@ -1790,10 +1790,6 @@ decode_krb5_sam_response_2(const krb5_data *, krb5_sam_response_2 **);
 /*************************************************************************
  * Prototypes for krb5_decode.c
  *************************************************************************/
-
-krb5_error_code
-krb5int_validate_times(krb5_context, krb5_ticket_times *);
-
 /*
   krb5_error_code decode_krb5_structure(const krb5_data *code,
   krb5_structure **rep);
