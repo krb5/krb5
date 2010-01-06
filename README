@@ -71,8 +71,111 @@ beginning with krb5-1.8.
 Major changes in 1.8
 --------------------
 
+The krb5-1.8 release contains a large number of changes, featuring
+improvements in the following broad areas:
+
+* Code quality
+* Modularity
+* Performance
+* End-user experience
+* Administrator experience
+* Protocol evolution
+
+Code quality:
+
+* Move toward test-driven development -- new features have test code,
+  or at least written testing procedures.
+
+* Increase conformance to coding style
+
+  + "The great reindent"
+
+  + Selective refactoring
+
+Modularity:
+
+* Crypto modularity -- vendors can more easily substitute their own
+  crypto implementations, which might be hardware-accelerated or
+  validated to FIPS 140, for the builtin crypto implementation that
+  has historically shipped as part of MIT Kerberos.  Currently, only
+  an OpenSSL provider is included, but others are possible.
+
+* Move toward improved KDB interface
+
+* Improved API for verifying and interrogating authorization data
+
+Performance:
+
+* Investigate and remedy repeatedly-reported performance bottlenecks.
+
+* Encryption performance -- new crypto API with opaque key structures,
+  to allow for optimizations such as caching of derived keys
+
+End-user experience:
+
+* Reduce DNS dependence by implementing an interface that allows
+  client library to track whether a KDC supports service principal
+  referrals.
+
+Administrator experience:
+
+* Disable DES by default -- this reduces security exposure from using
+  an increasingly insecure cipher.
+
+* More versatile crypto configuration, to simplify migration away from
+  DES -- new configuration syntax to allow inclusion and exclusion of
+  specific algorithms relative to a default set.
+
+* Account lockout for repeated login failures -- mitigates online
+  password guessing attacks, and helps with some enterprise regulatory
+  compliance.
+
+Protocol evolution:
+
+* FAST enhancements -- preauthentication framework enhancements
+
+* Microsoft Services for User (S4U) compatibility: S4U2Self, also
+  known as "protocol transition", allows for service to ask a KDC for
+  a ticket to themselves on behalf of a client authenticated via a
+  different means; S4U2Proxy allows a service to ask a KDC for a
+  ticket to another service on behalf of a client.
+
+* Anonymous PKINIT -- allows the use of public-key cryptography to
+  anonymously authenticate to a realm
+
 krb5-1.8 changes by ticket ID
 -----------------------------
+
+5468    delete kadmin v1 support
+6206    new API for storing extra per-principal data in ccache
+6434    krb5_cc_resolve() will crash if a null name param is provided
+6454    Make krb5_mkt_resolve error handling work
+6510    Restore limited support for static linking
+6539    Enctype list configuration enhancements
+6547    Modify kadm5 initializers to accept krb5 contexts
+6563    Implement s4u extensions
+6564    s4u extensions integration broke test suite...
+6565    HP-UX IA64 wrong endian
+6572    Implement GSS naming extensions and authdata verification
+6576    Implement new APIs to allow improved crypto performance
+6577    Account lockout for repeated login failures
+6578    Heimdal DB bridge plugin for KDC back end
+6580    Constrained delegation without PAC support
+6582    Memory leak in _kadm5_init_any introduced with ipropd
+6583    Unbundle applications into separate repository
+6586    libkrb5 support for non-blocking AS requests
+6590    allow testing even if name->addr->name mapping doesn't work
+6591    fix slow behavior on Mac OS X with link-local addresses
+6593    Remove dependency on /bin/csh in test suite
+6595    FAST (preauth framework) negotiation
+6597    Add GSS extensions to store credentials, generate random bits
+6605    PKINIT client should validate SAN for TGS, not service principal
+6606    allow testing when offline
+6607    anonymous PKINIT
+6616    Fix spelling and hyphen errors in man pages
+6618    Support optional creation of PID files for krb5kdc and kadmind
+6620    kdc_supported_enctypes does nothing; eradicate mentions thereof
+6621    disable weak crypto by default
 
 Copyright and Other Legal Notices
 ---------------------------------
