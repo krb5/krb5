@@ -26,12 +26,16 @@
  *
  *
  * krb5_copy_authenticator()
+ * krb5_auth_con_getauthenticator()
  */
 
 #include "k5-int.h"
+#include "auth_con.h"
+
 #ifndef LEAN_CLIENT
 krb5_error_code KRB5_CALLCONV
-krb5_copy_authenticator(krb5_context context, const krb5_authenticator *authfrom, krb5_authenticator **authto)
+krb5_copy_authenticator(krb5_context context, const krb5_authenticator *authfrom,
+                        krb5_authenticator **authto)
 {
     krb5_error_code retval;
     krb5_authenticator *tempto;
@@ -79,5 +83,13 @@ krb5_copy_authenticator(krb5_context context, const krb5_authenticator *authfrom
 
     *authto = tempto;
     return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_auth_con_getauthenticator(krb5_context context, krb5_auth_context auth_context,
+                               krb5_authenticator **authenticator)
+{
+    return (krb5_copy_authenticator(context, auth_context->authentp,
+                                    authenticator));
 }
 #endif
