@@ -205,8 +205,8 @@ krb5_error_code kdb_init_hist(kadm5_server_handle_t handle, char *r)
 
     }
 
-    ret = krb5_dbe_find_enctype(handle->context, &hist_db,
-                                handle->params.enctype, -1, -1, &key_data);
+    ret = krb5_dbe_find_enctype(handle->context, &hist_db, -1, -1, -1,
+                                &key_data);
     if (ret)
         goto done;
 
