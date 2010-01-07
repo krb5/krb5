@@ -2236,11 +2236,11 @@ proc kinit_fast { name pass standalone } {
 	    verbose "kinit started"
 	}
 	timeout {
-	    fail "kinit"
+	    fail "kinit_fast"
 	    return 0
 	}
 	eof {
-	    fail "kinit"
+	    fail "kinit_fast"
 	    return 0
 	}
     }
@@ -2251,7 +2251,7 @@ proc kinit_fast { name pass standalone } {
     }
 
     if {$standalone} {
-	pass "kinit"
+	pass "kinit_fast"
     }
 
     return 1
