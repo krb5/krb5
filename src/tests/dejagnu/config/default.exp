@@ -960,7 +960,9 @@ proc setup_krb5_conf { {type client} } {
     global portbase
     global KRB5_DB_MODULE_DIR
     global KRB5_PA_MODULE_DIR
+    global srcdir
 
+    set pkinit_certs [findfile "[pwd]/$srcdir/pkinit-certs" "[pwd]/$srcdir/pkinit-certs" "$srcdir/pkinit-certs"]
     # Create a krb5.conf file.
     if { ![file exists $tmppwd/krb5.$type.conf] \
 	    || $last_passname_conf != $multipass_name } {
@@ -973,6 +975,7 @@ proc setup_krb5_conf { {type client} } {
 	} else {
 	    puts $conffile "	allow_weak_crypto = true"
 	}
+	puts $conffile "	pkinit_anchors = FILE:$pkinit_certs/ca.pem"
 	if [info exists default_tgs_enctypes($type)] {
 	    puts $conffile \
 		    "	default_tgs_enctypes = $default_tgs_enctypes($type)"
@@ -1000,6 +1003,8 @@ proc setup_krb5_conf { {type client} } {
 	# failures.  If we were running the client and KDC on different
 	# hosts, this would be okay....
 	#puts $conffile "		kdc = $hostname:[expr 6 + $portbase]"
+	puts $conffile "		pkinit_identity = FILE:$pkinit_certs/kdc.pem,$pkinit_certs/privkey.pem"
+	puts $conffile "		pkinit_anchors = FILE:$pkinit_certs/ca.pem"
 	puts $conffile "		kdc = $hostname:[expr 1 + $portbase]"
 	puts $conffile "		admin_server = $hostname:[expr 4 + $portbase]"
 	puts $conffile "		kpasswd_server = $hostname:[expr 5 + $portbase]"
@@ -2254,6 +2259,23 @@ proc kinit_fast { name pass standalone } {
 	pass "kinit_fast"
     }
 
+    return 1
+}
+
+proc kinit_anonymous { name  } {
+    global REALMNAME
+    global KINIT
+    global spawn_id
+
+    # Use kinit to get a ticket.
+    #
+    spawn $KINIT -5 -f -n $name@$REALMNAME
+    expect eof
+    if ![check_exit_status kinit] {
+	fail "kinit anonymous"
+    }
+
+    pass "kinit anonymous"
     return 1
 }
 
