@@ -72,6 +72,7 @@ krb5int_dk_string_to_key(const struct krb5_keytypes *ktp,
     indata.data = (char *) foldstring;
     foldkeyblock.length = keylength;
     foldkeyblock.contents = foldkeydata;
+    foldkeyblock.enctype = ktp->etype;
 
     ret = enc->make_key(&indata, &foldkeyblock);
     if (ret != 0)
