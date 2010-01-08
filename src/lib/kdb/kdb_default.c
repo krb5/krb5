@@ -61,6 +61,7 @@ krb5_dbe_def_search_enctype(kcontext, dbentp, start, ktype, stype, kvno, kdatap)
     int                 maxkvno;
     krb5_key_data       *datap;
     krb5_error_code     ret;
+    krb5_boolean        saw_non_permitted = FALSE;
 
     ret = 0;
     if (kvno == -1 && stype == -1 && ktype == -1)
@@ -88,42 +89,38 @@ krb5_dbe_def_search_enctype(kcontext, dbentp, start, ktype, stype, kvno, kdatap)
             db_stype = KRB5_KDB_SALTTYPE_NORMAL;
         }
 
-        /*
-         * Filter out non-permitted enctypes.
-         */
-        if (!krb5_is_permitted_enctype(kcontext,
-                                       dbentp->key_data[i].key_data_type[0])) {
-            ret = KRB5_KDB_NO_PERMITTED_KEY;
-            continue;
-        }
-
-
+        /* Match this entry against the arguments. */
         if (ktype != -1) {
             if ((ret = krb5_c_enctype_compare(kcontext, (krb5_enctype) ktype,
                                               dbentp->key_data[i].key_data_type[0],
                                               &similar)))
 
                 return(ret);
+            if (!similar)
+                continue;
+        }
+        if (stype >= 0 && db_stype != stype)
+            continue;
+        if (kvno >= 0 && dbentp->key_data[i].key_data_kvno != kvno)
+            continue;
+
+        /* Filter out non-permitted enctypes. */
+        if (!krb5_is_permitted_enctype(kcontext,
+                                       dbentp->key_data[i].key_data_type[0])) {
+            saw_non_permitted = TRUE;
+            continue;
         }
 
-        if (((ktype == -1) || similar) &&
-            ((db_stype == stype) || (stype < 0))) {
-            if (kvno >= 0) {
-                if (kvno == dbentp->key_data[i].key_data_kvno) {
-                    datap = &dbentp->key_data[i];
-                    idx = i;
-                    maxkvno = kvno;
-                    break;
-                }
-            } else {
-                if (dbentp->key_data[i].key_data_kvno > maxkvno) {
-                    maxkvno = dbentp->key_data[i].key_data_kvno;
-                    datap = &dbentp->key_data[i];
-                    idx = i;
-                }
-            }
+        if (dbentp->key_data[i].key_data_kvno > maxkvno) {
+            maxkvno = dbentp->key_data[i].key_data_kvno;
+            datap = &dbentp->key_data[i];
+            idx = i;
         }
     }
+    /* If we scanned the whole set of keys and matched only non-permitted
+     * enctypes, indicate that. */
+    if (maxkvno < 0 && *start == 0 && saw_non_permitted)
+        ret = KRB5_KDB_NO_PERMITTED_KEY;
     if (maxkvno < 0)
         return ret ? ret : KRB5_KDB_NO_MATCHING_KEY;
     *kdatap = datap;
