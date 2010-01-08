@@ -310,7 +310,7 @@ egress:
  */
 
 static krb5_error_code
-krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
+locate_srv_conf_1(krb5_context context, const krb5_data *realm,
                        const char * name, struct addrlist *addrlist,
                        int get_masters, int socktype,
                        int udpport, int sec_udpport, int family)
@@ -491,7 +491,7 @@ krb5_locate_srv_conf(krb5_context context, const krb5_data *realm,
 {
     krb5_error_code ret;
 
-    ret = krb5_locate_srv_conf_1 (context, realm, name, al,
+    ret = locate_srv_conf_1 (context, realm, name, al,
                                   get_masters, 0, udpport, sec_udpport, 0);
     if (ret)
         return ret;
@@ -503,7 +503,7 @@ krb5_locate_srv_conf(krb5_context context, const krb5_data *realm,
 
 #ifdef KRB5_DNS_LOOKUP
 static krb5_error_code
-krb5_locate_srv_dns_1 (const krb5_data *realm,
+locate_srv_dns_1 (const krb5_data *realm,
                        const char *service,
                        const char *protocol,
                        struct addrlist *addrlist,
@@ -750,7 +750,7 @@ prof_locate_server (krb5_context context, const krb5_data *realm,
         return EBUSY;           /* XXX */
     }
 
-    return krb5_locate_srv_conf_1 (context, realm, profname, addrlist,
+    return locate_srv_conf_1 (context, realm, profname, addrlist,
                                    0, socktype,
                                    dflport1, dflport2, family);
 }
@@ -789,12 +789,12 @@ dns_locate_server (krb5_context context, const krb5_data *realm,
 
     code = 0;
     if (socktype == SOCK_DGRAM || socktype == 0) {
-        code = krb5_locate_srv_dns_1(realm, dnsname, "_udp", addrlist, family);
+        code = locate_srv_dns_1(realm, dnsname, "_udp", addrlist, family);
         if (code)
             Tprintf("dns udp lookup returned error %d\n", code);
     }
     if ((socktype == SOCK_STREAM || socktype == 0) && code == 0) {
-        code = krb5_locate_srv_dns_1(realm, dnsname, "_tcp", addrlist, family);
+        code = locate_srv_dns_1(realm, dnsname, "_tcp", addrlist, family);
         if (code)
             Tprintf("dns tcp lookup returned error %d\n", code);
     }

@@ -71,6 +71,7 @@ STLIBOBJS= \
 	mk_req_ext.o	\
 	mk_safe.o	\
 	pac.o		\
+	pac_sign.o	\
 	parse.o		\
 	pr_to_salt.o	\
 	preauth.o	\
@@ -167,6 +168,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)mk_req_ext.$(OBJEXT)	\
 	$(OUTPRE)mk_safe.$(OBJEXT)	\
 	$(OUTPRE)pac.$(OBJEXT)		\
+	$(OUTPRE)pac_sign.$(OBJEXT)	\
 	$(OUTPRE)parse.$(OBJEXT)	\
 	$(OUTPRE)pr_to_salt.$(OBJEXT)	\
 	$(OUTPRE)preauth.$(OBJEXT)	\
@@ -264,6 +266,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/mk_req_ext.c	\
 	$(srcdir)/mk_safe.c	\
 	$(srcdir)/pac.c		\
+	$(srcdir)/pac_sign.c	\
 	$(srcdir)/parse.c	\
 	$(srcdir)/pr_to_salt.c	\
 	$(srcdir)/preauth.c	\
@@ -331,12 +334,12 @@ T_WALK_RTREE_OBJS= t_walk_rtree.o walk_rtree.o tgtname.o unparse.o \
 T_KERB_OBJS= t_kerb.o conv_princ.o unparse.o set_realm.o str_conv.o
 
 T_SER_OBJS= t_ser.o ser_actx.o ser_adata.o ser_addr.o ser_auth.o ser_cksum.o \
-	ser_ctx.o ser_key.o ser_princ.o serialize.o authdata.o pac.o \
+	ser_ctx.o ser_key.o ser_princ.o serialize.o authdata.o pac.o pac_sign.o \
 	copy_data.o etype_list.o
 
 T_DELTAT_OBJS= t_deltat.o deltat.o
 
-T_PAC_OBJS= t_pac.o pac.o copy_data.o
+T_PAC_OBJS= t_pac.o pac.o pac_sign.o copy_data.o
 
 T_PRINC_OBJS= t_princ.o parse.o unparse.o
 
