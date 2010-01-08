@@ -121,7 +121,7 @@ main (int argc, char *argv[])
         break;
 
     case LOOKUP_DNS:
-        err = krb5_locate_srv_dns_1 (&realm, "_kerberos", "_udp", &al, 0);
+        err = locate_srv_dns_1 (&realm, "_kerberos", "_udp", &al, 0);
         break;
 
     case LOOKUP_WHATEVER:
