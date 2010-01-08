@@ -18,6 +18,7 @@ typedef struct
  */
 
 #define yarrow_enc_provider krb5int_enc_aes256
+#define yarrow_enc_type     ENCTYPE_AES256_CTS_HMAC_SHA1_96
 
 #define CIPHER_BLOCK_SIZE 16
 #define CIPHER_KEY_SIZE 32

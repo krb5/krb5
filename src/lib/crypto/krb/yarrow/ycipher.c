@@ -50,6 +50,7 @@ krb5int_yarrow_cipher_init(CIPHER_CTX *ctx, unsigned const char * key)
     ctx->key = NULL;
     keyblock.contents = malloc(keylength);
     keyblock.length = keylength;
+    keyblock.enctype = yarrow_enc_type;
     if (keyblock.contents == NULL)
         return (YARROW_NOMEM);
     randombits.data = (char *) key;
