@@ -391,45 +391,22 @@ static struct plugin_dir_handle preauth_plugins;
 
 /* Open plugin directories for preauth modules. */
 static krb5_error_code
-open_preauth_plugin_dirs(krb5_context kcontext)
+open_preauth_plugin_dirs(krb5_context ctx)
 {
     static const char *path[] = {
         KRB5_CONF_LIBDEFAULTS, KRB5_CONF_PREAUTH_MODULE_DIR, NULL,
     };
     char **profpath = NULL;
-    const char **plugindirs = NULL;
-    size_t nprofdirs, nobjdirs;
-    krb5_error_code retval;
+    const char **dirs;
+    krb5_error_code ret;
 
-    /* Fetch the list of paths specified in the profile, if any. */
-    retval = profile_get_values(kcontext->profile, path, &profpath);
-    if (retval != 0 && retval != PROF_NO_RELATION)
-        return retval;
-
-    /* Count the number of profile dirs. */
-    nprofdirs = 0;
-    if (profpath) {
-        while (profpath[nprofdirs] != NULL)
-            nprofdirs++;
-    }
-
-    nobjdirs = sizeof(objdirs) / sizeof(*objdirs);
-    plugindirs = k5alloc((nprofdirs + nobjdirs) * sizeof(char *), &retval);
-    if (retval != 0)
-        goto cleanup;
-
-    /* Concatenate the profile and hardcoded directory lists. */
-    if (profpath)
-        memcpy(plugindirs, profpath, nprofdirs * sizeof(char *));
-    memcpy(plugindirs + nprofdirs, objdirs, nobjdirs * sizeof(char *));
-
-    retval = krb5int_open_plugin_dirs(plugindirs, NULL, &preauth_plugins,
-                                      &kcontext->err);
-
-cleanup:
+    ret = profile_get_values(ctx->profile, path, &profpath);
+    if (ret != 0 && ret != PROF_NO_RELATION)
+        return ret;
+    dirs = (profpath != NULL) ? (const char **) profpath : objdirs;
+    ret = krb5int_open_plugin_dirs(dirs, NULL, &preauth_plugins, &ctx->err);
     profile_free_list(profpath);
-    free(plugindirs);
-    return retval;
+    return ret;
 }
 
 krb5_error_code

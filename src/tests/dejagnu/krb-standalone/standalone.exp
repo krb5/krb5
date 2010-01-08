@@ -138,6 +138,8 @@ proc doit { } {
     global KRBIV
     global portbase
     global mode
+    global tmppwd
+    global KRB5_PA_MODULE_DIR
 
     setup_kerberos_env kdc
 
@@ -223,6 +225,15 @@ proc doit { } {
 
     # Double check that the ticket was destroyed.
     if ![do_klist_err "klist after destroy"] { return }
+
+    if ![add_random_key WELLKNOWN/ANONYMOUS 0] {
+	return
+    }
+
+    # If we have anonymous  then test it
+    if [file exists "$tmppwd/../../../util/fakedest$KRB5_PA_MODULE_DIR/pkinit.so" ] {
+	kinit_anonymous "WELLKNOWN/ANONYMOUS"
+    }
 
     if ![add_random_key foo/bar 1] {
 	return
