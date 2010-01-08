@@ -74,11 +74,12 @@ static void set_bit(char *ptr, int bitnum)
 }
 
 /* Variable-Key tests */
-static void vk_test_1(int len)
+static void vk_test_1(int len, krb5_enctype etype)
 {
     int i;
 
     enc_key.length = len;
+    enc_key.enctype = etype;
     printf("\nKEYSIZE=%d\n\n", len * 8);
     memset(plain, 0, sizeof(plain));
     hexdump("PT", plain, 16);
@@ -94,16 +95,17 @@ static void vk_test_1(int len)
 }
 static void vk_test()
 {
-    vk_test_1(16);
-    vk_test_1(32);
+    vk_test_1(16, ENCTYPE_AES128_CTS_HMAC_SHA1_96);
+    vk_test_1(32, ENCTYPE_AES256_CTS_HMAC_SHA1_96);
 }
 
 /* Variable-Text tests */
-static void vt_test_1(int len)
+static void vt_test_1(int len, krb5_enctype etype)
 {
     int i;
 
     enc_key.length = len;
+    enc_key.enctype = etype;
     printf("\nKEYSIZE=%d\n\n", len * 8);
     memset(key, 0, len);
     hexdump("KEY", key, len);
@@ -119,8 +121,8 @@ static void vt_test_1(int len)
 }
 static void vt_test()
 {
-    vt_test_1(16);
-    vt_test_1(32);
+    vt_test_1(16, ENCTYPE_AES128_CTS_HMAC_SHA1_96);
+    vt_test_1(32, ENCTYPE_AES256_CTS_HMAC_SHA1_96);
 }
 
 

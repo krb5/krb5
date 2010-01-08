@@ -43,6 +43,7 @@
 
 const char *whoami;
 
+#if 0
 static void printhex (size_t len, const char *p)
 {
     while (len--)
@@ -54,19 +55,14 @@ static void printstringhex (const char *p) { printhex (strlen (p), p); }
 static void printdata (krb5_data *d) { printhex (d->length, d->data); }
 
 static void printkey (krb5_keyblock *k) { printhex (k->length, k->contents); }
+#endif
 
 
 #define JURISIC "Juri\305\241i\304\207" /* hi Miro */
 #define ESZETT "\303\237"
 #define GCLEF  "\360\235\204\236" /* outside BMP, woo hoo!  */
 
-static void
-keyToData (krb5_keyblock *k, krb5_data *d)
-{
-    d->length = k->length;
-    d->data = k->contents;
-}
-
+#if 0
 static void
 check_error (int r, int line) {
     if (r != 0) {
@@ -76,10 +72,7 @@ check_error (int r, int line) {
     }
 }
 #define CHECK check_error(r, __LINE__)
-
-extern struct krb5_enc_provider krb5int_enc_des3;
-struct krb5_enc_provider *enc = &krb5int_enc_des3;
-extern struct krb5_enc_provider krb5int_enc_aes128, krb5int_enc_aes256;
+#endif
 
 static void printd (const char *descr, krb5_data *d) {
     int i, j;
@@ -133,6 +126,7 @@ static void test_cts()
     deciv.data = decivbuf;
     keyblock.contents = aeskey;
     keyblock.length = 16;
+    keyblock.enctype = ENCTYPE_AES128_CTS_HMAC_SHA1_96;
 
     err = krb5_k_create_key(NULL, &keyblock, &key);
     if (err) {
