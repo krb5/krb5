@@ -407,6 +407,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
             goto errout;
         }
         enc_tkt_reply.client = request->client;
+        setflag(client.attributes, KRB5_KDB_REQUIRES_PRE_AUTH);
     }
     /*
      * Check the preauthentication if it is there.
