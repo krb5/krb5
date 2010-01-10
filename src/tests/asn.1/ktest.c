@@ -868,8 +868,6 @@ krb5_error_code ktest_make_sample_ad_signedpath_data(p)
     retval = ktest_make_sample_principal(&p->delegated[0]);
     if (retval) return retval;
     p->delegated[1] = NULL;
-    retval = ktest_make_sample_principal(&p->client);
-    if (retval) return retval;
     retval = ktest_make_sample_authorization_data(&p->authorization_data);
     if (retval) return retval;
     retval = ktest_make_sample_pa_data_array(&p->method_data);
