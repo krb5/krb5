@@ -17,6 +17,7 @@ STLIBOBJS= \
 	appdefault.o	\
 	auth_con.o	\
 	authdata.o	\
+	authdata_exp.o	\
 	authdata_enc.o	\
 	authdata_dec.o	\
 	bld_pr_ext.o	\
@@ -114,6 +115,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)appdefault.$(OBJEXT)	\
 	$(OUTPRE)auth_con.$(OBJEXT)	\
 	$(OUTPRE)authdata.$(OBJEXT)	\
+	$(OUTPRE)authdata_exp.$(OBJEXT)	\
 	$(OUTPRE)authdata_enc.$(OBJEXT)	\
 	$(OUTPRE)authdata_dec.$(OBJEXT)	\
 	$(OUTPRE)bld_pr_ext.$(OBJEXT)	\
@@ -211,6 +213,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/appdefault.c	\
 	$(srcdir)/auth_con.c	\
 	$(srcdir)/authdata.c	\
+	$(srcdir)/authdata_exp.c	\
 	$(srcdir)/authdata_enc.c	\
 	$(srcdir)/authdata_dec.c	\
 	$(srcdir)/bld_pr_ext.c	\
@@ -335,7 +338,7 @@ T_KERB_OBJS= t_kerb.o conv_princ.o unparse.o set_realm.o str_conv.o
 
 T_SER_OBJS= t_ser.o ser_actx.o ser_adata.o ser_addr.o ser_auth.o ser_cksum.o \
 	ser_ctx.o ser_key.o ser_princ.o serialize.o authdata.o pac.o pac_sign.o \
-	copy_data.o etype_list.o
+	authdata_exp.o copy_data.o etype_list.o
 
 T_DELTAT_OBJS= t_deltat.o deltat.o
 
