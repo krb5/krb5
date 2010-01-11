@@ -183,6 +183,10 @@ krb5int_derive_key(const struct krb5_enc_provider *enc,
     /* Derive into a temporary keyblock. */
     keyblock.length = enc->keylength;
     keyblock.contents = malloc(keyblock.length);
+    /* Set the enctype as the krb5_k_free_key will iterate over list
+       or derived keys and invoke krb5_k_free_key which will lookup
+       the enctype for key_cleanup handler */
+    keyblock.enctype = inkey->keyblock.enctype;
     if (keyblock.contents == NULL)
         return ENOMEM;
     ret = krb5int_derive_keyblock(enc, inkey, &keyblock, in_constant);
