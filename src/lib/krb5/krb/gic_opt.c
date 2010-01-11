@@ -132,7 +132,7 @@ free_gic_opt_ext_preauth_data(krb5_context context,
                               krb5_gic_opt_ext *opte);
 
 static krb5_error_code
-krb5int_gic_opte_private_alloc(krb5_context context, krb5_gic_opt_ext *opte)
+gic_opte_private_alloc(krb5_context context, krb5_gic_opt_ext *opte)
 {
     if (NULL == opte || !krb5_gic_opt_is_extended(opte))
         return EINVAL;
@@ -148,7 +148,7 @@ krb5int_gic_opte_private_alloc(krb5_context context, krb5_gic_opt_ext *opte)
 }
 
 static krb5_error_code
-krb5int_gic_opte_private_free(krb5_context context, krb5_gic_opt_ext *opte)
+gic_opte_private_free(krb5_context context, krb5_gic_opt_ext *opte)
 {
     if (NULL == opte || !krb5_gic_opt_is_extended(opte))
         return EINVAL;
@@ -164,7 +164,7 @@ krb5int_gic_opte_private_free(krb5_context context, krb5_gic_opt_ext *opte)
 }
 
 static krb5_gic_opt_ext *
-krb5int_gic_opte_alloc(krb5_context context)
+gic_opte_alloc(krb5_context context)
 {
     krb5_gic_opt_ext *opte;
     krb5_error_code code;
@@ -174,10 +174,10 @@ krb5int_gic_opte_alloc(krb5_context context)
         return NULL;
     opte->flags = KRB5_GET_INIT_CREDS_OPT_EXTENDED;
 
-    code = krb5int_gic_opte_private_alloc(context, opte);
+    code = gic_opte_private_alloc(context, opte);
     if (code) {
         krb5int_set_error(&context->err, code,
-                          "krb5int_gic_opte_alloc: krb5int_gic_opte_private_alloc failed");
+                          "gic_opte_alloc: gic_opte_private_alloc failed");
         free(opte);
         return NULL;
     }
@@ -197,7 +197,7 @@ krb5_get_init_creds_opt_alloc(krb5_context context,
     /*
      * We return a new extended structure cast as a krb5_get_init_creds_opt
      */
-    opte = krb5int_gic_opte_alloc(context);
+    opte = gic_opte_alloc(context);
     if (NULL == opte)
         return ENOMEM;
 
@@ -221,19 +221,19 @@ krb5_get_init_creds_opt_free(krb5_context context,
 
     opte = (krb5_gic_opt_ext *)opt;
     if (opte->opt_private)
-        krb5int_gic_opte_private_free(context, opte);
+        gic_opte_private_free(context, opte);
 
     free(opte);
 }
 
 static krb5_error_code
-krb5int_gic_opte_copy(krb5_context context,
+gic_opte_copy(krb5_context context,
                       krb5_get_init_creds_opt *opt,
                       krb5_gic_opt_ext **opte)
 {
     krb5_gic_opt_ext *oe;
 
-    oe = krb5int_gic_opte_alloc(context);
+    oe = gic_opte_alloc(context);
     if (NULL == oe)
         return ENOMEM;
 
@@ -285,7 +285,7 @@ krb5int_gic_opt_to_opte(krb5_context context,
 {
     if (!krb5_gic_opt_is_extended(opt)) {
         if (force) {
-            return krb5int_gic_opte_copy(context, opt, opte);
+            return gic_opte_copy(context, opt, opte);
         } else {
             krb5int_set_error(&context->err, EINVAL,
                               "%s: attempt to convert non-extended krb5_get_init_creds_opt",
@@ -318,75 +318,6 @@ free_gic_opt_ext_preauth_data(krb5_context context,
     free(opte->opt_private->preauth_data);
     opte->opt_private->preauth_data = NULL;
     opte->opt_private->num_preauth_data = 0;
-}
-
-static krb5_error_code
-add_gic_opt_ext_preauth_data(krb5_context context,
-                             krb5_gic_opt_ext *opte,
-                             const char *attr,
-                             const char *value)
-{
-    size_t newsize;
-    int i;
-    krb5_gic_opt_pa_data *newpad;
-
-    newsize = opte->opt_private->num_preauth_data + 1;
-    newsize = newsize * sizeof(*opte->opt_private->preauth_data);
-    if (opte->opt_private->preauth_data == NULL)
-        newpad = malloc(newsize);
-    else
-        newpad = realloc(opte->opt_private->preauth_data, newsize);
-    if (newpad == NULL)
-        return ENOMEM;
-    opte->opt_private->preauth_data = newpad;
-
-    i = opte->opt_private->num_preauth_data;
-    newpad[i].attr = strdup(attr);
-    if (newpad[i].attr == NULL)
-        return ENOMEM;
-    newpad[i].value = strdup(value);
-    if (newpad[i].value == NULL) {
-        free(newpad[i].attr);
-        return ENOMEM;
-    }
-    opte->opt_private->num_preauth_data += 1;
-    return 0;
-}
-
-/*
- * This function allows the caller to supply options to preauth
- * plugins.  Preauth plugin modules are given a chance to look
- * at each option at the time this function is called in ordre
- * to check the validity of the option.
- * The 'opt' pointer supplied to this function must have been
- * obtained using krb5_get_init_creds_opt_alloc()
- */
-krb5_error_code KRB5_CALLCONV
-krb5_get_init_creds_opt_set_pa(krb5_context context,
-                               krb5_get_init_creds_opt *opt,
-                               const char *attr,
-                               const char *value)
-{
-    krb5_error_code retval;
-    krb5_gic_opt_ext *opte;
-
-    retval = krb5int_gic_opt_to_opte(context, opt, &opte, 0,
-                                     "krb5_get_init_creds_opt_set_pa");
-    if (retval)
-        return retval;
-
-    /*
-     * Copy the option into the extended get_init_creds_opt structure
-     */
-    retval = add_gic_opt_ext_preauth_data(context, opte, attr, value);
-    if (retval)
-        return retval;
-
-    /*
-     * Give the plugins a chance to look at the option now.
-     */
-    retval = krb5_preauth_supply_preauth_data(context, opte, attr, value);
-    return retval;
 }
 
 /*

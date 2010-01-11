@@ -241,52 +241,6 @@ krb5_clear_preauth_context_use_counts(krb5_context context)
     }
 }
 
-/*
- * Give all the preauth plugins a look at the preauth option which
- * has just been set
- */
-krb5_error_code
-krb5_preauth_supply_preauth_data(krb5_context context,
-                                 krb5_gic_opt_ext *opte,
-                                 const char *attr,
-                                 const char *value)
-{
-    krb5_error_code retval = 0;
-    int i;
-    void *pctx;
-    const char *emsg = NULL;
-
-    if (context->preauth_context == NULL)
-        krb5_init_preauth_context(context);
-    if (context->preauth_context == NULL) {
-        retval = EINVAL;
-        krb5int_set_error(&context->err, retval,
-                          "krb5_preauth_supply_preauth_data: "
-                          "Unable to initialize preauth context");
-        return retval;
-    }
-
-    /*
-     * Go down the list of preauth modules, and supply them with the
-     * attribute/value pair.
-     */
-    for (i = 0; i < context->preauth_context->n_modules; i++) {
-        if (context->preauth_context->modules[i].client_supply_gic_opts == NULL)
-            continue;
-        pctx = context->preauth_context->modules[i].plugin_context;
-        retval = (*context->preauth_context->modules[i].client_supply_gic_opts)
-            (context, pctx,
-             (krb5_get_init_creds_opt *)opte, attr, value);
-        if (retval) {
-            emsg = krb5_get_error_message(context, retval);
-            krb5int_set_error(&context->err, retval, "Preauth plugin %s: %s",
-                              context->preauth_context->modules[i].name, emsg);
-            krb5_free_error_message(context, emsg);
-            break;
-        }
-    }
-    return retval;
-}
 
 /* Free the per-krb5_context preauth_context. This means clearing any
  * plugin-specific context which may have been created, and then
