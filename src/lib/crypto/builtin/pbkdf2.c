@@ -259,6 +259,7 @@ krb5int_pbkdf2_hmac_sha1(const krb5_data *out, unsigned long count,
         keyblock.length = pass->length;
         keyblock.contents = (krb5_octet *) pass->data;
     }
+    keyblock.enctype = ENCTYPE_NULL;
 
     err = krb5_k_create_key(NULL, &keyblock, &key);
     if (err)
