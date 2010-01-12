@@ -43,8 +43,8 @@ t_cksum5: t_cksum5.o $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o t_cksum5 t_cksum5.o $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(LIBS)
 
 check-unix:: t_cksum4 t_cksum5
-	$(RUN_SETUP) $(VALGRIND) $(C)t_cksum4 "this is a test"
-	$(RUN_SETUP) $(VALGRIND) $(C)t_cksum5 "this is a test"
+	$(RUN_SETUP) $(VALGRIND) $(C)t_cksum4 "this is a test" e3f76a07f3401e3536b43a3f54226c39422c35682c354835
+	$(RUN_SETUP) $(VALGRIND) $(C)t_cksum5 "this is a test" e3f76a07f3401e351143ee6f4c09be1edb4264d55015db53
 
 clean-unix::
 	$(RM) t_cksum4 t_cksum4.o

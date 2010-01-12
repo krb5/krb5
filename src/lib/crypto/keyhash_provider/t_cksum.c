@@ -59,6 +59,27 @@ print_checksum(text, number, message, checksum)
   printf("\n");
 }
 
+static void
+parse_hexstring(const char *s, krb5_data *dat)
+{
+  size_t i, len;
+  unsigned int byte;
+  unsigned char *cp;
+
+  len = strlen(s);
+  cp = malloc(len / 2);
+  dat->data = (char *)cp;
+  if (cp == NULL) {
+    dat->length = 0;
+    return;
+  }
+  dat->length = len / 2;
+  for (i = 0; i + 1 < len; i += 2) {
+    sscanf(&s[i], "%2x", &byte);
+    *cp++ = byte;
+  }
+}
+
 /*
  * Test the checksum verification of Old Style (tm) and correct RSA-MD[4,5]-DES
  * checksums.
@@ -76,7 +97,7 @@ main(argc, argv)
   size_t		length;
   krb5_keyblock		keyblock;
   krb5_error_code	kret=0;
-  krb5_data		plaintext, newstyle_checksum;
+  krb5_data		plaintext, newstyle_checksum, knowncksum_dat;
 
   /* this is a terrible seed, but that's ok for the test. */
 
@@ -98,7 +119,7 @@ main(argc, argv)
     printf("cannot get memory for new style checksum\n");
     return(ENOMEM);
   }
-  for (msgindex = 1; msgindex < argc; msgindex++) {
+  for (msgindex = 1; msgindex + 1 < argc; msgindex += 2) {
     plaintext.length = strlen(argv[msgindex]);
     plaintext.data = argv[msgindex];
 
@@ -115,6 +136,7 @@ main(argc, argv)
     }
     if (!valid) {
       printf("verify on new checksum failed\n");
+      kret = 1;
       break;
     }
     printf("Verify succeeded for \"%s\"\n", argv[msgindex]);
@@ -127,13 +149,32 @@ main(argc, argv)
     }
     if (valid) {
       printf("verify on new checksum succeeded, but shouldn't have\n");
+      kret = 1;
       break;
     }
     printf("Verify of bad checksum OK for \"%s\"\n", argv[msgindex]);
+    parse_hexstring(argv[msgindex+1], &knowncksum_dat);
+    if (knowncksum_dat.data == NULL) {
+      printf("parse_hexstring failed\n");
+      kret = 1;
+      break;
+    }
+    if ((kret = (*(khp.verify))(&keyblock, 0, 0, &plaintext, &knowncksum_dat,
+				&valid))) {
+      printf("verify on known checksum choked with %d\n", kret);
+      break;
+    }
+    if (!valid) {
+      printf("verify on known checksum failed\n");
+      kret = 1;
+      break;
+    }
+    printf("Verify on known checksum succeeded\n");
     kret = 0;
   }
   free(newstyle_checksum.data);
   if (!kret)
-    printf("%d tests passed successfully for MD%d checksum\n", argc-1, MD);
+    printf("%d tests passed successfully for MD%d checksum\n", (argc-1)/2, MD);
+
   return(kret);
 }
