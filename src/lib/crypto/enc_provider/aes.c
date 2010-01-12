@@ -105,9 +105,11 @@ krb5int_aes_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
     nblocks = (input->length + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
     if (nblocks == 1) {
-	/* XXX Used for DK function.  */
+	/* Used when deriving keys. */
+	if (input->length < BLOCK_SIZE)
+	    return KRB5_BAD_MSIZE;
 	enc(output->data, input->data, &ctx);
-    } else {
+    } else if (nblocks > 1) {
 	unsigned int nleft;
 
 	for (blockno = 0; blockno < nblocks - 2; blockno++) {
@@ -160,9 +162,9 @@ krb5int_aes_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
 
     if (nblocks == 1) {
 	if (input->length < BLOCK_SIZE)
-	    abort();
+	    return KRB5_BAD_MSIZE;
 	dec(output->data, input->data, &ctx);
-    } else {
+    } else if (nblocks > 1) {
 
 	for (blockno = 0; blockno < nblocks - 2; blockno++) {
 	    dec(tmp2, input->data + blockno * BLOCK_SIZE, &ctx);
@@ -208,6 +210,7 @@ krb5int_aes_encrypt_iov(const krb5_keyblock *key,
     char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE];
     int nblocks = 0, blockno;
     size_t input_length, i;
+    struct iov_block_state input_pos, output_pos;
 
     if (aes_enc_key(key->contents, key->length, &ctx) != aes_good)
 	abort();
@@ -224,17 +227,19 @@ krb5int_aes_encrypt_iov(const krb5_keyblock *key,
 	    input_length += iov->data.length;
     }
 
+    IOV_BLOCK_STATE_INIT(&input_pos);
+    IOV_BLOCK_STATE_INIT(&output_pos);
+
     nblocks = (input_length + BLOCK_SIZE - 1) / BLOCK_SIZE;
-
-    assert(nblocks > 1);
-
-    {
+    if (nblocks == 1) {
+	krb5int_c_iov_get_block((unsigned char *)tmp, BLOCK_SIZE,
+				data, num_data, &input_pos);
+	enc(tmp2, tmp, &ctx);
+	krb5int_c_iov_put_block(data, num_data, (unsigned char *)tmp2,
+				BLOCK_SIZE, &output_pos);
+    } else if (nblocks > 1) {
 	char blockN2[BLOCK_SIZE];   /* second last */
 	char blockN1[BLOCK_SIZE];   /* last block */
-	struct iov_block_state input_pos, output_pos;
-
-	IOV_BLOCK_STATE_INIT(&input_pos);
-	IOV_BLOCK_STATE_INIT(&output_pos);
 
 	for (blockno = 0; blockno < nblocks - 2; blockno++) {
 	    char blockN[BLOCK_SIZE];
@@ -288,6 +293,7 @@ krb5int_aes_decrypt_iov(const krb5_keyblock *key,
     char tmp[BLOCK_SIZE], tmp2[BLOCK_SIZE], tmp3[BLOCK_SIZE];
     int nblocks = 0, blockno, i;
     size_t input_length;
+    struct iov_block_state input_pos, output_pos;
 
     CHECK_SIZES;
 
@@ -306,17 +312,19 @@ krb5int_aes_decrypt_iov(const krb5_keyblock *key,
 	    input_length += iov->data.length;
     }
 
+    IOV_BLOCK_STATE_INIT(&input_pos);
+    IOV_BLOCK_STATE_INIT(&output_pos);
+
     nblocks = (input_length + BLOCK_SIZE - 1) / BLOCK_SIZE;
-
-    assert(nblocks > 1);
-
-    {
+    if (nblocks == 1) {
+	krb5int_c_iov_get_block((unsigned char *)tmp, BLOCK_SIZE,
+				data, num_data, &input_pos);
+	dec(tmp2, tmp, &ctx);
+	krb5int_c_iov_put_block(data, num_data, (unsigned char *)tmp2,
+				BLOCK_SIZE, &output_pos);
+    } else if (nblocks > 1) {
 	char blockN2[BLOCK_SIZE];   /* second last */
 	char blockN1[BLOCK_SIZE];   /* last block */
-	struct iov_block_state input_pos, output_pos;
-
-	IOV_BLOCK_STATE_INIT(&input_pos);
-	IOV_BLOCK_STATE_INIT(&output_pos);
 
 	for (blockno = 0; blockno < nblocks - 2; blockno++) {
 	    char blockN[BLOCK_SIZE];

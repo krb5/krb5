@@ -250,7 +250,7 @@ krb5int_dk_decrypt_iov(const struct krb5_aead_provider *aead,
     for (i = 0; i < num_data; i++) {
 	const krb5_crypto_iov *iov = &data[i];
 
-	if (ENCRYPT_DATA_IOV(iov))
+	if (ENCRYPT_IOV(iov))
 	    cipherlen += iov->data.length;
     }
         if (cipherlen % blocksize != 0)

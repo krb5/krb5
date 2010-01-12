@@ -34,5 +34,7 @@ krb5_raw_decrypt(const struct krb5_enc_provider *enc,
 		 const krb5_data *ivec, const krb5_data *input,
 		 krb5_data *output)
 {
+    if (output->length < input->length)
+	return KRB5_BAD_MSIZE;
     return((*(enc->decrypt))(key, ivec, input, output));
 }

@@ -89,6 +89,12 @@ krb5_dk_decrypt_maybe_trunc_hmac(const struct krb5_enc_provider *enc,
     else if (hmacsize > hashsize)
 	return KRB5KRB_AP_ERR_BAD_INTEGRITY;
 
+    /* Verify input and output lengths. */
+    if (input->length < blocksize + hmacsize)
+	return KRB5_BAD_MSIZE;
+    if (output->length < input->length - blocksize - hmacsize)
+	return KRB5_BAD_MSIZE;
+
     enclen = input->length - hmacsize;
 
     if ((kedata = (unsigned char *) malloc(keylength)) == NULL)

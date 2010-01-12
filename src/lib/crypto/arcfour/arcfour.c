@@ -199,6 +199,12 @@ krb5_arcfour_decrypt(const struct krb5_enc_provider *enc,
   keylength = enc->keylength;
   hashsize = hash->hashsize;
 
+  /* Verify input and output lengths. */
+  if (input->length < hashsize + CONFOUNDERLENGTH)
+    return KRB5_BAD_MSIZE;
+  if (output->length < input->length - hashsize - CONFOUNDERLENGTH)
+    return KRB5_BAD_MSIZE;
+
   d1.length=keybytes;
   d1.data=malloc(d1.length);
   if (d1.data == NULL)

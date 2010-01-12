@@ -45,8 +45,10 @@ krb5_old_decrypt(const struct krb5_enc_provider *enc,
     blocksize = enc->block_size;
     hashsize = hash->hashsize;
 
+    /* Verify input and output lengths. */
+    if (input->length < blocksize + hashsize || input->length % blocksize != 0)
+	return(KRB5_BAD_MSIZE);
     plainsize = input->length - blocksize - hashsize;
-
     if (arg_output->length < plainsize)
 	return(KRB5_BAD_MSIZE);
 
