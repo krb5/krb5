@@ -205,7 +205,7 @@ if test "$enable_thread_support" = yes; then
       # don't exclude CFLAGS when linking.  *sigh*
       PTHREAD_CFLAGS="-D_REENTRANT -D_THREAD_SAFE -D_POSIX_C_SOURCE=199506L"
       ;;
-    solaris2.[1-9])
+    solaris2.[[1-9]])
       # On Solaris 10 with gcc 3.4.3, the autoconf archive macro doesn't
       # get the right result.   XXX What about Solaris 9 and earlier?
       if test "$GCC" = yes ; then
