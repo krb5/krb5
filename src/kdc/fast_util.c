@@ -133,6 +133,7 @@ kdc_find_fast(krb5_kdc_req **requestptr,
     krb5_fast_req * fast_req = NULL;
     krb5_kdc_req *request = *requestptr;
     krb5_fast_armored_req *fast_armored_req = NULL;
+    krb5_checksum *cksum;
     krb5_boolean cksum_valid;
     krb5_keyblock empty_keyblock;
 
@@ -191,11 +192,11 @@ kdc_find_fast(krb5_kdc_req **requestptr,
             if (plaintext.data)
                 free(plaintext.data);
         }
+        cksum = &fast_armored_req->req_checksum;
         if (retval == 0)
             retval = krb5_c_verify_checksum(kdc_context, state->armor_key,
                                             KRB5_KEYUSAGE_FAST_REQ_CHKSUM,
-                                            checksummed_data,
-                                            &fast_armored_req->req_checksum,
+                                            checksummed_data, cksum,
                                             &cksum_valid);
         if (retval == 0 && !cksum_valid) {
             retval = KRB5KRB_AP_ERR_MODIFIED;
@@ -203,19 +204,7 @@ kdc_find_fast(krb5_kdc_req **requestptr,
                                    "FAST req_checksum invalid; request modified");
         }
         if (retval == 0) {
-            krb5_error_code ret;
-            /*
-             * We need to confirm that a keyed checksum is used for the
-             * fast_req checksum.  In April 2009, the best way to do this is
-             * to try verifying the checksum with a keyblock with an zero
-             * length; if it succeeds, then an unkeyed checksum is used.
-             */
-            ret  = krb5_c_verify_checksum(kdc_context, &empty_keyblock,
-                                          KRB5_KEYUSAGE_FAST_REQ_CHKSUM,
-                                          checksummed_data,
-                                          &fast_armored_req->req_checksum,
-                                          &cksum_valid);
-            if (ret == 0) {
+            if (!krb5_c_is_keyed_cksum(cksum->checksum_type)) {
                 retval = KRB5KDC_ERR_POLICY;
                 krb5_set_error_message(kdc_context, KRB5KDC_ERR_POLICY,
                                        "Unkeyed checksum used in fast_req");
