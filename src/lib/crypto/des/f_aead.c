@@ -187,6 +187,9 @@ krb5int_des_cbc_decrypt_iov(krb5_crypto_iov *data,
 	krb5int_c_iov_put_block(data, num_data, oblock, MIT_DES_BLOCK_LENGTH, &output_pos);
     }
 
-    if (ivec != NULL)
-	memcpy(ivec, oblock, MIT_DES_BLOCK_LENGTH);
+    if (ivec != NULL) {
+	op = ivec;
+	PUT_HALF_BLOCK(ocipherl, op);
+	PUT_HALF_BLOCK(ocipherr, op);
+    }
 }
