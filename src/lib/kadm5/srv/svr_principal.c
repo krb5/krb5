@@ -185,6 +185,32 @@ static void cleanup_key_data(context, count, data)
      krb5_db_free(context, data);
 }
 
+/*
+ * Set *passptr to NULL if the request looks like the first part of a krb5 1.6
+ * addprinc -randkey operation.  The krb5 1.6 dummy password for these requests
+ * was invalid UTF-8, which runs afoul of the arcfour string-to-key.
+ */
+static void
+check_1_6_dummy(kadm5_principal_ent_t entry, long mask,
+                int n_ks_tuple, krb5_key_salt_tuple *ks_tuple, char **passptr)
+{
+    int i;
+    char *password = *passptr;
+
+    /* Old-style randkey operations disallowed tickets to start. */
+    if (!(mask & KADM5_ATTRIBUTES) ||
+        !(entry->attributes & KRB5_KDB_DISALLOW_ALL_TIX))
+        return;
+
+    /* The 1.6 dummy password was the octets 1..255. */
+    for (i = 0; (unsigned char) password[i] == i + 1; i++);
+    if (password[i] != '\0' || i != 255)
+        return;
+
+    /* This will make the caller use a random password instead. */
+    *passptr = NULL;
+}
+
 kadm5_ret_t
 kadm5_create_principal(void *server_handle,
 			    kadm5_principal_ent_t entry, long mask,
@@ -214,6 +240,8 @@ kadm5_create_principal_3(void *server_handle,
 
     krb5_clear_error_message(handle->context);
 
+    check_1_6_dummy(entry, mask, n_ks_tuple, ks_tuple, &password);
+
     /*
      * Argument sanity checking, and opening up the DB
      */
@@ -226,7 +254,7 @@ kadm5_create_principal_3(void *server_handle,
 	return KADM5_BAD_MASK;
     if((mask & ~ALL_PRINC_MASK))
 	return KADM5_BAD_MASK;
-    if (entry == (kadm5_principal_ent_t) NULL || password == NULL)
+    if (entry == NULL)
 	return EINVAL;
 
     /*
@@ -260,11 +288,14 @@ kadm5_create_principal_3(void *server_handle,
 		return ret;
 	}
     }
-    if ((ret = passwd_check(handle, password, (mask & KADM5_POLICY),
-			    &polent, entry->principal))) {
-	if (mask & KADM5_POLICY)
-	     (void) kadm5_free_policy_ent(handle->lhandle, &polent);
-	return ret;
+    if (password) {
+	ret = passwd_check(handle, password, (mask & KADM5_POLICY),
+			   &polent, entry->principal);
+	if (ret) {
+	    if (mask & KADM5_POLICY)
+		(void) kadm5_free_policy_ent(handle->lhandle, &polent);
+	    return ret;
+	}
     }
     /*
      * Start populating the various DB fields, using the
@@ -360,12 +391,20 @@ kadm5_create_principal_3(void *server_handle,
         return (ret);
     }
 
-    if ((ret = krb5_dbe_cpw(handle->context, act_mkey,
-			    n_ks_tuple?ks_tuple:handle->params.keysalts,
-			    n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
-			    password,
-			    (mask & KADM5_KVNO)?entry->kvno:1,
-			    FALSE, &kdb))) {
+    if (password) {
+	ret = krb5_dbe_cpw(handle->context, act_mkey,
+			   n_ks_tuple?ks_tuple:handle->params.keysalts,
+			   n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
+			   password, (mask & KADM5_KVNO)?entry->kvno:1,
+			   FALSE, &kdb);
+    } else {
+	/* Null password means create with random key (new in 1.8). */
+	ret = krb5_dbe_crk(handle->context, &master_keyblock,
+			   n_ks_tuple?ks_tuple:handle->params.keysalts,
+			   n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
+			   FALSE, &kdb);
+    }
+    if (ret) {
 	krb5_db_free_principal(handle->context, &kdb, 1);
 	if (mask & KADM5_POLICY)
 	     (void) kadm5_free_policy_ent(handle->lhandle, &polent);

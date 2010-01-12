@@ -54,10 +54,10 @@ proc test3 {} {
 	perror "$test: unexpected failure in init"
 	return
     }
-    one_line_fail_test [format {
+    one_line_succeed_test [format {
 	ovsec_kadm_create_principal $server_handle [simple_principal "%s/a"] \
 		{OVSEC_KADM_PRINCIPAL} null
-    } $test] "EINVAL"
+    } $test]
     if { ! [cmd {ovsec_kadm_destroy $server_handle}]} {
 	perror "$test: unexpected failure in destroy"
 	return

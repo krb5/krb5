@@ -46,6 +46,11 @@ proc test3 {} {
 #    set prms_id 777
 #    setup_xfail {*-*-*} $prms_id
     begin_dump
+    if {! ((! [principal_exists "$test/a"]) ||
+	   [delete_principal "$test/a"])} {
+	    error_and_restart "$test: couldn't delete principal \"$test/a\""
+	    return
+    }
     if {! [cmd {
 	kadm5_init admin admin $KADM5_ADMIN_SERVICE null \
 		$KADM5_STRUCT_VERSION $KADM5_API_VERSION_2 \
@@ -54,10 +59,10 @@ proc test3 {} {
 	perror "$test: unexpected failure in init"
 	return
     }
-    one_line_fail_test [format {
+    one_line_succeed_test [format {
 	kadm5_create_principal $server_handle [simple_principal "%s/a"] \
 		{KADM5_PRINCIPAL} null
-    } $test] "EINVAL"
+    } $test]
     if { ! [cmd {kadm5_destroy $server_handle}]} {
 	perror "$test: unexpected failure in destroy"
 	return
