@@ -27,6 +27,7 @@ EXTRADEPSRCS=\
 	$(srcdir)/t_crc.c	\
 	$(srcdir)/t_mddriver.c	\
 	$(srcdir)/t_kperf.c	\
+	$(srcdir)/t_short.c	\
 	$(srcdir)/ytest.c	
 
 ##DOSBUILDTOP = ..\..\..
@@ -44,7 +45,7 @@ check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac \
 		t_cksum4 t_cksum5 \
 		aes-test  \
 		t_mddriver4 t_mddriver \
-		t_crc t_cts
+		t_crc t_cts t_short
 	$(RUN_SETUP) $(VALGRIND) ./t_nfold
 	$(RUN_SETUP) $(VALGRIND) ./t_encrypt
 	$(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output && \
@@ -62,6 +63,7 @@ check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac \
 	cmp vt.txt $(srcdir)/expect-vt.txt
 	$(RUN_SETUP) $(VALGRIND) $(C)t_mddriver4 -x
 	$(RUN_SETUP) $(VALGRIND) $(C)t_mddriver -x
+	$(RUN_SETUP) $(VALGRIND) ./t_short
 
 
 
@@ -94,6 +96,10 @@ vectors$(EXEEXT): vectors.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 
  t_cts$(EXEEXT): t_cts.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_cts.$(OBJEXT) \
+		$(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
+
+t_short$(EXEEXT): t_short.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ t_short.$(OBJEXT) \
 		$(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
 
 t_cksum4.o: $(srcdir)/t_cksum.c
@@ -139,7 +145,8 @@ clean::
 		t_cksum.o t_cksum \
 		t_crc.o t_crc t_cts.o t_cts \
 		t_mddriver4.o t_mddriver4 t_mddriver.o t_mddriver \
-		t_cksum4 t_cksum4.o t_cksum5 t_cksum5.o t_kperf.o t_kperf \
+		t_cksum4 t_cksum4.o t_cksum5 t_cksum5.o \
+		t_kperf.o t_kperf t_short t_short.o \
 		t_mddriver$(EXEEXT) $(OUTPRE)t_mddriver.$(OBJEXT)
 
 	-$(RM) t_prng.output
