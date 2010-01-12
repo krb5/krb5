@@ -22,6 +22,7 @@ EXTRADEPSRCS=\
 	$(srcdir)/t_hmac.c	\
 	$(srcdir)/t_pkcs5.c	\
 	$(srcdir)/t_cts.c	\
+	$(srcdir)/t_short.c	\
 	$(srcdir)/vectors.c
 
 ##DOSBUILDTOP = ..\..
@@ -184,12 +185,13 @@ libcrypto.lib:
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
-check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac t_pkcs5
+check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac t_pkcs5 t_short
 	$(RUN_SETUP) $(VALGRIND) ./t_nfold
 	$(RUN_SETUP) $(VALGRIND) ./t_encrypt
 	$(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output && \
 	diff t_prng.output $(srcdir)/t_prng.expected
 	$(RUN_SETUP) $(VALGRIND) ./t_hmac
+	$(RUN_SETUP) $(VALGRIND) ./t_short
 
 #	$(RUN_SETUP) $(VALGRIND) ./t_pkcs5
 
@@ -218,10 +220,14 @@ t_cts$(EXEEXT): t_cts.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_cts.$(OBJEXT) \
 		$(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
 
+t_short$(EXEEXT): t_short.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ t_short.$(OBJEXT) \
+		$(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
 
 clean::
 	$(RM) t_nfold.o t_nfold t_encrypt t_encrypt.o t_prng.o t_prng \
-		t_hmac.o t_hmac t_pkcs5.o t_pkcs5 pbkdf2.o t_prf t_prf.o
+		t_hmac.o t_hmac t_pkcs5.o t_pkcs5 pbkdf2.o t_prf t_prf.o \
+		t_short t_short.o
 	-$(RM) t_prng.output
 
 all-windows::
@@ -761,6 +767,15 @@ t_cts.so t_cts.po $(OUTPRE)t_cts.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
   $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
   $(srcdir)/hash_provider/hash_provider.h t_cts.c
+t_short.so t_short.po $(OUTPRE)t_short.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-plugin.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  t_short.c
 vectors.so vectors.po $(OUTPRE)vectors.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-err.h \

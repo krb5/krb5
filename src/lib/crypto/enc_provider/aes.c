@@ -94,9 +94,11 @@ krb5int_aes_encrypt(const krb5_keyblock *key, const krb5_data *ivec,
     nblocks = (input->length + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
     if (nblocks == 1) {
-	/* XXX Used for DK function.  */
+	/* Used when deriving keys. */
+	if (input->length < BLOCK_SIZE)
+	    return KRB5_BAD_MSIZE;
 	enc(output->data, input->data, &ctx);
-    } else {
+    } else if (nblocks > 1) {
 	unsigned int nleft;
 
 	for (blockno = 0; blockno < nblocks - 2; blockno++) {
@@ -149,9 +151,9 @@ krb5int_aes_decrypt(const krb5_keyblock *key, const krb5_data *ivec,
 
     if (nblocks == 1) {
 	if (input->length < BLOCK_SIZE)
-	    abort();
+	    return KRB5_BAD_MSIZE;
 	dec(output->data, input->data, &ctx);
-    } else {
+    } else if (nblocks > 1) {
 
 	for (blockno = 0; blockno < nblocks - 2; blockno++) {
 	    dec(tmp2, input->data + blockno * BLOCK_SIZE, &ctx);
