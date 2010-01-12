@@ -209,6 +209,9 @@ krb5int_fast_prep_req (krb5_context context, struct krb5int_fast_request_state *
     if (retval == 0)
 	retval = krb5int_c_mandatory_cksumtype(context, state->armor_key->enctype,
 					       &cksumtype);
+    /* DES enctypes have unkeyed mandatory checksums; need a keyed one. */
+    if (retval == 0 && !krb5_c_is_keyed_cksum(cksumtype))
+	cksumtype = CKSUMTYPE_RSA_MD5_DES;
     if (retval ==0)
 	retval = krb5_c_make_checksum(context, cksumtype, state->armor_key,
 				      KRB5_KEYUSAGE_FAST_REQ_CHKSUM, to_be_checksummed,
