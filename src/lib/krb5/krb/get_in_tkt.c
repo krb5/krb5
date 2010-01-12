@@ -1331,8 +1331,7 @@ krb5_get_init_creds(krb5_context context,
 					   &out_padata, &retry);
 	  if (ret !=0)
 	    goto cleanup;
-	  if ((err_reply->error == KDC_ERR_PREAUTH_REQUIRED ||err_reply->error == KDC_ERR_PREAUTH_FAILED)
-&& retry) {
+	  if (err_reply->error == KDC_ERR_PREAUTH_REQUIRED && retry) {
 		/* reset the list of preauth types to try */
 		if (preauth_to_use) {
 		    krb5_free_pa_data(context, preauth_to_use);
