@@ -131,85 +131,85 @@ proc api_start {} {
 	set pid [spawn $API]
 	expect {
 		-re "$prompt$" {}
-		eof { error "EOF starting API" }
-		timeout { error "Timeout starting API" }
+		eof { perror "EOF starting API" }
+		timeout { perror "Timeout starting API" }
 	}
 	if {! [info exists env(TCLUTIL)]} {
-		error "TCLUTIL environment variable isn't set"
+		perror "TCLUTIL environment variable isn't set"
 	}
 	# tcl 8.4 for some reason screws up autodetection of output
 	# EOL translation.  Work around it for now.
 	send "if { \[info commands fconfigure\] ne \"\" } { fconfigure stdout -translation lf }\n"
 	expect {
 		-re "$prompt$" {}
-		eof { error "EOF starting API" }
-		timeout { error "Timeout starting API" }
+		eof { perror "EOF starting API" }
+		timeout { perror "Timeout starting API" }
 	}
 	send "source $env(TCLUTIL)\n"
 	expect {
 		-re "$prompt$" {}
-		eof { error "EOF starting API" }
-		timeout { error "Timeout starting API" }
+		eof { perror "EOF starting API" }
+		timeout { perror "Timeout starting API" }
 	}
 	send "set current_struct_version \[expr \$OVSEC_KADM_STRUCT_VERSION &~ \$OVSEC_KADM_STRUCT_VERSION_MASK\]\n"
 	expect {
 		-re "$prompt$" {}
-		eof { error "EOF setting API varibles"}
-		timeout { error "timeout setting API varibles"}
+		eof { perror "EOF setting API varibles"}
+		timeout { perror "timeout setting API varibles"}
 	}
 	send "set current_api_version \[expr \$OVSEC_KADM_API_VERSION_1 &~ \$OVSEC_KADM_API_VERSION_MASK\]\n"
 	expect {
 		-re "$prompt$" {}
-		eof { error "EOF setting API varibles"}
-		timeout { error "timeout setting API varibles"}
+		eof { perror "EOF setting API varibles"}
+		timeout { perror "timeout setting API varibles"}
 	}
 	send "set bad_struct_version_mask \[expr 0x65432100 | \$current_struct_version\]\n"
 	expect {
 		-re "$prompt$" {}
-		eof { error "EOF setting API varibles"}
-		timeout { error "timeout setting API varibles"}
+		eof { perror "EOF setting API varibles"}
+		timeout { perror "timeout setting API varibles"}
 	}
 	send "set bad_api_version_mask \[expr 0x65432100 | \$current_api_version\]\n"
 	expect {
 		-re "$prompt$" {}
-		eof { error "EOF setting API varibles"}
-		timeout { error "timeout setting API varibles"}
+		eof { perror "EOF setting API varibles"}
+		timeout { perror "timeout setting API varibles"}
 	}
 	send "set no_api_version_mask \$current_api_version\n"
 	expect {
 		-re "$prompt$" {}
-		eof { error "EOF setting API varibles"}
-		timeout { error "timeout setting API varibles"}
+		eof { perror "EOF setting API varibles"}
+		timeout { perror "timeout setting API varibles"}
 	}
 	send "set no_struct_version_mask \$current_struct_version\n"
 	expect {
 		-re "$prompt$" {}
-		eof { error "EOF setting API varibles"}
-		timeout { error "timeout setting API varibles"}
+		eof { perror "EOF setting API varibles"}
+		timeout { perror "timeout setting API varibles"}
 	}
 	send "set old_api_version \[expr \$OVSEC_KADM_API_VERSION_MASK | 0x00\]\n"
 	expect {
 		-re "$prompt$" {}
-		eof { error "EOF setting API varibles"}
-		timeout { error "timeout setting API varibles"}
+		eof { perror "EOF setting API varibles"}
+		timeout { perror "timeout setting API varibles"}
 	}
 	send "set old_struct_version \[expr \$OVSEC_KADM_STRUCT_VERSION_MASK | 0x00\]\n"
 	expect {
 		-re "$prompt$" {}
-		eof { error "EOF setting API varibles"}
-		timeout { error "timeout setting API varibles"}
+		eof { perror "EOF setting API varibles"}
+		timeout { perror "timeout setting API varibles"}
 	}
 	send "set new_api_version \[expr \$OVSEC_KADM_API_VERSION_MASK | 0xca\]\n"
 	expect {
 		-re "$prompt$" {}
-		eof { error "EOF setting API varibles"}
-		timeout { error "timeout setting API varibles"}
+		eof { perror "EOF setting API varibles"}
+		timeout { perror "timeout setting API varibles"}
 	}
 	send "set new_struct_version \[expr \$OVSEC_KADM_STRUCT_VERSION_MASK | 0xca\]\n"
 	expect {
 		-re "$prompt$" {}
-		eof { error "EOF setting API varibles"}
-		timeout { error "timeout setting API varibles"}
+		eof { perror "EOF setting API varibles"}
+		timeout { perror "timeout setting API varibles"}
 	}
 
 	set api_pid $pid

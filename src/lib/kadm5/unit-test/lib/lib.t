@@ -22,7 +22,7 @@ proc lib_start_api {} {
 		    $OVSEC_KADM_STRUCT_VERSION $OVSEC_KADM_API_VERSION_1 \
 		    lib_handle
 	}]} {
-	    error "$test: unexpected failure in init"
+	    perror "$test: unexpected failure in init"
 	    return
 	}
 	verbose "+++ restarted api ($lib_pid) for lib"
@@ -40,7 +40,7 @@ proc cmd {command} {
     expect {
 	-re "OK .*$prompt$" { return 1 }
         -re "ERROR .*$prompt$" { return 0 }
-	"wrong # args" { error "$test: wrong number args"; return 0 }
+	"wrong # args" { perror "$test: wrong number args"; return 0 }
         timeout { fail "$test: timeout"; return 0 }
         eof { fail "$test: eof"; api_exit; lib_start_api; return 0 }
     }
@@ -52,7 +52,7 @@ proc tcl_cmd {command} {
     send "[string trim $command]\n"
     expect {
 	-re "$prompt$" { return 1}
-	"wrong # args" { error "$test: wrong number args"; return 0 }
+	"wrong # args" { perror "$test: wrong number args"; return 0 }
 	timeout { error_and_restart "timeout" }
 	eof { api_exit; lib_start_api; return 0 }
     }
@@ -69,7 +69,7 @@ proc one_line_succeed_test {command} {
 	-re "ERROR .*$prompt$" { 
 		fail "$test: $expect_out(buffer)"; return 0
 	}
-	"wrong # args" { error "$test: wrong number args"; return 0 }
+	"wrong # args" { perror "$test: wrong number args"; return 0 }
 	timeout				{ fail "$test: timeout"; return 0 }
 	eof				{ fail "$test: eof"; api_exit; lib_start_api; return 0 }
     }
@@ -85,7 +85,7 @@ proc one_line_fail_test {command code} {
 	-re "ERROR .*$code.*$prompt$"	{ pass "$test"; return 1 }
 	-re "ERROR .*$prompt$"	{ fail "$test: bad failure"; return 0 }
 	-re "OK .*$prompt$"		{ fail "$test: bad success"; return 0 }
-	"wrong # args" { error "$test: wrong number args"; return 0 }
+	"wrong # args" { perror "$test: wrong number args"; return 0 }
 	timeout				{ fail "$test: timeout"; return 0 }
 	eof				{ fail "$test: eof"; api_exit; lib_start_api; return 0 }
     }
@@ -100,7 +100,7 @@ proc one_line_fail_test_nochk {command} {
     expect {
 	-re "ERROR .*$prompt$"	{ pass "$test:"; return 1 }
 	-re "OK .*$prompt$"		{ fail "$test: bad success"; return 0 }
-	"wrong # args" { error "$test: wrong number args"; return 0 }
+	"wrong # args" { perror "$test: wrong number args"; return 0 }
 	timeout				{ fail "$test: timeout"; return 0 }
 	eof				{ fail "$test: eof"; api_exit; lib_start_api; return 0 }
     }
@@ -111,7 +111,7 @@ proc resync {} {
 
     expect {
 	-re "$prompt$"	{}
-	"wrong # args" { error "$test: wrong number args"; return 0 }
+	"wrong # args" { perror "$test: wrong number args"; return 0 }
 	eof { api_exit; lib_start_api }
     }
 }
@@ -246,7 +246,7 @@ proc kinit { princ pass {opts ""} } {
 	# the parent, which is us, to read pending data.
 
 	expect {
-		"when initializing cache" { error "kinit failed: $expect_out(buffer)" }
+		"when initializing cache" { perror "kinit failed: $expect_out(buffer)" }
 		eof {}
 	}
 	wait
@@ -282,20 +282,20 @@ proc create_principal_with_keysalts {name keysalts} {
     spawn $kadmin_local -e "$keysalts"
     expect {
 	"kadmin.local:" {}
-	default { error "waiting for kadmin.local prompt"; return 1}
+	default { perror "waiting for kadmin.local prompt"; return 1}
     }
     send "ank -pw \"$name\" \"$name\"\n"
     expect {
 	-re "Principal \"$name.*\" created." {}
 	"kadmin.local:" {
-	    error "expecting principal created message"; 
+	    perror "expecting principal created message";
 	    return 1
 	}
-	default { error "waiting for principal created message"; return 1 }
+	default { perror "waiting for principal created message"; return 1 }
     }
     expect {
 	"kadmin.local:" {}
-	default { error "waiting for kadmin.local prompt"; return 1 }
+	default { perror "waiting for kadmin.local prompt"; return 1 }
     }
     close
     wait
