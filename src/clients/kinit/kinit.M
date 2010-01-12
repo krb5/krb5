@@ -35,9 +35,11 @@ kinit \- obtain and cache Kerberos ticket-granting ticket
 [\fB\-f\fP | \fB\-F\fP]
 [\fB\-a\fP]
 [\fB\-A\fP]
+[\fB\-C\fP]
+[\fB\-E\fP]
 [\fB\-v\fP] [\fB\-R\fP]
 [\fB\-k\fP [\fB\-t\fP \fIkeytab_file\fP]] [\fB\-c\fP \fIcache_name\fP]
-[\fB\-S\fP \fIservice_name\fP][\fB\-T\fP \fIarmor_ccache\fP] 
+[\fB\-S\fP \fIservice_name\fP][\fB\-T\fP \fIarmor_ccache\fP]
 [\fB\-X\fP \fIattribute\fP[=\fIvalue\fP]]
 [\fIprincipal\fP]
 .ad b
@@ -108,6 +110,12 @@ request tickets with the local address[es].
 .TP
 .B \-A
 request address-less tickets.
+.TP
+.B \-C
+requests canonicalization of the principal name.
+.TP
+.B \-E
+treats the principal name as an enterprise name.
 .TP
 .B \-v
 requests that the ticket granting ticket in the cache (with the 
