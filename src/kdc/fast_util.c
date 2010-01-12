@@ -147,6 +147,12 @@ krb5_error_code  kdc_find_fast
     if (retval == 0 &&fast_armored_req->armor) {
 	switch (fast_armored_req->armor->armor_type) {
 	case KRB5_FAST_ARMOR_AP_REQUEST:
+	    if (tgs_subkey) {
+		krb5_set_error_message( kdc_context, KRB5KDC_ERR_PREAUTH_FAILED,
+					"Ap-request armor not permitted with TGS");
+		retval = KRB5KDC_ERR_PREAUTH_FAILED;
+		break;
+	    }
 	    retval = armor_ap_request(state, fast_armored_req->armor);
 	    break;
 	default:
