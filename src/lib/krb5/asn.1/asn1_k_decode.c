@@ -668,6 +668,7 @@ error_out:
     krb5_free_last_req(NULL, val->last_req);
     krb5_free_principal(NULL, val->server);
     krb5_free_addresses(NULL, val->caddrs);
+    krb5_free_pa_data(NULL, val->enc_padata);
     val->session = NULL;
     val->last_req = NULL;
     val->server = NULL;
