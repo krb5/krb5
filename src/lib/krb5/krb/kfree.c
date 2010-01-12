@@ -297,6 +297,7 @@ krb5_free_enc_kdc_rep_part(krb5_context context, register krb5_enc_kdc_rep_part 
     krb5_free_last_req(context, val->last_req);
     krb5_free_principal(context, val->server);
     krb5_free_addresses(context, val->caddrs);
+    krb5_free_pa_data(context, val->enc_padata);
     free(val);
 }
 
