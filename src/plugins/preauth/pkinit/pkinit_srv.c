@@ -579,66 +579,13 @@ pkinit_server_verify_padata(krb5_context context,
 
     /* return authorization data to be included in the ticket */
     switch ((int)data->pa_type) {
-	case KRB5_PADATA_PK_AS_REQ:
-	    my_authz_data = malloc(2 * sizeof(*my_authz_data));
-	    if (my_authz_data == NULL) {
-		retval = ENOMEM;
-		pkiDebug("Couldn't allocate krb5_authdata ptr array\n");
-		goto cleanup;
-	    }
-	    my_authz_data[1] = NULL;
-	    my_authz_data[0] = malloc(sizeof(krb5_authdata));
-	    if (my_authz_data[0] == NULL) {
-		retval = ENOMEM;
-		pkiDebug("Couldn't allocate krb5_authdata\n");
-		free(my_authz_data);
-		goto cleanup;
-	    }
-	    /* AD-INITIAL-VERIFIED-CAS must be wrapped in AD-IF-RELEVANT */
-	    my_authz_data[0]->magic = KV5M_AUTHDATA;
-	    my_authz_data[0]->ad_type = KRB5_AUTHDATA_IF_RELEVANT;
-
-	    /* create an internal AD-INITIAL-VERIFIED-CAS data */
-	    pkinit_authz_data = malloc(sizeof(krb5_authdata));
-	    if (pkinit_authz_data == NULL) {
-		retval = ENOMEM;
-		pkiDebug("Couldn't allocate krb5_authdata\n");
-		free(my_authz_data[0]);
-		free(my_authz_data);
-		goto cleanup;
-	    }
-	    pkinit_authz_data->ad_type = KRB5_AUTHDATA_INITIAL_VERIFIED_CAS;
-	    /* content of this ad-type contains the certification
-	       path with which the client certificate was validated
-	     */
-	    pkinit_authz_data->contents = krb5_authz.data;
-	    pkinit_authz_data->length = krb5_authz.length;
-	    retval = k5int_encode_krb5_authdata_elt(pkinit_authz_data, 
-			    &encoded_pkinit_authz_data);
-#ifdef DEBUG_ASN1
-	    print_buffer_bin((unsigned char *)encoded_pkinit_authz_data->data,
-			     encoded_pkinit_authz_data->length,
-			     "/tmp/kdc_pkinit_authz_data");
-#endif
-	    free(pkinit_authz_data);
-	    if (retval) {
-		pkiDebug("k5int_encode_krb5_authdata_elt failed\n");
-		free(my_authz_data[0]);
-		free(my_authz_data);
-		goto cleanup;
-	    }
-
-	    my_authz_data[0]->contents =
-			    (krb5_octet *) encoded_pkinit_authz_data->data;
-	    my_authz_data[0]->length = encoded_pkinit_authz_data->length;
-	    *authz_data = my_authz_data;
-	    pkiDebug("Returning %d bytes of authorization data\n", 
-		     krb5_authz.length);
-	    encoded_pkinit_authz_data->data = NULL; /* Don't free during cleanup*/
-	    free(encoded_pkinit_authz_data);
-	    break;
-	default: 
-	    *authz_data = NULL;
+	/*
+	 * This code used to generate ad-initial-verified-cas authorization data.
+	 * However that has been removed until the ad-kdc-issued discussion can happen
+	 * in the working group.  Dec 2009
+	 */
+    default:
+	*authz_data = NULL;
     }
     /* remember to set the PREAUTH flag in the reply */
     enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
