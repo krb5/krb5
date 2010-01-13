@@ -684,7 +684,7 @@ xmit_database(context, auth_context, my_creds, fd, database_fd,
 		exit(1);
 	}
 	free(outbuf.data);
-	free(inbuf.data);
+	/* inbuf.data points to local storage */
 }
 
 void
