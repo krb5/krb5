@@ -136,7 +136,6 @@ krb5_error_code kdb_init_hist(kadm5_server_handle_t handle, char *r)
 {
     int     ret = 0;
     char    *realm, *hist_name;
-    krb5_key_data *key_data;
     krb5_key_salt_tuple ks[1];
     krb5_keyblock *tmp_mkey;
 
@@ -205,10 +204,11 @@ krb5_error_code kdb_init_hist(kadm5_server_handle_t handle, char *r)
 
     }
 
-    ret = krb5_dbe_find_enctype(handle->context, &hist_db, -1, -1, -1,
-                                &key_data);
-    if (ret)
-        goto done;
+    if (hist_db.n_key_data <= 0) {
+        krb5_set_error_message(handle->context, KRB5_KDB_NO_MATCHING_KEY,
+                               "History entry contains no key data");
+        return KRB5_KDB_NO_MATCHING_KEY;
+    }
 
     ret = krb5_dbe_find_mkey(handle->context, master_keylist, &hist_db,
                              &tmp_mkey);
@@ -216,11 +216,11 @@ krb5_error_code kdb_init_hist(kadm5_server_handle_t handle, char *r)
         goto done;
 
     ret = krb5_dbekd_decrypt_key_data(handle->context, tmp_mkey,
-                                      key_data, &hist_key, NULL);
+                                      &hist_db.key_data[0], &hist_key, NULL);
     if (ret)
         goto done;
 
-    hist_kvno = key_data->key_data_kvno;
+    hist_kvno = hist_db.key_data[0].key_data_kvno;
 
 done:
     free(hist_name);
