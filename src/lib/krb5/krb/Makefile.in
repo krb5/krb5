@@ -14,6 +14,7 @@ STLIBOBJS= \
 	addr_comp.o	\
 	addr_order.o	\
 	addr_srch.o	\
+	allow_weak.o	\
 	appdefault.o	\
 	auth_con.o	\
 	authdata.o	\

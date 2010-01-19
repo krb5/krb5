@@ -108,6 +108,7 @@ krb5_524_convert_creds
 krb5_address_compare
 krb5_address_order
 krb5_address_search
+krb5_allow_weak_crypto
 krb5_aname_to_localname
 krb5_anonymous_principal
 krb5_anonymous_realm
