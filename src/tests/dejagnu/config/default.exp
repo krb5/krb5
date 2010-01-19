@@ -2270,7 +2270,17 @@ proc kinit_anonymous { name  } {
     # Use kinit to get a ticket.
     #
     spawn $KINIT -5 -f -n $name@$REALMNAME
-    expect eof
+    expect {
+	"Password for $name@$REALMNAME:" {
+	    fail "kinit_anonymous (password requested)"
+	    return 0
+	}
+	timeout {
+	    fail "kinit_anonymous (timeout)"
+	    return 0
+	}
+	eof { }
+    }
     if ![check_exit_status kinit] {
 	fail "kinit anonymous"
     }
