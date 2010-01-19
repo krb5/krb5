@@ -194,12 +194,12 @@ if test -n "$do_libs"; then
     fi
 
     if test $library = 'kadm_server'; then
-	lib_flags="$lib_flags -lkadm5srv -lkdb5 $KDB5_DB_LIB"
+	lib_flags="$lib_flags -lkadm5srv_mit -lkdb5 $KDB5_DB_LIB"
 	library=kadm_common
     fi
 
     if test $library = 'kadm_client'; then
-	lib_flags="$lib_flags -lkadm5clnt"
+	lib_flags="$lib_flags -lkadm5clnt_mit"
 	library=kadm_common
     fi
 
