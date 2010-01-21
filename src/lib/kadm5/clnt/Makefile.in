@@ -3,7 +3,7 @@ BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(BUILDTOP)/include/kadm5
 DEFS=
 
-LIBBASE=kadm5clnt
+LIBBASE=kadm5clnt_mit
 LIBMAJOR=7
 LIBMINOR=0
 STOBJLISTS=../OBJS.ST OBJS.ST
@@ -69,6 +69,11 @@ clean-windows::
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 install:: install-libs
+
+install-unix::
+	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/libkadm5clnt$(DEPLIBEXT)
+	(cd $(DESTDIR)$(KRB5_LIBDIR) && $(LN_S) lib$(LIBBASE)$(DEPLIBEXT) \
+		libkadm5clnt$(DEPLIBEXT))
 
 depend:: includes
 

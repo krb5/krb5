@@ -9,7 +9,7 @@ DEFS=
 ##DOSBUILDTOP = ..\..\..
 ##DOSLIBNAME = libkadm5srv.lib
 
-LIBBASE=kadm5srv
+LIBBASE=kadm5srv_mit
 LIBMAJOR=7
 LIBMINOR=0
 STOBJLISTS=../OBJS.ST OBJS.ST
@@ -86,6 +86,11 @@ clean-windows::
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 install:: install-libs
+
+install-unix::
+	$(RM) $(DESTDIR)$(KRB5_LIBDIR)/libkadm5srv$(DEPLIBEXT)
+	(cd $(DESTDIR)$(KRB5_LIBDIR) && $(LN_S) lib$(LIBBASE)$(DEPLIBEXT) \
+		libkadm5srv$(DEPLIBEXT))
 
 depend:: includes
 
