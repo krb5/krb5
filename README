@@ -1,4 +1,4 @@
-                   Kerberos Version 5, Release 1.7
+                  Kerberos Version 5, Release 1.7.1
 
                             Release Notes
                         The MIT Kerberos Team
@@ -7,20 +7,20 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.7.tar.gz.  Instructions on how to extract the entire
+krb5-1.7.1.tar.gz.  Instructions on how to extract the entire
 distribution follow.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
-        gtar zxpf krb5-1.7.tar.gz
+        gtar zxpf krb5-1.7.1.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
-        gzcat krb5-1.7.tar.gz | tar xpf -
+        gzcat krb5-1.7.1.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into krb5-1.7/src and
-the documentation into krb5-1.7/doc.
+Both of these methods will extract the sources into krb5-1.7.1/src and
+the documentation into krb5-1.7.1/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -73,6 +73,66 @@ away from using single-DES cryptosystems.  Among these is a
 configuration variable that enables "weak" enctypes, but will default
 to "false" in the future.  Additional migration aids are planned for
 future releases.
+
+Major changes in 1.7.1
+----------------------
+
+This is primarily a bugfix release.
+
+* Fix vulnerabilities: MITKRB5-SA-2009-003 [CVE-2009-3295],
+  MITKRB5-SA-2009-004 [CVE-2009-4212].
+
+* Restore compatibility for talking to older kadminds and kadmin
+  clients for the "addprinc -randkey" operation.
+
+* Fix some build problems and memory leaks.
+
+Changes in 1.7.1 by ticket ID
+-----------------------------
+
+1233    need to disable /dev/random use for testing
+5668    DAL changes break --with-kdc-kdb-update build
+6428    KDC prefers returning KDC_ERR_KEY_EXP vs. KDC_ERR_NAME_EXP
+6505    fix t_prf test code properly
+6506    Make results of krb5_db_def_fetch_mkey more predictable
+6508    kadm5int_acl_parse_restrictions could ref uninitialized variable
+6509    kadmind is parsing acls good deref NULL pointer on error
+6511    krb5int_rd_chpw_rep could call krb5_free_error with random value
+6512    krb5int_yarrow_final could deref NULL if out of memory
+6514    minor memory leak in 'none' replay cache type
+6515    reduce some mutex performance problems in profile library
+6519    krb5_copy_error_message() calls krb5int_clear_error() incorrectly
+6530    check for slogin failure in setup_root_shell
+6532    (1.7.x) include win-mac.h in gssftp/ftp/cmds.c for HAVE_STDLIB_H
+6533    krb5-1.7 cannot be compiled on Debian stable (5.0.2)
+6534    getaddrinfo in src/util/support/fake-addrinfo.c causes leak
+6536    C++ compatibility for Windows compilation
+6540    memory leak in test code t_authdata
+6541    Fix memory leak in k5_pac_verify_server_checksum
+6542    Check for null characters in pkinit cert fields
+6543    Reply message ordering bug in ftpd
+6551    Memory leak in spnego accept_sec_context error path
+6552    Document kinit -C and -E options
+6553    use perror instead of error in kadm5 test suite
+6556    Supply LDAP service principal aliases to non-referrals clients
+6557    Supply canonical name if present in LDAP iteration
+6558    Fix memory leak in gss_krb5int_copy_ccache
+6559    Fix parsing of GSS exported names
+6568    Fix addprinc -randkey when policy requires multiple character classes
+6571    krb5 1.7 memory leak
+6573    Fix preauth looping in krb5_get_init_creds
+6579    quoting bug causes solaris pre-10 thread handling bugs
+6584    crypto modularity work r22778 broke MD4-DES, MD5-DES cksums
+6585    KDC MUST NOT accept ap-request armor in FAST TGS
+6587    pkinit-obtained tickets can't make TGS requests
+6588    Fix ivec chaining for DES iov encryption
+6589    Fix AES IOV decryption of small messages
+6594    gss_krb5_copy_ccache() doesn't work with spnego delegation
+6608    MITKRB5-SA-2009-003 CVE-2009-3295 KDC null deref in referrals
+6633    Use keyed checksum type for DES FAST
+6635    Restore interoperability with 1.6 addprinc -randkey
+6637    MITKRB5-SA-2009-004 [CVE-2009-4212] integer underflow in AES
+        and RC4 decryption
 
 Major changes in 1.7
 --------------------
