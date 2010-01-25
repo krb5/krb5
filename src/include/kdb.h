@@ -848,7 +848,8 @@ typedef struct _kdb_vftabl {
      * The module must allocate each entry field separately, as callers may
      * free individual fields using db_free.  If the principal is not found,
      * set *nentries to 0 and return success.  The meaning of flags are as
-     * follows:
+     * follows (some of these may be processed by db_invoke methods such as
+     * KRB5_KDB_METHOD_SIGN_AUTH_DATA rather than by db_get_principal):
      *
      * KRB5_KDB_FLAG_CANONICALIZE: Indicates that a KDC client requested name
      *     canonicalization.  The module may return an out-of-realm referral by
@@ -856,6 +857,11 @@ typedef struct _kdb_vftabl {
      *     values elsewhere.  The module may return an in-realm alias by
      *     filling in an in-realm principal name in entries->princ other than
      *     the one requested.
+     *
+     * KRB5_KDB_INCLUDE_PAC: Set by the KDC during an AS request when the
+     *     client requested PAC information during padata, and during most TGS
+     *     requests.  Indicates that the module should include PAC information
+     *     when generating authorization data.
      *
      * KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY: Set by the KDC when looking up the
      *     client entry in an AS request.  Indicates that the module should
@@ -865,16 +871,17 @@ typedef struct _kdb_vftabl {
      * KRB5_KDB_FLAG_MAP_PRINCIPALS: Set by the KDC when looking up the client
      *     entry during TGS requests, except for S4U TGS requests and requests
      *     where the server entry has the KRB5_KDB_NO_AUTH_DATA_REQUIRED
-     *     attribute.  Indicates that the module should map cross-realm
-     *     principals if it is capable of doing so.
+     *     attribute.  Indicates that the module should map foreign principals
+     *     to local principals if it supports doing so.
      *
      * KRB5_KDB_FLAG_PROTOCOL_TRANSITION: Set by the KDC when looking up the
-     *     client entry during an S4U2Self TGS request.  No special behavior is
-     *     needed.
+     *     client entry during an S4U2Self TGS request.  This affects the PAC
+     *     information which should be included when authorization data is
+     *     generated; see the Microsoft S4U specification for details.
      *
      * KRB5_KDB_FLAG_CONSTRAINED_DELEGATION: Set by the KDC when looking up the
-     *     client entry during an S4U2Proxy TGS request.  No special behavior
-     *     is needed.
+     *     client entry during an S4U2Proxy TGS request.  Also affects PAC
+     *     generation.
      *
      * KRB5_KDB_FLAG_CROSS_REALM: Set by the KDC when looking up a client entry
      *     during a TGS request, if the client principal is not part of the
