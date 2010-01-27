@@ -11,7 +11,6 @@
 #include <utime.h>
 #include <k5-int.h>
 #include "kdb.h"
-#include "kdb_ext.h"
 
 #define KRB5_DB_GET_DB_CONTEXT(kcontext) (((kdb5_dal_handle*) (kcontext)->dal_handle)->db_context)
 #define KRB5_DB_GET_PROFILE(kcontext)  ((kcontext)->profile)

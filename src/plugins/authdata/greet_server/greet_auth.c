@@ -32,7 +32,6 @@
 #include <k5-int.h>
 #include <krb5/authdata_plugin.h>
 #include <kdb.h>
-#include <kdb_ext.h>
 
 static krb5_error_code
 greet_init(krb5_context ctx, void **blob)

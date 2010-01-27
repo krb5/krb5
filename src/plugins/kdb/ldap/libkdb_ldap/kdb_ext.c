@@ -32,7 +32,6 @@
 #include "kdb.h"
 #include <stdio.h>
 #include <errno.h>
-#include <kdb_ext.h>
 #include "kdb_ldap.h"
 
 static krb5_error_code
