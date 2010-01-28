@@ -556,10 +556,18 @@ krb5_dbe_find_mkey( krb5_context         context,
                     krb5_db_entry      * entry,
                     krb5_keyblock      ** mkey);
 
+/* Set *mkvno to mkvno in entry tl_data, or 0 if not present. */
 krb5_error_code
 krb5_dbe_lookup_mkvno( krb5_context    context,
                        krb5_db_entry * entry,
                        krb5_kvno     * mkvno);
+
+/* Set *mkvno to mkvno in entry tl_data, or minimum value from mkey_list. */
+krb5_error_code
+krb5_dbe_get_mkvno( krb5_context        context,
+                    krb5_db_entry     * entry,
+                    krb5_keylist_node * mkey_list,
+                    krb5_kvno         * mkvno);
 
 krb5_error_code
 krb5_dbe_lookup_mod_princ_data( krb5_context          context,
