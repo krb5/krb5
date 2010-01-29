@@ -542,49 +542,25 @@ krb5_def_fetch_mkey_list(krb5_context        context,
     }
 
     if (!found_key) {
-        /*
-         * Note the mkvno may provide a hint as to which mkey_aux tuple to
-         * decrypt.
-         */
         if ((retval = krb5_dbe_lookup_mkey_aux(context, &master_entry,
                                                &mkey_aux_data_list)))
             goto clean_n_exit;
 
-        /* mkvno may be 0 in some cases like keyboard and should be ignored */
-        if (mkvno != 0) {
-            /* for performance sake, try decrypting with matching kvno */
-            for (aux_data_entry = mkey_aux_data_list; aux_data_entry != NULL;
-                 aux_data_entry = aux_data_entry->next) {
+        for (aux_data_entry = mkey_aux_data_list; aux_data_entry != NULL;
+             aux_data_entry = aux_data_entry->next) {
 
-                if (aux_data_entry->mkey_kvno == mkvno) {
-                    if (krb5_dbekd_decrypt_key_data(context, mkey,
-                                                    &aux_data_entry->latest_mkey,
-                                                    &cur_mkey, NULL) == 0) {
-                        found_key = TRUE;
-                        break;
-                    }
-                }
+            if (krb5_dbekd_decrypt_key_data(context, mkey,
+                                             &aux_data_entry->latest_mkey,
+                                             &cur_mkey, NULL) == 0) {
+                found_key = TRUE;
+                break;
             }
         }
-        if (!found_key) {
-            /* given the importance of acquiring the latest mkey, try brute force */
-            for (aux_data_entry = mkey_aux_data_list; aux_data_entry != NULL;
-                 aux_data_entry = aux_data_entry->next) {
-
-                if (mkey->enctype == aux_data_entry->latest_mkey.key_data_type[0] &&
-                    (krb5_dbekd_decrypt_key_data(context, mkey,
-                                                 &aux_data_entry->latest_mkey,
-                                                 &cur_mkey, NULL) == 0)) {
-                    found_key = TRUE;
-                    break;
-                }
-            }
-            if (found_key != TRUE) {
-                krb5_set_error_message (context, KRB5_KDB_BADMASTERKEY,
-                                        "Unable to decrypt latest master key with the provided master key\n");
-                retval = KRB5_KDB_BADMASTERKEY;
-                goto clean_n_exit;
-            }
+        if (found_key != TRUE) {
+            krb5_set_error_message (context, KRB5_KDB_BADMASTERKEY,
+                                    "Unable to decrypt latest master key with the provided master key\n");
+            retval = KRB5_KDB_BADMASTERKEY;
+            goto clean_n_exit;
         }
     }
 
