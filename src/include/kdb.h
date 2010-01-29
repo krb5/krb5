@@ -988,16 +988,22 @@ typedef struct _kdb_vftabl {
      * Mandatory: Fill in *entries with the entry for the principal search_for.
      * The module must allocate each entry field separately, as callers may
      * free individual fields using db_free.  If the principal is not found,
-     * set *nentries to 0 and return success.  The meaning of flags are as
-     * follows (some of these may be processed by db_invoke methods such as
-     * KRB5_KDB_METHOD_SIGN_AUTH_DATA rather than by db_get_principal):
+     * set *nentries to 0 and return success.
      *
-     * KRB5_KDB_FLAG_CANONICALIZE: Indicates that a KDC client requested name
-     *     canonicalization.  The module may return an out-of-realm referral by
-     *     filling in an out-of-realm principal name in entries->princ and null
-     *     values elsewhere.  The module may return an in-realm alias by
-     *     filling in an in-realm principal name in entries->princ other than
-     *     the one requested.
+     * The nentries and more arguments appear to be intended to account for
+     * multiple entries for a principal, but this functionality is neither
+     * implemented nor used.  *nentries is set to 1 by all callers and should
+     * be set to 0 or 1 on return; *more sould be set to FALSE on return.
+     * Callers will typically error out if modules behave otherwise.
+     *
+     * The meaning of flags are as follows (some of these may be processed by
+     * db_invoke methods such as KRB5_KDB_METHOD_SIGN_AUTH_DATA rather than by
+     * db_get_principal):
+     *
+     * KRB5_KDB_FLAG_CANONICALIZE: Set by the KDC when looking up entries for
+     *     an AS or TGS request with canonicalization requested.  Affects
+     *     whether the module should return out-of-realm referrals and aliases
+     *     (see below).
      *
      * KRB5_KDB_INCLUDE_PAC: Set by the KDC during an AS request when the
      *     client requested PAC information during padata, and during most TGS
@@ -1005,9 +1011,9 @@ typedef struct _kdb_vftabl {
      *     when generating authorization data.
      *
      * KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY: Set by the KDC when looking up the
-     *     client entry in an AS request.  Indicates that the module should
-     *     return out-of-realm referral information in lieu of cross-realm TGT
-     *     information.
+     *     client entry in an AS request.  Affects how the module should return
+     *     out-of-realm referrals and whether the module should return in-realm
+     *     aliases (see below).
      *
      * KRB5_KDB_FLAG_MAP_PRINCIPALS: Set by the KDC when looking up the client
      *     entry during TGS requests, except for S4U TGS requests and requests
@@ -1028,11 +1034,17 @@ typedef struct _kdb_vftabl {
      *     during a TGS request, if the client principal is not part of the
      *     realm being served.
      *
-     * The nentries and more arguments appear to be intended to account for
-     * multiple entries for a principal, but this functionality is neither
-     * implemented nor used.  *nentries is set to 1 by all callers and should
-     * be set to 0 or 1 on return; the module should always set *more to FALSE.
-     * Callers will typically error out if modules behave otherwise.
+     * A module can return in-realm aliases if KRB5_KDB_FLAG_CANONICALIZE is
+     * set, or if KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY is not set (because
+     * aliases are always okay for TGS requests).  To return an in-realm alias,
+     * fill in a different value for entries->princ than the one requested.
+     *
+     * A module can return out-of-realm referrals if KRB5_KDB_FLAG_CANONICALIZE
+     * is set.  For AS request clients (KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY is
+     * also set), the module should do so by simply filling in an out-of-realm
+     * name in entries->princ and setting all other fields to NULL.  Otherwise,
+     * the module should return the entry for the cross-realm TGS of the
+     * referred-to realm.
      */
     krb5_error_code (*db_get_principal)(krb5_context kcontext,
                                         krb5_const_principal search_for,
