@@ -277,19 +277,31 @@ set_default_etype_var(krb5_context context, const krb5_enctype *etypes,
 {
     krb5_error_code code;
     krb5_enctype *list;
-    int i;
+    size_t src, dst;
 
     if (etypes) {
-        for (i = 0; etypes[i]; i++) {
-            if (!krb5_c_valid_enctype(etypes[i]))
-                return KRB5_PROG_ETYPE_NOSUPP;
-            if (!context->allow_weak_crypto && krb5int_c_weak_enctype(etypes[i]))
-                return KRB5_PROG_ETYPE_NOSUPP;
-        }
-
+        /* Empty list passed in. */
+        if (etypes[0] == 0)
+            return EINVAL;
         code = krb5int_copy_etypes(etypes, &list);
         if (code)
             return code;
+
+        /* Filter list in place to exclude invalid and (optionally) weak
+         * enctypes. */
+        for (src = dst = 0; list[src]; src++) {
+            if (!krb5_c_valid_enctype(list[src]))
+                continue;
+            if (!context->allow_weak_crypto
+                && krb5int_c_weak_enctype(list[src]))
+                continue;
+            list[dst++] = list[src];
+        }
+        list[dst] = 0;          /* Zero-terminate. */
+        if (dst == 0) {
+            free(list);
+            return KRB5_CONFIG_ETYPE_NOSUPP;
+        }
     } else {
         list = NULL;
     }
