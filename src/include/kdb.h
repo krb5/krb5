@@ -1424,11 +1424,15 @@ typedef struct _kdb_vftabl {
      *
      * KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE: req contains a
      *     kdb_check_allowed_to_delegate_req structure.  Perform a policy check
-     *     on proxy being allowed to act on behalf of client to server.  Return
-     *     0 if policy allows it, or an appropriate error (such as
-     *     KRB5KDC_ERR_POLICY) if not.  If this method is not implemented, all
-     *     S4U2Proxy delegation requests will be rejected.  Do not place any
-     *     data in rep.
+     *     on server being allowed to obtain tickets from client to proxy.
+     *     (Note that proxy is the target of the delegation, not the delegating
+     *     service; the term "proxy" is from the viewpoint of the delegating
+     *     service asking another service to perform some of its work in the
+     *     authentication context of the client.  This terminology comes from
+     *     the Microsoft S4U protocol documentation.)  Return 0 if policy
+     *     allows it, or an appropriate error (such as KRB5KDC_ERR_POLICY) if
+     *     not.  If this method is not implemented, all S4U2Proxy delegation
+     *     requests will be rejected.  Do not place any data in rep.
      */
     krb5_error_code (*db_invoke)(krb5_context context, unsigned int method,
                                  const krb5_data *req, krb5_data *rep);
