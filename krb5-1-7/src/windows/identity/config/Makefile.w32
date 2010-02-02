@@ -1,0 +1,344 @@
+#
+#  Khimaira : Win32 configuration makefile
+#             This file will be included by all the makefiles
+#             in the build tree.
+#
+# Copyright (c) 2004,2005,2006 Massachusetts Institute of Technology
+# Copyright (c) 2006,2007 Secure Endpoints Inc.
+#
+# Permission is hereby granted, free of charge, to any person
+# obtaining a copy of this software and associated documentation files
+# (the "Software"), to deal in the Software without restriction,
+# including without limitation the rights to use, copy, modify, merge,
+# publish, distribute, sublicense, and/or sell copies of the Software,
+# and to permit persons to whom the Software is furnished to do so,
+# subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be
+# included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+# BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+!ifndef KHIMAIRA_WIN32_CONFIG
+KHIMAIRA_WIN32_CONFIG=1
+
+# Environment Variables
+#  The following environment variables MUST be set:
+#   KH_ROOT : Root of the source tree.
+#   KH_BUILD: One of DEBUG or RETAIL
+#
+#  The following environment variables are optional:
+#   KH_RUNTIME: One of STATIC or DLL, specifies whether the CRT libs
+#               are linked statically or through MSVCRT.DLL.
+#   KH_AUXCFLAGS: Optional flags for CL
+#   KH_RELEASE: Release type.  One of OFFICIAL, PRERELEASE, PRIVATE or SPECIAL.
+#      OFFICIAL   : An official release of Khimaira
+#      PREPRELEASE: A beta/release candidate release
+#      PRIVATE    : Private build
+#      SPECIAL    : Special build.  Typically one with non-mainline patches.
+
+# Version info
+NETIDMGR_VERSION_MAJOR=1
+NETIDMGR_VERSION_MINOR=3
+NETIDMGR_VERSION_PATCH=1
+NETIDMGR_VERSION_AUX=0
+NETIDMGR_RELEASEDESC=
+
+# The API version.  This number must be incremented each time the API
+# changes.  Plugins specify the version of the API that they were
+# compiled against and the Module Manager uses the API numbers to
+# decide whether the plugin is safe to load or not.
+#
+# Changes to the API version numbers should be documented in
+# apiversion.txt at the root of the source tree.
+NETIDMGR_VERSION_API=10
+
+# Minimum backwards compatible version.  API versions from
+# NETIDMGR_VERSION_API_MINCOMPAT through NETIDMGR_VERSION_API
+# inclusive, are compatible with this version.
+NETIDMGR_VERSION_API_MINCOMPAT=5
+
+NETIDMGR_VERSION=$(NETIDMGR_VERSION_MAJOR).$(NETIDMGR_VERSION_MINOR).$(NETIDMGR_VERSION_PATCH).$(NETIDMGR_VERSION_AUX)
+NETIDMGR_VERSIONC=$(NETIDMGR_VERSION_MAJOR),$(NETIDMGR_VERSION_MINOR),$(NETIDMGR_VERSION_PATCH),$(NETIDMGR_VERSION_AUX)
+
+# Source information
+NETIDMGR_SRC_COMPANY_1033=Massachusetts Institute of Technology
+NETIDMGR_SRC_COPYRIGHT_1033=(C) 2005-2007 Massachusetts Institute of Technology
+
+# Choose the default build type if one is not set
+!if ("$(KH_BUILD)" != "DEBUG") && ("$(KH_BUILD)" != "RETAIL")
+!  if defined(NODEBUG) && "$(NODEBUG)"=="1"
+KH_BUILD=RETAIL
+!  else
+KH_BUILD=DEBUG
+!  endif
+!endif
+
+!if "$(KH_BUILD)"=="DEBUG" && defined(NODEBUG) && "$(NODEBUG)"=="1"
+! error The Khimaira build configuration is set for DEBUG while the Platform SDK build environment is set to RETAIL.
+!endif
+
+# The default release type is PRIVATE is no other type is specified
+!if ("$(KH_RELEASE)" != "OFFICIAL") && ("$(KH_RELEASE)" != "PRERELEASE") && ("$(KH_RELEASE)" != "PRIVATE") && ("$(KH_RELEASE)" != "SPECIAL")
+KH_RELEASE=PRIVATE
+!endif
+
+# Actual build environment settings
+
+# See what compiler we are using
+# TODO: Update this to support other compilers
+!if defined(MSVCVer) && "$(MSVCVer)"=="8.0"
+KH_CLVER=vc8
+!else
+KH_CLVER=vc7
+!endif
+
+# Check for required env vars
+!ifndef MODULE
+!	error MODULE must be specified
+!endif
+!ifndef KH_ROOT
+! ifndef PISMERE
+!   error Either KH_ROOT or PISMERE must be defined
+! else
+KH_ROOT=$(PISMERE)\athena\auth\krb5\src\windows\identity
+! endif
+!endif
+
+!ifdef NODEBUG
+OUTPRE_DBG=rel
+!else
+OUTPRE_DBG=dbg
+!endif
+OUTPRE1=obj
+OUTPRE2=$(OUTPRE1)\$(CPU)
+OUTPRE3=$(OUTPRE2)\$(OUTPRE_DBG)
+OUTPRE=$(OUTPRE3)^\
+
+
+
+# Output directory structure
+DESTROOT=$(KH_ROOT)\obj
+OBJROOT=$(KH_ROOT)\obj
+SRC=$(KH_ROOT)
+
+DESTDIR=$(DESTROOT)\$(CPU)\$(OUTPRE_DBG)
+OBJDIR=$(OBJROOT)\$(CPU)\$(OUTPRE_DBG)
+
+OBJ=$(OBJDIR)\$(MODULE)
+INCDIR=$(DESTDIR)\inc
+#BINDIR=$(DESTDIR)\bin
+BINDIR=$(KH_ROOT)\$(OUTPRE)
+#LIBDIR=$(DESTDIR)\lib
+LIBDIR=$(KH_ROOT)\$(OUTPRE)
+DOCDIR=$(DESTDIR)\doc
+
+# Source directories
+CONFDIR=$(SRC)\config
+
+# If we are forcing a Win2K build, we need to adjust the build
+# directories and environment.
+
+!ifdef KHBUILD_W2K
+
+OBJ=$(OBJ)\W2K
+BINDIR=$(BINDIR)\W2K
+LIBDIR=$(LIBDIR)\W2K
+
+APPVER=5.0
+TARGETOS=WINNT
+_WIN32_IE=0x0500
+_WIN32_WINNT=0x0500
+
+!endif
+
+# Setup environment for win32.mak
+
+!if "$(KH_BUILD)" == "RETAIL"
+NODEBUG=1
+!endif
+
+# Win32.mak
+
+!include <Win32.Mak>
+
+# Program macros
+
+CD=cd
+RM=del /q
+MKDIR=md
+RMDIR=rd
+ECHO=echo
+MAKECMD=nmake /nologo
+CP=copy /y
+LINK=link
+CCSV=perl $(SRC)\config\ccsv.pl
+MC=mc
+
+!ifdef KH_DOXYFULLPATH
+DOXYGEN=$(KH_DOXYFULLPATH)
+!else
+DOXYGEN=doxygen
+!endif
+
+!ifdef KH_HHCFULLPATH
+HHC=$(KH_HHCFULLPATH)
+!else
+HHC=hhc
+!endif
+
+!ifdef KH_KFWPATH
+KFWINCDIR=$(KH_KFWPATH)\inc
+kfwincflags = -I$(KFWINCDIR)\krb5 -I$(KFWINCDIR)\krb5\KerberosIV -I$(KFWINCDIR)\krb4 -I$(KFWINCDIR)\loadfuncs -I$(KFWINCDIR)
+KFWLIBDIR=$(KH_KFWPATH)\lib\$(CPU)
+!else if defined(PISMERE)
+KFWINCDIR=$(PISMERE)\athena\auth\krb5\src\include
+kfwincflags = -I$(KFWINCDIR) -I$(PISMERE)\athena\util\loadfuncs -I$(PISMERE)\athena\auth\krb5\src\include\kerberosIV -I$(PISMERE)\athena\auth\krb4\include
+KFWLIBDIR=$(PISMERE)\target\lib\$(CPU)\$(OUTPRE_DBG)
+!endif
+
+!ifdef KH_AFSPATH
+AFSINCDIR=$(KH_AFSPATH)\include
+AFSLIBDIR=$(KH_AFSPATH)\lib
+afsincflags=-I$(AFSINCDIR)
+!endif
+
+#EXTLIBDIR=$(SRC)\ext-lib\$(CPU)
+#EXTINCDIR=-I$(SRC)\ext-inc
+
+incflags= -I$(INCDIR) -I$(SRC)\include -I. -I$(OBJ) $(kfwincflags) $(afsincflags)
+rincflags= /i $(INCDIR) /i $(SRC)\include /i .
+khdefines=-DUNICODE -D_UNICODE
+khcwarn=/Wp64
+!ifndef KH_NO_WX
+khcwarn=$(khcwarn) /WX
+!endif
+
+!if "$(CPU)" == "i386"
+khdefines=$(khdefines) -D_USE_32BIT_TIME_T
+!endif
+
+#DEBUG_SYMBOLS
+ldebug=$(ldebug) /DEBUG
+cdebug=$(cdebug) -Os -Zi
+
+# Additionally, suppress conflicting default library directives that we
+# might pull in from external libraries.
+
+!ifndef NODEBUG
+lndeflibflag=/NODEFAULTLIB:MSVCRT
+!else
+lndeflibflag=/NODEFAULTLIB:MSVCRTD
+!endif
+
+khcflags=$(cdebug) $(cflags) $(incflags) $(khdefines) $(khcwarn)
+khlguiflags=$(ldebug) $(guilflags) $(lndeflibflag)
+khlconflags=$(ldebug) $(conlflags) $(lndeflibflag)
+khldllguiflags=$(ldebug) $(dlllflags) $(lndeflibflag)
+khldllconflags=$(ldebug) $(dlllflags) $(lndeflibflag)
+
+!if "$(KH_RUNTIME)" == "STATIC"
+khcflags=$(khcflags) $(cvarsmt)
+khlguiflags=$(khlguiflags) $(guilibsmt)
+khlconflags=$(khlconflags) $(conlibsmt)
+khldllguiflags=$(khldllguiflags) $(guilibsmt)
+khldllconflags=$(khldllconflags) $(conlibsmt)
+!else
+khcflags=$(khcflags) $(cvarsdll)
+khlguiflags=$(khlguiflags) $(guilibsdll)
+khlconflags=$(khlconflags) $(conlibsdll)
+khldllguiflags=$(khldllguiflags) $(guilibsdll)
+khldllconflags=$(khldllconflags) $(conlibsdll)
+!endif
+
+C2OBJ=$(CC) $(khcflags) $(KH_AUXCFLAGS) /Fo"$@" /c $**
+
+EXECONLINK=$(LINK) /NOLOGO $(khlconflags) /OUT:$@ $**
+
+EXEGUILINK=$(LINK) /NOLOGO $(khlguiflags) /OUT:$@ $**
+
+DLLCONLINK=$(LINK) /NOLOGO $(khldllconflags) /OUT:$@ /IMPLIB:$(LIBDIR)\$(@B).lib $**
+
+DLLGUILINK=$(LINK) /NOLOGO $(khldllguiflags) /OUT:$@ /IMPLIB:$(LIBDIR)\$(@B).lib $**
+
+DLLRESLINK=$(LINK) /NOLOGO /DLL /NOENTRY /MACHINE:$(PROCESSOR_ARCHITECTURE) /OUT:$@ $**
+
+RC2RES=$(RC) $(RFLAGS) $(rincflags) /fo $@ $**
+
+MC2RC=$(MC) $(MCFLAGS) -h $(OBJ)\ -m 1024 -r $(OBJ)\ -x $(OBJ)\ $**
+
+{}.c{$(OBJ)}.obj:
+	$(C2OBJ)
+
+{$(OBJ)}.c{$(OBJ)}.obj:
+	$(C2OBJ)
+
+{}.h{$(INCDIR)}.h:
+	$(CP) $** $@
+
+{}.rc{$(OBJ)}.res:
+	$(RC2RES)
+
+{$(OBJ)}.rc{$(OBJ)}.res:
+	$(RC2RES)
+
+clean::
+ 	if exist "$(OBJ)" $(RM) "$(OBJ)"
+ 	if exist vc70.pdb  $(RM) vc70.pdb
+        if exist vc80.pdb  $(RM) vc80.pdb
+
+test::
+
+mkdirs::
+!if !exist($(OBJ))
+	$(MKDIR) $(OBJ)
+!endif
+
+TAGFILE = $(SRC)\TAGS
+
+etag::
+	etags -o $(TAGFILE) -a *.c *.h
+
+.SUFFIXES: .h
+
+#
+# Manifest handling
+#
+# Starting with Visual Studio 8, the C compiler and the linker
+# generate manifests so that the applications will link with the
+# correct side-by-side DLLs at run-time.  These are required for
+# correct operation under Windows XP.  We also have custom manifests
+# which need to be merged with the manifests that VS creates.
+#
+# The syntax for invoking the _VC_MANIFEST_EMBED_foo macro is:
+# $(_VC_MANIFEST_EMBED_???) <any additional manifests that need to be merged in>
+#
+
+!ifndef MT
+MT=mt.exe -nologo
+!endif
+
+_VC_MANIFEST_EMBED_EXE= \
+if exist $@.manifest $(MT) -outputresource:$@;1 -manifest $@.manifest
+
+_VC_MANIFEST_EMBED_DLL= \
+if exist $@.manifest $(MT) -outputresource:$@;2 -manifest $@.manifest
+
+# Note that if you are merging manifests, then the VS generated
+# manifest should be cleaned up after calling _VC_MANIFEST_EMBED_???.
+# This ensures that even if the DLL or EXE is executed in-place, the
+# embedded manifest will be used.  Otherwise the $@.manifest file will
+# be used.
+_VC_MANIFEST_CLEAN= \
+if exist $@.manifest $(RM) $@.manifest
+
+# End of manifest handling
+
+!endif

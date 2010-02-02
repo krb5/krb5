@@ -1,0 +1,69 @@
+thisconfigdir=../../..
+myfulldir=lib/krb5/unicode
+mydir=lib/krb5/unicode
+BUILDTOP=$(REL)..$(S)..$(S)..
+KRB5_RUN_ENV = @KRB5_RUN_ENV@
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+DEFS=
+DEFINES=-DLIBDIR=\"$(KRB5_LIBDIR)\"
+LOCALINCLUDES=
+
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=unicode
+##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
+
+XXDIR = $(srcdir)/ucdata/
+XXHEADERS = ucdata.h ure.h uctable.h
+XXSRCS  = ucdata.c ucgendat.c ure.c urestubs.c
+
+STLIBOBJS= \
+	ucdata.o	\
+	ure.o		\
+	urestubs.o	\
+	ucstr.o		
+
+OBJS= \
+	$(OUTPRE)ucdata.$(OBJEXT)	\
+	$(OUTPRE)ure.$(OBJEXT)		\
+	$(OUTPRE)urestubs.$(OBJEXT)	\
+	$(OUTPRE)ucstr.$(OBJEXT)	
+
+SRCS= \
+	$(srcdir)/ucstr.c	
+
+EXTRADEPSRCS = 
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs
+clean-unix:: clean-libobjs
+
+shared:
+	mkdir shared
+
+uctable.h: $(XXDIR)/uctable.h
+
+$(XXDIR)/uctable.h: $(XXDIR)/ucgendat.c $(srcdir)/UnicodeData.txt $(srcdir)/CompositionExclusions.txt
+	$(MAKE) ucgendat
+	./ucgendat $(srcdir)/UnicodeData.txt -x $(srcdir)/CompositionExclusions.txt
+
+ucgendat: ucgendat.o
+	$(CC_LINK) $(ALL_CFLAGS) -o ucgendat ucgendat.o $(LIBS)
+
+.links :
+	@for i in $(XXSRCS) $(XXHEADERS); do \
+		$(RM) $$i ; \
+		ii=`find $(srcdir) -name $$i` ; \
+		$(LN_S) $$ii . ; \
+	done
+	touch .links
+
+$(XXSRCS) $(XXHEADERS) : .links
+
+clean:: 
+	$(RM) *.dat .links $(XXHEADERS) $(XXSRCS) ucgendat
+
+depend:: .links
+
+@libobj_frag@

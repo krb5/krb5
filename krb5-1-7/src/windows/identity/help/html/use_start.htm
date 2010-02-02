@@ -1,0 +1,70 @@
+<html>
+<head>
+  <title>Network Identity Manager - Starting Network Identity Manager</title>
+  <meta name="description" content="starting NetIDMgr">
+  <meta name="keywords" content="starting">
+  <link rel="stylesheet" type="text/css" href="nidmgr.css">
+</head>
+<body>
+
+<h1>Network Identity Manager - Starting Network Identity Manager</h1>
+
+<h3>Opening the Network Identity Manager window from the notification icon</h3>
+
+<p>Depending on how Network Identity Manager was installed, it may be configured 
+with a shortcut in the Startup Folder, or it may require a manual start. NetIDMgr is a
+notification tray application and therefore it is not listed in the Microsoft 
+Windows task bar.&nbsp; This design is based on the assumption that most users 
+rarely interact directly with the application.</p>
+
+<div class="sidebar">
+<img src="images/screen_tray_icon.png"/>
+<p class="caption">Figure 1: NetIDMgr notification icon</p>
+</div>
+
+<p>When NetIDMgr is running, it places an icon in the system
+notification area (sometimes referred to as the "system tray") as
+shown in figure 1.  Details about the state information represented by
+the icon can be found <a href="use_icon.htm">here</a>.</p>
+
+<p>Left clicking on this icon executes the default action which either changes 
+the view state of the credential list or displays the <i>Obtain New Credentials</i> 
+dialog. Right clicking on the icon displays a menu.</p>
+
+<h3>Starting Network Identity Manager from the Start Menu or command line</h3>
+
+<div class="sidebar">
+<img src="images/screen_app_icon.png" />
+<p class="caption">Figure 2: NetIDMgr application shortcut</p>
+</div>
+
+<p>If NetIDMgr was not configured to start automatically when you
+login to Windows, then you need to start it either from the
+commandline or the start menu.  The start menu application icon is
+under "Kerberos for Windows" as shown in figure 2.</p>
+
+<p>Alternatively, you can type 'netidmgr' at a command shell to start
+NetIDMgr as well.  When starting this way, you may specify additional
+<a href="cmdline_netidmgr.htm">command line options</a>.</p>
+
+<h3>Configuring startup options</h3>
+
+<p>
+Note that you can configure options related to the startup of NetIDMgr
+by using the NetIDMgr configuration dialog box.  You can use the menu
+items under the <span class="pre">Options</span> menu to invoke the
+configuration dialog.
+</p>
+
+<p>
+Only one instance of NetIDMgr can be running at any one time.
+Attempting to start NetIDMgr while it is still running will not do
+anything, unless you provide any command line options that trigger
+some action in the running application instance.  If more than one
+version of NetIDMgr is installed on the system, and the older version
+is running at the time the newer version is started, the older version
+will exit allowing the newer version to take over.
+</p>
+
+</body>
+</html>

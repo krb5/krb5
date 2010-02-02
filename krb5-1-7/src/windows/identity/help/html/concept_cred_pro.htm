@@ -1,0 +1,38 @@
+<html>
+<head>
+  <title>Network Identity Manager Concepts: Credentials Provider</title>
+  <meta name="description" content="NetIDMgr Concepts: Credentials Provider">
+  <meta name="keywords" content="credentials provider, concepts">
+  <link rel="stylesheet" type="text/css" href="nidmgr.css">
+</head>
+<body>
+
+<h1>Network Identity Manager Concepts: Credentials Provider</h1>
+
+<p>
+Network Identity Manager relies on plug-ins to provide the majority 
+of its functionality.  A <b>credentials provider</b> is a plug-in 
+that manages one or more types of credentials.  The responsibilities
+of a credential provider are:
+</p>
+<ul>
+	<li>to maintain the list of credentials and their properties for the supported type</li>
+	<li>to monitor credential expiration</li>
+	<li>to provide the logic necessary to obtain additional credentials once the
+	<a href="concept_ident_pro.htm">identity provider</a> has obtained the 
+	initial credential</li>
+	<li>to provide the user interface panels necessary to permit the user to 
+	configure the credential provider</li>
+</ul>
+
+
+<p>MIT Kerberos for Windows ships with two Network Identity Manager credential 
+providers supporting Kerberos v5 and Kerberos v4.&nbsp; Credential providers for 
+the Andrew File System and the Kerberized Certificate Authority are available 
+separately.</p>
+<p>
+<img border="0" src="images/screen_config_cred_provider.png" width="542" height="393"></p>
+
+
+</body>
+</html>

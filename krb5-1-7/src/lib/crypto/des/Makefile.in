@@ -1,0 +1,104 @@
+thisconfigdir=../../..
+myfulldir=lib/crypto/des
+mydir=lib/crypto/des
+BUILDTOP=$(REL)..$(S)..$(S)..
+DEFS=
+
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=des
+##DOS##OBJFILE=..\$(OUTPRE)des.lst
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
+
+STLIBOBJS=\
+	afsstring2key.o	\
+	d3_cbc.o	\
+	d3_aead.o	\
+	d3_kysched.o	\
+	des_prf.o \
+	f_aead.o 	\
+	f_cbc.o 	\
+	f_cksum.o	\
+	f_parity.o 	\
+	f_sched.o 	\
+	f_tables.o	\
+	key_sched.o	\
+	string2key.o	\
+	weak_key.o
+
+OBJS=	$(OUTPRE)afsstring2key.$(OBJEXT)	\
+	$(OUTPRE)d3_cbc.$(OBJEXT)	\
+	$(OUTPRE)d3_aead.$(OBJEXT)	\
+	$(OUTPRE)d3_kysched.$(OBJEXT)	\
+	$(OUTPRE)des_prf.$(OBJEXT) \
+	$(OUTPRE)f_aead.$(OBJEXT) 	\
+	$(OUTPRE)f_cbc.$(OBJEXT) 	\
+	$(OUTPRE)f_cksum.$(OBJEXT)	\
+	$(OUTPRE)f_parity.$(OBJEXT) 	\
+	$(OUTPRE)f_sched.$(OBJEXT) 	\
+	$(OUTPRE)f_tables.$(OBJEXT)	\
+	$(OUTPRE)key_sched.$(OBJEXT)	\
+	$(OUTPRE)string2key.$(OBJEXT)	\
+	$(OUTPRE)weak_key.$(OBJEXT)
+
+SRCS=	$(srcdir)/afsstring2key.c	\
+	$(srcdir)/d3_cbc.c	\
+	$(srcdir)/d3_aead.c	\
+	$(srcdir)/d3_kysched.c	\
+	$(srcdir)/des_prf.c \
+	$(srcdir)/f_aead.c	\
+	$(srcdir)/f_cbc.c	\
+	$(srcdir)/f_cksum.c	\
+	$(srcdir)/f_parity.c	\
+	$(srcdir)/f_sched.c	\
+	$(srcdir)/f_tables.c	\
+	$(srcdir)/key_sched.c	\
+	$(srcdir)/weak_key.c	\
+	$(srcdir)/string2key.c
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs
+
+includes:: depend
+
+depend:: $(SRCS)
+
+TOBJS = $(OUTPRE)key_sched.$(OBJEXT) $(OUTPRE)f_sched.$(OBJEXT) $(OUTPRE)f_cbc.$(OBJEXT) \
+	$(OUTPRE)f_tables.$(OBJEXT) $(OUTPRE)f_cksum.$(OBJEXT)
+
+verify$(EXEEXT): t_verify.$(OBJEXT) $(TOBJS) f_parity.$(OBJEXT) \
+	$(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ t_verify.$(OBJEXT) $(TOBJS) f_parity.$(OBJEXT) \
+		-lcom_err $(SUPPORT_LIB)
+
+destest$(EXEEXT): destest.$(OBJEXT) $(TOBJS) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ destest.$(OBJEXT) $(TOBJS) $(SUPPORT_LIB)
+
+TAFSS2KOBJS =								\
+	t_afss2k.$(OBJEXT) $(TOBJS)					\
+	afsstring2key.$(OBJEXT) f_parity.$(OBJEXT) weak_key.$(OBJEXT)
+
+t_afss2k$(EXEEXT): $(TAFSS2KOBJS) $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ $(TAFSS2KOBJS) -lcom_err $(SUPPORT_LIB)
+
+check-unix:: verify destest t_afss2k
+	$(RUN_SETUP) $(VALGRIND) ./verify -z
+	$(RUN_SETUP) $(VALGRIND) ./verify -m
+	$(RUN_SETUP) $(VALGRIND) ./verify
+	$(RUN_SETUP) $(VALGRIND) ./destest < $(srcdir)/keytest.data
+	$(RUN_SETUP) $(VALGRIND) ./t_afss2k
+
+check-windows::
+
+clean:: 
+	$(RM) destest$(EXEEXT) verify$(EXEEXT) destest.$(OBJEXT) \
+	t_verify.$(OBJEXT) t_afss2k.$(OBJEXT) t_afss2k$(EXEEXT)
+
+clean-unix:: clean-libobjs
+
+@libobj_frag@
+

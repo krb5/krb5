@@ -1,0 +1,287 @@
+# This is in api.1 so that it happens after all the tests in api.0.
+# If some API function does not unlock the database then the server
+# (whichs runs through all api tests) will still have it locked, and
+# these tests will fail.
+
+load_lib lib.t
+
+api_exit
+
+if { $RPC } {
+    return
+}
+
+send_user "UNTESTED: lock: DAL changes broke locking code (see MIT RT ticket 3201)\n"
+untested "lock: DAL changes broke locking code (see MIT RT ticket 3201)"
+return
+
+set locktest $LOCKTEST
+set lockfile $env(K5ROOT)/kdb5.kadm5.lock
+
+# The lock tests use the program lock-test in the unit test
+# directory.  The basic idea is that lock-test can be told to acquire
+# various kinds of locks and then wait for input before proceeding;
+# this is necessary because otherwise we'd have no way to test locking
+# interactions without a race condition.
+#
+# lock_test_start and lock_test_continue work together to give a crude
+# form of continuations.  lock_test_continue expects a list of
+# commands for lock-test (passed on the command line) and responses
+# (read from stdout).  When it gets to a command of "wait",
+# lock_test_continue returns, and its return value is a list of the
+# arguments that it should be passed to continue processing that
+# particular list of commands for that particular lock-test after
+# whatever that requried lock-test to wait has been completed.
+#
+# lock_test is simply a wrapper for tests that do not involve wait.
+
+proc lock_test_setup {test cmds} {
+    global locktest spawn_id
+
+    verbose "test $test"
+
+    set cmdline ""
+    foreach cmdpair $cmds {
+	if {[lindex $cmdpair 0] == "eof"} {
+	    break
+	}
+	set cmdline "$cmdline [lindex $cmdpair 0]"
+    }
+
+    verbose "spawning $locktest $cmdline"
+    eval "spawn $locktest $cmdline"
+}
+
+proc lock_test {test cmds} {
+    global spawn_id
+
+    lock_test_setup $test $cmds
+    set lockany [lock_test_continue $test $spawn_id 0 "" 0 $cmds]
+    while {$lockany != {}} {
+	set lockany [eval lock_test_continue $lockany]
+    }
+}
+
+proc lock_test_start {test cmds} {
+    global spawn_id
+
+    lock_test_setup $test $cmds
+    return [lock_test_continue $test $spawn_id 0 "" 0 $cmds]
+}
+
+proc lock_test_continue {test my_spawn_id test_failed fail_output cont cmds} {
+    global wait_error_index wait_errno_index wait_status_index
+    global spawn_id
+
+    set spawn_id $my_spawn_id
+
+    if {$cont == 1} {
+	send -i $spawn_id "\n"
+    }
+
+    while {[llength $cmds] > 0} {
+	set cmdpair [lindex $cmds 0]
+	set cmds [lrange $cmds 1 end]
+	set cmd [lindex $cmdpair 0]
+	set output [lindex $cmdpair 1]
+
+	verbose "test $test: command: $cmd"
+
+	if {$cmd == "wait"} {
+	    # ah, for continuations...
+	    return [list $test $spawn_id $test_failed $fail_output 1 $cmds]
+	} 
+	if {$cmd == "eof"} {
+	    set status $output
+	    set output "doesnotmatchanything"
+	}
+
+	expect {
+	    -i $spawn_id
+	    -re "$output" { verbose "test $test: read: $output" }
+	    timeout {
+		set test_failed 1
+		set fail_output "timeout while waiting for $output"
+	    }
+	    eof {
+		if {$cmd != "eof"} {
+		    set test_failed 1
+		    set fail_output "eof while waiting for $output"
+		}
+	    }
+	}
+
+	if {$test_failed == 1} { break }
+    }
+
+    # In timeout cases, the process may not be dead yet.
+    catch { exec kill -9 [exp_pid -i $spawn_id] } x
+    set ret [wait -i $spawn_id]
+    verbose "% Exit $ret" 2
+
+    if {$test_failed == 0} {
+	if {[lindex $ret $wait_error_index] == -1} {
+	    set test_failed 1
+	    set fail_output "wait returned error [lindex $ret $wait_errno_index]"
+	} else {
+	    if { [lindex $ret $wait_status_index] == $status ||
+	    (($status<0) && ([lindex $ret $wait_status_index] == ($status+256))) } {
+		verbose "test $test: status $status"
+	    } else {
+		set test_failed 1
+		set fail_output "unexpected return status [lindex $ret $wait_status_index], should be $status"
+	    }
+	}
+    }
+    
+    if {$test_failed == 0} {
+	pass $test 
+    } else { 
+	fail "$test: $fail_output"
+    }
+
+    return {}
+}
+
+set lock1 [lock_test_start 1 [list \
+	[list shared	"shared"] \
+	[list release	"released"] \
+	[list wait	""] \
+	[list eof	0]]]
+eval lock_test_continue $lock1
+
+set lock2 [lock_test_start 2 [list \
+	[list exclusive	exclusive] \
+	[list release	released] \
+	[list wait	""] \
+	[list eof	0]]]
+eval lock_test_continue $lock2
+
+set lock3 [lock_test_start 5 [list \
+	[list permanent	permanent] \
+	[list release	released] \
+	[list wait	""] \
+	[list eof	0]]]
+eval lock_test_continue $lock3
+
+set lock4 [lock_test_start 4 [list \
+	[list release	"Database not locked"] \
+	[list wait	""] \
+	[list eof	0]]]
+eval lock_test_continue $lock4
+
+set lock5 [lock_test_start 5 [list \
+	[list shared	shared] \
+	[list wait	""] \
+	[list eof	0]]]
+set lock5_1 [lock_test_start 5.1 [list \
+	[list shared	shared] \
+	[list wait	""] \
+	[list eof	0]]]
+eval lock_test_continue $lock5_1
+eval lock_test_continue $lock5
+
+set lock6 [lock_test_start 6 [list \
+	[list exclusive exclusive] \
+	[list wait	""] \
+	[list eof	0]]]
+set lock6_1 [lock_test_start 6.1 [list \
+	[list shared	"Cannot lock database"] \
+	[list wait	""] \
+	[list eof	0]]]
+eval lock_test_continue $lock6_1
+eval lock_test_continue $lock6
+
+set lock7 [lock_test_start 7 [list \
+	[list shared	shared] \
+	[list wait	""] \
+	[list eof	0]]]
+set lock7_1 [lock_test_start 7.1 [list \
+	[list exclusive	"Cannot lock database"] \
+	[list wait	""] \
+	[list eof	0]]]
+eval lock_test_continue $lock7_1
+eval lock_test_continue $lock7
+
+set lock8 [lock_test_start 8 [list \
+	[list permanent	permanent] \
+	[list wait	""] \
+	[list release	"released" ] \
+	[list wait	""] \
+	[list eof	0]]]
+set lock8_1 [lock_test_start 8.1 [list \
+	[list "" "administration database lock file missing while opening database" ] \
+	[list wait	""] \
+	[list eof	1]]]
+eval lock_test_continue $lock8_1
+eval set lock8 \[lock_test_continue $lock8\]
+eval lock_test_continue $lock8
+
+set lock9 [lock_test_start 9 [list \
+	[list exclusive exclusive] \
+	[list release released] \
+	[list wait	""] \
+	[list exclusive	"database lock file missing while getting exclusive"] \
+	[list wait	""] \
+	[list eof	0]]]
+set lock9_1 [lock_test_start 9.1 [list \
+	[list permanent	permanent] \
+	[list wait	""] \
+	[list release	released] \
+	[list wait	""] \
+	[list eof	0]]]
+eval set lock9 \[lock_test_continue $lock9\]
+eval lock_test_continue $lock9
+eval set lock9_1 \[lock_test_continue $lock9_1\]
+eval lock_test_continue $lock9_1
+
+if {! [file exists $lockfile]} {
+    perror "lock file missing before test 10"
+}
+set lock10 [lock_test_start 10 [list \
+	[list permanent	permanent] \
+	[list wait	""] \
+	[list release	released] \
+	[list wait	""] \
+	[list eof	0]]]
+if {[file exists $lockfile]} {
+    fail "test 10: lock file exists"
+}
+eval set lock10 \[lock_test_continue $lock10\]
+eval lock_test_continue $lock10
+if {[file exists $lockfile]} {
+    pass "test 11: lock file exists"
+} else {
+    fail "test 11: lock file does not exist"
+}
+
+set lock12 [lock_test_start 12 [list \
+	[list shared	shared] \
+	[list wait	""] \
+	[list eof	0]]]
+set lock12_1 [lock_test_start 12.1 [list \
+	[list "get test-pol"	retrieved] \
+	[list wait	""] \
+	[list eof	0]]]
+eval lock_test_continue $lock12_1
+eval lock_test_continue $lock12
+
+set lock13 [lock_test_start 13 [list \
+	[list "get lock13"	"Principal or policy does not exist"] \
+	[list wait	""] \
+	[list "get lock13"	retrieved] \
+	[list wait	""] \
+	[list eof	0]]]
+set test13_spawn_id $spawn_id
+# create_policy could call api_exit immediately when it starts up.
+# If it does, and the spawn ID in $spawn_id is ours rather than its,
+# it'll close our spawn ID.  So, we call api_start to give it something
+# to close.
+api_start
+create_policy lock13
+set api_spawn_id $spawn_id
+set spawn_id $test13_spawn_id
+eval set lock13 \[lock_test_continue $lock13\]
+eval lock_test_continue $lock13
+set spawn_id $api_spawn_id
+delete_policy lock13

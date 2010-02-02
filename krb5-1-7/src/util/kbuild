@@ -1,0 +1,168 @@
+#!/bin/sh
+#
+# Kerberos V5 build tool.  Builds Kerberos V5 using a specified 
+# configuration file to control which support programs are used to
+# compile it, which options are given to configure, etc.
+#
+# usage: kbuild { [ frag ] [ var=value ] [ config-lib-path ] }
+#    where frag is something like base, or gcc, or cns, where it finds
+#    base.conf in the config lib path
+#    var=value sets var to value in the script processing (useful to override
+#    SRCDIR or KRB4)
+#    config-lib-path adds itself to the search path for frags.
+#
+#
+# frags themselves are files named frag.conf which have variable settings
+# and filenames. # is a comment marker. If the line is an assignment, it's
+# read; if it begins with /, it's an explicit member of the path; if it 
+# doesn't, it's searched for in the path set in the last fragment.
+#
+# for example, at mit, one might say
+#
+# /mit/krb5/sandbox/util/kbuild base suncc athena
+#
+# or at cygnus, one might say
+#
+# /6h/eichin/mit-v5/build/base/util/kbuild base gcc cns
+#
+# You get the idea.
+#
+# -- Mark Eichin <eichin@cygnus.com> This file is in the Public Domain.
+#
+
+progname=$0
+pts="`echo ${progname} | sed 's=[^/]*$=='`"
+
+#
+# sneak in default knowledge that this program is one level down from the
+# top of the source tree
+#
+
+case $pts in
+/*)   SRCDIR="`echo ${pts} | sed 's=[^/]*/*$=='`"
+      echo "default srcdir $SRCDIR";;
+../*) SRCDIR="`cd ${pts}/.. ; pwd`"
+      echo "default srcdir $SRCDIR";;
+esac
+
+conflib=". $pts/kfrags"
+
+THISCONF=./kbuild.temp
+RECONF=./kbuild.reconf
+rm -f $THISCONF
+BUILD_PATH=./build-path
+rm -rf $BUILD_PATH
+
+echo '#' $0 $* > $THISCONF
+
+echo  $0 $* > $RECONF
+chmod +x $RECONF
+
+for arg
+do
+  case "$arg" in
+  /*)	conflib="$arg $conflib" ;;
+  ..*)	conflib="$arg $conflib" ;;
+  *=*)  echo $arg >> $THISCONF ;;
+  *)
+	  for p in $conflib
+	  do
+		frag=$p/$arg.conf
+		if test -r $frag ; then
+			break
+		fi
+	  done
+	  echo "# $frag" >> $THISCONF
+	  awk '/^#/ { next; } /^[ \t]*$/ {next; }/^[a-zA-Z0-9_]+=.*$/ { print; next; } /^\// { print "ABS_PROGS=\"${ABS_PROGS} "$0"\""; next; } { print "CMD_PROGS=\"${CMD_PROGS} "$0"\""; next; }' < $frag | sed -e 's/^PATH=/XPATH=/' >> $THISCONF
+	;;
+  esac
+done
+
+CONFIG_OPTS="-v"
+MAKETARGETS="all check"
+# echo ==== THISCONF: =====
+# cat $THISCONF
+# echo --------------------
+. $THISCONF
+
+
+if test "x${CC}" != "x"
+then
+	CONFIG_OPTS="$CONFIG_OPTS --with-cc=${CC}"
+fi
+
+if test "x${CC_OPTS}" != "x"
+then
+	CONFIG_OPTS="$CONFIG_OPTS --with-ccopts=${CC_OPTS}"
+fi
+
+if test "x${KRB4}" != "x"
+then
+	CONFIG_OPTS="$CONFIG_OPTS --with-krb4=${KRB4}"
+fi
+
+if test "x${SHARED}" != "x"
+then
+	CONFIG_OPTS="$CONFIG_OPTS --enable-shared"
+fi
+
+/bin/rm -rf $BUILD_PATH
+mkdir $BUILD_PATH
+cd $BUILD_PATH
+
+for i in $CMD_PROGS
+do
+missed=true
+# echo "trying cmdprog $i"
+	for p in `echo $XPATH | sed 's/:/ /g'`
+	do
+# echo "trying cmdprog $i in path element $p"
+		if test -x $p/$i ; then
+			if test -x $i ; then
+# echo "nuking $i"
+				rm $i
+			fi
+# echo "linking $p/$i"
+			ln -s $p/$i
+			missed=false
+			break
+		fi
+	done
+if $missed ; then
+	echo "COULDN'T FIND $i in $XPATH"
+fi
+done
+
+for i in $ABS_PROGS
+do
+	if test -x $i ; then
+# echo "trying absprog $i"
+	base=`echo $i | sed 's-^.*/\([^/]*\)$-\1-p'`
+	if test -x $base ; then
+		rm $base
+# echo "nuking $base"
+	fi
+# echo "linking $i"
+	ln -s $i 
+	else
+		echo "COULDN'T FIND $i"
+	fi
+done
+
+cd ..
+
+echo "Build path is `pwd`/$BUILD_PATH"
+echo "contents of build path: "
+ls -l $BUILD_PATH
+PATH=`pwd`/$BUILD_PATH
+export PATH
+echo "======"
+
+echo "configuring with: $SRCDIR/configure $CONFIG_OPTS"
+$SRCDIR/configure $CONFIG_OPTS
+
+echo "Configuration done.  Building using the command:"
+echo "	(setenv PATH $PATH; make $MAKETARGETS)"
+echo " "
+
+make $MAKETARGETS

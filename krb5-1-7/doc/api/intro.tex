@@ -1,0 +1,299 @@
+	This document describes the routines that make up the Kerberos
+V5 application programming interface.  It is geared towards
+programmers who already have a basic familiarity with Kerberos and are
+in the process of including Kerberos authentication as part of 
+applications being developed.
+
+	The function descriptions included are up to date, even if the
+description of the functions may be hard to understand for the novice
+Kerberos programmer.
+
+\subsection{Acknowledgments}
+
+
+The Kerberos model is based in part on Needham and Schroeder's trusted
+third-party authentication protocol and on modifications suggested by
+Denning and Sacco.  The original design and implementation of Kerberos
+Versions 1 through 4 was the work of Steve Miller of Digital Equipment
+Corporation and Clifford Neuman (now at the Information Sciences
+Institute of the University of Southern California), along with Jerome
+Saltzer, Technical Director of Project Athena, and Jeffrey Schiller,
+MIT Campus Network Manager.  Many other members of Project Athena have
+also contributed to the work on Kerberos.  Version 4 is publicly
+available, and has seen wide use across the Internet.
+
+Version 5 (described in this document) has evolved from Version 4 based
+on new requirements and desires for features not available in Version 4.
+
+%nlg- a bunch more probably needs to be added here to credit all
+%those that have contributed to V5 -nlg
+
+\subsection{Kerberos Basics}
+
+Kerberos performs authentication as a trusted third-party
+authentication service by using conventional (shared secret
+key\footnote{ {\em Secret} and {\em private} are often used
+interchangeably in the literature.  In our usage, it takes two (or
+more) to share a secret, thus a shared DES key is a {\em secret} key.
+Something is only private when no one but its owner knows it.  Thus,
+in public key cryptosystems, one has a public and a {\em private} key.
+}) cryptography.  Kerberos provides a means of verifying the
+identities of principals, without relying on authentication by the
+host operating system, without basing trust on host addresses, without
+requiring physical security of all the hosts on the network, and under
+the assumption that packets traveling along the network can be read,
+modified, and inserted at will.
+
+When integrating Kerberos into an application it is important to
+review how and when Kerberos functions are used to ensure that the
+application's design does not compromise the authentication.  For
+instance, an application which uses Kerberos' functions only upon the
+{\em initiation} of a stream-based network connection, and assumes the
+absence of any active attackers who might be able to ``hijack'' the
+stream connection.
+
+%{\Huge nlg- It would be nice to include more examples here of common
+%mistakes one can make in designing kerberized systems -nlg}
+
+The Kerberos protocol code libraries, whose API is described in this
+document, can be used to provide encryption to any application.  In
+order to add authentication to its transactions, a typical network
+application adds one or two calls to the Kerberos library, which
+results in the transmission of the necessary messages to achieve
+authentication.
+
+The two methods for obtaining credentials, the initial ticket exchange
+and the ticket granting ticket exchange, use slightly different
+protocols and require different API routines.  The basic difference an
+API programmer will see is that the initial request does not require a
+ticket granting ticket (TGT) but does require the client's secret key
+because the reply is sent back encrypted in the client's secret key.
+Usually this request is for a TGT and TGT based exchanges are used
+from then on.  In a TGT exchange the TGT is sent as part of the
+request for tickets and the reply is encrypted in the session key from
+the TGT.  For example, once a user's password is used to obtain a TGT,
+it is not required for subsequent TGT exchanges.
+
+The reply consists of a ticket and a session key, encrypted either in
+the user's secret key (i.e., password), or the TGT session key.  The
+combination of a ticket and a session key is known as a set of {\em
+credentials}.\footnote{In Kerberos V4, the ``ticket file'' was a bit of
+a misnomer, since it contained both tickets and their associated session
+keys.  In Kerberos V5, the ``ticket file'' has been renamed to be the
+{\em credentials cache}.} An application client can use these
+credentials to authenticate to the application server by sending the
+ticket and an {\em authenticator} to the server.  The authenticator is
+encrypted in the session key of the ticket, and contains the name of the
+client, the name of the server, the time the authenticator was created.
+
+In order to verify the authentication, the application server decrypts
+the ticket using its service key, which is only known by the application
+server and the Kerberos server.  Inside the ticket, the Kerberos server
+had placed the name of the client, the name of the server, a DES key
+associated with this ticket, and some additional information.  The
+application server then uses the ticket session key to decrypt the
+authenticator, and verifies that the information in the authenticator
+matches the information in the ticket, and that the timestamp in the
+authenticator is recent (to prevent reply attacks).  Since the session
+key was generated randomly by the Kerberos server, and delivered only
+encrypted in the service key, and in a key known only by the user, the
+application server can be confident that user is really who he or she
+claims to be, by virtue of the fact that the user was able to encrypt
+the authenticator in the correct key.
+
+To provide detection of both replay
+attacks and message stream modification attacks, the integrity of all
+the messages exchanged between principals can also be 
+guar\-an\-teed\footnote{Using
+\funcname{krb5_mk_safe} and \funcname{krb5_rd_safe} to create and
+verify KRB5_SAFE messages} by generating and transmitting a
+collision-proof checksum\footnote{aka cryptographic checksum,
+elsewhere this is called a hash or digest function} of the client's
+message, keyed with the session key.  Privacy and integrity of the
+messages exchanged between principals can be secured\footnote{Using
+\funcname{krb5_mk_priv} and \funcname{krb5_rd_priv} to create and
+verify KRB5_PRIV messages} by encrypting the data to be passed using
+the session key.
+
+\subsubsection{The purpose of Realms}
+
+The Kerberos protocol is designed to operate across organizational
+boundaries.   Each organization wishing to run a Kerberos
+server establishes its own {\em realm}.  The name of the realm in which a
+client is registered is part of the client's name, and can be used by the
+end-service to decide whether to honor a request.
+
+By establishing {\em inter-realm} keys, the administrators of two
+realms can allow a client authenticated in the local realm to use its
+credentials remotely.  The exchange of inter-realm keys (a separate
+key may be used for each direction) registers the ticket-granting
+service of each realm as a principal in the other realm.  A client is
+then able to obtain a ticket-granting ticket for the remote realm's
+ticket-granting service from its local realm.  When that
+ticket-granting ticket is used, the remote ticket-granting service
+uses the inter-realm key (which usually differs from its own normal
+TGS key) to decrypt the ticket-granting ticket, and is thus certain
+that it was issued by the client's own TGS. Tickets issued by the
+remote ticket-granting service will indicate to the end-service that
+the client was authenticated from another realm.   
+
+
+This method can be repeated to authenticate throughout an organization
+across multiple realms.  To build a valid authentication
+path\footnote{An {\em authentication path} is the sequence of
+intermediate realms that are transited in communicating from one realm
+to another.} to a distant realm, the local realm must share an
+inter-realm key with an intermediate realm which
+communicates\footnote{A realm is said to {\em communicate} with
+another realm if the two realms share an inter-realm key} with either
+the distant remote realm or yet another intermediate realm.
+
+Realms are typically organized hierarchically.  Each realm shares a
+key with its parent and a different key with each child.  If an
+inter-realm key is not directly shared by two realms, the hierarchical
+organization allows an authentication path to be easily constructed.
+If a hierarchical organization is not used, it may be necessary to
+consult some database in order to construct an authentication path
+between realms.
+
+Although realms are typically hierarchical, intermediate realms may be
+bypassed to achieve cross-realm authentication through alternate
+authentication paths\footnote{These might be established to make communication
+between two realms more efficient}.  It is important for the
+end-service to know which realms were transited when deciding how much
+faith to place in the authentication process.  To facilitate this
+decision, a field in each ticket contains the names of the realms that
+were involved in authenticating the client.
+
+\subsubsection{Fundamental assumptions about the environment}
+
+Kerberos has certain limitations that should be kept in mind when
+designing security measures:
+
+\begin{itemize}
+\item
+Kerberos does not address ``Denial of service'' attacks.  There are
+places in these protocols where an intruder can prevent an application
+from participating in the proper authentication steps.  Detection and
+solution of such attacks (some of which can appear to be not-uncommon
+``normal'' failure modes for the system) is usually best left to
+the human administrators and users.
+
+\item
+Principals must keep their secret keys secret.  If an intruder somehow
+steals a principal's key, it will be able to masquerade as that
+principal or impersonate any server to the legitimate principal.
+
+\item
+``Password guessing'' attacks are not solved by Kerberos.  If a user
+chooses a poor password, it is possible for an attacker to
+successfully mount an offline dictionary attack by repeatedly
+attempting to decrypt, with successive entries from a dictionary,
+messages obtained which are encrypted under a key derived from the
+user's password.
+
+\end{itemize}
+
+\subsection{Glossary of terms}
+
+Below is a list of terms used throughout this document.
+
+\begin{description}
+\item [Authentication] 
+Verifying the claimed identity of a principal.
+
+\item [Authentication header]
+A record containing a Ticket and an Authenticator to be presented to a
+server as part of the authentication process.
+
+\item [Authentication path]
+A sequence of intermediate realms transited in the authentication
+process when communicating from one realm to another.
+
+\item [Authenticator]
+A record containing information that can be shown to
+have been recently generated using the session key known only by the 
+client and server.
+
+\item [Authorization]
+The process of determining whether a client may use a
+service,  which objects the client is allowed to access, and the 
+type of access allowed for each.
+
+\item [Ciphertext]
+The output of an encryption function.  Encryption transforms plaintext
+into ciphertext.
+
+\item [Client]
+A process that makes use of a network service on behalf of a
+user.  Note that in some cases a {\em Server} may itself be a client of
+some other server (e.g. a print server may be a client of a file server).
+
+\item [Credentials]
+A ticket plus the secret session key necessary to
+successfully use that ticket in an authentication exchange.
+
+\item [KDC]
+Key Distribution Center, a network service that supplies
+tickets and temporary session keys; or an
+instance of that service or the host on which it runs.
+The KDC services both initial ticket and ticket-granting ticket
+requests.
+The initial ticket portion is sometimes referred to as the
+Authentication Server (or service).
+The ticket-granting ticket portion is sometimes referred to as the
+ticket-granting server (or service).
+
+\item [Kerberos]
+Aside from the 3-headed dog guarding Hades, the name given
+to Project Athena's authentication service, the protocol used by that
+service, or the code used to implement the authentication service.
+
+\item [Plaintext]
+The input to an encryption function or the output of a decryption
+function.  Decryption transforms ciphertext into plaintext.
+
+\item [Principal]
+A uniquely named client or server instance that participates in
+a network communication.
+
+\item [Principal identifier]
+The name used to uniquely identify each different
+principal.
+
+\item [Seal]
+To encipher a record containing several fields in such a way
+that the fields cannot be individually replaced without either
+knowledge of the encryption key or leaving evidence of tampering.
+
+\item [Secret key]
+An encryption key shared by a principal and the KDC,
+distributed outside the bounds of the system, with a long lifetime.
+In the case of a human user's principal, the secret key is derived from a
+password.
+
+\item [Server]
+A particular Principal which provides a resource to network clients.
+
+\item [Service]
+A resource provided to network clients; often provided by more than one
+server (for example, remote file service).
+
+\item [Session key]
+A temporary encryption key used between two principals,
+with a lifetime limited to the duration of a single login
+{\em session}.
+
+\item [Sub-session key] 
+A temporary encryption key used between two
+principals, selected and exchanged by the principals using the session
+key, and with a lifetime limited to the duration of a single
+association.
+
+\item [Ticket]
+A record that helps a client authenticate itself to a server; it contains
+the client's identity, a session key, a timestamp, and other
+information, all sealed using the server's secret key.  It only serves to
+authenticate a client when presented along with a fresh Authenticator.
+
+\end{description}

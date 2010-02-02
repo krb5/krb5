@@ -1,0 +1,68 @@
+K5_AC_INIT(README.gssftp)
+CONFIG_RULES
+AC_C_CONST
+AC_PROG_INSTALL
+AC_PROG_YACC
+KRB5_SIGTYPE
+CHECK_SIGNALS
+CHECK_SIGPROCMASK
+CHECK_SETJMP
+CHECK_WAIT_TYPE
+DECLARE_SYS_ERRLIST
+AC_HEADER_STDARG
+AC_CHECK_HEADER(termios.h,[AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS,1,[Define if POSIX termios interface found]))])
+AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/select.h sys/sockio.h paths.h)
+CHECK_UTMP
+DECLARE_SYS_ERRLIST
+AC_REPLACE_FUNCS(getdtablesize)
+AC_CHECK_FUNCS(getcwd getdtablesize getusershell seteuid setreuid setresuid strerror getenv)
+AC_CHECK_LIB(crypt,crypt) dnl 
+KRB5_AC_LIBUTIL
+dnl 
+dnl copied from appl/bsd/configure.in
+dnl
+AC_MSG_CHECKING([setenv])
+AC_CACHE_VAL(krb5_cv_setenv,
+[AC_TRY_LINK(
+[],[setenv("PATH","/bin",0);],
+krb5_cv_setenv=yes,krb5_cv_setenv=no)])
+AC_MSG_RESULT($krb5_cv_setenv)
+if test $krb5_cv_setenv = no; then
+SETENVSRC='$(srcdir)/../../bsd/setenv.c'
+SETENVOBJ=setenv.o
+AC_SUBST([SETENVSRC])
+AC_SUBST([SETENVOBJ])
+AC_DEFINE([NEED_SETENV],1,[Define if setenv needs to be defined])
+fi
+dnl
+dnl
+dnl
+AC_MSG_CHECKING([shadow password support])
+AC_CACHE_VAL(krb5_cv_shadow_pwd,
+[AC_TRY_LINK(
+[#include <sys/types.h>
+#include <pwd.h>
+#include <shadow.h>],
+[struct spwd *sp = getspnam("root")],
+krb5_cv_shadow_pwd=yes, krb5_cv_shadow_pwd=no)])
+AC_MSG_RESULT($krb5_cv_shadow_pwd)
+if test $krb5_cv_shadow_pwd = yes; then
+AC_DEFINE(HAVE_SHADOW,1,[Define if shadow password interface found])
+fi
+case $krb5_cv_host in
+alpha*-dec-osf*)
+	AC_CHECK_LIB(security,setluid,
+		AC_DEFINE(HAVE_SETLUID,1,[Define if setluid provided in OSF/1 security library])
+		FTPD_LIBS="$FTPD_LIBS -lsecurity"
+	)
+	;;
+esac
+dnl
+dnl
+dnl
+AC_SUBST(FTPD_LIBS)
+dnl
+dnl
+dnl
+KRB5_BUILD_PROGRAM
+V5_AC_OUTPUT_MAKEFILE(. ftp ftpd)

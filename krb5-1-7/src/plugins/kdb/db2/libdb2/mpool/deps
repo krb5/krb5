@@ -1,0 +1,7 @@
+# 
+# Generated makefile dependencies follow.
+#
+mpool.so mpool.po $(OUTPRE)mpool.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(srcdir)/../include/config.h $(srcdir)/../include/db-config.h \
+  $(srcdir)/../include/db-int.h $(srcdir)/../include/db-queue.h \
+  $(srcdir)/../include/db.h mpool.c mpool.h

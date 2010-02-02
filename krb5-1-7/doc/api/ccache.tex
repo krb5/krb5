@@ -1,0 +1,239 @@
+The credentials cache functions (some of which are macros which call to
+specific types of credentials caches) deal with storing credentials
+(tickets, session keys, and other identifying information) in a
+semi-permanent store for later use by different programs.
+
+\begin{funcdecl}{krb5_cc_resolve}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{char *}{string_name}
+\funcout
+\funcarg{krb5_ccache *}{id}
+\end{funcdecl}
+
+Fills in \funcparam{id} with a ccache identifier which corresponds to
+the name in \funcparam{string_name}.  
+
+Requires that \funcparam{string_name} be of the form ``type:residual'' and
+``type'' is a type known to the library.
+
+\begin{funcdecl}{krb5_cc_gen_new}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{krb5_cc_ops *}{ops}
+\funcout
+\funcarg{krb5_ccache *}{id}
+\end{funcdecl}
+
+
+Fills in \funcparam{id} with a unique ccache identifier of a type defined by
+\funcparam{ops}.  The cache is left unopened.
+
+\begin{funcdecl}{krb5_cc_register}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{krb5_cc_ops *}{ops}
+\funcarg{krb5_boolean}{override}
+\end{funcdecl}
+
+Adds a new cache type identified and implemented by \funcparam{ops} to
+the set recognized by \funcname{krb5_cc_resolve}.
+If \funcparam{override} is FALSE, a ticket cache type named
+\funcparam{ops{\ptsto}prefix} must not be known.
+
+\begin{funcdecl}{krb5_cc_get_name}{char *}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{krb5_ccache}{id}
+\end{funcdecl}
+
+Returns the name of the ccache denoted by \funcparam{id}.
+
+\begin{funcdecl}{krb5_cc_default_name}{char *}{\funcinout}
+\funcarg{krb5_context}{context}
+\end{funcdecl}
+
+Returns the name of the default credentials cache; this may be equivalent to
+\funcnamenoparens{getenv}({\tt "KRB5CCACHE"}) with an appropriate fallback.
+
+\begin{funcdecl}{krb5_cc_default}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcout
+\funcarg{krb5_ccache *}{ccache}
+\end{funcdecl}
+
+Equivalent to
+\funcnamenoparens{krb5_cc_resolve}(\funcparam{context},
+\funcname{krb5_cc_default_name},
+\funcparam{ccache}).
+
+\begin{funcdecl}{krb5_cc_initialize}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_ccache}{id}
+\funcin
+\funcarg{krb5_principal}{primary_principal}
+\end{funcdecl}
+
+Creates/refreshes a credentials cache identified by \funcparam{id} with
+primary principal set to \funcparam{primary_principal}.
+If the credentials cache already exists, its contents are destroyed.
+
+Errors:  permission errors, system errors.
+
+Modifies: cache identified by \funcparam{id}.
+
+\begin{funcdecl}{krb5_cc_destroy}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_ccache}{id}
+\end{funcdecl}
+
+Destroys the credentials cache identified by \funcparam{id}, invalidates
+\funcparam{id}, and releases any other resources acquired during use of
+the credentials cache.  Requires that \funcparam{id} identifies a valid
+credentials cache.  After return, \funcparam{id} must not be used unless
+it is first reinitialized using \funcname{krb5_cc_resolve} or
+\funcname{krb5_cc_gen_new}.
+
+Errors:  permission errors.
+
+\begin{funcdecl}{krb5_cc_close}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_ccache}{id}
+\end{funcdecl}
+
+Closes the credentials cache \funcparam{id}, invalidates
+\funcparam{id}, and releases \funcparam{id} and any other resources
+acquired during use of the credentials cache.  Requires that
+\funcparam{id} identifies a valid credentials cache.  After return,
+\funcparam{id} must not be used unless it is first reinitialized using
+\funcname{krb5_cc_resolve} or \funcname{krb5_cc_gen_new}.
+
+
+\begin{funcdecl}{krb5_cc_store_cred}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{krb5_ccache}{id}
+\funcarg{krb5_creds *}{creds}
+\end{funcdecl}
+
+Stores \funcparam{creds} in the cache \funcparam{id}, tagged with
+\funcparam{creds{\ptsto}client}.
+Requires that \funcparam{id} identifies a valid credentials cache.
+
+Errors: permission errors, storage failure errors.
+
+\begin{funcdecl}{krb5_cc_retrieve_cred}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{krb5_ccache}{id}
+\funcarg{krb5_flags}{whichfields}
+\funcarg{krb5_creds *}{mcreds}
+\funcout
+\funcarg{krb5_creds *}{creds}
+\end{funcdecl}
+
+Searches the cache \funcparam{id} for credentials matching
+\funcparam{mcreds}.  The fields which are to be matched are specified by
+set bits in \funcparam{whichfields}, and always include the principal
+name \funcparam{mcreds{\ptsto}server}.
+Requires that \funcparam{id} identifies a valid credentials cache.
+
+If at least one match is found, one of the matching credentials is
+returned in \funcparam{*creds}. The credentials should be freed using
+\funcname{krb5_free_credentials}.
+
+Errors: error code if no matches found.
+
+\begin{funcdecl}{krb5_cc_get_principal}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{krb5_ccache}{id}
+\funcarg{krb5_principal *}{principal}
+\end{funcdecl}
+
+Retrieves the primary principal of the credentials cache (as
+set by the \funcname{krb5_cc_initialize} request)
+The primary principal is filled into \funcparam{*principal}; the caller
+should release this memory by calling \funcname{krb5_free_principal} on
+\funcparam{*principal} when finished.
+
+Requires that \funcparam{id} identifies a valid credentials cache.
+
+\begin{funcdecl}{krb5_cc_start_seq_get}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_ccache}{id}
+\funcout
+\funcarg{krb5_cc_cursor *}{cursor}
+\end{funcdecl}
+
+Prepares to sequentially read every set of cached credentials.
+\funcparam{cursor} is filled in with a cursor to be used in calls to
+\funcname{krb5_cc_next_cred}.
+
+\begin{funcdecl}{krb5_cc_next_cred}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_ccache}{id}
+\funcout
+\funcarg{krb5_creds *}{creds}
+\funcinout
+\funcarg{krb5_cc_cursor *}{cursor}
+\end{funcdecl}
+
+Fetches the next entry from \funcparam{id}, returning its values in
+\funcparam{*creds}, and updates \funcparam{*cursor} for the next request.
+Requires that \funcparam{id} identifies a valid credentials cache and
+\funcparam{*cursor} be a cursor returned by
+\funcname{krb5_cc_start_seq_get} or a subsequent call to
+\funcname{krb5_cc_next_cred}.
+
+Errors: error code if no more cache entries.
+
+\begin{funcdecl}{krb5_cc_end_seq_get}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_ccache}{id}
+\funcarg{krb5_cc_cursor *}{cursor}
+\end{funcdecl}
+
+Finishes sequential processing mode and invalidates \funcparam{*cursor}.
+\funcparam{*cursor} must never be re-used after this call.
+
+Requires that \funcparam{id} identifies a valid credentials cache and
+\funcparam{*cursor} be a cursor returned by
+\funcname{krb5_cc_start_seq_get} or a subsequent call to
+\funcname{krb5_cc_next_cred}.
+
+Errors: may return error code if \funcparam{*cursor} is invalid.
+
+
+\begin{funcdecl}{krb5_cc_remove_cred}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{krb5_ccache}{id}
+\funcarg{krb5_flags}{which}
+\funcarg{krb5_creds *}{cred}
+\end{funcdecl}
+
+Removes any credentials from \funcparam{id} which match the principal
+name {cred{\ptsto}server} and the fields in \funcparam{cred} masked by
+\funcparam{which}.
+Requires that \funcparam{id} identifies a valid credentials cache.
+
+Errors: returns error code if nothing matches; returns error code if
+couldn't delete.
+
+\begin{funcdecl}{krb5_cc_set_flags}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_ccache}{id}
+\funcin
+\funcarg{krb5_flags}{flags}
+\end{funcdecl}
+
+Sets the flags on the cache \funcparam{id} to \funcparam{flags}.  Useful
+flags are defined in {\tt <krb5.h>}.
+
+\begin{funcdecl}{krb5_get_notification_message}{unsigned int}{\funcvoid}
+\end{funcdecl}
+
+Intended for use by Windows. Will register a unique message type using
+\funcname{RegisterWindowMessage} which will be notified whenever the
+cache changes. This will allow all processes to recheck their caches.

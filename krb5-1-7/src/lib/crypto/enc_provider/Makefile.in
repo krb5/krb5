@@ -1,0 +1,42 @@
+thisconfigdir=../../..
+myfulldir=lib/crypto/enc_provider
+mydir=lib/crypto/enc_provider
+BUILDTOP=$(REL)..$(S)..$(S)..
+LOCALINCLUDES = -I$(srcdir)/../des -I$(srcdir)/../arcfour -I$(srcdir)/../aes -I$(srcdir)/..
+DEFS=
+
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=enc_provider
+##DOS##OBJFILE=..\$(OUTPRE)enc_prov.lst
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
+
+STLIBOBJS= des.o des3.o rc4.o aes.o 
+
+OBJS= \
+	$(OUTPRE)des.$(OBJEXT) \
+	$(OUTPRE)des3.$(OBJEXT) \
+	$(OUTPRE)aes.$(OBJEXT) \
+	$(OUTPRE)rc4.$(OBJEXT)
+
+SRCS= \
+	$(srcdir)/des.c \
+	$(srcdir)/des3.c \
+	$(srcdir)/aes.c \
+	$(srcdir)/rc4.c
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs
+
+includes:: depend
+
+depend:: $(SRCS)
+
+clean-unix:: clean-libobjs
+
+@libobj_frag@
+

@@ -1,0 +1,205 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "..\..\langres.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "..\\..\\langres.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_NC_KRB4 DIALOGEX 0, 0, 300, 166
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Kerberos v4 Ticket Options",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | SS_SUNKEN | WS_GROUP,7,7,286,11
+    CONTROL         "Obtain Kerberos v4 credentials",IDC_NCK4_OBTAIN,"Button",BS_AUTOCHECKBOX | BS_NOTIFY | WS_TABSTOP,7,26,128,10
+    GROUPBOX        "Obtain Kerberos v4 credentials using",IDC_STATIC,7,43,286,72,WS_GROUP
+    CONTROL         "Automatically determine method",IDC_NCK4_AUTO,"Button",BS_AUTORADIOBUTTON,22,59,119,10
+    CONTROL         "Kerberos v5 to v4 translation",IDC_NCK4_K524,"Button",BS_AUTORADIOBUTTON,22,76,109,10
+    CONTROL         "Password",IDC_NCK4_PWD,"Button",BS_AUTORADIOBUTTON,22,93,47,10
+END
+
+IDD_CFG_KRB4 DIALOGEX 0, 0, 255, 182
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Credential cache location",IDC_CFG_LBL_CACHE,7,10,67,8
+    EDITTEXT        IDC_CFG_CACHE,83,7,165,14,ES_AUTOHSCROLL
+    LTEXT           "Config file path",IDC_CFG_LBL_CFGFILE,7,30,50,8
+    EDITTEXT        IDC_CFG_CFGPATH,83,27,165,14,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "Browse...",IDC_CFG_CFGBROW,200,95,48,14,NOT WS_VISIBLE
+    LTEXT           "Realm file path",IDC_CFG_LBL_RLMPATH,7,50,48,8
+    EDITTEXT        IDC_CFG_RLMPATH,83,47,165,14,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "Browse...",IDC_CFG_RLMBROW,200,127,48,14,NOT WS_VISIBLE
+END
+
+IDD_CFG_IDS_KRB4 DIALOGEX 0, 0, 235, 151
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Obtain Kerberos v4 credentials",IDC_CFG_GETTIX,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,7,221,17
+    LTEXT           "Note that, if enabled, Kerberos v4 credentials will be acquired during initial credential acquisition and during credential renewals.\n\nHowever, currently Kerberos v4 credentials can only be obtained for the default identity.",IDC_STATIC,7,91,221,53,SS_SUNKEN
+END
+
+IDD_CFG_ID_KRB4 DIALOGEX 0, 0, 235, 151
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Obtain Kerberos v4 credentials for this identity",IDC_CFG_GETTIX,
+                    "Button",BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,7,7,165,10
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_NC_KRB4, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 293
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 159
+    END
+
+    IDD_CFG_KRB4, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 248
+        VERTGUIDE, 83
+        VERTGUIDE, 196
+        VERTGUIDE, 200
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 175
+    END
+
+    IDD_CFG_IDS_KRB4, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 144
+    END
+
+    IDD_CFG_ID_KRB4, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 144
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_PLUGIN              ICON                    "..\\..\\images\\plugin.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_PLUGIN_DESC         "Kerberos v4 Credentials Provider"
+    IDS_NC_K4_SHORT         "Kerberos v4"
+    IDS_ERR_REALM           "Could not resolve Kerberos v4 realm"
+    IDS_ERR_PRINCIPAL       "Invalid principal"
+    IDS_ERR_INVINST         "Invalid instance"
+    IDS_ERR_PWINTKT         "Could not obtain Kerberos v4 credentials"
+    IDS_CT_DISABLED         "<p><a id=""SwitchPanel"" param=""Krb4Cred""><b>Krb4</b></a><tab>: Disabled  (click <a id=""Krb4Cred:Enable"">here</a> to enable)</p>"
+    IDS_CT_TGTFOR           "<p><a id=""SwitchPanel"" param=""Krb4Cred""><b>Krb4</b></a><tab>: Credentials for realm %s</p>"
+    IDS_METHOD_AUTO         "Automatically determined method"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_KRB4_SHORT_DESC     "Kerberos v4"
+    IDS_KRB4_LONG_DESC      "Kerberos v4"
+    IDS_CFG_KRB4_LONG       "Kerberos v4 Configuration"
+    IDS_CFG_KRB4_SHORT      "Kerberos v4"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_METHOD_PWD          "Password"
+    IDS_METHOD_K524         "Kerberos v5 to v4 translation"
+    IDS_CFG_IDS_KRB4_SHORT  "Kerberos v4"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
+

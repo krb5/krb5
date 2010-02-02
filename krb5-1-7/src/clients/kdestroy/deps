@@ -1,0 +1,6 @@
+# 
+# Generated makefile dependencies follow.
+#
+$(OUTPRE)kdestroy.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h \
+  kdestroy.c

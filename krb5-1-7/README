@@ -1,0 +1,1210 @@
+                  Kerberos Version 5, Release 1.7.1
+
+                            Release Notes
+                        The MIT Kerberos Team
+
+Unpacking the Source Distribution
+---------------------------------
+
+The source distribution of Kerberos 5 comes in a gzipped tarfile,
+krb5-1.7.1.tar.gz.  Instructions on how to extract the entire
+distribution follow.
+
+If you have the GNU tar program and gzip installed, you can simply do:
+
+        gtar zxpf krb5-1.7.1.tar.gz
+
+If you don't have GNU tar, you will need to get the FSF gzip
+distribution and use gzcat:
+
+        gzcat krb5-1.7.1.tar.gz | tar xpf -
+
+Both of these methods will extract the sources into krb5-1.7.1/src and
+the documentation into krb5-1.7.1/doc.
+
+Building and Installing Kerberos 5
+----------------------------------
+
+The first file you should look at is doc/install-guide.ps; it contains
+the notes for building and installing Kerberos 5.  The info file
+krb5-install.info has the same information in info file format.  You
+can view this using the GNU emacs info-mode, or by using the
+standalone info file viewer from the Free Software Foundation.  This
+is also available as an HTML file, install.html.
+
+Other good files to look at are admin-guide.ps and user-guide.ps,
+which contain the system administrator's guide, and the user's guide,
+respectively.  They are also available as info files
+kerberos-admin.info and krb5-user.info, respectively.  These files are
+also available as HTML files.
+
+If you are attempting to build under Windows, please see the
+src/windows/README file.
+
+Reporting Bugs
+--------------
+
+Please report any problems/bugs/comments using the krb5-send-pr
+program.  The krb5-send-pr program will be installed in the sbin
+directory once you have successfully compiled and installed Kerberos
+V5 (or if you have installed one of our binary distributions).
+
+If you are not able to use krb5-send-pr because you haven't been able
+compile and install Kerberos V5 on any platform, you may send mail to
+krb5-bugs@mit.edu.
+
+Keep in mind that unencrypted e-mail is not secure; if you need to
+send sensitive information, such as reporting potential security
+vulnerabilities, please PGP-encrypt it to our security contact
+address: krbcore-security@mit.edu.
+
+You may view bug reports by visiting
+
+http://krbdev.mit.edu/rt/
+
+and logging in as "guest" with password "guest".
+
+DES transition
+--------------
+
+The Data Encryption Standard (DES) is widely recognized as weak.  The
+krb5-1.7 release will contain measures to encourage sites to migrate
+away from using single-DES cryptosystems.  Among these is a
+configuration variable that enables "weak" enctypes, but will default
+to "false" in the future.  Additional migration aids are planned for
+future releases.
+
+Major changes in 1.7.1
+----------------------
+
+This is primarily a bugfix release.
+
+* Fix vulnerabilities: MITKRB5-SA-2009-003 [CVE-2009-3295],
+  MITKRB5-SA-2009-004 [CVE-2009-4212].
+
+* Restore compatibility for talking to older kadminds and kadmin
+  clients for the "addprinc -randkey" operation.
+
+* Fix some build problems and memory leaks.
+
+Changes in 1.7.1 by ticket ID
+-----------------------------
+
+1233    need to disable /dev/random use for testing
+5668    DAL changes break --with-kdc-kdb-update build
+6428    KDC prefers returning KDC_ERR_KEY_EXP vs. KDC_ERR_NAME_EXP
+6505    fix t_prf test code properly
+6506    Make results of krb5_db_def_fetch_mkey more predictable
+6508    kadm5int_acl_parse_restrictions could ref uninitialized variable
+6509    kadmind is parsing acls good deref NULL pointer on error
+6511    krb5int_rd_chpw_rep could call krb5_free_error with random value
+6512    krb5int_yarrow_final could deref NULL if out of memory
+6514    minor memory leak in 'none' replay cache type
+6515    reduce some mutex performance problems in profile library
+6519    krb5_copy_error_message() calls krb5int_clear_error() incorrectly
+6530    check for slogin failure in setup_root_shell
+6532    (1.7.x) include win-mac.h in gssftp/ftp/cmds.c for HAVE_STDLIB_H
+6533    krb5-1.7 cannot be compiled on Debian stable (5.0.2)
+6534    getaddrinfo in src/util/support/fake-addrinfo.c causes leak
+6536    C++ compatibility for Windows compilation
+6540    memory leak in test code t_authdata
+6541    Fix memory leak in k5_pac_verify_server_checksum
+6542    Check for null characters in pkinit cert fields
+6543    Reply message ordering bug in ftpd
+6551    Memory leak in spnego accept_sec_context error path
+6552    Document kinit -C and -E options
+6553    use perror instead of error in kadm5 test suite
+6556    Supply LDAP service principal aliases to non-referrals clients
+6557    Supply canonical name if present in LDAP iteration
+6558    Fix memory leak in gss_krb5int_copy_ccache
+6559    Fix parsing of GSS exported names
+6568    Fix addprinc -randkey when policy requires multiple character classes
+6571    krb5 1.7 memory leak
+6573    Fix preauth looping in krb5_get_init_creds
+6579    quoting bug causes solaris pre-10 thread handling bugs
+6584    crypto modularity work r22778 broke MD4-DES, MD5-DES cksums
+6585    KDC MUST NOT accept ap-request armor in FAST TGS
+6587    pkinit-obtained tickets can't make TGS requests
+6588    Fix ivec chaining for DES iov encryption
+6589    Fix AES IOV decryption of small messages
+6594    gss_krb5_copy_ccache() doesn't work with spnego delegation
+6608    MITKRB5-SA-2009-003 CVE-2009-3295 KDC null deref in referrals
+6633    Use keyed checksum type for DES FAST
+6635    Restore interoperability with 1.6 addprinc -randkey
+6637    MITKRB5-SA-2009-004 [CVE-2009-4212] integer underflow in AES
+        and RC4 decryption
+
+Major changes in 1.7
+--------------------
+
+The krb5-1.7 release contains a large number of changes, featuring
+improvements in the following broad areas:
+
+* Compatibility with Microsoft Windows
+
+* Administrator experience
+
+* User experience
+
+* Code quality
+
+* Protocol evolution
+
+Compatibility with Microsoft Windows:
+
+* Follow client principal referrals in the client library when
+  obtaining initial tickets.
+
+* KDC can issue realm referrals for service principals based on domain
+  names.
+
+* Extensions supporting DCE RPC, including three-leg GSS context setup
+  and unencapsulated GSS tokens inside SPNEGO.
+
+* Microsoft GSS_WrapEX, implemented using the gss_iov API, which is
+  similar to the equivalent SSPI functionality.  This is needed to
+  support some instances of DCE RPC.
+
+* NTLM recognition support in GSS-API, to facilitate dropping in an
+  NTLM implementation for improved compatibility with older releases
+  of Microsoft Windows.
+
+* KDC support for principal aliases, if the back end supports them.
+  Currently, only the LDAP back end supports aliases.
+
+* Support Microsoft set/change password (RFC 3244) protocol in
+  kadmind.
+
+* Implement client and KDC support for GSS_C_DELEG_POLICY_FLAG, which
+  allows a GSS application to request credential delegation only if
+  permitted by KDC policy.
+
+Administrator experience:
+
+* Install header files for the administration API, allowing
+  third-party software to manipulate the KDC database.
+
+* Incremental propagation support for the KDC database.
+
+* Master key rollover support, making it easier to change master key
+  passwords or encryption types.
+
+* New libdefaults configuration variable "allow_weak_crypto".  NOTE:
+  Currently defaults to "true", but may default to "false" in a future
+  release.  Setting this variable to "false" will have the effect of
+  removing weak enctypes (currently defined to be all single-DES
+  enctypes) from permitted_enctypes, default_tkt_enctypes, and
+  default_tgs_enctypes.
+
+User experience:
+
+* Provide enhanced GSS-API error message including supplementary
+  details about error conditions.
+
+* In the replay cache, use a hash over the complete ciphertext to
+  avoid false-positive replay indications.
+
+Code quality:
+
+* Replace many uses of "unsafe" string functions.  While most of these
+  instances were innocuous, they impeded efficient automatic and
+  manual static code analysis.
+
+* Fix many instances of resource leaks and similar bugs identified by
+  static analysis tools.
+
+* Fix CVE-2009-0844, CVE-2009-0845, CVE-2009-0846, CVE-2009-0847 --
+  various vulnerabilities in SPNEGO and ASN.1 code.
+
+Protocol evolution:
+
+* Remove support for version 4 of the Kerberos protocol (krb4).
+
+* Encryption algorithm negotiation (RFC 4537), allowing clients and
+  application services to negotiate stronger encryption than their KDC
+  supports.
+
+* Flexible Authentication Secure Tunneling (FAST), a preauthentiation
+  framework that can protect the AS exchange from dictionary attacks
+  on weak user passwords.
+
+Known bugs by ticket ID
+-----------------------
+
+6481    kdb ldap integration removed rev/recurse kdb5_util dumps
+6487    gss_unwrap_iov fails in stream mode
+6505    fix t_prf test code properly
+6506    Make results of krb5_db_def_fetch_mkey more predictable
+6507    kdb5_util update_princ_encryption uses latest mkey instead of
+        active mkey
+
+Changes by ticket ID
+--------------------
+
+194     a stash file is not a keytab
+914     keytab add without randomizing key
+1165    annoying error message from krb5_mk_priv()
+1201    replay cache can produce false positive indications
+1624    use more secure checksum types
+2836    feature request: compile/link time warnings for deprecated functions
+2939    unified CCAPI implementation
+3496    krb524d should log success as well as failure
+3497    problems with corrupt (truncated) ccaches
+3499    race in replay cache file ownership
+3737    plugins support requires a Windows equivalent to opendir and friends
+3929    support lazy launching of ccapi server
+3930    CCAPI server must be able to distinguish context handles from
+        other server instances
+3931    CCAPI context and ccache change times must be stored by the client
+3932    CCAPI should use a cc_handle not implemented as a pointer
+3933    CCAPI client library reconnection support
+3934    Implement CCAPI blocking calls
+3935    CCAPI implement locking
+3936    krb5_ccache functions should use the ccapi version 3 interface
+4241    Command line --version option
+5411    MEMORY keytab
+5425    nonce needs to be random
+5427    buffer overflow in krb5_kt_get_name
+5428    MEMORY keytab leaks
+5429    MEMORY keytab should use krb5_copy_keyblock
+5430    MEMORY keytab's get_entry should set enctypes and kvnos
+5431    krb5_kt_get_type should return const char *.
+5432    krb5_kt_default_name should take an unsized length
+5440    sendto_kdc() not signal safe, doesn't respond well to
+        staggered TCP responses.
+5481    manual test of commit handler
+5517    use IP(V6)_PKTINFO in KDC for UDP sockets
+5545    uninitialized salt length when reading some keys
+5560    threads on Solaris 10
+5561    close-on-exec flags
+5565    krb5kdc.M is confused about keytype
+5567    don't check for readability resolving SRVTAB: keytab
+5568    Move CCAPI sources to krb5 repository
+5569    Fixed bugs introduced while moving to krb5 repository
+5570    Only use __attribute__ on GNUC compilers
+5574    Add advisory locking to CCAPI
+5575    don't include time.h in CredentialsCache.h if it's not needed
+5578    test commit handler
+5580    provide asprintf functionality for internal use
+5587    PRF for non-AES enctypes
+5589    krb5 trunk no longer builds on Windows - vsnprintf
+        implementation required
+5590    gss krb5 mech enhanced error messages
+5593    kadmind crash on Debian AMD64
+5594    Work on compiling CCAPI test suite on Windows
+5595    Problems with kpasswd and an IPv6 enviroment
+5596    patch for providing a way to set the ok-as-delegate flag
+5598    ccs_pipe_t needs copy and release functions
+5599    Added new autogenerated file to generate-files-mac target
+5600    provide more useful error message when running kpropd on command line
+5635    need more dylib_file specs for darwin
+5641    kadm5_setkey_principal_3 fix
+5642    Remove unused, unlocalizable error strings
+5643    Alignment fix
+5649    t_ser should no longer use kdb libraries
+5654    remap mechanism-specific status codes in mechglue/spnego
+5655    authorization-data plugin support in KDC
+5657    (Mac-specific) PROG_LIBPATH build fix
+5667    listprincs *z is broken
+5670    Add documentation for CCAPI
+5671    cleanup src/lib/gssapi/krb5/error_map.h on Windows
+5672    no unistd.h on Windows
+5699    test program build problem
+5754    cci_array_move should work when the source and dest positions are equal
+5760    stdint.h should only be accessed if HAVE_STDINT_H defined
+5771    cc_ccache_set_principal always returns error 227
+5776    profile library memory leaks introduced when malloc returns 0
+5786    Update Release Documentation for KFW 3.2.2
+5804    cc_initalize(ccapi_version_2) should return CC_BAD_API_VERSION
+        not CC_NOT_SUPP
+5805    Add documentation for error codes used for flow control.
+5806    Removed NOP line of code from krb5_fcc_next_cred()
+5807    can't store delegated krb5 creds when using spnego
+5813    cc_ccache_store_credentials should return ccErrBadCredentialsVersion
+5814    cci_array_move not returning correct new position
+5815    ccs_lock_status_grant_lock granting wrong lock
+5822    fixed mispelling in kadmin error message
+5828    Include time.h for time()
+5835    Kerberos with apple leopard
+5863    [no subject]
+5864    improve debugging of ticket verification in ksu
+5867    krb-priv sequence numbers don't match up in retransmitted requests
+5872    Add ccs_pipe_compare
+5884    Need CCAPI v2 support for Windows
+5885    Remove AppleConnect workaround
+5894    krb5int_arcfour_string_to_key does not support utf-8 strings
+5899    Compiling krb5-1.6.3 on FreeBSD 7.0-RELEASE
+5900    ccs_ccache_reset should check all arguments for NULL
+5901    CCAPI v2 support crash when client or server strings are NULL
+5902    cci_cred_union_compare_to_credentials_union doesn't work for v5 creds
+5903    Fix pointer cast in cc_seq_fetch_NCs_end
+5904    cc_set_principal should return error on bad cred version
+5905    cc_remove_cred should only remove one cred
+5906    Fixed error code remapping
+5907    Removed tests for check_cc_context_get_version
+5908    Remove C warnings from CCAPI tests
+5909    Add CCAPI v2 tests
+5911    removed unused header file inclusion CoreFoundation.h
+5912    Invalid assignment while trying to set input to NULL
+5915    cc_ccache_iterator_release, cc_credentials_iterator_release
+        leak server memory
+5920    CCacheServer should track client iterators
+5923    Protect CFBundle calls with mutexes
+5925    Windows socket(...) returns SOCKET, not file handle
+5926    Added prototype to test function to remove warning.
+5943    db creation creates a kadmin/hostname princ but doesn't fix case
+5947    krb5_walk_realm_tree broken substring logic
+5948    error in filebase+suffix list generation in plugin code
+5949    Don't leak memory when multiple arguments are NULL
+5954    ksu fails without domain_realm mapping for local host
+5960    Move KIM implementation to the krb5 repository
+5962    unchecked calls to k5_mutex_lock() interact poorly with finalizers
+5963    Profile library should not call rw_access earlier than needed
+5964    Re: Fwd: [modauthkerb] [SOLVED] 'Request is a replay' + Basic auth
+5966    signed vs unsigned char * warnings in kdb_xdr.c
+5967    No prototype when building kdb5_util without krb4 support
+5969    Add header for kill() in USE_PASSWORD_SERVER case
+5982    cci_credentials_iterator_release using wrong message ID
+5989    Add new launchd flags to CCacheServer plist file
+5990    kadm5_setkey_principal_3 not copying key_data_ver and key_data_kvno
+5993    Masterkey Keytab Stash
+5999    fix ktutil listing with timestamp
+6000    misc uninitialized-storage accesses
+6001    Big endian stash file support
+6002    krb5_rc_io_creat should use mkstemp
+6005    krb5_get_error_message returns const char *
+6009    kdc does not compile with glibc 2.8
+6010    krb5int_gic_opte_copy should copy elements individually
+6011    Add EnableTransactions launchd option to CCacheServer
+6012    Add EnableTransactions  launchd option to KerberosAgent
+6013    Stop building Kerberos.app as part of KfM.
+6015    gss_export_lucid_sec_context support for SPNEGO
+6016    SPNEGO workaround for SAMBA mech OID quirks
+6017    KDC virtual address support
+6019    Add signal to force KDC to check for changed interfaces
+6024    Don't use "ccache" in error string printed to user
+6025    Add macro so we don't print deprecated warnings while building KfM
+6026    CCacheServer crashes iterating over creds which have been destroyed
+6029    kadmind leaks error strings on failures
+6031    krb needs better realm lookup logic
+6032    test commit handler change
+6044    Add Apple Inc. to copyright lists.
+6052    Return extended krb5 error strings
+6055    KIM API
+6066    turn off thread-support debugging code
+6070    update DES code copyright notices
+6074    Use a valid UTF8 password for randkey password
+6075    Open log file for appending only, not also reading
+6076    Don't build PKINIT ASN.1 support code if not building PKINIT plugin
+6077    krb5_fcc_resolve file locking error on malloc failuer
+6080    mac port of kim should not depend on kipc
+6081    Conditionalize building of CCAPI ccache type on USE_CCAPI
+6083    profile write code should only quote empty strings
+6087    Notify clients on ccache deletion
+6088    Add support to send CFNotifications on ccache and cache
+        collection changes
+6090    k5_mutex_destroy calls pthread_mutex_destroy with mutex locked
+6091    lean client changes
+6093    KIM should not provide keytab functions when building lite framework
+6094    CCAPI is leaking mach ports
+6101    compile-time flag to disable iprop
+6103    fix resource leak in USE_PASSWORD_SERVER code
+6108    A client can fail to get initial creds if it changes the
+        password while doing so.
+6111    CCAPI should only use one pthread key
+6120    increase rpc timeout
+6121    dead code in lib/rpc/clnt_udp.c
+6131    Removed argument from kipc_client_lookup_server
+6133    don't do C99-style mixing declarations with code
+6138    Switch KfM back to error tables
+6140    CCAPI should use common ipc and stream code
+6142    KerberosAgent dialogs jump around the screen
+6143    KerberosAgent: Enter Identity text field shouldn't be clear
+        automatically
+6144    KerberosAgent: ignore user interaction while busy
+6145    KerberosAgent attach associated dialogs to Select Identity dialog
+6146    Client name passed by KIM is incorrect
+6147    KerberosAgent Use Defaults button doesn't work
+6151    Don't touch keychain if home directory access is disabled
+6153    Add KLL error table
+6154    Hinge building KLL shim off KIM_TO_KLL_SHIM, not LEAN_CLIENT
+6155    KLLastChangedTime should return current time, not 0
+6156    KLL shim layer does not correctly handle options
+6157    KIM should remember options and identity if prefs indicate
+6158    KerberosAgent should handle multiple clients simultaneously
+6159    KerberosAgent should handle zoom button better
+6160    KLL should use __attribute ((deprecated))
+6162    kim_options_copy should allow in_options to be KIM_OPTIONS_DEFAULT
+6163    Crash in kim_credential_create_from_keytab
+6164    KL APIs which take a NULL principal return klParameterErr
+6165    kim_options_create sometimes returns KIM_OPTIONS_DEFAULT
+6166    preferences should handle KIM_OPTIONS_DEFAULT
+6168    prefs should not create empty dictionary for KIM_OPTIONS_DEFAULT
+6169    Missing keys in KerberosAgent Info.plist
+6170    change password should always reprompt on error
+6171    allow kim ui plugins to have any name
+6172    kim_ui_plugin_fini sends pointer to context instead of context.
+6175    always zero out authentication strings
+6176    Test KIM plugin
+6179    kim_os_string_create_localized leaks CFStringRef
+6181    Free error message returned by krb5_get_error_message
+6182    kim test suite reports error messages incorrectly
+6183    KerberosAgent enter identity dialog should use default
+6184    handle stash file names with missing keytab type spec and colon in path
+6185    Merge KerberosIPC into k5_mig support
+6186    Move GUI/CLI detection from KerberosIPC into KIM
+6187    use KIM_BUILTIN_UI instead of LEAN_CLIENT for builtin UI
+6189    remove unused variable in kim_ui_cli_ask_change_password
+6190    Use a context to store error table info
+6192    Treat unreadable terminal as user cancelled so regression tests work
+6193    Remap some of the more confusing krb5 errors
+6194    Double free and leak in kim_os_library_get_application_path
+6195    Added back KLL test programs
+6197    KLCreatePrincipalFromTriplet should work with empty instance
+6198    KerberosAgent continues to ignore mouse events after error
+6199    don't include "WRFILE:" in call to mktemp
+6201    small leak in KDC authdata plugins
+6202    kadmind leaks extended error strings
+6203    DELEG_POLICY_FLAG for GSS
+6210    pa_sam leaks parts of krb5_sam_challenge
+6211    pam_sam leaking outer krb5_data created by encode_krb5_sam_response
+6214    krb5_change_set_password not freeing chpw_rep contents
+6216    Free data in tests so leaks checking is easier
+6217    kim_preferences should free old identity before overwriting
+6218    kim_ccache_iterator_next leaks principal
+6219    kim_os_library_get_caller_name leaks file path
+6220    kim_identity_change_password_with_credential leaks krb5_creds
+6221    KerberosAgent should clear generic auth prompt
+6222    KerberosAgent enter dialog should add entered identities to favorites
+6224    KerberosAgent 'no selection' placeholder in ticket options
+6225    Remove ipc message sent on cc_context_release
+6226    KIM should only display error dialogs if it has displayed UI already
+6227    Apple LW_net_trans.patch make KDC rescan network after 30 seconds
+6231    Apple split build support
+6247    Apple patch: null out pointer in string_to_key after free
+6248    Apple patch: destroy Mach ports on unload
+6250    Use CFStringGetCStringPtr when possible
+6251    Add test for kim_identity_create_from_components
+6252    krb5_build_principal_va does not allocate krb5_principal
+6254    krb5_build_principal_ext walks off beginning of array
+6255    partial rewrite of the ASN.1 encoders
+6256    localize format strings, not final error string
+6260    KerberosAgent hangs changing pw for passwordless identities
+6261    Remove saved password if it fails to get tickets
+6262    Only prompt automatically from GUI apps
+6264    Avoid duplicate identical dialogs in KIM
+6265    KerberosAgent bindings causing crashes
+6266    BIND_8_COMPAT no longer needed in Leopard
+6267    Add _with_password credential acquisition functions to KIM API
+6274    Crypto IOV API per Projects/AEAD encryption API
+6282    krb5kdc deref uninit memory on the stack on unknown principal (pk-init)
+6285    Provide SPI to switch the mach port lookup for kipc
+6286    Allow kerberos configuration files fail with EPERM
+6289    replay cache is insecurely handled
+6290    KIM: Pushing authentication login window do application
+6291    Using referrals fills the the credentials cache more entries
+        of the same name
+6294    lib/gssapi/krb5/init_sec_context.c: don't leak on mutex_lock failure
+6295    Memory leak in KIM identity object
+6297    "make check" fails due to krb5_cc_new_unique() on 64-bit
+        Solaris SPARC under Sun Studio
+6302    kadmind mem leaks [rdar 6358917]
+6303    Remove krb4 support
+6308    Alignment problem in resolver test
+6309    update ldap plugin Makefile for krb4 removal
+6315    move generated dependencies out of Makefile.in
+6316    KIM GC problem on 64-bit
+6335    test failures in password changing
+6336    enctype negotiation - etype list
+6337    kadmin should force non-forwardable tickets
+6339    Fwd: krb5_sendauth vs NAGLE vs DelayedAck
+6342    hash db2 code breaks if st_blksize > 64k
+6348    kadmin and ktutil installed in sbin, should be bin
+6349    lib/rpc tests should not fail if portmap/rpcbind not running
+6351    gss_header|trailerlen should be unsigned int
+6352    return correct kvno in TGS case
+6354    Master Key Migration Project
+6355    use t_inetd with a ready message and avoid waiting a lot in
+        non-root tests
+6356    small storage leak in KDC startup
+6357    address lib/kadm5 test suite slowness
+6358    speed up kpasswd tests
+6360    utf8_conv.c: wrong level of indirection in free()
+6361    new multi-masterkey support doesn't work well when system
+        clock is set back
+6362    don't do arithmetic on void pointers
+6363    int/ptr bug in gssapi code
+6364    declare replacement [v]asprintf functions
+6365    include omitted system header string.h
+6367    Fix a memory leak in krb5_kt_resolve
+6368    chpw.c: missing break in switch statement
+6370    Fix assertion in gc_frm_kdc.c
+6371    deal with memleaks in migrate mkey project
+6372    Fix memory handling bug in mk_req_ext
+6373    remove some redundant or useless qualifiers
+6374    Do not assume sizeof(bool_t) == sizeof(krb5_boolean)
+6375    Fix error handling in krb5_walk_realm_tree
+6376    Memory handling fixes in walk_rtree
+6377    make krb5_free_* functions ignore NULL
+6378    Change contract of krb5int_utf8_normalize and fix memory leaks
+6379    Fix possible free of uninitialized value in walk_rtree
+6390    --disable-rpath is not working
+6392    Fix allocation failure check in walk_rtree
+6393    Implement TGS authenticator subkey support
+6397    use macros for config parameter strings
+6398    remove obsolete GNU.ORG realm info
+6400    GSSAPI authdata extraction should merge ticket and
+        authenticator authdata
+6401    send_as_req re-encodes the request
+6402    CVE-2009-0845 SPNEGO can dereference a null pointer
+6403    kdb5_ldap_util create segfaults when
+        krb5_dbekd_encrypt_key_data() called
+6405    fixing several bugs relating to the migrate mkey project using
+        a LDAP KDB
+6407    Make a working krb5_copy_error_message
+6408    Report verbose error messages from KDC
+6412    crash using library-allocated storage for header in wrap_iov
+6415    Use correct salt for canonicalized principals
+6418    Improve LDAP admin documentation
+6419    Document alias support in LDAP back end
+6420    Add LDAP back end support for canonical name attribute
+6421    Implement KRB-FX_CF2
+6422    Implement krb5int_find_authdata
+6423    krb5_auth_con_free should support freeing a null auth_context
+        without segfault.
+6424    Call kdb_set_mkey_list from the KDC
+6425    Memory leak cleanup in ASN.1
+6427    Fix error handling issue in ASN.1 decoder
+6431    Install kadmin and kdb headers
+6432    Update kdb5_util man page for mkey migration project
+6435    Add PAC and principal parsing test cases
+6436    Implement FAST from draft-ietf-krb-wg-preauth-framework
+6437    mark export grade RC4 as weak
+6438    Handle authdata encrypted in subkey
+6439    Implement KDC side of TGS FAST
+6442    Null pointer defref in adding info
+6443    CVE-2009-0844 SPNEGO can read beyond buffer end
+6444    CVE-2009-0847 asn1buf_imbed incorrect length validation
+6445    CVE-2009-0846 asn1_decode_generaltime can free uninitialized pointer
+6449    Fall through on error return
+6450    kdc: handle_referral_params does not return ENOMEM errors
+6451    Update defaults in documentation
+6452    Document allow_weak_crypto
+6456    fix memory management in handle_referral_params
+6457    KDC realm referral test
+6458    use isflagset correctly in TGS referrals
+6459    Update kdb5_util man page with missing purge_mkeys command
+6460    Implement kinit option for FAST armor ccache
+6461    Require fast_req checksum to be keyed
+6462    clean up KDC realm referrals error handling
+6463    realm referral test cases forcing KRB5_NT_UNKNOWN
+6464    verify return code from krb5_db_set_mkey_list
+6465    send_tgs.c static analyzer friendliness
+6466    check encode_krb5_ap_req return in send_tgs.c
+6467    new copy_data_contents variant that null-terminates
+6468    k5_utf8s_to_ucs2s could deref NULL pointer...
+6469    fcc_generate_new destroys locked mutex on error
+6470    Send explicit salt for SALTTYPE_NORMAL keys
+6472    typo in ksu error message
+6473    strip ok-as-delegate if not in cross-realm TGT chain
+6474    move kadmin, ktutil, k5srvutil man pages to man1
+6475    Adding keys to malformed keytabs can infinitely extend the file
+6477    make installed headers C++-safe
+6478    Fix handling of RET_SEQUENCE flag in mk_priv/mk_ncred
+6479    Add DEBUG_ERROR_LOCATIONS support
+6480    Do not return PREAUTH_FAILED on unknown preauth
+6482    Allow more than 10 past keys to be stored by a policy
+6483    man1 in title header for man1 manpages
+6484    work around Heimdal not using subkey in TGS-REP
+6485    document ok_as_delegate in admin.texinfo
+6486    t_pac fails on SPARC Solaris
+6488    NFS fails to work with KRB5 1.7
+6489    UCS2 support doesn't handle upper half of BMP
+6490    Windows interop with RC4 TGS-REQ subkeys
+6492    Remove spurious assertion in handle_authdata
+6493    some fixes for 1.7
+6495    Fix test rules for non-gmake make versions
+6496    Fix vector initialization error in KDC preauth code
+6497    kinit/fast usage message
+6498    spnego_mech.c syntax error under _GSS_STATIC_LINK
+6499    use printf format attribute only with gcc
+6500    use correct type for krb5_c_prf_length length arg
+6501    Temporarily disable FAST PKINIT for 1.7 release
+6502    typo in doc/api/krb5.tex
+6503    typo in admin.texinfo
+
+Copyright and Other Legal Notices
+---------------------------------
+
+Copyright (C) 1985-2009 by the Massachusetts Institute of Technology.
+
+All rights reserved.
+
+Export of this software from the United States of America may require
+a specific license from the United States Government.  It is the
+responsibility of any person or organization contemplating export to
+obtain such a license before exporting.
+
+WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+distribute this software and its documentation for any purpose and
+without fee is hereby granted, provided that the above copyright
+notice appear in all copies and that both that copyright notice and
+this permission notice appear in supporting documentation, and that
+the name of M.I.T. not be used in advertising or publicity pertaining
+to distribution of the software without specific, written prior
+permission.  Furthermore if you modify this software you must label
+your software as modified software and not distribute it in such a
+fashion that it might be confused with the original MIT software.
+M.I.T. makes no representations about the suitability of this software
+for any purpose.  It is provided "as is" without express or implied
+warranty.
+
+THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+Individual source code files are copyright MIT, Cygnus Support,
+Novell, OpenVision Technologies, Oracle, Red Hat, Sun Microsystems,
+FundsXpress, and others.
+
+Project Athena, Athena, Athena MUSE, Discuss, Hesiod, Kerberos, Moira,
+and Zephyr are trademarks of the Massachusetts Institute of Technology
+(MIT).  No commercial use of these trademarks may be made without
+prior written permission of MIT.
+
+"Commercial use" means use of a name in a product or other for-profit
+manner.  It does NOT prevent a commercial firm from referring to the
+MIT trademarks in order to convey information (although in doing so,
+recognition of their trademark status should be given).
+
+                         --------------------
+
+Portions of src/lib/crypto have the following copyright:
+
+  Copyright (C) 1998 by the FundsXpress, INC.
+
+  All rights reserved.
+
+  Export of this software from the United States of America may require
+  a specific license from the United States Government.  It is the
+  responsibility of any person or organization contemplating export to
+  obtain such a license before exporting.
+
+  WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+  distribute this software and its documentation for any purpose and
+  without fee is hereby granted, provided that the above copyright
+  notice appear in all copies and that both that copyright notice and
+  this permission notice appear in supporting documentation, and that
+  the name of FundsXpress. not be used in advertising or publicity pertaining
+  to distribution of the software without specific, written prior
+  permission.  FundsXpress makes no representations about the suitability of
+  this software for any purpose.  It is provided "as is" without express
+  or implied warranty.
+
+  THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR
+  IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+  WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+
+                         --------------------
+
+The following copyright and permission notice applies to the
+OpenVision Kerberos Administration system located in kadmin/create,
+kadmin/dbutil, kadmin/passwd, kadmin/server, lib/kadm5, and portions
+of lib/rpc:
+
+  Copyright, OpenVision Technologies, Inc., 1996, All Rights Reserved
+
+  WARNING: Retrieving the OpenVision Kerberos Administration system 
+  source code, as described below, indicates your acceptance of the 
+  following terms.  If you do not agree to the following terms, do not 
+  retrieve the OpenVision Kerberos administration system.
+
+  You may freely use and distribute the Source Code and Object Code
+  compiled from it, with or without modification, but this Source
+  Code is provided to you "AS IS" EXCLUSIVE OF ANY WARRANTY,
+  INCLUDING, WITHOUT LIMITATION, ANY WARRANTIES OF MERCHANTABILITY OR
+  FITNESS FOR A PARTICULAR PURPOSE, OR ANY OTHER WARRANTY, WHETHER
+  EXPRESS OR IMPLIED.  IN NO EVENT WILL OPENVISION HAVE ANY LIABILITY
+  FOR ANY LOST PROFITS, LOSS OF DATA OR COSTS OF PROCUREMENT OF 
+  SUBSTITUTE GOODS OR SERVICES, OR FOR ANY SPECIAL, INDIRECT, OR
+  CONSEQUENTIAL DAMAGES ARISING OUT OF THIS AGREEMENT, INCLUDING, 
+  WITHOUT LIMITATION, THOSE RESULTING FROM THE USE OF THE SOURCE 
+  CODE, OR THE FAILURE OF THE SOURCE CODE TO PERFORM, OR FOR ANY 
+  OTHER REASON.
+
+  OpenVision retains all copyrights in the donated Source Code. OpenVision
+  also retains copyright to derivative works of the Source Code, whether
+  created by OpenVision or by a third party. The OpenVision copyright 
+  notice must be preserved if derivative works are made based on the 
+  donated Source Code.
+
+  OpenVision Technologies, Inc. has donated this Kerberos 
+  Administration system to MIT for inclusion in the standard 
+  Kerberos 5 distribution.  This donation underscores our 
+  commitment to continuing Kerberos technology development 
+  and our gratitude for the valuable work which has been 
+  performed by MIT and the Kerberos community.
+
+                         --------------------
+
+  Portions contributed by Matt Crawford <crawdad@fnal.gov> were
+  work performed at Fermi National Accelerator Laboratory, which is
+  operated by Universities Research Association, Inc., under
+  contract DE-AC02-76CHO3000 with the U.S. Department of Energy.
+
+                         --------------------
+
+The implementation of the Yarrow pseudo-random number generator in
+src/lib/crypto/yarrow has the following copyright:
+
+  Copyright 2000 by Zero-Knowledge Systems, Inc.
+
+  Permission to use, copy, modify, distribute, and sell this software
+  and its documentation for any purpose is hereby granted without fee,
+  provided that the above copyright notice appear in all copies and that
+  both that copyright notice and this permission notice appear in
+  supporting documentation, and that the name of Zero-Knowledge Systems,
+  Inc. not be used in advertising or publicity pertaining to
+  distribution of the software without specific, written prior
+  permission.  Zero-Knowledge Systems, Inc. makes no representations
+  about the suitability of this software for any purpose.  It is
+  provided "as is" without express or implied warranty.
+
+  ZERO-KNOWLEDGE SYSTEMS, INC. DISCLAIMS ALL WARRANTIES WITH REGARD TO
+  THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+  FITNESS, IN NO EVENT SHALL ZERO-KNOWLEDGE SYSTEMS, INC. BE LIABLE FOR
+  ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTUOUS ACTION, ARISING OUT
+  OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+                         --------------------
+
+The implementation of the AES encryption algorithm in
+src/lib/crypto/aes has the following copyright:
+
+  Copyright (c) 2001, Dr Brian Gladman <brg@gladman.uk.net>, Worcester, UK.
+  All rights reserved.
+
+  LICENSE TERMS
+
+  The free distribution and use of this software in both source and binary 
+  form is allowed (with or without changes) provided that:
+
+    1. distributions of this source code include the above copyright 
+       notice, this list of conditions and the following disclaimer;
+
+    2. distributions in binary form include the above copyright
+       notice, this list of conditions and the following disclaimer
+       in the documentation and/or other associated materials;
+
+    3. the copyright holder's name is not used to endorse products 
+       built using this software without specific written permission. 
+
+  DISCLAIMER
+
+  This software is provided 'as is' with no explcit or implied warranties
+  in respect of any properties, including, but not limited to, correctness 
+  and fitness for purpose.
+
+                         --------------------
+
+Portions contributed by Red Hat, including the pre-authentication
+plug-ins framework, contain the following copyright:
+
+  Copyright (c) 2006 Red Hat, Inc.
+  Portions copyright (c) 2006 Massachusetts Institute of Technology
+  All Rights Reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
+  are met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above
+    copyright notice, this list of conditions and the following
+    disclaimer in the documentation and/or other materials provided
+    with the distribution.
+
+  * Neither the name of Red Hat, Inc., nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+  PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
+  OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+                         --------------------
+
+The implementations of GSSAPI mechglue in GSSAPI-SPNEGO in
+src/lib/gssapi, including the following files:
+
+  lib/gssapi/generic/gssapi_err_generic.et
+  lib/gssapi/mechglue/g_accept_sec_context.c
+  lib/gssapi/mechglue/g_acquire_cred.c
+  lib/gssapi/mechglue/g_canon_name.c
+  lib/gssapi/mechglue/g_compare_name.c
+  lib/gssapi/mechglue/g_context_time.c
+  lib/gssapi/mechglue/g_delete_sec_context.c
+  lib/gssapi/mechglue/g_dsp_name.c
+  lib/gssapi/mechglue/g_dsp_status.c
+  lib/gssapi/mechglue/g_dup_name.c
+  lib/gssapi/mechglue/g_exp_sec_context.c
+  lib/gssapi/mechglue/g_export_name.c
+  lib/gssapi/mechglue/g_glue.c
+  lib/gssapi/mechglue/g_imp_name.c
+  lib/gssapi/mechglue/g_imp_sec_context.c
+  lib/gssapi/mechglue/g_init_sec_context.c
+  lib/gssapi/mechglue/g_initialize.c
+  lib/gssapi/mechglue/g_inquire_context.c
+  lib/gssapi/mechglue/g_inquire_cred.c
+  lib/gssapi/mechglue/g_inquire_names.c
+  lib/gssapi/mechglue/g_process_context.c
+  lib/gssapi/mechglue/g_rel_buffer.c
+  lib/gssapi/mechglue/g_rel_cred.c
+  lib/gssapi/mechglue/g_rel_name.c
+  lib/gssapi/mechglue/g_rel_oid_set.c
+  lib/gssapi/mechglue/g_seal.c
+  lib/gssapi/mechglue/g_sign.c
+  lib/gssapi/mechglue/g_store_cred.c
+  lib/gssapi/mechglue/g_unseal.c
+  lib/gssapi/mechglue/g_userok.c
+  lib/gssapi/mechglue/g_utils.c
+  lib/gssapi/mechglue/g_verify.c
+  lib/gssapi/mechglue/gssd_pname_to_uid.c
+  lib/gssapi/mechglue/mglueP.h
+  lib/gssapi/mechglue/oid_ops.c
+  lib/gssapi/spnego/gssapiP_spnego.h
+  lib/gssapi/spnego/spnego_mech.c
+
+and the initial implementation of incremental propagation, including
+the following new or changed files:
+
+  include/iprop_hdr.h
+  kadmin/server/ipropd_svc.c
+  lib/kdb/iprop.x
+  lib/kdb/kdb_convert.c
+  lib/kdb/kdb_log.c
+  lib/kdb/kdb_log.h
+  lib/krb5/error_tables/kdb5_err.et
+  slave/kpropd_rpc.c
+  slave/kproplog.c
+
+and marked portions of the following files:
+
+  lib/krb5/os/hst_realm.c
+
+are subject to the following license:
+
+  Copyright (c) 2004 Sun Microsystems, Inc.
+
+  Permission is hereby granted, free of charge, to any person obtaining a
+  copy of this software and associated documentation files (the
+  "Software"), to deal in the Software without restriction, including
+  without limitation the rights to use, copy, modify, merge, publish,
+  distribute, sublicense, and/or sell copies of the Software, and to
+  permit persons to whom the Software is furnished to do so, subject to
+  the following conditions:
+
+  The above copyright notice and this permission notice shall be included
+  in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+                         --------------------
+
+MIT Kerberos includes documentation and software developed at the
+University of California at Berkeley, which includes this copyright
+notice:
+
+  Copyright (C) 1983 Regents of the University of California.
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions
+  are met:
+
+  1. Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+
+  2. Redistributions in binary form must reproduce the above
+     copyright notice, this list of conditions and the following
+     disclaimer in the documentation and/or other materials provided
+     with the distribution.
+
+  3. Neither the name of the University nor the names of its
+     contributors may be used to endorse or promote products derived
+     from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS "AS IS" AND
+  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+  OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+  HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+  OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+  SUCH DAMAGE.
+
+                         --------------------
+
+Portions contributed by Novell, Inc., including the LDAP database
+backend, are subject to the following license:
+
+  Copyright (c) 2004-2005, Novell, Inc.
+  All rights reserved.
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice,
+        this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+        notice, this list of conditions and the following disclaimer in the
+        documentation and/or other materials provided with the distribution.
+    * The copyright holder's name is not used to endorse or promote products
+        derived from this software without specific prior written permission.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  POSSIBILITY OF SUCH DAMAGE.
+
+                         --------------------
+
+Portions funded by Sandia National Laboratory and developed by the
+University of Michigan's Center for Information Technology
+Integration, including the PKINIT implementation, are subject to the
+following license:
+
+  COPYRIGHT (C) 2006-2007
+  THE REGENTS OF THE UNIVERSITY OF MICHIGAN
+  ALL RIGHTS RESERVED
+
+  Permission is granted to use, copy, create derivative works
+  and redistribute this software and such derivative works
+  for any purpose, so long as the name of The University of
+  Michigan is not used in any advertising or publicity
+  pertaining to the use of distribution of this software
+  without specific, written prior authorization.  If the
+  above copyright notice or any other identification of the
+  University of Michigan is included in any copy of any
+  portion of this software, then the disclaimer below must
+  also be included.
+
+  THIS SOFTWARE IS PROVIDED AS IS, WITHOUT REPRESENTATION
+  FROM THE UNIVERSITY OF MICHIGAN AS TO ITS FITNESS FOR ANY
+  PURPOSE, AND WITHOUT WARRANTY BY THE UNIVERSITY OF
+  MICHIGAN OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING
+  WITHOUT LIMITATION THE IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE
+  REGENTS OF THE UNIVERSITY OF MICHIGAN SHALL NOT BE LIABLE
+  FOR ANY DAMAGES, INCLUDING SPECIAL, INDIRECT, INCIDENTAL, OR
+  CONSEQUENTIAL DAMAGES, WITH RESPECT TO ANY CLAIM ARISING
+  OUT OF OR IN CONNECTION WITH THE USE OF THE SOFTWARE, EVEN
+  IF IT HAS BEEN OR IS HEREAFTER ADVISED OF THE POSSIBILITY OF
+  SUCH DAMAGES.
+
+                         --------------------
+
+The pkcs11.h file included in the PKINIT code has the following
+license:
+
+  Copyright 2006 g10 Code GmbH
+  Copyright 2006 Andreas Jellinghaus
+
+  This file is free software; as a special exception the author gives
+  unlimited permission to copy and/or distribute it, with or without
+  modifications, as long as this notice is preserved.
+
+  This file is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY, to the extent permitted by law; without even
+  the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+  PURPOSE.
+
+                         --------------------
+
+Portions contributed by Apple Inc. are subject to the following license:
+
+Copyright 2004-2008 Apple Inc.  All Rights Reserved.
+
+Export of this software from the United States of America may require
+a specific license from the United States Government.  It is the
+responsibility of any person or organization contemplating export to
+obtain such a license before exporting.
+
+WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+distribute this software and its documentation for any purpose and
+without fee is hereby granted, provided that the above copyright
+notice appear in all copies and that both that copyright notice and
+this permission notice appear in supporting documentation, and that
+the name of Apple Inc. not be used in advertising or publicity pertaining
+to distribution of the software without specific, written prior
+permission.  Apple Inc. makes no representations about the suitability of
+this software for any purpose.  It is provided "as is" without express
+or implied warranty.
+
+THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+                         --------------------
+
+The implementations of strlcpy and strlcat in
+src/util/support/strlcat.c have the following copyright and permission
+notice:
+
+Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
+
+Permission to use, copy, modify, and distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+                         --------------------
+
+The implementations of UTF-8 string handling in src/util/support and
+src/lib/krb5/unicode are subject to the following copyright and
+permission notice:
+
+The OpenLDAP Public License
+  Version 2.8, 17 August 2003
+
+Redistribution and use of this software and associated documentation
+("Software"), with or without modification, are permitted provided
+that the following conditions are met:
+
+1. Redistributions in source form must retain copyright statements
+   and notices,
+
+2. Redistributions in binary form must reproduce applicable copyright
+   statements and notices, this list of conditions, and the following
+   disclaimer in the documentation and/or other materials provided
+   with the distribution, and
+
+3. Redistributions must contain a verbatim copy of this document.
+
+The OpenLDAP Foundation may revise this license from time to time.
+Each revision is distinguished by a version number.  You may use
+this Software under terms of this license revision or under the
+terms of any subsequent revision of the license.
+
+THIS SOFTWARE IS PROVIDED BY THE OPENLDAP FOUNDATION AND ITS
+CONTRIBUTORS ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT
+SHALL THE OPENLDAP FOUNDATION, ITS CONTRIBUTORS, OR THE AUTHOR(S)
+OR OWNER(S) OF THE SOFTWARE BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+The names of the authors and copyright holders must not be used in
+advertising or otherwise to promote the sale, use or other dealing
+in this Software without specific, written prior permission.  Title
+to copyright in this Software shall at all times remain with copyright
+holders.
+
+OpenLDAP is a registered trademark of the OpenLDAP Foundation.
+
+Copyright 1999-2003 The OpenLDAP Foundation, Redwood City,
+California, USA.  All Rights Reserved.  Permission to copy and
+distribute verbatim copies of this document is granted.
+
+                         --------------------
+
+Marked test programs in src/lib/krb5/krb have the following copyright:
+
+Copyright (c) 2006 Kungliga Tekniska Högskolan
+(Royal Institute of Technology, Stockholm, Sweden).
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+3. Neither the name of KTH nor the names of its contributors may be
+   used to endorse or promote products derived from this software without
+   specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY KTH AND ITS CONTRIBUTORS ``AS IS'' AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL KTH OR ITS CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Acknowledgements
+----------------
+
+Thanks to Red Hat for donating the pre-authentication plug-in
+framework.
+
+Thanks to Novell for donating the KDB abstraction layer and the LDAP
+database plug-in, and also code implementing the Microsoft protocol
+extensions.
+
+Thanks to Sun Microsystems for donating their implementations of
+mechglue, SPNEGO, master key rollover, and incremental propagation.
+
+Thanks to Dennis Ferguson for donating the DES implementation.
+
+Thanks to the members of the Kerberos V5 development team at MIT, both
+past and present: Danilo Almeida, Jeffrey Altman, Justin Anderson,
+Richard Basch, Jay Berkenbilt, Mitch Berger, Andrew Boardman, Joe
+Calzaretta, John Carr, Don Davis, Alexandra Ellwood, Nancy Gilman,
+Matt Hancher, Sam Hartman, Paul Hill, Marc Horowitz, Eva Jacobus,
+Miroslav Jurisic, Barry Jaspan, Geoffrey King, Kevin Koch, John Kohl,
+Peter Litwack, Scott McGuire, Kevin Mitchell, Cliff Neuman, Paul Park,
+Ezra Peisach, Chris Provenzano, Ken Raeburn, Jon Rochlis, Jeff
+Schiller, Jen Selby, Robert Silk, Brad Thompson, Harry Tsai, Zhanna
+Tsitkova, Ted Ts'o, Marshall Vale, Tom Yu.

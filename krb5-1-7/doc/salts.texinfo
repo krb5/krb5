@@ -1,0 +1,19 @@
+@ignore 
+the information in this file should be consistent with the information
+in krb5/src/lib/krb5/krb/str_conv.c, in the struct salttype_lookup_entry
+@end ignore
+
+@table @code
+@item normal
+default for Kerberos Version 5
+@item v4
+the only type used by Kerberos Version 4, no salt
+@item norealm
+same as the default, without using realm information
+@item onlyrealm
+uses only realm information as the salt
+@item afs3
+AFS version 3, only used for compatibility with Kerberos 4 in AFS
+@item special
+only used in very special cases; not fully supported
+@end table

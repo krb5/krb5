@@ -1,0 +1,48 @@
+<html>
+<head>
+  <title>Network Identity Manager Concepts</title>
+  <meta name="description" content="NetIDMgr Concepts">
+  <meta name="keywords" content="concepts">
+  <link rel="stylesheet" type="text/css" href="nidmgr.css">
+</head>
+<body>
+
+<h1>Network Identity Manager Concepts</h1>
+
+<p>The Network Identity Manager (NetIDMgr) organizes and manages credentials 
+based on how they identify the user to network services. To this end, it is assumed that each 
+<a href="concept_credential.htm">credential </a>will uniquely identify the user to a service as a single
+<a href="concept_identity.htm">identity</a>.  When using Kerberos v5 the 
+identity is the Kerberos principal name.
+</p>
+
+<p>At it's core, NetIDMgr does not possess any knowledge about specific 
+credentials that might be available to the user or how to manage
+them.  It relies on several types of plug-ins to provide the
+information it needs, and to carry out credentials management tasks.
+One primary task is to identify and manage identities.  These services
+are provided by a plug-in called the <a
+href="concept_ident_pro.htm">identity provider</a>.  Information about
+individual credentials are provided by <a
+href="concept_cred_pro.htm">credential providers</a>.  Other plug-ins
+may extend the functionality of these plug-ins or provide additional
+functionality for NetIDMgr.
+</p>
+
+<p>
+</p>
+
+<p>The following topics provider further details: </p>
+
+<ul>
+  <li><a href="concept_identity.htm">Identity</a></li>
+
+  <li><a href="concept_ident_pro.htm">Identity Provider</a></li>
+
+  <li><a href="concept_cred_pro.htm">Credentials Provider</a></li>
+  
+  <li><a href="concept_credential.htm">Credential</a></li>
+</ul>
+
+</body>
+</html>

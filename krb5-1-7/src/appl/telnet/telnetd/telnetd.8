@@ -1,0 +1,631 @@
+.\" Copyright (c) 1983, 1993
+.\"	The Regents of the University of California.  All rights reserved.
+.\"
+.\" Redistribution and use in source and binary forms, with or without
+.\" modification, are permitted provided that the following conditions
+.\" are met:
+.\" 1. Redistributions of source code must retain the above copyright
+.\"    notice, this list of conditions and the following disclaimer.
+.\" 2. Redistributions in binary form must reproduce the above copyright
+.\"    notice, this list of conditions and the following disclaimer in the
+.\"    documentation and/or other materials provided with the distribution.
+.\" 3. All advertising materials mentioning features or use of this software
+.\"    must display the following acknowledgement:
+.\"	This product includes software developed by the University of
+.\"	California, Berkeley and its contributors.
+.\" 4. Neither the name of the University nor the names of its contributors
+.\"    may be used to endorse or promote products derived from this software
+.\"    without specific prior written permission.
+.\"
+.\" THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+.\" ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+.\" IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+.\" ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+.\" FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+.\" DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+.\" OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+.\" HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+.\" LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+.\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+.\" SUCH DAMAGE.
+.\"
+.\"	@(#)telnetd.8	8.2 (Berkeley) 2/3/94
+.\" "
+.TH TELNETD 8
+.SH NAME
+telnetd \-
+.SM DARPA TELNET
+protocol server
+.SH SYNOPSIS
+.B /usr/libexec/telnetd
+[\fB\-a\fP \fIauthmode\fP] [\fB\-B\fP] [\fB\-D\fP] [\fIdebugmode\fP]
+[\fB\-e\fP] [\fB\-h\fP] [\fB\-I\fP\fIinitid\fP] [\fB\-l\fP]
+[\fB\-k\fP] [\fB\-n\fP] [\fB\-r\fP\fIlowpty-highpty\fP] [\fB\-s\fP]
+[\fB\-S\fP \fItos\fP] [\fB\-U\fP] [\fB\-X\fP \fIauthtype\fP]
+[\fB\-w\fP [\fBip\fP|\fImaxhostlen\fP[\fB,\fP[\fBno\fP]\fBstriplocal\fP]]]
+[\fB\-debug\fP [\fIport\fP]]
+.SH DESCRIPTION
+The
+.B telnetd
+command is a server which supports the
+.SM DARPA
+standard
+.SM TELNET
+virtual terminal protocol.
+.B Telnetd
+is normally invoked by the internet server (see
+.BR inetd (8)
+for requests to connect to the
+.SM TELNET
+port as indicated by the
+.I /etc/services
+file (see
+.BR services (5)).
+The
+.B \-debug
+option may be used to start up
+.B telnetd
+manually, instead of through
+.IR inetd (8).
+If started up this way, 
+.I port
+may be specified to run
+.B telnetd
+on an alternate
+.SM TCP
+port number.
+.PP
+The
+.B telnetd
+command accepts the following options:
+.TP
+\fB\-a\fP \fIauthmode\fP
+This option may be used for specifying what mode should be used for
+authentication.  Note that this option is only useful if
+.B telnetd
+has been compiled with support for the
+.SM AUTHENTICATION
+option.  There are several valid values for
+.IR authmode :
+.RS
+.TP
+.B debug
+Turns on authentication debugging code.
+.TP
+.B valid
+Only allow connections when the remote user can provide valid
+authentication information to identify the remote user, and is allowed
+access to the specified account without providing a password.
+.TP
+.B user
+Only allow connections when the remote user can provide valid
+authentication information to identify the remote user.  The
+.IR login (1)
+command will provide any additional user verification needed if the
+remote user is not allowed automatic access to the specified account.
+.TP
+.B other
+Only allow connections that supply some authentication information.
+This option is currently not supported by any of the existing
+authentication mechanisms, and is thus the same as specifying
+.B \-a
+.BR valid .
+.TP
+.B none
+This is the default state.  Authentication information is not required.
+If no or insufficient authentication information is provided, then the
+.IR login (1)
+program will provide the necessary user verification.
+.TP
+.B off
+This disables the authentication code.  All user verification will
+happen through the
+.IR login (1)
+program.
+.RE
+.TP
+.B \-B
+Specifies bftp server mode.  In this mode,
+.B telnetd
+causes login to start a
+.IR bftp (1)
+session rather than the user's normal shell.  In bftp daemon mode,
+normal logins are not supported, and it must be used on a port other
+than the normal
+.SM TELNET
+port.
+.TP
+\fB\-D\fP \fIdebugmode\fP
+This option may be used for debugging purposes.  This allows
+.B telnetd
+to print out debugging information to the connection, allowing the user
+to see what
+.B telnetd
+is doing.  There are several possible values for
+.IR debugmode :
+.RS
+.TP
+.B options
+Prints information about the negotiation of
+.SM TELNET
+options.
+.TP
+.B report
+Prints the
+.B options
+information, plus some additional information about what processing is
+going on.
+.TP
+.B netdata
+Displays the data stream received by
+.B telnetd.
+.TP
+.B ptydata
+Displays data written to the pty.
+.TP
+.B encrypt
+Enables	encryption debugging code.
+.TP
+.B exercise
+Has not been implemented yet.
+.RE
+.TP
+.B \-debug
+Enables debugging on each socket created by
+.B telnetd
+(see
+.SM SO_DEBUG
+in
+.IR socket (2)).
+.TP
+.B \-e
+This option causes
+.B telnetd
+to refuse unencrypted connections.
+.TP
+.B \-h
+Disables the printing of host-specific information before login has been
+completed.
+.TP
+\fB\-I\fP \fIinitid\fP
+This option is only applicable to
+.SM UNICOS
+systems prior to 7.0.  It specifies the
+.SM ID
+from
+.I /etc/inittab
+to use when init starts login sessions.  The default
+.SM ID
+is fe.
+.TP
+.B \-k
+This option is only useful if
+.B telnetd
+has been compiled with both linemode and kludge linemode support.  If
+the
+.B \-k
+option is specified, then if the remote client does not support the
+.SM LINEMODE
+option, then
+.B telnetd
+will operate in character at a time mode.  It will still support kludge
+linemode, but will only go into kludge linemode if the remote client
+requests it.  (This is done by by the client sending
+.SM DONT SUPPRESS-GO-AHEAD
+and
+.SM DONT ECHO.)
+The
+.B \-k
+option is most useful when there are remote clients that do not support
+kludge linemode, but pass the heuristic (if they respond with
+.SM WILL TIMING-MARK
+in response to a
+.SM DO TIMING-MARK)
+for kludge linemode support.
+.TP
+.B \-l
+Specifies line mode.  Tries to force clients to use line-at-a-time
+mode.  If the
+.SM LINEMODE
+option is not supported, it will go into kludge linemode.
+.TP
+.B \-n
+Disable
+.SM TCP
+keep-alives.  Normally
+.B telnetd
+enables the
+.SM TCP
+keep-alive mechanism to probe connections that have been idle for some
+period of time to determine if the client is still there, so that idle
+connections from machines that have crashed or can no longer be reached
+may be cleaned up.
+.TP
+\fB\-r\fP \fIlowpty-highpty\fP
+This option is only enabled when
+.B telnetd
+is compiled for
+.SM UNICOS.
+It specifies an inclusive range of pseudo-terminal devices to use.  If
+the system has sysconf variable
+.SM _SC_CRAY_NPTY
+configured, the default pty search range is 0 to
+.SM _SC_CRAY_NPTY;
+otherwise, the default range is 0 to 128.  Either
+.I lowpty
+or
+.I highpty
+may be omitted to allow changing either end of the search range.  If
+.I lowpty
+is omitted, the - character is still required so that
+.B telnetd
+can differentiate
+.I highpty
+from
+.IR lowpty .
+.TP
+.B \-s
+This option is only enabled if
+.B telnetd
+is compiled with support for SecurID cards.  It causes the
+.B \-s
+option to be passed on to
+.IR login (1),
+and thus is only useful if
+.IR login (1)
+supports the
+.B \-s
+flag to indicate that only SecurID validated logins are allowed, and is
+usually useful for controlling remote logins from outside of a firewall.
+.TP
+\fB\-S\fP \fItos\fP
+.TP
+.B \-U
+This option causes
+.B telnetd
+to refuse connections from addresses that cannot be mapped back into a
+symbolic name via the
+.IR gethostbyaddr (3)
+routine.
+.TP
+.B \-w \fP[\fBip\fP|\fImaxhostlen\fP[\fB,\fP[\fBno\fP]\fBstriplocal\fP]]
+Controls the form of the remote hostname passed to login(1).
+Specifying \fBip\fP results in the numeric IP address always being
+passed to login(1).  Specifying a number, \fImaxhostlen\fP, sets the
+maximum length of the hostname passed to login(1) before it will be
+passed as a numeric IP address.  If \fImaxhostlen\fP is 0, then the
+system default, as determined by the utmp or utmpx structures, is
+used.  The \fBnostriplocal\fP and \fBstriplocal\fP options, which must
+be preceded by a comma, control whether or not the local host domain
+is stripped from the remote hostname.  By default, the equivalent of
+\fBstriplocal\fP is in effect.
+.TP
+\fB\-X\fP \fIauthtype\fP
+This option is only valid if
+.B telnetd
+has been built with support for the authentication option.  It disables
+the use of
+.I authtype
+authentication, and can be used to temporarily disable a specific
+authentication type without having to recompile
+.BR telnetd .
+.PP
+.B Telnetd
+operates by allocating a pseudo-terminal device (see
+.IR pty (4))
+for a client, then creating a login process which has the slave side of
+the pseudo-terminal as
+.IR stdin ,
+.I stdout
+and
+.IR stderr .
+.B Telnetd
+manipulates the master side of the pseudo-terminal, implementing the
+.SM TELNET
+protocol and passing characters between the remote client and the login
+process.
+.PP
+When a
+.SM TELNET
+session is started up, 
+.B telnetd
+sends
+.SM TELNET
+options to the client side indicating a willingness to do the following
+.SM TELNET
+options, which are described in more detail below:
+.sp
+.nf
+.in +0.5i
+DO AUTHENTICATION
+WILL ENCRYPT
+DO TERMINAL TYPE
+DO TSPEED
+DO XDISPLOC
+DO NEW-ENVIRON
+DO ENVIRON
+WILL SUPPRESS GO AHEAD
+DO ECHO
+DO LINEMODE
+DO NAWS
+WILL STATUS
+DO LFLOW
+DO TIMING-MARK
+.in 
+.fi
+.PP
+The pseudo-terminal allocated to the client is configured
+to operate in \*(lqcooked\*(rq mode, and with
+.SM XTABS
+and
+.SM CRMOD
+enabled (see
+.IR tty (4)).
+.PP
+.B Telnetd
+has support for enabling locally the following
+.SM TELNET
+options:
+.TP "\w'.SM WILL TIMING-MARK\ 'u"
+.SM WILL ECHO
+When the
+.SM LINEMODE
+option is enabled, a
+.SM WILL ECHO
+or
+.SM WONT ECHO
+will be sent to the client to indicate the current state of terminal
+echoing.  When terminal echo is not desired, a
+.SM WILL ECHO
+is sent to indicate that
+.B telnetd
+will take care of echoing any data that needs to be echoed to the
+terminal, and then nothing is echoed.  When terminal echo is desired, a
+.SM WONT ECHO
+is sent to indicate that
+.B telnetd
+will not be doing any terminal echoing, so the
+client should do any terminal echoing that is needed.
+.TP
+.SM WILL BINARY
+Indicates that the client is willing to send a 8 bits of data, rather
+than the normal 7 bits of the Network Virtual Terminal.
+.TP
+.SM WILL SGA
+Indicates that it will not be sending
+.SM IAC GA,
+go ahead, commands.
+.TP
+.SM WILL STATUS 
+Indicates a willingness to send the client, upon request, of the current
+status of all
+.SM TELNET
+options.
+.TP
+.SM WILL TIMING-MARK
+Whenever a
+.SM DO TIMING-MARK
+command is received, it is always responded to with a
+.SM WILL TIMING-MARK
+.TP
+.SM WILL LOGOUT
+When a
+.SM DO LOGOUT
+is received, a
+.SM WILL LOGOUT
+is sent in response, and the
+.SM TELNET
+session is shut down.
+.TP
+.SM WILL ENCRYPT
+Only sent if
+.B telnetd
+is compiled with support for data encryption, and indicates a
+willingness to decrypt the data stream.
+.PP
+.B Telnetd
+has support for enabling remotely the following
+.SM TELNET
+options:
+.TP "\w'.SM DO TERMINAL-SPEED\ 'u"
+.SM DO BINARY
+Sent to indicate that
+.B telnetd
+is willing to receive an 8 bit data stream.
+.TP
+.SM DO LFLOW
+Requests that the client handle flow control characters remotely.
+.TP
+.SM DO ECHO
+This is not really supported, but is sent to identify a 4.2BSD
+.IR telnet (1)
+client, which will improperly respond with
+.SM WILL ECHO.
+If a
+.SM WILL ECHO
+is received, a
+.SM DONT ECHO
+will be sent in response.
+.TP
+.SM DO TERMINAL-TYPE
+Indicates a desire to be able to request the name of the type of
+terminal that is attached to the client side of the connection.
+.TP
+.SM DO SGA
+Indicates that it does not need to receive
+.SM IAC GA,
+the go ahead command.
+.TP
+.SM DO NAWS
+Requests that the client inform the server when the window (display)
+size changes.
+.TP
+.SM DO TERMINAL-SPEED
+Indicates a desire to be able to request information about the speed of
+the serial line to which the client is attached.
+.TP
+.SM DO XDISPLOC
+Indicates a desire to be able to request the name of the X windows
+display that is associated with the telnet client.
+.TP
+.SM DO NEW-ENVIRON
+Indicates a desire to be able to request environment variable
+information, as described in RFC 1572.
+.TP
+.SM DO ENVIRON
+Indicates a desire to be able to request environment variable
+information, as described in RFC 1408.
+.TP
+.SM DO LINEMODE
+Only sent if
+.B telnetd
+is compiled with support for linemode, and requests that the client do
+line by line processing.
+.TP
+.SM DO TIMING-MARK
+Only sent if
+.B telnetd
+is compiled with support for both linemode and kludge linemode, and the
+client responded with
+.SM WONT LINEMODE.
+If the client responds with
+.SM WILL TM,
+the it is assumed that the client supports kludge linemode.  Note that
+the
+.B \-k
+option can be used to disable this.
+.TP
+.SM DO AUTHENTICATION
+Only sent if
+.B telnetd
+is compiled with support for authentication, and indicates a willingness
+to receive authentication information for automatic login.
+.TP
+.SM DO ENCRYPT
+Only sent if
+.B telnetd
+is compiled with support for data encryption, and indicates a
+willingness to decrypt the data stream.
+.SH FILES
+.I /etc/services
+.br
+.I /etc/inittab
+(UNICOS systems only)
+.br
+.I /etc/iptos
+(if supported)
+.br
+.I /usr/ucb/bftp
+(if supported)
+.SH "SEE ALSO"
+.IR telnet (1),
+.IR login (1),
+.IR bftp (1)
+(if supported)
+.SH STANDARDS
+.TP "\w'.B RFC-2000\ 'u"
+.B RFC-854
+TELNET PROTOCOL SPECIFICATION
+.sp -1
+.TP
+.B RFC-855
+TELNET OPTION SPECIFICATIONS
+.sp -1
+.TP
+.B RFC-856
+TELNET BINARY TRANSMISSION
+.sp -1
+.TP
+.B RFC-857
+TELNET ECHO OPTION
+.sp -1
+.TP
+.B RFC-858
+TELNET SUPPRESS GO AHEAD OPTION
+.sp -1
+.TP
+.B RFC-859
+TELNET STATUS OPTION
+.sp -1
+.TP
+.B RFC-860
+TELNET TIMING MARK OPTION
+.sp -1
+.TP
+.B RFC-861
+TELNET EXTENDED OPTIONS - LIST OPTION
+.sp -1
+.TP
+.B RFC-885
+TELNET END OF RECORD OPTION
+.sp -1
+.TP
+.B RFC-1073
+Telnet Window Size Option
+.sp -1
+.TP
+.B RFC-1079
+Telnet Terminal Speed Option
+.sp -1
+.TP
+.B RFC-1091
+Telnet Terminal-Type Option
+.sp -1
+.TP
+.B RFC-1096
+Telnet X Display Location Option
+.sp -1
+.TP
+.B RFC-1123
+Requirements for Internet Hosts -- Application and Support
+.sp -1
+.TP
+.B RFC-1184
+Telnet Linemode Option
+.sp -1
+.TP
+.B RFC-1372
+Telnet Remote Flow Control Option
+.sp -1
+.TP
+.B RFC-1416
+Telnet Authentication Option
+.sp -1
+.TP
+.B RFC-1411
+Telnet Authentication: Kerberos Version 4
+.sp -1
+.TP
+.B RFC-1412
+Telnet Authentication: SPX
+.sp -1
+.TP
+.B RFC-1571
+Telnet Environment Option Interoperability Issues
+.sp -1
+.TP
+.B RFC-1572
+Telnet Environment Option
+.SH BUGS
+Some
+.SM TELNET
+commands are only partially implemented.
+.PP
+Because of bugs in the original 4.2 BSD
+.IR telnet (1),
+.B telnetd
+performs some dubious protocol exchanges to try to discover if the
+remote client is, in fact, a 4.2 BSD
+.IR telnet (1).
+.PP
+Binary mode has no common interpretation except between similar
+operating systems (Unix in this case).
+.PP
+The terminal type name received from the remote client is converted to
+lower case.
+.PP
+.B Telnetd
+never sends
+.SM TELNET
+.SM IAC GA
+(go ahead) commands.

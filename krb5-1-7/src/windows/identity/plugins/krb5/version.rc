@@ -1,0 +1,88 @@
+/* Copyright (c) 2004 Massachusetts Institute of Technology
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy,
+ * modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+ * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
+/* $Id$ */
+
+#include<netidmgr_intver.h>
+
+#ifndef LANGVER
+
+#define STR_FILEDESC "Kerberos v5 Plugin for Network Identity Manager"
+#define STR_INTNAME  "krb5cred"
+#define STR_ORIGNAME "krb5cred.dll"
+
+#else
+
+#ifdef LANG_en_us
+
+#define STR_FILEDESC "English(US) language resources for the Keberos 5 plugin"
+#define STR_INTNAME  "krb5cred_en_us"
+#define STR_ORIGNAME "krb5cred_en_us.dll"
+
+#else
+
+#error Unknown langugae
+
+#endif
+
+#endif
+
+1 VERSIONINFO 
+        FILEVERSION     KH_VERSION_LIST
+        PRODUCTVERSION  KH_VERSION_LIST
+        FILEFLAGSMASK   KH_VER_FILEFLAGMASK
+        FILEFLAGS       KH_VER_FILEFLAGS
+        FILEOS          KH_VER_FILEOS
+        FILETYPE        KH_VER_FILETYPEDLL
+        FILESUBTYPE     0
+  {
+    BLOCK "StringFileInfo"
+    {
+      BLOCK "040904b0"
+      {
+        VALUE "CompanyName",     KH_VERSTR_COMPANY_1033
+        VALUE "FileDescription", STR_FILEDESC
+        VALUE "FileVersion",     KH_VERSTR_VERSION_1033
+        VALUE "InternalName",    STR_INTNAME
+        VALUE "LegalCopyright",  KH_VERSTR_COPYRIGHT_1033
+        VALUE "OriginalFilename", STR_ORIGNAME
+        VALUE "ProductName",     "Network Identity Manager"
+        VALUE "ProductVersion",  KH_VERSTR_PRODUCT_1033
+#ifdef KH_VERSTR_COMMENT_1033
+        VALUE "Comment", KH_VERSTR_COMMENT_1033
+#endif
+#ifndef LANGVER
+        VALUE NIMV_MODULE,       "MITKrb5"
+        VALUE NIMV_PLUGINS,      "Krb5Cred,Krb5Ident"
+        VALUE NIMV_APIVER,       KH_VERSION_STRINGAPI
+        VALUE NIMV_SUPPORT,      "http://web.mit.edu/kerberos"
+#endif
+      }
+    }
+
+    BLOCK "VarFileInfo"
+    {
+        VALUE "Translation", 0x409, 0x4b0
+    }
+  }

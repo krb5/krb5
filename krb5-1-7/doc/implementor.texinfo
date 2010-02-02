@@ -1,0 +1,1247 @@
+\input texinfo @c -*-texinfo-*-
+@c
+@c Note: the above texinfo file must include the "doubleleftarrow"
+@c definitions added by jcb.
+@c %**start of header
+@c guide
+@setfilename krb5-implement.info
+@settitle Kerberos V5 Installation Guide
+@setchapternewpage odd                  @c chapter begins on next odd page
+@c @setchapternewpage on                   @c chapter begins on next page
+@c @smallbook                              @c Format for 7" X 9.25" paper
+@c %**end of header
+
+@paragraphindent 0
+@iftex
+@parskip 6pt plus 6pt
+@end iftex
+
+@include definitions.texinfo
+@c @set EDITION b7-1
+@set EDITION [working copy]
+
+@finalout                               @c don't print black warning boxes
+
+@titlepage
+@title @value{PRODUCT} Implementor's Guide
+@subtitle Release:  @value{RELEASE}
+@subtitle Document Edition:  @value{EDITION}
+@subtitle Last updated:  @value{UPDATED}
+@author @value{COMPANY}
+
+@page
+@vskip 0pt plus 1filll
+
+@iftex
+@include copyright.texinfo
+@end iftex
+@end titlepage
+
+@node Top, Introduction, (dir), (dir)
+@comment  node-name,  next,  previous,  up
+
+@ifinfo
+This file contains internal implementor's information for the
+@value{RELEASE} release of @value{PRODUCT}.  
+
+@include copyright.texinfo
+
+@end ifinfo
+
+@c The master menu is updated using emacs19's M-x texinfo-all-menus-update
+@c function.  Don't forget to run M-x texinfo-every-node-update after
+@c you add a new section or subsection, or after you've rearranged the
+@c order of sections or subsections.  Also, don't forget to add an @node
+@c comand before each @section or @subsection!  All you need to enter
+@c is:
+@c
+@c @node New Section Name
+@c @section New Section Name
+@c
+@c M-x texinfo-every-node-update will take care of calculating the
+@c node's forward and back pointers.
+@c
+@c ---------------------------------------------------------------------
+
+@menu
+* Introduction::                
+* Compiler and OS Requirements::  
+* Networking::                  
+* Thread Safety::               
+* Shared Libraries::            
+* Porting Issues::              
+@end menu
+
+@node Introduction, Compiler and OS Requirements, Top, Top
+@chapter Introduction
+
+This file contains internal implementor's information for
+@value{PRODUCT}.  It is currently contains information that was removed
+from install.texi; eventually it will have more detailed information on
+the internals of the @value{PRODUCT}.
+
+@node Compiler and OS Requirements, Networking, Introduction, Top
+@chapter Compiler and OS Requirements
+
+The basic Kerberos libraries are entirely written in C.
+However, we do assume full ANSI C (1989) support, typical 32- or
+64-bit twos-complement architectures (@code{char} is 8 bits,
+@code{short} is 16 bits, @code{int} is 32 bits, byte order is 1234 or
+4321), and a few aspects of ISO C 1999:
+
+@itemize @bullet
+@item
+support for inline functions, even if the keyword isn't @code{inline}
+@item
+64-bit arithmetic types (needed for sequence numbers in GSSAPI)
+@end itemize
+
+These are handled through the internal header file
+@file{k5-platform.h}.
+
+We also conditionally tailor code for the GNU C compiler in a few
+places where it helps performance or debugging, but the code should
+still work fine with other C compilers.
+
+Inline functions should always be specified in the code as
+@code{static inline}, as the behavior of other forms vary across GCC
+versions and C and C++ language standards.  We assume that static
+copies of inline functions will not be generated if they are not
+needed; under some compilers that behave otherwise (such as the
+current Sun compiler as of this writing) may produce executables and
+libraries much larger than they need to be.
+
+On UNIX platforms, ... @i{(should outline what POSIX stuff we
+require)}.
+
+See also @ref{Advanced Shared Library Requirements}, for UNIX and
+Windows systems.
+
+Our makefiles are intended to support building from the top level with
+a POSIX-compliant version of @code{make}, and parallel builds using
+GNU @code{make}.  The latter sometimes comes at the cost of efficiency with
+non-GNU versions; for example, some targets in some directories will
+always be rebuilt with certain versions of @code{make}, even though
+the real dependencies are not out of date, because some versions of
+@code{make} don't understand how we're using phony intermediate
+targets to manage building in subdirectories in parallel builds.
+(Actually, this is more my view of how we've been doing things than
+official policy.  ---Ken)
+
+Some of our code uses the SUSv2/C99 functions @code{snprintf} and
+@code{vsnprintf}.  Since the two specifications differ, we assume that
+either specification may be followed: If truncation occurs, the return
+value may be the untruncated output length, or it may be negative (or
+may be zero if a zero length was supplied).  It is therefore not
+permitted in our code to call these functions with a zero output
+length in order to determine the desired buffer size.  A NULL output
+pointer is not permitted.  In the header @file{k5-platform.h} we
+provide inline definitions for some platforms where these functions do
+not exist.
+
+We also use the extension functions @code{asprintf} and
+@code{vasprintf}, available on modern GNU and BSD based systems.  The
+behaviors of these functions on errors vary between the two system
+types -- BSD stores a NULL as the output pointer, and GNU doesn't set
+it.  We assume either may be the case: The output pointer may be
+unchanged or may be overwritten with NULL, and our code should thus
+assume it may be garbage, and should be assigned to if the value
+matters after an error is detected.  Again, @file{k5-platform.h}
+provides workarounds for systems where these functions are not
+defined.
+
+Using these functions instead of plain @code{sprintf} without length
+checking may make our code slightly less vulnerable to buffer
+overruns.
+
+If necessary, we may eventually use a @code{[v]asnprintf} interface
+like that of the GNU C library, but we have not done so yet.  Do not
+write code using that interface.
+
+@node Networking, Thread Safety, Compiler and OS Requirements, Top
+@chapter Networking
+
+@menu
+* Socket API::                  
+* IPv6 Support::                
+* Local Addresses::             
+* Host Address Lookup::         
+@end menu
+
+@node Socket API, IPv6 Support, Networking, Networking
+@section Socket API
+
+Someone should describe the API subset we're allowed to use with
+sockets, how and when to use @code{SOCKET_ERRNO}, @i{etc}.
+
+Note that all new code doing hostname and address translation should
+use @code{getaddrinfo} and friends.  (@xref{Host Address Lookup}.)
+
+@node IPv6 Support, Local Addresses, Socket API, Networking
+@section IPv6 Support
+
+Most of the IPv6 support is keyed on the macro @code{KRB5_USE_INET6}.
+If this macro is not defined, there should be no references to
+@code{AF_INET6}, @code{struct sockaddr_in6}, @i{etc}.
+
+The @code{configure} scripts will check for the existence of various
+functions, macros and structure types to decide whether to enable the
+IPv6 support.  You can also use the @samp{--enable-ipv6} or
+@samp{--disable-ipv6} options to override this decision.
+
+Regardless of the setting of @code{KRB5_USE_INET6}, some aspects of
+the new APIs devised for IPv6 are used throughout the code, because it
+would be too difficult maintain code for the IPv6 APIs and for the old
+APIs at the same time.  But for backwards compatibility, we try to
+fake them if the system libraries don't provide them, at least for
+now.  This means we sometimes use slightly modified versions of the
+APIs, but we try to keep the modifications as non-intrusive as
+possible.  Macros are used to rename struct tags and function names,
+so don't @code{#undef} any of these names.
+
+@table @code
+
+@item getaddrinfo
+@itemx getnameinfo
+@itemx freeaddrinfo
+@itemx gai_strerror
+@itemx struct addrinfo
+Always include the header file @file{fake-addrinfo.h} before using
+these.  If the native system doesn't provide them, the header file
+will, using support functions that will call @code{gethostbyname} and
+the like in the native libraries.  (This is similar to how the Winsock
+2 headers work, depending on some of the predefined macros indicating
+the target OS version, though they define the support functions
+directly in the header, as our code used to do.)
+
+We also provide ``wrapper'' versions on some systems where a native
+implementation exists but the data it returns is broken in some way.
+
+So these may not always be thread-safe, and they may not always
+provide IPv6 support, but the API will be consistent.
+
+@item struct sockaddr_storage
+@itemx socklen_t
+These are provided by @file{socket-utils.h}, if the native headers
+don't provide them.  @code{sockaddr_storage} contains a
+@code{sockaddr_in}, so by definition it's big enough to hold one; it
+also has some extra padding which will probably make it big enough to
+hold a @code{sockaddr_in6} if the resulting binary should get run on a
+kernel with IPv6 support.
+
+Question: Should these simply be moved into @file{port-sockets.h}?
+
+@end table
+
+IRIX 6.5.7 has no IPv6 support.  Of the systems most actively in the
+MIT's Athena environment (used by MIT's Kerberos UNIX developers),
+this is the only one without built-in IPv6 support.  In another year
+or so we probably won't be using those systems any more, and we may
+consider dropping support for systems without IPv6 support.
+
+Somewhere between IRIX 6.5.14 and 6.5.16, partial IPv6 support was
+introduced to the extent that the configuration system detects the
+IPv6 support and attempts to use it.  Code compiles, but then upon
+linking, one discovers that @code{in6addr_any} is not defined in any
+system library.  The header file @file{fake-addrinfo.h} provides a
+static copy as a workaround.  This run time IPv6 code has still not
+been tested.
+
+Some utility functions or macros are also provided to give a
+convenient shorthand for some operations, and to retain compile-time
+type checking when possible (generally using inline functions but only
+when compiling with GCC).
+
+@table @code
+
+@item socklen(struct sockaddr *)
+Returns the length of the @code{sockaddr} structure, by looking at the
+@code{sa_len} field if it exists, or by returning the known sizes of
+@code{AF_INET} and @code{AF_INET6} address structures.
+
+@item sa2sin(struct sockaddr *)
+@itemx sa2sin6(struct sockaddr *)
+@itemx ss2sa(struct sockaddr_storage *)
+@itemx ss2sin(struct sockaddr_storage *)
+@itemx ss2sin6(struct sockaddr_storage *)
+Pointer type conversions.  Use these instead of plain casts, to get
+type checking under GCC.
+
+@end table
+
+@node Local Addresses, Host Address Lookup, IPv6 Support, Networking
+@section Local Addresses
+
+(Last update: 2005-04-21, but most of the information dates back to
+early 2002.)
+
+Different systems have different ways of finding the local network
+addresses.
+
+On Windows, @code{gethostbyname} is called on the local host name to get a
+set of addresses.  If that fails, a UDP socket is ``connected'' to a
+particular IPv4 address, and the local socket name is retrieved, its
+address being treated as the one local network address.  Future
+versions of the Windows code should be able to actually examine local
+interfaces.
+
+On (most?) UNIX systems, there is an @code{ioctl} called
+@code{SIOCGIFCONF} which gets interface configuration information.
+The behavior of this @code{ioctl} varies across UNIX systems though.
+It takes as input a buffer to fill with data structures, but if the
+buffer isn't big enough, the behavior isn't well defined.  Sometimes
+you get an error, sometimes you get incomplete data.  Sometimes you
+get a clear indication that more space was needed, sometimes not.  A
+couple of systems have additional @code{ioctl}s that can be used to
+determine or at least estimate the correct size for the buffer.  In
+Solaris, Sun has introduced @code{SIOCGLIFCONF} for querying IPv6
+addresses, and restricts @code{SIOCGIFCONF} to IPv4 only.  (** We
+should actually check if that's true.)  They also added
+@code{SIOCGIFNUM} and @code{SIOCGLIFNUM} for querying the number of
+interfaces.  HP-UX 11 also has @code{SIOCGLIFCONF}, but it requires a
+different data structure, and we haven't finished that support yet.
+
+We (Ken Raeburn in particular) ran some tests on various systems to
+see what would happen with buffers of various sizes from much smaller
+to much larger than needed for the actual data.  The buffers were
+filled with specific byte values, and then checked to see how much of
+the buffer was actually written to.  The ``largest gap'' values listed
+below are the largest number of bytes we've seen left unused at the
+end of the supplied buffer when there were more entries to return.
+These values may of coures be dependent on the configurations of the
+particular systems we wre testing with.  (See
+@file{lib/krb5/os/t_gifconf.c} for the test program.)
+
+NetBSD 1.5-alpha: The returned @code{ifc_len} is the desired amount of
+space, always.  The returned list may be truncated if there isn't
+enough room; no overrun.  Largest gap: 43.  However, NetBSD has
+@code{getifaddrs}, which hides all the ugliness within the C library.
+
+BSD/OS 4.0.1 (courtesy djm): The returned @code{ifc_len} is equal to
+or less than the supplied @code{ifc_len}.  Sometimes the entire buffer
+is used; sometimes N-1 bytes; occasionally, the buffer must have quite
+a bit of extra room before the next structure will be added.  Largest
+gap: 39.
+
+Solaris 7,8,9: Return @code{EINVAL} if the buffer space is too small
+for all the data to be returned, including when @code{ifc_len} is 0.
+Solaris is the only system I've found so far that actually returns an
+error.  No gap.  However, @code{SIOCGIFNUM} may be used to query the
+number of interfaces.
+
+Linux 2.2.12 (Red Hat 6.1 distribution, x86), 2.4.9 (RH 7.1, x86): The
+buffer is filled in with as many entries as will fit, and the size
+used is returned in @code{ifc_len}.  The list is truncated if needed,
+with no indication.  Largest gap: 31.  @emph{However}, this interface
+does not return any IPv6 addresses.  They must be read from a file
+under @file{/proc}.  (This appears to be what the @samp{ifconfig}
+program does.)
+
+IRIX 6.5.7: The buffer is filled in with as many entries as will fit
+in N-1 bytes, and the size used is returned in @code{ifc_len}.
+Providing exactly the desired number of bytes is inadequate; the
+buffer must be @emph{bigger} than needed.  (E.g., 32->0, 33->32.)  The
+returned @code{ifc_len} is always less than the supplied one.  Largest
+gap: 32.
+
+AIX 4.3.3: Sometimes the returned @code{ifc_len} is bigger than the
+supplied one, but it may not be big enough for @emph{all} the
+interfaces.  Sometimes it's smaller than the supplied value, even if
+the returned list is truncated.  The list is filled in with as many
+entries as will fit; no overrun.  Largest gap: 143.
+
+Older AIX: We're told by W. David Shambroom in RT ticket 919 that
+older versions of AIX have a bug in the @code{SIOCGIFCONF}
+@code{ioctl} which can cause them to overrun the supplied buffer.
+However, we don't yet have details as to which version, whether the
+overrun amount was bounded (e.g., one @code{ifreq}'s worth) or not,
+whether it's a real buffer overrun or someone assuming it was because
+@code{ifc_len} was increased, @i{etc}.  Once we've got details, we can
+try to work around the problem.
+
+Digital UNIX 4.0F: If input @code{ifc_len} is zero, return an
+@code{ifc_len} that's big enough to include all entries.  (Actually,
+on our system, it appears to be larger than that by 32.)  If input
+@code{ifc_len} is nonzero, fill in as many entries as will fit, and
+set @code{ifc_len} accordingly.  (Tested only with buffer previously
+filled with zeros.)
+
+Tru64 UNIX 5.1A: Like Digital UNIX 4.0F, except the ``extra'' space
+indicated when the input @code{ifc_len} is zero is larger.  (We got
+400 out when 320 appeared to be needed.)
+
+So... if the returned @code{ifc_len} is bigger than the supplied one,
+we'll need at least that much space -- but possibly more -- to hold
+all the results.  If the returned value is a little smaller or the
+same, we may still need more space.
+
+The heuristic we're using on most systems now is to keep growing the
+buffer until the unused space is larger than an @code{ifreq} structure
+by some safe margin.
+
+@node Host Address Lookup,  , Local Addresses, Networking
+@section Host Address Lookup
+
+The traditional @code{gethostbyname} function is not thread-safe, and
+does not support looking up IPv6 addresses, both of which are becoming
+more important.  New standards have been in development that should
+address both of these problems.  The most promising is
+@code{getaddrinfo} and friends, which is part of the Austin Group and
+UNIX 98(?) specifications.  Code in the MIT tree has mostly been
+converted to use this interface.
+
+@quotation
+(Question: What about @code{inet_ntop} and @code{inet_pton}?  We're
+not using them at the moment, but some bits of code would be
+simplified if we were to do so, when plain addresses and not socket
+addresses are already presented to us.)
+@end quotation
+
+The @code{getaddrinfo} function takes a host name and service name and
+returns a linked list of structures indicating the address family,
+length, and actual data in ``sockaddr'' form.  (That is, it includes a
+pointer to a @code{sockaddr_in} or @code{sockaddr_in6} structure.)
+Depending on options set via the @code{hints} input argument, the results
+can be limited to a single address family (@i{e.g.}, for IPv4
+applications), and the canonical name of the indicated host can be
+returned.  Either the host or service can be a null pointer, in which
+case only the other is looked up; they can also be expressed in
+numeric form.  This interface is extensible to additional address
+families in the future.  The returned linked list can be freed with
+the @code{freeaddrinfo} function.
+
+The @code{getnameinfo} function does the reverse -- given an address
+in ``sockaddr'' form, it converts the address and port values into
+printable forms.
+
+Errors returned by either of these functions -- as return values, not
+global variables -- can be translated into printable form with the
+@code{gai_strerror} function.
+
+Some vendors are starting to implement @code{getaddrinfo} and friends,
+however, some of the implementations are deficient in one way or
+another.
+
+@table @asis
+
+@item AIX
+As of AIX 4.3.3, @code{getaddrinfo} returns sockaddr structures
+without the family and length fields filled in.
+
+@item GNU libc
+The GNU C library, used on GNU/Linux systems, has had a few problems
+in this area.  One version would drop some IPv4 addresses for some
+hosts that had multiple IPv4 and IPv6 addresses.
+
+In GNU libc 2.2.4, when the DNS is used, the name referred to by PTR
+records for each of the addresses is looked up and stored in the
+@code{ai_canonname} field, or the printed numeric form of the address
+is, both of which are wrong.
+
+@item IRIX
+No known bugs here, but as of IRIX 6.5.7, the version we're using at
+MIT, these functions had not been implemented.
+
+@item Mac OS X
+Two problems have been found with @code{getaddrinfo} on Mac OS X, at
+least under version 10.3.  First, while @code{gethostbyname} data is
+cached to make multiple lookups of the same name (@i{e.g.}, by
+different parts of the code that need to know about the same server
+host), @code{getaddrinfo} results are not cached, so multiple queries
+mean multiple DNS requests, which means more delays if the DNS servers
+are not close by and fast to respond.  We've implemented a cache of
+our own to work around this, though it only applies to multiple
+lookups in a short period of time within the same application process,
+and it's only implemented for the Mac at the moment.
+
+Second, the Mac libraries will generate a DNS SRV RR query; as far as
+I [Ken] can tell this is a bug, but Apple seems to consider it a
+feature.  (Call @code{getaddrinfo("example.com", "telnet", ...)} and
+you get a SRV record query, but the spec on SRV records says you must
+not use them unless the specification for the service in question says
+to.)  Yet more network traffic for each name to look up.
+
+@item NetBSD
+As of NetBSD 1.5, this function is not thread-safe.  In 1.5X
+(intermediate code snapshot between 1.5 and 1.6 releases), the
+@code{ai_canonname} field can be empty, even if the
+@code{AI_CANONNAME} flag was passed.  In particular, this can happen
+if a numeric host address string is provided.  Also, numeric service
+names appear not to work unless the stream type is given; specifying
+the TCP protocol is not enough.
+
+@item Tru64 UNIX
+In Tru64 UNIX 5.0, @code{getaddrinfo} is available, but requires that
+@code{<netdb.h>} be included before its use; that header file defines
+@code{getaddrinfo} as a macro expanding to either @code{ogetaddrinfo}
+or @code{ngetaddrinfo}, and apparently the symbol @code{getaddrinfo}
+is not present in the system library, causing the @code{configure}
+test for it to fail.  Technically speaking, I [Ken] think Compaq has
+it wrong here, I think the symbol is supposed to be available even if
+the application uses @code{#undef}, but I have not confirmed it in the
+spec.
+
+@item Windows
+According to Windows documentation, the returned @code{ai_canonname}
+field can be null even if the @code{AI_CANONNAME} flag is given.
+
+@end table
+
+For most systems where @code{getaddrinfo} returns incorrect data,
+we've provided wrapper versions that call the system version and then
+try to fix up the returned data.
+
+For systems that don't provide these functions at all, we've provided
+replacement versions that neither are thread-safe nor support IPv6,
+but will allow us to convert the rest of our code to assume the
+availability of @code{getaddrinfo}, rather than having to use two
+branches everywhere, one for @code{getaddrinfo} and one for
+@code{gethostbyname}.  These replacement functions do use
+@code{gethostbyname} and the like; for some systems it would be
+possible to use @code{gethostbyname2} or @code{gethostbyname_r} or
+other such functions, to provide thread safety or IPv6 support, but
+this has not been a priority for us, since most modern systems have
+these functions anyways.  And if they don't, they probably don't have
+real IPv6 support either.
+
+Including @file{fake-addrinfo.h} will enable the wrapper or
+replacement versions when needed.  The functions are actually defined
+in the support library in @file{src/util/support}, added in the 1.4
+release.
+
+Do not assume that @code{ai_canonname} will be set when the
+@code{AI_CANONNAME} flag is set.  Check for a null pointer before
+using it.
+
+@node Thread Safety, Shared Libraries, Networking, Top
+@chapter Thread Safety
+
+Work is still needed as this section is being written.  However, we've
+made a lot of progress.
+
+@menu
+* Kerberos API Thread Safety::  
+* Thread System Requirements::  
+* Internal Thread API::         
+* Thread Shim Layer Implementation::  
+@end menu
+
+@node Kerberos API Thread Safety, Thread System Requirements, Thread Safety, Thread Safety
+@section Kerberos API Thread Safety
+
+We assume that a @code{krb5_context} or a @code{krb5_auth_context}
+will be used in only one thread at a time, and any non-opaque object
+clearly being modified by the application code (@i{e.g.}, a
+@code{krb5_principal} having a field replaced) is not being used in
+another thread at the same time.
+
+A credentials cache, key table, or replay cache object, once the C
+object is created, may be used in multiple threads simultaneously;
+internal locking is done by the implementations of those objects.  (We
+assume that object destructors are invoked only when all other threads
+are finished with the object.)  @i{(Iterators?  Probably okay now, but
+needs review.)}  However, this doesn't mean that we've fixed any
+problems there may be regarding simultaneous access to on-disk files
+from multiple processes, and in fact if a process opens a disk file
+multiple times, the same problems may come up.
+
+Any file locking issues may become worse, actually.  UNIX file locking
+with @code{flock} is done on a per-process basis, and closing a file
+descriptor that was opened on a file releases any locks the process
+may have on that file, even if they were obtained using other,
+still-open file descriptors.  UNIX file locks are used for credentials
+caches and keytab files; the replay cache implementation is already
+known to be unsafe in not using file locking.
+
+We MAY implement --- but haven't yet --- a ``fix'' whereby open files
+are tracked by name (and per object type), and a new attempt to open
+one gets a handle that uses the same open file descriptor, even if it
+appears as two objects to the application.  This won't address the
+problem of getting the same file via two names that look different,
+but it may be ``good enough.''
+
+GSSAPI ....
+
+Strictly speaking, the GSSAPI specification says nothing about thread
+safety, so for best portability, a GSSAPI application probably should
+not assume that a GSSAPI implementation is thread-safe in any way.  On
+the other hand, the GSSAPI specification doesn't explicitly say that
+it's safe to use in a program that uses the Berkeley sockets API,
+either; at some point, you have to start making some assumptions.
+
+A GSSAPI security context, like a @code{krb5_context}, may be used
+only in one thread at a time.  The GSSAPI specification gives precise
+definitions of C data structures for buffers, object identifiers, OID
+sets, and channel bindings, that do not allow for the addition of a
+mutex.  Thus, these objects must not be modified by one thread while
+in use by another.  (All of the GSSAPI functions that modify these
+types of objects should be obvious; they're listed as ``modify''
+parameters in the specification.  In fact, aside from the case of
+@code{gss_add_oid_set_member}, they're generally output arguments,
+with the previous value ignored.)
+
+The function @code{gss_add_cred} can modify the
+@code{input_cred_handle} object, if a null @code{output_cred_handle}
+argument is supplied.  Thus, all @code{gss_cred_id_t} objects must
+have mutexes, and all accesses (except in the functions creating or
+destroying them) must acquire the mutex first.
+
+Note that the use of @code{const} in the GSSAPI C bindings is not a
+useful guide to when an object might or might not be modified.  In
+most cases, @code{const} is applied to handle arguments, which are
+defined as arithmetic or pointer types.  It applies to the argument
+itself, not the data pointed to @i{if} the type is a pointer; this
+would mean that the GSSAPI function in question cannot modify the
+value of its handle parameter, and puts no constraints on
+modifications to the object indicated by the handle.  And according to
+the C type compatibility rules, the function definition can omit those
+@code{const} qualifiers anyways.@footnote{If you're thinking that this
+means the use of @code{const} in the GSSAPI C bindings is confusing
+and/or useless, you're right.}
+
+
+
+
+@node Thread System Requirements, Internal Thread API, Kerberos API Thread Safety, Thread Safety
+@section Thread System Requirements
+
+We support a few types of environments with regard to thread support:
+
+@itemize @bullet
+
+@item
+Windows native threads.  The objects used by the Windows thread
+support functions generally need run-time initialization; this is done
+through the library initialization function.  (@xref{Advanced Shared
+Library Requirements}.)
+
+@item
+POSIX threads, with weak reference support so we can tell whether the
+thread code was actually linked into the current executable.  If the
+functions aren't available, we assume the process is single-threaded
+and ignore locks.  (We do assume that the thread support functions
+won't show up half-way through execution of the program.)  In order to
+support single-threaded programs wanting to load Kerberos or GSSAPI
+modules through a plug-in mechanism, we don't list the pthread library
+in the dependencies of our shared libraries.
+
+@item
+POSIX threads, with the library functions always available, even if
+they're stub versions that behave normally but don't permit the
+creation of new threads.
+
+On AIX 4.3.3, we do not get weak references or useful stub functions,
+and calling @code{dlopen} apparently causes the pthread library to get
+loaded, so we've decided to link against the pthread library always.
+
+On Tru64 UNIX 5.1, we again do not get weak references or useful stub
+functions.  Rather than look for yet another approach for this one
+platform, we decided to always link against the pthread library on
+this platform as well.  This may break single-threaded applications
+that load the Kerberos libraries after startup.  A clean solution,
+even if platform-dependent, would be welcome.
+
+@item
+Single-threaded.  No locking is performed, any ``thread-local''
+storage is in fact global, @i{etc}.
+
+@end itemize
+
+If @code{pthread_once} is not provided in functional form in the
+default libraries, and weak references are not supported, we always
+link against the pthread libraries.  (Tru64, AIX.)
+
+System routines: @code{getaddrinfo} (not always implemented
+thread-safe), @code{gethostbyname_r}, @code{gmtime_r},
+@code{getpwnam_r} (but interfaces vary, see @file{k5-platform.h}),
+@code{res_nsearch} (but watch for resource leaks).
+
+Unsafe system routines: @code{setenv}, @code{setlocale}.
+
+@node Internal Thread API, Thread Shim Layer Implementation, Thread System Requirements, Thread Safety
+@section Internal Thread API
+
+Some ideas were discussed on the @samp{krbdev} mailing list, and while
+the current implementation does largely resemble the scheme Ken
+Raeburn proposed, some details have changed.
+
+The following macros in @file{k5-thread.h} implement a locking scheme
+similar to POSIX threads, with fewer features.
+
+@deftp {Data type} k5_mutex_t
+This is the type of a mutex to be used by the Kerberos libraries.  Any
+object of this type needs initialization.  If the object is
+dynamically allocated, @code{k5_mutex_init} must be used; if the
+object is allocated statically, it should be initialized at compile
+time with @code{K5_MUTEX_PARTIAL_INITIALIZER} and then
+@code{k5_mutex_finish_init} should be called at run time.  (In
+general, one of these will do the work, and the other will do nothing
+interesting, depending on the platform.  When the debugging code is
+turned on, it will check that both were done.  However, as far as I
+know, it should work to use just @code{k5_mutex_init} on a mutex in
+static storage.)
+
+The mutex may be used only within the current process.  It should not
+be created in memory shared between processes.  (Will it work in a
+child process after @code{fork()}?  I think so.)
+
+The @code{k5_mutex_t} object contains more than an operating-system
+mutex; it may also contain debugging information such as the file and
+line number in the Kerberos code where the last mutex operation was
+performed, information for gathering statistics on mutex usage,
+@i{etc}., depending on compile-time options.
+
+This type @emph{is not} a simple typedef for the native OS mutex
+object, to prevent programmers from accidentally assuming that
+arbitrary features of the native thread system will always be
+available.  (If someone wishes to make use of native thread system
+features in random library code, they'll have to go further out of
+their way to do it, and such changes probably won't be accepted in the
+main Kerberos code base at MIT.)
+
+If thread support is disabled, a simple flag will be stored in place
+of the operating-system mutex.  This flag indicates the ``locked''
+state, and is checked in the @code{k5_mutex_lock} and
+@code{k5_mutex_unlock} macros so that we can detect some cases of
+improperly written code even if thread support is not built in.  The
+other debugging fields will still be present as well.
+
+If POSIX thread support and weak references are available, both the
+POSIX mutex and a flag will be included; which one is used is
+determined at run time depending on whether the thread support
+routines are available.
+@end deftp
+
+@defvr Macro K5_MUTEX_PARTIAL_INITIALIZER
+Value to be used for compile-time initialization of a mutex in static
+storage.
+@end defvr
+
+@deftypefn Macro int k5_mutex_finish_init (k5_mutex_t *@var{m})
+Finishes run-time initialization, if such is needed, of a mutex that
+was initialized with @code{K5_MUTEX_PARTIAL_INITIALIZER}.  This macro
+must be called before the mutex can be locked; usually this is done
+from library initialization functions.
+@end deftypefn
+
+@deftypefn Macro int k5_mutex_init (k5_mutex_t *@var{m})
+Initializes a mutex.
+@end deftypefn
+
+@deftypefn Macro int k5_mutex_destroy (k5_mutex_t *@var{m})
+Destroys a mutex, whether allocated in static or heap storage.  All
+mutexes should be destroyed before the containing storage is freed, in
+case additional system resources have been allocated to manage them.
+@end deftypefn
+
+@deftypefn Macro int k5_mutex_lock (k5_mutex_t *@var{m})
+@deftypefnx Macro int k5_mutex_unlock (k5_mutex_t *@var{m})
+Lock or unlock a mutex, returning a system error code if an error
+happened, or zero for success.  (Typically, the return code from
+@code{k5_mutex_unlock} is ignored.)
+@end deftypefn
+
+@deftypefn Macro void k5_mutex_assert_locked (k5_mutex_t *@var{m})
+@deftypefnx Macro void k5_mutex_assert_unlocked (k5_mutex_t *@var{m})
+These macros may be used in functions that require that a certain
+mutex be locked by the current thread, or not, at certain points
+(typically on entry to the function).  They may generate error
+messages or debugger traps, or abort the program, if the mutex is not
+in the expected state.  Or, they may simply do nothing.
+
+It is not required that the OS mutex interface let the application
+code determine the state of a mutex; hence these are not specified as
+a single macro returning the current state, to be checked with
+@code{assert}.
+@end deftypefn
+
+Mutexes should be assumed not to be recursive; if a thread has the
+mutex locked already, attempting to lock it again is an error and may
+have unpredictable results (error return, abort, data corruption).
+There is also no support assumed for ``trylock'' or ``lock with
+timeout'' operations.
+
+Kerberos library code should use the macros above, and ports to new
+thread systems should be done through the @code{k5_os_} layer.
+(@xref{Thread Shim Layer Implementation}.)
+
+Thread-local storage is managed through another interface layer:
+
+@deftp {Enumerator} k5_key_t
+This is an enumeration type which indicates which of the per-thread
+data objects is to be referenced.
+@end deftp
+
+@deftypefn Macro int k5_key_register (k5_key_t @var{key}, void (*@var{destructor})(void*))
+Registers a thread-local storage key and a function to destroy a
+stored object if the thread exits.  This function must be called
+before @code{k5_setspecific} can be used.  Currently @var{destructor}
+must not be a null pointer; note, however, that the standard library
+function @code{free} is of the correct type to be used here if the
+allocated data doesn't require any special cleanup besides releasing
+one block of storage.
+@end deftypefn
+
+@deftypefn Macro void *k5_getspecific (k5_key_t @var{key})
+@deftypefnx Macro int k5_setspecific (k5_key_t @var{key}, void *@var{value})
+As with the POSIX interface, retrieve or store the value for the
+current thread.  Storing a value may return an error indication.  If
+an error occurs retrieving a value, @code{NULL} is returned.
+@end deftypefn
+
+@deftypefn Macro int k5_key_delete (k5_key_t @var{key})
+Called to indicate that the key value will no longer be used, for
+example if the library is in the process of being unloaded.  The
+destructor function should be called on objects of this type currently
+allocated in any thread.  (XXX Not implemented yet.)
+@end deftypefn
+
+If support functions are needed to implement any of these macros,
+they'll be in the Kerberos support library, and any exported symbols
+will use the @code{krb5int_} prefix.  The shorter @code{k5_} prefix is
+just for convenience, and should not be visible to any application
+code.
+
+@node Thread Shim Layer Implementation,  , Internal Thread API, Thread Safety
+@section Thread Shim Layer Implementation
+
+Each of the @code{k5_mutex_} macros has a corresponding
+@code{k5_os_mutex_} macro which incorporates the operating system's
+mutex object, a flag for non-threaded systems, or both if the use of
+the OS pthread support is left until run time.  The @code{k5_mutex_}
+wrappers add debugging information like the file and line number of
+the last lock or unlock call, where the mutex was created, @i{etc}.
+There may also be statistical information gathered, such as how long a
+thread waits for a mutex or how long the mutex is held.  This is all
+defined in @file{k5-thread.h}.
+
+The thread-specific storage support is defined as macros expanding to
+similar function names with the @code{krb5int_} prefix, which
+functions are defined in @file{util/support/threads.c}.  POSIX,
+Windows, and non-threaded versions are defined so far.
+
+The code for collecting and reporting statistics is also mainly in
+that file.  Macros defined in @file{k5-thread.h} will expand to
+include calls to these functions, if @code{DEBUG_THREADS_STATS} is
+defined, or do nothing.
+
+@node Shared Libraries, Porting Issues, Thread Safety, Top
+@chapter Shared Libraries
+
+(These sections are old -- they should get updated.)
+
+@menu
+* Shared Library Theory::       
+* Advanced Shared Library Requirements::  
+* Operating System Notes for Shared Libraries::  
+@end menu
+
+@node Shared Library Theory, Advanced Shared Library Requirements, Shared Libraries, Shared Libraries
+@section Theory of How Shared Libraries are Used
+
+An explanation of how shared libraries are implemented on a given
+platform is too broad a topic for this manual. Instead this will touch
+on some of the issues that the Kerberos V5 tree uses to support version
+numbering and alternate install locations.
+
+Normally when one builds a shared library and then links with it, the
+name of the shared library is stored in the object
+(i.e. libfoo.so). Most operating systems allows one to change name that
+is referenced and we have done so, placing the version number into the
+shared library (i.e. libfoo.so.0.1). At link time, one would reference
+libfoo.so, but when one executes the program, the shared library loader
+would then look for the shared library with the alternate name.  Hence
+multiple versions of shared libraries may be supported relatively
+easily. @footnote{Under AIX for the RISC/6000, multiple versions of
+shared libraries are supported by combining two or more versions of the
+shared library into one file.  The Kerberos build procedure produces
+shared libraries with version numbers in the internal module names, so
+that the shared libraries are compatible with this scheme.
+Unfortunately, combining two shared libraries requires internal
+knowledge of the AIX shared library system beyond the scope of this
+document.  Practically speaking, only one version of AIX shared libraries
+can be supported on a system, unless the multi-version library is
+constructed by a programmer familiar with the AIX internals.}
+
+All operating systems (that we have seen) provide a means for programs
+to specify the location of shared libraries.  On different operating
+systems, this is either specified when creating the shared library, and
+link time, or both.@footnote{Both are necessary sometimes as the shared
+libraries are dependent on other shared libraries.}  The build process
+will hardwire a path to the installed destination.
+
+@node Advanced Shared Library Requirements, Operating System Notes for Shared Libraries, Shared Library Theory, Shared Libraries
+@section Advanced Shared Library Requirements
+
+In order to better support some multithreading models, and permit the
+libraries to clean up internally maintained caches of information,
+we've imposed new requirements on the OS shared library support.
+
+Specifically, we want the ability to run certain bits of code in a
+thread-safe manner at library load time, on multithreading platforms
+not supporting @code{pthread_once}, and we want the ability to run
+cleanup code when the library is unloaded.
+
+In general, where platforms have initialization functions, we don't
+always get an opportunity to return an error from them.  However, the
+system functions we call can return errors.  So a framework has been
+built that attempts to combine the @code{pthread_once} and load-time
+initialization approaches, and add the ability to store an error code
+indicating success or failure of the initialization routine.
+
+The main implementation of this framework is in @file{k5-platform.h}.
+Some additional information, specifically the names of the
+initialization and finalization functions, are stored in the makefiles
+used to generate each of the UNIX libraries, in @file{win_glue.c}, and
+somewhere in the Mac OS X support (XXX not added yet?).  How the
+information is used depends on the platform:
+
+@itemize @bullet
+
+@item
+On platforms without any thread support, a simple flag is used, on the
+assumption that the library code will have sole control over the
+process execution until the initialization function returns.  (It's
+generally a bad idea to call any ``interesting'' function like
+@code{longjmp} or Kerberos functions from signal handlers; now it's a
+slightly worse idea.)
+
+@item
+On platforms supporting @code{pthread_once}, library initialization is
+generally delayed until the point where the library code needs to
+verify that the initialization succeeded.  If @code{pthread_once} may
+not have been linked into the executable and we can tell (for example,
+with weak symbol references), this is combined with the simple-flag
+approach above.
+
+@item
+On Windows, the library initialization function is run from
+@file{win_glue.c} at load time; it should complete before the
+library's symbol table is made accessible to the calling process.
+
+Windows note: There are limitations on what @code{DllMain} should do
+in the initialization and finalization cases, and unfortunately we've
+found that we do some of these things (specifically, calling
+@code{WSAStartup} and @code{WSACleanup}, and loading other libraries
+which do so also).  Until we can rectify this problem, there is a
+chance that explicitly unloading an MIT Kerberos library from an
+application (more specifically, from within the @code{DllMain} of
+another library) may cause a deadlock.
+@end itemize
+
+Library finalization is similarly dependent on the platform and
+configuration:
+
+@itemize @bullet
+
+@item
+In static-library builds, since the library will be unloaded only when
+the entire process calls @code{exit} or @code{exec} or otherwise
+ceases to exist in its current form, freeing up memory resources in
+the process, finalization can be skipped.
+
+@item
+On UNIX platforms with library finalization support in shared
+libraries, the (OS-level) finalization function is specified to run
+the library's (shim-level) finalization function.  If @code{gcc}'s
+``destructor'' attribute appears to work, we use that.
+
+@item
+On UNIX platforms without library finalization function support,
+the finalization functions won't get called if the library is
+unloaded.  Resources (probably just memory) will be leaked.
+
+@item
+On Windows, the finalization code is run out of @code{DllMain} in
+@file{win_glue.c} at unload time.  See the warnings above.
+
+@end itemize
+
+If there are other limitations on what operations can be performed in
+shared library initialization and finalization routines on some
+systems, the MIT Kerberos team would appreciate specific information
+on these limitations.
+
+The internal interface currently used within the code of the Kerberos
+libraries consists of four macros:
+
+@defmac MAKE_INIT_FUNCTION (@var{fname})
+Used at the top level of the file (@i{i.e.}, not within a function),
+with a semicolon after it, declares @var{fname}, a function taking no
+arguments and returning @code{int}, to be an initialization function.
+This macro must be used before the function is declared, and it must
+be defined in the current file as:
+@example
+int @var{fname} (void) @{ ... @}
+@end example
+This macro may define additional data and function objects,
+and will declare @var{fname}, though it may or may not declare
+@var{fname} as @code{static}.  (Under C rules, the declaration above
+is compatible with a declaration of the function as @code{static}, and
+@code{static} linkage does apply, as long as the @code{static} declaration
+comes first.)
+
+When the function is invoked, the return value --- zero or an error
+code --- will be saved away, and returned any time
+@code{CALL_INIT_FUNCTION} is used.
+
+There can be multiple initialization functions defined this way in a
+library.
+@end defmac
+
+@defmac MAKE_FINI_FUNCTION (@var{fname})
+This is similar to @code{MAKE_INIT_FUNCTION} except that @var{fname}
+is to be a library finalization function, called when the library is
+no longer in use and is being unloaded from the address space.
+@example
+void @var{fname} (void) @{ ... @}
+@end example
+
+There may be multiple finalization functions defined for a library.
+@end defmac
+
+@deftypefn Macro int CALL_INIT_FUNCTION (@var{fname})
+This macro ensures that the initialization function @var{fname} is
+called at this point, if it has not been called already.  The macro
+returns an error code that indicates success (zero), an error in the
+OS support (@i{e.g.}, if @code{pthread_once} returns an error), or an
+error returned by the initialization function.
+
+Currently, all uses of @code{CALL_INIT_FUNCTION} must be in the same
+file as the use of @code{MAKE_INIT_FUNCTION}, and must come after it.
+@end deftypefn
+
+@deftypefn Macro int INITIALIZER_RAN (@var{fname})
+This macro returns non-zero iff the initialization function designated
+by @var{fname} (and previously declared in the current file with
+@code{MAKE_INIT_FUNCTION}) has been run, and returned no error
+indication.
+
+Since the finalization function might always be invoked through linker
+support and initialization functions only sometimes invoked via
+@code{pthread_once} in other functions that may not ever be called,
+finalization functions should check whether the objects to be
+destroyed have actually been created.  This macro provides one way of
+doing that.
+@end deftypefn
+
+The @file{Makefile.in} for the library must define two variables,
+@code{LIBINITFUNC} and @code{LIBFINIFUNC}, containing a (possibly
+empty) list of the names of the initialization and finalization
+functions for the library as built under UNIX, ordered from
+lowest-level (initialized first, finalized last) to highest-level.
+(Windows and Mac OS X builds work differently.)
+
+Note that all of this assumes shared libraries.  If static linking is
+done, our options are a bit more limited.  We assume
+@code{pthread_once} is available if there is any thread support
+(@i{i.e.}, we don't support static linking on Windows), and we assume
+that finalization code would be called only when the process is
+exiting, at which point all resources should be freed up anyways, so
+it doesn't really matter whether our cleanup code gets called.  In
+fact, it should be more efficient if it does not.
+
+While one of our goals is to be able to repeatedly load, use, and
+unload the MIT Kerberos libraries under a plugin architecture without
+memory or other resource leaks, the main goal was to provide hooks
+through which the library threading support could be properly
+initialized on various platforms.  The hooks we've added should be
+sufficient for each library to free up any internal caches of
+information at unload time, and we have added some of that support,
+but it is not complete at this time.
+
+
+We have also started limiting the list of exported symbols from shared
+libraries on some UNIX platforms, and intend to start doing symbol
+versioning on platforms that support it.  The symbol lists we use for
+UNIX at the moment are fairly all-inclusive, because we need more
+symbols exported than are in the lists used for Windows and Mac
+platforms, and we have not yet narrowed them down.  The current lists
+should not be taken as an indication of what we intend to export and
+support in the future; see @file{krb5.h} for that.
+
+The export lists are stored in the directories in which each UNIX
+library is built, and the commands set up at configuration time by
+@file{shlib.conf} can specify any processing to be done on those files
+(@i{e.g.}, insertion of leading underscores or linker command-line
+arguments).
+
+For some systems with somewhat non-trivial commands that need to be
+run to convert the export list into the proper form, file targets can be
+defined in @file{config/lib.in}.  
+
+@node Operating System Notes for Shared Libraries,  , Advanced Shared Library Requirements, Shared Libraries
+@section Operating System Notes for Shared Libraries
+
+From time to time users or developers suggest using GNU @code{Libtool}
+or some other mechanism to  generate shared libraries.  Experience
+with other packages suggests that Libtool tends to be difficult to
+debug and when it works incorrectly, patches are required to generated
+scripts to work around problems.  So far, the Kerberos shared library
+build mechanism, which sets a variety of makefile variables based on
+operating system type and then uses those variables in the build
+process has proven to be easier to debug and adequate to the task of
+building shared libraries for Kerberos.
+
+@menu
+* AIX Shared Library Support::  
+* Alpha OSF/1 Shared Library Support::  
+* ELF Shared Library Support::  
+@end menu
+
+@node AIX Shared Library Support, Alpha OSF/1 Shared Library Support, Operating System Notes for Shared Libraries, Operating System Notes for Shared Libraries
+@subsection AIX Shared Library Support
+
+        AIX specifies shared library versions by combining multiple
+versions into a single file.  Because of the complexity of this process,
+no automatic procedure for building multi-versioned shared libraries is
+provided. Therefore, supporting multiple versions of the Kerberos shared
+libraries under AIX will require significant work on the part of a
+programmer famiiliar with AIX internals.  
+
+        AIX allows a single library to be used both as a static library
+and as a shared library.  For this reason, the @samp{--enable-shared}
+switch to configure builds only shared libraries.  On other operating
+systems, both shared and static libraries are built when this switch is
+specified.  As with all other operating systems, only non-shared static
+libraries are built when @samp{--enable-shared} is not specified.
+
+        The AIX 3.2.5 linker dumps core trying to build a shared
+@samp{libkrb5.a} produced with the GNU C compiler.  The native AIX
+compiler works fine.  In addition, the AIX 4.1 linker is able to build a
+shared @samp{libkrb5.a} when GNU C is used.
+
+
+@node Alpha OSF/1 Shared Library Support, ELF Shared Library Support, AIX Shared Library Support, Operating System Notes for Shared Libraries
+@subsection Alpha OSF/1 Shared Library Support
+
+Shared library support has been tested with V2.1 and higher of the
+operating system. Shared libraries may be compiled both with GCC and the
+native compiler.
+
+One of the nice features on this platform is that the paths to the
+shared libraries is specified in the library itself without requiring
+that one specify the same at link time. 
+
+We are using the @samp{-rpath} option to @samp{ld} to place the library
+load path into the executables. The one disadvantage of this is during
+testing where we want to make sure that we are using the build tree
+instead of a possibly installed library. The loader uses the contents of
+@samp{-rpath} before LD_LIBRARY_PATH so we must specify a dummy _RLD_ROOT
+and complete LD_LIBRARY_PATH in our tests.
+
+The one disadvantage with the method we are using....  [What??  This
+never got finished!]
+
+@node ELF Shared Library Support,  , Alpha OSF/1 Shared Library Support, Operating System Notes for Shared Libraries
+@subsection ELF Shared Library Support
+
+It's tempting to add @samp{-Bsymbolic} to the commands for generating
+shared libraries.  We don't explicitly support overriding our
+(internal or public) symbol names by applications, and binding at
+shared library creation time would result in smaller libraries that
+would load faster.  However, it won't work.  At least with the GNU and
+Solaris linkers and runtime environments, an executable using a data
+symbol exported by a shared library gets a copy of that data,
+initialized at run time by copying, and the program will only function
+properly if that definition can override the one present in the shared
+library.  And, sadly, some of our shared libraries export variables
+that are directly referenced from programs.
+
+@node Porting Issues,  , Shared Libraries, Top
+@chapter Porting Issues
+
+[Snipped from email from Ken Raeburn in reply to email asking about
+porting MIT Kerberos to pSOS; maybe it'll be of use to someone else.]
+
+> - Any Porting issues to be considered?
+
+Yes.  Our build procedure currently assumes that the machine used for
+building is either a UNIX (or similar) system, or running Windows; it
+also assumes that it's a native compilation, not a cross compilation.
+I'm not familiar with pSOS, but assuming that you do cross compilation
+on another OS, how you deal with that depends on the host system.
+
+UNIX host: The configure script attempts to learn a bunch of
+attributes about the host system (program names, availability of
+header files and functions and libraries) and uses them to decide how
+to build the krb5 libraries and programs.  Many attributes are tested
+by running the compiler with various options and test source files, so
+if you tell the configure script to run a cross compiler, it may come
+up with most of the right answers, if you can arrange for success and
+failure indications to be given at compile/link time.  (This probably
+wouldn't work well for VxWorks, for example, where symbol resolution
+is done when the object code is loaded into the OS.)
+
+The configure script generates include/autoconf.h to influence
+whether certain calls are made or certain headers are included, and
+Makefile in each directory to indicate compilation options.  Each
+source directory has a Makefile.in, and config/pre.in and
+config/post.in are incorporated into each generate Makefile.  Various
+@@FOO@@ sequences are substituted based on the system attributes or
+configure options.  (Aside from always using the config/ fragments,
+this is typical of GNU Autoconf based software configuration.)
+
+Windows host: The ``wconfig'' program generates the Makefiles in
+subdirectories, with config/win-pre.in and config/win-post.in used in
+combination with each Makefile.in, and lines starting @code{##WIN32##}
+are uncommented, but @code{@@FOO@@} substitutions are not done.
+Instead of generating @file{autoconf.h}, it's copied from
+@file{include/win-mac.h}, where we've hardcoded some of the parameters
+we care about, and just left a bunch of others out.  If you work with
+a Windows host, you may want to provide your own makefile fragments,
+and a replacement for @file{win-mac.h} or some additional data to go
+into it conditionalized on some preprocessor symbol for pSOS.
+
+There are also places where we assume that certain header files or
+functions are available, because both (most) UNIX and Windows
+platforms (that we care about currently) provide them.  And probably a
+handful of places where we check for @code{_WIN32} to decide between ``the
+Windows way'' and ``everything else'' (i.e., UNIX); you might need to add
+a third branch for pSOS.  And some places where we've got hooks for
+Kerberos for Mac support, which you can probably ignore.
+
+Our build environment assumes that Perl is available, but it's only
+needed in the build process, not for run time.  If Tcl is available,
+on UNIX, a few more programs may be built that are used for testing
+some interfaces, but a cross compiler should notice that it can't link
+against the native Tcl libraries, and configure should choose not to
+build those programs.
+
+In the current 1.4 beta code, our library wants to find routines for
+making DNS queries (SRV and TXT RR queries specifically) that are
+outside the scope of getaddrinfo and friends.  We also look for
+@file{/dev/random} as a strong random number source, and text files
+for configuration information.  Our code assumes that allocating and
+reallocating lots of little (or not so little) bits of memory isn't
+too horribly expensive, and we don't take any special pains to keep
+our stack size small.  Depending how pSOS works, you may need to add
+to the thread support code.  (The MIT code doesn't create threads, but
+will do locking and such to allow multiple threads to share global
+data.  The code in @file{include/k5-thread.h} is, uh, kind of
+involved, and some pains have been taken to use macros whenever
+possible to allow @code{assert()} calls during debugging to report
+useful line numbers.)  There are probably other minor issues to deal
+with, I'm just making some guesses.
+
+> - what type of Data formats exchanged between Client and Server?
+
+If you're aiming for a server implementation only, it'll depend on the
+exact protocol you wish to use, but typically the Kerberos application
+server needs to accept the AP-REQ message and generate the AP-REP
+message.  Protection for the data to be transferred depends on on the
+application protocol.  For example, Kerberos provides some message
+types for encapsulating application data with or without encryption;
+the Kerberos mechanism for GSSAPI uses the Kerberos session key to
+protect application data in a different message format.
+
+The server implementation would also need some secure means of getting
+the service principal's key stored away.
+
+If you want client code support as well under pSOS, then you may have
+to deal with DNS queries to find the KDC,
+AS-REQ/AS-REP/TGS-REQ/TGS-REP message exchanges, and generating AP-REQ
+and accepting AP-REP messages, etc.
+
+@contents
+@bye

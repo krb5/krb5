@@ -1,0 +1,238 @@
+# Password-changing Kerberos test.
+# This is a DejaGnu test script.
+
+proc setup_slave {} {
+    global tmppwd hostname REALMNAME KDB5_UTIL
+    file delete $tmppwd/slave-stash $tmppwd/slave-acl
+    file copy -force $tmppwd/acl $tmppwd/slave-acl
+    if ![file exists $tmppwd/kpropdacl] {
+	set aclfile [open $tmppwd/kpropd-acl w]
+	puts $aclfile "host/$hostname@$REALMNAME"
+	close $aclfile
+    }
+    setup_slave_db
+    # copy database - must be used after master db set up
+    envstack_push
+    setup_kerberos_env kdc
+    set dumpfile $tmppwd/dump-file
+    file delete $dumpfile $dumpfile.dump_ok
+    if [catch {exec $KDB5_UTIL dump -i $dumpfile} msg] {
+	error "master dump failed: $msg"
+    }
+    setup_kerberos_env slave
+    foreach suffix { .kadm5.lock .ok } {
+	file copy -force $tmppwd/kdc-db$suffix $tmppwd/slave-db$suffix
+    }
+    if [catch {exec $KDB5_UTIL load -i $dumpfile} msg] {
+	send_user "slave load failed: $msg"
+	spawn_shell
+	error "slave load failed: $msg"
+    }
+}
+
+# We are about to start up a couple of daemon processes.  We do all
+# the rest of the tests inside a proc, so that we can easily kill the
+# processes when the procedure ends.
+
+proc doit { } {
+    global REALMNAME KEY
+    global KLIST KDESTROY KADMIN_LOCAL KTUTIL KPROPLOG KPROPD KDB5_UTIL
+    global hostname tmppwd spawn_id kpropd_spawn_id kpropd_pid
+    global supported_enctypes KRBIV portbase mode
+    global ulog des3_krbtgt
+
+    # Delete any db, ulog files
+    delete_db
+
+    # Update config file
+    set ulog 1
+    reset_kerberos_files
+
+    # Initialize the Kerberos database.  The argument tells
+    # setup_kerberos_db that it is being called from here.
+    if ![setup_kerberos_db 0] {
+	return
+    }
+    if ![start_kerberos_daemons 0] {
+	return
+    }
+
+    # Check that ulog file does exist
+    if [file exists $tmppwd/db.ulog] {
+	pass "create update log"
+    } else {
+	fail "create update log"
+    }
+
+    setup_slave
+
+    # Use kadmin to add a key.
+    if ![add_kerberos_key wakawaka 0] {
+	return
+    }
+    set c chocolate-flavored-school-bus
+    # Long enough to make realloc likely, but not enough to grow
+    # basic ulog entry size.
+    set longname $c/$c/$c/$c/$c/$c/$c/$c/$c/$c/$c/$c/$c
+    if ![add_kerberos_key $longname 0] {
+	return
+    }
+    if ![add_kerberos_key w 0] {
+	return
+    }
+    if ![modify_principal w -allow_tix] {
+	return
+    }
+    if ![modify_principal w +allow_tix] {
+	return
+    }
+    # Should test rename_principal once we have that.
+
+    # Run kproplog, look at output.
+    setup_kerberos_env kdc
+    spawn $KPROPLOG
+    expect_after {
+	timeout {
+	    fail "kproplog output"
+	    break
+	}
+	eof {
+	    fail "kproplog output"
+	    break
+	}
+    }
+    catch {
+	expect -re "Kerberos update log"
+	expect -re "Update log dump"
+	expect -re "First serial \# : 1"
+	if $des3_krbtgt {
+	    expect -re "Last serial \# : 8"
+	    expect -re "Update Entry"
+	    expect -re "Update serial \# : 1"
+	    expect -re "Attributes changed : 15"
+	    expect -re "Update Entry"
+	    expect -re "Update serial \# : 2"
+	    expect -re "Attributes changed : 6"
+	    expect -re "Update Entry"
+	    expect -re "Update serial \# : 3"
+	    expect -re "Attributes changed : 15"
+	    expect -re "Update Entry"
+	    expect -re "Update serial \# : 4"
+	} else {
+	    expect -re "Last serial \# : 7"
+	    expect -re "Update Entry"
+	    expect -re "Update serial \# : 1"
+	    expect -re "Attributes changed : 15"
+	    expect -re "Update Entry"
+	    expect -re "Update serial \# : 2"
+	    expect -re "Attributes changed : 15"
+	    expect -re "Update Entry"
+	    expect -re "Update serial \# : 3"
+	}
+	expect -re "Update operation : Add"
+	expect -re "Update principal : wakawaka@KRBTEST.COM"
+	expect_after {
+	    timeout {
+		fail "kproplog output"
+		break
+	    }
+	}
+	expect -re "Attributes changed : 15"
+	expect eof
+	pass "kproplog output"
+    } foo
+    catch expect_after
+    if [check_exit_status kproplog] {
+	pass "kproplog"
+    }
+    add_random_key host/$hostname 0
+    add_random_key kiprop/$hostname 0
+
+    # Already have kadmind running.
+
+    # Get a keytab file.
+    setup_srvtab 0
+
+    # Sleep 11s for built-in delay.
+    verbose "Delaying to bypass contention-avoidance code in kadmind/iprop"
+    sleep 11
+
+    # Launch slave kpropd.
+    start_kpropd
+#    send_user [list $KPROPD -S -d -P [expr 10 + $portbase] -s $tmppwd/srvtab -f $tmppwd/incoming-slave-datatrans -p $KDB5_UTIL -a $tmppwd/kpropd-acl]\n
+#    spawn_shell
+    expect {
+	-i $kpropd_spawn_id
+	"Update transfer from master was OK" {
+	    exec kill $kpropd_pid
+	    wait -i $kpropd_spawn_id
+	    unset kpropd_spawn_id kpropd_pid
+	}
+	-re ..* { exp_continue }
+	timeout {
+	    catch { exec kill $kpropd_pid }
+	    exp_continue
+	}
+	eof {
+	    wait -i $kpropd_spawn_id
+	    unset kpropd_spawn_id kpropd_pid
+	}
+    }
+
+    # Wait briefly?
+    # Check slave db for new principal.
+    setup_kerberos_env slave
+    spawn $KADMIN_LOCAL -r $REALMNAME -q listprincs
+    expect {
+	wakawaka@ {
+	    expect eof
+	}
+	eof {
+	    fail "kprop (updated slave data)"
+	    return
+	}
+	timeout {
+	    fail "kprop (examining new db)"
+	    return
+	}
+    }
+    pass "iprop"
+
+    # What about testing for full propagation?  (Small number of
+    # entries in update log, change one principal's record a lot of
+    # times, then fire up incremental kpropd...)  Do later.
+}
+
+run_once iprop {
+    catch "unset kpropd_pid"
+    catch "unset kpropd_spawn_id"
+
+    # Set up the Kerberos files and environment.
+    if {![get_hostname] || ![setup_kerberos_files] || ![setup_kerberos_env]} {
+	return
+    }
+
+    set status [catch doit msg]
+
+    stop_kerberos_daemons
+
+    # if kpropd is running, kill it
+    if [info exists kpropd_pid] {
+	catch {
+	    exec kill $kpropd_pid
+	    expect -i $kpropd_spawn_id eof
+	    wait -i $kpropd_spawn_id
+	    unset kpropd_pid kpropd_spawn_id
+	}
+    }
+
+    set ulog 0
+    reset_kerberos_files
+    delete_db
+
+    if { $status != 0 } {
+	send_error "ERROR: error in iprop.exp\n"
+	send_error "$msg\n"
+	exit 1
+    }
+}

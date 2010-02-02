@@ -1,0 +1,9 @@
+open issues:
+
+* when should the initial seed be considered complete?
+* poll system ressources for randomness on startup?
+* how frequently should the PRNG state be saved?
+* how to react to fork()?
+* what should the seed file contain, how should it be processed?
+* test fork() hack
+* test openSSL locks in multi-threaded environment

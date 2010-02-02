@@ -1,0 +1,45 @@
+Name,Type,Value,Description
+Krb5Cred,KC_SPACE,0,Kerberos V Credentials Provider
+  Module,KC_STRING,MITKrb5,
+  Description,KC_STRING,Kerberos V Credentials Provider,
+  Type,KC_INT32,1,
+  Flags,KC_INT32,0,
+  Parameters,KC_SPACE,0,Parameters for KrbCred
+    CreateMissingConfig,KC_INT32,0,Create missing configuration files
+    MsLsaImport,KC_INT32,1,Automatically import MSLSA credentials: 0-never 1-always 2-if principle matches
+    MsLsaList,KC_INT32,1,Include MSLSA in the credentials list
+    FileCCList,KC_STRING,,List of file CCaches to include in listing
+    AutoRenewTickets,KC_INT32,1,Automatically renew expiring tickets
+    DefaultLifetime,KC_INT32,36000,Default ticket lifetime
+    MaxLifetime,KC_INT32,86400,Maximum lifetime
+    MinLifetime,KC_INT32,60,Minimum lifetime
+    Forwardable,KC_INT32,1,Obtain forwardable tickets (boolean)
+    Proxiable,KC_INT32,0,Obtain proxiable tickets (boolean)
+    Addressless,KC_INT32,1,Obtain addressless tickets (boolean)
+    PublicIP,KC_INT32,0,Additional public IP address to use (int32)
+    Renewable,KC_INT32,1,Obtain renewable tickets (boolean)
+    DefaultRenewLifetime,KC_INT32,604800,Default renewable lifetime
+    MaxRenewLifetime,KC_INT32,2592000,Maximum renewable lifetime
+    MinRenewLifetime,KC_INT32,60,Maximum renewable lifetime
+    UseFullRealmList,KC_INT32,0,Use the full list of realms in the New Creds dialog
+    LRURealms,KC_STRING,,
+    LRUPrincipals,KC_STRING,,
+    LastDefaultIdent,KC_STRING,,Last known default identity
+    PromptCacheLifetime,KC_INT32,172800,Lifetime of the prompt cache in seconds
+    DefaultCCName,KC_STRING,,Default CC name (only per identity)
+    DefaultToFileCache,KC_INT32,0,"If no DefaultCCName is specified for an identity, use a generated FILE: cache instead of an API: cache"
+    PromptCache,KC_SPACE,0,Cache of prompts (only per identity)
+      Name,KC_STRING,,
+      Banner,KC_STRING,,
+      PromptCount,KC_INT32,0,
+      ExpiresOn,KC_INT64,0,FILETIME of when the prompt cache is set to expire
+      (n),KC_SPACE,0,Parameters for each prompt
+        Prompt,KC_STRING,,
+        Type,KC_INT32,0,
+        Flags,KC_INT32,0,
+      (n),KC_ENDSPACE,0,
+    PromptCache,KC_ENDSPACE,0,
+    Realms,KC_SPACE,0,Realm specific configuration (same schema as per identity config)
+    Realms,KC_ENDSPACE,0,
+  Parameters,KC_ENDSPACE,0,
+Krb5Cred,KC_ENDSPACE,0,

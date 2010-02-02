@@ -1,0 +1,106 @@
+#!/bin/sh
+
+force=
+autoreconfprog=autoreconf
+localdir=.
+autoreconfoptions=""
+verbose=false
+localdirarg=
+
+autoreconf="/bin/sh $autoreconfprog"
+
+# This should prevent autoreconf -- at least, the Debian version -- from
+# running aclocal in directories with configure.in but not aclocal.m4, so
+# that we can find the top-level one via the --include option.
+ACLOCAL=true ; export ACLOCAL
+
+usage="Usage: $0 [--force] [--verbose] [--help]"
+for option
+do
+  case "$option" in
+  --force | -f)
+    echo "Remaking all configuration files"
+    force=--force ;;
+  -help | --help | --hel | --he | --h)
+    echo "$usage"; exit 0 ;;
+  -v | --verbose)
+    verbose=true ;;
+  *) echo "$usage"; exit 1 ;;
+  esac
+done
+
+# Currently (2003-04-24) we need 2.52 or later.
+patb="2.(1[0-9][0-9])|(5[2-9])|([6-9][0-9])"
+
+# sedcmd1 recognizes the older 2.12 version, and sedcmd2 the newer 2.49
+sedcmd1="s,.*version \(.*\)$,\1,"
+sedcmd2="s,.*) \(.*\)$,\1,;1q"
+
+if autoreconf --version | sed -e "$sedcmd1" -e "$sedcmd2" | egrep "$patb" >/dev/null && \
+    autoconf --version  | sed -e "$sedcmd1" -e "$sedcmd2"  | egrep "$patb" >/dev/null && \
+    autoheader --version | sed -e "$sedcmd1" -e "$sedcmd2" | egrep "$patb" >/dev/null; then
+    autoreconf=autoreconf
+    autoreconfoptions=
+    autoconfversion=`autoconf --version | sed -e "$sedcmd1" -e "$sedcmd2"`
+	echo "Using autoconf version $autoconfversion found in your path..."
+	localdir=`pwd`
+
+	# Determine if we need to patch autoreconf for 2.53
+	case "$autoconfversion" in
+	  2.52)
+	       echo "WARNING: autoconf 2.52 is known to generate buggy configure scripts!"
+	       ;;
+	  2.53)
+	       echo "Patching autoreconf"
+	       # Walk the path to find autoreconf
+	       autoreconfpath=
+	       for i in `echo $PATH | sed -e 's/:/ /g'` ; do
+		   if test -r $i/autoreconf; then
+		       autoreconfpath=$i/autoreconf
+		       break
+		   fi
+	       done
+	       if test "x$autoreconfpath" = "x" ; then 
+		   echo "Could not find autoreconf executable!!!"
+		   exit
+	       fi
+	       
+	       echo "About to patch $autoreconfpath to ..."
+	       TMPCMD=/tmp/autoreconf$$
+	       sed -e 's/push @ARGV, $_;/push @ARGV, catfile ($directory, $_);/' $autoreconfpath > $TMPCMD
+	       autoreconf="/bin/sh $TMPCMD"
+	       trap "rm $TMPCMD" 0
+	       ;;
+	  *)
+	       ;;
+	esac
+
+	# Determine the proper argument to autoreconf 
+	case "$autoconfversion" in
+	  2.1*)
+	       localdirarg="-l"
+	       ;;
+	  2.5[23])
+	       localdirarg="-l"
+	       ;;
+	    *)
+	       localdirarg="-I"
+	       ;;
+	esac
+else
+	echo "Couldn't find autoconf 2.52 or higher in your path."
+	echo " "
+	echo "Please install or add to your path and re-run ./util/reconf"
+	exit 1
+fi
+
+if $verbose ; then 
+	echo $autoreconf $autoreconfoptions $localdirarg $localdir --verbose $force
+fi
+$autoreconf $autoreconfoptions  $localdirarg $localdir --verbose $force || exit 1
+if test $? = 0 ; then
+    if test ! -d include/autoconf.stmp ; then
+	cp /dev/null include/autoconf.stmp
+    fi
+fi
+find . -name autom4te.cache -print | xargs rm -rf

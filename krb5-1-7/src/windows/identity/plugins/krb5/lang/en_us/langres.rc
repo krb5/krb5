@@ -1,0 +1,507 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "..\..\langres.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "..\\..\\langres.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_NC_KRB5 DIALOGEX 0, 0, 300, 166
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Kerberos v5 Credential Options",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | SS_SUNKEN | WS_GROUP,7,7,286,11
+    LTEXT           "Realm",IDC_STATIC,7,25,52,13
+    COMBOBOX        IDC_NCK5_REALM,60,25,233,51,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Specify &additional realms ...",IDC_NCK5_ADD_REALMS,181,43,112,16,BS_NOTIFY | NOT WS_VISIBLE | WS_DISABLED
+    LTEXT           "&Lifetime",IDC_STATIC,7,67,61,12
+    EDITTEXT        IDC_NCK5_LIFETIME_EDIT,85,67,107,12,ES_AUTOHSCROLL
+    CONTROL         "&Renewable for",IDC_NCK5_RENEWABLE,"Button",BS_AUTOCHECKBOX | BS_NOTIFY | WS_TABSTOP,7,87,64,12
+    EDITTEXT        IDC_NCK5_RENEW_EDIT,85,87,108,12,ES_AUTOHSCROLL
+    CONTROL         "Can be &forwarded to other machines",IDC_NCK5_FORWARDABLE,
+                    "Button",BS_AUTOCHECKBOX | BS_NOTIFY | WS_TABSTOP,7,107,132,12
+    CONTROL         "Addressless",IDC_NCK5_ADDRESS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,128,54,10
+    LTEXT           "Additional IP address",IDC_STATIC,118,129,68,8,NOT WS_VISIBLE
+    CONTROL         "",IDC_NCK5_PUBLICIP,"SysIPAddress32",NOT WS_VISIBLE | WS_TABSTOP,193,125,100,15
+END
+
+IDD_PP_KRB5C DIALOGEX 0, 0, 235, 156
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Kerberos v5"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    LTEXT           "Name",IDC_STATIC,7,7,19,8
+    LTEXT           "Valid till",IDC_STATIC,7,39,24,8
+    LTEXT           "Renewable till",IDC_STATIC,7,55,45,12
+    LTEXT           "Issued on",IDC_STATIC,7,23,32,8
+    LTEXT           "Credential flags",IDC_STATIC,7,75,51,8
+    EDITTEXT        IDC_PPK5_NAME,72,7,156,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_PPK5_ISSUE,72,23,156,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_PPK5_VALID,72,39,156,12,ES_AUTOHSCROLL | ES_READONLY
+    EDITTEXT        IDC_PPK5_RENEW,72,55,156,12,ES_AUTOHSCROLL | ES_READONLY
+    LISTBOX         IDC_PPK5_FLAGS,72,74,156,75,LBS_SORT | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_PP_KRB5 DIALOGEX 0, 0, 235, 156
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Kerberos v5"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    LTEXT           "Default realm",IDC_STATIC,7,7,44,8
+    LTEXT           "Default lifetime",IDC_STATIC,7,22,49,8
+    LTEXT           "Minimum lifetime",IDC_STATIC,7,37,52,8
+    LTEXT           "Maximum lifetime",IDC_STATIC,7,52,55,8
+    LTEXT           "Renewable lifetime",IDC_STATIC,7,67,61,8
+    LTEXT           "Min. Renewable lifetime",IDC_STATIC,7,82,76,8
+    LTEXT           "Max. Renewable lifetime",IDC_STATIC,7,97,79,8
+    GROUPBOX        "Default credential flags",IDC_STATIC,7,113,221,36
+    CONTROL         "Proxiable",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,160,129,45,10
+    CONTROL         "Renewable",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,23,129,51,10
+    CONTROL         "Forwardable",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,89,129,56,10
+    LTEXT           "ATHENA.MIT.EDU",IDC_STATIC,95,7,133,11,0,WS_EX_CLIENTEDGE
+    LTEXT           "10 hours",IDC_STATIC,95,22,133,11,0,WS_EX_CLIENTEDGE
+    LTEXT           "1 minute",IDC_STATIC,95,37,133,11,0,WS_EX_CLIENTEDGE
+    LTEXT           "7 days",IDC_STATIC,95,52,133,11,0,WS_EX_CLIENTEDGE
+    LTEXT           "7 days",IDC_STATIC,95,67,133,11,0,WS_EX_CLIENTEDGE
+    LTEXT           "1 minute",IDC_STATIC,95,82,133,11,0,WS_EX_CLIENTEDGE
+    LTEXT           "21 days",IDC_STATIC,95,97,133,11,0,WS_EX_CLIENTEDGE
+END
+
+IDD_CONFIG DIALOGEX 0, 0, 255, 182
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Default Realm",IDC_CFG_LBL_REALM,13,9,46,8
+    COMBOBOX        IDC_CFG_DEFREALM,76,7,166,51,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Include all configured realms in New Credentials realm list",IDC_CFG_INCREALMS,
+                    "Button",BS_AUTOCHECKBOX | BS_MULTILINE | WS_TABSTOP,76,26,166,22
+    PUSHBUTTON      "Configure Realms ...",IDC_CFG_CFGREALMS,76,46,84,14,NOT WS_VISIBLE | WS_DISABLED
+    GROUPBOX        "Configuration File",IDC_CFG_CFGFILEGRP,7,59,241,47
+    LTEXT           "Location",IDC_CFG_LBL_CFGFILE,13,74,28,8
+    EDITTEXT        IDC_CFG_CFGFILE,76,71,166,14,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "Browse...",IDC_CFG_BROWSE,145,89,44,14,NOT WS_VISIBLE
+    CONTROL         "Create file if missing",IDC_CFG_CREATECONFIG,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_DISABLED | WS_TABSTOP,76,93,80,10
+    PUSHBUTTON      "Load into realm editor ...",IDC_CFG_BROWSE2,26,89,100,14,NOT WS_VISIBLE
+    GROUPBOX        "Microsoft Windows® Options",IDC_CFG_WINGRP,7,110,241,65
+    LTEXT           "Hostname",IDC_CFG_LBL_HOSTNAME,13,123,33,8
+    EDITTEXT        IDC_CFG_HOSTNAME,76,120,166,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Domain",IDC_CFG_LBL_DOMAIN,13,141,24,8
+    EDITTEXT        IDC_CFG_DOMAIN,76,138,166,14,ES_AUTOHSCROLL | ES_READONLY
+    LTEXT           "Import credentials",IDC_LBL_IMPORT,13,158,45,8
+    COMBOBOX        IDC_CFG_IMPORT,76,156,166,51,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_CFG_REALMS DIALOGEX 0, 0, 255, 182
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_CFG_REALMS,"SysListView32",LVS_REPORT | LVS_SHOWSELALWAYS | LVS_SORTASCENDING | LVS_EDITLABELS | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | WS_TABSTOP,7,19,81,148
+    GROUPBOX        "Kerberos v5 Servers",IDC_CFG_SERVERSGRP,93,7,155,91
+    GROUPBOX        "Domain to Realm mappings",IDC_CFG_DOMAINGRP,93,101,155,74
+    CONTROL         "",IDC_CFG_KDC,"SysListView32",LVS_REPORT | LVS_EDITLABELS | LVS_ALIGNLEFT | WS_TABSTOP,99,19,143,72
+    CONTROL         "",IDC_CFG_DMAP,"SysListView32",LVS_REPORT | LVS_EDITLABELS | LVS_ALIGNLEFT | WS_TABSTOP,99,111,143,56
+END
+
+IDD_CFG_IDS_TAB DIALOGEX 0, 0, 235, 151
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Ticket &lifetime",IDC_CFG_LBL_DEFLIFE,7,10,44,8
+    EDITTEXT        IDC_CFG_DEFLIFE,94,7,134,14,ES_AUTOHSCROLL
+    LTEXT           "Ticket re&newable lifetime",IDC_CFG_LBL_DEFRLIFE,7,29,80,8
+    EDITTEXT        IDC_CFG_DEFRLIFE,94,26,134,14,ES_AUTOHSCROLL
+    CONTROL         "&Renewable",IDC_CFG_RENEW,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,47,51,10
+    CONTROL         "&Forwardable",IDC_CFG_FORWARD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,94,47,56,10
+    CONTROL         "&Addressless",IDC_CFG_ADDRESSLESS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,63,54,10
+    GROUPBOX        "Credential lifetime range",IDC_CFG_LIFEGRP,7,79,221,31
+    LTEXT           "From",IDC_STATIC,13,93,17,8
+    EDITTEXT        IDC_CFG_LRNG_MIN,38,90,79,14,ES_AUTOHSCROLL
+    LTEXT           "To",IDC_STATIC,125,93,9,8
+    EDITTEXT        IDC_CFG_LRNG_MAX,143,90,79,14,ES_AUTOHSCROLL
+    GROUPBOX        "Credential renewable lifetime range",IDC_STATIC,7,113,221,31
+    LTEXT           "From",IDC_STATIC,13,128,17,8
+    EDITTEXT        IDC_CFG_RLRNG_MIN,38,125,79,14,ES_AUTOHSCROLL
+    LTEXT           "To",IDC_STATIC,125,128,9,8
+    EDITTEXT        IDC_CFG_RLRNG_MAX,143,125,79,14,ES_AUTOHSCROLL
+END
+
+IDD_CFG_ID_TAB DIALOGEX 0, 0, 235, 151
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Credential lifetime",IDC_CFG_LBL_DEFLIFE,7,10,58,8
+    EDITTEXT        IDC_CFG_DEFLIFE,91,7,137,14,ES_AUTOHSCROLL
+    CONTROL         "Renewable for",IDC_CFG_RENEW,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,41,63,10
+    EDITTEXT        IDC_CFG_DEFRLIFE,91,39,137,14,ES_AUTOHSCROLL
+    CONTROL         "Can be forwarded to other machines",IDC_CFG_FORWARD,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,59,133,10
+    CONTROL         "Addressless",IDC_CFG_ADDRESSLESS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,77,54,10
+    LTEXT           "Additional IP address",IDC_STATIC,91,78,68,8,NOT WS_VISIBLE
+    CONTROL         "",IDC_CFG_PUBLICIP,"SysIPAddress32",NOT WS_VISIBLE | WS_TABSTOP,128,89,100,15
+    LTEXT           "Credential cache",IDC_STATIC,7,132,58,8
+    EDITTEXT        IDC_CFG_CCACHE,91,130,137,14,ES_AUTOHSCROLL
+END
+
+IDD_NC_KRB5_PASSWORD DIALOGEX 0, 0, 300, 166
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    CONTROL         "Kerberos v5 Change Password Options",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | SS_SUNKEN | WS_GROUP,7,7,286,11
+    LTEXT           "Realm",IDC_STATIC,7,25,52,13
+    COMBOBOX        IDC_NCK5_REALM,60,25,233,51,CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Specify &additional realms ...",IDC_NCK5_ADD_REALMS,181,43,112,16,BS_NOTIFY | WS_DISABLED
+END
+
+IDD_CFG_CACHES DIALOGEX 0, 0, 255, 182
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_SYSMENU
+EXSTYLE WS_EX_CONTROLPARENT
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "File-based Credential Caches",IDC_CFG_FCGRP,7,26,241,149
+    CONTROL         "",IDC_CFG_FCLIST,"SysListView32",LVS_REPORT | LVS_SORTASCENDING | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,13,37,229,97
+    EDITTEXT        IDC_CFG_FCNAME,13,139,173,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Browse ...",IDC_CFG_BROWSE,192,139,50,14
+    PUSHBUTTON      "Add",IDC_CFG_ADD,13,156,50,14
+    PUSHBUTTON      "Remove Selected",IDC_CFG_REMOVE,88,156,80,14
+    CONTROL         "Include all API: credentials caches",IDC_CFG_INCAPI,
+                    "Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,123,7,125,10
+    CONTROL         "Include Windows LSA cache (MSLSA:)",IDC_CFG_INCMSLSA,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,7,136,10
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_NC_KRB5, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 293
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 159
+    END
+
+    IDD_PP_KRB5C, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 149
+    END
+
+    IDD_PP_KRB5, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 149
+    END
+
+    IDD_CONFIG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 248
+        VERTGUIDE, 13
+        VERTGUIDE, 76
+        VERTGUIDE, 242
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 175
+    END
+
+    IDD_CFG_REALMS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 248
+        VERTGUIDE, 93
+        VERTGUIDE, 99
+        VERTGUIDE, 242
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 175
+        HORZGUIDE, 19
+        HORZGUIDE, 167
+    END
+
+    IDD_CFG_IDS_TAB, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        VERTGUIDE, 13
+        VERTGUIDE, 94
+        VERTGUIDE, 222
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 144
+    END
+
+    IDD_CFG_ID_TAB, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        VERTGUIDE, 91
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 144
+    END
+
+    IDD_NC_KRB5_PASSWORD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 293
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 159
+    END
+
+    IDD_CFG_CACHES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 248
+        VERTGUIDE, 7
+        VERTGUIDE, 13
+        VERTGUIDE, 242
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 175
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_PLUGIN              ICON                    "..\\..\\images\\krb5plugin.ico"
+IDI_DELETED             ICON                    "..\\..\\images\\deleted.ico"
+IDI_NEW                 ICON                    "..\\..\\images\\new.ico"
+IDI_NORMAL              ICON                    "..\\..\\images\\normal.ico"
+IDI_MODIFIED            ICON                    "..\\..\\images\\modified.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_UNK_ADDR_FMT        "Unknown address type %d"
+    IDS_KRB5_CREDTEXT_0     "<p><a id=""SwitchPanel"" param=""Krb5Cred""><b>Krb5</b></a><tab>: Tickets for realm %s</p>"
+    IDS_KRB5_CCNAME_SHORT_DESC "Kerberos v5 CCache"
+    IDS_KEY_ENCTYPE_SHORT_DESC "Session EncType"
+    IDS_TKT_ENCTYPE_SHORT_DESC "Service EncType"
+    IDS_KEY_ENCTYPE_LONG_DESC "Session Key Encryption Type"
+    IDS_TKT_ENCTYPE_LONG_DESC "Service Encryption Type"
+    IDS_ADDR_LIST_SHORT_DESC "Addresses"
+    IDS_ADDR_LIST_LONG_DESC "Address List"
+    IDS_ETYPE_NULL          "NULL"
+    IDS_ETYPE_DES_CBC_CRC   "DES-CBC-CRC"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ETYPE_DES_CBC_MD4   "DES-CBC-MD4"
+    IDS_ETYPE_DES_CBC_MD5   "DES-CBC-MD5"
+    IDS_ETYPE_DES_CBC_RAW   "DES-CBC-RAW"
+    IDS_ETYPE_DES3_CBC_SHA  "DES3-CBC-SHA"
+    IDS_ETYPE_DES3_CBC_RAW  "DES3-CBC-RAW"
+    IDS_ETYPE_DES_HMAC_SHA1 "DES-HMAC-SHA1"
+    IDS_ETYPE_DES3_CBC_SHA1 "DES3-CBC-SHA1"
+    IDS_ETYPE_AES128_CTS_HMAC_SHA1_96 "AES128_CTS-HMAC-SHA1_96"
+    IDS_ETYPE_AES256_CTS_HMAC_SHA1_96 "AES256_CTS-HMAC-SHA1_96"
+    IDS_ETYPE_ARCFOUR_HMAC  "RC4-HMAC-NT"
+    IDS_ETYPE_ARCFOUR_HMAC_EXP "RC4-HMAC-NT-EXP"
+    IDS_ETYPE_UNKNOWN       "(Unknown)"
+    IDS_ETYPE_LOCAL_DES3_HMAC_SHA1 "LOCAL-DES3-HMAC-SHA1"
+    IDS_ETYPE_LOCAL_RC4_MD4 "LOCAL-RC4-MD4"
+    IDS_KRB5_SHORT_DESC     "Kerberos v5 credentials"
+    IDS_KRB5_LONG_DESC      "Kerberos v5 credentials"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_KRB4_SHORT_DESC     "Kerberos v4"
+    IDS_KRB4_LONG_DESC      "Kerberos v4 credentials"
+    IDS_KRB5_FLAGS_SHORT_DESC "Kerberos v5 Flags"
+    IDS_RENEW_TILL_SHORT_DESC "Renew Till"
+    IDS_RENEW_TILL_LONG_DESC "Renewable Till"
+    IDS_RENEW_FOR_SHORT_DESC "Renew for"
+    IDS_RENEW_FOR_LONG_DESC "Renewable for"
+    IDS_KRB5_CCNAME_LONG_DESC "Kerberos v5 Primary Credentials Cache"
+    IDS_NC_USERNAME         "Username"
+    IDS_NC_REALM            "Realm"
+    IDS_KRB5_WARNING        "Kerberos v5 Warning"
+    IDS_K5ERR_NAME_EXPIRED  "<p><a id=""SwitchPanel"" param=""Krb5Cred""><b>Krb5</b></a><tab>: The selected principal name has expired.</p><p><tab>  Please contact your system administrator.</p>"
+    IDS_K5ERR_KEY_EXPIRED   "<p><a id=""SwitchPanel"" param=""Krb5Cred""><b>Krb5</b></a><tab>: The password for the selected identity has expired.</p><p><tab>  Click <a id=""Krb5Cred:!Passwd"">here</a> to change the password</p>"
+    IDS_KRB5_WARN_FMT       "Kerberos v5: %s\n\n%s"
+    IDS_K5ERR_FMT           "<p><a id=""SwitchPanel"" param=""Krb5Cred""><b>Krb5</b></a><tag>: %s</p>"
+    IDS_K5CFG_SHORT_DESC    "Kerberos v5"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_K5CFG_LONG_DESC     "Kerberos v5 Configuration"
+    IDS_K5RLM_SHORT_DESC    "Realms"
+    IDS_K5RLM_LONG_DESC     "Kerberos Realm Configuration"
+    IDS_K5CFG_IDS_SHORT_DESC "Kerberos v5"
+    IDS_K5CFG_IDS_LONG_DESC "Kerberos v5 options for all identities"
+    IDS_K5CFG_ID_SHORT_DESC "Kerberos v5"
+    IDS_K5CFG_ID_LONG_DESC  "Kerberos v5 options for this identity"
+    IDS_PLUGIN_DESC         "Kerberos v5 Credentials Provider"
+    IDS_NC_PWD_BANNER       "Changing Kerberos v5 Password"
+    IDS_NC_PWD_PWD          "Current Password"
+    IDS_NC_PWD_NPWD         "New Password"
+    IDS_NC_PWD_NPWD_AGAIN   "New Password again"
+    IDS_KRB5_CREDTEXT_P0    "<p><a id=""SwitchPanel"" param=""Krb5Cred""><b>Krb5</b></a><tab>: Changing password for %s</p>"
+    IDS_K5CFG_IMPORT_OPTIONS "Never,Always,Only when the principal matches"
+    IDS_IDENTPRO_DESC       "Kerberos v5 Identity Provider"
+    IDS_K5CCC_SHORT_DESC    "Credential Caches"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_K5CCC_LONG_DESC     "Kerberos v5 Credential Caches"
+    IDS_CFG_FCTITLE         "File based Credential Caches"
+    IDS_CFG_FCN_WARNING     "Warning:"
+    IDS_CFG_FCN_W_NOTFOUND  "The credentials cache you specified does not exist."
+    IDS_CFG_FCN_W_RELATIVE  "The path you specified not an absolute path."
+    IDS_CFG_FCOPENTITLE     "Select a credential cache to add"
+    IDS_UNAVAILABLE         "(Not available)"
+    IDS_FLG_FORWARDABLE     "Forwardable"
+    IDS_FLG_FORWARDED       "Forwarded"
+    IDS_FLG_PROXIABLE       "Proxiable"
+    IDS_FLG_PROXY           "Proxy"
+    IDS_FLG_MAY_POSTDATE    "May postdate"
+    IDS_FLG_POSTDATED       "Postdated"
+    IDS_FLG_INVALID         "Invalid"
+    IDS_FLG_RENEWABLE       "Renewable"
+    IDS_FLG_INITIAL         "Initial"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_FLG_PRE_AUTH        "Pre-authenticated"
+    IDS_FLG_HW_AUTH         "Hardware authentication"
+    IDS_FLG_TRANSIT_POL     "Transit policy checked"
+    IDS_FLG_OK_DELEGATE     "Approved for delegation"
+    IDS_FLG_ANONYMOUS       "Anonymous"
+    IDS_K5ERR_CANTWRITEPROFILE 
+                            "The Kerberos v5 profile file could not be written"
+    IDS_K5ERR_PROFNOWRITE   "The file %s could not be opened as a profile file for writing."
+    IDS_K5ERR_PROFUSETEMP   "The file %s could not be opened for writing.  The current changes will be saved to %s temporarily."
+    IDS_K5ERR_PROFSUGGEST   "This may be due to not having privileges to modify the configuration file.  Please contact your system administrator to resolve the issue."
+    IDS_CFG_RE_REALMS       "Kerberos Realms"
+    IDS_CFG_RE_KDCS         "Kerberos Servers"
+    IDS_CFG_RE_DMAPS        "Domain mappings"
+    IDS_CFG_RE_KDCS_R       "Kerberos Servers for %s"
+    IDS_CFG_RE_DMAPS_R      "Domains that map to %s"
+    IDS_CFG_RE_HEAD_SVR     "Server"
+    IDS_CFG_RE_HEAD_ADMIN   "Admin"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CFG_RE_HEAD_MASTER  "Master"
+    IDS_CFG_RE_HEAD_DOMAIN  "Domain"
+    IDS_CFG_RE_NEWREALM     "<New realm...>"
+    IDS_YES                 "Yes"
+    IDS_NO                  "No"
+    IDS_CFG_RE_NEWSERVER    "<New server...>"
+    IDS_CFG_RE_NEWDMAP      "<New domain mapping...>"
+    IDS_KRB5_NC_NAME        "Kerberos v5"
+    IDS_NCERR_IDENT_TOO_LONG "The identity name is too long."
+    IDS_NCERR_IDENT_INVALID "The identity name is invalid."
+    IDS_NCERR_IDENT_UNKNOWN "An unknown error occurred while validating the identity name."
+    IDS_CFG_RE_ARNUT        "Can't add new realm %s"
+    IDS_CFG_RE_ARNUM        "The new realm name %s can't be added because there is already a realm with the same name listed.  Please type another name."
+    IDS_CFG_RE_ASNUT        "Can't add new server %s for realm %s"
+    IDS_CFG_RE_ASNUM        "There already is a server named %s for realm %s. The new server can not be added."
+    IDS_CFG_RE_DMNUT        "Can't add new domain map %s for realm %s"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_CFG_RE_DMNUM        "There already is a domain named %s mapping to realm %s.  The new domain map could not be added."
+    IDS_CFG_RE_MNR          "&Add new realm"
+    IDS_CFG_RE_MDR          "&Remove realm"
+    IDS_CFG_RE_MNK          "&Add new server"
+    IDS_CFG_RE_MDK          "&Remove server"
+    IDS_CFG_RE_MAK          "Toggle a&dmin server"
+    IDS_CFG_RE_MMK          "Toggle &master KDC"
+    IDS_CFG_RE_MND          "&Add new domain mapping"
+    IDS_CFG_RE_MDD          "&Remove domain mapping"
+    IDS_KVNO_SHORT_DESC     "Kvno"
+    IDS_KVNO_LONG_DESC      "Key version number"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
+

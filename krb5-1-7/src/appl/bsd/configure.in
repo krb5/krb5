@@ -1,0 +1,159 @@
+K5_AC_INIT(krlogind.c)
+CONFIG_RULES
+KRB5_AC_INET6
+LOGINLIBS=
+AC_ARG_WITH([afs],
+[  --without-afs        don't have afs libraries to build against (default)
+  --with-afs=AFSDIR    use preinstalled AFS library tree],
+,with_afs=no)dnl
+if test $with_afs != no; then
+	AC_DEFINE(SETPAG,1,[Define if setpag should be used])
+	LOGINLIBS="$LOGINLIBS -L$with_afs/lib -L$with_afs/lib/afs -lauth -lsys -lrx -llwp"
+fi
+AC_PROG_INSTALL
+dnl dbm libs for use of an_to_ln
+save_LIBS="$LIBS"
+ LIBS=
+ AC_CHECK_LIB(crypt,crypt)
+ LOGINLIBS="$LOGINLIBS $LIBS"
+LIBS="$save_LIBS"
+dnl
+dnl AIX has them all; SCO might too
+AC_CHECK_LIB(odm,main,
+  AC_CHECK_LIB(s,main,
+    AC_CHECK_LIB(cfg,main, 
+      LOGINLIBS="$LOGINLIBS -lodm -ls -lcfg" 
+      )))
+dnl
+dnl Make our operating system-specific security checks and definitions for
+dnl login.
+dnl
+case $krb5_cv_host in
+*-*-aix3*)
+	# AIX has streams include files but not streams TTY
+	# Moreover, strops.h trashes sys/ioctl.h
+	krb5_cv_has_streams=no
+	;;
+alpha*-dec-osf*)
+	AC_CHECK_LIB(security,setluid,
+		AC_DEFINE(HAVE_SETLUID,1,[Define if setluid is supplied by the OSF/1 security library])
+		LOGINLIBS="$LOGINLIBS -lsecurity"
+	)
+	;;
+esac
+dnl
+KRSHDLIBS="$LOGINLIBS"
+dnl
+AC_SUBST(KRSHDLIBS)
+AC_SUBST(LOGINLIBS)
+dnl
+AC_FUNC_VFORK
+AC_TYPE_MODE_T
+AC_CHECK_FUNCS(isatty inet_aton getenv gettosbyname killpg initgroups setpriority setreuid setresuid waitpid setsid ptsname setlogin tcgetpgrp tcsetpgrp setpgid strsave utimes rmufile rresvport_af)
+AC_CHECK_HEADERS(unistd.h stdlib.h string.h sys/filio.h sys/sockio.h sys/label.h sys/tty.h ttyent.h lastlog.h sys/select.h sys/ptyvar.h utmp.h sys/time.h sys/ioctl_compat.h paths.h arpa/nameser.h)
+AC_HEADER_STDARG
+AC_REPLACE_FUNCS(getdtablesize)
+dnl
+KRB5_AC_NEED_DAEMON
+dnl
+KRB5_SIGTYPE
+CHECK_SIGNALS
+CHECK_SETJMP
+CHECK_DIRENT
+CHECK_WAIT_TYPE
+AC_CHECK_HEADER(termios.h,[AC_CHECK_FUNC(cfsetispeed,AC_DEFINE(POSIX_TERMIOS,1,[Define if POSIX-compatible termios interface is found]))])
+CHECK_UTMP
+KRB5_GETSOCKNAME_ARGS
+dnl
+dnl Check for where the BSD rlogin, rcp, and rsh programs live.
+dnl
+save_path=$PATH
+ifdef([_AC_PROG_ECHO], [_AC_PROG_ECHO])
+ifdef([AC_PROG_ECHO_N], [AC_PROG_ECHO_N])
+AC_ARG_ENABLE([athena],
+[  --enable-athena         build with MIT Project Athena configuration],
+[PATH=/usr/athena/bin:/bin:/usr/bin:/usr/bsd:/usr/ucb],
+[PATH=/bin:/usr/bin:/usr/bsd:/usr/ucb])
+AC_PATH_PROG(UCB_RLOGIN,rlogin,/usr/ucb/rlogin)
+AC_PATH_PROG(UCB_RSH,rsh,/usr/ucb/rsh)
+AC_PATH_PROG(UCB_RCP,rcp,/usr/ucb/rcp)
+PATH=$save_path
+ifdef([_AC_PROG_ECHO], [_AC_PROG_ECHO])
+ifdef([AC_PROG_ECHO_N], [AC_PROG_ECHO_N])
+dnl
+dnl
+AC_MSG_CHECKING([streams interface])
+AC_CACHE_VAL(krb5_cv_has_streams,
+[AC_TRY_COMPILE(
+[#include <sys/stream.h>
+#include <sys/stropts.h>], [],
+krb5_cv_has_streams=yes, krb5_cv_has_streams=no)])
+AC_MSG_RESULT($krb5_cv_has_streams)
+if test $krb5_cv_has_streams = yes; then
+AC_DEFINE(HAVE_STREAMS,1,[Define if the OS uses streams])
+fi
+dnl
+dnl
+AC_MSG_CHECKING([F_SETOWN])
+AC_CACHE_VAL(krb5_cv_f_setown,
+[AC_TRY_COMPILE(
+[#include <sys/types.h>
+#include <fcntl.h>], [1+F_SETOWN;],
+krb5_cv_f_setown=yes,krb5_cv_f_setown=no)])
+AC_MSG_RESULT($krb5_cv_f_setown)
+if test $krb5_cv_f_setown = yes; then
+AC_DEFINE(HAVE_SETOWN,1,[Define if F_SETOWN is available])
+fi
+dnl
+dnl
+AC_MSG_CHECKING([setenv])
+AC_CACHE_VAL(krb5_cv_setenv,
+[AC_TRY_LINK(
+[],[setenv("PATH","/bin",0);],
+krb5_cv_setenv=yes,krb5_cv_setenv=no)])
+AC_MSG_RESULT($krb5_cv_setenv)
+if test $krb5_cv_setenv = no; then
+SETENVSRC=setenv.c
+SETENVOBJ=setenv.o
+AC_SUBST([SETENVSRC])
+AC_SUBST([SETENVOBJ])
+AC_DEFINE([NEED_SETENV],1,[Define if setenv needs to be defined])
+fi
+dnl
+dnl
+AC_MSG_CHECKING([number of arguments to setpgrp])
+AC_CACHE_VAL(krb5_cv_setpgrp_args,
+[AC_TRY_COMPILE(
+[#ifndef __STDC__
+#define __STDC__ 1
+#endif
+#include <unistd.h>],[setpgrp(0,0)],
+krb5_cv_setpgrp_args=two, krb5_cv_setpgrp_args=void)])
+AC_MSG_RESULT($krb5_cv_setpgrp_args)
+if test $krb5_cv_setpgrp_args = two; then
+AC_DEFINE(SETPGRP_TWOARG,1,[Define if setpgrp takes two arguments])
+fi
+dnl
+dnl
+AC_MSG_CHECKING([shadow password support])
+AC_CACHE_VAL(krb5_cv_shadow_pwd,
+[AC_TRY_LINK(
+[#include <sys/types.h>
+#include <pwd.h>
+#include <shadow.h>],
+[struct spwd *sp = getspnam("root")],
+krb5_cv_shadow_pwd=yes, krb5_cv_shadow_pwd=no)])
+AC_MSG_RESULT($krb5_cv_shadow_pwd)
+if test $krb5_cv_shadow_pwd = yes; then
+AC_DEFINE(HAVE_SHADOW,1,[Define if shadow password interface is available])
+fi
+dnl
+dnl
+K5_AC_CHECK_FILES(/etc/environment /etc/TIMEZONE)
+dnl
+dnl
+AC_C_CONST
+
+KRB5_AC_LIBUTIL
+KRB5_BUILD_PROGRAM
+V5_AC_OUTPUT_MAKEFILE

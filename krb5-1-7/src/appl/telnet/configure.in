@@ -1,0 +1,164 @@
+K5_AC_INIT(configure.in)
+CONFIG_RULES
+dnl AC_CONFIG_SUBDIRS(libtelnet telnet telnetd)
+dnl
+dnl from old libtelnet/configure.in, plus additional header & func checks
+dnl
+AC_REPLACE_FUNCS([strcasecmp strdup setsid strerror strftime getopt herror parsetos])
+AC_CHECK_FUNCS(setenv unsetenv getenv gettosbyname cgetent gettosbyname vsnprintf)
+AC_CHECK_HEADERS(stdlib.h string.h unistd.h arpa/nameser.h sys/select.h arpa/inet.h sys/filio.h curses.h utmp.h sys/time.h sys/tty.h sac.h sys/ptyvar.h sys/stream.h sys/utsname.h memory.h)
+if test $ac_cv_func_setenv = no || test $ac_cv_func_unsetenv = no \
+  || test $ac_cv_func_getenv = no; then
+  SETENVSRC=setenv.c
+  SETENVOBJ=setenv.o
+  AC_SUBST([SETENVSRC])
+  AC_SUBST([SETENVOBJ])
+  AC_DEFINE([NEED_SETENV],1,[Define if setenv needs to be defined])
+fi
+dnl
+KRB5_NEED_PROTO([#include <stdlib.h>],setenv)
+AC_C_CONST
+KRB5_BUILD_LIBRARY
+KRB5_BUILD_LIBOBJS
+dnl
+old_LIBS="$LIBS"
+dnl
+dnl from old telnet/configure.in
+dnl
+AC_PROG_INSTALL
+AC_FUNC_VFORK
+AC_HEADER_STDARG
+case $krb5_cv_host in
+*-*-solaris*)
+	if test "$ac_cv_c_compiler_gnu" = yes; then
+		# Solaris 8 at least has curses.h that is noisy under gcc
+		ac_cv_header_curses_h=yes
+	fi
+	;;
+esac
+dnl
+dnl On some systems, term.h requires curses.h inclusion
+AC_CHECK_HEADERS(term.h,,,dnl
+[#ifdef HAVE_CURSES_H
+#include <curses.h>
+#endif
+])
+dnl
+AC_CHECK_LIB(termcap,main,AC_DEFINE(TERMCAP,1,[Define if termcap library is available])
+LIBS="$LIBS -ltermcap")
+AC_CHECK_LIB(curses,setupterm,LIBS="$LIBS -lcurses",
+  AC_CHECK_LIB(ncurses,setupterm,LIBS="$LIBS -lncurses")
+)
+AC_CHECK_FUNC(tgetent, , [AC_MSG_ERROR([Could not find tgetent; are you missing a curses/ncurses library?])])
+KRB5_AC_INET6
+AC_CHECK_FUNCS(setupterm)
+AC_CHECK_HEADER(termios.h,AC_DEFINE(USE_TERMIO,1,[Define if termio should be used]) ac_termio=1)
+if test -z "$ac_termio"; then
+AC_CHECK_HEADER(termio.h,AC_DEFINE(SYSV_TERMIO,1,[Define if SysV termio interface is found]),ac_sysv_termio=1)
+if test -z "$ac_sysv_termio"; then
+  AC_MSG_CHECKING([for cc_t in termio.h])
+  AC_CACHE_VAL(krb_cv_type_cc_t,
+  [AC_TRY_LINK([cc_t],[#include <termio.h>],
+  [cc_t foo;],krb_cv_type_cc_t=yes,krb_cv_type_cc_t=no)])
+  AC_MSG_RESULT($krb_cv_type_cc_t)
+  if test $krb_cv_type_cc_t = no; then
+    AC_DEFINE(NO_CC_T,1,[Define if termio.h does not define type cc_t])
+  fi
+fi
+fi
+KRB5_NEED_PROTO([#include <unistd.h>
+#include <stdlib.h>],parsetos,1)
+dnl
+KRB5_NEED_PROTO([#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>],herror,1)
+dnl
+CHECK_SIGNALS
+dnl
+KRB5_BUILD_PROGRAM
+dnl
+TELNET_LIBS="$LIBS"
+AC_SUBST(TELNET_LIBS)
+LIBS="$old_LIBS"
+dnl
+dnl from old telnetd/configure.in
+dnl
+dnl AC_PROG_INSTALL
+AC_CHECK_LIB(termcap,main,AC_DEFINE(TERMCAP)
+LIBS="$LIBS -ltermcap",
+  AC_CHECK_LIB(curses,setupterm,LIBS="$LIBS -lcurses",
+  AC_CHECK_LIB(ncurses,setupterm,LIBS="$LIBS -lncurses")
+))
+dnl ... whole termios.h/termio.h/NO_CC_T thing again ...
+AC_HEADER_TIME
+dnl KRB5_AC_INET6
+dnl
+dnl Test if speed_t needs to be defined
+AC_CACHE_CHECK([if speed_t is defined], krb5_cv_type_speed_t,
+[AC_TRY_COMPILE(dnl
+[#include <sys/types.h>
+#if STDC_HEADERS
+#include <stdlib.h>
+#include <stddef.h>
+#endif
+#ifndef	USE_TERMIO
+#include <sgtty.h>
+#else
+# ifdef	SYSV_TERMIO
+# include <termio.h>
+# else
+# include <termios.h>
+# endif
+#endif
+],[speed_t termspeed],krb5_cv_type_speed_t=yes, krb5_cv_type_speed_t=no)])
+if test $krb5_cv_type_speed_t = no; then
+   AC_DEFINE(speed_t, int, [Define if system termios interface doesn't define speed_t])
+fi;
+dnl
+dnl
+dnl Make our operating system-specific security checks and definitions for
+dnl login.
+dnl
+case $krb5_cv_host in
+*-*-hpux*)
+     broken_streams=yes
+     ;;
+*-*-linux*)
+     # Someday Linux may have a Streams user-level interface, so checking
+     # for sys/stream.h may not always work.  But I'm reasonably
+     # sure Linux will never require pushing magic streams modules onto 
+     # pty's! :-)   --- TYT
+     broken_streams=yes
+     ;;
+*-*-irix*)
+     # Irix doesn't have a working granpt, and more over
+     # you can't push anything onto a pty, so telnetd really
+     # Really wants to treat it as if it doesn't have streams
+     broken_streams=yes
+     ;;
+esac
+if test -z "$broken_streams" -a "$ac_cv_header_sys_stream_h" = yes; then
+    AC_CHECK_FUNC(grantpt,AC_DEFINE(STREAMSPTY,1,[Define if streams pty interface should be used]))
+fi
+AC_MSG_CHECKING([if setpgrp takes two arguments])
+dnl
+AC_CACHE_VAL(krb5_cv_sys_setpgrp_two,
+[AC_TRY_LINK( 
+[#include <unistd.h>],[setpgrp(0,0)],
+krb5_cv_sys_setpgrp_two=yes,krb5_cv_sys_setpgrp_two=no)])
+AC_MSG_RESULT($krb5_cv_sys_setpgrp_two)
+if test $krb5_cv_sys_setpgrp_two = yes; then
+  AC_DEFINE(SETPGRP_TWOARG,1,[Define if setpgrp takes two arguments])
+fi
+dnl
+KRB5_NEED_PROTO([#include <stdlib.h>],unsetenv,1)
+dnl KRB5_NEED_PROTO([#include <stdlib.h>],setenv,1)
+dnl KRB5_BUILD_PROGRAM
+dnl
+TELNETD_LIBS="$LIBS"
+AC_SUBST(TELNETD_LIBS)
+LIBS="$old_LIBS"
+dnl
+KRB5_AC_LIBUTIL
+V5_AC_OUTPUT_MAKEFILE(. libtelnet telnet telnetd)

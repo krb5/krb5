@@ -1,0 +1,227 @@
+#!/bin/sh
+
+if $VERBOSE; then
+	REDIRECT=
+else
+	REDIRECT='>/dev/null'
+fi
+
+# Requires that $K5ROOT, /etc/krb.conf, and .k5.$REALM be world-writeable.
+
+if [ "$TOP" = "" ]; then
+	echo "init_db: Environment variable \$TOP must point to top of build tree" 1>&2
+	exit 1
+fi
+
+if [ "$STOP" = "" ]; then
+	echo "init_db: Environment variable \$STOP must point to top of source tree" 1>&2
+	exit 1
+fi
+
+if [ "$libdir" = "" ]; then
+	echo "init_db: Environment variable \$libdir must point to library install directory" 1>&2
+	exit 1
+fi
+
+IROOT=$TOP/..
+ADMIN=$TOP/dbutil
+BIN=$IROOT/bin
+ETC=$IROOT/etc
+MODDIR=$TOP/../util/fakedest$libdir/krb5/plugins/kdb
+SBIN=$TOP/keytab:$TOP/server
+DUMMY=${REALM=SECURE-TEST.OV.COM}; export REALM
+
+if [ ! -d $MODDIR ]; then
+	echo "+++" 1>&2
+	echo "+++ Error!  $MODDIR does not exist!" 1>&2
+	echo "+++ The MODDIR variable should point to the directory in which" 1>&2
+	echo "+++ database modules have been installed for testing." 1>&2
+	echo "+++" 1>&2
+	exit 1
+fi
+
+DUMMY=${TESTDIR=$TOP/testing}; export TESTDIR
+DUMMY=${STESTDIR=$STOP/testing}
+DUMMY=${SRVTCL=$TESTDIR/util/ovsec_kadm_srv_tcl}; export SRVTCL
+DUMMY=${TCLUTIL=$STESTDIR/tcl/util.t}; export TCLUTIL
+DUMMY=${LOCAL_MAKE_KEYTAB=$TESTDIR/scripts/make-host-keytab.pl}
+
+PATH=$ADMIN:$BIN:$ETC:$SBIN:$PATH; export PATH
+
+if [ ! -x $SRVTCL ]; then
+	echo "+++" 1>&2
+	echo "+++ Error!  $SRVTCL does not exist!" 1>&2
+	echo "+++ It was probably not compiled because TCL was not available.  If you" 1>&2
+	echo "+++ now have TCL installed, cd into that directory, re-run configure" 1>&2 
+	echo "+++ with the --with-tcl option, and then re-run make." 1>&2
+	echo "+++" 1>&2
+
+	exit 1
+fi
+
+rm -rf $K5ROOT/*
+if [ -d $K5ROOT ]; then
+	true
+else
+	mkdir $K5ROOT
+fi
+
+# touch $K5ROOT/syslog
+# for pid in `$PS_ALL | awk '/syslogd/ && !/awk/  {print $2}'` ; do
+# 	case "$pid" in
+# 		xxx) ;;
+# 		*)
+# 			if $VERBOSE; then $PS_PID$pid | grep -v COMMAND; fi
+# 			kill -1 $pid
+# 			;;
+# 	esac
+# done
+
+qualname=`$QUALNAME`
+
+sed -e "s/__REALM__/$REALM/g" -e "s#__K5ROOT__#$K5ROOT#g" \
+	-e "s/__KDCHOST__/$qualname/g" \
+	-e "s/__LOCALHOST__/$qualname/g" \
+	-e "s#__MODDIR__#$MODDIR#g" \
+	< $STESTDIR/proto/krb5.conf.proto > $K5ROOT/krb5.conf
+sed -e "s/__REALM__/$REALM/g" -e "s#__K5ROOT__#$K5ROOT#g" \
+	< $STESTDIR/proto/kdc.conf.proto > $K5ROOT/kdc.conf
+
+eval kdb5_util -r $REALM create -P mrroot -s $REDIRECT || exit 1
+
+cp $STESTDIR/proto/ovsec_adm.dict $K5ROOT/ovsec_adm.dict
+
+cat - > /tmp/init_db$$ <<\EOF
+source $env(TCLUTIL)
+set r $env(REALM)
+if {[info exists env(USER)]} {
+    set whoami $env(USER)
+} else {
+    set whoami [exec whoami]
+}
+
+set cmds {
+    {ovsec_kadm_init $env(SRVTCL) mrroot null $r $OVSEC_KADM_STRUCT_VERSION \
+	    $OVSEC_KADM_API_VERSION_1 server_handle}
+
+    {ovsec_kadm_create_policy $server_handle "test-pol 0 10000 8 2 3 0" \
+	    {OVSEC_KADM_POLICY OVSEC_KADM_PW_MIN_LENGTH OVSEC_KADM_PW_MIN_CLASSES OVSEC_KADM_PW_MAX_LIFE OVSEC_KADM_PW_HISTORY_NUM}}
+    {ovsec_kadm_create_policy $server_handle "once-a-min 10 0 0 0 0 0" \
+	    {OVSEC_KADM_POLICY OVSEC_KADM_PW_MIN_LIFE}}
+    {ovsec_kadm_create_policy $server_handle "dict-only 0 0 0 0 0 0" \
+	    {OVSEC_KADM_POLICY}}
+    {ovsec_kadm_create_policy $server_handle [simple_policy test-pol-nopw] \
+	    {OVSEC_KADM_POLICY}}
+
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal testuser@$r] {OVSEC_KADM_PRINCIPAL} notathena}
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal test1@$r] {OVSEC_KADM_PRINCIPAL} test1}
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal test2@$r] {OVSEC_KADM_PRINCIPAL} test2}
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal test3@$r] {OVSEC_KADM_PRINCIPAL} test3}
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal admin@$r] {OVSEC_KADM_PRINCIPAL} admin}
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal admin/get@$r] {OVSEC_KADM_PRINCIPAL} admin}
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal admin/modify@$r] {OVSEC_KADM_PRINCIPAL} admin}
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal admin/delete@$r] {OVSEC_KADM_PRINCIPAL} admin}
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal admin/add@$r] {OVSEC_KADM_PRINCIPAL} admin}
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal admin/none@$r] {OVSEC_KADM_PRINCIPAL} admin}
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal admin/rename@$r] {OVSEC_KADM_PRINCIPAL} admin}
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal admin/mod-add@$r] {OVSEC_KADM_PRINCIPAL} admin}
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal admin/mod-delete@$r] {OVSEC_KADM_PRINCIPAL} \
+	    admin}
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal admin/get-add@$r] {OVSEC_KADM_PRINCIPAL} admin}
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal admin/get-delete@$r] {OVSEC_KADM_PRINCIPAL} \
+	    admin}
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal admin/get-mod@$r] {OVSEC_KADM_PRINCIPAL} admin}
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal admin/no-add@$r] {OVSEC_KADM_PRINCIPAL} admin}
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal admin/no-delete@$r] {OVSEC_KADM_PRINCIPAL} admin}
+    {ovsec_kadm_create_principal $server_handle \
+	    [princ_w_pol pol1@$r test-pol] {OVSEC_KADM_PRINCIPAL \
+	    OVSEC_KADM_POLICY} pol111111}
+    {ovsec_kadm_create_principal $server_handle \
+	    [princ_w_pol pol2@$r once-a-min] {OVSEC_KADM_PRINCIPAL \
+	    OVSEC_KADM_POLICY} pol222222}
+    {ovsec_kadm_create_principal $server_handle \
+	    [princ_w_pol pol3@$r dict-only] {OVSEC_KADM_PRINCIPAL \
+	    OVSEC_KADM_POLICY} pol333333}
+    {ovsec_kadm_create_principal $server_handle \
+	    [princ_w_pol admin/get-pol@$r test-pol-nopw] \
+	    {OVSEC_KADM_PRINCIPAL OVSEC_KADM_POLICY} StupidAdmin}
+    {ovsec_kadm_create_principal $server_handle \
+	    [princ_w_pol admin/pol@$r test-pol-nopw] {OVSEC_KADM_PRINCIPAL \
+	    OVSEC_KADM_POLICY} StupidAdmin}
+
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal changepw/kerberos] \
+            {OVSEC_KADM_PRINCIPAL} {XXX THIS IS WRONG}}
+
+    {ovsec_kadm_create_principal $server_handle \
+	    [simple_principal $whoami] \
+	    {OVSEC_KADM_PRINCIPAL} $whoami}
+
+    {ovsec_kadm_destroy $server_handle}
+}
+
+foreach cmd $cmds {
+    if {[catch $cmd output]} {
+	puts stderr "Error!  Command: $cmd\nError: $output"
+	exit 1
+    } else {
+	puts stdout $output
+    }
+}
+EOF
+eval "$SRVTCL < /tmp/init_db$$ $REDIRECT"
+rm /tmp/init_db$$
+
+if [ $? -ne 0 ]; then
+	echo "Error in $SRVTCL!" 1>&2
+	exit 1
+fi
+
+cat > $K5ROOT/ovsec_adm.acl <<EOF
+admin@$REALM			admcil
+admin/get@$REALM		il
+admin/modify@$REALM		mc
+admin/delete@$REALM		d
+admin/add@$REALM		a
+admin/get-pol@$REALM		il
+admin/rename@$REALM		adil
+admin/mod-add@$REALM		amc
+admin/mod-delete@$REALM		mcd
+admin/get-add@$REALM		ail
+admin/get-delete@$REALM		ild
+admin/get-mod@$REALM		ilmc
+admin/no-add@$REALM		mcdil
+admin/no-delete@$REALM		amcil
+changepw/kerberos@$REALM	cil
+
+EOF
+
+eval $LOCAL_MAKE_KEYTAB -princ kadmin/admin -princ kadmin/changepw -princ ovsec_adm/admin -princ ovsec_adm/changepw $K5ROOT/ovsec_adm.srvtab $REDIRECT
+
+# Create $K5ROOT/setup.csh to make it easy to run other programs against
+# the test db
+cat > $K5ROOT/setup.csh <<EOF
+setenv KRB5_CONFIG $KRB5_CONFIG
+setenv KRB5_KDC_PROFILE $KRB5_KDC_PROFILE
+setenv KRB5_KTNAME $KRB5_KTNAME
+$KRB5_RUN_ENV_CSH
+EOF
+

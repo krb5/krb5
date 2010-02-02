@@ -1,0 +1,115 @@
+thisconfigdir=../../..
+myfulldir=lib/krb5/ccache
+mydir=lib/krb5/ccache
+BUILDTOP=$(REL)..$(S)..$(S)..
+SUBDIRS =
+DEFS=
+
+RUN_SETUP = @KRB5_RUN_ENV@
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+LOCALINCLUDES = -I$(srcdir)$(S)ccapi $(WIN_INCLUDES)
+
+##DOS##WIN_INCLUDES = -I$(SRCTOP)\windows\lib
+
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=ccache
+##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
+
+##WIN32##MSLSA_OBJ = $(OUTPRE)cc_mslsa.$(OBJEXT)
+##WIN32##MSLSA_SRC = $(srcdir)/cc_mslsa.c
+
+STLIBOBJS= \
+	ccbase.o \
+	cccopy.o \
+	cccursor.o \
+	ccdefault.o \
+	ccdefops.o \
+	cc_retr.o \
+	cc_file.o \
+	cc_memory.o \
+	cc_keyring.o \
+	ccfns.o \
+	ser_cc.o
+
+OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
+	$(OUTPRE)cccopy.$(OBJEXT) \
+	$(OUTPRE)cccursor.$(OBJEXT) \
+	$(OUTPRE)ccdefault.$(OBJEXT) \
+	$(OUTPRE)ccdefops.$(OBJEXT) \
+	$(OUTPRE)cc_retr.$(OBJEXT) \
+	$(OUTPRE)cc_file.$(OBJEXT) \
+	$(OUTPRE)cc_memory.$(OBJEXT) \
+	$(OUTPRE)cc_keyring.$(OBJEXT) \
+	$(OUTPRE)ccfns.$(OBJEXT) \
+	$(OUTPRE)ser_cc.$(OBJEXT) $(MSLSA_OBJ)
+
+SRCS=	$(srcdir)/ccbase.c \
+	$(srcdir)/cccopy.c \
+	$(srcdir)/cccursor.c \
+	$(srcdir)/ccdefault.c \
+	$(srcdir)/ccdefops.c \
+	$(srcdir)/cc_retr.c \
+	$(srcdir)/cc_file.c \
+	$(srcdir)/cc_memory.c \
+	$(srcdir)/cc_keyring.c \
+	$(srcdir)/ccfns.c \
+	$(srcdir)/ser_cc.c $(MSLSA_SRC)
+
+EXTRADEPSRCS= \
+	$(srcdir)/t_cc.c \
+	$(srcdir)/t_cccursor.c
+
+##DOS##OBJS=$(OBJS) $(OUTPRE)ccfns.$(OBJEXT)
+
+all-unix:: all-libobjs
+
+all-windows:: subdirs $(OBJFILE) 
+
+##DOS##subdirs:: ccapi\$(OUTPRE)file.lst
+
+##DOS##ccapi\$(OUTPRE)file.lst::
+##DOS##	cd ccapi
+##DOS##	@echo Making in krb5\ccache\ccapi
+##DOS##	$(MAKE) -$(MFLAGS)
+##DOS##	cd ..
+
+##DOS##$(OBJFILE): $(OBJS) ccapi\$(OUTPRE)file.lst
+##DOS##	$(RM) $(OBJFILE)
+##WIN32##	$(LIBECHO) -p $(PREFIXDIR)\ $(OUTPRE)*.obj \
+##WIN32##		ccapi\$(OUTPRE)*.obj > $(OBJFILE)
+
+
+clean-unix:: clean-libobjs
+
+clean-windows::
+	cd ccapi
+	@echo Making clean in krb5\ccache\ccapi
+	$(MAKE) -$(MFLAGS) clean
+	cd ..
+	@echo Making clean in krb5\ccache
+	$(RM) $(OBJFILE)
+
+T_CC_OBJS=t_cc.o
+
+t_cc: $(T_CC_OBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_cc $(T_CC_OBJS) $(KRB5_BASE_LIBS)
+
+T_CCCURSOR_OBJS = t_cccursor.o
+t_cccursor: $(T_CCCURSOR_OBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ $(T_CCCURSOR_OBJS) $(KRB5_BASE_LIBS)
+
+check-unix:: t_cc t_cccursor
+	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
+	$(RUN_SETUP) $(VALGRIND) ./t_cc
+	KRB5_CONFIG=$(srcdir)/../krb/t_krb5.conf ; export KRB5_CONFIG ;\
+	$(RUN_SETUP) $(VALGRIND) ./t_cccursor
+
+clean-unix::
+	$(RM) t_cc t_cc.o t_cccursor t_cccursor.o
+
+##WIN32## $(OUTPRE)cc_mslsa.$(OBJEXT): cc_mslsa.c $(SRCTOP)/include/k5-int.h $(BUILDTOP)/include/krb5/osconf.h $(BUILDTOP)/include/krb5/autoconf.h $(BUILDTOP)/include/krb5.h $(COM_ERR_DEPS)
+
+@libobj_frag@
+

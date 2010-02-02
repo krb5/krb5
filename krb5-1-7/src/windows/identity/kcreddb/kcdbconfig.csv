@@ -1,0 +1,15 @@
+Name,Type,Value,Description
+KCDB,KC_SPACE,0,Khimaira Configuration DB
+  Identity,KC_SPACE,0,Configuration space for identities
+    _Schema,KC_SPACE,0,Schema for identities
+      Sticky,KC_INT32,0,Boolean. Is this a sticky identity?
+      Monitor,KC_INT32,1,Boolean. Enables monitoring the identity
+      WarnThreshold,KC_INT32,900,In seconds
+      AllowWarn,KC_INT32,1,Boolean. Allow warning.
+      CriticalThreshold,KC_INT32,60,In seconds
+      AllowCritical,KC_INT32,1,Boolean. Allow critical.
+      AutoRenewThreshold,KC_INT32,60,In seconds
+      AllowAutoRenew,KC_INT32,1,Boolean.
+    _Schema,KC_ENDSPACE,0,
+  Identity,KC_ENDSPACE,0,
+KCDB,KC_ENDSPACE,0,

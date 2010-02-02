@@ -1,0 +1,90 @@
+﻿<?xml version="1.0"?> 
+<Include>
+    <?ifdef CL1400 ?>
+		<MergeRef Id="MSVCRT8MEM"/>
+		<MergeRef Id="MSVCRT8POL"/>
+		<MergeRef Id="MSVCRT8MFC"/>
+		<MergeRef Id="MSVCRT8PFC"/>
+		<MergeRef Id="MSVCRT8MFL"/>
+		<MergeRef Id="MSVCRT8PFL"/>
+    <?endif?>
+<?ifndef Debug?>
+    <?ifdef CL1310 ?>
+        <?ifdef comment?>
+        <MergeRef Id="mergeVC1310LibMFC" />
+        <MergeRef Id="mergeVC1310LibCRT" />
+        <?else?>
+            <ComponentRef Id="cmf_mfc71_dll" />
+            <ComponentRef Id="cmf_msvcr71_dll" />
+            <ComponentRef Id="cmf_msvcp71_dll" />
+            <ComponentRef Id="cmf_mfc71chs_dll" />
+            <ComponentRef Id="cmf_mfc71cht_dll" />
+            <ComponentRef Id="cmf_mfc71deu_dll" />
+            <ComponentRef Id="cmf_mfc71enu_dll" />
+            <ComponentRef Id="cmf_mfc71esp_dll" />
+            <ComponentRef Id="cmf_mfc71fra_dll" />
+            <ComponentRef Id="cmf_mfc71ita_dll" />
+            <ComponentRef Id="cmf_mfc71jpn_dll" />
+            <ComponentRef Id="cmf_mfc71kor_dll" />
+        <?endif?>
+    <?endif?>
+    <?ifdef CL1300 ?>
+        <?ifdef comment?>
+        <MergeRef Id="mergeVC1300LibMFC" />
+        <MergeRef Id="mergeVC1300LibCRT" />
+        <?else?>
+            <ComponentRef Id="cmf_mfc70_dll" />
+            <ComponentRef Id="cmf_msvcr70_dll" />
+            <ComponentRef Id="cmf_msvcp70_dll" />
+            <ComponentRef Id="cmf_mfc70chs_dll" />
+            <ComponentRef Id="cmf_mfc70cht_dll" />
+            <ComponentRef Id="cmf_mfc70deu_dll" />
+            <ComponentRef Id="cmf_mfc70enu_dll" />
+            <ComponentRef Id="cmf_mfc70esp_dll" />
+            <ComponentRef Id="cmf_mfc70fra_dll" />
+            <ComponentRef Id="cmf_mfc70ita_dll" />
+            <ComponentRef Id="cmf_mfc70jpn_dll" />
+            <ComponentRef Id="cmf_mfc70kor_dll" />
+        <?endif?>
+    <?endif?>
+    <?ifdef CL1200 ?>
+        <ComponentRef Id="cmf_mfc42_dll" />
+        <ComponentRef Id="cmf_msvcp60_dll" />
+        <ComponentRef Id="cmf_msvcrt_dll" />
+    <?endif?>
+<?else?>
+    <?ifdef CL1310 ?>
+        <ComponentRef Id="cmf_mfc71d_dll" />
+        <ComponentRef Id="cmf_msvcr71d_dll" />
+        <ComponentRef Id="cmf_msvcp71d_dll" />
+        <ComponentRef Id="cmf_mfc71chs_dll" />
+        <ComponentRef Id="cmf_mfc71cht_dll" />
+        <ComponentRef Id="cmf_mfc71deu_dll" />
+        <ComponentRef Id="cmf_mfc71enu_dll" />
+        <ComponentRef Id="cmf_mfc71esp_dll" />
+        <ComponentRef Id="cmf_mfc71fra_dll" />
+        <ComponentRef Id="cmf_mfc71ita_dll" />
+        <ComponentRef Id="cmf_mfc71jpn_dll" />
+        <ComponentRef Id="cmf_mfc71kor_dll" />
+    <?endif?>
+    <?ifdef CL1300 ?>
+        <ComponentRef Id="cmf_mfc70d_dll" />
+        <ComponentRef Id="cmf_msvcr70d_dll" />
+        <ComponentRef Id="cmf_msvcp70d_dll" />
+        <ComponentRef Id="cmf_mfc70chs_dll" />
+        <ComponentRef Id="cmf_mfc70cht_dll" />
+        <ComponentRef Id="cmf_mfc70deu_dll" />
+        <ComponentRef Id="cmf_mfc70enu_dll" />
+        <ComponentRef Id="cmf_mfc70esp_dll" />
+        <ComponentRef Id="cmf_mfc70fra_dll" />
+        <ComponentRef Id="cmf_mfc70ita_dll" />
+        <ComponentRef Id="cmf_mfc70jpn_dll" />
+        <ComponentRef Id="cmf_mfc70kor_dll" />
+    <?endif?>
+    <?ifdef CL1200 ?>
+        <ComponentRef Id="cmf_mfc42d_dll" />
+        <ComponentRef Id="cmf_msvcp60d_dll" />
+        <ComponentRef Id="cmf_msvcrtd_dll" />
+    <?endif?>
+<?endif?>
+</Include>

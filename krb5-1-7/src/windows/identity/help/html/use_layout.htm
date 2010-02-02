@@ -1,0 +1,91 @@
+<html>
+<head>
+  <title>Network Identity Manager - Managing the credentials view layout</title>
+  <meta name="description" content="Managing the credentials view layout">
+  <meta name="keywords" content="view, layout">
+  <link rel="stylesheet" type="text/css" href="nidmgr.css">
+  <Object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="Keyword" value="Credential View Layouts">
+<param name="Keyword" value="Sorting credentials by a column">
+<param name="Keyword" value="Grouping credentials by a column">
+<param name="Keyword" value="Selecting Columns">
+</OBJECT>
+</head>
+<body>
+
+<h1>Network Identity Manager - Managing the credentials view layout</h1>
+
+<p>The credentials view layout provides an outlined view of the
+credentials that are being managed by NetIDMgr.  The columns that are
+displayed in the window, the columns that are used for grouping and
+sorting the list of credentials can be customized. </p>
+
+<p>The following sections provide more details on the types of
+customizations that can be performed:</p>
+
+<ul>
+  <li><a href="#predef">Predefined layouts</a></li>
+  <li><a href="#addcol">Adding and removing columns.</a></li>
+  <li><a href="#sort">Sorting by a column.</a></li>
+  <li><a href="#group">Grouping by a column.</a></li>
+</ul>
+
+<a name="predef"></a>
+<h3>Pre-defined layouts</h3>
+
+<p>The predefined layouts in NetIDMgr are:</p>
+
+<ul>
+
+  <li><span class="title">By Identity</span>: Credentials grouped by
+  identity, credentials type and location, and finally sorted by
+  credential name.</li>
+
+  <li><span class="title">By Type</span>: Credentials grouped by
+  credentials type and then by identity.</li>
+
+  <li><span class="title">By Location</span>: Credentials grouped by
+  location, identity and then by credentials type.  The location is
+  reported by individual credentials providers that indicate where
+  each credential is stored. For Kerberos 5 and Kerberos 4, this is a
+  credentials cache name.</li>
+
+</ul>
+
+<a name="addcol"></a>
+<h3>Adding and removing columns</h3>
+
+<p>The <span class="pre">View Columns</span> menu lists all the
+columns that are available for display.  Each column that is already
+displayed will have a check mark next to it.  Selecting a column that
+is not currently being displayed will add that column to the display.
+Selecting a column that is is being displayed will remove it from the
+display.</p>
+
+<p>This menu can be reached either by right-clicking the column header
+area or by invoking the <span class="pre">View</span> menu.  The menu
+is shown below.</p>
+
+<p><img src="images/screen_menu_view_cols.png"/> </p>
+
+<a name="sort"></a>
+<h3>Sorting by a column</h3>
+
+<p>Clicking on a column header will change the sort order of the
+column if it is already being used as a sort key.  If the colunm is
+not currently being used as a sort key, clicking on the column header
+will start sorting in increasing order by that column.</p>
+
+<p>Double-clicking a column that is not used for grouping will stop
+sorting by that column.</p>
+
+<a name="group"></a>
+<h3>Grouping by a column</h3>
+
+<p>Double-clicking on a column header will start grouping by that
+column if the column is currently not being used as a sort key.  If
+the column is currently being used for grouping, then double-clicking
+will stop it from being used for grouping.</p>
+
+</body>
+</html>

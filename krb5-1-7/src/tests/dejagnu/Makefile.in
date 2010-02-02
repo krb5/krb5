@@ -1,0 +1,49 @@
+thisconfigdir=../..
+myfulldir=tests/dejagnu
+mydir=tests/dejagnu
+BUILDTOP=$(REL)..$(S)..
+RUNTEST = @RUNTEST@ $(DEJAFLAGS)
+RUNTESTFLAGS =
+KRB5_RUN_ENV= @KRB5_RUN_ENV@
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+SRCS=$(srcdir)/t_inetd.c
+
+all install::
+
+check:: check-runtest-@HAVE_RUNTEST@
+
+check-runtest-no::
+	@echo "+++"
+	@echo "+++ WARNING: tests/dejagnu tests not run."
+	@echo "+++ runtest is unavailable."
+	@echo "+++"
+
+# Set VALGRIND at run time, that may be changed when running 'make'.
+check-runtest-yes:: t_inetd site.exp
+	$(RUNTEST) --tool krb --srcdir $(srcdir) VALGRIND="$(VALGRIND)" $(RUNTESTFLAGS)
+
+t_inetd:: t_inetd.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_inetd t_inetd.o $(KRB5_BASE_LIBS)
+
+clean::
+	$(RM) t_inetd t_inetd.o site.exp runenv.vars runenv.vals
+
+clean-unix::
+	$(RM) -rf tmpdir dbg.log krb.log krb.sum
+
+runenv.vars: Makefile
+	echo '$(KRB5_RUN_ENV)' | tr ';' '\012' | \
+		sed -ne 's% *\([^=]*\)=.*%\1%p' > runenv.vars
+
+runenv.vals: runenv.vars
+	$(KRB5_RUN_ENV) for i in `cat runenv.vars`; do \
+		eval echo "{$$i=\$$$$i}"; done > runenv.vals
+
+site.exp: runenv.vals Makefile
+	echo "set runvarlist [list `cat runenv.vals | tr '\n' ' '`]" | \
+		sed -e 's%=\.%='`pwd`'/.%g' > site.exp
+	echo "set KRB5_DB_MODULE_DIR {$(KRB5_DB_MODULE_DIR)}" >> site.exp
+	echo "set PRIOCNTL_HACK @PRIOCNTL_HACK@" >> site.exp
+

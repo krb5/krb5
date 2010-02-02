@@ -1,0 +1,8 @@
+#!/bin/sh
+
+find . \( \( -name .svn -o -name .\#\* -o -name \*~ -o -name \#\* -o -name autom4te.cache \) -prune \) -o \( -type f -print \) | \
+while read name; do
+  if test "`svn pg svn:eol-style $name`" == ""; then
+    echo svn:eol-style missing on $name
+  fi
+done

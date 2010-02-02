@@ -1,0 +1,30 @@
+thisconfigdir=../../..
+myfulldir=plugins/locate/python
+mydir=plugins/locate/python
+BUILDTOP=$(REL)..$(S)..$(S)..
+
+LIBBASE=python
+LIBMAJOR=0
+LIBMINOR=0
+SO_EXT=.so
+RELDIR=../plugins/locate/python
+MODULE_INSTALL_DIR = $(KRB5_LIBKRB5_MODULE_DIR)
+
+SHLIB_EXPDEPS= $(KRB5_DEPLIB) $(SUPPORT_DEPLIB)
+SHLIB_EXPLIBS= @PYTHON_LIB@ $(KRB5_LIB) $(SUPPORT_LIB)
+
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+
+SRCS= \
+	$(srcdir)/py-locate.c
+STOBJLISTS=OBJS.ST
+STLIBOBJS= py-locate.o
+
+all-unix:: $(LIBBASE)$(SO_EXT)
+install-unix:: install-libs
+clean-unix:: clean-libs clean-libobjs
+
+@libnover_frag@
+@libobj_frag@
+

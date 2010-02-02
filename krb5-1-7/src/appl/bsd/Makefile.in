@@ -1,0 +1,84 @@
+thisconfigdir=.
+myfulldir=appl/bsd
+mydir=.
+BUILDTOP=$(REL)..$(S)..
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+SETENVSRC=@SETENVSRC@
+SETENVOBJ=@SETENVOBJ@
+
+LOGINLIBS=@LOGINLIBS@
+LIBOBJS=@LIBOBJS@
+KRSHDLIBS=@KRSHDLIBS@
+
+SRCS= $(srcdir)/krcp.c $(srcdir)/krlogin.c $(srcdir)/krsh.c $(srcdir)/kcmd.c \
+	$(srcdir)/forward.c $(srcdir)/login.c $(srcdir)/krshd.c \
+	$(srcdir)/krlogind.c
+OBJS= krcp.o krlogin.o krsh.o kcmd.o forward.o $(SETENVOBJ) login.o krshd.o \
+	krlogind.o $(LIBOBJS)
+
+UCB_RLOGIN = @UCB_RLOGIN@
+UCB_RSH = @UCB_RSH@
+UCB_RCP = @UCB_RCP@
+
+RSH=	-DKRB5_PATH_RLOGIN=\"$(CLIENT_BINDIR)/rlogin\"
+BSD=	-DUCB_RLOGIN=\"$(UCB_RLOGIN)\" \
+	-DUCB_RSH=\"$(UCB_RSH)\" -DUCB_RCP=\"$(UCB_RCP)\"
+
+DEFINES = $(RSH) $(BSD) $(RPROGS) -DKERBEROS \
+	-DLOGIN_PROGRAM=\"$(SERVER_BINDIR)/login.krb5\" -DKPROGDIR=\"$(CLIENT_BINDIR)\" \
+	-DHEIMDAL_FRIENDLY
+
+all:: rsh rcp rlogin kshd klogind login.krb5
+
+clean:: 
+	$(RM) rsh rcp rlogin kshd klogind login.krb5
+
+rsh: krsh.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o rsh krsh.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB5_BASE_LIBS)
+
+rcp: krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o rcp krcp.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB5_BASE_LIBS)
+
+rlogin: krlogin.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o rlogin krlogin.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRB5_BASE_LIBS)
+
+install::
+	for f in rsh rcp rlogin; do \
+	 ($(INSTALL_PROGRAM) $$f \
+		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'` && \
+	  $(INSTALL_DATA) $(srcdir)/$$f.M \
+		${DESTDIR}$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1 \
+	  ) || exit 1; \
+	done
+
+kshd: krshd.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(PTY_DEPLIB) $(KRB5_BASE_DEPLIBS) $(APPUTILS_DEPLIB)
+	$(CC_LINK) -o kshd krshd.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(KRSHDLIBS) $(PTY_LIB) $(UTIL_LIB) $(KRB5_BASE_LIBS) $(APPUTILS_LIB)
+
+klogind: krlogind.o kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(PTY_DEPLIB) $(KRB5_BASE_DEPLIBS) $(APPUTILS_DEPLIB)
+	$(CC_LINK) -o klogind krlogind.o  kcmd.o forward.o $(SETENVOBJ) $(LIBOBJS) $(PTY_LIB) $(UTIL_LIB) $(KRB5_BASE_LIBS) $(APPUTILS_LIB)
+
+install::
+	for f in kshd klogind; do \
+	 ($(INSTALL_PROGRAM) $$f \
+		$(DESTDIR)$(SERVER_BINDIR)/`echo $$f|sed '$(transform)'` && \
+	  $(INSTALL_DATA) $(srcdir)/$$f.M \
+		${DESTDIR}$(SERVER_MANDIR)/`echo $$f|sed '$(transform)'`.8 \
+	 ) || exit 1 ; \
+	done
+
+# No program name transformation is done with login.krb5 since it is directly
+# referenced by klogind.
+#
+login.krb5: login.o  $(SETENVOBJ) $(LIBOBJS) $(PTY_DEPLIB) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o login.krb5 login.o $(SETENVOBJ) $(LIBOBJS) $(LOGINLIBS) $(PTY_LIB) $(KRB5_BASE_LIBS)
+
+install::
+	$(INSTALL_PROGRAM) login.krb5 $(DESTDIR)$(SERVER_BINDIR)/login.krb5
+	$(INSTALL_DATA) $(srcdir)/login.M \
+		${DESTDIR}$(SERVER_MANDIR)/login.krb5.8
+
+getdtablesize.o: $(srcdir)/getdtablesize.c
+
+kcmd.o krcp.o krlogin.o krlogind.o krsh.o krshd.o forward.o: defines.h

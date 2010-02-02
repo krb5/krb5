@@ -1,0 +1,20 @@
+thisconfigdir=../..
+myfulldir=tests/verify
+mydir=tests/verify
+BUILDTOP=$(REL)..$(S)..
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+KDB5_DEP_LIB=$(THREAD_LINKOPTS) $(DL_LIB)
+
+SRCS=$(srcdir)/kdb5_verify.c
+
+all:: kdb5_verify
+
+kdb5_verify: kdb5_verify.o $(KDB5_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o kdb5_verify kdb5_verify.o $(KDB5_LIBS) $(KDB5_DEP_LIB) $(KRB5_BASE_LIBS)
+
+install::
+
+clean::
+	$(RM) kdb5_verify.o kdb5_verify
+

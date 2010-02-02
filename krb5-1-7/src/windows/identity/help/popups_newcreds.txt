@@ -1,0 +1,30 @@
+.topic IDH_NC_TABMAIN
+Opens the identity selection panel.
+
+.topic IDH_NC_TABBUTTON
+Opens the option panel for this credentials type.
+
+.topic IDH_NC_OK
+Obtains new credentials using the information that you provided.
+
+.topic IDH_NC_CANCEL
+Cancels the new credentials operation.
+
+.topic IDH_NC_HELP
+Provides help for this dialog box.
+
+.topic IDH_NC_ADVANCED
+Expands the dialog and allows you to set additional
+options for the credentials that will be obtained
+by this dialog.
+
+.topic IDH_NC_CREDWND
+Provides an overview of the credentials that will be obtained
+after the successful completion of the new credentials dialog.
+Clicking on the hyperlinks will take you to the corresponding
+credentials option panels where you will be able to set
+additional options for each type.
+
+.topic IDH_NC_SETDEF
+If checked, once the credentials acquisition operation completes, the
+identity will be set as the default.

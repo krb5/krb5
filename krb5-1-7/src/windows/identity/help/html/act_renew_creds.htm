@@ -1,0 +1,40 @@
+<html>
+<head>
+  <title>Network Identity Manager - Renew Credentials</title>
+  <meta name="description" content="Renew Credentials">
+  <meta name="keywords" content="renew, credentials">
+  <link rel="stylesheet" type="text/css" href="nidmgr.css">
+  
+  <Object type="application/x-oleobject" classid="clsid:1e2a7bd0-dab9-11d0-b93a-00c04fc99f9e">
+<param name="Keyword" value="Renewing Credentials">
+<param name="Keyword" value="Ctrl + R">
+<param name="Keyword" value="Monitor Credential Expiration">
+<param name="Keyword" value="krb524 translator">
+<param name="Keyword" value="">
+<param name="Keyword" value="">
+</OBJECT>
+</head>
+<body>
+
+<h1>Network Identity Manager - Renew Credentials</h1>
+
+<p>The renew credentials action can be invoked via the <a
+href="">Credential</a> menu or by pressing <span class="pre">Ctrl +
+R</span>.  Additionally, if the <span class="pre">Monitor credential
+expiration</span> option is enabled for all identities or for a
+specific identity, then those credentials will be automatically
+renewed whenever possible before they expire.</p>
+
+<p>An identity must be selected before invoking the renew credentials
+action.</p>
+
+<p>Not all credentials can be renewed.  The actual logic of renewing
+the credentials is up to each credentials provider.  In general, NetIDMgr will invoke each credentials provider to renew their
+respective credentials. For Kerberos v5, if the initial ticket is
+renewable and not expired, then it will obtain a renewed initial
+ticket.  For Kerberos v4, once a renewed Kerberos v5 initial ticket is
+obtained, it will try to use a Krb524 translator to obtain a new
+Kerberos v4 initial ticket.</p>
+
+</body>
+</html>

@@ -1,0 +1,47 @@
+# Makefile for the KFW Network Provider
+#
+
+thisconfigdir=./..
+myfulldir=windows/nplogon
+mydir=.
+BUILDTOP=$(REL)..$(S)..
+DEFINES = 
+LOCALINCLUDES = -I$(BUILDTOP) -I$(PISMERE)\athena\util\loadfuncs \
+	-I$(PISMERE)\athena\auth\krb5\src\include\kerberosIV \
+	-I$(PISMERE)\athena\auth\krb4\include \
+	-I$(PISMERE)\athena\auth\leash\include
+PROG_LIBPATH=-L$(TOPLIBD) -L$(KRB5_LIBDIR)
+
+SYSLIBS = kernel32.lib user32.lib advapi32.lib wsock32.lib secur32.lib userenv.lib
+
+VERSIONRC = $(BUILDTOP)\windows\version.rc
+RCFLAGS=$(CPPFLAGS) -I$(SRCTOP) -D_WIN32 -DRES_ONLY
+
+KFWLOGON=$(OUTPRE)kfwlogon.dll
+KFWCPCC=$(OUTPRE)kfwcpcc.exe
+
+LIBRES=$(KFWLOGON:.dll=.res)
+EXERES=$(KFWCPCC:.exe=.res)
+
+$(LIBRES): $(VERSIONRC)
+        $(RC) $(RCFLAGS) -DKFWLOGON_LIB -fo $@ -r $**
+$(EXERES): $(VERSIONRC)
+        $(RC) $(RCFLAGS) -DKFWCPCC_APP -fo $@ -r $**
+
+all-windows:: $(OUTPRE)kfwlogon.dll $(OUTPRE)kfwcpcc.exe
+
+$(KFWLOGON): $(OUTPRE)kfwlogon.obj $(OUTPRE)kfwcommon.obj $(LIBRES)
+    link $(DLL_LINKOPTS) -out:$@ $(OUTPRE)kfwlogon.obj $(OUTPRE)kfwcommon.obj -entry:DllEntryPoint -def:kfwlogon.def $(SYSLIBS) $(KLIB) $(CLIB) $(SCLIB) $(LIBRES)
+    $(_VC_MANIFEST_EMBED_DLL)
+
+$(KFWCPCC): $(OUTPRE)kfwcpcc.obj $(OUTPRE)kfwcommon.obj $(EXERES)
+    link $(EXE_LINKOPTS) -out:$@ $(OUTPRE)kfwcpcc.obj $(OUTPRE)kfwcommon.obj $(SYSLIBS) $(KLIB) $(CLIB) $(SCLIB) $(EXERES)
+    $(_VC_MANIFEST_EMBED_EXE)
+
+install::
+        copy $(OUTPRE)kfwlogon.dll $(DESTDIR)
+        copy $(OUTPRE)kfwcpcc.exe  $(DESTDIR)
+
+clean::
+        $(RM) $(OUTPRE)*.exe $(OUTPRE)*.dll $(OUTPRE)*.res
+

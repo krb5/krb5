@@ -1,0 +1,52 @@
+thisconfigdir=../..
+mydir=tests/mkeystash_compat
+myfulldir=tests/mkeystash_compat
+BUILDTOP=$(REL)..$(S)..
+
+RUN_SETUP = @KRB5_RUN_ENV@ KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf
+KRB5_RUN_ENV= @KRB5_RUN_ENV@
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+OBJS = bigendian.o
+SRCS = $(srcdir)/bigendian.c
+
+TEST_DB = ./testdb
+TEST_REALM = FOO.TEST.REALM
+TEST_MKEY = footes
+
+KADMIN_OPTS= -d $(TEST_DB) -r $(TEST_REALM)
+KDB_OPTS= $(KADMIN_OPTS) -P $(TEST_MKEY)
+
+check-unix:: mkeystash_check
+
+bigendian: $(OUTPRE)bigendian.$(OBJEXT) $(SUPPORT_DEPLIB)
+	$(CC_LINK) $(ALL_CFLAGS) -o bigendian $(OUTPRE)bigendian.$(OBJEXT)
+
+kdc.conf: Makefile
+	rm -rf kdc.conf
+	@echo "[realms]" > kdc.conf
+	@echo "$(TEST_REALM) = {" >> kdc.conf
+	@echo "  key_stash_file = `pwd`/stash_file" >> kdc.conf
+	@echo "}" >> kdc.conf
+
+krb5.conf: Makefile
+	cat $(SRCTOP)/config-files/krb5.conf > krb5.new
+	echo "[dbmodules]" >> krb5.new
+	echo " db_module_dir = $(BUILDTOP)/util/fakedest$(KRB5_DB_MODULE_DIR)" >> krb5.new
+	mv krb5.new krb5.conf
+
+# Verify that the mkey stash code is backward compat with old/non-keytab stashfile format
+mkeystash_check: kdc.conf krb5.conf bigendian
+	$(RM) $(TEST_DB)* stash_file
+	$(RUN_SETUP) $(VALGRIND) ../../kadmin/dbutil/kdb5_util $(KDB_OPTS) create -s
+	# overwrite keytab stash file with old format stash, depends on endianness of current test system
+	./bigendian && cp $(srcdir)/old_stash_bendian stash_file || cp $(srcdir)/old_stash_lendian stash_file
+	# getprinc will fail if old stash file can not be read
+	$(RUN_SETUP) $(VALGRIND) ../../kadmin/cli/kadmin.local $(KADMIN_OPTS) -q 'getprinc K/M'
+	$(RUN_SETUP) $(VALGRIND) ../../kadmin/dbutil/kdb5_util $(KDB_OPTS) destroy -f
+	$(RM) $(TEST_DB)* stash_file
+
+clean::
+	$(RM) kdc.conf
+

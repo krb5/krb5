@@ -1,0 +1,76 @@
+# Copyright 2005-2006 by the Massachusetts Institute of Technology.
+# 
+# Export of this software from the United States of America may
+# require a specific license from the United States Government.
+# It is the responsibility of any person or organization contemplating
+# export to obtain such a license before exporting.
+# 
+# WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+# distribute this software and its documentation for any purpose and
+# without fee is hereby granted, provided that the above copyright
+# notice appear in all copies and that both that copyright notice and
+# this permission notice appear in supporting documentation, and that
+# the name of M.I.T. not be used in advertising or publicity pertaining
+# to distribution of the software without specific, written prior
+# permission.  Furthermore if you modify this software you must label
+# your software as modified software and not distribute it in such a
+# fashion that it might be confused with the original M.I.T. software.
+# M.I.T. makes no representations about the suitability of
+# this software for any purpose.  It is provided "as is" without express
+# or implied warranty.
+
+error_table_manager "Kerberos Identity Management"
+error_table KIM
+
+# Configuration and System Errors
+error_code KIM_OUT_OF_MEMORY_ERR,                 "Out of memory"
+error_code KIM_NULL_PARAMETER_ERR,                "Parameter may not be NULL.  Please consult the KIM API documentation"
+error_code KIM_KRB5_INIT_FAILED_ERR,              "Unable to initialize Kerberos v5"
+error_code KIM_NO_REALMS_ERR,                     "There are no Kerberos realms configured"
+error_code KIM_NO_SUCH_REALM_ERR,                 "The realm '%s' is not in your configuration file or does not exist"
+error_code KIM_UNSUPPORTED_HINT_ERR,              "The hint '%s' is not supported by this version of KIM"
+error_code KIM_CLOCK_SKEW_ERR,                    "Clock skew too big: please check your time, time zone and daylight savings settings"
+
+index 25
+# Principal Errors
+error_code KIM_BAD_PRINCIPAL_STRING_ERR,          "'%s' is not a valid Kerberos principal"
+error_code KIM_BAD_COMPONENT_INDEX_ERR,           "Principal does not have a component at index %d"
+error_code KIM_PASSWORD_MISMATCH_ERR,             "New and verify passwords do not match"
+error_code KIM_INSECURE_PASSWORD_ERR,             "Your new password for '%s' is insecure; please pick another one"
+error_code KIM_PASSWORD_CHANGE_FAILED_ERR,        "Unable to change password for %s"
+error_code KIM_BAD_PASSWORD_ERR,                  "Password incorrect"
+error_code KIM_PREAUTH_FAILED_ERR,                "Password incorrect or preauthentication failed"
+
+index 50
+# Options Errors
+error_code KIM_BAD_OPTIONS_ERR,                   "Invalid options"
+error_code KIM_BAD_OPTIONS_VALUE_ERR,             "Invalid value for Kerberos default login option"
+
+index 75
+# User Interface Errors
+error_code KIM_CAPS_LOCK_ERR,                     "Password Incorrect (check your Caps Lock)"
+error_code KIM_USER_CANCELED_ERR,                 "The user cancelled the operation"
+error_code KIM_NO_SERVER_ERR,                     "KerberosAgent is not responding"
+error_code KIM_NO_UI_ERR,                         "Unable to display a user interface from this environment"
+error_code KIM_DUPLICATE_UI_REQUEST_ERR,          "UI just handled this request"
+
+index 100
+# Preferences Errors
+error_code KIM_PREFERENCES_READ_ERR,              "Unable to read user preferences.  The file may be missing, inaccessible or corrupted"
+error_code KIM_PREFERENCES_WRITE_ERR,             "Unable to write user preferences.  The file may be inaccessible"
+error_code KIM_IDENTITY_NOT_IN_LIST_ERR,          "Identity %s is not in the favorite identities list"
+error_code KIM_IDENTITY_ALREADY_IN_LIST_ERR,      "Identity %s is already in the favorite identities list"
+error_code KIM_BAD_IDENTITY_INDEX_ERR,            "No identity at index %d in the favorite identities list"
+
+index 125
+# Cache Collection Errors
+error_code KIM_NO_SUCH_PRINCIPAL_ERR,             "Principal '%s' does not exist in the cache collection"
+error_code KIM_CANT_BECOME_DEFAULT_ERR,           "The credentials cache '%s' cannot become the system default cache"
+error_code KIM_CREDENTIALS_EXPIRED_ERR,           "The Kerberos credentials for '%s' have expired"
+error_code KIM_NO_CREDENTIALS_ERR,                "No Kerberos credentials for '%s' available"
+error_code KIM_BAD_IP_ADDRESS_ERR,                "The IP addresses in the Kerberos credentials for '%s' do not match any of your computer's IP addresses"
+error_code KIM_NO_SUCH_CCACHE_ERR,                "The credentials cache '%s' does not exist"
+error_code KIM_BAD_HOST_CONFIGURATION_ERR,        "Unable to get local hostname or address information"
+error_code KIM_NEEDS_VALIDATION_ERR,              "The Kerberos credentials for '%s' need to be validated"
+
+end

@@ -1,0 +1,486 @@
+The operating-system specific functions provide an interface between the
+other parts of the \libname{libkrb5.a} libraries and the operating system.
+
+Beware! Any of the functions below are allowed to be implemented as
+macros.  Prototypes for functions can be found in {\tt
+<krb5.h>}; other definitions (including macros, if used) are
+in {\tt <krb5/libos.h>}.
+
+The following global symbols are provided in \libname{libos.a}.  If you
+wish to substitute for any of them, you must substitute for all of them
+(they are all declared and initialized in the same object file):
+\begin{description}
+% These come from src/lib/osconfig.c
+\item[extern char *\globalname{krb5_defkeyname}:] default name of key
+table file
+\item[extern char *\globalname{krb5_lname_file}:] name of aname/lname
+translation database
+\item[extern int \globalname{krb5_max_dgram_size}:] maximum allowable
+datagram size
+\item[extern int \globalname{krb5_max_skdc_timeout}:] maximum
+per-message KDC reply timeout
+\item[extern int \globalname{krb5_skdc_timeout_shift}:] shift factor
+(bits) to exponentially back-off the KDC timeouts
+\item[extern int \globalname{krb5_skdc_timeout_1}:] initial KDC timeout
+\item[extern char *\globalname{krb5_kdc_udp_portname}:] name of KDC UDP port
+\item[extern char *\globalname{krb5_default_pwd_prompt1}:] first prompt
+for password reading.
+\item[extern char *\globalname{krb5_default_pwd_prompt2}:] second prompt
+
+\end{description}
+
+\subsubsection{Operating specific context}
+The \datatype{krb5_context} has space for operating system specific
+data. These functions are called from \funcname{krb5_init_context} and
+\funcname{krb5_free_context}, but are included here for completeness.
+
+\begin{funcdecl}{krb5_os_init_context}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\end{funcdecl}
+
+\internalfunc
+
+Initializes \funcparam{context{\ptsto}os_context} and establishes the
+location of the initial configuration files. 
+
+\begin{funcdecl}{krb5_os_free_context}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\end{funcdecl}
+
+\internalfunc
+
+Frees the operating system specific portion of \funcparam{context}. 
+
+\subsubsection{Configuration based functions}
+These functions allow access to configuration specific information. In
+some cases, the configuration may be overriden by program control.
+
+
+\begin{funcdecl}{krb5_set_config_files}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{const char **}{filenames}
+\end{funcdecl}
+
+Sets the list of configuration files to be examined in determining
+machine defaults. \funcparam{filenames} is an array of files to check in
+order. The array must have a NULL entry as the last element.
+
+Returns system errors.
+
+\begin{funcdecl}{krb5_get_krbhst}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{const krb5_data *}{realm}
+\funcout
+\funcarg{char ***}{hostlist}
+\end{funcdecl}
+
+Figures out the Kerberos server names for the given \funcparam{realm},
+filling in \funcparam{hostlist} with a null terminated array of
+pointers to hostnames. 
+ 
+If \funcparam{realm} is unknown, the filled-in pointer is set to NULL.
+
+The pointer array and strings pointed to are all in allocated storage,
+and should be freed by the caller when finished.
+
+Returns system errors.
+
+\begin{funcdecl}{krb5_free_krbhst}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{char * const *}{hostlist}
+\end{funcdecl}
+
+Frees the storage taken by a host list returned by \funcname{krb5_get_krbhst}.
+
+\begin{funcdecl}{krb5_get_default_realm}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcout
+\funcarg{char **}{lrealm}
+\end{funcdecl}
+
+Retrieves the default realm to be used if no user-specified realm is
+available (e.g. to interpret a user-typed principal name with the
+realm omitted for convenience), filling in \funcparam{lrealm} with a
+pointer to the default realm in allocated storage.
+
+It is the caller's responsibility for freeing the allocated storage
+pointed to be \funcparam{lream} when it is finished with it.
+
+Returns system errors.
+
+\begin{funcdecl}{krb5_set_default_realm}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{char *}{realm}
+\end{funcdecl}
+
+Sets the default realm to be used if no user-specified realm is
+available (e.g. to interpret a user-typed principal name with the
+realm omitted for convenience). (c.f. krb5_get_default_realm)
+
+If \funcparam{realm} is NULL, then the operating system default value
+will used.
+
+Returns system errors.
+
+\begin{funcdecl}{krb5_get_host_realm}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{const char *}{host}
+\funcout
+\funcarg{char ***}{realmlist}
+\end{funcdecl}
+
+Figures out the Kerberos realm names for \funcparam{host}, filling in
+\funcparam{realmlist} with a
+pointer to an argv[] style list of names, terminated with a null pointer.
+ 
+If \funcparam{host} is NULL, the local host's realms are determined.
+
+If there are no known realms for the host, the filled-in pointer is set
+to NULL.
+
+The pointer array and strings pointed to are all in allocated storage,
+and should be freed by the caller when finished.
+
+Returns system errors.
+
+\begin{funcdecl}{krb5_free_host_realm}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{char * const *}{realmlist}
+\end{funcdecl}
+
+Frees the storage taken by a \funcparam{realmlist} returned by
+\funcname{krb5_get_local_realm}.
+
+\begin{funcdecl}{krb5_get_realm_domain}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{const char *}{realm}
+\funcout
+\funcarg{char **}{domain}
+\end{funcdecl}
+
+Determines the proper name of a realm. This is mainly so that a krb4
+principal can be converted properly into a krb5 one. If
+\funcparam{realm} is null, the function will assume the default realm of
+the host. The returned \funcparam{*domain} is allocated and must be
+freed by the caller. 
+
+\subsubsection{Disk based functions}
+These functions all relate to disk based I/O.
+
+\begin{funcdecl}{krb5_lock_file}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{in}{fd}
+\funcarg{int}{mode}
+\end{funcdecl}
+
+Attempts to lock the file in the given \funcparam{mode}; returns 0 for a
+successful lock, or an error code otherwise.
+
+The caller should arrange for the file referred by \funcparam{fd} to be
+opened in such a way as to allow the required lock.
+
+Modes are given in {\tt <krb5/libos.h>}
+
+\begin{funcdecl}{krb5_unlock_file}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{int}{fd}
+\end{funcdecl}
+
+Attempts to (completely) unlock the file.  Returns 0 if successful,
+or an error code otherwise.
+
+
+\begin{funcdecl}{krb5_create_secure_file}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{const char *}{pathname}
+\end{funcdecl}
+
+Creates a file named pathname which can only be read by the current
+user.
+
+\begin{funcdecl}{krb5_sync_disk_file}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{FILE *}{fp}
+\end{funcdecl}
+
+Assures that the changes made to the file pointed to by the file
+handle
+fp are forced out to disk.
+
+\subsubsection{Network based routines}
+
+These routines send and receive network data the specifics 
+of addresses and families on a given operating system.
+
+\begin{funcdecl}{krb5_os_localaddr}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcout
+\funcarg{krb5_address ***}{addr}
+\end{funcdecl}
+
+Return all the protocol addresses of this host.
+
+Compile-time configuration flags will indicate which protocol family
+addresses might be returned.
+\funcparam{*addr} is filled in to point to an array of address pointers,
+terminated by a null pointer.  All the storage pointed to is allocated
+and should be freed by the caller with \funcname{krb5_free_address}
+when no longer needed.
+
+\begin{funcdecl}{krb5_gen_portaddr}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{const krb5_address *}{adr}
+\funcarg{krb5_const_pointer}{ptr}
+\funcout
+\funcarg{krb5_address **}{outaddr}
+\end{funcdecl}
+
+Given an address \funcparam{adr} and an additional address-type specific
+portion pointed to by
+\funcparam{port} this routine
+combines them into a freshly-allocated
+\datatype{krb5_address} with type \datatype{ADDRTYPE_ADDRPORT} and fills in
+\funcparam{*outaddr} to point to this address.  For IP addresses,
+\funcparam{ptr} should point to a network-byte-order TCP or UDP port
+number.  Upon success, \funcparam{*outaddr} will point to an allocated
+address which should be freed with \funcname{krb5_free_address}.
+
+
+\begin{funcdecl}{krb5_sendto_kdc}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{const krb5_data *}{send}
+\funcarg{const krb5_data *}{realm}
+\funcout
+\funcarg{krb5_data *}{receive}
+\end{funcdecl}
+
+Send the message \funcparam{send} to a KDC for realm \funcparam{realm} and
+return the response (if any) in \funcparam{receive}.
+
+If the message is sent and a response is received, 0 is returned,
+otherwise an error code is returned.
+
+The storage for \funcparam{receive} is allocated and should be freed by
+the caller when finished.
+
+
+\begin{funcdecl}{krb5_net_read}{int}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{int}{fd}
+\funcout
+\funcarg{char *}{buf}
+\funcin
+\funcarg{int}{len}
+\end{funcdecl}
+
+Like read(2), but guarantees that it reads as much as was requested
+or returns -1 and sets errno.
+
+(make sure your sender will send all the stuff you are looking for!)
+Only useful on stream sockets and pipes.
+
+\begin{funcdecl}{krb5_net_write}{int}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{int}{fd}
+\funcarg{const char *}{buf}
+\funcarg{int}{len}
+\end{funcdecl}
+
+Like write(2), but guarantees that it writes as much as was requested
+or returns -1 and sets errno.
+
+Only useful on stream sockets and pipes.
+
+\begin{funcdecl}{krb5_write_message}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_pointer}{fd}
+\funcarg{krb5_data *}{data}
+\end{funcdecl}
+
+
+\funcname{krb5_write_message} writes data to the network as a message,
+using the network connection pointed to by \funcparam{fd}.
+
+\begin{funcdecl}{krb5_read_message}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_pointer}{fd}
+\funcout
+\funcarg{krb5_data *}{data}
+\end{funcdecl}
+
+Reads data from the network as a message, using the network connection
+pointed to by fd.
+
+\subsubsection{Operating specific access functions}
+These functions are involved with access control decisions and policies.
+
+\begin{funcdecl}{krb5_aname_to_localname}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_const_principal}{aname}
+\funcarg{int}{lnsize}
+\funcout
+\funcarg{char *}{lname}
+\end{funcdecl}
+
+Converts a principal name \funcparam{aname} to a local name suitable for use by
+programs wishing a translation to an environment-specific name (e.g.
+user account name).
+
+\funcparam{lnsize} specifies the maximum length name that is to be filled into
+\funcparam{lname}.
+The translation will be null terminated in all non-error returns.
+
+Returns system errors.
+
+\begin{funcdecl}{krb5_kuserok}{krb5_boolean}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_principal}{principal}
+\funcarg{const char *}{luser}
+\end{funcdecl}
+
+Given a Kerberos principal \funcparam{principal}, and a local username
+\funcparam{luser},
+determine whether user is authorized to login to the account \funcparam{luser}.
+Returns TRUE if authorized, FALSE if not authorized.
+
+\begin{funcdecl}{krb5_sname_to_principal}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{const char *}{hostname}
+\funcarg{const char *}{sname}
+\funcarg{krb5_int32}{type}
+\funcout
+\funcarg{krb5_principal *}{ret_princ}
+\end{funcdecl}
+
+Given a hostname \funcparam{hostname} and a generic service name
+\funcparam{sname}, this function generates a full principal name to be
+used when authenticating with the named service on the host.  The full
+prinicpal name is  returned  in \funcparam{ret_princ}.
+
+The realm of the
+principal is determined internally by calling \funcname{krb5_get_host_realm}.
+
+The \funcparam{type} argument controls how
+\funcname{krb5_sname_to_principal} generates the principal name,
+\funcparam{ret_princ}, for the named service, \funcparam{sname}.
+Currently, two values   are supported: KRB5_NT_SRV_HOST, and
+KRB5_NT_UNKNOWN.  
+
+If \funcparam{type} is set to
+KRB5_NT_SRV_HOST, the hostname will be
+canonicalized, i.e. a fully qualified lowercase hostname using
+the primary name and the domain name, before \funcparam{ret_princ} is
+generated in the form
+"sname/hostname@LOCAL.REALM." Most applications should use
+KRB5_NT_SRV_HOST.  
+
+However, if \funcparam{type} is set to KRB5_NT_UNKNOWN,
+while the generated principal name will have    the form
+"sname/hostname@LOCAL.REALM" the hostname will not be canonicalized
+first.  It will appear exactly as it was passed in \funcparam{hostname}.  
+
+The caller should release \funcparam{ret_princ}'s storage by calling
+\funcname{krb5_free_principal} when it is finished with the principal.
+
+
+
+\subsubsection{Miscellaneous operating specific functions}
+These functions handle the other operating specific functions that do
+not fall into any other major class.
+
+\begin{funcdecl}{krb5_timeofday}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcout
+\funcarg{krb5_context}{context}
+\funcarg{krb5_int32 *}{timeret}
+\end{funcdecl}
+
+Retrieves the system time of day, in seconds since the local system's
+epoch.
+[The ASN.1 encoding routines must convert this to the standard ASN.1
+encoding as needed]
+
+\begin{funcdecl}{krb5_us_timeofday}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcout
+\funcarg{krb5_int32 *}{seconds}
+\funcarg{krb5_int32 *}{microseconds}
+\end{funcdecl}
+
+Retrieves the system time of day, in seconds since the local system's
+epoch.
+[The ASN.1 encoding routines must convert this to the standard ASN.1
+encoding as needed]
+
+{\raggedright The seconds portion is returned in \funcparam{*seconds}, the
+microseconds portion in \funcparam{*microseconds}.}
+
+\begin{funcdecl}{krb5_read_password}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{const char *}{prompt}
+\funcarg{const char *}{prompt2}
+\funcout
+\funcarg{char *}{return_pwd}
+\funcinout
+\funcarg{unsigned int *}{size_return}
+\end{funcdecl}
+
+Read a password from the keyboard.  The first \funcparam{*size_return}
+bytes of the password entered are returned in \funcparam{return_pwd}.
+If fewer than \funcparam{*size_return} bytes are typed as a password,
+the remainder of \funcparam{return_pwd} is zeroed.  Upon success, the
+total number of bytes filled in is stored in \funcparam{*size_return}.
+
+\funcparam{prompt} is used as the prompt for the first reading of a password.
+It is printed to the terminal, and then a password is read from the
+keyboard.  No newline or spaces are emitted between the prompt and the
+cursor, unless the newline/space is included in the prompt.
+
+If \funcparam{prompt2} is a null pointer, then the password is read
+once.  If \funcparam{prompt2} is set, then it is used as a prompt to
+read another password in the same manner as described for
+\funcparam{prompt}.  After the second password is read, the two
+passwords are compared, and an error is returned if they are not
+identical.
+
+Echoing is turned off when the password is read.
+
+If there is an error in reading or verifying the password, an error code
+is returned; else zero is returned.
+
+
+\begin{funcdecl}{krb5_random_confounder}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{int}{size}
+\funcout
+\funcarg{krb5_pointer}{fillin}
+\end{funcdecl}
+
+Given a length and a pointer, fills in the area pointed to by
+\funcparam{fillin} with \funcparam{size} random octets suitable for use
+in a confounder.
+
+\begin{funcdecl}{krb5_gen_replay_name}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{const krb5_address *}{inaddr}
+\funcarg{const char *}{uniq}
+\funcout
+\funcarg{char **}{string}
+\end{funcdecl}
+
+Given a \datatype{krb5_address} with type \datatype{ADDRTYPE_ADDRPORT}
+in \funcparam{inaddr}, this function unpacks its component address and
+additional type, and uses them along with \funcparam{uniq} to allocate a
+fresh string to represent the address and additional information.  The
+string is suitable for use as a replay cache tag.  This string is
+allocated and should be freed with \funcname{free} when the caller has
+finished using it.  When using IP addresses, the components in
+\funcparam{inaddr{\ptsto}contents} must be of type
+\datatype{ADDRTYPE_INET} and \datatype{ADDRTYPE_PORT}.
+
+% XXX Note that if the bug I sent in entitled ``krb5_gen_replay_name
+% outputs char * when krb5_get_server_rcache expects krb5_data''
+% (OpenVision Cambridge bug number 1582) causes the code of this
+% function to change, the documentation above will have to be updated.

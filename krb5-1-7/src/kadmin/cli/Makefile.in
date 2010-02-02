@@ -1,0 +1,46 @@
+thisconfigdir=../..
+myfulldir=kadmin/cli
+mydir=kadmin/cli
+BUILDTOP=$(REL)..$(S)..
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+KDB_DEP_LIB=$(DL_LIB) $(THREAD_LINKOPTS)
+DEFS=
+
+PROG = kadmin
+COMMON_OBJS = kadmin.o kadmin_ct.o ss_wrapper.o getdate.o
+KADMIN_OBJS = $(COMMON_OBJS) keytab.o
+LOCAL_OBJS = $(COMMON_OBJS) keytab_local.o
+
+SRCS = kadmin.c kadmin_ct.c ss_wrapper.c getdate.c keytab.c
+
+LOCALINCLUDES=-I$(srcdir)
+
+all:: $(PROG).local $(PROG)
+
+$(PROG).local: $(LOCAL_OBJS) $(SS_DEPLIB) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $(PROG).local $(LOCAL_OBJS) $(SS_LIB) $(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_BASE_LIBS)
+
+$(PROG): $(KADMIN_OBJS) $(SS_DEPLIB) $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $(PROG) $(KADMIN_OBJS) $(SS_LIB) $(KADMCLNT_LIBS) $(KRB5_BASE_LIBS)
+
+kadmin_ct.o: kadmin_ct.c
+
+install::
+	$(INSTALL_PROGRAM) $(PROG).local ${DESTDIR}$(ADMIN_BINDIR)/$(PROG).local
+	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(CLIENT_BINDIR)/$(PROG)
+	$(INSTALL_SCRIPT) $(srcdir)/k5srvutil.sh ${DESTDIR}$(CLIENT_BINDIR)/k5srvutil
+	$(INSTALL_DATA) $(srcdir)/k5srvutil.M ${DESTDIR}$(CLIENT_MANDIR)/k5srvutil.1
+	$(INSTALL_DATA) $(srcdir)/$(PROG).M ${DESTDIR}$(CLIENT_MANDIR)/$(PROG).1
+	$(INSTALL_DATA) $(srcdir)/$(PROG).local.M ${DESTDIR}$(ADMIN_MANDIR)/$(PROG).local.8
+
+generate-files-mac: kadmin_ct.c getdate.c
+
+clean::
+	$(RM) $(PROG).local $(PROG) $(COMMON_OBJS) $(KADMIN_OBJS) $(LOCAL_OBJS)
+clean-unix::
+	$(RM) getdate.c kadmin_ct.c
+
+# for testing getdate.y
+datetest: getdate.c
+	$(CC) -o datetest $(ALL_CFLAGS) $(LDFLAGS) $(LDARGS) -DTEST getdate.c

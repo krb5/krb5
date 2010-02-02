@@ -1,0 +1,5 @@
+thisconfigdir=../..
+myfulldir=appl/sample
+mydir=appl/sample
+SUBDIRS = sclient sserver
+BUILDTOP=$(REL)..$(S)..

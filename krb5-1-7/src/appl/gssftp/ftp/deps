@@ -1,0 +1,28 @@
+# 
+# Generated makefile dependencies follow.
+#
+$(OUTPRE)cmds.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/port-sockets.h $(srcdir)/../arpa/ftp.h \
+  cmds.c ftp_var.h pathnames.h
+$(OUTPRE)cmdtab.$(OBJEXT): cmdtab.c ftp_var.h
+$(OUTPRE)domacro.$(OBJEXT): domacro.c ftp_var.h
+$(OUTPRE)ftp.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_ext.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h $(BUILDTOP)/include/gssapi/gssapi_krb5.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/port-sockets.h $(srcdir)/../arpa/ftp.h \
+  $(srcdir)/../arpa/telnet.h ftp.c ftp_var.h secure.h
+$(OUTPRE)getpass.$(OBJEXT): ftp_var.h getpass.c
+$(OUTPRE)glob.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  ftp_var.h glob.c
+$(OUTPRE)main.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/port-sockets.h $(srcdir)/../arpa/ftp.h \
+  ftp_var.h main.c
+$(OUTPRE)radix.$(OBJEXT): ftp_var.h radix.c
+$(OUTPRE)ruserpass.$(OBJEXT): ftp_var.h ruserpass.c
+$(OUTPRE)secure.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+  $(srcdir)/../arpa/ftp.h secure.c secure.h

@@ -1,0 +1,65 @@
+thisconfigdir=./..
+myfulldir=appl/gssftp/ftp
+mydir=ftp
+BUILDTOP=$(REL)..$(S)..$(S)..
+#
+# appl/gssftp/ftp/Makefile.in
+#
+DEFINES = -DGSSAPI -DFTP_BUFSIZ=65535
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+SRCS	= $(srcdir)/cmds.c $(srcdir)/cmdtab.c $(srcdir)/domacro.c \
+	  $(srcdir)/ftp.c $(srcdir)/getpass.c $(srcdir)/glob.c \
+	  $(srcdir)/main.c $(srcdir)/radix.c \
+	  $(srcdir)/ruserpass.c $(srcdir)/secure.c 
+
+
+OBJS	= $(OUTPRE)cmds.$(OBJEXT) $(OUTPRE)cmdtab.$(OBJEXT) \
+	  $(OUTPRE)domacro.$(OBJEXT) $(OUTPRE)ftp.$(OBJEXT) \
+	  $(OUTPRE)getpass.$(OBJEXT) $(OUTPRE)glob.$(OBJEXT) \
+	  $(OUTPRE)main.$(OBJEXT) $(OUTPRE)radix.$(OBJEXT) \
+	  $(OUTPRE)ruserpass.$(OBJEXT) $(OUTPRE)secure.$(OBJEXT)
+
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)
+
+all-unix::	ftp
+all-windows::	$(OUTPRE)ftp.exe
+
+ftp:	$(OBJS) $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o ftp $(OBJS) $(GSS_LIBS) $(KRB5_BASE_LIBS)
+
+$(OUTPRE)ftp.exe: $(OBJS) $(GLIB) $(KLIB)
+	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib advapi32.lib $(SCLIB)
+	$(_VC_MANIFEST_EMBED_EXE)
+
+clean-unix::
+	$(RM) ftp
+
+depend::
+
+install-unix::
+	for f in ftp; do \
+	  $(INSTALL_PROGRAM) $$f \
+		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \
+	  $(INSTALL_DATA) $(srcdir)/$$f.M \
+		$(DESTDIR)$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
+	done
+
+ftp.o cmds.o main.o:	$(srcdir)/../arpa/ftp.h
+ftp.o cmds.o cmdtab.o domacro.o main.o ruserpass.o: $(srcdir)/ftp_var.h 
+secure.o: secure.h
+
+cmds.o: $(srcdir)/cmds.c
+cmdtab.o: $(srcdir)/cmdtab.c
+ftp.o: $(srcdir)/ftp.c
+getpass.o: $(srcdir)/getpass.c
+glob.o: $(srcdir)/glob.c
+main.o: $(srcdir)/main.c
+pclose.o: $(srcdir)/pclose.c
+ruserpass.o: $(srcdir)/ruserpass.c
+domacro.o: $(srcdir)/domacro.c
+radix.o: $(srcdir)/radix.c
+secure.o: $(srcdir)/secure.c
+
+# NOPOSTFIX

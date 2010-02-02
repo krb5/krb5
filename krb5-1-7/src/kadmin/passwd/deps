@@ -1,0 +1,26 @@
+# 
+# Generated makefile dependencies follow.
+#
+$(OUTPRE)tty_kpasswd.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/kadm5/admin.h \
+  $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/kadm_err.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/gssrpc/auth.h \
+  $(SRCTOP)/include/gssrpc/auth_gss.h $(SRCTOP)/include/gssrpc/auth_unix.h \
+  $(SRCTOP)/include/gssrpc/clnt.h $(SRCTOP)/include/gssrpc/rename.h \
+  $(SRCTOP)/include/gssrpc/rpc.h $(SRCTOP)/include/gssrpc/rpc_msg.h \
+  $(SRCTOP)/include/gssrpc/svc.h $(SRCTOP)/include/gssrpc/svc_auth.h \
+  $(SRCTOP)/include/gssrpc/xdr.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h kpasswd.h kpasswd_strings.h \
+  tty_kpasswd.c
+$(OUTPRE)kpasswd.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/kadm5/admin.h \
+  $(BUILDTOP)/include/kadm5/chpass_util_strings.h $(BUILDTOP)/include/kadm5/kadm_err.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(SRCTOP)/include/gssrpc/auth.h \
+  $(SRCTOP)/include/gssrpc/auth_gss.h $(SRCTOP)/include/gssrpc/auth_unix.h \
+  $(SRCTOP)/include/gssrpc/clnt.h $(SRCTOP)/include/gssrpc/rename.h \
+  $(SRCTOP)/include/gssrpc/rpc.h $(SRCTOP)/include/gssrpc/rpc_msg.h \
+  $(SRCTOP)/include/gssrpc/svc.h $(SRCTOP)/include/gssrpc/svc_auth.h \
+  $(SRCTOP)/include/gssrpc/xdr.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h kpasswd.c kpasswd.h kpasswd_strings.h
+$(OUTPRE)kpasswd_strings.$(OBJEXT): $(COM_ERR_DEPS) \
+  kpasswd_strings.c

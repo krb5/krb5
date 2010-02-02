@@ -1,0 +1,35 @@
+[OPTIONS]
+Auto Index=Yes
+Compatibility=1.1 or later
+Compiled file=netidmgr.chm
+Contents file=toc.hhc
+Default Window=MainHelpWnd
+Default topic=html/welcome.htm
+Display compile progress=No
+Index file=Index.hhk
+Language=0x409 English (United States)
+Title=NetIDMgr
+
+[WINDOWS]
+MainHelpWnd="NetIDMgr Help","toc.hhc","Index.hhk","html/welcome.htm","html/welcome.htm",,,,,0x42120,,0x384e,[271,372,593,566],0x830000,,,,,,0
+
+
+[ALIAS]
+IDH_ACTION_NEW_ID=html\act_new_creds.htm
+IDH_ACTION_PASSWD_ID=html\act_chpw.htm
+IDH_WELCOME=html\welcome.htm
+
+[MAP]
+#include khhelp.h
+
+[TEXT POPUPS]
+khhelp.h
+popups_newcreds.txt
+popups_password.txt
+
+[INFOTYPES]
+Category:Concepts
+CategoryDesc:Authentication, authorization and related concepts.
+Category:Usage
+CategoryDesc:Usage instructions for NetIDMgr
+

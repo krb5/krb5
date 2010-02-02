@@ -1,0 +1,174 @@
+@c Set the "MIT" flag for the MIT edition; set the "CYGNUS" flag for
+@c the Cygnus edition.
+@clear CYGNUS
+@set MIT
+@set ADMINUSER joeadmin
+@set COMPANY MIT
+@set KDCSERVER kerberos
+@set KDCSLAVE1 @value{KDCSERVER}-1
+@set KDCSLAVE2 @value{KDCSERVER}-2
+@set PRIMARYDOMAIN mit.edu
+@set PRIMARYREALM ATHENA.MIT.EDU
+@set PRODUCT Kerberos V5
+@set CPRODUCT Kerberos
+@set LCPRODUCT krb5
+@set RANDOMHOST1 daffodil
+@set RANDOMHOST1IP 10.0.0.6
+@set RANDOMHOST2 trillium
+@set RANDOMHOST2IP 10.1.2.3
+@set RANDOMUSER johndoe
+@set RANDOMUSER1 jennifer
+@set RANDOMUSER2 david
+@set RELEASE 1.7
+@set PREVRELEASE 1.6
+@set INSTALLDIR /usr/@value{LCPRODUCT}
+@set PREVINSTALLDIR @value{INSTALLDIR}
+@set ROOTDIR /usr/local
+@set BINDIR /usr/local/bin
+@set LOCALSTATEDIR @value{ROOTDIR}/var
+@set SECONDDOMAIN example.com
+@set SECONDREALM EXAMPLE.COM
+@set UPDATED @today
+
+@ignore
+The rest of the variables in this file are defaults for tags in the
+configuration files.  Each group of defaults come from the same file in
+the code, which is specified in the ignore comment above the group.
+After each variable, there should be a comment specifying the variable
+in the code that holds the default variable, or the line in which the
+default was set.
+@end ignore
+
+@ignore 
+the following should be consistent with the variables set in
+krb5/src/lib/krb5/krb/init_ctx.c
+@end ignore
+@set DefaultETypeList aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4 
+@comment DEFAULT_ETYPE_LIST
+@set DefaultDefaultTgsEnctypes @value{DefaultETypeList}
+@set DefaultDefaultTktEnctypes @value{DefaultETypeList}
+@set DefaultPermittedEnctypes @value{DefaultETypeList}
+@set DefaultClockskew 300 seconds, or five minutes 
+@comment libdefaults, clockskew
+@set DefaultChecksumType RSA MD5 
+@comment libdefaults, kdc_req_checksum_type, ap_req_checksum_type, safe_checksum_type
+@set DefaultCcacheType 4
+@comment DEFAULT_CCACHE_TYPE 
+@set DefaultTktLifetime 1 day
+@comment libdefaults, tkt_lifetime
+@comment -- actually, that's not implemented; see
+@comment lib/krb5/krb/get_in_tkt.c, and clients/kinit/kinit.c for krb4
+@comment fallback
+@set DefaultKDCTimesync 1
+@comment DEFAULT_KDC_TIMESYNC
+@set DefaultKDCDefaultOptions KDC_OPT_RENEWABLE_OK
+@comment line 194
+
+@ignore
+the following defaults should be consistent with default variables set
+in krb5/src/include/osconf.hin
+@end ignore
+@set DefaultMasterKeyType des3-cbc-sha1
+@comment DEFAULT_KDC_ENCTYPE
+@set DefaultKadmindPort 749 
+@comment DEFAULT_KADM5_PORT
+@set DefaultAclFile @value{LOCALSTATEDIR}/krb5kdc/kadm5.acl 
+@comment DEFAULT_KADM5_ACL_FILE
+@set DefaultAdminKeytab @value{LOCALSTATEDIR}/krb5kdc/kadm5.keytab 
+@comment DEFAULT_KADM5_KEYTAB
+@set DefaultDatabaseName @value{LOCALSTATEDIR}/krb5kdc/principal
+@comment DEFAULT_KDB_FILE
+@set DefaultKdcPorts 88,750 
+@comment DEFAULT_KDC_PORTLIST
+@set DefaultKpasswdPort 464 
+@comment DEFAULT_KPASSWD_PORT
+@set DefaultSecondPort 750 
+@comment KRB5_DEFAULT_SEC_PORT
+@set DefaultPort 88 
+@comment KRB5_DEFAULT_PORT
+@set DefaultKeyStashFileStub @value{LOCALSTATEDIR}/krb5kdc/.k5. 
+@comment DEFAULT_KEYFILE_STUB
+@set DefaultDefaultKeytabName /etc/krb5.keytab
+@comment DEFAULT_KEYTAB_NAME
+@set DefaultKpasswdPort 464
+@comment DEFAULT_KPASSWD_PORT
+@set DefaultDefaultProfilePath /etc/krb5.conf
+@comment DEFAULT_PROFILE_PATH
+@set DefaultKDCRCache krb5kdc_rcache
+@comment KDCRCACHE
+@set DefaultRCTmpDirs /var/tmp, /usr/tmp, /var/usr/tmp, and /tmp
+
+@ignore
+the following defaults should be consistent with the numbers set in
+krb5/src/lib/kadm5/alt_prof.c
+@end ignore
+@set DefaultMaxLife 24 hours 
+@comment max_life
+@set DefaultMaxRenewableLife 0 
+@comment max_rlife
+@set DefaultDefaultPrincipalExpiration 0 
+@comment expiration
+@set DefaultSupportedEnctypes aes256-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:normal des3-cbc-sha1:normal arcfour-hmac-md5:normal
+@comment krb5/src/include/osconf.hin, KRB5_DEFAULT_SUPPORTED_ENCTYPES
+
+@ignore
+the following defaults should be consistent with the values set in
+krb5/src/include/kdb.h
+@end ignore
+@set DefaultDefaultPrincipalFlags postdateable, forwardable, tgt-based, renewable, proxiable, dup-skey, allow-tickets, and service enabled.
+@comment KRB_KDC_DEFAULT_FLAGS set to 0
+
+@ignore
+the following defaults should be consistent with the values set in
+include/kdb.h
+@end ignore
+@set DefaultMasterKeyName K/M
+@comment KRB5_KDB_M_NAME
+
+@ignore
+the following defaults should be consistent with the values set in
+krb5/src/appl/bsd/login.c
+@end ignore
+@set DefaultKrb5GetTickets true
+@comment login_krb5_get_tickets
+@set DefaultKrbRunAklog false
+@comment login_krb_run_aklog
+@set DefaultAklogPath $(prefix)/bin/aklog
+@comment lines 955-956
+@set DefaultAcceptPasswd false
+@comment login_accept_password
+
+@ignore
+these defaults are based on code in krb5/src/aclocal.m4
+@end ignore
+@set DefaultDNSLookupKDC true
+@set DefaultDNSLookupRealm false
+@comment lines 1259-1300
+
+@ignore
+the following are based on variables in krb5/src/include/kerberosIV/krbports.h
+@end ignore
+@set DefaultKrbPropPort 754
+@comment KRB_PROP_PORT
+@set DefaultKloginPort 543
+@comment KLOGIN_PORT
+@set DefaultEkloginPort 2105
+@comment EKLOGIN_PORT
+@set DefaultKshellPort 544
+@comment KRB_SHELL_PORT
+
+@ignore
+/etc/services
+@end ignore
+@set DefaultTelnetPort 23
+@set DefaultFTPPort 21
+@set DefaultKrb524Port 4444
+
+@comment krb5/src/lib/krb5/krb/get_in_tkt.c
+@set DefaultRenewLifetime 0
+@set DefaultNoaddresses set
+@set DefaultForwardable not set
+@set DefaultProxiable not set
+
+@comment lib/krb5/krb/vfy_increds.c
+@set DefaultVerifyApReqNofail not set

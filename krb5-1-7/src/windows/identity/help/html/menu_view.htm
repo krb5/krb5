@@ -1,0 +1,99 @@
+<html>
+<head>
+  <title>Network Identity Manager - View Menu</title>
+  <meta name="description" content="View menu">
+  <meta name="keywords" content="view menu">
+  <link rel="stylesheet" type="text/css" href="nidmgr.css">
+</head>
+<body>
+
+<h1>Network Identity Manager - View Menu</h1>
+
+<p>
+Click an item on the menu to go to the description of the action, or choose from 
+the list below. You can activate the View Menu by pressing <span
+class="pre">Alt + V</span> and you can activate each action by pressing the 
+highlighted character.
+</p>
+
+<p>
+Actions which have an associated hot key show this hot key to the
+right of the action.  You can use the hot key to trigger the action
+without invoking the <span class="pre">View</span> menu.
+</p>
+
+<p>
+<map name="menumap">
+<area href="#advanced" shape="rect" coords="91, 20, 230, 39">
+<area href="#choosecol" shape="rect" coords="89, 38, 230, 57">
+<area href="#layout" shape="rect" coords="89, 52, 229, 76">
+<area href="#layout" shape="rect" coords="225, 54, 319, 125">
+<area href="#refresh" shape="rect" coords="91, 77, 226, 101">
+</map>
+<img src="images/screen_menu_view.png" usemap="#menumap" />
+</p>
+
+<ul>
+
+<li><a name="advanced"></a> <span class="title">Advanced F7</span>:
+
+Toggles the display mode between <b>basic</b> and <b>advanced</b> modes.  
+In basic mode, the Network Identity Manager displays a list of identities 
+and their current status.  In the advanced mode, NetIdMgr provides a 
+customizable list of all discovered credentials.
+</li>
+
+<li><a name="all_ids"></a> <span class="title">All identities</span>: Toggles 
+the inclusion of all configured identities in the NetIdMgr identity lists.&nbsp; 
+If all identities is unchecked, only the default identity, pinned identities, 
+and identities with credentials are included in the NetIdMgr identity lists.</li>
+
+<li><a name="choosecol"></a> <span class="title">View columns</span>:
+
+<i>Only available in Advanced mode.</i>
+Invokes a submenu from which you can choose the columns that are
+displayed in the credentials window.  If you change the columns, or
+their order, a new custom layout will be created for you which you can
+later use using the <span class="pre">Layout</span> submenu later. For
+more information about managing layouts, see the <a href="use_layout.htm">Layout</a> topic.</li>
+
+<li><a name="layout"></a> <span class="title">Layout</span>: 
+<i>Only available in Advanced mode.</i>  Opens a
+submenu where you can select the layout for the credentials
+display.
+   <ul>
+
+      <li><span class="title">By Identity</span>: A predefined layout
+      where the credentials will be grouped by identity and by
+      credentials type, in that order.</li>
+
+      <li><span class="title">By Type</span>: <b>Not implemented in
+      this release.</b> A predefined layout
+      where the credentials are grouped by credentials type</li>
+
+      <li><span class="title">By Location</span>: A predefined layout
+      where the credentials are grouped by the location where they are
+      stored in.  For Kerberos 5, the location is the name of the
+      credentials cache in which the tickets are stored, and for AFS,
+      the location is always the cache manager.  Individual <a
+      href="concept_cred_pro.htm">credential providers</a> choose the
+      interpretation of the <span class="pre">location</span> property
+      as the concept of location changes from type to type.</li>
+
+      <li><span class="title">Custom</span>: If you customize any of
+      the above layouts by adding, removing, reordering or changing
+      the sort or outline columns, then NetIDMgr will store your new
+      layout settings under this layout.  Invoking this menu item
+      restores your customizations.</ul>
+
+</li>
+
+<li><a name="refresh"></a> <span class="title">Refresh view F5</span>: Refresh
+the contents of the credentials view.  This queries each <a
+href="concept_cred_pro.htm">credential provider</a> for any
+credentials and redraws the credentials view.</li>
+
+</ul>
+
+</body>
+</html>

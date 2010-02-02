@@ -1,0 +1,5 @@
+# 
+# Generated makefile dependencies follow.
+#
+$(OUTPRE)t_imp_name.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h t_imp_name.c

@@ -1,0 +1,60 @@
+#!/bin/sh
+
+com=`basename $0`
+files=$*
+ROFF=groff
+ROFF_FLAGS="-C -man -Tps"
+CSPLIT=
+
+IFS="${IFS= 	}"; save_ifs="$IFS"; IFS="${IFS}:"
+for i in $PATH; do
+  if [ -f $i/gcsplit ]; then
+	CSPLIT=$i/gcsplit
+	break
+  fi
+  if [ -f $i/csplit ]; then
+	CSPLIT=$i/csplit
+	break
+  fi
+done
+IFS="$save_ifs"
+
+if [ "$files" = "" ]; then
+    echo "Usage: $com file [file2 ...]"
+    exit 1
+fi
+
+for file in $files
+do
+    filename=`basename $file | awk -F. '{print $1}'`
+    eval $ROFF $ROFF_FLAGS $file > $filename.ps
+
+    pages=`grep '%%Pages\:' $filename.ps | awk '{print $2}'`
+    pp=`expr $pages - 1`
+
+    echo $filename': '$pages' pages'
+
+    if [ "$CSPLIT"x != x ]; then
+        $CSPLIT -k $filename.ps /Page:/ \{$pp\} > /dev/null
+
+        counter=0
+
+        for number in `ls xx*`
+        do
+            cat xx00 > $filename$counter.ps
+            echo '0.85 dup scale' >> $filename$counter.ps
+            cat $number >> $filename$counter.ps
+            if [ $counter != $pages ];
+                then
+                echo '%%Trailer' >> $filename$counter.ps
+                echo 'end' >> $filename$counter.ps
+                echo '%%EOF' >> $filename$counter.ps
+            fi
+            counter=`expr $counter + 1`
+        done
+
+        rm $filename.ps $filename'0.ps' xx*
+    else
+        echo "Can't find the csplit command.  You'll have to split $filename.ps manually."
+    fi
+done

@@ -1,0 +1,207 @@
+The replay cache functions deal with verifying that AP_REQ's do not
+contain duplicate authenticators; the storage must be non-volatile for
+the site-determined validity period of authenticators.
+
+Each replay cache has a string ``name'' associated with it.  The use of
+this name is dependent on the underlying caching strategy (for
+file-based things, it would be a cache file name).  The
+caching strategy uses non-volatile storage so that replay
+integrity can be maintained across system failures.
+
+\begin{funcdecl}{krb5_auth_to_rep}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcin
+\funcarg{krb5_tkt_authent *}{auth}
+\funcout
+\funcarg{krb5_donot_replay *}{rep}
+\end{funcdecl}
+Extract the relevant parts of \funcparam{auth} and fill them into the
+structure pointed to by \funcparam{rep}.  \funcparam{rep{\ptsto}client}
+and \funcparam{rep{\ptsto}server} are set to allocated storage and
+should be freed when \funcparam{*rep} is no longer needed.
+
+\begin{funcdecl}{krb5_rc_resolve_full}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_rcache *}{id}
+\funcin
+\funcarg{char *}{string_name}
+\end{funcdecl}
+
+\begin{sloppypar}
+\funcparam{id} is filled in to identify a replay cache which
+corresponds to the name in \funcparam{string_name}.  The cache is not opened.
+Requires that \funcparam{string_name} be of the form ``type:residual''
+and that ``type'' is a type known to the library.
+\end{sloppypar}
+
+Before the cache can be used \funcname{krb5_rc_initialize} or
+\funcname{krb5_rc_recover} must be called.
+
+Errors: error if cannot resolve name.
+
+
+\begin{funcdecl}{krb5_rc_resolve_type}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_rcache *}{id}
+\funcin
+\funcarg{char *}{type}
+\end{funcdecl}
+
+\internalfunc
+
+Looks up \funcparam{type} in the list of knows cache types and if found
+attaches the operations to \funcparam{*id} which must be previously
+allocated. 
+
+If \funcparam{type} is not found, {\sc krb5_rc_type_notfound} is returned.
+
+\begin{funcdecl}{krb5_rc_register_type}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_rc_ops *}{ops}
+\end{funcdecl}
+Adds a new replay cache type implemented and identified by
+\funcparam{ops} to the set recognized by
+\funcname{krb5_rc_resolve}.  This function requires that a ticket
+cache of the type named in 
+\funcparam{ops{\ptsto}prefix} has not been previously registered.
+
+
+\begin{funcdecl}{krb5_rc_default_name}{char *}{\funcin}
+\funcarg{krb5_context}{context}
+\end{funcdecl}
+
+\begin{sloppypar}
+Returns  the name of the default replay cache; this may be equivalent to
+\funcnamenoparens{getenv}({\tt "KRB5RCACHE"}) with an appropriate fallback.
+\end{sloppypar}
+
+\begin{funcdecl}{krb5_rc_default_type}{char *}{\funcin}
+\funcarg{krb5_context}{context}
+\end{funcdecl}
+
+Returns the type of the default replay cache.
+
+\begin{funcdecl}{krb5_rc_default}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_rcache *}{id}
+\end{funcdecl}
+
+This function returns an unopened replay cache of the default type and
+default name (as would be returned by \funcname{krb5_rc_default_type}
+and \funcname{krb5_rc_default_name}).  Before the cache can be used
+\funcname{krb5_rc_initialize} or \funcname{krb5_rc_recover} must be
+called.
+
+
+\begin{funcdecl}{krb5_rc_initialize}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_rcache}{id}
+\funcarg{krb5_deltat}{auth_lifespan}
+\end{funcdecl}
+
+Creates/refreshes the replay cache identified by \funcparam{id} and sets its
+authenticator lifespan to \funcparam{auth_lifespan}.  If the 
+replay cache already exists, its contents are destroyed.
+
+Errors: permission errors, system errors
+
+\begin{funcdecl}{krb5_rc_recover}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_rcache}{id}
+\end{funcdecl}
+Attempts to recover the replay cache \funcparam{id}, (presumably after a
+system crash or server restart).
+
+Errors: error indicating that no cache was found to recover
+
+\begin{funcdecl}{krb5_rc_destroy}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_rcache}{id}
+\end{funcdecl}
+
+Destroys the replay cache \funcparam{id}.
+Requires that \funcparam{id} identifies a valid replay cache.
+
+Errors: permission errors.
+
+\begin{funcdecl}{krb5_rc_close}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_rcache}{id}
+\end{funcdecl}
+
+Closes the replay cache \funcparam{id}, invalidates \funcparam{id},
+and releases any other resources acquired during use of the replay cache.
+Requires that \funcparam{id} identifies a valid replay cache.
+
+Errors: permission errors
+
+\begin{funcdecl}{krb5_rc_store}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_rcache}{id}
+\funcarg{krb5_donot_replay *}{rep}
+\end{funcdecl}
+Stores \funcparam{rep} in the replay cache \funcparam{id}.
+Requires that \funcparam{id} identifies a valid replay cache.
+
+Returns KRB5KRB_AP_ERR_REPEAT if \funcparam{rep} is already in the
+cache.  May also return permission errors, storage failure errors.
+
+\begin{funcdecl}{krb5_rc_expunge}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_rcache}{id}
+\end{funcdecl}
+Removes all expired replay information (i.e. those entries which are
+older than then authenticator lifespan of the cache) from the cache
+\funcparam{id}.  Requires that \funcparam{id} identifies a valid replay
+cache.
+
+Errors: permission errors.
+
+\begin{funcdecl}{krb5_rc_get_lifespan}{krb5_error_code}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_rcache}{id}
+\funcout
+\funcarg{krb5_deltat *}{auth_lifespan}
+\end{funcdecl}
+Fills in \funcparam{auth_lifespan} with the lifespan of
+the cache \funcparam{id}.
+Requires that \funcparam{id} identifies a valid replay cache.
+
+\begin{funcdecl}{krb5_rc_resolve}{krb5_error_code}{\funcinout}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_rcache}{id}
+\funcin
+\funcarg{char *}{name}
+\end{funcdecl}
+
+Initializes private data attached to \funcparam{id}.  This function MUST
+be called before the other per-replay cache functions.
+
+Requires that \funcparam{id} points to allocated space, with an
+initialized \funcparam{id{\ptsto}ops} field.
+
+Since \funcname{krb5_rc_resolve} allocates memory,
+\funcname{krb5_rc_close} must be called to free the allocated memory,
+even if neither \funcname{krb5_rc_initialize} or
+\funcname{krb5_rc_recover} were successfully called by the application.
+
+Returns:  allocation errors.
+
+
+\begin{funcdecl}{krb5_rc_get_name}{char *}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_rcache}{id}
+\end{funcdecl}
+
+Returns the name (excluding the type) of the rcache \funcparam{id}.
+Requires that \funcparam{id} identifies a valid replay cache.
+
+\begin{funcdecl}{krb5_rc_get_type}{char *}{\funcin}
+\funcarg{krb5_context}{context}
+\funcarg{krb5_rcache}{id}
+\end{funcdecl}
+
+Returns the type (excluding the name) of the rcache \funcparam{id}.
+Requires that \funcparam{id} identifies a valid replay cache.
+
+

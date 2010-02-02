@@ -1,0 +1,12 @@
+# 
+# Generated makefile dependencies follow.
+#
+$(OUTPRE)gss-client.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_generic.h gss-client.c \
+  gss-misc.h
+$(OUTPRE)gss-misc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+  gss-misc.c gss-misc.h
+$(OUTPRE)gss-server.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_generic.h \
+  $(SRCTOP)/include/port-sockets.h gss-misc.h gss-server.c

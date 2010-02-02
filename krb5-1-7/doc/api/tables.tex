@@ -1,0 +1,79 @@
+The following is a list of options which can be passed to the Kerberos
+server (also known as the Key Distribution Center or KDC).  These
+options affect what sort of tickets the KDC will return to the
+application program.  The KDC options can be passed to
+\funcname{krb5_get_in_tkt}, \funcname{krb5_get_in_tkt_with_password},
+\funcname{krb5_get_in_tkt_with_skey}, and \funcname{krb5_send_tgs}. 
+
+
+\begin{center}
+\begin{tabular}{llc}
+\multicolumn{1}{c}{Symbol}&\multicolumn{1}{c}{RFC}& Valid for \\
+&\multicolumn{1}{c}{section}&get_in_tkt? \\ \hline
+KDC_OPT_FORWARDABLE	& 2.6	& yes		\\
+KDC_OPT_FORWARDED	& 2.6	&		\\
+KDC_OPT_PROXIABLE	& 2.5	& yes		\\
+KDC_OPT_PROXY		& 2.5	&		\\
+KDC_OPT_ALLOW_POSTDATE	& 2.4	& yes		\\
+KDC_OPT_POSTDATED	& 2.4	& yes		\\
+KDC_OPT_RENEWABLE	& 2.3	& yes		\\
+KDC_OPT_RENEWABLE_OK	& 2.7	& yes		\\
+KDC_OPT_ENC_TKT_IN_SKEY	& 2.7	&		\\
+KDC_OPT_RENEW		& 2.3	&		\\
+KDC_OPT_VALIDATE	& 2.2	&		\\
+\end{tabular}
+\end{center}
+\label{KDCOptions}
+
+The following is a list of preauthentication methods which are supported
+by Kerberos.  Most preauthentication methods are used by
+\funcname{krb5_get_in_tkt}, \funcname{krb5_get_in_tkt_with_password}, and
+\funcname{krb5_get_in_tkt_with_skey}; at some sites, the Kerberos server can be
+configured so that during the initial ticket transation, it will only
+return encrypted tickets after the user has proven his or her identity
+using a supported preauthentication mechanism.  This is done to make
+certain password guessing attacks more difficult to carry out.
+
+
+
+\begin{center}
+\begin{tabular}{lcc}
+\multicolumn{1}{c}{Symbol}&In & Valid for \\
+&RFC?&get_in_tkt? \\ \hline
+KRB5_PADATA_NONE		& yes	& yes	\\
+KRB5_PADATA_AP_REQ		& yes	&	\\
+KRB5_PADATA_TGS_REQ		& yes	&	\\
+KRB5_PADATA_PW_SALT		& yes	&	\\
+KRB5_PADATA_ENC_TIMESTAMP	& yes	& yes	\\
+KRB5_PADATA_ENC_SECURID		&	& yes	\\
+\end{tabular}
+\end{center}
+\label{padata-types}
+
+KRB5_PADATA_TGS_REQ is rarely used by a programmer; it is used to pass
+the ticket granting ticket to the Ticket Granting Service (TGS) during a
+TGS transaction (as opposed to an initial ticket transaction).
+
+KRB5_PW_SALT is not really a preauthentication method at all.  It is
+passed back from the Kerberos server to application program, and it
+contains a hint to the proper password salting algorithm which should be
+used during the initial ticket exchange.
+
+%The encription type can also be specified in
+%\funcname{krb5_get_in_tkt}, however normally only one keytype is used
+%in any one database.
+%
+%\begin{center}
+%\begin{tabular}{llc}
+%\multicolumn{1}{c}{Symbol}&\multicolumn{1}{c}{RFC}& Supported? \\
+%& \multicolumn{1}{c}{section} &  \\ \hline
+%ETYPE_NULL		& 6.3.1	& 	\\
+%ETYPE_DES_CBC_CRC	& 6.3.2	& yes	\\
+%ETYPE_DES_CBC_MD4	& 6.3.3	&	\\
+%ETYPE_DES_CBC_MD5	& 6.3.4	&	\\
+%ETYPE_RAW_DES_CBC	&	& yes	\\
+%\end{tabular}
+%\end{center}
+%\label{etypes}
+
+

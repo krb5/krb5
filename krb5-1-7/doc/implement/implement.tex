@@ -1,0 +1,94 @@
+\documentstyle[fixunder,functions,twoside,fancyheadings]{article}
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{2.00in}
+\setlength{\marginparsep}{0.05in}
+\setlength{\marginparwidth}{1.95 in}
+\setlength{\textwidth}{4.75in}
+\setlength{\topmargin}{-.5in}
+\setlength{\textheight}{9in}
+\setlength{\parskip}{.1in}
+\setlength{\parindent}{2em}
+\setlength{\footrulewidth}{0.4pt}
+\setlength{\plainfootrulewidth}{0.4pt}
+\setlength{\plainheadrulewidth}{0.4pt}
+\makeindex
+\newif\ifdraft
+\draftfalse
+%
+% Far, far too inconvenient... it's still very draft-like anyway....
+%   [tytso:19900921.0018EDT]
+%
+%\typein{Draft flag? (type \noexpand\draftfalse<CR> if not draft...)}
+\ifdraft
+\pagestyle{fancyplain}
+\addtolength{\headwidth}{\marginparsep}
+\addtolength{\headwidth}{\marginparwidth}
+\makeatletter
+\renewcommand{\sectionmark}[1]{\markboth {\uppercase{\ifnum \c@secnumdepth >\z@
+    \thesection\hskip 1em\relax \fi #1}}{}}%
+\renewcommand{\subsectionmark}[1]{\markright {\ifnum \c@secnumdepth >\@ne
+          \thesubsection\hskip 1em\relax \fi #1}}
+\makeatother
+\lhead[\thepage]{\fancyplain{}{\sl\rightmark}}
+\rhead[\fancyplain{}{\sl\rightmark}]{\thepage}
+\lfoot[]{{\bf DRAFT---DO NOT REDISTRIBUTE}}
+\rfoot[{\bf DRAFT---DO NOT REDISTRIBUTE}]{}
+\cfoot{\thepage}
+\else\pagestyle{headings}\fi
+
+%nlg- time to make this a real document
+
+\title{\Huge Kerberos V5 Implementer's Guide}
+\date{\ifdraft \\ {\Large DRAFT---}\fi\today}
+\author{MIT Information Systems}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{Introduction}
+
+	This document is designed to aide the programmer who plans to
+change MIT's implementation of Kerberos significantly.  It is geared towards
+programmers who are already familiar with Kerberos and how MIT's
+implementation is structured.
+
+	Some of the more basic information needed can be found in the
+API document, although many functions have been repeated where
+additional information has been included for the implementer.  The
+function descriptions included are up to date, even if the description
+of the functions may not be very verbose.
+
+\ifdraft\sloppy\fi
+
+\section{Cache and Key table functions}
+
+\subsection{Credentials cache functions}
+\input{ccache-i.tex}
+
+\subsection{Replay cache functions}
+\input{rcache-i.tex}
+
+\subsection{Key table functions}
+\input{keytab-i.tex}
+
+\section{Operating-system specific functions}
+\input{libos-i.tex}
+
+\section{Principal database functions}
+
+\input{kdb-i.tex}
+
+\section{Encryption system interface}
+\input{encrypt-i.tex}
+
+\section{Checksum interface}
+\input{cksum-i.tex}
+
+\section{CRC-32 checksum functions}
+\input{crc-32-i.tex}
+
+\appendix
+\cleardoublepage
+\input{\jobname.ind}
+\end{document}

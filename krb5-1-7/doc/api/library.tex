@@ -1,0 +1,114 @@
+\documentclass[twoside]{article}
+\usepackage{fixunder,functions,fancyheadings}
+\usepackage{krb5idx}
+%\usepackage{hyperref}
+
+%\hypersetup{letterpaper,
+%    bookmarks=true,
+%pdfpagemode=UseOutlines,
+%}
+
+%
+%\setlength{\oddsidemargin}{1in}
+%\setlength{\evensidemargin}{1.00in}
+%\setlength{\textwidth}{6.5in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{1.50in}
+\setlength{\textwidth}{5.25in}
+\setlength{\marginparsep}{0.0in}
+\setlength{\marginparwidth}{1.95 in}
+\setlength{\topmargin}{-.5in}
+\setlength{\textheight}{9in}
+\setlength{\parskip}{.1in}
+\setlength{\parindent}{2em}
+\setlength{\footrulewidth}{0.4pt}
+\setlength{\plainfootrulewidth}{0.4pt}
+\setlength{\plainheadrulewidth}{0.4pt}
+\makeindex
+\newif\ifdraft
+\draftfalse
+%
+% Far, far too inconvenient... it's still very draft-like anyway....
+%   [tytso:19900921.0018EDT]
+%
+%\typein{Draft flag? (type \noexpand\draftfalse<CR> if not draft...)}
+\ifdraft
+\pagestyle{fancyplain}
+\addtolength{\headwidth}{\marginparsep}
+\addtolength{\headwidth}{\marginparwidth}
+\makeatletter
+\renewcommand{\sectionmark}[1]{\markboth {\uppercase{\ifnum \c@secnumdepth >\z@
+    \thesection\hskip 1em\relax \fi #1}}{}}%
+\renewcommand{\subsectionmark}[1]{\markright {\ifnum \c@secnumdepth >\@ne
+          \thesubsection\hskip 1em\relax \fi #1}}
+\makeatother
+\lhead[\thepage]{\fancyplain{}{\sl\rightmark}}
+\rhead[\fancyplain{}{\sl\rightmark}]{\thepage}
+\lfoot[]{{\bf DRAFT---DO NOT REDISTRIBUTE}}
+\rfoot[{\bf DRAFT---DO NOT REDISTRIBUTE}]{}
+\cfoot{\thepage}
+\else\pagestyle{headings}\fi
+
+\def\internalfunc{NOTE: This is an internal function, which is not
+necessarily intended for use by application programs.  Its interface may
+change at any time.\par}
+
+%nlg- time to make this a real document
+
+\title{\Huge Kerberos V5 application programming library}
+\date{\ifdraft \\ {\Large DRAFT---}\fi\today}
+\author{MIT Information Systems}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+%\thispagestyle{empty}
+%\begin{center}
+%{\Huge Kerberos V5 application programming library}
+%\ifdraft \\ {\Large DRAFT---\today}\fi
+%\end{center}
+
+\section{Introduction}
+\input{intro.tex}
+
+\section{Useful KDC parameters to know about}
+\input{tables.tex}
+
+\section{Error tables}
+\input{errors.tex}
+
+%\addtolength{\oddsidemargin}{-1in}
+%\addtolength{\evensidemargin}{1.00in}
+%\addtolength{\textwidth}{-1.75in}
+\newpage
+
+\section{libkrb5.a functions}
+This section describes the functions provided in the \libname{libkrb5.a}
+library.  The library is built from several pieces, mostly for convenience in
+programming, maintenance, and porting.
+
+\ifdraft\sloppy\fi
+
+\subsection{Main functions}
+\input{krb5.tex}
+
+\subsection{Credentials cache functions}
+\input{ccache.tex}
+
+\subsection{Replay cache functions}
+\input{rcache.tex}
+
+\subsection{Key table functions}
+\input{keytab.tex}
+
+\subsection{Free functions}
+\input{free.tex}
+
+\subsection{Operating-system specific functions}
+\input{libos.tex}
+
+\appendix
+\cleardoublepage
+\printindex
+\end{document}

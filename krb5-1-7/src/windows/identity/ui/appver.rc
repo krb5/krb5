@@ -1,0 +1,40 @@
+
+#include<windows.h>
+#include<netidmgr_intver.h>
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION    KH_VERSION_LIST
+ PRODUCTVERSION KH_VERSION_LIST
+ FILEFLAGSMASK  0x17L
+ FILEFLAGS      KH_VER_FILEFLAGS
+ FILEOS         KH_VER_FILEOS
+ FILETYPE       0x0L
+ FILESUBTYPE    0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", KH_VERSTR_COMPANY_1033
+            VALUE "FileDescription", "Network Identity Manager"
+            VALUE "FileVersion", KH_VERSTR_VERSION_1033
+            VALUE "InternalName", "NetIDMgr"
+            VALUE "LegalCopyright", KH_VERSTR_COPYRIGHT_1033
+            VALUE "OriginalFilename", "netidmgr.exe"
+            VALUE "ProductName", "Network Identity Manager"
+            VALUE "ProductVersion", KH_VERSTR_PRODUCT_1033
+#ifdef KH_VERSTR_COMMENT_1033
+            VALUE "Comment", KH_VERSTR_COMMENT_1033
+#endif
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

@@ -1,0 +1,8 @@
+The first two tests are effectively a call to krb-fx-cf2 for
+aes-128-cts.  This mirrorrs the first test in t_cf2.in.
+
+
+The next four tests mirror a call to KRB-FX-CF2 for aes256-cts; this
+mirrors the second test in t_cf2.in.
+
+

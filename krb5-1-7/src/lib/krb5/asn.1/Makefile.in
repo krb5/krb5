@@ -1,0 +1,59 @@
+thisconfigdir=../../..
+myfulldir=lib/krb5/asn.1
+mydir=lib/krb5/asn.1
+BUILDTOP=$(REL)..$(S)..$(S)..
+DEFS=
+
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=asn.1
+##DOS##OBJFILE=..\$(OUTPRE)asn1.lst
+
+EHDRDIR=$(BUILDTOP)/include/krb5/asn.1
+
+STLIBOBJS= \
+	asn1_decode.o\
+	asn1_k_decode.o\
+	asn1_encode.o\
+	asn1_get.o\
+	asn1_make.o\
+	asn1buf.o\
+	krb5_decode.o\
+	krb5_encode.o\
+	asn1_k_encode.o\
+	ldap_key_seq.o\
+	asn1_misc.o
+
+SRCS= \
+	$(srcdir)/asn1_decode.c\
+	$(srcdir)/asn1_k_decode.c\
+	$(srcdir)/asn1_encode.c\
+	$(srcdir)/asn1_get.c\
+	$(srcdir)/asn1_make.c\
+	$(srcdir)/asn1buf.c\
+	$(srcdir)/krb5_decode.c\
+	$(srcdir)/krb5_encode.c\
+	$(srcdir)/asn1_k_encode.c\
+	$(srcdir)/ldap_key_seq.c\
+	$(srcdir)/asn1_misc.c
+
+OBJS= \
+	$(OUTPRE)asn1_decode.$(OBJEXT)\
+	$(OUTPRE)asn1_k_decode.$(OBJEXT)\
+	$(OUTPRE)asn1_encode.$(OBJEXT)\
+	$(OUTPRE)asn1_get.$(OBJEXT)\
+	$(OUTPRE)asn1_make.$(OBJEXT)\
+	$(OUTPRE)asn1buf.$(OBJEXT)\
+	$(OUTPRE)krb5_decode.$(OBJEXT)\
+	$(OUTPRE)krb5_encode.$(OBJEXT)\
+	$(OUTPRE)asn1_k_encode.$(OBJEXT)\
+	$(OUTPRE)ldap_key_seq.$(OBJEXT)\
+	$(OUTPRE)asn1_misc.$(OBJEXT)
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs
+
+clean-unix:: clean-libobjs
+
+@libobj_frag@
+

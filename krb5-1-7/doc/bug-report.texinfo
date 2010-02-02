@@ -1,0 +1,10 @@
+In any complex software, there will be bugs. Please send bug reports or
+other problems you may uncover using the @code{krb5-send-pr} program
+installed with the distribution.  In case @code{krb5-send-pr} fails to
+work, send bug reports to @samp{krb5-bugs@@mit.edu}.  Please mention
+which version of the Kerberos V5 distribution you are using, and whether
+you have made any private changes.  Bug reports that include proposed
+fixes are especially welcome.  If you do include fixes, please send them
+using either context diffs or unified diffs (using @samp{diff -c} or
+@samp{diff -u}, respectively).
+

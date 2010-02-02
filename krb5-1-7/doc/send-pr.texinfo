@@ -1,0 +1,144 @@
+In any complex software, there will be bugs.  If you have successfully
+built and installed @value{PRODUCT}, please use the @code{krb5-send-pr}
+program to fill out a Problem Report should you encounter any errors in
+our software.
+
+Bug reports that include proposed fixes are especially welcome.  If you
+do include fixes, please send them using either context diffs or unified
+diffs (using @samp{diff -c} or @samp{diff -u}, respectively).  Please be
+careful when using ``cut and paste'' or other such means to copy a patch
+into a bug report; depending on the system being used, that can result
+in converting TAB characters into spaces, which makes applying the
+patches more difficult.
+
+The @code{krb5-send-pr} program is installed in the directory
+@code{@value{ROOTDIR}/sbin}.
+
+The @code{krb5-send-pr} program enters the problem report into our
+Problem Report Management System (PRMS), which automatically assigns it
+to the engineer best able to help you with problems in the assigned
+category.
+@ifset CYGNUS
+The engineer will work with you via email, telephone, or both, and all
+email related to this Problem Report will be tracked by PRMS for future
+reference.  If you need to talk to someone else in our organization
+about the problem (@i{e.g.}, if the engineer gets hit by a truck), we
+can find out what the current state is through the PR number.
+@end ifset
+
+The @code{krb5-send-pr} program will try to intelligently fill in as
+many fields as it can.  You need to choose the @dfn{category},
+@dfn{class}, @dfn{severity}, and @dfn{priority} of the problem, as well
+as giving us as much information as you can about its exact nature.
+
+@need 1000
+The PR @b{category} will be one of:
+
+@smallexample
+@group
+krb5-admin   krb5-appl    krb5-build   krb5-clients 
+krb5-doc     krb5-kdc     krb5-libs    krb5-misc    
+pty          telnet       test         
+@end group
+@end smallexample
+
+@noindent
+Choose the category that best describes the area under which your
+problem falls.
+
+The @b{class} can be @dfn{sw-bug}, @dfn{doc-bug}, @dfn{change-request},
+or @dfn{support}.  The first two are exactly as their names imply.  Use
+@i{change-request} when the software is behaving according to
+specifications, but you want to request changes in some feature or
+behavior.  The @i{support} class is intended for more general questions
+about building or using @value{PRODUCT}.
+
+The @b{severity} of the problem indicates the problem's impact on the
+usability of @value{PRODUCT}.  If a problem is @dfn{critical}, that
+means the product, component or concept is completely non-operational,
+or some essential functionality is missing, and no workaround is known.
+A @dfn{serious} problem is one in which the product, component or
+concept is not working properly or significant functionality is missing.
+Problems that would otherwise be considered @i{critical} are rated
+@i{serious} when a workaround is known.  A @dfn{non-critical} problem is
+one that is indeed a problem, but one that is having a minimal effect on
+your ability to use @value{PRODUCT}.  @i{E.g.}, The product, component
+or concept is working in general, but lacks features, has irritating
+behavior, does something wrong, or doesn't match its documentation.  The
+default severity is @i{serious}.
+
+The @b{priority} indicates how urgent this particular problem is in
+relation to your work.  Note that low priority does not imply low
+importance.
+@ifset CYGNUS
+@value{COMPANY} considers all problems important, and
+encourages its customers to be realistic about priority ratings.
+@end ifset
+A priority of @dfn{high} means a solution is needed as soon as possible.
+A priority of @dfn{medium} means the problem should be solved no later
+than the next release.  A priority of @dfn{low} means the problem should
+be solved in a future release, but it is not important to your work how
+soon this happens.  The default priority is @i{medium}.
+
+Note that a given severity does not necessarily imply a given priority.
+For example, a non-critical problem might still have a high priority if
+you are faced with a hard deadline.  Conversely, a serious problem might
+have a low priority if the feature it is disabling is one that you do
+not need.
+
+It is important that you fill in the @i{release} field and tell us
+what changes you have made, if any.
+
+@iftex
+@vfill
+@end iftex
+
+@page
+A sample filled-out form from a company named ``Toasters, Inc.'' might
+look like this:
+
+@smallexample
+@group
+To: krb5-bugs@@mit.edu
+Subject: misspelled "Kerberos" in title of installation guide
+From: jcb
+Reply-To: jcb
+Cc: 
+X-send-pr-version: 3.99
+
+
+>Submitter-Id:	mit
+>Originator:	Jeffrey C. Gilman Bigler
+>Organization:
+mit
+>Confidential:	no
+>Synopsis:	Misspelled "Kerberos" in title of installation guide
+>Severity:	non-critical
+>Priority:	low
+>Category:	krb5-doc
+>Class:		doc-bug
+>Release:	1.0-development
+>Environment:
+	<machine, os, target, libraries (multiple lines)>
+System: ULTRIX imbrium 4.2 0 RISC
+Machine: mips
+>Description:
+        Misspelled "Kerberos" in title of "Kerboros V5 Installation Guide"
+>How-To-Repeat:
+        N/A
+>Fix:
+        Correct the spelling.
+@end group        
+@end smallexample
+
+@iftex
+@vfill
+@end iftex
+
+If the @code{krb5-send-pr} program does not work for you, or if you did
+not get far enough in the process to have an installed and working
+@code{krb5-send-pr}, you can generate your own form, using the above as
+an example.
+
+
+

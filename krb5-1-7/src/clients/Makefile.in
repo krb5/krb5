@@ -1,0 +1,55 @@
+thisconfigdir=..
+myfulldir=clients
+mydir=clients
+BUILDTOP=$(REL)..
+
+SUBDIRS= klist kinit kdestroy kpasswd ksu kvno kcpytkt kdeltkt
+
+NO_OUTPRE=1
+all-windows::
+	@echo Making all in clients\klist
+	cd klist
+	$(MAKE) -$(MFLAGS)
+	@echo Making all in clients\kdestroy
+	cd ..\kdestroy
+	$(MAKE) -$(MFLAGS)
+	@echo Making all in clients\kinit
+	cd ..\kinit
+	$(MAKE) -$(MFLAGS)
+	@echo Making all in clients\kpasswd
+	cd ..\kpasswd
+	$(MAKE) -$(MFLAGS)
+	@echo Making all in clients\kvno
+	cd ..\kvno
+	$(MAKE) -$(MFLAGS)
+	@echo Making all in clients\kcpytkt
+	cd ..\kcpytkt
+	$(MAKE) -$(MFLAGS)
+	@echo Making all in clients\kdeltkt
+	cd ..\kdeltkt
+	$(MAKE) -$(MFLAGS)
+	cd ..
+
+clean-windows::
+	@echo Making clean in clients\klist
+	cd klist
+	$(MAKE) -$(MFLAGS) clean
+	@echo Making clean in clients\kdestroy
+	cd ..\kdestroy
+	$(MAKE) -$(MFLAGS) clean
+	@echo Making clean in clients\kinit
+	cd ..\kinit
+	$(MAKE) -$(MFLAGS) clean
+	@echo Making clean in clients\kpasswd
+	cd ..\kpasswd
+	$(MAKE) -$(MFLAGS) clean
+	@echo Making clean in clients\kvno
+	cd ..\kvno
+	$(MAKE) -$(MFLAGS) clean
+	@echo Making clean in clients\kcpytkt
+	cd ..\kcpytkt
+	$(MAKE) -$(MFLAGS) clean
+	@echo Making clean in clients\kdeltkt
+	cd ..\kdeltkt
+	$(MAKE) -$(MFLAGS) clean
+	cd ..

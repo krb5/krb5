@@ -1,0 +1,94 @@
+/* Copyright (c) 2006 Secure Endpoints Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person
+ * obtaining a copy of this software and associated documentation
+ * files (the "Software"), to deal in the Software without
+ * restriction, including without limitation the rights to use, copy,
+ * modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+ * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+
+/* $Id$ */
+
+#include "credprov.h"
+#include<netidmgr_version.h>
+
+/* We use the same version.rc file for the main plugin DLL as well as
+   for the localized resource DLLs.*/
+
+#ifndef LANGVER
+
+#define STR_FILEDESC "My Credentials Provider Plugin for NetIDMgr"
+#define STR_INTNAME  MYPLUGIN_NAME
+#define STR_ORIGNAME MYPLUGIN_DLLBASE ".dll"
+
+#else
+
+#ifdef LANG_en_us
+
+#define STR_FILEDESC "English(US) language resources for My Credentials Provider"
+#define STR_INTNAME  MYPLUGIN_DLLBASE "_en_us"
+#define STR_ORIGNAME MYPLUGIN_DLLBASE "_en_us.dll"
+
+#else
+
+#error Unknown langugae
+
+#endif
+
+#endif
+
+1 VERSIONINFO 
+        FILEVERSION     VERSION_LISTC
+        PRODUCTVERSION  VERSION_LISTC
+        FILEFLAGSMASK   KH_VER_FILEFLAGMASK
+        FILEFLAGS       KH_VER_FILEFLAGS
+        FILEOS          KH_VER_FILEOS
+        FILETYPE        KH_VER_FILETYPEDLL
+        FILESUBTYPE     0
+  {
+
+    BLOCK "StringFileInfo"
+    {
+      BLOCK "040904b0"
+      {
+        VALUE "CompanyName",     "My Company"
+        VALUE "FileDescription", "My Credentials Provider Plugin"
+        VALUE "FileVersion",     VERSION_STRING
+        VALUE "InternalName",    STR_INTNAME
+        VALUE "LegalCopyright",  "(C) 2006 My Company"
+        VALUE "OriginalFilename", STR_ORIGNAME
+        VALUE "ProductName",     "My Plugin Product"
+        VALUE "ProductVersion",  VERSION_STRING
+#ifndef LANGVER
+        VALUE NIMV_MODULE,       MYMODULE_NAME
+
+/* if more than one plugin is provided by this module, then all of
+   those plugins should be listed here separated by commas. */
+        VALUE NIMV_PLUGINS,      MYPLUGIN_NAME
+
+        VALUE NIMV_APIVER,       KH_VERSION_STRINGAPI
+        VALUE NIMV_SUPPORT,      "http://example.com/myplugin"
+#endif
+      }
+    }
+
+    BLOCK "VarFileInfo"
+    {
+        VALUE "Translation", 0x409, 1200
+    }
+  }

@@ -1,0 +1,4 @@
+# 
+# Generated makefile dependencies follow.
+#
+$(OUTPRE)bigendian.$(OBJEXT): bigendian.c

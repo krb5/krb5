@@ -1,0 +1,34 @@
+The operating-system specific functions provide an interface between the
+other parts of the \libname{libkrb5.a} libraries and the operating system.
+
+Beware! Any of the functions below are allowed to be implemented as
+macros.  Prototypes for functions can be found in {\tt
+<krb5/libos-proto.h>}; other definitions (including macros, if used) are
+in {\tt <krb5/libos.h>}.
+
+The following global symbols are provided in \libname{libos.a}.  If you
+wish to substitute for any of them, you must substitute for all of them
+(they are all declared and initialized in the same object file):
+\begin{description}
+% These come from src/lib/osconfig.c
+\item[extern char *\globalname{krb5_config_file}:] name of configuration file
+\item[extern char *\globalname{krb5_trans_file}:] name of hostname/realm
+name translation file
+\item[extern char *\globalname{krb5_defkeyname}:] default name of key
+table file
+\item[extern char *\globalname{krb5_lname_file}:] name of aname/lname
+translation database
+\item[extern int \globalname{krb5_max_dgram_size}:] maximum allowable
+datagram size
+\item[extern int \globalname{krb5_max_skdc_timeout}:] maximum
+per-message KDC reply timeout
+\item[extern int \globalname{krb5_skdc_timeout_shift}:] shift factor
+(bits) to exponentially back-off the KDC timeouts
+\item[extern int \globalname{krb5_skdc_timeout_1}:] initial KDC timeout
+\item[extern char *\globalname{krb5_kdc_udp_portname}:] name of KDC UDP port
+\item[extern char *\globalname{krb5_default_pwd_prompt1}:] first prompt
+for password reading.
+\item[extern char *\globalname{krb5_default_pwd_prompt2}:] second prompt
+
+\end{description}
+

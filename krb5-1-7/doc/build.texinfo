@@ -1,0 +1,1052 @@
+@value{PRODUCT} uses a configuration system built using the Free
+Software Foundation's @samp{autoconf} program.  This system makes
+Kerberos V5 much simpler to build and reduces the amount of effort
+required in porting Kerberos V5 to a new platform.
+
+@menu
+* Organization of the Source Directory::  Description of the source tree.
+* Build Requirements::          How much disk space, etc. you need to
+                                           build Kerberos.
+* Unpacking the Sources::       Preparing the source tree.
+* Doing the Build::             Compiling Kerberos.
+* Installing the Binaries::     Installing the compiled binaries.
+* Testing the Build::           Making sure Kerberos built correctly.
+* Options to Configure::        Command-line options to Configure
+* osconf.h::                    Header file-specific configurations
+* Shared Library Support::      Building Shared Libraries for Kerberos V5
+* OS Incompatibilities::        Special cases to watch for.
+* Using Autoconf::              Modifying Kerberos V5's 
+                                            configuration scripts.
+@end menu
+
+@node Organization of the Source Directory, Build Requirements, Building Kerberos V5, Building Kerberos V5
+@section Organization of the Source Directory
+
+Below is a brief overview of the organization of the complete source
+directory.  More detailed descriptions follow.
+
+@table @b
+@itemx appl
+applications with @value{PRODUCT} extensions
+@itemx clients
+@value{PRODUCT} user programs
+@itemx gen-manpages
+manpages for @value{PRODUCT} and the @value{PRODUCT} login program
+@itemx include
+include files
+@itemx kadmin
+administrative interface to the Kerberos master database
+@itemx kdc
+the @value{PRODUCT} Authentication Service and Key Distribution Center
+@itemx krb524
+utilities for converting between Kerberos 4 and Kerberos 5
+@itemx lib
+libraries for use with/by @value{PRODUCT}
+@itemx mac
+source code for building @value{PRODUCT} on MacOS
+@itemx prototype
+templates for source code files
+@itemx slave
+utilities for propagating the database to slave KDCs
+@itemx tests
+test suite
+@itemx util
+various utilities for building/configuring the code, sending bug reports, etc.
+@itemx windows
+source code for building @value{PRODUCT} on Windows (see windows/README)
+@end table
+
+@menu
+* The appl Directory::          
+* The clients Directory::       
+* The gen-manpages Directory::  
+* The include Directory::       
+* The kadmin Directory::        
+* The kdc Directory::           
+* The krb524 Directory::        
+* The lib Directory::           
+* The prototype Directory::     
+* The slave Directory::         
+* The util Directory::          
+@end menu
+
+@node The appl Directory, The clients Directory, Organization of the Source Directory, Organization of the Source Directory
+@subsection The appl Directory
+
+The Kerberos release provides certain UNIX utilities, modified to use
+Kerberos authentication.  In the @i{appl/bsd} directory are the
+Berkeley utilities @i{login}, @i{rlogin}, @i{rsh}, and @i{rcp}, as well as
+the associated daemons @i{kshd} and @i{klogind}.  The @i{login} program
+obtains ticket-granting tickets for users upon login; the other utilities
+provide authenticated Unix network services.
+
+The @i{appl} directory also contains Kerberized telnet and ftp programs,
+as well as sample Kerberos application client and server programs.
+
+@node The clients Directory, The gen-manpages Directory, The appl Directory, Organization of the Source Directory
+@subsection The clients Directory
+
+This directory contains the code for several user-oriented programs.
+
+@table @b
+@itemx kdestroy
+This program destroys the user's active Kerberos authorization tickets.
+@value{COMPANY} recommends that users @code{kdestroy} before logging out.
+
+@itemx kinit
+This program prompts users for their Kerberos principal name and password,
+and attempts to get an initial ticket-granting-ticket for that principal.
+
+@itemx klist
+This program lists the Kerberos principal and Kerberos tickets held in
+a credentials cache, or the keys held in a keytab file.
+
+@itemx kpasswd
+This program changes a user's Kerberos password.
+
+@itemx ksu
+This program is a Kerberized version of the @code{su} program that is
+meant to securely change the real and effective user ID to that of the
+target user and to create a new security context.
+
+@itemx kvno
+This program acquires a service ticket for the specified Kerberos
+principals and prints out the key version numbers of each.
+@end table
+
+@node The gen-manpages Directory, The include Directory, The clients Directory, Organization of the Source Directory
+@subsection The gen-manpages Directory
+
+There are two manual pages in this directory.  One is an introduction
+to the Kerberos system.  The other describes the @code{.k5login} file
+which allows users to give access with their UID to other users
+authenticated by the Kerberos system.
+
+@node The include Directory, The kadmin Directory, The gen-manpages Directory, Organization of the Source Directory
+@subsection The include Directory
+
+This directory contains the @i{include} files needed to build the
+Kerberos system.
+
+@node The kadmin Directory, The kdc Directory, The include Directory, Organization of the Source Directory
+@subsection The kadmin Directory
+
+In this directory is the code for the utilities @code{kadmin},
+@code{kadmin.local}, @code{kdb5_util}, and @code{ktutil}.
+@code{ktutil} is the Kerberos keytab file maintenance utility from
+which a Kerberos administrator can read, write, or edit entries in a
+Kerberos V5 keytab or Kerberos V4 srvtab.  @code{kadmin} and
+@code{kadmin.local} are command-line interfaces to the Kerberos V5 KADM5
+administration system.  @code{kadmin.local} runs on the master KDC and
+does not use Kerberos to authenticate to the database, while
+@code{kadmin} uses Kerberos authentication and an encrypted RPC.  The
+two provide identical functionalities, which allow administrators to
+modify the database of Kerberos principals.  @code{kdb5_util} allows
+administrators to perform low-level maintenance procedures on Kerberos
+and the KADM5 database.  With this utility, databases can be created,
+destroyed, or dumped to and loaded from ASCII files.  It can also be
+used to create master key stash files.
+
+@node The kdc Directory, The krb524 Directory, The kadmin Directory, Organization of the Source Directory
+@subsection The kdc Directory
+
+This directory contains the code for the @code{krb5kdc} daemon, the
+Kerberos Authentication Service and Key Distribution Center.
+
+@node The krb524 Directory, The lib Directory, The kdc Directory, Organization of the Source Directory
+@subsection The krb524 Directory
+
+This directory contains the code for @code{krb524}, a service that
+converts Kerberos V5 credentials into Kerberos V4 credentials suitable
+for use with applications that for whatever reason do not use V5
+directly.
+
+@node The lib Directory, The prototype Directory, The krb524 Directory, Organization of the Source Directory
+@subsection The lib Directory
+
+The @i{lib} directory contain 10 subdirectories as well as some
+definition and glue files.  The @i{crypto} subdirectory contains the
+Kerberos V5 encryption library.  The @i{des425} subdirectory exports
+the Kerberos V4 encryption API, and translates these functions into
+calls to the Kerberos V5 encryption API.  The @i{gssapi} library
+contains the Generic Security Services API, which is a library of
+commands to be used in secure client-server communication.  The
+@i{kadm5} directory contains the libraries for the KADM5 administration
+utilities.  The Kerberos 5 database libraries are contained in
+@i{kdb}.  The directories @i{krb4} and @i{krb5} contain the Kerberos 4
+and Kerberos 5 APIs, respectively.  The @i{rpc} directory contains the
+API for the Kerberos Remote Procedure Call protocol.
+
+@node The prototype Directory, The slave Directory, The lib Directory, Organization of the Source Directory
+@subsection The prototype Directory
+
+This directory contains several template files.  The @code{prototype.h}
+and @code{prototype.c} files contain the MIT copyright message and a
+placeholder for the title and description of the file.
+@code{prototype.h} also has a short template for writing @code{ifdef}
+and @code{ifndef} preprocessor statements.  The @code{getopt.c} file
+provides a template for writing code that will parse the options with
+which a program was called.
+
+@node The slave Directory, The util Directory, The prototype Directory, Organization of the Source Directory
+@subsection The slave Directory
+
+This directory contains code which allows for the propagation of the
+Kerberos principal database from the master KDC to slave KDCs over an
+encrypted, secure channel.  @code{kprop} is the program which actually
+propagates the database dump file.  @code{kpropd} is the Kerberos V5
+slave KDC update server which accepts connections from the @code{kprop}
+program.  @code{kslave_update} is a script that takes the name of a
+slave server, and propagates the database to that server if the
+database has been modified since the last dump or if the database has
+been dumped since the last propagation.
+
+@node The util Directory,  , The slave Directory, Organization of the Source Directory
+@subsection The util Directory
+
+This directory contains several utility programs and libraries.  The
+programs used to configure and build the code, such as @code{autoconf},
+@code{lndir}, @code{kbuild}, @code{reconf},  and @code{makedepend},
+are in this directory.  The @i{profile} directory contains most of the
+functions which parse the Kerberos configuration files (@code{krb5.conf}
+and @code{kdc.conf}).  Also in this directory are the Kerberos error table
+library and utilities (@i{et}), the Sub-system library and utilities
+(@i{ss}), database utilities (@i{db2}), pseudo-terminal utilities
+(@i{pty}), bug-reporting program @code{send-pr}, and a generic
+support library @code{support} used by several of our other libraries.
+
+@node Build Requirements, Unpacking the Sources, Organization of the Source Directory, Building Kerberos V5
+@section Build Requirements
+
+In order to build Kerberos V5, you will need approximately 60-70
+megabytes of disk space.  The exact amount will vary depending on the
+platform and whether the distribution is compiled with debugging symbol
+tables or not.
+
+Your C compiler must conform to ANSI C (ISO/IEC 9899:1990, ``c89'').
+Some operating systems do not have an ANSI C compiler, or their
+default compiler requires extra command-line options to enable ANSI C
+conformance.
+
+If you wish to keep a separate @dfn{build tree}, which contains the compiled
+@file{*.o} file and executables, separate from your source tree, you
+will need a @samp{make} program which supports @samp{VPATH}, or
+you will need to use a tool such as @samp{lndir} to produce a symbolic
+link tree for your build tree.
+
+@c Library support...
+
+@node Unpacking the Sources, Doing the Build, Build Requirements, Building Kerberos V5
+@section Unpacking the Sources
+
+The first step in each of these build procedures is to unpack the
+source distribution.  The Kerberos V5 distribution comes in a tar file,
+generally named @file{krb5-@value{RELEASE}.tar}, which contains a
+compressed tar file consisting of the sources for all of Kerberos
+(generally @file{krb5-@value{RELEASE}.tar.gz}) and a PGP signature for
+this source tree (generally @file{krb5-@value{RELEASE}.tar.gz.asc}).
+@value{COMPANY} highly recommends that you verify the integrity of the
+source code using this signature.
+
+Unpack the compressed tar file in some directory, such as
+@file{/u1/krb5-@value{RELEASE}}.  (In the rest of this document, we
+will assume that you have chosen to unpack the Kerberos V5 source
+distribution in this directory.  Note that the tarfiles will by default
+all unpack into the @file{./krb5-@value{RELEASE}} directory, so that if
+your current directory is @file{/u1} when you unpack the tarfiles, you
+will get @file{/u1/krb5-@value{RELEASE}/src}, etc.)
+
+
+@node Doing the Build, Installing the Binaries, Unpacking the Sources, Building Kerberos V5
+@section Doing the Build
+
+You have a number of different options in how to build Kerberos.  If you
+only need to build Kerberos for one platform, using a single directory
+tree which contains both the source files and the object files is the
+simplest.  However, if you need to maintain Kerberos for a large number
+of platforms, you will probably want to use separate build trees for
+each platform. We recommend that you look at @ref{OS
+Incompatibilities}, for notes that we have on particular operating
+systems. 
+
+@menu
+* Building Within a Single Tree::  
+* Building with Separate Build Directories::  
+* Building using lndir::        
+@end menu
+
+@node Building Within a Single Tree, Building with Separate Build Directories, Doing the Build, Doing the Build
+@subsection Building Within a Single Tree
+
+If you don't want separate build trees for each architecture, then
+use the following abbreviated procedure.
+
+@enumerate
+@item
+ @code{cd /u1/krb5-@value{RELEASE}/src}
+@item
+ @code{./configure}
+@item
+ @code{make}
+@end enumerate
+
+That's it!
+
+@node Building with Separate Build Directories, Building using lndir, Building Within a Single Tree, Doing the Build
+@subsection Building with Separate Build Directories
+
+If you wish to keep separate build directories for each platform, you
+can do so using the following procedure.  (Note, this requires that your
+@samp{make} program support @samp{VPATH}.  GNU's make will provide this
+functionality, for example.)  If your @samp{make} program does not
+support this, see the next section.
+
+For example, if you wish to create a build directory for @code{pmax} binaries
+you might use the following procedure:
+
+@enumerate
+@item 
+@code{mkdir /u1/krb5-@value{RELEASE}/pmax}
+@item
+ @code{cd /u1/krb5-@value{RELEASE}/pmax}
+@item
+ @code{../src/configure}
+@item
+ @code{make}
+@end enumerate
+
+@node Building using lndir,  , Building with Separate Build Directories, Doing the Build
+@subsection Building Using @samp{lndir}
+
+If you wish to keep separate build directories for each platform, and
+you do not have access to a @samp{make} program which supports @samp{VPATH},
+all is not lost.  You can use the @samp{lndir} program to create
+symbolic link trees in your build directory.
+
+For example, if you wish to create a build directory for solaris binaries
+you might use the following procedure:
+
+@enumerate
+@item
+ @code{mkdir /u1/krb5-@value{RELEASE}/solaris}
+@item
+ @code{cd /u1/krb5-@value{RELEASE}/solaris}
+@item
+ @code{/u1/krb5-@value{RELEASE}/src/util/lndir `pwd`/../src}
+@item
+ @code{./configure}
+@item
+ @code{make}
+@end enumerate
+
+You must give an absolute pathname to @samp{lndir} because it has a bug that
+makes it fail for relative pathnames. Note that this version differs
+from the latest version as distributed and installed by the XConsortium
+with X11R6. Either version should be acceptable.
+
+@node Installing the Binaries, Testing the Build, Doing the Build, Building Kerberos V5
+@section Installing the Binaries
+
+Once you have built Kerberos, you should install the binaries.  You
+can do this by running:
+
+@example
+% make install
+@end example
+
+If you want to install the binaries into a destination directory that
+is not their final destination, which may be convenient if you want to
+build a binary distribution to be deployed on multiple hosts, you may
+use:
+
+@example
+% make install DESTDIR=/path/to/destdir
+@end example
+
+This will install the binaries under @code{DESTDIR/PREFIX}, e.g., the
+user programs will install into @code{DESTDIR/PREFIX/bin}, the
+libraries into @code{DESTDIR/PREFIX/lib}, etc.
+
+Note that if you want to test the build (see @ref{Testing the Build}),
+you usually do not need to do a @code{make install} first.
+
+Some implementations of @samp{make} allow multiple commands to be run in
+parallel, for faster builds.  We test our Makefiles in parallel builds with
+GNU @samp{make} only; they may not be compatible with other parallel build
+implementations.
+
+@node Testing the Build, Options to Configure, Installing the Binaries, Building Kerberos V5
+@section Testing the Build
+
+The Kerberos V5 distribution comes with built-in regression tests.  To
+run them, simply type the following command while in the top-level build
+directory (i.e., the directory where you sent typed @samp{make} to start
+building Kerberos; see @ref{Doing the Build}.): 
+
+@example
+% make check
+@end example
+
+However, there are several prerequisites that must be satisfied first:
+
+@itemize @bullet
+@item
+Configure and build Kerberos with Tcl support.  Tcl is used to drive the
+test suite.  This often means passing @code{--with-tcl} to configure to
+tell it the location of the Tcl configuration script.  (See
+@xref{Options to Configure}.)
+
+@item
+You have to run @samp{make install} before running @samp{make check}, or
+the test suite will often pick up the installed version of Kerberos
+rather than the newly built one.  You can install into a prefix that
+isn't in the system library search path, though.  This theoretically
+could be fixed with the appropriate environment variable magic in the
+test suite, but hasn't been yet.
+
+@item
+In order to test the RPC layer, the local system has to be running the
+@command{portmap} daemon and it has to be listening to the regular
+network interface (not just localhost).
+@end itemize
+
+@menu
+* The DejaGnu Tests::           
+* The KADM5 Tests::             
+@end menu
+
+@node The DejaGnu Tests, The KADM5 Tests, Testing the Build, Testing the Build
+@subsection The DejaGnu Tests 
+
+Some of the built-in regression tests are setup to use the DejaGnu
+framework for running tests. These tests tend to be more comprehensive
+than the normal built-in tests as they setup test servers and test
+client/server activities. 
+
+DejaGnu may be found wherever GNU software is archived.  
+
+Most of the tests are setup to run as a non-privileged user.  For some
+of the krb-root tests to work properly, either (a) the user running the
+tests must not have a .k5login file in the home directory or (b) the
+.k5login file must contain an entry for @code{<username>@@KRBTEST.COM}.
+There are two series of tests (@samp{rlogind} and @samp{telnetd}) which
+require the ability to @samp{rlogin} as root to the local
+machine. Admittedly, this does require the use of a @file{.rhosts} file
+or some authenticated means. @footnote{If you are fortunate enough to
+have a previous version of Kerberos V5 or V4 installed, and the Kerberos
+rlogin is first in your path, you can setup @file{.k5login} or
+@file{.klogin} respectively to allow you access.}
+
+If you cannot obtain root access to your machine, all the other tests
+will still run. Note however, with DejaGnu 1.2, the "untested testcases"
+will cause the testsuite to exit with a non-zero exit status which
+@samp{make} will consider a failure of the testing process. Do not worry
+about this, as these tests are the last run when @samp{make check} is
+executed from the top level of the build tree.  This problem does not
+exist with DejaGnu 1.3.
+
+@node The KADM5 Tests,  , The DejaGnu Tests, Testing the Build
+@subsection The KADM5 Tests
+
+Regression tests for the KADM5 system, including the GSS-RPC, KADM5
+client and server libraries, and kpasswd, are also included in this
+release.  Each set of KADM5 tests is contained in a sub-directory called
+@code{unit-test} directly below the system being tested.  For example,
+lib/rpc/unit-test contains the tests for GSS-RPC.  The tests are all
+based on DejaGnu (but they are not actually called part of "The DejaGnu
+tests," whose naming predates the inclusion of the KADM5 system).  In
+addition, they require the Tool Command Language (TCL) header files and
+libraries to be available during compilation and some of the tests also
+require Perl in order to operate.  If all of these resources are not
+available during configuration, the KADM5 tests will not run.  The TCL
+installation directory can be specified with the @code{--with-tcl}
+configure option.  (See @xref{Options to Configure}.)  The runtest and
+perl programs must be in the current execution path.
+
+If you install DejaGnu, TCL, or Perl after configuring and building
+Kerberos and then want to run the KADM5 tests, you will need to
+re-configure the tree and run @code{make} at the top level again to make
+sure all the proper programs are built.  To save time, you actually only
+need to reconfigure and build in the directories src/kadmin/testing,
+src/lib/rpc, src/lib/kadm5.
+
+@node Options to Configure, osconf.h, Testing the Build, Building Kerberos V5
+@section Options to Configure 
+
+There are a number of options to @samp{configure} which you can use to
+control how the Kerberos distribution is built.  The following table
+lists the most commonly used options to Kerberos V5's @samp{configure}
+program.
+
+@table @code
+
+@item --help
+
+Provides help to configure. This will list the set of commonly used
+options for building Kerberos.
+
+@item --prefix=PREFIX
+
+By default, Kerberos will install the package's files rooted at
+`/usr/local' as in `/usr/local/bin', `/usr/local/sbin', etc. If you
+desire a different location, use this option.
+
+@item --exec-prefix=EXECPREFIX
+
+This option allows one to separate the architecture independent programs
+from the configuration files and manual pages. 
+
+@item --localstatedir=LOCALSTATEDIR
+
+This option sets the directory for locally modifiable single-machine
+data.  In Kerberos, this mostly is useful for setting a location for the
+KDC data files, as they will be installed in
+@code{LOCALSTATEDIR/krb5kdc}, which is by default
+@code{PREFIX/var/krb5kdc}.
+
+@item CC=COMPILER
+
+Use @code{COMPILER} as the C compiler.
+
+@item CFLAGS=FLAGS
+
+Use @code{FLAGS} as the default set of C compiler flags.
+
+Note that if you use the native Ultrix compiler on a
+DECstation you are likely to lose if you pass no flags to cc; md4.c
+takes an estimated 3,469 billion years to compile if you provide neither
+the @samp{-g} flag nor the @samp{-O} flag to @samp{cc}.
+
+@item CPPFLAGS=CPPOPTS 
+
+Use @code{CPPOPTS} as the default set of C preprocessor flags.  The most
+common use of this option is to select certain @code{#define}'s for use
+with the operating system's include files.
+
+@item LD=LINKER
+
+Use @code{LINKER} as the default loader if it should be different from C
+compiler as specified above.
+
+@item LDFLAGS=LDOPTS
+
+This option allows one to specify optional arguments to be passed to the
+linker. This might be used to specify optional library paths.
+
+@item  --with-krb4
+
+This option enables Kerberos V4 backwards compatibility using the
+builtin Kerberos V4 library.
+
+@item  --with-krb4=KRB4DIR 
+
+This option enables Kerberos V4 backwards compatibility using a
+pre-existing Kerberos V4 installation.  The directory specified by
+@code{KRB4DIR} specifies where the V4 header files should be found
+(@file{KRB4DIR/include}) as well as where the V4 Kerberos library should
+be found (@file{KRB4DIR/lib}).
+
+@item  --without-krb4
+
+Disables Kerberos V4 backwards compatibility. This prevents Kerberos V4
+clients from using the V5 services including the KDC. This would be
+useful if you know you will never install or need to interact with V4
+clients. 
+
+@item --with-netlib[=libs]
+
+Allows for suppression of or replacement of network libraries. By
+default, Kerberos V5 configuration will look for @code{-lnsl} and
+@code{-lsocket}. If your operating system has a broken resolver library
+(see @ref{Solaris versions 2.0 through 2.3}) or fails to pass the tests in
+@file{src/tests/resolv} you will need to use this option.
+
+@item --with-tcl=TCLPATH
+
+Some of the unit-tests in the build tree rely upon using a program in
+Tcl. The directory specified by @code{TCLPATH} specifies where the Tcl
+header file (@file{TCLPATH/include/tcl.h} as well as where the Tcl
+library should be found (@file{TCLPATH/lib}).
+
+@item --enable-shared
+
+This option will turn on the building and use of shared library objects
+in the Kerberos build. This option is only supported on certain
+platforms. 
+
+@item --enable-dns
+@item --enable-dns-for-kdc
+@item --enable-dns-for-realm
+
+Enable the use of DNS to look up a host's Kerberos realm, or a realm's
+KDCs, if the information is not provided in krb5.conf. See @ref{Hostnames
+for the Master and Slave KDCs} for information about using DNS to
+locate the KDCs, and @ref{Mapping Hostnames onto Kerberos Realms} for
+information about using DNS to determine the default realm.  By default,
+DNS lookups are enabled for the former but not for the latter.
+
+@item --enable-kdc-replay-cache
+
+Enable a cache in the KDC to detect retransmitted messages, and resend
+the previous responses to them.  This protects against certain types of
+attempts to extract information from the KDC through some of the
+hardware preauthentication systems.
+
+@item --with-system-et
+
+Use an installed version of the error-table support software, the
+@samp{compile_et} program, the @file{com_err.h} header file and the
+@file{com_err} library.  If these are not in the default locations,
+you may wish to specify @code{CPPFLAGS=-I/some/dir} and
+@code{LDFLAGS=-L/some/other/dir} options at configuration time as
+well.
+
+If this option is not given, a version supplied with the Kerberos
+sources will be built and installed along with the rest of the
+Kerberos tree, for Kerberos applications to link against.
+
+@item --with-system-ss
+
+Use an installed version of the subsystem command-line interface
+software, the @samp{mk_cmds} program, the @file{ss/ss.h} header file
+and the @file{ss} library.  If these are not in the default locations,
+you may wish to specify @code{CPPFLAGS=-I/some/dir} and
+@code{LDFLAGS=-L/some/other/dir} options at configuration time as
+well.  See also the @samp{SS_LIB} option.
+
+If this option is not given, the @file{ss} library supplied with the
+Kerberos sources will be compiled and linked into those programs that
+need it; it will not be installed separately.
+
+@item SS_LIB=libs...
+
+If @samp{-lss} is not the correct way to link in your installed
+@file{ss} library, for example if additional support libraries are
+needed, specify the correct link options here.  Some variants of this
+library are around which allow for Emacs-like line editing, but
+different versions require different support libraries to be
+explicitly specified.
+
+This option is ignored if @samp{--with-system-ss} is not specified.
+
+@item --with-system-db
+
+Use an installed version of the Berkeley DB package, which must
+provide an API compatible with version 1.85.  This option is
+@emph{unsupported} and untested.  In particular, we do not know if the
+database-rename code used in the dumpfile load operation will behave
+properly.
+
+If this option is not given, a version supplied with the Kerberos
+sources will be built and installed.  (We are not updating this
+version at this time because of licensing issues with newer versions
+that we haven't investigated sufficiently yet.)
+
+@item DB_HEADER=headername.h
+
+If @samp{db.h} is not the correct header file to include to compile
+against the Berkeley DB 1.85 API, specify the correct header file name
+with this option.  For example, @samp{DB_HEADER=db3/db_185.h}.
+
+@item DB_LIB=libs...
+
+If @samp{-ldb} is not the correct library specification for the
+Berkeley DB library version to be used, override it with this option.
+For example, @samp{DB_LIB=-ldb-3.3}.
+
+@end table
+
+For example, in order to configure Kerberos on a Solaris machine using
+the @samp{suncc} compiler with the optimizer turned on, run the configure
+script with the following options:
+
+@example
+% ./configure CC=suncc CFLAGS=-O
+@end example
+
+For a slightly more complicated example, consider a system where
+several packages to be used by Kerberos are installed in
+@samp{/usr/foobar}, including Berkeley DB 3.3, and an @samp{ss}
+library that needs to link against the @samp{curses} library.  The
+configuration of Kerberos might be done thus:
+
+@example
+% ./configure CPPFLAGS=-I/usr/foobar/include LDFLAGS=-L/usr/foobar/lib \
+              --with-system-et --with-system-ss --with-system-db \
+              SS_LIB='-lss -lcurses' \
+              DB_HEADER=db3/db_185.h DB_LIB=-ldb-3.3
+@end example
+
+In previous releases, @code{--with-} options were used to specify the
+compiler and linker and their options.
+
+@node osconf.h, Shared Library Support, Options to Configure, Building Kerberos V5
+@section @file{osconf.h}
+
+There is one configuration file which you may wish to edit to control
+various compile-time parameters in the Kerberos distribution:
+@file{include/stock/osconf.h}. The list that follows is by no means
+complete, just some of the more interesting variables.
+
+Please note: The former configuration file @file{config.h} no longer
+exists as its functionality has been merged into the auto-configuration
+process. @xref{Options to Configure}.
+
+
+@table @code
+
+@item DEFAULT_PROFILE_PATH
+
+The pathname to the file which contains the profiles for the known realms,
+their KDCs, etc.  The default value is @value{DefaultDefaultProfilePath}.
+
+The profile file format is no longer the same format as Kerberos V4's
+@file{krb.conf} file. 
+
+@item DEFAULT_KEYTAB_NAME
+
+The type and pathname to the default server keytab file (the
+equivalent of Kerberos V4's @file{/etc/srvtab}).  The default is
+@value{DefaultDefaultKeytabName}.
+
+@item DEFAULT_KDC_ENCTYPE
+
+The default encryption type for the KDC.  The default value is
+@value{DefaultMasterKeyType}.
+
+@item KDCRCACHE
+
+The name of the replay cache used by the KDC.  The default value is
+@value{DefaultKDCRCache}.
+
+@item RCTMPDIR
+
+The directory which stores replay caches.  The default is to try
+@value{DefaultRCTmpDirs}.
+
+@item DEFAULT_KDB_FILE
+
+The location of the default database.  The default value is
+@value{DefaultDatabaseName}.
+
+@end table
+
+@node Shared Library Support, OS Incompatibilities, osconf.h, Building Kerberos V5
+@section Shared Library Support
+
+Shared library support is provided for a few operating systems. There
+are restrictions as to which compiler to use when using shared
+libraries. In all cases, executables linked with the shared libraries in
+this build process will have built in the location of the libraries,
+therefore obliterating the need for special LD_LIBRARY_PATH, et al environment
+variables when using the programs. Except where noted, multiple versions
+of the libraries may be installed on the same system and continue to
+work.
+
+Currently the supported platforms are Solaris 2.6-2.9 (aka SunOS
+5.6-5.9), Irix 6.5, Redhat Linux, MacOS 8-10, and Microsoft Windows
+(using DLLs).
+
+Shared library support has been tested on the following platforms but
+not exhaustively (they have been built but not necessarily tested in an
+installed state): Tru64 (aka Alpha OSF/1 or Digital Unix) 4.0, and
+HP/UX 10.20.
+
+Platforms for which there is shared library support but not significant
+testing include FreeBSD, OpenBSD, AIX (4.3.3), Linux, NetBSD 1.4.x
+(i386).
+
+To enable shared libraries on the above platforms, run the configure
+script with the option @samp{--enable-shared}.
+
+@ifset notdef
+
+XXX What does this mean?
+
+One special note is that if the Kerberos V4 compatibility is compiled
+in, you @b{must not} specify an alternate Kerberos V4 library from the
+one in the tree or you will be missing references.
+
+@end ifset
+
+@node OS Incompatibilities, Using Autoconf, Shared Library Support, Building Kerberos V5
+@section Operating System Incompatibilities
+
+This section details operating system incompatibilities with Kerberos V5
+which have been reported to the developers at MIT.  If you find
+additional incompatibilities, and/or discover workarounds to such
+problems, please send a report via the @code{krb5-send-pr} program.
+Thanks!
+
+@menu
+* AIX::                         
+* Alpha OSF/1 V1.3::            
+* Alpha OSF/1 V2.0::            
+* Alpha OSF/1 V4.0::            
+* BSDI::                        
+* HPUX::                        
+* Solaris versions 2.0 through 2.3::  
+* Solaris 2.X::                 
+* Solaris 9::                   
+* SGI Irix 5.X::                
+* Ultrix 4.2/3::                
+@end menu
+
+@node AIX, Alpha OSF/1 V1.3, OS Incompatibilities, OS Incompatibilities
+@subsection AIX
+
+The AIX 3.2.5 linker dumps core trying to build a shared
+@samp{libkrb5.a} produced with the GNU C compiler.  The native AIX
+compiler works fine.  This problem is fixed using the AIX 4.1 linker.
+
+@node Alpha OSF/1 V1.3, Alpha OSF/1 V2.0, AIX, OS Incompatibilities
+@subsection Alpha OSF/1 V1.3
+
+Using the native compiler, compiling with the @samp{-O} compiler flag
+causes the @code{asn.1} library to be compiled incorrectly.  
+
+Using GCC version 2.6.3 or later instead of the native compiler will also work
+fine, both with or without optimization.
+
+@node Alpha OSF/1 V2.0, Alpha OSF/1 V4.0, Alpha OSF/1 V1.3, OS Incompatibilities
+@subsection Alpha OSF/1 V2.0
+
+There used to be a bug when using the native compiler in compiling
+@file{md4.c} when compiled without either the @samp{-O} or @samp{-g}
+compiler options.  We have changed the code and there is no problem
+under V2.1, but we do not have access to V2.0 to test and see if the
+problem would exist there. (We welcome feedback on this issue). There
+was never a problem in using GCC version 2.6.3.
+
+In version 3.2 and beyond of the operating system, we have not seen
+this sort of problem with the native compiler.
+
+@node Alpha OSF/1 V4.0, BSDI, Alpha OSF/1 V2.0, OS Incompatibilities
+@subsection Alpha OSF/1 (Digital UNIX) V4.0
+
+The C compiler provided with Alpha OSF/1 V4.0 (a.k.a. Digital UNIX)
+defaults to an extended K&R C mode, not ANSI C.  You need to provide
+the @samp{-std} argument to the compiler (i.e., @samp{./configure
+CC='cc -std'}) to enable extended ANSI C mode.  More recent versions
+of the operating system, such as 5.0, seem to have C compilers which
+default to @samp{-std}.
+
+@c @node Alpha Tru64 UNIX 5.0
+@c @subsection Alpha Tru64 UNIX 5.0
+@c ... login.krb5 problems
+
+@node BSDI, HPUX, Alpha OSF/1 V4.0, OS Incompatibilities
+@subsection BSDI
+
+BSDI versions 1.0 and 1.1 reportedly has a bad @samp{sed} which causes
+it to go into an infinite loop during the build.  The work around is
+to use a @samp{sed} from somewhere else, such as GNU.  (This may be
+true for some versions of other systems derived from BSD 4.4, such as
+NetBSD and FreeBSD.)
+
+@node HPUX, Solaris versions 2.0 through 2.3, BSDI, OS Incompatibilities
+@subsection HPUX
+
+The native (bundled) compiler for HPUX currently will not work,
+because it is not a full ANSI C compiler.  The optional ANSI C
+compiler should work as long as you give it the @samp{-Ae} flag
+(i.e. @samp{./configure CC='cc -Ae'}).  This is equivalent to
+@samp{./configure CC='c89 -D_HPUX_SOURCE'}, which was the previous
+recommendation.  This has only been tested recently for HPUX 10.20.
+
+You will need to configure with @samp{--disable-shared
+--enable-static}, because as of 1.4 we don't have support for HPUX
+shared library finalization routines, nor the option (yet) to ignore
+that lack of support (which means repeated
+@code{dlopen}/@code{dlclose} cycles on the Kerberos libraries may not
+be safe) and build the shared libraries anyways.
+
+You will also need to configure the build tree with
+@samp{--disable-thread-support} if you are on HPUX 10 and do not have
+the DCE development package installed, because that's where the
+@code{pthread.h} header file is found.  (We don't know if our code
+will work with such a package installed, because according to some HP
+documentation, their @code{pthread.h} has to be included before any
+other header files, and our code doesn't do that.)
+
+If you use GCC, it may work, but some versions of GCC have omitted
+certain important preprocessor defines, like @code{__STDC_EXT__} and
+@code{__hpux}.
+
+@node Solaris versions 2.0 through 2.3, Solaris 2.X, HPUX, OS Incompatibilities
+@subsection Solaris versions 2.0 through 2.3
+
+The @code{gethostbyname()} routine is broken; it does not return a fully
+qualified domain name, even if you are using the Domain Name Service
+routines.  Since Kerberos V5 uses the fully qualified domain name as the
+second component of a service principal (i.e,
+@samp{host/tsx-11.mit.edu@@ATHENA.MIT.EDU}), this causes problems for servers
+who try to figure out their own fully qualified domain name.  
+
+Workarounds:  
+
+@enumerate
+
+@item
+   Supply your own resolver library. (such as bind-4.9.3pl1 available
+from ftp.vix.com)
+
+@item
+   Upgrade to Solaris 2.4
+
+@item
+   Make sure your /etc/nsswitch.conf has `files' before `dns' like:
+
+@example
+hosts:      files dns
+@end example
+
+and then in /etc/hosts, make sure there is a line with your
+workstation's IP address and hostname, with the fully qualified domain
+name first.  Example:
+
+@example
+18.172.1.4      dcl.mit.edu dcl
+@end example
+
+Note that making this change may cause other programs in your
+environment to break or behave differently.
+
+@end enumerate
+
+@node Solaris 2.X, Solaris 9, Solaris versions 2.0 through 2.3, OS Incompatibilities
+@subsection Solaris 2.X
+
+You @b{must} compile Kerberos V5 without the UCB compatibility
+libraries.  This means that @file{/usr/ucblib} must not be in the
+LD_LIBRARY_PATH environment variable when you compile it.  Alternatively
+you can use the @code{-i} option to @samp{cc}, by using the specifying
+@code{CFLAGS=-i} option to @samp{configure}.
+
+If you are compiling for a 64-bit execution environment, you may need
+to configure with the option @code{CFLAGS="-D_XOPEN_SOURCE=500
+-D__EXTENSIONS__"}.  This is not well tested; at MIT we work primarily
+with the 32-bit execution environment.
+
+@node Solaris 9, SGI Irix 5.X, Solaris 2.X, OS Incompatibilities
+@subsection Solaris 9
+
+Solaris 9 has a kernel race condition which causes the final output
+written to the slave side of a pty to be lost upon the final close()
+of the slave device.  This causes the dejagnu-based tests to fail
+intermittently.  A workaround exists, but requires some help from the
+scheduler, and the ``make check'' must be executed from a shell with
+elevated priority limits.
+
+Run something like
+
+@code{priocntl -s -c FX -m 30 -p 30 -i pid nnnn}
+
+as root, where @code{nnnn} is the pid of the shell whose priority
+limit you wish to raise.
+
+Sun has released kernel patches for this race condition.  Apply patch
+117171-11 for sparc, or patch 117172-11 for x86.  Later revisions of
+the patches should also work.  It is not necessary to run ``make
+check'' from a shell with elevated priority limits once the patch has
+been applied.
+
+@node SGI Irix 5.X, Ultrix 4.2/3, Solaris 9, OS Incompatibilities
+@subsection SGI Irix 5.X
+
+If you are building in a tree separate from the source tree, the vendors
+version of make does not work properly with regards to
+@samp{VPATH}. It also has problems with standard inference rules in 5.2
+(not tested yet in 5.3) so one needs to use GNU's make.
+
+Under 5.2, there is a bug in the optional System V @code{-lsocket}
+library in which the routine @code{gethostbyname()} is broken. The
+system supplied version in @code{-lc} appears to work though so one may
+simply specify @code{--with-netlib} option to @samp{configure}. 
+
+In 5.3, @code{gethostbyname()} is no longer present in @code{-lsocket} and
+is no longer an issue. 
+
+@node Ultrix 4.2/3,  , SGI Irix 5.X, OS Incompatibilities
+@subsection Ultrix 4.2/3
+
+The DEC MIPS platform currently will not support the native compiler,
+since the Ultrix compiler is not a full ANSI C compiler.  You should use
+GCC instead.
+
+@ifset notdef
+
+On the DEC MIPS platform, using the native compiler, @file{md4.c} and
+@file{md5.c} can not be compiled with the optimizer set at level 1.
+That is, you must specify either @samp{CFLAGS=-O} and
+@samp{CFLAGS=-g} to configure.  If you don't specify either, the
+compile will never complete.
+
+The optimizer isn't hung; it just takes an exponentially long time.
+Compiling 6 out of the 48 algorithmic steps takes 3 seconds; compiling 7
+steps takes 9 seconds; compiling 8 steps takes 27 seconds, and so on.
+Calculations estimate it will finish in approximately 3,469 billion
+years....
+
+Using GCC instead of the native compiler will also work fine, both with
+or without optimization.
+
+@end ifset
+
+@node Using Autoconf,  , OS Incompatibilities, Building Kerberos V5
+@section Using @samp{Autoconf}
+
+(If you are not a developer, you can skip this section.)
+
+In most of the Kerberos V5 source directories, there is a
+@file{configure} script which automatically determines the compilation
+environment and creates the proper Makefiles for a particular
+platform.  These @file{configure} files are generated using
+@samp{autoconf}, which can be found in the @file{src/util/autoconf}
+directory in the distribution.
+
+Normal users will not need to worry about running @samp{autoconf}; the
+distribution comes with the @file{configure} files already prebuilt.
+Developers who wish to modify the @file{configure.in} files should see
+@ref{Top, , Overview, autoconf, The Autoconf Manual}.  
+
+Note that in order to run @samp{autoconf}, you must have GNU @samp{m4}
+in your path.  Before you use the @samp{autoconf} in the Kerberos V5
+source tree, you may also need to run @samp{configure}, and then run
+@samp{make} in the @file{src/util/autoconf} directory in order to
+properly set up @samp{autoconf}.
+
+One tool which is provided for the convenience of developers can be
+found in @file{src/util/reconf}.  This program should be run while the
+current directory is the top source directory.  It will automatically
+rebuild any @file{configure} files which need rebuilding.  If you know
+that you have made a change that will require that all the
+@file{configure} files need to be rebuilt from scratch, specify the
+@code{--force} option:
+
+@example
+% cd /u1/krb5-@value{RELEASE}/src
+% ./util/reconf --force
+@end example
+
+The developmental sources are a raw source tree (before it's been packaged
+for public release), without the pre-built @file{configure} files.
+In order to build from such a source tree, you must do:
+
+@example
+% cd krb5/util/autoconf
+% ./configure
+% make
+% cd ../..
+% util/reconf
+@end example
+
+Then follow the instructions for building packaged source trees (above).
+To install the binaries into a binary tree, do:
+
+@example
+% cd /u1/krb5-@value{RELEASE}/src
+% make all
+% make install DESTDIR=somewhere-else
+@end example
+

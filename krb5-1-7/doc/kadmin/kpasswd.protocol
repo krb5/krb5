@@ -1,0 +1,303 @@
+
+
+
+		    A Proposal for a Standardized
+		 Kerberos Password Changing Protocol
+
+		   **DRAFT**  **DRAFT**  **DRAFT**
+
+			   by Theodore Ts'o
+			  September 7, 1995
+				   
+Rationale
+=========
+
+Currently, the Kerberos administration server which is being shipped
+with the Beta Kerberos V5 distributions from MIT has not been of
+sufficient quality for vendors to ship it in their products.  Hence,
+many vendors are creating and deploying proprietary administration
+servers.  In general, this is not a big problem --- relatively few
+users are Kerberos administrators and thus the Kerberos administration
+clients are used by relatively few users.
+
+There is a big exception to this, however, which is the functionality of
+a user being able to change his or her own password.  Application
+programs may want to include this functionality in their programs; it
+would be desireable for there to be a standardized protocol for doing
+this.  Standardized Kerberos desktop management programs (such as
+Cornell's Authman) would also benefit from a standardized protocol; this
+way, they will do not need to implement many vendor-specific Kerberos
+administration protocols.  Similarily, at least one terminal server
+vendor has come to expressing their concern that there was not a
+standardized password changing protocol, since they wanted their product
+to offer this functionality.
+
+This protocol is designed to address these concerns.
+
+
+Protocol Description
+====================
+
+The protocol used by the password changing protocol is intentionally
+very simple.  This is to encourage its widespread implementation, even
+in cases where there are size constraints (i.e., in a terminal server).
+
+The protocol will use a TCP stream connection using port 464.  The
+symbolic name of this port is kpasswd:
+
+		kpasswd		464/tcp
+
+
+The following encoding standards are used throughout.
+
+Integers are sent as 4 byte objects, where the most significant byte
+is sent first, and the least signifcant byte is sent last.  (i.e.,
+standard Internet network byte order.)
+
+Protocol data units (PDU's) are sent across using the following
+encoding.  First, the size of the PDU is sent as a 4 byte integer,
+followed by the PDU itself.  PDU's used by the protocol will be either a
+KRB_AP_REQ message, a KRB_AP_REP message, a "command request" PDU, or a
+"command response" PDU.  (The last two PDU's are encoded using a
+KRB_PRIV message.  For definitions of the KRB_AP_REQ, KRB_AP_REP, and
+KRB_PRIV message, see the Kerberos V5 protocol specification found in
+RFC 1510.)
+
+The PDU's which are encoded using the KRB_PRIV message must include the
+sequence number field --- the client and server must fill in each
+successive PDU that it sends with a monotonically increasing sequence
+number.  The initial sequence number in each direction are negotiated in
+the KRB_AP_REQ and KRB_AP_REP messages.
+
+The size of a Protoocl Data Unit SHOULD not exceed 16,384 bytes.  If an
+implementation receives a PDU which is larger that 16,384 bytes, the
+implementation MAY consider this a fatal error and terminate the TCP
+connection.  An implementation MUST be able to receive PDU's of at least
+16,384 bytes.
+
+The "command request" PDU
+-------------------------
+
+The "command request" PDU is sent from the client to server.  This PDU
+uses the following structure: First, the number of arguments, sent
+across as an integer.  The number of arguments MUST be greater than
+zero.  It is then followed by the arguments themselves, which are
+encoded as an integer length followed by the value of the argument.
+
+The first argument is "command name".  The command name is a NETASCII
+string, and it may not contain an ASCII null.  Command names are case
+insentive.  Valid command names are defined below; any site-, or vendor-
+specific extensions to this protocol should use command names which
+begin with the letter 'X'.
+
+The other arguments (if any) are dependent on the command specified by
+the first argument.
+
+In other words:
+
+	Number of Arguments (integer, must be greater than zero)
+		Arg size 1 (integer)
+		Arg data 1 (octet string, command name)
+		...
+		Arg size N (integer)
+		Arg data N (octet string)
+
+This structure is then encrypted using the Kerberos V5 KRB_PRIV message.
+
+The "command reply" PDU
+-----------------------
+
+In response to a "command request" PDU, the server will send to the
+client a "command reply" PDU.  The structure of a "command reply" PDU is
+as follows:
+
+	status code (integer)
+	Number of reply components (integer, may be zero)
+		Arg size 1 (integer)
+		Arg data 1 (octet string)
+		...
+		Arg size N (integer)
+		Arg data N (octet string)
+
+This structure is then encrypted using the Kerberos V5 KRB_PRIV message.
+
+The status code may be one of the following values:
+
+# Symbolic name			Meaning
+
+0 SUCCESS		The command was executed without any errors
+1 CMD_UNKNOWN		Command not recognized
+2 PW_UNACCEPT		The password chosen by the user is unnacceptable.
+3 BAD_PW		The old password furnished by the user is not correct.
+4 NOT_IN_TKT		The ticket used to authenticate to the server
+				did not have the TKT_FLAG_INITIAL flag set.
+5 CANT_CHANGE		The server is not able to change the password
+				due to no fault of the user.  (For
+				example, the database may be in
+				read-only mode for maintance reasons.)
+6 LANG_NOT_SUPPORTED	The requested language is not supported.
+
+The error codes below 127, and above 256 are reserved for future
+expansion.  Local extensions of this protocol should use error codes
+between 128 and 255.
+
+The user text in the reply message is generally some sort of
+explanatory text, which should be displayed to the user.
+
+
+Connection Establishment
+========================
+
+When a connection is made the password changing client exchanges the
+following PDU's:
+
+Client				Server
+------				------
+
+KRB_AP_REQ      ------->
+
+		<-------        KRB_AP_REP
+
+KRB_AP_REQ and KRB_AP_REP are the respective Kerberos V5 messages.  The
+client will autenticate to the server using the service name
+changepw/<REALMNAME>@<REALMNAME>, where <REALMNAME> should be
+substituted with the name of the Kerberos realm of the password changing
+server.  The client MUST set the MUTUAL-REQUIRED flag in the KRB_AP_REQ
+message, which indicates that server shall send a KRB_AP_REP message for
+the purposes of establishing mutual authentication between the client
+and the server.
+
+Protocol Commands
+==================
+
+After the connection is established, the client may then send any
+number of "command request" PDUs; after each command request PDU is
+sent, the client should wait for a "command reply" PDU from the
+server.
+
+If after 30 seconds inactivity, the client does not send a "command
+request" PDU, the server MAY elect to terminate the TCP connection.
+
+The following commands defined in this standard: 
+
+	QUIT
+	CHECKPW
+	CHANGEPW
+	MOTD (*)
+	MIME (*)
+	LANGUAGE (*)
+
+The commands marked with a (*) are optional; servers may or may not
+elect to support these commands.  If the commands are not supported, the
+server shall return a status code of CMD_UNKNOWN.
+
+The quit command
+----------------
+
+The name of this command is "QUIT", and it takes no arguments.  The
+response to this command must be the error code "NO_ERROR".  There may
+be an optional reply component, which will consist of user text which
+should be displayed to the user.  After processing this command, the
+server will terminate the connection.
+
+Kerberos password changing servers MUST implement this command.
+
+
+The check password command
+---------------------------
+
+The name of this command is "CHECKPW", and it takes one argument,
+which is a proposed password.  The server will evaluate this password
+according to its criteria and return either an NO_ERROR or PW_UNACCEPT
+error code.  
+
+There may be an optional reply component which consists of user text
+which should be displayed to the user.  It will typically explain why
+the password was unacceptable.
+
+Kerberos password changing servers MUST implement this command.
+
+
+The change password command
+---------------------------
+
+The name of this command is "CHANGEPW", and it takes two arguments.  The
+first argument is the old password, and the second password is the new
+password.  The response from this command will generally be one of the
+following error codes: NO_ERROR, PW_UNACCEPT, BAD_PW, NOT_IN_TKT,
+CANT_CHANGE.
+
+This command changes the password of the Kerberos principal which the
+client used to authenticate to the server.  For security reasons, the
+server should check to make sure that the ticket used to authenticate to
+the server had the TKT_FLG_INITIAL flag set; if this flag is not set in
+the ticket, then when the client attempts to use the "CHANGEPW" command,
+the server should return the NOT_IN_TKT error.
+
+There may be an optional reply component which consists of user text
+which should be displayed to the user, explaining why the password was
+unacceptable or why the user's password could not be changed.
+
+Kerberos password changing servers MUST implement this command.
+
+
+The Message of the Day command
+------------------------------
+
+The name of this command is "MOTD", and it takes zero or one additional
+arguments.  The optional argument is a magic token passed back from a
+previous MOTD command.  If this magic token is sent, the server MAY use
+it to determine use it to determine what (if any) messages should be
+displayed to the user.
+
+This command returns one or two reply components.  The first reply
+component is a magic token; the magic token shall be a NETASCII string
+which may not contain an ASCII null character, and its length shall be
+less than 64 characters.  A client MAY store this magic token between
+invocations of the client, and send it to the server the next time the
+MOTD command is requested.
+
+The second (optional) reply component contains text which should be
+displayed to the user.
+
+Kerberos password changing servers MAY optionally implement this command.
+
+
+The MIME command
+----------------
+
+The name of this command is "MIME", and it takes zero additional
+arguments.
+
+This command indicates that the client is willing to accept
+MIME-enhanced textual messages in place of the standard NETASCII textual
+messages.
+
+If this command is not sent, the server MUST send all textual messages
+using NETASCII, with <CR><LF> used as a line breaks, and line lengths no
+more than 80 characters.  If this command is sent, and the server
+returns a status code of SUCCESS, the server MUST send textual messages
+as MIME-enhanced textual messages.  The server may refuse to send MIME
+messages by sending a status code of CMD_UNKNOWN.
+
+Kerberos password changing servers MAY optionally implement this command.
+
+
+The Language Command
+---------------------
+
+The name of this command is "LANGUAGE", and it takes one additional
+argument, which indicates the language that the textual messages should
+be sent back in.  This additional argument must be consist of NETASCII
+characters, with ASCII nulls not allowed.  The argument shall be case
+insensitive.  What constitute valid arguments to this command are a
+local matter.  [Since ISO apparently doesn't have a standard way of
+referring to different languages or dialects.]
+
+This command indicates that the client would prefer that textual
+messages be sent back using the requested language.  If the server does
+not support the requested language, the server may refuse the request by
+sending the error code LANG_NOT_SUPPORTED.
+
+Kerberos password changing servers MAY optionally implement this command.
+

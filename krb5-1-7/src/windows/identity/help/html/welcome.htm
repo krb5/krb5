@@ -1,0 +1,130 @@
+<html>
+<head>
+  <title>Welcome to the Network Identity Manager</title>
+  <meta name="description" content="Welcome">
+  <meta name="keywords" content="welcome">
+  <link rel="stylesheet" type="text/css" href="nidmgr.css">
+	<style>
+</style>
+</head>
+
+<h1>Welcome to the Network Identity Manager</h1>
+
+<div class="inline">
+<img src="images/logo.jpg" width="100" height="100"/>
+</div>
+
+<p>Network Identity Manager (NetIdMgr) is a graphical 
+tool designed to simplify the management of network identities and their credentials 
+which are used by network authentication protocols while providing 
+secure access to network services.&nbsp; When NetIDMgr is used with Kerberos v5 each 
+network identity is a unique Kerberos principal name and the credentials 
+are Kerberos v5 tickets.&nbsp; Kerberos v5 tickets can be used by NetIDMgr to 
+obtain Andrew File System (AFS) tokens and X.509 public key certificates if the 
+appropriate plug-ins are installed.</p>
+<p>When you log into Microsoft Windows with a domain account, 
+your account name and the Windows Domain name when combined form a Kerberos 
+principal name.&nbsp; As an example, “WINDOWS\jaltman” is actually a short form 
+representation of
+jaltman@WINDOWS.SECURE-ENDPOINTS.COM.&nbsp;&nbsp; Microsoft Windows uses 
+Kerberos-based network identities for all domain-based network authentications.&nbsp;
+</p>
+<p>Since Microsoft Windows already provides a network 
+identity, why do you need NetIdMgr?&nbsp; Here are some examples:</p>
+<ol>
+	<li>Your only network identity is your Windows Domain 
+	account but you have third-party applications that rely on MIT Kerberos for 
+	authentication for access to remote files, e-mail, web data, or other 
+	services.&nbsp; In this scenario, NetIdMgr will automatically import your Windows 
+	Domain credentials into a form that can be used by applications that rely on 
+	MIT Kerberos.</li>
+	<li>You do not have a Windows Domain account but you must 
+	obtain network credentials in order to securely access a network service.&nbsp; 
+	In this scenario, NetIdMgr can be used to obtain new credentials for network 
+	identities and can automatically renew them before they expire.</li>
+	<li>You have Kerberos credentials for a network identity 
+	and you have third-party applications that require an alternative form of 
+	network credential, such as an AFS token or a X.509 certificate, which can 
+	be obtained via a Kerberos authentication.&nbsp; In this scenario, NetIdMgr can 
+	automatically use your existing credentials to obtain and renew the 
+	additional network credentials types.</li>
+	<li>You have a Windows Domain account but you need to 
+	authenticate to a service belonging to a Kerberos realm outside the Windows 
+	Domain.&nbsp; In this scenario, NetIdMgr can be used to manage multiple network 
+	identities, the Windows Domain identity as well as the additional Kerberos 
+	identity required for the external network services.&nbsp; </li>
+	<li>You have multiple network identities within the same 
+	Kerberos realm which are used for different roles.&nbsp; For example, an 
+	unprivileged user identity and a privileged identity that is only meant to 
+	be used for system administration.&nbsp; In this scenario, NetIdMgr can be used 
+	to obtain credentials for all of your identities and automatically renew 
+	them as necessary.</li>
+</ol>
+<p>NetIdMgr’s automated credential acquisition and renewal 
+makes it an invaluable tool which provides users with a Single Sign-on 
+experience. </p>
+<p>NetIdMgr is most commonly configured as a StartUp item that runs an icon in the Taskbar Notification Area until you logout.&nbsp; 
+While running, NetIDMgr automatically renews your credentials, notifies you of 
+pending expirations and prompts you when a Kerberized application requires 
+credentials that have not already been obtained.&nbsp; </p>
+<p>When configured to do so, NetIdMgr will prompt you 
+immediately after it starts to obtain Kerberos credentials.&nbsp; This is often 
+referred to as logging on to Kerberos.&nbsp; NetIdMgr does not perform a logon in the 
+sense of the Windows Logon Service.&nbsp; A logon service would do more than manage 
+Kerberos tickets. A logon service would authenticate you to the local machine, 
+validate access to your local file system and performs additional set-up tasks. 
+These are beyond the scope of NetIdMgr. NetIdMgr simply allows you to manage 
+Kerberos identities on behalf of compatible applications and to change your 
+Kerberos password.</p>
+<p>
+NetIDMgr is distributed as a part of MIT Kerberos for Windows
+along with the Kerberos v5 and Kerberos v4 plug-ins.  Plug-ins for additional 
+credential types including AFS tokens and KCA certificates are available as 
+separate distributions.&nbsp; The OpenAFS plug-in, which is required for supporting AFS tokens, is
+distributed as part of <a href="http://www.openafs.org/windows.html">OpenAFS for 
+Windows</a>.&nbsp; The KCA plug-in is distributed by
+<a href="http://www.secure-endpoints.com/">Secure Endpoints Inc.</a></p>
+
+<ul>
+<li><a href="copyright.htm">Legal information</a></li>
+<li><a href="bugs.htm">Reporting problems</a></li>
+</ul>
+
+<h3>Getting started</h3>
+
+<ul>
+<li><a href="concepts.htm">Network Identity Manager concepts</a></li>
+<li><a href="using.htm">Using Network Identity Manager</a></li>
+<li><a href="howdoi.htm">How do I ...</a></li>
+<li><a href="menu_all.htm">All Menus</a></li>
+</ul>
+
+<h3>Information for developers</h3>
+
+<p>
+If you are interested in developing plug-ins or extending the features
+of NetIDMgr, your first stop should be the NetIDMgr SDK which is included in the 
+MIT Kerberos for Windows SDK.</p>
+
+<p>
+Contact the <a
+href="mailto:netidmgr@secure-endpoints.com">netidmgr@secure-endpoints.com</a>
+mailing list with questions or comments.</p>
+
+<h3>External links</h3>
+
+<ul>
+<li><a class="external" href="http://web.mit.edu/kerberos">http://web.mit.edu/kerberos</a>:
+
+MIT Kerberos distribution
+</li>
+<li><a class="external" href="http://www.openafs.org/windows.html">http://www.openafs.org/windows.html</a>:
+
+OpenAFS for Windows
+</li>
+<li>
+<a class="external" href="http://www.secure-endpoints.com/">http://www.secure-endpoints.com/</a>: 
+Secure Endpoints Inc.</li>
+</ul>
+
+</html>

@@ -1,0 +1,35 @@
+thisconfigdir=../../..
+myfulldir=lib/crypto/old
+mydir=lib/crypto/old
+BUILDTOP=$(REL)..$(S)..$(S)..
+LOCALINCLUDES = -I$(srcdir)/../des
+DEFS=
+
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR=old
+##DOS##OBJFILE=..\$(OUTPRE)old.lst
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+RUN_SETUP = @KRB5_RUN_ENV@ KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf
+
+STLIBOBJS= old_decrypt.o old_encrypt.o des_stringtokey.o
+
+OBJS= $(OUTPRE)des_stringtokey.$(OBJEXT) $(OUTPRE)old_decrypt.$(OBJEXT) $(OUTPRE)old_encrypt.$(OBJEXT)
+
+SRCS= $(srcdir)/des_stringtokey.c $(srcdir)/old_decrypt.c \
+	$(srcdir)/old_encrypt.c
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs
+
+includes:: depend
+
+depend:: $(SRCS)
+
+clean-unix:: clean-libobjs
+
+@libobj_frag@
+

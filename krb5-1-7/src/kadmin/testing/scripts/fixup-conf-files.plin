@@ -1,0 +1,344 @@
+#!/usr/local/bin/perl
+#
+# Usage: fixup-conf-files.pl [-server hostname]
+
+$verbose = $ENV{'VERBOSE_TEST'};
+$archos = $ENV{'ARCH_OS'};
+
+$REALM = "SECURE-TEST.OV.COM";
+
+sub replace {
+    local($old, $new, $backup) = @_;
+    local($dev, $ino, $mode);
+
+    $new = $old.".new" if !$new;
+    $backup = $old.".bak" if !$backup;
+
+    chmod($mode,$new) if (($dev, $ino, $mode) = stat($old));
+
+    unlink($backup);
+    link($old, $backup) || die "couldn't make backup link: $backup: $!\n"
+	if -e $old;
+    rename($new, $old) || die "couldn't rename $old to $new: $!\n";
+}
+
+if (@ARGV == 2 && $ARGV[0] eq "-server") {
+    $servername = $ARGV[1];
+} elsif (@ARGV != 0) {
+    print STDERR "Usage: $0 fixup-conf-files.pl [-server hostname]\n";
+}
+
+sub canonicalize_name {
+    local($hostname) = @_;
+    local($d, $addr, $addrtype);
+    
+    ($host,$d,$addrtype,$d,$addr) = gethostbyname($hostname);
+    die "couldn't get hostname $hostname\n" if !$host;
+    ($host) = gethostbyaddr($addr,$addrtype);
+    die "couldn't reverse-resolve $hostname\n" if !$host;
+    return $host;
+}
+
+## Get server's canonical hostname.
+if ($servername) {
+    $serverhost = $servername;
+} else {
+    chop ($serverhost = `hostname`);
+}
+$serverhost = &canonicalize_name($serverhost);
+
+## Get local canonical hostname
+chop($localhost=`hostname`);
+$localhost = &canonicalize_name($localhost);
+
+## parse krb.conf
+
+if (open(KCONF, "/etc/athena/krb.conf")) {
+    chop($hrealm = <KCONF>);
+
+    $confok = 0;
+
+    while(<KCONF>) {
+	$confs .= $_ if !/^$REALM\s+/o;
+	$confok = 1 if /^$REALM\s+$serverhost\s+admin\s+server$/oi;
+    }
+
+    close(KCONF);
+}
+
+## rewrite krb.conf if necessary.
+
+if (($hrealm ne $REALM) || !$confok) {
+    print "Rewriting /etc/athena/krb.conf...\n" if $verbose;
+
+    open(KCONF, ">/etc/athena/krb.conf.new") ||
+	die "couldn't open /etc/athena/krb.conf.new: $!\n";
+
+    print KCONF "$REALM\n";
+    print KCONF "$REALM $serverhost admin server\n";
+    print KCONF $confs;
+
+    close(KCONF);
+
+    &replace("/etc/athena/krb.conf");
+}
+
+## parse krb.realms
+
+if (open(KREALMS, "/etc/athena/krb.realms")) {
+    $serverrealmok = 0;
+    $localrealmok = 0;
+
+    while(<KREALMS>) {
+	$realms .= $_
+	    if !/^$serverhost\s+$REALM$/oi && !/^$localhost\s+$REALM$/oi;
+	$serverrealmok = 1 if /^$serverhost\s+$REALM$/oi;
+	$localrealmok = 1 if /^$localhost\s+$REALM$/oi;
+    }
+
+    close(KREALMS);
+}
+
+## rewrite krb.realms if necessary.
+
+if (!$serverrealmok || !$localrealmok) {
+    print "Rewriting /etc/athean/krb.realms...\n" if $verbose;
+
+    open(KREALMS, ">/etc/athena/krb.realms.new") ||
+	die "couldn't open /etc/athena/krb.realms.new: $!\n";
+
+    print KREALMS "$serverhost $REALM\n";
+    print KREALMS "$localhost $REALM\n" if ($localhost ne $serverhost);
+    print KREALMS $realms;
+
+    close(KREALMS);
+
+    &replace("/etc/athena/krb.realms");
+}
+
+# ## read /etc/passwd
+# 
+# open(PASSWD, "/etc/passwd") || die "couldn't open /etc/passwd: $!\n";
+# 
+# $passok = 0;
+# 
+# if ($archos ne "solaris2.3") {
+#     %mypass =
+# 	(
+# 	 "root", crypt("testroot","St"),
+# 	 "testenc", crypt("notath","HJ"),
+# 	 "testuser", "KERBEROS5",
+# 	 "pol1", "KERBEROS5",
+# 	 "pol2", "KERBEROS5",
+# 	 "pol3", "KERBEROS5",
+# 	 );
+# } else {
+#     %mypass =
+# 	(
+# 	 "root", "x", 
+# 	 "testenc", "x",
+# 	 "testuser", "x",
+# 	 "pol1", "x",
+# 	 "pol2", "x", 
+# 	 "pol3", "x",
+# 	 );
+#     %myshadow =
+# 	(
+# 	 "root", crypt("testroot","St"),
+# 	 "testenc", crypt("notath","HJ"),
+# 	 "testuser", "KERBEROS5",
+# 	 "pol1", "KERBEROS5",
+# 	 "pol2", "KERBEROS5",
+# 	 "pol3", "KERBEROS5",
+# 	 );
+# }    
+# 
+# $chpw = 0;
+# 
+# while(<PASSWD>) {
+#     if (/^([^:]+):([^:]+):/ && $mypass{$1}) {
+# 	$users{$1}++;
+# 	if ($2 ne $mypass{$1}) {
+# 	    s/^([^:]+):([^:]+):/$1:$mypass{$1}:/;
+# 	    $chpw++;
+# 	}
+#     }
+#     $pass .= $_;
+# }
+# 
+# $passok = 1;
+# 
+# for (keys %mypass) {
+#     if (!$users{$_}) {
+# 	$pass .= "$_:$mypass{$_}:32765:101::/tmp:/bin/csh\n";
+# 	$passok = 0;
+#     }
+# }
+# close(PASSWD);
+# 
+# ## rewrite passwd if necessary.
+# 
+# if ($chpw || !$passok) {
+#     print "Rewriting /etc/passwd...\n" if $verbose;
+# 
+#     open(PASSWD, ">/etc/passwd.new") ||
+# 	die "couldn't open /etc/passwd.new: $!\n";
+# 
+#     print PASSWD $pass;
+# 
+#     close(PASSWD);
+# 
+#     &replace("/etc/passwd");
+# }
+# 
+# if ($archos eq "solaris2.3") {
+# 
+# ## read /etc/shadow
+# 
+#     open(SHADOW, "/etc/shadow") || die "couldn't open /etc/shadow: $!\n";
+# 
+#     $shadowok = 0;
+#     $chpw = 0;
+#     %users = ();
+# 
+#     while(<SHADOW>) {
+# 	if (/^([^:]+):([^:]+):/ && $myshadow{$1}) {
+# 	    $users{$1}++;
+# 	    if ($2 ne $myshadow{$1}) {
+# 		s/^([^:]+):([^:]+):/$1:$myshadow{$1}:/;
+# 		$chpw++;
+# 	    }
+# 	}
+# 	$shadow .= $_;
+#     }
+#     
+#     $shadowok = 1;
+#     
+#     for (keys %myshadow) {
+# 	if (!$users{$_}) {
+# 	    $shadow .= "$_:$myshadow{$_}:6445::::::\n";
+# 	    $shadowok = 0;
+# 	}
+#     }
+#     close(SHADOW);
+#     
+# ## rewrite shadow if necessary.
+#     
+#     if ($chpw || !$shadowok) {
+# 	print "Rewriting /etc/shadow...\n" if $verbose;
+# 	
+# 	open(SHADOW, ">/etc/shadow.new") ||
+# 	    die "couldn't open /etc/shadow.new: $!\n";
+# 	
+# 	print SHADOW $shadow;
+# 	
+# 	close(SHADOW);
+# 	
+# 	&replace("/etc/shadow");
+#     }
+# }
+# 
+# if ($archos eq "aix3.2") {
+# 
+# ## read /etc/security/passwd
+# 
+#     open(SHADOW, "/etc/security/passwd") || die "couldn't open /etc/security/passwd: $!\n";
+# 
+#     $shadowok = 0;
+#     %users = ();
+# 
+#     while(<SHADOW>) {
+# 	if (/^([^:]+):\s*$/ && $mypass{$1}) {
+# 	    $user = $1;
+# 	    $users{$user}++;
+# 	    # arrange for the user to have a password entry and none other
+# 	    while (<SHADOW>) {
+# 		last if (!/=/);
+# 	    }
+# 	    $shadow .= "$user:\n\tpassword = KERBEROS5\n\n";
+# 	} else {
+# 	    $shadow .= $_;
+# 	}
+#     }
+#     
+#     $shadowok = 1;
+#     
+#     for (keys %mypass) {
+# 	if (!$users{$_}) {
+# 	    $shadow .= "$_:\n\tpassword = KERBEROS5\n\n";
+# 	    $shadowok = 0;
+# 	}
+#     }
+#     close(SHADOW);
+#     
+# ## rewrite shadow if necessary.
+#     
+#     if (!$shadowok) {
+# 	print "Rewriting /etc/security/passwd...\n" if $verbose;
+# 	
+# 	open(SHADOW, ">/etc/security/passwd.new") ||
+# 	    die "couldn't open /etc/security/passwd.new: $!\n";
+# 	
+# 	print SHADOW $shadow;
+# 	
+# 	close(SHADOW);
+# 	
+# 	&replace("/etc/security/passwd");
+#     }
+# }
+# 
+# open(SERVICES, "/etc/services") || die "couldn't open /etc/services: $!\n";
+# open(NEW_SERVICES, ">/etc/services.new") ||
+#     die "couldn't open /etc/services.new: $!\n";
+# 
+# print "Rewriting /etc/services...\n" if $verbose;
+# 
+# @needed_services = ('klogin', 'kshell', 'kerberos', 'kerberos-sec',
+# 		    'kerberos5', 'kerberos4', 'kerberos_master', 
+# 		    'passwd_server', 'eklogin', 'krb5_prop',
+# 		    'kerberos_adm', 'kerberos-adm');
+# for (@needed_services) {
+#     $needed_services{$_}++;
+# }
+# 
+# while (<SERVICES>) {
+#     m/^\s*([^\#\s][^\s]+)/;
+#     if ($needed_services{$1}) {
+# 	print "+ Commenting out old entry: $1\n" if $verbose;
+# 	print NEW_SERVICES "# $_";
+#     } else {
+# 	print NEW_SERVICES $_;
+#     }
+# }
+# 
+# close(SERVICES);
+# 
+# print NEW_SERVICES <<EOF || die "writing to /etc/services.new: $!\n";
+# 
+# klogin		543/tcp				# Kerberos authenticated rlogin
+# kshell          544/tcp         cmd             # and remote shell
+# kerberos	88/udp 		kdc		# Kerberos authentication--udp
+# kerberos	88/tcp 		kdc		# Kerberos authentication--tcp
+# kerberos-sec	750/udp 			# Kerberos authentication--udp
+# kerberos-sec	750/tcp 			# Kerberos authentication--tcp
+# kerberos5	88/udp 		kdc		# Kerberos authentication--udp
+# kerberos5	88/tcp 		kdc		# Kerberos authentication--tcp
+# kerberos4	750/udp 			# Kerberos authentication--udp
+# kerberos4	750/tcp 			# Kerberos authentication--tcp
+# kerberos_master	751/udp 			# Kerberos authentication
+# kerberos_master	751/tcp 			# Kerberos authentication
+# passwd_server	752/udp				# Kerberos passwd server
+# eklogin		2105/tcp			# Kerberos encrypted rlogin
+# krb5_prop	754/tcp				# Kerberos slave propagation
+# kerberos_adm	752/tcp				# Kerberos 5 admin/changepw
+# kerberos-adm	752/tcp				# Kerberos 5 admin/changepw
+# EOF
+# 
+# close(NEW_SERVICES) || die "error closing /etc/services.new: $!\n";
+# 
+# rename("/etc/services", "/etc/services.old") ||
+#     die "couldn't rename /etc/services to /etc/services.old: $!\n";
+# rename("/etc/services.new", "/etc/services") ||
+#     die "couldn't rename /etc/services.new to /etc/services: $!\n";
+# unlink("/etc/services.old") || die "couldn't unlink /etc/services: $!\n";
+# 

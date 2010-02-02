@@ -1,0 +1,24 @@
+This document is one piece of the document set for @value{PRODUCT}.  The
+documents, and their intended audiences, are:
+
+@itemize @bullet
+@item
+@b{@value{PRODUCT} Installation Guide}:  a concise guide for installing
+@value{PRODUCT}.  Kerberos administrators (particularly whoever will be
+making site-wide decisions about the installation) and the system
+administrators who will be installing the software should read this
+guide.
+
+@item
+@b{@value{PRODUCT} System Administrator's Guide}:  a sysadmin's guide to
+administering a Kerberos installation.  The System Administrator's Guide
+describes the administration software and suggests policies and
+procedures for administering a Kerberos installation.  Anyone who will
+have administrative access to your Kerberos database should read this
+guide.
+
+@item
+@b{@value{PRODUCT} UNIX User's Guide}:  a guide to using the Kerberos
+UNIX client programs.  All users on UNIX systems should read this guide,
+particularly the ``Tutorial'' section.
+@end itemize

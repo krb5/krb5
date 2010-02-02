@@ -1,0 +1,26 @@
+thisconfigdir=../..
+myfulldir=kadmin/passwd
+mydir=kadmin/passwd
+BUILDTOP=$(REL)..$(S)..
+LOCALINCLUDES = -I.
+DEFINES = -DUSE_KADM5_API_VERSION=1
+DEFS=
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+SUBDIRS = unit-test
+
+PROG = kpasswd
+OBJS = tty_kpasswd.o kpasswd.o kpasswd_strings.o
+SRCS = tty_kpasswd.c kpasswd.c kpasswd_strings.c
+
+all:: $(PROG)
+
+kpasswd_strings.c kpasswd_strings.h: $(srcdir)/kpasswd_strings.et
+
+$(OBJS): kpasswd_strings.h
+
+$(PROG): $(OBJS) $(KADMCLNT_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $(PROG) $(OBJS) $(KADMCLNT_LIBS) $(KRB5_BASE_LIBS)
+
+clean::
+	$(RM) kpasswd_strings.c kpasswd_strings.h $(PROG) $(OBJS)

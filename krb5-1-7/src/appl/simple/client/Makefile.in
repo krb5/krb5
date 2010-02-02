@@ -1,0 +1,19 @@
+thisconfigdir=../../..
+myfulldir=appl/simple/client
+mydir=appl/simple/client
+BUILDTOP=$(REL)..$(S)..$(S)..
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+all:: sim_client
+
+LOCALINCLUDES= -I.. -I$(srcdir)/..
+
+sim_client: sim_client.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o sim_client sim_client.o $(KRB5_BASE_LIBS)
+
+install::
+	$(INSTALL_PROGRAM) sim_client $(DESTDIR)$(CLIENT_BINDIR)/sim_client
+
+clean::
+	$(RM) sim_client.o sim_client

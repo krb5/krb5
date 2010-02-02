@@ -1,0 +1,29 @@
+thisconfigdir=../..
+myfulldir=kadmin/server
+mydir=kadmin/server
+BUILDTOP=$(REL)..$(S)..
+KDB_DEP_LIB=$(DL_LIB) $(THREAD_LINKOPTS)
+DEFS=
+
+LOCALINCLUDES = -I$(SRCTOP)/lib/gssapi/generic -I$(SRCTOP)/lib/gssapi/krb5 \
+	-I$(BUILDTOP)/lib/gssapi/generic -I$(BUILDTOP)/lib/gssapi/krb5 \
+	-I$(SRCTOP)/lib/kadm5/srv
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+PROG = kadmind
+OBJS = kadm_rpc_svc.o server_stubs.o ovsec_kadmd.o schpw.o misc.o server_glue_v1.o ipropd_svc.o network.o
+SRCS = kadm_rpc_svc.c server_stubs.c ovsec_kadmd.c schpw.c misc.c server_glue_v1.c ipropd_svc.c network.c
+
+all:: $(PROG)
+
+$(PROG): $(OBJS) $(KADMSRV_DEPLIBS) $(KRB5_BASE_DEPLIBS) $(APPUTILS_DEPLIB)
+	$(CC_LINK) -o $(PROG) $(OBJS) $(KADMSRV_LIBS) $(KDB_DEP_LIB) $(KRB5_BASE_LIBS) $(APPUTILS_LIB)
+
+install::
+	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(SERVER_BINDIR)/$(PROG)
+	$(INSTALL_DATA) $(srcdir)/$(PROG).M ${DESTDIR}$(SERVER_MANDIR)/$(PROG).8
+
+clean::
+	$(RM) $(PROG) $(OBJS)

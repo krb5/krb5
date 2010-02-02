@@ -1,0 +1,45 @@
+Notes on "Secure FTP" Implementation
+===============================================
+Mark Eichin <eichin@cygnus.com>, Cygnus Support
+last modified: 1995 Jan 14
+===============================================
+
+This implementation is supplied by Cygnus Support for inclusion in the MIT
+Kerberos V5 Release. 
+
+Copyrights:
+The original BSD ftp implementation is:
+ * Copyright (c) 1980, 1983, 1985, 1988, 1989, 1990, 1991 Regents of the
+   University of California.
+
+History and Credits (as of 1995 Jan 14)
+================================================
+
+Steve Lunt at Bellcore developed the original V4 kerberized ftp. He
+also started writing the IETF ftpsec draft at the time. This was
+available to the public, and Cygnus eventually incorporated it into
+CNS V4.
+
+Steve Lunt left Bellcore, and dropped out of the computer security
+field altogether, after handing the draft off to Marc Horowitz at
+OpenVision, who was working on a commercial GSSAPI implementation.
+
+Marc Horowitz left OpenVision and is back at MIT currently; in the
+mean time, Cygnus took the V4 ftp and upgraded it to use GSSAPI and
+draft-08, as well as integrating it into the Kerberos V5 autoconf
+based configuration scheme.
+
+Bill Schoofs <wjs@cray.com> supplied corrections to the implementation
+to more correctly match draft 8, as well as correcting some of the
+remaining KERBEROS_V4 code.
+
+Karri Balk - Contractor <kbalk@cup.hp.com> supplied additional
+corrections based on interoperation testing with non-free
+implementations.
+
+Marc Horowitz has indicated that a draft 9 is forthcoming, with some
+clarifications based on experience with this implementation.
+
+No other free implementation of draft-8 is known at this time. 
+
+

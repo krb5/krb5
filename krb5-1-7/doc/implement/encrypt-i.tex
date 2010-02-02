@@ -1,0 +1,164 @@
+Kerberos v5 has the ability to use multiple encryption systems.  Any
+encryption system which desires to link with and be usable from the MIT
+Kerberos v5 implementation must implement at least this interface:
+
+\subsection{Functional interface}
+
+\begin{funcdecl}{encrypt_func}{krb5_error_code}{\funcvoid}
+\funcarg{krb5_const_pointer}{in}
+\funcarg{krb5_pointer}{out}
+\funcarg{const size_t}{size}
+\funcarg{krb5_encrypt_block *}{eblock}
+\funcarg{krb5_pointer}{ivec}
+\end{funcdecl}
+Encrypts \funcparam{size} bytes at \funcparam{in}, storing result in
+\funcparam{out}.  \funcparam{eblock} points to an encrypt block which
+has been initialized by \funcname{process_key}.
+
+\funcparam{in} must include sufficient space beyond the \funcparam{size}
+bytes of input data to hold pad and redundancy check bytes; the macro
+\funcname{krb5_encrypt_size} can be used to compute this size.
+
+\funcparam{out} must be preallocated by the caller to contain sufficient
+storage to hold the output; the macro \funcname{krb5_encrypt_size} can
+be used to compute this size.
+
+\funcparam{ivec} points to an initial vector/seed to be used in the encryption.
+If null, the cryptosystem may choose an appropriate initialization vector.
+
+%Errors: Returns errors.
+
+\begin{funcdecl}{decrypt_func}{krb5_error_code}{\funcvoid}
+\funcarg{krb5_const_pointer}{in}
+\funcarg{krb5_pointer}{out}
+\funcarg{const size_t}{size}
+\funcarg{krb5_encrypt_block *}{eblock}
+\funcarg{krb5_pointer}{ivec}
+\end{funcdecl}
+Decrypts \funcparam{size} bytes at \funcparam{in}, storing result in
+\funcparam{out}.
+\funcparam{eblock} points to an encrypt block which has been initialized
+by \funcname{process_key}.
+
+\funcparam{size} must be a multiple of the encryption block size.
+
+\funcparam{out} must be preallocated by the caller to contain sufficient
+storage to hold the output; this is guaranteed to be no more than
+the input size.
+
+\funcparam{ivec} points to an initial vector/seed to be used in the decryption.
+If null, the cryptosystem may choose an appropriate ivec.
+
+%Errors: Returns errors.
+
+\begin{funcdecl}{process_key}{krb5_error_code}{\funcvoid}
+\funcarg{krb5_encrypt_block *}{eblock}
+\funcarg{const krb5_keyblock *}{keyblock}
+\end{funcdecl}
+Does any necessary key preprocessing (such as computing key
+schedules for DES).
+\funcparam{eblock{\ptsto}crypto_entry} must be set by the caller; the
+other elements of \funcparam{eblock} are to be assigned by this function.
+[In particular, \funcparam{eblock{\ptsto}key} must be set by this
+function if the key is needed in raw form by the encryption routine.]
+
+The caller may not move or reallocate \funcparam{keyblock} before calling
+\funcname{finish_key} on \funcparam{eblock}.
+
+%Errors: Returns errors.
+
+\begin{funcdecl}{finish_key}{krb5_error_code}{\funcvoid}
+\funcarg{krb5_encrypt_block *}{eblock}
+\end{funcdecl}
+Does any necessary clean-up on \funcparam{eblock} (such as releasing
+resources held by \funcparam{eblock{\ptsto}priv}.
+
+%Errors: Returns errors.
+
+\begin{funcdecl}{string_to_key}{krb5_error_code}{\funcvoid}
+\funcarg{const krb5_keytype}{keytype}
+\funcarg{krb5_keyblock *}{keyblock}
+\funcarg{const krb5_data *}{data}
+\funcarg{const krb5_data}{salt}
+\end{funcdecl}
+Converts the string pointed to by \funcparam{data} into an encryption key
+of type \funcparam{keytype}.  \funcparam{*keyblock} is filled in with
+the key info; in particular, \funcparam{keyblock{\ptsto}contents} is to
+be set to allocated storage. It is the responsibility of the caller to
+release this storage when the generated key no longer needed.
+
+The routine may use \funcparam{salt} to seed or alter the conversion
+algorithm.
+
+If the particular function called does not know how to make a
+key of type \funcparam{keytype}, an error may be returned.
+
+%Errors: Returns errors.
+
+\begin{funcdecl}{init_random_key}{krb5_error_code}{\funcvoid}
+\funcarg{const krb5_keyblock *}{seedblock}
+\funcarg{krb5_pointer *}{seed}
+\end{funcdecl}
+
+Initialize the random key generator using the encryption key
+\funcparam{seedblock} and allocating private sequence information, filling
+in \funcparam{*seed} with the address of such information.
+\funcparam{*seed} is to be passed to \funcname{random_key} to provide
+sequence information.
+
+\begin{funcdecl}{finish_random_key}{krb5_error_code}{\funcvoid}
+\funcarg{krb5_pointer *}{seed}
+\end{funcdecl}
+
+Free any resources held by \funcparam{seed} and assigned by
+\funcname{init_random_key}. 
+
+\begin{funcdecl}{random_key}{krb5_error_code}{\funcvoid}
+\funcarg{krb5_pointer *}{seed}
+\funcarg{krb5_keyblock **}{keyblock}
+\end{funcdecl}
+
+Generate a random encryption key, allocating storage for it and
+filling in the keyblock address in \funcparam{*keyblock}.
+When the caller has finished using the keyblock, he should call
+\funcname{krb5_free_keyblock} to release its storage.
+
+%\begin{funcdecl}{combine_keys}{krb5_error_code}{\funcin}
+%\funcarg{const krb5_keyblock *}{key1}
+%\funcarg{const krb5_keyblock *}{key2}
+%\funcout
+%\funcarg{krb5_keyblock **}{outkey}
+%\end{funcdecl}
+%Combine the two encryption keys \funcparam{key1} and \funcparam{key2} to
+%generate a new output key \funcparam{outkey}.  \funcparam{outkey} is
+%filled in to point to the freshly-allocated key.  When the caller is
+%finished using the \funcparam{*outkey}, it should be freed with
+%\funcname{krb5_free_keyblock}.
+
+\subsection{Other data elements}
+In addition to the above listed function entry points, each encryption
+system should have an entry in \globalname{krb5_csarray} and a
+\datatype{krb5_cryptosystem_entry} structure describing the entry points
+and key and padding sizes for the encryption system.
+
+\subsection{DES functions}
+The DES functions conform to the encryption interface required by the
+Kerberos version 5 library, and provide an encryption mechanism based on
+the DES Cipher-block chaining mode (CBC), with the addition of a
+cyclical redundancy check (CRC-32) for integrity checking upon
+decryption.
+
+The functions have the same signatures as those described by the main
+library document; the names are:
+{\obeylines
+\funcname{mit_des_encrypt_func}
+\funcname{mit_des_decrypt_func}
+\funcname{mit_des_process_key}
+\funcname{mit_des_finish_key}
+\funcname{mit_des_string_to_key}
+\funcname{mit_des_init_random_key}
+\funcname{mit_des_finish_random_key}
+\funcname{mit_des_random_key}
+}
+The \datatype{krb5_cryptosystem_entry} for this cryptosystem is
+\globalname{mit_des_cryptosystem_entry}.

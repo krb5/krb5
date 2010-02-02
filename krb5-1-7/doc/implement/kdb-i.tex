@@ -1,0 +1,242 @@
+The \libname{libkdb.a} library provides a principal database interface
+to be used by the Key Distribution center and other database
+manipulation tools.
+
+
+\begin{funcdecl}{krb5_db_set_name}{krb5_error_code}{\funcin}
+\funcarg{char *}{name}
+\end{funcdecl}
+
+Set the name of the database to \funcparam{name}.  
+%Errors: If it doesn't exist, an error code is returned.
+
+Must be called before \funcname{krb5_db_init} or after
+\funcname{krb5_db_fini}; must not be called while db functions are active.
+
+\begin{funcdecl}{krb5_db_set_nonblocking}{krb5_error_code}{\funcin}
+\funcarg{krb5_boolean}{newmode}
+\funcout
+\funcarg{krb5_boolean *}{oldmode}
+\end{funcdecl}
+
+Changes the locking mode of the database functions, returning the previous
+mode in \funcparam{*oldmode}.
+
+If \funcparam{newmode} is TRUE, then the database is put into
+non-blocking mode, which may result in ``database busy'' error codes from
+the get, put, and iterate routines.
+
+If \funcparam{newmode} is FALSE, then the database is put into blocking mode,
+which may result in delays from the get, put and iterate routines.
+
+The default database mode is blocking mode.
+
+\begin{funcdecl}{krb5_db_init}{krb5_error_code}{\funcvoid}
+\end{funcdecl}
+
+Called before using \funcname{krb5_db_get_principal},
+\funcname{krb5_db_put_principal}, \funcname{krb5_db_iterate}, and
+\funcname{krb5_db_set_nonblocking}.
+
+Does any required initialization.
+
+%Errors: init errors, system errors.
+
+\begin{funcdecl}{krb5_db_fini}{krb5_error_code}{\funcvoid}
+\end{funcdecl}
+
+Called after all database operations are complete, to perform any required
+clean-up.
+
+%Errors: sysytem errors.
+
+
+\begin{funcdecl}{krb5_db_get_age}{krb5_error_code}{\funcin}
+\funcarg{char *}{db_name}
+\funcout
+\funcarg{time_t *}{age}
+\end{funcdecl}
+
+Retrieves the age of the database \funcname{db_name} (or the current
+default database if \funcname{db_name} is NULL).
+
+\funcparam{*age} is filled in in local system time units, and represents
+the last modification time of the database.
+
+%Errors: system errors.
+
+
+\begin{funcdecl}{krb5_db_create}{krb5_error_code}{\funcin}
+\funcarg{char *}{db_name}
+\end{funcdecl}
+
+Creates a new database named \funcname{db_name}.  Will not create a
+database by that name if it already exists.  The database must be
+populated by the caller by using \funcname{krb5_db_put_principal}.
+
+%Errors: db exists, system errors.
+
+\begin{funcdecl}{krb5_db_rename}{krb5_error_code}{\funcin}
+\funcarg{char *}{source}
+\funcarg{char *}{dest}
+\end{funcdecl}
+Renames the database \funcarg{source} to \funcarg{dest}
+
+Any database named \funcarg{dest} is destroyed.
+
+%Errors: system errors.
+
+\begin{funcdecl}{krb5_db_get_principal}{krb5_error_code}{\funcin}
+\funcarg{krb5_principal}{searchfor}
+\funcout
+\funcarg{krb5_db_entry *}{entries}
+\funcinout
+\funcarg{int *}{nentries}
+\funcout
+\funcarg{krb5_boolean *}{more}
+\end{funcdecl}
+
+Retrieves the principal records named by \funcparam{searchfor}.
+
+\funcparam{entries} must point to an array of \funcparam{*nentries}
+krb5_db_entry structures.
+At most \funcparam{*nentries} structures are filled in, and
+\funcparam{*nentries} is modified to reflect the number actually returned.
+
+\funcparam{*nentries} must be at least one (1) when this function is called.
+
+\funcparam{*more} is set to TRUE if there are more records that wouldn't fit
+in the available space, and FALSE otherwise.
+
+The principal structures filled in have pointers to allocated storage;
+\funcname{krb5_db_free_principal} should be called with
+\funcparam{entries} and \funcparam{*nentries}
+in order to free this storage when no longer needed.
+
+
+\begin{funcdecl}{krb5_db_free_principal}{void}{\funcin}
+\funcarg{krb5_db_entry *}{entries}
+\funcarg{int}{nentries}
+\end{funcdecl}
+
+Frees allocated storage held by \funcparam{entries} as filled in by
+\funcname{krb5_db_get_principal}.
+
+
+\begin{funcdecl}{krb5_db_put_principal}{krb5_error_code}{\funcin}
+\funcarg{krb5_db_entry *}{entries}
+\funcarg{int *}{nentries}
+\end{funcdecl}
+
+Stores the \funcparam{*nentries} principal structures pointed to by
+\funcparam{entries} in the database.
+
+\funcparam{*nentries} is updated upon return to reflect the number of records
+acutally stored; the first \funcparam{*nentries} records will have been
+stored in the database.
+
+%Errors: Returns error code if not all entries were stored.
+
+\begin{funcdecl}{krb5_db_iterate}{krb5_error_code}{\funcin}
+\funcfuncarg{krb5_error_code}{(*func)}
+\funcarg{krb5_pointer}{}
+\funcarg{krb5_db_entry *}{}
+\funcendfuncarg
+\funcarg{krb5_pointer}{iterate_arg}
+\end{funcdecl}
+
+Iterates over the database, fetching every entry in an unspecified order
+and calling \funcparam{(*func)}(\funcparam{iterate_arg},
+\funcparam{principal}) where \funcparam{principal} points to a record from the
+database.
+
+If \funcparam{(*func)}() ever returns an error code, the iteration
+should be
+aborted and that error code is returned by this function.
+
+\begin{funcdecl}{krb5_db_store_mkey}{krb5_error_code}{\funcin}
+\funcarg{char *}{keyfile}
+\funcarg{krb5_principal}{mname}
+\funcarg{krb5_keyblock *}{key}
+\end{funcdecl}
+
+Put the KDC database master key into the file \funcparam{keyfile}. If
+\funcparam{keyfile} is NULL, then a default file name derived from the
+principal name \funcparam{mname} is used.
+
+\begin{funcdecl}{krb5_db_fetch_mkey}{krb5_error_code}{\funcin}
+\funcarg{krb5_principal}{mname}
+\funcarg{krb5_encrypt_block *}{eblock}
+\funcarg{krb5_boolean}{fromkeyboard}
+\funcarg{krb5_boolean}{twice}
+\funcarg{krb5_data }{salt}
+\funcinout
+\funcarg{krb5_keyblock *}{key}
+\end{funcdecl}
+
+Get the KDC database master key from somewhere, filling it into
+\funcparam{*key}. 
+\funcparam{key{\ptsto}keytype} should be set to the desired key type.
+
+If \funcparam{fromkeyboard} is TRUE, then the master key is read as a password
+from the user's terminal.  In this case:
+\funcparam{eblock} should point to a block with an appropriate
+\funcname{string_to_key} function; if \funcparam{twice} is TRUE, the
+password is read twice for verification; and if \funcparam{salt} is
+non-NULL, it is used as the salt when converting the typed
+password to the master key.
+
+
+If \funcparam{fromkeyboard} is false, then the key is read from
+a file whose name is derived from the principal name \funcparam{mname}.
+Therefore, \funcparam{eblock}, \funcparam{twice} and \funcparam{salt}
+are ignored.
+
+
+\funcparam{mname} is the name of the key sought; this is often used by
+\funcname{string_to_key} to aid in conversion of the password to a key. 
+
+\begin{funcdecl}{krb5_kdb_encrypt_key}{krb5_error_code}{\funcin}
+\funcarg{krb5_encrypt_block *}{eblock}
+\funcarg{const krb5_keyblock *}{in}
+\funcinout
+\funcarg{krb5_encrypted_keyblock *}{out}
+\end{funcdecl}
+
+Encrypt a key for storage in the database.  \funcparam{eblock} is used
+to encrypt the key in \funcparam{in} into \funcparam{out}; the storage
+pointed to by \funcparam{*out} is allocated before use and should be
+freed when the caller is finished with it.
+
+\begin{funcdecl}{krb5_kdb_decrypt_key}{krb5_error_code}{\funcin}
+\funcarg{krb5_encrypt_block *}{eblock}
+\funcarg{const krb5_encrypted_keyblock *}{in}
+\funcinout
+\funcarg{krb5_keyblock *}{out}
+\end{funcdecl}
+
+Decrypt a key from storage in the database.  \funcparam{eblock} is used
+to decrypt the key in \funcparam{in} into \funcparam{out}; the storage
+pointed to by \funcparam{*out} is allocated before use and should be
+freed when the caller is finished with it.
+
+\begin{funcdecl}{krb5_db_setup_mkey_name}{krb5_error_code}{\funcin}
+\funcarg{const}{char *keyname}
+\funcarg{const}{char *realm}
+\funcout
+\funcarg{char **}{fullname}
+\funcarg{krb5_principal *}{principal}
+\end{funcdecl}
+
+Given a key name \funcparam{keyname} and a realm name \funcparam{realm},
+construct a principal which can be used to fetch the master key from the
+database.  This principal is filled into \funcparam{*principal};
+\funcparam{*principal} should be freed by \funcname{krb5_free_principal}
+when the caller is finished.
+
+If \funcparam{keyname} is NULL, the default key name will be used.
+
+If \funcparam{fullname} is not NULL, it is set to point to a string
+representation of the complete principal name; its storage may be freed
+by calling \funcname{free} on \funcparam{*fullname}.
+

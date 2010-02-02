@@ -1,0 +1,21 @@
+The reseedtest is intended to allow confirmation that if sufficient
+entropy is provided then the PRNG will reseed (well initially seed)
+itself before the first random data is requested.  This test is not
+useful to run in an automated manner because the point is to look at
+internal function call order.
+
+To test this, set a break point at krb5int_yarrow_reseed and
+krb5_c_random_make_octets and run the test.  The reseed function
+should be called with a pool of 1 (YARROW_SLOW_POOL) before
+krb5_c_random_make_octets is called.
+
+A slow reseed should require two sources to reach sufficient entropy.
+Sources  start out sending entropy to fast pool then alternate with
+slow pool.  So this test does the following:
+* Seed source 1
+* Seed source 1 (this time to slow pool)
+* Seed source 0
+* Seed source 0 (to slow pool triggering reseed)
+* Output some random data
+
+

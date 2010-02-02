@@ -1,0 +1,7 @@
+# 
+# Generated makefile dependencies follow.
+#
+$(OUTPRE)t_loader.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(COM_ERR_DEPS) $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/krb5.h t_loader.c

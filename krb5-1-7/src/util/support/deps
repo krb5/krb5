@@ -1,0 +1,46 @@
+# 
+# Generated makefile dependencies follow.
+#
+threads.so threads.po $(OUTPRE)threads.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/fake-addrinfo.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/port-sockets.h \
+  $(SRCTOP)/include/socket-utils.h cache-addrinfo.h supp-int.h \
+  threads.c
+init-addrinfo.so init-addrinfo.po $(OUTPRE)init-addrinfo.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/fake-addrinfo.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  cache-addrinfo.h init-addrinfo.c
+errors.so errors.po $(OUTPRE)errors.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h errors.c supp-int.h
+k5buf.so k5buf.po $(OUTPRE)k5buf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h k5buf-int.h k5buf.c
+gmt_mktime.so gmt_mktime.po $(OUTPRE)gmt_mktime.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  gmt_mktime.c
+fake-addrinfo.so fake-addrinfo.po $(OUTPRE)fake-addrinfo.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/fake-addrinfo.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  cache-addrinfo.h fake-addrinfo.c supp-int.h
+utf8.so utf8.po $(OUTPRE)utf8.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/k5-utf8.h supp-int.h utf8.c
+utf8_conv.so utf8_conv.po $(OUTPRE)utf8_conv.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h $(SRCTOP)/include/k5-utf8.h \
+  supp-int.h utf8_conv.c
+strlcpy.so strlcpy.po $(OUTPRE)strlcpy.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  strlcpy.c
+printf.so printf.po $(OUTPRE)printf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  printf.c
+mkstemp.so mkstemp.po $(OUTPRE)mkstemp.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-platform.h $(SRCTOP)/include/k5-thread.h \
+  mkstemp.c
+t_k5buf.so t_k5buf.po $(OUTPRE)t_k5buf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(SRCTOP)/include/k5-buf.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-thread.h k5buf-int.h t_k5buf.c

@@ -1,0 +1,101 @@
+Assumptions
+===========
+
+The Yarrow design, described in "Yarrow-160: Notes on the Design and
+Analysis of the Yarrow Cryptographic Pseudonumber Generator" by John
+Kelsey, Bruce Schneier and Niels Ferguson of Counterpane Systems
+(available from http://www.counterpane.com/yarrow.html), left out some
+implementation details and has some ambiguities in the protocol.  ZKS
+has to made some assumptions and taken some decisions in its
+implementation of Yarrow. In the text, `we' represents ZKS.
+
+Here is the list of those assumptions: 
+
+1) To simplify the code and speed up running time, we limit the number
+of different sources to 20. This should be enough for most
+applications. This can be changed by redefining YARROW_MAX_SOURCE in
+yarrow.h.
+
+2) The Yarrow paper (in section 5.3) state that Pt is either
+implementation dependent or dynamically adjusted. We chose to fix the
+slow pool's Pt to 100 and the fast pool's Pt to 10. This can be
+changed by redefining YARROW_FAST_PT and YARROW_SLOW_PT in yarrow.c.
+
+3) Initialization when there is no saved state is not discussed in the
+Yarrow paper.  We have defined that CPRNG is becomes seeded after a
+slow reseed.  During initialization, a slow reseed is triggered by
+YARROW_K_OF_N_INIT_THRESH sources reaching the slow threshold
+YARROW_SLOW_INIT_THRESH.  During initialization, fast reseeds are
+triggered when a source reaches the fast threshold
+YARROW_FAST_INIT_THRESH.  After reseed the behavior of the pools is
+controlled by YARROW_K_OF_N_THRESH, YARROW_SLOW_THRESH and
+YARROW_FAST_THRESH.  
+
+Our default values for YARROW_K_OF_N_INIT_THRESH,
+YARROW_SLOW_INIT_THRESH and YARROW_FAST_INIT_THRESH are the same as
+YARROW_K_OF_N_THRESH, YARROW_SLOW_THRESH and YARROW_FAST_THRESH
+respectively.  Note this means that a Yarrow_Poll call by itself can
+never put us in an initialized state, as it only works on one pool,
+and the default YARROW_K_OF_N_INIT_THRESH value is 2.
+
+4) We define a function Yarrow_Poll which can gather entropy.  The
+user must allocate a source_id, and call Yarrow_Poll manually.
+Yarrow_Poll just adds samples from the machines state to the source
+given as an argument.
+
+5) Prior to initialization, Yarrow_Output will fail.
+
+6) The actions to take on state load are not described in the yarrow
+paper, all it says is that 2k bytes should be written (and by
+implication read back in somehow).  We read in the 2k bytes, hash
+them into the fast pool, and then do a forced fast reseed, and an
+immediate state save.
+
+7) In step 2 of the reseed process, we must hash the value i. The
+representation of this integer will affect the hash value. In our
+code, i is a 64-bit unsigned value. We update the hash context using
+the 64 bit big endian representation of i.
+
+8) Yarrow outputs random bits in blocks. If the calling function
+requests less bits than available, then the unused bits are kept
+in memory until the next call. In case of a reseed, we chose to 
+discard those leftover bits.
+
+9) The samples from one source must alternate between the two pools.
+As a default, we initialize the first pool to send the sample too to
+be the fast pool. This initialization is done only when a source is
+added, not when we reseed from one.
+
+10) The Yarrow paper states that the maximum number of outputs between
+reseeding is limited to min(2^n,2^(k/3)*Pg), but does not explain
+what is to happen when this limit is reached. It could be the case
+that we reach the limit but there is not enough entropy in the pools 
+to reseed. In our code, the Yarrow_Output_Block will do a forced
+fast reseed. 
+
+11) In the Yarrow paper, the limit on the number of outputs between
+reseeding is expressed in number of outputs:
+
+#oututs <= min(2^n, 2^(k/3).Pg)
+
+but we redefine it in terms of gates by dividing the numbers by Pg,
+the number of outputs per gate, and counting the number of gates
+instead.  This makes an overflow a little less likely.
+
+We don't use a bignum library, so in event of overflow, the limit in
+number of gates before reseed (y->gates_limit) is reduced down to
+2^64-1 (or 2^32-1 if 64 bit ints aren't available on the platform).
+
+12) The Yarrow paper describes that the cipher block C should be 
+incremented as part of the output function.  We treat the bytes
+of C as a big endian number to do the increment.
+
+13) Triple-DES key size.  The yarrow paper uses the letter k to
+represent the keysize in bits.  Due to the parity bits, the size of k
+is 192 bits.  However the effective key size is actually 168 bits, as
+the value of k is used in security limits, k must be 168 bits.  The
+paper uses k (eg set K to the next k output bits), so we have to do
+the parity padding function, to copy bits 0-6 to 0-7, 7-13 to 8-15
+etc.  The macro DES_Init performs the function of doing a DES key
+schedule from a packed key (no parity bits), internally doing the
+parity padding.  Other ciphers are simpler as there is no parity.

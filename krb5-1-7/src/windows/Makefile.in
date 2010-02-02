@@ -1,0 +1,76 @@
+BUILDTOP=..
+NO_OUTPRE=1
+
+#
+# Makefile that recurses into cns subdirectory.
+#
+all-windows:: ntsecapitest
+	@echo Making in windows\lib
+	cd lib
+	$(MAKE) -$(MFLAGS)
+	@echo Making in windows\cns
+	cd ..\cns
+	$(MAKE) -$(MFLAGS)
+	@echo Making in windows\wintel
+	cd ..\wintel
+	$(MAKE) -$(MFLAGS)
+       @echo Making in windows\gss
+	cd ..\gss
+	cd
+	$(MAKE) -$(MFLAGS)
+	@echo Making in windows\gina
+	cd ..\gina
+	$(MAKE) -$(MFLAGS)
+	@echo Making in windows\ms2mit
+	cd ..\ms2mit
+	$(MAKE) -$(MFLAGS)
+!if "$(KRB5_KFW_COMPILE)"=="1" 
+        @echo Making in windows\kfwlogon
+        cd ..\kfwlogon
+        $(MAKE) -$(MFLAGS) 
+        @echo Making in windows\identity 
+        cd ..\identity 
+        $(MAKE) -$(MFLAGS) 
+!endif 
+	cd ..
+
+clean-windows:: clean-ntsecapitest
+	@echo Making clean in windows\lib
+	cd lib
+	$(MAKE) -$(MFLAGS) clean
+	@echo Making clean in windows\cns
+	cd ..\cns
+	$(MAKE) -$(MFLAGS) clean
+	@echo Making clean in windows\wintel
+	cd ..\wintel
+	$(MAKE) -$(MFLAGS) clean
+	@echo Making clean in windows\gss
+	cd ..\gss
+	$(MAKE) -$(MFLAGS) clean
+	@echo Making clean in windows\gina
+	cd ..\gina
+	$(MAKE) -$(MFLAGS) clean
+	@echo Making clean in windows\ms2mit
+	cd ..\ms2mit
+	$(MAKE) -$(MFLAGS) clean
+!if "$(KRB5_KFW_COMPILE)"=="1" 
+        @echo Making clean in windows\kfwlogon
+        cd ..\kfwlogon
+        $(MAKE) -$(MFLAGS) clean 
+        @echo Making clean in windows\identity 
+        cd ..\identity 
+        $(MAKE) -$(MFLAGS) clean 
+!endif 
+	cd ..
+
+# If ntsecapi.h contains the string that indicates it came from the Vista SDK,
+#  then ntsecapitest.i will be left behind.  If the string is not present,
+#  ntsecapitest.i will be deleted. 
+ntsecapitest:: ntsecapitest.i
+    ntsecapitest.pl
+
+clean-ntsecapitest::
+    $(RM) ntsecapitest.i
+
+{}.c{}.i:
+    @$(C_RULE) -P

@@ -1,0 +1,86 @@
+thisconfigdir=../../../..
+myfulldir=plugins/kdb/ldap/libkdb_ldap
+mydir=plugins/kdb/ldap/libkdb_ldap
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
+KRB5_RUN_ENV = @KRB5_RUN_ENV@
+KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+# Lots of ugliness here because of duplicated symbol names.
+# Can I just punt the duplicates and import from libkdb5, or
+# is keeping them separate important?
+DEFINES = \
+	-Dkrb5_dbe_lookup_last_pwd_change=kdb_ldap_dbe_lookup_last_pwd_change \
+	-Dkrb5_dbe_lookup_mod_princ_data=kdb_ldap_dbe_lookup_mod_princ_data \
+	-Dkrb5_dbe_lookup_tl_data=kdb_ldap_dbe_lookup_tl_data \
+	-Dkrb5_dbe_update_last_pwd_change=kdb_ldap_dbe_update_last_pwd_change \
+	-Dkrb5_dbe_update_mod_princ_data=kdb_ldap_dbe_update_mod_princ_data \
+	-Dkrb5_dbe_update_tl_data=kdb_ldap_dbe_update_tl_data
+DEFS=
+
+LOCALINCLUDES = -I$(SRCTOP)/lib/kdb -I$(SRCTOP)/lib/krb5/asn.1
+
+LIBBASE=kdb_ldap
+LIBMAJOR=1
+LIBMINOR=0
+RELDIR=../plugins/kdb/ldap/libkdb_ldap
+# Depends on libk5crypto and libkrb5
+# Also on gssrpc, for xdr stuff.
+SHLIB_EXPDEPS = \
+	$(GSSRPC_DEPLIBS) \
+	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+	$(SUPPORT_DEPLIB) \
+	$(TOPLIBD)/libkrb5$(SHLIBEXT)
+SHLIB_EXPLIBS= $(KADMSRV_LIBS) -lkrb5 -lk5crypto $(COM_ERR_LIB) $(SUPPORT_LIB) @LDAP_LIBS@ $(LIBS)
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+
+LIBINITFUNC= kldap_init_fn
+LIBFINIFUNC=
+
+SRCS= 	$(srcdir)/kdb_ldap.c \
+	$(srcdir)/kdb_ldap_conn.c \
+	$(srcdir)/ldap_realm.c \
+	$(srcdir)/ldap_create.c \
+	$(srcdir)/ldap_krbcontainer.c \
+	$(srcdir)/ldap_principal.c \
+	$(srcdir)/ldap_principal2.c \
+	$(srcdir)/ldap_pwd_policy.c \
+	$(srcdir)/ldap_misc.c \
+	$(srcdir)/ldap_handle.c \
+	$(srcdir)/ldap_tkt_policy.c \
+	$(srcdir)/ldap_services.c \
+	$(srcdir)/ldap_service_rights.c \
+	$(srcdir)/princ_xdr.c \
+	$(srcdir)/ldap_fetch_mkey.c \
+	$(srcdir)/ldap_service_stash.c \
+	$(srcdir)/kdb_xdr.c \
+	$(srcdir)/ldap_err.c
+
+STOBJLISTS=OBJS.ST
+STLIBOBJS= kdb_ldap.o \
+	kdb_ldap_conn.o \
+	ldap_realm.o \
+	ldap_create.o \
+	ldap_krbcontainer.o \
+	ldap_principal.o \
+	ldap_principal2.o \
+	ldap_pwd_policy.o \
+	ldap_misc.o \
+	ldap_handle.o \
+	ldap_tkt_policy.o \
+	ldap_services.o \
+	ldap_service_rights.o \
+	princ_xdr.o \
+	ldap_fetch_mkey.o \
+	ldap_service_stash.o \
+	kdb_xdr.o \
+	ldap_err.o
+
+all-unix:: all-liblinks
+install-unix:: install-libs
+clean-unix:: clean-liblinks clean-libobjs clean-libs
+
+@lib_frag@
+@libobj_frag@
+

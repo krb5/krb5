@@ -1,0 +1,37 @@
+@ignore 
+the information in this file should be consistent with the information
+in krb5/src/lib/crypto/etypes.c (and krb5/src/include/krb5.h[in]?)
+@end ignore
+
+@table @code
+@item des-cbc-crc 
+DES cbc mode with CRC-32 (weak)
+@item des-cbc-md4 
+DES cbc mode with RSA-MD4 (weak)
+@item des-cbc-md5 
+DES cbc mode with RSA-MD5 (weak)
+@item des-cbc-raw
+DES cbc mode raw (weak)
+@item des3-cbc-raw
+Triple DES cbc mode raw (weak)
+@item des3-cbc-sha1 
+@itemx des3-hmac-sha1
+@itemx des3-cbc-sha1-kd
+Triple DES cbc mode with HMAC/sha1
+@item des-hmac-sha1 
+DES with HMAC/sha1 (weak)
+@item aes256-cts-hmac-sha1-96
+@itemx aes256-cts
+AES-256 CTS mode with 96-bit SHA-1 HMAC
+@item aes128-cts-hmac-sha1-96
+@itemx aes128-cts
+AES-128 CTS mode with 96-bit SHA-1 HMAC
+@item arcfour-hmac 
+@itemx rc4-hmac
+@itemx arcfour-hmac-md5
+RC4 with HMAC/MD5
+@item arcfour-hmac-exp 
+@itemx rc4-hmac-exp
+@itemx arcfour-hmac-md5-exp
+Exportable RC4 with HMAC/MD5 (weak)
+@end table

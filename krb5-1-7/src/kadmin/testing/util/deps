@@ -1,0 +1,27 @@
+# 
+# Generated makefile dependencies follow.
+#
+$(OUTPRE)tcl_ovsec_kadm.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
+  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/lib/kdb/adb_err.h $(COM_ERR_DEPS) $(SRCTOP)/include/gssrpc/auth.h \
+  $(SRCTOP)/include/gssrpc/auth_gss.h $(SRCTOP)/include/gssrpc/auth_unix.h \
+  $(SRCTOP)/include/gssrpc/clnt.h $(SRCTOP)/include/gssrpc/rename.h \
+  $(SRCTOP)/include/gssrpc/rpc.h $(SRCTOP)/include/gssrpc/rpc_msg.h \
+  $(SRCTOP)/include/gssrpc/svc.h $(SRCTOP)/include/gssrpc/svc_auth.h \
+  $(SRCTOP)/include/gssrpc/xdr.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h tcl_kadm5.h tcl_ovsec_kadm.c
+$(OUTPRE)tcl_kadm5.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
+  $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/chpass_util_strings.h \
+  $(BUILDTOP)/include/kadm5/kadm_err.h $(BUILDTOP)/include/krb5/krb5.h \
+  $(BUILDTOP)/lib/kdb/adb_err.h $(COM_ERR_DEPS) $(SRCTOP)/include/gssrpc/auth.h \
+  $(SRCTOP)/include/gssrpc/auth_gss.h $(SRCTOP)/include/gssrpc/auth_unix.h \
+  $(SRCTOP)/include/gssrpc/clnt.h $(SRCTOP)/include/gssrpc/rename.h \
+  $(SRCTOP)/include/gssrpc/rpc.h $(SRCTOP)/include/gssrpc/rpc_msg.h \
+  $(SRCTOP)/include/gssrpc/svc.h $(SRCTOP)/include/gssrpc/svc_auth.h \
+  $(SRCTOP)/include/gssrpc/xdr.h $(SRCTOP)/include/kdb.h \
+  $(SRCTOP)/include/krb5.h tcl_kadm5.c tcl_kadm5.h
+$(OUTPRE)test.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  tcl_kadm5.h test.c

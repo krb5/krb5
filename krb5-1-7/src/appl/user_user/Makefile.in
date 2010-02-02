@@ -1,0 +1,25 @@
+thisconfigdir=../..
+myfulldir=appl/user_user
+mydir=appl/user_user
+BUILDTOP=$(REL)..$(S)..
+DEFINES = -DDEBUG
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+all:: uuclient uuserver
+
+uuclient: client.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o uuclient client.o $(KRB5_BASE_LIBS)
+
+clean::
+	$(RM) client.o uuclient
+
+uuserver: server.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o uuserver server.o $(KRB5_BASE_LIBS)
+
+install::
+	$(INSTALL_PROGRAM) uuclient $(DESTDIR)$(CLIENT_BINDIR)/uuclient
+	$(INSTALL_PROGRAM) uuserver $(DESTDIR)$(SERVER_BINDIR)/uuserver
+
+clean::
+	$(RM) server.o uuserver

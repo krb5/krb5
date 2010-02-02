@@ -1,0 +1,148 @@
+// Microsoft Visual C++ generated resource script.
+//
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "windows.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+#include "resource.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+GSS                     ICON                    "gss.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+GSSAPIDLG DIALOGEX 63, 65, 330, 311
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Test GSSAPI Connection"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    RTEXT           "Hostname:",IDC_STATIC_HOST,5,12,60,10,NOT WS_GROUP
+    COMBOBOX        GSS_HOST_NAME,70,9,245,60,CBS_DROPDOWN | CBS_AUTOHSCROLL | 
+                    WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    DEFPUSHBUTTON   "Test",GSS_OK,80,290,51,14,WS_GROUP
+    PUSHBUTTON      "Exit",GSS_CANCEL,185,290,51,14
+    RTEXT           "Port:",IDC_STATIC_PORT,16,27,50,8
+    EDITTEXT        GSS_PORT,70,25,40,14,ES_RIGHT | ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    COMBOBOX        GSS_SERVICE_NAME,70,41,245,60,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    RTEXT           "GSS Service Name:",IDC_STATIC_SERVICE,1,44,64,8
+    COMBOBOX        GSS_CCACHE_NAME,70,69,245,60,CBS_DROPDOWN | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    RTEXT           "CCache Name:",IDC_STATIC_CCACHE,16,71,49,8
+    COMBOBOX        GSS_MECHANISM,70,110,245,60,CBS_DROPDOWN | 
+                    CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Mechanism (OID):",IDC_STATIC_MECH,0,115,65,8
+    RTEXT           "Test Message:",IDC_STATIC_MSG,0,55,65,8
+    COMBOBOX        GSS_MESSAGE,70,55,245,60,CBS_DROPDOWN | CBS_AUTOHSCROLL | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "The following items are optional and should only be altered by those who understand their implications.",
+                    IDC_STATIC_OPTIONS,10,85,305,20
+    CONTROL         "Verbose Output",GSS_VERBOSE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,72,138,65,10
+    CONTROL         "Delegation",GSS_DELEGATION,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,72,150,50,10
+    CONTROL         "Version 1",GSS_VERSION_ONE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,150,138,45,10
+    CONTROL         "No Auth",GSS_NO_AUTH,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,72,162,42,10
+    CONTROL         "No Wrap",GSS_NO_WRAP,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,132,162,45,10
+    CONTROL         "No Encrypt",GSS_NO_ENCRYPT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,198,162,51,10
+    CONTROL         "No Mic",GSS_NO_MIC,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,270,162,39,10
+    CONTROL         "Slider1",GSS_CALL_COUNT,"msctls_trackbar32",TBS_BOTH | 
+                    WS_TABSTOP,66,174,100,15
+    CONTROL         "Slider2",GSS_MESSAGE_COUNT,"msctls_trackbar32",TBS_BOTH | 
+                    WS_TABSTOP,204,174,100,15
+    CTEXT           "Call Count",IDC_STATIC_CCOUNT,72,192,90,8
+    CTEXT           "Message Count",IDC_STATIC_MSG_COUNT,210,192,90,8
+    GROUPBOX        "Output",IDC_GROUP_OUTPUT,0,210,325,75
+    GROUPBOX        "Configuration Options",IDC_GROUP_OPTIONS,0,0,325,205
+    EDITTEXT        GSS_OUTPUT,0,220,320,60,ES_MULTILINE | ES_AUTOVSCROLL | 
+                    ES_AUTOHSCROLL | ES_READONLY | WS_VSCROLL | WS_HSCROLL
+    CONTROL         "Mutual",GSS_MUTUAL,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,132,150,37,10
+    CONTROL         "Replay",GSS_REPLAY,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,198,150,38,10
+    CONTROL         "Sequence",GSS_SEQUENCE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,270,150,49,10
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resrc1.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""windows.h""\r\n"
+    "#undef APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""resource.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
+
+#include <winver.h>
+#include "..\version.rc"
+
+TestTrackerMOTD TEXT ver_serv.txt

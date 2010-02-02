@@ -1,0 +1,18 @@
+thisconfigdir=.
+myfulldir=kadmin/kdbkeys
+mydir=.
+BUILDTOP=$(REL)..$(S)..
+
+PROG = kdbkeys
+OBJS = kdbkeys.o
+
+all:: $(PROG)
+
+$(PROG): $(OBJS) $(DEPLIBS)
+	$(CC) $(LDFLAGS) $(LDARGS) -o $(PROG) $(OBJS) $(LIBS)
+
+install::
+	$(INSTALL_PROGRAM) $(PROG) ${DESTDIR}$(ADMIN_BINDIR)/$(PROG)
+
+clean::
+	$(RM) $(PROG) $(OBJS)

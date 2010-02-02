@@ -1,0 +1,48 @@
+thisconfigdir=./../..
+myfulldir=util/send-pr
+mydir=util/send-pr
+BUILDTOP=$(REL)..$(S)..
+#
+# Makefile for building a standalone send-pr.
+#
+RELEASE=@KRB5_VERSION@
+SUBMITTER=net
+sendprname = krb5-send-pr
+EMACS=emacs
+
+infodir = $(prefix)/info
+lispdir = $(prefix)/lib/emacs/site-lisp
+mandir  = $(KRB5MANROOT)
+man1dir = $(mandir)/man1
+datadir = @datadir@
+
+all:: send-pr  install-sid
+
+send-pr: send-pr.sh
+	sed -e 's,@DATADIR@,$(datadir),g' \
+	    -e 's,@SUBMITTER@,$(SUBMITTER),g' \
+	    -e 's/@DEFAULT_RELEASE@/$(RELEASE)/g' $(srcdir)/send-pr.sh > send-pr
+
+
+
+install-sid: install-sid.sh
+	sed -e 's,@ADMIN_BINDIR@,$(ADMIN_BINDIR),g' $(srcdir)/install-sid.sh > install-sid
+
+install:: all
+	if [ -d $(DESTDIR)$(prefix) ]; then true ; else mkdir $(DESTDIR)$(prefix) ; fi
+	if [ -d $(DESTDIR)$(ADMIN_BINDIR) ]; then true ; else mkdir $(DESTDIR)$(ADMIN_BINDIR) ; fi
+	cp send-pr $(DESTDIR)$(ADMIN_BINDIR)/$(sendprname)
+	chmod 755 $(DESTDIR)$(ADMIN_BINDIR)/$(sendprname)
+	if [ -d $(DESTDIR)$(datadir) ] ; then true ; else mkdir $(DESTDIR)$(datadir) ; fi
+	if [ -d $(DESTDIR)$(datadir)/gnats ] ; then true ; else mkdir $(DESTDIR)$(datadir)/gnats ; fi
+	cp $(srcdir)/categories $(DESTDIR)$(datadir)/gnats/mit
+	chmod 644 $(DESTDIR)$(datadir)/gnats/mit
+	-parent=`echo $(DESTDIR)$(man1dir)|sed -e 's@/[^/]*$$@@'`; \
+	if [ -d $$parent ] ; then true ; else mkdir $$parent ; fi
+	if [ -d $(DESTDIR)$(man1dir) ] ; then true ; else mkdir $(DESTDIR)$(man1dir) ; fi
+	sed -e 's/send-pr/$(sendprname)/g' $(srcdir)/send-pr.1 > $(DESTDIR)$(man1dir)/$(sendprname).1
+	chmod 644 $(DESTDIR)$(man1dir)/$(sendprname).1
+
+clean::
+	rm -f install-sid send-pr send-pr.el*
+

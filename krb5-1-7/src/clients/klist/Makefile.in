@@ -1,0 +1,42 @@
+thisconfigdir=../..
+myfulldir=clients/klist
+mydir=clients/klist
+BUILDTOP=$(REL)..$(S)..
+DEFS=
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+SRCS = klist.c
+
+##WIN32##VERSIONRC = $(BUILDTOP)\windows\version.rc
+##WIN32##RCFLAGS=$(CPPFLAGS) -I$(SRCTOP) -D_WIN32 -DRES_ONLY
+
+##WIN32##KLIST=$(OUTPRE)klist.exe
+
+##WIN32##EXERES=$(KLIST:.exe=.res)
+
+##WIN32##$(EXERES): $(VERSIONRC)
+##WIN32##        $(RC) $(RCFLAGS) -DKLIST_APP -fo $@ -r $**
+
+all-unix:: klist
+##WIN32##all-windows:: $(KLIST)
+
+klist: klist.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ klist.o $(KRB5_BASE_LIBS)
+
+##WIN32##$(KLIST): $(OUTPRE)klist.obj $(BUILDTOP)\util\windows\$(OUTPRE)getopt.lib $(SLIB) $(KLIB) $(CLIB) $(EXERES)
+##WIN32##	link $(EXE_LINKOPTS) -out:$@ $** ws2_32.lib $(SCLIB)
+##WIN32##	$(_VC_MANIFEST_EMBED_EXE)
+
+clean-unix::
+	$(RM) klist.o klist
+
+install-unix::
+	for f in klist; do \
+	  $(INSTALL_PROGRAM) $$f \
+		$(DESTDIR)$(CLIENT_BINDIR)/`echo $$f|sed '$(transform)'`; \
+	  $(INSTALL_DATA) $(srcdir)/$$f.M \
+		$(DESTDIR)$(CLIENT_MANDIR)/`echo $$f|sed '$(transform)'`.1; \
+	done
+

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>edu.mit.Kerberos.KerberosAgent</string>
+	<key>Program</key>
+	<string>/System/Library/CoreServices/KerberosAgent.app/Contents/MacOS/KerberosAgent</string>
+	<key>MachServices</key>
+	<dict>
+		<key>edu.mit.Kerberos.KerberosAgent.ipcLookup</key>
+		<dict>
+			<key>HideUntilCheckIn</key>
+			<true/>
+			<key>ResetAtClose</key>
+			<true/>
+		</dict>
+		<key>edu.mit.Kerberos.KerberosAgent.ipcService</key>
+		<true/>
+	</dict>
+	<key>EnableTransactions</key>
+	<true/>
+	<key>ThrottleInterval</key>
+	<integer>1</integer>
+	<key>OnDemand</key>
+	<true/>
+</dict>
+</plist>
