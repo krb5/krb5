@@ -1,5 +1,0 @@
-thisconfigdir=.
-myfulldir=appl/telnet
-mydir=.
-BUILDTOP=$(REL)..$(S)..
-SUBDIRS=libtelnet telnet telnetd
