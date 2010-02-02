@@ -55,4 +55,4 @@
 #define KRB5_PATCHLEVEL 1
 /* #undef KRB5_RELTAIL */
 /* #undef KRB5_RELDATE */
-#define KRB5_RELTAG "branches/krb5-1-7"
+#define KRB5_RELTAG "tags/krb5-1-7-1-final"
