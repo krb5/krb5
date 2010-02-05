@@ -45,6 +45,8 @@ gssspi_set_cred_option(OM_uint32 *minor_status,
     gss_mechanism	mech;
     int			i;
     OM_uint32		status;
+    OM_uint32		mech_status;
+    OM_uint32		mech_minor_status;
 
     if (minor_status == NULL)
 	return GSS_S_CALL_INACCESSIBLE_WRITE;
@@ -66,14 +68,20 @@ gssspi_set_cred_option(OM_uint32 *minor_status,
 	}
 
 	if (mech->gssspi_set_cred_option == NULL) {
-	    status = GSS_S_UNAVAILABLE;
 	    continue;
 	}
 
-	status = (mech->gssspi_set_cred_option)(minor_status,
+	mech_status = (mech->gssspi_set_cred_option)(&mech_minor_status,
 						union_cred->cred_array[i],
 						desired_object,
 						value);
+        if (mech_status == GSS_S_UNAVAILABLE) {
+            continue;
+        }
+        else {
+            status = mech_status;
+            *minor_status = mech_minor_status;
+        }
 	if (status != GSS_S_COMPLETE) {
 	    map_error(minor_status, mech);
 	    break;
