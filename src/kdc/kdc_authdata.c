@@ -897,10 +897,6 @@ verify_ad_signedpath_checksum(krb5_context context,
                                   valid);
 
     krb5_free_data(context, data);
-
-    if (code == 0 && *valid == FALSE)
-        code = KRB5KRB_AP_ERR_MODIFIED;
-
     return code;
 }
 
@@ -952,8 +948,10 @@ verify_ad_signedpath(krb5_context context,
     if (code != 0)
         goto cleanup;
 
-    *pdelegated = sp->delegated;
-    sp->delegated = NULL;
+    if (*path_is_signed) {
+        *pdelegated = sp->delegated;
+        sp->delegated = NULL;
+    }
 
 cleanup:
     krb5_free_ad_signedpath(context, sp);
@@ -1179,7 +1177,9 @@ handle_signedpath_authdata (krb5_context context,
         }
     }
 
-    if (!isflagset(flags, KRB5_KDB_FLAG_CROSS_REALM) &&
+    /* No point in including signedpath authdata for a cross-realm TGT, since
+     * it will be presented to a different KDC. */
+    if (!is_cross_tgs_principal(server->princ) &&
         !only_pac_p(context, enc_tkt_reply->authorization_data)) {
         code = make_ad_signedpath(context,
                                   for_user_princ,
