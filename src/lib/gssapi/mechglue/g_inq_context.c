@@ -141,6 +141,7 @@ gss_inquire_context(
     }
 
     if (targ_name) {
+        if (localTargName) {
 	    status = gssint_convert_name_to_union_name(minor_status, mech,
 						      localTargName, targ_name);
 
@@ -150,6 +151,10 @@ gss_inquire_context(
 
 		return (status);
 	    }
+        }
+        else {
+            *targ_name = GSS_C_NO_NAME;
+        }
     }
 
     /* spec says mech type must point to static storage */
