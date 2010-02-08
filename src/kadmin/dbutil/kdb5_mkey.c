@@ -866,7 +866,7 @@ update_princ_encryption_1(void *cb, krb5_db_entry *ent)
         goto skip;
     }
     p->re_match_count++;
-    retval = krb5_dbe_lookup_mkvno(util_context, ent, &old_mkvno);
+    retval = krb5_dbe_get_mkvno(util_context, ent, master_keylist, &old_mkvno);
     if (retval) {
         com_err(progname, retval,
                 "determining master key used for principal '%s'",
@@ -1137,7 +1137,7 @@ find_mkvnos_in_use(krb5_pointer   ptr,
 
     args = (struct purge_args *) ptr;
 
-    retval = krb5_dbe_lookup_mkvno(args->kcontext, entry, &mkvno);
+    retval = krb5_dbe_get_mkvno(args->kcontext, entry, master_keylist, &mkvno);
     if (retval)
         return (retval);
 
@@ -1191,6 +1191,12 @@ kdb5_purge_mkeys(int argc, char *argv[])
             usage();
             return;
         }
+    }
+
+    if (master_keylist == NULL) {
+        com_err(progname, 0, "master keylist not initialized");
+        exit_status++;
+        return;
     }
 
     /* assemble & parse the master key name */
