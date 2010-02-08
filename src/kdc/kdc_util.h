@@ -32,7 +32,6 @@
 #define __KRB5_KDC_UTIL__
 
 #include "kdb.h"
-#include "kdb_ext.h"
 
 typedef struct _krb5_fulladdr {
     krb5_address *      address;
