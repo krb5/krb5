@@ -114,8 +114,10 @@ rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
 
         while ((code = krb5_kt_next_entry(context, keytab,
                                           &ktent, &cursor)) == 0) {
-            if (ktent.key.enctype != req->ticket->enc_part.enctype)
+            if (ktent.key.enctype != req->ticket->enc_part.enctype) {
+                (void) krb5_free_keytab_entry_contents(context, &ktent);
                 continue;
+            }
 
             retval = krb5_decrypt_tkt_part(context, &ktent.key,
                                            req->ticket);
