@@ -32,6 +32,10 @@
 #include "gssapiP_krb5.h"
 #include <stdarg.h>
 
+#ifndef MIN             /* Usually found in <sys/param.h>. */
+#define MIN(_a,_b)  ((_a)<(_b)?(_a):(_b))
+#endif
+
 OM_uint32
 krb5_gss_pseudo_random(OM_uint32 *minor_status,
                        gss_ctx_id_t context,
