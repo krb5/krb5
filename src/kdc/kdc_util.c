@@ -192,6 +192,17 @@ krb5_is_tgs_principal(krb5_const_principal principal)
     return FALSE;
 }
 
+/* Returns TRUE if principal is the name of a cross-realm TGS. */
+krb5_boolean
+is_cross_tgs_principal(krb5_const_principal principal)
+{
+    return (krb5_princ_size(kdc_context, principal) >= 2 &&
+            data_eq_string(*krb5_princ_component(kdc_context, principal, 0),
+                           KRB5_TGS_NAME) &&
+            !data_eq(*krb5_princ_component(kdc_context, principal, 1),
+                     *krb5_princ_realm(kcd_context, principal)));
+}
+
 /*
  * given authentication data (provides seed for checksum), verify checksum
  * for source data.

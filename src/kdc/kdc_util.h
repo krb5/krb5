@@ -42,6 +42,7 @@ krb5_error_code check_hot_list (krb5_ticket *);
 krb5_boolean realm_compare (krb5_const_principal, krb5_const_principal);
 krb5_boolean is_local_principal(krb5_const_principal princ1);
 krb5_boolean krb5_is_tgs_principal (krb5_const_principal);
+krb5_boolean is_cross_tgs_principal(krb5_const_principal);
 krb5_error_code
 add_to_transited (krb5_data *,
                   krb5_data *,
