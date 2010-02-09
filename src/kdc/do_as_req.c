@@ -623,7 +623,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         goto errout;
     }
     errcode = return_enc_padata(kdc_context, req_pkt, request,
-                                as_encrypting_key, &server, &reply_encpart);
+                                as_encrypting_key, &server, &reply_encpart, FALSE);
     if (errcode) {
         status = "KDC_RETURN_ENC_PADATA";
         goto errout;
