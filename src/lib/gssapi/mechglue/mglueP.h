@@ -583,6 +583,12 @@ typedef struct gss_config {
             gss_buffer_t                /* prf_out */
         /* */);
 
+	OM_uint32	(*gss_set_neg_mechs)
+	(
+	    OM_uint32 *,		/* minor_status */
+	    gss_cred_id_t,		/* cred_handle */
+	    const gss_OID_set		/* mech_set */
+	/* */);
 } *gss_mechanism;
 
 /* This structure MUST NOT be used by any code outside libgss */

@@ -805,6 +805,12 @@ gss_store_cred(
     gss_OID_set *,      /* elements_stored */
     gss_cred_usage_t *);/* cred_usage_stored */
 
+OM_uint32 KRB5_CALLCONV
+gss_set_neg_mechs(
+    OM_uint32 *,        /* minor_status */
+    gss_cred_id_t,      /* cred_handle */
+    const gss_OID_set); /* mech_set */
+
 #if TARGET_OS_MAC
 #    pragma pack(pop)
 #endif
