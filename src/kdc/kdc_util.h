@@ -259,7 +259,7 @@ return_enc_padata(krb5_context context,
                   krb5_keyblock *reply_key,
                   krb5_db_entry *server,
                   krb5_enc_kdc_rep_part *reply_encpart,
-krb5_boolean is_referral);
+                  krb5_boolean is_referral);
 
 krb5_error_code
 sign_db_authdata (krb5_context context,

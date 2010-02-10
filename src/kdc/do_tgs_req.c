@@ -950,12 +950,13 @@ tgt_again:
     }
     errcode = return_enc_padata(kdc_context, pkt, request,
                                 reply_key, &server, &reply_encpart,
-                                is_referral && isflagset(s_flags, KRB5_KDB_FLAG_CANONICALIZE));
+                                is_referral &&
+                                isflagset(s_flags,
+                                          KRB5_KDB_FLAG_CANONICALIZE));
     if (errcode) {
         status = "KDC_RETURN_ENC_PADATA";
         goto cleanup;
     }
-
 
     errcode = krb5_encode_kdc_rep(kdc_context, KRB5_TGS_REP, &reply_encpart,
                                   subkey ? 1 : 0,

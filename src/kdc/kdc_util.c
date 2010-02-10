@@ -2697,9 +2697,9 @@ kdc_handle_protected_negotiation(krb5_data *req_pkt, krb5_kdc_req *request,
     pa.contents = (krb5_octet *) out->data;
     pa.length = out->length;
     retval = add_pa_data_element(kdc_context, &pa, out_enc_padata, FALSE);
-    out->data = NULL;
     if (retval)
         goto cleanup;
+    out->data = NULL;
     pa.magic = KV5M_PA_DATA;
     pa.pa_type = KRB5_PADATA_FX_FAST;
     pa.length = 0;

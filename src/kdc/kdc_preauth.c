@@ -3086,9 +3086,10 @@ include_pac_p(krb5_context context, krb5_kdc_req *request)
 
 static krb5_error_code
 return_referral_enc_padata( krb5_context context,
-                            krb5_enc_kdc_rep_part *reply, krb5_db_entry *server)
+                            krb5_enc_kdc_rep_part *reply,
+                            krb5_db_entry *server)
 {
-        krb5_error_code             code;
+    krb5_error_code             code;
     krb5_tl_data                tl_data;
     krb5_pa_data                pa_data;
 
@@ -3101,9 +3102,8 @@ return_referral_enc_padata( krb5_context context,
     pa_data.pa_type = KRB5_PADATA_SVR_REFERRAL_INFO;
     pa_data.length = tl_data.tl_data_length;
     pa_data.contents = tl_data.tl_data_contents;
-    return add_pa_data_element(context, &pa_data, &reply->enc_padata, FALSE);
+    return add_pa_data_element(context, &pa_data, &reply->enc_padata, TRUE);
 }
-
 
 krb5_error_code
 return_enc_padata(krb5_context context, krb5_data *req_pkt,
