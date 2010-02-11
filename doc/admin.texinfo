@@ -2534,6 +2534,7 @@ passwords kept in the database.
 * Retrieving the List of Policies::  
 * Adding or Modifying Policies::  
 * Deleting Policies::           
+* Updating the History Key::
 @end menu
 
 @node Retrieving Policies, Retrieving the List of Policies, Policies, Policies
@@ -2653,7 +2654,7 @@ Sets the number of past keys kept for a principal to @i{number}. This option is 
 @noindent
 Note: The policies are created under realm container in the LDAP database.
 
-@node Deleting Policies,  , Adding or Modifying Policies, Policies
+@node Deleting Policies, Updating the History Key, Adding or Modifying Policies, Policies
 @subsection Deleting Policies
 
 To delete a policy, use the @code{kadmin} @code{delete_policy} command,
@@ -2679,6 +2680,31 @@ For example:
 Note that you must cancel the policy from all principals before deleting
 it.  The @code{delete_policy} command will fail if it is in use by any
 principals.
+
+@node Updating the History Key,  , Deleting Policies, Policies
+
+If a policy specifies a number of old keys kept of two or more, the
+stored old keys are encrypted in a history key, which is found in the
+key data of the kadmin/history principal.
+
+Currently there is no support for proper rollover of the history key,
+but you can change the history key (for example, to use a better
+encryption type) at the cost of invalidating currently stored old keys.
+To change the history key, run:
+
+@smallexample
+@group
+@b{kadmin:} change_password -randkey kadmin/history
+@end group
+@end smallexample
+
+This command will fail if you specify the @b{-keepold} flag.  Only one
+new history key will be created, even if you specify multiple key/salt
+combinations.
+
+In the future, we plan to migrate towards encrypting old keys in the
+master key instead of the history key, and implementing proper rollover
+support for stored old keys.
 
 @node Global Operations on the Kerberos Database, Global Operations on the Kerberos LDAP Database, Policies, Administrating the Kerberos Database
 @section Global Operations on the Kerberos Database

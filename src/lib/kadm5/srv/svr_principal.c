@@ -36,10 +36,7 @@ extern  krb5_principal      hist_princ;
 extern  krb5_keyblock       master_keyblock;
 extern  krb5_keylist_node  *master_keylist;
 extern  krb5_actkvno_node  *active_mkey_list;
-extern  krb5_keyblock       hist_key;
 extern  krb5_db_entry       master_db;
-extern  krb5_db_entry       hist_db;
-extern  krb5_kvno           hist_kvno;
 
 static int decrypt_key_data(krb5_context context, krb5_keyblock *mkey,
                             int n_key_data, krb5_key_data *key_data,
@@ -428,7 +425,7 @@ kadm5_create_principal_3(void *server_handle,
        I'm going to keep it, and make all the admin stuff occupy a
        single tl_data record, */
 
-    adb.admin_history_kvno = hist_kvno;
+    adb.admin_history_kvno = INITIAL_HIST_KVNO;
     if ((mask & KADM5_POLICY)) {
         adb.aux_attributes = KADM5_POLICY;
 
@@ -1020,6 +1017,8 @@ check_pw_reuse(krb5_context context,
  * Arguments:
  *
  *      context         (r) krb5_context to use
+ *      mkey            (r) master keyblock to decrypt key data with
+ *      hist_key        (r) history keyblock to encrypt key data with
  *      n_key_data      (r) number of elements in key_data
  *      key_data        (r) keys to add to the history entry
  *      hist            (w) history entry to fill in
@@ -1032,7 +1031,8 @@ check_pw_reuse(krb5_context context,
  * set to n_key_data.
  */
 static
-int create_history_entry(krb5_context context, krb5_keyblock *mkey, int n_key_data,
+int create_history_entry(krb5_context context, krb5_keyblock *mkey,
+                         krb5_keyblock *hist_key, int n_key_data,
                          krb5_key_data *key_data, osa_pw_hist_ent *hist)
 {
     int i, ret;
@@ -1052,7 +1052,7 @@ int create_history_entry(krb5_context context, krb5_keyblock *mkey, int n_key_da
         if (ret)
             return ret;
 
-        ret = krb5_dbekd_encrypt_key_data(context, &hist_key,
+        ret = krb5_dbekd_encrypt_key_data(context, hist_key,
                                           &key, &salt,
                                           key_data[i].key_data_kvno,
                                           &hist->key_data[i]);
@@ -1085,6 +1085,7 @@ void free_history_entry(krb5_context context, osa_pw_hist_ent *hist)
  * Arguments:
  *
  *      context         (r) krb5_context to use
+ *      hist_kvno       (r) kvno of current history key
  *      adb             (r/w) admin principal entry to add keys to
  *      pol             (r) adb's policy
  *      pw              (r) keys for the password to add to adb's key history
@@ -1104,6 +1105,7 @@ void free_history_entry(krb5_context context, osa_pw_hist_ent *hist)
  * adb->old_key_len).
  */
 static kadm5_ret_t add_to_history(krb5_context context,
+                                  krb5_kvno hist_kvno,
                                   osa_princ_ent_t adb,
                                   kadm5_policy_ent_t pol,
                                   osa_pw_hist_ent *pw)
@@ -1116,6 +1118,16 @@ static kadm5_ret_t add_to_history(krb5_context context,
     /* A history of 1 means just check the current password */
     if (nhist <= 1)
         return 0;
+
+    if (adb->admin_history_kvno != hist_kvno) {
+        /* The history key has changed since the last password change, so we
+         * have to reset the password history. */
+        free(adb->old_keys);
+        adb->old_keys = NULL;
+        adb->old_key_len = 0;
+        adb->old_key_next = 0;
+        adb->admin_history_kvno = hist_kvno;
+    }
 
     nkeys = adb->old_key_len;
     knext = adb->old_key_next;
@@ -1335,8 +1347,8 @@ kadm5_chpass_principal_3(void *server_handle,
     int                         have_pol = 0;
     kadm5_server_handle_t       handle = server_handle;
     osa_pw_hist_ent             hist;
-    krb5_keyblock               *act_mkey;
-    krb5_kvno                   act_kvno;
+    krb5_keyblock               *act_mkey, hist_keyblock;
+    krb5_kvno                   act_kvno, hist_kvno;
 
     CHECK_HANDLE(server_handle);
 
@@ -1344,6 +1356,7 @@ kadm5_chpass_principal_3(void *server_handle,
 
     hist_added = 0;
     memset(&hist, 0, sizeof(hist));
+    memset(&hist_keyblock, 0, sizeof(hist_keyblock));
 
     if (principal == NULL || password == NULL)
         return EINVAL;
@@ -1415,32 +1428,36 @@ kadm5_chpass_principal_3(void *server_handle,
         }
 #endif
 
+        ret = kdb_get_hist_key(handle, &hist_keyblock, &hist_kvno);
+        if (ret)
+            goto done;
+
         ret = create_history_entry(handle->context,
-                                   act_mkey,
+                                   act_mkey, &hist_keyblock,
                                    kdb_save.n_key_data,
                                    kdb_save.key_data, &hist);
         if (ret)
             goto done;
 
-        ret = check_pw_reuse(handle->context, act_mkey, &hist_key,
+        ret = check_pw_reuse(handle->context, act_mkey, &hist_keyblock,
                              kdb.n_key_data, kdb.key_data,
                              1, &hist);
         if (ret)
             goto done;
 
         if (pol.pw_history_num > 1) {
-            if (adb.admin_history_kvno != hist_kvno) {
-                ret = KADM5_BAD_HIST_KEY;
-                goto done;
+            /* If hist_kvno has changed since the last password change, we
+             * can't check the history. */
+            if (adb.admin_history_kvno == hist_kvno) {
+                ret = check_pw_reuse(handle->context, act_mkey, &hist_keyblock,
+                                     kdb.n_key_data, kdb.key_data,
+                                     adb.old_key_len, adb.old_keys);
+                if (ret)
+                    goto done;
             }
 
-            ret = check_pw_reuse(handle->context, act_mkey, &hist_key,
-                                 kdb.n_key_data, kdb.key_data,
-                                 adb.old_key_len, adb.old_keys);
-            if (ret)
-                goto done;
-
-            ret = add_to_history(handle->context, &adb, &pol, &hist);
+            ret = add_to_history(handle->context, hist_kvno, &adb, &pol,
+                                 &hist);
             if (ret)
                 goto done;
             hist_added = 1;
@@ -1505,6 +1522,7 @@ done:
     kdb_free_entry(handle, &kdb, &adb);
     kdb_free_entry(handle, &kdb_save, NULL);
     krb5_db_free_principal(handle->context, &kdb, 1);
+    krb5_free_keyblock_contents(handle->context, &hist_keyblock);
 
     if (have_pol && (ret2 = kadm5_free_policy_ent(handle->lhandle, &pol))
         && !ret)
@@ -1549,10 +1567,14 @@ kadm5_randkey_principal_3(void *server_handle,
 
     if (principal == NULL)
         return EINVAL;
-    if (hist_princ && /* this will be NULL when initializing the databse */
-        ((krb5_principal_compare(handle->context,
-                                 principal, hist_princ)) == TRUE))
-        return KADM5_PROTECT_PRINCIPAL;
+    if (krb5_principal_compare(handle->context, principal, hist_princ)) {
+        /* If changing the history entry, the new entry must have exactly one
+         * key. */
+        if (keepold)
+            return KADM5_PROTECT_PRINCIPAL;
+        ks_tuple = n_ks_tuple ? ks_tuple : handle->params.keysalts,
+        n_ks_tuple = 1;
+    }
 
     if ((ret = kdb_get_entry(handle, principal, &kdb, &adb)))
         return(ret);
@@ -1601,18 +1623,6 @@ kadm5_randkey_principal_3(void *server_handle,
         }
 #endif
 
-        if(pol.pw_history_num > 1) {
-            if(adb.admin_history_kvno != hist_kvno) {
-                ret = KADM5_BAD_HIST_KEY;
-                goto done;
-            }
-
-            ret = check_pw_reuse(handle->context, act_mkey, &hist_key,
-                                 kdb.n_key_data, kdb.key_data,
-                                 adb.old_key_len, adb.old_keys);
-            if (ret)
-                goto done;
-        }
         if (pol.pw_max_life)
             kdb.pw_expiration = now + pol.pw_max_life;
         else
@@ -1774,23 +1784,6 @@ kadm5_setv4key_principal(void *server_handle,
            !(kdb.attributes & KRB5_KDB_REQUIRES_PWCHANGE)) {
             ret = KADM5_PASS_TOOSOON;
             goto done;
-        }
-#endif
-#if 0
-        /*
-         * Should we be checking/updating pw history here?
-         */
-        if(pol.pw_history_num > 1) {
-            if(adb.admin_history_kvno != hist_kvno) {
-                ret = KADM5_BAD_HIST_KEY;
-                goto done;
-            }
-
-            if (ret = check_pw_reuse(handle->context,
-                                     &hist_key,
-                                     kdb.n_key_data, kdb.key_data,
-                                     adb.old_key_len, adb.old_keys))
-                goto done;
         }
 #endif
 
@@ -2015,23 +2008,6 @@ kadm5_setkey_principal_3(void *server_handle,
            !(kdb.attributes & KRB5_KDB_REQUIRES_PWCHANGE)) {
             ret = KADM5_PASS_TOOSOON;
             goto done;
-        }
-#endif
-#if 0
-        /*
-         * Should we be checking/updating pw history here?
-         */
-        if (pol.pw_history_num > 1) {
-            if(adb.admin_history_kvno != hist_kvno) {
-                ret = KADM5_BAD_HIST_KEY;
-                goto done;
-            }
-
-            if (ret = check_pw_reuse(handle->context,
-                                     &hist_key,
-                                     kdb.n_key_data, kdb.key_data,
-                                     adb.old_key_len, adb.old_keys))
-                goto done;
         }
 #endif
 

@@ -9,9 +9,6 @@ adb_policy_close
 adb_policy_init
 destroy_dict
 find_word
-hist_db
-hist_key
-hist_kvno
 hist_princ
 init_dict
 kadm5_set_use_password_server
