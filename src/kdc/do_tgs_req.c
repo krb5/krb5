@@ -948,29 +948,14 @@ tgt_again:
         status  = "generating reply key";
         goto cleanup;
     }
-    if (is_referral && isflagset(s_flags, KRB5_KDB_FLAG_CANONICALIZE)) {
-        int idx = 0;
-
-        errcode = return_enc_padata(kdc_context, pkt, request,
-                                    reply_key, &server, &reply_encpart);
-        if (errcode) {
-            status = "KDC_RETURN_ENC_PADATA";
-            goto cleanup;
-        }
-        /* Not referral. */
-        reply_encpart.enc_padata = calloc(3, sizeof(krb5_pa_data *));
-        if (reply_encpart.enc_padata == NULL) {
-            errcode = ENOMEM;
-            status = "Allocating enc_padata";
-            goto cleanup;
-        }
-        errcode = kdc_handle_protected_negotiation(pkt, request, reply_key,
-                                                   reply_encpart.enc_padata,
-                                                   &idx);
-        if (errcode != 0) {
-            status = "protected negotiation";
-            goto cleanup;
-        }
+    errcode = return_enc_padata(kdc_context, pkt, request,
+                                reply_key, &server, &reply_encpart,
+                                is_referral &&
+                                isflagset(s_flags,
+                                          KRB5_KDB_FLAG_CANONICALIZE));
+    if (errcode) {
+        status = "KDC_RETURN_ENC_PADATA";
+        goto cleanup;
     }
 
     errcode = krb5_encode_kdc_rep(kdc_context, KRB5_TGS_REP, &reply_encpart,

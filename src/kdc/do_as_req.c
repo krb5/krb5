@@ -133,6 +133,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     server_keyblock.contents = NULL;
     client_keyblock.contents = NULL;
     reply.padata = 0;
+    reply_encpart.enc_padata = 0;
     memset(&reply, 0, sizeof(reply));
 
     session_key.contents = 0;
@@ -623,7 +624,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         goto errout;
     }
     errcode = return_enc_padata(kdc_context, req_pkt, request,
-                                as_encrypting_key, &server, &reply_encpart);
+                                as_encrypting_key, &server, &reply_encpart,
+                                FALSE);
     if (errcode) {
         status = "KDC_RETURN_ENC_PADATA";
         goto errout;
@@ -689,6 +691,8 @@ egress:
         krb5_free_keyblock_contents(kdc_context, &client_keyblock);
     if (reply.padata != NULL)
         krb5_free_pa_data(kdc_context, reply.padata);
+    if (reply_encpart.enc_padata)
+        krb5_free_pa_data(kdc_context, reply_encpart.enc_padata);
 
     if (cname != NULL)
         free(cname);
