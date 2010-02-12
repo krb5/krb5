@@ -54,6 +54,7 @@ SRCS = \
 	$(srcdir)/g_set_context_option.c \
 	$(srcdir)/g_set_cred_option.c \
 	$(srcdir)/g_set_name_attr.c \
+	$(srcdir)/g_set_neg_mechs.c \
 	$(srcdir)/g_sign.c \
 	$(srcdir)/g_store_cred.c \
 	$(srcdir)/g_unseal.c \
@@ -108,6 +109,7 @@ OBJS = \
 	$(OUTPRE)g_set_context_option.$(OBJEXT) \
 	$(OUTPRE)g_set_cred_option.$(OBJEXT) \
 	$(OUTPRE)g_set_name_attr.$(OBJEXT) \
+	$(OUTPRE)g_set_neg_mechs.$(OBJEXT) \
 	$(OUTPRE)g_sign.$(OBJEXT) \
 	$(OUTPRE)g_store_cred.$(OBJEXT) \
 	$(OUTPRE)g_unseal.$(OBJEXT) \
@@ -162,6 +164,7 @@ STLIBOBJS = \
 	g_set_context_option.o \
 	g_set_cred_option.o \
 	g_set_name_attr.o \
+	g_set_neg_mechs.o \
 	g_sign.o \
 	g_store_cred.o \
 	g_unseal.o \
