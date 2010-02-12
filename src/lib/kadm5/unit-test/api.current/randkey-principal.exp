@@ -279,9 +279,9 @@ proc test32 {} {
 	perror "$test: unexpected failure in init"
 	return
     }
-    one_line_fail_test {
+    one_line_succeed_test {
 	kadm5_randkey_principal $server_handle kadmin/history keys num_keys
-    } "PROTECT"
+    }
     if { ! [cmd {kadm5_destroy $server_handle}]} {
 	perror "$test: unexpected failure in destroy"
 	return

@@ -24,6 +24,15 @@
 #include    <kadm5/admin.h>
 #include    "admin_internal.h"
 
+/*
+ * This is the history key version for a newly created DB.  We use this value
+ * for principals which have no password history yet to avoid having to look up
+ * the history key.  Values other than 2 will cause compatibility issues with
+ * pre-1.8 libkadm5 code; the older code will reject key changes when it sees
+ * an unexpected value of admin_history_kvno.
+ */
+#define INITIAL_HIST_KVNO 2
+
 typedef struct _kadm5_server_handle_t {
     krb5_ui_4       magic_number;
     krb5_ui_4       struct_version;
@@ -64,6 +73,9 @@ krb5_error_code     kdb_init_master(kadm5_server_handle_t handle,
                                     char *r, int from_keyboard);
 krb5_error_code     kdb_init_hist(kadm5_server_handle_t handle,
                                   char *r);
+krb5_error_code     kdb_get_hist_key(kadm5_server_handle_t handle,
+                                     krb5_keyblock *hist_keyblock,
+                                     krb5_kvno *hist_kvno);
 krb5_error_code     kdb_get_entry(kadm5_server_handle_t handle,
                                   krb5_principal principal, krb5_db_entry *kdb,
                                   osa_princ_ent_rec *adb);

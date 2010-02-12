@@ -27,9 +27,6 @@ krb5_actkvno_node   *active_mkey_list = NULL;
 krb5_db_entry       master_db;
 
 krb5_principal      hist_princ;
-krb5_keyblock       hist_key;
-krb5_db_entry       hist_db;
-krb5_kvno           hist_kvno;
 
 /* much of this code is stolen from the kdc.  there should be some
    library code to deal with this. */
@@ -116,28 +113,16 @@ done:
  *      handle          (r) kadm5 api server handle
  *      r               (r) realm of history principal to use, or NULL
  *
- * Effects: This function sets the value of the following global
- * variables:
- *
- *      hist_princ      krb5_principal holding the history principal
- *      hist_db         krb5_db_entry of the history principal
- *      hist_key        krb5_keyblock holding the history principal's key
- *      hist_encblock   krb5_encrypt_block holding the procssed hist_key
- *      hist_kvno       the version number of the history key
- *
- * If the history principal does not already exist, this function
- * attempts to create it with kadm5_create_principal.  WARNING!
- * If the history principal is deleted and this function is executed
- * (by kadmind, or kadmin.local, or anything else with permission),
- * the principal will be assigned a new random key and all existing
- * password history information will become useless.
+ * Effects: This function sets the value of the hist_princ global variable.  If
+ * the history principal does not already exist, this function attempts to
+ * create it with kadm5_create_principal.
  */
 krb5_error_code kdb_init_hist(kadm5_server_handle_t handle, char *r)
 {
     int     ret = 0;
     char    *realm, *hist_name;
     krb5_key_salt_tuple ks[1];
-    krb5_keyblock *tmp_mkey;
+    krb5_db_entry kdb;
 
     if (r == NULL)  {
         if ((ret = krb5_get_default_realm(handle->context, &realm)))
@@ -154,78 +139,90 @@ krb5_error_code kdb_init_hist(kadm5_server_handle_t handle, char *r)
     if ((ret = krb5_parse_name(handle->context, hist_name, &hist_princ)))
         goto done;
 
-    if ((ret = kdb_get_entry(handle, hist_princ, &hist_db, NULL))) {
+    if ((ret = kdb_get_entry(handle, hist_princ, &kdb, NULL))) {
         kadm5_principal_ent_rec ent;
 
         if (ret != KADM5_UNK_PRINC)
             goto done;
 
-        /* try to create the principal */
-
+        /* Create the history principal. */
         memset(&ent, 0, sizeof(ent));
-
         ent.principal = hist_princ;
         ent.max_life = KRB5_KDB_DISALLOW_ALL_TIX;
         ent.attributes = 0;
-
-        /* this uses hist_kvno.  So we set it to 2, which will be the
-           correct value once the principal is created and randomized.
-           Of course, it doesn't make sense to keep a history for the
-           history principal, anyway. */
-
-        hist_kvno = 2;
         ks[0].ks_enctype = handle->params.enctype;
         ks[0].ks_salttype = KRB5_KDB_SALTTYPE_NORMAL;
         ret = kadm5_create_principal_3(handle, &ent,
                                        (KADM5_PRINCIPAL | KADM5_MAX_LIFE |
                                         KADM5_ATTRIBUTES),
-                                       1, ks,
-                                       "to-be-random");
+                                       1, ks, NULL);
         if (ret)
             goto done;
 
-        /* this won't let us randomize the hist_princ.  So we cheat. */
-
-        hist_princ = NULL;
-
+        /* For better compatibility with pre-1.8 libkadm5 code, we want the
+         * initial history kvno to be 2, so re-randomize it. */
         ret = kadm5_randkey_principal_3(handle, ent.principal, 0, 1, ks,
                                         NULL, NULL);
-
-        hist_princ = ent.principal;
-
         if (ret)
             goto done;
-
-        /* now read the newly-created kdb record out of the
-           database. */
-
-        if ((ret = kdb_get_entry(handle, hist_princ, &hist_db, NULL)))
-            goto done;
-
+    } else {
+        kdb_free_entry(handle, &kdb, NULL);
     }
-
-    if (hist_db.n_key_data <= 0) {
-        krb5_set_error_message(handle->context, KRB5_KDB_NO_MATCHING_KEY,
-                               "History entry contains no key data");
-        return KRB5_KDB_NO_MATCHING_KEY;
-    }
-
-    ret = krb5_dbe_find_mkey(handle->context, master_keylist, &hist_db,
-                             &tmp_mkey);
-    if (ret)
-        goto done;
-
-    ret = krb5_dbekd_decrypt_key_data(handle->context, tmp_mkey,
-                                      &hist_db.key_data[0], &hist_key, NULL);
-    if (ret)
-        goto done;
-
-    hist_kvno = hist_db.key_data[0].key_data_kvno;
 
 done:
     free(hist_name);
     if (r == NULL)
         free(realm);
+    return ret;
+}
+
+/*
+ * Function: kdb_get_hist_key
+ *
+ * Purpose: Fetches the current history key
+ *
+ * Arguments:
+ *
+ *      handle          (r) kadm5 api server handle
+ *      hist_keyblock   (w) keyblock to fill in with history key
+ *      hist_kvno       (w) kvno to fill in with history kvno
+ *
+ * Effects: This function looks up the history principal and retrieves the
+ * current history key and version.
+ */
+krb5_error_code
+kdb_get_hist_key(kadm5_server_handle_t handle, krb5_keyblock *hist_keyblock,
+                 krb5_kvno *hist_kvno)
+{
+    krb5_error_code ret;
+    krb5_db_entry kdb;
+    krb5_keyblock *mkey;
+
+    ret = kdb_get_entry(handle, hist_princ, &kdb, NULL);
+    if (ret)
+        return ret;
+
+    if (kdb.n_key_data <= 0) {
+        ret = KRB5_KDB_NO_MATCHING_KEY;
+        krb5_set_error_message(handle->context, ret,
+                               "History entry contains no key data");
+        goto done;
+    }
+
+    ret = krb5_dbe_find_mkey(handle->context, master_keylist, &kdb,
+                             &mkey);
+    if (ret)
+        goto done;
+
+    ret = krb5_dbekd_decrypt_key_data(handle->context, mkey,
+                                      &kdb.key_data[0], hist_keyblock, NULL);
+    if (ret)
+        goto done;
+
+    *hist_kvno = kdb.key_data[0].key_data_kvno;
+
+done:
+    kdb_free_entry(handle, &kdb, NULL);
     return ret;
 }
 
@@ -289,7 +286,7 @@ kdb_get_entry(kadm5_server_handle_t handle,
                in), and when the entry is written, the admin
                data will get stored correctly. */
 
-            adb->admin_history_kvno = hist_kvno;
+            adb->admin_history_kvno = INITIAL_HIST_KVNO;
 
             return(ret);
         }
