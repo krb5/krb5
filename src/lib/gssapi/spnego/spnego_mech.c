@@ -2678,7 +2678,8 @@ get_negotiable_mechs(OM_uint32 *minor_status, spnego_gss_cred_id_t spcred,
 	gss_cred_id_t creds = GSS_C_NO_CREDENTIAL, *credptr;
 	gss_OID_set cred_mechs = GSS_C_NULL_OID_SET;
 	gss_OID_set intersect_mechs = GSS_C_NULL_OID_SET;
-	unsigned int i, j;
+	unsigned int i;
+	int present;
 
 	if (spcred == NULL) {
 		/*
@@ -2715,12 +2716,10 @@ get_negotiable_mechs(OM_uint32 *minor_status, spnego_gss_cred_id_t spcred,
 	}
 
 	for (i = 0; i < spcred->neg_mechs->count; i++) {
-		for (j = 0; j < cred_mechs->count; j++) {
-			if (!g_OID_equal(&spcred->neg_mechs->elements[i],
-					 &cred_mechs->elements[j]))
-				break;
-		}
-		if (j == cred_mechs->count)
+		gss_test_oid_set_member(&tmpmin,
+					&spcred->neg_mechs->elements[i],
+					cred_mechs, &present);
+		if (!present)
 			continue;
 		ret = gss_add_oid_set_member(minor_status,
 					     &spcred->neg_mechs->elements[i],
