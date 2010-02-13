@@ -841,21 +841,22 @@ init_ctx_call_init(OM_uint32 *minor_status,
 		if (ret_flags != NULL)
 			*ret_flags = sc->ctx_flags;
 		/*
-		 * If this isn't the first time we've been called,
-		 * we're done unless a MIC needs to be
-		 * generated/handled.
+		 * Microsoft SPNEGO implementations expect an even number of
+		 * token exchanges.  So if we're sending a final token, ask for
+		 * a zero-length token back from the server.  Also ask for a
+		 * token back if this is the first token or if a MIC exchange
+		 * is required.
 		 */
 		if (*send_token == CONT_TOKEN_SEND &&
 		    mechtok_out->length == 0 &&
 		    (!sc->mic_reqd ||
 		     !(sc->ctx_flags & GSS_C_INTEG_FLAG))) {
-
+			/* The exchange is complete. */
 			*negState = ACCEPT_COMPLETE;
 			ret = GSS_S_COMPLETE;
-			if (mechtok_out->length == 0) {
-				*send_token = NO_TOKEN_SEND;
-			}
+			*send_token = NO_TOKEN_SEND;
 		} else {
+			/* Ask for one more hop. */
 			*negState = ACCEPT_INCOMPLETE;
 			ret = GSS_S_CONTINUE_NEEDED;
 		}
@@ -1200,6 +1201,11 @@ errout:
 	return (major_status);
 }
 
+/*
+ * Support the Microsoft NegHints extension to SPNEGO for compatibility with
+ * some versions of Samba.  See:
+ *   http://msdn.microsoft.com/en-us/library/cc247039(PROT.10).aspx
+ */
 static OM_uint32
 acc_ctx_hints(OM_uint32 *minor_status,
 	      gss_ctx_id_t *ctx,
@@ -1214,40 +1220,30 @@ acc_ctx_hints(OM_uint32 *minor_status,
 
 	*mechListMIC = GSS_C_NO_BUFFER;
 	supported_mechSet = GSS_C_NO_OID_SET;
-	*return_token = ERROR_TOKEN_SEND;
+	*return_token = NO_TOKEN_SEND;
 	*negState = REJECT;
 	*minor_status = 0;
 
-	*ctx = GSS_C_NO_CONTEXT;
-	ret = GSS_S_DEFECTIVE_TOKEN;
+	/* A hint request must be the first token received. */
+	if (*ctx != GSS_C_NO_CONTEXT)
+	    return GSS_S_DEFECTIVE_TOKEN;
 
 	ret = get_negotiable_mechs(minor_status, spcred, GSS_C_ACCEPT,
 				   &supported_mechSet);
-	if (ret != GSS_S_COMPLETE) {
-		*return_token = NO_TOKEN_SEND;
+	if (ret != GSS_S_COMPLETE)
 		goto cleanup;
-	}
 
 	ret = make_NegHints(minor_status, spcred, mechListMIC);
-	if (ret != GSS_S_COMPLETE) {
-		*return_token = NO_TOKEN_SEND;
+	if (ret != GSS_S_COMPLETE)
 		goto cleanup;
-	}
 
-	/*
-	 * Select the best match between the list of mechs
-	 * that the initiator requested and the list that
-	 * the acceptor will support.
-	 */
 	sc = create_spnego_ctx();
 	if (sc == NULL) {
 		ret = GSS_S_FAILURE;
-		*return_token = NO_TOKEN_SEND;
 		goto cleanup;
 	}
 	if (put_mech_set(supported_mechSet, &sc->DER_mechTypes) < 0) {
 		ret = GSS_S_FAILURE;
-		*return_token = NO_TOKEN_SEND;
 		goto cleanup;
 	}
 	sc->internal_mech = GSS_C_NO_OID;
@@ -1284,8 +1280,6 @@ acc_ctx_new(OM_uint32 *minor_status,
 	gss_buffer_desc der_mechTypes;
 	gss_OID mech_wanted;
 	spnego_gss_ctx_id_t sc = NULL;
-
-	*ctx = GSS_C_NO_CONTEXT;
 
 	ret = GSS_S_DEFECTIVE_TOKEN;
 	der_mechTypes.length = 0;
