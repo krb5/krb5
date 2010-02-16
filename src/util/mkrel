@@ -200,6 +200,12 @@ fi
 echo "Generating tarfiles..."
 GZIP=-9; export GZIP
 if test $multitar = t; then
+	if test -d $reldir/src/lib/des425; then
+		des425=$reldir/src/lib/des425
+	fi
+	if test -f $reldir/NOTICE;
+		then notice=$reldir/NOTICE
+	fi
 	if test $dosrc = t; then
 		gtar --exclude $reldir/src/lib/crypto \
 			--exclude $reldir/src/lib/des425 \
@@ -208,10 +214,10 @@ if test $multitar = t; then
 
 		gtar zcf ${reldir}.crypto.tar.gz \
 			$reldir/src/lib/crypto \
-			$reldir/src/lib/des425
+			$des425
 	fi
 	if test $dodoc = t; then
-		gtar zcf ${reldir}.doc.tar.gz $reldir/doc $reldir/README
+		gtar zcf ${reldir}.doc.tar.gz $reldir/doc $reldir/README $notice
 	fi
 	ls -l ${reldir}.*.tar.gz
 fi
