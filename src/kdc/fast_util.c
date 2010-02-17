@@ -384,7 +384,7 @@ krb5_error_code kdc_fast_handle_error
     krb5_data *encoded_e_data = NULL;
 
     memset(outer_pa, 0, sizeof(outer_pa));
-    if (!state->armor_key)
+    if (!state || !state->armor_key)
 	return 0;
     fx_error = *err;
     fx_error.e_data.data = NULL;
