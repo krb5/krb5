@@ -59,8 +59,8 @@
 #define DES_BLOCK_SIZE  8
 
 static krb5_error_code
-validate(krb5_key key, const krb5_data *ivec,
-         const krb5_crypto_iov *data, size_t num_data)
+validate(krb5_key key, const krb5_data *ivec, const krb5_crypto_iov *data,
+         size_t num_data, krb5_boolean *empty)
 {
     size_t i, input_length;
 
@@ -77,6 +77,7 @@ validate(krb5_key key, const krb5_data *ivec,
     if (ivec && (ivec->length != 8))
         return(KRB5_BAD_MSIZE);
 
+    *empty = (input_length == 0);
     return 0;
 }
 
@@ -88,9 +89,10 @@ k5_des3_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
     unsigned char iblock[MIT_DES_BLOCK_LENGTH], oblock[MIT_DES_BLOCK_LENGTH];
     struct iov_block_state input_pos, output_pos;
     EVP_CIPHER_CTX ciph_ctx;
+    krb5_boolean empty;
 
-    ret = validate(key, ivec, data, num_data);
-    if (ret)
+    ret = validate(key, ivec, data, num_data, &empty);
+    if (ret != 0 || empty)
         return ret;
 
     IOV_BLOCK_STATE_INIT(&input_pos);
@@ -121,8 +123,8 @@ k5_des3_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
                                 oblock, MIT_DES_BLOCK_LENGTH, &output_pos);
     }
 
-    /*if (ivec != NULL && ivec->data)
-      memcpy(ivec->data, oblock, MIT_DES_BLOCK_LENGTH); */
+    if (ivec != NULL)
+        memcpy(ivec->data, oblock, MIT_DES_BLOCK_LENGTH);
 
     EVP_CIPHER_CTX_cleanup(&ciph_ctx);
 
@@ -142,9 +144,10 @@ k5_des3_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
     unsigned char iblock[MIT_DES_BLOCK_LENGTH], oblock[MIT_DES_BLOCK_LENGTH];
     struct iov_block_state input_pos, output_pos;
     EVP_CIPHER_CTX ciph_ctx;
+    krb5_boolean empty;
 
-    ret = validate(key, ivec, data, num_data);
-    if (ret)
+    ret = validate(key, ivec, data, num_data, &empty);
+    if (ret != 0 || empty)
         return ret;
 
     IOV_BLOCK_STATE_INIT(&input_pos);
@@ -175,8 +178,8 @@ k5_des3_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
                                 &output_pos);
     }
 
-    /*if (ivec != NULL && ivec->data)
-      memcpy(ivec->data, oblock, MIT_DES_BLOCK_LENGTH); */
+    if (ivec != NULL)
+        memcpy(ivec->data, iblock, MIT_DES_BLOCK_LENGTH);
 
     EVP_CIPHER_CTX_cleanup(&ciph_ctx);
 
