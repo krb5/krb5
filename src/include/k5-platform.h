@@ -526,8 +526,7 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 # ifdef HAVE_BSWAP_64
 #  define SWAP64                bswap_64
 # endif
-#endif
-#if TARGET_OS_MAC
+#elif TARGET_OS_MAC
 # include <architecture/byte_order.h>
 # if 0 /* This causes compiler warnings.  */
 #  define SWAP16                OSSwapInt16
@@ -540,6 +539,19 @@ static inline unsigned int k5_swap16 (unsigned int x) {
 # endif
 # define SWAP32                 OSSwapInt32
 # define SWAP64                 OSSwapInt64
+#elif defined(HAVE_SYS_BSWAP_H)
+/* XXX NetBSD/x86 5.0.1 defines bswap16 and bswap32 as inline
+   functions only, so autoconf doesn't pick up on their existence.
+   So, no feature macro test for them here.  The 64-bit version isn't
+   inline at all, though, for whatever reason.  */
+# include <sys/bswap.h>
+# define SWAP16                 bswap16
+# define SWAP32                 bswap32
+/* However, bswap64 causes lots of warnings about 'long long'
+   constants; probably only on 32-bit platforms.  */
+# if LONG_MAX > 0x7fffffffL
+#  define SWAP64                bswap64
+# endif
 #endif
 
 /* Note that on Windows at least this file can be included from C++
