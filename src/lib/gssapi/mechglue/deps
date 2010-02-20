@@ -358,6 +358,14 @@ g_set_name_attr.so g_set_name_attr.po $(OUTPRE)g_set_name_attr.$(OBJEXT): \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   ../generic/gssapi_err_generic.h g_set_name_attr.c mechglue.h \
   mglueP.h
+g_set_neg_mechs.so g_set_neg_mechs.po $(OUTPRE)g_set_neg_mechs.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_ext.h $(COM_ERR_DEPS) \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_ext.h \
+  $(srcdir)/../generic/gssapi_generic.h $(top_srcdir)/include/k5-buf.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
+  ../generic/gssapi_err_generic.h g_set_neg_mechs.c mechglue.h \
+  mglueP.h
 g_sign.so g_sign.po $(OUTPRE)g_sign.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_ext.h \
   $(COM_ERR_DEPS) $(srcdir)/../generic/gssapiP_generic.h \
