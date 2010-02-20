@@ -506,19 +506,22 @@ server_verify(krb5_context kcontext,
 #ifdef DEBUG
     fprintf(stderr, "cksum_body: doing authorization data!\n");
 #endif
-#if 1 /* USE_5000_AD */
-#define AD_ALLOC_SIZE 5000
-    /* ad_header consists of a sequence tag (0x30) and length (0x82 0x1384)
-     * followed by octet string tag (0x04) and length (0x82 0x1380) */
-    krb5_octet ad_header[] = {0x30, 0x82, 0x13, 0x84, 0x04, 0x82, 0x13, 0x80};
-#else
-#define AD_ALLOC_SIZE 100
-    /* ad_header consists of a sequence tag (0x30) and length (0x62)
-     * followed by octet string tag (0x04) and length (0x60) */
-    krb5_octet ad_header[] = {0x30, 0x62, 0x04, 0x60};
-#endif
     my_authz_data = malloc(2 * sizeof(*my_authz_data));
     if (my_authz_data != NULL) {
+#if 1 /* USE_5000_AD */
+#define AD_ALLOC_SIZE 5000
+        /* ad_header consists of a sequence tag (0x30) and length
+         * (0x82 0x1384) followed by octet string tag (0x04) and
+         * length (0x82 0x1380) */
+        krb5_octet ad_header[] = {0x30, 0x82, 0x13, 0x84, 0x04, 0x82, 0x13, 0x80};
+#else
+#define AD_ALLOC_SIZE 100
+        /* ad_header consists of a sequence tag (0x30) and length
+         * (0x62) followed by octet string tag (0x04) and length
+         * (0x60) */
+        krb5_octet ad_header[] = {0x30, 0x62, 0x04, 0x60};
+#endif
+
         my_authz_data[1] = NULL;
         my_authz_data[0] = malloc(sizeof(krb5_authdata));
         if (my_authz_data[0] == NULL) {
