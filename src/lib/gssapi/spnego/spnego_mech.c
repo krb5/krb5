@@ -448,8 +448,9 @@ create_spnego_ctx(void)
 }
 
 /*
- * Both initiator and acceptor call here to verify and/or create
- * mechListMIC, and to consistency-check the MIC state.
+ * Both initiator and acceptor call here to verify and/or create mechListMIC,
+ * and to consistency-check the MIC state.  handle_mic is invoked only if the
+ * negotiated mech has completed and supports MICs.
  */
 static OM_uint32
 handle_mic(OM_uint32 *minor_status, gss_buffer_t mic_in,
@@ -658,18 +659,20 @@ init_ctx_cont(OM_uint32 *minor_status, gss_ctx_id_t *ctx, gss_buffer_t buf,
 				    supportedMech, responseToken,
 				    mechListMIC,
 				    negState, tokflag);
-	} else if (!sc->mech_complete &&
-		   *responseToken == GSS_C_NO_BUFFER) {
-		/*
-		 * mech not finished and mech token missing
-		 */
+	} else if ((!sc->mech_complete && *responseToken == GSS_C_NO_BUFFER) ||
+		   (sc->mech_complete && *responseToken != GSS_C_NO_BUFFER)) {
+		/* Missing or spurious token from acceptor. */
 		ret = GSS_S_DEFECTIVE_TOKEN;
-	} else if (sc->mic_reqd &&
-		   (sc->ctx_flags & GSS_C_INTEG_FLAG)) {
+	} else if (!sc->mech_complete ||
+		   (sc->mic_reqd &&
+		    (sc->ctx_flags & GSS_C_INTEG_FLAG))) {
+		/* Not obviously done; we may decide we're done later in
+		 * init_ctx_call_init or handle_mic. */
 		*negState = ACCEPT_INCOMPLETE;
 		*tokflag = CONT_TOKEN_SEND;
 		ret = GSS_S_CONTINUE_NEEDED;
 	} else {
+		/* mech finished on last pass and no MIC required, so done. */
 		*negState = ACCEPT_COMPLETE;
 		*tokflag = NO_TOKEN_SEND;
 		ret = GSS_S_COMPLETE;
@@ -1529,10 +1532,13 @@ acc_ctx_call_acc(OM_uint32 *minor_status, spnego_gss_ctx_id_t sc,
 		if (ret_flags != NULL)
 			*ret_flags = sc->ctx_flags;
 
-		if (!sc->mic_reqd) {
+		if (!sc->mic_reqd ||
+		    !(sc->ctx_flags & GSS_C_INTEG_FLAG)) {
+			/* No MIC exchange required, so we're done. */
 			*negState = ACCEPT_COMPLETE;
 			ret = GSS_S_COMPLETE;
 		} else {
+			/* handle_mic will decide if we're done. */
 			ret = GSS_S_CONTINUE_NEEDED;
 		}
 	} else if (ret != GSS_S_CONTINUE_NEEDED) {
