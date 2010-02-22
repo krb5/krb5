@@ -2363,32 +2363,6 @@ proc xst { keytab name } {
     return 1
 }
 
-# Check the date.  The string will be the output of date on this
-# system, and we must make sure that it is in the same timezone as the
-# output of date run a second time.  The first date will be run on an
-# rlogin or some such connection to the local system.  This is to test
-# to make sure that the TZ environment variable is handled correctly.
-# Returns 1 on sucess, 0 on failure.
-
-proc check_date { date } {
-    catch "exec date" ndate
-    set atz ""
-    set ntz ""
-    scan $date "%s %s %d %d:%d:%d %s %d" adow amon adom ahr amn asc atz ayr
-    scan $ndate "%s %s %d %d:%d:%d %s %d" ndow nmon ndom nhr nmn nsc ntz nyr
-    if { $atz != $ntz } {
-	verbose -log "date check failed: $atz != $ntz"
-	return 0
-    }
-    return 1
-}
-
-proc touch { file } {
-    set f [open $file "a"]
-    puts $f ""
-    close $f
-}
-
 # helpful sometimes for debugging the test suite
 proc export_debug_envvars { } {
     global env
