@@ -474,25 +474,6 @@ foreach i {
     }
 }
 
-if ![info exists RLOGIN] {
-    set RLOGIN rlogin
-}
-
-if ![info exists RLOGIN_FLAGS] {
-    set RLOGIN_FLAGS "-x"
-}
-
-# We use a couple of variables to hold shell prompts which may be
-# overridden by the user.
-
-if ![info exists ROOT_PROMPT] {
-    set ROOT_PROMPT "(%|#|>|\\$) $"
-}
-
-if ![info exists SHELL_PROMPT] {
-    set SHELL_PROMPT "(%|#|>|\\$) $"
-}
-
 verbose "setting up onexit handler (old handler=[exit -onexit])"
 exit -onexit [concat {
     verbose "calling stop_kerberos_daemons (onexit handler)"
@@ -514,48 +495,6 @@ proc run_once { tag body } {
 	set run_once_tags($tag) 1
 	uplevel 1 $body
     }
-}
-
-# check_k5login
-
-# Most of the tests won't work if the user has a .k5login file, unless
-# the user's name appears with $REALMNAME in .k5login
-
-# This procedure returns 1 if the .k5login file appears to be OK, 0
-# otherwise.  This check is not foolproof.
-
-# Note that this previously checked for a username with no realm; this
-# works for krb4's kuserok() but not for krb5_kuserok(), due to some
-# implementation details.  *sigh*
-
-proc check_k5login { testname } {
-    global env
-    global REALMNAME
-
-    if {![file exists ~/.k5login]} {
-	if {$env(USER) == "root"} {
-	    return 0
-	} else {
-	    return 1
-	}
-    }
-
-    verbose "looking for $env(USER)@$REALMNAME in ~/.k5login" 2
-    set file [open ~/.k5login r]
-    while { [gets $file principal] != -1 } {
-	verbose " found $principal" 2
-	if { $principal == "$env(USER)@$REALMNAME" } {
-	    close $file
-	    return 1
-	}
-    }
-    close $file
-
-    note "$testname test requires that your name appear in your ~/.k5login"
-    note "file in the form $env(USER)@$REALMNAME"
-    unsupported "$testname"
-
-    return 0
 }
 
 # check_exit_status
@@ -666,8 +605,7 @@ proc envstack_pop { } {
 # Initialize the envstack
 #
 set envvars_tosave {
-    KRB5_CONFIG KRB5CCNAME KRBTKFILE KRB5RCACHEDIR
-    KERBEROS_SERVER KRB5_KDC_PROFILE
+    KRB5_CONFIG KRB5CCNAME KRBTKFILE KRB5RCACHEDIR KRB5_KDC_PROFILE
 }
 set krb5_init_vars [list ]
 # XXX -- fix me later!
@@ -1054,12 +992,6 @@ if [ info exists env(KRB5RCACHEDIR)] {
     catch "unset orig_krb5rcachedir"
 }
 
-if [ info exists env(KERBEROS_SERVER)] {
-    set orig_kerberos_server $env(KERBEROS_SERVER)
-} else {
-    catch "unset orig_kerberos_server"
-}
-
 # setup_kerberos_env
 # Set the environment variables needed to run Kerberos programs.
 
@@ -1086,10 +1018,6 @@ proc setup_kerberos_env { {type client} } {
     set env(KRB5RCACHEDIR) $tmppwd
     verbose "KRB5RCACHEDIR=$env(KRB5RCACHEDIR)"
 
-    # Tell the Kerberos tools how to contact the $REALMNAME server.
-    set env(KERBEROS_SERVER) "$REALMNAME:$hostname:[expr 1 + $portbase]"
-    verbose "KERBEROS_SERVER=$env(KERBEROS_SERVER)"
-
     # Get the run time environment variables... (including LD_LIBRARY_PATH)
     setup_runtime_env
 
@@ -1111,14 +1039,13 @@ proc setup_kerberos_env { {type client} } {
 	puts $envfile "KRB5_CONFIG=$env(KRB5_CONFIG)"
 	puts $envfile "KRB5CCNAME=$env(KRB5CCNAME)"
 	puts $envfile "KRB5RCACHEDIR=$env(KRB5RCACHEDIR)"
-	puts $envfile "KERBEROS_SERVER=$env(KERBEROS_SERVER)"
 	if [info exists env(KRB5_KDC_PROFILE)] {
 	    puts $envfile "KRB5_KDC_PROFILE=$env(KRB5_KDC_PROFILE)"
 	} else {
 	    puts $envfile "unset KRB5_KDC_PROFILE"
 	}
 	puts $envfile "export KRB5_CONFIG KRB5CCNAME KRB5RCACHEDIR"
-	puts $envfile "export KERBEROS_SERVER KRB5_KDC_PROFILE"
+	puts $envfile "export KRB5_KDC_PROFILE"
 	foreach i $krb5_init_vars {
 		regexp "^(\[^=\]*)=(.*)" $i foo evar evalue
 		puts $envfile "$evar=$env($evar)"
@@ -1131,7 +1058,6 @@ proc setup_kerberos_env { {type client} } {
 	puts $envfile "setenv KRB5_CONFIG $env(KRB5_CONFIG)"
 	puts $envfile "setenv KRB5CCNAME $env(KRB5CCNAME)"
 	puts $envfile "setenv KRB5RCACHEDIR $env(KRB5RCACHEDIR)"
-	puts $envfile "setenv KERBEROS_SERVER $env(KERBEROS_SERVER)"
 	if [info exists env(KRB5_KDC_PROFILE)] {
 	    puts $envfile "setenv KRB5_KDC_PROFILE $env(KRB5_KDC_PROFILE)"
 	} else {
@@ -1144,42 +1070,6 @@ proc setup_kerberos_env { {type client} } {
 	close $envfile
     }
     return 1
-}
-
-# Restore the Kerberos environment, in case setup_kerberos_env was
-# already called by an earlier test.
-
-proc restore_kerberos_env { } {
-    global env
-    global orig_krb5_config
-    global orig_krb5ccname
-    global orig_krb5rcachedir
-    global orig_kerberos_server
-
-    if [info exists orig_krb5_config] {
-    set env(KRB5_CONFIG) $orig_krb5_config
-    } else {
-    catch "unset env(KRB5_CONFIG)"
-    }
-
-    if [info exists orig_krb5ccname] {
-	set env(KRB5CCNAME) $orig_krb5ccname
-    } else {
-	catch "unset env(KRB5CCNAME)"
-    }
-
-    if [info exists orig_krb5rcachedir] {
-	set env(KRB5RCACHEDIR) $orig_krb5rcachedir
-    } else {
-	catch "unset env(KRB5RCACHEDIR)"
-    }
-
-    if [info exists orig_kerberos_server] {
-	set env(KERBEROS_SERVER) $orig_kerberos_server
-    } else {
-	catch "unset env(KERBEROS_SERVER)"
-    }
-
 }
 
 # setup_kerberos_db
@@ -2473,328 +2363,6 @@ proc xst { keytab name } {
     return 1
 }
 
-# v4_compatible_enctype
-# Returns 1 if v4 testing is enabled this passes encryption types are compatable with kerberos 4 work
-proc v4_compatible_enctype {} {
-    global supported_enctypes
-    global KRBIV
-
-    if ![info exists KRBIV] || ![info exists supported_enctypes] {
-	return 0;
-    }
-
-    if { $KRBIV && [string first des-cbc-crc:v4 "$supported_enctypes"] >= 0} {
-	return 1
-    } else {
-	return 0
-    }
-}
-
-# Set up a root shell using rlogin $hostname -l root.  This is used
-# when testing the daemons that must be run as root, such as telnetd
-# or rlogind.  This sets the global variables rlogin_spawn_id and
-# rlogin_pid.  Returns 1 on success, 0 on failure.
-#
-# This procedure will only succeed if the person running the test has
-# a valid ticket for a name listed in the /.klogin file.  Naturally,
-# Kerberos must already be installed on this machine.  It's a pain,
-# but I can't think of a better approach.
-
-if ![info exists can_get_root] { set can_get_root yes }
-
-proc setup_root_shell { testname } {
-    global BINSH
-    global ROOT_PROMPT
-    global KEY
-    global RLOGIN
-    global RLOGIN_FLAGS
-    global hostname
-    global rlogin_spawn_id
-    global rlogin_pid
-    global tmppwd
-    global env
-    global krb5_init_vars
-    global can_get_root
-
-    global timeout
-
-    if [string match $can_get_root no] {
-	note "$testname test requires ability to log in as root"
-	unsupported $testname
-	return 0
-    }
-
-    # Make sure we are using the original values of the environment
-    # variables.  This means that the caller must call
-    # setup_kerberos_env after calling this procedure.
-
-    # XXX fixme to deal with envstack
-    restore_kerberos_env
-
-    setup_runtime_env
-
-    set me [exec whoami]
-    if [string match root $me] {
-	return [setup_root_shell_noremote $testname]
-    }
-
-    if ![get_hostname] {
-	set can_get_root no
-	return 0
-    }
-
-    # If you have not installed Kerberos on your system, and you want
-    # to run these tests, you can do it if you are willing to put your
-    # root password in this file (this is not a very good idea, but
-    # it's safe enough if you disconnect from the network and remember
-    # to remove the password later).  Change the rlogin in the next
-    # line to be /usr/ucb/rlogin (or whatever is appropriate for your
-    # system).  Then change the lines after "word:" a few lines
-    # farther down to be
-    #    send "rootpassword\r"
-    #    exp_continue
-
-    eval spawn $RLOGIN $hostname -l root $RLOGIN_FLAGS
-    set rlogin_spawn_id $spawn_id
-    set rlogin_pid [exp_pid]
-    set old_timeout $timeout
-    set timeout 300
-    set got_refused 0
-
-    expect {
-	-re {connect to address [0-9a-fA-F.:]*: Connection refused} {
-	    note $expect_out(buffer)
-	    set got_refused 1
-	    exp_continue
-	}
-	-re "word:|erberos rlogin failed|ection refused|ection reset by peer|not authorized|Ticket expired|authenticity of" {
-	    note "$testname test requires ability to rlogin as root"
-	    unsupported "$testname"
-	    set timeout $old_timeout
-	    stop_root_shell
-	    set can_get_root no
-	    return 0
-	}
-	"Cannot assign requested address" {
-	    note "$testname: rlogin as root 'cannot assign requested address'"
-	    unsupported "$testname"
-	    set timeout $old_timeout
-	    stop_root_shell
-	    set can_get_root no
-	    return 0
-	}
-	-re "usage: rlogin|illegal option -- x|invalid option -- x" {
-	    note "$testname: rlogin doesn't like command-line flags"
-	    unsupported "$testname"
-	    set timeout $old_timeout
-	    stop_root_shell
-	    set can_get_root no
-	    return 0
-	}
-	-re "$ROOT_PROMPT" { }
-	timeout {
-	    perror "timeout from rlogin $hostname -l root"
-	    perror "If you have an unusual root prompt,"
-	    perror "try running with ROOT_PROMPT=\"regexp\""
-	    set timeout $old_timeout
-	    stop_root_shell
-	    set can_get_root no
-	    return 0
-	}
-	eof {
-	    if {$got_refused} {
-		# reported some errors, continued, and failed
-		note "$testname test requires ability to log in as root"
-		unsupported $testname
-	    } else {
-		# unknown problem?
-#		perror "eof from rlogin $hostname -l root"
-		note "eof (and unrecognized messages?) from rlogin $hostname -l root"
-		note "$testname test requires ability to log in as root"
-		unsupported $testname
-	    }
-	    stop_root_shell
-	    set timeout $old_timeout
-	    catch "expect_after"
-	    set can_get_root no
-	    return 0
-	}
-    }
-
-    expect_after {
-	timeout {
-	    perror "timeout from rlogin $hostname -l root"
-	    stop_root_shell
-	    set timeout $old_timeout
-	    catch "expect_after"
-	    set can_get_root no
-	    return 0
-	}
-	eof {
-	    perror "eof from rlogin $hostname -l root"
-	    stop_root_shell
-	    set timeout $old_timeout
-	    catch "expect_after"
-	    set can_get_root no
-	    return 0
-	}
-    }
-
-    # Make sure the root shell is using /bin/sh.
-    send "$BINSH\r"
-    expect {
-	-re "$ROOT_PROMPT" { }
-    }
-
-    # Set up a shell variable tmppwd.  The callers use this to keep
-    # command line lengths down.  The command line length is important
-    # because we are feeding input to a shell via a pty.  On some
-    # systems a pty will only accept 255 characters.
-    send "tmppwd=$tmppwd\r"
-    expect {
-	-re "$ROOT_PROMPT" { }
-    }
-
-    # Set up our krb5.conf
-    send "KRB5_CONFIG=$tmppwd/krb5.server.conf\r"
-    expect {
-	-re "$ROOT_PROMPT" { }
-    }
-    send "export KRB5_CONFIG\r"
-    expect {
-	-re "$ROOT_PROMPT" { }
-    }
-
-    # For all of our runtime environment variables - send them over...
-    foreach i $krb5_init_vars {
-	regexp "^(\[^=\]*)=(.*)" $i foo evar evalue
-	send "$evar=$env($evar)\r"
-	expect {
-		-re "$ROOT_PROMPT" { }
-        }
-
-        send "export $evar\r"
-        expect {
-		-re "$ROOT_PROMPT" { }
-        }
-    }
-
-    # Move over to the right directory.
-    set dir [pwd]
-    send "cd $dir\r"
-    expect {
-	-re "$ROOT_PROMPT" { }
-	"$dir:" {
-	    perror "root shell can not cd to $dir"
-	    set timeout $old_timeout
-	    stop_root_shell
-	    set can_get_root no
-	    return 0
-	}
-    }
-
-    expect_after
-    set timeout $old_timeout
-
-    return 1
-}
-
-proc setup_root_shell_noremote { testname } {
-    global BINSH
-    global ROOT_PROMPT
-    global KEY
-    global hostname
-    global rlogin_spawn_id
-    global rlogin_pid
-    global tmppwd
-    global env
-    global krb5_init_vars
-
-    eval spawn $BINSH
-    set rlogin_spawn_id $spawn_id
-    set rlogin_pid [exp_pid]
-
-    expect_after {
-	timeout {
-	    perror "timeout from root shell"
-	    stop_root_shell
-	    catch "expect_after"
-	    return 0
-	}
-	eof {
-	    perror "eof from root shell"
-	    stop_root_shell
-	    catch "expect_after"
-	    return 0
-	}
-    }
-    expect {
-	-re "$ROOT_PROMPT" { }
-    }
-
-    # Set up a shell variable tmppwd.  The callers use this to keep
-    # command line lengths down.  The command line length is important
-    # because we are feeding input to a shell via a pty.  On some
-    # systems a pty will only accept 255 characters.
-    send "tmppwd=$tmppwd\r"
-    expect {
-	-re "$ROOT_PROMPT" { }
-    }
-
-    # Set up our krb5.conf
-    send "KRB5_CONFIG=$tmppwd/krb5.server.conf\r"
-    expect {
-	-re "$ROOT_PROMPT" { }
-    }
-    send "export KRB5_CONFIG\r"
-    expect {
-	-re "$ROOT_PROMPT" { }
-    }
-
-    # For all of our runtime environment variables - send them over...
-    foreach i $krb5_init_vars {
-	regexp "^(\[^=\]*)=(.*)" $i foo evar evalue
-	send "$evar=$env($evar)\r"
-	expect {
-		-re "$ROOT_PROMPT" { }
-        }
-
-        send "export $evar\r"
-        expect {
-		-re "$ROOT_PROMPT" { }
-        }
-    }
-
-    # Move over to the right directory.
-    set dir [pwd]
-    send "cd $dir\r"
-    expect {
-	-re "$ROOT_PROMPT" { }
-	"$dir:" {
-	    perror "root shell can not cd to $dir"
-	    stop_root_shell
-	    return 0
-	}
-    }
-
-    expect_after
-
-    return 1
-}
-
-# Kill off a root shell started by setup_root_shell.
-
-proc stop_root_shell { } {
-    global rlogin_spawn_id
-    global rlogin_pid
-
-    catch "close -i $rlogin_spawn_id"
-    catch "exec kill $rlogin_pid"
-    sleep 1
-    catch "exec kill -9 $rlogin_pid"
-    catch "wait -i $rlogin_spawn_id"
-}
-
 # Check the date.  The string will be the output of date on this
 # system, and we must make sure that it is in the same timezone as the
 # output of date run a second time.  The first date will be run on an
@@ -2821,46 +2389,10 @@ proc touch { file } {
     close $f
 }
 
-# Implement this in tcl someday?
-proc tail1 { file } {
-    exec tail -1 $file
-}
-
-# setup_wrapper
-# Sets up a wraper script to set the runtime shared library environment 
-# variables and then executes a specific command. This is used to allow
-# a "rsh klist" or telnetd to execute login.krb5. 
-proc setup_wrapper { file command } {
-    global BINSH
-    global env
-    global krb5_init_vars
-
-    # We will start with a BINSH script
-    file delete $file
-
-    set f [open $file "w" 0777]
-    puts $f "#!$BINSH"
-    puts $f "KRB5_CONFIG=$env(KRB5_CONFIG)"
-    puts $f "export KRB5_CONFIG"
-    foreach i $krb5_init_vars {
-	regexp "^(\[^=\]*)=(.*)" $i foo evar evalue
-	puts $f "$evar=$env($evar)"
-	puts $f "export $evar"
-    }
-    puts $f "exec $command"
-    close $f
-    
-    return 1
-}
-
-proc krb_exit { } {
-    stop_kerberos_daemons
-}
-
 # helpful sometimes for debugging the test suite
 proc export_debug_envvars { } {
     global env
-    foreach i {KDB5_UTIL KRB5KDC KADMIND KADMIN KADMIN_LOCAL KINIT KTUTIL KLIST RLOGIN RLOGIN_FLAGS RLOGIND FTP FTPD KPASSWD REALMNAME GSSCLIENT KPROPLOG} {
+    foreach i {KDB5_UTIL KRB5KDC KADMIND KADMIN KADMIN_LOCAL KINIT KTUTIL KLIST KPASSWD REALMNAME GSSCLIENT KPROPLOG} {
 	global $i
 	if [info exists $i] { set env($i) [set $i] }
     }
