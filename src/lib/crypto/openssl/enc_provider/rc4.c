@@ -40,19 +40,17 @@
 #include <rand2key.h>
 #include <openssl/evp.h>
 
-typedef struct
-{
-    EVP_CIPHER_CTX  evp_ctx;
-    unsigned int x;
-    unsigned int y;
-    unsigned char state[256];
-
-} ArcfourContext;
-
-typedef struct {
-    int initialized;
-    ArcfourContext ctx;
-} ArcFourCipherState;
+/*
+ * The loopback field is NULL if ctx is uninitialized (no encrypt or decrypt
+ * operation has taken place), or a pointer to the structure address if ctx is
+ * initialized.  If the application copies the state (not a valid operation,
+ * but one which happens to works with some other enc providers), we can detect
+ * it via the loopback field and return a sane error code.
+ */
+struct arcfour_state {
+    struct arcfour_state *loopback;
+    EVP_CIPHER_CTX ctx;
+};
 
 #define RC4_KEY_SIZE 16
 #define RC4_BLOCK_SIZE 1
@@ -76,43 +74,49 @@ k5_arcfour_docrypt(krb5_key key,const krb5_data *state, krb5_crypto_iov *data,
                    size_t num_data)
 {
     size_t i;
-    int ret = 0, tmp_len = 0;
-    unsigned char   *tmp_buf = NULL;
+    int ret = 1, tmp_len = 0;
     krb5_crypto_iov *iov     = NULL;
-    EVP_CIPHER_CTX  ciph_ctx;
+    EVP_CIPHER_CTX  ciph_ctx, *ctx;
+    struct arcfour_state *arcstate;
+    krb5_boolean do_init = TRUE;
 
-
-    EVP_CIPHER_CTX_init(&ciph_ctx);
-
-    ret = EVP_EncryptInit_ex(&ciph_ctx, EVP_rc4(), NULL, key->keyblock.contents, NULL);
-    if (!ret){
-        EVP_CIPHER_CTX_cleanup(&ciph_ctx);
-        return KRB5_CRYPTO_INTERNAL;
+    arcstate = (state != NULL) ? (struct arcfour_state *) state->data : NULL;
+    if (arcstate != NULL) {
+        ctx = &arcstate->ctx;
+        if (arcstate->loopback == arcstate)
+            do_init = FALSE;
+        else if (arcstate->loopback != NULL)
+            return KRB5_CRYPTO_INTERNAL;
+    } else {
+        ctx = &ciph_ctx;
+    }
+    if (do_init) {
+        EVP_CIPHER_CTX_init(ctx);
+        ret = EVP_EncryptInit_ex(ctx, EVP_rc4(), NULL, key->keyblock.contents,
+                                 NULL);
+        if (!ret)
+            return KRB5_CRYPTO_INTERNAL;
     }
 
     for (i = 0; i < num_data; i++) {
         iov = &data[i];
-        if (iov->data.length <= 0) break;
-        tmp_len = iov->data.length;
-
         if (ENCRYPT_IOV(iov)) {
-            tmp_buf=(unsigned char *)iov->data.data;
-            ret = EVP_EncryptUpdate(&ciph_ctx,
-                                    tmp_buf, &tmp_len,
-                                    (unsigned char *)iov->data.data, iov->data.length);
-            if (!ret) break;
-            iov->data.length = tmp_len;
+            ret = EVP_EncryptUpdate(ctx,
+                                    (unsigned char *) iov->data.data, &tmp_len,
+                                    (unsigned char *) iov->data.data,
+                                    iov->data.length);
+            if (!ret)
+                break;
         }
     }
-    if(ret)
-        ret = EVP_EncryptFinal_ex(&ciph_ctx, (unsigned char *)tmp_buf, &tmp_len);
 
-    EVP_CIPHER_CTX_cleanup(&ciph_ctx);
+    if (arcstate)               /* Context is saved; mark as initialized. */
+        arcstate->loopback = arcstate;
+    else                        /* Context is not saved; clean it up now. */
+        EVP_CIPHER_CTX_cleanup(ctx);
 
-    if (ret != 1)
+    if (!ret)
         return KRB5_CRYPTO_INTERNAL;
-
-    iov->data.length += tmp_len;
 
     return 0;
 }
@@ -120,15 +124,29 @@ k5_arcfour_docrypt(krb5_key key,const krb5_data *state, krb5_crypto_iov *data,
 static krb5_error_code
 k5_arcfour_free_state ( krb5_data *state)
 {
-    return 0; /* not implemented */
+    struct arcfour_state *arcstate = (struct arcfour_state *) state->data;
+
+    /* Clean up the OpenSSL context if it was initialized. */
+    if (arcstate && arcstate->loopback == arcstate)
+        EVP_CIPHER_CTX_cleanup(&arcstate->ctx);
+    free(arcstate);
+    return 0;
 }
 
 static krb5_error_code
 k5_arcfour_init_state (const krb5_keyblock *key,
                        krb5_keyusage keyusage, krb5_data *new_state)
 {
-    return 0; /* not implemented */
+    struct arcfour_state *arcstate;
 
+    /* Create a state structure with an uninitialized context. */
+    arcstate = calloc(1, sizeof(*arcstate));
+    if (arcstate == NULL)
+        return ENOMEM;
+    arcstate->loopback = NULL;
+    new_state->data = (char *) arcstate;
+    new_state->length = sizeof(*arcstate);
+    return 0;
 }
 
 /* Since the arcfour cipher is identical going forwards and backwards,
@@ -147,6 +165,6 @@ const struct krb5_enc_provider krb5int_enc_arcfour = {
     k5_arcfour_docrypt,
     NULL,
     krb5int_arcfour_make_key,
-    k5_arcfour_init_state, /*xxx not implemented */
-    k5_arcfour_free_state  /*xxx not implemented */
+    k5_arcfour_init_state,
+    k5_arcfour_free_state
 };
