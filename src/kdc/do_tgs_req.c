@@ -136,6 +136,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
 
     reply.padata = 0; /* For cleanup handler */
     reply_encpart.enc_padata = 0;
+    enc_tkt_reply.authorization_data = NULL;
     e_data.data = NULL;
 
     session_key.contents = NULL;
@@ -726,8 +727,6 @@ tgt_again:
         }
     }
 
-    enc_tkt_reply.authorization_data = NULL;
-
     if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) &&
         !isflagset(c_flags, KRB5_KDB_FLAG_CROSS_REALM))
         enc_tkt_reply.client = s4u_x509_user->user_id.user;
@@ -1045,6 +1044,8 @@ cleanup:
         krb5_free_pa_data(kdc_context, reply.padata);
     if (reply_encpart.enc_padata)
         krb5_free_pa_data(kdc_context, reply_encpart.enc_padata);
+    if (enc_tkt_reply.authorization_data != NULL)
+        krb5_free_authdata(kdc_context, enc_tkt_reply.authorization_data);
     krb5_free_data_contents(kdc_context, &e_data);
 
     return retval;
