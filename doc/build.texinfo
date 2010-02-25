@@ -630,6 +630,12 @@ If @samp{-ldb} is not the correct library specification for the
 Berkeley DB library version to be used, override it with this option.
 For example, @samp{DB_LIB=-ldb-3.3}.
 
+@item --with-crypto-impl=IMPL
+
+Use specified crypto implementation in lieu of the default builtin.
+Currently only one alternative crypto-system openssl is available and
+it requires version 1.0.0 or higher of OpenSSL.
+
 @end table
 
 For example, in order to configure Kerberos on a Solaris machine using
