@@ -128,6 +128,14 @@ types that should be requested by the client, in the same format.
 This relation identifies the permitted list of session key encryption
 types.
 
+.IP allow_weak_crypto
+If this is set to 0 (for false), then weak encryption types will be
+filtered out of the previous three lists.  The default value for this
+tag is false, which may cause authentication failures in existing
+Kerberos infrastructures that do not support strong crypto.  Users in
+affected environments should set this tag to true until their
+infrastructure adopts stronger ciphers.
+
 .IP clockskew 
 This relation sets the maximum allowable amount of clockskew in seconds
 that the library will tolerate before assuming that a Kerberos message

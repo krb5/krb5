@@ -456,8 +456,11 @@ key encryption.  The default value for this tag is
 @itemx allow_weak_crypto
 If this is set to 0 (for false), then weak encryption types will be
 filtered out of the previous three lists (as noted in @ref{Supported
-Encryption Types}).  The default value for this tag is true, but that
-default may change in the future.
+Encryption Types}).  The default value for this tag is false, which
+may cause authentication failures in existing Kerberos infrastructures
+that do not support strong crypto.  Users in affected environments
+should set this tag to true until their infrastructure adopts stronger
+ciphers.
 
 @itemx clockskew
 Sets the maximum allowable amount of clockskew in seconds that the
