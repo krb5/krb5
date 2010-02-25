@@ -64,6 +64,11 @@ and logging in as "guest" with password "guest".
 DES transition
 --------------
 
+The krb5-1.8 release disables single-DES cryptosystems by default.  As
+a result, you may need to add the libdefaults setting
+"allow_weak_crypto = true" to communicate with existing Kerberos
+infrastructures if they do not support stronger ciphers.
+
 The Data Encryption Standard (DES) is widely recognized as weak.  The
 krb5-1.7 release contains measures to encourage sites to migrate away
 from using single-DES cryptosystems.  Among these is a configuration
@@ -192,6 +197,7 @@ krb5-1.8 changes by ticket ID
 6599    memory leak in krb5_rd_req_decrypt_tkt_part
 6600    gss_inquire_context cannot handle no target name from mechanism
 6601    gsssspi_set_cred_option cannot handle mech specific option
+6603    issues with SPNEGO
 6605    PKINIT client should validate SAN for TGS, not service principal
 6606    allow testing when offline
 6607    anonymous PKINIT
@@ -202,7 +208,8 @@ krb5-1.8 changes by ticket ID
 6622    kinit_fast fails if weak enctype is among client principal keys
 6623    Always treat anonymous as preauth required
 6624    automated tests for anonymous pkinit
-6625    yarrow code does not initialize keyblock enctype and uses unitialized value
+6625    yarrow code does not initialize keyblock enctype and uses
+        unitialized value
 6626    Restore interoperability with 1.6 addprinc -randkey
 6627    Set enctype in crypto_tests to prevent memory leaks
 6628    krb5int_dk_string_to_key fails to set enctype
@@ -217,7 +224,8 @@ krb5-1.8 changes by ticket ID
 6645    Add krb5_allow_weak_crypto API
 6648    define MIN() in lib/gssapi/krb5/prf.c
 6649    Get rid of kdb_ext.h and allow out-of-tree KDB plugins
-6651    Handle migration from pre-1.7 databases with master key kvno != 1 (1.8 pullup)
+6651    Handle migration from pre-1.7 databases with master key
+        kvno != 1 (1.8 pullup)
 6652    Make decryption of master key list more robust
 6653    set_default_enctype_var should filter not reject weak enctypes
 6654    Fix greet_server build
@@ -225,9 +233,12 @@ krb5-1.8 changes by ticket ID
 6656    krb5int_fast_free_state segfaults if state is null
 6657    enc_padata can include empty sequence
 6658    Implement gss_set_neg_mechs
+6659    Additional memory leaks in kdc
 6660    Minimal support for updating history key
 6662    MITKRB5-SA-2010-001 CVE-2010-0283 KDC denial of service
 6663    update mkrel to deal with changed source layout
+6665    Fix cipher state chaining in OpenSSL back end
+6669    doc updates for allow_weak_crypto
 
 Acknowledgements
 ----------------
