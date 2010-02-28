@@ -640,17 +640,16 @@ proc setup_runtime_env { } {
 
 # get_hostname
 # This procedure will get the local hostname.  It sets the global
-# variables hostname (the full name) and localhostname (the first part
-# of the name).  Returns 1 on success, 0 on failure.
+# variables hostname (the full name) and domain (all but the first
+# part of the name).  Returns 1 on success, 0 on failure.
 
 proc get_hostname { } {
     global RESOLVE
     global hostname
-    global localhostname
     global domain
     global tmppwd
 
-    if {[info exists hostname] && [info exists localhostname]} {
+    if {[info exists hostname]} {
 	return 1
     }
 
@@ -670,12 +669,11 @@ proc get_hostname { } {
     }
     close $file
     file delete $tmppwd/hostname
-    regexp "^(\[^.\]*)\\.(.*)$" $hostname foo localhostname domain
+    regexp "^\[^.\]*\\.(.*)$" $hostname foo domain
 
     set hostname [string tolower $hostname]
-    set localhostname [string tolower $localhostname]
     set domain [string tolower $domain]
-    verbose "hostname: $hostname; localhostname: $localhostname; domain $domain"
+    verbose "hostname: $hostname; domain: $domain"
 
     return 1
 }
@@ -766,9 +764,6 @@ proc setup_kerberos_files { } {
 	puts $conffile ""
 	puts $conffile "\[realms\]"
 	puts $conffile "	$REALMNAME = \{"
-#	puts $conffile "		database_name = $tmppwd/db"
-	puts $conffile "		admin_database_name = $tmppwd/adb"
-	puts $conffile "		admin_database_lockfile = $tmppwd/adb.lock"
 	# Testing with a colon in the name exercises default handling
 	# for pathnames.
 	puts $conffile "		key_stash_file = $tmppwd/stash:foo"
@@ -817,9 +812,6 @@ proc setup_kerberos_files { } {
 	puts $conffile ""
 	puts $conffile "\[realms\]"
 	puts $conffile "	$REALMNAME = \{"
-#	puts $conffile "		database_name = $tmppwd/slave-db"
-	puts $conffile "		admin_database_name = $tmppwd/slave-adb"
-	puts $conffile "		admin_database_lockfile = $tmppwd/slave-adb.lock"
 	# Testing with a colon in the name exercises default handling
 	# for pathnames.
 	puts $conffile "		key_stash_file = $tmppwd/slave-stash"
@@ -946,7 +938,6 @@ proc setup_krb5_conf { {type client} } {
 	puts $conffile "		kdc = $hostname:[expr 1 + $portbase]"
 	puts $conffile "		admin_server = $hostname:[expr 4 + $portbase]"
 	puts $conffile "		kpasswd_server = $hostname:[expr 5 + $portbase]"
-	puts $conffile "		default_domain = $domain"
 	puts $conffile "		database_module = foo_db2"
 	puts $conffile "	\}"
 	puts $conffile ""
