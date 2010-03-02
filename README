@@ -74,7 +74,13 @@ krb5-1.7 release contains measures to encourage sites to migrate away
 from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which now defaults to "false"
 beginning with krb5-1.8.  The krb5-1.8 release includes additional
-measures to ease the transition away from single-DES.
+measures to ease the transition away from single-DES.  These
+additional measures include:
+
+* enctype config enhancements (so you can do "DEFAULT +des", etc.)
+* new API to allow applications (e.g. AFS) to explicitly reenable weak
+  crypto
+* easier kadmin history key changes
 
 Major changes in 1.8
 --------------------
