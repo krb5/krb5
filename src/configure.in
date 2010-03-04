@@ -928,6 +928,15 @@ else
 fi
 AC_SUBST(HAVE_RUNTEST)
 
+# for Python tests
+AC_CHECK_PROG(PYTHON,python,python)
+if test x"$PYTHON" != x; then
+	HAVE_PYTHON=yes
+else
+	HAVE_PYTHON=no
+fi
+AC_SUBST(HAVE_PYTHON)
+
 # for plugins/kdb/db2
 
 # AIX is unusual in that it wants all symbols resolved at link time
@@ -1037,7 +1046,9 @@ fi
 AC_SUBST(ldap_plugin_dir)
 AC_SUBST(LDAP)
 
-# We really should look for and use python-config.
+# This checks is for plugins/locate/python, which isn't built by
+# default, so it's not a big deal that it isn't very good.  We should
+# use python-config instead.
 PYTHON_LIB=
 AC_CHECK_HEADERS(Python.h python2.3/Python.h python2.5/Python.h)
 AC_CHECK_LIB(python2.3,main,[PYTHON_LIB=-lpython2.3],

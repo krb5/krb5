@@ -268,6 +268,7 @@ LEX = @LEX@
 LEXLIB = @LEXLIB@
 YACC = @YACC@
 PERL = @PERL@
+PYTHON = @PYTHON@
 AUTOCONF = autoconf
 AUTOCONFFLAGS =
 AUTOHEADER = autoheader
@@ -566,6 +567,10 @@ VALGRIND1 = valgrind --tool=memcheck --log-file=$(VALGRIND_LOGDIR)/vg --trace-ch
 # tests still assume that the local hostname can be resolved into
 # something that looks like an FQDN, with an IPv4 address.
 OFFLINE=no
+
+# Makefile.in should set PYTESTS to a list of Python test scripts to run.
+PYTESTS=
+PYTESTFLAGS=
 
 ##
 ## end of pre.in

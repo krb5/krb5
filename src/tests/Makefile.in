@@ -2,6 +2,7 @@ mydir=tests
 BUILDTOP=$(REL)..
 SUBDIRS = resolve asn.1 create hammer verify gssapi dejagnu shlib \
 	gss-threads misc mkeystash_compat
+PYTESTS = t_general.py t_anonpkinit.py
 
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf
 KRB5_RUN_ENV= @KRB5_RUN_ENV@

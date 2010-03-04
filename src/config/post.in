@@ -128,6 +128,23 @@ undepend-postrecurse: undepend-recurse
 # end dependency generation
 ##############################
 
+# Python tests
+check-unix:: check-python-tests-@HAVE_PYTHON@
+
+check-python-tests-yes:
+	@pytests="$(PYTESTS)"; \
+	for t in $$pytests; do \
+		echo PYTHONPATH=$(top_srcdir)/util VALGRIND="$(VALGRIND)" \
+			$(PYTHON) $(srcdir)/$$t $(PYTESTFLAGS); \
+		PYTHONPATH=$(top_srcdir)/util VALGRIND="$(VALGRIND)" \
+			$(PYTHON) $(srcdir)/$$t $(PYTESTFLAGS); \
+	done
+
+check-python-tests-no:
+	@if test -n "$(PYTESTS)"; then \
+		echo "+++ Skipping because Python not available: $(PYTESTS)"; \
+	fi
+
 clean:: clean-$(WHAT)
 
 clean-unix::
