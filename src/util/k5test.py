@@ -403,8 +403,8 @@ def _parse_args():
                       default=False, help='Display verbose output')
     parser.add_option('-p', '--pass', dest='testpass', metavar='PASS',
                       help='If a multi-pass test, run only PASS')
-    parser.add_option('--debug', dest='debug', metavar='CMDNUM,...',
-                      help='Debug commands by number (or "all")')
+    parser.add_option('--debug', dest='debug', metavar='NUM',
+                      help='Debug numbered command (or "all")')
     parser.add_option('--debugger', dest='debugger', metavar='COMMAND',
                       help='Debugger command (default is gdb --args)',
                       default='gdb --args')
