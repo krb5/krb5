@@ -129,9 +129,14 @@ undepend-postrecurse: undepend-recurse
 ##############################
 
 # Python tests
-check-unix:: check-python-tests-@HAVE_PYTHON@
+check-unix:: check-pytests
 
-check-python-tests-yes:
+# Makefile.in should add dependencies to check-pytests for test
+# programs that need to be built before scripts are run.
+
+check-pytests:: check-pytests-@HAVE_PYTHON@
+
+check-pytests-yes:
 	@pytests="$(PYTESTS)"; \
 	for t in $$pytests; do \
 		echo PYTHONPATH=$(top_srcdir)/util VALGRIND="$(VALGRIND)" \
@@ -140,7 +145,7 @@ check-python-tests-yes:
 			$(PYTHON) $(srcdir)/$$t $(PYTESTFLAGS) || exit 1; \
 	done
 
-check-python-tests-no:
+check-pytests-no:
 	@if test -n "$(PYTESTS)"; then \
 		echo "+++ Skipping because Python not available: $(PYTESTS)"; \
 	fi
