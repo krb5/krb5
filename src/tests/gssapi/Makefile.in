@@ -8,7 +8,11 @@ SRCS= $(srcdir)/t_imp_name.c $(srcdir)/t_s4u.c $(srcdir)/t_namingexts.c $(srcdir
 
 OBJS= t_imp_name.o t_s4u.o t_namingexts.o t_gssexts.o
 
+PYTESTS= t_gssapi.py
+
 all:: t_imp_name t_s4u t_namingexts t_gssexts t_spnego
+
+check-pytests:: t_spnego
 
 t_imp_name: t_imp_name.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_imp_name t_imp_name.o $(GSS_LIBS) $(KRB5_BASE_LIBS)
