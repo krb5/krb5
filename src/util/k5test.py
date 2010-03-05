@@ -38,7 +38,7 @@ script usage:
     realm.run_as_client(['./clientprog', realm.host_princ])
 
     # Inform framework that tests completed successfully.
-    success()
+    success('World peace and cure for cancer.')
 
 By default, the realm will have:
 
@@ -124,6 +124,12 @@ Scripts may use the following functions and variables:
 * fail(message): Display message (plus leading marker and trailing
   newline) and explanatory messages about debugging.
 
+* success(message): Indicate that the test script has completed
+  successfully.  Suppresses the display of explanatory debugging
+  messages in the on-exit handler.  message should briefly summarize
+  the operations tested; it will only be displayed (with leading
+  marker and trailing newline) if the script is running verbosely.
+
 * output(message, force_verbose=False): Place message (without any
   added newline) in testlog, and write it to stdout if running
   verbosely.
@@ -143,10 +149,6 @@ Scripts may use the following functions and variables:
   keyword with the exception of krbtgt_keysalt, which will not be
   honored.  If keywords contains krb5_conf and/or kdc_conf fragments,
   they will be merged with the default and per-pass specifications.
-
-* success(): Indicate that the test script has completed successfully.
-  Suppresses the display of explanatory debugging messages in the
-  on-exit handler.
 
 * buildtop: The top of the build directory (absolute path).
 
@@ -308,8 +310,9 @@ def fail(msg):
     sys.exit(1)
 
 
-def success():
+def success(msg):
     global _success
+    output('*** Success: %s\n' % msg)
     _success = True
 
 

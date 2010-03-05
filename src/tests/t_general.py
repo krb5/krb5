@@ -11,7 +11,7 @@ for realm in multipass_realms(create_host=False):
     if 'fred\n' not in output:
         fail('Policy not preserved across dump/load.')
 
-    # Check that kinit fails appropriatel with the wrong password.
+    # Check that kinit fails appropriately with the wrong password.
     output = realm.run_as_client([kinit, realm.user_princ], input='wrong\n',
                                  expected_code=1)
     if 'Password incorrect while getting initial credentials' not in output:
@@ -45,4 +45,4 @@ for realm in multipass_realms(create_host=False):
     if 'Key: vno 258,' not in output:
         fail('Expected vno not seen in kadmin.local output')
 
-success()
+success('Dump/load, FAST kinit, kdestroy, kvno wrapping.')

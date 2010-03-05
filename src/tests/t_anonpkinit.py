@@ -31,4 +31,4 @@ realm.addprinc('WELLKNOWN/ANONYMOUS')
 realm.kinit('@%s' % realm.realm, flags=['-n'])
 realm.klist('WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS')
 
-success()
+success('Anonymous PKINIT.')
