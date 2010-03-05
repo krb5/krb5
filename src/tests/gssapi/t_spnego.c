@@ -153,9 +153,6 @@ initAcceptSecContext(OM_uint32 *minor,
                                  NULL,
                                  &time_rec);
 
-    if (target_name != GSS_C_NO_NAME)
-        (void) gss_release_name(minor, &target_name);
-
     if (GSS_ERROR(major)) {
         displayStatus("gss_init_sec_context", major, *minor);
         return major;
