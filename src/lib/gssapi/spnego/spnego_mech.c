@@ -1742,6 +1742,7 @@ cleanup:
 		if (sc->internal_name != GSS_C_NO_NAME &&
 		    src_name != NULL) {
 			*src_name = sc->internal_name;
+			sc->internal_name = GSS_C_NO_NAME;
 		}
 		release_spnego_ctx(&sc);
 	} else if (ret != GSS_S_CONTINUE_NEEDED) {
@@ -2626,6 +2627,8 @@ release_spnego_ctx(spnego_gss_ctx_id_t *ctx)
 
 		(void) generic_gss_release_oid(&minor_stat,
 				&context->internal_mech);
+
+		(void) gss_release_name(&minor_stat, &context->internal_name);
 
 		if (context->optionStr != NULL) {
 			free(context->optionStr);
