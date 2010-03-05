@@ -137,7 +137,7 @@ check-python-tests-yes:
 		echo PYTHONPATH=$(top_srcdir)/util VALGRIND="$(VALGRIND)" \
 			$(PYTHON) $(srcdir)/$$t $(PYTESTFLAGS); \
 		PYTHONPATH=$(top_srcdir)/util VALGRIND="$(VALGRIND)" \
-			$(PYTHON) $(srcdir)/$$t $(PYTESTFLAGS); \
+			$(PYTHON) $(srcdir)/$$t $(PYTESTFLAGS) || exit 1; \
 	done
 
 check-python-tests-no:
