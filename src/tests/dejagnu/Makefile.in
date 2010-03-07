@@ -8,7 +8,9 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 SRCS=$(srcdir)/t_inetd.c
 
-all install::
+all:: t_inetd
+
+install::
 
 check:: check-runtest-@HAVE_RUNTEST@
 

@@ -791,7 +791,7 @@ class K5Realm(object):
     def start_in_inetd(self, args, port=None):
         if not port:
             port = self.server_port()
-        inetd_args = [t_inetd, str(ptr)] + args
+        inetd_args = [t_inetd, str(port)] + args
         return _start_daemon(inetd_args, self._env_server, 'Ready!')
 
     def create_kdb(self):
