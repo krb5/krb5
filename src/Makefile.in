@@ -624,6 +624,10 @@ check-unix:: krb5-config
 	$(SHELL) $(srcdir)/t_krbconf
 check-prerecurse: fake-install
 
+# Create a test realm and spawn a shell in an environment pointing to it.
+testrealm: fake-install
+	PYTHONPATH=$(top_srcdir)/util $(PYTHON) $(srcdir)/util/testrealm.py
+
 COV_BUILD=	cov-build
 COV_ANALYZE=	cov-analyze
 COV_COMMIT=	cov-commit-defects --product "$(COV_PRODUCT)" --user "$(COV_USER)" --target "$(COV_TARGET)" --description "$(COV_DESC)"

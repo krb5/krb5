@@ -281,6 +281,13 @@ Scripts may use the following realm methods and attributes:
   credentials for user unless disabled by the realm construction
   options.
 
+* Attributes for the client, server, master, and slave environments.
+  These environments are extensions of os.environ.
+  - realm.env_client
+  - realm.env_server
+  - realm.env_master
+  - realm.env_slave
+
 When the test script is run, its behavior can be modified with
 command-line flags.  These are documented in the --help output.
 
@@ -654,10 +661,10 @@ class K5Realm(object):
         self._create_acl()
         self._create_dictfile()
 
-        self._env_client = self._make_env('client', False)
-        self._env_server = self._make_env('server', False)
-        self._env_master = self._make_env('master', True)
-        self._env_slave = self._make_env('slave', True)
+        self.env_client = self._make_env('client', False)
+        self.env_server = self._make_env('server', False)
+        self.env_master = self._make_env('master', True)
+        self.env_slave = self._make_env('slave', True)
 
         if create_kdb:
             self.create_kdb()
@@ -771,28 +778,28 @@ class K5Realm(object):
         return env
 
     def run_as_client(self, args, **keywords):
-        return _run_cmd(args, self._env_client, **keywords)
+        return _run_cmd(args, self.env_client, **keywords)
 
     def run_as_server(self, args, **keywords):
-        return _run_cmd(args, self._env_server, **keywords)
+        return _run_cmd(args, self.env_server, **keywords)
 
     def run_as_master(self, args, **keywords):
-        return _run_cmd(args, self._env_master, **keywords)
+        return _run_cmd(args, self.env_master, **keywords)
 
     def run_as_slave(self, args, **keywords):
-        return _run_cmd(args, self._env_slave, **keywords)
+        return _run_cmd(args, self.env_slave, **keywords)
 
     def server_port(self):
         return self.portbase + 3
 
     def start_server(self, args, sentinel):
-        return _start_daemon(args, self._env_server, sentinel)
+        return _start_daemon(args, self.env_server, sentinel)
 
     def start_in_inetd(self, args, port=None):
         if not port:
             port = self.server_port()
         inetd_args = [t_inetd, str(port)] + args
-        return _start_daemon(inetd_args, self._env_server, 'Ready!')
+        return _start_daemon(inetd_args, self.env_server, 'Ready!')
 
     def create_kdb(self):
         global kdb5_util
@@ -801,7 +808,7 @@ class K5Realm(object):
     def start_kdc(self):
         global krb5kdc
         assert(self._kdc_proc is None)
-        self._kdc_proc = _start_daemon([krb5kdc, '-n'], self._env_master,
+        self._kdc_proc = _start_daemon([krb5kdc, '-n'], self.env_master,
                                         'starting...')
 
     def stop_kdc(self):
@@ -813,7 +820,7 @@ class K5Realm(object):
         global krb5kdc
         assert(self._kadmind_proc is None)
         self._kadmind_proc = _start_daemon([kadmind, '-nofork', '-W'],
-                                            self._env_master, 'starting...')
+                                            self.env_master, 'starting...')
 
     def stop_kadmind(self):
         assert(self._kadmind_proc is not None)
