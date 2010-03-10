@@ -373,11 +373,11 @@ krb5_klog_init(krb5_context kcontext, char *ename, char *whoami, krb5_boolean do
      * Look up [logging]-><ename> in the profile.  If that doesn't
      * succeed, then look for [logging]->default.
      */
-    logging_profent[0] = "logging";
+    logging_profent[0] = KRB5_CONF_LOGGING;
     logging_profent[1] = ename;
     logging_profent[2] = (char *) NULL;
-    logging_defent[0] = "logging";
-    logging_defent[1] = "default";
+    logging_defent[0] = KRB5_CONF_LOGGING;
+    logging_defent[1] = KRB5_CONF_DEFAULT;
     logging_defent[2] = (char *) NULL;
     logging_specs = (char **) NULL;
     ngood = 0;
