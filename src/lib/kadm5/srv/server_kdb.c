@@ -106,23 +106,19 @@ done:
 /*
  * Function: kdb_init_hist
  *
- * Purpose: Initializes the global history variables.
+ * Purpose: Initializes the hist_princ variable.
  *
  * Arguments:
  *
  *      handle          (r) kadm5 api server handle
  *      r               (r) realm of history principal to use, or NULL
  *
- * Effects: This function sets the value of the hist_princ global variable.  If
- * the history principal does not already exist, this function attempts to
- * create it with kadm5_create_principal.
+ * Effects: This function sets the value of the hist_princ global variable.
  */
 krb5_error_code kdb_init_hist(kadm5_server_handle_t handle, char *r)
 {
     int     ret = 0;
     char    *realm, *hist_name;
-    krb5_key_salt_tuple ks[1];
-    krb5_db_entry kdb;
 
     if (r == NULL)  {
         if ((ret = krb5_get_default_realm(handle->context, &realm)))
@@ -139,36 +135,6 @@ krb5_error_code kdb_init_hist(kadm5_server_handle_t handle, char *r)
     if ((ret = krb5_parse_name(handle->context, hist_name, &hist_princ)))
         goto done;
 
-    if ((ret = kdb_get_entry(handle, hist_princ, &kdb, NULL))) {
-        kadm5_principal_ent_rec ent;
-
-        if (ret != KADM5_UNK_PRINC)
-            goto done;
-
-        /* Create the history principal. */
-        memset(&ent, 0, sizeof(ent));
-        ent.principal = hist_princ;
-        ent.max_life = KRB5_KDB_DISALLOW_ALL_TIX;
-        ent.attributes = 0;
-        ks[0].ks_enctype = handle->params.enctype;
-        ks[0].ks_salttype = KRB5_KDB_SALTTYPE_NORMAL;
-        ret = kadm5_create_principal_3(handle, &ent,
-                                       (KADM5_PRINCIPAL | KADM5_MAX_LIFE |
-                                        KADM5_ATTRIBUTES),
-                                       1, ks, NULL);
-        if (ret)
-            goto done;
-
-        /* For better compatibility with pre-1.8 libkadm5 code, we want the
-         * initial history kvno to be 2, so re-randomize it. */
-        ret = kadm5_randkey_principal_3(handle, ent.principal, 0, 1, ks,
-                                        NULL, NULL);
-        if (ret)
-            goto done;
-    } else {
-        kdb_free_entry(handle, &kdb, NULL);
-    }
-
 done:
     free(hist_name);
     if (r == NULL)
@@ -176,10 +142,35 @@ done:
     return ret;
 }
 
+static krb5_error_code
+create_hist(kadm5_server_handle_t handle)
+{
+    kadm5_ret_t ret;
+    krb5_key_salt_tuple ks[1];
+    kadm5_principal_ent_rec ent;
+    long mask = KADM5_PRINCIPAL | KADM5_MAX_LIFE | KADM5_ATTRIBUTES;
+
+    /* Create the history principal. */
+    memset(&ent, 0, sizeof(ent));
+    ent.principal = hist_princ;
+    ent.max_life = KRB5_KDB_DISALLOW_ALL_TIX;
+    ent.attributes = 0;
+    ks[0].ks_enctype = handle->params.enctype;
+    ks[0].ks_salttype = KRB5_KDB_SALTTYPE_NORMAL;
+    ret = kadm5_create_principal_3(handle, &ent, mask, 1, ks, NULL);
+    if (ret)
+        return ret;
+
+    /* For better compatibility with pre-1.8 libkadm5 code, we want the
+     * initial history kvno to be 2, so re-randomize it. */
+    return kadm5_randkey_principal_3(handle, ent.principal, 0, 1, ks,
+                                     NULL, NULL);
+}
+
 /*
  * Function: kdb_get_hist_key
  *
- * Purpose: Fetches the current history key
+ * Purpose: Fetches the current history key, creating it if necessary
  *
  * Arguments:
  *
@@ -188,7 +179,8 @@ done:
  *      hist_kvno       (w) kvno to fill in with history kvno
  *
  * Effects: This function looks up the history principal and retrieves the
- * current history key and version.
+ * current history key and version.  If the history principal does not exist,
+ * it will be created.
  */
 krb5_error_code
 kdb_get_hist_key(kadm5_server_handle_t handle, krb5_keyblock *hist_keyblock,
@@ -198,7 +190,14 @@ kdb_get_hist_key(kadm5_server_handle_t handle, krb5_keyblock *hist_keyblock,
     krb5_db_entry kdb;
     krb5_keyblock *mkey;
 
+    /* Fetch the history principal, creating it if necessary. */
     ret = kdb_get_entry(handle, hist_princ, &kdb, NULL);
+    if (ret == KADM5_UNK_PRINC) {
+        ret = create_hist(handle);
+        if (ret)
+            return ret;
+        ret = kdb_get_entry(handle, hist_princ, &kdb, NULL);
+    }
     if (ret)
         return ret;
 
