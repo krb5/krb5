@@ -65,20 +65,23 @@ locate_kpasswd(krb5_context context, const krb5_data *realm,
     int sockType = (useTcp ? SOCK_STREAM : SOCK_DGRAM);
 
     code = krb5int_locate_server (context, realm, addrlist,
-                                  locate_service_kpasswd, sockType, AF_INET);
+                                  locate_service_kpasswd, sockType, AF_UNSPEC);
 
     if (code == KRB5_REALM_CANT_RESOLVE || code == KRB5_REALM_UNKNOWN) {
         code = krb5int_locate_server (context, realm, addrlist,
                                       locate_service_kadmin, SOCK_STREAM,
-                                      AF_INET);
+                                      AF_UNSPEC);
         if (!code) {
             /* Success with admin_server but now we need to change the
                port number to use DEFAULT_KPASSWD_PORT and the socktype.  */
             size_t i;
             for (i=0; i<addrlist->naddrs; i++) {
                 struct addrinfo *a = addrlist->addrs[i].ai;
+                krb5_ui_2 kpasswd_port = htons(DEFAULT_KPASSWD_PORT);
                 if (a->ai_family == AF_INET)
-                    sa2sin (a->ai_addr)->sin_port = htons(DEFAULT_KPASSWD_PORT);
+                    sa2sin (a->ai_addr)->sin_port = kpasswd_port;
+                if (a->ai_family == AF_INET6)
+                    sa2sin6 (a->ai_addr)->sin6_port = kpasswd_port;
                 if (sockType != SOCK_STREAM)
                     a->ai_socktype = sockType;
             }
@@ -131,10 +134,16 @@ kpasswd_sendto_msg_callback(struct conn_state *conn,
     /* some brain-dead OS's don't return useful information from
      * the getsockname call.  Namely, windows and solaris.  */
 
-    if (ss2sin(&local_addr)->sin_addr.s_addr != 0) {
+    if (local_addr.ss_family == AF_INET &&
+        ss2sin(&local_addr)->sin_addr.s_addr != 0) {
         local_kaddr.addrtype = ADDRTYPE_INET;
         local_kaddr.length = sizeof(ss2sin(&local_addr)->sin_addr);
         local_kaddr.contents = (krb5_octet *) &ss2sin(&local_addr)->sin_addr;
+    } else if (local_addr.ss_family == AF_INET6 &&
+               ss2sin6(&local_addr)->sin6_addr.s6_addr != 0) {
+        local_kaddr.addrtype = ADDRTYPE_INET6;
+        local_kaddr.length = sizeof(ss2sin6(&local_addr)->sin6_addr);
+        local_kaddr.contents = (krb5_octet *) &ss2sin6(&local_addr)->sin6_addr;
     } else {
         krb5_address **addrs;
 
@@ -278,9 +287,19 @@ change_set_password(krb5_context context,
             break;
         }
 
-        remote_kaddr.addrtype = ADDRTYPE_INET;
-        remote_kaddr.length = sizeof(ss2sin(&remote_addr)->sin_addr);
-        remote_kaddr.contents = (krb5_octet *) &ss2sin(&remote_addr)->sin_addr;
+        if (remote_addr.ss_family == AF_INET) {
+            remote_kaddr.addrtype = ADDRTYPE_INET;
+            remote_kaddr.length = sizeof(ss2sin(&remote_addr)->sin_addr);
+            remote_kaddr.contents =
+                (krb5_octet *) &ss2sin(&remote_addr)->sin_addr;
+        } else if (remote_addr.ss_family == AF_INET6) {
+            remote_kaddr.addrtype = ADDRTYPE_INET6;
+            remote_kaddr.length = sizeof(ss2sin6(&remote_addr)->sin6_addr);
+            remote_kaddr.contents =
+                (krb5_octet *) &ss2sin6(&remote_addr)->sin6_addr;
+        } else {
+            break;
+        }
 
         if ((code = krb5_auth_con_setaddrs(callback_ctx.context,
                                            callback_ctx.auth_context,
