@@ -934,8 +934,12 @@ verify_ad_signedpath(krb5_context context,
     enc_sp.length = sp_authdata[0]->length;
 
     code = decode_krb5_ad_signedpath(&enc_sp, &sp);
-    if (code != 0)
+    if (code != 0) {
+        /* Treat an invalid signedpath authdata element as a missing one, since
+         * we believe MS is using the same number for something else. */
+        code = 0;
         goto cleanup;
+    }
 
     code = verify_ad_signedpath_checksum(context,
                                          krbtgt,
