@@ -858,8 +858,8 @@ kadm5_get_principal(void *server_handle, krb5_principal principal,
         if (! (mask & KADM5_MOD_TIME))
             entry->mod_date = 0;
         if (! (mask & KADM5_MOD_NAME)) {
-            krb5_free_principal(handle->context, entry->principal);
-            entry->principal = NULL;
+            krb5_free_principal(handle->context, entry->mod_name);
+            entry->mod_name = NULL;
         }
     }
 
@@ -871,10 +871,12 @@ kadm5_get_principal(void *server_handle, krb5_principal principal,
             if (kdb.key_data[i].key_data_kvno > entry->kvno)
                 entry->kvno = kdb.key_data[i].key_data_kvno;
 
-    ret = krb5_dbe_get_mkvno(handle->context, &kdb, master_keylist,
-                             &entry->mkvno);
-    if (ret)
-        goto done;
+    if (mask & KADM5_MKVNO) {
+        ret = krb5_dbe_get_mkvno(handle->context, &kdb, master_keylist,
+                                 &entry->mkvno);
+        if (ret)
+            goto done;
+    }
 
     if (mask & KADM5_MAX_RLIFE)
         entry->max_renewable_life = kdb.max_renewable_life;
