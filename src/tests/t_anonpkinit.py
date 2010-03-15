@@ -3,7 +3,7 @@ from k5test import *
 
 # Skip this test if pkinit wasn't built.
 if not os.path.exists(os.path.join(plugins, 'preauth', 'pkinit.so')):
-    success()
+    success('Warning: not testing pkinit because it is not built.')
     exit(0)
 
 # Construct a krb5.conf fragment configuring pkinit.

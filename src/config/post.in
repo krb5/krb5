@@ -139,8 +139,10 @@ check-pytests:: check-pytests-@HAVE_PYTHON@
 check-pytests-yes:
 	@pytests="$(PYTESTS)"; \
 	for t in $$pytests; do \
-		echo PYTHONPATH=$(top_srcdir)/util VALGRIND="$(VALGRIND)" \
+		echo "$(KRB5_RUN_ENV)" \
+			PYTHONPATH=$(top_srcdir)/util VALGRIND="$(VALGRIND)" \
 			$(PYTHON) $(srcdir)/$$t $(PYTESTFLAGS); \
+		$(KRB5_RUN_ENV) \
 		PYTHONPATH=$(top_srcdir)/util VALGRIND="$(VALGRIND)" \
 			$(PYTHON) $(srcdir)/$$t $(PYTESTFLAGS) || exit 1; \
 	done
