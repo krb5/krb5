@@ -1215,6 +1215,7 @@ prep_reprocess_req(krb5_kdc_req *request, krb5_principal *krbtgt_princ)
         strlcpy(comp1_str,comp1->data,comp1->length+1);
 
         if ((krb5_princ_type(kdc_context, request->server) == KRB5_NT_SRV_HST ||
+             krb5_princ_type(kdc_context, request->server) == KRB5_NT_SRV_INST ||
              (krb5_princ_type(kdc_context, request->server) == KRB5_NT_UNKNOWN &&
               kdc_active_realm->realm_host_based_services != NULL &&
               (krb5_match_config_pattern(kdc_active_realm->realm_host_based_services,
