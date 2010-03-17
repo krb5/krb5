@@ -32,11 +32,7 @@
 #define __KRB5_KDC_UTIL__
 
 #include "kdb.h"
-
-typedef struct _krb5_fulladdr {
-    krb5_address *      address;
-    krb5_ui_4           port;
-} krb5_fulladdr;
+#include "net-server.h"
 
 krb5_error_code check_hot_list (krb5_ticket *);
 krb5_boolean realm_compare (krb5_const_principal, krb5_const_principal);
@@ -137,9 +133,12 @@ process_tgs_req (krb5_data *,
                  krb5_data ** );
 /* dispatch.c */
 krb5_error_code
-dispatch (krb5_data *,
+dispatch (void *,
+          struct sockaddr *,
           const krb5_fulladdr *,
-          krb5_data **);
+          krb5_data *,
+          krb5_data **,
+          int);
 
 /* main.c */
 krb5_error_code kdc_initialize_rcache (krb5_context, char *);
@@ -152,11 +151,6 @@ kdc_err(krb5_context call_context, errcode_t code, const char *fmt, ...)
     __attribute__((__format__(__printf__, 3, 4)))
 #endif
 ;
-
-/* network.c */
-krb5_error_code listen_and_process (void);
-krb5_error_code setup_network (void);
-krb5_error_code closedown_network (void);
 
 /* policy.c */
 int
@@ -240,6 +234,8 @@ void kdc_insert_lookaside (krb5_data *, krb5_data *);
 void kdc_free_lookaside(krb5_context);
 
 /* kdc_util.c */
+void reset_for_hangup(void);
+
 krb5_error_code
 get_principal_locked (krb5_context kcontext,
                       krb5_const_principal search_for,

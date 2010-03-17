@@ -106,7 +106,4 @@ extern const int        kdc_modifies_kdb;
 extern krb5_int32       max_dgram_reply_size; /* maximum datagram size */
 
 extern const int        vague_errors;
-
-extern volatile int signal_requests_exit;
-extern volatile int signal_requests_hup;
 #endif /* __KRB5_KDC_EXTERN__ */

@@ -9,6 +9,7 @@
 #include    <kadm5/server_internal.h>
 #include    <kadm5/server_acl.h>
 #include    "misc.h"
+#include    "net-server.h"
 
 /*
  * Function: chpass_principal_wrapper_3
@@ -223,4 +224,48 @@ trunc_name(size_t *len, char **dots)
 {
     *dots = *len > MAXPRINCLEN ? "..." : "";
     *len = *len > MAXPRINCLEN ? MAXPRINCLEN : *len;
+}
+
+krb5_error_code
+make_toolong_error (void *handle, krb5_data **out)
+{
+    krb5_error errpkt;
+    krb5_error_code retval;
+    krb5_data *scratch;
+    kadm5_server_handle_t server_handle = (kadm5_server_handle_t)handle;
+
+    retval = krb5_us_timeofday(server_handle->context, &errpkt.stime, &errpkt.susec);
+    if (retval)
+        return retval;
+    errpkt.error = KRB_ERR_FIELD_TOOLONG;
+    retval = krb5_build_principal(server_handle->context, &errpkt.server,
+                                  strlen(server_handle->params.realm),
+                                  server_handle->params.realm,
+                                  "kadmin", "changepw", NULL);
+    if (retval)
+        return retval;
+    errpkt.client = NULL;
+    errpkt.cusec = 0;
+    errpkt.ctime = 0;
+    errpkt.text.length = 0;
+    errpkt.text.data = 0;
+    errpkt.e_data.length = 0;
+    errpkt.e_data.data = 0;
+    scratch = malloc(sizeof(*scratch));
+    if (scratch == NULL)
+        return ENOMEM;
+    retval = krb5_mk_error(server_handle->context, &errpkt, scratch);
+    if (retval) {
+        free(scratch);
+        return retval;
+    }
+
+    *out = scratch;
+    return 0;
+}
+
+krb5_context get_context(void *handle)
+{
+    kadm5_server_handle_t server_handle = (kadm5_server_handle_t)handle;
+    return server_handle->context;
 }

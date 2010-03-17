@@ -63,6 +63,7 @@
 #include <syslog.h>
 #include "adm.h"
 #include "adm_proto.h"
+#include "net-server.h"
 #include <limits.h>
 
 #ifdef USE_RCACHE
@@ -2770,4 +2771,51 @@ krb5int_get_domain_realm_mapping(krb5_context context,
 
     *realmsp = retrealms;
     return 0;
+}
+
+krb5_error_code
+make_toolong_error (void *handle, krb5_data **out)
+{
+    krb5_error errpkt;
+    krb5_error_code retval;
+    krb5_data *scratch;
+
+    retval = krb5_us_timeofday(kdc_context, &errpkt.stime, &errpkt.susec);
+    if (retval)
+        return retval;
+    errpkt.error = KRB_ERR_FIELD_TOOLONG;
+    errpkt.server = tgs_server;
+    errpkt.client = NULL;
+    errpkt.cusec = 0;
+    errpkt.ctime = 0;
+    errpkt.text.length = 0;
+    errpkt.text.data = 0;
+    errpkt.e_data.length = 0;
+    errpkt.e_data.data = 0;
+    scratch = malloc(sizeof(*scratch));
+    if (scratch == NULL)
+        return ENOMEM;
+    retval = krb5_mk_error(kdc_context, &errpkt, scratch);
+    if (retval) {
+        free(scratch);
+        return retval;
+    }
+
+    *out = scratch;
+    return 0;
+}
+
+krb5_context get_context(void *handle)
+{
+    return kdc_context;
+}
+
+void reset_for_hangup()
+{
+    int k;
+
+    for (k = 0; k < kdc_numrealms; k++)
+        krb5_db_invoke(kdc_realmlist[k]->realm_context,
+                       KRB5_KDB_METHOD_REFRESH_POLICY,
+                       NULL, NULL);
 }

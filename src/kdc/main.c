@@ -60,6 +60,7 @@
 #include <errno.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #include "k5-int.h"
 #include "com_err.h"
@@ -69,6 +70,7 @@
 #include "extern.h"
 #include "kdc5_err.h"
 #include "kdb_kt.h"
+#include "net-server.h"
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -519,7 +521,7 @@ request_exit(int signo)
 static krb5_sigtype
 request_hup(int signo)
 {
-    signal_requests_hup = 1;
+    signal_requests_reset = 1;
 
 #ifdef POSIX_SIGTYPE
     return;
@@ -865,6 +867,7 @@ int main(int argc, char **argv)
     krb5_error_code     retval;
     krb5_context        kcontext;
     int errout = 0;
+    int i;
 
     if (strrchr(argv[0], '/'))
         argv[0] = strrchr(argv[0], '/')+1;
@@ -915,7 +918,40 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    if ((retval = setup_network())) {
+    /* Handle each realm's ports */
+    for (i=0; i<kdc_numrealms; i++) {
+        char *cp = kdc_realmlist[i]->realm_ports;
+        int port;
+        while (cp && *cp) {
+            if (*cp == ',' || isspace((int) *cp)) {
+                cp++;
+                continue;
+            }
+            port = strtol(cp, &cp, 10);
+            if (cp == 0)
+                break;
+            retval = add_udp_port(port);
+            if (retval)
+                goto net_init_error;
+        }
+
+        cp = kdc_realmlist[i]->realm_tcp_ports;
+        while (cp && *cp) {
+            if (*cp == ',' || isspace((int) *cp)) {
+                cp++;
+                continue;
+            }
+            port = strtol(cp, &cp, 10);
+            if (cp == 0)
+                break;
+            retval = add_tcp_port(port);
+            if (retval)
+                goto net_init_error;
+        }
+    }
+
+    if ((retval = setup_network(NULL, kdc_progname))) {
+    net_init_error:
         kdc_err(kcontext, retval, "while initializing network");
         finish_realms();
         return 1;
@@ -936,14 +972,11 @@ int main(int argc, char **argv)
     krb5_klog_syslog(LOG_INFO, "commencing operation");
     if (nofork)
         fprintf(stderr, "%s: starting...\n", kdc_progname);
-    if ((retval = listen_and_process())) {
+    if ((retval = listen_and_process(0, kdc_progname, reset_for_hangup))) {
         kdc_err(kcontext, retval, "while processing network requests");
         errout++;
     }
-    if ((retval = closedown_network())) {
-        kdc_err(kcontext, retval, "while shutting down network");
-        errout++;
-    }
+    closedown_network();
     krb5_klog_syslog(LOG_INFO, "shutting down");
     unload_preauth_plugins(kcontext);
     unload_authdata_plugins(kcontext);

@@ -13,9 +13,7 @@ DEFS=
 ##DOS##XTRA=
 ##DOS##OBJFILE=$(OUTPRE)apputils.lst
 
-# LIBOBJS may or may not contain daemon.o; dummy.o is just here to
-# avoid having an empty library.
-STLIBOBJS=dummy.o @LIBOBJS@
+STLIBOBJS=net-server.o @LIBOBJS@
 STOBJLISTS=OBJS.ST
 LIBBASE=apputils
 
@@ -28,7 +26,7 @@ LINTFILES= daemon.c
 LIBOBJS=$(OUTPRE)daemon.$(OBJEXT)
 
 SRCS=	$(srcdir)/daemon.c \
-	$(srcdir)/dummy.c
+	$(srcdir)/net-server.c
 
 @libpriv_frag@
 @lib_frag@

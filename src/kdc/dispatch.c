@@ -38,8 +38,11 @@
 
 static krb5_int32 last_usec = 0, last_os_random = 0;
 
+static krb5_error_code make_too_big_error (krb5_data **out);
+
 krb5_error_code
-dispatch(krb5_data *pkt, const krb5_fulladdr *from, krb5_data **response)
+dispatch(void *cb, struct sockaddr *local_saddr, const krb5_fulladdr *from,
+         krb5_data *pkt, krb5_data **response, int is_tcp)
 {
 
     krb5_error_code retval;
@@ -54,6 +57,9 @@ dispatch(krb5_data *pkt, const krb5_fulladdr *from, krb5_data **response)
         /* a hit! */
         const char *name = 0;
         char buf[46];
+
+        if (is_tcp == 0 && (*response)->length > max_dgram_reply_size)
+            goto too_big_for_udp;
 
         name = inet_ntop (ADDRTYPE2FAMILY (from->address->addrtype),
                           from->address->contents, buf, sizeof (buf));
@@ -109,5 +115,49 @@ dispatch(krb5_data *pkt, const krb5_fulladdr *from, krb5_data **response)
         kdc_insert_lookaside(pkt, *response);
 #endif
 
+    if (is_tcp == 0 && (*response)->length > max_dgram_reply_size) {
+    too_big_for_udp:
+        krb5_free_data(kdc_context, *response);
+        retval = make_too_big_error(response);
+        if (retval) {
+            krb5_klog_syslog(LOG_ERR,
+                             "error constructing KRB_ERR_RESPONSE_TOO_BIG error: %s",
+                             error_message(retval));
+        }
+    }
+
     return retval;
+}
+
+static krb5_error_code
+make_too_big_error (krb5_data **out)
+{
+    krb5_error errpkt;
+    krb5_error_code retval;
+    krb5_data *scratch;
+
+    *out = NULL;
+    memset(&errpkt, 0, sizeof(errpkt));
+
+    retval = krb5_us_timeofday(kdc_context, &errpkt.stime, &errpkt.susec);
+    if (retval)
+        return retval;
+    errpkt.error = KRB_ERR_RESPONSE_TOO_BIG;
+    errpkt.server = tgs_server;
+    errpkt.client = NULL;
+    errpkt.text.length = 0;
+    errpkt.text.data = 0;
+    errpkt.e_data.length = 0;
+    errpkt.e_data.data = 0;
+    scratch = malloc(sizeof(*scratch));
+    if (scratch == NULL)
+        return ENOMEM;
+    retval = krb5_mk_error(kdc_context, &errpkt, scratch);
+    if (retval) {
+        free(scratch);
+        return retval;
+    }
+
+    *out = scratch;
+    return 0;
 }

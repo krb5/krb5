@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <errno.h>
 
+#include "kadm5/server_internal.h" /* XXX for kadm5_server_handle_t */
+
 #include "misc.h"
 
 #ifndef GETSOCKNAME_ARG3_TYPE
@@ -475,4 +477,61 @@ bailout:
         krb5_free_error_message(context, errmsg);
 
     return(ret);
+}
+
+/* Dispatch routine for set/change password */
+krb5_error_code
+dispatch(void *handle,
+         struct sockaddr *local_saddr, const krb5_fulladdr *remote_faddr,
+         krb5_data *request, krb5_data **response, int is_tcp)
+{
+    krb5_error_code ret;
+    krb5_keytab kt = NULL;
+    kadm5_server_handle_t server_handle = (kadm5_server_handle_t)handle;
+    krb5_fulladdr local_faddr;
+    krb5_address **local_kaddrs = NULL, local_kaddr_buf;
+
+    *response = NULL;
+
+    if (local_saddr == NULL) {
+        ret = krb5_os_localaddr(server_handle->context, &local_kaddrs);
+        if (ret != 0)
+            goto cleanup;
+
+        local_faddr.address = local_kaddrs[0];
+        local_faddr.port = 0;
+    } else {
+        local_faddr.address = &local_kaddr_buf;
+        init_addr(&local_faddr, local_saddr);
+    }
+
+    ret = krb5_kt_resolve(server_handle->context, "KDB:", &kt);
+    if (ret != 0) {
+        krb5_klog_syslog(LOG_ERR, "chpw: Couldn't open admin keytab %s",
+                         krb5_get_error_message(server_handle->context, ret));
+        goto cleanup;
+    }
+
+    *response = (krb5_data *)malloc(sizeof(krb5_data));
+    if (*response == NULL) {
+        ret = ENOMEM;
+        goto cleanup;
+    }
+
+    ret = process_chpw_request(server_handle->context,
+                               handle,
+                               server_handle->params.realm,
+                               kt,
+                               &local_faddr,
+                               remote_faddr,
+                               request,
+                               *response);
+
+cleanup:
+    if (local_kaddrs != NULL)
+        krb5_free_addresses(server_handle->context, local_kaddrs);
+
+    krb5_kt_close(server_handle->context, kt);
+
+    return ret;
 }

@@ -1,8 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * kadmin/server/network.c
+ * lib/apputils/net-server.c
  *
- * Copyright 1990,2000,2007,2008,2009 by the Massachusetts Institute of Technology.
+ * Copyright 1990,2000,2007,2008,2009,2010 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -24,24 +24,19 @@
  * or implied warranty.
  *
  *
- * Network code for Kerberos v5 kadmin server (based on KDC code).
+ * Network code for Kerberos v5 servers (kdc, kadmind).
  */
 
 #include "k5-int.h"
-#include "com_err.h"
-#include "kadm5/admin.h"
-#include "kadm5/server_internal.h"
-#include "kadm5/kadm_rpc.h"
-#include "iprop.h"
 #include "adm_proto.h"
-#include "misc.h"
 #include <sys/ioctl.h>
 #include <syslog.h>
 
 #include <stddef.h>
-#include <ctype.h>
 #include "port-sockets.h"
 #include "socket-utils.h"
+
+#include <gssrpc/rpc.h>
 
 #ifdef HAVE_NETINET_IN_H
 #include <sys/types.h>
@@ -66,9 +61,14 @@
 #endif
 
 #include "fake-addrinfo.h"
+#include "net-server.h"
 
 /* XXX */
 #define KDC5_NONET                               (-1779992062L)
+
+volatile int signal_requests_exit = 0, signal_requests_reset = 0;
+
+static void closedown_network_sockets(void);
 
 /* Misc utility routines.  */
 static void
@@ -179,7 +179,7 @@ static const char *paddr (struct sockaddr *sa)
     return buf;
 }
 
-/* kadmin data.  */
+/* KDC data.  */
 
 enum conn_type {
     CONN_UDP, CONN_UDP_PKTINFO, CONN_TCP_LISTENER, CONN_TCP,
@@ -281,7 +281,7 @@ static SET(struct rpc_svc_data) rpc_svc_data;
 static struct select_state sstate;
 static fd_set rpc_listenfds;
 
-static krb5_error_code add_udp_port(int port)
+krb5_error_code add_udp_port(int port)
 {
     int i;
     void *tmp;
@@ -299,7 +299,7 @@ static krb5_error_code add_udp_port(int port)
     return 0;
 }
 
-static krb5_error_code add_tcp_port(int port)
+krb5_error_code add_tcp_port(int port)
 {
     int i;
     void *tmp;
@@ -317,8 +317,8 @@ static krb5_error_code add_tcp_port(int port)
     return 0;
 }
 
-static krb5_error_code add_rpc_service(int port, u_long prognum, u_long versnum,
-                                       void (*dispatch)())
+krb5_error_code add_rpc_service(int port, u_long prognum, u_long versnum,
+                                void (*dispatch)())
 {
     int i;
     void *tmp;
@@ -370,7 +370,7 @@ add_fd (struct socksetup *data, int sock, enum conn_type conntype,
         return 0;
     }
 #endif
-    newconn = (struct connection *)malloc(sizeof(*newconn));
+    newconn = malloc(sizeof(*newconn));
     if (newconn == NULL) {
         data->retval = ENOMEM;
         com_err(data->prog, ENOMEM,
@@ -964,7 +964,6 @@ static void process_routing_update(void *handle, struct connection *conn,
     int n_read;
     struct rt_msghdr rtm;
 
-    krb5_klog_syslog(LOG_INFO, "routing socket readable");
     while ((n_read = read(conn->fd, &rtm, sizeof(rtm))) > 0) {
         if (n_read < sizeof(rtm)) {
             /* Quick hack to figure out if the interesting
@@ -983,10 +982,12 @@ static void process_routing_update(void *handle, struct connection *conn,
                 return;
             }
         }
+#if 0
         krb5_klog_syslog(LOG_INFO,
                          "got routing msg type %d(%s) v%d",
                          rtm.rtm_type, rtm_type_name(rtm.rtm_type),
                          rtm.rtm_version);
+#endif
         if (rtm.rtm_msglen > sizeof(rtm)) {
             /* It appears we get a partial message and the rest is
                thrown away?  */
@@ -1003,7 +1004,35 @@ static void process_routing_update(void *handle, struct connection *conn,
         case RTM_IFINFO:
         case RTM_OLDADD:
         case RTM_OLDDEL:
-            krb5_klog_syslog(LOG_INFO, "reconfiguration needed");
+            /*
+             * Some flags indicate routing table updates that don't
+             * indicate local address changes.  They may come from
+             * redirects, or ARP, etc.
+             *
+             * This set of symbols is just an initial guess based on
+             * some messages observed in real life; working out which
+             * other flags also indicate messages we should ignore,
+             * and which flags are portable to all system and thus
+             * don't need to be conditionalized, is left as a future
+             * exercise.
+             */
+#ifdef RTF_DYNAMIC
+            if (rtm.rtm_flags & RTF_DYNAMIC)
+                break;
+#endif
+#ifdef RTF_CLONED
+            if (rtm.rtm_flags & RTF_CLONED)
+                break;
+#endif
+#ifdef RTF_LLINFO
+            if (rtm.rtm_flags & RTF_LLINFO)
+                break;
+#endif
+#if 0
+            krb5_klog_syslog(LOG_DEBUG,
+                             "network reconfiguration message (%s) received",
+                             rtm_type_name(rtm.rtm_type));
+#endif
             network_reconfiguration_needed = 1;
             break;
         case RTM_RESOLVE:
@@ -1016,10 +1045,14 @@ static void process_routing_update(void *handle, struct connection *conn,
         case RTM_LOSING:
         case RTM_GET:
             /* Not interesting.  */
+#if 0
             krb5_klog_syslog(LOG_DEBUG, "routing msg not interesting");
+#endif
             break;
         default:
-            krb5_klog_syslog(LOG_INFO, "unhandled routing message type, will reconfigure just for the fun of it");
+            krb5_klog_syslog(LOG_INFO,
+                             "unhandled routing message type %d, will reconfigure just for the fun of it",
+                             rtm.rtm_type);
             network_reconfiguration_needed = 1;
             break;
         }
@@ -1051,8 +1084,6 @@ krb5_error_code
 setup_network(void *handle, const char *prog)
 {
     struct socksetup setup_data;
-    krb5_error_code retval;
-    kadm5_server_handle_t server_handle = (kadm5_server_handle_t)handle;
 
     FD_ZERO(&sstate.rfds);
     FD_ZERO(&sstate.wfds);
@@ -1061,30 +1092,6 @@ setup_network(void *handle, const char *prog)
 
 /*    krb5int_debug_sendto_kdc = 1; */
     krb5int_sendtokdc_debug_handler = klog_handler;
-
-    retval = add_udp_port(server_handle->params.kpasswd_port);
-    if (retval)
-        return retval;
-
-    retval = add_tcp_port(server_handle->params.kpasswd_port);
-    if (retval)
-        return retval;
-
-    retval = add_rpc_service(server_handle->params.kadmind_port,
-                             KADM, KADMVERS,
-                             kadm_1);
-    if (retval)
-        return retval;
-
-#ifndef DISABLE_IPROP
-    if (server_handle->params.iprop_enabled) {
-        retval = add_rpc_service(server_handle->params.iprop_port,
-                                 KRB5_IPROP_PROG, KRB5_IPROP_VERS,
-                                 krb5_iprop_prog_1);
-        if (retval)
-            return retval;
-    }
-#endif /* DISABLE_IPROP */
 
     setup_data.prog = prog;
     setup_data.retval = 0;
@@ -1114,7 +1121,7 @@ setup_network(void *handle, const char *prog)
     return 0;
 }
 
-static void init_addr(krb5_fulladdr *faddr, struct sockaddr *sa)
+void init_addr(krb5_fulladdr *faddr, struct sockaddr *sa)
 {
     switch (sa->sa_family) {
     case AF_INET:
@@ -1332,63 +1339,6 @@ send_to_from(int s, void *buf, size_t len, int flags,
 #endif
 }
 
-/* Dispatch routine for set/change password */
-static krb5_error_code
-dispatch(void *handle,
-         struct sockaddr *local_saddr, krb5_fulladdr *remote_faddr,
-         krb5_data *request, krb5_data **response)
-{
-    krb5_error_code ret;
-    krb5_keytab kt = NULL;
-    kadm5_server_handle_t server_handle = (kadm5_server_handle_t)handle;
-    krb5_fulladdr local_faddr;
-    krb5_address **local_kaddrs = NULL, local_kaddr_buf;
-
-    *response = NULL;
-
-    if (local_saddr == NULL) {
-        ret = krb5_os_localaddr(server_handle->context, &local_kaddrs);
-        if (ret != 0)
-            goto cleanup;
-
-        local_faddr.address = local_kaddrs[0];
-        local_faddr.port = 0;
-    } else {
-        local_faddr.address = &local_kaddr_buf;
-        init_addr(&local_faddr, local_saddr);
-    }
-
-    ret = krb5_kt_resolve(server_handle->context, "KDB:", &kt);
-    if (ret != 0) {
-        krb5_klog_syslog(LOG_ERR, "chpw: Couldn't open admin keytab %s",
-                         krb5_get_error_message(server_handle->context, ret));
-        goto cleanup;
-    }
-
-    *response = (krb5_data *)malloc(sizeof(krb5_data));
-    if (*response == NULL) {
-        ret = ENOMEM;
-        goto cleanup;
-    }
-
-    ret = process_chpw_request(server_handle->context,
-                               handle,
-                               server_handle->params.realm,
-                               kt,
-                               &local_faddr,
-                               remote_faddr,
-                               request,
-                               *response);
-
-cleanup:
-    if (local_kaddrs != NULL)
-        krb5_free_addresses(server_handle->context, local_kaddrs);
-
-    krb5_kt_close(server_handle->context, kt);
-
-    return ret;
-}
-
 static void process_packet(void *handle,
                            struct connection *conn, const char *prog,
                            int selflags)
@@ -1404,7 +1354,6 @@ static void process_packet(void *handle,
     char pktbuf[MAX_DGRAM_SIZE];
     int port_fd = conn->fd;
     union aux_addressing_info auxaddr;
-    kadm5_server_handle_t server_handle = (kadm5_server_handle_t)handle;
 
     response = NULL;
     saddr_len = sizeof(saddr);
@@ -1453,7 +1402,7 @@ static void process_packet(void *handle,
     faddr.address = &addr;
     init_addr(&faddr, ss2sa(&saddr));
     /* this address is in net order */
-    if ((retval = dispatch(handle, ss2sa(&daddr), &faddr, &request, &response))) {
+    if ((retval = dispatch(handle, ss2sa(&daddr), &faddr, &request, &response, 0))) {
         com_err(prog, retval, "while dispatching (udp)");
         return;
     }
@@ -1471,7 +1420,7 @@ static void process_packet(void *handle,
         char saddrbuf[NI_MAXHOST], sportbuf[NI_MAXSERV];
         char daddrbuf[NI_MAXHOST];
         int e = errno;
-        krb5_free_data(server_handle->context, response);
+        krb5_free_data(get_context(handle), response);
         if (getnameinfo((struct sockaddr *)&daddr, daddr_len,
                         daddrbuf, sizeof(daddrbuf), 0, 0,
                         NI_NUMERICHOST) != 0) {
@@ -1491,7 +1440,7 @@ static void process_packet(void *handle,
         com_err(prog, 0, "short reply write %d vs %d\n",
                 response->length, cc);
     }
-    krb5_free_data(server_handle->context, response);
+    krb5_free_data(get_context(handle), response);
     return;
 }
 
@@ -1613,13 +1562,11 @@ static void accept_tcp_connection(void *handle,
 static void
 kill_tcp_or_rpc_connection(void *handle, struct connection *conn, int isForcedClose)
 {
-    kadm5_server_handle_t server_handle = (kadm5_server_handle_t)handle;
-
     assert(conn->type == CONN_TCP || conn->type == CONN_RPC);
     assert(conn->fd != -1);
 
     if (conn->u.tcp.response)
-        krb5_free_data(server_handle->context, conn->u.tcp.response);
+        krb5_free_data(get_context(handle), conn->u.tcp.response);
     if (conn->u.tcp.buffer)
         free(conn->u.tcp.buffer);
     FD_CLR(conn->fd, &sstate.rfds);
@@ -1655,44 +1602,6 @@ kill_tcp_or_rpc_connection(void *handle, struct connection *conn, int isForcedCl
     conn->fd = -1;
     delete_fd(conn);
     tcp_or_rpc_data_counter--;
-}
-
-static krb5_error_code
-make_toolong_error (void *handle, krb5_data **out)
-{
-    krb5_error errpkt;
-    krb5_error_code retval;
-    krb5_data *scratch;
-    kadm5_server_handle_t server_handle = (kadm5_server_handle_t)handle;
-
-    retval = krb5_us_timeofday(server_handle->context, &errpkt.stime, &errpkt.susec);
-    if (retval)
-        return retval;
-    errpkt.error = KRB_ERR_FIELD_TOOLONG;
-    retval = krb5_build_principal(server_handle->context, &errpkt.server,
-                                  strlen(server_handle->params.realm),
-                                  server_handle->params.realm,
-                                  "kadmin", "changepw", NULL);
-    if (retval)
-        return retval;
-    errpkt.client = NULL;
-    errpkt.cusec = 0;
-    errpkt.ctime = 0;
-    errpkt.text.length = 0;
-    errpkt.text.data = 0;
-    errpkt.e_data.length = 0;
-    errpkt.e_data.data = 0;
-    scratch = malloc(sizeof(*scratch));
-    if (scratch == NULL)
-        return ENOMEM;
-    retval = krb5_mk_error(server_handle->context, &errpkt, scratch);
-    if (retval) {
-        free(scratch);
-        return retval;
-    }
-
-    *out = scratch;
-    return 0;
 }
 
 static void
@@ -1819,7 +1728,7 @@ process_tcp_connection(void *handle,
             }
 
             err = dispatch(handle, local_saddrp, &conn->u.tcp.faddr,
-                           &request, &conn->u.tcp.response);
+                           &request, &conn->u.tcp.response, 1);
             if (err) {
                 com_err(prog, err, "while dispatching (tcp)");
                 goto kill_tcp_connection;
@@ -1858,7 +1767,8 @@ static int getcurtime(struct timeval *tvp)
 }
 
 krb5_error_code
-listen_and_process(void *handle, const char *prog)
+listen_and_process(void *handle, const char *prog,
+                   void (*reset)(void))
 {
     int                 nfound;
     /* This struct contains 3 fd_set objects; on some platforms, they
@@ -1867,29 +1777,21 @@ listen_and_process(void *handle, const char *prog)
     static struct select_state sout;
     int                 i, sret, netchanged = 0;
     krb5_error_code     err;
-    kadm5_server_handle_t server_handle = (kadm5_server_handle_t)handle;
 
     if (conns == (struct connection **) NULL)
         return KDC5_NONET;
 
-    while (!signal_request_exit) {
-        if (signal_request_hup) {
-            krb5_klog_reopen(server_handle->context);
-            reset_db();
-            signal_request_hup = 0;
+    while (!signal_requests_exit) {
+        if (signal_requests_reset) {
+            krb5_klog_reopen(get_context(handle));
+            reset();
+            signal_requests_reset = 0;
         }
-#ifdef PURIFY
-        if (signal_pure_report) {
-            purify_new_reports();
-            signal_pure_report = 0;
-        }
-        if (signal_pure_clear) {
-            purify_clear_new_reports();
-            signal_pure_clear = 0;
-        }
-#endif /* PURIFY */
+
         if (network_reconfiguration_needed) {
-            krb5_klog_syslog(LOG_INFO, "network reconfiguration needed");
+            /* No point in re-logging what we've just logged.  */
+            if (netchanged == 0)
+                krb5_klog_syslog(LOG_INFO, "network reconfiguration needed");
             /* It might be tidier to add a timer-callback interface to
                the control loop here, but for this one use, it's not a
                big deal.  */
@@ -1911,7 +1813,7 @@ listen_and_process(void *handle, const char *prog)
         }
         if (sret == 0 && netchanged) {
             network_reconfiguration_needed = 0;
-            closedown_network(handle, prog);
+            closedown_network_sockets();
             err = setup_network(handle, prog);
             if (err) {
                 com_err(prog, err, "while reinitializing network");
@@ -1941,14 +1843,14 @@ listen_and_process(void *handle, const char *prog)
     return 0;
 }
 
-krb5_error_code
-closedown_network(void *handle, const char *prog)
+static void
+closedown_network_sockets()
 {
     int i;
     struct connection *conn;
 
     if (conns == (struct connection **) NULL)
-        return KDC5_NONET;
+        return;
 
     FOREACH_ELT (connections, i, conn) {
         if (conn->fd >= 0) {
@@ -1974,12 +1876,16 @@ closedown_network(void *handle, const char *prog)
            progress.  */
         free(conn);
     }
+}
+
+void
+closedown_network()
+{
+    closedown_network_sockets();
     FREE_SET_DATA(connections);
     FREE_SET_DATA(udp_port_data);
     FREE_SET_DATA(tcp_port_data);
     FREE_SET_DATA(rpc_svc_data);
-
-    return 0;
 }
 
 static void accept_rpc_connection(void *handle, struct connection *conn,
