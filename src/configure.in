@@ -930,19 +930,13 @@ AC_SUBST(HAVE_RUNTEST)
 
 # For Python tests.
 AC_CHECK_PROG(PYTHON,python,python)
+HAVE_PYTHON=no
 if test x"$PYTHON" != x; then
 	# k5test.py requires python 2.4 (for the subprocess module).
-	pyversion=$(python --version 2>&1 | awk '{print $2}')
-	case $pyversion in
-	1.*|2.0.*|2.1.*|2.2.*|2.3.*)
-		HAVE_PYTHON=no
-		;;
-	*)
+    	vercheck="import sys;sys.exit((sys.hexversion < 0x2040000) and 1 or 0)"
+	if python -c "$vercheck"; then
 		HAVE_PYTHON=yes
-		;;
-	esac
-else
-	HAVE_PYTHON=no
+	fi
 fi
 AC_SUBST(HAVE_PYTHON)
 
