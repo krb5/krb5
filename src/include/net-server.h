@@ -45,7 +45,7 @@ krb5_error_code add_rpc_service(int port, u_long prognum, u_long versnum,
                                 void (*dispatch)());
 krb5_error_code setup_network(void *handle, const char *prog);
 krb5_error_code listen_and_process(void *handle, const char *prog,
-				   void (*reset)(void));
+                                   void (*reset)(void));
 void closedown_network(void);
 
 /* to be supplied by the server application */
@@ -60,11 +60,11 @@ void closedown_network(void);
  * listen_and_process can accept.
  */
 krb5_error_code dispatch (void *handle,
-			  struct sockaddr *local_addr,
-			  const krb5_fulladdr *remote_addr,
-			  krb5_data *request,
-			  krb5_data **response,
-			  int is_tcp);
+                          struct sockaddr *local_addr,
+                          const krb5_fulladdr *remote_addr,
+                          krb5_data *request,
+                          krb5_data **response,
+                          int is_tcp);
 krb5_error_code make_toolong_error (void *handle, krb5_data **);
 
 /*
