@@ -30,6 +30,7 @@
 
 
 #include "k5-int.h"
+#include "int-proto.h"
 #include "auth_con.h"
 
 /*
