@@ -220,6 +220,10 @@ If this flag is set, then an attempt to get initial credentials will
 fail if the client machine does not have a keytab.  The default for the
 flag is false.
 
+.IP ticket_lifetime
+The value of this tag is the default lifetime for initial tickets.  The
+default value for the tag is 1 day (1d).
+
 .IP renew_lifetime
 The value of this tag is the default renewable lifetime for initial
 tickets.  The default value for the tag is 0.

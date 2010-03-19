@@ -516,13 +516,6 @@ DCE do not support the default cache as created by this version of
 Kerberos.  Use a value of 1 on DCE 1.0.3a systems, and a value of 2 on
 DCE 1.1 systems.  The default value is @value{DefaultCcacheType}.
 
-@ignore
-@itemx tkt_lifetime
-The default lifetime of a ticket.  The default is
-@value{DefaultTktLifetime}.  This is currently not supported by the
-code.
-@end ignore
-
 @itemx dns_lookup_kdc
 Indicate whether DNS SRV records should be used to locate the KDCs and
 other servers for a realm, if they are not listed in the information for
@@ -582,6 +575,11 @@ be tried if the first attempt fails.
 If this flag is set, then an attempt to get initial credentials will
 fail if the client machine does not have a keytab.  The default for the
 flag is @value{DefaultVerifyApReqNofail}.
+
+@itemx ticket_lifetime
+The value of this tag is the default lifetime for
+initial tickets.  The default value for the tag is
+@value{DefaultTktLifetime}.
 
 @itemx renew_lifetime
 The value of this tag is the default renewable lifetime for
