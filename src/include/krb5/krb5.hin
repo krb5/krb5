@@ -1066,7 +1066,7 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 #define KRB5_AUTHDATA_SESAME    65
 #define KRB5_AUTHDATA_WIN2K_PAC 128
 #define KRB5_AUTHDATA_ETYPE_NEGOTIATION 129     /* RFC 4537 */
-#define KRB5_AUTHDATA_SIGNTICKET        142
+#define KRB5_AUTHDATA_SIGNTICKET        512     /* formerly 142 in krb5 1.8 */
 #define KRB5_AUTHDATA_FX_ARMOR 71
 /* password change constants */
 
