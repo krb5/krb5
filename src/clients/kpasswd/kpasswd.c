@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 {
     krb5_error_code ret;
     krb5_context context;
-    krb5_principal princ;
+    krb5_principal princ = NULL;
     char *pname;
     krb5_ccache ccache;
     krb5_get_init_creds_opt *opts = NULL;
@@ -84,23 +84,27 @@ int main(int argc, char *argv[])
             com_err(argv[0], ret, "parsing client name");
             exit(1);
         }
-    } else if ((ret = krb5_cc_default(context, &ccache)) != KRB5_CC_NOTFOUND) {
-        if (ret) {
+    } else {
+        ret = krb5_cc_default(context, &ccache);
+        if (ret != 0) {
             com_err(argv[0], ret, "opening default ccache");
             exit(1);
         }
 
-        if ((ret = krb5_cc_get_principal(context, ccache, &princ))) {
+        ret = krb5_cc_get_principal(context, ccache, &princ);
+        if (ret != 0 && ret != KRB5_CC_NOTFOUND && ret != KRB5_FCC_NOFILE) {
             com_err(argv[0], ret, "getting principal from ccache");
             exit(1);
         }
 
-        if ((ret = krb5_cc_close(context, ccache))) {
+        ret = krb5_cc_close(context, ccache);
+        if (ret != 0) {
             com_err(argv[0], ret, "closing ccache");
             exit(1);
         }
-    } else {
-        get_name_from_passwd_file(argv[0], context, &princ);
+
+        if (princ == NULL)
+            get_name_from_passwd_file(argv[0], context, &princ);
     }
 
     if ((ret = krb5_get_init_creds_opt_alloc(context, &opts))) {
