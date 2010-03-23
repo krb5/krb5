@@ -2007,7 +2007,7 @@ krb5_dbe_find_mkey(krb5_context         context,
     krb5_error_code retval;
     krb5_keylist_node *cur_keyblock = mkey_list;
 
-    retval = krb5_dbe_lookup_mkvno(context, entry, &mkvno);
+    retval = krb5_dbe_get_mkvno(context, entry, mkey_list, &mkvno);
     if (retval)
         return (retval);
 
@@ -2304,8 +2304,8 @@ krb5_dbe_lookup_mkvno(krb5_context	context,
 	return (code);
 
     if (tl_data.tl_data_length == 0) {
-	*mkvno = 1; /* default for princs that lack the KRB5_TL_MKVNO data */
-	return (0);
+	*mkvno = 0; /* Indicates KRB5_TL_MKVNO data not present */
+        return (0);
     } else if (tl_data.tl_data_length != 2) {
 	return (KRB5_KDB_TRUNCATED_RECORD);
     }
@@ -2313,6 +2313,38 @@ krb5_dbe_lookup_mkvno(krb5_context	context,
     krb5_kdb_decode_int16(tl_data.tl_data_contents, tmp);
     *mkvno = (krb5_kvno) tmp;
     return (0);
+}
+
+krb5_error_code
+krb5_dbe_get_mkvno(krb5_context        context,
+                   krb5_db_entry     * entry,
+                   krb5_keylist_node * mkey_list,
+                   krb5_kvno         * mkvno)
+{
+    krb5_error_code code;
+    krb5_kvno kvno;
+
+    if (mkey_list == NULL)
+        return EINVAL;
+
+    /* Output the value from entry tl_data if present. */
+    code = krb5_dbe_lookup_mkvno(context, entry, &kvno);
+    if (code != 0)
+        return code;
+    if (kvno != 0) {
+        *mkvno = kvno;
+        return 0;
+    }
+
+    /* Determine the minimum kvno in mkey_list and output that. */
+    kvno = (krb5_kvno) -1;
+    while (mkey_list != NULL) {
+        if (mkey_list->kvno < kvno)
+            kvno = mkey_list->kvno;
+        mkey_list = mkey_list->next;
+    }
+    *mkvno = kvno;
+    return 0;
 }
 
 krb5_error_code

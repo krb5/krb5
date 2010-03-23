@@ -868,7 +868,8 @@ kadm5_get_principal(void *server_handle, krb5_principal principal,
 	      if (kdb.key_data[i].key_data_kvno > entry->kvno)
 		   entry->kvno = kdb.key_data[i].key_data_kvno;
 
-    ret = krb5_dbe_lookup_mkvno(handle->context, &kdb, &entry->mkvno);
+    ret = krb5_dbe_get_mkvno(handle->context, &kdb, master_keylist,
+                             &entry->mkvno);
     if (ret)
 	goto done;
 
