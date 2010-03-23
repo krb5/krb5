@@ -6,7 +6,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 SRCS= $(srcdir)/t_imp_name.c $(srcdir)/t_s4u.c $(srcdir)/t_namingexts.c $(srcdir)/t_gssexts.c
 
-OBJS= t_imp_name.o t_s4u.o t_namingexts.o t_gssexts.o
+OBJS= t_imp_name.o t_s4u.o t_namingexts.o t_gssexts.o t_spnego.o
 
 PYTESTS= t_gssapi.py
 
