@@ -106,12 +106,13 @@ krb5_gss_import_sec_context(minor_status, interprocess_token, context_handle)
     ibp = (krb5_octet *) interprocess_token->value;
     blen = (size_t) interprocess_token->length;
     kret = kg_ctx_internalize(context, (krb5_pointer *) &ctx, &ibp, &blen);
-    krb5_free_context(context);
     if (kret) {
         *minor_status = (OM_uint32) kret;
         save_error_info(*minor_status, context);
+        krb5_free_context(context);
         return(GSS_S_FAILURE);
     }
+    krb5_free_context(context);
 
     /* intern the context handle */
     if (! kg_save_ctx_id((gss_ctx_id_t) ctx)) {
