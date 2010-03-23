@@ -101,17 +101,6 @@ typedef struct _krb5_trusted_ca {
     } u;
 } krb5_trusted_ca;
 
-/* typed data */
-/* The FAST error handling logic currently assumes that this structure  and krb5_pa_data * can be safely cast to each other
- * if this structure changes, that code needs to be updated to copy.
- */
-typedef struct _krb5_typed_data {
-    krb5_magic magic;
-    krb5_int32  type;
-    unsigned int length;
-    krb5_octet *data;
-} krb5_typed_data;
-
 /* PA-PK-AS-REQ (Draft 9 -- PA TYPE 14) */
 typedef struct _krb5_pa_pk_as_req_draft9 {
     krb5_octet_data signedAuthPack;
