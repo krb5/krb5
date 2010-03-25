@@ -72,14 +72,14 @@ process_preauth(krb5_context context, void *plugin_context,
                              salt, s2kparams,
                              as_key, gak_data);
     }
-    if (padata->length) {
+    if (retval == 0 && padata->length) {
         krb5_enc_data *enc = NULL;
         krb5_data scratch;
         scratch.length = padata->length;
         scratch.data = (char *) padata->contents;
-        if (retval == 0)
-            retval = krb5_c_fx_cf2_simple(context,armor_key, "kdcchallengearmor",
-                                          as_key, "challengelongterm", &challenge_key);
+        retval = krb5_c_fx_cf2_simple(context,armor_key, "kdcchallengearmor",
+                                      as_key, "challengelongterm",
+                                      &challenge_key);
         if (retval == 0)
             retval =kaccess.decode_enc_data(&scratch, &enc);
         scratch.data = NULL;
@@ -104,15 +104,14 @@ process_preauth(krb5_context context, void *plugin_context,
             fast_set_kdc_verified(context, get_data_proc, rock);
         if (enc)
             kaccess.free_enc_data(context, enc);
-    } else { /*No padata; we send*/
+    } else if (retval == 0) { /*No padata; we send*/
         krb5_enc_data enc;
         krb5_pa_data *pa = NULL;
         krb5_pa_data **pa_array = NULL;
         krb5_data *encoded_ts = NULL;
         krb5_pa_enc_ts ts;
         enc.ciphertext.data = NULL;
-        if (retval == 0)
-            retval = krb5_us_timeofday(context, &ts.patimestamp, &ts.pausec);
+        retval = krb5_us_timeofday(context, &ts.patimestamp, &ts.pausec);
         if (retval == 0)
             retval = kaccess.encode_enc_ts(&ts, &encoded_ts);
         if (retval == 0)
