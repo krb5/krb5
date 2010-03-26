@@ -81,11 +81,11 @@ static void clean_cc_tgts(struct tr_state *);
 struct tr_state {
     krb5_context ctx;
     krb5_ccache ccache;
-    krb5_principal *kdc_list;
+    krb5_principal *realm_list;
     unsigned int nkdcs;
-    krb5_principal *cur_kdc;
-    krb5_principal *nxt_kdc;
-    krb5_principal *lst_kdc;
+    krb5_principal *cur_realm;
+    krb5_principal *nxt_realm;
+    krb5_principal *lst_realm;
     krb5_creds *cur_tgt;
     krb5_creds *nxt_tgt;
     krb5_creds **kdc_tgts;
@@ -156,7 +156,7 @@ static krb5_error_code tgt_mcred(krb5_context, krb5_principal,
                                  krb5_principal, krb5_principal, krb5_creds *);
 static krb5_error_code retr_local_tgt(struct tr_state *, krb5_principal);
 static krb5_error_code try_ccache(struct tr_state *, krb5_creds *);
-static krb5_error_code find_nxt_kdc(struct tr_state *);
+static krb5_error_code find_nxt_realm(struct tr_state *);
 static krb5_error_code try_kdc(struct tr_state *, krb5_creds *);
 static krb5_error_code kdc_mcred(struct tr_state *, krb5_principal,
                                  krb5_creds *mcreds);
@@ -244,25 +244,25 @@ static void
 tr_dbg(struct tr_state *ts, const char *prog)
 {
     krb5_error_code retval;
-    char *cur_tgt_str, *cur_kdc_str, *nxt_kdc_str;
+    char *cur_tgt_str, *cur_realm_str, *nxt_realm_str;
 
-    cur_tgt_str = cur_kdc_str = nxt_kdc_str = NULL;
+    cur_tgt_str = cur_realm_str = nxt_realm_str = NULL;
     retval = krb5_unparse_name(ts->ctx, ts->cur_tgt->server, &cur_tgt_str);
     if (retval) goto cleanup;
-    retval = krb5_unparse_name(ts->ctx, *ts->cur_kdc, &cur_kdc_str);
+    retval = krb5_unparse_name(ts->ctx, *ts->cur_realm, &cur_realm_str);
     if (retval) goto cleanup;
-    retval = krb5_unparse_name(ts->ctx, *ts->nxt_kdc, &nxt_kdc_str);
+    retval = krb5_unparse_name(ts->ctx, *ts->nxt_realm, &nxt_realm_str);
     if (retval) goto cleanup;
     fprintf(stderr, "%s: cur_tgt %s\n", prog, cur_tgt_str);
-    fprintf(stderr, "%s: cur_kdc %s\n", prog, cur_kdc_str);
-    fprintf(stderr, "%s: nxt_kdc %s\n", prog, nxt_kdc_str);
+    fprintf(stderr, "%s: cur_realm %s\n", prog, cur_realm_str);
+    fprintf(stderr, "%s: nxt_realm %s\n", prog, nxt_realm_str);
 cleanup:
     if (cur_tgt_str)
         krb5_free_unparsed_name(ts->ctx, cur_tgt_str);
-    if (cur_kdc_str)
-        krb5_free_unparsed_name(ts->ctx, cur_kdc_str);
-    if (nxt_kdc_str)
-        krb5_free_unparsed_name(ts->ctx, nxt_kdc_str);
+    if (cur_realm_str)
+        krb5_free_unparsed_name(ts->ctx, cur_realm_str);
+    if (nxt_realm_str)
+        krb5_free_unparsed_name(ts->ctx, nxt_realm_str);
 }
 
 static void
@@ -324,7 +324,7 @@ cleanup:
 /*
  * init_rtree()
  *
- * Populate KDC_LIST with the output of krb5_walk_realm_tree().
+ * Populate REALM_LIST with the output of krb5_walk_realm_tree().
  */
 static krb5_error_code
 init_rtree(struct tr_state *ts,
@@ -332,19 +332,19 @@ init_rtree(struct tr_state *ts,
 {
     krb5_error_code retval;
 
-    ts->kdc_list = NULL;
+    ts->realm_list = NULL;
     retval = krb5_walk_realm_tree(ts->ctx, krb5_princ_realm(ts->ctx, client),
                                   krb5_princ_realm(ts->ctx, server),
-                                  &ts->kdc_list, KRB5_REALM_BRANCH_CHAR);
+                                  &ts->realm_list, KRB5_REALM_BRANCH_CHAR);
     if (retval)
         return retval;
 
-    for (ts->nkdcs = 0; ts->kdc_list[ts->nkdcs]; ts->nkdcs++) {
-        assert(krb5_princ_size(ts->ctx, ts->kdc_list[ts->nkdcs]) == 2);
-        TR_DBG_RTREE(ts, "init_rtree", ts->kdc_list[ts->nkdcs]);
+    for (ts->nkdcs = 0; ts->realm_list[ts->nkdcs]; ts->nkdcs++) {
+        assert(krb5_princ_size(ts->ctx, ts->realm_list[ts->nkdcs]) == 2);
+        TR_DBG_RTREE(ts, "init_rtree", ts->realm_list[ts->nkdcs]);
     }
     assert(ts->nkdcs > 1);
-    ts->lst_kdc = ts->kdc_list + ts->nkdcs - 1;
+    ts->lst_realm = ts->realm_list + ts->nkdcs - 1;
 
     ts->kdc_tgts = calloc(ts->nkdcs + 1, sizeof(krb5_creds));
     if (ts->kdc_tgts == NULL)
@@ -404,19 +404,19 @@ try_ccache(struct tr_state *ts, krb5_creds *tgtq)
 }
 
 /*
- * find_nxt_kdc()
+ * find_nxt_realm()
  *
  * A NXT_TGT gotten from an intermediate KDC might actually be a
- * referral.  Search KDC_LIST forward starting from CUR_KDC, looking
+ * referral.  Search REALM_LIST forward starting from CUR_REALM, looking
  * for the KDC with the same remote realm as NXT_TGT.  If we don't
  * find it, the intermediate KDC is leading us off the transit path.
  *
- * Match on CUR_KDC's remote realm, not local realm, because, among
+ * Match on CUR_REALM's remote realm, not local realm, because, among
  * other reasons, we can get a referral to the final realm; e.g.,
  * given
  *
- *     KDC_LIST == { krbtgt/R1@R1, krbtgt/R2@R1, krbtgt/R3@R2,
- *                   krbtgt/R4@R3, NULL }
+ *     REALM_LIST == { krbtgt/R1@R1, krbtgt/R2@R1, krbtgt/R3@R2,
+ *                     krbtgt/R4@R3, NULL }
  *     CUR_TGT->SERVER == krbtgt/R2@R1
  *     NXT_TGT->SERVER == krbtgt/R4@R2
  *
@@ -425,15 +425,15 @@ try_ccache(struct tr_state *ts, krb5_creds *tgtq)
  * with R3 as its local realm.
  *
  * Set up for next iteration of do_traversal() loop by pointing
- * NXT_KDC to one entry forward of the match.
+ * NXT_REALM to one entry forward of the match.
  */
 static krb5_error_code
-find_nxt_kdc(struct tr_state *ts)
+find_nxt_realm(struct tr_state *ts)
 {
     krb5_data *r1, *r2;
     krb5_principal *kdcptr;
 
-    TR_DBG(ts, "find_nxt_kdc");
+    TR_DBG(ts, "find_nxt_realm");
     assert(ts->ntgts > 0);
     assert(ts->nxt_tgt == ts->kdc_tgts[ts->ntgts-1]);
     if (krb5_princ_size(ts->ctx, ts->nxt_tgt->server) != 2)
@@ -441,7 +441,7 @@ find_nxt_kdc(struct tr_state *ts)
 
     r1 = krb5_princ_component(ts->ctx, ts->nxt_tgt->server, 1);
 
-    for (kdcptr = ts->cur_kdc + 1; *kdcptr != NULL; kdcptr++) {
+    for (kdcptr = ts->cur_realm + 1; *kdcptr != NULL; kdcptr++) {
 
         r2 = krb5_princ_component(ts->ctx, *kdcptr, 1);
 
@@ -450,16 +450,16 @@ find_nxt_kdc(struct tr_state *ts)
         }
     }
     if (*kdcptr != NULL) {
-        ts->nxt_kdc = kdcptr;
-        TR_DBG_RET(ts, "find_nxt_kdc", 0);
+        ts->nxt_realm = kdcptr;
+        TR_DBG_RET(ts, "find_nxt_realm", 0);
         return 0;
     }
 
-    r2 = krb5_princ_component(ts->ctx, ts->kdc_list[0], 1);
+    r2 = krb5_princ_component(ts->ctx, ts->realm_list[0], 1);
     if (r1 != NULL && r2 != NULL &&
         r1->length == r2->length &&
         !memcmp(r1->data, r2->data, r1->length)) {
-        TR_DBG_RET(ts, "find_nxt_kdc: looped back to local",
+        TR_DBG_RET(ts, "find_nxt_realm: looped back to local",
                    KRB5_KDCREP_MODIFIED);
         return KRB5_KDCREP_MODIFIED;
     }
@@ -469,7 +469,7 @@ find_nxt_kdc(struct tr_state *ts)
      * referral.
      */
     ts->offpath_tgt = ts->nxt_tgt;
-    if (ts->cur_kdc == ts->kdc_list) {
+    if (ts->cur_realm == ts->realm_list) {
         /*
          * Local KDC referred us off path; trust it for caching
          * purposes.
@@ -482,14 +482,14 @@ find_nxt_kdc(struct tr_state *ts)
      */
     ts->kdc_tgts[--ts->ntgts] = NULL;
     ts->nxt_tgt = ts->cur_tgt;
-    TR_DBG_RET(ts, "find_nxt_kdc", 0);
+    TR_DBG_RET(ts, "find_nxt_realm", 0);
     return 0;
 }
 
 /*
  * try_kdc()
  *
- * Using CUR_TGT, attempt to get desired NXT_TGT.  Update NXT_KDC if
+ * Using CUR_TGT, attempt to get desired NXT_TGT.  Update NXT_REALM if
  * successful.
  */
 static krb5_error_code
@@ -517,7 +517,7 @@ try_kdc(struct tr_state *ts, krb5_creds *tgtq)
         return retval;
     }
     ts->nxt_tgt = ts->kdc_tgts[ts->ntgts-1];
-    retval = find_nxt_kdc(ts);
+    retval = find_nxt_realm(ts);
     TR_DBG_RET(ts, "try_kdc", retval);
     return retval;
 }
@@ -528,7 +528,7 @@ try_kdc(struct tr_state *ts, krb5_creds *tgtq)
  * Return MCREDS for use as a match criterion.
  *
  * Resulting credential has CLIENT as the client principal, and
- * krbtgt/remote_realm(NXT_KDC)@local_realm(CUR_KDC) as the server
+ * krbtgt/remote_realm(NXT_REALM)@local_realm(CUR_REALM) as the server
  * principal.  Zeroes MCREDS first, does not allocate MCREDS, and
  * cleans MCREDS on failure.
  */
@@ -541,8 +541,8 @@ kdc_mcred(struct tr_state *ts, krb5_principal client, krb5_creds *mcreds)
     retval = 0;
     memset(mcreds, 0, sizeof(*mcreds));
 
-    rdst = krb5_princ_component(ts->ctx, *ts->nxt_kdc, 1);
-    rsrc = krb5_princ_component(ts->ctx, *ts->cur_kdc, 1);
+    rdst = krb5_princ_component(ts->ctx, *ts->nxt_realm, 1);
+    rsrc = krb5_princ_component(ts->ctx, *ts->cur_realm, 1);
     retval = krb5_copy_principal(ts->ctx, client, &mcreds->client);
     if (retval)
         goto cleanup;
@@ -562,7 +562,7 @@ cleanup:
  * next_closest_tgt()
  *
  * Using CUR_TGT, attempt to get the cross-realm TGT having its remote
- * realm closest to the target principal's.  Update NXT_TGT, NXT_KDC
+ * realm closest to the target principal's.  Update NXT_TGT, NXT_REALM
  * accordingly.
  */
 static krb5_error_code
@@ -574,16 +574,17 @@ next_closest_tgt(struct tr_state *ts, krb5_principal client)
     retval = 0;
     memset(&tgtq, 0, sizeof(tgtq));
 
-    for (ts->nxt_kdc = ts->lst_kdc;
-         ts->nxt_kdc > ts->cur_kdc;
-         ts->nxt_kdc--) {
+    for (ts->nxt_realm = ts->lst_realm;
+         ts->nxt_realm > ts->cur_realm;
+         ts->nxt_realm--) {
 
         krb5_free_cred_contents(ts->ctx, &tgtq);
         retval = kdc_mcred(ts, client, &tgtq);
         if (retval)
             goto cleanup;
         /* Don't waste time retrying ccache for direct path. */
-        if (ts->cur_kdc != ts->kdc_list || ts->nxt_kdc != ts->lst_kdc) {
+        if (ts->cur_realm != ts->realm_list ||
+            ts->nxt_realm != ts->lst_realm) {
             retval = try_ccache(ts, &tgtq);
             if (!retval)
                 break;
@@ -596,7 +597,7 @@ next_closest_tgt(struct tr_state *ts, krb5_principal client)
             break;
         }
         /*
-         * In case of errors in try_kdc() or find_nxt_kdc(), continue
+         * In case of errors in try_kdc() or find_nxt_realm(), continue
          * looping through the KDC list.
          */
     }
@@ -627,27 +628,29 @@ cleanup:
  *
  *     krbtgt/R1@R1, krbtgt/R2@R1, krbtgt/R3@R2, ...
  *
- * These are prinicpal names, not realm names.  We only really use the
- * remote parts of the TGT principal names.
+ * These are principal names, not realm names.  We only use the
+ * remote parts of the TGT principal names (i.e. the second principal
+ * name component), so to us the list of principal names is logically
+ * a list of realms.
  *
  * The do_traversal loop calls next_closest_tgt() to find the next
  * closest TGT to the destination realm.  next_closest_tgt() updates
- * NXT_KDC for the following iteration of the do_traversal() loop.
+ * NXT_REALM for the following iteration of the do_traversal() loop.
  *
  * At the beginning of any given iteration of the do_traversal() loop,
- * CUR_KDC's remote realm is the remote realm of CUR_TGT->SERVER.  The
- * local realms of CUR_KDC and CUR_TGT->SERVER may not match due to
- * short-circuit paths provided by intermediate KDCs, e.g., CUR_KDC
+ * CUR_REALM's remote realm is the remote realm of CUR_TGT->SERVER.  The
+ * local realms of CUR_REALM and CUR_TGT->SERVER may not match due to
+ * short-circuit paths provided by intermediate KDCs, e.g., CUR_REALM
  * might be krbtgt/D@C, while CUR_TGT->SERVER is krbtgt/D@B.
  *
- * For example, given KDC_LIST of
+ * For example, given REALM_LIST of
  *
  * krbtgt/R1@R1, krbtgt/R2@R1, krbtgt/R3@R2, krbtgt/R4@R3,
  * krbtgt/R5@R4
  *
- * The next_closest_tgt() loop moves NXT_KDC to the left starting from
- * R5, stopping before it reaches CUR_KDC.  When next_closest_tgt()
- * returns, the do_traversal() loop updates CUR_KDC to be NXT_KDC, and
+ * The next_closest_tgt() loop moves NXT_REALM to the left starting from
+ * R5, stopping before it reaches CUR_REALM.  When next_closest_tgt()
+ * returns, the do_traversal() loop updates CUR_REALM to be NXT_REALM, and
  * calls next_closest_tgt() again.
  *
  * next_closest_tgt() at start of its loop:
@@ -668,7 +671,7 @@ cleanup:
  *     | R1 | R2 | R3 | R4 | R5 |
  *     +----+----+----+----+----+
  *
- * do_traversal() updates CUR_KDC:
+ * do_traversal() updates CUR_REALM:
  *
  *                NXT
  *                CUR
@@ -695,8 +698,8 @@ cleanup:
  * path.  Typically, short-circuit paths will cause execution occur
  * faster than this worst-case scenario.
  *
- * When next_closest_tgt() updates NXT_KDC, it may not perform a
- * simple increment from CUR_KDC, in part because some KDC may
+ * When next_closest_tgt() updates NXT_REALM, it may not perform a
+ * simple increment from CUR_REALM, in part because some KDC may
  * short-circuit pieces of the transit path.
  */
 static krb5_error_code
@@ -728,9 +731,9 @@ do_traversal(krb5_context ctx,
     if (retval)
         goto cleanup;
 
-    for (ts->cur_kdc = ts->kdc_list, ts->nxt_kdc = NULL;
-         ts->cur_kdc != NULL && ts->cur_kdc < ts->lst_kdc;
-         ts->cur_kdc = ts->nxt_kdc, ts->cur_tgt = ts->nxt_tgt) {
+    for (ts->cur_realm = ts->realm_list, ts->nxt_realm = NULL;
+         ts->cur_realm != NULL && ts->cur_realm < ts->lst_realm;
+         ts->cur_realm = ts->nxt_realm, ts->cur_tgt = ts->nxt_tgt) {
 
         retval = next_closest_tgt(ts, client);
         if (retval)
@@ -742,7 +745,7 @@ do_traversal(krb5_context ctx,
                 goto cleanup;
             break;
         }
-        assert(ts->cur_kdc != ts->nxt_kdc);
+        assert(ts->cur_realm != ts->nxt_realm);
     }
 
     if (NXT_TGT_IS_CACHED(ts)) {
@@ -759,8 +762,8 @@ do_traversal(krb5_context ctx,
 
 cleanup:
     clean_cc_tgts(ts);
-    if (ts->kdc_list != NULL)
-        krb5_free_realm_tree(ctx, ts->kdc_list);
+    if (ts->realm_list != NULL)
+        krb5_free_realm_tree(ctx, ts->realm_list);
     if (ts->ntgts == 0) {
         *out_kdc_tgts = NULL;
         if (ts->kdc_tgts != NULL)
