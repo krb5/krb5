@@ -1411,7 +1411,7 @@ proc setup_slave_db { } {
 	}
 	#exec xterm
 	verbose "starting $test"
-	spawn $KDB5_UTIL -r $REALMNAME create
+	spawn $KDB5_UTIL -r $REALMNAME create -W
 	expect_after $def_exp_after
 
 	expect "Enter KDC database master key:"

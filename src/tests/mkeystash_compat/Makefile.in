@@ -38,7 +38,7 @@ krb5.conf: Makefile
 # Verify that the mkey stash code is backward compat with old/non-keytab stashfile format
 mkeystash_check: kdc.conf krb5.conf bigendian
 	$(RM) $(TEST_DB)* stash_file
-	$(RUN_SETUP) $(VALGRIND) ../../kadmin/dbutil/kdb5_util $(KDB_OPTS) create -s
+	$(RUN_SETUP) $(VALGRIND) ../../kadmin/dbutil/kdb5_util $(KDB_OPTS) create -s -W
 	# overwrite keytab stash file with old format stash, depends on endianness of current test system
 	./bigendian && cp $(srcdir)/old_stash_bendian stash_file || cp $(srcdir)/old_stash_lendian stash_file
 	# getprinc will fail if old stash file can not be read

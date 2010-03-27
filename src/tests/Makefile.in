@@ -36,7 +36,7 @@ krb5.conf: Makefile
 
 kdb_check: kdc.conf krb5.conf
 	$(RM) $(TEST_DB)*
-	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) create
+	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) create -W
 	$(RUN_SETUP) $(VALGRIND) ../tests/create/kdb5_mkdums $(KTEST_OPTS) 
 	$(RUN_SETUP) $(VALGRIND) ../tests/verify/kdb5_verify $(KTEST_OPTS) 
 	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) dump $(TEST_DB).dump
@@ -46,7 +46,7 @@ kdb_check: kdc.conf krb5.conf
 	@echo "The following 'create' command is needed due to a change"
 	@echo "in functionality caused by DAL integration.  See ticket 3973."
 	@echo ====
-	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) create
+	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) create -W
 	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) load $(TEST_DB).dump 
 	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) load -update -ov $(TEST_DB).ovdump 
 	$(RUN_SETUP) $(VALGRIND) ../tests/verify/kdb5_verify $(KTEST_OPTS) 
