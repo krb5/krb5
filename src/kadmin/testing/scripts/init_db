@@ -87,7 +87,7 @@ sed -e "s/__REALM__/$REALM/g" -e "s#__K5ROOT__#$K5ROOT#g" \
 sed -e "s/__REALM__/$REALM/g" -e "s#__K5ROOT__#$K5ROOT#g" \
 	< $STESTDIR/proto/kdc.conf.proto > $K5ROOT/kdc.conf
 
-eval kdb5_util -r $REALM create -P mrroot -s $REDIRECT || exit 1
+eval kdb5_util -r $REALM create -W -P mrroot -s $REDIRECT || exit 1
 
 cp $STESTDIR/proto/ovsec_adm.dict $K5ROOT/ovsec_adm.dict
 
