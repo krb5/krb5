@@ -82,6 +82,36 @@ additional measures include:
   crypto
 * easier kadmin history key changes
 
+Major changes in 1.8.1
+----------------------
+
+This is primarily a bugfix release.
+
+* MITKRB5-SA-2010-002 CVE-2010-0628 denial of service in SPNEGO
+
+* Support IPv6 in kpasswd client.
+
+* Fix an authorization data type number assignment that conflicted
+  with an undocumented Microsoft usage.
+
+krb5-1.8.1 changes by ticket ID
+-------------------------------
+
+6661    [RFE] properly support IPv6 in kpasswd
+6668    Two problems in kadm5_get_principal mask handling
+6674    memory leak in SPNEGO
+6676    Ignore improperly encoded signedpath AD elements
+6678    use of freed memory in gss_import_sec_context error path
+6680    the "ticket_lifetime" setting isn't documented
+6681    krb5_get_init_creds_password() can crash with NULL options and
+        expired keys
+6683    kpasswd doesn't guess the client principal name correctly
+        without a ccache
+6685    handle NT_SRV_INST in service principal referrals
+6687    Change KRB5_AUTHDATA_SIGNTICKET from 142 to 512
+6689    krb5_typed_data not castable to krb5_pa_data on 64-bit MacOSX
+6690    MITKRB5-SA-2010-002 CVE-2010-0628 denial of service in SPNEGO
+
 Major changes in 1.8
 --------------------
 
