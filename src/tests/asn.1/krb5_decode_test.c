@@ -916,6 +916,22 @@ int main(argc, argv)
         ktest_empty_ad_signedpath(&ref);
     }
 
+    /****************************************************************/
+    /* decode_iakerb_header */
+    {
+        setup(krb5_iakerb_header,"krb5_iakerb_header",ktest_make_sample_iakerb_header);
+        decode_run("iakerb_header","","30 18 A1 0A 04 08 6B 72 62 35 64 61 74 61 A2 0A 04 08 6B 72 62 35 64 61 74 61",decode_krb5_iakerb_header,ktest_equal_iakerb_header,krb5_free_iakerb_header);
+        ktest_empty_iakerb_header(&ref);
+    }
+
+    /****************************************************************/
+    /* decode_iakerb_finished */
+    {
+        setup(krb5_iakerb_finished,"krb5_iakerb_finished",ktest_make_sample_iakerb_finished);
+        decode_run("iakerb_finished","","30 11 A1 0F 30 0D A0 03 02 01 01 A1 06 04 04 31 32 33 34",decode_krb5_iakerb_finished,ktest_equal_iakerb_finished,krb5_free_iakerb_finished);
+        ktest_empty_iakerb_finished(&ref);
+    }
+
 #ifdef ENABLE_LDAP
     /* ldap sequence_of_keys */
     {

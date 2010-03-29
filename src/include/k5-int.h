@@ -358,6 +358,10 @@ typedef INT64_TYPE krb5_int64;
 #define KDC_ERR_PA_CHECKSUM_MUST_BE_INCLUDED    79 /* missing paChecksum in PA-PK-AS-REQ */
 #define KDC_ERR_DIGEST_IN_SIGNED_DATA_NOT_ACCEPTED 80 /* bad digest algorithm in SignedData */
 #define KDC_ERR_PUBLIC_KEY_ENCRYPTION_NOT_SUPPORTED 81
+#define KRB_AP_ERR_IAKERB_KDC_NOT_FOUND         85 /* The IAKERB proxy could
+not find a KDC */
+#define KRB_AP_ERR_IAKERB_KDC_NO_RESPONSE       86 /* The KDC did not respond
+to the IAKERB proxy */
 
 /*
  * This structure is returned in the e-data field of the KRB-ERROR
@@ -1032,6 +1036,15 @@ typedef struct _krb5_ad_signedpath {
     krb5_pa_data **method_data;
 } krb5_ad_signedpath;
 
+typedef struct _krb5_iakerb_header {
+    krb5_data target_realm;
+    krb5_data *cookie;
+} krb5_iakerb_header;
+
+typedef struct _krb5_iakerb_finished {
+    krb5_checksum checksum;
+} krb5_iakerb_finished;
+
 typedef krb5_error_code
 (*krb5_preauth_obtain_proc)(krb5_context, krb5_pa_data *,
                             krb5_etype_info, krb5_keyblock *,
@@ -1329,6 +1342,10 @@ void KRB5_CALLCONV krb5_free_fast_finished(krb5_context, krb5_fast_finished *);
 void KRB5_CALLCONV krb5_free_fast_response(krb5_context, krb5_fast_response *);
 void KRB5_CALLCONV krb5_free_ad_kdcissued(krb5_context, krb5_ad_kdcissued *);
 void KRB5_CALLCONV krb5_free_ad_signedpath(krb5_context, krb5_ad_signedpath *);
+void KRB5_CALLCONV krb5_free_iakerb_header
+(krb5_context, krb5_iakerb_header *);
+void KRB5_CALLCONV krb5_free_iakerb_finished
+(krb5_context, krb5_iakerb_finished *);
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "com_err.h"
@@ -1740,6 +1757,10 @@ encode_krb5_fast_req(const krb5_fast_req *, krb5_data **);
 
 krb5_error_code
 encode_krb5_pa_fx_fast_reply(const krb5_enc_data *, krb5_data **);
+krb5_error_code encode_krb5_iakerb_header
+(const krb5_iakerb_header *, krb5_data **);
+krb5_error_code encode_krb5_iakerb_finished
+(const krb5_iakerb_finished *, krb5_data **);
 
 krb5_error_code
 encode_krb5_fast_response(const krb5_fast_response *, krb5_data **);
@@ -1938,6 +1959,12 @@ decode_krb5_ad_kdcissued(const krb5_data *, krb5_ad_kdcissued **);
 
 krb5_error_code
 decode_krb5_ad_signedpath(const krb5_data *, krb5_ad_signedpath **);
+
+krb5_error_code decode_krb5_iakerb_header
+(const krb5_data *, krb5_iakerb_header **);
+
+krb5_error_code decode_krb5_iakerb_finished
+(const krb5_data *, krb5_iakerb_finished **);
 
 struct _krb5_key_data;          /* kdb.h */
 

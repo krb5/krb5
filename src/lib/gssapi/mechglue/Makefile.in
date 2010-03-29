@@ -12,6 +12,7 @@ DEFS=-D_GSS_STATIC_LINK=1
 SRCS = \
 	$(srcdir)/g_accept_sec_context.c \
 	$(srcdir)/g_acquire_cred.c \
+	$(srcdir)/g_acquire_cred_with_pw.c \
 	$(srcdir)/g_acquire_cred_imp_name.c \
 	$(srcdir)/g_buffer_set.c \
 	$(srcdir)/g_canon_name.c \
@@ -67,6 +68,7 @@ SRCS = \
 OBJS = \
 	$(OUTPRE)g_accept_sec_context.$(OBJEXT) \
 	$(OUTPRE)g_acquire_cred.$(OBJEXT) \
+	$(OUTPRE)g_acquire_cred_with_pw.$(OBJEXT) \
 	$(OUTPRE)g_acquire_cred_imp_name.$(OBJEXT) \
 	$(OUTPRE)g_buffer_set.$(OBJEXT) \
 	$(OUTPRE)g_canon_name.$(OBJEXT) \
@@ -122,6 +124,7 @@ OBJS = \
 STLIBOBJS = \
 	g_accept_sec_context.o \
 	g_acquire_cred.o \
+	g_acquire_cred_with_pw.o \
 	g_acquire_cred_imp_name.o \
 	g_buffer_set.o \
 	g_canon_name.o \

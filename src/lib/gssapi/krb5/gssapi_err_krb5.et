@@ -38,4 +38,5 @@ error_code KG_EMPTY_CCACHE, "Credential cache is empty"
 error_code KG_NO_CTYPES, "Acceptor and Initiator share no checksum types"
 error_code KG_LUCID_VERSION, "Requested lucid context version not supported"
 error_code KG_INPUT_TOO_LONG, "PRF input too long"
+error_code KG_IAKERB_CONTEXT, "Bad magic number for iakerb_ctx_id_t"
 end

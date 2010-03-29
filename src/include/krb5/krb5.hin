@@ -637,6 +637,7 @@ krb5_c_keyed_checksum_types(krb5_context context, krb5_enctype enctype,
 #define KRB5_KEYUSAGE_PA_S4U_X509_USER_REPLY    27 /* XXX note conflict with above */
 
 #define KRB5_KEYUSAGE_AD_SIGNEDPATH             -21
+#define KRB5_KEYUSAGE_IAKERB_FINISHED           42
 #define KRB5_KEYUSAGE_PA_PKINIT_KX              44
 /* define in draft-ietf-krb-wg-preauth-framework*/
 #define KRB5_KEYUSAGE_FAST_REQ_CHKSUM 50
@@ -2407,6 +2408,33 @@ krb5_init_creds_set_service(krb5_context context, krb5_init_creds_context ctx,
 krb5_error_code KRB5_CALLCONV
 krb5_init_creds_get_times(krb5_context context, krb5_init_creds_context ctx,
                           krb5_ticket_times *times);
+
+struct _krb5_tkt_creds_context;
+typedef struct _krb5_tkt_creds_context *krb5_tkt_creds_context;
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_init(krb5_context context, krb5_ccache ccache,
+                    krb5_creds *creds, int kdcopt, krb5_tkt_creds_context *ctx);
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_get_creds(krb5_context context, krb5_tkt_creds_context ctx,
+                         krb5_creds *creds);
+
+void KRB5_CALLCONV
+krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx);
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_step(krb5_context context, krb5_tkt_creds_context ctx,
+                    krb5_data *in, krb5_data *out, krb5_data *realm,
+                    unsigned int *flags);
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_store_creds(krb5_context context, krb5_tkt_creds_context ctx,
+                           krb5_ccache ccache);
+
+krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_get_times(krb5_context context, krb5_tkt_creds_context ctx,
+                         krb5_ticket_times *times);
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_keytab(krb5_context context, krb5_creds *creds,

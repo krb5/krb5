@@ -274,6 +274,11 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_set_neg_mechs,
 };
 
+static struct gss_config_ext spnego_mechanism_ext =
+{
+	spnego_gss_acquire_cred_with_password
+};
+
 #ifdef _GSS_STATIC_LINK
 #include "mglueP.h"
 
@@ -283,6 +288,7 @@ static int gss_spnegomechglue_init(void)
 
 	memset(&mech_spnego, 0, sizeof(mech_spnego));
 	mech_spnego.mech = &spnego_mechanism;
+	mech_spnego.mech_ext = &spnego_mechanism_ext;
 	mech_spnego.mechNameStr = "spnego";
 	mech_spnego.mech_type = GSS_C_NO_OID;
 
@@ -852,7 +858,7 @@ init_ctx_call_init(OM_uint32 *minor_status,
 		 * token back if this is the first token or if a MIC exchange
 		 * is required.
 		 */
-		if (*send_token == CONT_TOKEN_SEND &&
+		if (mechtok_in->length != 0 &&
 		    mechtok_out->length == 0 &&
 		    (!sc->mic_reqd ||
 		     !(sc->ctx_flags & GSS_C_INTEG_FLAG))) {
@@ -873,7 +879,8 @@ init_ctx_call_init(OM_uint32 *minor_status,
 			*send_token = ERROR_TOKEN_SEND;
 		}
 		*negState = REJECT;
-	}
+	} else if (*send_token == NO_TOKEN_SEND)
+		*send_token = CONT_TOKEN_SEND;
 	return ret;
 }
 
@@ -2443,6 +2450,47 @@ spnego_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
 	*output_cred_handle = (gss_cred_id_t)out_spcred;
 
 	dsyslog("Leaving spnego_gss_acquire_cred_impersonate_name\n");
+	return (status);
+}
+
+OM_uint32
+spnego_gss_acquire_cred_with_password(OM_uint32 *minor_status,
+				      const gss_name_t desired_name,
+				      const gss_buffer_t password,
+				      OM_uint32 time_req,
+				      const gss_OID_set desired_mechs,
+				      gss_cred_usage_t cred_usage,
+				      gss_cred_id_t *output_cred_handle,
+				      gss_OID_set *actual_mechs,
+				      OM_uint32 *time_rec)
+{
+	OM_uint32 status;
+	gss_OID_set amechs = GSS_C_NULL_OID_SET;
+
+	dsyslog("Entering spnego_gss_acquire_cred_with_password\n");
+
+	if (actual_mechs)
+		*actual_mechs = NULL;
+
+	if (time_rec)
+		*time_rec = 0;
+
+	if (desired_mechs == GSS_C_NULL_OID_SET) {
+		status = get_available_mechs(minor_status,
+				desired_name, cred_usage,
+				output_cred_handle, &amechs);
+	}
+
+	status = gss_acquire_cred_with_password(minor_status,
+			desired_name, password, time_req,
+			desired_mechs ? desired_mechs : amechs, cred_usage,
+			output_cred_handle, actual_mechs,
+			time_rec);
+
+	if (amechs != GSS_C_NULL_OID_SET)
+		(void) gss_release_oid_set(minor_status, &amechs);
+
+	dsyslog("Leaving spnego_gss_acquire_cred_with_password\n");
 	return (status);
 }
 

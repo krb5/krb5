@@ -890,6 +890,28 @@ krb5_error_code ktest_make_sample_ad_signedpath(p)
     return retval;
 }
 
+krb5_error_code ktest_make_sample_iakerb_header(ih)
+    krb5_iakerb_header *ih;
+{
+    krb5_error_code retval;
+    retval = ktest_make_sample_data(&(ih->target_realm));
+    if (retval) return retval;
+    ih->cookie = k5alloc(sizeof(krb5_data), &retval);
+    if (retval) return retval;
+    retval = ktest_make_sample_data(ih->cookie);
+    if (retval) return retval;
+    return retval;
+}
+
+krb5_error_code ktest_make_sample_iakerb_finished(ih)
+    krb5_iakerb_finished *ih;
+{
+    krb5_error_code retval;
+    retval = ktest_make_sample_checksum(&ih->checksum);
+    if (retval) return retval;
+    return retval;
+}
+
 #ifdef ENABLE_LDAP
 static krb5_error_code ktest_make_sample_key_data(krb5_key_data *p, int i)
 {
@@ -1530,6 +1552,19 @@ void ktest_empty_ad_signedpath(p)
         free(p->delegated);
     }
     ktest_destroy_pa_data_array(&p->method_data);
+}
+
+void ktest_empty_iakerb_header(p)
+    krb5_iakerb_header *p;
+{
+    krb5_free_data_contents(NULL, &p->target_realm);
+    krb5_free_data(NULL, p->cookie);
+}
+
+void ktest_empty_iakerb_finished(p)
+    krb5_iakerb_finished *p;
+{
+    krb5_free_checksum_contents(NULL, &p->checksum);
 }
 
 #ifdef ENABLE_LDAP

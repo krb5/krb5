@@ -152,8 +152,6 @@ static void tr_dbg_rtree(struct tr_state *, const char *, krb5_principal);
 /*
  * Prototypes of helper functions
  */
-static krb5_error_code tgt_mcred(krb5_context, krb5_principal,
-                                 krb5_principal, krb5_principal, krb5_creds *);
 static krb5_error_code retr_local_tgt(struct tr_state *, krb5_principal);
 static krb5_error_code try_ccache(struct tr_state *, krb5_creds *);
 static krb5_error_code find_nxt_realm(struct tr_state *);
@@ -295,10 +293,10 @@ tr_dbg_rtree(struct tr_state *ts, const char *prog, krb5_principal princ)
  * failure.  The peculiar ordering of DST and SRC args is for
  * consistency with krb5int_tgtname().
  */
-static krb5_error_code
-tgt_mcred(krb5_context ctx, krb5_principal client,
-          krb5_principal dst, krb5_principal src,
-          krb5_creds *mcreds)
+krb5_error_code
+krb5int_tgt_mcred(krb5_context ctx, krb5_principal client,
+                  krb5_principal dst, krb5_principal src,
+                  krb5_creds *mcreds)
 {
     krb5_error_code retval;
 
@@ -365,7 +363,7 @@ retr_local_tgt(struct tr_state *ts, krb5_principal client)
     krb5_creds tgtq;
 
     memset(&tgtq, 0, sizeof(tgtq));
-    retval = tgt_mcred(ts->ctx, client, client, client, &tgtq);
+    retval = krb5int_tgt_mcred(ts->ctx, client, client, client, &tgtq);
     if (retval)
         return retval;
 
@@ -997,7 +995,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
      * local realm in the default (referral) case or for the remote
      * realm if we're starting someplace non-local.
      */
-    retval = tgt_mcred(context, client, server, client, &tgtq);
+    retval = krb5int_tgt_mcred(context, client, server, client, &tgtq);
     if (retval)
         goto cleanup;
 
@@ -1235,7 +1233,7 @@ krb5_get_cred_from_kdc_opt(krb5_context context, krb5_ccache ccache,
      */
 
     krb5_free_cred_contents(context, &tgtq);
-    retval = tgt_mcred(context, client, server, client, &tgtq);
+    retval = krb5int_tgt_mcred(context, client, server, client, &tgtq);
     if (retval)
         goto cleanup;
 

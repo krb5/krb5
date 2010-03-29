@@ -142,6 +142,11 @@ krb5int_process_tgs_reply(krb5_context context,
                           krb5_pa_data ***out_enc_padata,
                           krb5_creds **out_cred);
 
+krb5_error_code
+krb5int_tgt_mcred(krb5_context ctx, krb5_principal client,
+                  krb5_principal dst, krb5_principal src,
+                  krb5_creds *mcreds);
+
 krb5_error_code krb5int_send_tgs(krb5_context, krb5_flags,
                                  const krb5_ticket_times *,
                                  const krb5_enctype *,

@@ -22,6 +22,8 @@ decode_krb5_error
 decode_krb5_etype_info
 decode_krb5_etype_info2
 decode_krb5_fast_req
+decode_krb5_iakerb_finished
+decode_krb5_iakerb_header
 decode_krb5_kdc_req_body
 decode_krb5_pa_enc_ts
 decode_krb5_pa_for_user
@@ -67,6 +69,8 @@ encode_krb5_error
 encode_krb5_etype_info
 encode_krb5_etype_info2
 encode_krb5_fast_response
+encode_krb5_iakerb_finished
+encode_krb5_iakerb_header
 encode_krb5_kdc_req_body
 encode_krb5_pa_enc_ts
 encode_krb5_pa_for_user
@@ -266,6 +270,8 @@ krb5_free_etype_info
 krb5_free_fast_armored_req
 krb5_free_fast_req
 krb5_free_host_realm
+krb5_free_iakerb_finished
+krb5_free_iakerb_header
 krb5_free_kdc_rep
 krb5_free_kdc_req
 krb5_free_keyblock
@@ -550,6 +556,12 @@ krb5_string_to_salttype
 krb5_string_to_timestamp
 krb5_sync_disk_file
 krb5int_tgtname
+krb5_tkt_creds_free
+krb5_tkt_creds_get_creds
+krb5_tkt_creds_get_times
+krb5_tkt_creds_init
+krb5_tkt_creds_step
+krb5_tkt_creds_store_creds
 krb5_timeofday
 krb5_timestamp_to_sfstring
 krb5_timestamp_to_string
