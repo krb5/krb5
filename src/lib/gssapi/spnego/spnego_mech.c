@@ -1561,7 +1561,7 @@ spnego_gss_accept_sec_context(
 	gss_buffer_desc mechtok_out = GSS_C_EMPTY_BUFFER;
 	spnego_gss_ctx_id_t sc = NULL;
 	OM_uint32 mechstat = GSS_S_FAILURE;
-	int sendTokenInit = 0;
+	int sendTokenInit = 0, tmpret;
 
 	mechtok_in = mic_in = mic_out = GSS_C_NO_BUFFER;
 
@@ -1593,7 +1593,6 @@ spnego_gss_accept_sec_context(
 		if (delegated_cred_handle != NULL)
 			*delegated_cred_handle = GSS_C_NO_CREDENTIAL;
 		if (input_token->length == 0) {
-			sendTokenInit = 1;
 			ret = acc_ctx_hints(minor_status,
 					    context_handle,
 					    verifier_cred_handle,
@@ -1602,6 +1601,7 @@ spnego_gss_accept_sec_context(
 					    &return_token);
 			if (ret != GSS_S_COMPLETE)
 				goto cleanup;
+			sendTokenInit = 1;
 			ret = GSS_S_CONTINUE_NEEDED;
 		} else {
 			/* Can set negState to REQUEST_MIC */
@@ -1650,27 +1650,21 @@ spnego_gss_accept_sec_context(
 				 &negState, &return_token);
 	}
 cleanup:
-	if (return_token != NO_TOKEN_SEND && return_token != CHECK_MIC) {
-		/* For acceptor-sends-first send a tokenInit */
-		int tmpret;
-
+	if (return_token == INIT_TOKEN_SEND && sendTokenInit) {
 		assert(sc != NULL);
-
-		if (sendTokenInit) {
-			tmpret = make_spnego_tokenInit_msg(sc,
-							   1,
-							   mic_out,
-							   0,
-							   GSS_C_NO_BUFFER,
-							   return_token,
-							   output_token);
-		} else {
-			tmpret = make_spnego_tokenTarg_msg(negState,
-							   sc ? sc->internal_mech : GSS_C_NO_OID,
-							   &mechtok_out, mic_out,
-							   return_token,
-							   output_token);
-		}
+		tmpret = make_spnego_tokenInit_msg(sc, 1, mic_out, 0,
+						   GSS_C_NO_BUFFER,
+						   return_token, output_token);
+		if (tmpret < 0)
+			ret = GSS_S_FAILURE;
+	} else if (return_token != NO_TOKEN_SEND &&
+		   return_token != CHECK_MIC) {
+		tmpret = make_spnego_tokenTarg_msg(negState,
+						   sc ? sc->internal_mech :
+						   GSS_C_NO_OID,
+						   &mechtok_out, mic_out,
+						   return_token,
+						   output_token);
 		if (tmpret < 0)
 			ret = GSS_S_FAILURE;
 	}
