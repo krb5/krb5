@@ -111,6 +111,7 @@ krb5-1.8.1 changes by ticket ID
 6687    Change KRB5_AUTHDATA_SIGNTICKET from 142 to 512
 6689    krb5_typed_data not castable to krb5_pa_data on 64-bit MacOSX
 6690    MITKRB5-SA-2010-002 CVE-2010-0628 denial of service in SPNEGO
+6693    Fix backwards flag output in krb5_init_creds_step()
 
 Major changes in 1.8
 --------------------
