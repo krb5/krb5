@@ -599,7 +599,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
                                     &flags);
         if (code != 0)
             goto cleanup;
-        if (flags != 0) {
+        if ((flags & 1) != 1) {
             krb5_init_creds_get_times(ctx->k5c, ctx->u.icc, &times);
             cred->tgt_expire = times.endtime;
 
@@ -609,6 +609,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
             ctx->state = IAKERB_TGS_REQ;
         } else
             break;
+        in = empty_data();
     case IAKERB_TGS_REQ:
         if (ctx->u.tcc == NULL) {
             code = iakerb_tkt_creds_ctx(ctx, cred, name, time_req);
@@ -618,7 +619,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
 
         code = krb5_tkt_creds_step(ctx->k5c,
                                    ctx->u.tcc,
-                                   flags ? NULL : &in,
+                                   &in,
                                    &out,
                                    &realm,
                                    &flags);
@@ -627,7 +628,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
             krb5_tkt_creds_store_creds(ctx->k5c, ctx->u.tcc, NULL);
             goto cleanup;
         }
-        if (flags != 0) {
+        if ((flags & 1) != 1) {
             code = krb5_tkt_creds_store_creds(ctx->k5c, ctx->u.tcc, NULL);
             if (code != 0)
                 goto cleanup;
