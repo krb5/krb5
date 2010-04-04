@@ -1083,7 +1083,7 @@ init_creds_get(krb5_context context,
                                     &flags);
         if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG && !tcp_only)
             tcp_only = 1;
-        else if (code != 0 || (flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE))
+        else if (code != 0 || (flags & 1) == 0)
             break;
 
         krb5_free_data_contents(context, &reply);
@@ -2065,7 +2065,7 @@ cleanup:
         }
     }
 
-    *flags = (ctx->flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE);
+    *flags = (ctx->flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE) ? 0 : 1;
 
     return code;
 }
