@@ -394,7 +394,6 @@ try_fallback_realm(krb5_context context, krb5_tkt_creds_context ctx)
 {
     krb5_error_code code;
     char **hrealms;
-    krb5_creds *server_tgt;
 
     if (ctx->server->length < 2) {
         /* We need a type/host format principal to find a fallback realm. */
@@ -849,7 +848,6 @@ begin_get_tgt(krb5_context context, krb5_tkt_creds_context ctx)
 static krb5_error_code
 begin(krb5_context context, krb5_tkt_creds_context ctx)
 {
-    krb5_creds *server_tgt;
     krb5_error_code code;
 
     /* If the server realm is unspecified, start with the client realm. */
@@ -952,6 +950,42 @@ krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx)
     krb5int_free_data_list(context, ctx->realm_path);
     krb5_free_creds(context, ctx->reply_creds);
     free(ctx);
+}
+
+krb5_error_code
+krb5_tkt_creds_get(krb5_context context, krb5_tkt_creds_context ctx)
+{
+    krb5_error_code code;
+    krb5_data request = empty_data(), reply = empty_data();
+    krb5_data realm = empty_data();
+    unsigned int flags = 0;
+    int tcp_only = 0, use_master;
+
+    for (;;) {
+        /* Get the next request and realm.  Turn on TCP if necessary. */
+        code = krb5_tkt_creds_step(context, ctx, &reply, &request, &realm,
+                                   &flags);
+        if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG && !tcp_only)
+            tcp_only = 1;
+        else if (code != 0 || (flags & 1) == 0)
+            break;
+        krb5_free_data_contents(context, &reply);
+
+        /* Send it to a KDC for the appropriate realm. */
+        use_master = 0;
+        code = krb5_sendto_kdc(context, &request, &realm,
+                               &reply, &use_master, tcp_only);
+        if (code != 0)
+            break;
+
+        krb5_free_data_contents(context, &request);
+        krb5_free_data_contents(context, &realm);
+    }
+
+    krb5_free_data_contents(context, &request);
+    krb5_free_data_contents(context, &reply);
+    krb5_free_data_contents(context, &realm);
+    return code;
 }
 
 krb5_error_code KRB5_CALLCONV

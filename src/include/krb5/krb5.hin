@@ -2417,6 +2417,9 @@ krb5_tkt_creds_init(krb5_context context, krb5_ccache ccache,
                     krb5_creds *creds, int kdcopt, krb5_tkt_creds_context *ctx);
 
 krb5_error_code KRB5_CALLCONV
+krb5_tkt_creds_get(krb5_context context, krb5_tkt_creds_context ctx);
+
+krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_get_creds(krb5_context context, krb5_tkt_creds_context ctx,
                          krb5_creds *creds);
 
