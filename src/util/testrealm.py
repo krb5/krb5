@@ -33,10 +33,12 @@ progpaths = [
     os.path.join('kadmin', 'cli'),
     os.path.join('kadmin', 'dbutil'),
     os.path.join('kadmin', 'ktutil'),
+    os.path.join('clients', 'kdestroy'),
     os.path.join('clients', 'kinit'),
     os.path.join('clients', 'klist'),
-    os.path.join('clients', 'kdestroy'),
     os.path.join('clients', 'kpasswd'),
+    os.path.join('clients', 'ksu'),
+    os.path.join('clients', 'kvno'),
     'slave'
 ]
 
