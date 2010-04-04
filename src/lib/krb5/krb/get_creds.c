@@ -116,12 +116,17 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
                      krb5_creds **out_creds)
 {
     krb5_error_code retval;
-    krb5_creds mcreds, *ncreds, **tgts, **tgts_iter;
+    krb5_tkt_creds_context ctx = NULL;
+    krb5_creds mcreds, *ncreds = NULL;
     krb5_flags fields;
     krb5_boolean not_ktype = FALSE;
     int kdcopt = 0;
 
     *out_creds = NULL;
+
+    ncreds = k5alloc(sizeof(*ncreds), &retval);
+    if (ncreds == NULL)
+        goto cleanup;
 
     /*
      * See if we already have the ticket cached. To do this usefully
@@ -133,14 +138,7 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
                                                   &mcreds, &fields);
 
         if (retval)
-            return retval;
-
-        ncreds = malloc(sizeof(krb5_creds));
-        if (!ncreds)
-            return ENOMEM;
-
-        memset(ncreds, 0, sizeof(krb5_creds));
-        ncreds->magic = KV5M_CREDS;
+            goto cleanup;
 
         retval = krb5_cc_retrieve_cred(context, ccache, fields, &mcreds,
                                        ncreds);
@@ -148,14 +146,14 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
             *out_creds = ncreds;
             return 0;
         }
-        free(ncreds);
-        ncreds = NULL;
         if ((retval != KRB5_CC_NOTFOUND && retval != KRB5_CC_NOT_KTYPE)
             || options & KRB5_GC_CACHED)
-            return retval;
+            goto cleanup;
         not_ktype = (retval == KRB5_CC_NOT_KTYPE);
-    } else if (options & KRB5_GC_CACHED)
-        return KRB5_CC_NOTFOUND;
+    } else if (options & KRB5_GC_CACHED) {
+        retval = KRB5_CC_NOTFOUND;
+        goto cleanup;
+    }
 
     if (options & KRB5_GC_CANONICALIZE)
         kdcopt |= KDC_OPT_CANONICALIZE;
@@ -164,18 +162,34 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
     if (options & KRB5_GC_NO_TRANSIT_CHECK)
         kdcopt |= KDC_OPT_DISABLE_TRANSITED_CHECK;
     if (options & KRB5_GC_CONSTRAINED_DELEGATION) {
-        if (options & KRB5_GC_USER_USER)
-            return EINVAL;
+        if (options & KRB5_GC_USER_USER) {
+            retval = EINVAL;
+            goto cleanup;
+
+        }
         kdcopt |= KDC_OPT_FORWARDABLE | KDC_OPT_CNAME_IN_ADDL_TKT;
     }
 
-    retval = krb5_get_cred_from_kdc_opt(context, ccache, in_creds,
-                                        &ncreds, &tgts, kdcopt);
-    if (tgts) {
-        /* Attempt to cache intermediate ticket-granting tickets. */
-        for (tgts_iter = tgts; *tgts_iter; tgts_iter++)
-            (void) krb5_cc_store_cred(context, ccache, *tgts_iter);
-        krb5_free_tgt_creds(context, tgts);
+    /* Get the credential from the KDC. */
+    retval = krb5_tkt_creds_init(context, ccache, in_creds, kdcopt, &ctx);
+    if (retval != 0)
+        goto cleanup;
+    retval = krb5_tkt_creds_get(context, ctx);
+    if (retval != 0)
+        goto cleanup;
+    retval = krb5_tkt_creds_get_creds(context, ctx, ncreds);
+    if (retval != 0)
+        goto cleanup;
+
+    /* Attempt to cache the returned ticket. */
+    if (!(options & KRB5_GC_NO_STORE))
+        (void) krb5_cc_store_cred(context, ccache, ncreds);
+
+    if ((options & KRB5_GC_CONSTRAINED_DELEGATION)
+        && (ncreds->ticket_flags & TKT_FLG_FORWARDABLE) == 0) {
+        /* This ticket won't work for constrained delegation. */
+        retval = KRB5_TKT_NOT_FORWARDABLE;
+        goto cleanup;
     }
 
     /*
@@ -189,25 +203,16 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
      * actual failure was the non-existence of a ticket of the correct
      * enctype rather than the missing TGT.
      */
-    if ((retval == KRB5_CC_NOTFOUND || retval == KRB5_CC_NOT_KTYPE)
-        && not_ktype)
-        return KRB5_CC_NOT_KTYPE;
-    else if (retval)
-        return retval;
-
-    if ((options & KRB5_GC_CONSTRAINED_DELEGATION)
-        && (ncreds->ticket_flags & TKT_FLG_FORWARDABLE) == 0) {
-        /* This ticket won't work for constrained delegation. */
-        krb5_free_creds(context, ncreds);
-        return KRB5_TKT_NOT_FORWARDABLE;
-    }
-
-    /* Attempt to cache the returned ticket. */
-    if (!(options & KRB5_GC_NO_STORE))
-        (void) krb5_cc_store_cred(context, ccache, ncreds);
+    if (retval == KRB5_CC_NOTFOUND && not_ktype)
+        retval = KRB5_CC_NOT_KTYPE;
 
     *out_creds = ncreds;
-    return 0;
+    ncreds = NULL;
+
+cleanup:
+    krb5_free_creds(context, ncreds);
+    krb5_tkt_creds_free(context, ctx);
+    return retval;
 }
 
 #define INT_GC_VALIDATE 1
