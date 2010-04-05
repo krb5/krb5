@@ -701,7 +701,7 @@ find_realm_in_path(krb5_context context, krb5_tkt_creds_context ctx,
 /*
  * Generate the next request in the path traversal.  If a cached TGT for the
  * target realm appeared in the ccache since we started the TGT acquisition
- * process, tihs function may invoke end_get_tgt().
+ * process, this function may invoke end_get_tgt().
  */
 static krb5_error_code
 get_tgt_request(krb5_context context, krb5_tkt_creds_context ctx)
