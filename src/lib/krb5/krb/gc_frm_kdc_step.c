@@ -457,13 +457,9 @@ step_referrals(krb5_context context, krb5_tkt_creds_context ctx)
     if (krb5_principal_compare(context, ctx->reply_creds->server,
                                ctx->server)) {
         /* We got the ticket we asked for... but we didn't necessarily ask for
-         * it with the right enctypes. */
-        if (wrong_enctype(context, ctx->reply_creds->keyblock.enctype)) {
-            /* Try again with the app-provided enctypes. */
-            krb5_free_creds(context, ctx->reply_creds);
-            ctx->reply_creds = NULL;
+         * it with the right enctypes.  Try a non-referral request if so. */
+        if (wrong_enctype(context, ctx->reply_creds->keyblock.enctype))
             return begin_non_referral(context, ctx);
-        }
 
         /* Note the authdata we asked for in the output creds. */
         ctx->reply_creds->authdata = ctx->authdata;
@@ -472,13 +468,10 @@ step_referrals(krb5_context context, krb5_tkt_creds_context ctx)
         return 0;
     }
 
-    if (!IS_TGS_PRINC(context, ctx->reply_creds->server)) {
-        /* We didn't get what we asked or a TGT.  Old versions of Active
-         * Directory can do this.  Try again with canonicalize off. */
-        krb5_free_creds(context, ctx->reply_creds);
-        ctx->reply_creds = NULL;
+    /* Old versions of Active Directory can rewrite the server name instead of
+     * returning a referral.  Try a non-referral query if we see this. */
+    if (!IS_TGS_PRINC(context, ctx->reply_creds->server))
         return begin_non_referral(context, ctx);
-    }
 
     if (ctx->referral_count == 1) {
         /* Cache the referral TGT only if it's from the local realm.
@@ -491,16 +484,15 @@ step_referrals(krb5_context context, krb5_tkt_creds_context ctx)
         if (code != 0)
             return code;
 
-        /* The authdata is in this TGT and will be copied into subsequent TGTs
-         * or the final credentials, so we don't need to ask for it again. */
+        /* The authdata in this TGT will be copied into subsequent TGTs or the
+         * final credentials, so we don't need to request it again. */
         krb5_free_authdata(context, ctx->in_creds->authdata);
         ctx->in_creds->authdata = NULL;
     }
 
-    if (ctx->referral_count++ >= KRB5_REFERRAL_MAXHOPS) {
-        /* We've gotten too many referral TGTs; it's time to give up. */
+    /* Give up if we've gotten too many referral TGTs. */
+    if (ctx->referral_count++ >= KRB5_REFERRAL_MAXHOPS)
         return KRB5_KDC_UNREACH;
-    }
 
     /* Check for referral loops. */
     referral_realm = &ctx->reply_creds->server->data[1];
@@ -637,7 +629,7 @@ begin_get_tgt_offpath(krb5_context context, krb5_tkt_creds_context ctx)
  * the path length will generally be short and the process will usually end
  * much faster than the worst case.
  *
- * In some cases we may get back a realm for a TGT not in the path.  In that
+ * In some cases we may get back a TGT for a realm not in the path.  In that
  * case we enter STATE_GET_TGT_OFFPATH.
  */
 
