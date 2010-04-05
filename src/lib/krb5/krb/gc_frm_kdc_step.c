@@ -644,10 +644,6 @@ init_realm_path(krb5_context context, krb5_tkt_creds_context ctx)
     krb5_data *realm_path;
     size_t nrealms, i;
 
-    /* Make sure we're actually trying to acquire a foreign TGT. */
-    if (data_eq(ctx->client->realm, ctx->server->realm))
-        return KRB5_CC_NOTFOUND;
-
     /* Construct a list of TGT principals from client to server.  We will throw
      * this away after grabbing the remote realms from each principal. */
     code = krb5_walk_realm_tree(context, &ctx->client->realm,
