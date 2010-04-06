@@ -50,10 +50,15 @@
  * generate the next request.  If it's time to advance to another state, any of
  * the three functions can make a tail call to begin_<nextstate> to do so.
  *
- * For the most part the state is always increasing, but we may go from
- * REFERRALS to GET_TGT in order to get a TGT for the fallback realm.  The
+ * The overall process is as follows:
+ *   1. Get a TGT for the service principal's realm (STATE_GET_TGT).
+ *   2. Make one or more referrals queries (STATE_REFERRALS).
+ *   3. In some cases, get a TGT for the fallback realm (STATE_GET_TGT again).
+ *   4. In some cases, make a non-referral query (STATE_NON_REFERRAL).
+ *
+ * STATE_GET_TGT can precede either STATE_REFERRALS or STATE_NON_REFERRAL.  The
  * getting_tgt_for field in the context keeps track of what state we will go to
- * after successfully obtaining a foreign TGT, and the end_get_tgt() function
+ * after successfully obtaining the TGT, and the end_get_tgt() function
  * advances to the proper next state.
  */
 
@@ -84,6 +89,9 @@ struct _krb5_tkt_creds_context {
     krb5_data *realms_seen;     /* For loop detection */
 
     /* The following fields track state between request and reply. */
+    krb5_principal tgt_princ;   /* Storage for TGT principal */
+    krb5_creds tgt_in_creds;    /* Container for TGT matching creds */
+    krb5_creds *tgs_in_creds;   /* Input credentials of request (alias) */
     krb5_timestamp timestamp;   /* Timestamp of request */
     krb5_int32 nonce;           /* Nonce of request */
     int kdcopt;                 /* KDC options of request */
@@ -204,13 +212,13 @@ cleanup:
 }
 
 /*
- * Set up the request given by in_cred, using ctx->cur_tgt.  KDC options for
- * the requests are determined by ctx->cur_tgt->ticket_flags and
+ * Set up the request given by ctx->tgs_in_creds, using ctx->cur_tgt.  KDC
+ * options for the requests are determined by ctx->cur_tgt->ticket_flags and
  * extra_options.
  */
 static krb5_error_code
 make_request(krb5_context context, krb5_tkt_creds_context ctx,
-             krb5_creds *in_cred, int extra_options)
+             int extra_options)
 {
     krb5_error_code code;
     krb5_data request = empty_data();
@@ -222,8 +230,8 @@ make_request(krb5_context context, krb5_tkt_creds_context ctx,
         return KRB5_PROG_ETYPE_NOSUPP;
 
     code = krb5int_make_tgs_request(context, ctx->cur_tgt, ctx->kdcopt,
-                                    ctx->cur_tgt->addresses,
-                                    NULL, in_cred, NULL, NULL, &request,
+                                    ctx->cur_tgt->addresses, NULL,
+                                    ctx->tgs_in_creds, NULL, NULL, &request,
                                     &ctx->timestamp, &ctx->nonce,
                                     &ctx->subkey);
     if (code != 0)
@@ -240,21 +248,23 @@ make_request_for_tgt(krb5_context context, krb5_tkt_creds_context ctx,
                      const krb5_data *realm)
 {
     krb5_error_code code;
-    krb5_creds mcreds;
-    krb5_principal tgtname = NULL;
 
     /* Construct the principal krbtgt/<realm>@<cur-tgt-realm>. */
+    krb5_free_principal(context, ctx->tgt_princ);
+    ctx->tgt_princ = NULL;
     code = krb5int_tgtname(context, realm, &ctx->cur_tgt->server->realm,
-                           &tgtname);
+                           &ctx->tgt_princ);
     if (code != 0)
         return code;
 
-    /* Make a request for the specified TGT with no extra flags. */
-    memset(&mcreds, 0, sizeof(mcreds));
-    mcreds.client = ctx->client;
-    mcreds.server = tgtname;
-    code = make_request(context, ctx, &mcreds, 0);
-    krb5_free_principal(context, tgtname);
+    /* Construct input creds using ctx->tgt_in_creds as a container. */
+    memset(&ctx->tgt_in_creds, 0, sizeof(ctx->tgt_in_creds));
+    ctx->tgt_in_creds.client = ctx->client;
+    ctx->tgt_in_creds.server = ctx->tgt_princ;
+
+    /* Make a request for the above creds with no extra options. */
+    ctx->tgs_in_creds = &ctx->tgt_in_creds;
+    code = make_request(context, ctx, 0);
     return code;
 }
 
@@ -286,7 +296,8 @@ make_request_for_service(krb5_context context, krb5_tkt_creds_context ctx,
      */
     if (referral)
         context->use_conf_ktypes = TRUE;
-    code = make_request(context, ctx, ctx->in_creds, extra_options);
+    ctx->tgs_in_creds = ctx->in_creds;
+    code = make_request(context, ctx, extra_options);
     if (referral)
         context->use_conf_ktypes = FALSE;
     return code;
@@ -304,7 +315,7 @@ get_creds_from_tgs_reply(krb5_context context, krb5_tkt_creds_context ctx,
     ctx->reply_creds = NULL;
     code = krb5int_process_tgs_reply(context, reply, ctx->cur_tgt, ctx->kdcopt,
                                      ctx->cur_tgt->addresses, NULL,
-                                     ctx->in_creds, ctx->timestamp,
+                                     ctx->tgs_in_creds, ctx->timestamp,
                                      ctx->nonce, ctx->subkey, NULL, NULL,
                                      &ctx->reply_creds);
     if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG) {
@@ -668,6 +679,7 @@ init_realm_path(krb5_context context, krb5_tkt_creds_context ctx)
     realm_path[nrealms] = empty_data();
 
     /* Initialize the realm path fields in ctx. */
+    krb5int_free_data_list(context, ctx->realm_path);
     ctx->realm_path = realm_path;
     ctx->last_realm = realm_path + nrealms - 1;
     ctx->cur_realm = realm_path;
@@ -934,6 +946,7 @@ krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx)
     krb5_free_authdata(context, ctx->authdata);
     krb5_free_creds(context, ctx->cur_tgt);
     krb5int_free_data_list(context, ctx->realms_seen);
+    krb5_free_principal(context, ctx->tgt_princ);
     krb5_free_keyblock(context, ctx->subkey);
     krb5_free_data_contents(context, &ctx->previous_request);
     krb5int_free_data_list(context, ctx->realm_path);
