@@ -47,6 +47,28 @@
 #include "k5-int.h"
 #include "int-proto.h"
 
+/* Using the krb5_tkt_creds interface, get credentials matching in_creds from
+ * the KDC using the credentials in ccache. */
+static krb5_error_code
+get_tkt_creds(krb5_context context, krb5_ccache ccache, krb5_creds *in_creds,
+              int kdcopt, krb5_creds *creds)
+{
+    krb5_error_code retval;
+    krb5_tkt_creds_context ctx = NULL;
+
+    retval = krb5_tkt_creds_init(context, ccache, in_creds, kdcopt, &ctx);
+    if (retval != 0)
+        goto cleanup;
+    retval = krb5_tkt_creds_get(context, ctx);
+    if (retval != 0)
+        goto cleanup;
+    retval = krb5_tkt_creds_get_creds(context, ctx, creds);
+
+cleanup:
+    krb5_tkt_creds_free(context, ctx);
+    return retval;
+}
+
 /*
  * Set *mcreds and *fields to a matching credential and field set for
  * use with krb5_cc_retrieve_cred, based on a set of input credentials
@@ -116,7 +138,6 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
                      krb5_creds **out_creds)
 {
     krb5_error_code retval;
-    krb5_tkt_creds_context ctx = NULL;
     krb5_creds mcreds, *ncreds = NULL;
     krb5_flags fields;
     krb5_boolean not_ktype = FALSE;
@@ -171,13 +192,7 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
     }
 
     /* Get the credential from the KDC. */
-    retval = krb5_tkt_creds_init(context, ccache, in_creds, kdcopt, &ctx);
-    if (retval != 0)
-        goto cleanup;
-    retval = krb5_tkt_creds_get(context, ctx);
-    if (retval != 0)
-        goto cleanup;
-    retval = krb5_tkt_creds_get_creds(context, ctx, ncreds);
+    retval = get_tkt_creds(context, ccache, in_creds, kdcopt, ncreds);
     if (retval != 0)
         goto cleanup;
 
@@ -193,15 +208,13 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
     }
 
     /*
-     * Translate KRB5_CC_NOTFOUND if we previously got
-     * KRB5_CC_NOT_KTYPE from krb5_cc_retrieve_cred(), in order to
-     * handle the case where there is no TGT in the ccache and the
-     * input enctype didn't match.  This handling is necessary because
-     * some callers, such as GSSAPI, iterate through enctypes and
-     * KRB5_CC_NOTFOUND passed through from the
-     * krb5_get_cred_from_kdc() is semantically incorrect, since the
-     * actual failure was the non-existence of a ticket of the correct
-     * enctype rather than the missing TGT.
+     * Translate KRB5_CC_NOTFOUND if we previously got KRB5_CC_NOT_KTYPE from
+     * krb5_cc_retrieve_cred(), in order to handle the case where there is no
+     * TGT in the ccache and the input enctype didn't match.  This handling is
+     * necessary because some callers, such as GSSAPI, iterate through enctypes
+     * and KRB5_CC_NOTFOUND passed through from get_tkt_creds() is semantically
+     * incorrect, since the actual failure was the non-existence of a ticket of
+     * the correct enctype rather than the missing TGT.
      */
     if (retval == KRB5_CC_NOTFOUND && not_ktype)
         retval = KRB5_CC_NOT_KTYPE;
@@ -211,50 +224,44 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
 
 cleanup:
     krb5_free_creds(context, ncreds);
-    krb5_tkt_creds_free(context, ctx);
     return retval;
 }
-
-#define INT_GC_VALIDATE 1
-#define INT_GC_RENEW 2
 
 static krb5_error_code
 get_credentials_val_renew_core(krb5_context context, krb5_flags options,
                                krb5_ccache ccache, krb5_creds *in_creds,
-                               krb5_creds **out_creds, int which)
+                               krb5_creds **out_creds, int kdcopt)
 {
     krb5_error_code retval;
     krb5_principal tmp;
-    krb5_creds **tgts = 0;
+    krb5_creds *ncreds = NULL;
 
-    switch(which) {
-    case INT_GC_VALIDATE:
-        retval = krb5_get_cred_from_kdc_validate(context, ccache,
-                                                 in_creds, out_creds, &tgts);
-        break;
-    case INT_GC_RENEW:
-        retval = krb5_get_cred_from_kdc_renew(context, ccache,
-                                              in_creds, out_creds, &tgts);
-        break;
-    default:
-        /* Should never happen */
-        retval = 255;
-        break;
-    }
-    /*
-     * Callers to krb5_get_cred_blah... must free up tgts even in
-     * error cases.
-     */
-    if (tgts) krb5_free_tgt_creds(context, tgts);
-    if (retval) return retval;
+    *out_creds = NULL;
 
+    /* Get the validated or renewed credential from the KDC. */
+    ncreds = k5alloc(sizeof(*ncreds), &retval);
+    if (ncreds == NULL)
+        goto cleanup;
+    retval = get_tkt_creds(context, ccache, in_creds, kdcopt, ncreds);
+    if (retval != 0)
+        goto cleanup;
+
+    /* Reinitialize the cache with the new credential. */
     retval = krb5_cc_get_principal(context, ccache, &tmp);
-    if (retval) return retval;
-
+    if (retval != 0)
+        goto cleanup;
     retval = krb5_cc_initialize(context, ccache, tmp);
-    if (retval) return retval;
+    if (retval != 0)
+        goto cleanup;
+    retval = krb5_cc_store_cred(context, ccache, ncreds);
+    if (retval != 0)
+        goto cleanup;
 
-    retval = krb5_cc_store_cred(context, ccache, *out_creds);
+    *out_creds = ncreds;
+    ncreds = NULL;
+
+cleanup:
+    krb5_free_creds(context, ncreds);
     return retval;
 }
 
@@ -265,7 +272,7 @@ krb5_get_credentials_validate(krb5_context context, krb5_flags options,
 {
     return(get_credentials_val_renew_core(context, options, ccache,
                                           in_creds, out_creds,
-                                          INT_GC_VALIDATE));
+                                          KDC_OPT_VALIDATE));
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -276,24 +283,19 @@ krb5_get_credentials_renew(krb5_context context, krb5_flags options,
 
     return(get_credentials_val_renew_core(context, options, ccache,
                                           in_creds, out_creds,
-                                          INT_GC_RENEW));
+                                          KDC_OPT_RENEW));
 }
 
 static krb5_error_code
 validate_or_renew_creds(krb5_context context, krb5_creds *creds,
                         krb5_principal client, krb5_ccache ccache,
-                        char *in_tkt_service, int validate)
+                        char *in_tkt_service, int kdcopt)
 {
     krb5_error_code ret;
     krb5_creds in_creds; /* only client and server need to be filled in */
-    krb5_creds *out_creds = 0; /* for check before dereferencing below */
-    krb5_creds **tgts;
 
     memset(&in_creds, 0, sizeof(krb5_creds));
-
     in_creds.server = NULL;
-    tgts = NULL;
-
     in_creds.client = client;
 
     if (in_tkt_service) {
@@ -329,39 +331,24 @@ validate_or_renew_creds(krb5_context context, krb5_creds *creds,
             goto cleanup;
     }
 
-    if (validate)
-        ret = krb5_get_cred_from_kdc_validate(context, ccache,
-                                              &in_creds, &out_creds, &tgts);
-    else
-        ret = krb5_get_cred_from_kdc_renew(context, ccache,
-                                           &in_creds, &out_creds, &tgts);
-
-    /* ick.  copy the struct contents, free the container */
-    if (out_creds) {
-        *creds = *out_creds;
-        free(out_creds);
-    }
+    /* Get the validated or renewed credential from the KDC. */
+    ret = get_tkt_creds(context, ccache, &in_creds, kdcopt, creds);
 
 cleanup:
-
-    if (in_creds.server)
-        krb5_free_principal(context, in_creds.server);
-    if (tgts)
-        krb5_free_tgt_creds(context, tgts);
-
-    return(ret);
+    krb5_free_principal(context, in_creds.server);
+    return ret;
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_validated_creds(krb5_context context, krb5_creds *creds, krb5_principal client, krb5_ccache ccache, char *in_tkt_service)
 {
-    return(validate_or_renew_creds(context, creds, client, ccache,
-                                   in_tkt_service, 1));
+    return validate_or_renew_creds(context, creds, client, ccache,
+                                   in_tkt_service, KDC_OPT_VALIDATE);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_renewed_creds(krb5_context context, krb5_creds *creds, krb5_principal client, krb5_ccache ccache, char *in_tkt_service)
 {
-    return(validate_or_renew_creds(context, creds, client, ccache,
-                                   in_tkt_service, 0));
+    return validate_or_renew_creds(context, creds, client, ccache,
+                                   in_tkt_service, KDC_OPT_RENEW);
 }
