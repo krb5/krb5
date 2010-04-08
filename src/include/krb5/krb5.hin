@@ -1850,6 +1850,13 @@ krb5_principal2salt(krb5_context, krb5_const_principal, krb5_data *);
 krb5_error_code KRB5_CALLCONV
 krb5_cc_resolve(krb5_context, const char *, krb5_ccache *);
 
+/**
+ * Create a new handle referring to the same cache as @a in.
+ * The new handle and @a in can be closed independently.
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_cc_dup(krb5_context context, krb5_ccache in, krb5_ccache *out);
+
 const char *KRB5_CALLCONV
 krb5_cc_default_name(krb5_context);
 
