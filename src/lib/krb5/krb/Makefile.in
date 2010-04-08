@@ -48,7 +48,6 @@ STLIBOBJS= \
 	fast.o \
 	fwd_tgt.o	\
 	gc_frm_kdc.o	\
-	gc_frm_kdc_step.o	\
 	gc_via_tkt.o	\
 	gen_seqnum.o	\
 	gen_subkey.o	\
@@ -148,7 +147,6 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)fast.$(OBJEXT) \
 	$(OUTPRE)fwd_tgt.$(OBJEXT)	\
 	$(OUTPRE)gc_frm_kdc.$(OBJEXT)	\
-	$(OUTPRE)gc_frm_kdc_step.$(OBJEXT)	\
 	$(OUTPRE)gc_via_tkt.$(OBJEXT)	\
 	$(OUTPRE)gen_seqnum.$(OBJEXT)	\
 	$(OUTPRE)gen_subkey.$(OBJEXT)	\
@@ -249,7 +247,6 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/fast.c \
 	$(srcdir)/fwd_tgt.c	\
 	$(srcdir)/gc_frm_kdc.c	\
-	$(srcdir)/gc_frm_kdc_step.c	\
 	$(srcdir)/gc_via_tkt.c	\
 	$(srcdir)/gen_seqnum.c	\
 	$(srcdir)/gen_subkey.c	\

@@ -319,9 +319,6 @@ krb5_gen_portaddr
 krb5_gen_replay_name
 krb5_generate_seq_number
 krb5_generate_subkey
-krb5_get_cred_from_kdc
-krb5_get_cred_from_kdc_renew
-krb5_get_cred_from_kdc_validate
 krb5_get_cred_via_tkt
 krb5_get_credentials
 krb5_get_credentials_for_proxy
