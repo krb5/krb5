@@ -891,8 +891,9 @@ krb5_tkt_creds_init(krb5_context context, krb5_ccache ccache,
     code = krb5_copy_principal(context, ctx->server, &ctx->req_server);
     if (code != 0)
         goto cleanup;
-    /* XXX Make an alias for now; use krb5_cc_dup later. */
-    ctx->ccache = ccache;
+    code = krb5_cc_dup(context, ccache, &ctx->ccache);
+    if (code != 0)
+        goto cleanup;
     ctx->req_kdcopt = kdcopt;
     code = krb5_copy_authdata(context, in_creds->authdata, &ctx->authdata);
     if (code != 0)
@@ -944,6 +945,7 @@ krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx)
     if (ctx == NULL)
         return;
     krb5_free_creds(context, ctx->in_creds);
+    krb5_cc_close(context, ctx->ccache);
     krb5_free_principal(context, ctx->req_server);
     krb5_free_authdata(context, ctx->authdata);
     krb5_free_creds(context, ctx->cur_tgt);
