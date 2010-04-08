@@ -238,6 +238,12 @@ krb5_cc_resolve (krb5_context context, const char *name, krb5_ccache *cache)
     return ops->resolve(context, cache, resid);
 }
 
+krb5_error_code KRB5_CALLCONV
+krb5_cc_dup(krb5_context context, krb5_ccache in, krb5_ccache *out)
+{
+    return in->ops->resolve(context, out, in->ops->get_name(context, in));
+}
+
 /*
  * cc_getops
  *
