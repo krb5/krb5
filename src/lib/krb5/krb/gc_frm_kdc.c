@@ -280,7 +280,7 @@ make_request_for_service(krb5_context context, krb5_tkt_creds_context ctx,
     int extra_options;
 
     /* Include the caller-specified KDC options in service requests. */
-    extra_options = ctx->kdcopt;
+    extra_options = ctx->req_kdcopt;
 
     /* Automatically set the enc-tkt-in-skey flag for user-to-user requests. */
     if (ctx->in_creds->second_ticket.length != 0 &&
