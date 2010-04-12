@@ -89,6 +89,7 @@ struct _krb5_tkt_creds_context {
     /* The following fields are used in multiple steps. */
     krb5_creds *cur_tgt;        /* TGT to be used for next query */
     krb5_data *realms_seen;     /* For loop detection */
+    krb5_error_code cache_code; /* KRB5_CC_NOTFOUND or KRB5_CC_NOT_KTYPE */
 
     /* The following fields track state between request and reply. */
     krb5_principal tgt_princ;   /* Storage for TGT principal */
@@ -156,6 +157,31 @@ cleanup:
     return code;
 }
 
+/* Simple wrapper around krb5_cc_retrieve_cred which allocates the result
+ * container. */
+static krb5_error_code
+cache_get(krb5_context context, krb5_ccache ccache, krb5_flags flags,
+          krb5_creds *in_creds, krb5_creds **out_creds)
+{
+    krb5_error_code code;
+    krb5_creds *creds;
+
+    *out_creds = NULL;
+
+    creds = malloc(sizeof(*creds));
+    if (creds == NULL)
+        return ENOMEM;
+
+    code = krb5_cc_retrieve_cred(context, ccache, flags, in_creds, creds);
+    if (code != 0) {
+        free(creds);
+        return code;
+    }
+
+    *out_creds = creds;
+    return 0;
+}
+
 /*
  * Point *TGT at an allocated credentials structure containing a TGT for realm
  * retrieved from ctx->ccache.  If we are retrieving a foreign TGT, accept any
@@ -166,10 +192,11 @@ static krb5_error_code
 get_cached_tgt(krb5_context context, krb5_tkt_creds_context ctx,
                const krb5_data *realm, krb5_creds **tgt)
 {
-    krb5_creds mcreds, *creds = NULL;
+    krb5_creds mcreds;
     krb5_error_code code;
     krb5_principal tgtname = NULL;
     krb5_flags flags;
+    krb5_boolean local_realm = data_eq(*realm, ctx->client->realm);
 
     *tgt = NULL;
 
@@ -181,35 +208,29 @@ get_cached_tgt(krb5_context context, krb5_tkt_creds_context ctx,
 
     /* Match the TGT realm only if we're getting the local TGT. */
     flags = KRB5_TC_SUPPORTED_KTYPES;
-    if (!data_eq(*realm, ctx->client->realm))
+    if (local_realm)
         flags |= KRB5_TC_MATCH_SRV_NAMEONLY;
-
-    /* Allocate a structure for the resulting creds. */
-    creds = k5alloc(sizeof(*creds), &code);
-    if (creds == NULL)
-        goto cleanup;
 
     /* Construct a matching cred for the ccache query. */
     memset(&mcreds, 0, sizeof(mcreds));
     mcreds.client = ctx->client;
     mcreds.server = tgtname;
 
-    /* Fetch the TGT credential, handling not-found errors. */
+    /* Fetch the TGT credential. */
     context->use_conf_ktypes = TRUE;
-    code = krb5_cc_retrieve_cred(context, ctx->ccache, flags, &mcreds,
-                                 creds);
+    code = cache_get(context, ctx->ccache, flags, &mcreds, tgt);
     context->use_conf_ktypes = FALSE;
+
+    /* Handle not-found errors.  Make a note if we couldn't find a local TGT
+     * because of enctypes. */
+    if (local_realm && code == KRB5_CC_NOT_KTYPE)
+        ctx->cache_code = KRB5_CC_NOT_KTYPE;
     if (code != 0 && code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE)
         goto cleanup;
-    if (code == 0) {
-        *tgt = creds;
-        creds = NULL;
-    }
     code = 0;
 
 cleanup:
     krb5_free_principal(context, tgtname);
-    free(creds);
     return code;
 }
 
@@ -836,7 +857,7 @@ begin_get_tgt(krb5_context context, krb5_tkt_creds_context ctx)
     if (code != 0)
         return code;
     if (ctx->cur_tgt == NULL)
-        return KRB5_CC_NOTFOUND;
+        return ctx->cache_code;
 
     /* Empty out the realms-seen list for loop checking. */
     krb5int_free_data_list(context, ctx->realms_seen);
@@ -882,6 +903,7 @@ krb5_tkt_creds_init(krb5_context context, krb5_ccache ccache,
         goto cleanup;
 
     ctx->state = STATE_BEGIN;
+    ctx->cache_code = KRB5_CC_NOTFOUND;
 
     code = krb5_copy_creds(context, in_creds, &ctx->in_creds);
     if (code != 0)
