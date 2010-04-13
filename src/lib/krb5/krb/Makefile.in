@@ -106,6 +106,7 @@ STLIBOBJS= \
 	str_conv.o	\
 	tgtname.o	\
 	unparse.o	\
+	val_renew.o	\
 	valid_times.o	\
 	vfy_increds.o	\
 	vic_opt.o	\
@@ -205,6 +206,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)str_conv.$(OBJEXT)	\
 	$(OUTPRE)tgtname.$(OBJEXT)	\
 	$(OUTPRE)unparse.$(OBJEXT)	\
+	$(OUTPRE)val_renew.$(OBJEXT)	\
 	$(OUTPRE)valid_times.$(OBJEXT)	\
 	$(OUTPRE)vfy_increds.$(OBJEXT)	\
 	$(OUTPRE)vic_opt.$(OBJEXT)	\
@@ -306,6 +308,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/t_ad_fx_armor.c \
 	$(srcdir)/tgtname.c	\
 	$(srcdir)/unparse.c	\
+	$(srcdir)/val_renew.c	\
 	$(srcdir)/valid_times.c	\
 	$(srcdir)/vfy_increds.c \
 	$(srcdir)/vic_opt.c	\
