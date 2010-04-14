@@ -169,7 +169,7 @@ AC_PROG_AWK
 AC_PROG_LEX
 AC_C_CONST
 AC_HEADER_DIRENT
-AC_CHECK_FUNCS(strdup setvbuf inet_ntoa inet_aton seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv gmtime_r localtime_r bswap16 bswap64 mkstemp getusershell access getcwd srand48 srand srandom stat strchr strerror strerror_r)
+AC_CHECK_FUNCS(strdup setvbuf inet_ntoa inet_aton seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv gmtime_r localtime_r bswap16 bswap64 mkstemp getusershell lstat access getcwd srand48 srand srandom stat strchr strerror strerror_r)
 
 AC_CHECK_FUNC(mkstemp,
 [MKSTEMP_ST_OBJ=
@@ -1078,7 +1078,7 @@ V5_AC_OUTPUT_MAKEFILE(.
 	lib/crypto/krb/prf lib/crypto/krb/rand2key
 	lib/crypto/$CRYPTO_IMPL lib/crypto/$CRYPTO_IMPL/md4 lib/crypto/$CRYPTO_IMPL/md5
 	lib/crypto/krb/old lib/crypto/krb/raw lib/crypto/$CRYPTO_IMPL/sha1
-	lib/crypto/krb/arcfour lib/crypto/krb/yarrow lib/crypto/$CRYPTO_IMPL/aes
+	lib/crypto/krb/arcfour lib/crypto/$CRYPTO_IMPL/aes
 	lib/crypto/crypto_tests
 
 	lib/krb5 lib/krb5/error_tables lib/krb5/asn.1 lib/krb5/ccache
@@ -1114,6 +1114,11 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	plugins/authdata/greet
 	plugins/authdata/greet_client
 	plugins/authdata/greet_server
+
+	plugins/prng
+	plugin_core/impl
+	plugins/prng/plugin_yarrow
+	plugin_core
 
 	clients clients/klist clients/kinit clients/kvno
 	clients/kdestroy clients/kpasswd clients/ksu

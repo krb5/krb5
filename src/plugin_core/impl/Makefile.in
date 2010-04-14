@@ -1,0 +1,29 @@
+mydir=impl
+BUILDTOP=$(REL)../..
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+DEFS=
+
+LOCALINCLUDES = -I$(srcdir)/../../include/krb5  -I$(srcdir)/. 	\
+		-I$(srcdir)/../../plugins/prng/plugin_yarrow -I$(srcdir)/../../plugins/prng 	\
+		-I$(srcdir)/..
+
+ 
+STLIBOBJS= plugin_default_factory.o plugin_default_manager.o
+
+OBJS=\
+	$(OUTPRE)plugin_default_manager.$(OBJEXT) \
+	$(OUTPRE)plugin_default_factory.$(OBJEXT) 
+
+SRCS= plugin_default_factory.c plugin_default_manager.c
+
+all-unix:: all-libobjs
+
+includes:: depend
+
+depend:: $(SRCS)
+
+clean-unix:: clean-libobjs
+
+@libobj_frag@
+

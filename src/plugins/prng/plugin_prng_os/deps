@@ -1,0 +1,5 @@
+plugin_prng_impl.so plugin_prng_impl.po $(OUTPRE)plugin_prng_impl.$(OBJEXT): \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/plugins/prng/os/plugin_prng_impl.h \
+  $(top_srcdir)/plugin_core/plugin_manager.h \
+  $(top_srcdir)/plugin_core/plugin_factory.h \
+  plugin_prng_impl.c

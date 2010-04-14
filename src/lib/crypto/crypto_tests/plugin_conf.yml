@@ -1,0 +1,17 @@
+- !Plugin
+  api: plugin_prng
+  type: service
+  constructor:
+    factory_name: plugin_default_factory
+    factory_type: static
+    plugin_name: plugin_yarrow_prng
+  Properties: null
+
+- !Plugin
+  api: audit
+  type: listener
+  constructor: 
+    factory_name: plugin_default_factory
+    factory_type: shared
+    plugin_name: undef
+  Properties: null

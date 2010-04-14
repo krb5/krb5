@@ -1424,6 +1424,14 @@ krb5_authdata_free_internal(krb5_context kcontext,
 struct _kdb5_dal_handle;        /* private, in kdb5.h */
 typedef struct _kdb5_dal_handle kdb5_dal_handle;
 struct _kdb_log_context;
+
+/* Plugin API ----  PLUGIN HANDLE */
+typedef struct _plhandle{
+        void *api;
+    struct _plhandle *next;
+} plhandle;
+
+
 struct _krb5_context {
     krb5_magic      magic;
     krb5_enctype    *in_tkt_etypes;

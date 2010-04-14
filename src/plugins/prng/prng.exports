@@ -1,0 +1,5 @@
+plugin_prng_seed
+plugin_prng_os_seed
+plugin_prng_rand
+plugin_prng_init
+plugin_prng_cleanup

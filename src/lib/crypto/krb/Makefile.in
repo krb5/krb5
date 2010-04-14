@@ -1,14 +1,15 @@
 mydir=lib/crypto/krb
 BUILDTOP=$(REL)..$(S)..$(S)..
 SUBDIRS= arcfour checksum crc32 dk \
-	prf rand2key old raw yarrow 
+	prf rand2key old raw 
 LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/../@CRYPTO_IMPL@/enc_provider -I$(srcdir)/dk	\
 		-I$(srcdir)/../@CRYPTO_IMPL@/hash_provider				\
 		-I$(srcdir)/prf -I$(srcdir)/rand2key		 			\
-		-I$(srcdir)/old -I$(srcdir)/raw -I$(srcdir)/yarrow 			\
+		-I$(srcdir)/old -I$(srcdir)/raw  			\
 		-I$(srcdir)/../@CRYPTO_IMPL@/ -I$(srcdir)/../@CRYPTO_IMPL@/des		\
 		-I$(srcdir)/../@CRYPTO_IMPL@/aes -I$(srcdir)/arcfour 	\
-		-I$(srcdir)/../@CRYPTO_IMPL@/sha1 -I$(srcdir)/../@CRYPTO_IMPL@
+		-I$(srcdir)/../@CRYPTO_IMPL@/sha1 -I$(srcdir)/../@CRYPTO_IMPL@	\
+		-I$(BUILDTOP)/plugins/prng -I$(BUILDTOP)/plugin_core
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
@@ -143,11 +144,11 @@ SRCS=\
 
 STOBJLISTS=arcfour/OBJS.ST checksum/OBJS.ST crc32/OBJS.ST	\
 	dk/OBJS.ST prf/OBJS.ST rand2key/OBJS.ST			\
-	old/OBJS.ST raw/OBJS.ST  yarrow/OBJS.ST  OBJS.ST
+	old/OBJS.ST raw/OBJS.ST  OBJS.ST
 
 SUBDIROBJLISTS=arcfour/OBJS.ST checksum/OBJS.ST crc32/OBJS.ST	\
 	dk/OBJS.ST prf/OBJS.ST rand2key/OBJS.ST			\
-	old/OBJS.ST raw/OBJS.ST  yarrow/OBJS.ST 
+	old/OBJS.ST raw/OBJS.ST  
 
 ##DOS##LIBOBJS = $(OBJS)
 
@@ -183,9 +184,6 @@ all-windows::
 	cd ..\raw
 	@echo Making in crypto\raw
 	$(MAKE) -$(MFLAGS)
-	cd ..\yarrow
-	@echo Making in crypto\yarrow
-	$(MAKE) -$(MFLAGS)
 	cd ..
 
 clean-windows::
@@ -213,9 +211,6 @@ clean-windows::
 	cd ..\raw
 	@echo Making clean in crypto\raw
 	$(MAKE) -$(MFLAGS) clean
-	cd ..\yarrow
-	@echo Making clean in crypto\yarrow
-	$(MAKE) -$(MFLAGS) clean
 	cd ..
 
 check-windows::
@@ -242,9 +237,6 @@ check-windows::
 	$(MAKE) -$(MFLAGS) check
 	cd ..\raw
 	@echo Making check in crypto\raw
-	$(MAKE) -$(MFLAGS) check
-	cd ..\yarrow
-	@echo Making check in crypto\yarrow
 	$(MAKE) -$(MFLAGS) check
 	cd ..
 

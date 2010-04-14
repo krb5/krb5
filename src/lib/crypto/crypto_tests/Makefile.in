@@ -3,15 +3,23 @@ BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../krb -I$(srcdir)/../@CRYPTO_IMPL@/enc_provider 		\
 	-I$(srcdir)/../@CRYPTO_IMPL@/hash_provider -I$(srcdir)/../krb/keyhash_provider 	\
 	-I$(srcdir)/../krb/dk -I$(srcdir)/../@CRYPTO_IMPL@/ 			\
-	-I$(srcdir)/../krb/yarrow 	\
 	-I$(srcdir)/../krb/crc32 -I$(srcdir)/../krb/old -I$(srcdir)/../krb/raw 	\
 	-I$(srcdir)/../@CRYPTO_IMPL@/aes -I$(srcdir)/../@CRYPTO_IMPL@/des 	\
 	-I$(srcdir)/../@CRYPTO_IMPL@/arcfour -I$(srcdir)/../@CRYPTO_IMPL@/sha1 	\
-	-I$(srcdir)/../@CRYPTO_IMPL@/md5 -I$(srcdir)/../@CRYPTO_IMPL@/md4 
+	-I$(srcdir)/../@CRYPTO_IMPL@/md5 -I$(srcdir)/../@CRYPTO_IMPL@/md4 \
+	-I$(srcdir)/../../../plugin_core/impl  -I$(srcdir)/../../../plugins/prng \
+	-I$(srcdir)/../../../plugins/prng/plugin_yarrow -I$(srcdir)/../../../plugin_core
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
+
+PLUGINS_LIBS = \
+	../../../plugin_core/impl/plugin_default_manager.so 	\
+	../../../plugin_core/impl/plugin_default_factory.so 	\ 
+	../../../plugins/prng/plugin_yarrow/plugin_prng_impl.so 	\ 
+	../../../plugins/prng/plugin_yarrow/yarrow.so 	\ 
+	../../../plugins/prng/plugin_yarrow/ycipher.so 	
 
 EXTRADEPSRCS=\
 	$(srcdir)/t_nfold.c	\
@@ -41,15 +49,17 @@ EXTRADEPSRCS=\
 # NOTE: The t_cksum known checksum values are primarily for regression
 # testing.  They are not derived a priori, but are known to produce
 # checksums that interoperate.
-check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac \
+#  check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac \
+#
+check-unix:: t_prng t_nfold t_encrypt t_hmac t_prf\
 		t_cksum4 t_cksum5 \
 		aes-test  \
 		t_mddriver4 t_mddriver \
 		t_crc t_cts t_short
-	$(RUN_SETUP) $(VALGRIND) ./t_nfold
-	$(RUN_SETUP) $(VALGRIND) ./t_encrypt
 	$(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output && \
 	diff t_prng.output $(srcdir)/t_prng.expected
+	$(RUN_SETUP) $(VALGRIND) ./t_nfold
+	$(RUN_SETUP) $(VALGRIND) ./t_encrypt
 	$(RUN_SETUP) $(VALGRIND) ./t_hmac
 	$(RUN_SETUP) $(VALGRIND) ./t_prf <$(srcdir)/t_prf.in >t_prf.output
 	diff t_prf.output $(srcdir)/t_prf.expected
@@ -77,30 +87,31 @@ nfold.$(OBJEXT): $(srcdir)/../krb/nfold.c
 	$(CC) -c $(ALL_CFLAGS) $(srcdir)/../krb/nfold.c
 
 t_encrypt$(EXEEXT): t_encrypt.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_encrypt.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
+	$(CC_LINK) -o $@ t_encrypt.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) 	\
+	$(PLUGINS_LIBS)
 
 t_prf$(EXEEXT): t_prf.$(OBJEXT) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_prf.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
+	$(CC_LINK) -o $@ t_prf.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(PLUGINS_LIBS)
 
 t_prng$(EXEEXT): t_prng.$(OBJEXT) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_prng.$(OBJEXT)  -lk5crypto -lcom_err $(SUPPORT_LIB)
+	$(CC_LINK) -o $@ t_prng.$(OBJEXT)  -lk5crypto -lcom_err $(SUPPORT_LIB)  $(PLUGINS_LIBS)
 
 t_hmac$(EXEEXT): t_hmac.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_hmac.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
+	$(CC_LINK) -o $@ t_hmac.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)  $(PLUGINS_LIBS)
 
 #t_pkcs5$(EXEEXT): t_pkcs5.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
-#	$(CC_LINK) -o $@ t_pkcs5.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
+#	$(CC_LINK) -o $@ t_pkcs5.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(PLUGINS_LIBS)
 
 vectors$(EXEEXT): vectors.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ vectors.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
+	$(CC_LINK) -o $@ vectors.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(PLUGINS_LIBS)
 
- t_cts$(EXEEXT): t_cts.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
+t_cts$(EXEEXT): t_cts.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_cts.$(OBJEXT) \
-		$(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
+		$(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(PLUGINS_LIBS)
 
 t_short$(EXEEXT): t_short.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_short.$(OBJEXT) \
-		$(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
+		$(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(PLUGINS_LIBS)
 
 t_cksum4.o: $(srcdir)/t_cksum.c
 	$(CC) -DMD=4 $(ALL_CFLAGS) -o t_cksum4.o -c $(srcdir)/t_cksum.c
@@ -109,31 +120,31 @@ t_cksum5.o: $(srcdir)/t_cksum.c
 	$(CC) -DMD=5 $(ALL_CFLAGS) -o t_cksum5.o -c $(srcdir)/t_cksum.c
 
 t_cksum4: t_cksum4.o $(CRYTPO_DEPLIB)
-	$(CC_LINK) -o t_cksum4 t_cksum4.o $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(LIBS)
+	$(CC_LINK) -o t_cksum4 t_cksum4.o $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(LIBS) $(PLUGINS_LIBS)
 
 t_cksum5: t_cksum5.o $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o t_cksum5 t_cksum5.o $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(LIBS)
+	$(CC_LINK) -o t_cksum5 t_cksum5.o $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(LIBS) $(PLUGINS_LIBS)
 
 t_crc: t_crc.o $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_crc.o $(K5CRYPTO_LIB) $(SUPPORT_LIB)
+	$(CC_LINK) -o $@ t_crc.o $(K5CRYPTO_LIB) $(SUPPORT_LIB) $(PLUGINS_LIBS)
 
 aes-test: aes-test.$(OBJEXT) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o aes-test aes-test.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
+	$(CC_LINK) -o aes-test aes-test.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(PLUGINS_LIBS)
 
 t_mddriver4.o: $(srcdir)/t_mddriver.c
 	$(CC) -DMD=4 $(ALL_CFLAGS) -o t_mddriver4.o -c $(srcdir)/t_mddriver.c
 
-t_mddriver4: t_mddriver4.o  $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -DMD4  -o t_mddriver4 t_mddriver4.o -lk5crypto $(SUPPORT_LIB)
+t_mddriver4: t_mddriver4.o  $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB) 
+	$(CC_LINK) -DMD4  -o t_mddriver4 t_mddriver4.o -lk5crypto $(SUPPORT_LIB) $(PLUGINS_LIBS)
 
 t_mddriver: t_mddriver.o  $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o t_mddriver t_mddriver.o -lk5crypto $(SUPPORT_LIB)
+	$(CC_LINK) -o t_mddriver t_mddriver.o -lk5crypto $(SUPPORT_LIB) $(PLUGINS_LIBS)
 
 t_kperf: t_kperf.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o t_kperf t_kperf.o  $(SUPPORT_LIB) $(CRYPTO_DEPLIB)
+	$(CC_LINK) -o t_kperf t_kperf.o  $(SUPPORT_LIB) $(CRYPTO_DEPLIB) $(PLUGINS_LIBS)
 
 ytest: ytest.o shs.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o ytest ytest.o  $(SUPPORT_LIB)  $(CRYPTO_DEPLIB)
+	$(CC_LINK) -o ytest ytest.o  $(SUPPORT_LIB)  $(CRYPTO_DEPLIB) $(PLUGINS_LIBS)
 
 
 
@@ -149,7 +160,7 @@ clean::
 		t_kperf.o t_kperf t_short t_short.o \
 		t_mddriver$(EXEEXT) $(OUTPRE)t_mddriver.$(OBJEXT)
 
-	-$(RM) t_prng.output
+# temp	-$(RM) t_prng.output
 	-$(RM) t_prf.output
 
 @lib_frag@

@@ -1,0 +1,34 @@
+mydir=plugins/prng/plugin_yarrow
+BUILDTOP=$(REL)../../..
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+DEFS=
+
+LOCALINCLUDES = -I../../../include/krb5 -I. -I../../../plugin_core -I..  -I$(srcdir)/.. \
+		-I$(srcdir)/../../../lib/crypto/@CRYPTO_IMPL@         \
+		-I$(srcdir)/../../../lib/crypto/@CRYPTO_IMPL@/sha1    \
+		-I$(srcdir)/../../../lib/crypto/@CRYPTO_IMPL@/enc_provider
+
+
+
+STLIBOBJS=\
+	yarrow.o \
+	ycipher.o \
+	plugin_prng_impl.o
+
+OBJS=\
+	$(OUTPRE)yarrow.$(OBJEXT) \
+	$(OUTPRE)ycipher.$(OBJEXT) \
+	$(OUTPRE)plugin_prng_impl.$(OBJEXT)
+
+SRCS=\
+	$(srcdir)/yarrow.c \
+	$(srcdir)/ycipher.c \
+	$(srcdir)/plugin_prng_impl.c
+
+all-unix:: all-libobjs
+
+depend:: $(SRCS)
+clean-unix:: clean-libobjs
+
+@libobj_frag@

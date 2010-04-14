@@ -34,6 +34,9 @@
 #include "k5-int.h"
 #include "etypes.h"
 #include <stdio.h>
+#include <plugin_default_manager.h>
+#include <plugin_prng.h>
+
 
 /* What enctypes should we test?*/
 krb5_enctype interesting_enctypes[] = {
@@ -98,6 +101,14 @@ main ()
     krb5_enc_data enc_out, enc_out2;
     krb5_keyblock *keyblock;
     krb5_key key;
+    plugin_manager* default_manager;
+    const char conf_path[] = "plugin_conf.yml";
+
+        default_manager = plugin_default_manager_get_instance();
+        set_plugin_manager_instance(default_manager);
+
+        plugin_manager_configure(conf_path);
+        plugin_manager_start();
 
     memset(iov, 0, sizeof(iov));
 

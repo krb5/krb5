@@ -31,6 +31,9 @@
  */
 
 #include "k5-int.h"
+#include <plugin_default_manager.h>
+#include <plugin_prng.h>
+
 
 #define MD5_K5BETA_COMPAT
 #define MD4_K5BETA_COMPAT
@@ -96,6 +99,14 @@ main(argc, argv)
     krb5_error_code       kret=0;
     krb5_data             plaintext;
     krb5_checksum         checksum, knowncksum;
+    plugin_manager* default_manager;
+    const char conf_path[] = "plugin_conf.yml";
+
+    default_manager = plugin_default_manager_get_instance();
+    set_plugin_manager_instance(default_manager);
+
+    plugin_manager_configure(conf_path);
+    plugin_manager_start();
 
     /* this is a terrible seed, but that's ok for the test. */
 

@@ -1,3 +1,9 @@
+krb5_c_random_os_entropy
+krb5int_crypto_init
+shsUpdate
+shsInit
+shsFinal
+krb5int_enc_aes256
 krb5_c_make_random_key
 krb5_c_encrypt_length
 krb5_process_key
@@ -13,7 +19,6 @@ is_coll_proof_cksum
 krb5_init_random_key
 krb5_c_string_to_key_with_params
 krb5_c_random_make_octets
-krb5_c_random_os_entropy
 krb5_c_decrypt
 krb5_c_crypto_length
 krb5_c_block_size

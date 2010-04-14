@@ -31,6 +31,9 @@
  */
 
 #include "k5-int.h"
+#include <plugin_default_manager.h>
+#include <plugin_prng.h>
+
 
 krb5_enctype interesting_enctypes[] = {
     ENCTYPE_DES_CBC_CRC,
@@ -116,6 +119,14 @@ main(int argc, char **argv)
 {
     int i;
     krb5_data notrandom;
+    plugin_manager* default_manager;
+    const char conf_path[] = "plugin_conf.yml";
+
+        default_manager = plugin_default_manager_get_instance();
+        set_plugin_manager_instance(default_manager);
+
+        plugin_manager_configure(conf_path);
+        plugin_manager_start();
 
     notrandom.data = "notrandom";
     notrandom.length = 9;

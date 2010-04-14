@@ -40,12 +40,23 @@
 
 #include "k5-int.h"
 #include <assert.h>
+#include <plugin_default_manager.h>
+#include <plugin_prng.h>
 
 int main () {
     krb5_error_code ret;
     krb5_data input, output;
     unsigned int source_id, seed_length;
     unsigned int i;
+    plugin_manager* default_manager;
+    const char conf_path[] = "plugin_conf.yml";
+
+        default_manager = plugin_default_manager_get_instance();
+        set_plugin_manager_instance(default_manager);
+
+        plugin_manager_configure(conf_path);
+        plugin_manager_start();
+
     while (1) {
         /* Read source*/
         if (scanf ("%u", &source_id ) == EOF )
