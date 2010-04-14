@@ -52,9 +52,6 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
     krb5_principal client, server;
     krb5_verify_init_creds_opt vfy_opts;
     krb5_creds tgt, tgtq, in_creds, * out_creds;
-    krb5_creds **tgts = NULL; /* list of ticket granting tickets */
-
-    krb5_ticket * target_tkt; /* decrypted ticket for server */
     krb5_error_code retval =0;
     int got_it = 0;
     krb5_boolean zero_password;
@@ -178,8 +175,8 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
         return (FALSE) ;
     }
 
-    if ((retval = krb5_get_cred_from_kdc(context, cc, &in_creds,
-                                         &out_creds, &tgts))){
+    if ((retval = krb5_get_credentials(context, 0, cc, &in_creds,
+                                       &out_creds))){
         com_err(prog_name, retval, "while getting credentials from kdc");
         return (FALSE);
     }
@@ -191,23 +188,6 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
     }
 
 
-    if (tgts){
-        register int i =0;
-
-        if (auth_debug){
-            fprintf(stderr, "krb5_auth_check: went via multiple realms");
-        }
-        while (tgts[i]){
-            if ((retval=krb5_cc_store_cred(context,cc,tgts[i]))) {
-                com_err(prog_name, retval,
-                        "while storing credentials from cross-realm walk");
-                return (FALSE);
-            }
-            i++;
-        }
-        krb5_free_tgt_creds(context, tgts);
-    }
-
     krb5_verify_init_creds_opt_init(&vfy_opts);
     krb5_verify_init_creds_opt_set_ap_req_nofail( &vfy_opts, 1);
     retval = krb5_verify_init_creds(context, out_creds, server, NULL /*keytab*/,
@@ -215,12 +195,6 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
                                     &vfy_opts);
     if (retval) {
         com_err(prog_name, retval, "while verifying ticket for server");
-        return (FALSE);
-    }
-
-    if ((retval = krb5_cc_store_cred(context,  cc, out_creds))){
-        com_err(prog_name, retval,
-                "While storing credentials");
         return (FALSE);
     }
 
