@@ -16,10 +16,10 @@ DEFS=
 
 PLUGINS_LIBS = \
 	../../../plugin_core/impl/plugin_default_manager.so 	\
-	../../../plugin_core/impl/plugin_default_factory.so 	\ 
-	../../../plugins/prng/plugin_yarrow/plugin_prng_impl.so 	\ 
-	../../../plugins/prng/plugin_yarrow/yarrow.so 	\ 
-	../../../plugins/prng/plugin_yarrow/ycipher.so 	
+	../../../plugin_core/impl/plugin_default_factory.so 	\
+	../../../plugins/prng/plugin_yarrow/plugin_prng_impl.so \
+	../../../plugins/prng/plugin_yarrow/yarrow.so 	\
+	../../../plugins/prng/plugin_yarrow/ycipher.so
 
 EXTRADEPSRCS=\
 	$(srcdir)/t_nfold.c	\

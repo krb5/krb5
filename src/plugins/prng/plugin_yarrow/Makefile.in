@@ -28,7 +28,10 @@ SRCS=\
 
 all-unix:: all-libobjs
 
+includes:: depend
+
 depend:: $(SRCS)
+
 clean-unix:: clean-libobjs
 
 @libobj_frag@
