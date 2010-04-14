@@ -623,16 +623,9 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
                                    &out,
                                    &realm,
                                    &flags);
-        if (code != 0) {
-            /* we failed, but store any referrals in our ccache */
-            krb5_tkt_creds_store_creds(ctx->k5c, ctx->u.tcc, NULL);
+        if (code != 0)
             goto cleanup;
-        }
         if ((flags & 1) != 1) {
-            code = krb5_tkt_creds_store_creds(ctx->k5c, ctx->u.tcc, NULL);
-            if (code != 0)
-                goto cleanup;
-
             krb5_tkt_creds_get_times(ctx->k5c, ctx->u.tcc, &times);
             cred->tgt_expire = times.endtime;
 

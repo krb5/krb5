@@ -1024,19 +1024,6 @@ krb5_tkt_creds_get_creds(krb5_context context, krb5_tkt_creds_context ctx,
     return krb5int_copy_creds_contents(context, ctx->reply_creds, creds);
 }
 
-/* Store credentials in credentials cache.  If ccache is NULL, the
- * credentials cache associated with the context is used. */
-krb5_error_code KRB5_CALLCONV
-krb5_tkt_creds_store_creds(krb5_context context, krb5_tkt_creds_context ctx,
-                           krb5_ccache ccache)
-{
-    if (ctx->state != STATE_COMPLETE)
-        return KRB5_NO_TKT_SUPPLIED;
-    if (ccache == NULL)
-        ccache = ctx->ccache;
-    return krb5_cc_store_cred(context, ccache, ctx->reply_creds);
-}
-
 krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_get_times(krb5_context context, krb5_tkt_creds_context ctx,
                          krb5_ticket_times *times)

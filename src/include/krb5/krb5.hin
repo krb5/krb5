@@ -2473,10 +2473,6 @@ krb5_tkt_creds_step(krb5_context context, krb5_tkt_creds_context ctx,
                     unsigned int *flags);
 
 krb5_error_code KRB5_CALLCONV
-krb5_tkt_creds_store_creds(krb5_context context, krb5_tkt_creds_context ctx,
-                           krb5_ccache ccache);
-
-krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_get_times(krb5_context context, krb5_tkt_creds_context ctx,
                          krb5_ticket_times *times);
 
