@@ -151,17 +151,6 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
     if (retval != 0)
         goto cleanup;
 
-    /* Attempt to cache the returned ticket. */
-    if (!(options & KRB5_GC_NO_STORE))
-        (void) krb5_cc_store_cred(context, ccache, ncreds);
-
-    if ((options & KRB5_GC_CONSTRAINED_DELEGATION)
-        && (ncreds->ticket_flags & TKT_FLG_FORWARDABLE) == 0) {
-        /* This ticket won't work for constrained delegation. */
-        retval = KRB5_TKT_NOT_FORWARDABLE;
-        goto cleanup;
-    }
-
     *out_creds = ncreds;
     ncreds = NULL;
 

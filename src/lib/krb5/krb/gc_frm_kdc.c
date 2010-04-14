@@ -340,6 +340,36 @@ seen_realm_before(krb5_context context, krb5_tkt_creds_context ctx,
     return FALSE;
 }
 
+/***** STATE_COMPLETE *****/
+
+/* Check and cache the desired credential when we receive it.  Expects the
+ * received credential to be in ctx->reply_creds. */
+static krb5_error_code
+complete(krb5_context context, krb5_tkt_creds_context ctx)
+{
+    krb5_error_code code;
+
+    /* Note the authdata we asked for in the output creds. */
+    ctx->reply_creds->authdata = ctx->authdata;
+    ctx->authdata = NULL;
+
+    /* Cache the credential if desired. */
+    if (!(ctx->req_options & KRB5_GC_NO_STORE)) {
+        code = krb5_cc_store_cred(context, ctx->ccache, ctx->reply_creds);
+        if (code != 0)
+            return code;
+    }
+
+    /* If we were doing constrained delegation, make sure we got a forwardable
+     * ticket, or it won't work. */
+    if ((ctx->req_options & KRB5_GC_CONSTRAINED_DELEGATION)
+        && (ctx->reply_creds->ticket_flags & TKT_FLG_FORWARDABLE) == 0)
+        return KRB5_TKT_NOT_FORWARDABLE;
+
+    ctx->state = STATE_COMPLETE;
+    return 0;
+}
+
 /***** STATE_NON_REFERRAL *****/
 
 /* Process the response to a non-referral request. */
@@ -350,11 +380,7 @@ step_non_referral(krb5_context context, krb5_tkt_creds_context ctx)
     if (ctx->reply_code)
         return ctx->reply_code;
 
-    /* Note the authdata we asked for in the output creds. */
-    ctx->reply_creds->authdata = ctx->authdata;
-    ctx->authdata = NULL;
-    ctx->state = STATE_COMPLETE;
-    return 0;
+    return complete(context, ctx);
 }
 
 /* Make a non-referrals request for the desired service ticket. */
@@ -446,10 +472,7 @@ step_referrals(krb5_context context, krb5_tkt_creds_context ctx)
             return begin_non_referral(context, ctx);
 
         /* Note the authdata we asked for in the output creds. */
-        ctx->reply_creds->authdata = ctx->authdata;
-        ctx->authdata = NULL;
-        ctx->state = STATE_COMPLETE;
-        return 0;
+        return complete(context, ctx);
     }
 
     /* Old versions of Active Directory can rewrite the server name instead of
