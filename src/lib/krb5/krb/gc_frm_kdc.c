@@ -184,58 +184,6 @@ cache_get(krb5_context context, krb5_ccache ccache, krb5_flags flags,
 }
 
 /*
- * Point *TGT at an allocated credentials structure containing a TGT for realm
- * retrieved from ctx->ccache.  If we are retrieving a foreign TGT, accept any
- * issuing realm (i.e. match only the service principal name).  If the TGT is
- * not found in the cache, return successfully but set *tgt to NULL.
- */
-static krb5_error_code
-get_cached_tgt(krb5_context context, krb5_tkt_creds_context ctx,
-               const krb5_data *realm, krb5_creds **tgt)
-{
-    krb5_creds mcreds;
-    krb5_error_code code;
-    krb5_principal tgtname = NULL;
-    krb5_flags flags;
-    krb5_boolean local_realm = data_eq(*realm, ctx->client->realm);
-
-    *tgt = NULL;
-
-    /* Construct the principal krbtgt/<realm>@<client realm>.  The realm
-     * won't matter unless we're getting the local TGT. */
-    code = krb5int_tgtname(context, realm, &ctx->client->realm, &tgtname);
-    if (code != 0)
-        goto cleanup;
-
-    /* Match the TGT realm only if we're getting the local TGT. */
-    flags = KRB5_TC_SUPPORTED_KTYPES;
-    if (local_realm)
-        flags |= KRB5_TC_MATCH_SRV_NAMEONLY;
-
-    /* Construct a matching cred for the ccache query. */
-    memset(&mcreds, 0, sizeof(mcreds));
-    mcreds.client = ctx->client;
-    mcreds.server = tgtname;
-
-    /* Fetch the TGT credential. */
-    context->use_conf_ktypes = TRUE;
-    code = cache_get(context, ctx->ccache, flags, &mcreds, tgt);
-    context->use_conf_ktypes = FALSE;
-
-    /* Handle not-found errors.  Make a note if we couldn't find a local TGT
-     * because of enctypes. */
-    if (local_realm && code == KRB5_CC_NOT_KTYPE)
-        ctx->cache_code = KRB5_CC_NOT_KTYPE;
-    if (code != 0 && code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE)
-        goto cleanup;
-    code = 0;
-
-cleanup:
-    krb5_free_principal(context, tgtname);
-    return code;
-}
-
-/*
  * Set up the request given by ctx->tgs_in_creds, using ctx->cur_tgt.  KDC
  * options for the requests are determined by ctx->cur_tgt->ticket_flags and
  * extra_options.
@@ -668,6 +616,58 @@ begin_get_tgt_offpath(krb5_context context, krb5_tkt_creds_context ctx)
  * In some cases we may get back a TGT for a realm not in the path.  In that
  * case we enter STATE_GET_TGT_OFFPATH.
  */
+
+/*
+ * Point *TGT at an allocated credentials structure containing a TGT for realm
+ * retrieved from ctx->ccache.  If we are retrieving a foreign TGT, accept any
+ * issuing realm (i.e. match only the service principal name).  If the TGT is
+ * not found in the cache, return successfully but set *tgt to NULL.
+ */
+static krb5_error_code
+get_cached_tgt(krb5_context context, krb5_tkt_creds_context ctx,
+               const krb5_data *realm, krb5_creds **tgt)
+{
+    krb5_creds mcreds;
+    krb5_error_code code;
+    krb5_principal tgtname = NULL;
+    krb5_flags flags;
+    krb5_boolean local_realm = data_eq(*realm, ctx->client->realm);
+
+    *tgt = NULL;
+
+    /* Construct the principal krbtgt/<realm>@<client realm>.  The realm
+     * won't matter unless we're getting the local TGT. */
+    code = krb5int_tgtname(context, realm, &ctx->client->realm, &tgtname);
+    if (code != 0)
+        goto cleanup;
+
+    /* Match the TGT realm only if we're getting the local TGT. */
+    flags = KRB5_TC_SUPPORTED_KTYPES;
+    if (local_realm)
+        flags |= KRB5_TC_MATCH_SRV_NAMEONLY;
+
+    /* Construct a matching cred for the ccache query. */
+    memset(&mcreds, 0, sizeof(mcreds));
+    mcreds.client = ctx->client;
+    mcreds.server = tgtname;
+
+    /* Fetch the TGT credential. */
+    context->use_conf_ktypes = TRUE;
+    code = cache_get(context, ctx->ccache, flags, &mcreds, tgt);
+    context->use_conf_ktypes = FALSE;
+
+    /* Handle not-found errors.  Make a note if we couldn't find a local TGT
+     * because of enctypes. */
+    if (local_realm && code == KRB5_CC_NOT_KTYPE)
+        ctx->cache_code = KRB5_CC_NOT_KTYPE;
+    if (code != 0 && code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE)
+        goto cleanup;
+    code = 0;
+
+cleanup:
+    krb5_free_principal(context, tgtname);
+    return code;
+}
 
 /* Initialize the realm path fields for getting a TGT for
  * ctx->server->realm. */
