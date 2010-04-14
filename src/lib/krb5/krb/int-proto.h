@@ -137,19 +137,6 @@ krb5int_process_tgs_reply(krb5_context context,
                           krb5_pa_data ***out_enc_padata,
                           krb5_creds **out_cred);
 
-krb5_error_code krb5int_send_tgs(krb5_context, krb5_flags,
-                                 const krb5_ticket_times *,
-                                 const krb5_enctype *,
-                                 krb5_const_principal, krb5_address *const *,
-                                 krb5_authdata *const *,
-                                 krb5_pa_data *const *, const krb5_data *,
-                                 krb5_creds *,
-                                 krb5_error_code (*gcvt_fct)(krb5_context,
-                                                             krb5_keyblock *,
-                                                             krb5_kdc_req *,
-                                                             void *),
-                                 void *gcvt_data, krb5_response *,
-                                 krb5_keyblock **subkey);
 /* The subkey field is an output parameter; if a
  * tgs-rep is received then the subkey will be filled
  * in with the subkey needed to decrypt the TGS
