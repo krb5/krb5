@@ -2427,9 +2427,10 @@ typedef struct _krb5_tkt_creds_context *krb5_tkt_creds_context;
  * krb5_get_credentials() for synchrous use.
  *
  * @param[in]  context  A krb5 library context (see krb5_init_context())
- * @param[in]  ccache   A credentials cache containing a Ticket Granting Ticket
- *                      (TGT) for the client realm.  Cross-realm TGTs may be
- *                      stored into this cache.
+ * @param[in]  ccache   A credentials cache containing the desired credentials
+ *                      or a Ticket Granting Ticket (TGT) for the client realm.
+ *                      TGT and service credentials may be stored into this
+ *                      cache as they are acquired.
  * @param[in]  options  KRB5_GC_* options for this request.
  * @param[out] ctx      The TGS acquisition context.
  */
@@ -2452,8 +2453,9 @@ krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_get(krb5_context context, krb5_tkt_creds_context ctx);
 
 /**
- * Retrieve credentials from an acquisition context, filling in @a creds.  The
- * acquisition context must have completed obtaining credentials via either
+ * Retrieve credentials from an acquisition context, filling in @a creds.
+ *
+ * The acquisition context must have completed obtaining credentials via either
  * krb5_tkt_creds_get() or krb5_tkt_creds_step().
  *
  * @param[in]  context  A krb5 library context (see krb5_init_context())
@@ -2464,14 +2466,48 @@ krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_get_creds(krb5_context context, krb5_tkt_creds_context ctx,
                          krb5_creds *creds);
 
+/**
+ * Release the resources used by an acquisition context.
+ *
+ * @param[in]  context  A krb5 library context (see krb5_init_context())
+ * @param[in]  ctx      A TGS acquisition context (see krb5_tkt_creds_init())
+ */
 void KRB5_CALLCONV
 krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx);
 
+#define KRB5_TKT_CREDS_CONTINUE 1  /* Another KDC response is needed. */
+
+/**
+ * Process a response and generate the next request to acquire credentials.
+ *
+ * On the first call, @a in should be empty or NULL.  If more responses are
+ * needed, the @a flags output parameter will contain @a
+ * KRB5_TKT_CREDS_CONTINUE.  In this case, the caller must transport @a out to
+ * a KDC for @a realm and receive a response, which should be provided as @a
+ * in to the next call.
+ *
+ * @param[in]  context  A krb5 library context (see krb5_init_context())
+ * @param[in]  ctx      A TGS acquisition context (see krb5_tkt_creds_init())
+ * @param[in]  in       The last response (empty or NULL for first call)
+ * @param[out] out      The next request to be sent
+ * @param[out] realm    The realm to which the next request should be sent
+ * @param[out] flags    Indicates whether more responses are needed
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_step(krb5_context context, krb5_tkt_creds_context ctx,
                     krb5_data *in, krb5_data *out, krb5_data *realm,
                     unsigned int *flags);
 
+/**
+ * Retrieve ticket times for obtained credentials, filling in @a times.
+ *
+ * The acquisition context must have completed obtaining credentials via either
+ * krb5_tkt_creds_get() or krb5_tkt_creds_step().
+ *
+ * @param[in]  context  A krb5 library context (see krb5_init_context())
+ * @param[in]  ctx      A TGS acquisition context (see krb5_tkt_creds_init())
+ * @param[out] times    Ticket times for the acquired credentials
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_get_times(krb5_context context, krb5_tkt_creds_context ctx,
                          krb5_ticket_times *times);
