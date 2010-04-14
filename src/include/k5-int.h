@@ -2574,15 +2574,6 @@ krb5_error_code krb5_kdc_rep_decrypt_proc(krb5_context, const krb5_keyblock *,
 krb5_error_code KRB5_CALLCONV krb5_decrypt_tkt_part(krb5_context,
                                                     const krb5_keyblock *,
                                                     krb5_ticket * );
-krb5_error_code krb5_get_cred_from_kdc(krb5_context, krb5_ccache,
-                                       krb5_creds *, krb5_creds **,
-                                       krb5_creds *** );
-krb5_error_code krb5_get_cred_from_kdc_validate(krb5_context, krb5_ccache,
-                                                krb5_creds *, krb5_creds **,
-                                                krb5_creds *** );
-krb5_error_code krb5_get_cred_from_kdc_renew(krb5_context, krb5_ccache,
-                                             krb5_creds *, krb5_creds **,
-                                             krb5_creds *** );
 
 krb5_error_code krb5_get_cred_via_tkt(krb5_context, krb5_creds *, krb5_flags,
                                       krb5_address *const *, krb5_creds *,
