@@ -138,9 +138,7 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
                      krb5_creds **out_creds)
 {
     krb5_error_code retval;
-    krb5_creds mcreds, *ncreds = NULL;
-    krb5_flags fields;
-    krb5_boolean not_ktype = FALSE;
+    krb5_creds *ncreds = NULL;
 
     *out_creds = NULL;
 
@@ -148,34 +146,7 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
     if (ncreds == NULL)
         goto cleanup;
 
-    /*
-     * See if we already have the ticket cached. To do this usefully
-     * for constrained delegation, we would need to look inside
-     * second_ticket, which we can't do.
-     */
-    if ((options & KRB5_GC_CONSTRAINED_DELEGATION) == 0) {
-        retval = krb5int_construct_matching_creds(context, options, in_creds,
-                                                  &mcreds, &fields);
-
-        if (retval)
-            goto cleanup;
-
-        retval = krb5_cc_retrieve_cred(context, ccache, fields, &mcreds,
-                                       ncreds);
-        if (retval == 0) {
-            *out_creds = ncreds;
-            return 0;
-        }
-        if ((retval != KRB5_CC_NOTFOUND && retval != KRB5_CC_NOT_KTYPE)
-            || options & KRB5_GC_CACHED)
-            goto cleanup;
-        not_ktype = (retval == KRB5_CC_NOT_KTYPE);
-    } else if (options & KRB5_GC_CACHED) {
-        retval = KRB5_CC_NOTFOUND;
-        goto cleanup;
-    }
-
-    /* Get the credential from the KDC. */
+    /* Get the credential. */
     retval = get_tkt_creds(context, ccache, in_creds, options, ncreds);
     if (retval != 0)
         goto cleanup;
@@ -190,18 +161,6 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
         retval = KRB5_TKT_NOT_FORWARDABLE;
         goto cleanup;
     }
-
-    /*
-     * Translate KRB5_CC_NOTFOUND if we previously got KRB5_CC_NOT_KTYPE from
-     * krb5_cc_retrieve_cred(), in order to handle the case where there is no
-     * TGT in the ccache and the input enctype didn't match.  This handling is
-     * necessary because some callers, such as GSSAPI, iterate through enctypes
-     * and KRB5_CC_NOTFOUND passed through from get_tkt_creds() is semantically
-     * incorrect, since the actual failure was the non-existence of a ticket of
-     * the correct enctype rather than the missing TGT.
-     */
-    if (retval == KRB5_CC_NOTFOUND && not_ktype)
-        retval = KRB5_CC_NOT_KTYPE;
 
     *out_creds = ncreds;
     ncreds = NULL;

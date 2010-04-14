@@ -870,10 +870,57 @@ begin_get_tgt(krb5_context context, krb5_tkt_creds_context ctx)
 
 /***** STATE_BEGIN *****/
 
+/*
+ * Look for the desired credentials in the cache, if possible.  If we find
+ * them, put them in ctx->reply_creds and advance the state to STATE_COMPLETE.
+ * Return successfully even if creds are not found, unless the caller only
+ * wanted cached creds.
+ */
+static krb5_error_code
+check_cache(krb5_context context, krb5_tkt_creds_context ctx)
+{
+    krb5_error_code code;
+    krb5_creds mcreds;
+    krb5_flags fields;
+
+    /* For constrained delegation, the expected result is in second_ticket, so
+     * we can't really do a cache check here. */
+    if (ctx->req_options & KRB5_GC_CONSTRAINED_DELEGATION)
+        return (ctx->req_options & KRB5_GC_CACHED) ? KRB5_CC_NOTFOUND : 0;
+
+    /* Perform the cache lookup. */
+    code = krb5int_construct_matching_creds(context, ctx->req_options,
+                                            ctx->in_creds, &mcreds, &fields);
+    if (code)
+        return code;
+    code = cache_get(context, ctx->ccache, fields, &mcreds, &ctx->reply_creds);
+    if (code == 0) {
+        ctx->state = STATE_COMPLETE;
+        return 0;
+    }
+
+    /* Stop on unexpected cache errors. */
+    if (code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE)
+        return code;
+
+    /* Stop if the caller only wanted cached creds. */
+    if (ctx->req_options & KRB5_GC_CACHED)
+        return code;
+
+    /* Remember whether the cache lookup failed due to enctypes or not. */
+    ctx->cache_code = code;
+    return 0;
+}
+
+/* Decide where to begin the acquisition process. */
 static krb5_error_code
 begin(krb5_context context, krb5_tkt_creds_context ctx)
 {
     krb5_error_code code;
+
+    code = check_cache(context, ctx);
+    if (code != 0 || ctx->state == STATE_COMPLETE)
+        return code;
 
     /* If the server realm is unspecified, start with the client realm. */
     if (krb5_is_referral_realm(&ctx->server->realm)) {
