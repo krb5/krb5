@@ -48,11 +48,11 @@ _create_api (const char* plugin_name)
 }
 
 
-FactoryHandle
+factory_handle
 plugin_default_factory_get_instance()
 {
     plugin_factory* instance = _default_factory_instance;
-    FactoryHandle handle;
+    factory_handle handle;
 
     if(_default_factory_instance == NULL) {
         instance = (plugin_factory*) malloc(sizeof(plugin_factory));

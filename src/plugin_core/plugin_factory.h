@@ -10,11 +10,11 @@
 /* Plugin factory API */
 typedef struct {
 	void *api;
-} FactoryHandle;
+} factory_handle;
 
 typedef struct {
 	const char* factory_name;
-	FactoryHandle (*factory_creator)();
+	factory_handle (*factory_creator)();
 } plugin_factory_descr;
 
 typedef struct {
@@ -28,7 +28,7 @@ typedef struct {
 } plugin_factory;
 
 /* Utility functions */
-void get_factory_content(FactoryHandle handle, const char* container[]);
-plhandle create_api(FactoryHandle handle, const char* plugin_name);
+void get_factory_content(factory_handle handle, const char* container[]);
+plhandle create_api(factory_handle handle, const char* plugin_name);
 
 #endif /* PLUGIN_FACTORY_H_ */

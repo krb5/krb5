@@ -8,7 +8,7 @@
 
 #include <plugin_factory.h>
 
-FactoryHandle plugin_default_factory_get_instance(void);
+factory_handle plugin_default_factory_get_instance(void);
 
 
 #endif /* SIMPLE_PLUGIN_FACTORY_H_ */

@@ -20,10 +20,10 @@ static plugin_factory_descr _table[] = {
         {NULL, NULL}
 };
 
-static FactoryHandle
+static factory_handle
 _load_factory (const char* factory_name, const char* factory_type)
 {
-    FactoryHandle handle;
+    factory_handle handle;
     plugin_factory_descr *ptr = NULL;
 
     handle.api = NULL;
@@ -75,7 +75,7 @@ _create_api(const char* plugin_name, const char* factory_name,
             const char* factory_type, config_node* properties)
 {
     plhandle p_handle;
-    FactoryHandle f_handle = _load_factory(factory_name, factory_type);
+    factory_handle f_handle = _load_factory(factory_name, factory_type);
     p_handle = create_api(f_handle, plugin_name);
 
     return(p_handle);
