@@ -2419,13 +2419,47 @@ krb5_init_creds_get_times(krb5_context context, krb5_init_creds_context ctx,
 struct _krb5_tkt_creds_context;
 typedef struct _krb5_tkt_creds_context *krb5_tkt_creds_context;
 
+/**
+ * Create a context to get credentials from a KDC's Ticket Granting Service.
+ *
+ * The resulting TGS acquisition context can be used asynchronously with
+ * krb5_tkt_creds_step() or synchronously with krb5_tkt_creds_get().  See also
+ * krb5_get_credentials() for synchrous use.
+ *
+ * @param[in]  context  A krb5 library context (see krb5_init_context())
+ * @param[in]  ccache   A credentials cache containing a Ticket Granting Ticket
+ *                      (TGT) for the client realm.  Cross-realm TGTs may be
+ *                      stored into this cache.
+ * @param[in]  options  KRB5_GC_* options for this request.
+ * @param[out] ctx      The TGS acquisition context.
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_init(krb5_context context, krb5_ccache ccache,
-                    krb5_creds *creds, int kdcopt, krb5_tkt_creds_context *ctx);
+                    krb5_creds *creds, krb5_flags options,
+                    krb5_tkt_creds_context *ctx);
 
+/**
+ * Synchronously obtain credentials within an acquisition context.
+ *
+ * This function repeatedly generates requests, sends them to the appropriate
+ * realms' KDCs, and processes the replies until credentials are available for
+ * retrieval with krb5_tkt_creds_get_creds().
+ *
+ * @param[in]  context  A krb5 library context (see krb5_init_context())
+ * @param[in]  ctx      A TGS acquisition context (see krb5_tkt_creds_init())
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_get(krb5_context context, krb5_tkt_creds_context ctx);
 
+/**
+ * Retrieve credentials from an acquisition context, filling in @a creds.  The
+ * acquisition context must have completed obtaining credentials via either
+ * krb5_tkt_creds_get() or krb5_tkt_creds_step().
+ *
+ * @param[in]  context  A krb5 library context (see krb5_init_context())
+ * @param[in]  ctx      A TGS acquisition context (see krb5_tkt_creds_init())
+ * @param[out] creds    The acquired credentials
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_get_creds(krb5_context context, krb5_tkt_creds_context ctx,
                          krb5_creds *creds);

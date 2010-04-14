@@ -83,7 +83,8 @@ struct _krb5_tkt_creds_context {
     krb5_principal server;      /* Server principal (alias) */
     krb5_principal req_server;  /* Caller-requested server principal */
     krb5_ccache ccache;         /* Caller-provided ccache (alias) */
-    int req_kdcopt;             /* Caller-requested KDC options */
+    krb5_flags req_options;     /* Caller-requested KRB5_GC_* options */
+    krb5_flags req_kdcopt;      /* Caller-requested options as KDC options */
     krb5_authdata **authdata;   /* Caller-requested authdata */
 
     /* The following fields are used in multiple steps. */
@@ -892,7 +893,7 @@ begin(krb5_context context, krb5_tkt_creds_context ctx)
 
 krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_init(krb5_context context, krb5_ccache ccache,
-                    krb5_creds *in_creds, int kdcopt,
+                    krb5_creds *in_creds, krb5_flags options,
                     krb5_tkt_creds_context *pctx)
 {
     krb5_error_code code;
@@ -901,6 +902,22 @@ krb5_tkt_creds_init(krb5_context context, krb5_ccache ccache,
     ctx = k5alloc(sizeof(*ctx), &code);
     if (ctx == NULL)
         goto cleanup;
+
+    ctx->req_options = options;
+    ctx->req_kdcopt = 0;
+    if (options & KRB5_GC_CANONICALIZE)
+        ctx->req_kdcopt |= KDC_OPT_CANONICALIZE;
+    if (options & KRB5_GC_FORWARDABLE)
+        ctx->req_kdcopt |= KDC_OPT_FORWARDABLE;
+    if (options & KRB5_GC_NO_TRANSIT_CHECK)
+        ctx->req_kdcopt |= KDC_OPT_DISABLE_TRANSITED_CHECK;
+    if (options & KRB5_GC_CONSTRAINED_DELEGATION) {
+        if (options & KRB5_GC_USER_USER) {
+            code = EINVAL;
+            goto cleanup;
+        }
+        ctx->req_kdcopt |= KDC_OPT_FORWARDABLE | KDC_OPT_CNAME_IN_ADDL_TKT;
+    }
 
     ctx->state = STATE_BEGIN;
     ctx->cache_code = KRB5_CC_NOTFOUND;
@@ -916,7 +933,6 @@ krb5_tkt_creds_init(krb5_context context, krb5_ccache ccache,
     code = krb5_cc_dup(context, ccache, &ctx->ccache);
     if (code != 0)
         goto cleanup;
-    ctx->req_kdcopt = kdcopt;
     code = krb5_copy_authdata(context, in_creds->authdata, &ctx->authdata);
     if (code != 0)
         goto cleanup;

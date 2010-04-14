@@ -141,7 +141,6 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
     krb5_creds mcreds, *ncreds = NULL;
     krb5_flags fields;
     krb5_boolean not_ktype = FALSE;
-    int kdcopt = 0;
 
     *out_creds = NULL;
 
@@ -176,23 +175,8 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
         goto cleanup;
     }
 
-    if (options & KRB5_GC_CANONICALIZE)
-        kdcopt |= KDC_OPT_CANONICALIZE;
-    if (options & KRB5_GC_FORWARDABLE)
-        kdcopt |= KDC_OPT_FORWARDABLE;
-    if (options & KRB5_GC_NO_TRANSIT_CHECK)
-        kdcopt |= KDC_OPT_DISABLE_TRANSITED_CHECK;
-    if (options & KRB5_GC_CONSTRAINED_DELEGATION) {
-        if (options & KRB5_GC_USER_USER) {
-            retval = EINVAL;
-            goto cleanup;
-
-        }
-        kdcopt |= KDC_OPT_FORWARDABLE | KDC_OPT_CNAME_IN_ADDL_TKT;
-    }
-
     /* Get the credential from the KDC. */
-    retval = get_tkt_creds(context, ccache, in_creds, kdcopt, ncreds);
+    retval = get_tkt_creds(context, ccache, in_creds, options, ncreds);
     if (retval != 0)
         goto cleanup;
 
