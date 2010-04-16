@@ -33,12 +33,8 @@ clean::
 clean-unix::
 	$(RM) -rf tmpdir dbg.log krb.log krb.sum
 
-runenv.vars: Makefile
-	echo '$(KRB5_RUN_ENV)' | tr ';' '\012' | \
-		sed -ne 's% *\([^=]*\)=.*%\1%p' > runenv.vars
-
-runenv.vals: runenv.vars
-	$(KRB5_RUN_ENV) for i in `cat runenv.vars`; do \
+runenv.vals: Makefile
+	$(KRB5_RUN_ENV) for i in $(KRB5_RUN_VARS); do \
 		eval echo "{$$i=\$$$$i}"; done > runenv.vals
 
 site.exp: runenv.vals Makefile

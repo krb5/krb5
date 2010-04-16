@@ -398,6 +398,7 @@ APPUTILS_LIB	= -lapputils
 
 # So test programs can find their libraries without "make install", etc.
 KRB5_RUN_ENV=@KRB5_RUN_ENV@
+KRB5_RUN_VARS=@KRB5_RUN_VARS@
 
 #
 # variables for --with-tcl=
