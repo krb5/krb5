@@ -14,8 +14,10 @@ SUBDIRS=util include lib \
 	plugins/preauth/encrypted_challenge \
 	kdc kadmin slave clients appl tests \
 	config-files gen-manpages
-BUILDTOP=$(REL)$(C)
+BUILDTOP=$(REL).
 LOCALINCLUDES = -I$(srcdir) 
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
 
 SRCS =  
 HDRS = 
@@ -625,8 +627,25 @@ check-unix:: krb5-config
 check-prerecurse: fake-install
 
 # Create a test realm and spawn a shell in an environment pointing to it.
-testrealm: fake-install
-	PYTHONPATH=$(top_srcdir)/util $(PYTHON) $(srcdir)/util/testrealm.py
+testrealm: fake-install runenv.py
+	PYTHONPATH=$(BUILDTOP):$(top_srcdir)/util $(PYTHON) $(srcdir)/util/testrealm.py
+
+# environment variable settings to propagate to Python-based tests
+
+check-pytests-yes: runenv.py
+
+pyrunenv.vals: Makefile
+	$(KRB5_RUN_ENV) \
+	for i in $(KRB5_RUN_VARS); do \
+		eval echo 'env['\\\'$$i\\\''] = '\\\'\$$$$i\\\'; \
+	done > $@
+
+runenv.py: pyrunenv.vals
+	echo 'env = {}' > $@
+	cat pyrunenv.vals >> $@
+
+clean-unix::
+	$(RM) runenv.py pyrunenv.vals
 
 COV_BUILD=	cov-build
 COV_ANALYZE=	cov-analyze
