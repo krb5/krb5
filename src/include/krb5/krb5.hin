@@ -2371,6 +2371,8 @@ krb5_get_init_creds_password(krb5_context context, krb5_creds *creds,
 struct _krb5_init_creds_context;
 typedef struct _krb5_init_creds_context *krb5_init_creds_context;
 
+#define KRB5_INIT_CREDS_STEP_FLAG_CONTINUE 0x1  /* More responses needed */
+
 void KRB5_CALLCONV
 krb5_init_creds_free(krb5_context context, krb5_init_creds_context ctx);
 
@@ -2475,16 +2477,16 @@ krb5_tkt_creds_get_creds(krb5_context context, krb5_tkt_creds_context ctx,
 void KRB5_CALLCONV
 krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx);
 
-#define KRB5_TKT_CREDS_CONTINUE 1  /* Another KDC response is needed. */
+#define KRB5_TKT_CREDS_STEP_FLAG_CONTINUE 0x1  /* More responses needed. */
 
 /**
  * Process a response and generate the next request to acquire credentials.
  *
  * On the first call, @a in should be empty or NULL.  If more responses are
  * needed, the @a flags output parameter will contain @a
- * KRB5_TKT_CREDS_CONTINUE.  In this case, the caller must transport @a out to
- * a KDC for @a realm and receive a response, which should be provided as @a
- * in to the next call.
+ * KRB5_TKT_CREDS_STEP_FLAG_CONTINUE.  In that case, the caller must transport
+ * @a out to a KDC for @a realm and receive a response, which should be
+ * provided as @a in to the next call.
  *
  * @param[in]  context  A krb5 library context (see krb5_init_context())
  * @param[in]  ctx      A TGS acquisition context (see krb5_tkt_creds_init())

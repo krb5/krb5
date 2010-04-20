@@ -304,6 +304,11 @@ import string
 import subprocess
 import sys
 
+# runenv.py is built in each directory where tests are run, providing
+# the environment variable settings needed for running programs in the
+# build tree.  These can vary by platform.
+import runenv
+
 # Used when most things go wrong (other than programming errors) so
 # that the user sees an error message rather than a Python traceback,
 # without help from the test script.  The on-exit handler will display
@@ -462,16 +467,7 @@ def _match_cmdnum(cmdnum, ind):
 # Return an environment suitable for running programs in the build
 # tree.  It is safe to modify the result.
 def _build_env():
-    libdir = os.path.join(buildtop, 'lib')
-    env = os.environ.copy()
-    ldlpath = env.get('LD_LIBRARY_PATH')
-    if ldlpath:
-        ldlpath = libdir + os.pathsep + ldlpath
-    else:
-        ldlpath = libdir
-    env['LD_LIBRARY_PATH'] = ldlpath
-    return env
-
+    return dict(runenv.env)
 
 # Merge the nested dictionaries cfg1 and cfg2 into a new dictionary.
 # cfg1 or cfg2 may be None, in which case the other is returned.  If

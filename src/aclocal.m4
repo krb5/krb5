@@ -1131,7 +1131,9 @@ dnl Set up environment for running dynamic executables out of build tree
 AC_DEFUN(KRB5_RUN_FLAGS,
 [AC_REQUIRE([KRB5_LIB_AUX])dnl
 KRB5_RUN_ENV="$RUN_ENV"
-AC_SUBST(KRB5_RUN_ENV)])
+KRB5_RUN_VARS="$RUN_VARS"
+AC_SUBST(KRB5_RUN_ENV)
+AC_SUBST(KRB5_RUN_VARS)])
 
 dnl
 dnl KRB5_LIB_AUX

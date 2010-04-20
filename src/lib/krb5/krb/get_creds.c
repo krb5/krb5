@@ -221,7 +221,7 @@ set_caller_request(krb5_context context, krb5_tkt_creds_context ctx)
 
     *ctx->caller_out = out_copy;
     *ctx->caller_realm = realm_copy;
-    *ctx->caller_flags = KRB5_TKT_CREDS_CONTINUE;
+    *ctx->caller_flags = KRB5_TKT_CREDS_STEP_FLAG_CONTINUE;
     return 0;
 
 cleanup:
@@ -1140,7 +1140,7 @@ krb5_tkt_creds_get(krb5_context context, krb5_tkt_creds_context ctx)
                                    &flags);
         if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG && !tcp_only)
             tcp_only = 1;
-        else if (code != 0 || !(flags & KRB5_TKT_CREDS_CONTINUE))
+        else if (code != 0 || !(flags & KRB5_TKT_CREDS_STEP_FLAG_CONTINUE))
             break;
         krb5_free_data_contents(context, &reply);
 

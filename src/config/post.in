@@ -136,14 +136,12 @@ check-unix:: check-pytests
 
 check-pytests:: check-pytests-@HAVE_PYTHON@
 
-check-pytests-yes:
+check-pytests-yes: runenv.py
 	@pytests="$(PYTESTS)"; \
 	for t in $$pytests; do \
-		echo "$(KRB5_RUN_ENV)" \
-			PYTHONPATH=$(top_srcdir)/util VALGRIND="$(VALGRIND)" \
+		echo PYTHONPATH=`pwd`:$(top_srcdir)/util VALGRIND="$(VALGRIND)" \
 			$(PYTHON) $(srcdir)/$$t $(PYTESTFLAGS); \
-		$(KRB5_RUN_ENV) \
-		PYTHONPATH=$(top_srcdir)/util VALGRIND="$(VALGRIND)" \
+		PYTHONPATH=`pwd`:$(top_srcdir)/util VALGRIND="$(VALGRIND)" \
 			$(PYTHON) $(srcdir)/$$t $(PYTESTFLAGS) || exit 1; \
 	done
 
@@ -152,11 +150,22 @@ check-pytests-no:
 		echo "+++ Skipping because Python not available: $(PYTESTS)"; \
 	fi
 
+pyrunenv.vals: Makefile
+	$(KRB5_RUN_ENV) \
+	for i in $(KRB5_RUN_VARS); do \
+		eval echo 'env['\\\'$$i\\\''] = '\\\'\$$$$i\\\'; \
+	done > $@
+
+runenv.py: pyrunenv.vals
+	echo 'env = {}' > $@
+	cat pyrunenv.vals >> $@
+
 clean:: clean-$(WHAT)
 
 clean-unix::
 	$(RM) $(OBJS) $(DEPTARGETS_CLEAN) $(EXTRA_FILES) et-[ch]-*.et et-[ch]-*.[ch]
 	-$(RM) -r $(top_srcdir)/autom4te.cache
+	$(RM) runenv.py pyrunenv.vals
 
 clean-windows::
 	$(RM) *.$(OBJEXT)
