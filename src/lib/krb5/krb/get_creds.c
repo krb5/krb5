@@ -941,11 +941,6 @@ begin_get_tgt(krb5_context context, krb5_tkt_creds_context ctx)
         return end_get_tgt(context, ctx);
     }
 
-    /* Initialize the realm path. */
-    code = init_realm_path(context, ctx);
-    if (code != 0)
-        return code;
-
     /* Start with the local tgt. */
     krb5_free_creds(context, ctx->cur_tgt);
     ctx->cur_tgt = NULL;
@@ -954,6 +949,11 @@ begin_get_tgt(krb5_context context, krb5_tkt_creds_context ctx)
         return code;
     if (ctx->cur_tgt == NULL)
         return ctx->cache_code;
+
+    /* Initialize the realm path. */
+    code = init_realm_path(context, ctx);
+    if (code != 0)
+        return code;
 
     /* Empty out the realms-seen list for loop checking. */
     krb5int_free_data_list(context, ctx->realms_seen);
