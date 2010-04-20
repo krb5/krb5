@@ -599,7 +599,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
                                     &flags);
         if (code != 0)
             goto cleanup;
-        if ((flags & 1) != 1) {
+        if (!(flags & KRB5_INIT_CREDS_STEP_FLAG_CONTINUE)) {
             krb5_init_creds_get_times(ctx->k5c, ctx->u.icc, &times);
             cred->tgt_expire = times.endtime;
 
@@ -625,7 +625,7 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
                                    &flags);
         if (code != 0)
             goto cleanup;
-        if ((flags & 1) != 1) {
+        if (!(flags & KRB5_TKT_CREDS_STEP_FLAG_CONTINUE)) {
             krb5_tkt_creds_get_times(ctx->k5c, ctx->u.tcc, &times);
             cred->tgt_expire = times.endtime;
 
