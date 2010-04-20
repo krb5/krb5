@@ -1083,7 +1083,7 @@ init_creds_get(krb5_context context,
                                     &flags);
         if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG && !tcp_only)
             tcp_only = 1;
-        else if (code != 0 || (flags & 1) == 0)
+        else if (code != 0 || !(flags & KRB5_INIT_CREDS_STEP_FLAG_CONTINUE))
             break;
 
         krb5_free_data_contents(context, &reply);
@@ -1119,7 +1119,7 @@ krb5_init_creds_get_creds(krb5_context context,
                           krb5_init_creds_context ctx,
                           krb5_creds *creds)
 {
-    if ((ctx->flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE) == 0)
+    if (!ctx->complete)
         return KRB5_NO_TKT_SUPPLIED;
 
     return krb5int_copy_creds_contents(context, &ctx->cred, creds);
@@ -1130,7 +1130,7 @@ krb5_init_creds_get_times(krb5_context context,
                           krb5_init_creds_context ctx,
                           krb5_ticket_times *times)
 {
-    if ((ctx->flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE) == 0)
+    if (!ctx->complete)
         return KRB5_NO_TKT_SUPPLIED;
 
     *times = ctx->cred.times;
@@ -1979,7 +1979,7 @@ init_creds_step_reply(krb5_context context,
 
     /* success */
     code = 0;
-    ctx->flags |= KRB5_INIT_CREDS_STEP_FLAG_COMPLETE;
+    ctx->complete = TRUE;
 
 cleanup:
     krb5_free_pa_data(context, padata);
@@ -2014,8 +2014,8 @@ krb5_init_creds_step(krb5_context context,
     realm->data = NULL;
     realm->length = 0;
 
-    if (ctx->flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE)
-        goto cleanup;
+    if (ctx->complete)
+        return EINVAL;
 
     if (in->length != 0) {
         code = init_creds_step_reply(context, ctx, in);
@@ -2029,7 +2029,7 @@ krb5_init_creds_step(krb5_context context,
             }
             goto copy_realm;
         }
-        if (code != 0 || (ctx->flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE))
+        if (code != 0 || ctx->complete)
             goto cleanup;
     }
 
@@ -2065,8 +2065,7 @@ cleanup:
         }
     }
 
-    *flags = (ctx->flags & KRB5_INIT_CREDS_STEP_FLAG_COMPLETE) ? 0 : 1;
-
+    *flags = ctx->complete ? 0 : KRB5_INIT_CREDS_STEP_FLAG_CONTINUE;
     return code;
 }
 

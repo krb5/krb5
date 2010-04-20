@@ -14,7 +14,7 @@ struct _krb5_init_creds_context {
     krb5_deltat start_time;
     krb5_deltat tkt_life;
     krb5_deltat renew_life;
-    unsigned int flags;
+    krb5_boolean complete;
     unsigned int loopcount;
     krb5_data password;
     krb5_error *err_reply;
@@ -34,8 +34,6 @@ struct _krb5_init_creds_context {
     krb5_boolean have_restarted;
     krb5_boolean sent_nontrivial_preauth;
 };
-
-#define KRB5_INIT_CREDS_STEP_FLAG_COMPLETE          0x1
 
 krb5_error_code
 krb5_get_as_key_password(krb5_context context,
