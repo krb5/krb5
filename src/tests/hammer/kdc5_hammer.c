@@ -328,7 +328,7 @@ int verify_cs_pair(context, p_client_str, p_client, service, hostname,
     krb5_ticket 	* ticket = NULL;
     krb5_keyblock 	* keyblock = NULL;
     krb5_auth_context 	  auth_context = NULL;
-    krb5_data		  request_data;
+    krb5_data		  request_data = empty_data();
     char		* sname;
     float		  dt;
 
@@ -355,18 +355,14 @@ int verify_cs_pair(context, p_client_str, p_client, service, hostname,
     /* obtain ticket & session key */
     if ((retval = krb5_cc_get_principal(context, ccache, &creds.client))) {
 	com_err(prog, retval, "while getting client princ for %s", hostname);
-    	krb5_free_cred_contents(context, &creds);
 	return retval;
     }
 
     if ((retval = krb5_get_credentials(context, 0,
                                       ccache, &creds, &credsp))) {
 	com_err(prog, retval, "while getting creds for %s", hostname);
-    	krb5_free_cred_contents(context, &creds);
 	return retval;
     }
-
-    krb5_free_cred_contents(context, &creds);
 
     if (do_timer)
 	swatch_on();
@@ -374,8 +370,7 @@ int verify_cs_pair(context, p_client_str, p_client, service, hostname,
     if ((retval = krb5_mk_req_extended(context, &auth_context, 0, NULL,
 			            credsp, &request_data))) {
 	com_err(prog, retval, "while preparing AP_REQ for %s", hostname);
-        krb5_auth_con_free(context, auth_context);
-	return retval;
+	goto cleanup;
     }
 
     krb5_auth_con_free(context, auth_context);
@@ -385,24 +380,23 @@ int verify_cs_pair(context, p_client_str, p_client, service, hostname,
     if ((retval = get_server_key(context, credsp->server,
 				credsp->keyblock.enctype, &keyblock))) {
 	com_err(prog, retval, "while getting server key for %s", hostname);
-	goto cleanup_rdata;
+	goto cleanup;
     }
 
     if (krb5_auth_con_init(context, &auth_context)) {
 	com_err(prog, retval, "while creating auth_context for %s", hostname);
-	goto cleanup_keyblock;
+	goto cleanup;
     }
 
     if (krb5_auth_con_setuseruserkey(context, auth_context, keyblock)) {
 	com_err(prog, retval, "while setting auth_context key %s", hostname);
-	goto cleanup_keyblock;
+	goto cleanup;
     }
 
     if ((retval = krb5_rd_req(context, &auth_context, &request_data,
 			     NULL /* server */, 0, NULL, &ticket))) {
 	com_err(prog, retval, "while decoding AP_REQ for %s", hostname);
-        krb5_auth_con_free(context, auth_context);
-	goto cleanup_keyblock;
+	goto cleanup;
     }
 
     if (do_timer) {
@@ -414,8 +408,6 @@ int verify_cs_pair(context, p_client_str, p_client, service, hostname,
 	if (dt < tgs_req_times.ht_min)
 	    tgs_req_times.ht_min = dt;
     }
-
-    krb5_auth_con_free(context, auth_context);
 
     if (!(krb5_principal_compare(context,ticket->enc_part2->client,p_client))){
     	char *returned_client;
@@ -431,14 +423,13 @@ int verify_cs_pair(context, p_client_str, p_client, service, hostname,
 	retval = 0;
     }
 
+cleanup:
+    krb5_free_cred_contents(context, &creds);
     krb5_free_ticket(context, ticket);
-
-cleanup_keyblock:
+    krb5_auth_con_free(context, auth_context);
     krb5_free_keyblock(context, keyblock);
-
-cleanup_rdata:
     krb5_free_data_contents(context, &request_data);
-    if(credsp ) krb5_free_creds(context, credsp);
+    krb5_free_creds(context, credsp);
 
     return retval;
 }
