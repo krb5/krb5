@@ -13,20 +13,19 @@
 
 static plugin_factory* _default_factory_instance = NULL;
 
-static plugin_descr _table[] = {
+static plugin_descr  plugin_default_factory_table[] = {
         {"plugin_yarrow_prng", plugin_yarrow_prng_create},
         //{"plugin_simple_prng", plugin_simple_prng_create},
         {"plugin_ldap_audit", NULL},
         {NULL,NULL}
 };
 
-
 /* Factory API implementation */
 static void
 _get_factory_content (const char* container[]) {
     plugin_descr *ptr = NULL;
     int i = 0;
-    for( ptr = _table; ptr->plugin_name != NULL; ptr++,i++) {
+    for( ptr = plugin_default_factory_table; ptr->plugin_name != NULL; ptr++,i++) {
         container[i] = ptr->plugin_name;
     }
 }
@@ -38,7 +37,7 @@ _create_api (const char* plugin_name)
     plugin_descr *ptr = NULL;
 
     handle.api = NULL;
-    for( ptr = _table; ptr->plugin_name != NULL; ptr++) {
+    for( ptr = plugin_default_factory_table; ptr->plugin_name != NULL; ptr++) {
         if (strcmp(ptr->plugin_name, plugin_name) == 0) {
             handle = ptr->plugin_creator();
             break;

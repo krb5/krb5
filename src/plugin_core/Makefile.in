@@ -1,12 +1,13 @@
 mydir=plugin_core
 BUILDTOP=$(REL)..
+RELDIR=../plugin_core
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
 
 LOCALINCLUDES = -I$(srcdir)/include/krb5  -I$(srcdir)/. -I$(srcdir)/../plugins/prng
 
-LIBBASE=plugin_core
+LIBBASE= plugin_core
 LIBMAJOR=0
 LIBMINOR=0
 SO_EXT=.so
@@ -15,7 +16,7 @@ LIBS_UTILS = -lyaml
 
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
-STOBJLISTS=OBJS.ST ../plugins/prng/OBJS.SH  
+STOBJLISTS=OBJS.ST
 
 SHLIB_EXPLIBS=  $(LIBS_UTILS)
  
@@ -23,14 +24,13 @@ STLIBOBJS= plugin_manager.o plugin_factory.o yaml_parser.o
 
 SRCS= plugin_manager.c plugin_factory.c yaml_parser.c
 
-# all-unix:: all-libobjs
 all-unix:: all-liblinks
 install-unix:: install-libs
-clean-unix:: clean-libs clean-libobjs
+clean-unix:: clean-libs clean-libobjs clean-liblinks
 
 clean::
 	$(RM) lib$(LIBBASE)$(SO_EXT)
 
-@libnover_frag@
+@lib_frag@
 @libobj_frag@
 

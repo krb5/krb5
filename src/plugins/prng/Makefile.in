@@ -1,26 +1,22 @@
 mydir=plugins/prng
 BUILDTOP=$(REL)../..
-KRB5_RUN_ENV = @KRB5_RUN_ENV@
-KRB5_CONFIG_SETUP =
+RELDIR=../plugins/prng
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
-MODULE_INSTALL_DIR = 
-DEFS=@DEFS@
+DEFS=
 
 LOCALINCLUDES = -I../../include/krb5 -I. -I../../plugin_core
 
-STLIBOBJS=  plugin_prng.o  
-OBJS= $(OUTPRE)plugin_prng.$(OBJEXT)
-SRCS=  plugin_prng.c  
+LIBBASE=plugin_prng
 
-#all-unix:: all-liblinks
-all-unix:: all-libobjs
+STLIBOBJS= plugin_prng.o  
+SRCS= plugin_prng.c  
+STOBJLISTS=OBJS.ST
 
-includes:: depend
+all-unix:: all-liblinks
+clean-unix:: clean-liblinks clean-libs clean-libobjs
+install-unix:: install-libs
 
-depend:: $(SRCS)
-
-clean-unix::  clean-libobjs
-
+@libpriv_frag@
+@lib_frag@
 @libobj_frag@
-

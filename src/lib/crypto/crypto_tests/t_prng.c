@@ -48,6 +48,7 @@ int main () {
     krb5_data input, output;
     unsigned int source_id, seed_length;
     unsigned int i;
+//#if 0
     plugin_manager* default_manager;
     const char conf_path[] = "plugin_conf.yml";
 
@@ -56,7 +57,7 @@ int main () {
 
         plugin_manager_configure(conf_path);
         plugin_manager_start();
-
+//#endif
     while (1) {
         /* Read source*/
         if (scanf ("%u", &source_id ) == EOF )

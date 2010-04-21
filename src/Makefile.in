@@ -7,8 +7,7 @@ mydir=.
 #	plugins/preauth/wpse
 #	plugins/preauth/cksum_body
 #	plugins/authdata/greet
-SUBDIRS=util include plugins/prng   plugin_core  lib \
-	plugins/prng/plugin_yarrow   plugin_core/impl   \
+SUBDIRS=util include plugin_core   plugins/prng lib \
 	@ldap_plugin_dir@ \
 	plugins/kdb/db2 \
 	plugins/preauth/pkinit \
@@ -17,6 +16,8 @@ SUBDIRS=util include plugins/prng   plugin_core  lib \
 	config-files gen-manpages
 BUILDTOP=$(REL)$(C)
 LOCALINCLUDES = -I$(srcdir) 
+
+#	plugins/prng/plugin_yarrow   
 
 SRCS =  
 HDRS = 

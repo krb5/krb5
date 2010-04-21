@@ -15,6 +15,9 @@
 #include "kt-int.h"
 #include "rc-int.h"
 #include "os-proto.h"
+#include <plugin_default_manager.h>
+#include <plugin_prng.h>
+
 
 /*
  * Initialize the Kerberos v5 library.
@@ -27,6 +30,8 @@ MAKE_FINI_FUNCTION(krb5int_lib_fini);
 int krb5int_lib_init(void)
 {
     int err;
+    plugin_manager* default_manager;
+    const char conf_path[] = "/tmp/plugin_conf.yml";
 
     krb5int_set_error_info_callout_fn (error_message);
 
@@ -39,7 +44,6 @@ int krb5int_lib_init(void)
     add_error_table(&et_kdb5_error_table);
     add_error_table(&et_asn1_error_table);
     add_error_table(&et_k524_error_table);
-
     err = krb5int_rc_finish_init();
     if (err)
         return err;
@@ -51,6 +55,13 @@ int krb5int_lib_init(void)
     err = krb5int_cc_initialize();
     if (err)
         return err;
+
+    /* Plugin initialization */
+    default_manager = plugin_default_manager_get_instance();
+    set_plugin_manager_instance(default_manager);
+    plugin_manager_configure(conf_path);
+    plugin_manager_start();
+
     err = k5_mutex_finish_init(&krb5int_us_time_mutex);
     if (err)
         return err;

@@ -3,12 +3,14 @@
  *
  */
 
-#ifndef SIMPLE_PLUGIN_FACTORY_H_
-#define SIMPLE_PLUGIN_FACTORY_H_
+#ifndef PLUGIN_DEFAULT_FACTORY_H_
+#define PLUGIN_DEFAULT_FACTORY_H_
 
 #include <plugin_factory.h>
+#include "plugin_prng_impl.h"
+
 
 factory_handle plugin_default_factory_get_instance(void);
 
 
-#endif /* SIMPLE_PLUGIN_FACTORY_H_ */
+#endif /* PLUGIN_DEFAULT_FACTORY_H_ */

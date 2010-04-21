@@ -1,5 +1,5 @@
 mydir=lib
-SUBDIRS=crypto krb5 gssapi rpc kdb kadm5 apputils
+SUBDIRS=crypto ../plugins/prng/plugin_yarrow ../plugin_core/impl krb5 gssapi rpc kdb kadm5 apputils
 BUILDTOP=$(REL)..
 
 all-unix::
