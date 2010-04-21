@@ -128,9 +128,11 @@ static krb5_error_code get_credentials(context, cred, server, now,
     krb5_creds **out_creds;
 {
     krb5_error_code     code;
-    krb5_creds          in_creds, evidence_creds;
+    krb5_creds          in_creds, evidence_creds, *result_creds = NULL;
     krb5_flags          flags = 0;
     krb5_principal      cc_princ = NULL;
+
+    *out_creds = NULL;
 
     k5_mutex_assert_locked(&cred->lock);
     memset(&in_creds, 0, sizeof(krb5_creds));
@@ -196,7 +198,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
     }
 
     code = krb5_get_credentials(context, flags, cred->ccache,
-                                &in_creds, out_creds);
+                                &in_creds, &result_creds);
     if (code)
         goto cleanup;
 
@@ -220,10 +222,14 @@ static krb5_error_code get_credentials(context, cred, server, now,
         goto cleanup;
     }
 
+    *out_creds = result_creds;
+    result_creds = NULL;
+
 cleanup:
     krb5_free_authdata(context, in_creds.authdata);
     krb5_free_principal(context, cc_princ);
     krb5_free_cred_contents(context, &evidence_creds);
+    krb5_free_creds(context, result_creds);
 
     return code;
 }
