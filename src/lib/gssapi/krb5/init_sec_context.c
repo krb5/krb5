@@ -204,7 +204,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
 
     if (flags & KRB5_GC_CONSTRAINED_DELEGATION) {
         if (!krb5_principal_compare(context, cred->name->princ,
-                                    (*out_creds)->client)) {
+                                    result_creds->client)) {
             /* server did not support constrained delegation */
             code = KRB5_KDCREP_MODIFIED;
             goto cleanup;
@@ -216,8 +216,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
      * boundaries) because accept_sec_context code is also similarly
      * non-forgiving.
      */
-    if (!krb5_gss_dbg_client_expcreds && *out_creds != NULL &&
-        (*out_creds)->times.endtime < now) {
+    if (!krb5_gss_dbg_client_expcreds && result_creds->times.endtime < now) {
         code = KRB5KRB_AP_ERR_TKT_EXPIRED;
         goto cleanup;
     }
