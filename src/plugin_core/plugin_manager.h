@@ -8,7 +8,6 @@
 
 #include <k5-int.h>
 
-
 typedef struct {
 	void* data;
 	void (*configure)(void* data, const char*);

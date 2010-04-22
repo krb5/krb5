@@ -9,13 +9,14 @@
 #include "plugin_manager.h"
 #include "plugin_factory.h"
 #include "plugin_prng_impl.h"
+#include "plugin_pa_impl.h"
 #include "plugin_default_factory.h"
 
 static plugin_factory* _default_factory_instance = NULL;
 
 static plugin_descr  plugin_default_factory_table[] = {
         {"plugin_yarrow_prng", plugin_yarrow_prng_create},
-        //{"plugin_simple_prng", plugin_simple_prng_create},
+        {"plugin_encrypted_challenge_pa", plugin_encrypted_challenge_pa_create},
         {"plugin_ldap_audit", NULL},
         {NULL,NULL}
 };

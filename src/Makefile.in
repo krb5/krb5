@@ -7,7 +7,9 @@ mydir=.
 #	plugins/preauth/wpse
 #	plugins/preauth/cksum_body
 #	plugins/authdata/greet
-SUBDIRS=util include plugin_core   plugins/prng lib \
+SUBDIRS=util include plugin_core   plugins/prng \
+	plugins/pa plugins/pa/encrypted_challenge \
+	lib \
 	@ldap_plugin_dir@ \
 	plugins/kdb/db2 \
 	plugins/preauth/pkinit \

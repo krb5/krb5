@@ -7,6 +7,7 @@ DEFS=
 
 LOCALINCLUDES = -I$(srcdir)/../../include/krb5  -I$(srcdir)/. 	\
 		-I$(srcdir)/../../plugins/prng/plugin_yarrow -I$(srcdir)/../../plugins/prng 	\
+		-I$(srcdir)/../../plugins/pa -I$(srcdir)/../../plugins/pa/encrypted_challenge 	\
 		-I$(srcdir)/..
 
 LIBBASE=plugin_impl

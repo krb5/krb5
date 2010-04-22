@@ -1118,6 +1118,8 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	plugins/prng
 	plugin_core/impl
 	plugins/prng/plugin_yarrow
+	plugins/pa
+	plugins/pa/encrypted_challenge
 	plugin_core
 
 	clients clients/klist clients/kinit clients/kvno

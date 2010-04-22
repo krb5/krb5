@@ -1,13 +1,15 @@
 mydir=lib/krb5
 BUILDTOP=$(REL)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/ccache -I$(srcdir)/keytab -I$(srcdir)/rcache -I$(srcdir)/os -I$(srcdir)/unicode	\
-	-I$(srcdir)/../../plugin_core/ -I$(srcdir)/../../plugins/prng/ -I$(srcdir)/../../plugin_core/impl
+	-I$(srcdir)/../../plugin_core/ -I$(srcdir)/../../plugins/prng/ -I$(srcdir)/../../plugin_core/impl	\
+	-I$(srcdir)/../../pa -I$(srcdir)/../../pa/encrypted_challenge
 
 SUBDIRS= error_tables asn.1 ccache keytab krb os rcache unicode
 DEFS=
 
 PLUGINS_LIBS = \
 	../../plugin_core/impl/libplugin_impl.a $(PLUGIN_CORE_DEPLIB) 	\
+	../../plugins/pa/encrypted_challenge/libencrypted_challenge.a	\
 	../../plugins/prng/plugin_yarrow/libplugin_yarrow.a
 
 
