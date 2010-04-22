@@ -685,11 +685,17 @@ krb5_get_credentials_for_user(krb5_context context, krb5_flags options,
     if (code != 0)
         goto cleanup;
 
-    code = krb5_get_credentials(context, options | KRB5_GC_CACHED,
-                                ccache, in_creds, out_creds);
-    if ((code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE)
-        || options & KRB5_GC_CACHED)
-        goto cleanup;
+    if (in_creds->client != NULL &&
+        in_creds->client->type == KRB5_NT_ENTERPRISE_PRINCIPAL) {
+       /* Post-canonicalisation check for enterprise principals */
+       krb5_creds mcreds = *in_creds;
+       mcreds.client = realm;
+       code = krb5_get_credentials(context, options | KRB5_GC_CACHED,
+                                   ccache, &mcreds, out_creds);
+       if ((code != KRB5_CC_NOTFOUND && code != KRB5_CC_NOT_KTYPE)
+           || (options & KRB5_GC_CACHED))
+           goto cleanup;
+    }
 
     code = krb5_get_self_cred_from_kdc(context, options, ccache,
                                        in_creds, subject_cert,
