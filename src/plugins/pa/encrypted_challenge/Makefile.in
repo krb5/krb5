@@ -1,0 +1,25 @@
+mydir=plugins/pa/encrypted_challenge
+BUILDTOP=$(REL)../../..
+RELDIR=../plugins/pa/encrypted_challenge
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+DEFS=
+
+LOCALINCLUDES = -I../../../include/krb5 -I. -I../../../plugin_core -I..  -I$(srcdir)/..	\
+		-I../../../plugins/preauth
+
+LIBBASE=encrypted_challenge
+
+STLIBOBJS= plugin_pa_impl.o
+SRCS= $(srcdir)/plugin_pa_impl.c
+
+STOBJLISTS=OBJS.ST
+
+all-unix:: all-liblinks
+clean-unix:: clean-liblinks clean-libs clean-libobjs
+install-unix:: install-libs
+
+
+@libpriv_frag@
+@lib_frag@
+@libobj_frag@

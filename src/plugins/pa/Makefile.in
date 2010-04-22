@@ -1,0 +1,22 @@
+mydir=plugins/pa
+BUILDTOP=$(REL)../..
+RELDIR=../plugins/pa
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+DEFS=
+
+LOCALINCLUDES = -I../../include/krb5 -I. -I../../plugin_core
+
+LIBBASE=plugin_pa
+
+STLIBOBJS= plugin_pa.o  
+SRCS= plugin_pa.c  
+STOBJLISTS=OBJS.ST
+
+all-unix:: all-liblinks
+clean-unix:: clean-liblinks clean-libs clean-libobjs
+install-unix:: install-libs
+
+@libpriv_frag@
+@lib_frag@
+@libobj_frag@
