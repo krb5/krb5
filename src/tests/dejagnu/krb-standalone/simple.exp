@@ -46,8 +46,10 @@ proc start_sim_server_daemon { } {
 
     verbose "sim_server_spawn is $sim_server_spawn_id" 1
 
-    # Give sim_server some time to start
-    sleep 2
+    expect {
+	"starting"	{ }
+	eof		{ perror "sim_server failed to start" }
+    }
 
     return 1
 }
