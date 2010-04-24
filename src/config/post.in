@@ -139,9 +139,11 @@ check-pytests:: check-pytests-@HAVE_PYTHON@
 check-pytests-yes:
 	@pytests="$(PYTESTS)"; \
 	for t in $$pytests; do \
-		echo PYTHONPATH=$(BUILDTOP):$(top_srcdir)/util VALGRIND="$(VALGRIND)" \
+		echo PYTHONPATH=$(BUILDTOP):$(top_srcdir)/util \
+			VALGRIND="$(VALGRIND)" \
 			$(PYTHON) $(srcdir)/$$t $(PYTESTFLAGS); \
-		PYTHONPATH=`pwd`:$(top_srcdir)/util VALGRIND="$(VALGRIND)" \
+		PYTHONPATH=$(BUILDTOP):$(top_srcdir)/util \
+			VALGRIND="$(VALGRIND)" \
 			$(PYTHON) $(srcdir)/$$t $(PYTESTFLAGS) || exit 1; \
 	done
 
