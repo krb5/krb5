@@ -244,8 +244,8 @@ host=@krb5_cv_host@
 DEJAFLAGS	= --debug --srcdir $(srcdir) --host $(host)
 RUNTEST		= runtest $(DEJAFLAGS)
 
-RUNPYTEST	= PYTHONPATH=$(BUILDTOP):$(top_srcdir)/util \
-			VALGRIND="$(VALGRIND)" $(PYTHON)
+RUNPYTEST	= PYTHONPATH=$(top_srcdir)/util VALGRIND="$(VALGRIND)" \
+			$(PYTHON)
 
 START_SERVERS	= $(STESTDIR)/scripts/start_servers $(TEST_SERVER) $(TEST_PATH)
 START_SERVERS_LOCAL = $(STESTDIR)/scripts/start_servers_local

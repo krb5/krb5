@@ -307,6 +307,7 @@ import socket
 import string
 import subprocess
 import sys
+import imp
 
 # Used when most things go wrong (other than programming errors) so
 # that the user sees an error message rather than a Python traceback,
@@ -466,14 +467,24 @@ def _match_cmdnum(cmdnum, ind):
 # Return an environment suitable for running programs in the build
 # tree.  It is safe to modify the result.
 def _build_env():
-    global buildtop
+    global buildtop, _runenv
     env = os.environ.copy()
-    for (k, v) in runenv.env.iteritems():
+    for (k, v) in _runenv.iteritems():
         if v.find('./') == 0:
             env[k] = os.path.join(buildtop, v)
         else:
             env[k] = v
     return env
+
+
+def _import_runenv():
+    global buildtop
+    runenv_py = os.path.join(buildtop, 'runenv.py')
+    if not os.path.exists(runenv_py):
+        fail('You must run "make fake-install" in %s first.' % buildtop)
+    module = imp.load_source('runenv', runenv_py)
+    return module.env
+
 
 # Merge the nested dictionaries cfg1 and cfg2 into a new dictionary.
 # cfg1 or cfg2 may be None, in which case the other is returned.  If
@@ -1018,14 +1029,9 @@ _cmd_index = 1
 buildtop = _find_buildtop()
 srctop = _find_srctop()
 plugins = _find_plugins()
+_runenv = _import_runenv()
 hostname = socket.getfqdn()
 null_input = open(os.devnull, 'r')
-
-# runenv.py is built in the top level by "make fake-install".  Import
-# it now (rather than at the beginning of the file) so that we get a
-# friendly error message from _find_plugins() if "make fake-install"
-# has not been run.
-import runenv
 
 krb5kdc = os.path.join(buildtop, 'kdc', 'krb5kdc')
 kadmind = os.path.join(buildtop, 'kadmin', 'server', 'kadmind')
