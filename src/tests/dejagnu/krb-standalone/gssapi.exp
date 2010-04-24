@@ -285,7 +285,11 @@ proc doit { } {
     spawn $GSSSERVER -export -logfile $tmppwd/gss-server.log -verbose -port [expr 8 + $portbase] gssservice@$hostname
     set gss_server_pid [exp_pid]
     set gss_server_spawn_id $spawn_id
-    sleep 2
+
+    expect {
+	"starting" { }
+	eof        { perror "gss-server failed to start" }
+    }
 
     run_client gssclient0 $tmppwd/gss_tk_0 gssclient0
     run_client gssclient1 $tmppwd/gss_tk_1 gssclient1
