@@ -74,18 +74,38 @@ print_flags(unsigned int flags)
     }
 }
 
+/* ctime() for uint32_t* */
+static char *
+ctime_uint32(uint32_t *time32)
+{
+    time_t tmp;
+    tmp = *time32;
+    return ctime(&tmp);
+}
+
 /*
  * Display time information.
  */
 static void
-print_time(unsigned int *timep)
+print_time(uint32_t *timep)
 {
     if (*timep == 0L)
         printf("\t\t\tNone\n");
     else {
-        time_t ltime = *timep;
-        printf("\t\t\t%s", ctime(&ltime));
+        printf("\t\t\t%s", ctime_uint32(timep));
     }
+}
+
+static void
+print_deltat(uint32_t *deltat)
+{
+    krb5_error_code ret;
+    static char buf[30];
+    ret = krb5_deltat_to_string(*deltat, buf, sizeof(buf));
+    if (ret)
+        printf("\t\t\t(error)\n");
+    else
+        printf("\t\t\t%s\n", buf);
 }
 
 /*
@@ -251,13 +271,13 @@ print_attr(kdbe_val_t *val, int vverbose)
     case AT_MAX_LIFE:
         (void) printf(_("\t\tMaximum ticket life\n"));
         if (vverbose) {
-            print_time(&val->kdbe_val_t_u.av_max_life);
+            print_deltat(&val->kdbe_val_t_u.av_max_life);
         }
         break;
     case AT_MAX_RENEW_LIFE:
         (void) printf(_("\t\tMaximum renewable life\n"));
         if (vverbose) {
-            print_time(&val->kdbe_val_t_u.av_max_renew_life);
+            print_deltat(&val->kdbe_val_t_u.av_max_renew_life);
         }
         break;
     case AT_EXP:
@@ -447,7 +467,7 @@ print_update(kdb_hlog_t *ulog, uint32_t entry, unsigned int verbose)
             (void) printf(_("\tUpdate time stamp : None\n"));
         else
             (void) printf(_("\tUpdate time stamp : %s"),
-                          ctime((time_t *)&(indx_log->kdb_time.seconds)));
+                          ctime_uint32(&indx_log->kdb_time.seconds));
 
         (void) printf(_("\tAttributes changed : %d\n"),
                       upd.kdb_update.kdbe_t_len);
@@ -581,12 +601,11 @@ main(int argc, char **argv)
             (void) printf(_("\tFirst time stamp : None\n"));
         else {
             (void) printf(_("\tFirst time stamp : %s"),
-                          ctime((time_t *)
-                                &(ulog->kdb_first_time.seconds)));
+                          ctime_uint32(&ulog->kdb_first_time.seconds));
         }
 
         (void) printf(_("\tLast time stamp : %s\n"),
-                      ctime((time_t *)&(ulog->kdb_last_time.seconds)));
+                      ctime_uint32(&ulog->kdb_last_time.seconds));
     }
 
     if ((!headeronly) && ulog->kdb_num) {

@@ -356,9 +356,6 @@ error_out:
 	free(union_ctx_id);
     }
 
-    if (output_token->length)
-	(void) gss_release_buffer(&temp_minor_status, output_token);
-
     if (src_name)
 	*src_name = GSS_C_NO_NAME;
 

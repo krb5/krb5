@@ -467,7 +467,14 @@ def _match_cmdnum(cmdnum, ind):
 # Return an environment suitable for running programs in the build
 # tree.  It is safe to modify the result.
 def _build_env():
-    return dict(runenv.env)
+    global buildtop
+    env = os.environ.copy()
+    for (k, v) in runenv.env.iteritems():
+        if v.find('./') == 0:
+            env[k] = os.path.join(buildtop, v)
+        else:
+            env[k] = v
+    return env
 
 # Merge the nested dictionaries cfg1 and cfg2 into a new dictionary.
 # cfg1 or cfg2 may be None, in which case the other is returned.  If

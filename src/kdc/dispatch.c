@@ -111,7 +111,7 @@ dispatch(void *cb, struct sockaddr *local_saddr, const krb5_fulladdr *from,
         retval = KRB5KRB_AP_ERR_MSG_TYPE;
 #ifndef NOCACHE
     /* put the response into the lookaside buffer */
-    if (!retval && *response != NULL)
+    if (!retval)
         kdc_insert_lookaside(pkt, *response);
 #endif
 

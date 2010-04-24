@@ -2107,6 +2107,41 @@ proc kinit { name pass standalone } {
 
     return 1
 }
+
+proc kinit_renew { name pass standalone } {
+    global REALMNAME
+    global KINIT
+    global spawn_id
+
+    spawn $KINIT -5 -f $name@$REALMNAME
+    expect {
+	"Password for $name@$REALMNAME:" {
+	    verbose "kinit started"
+	}
+	timeout {
+	    fail "kinit"
+	    return 0
+	}
+	eof {
+	    fail "kinit"
+	    return 0
+	}
+    }
+    send "$pass\r"
+    expect eof
+    if ![check_exit_status kinit] {
+	return 0
+    }
+
+    spawn $KINIT -R
+    expect eof
+    if ![check_exit_status "kinit_renew"] {
+	return 0
+    }
+
+    return 1
+}
+
 # Retrieve a ticket using FAST armor
 proc kinit_fast { name pass standalone } {
     global REALMNAME

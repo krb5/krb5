@@ -300,7 +300,6 @@ krb5_deltat_to_string(krb5_deltat deltat, char *buffer, size_t buflen)
      * This will break if bytes are more than 8 bits.
      */
 #define MAX_CHARS_FOR_INT_TYPE(TYPE)    ((int) (2 + 2.408241 * sizeof (TYPE)))
-    char tmpbuf[MAX_CHARS_FOR_INT_TYPE(int) * 4 + 8];
 
     days = (int) (deltat / (24*3600L));
     dt = deltat % (24*3600L);
@@ -309,7 +308,6 @@ krb5_deltat_to_string(krb5_deltat deltat, char *buffer, size_t buflen)
     minutes = (int) (dt / 60);
     seconds = (int) (dt % 60);
 
-    memset (tmpbuf, 0, sizeof (tmpbuf));
     if (days == 0)
         snprintf(buffer, buflen, "%d:%02d:%02d", hours, minutes, seconds);
     else if (hours || minutes || seconds)
@@ -319,14 +317,6 @@ krb5_deltat_to_string(krb5_deltat deltat, char *buffer, size_t buflen)
     else
         snprintf(buffer, buflen, "%d %s", days,
                  (days > 1) ? "days" : "day");
-    if (tmpbuf[sizeof(tmpbuf)-1] != 0)
-        /* Something must be very wrong with my math above, or the
-           assumptions going into it...  */
-        abort ();
-    if (strlen (tmpbuf) > buflen)
-        return ENOMEM;
-    else
-        strncpy (buffer, tmpbuf, buflen);
     return 0;
 }
 

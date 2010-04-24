@@ -128,9 +128,11 @@ static krb5_error_code get_credentials(context, cred, server, now,
     krb5_creds **out_creds;
 {
     krb5_error_code     code;
-    krb5_creds          in_creds, evidence_creds;
+    krb5_creds          in_creds, evidence_creds, *result_creds = NULL;
     krb5_flags          flags = 0;
     krb5_principal      cc_princ = NULL;
+
+    *out_creds = NULL;
 
     k5_mutex_assert_locked(&cred->lock);
     memset(&in_creds, 0, sizeof(krb5_creds));
@@ -200,7 +202,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
         flags |= KRB5_GC_CACHED;
 
     code = krb5_get_credentials(context, flags, cred->ccache,
-                                &in_creds, out_creds);
+                                &in_creds, &result_creds);
     if (code == KRB5_CC_NOTFOUND && cred->password.data != NULL &&
         !cred->iakerb_mech) {
         krb5_creds tgt_creds;
@@ -232,7 +234,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
 
     if (flags & KRB5_GC_CONSTRAINED_DELEGATION) {
         if (!krb5_principal_compare(context, cred->name->princ,
-                                    (*out_creds)->client)) {
+                                    result_creds->client)) {
             /* server did not support constrained delegation */
             code = KRB5_KDCREP_MODIFIED;
             goto cleanup;
@@ -244,16 +246,19 @@ static krb5_error_code get_credentials(context, cred, server, now,
      * boundaries) because accept_sec_context code is also similarly
      * non-forgiving.
      */
-    if (!krb5_gss_dbg_client_expcreds && *out_creds != NULL &&
-        (*out_creds)->times.endtime < now) {
+    if (!krb5_gss_dbg_client_expcreds && result_creds->times.endtime < now) {
         code = KRB5KRB_AP_ERR_TKT_EXPIRED;
         goto cleanup;
     }
+
+    *out_creds = result_creds;
+    result_creds = NULL;
 
 cleanup:
     krb5_free_authdata(context, in_creds.authdata);
     krb5_free_principal(context, cc_princ);
     krb5_free_cred_contents(context, &evidence_creds);
+    krb5_free_creds(context, result_creds);
 
     return code;
 }
@@ -535,7 +540,7 @@ kg_new_connection(
 {
     OM_uint32 major_status;
     krb5_error_code code;
-    krb5_creds *k_cred;
+    krb5_creds *k_cred = NULL;
     krb5_gss_ctx_id_rec *ctx, *ctx_free;
     krb5_timestamp now;
     gss_buffer_desc token;
@@ -671,8 +676,6 @@ kg_new_connection(
             goto fail;
     }
 
-    krb5_free_creds(context, k_cred);
-    k_cred = NULL;
     ctx->enc = NULL;
     ctx->seq = NULL;
     ctx->have_acceptor_subkey = 0;
@@ -725,6 +728,7 @@ kg_new_connection(
     }
 
 fail:
+    krb5_free_creds(context, k_cred);
     if (ctx_free) {
         if (ctx_free->auth_context)
             krb5_auth_con_free(context, ctx_free->auth_context);

@@ -268,6 +268,8 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
             handle = dlopen(filepath, PLUGIN_DLOPEN_FLAGS);
             if (handle == NULL) {
                 const char *e = dlerror();
+                if (e == NULL)
+                    e = "unknown failure";
                 Tprintf ("dlopen(%s): %s\n", filepath, e);
                 err = ENOENT; /* XXX */
                 krb5int_set_error (ep, err, "%s", e);
@@ -335,6 +337,8 @@ krb5int_get_plugin_sym (struct plugin_file_handle *h,
         sym = dlsym (h->dlhandle, csymname);
         if (sym == NULL) {
             const char *e = dlerror (); /* XXX copy and save away */
+            if (e == NULL)
+                e = "unknown failure";
             Tprintf ("dlsym(%s): %s\n", csymname, e);
             err = ENOENT; /* XXX */
             krb5int_set_error(ep, err, "%s", e);

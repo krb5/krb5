@@ -496,8 +496,10 @@ try_fallback_realm(krb5_context context, krb5_tkt_creds_context ctx)
         return code;
 
     /* Give up if the fallback realm isn't any different. */
-    if (data_eq_string(ctx->server->realm, hrealms[0]))
+    if (data_eq_string(ctx->server->realm, hrealms[0])) {
+        krb5_free_host_realm(context, hrealms);
         return ctx->reply_code;
+    }
 
     /* Rewrite server->realm to be the fallback realm. */
     krb5_free_data_contents(context, &ctx->server->realm);
