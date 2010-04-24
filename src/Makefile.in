@@ -106,7 +106,7 @@ install-headers-prerecurse: install-headers-mkdirs
 # install::
 #	$(MAKE) $(MFLAGS) install.man
 
-fake-install:
+fake-install: runenv.py
 	$(RM) -r $(FAKEPREFIX)
 	@for i in $(INSTALLMKDIRS); do \
 		$(srcdir)/config/mkinstalldirs util/fakedest$$i; \
@@ -627,12 +627,10 @@ check-unix:: krb5-config
 check-prerecurse: fake-install
 
 # Create a test realm and spawn a shell in an environment pointing to it.
-testrealm: fake-install runenv.py
+testrealm: fake-install
 	PYTHONPATH=$(BUILDTOP):$(top_srcdir)/util $(PYTHON) $(srcdir)/util/testrealm.py
 
 # environment variable settings to propagate to Python-based tests
-
-check-pytests-yes: runenv.py
 
 pyrunenv.vals: Makefile
 	$(KRB5_RUN_ENV) \

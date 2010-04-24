@@ -22,9 +22,13 @@
 
 """A module for krb5 test scripts
 
-Put test script names in the PYTESTS make variable to get them run
-with the appropriate PYTHONPATH during "make check".  Sample test
-script usage:
+To run test scripts during "make check" (if Python 2.4 or later is
+available), add rules like the following to Makeflie.in:
+
+    check-pytests::
+	$(RUNPYTEST) $(srcdir)/t_testname.py $(PYTESTFLAGS)
+
+A sample test script:
 
     from k5test import *
 
@@ -303,11 +307,6 @@ import socket
 import string
 import subprocess
 import sys
-
-# runenv.py is built in each directory where tests are run, providing
-# the environment variable settings needed for running programs in the
-# build tree.  These can vary by platform.
-import runenv
 
 # Used when most things go wrong (other than programming errors) so
 # that the user sees an error message rather than a Python traceback,
@@ -1021,6 +1020,12 @@ srctop = _find_srctop()
 plugins = _find_plugins()
 hostname = socket.getfqdn()
 null_input = open(os.devnull, 'r')
+
+# runenv.py is built in the top level by "make fake-install".  Import
+# it now (rather than at the beginning of the file) so that we get a
+# friendly error message from _find_plugins() if "make fake-install"
+# has not been run.
+import runenv
 
 krb5kdc = os.path.join(buildtop, 'kdc', 'krb5kdc')
 kadmind = os.path.join(buildtop, 'kadmin', 'server', 'kadmind')
