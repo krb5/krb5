@@ -2,7 +2,6 @@ mydir=tests
 BUILDTOP=$(REL)..
 SUBDIRS = resolve asn.1 create hammer verify gssapi dejagnu shlib \
 	gss-threads misc mkeystash_compat
-PYTESTS = t_general.py t_anonpkinit.py
 
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf
 KRB5_RUN_ENV= @KRB5_RUN_ENV@
@@ -60,6 +59,10 @@ kdb_check: kdc.conf krb5.conf
 	cmp $(TEST_DB).ovsort $(TEST_DB).ovsort2
 	$(RUN_SETUP) $(VALGRIND) ../kadmin/dbutil/kdb5_util $(KADMIN_OPTS) destroy -f
 	$(RM) $(TEST_DB)* stash_file
+
+check-pytests::
+	$(RUNPYTEST) $(srcdir)/t_general.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_anonpkinit.py $(PYTESTFLAGS)
 
 clean::
 	$(RM) kdc.conf

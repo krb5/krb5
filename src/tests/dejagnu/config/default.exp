@@ -1489,69 +1489,6 @@ proc start_kpropd {} {
     envstack_pop
 }
 
-proc start_tail { fname spawnid_var pid_var which standalone } {
-    upvar $spawnid_var spawnid
-    upvar $pid_var pid
-    global timeout
-
-    set f [open $fname a]
-
-    spawn tail -f $fname
-    set spawnid $spawn_id
-    set pid [exp_pid]
-
-    set markstr "===MARK $pid [clock format [clock seconds]] ==="
-    puts $f $markstr
-    flush $f
-
-    set p 0
-    set otimeout $timeout
-    set timeout 3
-    set ok 0
-    while { $ok == 0 && $p < 3 } {
-	expect {
-	    -i $spawn_id
-	    -ex "$markstr" { set ok 1 }
-	    -re "\[^\r\n\]*\r\n" { exp_continue }
-	    timeout {
-		# Some versions of GNU tail had a race condition where
-		# the first batch of data would be read from the end
-		# of the file, and then there was a brief window
-		# before calling stat and recording the size of the
-		# file.  If the marker is written during that window,
-		# then yet another file modification is needed to get
-		# the first one noticed.
-		if { $p < 3 } {
-		    verbose -log "no tail output yet, prodding with a blank line"
-		    incr p
-		    puts $f ""
-		    flush $f
-		    exp_continue
-		} else {
-		    close $f
-		    verbose -log "tail $fname output:"
-		    verbose -log [exec tail $fname]
-		    if {$standalone} {
-			verbose -log "tail -f timed out ($timeout sec) looking for mark in $which log"
-			fail "$which"
-		    } else {
-			perror "$which tail -f timed out ($timeout sec) looking for mark in $which log"
-		    }
-		    stop_kerberos_daemons
-		    exec kill $pid
-		    expect -i $spawn_id eof
-		    wait -i $spawn_id
-		    set timeout $otimeout
-		    return 0
-		}
-	    }
-	}
-    }
-    close $f
-    set timeout $otimeout
-    return 1
-}
-
 # start_kerberos_daemons
 # A procedure to build a Kerberos database and start up the kerberos
 # and kadmind daemons.  This sets the global variables kdc_pid,
@@ -1595,10 +1532,6 @@ proc start_kerberos_daemons { standalone } {
     set kdc_pidfile $tmppwd/kdc.pid
     set kadmind_pidfile $tmppwd/kadmind.pid
 
-    if ![start_tail $kdc_lfile tailf_spawn_id tailf_pid krb5kdc $standalone] {
-	return 0
-    }
-
     envstack_push
     setup_kerberos_env kdc
     # Nuke pid file - to test if setup
@@ -1609,42 +1542,18 @@ proc start_kerberos_daemons { standalone } {
     set kdc_spawn_id $spawn_id
 
     expect {
-	-i $tailf_spawn_id
-	-re "commencing operation\r\n" { }
-	-re "krb5kdc: \[a-zA-Z\]* - Cannot bind server socket to \[ 0-9a-fA-F:.\]*\r\n" {
-	    verbose -log "warning: $expect_out(0,string)"
-	    exp_continue
-	}
-	"no sockets set up?" {
+	"starting" { }
+	eof {
 	    if {$standalone} {
-		verbose -log "krb5kdc startup failed to bind listening sockets"
+		verbose -log "krb5kdc failed to start"
 		fail "krb5kdc"
 	    } else {
-		perror "krb5kdc startup failed to bind listening sockets"
+		perror "krb5kdc failed to start"
 	    }
 	    stop_kerberos_daemons
-	    exec kill $tailf_pid
-	    expect -i $tailf_spawn_id eof
-	    wait -i $tailf_spawn_id
-	    return 0
-	}
-	timeout {
-	    if {$standalone} {
-		verbose -log "krb5kdc startup timed out"
-		fail "krb5kdc"
-	    } else {
-		perror "krb5kdc startup timed out"
-	    }
-	    stop_kerberos_daemons
-	    exec kill $tailf_pid
-	    expect -i $tailf_spawn_id eof
-	    wait -i $tailf_spawn_id
 	    return 0
 	}
     }
-    exec kill $tailf_pid
-    expect -i $tailf_spawn_id eof
-    wait -i $tailf_spawn_id
 
     if (![file exists $kdc_pidfile]) {
 	fail "krb5kdc pidfile"
@@ -1677,17 +1586,11 @@ proc start_kerberos_daemons { standalone } {
     }
     catch "unset env(KRB5_KTNAME)"
 
-    if ![start_tail $kadmind_lfile tailf_spawn_id tailf_pid kadmind $standalone] {
-	return 0
-    }
-
     # Start up the kadmind daemon
-    # XXXX kadmind uses stderr a lot.  the sh -c and redirect can be
-    # removed when this is fixed
     envstack_push
     setup_kerberos_env kdc
     file delete $kadmind_pidfile
-    spawn $BINSH -c "exec $KADMIND -r $REALMNAME -W -nofork -P $kadmind_pidfile 2>>$kadmind_lfile"
+    spawn $BINSH -c "exec $KADMIND -r $REALMNAME -W -nofork -P $kadmind_pidfile"
     envstack_pop
     set kadmind_pid [exp_pid]
     set kadmind_spawn_id $spawn_id
@@ -1699,58 +1602,23 @@ proc start_kerberos_daemons { standalone } {
     }
 
     expect {
-	-i $tailf_spawn_id
 	"Seeding random number" exp_continue
-	"cannot initialize network" {
-	    if {$standalone} {
-		verbose -log "kadmind failed network init"
-		fail "kadmind"
-	    } else {
-		perror "kadmind failed network init"
-	    }
-	    stop_kerberos_daemons
-	    exec kill $tailf_pid
-	    expect -i $tailf_spawn_id eof
-	    wait -i $tailf_spawn_id
-	    return 0
-	}
-	"cannot bind to network address" {
-	    if {$standalone} {
-		verbose -log "kadmind failed to bind socket"
-		fail "kadmind"
-	    } else {
-		perror "kadmind failed to bind socket"
-	    }
-	    stop_kerberos_daemons
-	    exec kill $tailf_pid
-	    expect -i $tailf_spawn_id eof
-	    wait -i $tailf_spawn_id
-	    return 0
-	}
 	"No principal in keytab matches desired name" {
 	    dump_db
 	    exp_continue
 	}
 	"starting" { }
-	timeout {
+	eof {
+	    verbose -log "kadmind failed to start"
 	    if {$standalone} {
-		verbose -log "kadmind failed to start"
 		fail "kadmind"
 	    } else {
-		verbose -log "kadmind failed to start"
 		perror "kadmind failed to start"
 	    }
-#sleep 10
 	    stop_kerberos_daemons
-	    exec kill $tailf_pid
-	    expect -i $tailf_spawn_id eof
-	    wait -i $tailf_spawn_id
 	    return 0
 	}
     }
-    exec kill $tailf_pid
-    expect -i $tailf_spawn_id eof
-    wait -i $tailf_spawn_id
 
     if (![file exists $kadmind_pidfile]) {
 	fail "kadmind pidfile"
