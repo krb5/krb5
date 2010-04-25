@@ -2463,8 +2463,10 @@ spnego_gss_acquire_cred_with_password(OM_uint32 *minor_status,
 				      gss_OID_set *actual_mechs,
 				      OM_uint32 *time_rec)
 {
-	OM_uint32 status;
-	gss_OID_set amechs = GSS_C_NULL_OID_SET;
+	OM_uint32 status, tmpmin;
+	gss_OID_set amechs = GSS_C_NULL_OID_SET, dmechs;
+	gss_cred_id_t mcred = NULL;
+	spnego_gss_cred_id_t spcred = NULL;
 
 	dsyslog("Entering spnego_gss_acquire_cred_with_password\n");
 
@@ -2474,20 +2476,35 @@ spnego_gss_acquire_cred_with_password(OM_uint32 *minor_status,
 	if (time_rec)
 		*time_rec = 0;
 
+	dmechs = desired_mechs;
 	if (desired_mechs == GSS_C_NULL_OID_SET) {
-		status = get_available_mechs(minor_status,
-				desired_name, cred_usage,
-				output_cred_handle, &amechs);
+		status = get_available_mechs(minor_status, desired_name,
+					     cred_usage, NULL, &amechs);
+		dmechs = amechs;
 	}
 
-	status = gss_acquire_cred_with_password(minor_status,
-			desired_name, password, time_req,
-			desired_mechs ? desired_mechs : amechs, cred_usage,
-			output_cred_handle, actual_mechs,
-			time_rec);
+	status = gss_acquire_cred_with_password(minor_status, desired_name,
+						password, time_req, dmechs,
+						cred_usage, &mcred,
+						actual_mechs, time_rec);
+	if (status != GSS_S_COMPLETE)
+	    goto cleanup;
 
-	if (amechs != GSS_C_NULL_OID_SET)
-		(void) gss_release_oid_set(minor_status, &amechs);
+	spcred = malloc(sizeof(spnego_gss_cred_id_rec));
+	if (spcred == NULL) {
+		*minor_status = ENOMEM;
+		status = GSS_S_FAILURE;
+		goto cleanup;
+	}
+	spcred->neg_mechs = GSS_C_NULL_OID_SET;
+	spcred->mcred = mcred;
+	mcred = GSS_C_NO_CREDENTIAL;
+	*output_cred_handle = (gss_cred_id_t)spcred;
+
+cleanup:
+
+	(void) gss_release_oid_set(&tmpmin, &amechs);
+	(void) gss_release_cred(&tmpmin, &mcred);
 
 	dsyslog("Leaving spnego_gss_acquire_cred_with_password\n");
 	return (status);
