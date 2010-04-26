@@ -414,7 +414,6 @@ make_ap_req_v1(context, ctx, cred, k_cred, ad_context,
     struct gss_checksum_data cksum_struct;
     krb5_checksum md5;
     krb5_data ap_req;
-    krb5_data *checksum_data = NULL;
     unsigned char *ptr;
     unsigned char *t;
     unsigned int tlen;
@@ -434,22 +433,8 @@ make_ap_req_v1(context, ctx, cred, k_cred, ad_context,
     cksum_struct.cred = cred;
     cksum_struct.checksum_data.data = NULL;
     cksum_struct.exts = exts;
-    switch (k_cred->keyblock.enctype) {
-    case ENCTYPE_DES_CBC_CRC:
-    case ENCTYPE_DES_CBC_MD4:
-    case ENCTYPE_DES_CBC_MD5:
-    case ENCTYPE_DES3_CBC_SHA1:
-        code = make_gss_checksum(context, ctx->auth_context, &cksum_struct,
-                                 &checksum_data);
-        if (code)
-            goto cleanup;
-        break;
-    default:
-        krb5_auth_con_set_checksum_func(context, ctx->auth_context,
-                                        make_gss_checksum, &cksum_struct);
-        break;
-    }
-
+    krb5_auth_con_set_checksum_func(context, ctx->auth_context,
+                                    make_gss_checksum, &cksum_struct);
 
     /* call mk_req.  subkey and ap_req need to be used or destroyed */
 
@@ -460,7 +445,7 @@ make_ap_req_v1(context, ctx, cred, k_cred, ad_context,
 
     krb5_auth_con_set_authdata_context(context, ctx->auth_context, ad_context);
     code = krb5_mk_req_extended(context, &ctx->auth_context, mk_req_flags,
-                                checksum_data, k_cred, &ap_req);
+                                NULL, k_cred, &ap_req);
     krb5_auth_con_set_authdata_context(context, ctx->auth_context, NULL);
     krb5_free_data_contents(context, &cksum_struct.checksum_data);
     if (code)
@@ -506,8 +491,6 @@ make_ap_req_v1(context, ctx, cred, k_cred, ad_context,
     code = 0;
 
 cleanup:
-    if (checksum_data && checksum_data->data)
-        krb5_free_data_contents(context, checksum_data);
     if (ap_req.data)
         krb5_free_data_contents(context, &ap_req);
 
