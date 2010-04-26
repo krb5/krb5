@@ -339,10 +339,10 @@ acquire_init_cred(krb5_context context,
     code = krb5_cc_set_flags(context, ccache, 0);
     if (code == KRB5_FCC_NOFILE &&
         password != GSS_C_NO_BUFFER && desired_name != NULL) {
-        /* Well, we can create a memory ccache. */
-        code = krb5_cc_new_unique(context, "MEMORY", NULL, &ccache);
+        /* We will get initial creds later. */
+        code = krb5_cc_initialize(context, ccache, desired_name->princ);
         if (code == 0)
-            code = krb5_cc_initialize(context, ccache, desired_name->princ);
+            code = krb5_cc_set_flags(context, ccache, 0);
     }
     if (code != 0) {
         (void)krb5_cc_close(context, ccache);

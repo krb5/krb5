@@ -29,7 +29,8 @@ gss_server = os.path.join(appdir, 'gss-server')
 
 # Run a gss-server process and a gss-client process, with additional
 # gss-client flags given by options.  Verify that gss-client displayed
-# the expected output for a successful negotiation.
+# the expected output for a successful negotiation, and that we
+# obtained credentials for the host service.
 def server_client_test(realm, options):
     portstr = str(realm.server_port())
     server = realm.start_server([gss_server, '-port', portstr, 'host'],
@@ -39,6 +40,7 @@ def server_client_test(realm, options):
     if 'Signature verified.' not in output:
         fail('Expected message not seen in gss-client output')
     stop_daemon(server)
+    realm.klist(realm.user_princ, realm.host_princ)
 
 # Make up a filename to hold user's initial credentials.
 def ccache_savefile(realm):
@@ -56,18 +58,13 @@ def ccache_restore(realm):
 def tgs_test(realm, options):
     ccache_restore(realm)
     server_client_test(realm, options)
-    realm.klist(realm.user_princ, realm.host_princ)
 
 # Perform a test of the server and client with initial credentials
 # obtained through gss_acquire_cred_with_password().
 def as_test(realm, options):
-    if os.path.exists(realm.ccache):
-        os.remove(realm.ccache)
+    os.remove(realm.ccache)
     server_client_test(realm, options + ['-user', realm.user_princ,
                                          '-pass', password('user')])
-    # Currently, gss_acquire_cred_with_password() doesn't cache the
-    # resulting creds if the default ccache doesn't exist.
-    # realm.klist(realm.user_princ, realm.host_princ)
 
 for realm in multipass_realms():
     ccache_save(realm)
