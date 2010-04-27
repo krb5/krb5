@@ -707,7 +707,7 @@ iakerb_get_initial_state(iakerb_ctx_id_t ctx,
     code = krb5_get_credentials(ctx->k5c, KRB5_GC_CACHED,
                                 cred->ccache,
                                 &in_creds, &out_creds);
-    if (code == KRB5_CC_NOTFOUND) {
+    if (code == KRB5_CC_NOTFOUND || code == KRB5_CC_NOT_KTYPE) {
         krb5_principal tgs;
         krb5_data *realm = krb5_princ_realm(ctx->k5c, in_creds.client);
 
@@ -726,10 +726,14 @@ iakerb_get_initial_state(iakerb_ctx_id_t ctx,
 
         in_creds.server = tgs;
 
+        /* It would be nice if we could return KRB5KRB_AP_ERR_TKT_EXPIRED if
+         * the TGT is expired, for consistency with the krb5 mech.  As it
+         * stands, we won't see the expired TGT and will return
+         * KRB5_CC_NOTFOUND. */
         code = krb5_get_credentials(ctx->k5c, KRB5_GC_CACHED,
                                     cred->ccache,
                                     &in_creds, &out_creds);
-        if (code == KRB5_CC_NOTFOUND) {
+        if (code == KRB5_CC_NOTFOUND && cred->password.data != NULL) {
             *state = IAKERB_AS_REQ;
             code = 0;
         } else if (code == 0) {
