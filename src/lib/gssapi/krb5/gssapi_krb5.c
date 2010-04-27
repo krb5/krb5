@@ -797,10 +797,10 @@ int gss_krb5int_lib_init(void)
         return err;
 #endif
 #ifdef _GSS_STATIC_LINK
-    err = gss_iakerbmechglue_init();
+    err = gss_krb5mechglue_init();
     if (err)
         return err;
-    err = gss_krb5mechglue_init();
+    err = gss_iakerbmechglue_init();
     if (err)
         return err;
 #endif
