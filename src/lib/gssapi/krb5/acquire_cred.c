@@ -529,12 +529,6 @@ acquire_cred(minor_status, desired_name, password, time_req,
         goto krb_error_out;
     }
 
-    if (req_iakerb &&
-        (password == GSS_C_NO_BUFFER || cred_usage == GSS_C_BOTH)) {
-        code = G_BAD_USAGE;
-        goto krb_error_out;
-    }
-
     /* verify that the requested mechanism set is the default, or
        contains krb5 */
 
@@ -768,6 +762,25 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
                         time_req, desired_mechs,
                         cred_usage, output_cred_handle, actual_mechs,
                         time_rec, 0);
+}
+
+OM_uint32
+iakerb_gss_acquire_cred(minor_status, desired_name, time_req,
+                        desired_mechs, cred_usage, output_cred_handle,
+                        actual_mechs, time_rec)
+    OM_uint32 *minor_status;
+    gss_name_t desired_name;
+    OM_uint32 time_req;
+    gss_OID_set desired_mechs;
+    gss_cred_usage_t cred_usage;
+    gss_cred_id_t *output_cred_handle;
+    gss_OID_set *actual_mechs;
+    OM_uint32 *time_rec;
+{
+    return acquire_cred(minor_status, desired_name, GSS_C_NO_BUFFER,
+                        time_req, desired_mechs,
+                        cred_usage, output_cred_handle, actual_mechs,
+                        time_rec, 1);
 }
 
 OM_uint32

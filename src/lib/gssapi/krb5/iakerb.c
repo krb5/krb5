@@ -680,11 +680,6 @@ iakerb_get_initial_state(iakerb_ctx_id_t ctx,
     krb5_creds in_creds, *out_creds = NULL;
     krb5_error_code code;
 
-    if (cred == NULL || cred->iakerb_mech == 0) {
-        *state = IAKERB_AP_REQ;
-        return 0;
-    }
-
     memset(&in_creds, 0, sizeof(in_creds));
 
     in_creds.client = cred->name->princ;
@@ -951,8 +946,10 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
                             OM_uint32 *time_rec)
 {
     OM_uint32 major_status = GSS_S_FAILURE;
+    OM_uint32 tmpmin;
     krb5_error_code code;
     iakerb_ctx_id_t ctx;
+    gss_cred_id_t defcred = GSS_C_NO_CREDENTIAL;
     krb5_gss_cred_id_t kcred;
     krb5_gss_name_t kname;
     int credLocked = 0;
@@ -984,8 +981,16 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
 
         credLocked = 1;
         kcred = (krb5_gss_cred_id_t)claimant_cred_handle;
-    } else
-        kcred = NULL;
+    } else {
+        major_status = iakerb_gss_acquire_cred(minor_status, NULL,
+                                               GSS_C_INDEFINITE,
+                                               GSS_C_NULL_OID_SET,
+                                               GSS_C_INITIATE,
+                                               &defcred, NULL, NULL);
+        if (GSS_ERROR(major_status))
+            goto cleanup;
+        kcred = (krb5_gss_cred_id_t)defcred;
+    }
 
     major_status = GSS_S_FAILURE;
 
@@ -1034,7 +1039,7 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
 
         /* IAKERB is finished, or we skipped to Kerberos directly. */
         major_status = krb5_gss_init_sec_context_ext(minor_status,
-                                                     claimant_cred_handle,
+                                                     (gss_cred_id_t) kcred,
                                                      &ctx->u.gssc,
                                                      target_name,
                                                      GSS_C_NULL_OID,
@@ -1069,6 +1074,7 @@ cleanup:
         iakerb_release_context(ctx);
         *context_handle = GSS_C_NO_CONTEXT;
     }
+    krb5_gss_release_cred(&tmpmin, &defcred);
 
     return major_status;
 }

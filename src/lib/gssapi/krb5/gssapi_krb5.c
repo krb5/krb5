@@ -718,6 +718,7 @@ static int gss_iakerbmechglue_init(void)
     iakerb_mechanism.gss_accept_sec_context = iakerb_gss_accept_sec_context;
     iakerb_mechanism.gss_init_sec_context   = iakerb_gss_init_sec_context;
     iakerb_mechanism.gss_delete_sec_context = iakerb_gss_delete_sec_context;
+    iakerb_mechanism.gss_acquire_cred       = iakerb_gss_acquire_cred;
 
     memset(&mech_iakerb, 0, sizeof(mech_iakerb));
     mech_iakerb.mech = &iakerb_mechanism;
