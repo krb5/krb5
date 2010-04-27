@@ -733,14 +733,14 @@ get_cached_tgt(krb5_context context, krb5_tkt_creds_context ctx,
     *tgt = NULL;
 
     /* Construct the principal krbtgt/<realm>@<client realm>.  The realm
-     * won't matter unless we're getting the local TGT. */
+     * won't matter if we're getting a foreign TGT. */
     code = krb5int_tgtname(context, realm, &ctx->client->realm, &tgtname);
     if (code != 0)
         goto cleanup;
 
-    /* Match the TGT realm only if we're getting the local TGT. */
+    /* Don't match the TGT realm if we're getting a foreign TGT. */
     flags = KRB5_TC_SUPPORTED_KTYPES;
-    if (local_realm)
+    if (!local_realm)
         flags |= KRB5_TC_MATCH_SRV_NAMEONLY;
 
     /* Construct a matching cred for the ccache query. */
