@@ -14,8 +14,8 @@ PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
 
-PLUGINS_LIBS = \
-	$(srcdir)/../../libplugin_impl.a $(srcdir)/../../libplugin_yarrow.a
+PLUGINS_LIBS = -lkrb5 \
+	$(srcdir)/../../libplugin_impl.a $(srcdir)/../../libplugin_yarrow.a $(srcdir)/../../libencrypted_challenge.a
 
 EXTRADEPSRCS=\
 	$(srcdir)/t_nfold.c	\
