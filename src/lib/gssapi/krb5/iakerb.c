@@ -25,10 +25,6 @@
  */
 #include "k5-int.h"
 #include "gssapiP_krb5.h"
-#ifdef HAVE_MEMORY_H
-#include <memory.h>
-#endif
-#include <assert.h>
 
 /*
  * IAKERB implementation
