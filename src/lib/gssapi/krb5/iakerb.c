@@ -86,7 +86,6 @@ iakerb_make_finished(krb5_context context,
                      krb5_data **finished)
 {
     krb5_error_code code;
-    krb5_cksumtype cksumtype;
     krb5_iakerb_finished iaf;
 
     *finished = NULL;
@@ -96,14 +95,7 @@ iakerb_make_finished(krb5_context context,
     if (key == NULL)
         return KRB5KDC_ERR_NULL_KEY;
 
-    code = krb5int_c_mandatory_cksumtype(context,
-                                         krb5_k_key_enctype(context, key),
-                                         &cksumtype);
-    if (code != 0)
-        return code;
-
-    code = krb5_k_make_checksum(context, cksumtype,
-                                key, KRB5_KEYUSAGE_IAKERB_FINISHED,
+    code = krb5_k_make_checksum(context, 0, key, KRB5_KEYUSAGE_IAKERB_FINISHED,
                                 conv, &iaf.checksum);
     if (code != 0)
         return code;
