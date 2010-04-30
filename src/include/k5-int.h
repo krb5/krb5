@@ -1342,10 +1342,9 @@ void KRB5_CALLCONV krb5_free_fast_finished(krb5_context, krb5_fast_finished *);
 void KRB5_CALLCONV krb5_free_fast_response(krb5_context, krb5_fast_response *);
 void KRB5_CALLCONV krb5_free_ad_kdcissued(krb5_context, krb5_ad_kdcissued *);
 void KRB5_CALLCONV krb5_free_ad_signedpath(krb5_context, krb5_ad_signedpath *);
-void KRB5_CALLCONV krb5_free_iakerb_header
-(krb5_context, krb5_iakerb_header *);
-void KRB5_CALLCONV krb5_free_iakerb_finished
-(krb5_context, krb5_iakerb_finished *);
+void KRB5_CALLCONV krb5_free_iakerb_header(krb5_context, krb5_iakerb_header *);
+void KRB5_CALLCONV krb5_free_iakerb_finished(krb5_context,
+                                             krb5_iakerb_finished *);
 
 /* #include "krb5/wordsize.h" -- comes in through base-defs.h. */
 #include "com_err.h"
@@ -1757,10 +1756,12 @@ encode_krb5_fast_req(const krb5_fast_req *, krb5_data **);
 
 krb5_error_code
 encode_krb5_pa_fx_fast_reply(const krb5_enc_data *, krb5_data **);
-krb5_error_code encode_krb5_iakerb_header
-(const krb5_iakerb_header *, krb5_data **);
-krb5_error_code encode_krb5_iakerb_finished
-(const krb5_iakerb_finished *, krb5_data **);
+
+krb5_error_code
+encode_krb5_iakerb_header(const krb5_iakerb_header *, krb5_data **);
+
+krb5_error_code
+encode_krb5_iakerb_finished(const krb5_iakerb_finished *, krb5_data **);
 
 krb5_error_code
 encode_krb5_fast_response(const krb5_fast_response *, krb5_data **);
@@ -1960,11 +1961,11 @@ decode_krb5_ad_kdcissued(const krb5_data *, krb5_ad_kdcissued **);
 krb5_error_code
 decode_krb5_ad_signedpath(const krb5_data *, krb5_ad_signedpath **);
 
-krb5_error_code decode_krb5_iakerb_header
-(const krb5_data *, krb5_iakerb_header **);
+krb5_error_code
+decode_krb5_iakerb_header(const krb5_data *, krb5_iakerb_header **);
 
-krb5_error_code decode_krb5_iakerb_finished
-(const krb5_data *, krb5_iakerb_finished **);
+krb5_error_code
+decode_krb5_iakerb_finished(const krb5_data *, krb5_iakerb_finished **);
 
 struct _krb5_key_data;          /* kdb.h */
 
