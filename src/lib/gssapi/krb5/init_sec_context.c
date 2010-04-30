@@ -270,6 +270,9 @@ struct gss_checksum_data {
     krb5_gss_ctx_ext_t exts;
 };
 
+#ifdef CFX_EXERCISE
+#include "../../krb5/krb/auth_con.h"
+#endif
 static krb5_error_code KRB5_CALLCONV
 make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
                    void *cksum_data, krb5_data **out)
@@ -748,8 +751,7 @@ mutual_auth(
     gss_buffer_t output_token,
     OM_uint32 *ret_flags,
     OM_uint32 *time_rec,
-    krb5_context context,
-    krb5_gss_ctx_ext_t exts)
+    krb5_context context)
 {
     OM_uint32 major_status;
     unsigned char *ptr;
@@ -1071,7 +1073,7 @@ krb5_gss_init_sec_context_ext(
                                    time_req, input_chan_bindings,
                                    input_token, actual_mech_type,
                                    output_token, ret_flags, time_rec,
-                                   context, exts);
+                                   context);
         /* If context_handle is now NO_CONTEXT, mutual_auth called
            delete_sec_context, which would've zapped the krb5 context
            too.  */
