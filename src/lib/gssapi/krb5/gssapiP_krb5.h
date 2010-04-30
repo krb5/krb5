@@ -254,7 +254,8 @@ extern k5_mutex_t gssint_krb5_keytab_lock;
 #define kg_validate_name(name)          g_validate_name(&kg_vdb,name)
 #define kg_validate_cred_id(cred)       g_validate_cred_id(&kg_vdb,cred)
 #define kg_validate_ctx_id(ctx)         (g_validate_ctx_id(&kg_vdb,ctx) && \
-                                         ((krb5_gss_ctx_id_t)ctx)->magic == KG_CONTEXT)
+                                         ((krb5_gss_ctx_id_t)ctx)->magic == \
+                                         KG_CONTEXT)
 #define kg_validate_lucidctx_id(lctx)   g_validate_lucidctx_id(&kg_vdb,lctx)
 
 #define kg_delete_name(name)            g_delete_name(&kg_vdb,name)
