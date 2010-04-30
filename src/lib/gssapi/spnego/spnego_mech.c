@@ -274,6 +274,11 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_set_neg_mechs,
 };
 
+static struct gss_config_ext spnego_mechanism_ext =
+{
+	spnego_gss_acquire_cred_with_password
+};
+
 #ifdef _GSS_STATIC_LINK
 #include "mglueP.h"
 
@@ -283,6 +288,7 @@ static int gss_spnegomechglue_init(void)
 
 	memset(&mech_spnego, 0, sizeof(mech_spnego));
 	mech_spnego.mech = &spnego_mechanism;
+	mech_spnego.mech_ext = &spnego_mechanism_ext;
 	mech_spnego.mechNameStr = "spnego";
 	mech_spnego.mech_type = GSS_C_NO_OID;
 
@@ -2443,6 +2449,64 @@ spnego_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
 	*output_cred_handle = (gss_cred_id_t)out_spcred;
 
 	dsyslog("Leaving spnego_gss_acquire_cred_impersonate_name\n");
+	return (status);
+}
+
+OM_uint32
+spnego_gss_acquire_cred_with_password(OM_uint32 *minor_status,
+				      const gss_name_t desired_name,
+				      const gss_buffer_t password,
+				      OM_uint32 time_req,
+				      const gss_OID_set desired_mechs,
+				      gss_cred_usage_t cred_usage,
+				      gss_cred_id_t *output_cred_handle,
+				      gss_OID_set *actual_mechs,
+				      OM_uint32 *time_rec)
+{
+	OM_uint32 status, tmpmin;
+	gss_OID_set amechs = GSS_C_NULL_OID_SET, dmechs;
+	gss_cred_id_t mcred = NULL;
+	spnego_gss_cred_id_t spcred = NULL;
+
+	dsyslog("Entering spnego_gss_acquire_cred_with_password\n");
+
+	if (actual_mechs)
+		*actual_mechs = NULL;
+
+	if (time_rec)
+		*time_rec = 0;
+
+	dmechs = desired_mechs;
+	if (desired_mechs == GSS_C_NULL_OID_SET) {
+		status = get_available_mechs(minor_status, desired_name,
+					     cred_usage, NULL, &amechs);
+		dmechs = amechs;
+	}
+
+	status = gss_acquire_cred_with_password(minor_status, desired_name,
+						password, time_req, dmechs,
+						cred_usage, &mcred,
+						actual_mechs, time_rec);
+	if (status != GSS_S_COMPLETE)
+	    goto cleanup;
+
+	spcred = malloc(sizeof(spnego_gss_cred_id_rec));
+	if (spcred == NULL) {
+		*minor_status = ENOMEM;
+		status = GSS_S_FAILURE;
+		goto cleanup;
+	}
+	spcred->neg_mechs = GSS_C_NULL_OID_SET;
+	spcred->mcred = mcred;
+	mcred = GSS_C_NO_CREDENTIAL;
+	*output_cred_handle = (gss_cred_id_t)spcred;
+
+cleanup:
+
+	(void) gss_release_oid_set(&tmpmin, &amechs);
+	(void) gss_release_cred(&tmpmin, &mcred);
+
+	dsyslog("Leaving spnego_gss_acquire_cred_with_password\n");
 	return (status);
 }
 

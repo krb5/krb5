@@ -52,6 +52,7 @@ SRCS = \
 	$(srcdir)/export_sec_context.c \
 	$(srcdir)/get_tkt_flags.c \
 	$(srcdir)/gssapi_krb5.c \
+	$(srcdir)/iakerb.c \
 	$(srcdir)/import_name.c \
 	$(srcdir)/import_sec_context.c \
 	$(srcdir)/indicate_mechs.c \
@@ -106,6 +107,7 @@ OBJS = \
 	$(OUTPRE)export_sec_context.$(OBJEXT) \
 	$(OUTPRE)get_tkt_flags.$(OBJEXT) \
 	$(OUTPRE)gssapi_krb5.$(OBJEXT) \
+	$(OUTPRE)iakerb.$(OBJEXT) \
 	$(OUTPRE)import_name.$(OBJEXT) \
 	$(OUTPRE)import_sec_context.$(OBJEXT) \
 	$(OUTPRE)indicate_mechs.$(OBJEXT) \
@@ -163,6 +165,7 @@ STLIBOBJS = \
 	export_sec_context.o \
 	get_tkt_flags.o \
 	gssapi_krb5.o \
+	iakerb.o \
 	import_name.o \
 	import_sec_context.o \
 	indicate_mechs.o \

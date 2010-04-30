@@ -913,3 +913,22 @@ krb5_free_ad_signedpath(krb5_context context, krb5_ad_signedpath *val)
     krb5_free_pa_data(context, val->method_data);
     free(val);
 }
+
+void KRB5_CALLCONV
+krb5_free_iakerb_header(krb5_context context, krb5_iakerb_header *val)
+{
+    if (val == NULL)
+        return ;
+
+    krb5_free_data_contents(context, &val->target_realm);
+    krb5_free_data(context, val->cookie);
+}
+
+void KRB5_CALLCONV
+krb5_free_iakerb_finished(krb5_context context, krb5_iakerb_finished *val)
+{
+    if (val == NULL)
+        return ;
+
+    krb5_free_checksum_contents(context, &val->checksum);
+}

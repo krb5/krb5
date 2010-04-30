@@ -9,6 +9,7 @@ GSS_C_NT_USER_NAME
 GSS_KRB5_NT_PRINCIPAL_NAME
 gss_accept_sec_context
 gss_acquire_cred
+gss_acquire_cred_with_password
 gss_acquire_cred_impersonate_name
 gss_add_buffer_set_member
 gss_add_cred
@@ -54,6 +55,7 @@ gss_krb5int_unseal_token_v3
 gsskrb5_extract_authtime_from_sec_context
 gsskrb5_extract_authz_data_from_sec_context
 gss_map_name_to_any
+gss_mech_iakerb
 gss_mech_krb5
 gss_mech_krb5_old
 gss_mech_set_krb5

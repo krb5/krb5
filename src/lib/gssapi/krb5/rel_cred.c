@@ -77,6 +77,11 @@ krb5_gss_release_cred(minor_status, cred_handle)
     if (cred->req_enctypes)
         free(cred->req_enctypes);
 
+    if (cred->password.data) {
+        zap(cred->password.data, cred->password.length);
+        krb5_free_data_contents(context, &cred->password);
+    }
+
     xfree(cred);
 
     *cred_handle = NULL;

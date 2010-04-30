@@ -740,6 +740,28 @@ main(argc, argv)
                    encode_krb5_ad_signedpath);
         ktest_empty_ad_signedpath(&sp);
     }
+    /****************************************************************/
+    /* encode_krb5_iakerb_header */
+    {
+        krb5_iakerb_header ih;
+        setup(ih,krb5_ad_signedpath,"iakerb_header",
+              ktest_make_sample_iakerb_header);
+        encode_run(ih,krb5_iakerb_header,
+                   "iakerb_header","",
+                   encode_krb5_iakerb_header);
+        ktest_empty_iakerb_header(&ih);
+    }
+    /****************************************************************/
+    /* encode_krb5_iakerb_finished */
+    {
+        krb5_iakerb_finished ih;
+        setup(ih,krb5_ad_signedpath,"iakerb_finished",
+              ktest_make_sample_iakerb_finished);
+        encode_run(ih,krb5_iakerb_finished,
+                   "iakerb_finished","",
+                   encode_krb5_iakerb_finished);
+        ktest_empty_iakerb_finished(&ih);
+    }
 #ifdef ENABLE_LDAP
     {
         ldap_seqof_key_data skd;

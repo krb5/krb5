@@ -600,6 +600,29 @@ int ktest_equal_ad_signedpath(ref, var)
     return p;
 }
 
+int ktest_equal_iakerb_header(ref, var)
+    krb5_iakerb_header *ref;
+    krb5_iakerb_header *var;
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p=p&&struct_equal(target_realm,ktest_equal_data);
+    p=p&&ptr_equal(cookie,ktest_equal_data);
+    return p;
+}
+
+int ktest_equal_iakerb_finished(ref, var)
+    krb5_iakerb_finished *ref;
+    krb5_iakerb_finished *var;
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p=p&&struct_equal(checksum,ktest_equal_checksum);
+    return p;
+}
+
 #ifdef ENABLE_LDAP
 static int equal_key_data(ref, var)
     krb5_key_data *ref;

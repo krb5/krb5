@@ -1394,6 +1394,35 @@ static unsigned int ad_signedpath_optional(const void *p)
 
 DEFSEQTYPE(ad_signedpath, krb5_ad_signedpath, ad_signedpath_fields, ad_signedpath_optional);
 
+static const struct field_info iakerb_header_fields[] = {
+    FIELDOF_NORM(krb5_iakerb_header, ostring_data, target_realm, 1),
+    FIELDOF_OPT(krb5_iakerb_header, ostring_data_ptr, cookie, 2, 2),
+};
+
+static unsigned int iakerb_header_optional(const void *p)
+{
+    unsigned int optional = 0;
+    const krb5_iakerb_header *val = p;
+    if (val->cookie && val->cookie->data)
+        optional |= (1u << 2);
+    return optional;
+}
+
+DEFSEQTYPE(iakerb_header, krb5_iakerb_header, iakerb_header_fields, iakerb_header_optional);
+
+static const struct field_info iakerb_finished_fields[] = {
+    FIELDOF_NORM(krb5_iakerb_finished, checksum, checksum, 1),
+};
+
+static unsigned int iakerb_finished_optional(const void *p)
+{
+    unsigned int optional = 0;
+    return optional;
+}
+
+DEFSEQTYPE(iakerb_finished, krb5_iakerb_finished, iakerb_finished_fields,
+iakerb_finished_optional);
+
 /* Exported complete encoders -- these produce a krb5_data with
    the encoding in the correct byte order.  */
 
@@ -1472,6 +1501,8 @@ MAKE_FULL_ENCODER(encode_krb5_fast_response, fast_response);
 MAKE_FULL_ENCODER(encode_krb5_ad_kdcissued, ad_kdc_issued);
 MAKE_FULL_ENCODER(encode_krb5_ad_signedpath_data, ad_signedpath_data);
 MAKE_FULL_ENCODER(encode_krb5_ad_signedpath, ad_signedpath);
+MAKE_FULL_ENCODER(encode_krb5_iakerb_header, iakerb_header);
+MAKE_FULL_ENCODER(encode_krb5_iakerb_finished, iakerb_finished);
 
 
 
