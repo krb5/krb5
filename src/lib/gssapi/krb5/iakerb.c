@@ -321,31 +321,22 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx,
                      gss_buffer_t output_token)
 {
     krb5_error_code code;
-    krb5_data request, reply, realm;
+    krb5_data request = empty_data(), reply = empty_data();
+    krb5_data realm = empty_data();
     OM_uint32 tmp;
-    int tcpOnly = 0, useMaster;
+    int tcp_only, use_master;
+    krb5_ui_4 kdc_code;
 
     output_token->length = 0;
     output_token->value = NULL;
-
-    request.data = NULL;
-    request.length = 0;
-    reply.data = NULL;
-    reply.length = 0;
-    realm.data = NULL;
-    realm.length = 0;
 
     if (ctx->count >= IAKERB_MAX_HOPS) {
         code = KRB5_KDC_UNREACH;
         goto cleanup;
     }
 
-    code = iakerb_parse_token(ctx,
-                              initialContextToken,
-                              input_token,
-                              &realm,
-                              NULL,
-                              &request);
+    code = iakerb_parse_token(ctx, initialContextToken, input_token, &realm,
+                              NULL, &request);
     if (code != 0)
         goto cleanup;
 
@@ -358,10 +349,27 @@ iakerb_acceptor_step(iakerb_ctx_id_t ctx,
     if (code != 0)
         goto cleanup;
 
-send_again:
-    useMaster = 0;
-    code = krb5_sendto_kdc(ctx->k5c, &request, &realm,
-                           &reply, &useMaster, tcpOnly);
+    for (tcp_only = 0; tcp_only <= 1; tcp_only++) {
+        use_master = 0;
+        code = krb5_sendto_kdc(ctx->k5c, &request, &realm,
+                               &reply, &use_master, tcp_only);
+        if (code == 0 && krb5_is_krb_error(&reply)) {
+            krb5_error *error;
+
+            code = decode_krb5_error(&reply, &error);
+            if (code != 0)
+                goto cleanup;
+            kdc_code = error->error;
+            krb5_free_error(ctx->k5c, error);
+            if (kdc_code == KRB_ERR_RESPONSE_TOO_BIG) {
+                krb5_free_data_contents(ctx->k5c, &reply);
+                reply = empty_data();
+                continue;
+            }
+        }
+        break;
+    }
+
     if (code == KRB5_KDC_UNREACH || code == KRB5_REALM_UNKNOWN) {
         krb5_error error;
 
@@ -374,25 +382,10 @@ send_again:
         code = krb5_mk_error(ctx->k5c, &error, &reply);
         if (code != 0)
             goto cleanup;
-    } else if (code == 0 && krb5_is_krb_error(&reply)) {
-        krb5_error *error;
-
-        code = decode_krb5_error(&reply, &error);
-        if (code != 0)
-            goto cleanup;
-
-        if (error && error->error == KRB_ERR_RESPONSE_TOO_BIG &&
-            tcpOnly == 0) {
-            tcpOnly = 1;
-            krb5_free_error(ctx->k5c, error);
-            krb5_free_data_contents(ctx->k5c, &reply);
-            goto send_again;
-        }
     } else if (code != 0)
         goto cleanup;
 
-    code = iakerb_make_token(ctx, &realm, NULL, &reply,
-                             0, output_token);
+    code = iakerb_make_token(ctx, &realm, NULL, &reply, 0, output_token);
     if (code != 0)
         goto cleanup;
 
