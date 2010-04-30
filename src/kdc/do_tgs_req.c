@@ -144,8 +144,10 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     retval = decode_krb5_tgs_req(pkt, &request);
     if (retval)
         return retval;
-    if (request->msg_type != KRB5_TGS_REQ)
+    if (request->msg_type != KRB5_TGS_REQ) {
+        krb5_free_kdc_req(kdc_context, request);
         return KRB5_BADMSGTYPE;
+    }
 
     /*
      * setup_server_realm() sets up the global realm-specific data pointer.
