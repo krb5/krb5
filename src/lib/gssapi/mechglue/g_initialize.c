@@ -857,8 +857,8 @@ gss_mechanism
 gssint_get_mechanism(oid)
 const gss_OID oid;
 {
-        gss_mech_info aMech;
-        gss_mechanism (*sym)(const gss_OID);
+	gss_mech_info aMech;
+	gss_mechanism (*sym)(const gss_OID);
 	struct plugin_file_handle *dl;
 	struct errinfo errinfo;
 
@@ -934,7 +934,7 @@ gss_mechanism_ext
 gssint_get_mechanism_ext(oid)
 const gss_OID oid;
 {
-        gss_mech_info aMech;
+	gss_mech_info aMech;
 
 	if (gssint_mechglue_initialize_library() != 0)
 		return (NULL);
