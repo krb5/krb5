@@ -517,33 +517,18 @@ iakerb_initiator_step(iakerb_ctx_id_t ctx,
                       const gss_buffer_t input_token,
                       gss_buffer_t output_token)
 {
-    krb5_error_code code;
-    krb5_data in, out, realm, *cookie = NULL;
+    krb5_error_code code = 0;
+    krb5_data in = empty_data(), out = empty_data(), realm = empty_data();
+    krb5_data *cookie = NULL;
     OM_uint32 tmp;
-    int initialContextToken = (input_token == GSS_C_NO_BUFFER);
     unsigned int flags = 0;
     krb5_ticket_times times;
 
     output_token->length = 0;
     output_token->value = NULL;
 
-    in.data = NULL;
-    in.length = 0;
-    out.data = NULL;
-    out.length = 0;
-    realm.data = NULL;
-    realm.length = 0;
-
-    if (initialContextToken) {
-        in.data = NULL;
-        in.length = 0;
-    } else {
-        code = iakerb_parse_token(ctx,
-                                  0,
-                                  input_token,
-                                  NULL,
-                                  &cookie,
-                                  &in);
+    if (input_token != GSS_C_NO_BUFFER) {
+        code = iakerb_parse_token(ctx, 0, input_token, NULL, &cookie, &in);
         if (code != 0)
             goto cleanup;
 

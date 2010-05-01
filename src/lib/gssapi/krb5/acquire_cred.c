@@ -580,6 +580,7 @@ acquire_cred(minor_status, desired_name, password, time_req,
     if ((cred_usage != GSS_C_INITIATE) &&
         (cred_usage != GSS_C_ACCEPT) &&
         (cred_usage != GSS_C_BOTH)) {
+        ret = GSS_S_FAILURE;
         *minor_status = (OM_uint32) G_BAD_USAGE;
         goto error_out;
     }
@@ -685,16 +686,18 @@ error_out:
         free(ret_mechs->elements);
         free(ret_mechs);
     }
-    if (cred->ccache)
-        (void)krb5_cc_close(context, cred->ccache);
+    if (cred != NULL) {
+        if (cred->ccache)
+            (void)krb5_cc_close(context, cred->ccache);
 #ifndef LEAN_CLIENT
-    if (cred->keytab)
-        (void)krb5_kt_close(context, cred->keytab);
+        if (cred->keytab)
+            (void)krb5_kt_close(context, cred->keytab);
 #endif /* LEAN_CLIENT */
-    if (cred->name)
-        kg_release_name(context, 0, &cred->name);
-    k5_mutex_destroy(&cred->lock);
-    xfree(cred);
+        if (cred->name)
+            kg_release_name(context, 0, &cred->name);
+        k5_mutex_destroy(&cred->lock);
+        xfree(cred);
+    }
     save_error_info(*minor_status, context);
     krb5_free_context(context);
     return ret;
