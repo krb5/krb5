@@ -355,7 +355,7 @@ void printtime(tv)
                                     fmtbuf,
                                     sizeof(fmtbuf),
                                     &fill))
-        printf(fmtbuf);
+        printf("%s", fmtbuf);
 }
 
 

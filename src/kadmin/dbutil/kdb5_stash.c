@@ -122,7 +122,7 @@ kdb5_stash(argc, argv)
             com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP,
                     "while setting up enctype %d", master_keyblock.enctype);
         else
-            com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP, tmp);
+            com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP, "%s", tmp);
         exit_status++; return;
     }
 

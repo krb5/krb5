@@ -487,7 +487,7 @@ printtime(tv)
                                     timestring,
                                     timestamp_width+1,
                                     &fill)) {
-        printf(timestring);
+        printf("%s", timestring);
     }
 }
 

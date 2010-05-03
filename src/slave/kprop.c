@@ -591,7 +591,7 @@ xmit_database(context, auth_context, my_creds, fd, database_fd,
             snprintf(buf, sizeof(buf),
                      "while encoding database block starting at %d",
                      sent_size);
-            com_err(progname, retval, buf);
+            com_err(progname, retval, "%s", buf);
             send_error(context, my_creds, fd, buf, retval);
             exit(1);
         }

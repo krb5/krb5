@@ -1445,7 +1445,7 @@ recv_database(context, fd, database_fd, confmsg)
             snprintf(buf, sizeof(buf),
                      "while reading database block starting at offset %d",
                      received_size);
-            com_err(progname, retval, buf);
+            com_err(progname, retval, "%s", buf);
             send_error(context, fd, retval, buf);
             exit(1);
         }
@@ -1457,7 +1457,7 @@ recv_database(context, fd, database_fd, confmsg)
             snprintf(buf, sizeof(buf),
                      "while decoding database block starting at offset %d",
                      received_size);
-            com_err(progname, retval, buf);
+            com_err(progname, retval, "%s", buf);
             send_error(context, fd, retval, buf);
             krb5_free_data_contents(context, &inbuf);
             exit(1);
