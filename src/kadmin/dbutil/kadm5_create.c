@@ -31,8 +31,6 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "string_table.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -288,7 +286,7 @@ int add_admin_princ(void *handle, krb5_context context,
     fullname = build_name_with_realm(name, realm);
     ret = krb5_parse_name(context, fullname, &ent.principal);
     if (ret) {
-        com_err(progname, ret, str_PARSE_NAME);
+        com_err(progname, ret, "while parsing admin principal name");
         return(ERR);
     }
     ent.max_life = lifetime;
@@ -300,7 +298,7 @@ int add_admin_princ(void *handle, krb5_context context,
                                  "to-be-random");
     if (ret) {
         if (ret != KADM5_DUP) {
-            com_err(progname, ret, str_PUT_PRINC, fullname);
+            com_err(progname, ret, "while creating principal %s", fullname);
             krb5_free_principal(context, ent.principal);
             free(fullname);
             return ERR;
@@ -309,7 +307,7 @@ int add_admin_princ(void *handle, krb5_context context,
         /* only randomize key if we created the principal */
         ret = kadm5_randkey_principal(handle, ent.principal, NULL, NULL);
         if (ret) {
-            com_err(progname, ret, str_RANDOM_KEY, fullname);
+            com_err(progname, ret, "while randomizing principal %s", fullname);
             krb5_free_principal(context, ent.principal);
             free(fullname);
             return ERR;
@@ -318,7 +316,7 @@ int add_admin_princ(void *handle, krb5_context context,
         ent.attributes = attrs;
         ret = kadm5_modify_principal(handle, &ent, KADM5_ATTRIBUTES);
         if (ret) {
-            com_err(progname, ret, str_PUT_PRINC, fullname);
+            com_err(progname, ret, "while setting attributes on %s", fullname);
             krb5_free_principal(context, ent.principal);
             free(fullname);
             return ERR;

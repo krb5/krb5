@@ -1180,7 +1180,7 @@ dump_db(argc, argv)
      * to be opened if we try a dump that uses it.
      */
     if (!dbactive) {
-        com_err(progname, 0, Err_no_database);
+        com_err(progname, 0, "Database not currently opened!");
         exit_status++;
         return;
     }

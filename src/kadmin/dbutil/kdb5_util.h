@@ -33,7 +33,6 @@
 #define REALM_SEP_STR   "@"
 
 extern char *progname;
-extern char *Err_no_database;
 #ifndef V4_DECLARES_STATIC
 extern krb5_keyblock master_keyblock;
 extern krb5_principal master_princ;

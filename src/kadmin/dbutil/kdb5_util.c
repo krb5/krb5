@@ -66,9 +66,6 @@
 #include <time.h>
 #include "kdb5_util.h"
 
-char    *Err_no_master_msg = "Master key not entered!\n";
-char    *Err_no_database = "Database not currently opened!\n";
-
 /*
  * XXX Ick, ick, ick.  These global variables shouldn't be global....
  */
