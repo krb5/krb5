@@ -920,9 +920,10 @@ typedef struct _kdb_vftabl {
     krb5_error_code (*fini_module)(krb5_context kcontext);
 
     /*
-     * Optional: Create, but do not open, a database.  conf_section and db_args
-     * have the same meaning as in init_module.  This function may return an
-     * error if the database already exists.  Used by kdb5_util create.
+     * Optional: Initialize a database object while creating the underlying
+     * database.  conf_section and db_args have the same meaning as in
+     * init_module.  This function may return an error if the database already
+     * exists.  Used by kdb5_util create.
      */
     krb5_error_code (*db_create)(krb5_context kcontext, char *conf_section,
                                  char **db_args);
