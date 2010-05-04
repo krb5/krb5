@@ -57,8 +57,6 @@ typedef struct _krb5_db2_context {
 krb5_error_code krb5_db2_db_init(krb5_context);
 krb5_error_code krb5_db2_db_fini(krb5_context);
 krb5_error_code krb5_db2_db_get_age(krb5_context, char *, time_t *);
-krb5_error_code krb5_db2_db_create(krb5_context, char *, krb5_int32);
-krb5_error_code krb5_db2_db_destroy(krb5_context, char *);
 krb5_error_code krb5_db2_db_rename(krb5_context, char *, char *, int );
 krb5_error_code krb5_db2_db_get_principal(krb5_context, krb5_const_principal,
                                           krb5_db_entry *, int *,

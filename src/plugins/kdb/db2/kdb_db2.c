@@ -74,13 +74,9 @@ static char *gen_dbsuffix(char *, char *);
 static krb5_error_code krb5_db2_db_start_update(krb5_context);
 static krb5_error_code krb5_db2_db_end_update(krb5_context);
 
-static krb5_error_code krb5_db2_db_set_name(krb5_context, char *, int);
-
 krb5_error_code krb5_db2_db_lock(krb5_context, int);
 
 static krb5_error_code krb5_db2_db_set_hashfirst(krb5_context, int);
-
-static char default_db_name[] = DEFAULT_KDB_FILE;
 
 /*
  * Locking:
@@ -172,15 +168,13 @@ k5db2_clear_context(krb5_db2_context *dbctx)
      * Free any dynamically allocated memory.  File descriptors and locks
      * are the caller's problem.
      */
-    if (dbctx->db_lf_name)
-        free(dbctx->db_lf_name);
-    if (dbctx->db_name && (dbctx->db_name != default_db_name))
-        free(dbctx->db_name);
+    free(dbctx->db_lf_name);
+    free(dbctx->db_name);
     /*
      * Clear the structure and reset the defaults.
      */
     memset(dbctx, 0, sizeof(krb5_db2_context));
-    dbctx->db_name = default_db_name;
+    dbctx->db_name = NULL;
     dbctx->db_nb_locks = FALSE;
     dbctx->tempdb = FALSE;
 }
@@ -204,6 +198,70 @@ k5db2_init_context(krb5_context context)
         }
     }
     return (0);
+}
+
+/* Using db_args and the profile, initialize the configurable parameters of the
+ * DB context inside context. */
+static krb5_error_code
+configure_context(krb5_context context, char *conf_section, char **db_args)
+{
+    krb5_error_code status;
+    krb5_db2_context *db_ctx;
+    char **t_ptr, *opt = NULL, *val = NULL, *pval = NULL;
+    profile_t profile = KRB5_DB_GET_PROFILE(context);
+
+    status = k5db2_init_context(context);
+    if (status != 0)
+        return status;
+    db_ctx = context->dal_handle->db_context;
+
+    for (t_ptr = db_args; t_ptr && *t_ptr; t_ptr++) {
+        free(opt);
+        free(val);
+        status = krb5_db2_get_db_opt(*t_ptr, &opt, &val);
+        if (opt && !strcmp(opt, "dbname")) {
+            db_ctx->db_name = strdup(val);
+            if (db_ctx->db_name == NULL) {
+                status = ENOMEM;
+                goto cleanup;
+            }
+        }
+        else if (!opt && !strcmp(val, "temporary")) {
+            db_ctx->tempdb = 1;
+        } else if (!opt && !strcmp(val, "merge_nra")) {
+            ;
+        } else if (opt && !strcmp(opt, "hash")) {
+            db_ctx->hashfirst = TRUE;
+        } else {
+            status = EINVAL;
+            krb5_set_error_message(context, status,
+                                   "Unsupported argument \"%s\" for db2",
+                                   opt ? opt : val);
+            goto cleanup;
+        }
+    }
+
+    if (db_ctx->db_name == NULL) {
+        /* Check for database_name in the db_module section. */
+        status = profile_get_string(profile, KDB_MODULE_SECTION, conf_section,
+                                    KDB_DB2_DATABASE_NAME, NULL, &pval);
+        if (status == 0 && pval == NULL) {
+            /* For compatibility, check for database_name in the realm. */
+            status = profile_get_string(profile, KDB_REALM_SECTION,
+                                        KRB5_DB_GET_REALM(context),
+                                        KDB_DB2_DATABASE_NAME,
+                                        DEFAULT_KDB_FILE, &pval);
+        }
+        if (status != 0)
+            goto cleanup;
+        db_ctx->db_name = strdup(pval);
+    }
+
+cleanup:
+    free(opt);
+    free(val);
+    profile_release_string(pval);
+    return status;
 }
 
 /*
@@ -460,41 +518,17 @@ krb5_db2_db_get_mkey_list(krb5_context context, krb5_keylist_node **key_list)
     return 0;
 }
 
-/*
- * Set the "name" of the current database to some alternate value.
- *
- * Passing a null pointer as "name" will set back to the default.
- * If the alternate database doesn't exist, nothing is changed.
- *
- * XXX rethink this
- */
-
+/* Return successfully if the db2 name set in context can be opened. */
 static krb5_error_code
-krb5_db2_db_set_name(krb5_context context, char *name, int tempdb)
+check_openable(krb5_context context)
 {
     DB     *db;
     krb5_db2_context *db_ctx;
-    krb5_error_code kret;
-    kdb5_dal_handle *dal_handle;
 
-    if (k5db2_inited(context))
-        return KRB5_KDB_DBINITED;
-
-    /* Check for presence of our context, if not present, allocate one. */
-    if ((kret = k5db2_init_context(context)))
-        return (kret);
-
-    if (name == NULL)
-        name = default_db_name;
-
-    dal_handle = context->dal_handle;
-    db_ctx = dal_handle->db_context;
-    db_ctx->tempdb = tempdb;
-    db = k5db2_dbopen(db_ctx, name, O_RDONLY, 0, tempdb);
+    db_ctx = context->dal_handle->db_context;
+    db = k5db2_dbopen(db_ctx, db_ctx->db_name, O_RDONLY, 0, db_ctx->tempdb);
     if (db == NULL)
         return errno;
-
-    db_ctx->db_name = strdup(name);
     (*db->close) (db);
     return 0;
 }
@@ -700,14 +734,11 @@ krb5_db2_db_unlock(krb5_context context)
     return 0;
 }
 
-/*
- * Create the database, assuming it's not there.
- */
-krb5_error_code
-krb5_db2_db_create(krb5_context context, char *db_name, krb5_int32 flags)
+/* Create the database, assuming it's not there. */
+static krb5_error_code
+create_db(krb5_context context, char *db_name)
 {
-    register krb5_error_code retval = 0;
-    kdb5_dal_handle *dal_handle;
+    krb5_error_code retval = 0;
     char   *okname;
     char   *db_name2 = NULL;
     int     fd;
@@ -715,28 +746,16 @@ krb5_db2_db_create(krb5_context context, char *db_name, krb5_int32 flags)
     DB     *db;
     char    policy_db_name[1024], policy_lock_name[1024];
 
-    if ((retval = k5db2_init_context(context)))
-        return (retval);
+    retval = k5db2_init_context(context);
+    if (retval != 0)
+        return retval;
 
-    dal_handle = context->dal_handle;
-    db_ctx = (krb5_db2_context *) dal_handle->db_context;
-    switch (flags) {
-    case KRB5_KDB_CREATE_HASH:
-        if ((retval = krb5_db2_db_set_hashfirst(context, TRUE)))
-            return retval;
-        break;
-    case KRB5_KDB_CREATE_BTREE:
-    case 0:
-        if ((retval = krb5_db2_db_set_hashfirst(context, FALSE)))
-            return retval;
-        break;
-    default:
-        return KRB5_KDB_BAD_CREATEFLAGS;
-    }
-    db = k5db2_dbopen(db_ctx, db_name, O_RDWR | O_CREAT | O_EXCL, 0600, db_ctx->tempdb);
+    db_ctx = context->dal_handle->db_context;
+    db = k5db2_dbopen(db_ctx, db_name, O_RDWR | O_CREAT | O_EXCL, 0600,
+                      db_ctx->tempdb);
     if (db == NULL)
         return errno;
-    (*db->close) (db);
+    (*db->close)(db);
 
     db_name2 = db_ctx->tempdb ? gen_dbsuffix(db_name, "~") : strdup(db_name);
     if (db_name2 == NULL)
@@ -857,8 +876,8 @@ destroy_file_suffix(char *dbname, char *suffix)
  *
  * Not quite valid due to ripping out of dbops...
  */
-krb5_error_code
-krb5_db2_db_destroy(krb5_context context, char *dbname)
+static krb5_error_code
+destroy_db(krb5_context context, char *dbname)
 {
     krb5_error_code retval1, retval2;
     krb5_boolean tmpcontext;
@@ -1284,270 +1303,76 @@ krb5_db2_lib_cleanup()
 }
 
 krb5_error_code
-krb5_db2_open(krb5_context kcontext,
-              char *conf_section, char **db_args, int mode)
+krb5_db2_open(krb5_context context, char *conf_section, char **db_args,
+              int mode)
 {
     krb5_error_code status = 0;
-    char  **t_ptr = db_args;
-    int     db_name_set = 0, tempdb=0;
-    char *dbname = NULL;
 
-    krb5_clear_error_message (kcontext);
-
-    if (k5db2_inited(kcontext))
+    krb5_clear_error_message(context);
+    if (k5db2_inited(context))
         return 0;
 
-    while (t_ptr && *t_ptr) {
-        char   *opt = NULL, *val = NULL;
+    status = configure_context(context, conf_section, db_args);
+    if (status != 0)
+        return status;
 
-        krb5_db2_get_db_opt(*t_ptr, &opt, &val);
-        if (opt && !strcmp(opt, "dbname")) {
-            if (dbname) free(dbname);
-            dbname = strdup(val);
-            if (dbname == NULL) {
-                free(opt);
-                free(val);
-                return ENOMEM;
-            }
-        }
-        else if (!opt && !strcmp(val, "temporary") ) {
-            tempdb = 1;
-        }
-        else if (!opt && !strcmp(val, "merge_nra")) {
-            ;
-        }
-        /* ignore hash argument. Might have been passed from create */
-        else if (!opt || strcmp(opt, "hash")) {
-            krb5_set_error_message(kcontext, EINVAL,
-                                   "Unsupported argument \"%s\" for db2",
-                                   opt ? opt : val);
-            free(opt);
-            free(val);
-            return EINVAL;
-        }
+    status = check_openable(context);
+    if (status != 0)
+        return status;
 
-        free(opt);
-        free(val);
-        t_ptr++;
-    }
-
-    if(dbname) {
-        status = krb5_db2_db_set_name(kcontext, dbname, tempdb);
-        free(dbname);
-        if (status) {
-            goto clean_n_exit;
-        }
-        db_name_set = 1;
-    }
-    if (!db_name_set) {
-        char   *value = NULL;
-        status = profile_get_string(KRB5_DB_GET_PROFILE(kcontext), KDB_MODULE_SECTION, conf_section, KDB_DB2_DATABASE_NAME,     /* under given conf section */
-                                    NULL, &value);
-
-        if (value == NULL) {
-            /* special case for db2. We might actually be looking at old type config file where database is specified as part of realm */
-            status = profile_get_string(KRB5_DB_GET_PROFILE(kcontext), KDB_REALM_SECTION, KRB5_DB_GET_REALM(kcontext), KDB_DB2_DATABASE_NAME,   /* under given realm */
-                                        default_db_name, &value);
-            if (status) {
-                goto clean_n_exit;
-            }
-        }
-
-        status = krb5_db2_db_set_name(kcontext, value, tempdb);
-        profile_release_string(value);
-        if (status) {
-            goto clean_n_exit;
-        }
-
-    }
-
-    status = krb5_db2_db_init(kcontext);
-
-clean_n_exit:
-    return status;
+    return krb5_db2_db_init(context);
 }
 
 krb5_error_code
-krb5_db2_create(krb5_context kcontext, char *conf_section, char **db_args)
+krb5_db2_create(krb5_context context, char *conf_section, char **db_args)
 {
     krb5_error_code status = 0;
-    char  **t_ptr = db_args;
-    int     db_name_set = 0, tempdb=0;
-    krb5_int32 flags = KRB5_KDB_CREATE_BTREE;
-    char   *db_name = NULL;
+    krb5_db2_context *db_ctx;
 
-    krb5_clear_error_message (kcontext);
-
-    if (k5db2_inited(kcontext))
+    krb5_clear_error_message(context);
+    if (k5db2_inited(context))
         return 0;
 
-    while (t_ptr && *t_ptr) {
-        char   *opt = NULL, *val = NULL;
+    status = configure_context(context, conf_section, db_args);
+    if (status != 0)
+        return status;
 
-        krb5_db2_get_db_opt(*t_ptr, &opt, &val);
-        if (opt && !strcmp(opt, "dbname")) {
-            db_name = strdup(val);
-            if (db_name == NULL) {
-                free(opt);
-                free(val);
-                return ENOMEM;
-            }
-        }
-        else if (!opt && !strcmp(val, "temporary")) {
-            tempdb = 1;
-        } else if (!opt && !strcmp(val, "merge_nra")) {
-            ;
-        } else if (opt && !strcmp(opt, "hash")) {
-            flags = KRB5_KDB_CREATE_HASH;
-        } else {
-            krb5_set_error_message(kcontext, EINVAL,
-                                   "Unsupported argument \"%s\" for db2",
-                                   opt ? opt : val);
-            free(opt);
-            free(val);
-            return EINVAL;
-        }
+    status = check_openable(context);
+    if (status == 0)
+        return EEXIST;
 
-        free(opt);
-        free(val);
-        t_ptr++;
-    }
-    if (db_name) {
-        status = krb5_db2_db_set_name(kcontext, db_name, tempdb);
-        if (!status) {
-            status = EEXIST;
-            goto clean_n_exit;
-        }
-        db_name_set = 1;
-    }
-    if (!db_name_set) {
-        char   *value = NULL;
-        status = profile_get_string(KRB5_DB_GET_PROFILE(kcontext),
-                                    KDB_MODULE_SECTION, conf_section,
-                                    /* under given conf section */
-                                    KDB_DB2_DATABASE_NAME, NULL, &value);
+    db_ctx = context->dal_handle->db_context;
+    status = create_db(context, db_ctx->db_name);
+    if (status != 0)
+        return status;
 
-        if (value == NULL) {
-            /* Special case for db2.  We might actually be looking at
-             * old type config file where database is specified as
-             * part of realm.  */
-            status = profile_get_string(KRB5_DB_GET_PROFILE(kcontext),
-                                        KDB_REALM_SECTION,
-                                        KRB5_DB_GET_REALM(kcontext),
-                                        /* under given realm */
-                                        KDB_DB2_DATABASE_NAME,
-                                        default_db_name, &value);
-            if (status) {
-                goto clean_n_exit;
-            }
-        }
-
-        db_name = strdup(value);
-        if (db_name == NULL) {
-            status = ENOMEM;
-            profile_release_string(value);
-            goto clean_n_exit;
-        }
-        status = krb5_db2_db_set_name(kcontext, value, tempdb);
-        profile_release_string(value);
-        if (!status) {
-            status = EEXIST;
-            goto clean_n_exit;
-        }
-
-    }
-
-    status = krb5_db2_db_create(kcontext, db_name, flags);
-    if (status)
-        goto clean_n_exit;
-    /* db2 has a problem of needing to close and open the database again. This removes that need */
-    status = krb5_db2_db_fini(kcontext);
-    if (status)
-        goto clean_n_exit;
-
-    status = krb5_db2_open(kcontext, conf_section, db_args, KRB5_KDB_OPEN_RW);
-
-clean_n_exit:
-    if (db_name)
-        free(db_name);
-    return status;
+    /* XXX note removal of close-and-reopen */
+    return krb5_db2_db_init(context);
 }
 
 krb5_error_code
-krb5_db2_destroy(krb5_context kcontext, char *conf_section, char **db_args)
+krb5_db2_destroy(krb5_context context, char *conf_section, char **db_args)
 {
     krb5_error_code status = 0;
-    char  **t_ptr = db_args;
-    int     db_name_set = 0, tempdb=0;
-    char   *db_name = NULL;
+    krb5_db2_context *db_ctx;
 
-    while (t_ptr && *t_ptr) {
-        char   *opt = NULL, *val = NULL;
-
-        krb5_db2_get_db_opt(*t_ptr, &opt, &val);
-        if (opt && !strcmp(opt, "dbname")) {
-            db_name = strdup(val);
-            if (db_name == NULL) {
-                free(opt);
-                free(val);
-                return ENOMEM;
-            }
-        }
-        else if (!opt && !strcmp(val, "temporary")) {
-            tempdb = 1;
-        }
-        /* ignore hash argument. Might have been passed from create */
-        else if (!opt || strcmp(opt, "hash")) {
-            free(opt);
-            free(val);
-            return EINVAL;
-        }
-
-        free(opt);
-        free(val);
-        t_ptr++;
+    if (k5db2_inited(context)) {
+        status = krb5_db2_db_fini(context);
+        if (status != 0)
+            return status;
     }
 
-    if (db_name) {
-        status = krb5_db2_db_set_name(kcontext, db_name, tempdb);
-        if (status) {
-            goto clean_n_exit;
-        }
-        db_name_set = 1;
-    }
-    if (!db_name_set) {
-        char   *value = NULL;
-        status = profile_get_string(KRB5_DB_GET_PROFILE(kcontext), KDB_MODULE_SECTION, conf_section, KDB_DB2_DATABASE_NAME,     /* under given conf section */
-                                    NULL, &value);
+    krb5_clear_error_message(context);
+    status = configure_context(context, conf_section, db_args);
+    if (status != 0)
+        return status;
 
-        if (value == NULL) {
-            /* special case for db2. We might actually be looking at old type config file where database is specified as part of realm */
-            status = profile_get_string(KRB5_DB_GET_PROFILE(kcontext), KDB_REALM_SECTION, KRB5_DB_GET_REALM(kcontext), KDB_DB2_DATABASE_NAME,   /* under given realm */
-                                        default_db_name, &value);
-            if (status) {
-                goto clean_n_exit;
-            }
-        }
+    status = check_openable(context);
+    if (status != 0)
+        return status;
 
-        db_name = strdup(value);
-        if (db_name == NULL) {
-            status = ENOMEM;
-            goto clean_n_exit;
-        }
-        status = krb5_db2_db_set_name(kcontext, value, tempdb);
-        profile_release_string(value);
-        if (status) {
-            goto clean_n_exit;
-        }
-
-    }
-
-    status = krb5_db2_db_destroy(kcontext, db_name);
-
-clean_n_exit:
-    if (db_name)
-        free(db_name);
-    return status;
+    db_ctx = context->dal_handle->db_context;
+    return destroy_db(context, db_ctx->db_name);
 }
 
 krb5_error_code
@@ -1871,7 +1696,7 @@ krb5_db2_db_rename(context, from, to, merge_nra)
      * files must exist because krb5_db2_db_lock, called below,
      * will fail otherwise.
      */
-    retval = krb5_db2_db_create(context, to, 0);
+    retval = create_db(context, to);
     if (retval != 0 && retval != EEXIST)
         goto errout;
 
@@ -1879,7 +1704,13 @@ krb5_db2_db_rename(context, from, to, merge_nra)
      * Set the database to the target, so that other processes sharing
      * the target will stop their activity, and notice the new database.
      */
-    retval = krb5_db2_db_set_name(context, to, 0);
+    db_ctx->db_name = strdup(to);
+    if (db_ctx->db_name == NULL) {
+        retval = ENOMEM;
+        goto errout;
+    }
+
+    retval = check_openable(context);
     if (retval)
         goto errout;
 
