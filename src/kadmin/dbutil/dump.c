@@ -2350,7 +2350,6 @@ load_db(argc, argv)
     int         argc;
     char        **argv;
 {
-    kadm5_config_params newparams;
     krb5_error_code     kret;
     krb5_context        kcontext;
     FILE                *f;
@@ -2358,7 +2357,6 @@ load_db(argc, argv)
     extern int          optind;
     char                *dumpfile;
     char                *dbname;
-    char                *dbname_tmp;
     char                buf[BUFSIZ];
     dump_version        *load;
     int                 flags;
@@ -2379,7 +2377,6 @@ load_db(argc, argv)
     flags = 0;
     crflags = KRB5_KDB_CREATE_BTREE;
     exit_status = 0;
-    dbname_tmp = (char *) NULL;
     log_ctx = util_context->kdblog_context;
 
     for (aindex = 1; aindex < argc; aindex++) {
@@ -2420,18 +2417,11 @@ load_db(argc, argv)
     }
     dumpfile = argv[aindex];
 
-    if (asprintf(&dbname_tmp, "%s%s", dbname, dump_tmptrail) < 0) {
-        fprintf(stderr, no_name_mem_fmt, progname);
-        exit_status++;
-        return;
-    }
-
     /*
      * Initialize the Kerberos context and error tables.
      */
     if ((kret = kadm5_init_krb5_context(&kcontext))) {
         fprintf(stderr, ctx_err_fmt, progname);
-        free(dbname_tmp);
         exit_status++;
         return;
     }
@@ -2439,7 +2429,6 @@ load_db(argc, argv)
     if( (kret = krb5_set_default_realm(kcontext, util_context->default_realm)) )
     {
         fprintf(stderr, "%s: Unable to set the default realm\n", progname);
-        free(dbname_tmp);
         exit_status++;
         return;
     }
@@ -2515,19 +2504,7 @@ load_db(argc, argv)
      * mode, we create an alternate database and then promote it to
      * be the live db.
      */
-    newparams = global_params;
     if (! (flags & FLAG_UPDATE)) {
-        newparams.mask |= KADM5_CONFIG_DBNAME;
-        newparams.dbname = dbname_tmp;
-
-        if ((kret = kadm5_get_config_params(kcontext, 1,
-                                            &newparams, &newparams))) {
-            com_err(progname, kret,
-                    "while retreiving new configuration parameters");
-            exit_status++;
-            return;
-        }
-
         if (!add_db_arg("temporary")) {
             com_err(progname, ENOMEM, "computing parameters for database");
             exit(1);
@@ -2537,12 +2514,7 @@ load_db(argc, argv)
             com_err(progname, ENOMEM, "computing parameters for database");
             exit(1);
         }
-    }
 
-    /*
-     * If not an update restoration, create the database. otherwise open
-     */
-    if (!(flags & FLAG_UPDATE)) {
         if((kret = krb5_db_create(kcontext, db5util_db_args))) {
             const char *emsg = krb5_get_error_message(kcontext, kret);
             /*
@@ -2558,7 +2530,6 @@ load_db(argc, argv)
                         progname, dbname, error_message(kret));
             }
             exit_status++;
-            kadm5_free_config_params(kcontext, &newparams);
             if (dumpfile) fclose(f);
             return;
         }
@@ -2686,7 +2657,7 @@ load_db(argc, argv)
     }
 
     if (!(flags & FLAG_UPDATE) && load->create_kadm5 &&
-        ((kret = kadm5_create_magic_princs(&newparams, kcontext)))) {
+        ((kret = kadm5_create_magic_princs(&global_params, kcontext)))) {
         /* error message printed by create_magic_princs */
         exit_status++;
     }
@@ -2748,7 +2719,5 @@ error:
         fclose(f);
     }
 
-    if (dbname_tmp)
-        free(dbname_tmp);
     krb5_free_context(kcontext);
 }
