@@ -41,7 +41,6 @@ krb5_ldap_set_mkey
 krb5_ldap_get_mkey
 disjoint_members
 krb5_ldap_delete_realm_1
-krb5_ldap_set_option
 krb5_ldap_lock
 krb5_ldap_unlock
 krb5_ldap_supported_realms
