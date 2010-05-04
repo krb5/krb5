@@ -594,10 +594,6 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
     GET_STRING_PARAM(dbname, KADM5_CONFIG_DBNAME, KRB5_CONF_DATABASE_NAME,
                      DEFAULT_KDB_FILE);
 
-    params.admin_dbname_was_here = NULL;
-    params.admin_lockfile_was_here = NULL;
-    /* never set KADM5_CONFIG_ADBNAME, KADM5_CONFIG_ADB_LOCKFILE */
-
     /* Get the value for the admin (policy) database lock file*/
     if (!GET_STRING_PARAM(admin_keytab, KADM5_CONFIG_ADMIN_KEYTAB,
                           KRB5_CONF_ADMIN_KEYTAB, NULL)) {
