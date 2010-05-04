@@ -195,7 +195,6 @@
  */
 typedef struct __krb5_realm_params {
     char *              realm_profile;
-    char *              realm_dbname;
     char *              realm_mkey_name;
     char *              realm_stash_file;
     char *              realm_kdc_ports;

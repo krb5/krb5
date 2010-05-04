@@ -164,8 +164,6 @@ setup_server_realm(krb5_principal sprinc)
 static void
 finish_realm(kdc_realm_t *rdp)
 {
-    if (rdp->realm_dbname)
-        free(rdp->realm_dbname);
     if (rdp->realm_mpname)
         free(rdp->realm_mpname);
     if (rdp->realm_stash)

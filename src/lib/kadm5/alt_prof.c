@@ -955,13 +955,10 @@ krb5_read_realm_params(kcontext, realm, rparamp)
     /* Initialize realm parameters */
     memset(rparams, 0, sizeof(krb5_realm_params));
 
-    /* Get the value for the database */
+    /* Set up the hierarchy so we can query multiple realm variables. */
     hierarchy[0] = KRB5_CONF_REALMS;
     hierarchy[1] = lrealm;
-    hierarchy[2] = KRB5_CONF_DATABASE_NAME;
     hierarchy[3] = (char *) NULL;
-    if (!krb5_aprof_get_string(aprofile, hierarchy, TRUE, &svalue))
-        rparams->realm_dbname = svalue;
 
     /* Get the value for the KDC port list */
     hierarchy[2] = KRB5_CONF_KDC_PORTS;
@@ -1105,7 +1102,6 @@ krb5_free_realm_params(kcontext, rparams)
 {
     if (rparams) {
         free(rparams->realm_profile);
-        free(rparams->realm_dbname);
         free(rparams->realm_mkey_name);
         free(rparams->realm_stash_file);
         free(rparams->realm_keysalts);

@@ -50,7 +50,6 @@ typedef struct __kdc_realm_data {
     /*
      * Database per-realm data.
      */
-    char *              realm_dbname;   /* Database name for realm          */
     char *              realm_stash;    /* Stash file name for realm        */
     char *              realm_mpname;   /* Master principal name for realm  */
     krb5_principal      realm_mprinc;   /* Master principal for realm       */
