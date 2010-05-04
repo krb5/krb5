@@ -1346,7 +1346,6 @@ krb5_db2_create(krb5_context context, char *conf_section, char **db_args)
     if (status != 0)
         return status;
 
-    /* XXX note removal of close-and-reopen */
     return krb5_db2_db_init(context);
 }
 
