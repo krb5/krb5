@@ -110,11 +110,6 @@ WRAP_K (krb5_db2_db_get_age,
          char *s,
          time_t *t),
         (ctx, s, t));
-WRAP_K (krb5_db2_db_set_option,
-        ( krb5_context kcontext,
-          int option,
-          void *value ),
-        (kcontext, option, value));
 
 WRAP_K (krb5_db2_db_lock,
         ( krb5_context    context,
@@ -238,7 +233,6 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_db2, kdb_function_table) = {
     /* db_create */                              wrap_krb5_db2_create,
     /* db_destroy */                             wrap_krb5_db2_destroy,
     /* db_get_age */                             wrap_krb5_db2_db_get_age,
-    /* db_set_option */                          wrap_krb5_db2_db_set_option,
     /* db_lock */                                wrap_krb5_db2_db_lock,
     /* db_unlock */                              wrap_krb5_db2_db_unlock,
     /* db_get_principal */                       wrap_krb5_db2_db_get_principal,

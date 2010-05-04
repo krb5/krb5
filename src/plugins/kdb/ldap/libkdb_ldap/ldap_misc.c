@@ -1474,14 +1474,6 @@ krb5_add_int_mem_ldap_mod(LDAPMod ***mods, char *attribute, int op, int value)
 }
 
 krb5_error_code
-krb5_ldap_set_option(krb5_context kcontext, int option, void *value)
-{
-    krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
-    krb5_set_error_message(kcontext, status, "LDAP %s", error_message(status));
-    return status;
-}
-
-krb5_error_code
 krb5_ldap_lock(krb5_context kcontext, int mode)
 {
     krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;

@@ -304,9 +304,6 @@ krb5_ldap_free_server_context_params(krb5_ldap_context *ldap_context);
 
 
 krb5_error_code
-krb5_ldap_set_option( krb5_context, int, void * );
-
-krb5_error_code
 krb5_ldap_lock( krb5_context, int );
 
 krb5_error_code

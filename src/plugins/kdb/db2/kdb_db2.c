@@ -1557,39 +1557,6 @@ krb5_db2_set_master_key_ext(krb5_context kcontext,
     return krb5_db2_db_set_mkey(kcontext, key);
 }
 
-krb5_error_code
-krb5_db2_db_set_option(krb5_context kcontext, int option, void *value)
-{
-    krb5_error_code status = 0;
-    krb5_boolean oldval;
-    krb5_db2_context *db_ctx;
-    kdb5_dal_handle *dal_handle;
-
-    if (!k5db2_inited(kcontext))
-        return KRB5_KDB_DBNOTINITED;
-
-    dal_handle = kcontext->dal_handle;
-    db_ctx = (krb5_db2_context *) dal_handle->db_context;
-
-
-    switch (option) {
-    case KRB5_KDB_OPT_SET_DB_NAME:
-        status = krb5_db2_db_set_name(kcontext, (char *) value, db_ctx->tempdb);
-        break;
-
-    case KRB5_KDB_OPT_SET_LOCK_MODE:
-        oldval = krb5_db2_db_set_lockmode(kcontext, *((krb5_boolean *) value));
-        *((krb5_boolean *) value) = oldval;
-        break;
-
-    default:
-        status = -1;            /* TBD */
-        break;
-    }
-
-    return status;
-}
-
 void   *
 krb5_db2_alloc(krb5_context kcontext, void *ptr, size_t size)
 {

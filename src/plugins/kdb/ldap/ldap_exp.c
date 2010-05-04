@@ -56,7 +56,6 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_ldap, kdb_function_table) = {
     /* db_create */                         krb5_ldap_create,
     /* db_destroy */                        krb5_ldap_delete_realm_1,
     /* db_get_age */                        krb5_ldap_db_get_age,
-    /* db_set_option */                     krb5_ldap_set_option,
     /* db_lock */                           krb5_ldap_lock,
     /* db_unlock */                         krb5_ldap_unlock,
     /* db_get_principal */                  krb5_ldap_get_principal,

@@ -744,22 +744,6 @@ krb5_db_get_age(krb5_context kcontext, char *db_name, time_t * t)
 }
 
 krb5_error_code
-krb5_db_set_option(krb5_context kcontext, int option, void *value)
-{
-    krb5_error_code status = 0;
-    kdb_vftabl *v;
-
-    status = get_vftabl(kcontext, &v);
-    if (status)
-        return status;
-    if (v->db_set_option == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
-    status = v->db_set_option(kcontext, option, value);
-    get_errmsg(kcontext, status);
-    return status;
-}
-
-krb5_error_code
 krb5_db_lock(krb5_context kcontext, int lock_mode)
 {
     krb5_error_code status = 0;

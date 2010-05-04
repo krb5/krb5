@@ -567,14 +567,6 @@ kh_db_get_age(krb5_context context,
 }
 
 static krb5_error_code
-kh_db_set_option(krb5_context context,
-                 int option,
-                 void *value)
-{
-    return KRB5_KDB_DBTYPE_NOSUP;
-}
-
-static krb5_error_code
 kh_db_lock(krb5_context context, int kmode)
 {
     kh_db_context *kh = KH_DB_CONTEXT(context);
@@ -1386,7 +1378,6 @@ kdb_vftabl kdb_function_table = {
     kh_db_create,
     kh_db_destroy,
     kh_db_get_age,
-    kh_db_set_option,
     kh_db_lock,
     kh_db_unlock,
     kh_db_get_principal,

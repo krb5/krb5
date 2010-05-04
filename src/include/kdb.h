@@ -417,7 +417,6 @@ const char * krb5_db_errcode2string ( krb5_context kcontext, long err_code );
 krb5_error_code krb5_db_destroy ( krb5_context kcontext, char **db_args );
 krb5_error_code krb5_db_promote ( krb5_context kcontext, char **db_args );
 krb5_error_code krb5_db_get_age ( krb5_context kcontext, char *db_name, time_t *t );
-krb5_error_code krb5_db_set_option ( krb5_context kcontext, int option, void *value );
 krb5_error_code krb5_db_lock ( krb5_context kcontext, int lock_mode );
 krb5_error_code krb5_db_unlock ( krb5_context kcontext );
 krb5_error_code krb5_db_get_principal ( krb5_context kcontext,
@@ -948,22 +947,6 @@ typedef struct _kdb_vftabl {
      */
     krb5_error_code (*db_get_age)(krb5_context kcontext, char *db_name,
                                   time_t *age);
-
-    /*
-     * Optional: Set a database option.  This function is not currently used by
-     * any callers.  Behavior depends on the value of option:
-     *
-     * KRB5_KDB_OPT_SET_DB_NAME: Interpret value as a C string.  Set the
-     * database name (e.g. a filename for an embedded database).
-     *
-     * KRB5_KDB_OPT_SET_LOCK_MODE: Interpret value as a pointer to
-     * krb5_boolean.  If *value points to TRUE, set the database to
-     * non-blocking lock mode, causing operations to return OSA_ADB_CANTLOCK_DB
-     * when it would otherwise wait to obtain a lock.  Set *value to the old
-     * value of the non-blocking flag.
-     */
-    krb5_error_code (*db_set_option)(krb5_context kcontext, int option,
-                                     void *value);
 
     /*
      * Optional: Lock the database, with semantics depending on the mode
