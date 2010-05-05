@@ -69,14 +69,10 @@
 
 #define KDB_DB2_DATABASE_NAME "database_name"
 
-static char *gen_dbsuffix(char *, char *);
-
 static krb5_error_code krb5_db2_db_start_update(krb5_context);
 static krb5_error_code krb5_db2_db_end_update(krb5_context);
 
 krb5_error_code krb5_db2_db_lock(krb5_context, int);
-
-static krb5_error_code krb5_db2_db_set_hashfirst(krb5_context, int);
 
 /*
  * Locking:
@@ -127,8 +123,7 @@ static krb5_error_code krb5_db2_db_set_hashfirst(krb5_context, int);
 /*
  * Routines to deal with context.
  */
-#define k5db2_inited(c) (c && c->dal_handle                             \
-                         && c->dal_handle->db_context                   \
+#define k5db2_inited(c) (c->dal_handle->db_context                   \
                          && ((krb5_db2_context *) c->dal_handle->db_context)->db_inited)
 
 static krb5_error_code
@@ -337,20 +332,6 @@ k5db2_dbopen(krb5_db2_context *dbc, char *fname, int flags, int mode, int tempdb
     }
 }
 
-static krb5_error_code
-krb5_db2_db_set_hashfirst(krb5_context context, int hashfirst)
-{
-    krb5_db2_context *dbc;
-    kdb5_dal_handle *dal_handle;
-
-    if (k5db2_inited(context))
-        return KRB5_KDB_DBNOTINITED;
-    dal_handle = context->dal_handle;
-    dbc = (krb5_db2_context *) dal_handle->db_context;
-    dbc->hashfirst = hashfirst;
-    return 0;
-}
-
 /*
  * initialization for data base routines.
  */
@@ -361,7 +342,6 @@ krb5_db2_db_init(krb5_context context)
     char   *filename = NULL;
     krb5_db2_context *db_ctx;
     krb5_error_code retval;
-    kdb5_dal_handle *dal_handle;
     char    policy_db_name[1024], policy_lock_name[1024];
 
     if (k5db2_inited(context))
@@ -371,8 +351,7 @@ krb5_db2_db_init(krb5_context context)
     if ((retval = k5db2_init_context(context)))
         return (retval);
 
-    dal_handle = context->dal_handle;
-    db_ctx = dal_handle->db_context;
+    db_ctx = context->dal_handle->db_context;
     db_ctx->db = NULL;
 
     if (!(filename = gen_dbsuffix(db_ctx->db_name, db_ctx->tempdb
@@ -423,15 +402,8 @@ krb5_db2_db_fini(krb5_context context)
 {
     krb5_error_code retval = 0;
     krb5_db2_context *db_ctx;
-    kdb5_dal_handle *dal_handle;
 
-    dal_handle = context->dal_handle;
-    if (dal_handle == NULL) {
-        return 0;
-    }
-
-    db_ctx = (krb5_db2_context *) dal_handle->db_context;
-
+    db_ctx = context->dal_handle->db_context;
     if (k5db2_inited(context)) {
         if (close(db_ctx->db_lf_file))
             retval = errno;
@@ -447,8 +419,8 @@ krb5_db2_db_fini(krb5_context context)
         }
 
         k5db2_clear_context(db_ctx);
-        /*      free(dal_handle->db_context); */
-        dal_handle->db_context = NULL;
+        free(context->dal_handle->db_context);
+        context->dal_handle->db_context = NULL;
     }
     return retval;
 }
@@ -460,13 +432,11 @@ krb5_error_code
 krb5_db2_db_set_mkey(krb5_context context, krb5_keyblock *key)
 {
     krb5_db2_context *db_ctx;
-    kdb5_dal_handle *dal_handle;
 
     if (!k5db2_inited(context))
         return (KRB5_KDB_DBNOTINITED);
 
-    dal_handle = context->dal_handle;
-    db_ctx = dal_handle->db_context;
+    db_ctx = context->dal_handle->db_context;
     db_ctx->db_master_key = key;
     return 0;
 }
@@ -475,13 +445,11 @@ krb5_error_code
 krb5_db2_db_get_mkey(krb5_context context, krb5_keyblock **key)
 {
     krb5_db2_context *db_ctx;
-    kdb5_dal_handle *dal_handle;
 
     if (!k5db2_inited(context))
         return (KRB5_KDB_DBNOTINITED);
 
-    dal_handle = context->dal_handle;
-    db_ctx = dal_handle->db_context;
+    db_ctx = context->dal_handle->db_context;
     *key = db_ctx->db_master_key;
 
     return 0;
@@ -491,13 +459,11 @@ krb5_error_code
 krb5_db2_db_set_mkey_list(krb5_context context, krb5_keylist_node *key_list)
 {
     krb5_db2_context *db_ctx;
-    kdb5_dal_handle *dal_handle;
 
     if (!k5db2_inited(context))
         return (KRB5_KDB_DBNOTINITED);
 
-    dal_handle = context->dal_handle;
-    db_ctx = dal_handle->db_context;
+    db_ctx = context->dal_handle->db_context;
     db_ctx->db_master_key_list = key_list;
     return 0;
 }
@@ -506,13 +472,11 @@ krb5_error_code
 krb5_db2_db_get_mkey_list(krb5_context context, krb5_keylist_node **key_list)
 {
     krb5_db2_context *db_ctx;
-    kdb5_dal_handle *dal_handle;
 
     if (!k5db2_inited(context))
         return (KRB5_KDB_DBNOTINITED);
 
-    dal_handle = context->dal_handle;
-    db_ctx = dal_handle->db_context;
+    db_ctx = context->dal_handle->db_context;
     *key_list = db_ctx->db_master_key_list;
 
     return 0;
@@ -543,13 +507,11 @@ krb5_error_code
 krb5_db2_db_get_age(krb5_context context, char *db_name, time_t *age)
 {
     krb5_db2_context *db_ctx;
-    kdb5_dal_handle *dal_handle;
     struct stat st;
 
     if (!k5db2_inited(context))
         return (KRB5_KDB_DBNOTINITED);
-    dal_handle = context->dal_handle;
-    db_ctx = (krb5_db2_context *) dal_handle->db_context;
+    db_ctx = context->dal_handle->db_context;
 
     if (fstat(db_ctx->db_lf_file, &st) < 0)
         *age = -1;
@@ -577,7 +539,6 @@ krb5_db2_db_end_update(krb5_context context)
 {
     krb5_error_code retval;
     krb5_db2_context *db_ctx;
-    kdb5_dal_handle *dal_handle;
     struct stat st;
     time_t  now;
     struct utimbuf utbuf;
@@ -586,8 +547,7 @@ krb5_db2_db_end_update(krb5_context context)
         return (KRB5_KDB_DBNOTINITED);
 
     retval = 0;
-    dal_handle = context->dal_handle;
-    db_ctx = dal_handle->db_context;
+    db_ctx = context->dal_handle->db_context;
     now = time((time_t *) NULL);
     if (fstat(db_ctx->db_lf_file, &st) == 0) {
         if (st.st_mtime >= now) {
@@ -620,7 +580,6 @@ krb5_db2_db_lock(krb5_context context, int in_mode)
     DB     *db;
     krb5_error_code retval;
     time_t  mod_time;
-    kdb5_dal_handle *dal_handle;
     int     mode, gotlock, tries;
 
     switch (in_mode) {
@@ -641,8 +600,7 @@ krb5_db2_db_lock(krb5_context context, int in_mode)
     if (!k5db2_inited(context))
         return KRB5_KDB_DBNOTINITED;
 
-    dal_handle = context->dal_handle;
-    db_ctx = (krb5_db2_context *) dal_handle->db_context;
+    db_ctx = context->dal_handle->db_context;
     if (db_ctx->db_locks_held && (db_ctx->db_lock_mode >= mode)) {
         /* No need to upgrade lock, just return */
         db_ctx->db_locks_held++;
@@ -705,15 +663,13 @@ krb5_error_code
 krb5_db2_db_unlock(krb5_context context)
 {
     krb5_db2_context *db_ctx;
-    kdb5_dal_handle *dal_handle;
     DB     *db;
     krb5_error_code retval;
 
     if (!k5db2_inited(context))
         return KRB5_KDB_DBNOTINITED;
 
-    dal_handle = context->dal_handle;
-    db_ctx = (krb5_db2_context *) dal_handle->db_context;
+    db_ctx = context->dal_handle->db_context;
 
     if ((retval = osa_adb_release_lock(db_ctx->policy_db))) {
         return retval;
@@ -884,8 +840,7 @@ destroy_db(krb5_context context, char *dbname)
     char    policy_db_name[1024], policy_lock_name[1024];
 
     tmpcontext = 0;
-    if (!context->dal_handle
-        || !context->dal_handle->db_context) {
+    if (!context->dal_handle->db_context) {
         tmpcontext = 1;
         if ((retval1 = k5db2_init_context(context)))
             return (retval1);
@@ -896,7 +851,7 @@ destroy_db(krb5_context context, char *dbname)
     retval2 = destroy_file_suffix(dbname, KDB2_LOCK_EXT);
 
     if (tmpcontext) {
-        k5db2_clear_context((krb5_db2_context *) context->dal_handle->db_context);
+        k5db2_clear_context(context->dal_handle->db_context);
         free(context->dal_handle->db_context);
         context->dal_handle->db_context = NULL;
     }
@@ -933,7 +888,6 @@ krb5_db2_db_get_principal(krb5_context context,
     DBT     key, contents;
     krb5_data keydata, contdata;
     int     trynum, dbret;
-    kdb5_dal_handle *dal_handle;
 
     *more = FALSE;
     *nentries = 0;
@@ -941,8 +895,7 @@ krb5_db2_db_get_principal(krb5_context context,
     if (!k5db2_inited(context))
         return KRB5_KDB_DBNOTINITED;
 
-    dal_handle = context->dal_handle;
-    db_ctx = (krb5_db2_context *) dal_handle->db_context;
+    db_ctx = context->dal_handle->db_context;
 
     for (trynum = 0; trynum < KRB5_DB2_MAX_RETRY; trynum++) {
         if ((retval = krb5_db2_db_lock(context, KRB5_LOCKMODE_SHARED))) {
@@ -1023,7 +976,6 @@ krb5_db2_db_put_principal(krb5_context context,
     krb5_data contdata, keydata;
     krb5_error_code retval;
     krb5_db2_context *db_ctx;
-    kdb5_dal_handle *dal_handle;
 
     krb5_clear_error_message (context);
     if (db_args) {
@@ -1039,8 +991,7 @@ krb5_db2_db_put_principal(krb5_context context,
     if (!k5db2_inited(context))
         return KRB5_KDB_DBNOTINITED;
 
-    dal_handle = context->dal_handle;
-    db_ctx = (krb5_db2_context *) dal_handle->db_context;
+    db_ctx = context->dal_handle->db_context;
     if ((retval = krb5_db2_db_lock(context, KRB5_LOCKMODE_EXCLUSIVE)))
         return retval;
 
@@ -1097,13 +1048,11 @@ krb5_db2_db_delete_principal(krb5_context context,
     DBT     key, contents;
     krb5_data keydata, contdata;
     int     i, dbret;
-    kdb5_dal_handle *dal_handle;
 
     if (!k5db2_inited(context))
         return KRB5_KDB_DBNOTINITED;
 
-    dal_handle = context->dal_handle;
-    db_ctx = (krb5_db2_context *) dal_handle->db_context;
+    db_ctx = context->dal_handle->db_context;
     if ((retval = krb5_db2_db_lock(context, KRB5_LOCKMODE_EXCLUSIVE)))
         return (retval);
 
@@ -1181,7 +1130,6 @@ krb5_db2_db_iterate_ext(krb5_context context,
     krb5_data contdata;
     krb5_db_entry entries;
     krb5_error_code retval;
-    kdb5_dal_handle *dal_handle;
     int     dbret;
     void   *cookie;
 
@@ -1189,8 +1137,7 @@ krb5_db2_db_iterate_ext(krb5_context context,
     if (!k5db2_inited(context))
         return KRB5_KDB_DBNOTINITED;
 
-    dal_handle = context->dal_handle;
-    db_ctx = (krb5_db2_context *) dal_handle->db_context;
+    db_ctx = context->dal_handle->db_context;
     retval = krb5_db2_db_lock(context, KRB5_LOCKMODE_SHARED);
 
     if (retval)
@@ -1275,11 +1222,10 @@ krb5_db2_db_set_lockmode(krb5_context context, krb5_boolean mode)
 {
     krb5_boolean old;
     krb5_db2_context *db_ctx;
-    kdb5_dal_handle *dal_handle;
 
-    dal_handle = context->dal_handle;
+    db_ctx = context->dal_handle->db_context;
     old = mode;
-    if (dal_handle && (db_ctx = (krb5_db2_context *) dal_handle->db_context)) {
+    if (db_ctx) {
         old = db_ctx->db_nb_locks;
         db_ctx->db_nb_locks = mode;
     }
@@ -1375,90 +1321,70 @@ krb5_db2_destroy(krb5_context context, char *conf_section, char **db_args)
 }
 
 krb5_error_code
-krb5_db2_set_master_key_ext(krb5_context kcontext,
+krb5_db2_set_master_key_ext(krb5_context context,
                             char *pwd, krb5_keyblock * key)
 {
-    return krb5_db2_db_set_mkey(kcontext, key);
+    return krb5_db2_db_set_mkey(context, key);
 }
 
 void   *
-krb5_db2_alloc(krb5_context kcontext, void *ptr, size_t size)
+krb5_db2_alloc(krb5_context context, void *ptr, size_t size)
 {
     return realloc(ptr, size);
 }
 
 void
-krb5_db2_free(krb5_context kcontext, void *ptr)
+krb5_db2_free(krb5_context context, void *ptr)
 {
     free(ptr);
 }
 
 /* policy functions */
 krb5_error_code
-krb5_db2_create_policy(krb5_context kcontext, osa_policy_ent_t policy)
+krb5_db2_create_policy(krb5_context context, osa_policy_ent_t policy)
 {
-    kdb5_dal_handle *dal_handle;
-    krb5_db2_context *dbc;
-
-    dal_handle = kcontext->dal_handle;
-    dbc = (krb5_db2_context *) dal_handle->db_context;
+    krb5_db2_context *dbc = context->dal_handle->db_context;
 
     return osa_adb_create_policy(dbc->policy_db, policy);
 }
 
 krb5_error_code
-krb5_db2_get_policy(krb5_context kcontext,
+krb5_db2_get_policy(krb5_context context,
                     char *name, osa_policy_ent_t * policy, int *cnt)
 {
-    kdb5_dal_handle *dal_handle;
-    krb5_db2_context *dbc;
-
-    dal_handle = kcontext->dal_handle;
-    dbc = (krb5_db2_context *) dal_handle->db_context;
+    krb5_db2_context *dbc = context->dal_handle->db_context;
 
     return osa_adb_get_policy(dbc->policy_db, name, policy, cnt);
 }
 
 krb5_error_code
-krb5_db2_put_policy(krb5_context kcontext, osa_policy_ent_t policy)
+krb5_db2_put_policy(krb5_context context, osa_policy_ent_t policy)
 {
-    kdb5_dal_handle *dal_handle;
-    krb5_db2_context *dbc;
-
-    dal_handle = kcontext->dal_handle;
-    dbc = (krb5_db2_context *) dal_handle->db_context;
+    krb5_db2_context *dbc = context->dal_handle->db_context;
 
     return osa_adb_put_policy(dbc->policy_db, policy);
 }
 
 krb5_error_code
-krb5_db2_iter_policy(krb5_context kcontext,
+krb5_db2_iter_policy(krb5_context context,
                      char *match_entry,
                      osa_adb_iter_policy_func func, void *data)
 {
-    kdb5_dal_handle *dal_handle;
-    krb5_db2_context *dbc;
-
-    dal_handle = kcontext->dal_handle;
-    dbc = (krb5_db2_context *) dal_handle->db_context;
+    krb5_db2_context *dbc = context->dal_handle->db_context;
 
     return osa_adb_iter_policy(dbc->policy_db, func, data);
 }
 
 krb5_error_code
-krb5_db2_delete_policy(krb5_context kcontext, char *policy)
+krb5_db2_delete_policy(krb5_context context, char *policy)
 {
-    kdb5_dal_handle *dal_handle;
-    krb5_db2_context *dbc;
-
-    dal_handle = kcontext->dal_handle;
-    dbc = (krb5_db2_context *) dal_handle->db_context;
+    krb5_db2_context *dbc = context->dal_handle->db_context;
 
     return osa_adb_destroy_policy(dbc->policy_db, policy);
 }
 
 void
-krb5_db2_free_policy(krb5_context kcontext, osa_policy_ent_t entry)
+krb5_db2_free_policy(krb5_context context, osa_policy_ent_t entry)
 {
     osa_free_policy_ent(entry);
 }
@@ -1467,27 +1393,23 @@ krb5_db2_free_policy(krb5_context kcontext, osa_policy_ent_t entry)
 /* */
 
 krb5_error_code
-krb5_db2_promote_db(krb5_context kcontext, char *conf_section, char **db_args)
+krb5_db2_promote_db(krb5_context context, char *conf_section, char **db_args)
 {
     krb5_error_code status = 0;
     char *db_name = NULL;
     char *temp_db_name = NULL;
     char **db_argp;
     int merge_nra = 0;
+    krb5_db2_context *db_ctx = context->dal_handle->db_context;
 
-    krb5_clear_error_message (kcontext);
+    krb5_clear_error_message (context);
 
-    {
-        kdb5_dal_handle *dal_handle = kcontext->dal_handle;
-        krb5_db2_context *db_ctx = dal_handle->db_context;
-        db_name = strdup(db_ctx->db_name);
-        if (db_name == NULL) {
-            status = ENOMEM;
-            goto clean_n_exit;
-        }
+    db_name = strdup(db_ctx->db_name);
+    if (db_name == NULL) {
+        status = ENOMEM;
+        goto clean_n_exit;
     }
 
-    assert(kcontext->dal_handle != NULL);
     temp_db_name = gen_dbsuffix(db_name, "~");
     if (temp_db_name == NULL) {
         status = ENOMEM;
@@ -1501,15 +1423,13 @@ krb5_db2_promote_db(krb5_context kcontext, char *conf_section, char **db_args)
         }
     }
 
-    status = krb5_db2_db_rename (kcontext, temp_db_name, db_name, merge_nra);
+    status = krb5_db2_db_rename (context, temp_db_name, db_name, merge_nra);
     if (status)
         goto clean_n_exit;
 
 clean_n_exit:
-    if (db_name)
-        free(db_name);
-    if (temp_db_name)
-        free(temp_db_name);
+    free(db_name);
+    free(temp_db_name);
     return status;
 }
 
@@ -1521,7 +1441,7 @@ clean_n_exit:
  * fail_auth_count, and any negative TL data values.
  */
 static krb5_error_code
-krb5_db2_merge_principal(krb5_context kcontext,
+krb5_db2_merge_principal(krb5_context context,
                          krb5_db_entry *src,
                          krb5_db_entry *dst,
                          int *changed)
@@ -1609,33 +1529,33 @@ krb5_db2_merge_nra_iterator(krb5_pointer ptr, krb5_db_entry *entry)
  * Note: src_db is locked on success.
  */
 static krb5_error_code
-krb5_db2_begin_nra_merge(krb5_context kcontext,
+krb5_db2_begin_nra_merge(krb5_context context,
                          krb5_db2_context *src_db,
                          krb5_db2_context *dst_db)
 {
     krb5_error_code retval;
-    kdb5_dal_handle *dal_handle = kcontext->dal_handle;
+    kdb5_dal_handle *dal_handle = context->dal_handle;
     struct nra_context nra;
 
-    nra.kcontext = kcontext;
+    nra.kcontext = context;
     nra.db_context = dst_db;
 
     assert(dal_handle->db_context == dst_db);
     dal_handle->db_context = src_db;
 
-    retval = krb5_db2_db_lock(kcontext, KRB5_LOCKMODE_EXCLUSIVE);
+    retval = krb5_db2_db_lock(context, KRB5_LOCKMODE_EXCLUSIVE);
     if (retval) {
         dal_handle->db_context = dst_db;
         return retval;
     }
 
-    retval = krb5_db2_db_iterate_ext(kcontext,
+    retval = krb5_db2_db_iterate_ext(context,
                                      krb5_db2_merge_nra_iterator,
                                      &nra,
                                      0,
                                      0);
     if (retval != 0)
-        (void) krb5_db2_db_unlock(kcontext);
+        (void) krb5_db2_db_unlock(context);
 
     dal_handle->db_context = dst_db;
 
@@ -1647,15 +1567,15 @@ krb5_db2_begin_nra_merge(krb5_context kcontext,
  * src_db.
  */
 static krb5_error_code
-krb5_db2_end_nra_merge(krb5_context kcontext,
+krb5_db2_end_nra_merge(krb5_context context,
                        krb5_db2_context *src_db,
                        krb5_db2_context *dst_db)
 {
     krb5_error_code retval;
-    kdb5_dal_handle *dal_handle = kcontext->dal_handle;
+    kdb5_dal_handle *dal_handle = context->dal_handle;
 
     dal_handle->db_context = src_db;
-    retval = krb5_db2_db_unlock(kcontext);
+    retval = krb5_db2_db_unlock(context);
     dal_handle->db_context = dst_db;
 
     return retval;
