@@ -7,7 +7,7 @@
 #define PLUGIN_DEFAULT_MANAGER_H_
 
 #include <plugin_manager.h>
-
+#if 0
 typedef struct {
     char api_name[512];
     plhandle* first;
@@ -24,6 +24,7 @@ typedef struct {
 typedef struct {
     registry_data* registry;
 } manager_data;
+#endif
 
 plugin_manager* plugin_default_manager_get_instance(void);
 

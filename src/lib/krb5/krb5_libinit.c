@@ -31,8 +31,11 @@ int krb5int_lib_init(void)
 {
     int err;
     plugin_manager* default_manager;
+#ifdef CONFIG_IN_YAML
     const char conf_path[] = "/tmp/plugin_conf.yml";
-
+#else
+    const char conf_path[] = ""; // need to be something meaningful. os_get_default_config_files?
+#endif
     krb5int_set_error_info_callout_fn (error_message);
 
 #ifdef SHOW_INITFINI_FUNCS

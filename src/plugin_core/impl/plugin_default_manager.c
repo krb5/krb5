@@ -205,7 +205,7 @@ _configure_yaml(void* data, const char* path)
 /* krb5.conf */
 
 static void
-_configure_krb5(void* data, const char* path)
+_configure_krb5(manager_data* data, const char* path)
 {
     manager_data* mdata = (manager_data*) data;
     krb5_error_code retval;
@@ -289,19 +289,19 @@ _configure_krb5(void* data, const char* path)
 #endif
 
 static void
-_start(void* data)
+_start(manager_data* data)
 {
     return;
 }
 
 static void
-_stop(void* data)
+_stop(manager_data* data)
 {
     return;
 }
 
 static plhandle
-_getService(void* data, const char* service_name)
+_getService(manager_data* data, const char* service_name)
 {
     plhandle handle;
     manager_data* mdata = (manager_data*) data;
