@@ -9,11 +9,14 @@
 #include <plugin_factory.h>
 #include "plugin_default_manager.h"
 #include "plugin_default_factory.h"
+#ifdef CONFIG_IN_YAML
 #include "yaml_parser.h"
+#else
+#include "krb5_parser.h"
+#endif
 
 
 static plugin_manager* _instance = NULL;
-//static plhandle* _prng_instance = NULL;
 
 static plugin_factory_descr _table[] = {
         {"plugin_default_factory", plugin_default_factory_get_instance},
@@ -72,7 +75,7 @@ _search_registry (registry_data* data, const char* api_name)
 
 static plhandle
 _create_api(const char* plugin_name, const char* factory_name,
-            const char* factory_type, config_node* properties)
+            const char* factory_type/*, config_node* properties*/)
 {
     plhandle p_handle;
     factory_handle f_handle = _load_factory(factory_name, factory_type);
@@ -119,8 +122,9 @@ _register_api(registry_data* data, const char* api_name,
     return ret;
 }
 
+#ifdef CONFIG_IN_YAML
 static void
-_configure_plugin(manager_data* mdata, config_node* plugin_node)
+_configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
 {
     config_node* p = NULL;
     config_node* properties = NULL;
@@ -159,7 +163,7 @@ _configure_plugin(manager_data* mdata, config_node* plugin_node)
     printf("plugin_type=%s\n", plugin_type);
     printf("**End**\n");
 */
-    handle = _create_api(plugin_name, factory_name, factory_type, properties);
+    handle = _create_api(plugin_name, factory_name, factory_type/*, properties*/);
     if(handle.api != NULL) {
         if(!(_register_api(mdata->registry,plugin_api, plugin_type, handle))) {
          /*   printf("Failed to register %s for %s(factory=%s,plugin_type=%s)\n",
@@ -177,7 +181,7 @@ _configure_plugin(manager_data* mdata, config_node* plugin_node)
 
 /* Plugin API implementation */
 static void
-_configure(void* data, const char* path)
+_configure_yaml(void* data, const char* path)
 {
     manager_data* mdata = (manager_data*) data;
     config_node* stream = NULL;
@@ -188,13 +192,101 @@ _configure(void* data, const char* path)
         config_node* q = NULL;
         for(q = p->node_value.seq_value.start; q != NULL; q = q->next) {
             if(strcmp(q->node_tag,"!Plugin") == 0) {
-                _configure_plugin(mdata, q);
+                _configure_plugin_yaml(mdata, q);
             } else {
                 printf("Failed to find plugin configuration\n");
             }
         }
     }
 }
+
+#else
+
+/* krb5.conf */
+
+static void
+_configure_krb5(void* data, const char* path)
+{
+    manager_data* mdata = (manager_data*) data;
+    krb5_error_code retval;
+    char *plugin;
+    void *iter;
+    profile_filespec_t *files = 0;
+    profile_t profile;
+    const char  *realm_srv_names[4];
+    char **factory_name, **factory_type, **plugin_name, **plugin_type;
+    plhandle handle;
+
+    retval = os_get_default_config_files(&files, FALSE); // TRUE - goes to /etc/krb5.conf
+    retval = profile_init((const_profile_filespec_t *) files, &profile);
+/*    if (files)
+        free_filespecs(files);
+
+    if (retval)
+        ctx->profile = 0;
+*/
+    if (retval == ENOENT)
+        return; // KRB5_CONFIG_CANTOPEN;
+
+
+    if ((retval = krb5_plugin_iterator_create(profile, &iter))) {
+        com_err("krb5_PLUGIN_iterator_create", retval, 0);
+        return;
+    }
+    while (iter) {
+        if ((retval = krb5_plugin_iterator(profile, &iter, &plugin))) {
+            com_err("krb5_PLUGIN_iterator", retval, 0);
+            krb5_plugin_iterator_free(profile, &iter);
+            return;
+        }
+        if (plugin) {
+            printf("PLUGIN: '%s'\n", plugin);
+            realm_srv_names[0] = "plugins";
+            realm_srv_names[1] = plugin;
+
+            /* plugin_name */
+            realm_srv_names[2] = "plugin_name";
+            realm_srv_names[3] = 0;
+
+            retval = profile_get_values(profile, realm_srv_names, &plugin_name);
+
+            /* plugin_type */
+            realm_srv_names[2] = "plugin_type";
+            realm_srv_names[3] = 0;
+
+            retval = profile_get_values(profile, realm_srv_names, &plugin_type);
+
+            /* factory_name */
+            realm_srv_names[2] = "plugin_factory_name";
+            realm_srv_names[3] = 0;
+
+            retval = profile_get_values(profile, realm_srv_names, &factory_name);
+
+            /* factory_type */
+            realm_srv_names[2] = "plugin_factory_type";
+            realm_srv_names[3] = 0;
+
+            retval = profile_get_values(profile, realm_srv_names, &factory_type);
+
+            handle = _create_api(*plugin_name, *factory_name, *factory_type/*, properties*/);
+            if(handle.api != NULL) {
+                if(!(_register_api(mdata->registry,plugin, *plugin_type, handle))) {
+                   printf("Failed to register %s for %s(factory=%s,plugin_type=%s)\n",
+                            *plugin_name, plugin, *factory_name, *plugin_type);
+                    exit(1);
+                }
+            } else {
+                printf("Failed to configure plugin: api=%s, plugin_name=%s,factory=%s\n",
+                         plugin, *plugin_name, *factory_name);
+            }
+
+            krb5_free_plugin_string(profile, plugin);
+        }
+    }
+
+}
+
+#endif
 
 static void
 _start(void* data)
@@ -244,7 +336,11 @@ plugin_default_manager_get_instance()
         instance = (plugin_manager*) malloc(sizeof(plugin_manager));
         memset(instance, 0, sizeof(plugin_manager));
         instance->data = _init_data();
-        instance->configure = _configure;
+#ifdef CONFIG_IN_YAML
+        instance->configure = _configure_yaml;
+#else
+        instance->configure = _configure_krb5;
+#endif
         instance->start = _start;
         instance->stop = _stop;
         instance->getService = _getService;

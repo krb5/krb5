@@ -5,24 +5,26 @@ PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
 
-LOCALINCLUDES = -I$(srcdir)/include/krb5  -I$(srcdir)/. -I$(srcdir)/../plugins/prng
+LOCALINCLUDES = -I$(srcdir)/../include/krb5  -I$(srcdir)/. -I$(srcdir)/../plugins/prng -I$(srcdir)/../util/profile
 
 LIBBASE= plugin_core
 LIBMAJOR=0
 LIBMINOR=0
 SO_EXT=.so
 
-LIBS_UTILS = -lyaml
+# LIBS_UTILS = -lyaml
+# LIBS_UTILS = -lprofile
+LIBS_UTILS = $(BUILDTOP)/util/profile/libprofile.so
 
-SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_DIRS=-L$(TOPLIBD) 
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 STOBJLISTS=OBJS.ST
 
 SHLIB_EXPLIBS=  $(LIBS_UTILS)
  
-STLIBOBJS= plugin_manager.o plugin_factory.o yaml_parser.o
+STLIBOBJS= plugin_manager.o plugin_factory.o krb5_parser.o	
 
-SRCS= plugin_manager.c plugin_factory.c yaml_parser.c
+SRCS= plugin_manager.c plugin_factory.c krb5_parser.c
 
 all-unix:: all-liblinks
 install-unix:: install-libs

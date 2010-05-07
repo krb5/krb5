@@ -5,4 +5,7 @@ set_plugin_manager_instance
 plugin_manager_start
 plugin_manager_stop
 create_api
-parse_file
+krb5_plugin_iterator_create
+krb5_plugin_iterator
+krb5_plugin_iterator_free
+krb5_free_plugin_string
