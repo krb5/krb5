@@ -426,7 +426,7 @@ s4u2proxy_size(krb5_context kcontext,
                size_t *sizep)
 {
     struct s4u2proxy_context *s4uctx = (struct s4u2proxy_context *)request_context;
-    krb5_error_code code;
+    krb5_error_code code = 0;
     int i;
 
     *sizep += sizeof(krb5_int32); /* version */
@@ -453,7 +453,7 @@ s4u2proxy_externalize(krb5_context kcontext,
                       size_t *lenremain)
 {
     struct s4u2proxy_context *s4uctx = (struct s4u2proxy_context *)request_context;
-    krb5_error_code code;
+    krb5_error_code code = 0;
     size_t required = 0;
     krb5_octet *bp;
     size_t remain;
@@ -465,7 +465,7 @@ s4u2proxy_externalize(krb5_context kcontext,
     s4u2proxy_size(kcontext, context, plugin_context,
                    request_context, &required);
 
-    if (required <= remain)
+    if (required > remain)
         return ENOMEM;
 
     krb5_ser_pack_int32(1, &bp, &remain); /* version */
@@ -521,7 +521,7 @@ s4u2proxy_internalize(krb5_context kcontext,
     if (code != 0)
         goto cleanup;
 
-    if (count > 65536)
+    if (count > 65535)
         return ERANGE; /* let's set some reasonable limits here */
     else if (count > 0) {
         int i;
