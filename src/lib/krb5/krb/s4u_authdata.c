@@ -232,11 +232,13 @@ s4u2proxy_request_fini(krb5_context kcontext,
  * interoperability
  */
 
+#if 0
 static krb5_data s4u2proxy_proxy_target_attr = {
     KV5M_DATA,
     sizeof("urn:constrained-delegation:proxy-target") - 1,
     "urn:constrained-delegation:proxy-target"
 };
+#endif
 
 static krb5_data s4u2proxy_transited_services_attr = {
     KV5M_DATA,
@@ -259,23 +261,15 @@ s4u2proxy_get_attribute_types(krb5_context kcontext,
     if (s4uctx->count == 0)
         return ENOENT;
 
-    attrs = k5alloc(3 * sizeof(krb5_data), &code);
+    attrs = k5alloc(2 * sizeof(krb5_data), &code);
     if (attrs == NULL)
         goto cleanup;
 
     code = krb5int_copy_data_contents(kcontext,
-                                      &s4u2proxy_proxy_target_attr,
+                                      &s4u2proxy_transited_services_attr,
                                       &attrs[i++]);
     if (code != 0)
         goto cleanup;
-
-    if (s4uctx->count > 1) {
-        code = krb5int_copy_data_contents(kcontext,
-                                          &s4u2proxy_transited_services_attr,
-                                          &attrs[i++]);
-        if (code != 0)
-            goto cleanup;
-    }
 
     attrs[i].data = NULL;
     attrs[i].length = 0;
@@ -309,21 +303,13 @@ s4u2proxy_get_attribute(krb5_context kcontext,
     krb5_error_code code;
     krb5_principal principal;
     int i;
-    krb5_boolean transitedServicesAttr;
 
     if (display_value != NULL) {
         display_value->data = NULL;
         display_value->length = 0;
     }
 
-    if (data_eq(*attribute, s4u2proxy_transited_services_attr))
-        transitedServicesAttr = TRUE;
-    else if (data_eq(*attribute, s4u2proxy_proxy_target_attr))
-        transitedServicesAttr = FALSE;
-    else
-        return ENOENT;
-
-    i = transitedServicesAttr ? -(*more) : 0;
+    i = -(*more) - 1;
     if (i < 0 || i >= s4uctx->count)
         return ENOENT;
 
@@ -348,10 +334,10 @@ s4u2proxy_get_attribute(krb5_context kcontext,
 
     i++;
 
-    if (!transitedServicesAttr || i == s4uctx->count)
+    if (i == s4uctx->count)
         *more = 0;
     else
-        *more = -i;
+        *more = -(i + 1);
 
     *authenticated = s4uctx->authenticated;
     *complete = TRUE;
