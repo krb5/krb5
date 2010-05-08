@@ -309,8 +309,13 @@ s4u2proxy_get_attribute(krb5_context kcontext,
         display_value->length = 0;
     }
 
+    if (!data_eq(*attribute, s4u2proxy_transited_services_attr))
+        return ENOENT;
+
     i = -(*more) - 1;
-    if (i < 0 || i >= s4uctx->count)
+    if (i < 0)
+        return EINVAL;
+    else if (i >= s4uctx->count)
         return ENOENT;
 
     principal = s4uctx->delegated[i];
