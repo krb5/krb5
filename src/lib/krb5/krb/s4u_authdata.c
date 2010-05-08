@@ -159,7 +159,7 @@ s4u2proxy_export_authdata(krb5_context kcontext,
     krb5_authdata **authdata;
     krb5_data *data;
 
-    if (s4uctx->delegated == NULL)
+    if (s4uctx->count == 0)
         return 0;
 
     memset(&sp, 0, sizeof(sp));
@@ -227,6 +227,17 @@ s4u2proxy_request_fini(krb5_context kcontext,
     free(s4uctx);
 }
 
+/*
+ * Nomenclature defined to be similar to [MS-PAC] 2.9, for future
+ * interoperability
+ */
+
+static krb5_data s4u2proxy_proxy_target_attr = {
+    KV5M_DATA,
+    sizeof("urn:constrained-delegation:proxy-target") - 1,
+    "urn:constrained-delegation:proxy-target"
+};
+
 static krb5_data s4u2proxy_transited_services_attr = {
     KV5M_DATA,
     sizeof("urn:constrained-delegation:transited-services") - 1,
@@ -243,26 +254,41 @@ s4u2proxy_get_attribute_types(krb5_context kcontext,
     struct s4u2proxy_context *s4uctx = (struct s4u2proxy_context *)request_context;
     krb5_error_code code;
     krb5_data *attrs;
+    int i = 0;
 
-    if (s4uctx->delegated == NULL || s4uctx->delegated[0] == NULL)
+    if (s4uctx->count == 0)
         return ENOENT;
 
-    attrs = k5alloc(2 * sizeof(krb5_data), &code);
+    attrs = k5alloc(3 * sizeof(krb5_data), &code);
     if (attrs == NULL)
-        return code;
+        goto cleanup;
 
     code = krb5int_copy_data_contents(kcontext,
-                                      &s4u2proxy_transited_services_attr, 
-                                      &attrs[0]);
-    if (code != 0) {
-        free(attrs);
-        return code;
+                                      &s4u2proxy_proxy_target_attr,
+                                      &attrs[i++]);
+    if (code != 0)
+        goto cleanup;
+
+    if (s4uctx->count > 1) {
+        code = krb5int_copy_data_contents(kcontext,
+                                          &s4u2proxy_transited_services_attr,
+                                          &attrs[i++]);
+        if (code != 0)
+            goto cleanup;
     }
 
-    attrs[1].data = NULL;
-    attrs[1].length = 0;
+    attrs[i].data = NULL;
+    attrs[i].length = 0;
 
     *out_attrs = attrs;
+    attrs = NULL;
+
+cleanup:
+    if (attrs != NULL) {
+        for (i = 0; attrs[i].data; i++)
+            krb5_free_data_contents(kcontext, &attrs[i]);
+        free(attrs);
+    }
 
     return 0;
 }
@@ -283,18 +309,23 @@ s4u2proxy_get_attribute(krb5_context kcontext,
     krb5_error_code code;
     krb5_principal principal;
     int i;
+    krb5_boolean transitedServicesAttr;
 
     if (display_value != NULL) {
         display_value->data = NULL;
         display_value->length = 0;
     }
 
-    if (s4uctx->delegated == NULL)
+    if (data_eq(*attribute, s4u2proxy_transited_services_attr))
+        transitedServicesAttr = TRUE;
+    else if (data_eq(*attribute, s4u2proxy_proxy_target_attr))
+        transitedServicesAttr = FALSE;
+    else
         return ENOENT;
 
-    i = -(*more) - 1;
-
-    assert(i < s4uctx->count);
+    i = transitedServicesAttr ? -(*more) : 0;
+    if (i < 0 || i >= s4uctx->count)
+        return ENOENT;
 
     principal = s4uctx->delegated[i];
     assert(principal != NULL);
@@ -317,10 +348,10 @@ s4u2proxy_get_attribute(krb5_context kcontext,
 
     i++;
 
-    if (i == s4uctx->count)
+    if (!transitedServicesAttr || i == s4uctx->count)
         *more = 0;
     else
-        *more = -(i + 1);
+        *more = -i;
 
     *authenticated = s4uctx->authenticated;
     *complete = TRUE;
@@ -357,7 +388,7 @@ s4u2proxy_export_internal(krb5_context kcontext,
 
     *ptr = NULL;
 
-    if (s4uctx->delegated == NULL)
+    if (s4uctx->count == 0)
         return 0;
 
     if (restrict_authenticated)
