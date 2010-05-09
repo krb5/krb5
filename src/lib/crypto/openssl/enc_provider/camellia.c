@@ -2,7 +2,7 @@
 /*
  * lib/crypto/openssl/enc_provider/camellia.c
  *
- * Copyright (C) 2009 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2009-2010 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -243,7 +243,7 @@ cts_decr(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 
 krb5_error_code
 krb5int_camellia_encrypt(krb5_key key, const krb5_data *ivec,
-                    krb5_crypto_iov *data, size_t num_data)
+                         krb5_crypto_iov *data, size_t num_data)
 {
     int    ret = 0;
     int    nblocks = 0;
@@ -270,7 +270,7 @@ krb5int_camellia_encrypt(krb5_key key, const krb5_data *ivec,
 
 krb5_error_code
 krb5int_camellia_decrypt(krb5_key key, const krb5_data *ivec,
-                    krb5_crypto_iov *data, size_t num_data)
+                         krb5_crypto_iov *data, size_t num_data)
 {
     int    ret = 0;
     int    nblocks = 0;
@@ -297,7 +297,7 @@ krb5int_camellia_decrypt(krb5_key key, const krb5_data *ivec,
 
 static krb5_error_code
 krb5int_camellia_init_state (const krb5_keyblock *key, krb5_keyusage usage,
-                        krb5_data *state)
+                             krb5_data *state)
 {
     state->length = 16;
     state->data = (void *) malloc(16);
@@ -306,11 +306,13 @@ krb5int_camellia_init_state (const krb5_keyblock *key, krb5_keyusage usage,
     memset(state->data, 0, state->length);
     return 0;
 }
+
 const struct krb5_enc_provider krb5int_enc_camellia128 = {
     16,
     16, 16,
     krb5int_camellia_encrypt,
     krb5int_camellia_decrypt,
+    NULL,
     krb5int_camellia_make_key,
     krb5int_camellia_init_state,
     krb5int_default_free_state
@@ -321,6 +323,7 @@ const struct krb5_enc_provider krb5int_enc_camellia256 = {
     32, 32,
     krb5int_camellia_encrypt,
     krb5int_camellia_decrypt,
+    NULL,
     krb5int_camellia_make_key,
     krb5int_camellia_init_state,
     krb5int_default_free_state
