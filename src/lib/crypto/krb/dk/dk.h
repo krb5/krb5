@@ -82,6 +82,12 @@ krb5int_dk_checksum(const struct krb5_cksumtypes *ctp,
                     krb5_data *output);
 
 krb5_error_code
+krb5int_dk_cbc_checksum(const struct krb5_cksumtypes *ctp,
+                        krb5_key key, krb5_keyusage usage,
+                        const krb5_crypto_iov *data, size_t num_data,
+                        krb5_data *output);
+
+krb5_error_code
 krb5int_derive_random(const struct krb5_enc_provider *enc,
                       krb5_key inkey, krb5_data *outrnd,
                       const krb5_data *in_constant);
