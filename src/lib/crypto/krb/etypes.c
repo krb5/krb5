@@ -153,6 +153,30 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_dk_prf,
       CKSUMTYPE_HMAC_SHA1_96_AES256,
       0 /*flags*/ },
+#ifdef AES_CCM
+    { ENCTYPE_AES128_CCM_128,
+      "aes128-ccm-128", { "aes128-ccm" },
+      "AES-128 CTR mode with 128-bit CBC MAC",
+      &krb5int_enc_aes128_ctr, NULL,
+      16,
+      krb5int_ccm_crypto_length, krb5int_ccm_encrypt, krb5int_ccm_decrypt,
+      krb5int_aes_string_to_key,
+      krb5int_dk_prf,
+      CKSUMTYPE_AES128_CBC,
+      0,
+    },
+    { ENCTYPE_AES256_CCM_128,
+      "aes256-ccm-128", { "aes256-ccm" },
+      "AES-256 CTR mode with 128-bit CBC MAC",
+      &krb5int_enc_aes256_ctr, NULL,
+      16,
+      krb5int_ccm_crypto_length, krb5int_ccm_encrypt, krb5int_ccm_decrypt,
+      krb5int_aes_string_to_key,
+      krb5int_dk_prf,
+      CKSUMTYPE_AES128_CBC,
+      0,
+    },
+#endif /* AES_CCM */
 };
 
 const int krb5int_enctypes_length =

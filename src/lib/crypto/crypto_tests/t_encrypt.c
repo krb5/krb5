@@ -45,6 +45,10 @@ krb5_enctype interesting_enctypes[] = {
     ENCTYPE_ARCFOUR_HMAC_EXP,
     ENCTYPE_AES256_CTS_HMAC_SHA1_96,
     ENCTYPE_AES128_CTS_HMAC_SHA1_96,
+#ifdef AES_CCM
+    ENCTYPE_AES128_CCM_128,
+    ENCTYPE_AES256_CCM_128,
+#endif
     0
 };
 

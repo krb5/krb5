@@ -79,3 +79,23 @@ krb5_error_code
 krb5int_derive_random(const struct krb5_enc_provider *enc,
                       krb5_key inkey, krb5_data *outrnd,
                       const krb5_data *in_constant);
+
+unsigned int
+krb5int_ccm_crypto_length(const struct krb5_keytypes *ktp,
+                          krb5_cryptotype type);
+
+krb5_error_code
+krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
+                    krb5_key key,
+                    krb5_keyusage usage,
+                    const krb5_data *ivec,
+                    krb5_crypto_iov *data,
+                    size_t num_data);
+
+krb5_error_code
+krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
+                    krb5_key key,
+                    krb5_keyusage usage,
+                    const krb5_data *ivec,
+                    krb5_crypto_iov *data,
+                    size_t num_data);

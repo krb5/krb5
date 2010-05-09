@@ -104,6 +104,21 @@ const struct krb5_cksumtypes krb5int_cksumtypes_list[] = {
       &krb5int_enc_arcfour, &krb5int_hash_md5,
       krb5int_hmacmd5_checksum, NULL,
       16, 16, 0 },
+
+#ifdef AES_CCM
+    { CKSUMTYPE_AES128_CBC,
+       "aes128-cbc", { 0 }, "CBC AES128 key",
+       &krb5int_enc_aes128_ctr, NULL,
+       krb5int_cbc_checksum, NULL,
+       16, 16, 0 },
+
+    { CKSUMTYPE_AES256_CBC,
+       "aes256-cbc", { 0 }, "CBC AES256 key",
+       &krb5int_enc_aes256_ctr, NULL,
+       krb5int_cbc_checksum, NULL,
+       16, 16, 0 },
+#endif /* AES_CCM */
+
 };
 
 const size_t krb5int_cksumtypes_length =
