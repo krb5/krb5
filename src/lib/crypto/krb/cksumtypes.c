@@ -133,7 +133,7 @@ const struct krb5_cksumtypes krb5int_cksumtypes_list[] = {
 
     { CKSUMTYPE_CAMELLIA128_CBC,
        "camellia128-cbc", { 0 }, "CBC Camellia128 key",
-       &krb5int_enc_aes128_ctr, NULL,
+       &krb5int_enc_camellia128_ctr, NULL,
        krb5int_cbc_checksum, NULL,
        16, 16, 0 },
 

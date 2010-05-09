@@ -1,5 +1,5 @@
 /*
- * lib/crypto/builtin/enc_provider/camellia_ctr.c
+ * lib/crypto/openssl/enc_provider/camellia_ctr.c
  *
  * Copyright (C) 2003, 2007-2010 by the Massachusetts Institute of Technology.
  * All rights reserved.
@@ -24,11 +24,17 @@
  * or implied warranty.
  */
 
+#ifndef OPENSSL_NO_CAMELLIA
 #include "k5-int.h"
 #include "enc_provider.h"
-#include "camellia.h"
-#include <aead.h>
-#include <rand2key.h>
+#include "rand2key.h"
+#include "aead.h"
+#include "hash_provider/hash_provider.h"
+#include <openssl/evp.h>
+#include <openssl/camellia.h>
+#include <openssl/modes.h>
+
+#define NUM_BITS 8
 
 #define CCM_FLAG_MASK_Q                0x07
 
@@ -38,7 +44,7 @@ static void
 xorblock(unsigned char *out, const unsigned char *in)
 {
     int z;
-    for (z = 0; z < BLOCK_SIZE/4; z++) {
+    for (z = 0; z < CAMELLIA_BLOCK_SIZE/4; z++) {
         unsigned char *outptr = &out[z*4];
         unsigned char *inptr = (unsigned char *)&in[z*4];
         /*
@@ -59,39 +65,18 @@ xorblock(unsigned char *out, const unsigned char *in)
     }
 }
 
-/* Get the current counter block number from the IV */
-static inline void getctrblockno(krb5_ui_8 *pblockno,
-                                 const unsigned char ctr[BLOCK_SIZE])
+static const EVP_CIPHER * 
+map_mode(krb5_key key)
 {
-    register krb5_octet q, i;
-    krb5_ui_8 blockno;
-
-    q = ctr[0] + 1;
-
-    assert(q >= 2 && q <= 8);
-
-    for (i = 0, blockno = 0; i < q; i++) {
-        register krb5_octet s = (q - i - 1) * 8;
-
-        blockno |= ctr[16 - q + i] << s;
+    switch (krb5_k_key_enctype(NULL, key)) {
+    case ENCTYPE_CAMELLIA128_CCM_128:
+        return EVP_camellia_128_cbc(); 
+    case ENCTYPE_CAMELLIA256_CCM_128:
+        return EVP_camellia_256_cbc();
+    default:
+        break;
     }
-
-    *pblockno = blockno;
-}
-
-/* Store the current counter block number in the IV */
-static inline void putctrblockno(krb5_ui_8 blockno,
-                                 unsigned char ctr[BLOCK_SIZE])
-{
-    register krb5_octet q, i;
-
-    q = ctr[0] + 1;
-
-    for (i = 0; i < q; i++) {
-        register krb5_octet s = (q - i - 1) * 8;
-
-        ctr[16 - q + i] = (blockno >> s) & 0xFF;
-    }
+    return NULL;
 }
 
 /* Maximum number of invocations with a given nonce and key */
@@ -106,14 +91,13 @@ krb5int_camellia_encrypt_ctr(krb5_key key,
                              krb5_crypto_iov *data,
                              size_t num_data)
 {
-    camellia_ctx ctx;
-    unsigned char ctr[BLOCK_SIZE];
+    CAMELLIA_KEY enck;
+    unsigned char ctr[CAMELLIA_BLOCK_SIZE];
     krb5_ui_8 blockno;
     struct iov_block_state input_pos, output_pos;
 
-    if (camellia_enc_key(key->keyblock.contents,
-                         key->keyblock.length, &ctx) != camellia_good)
-        abort();
+    Camellia_set_key(key->keyblock.contents,
+                     NUM_BITS * key->keyblock.length, &enck);
 
     IOV_BLOCK_STATE_INIT(&input_pos);
     IOV_BLOCK_STATE_INIT(&output_pos);
@@ -123,34 +107,33 @@ krb5int_camellia_encrypt_ctr(krb5_key key,
     input_pos.pad_to_boundary = output_pos.pad_to_boundary = 1;
 
     if (ivec != NULL) {
-        if (ivec->length != BLOCK_SIZE || (ivec->data[0] & ~(CCM_FLAG_MASK_Q)))
+        if (ivec->length != CAMELLIA_BLOCK_SIZE || (ivec->data[0] & ~(CCM_FLAG_MASK_Q)))
             return KRB5_BAD_MSIZE;
 
-        memcpy(ctr, ivec->data, BLOCK_SIZE);
+        memcpy(ctr, ivec->data, CAMELLIA_BLOCK_SIZE);
     } else {
-        memset(ctr, 0, BLOCK_SIZE);
+        memset(ctr, 0, CAMELLIA_BLOCK_SIZE);
         ctr[0] = CCM_DEFAULT_COUNTER_LEN - 1;
     }
 
-    getctrblockno(&blockno, ctr);
-
-    for (;;) {
-        unsigned char plain[BLOCK_SIZE];
-        unsigned char ectr[BLOCK_SIZE];
+    for (blockno = 0; ; blockno++) {
+        unsigned char plain[CAMELLIA_BLOCK_SIZE];
+        unsigned char cipher[CAMELLIA_BLOCK_SIZE];
+        unsigned char ectr[CAMELLIA_BLOCK_SIZE];
+        unsigned int num = 0;
 
         if (blockno >= maxblocks(ctr[0] + 1))
             return KRB5_CRYPTO_INTERNAL;
 
-        if (!krb5int_c_iov_get_block(plain, BLOCK_SIZE, data, num_data, &input_pos))
+        if (!krb5int_c_iov_get_block(plain, CAMELLIA_BLOCK_SIZE, data, num_data, &input_pos))
             break;
 
-        if (camellia_enc_blk(ctr, ectr, &ctx) != camellia_good)
-            abort();
+        memset(ectr, 0, sizeof(ectr));
+        Camellia_ctr128_encrypt(plain, cipher, CAMELLIA_BLOCK_SIZE, &enck,
+                                ctr, ectr, &num);
+        assert(num == 0);
 
-        xorblock(plain, ectr);
-        krb5int_c_iov_put_block(data, num_data, plain, BLOCK_SIZE, &output_pos);
-
-        putctrblockno(++blockno, ctr);
+        krb5int_c_iov_put_block(data, num_data, cipher, CAMELLIA_BLOCK_SIZE, &output_pos);
     }
 
     if (ivec != NULL)
@@ -165,14 +148,13 @@ krb5int_camellia_decrypt_ctr(krb5_key key,
                              krb5_crypto_iov *data,
                              size_t num_data)
 {
-    camellia_ctx ctx;
-    unsigned char ctr[BLOCK_SIZE];
+    CAMELLIA_KEY enck;
+    unsigned char ctr[CAMELLIA_BLOCK_SIZE];
     krb5_ui_8 blockno;
     struct iov_block_state input_pos, output_pos;
 
-    if (camellia_enc_key(key->keyblock.contents,
-                         key->keyblock.length, &ctx) != camellia_good)
-        abort();
+    Camellia_set_key(key->keyblock.contents,
+                     NUM_BITS * key->keyblock.length, &enck);
 
     IOV_BLOCK_STATE_INIT(&input_pos);
     IOV_BLOCK_STATE_INIT(&output_pos);
@@ -182,34 +164,33 @@ krb5int_camellia_decrypt_ctr(krb5_key key,
     input_pos.pad_to_boundary = output_pos.pad_to_boundary = 1;
 
     if (ivec != NULL) {
-        if (ivec->length != BLOCK_SIZE || (ivec->data[0] & ~(CCM_FLAG_MASK_Q)))
+        if (ivec->length != CAMELLIA_BLOCK_SIZE || (ivec->data[0] & ~(CCM_FLAG_MASK_Q)))
             return KRB5_BAD_MSIZE;
 
-        memcpy(ctr, ivec->data, BLOCK_SIZE);
+        memcpy(ctr, ivec->data, CAMELLIA_BLOCK_SIZE);
     } else {
-        memset(ctr, 0, BLOCK_SIZE);
+        memset(ctr, 0, CAMELLIA_BLOCK_SIZE);
         ctr[0] = CCM_DEFAULT_COUNTER_LEN - 1;
     }
 
-    getctrblockno(&blockno, ctr);
-
-    for (;;) {
-        unsigned char ectr[BLOCK_SIZE];
-        unsigned char cipher[BLOCK_SIZE];
+    for (blockno = 0; ; blockno++) {
+        unsigned char cipher[CAMELLIA_BLOCK_SIZE];
+        unsigned char plain[CAMELLIA_BLOCK_SIZE];
+        unsigned char ectr[CAMELLIA_BLOCK_SIZE];
+        unsigned int num = 0;
 
         if (blockno >= maxblocks(ctr[0] + 1))
             return KRB5_CRYPTO_INTERNAL;
 
-        if (!krb5int_c_iov_get_block(cipher, BLOCK_SIZE, data, num_data, &input_pos))
+        if (!krb5int_c_iov_get_block(cipher, CAMELLIA_BLOCK_SIZE, data, num_data, &input_pos))
             break;
 
-        if (camellia_enc_blk(ctr, ectr, &ctx) != camellia_good)
-            abort();
+        memset(ectr, 0, sizeof(ectr));
+        Camellia_ctr128_encrypt(cipher, plain, CAMELLIA_BLOCK_SIZE, &enck,
+                                ctr, ectr, &num);
+        assert(num == 0);
 
-        xorblock(cipher, ectr);
-        krb5int_c_iov_put_block(data, num_data, cipher, BLOCK_SIZE, &output_pos);
-
-        putctrblockno(++blockno, ctr);
+        krb5int_c_iov_put_block(data, num_data, plain, CAMELLIA_BLOCK_SIZE, &output_pos);
     }
 
     if (ivec != NULL)
@@ -225,23 +206,27 @@ krb5int_camellia_cbc_mac(krb5_key key,
                          const krb5_data *iv,
                          krb5_data *output)
 {
-    camellia_ctx ctx;
-    unsigned char blockY[BLOCK_SIZE];
+    unsigned char blockY[CAMELLIA_BLOCK_SIZE];
     struct iov_block_state iov_state;
+    krb5_error_code ret;
+    EVP_CIPHER_CTX ciph_ctx;
 
-    if (output->length < BLOCK_SIZE)
+    if (output->length < CAMELLIA_BLOCK_SIZE)
         return KRB5_BAD_MSIZE;
 
-    if (camellia_enc_key(key->keyblock.contents,
-                         key->keyblock.length, &ctx) != camellia_good)
-        abort();
-
     if (iv != NULL)
-        memcpy(blockY, iv->data, BLOCK_SIZE);
+        memcpy(blockY, iv->data, CAMELLIA_BLOCK_SIZE);
     else
-        memset(blockY, 0, BLOCK_SIZE);
+        memset(blockY, 0, CAMELLIA_BLOCK_SIZE);
+
+    EVP_CIPHER_CTX_init(&ciph_ctx);
+    if (EVP_EncryptInit_ex(&ciph_ctx, map_mode(key),
+                           NULL, key->keyblock.contents, NULL) == 0) {
+        return KRB5_CRYPTO_INTERNAL;
+    }
 
     IOV_BLOCK_STATE_INIT(&iov_state);
+    EVP_CIPHER_CTX_set_padding(&ciph_ctx, 0);
 
     /*
      * The CCM header may not fit in a block, because it includes a variable
@@ -251,22 +236,27 @@ krb5int_camellia_cbc_mac(krb5_key key,
     iov_state.include_sign_only = 1;
     iov_state.pad_to_boundary = 1;
 
-    for (;;) {
-        unsigned char blockB[BLOCK_SIZE];
+    for (ret = 0; ;) {
+        unsigned char blockB[CAMELLIA_BLOCK_SIZE];
+        int olen = CAMELLIA_BLOCK_SIZE;
 
-        if (!krb5int_c_iov_get_block(blockB, BLOCK_SIZE, data, num_data, &iov_state))
+        if (!krb5int_c_iov_get_block(blockB, CAMELLIA_BLOCK_SIZE, data, num_data, &iov_state))
             break;
 
         xorblock(blockB, blockY);
 
-        if (camellia_enc_blk(blockB, blockY, &ctx) != camellia_good)
-            abort();
+        if (EVP_EncryptUpdate(&ciph_ctx, blockY, &olen, blockB, CAMELLIA_BLOCK_SIZE) == 0) {
+            ret = KRB5_CRYPTO_INTERNAL;
+            break;
+        }
     }
 
-    output->length = BLOCK_SIZE;
-    memcpy(output->data, blockY, BLOCK_SIZE);
+    output->length = CAMELLIA_BLOCK_SIZE;
+    memcpy(output->data, blockY, CAMELLIA_BLOCK_SIZE);
 
-    return 0;
+    EVP_CIPHER_CTX_cleanup(&ciph_ctx);
+
+    return ret;
 }
 
 static krb5_error_code
@@ -316,3 +306,5 @@ const struct krb5_enc_provider krb5int_enc_camellia256_ctr = {
     krb5int_default_free_state,
     NULL
 };
+
+#endif
