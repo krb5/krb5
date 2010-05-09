@@ -380,10 +380,10 @@ s4u2proxy_export_internal(krb5_context kcontext,
     *ptr = NULL;
 
     if (s4uctx->count == 0)
-        return 0;
+        return ENOENT;
 
     if (restrict_authenticated)
-        return 0;
+        return ENOENT;
 
     delegated = k5alloc((s4uctx->count + 1) * sizeof(krb5_principal), &code);
     if (delegated == NULL)
