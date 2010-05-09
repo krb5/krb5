@@ -162,11 +162,11 @@ cts_encr(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 
     krb5int_c_iov_get_block(dbuf, dlen, data, num_data, &input_pos);
 
-    CAMELLIA_set_encrypt_key(key->keyblock.contents,
-                        NUM_BITS * key->keyblock.length, &enck);
+    Camellia_set_key(key->keyblock.contents,
+                     NUM_BITS * key->keyblock.length, &enck);
 
     size = CRYPTO_cts128_encrypt((unsigned char *)dbuf, oblock, dlen, &enck,
-                                 iv_cts, (cbc128_f)CAMELLIA_cbc_encrypt);
+                                 iv_cts, (cbc128_f)Camellia_cbc_encrypt);
     if (size <= 0) {
         ret = KRB5_CRYPTO_INTERNAL;
     } else {
@@ -216,14 +216,14 @@ cts_decr(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
         return ENOMEM;
     }
 
-    CAMELLIA_set_decrypt_key(key->keyblock.contents,
-                        NUM_BITS * key->keyblock.length, &deck);
+    Camellia_set_key(key->keyblock.contents,
+                     NUM_BITS * key->keyblock.length, &deck);
 
     krb5int_c_iov_get_block(dbuf, dlen, data, num_data, &input_pos);
 
     size = CRYPTO_cts128_decrypt((unsigned char *)dbuf, oblock,
                                  dlen, &deck,
-                                 iv_cts, (cbc128_f)CAMELLIA_cbc_encrypt);
+                                 iv_cts, (cbc128_f)Camellia_cbc_encrypt);
     if (size <= 0)
         ret = KRB5_CRYPTO_INTERNAL;
     else {
