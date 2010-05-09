@@ -65,10 +65,10 @@
 
 #define K5CLENGTH 5 /* 32 bit net byte order integer + one byte seed */
 
-#define CCM_FLAG_MASK_Q                0x07
-#define CCM_FLAG_MASK_T                0x38
-#define CCM_FLAG_ADATA                0x40
-#define CCM_FLAG_RESERVED        0x80
+#define CCM_FLAG_MASK_Q                 0x07
+#define CCM_FLAG_MASK_T                 0x38
+#define CCM_FLAG_ADATA                  0x40
+#define CCM_FLAG_RESERVED               0x80
 
 unsigned int
 krb5int_ccm_crypto_length(const struct krb5_keytypes *ktp,
@@ -154,9 +154,9 @@ encode_a_len(krb5_data *a, krb5_ui_8 adata_len)
  */
 static krb5_error_code
 format_B0(krb5_data *B0,            /* B0 */
-          krb5_data *nonce,            /* N */
-          size_t trailer_len,            /* t */
-          krb5_ui_8 adata_len,            /* a */
+          krb5_data *nonce,         /* N */
+          size_t trailer_len,       /* t */
+          krb5_ui_8 adata_len,      /* a */
           krb5_ui_8 payload_len)    /* Q */
 {
     unsigned char flags;
@@ -294,7 +294,7 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
         }
         memcpy(header->data.data, &ivec->data[1], header_len);
     } else {
-        ret = krb5_c_random_make_octets(/* XXX */ NULL, &header->data);
+        ret = krb5_c_random_make_octets(NULL, &header->data);
         if (ret != 0)
             goto cleanup;
     }
@@ -409,12 +409,12 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
     unsigned int trailer_len = 0;
     size_t adata_len = 0;
     size_t payload_len = 0;
-    krb5_data cksum, counter;
+    krb5_data made_cksum, counter;
     char adata_len_buf[6];
     unsigned char B0[16], Ctr[16];
 
-    cksum.data = NULL;
-    cksum.length = 0;
+    made_cksum.data = NULL;
+    made_cksum.length = 0;
 
     header_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_HEADER);
 
@@ -487,10 +487,10 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
 
     assert(ktp->enc->decrypt != NULL);
 
-    cksum.data = k5alloc(trailer_len, &ret);
-    if (cksum.data == NULL)
+    made_cksum.data = k5alloc(trailer_len, &ret);
+    if (made_cksum.data == NULL)
         goto cleanup;
-    cksum.length = trailer_len;
+    made_cksum.length = trailer_len;
 
     /* Initialize first counter block */
     if (ivec == NULL) {
@@ -506,12 +506,12 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
 
     /* Decrypt checksum from trailer */
     {
-        krb5_crypto_iov cksum[1];
+        krb5_crypto_iov got_cksum[1];
 
-        cksum[0].flags = KRB5_CRYPTO_TYPE_DATA;
-        cksum[0].data = trailer->data;
+        got_cksum[0].flags = KRB5_CRYPTO_TYPE_DATA;
+        got_cksum[0].data = trailer->data;
 
-        ret = ktp->enc->decrypt(kc, ivec, cksum, 1);
+        ret = ktp->enc->decrypt(kc, ivec, got_cksum, 1);
         if (ret != 0)
             goto cleanup;
     }
@@ -532,19 +532,19 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
     }
 
     /* Now, calculate hash for comparison (including B0) */
-    ret = ktp->enc->cbc_mac(kc, sign_data, num_sign_data, NULL, &cksum);
+    ret = ktp->enc->cbc_mac(kc, sign_data, num_sign_data, NULL, &made_cksum);
     if (ret != 0)
         goto cleanup;
 
-    if (cksum.length != trailer->data.length ||
-        memcmp(cksum.data, trailer->data.data, trailer->data.length) != 0) {
+    if (made_cksum.length != trailer->data.length ||
+        memcmp(made_cksum.data, trailer->data.data, trailer->data.length) != 0) {
         ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
         goto cleanup;
     }
 
 cleanup:
     krb5_k_free_key(NULL, kc);
-    free(cksum.data);
+    free(made_cksum.data);
     free(sign_data);
 
     return ret;
