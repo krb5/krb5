@@ -249,12 +249,9 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
     unsigned int trailer_len = 0;
     size_t payload_len = 0;
     size_t adata_len = 0;
-    krb5_data cksum, counter;
+    krb5_data counter;
     char adata_len_buf[6];
     unsigned char B0[16], Ctr[16];
-
-    cksum.data = NULL;
-    cksum.length = 0;
 
     header_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_HEADER);
 
@@ -351,15 +348,10 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
         goto cleanup;
 
     assert(ktp->enc->encrypt != NULL);
-
-    cksum.data = k5alloc(trailer_len, &ret);
-    if (cksum.data == NULL)
-        goto cleanup;
-    cksum.length = trailer_len;
-
     assert(ktp->enc->cbc_mac != NULL);
 
-    ret = ktp->enc->cbc_mac(kc, sign_data, num_sign_data, NULL, &cksum);
+    /* Make checksum and place in trailer */
+    ret = ktp->enc->cbc_mac(kc, sign_data, num_sign_data, NULL, &trailer->data);
     if (ret != 0)
         goto cleanup;
 
@@ -375,8 +367,17 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
         ivec = &counter;
     }
 
-    memcpy(trailer->data.data, cksum.data, trailer_len);
-    trailer->data.length = trailer_len;
+    /* Encrypt checksum in trailer */
+    {
+        krb5_crypto_iov cksum[1];
+
+        cksum[0].flags = KRB5_CRYPTO_TYPE_DATA;
+        cksum[0].data = trailer->data;
+
+        ret = ktp->enc->encrypt(kc, ivec, cksum, 1);
+        if (ret != 0)
+            goto cleanup;
+    }
 
     /* Don't encrypt B0 (header), but encrypt everything else */
     ret = ktp->enc->encrypt(kc, ivec, data, num_data);
@@ -385,7 +386,6 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
 
 cleanup:
     krb5_k_free_key(NULL, kc);
-    free(cksum.data);
     free(sign_data);
 
     return ret;
@@ -502,6 +502,18 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
             goto cleanup;
 
         ivec = &counter;
+    }
+
+    /* Decrypt checksum from trailer */
+    {
+        krb5_crypto_iov cksum[1];
+
+        cksum[0].flags = KRB5_CRYPTO_TYPE_DATA;
+        cksum[0].data = trailer->data;
+
+        ret = ktp->enc->decrypt(kc, ivec, cksum, 1);
+        if (ret != 0)
+            goto cleanup;
     }
 
     /* Don't decrypt B0 (header), but decrypt everything else */
