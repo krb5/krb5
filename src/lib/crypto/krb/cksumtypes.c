@@ -125,23 +125,23 @@ const struct krb5_cksumtypes krb5int_cksumtypes_list[] = {
       krb5int_dk_checksum, NULL,
       20, 12, 0 },
 
-    { CKSUMTYPE_HMAC_SHA1_96_AES256,
+    { CKSUMTYPE_HMAC_SHA1_96_CAMELLIA256,
       "hmac-sha1-96-camellia256", { 0 }, "HMAC-SHA1 Camellia256 key",
       NULL, &krb5int_hash_sha1,
       krb5int_dk_checksum, NULL,
       20, 12, 0 },
 
     { CKSUMTYPE_CAMELLIA128_CBC,
-       "camellia128-cbc", { 0 }, "CBC Camellia128 key",
-       &krb5int_enc_camellia128_ctr, NULL,
-       krb5int_cbc_checksum, NULL,
-       16, 16, 0 },
+      "camellia128-cbc", { 0 }, "CBC Camellia128 key",
+      &krb5int_enc_camellia128_ctr, NULL,
+      krb5int_cbc_checksum, NULL,
+      16, 16, 0 },
 
     { CKSUMTYPE_CAMELLIA256_CBC,
-       "camellia256-cbc", { 0 }, "CBC Camellia256 key",
-       &krb5int_enc_camellia256_ctr, NULL,
-       krb5int_cbc_checksum, NULL,
-       16, 16, 0 },
+      "camellia256-cbc", { 0 }, "CBC Camellia256 key",
+      &krb5int_enc_camellia256_ctr, NULL,
+      krb5int_cbc_checksum, NULL,
+      16, 16, 0 },
 
 };
 

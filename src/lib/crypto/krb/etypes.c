@@ -172,7 +172,7 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_ccm_crypto_length, krb5int_ccm_encrypt, krb5int_ccm_decrypt,
       krb5int_aes_string_to_key,
       krb5int_dk_prf,
-      CKSUMTYPE_AES128_CBC,
+      CKSUMTYPE_AES256_CBC,
       0 /*flags */ },
 #endif /* AES_CCM */
     { ENCTYPE_CAMELLIA128_CTS_HMAC_SHA1_96,
@@ -213,7 +213,7 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_ccm_crypto_length, krb5int_ccm_encrypt, krb5int_ccm_decrypt,
       krb5int_camellia_string_to_key,
       krb5int_dk_prf,
-      CKSUMTYPE_CAMELLIA128_CBC,
+      CKSUMTYPE_CAMELLIA256_CBC,
       0 /*flags */ },
 };
 
