@@ -2564,6 +2564,16 @@ krb5_error_code
 krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
                     size_t num_data);
 
+krb5_error_code
+krb5int_camellia_encrypt(krb5_key key, const krb5_data *ivec,
+                         krb5_crypto_iov *data,
+                         size_t num_data);
+
+krb5_error_code
+krb5int_camellia_decrypt(krb5_key key, const krb5_data *ivec,
+                         krb5_crypto_iov *data,
+                         size_t num_data);
+
 struct _krb5_kt {       /* should move into k5-int.h */
     krb5_magic magic;
     const struct _krb5_kt_ops *ops;

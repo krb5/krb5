@@ -49,6 +49,8 @@ krb5_enctype interesting_enctypes[] = {
     ENCTYPE_AES128_CCM_128,
     ENCTYPE_AES256_CCM_128,
 #endif
+    ENCTYPE_CAMELLIA128_CTS_HMAC_SHA1_96,
+    ENCTYPE_CAMELLIA256_CTS_HMAC_SHA1_96,
     0
 };
 

@@ -65,6 +65,12 @@ static struct {
       { ENCTYPE_ARCFOUR_HMAC, ENCTYPE_DES_CBC_MD5, 0 },
       0, 0
     },
+    /* Single non-weak enctype */
+    { "camellia128-cts-hmac-sha1-96",
+      { 0 },
+      { ENCTYPE_CAMELLIA128_CTS_HMAC_SHA1_96, 0 },
+      { ENCTYPE_CAMELLIA128_CTS_HMAC_SHA1_96, 0 }
+    },
     /* Three enctypes, all weak, case variation, funky separators */
     { "  deS-HMac-shA1 , arCFour-hmaC-mD5-exp\tdeS3-Cbc-RAw\n",
       { 0 },

@@ -1,6 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * Copyright (C) 1998 by the FundsXpress, INC.
+ * Copyright (C) 1998, 2010 by the FundsXpress, INC.
  *
  * All rights reserved.
  *
@@ -104,6 +104,18 @@ const struct krb5_cksumtypes krb5int_cksumtypes_list[] = {
       &krb5int_enc_arcfour, &krb5int_hash_md5,
       krb5int_hmacmd5_checksum, NULL,
       16, 16, 0 },
+
+    { CKSUMTYPE_HMAC_SHA1_96_CAMELLIA128,
+      "hmac-sha1-96-camellia128", { 0 }, "HMAC-SHA1 Camellia128 key",
+      NULL, &krb5int_hash_sha1,
+      krb5int_dk_checksum, NULL,
+      20, 12, 0 },
+
+    { CKSUMTYPE_HMAC_SHA1_96_AES256,
+      "hmac-sha1-96-camellia256", { 0 }, "HMAC-SHA1 Camellia256 key",
+      NULL, &krb5int_hash_sha1,
+      krb5int_dk_checksum, NULL,
+      20, 12, 0 },
 
 #ifdef AES_CCM
     { CKSUMTYPE_AES128_CBC,
