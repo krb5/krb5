@@ -204,6 +204,7 @@ configure_context(krb5_context context, char *conf_section, char **db_args)
     krb5_db2_context *db_ctx;
     char **t_ptr, *opt = NULL, *val = NULL, *pval = NULL;
     profile_t profile = KRB5_DB_GET_PROFILE(context);
+    int bval;
 
     status = k5db2_init_context(context);
     if (status != 0)
@@ -251,6 +252,18 @@ configure_context(krb5_context context, char *conf_section, char **db_args)
             goto cleanup;
         db_ctx->db_name = strdup(pval);
     }
+
+    status = profile_get_boolean(profile, KDB_MODULE_SECTION, conf_section,
+                                 KRB5_CONF_DISABLE_LAST_SUCCESS, FALSE, &bval);
+    if (status != 0)
+        goto cleanup;
+    db_ctx->disable_last_success = bval;
+
+    status = profile_get_boolean(profile, KDB_MODULE_SECTION, conf_section,
+                                 KRB5_CONF_DISABLE_LOCKOUT, FALSE, &bval);
+    if (status != 0)
+        goto cleanup;
+    db_ctx->disable_lockout = bval;
 
 cleanup:
     free(opt);

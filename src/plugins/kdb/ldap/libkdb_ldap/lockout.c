@@ -113,9 +113,15 @@ krb5_ldap_lockout_check_policy(krb5_context context,
                                krb5_timestamp stamp)
 {
     krb5_error_code code;
+    kdb5_dal_handle *dal_handle;
+    krb5_ldap_context *ldap_context;
     krb5_kvno max_fail = 0;
     krb5_deltat failcnt_interval = 0;
     krb5_deltat lockout_duration = 0;
+
+    SETUP_CONTEXT();
+    if (ldap_context->disable_lockout)
+        return 0;
 
     code = lookup_lockout_policy(context, entry, &max_fail,
                                  &failcnt_interval,
@@ -136,10 +142,14 @@ krb5_ldap_lockout_audit(krb5_context context,
                         krb5_error_code status)
 {
     krb5_error_code code;
+    kdb5_dal_handle *dal_handle;
+    krb5_ldap_context *ldap_context;
     krb5_kvno max_fail = 0;
     krb5_deltat failcnt_interval = 0;
     krb5_deltat lockout_duration = 0;
     int nentries = 1;
+
+    SETUP_CONTEXT();
 
     switch (status) {
     case 0:
@@ -150,26 +160,32 @@ krb5_ldap_lockout_audit(krb5_context context,
         return 0;
     }
 
-    code = lookup_lockout_policy(context, entry, &max_fail,
-                                 &failcnt_interval,
-                                 &lockout_duration);
-    if (code != 0)
-        return code;
+    if (!ldap_context->disable_lockout) {
+        code = lookup_lockout_policy(context, entry, &max_fail,
+                                     &failcnt_interval,
+                                     &lockout_duration);
+        if (code != 0)
+            return code;
+    }
 
     entry->mask = 0;
 
     assert (!locked_check_p(context, stamp, max_fail, lockout_duration, entry));
 
+    /* Only mark the authentication as successful if the entry
+     * required preauthentication, otherwise we have no idea. */
     if (status == 0 && (entry->attributes & KRB5_KDB_REQUIRES_PRE_AUTH)) {
-        /*
-         * Only mark the authentication as successful if the entry
-         * required preauthentication, otherwise we have no idea.
-         */
-        entry->fail_auth_count = 0;
-        entry->last_success = stamp;
-        entry->mask |= KADM5_FAIL_AUTH_COUNT | KADM5_LAST_SUCCESS;
-    } else if (status == KRB5KDC_ERR_PREAUTH_FAILED ||
-               status == KRB5KRB_AP_ERR_BAD_INTEGRITY) {
+        if (!ldap_context->disable_lockout && entry->fail_auth_count != 0) {
+            entry->fail_auth_count = 0;
+            entry->mask |= KADM5_FAIL_AUTH_COUNT;
+        }
+        if (!ldap_context->disable_last_success) {
+            entry->last_success = stamp;
+            entry->mask |= KADM5_LAST_SUCCESS;
+        }
+    } else if (!ldap_context->disable_lockout &&
+               (status == KRB5KDC_ERR_PREAUTH_FAILED ||
+                status == KRB5KRB_AP_ERR_BAD_INTEGRITY)) {
         if (failcnt_interval != 0 &&
             stamp > entry->last_failed + failcnt_interval) {
             /* Reset fail_auth_count after failcnt_interval */
@@ -182,8 +198,7 @@ krb5_ldap_lockout_audit(krb5_context context,
     }
 
     if (entry->mask) {
-        code = krb5_ldap_put_principal(context, entry,
-                                       &nentries, NULL);
+        code = krb5_ldap_put_principal(context, entry, &nentries, NULL);
         if (code != 0)
             return code;
     }

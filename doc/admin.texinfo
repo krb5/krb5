@@ -1051,6 +1051,23 @@ For each section, the following tags may be specified in the subsection:
 @itemx db_library
 This tag indicates the name of the loadable database library. The value should be @samp{db2} for DB2 database and @samp{kldap} for LDAP database.
 
+@itemx database_name
+This DB2-specific tag indicates the location of the database.  The
+default is @* @code{@value{DefaultDatabaseName}}.
+
+@itemx disable_last_success
+If set to @code{true}, suppresses KDC updates to the ``Last successful
+authentication'' field of principal entries requiring preauthentication.
+Setting this flag may improve performance.  (Principal entries which do
+not require preauthentication never update the ``Last successful
+authentication'' field.)
+
+@itemx disable_lockout
+If set to @code{true}, suppresses KDC updates to the ``Last failed
+authentication'' and ``Failed password attempts'' fields of principal
+entries requiring preauthentication.  Setting this flag may improve
+performance, but also disables account lockout.
+
 @itemx ldap_kerberos_container_dn 
 This LDAP specific tag indicates the DN of the container object where the realm objects will be located.
 
@@ -1480,10 +1497,6 @@ database.  The default is @code{@value{DefaultAclFile}}.
 (String.)  Location of the keytab file that the legacy administration
 daemons @code{kadmind4} and @code{v5passwdd} use to authenticate to
 the database.  The default is @code{@value{DefaultAdminKeytab}}.
-
-@itemx database_name
-(String.)  Location of the Kerberos database for this realm.  The
-default is @* @code{@value{DefaultDatabaseName}}.
 
 @itemx default_principal_expiration
 (Absolute time string.)  Specifies the default expiration date of

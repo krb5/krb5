@@ -105,6 +105,37 @@ prof_get_integer_def(krb5_context ctx, const char *conf_section,
     return 0;
 }
 
+/* Get integer or string values from the config section, falling back
+   to the default section, then to hard-coded values.  */
+static errcode_t
+prof_get_boolean_def(krb5_context ctx, const char *conf_section,
+                     const char *name, krb5_boolean dfl, krb5_boolean *out)
+{
+    errcode_t err;
+    int out_temp = 0;
+
+    err = profile_get_boolean(ctx->profile, KDB_MODULE_SECTION, conf_section,
+                              name, -1, &out_temp);
+    if (err) {
+        krb5_set_error_message(ctx, err, "Error reading '%s' attribute: %s",
+                               name, error_message(err));
+        return err;
+    }
+    if (out_temp != -1) {
+        *out = out_temp;
+        return 0;
+    }
+    err = profile_get_boolean(ctx->profile, KDB_MODULE_DEF_SECTION, name, 0,
+                              dfl, &out_temp);
+    if (err) {
+        krb5_set_error_message(ctx, err, "Error reading '%s' attribute: %s",
+                               name, error_message(err));
+        return err;
+    }
+    *out = out_temp;
+    return 0;
+}
+
 /* We don't have non-null defaults in any of our calls, so don't
    bother with the extra argument.  */
 static errcode_t
@@ -308,6 +339,16 @@ krb5_ldap_read_server_params(krb5_context context, char *conf_section,
             profile_release_string(tempval);
         }
     }
+
+    if ((st = prof_get_boolean_def(context, conf_section,
+                                   KRB5_CONF_DISABLE_LAST_SUCCESS, FALSE,
+                                   &ldap_context->disable_last_success)))
+        goto cleanup;
+
+    if ((st = prof_get_boolean_def(context, conf_section,
+                                   KRB5_CONF_DISABLE_LOCKOUT, FALSE,
+                                   &ldap_context->disable_lockout)))
+        goto cleanup;
 
 cleanup:
     return(st);

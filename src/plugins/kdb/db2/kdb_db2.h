@@ -46,7 +46,9 @@ typedef struct _krb5_db2_context {
     krb5_keyblock      *db_master_key; /* Master key of database */
     krb5_keylist_node *db_master_key_list;  /* Master key list of database */
     osa_adb_policy_t    policy_db;
-    krb5_boolean tempdb;
+    krb5_boolean        tempdb;
+    krb5_boolean        disable_last_success;
+    krb5_boolean        disable_lockout;
 } krb5_db2_context;
 
 #define KRB5_DB2_MAX_RETRY 5

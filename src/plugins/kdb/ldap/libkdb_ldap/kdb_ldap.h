@@ -223,6 +223,8 @@ typedef struct _krb5_ldap_context {
     k5_mutex_t                    hndl_lock;
     krb5_ldap_krbcontainer_params *krbcontainer;
     krb5_ldap_realm_params        *lrparams;
+    krb5_boolean                  disable_last_success;
+    krb5_boolean                  disable_lockout;
     krb5_context                  kcontext;   /* to set the error code and message */
 } krb5_ldap_context;
 

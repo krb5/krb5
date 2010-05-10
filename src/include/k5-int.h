@@ -203,6 +203,8 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_DEFAULT_PRINCIPAL_EXPIRATION   "default_principal_expiration"
 #define KRB5_CONF_DEFAULT_PRINCIPAL_FLAGS        "default_principal_flags"
 #define KRB5_CONF_DICT_FILE                   "dict_file"
+#define KRB5_CONF_DISABLE_LAST_SUCCESS        "disable_last_success"
+#define KRB5_CONF_DISABLE_LOCKOUT             "disable_lockout"
 #define KRB5_CONF_DNS_LOOKUP_KDC              "dns_lookup_kdc"
 #define KRB5_CONF_DNS_LOOKUP_REALM            "dns_lookup_realm"
 #define KRB5_CONF_DNS_FALLBACK                "dns_fallback"
