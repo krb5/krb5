@@ -103,11 +103,10 @@ generate_subkey(const struct krb5_cksumtypes *ctp,
     d.length = BLOCK_SIZE;
 
     /*
-     * CBC in terms of CBC-MAC; at the cost of an additional XOR, this
-     * avoids needing to extend the SPI interface (because we need
-     * access to the AES-CBC function in the CCM provider, and moreover,
-     * verify_key() requires that the encryption providers for the key
-     * and checksum must match.
+     * CBC in terms of CBC-MAC; at the cost of an additional XOR,
+     * this avoids needing to extend the SPI interface (because we
+     * need both the CBC-MAC function from the CCM provider and
+     * the CBC function from the CTS provider).
      */
     ctp->enc->cbc_mac(key, iov, 1, NULL, &d);
     xor_128(const_Zero, L, L);
