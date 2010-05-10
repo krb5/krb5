@@ -445,6 +445,12 @@ typedef struct _krb5_crypto_iov {
 #define CKSUMTYPE_HMAC_SHA1_96_AES256   0x0010
 #define CKSUMTYPE_HMAC_SHA1_96_CAMELLIA128     -17
 #define CKSUMTYPE_HMAC_SHA1_96_CAMELLIA256     -18
+#ifdef AES_CCM
+#define CKSUMTYPE_CMAC_128_AES128              -64
+#define CKSUMTYPE_CMAC_128_AES256              -65
+#endif
+#define CKSUMTYPE_CMAC_128_CAMELLIA128         -66
+#define CKSUMTYPE_CMAC_128_CAMELLIA256         -67
 #define CKSUMTYPE_MD5_HMAC_ARCFOUR -137 /*Microsoft netlogon cksumtype*/
 #define CKSUMTYPE_HMAC_MD5_ARCFOUR -138 /*Microsoft md5 hmac cksumtype*/
 

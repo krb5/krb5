@@ -99,6 +99,20 @@ const struct krb5_cksumtypes krb5int_cksumtypes_list[] = {
       krb5int_dk_checksum, NULL,
       20, 12, 0 },
 
+#ifdef AES_CCM
+    { CKSUMTYPE_CMAC_128_AES128,
+      "cmac-128-aes128", { 0 }, "CMAC AES128 key",
+      &krb5int_enc_aes128_ctr, NULL,
+      krb5int_cmac_checksum, NULL,
+      16, 16, 0, &krb5int_enc_aes128 },
+
+    { CKSUMTYPE_CMAC_128_AES256,
+      "cmac-128-aes256", { 0 }, "CMAC AES256 key",
+      &krb5int_enc_aes256_ctr, NULL,
+      krb5int_cmac_checksum, NULL,
+      16, 16, 0, &krb5int_enc_aes256 },
+#endif /* AES_CCM */
+
     { CKSUMTYPE_MD5_HMAC_ARCFOUR,
       "md5-hmac-rc4", { 0 }, "Microsoft MD5 HMAC (RC4 key)",
       &krb5int_enc_arcfour, &krb5int_hash_md5,
@@ -117,6 +131,17 @@ const struct krb5_cksumtypes krb5int_cksumtypes_list[] = {
       krb5int_dk_checksum, NULL,
       20, 12, 0 },
 
+    { CKSUMTYPE_CMAC_128_CAMELLIA128,
+      "cmac-128-camellia128", { 0 }, "CMAC Camellia128 key",
+      &krb5int_enc_camellia128_ctr, NULL,
+      krb5int_cmac_checksum, NULL,
+      16, 16, 0, &krb5int_enc_camellia128 },
+
+    { CKSUMTYPE_CMAC_128_CAMELLIA256,
+      "cmac-128-camellia256", { 0 }, "CMAC Camellia256 key",
+      &krb5int_enc_camellia256_ctr, NULL,
+      krb5int_cmac_checksum, NULL,
+      16, 16, 0, &krb5int_enc_camellia256 },
 };
 
 const size_t krb5int_cksumtypes_length =

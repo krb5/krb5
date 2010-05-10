@@ -105,3 +105,9 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
                     const krb5_data *ivec,
                     krb5_crypto_iov *data,
                     size_t num_data);
+
+krb5_error_code
+krb5int_cmac_checksum(const struct krb5_cksumtypes *ctp,
+                      krb5_key key, krb5_keyusage usage,
+                      const krb5_crypto_iov *data, size_t num_data,
+                      krb5_data *output);
