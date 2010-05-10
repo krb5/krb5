@@ -82,7 +82,7 @@ leftshift_onebit(unsigned char *input, unsigned char *output)
     }
 }
 
-static void
+static krb5_error_code
 generate_subkey(const struct krb5_cksumtypes *ctp,
                 krb5_key key,
                 unsigned char *K1,
@@ -93,6 +93,7 @@ generate_subkey(const struct krb5_cksumtypes *ctp,
     unsigned char tmp[BLOCK_SIZE];
     krb5_crypto_iov iov[1];
     krb5_data d;
+    krb5_error_code ret;
 
     memset(Z, 0, sizeof(Z));
     iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
@@ -108,7 +109,10 @@ generate_subkey(const struct krb5_cksumtypes *ctp,
      * need both the CBC-MAC function from the CCM provider and
      * the CBC function from the CTS provider).
      */
-    ctp->enc->cbc_mac(key, iov, 1, NULL, &d);
+    ret = ctp->enc->cbc_mac(key, iov, 1, NULL, &d);
+    if (ret != 0)
+        return ret;
+
     xor_128(const_Zero, L, L);
 
     if ((L[0] & 0x80) == 0) {
@@ -124,6 +128,8 @@ generate_subkey(const struct krb5_cksumtypes *ctp,
         leftshift_onebit(K1, tmp);
         xor_128(tmp, const_Rb, K2);
     }
+
+    return 0;
 }
 
 static void
@@ -163,6 +169,8 @@ cmac128_checksum(const struct krb5_cksumtypes *ctp, krb5_key key,
     krb5_crypto_iov iov[1];
     krb5_data d;
 
+    assert(ctp->enc->cbc_mac != NULL);
+
     for (i = 0, length = 0; i < num_data; i++) {
         const krb5_crypto_iov *piov = &data[i];
 
@@ -170,7 +178,9 @@ cmac128_checksum(const struct krb5_cksumtypes *ctp, krb5_key key,
             length += piov->data.length;
     }
 
-    generate_subkey(ctp, key, K1, K2);
+    ret = generate_subkey(ctp, key, K1, K2);
+    if (ret != 0)
+        return ret;
 
     n = (length + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
@@ -196,8 +206,6 @@ cmac128_checksum(const struct krb5_cksumtypes *ctp, krb5_key key,
     IOV_BLOCK_STATE_INIT(&iov_state);
     iov_state.include_sign_only = 1;
     iov_state.pad_to_boundary = 1;
-
-    assert(ctp->enc->cbc_mac != NULL);
 
     for (i = 0; i < n - 1; i++) {
         krb5int_c_iov_get_block(input, BLOCK_SIZE, data, num_data, &iov_state);
