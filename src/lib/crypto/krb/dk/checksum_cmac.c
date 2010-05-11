@@ -62,10 +62,14 @@ static unsigned char const_Zero[BLOCK_SIZE] = {
 static void
 xor_128(unsigned char *a, unsigned char *b, unsigned char *out)
 {
-    int i;
+    int z;
 
-    for (i = 0; i < BLOCK_SIZE; i++) {
-        out[i] = a[i] ^ b[i];
+    for (z = 0; z < BLOCK_SIZE / 4; z++) {
+        unsigned char *aptr = &a[z * 4];
+        unsigned char *bptr = &b[z * 4];
+        unsigned char *outptr = &out[z * 4];
+
+        store_32_n(load_32_n(aptr) ^ load_32_n(bptr), outptr);
     }
 }
 
@@ -75,10 +79,10 @@ leftshift_onebit(unsigned char *input, unsigned char *output)
     int i;
     unsigned char overflow = 0;
 
-    for (i = BLOCK_SIZE - 1; i>=0; i--) {
+    for (i = BLOCK_SIZE - 1; i >= 0; i--) {
         output[i] = input[i] << 1;
         output[i] |= overflow;
-        overflow = (input[i] & 0x80) ? 1 :0;
+        overflow = (input[i] & 0x80) ? 1 : 0;
     }
 }
 
