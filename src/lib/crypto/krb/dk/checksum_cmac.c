@@ -236,6 +236,8 @@ cmac128_checksum(const struct krb5_cksumtypes *ctp, krb5_key key,
     if (ret != 0)
         return ret;
 
+    assert(output->length >= d.length);
+
     output->length = d.length;
     memcpy(output->data, d.data, d.length);
 
