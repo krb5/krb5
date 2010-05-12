@@ -1950,17 +1950,6 @@ krb5_get_profile(krb5_context, struct _profile_t * /* profile_t */ *);
 
 #if KRB5_DEPRECATED
 KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV
-krb5_get_in_tkt(krb5_context, krb5_flags, krb5_address *const *,
-                krb5_enctype *, krb5_preauthtype *,
-                krb5_error_code (*)(krb5_context, krb5_enctype, krb5_data *,
-                                    krb5_const_pointer, krb5_keyblock **),
-                krb5_const_pointer,
-                krb5_error_code (*)(krb5_context, const krb5_keyblock *,
-                                    krb5_const_pointer, krb5_kdc_rep * ),
-                krb5_const_pointer, krb5_creds *, krb5_ccache,
-                krb5_kdc_rep **);
-
-KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV
 krb5_get_in_tkt_with_password(krb5_context, krb5_flags, krb5_address *const *,
                               krb5_enctype *, krb5_preauthtype *, const char *,
                               krb5_ccache, krb5_creds *, krb5_kdc_rep **);

@@ -75,7 +75,6 @@ STLIBOBJS= \
 	pac_sign.o	\
 	parse.o		\
 	pr_to_salt.o	\
-	preauth.o	\
 	preauth2.o	\
 	gic_opt_set_pa.o	\
 	princ_comp.o	\
@@ -174,7 +173,6 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)pac_sign.$(OBJEXT)	\
 	$(OUTPRE)parse.$(OBJEXT)	\
 	$(OUTPRE)pr_to_salt.$(OBJEXT)	\
-	$(OUTPRE)preauth.$(OBJEXT)	\
 	$(OUTPRE)preauth2.$(OBJEXT)	\
 	$(OUTPRE)gic_opt_set_pa.$(OBJEXT)	\
 	$(OUTPRE)princ_comp.$(OBJEXT)	\
@@ -274,7 +272,6 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/pac_sign.c	\
 	$(srcdir)/parse.c	\
 	$(srcdir)/pr_to_salt.c	\
-	$(srcdir)/preauth.c	\
 	$(srcdir)/preauth2.c	\
 	$(srcdir)/gic_opt_set_pa.c	\
 	$(srcdir)/princ_comp.c	\

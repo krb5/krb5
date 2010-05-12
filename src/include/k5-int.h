@@ -1082,23 +1082,6 @@ typedef struct _krb5_preauth_ops {
     krb5_preauth_process_proc   process;
 } krb5_preauth_ops;
 
-krb5_error_code
-krb5_obtain_padata(krb5_context, krb5_pa_data **,
-                   krb5_error_code (*)(krb5_context, const krb5_enctype,
-                                       krb5_data *, krb5_const_pointer,
-                                       krb5_keyblock **),
-                   krb5_const_pointer, krb5_creds *, krb5_kdc_req *);
-
-krb5_error_code
-krb5_process_padata(krb5_context, krb5_kdc_req *, krb5_kdc_rep *,
-                    krb5_error_code (*)(krb5_context, const krb5_enctype,
-                                        krb5_data *, krb5_const_pointer,
-                                        krb5_keyblock **),
-                    krb5_const_pointer,
-                    krb5_error_code (*)(krb5_context, const krb5_keyblock *,
-                                        krb5_const_pointer, krb5_kdc_rep *),
-                    krb5_keyblock **, krb5_creds *, krb5_int32 *);
-
 krb5_pa_data *
 krb5int_find_pa_data(krb5_context, krb5_pa_data *const *, krb5_preauthtype);
 /* Does not return a copy; original padata sequence responsible for freeing*/
