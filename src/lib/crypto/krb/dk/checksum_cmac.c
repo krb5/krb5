@@ -101,11 +101,9 @@ generate_subkey(const struct krb5_cksumtypes *ctp,
 
     memset(Z, 0, sizeof(Z));
     iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
-    iov[0].data.length = sizeof(Z);
-    iov[0].data.data = (char *)Z;
+    iov[0].data = make_data((char *)Z, sizeof(Z));
 
-    d.data = (char *)L;
-    d.length = BLOCK_SIZE;
+    d = make_data((char *)L, BLOCK_SIZE);
 
     /*
      * CBC in terms of CBC-MAC; at the cost of an additional XOR,
@@ -196,16 +194,12 @@ cmac128_checksum(const struct krb5_cksumtypes *ctp, krb5_key key,
     }
 
     iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
-    iov[0].data.data = (char *)input;
-    iov[0].data.length = BLOCK_SIZE;
+    iov[0].data = make_data((char *)input, BLOCK_SIZE);
 
     memset(Y, 0, BLOCK_SIZE);
 
-    ivec.data = (char *)Y;
-    ivec.length = BLOCK_SIZE;
-
-    d.data = (char *)Y;
-    d.length = BLOCK_SIZE;
+    ivec = make_data((char *)Y, BLOCK_SIZE);
+    d = make_data((char *)Y, BLOCK_SIZE);
 
     IOV_BLOCK_STATE_INIT(&iov_state);
     iov_state.include_sign_only = 1;
@@ -229,8 +223,7 @@ cmac128_checksum(const struct krb5_cksumtypes *ctp, krb5_key key,
         xor_128(padded, K2, M_last);
     }
 
-    iov[0].data.data = (char *)M_last;
-    iov[0].data.length = BLOCK_SIZE;
+    iov[0].data = make_data((char *)M_last, BLOCK_SIZE);
 
     ret = ctp->enc->cbc_mac(key, iov, 1, &ivec, &d);
     if (ret != 0)

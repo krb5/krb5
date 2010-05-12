@@ -306,8 +306,7 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
     }
 
     sign_data[num_sign_data].flags = KRB5_CRYPTO_TYPE_HEADER;
-    sign_data[num_sign_data].data.data = (char *)B0;
-    sign_data[num_sign_data].data.length = sizeof(B0);
+    sign_data[num_sign_data].data = make_data((char *)B0, sizeof(B0));
     ret = format_B0(&sign_data[num_sign_data].data, &header->data, trailer_len,
                     (krb5_ui_8)adata_len, (krb5_ui_8)payload_len);
     if (ret != 0)
@@ -316,8 +315,7 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
 
     /* Include length of associated data in CBC-MAC */
     sign_data[num_sign_data].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
-    sign_data[num_sign_data].data.data = adata_len_buf;
-    sign_data[num_sign_data].data.length = sizeof(adata_len_buf);
+    sign_data[num_sign_data].data = make_data(adata_len_buf, sizeof(adata_len_buf));
     ret = encode_a_len(&sign_data[num_sign_data].data, (krb5_ui_8)adata_len);
     if (ret != 0)
         goto cleanup;
@@ -333,8 +331,7 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
             sign_data[num_sign_data++] = data[i];
     }
 
-    d1.data = (char *)constantdata;
-    d1.length = K5CLENGTH;
+    d1 = make_data((char *)constantdata, K5CLENGTH);
 
     d1.data[0] = (usage >> 24) & 0xFF;
     d1.data[1] = (usage >> 16) & 0xFF;
@@ -357,8 +354,7 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
 
     /* Initialize first counter block */
     if (ivec == NULL) {
-        counter.length = sizeof(Ctr);
-        counter.data = (char *)Ctr;
+        counter = make_data((char *)Ctr, sizeof(Ctr));
 
         ret = format_Ctr0(&counter, &sign_data[0].data);
         if (ret != 0)
@@ -413,8 +409,7 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
     char adata_len_buf[6];
     unsigned char B0[16], Ctr[16];
 
-    made_cksum.data = NULL;
-    made_cksum.length = 0;
+    made_cksum = empty_data();
 
     header_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_HEADER);
 
@@ -454,8 +449,7 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
     }
 
     sign_data[num_sign_data].flags = KRB5_CRYPTO_TYPE_HEADER;
-    sign_data[num_sign_data].data.data = (char *)B0;
-    sign_data[num_sign_data].data.length = sizeof(B0);
+    sign_data[num_sign_data].data = make_data((char *)B0, sizeof(B0));
     ret = format_B0(&sign_data[num_sign_data].data, &header->data, trailer_len,
                     (krb5_ui_8)adata_len, (krb5_ui_8)payload_len);
     if (ret != 0)
@@ -464,8 +458,7 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
 
     /* Include length of associated data in CBC-MAC */
     sign_data[num_sign_data].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
-    sign_data[num_sign_data].data.data = adata_len_buf;
-    sign_data[num_sign_data].data.length = sizeof(adata_len_buf);
+    sign_data[num_sign_data].data = make_data(adata_len_buf, sizeof(adata_len_buf));
     ret = encode_a_len(&sign_data[num_sign_data].data, (krb5_ui_8)adata_len);
     if (ret != 0)
         goto cleanup;
@@ -494,8 +487,7 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
 
     /* Initialize first counter block */
     if (ivec == NULL) {
-        counter.length = sizeof(Ctr);
-        counter.data = (char *)Ctr;
+        counter = make_data((char *)Ctr, sizeof(Ctr));
 
         ret = format_Ctr0(&counter, &sign_data[0].data);
         if (ret != 0)
