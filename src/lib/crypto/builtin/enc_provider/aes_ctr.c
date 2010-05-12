@@ -135,13 +135,13 @@ krb5int_aes_encrypt_ctr(krb5_key key,
     getctrblockno(&blockno, ctr);
 
     for (;;) {
-	unsigned char plain[BLOCK_SIZE], *block;
+	unsigned char storage[BLOCK_SIZE], *block;
 	unsigned char ectr[BLOCK_SIZE];
 
 	if (blockno >= maxblocks(ctr[0] + 1))
 	    return KRB5_CRYPTO_INTERNAL;
 
-        block = iov_next_block(plain, BLOCK_SIZE, data, num_data, &input_pos);
+        block = iov_next_block(storage, BLOCK_SIZE, data, num_data, &input_pos);
         if (block == NULL)
 	    break;
 
@@ -149,7 +149,7 @@ krb5int_aes_encrypt_ctr(krb5_key key,
 	    abort();
 
 	xorblock(block, ectr);
-	iov_store_block(data, num_data, block, plain, BLOCK_SIZE, &output_pos);
+	iov_store_block(data, num_data, block, storage, BLOCK_SIZE, &output_pos);
 
 	putctrblockno(++blockno, ctr);
     }
