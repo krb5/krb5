@@ -135,79 +135,21 @@ krb5int_camellia_encrypt_ctr(krb5_key key,
     getctrblockno(&blockno, ctr);
 
     for (;;) {
-        unsigned char plain[BLOCK_SIZE];
+        unsigned char plain[BLOCK_SIZE], *block;
         unsigned char ectr[BLOCK_SIZE];
 
         if (blockno >= maxblocks(ctr[0] + 1))
             return KRB5_CRYPTO_INTERNAL;
 
-        if (!krb5int_c_iov_get_block(plain, BLOCK_SIZE, data, num_data, &input_pos))
+        block = iov_next_block(plain, BLOCK_SIZE, data, num_data, &input_pos);
+        if (block == NULL)
             break;
 
         if (camellia_enc_blk(ctr, ectr, &ctx) != camellia_good)
             abort();
 
-        xorblock(plain, ectr);
-        krb5int_c_iov_put_block(data, num_data, plain, BLOCK_SIZE, &output_pos);
-
-        putctrblockno(++blockno, ctr);
-    }
-
-    if (ivec != NULL)
-        memcpy(ivec->data, ctr, sizeof(ctr));
-
-    return 0;
-}
-
-static krb5_error_code
-krb5int_camellia_decrypt_ctr(krb5_key key,
-                             const krb5_data *ivec,
-                             krb5_crypto_iov *data,
-                             size_t num_data)
-{
-    camellia_ctx ctx;
-    unsigned char ctr[BLOCK_SIZE];
-    krb5_ui_8 blockno;
-    struct iov_block_state input_pos, output_pos;
-
-    if (camellia_enc_key(key->keyblock.contents,
-                         key->keyblock.length, &ctx) != camellia_good)
-        abort();
-
-    IOV_BLOCK_STATE_INIT(&input_pos);
-    IOV_BLOCK_STATE_INIT(&output_pos);
-
-    /* Don't encrypt the header (B0), and use zero instead of IOV padding */
-    input_pos.ignore_header = output_pos.ignore_header = 1;
-    input_pos.pad_to_boundary = output_pos.pad_to_boundary = 1;
-
-    if (ivec != NULL) {
-        if (ivec->length != BLOCK_SIZE || (ivec->data[0] & ~(CCM_FLAG_MASK_Q)))
-            return KRB5_BAD_MSIZE;
-
-        memcpy(ctr, ivec->data, BLOCK_SIZE);
-    } else {
-        memset(ctr, 0, BLOCK_SIZE);
-        ctr[0] = CCM_DEFAULT_COUNTER_LEN - 1;
-    }
-
-    getctrblockno(&blockno, ctr);
-
-    for (;;) {
-        unsigned char ectr[BLOCK_SIZE];
-        unsigned char cipher[BLOCK_SIZE];
-
-        if (blockno >= maxblocks(ctr[0] + 1))
-            return KRB5_CRYPTO_INTERNAL;
-
-        if (!krb5int_c_iov_get_block(cipher, BLOCK_SIZE, data, num_data, &input_pos))
-            break;
-
-        if (camellia_enc_blk(ctr, ectr, &ctx) != camellia_good)
-            abort();
-
-        xorblock(cipher, ectr);
-        krb5int_c_iov_put_block(data, num_data, cipher, BLOCK_SIZE, &output_pos);
+        xorblock(block, ectr);
+        iov_store_block(data, num_data, block, plain, BLOCK_SIZE, &output_pos);
 
         putctrblockno(++blockno, ctr);
     }

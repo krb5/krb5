@@ -42,7 +42,7 @@ xorblock(unsigned char *out, const unsigned char *in)
     int z;
     for (z = 0; z < BLOCK_SIZE/4; z++) {
         unsigned char *outptr = &out[z*4];
-        unsigned char *inptr = &in[z*4];
+        unsigned char *inptr = (unsigned char *)&in[z*4];
         /*
          * Use unaligned accesses.  On x86, this will probably still be faster
          * than multiple byte accesses for unaligned data, and for aligned data
@@ -137,79 +137,21 @@ krb5int_aes_encrypt_ctr(krb5_key key,
     getctrblockno(&blockno, ctr);
 
     for (;;) {
-	unsigned char plain[BLOCK_SIZE];
+	unsigned char plain[BLOCK_SIZE], *block;
 	unsigned char ectr[BLOCK_SIZE];
 
 	if (blockno >= maxblocks(ctr[0] + 1))
 	    return KRB5_CRYPTO_INTERNAL;
 
-	if (!krb5int_c_iov_get_block((unsigned char *)plain, BLOCK_SIZE, data, num_data, &input_pos))
+        block = iov_next_block(plain, BLOCK_SIZE, data, num_data, &input_pos);
+        if (block == NULL)
 	    break;
 
 	if (aes_enc_blk(ctr, ectr, &ctx) != aes_good)
 	    abort();
 
-	xorblock(plain, ectr);
-	krb5int_c_iov_put_block(data, num_data, (unsigned char *)plain, BLOCK_SIZE, &output_pos);
-
-	putctrblockno(++blockno, ctr);
-    }
-
-    if (ivec != NULL)
-	memcpy(ivec->data, ctr, sizeof(ctr));
-
-    return 0;
-}
-
-static krb5_error_code
-krb5int_aes_decrypt_ctr(krb5_key key,
-			const krb5_data *ivec,
-			krb5_crypto_iov *data,
-			size_t num_data)
-{
-    aes_ctx ctx;
-    unsigned char ctr[BLOCK_SIZE];
-    krb5_ui_8 blockno;
-    struct iov_block_state input_pos, output_pos;
-
-    if (aes_enc_key(key->keyblock.contents,
-		    key->keyblock.length, &ctx) != aes_good)
-	abort();
-
-    IOV_BLOCK_STATE_INIT(&input_pos);
-    IOV_BLOCK_STATE_INIT(&output_pos);
-
-    /* Don't encrypt the header (B0), and use zero instead of IOV padding */
-    input_pos.ignore_header = output_pos.ignore_header = 1;
-    input_pos.pad_to_boundary = output_pos.pad_to_boundary = 1;
-
-    if (ivec != NULL) {
-	if (ivec->length != BLOCK_SIZE || (ivec->data[0] & ~(CCM_FLAG_MASK_Q)))
-	    return KRB5_BAD_MSIZE;
-
-	memcpy(ctr, ivec->data, BLOCK_SIZE);
-    } else {
-	memset(ctr, 0, BLOCK_SIZE);
-	ctr[0] = CCM_DEFAULT_COUNTER_LEN - 1;
-    }
-
-    getctrblockno(&blockno, ctr);
-
-    for (;;) {
-	unsigned char ectr[BLOCK_SIZE];
-	unsigned char cipher[BLOCK_SIZE];
-
-	if (blockno >= maxblocks(ctr[0] + 1))
-	    return KRB5_CRYPTO_INTERNAL;
-
-	if (!krb5int_c_iov_get_block((unsigned char *)cipher, BLOCK_SIZE, data, num_data, &input_pos))
-	    break;
-
-	if (aes_enc_blk(ctr, ectr, &ctx) != aes_good)
-	    abort();
-
-	xorblock(cipher, ectr);
-	krb5int_c_iov_put_block(data, num_data, (unsigned char *)cipher, BLOCK_SIZE, &output_pos);
+	xorblock(block, ectr);
+	iov_store_block(data, num_data, block, plain, BLOCK_SIZE, &output_pos);
 
 	putctrblockno(++blockno, ctr);
     }
@@ -277,10 +219,6 @@ krb5int_aes_init_state_ctr (const krb5_keyblock *key, krb5_keyusage usage,
 {
     unsigned int n, q;
     krb5_error_code code;
-#if 0
-    krb5_enctype enctype;
-    krb5_data nonce;
-#endif
 
     code = krb5_c_crypto_length(NULL, key->enctype, KRB5_CRYPTO_TYPE_HEADER, &n);
     if (code != 0)
@@ -296,20 +234,6 @@ krb5int_aes_init_state_ctr (const krb5_keyblock *key, krb5_keyusage usage,
     q = 15 - n;
     state->data[0] = q - 1;
 
-#if 0
-    nonce.data = &state->data[1];
-    nonce.length = n;
-
-    code = krb5_c_random_make_octets(NULL, &nonce);
-    if (code != 0) {
-	free(state->data);
-	state->data = NULL;
-	return code;
-    }
-
-    memset(&state->data[1 + n], 0, q);
-#endif
-
     return 0;
 }
 
@@ -317,7 +241,7 @@ const struct krb5_enc_provider krb5int_enc_aes128_ctr = {
     16,
     16, 16,
     krb5int_aes_encrypt_ctr,
-    krb5int_aes_decrypt_ctr,
+    krb5int_aes_encrypt_ctr,
     krb5int_aes_cbc_mac,
     krb5int_aes_make_key,
     krb5int_aes_init_state_ctr,
@@ -329,7 +253,7 @@ const struct krb5_enc_provider krb5int_enc_aes256_ctr = {
     16,
     32, 32,
     krb5int_aes_encrypt_ctr,
-    krb5int_aes_decrypt_ctr,
+    krb5int_aes_encrypt_ctr,
     krb5int_aes_cbc_mac,
     krb5int_aes_make_key,
     krb5int_aes_init_state_ctr,

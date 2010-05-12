@@ -66,20 +66,6 @@ xorblock(unsigned char *out, const unsigned char *in)
     }
 }
 
-static const EVP_CIPHER * 
-map_mode(krb5_key key)
-{
-    switch (krb5_k_key_enctype(NULL, key)) {
-    case ENCTYPE_AES128_CCM_128:
-        return EVP_aes_128_cbc(); 
-    case ENCTYPE_AES256_CCM_128:
-        return EVP_aes_256_cbc();
-    default:
-        break;
-    }
-    return NULL;
-}
-
 /* Maximum number of invocations with a given nonce and key */
 #define maxblocks(q)            (1UL << (8 * (q)))
 
@@ -118,80 +104,22 @@ krb5int_aes_encrypt_ctr(krb5_key key,
     }
 
     for (blockno = 0; ; blockno++) {
-        unsigned char plain[AES_BLOCK_SIZE];
-        unsigned char cipher[AES_BLOCK_SIZE];
+        unsigned char storage[AES_BLOCK_SIZE], *block;
         unsigned char ectr[AES_BLOCK_SIZE];
         unsigned int num = 0;
 
         if (blockno >= maxblocks(ctr[0] + 1))
             return KRB5_CRYPTO_INTERNAL;
 
-        if (!krb5int_c_iov_get_block(plain, AES_BLOCK_SIZE, data, num_data, &input_pos))
+        block = iov_next_block(storage, AES_BLOCK_SIZE, data, num_data, &input_pos);
+        if (block == NULL)
             break;
 
-        memset(ectr, 0, sizeof(ectr));
-        AES_ctr128_encrypt(plain, cipher, AES_BLOCK_SIZE, &enck,
-                           ctr, ectr, &num);
+        /* We should not need to initialise ectr because we're on a block boundary. */
+        AES_ctr128_encrypt(block, block, AES_BLOCK_SIZE, &enck, ctr, ectr, &num);
         assert(num == 0);
 
-        krb5int_c_iov_put_block(data, num_data, cipher, AES_BLOCK_SIZE, &output_pos);
-    }
-
-    if (ivec != NULL)
-        memcpy(ivec->data, ctr, sizeof(ctr));
-
-    return 0;
-}
-
-static krb5_error_code
-krb5int_aes_decrypt_ctr(krb5_key key,
-                        const krb5_data *ivec,
-                        krb5_crypto_iov *data,
-                        size_t num_data)
-{
-    AES_KEY enck;
-    unsigned char ctr[AES_BLOCK_SIZE];
-    krb5_ui_8 blockno;
-    struct iov_block_state input_pos, output_pos;
-
-    AES_set_encrypt_key(key->keyblock.contents,
-                        NUM_BITS * key->keyblock.length, &enck);
-
-    IOV_BLOCK_STATE_INIT(&input_pos);
-    IOV_BLOCK_STATE_INIT(&output_pos);
-
-    /* Don't encrypt the header (B0), and use zero instead of IOV padding */
-    input_pos.ignore_header = output_pos.ignore_header = 1;
-    input_pos.pad_to_boundary = output_pos.pad_to_boundary = 1;
-
-    if (ivec != NULL) {
-        if (ivec->length != AES_BLOCK_SIZE || (ivec->data[0] & ~(CCM_FLAG_MASK_Q)))
-            return KRB5_BAD_MSIZE;
-
-        memcpy(ctr, ivec->data, AES_BLOCK_SIZE);
-    } else {
-        memset(ctr, 0, AES_BLOCK_SIZE);
-        ctr[0] = CCM_DEFAULT_COUNTER_LEN - 1;
-    }
-
-    for (blockno = 0; ; blockno++) {
-        unsigned char cipher[AES_BLOCK_SIZE];
-        unsigned char plain[AES_BLOCK_SIZE];
-        unsigned char ectr[AES_BLOCK_SIZE];
-        unsigned int num = 0;
-
-        if (blockno >= maxblocks(ctr[0] + 1))
-            return KRB5_CRYPTO_INTERNAL;
-
-        if (!krb5int_c_iov_get_block(cipher, AES_BLOCK_SIZE, data, num_data, &input_pos))
-            break;
-
-        memset(ectr, 0, sizeof(ectr));
-        AES_ctr128_encrypt(cipher, plain, AES_BLOCK_SIZE, &enck,
-                           ctr, ectr, &num);
-        assert(num == 0);
-
-        krb5int_c_iov_put_block(data, num_data, plain, AES_BLOCK_SIZE, &output_pos);
+        iov_store_block(data, num_data, block, storage, AES_BLOCK_SIZE, &output_pos);
     }
 
     if (ivec != NULL)
@@ -207,27 +135,22 @@ krb5int_aes_cbc_mac(krb5_key key,
                     const krb5_data *iv,
                     krb5_data *output)
 {
+    AES_KEY enck;
     unsigned char blockY[AES_BLOCK_SIZE];
     struct iov_block_state iov_state;
-    krb5_error_code ret;
-    EVP_CIPHER_CTX ciph_ctx;
 
     if (output->length < AES_BLOCK_SIZE)
         return KRB5_BAD_MSIZE;
+
+    AES_set_encrypt_key(key->keyblock.contents,
+                        NUM_BITS * key->keyblock.length, &enck);
 
     if (iv != NULL)
         memcpy(blockY, iv->data, AES_BLOCK_SIZE);
     else
         memset(blockY, 0, AES_BLOCK_SIZE);
 
-    EVP_CIPHER_CTX_init(&ciph_ctx);
-    if (EVP_EncryptInit_ex(&ciph_ctx, map_mode(key),
-                           NULL, key->keyblock.contents, NULL) == 0) {
-        return KRB5_CRYPTO_INTERNAL;
-    }
-
     IOV_BLOCK_STATE_INIT(&iov_state);
-    EVP_CIPHER_CTX_set_padding(&ciph_ctx, 0);
 
     /*
      * The CCM header may not fit in a block, because it includes a variable
@@ -237,27 +160,21 @@ krb5int_aes_cbc_mac(krb5_key key,
     iov_state.include_sign_only = 1;
     iov_state.pad_to_boundary = 1;
 
-    for (ret = 0; ;) {
+    for (;;) {
         unsigned char blockB[AES_BLOCK_SIZE];
-        int olen = AES_BLOCK_SIZE;
 
         if (!krb5int_c_iov_get_block(blockB, AES_BLOCK_SIZE, data, num_data, &iov_state))
             break;
 
         xorblock(blockB, blockY);
 
-        if (EVP_EncryptUpdate(&ciph_ctx, blockY, &olen, blockB, AES_BLOCK_SIZE) == 0) {
-            ret = KRB5_CRYPTO_INTERNAL;
-            break;
-        }
+        AES_ecb_encrypt(blockB, blockY, &enck, 1);
     }
 
     output->length = AES_BLOCK_SIZE;
     memcpy(output->data, blockY, AES_BLOCK_SIZE);
 
-    EVP_CIPHER_CTX_cleanup(&ciph_ctx);
-
-    return ret;
+    return 0;
 }
 
 static krb5_error_code
@@ -288,7 +205,7 @@ const struct krb5_enc_provider krb5int_enc_aes128_ctr = {
     16,
     16, 16,
     krb5int_aes_encrypt_ctr,
-    krb5int_aes_decrypt_ctr,
+    krb5int_aes_encrypt_ctr,
     krb5int_aes_cbc_mac,
     krb5int_aes_make_key,
     krb5int_aes_init_state_ctr,
@@ -300,7 +217,7 @@ const struct krb5_enc_provider krb5int_enc_aes256_ctr = {
     16,
     32, 32,
     krb5int_aes_encrypt_ctr,
-    krb5int_aes_decrypt_ctr,
+    krb5int_aes_encrypt_ctr,
     krb5int_aes_cbc_mac,
     krb5int_aes_make_key,
     krb5int_aes_init_state_ctr,
