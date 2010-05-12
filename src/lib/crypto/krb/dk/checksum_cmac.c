@@ -203,7 +203,6 @@ cmac128_checksum(const struct krb5_cksumtypes *ctp, krb5_key key,
 
     IOV_BLOCK_STATE_INIT(&iov_state);
     iov_state.include_sign_only = 1;
-    iov_state.pad_to_boundary = 1;
 
     for (i = 0; i < n - 1; i++) {
         krb5int_c_iov_get_block(input, BLOCK_SIZE, data, num_data, &iov_state);
