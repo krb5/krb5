@@ -150,7 +150,7 @@ EXPORTS
 	krb5_get_default_config_files		@148
 	krb5_get_default_realm			@149
 	krb5_get_host_realm			@151
-	krb5_get_in_tkt				@152	; DEPRECATED
+;	krb5_get_in_tkt				@152	; REMOVED
 	krb5_get_in_tkt_with_keytab		@153	; DEPRECATED
 	krb5_get_in_tkt_with_password		@154	; DEPRECATED
 	krb5_get_in_tkt_with_skey		@155	; DEPRECATED
