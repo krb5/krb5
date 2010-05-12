@@ -32,9 +32,7 @@
 #include <aead.h>
 #include <rand2key.h>
 
-#define CCM_FLAG_MASK_Q		0x07
-
-#define CCM_DEFAULT_COUNTER_LEN	3 /* default q=3 from RFC 5116 5.3 */
+#define DEFAULT_COUNTER_LEN	3 /* default q=3 from RFC 5116 5.3 */
 
 static void
 xorblock(unsigned char *out, const unsigned char *in)
@@ -125,13 +123,13 @@ krb5int_aes_encrypt_ctr(krb5_key key,
     input_pos.pad_to_boundary = output_pos.pad_to_boundary = 1;
 
     if (ivec != NULL) {
-	if (ivec->length != BLOCK_SIZE || (ivec->data[0] & ~(CCM_FLAG_MASK_Q)))
+	if (ivec->length != BLOCK_SIZE)
 	    return KRB5_BAD_MSIZE;
 
 	memcpy(ctr, ivec->data, BLOCK_SIZE);
     } else {
 	memset(ctr, 0, BLOCK_SIZE);
-	ctr[0] = CCM_DEFAULT_COUNTER_LEN - 1;
+	ctr[0] = DEFAULT_COUNTER_LEN - 1;
     }
 
     getctrblockno(&blockno, ctr);
