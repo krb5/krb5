@@ -1362,10 +1362,9 @@ krb5_ktfileint_internal_read_entry(krb5_context context, krb5_keytab id, krb5_ke
         error = KRB5_KT_END;
         goto fail;
     }
-    ret_entry->key.enctype = (krb5_enctype)enctype;
-
     if (KTVERSION(id) != KRB5_KT_VNO_1)
-        ret_entry->key.enctype = ntohs(ret_entry->key.enctype);
+        enctype = ntohs(enctype);
+    ret_entry->key.enctype = (krb5_enctype)enctype;
 
     /* key contents */
     ret_entry->key.magic = KV5M_KEYBLOCK;
