@@ -57,7 +57,7 @@ krb5int_ccm_prf(const struct krb5_keytypes *ktp, krb5_key key,
     memset(&ctp, 0, sizeof(ctp));
     ctp.enc = ktp->enc;
 
-    /* Similar to RFC 4615, PRF is CMAC of input */
+    /* PRF is CMAC of input */
     ret = krb5int_cmac_checksum(&ctp, kp, 0, &iov, 1, out);
     if (ret != 0)
         goto cleanup;
