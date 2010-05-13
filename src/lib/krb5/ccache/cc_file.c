@@ -595,8 +595,9 @@ krb5_fcc_read_keyblock(krb5_context context, krb5_ccache id, krb5_keyblock *keyb
     keyblock->magic = KV5M_KEYBLOCK;
     keyblock->contents = 0;
 
+    /* Enctype is signed, so sign-extend the 16-bit value we read. */
     kret = krb5_fcc_read_ui_2(context, id, &ui2);
-    keyblock->enctype = ui2;
+    keyblock->enctype = (krb5_int16) ui2;
     CHECK(kret);
     if (data->version == KRB5_FCC_FVNO_3) {
         /* This works because the old etype is the same as the new enctype. */
