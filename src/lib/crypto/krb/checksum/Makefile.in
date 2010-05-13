@@ -10,12 +10,14 @@ DEFS=
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-STLIBOBJS= cbc.o confounder.o hmac_md5.o unkeyed.o
+STLIBOBJS= cbc.o cmac.o confounder.o hmac_md5.o unkeyed.o
 
-OBJS=	$(OUTPRE)cbc.$(OBJEXT) $(OUTPRE)confounder.$(OBJEXT) \
-	$(OUTPRE)hmac_md5.$(OBJEXT) $(OUTPRE)unkeyed.$(OBJEXT)
+OBJS=	$(OUTPRE)cbc.$(OBJEXT) $(OUTPRE)cmac.$(OBJECT) \
+	$(OUTPRE)confounder.$(OBJEXT) $(OUTPRE)hmac_md5.$(OBJEXT) \
+	$(OUTPRE)unkeyed.$(OBJEXT)
 
-SRCS=	$(srcdir)/cbc.c $(srcdir)/confounder.c $(srcdir)/hmac_md5.c \
+SRCS=	$(srcdir)/cbc.c $(srcdir)/cmac.c \
+	$(srcdir)/confounder.c $(srcdir)/hmac_md5.c \
 	$(srcdir)/unkeyed.c
 
 ##DOS##LIBOBJS = $(OBJS)

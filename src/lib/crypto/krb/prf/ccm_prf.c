@@ -37,10 +37,14 @@ krb5_error_code
 krb5int_ccm_prf(const struct krb5_keytypes *ktp, krb5_key key,
                 const krb5_data *in, krb5_data *out)
 {
+    struct krb5_cksumtypes ctp;
     krb5_crypto_iov iov;
     krb5_data prfconst = make_data("prf", 3);
     krb5_key kp = NULL;
     krb5_error_code ret;
+
+    if (ktp->prf_length != ktp->enc->block_size)
+        return KRB5_BAD_MSIZE;
 
     iov.flags = KRB5_CRYPTO_TYPE_DATA;
     iov.data = *in;
@@ -50,7 +54,11 @@ krb5int_ccm_prf(const struct krb5_keytypes *ktp, krb5_key key,
     if (ret != 0)
         goto cleanup;
 
-    ret = ktp->enc->cbc_mac(kp, &iov, 1, NULL, out);
+    memset(&ctp, 0, sizeof(ctp));
+    ctp.enc = ktp->enc;
+
+    /* Similar to RFC 4615, PRF is CMAC of input */
+    ret = krb5int_cmac_checksum(&ctp, kp, 0, &iov, 1, out);
     if (ret != 0)
         goto cleanup;
 
