@@ -116,7 +116,7 @@ pbkdf2_string_to_key(const struct krb5_keytypes *ktp,
     static const krb5_data usage = { KV5M_DATA, 8, "kerberos" };
     krb5_key tempkey = NULL;
     krb5_error_code err;
-    krb5_data spepper = empty_data();
+    krb5_data sandp = empty_data();
 
     if (params) {
         unsigned char *p = (unsigned char *) params->data;
@@ -145,15 +145,15 @@ pbkdf2_string_to_key(const struct krb5_keytypes *ktp,
         return KRB5_CRYPTO_INTERNAL;
 
     if (pepper != NULL) {
-        err = alloc_data(&spepper, pepper->length + 1 + salt->length);
+        err = alloc_data(&sandp, pepper->length + 1 + salt->length);
         if (err)
             return err;
 
-        memcpy(spepper.data, pepper->data, pepper->length);
-        spepper.data[pepper->length] = '\0';
-        memcpy(&spepper.data[pepper->length + 1], salt->data, salt->length);
+        memcpy(sandp.data, pepper->data, pepper->length);
+        sandp.data[pepper->length] = '\0';
+        memcpy(&sandp.data[pepper->length + 1], salt->data, salt->length);
 
-        salt = &spepper;
+        salt = &sandp;
     }
 
     err = krb5int_pbkdf2_hmac_sha1 (&out, iter_count, string, salt);
@@ -167,8 +167,8 @@ pbkdf2_string_to_key(const struct krb5_keytypes *ktp,
     err = krb5int_derive_keyblock(ktp->enc, tempkey, key, &usage);
 
 cleanup:
-    if (spepper.data)
-        free(spepper.data);
+    if (sandp.data)
+        free(sandp.data);
     if (err)
         memset (out.data, 0, out.length);
     krb5_k_free_key (NULL, tempkey);
