@@ -266,9 +266,6 @@ init_cipher_state(krb5_data *counter,
                 return ret;
         } else
             memcpy(nonce->data, &state->data[1], n);
-    } else {
-        if (nonce->length != n)
-            return KRB5_BAD_MSIZE;
     }
 
     assert(n >= 7 && n <= 13);
