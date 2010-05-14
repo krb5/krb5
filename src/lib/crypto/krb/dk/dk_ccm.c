@@ -452,7 +452,7 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
     header_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_HEADER);
 
     header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
-    if (header == NULL)
+    if (header == NULL || header->data.length != header_len)
         return KRB5_BAD_MSIZE;
 
     trailer_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_TRAILER);
