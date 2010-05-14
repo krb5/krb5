@@ -45,8 +45,6 @@
 #include "etypes.h"
 #include "cksumtypes.h"
 
-#define K5CLENGTH 5 /* 32 bit net byte order integer + one byte seed */
-
 #define BLOCK_SIZE 16
 
 static unsigned char const_Rb[BLOCK_SIZE] = {
