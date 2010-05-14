@@ -1,8 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * lib/crypto/krb/prf/dk_prf.c
+ * lib/crypto/krb/prf/ccm_prf.c
  *
- * Copyright (C) 2004 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2010 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
