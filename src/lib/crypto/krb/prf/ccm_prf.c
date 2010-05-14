@@ -37,7 +37,6 @@ krb5_error_code
 krb5int_ccm_prf(const struct krb5_keytypes *ktp, krb5_key key,
                 const krb5_data *in, krb5_data *out)
 {
-    struct krb5_cksumtypes ctp;
     krb5_crypto_iov iov;
     krb5_data prfconst = make_data("prf", 3);
     krb5_key kp = NULL;
@@ -54,11 +53,8 @@ krb5int_ccm_prf(const struct krb5_keytypes *ktp, krb5_key key,
     if (ret != 0)
         goto cleanup;
 
-    memset(&ctp, 0, sizeof(ctp));
-    ctp.enc = ktp->enc;
-
     /* PRF is CMAC of input */
-    ret = krb5int_cmac_checksum(&ctp, kp, 0, &iov, 1, out);
+    ret = krb5int_cmac_checksum(ktp->enc, kp, 0, &iov, 1, out);
     if (ret != 0)
         goto cleanup;
 

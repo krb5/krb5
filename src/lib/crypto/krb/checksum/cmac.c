@@ -154,12 +154,11 @@ padding(unsigned char *lastb, unsigned char *pad, int length)
  * is compatible with RFC 4493.
  */
 krb5_error_code
-krb5int_cmac_checksum(const struct krb5_cksumtypes *ctp,
+krb5int_cmac_checksum(const struct krb5_enc_provider *enc,
                       krb5_key key, krb5_keyusage usage,
                       const krb5_crypto_iov *data, size_t num_data,
                       krb5_data *output)
 {
-    const struct krb5_enc_provider *enc = ctp->enc;
     unsigned char Y[BLOCK_SIZE], M_last[BLOCK_SIZE], padded[BLOCK_SIZE];
     unsigned char K1[BLOCK_SIZE], K2[BLOCK_SIZE];
     unsigned char input[BLOCK_SIZE];
