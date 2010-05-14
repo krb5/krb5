@@ -235,6 +235,6 @@ krb5int_cmac_checksum(const struct krb5_enc_provider *enc,
     output->length = d.length;
     memcpy(output->data, d.data, d.length);
 
-    return ret;
+    return 0;
 }
 
