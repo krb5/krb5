@@ -61,7 +61,14 @@ krb5int_aes_string_to_key(const struct krb5_keytypes *enc,
                           const krb5_data *string, const krb5_data *salt,
                           const krb5_data *params, krb5_keyblock *key);
 
-#define krb5int_camellia_string_to_key krb5int_aes_string_to_key
+krb5_error_code
+krb5int_peppered_string_to_key(const struct krb5_keytypes *enc,
+                               const krb5_data *string, const krb5_data *salt,
+                               const krb5_data *params, krb5_keyblock *key);
+
+#define krb5int_aes_ccm_string_to_key       krb5int_peppered_string_to_key
+#define krb5int_camellia_string_to_key      krb5int_peppered_string_to_key
+#define krb5int_camellia_ccm_string_to_key  krb5int_peppered_string_to_key
 
 krb5_error_code
 krb5int_derive_keyblock(const struct krb5_enc_provider *enc,
