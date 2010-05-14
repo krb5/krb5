@@ -444,10 +444,8 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
     size_t payload_len = 0;
     char adata_len_buf[6];
     unsigned char B0[16], Ctr[16];
-    krb5_data made_cksum;
+    krb5_data made_cksum = empty_data();
     krb5_data counter = make_data((char *)Ctr, sizeof(Ctr));
-
-    made_cksum = empty_data();
 
     header_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_HEADER);
 
