@@ -224,49 +224,9 @@ valid_cipher_state_p(const krb5_data *state, unsigned int n)
 }
 
 /*
- * Returns TRUE if the cipher state is in its initial state.
+ * Format initial counter block. Counter may be chained
+ * across invocations.
  */
-static krb5_boolean
-initial_cipher_state_p(const krb5_data *state)
-{
-    unsigned int i, n;
-
-    if (state == NULL)
-        return TRUE;
-
-    n = 14 - (unsigned)state->data[0];
-
-    for (i = 1; i < n; i++) {
-        if (state->data[i] != 0)
-            return FALSE;
-    }
-
-    return TRUE;
-}
-
-static krb5_error_code
-init_cipher_state(krb5_data *counter,
-                  krb5_data *nonce,
-                  const krb5_data *state,
-                  unsigned int n)
-{
-    krb5_error_code ret;
-
-    assert(nonce->length == n);
-
-    if (!valid_cipher_state_p(state, n))
-        return KRB5_BAD_MSIZE;
-
-    if (initial_cipher_state_p(state)) {
-        ret = krb5_c_random_make_octets(NULL, nonce);
-        if (ret != 0)
-            return ret;
-    } else
-        memcpy(nonce->data, &state->data[1], n);
-
-    return 0;
-}
-
 static krb5_error_code
 format_Ctr0(krb5_data *counter,
             const krb5_data *nonce,
@@ -346,7 +306,8 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
 
     header->data.length = header_len;
 
-    ret = init_cipher_state(&counter, &header->data, state, header_len);
+    /* Initialize nonce */
+    ret = krb5_c_random_make_octets(NULL, &header->data);
     if (ret != 0)
         goto cleanup;
 
