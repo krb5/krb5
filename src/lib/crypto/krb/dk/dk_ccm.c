@@ -207,35 +207,89 @@ format_B0(krb5_data *B0,            /* B0 */
 }
 
 /*
- * format_Ctr0 is parameterized by extracting the flags octet from B0
+ * Returns TRUE if the cipher state is valid.
  */
-static krb5_error_code
-format_Ctr0(krb5_data *Ctr0, krb5_data *B0)
+static krb5_boolean
+valid_cipher_state_p(const krb5_data *state, unsigned int n)
 {
-    krb5_octet n; /* nonce length */
+    if (state != NULL) {
+        if (state->length != 16 ||
+            state->data[0] & ~(CCM_FLAG_MASK_Q) ||
+            14 - (unsigned)state->data[0] != n) {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
+/*
+ * Returns TRUE if the cipher state is in its initial state.
+ */
+static krb5_boolean
+initial_cipher_state_p(const krb5_data *state)
+{
+    unsigned int i, n;
+
+    if (state == NULL)
+        return TRUE;
+
+    n = 14 - (unsigned)state->data[0];
+
+    for (i = 1; i < n; i++) {
+        if (state->data[i] != 0)
+            return FALSE;
+    }
+
+    return TRUE;
+}
+
+static krb5_error_code
+init_cipher_state(krb5_data *counter,
+                  krb5_data *nonce,
+                  const krb5_data *state,
+                  unsigned int n,
+                  krb5_boolean encrypting)
+{
     krb5_octet q; /* counter length */
+    krb5_error_code ret;
 
-    assert(B0->length == 16);
+    assert(nonce->length == n);
 
-    q = (B0->data[0] & CCM_FLAG_MASK_Q) + 1;
+    if (!valid_cipher_state_p(state, n))
+        return KRB5_BAD_MSIZE;
 
-    Ctr0->data[0] = q - 1;
-
-    n = 15 - q;
+    if (encrypting) {
+        if (initial_cipher_state_p(state)) {
+            ret = krb5_c_random_make_octets(NULL, nonce);
+            if (ret != 0)
+                return ret;
+        } else
+            memcpy(nonce->data, &state->data[1], n);
+    } else {
+        if (nonce->length != n)
+            return KRB5_BAD_MSIZE;
+    }
 
     assert(n >= 7 && n <= 13);
 
-    memcpy(&Ctr0->data[1], &B0->data[1], n);
-    memset(&Ctr0->data[1 + n], 0, q);
+    q = 15 - n;
+    counter->data[0] = q - 1;
+    memcpy(&counter->data[1], nonce->data, n);
+
+    if (state != NULL)
+        memcpy(&counter->data[1 + n], &state->data[1 + n], q);
+    else
+        memset(&counter->data[1 + n], 0, q);
 
     return 0;
 }
- 
+
 krb5_error_code
 krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
                     krb5_key key,
                     krb5_keyusage usage,
-                    const krb5_data *ivec,
+                    const krb5_data *state,
                     krb5_crypto_iov *data,
                     size_t num_data)
 {
@@ -245,13 +299,13 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
     krb5_crypto_iov *header, *trailer, *sign_data = NULL;
     krb5_key kc = NULL;
     size_t i, num_sign_data = 0;
-    unsigned int header_len = 0;
-    unsigned int trailer_len = 0;
+    unsigned int header_len;
+    unsigned int trailer_len;
     size_t payload_len = 0;
     size_t adata_len = 0;
-    krb5_data counter;
     char adata_len_buf[6];
     unsigned char B0[16], Ctr[16];
+    krb5_data counter = make_data((char *)Ctr, sizeof(Ctr));
 
     header_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_HEADER);
 
@@ -285,19 +339,10 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
 
     header->data.length = header_len;
 
-    if (ivec != NULL) {
-        if (ivec->length != 16 ||
-            ivec->data[0] & ~(CCM_FLAG_MASK_Q) ||
-            14 - (unsigned)ivec->data[0] != header_len) {
-            ret = KRB5_BAD_MSIZE;
-            goto cleanup;
-        }
-        memcpy(header->data.data, &ivec->data[1], header_len);
-    } else {
-        ret = krb5_c_random_make_octets(NULL, &header->data);
-        if (ret != 0)
-            goto cleanup;
-    }
+    /* Initialize counter block */
+    ret = init_cipher_state(&counter, &header->data, state, header_len, TRUE);
+    if (ret != 0)
+        goto cleanup;
 
     sign_data = (krb5_crypto_iov *)calloc(num_data + 1, sizeof(krb5_crypto_iov));
     if (sign_data == NULL) {
@@ -352,17 +397,6 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
     if (ret != 0)
         goto cleanup;
 
-    /* Initialize first counter block */
-    if (ivec == NULL) {
-        counter = make_data((char *)Ctr, sizeof(Ctr));
-
-        ret = format_Ctr0(&counter, &sign_data[0].data);
-        if (ret != 0)
-            goto cleanup;
-
-        ivec = &counter;
-    }
-
     /* Encrypt checksum in trailer */
     {
         krb5_crypto_iov cksum[1];
@@ -370,15 +404,18 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
         cksum[0].flags = KRB5_CRYPTO_TYPE_DATA;
         cksum[0].data = trailer->data;
 
-        ret = ktp->enc->encrypt(kc, ivec, cksum, 1);
+        ret = ktp->enc->encrypt(kc, &counter, cksum, 1);
         if (ret != 0)
             goto cleanup;
     }
 
     /* Don't encrypt B0 (header), but encrypt everything else */
-    ret = ktp->enc->encrypt(kc, ivec, data, num_data);
+    ret = ktp->enc->encrypt(kc, &counter, data, num_data);
     if (ret != 0)
         goto cleanup;
+
+    if (state != NULL)
+        memcpy(state->data, counter.data, counter.length);
 
 cleanup:
     krb5_k_free_key(NULL, kc);
@@ -391,7 +428,7 @@ krb5_error_code
 krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
                     krb5_key key,
                     krb5_keyusage usage,
-                    const krb5_data *ivec,
+                    const krb5_data *state,
                     krb5_crypto_iov *data,
                     size_t num_data)
 {
@@ -401,20 +438,21 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
     krb5_crypto_iov *header, *trailer, *sign_data = NULL;
     krb5_key kc = NULL;
     size_t i, num_sign_data = 0;
-    unsigned int header_len = 0;
-    unsigned int trailer_len = 0;
+    unsigned int header_len;
+    unsigned int trailer_len;
     size_t adata_len = 0;
     size_t payload_len = 0;
-    krb5_data made_cksum, counter;
     char adata_len_buf[6];
     unsigned char B0[16], Ctr[16];
+    krb5_data made_cksum;
+    krb5_data counter = make_data((char *)Ctr, sizeof(Ctr));
 
     made_cksum = empty_data();
 
     header_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_HEADER);
 
     header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
-    if (header == NULL || header->data.length != header_len)
+    if (header == NULL)
         return KRB5_BAD_MSIZE;
 
     trailer_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_TRAILER);
@@ -441,6 +479,11 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
             break;
         }
     }
+
+    /* Initialize counter block */
+    ret = init_cipher_state(&counter, &header->data, state, header_len, FALSE);
+    if (ret != 0)
+        goto cleanup;
 
     sign_data = (krb5_crypto_iov *)calloc(num_data + 1, sizeof(krb5_crypto_iov));
     if (sign_data == NULL) {
@@ -485,17 +528,6 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
         goto cleanup;
     made_cksum.length = trailer_len;
 
-    /* Initialize first counter block */
-    if (ivec == NULL) {
-        counter = make_data((char *)Ctr, sizeof(Ctr));
-
-        ret = format_Ctr0(&counter, &sign_data[0].data);
-        if (ret != 0)
-            goto cleanup;
-
-        ivec = &counter;
-    }
-
     /* Decrypt checksum from trailer */
     {
         krb5_crypto_iov got_cksum[1];
@@ -503,13 +535,13 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
         got_cksum[0].flags = KRB5_CRYPTO_TYPE_DATA;
         got_cksum[0].data = trailer->data;
 
-        ret = ktp->enc->decrypt(kc, ivec, got_cksum, 1);
+        ret = ktp->enc->decrypt(kc, &counter, got_cksum, 1);
         if (ret != 0)
             goto cleanup;
     }
 
     /* Don't decrypt B0 (header), but decrypt everything else */
-    ret = ktp->enc->decrypt(kc, ivec, data, num_data);
+    ret = ktp->enc->decrypt(kc, &counter, data, num_data);
     if (ret != 0)
         goto cleanup;
 
@@ -533,6 +565,9 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
         ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
         goto cleanup;
     }
+
+    if (state != NULL)
+        memcpy(state->data, counter.data, counter.length);
 
 cleanup:
     krb5_k_free_key(NULL, kc);
