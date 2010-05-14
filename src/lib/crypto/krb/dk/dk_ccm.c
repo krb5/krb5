@@ -248,10 +248,8 @@ static krb5_error_code
 init_cipher_state(krb5_data *counter,
                   krb5_data *nonce,
                   const krb5_data *state,
-                  unsigned int n,
-                  krb5_boolean encrypting)
+                  unsigned int n)
 {
-    krb5_octet q; /* counter length */
     krb5_error_code ret;
 
     assert(nonce->length == n);
@@ -259,16 +257,28 @@ init_cipher_state(krb5_data *counter,
     if (!valid_cipher_state_p(state, n))
         return KRB5_BAD_MSIZE;
 
-    if (encrypting) {
-        if (initial_cipher_state_p(state)) {
-            ret = krb5_c_random_make_octets(NULL, nonce);
-            if (ret != 0)
-                return ret;
-        } else
-            memcpy(nonce->data, &state->data[1], n);
-    }
+    if (initial_cipher_state_p(state)) {
+        ret = krb5_c_random_make_octets(NULL, nonce);
+        if (ret != 0)
+            return ret;
+    } else
+        memcpy(nonce->data, &state->data[1], n);
+
+    return 0;
+}
+
+static krb5_error_code
+format_Ctr0(krb5_data *counter,
+            const krb5_data *nonce,
+            const krb5_data *state,
+            unsigned int n)
+{
+    krb5_octet q; /* counter length */
 
     assert(n >= 7 && n <= 13);
+
+    if (!valid_cipher_state_p(state, n))
+        return KRB5_BAD_MSIZE;
 
     q = 15 - n;
     counter->data[0] = q - 1;
@@ -336,8 +346,12 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
 
     header->data.length = header_len;
 
+    ret = init_cipher_state(&counter, &header->data, state, header_len);
+    if (ret != 0)
+        goto cleanup;
+
     /* Initialize counter block */
-    ret = init_cipher_state(&counter, &header->data, state, header_len, TRUE);
+    ret = format_Ctr0(&counter, &header->data, state, header_len);
     if (ret != 0)
         goto cleanup;
 
@@ -476,7 +490,7 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
     }
 
     /* Initialize counter block */
-    ret = init_cipher_state(&counter, &header->data, state, header_len, FALSE);
+    ret = format_Ctr0(&counter, &header->data, state, header_len);
     if (ret != 0)
         goto cleanup;
 
