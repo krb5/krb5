@@ -177,7 +177,7 @@ krb5int_aes_cbc_mac(krb5_key key,
 
 static krb5_error_code
 krb5int_aes_init_state_ctr (const krb5_keyblock *key, krb5_keyusage usage,
-                                 krb5_data *state)
+                            krb5_data *state)
 {
     unsigned int n, q;
     krb5_error_code code;
