@@ -1030,7 +1030,8 @@ buildtop = _find_buildtop()
 srctop = _find_srctop()
 plugins = _find_plugins()
 _runenv = _import_runenv()
-hostname = socket.getfqdn()
+# This gets used for principal names, so force it to lower case.
+hostname = socket.getfqdn().lower()
 null_input = open(os.devnull, 'r')
 
 krb5kdc = os.path.join(buildtop, 'kdc', 'krb5kdc')
