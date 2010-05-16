@@ -52,11 +52,6 @@ static unsigned char const_Rb[BLOCK_SIZE] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x87
 };
 
-static unsigned char const_Zero[BLOCK_SIZE] = {
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-};
-
 static void
 xor_128(unsigned char *a, unsigned char *b, unsigned char *out)
 {
@@ -103,17 +98,9 @@ generate_subkey(const struct krb5_enc_provider *enc,
 
     d = make_data((char *)L, BLOCK_SIZE);
 
-    /*
-     * CBC in terms of CBC-MAC; at the cost of an additional XOR,
-     * this avoids needing to extend the SPI interface (because we
-     * need both the CBC-MAC function from the CCM provider and
-     * the CBC function from the CTS provider).
-     */
     ret = enc->cbc_mac(key, iov, 1, NULL, &d);
     if (ret != 0)
         return ret;
-
-    xor_128(const_Zero, L, L);
 
     if ((L[0] & 0x80) == 0) {
         leftshift_onebit(L, K1);

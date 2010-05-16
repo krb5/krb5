@@ -91,15 +91,12 @@ krb5int_aes_encrypt_ctr(krb5_key key,
     input_pos.ignore_header = output_pos.ignore_header = 1;
     input_pos.pad_to_boundary = output_pos.pad_to_boundary = 1;
 
-    if (ivec != NULL) {
-        if (ivec->length != AES_BLOCK_SIZE)
-            return KRB5_BAD_MSIZE;
+    assert(ivec != NULL);
 
-        memcpy(ctr, ivec->data, AES_BLOCK_SIZE);
-    } else {
-        memset(ctr, 0, AES_BLOCK_SIZE);
-        ctr[0] = DEFAULT_COUNTER_LEN - 1;
-    }
+    if (ivec->length != AES_BLOCK_SIZE)
+        return KRB5_BAD_MSIZE;
+
+    memcpy(ctr, ivec->data, AES_BLOCK_SIZE);
 
     for (blockno = 0; ; blockno++) {
         unsigned char storage[AES_BLOCK_SIZE], *block;

@@ -122,15 +122,12 @@ krb5int_camellia_encrypt_ctr(krb5_key key,
     input_pos.ignore_header = output_pos.ignore_header = 1;
     input_pos.pad_to_boundary = output_pos.pad_to_boundary = 1;
 
-    if (ivec != NULL) {
-        if (ivec->length != BLOCK_SIZE)
-            return KRB5_BAD_MSIZE;
+    assert(ivec != NULL);
 
-        memcpy(ctr, ivec->data, BLOCK_SIZE);
-    } else {
-        memset(ctr, 0, BLOCK_SIZE);
-        ctr[0] = DEFAULT_COUNTER_LEN - 1;
-    }
+    if (ivec->length != BLOCK_SIZE)
+        return KRB5_BAD_MSIZE;
+
+    memcpy(ctr, ivec->data, BLOCK_SIZE);
 
     getctrblockno(&blockno, ctr);
 
