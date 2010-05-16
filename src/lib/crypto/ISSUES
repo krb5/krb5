@@ -10,7 +10,3 @@ polluting names?
 
 Some routines assume "int" is big enough to describe all buffers that
 may be supplied.
-
-The prng here is poor.  It should not use n-fold as a mixing function,
-because it's possible that the input will be structured in some way
-that may interact poorly with the n-fold algorithm.
