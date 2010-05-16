@@ -94,9 +94,6 @@ static inline void putctrblockno(krb5_ui_8 blockno,
     }
 }
 
-/* Maximum number of invocations with a given nonce and key */
-#define maxblocks(q)            (1UL << (8 * (q)))
-
 /*
  * ivec must be a correctly formatted counter block per SP800-38C A.3
  */
@@ -134,9 +131,6 @@ krb5int_camellia_encrypt_ctr(krb5_key key,
     for (;;) {
         unsigned char storage[BLOCK_SIZE], *block;
         unsigned char ectr[BLOCK_SIZE];
-
-        if (blockno >= maxblocks(ctr[0] + 1))
-            return KRB5_CRYPTO_INTERNAL;
 
         block = iov_next_block(storage, BLOCK_SIZE, data, num_data, &input_pos);
         if (block == NULL)
@@ -212,24 +206,7 @@ static krb5_error_code
 krb5int_camellia_init_state_ctr (const krb5_keyblock *key, krb5_keyusage usage,
                                  krb5_data *state)
 {
-    unsigned int n, q;
-    krb5_error_code code;
-
-    code = krb5_c_crypto_length(NULL, key->enctype, KRB5_CRYPTO_TYPE_HEADER, &n);
-    if (code != 0)
-        return code;
-
-    assert(n >= 7 && n <= 13);
-
-    state->length = 16;
-    state->data = k5alloc(state->length, &code);
-    if (code != 0)
-        return code;
-
-    q = 15 - n;
-    state->data[0] = q - 1;
-
-    return 0;
+    return alloc_data(state, 16);
 }
 
 const struct krb5_enc_provider krb5int_enc_camellia128_ctr = {

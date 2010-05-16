@@ -207,23 +207,6 @@ format_B0(krb5_data *B0,            /* B0 */
 }
 
 /*
- * Returns TRUE if the cipher state is valid.
- */
-static krb5_boolean
-valid_cipher_state_p(const krb5_data *state, unsigned int n)
-{
-    if (state != NULL) {
-        if (state->length != 16 ||
-            state->data[0] & ~(CCM_FLAG_MASK_Q) ||
-            14 - (unsigned)state->data[0] != n) {
-            return FALSE;
-        }
-    }
-
-    return TRUE;
-}
-
-/*
  * Format initial counter block. Counter may be chained
  * across invocations.
  */
@@ -237,9 +220,6 @@ format_Ctr0(krb5_data *counter,
 
     assert(n >= 7 && n <= 13);
 
-    if (!valid_cipher_state_p(state, n))
-        return KRB5_BAD_MSIZE;
-
     q = 15 - n;
     counter->data[0] = q - 1;
     memcpy(&counter->data[1], nonce->data, n);
@@ -250,6 +230,27 @@ format_Ctr0(krb5_data *counter,
         memset(&counter->data[1 + n], 0, q);
 
     return 0;
+}
+
+static krb5_boolean
+valid_payload_length_p(const struct krb5_keytypes *ktp,
+                       unsigned int n,
+                       unsigned int payload_len)
+{
+    unsigned int block_size = ktp->enc->block_size;
+    unsigned int nblocks, maxblocks;
+    krb5_octet q;
+
+    assert(n >= 7 && n <= 13);
+
+    q = 15 - n;
+
+    maxblocks = (1UL << (8 * q));
+
+    nblocks = 1; /* tag */
+    nblocks += (payload_len + block_size - 1) / block_size;
+
+    return (nblocks <= maxblocks);
 }
 
 krb5_error_code
@@ -303,6 +304,9 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
             break;
         }
     }
+
+    if (!valid_payload_length_p(ktp, header_len, payload_len))
+        return KRB5_BAD_MSIZE;
 
     header->data.length = header_len;
 
@@ -449,6 +453,9 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
             break;
         }
     }
+
+    if (!valid_payload_length_p(ktp, header_len, payload_len))
+        return KRB5_BAD_MSIZE;
 
     /* Initialize counter block */
     ret = format_Ctr0(&counter, &header->data, state, header_len);
