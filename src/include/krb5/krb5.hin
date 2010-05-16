@@ -426,9 +426,13 @@ typedef struct _krb5_crypto_iov {
 #ifdef AES_CCM
 #define ENCTYPE_AES128_CCM_128  -64     /* AES CCM mode with 128-bit key */
 #define ENCTYPE_AES256_CCM_128  -65     /* AES CCM mode with 256-bit key */
+#define ENCTYPE_AES128_GCM_128  -68     /* AES GCM mode with 128-bit key */
+#define ENCTYPE_AES256_GCM_128  -69     /* AES GCM mode with 256-bit key */
 #endif
 #define ENCTYPE_CAMELLIA128_CCM_128 -66 /* Camellia CCM mode with 128-bit key */
 #define ENCTYPE_CAMELLIA256_CCM_128 -67 /* Camellia CCM mode with 256-bit key */
+#define ENCTYPE_CAMELLIA128_GCM_128 -70 /* Camellia GCM mode with 128-bit key */
+#define ENCTYPE_CAMELLIA256_GCM_128 -71 /* Camellia GCM mode with 256-bit key */
 #define ENCTYPE_UNKNOWN         0x01ff
 
 #define CKSUMTYPE_CRC32         0x0001
@@ -448,9 +452,13 @@ typedef struct _krb5_crypto_iov {
 #ifdef AES_CCM
 #define CKSUMTYPE_CMAC_128_AES128              -64  /* CMAC with 128-bit AES key */
 #define CKSUMTYPE_CMAC_128_AES256              -65  /* CMAC with 256-bit AES key */
+#define CKSUMTYPE_GMAC_128_AES128              -68  /* GMAC with 128-bit AES key */
+#define CKSUMTYPE_GMAC_128_AES256              -69  /* GMAC with 256-bit AES key */
 #endif
 #define CKSUMTYPE_CMAC_128_CAMELLIA128         -66  /* CMAC with 128-bit Camellia key */
 #define CKSUMTYPE_CMAC_128_CAMELLIA256         -67  /* CMAC with 256-bit Camellia key */
+#define CKSUMTYPE_GMAC_128_CAMELLIA128         -70  /* GMAC with 128-bit Camellia key */
+#define CKSUMTYPE_GMAC_128_CAMELLIA256         -71  /* GMAC with 256-bit Camellia key */
 #define CKSUMTYPE_MD5_HMAC_ARCFOUR -137 /*Microsoft netlogon cksumtype*/
 #define CKSUMTYPE_HMAC_MD5_ARCFOUR -138 /*Microsoft md5 hmac cksumtype*/
 
