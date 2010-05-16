@@ -112,6 +112,7 @@ krb5int_derive_random(const struct krb5_enc_provider *enc,
     /* Loop encrypting the blocks until enough key bytes are generated. */
     n = 0;
     while (n < keybytes) {
+        /* Counter mode ciphers use CBC-MAC to get ECB mode */
         if (enc->cbc_mac != NULL)
             ret = enc->cbc_mac(inkey, &iov, 1, NULL, &iov.data);
         else
