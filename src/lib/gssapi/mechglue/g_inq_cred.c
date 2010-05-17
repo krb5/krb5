@@ -51,9 +51,8 @@ gss_OID_set *		mechanisms;
 
 {
     OM_uint32		status, elapsed_time, temp_minor_status;
+    gss_cred_id_t	defcred = GSS_C_NO_CREDENTIAL;
     gss_union_cred_t	union_cred;
-    gss_mechanism	mech;
-    gss_name_t		internal_name;
     int			i;
 
     /* Initialize outputs. */
@@ -72,49 +71,14 @@ gss_OID_set *		mechanisms;
 	return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
     if (cred_handle == GSS_C_NO_CREDENTIAL) {
-	/*
-	 * No credential was supplied. This means we can't get a mechanism
-	 * pointer to call the mechanism specific gss_inquire_cred.
-	 * So, call get_mechanism with an arguement of GSS_C_NULL_OID.
-	 * get_mechanism will return the first mechanism in the mech
-	 * array, which becomes the default mechanism.
-	 */
+	/* Acquire a default initiator credential to query. */
+	status = gss_acquire_cred(minor_status, GSS_C_NO_NAME,
+				  GSS_C_INDEFINITE, GSS_C_NULL_OID_SET,
+				  GSS_C_INITIATE, &defcred, NULL, NULL);
+	if (status != GSS_S_COMPLETE)
+	    return (status);
 
-	if ((mech = gssint_get_mechanism(GSS_C_NULL_OID)) == NULL)
-	    return (GSS_S_DEFECTIVE_CREDENTIAL);
-
-	if (!mech->gss_inquire_cred)
-	    return (GSS_S_UNAVAILABLE);
-
-	status = mech->gss_inquire_cred(minor_status,
-					GSS_C_NO_CREDENTIAL,
-					name ? &internal_name : NULL,
-					lifetime, cred_usage, mechanisms);
-
-	if (status != GSS_S_COMPLETE) {
-	    map_error(minor_status, mech);
-	    return(status);
-	}
-
-	if (name) {
-	    /*
-	     * Convert internal_name into a union_name equivalent.
-	     */
-	    status = gssint_convert_name_to_union_name(&temp_minor_status,
-						      mech, internal_name,
-						      name);
-	    if (status != GSS_S_COMPLETE) {
-		*minor_status = temp_minor_status;
-		map_error(minor_status, mech);
-		if (mechanisms && *mechanisms) {
-		    (void) gss_release_oid_set(
-			&temp_minor_status,
-			mechanisms);
-		}
-		return (status);
-	    }
-	}
-	return(GSS_S_COMPLETE);
+	cred_handle = defcred;
     }
 
     /* get the cred_handle cast as a union_credentials structure */
@@ -190,6 +154,8 @@ gss_OID_set *		mechanisms;
 	}
     }
 
+    if (defcred)
+	(void) gss_release_cred(&temp_minor_status, &defcred);
     return(GSS_S_COMPLETE);
 
 error:
@@ -204,6 +170,9 @@ error:
 
     if (name && *name != NULL)
 	(void) gss_release_name(&temp_minor_status, name);
+
+    if (defcred)
+	(void) gss_release_cred(&temp_minor_status, &defcred);
 
     return (status);
 }
