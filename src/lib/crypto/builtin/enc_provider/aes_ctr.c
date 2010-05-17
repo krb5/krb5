@@ -63,35 +63,14 @@ xorblock(unsigned char *out, const unsigned char *in)
 static inline void getctrblockno(krb5_ui_8 *pblockno,
 				 const unsigned char ctr[BLOCK_SIZE])
 {
-    register krb5_octet q, i;
-    krb5_ui_8 blockno;
-
-    q = ctr[0] + 1;
-
-    assert(q >= 2 && q <= 8);
-
-    for (i = 0, blockno = 0; i < q; i++) {
-	register krb5_octet s = (q - i - 1) * 8;
-
-	blockno |= ctr[16 - q + i] << s;
-    }
-
-    *pblockno = blockno;
+    *pblockno = load_64_be(&ctr[BLOCK_SIZE - 8]);
 }
 
 /* Store the current counter block number in the IV */
 static inline void putctrblockno(krb5_ui_8 blockno,
 				 unsigned char ctr[BLOCK_SIZE])
 {
-    register krb5_octet q, i;
-
-    q = ctr[0] + 1;
-
-    for (i = 0; i < q; i++) {
-	register krb5_octet s = (q - i - 1) * 8;
-
-	ctr[16 - q + i] = (blockno >> s) & 0xFF;
-    }
+    store_64_be(blockno, &ctr[BLOCK_SIZE - 8]);
 }
 
 /*
