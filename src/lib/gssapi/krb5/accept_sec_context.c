@@ -149,9 +149,7 @@ create_constrained_deleg_creds(OM_uint32 *minor_status,
                                          verifier_cred_handle,
                                          &krb_creds,
                                          GSS_C_INDEFINITE,
-                                         GSS_C_NO_OID_SET,
                                          out_cred,
-                                         NULL,
                                          NULL,
                                          context);
 
@@ -252,8 +250,6 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
 
         cred->usage = GSS_C_INITIATE; /* we can't accept with this */
         /* cred->name already set */
-        cred->prerfc_mech = 1; /* this cred will work with all three mechs */
-        cred->rfc_mech = 1;
         cred->keytab = NULL; /* no keytab associated with this... */
         cred->tgt_expire = creds[0]->times.endtime; /* store the end time */
         cred->ccache = ccache; /* the ccache containing the credential */

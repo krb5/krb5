@@ -483,24 +483,18 @@ acquire_init_cred(krb5_context context,
 /*ARGSUSED*/
 static OM_uint32
 acquire_cred(minor_status, desired_name, password, time_req,
-             desired_mechs, cred_usage, output_cred_handle,
-             actual_mechs, time_rec, req_iakerb)
+             cred_usage, output_cred_handle, time_rec, req_iakerb)
     OM_uint32 *minor_status;
     const gss_name_t desired_name;
     const gss_buffer_t password;
     OM_uint32 time_req;
-    const gss_OID_set desired_mechs;
     gss_cred_usage_t cred_usage;
     gss_cred_id_t *output_cred_handle;
-    gss_OID_set *actual_mechs;
     OM_uint32 *time_rec;
     int req_iakerb;
 {
     krb5_context context = NULL;
-    size_t i;
     krb5_gss_cred_id_t cred = NULL;
-    gss_OID_set ret_mechs = GSS_C_NO_OID_SET;
-    int req_old, req_new;
     OM_uint32 ret;
     krb5_error_code code = 0;
 
@@ -515,8 +509,6 @@ acquire_cred(minor_status, desired_name, password, time_req,
     /* make sure all outputs are valid */
 
     *output_cred_handle = NULL;
-    if (actual_mechs)
-        *actual_mechs = NULL;
     if (time_rec)
         *time_rec = 0;
 
@@ -529,29 +521,6 @@ acquire_cred(minor_status, desired_name, password, time_req,
         goto krb_error_out;
     }
 
-    /* verify that the requested mechanism set is the default, or
-       contains krb5 */
-
-    if (desired_mechs == GSS_C_NULL_OID_SET) {
-        req_old = 1;
-        req_new = 1;
-    } else {
-        req_old = 0;
-        req_new = 0;
-
-        for (i=0; i<desired_mechs->count; i++) {
-            if (g_OID_equal(gss_mech_krb5_old, &(desired_mechs->elements[i])))
-                req_old++;
-            if (g_OID_equal(gss_mech_krb5, &(desired_mechs->elements[i])))
-                req_new++;
-        }
-
-        if (!req_old && !req_new) {
-            ret = GSS_S_BAD_MECH;
-            goto error_out;
-        }
-    }
-
     /* create the gss cred structure */
     cred = k5alloc(sizeof(krb5_gss_cred_id_rec), &code);
     if (code != 0)
@@ -559,8 +528,6 @@ acquire_cred(minor_status, desired_name, password, time_req,
 
     cred->usage = cred_usage;
     cred->name = NULL;
-    cred->prerfc_mech = (req_old != 0) && (req_iakerb == 0);
-    cred->rfc_mech = (req_new != 0) && (req_iakerb == 0);
     cred->iakerb_mech = req_iakerb;
     cred->default_identity = (desired_name == GSS_C_NO_NAME);
 
@@ -639,27 +606,6 @@ acquire_cred(minor_status, desired_name, password, time_req,
             *time_rec = (cred->tgt_expire > now) ? (cred->tgt_expire - now) : 0;
     }
 
-    /* create mechs */
-
-    if (actual_mechs) {
-        if (GSS_ERROR(ret = generic_gss_create_empty_oid_set(minor_status,
-                                                             &ret_mechs)) ||
-            (cred->prerfc_mech &&
-             GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
-                                                            gss_mech_krb5_old,
-                                                            &ret_mechs))) ||
-            (cred->rfc_mech &&
-             GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
-                                                            gss_mech_krb5,
-                                                            &ret_mechs))) ||
-            (cred->iakerb_mech &&
-             GSS_ERROR(ret = generic_gss_add_oid_set_member(minor_status,
-                                                            gss_mech_iakerb,
-                                                            &ret_mechs)))) {
-            goto error_out;
-        }
-    }
-
     /* intern the credential handle */
 
     if (! kg_save_cred_id((gss_cred_id_t) cred)) {
@@ -671,8 +617,6 @@ acquire_cred(minor_status, desired_name, password, time_req,
 
     *minor_status = 0;
     *output_cred_handle = (gss_cred_id_t) cred;
-    if (actual_mechs)
-        *actual_mechs = ret_mechs;
 
     krb5_free_context(context);
     return(GSS_S_COMPLETE);
@@ -682,10 +626,6 @@ krb_error_out:
     ret = GSS_S_FAILURE;
 
 error_out:
-    if (ret_mechs != GSS_C_NO_OID_SET) {
-        free(ret_mechs->elements);
-        free(ret_mechs);
-    }
     if (cred != NULL) {
         if (cred->ccache)
             (void)krb5_cc_close(context, cred->ccache);
@@ -748,6 +688,11 @@ gss_krb5int_set_cred_rcache(OM_uint32 *minor_status,
     return GSS_S_COMPLETE;
 }
 
+/*
+ * krb5 and IAKERB mech API functions follow.  The mechglue always passes null
+ * desired_mechs and actual_mechs, so we ignore those parameters.
+ */
+
 OM_uint32
 krb5_gss_acquire_cred(minor_status, desired_name, time_req,
                       desired_mechs, cred_usage, output_cred_handle,
@@ -762,9 +707,7 @@ krb5_gss_acquire_cred(minor_status, desired_name, time_req,
     OM_uint32 *time_rec;
 {
     return acquire_cred(minor_status, desired_name, GSS_C_NO_BUFFER,
-                        time_req, desired_mechs,
-                        cred_usage, output_cred_handle, actual_mechs,
-                        time_rec, 0);
+                        time_req, cred_usage, output_cred_handle, time_rec, 0);
 }
 
 OM_uint32
@@ -781,9 +724,7 @@ iakerb_gss_acquire_cred(minor_status, desired_name, time_req,
     OM_uint32 *time_rec;
 {
     return acquire_cred(minor_status, desired_name, GSS_C_NO_BUFFER,
-                        time_req, desired_mechs,
-                        cred_usage, output_cred_handle, actual_mechs,
-                        time_rec, 1);
+                        time_req, cred_usage, output_cred_handle, time_rec, 1);
 }
 
 OM_uint32
@@ -798,9 +739,7 @@ krb5_gss_acquire_cred_with_password(OM_uint32 *minor_status,
                                     OM_uint32 *time_rec)
 {
     return acquire_cred(minor_status, desired_name, password,
-                        time_req, desired_mechs,
-                        cred_usage, output_cred_handle, actual_mechs,
-                        time_rec, 0);
+                        time_req, cred_usage, output_cred_handle, time_rec, 0);
 }
 
 OM_uint32
@@ -815,8 +754,5 @@ iakerb_gss_acquire_cred_with_password(OM_uint32 *minor_status,
                                       OM_uint32 *time_rec)
 {
     return acquire_cred(minor_status, desired_name, password,
-                        time_req, desired_mechs,
-                        cred_usage, output_cred_handle, actual_mechs,
-                        time_rec, 1);
+                        time_req, cred_usage, output_cred_handle, time_rec, 1);
 }
-

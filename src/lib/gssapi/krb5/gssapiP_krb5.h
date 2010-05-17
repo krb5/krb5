@@ -170,8 +170,6 @@ typedef struct _krb5_gss_cred_id_rec {
     /* name/type of credential */
     gss_cred_usage_t usage;
     krb5_gss_name_t name;
-    unsigned int prerfc_mech : 1;
-    unsigned int rfc_mech : 1;
     unsigned int proxy_cred : 1;
     unsigned int default_identity : 1;
     unsigned int iakerb_mech : 1;
@@ -491,25 +489,6 @@ krb5_error_code
 krb5_to_gss_cred(krb5_context context,
                  krb5_creds *creds,
                  krb5_gss_cred_id_t *out_cred);
-
-OM_uint32
-kg_new_connection(
-    OM_uint32 *minor_status,
-    krb5_gss_cred_id_t cred,
-    gss_ctx_id_t *context_handle,
-    gss_name_t target_name,
-    gss_OID mech_type,
-    OM_uint32 req_flags,
-    OM_uint32 time_req,
-    gss_channel_bindings_t input_chan_bindings,
-    gss_buffer_t input_token,
-    gss_OID *actual_mech_type,
-    gss_buffer_t output_token,
-    OM_uint32 *ret_flags,
-    OM_uint32 *time_rec,
-    krb5_context context,
-    int default_mech,
-    krb5_gss_ctx_ext_t exts);
 
 /** declarations of internal name mechanism functions **/
 
@@ -1006,9 +985,7 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
                       krb5_gss_cred_id_t impersonator_cred,
                       krb5_creds *subject_creds,
                       OM_uint32 time_req,
-                      const gss_OID_set desired_mechs,
                       krb5_gss_cred_id_t *output_cred,
-                      gss_OID_set *actual_mechs,
                       OM_uint32 *time_rec,
                       krb5_context context);
 

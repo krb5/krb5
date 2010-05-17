@@ -902,7 +902,7 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
     gss_cred_id_t defcred = GSS_C_NO_CREDENTIAL;
     krb5_gss_cred_id_t kcred;
     krb5_gss_name_t kname;
-    int credLocked = 0;
+    krb5_boolean cred_locked = FALSE;
     int initialContextToken = (*context_handle == GSS_C_NO_CONTEXT);
 
     if (initialContextToken) {
@@ -929,14 +929,14 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
         if (GSS_ERROR(major_status))
             goto cleanup;
 
-        credLocked = 1;
+        cred_locked = TRUE;
         kcred = (krb5_gss_cred_id_t)claimant_cred_handle;
     } else {
-        major_status = iakerb_gss_acquire_cred(minor_status, NULL,
-                                               GSS_C_INDEFINITE,
-                                               GSS_C_NULL_OID_SET,
-                                               GSS_C_INITIATE,
-                                               &defcred, NULL, NULL);
+        major_status = krb5_gss_acquire_cred(minor_status, NULL,
+                                             GSS_C_INDEFINITE,
+                                             GSS_C_NULL_OID_SET,
+                                             GSS_C_INITIATE,
+                                             &defcred, NULL, NULL);
         if (GSS_ERROR(major_status))
             goto cleanup;
         kcred = (krb5_gss_cred_id_t)defcred;
@@ -973,13 +973,9 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
     if (ctx->state == IAKERB_AP_REQ) {
         krb5_gss_ctx_ext_rec exts;
 
-        /* Ensure cred is marked as usable for Kerberos mechanism */
-        if (kcred != NULL) {
-            if (kcred->iakerb_mech)
-                kcred->rfc_mech = 1;
-
+        if (cred_locked) {
             k5_mutex_unlock(&kcred->lock);
-            credLocked = 0;
+            cred_locked = FALSE;
         }
 
         iakerb_make_exts(ctx, &exts);
@@ -1018,7 +1014,7 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
     }
 
 cleanup:
-    if (credLocked)
+    if (cred_locked)
         k5_mutex_unlock(&kcred->lock);
     if (initialContextToken && GSS_ERROR(major_status)) {
         iakerb_release_context(ctx);

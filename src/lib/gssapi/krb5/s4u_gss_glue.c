@@ -30,75 +30,6 @@
 #endif
 #include <assert.h>
 
-static OM_uint32
-kg_set_desired_mechs(OM_uint32 *minor_status,
-                     const gss_OID_set desired_mechs,
-                     krb5_gss_cred_id_t cred)
-{
-    unsigned int i;
-
-    if (desired_mechs == GSS_C_NULL_OID_SET) {
-        cred->prerfc_mech = 1;
-        cred->rfc_mech = 1;
-    } else {
-        cred->prerfc_mech = 0;
-        cred->rfc_mech = 0;
-
-        for (i = 0; i < desired_mechs->count; i++) {
-            if (g_OID_equal(gss_mech_krb5_old, &desired_mechs->elements[i]))
-                cred->prerfc_mech = 1;
-            else if (g_OID_equal(gss_mech_krb5, &desired_mechs->elements[i]))
-                cred->rfc_mech = 1;
-        }
-
-        if (!cred->prerfc_mech && !cred->rfc_mech) {
-            *minor_status = 0;
-            return GSS_S_BAD_MECH;
-        }
-    }
-
-    return GSS_S_COMPLETE;
-}
-
-static OM_uint32
-kg_return_mechs(OM_uint32 *minor_status,
-                krb5_gss_cred_id_t cred,
-                gss_OID_set *actual_mechs)
-{
-    OM_uint32 major_status, minor;
-    gss_OID_set mechs;
-
-    if (actual_mechs == NULL)
-        return GSS_S_COMPLETE;
-
-    major_status = generic_gss_create_empty_oid_set(minor_status, &mechs);
-    if (GSS_ERROR(major_status))
-        return major_status;
-
-    if (cred->prerfc_mech) {
-        major_status = generic_gss_add_oid_set_member(minor_status,
-                                                      gss_mech_krb5_old,
-                                                      &mechs);
-        if (GSS_ERROR(major_status)) {
-            generic_gss_release_oid_set(&minor, &mechs);
-            return major_status;
-        }
-    }
-    if (cred->rfc_mech) {
-        major_status = generic_gss_add_oid_set_member(minor_status,
-                                                      gss_mech_krb5,
-                                                      &mechs);
-        if (GSS_ERROR(major_status)) {
-            generic_gss_release_oid_set(&minor, &mechs);
-            return major_status;
-        }
-    }
-
-    *actual_mechs = mechs;
-
-    return GSS_S_COMPLETE;
-}
-
 static int
 kg_is_initiator_cred(krb5_gss_cred_id_t cred)
 {
@@ -111,9 +42,7 @@ kg_impersonate_name(OM_uint32 *minor_status,
                     const krb5_gss_cred_id_t impersonator_cred,
                     const krb5_gss_name_t user,
                     OM_uint32 time_req,
-                    const gss_OID_set desired_mechs,
                     krb5_gss_cred_id_t *output_cred,
-                    gss_OID_set *actual_mechs,
                     OM_uint32 *time_rec,
                     krb5_context context)
 {
@@ -165,9 +94,7 @@ kg_impersonate_name(OM_uint32 *minor_status,
                                          impersonator_cred,
                                          out_creds,
                                          time_req,
-                                         desired_mechs,
                                          output_cred,
-                                         actual_mechs,
                                          time_rec,
                                          context);
 
@@ -177,6 +104,7 @@ kg_impersonate_name(OM_uint32 *minor_status,
     return major_status;
 }
 
+/* The mechglue always passes null desired_mechs and actual_mechs. */
 OM_uint32
 krb5_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
                                        const gss_cred_id_t impersonator_cred_handle,
@@ -208,8 +136,6 @@ krb5_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
     }
 
     *output_cred_handle = GSS_C_NO_CREDENTIAL;
-    if (actual_mechs != NULL)
-        *actual_mechs = GSS_C_NO_OID_SET;
     if (time_rec != NULL)
         *time_rec = 0;
 
@@ -231,9 +157,7 @@ krb5_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
                                        (krb5_gss_cred_id_t)impersonator_cred_handle,
                                        (krb5_gss_name_t)desired_name,
                                        time_req,
-                                       desired_mechs,
                                        &cred,
-                                       actual_mechs,
                                        time_rec,
                                        context);
 
@@ -251,9 +175,7 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
                       krb5_gss_cred_id_t impersonator_cred,
                       krb5_creds *subject_creds,
                       OM_uint32 time_req,
-                      const gss_OID_set desired_mechs,
                       krb5_gss_cred_id_t *output_cred,
-                      gss_OID_set *actual_mechs,
                       OM_uint32 *time_rec,
                       krb5_context context)
 {
@@ -295,10 +217,6 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
     cred->usage = GSS_C_INITIATE;
     cred->proxy_cred = !!(subject_creds->ticket_flags & TKT_FLG_FORWARDABLE);
 
-    major_status = kg_set_desired_mechs(minor_status, desired_mechs, cred);
-    if (GSS_ERROR(major_status))
-        goto cleanup;
-
     cred->tgt_expire = impersonator_cred->tgt_expire;
 
     code = kg_init_name(context, subject_creds->client, NULL, 0, &cred->name);
@@ -336,10 +254,6 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
 
         *time_rec = cred->tgt_expire - now;
     }
-
-    major_status = kg_return_mechs(minor_status, cred, actual_mechs);
-    if (GSS_ERROR(major_status))
-        goto cleanup;
 
     if (!kg_save_cred_id((gss_cred_id_t)cred)) {
         code = G_VALIDATE_FAILED;
