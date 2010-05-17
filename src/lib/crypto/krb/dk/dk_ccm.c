@@ -71,8 +71,8 @@
 #define CCM_FLAG_RESERVED               0x80
 
 unsigned int
-krb5int_ccm_crypto_length(const struct krb5_keytypes *ktp,
-                          krb5_cryptotype type)
+krb5int_dk_ccm_crypto_length(const struct krb5_keytypes *ktp,
+                             krb5_cryptotype type)
 {
     unsigned int length;
 
@@ -88,7 +88,7 @@ krb5int_ccm_crypto_length(const struct krb5_keytypes *ktp,
         length = ktp->enc->block_size;
         break;
     default:
-        assert(0 && "invalid cryptotype passed to krb5int_ccm_crypto_length");
+        assert(0 && "invalid cryptotype passed to ccm_crypto_length");
         length = ~0;
         break;
     }
@@ -245,7 +245,7 @@ valid_payload_length_p(const struct krb5_keytypes *ktp,
 
     q = 15 - n;
 
-    maxblocks = (1UL << (8 * q));
+    maxblocks = (1U << (8 * q));
 
     nblocks = 1; /* tag */
     nblocks += (payload_len + block_size - 1) / block_size;
@@ -253,19 +253,16 @@ valid_payload_length_p(const struct krb5_keytypes *ktp,
     return (nblocks <= maxblocks);
 }
 
-krb5_error_code
-krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
-                    krb5_key key,
-                    krb5_keyusage usage,
-                    const krb5_data *state,
-                    krb5_crypto_iov *data,
-                    size_t num_data)
+static krb5_error_code
+ccm_encrypt(const struct krb5_keytypes *ktp,
+            krb5_key kc,
+            krb5_keyusage usage,
+            const krb5_data *state,
+            krb5_crypto_iov *data,
+            size_t num_data)
 {
     krb5_error_code ret;
-    unsigned char constantdata[K5CLENGTH];
-    krb5_data d1;
     krb5_crypto_iov *header, *trailer, *sign_data = NULL;
-    krb5_key kc = NULL;
     size_t i, num_sign_data = 0;
     unsigned int header_len;
     unsigned int trailer_len;
@@ -278,14 +275,18 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
     header_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_HEADER);
 
     header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
-    if (header == NULL || header->data.length < header_len)
-        return KRB5_BAD_MSIZE;
+    if (header == NULL || header->data.length < header_len) {
+        ret = KRB5_BAD_MSIZE;
+        goto cleanup;
+    }
 
     trailer_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_TRAILER);
 
     trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
-    if (trailer == NULL || trailer->data.length < trailer_len)
-        return KRB5_BAD_MSIZE;
+    if (trailer == NULL || trailer->data.length < trailer_len) {
+        ret = KRB5_BAD_MSIZE;
+        goto cleanup;
+    }
 
     for (i = 0; i < num_data; i++) {
         krb5_crypto_iov *iov = &data[i];
@@ -305,8 +306,10 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
         }
     }
 
-    if (!valid_payload_length_p(ktp, header_len, payload_len))
-        return KRB5_BAD_MSIZE;
+    if (!valid_payload_length_p(ktp, header_len, payload_len)) {
+        ret = KRB5_BAD_MSIZE;
+        goto cleanup;
+    }
 
     header->data.length = header_len;
 
@@ -352,19 +355,6 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
             sign_data[num_sign_data++] = data[i];
     }
 
-    d1 = make_data((char *)constantdata, K5CLENGTH);
-
-    d1.data[0] = (usage >> 24) & 0xFF;
-    d1.data[1] = (usage >> 16) & 0xFF;
-    d1.data[2] = (usage >> 8 ) & 0xFF;
-    d1.data[3] = (usage      ) & 0xFF;
-
-    d1.data[4] = 0xCC;
-
-    ret = krb5int_derive_key(ktp->enc, key, &kc, &d1);
-    if (ret != 0)
-        goto cleanup;
-
     assert(ktp->enc->encrypt != NULL);
     assert(ktp->enc->cbc_mac != NULL);
 
@@ -394,25 +384,55 @@ krb5int_ccm_encrypt(const struct krb5_keytypes *ktp,
         memcpy(state->data, counter.data, counter.length);
 
 cleanup:
-    krb5_k_free_key(NULL, kc);
     free(sign_data);
 
     return ret;
 }
 
 krb5_error_code
-krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
-                    krb5_key key,
-                    krb5_keyusage usage,
-                    const krb5_data *state,
-                    krb5_crypto_iov *data,
-                    size_t num_data)
+krb5int_dk_ccm_encrypt(const struct krb5_keytypes *ktp,
+                       krb5_key key,
+                       krb5_keyusage usage,
+                       const krb5_data *state,
+                       krb5_crypto_iov *data,
+                       size_t num_data)
+{
+    unsigned char constantdata[K5CLENGTH];
+    krb5_error_code ret;
+    krb5_key kc;
+    krb5_data d1;
+
+    d1.data = (char *)constantdata;
+    d1.length = K5CLENGTH;
+
+    d1.data[0] = (usage >> 24) & 0xFF;
+    d1.data[1] = (usage >> 16) & 0xFF;
+    d1.data[2] = (usage >> 8 ) & 0xFF;
+    d1.data[3] = (usage      ) & 0xFF;
+
+    d1.data[4] = 0xCC;
+
+    ret = krb5int_derive_key(ktp->enc, key, &kc, &d1);
+    if (ret != 0)
+        return ret;
+
+    ret = ccm_encrypt(ktp, kc, usage, state, data, num_data);
+
+    krb5_k_free_key(NULL, kc);
+
+    return ret;
+}
+
+static krb5_error_code
+ccm_decrypt(const struct krb5_keytypes *ktp,
+            krb5_key kc,
+            krb5_keyusage usage,
+            const krb5_data *state,
+            krb5_crypto_iov *data,
+            size_t num_data)
 {
     krb5_error_code ret;
-    unsigned char constantdata[K5CLENGTH];
-    krb5_data d1;
     krb5_crypto_iov *header, *trailer, *sign_data = NULL;
-    krb5_key kc = NULL;
     size_t i, num_sign_data = 0;
     unsigned int header_len;
     unsigned int trailer_len;
@@ -426,14 +446,18 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
     header_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_HEADER);
 
     header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
-    if (header == NULL || header->data.length != header_len)
-        return KRB5_BAD_MSIZE;
+    if (header == NULL || header->data.length != header_len) {
+        ret = KRB5_BAD_MSIZE;
+        goto cleanup;
+    }
 
     trailer_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_TRAILER);
 
     trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
-    if (trailer == NULL || trailer->data.length != trailer_len)
-        return KRB5_BAD_MSIZE;
+    if (trailer == NULL || trailer->data.length != trailer_len) {
+        ret = KRB5_BAD_MSIZE;
+        goto cleanup;
+    }
 
     for (i = 0; i < num_data; i++) {
         krb5_crypto_iov *iov = &data[i];
@@ -446,16 +470,20 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
             adata_len += iov->data.length;
             break;
         case KRB5_CRYPTO_TYPE_PADDING:
-            if (iov->data.length != 0)
-                return KRB5_BAD_MSIZE;
+            if (iov->data.length != 0) {
+                ret = KRB5_BAD_MSIZE;
+                goto cleanup;
+            }
             break;
         default:
             break;
         }
     }
 
-    if (!valid_payload_length_p(ktp, header_len, payload_len))
-        return KRB5_BAD_MSIZE;
+    if (!valid_payload_length_p(ktp, header_len, payload_len)) {
+        ret = KRB5_BAD_MSIZE;
+        goto cleanup;
+    }
 
     /* Initialize counter block */
     ret = format_Ctr0(&counter, &header->data, state, header_len);
@@ -484,21 +512,8 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
         goto cleanup;
     num_sign_data++;
 
-    d1.data = (char *)constantdata;
-    d1.length = K5CLENGTH;
-
-    d1.data[0] = (usage >> 24) & 0xFF;
-    d1.data[1] = (usage >> 16) & 0xFF;
-    d1.data[2] = (usage >> 8 ) & 0xFF;
-    d1.data[3] = (usage      ) & 0xFF;
-
-    d1.data[4] = 0xCC;
-
-    ret = krb5int_derive_key(ktp->enc, key, &kc, &d1);
-    if (ret != 0)
-        goto cleanup;
-
     assert(ktp->enc->decrypt != NULL);
+    assert(ktp->enc->cbc_mac != NULL);
 
     made_cksum.data = k5alloc(trailer_len, &ret);
     if (made_cksum.data == NULL)
@@ -547,9 +562,42 @@ krb5int_ccm_decrypt(const struct krb5_keytypes *ktp,
         memcpy(state->data, counter.data, counter.length);
 
 cleanup:
-    krb5_k_free_key(NULL, kc);
     free(made_cksum.data);
     free(sign_data);
+
+    return ret;
+}
+
+krb5_error_code
+krb5int_dk_ccm_decrypt(const struct krb5_keytypes *ktp,
+                       krb5_key key,
+                       krb5_keyusage usage,
+                       const krb5_data *state,
+                       krb5_crypto_iov *data,
+                       size_t num_data)
+{
+    unsigned char constantdata[K5CLENGTH];
+    krb5_error_code ret;
+    krb5_key kc;
+    krb5_data d1;
+
+    d1.data = (char *)constantdata;
+    d1.length = K5CLENGTH;
+
+    d1.data[0] = (usage >> 24) & 0xFF;
+    d1.data[1] = (usage >> 16) & 0xFF;
+    d1.data[2] = (usage >> 8 ) & 0xFF;
+    d1.data[3] = (usage      ) & 0xFF;
+
+    d1.data[4] = 0xCC;
+
+    ret = krb5int_derive_key(ktp->enc, key, &kc, &d1);
+    if (ret != 0)
+        return ret;
+
+    ret = ccm_decrypt(ktp, kc, usage, state, data, num_data);
+
+    krb5_k_free_key(NULL, kc);
 
     return ret;
 }
