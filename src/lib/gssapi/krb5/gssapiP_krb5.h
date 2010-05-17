@@ -802,20 +802,6 @@ OM_uint32 krb5_gss_export_name_object
  void * *                    /* output_name */
 );
 
-OM_uint32 krb5_gss_add_cred
-(OM_uint32 *,           /* minor_status */
- gss_cred_id_t,              /* input_cred_handle */
- gss_name_t,                 /* desired_name */
- gss_OID,                    /* desired_mech */
- gss_cred_usage_t,           /* cred_usage */
- OM_uint32,                  /* initiator_time_req */
- OM_uint32,                  /* acceptor_time_req */
- gss_cred_id_t *,            /* output_cred_handle */
- gss_OID_set *,              /* actual_mechs */
- OM_uint32 *,                /* initiator_time_rec */
- OM_uint32 *                 /* acceptor_time_rec */
-);
-
 OM_uint32 krb5_gss_inquire_cred_by_mech
 (OM_uint32  *,          /* minor_status */
  gss_cred_id_t,              /* cred_handle */

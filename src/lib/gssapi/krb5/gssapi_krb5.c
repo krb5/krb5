@@ -659,7 +659,7 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_import_name,
     krb5_gss_release_name,
     krb5_gss_inquire_cred,
-    krb5_gss_add_cred,
+    NULL,                /* add_cred */
 #ifdef LEAN_CLIENT
     NULL,
     NULL,
