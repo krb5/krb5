@@ -452,10 +452,8 @@ kadm5_get_init_creds(kadm5_server_handle_t handle,
         code = kadm5_get_admin_service_name(handle->context,
                                             handle->params.realm,
                                             svcname, sizeof(svcname));
-        if (code) {
-            code = KADM5_MISSING_KRB5_CONF_PARAMS;
+        if (code)
             goto error;
-        }
     } else {
         strncpy(svcname, svcname_in, sizeof(svcname));
         svcname[sizeof(svcname)-1] = '\0';
