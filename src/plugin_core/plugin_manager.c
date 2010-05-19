@@ -3,6 +3,7 @@
  *
  */
 #include "plugin_manager.h"
+#include <k5-int.h>
 #include "string.h"
 
 

@@ -61,8 +61,9 @@ check-unix:: t_cf2
 	$(RUN_SETUP) $(VALGRIND) ./t_cf2 <$(srcdir)/t_cf2.in >t_cf2.output
 	diff t_cf2.output $(srcdir)/t_cf2.expected
 
-t_cf2$(EXEEXT): t_cf2.$(OBJEXT) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_cf2.$(OBJEXT) -L$(BUILDTOP)/plugin_core -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) 
+t_cf2$(EXEEXT): t_cf2.$(OBJEXT) $(SUPPORT_DEPLIB) 
+	$(CC_LINK) -o $@ t_cf2.$(OBJEXT) -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)  $(LIBS_PROFILE) $(PLUGIN_CORE_DEPLIB)
+
 
 clean::
 	$(RM)  t_cf2 t_cf2.o  t_cf2.output

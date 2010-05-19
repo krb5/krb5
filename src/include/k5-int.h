@@ -91,6 +91,12 @@
 #    endif
 #endif
 
+/* Plugin manager */
+//#include <plugin_manager.h>
+//#include <plugin_factory.h>
+//#include "plugin_default_manager.h"
+//#include "plugin_default_factory.h"
+
 /*
  * Begin "k5-config.h"
  */
@@ -1427,10 +1433,36 @@ struct _kdb_log_context;
 
 /* Plugin API ----  PLUGIN HANDLE */
 typedef struct _plhandle{
-        void *api;
+    void *api;
     struct _plhandle *next;
 } plhandle;
 
+typedef struct {
+    char api_name[512];
+    plhandle* first;
+    plhandle* last;
+    int size;
+} reg_entry;
+
+typedef struct {
+    reg_entry* table;
+    long registry_size;
+    long registry_max_size;
+} registry_data;
+
+typedef struct {
+    registry_data* registry;
+} manager_data;
+
+typedef struct {
+        manager_data * data;
+        void (*configure)(manager_data *  data, const char*);
+        void (*start)(manager_data * data);
+        void (*stop)(manager_data * data);
+        plhandle (*getService)(manager_data * data, const char*);
+} plugin_manager;
+
+/* Plugin API ----  PLUGIN HANDLE ----- END*/
 
 struct _krb5_context {
     krb5_magic      magic;
@@ -1480,6 +1512,9 @@ struct _krb5_context {
     struct _kdb_log_context *kdblog_context;
 
     krb5_boolean allow_weak_crypto;
+
+    /* PLUGIN HANDLE */
+    plugin_manager *pl_handle;
 };
 
 /* could be used in a table to find an etype and initialize a block */

@@ -102,7 +102,9 @@ _register_api(registry_data* data, const char* api_name,
         data->registry_size++;
     }
     if(entry->size && strcmp(plugin_type, "service") == 0) {
-        //printf("%s is already registered, only one plugin is allowed per service\n", api_name);
+#ifdef DEBUG_PLUGINS
+        printf("%s is already registered, only one plugin is allowed per service\n", api_name);
+#endif
         ret = 0;
     } else {
         strcpy(entry->api_name, api_name);
@@ -155,26 +157,31 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
             properties = p;
         }
     }
-    /*printf("**Start**\n");
+#ifdef DEBUG_PLUGINS
+    printf("**Start**\n");
     printf("api=%s\n", plugin_api);
     printf("factory=%s\n", factory_name);
     printf("factory_type=%s\n", factory_type);
     printf("plugin_name=%s\n", plugin_name);
     printf("plugin_type=%s\n", plugin_type);
     printf("**End**\n");
-*/
+#endif
+
     handle = _create_api(plugin_name, factory_name, factory_type/*, properties*/);
     if(handle.api != NULL) {
         if(!(_register_api(mdata->registry,plugin_api, plugin_type, handle))) {
-         /*   printf("Failed to register %s for %s(factory=%s,plugin_type=%s)\n",
+#ifdef DEBUG_PLUGINS
+            printf("Failed to register %s for %s(factory=%s,plugin_type=%s)\n",
                     plugin_name, plugin_api, factory_name, plugin_type);
-           */
+#endif
               exit(1);
         }
     } else {
-        /*printf("Failed to configure plugin: api=%s, plugin_name=%s,factory=%s\n",
+#ifdef DEBUG_PLUGINS
+        printf("Failed to configure plugin: api=%s, plugin_name=%s,factory=%s\n",
                 plugin_api, plugin_name, factory_name);
-*/
+#endif
+
     }
     return;
 }
@@ -194,7 +201,9 @@ _configure_yaml(void* data, const char* path)
             if(strcmp(q->node_tag,"!Plugin") == 0) {
                 _configure_plugin_yaml(mdata, q);
             } else {
+#ifdef DEBUG_PLUGINS
                 printf("Failed to find plugin configuration\n");
+#endif
             }
         }
     }
@@ -211,13 +220,14 @@ _configure_krb5(manager_data* data, const char* path)
     krb5_error_code retval;
     char *plugin;
     void *iter;
-    profile_filespec_t *files = 0;
+    profile_filespec_t *files = NULL;
     profile_t profile;
     const char  *realm_srv_names[4];
     char **factory_name, **factory_type, **plugin_name, **plugin_type;
     plhandle handle;
 
-    retval = os_get_default_config_files(&files, FALSE); // TRUE - goes to /etc/krb5.conf
+   // retval = os_get_default_config_files(&files, FALSE); // TRUE - goes to /etc/krb5.conf
+    retval = krb5_get_default_config_files(&files); // TRUE - goes to /etc/krb5.conf
     retval = profile_init((const_profile_filespec_t *) files, &profile);
 /*    if (files)
         free_filespecs(files);
@@ -240,7 +250,9 @@ _configure_krb5(manager_data* data, const char* path)
             return;
         }
         if (plugin) {
+#ifdef DEBUG_PLUGINS
             printf("PLUGIN: '%s'\n", plugin);
+#endif
             realm_srv_names[0] = "plugins";
             realm_srv_names[1] = plugin;
 
@@ -271,13 +283,17 @@ _configure_krb5(manager_data* data, const char* path)
             handle = _create_api(*plugin_name, *factory_name, *factory_type/*, properties*/);
             if(handle.api != NULL) {
                 if(!(_register_api(mdata->registry,plugin, *plugin_type, handle))) {
+#ifdef DEBUG_PLUGINS
                    printf("Failed to register %s for %s(factory=%s,plugin_type=%s)\n",
                             *plugin_name, plugin, *factory_name, *plugin_type);
+#endif
                     exit(1);
                 }
             } else {
+#ifdef DEBUG_PLUGINS
                 printf("Failed to configure plugin: api=%s, plugin_name=%s,factory=%s\n",
                          plugin, *plugin_name, *factory_name);
+#endif
             }
 
             krb5_free_plugin_string(profile, plugin);
@@ -311,7 +327,9 @@ _getService(manager_data* data, const char* service_name)
     if(entry) {
         handle = *(entry->first);
     } else {
+#ifdef DEBUG_PLUGINS
         printf("service %s is not available\n", service_name);
+#endif
     }
 
     return handle;
@@ -331,6 +349,7 @@ plugin_manager*
 plugin_default_manager_get_instance()
 {
     plugin_manager* instance = _instance;
+    _instance = NULL;
 
     if(_instance == NULL) {
         instance = (plugin_manager*) malloc(sizeof(plugin_manager));

@@ -382,7 +382,7 @@ def _find_buildtop():
 
 
 def _find_srctop():
-    scriptdir = os.path.dirname(sys.argv[0])
+    scriptdir = os.path.abspath(os.path.dirname(sys.argv[0]))
     if not scriptdir:
         scriptdir = os.getcwd()
     root = _find_root(scriptdir)

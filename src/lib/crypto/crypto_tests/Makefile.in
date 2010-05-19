@@ -14,8 +14,9 @@ PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
 
-PLUGINS_LIBS = -lkrb5 \
-	$(srcdir)/../../libplugin_impl.a $(srcdir)/../../libplugin_yarrow.a $(srcdir)/../../libencrypted_challenge.a
+PLUGINS_LIBS = -lkrb5 	\
+	$(srcdir)/../../libplugin_impl.a $(srcdir)/../../libplugin_yarrow.a $(srcdir)/../../libencrypted_challenge.a \
+	$(LIBS_PROFILE) $(PLUGIN_CORE_DEPLIB) 
 
 EXTRADEPSRCS=\
 	$(srcdir)/t_nfold.c	\
@@ -83,17 +84,16 @@ nfold.$(OBJEXT): $(srcdir)/../krb/nfold.c
 	$(CC) -c $(ALL_CFLAGS) $(srcdir)/../krb/nfold.c
 
 t_encrypt$(EXEEXT): t_encrypt.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_encrypt.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) 	\
-	$(PLUGINS_LIBS)
+	$(CC_LINK) -o $@ t_encrypt.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(PLUGINS_LIBS)
 
 t_prf$(EXEEXT): t_prf.$(OBJEXT) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_prf.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(PLUGINS_LIBS)
+	$(CC_LINK) -o $@ t_prf.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(PLUGINS_LIBS)	
 
 t_prng$(EXEEXT): t_prng.$(OBJEXT) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_prng.$(OBJEXT)  -lk5crypto -lcom_err $(SUPPORT_LIB)  $(PLUGINS_LIBS)
+	$(CC_LINK) -o $@ t_prng.$(OBJEXT)  -lk5crypto -lcom_err $(SUPPORT_LIB)  $(PLUGINS_LIBS) 
 
 t_hmac$(EXEEXT): t_hmac.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_hmac.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)  $(PLUGINS_LIBS)
+	$(CC_LINK) -o $@ t_hmac.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)  $(PLUGINS_LIBS) 
 
 #t_pkcs5$(EXEEXT): t_pkcs5.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 #	$(CC_LINK) -o $@ t_pkcs5.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(PLUGINS_LIBS)
@@ -116,16 +116,16 @@ t_cksum5.o: $(srcdir)/t_cksum.c
 	$(CC) -DMD=5 $(ALL_CFLAGS) -o t_cksum5.o -c $(srcdir)/t_cksum.c
 
 t_cksum4: t_cksum4.o $(CRYTPO_DEPLIB)
-	$(CC_LINK) -o t_cksum4 t_cksum4.o $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(LIBS) $(PLUGINS_LIBS)
+	$(CC_LINK) -o t_cksum4 t_cksum4.o $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(LIBS) $(PLUGINS_LIBS)	
 
 t_cksum5: t_cksum5.o $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o t_cksum5 t_cksum5.o $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(LIBS) $(PLUGINS_LIBS)
+	$(CC_LINK) -o t_cksum5 t_cksum5.o $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(LIBS) $(PLUGINS_LIBS)	
 
 t_crc: t_crc.o $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_crc.o $(K5CRYPTO_LIB) $(SUPPORT_LIB) $(PLUGINS_LIBS)
 
 aes-test: aes-test.$(OBJEXT) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o aes-test aes-test.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(PLUGINS_LIBS)
+	$(CC_LINK) -o aes-test aes-test.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(PLUGINS_LIBS) 
 
 t_mddriver4.o: $(srcdir)/t_mddriver.c
 	$(CC) -DMD=4 $(ALL_CFLAGS) -o t_mddriver4.o -c $(srcdir)/t_mddriver.c

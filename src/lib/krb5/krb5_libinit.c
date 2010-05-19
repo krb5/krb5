@@ -15,9 +15,6 @@
 #include "kt-int.h"
 #include "rc-int.h"
 #include "os-proto.h"
-#include <plugin_default_manager.h>
-#include <plugin_prng.h>
-
 
 /*
  * Initialize the Kerberos v5 library.
@@ -30,12 +27,6 @@ MAKE_FINI_FUNCTION(krb5int_lib_fini);
 int krb5int_lib_init(void)
 {
     int err;
-    plugin_manager* default_manager;
-#ifdef CONFIG_IN_YAML
-    const char conf_path[] = "/tmp/plugin_conf.yml";
-#else
-    const char conf_path[] = ""; // need to be something meaningful. os_get_default_config_files?
-#endif
     krb5int_set_error_info_callout_fn (error_message);
 
 #ifdef SHOW_INITFINI_FUNCS
@@ -55,15 +46,10 @@ int krb5int_lib_init(void)
     if (err)
         return err;
 #endif /* LEAN_CLIENT */
+
     err = krb5int_cc_initialize();
     if (err)
         return err;
-
-    /* Plugin initialization */
-    default_manager = plugin_default_manager_get_instance();
-    set_plugin_manager_instance(default_manager);
-    plugin_manager_configure(conf_path);
-    plugin_manager_start();
 
     err = k5_mutex_finish_init(&krb5int_us_time_mutex);
     if (err)

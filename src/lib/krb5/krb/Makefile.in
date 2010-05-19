@@ -3,12 +3,17 @@ BUILDTOP=$(REL)..$(S)..$(S)..
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
-LOCALINCLUDES = -I$(srcdir)/../os -I$(top_srcdir)
+LOCALINCLUDES = -I$(srcdir)/../os -I$(top_srcdir) \
+	 -I$(srcdir)/../../../plugin_core/ -I$(srcdir)/../../../plugins/prng/ -I$(srcdir)/../../../plugin_core/impl       \
+	-I$(srcdir)/../../../pa -I$(srcdir)/../../../pa/encrypted_challenge
 DEFS=-DLIBDIR=\"$(KRB5_LIBDIR)\"
 
 ##DOS##BUILDTOP = ..\..\..
 ##DOS##PREFIXDIR=krb
 ##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
+
+PLUGINS_LIBS =   $(srcdir)/../../libplugin_impl.a $(srcdir)/../../libplugin_yarrow.a $(srcdir)/../../libencrypted_challenge.a 
+
 
 STLIBOBJS= \
 	addr_comp.o	\
@@ -381,7 +386,7 @@ t_princ: $(T_PRINC_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_princ $(T_PRINC_OBJS) $(KRB5_BASE_LIBS)
 
 t_etypes: $(T_ETYPES_OBJS) $(KRB5_BASE_DEPLIBS)
-	$(CC_LINK) -o t_etypes $(T_ETYPES_OBJS) $(KRB5_BASE_LIBS)
+	$(CC_LINK) -o t_etypes $(T_ETYPES_OBJS) $(KRB5_BASE_LIBS)  $(PLUGINS_LIBS)
 
 TEST_PROGS= t_walk_rtree t_kerb t_ser t_deltat t_expand t_authdata t_pac \
 	t_princ t_etypes

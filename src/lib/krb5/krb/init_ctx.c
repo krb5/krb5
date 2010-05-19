@@ -61,6 +61,9 @@
 #if defined(unix) || TARGET_OS_MAC
 #include "../krb5_libinit.h"
 #endif
+#include <plugin_default_manager.h>
+#include <plugin_prng.h>
+
 
 /* The des-mdX entries are last for now, because it's easy to
    configure KDCs to issue TGTs with des-mdX keys and then not accept
@@ -114,6 +117,8 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
     } seed_data;
     krb5_data seed;
     int tmp;
+    plugin_manager* default_manager;
+    const char conf_path[] = "";
 
     /* Verify some assumptions.  If the assumptions hold and the
        compiler is optimizing, this should result in no code being
@@ -169,6 +174,15 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
     if (retval)
         goto cleanup;
     ctx->allow_weak_crypto = tmp;
+
+
+    /* Plugin initialization */
+
+    ctx->pl_handle = plugin_default_manager_get_instance();
+    set_plugin_manager_instance(ctx->pl_handle);
+    plugin_manager_configure(conf_path);
+    plugin_manager_start();
+
 
     /* initialize the prng (not well, but passable) */
     if ((retval = krb5_c_random_os_entropy( ctx, 0, NULL)) !=0)
@@ -572,3 +586,4 @@ krb5_is_permitted_enctype_ext ( krb5_context context,
 
     return(ret);
 }
+
