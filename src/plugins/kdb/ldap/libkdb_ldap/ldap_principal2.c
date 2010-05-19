@@ -891,6 +891,16 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entries,
             if (st != 0)
                 goto cleanup;
         } else if (entries->mask & KADM5_FAIL_AUTH_COUNT_INCREMENT) {
+            int attr_mask = 0;
+            krb5_boolean has_fail_count;
+
+            /* Check if the krbLoginFailedCount attribute exists.  (Through
+             * krb5 1.8.1, it wasn't set in new entries.) */
+            st = krb5_get_attributes_mask(context, entries, &attr_mask);
+            if (st != 0)
+                goto cleanup;
+            has_fail_count = ((attr_mask & KDB_FAIL_AUTH_COUNT_ATTR) != 0);
+
             /*
              * If the client library and server supports RFC 4525,
              * then use it to increment by one the value of the
@@ -898,38 +908,35 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entries,
              * (provided) old value by deleting it before adding.
              */
 #ifdef LDAP_MOD_INCREMENT
-            if (ldap_server_handle->server_info->modify_increment) {
+            if (ldap_server_handle->server_info->modify_increment &&
+                has_fail_count) {
                 st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
                                                LDAP_MOD_INCREMENT, 1);
                 if (st != 0)
                     goto cleanup;
-            } else
+            } else {
 #endif /* LDAP_MOD_INCREMENT */
-                if (entries->fail_auth_count == 0) {
-                    /*
-                     * Unfortunately we have no way of distinguishing between
-                     * an absent and a zero-valued attribute by the time we are
-                     * called here. So, although this creates a race condition,
-                     * it appears impossible to assert the old value as that
-                     * would fail were the attribute absent.
-                     */
-                    st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
-                                                   LDAP_MOD_REPLACE, 1);
-                    if (st != 0)
-                        goto cleanup;
-                } else {
-                    st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
+                if (has_fail_count) {
+                    st = krb5_add_int_mem_ldap_mod(&mods,
+                                                   "krbLoginFailedCount",
                                                    LDAP_MOD_DELETE,
                                                    entries->fail_auth_count);
                     if (st != 0)
                         goto cleanup;
-
-                    st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
-                                                   LDAP_MOD_ADD,
-                                                   entries->fail_auth_count + 1);
-                    if (st != 0)
-                        goto cleanup;
                 }
+                st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
+                                               LDAP_MOD_ADD,
+                                               entries->fail_auth_count + 1);
+                if (st != 0)
+                    goto cleanup;
+#ifdef LDAP_MOD_INCREMENT
+            }
+#endif
+        } else if (optype == ADD_PRINCIPAL) {
+            /* Initialize krbLoginFailedCount in new entries to help avoid a
+             * race during the first failed login. */
+            st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
+                                           LDAP_MOD_ADD, 0);
         }
 
         if (entries->mask & KADM5_MAX_LIFE) {
