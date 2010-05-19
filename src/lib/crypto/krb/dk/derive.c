@@ -161,7 +161,7 @@ derive_random_cmac(const struct krb5_enc_provider *enc,
     iov[1].data = *in_constant;
     iov[2].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[2].data = make_data(Lbuf, sizeof(Lbuf));
-    store_32_be(in_constant->length, Lbuf);
+    store_32_be(outrnd->length, Lbuf);
 
     for (i = 1, n = 0; n < keybytes; i++) {
         store_32_be(i, ibuf);
