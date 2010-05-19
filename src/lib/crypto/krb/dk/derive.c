@@ -79,8 +79,8 @@ cleanup:
     return ENOMEM;
 }
 
-krb5_error_code
-krb5int_derive_random(const struct krb5_enc_provider *enc,
+static krb5_error_code
+derive_random_rfc3961(const struct krb5_enc_provider *enc,
                       krb5_key inkey, krb5_data *outrnd,
                       const krb5_data *in_constant)
 {
@@ -112,11 +112,7 @@ krb5int_derive_random(const struct krb5_enc_provider *enc,
     /* Loop encrypting the blocks until enough key bytes are generated. */
     n = 0;
     while (n < keybytes) {
-        /* Counter mode ciphers use CBC-MAC to get ECB mode */
-        if (enc->cbc_mac != NULL)
-            ret = enc->cbc_mac(inkey, &iov, 1, NULL, &iov.data);
-        else
-            ret = enc->encrypt(inkey, 0, &iov, 1);
+        ret = enc->encrypt(inkey, 0, &iov, 1);
         if (ret)
             goto cleanup;
 
@@ -131,6 +127,75 @@ krb5int_derive_random(const struct krb5_enc_provider *enc,
 
 cleanup:
     zapfree(iov.data.data, blocksize);
+    return ret;
+}
+
+static krb5_error_code
+derive_random_cmac(const struct krb5_enc_provider *enc,
+                   krb5_key inkey, krb5_data *outrnd,
+                   const krb5_data *in_constant)
+{
+    size_t blocksize, keybytes, n;
+    krb5_crypto_iov iov[3];
+    krb5_error_code ret;
+    krb5_data prf;
+    unsigned int i;
+    unsigned char ibuf[4], Lbuf[4];
+
+    blocksize = enc->block_size;
+    keybytes = enc->keybytes;
+
+    if (inkey->keyblock.length != enc->keylength || outrnd->length != keybytes)
+        return KRB5_CRYPTO_INTERNAL;
+
+    /* Allocate encryption data buffer. */
+    ret = alloc_data(&prf, blocksize);
+    if (ret)
+        return ret;
+
+    /* NIST SP800-108 KDF in counter mode with CMAC as PRF */
+
+    iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
+    iov[0].data = make_data(ibuf, sizeof(ibuf));
+    iov[1].flags = KRB5_CRYPTO_TYPE_DATA;
+    iov[1].data = *in_constant;
+    iov[2].flags = KRB5_CRYPTO_TYPE_DATA;
+    iov[2].data = make_data(Lbuf, sizeof(Lbuf));
+    store_32_be(in_constant->length, Lbuf);
+
+    for (i = 1, n = 0; n < keybytes; i++) {
+        store_32_be(i, ibuf);
+
+        ret = krb5int_cmac_checksum(enc, inkey, 0, iov, 3, &prf);
+        if (ret)
+            goto cleanup;
+
+        if (keybytes - n <= blocksize) {
+            memcpy(outrnd->data + n, prf.data, (keybytes - n));
+            break;
+        }
+
+        memcpy(outrnd->data + n, prf.data, blocksize);
+        n += blocksize;
+    }
+
+cleanup:
+    zapfree(prf.data, blocksize);
+    return ret;
+}
+
+krb5_error_code
+krb5int_derive_random(const struct krb5_enc_provider *enc,
+                      krb5_key inkey, krb5_data *outrnd,
+                      const krb5_data *in_constant)
+{
+    krb5_error_code ret;
+
+    if (enc->cbc_mac)
+        ret = derive_random_cmac(enc, inkey, outrnd, in_constant);
+    else
+        ret = derive_random_rfc3961(enc, inkey, outrnd, in_constant);
+
     return ret;
 }
 
