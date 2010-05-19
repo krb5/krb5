@@ -136,7 +136,7 @@ derive_random_cmac(const struct krb5_enc_provider *enc,
                    const krb5_data *in_constant)
 {
     size_t blocksize, keybytes, n;
-    krb5_crypto_iov iov[3];
+    krb5_crypto_iov iov[4];
     krb5_error_code ret;
     krb5_data prf;
     unsigned int i;
@@ -153,25 +153,26 @@ derive_random_cmac(const struct krb5_enc_provider *enc,
     if (ret)
         return ret;
 
-    /* NIST SP800-108 KDF in counter mode with CMAC as PRF */
-
+    /* NIST SP800-108 KDF in feedback mode with CMAC as PRF */
     iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
-    iov[0].data = make_data(ibuf, sizeof(ibuf));
+    iov[0].data = prf;
     iov[1].flags = KRB5_CRYPTO_TYPE_DATA;
-    iov[1].data = *in_constant;
+    iov[1].data = make_data(ibuf, sizeof(ibuf));
     iov[2].flags = KRB5_CRYPTO_TYPE_DATA;
-    iov[2].data = make_data(Lbuf, sizeof(Lbuf));
+    iov[2].data = *in_constant;
+    iov[3].flags = KRB5_CRYPTO_TYPE_DATA;
+    iov[3].data = make_data(Lbuf, sizeof(Lbuf));
     store_32_be(outrnd->length, Lbuf);
 
     for (i = 1, n = 0; n < keybytes; i++) {
         store_32_be(i, ibuf);
 
-        ret = krb5int_cmac_checksum(enc, inkey, 0, iov, 3, &prf);
+        ret = krb5int_cmac_checksum(enc, inkey, 0, iov, 4, &prf);
         if (ret)
             goto cleanup;
 
         if (keybytes - n <= blocksize) {
-            memcpy(outrnd->data + n, prf.data, (keybytes - n));
+            memcpy(outrnd->data + n, prf.data, keybytes - n);
             break;
         }
 
