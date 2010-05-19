@@ -492,6 +492,7 @@ tgt_again:
            to the caller */
         ticket_reply = *(header_ticket);
         enc_tkt_reply = *(header_ticket->enc_part2);
+        enc_tkt_reply.authorization_data = NULL;
         clear(enc_tkt_reply.flags, TKT_FLG_INVALID);
     }
 
@@ -503,6 +504,7 @@ tgt_again:
            to the caller */
         ticket_reply = *(header_ticket);
         enc_tkt_reply = *(header_ticket->enc_part2);
+        enc_tkt_reply.authorization_data = NULL;
 
         old_life = enc_tkt_reply.times.endtime - enc_tkt_reply.times.starttime;
 

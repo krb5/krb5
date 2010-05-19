@@ -199,6 +199,10 @@ proc doit { } {
 	return
     }
 
+    if ![kinit_renew krbtest/admin adminpass$KEY 1] {
+	return
+    }
+
     # Make sure that klist can see the ticket.
     if ![do_klist "krbtest/admin@$REALMNAME" "krbtgt/$REALMNAME@$REALMNAME" "klist"] {
 	return
