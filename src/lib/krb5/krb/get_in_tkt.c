@@ -1489,14 +1489,15 @@ krb5_init_creds_init(krb5_context context,
         krb5_princ_type(context, ctx->request->client) = KRB5_NT_WELLKNOWN;
     }
     code = restart_init_creds_loop(context, ctx, NULL);
+    if (code)
+        goto cleanup;
 
     *pctx = ctx;
+    ctx = NULL;
 
 cleanup:
-    if (code != 0)
-        krb5_init_creds_free(context, ctx);
-    if (str != NULL)
-        free(str);
+    krb5_init_creds_free(context, ctx);
+    free(str);
 
     return code;
 }
