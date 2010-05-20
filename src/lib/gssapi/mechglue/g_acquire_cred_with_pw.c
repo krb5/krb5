@@ -64,6 +64,9 @@ val_acq_cred_pw_args(
 
     /* Validate arguments. */
 
+    if (desired_name == GSS_C_NO_NAME)
+	return (GSS_S_BAD_NAME);
+
     if (minor_status == NULL)
 	return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
@@ -270,6 +273,9 @@ val_add_cred_pw_args(
 
     /* Validate arguments. */
 
+    if (desired_name == GSS_C_NO_NAME)
+	return (GSS_S_BAD_NAME);
+
     if (minor_status == NULL)
 	return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
@@ -371,24 +377,20 @@ gss_add_cred_with_password(minor_status, input_cred_handle,
 	if (gssint_get_mechanism_cred(union_cred, desired_mech) !=
 	    GSS_C_NO_CREDENTIAL)
 	    return (GSS_S_DUPLICATE_ELEMENT);
-
-	/* may need to create a mechanism specific name */
-	if (desired_name) {
-	    union_name = (gss_union_name_t)desired_name;
-	    if (union_name->mech_type &&
-		g_OID_equal(union_name->mech_type,
-			    &mech->mech_type))
-		internal_name = union_name->mech_name;
-	    else {
-		if (gssint_import_internal_name(minor_status,
-					        &mech->mech_type, union_name,
-					        &allocated_name) != GSS_S_COMPLETE)
-		    return (GSS_S_BAD_NAME);
-		internal_name = allocated_name;
-	    }
-	}
     }
 
+    /* may need to create a mechanism specific name */
+    union_name = (gss_union_name_t)desired_name;
+    if (union_name->mech_type && g_OID_equal(union_name->mech_type,
+					     &mech->mech_type))
+	internal_name = union_name->mech_name;
+    else {
+	if (gssint_import_internal_name(minor_status,
+					&mech->mech_type, union_name,
+					&allocated_name) != GSS_S_COMPLETE)
+	    return (GSS_S_BAD_NAME);
+	internal_name = allocated_name;
+    }
 
     if (cred_usage == GSS_C_ACCEPT)
 	time_req = acceptor_time_req;
@@ -420,28 +422,11 @@ gss_add_cred_with_password(minor_status, input_cred_handle,
 	union_cred->auxinfo.time_rec = time_rec;
 	union_cred->auxinfo.cred_usage = cred_usage;
 
-	/*
-	 * we must set the name; if name is not supplied
-	 * we must do inquire cred to get it
-	 */
-	if (internal_name == NULL) {
-	    if (mech->gss_inquire_cred == NULL ||
-		((status = mech->gss_inquire_cred(
-		      &temp_minor_status, cred,
-		      &allocated_name, NULL, NULL,
-		      NULL)) != GSS_S_COMPLETE))
-		goto errout;
-	    internal_name = allocated_name;
-	}
-
-	if (internal_name != GSS_C_NO_NAME) {
-	    status = mech->gss_display_name(&temp_minor_status, internal_name,
-					    &union_cred->auxinfo.name,
-					    &union_cred->auxinfo.name_type);
-
-	    if (status != GSS_S_COMPLETE)
-		goto errout;
-	}
+	status = mech->gss_display_name(&temp_minor_status, internal_name,
+					&union_cred->auxinfo.name,
+					&union_cred->auxinfo.name_type);
+	if (status != GSS_S_COMPLETE)
+	    goto errout;
     }
 
     /* now add the new credential elements */
