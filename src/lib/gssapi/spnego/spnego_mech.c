@@ -3149,6 +3149,18 @@ get_negTokenResp(OM_uint32 *minor_status,
 		*mechListMIC = get_input_token(&ptr, REMAIN);
 		if (*mechListMIC == GSS_C_NO_BUFFER)
 			return GSS_S_DEFECTIVE_TOKEN;
+
+                /* Handle Windows 2000 duplicate response token */
+                if (*responseToken &&
+                    ((*responseToken)->length == (*mechListMIC)->length) &&
+                    !memcmp((*responseToken)->value, (*mechListMIC)->value,
+                            (*responseToken)->length)) {
+			OM_uint32 tmpmin;
+
+			gss_release_buffer(&tmpmin, *mechListMIC);
+			free(*mechListMIC);
+			*mechListMIC = NULL;
+		}
 	}
 	return GSS_S_COMPLETE;
 #undef REMAIN
