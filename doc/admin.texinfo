@@ -680,12 +680,14 @@ tags may be specified in the realm's subsection:
 
 @table @b
 @itemx kdc
-The name of a host running a KDC for that realm.  An optional port
-number (separated from the hostname by a colon) may be included.  For
-your computer to be able to communicate with the KDC for each realm,
-this tag must be given a value in each realm subsection in the
-configuration file, or there must be DNS SRV records specifying the
-KDCs (see @ref{Using DNS}).
+The name or address of a host running a KDC for that realm.  An optional
+port number, separated from the hostname by a colon, may be included.
+If the name or address contains colons (for example, if it is an IPv6
+address), enclose it in square brackets to distinguish the colon from a
+port separator.  For your computer to be able to communicate with the
+KDC for each realm, this tag must be given a value in each realm
+subsection in the configuration file, or there must be DNS SRV records
+specifying the KDCs (see @ref{Using DNS}).
 
 @itemx master_kdc
 Identifies the master KDC(s).  Currently, this tag is used in only one

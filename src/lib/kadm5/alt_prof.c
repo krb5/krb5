@@ -482,6 +482,36 @@ get_deltat_param(krb5_deltat *param_out, krb5_deltat param_in,
 }
 
 /*
+ * Parse out the port number from an admin_server setting.  Modify server to
+ * contain just the hostname or address.  If a port is given, set *port, and
+ * set the appropriate bit in *mask.
+ */
+static void
+parse_admin_server_port(char *server, int *port, long *mask)
+{
+    char *end, *portstr;
+
+    /* Allow the name or addr to be enclosed in brackets, for IPv6 addrs. */
+    if (*server == '[' && (end = strchr(server + 1, ']')) != NULL) {
+        portstr = (*(end + 1) == ':') ? end + 2 : NULL;
+        /* Shift the bracketed name or address back into server. */
+        memmove(server, server + 1, end - (server + 1));
+        *(end - 1) = '\0';
+    } else {
+        /* Terminate the name at the colon, if any. */
+        end = server + strcspn(server, ":");
+        portstr = (*end == ':') ? end + 1 : NULL;
+        *end = '\0';
+    }
+
+    /* If we found a port string, parse it and set the appropriate bit. */
+    if (portstr) {
+        *port = atoi(portstr);
+        *mask |= KADM5_CONFIG_KADMIND_PORT;
+    }
+}
+
+/*
  * Function: kadm5_get_config_params
  *
  * Purpose: Merge configuration parameters provided by the caller with
@@ -581,13 +611,8 @@ krb5_error_code kadm5_get_config_params(context, use_kdc_config,
                      NULL);
 
     if (params.mask & KADM5_CONFIG_ADMIN_SERVER) {
-        char *p;
-        p = strchr(params.admin_server, ':');
-        if (p) {
-            params.kadmind_port = atoi(p+1);
-            params.mask |= KADM5_CONFIG_KADMIND_PORT;
-            *p = '\0';
-        }
+        parse_admin_server_port(params.admin_server, &params.kadmind_port,
+                                &params.mask);
     }
 
     /* Get the value for the database */

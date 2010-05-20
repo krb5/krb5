@@ -374,19 +374,11 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
         if (code == 0) {
             for (i=0; masterlist[i]; i++) {
                 host = masterlist[i];
-
-                /*
-                 * Strip off excess whitespace
-                 */
-                cp = strchr(host, ' ');
-                if (cp)
-                    *cp = 0;
-                cp = strchr(host, '\t');
-                if (cp)
-                    *cp = 0;
-                cp = strchr(host, ':');
-                if (cp)
-                    *cp = 0;
+                /* Strip off excess characters. */
+                if (*host == '[' && (cp = strchr(host, ']')))
+                    *(cp + 1) = '\0';
+                else
+                    *(host + strcspn(host, " \t:")) = '\0';
             }
         }
     } else {
@@ -407,20 +399,13 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 
         host = hostlist[i];
         Tprintf ("entry %d is '%s'\n", i, host);
-        /*
-         * Strip off excess whitespace
-         */
-        cp = strchr(host, ' ');
-        if (cp)
-            *cp = 0;
-        cp = strchr(host, '\t');
-        if (cp)
-            *cp = 0;
-        port = strchr(host, ':');
-        if (port) {
-            *port = 0;
-            port++;
-        }
+        /* Find port number, and strip off any excess characters. */
+        if (*host == '[' && (cp = strchr(host, ']')))
+            cp = cp + 1;
+        else
+            cp = host + strcspn(host, " \t:");
+        port = (*cp == ':') ? cp + 1 : NULL;
+        *cp = '\0';
 
         ismaster = 0;
         if (masterlist) {
@@ -454,15 +439,20 @@ krb5_locate_srv_conf_1(krb5_context context, const krb5_data *realm,
             p2 = sec_udpport;
         }
 
+        /* If the hostname was in brackets, strip those off now. */
+        if (*host == '[' && (cp = strchr(host, ']'))) {
+            host++;
+            *cp = '\0';
+        }
+
         if (socktype != 0)
-            code = add_host_to_list (addrlist, hostlist[i], p1, p2,
-                                     socktype, family);
+            code = add_host_to_list(addrlist, host, p1, p2, socktype, family);
         else {
-            code = add_host_to_list (addrlist, hostlist[i], p1, p2,
-                                     SOCK_DGRAM, family);
+            code = add_host_to_list(addrlist, host, p1, p2, SOCK_DGRAM,
+                                    family);
             if (code == 0)
-                code = add_host_to_list (addrlist, hostlist[i], p1, p2,
-                                         SOCK_STREAM, family);
+                code = add_host_to_list(addrlist, host, p1, p2, SOCK_STREAM,
+                                        family);
         }
         if (code) {
             Tprintf ("error %d (%s) returned from add_host_to_list\n", code,
