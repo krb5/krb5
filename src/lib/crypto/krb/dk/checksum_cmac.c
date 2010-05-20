@@ -64,7 +64,7 @@ krb5int_dk_cmac_checksum(const struct krb5_cksumtypes *ctp,
         return ret;
 
     /* Hash the data. */
-    ret = krb5int_cmac_checksum(enc, kc, usage, data, num_data, output);
+    ret = krb5int_cmac_checksum(enc, kc, data, num_data, output);
     if (ret != 0)
         memset(output->data, 0, output->length);
 

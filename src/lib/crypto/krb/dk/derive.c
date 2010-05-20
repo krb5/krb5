@@ -131,9 +131,9 @@ cleanup:
 }
 
 static krb5_error_code
-derive_random_cmac(const struct krb5_enc_provider *enc,
-                   krb5_key inkey, krb5_data *outrnd,
-                   const krb5_data *in_constant)
+derive_random_sp800_cmac(const struct krb5_enc_provider *enc,
+                         krb5_key inkey, krb5_data *outrnd,
+                         const krb5_data *in_constant)
 {
     size_t blocksize, keybytes, n;
     krb5_crypto_iov iov[4];
@@ -167,7 +167,7 @@ derive_random_cmac(const struct krb5_enc_provider *enc,
     for (i = 1, n = 0; n < keybytes; i++) {
         store_32_be(i, ibuf);
 
-        ret = krb5int_cmac_checksum(enc, inkey, 0, iov, 4, &prf);
+        ret = krb5int_cmac_checksum(enc, inkey, iov, 4, &prf);
         if (ret)
             goto cleanup;
 
@@ -193,7 +193,7 @@ krb5int_derive_random(const struct krb5_enc_provider *enc,
     krb5_error_code ret;
 
     if (enc->cbc_mac)
-        ret = derive_random_cmac(enc, inkey, outrnd, in_constant);
+        ret = derive_random_sp800_cmac(enc, inkey, outrnd, in_constant);
     else
         ret = derive_random_rfc3961(enc, inkey, outrnd, in_constant);
 
