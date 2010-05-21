@@ -299,8 +299,6 @@ krb5_error_code master_key_convert(context, db_entry)
             krb5_keyblock   *tmp_mkey;
 
             key_data = &db_entry->key_data[i];
-            if (key_data->key_data_length == 0)
-                continue;
             retval = krb5_dbe_find_mkey(context, master_keylist, db_entry, &tmp_mkey);
             if (retval)
                 return retval;
