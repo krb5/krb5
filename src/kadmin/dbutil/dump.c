@@ -1271,6 +1271,7 @@ dump_db(argc, argv)
                                    KRB5_LOCKMODE_EXCLUSIVE))) {
             fprintf(stderr, oflock_error,
                     progname, ofile, error_message(kret));
+            fclose(f);
             exit_status++;
         }
         else
