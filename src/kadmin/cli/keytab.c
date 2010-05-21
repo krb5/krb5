@@ -334,11 +334,9 @@ add_principal(void *lhandle, char *keytab_str, krb5_keytab keytab,
     }
 
 cleanup:
-    if (nkeys) {
-        for (i = 0; i < nkeys; i++)
-            krb5_free_keyblock_contents(context, &keys[i]);
-        free(keys);
-    }
+    for (i = 0; i < nkeys; i++)
+        krb5_free_keyblock_contents(context, &keys[i]);
+    free(keys);
     krb5_free_principal(context, princ);
 }
 
