@@ -70,7 +70,7 @@ krb5_k_encrypt(krb5_context context, krb5_key key,
     iov[3].flags = KRB5_CRYPTO_TYPE_TRAILER;
     iov[3].data = make_data(iov[2].data.data + padding_len, trailer_len);
 
-    ret = ktp->encrypt(ktp, key, usage, ivec, iov, 4);
+    ret = ktp->encrypt(context, ktp, key, usage, ivec, iov, 4);
     if (ret != 0)
         zap(iov[1].data.data, iov[1].data.length);
     else

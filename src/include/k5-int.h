@@ -813,7 +813,7 @@ krb5_error_code krb5int_c_copy_keyblock_contents(krb5_context context,
 /*
  * Internal - for cleanup.
  */
-extern void krb5int_prng_cleanup(void);
+extern void krb5int_prng_cleanup(krb5_context context);
 
 
 #ifdef KRB5_OLD_CRYPTO
@@ -2554,8 +2554,8 @@ extern krb5_error_code krb5int_translate_gai_error(int);
 extern krb5_error_code
 krb5int_c_mandatory_cksumtype(krb5_context, krb5_enctype, krb5_cksumtype *);
 
-extern int krb5int_crypto_init (void);
-extern int krb5int_prng_init(void);
+extern int krb5int_crypto_init (krb5_context);
+extern int krb5int_prng_init(krb5_context context);
 
 /*
  * Referral definitions, debugging hooks, and subfunctions.

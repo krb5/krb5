@@ -7,29 +7,29 @@
 #include "string.h"
 
 
-static plugin_manager* _instance = NULL;
+//static plugin_manager* _instance = NULL;
 
 void
-set_plugin_manager_instance(plugin_manager* manager) {
-	_instance = manager;
+set_plugin_manager_instance(plugin_manager **_instance, plugin_manager* manager) {
+	*_instance = manager;
 }
 
 void
-plugin_manager_configure(const char* path)
+plugin_manager_configure(plugin_manager* _instance,const char* path)
 {
 	if(_instance != NULL) {
 		_instance->configure(_instance->data, path);
 	}
 }
 
-void plugin_manager_start()
+void plugin_manager_start(plugin_manager* _instance)
 {
 	if(_instance != NULL) {
 		_instance->start(_instance->data);
 	}
 }
 
-void plugin_manager_stop()
+void plugin_manager_stop(plugin_manager* _instance)
 {
 	if(_instance != NULL) {
 		_instance->stop(_instance->data);
@@ -37,7 +37,7 @@ void plugin_manager_stop()
 }
 
 plhandle
-plugin_manager_get_service(const char* service_name)
+plugin_manager_get_service(plugin_manager* _instance, const char* service_name)
 {
 	plhandle handle;
 	if(_instance != NULL) {

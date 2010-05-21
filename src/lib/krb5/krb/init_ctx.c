@@ -119,6 +119,7 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
     int tmp;
     plugin_manager* default_manager;
     const char conf_path[] = "";
+    static plugin_manager* plugin_mngr_instance = NULL;
 
     /* Verify some assumptions.  If the assumptions hold and the
        compiler is optimizing, this should result in no code being
@@ -176,12 +177,11 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
     ctx->allow_weak_crypto = tmp;
 
 
-    /* Plugin initialization */
-
-    ctx->pl_handle = plugin_default_manager_get_instance();
-    set_plugin_manager_instance(ctx->pl_handle);
-    plugin_manager_configure(conf_path);
-    plugin_manager_start();
+    /* Plugin initialization */   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>...
+    plugin_default_manager_get_instance(&plugin_mngr_instance);
+    set_plugin_manager_instance(&ctx->pl_handle,  plugin_mngr_instance);
+    plugin_manager_configure(ctx->pl_handle, conf_path);
+    plugin_manager_start(ctx->pl_handle);
 
 
     /* initialize the prng (not well, but passable) */

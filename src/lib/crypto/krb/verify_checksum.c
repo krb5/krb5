@@ -53,7 +53,7 @@ krb5_k_verify_checksum(krb5_context context, krb5_key key,
     /* If there's actually a verify function, call it. */
     cksum_data = make_data(cksum->contents, cksum->length);
     if (ctp->verify != NULL)
-        return ctp->verify(ctp, key, usage, &iov, 1, &cksum_data, valid);
+        return ctp->verify(context, ctp, key, usage, &iov, 1, &cksum_data, valid);
 
     /* Otherwise, make the checksum again, and compare. */
     if (cksum->length != ctp->output_size)

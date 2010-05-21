@@ -26,6 +26,7 @@ typedef struct {
 } manager_data;
 #endif
 
-plugin_manager* plugin_default_manager_get_instance(void);
+plugin_manager* plugin_default_manager_get_instance(plugin_manager** plugin_mngr_instance);
+//plugin_manager* plugin_default_manager_get_instance(void);
 
 #endif /* PLUGIN_DEFAULT_MANAGER_H_ */

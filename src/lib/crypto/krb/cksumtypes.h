@@ -39,7 +39,7 @@ struct krb5_cksumtypes;
  * fill in the contents.  If ctp->enc is not NULL, the handler can assume that
  * key is a valid-length key of an enctype which uses that enc provider.
  */
-typedef krb5_error_code (*checksum_func)(const struct krb5_cksumtypes *ctp,
+typedef krb5_error_code (*checksum_func)(krb5_context, const struct krb5_cksumtypes *ctp,
                                          krb5_key key, krb5_keyusage usage,
                                          const krb5_crypto_iov *data,
                                          size_t num_data,
@@ -52,7 +52,7 @@ typedef krb5_error_code (*checksum_func)(const struct krb5_cksumtypes *ctp,
  * ctp->enc is not NULL, the handler can assume that key a valid-length key of
  * an enctype which uses that enc provider.
  */
-typedef krb5_error_code (*verify_func)(const struct krb5_cksumtypes *ctp,
+typedef krb5_error_code (*verify_func)(krb5_context, const struct krb5_cksumtypes *ctp,
                                        krb5_key key, krb5_keyusage usage,
                                        const krb5_crypto_iov *data,
                                        size_t num_data,

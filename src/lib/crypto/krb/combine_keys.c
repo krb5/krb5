@@ -47,7 +47,7 @@
 #include "etypes.h"
 #include "dk.h"
 
-static krb5_error_code dr(const struct krb5_enc_provider *enc,
+static krb5_error_code dr(krb5_context ctx, const struct krb5_enc_provider *enc,
                           const krb5_keyblock *inkey, unsigned char *outdata,
                           const krb5_data *in_constant);
 
@@ -125,13 +125,13 @@ krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
 
     input.length = key2->length;
     input.data = (char *) key2->contents;
-    ret = dr(enc, key1, r1, &input);
+    ret = dr(context, enc, key1, r1, &input);
     if (ret)
         goto cleanup;
 
     input.length = key1->length;
     input.data = (char *) key1->contents;
-    ret = dr(enc, key2, r2, &input);
+    ret = dr(context, enc, key2, r2, &input);
     if (ret)
         goto cleanup;
 
@@ -191,7 +191,7 @@ krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
         myalloc = TRUE;
     }
 
-    ret = krb5int_derive_keyblock(enc, tkey, outkey, &input);
+    ret = krb5int_derive_keyblock(context, enc, tkey, outkey, &input);
     if (ret) {
         if (myalloc) {
             free(outkey->contents);
@@ -212,7 +212,7 @@ cleanup:
 
 /* Our DR function, a simple wrapper around krb5int_derive_random(). */
 static krb5_error_code
-dr(const struct krb5_enc_provider *enc, const krb5_keyblock *inkey,
+dr(krb5_context ctx, const struct krb5_enc_provider *enc, const krb5_keyblock *inkey,
    unsigned char *out, const krb5_data *in_constant)
 {
     krb5_data outdata = make_data(out, enc->keybytes);
@@ -222,7 +222,7 @@ dr(const struct krb5_enc_provider *enc, const krb5_keyblock *inkey,
     ret = krb5_k_create_key(NULL, inkey, &key);
     if (ret != 0)
         return ret;
-    ret = krb5int_derive_random(enc, key, &outdata, in_constant);
+    ret = krb5int_derive_random(ctx, enc, key, &outdata, in_constant);
     krb5_k_free_key(NULL, key);
     return ret;
 }

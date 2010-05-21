@@ -1052,6 +1052,8 @@ krb5_init_creds_free(krb5_context context,
     krb5_free_data_contents(context, &ctx->salt);
     krb5_free_data_contents(context, &ctx->s2kparams);
     krb5_free_keyblock_contents(context, &ctx->as_key);
+    // TEMP Zh
+    context->pl_handle = NULL;
     free(ctx);
 }
 

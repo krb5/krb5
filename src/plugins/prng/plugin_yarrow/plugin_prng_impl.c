@@ -159,7 +159,7 @@ _plugin_prng_seed(krb5_context context, unsigned int randsource,
     int yerr;
 
     /* Make sure the mutex got initialized.  */
-    yerr = krb5int_crypto_init();
+    yerr = krb5int_crypto_init(context);
     if (yerr)
         return yerr;
     /* Now, finally, feed in the data.  */

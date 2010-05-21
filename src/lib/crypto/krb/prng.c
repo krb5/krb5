@@ -37,7 +37,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_c_random_add_entropy(krb5_context context, unsigned int randsource,
                           const krb5_data *data)
 {
-    plhandle handle = plugin_manager_get_service("plugin_prng");
+    plhandle handle = plugin_manager_get_service(context->pl_handle, "plugin_prng");
 
     plugin_prng_seed(handle, context, randsource, data);
     return 0;
@@ -54,7 +54,7 @@ krb5_c_random_seed(krb5_context context, krb5_data *data)
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_os_entropy(krb5_context context, int strong, int *success)
 {
-    plhandle handle = plugin_manager_get_service("plugin_prng");
+    plhandle handle = plugin_manager_get_service(context->pl_handle, "plugin_prng");
 
     plugin_prng_os_seed(handle, context, strong, success);
 
@@ -64,17 +64,17 @@ krb5_c_random_os_entropy(krb5_context context, int strong, int *success)
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_make_octets(krb5_context context, krb5_data *data)
 {
-    plhandle handle = plugin_manager_get_service("plugin_prng");
+    plhandle handle = plugin_manager_get_service(context->pl_handle, "plugin_prng");
 
     plugin_prng_rand(handle, context,  data);
 
     return 0;
 }
 
-int krb5int_prng_init(void)
+int krb5int_prng_init(krb5_context context)
 {
     int ret = 0;
-    plhandle handle = plugin_manager_get_service("plugin_prng");
+    plhandle handle = plugin_manager_get_service(context->pl_handle, "plugin_prng");
 
     ret = plugin_prng_init(handle);
 
@@ -82,9 +82,9 @@ int krb5int_prng_init(void)
 }
 
 void
-krb5int_prng_cleanup(void)
+krb5int_prng_cleanup(krb5_context context)
 {
-    plhandle handle = plugin_manager_get_service("plugin_prng");
+    plhandle handle = plugin_manager_get_service(context->pl_handle, "plugin_prng");
 
     plugin_prng_cleanup(handle);
 

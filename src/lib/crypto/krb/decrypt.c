@@ -77,7 +77,7 @@ krb5_k_decrypt(krb5_context context, krb5_key key,
     memcpy(iov[3].data.data, input->ciphertext.data + header_len + plain_len,
            trailer_len);
 
-    ret = ktp->decrypt(ktp, key, usage, ivec, iov, 4);
+    ret = ktp->decrypt(context, ktp, key, usage, ivec, iov, 4);
     if (ret != 0)
         zap(output->data, plain_len);
     else

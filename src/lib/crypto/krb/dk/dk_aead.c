@@ -69,7 +69,7 @@ krb5int_aes_crypto_length(const struct krb5_keytypes *ktp,
 }
 
 krb5_error_code
-krb5int_dk_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
+krb5int_dk_encrypt(krb5_context context, const struct krb5_keytypes *ktp, krb5_key key,
                    krb5_keyusage usage, const krb5_data *ivec,
                    krb5_crypto_iov *data, size_t num_data)
 {
@@ -134,13 +134,13 @@ krb5int_dk_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
 
     d1.data[4] = 0xAA;
 
-    ret = krb5int_derive_key(enc, key, &ke, &d1);
+    ret = krb5int_derive_key(context, enc, key, &ke, &d1);
     if (ret != 0)
         goto cleanup;
 
     d1.data[4] = 0x55;
 
-    ret = krb5int_derive_key(enc, key, &ki, &d1);
+    ret = krb5int_derive_key(context, enc, key, &ki, &d1);
     if (ret != 0)
         goto cleanup;
 
@@ -148,7 +148,7 @@ krb5int_dk_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
 
     header->data.length = enc->block_size;
 
-    ret = krb5_c_random_make_octets(/* XXX */ NULL, &header->data);
+    ret = krb5_c_random_make_octets(/* XXX */ context, &header->data);
     if (ret != 0)
         goto cleanup;
 
@@ -161,7 +161,7 @@ krb5int_dk_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
         goto cleanup;
 
     /* Encrypt the plaintext (header | data | padding) */
-    ret = enc->encrypt(ke, ivec, data, num_data);
+    ret = enc->encrypt(/*context,*/ ke, ivec, data, num_data);
     if (ret != 0)
         goto cleanup;
 
@@ -179,7 +179,7 @@ cleanup:
 }
 
 krb5_error_code
-krb5int_dk_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
+krb5int_dk_decrypt(krb5_context context, const struct krb5_keytypes *ktp, krb5_key key,
                    krb5_keyusage usage, const krb5_data *ivec,
                    krb5_crypto_iov *data, size_t num_data)
 {
@@ -235,13 +235,13 @@ krb5int_dk_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
 
     d1.data[4] = 0xAA;
 
-    ret = krb5int_derive_key(enc, key, &ke, &d1);
+    ret = krb5int_derive_key(context, enc, key, &ke, &d1);
     if (ret != 0)
         goto cleanup;
 
     d1.data[4] = 0x55;
 
-    ret = krb5int_derive_key(enc, key, &ki, &d1);
+    ret = krb5int_derive_key(context, enc, key, &ki, &d1);
     if (ret != 0)
         goto cleanup;
 

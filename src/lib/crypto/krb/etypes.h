@@ -35,7 +35,7 @@ struct krb5_keytypes;
 typedef unsigned int (*crypto_length_func)(const struct krb5_keytypes *ktp,
                                            krb5_cryptotype type);
 
-typedef krb5_error_code (*crypt_func)(const struct krb5_keytypes *ktp,
+typedef krb5_error_code (*crypt_func)(krb5_context ctx, const struct krb5_keytypes *ktp,
                                       krb5_key key, krb5_keyusage keyusage,
                                       const krb5_data *ivec,
                                       krb5_crypto_iov *data, size_t num_data);

@@ -16,7 +16,7 @@
 #endif
 
 
-static plugin_manager* _instance = NULL;
+//static plugin_manager* _instance = NULL;
 
 static plugin_factory_descr _table[] = {
         {"plugin_default_factory", plugin_default_factory_get_instance},
@@ -105,7 +105,7 @@ _register_api(registry_data* data, const char* api_name,
 #ifdef DEBUG_PLUGINS
         printf("%s is already registered, only one plugin is allowed per service\n", api_name);
 #endif
-        ret = 0;
+        ret = 2;
     } else {
         strcpy(entry->api_name, api_name);
         next = (plhandle*) malloc(sizeof(plhandle));
@@ -136,6 +136,7 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
     const char* plugin_name = NULL;
     const char* plugin_type = NULL;
     plhandle handle;
+    int ret = 0;
 
     for (p = plugin_node->node_value.seq_value.start; p != NULL; p = p->next) {
         if(strcmp(p->node_name, "api") == 0) {
@@ -169,12 +170,13 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
 
     handle = _create_api(plugin_name, factory_name, factory_type/*, properties*/);
     if(handle.api != NULL) {
-        if(!(_register_api(mdata->registry,plugin_api, plugin_type, handle))) {
+        ret = _register_api(mdata->registry,plugin_api, plugin_type, handle);
+        if (ret != 1) {
 #ifdef DEBUG_PLUGINS
             printf("Failed to register %s for %s(factory=%s,plugin_type=%s)\n",
                     plugin_name, plugin_api, factory_name, plugin_type);
 #endif
-              exit(1);
+             if (ret == 0) exit(1);
         }
     } else {
 #ifdef DEBUG_PLUGINS
@@ -282,12 +284,13 @@ _configure_krb5(manager_data* data, const char* path)
 
             handle = _create_api(*plugin_name, *factory_name, *factory_type/*, properties*/);
             if(handle.api != NULL) {
-                if(!(_register_api(mdata->registry,plugin, *plugin_type, handle))) {
+                retval = _register_api(mdata->registry,plugin, *plugin_type, handle);
+                if( retval != 1) {
 #ifdef DEBUG_PLUGINS
                    printf("Failed to register %s for %s(factory=%s,plugin_type=%s)\n",
                             *plugin_name, plugin, *factory_name, *plugin_type);
 #endif
-                    exit(1);
+                   if (retval == 0) exit(1);
                 }
             } else {
 #ifdef DEBUG_PLUGINS
@@ -346,12 +349,11 @@ _init_data()
 }
 
 plugin_manager*
-plugin_default_manager_get_instance()
+plugin_default_manager_get_instance(plugin_manager** plugin_mngr_instance)
 {
-    plugin_manager* instance = _instance;
-    _instance = NULL;
+    plugin_manager* instance = NULL;  // = plugin_mngr_instance;
 
-    if(_instance == NULL) {
+    if(*plugin_mngr_instance == NULL) {
         instance = (plugin_manager*) malloc(sizeof(plugin_manager));
         memset(instance, 0, sizeof(plugin_manager));
         instance->data = _init_data();
@@ -363,8 +365,8 @@ plugin_default_manager_get_instance()
         instance->start = _start;
         instance->stop = _stop;
         instance->getService = _getService;
-        _instance = instance;
+        *plugin_mngr_instance = instance;
     }
-    return (instance);
+    return (*plugin_mngr_instance);
 }
 

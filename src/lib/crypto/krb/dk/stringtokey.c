@@ -31,7 +31,7 @@ static const unsigned char kerberos[] = "kerberos";
 #define kerberos_len (sizeof(kerberos)-1)
 
 krb5_error_code
-krb5int_dk_string_to_key(const struct krb5_keytypes *ktp,
+krb5int_dk_string_to_key(krb5_context ctx, const struct krb5_keytypes *ktp,
                          const krb5_data *string, const krb5_data *salt,
                          const krb5_data *parms, krb5_keyblock *keyblock)
 {
@@ -87,7 +87,7 @@ krb5int_dk_string_to_key(const struct krb5_keytypes *ktp,
     indata.length = kerberos_len;
     indata.data = (char *) kerberos;
 
-    ret = krb5int_derive_keyblock(enc, foldkey, keyblock, &indata);
+    ret = krb5int_derive_keyblock(ctx, enc, foldkey, keyblock, &indata);
     if (ret != 0)
         memset(keyblock->contents, 0, keyblock->length);
 
@@ -104,7 +104,7 @@ cleanup:
 #define MAX_ITERATION_COUNT             0x1000000L
 
 krb5_error_code
-krb5int_aes_string_to_key(const struct krb5_keytypes *ktp,
+krb5int_aes_string_to_key(krb5_context ctx, const struct krb5_keytypes *ktp,
                           const krb5_data *string,
                           const krb5_data *salt,
                           const krb5_data *params,
@@ -150,7 +150,7 @@ krb5int_aes_string_to_key(const struct krb5_keytypes *ktp,
     if (err)
         goto cleanup;
 
-    err = krb5int_derive_keyblock(ktp->enc, tempkey, key, &usage);
+    err = krb5int_derive_keyblock(ctx, ktp->enc, tempkey, key, &usage);
 
 cleanup:
     if (err)

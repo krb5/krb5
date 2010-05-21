@@ -80,7 +80,7 @@ cleanup:
 }
 
 krb5_error_code
-krb5int_derive_random(const struct krb5_enc_provider *enc,
+krb5int_derive_random(krb5_context context, const struct krb5_enc_provider *enc,
                       krb5_key inkey, krb5_data *outrnd,
                       const krb5_data *in_constant)
 {
@@ -137,7 +137,7 @@ cleanup:
  * the same inkey and constant.
  */
 krb5_error_code
-krb5int_derive_keyblock(const struct krb5_enc_provider *enc,
+krb5int_derive_keyblock(krb5_context context, const struct krb5_enc_provider *enc,
                         krb5_key inkey, krb5_keyblock *outkey,
                         const krb5_data *in_constant)
 {
@@ -150,7 +150,7 @@ krb5int_derive_keyblock(const struct krb5_enc_provider *enc,
         goto cleanup;
 
     /* Derive pseudo-random data for the key bytes. */
-    ret = krb5int_derive_random(enc, inkey, &rawkey, in_constant);
+    ret = krb5int_derive_random(context, enc, inkey, &rawkey, in_constant);
     if (ret)
         goto cleanup;
 
@@ -163,7 +163,7 @@ cleanup:
 }
 
 krb5_error_code
-krb5int_derive_key(const struct krb5_enc_provider *enc,
+krb5int_derive_key(krb5_context context, const struct krb5_enc_provider *enc,
                    krb5_key inkey, krb5_key *outkey,
                    const krb5_data *in_constant)
 {
@@ -189,7 +189,7 @@ krb5int_derive_key(const struct krb5_enc_provider *enc,
     keyblock.enctype = inkey->keyblock.enctype;
     if (keyblock.contents == NULL)
         return ENOMEM;
-    ret = krb5int_derive_keyblock(enc, inkey, &keyblock, in_constant);
+    ret = krb5int_derive_keyblock(context, enc, inkey, &keyblock, in_constant);
     if (ret)
         goto cleanup;
 
