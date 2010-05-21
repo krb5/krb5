@@ -968,8 +968,6 @@ get_date(char *p)
 			yyMeridian, yyDSTmode);
 	if (Start < 0)
 	    return -1;
-	if (error != 0)
-	    return -1;
     }
     else {
 	Start = now->time;
