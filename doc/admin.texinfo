@@ -1054,8 +1054,8 @@ For each section, the following tags may be specified in the subsection:
 This tag indicates the name of the loadable database library. The value should be @samp{db2} for DB2 database and @samp{kldap} for LDAP database.
 
 @itemx database_name
-This DB2-specific tag indicates the location of the database.  The
-default is @* @code{@value{DefaultDatabaseName}}.
+This DB2-specific tag indicates the location of the database in the
+filesystem.  The default is @* @code{@value{DefaultDatabaseName}}.
 
 @itemx disable_last_success
 If set to @code{true}, suppresses KDC updates to the ``Last successful
