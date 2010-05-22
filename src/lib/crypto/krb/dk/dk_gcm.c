@@ -85,7 +85,7 @@ krb5int_dk_gcm_crypto_length(const struct krb5_keytypes *ktp,
     case KRB5_CRYPTO_TYPE_TRAILER:
     case KRB5_CRYPTO_TYPE_CHECKSUM:
         length = ktp->enc->block_size;
-        assert(length == BLOCK_SIZE); /* SP-800-38D requires this */
+        assert(length <= BLOCK_SIZE); /* SP-800-38D requires this */
         break;
     default:
         assert(0 && "invalid cryptotype passed to gcm_crypto_length");
@@ -293,13 +293,13 @@ krb5int_gcm_encrypt(const struct krb5_keytypes *ktp,
     size_t plain_len = 0,  adata_len = 0;
     char len_buf[BLOCK_SIZE];
     unsigned char H[BLOCK_SIZE], J0[BLOCK_SIZE];
-    unsigned char ICB[BLOCK_SIZE];
+    unsigned char ICB[BLOCK_SIZE], S[BLOCK_SIZE];
     krb5_data counter;
 
     header_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_HEADER);
 
     header = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_HEADER);
-    if (header == NULL || header->data.length != header_len) {
+    if (header == NULL || header->data.length < header_len) {
         ret = KRB5_BAD_MSIZE;
         goto cleanup;
     }
@@ -307,7 +307,7 @@ krb5int_gcm_encrypt(const struct krb5_keytypes *ktp,
     trailer_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_TRAILER);
 
     trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
-    if (trailer == NULL || trailer->data.length != trailer_len) {
+    if (trailer == NULL || trailer->data.length < trailer_len) {
         ret = KRB5_BAD_MSIZE;
         goto cleanup;
     }
@@ -388,22 +388,24 @@ krb5int_gcm_encrypt(const struct krb5_keytypes *ktp,
     num_sign_data++;
 
     /* Make checksum */
-    ret = GHASH(H, sign_data, num_sign_data,
-                (unsigned char *)trailer->data.data);
+    ret = GHASH(H, sign_data, num_sign_data, S);
     if (ret != 0)
         goto cleanup;
 
-    /* Encrypt checksum in trailer */
+    /* Encrypt checksum and place (possibly truncated) into trailer */
     {
         krb5_data J0_data = make_data((char *)J0, sizeof(J0));
         krb5_crypto_iov cksum[1];
 
         cksum[0].flags = KRB5_CRYPTO_TYPE_DATA;
-        cksum[0].data = trailer->data;
+        cksum[0].data = make_data(S, sizeof(S));
 
         ret = ktp->enc->encrypt(kg, &J0_data, cksum, 1);
         if (ret != 0)
             goto cleanup;
+
+        memcpy(trailer->data.data, S, trailer_len);
+        trailer->data.length = trailer_len;
     }
 
     if (state != NULL)
@@ -411,6 +413,7 @@ krb5int_gcm_encrypt(const struct krb5_keytypes *ktp,
 
 cleanup:
     free(sign_data);
+    zap(S, sizeof(S));
     zap(ICB, sizeof(ICB));
     zap(J0, sizeof(J0));
     zap(H, sizeof(H));
@@ -480,7 +483,6 @@ krb5int_gcm_decrypt(const struct krb5_keytypes *ktp,
     }
 
     trailer_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_TRAILER);
-    assert(trailer_len <= sizeof(made_cksum));
 
     trailer = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_TRAILER);
     if (trailer == NULL || trailer->data.length < trailer_len) {

@@ -312,6 +312,7 @@ ccm_encrypt(const struct krb5_keytypes *ktp,
     }
 
     header->data.length = header_len;
+    trailer->data.length = trailer_len;
 
     /* Initialize nonce */
     ret = krb5_c_random_make_octets(NULL, &header->data);
