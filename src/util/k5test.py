@@ -1023,6 +1023,16 @@ _passes = [
                         'supported_enctypes' : 'camellia256-ccm:normal',       
                         'master_key_type' : 'camellia256-ccm'}}}}),            
 
+    # Exercise the camellia256-gcm enctype.                                    
+    ('camellia256', None,                                                      
+      {'all' : {'libdefaults' : {                                              
+                    'default_tgs_enctypes' : 'camellia256-gcm',                
+                    'default_tkt_enctypes' : 'camellia256-gcm',                
+                    'permitted_enctypes' : 'camellia256-gcm'}}},               
+      {'master' : {'realms' : {'$realm' : {                                    
+                        'supported_enctypes' : 'camellia256-gcm:normal',       
+                        'master_key_type' : 'camellia256-gcm'}}}}),            
+
     # Test a setup with modern principal keys but an old TGT key.
     ('aes256.destgt', 'des-cbc-crc:normal',
      {'all' : {'libdefaults' : {'allow_weak_crypto' : 'true'}}},

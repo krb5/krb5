@@ -111,6 +111,18 @@ const struct krb5_cksumtypes krb5int_cksumtypes_list[] = {
       &krb5int_enc_aes256_ctr, NULL,
       krb5int_dk_cmac_checksum, NULL,
       16, 16, 0 },
+
+    { CKSUMTYPE_GMAC_128_AES128,
+      "gmac-128-aes128", { 0 }, "GMAC AES128 key",
+      &krb5int_enc_aes128_ctr, NULL,
+      krb5int_dk_gmac_checksum, krb5int_dk_gmac_verify,
+      28, 28, 0 },
+
+    { CKSUMTYPE_GMAC_128_AES256,
+      "gmac-128-aes256", { 0 }, "GMAC AES256 key",
+      &krb5int_enc_aes256_ctr, NULL,
+      krb5int_dk_gmac_checksum, krb5int_dk_gmac_verify,
+      28, 28, 0 },
 #endif /* AES_CCM */
 
     { CKSUMTYPE_MD5_HMAC_ARCFOUR,
@@ -142,6 +154,18 @@ const struct krb5_cksumtypes krb5int_cksumtypes_list[] = {
       &krb5int_enc_camellia256_ctr, NULL,
       krb5int_dk_cmac_checksum, NULL,
       16, 16, 0 },
+
+    { CKSUMTYPE_GMAC_128_CAMELLIA128,
+      "gmac-128-camellia128", { 0 }, "GMAC Camellia128 key",
+      &krb5int_enc_camellia128_ctr, NULL,
+      krb5int_dk_gmac_checksum, krb5int_dk_gmac_verify,
+      28, 28, 0 },
+
+    { CKSUMTYPE_GMAC_128_CAMELLIA256,
+      "gmac-128-camellia256", { 0 }, "GMAC Camellia256 key",
+      &krb5int_enc_camellia256_ctr, NULL,
+      krb5int_dk_gmac_checksum, krb5int_dk_gmac_verify,
+      28, 28, 0 },
 };
 
 const size_t krb5int_cksumtypes_length =

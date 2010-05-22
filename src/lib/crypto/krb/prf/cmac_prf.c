@@ -1,6 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * lib/crypto/krb/prf/ccm_prf.c
+ * lib/crypto/krb/prf/cmac_prf.c
  *
  * Copyright (C) 2010 by the Massachusetts Institute of Technology.
  * All rights reserved.
@@ -34,8 +34,8 @@
 #include <dk.h>
 
 krb5_error_code
-krb5int_dk_ccm_prf(const struct krb5_keytypes *ktp, krb5_key key,
-                   const krb5_data *in, krb5_data *out)
+krb5int_dk_cmac_prf(const struct krb5_keytypes *ktp, krb5_key key,
+                    const krb5_data *in, krb5_data *out)
 {
     krb5_crypto_iov iov;
     krb5_data prfconst = make_data("prf", 3);

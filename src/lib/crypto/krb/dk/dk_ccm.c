@@ -323,11 +323,9 @@ ccm_encrypt(const struct krb5_keytypes *ktp,
     if (ret != 0)
         goto cleanup;
 
-    sign_data = (krb5_crypto_iov *)calloc(num_data + 1, sizeof(krb5_crypto_iov));
-    if (sign_data == NULL) {
-        ret = ENOMEM;
+    sign_data = k5alloc((num_data + 1) * sizeof(krb5_crypto_iov), &ret);
+    if (sign_data == NULL)
         goto cleanup;
-    }
 
     sign_data[num_sign_data].flags = KRB5_CRYPTO_TYPE_HEADER;
     sign_data[num_sign_data].data = make_data((char *)B0, sizeof(B0));
@@ -490,11 +488,9 @@ ccm_decrypt(const struct krb5_keytypes *ktp,
     if (ret != 0)
         goto cleanup;
 
-    sign_data = (krb5_crypto_iov *)calloc(num_data + 1, sizeof(krb5_crypto_iov));
-    if (sign_data == NULL) {
-        ret = ENOMEM;
+    sign_data = k5alloc((num_data + 1) * sizeof(krb5_crypto_iov), &ret);
+    if (sign_data == NULL)
         goto cleanup;
-    }
 
     sign_data[num_sign_data].flags = KRB5_CRYPTO_TYPE_HEADER;
     sign_data[num_sign_data].data = make_data((char *)B0, sizeof(B0));
