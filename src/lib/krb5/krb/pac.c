@@ -1053,10 +1053,10 @@ mspac_export_internal(krb5_context kcontext,
     *ptr = NULL;
 
     if (pacctx->pac == NULL)
-        return 0;
+        return ENOENT;
 
     if (restrict_authenticated && (pacctx->pac->verified) == FALSE)
-        return 0;
+        return ENOENT;
 
     code = krb5_pac_parse(kcontext, pacctx->pac->data.data,
                           pacctx->pac->data.length, &pac);
