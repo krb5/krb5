@@ -205,11 +205,10 @@ krb5int_c_iov_get_block_nocopy(unsigned char *storage,
 
     iov_state->iov_pos = i;
 
-    if (j != block_size)
-        memset(storage + j, 0, block_size - j);
-
     if (j == 0)
         return FALSE;
+    else if (j != block_size)
+        memset(storage + j, 0, block_size - j);
 
 #ifdef DEBUG_IOV
     dump_block("get_block", i, j, (p && *p) ? *p : storage, block_size);
