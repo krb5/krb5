@@ -32,8 +32,6 @@
 #include <aead.h>
 #include <rand2key.h>
 
-#define DEFAULT_COUNTER_LEN	3 /* default q=3 from RFC 5116 5.3 */
-
 static void
 xorblock(unsigned char *out, const unsigned char *in)
 {
