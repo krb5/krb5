@@ -109,7 +109,6 @@ k5_des3_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
     EVP_CIPHER_CTX_set_padding(&ciph_ctx,0);
 
     for (;;) {
-
         if (!krb5int_c_iov_get_block(iblock, MIT_DES_BLOCK_LENGTH,
                                      data, num_data, &input_pos))
             break;
@@ -164,7 +163,6 @@ k5_des3_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
     EVP_CIPHER_CTX_set_padding(&ciph_ctx,0);
 
     for (;;) {
-
         if (!krb5int_c_iov_get_block(iblock, MIT_DES_BLOCK_LENGTH,
                                      data, num_data, &input_pos))
             break;
