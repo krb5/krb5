@@ -109,16 +109,16 @@ krb5int_aes_encrypt_ctr(krb5_key key,
 	unsigned char storage[BLOCK_SIZE], *block;
 	unsigned char ectr[BLOCK_SIZE];
 
-        block = iov_next_block(storage, BLOCK_SIZE, data, num_data, &input_pos);
-        if (block == NULL)
+        if (!krb5int_c_iov_get_block_nocopy(storage, BLOCK_SIZE,
+                                            data, num_data, &input_pos, &block))
 	    break;
 
 	if (aes_enc_blk(ctr, ectr, &ctx) != aes_good)
 	    abort();
 
 	xorblock(block, ectr);
-	iov_store_block(data, num_data, block, storage, BLOCK_SIZE, &output_pos);
-
+        krb5int_c_iov_put_block_nocopy(data, num_data, storage, BLOCK_SIZE,
+                                       &output_pos, block);
 	putctrblockno(++blockno, ctr);
     }
 

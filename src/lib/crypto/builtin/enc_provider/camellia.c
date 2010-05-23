@@ -113,12 +113,12 @@ krb5int_camellia_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *d
         for (blockno = 0; blockno < nblocks - 2; blockno++) {
             unsigned char blockN[BLOCK_SIZE], *block;
 
-            block = iov_next_block(blockN, BLOCK_SIZE, data, num_data,
-                                   &input_pos);
+            krb5int_c_iov_get_block_nocopy(blockN, BLOCK_SIZE,
+                                           data, num_data, &input_pos, &block);
             xorblock(tmp, block);
             enc(block, tmp, &ctx);
-            iov_store_block(data, num_data, block, blockN, BLOCK_SIZE,
-                            &output_pos);
+            krb5int_c_iov_put_block_nocopy(data, num_data, blockN,
+                                           BLOCK_SIZE, &output_pos, block);
 
             /* Set up for next block.  */
             memcpy(tmp, block, BLOCK_SIZE);
@@ -202,14 +202,14 @@ krb5int_camellia_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *d
         for (blockno = 0; blockno < nblocks - 2; blockno++) {
             unsigned char blockN[BLOCK_SIZE], *block;
 
-            block = iov_next_block(blockN, BLOCK_SIZE, data, num_data,
-                                   &input_pos);
+            krb5int_c_iov_get_block_nocopy(blockN, BLOCK_SIZE,
+                                           data, num_data, &input_pos, &block);
             memcpy(tmp2, block, BLOCK_SIZE);
             dec(block, block, &ctx);
             xorblock(block, tmp);
             memcpy(tmp, tmp2, BLOCK_SIZE);
-            iov_store_block(data, num_data, block, blockN, BLOCK_SIZE,
-                            &output_pos);
+            krb5int_c_iov_put_block_nocopy(data, num_data, blockN,
+                                           BLOCK_SIZE, &output_pos, block);
         }
 
         /* Do last two blocks, the second of which (next-to-last block

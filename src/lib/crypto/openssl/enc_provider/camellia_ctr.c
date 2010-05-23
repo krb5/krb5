@@ -97,15 +97,15 @@ krb5int_camellia_encrypt_ctr(krb5_key key,
         unsigned char ectr[CAMELLIA_BLOCK_SIZE];
         unsigned int num = 0;
 
-        block = iov_next_block(storage, CAMELLIA_BLOCK_SIZE, data, num_data, &input_pos);
-        if (block == NULL)
+        if (!krb5int_c_iov_get_block_nocopy(storage, CAMELLIA_BLOCK_SIZE,
+                                            data, num_data, &input_pos, &block))
             break;
 
         /* We should not need to initialise ectr because we're on a block boundary. */
         Camellia_ctr128_encrypt(block, block, CAMELLIA_BLOCK_SIZE, &enck, ctr, ectr, &num);
         assert(num == 0);
-
-        iov_store_block(data, num_data, block, storage, CAMELLIA_BLOCK_SIZE, &output_pos);
+        krb5int_c_iov_put_block_nocopy(data, num_data, storage,
+                                       CAMELLIA_BLOCK_SIZE, &output_pos, block);
     }
 
     if (ivec != NULL)

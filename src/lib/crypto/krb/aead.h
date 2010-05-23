@@ -74,14 +74,6 @@ krb5int_c_iov_put_block(const krb5_crypto_iov *data,
                         size_t block_size,
                         struct iov_block_state *iov_state);
 
-krb5_error_code
-krb5int_c_iov_decrypt_stream(const struct krb5_keytypes *ktp, krb5_key key,
-                             krb5_keyusage keyusage, const krb5_data *ivec,
-                             krb5_crypto_iov *data, size_t num_data);
-
-unsigned int
-krb5int_c_padding_length(const struct krb5_keytypes *ktp, size_t data_length);
-
 /*
  * Returns an alias into the current buffer if the next block is fully
  * contained within; otherwise makes a copy of the next block and returns an
@@ -90,40 +82,31 @@ krb5int_c_padding_length(const struct krb5_keytypes *ktp, size_t data_length);
  * store the result back into the iov if necessary.  Returns NULL if there
  * is no next block.
  */
-static inline unsigned char *
-iov_next_block(unsigned char *storage, size_t len,
-               const krb5_crypto_iov *data, size_t num_data,
-               struct iov_block_state *pos)
-{
-    const krb5_crypto_iov *iov = &data[pos->iov_pos];
-    unsigned char *block;
-
-    if (pos->iov_pos < num_data && iov->data.length - pos->data_pos >= len) {
-        /* Return an alias to memory inside the current iov. */
-        block = (unsigned char *) iov->data.data + pos->data_pos;
-        pos->data_pos += len;
-        return block;
-    }
-    /* Do it the slow way and return a copy into storage. */
-    if (krb5int_c_iov_get_block(storage, len, data, num_data, pos))
-        return storage;
-    return NULL;
-}
+krb5_boolean
+krb5int_c_iov_get_block_nocopy(unsigned char *block,
+                               size_t block_size,
+                               const krb5_crypto_iov *data,
+                               size_t num_data,
+                               struct iov_block_state *iov_state,
+                               unsigned char **p);
 
 /*
  * Store a block retrieved with iov_next_block if necessary, and advance the
  * output cursor.
  */
-static inline void
-iov_store_block(const krb5_crypto_iov *data, size_t num_data,
-                unsigned char *block, unsigned char *storage, size_t len,
-                struct iov_block_state *pos)
-{
-    if (block == storage) {
-        /* We got the block the slow way; put it back that way too. */
-        krb5int_c_iov_put_block(data, num_data, storage, len, pos);
-    } else {
-        /* It's already stored; we just have to advance the output cursor. */
-        pos->data_pos += len;
-    }
-}
+krb5_boolean
+krb5int_c_iov_put_block_nocopy(const krb5_crypto_iov *data,
+                               size_t num_data,
+                               unsigned char *block,
+                               size_t block_size,
+                               struct iov_block_state *iov_state,
+                               unsigned char *p);
+
+krb5_error_code
+krb5int_c_iov_decrypt_stream(const struct krb5_keytypes *ktp, krb5_key key,
+                             krb5_keyusage keyusage, const krb5_data *ivec,
+                             krb5_crypto_iov *data, size_t num_data);
+
+unsigned int
+krb5int_c_padding_length(const struct krb5_keytypes *ktp, size_t data_length);
+

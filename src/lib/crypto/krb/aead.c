@@ -63,7 +63,7 @@ dump_block(const char *tag,
 {
     size_t k;
 
-    printf("[%s: %d.%d] ", tag, i, j);
+    printf("[%s: %lu.%lu] ", tag, i, j);
 
     for (k = 0; k < block_size; k++)
         printf("%02x ", block[k] & 0xFF);
@@ -129,13 +129,17 @@ pad_to_boundary_p(const krb5_crypto_iov *data,
 }
 
 krb5_boolean
-krb5int_c_iov_get_block(unsigned char *block,
-                        size_t block_size,
-                        const krb5_crypto_iov *data,
-                        size_t num_data,
-                        struct iov_block_state *iov_state)
+krb5int_c_iov_get_block_nocopy(unsigned char *block,
+                               size_t block_size,
+                               const krb5_crypto_iov *data,
+                               size_t num_data,
+                               struct iov_block_state *iov_state,
+                               unsigned char **p)
 {
     size_t i, j = 0;
+
+    if (p != NULL)
+        *p = block;
 
     for (i = iov_state->iov_pos; i < num_data; i++) {
         const krb5_crypto_iov *iov = &data[i];
@@ -153,7 +157,14 @@ krb5int_c_iov_get_block(unsigned char *block,
         if (nbytes > block_size - j)
             nbytes = block_size - j;
 
-        memcpy(block + j, iov->data.data + iov_state->data_pos, nbytes);
+        /*
+         * If we can return a pointer into a complete block, then do so.
+         */
+        if (p != NULL && j == 0 && nbytes == block_size) {
+            *p = (unsigned char *)iov->data.data + iov_state->data_pos;
+        } else {
+            memcpy(block + j, iov->data.data + iov_state->data_pos, nbytes);
+        }
 
         iov_state->data_pos += nbytes;
         j += nbytes;
@@ -169,27 +180,31 @@ krb5int_c_iov_get_block(unsigned char *block,
     }
 
     iov_state->iov_pos = i;
-    if (i == num_data)
-        return FALSE;
 
     if (j != block_size)
         memset(block + j, 0, block_size - j);
 
+    if (j == 0)
+        return FALSE;
+
 #ifdef DEBUG_IOV
-    dump_block("get_block", i, j, block, block_size);
+    dump_block("get_block", i, j, (p && *p) ? *p : block, block_size);
 #endif
 
     return TRUE;
 }
 
 krb5_boolean
-krb5int_c_iov_put_block(const krb5_crypto_iov *data,
-                        size_t num_data,
-                        unsigned char *block,
-                        size_t block_size,
-                        struct iov_block_state *iov_state)
+krb5int_c_iov_put_block_nocopy(const krb5_crypto_iov *data,
+                               size_t num_data,
+                               unsigned char *block,
+                               size_t block_size,
+                               struct iov_block_state *iov_state,
+                               unsigned char *p)
 {
     size_t i, j = 0;
+
+    assert(p != NULL);
 
     for (i = iov_state->iov_pos; i < num_data; i++) {
         const krb5_crypto_iov *iov = &data[i];
@@ -207,7 +222,17 @@ krb5int_c_iov_put_block(const krb5_crypto_iov *data,
         if (nbytes > block_size - j)
             nbytes = block_size - j;
 
-        memcpy(iov->data.data + iov_state->data_pos, block + j, nbytes);
+        /*
+         * If we had previously returned a pointer into a complete block,
+         * then no action is required.
+         */
+        if (p == block) {
+            memcpy(iov->data.data + iov_state->data_pos, block + j, nbytes);
+        } else {
+            /* Validate we correctly paired with a call to get_block_nocopy() */
+            assert(j == 0);
+            assert(nbytes == 0 || nbytes == block_size);
+        }
 
         iov_state->data_pos += nbytes;
         j += nbytes;
@@ -225,11 +250,12 @@ krb5int_c_iov_put_block(const krb5_crypto_iov *data,
     iov_state->iov_pos = i;
 
 #ifdef DEBUG_IOV
-    dump_block("put_block", i, j, block, block_size);
+    dump_block("put_block", i, j, p == block ? block : p, block_size);
 #endif
 
     return (iov_state->iov_pos < num_data);
 }
+
 
 krb5_error_code
 krb5int_c_iov_decrypt_stream(const struct krb5_keytypes *ktp, krb5_key key,
@@ -318,3 +344,26 @@ krb5int_c_padding_length(const struct krb5_keytypes *ktp, size_t data_length)
     else
         return padding - (data_length % padding);
 }
+
+krb5_boolean
+krb5int_c_iov_get_block(unsigned char *block,
+                        size_t block_size,
+                        const krb5_crypto_iov *data,
+                        size_t num_data,
+                        struct iov_block_state *iov_state)
+{
+    return krb5int_c_iov_get_block_nocopy(block, block_size, data, num_data,
+                                          iov_state, NULL);
+}
+
+krb5_boolean
+krb5int_c_iov_put_block(const krb5_crypto_iov *data,
+                        size_t num_data,
+                        unsigned char *block,
+                        size_t block_size,
+                        struct iov_block_state *iov_state)
+{
+    return krb5int_c_iov_put_block_nocopy(data, num_data, block, block_size,
+                                          iov_state, block);
+}
+
