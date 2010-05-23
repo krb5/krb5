@@ -101,6 +101,14 @@ enctype_toString(const void * data, khm_size cbdata,
     case ENCYTPE_AES256_CCM_128:
         resid = IDS_ETYPE_AES256_CCM_128;
         break;
+
+    case ENCTYPE_AES128_GCM_128:
+        resid = IDS_ETYPE_AES128_GCM_128;
+        break;
+
+    case ENCYTPE_AES256_GCM_128:
+        resid = IDS_ETYPE_AES256_GCM_128;
+        break;
 #endif
 
     case ENCTYPE_CAMELLIA128_CTS_HMAC_SHA1_96:
@@ -117,6 +125,14 @@ enctype_toString(const void * data, khm_size cbdata,
 
     case ENCTYPE_CAMELLIA256_CCM_128:
         resid = IDS_ETYPE_CAMELLIA256_CCM_128;
+        break;
+
+    case ENCTYPE_CAMELLIA128_GCM_128:
+        resid = IDS_ETYPE_CAMELLIA128_GCM_128;
+        break;
+
+    case ENCTYPE_CAMELLIA256_GCM_128:
+        resid = IDS_ETYPE_CAMELLIA256_GCM_128;
         break;
 
     case ENCTYPE_ARCFOUR_HMAC:
