@@ -245,10 +245,9 @@ valid_payload_length_p(const struct krb5_keytypes *ktp,
 
     q = 15 - n;
 
-    maxblocks = (1U << (8 * q));
+    maxblocks = (1U << (8 * q)) - 1 /* tag */;
 
-    nblocks = 1; /* tag */
-    nblocks += (payload_len + block_size - 1) / block_size;
+    nblocks = (payload_len + block_size - 1) / block_size;
 
     return (nblocks <= maxblocks);
 }
