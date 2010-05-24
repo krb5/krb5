@@ -31,7 +31,7 @@
 /*
  * Implement AEAD_AES_{128,256}_GCM as described in section 5.1 of RFC 5116.
  *
- * This is the GCM mode as described in NIST 800-38D, with a 12 byte IV
+ * This is the GCM mode as described in NIST SP800-38D, with a 12 byte IV
  * and 16 byte checksum. Multiple buffers of the same type are logically
  * concatenated.
  *
@@ -85,7 +85,7 @@ krb5int_dk_gcm_crypto_length(const struct krb5_keytypes *ktp,
     case KRB5_CRYPTO_TYPE_TRAILER:
     case KRB5_CRYPTO_TYPE_CHECKSUM:
         length = ktp->enc->block_size;
-        assert(length <= BLOCK_SIZE); /* SP-800-38D requires this */
+        assert(length <= BLOCK_SIZE); /* SP800-38D requires this */
         break;
     default:
         assert(0 && "invalid cryptotype passed to gcm_crypto_length");
@@ -97,17 +97,22 @@ krb5int_dk_gcm_crypto_length(const struct krb5_keytypes *ktp,
 }
 
 static krb5_boolean
-valid_payload_length_p(const struct krb5_keytypes *ktp,
-                       unsigned int n,
-                       unsigned int payload_len)
+valid_plaintext_length_p(const struct krb5_keytypes *ktp,
+                         unsigned int payload_len)
 {
-    unsigned int block_size = ktp->enc->block_size;
+    size_t block_size = ktp->enc->block_size;
     unsigned long nblocks, maxblocks;
 
-    maxblocks = (1UL << 32);
+    /*
+     * Counter typically starts at 1, so to avoid wrapping around
+     * we sacrifice another block. This appears to be implied by
+     * SP800-38D, which says that the maximum bit length of the
+     * plaintext is 2^39 - 256; thus the maximum number of blocks
+     * of plaintext is 2^32 - 2.
+     */
+    maxblocks = (1UL << 32) - 2;
 
-    nblocks = 1; /* tag */
-    nblocks += (payload_len + block_size - 1) / block_size;
+    nblocks = (payload_len + block_size - 1) / block_size;
 
     return (nblocks <= maxblocks);
 }
@@ -333,7 +338,7 @@ krb5int_gcm_encrypt(const struct krb5_keytypes *ktp,
         }
     }
 
-    if (!valid_payload_length_p(ktp, header_len, plain_len)) {
+    if (!valid_plaintext_length_p(ktp, plain_len)) {
         ret = KRB5_BAD_MSIZE;
         goto cleanup;
     }
@@ -508,7 +513,7 @@ krb5int_gcm_decrypt(const struct krb5_keytypes *ktp,
         }
     }
 
-    if (!valid_payload_length_p(ktp, header_len, plain_len)) {
+    if (!valid_plaintext_length_p(ktp, plain_len)) {
         ret = KRB5_BAD_MSIZE;
         goto cleanup;
     }
