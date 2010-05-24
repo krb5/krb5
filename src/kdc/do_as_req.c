@@ -750,7 +750,7 @@ prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request,
         errpkt.client = canon_client;
     else
         errpkt.client = request->client;
-    errpkt.text.length = strlen(status) + 1;
+    errpkt.text.length = strlen(status);
     if (!(errpkt.text.data = strdup(status)))
         return ENOMEM;
 

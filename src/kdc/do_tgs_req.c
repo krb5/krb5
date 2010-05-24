@@ -1078,7 +1078,7 @@ prepare_error_tgs (struct kdc_request_state *state,
         errpkt.client = ticket->enc_part2->client;
     else
         errpkt.client = NULL;
-    errpkt.text.length = strlen(status) + 1;
+    errpkt.text.length = strlen(status);
     if (!(errpkt.text.data = strdup(status)))
         return ENOMEM;
 
