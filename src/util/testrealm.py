@@ -56,6 +56,11 @@ realm = K5Realm()
 env = realm.env_master.copy()
 supplement_path(env)
 
+pwfilename = os.path.join('testdir', 'passwords')
+pwfile = open(pwfilename, 'w')
+pwfile.write('user: %s\nadmin: %s\n' % (password('user'), password('admin')))
+pwfile.close()
+
 print
 print 'Realm files are in %s' % realm.testdir
 print 'KRB5_CONFIG is %s' % env['KRB5_CONFIG']
@@ -63,7 +68,7 @@ print 'KRB5_KDC_PROFILE is %s' % env['KRB5_KDC_PROFILE']
 print 'KRB5CCNAME is %s' % env['KRB5CCNAME']
 print 'KRB5_KTNAME is %s' % env['KRB5_KTNAME']
 print 'KRB5RCACHEDIR is %s' % env['KRB5RCACHEDIR']
-print 'Password for user is %s' % password('user')
+print 'Password for user is %s (see also %s)' % (password('user'), pwfilename)
 print 'Password for admin is %s' % password('admin')
 print
 
