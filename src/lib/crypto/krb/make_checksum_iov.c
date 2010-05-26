@@ -58,7 +58,7 @@ krb5_k_make_checksum_iov(krb5_context context,
     if (ret != 0)
         return ret;
 
-    ret = ctp->checksum(context, ctp, key, usage, data, num_data, &cksum_data);
+    ret = ctp->checksum(ctp, key, usage, data, num_data, &cksum_data);
     if (ret != 0)
         goto cleanup;
 

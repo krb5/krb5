@@ -49,14 +49,30 @@ int main () {
     unsigned int source_id, seed_length;
     unsigned int i;
 //#if 0
+    krb5_context ctx;
     plugin_manager* default_manager;
-    const char conf_path[] = "plugin_conf.yml";
+    static plugin_manager* plugin_mngr_instance = NULL;
+
+//    ret = krb5int_initialize_library();
+    //if (ret) return ret;
+
+    ctx = calloc(1, sizeof(struct _krb5_context));
+    if (!ctx) return ENOMEM;
+
+    /* Plugin initialization */
+    plugin_default_manager_get_instance(&plugin_mngr_instance);
+    set_plugin_manager_instance(&ctx->pl_handle,  plugin_mngr_instance);
+    plugin_manager_configure(ctx->pl_handle, "");
+    plugin_manager_start(ctx->pl_handle);
+/*
 
         default_manager = plugin_default_manager_get_instance();
         set_plugin_manager_instance(default_manager);
 
-        plugin_manager_configure(conf_path);
+        plugin_manager_configure("");
         plugin_manager_start();
+*/
+
 //#endif
     while (1) {
         /* Read source*/
@@ -73,7 +89,7 @@ int main () {
                 input.data[seed_length-lc] = (unsigned) (i&0xff);
             }
             input.length = seed_length;
-            assert (krb5_c_random_add_entropy (0, source_id, &input) == 0);
+            assert (krb5_c_random_add_entropy (ctx, source_id, &input) == 0);
             free (input.data);
             input.data = NULL;
         }
@@ -82,7 +98,7 @@ int main () {
         if (i) {
             assert ((output.data = malloc (i)) != NULL);
             output.length = i;
-            ret = krb5_c_random_make_octets (0, &output);
+            ret = krb5_c_random_make_octets (ctx, &output);
             if (ret)
                 printf ("failed\n");
             else {

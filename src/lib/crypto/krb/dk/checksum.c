@@ -33,7 +33,7 @@
 #define K5CLENGTH 5 /* 32 bit net byte order integer + one byte seed */
 
 krb5_error_code
-krb5int_dk_checksum(krb5_context context, const struct krb5_cksumtypes *ctp,
+krb5int_dk_checksum(const struct krb5_cksumtypes *ctp,
                     krb5_key key, krb5_keyusage usage,
                     const krb5_crypto_iov *data, size_t num_data,
                     krb5_data *output)
@@ -57,7 +57,7 @@ krb5int_dk_checksum(krb5_context context, const struct krb5_cksumtypes *ctp,
     datain = make_data(constantdata, K5CLENGTH);
     store_32_be(usage, constantdata);
     constantdata[4] = (char) 0x99;
-    ret = krb5int_derive_key(context, enc, key, &kc, &datain);
+    ret = krb5int_derive_key(enc, key, &kc, &datain);
     if (ret)
         return ret;
 

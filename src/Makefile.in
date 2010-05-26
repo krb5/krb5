@@ -7,7 +7,7 @@ mydir=.
 #	plugins/preauth/wpse
 #	plugins/preauth/cksum_body
 #	plugins/authdata/greet
-SUBDIRS=util include plugin_core   plugins/prng \
+SUBDIRS=util include plugin_core plugin_core/impl   plugins/prng \
 	plugins/pa plugins/pa/encrypted_challenge \
 	lib \
 	@ldap_plugin_dir@ \
@@ -202,6 +202,7 @@ WINMAKEFILES=Makefile \
 	lib\crypto\@CRYPTO_IMPL@\hash_provider\Makefile \
 	lib\crypto\krb\keyhash_provider\Makefile \
 	lib\crypto\krb\prf\Makefile lib\crypto\krb\rand2key\Makefile \
+	lib\crypto\krb\yarrow\Makefile \
 	lib\crypto\krb\raw\Makefile lib\crypto\krb\old\Makefile \
 	lib\crypto\@CRYPTO_IMPL@\sha1\Makefile lib\crypto\@CRYPTO_IMPL@\arcfour\Makefile \
 	lib\crypto\@CRYPTO_IMPL@\md4\Makefile lib\crypto\@CRYPTO_IMPL@\md5\Makefile \

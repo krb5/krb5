@@ -232,7 +232,7 @@ krb5int_c_iov_put_block(const krb5_crypto_iov *data,
 }
 
 krb5_error_code
-krb5int_c_iov_decrypt_stream(krb5_context ctx, const struct krb5_keytypes *ktp, krb5_key key,
+krb5int_c_iov_decrypt_stream(const struct krb5_keytypes *ktp, krb5_key key,
                              krb5_keyusage keyusage, const krb5_data *ivec,
                              krb5_crypto_iov *data, size_t num_data)
 {
@@ -292,7 +292,7 @@ krb5int_c_iov_decrypt_stream(krb5_context ctx, const struct krb5_keytypes *ktp, 
 
     assert(i <= num_data + 2);
 
-    ret = ktp->decrypt(ctx, ktp, key, keyusage, ivec, iov, i);
+    ret = ktp->decrypt(ktp, key, keyusage, ivec, iov, i);
     free(iov);
     return ret;
 }

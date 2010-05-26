@@ -3,8 +3,8 @@
 #
 yarrow.so yarrow.po $(OUTPRE)yarrow.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../../../lib/crypto/builtin/sha1/shs.h \
-  $(srcdir)/../../../lib/crypto/builtin/yhash.h $(top_srcdir)/include/k5-buf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../../../crypto/builtin/sha1/shs.h \
+  $(srcdir)/../../../crypto/builtin/yhash.h $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
@@ -15,8 +15,8 @@ yarrow.so yarrow.po $(OUTPRE)yarrow.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   ycipher.h yexcep.h ylock.h ystate.h ytypes.h
 ycipher.so ycipher.po $(OUTPRE)ycipher.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../../../lib/crypto/builtin/enc_provider/enc_provider.h \
-  $(srcdir)/../../../lib/crypto/builtin/sha1/shs.h $(srcdir)/../../../lib/crypto/builtin/yhash.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../../../crypto/builtin/enc_provider/enc_provider.h \
+  $(srcdir)/../../../crypto/builtin/sha1/shs.h $(srcdir)/../../../crypto/builtin/yhash.h \
   $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
@@ -29,7 +29,7 @@ plugin_prng_impl.so plugin_prng_impl.po $(OUTPRE)plugin_prng_impl.$(OBJEXT): \
   $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/plugins/prng/plugin_yarrow/plugin_prng_impl.h \
   $(top_srcdir)/plugin_core/plugin_manager.h \
   $(top_srcdir)/plugin_core/plugin_factory.h \
-  $(srcdir)/../../../lib/crypto/builtin/yhash.h \
-  $(srcdir)/../../../lib/crypto/builtin/enc_provider/enc_provider.h \
+  $(srcdir)/../../../crypto/builtin/yhash.h \
+  $(srcdir)/../../../crypto/builtin/enc_provider/enc_provider.h \
   plugin_prng_impl.c
 

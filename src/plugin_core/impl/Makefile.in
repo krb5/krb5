@@ -6,7 +6,7 @@ PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
 
 LOCALINCLUDES = -I$(srcdir)/../../include/krb5  -I$(srcdir)/. 	\
-		-I$(srcdir)/../../plugins/prng/plugin_yarrow -I$(srcdir)/../../plugins/prng 	\
+		-I$(srcdir)/../../plugins/prng 	\
 		-I$(srcdir)/../../plugins/pa -I$(srcdir)/../../plugins/pa/encrypted_challenge 	\
 		-I$(srcdir)/..
 
@@ -18,10 +18,11 @@ SRCS= plugin_default_factory.c plugin_default_manager.c
 
 STOBJLISTS=OBJS.ST
 
-LIBS_UTILS = ../plugin_core$(SO_EXT) \
-	../../plugins/prng/plugin_yarrow/plugin_prng_impl$(SO_EXT) 	\
-	../../plugins/prng/plugin_yarrow/ycipher$(SO_EXT) 		\
-	../../plugins/prng/plugin_yarrow/yarrow$(SO_EXT) 
+LIBS_UTILS = ../plugin_core$(SO_EXT) 
+
+#	../../plugins/prng/plugin_yarrow/plugin_prng_impl$(SO_EXT) 	\
+#	../../plugins/prng/plugin_yarrow/ycipher$(SO_EXT) 		\
+#	../../plugins/prng/plugin_yarrow/yarrow$(SO_EXT) 
 
 SHLIB_EXPLIBS=  $(LIBS_UTILS) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 

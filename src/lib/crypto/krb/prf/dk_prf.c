@@ -34,7 +34,7 @@
 #include <dk.h>
 
 krb5_error_code
-krb5int_dk_prf(krb5_context ctx, const struct krb5_keytypes *ktp, krb5_key key,
+krb5int_dk_prf(const struct krb5_keytypes *ktp, krb5_key key,
                const krb5_data *in, krb5_data *out)
 {
     const struct krb5_enc_provider *enc = ktp->enc;
@@ -55,7 +55,7 @@ krb5int_dk_prf(krb5_context ctx, const struct krb5_keytypes *ktp, krb5_key key,
         goto cleanup;
 
     /* Derive a key using the PRF constant. */
-    ret = krb5int_derive_key(ctx, ktp->enc, key, &kp, &prfconst);
+    ret = krb5int_derive_key(ktp->enc, key, &kp, &prfconst);
     if (ret != 0)
         goto cleanup;
 

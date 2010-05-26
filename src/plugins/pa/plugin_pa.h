@@ -107,34 +107,5 @@ krb5_error_code plugin_server_free_reqctx(plhandle handle, krb5_context kcontext
 krb5_error_code plugin_server_init(plhandle handle, krb5_context kcontext, void **module_context, const char **realmnames);
 void plugin_server_fini(plhandle handle, krb5_context kcontext, void *module_context);
 
-#if 0
-krb5_preauthtype supported_pa_types[] = {KRB5_PADATA_ENCRYPTED_CHALLENGE, 0};
-
-struct krb5plugin_preauth_server_ftable_v1 preauthentication_server_1 = {
-    "Encrypted challenge",
-    &supported_pa_types[0],
-    NULL,
-    NULL,
-    kdc_preauth_flags,
-    kdc_include_padata,
-    kdc_verify_preauth,
-    kdc_return_preauth,
-    NULL
-};
-
-struct krb5plugin_preauth_client_ftable_v1 preauthentication_client_1 = {
-    "Encrypted Challenge",                /* name */
-    &supported_pa_types[0],        /* pa_type_list */
-    NULL,                    /* enctype_list */
-    NULL,                    /* plugin init function */
-    NULL,                    /* plugin fini function */
-    preauth_flags,                /* get flags function */
-    NULL,                    /* request init function */
-    NULL,                    /* request fini function */
-    process_preauth,                /* process function */
-    NULL,                    /* try_again function */
-    NULL                /* get init creds opt function */
-};
-#endif
 
 #endif /* PLUGIN_PA_H_ */

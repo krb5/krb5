@@ -31,8 +31,6 @@
  */
 
 #include "k5-int.h"
-#include <plugin_default_manager.h>
-#include <plugin_prng.h>
 
 
 krb5_enctype interesting_enctypes[] = {
@@ -71,7 +69,7 @@ check_decrypt_result(krb5_error_code code, size_t len, size_t min_len)
 }
 
 static void
-test_enctype(krb5_enctype enctype)
+test_enctype(krb5_context context, krb5_enctype enctype)
 {
     krb5_error_code ret;
     krb5_keyblock keyblock;
@@ -83,7 +81,7 @@ test_enctype(krb5_enctype enctype)
 
     printf("Testing enctype %d\n", (int) enctype);
     x(krb5_c_encrypt_length(NULL, enctype, 0, &min_len));
-    x(krb5_c_make_random_key(NULL, enctype, &keyblock));
+    x(krb5_c_make_random_key(context, enctype, &keyblock));
     input.enctype = enctype;
 
     /* Try each length up to the minimum length. */
@@ -119,19 +117,14 @@ main(int argc, char **argv)
 {
     int i;
     krb5_data notrandom;
-    plugin_manager* default_manager;
-    const char conf_path[] = "plugin_conf.yml";
+    krb5_context context;
 
-        default_manager = plugin_default_manager_get_instance();
-        set_plugin_manager_instance(default_manager);
-
-        plugin_manager_configure(conf_path);
-        plugin_manager_start();
+    krb5_init_context(&context);
 
     notrandom.data = "notrandom";
     notrandom.length = 9;
-    krb5_c_random_seed(NULL, &notrandom);
+    krb5_c_random_seed(context, &notrandom);
     for (i = 0; interesting_enctypes[i]; i++)
-        test_enctype(interesting_enctypes[i]);
+        test_enctype(context, interesting_enctypes[i]);
     return 0;
 }

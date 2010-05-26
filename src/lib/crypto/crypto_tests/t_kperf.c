@@ -57,6 +57,9 @@ main(int argc, char **argv)
     krb5_enc_data outblock;
     krb5_checksum sum;
     krb5_boolean val;
+    krb5_context ctx;
+
+    krb5_init_context ctx;
 
     if (argc != 5) {
         fprintf(stderr, "Usage: t_kperf {c|k}{e|d|m|v} type size nblocks\n");
@@ -76,9 +79,9 @@ main(int argc, char **argv)
 
     block.data = "notrandom";
     block.length = 9;
-    krb5_c_random_seed(NULL, &block);
+    krb5_c_random_seed(ctx, &block);
 
-    krb5_c_make_random_key(NULL, enctype, &kblock);
+    krb5_c_make_random_key(ctx, enctype, &kblock);
     krb5_k_create_key(NULL, &kblock, &key);
 
     block.length = blocksize;

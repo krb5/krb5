@@ -42,11 +42,11 @@ krb5_k_decrypt_iov(krb5_context context, krb5_key key, krb5_keyusage usage,
 
     if (krb5int_c_locate_iov(data, num_data,
                              KRB5_CRYPTO_TYPE_STREAM) != NULL) {
-        return krb5int_c_iov_decrypt_stream(context, ktp, key, usage, cipher_state,
+        return krb5int_c_iov_decrypt_stream(ktp, key, usage, cipher_state,
                                             data, num_data);
     }
 
-    return ktp->decrypt(context, ktp, key, usage, cipher_state, data, num_data);
+    return ktp->decrypt(ktp, key, usage, cipher_state, data, num_data);
 }
 
 krb5_error_code KRB5_CALLCONV

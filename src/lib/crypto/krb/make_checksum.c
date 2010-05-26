@@ -63,7 +63,7 @@ krb5_k_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
 
     iov.flags = KRB5_CRYPTO_TYPE_DATA;
     iov.data = *input;
-    ret = ctp->checksum(context, ctp, key, usage, &iov, 1, &cksum_data);
+    ret = ctp->checksum(ctp, key, usage, &iov, 1, &cksum_data);
     if (ret != 0)
         goto cleanup;
 

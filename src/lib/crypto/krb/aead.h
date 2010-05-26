@@ -75,7 +75,7 @@ krb5int_c_iov_put_block(const krb5_crypto_iov *data,
                         struct iov_block_state *iov_state);
 
 krb5_error_code
-krb5int_c_iov_decrypt_stream(krb5_context, const struct krb5_keytypes *ktp, krb5_key key,
+krb5int_c_iov_decrypt_stream(const struct krb5_keytypes *ktp, krb5_key key,
                              krb5_keyusage keyusage, const krb5_data *ivec,
                              krb5_crypto_iov *data, size_t num_data);
 

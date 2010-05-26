@@ -58,7 +58,7 @@ krb5_k_verify_checksum_iov(krb5_context context,
 
     /* If there's actually a verify function, call it. */
     if (ctp->verify != NULL) {
-        return ctp->verify(context, ctp, key, usage, data, num_data, &checksum->data,
+        return ctp->verify(ctp, key, usage, data, num_data, &checksum->data,
                            valid);
     }
 
@@ -66,7 +66,7 @@ krb5_k_verify_checksum_iov(krb5_context context,
     if (ret != 0)
         return ret;
 
-    ret = ctp->checksum(context, ctp, key, usage, data, num_data, &computed);
+    ret = ctp->checksum(ctp, key, usage, data, num_data, &computed);
     if (ret == 0) {
         *valid = (memcmp(computed.data, checksum->data.data,
                          ctp->output_size) == 0);

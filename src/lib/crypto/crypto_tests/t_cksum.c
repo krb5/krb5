@@ -31,9 +31,6 @@
  */
 
 #include "k5-int.h"
-#include <plugin_default_manager.h>
-#include <plugin_prng.h>
-
 
 #define MD5_K5BETA_COMPAT
 #define MD4_K5BETA_COMPAT
@@ -99,34 +96,29 @@ main(argc, argv)
     krb5_error_code       kret=0;
     krb5_data             plaintext;
     krb5_checksum         checksum, knowncksum;
-    plugin_manager* default_manager;
-    const char conf_path[] = "plugin_conf.yml";
 
-    default_manager = plugin_default_manager_get_instance();
-    set_plugin_manager_instance(default_manager);
-
-    plugin_manager_configure(conf_path);
-    plugin_manager_start();
+    krb5_context context;
+    krb5_init_context(&context);
 
     /* this is a terrible seed, but that's ok for the test. */
 
     plaintext.length = 8;
     plaintext.data = (char *) testkey;
 
-    krb5_c_random_seed(/* XXX */ 0, &plaintext);
+    krb5_c_random_seed(context, &plaintext);
 
     keyblock.enctype = ENCTYPE_DES_CBC_CRC;
     keyblock.length = sizeof(testkey);
     keyblock.contents = testkey;
 
-    krb5_k_create_key(NULL, &keyblock, &key);
+    krb5_k_create_key(context, &keyblock, &key);
 
     for (msgindex = 1; msgindex + 1 < argc; msgindex += 2) {
         plaintext.length = strlen(argv[msgindex]);
         plaintext.data = argv[msgindex];
 
         /* Create a checksum. */
-        kret = krb5_k_make_checksum(NULL, CKTYPE, key, 0, &plaintext,
+        kret = krb5_k_make_checksum(context, CKTYPE, key, 0, &plaintext,
                                     &checksum);
         if (kret != 0) {
             printf("krb5_calculate_checksum choked with %d\n", kret);
@@ -135,7 +127,7 @@ main(argc, argv)
         print_checksum("correct", MD, argv[msgindex], &checksum);
 
         /* Verify it. */
-        kret = krb5_k_verify_checksum(NULL, key, 0, &plaintext, &checksum,
+        kret = krb5_k_verify_checksum(context, key, 0, &plaintext, &checksum,
                                       &valid);
         if (kret != 0) {
             printf("verify on new checksum choked with %d\n", kret);
@@ -150,7 +142,7 @@ main(argc, argv)
 
         /* Corrupt the checksum and see if it still verifies. */
         checksum.contents[0]++;
-        kret = krb5_k_verify_checksum(NULL, key, 0, &plaintext, &checksum,
+        kret = krb5_k_verify_checksum(context, key, 0, &plaintext, &checksum,
                                       &valid);
         if (kret != 0) {
             printf("verify on new checksum choked with %d\n", kret);
@@ -171,7 +163,7 @@ main(argc, argv)
             kret = 1;
             break;
         }
-        kret = krb5_k_verify_checksum(NULL, key, 0, &plaintext, &knowncksum,
+        kret = krb5_k_verify_checksum(context, key, 0, &plaintext, &knowncksum,
                                       &valid);
         if (kret != 0) {
             printf("verify on known checksum choked with %d\n", kret);
@@ -188,7 +180,8 @@ main(argc, argv)
     if (!kret)
         printf("%d tests passed successfully for MD%d checksum\n", (argc-1)/2, MD);
 
-    krb5_k_free_key(NULL, key);
+    krb5_k_free_key(context, key);
 
     return(kret);
 }
+

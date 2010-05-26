@@ -39,7 +39,7 @@ krb5_k_encrypt_iov(krb5_context context, krb5_key key, krb5_keyusage usage,
     if (ktp == NULL)
         return KRB5_BAD_ENCTYPE;
 
-    return ktp->encrypt(context, ktp, key, usage, cipher_state, data, num_data);
+    return ktp->encrypt(ktp, key, usage, cipher_state, data, num_data);
 }
 
 krb5_error_code KRB5_CALLCONV
