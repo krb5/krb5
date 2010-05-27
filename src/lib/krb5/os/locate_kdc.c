@@ -305,20 +305,17 @@ egress:
 
 /*
  * returns count of number of addresses found
- * if master is non-NULL, it is filled in with the index of
- * the master kdc
  */
 
 static krb5_error_code
 locate_srv_conf_1(krb5_context context, const krb5_data *realm,
                        const char * name, struct addrlist *addrlist,
-                       int get_masters, int socktype,
-                       int udpport, int sec_udpport, int family)
+                       int socktype, int udpport, int sec_udpport, int family)
 {
     const char  *realm_srv_names[4];
-    char **masterlist, **hostlist, *host, *port, *cp;
+    char **hostlist, *host, *port, *cp;
     krb5_error_code code;
-    int i, j, count, ismaster;
+    int i, count;
 
     Tprintf ("looking in krb5.conf for realm %s entry %s; ports %d,%d\n",
              realm->data, name, ntohs (udpport), ntohs (sec_udpport));
@@ -330,21 +327,19 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
     host[realm->length] = '\0';
     hostlist = 0;
 
-    masterlist = NULL;
-
     realm_srv_names[0] = KRB5_CONF_REALMS;
     realm_srv_names[1] = host;
     realm_srv_names[2] = name;
     realm_srv_names[3] = 0;
 
     code = profile_get_values(context->profile, realm_srv_names, &hostlist);
+    free(host);
 
     if (code) {
         Tprintf ("config file lookup failed: %s\n",
                  error_message(code));
         if (code == PROF_NO_SECTION || code == PROF_NO_RELATION)
             code = KRB5_REALM_UNKNOWN;
-        free(host);
         return code;
     }
 
@@ -355,39 +350,9 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 
     if (count == 0) {
         profile_free_list(hostlist);
-        free(host);
         addrlist->naddrs = 0;
         return 0;
     }
-
-    if (get_masters) {
-        realm_srv_names[0] = KRB5_CONF_REALMS;
-        realm_srv_names[1] = host;
-        realm_srv_names[2] = KRB5_CONF_ADMIN_SERVER;
-        realm_srv_names[3] = 0;
-
-        code = profile_get_values(context->profile, realm_srv_names,
-                                  &masterlist);
-
-        free(host);
-
-        if (code == 0) {
-            for (i=0; masterlist[i]; i++) {
-                host = masterlist[i];
-                /* Strip off excess characters. */
-                if (*host == '[' && (cp = strchr(host, ']')))
-                    *(cp + 1) = '\0';
-                else
-                    *(host + strcspn(host, " \t:")) = '\0';
-            }
-        }
-    } else {
-        free(host);
-    }
-
-    /* at this point, if master is non-NULL, then either the master kdc
-       is required, and there is one, or the master kdc is not required,
-       and there may or may not be one. */
 
 #ifdef HAVE_NETINET_IN_H
     if (sec_udpport)
@@ -406,18 +371,6 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
             cp = host + strcspn(host, " \t:");
         port = (*cp == ':') ? cp + 1 : NULL;
         *cp = '\0';
-
-        ismaster = 0;
-        if (masterlist) {
-            for (j=0; masterlist[j]; j++) {
-                if (strcasecmp(hostlist[i], masterlist[j]) == 0) {
-                    ismaster = 1;
-                }
-            }
-        }
-
-        if (get_masters && !ismaster)
-            continue;
 
         if (port) {
             unsigned long l;
@@ -459,16 +412,12 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
                      error_message (code));
             if (hostlist)
                 profile_free_list (hostlist);
-            if (masterlist)
-                profile_free_list (masterlist);
             return code;
         }
     }
 
     if (hostlist)
         profile_free_list(hostlist);
-    if (masterlist)
-        profile_free_list(masterlist);
 
     return 0;
 }
@@ -476,13 +425,13 @@ locate_srv_conf_1(krb5_context context, const krb5_data *realm,
 #ifdef TEST
 static krb5_error_code
 krb5_locate_srv_conf(krb5_context context, const krb5_data *realm,
-                     const char *name, struct addrlist *al, int get_masters,
-                     int udpport, int sec_udpport)
+                     const char *name, struct addrlist *al, int udpport,
+                     int sec_udpport)
 {
     krb5_error_code ret;
 
-    ret = locate_srv_conf_1 (context, realm, name, al,
-                                  get_masters, 0, udpport, sec_udpport, 0);
+    ret = locate_srv_conf_1(context, realm, name, al, 0, udpport,
+                            sec_udpport, 0);
     if (ret)
         return ret;
     if (al->naddrs == 0)        /* Couldn't resolve any KDC names */
@@ -740,9 +689,8 @@ prof_locate_server (krb5_context context, const krb5_data *realm,
         return EBUSY;           /* XXX */
     }
 
-    return locate_srv_conf_1 (context, realm, profname, addrlist,
-                                   0, socktype,
-                                   dflport1, dflport2, family);
+    return locate_srv_conf_1(context, realm, profname, addrlist, socktype,
+                             dflport1, dflport2, family);
 }
 
 static krb5_error_code
