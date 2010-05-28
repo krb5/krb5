@@ -572,7 +572,7 @@ s4u2proxy_copy(krb5_context kcontext,
     code = s4u2proxy_export_internal(kcontext, context,
                                      plugin_context, request_context,
                                      FALSE, (void **)&dstctx->delegated);
-    if (code != 0)
+    if (code != 0 && code != ENOENT)
         return code;
 
     dstctx->count = srcctx->count;
