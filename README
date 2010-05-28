@@ -82,6 +82,35 @@ additional measures include:
   crypto
 * easier kadmin history key changes
 
+Major changes in 1.8.2
+----------------------
+
+This is primarily a bugfix release.
+
+* Fix vulnerabilities:
+  ** CVE-2010-1320 KDC double free caused by ticket renewal
+     (MITKRB5-SA-2010-004)
+  ** CVE-2010-1321 GSS-API lib null pointer deref (MITKRB5-SA-2010-005)
+
+* Allow numeric IPv6 addresses for configuring KDC locations.
+
+krb5-1.8.2 changes by ticket ID
+-------------------------------
+
+6562    kinit not working if kdc is configured with numerical IPv6 address
+6696    gss_accept_sec_context doesn't produce error tokens
+6697    segfault caused by dlerror returning NULL
+6698    kproplog displays incorrect iprop timestamps on 64-bit platforms
+6702    CVE-2010-1320 KDC double free caused by ticket renewal
+        (MITKRB5-SA-2010-004)
+6711    memory leak in process_tgs_req in r23724
+6718    Make KADM5_FAIL_AUTH_COUNT_INCREMENT more robust with LDAP
+6722    Error handling bug in krb5_init_creds_init()
+6725    CVE-2010-1321 GSS-API lib null pointer deref (MITKRB5-SA-2010-005)
+6726    SPNEGO doesn't interoperate with Windows 2000
+6730    kdc_tcp_ports not documented in kdc.conf.M
+6734    FAST negotiation could erroneously succeed
+
 Major changes in 1.8.1
 ----------------------
 
@@ -362,6 +391,7 @@ reports, suggestions, and valuable resources:
 
     Brandon Allbery
     Russell Allbery
+    Brian Almeida
     Michael B Allen
     Derek Atkins
     David Bantz
@@ -405,6 +435,7 @@ reports, suggestions, and valuable resources:
     Jeffrey Hutzelman
     Wyllys Ingersoll
     Holger Isenberg
+    Joel Johnson
     Mikkel Kruse
     Volker Lendecke
     Jan iankko Lieskovsky
@@ -420,9 +451,9 @@ reports, suggestions, and valuable resources:
     Ezra Peisach
     W. Michael Petullo
     Mark Phalan
-    Xu Qiang
     Robert Relyea
     Martin Rex
+    Jason Rogers
     Guillaume Rousse
     Tom Shaw
     Peter Shoults
@@ -437,6 +468,7 @@ reports, suggestions, and valuable resources:
     Simon Wilkinson
     Nicolas Williams
     Ross Wilper
+    Xu Qiang
     Hanz van Zijst
 
 The above is not an exhaustive list; many others have contributed in
