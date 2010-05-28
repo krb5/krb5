@@ -572,6 +572,7 @@ krb5int_fast_verify_nego(krb5_context context,
     krb5_data scratch;
     krb5_boolean valid;
 
+    *fast_avail = FALSE;
     if (rep->enc_part2->flags& TKT_FLG_ENC_PA_REP) {
         pa = krb5int_find_pa_data(context, rep->enc_part2->enc_padata,
                                   KRB5_ENCPADATA_REQ_ENC_PA_REP);
