@@ -31,21 +31,6 @@ acquire_cred.so acquire_cred.po $(OUTPRE)acquire_cred.$(OBJEXT): \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   ../generic/gssapi_err_generic.h acquire_cred.c gssapiP_krb5.h \
   gssapi_err_krb5.h gssapi_krb5.h
-add_cred.so add_cred.po $(OUTPRE)add_cred.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssapi/gssapi_ext.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../generic/gssapiP_generic.h \
-  $(srcdir)/../generic/gssapi_ext.h $(srcdir)/../generic/gssapi_generic.h \
-  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
-  $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
-  $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
-  $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
-  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
-  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  ../generic/gssapi_err_generic.h add_cred.c gssapiP_krb5.h \
-  gssapi_err_krb5.h gssapi_krb5.h
 canon_name.so canon_name.po $(OUTPRE)canon_name.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_ext.h $(BUILDTOP)/include/krb5/krb5.h \
