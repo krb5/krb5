@@ -1,0 +1,25 @@
+mydir=plugins/pwd_qlty/plugin_pwd_qlty_krb
+BUILDTOP=$(REL)../../..
+RELDIR=../plugins/pwd_qlty/plugin_pwd_qlty_krb
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+DEFS=
+
+LOCALINCLUDES = -I../../../include/krb5 -I. -I../../../plugin_core -I..  -I$(srcdir)/..	\
+		-I../../../lib/kadm5
+
+LIBBASE=plugin_pwd_qlty_krb
+
+STLIBOBJS= plugin_pwd_qlty_impl.o server_dict.o
+SRCS= $(srcdir)/plugin_pwd_qlty_impl.c  $(srcdir)/server_dict.c
+
+STOBJLISTS=OBJS.ST
+
+all-unix:: all-liblinks
+clean-unix:: clean-liblinks clean-libs clean-libobjs
+install-unix:: install-libs
+
+
+@libpriv_frag@
+@lib_frag@
+@libobj_frag@

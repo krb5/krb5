@@ -13,8 +13,6 @@ DEFS=-DLIBDIR=\"$(KRB5_LIBDIR)\"
 ##DOS##OBJFILE=..\$(OUTPRE)$(PREFIXDIR).lst
 
 PLUGINS_LIBS =   $(srcdir)/../../libplugin_impl.a $(srcdir)/../../libencrypted_challenge.a 
-# PLUGINS_LIBS =   $(srcdir)/../../libplugin_impl.a $(srcdir)/../../libplugin_yarrow.a $(srcdir)/../../libencrypted_challenge.a 
-
 
 STLIBOBJS= \
 	addr_comp.o	\

@@ -1116,7 +1116,8 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	plugins/authdata/greet_client
 	plugins/authdata/greet_server
 
-	plugins/prng
+	plugins/pwd_qlty
+	plugins/pwd_qlty/plugin_pwd_qlty_krb
 	plugin_core/impl
 	plugins/pa
 	plugins/pa/encrypted_challenge

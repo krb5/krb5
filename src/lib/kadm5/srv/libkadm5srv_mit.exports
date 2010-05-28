@@ -7,10 +7,7 @@ kadm5int_acl_impose_restrictions
 kadm5int_acl_init
 adb_policy_close
 adb_policy_init
-destroy_dict
-find_word
 hist_princ
-init_dict
 kadm5_set_use_password_server
 kadm5_chpass_principal
 kadm5_chpass_principal_3

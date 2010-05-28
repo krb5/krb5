@@ -9,7 +9,8 @@ DEFS=
 
 PLUGINS_LIBS = \
 	../../plugin_core/impl/libplugin_impl.a $(PLUGIN_CORE_DEPLIB) 	\
-	../../plugins/pa/encrypted_challenge/libencrypted_challenge.a	
+	../../plugins/pa/encrypted_challenge/libencrypted_challenge.a	\
+	../../plugins/pwd_qlty/plugin_pwd_qlty_krb/libplugin_pwd_qlty_krb.a	
 
 
 ##DOSBUILDTOP = ..\..

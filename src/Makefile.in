@@ -7,8 +7,9 @@ mydir=.
 #	plugins/preauth/wpse
 #	plugins/preauth/cksum_body
 #	plugins/authdata/greet
-SUBDIRS=util include plugin_core plugin_core/impl   plugins/prng \
+SUBDIRS=util include plugin_core plugin_core/impl    \
 	plugins/pa plugins/pa/encrypted_challenge \
+	plugins/pwd_qlty plugins/pwd_qlty/plugin_pwd_qlty_krb	\
 	lib \
 	@ldap_plugin_dir@ \
 	plugins/kdb/db2 \
@@ -19,7 +20,6 @@ SUBDIRS=util include plugin_core plugin_core/impl   plugins/prng \
 BUILDTOP=$(REL)$(C)
 LOCALINCLUDES = -I$(srcdir) 
 
-#	plugins/prng/plugin_yarrow   
 
 SRCS =  
 HDRS = 

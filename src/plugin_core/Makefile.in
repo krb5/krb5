@@ -5,7 +5,7 @@ PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
 
-LOCALINCLUDES = -I$(srcdir)/../include/krb5  -I$(srcdir)/. -I$(srcdir)/../plugins/prng -I$(srcdir)/../util/profile
+LOCALINCLUDES = -I$(srcdir)/../include/krb5  -I$(srcdir)/. -I$(srcdir)/../plugins/pwd_qlty -I$(srcdir)/../util/profile
 
 LIBBASE= plugin_core
 LIBMAJOR=0

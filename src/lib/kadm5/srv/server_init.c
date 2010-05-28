@@ -316,7 +316,8 @@ kadm5_ret_t kadm5_init(krb5_context context, char *client_name, char *pass,
         free(handle);
         return ret;
     }
-
+#if 0
+// Should happen in plugin
     ret = init_dict(&handle->params);
     if (ret) {
         krb5_db_fini(handle->context);
@@ -325,6 +326,8 @@ kadm5_ret_t kadm5_init(krb5_context context, char *client_name, char *pass,
         free(handle);
         return ret;
     }
+#endif
+
 
     *server_handle = (void *) handle;
 
@@ -337,8 +340,10 @@ kadm5_ret_t kadm5_destroy(void *server_handle)
 
     CHECK_HANDLE(server_handle);
 
+#if 0
+// Should happen in plugin
     destroy_dict();
-
+#endif
     adb_policy_close(handle);
     krb5_db_fini(handle->context);
     krb5_free_principal(handle->context, handle->current_caller);

@@ -91,15 +91,10 @@ int init_dict(kadm5_config_params *params)
     if(word_list != NULL && word_block != NULL)
         return KADM5_OK;
     if (! (params->mask & KADM5_CONFIG_DICT_FILE)) {
-        krb5_klog_syslog(LOG_INFO, "No dictionary file specified, continuing "
-                         "without one.");
         return KADM5_OK;
     }
     if ((fd = open(params->dict_file, O_RDONLY)) == -1) {
         if (errno == ENOENT) {
-            krb5_klog_syslog(LOG_ERR,
-                             "WARNING!  Cannot find dictionary file %s, "
-                             "continuing without one.", params->dict_file);
             return KADM5_OK;
         } else
             return errno;

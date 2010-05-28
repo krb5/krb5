@@ -1,0 +1,15 @@
+# 
+# Generated makefile dependencies follow.
+#
+plugin_pwd_qlty.so plugin_pwd_qlty.po $(OUTPRE)plugin_pwd_qlty.$(OBJEXT): \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/plugins/pwd_qlty/plugin_pwd_qlty.h \
+  $(top_srcdir)/plugin_core/plugin_manager.h \
+  $(top_srcdir)/plugin_core/plugin_factory.h \
+  $(top_srcdir)/lib/kadm5/admin.h \
+  plugin_pwd_qlty.c
+plugin_pwd_qlty_impl.so plugin_pwd_qlty_impl.po $(OUTPRE)plugin_pwd_qlty_impl.$(OBJEXT): \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/plugins/pwd_qlty/plugin_pwd_qlty_impl.h \
+  $(top_srcdir)/plugin_core/plugin_manager.h \
+  $(top_srcdir)/plugin_core/plugin_factory.h \
+  $(top_srcdir)/lib/kadm5/admin.h \
+  plugin_pwd_qlty_impl.c
