@@ -11,7 +11,7 @@ PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
 STLIBOBJS=\
-	checksum.o	\
+	checksum_hmac.o	\
 	checksum_cmac.o	\
 	checksum_gmac.o	\
 	dk_aead.o	\
@@ -21,7 +21,7 @@ STLIBOBJS=\
 	stringtokey.o
 
 OBJS=\
-	$(OUTPRE)checksum.$(OBJEXT)	\
+	$(OUTPRE)checksum_hmac.$(OBJEXT)\
 	$(OUTPRE)checksum_cmac.$(OBJEXT)\
 	$(OUTPRE)checksum_gmac.$(OBJEXT)\
 	$(OUTPRE)dk_aead.$(OBJEXT)	\
@@ -31,7 +31,7 @@ OBJS=\
 	$(OUTPRE)stringtokey.$(OBJEXT)
 
 SRCS=\
-	$(srcdir)/checksum.c	\
+	$(srcdir)/checksum_hmac.c	\
 	$(srcdir)/checksum_cmac.c	\
 	$(srcdir)/checksum_gmac.c	\
 	$(srcdir)/dk_aead.c	\
