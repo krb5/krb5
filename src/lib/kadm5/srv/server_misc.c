@@ -48,12 +48,17 @@ passwd_check(kadm5_server_handle_t srv_handle,
              char *password, int use_policy, kadm5_policy_ent_t pol,
              krb5_principal principal)
 {
+    plhandle plugin_handle;
+    int ret = KADM5_OK;
 
-    int ret = 0;
+    if (srv_handle != NULL && srv_handle->context != NULL &&
+        srv_handle->context->pl_handle != NULL ){
 
-    plhandle plugin_handle = plugin_manager_get_service(srv_handle->context->pl_handle, "plugin_pwd_qlty");
+        plugin_handle = plugin_manager_get_service(srv_handle->context->pl_handle,
+                                                   "plugin_pwd_qlty");
 
-    ret = plugin_pwd_qlty_check(plugin_handle, srv_handle, password, use_policy, pol, principal);
-
+        ret = plugin_pwd_qlty_check(plugin_handle,
+                                    srv_handle, password, use_policy, pol, principal);
+    }
     return ret;
 }

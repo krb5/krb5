@@ -15,9 +15,6 @@
 #include "krb5_parser.h"
 #endif
 
-
-//static plugin_manager* _instance = NULL;
-
 static plugin_factory_descr _table[] = {
         {"plugin_default_factory", plugin_default_factory_get_instance},
         {NULL, NULL}
@@ -84,6 +81,14 @@ _create_api(const char* plugin_name, const char* factory_name,
     return(p_handle);
 }
 
+#define API_REGISTER_OK 	0
+#define API_REGISTER_FAILED 	1
+#define API_ALREADY_REGISTERED 	2
+
+/* _register_api - returns API_REGISTER_OK on success,
+ *                         API_REGISTER_FAILED - on failure,
+ *                         API_ALREADY_REGISTERED if api is already registered
+ */
 static int
 _register_api(registry_data* data, const char* api_name,
               const char* plugin_type, plhandle handle)
@@ -91,7 +96,7 @@ _register_api(registry_data* data, const char* api_name,
     const int extension_size = 32;
     reg_entry* entry = NULL;
     plhandle* next;
-    int ret = 0;
+    int ret = API_REGISTER_FAILED;
 
     if(data->registry_size == data->registry_max_size) {
         _extend_registry(data, extension_size);
@@ -105,7 +110,7 @@ _register_api(registry_data* data, const char* api_name,
 #ifdef DEBUG_PLUGINS
         printf("%s is already registered, only one plugin is allowed per service\n", api_name);
 #endif
-        ret = 2;
+        ret = API_ALREADY_REGISTERED;
     } else {
         strcpy(entry->api_name, api_name);
         next = (plhandle*) malloc(sizeof(plhandle));
@@ -119,13 +124,13 @@ _register_api(registry_data* data, const char* api_name,
             entry->last = next;
         }
         entry->size++;
-        ret = 1;
+        ret = API_REGISTER_OK;
     }
     return ret;
 }
 
 #ifdef CONFIG_IN_YAML
-static void
+static int
 _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
 {
     config_node* p = NULL;
@@ -136,7 +141,7 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
     const char* plugin_name = NULL;
     const char* plugin_type = NULL;
     plhandle handle;
-    int ret = 0;
+    int ret = API_REGISTER_FAILED;
 
     for (p = plugin_node->node_value.seq_value.start; p != NULL; p = p->next) {
         if(strcmp(p->node_name, "api") == 0) {
@@ -171,25 +176,23 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
     handle = _create_api(plugin_name, factory_name, factory_type/*, properties*/);
     if(handle.api != NULL) {
         ret = _register_api(mdata->registry,plugin_api, plugin_type, handle);
-        if (ret != 1) {
+        if (ret != API_REGISTER_OK) {
 #ifdef DEBUG_PLUGINS
             printf("Failed to register %s for %s(factory=%s,plugin_type=%s)\n",
                     plugin_name, plugin_api, factory_name, plugin_type);
 #endif
-             if (ret == 0) exit(1);
         }
     } else {
 #ifdef DEBUG_PLUGINS
         printf("Failed to configure plugin: api=%s, plugin_name=%s,factory=%s\n",
                 plugin_api, plugin_name, factory_name);
 #endif
-
     }
-    return;
+    return ret;
 }
 
 /* Plugin API implementation */
-static void
+static int
 _configure_yaml(void* data, const char* path)
 {
     manager_data* mdata = (manager_data*) data;
@@ -228,18 +231,20 @@ _configure_krb5(manager_data* data, const char* path)
     char **factory_name, **factory_type, **plugin_name, **plugin_type;
     plhandle handle;
 
-   // retval = os_get_default_config_files(&files, FALSE); // TRUE - goes to /etc/krb5.conf
-    retval = krb5_get_default_config_files(&files); // TRUE - goes to /etc/krb5.conf
-    retval = profile_init((const_profile_filespec_t *) files, &profile);
-/*    if (files)
+    retval = krb5_get_default_config_files(&files);
+#if 0
+    if (files)
         free_filespecs(files);
-
     if (retval)
         ctx->profile = 0;
-*/
+#endif
+
     if (retval == ENOENT)
         return; // KRB5_CONFIG_CANTOPEN;
 
+    retval = profile_init((const_profile_filespec_t *) files, &profile);
+    if (retval == ENOENT)
+        return;
 
     if ((retval = krb5_plugin_iterator_create(profile, &iter))) {
         com_err("krb5_PLUGIN_iterator_create", retval, 0);
@@ -285,12 +290,11 @@ _configure_krb5(manager_data* data, const char* path)
             handle = _create_api(*plugin_name, *factory_name, *factory_type/*, properties*/);
             if(handle.api != NULL) {
                 retval = _register_api(mdata->registry,plugin, *plugin_type, handle);
-                if( retval != 1) {
+                if( retval != API_REGISTER_OK) {
 #ifdef DEBUG_PLUGINS
                    printf("Failed to register %s for %s(factory=%s,plugin_type=%s)\n",
                             *plugin_name, plugin, *factory_name, *plugin_type);
 #endif
-                   if (retval == 0) exit(1);
                 }
             } else {
 #ifdef DEBUG_PLUGINS
@@ -302,7 +306,6 @@ _configure_krb5(manager_data* data, const char* path)
             krb5_free_plugin_string(profile, plugin);
         }
     }
-
 }
 
 #endif

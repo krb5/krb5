@@ -9,13 +9,19 @@
 void
 get_factory_content (factory_handle handle, const char* container[])
 {
-	plugin_factory* factory = (plugin_factory*) handle.api;
-	factory->get_factory_content(container);
+    plugin_factory* factory = (plugin_factory*) handle.api;
+    if (factory != NULL) {
+        return factory->get_factory_content(container);
+    }
+    return;
 }
 
 plhandle
 create_api (factory_handle handle, const char* plugin_name)
 {
-	plugin_factory* factory = (plugin_factory*) handle.api;
-	return factory->create_api(plugin_name);
+    plugin_factory* factory = (plugin_factory*) handle.api;
+    if (factory != NULL) {
+        return factory->create_api(plugin_name);
+    }
+    return;
 }

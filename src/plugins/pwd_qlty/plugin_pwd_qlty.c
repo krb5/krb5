@@ -12,8 +12,9 @@ plugin_pwd_qlty_check(plhandle handle, kadm5_server_handle_t srv_handle,
 {
     kadm5_ret_t ret = KADM5_OK;
     plugin_pwd_qlty* api = (plugin_pwd_qlty*) handle.api;
-    ret = api->pwd_qlty_check(srv_handle, password, use_policy, pol, principal);
-
+    if (api != NULL) {
+        ret = api->pwd_qlty_check(srv_handle, password, use_policy, pol, principal);
+    }
     return ret;
 }
 
@@ -23,8 +24,9 @@ plugin_pwd_qlty_init(plhandle handle, kadm5_server_handle_t srv_handle)
 {
     kadm5_ret_t ret = KADM5_OK;
     plugin_pwd_qlty* api = (plugin_pwd_qlty*) handle.api;
-    ret = api->pwd_qlty_init(srv_handle);
-
+    if (api != NULL) {
+        ret = api->pwd_qlty_init(srv_handle);
+    }
     return ret;
 }
 
