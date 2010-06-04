@@ -81,8 +81,7 @@ krb5_string_to_enctype(char *string, krb5_enctype *enctypep)
             *enctypep = ktp->etype;
             return 0;
         }
-#define MAX_ALIASES (sizeof(ktp->aliases) / sizeof(ktp->aliases[0]))
-        for (j = 0; j < MAX_ALIASES; j++) {
+        for (j = 0; j < MAX_ETYPE_ALIASES; j++) {
             alias = ktp->aliases[j];
             if (alias == NULL)
                 break;
@@ -105,6 +104,31 @@ krb5_enctype_to_string(krb5_enctype enctype, char *buffer, size_t buflen)
     if (ktp == NULL)
         return EINVAL;
     if (strlcpy(buffer, ktp->out_string, buflen) >= buflen)
+        return ENOMEM;
+    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_enctype_to_name(krb5_enctype enctype, krb5_boolean shortest,
+                     char *buffer, size_t buflen)
+{
+    const struct krb5_keytypes *ktp;
+    const char *name;
+    int i;
+
+    ktp = find_enctype(enctype);
+    if (ktp == NULL)
+        return EINVAL;
+    name = ktp->name;
+    if (shortest) {
+        for (i = 0; i < MAX_ETYPE_ALIASES; i++) {
+            if (ktp->aliases[i] == NULL)
+                break;
+            if (strlen(ktp->aliases[i]) < strlen(name))
+                name = ktp->aliases[i];
+        }
+    }
+    if (strlcpy(buffer, name, buflen) >= buflen)
         return ENOMEM;
     return 0;
 }

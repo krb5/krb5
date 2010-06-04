@@ -47,6 +47,7 @@ krb5_c_enctype_compare
 krb5_c_verify_checksum_iov
 valid_enctype
 krb5_enctype_to_string
+krb5_enctype_to_name
 krb5_c_make_checksum_iov
 krb5_calculate_checksum
 krb5_c_string_to_key

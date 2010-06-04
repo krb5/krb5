@@ -30,6 +30,8 @@
 
 #include "k5-int.h"
 
+#define MAX_ETYPE_ALIASES 2
+
 struct krb5_keytypes;
 
 typedef unsigned int (*crypto_length_func)(const struct krb5_keytypes *ktp,
@@ -53,7 +55,7 @@ typedef krb5_error_code (*prf_func)(const struct krb5_keytypes *ktp,
 struct krb5_keytypes {
     krb5_enctype etype;
     char *name;
-    char *aliases[2];
+    char *aliases[MAX_ETYPE_ALIASES];
     char *out_string;
     const struct krb5_enc_provider *enc;
     const struct krb5_hash_provider *hash;
