@@ -69,10 +69,12 @@ fast_armor_ap_request(krb5_context context,
     retval = krb5_cc_get_principal(context, ccache, &creds.client);
     if (retval == 0)
         retval = krb5_get_credentials(context, 0, ccache,  &creds, &out_creds);
-    if (retval == 0)
+    if (retval == 0) {
+        TRACE_FAST_ARMOR_CCACHE_KEY(context, &out_creds->keyblock);
         retval = krb5_mk_req_extended(context, &authcontext,
                                       AP_OPTS_USE_SUBKEY, NULL /*data*/,
                                       out_creds, &encoded_authenticator);
+    }
     if (retval == 0)
         retval = krb5_auth_con_getsendsubkey(context, authcontext, &subkey);
     if (retval == 0)
@@ -80,6 +82,7 @@ fast_armor_ap_request(krb5_context context,
                                       &out_creds->keyblock, "ticketarmor",
                                       &armor_key);
     if (retval == 0) {
+        TRACE_FAST_ARMOR_KEY(context, armor_key);
         armor = calloc(1, sizeof(krb5_fast_armor));
         if (armor == NULL)
             retval = ENOMEM;
@@ -148,6 +151,7 @@ krb5int_fast_as_armor(krb5_context context,
     krb5_clear_error_message(context);
     target_realm = krb5_princ_realm(context, request->server);
     if (opte->opt_private->fast_ccache_name) {
+        TRACE_FAST_ARMOR_CCACHE(context, opte->opt_private->fast_ccache_name);
         state->fast_state_flags |= KRB5INT_FAST_ARMOR_AVAIL;
         retval = krb5_cc_resolve(context, opte->opt_private->fast_ccache_name,
                                  &ccache);
@@ -160,13 +164,17 @@ krb5int_fast_as_armor(krb5_context context,
             config_data.data = NULL;
             retval = krb5_cc_get_config(context, ccache, target_principal,
                                         KRB5_CONF_FAST_AVAIL, &config_data);
-            if ((retval == 0) && config_data.data )
+            if ((retval == 0) && config_data.data) {
+                TRACE_FAST_CCACHE_CONFIG(context);
                 state->fast_state_flags |= KRB5INT_FAST_DO_FAST;
+            }
             krb5_free_data_contents(context, &config_data);
             retval = 0;
         }
-        if (opte->opt_private->fast_flags& KRB5_FAST_REQUIRED)
+        if (opte->opt_private->fast_flags & KRB5_FAST_REQUIRED) {
+            TRACE_FAST_REQUIRED(context);
             state->fast_state_flags |= KRB5INT_FAST_DO_FAST;
+        }
         if (retval == 0 && (state->fast_state_flags & KRB5INT_FAST_DO_FAST)) {
             retval = fast_armor_ap_request(context, state, ccache,
                                            target_principal);
@@ -215,6 +223,8 @@ krb5int_fast_prep_req(krb5_context context,
     if (state->armor_key == NULL) {
         return encoder(request, encoded_request);
     }
+
+    TRACE_FAST_ENCODE(context);
     /* Fill in a fresh random nonce for each inner request*/
     random_data.length = 4;
     random_data.data = (char *)random_buf;
@@ -302,6 +312,7 @@ decrypt_fast_reply(krb5_context context,
     fx_reply = krb5int_find_pa_data(context, in_padata, KRB5_PADATA_FX_FAST);
     if (fx_reply == NULL)
         retval = KRB5_ERR_FAST_REQUIRED;
+    TRACE_FAST_DECODE(context);
     if (retval == 0) {
         scratch.data = (char *) fx_reply->contents;
         scratch.length = fx_reply->length;
@@ -530,6 +541,7 @@ krb5int_fast_reply_key(krb5_context context,
                                       "strengthenkey", existing_key,
                                       "replykey", &key);
         if (retval == 0) {
+            TRACE_FAST_REPLY_KEY(context, key);
             *out_key = *key;
             free(key);
         }
@@ -621,6 +633,7 @@ krb5int_fast_verify_nego(krb5_context context,
             *fast_avail = (pa != NULL);
         }
     }
+    TRACE_FAST_NEGO(context, *fast_avail);
     if (checksum)
         krb5_free_checksum(context, checksum);
     return retval;
@@ -636,6 +649,7 @@ krb5int_upgrade_to_fast_p(krb5_context context,
     if (!(state->fast_state_flags & KRB5INT_FAST_ARMOR_AVAIL))
         return FALSE;
     if (krb5int_find_pa_data(context, padata, KRB5_PADATA_FX_FAST) != NULL) {
+        TRACE_FAST_PADATA_UPGRADE(context);
         state->fast_state_flags |= KRB5INT_FAST_DO_FAST;
         return TRUE;
     }

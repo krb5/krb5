@@ -50,6 +50,7 @@ STLIBOBJS= \
         thread_safe.o   \
 	timeofday.o	\
 	toffset.o	\
+	trace.o		\
 	unlck_file.o	\
 	ustime.o	\
 	write_msg.o
@@ -93,6 +94,7 @@ OBJS= \
         $(OUTPRE)thread_safe.$(OBJEXT)  \
 	$(OUTPRE)timeofday.$(OBJEXT)	\
 	$(OUTPRE)toffset.$(OBJEXT)	\
+	$(OUTPRE)trace.$(OBJEXT)	\
 	$(OUTPRE)unlck_file.$(OBJEXT)	\
 	$(OUTPRE)ustime.$(OBJEXT)	\
 	$(OUTPRE)write_msg.$(OBJEXT)
@@ -136,6 +138,7 @@ SRCS= \
         $(srcdir)/thread_safe.c \
 	$(srcdir)/timeofday.c	\
 	$(srcdir)/toffset.c	\
+	$(srcdir)/trace.c	\
 	$(srcdir)/unlck_file.c	\
 	$(srcdir)/ustime.c	\
 	$(srcdir)/write_msg.c

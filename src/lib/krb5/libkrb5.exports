@@ -587,9 +587,11 @@ krb5int_free_addrlist
 krb5int_free_data_list
 krb5int_get_authdata_containee_types
 krb5int_init_context_kdc
+krb5int_init_trace
 krb5int_initialize_library
 krb5int_pac_sign
 krb5int_sendtokdc_debug_handler
+krb5int_trace
 profile_abandon
 profile_add_relation
 profile_clear_relation

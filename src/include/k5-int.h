@@ -110,6 +110,7 @@
 #define INI_KRB_CCACHE  "krb5cc"        /* Location of the ccache */
 #define INI_KRB5_CONF   "krb5.ini"      /* Location of krb5.conf file */
 #define ANSI_STDIO
+#define DISABLE_TRACING
 #endif
 
 #include "autoconf.h"
@@ -129,6 +130,7 @@ typedef unsigned char   u_char;
 
 
 #include "k5-platform.h"
+#include "k5-trace.h"
 /* not used in krb5.h (yet) */
 typedef UINT64_TYPE krb5_ui_8;
 typedef INT64_TYPE krb5_int64;
@@ -1473,6 +1475,9 @@ struct _krb5_context {
     struct _kdb_log_context *kdblog_context;
 
     krb5_boolean allow_weak_crypto;
+
+    krb5_trace_callback trace_callback;
+    void *trace_callback_data;
 };
 
 /* could be used in a table to find an etype and initialize a block */
@@ -2867,6 +2872,12 @@ krb5_error_code krb5int_parse_enctype_list(krb5_context context, char *profstr,
 #ifdef DEBUG_ERROR_LOCATIONS
 #define krb5_set_error_message(ctx, code, ...)                          \
     krb5_set_error_message_fl(ctx, code, __FILE__, __LINE__, __VA_ARGS__)
+#endif
+
+#ifndef DISABLE_TRACING
+/* Do not use these functions directly; see k5-trace.h. */
+void krb5int_init_trace(krb5_context context);
+void krb5int_trace(krb5_context context, const char *fmt, ...);
 #endif
 
 #endif /* _KRB5_INT_H */

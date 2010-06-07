@@ -211,6 +211,7 @@ krb5int_make_tgs_request_ext(krb5_context context,
     if ((retval = krb5_generate_subkey( context, &in_cred->keyblock,
                                         &local_subkey)) != 0)
         return retval;
+    TRACE_SEND_TGS_SUBKEY(context, local_subkey);
 
     if (authorization_data) {
         /* need to encrypt it in the request */
@@ -241,6 +242,7 @@ krb5int_make_tgs_request_ext(krb5_context context,
         krb5_get_tgs_ktypes(context, sname, &(tgsreq.ktype));
         for(tgsreq.nktypes = 0; tgsreq.ktype[tgsreq.nktypes]; tgsreq.nktypes++);
     }
+    TRACE_SEND_TGS_ETYPES(context, tgsreq.ktype);
 
     if (second_ticket) {
         if ((retval = decode_krb5_ticket(second_ticket, &sec_ticket)))

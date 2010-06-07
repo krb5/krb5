@@ -40,6 +40,7 @@ krb5_cc_get_name (krb5_context context, krb5_ccache cache)
 krb5_error_code KRB5_CALLCONV
 krb5_cc_gen_new (krb5_context context, krb5_ccache *cache)
 {
+    TRACE_CC_GEN_NEW(context, cache);
     return (*cache)->ops->gen_new(context, cache);
 }
 
@@ -47,12 +48,14 @@ krb5_error_code KRB5_CALLCONV
 krb5_cc_initialize(krb5_context context, krb5_ccache cache,
                    krb5_principal principal)
 {
+    TRACE_CC_INIT(context, cache, principal);
     return cache->ops->init(context, cache, principal);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_destroy (krb5_context context, krb5_ccache cache)
 {
+    TRACE_CC_DESTROY(context, cache);
     return cache->ops->destroy(context, cache);
 }
 
@@ -73,6 +76,7 @@ krb5_cc_store_cred (krb5_context context, krb5_ccache cache,
     /* remove any dups */
     krb5_cc_remove_cred(context, cache, KRB5_TC_MATCH_AUTHDATA, creds);
 
+    TRACE_CC_STORE(context, cache, creds);
     ret = cache->ops->store(context, cache, creds);
     if (ret) return ret;
 
@@ -87,6 +91,7 @@ krb5_cc_store_cred (krb5_context context, krb5_ccache cache,
     s2 = tkt->server;
     if (!krb5_principal_compare(context, s1, s2)) {
         creds->server = s2;
+        TRACE_CC_STORE_TKT(context, cache, creds);
         /* remove any dups */
         krb5_cc_remove_cred(context, cache, KRB5_TC_MATCH_AUTHDATA, creds);
         ret = cache->ops->store(context, cache, creds);
@@ -105,6 +110,7 @@ krb5_cc_retrieve_cred (krb5_context context, krb5_ccache cache,
     krb5_data tmprealm;
 
     ret = cache->ops->retrieve(context, cache, flags, mcreds, creds);
+    TRACE_CC_RETRIEVE(context, cache, mcreds, ret);
     if (ret != KRB5_CC_NOTFOUND)
         return ret;
     if (!krb5_is_referral_realm(&mcreds->server->realm))
@@ -116,6 +122,7 @@ krb5_cc_retrieve_cred (krb5_context context, krb5_ccache cache,
     tmprealm = mcreds->server->realm;
     mcreds->server->realm = mcreds->client->realm;
     ret = cache->ops->retrieve(context, cache, flags, mcreds, creds);
+    TRACE_CC_RETRIEVE_REF(context, cache, mcreds, ret);
     mcreds->server->realm = tmprealm;
     return ret;
 }
@@ -152,6 +159,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_cc_remove_cred (krb5_context context, krb5_ccache cache, krb5_flags flags,
                      krb5_creds *creds)
 {
+    TRACE_CC_REMOVE(context, cache, creds);
     return cache->ops->remove_cred(context, cache, flags, creds);
 }
 
@@ -282,6 +290,8 @@ krb5_cc_set_config (krb5_context context, krb5_ccache id,
     krb5_creds cred;
     memset(&cred, 0, sizeof(cred));
 
+    TRACE_CC_SET_CONFIG(context, id, principal, key, data);
+
     ret = build_conf_principals(context, id, principal, key, &cred);
     if (ret)
         goto out;
@@ -340,6 +350,8 @@ krb5_cc_get_config (krb5_context context, krb5_ccache id,
     }
     data->length = cred.ticket.length;
     memcpy(data->data, cred.ticket.data, data->length);
+
+    TRACE_CC_GET_CONFIG(context, id, principal, key, data);
 
 out:
     krb5_free_cred_contents(context, &cred);

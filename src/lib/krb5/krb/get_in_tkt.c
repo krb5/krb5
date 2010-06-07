@@ -557,9 +557,10 @@ init_creds_get(krb5_context context,
                                     &request,
                                     &realm,
                                     &flags);
-        if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG && !tcp_only)
+        if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG && !tcp_only) {
+            TRACE_INIT_CREDS_RETRY_TCP(context);
             tcp_only = 1;
-        else if (code != 0 || !(flags & KRB5_INIT_CREDS_STEP_FLAG_CONTINUE))
+        } else if (code != 0 || !(flags & KRB5_INIT_CREDS_STEP_FLAG_CONTINUE))
             break;
 
         krb5_free_data_contents(context, &reply);
@@ -787,6 +788,8 @@ krb5_init_creds_init(krb5_context context,
     char *str = NULL;
     krb5_gic_opt_ext *opte;
 
+    TRACE_INIT_CREDS(context, client);
+
     ctx = k5alloc(sizeof(*ctx), &code);
     if (code != 0)
         goto cleanup;
@@ -985,6 +988,8 @@ krb5_init_creds_set_service(krb5_context context,
 {
     char *s;
 
+    TRACE_INIT_CREDS_SERVICE(context, service);
+
     s = strdup(service);
     if (s == NULL)
         return ENOMEM;
@@ -1018,6 +1023,8 @@ init_creds_validate_reply(krb5_context context,
 
         assert(error != NULL);
 
+        TRACE_INIT_CREDS_ERROR_REPLY(context,
+                                     error->error + ERROR_TABLE_BASE_krb5);
         if (error->error == KRB_ERR_RESPONSE_TOO_BIG) {
             krb5_free_error(context, error);
             return KRB5KRB_ERR_RESPONSE_TOO_BIG;
@@ -1199,12 +1206,18 @@ static krb5_boolean
 negotiation_requests_restart(krb5_context context, krb5_init_creds_context ctx,
                              krb5_pa_data **padata)
 {
-    if (!ctx->have_restarted &&
-        (krb5int_upgrade_to_fast_p(context, ctx->fast_state, padata) ||
-         (ctx->err_reply->error == KDC_ERR_PREAUTH_FAILED &&
-          !ctx->sent_nontrivial_preauth)))
-        return 1;
-    return 0;
+    if (ctx->have_restarted)
+        return FALSE;
+    if (krb5int_upgrade_to_fast_p(context, ctx->fast_state, padata)) {
+        TRACE_INIT_CREDS_RESTART_FAST(context);
+        return TRUE;
+    }
+    if (ctx->err_reply->error == KDC_ERR_PREAUTH_FAILED &&
+        !ctx->sent_nontrivial_preauth) {
+        TRACE_INIT_CREDS_RESTART_PREAUTH_FAILED(context);
+        return TRUE;
+    }
+    return FALSE;
 }
 
 /* Ensure that the reply enctype was among the requested enctypes. */
@@ -1278,6 +1291,7 @@ init_creds_step_reply(krb5_context context,
                 code = KRB5KDC_ERR_WRONG_REALM;
                 goto cleanup;
             }
+            TRACE_INIT_CREDS_REFERRAL(context, &ctx->err_reply->client->realm);
             /* Rewrite request.client with realm from error reply */
             krb5_free_data_contents(context, &ctx->request->client->realm);
             code = krb5int_copy_data_contents(context,
@@ -1360,6 +1374,7 @@ init_creds_step_reply(krb5_context context,
      */
     if (ctx->salt.length == SALT_TYPE_AFS_LENGTH && ctx->salt.data == NULL) {
         code = krb5_principal2salt(context, ctx->reply->client, &ctx->salt);
+        TRACE_INIT_CREDS_SALT_PRINC(context, &ctx->salt);
         if (code != 0)
             goto cleanup;
     }
@@ -1377,16 +1392,20 @@ init_creds_step_reply(krb5_context context,
        as_key at all yet, then use the gak_fct to get one, and try
        again.  */
     if (ctx->as_key.length) {
+        TRACE_INIT_CREDS_AS_KEY_PREAUTH(context, &ctx->as_key);
         code = krb5int_fast_reply_key(context, strengthen_key, &ctx->as_key,
                                       &encrypting_key);
         if (code != 0)
             goto cleanup;
         code = decrypt_as_reply(context, NULL, ctx->reply, &encrypting_key);
+        if (code != 0)
+            TRACE_INIT_CREDS_PREAUTH_DECRYPT_FAIL(context, code);
     } else
         code = -1;
 
     if (code != 0) {
         /* if we haven't get gotten a key, get it now */
+        TRACE_INIT_CREDS_GAK(context, &ctx->salt, &ctx->s2kparams);
         code = (*ctx->gak_fct)(context, ctx->request->client,
                                ctx->reply->enc_part.enctype,
                                ctx->prompter, ctx->prompter_data,
@@ -1394,6 +1413,7 @@ init_creds_step_reply(krb5_context context,
                                &ctx->as_key, ctx->gak_data);
         if (code != 0)
             goto cleanup;
+        TRACE_INIT_CREDS_AS_KEY_GAK(context, &ctx->as_key);
 
         code = krb5int_fast_reply_key(context, strengthen_key, &ctx->as_key,
                                       &encrypting_key);
@@ -1404,6 +1424,8 @@ init_creds_step_reply(krb5_context context,
         if (code != 0)
             goto cleanup;
     }
+
+    TRACE_INIT_CREDS_DECRYPTED_REPLY(context, ctx->reply->enc_part2->session);
 
     code = krb5int_fast_verify_nego(context, ctx->fast_state,
                                     ctx->reply, ctx->encoded_previous_request,

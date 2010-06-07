@@ -72,6 +72,7 @@ krb5_kt_get_entry(krb5_context context, krb5_keytab keytab,
     }
     err = krb5_x((keytab)->ops->get,(context, keytab, principal, vno, enctype,
                                      entry));
+    TRACE_KT_GET_ENTRY(context, keytab, principal, vno, enctype, err);
     if (principal == &princ_data)
         krb5_free_default_realm(context, princ_data.realm.data);
     return err;

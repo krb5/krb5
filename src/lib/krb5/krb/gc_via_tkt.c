@@ -55,6 +55,8 @@ kdcrep2creds(krb5_context context, krb5_kdc_rep *pkdcrep, krb5_address *const *a
                                               pkdcrep->enc_part2->session,
                                               &(*ppcreds)->keyblock)))
         goto cleanup;
+    TRACE_TGS_REPLY(context, (*ppcreds)->client, (*ppcreds)->server,
+                    &(*ppcreds)->keyblock);
 
     if ((retval = krb5_copy_data(context, psectkt, &pdata)))
         goto cleanup_keyblock;
@@ -295,6 +297,7 @@ krb5int_process_tgs_reply(krb5_context context,
                                     KRB5_KEYUSAGE_TGS_REP_ENCPART_SUBKEY,
                                     &dec_rep);
     if (retval) {
+        TRACE_TGS_REPLY_DECODE_SESSION(context, &tkt->keyblock);
         if ((krb5int_decode_tgs_rep(context, response_data,
                                     &tkt->keyblock,
                                     KRB5_KEYUSAGE_TGS_REP_ENCPART_SESSKEY, &dec_rep)) == 0)

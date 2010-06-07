@@ -173,6 +173,7 @@ krb5_get_init_creds_password(krb5_context context,
        the master kdc */
 
     if (!use_master) {
+        TRACE_GIC_PWD_MASTER(context);
         use_master = 1;
 
         if (as_reply) {
@@ -220,6 +221,7 @@ krb5_get_init_creds_password(krb5_context context,
      */
     if (options && !(options->flags & KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT))
         goto cleanup;
+    TRACE_GIC_PWD_EXPIRED(context);
 
     /* ok, we have an expired password.  Give the user a few chances
        to change it */
@@ -255,6 +257,7 @@ krb5_get_init_creds_password(krb5_context context,
             sizeof(banner));
 
     for (tries = 3; tries; tries--) {
+        TRACE_GIC_PWD_CHANGEPW(context, tries);
         pw0.length = sizeof(pw0array);
         pw1.length = sizeof(pw1array);
 
@@ -326,6 +329,7 @@ krb5_get_init_creds_password(krb5_context context,
        from the master.  this is the last try.  the return from this
        is final.  */
 
+    TRACE_GIC_PWD_CHANGED(context);
     ret = krb5int_get_init_creds(context, creds, client, prompter, data,
                                  start_time, in_tkt_service, options,
                                  krb5_get_as_key_password, (void *) &pw0,

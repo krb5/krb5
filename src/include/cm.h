@@ -60,7 +60,8 @@ struct conn_state {
     krb5_error_code err;
     enum conn_states state;
     unsigned int is_udp : 1;
-    int (*service)(struct conn_state *, struct select_state *, int);
+    int (*service)(krb5_context context, struct conn_state *,
+                   struct select_state *, int);
     struct addrinfo *addr;
     struct {
         struct {

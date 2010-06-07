@@ -135,10 +135,11 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
     /* generate seq number if needed */
     if ((((*auth_context)->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE)
          || ((*auth_context)->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE))
-        && ((*auth_context)->local_seq_number == 0))
+        && ((*auth_context)->local_seq_number == 0)) {
         if ((retval = krb5_generate_seq_number(context, &in_creds->keyblock,
                                                &(*auth_context)->local_seq_number)))
             goto cleanup;
+    }
 
     /* generate subkey if needed */
     if ((ap_req_options & AP_OPTS_USE_SUBKEY)&&(!(*auth_context)->send_subkey)) {
@@ -201,6 +202,8 @@ krb5_mk_req_extended(krb5_context context, krb5_auth_context *auth_context,
             desired_etypes = (*auth_context)->permitted_etypes;
     }
 
+    TRACE_MK_REQ(context, in_creds, (*auth_context)->local_seq_number,
+                 (*auth_context)->send_subkey, &in_creds->keyblock);
     if ((retval = generate_authenticator(context,
                                          (*auth_context)->authentp,
                                          in_creds->client, checksump,
@@ -305,6 +308,7 @@ generate_authenticator(krb5_context context, krb5_authenticator *authent,
 
     /* Only send EtypeList if we prefer another enctype to tkt_enctype */
     if (desired_etypes != NULL && desired_etypes[0] != tkt_enctype) {
+        TRACE_MK_REQ_ETYPES(context, desired_etypes);
         retval = make_etype_list(context, desired_etypes, tkt_enctype,
                                  &authent->authorization_data);
         if (retval)

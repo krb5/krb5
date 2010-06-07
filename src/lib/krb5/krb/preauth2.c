@@ -540,10 +540,7 @@ run_preauth_plugins(krb5_context kcontext,
         /* if it's a REAL module, try to call it only once per library call */
         if (module_required_flags & PA_REAL) {
             if (module->use_count > 0) {
-#ifdef DEBUG
-                fprintf(stderr, "skipping already-used module \"%s\"(%d)\n",
-                        module->name, module->pa_type);
-#endif
+                TRACE_PREAUTH_SKIP(kcontext, module->name, module->pa_type);
                 continue;
             }
             module->use_count++;
@@ -568,6 +565,8 @@ run_preauth_plugins(krb5_context kcontext,
                                      gak_fct, gak_data, salt, s2kparams,
                                      as_key,
                                      &out_pa_data);
+        TRACE_PREAUTH_PROCESS(kcontext, module->name, module->pa_type,
+                              module->flags, ret);
         /* Make note of the module's flags and status. */
         *module_flags = module->flags;
         *module_ret = ret;
@@ -613,6 +612,7 @@ pa_salt(krb5_context context, krb5_kdc_req *request, krb5_pa_data *in_padata,
     if (retval)
         return retval;
 
+    TRACE_PREAUTH_SALT(context, salt, in_padata->pa_type);
     if (in_padata->pa_type == KRB5_PADATA_AFS3_SALT)
         salt->length = SALT_TYPE_AFS_LENGTH;
 
@@ -629,6 +629,8 @@ pa_fx_cookie(krb5_context context, krb5_kdc_req *request,
 {
     krb5_pa_data *pa = calloc(1, sizeof(krb5_pa_data));
     krb5_octet *contents;
+
+    TRACE_PREAUTH_COOKIE(context, in_padata->length, in_padata->contents);
     if (pa == NULL)
         return ENOMEM;
     contents = malloc(in_padata->length);
@@ -671,6 +673,7 @@ pa_enc_timestamp(krb5_context context, krb5_kdc_req *request,
                                prompter, prompter_data,
                                salt, s2kparams, as_key, gak_data))))
             return(ret);
+        TRACE_PREAUTH_ENC_TS_KEY_GAK(context, as_key);
     }
 
     /* now get the time of day, and encrypt it accordingly */
@@ -681,20 +684,11 @@ pa_enc_timestamp(krb5_context context, krb5_kdc_req *request,
     if ((ret = encode_krb5_pa_enc_ts(&pa_enc, &tmp)))
         return(ret);
 
-#ifdef DEBUG
-    fprintf (stderr, "key type %d bytes %02x %02x ...\n",
-             as_key->enctype,
-             as_key->contents[0], as_key->contents[1]);
-#endif
     ret = krb5_encrypt_helper(context, as_key,
                               KRB5_KEYUSAGE_AS_REQ_PA_ENC_TS,
                               tmp, &enc_data);
-#ifdef DEBUG
-    fprintf (stderr, "enc data { type=%d kvno=%d data=%02x %02x ... }\n",
-             enc_data.enctype, enc_data.kvno,
-             0xff & enc_data.ciphertext.data[0],
-             0xff & enc_data.ciphertext.data[1]);
-#endif
+    TRACE_PREAUTH_ENC_TS(context, pa_enc.patimestamp, pa_enc.pausec,
+                         tmp, &enc_data.ciphertext);
 
     krb5_free_data(context, tmp);
 
@@ -831,6 +825,7 @@ pa_sam(krb5_context context, krb5_kdc_req *request, krb5_pa_data *in_padata,
             krb5_free_sam_challenge(context, sam_challenge);
             return(ret);
         }
+        TRACE_PREAUTH_SAM_KEY_GAK(context, as_key);
     }
     snprintf(name, sizeof(name), "%.*s",
              SAMDATA(sam_challenge->sam_type_name, "SAM Authentication",
@@ -1789,6 +1784,8 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
         return KRB5KRB_ERR_GENERIC;
     }
 
+    TRACE_PREAUTH_TRYAGAIN_INPUT(kcontext, padata);
+
     for (i = 0; padata[i] != NULL && padata[i]->pa_type != 0; i++) {
         out_padata = NULL;
         for (j = 0; j < context->n_modules; j++) {
@@ -1820,6 +1817,7 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
                     grow_pa_list(return_padata, &out_pa_list_size,
                                  out_padata, k);
                     free(out_padata);
+                    TRACE_PREAUTH_TRYAGAIN_OUTPUT(kcontext, *return_padata);
                     return 0;
                 }
             }
@@ -1857,16 +1855,7 @@ krb5_do_preauth(krb5_context context,
         return(0);
     }
 
-#ifdef DEBUG
-    fprintf (stderr, "salt len=%d", (int) salt->length);
-    if ((int) salt->length > 0)
-        fprintf (stderr, " '%.*s'", salt->length, salt->data);
-    fprintf (stderr, "; preauth data types:");
-    for (i = 0; in_padata[i]; i++) {
-        fprintf (stderr, " %d", in_padata[i]->pa_type);
-    }
-    fprintf (stderr, "\n");
-#endif
+    TRACE_PREAUTH_INPUT(context, in_padata);
 
     out_pa_list = NULL;
     out_pa_list_size = 0;
@@ -1961,16 +1950,7 @@ krb5_do_preauth(krb5_context context,
                                                       &etype_info[l]->s2kparams,
                                                       s2kparams)) != 0)
                     goto cleanup;
-#ifdef DEBUG
-                for (j = 0; etype_info[j]; j++) {
-                    krb5_etype_info_entry *e = etype_info[j];
-                    fprintf (stderr, "etype info %d: etype %d salt len=%d",
-                             j, e->etype, e->length);
-                    if (e->length > 0 && e->length != KRB5_ETYPE_NO_SALT)
-                        fprintf (stderr, " '%.*s'", e->length, e->salt);
-                    fprintf (stderr, "\n");
-                }
-#endif
+                TRACE_PREAUTH_ETYPE_INFO(context, *etype, salt, s2kparams);
                 break;
             }
             case KRB5_PADATA_PW_SALT:
@@ -1997,12 +1977,9 @@ krb5_do_preauth(krb5_context context,
                                                        prompter, prompter_data,
                                                        gak_fct, gak_data)))) {
                             if (paorder[h] == PA_INFO) {
-#ifdef DEBUG
-                                fprintf (stderr,
-                                         "internal function for type %d, flag %d "
-                                         "failed with err %d\n",
-                                         in_padata[i]->pa_type, paorder[h], ret);
-#endif
+                                TRACE_PREAUTH_INFO_FAIL(context,
+                                                        in_padata[i]->pa_type,
+                                                        ret);
                                 ret = 0;
                                 continue; /* PA_INFO type failed, ignore */
                             }
@@ -2059,6 +2036,7 @@ krb5_do_preauth(krb5_context context,
         }
     }
 
+    TRACE_PREAUTH_OUTPUT(context, out_pa_list);
     *out_padata = out_pa_list;
     if (etype_info)
         krb5_free_etype_info(context, etype_info);

@@ -97,6 +97,10 @@ rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
                                    req->ticket->enc_part.enctype, &ktent);
         if (retval == 0) {
             retval = krb5_decrypt_tkt_part(context, &ktent.key, req->ticket);
+            if (retval == 0) {
+                TRACE_RD_REQ_DECRYPT_SPECIFIC(context, ktent.principal,
+                                              &ktent.key);
+            }
             if (retval == 0 && key != NULL)
                 retval = krb5_copy_keyblock_contents(context, &ktent.key, key);
 
@@ -125,6 +129,7 @@ rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
             if (retval == 0) {
                 krb5_principal tmp = NULL;
 
+                TRACE_RD_REQ_DECRYPT_ANY(context, ktent.principal, &ktent.key);
                 /*
                  * We overwrite ticket->server to be the principal
                  * that we match in the keytab.  The reason for doing
@@ -248,6 +253,8 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
                                               check_valid_flag ? &decrypt_key : NULL)))
             goto cleanup;
     }
+    TRACE_RD_REQ_TICKET(context, req->ticket->enc_part2->client,
+                        req->ticket->server, req->ticket->enc_part2->session);
 
     /* XXX this is an evil hack.  check_valid_flag is set iff the call
        is not from inside the kdc.  we can use this to determine which
@@ -471,11 +478,13 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
                              &(*auth_context)->negotiated_etype);
     if (retval != 0)
         goto cleanup;
+    TRACE_RD_REQ_NEGOTIATED_ETYPE(context, (*auth_context)->negotiated_etype);
 
     assert((*auth_context)->negotiated_etype != ENCTYPE_NULL);
 
     (*auth_context)->remote_seq_number = (*auth_context)->authentp->seq_number;
     if ((*auth_context)->authentp->subkey) {
+        TRACE_RD_REQ_SUBKEY(context, (*auth_context)->authentp->subkey);
         if ((retval = krb5_k_create_key(context,
                                         (*auth_context)->authentp->subkey,
                                         &((*auth_context)->recv_subkey))))

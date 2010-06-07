@@ -113,6 +113,9 @@ k5_mk_rep(krb5_context context, krb5_auth_context auth_context,
     else
         repl.seq_number = auth_context->local_seq_number;
 
+    TRACE_MK_REP(context, repl.ctime, repl.cusec, repl.subkey,
+                 repl.seq_number);
+
     /* encode it before encrypting */
     if ((retval = encode_krb5_ap_rep_enc_part(&repl, &scratch)))
         return retval;

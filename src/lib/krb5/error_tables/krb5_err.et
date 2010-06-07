@@ -351,4 +351,6 @@ error_code KRB5_ERR_FAST_REQUIRED, "FAST protected pre-authentication required b
 
 error_code KRB5_LOCAL_ADDR_REQUIRED,  "Auth context must contain local address"
 error_code KRB5_REMOTE_ADDR_REQUIRED, "Auth context must contain remote address"
+
+error_code KRB5_TRACE_NOSUPP, "Tracing unsupported"
 end

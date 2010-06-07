@@ -301,6 +301,8 @@ make_request_for_tgt(krb5_context context, krb5_tkt_creds_context ctx,
     if (code != 0)
         return code;
 
+    TRACE_TKT_CREDS_TGT_REQ(context, ctx->tgt_princ, ctx->cur_tgt->server);
+
     /* Construct input creds using ctx->tgt_in_creds as a container. */
     memset(&ctx->tgt_in_creds, 0, sizeof(ctx->tgt_in_creds));
     ctx->tgt_in_creds.client = ctx->client;
@@ -320,6 +322,8 @@ make_request_for_service(krb5_context context, krb5_tkt_creds_context ctx,
 {
     krb5_error_code code;
     int extra_options;
+
+    TRACE_TKT_CREDS_SERVICE_REQ(context, ctx->server, referral);
 
     /* Include the caller-specified KDC options in service requests. */
     extra_options = ctx->req_kdcopt;
@@ -372,6 +376,7 @@ get_creds_from_tgs_reply(krb5_context context, krb5_tkt_creds_context ctx,
 
     /* Depending on our state, we may or may not be able to handle an error.
      * For now, store it in the context and return success. */
+    TRACE_TKT_CREDS_RESPONSE_CODE(context, code);
     ctx->reply_code = code;
     return 0;
 }
@@ -420,6 +425,8 @@ static krb5_error_code
 complete(krb5_context context, krb5_tkt_creds_context ctx)
 {
     krb5_error_code code;
+
+    TRACE_TKT_CREDS_COMPLETE(context, ctx->reply_creds->server);
 
     /* Note the authdata we asked for in the output creds. */
     ctx->reply_creds->authdata = ctx->authdata;
@@ -505,6 +512,7 @@ try_fallback_realm(krb5_context context, krb5_tkt_creds_context ctx)
     krb5_free_data_contents(context, &ctx->server->realm);
     ctx->server->realm = string2data(hrealms[0]);
     free(hrealms);
+    TRACE_TKT_CREDS_FALLBACK(context, ctx->server->realm);
 
     /* Obtain a TGT for the new service realm. */
     ctx->getting_tgt_for = STATE_NON_REFERRAL;
@@ -542,17 +550,20 @@ step_referrals(krb5_context context, krb5_tkt_creds_context ctx)
                                ctx->server)) {
         /* We got the ticket we asked for... but we didn't necessarily ask for
          * it with the right enctypes.  Try a non-referral request if so. */
-        if (wrong_enctype(context, ctx->reply_creds->keyblock.enctype))
+        if (wrong_enctype(context, ctx->reply_creds->keyblock.enctype)) {
+            TRACE_TKT_CREDS_WRONG_ENCTYPE(context);
             return begin_non_referral(context, ctx);
+        }
 
-        /* Note the authdata we asked for in the output creds. */
         return complete(context, ctx);
     }
 
     /* Old versions of Active Directory can rewrite the server name instead of
      * returning a referral.  Try a non-referral query if we see this. */
-    if (!IS_TGS_PRINC(context, ctx->reply_creds->server))
+    if (!IS_TGS_PRINC(context, ctx->reply_creds->server)) {
+        TRACE_TKT_CREDS_NON_TGT(context, ctx->reply_creds->server);
         return begin_non_referral(context, ctx);
+    }
 
     if (ctx->referral_count == 1) {
         /* Cache the referral TGT only if it's from the local realm.
@@ -587,6 +598,7 @@ step_referrals(krb5_context context, krb5_tkt_creds_context ctx)
     krb5_free_creds(context, ctx->cur_tgt);
     ctx->cur_tgt = ctx->reply_creds;
     ctx->reply_creds = NULL;
+    TRACE_TKT_CREDS_REFERRAL(context, ctx->cur_tgt->server);
 
     /* Rewrite the server realm to be the referral realm. */
     krb5_free_data_contents(context, &ctx->server->realm);
@@ -672,6 +684,7 @@ step_get_tgt_offpath(krb5_context context, krb5_tkt_creds_context ctx)
 
     if (data_eq(*tgt_realm, ctx->server->realm)) {
         /* We received the server realm TGT we asked for. */
+        TRACE_TKT_CREDS_TARGET_TGT_OFFPATH(context, ctx->cur_tgt->server);
         return end_get_tgt(context, ctx);
     } else if (ctx->offpath_count++ >= KRB5_REFERRAL_MAXHOPS) {
         /* Time to give up. */
@@ -845,6 +858,7 @@ get_tgt_request(krb5_context context, krb5_tkt_creds_context ctx)
             return code;
         if (cached_tgt != NULL) {
             /* Advance the current realm and keep going. */
+            TRACE_TKT_CREDS_CACHED_INTERMEDIATE_TGT(context, cached_tgt);
             krb5_free_creds(context, ctx->cur_tgt);
             ctx->cur_tgt = cached_tgt;
             if (ctx->next_realm == ctx->last_realm)
@@ -874,6 +888,7 @@ step_get_tgt(krb5_context context, krb5_tkt_creds_context ctx)
              * ctx->cur_realm, so it's time to give up. */
             return ctx->reply_code;
         }
+        TRACE_TKT_CREDS_CLOSER_REALM(context, ctx->next_realm);
     } else {
         /* Verify that we got a TGT. */
         if (!IS_TGS_PRINC(context, ctx->reply_creds->server))
@@ -899,9 +914,11 @@ step_get_tgt(krb5_context context, krb5_tkt_creds_context ctx)
                 return code;
             if (path_realm == ctx->last_realm) {
                 /* We received a TGT for the target realm. */
+                TRACE_TKT_CREDS_TARGET_TGT(context, ctx->cur_tgt->server);
                 return end_get_tgt(context, ctx);
             } else if (path_realm != NULL) {
                 /* We still have further to go; advance the traversal. */
+                TRACE_TKT_CREDS_ADVANCE(context, tgt_realm);
                 ctx->cur_realm = path_realm;
                 ctx->next_realm = ctx->last_realm;
             }
@@ -910,6 +927,7 @@ step_get_tgt(krb5_context context, krb5_tkt_creds_context ctx)
             return KRB5_KDCREP_MODIFIED;
         } else {
             /* We went off the path; start the off-path chase. */
+            TRACE_TKT_CREDS_OFFPATH(context, tgt_realm);
             return begin_get_tgt_offpath(context, ctx);
         }
     }
@@ -938,6 +956,7 @@ begin_get_tgt(krb5_context context, krb5_tkt_creds_context ctx)
     if (code != 0)
         return code;
     if (cached_tgt != NULL) {
+        TRACE_TKT_CREDS_CACHED_SERVICE_TGT(context, cached_tgt);
         krb5_free_creds(context, ctx->cur_tgt);
         ctx->cur_tgt = cached_tgt;
         return end_get_tgt(context, ctx);
@@ -951,6 +970,7 @@ begin_get_tgt(krb5_context context, krb5_tkt_creds_context ctx)
         return code;
     if (ctx->cur_tgt == NULL)
         return ctx->cache_code;
+    TRACE_TKT_CREDS_LOCAL_TGT(context, ctx->cur_tgt);
 
     /* Initialize the realm path. */
     code = init_realm_path(context, ctx);
@@ -1024,6 +1044,7 @@ begin(krb5_context context, krb5_tkt_creds_context ctx)
         krb5_free_data_contents(context, &ctx->server->realm);
         code = krb5int_copy_data_contents(context, &ctx->client->realm,
                                           &ctx->server->realm);
+        TRACE_TKT_CREDS_REFERRAL_REALM(context, ctx->server);
         if (code != 0)
             return code;
     }
@@ -1043,6 +1064,7 @@ krb5_tkt_creds_init(krb5_context context, krb5_ccache ccache,
     krb5_error_code code;
     krb5_tkt_creds_context ctx = NULL;
 
+    TRACE_TKT_CREDS(context, in_creds, ccache);
     ctx = k5alloc(sizeof(*ctx), &code);
     if (ctx == NULL)
         goto cleanup;
@@ -1140,9 +1162,10 @@ krb5_tkt_creds_get(krb5_context context, krb5_tkt_creds_context ctx)
         /* Get the next request and realm.  Turn on TCP if necessary. */
         code = krb5_tkt_creds_step(context, ctx, &reply, &request, &realm,
                                    &flags);
-        if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG && !tcp_only)
+        if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG && !tcp_only) {
+            TRACE_TKT_CREDS_RETRY_TCP(context);
             tcp_only = 1;
-        else if (code != 0 || !(flags & KRB5_TKT_CREDS_STEP_FLAG_CONTINUE))
+        } else if (code != 0 || !(flags & KRB5_TKT_CREDS_STEP_FLAG_CONTINUE))
             break;
         krb5_free_data_contents(context, &reply);
 

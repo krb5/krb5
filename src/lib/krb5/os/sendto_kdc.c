@@ -371,6 +371,7 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
 
     dprint("krb5_sendto_kdc(%d@%p, \"%D\", use_master=%d, tcp_only=%d)\n",
            message->length, message->data, realm, *use_master, tcp_only);
+    TRACE_SENDTO_KDC(context, message->length, realm, *use_master, tcp_only);
 
     if (!tcp_only && context->udp_pref_limit < 0) {
         int tmp;
@@ -442,6 +443,7 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
                         *use_master = 1;
                     krb5int_free_addrlist (&addrs3);
                 }
+                TRACE_SENDTO_KDC_MASTER(context, *use_master);
             }
             krb5int_free_addrlist (&addrs);
             return 0;
@@ -575,10 +577,10 @@ krb5int_cm_call_select (const struct select_state *in,
     return 0;
 }
 
-static int service_tcp_fd (struct conn_state *conn,
-                           struct select_state *selstate, int ssflags);
-static int service_udp_fd (struct conn_state *conn,
-                           struct select_state *selstate, int ssflags);
+static int service_tcp_fd(krb5_context context, struct conn_state *conn,
+                          struct select_state *selstate, int ssflags);
+static int service_udp_fd(krb5_context context, struct conn_state *conn,
+                          struct select_state *selstate, int ssflags);
 
 static void
 set_conn_state_msg_length (struct conn_state *state, const krb5_data *message)
@@ -649,10 +651,10 @@ setup_connection (struct conn_state *state, struct addrinfo *ai,
 }
 
 static int
-start_connection (struct conn_state *state,
-                  struct select_state *selstate,
-                  struct sendto_callback_info* callback_info,
-                  krb5_data* callback_buffer)
+start_connection(krb5_context context, struct conn_state *state,
+                 struct select_state *selstate,
+                 struct sendto_callback_info *callback_info,
+                 krb5_data *callback_buffer)
 {
     int fd, e;
     struct addrinfo *ai = state->addr;
@@ -683,6 +685,7 @@ start_connection (struct conn_state *state,
             dperror("sendto_kdc: ioctl(FIONBIO)");
         if (setsockopt(fd, SOL_SOCKET, SO_LINGER, &lopt, sizeof(lopt)))
             dperror("sendto_kdc: setsockopt(SO_LINGER)");
+        TRACE_SENDTO_KDC_TCP_CONNECT(context, ai);
     }
 
     /* Start connecting to KDC.  */
@@ -705,10 +708,9 @@ start_connection (struct conn_state *state,
         }
     } else {
         /*
-         * Connect returned zero even though we tried to make it
-         * non-blocking, which should have caused it to return before
-         * finishing the connection.  Oh well.  Someone's network
-         * stack is broken, but if they gave us a connection, use it.
+         * Connect returned zero even though we made it non-blocking.  This
+         * happens normally for UDP sockets, and can perhaps also happen for
+         * TCP sockets connecting to localhost.
          */
         state->state = WRITING;
         state->fd = fd;
@@ -747,9 +749,11 @@ start_connection (struct conn_state *state,
         ssize_t ret;
         sg_buf *sg = &state->x.out.sgbuf[0];
 
+        TRACE_SENDTO_KDC_UDP_SEND_INITIAL(context, ai);
         dprint("sending %d bytes on fd %d\n", SG_LEN(sg), state->fd);
         ret = send(state->fd, SG_BUF(sg), SG_LEN(sg), 0);
         if (ret < 0 || (size_t) ret != SG_LEN(sg)) {
+            TRACE_SENDTO_KDC_UDP_ERROR_SEND_INITIAL(context, ai, SOCKET_ERRNO);
             dperror("sendto");
             (void) closesocket(state->fd);
             state->fd = INVALID_SOCKET;
@@ -793,10 +797,10 @@ start_connection (struct conn_state *state,
    Otherwise, the caller should immediately move on to process the
    next connection.  */
 static int
-maybe_send (struct conn_state *conn,
-            struct select_state *selstate,
-            struct sendto_callback_info* callback_info,
-            krb5_data* callback_buffer)
+maybe_send(krb5_context context, struct conn_state *conn,
+           struct select_state *selstate,
+           struct sendto_callback_info *callback_info,
+           krb5_data *callback_buffer)
 {
     sg_buf *sg;
     ssize_t ret;
@@ -804,8 +808,10 @@ maybe_send (struct conn_state *conn,
     dprint("maybe_send(@%p) state=%s type=%s\n", conn,
            state_strings[conn->state],
            conn->is_udp ? "udp" : "tcp");
-    if (conn->state == INITIALIZING)
-        return start_connection(conn, selstate, callback_info, callback_buffer);
+    if (conn->state == INITIALIZING) {
+        return start_connection(context, conn, selstate, callback_info,
+                                callback_buffer);
+    }
 
     /* Did we already shut down this channel?  */
     if (conn->state == FAILED) {
@@ -820,12 +826,14 @@ maybe_send (struct conn_state *conn,
         return -1;
     }
 
-    /* UDP - Send message, possibly for the first time, possibly a
-       retransmit if a previous attempt timed out.  */
+    /* UDP - retransmit after a previous attempt timed out. */
     sg = &conn->x.out.sgbuf[0];
+    TRACE_SENDTO_KDC_UDP_SEND_RETRY(context, conn->addr);
     dprint("sending %d bytes on fd %d\n", SG_LEN(sg), conn->fd);
     ret = send(conn->fd, SG_BUF(sg), SG_LEN(sg), 0);
     if (ret < 0 || (size_t) ret != SG_LEN(sg)) {
+        TRACE_SENDTO_KDC_UDP_ERROR_SEND_INITIAL(context, conn->addr,
+                                                SOCKET_ERRNO);
         dperror("send");
         /* Keep connection alive, we'll try again next pass.
 
@@ -883,10 +891,10 @@ get_so_error(int fd)
    or the socket has closed and no others are open.  */
 
 static int
-service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
-                int ssflags)
+service_tcp_fd(krb5_context context, struct conn_state *conn,
+               struct select_state *selstate, int ssflags)
 {
-    krb5_error_code e = 0;
+    int e = 0;
     ssize_t nwritten, nread;
 
     if (!(ssflags & (SSF_READ|SSF_WRITE|SSF_EXCEPTION)))
@@ -899,6 +907,7 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
             /* Bad -- the KDC shouldn't be sending to us first.  */
             e = EINVAL /* ?? */;
         kill_conn:
+            TRACE_SENDTO_KDC_TCP_DISCONNECT(context, conn->addr);
             kill_conn(conn, selstate, e);
             if (e == EINVAL) {
                 closesocket(conn->fd);
@@ -927,6 +936,7 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
          */
         e = get_so_error(conn->fd);
         if (e) {
+            TRACE_SENDTO_KDC_TCP_ERROR_CONNECT(context, conn->addr, e);
             dprint("socket error on write fd: %m", e);
             goto kill_conn;
         }
@@ -948,10 +958,12 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
                ((conn->x.out.sg_count == 2 ? SG_LEN(&conn->x.out.sgp[1]) : 0)
                 + SG_LEN(&conn->x.out.sgp[0])),
                conn->fd);
+        TRACE_SENDTO_KDC_TCP_SEND(context, conn->addr);
         nwritten = SOCKET_WRITEV(conn->fd, conn->x.out.sgp,
                                  conn->x.out.sg_count, tmp);
         if (nwritten < 0) {
             e = SOCKET_ERRNO;
+            TRACE_SENDTO_KDC_TCP_ERROR_SEND(context, conn->addr, e);
             dprint("failed: %m\n", e);
             goto kill_conn;
         }
@@ -1006,6 +1018,7 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
                 e = nread ? SOCKET_ERRNO : ECONNRESET;
                 free(conn->x.in.buf);
                 conn->x.in.buf = 0;
+                TRACE_SENDTO_KDC_TCP_ERROR_RECV(context, conn->addr, e);
                 goto kill_conn;
             }
             conn->x.in.n_left -= nread;
@@ -1020,6 +1033,7 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
                                 conn->x.in.bufsizebytes + conn->x.in.bufsizebytes_read,
                                 4 - conn->x.in.bufsizebytes_read);
             if (nread < 0) {
+                TRACE_SENDTO_KDC_TCP_ERROR_RECV_LEN(context, conn->addr, e);
                 e = SOCKET_ERRNO;
                 goto kill_conn;
             }
@@ -1052,8 +1066,8 @@ service_tcp_fd (struct conn_state *conn, struct select_state *selstate,
 }
 
 static int
-service_udp_fd(struct conn_state *conn, struct select_state *selstate,
-               int ssflags)
+service_udp_fd(krb5_context context, struct conn_state *conn,
+               struct select_state *selstate, int ssflags)
 {
     int nread;
 
@@ -1064,6 +1078,7 @@ service_udp_fd(struct conn_state *conn, struct select_state *selstate,
 
     nread = recv(conn->fd, conn->x.in.buf, conn->x.in.bufsize, 0);
     if (nread < 0) {
+        TRACE_SENDTO_KDC_UDP_ERROR_RECV(context, conn->addr, SOCKET_ERRNO);
         kill_conn(conn, selstate, SOCKET_ERRNO);
         return 0;
     }
@@ -1120,7 +1135,7 @@ service_fds (krb5_context context,
                    conns[i].fd, conns[i].addr,
                    state_strings[(int) conns[i].state]);
 
-            if (conns[i].service (&conns[i], selstate, ssflags)) {
+            if (conns[i].service(context, &conns[i], selstate, ssflags)) {
                 int stop = 1;
 
                 if (msg_handler != NULL) {
@@ -1246,9 +1261,7 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
             dprint("host %d\n", host);
 
             /* Send to the host, wait for a response, then move on. */
-            if (maybe_send(&conns[host],
-                           sel_state,
-                           callback_info,
+            if (maybe_send(context, &conns[host], sel_state, callback_info,
                            (callback_info ? &callback_data[host] : NULL)))
                 continue;
 
@@ -1297,6 +1310,7 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
         goto egress;
     }
     /* Success!  */
+    TRACE_SENDTO_KDC_RESPONSE(context, conns[winning_conn].addr);
     reply->data = conns[winning_conn].x.in.buf;
     reply->length = (conns[winning_conn].x.in.pos
                      - conns[winning_conn].x.in.buf);
