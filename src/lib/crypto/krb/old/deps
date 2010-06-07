@@ -9,11 +9,11 @@ des_stringtokey.so des_stringtokey.po $(OUTPRE)des_stringtokey.$(OBJEXT): \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
-  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/locate_plugin.h \
-  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h des_stringtokey.c \
-  old.h
+  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
+  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
+  $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
+  des_stringtokey.c old.h
 old_aead.so old_aead.po $(OUTPRE)old_aead.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -22,7 +22,8 @@ old_aead.so old_aead.po $(OUTPRE)old_aead.$(OBJEXT): \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
-  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/locate_plugin.h \
-  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h old.h old_aead.c
+  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
+  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
+  $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
+  old.h old_aead.c

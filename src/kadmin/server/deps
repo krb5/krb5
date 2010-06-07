@@ -50,12 +50,12 @@ $(OUTPRE)ovsec_kadmd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
-  $(top_srcdir)/include/kdb.h $(top_srcdir)/include/kdb_kt.h \
-  $(top_srcdir)/include/kdb_log.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/locate_plugin.h \
-  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/net-server.h \
-  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  $(top_srcdir)/lib/gssapi/generic/gssapiP_generic.h \
+  $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/kdb.h \
+  $(top_srcdir)/include/kdb_kt.h $(top_srcdir)/include/kdb_log.h \
+  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
+  $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/net-server.h $(top_srcdir)/include/port-sockets.h \
+  $(top_srcdir)/include/socket-utils.h $(top_srcdir)/lib/gssapi/generic/gssapiP_generic.h \
   $(top_srcdir)/lib/gssapi/generic/gssapi_ext.h $(top_srcdir)/lib/gssapi/generic/gssapi_generic.h \
   $(top_srcdir)/lib/gssapi/krb5/gssapiP_krb5.h misc.h \
   ovsec_kadmd.c
@@ -74,11 +74,12 @@ $(OUTPRE)schpw.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
-  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/kdb.h \
-  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
-  $(top_srcdir)/include/net-server.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h misc.h schpw.c
+  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
+  $(top_srcdir)/include/kdb.h $(top_srcdir)/include/krb5.h \
+  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/locate_plugin.h \
+  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/net-server.h \
+  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
+  misc.h schpw.c
 $(OUTPRE)misc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssrpc/types.h \
   $(BUILDTOP)/include/kadm5/admin.h $(BUILDTOP)/include/kadm5/admin_internal.h \
@@ -94,11 +95,12 @@ $(OUTPRE)misc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
-  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/kdb.h \
-  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
-  $(top_srcdir)/include/net-server.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h misc.c misc.h
+  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
+  $(top_srcdir)/include/kdb.h $(top_srcdir)/include/krb5.h \
+  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/locate_plugin.h \
+  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/net-server.h \
+  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
+  misc.c misc.h
 $(OUTPRE)ipropd_svc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/gssapi/gssapi.h $(BUILDTOP)/include/gssapi/gssapi_ext.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/kadm5/admin.h \

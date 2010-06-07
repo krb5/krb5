@@ -8,10 +8,11 @@ aes_rand2key.so aes_rand2key.po $(OUTPRE)aes_rand2key.$(OBJEXT): \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
-  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
-  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  aes_rand2key.c rand2key.h
+  $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
+  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/locate_plugin.h \
+  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
+  $(top_srcdir)/include/socket-utils.h aes_rand2key.c \
+  rand2key.h
 des_rand2key.so des_rand2key.po $(OUTPRE)des_rand2key.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -20,10 +21,11 @@ des_rand2key.so des_rand2key.po $(OUTPRE)des_rand2key.$(OBJEXT): \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
-  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
-  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  des_rand2key.c rand2key.h
+  $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
+  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/locate_plugin.h \
+  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
+  $(top_srcdir)/include/socket-utils.h des_rand2key.c \
+  rand2key.h
 des3_rand2key.so des3_rand2key.po $(OUTPRE)des3_rand2key.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -32,10 +34,11 @@ des3_rand2key.so des3_rand2key.po $(OUTPRE)des3_rand2key.$(OBJEXT): \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
-  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
-  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  des3_rand2key.c rand2key.h
+  $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
+  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/locate_plugin.h \
+  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
+  $(top_srcdir)/include/socket-utils.h des3_rand2key.c \
+  rand2key.h
 rc4_rand2key.so rc4_rand2key.po $(OUTPRE)rc4_rand2key.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -43,7 +46,7 @@ rc4_rand2key.so rc4_rand2key.po $(OUTPRE)rc4_rand2key.$(OBJEXT): \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
-  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
-  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  rand2key.h rc4_rand2key.c
+  $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
+  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/locate_plugin.h \
+  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
+  $(top_srcdir)/include/socket-utils.h rand2key.h rc4_rand2key.c

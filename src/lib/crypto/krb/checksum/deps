@@ -8,10 +8,11 @@ cbc.so cbc.po $(OUTPRE)cbc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
-  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/locate_plugin.h \
-  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h cbc.c
+  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
+  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
+  $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
+  cbc.c
 confounder.so confounder.po $(OUTPRE)confounder.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -20,10 +21,10 @@ confounder.so confounder.po $(OUTPRE)confounder.$(OBJEXT): \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
-  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
-  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  confounder.c
+  $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
+  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/locate_plugin.h \
+  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
+  $(top_srcdir)/include/socket-utils.h confounder.c
 hmac_md5.so hmac_md5.po $(OUTPRE)hmac_md5.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -33,10 +34,11 @@ hmac_md5.so hmac_md5.po $(OUTPRE)hmac_md5.$(OBJEXT): \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
-  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/locate_plugin.h \
-  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h hmac_md5.c
+  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
+  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
+  $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
+  hmac_md5.c
 unkeyed.so unkeyed.po $(OUTPRE)unkeyed.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../cksumtypes.h \
@@ -44,7 +46,8 @@ unkeyed.so unkeyed.po $(OUTPRE)unkeyed.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
-  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/krb5.h \
-  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/locate_plugin.h \
-  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h unkeyed.c
+  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
+  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
+  $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
+  unkeyed.c
