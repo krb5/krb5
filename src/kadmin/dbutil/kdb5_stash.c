@@ -118,7 +118,8 @@ kdb5_stash(argc, argv)
 
     if (!krb5_c_valid_enctype(master_keyblock.enctype)) {
         char tmp[32];
-        if (krb5_enctype_to_string(master_keyblock.enctype, tmp, sizeof(tmp)))
+        if (krb5_enctype_to_name(master_keyblock.enctype, FALSE,
+                                 tmp, sizeof(tmp)))
             com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP,
                     "while setting up enctype %d", master_keyblock.enctype);
         else

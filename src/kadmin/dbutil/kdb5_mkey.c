@@ -668,8 +668,8 @@ kdb5_list_mkeys(int argc, char *argv[])
     for (cur_kb_node = master_keylist; cur_kb_node != NULL;
          cur_kb_node = cur_kb_node->next) {
 
-        if ((retval = krb5_enctype_to_string(cur_kb_node->keyblock.enctype,
-                                             enctype, sizeof(enctype)))) {
+        if ((retval = krb5_enctype_to_name(cur_kb_node->keyblock.enctype,
+                                           FALSE, enctype, sizeof(enctype)))) {
             com_err(progname, retval, "while getting enctype description");
             exit_status++;
             goto cleanup_return;

@@ -473,7 +473,7 @@ etype_string(krb5_enctype enctype)
     static char buf[100];
     krb5_error_code ret;
 
-    ret = krb5_enctype_to_string(enctype, buf, sizeof(buf));
+    ret = krb5_enctype_to_name(enctype, FALSE, buf, sizeof(buf));
     if (ret)
         snprintf(buf, sizeof(buf), "etype %d", enctype);
 

@@ -1380,8 +1380,8 @@ kadmin_getprinc(int argc, char *argv[])
             krb5_key_data *key_data = &dprinc.key_data[i];
             char enctype[BUFSIZ], salttype[BUFSIZ];
 
-            if (krb5_enctype_to_string(key_data->key_data_type[0],
-                                       enctype, sizeof(enctype)))
+            if (krb5_enctype_to_name(key_data->key_data_type[0], FALSE,
+                                     enctype, sizeof(enctype)))
                 snprintf(enctype, sizeof(enctype), "<Encryption type 0x%x>",
                          key_data->key_data_type[0]);
             printf("Key: vno %d, %s, ", key_data->key_data_kvno, enctype);

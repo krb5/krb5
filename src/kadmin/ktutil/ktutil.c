@@ -252,8 +252,8 @@ void ktutil_list(argc, argv)
         printf("%40s", pname);
         if (show_enctype) {
             static char buf[256];
-            if ((retval = krb5_enctype_to_string(
-                     lp->entry->key.enctype, buf, 256))) {
+            if ((retval = krb5_enctype_to_name(lp->entry->key.enctype, FALSE,
+                                               buf, sizeof(buf)))) {
                 com_err(argv[0], retval, "While converting enctype to string");
                 return;
             }
