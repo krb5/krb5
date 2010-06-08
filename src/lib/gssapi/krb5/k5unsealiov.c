@@ -52,7 +52,6 @@ kg_unseal_v1_iov(krb5_context context,
     int signalg;
     krb5_checksum cksum;
     krb5_checksum md5cksum;
-    krb5_timestamp now;
     size_t cksum_len = 0;
     size_t conflen = 0;
     int direction;
@@ -279,19 +278,6 @@ kg_unseal_v1_iov(krb5_context context,
 
     if (qop_state != NULL)
         *qop_state = GSS_C_QOP_DEFAULT;
-
-    code = krb5_timeofday(context, &now);
-    if (code != 0) {
-        *minor_status = code;
-        retval = GSS_S_FAILURE;
-        goto cleanup;
-    }
-
-    if (now > ctx->krb_times.endtime) {
-        *minor_status = 0;
-        retval = GSS_S_CONTEXT_EXPIRED;
-        goto cleanup;
-    }
 
     if ((ctx->initiate && direction != 0xff) ||
         (!ctx->initiate && direction != 0)) {
