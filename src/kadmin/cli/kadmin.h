@@ -68,7 +68,6 @@ extern time_t get_date(char *);
 
 /* Yucky global variables */
 extern krb5_context context;
-extern char *krb5_defkeyname;
 extern char *whoami;
 extern void *handle;
 
