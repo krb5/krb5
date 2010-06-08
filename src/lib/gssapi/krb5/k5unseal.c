@@ -79,7 +79,6 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
     krb5_checksum md5cksum;
     krb5_data plaind;
     char *data_ptr;
-    krb5_timestamp now;
     unsigned char *plain;
     unsigned int cksum_len = 0;
     size_t plainlen;
@@ -440,16 +439,6 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
 
     if (qop_state)
         *qop_state = GSS_C_QOP_DEFAULT;
-
-    if ((code = krb5_timeofday(context, &now))) {
-        *minor_status = code;
-        return(GSS_S_FAILURE);
-    }
-
-    if (now > ctx->krb_times.endtime) {
-        *minor_status = 0;
-        return(GSS_S_CONTEXT_EXPIRED);
-    }
 
     /* do sequencing checks */
 
