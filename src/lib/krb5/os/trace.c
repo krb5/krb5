@@ -69,9 +69,8 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
 {
     struct k5buf buf;
     krb5_error_code kerr;
-    size_t len;
+    size_t len, i;
     int err;
-    unsigned int i;
     struct addrinfo *ai;
     const krb5_data *d;
     krb5_data data;
@@ -285,9 +284,9 @@ krb5int_trace(krb5_context context, const char *fmt, ...)
     char *str = NULL, *msg = NULL;
     krb5_int32 sec, usec;
 
-    va_start(ap, fmt);
     if (context == NULL || context->trace_callback == NULL)
         return;
+    va_start(ap, fmt);
     str = trace_format(context, fmt, ap);
     if (str == NULL)
         goto cleanup;
