@@ -43,6 +43,7 @@
 #   include <stdio.h>
 #endif
 
+#undef TRACE
 #if defined( YARROW_TRACE )
 extern int yarrow_verbose;
 #define TRACE( x ) do { if (yarrow_verbose) { x } } while (0)
