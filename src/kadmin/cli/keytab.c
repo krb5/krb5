@@ -84,9 +84,7 @@ process_keytab(krb5_context my_context, char **keytab_str,
     char *name = *keytab_str;
 
     if (name == NULL) {
-        /* XXX krb5_defkeyname is an internal library global and
-           should go away */
-        name = strdup(krb5_defkeyname);
+        name = malloc(BUFSIZ);
         if (!name) {
             com_err(whoami, ENOMEM, "while creating keytab name");
             return 1;
@@ -94,6 +92,12 @@ process_keytab(krb5_context my_context, char **keytab_str,
         code = krb5_kt_default(my_context, keytab);
         if (code != 0) {
             com_err(whoami, code, "while opening default keytab");
+            free(name);
+            return 1;
+        }
+        code = krb5_kt_get_name(my_context, *keytab, name, BUFSIZ);
+        if (code != 0) {
+            com_err(whoami, code, "while getting keytab name");
             free(name);
             return 1;
         }
