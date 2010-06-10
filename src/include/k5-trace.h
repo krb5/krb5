@@ -177,11 +177,6 @@
 #define TRACE_INIT_CREDS_SERVICE(c, service) \
     TRACE(c, (c, "Setting initial creds service to {string}", service))
 
-#define TRACE_KDC_AS_CLIENT_KEY(c, keyblock) \
-    TRACE(c, (c, "Client key: {keyblock}", keyblock))
-#define TRACE_KDC_AS_PREAUTH_REPLY_KEY(c, keyblock) \
-    TRACE(c, (c, "Reply key after preauth: {keyblock}", keyblock))
-
 #define TRACE_KT_GET_ENTRY(c, keytab, princ, vno, enctype, err) \
     TRACE(c, (c, "Retrieving {princ} from {keytab} (vno {int}, " \
               "enctype {etype}) with result: {kerr}", princ, keytab, \
@@ -198,11 +193,6 @@
 #define TRACE_MK_REQ_ETYPES(c, etypes) \
     TRACE(c, (c, "Negotiating for enctypes in authenticator: {etypes}", \
               etypes))
-
-#define TRACE_PKINIT_DH_CLIENT_KEY(c, len, keybytes) \
-    TRACE(c, (c, "DH result on client: {hexlenstr}", len, keybytes))
-#define TRACE_PKINIT_DH_SERVER_KEY(c, len, keybytes) \
-    TRACE(c, (c, "DH result on KDC: {hexlenstr}", len, keybytes))
 
 #define TRACE_PREAUTH_COOKIE(c, len, data) \
     TRACE(c, (c, "Received cookie: {lenstr}", (size_t) len, data))
