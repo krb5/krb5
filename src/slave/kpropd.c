@@ -146,9 +146,9 @@ char    *kdb5_util = KPROPD_DEFAULT_KDB5_UTIL;
 char    *kerb_database = NULL;
 char    *acl_file_name = KPROPD_ACL_FILE;
 
-krb5_address    sender_addr;
-krb5_address    receiver_addr;
-short           port = 0;
+krb5_address    *sender_addr;
+krb5_address    *receiver_addr;
+const char      *port = KPROP_SERVICE;
 
 char **db_args = NULL;
 int db_args_size = 0;
@@ -157,12 +157,8 @@ void    PRS(char**);
 int     do_standalone(iprop_role iproprole);
 void    doit(int);
 krb5_error_code do_iprop(kdb_log_context *log_ctx);
-void    kerberos_authenticate(
-    krb5_context,
-    int,
-    krb5_principal *,
-    krb5_enctype *,
-    struct sockaddr_in);
+void    kerberos_authenticate(krb5_context, int, krb5_principal *,
+                              krb5_enctype *, struct sockaddr_storage *);
 krb5_boolean authorized_principal(krb5_context, krb5_principal, krb5_enctype);
 void    recv_database(krb5_context, int, int, krb5_data *);
 void    load_database(krb5_context, char *, char *);
@@ -241,11 +237,11 @@ static void resync_alarm(int sn)
 
 int do_standalone(iprop_role iproprole)
 {
-    struct  sockaddr_in     my_sin, frominet;
-    struct servent *sp;
+    struct  sockaddr_in     frominet;
+    struct addrinfo hints, *res;
     int     finet, s;
     GETPEERNAME_ARG3_TYPE fromlen;
-    int     ret;
+    int ret, error, val;
     /*
      * Timer for accept/read calls, in case of network type errors.
      */
@@ -253,23 +249,34 @@ int do_standalone(iprop_role iproprole)
 
 retry:
 
-    finet = socket(AF_INET, SOCK_STREAM, 0);
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
+
+    error = getaddrinfo(NULL, port, &hints, &res);
+    if (error != 0) {
+        (void) fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(error));
+        exit(1);
+    }
+
+    finet = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (finet < 0) {
         com_err(progname, errno, "while obtaining socket");
         exit(1);
     }
-    memset(&my_sin,0, sizeof(my_sin));
-    if(!port) {
-        sp = getservbyname(KPROP_SERVICE, "tcp");
-        if (sp == NULL) {
-            com_err(progname, 0, "%s/tcp: unknown service", KPROP_SERVICE);
-            my_sin.sin_port = htons(KPROP_PORT);
-        }
-        else my_sin.sin_port = sp->s_port;
-    } else {
-        my_sin.sin_port = port;
-    }
-    my_sin.sin_family = AF_INET;
+
+    val = 1;
+    if (setsockopt(finet, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) < 0)
+        com_err(progname, errno, "while setting SO_REUSEADDR option");
+
+#ifdef IPV6_V6ONLY
+    /* Typically, res will be the IPv6 wildcard address.  Some systems, such as
+     * the *BSDs, don't accept IPv4 connections on this address by default. */
+    val = 0;
+    if (setsockopt(finet, IPPROTO_IPV6, IPV6_V6ONLY, &val, sizeof(val)) < 0)
+        com_err(progname, errno, "while unsetting IPV6_V6ONLY option");
+#endif
 
     /*
      * We need to close the socket immediately if iprop is enabled,
@@ -277,13 +284,8 @@ retry:
      * linger around for too long
      */
     if (iproprole == IPROP_SLAVE) {
-        int on = 1;
         struct linger linger;
 
-        if (setsockopt(finet, SOL_SOCKET, SO_REUSEADDR,
-                       (char *)&on, sizeof(on)) < 0)
-            com_err(progname, errno,
-                    _("while setting socket option (SO_REUSEADDR)"));
         linger.l_onoff = 1;
         linger.l_linger = 2;
         if (setsockopt(finet, SOL_SOCKET, SO_LINGER,
@@ -308,22 +310,9 @@ retry:
         }
         backoff_timer *= 2;
     }
-    if ((ret = bind(finet, (struct sockaddr *) &my_sin, sizeof(my_sin))) < 0) {
-        if (debug) {
-            int on = 1;
-            fprintf(stderr,
-                    "%s: attempting to rebind socket with SO_REUSEADDR\n",
-                    progname);
-            if (setsockopt(finet, SOL_SOCKET, SO_REUSEADDR,
-                           (char *)&on, sizeof(on)) < 0)
-                com_err(progname, errno, "in setsockopt(SO_REUSEADDR)");
-            ret = bind(finet, (struct sockaddr *) &my_sin, sizeof(my_sin));
-        }
-        if (ret < 0) {
-            perror("bind");
-            com_err(progname, errno, "while binding listener socket");
-            exit(1);
-        }
+    if ((ret = bind(finet, res->ai_addr, res->ai_addrlen)) < 0) {
+        com_err(progname, errno, "while binding listener socket");
+        exit(1);
     }
     if (!debug && iproprole != IPROP_SLAVE)
         daemon(1, 0);
@@ -419,16 +408,16 @@ retry:
 void doit(fd)
     int     fd;
 {
-    struct sockaddr_in from;
+    struct sockaddr_storage from;
     int on = 1;
     GETPEERNAME_ARG3_TYPE fromlen;
-    struct hostent  *hp;
     krb5_error_code retval;
     krb5_data confmsg;
     int lock_fd;
     mode_t omask;
     krb5_enctype etype;
     int database_fd;
+    char host[INET6_ADDRSTRLEN+1];
 
     if (kpropd_context->kdblog_context &&
         kpropd_context->kdblog_context->iproprole == IPROP_SLAVE) {
@@ -468,23 +457,17 @@ void doit(fd)
                 "while attempting setsockopt (SO_KEEPALIVE)");
     }
 
-    if (!(hp = gethostbyaddr((char *) &(from.sin_addr.s_addr), fromlen,
-                             AF_INET))) {
-        syslog(LOG_INFO, "Connection from %s",
-               inet_ntoa(from.sin_addr));
+    if (getnameinfo((const struct sockaddr *) &from, fromlen,
+                    host, sizeof(host), NULL, 0, 0) == 0) {
+        syslog(LOG_INFO, "Connection from %s", host);
         if (debug)
-            printf("Connection from %s\n",
-                   inet_ntoa(from.sin_addr));
-    } else {
-        syslog(LOG_INFO, "Connection from %s", hp->h_name);
-        if (debug)
-            printf("Connection from %s\n", hp->h_name);
+            printf("Connection from %s\n", host);
     }
 
     /*
      * Now do the authentication
      */
-    kerberos_authenticate(kpropd_context, fd, &client, &etype, from);
+    kerberos_authenticate(kpropd_context, fd, &client, &etype, &from);
 
     /*
      * Turn off alarm upon successful authentication from master.
@@ -1070,11 +1053,8 @@ void PRS(argv)
                     word = 0;
                     break;
                 case 'P':
-                    if (*word)
-                        port = htons(atoi(word));
-                    else
-                        port = htons(atoi(*argv++));
-                    if (!port)
+                    port = (*word != '\0') ? word : *argv++;
+                    if (port == NULL)
                         usage();
                     word = 0;
                     break;
@@ -1216,22 +1196,19 @@ kerberos_authenticate(context, fd, clientp, etype, my_sin)
     int                   fd;
     krb5_principal      * clientp;
     krb5_enctype        * etype;
-    struct sockaddr_in    my_sin;
+    struct sockaddr_storage * my_sin;
 {
     krb5_error_code       retval;
     krb5_ticket         * ticket;
-    struct sockaddr_in    r_sin;
+    struct sockaddr_storage  r_sin;
     GETSOCKNAME_ARG3_TYPE sin_length;
     krb5_keytab           keytab = NULL;
 
     /*
      * Set recv_addr and send_addr
      */
-    sender_addr.addrtype = ADDRTYPE_INET;
-    sender_addr.length = sizeof(my_sin.sin_addr);
-    sender_addr.contents = (krb5_octet *) malloc(sizeof(my_sin.sin_addr));
-    memcpy(sender_addr.contents, &my_sin.sin_addr,
-           sizeof(my_sin.sin_addr));
+    sockaddr2krbaddr(context, my_sin->ss_family, (struct sockaddr *) my_sin,
+                     &sender_addr);
 
     sin_length = sizeof(r_sin);
     if (getsockname(fd, (struct sockaddr *) &r_sin, &sin_length)) {
@@ -1239,11 +1216,8 @@ kerberos_authenticate(context, fd, clientp, etype, my_sin)
         exit(1);
     }
 
-    receiver_addr.addrtype = ADDRTYPE_INET;
-    receiver_addr.length = sizeof(r_sin.sin_addr);
-    receiver_addr.contents = (krb5_octet *) malloc(sizeof(r_sin.sin_addr));
-    memcpy(receiver_addr.contents, &r_sin.sin_addr,
-           sizeof(r_sin.sin_addr));
+    sockaddr2krbaddr(context, r_sin.ss_family, (struct sockaddr *) &r_sin,
+                     &receiver_addr);
 
     if (debug) {
         char *name;
@@ -1272,8 +1246,8 @@ kerberos_authenticate(context, fd, clientp, etype, my_sin)
         exit(1);
     }
 
-    retval = krb5_auth_con_setaddrs(context, auth_context, &receiver_addr,
-                                    &sender_addr);
+    retval = krb5_auth_con_setaddrs(context, auth_context, receiver_addr,
+                                    sender_addr);
     if (retval) {
         syslog(LOG_ERR, "Error in krb5_auth_con_setaddrs: %s",
                error_message(retval));

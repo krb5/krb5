@@ -6,11 +6,11 @@ DEFS=
 
 all::	kprop kpropd kproplog
 
-CLIENTSRCS= $(srcdir)/kprop.c 
-CLIENTOBJS= kprop.o 
+CLIENTSRCS= $(srcdir)/kprop.c $(srcdir)/kprop_sock.c
+CLIENTOBJS= kprop.o kprop_sock.o
 
-SERVERSRCS= $(srcdir)/kpropd.c $(srcdir)/kpropd_rpc.c
-SERVEROBJS= kpropd.o kpropd_rpc.o
+SERVERSRCS= $(srcdir)/kpropd.c $(srcdir)/kpropd_rpc.c $(srcdir)/kprop_sock.c
+SERVEROBJS= kpropd.o kpropd_rpc.o kprop_sock.o
 
 LOGSRCS= $(srcdir)/kproplog.c
 LOGOBJS= kproplog.o

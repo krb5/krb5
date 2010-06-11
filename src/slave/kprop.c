@@ -59,20 +59,20 @@ char    *srvtab = 0;
 char    *slave_host;
 char    *realm = 0;
 char    *file = KPROP_DEFAULT_FILE;
-short   port = 0;
 
 krb5_principal  my_principal;           /* The Kerberos principal we'll be */
 /* running under, initialized in */
 /* get_tickets() */
 krb5_ccache     ccache;         /* Credentials cache which we'll be using */
 krb5_creds      creds;
-krb5_address    sender_addr;
-krb5_address    receiver_addr;
+krb5_address    *sender_addr;
+krb5_address    *receiver_addr;
+const char      *port = KPROP_SERVICE;
 
 void    PRS(int, char **);
 void    get_tickets(krb5_context);
 static void usage(void);
-krb5_error_code open_connection(char *, int *, char *, unsigned int);
+static void open_connection(krb5_context, char *, int *);
 void    kerberos_authenticate(krb5_context, krb5_auth_context *,
                               int, krb5_principal, krb5_creds **);
 int     open_database(krb5_context, char *, int *);
@@ -99,7 +99,6 @@ main(argc, argv)
     krb5_context context;
     krb5_creds *my_creds;
     krb5_auth_context auth_context;
-    char    Errmsg[256];
 
     retval = krb5_init_context(&context);
     if (retval) {
@@ -110,17 +109,7 @@ main(argc, argv)
     get_tickets(context);
 
     database_fd = open_database(context, file, &database_size);
-    retval = open_connection(slave_host, &fd, Errmsg, sizeof(Errmsg));
-    if (retval) {
-        com_err(progname, retval, "%s while opening connection to %s",
-                Errmsg, slave_host);
-        exit(1);
-    }
-    if (fd < 0) {
-        fprintf(stderr, "%s: %s while opening connection to %s\n",
-                progname, Errmsg, slave_host);
-        exit(1);
-    }
+    open_connection(context, slave_host, &fd);
     kerberos_authenticate(context, &auth_context, fd, my_principal,
                           &my_creds);
     xmit_database(context, auth_context, my_creds, fd, database_fd,
@@ -166,11 +155,8 @@ void PRS(argc, argv)
                     debug++;
                     break;
                 case 'P':
-                    if (*word)
-                        port = htons(atoi(word));
-                    else
-                        port = htons(atoi(*argv++));
-                    if (!port)
+                    port = (*word != '\0') ? word : *argv++;
+                    if (port == NULL)
                         usage();
                     word = 0;
                     break;
@@ -311,75 +297,72 @@ void get_tickets(context)
     }
 }
 
-krb5_error_code
-open_connection(host, fd, Errmsg, ErrmsgSz)
-    char            *host;
-    int             *fd;
-    char            *Errmsg;
-    unsigned int     ErrmsgSz;
+static void
+open_connection(krb5_context context, char *host, int *fd)
 {
     int     s;
     krb5_error_code retval;
-
-    struct hostent  *hp;
-    register struct servent *sp;
-    struct sockaddr_in my_sin;
     GETSOCKNAME_ARG3_TYPE socket_length;
+    struct addrinfo hints, *res, *answers;
+    struct sockaddr *sa;
+    struct sockaddr_storage my_sin;
+    int error;
 
-    hp = gethostbyname(host);
-    if (hp == NULL) {
-        (void) snprintf(Errmsg, ErrmsgSz, "%s: unknown host", host);
-        *fd = -1;
-        return(0);
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = PF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    error = getaddrinfo(host, port, &hints, &answers);
+    if (error != 0) {
+        com_err(progname, 0, "%s: %s", host, gai_strerror(error));
+        exit(1);
     }
-    my_sin.sin_family = hp->h_addrtype;
-    memcpy(&my_sin.sin_addr, hp->h_addr, sizeof(my_sin.sin_addr));
-    if(!port) {
-        sp = getservbyname(KPROP_SERVICE, "tcp");
-        if (sp == 0) {
-            my_sin.sin_port = htons(KPROP_PORT);
-        } else {
-            my_sin.sin_port = sp->s_port;
+
+    s = -1;
+    retval = EINVAL;
+    for (res = answers; res != NULL; res = res->ai_next) {
+        s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+        if (s < 0) {
+            com_err(progname, errno, "while creating socket");
+            exit(1);
         }
-    } else
-        my_sin.sin_port = port;
-    s = socket(AF_INET, SOCK_STREAM, 0);
 
-    if (s < 0) {
-        (void) snprintf(Errmsg, ErrmsgSz, "in call to socket");
-        return(errno);
+        if (connect(s, res->ai_addr, res->ai_addrlen) < 0) {
+            retval = errno;
+            close(s);
+            s = -1;
+            continue;
+        }
+
+        /* We successfully connect()ed */
+        *fd = s;
+        retval = sockaddr2krbaddr(context, res->ai_family, res->ai_addr,
+                                  &receiver_addr);
+        if (retval != 0) {
+            com_err(progname, retval, "while converting server address");
+            exit(1);
+        }
+
+        break;
     }
-    if (connect(s, (struct sockaddr *)&my_sin, sizeof my_sin) < 0) {
-        retval = errno;
-        close(s);
-        (void) snprintf(Errmsg, ErrmsgSz, "in call to connect");
-        return(retval);
+
+    freeaddrinfo(answers);
+
+    if (s == -1) {
+        com_err(progname, retval, "while connecting to server");
+        exit(1);
     }
-    *fd = s;
 
-    /*
-     * Set receiver_addr and sender_addr.
-     */
-    receiver_addr.addrtype = ADDRTYPE_INET;
-    receiver_addr.length = sizeof(my_sin.sin_addr);
-    receiver_addr.contents = (krb5_octet *) malloc(sizeof(my_sin.sin_addr));
-    memcpy(receiver_addr.contents, &my_sin.sin_addr,
-           sizeof(my_sin.sin_addr));
-
+    /* Set sender_addr. */
     socket_length = sizeof(my_sin);
     if (getsockname(s, (struct sockaddr *)&my_sin, &socket_length) < 0) {
-        retval = errno;
-        close(s);
-        (void) snprintf(Errmsg, ErrmsgSz, "in call to getsockname");
-        return(retval);
+        com_err(progname, errno, "while getting local socket address");
+        exit(1);
     }
-    sender_addr.addrtype = ADDRTYPE_INET;
-    sender_addr.length = sizeof(my_sin.sin_addr);
-    sender_addr.contents = (krb5_octet *) malloc(sizeof(my_sin.sin_addr));
-    memcpy(sender_addr.contents, &my_sin.sin_addr,
-           sizeof(my_sin.sin_addr));
-
-    return(0);
+    sa = (struct sockaddr *) &my_sin;
+    if (sockaddr2krbaddr(context, sa->sa_family, sa, &sender_addr) != 0) {
+        com_err(progname, errno, "while converting local address");
+        exit(1);
+    }
 }
 
 
@@ -401,8 +384,8 @@ void kerberos_authenticate(context, auth_context, fd, me, new_creds)
     krb5_auth_con_setflags(context, *auth_context,
                            KRB5_AUTH_CONTEXT_DO_SEQUENCE);
 
-    retval = krb5_auth_con_setaddrs(context, *auth_context, &sender_addr,
-                                    &receiver_addr);
+    retval = krb5_auth_con_setaddrs(context, *auth_context, sender_addr,
+                                    receiver_addr);
     if (retval) {
         com_err(progname, retval, "in krb5_auth_con_setaddrs");
         exit(1);
