@@ -33,23 +33,6 @@
 
 static krb5_boolean chk_heimdal_seqnum(krb5_ui_4, krb5_ui_4);
 
-static krb5_error_code
-actx_copy_addr(krb5_context context, const krb5_address *inad, krb5_address **outad)
-{
-    krb5_address *tmpad;
-
-    if (!(tmpad = (krb5_address *)malloc(sizeof(*tmpad))))
-        return ENOMEM;
-    *tmpad = *inad;
-    if (!(tmpad->contents = (krb5_octet *)malloc(inad->length))) {
-        free(tmpad);
-        return ENOMEM;
-    }
-    memcpy(tmpad->contents, inad->contents, inad->length);
-    *outad = tmpad;
-    return 0;
-}
-
 krb5_error_code KRB5_CALLCONV
 krb5_auth_con_init(krb5_context context, krb5_auth_context *auth_context)
 {
@@ -115,14 +98,14 @@ krb5_auth_con_setaddrs(krb5_context context, krb5_auth_context auth_context, krb
 
     retval = 0;
     if (local_addr)
-        retval = actx_copy_addr(context,
+        retval = krb5_copy_addr(context,
                                 local_addr,
                                 &auth_context->local_addr);
     else
         auth_context->local_addr = NULL;
 
     if (!retval && remote_addr)
-        retval = actx_copy_addr(context,
+        retval = krb5_copy_addr(context,
                                 remote_addr,
                                 &auth_context->remote_addr);
     else
@@ -138,12 +121,12 @@ krb5_auth_con_getaddrs(krb5_context context, krb5_auth_context auth_context, krb
 
     retval = 0;
     if (local_addr && auth_context->local_addr) {
-        retval = actx_copy_addr(context,
+        retval = krb5_copy_addr(context,
                                 auth_context->local_addr,
                                 local_addr);
     }
     if (!retval && (remote_addr) && auth_context->remote_addr) {
-        retval = actx_copy_addr(context,
+        retval = krb5_copy_addr(context,
                                 auth_context->remote_addr,
                                 remote_addr);
     }
@@ -163,14 +146,14 @@ krb5_auth_con_setports(krb5_context context, krb5_auth_context auth_context, krb
 
     retval = 0;
     if (local_port)
-        retval = actx_copy_addr(context,
+        retval = krb5_copy_addr(context,
                                 local_port,
                                 &auth_context->local_port);
     else
         auth_context->local_port = NULL;
 
     if (!retval && remote_port)
-        retval = actx_copy_addr(context,
+        retval = krb5_copy_addr(context,
                                 remote_port,
                                 &auth_context->remote_port);
     else
