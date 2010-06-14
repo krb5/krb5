@@ -2246,7 +2246,7 @@ client_process_dh(krb5_context context,
     DH_compute_key(*client_key, server_pub_key, cryptoctx->dh);
 #ifdef DEBUG_DH
     print_pubkey(server_pub_key, "server's pub_key=");
-    pkiDebug("client secret key (%d)= ", *client_key_len);
+    pkiDebug("client computed key (%d)= ", *client_key_len);
     print_buffer(*client_key, *client_key_len);
 #endif
 
@@ -2384,7 +2384,7 @@ server_process_dh(krb5_context context,
     print_dh(dh_server, "client&server's DH params\n");
     print_pubkey(dh->pub_key, "client's pub_key=");
     print_pubkey(dh_server->pub_key, "server's pub_key=");
-    pkiDebug("server secret key=");
+    pkiDebug("server computed key=");
     print_buffer(*server_key, *server_key_len);
 #endif
 
@@ -3527,7 +3527,7 @@ pkinit_C_Decrypt(pkinit_identity_crypto_context id_cryptoctx,
     rv = id_cryptoctx->p11->C_Decrypt(id_cryptoctx->session, pEncryptedData,
                                       ulEncryptedDataLen, pData, pulDataLen);
     if (rv == CKR_OK) {
-        pkiDebug("pData %x *pulDataLen %d\n", (unsigned int) pData,
+        pkiDebug("pData %p *pulDataLen %d\n", (void *) pData,
                  (int) *pulDataLen);
     }
     return rv;
@@ -3568,9 +3568,9 @@ pkinit_decode_data_pkcs11(krb5_context context,
     if (cp == NULL)
         return ENOMEM;
     len = data_len;
-    pkiDebug("session %x edata %x edata_len %d data %x datalen @%x %d\n",
-             (int) id_cryptoctx->session, (int) data, (int) data_len, (int) cp,
-             (int) &len, (int) len);
+    pkiDebug("session %p edata %p edata_len %d data %p datalen @%p %d\n",
+             (void *) id_cryptoctx->session, (void *) data, (int) data_len,
+             (void *) cp, (void *) &len, (int) len);
     if ((r = pkinit_C_Decrypt(id_cryptoctx, data, (CK_ULONG) data_len,
                               cp, &len)) != CKR_OK) {
         pkiDebug("C_Decrypt: %s\n", pkinit_pkcs11_code_to_text(r));
@@ -5659,7 +5659,8 @@ print_dh(DH * dh, char *msg)
     if (dh)
         DHparams_print(bio_err, dh);
 
-    BN_print(bio_err, dh->q);
+    BIO_puts(bio_err, "private key: ");
+    BN_print(bio_err, dh->priv_key);
     BIO_puts(bio_err, (const char *)"\n");
     BIO_free(bio_err);
 
