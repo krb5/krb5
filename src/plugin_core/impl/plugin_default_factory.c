@@ -9,12 +9,12 @@
 #include "plugin_manager.h"
 #include "plugin_factory.h"
 #include "plugin_pa_impl.h"
-#include "plugin_pwd_qlty_impl.h"
 #include "plugin_default_factory.h"
 
 static plugin_factory* _default_factory_instance = NULL;
 
 static plugin_descr  plugin_default_factory_table[] = {
+        {"plugin_pwd_qlty_X",   plugin_pwd_qlty_X_create},
         {"plugin_pwd_qlty_krb", plugin_pwd_qlty_krb_create},
         {"plugin_encrypted_challenge_pa", plugin_encrypted_challenge_pa_create},
         {"plugin_ldap_audit", NULL},

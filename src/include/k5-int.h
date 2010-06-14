@@ -1433,6 +1433,7 @@ struct _kdb_log_context;
 
 /* Plugin API ----  PLUGIN HANDLE */
 typedef struct _plhandle{
+    int plugin_id;
     void *api;
     struct _plhandle *next;
 } plhandle;
@@ -1459,7 +1460,7 @@ typedef struct {
         void (*configure)(manager_data *  data, const char*);
         void (*start)(manager_data * data);
         void (*stop)(manager_data * data);
-        plhandle (*getService)(manager_data * data, const char*);
+        plhandle (*getService)(manager_data * data, const char*, const int pl_id);
 } plugin_manager;
 
 /* Plugin API ----  PLUGIN HANDLE ----- END*/
@@ -1513,7 +1514,7 @@ struct _krb5_context {
 
     krb5_boolean allow_weak_crypto;
 
-    /* PLUGIN HANDLE */
+    /* PLUGIN manager HANDLE */
     plugin_manager *pl_handle;
 };
 

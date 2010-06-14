@@ -4,7 +4,7 @@
 
 #include <plugin_manager.h>
 #include <plugin_pwd_qlty.h>
-#include "plugin_pwd_qlty_impl.h"
+#include "plugin_pwd_qlty_X_impl.h"
 #include    <string.h>
 #include    <ctype.h>
 
@@ -71,7 +71,7 @@ _plugin_pwd_qlty_check(kadm5_server_handle_t srv_handle,
              char *password, int use_policy, kadm5_policy_ent_t pol,
              krb5_principal principal)
 {
-    int     nupper = 0,
+    int nupper = 0,
         nlower = 0,
         ndigit = 0,
         npunct = 0,
@@ -82,6 +82,11 @@ _plugin_pwd_qlty_check(kadm5_server_handle_t srv_handle,
     extern  struct passwd *hes_getpwnam();
     struct  passwd *ent;
 #endif
+
+#ifdef DEBUG_PLUGINS
+    printf("Plugin pwd qlty X\n");
+#endif
+
     if(use_policy) {
         if(strlen(password) < (unsigned int)pol->pw_min_length)
             return KADM5_PASS_Q_TOOSHORT;
@@ -105,7 +110,7 @@ _plugin_pwd_qlty_check(kadm5_server_handle_t srv_handle,
                 continue;
             }
         }
-        if ((nupper + nlower + ndigit + npunct + nspec) < pol->pw_min_classes)
+        if ((nupper + nlower + ndigit + npunct + nspec) < pol->pw_min_classes || nlower < 1) // Zh X-policy
             return KADM5_PASS_Q_CLASS;
         if((find_word(password) == KADM5_OK))
             return KADM5_PASS_Q_DICT;
@@ -150,13 +155,14 @@ _plugin_pwd_qlty_clean()
 }
 
 plhandle
-plugin_pwd_qlty_krb_create()
+plugin_pwd_qlty_X_create()
 {
         plhandle handle;
         plugin_pwd_qlty* api = malloc(sizeof(plugin_pwd_qlty));
 
         memset(api, 0, sizeof(plugin_pwd_qlty));
         api->version = 1;
+        api->plugin_id = PWD_QLTY_X;
         api->pwd_qlty_init    = _plugin_pwd_qlty_init;
         api->pwd_qlty_check   = _plugin_pwd_qlty_check;
         api->pwd_qlty_cleanup = _plugin_pwd_qlty_clean;

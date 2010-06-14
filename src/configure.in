@@ -1118,6 +1118,7 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 
 	plugins/pwd_qlty
 	plugins/pwd_qlty/plugin_pwd_qlty_krb
+	plugins/pwd_qlty/plugin_pwd_qlty_X
 	plugin_core/impl
 	plugins/pa
 	plugins/pa/encrypted_challenge

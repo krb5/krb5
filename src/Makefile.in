@@ -10,6 +10,7 @@ mydir=.
 SUBDIRS=util include plugin_core plugin_core/impl    \
 	plugins/pa plugins/pa/encrypted_challenge \
 	plugins/pwd_qlty plugins/pwd_qlty/plugin_pwd_qlty_krb	\
+	plugins/pwd_qlty/plugin_pwd_qlty_X	\
 	lib \
 	@ldap_plugin_dir@ \
 	plugins/kdb/db2 \

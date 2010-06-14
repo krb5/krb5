@@ -177,7 +177,7 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
     ctx->allow_weak_crypto = tmp;
 
 
-    /* Plugin initialization */   // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>...
+    /* Plugin initialization */
     plugin_default_manager_get_instance(&plugin_mngr_instance);
     set_plugin_manager_instance(&ctx->pl_handle,  plugin_mngr_instance);
     plugin_manager_configure(ctx->pl_handle, conf_path);

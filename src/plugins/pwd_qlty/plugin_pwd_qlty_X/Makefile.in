@@ -1,6 +1,6 @@
-mydir=plugins/pwd_qlty/plugin_pwd_qlty_krb
+mydir=plugins/pwd_qlty/plugin_pwd_qlty_X
 BUILDTOP=$(REL)../../..
-RELDIR=../plugins/pwd_qlty/plugin_pwd_qlty_krb
+RELDIR=../plugins/pwd_qlty/plugin_pwd_qlty_X
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
@@ -8,10 +8,10 @@ DEFS=
 LOCALINCLUDES = -I../../../include/krb5 -I. -I../../../plugin_core -I..  -I$(srcdir)/..	\
 		-I../../../lib/kadm5
 
-LIBBASE=plugin_pwd_qlty_krb
+LIBBASE=plugin_pwd_qlty_X
 
-STLIBOBJS= plugin_pwd_qlty_krb_impl.o server_dict.o
-SRCS= $(srcdir)/plugin_pwd_qlty_krb_impl.c  $(srcdir)/server_dict.c
+STLIBOBJS= plugin_pwd_qlty_X_impl.o server_dict.o
+SRCS= $(srcdir)/plugin_pwd_qlty_X_impl.c  $(srcdir)/server_dict.c
 
 STOBJLISTS=OBJS.ST
 

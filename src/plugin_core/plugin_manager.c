@@ -17,6 +17,7 @@ plugin_manager_configure(plugin_manager* _instance,const char* path)
     if (_instance != NULL) {
         _instance->configure(_instance->data, path);
     }
+    return 0;
 }
 
 void plugin_manager_start(plugin_manager* _instance)
@@ -34,16 +35,13 @@ void plugin_manager_stop(plugin_manager* _instance)
 }
 
 plhandle
-plugin_manager_get_service(plugin_manager* _instance, const char* service_name)
+plugin_manager_get_service(plugin_manager* _instance, const char* service_name, const int pl_id)
 {
     plhandle handle;
     if (_instance != NULL) {
-        handle = _instance->getService(_instance->data, service_name);
+        handle = _instance->getService(_instance->data, service_name, pl_id);
     } else {
         handle.api = NULL;
     }
     return handle;
 }
-
-
-

@@ -25,6 +25,9 @@ _load_factory (const char* factory_name, const char* factory_type)
 {
     factory_handle handle;
     plugin_factory_descr *ptr = NULL;
+#ifdef DEBUG_PLUGINS
+    printf("plugins:  _load_factory\n");
+#endif
 
     handle.api = NULL;
     for( ptr = _table; ptr->factory_name != NULL; ptr++) {
@@ -40,6 +43,9 @@ static registry_data*
 _create_registry()
 {
     registry_data* registry = (registry_data*) malloc(sizeof(registry_data));
+#ifdef DEBUG_PLUGINS
+    printf("plugins:  _create_registry\n");
+#endif
     memset(registry, 0, sizeof(registry_data));
 
     return registry;
@@ -48,6 +54,9 @@ _create_registry()
 static void
 _extend_registry (registry_data* data, int ext_n)
 {
+#ifdef DEBUG_PLUGINS
+    printf("plugins:  _extend_registry\n");
+#endif
     if(data->registry_max_size == 0) {
         data->table = NULL;
     }
@@ -62,6 +71,9 @@ _search_registry (registry_data* data, const char* api_name)
     int i = 0;
     reg_entry* ptr = data->table;
 
+#ifdef DEBUG_PLUGINS
+    printf("plugins:  _search_registry\n");
+#endif
     for(i = 0; i < data->registry_size; i++,ptr++) {
         if(strcmp(api_name, ptr->api_name) == 0) {
             return ptr;
@@ -72,11 +84,15 @@ _search_registry (registry_data* data, const char* api_name)
 
 static plhandle
 _create_api(const char* plugin_name, const char* factory_name,
-            const char* factory_type/*, config_node* properties*/)
+            const char* factory_type, const char* plugin_id /*, config_node* properties*/)
 {
     plhandle p_handle;
     factory_handle f_handle = _load_factory(factory_name, factory_type);
+#ifdef DEBUG_PLUGINS
+    printf("plugins:  _create_api\n");
+#endif
     p_handle = create_api(f_handle, plugin_name);
+    p_handle.plugin_id = atoi(plugin_id);
 
     return(p_handle);
 }
@@ -101,21 +117,31 @@ _register_api(registry_data* data, const char* api_name,
     if(data->registry_size == data->registry_max_size) {
         _extend_registry(data, extension_size);
     }
+
+#ifdef DEBUG_PLUGINS
+    printf ("plugins: _register_api %s\n", api_name);
+#endif
+
     entry = _search_registry(data, api_name);
     if(entry == NULL) {
+        /* Do this in case of a new id only */
         entry = data->table + data->registry_size;
         data->registry_size++;
     }
+#if 0
     if(entry->size && strcmp(plugin_type, "service") == 0) {
 #ifdef DEBUG_PLUGINS
         printf("%s is already registered, only one plugin is allowed per service\n", api_name);
 #endif
         ret = API_ALREADY_REGISTERED;
-    } else {
+    } else
+#endif
+    {
         strcpy(entry->api_name, api_name);
         next = (plhandle*) malloc(sizeof(plhandle));
         memset(next, 0, sizeof(plhandle));
         next->api = handle.api;
+        next->plugin_id = handle.plugin_id;
         if(entry->first == NULL) {
             entry->first = next;
             entry->last = next;
@@ -140,6 +166,7 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
     const char* factory_type = NULL;
     const char* plugin_name = NULL;
     const char* plugin_type = NULL;
+    const char* plugin_id = NULL;
     plhandle handle;
     int ret = API_REGISTER_FAILED;
 
@@ -157,7 +184,10 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
                     factory_type = q->node_value.str_value;
                 } else if(strcmp(q->node_name, "plugin_name") == 0) {
                     plugin_name = q->node_value.str_value;
+                } else if(strcmp(q->node_name, "plugin_id") == 0) {
+                    plugin_id = q->node_value.str_value;
                 }
+
             }
         } else if(strcmp(p->node_name, "properties") == 0) {
             properties = p;
@@ -170,10 +200,11 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
     printf("factory_type=%s\n", factory_type);
     printf("plugin_name=%s\n", plugin_name);
     printf("plugin_type=%s\n", plugin_type);
+    printf("plugin_id=%s\n", plugin_id);
     printf("**End**\n");
 #endif
 
-    handle = _create_api(plugin_name, factory_name, factory_type/*, properties*/);
+    handle = _create_api(plugin_name, factory_name, factory_type/*, plugin_id*//*, properties*/);
     if(handle.api != NULL) {
         ret = _register_api(mdata->registry,plugin_api, plugin_type, handle);
         if (ret != API_REGISTER_OK) {
@@ -182,6 +213,9 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
                     plugin_name, plugin_api, factory_name, plugin_type);
 #endif
         }
+        else
+            printf("SUCCESS to register %s for %s(factory=%s,plugin_type=%s)\n",
+                    plugin_name, plugin_api, factory_name, plugin_type);
     } else {
 #ifdef DEBUG_PLUGINS
         printf("Failed to configure plugin: api=%s, plugin_name=%s,factory=%s\n",
@@ -225,11 +259,16 @@ _configure_krb5(manager_data* data, const char* path)
     krb5_error_code retval;
     char *plugin;
     void *iter;
+    int i = 0;
     profile_filespec_t *files = NULL;
     profile_t profile;
-    const char  *realm_srv_names[4];
+    const char  *hierarchy[4];
     char **factory_name, **factory_type, **plugin_name, **plugin_type;
+    char** plugin_id;
+    char** plugin_api;
     plhandle handle;
+    char **pl_list, *pl_l;
+
 
     retval = krb5_get_default_config_files(&files);
 #if 0
@@ -250,61 +289,98 @@ _configure_krb5(manager_data* data, const char* path)
         com_err("krb5_PLUGIN_iterator_create", retval, 0);
         return;
     }
-    while (iter) {
+    /* Get the list of the plugins that may be used during run time */
+    hierarchy[0] = "plugins";
+    hierarchy[1] = "plugin_list";
+    hierarchy[2] = 0;
+    retval = profile_get_values(profile, hierarchy, &pl_list);
+    if (retval){
+        com_err("krb5_PLUGIN no plugins listed to configure/register", retval, 0);
+        return;
+    }
+
+#if 0
+    while (iter && pl_list[i]) {
         if ((retval = krb5_plugin_iterator(profile, &iter, &plugin))) {
             com_err("krb5_PLUGIN_iterator", retval, 0);
             krb5_plugin_iterator_free(profile, &iter);
             return;
         }
         if (plugin) {
-#ifdef DEBUG_PLUGINS
-            printf("PLUGIN: '%s'\n", plugin);
 #endif
-            realm_srv_names[0] = "plugins";
-            realm_srv_names[1] = plugin;
 
-            /* plugin_name */
-            realm_srv_names[2] = "plugin_name";
-            realm_srv_names[3] = 0;
+    i=0;
+    while (pl_l = pl_list[i++]){
 
-            retval = profile_get_values(profile, realm_srv_names, &plugin_name);
-
-            /* plugin_type */
-            realm_srv_names[2] = "plugin_type";
-            realm_srv_names[3] = 0;
-
-            retval = profile_get_values(profile, realm_srv_names, &plugin_type);
-
-            /* factory_name */
-            realm_srv_names[2] = "plugin_factory_name";
-            realm_srv_names[3] = 0;
-
-            retval = profile_get_values(profile, realm_srv_names, &factory_name);
-
-            /* factory_type */
-            realm_srv_names[2] = "plugin_factory_type";
-            realm_srv_names[3] = 0;
-
-            retval = profile_get_values(profile, realm_srv_names, &factory_type);
-
-            handle = _create_api(*plugin_name, *factory_name, *factory_type/*, properties*/);
-            if(handle.api != NULL) {
-                retval = _register_api(mdata->registry,plugin, *plugin_type, handle);
-                if( retval != API_REGISTER_OK) {
 #ifdef DEBUG_PLUGINS
-                   printf("Failed to register %s for %s(factory=%s,plugin_type=%s)\n",
-                            *plugin_name, plugin, *factory_name, *plugin_type);
+        printf("plugins: nickname in conf file: '%s'\n", pl_l);
 #endif
-                }
+        hierarchy[0] = "plugins";
+        hierarchy[1] = pl_l;
+        //hierarchy[1] = plugin;
+
+        /* plugin_name */
+        hierarchy[2] = "plugin_api";
+        hierarchy[3] = 0;
+        retval = profile_get_values(profile, hierarchy, &plugin_api);
+
+        /* plugin_name */
+        hierarchy[2] = "plugin_name";
+        hierarchy[3] = 0;
+        retval = profile_get_values(profile, hierarchy, &plugin_name);
+
+        /* plugin_type */
+        hierarchy[2] = "plugin_type";
+        hierarchy[3] = 0;
+        retval = profile_get_values(profile, hierarchy, &plugin_type);
+
+        /* plugin_id */
+        hierarchy[2] = "plugin_id";
+        hierarchy[3] = 0;
+        retval = profile_get_values(profile, hierarchy, &plugin_id);
+
+        /* factory_name */
+        hierarchy[2] = "plugin_factory_name";
+        hierarchy[3] = 0;
+        retval = profile_get_values(profile, hierarchy, &factory_name);
+
+        /* factory_type */
+        hierarchy[2] = "plugin_factory_type";
+        hierarchy[3] = 0;
+        retval = profile_get_values(profile, hierarchy, &factory_type);
+
+#ifdef DEBUG_PLUGINS
+        printf("plugins:  >>>\n");
+        printf("api=%s\n", *plugin_api);
+        printf("factory=%s\n", *factory_name);
+        printf("factory_type=%s\n", *factory_type);
+        printf("plugin_name=%s\n", *plugin_name);
+        printf("plugin_type=%s\n",*plugin_type);
+        printf("plugin_id=%s\n", *plugin_id);
+        printf("<<< plugins\n");
+#endif
+
+        handle = _create_api(*plugin_name, *factory_name, *factory_type ,*plugin_id/*, properties*/);
+        if(handle.api != NULL) {
+            retval = _register_api(mdata->registry,*plugin_api, *plugin_type, handle);
+            if(retval != API_REGISTER_OK) {
+#ifdef DEBUG_PLUGINS
+                printf("plugins: Failed to register %s for %s(factory=%s,plugin_type=%s) ret=%i\n",
+                       *plugin_name, *plugin_api, *factory_name, *plugin_type, retval);
+#endif
             } else {
 #ifdef DEBUG_PLUGINS
-                printf("Failed to configure plugin: api=%s, plugin_name=%s,factory=%s\n",
-                         plugin, *plugin_name, *factory_name);
+                   printf("plugins: registered OK\n");
 #endif
             }
-
-            krb5_free_plugin_string(profile, plugin);
+        } else {
+#ifdef DEBUG_PLUGINS
+            printf("plugins: Failed to configure plugin: api=%s, plugin_name=%s,factory=%s\n",
+                    *plugin_api, *plugin_name, *factory_name);
+#endif
         }
+
+        // Need to cleanup ~ krb5_free_plugin_string(profile, plugin);
     }
 }
 
@@ -323,22 +399,31 @@ _stop(manager_data* data)
 }
 
 static plhandle
-_getService(manager_data* data, const char* service_name)
+_getService(manager_data* data, const char* service_name, int plugin_id)
 {
-    plhandle handle;
+    plhandle *handle;
     manager_data* mdata = (manager_data*) data;
     reg_entry* entry = _search_registry(mdata->registry, service_name);
 
     memset(&handle, 0, sizeof handle);
     if(entry) {
-        handle = *(entry->first);
+        for(handle = entry->first; handle != NULL; handle = handle->next) {
+            if (handle->plugin_id == plugin_id)
+                break;
+        }
+        if (handle == NULL) {
+#ifdef DEBUG_PLUGINS
+            printf("service %s:%d is not registered \n", service_name, plugin_id);
+#endif
+        }
+
     } else {
 #ifdef DEBUG_PLUGINS
         printf("service %s is not available\n", service_name);
 #endif
     }
 
-    return handle;
+    return *handle;
 }
 
 static manager_data*
@@ -354,11 +439,18 @@ _init_data()
 plugin_manager*
 plugin_default_manager_get_instance(plugin_manager** plugin_mngr_instance)
 {
-    plugin_manager* instance = NULL;  // = plugin_mngr_instance;
+    plugin_manager* instance = NULL;
+#ifdef DEBUG_PLUGINS
+    printf("plugins: plugin_default_manager_get_instanc \n");
+#endif
 
     if(*plugin_mngr_instance == NULL) {
+
         instance = (plugin_manager*) malloc(sizeof(plugin_manager));
+        if (!instance)
+            return NULL;
         memset(instance, 0, sizeof(plugin_manager));
+
         instance->data = _init_data();
 #ifdef CONFIG_IN_YAML
         instance->configure = _configure_yaml;
@@ -372,4 +464,3 @@ plugin_default_manager_get_instance(plugin_manager** plugin_mngr_instance)
     }
     return (*plugin_mngr_instance);
 }
-

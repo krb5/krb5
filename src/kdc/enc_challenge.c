@@ -10,7 +10,7 @@ int
 preauth_flags(krb5_context context, krb5_preauthtype pa_type)
 {
     int flags = 0;
-    plhandle handle = plugin_manager_get_service(context->pl_handle, "plugin_pa");
+    plhandle handle = plugin_manager_get_service(context->pl_handle, "plugin_pa", 0);
     flags = plugin_preauth_flags(handle, context, pa_type);
     return flags;
 
@@ -30,7 +30,7 @@ process_preauth(krb5_context context, void *plugin_context,
                                        krb5_pa_data ***out_padata)
 {
     krb5_error_code ret = 0;
-    plhandle handle = plugin_manager_get_service(context->pl_handle, "plugin_pa");
+    plhandle handle = plugin_manager_get_service(context->pl_handle, "plugin_pa", 0);
 
     ret = plugin_process_preauth(handle, context, plugin_context,
                                        request_context, opt,
@@ -52,7 +52,7 @@ kdc_include_padata(krb5_context context, krb5_kdc_req *request,
                                           void *pa_module_context, krb5_pa_data *data)
 {
     krb5_error_code retval = 0;
-    plhandle handle = plugin_manager_get_service(context->pl_handle, "plugin_pa");
+    plhandle handle = plugin_manager_get_service(context->pl_handle, "plugin_pa", 0);
     retval = plugin_kdc_include_padata(handle, context, request,
                                          client,
                                          server,
@@ -69,7 +69,7 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
                                           krb5_data **e_data, krb5_authdata ***authz_data)
 {
     krb5_error_code retval = 0;
-    plhandle handle = plugin_manager_get_service(context->pl_handle, "plugin_pa");
+    plhandle handle = plugin_manager_get_service(context->pl_handle, "plugin_pa", 0);
     retval = plugin_kdc_verify_preauth(handle, context, client,
                                           req_pkt, request,
                                           enc_tkt_reply, data,
@@ -89,7 +89,7 @@ kdc_return_preauth(krb5_context context, krb5_pa_data *padata,
                                           void *pa_module_context, void **pa_request_context)
 {
     krb5_error_code retval = 0;
-    plhandle handle = plugin_manager_get_service(context->pl_handle, "plugin_pa");
+    plhandle handle = plugin_manager_get_service(context->pl_handle, "plugin_pa", 0);
     retval = plugin_kdc_return_preauth(handle, context, padata,
                                           client, req_pkt,
                                           request, reply,
@@ -106,7 +106,7 @@ server_free_reqctx(krb5_context kcontext,
                                           void **pa_request_context)
 {
     krb5_error_code retval = 0;
-    plhandle handle = plugin_manager_get_service(kcontext->pl_handle, "plugin_pa");
+    plhandle handle = plugin_manager_get_service(kcontext->pl_handle, "plugin_pa", 0);
     retval = plugin_server_free_reqctx(handle, kcontext,
                                           pa_module_context,
                                           pa_request_context);
@@ -116,14 +116,14 @@ krb5_error_code
 server_init(krb5_context kcontext, void **module_context, const char **realmnames)
 {
     krb5_error_code retval = 0;
-    plhandle handle = plugin_manager_get_service(kcontext->pl_handle, "plugin_pa");
+    plhandle handle = plugin_manager_get_service(kcontext->pl_handle, "plugin_pa", 0);
     retval = plugin_server_init(handle, kcontext, module_context, realmnames);
     return retval;
 }
 void
 server_fini(krb5_context kcontext, void *module_context)
 {
-    plhandle handle = plugin_manager_get_service(kcontext->pl_handle, "plugin_pa");
+    plhandle handle = plugin_manager_get_service(kcontext->pl_handle, "plugin_pa", 0);
     plugin_server_fini(handle, kcontext, module_context);
     return;
 }
