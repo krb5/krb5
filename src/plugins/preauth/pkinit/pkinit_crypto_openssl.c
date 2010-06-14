@@ -2092,6 +2092,22 @@ cleanup:
     return retval;
 }
 
+/* Call DH_compute_key() and ensure that we left-pad short results instead of
+ * leaving junk bytes at the end of the buffer. */
+static void
+compute_dh(unsigned char *buf, int size, BIGNUM *server_pub_key, DH *dh)
+{
+    int len, pad;
+
+    len = DH_compute_key(buf, server_pub_key, dh);
+    assert(len >= 0 && len <= size);
+    if (len < size) {
+        pad = size - len;
+        memmove(buf + pad, buf, len);
+        memset(buf, 0, pad);
+    }
+}
+
 krb5_error_code
 client_create_dh(krb5_context context,
                  pkinit_plg_crypto_context plg_cryptoctx,
@@ -2243,7 +2259,7 @@ client_process_dh(krb5_context context,
     if ((server_pub_key = ASN1_INTEGER_to_BN(pub_key, NULL)) == NULL)
         goto cleanup;
 
-    DH_compute_key(*client_key, server_pub_key, cryptoctx->dh);
+    compute_dh(*client_key, *client_key_len, server_pub_key, cryptoctx->dh);
 #ifdef DEBUG_DH
     print_pubkey(server_pub_key, "server's pub_key=");
     pkiDebug("client computed key (%d)= ", *client_key_len);
@@ -2378,7 +2394,7 @@ server_process_dh(krb5_context context,
     *server_key_len = DH_size(dh_server);
     if ((*server_key = malloc(*server_key_len)) == NULL)
         goto cleanup;
-    DH_compute_key(*server_key, dh->pub_key, dh_server);
+    compute_dh(*server_key, *server_key_len, dh->pub_key, dh_server);
 
 #ifdef DEBUG_DH
     print_dh(dh_server, "client&server's DH params\n");
