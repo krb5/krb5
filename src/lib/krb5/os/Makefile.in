@@ -213,13 +213,16 @@ DIG = @DIG@
 NSLOOKUP = @NSLOOKUP@
 
 check-unix-locate:: t_locate_kdc
-	if [ "$(OFFLINE)" = no ] && \
-	    $(DIG) $(SRVNAME) srv | grep -i $(DIGPAT) || \
-	    $(NSLOOKUP) -q=srv $(SRVNAME) | grep -i $(NSPAT); then \
-	    KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\
-	    $(KRB5_RUN_ENV) $(VALGRIND) ./t_locate_kdc $(LOCREALM); \
+	if [ "$(OFFLINE)" = no ]; then \
+	    if $(DIG) $(SRVNAME) srv | grep -i $(DIGPAT) || \
+		$(NSLOOKUP) -q=srv $(SRVNAME) | grep -i $(NSPAT); then \
+		KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\
+		$(KRB5_RUN_ENV) $(VALGRIND) ./t_locate_kdc $(LOCREALM); \
+	    else \
+		echo '*** WARNING: skipped t_locate_kdc test: known DNS name not found'; \
+	    fi; \
 	else \
-	    echo '*** WARNING: skipped t_locate_kdc test: known DNS name not found'; \
+		echo '*** WARNING: skipped t_locate_kdc test: OFFLINE'; \
 	fi
 
 #
