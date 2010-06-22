@@ -77,13 +77,9 @@ kdb5_stash(argc, argv)
     extern int optind;
     int optchar;
     krb5_error_code retval;
-    char *dbname = (char *) NULL;
-    char *mkey_name = 0;
     char *keyfile = 0;
     krb5_kvno mkey_kvno;
 
-    dbname = global_params.dbname;
-    mkey_name = global_params.mkey_name;
     keyfile = global_params.stash_file;
 
     optind = 1;
@@ -142,11 +138,6 @@ kdb5_stash(argc, argv)
                                            master_keylist, NULL);
     if (retval) {
         com_err(progname, errno, "while storing key");
-        exit_status++; return;
-    }
-
-    if (retval) {
-        com_err(progname, retval, "closing database '%s'", dbname);
         exit_status++; return;
     }
 
