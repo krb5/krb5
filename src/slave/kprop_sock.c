@@ -46,6 +46,7 @@ sockaddr2krbaddr(krb5_context context, int family, struct sockaddr *sa,
 {
     krb5_address addr;
 
+    addr.magic = KV5M_ADDRESS;
     if (family == AF_INET) {
 	struct sockaddr_in *sa4 = (struct sockaddr_in *) sa;
 	addr.addrtype = ADDRTYPE_INET;
