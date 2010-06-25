@@ -183,8 +183,10 @@ static kadm5_ret_t _kadm5_init_any(krb5_context context, char *client_name,
     struct hostent *hp;
     int fd;
 
-    char *iprop_svc;
-    int iprop_enable = 0;
+    krb5_boolean iprop_enable;
+    int port;
+    rpcprog_t rpc_prog;
+    rpcvers_t rpc_vers;
     char full_svcname[BUFSIZ];
     char *realm;
     krb5_ccache ccache;
@@ -311,34 +313,26 @@ static kadm5_ret_t _kadm5_init_any(krb5_context context, char *client_name,
      * If the service_name and client_name are iprop-centric,
      * we need to clnttcp_create to the appropriate RPC prog.
      */
-    iprop_svc = strdup(KIPROP_SVC_NAME);
-    if (iprop_svc == NULL)
-        return ENOMEM;
-
-    if (service_name != NULL &&
-        (strstr(service_name, iprop_svc) != NULL) &&
-        (strstr(client_name, iprop_svc) != NULL))
-        iprop_enable = 1;
-    else
-        iprop_enable = 0;
-
-    free(iprop_svc);
+    iprop_enable = (service_name != NULL &&
+                    strstr(service_name, KIPROP_SVC_NAME) != NULL &&
+                    strstr(client_name, KIPROP_SVC_NAME) != NULL);
+    if (iprop_enable) {
+        port = handle->params.iprop_port;
+        rpc_prog = KRB5_IPROP_PROG;
+        rpc_vers = KRB5_IPROP_VERS;
+    } else {
+        port = handle->params.kadmind_port;
+        rpc_prog = KADM;
+        rpc_vers = KADMVERS;
+    }
 
     memset(&addr, 0, sizeof(addr));
     addr.sin_family = hp->h_addrtype;
     (void) memcpy(&addr.sin_addr, hp->h_addr, sizeof(addr.sin_addr));
-    if (iprop_enable)
-        addr.sin_port = htons((u_short) handle->params.iprop_port);
-    else
-        addr.sin_port = htons((u_short) handle->params.kadmind_port);
+    addr.sin_port = htons((u_short) port);
 
     fd = RPC_ANYSOCK;
-
-    if (iprop_enable) {
-        handle->clnt = clnttcp_create(&addr, KRB5_IPROP_PROG, KRB5_IPROP_VERS,
-                                      &fd, 0, 0);
-    } else
-        handle->clnt = clnttcp_create(&addr, KADM, KADMVERS, &fd, 0, 0);
+    handle->clnt = clnttcp_create(&addr, rpc_prog, rpc_vers, &fd, 0, 0);
     if (handle->clnt == NULL) {
         code = KADM5_RPC_ERROR;
 #ifdef DEBUG
@@ -366,7 +360,7 @@ static kadm5_ret_t _kadm5_init_any(krb5_context context, char *client_name,
      * Bypass the remainder of the code and return straightaway
      * if the gss service requested is kiprop
      */
-    if (iprop_enable == 1) {
+    if (iprop_enable) {
         code = 0;
         *server_handle = (void *) handle;
         goto cleanup;
