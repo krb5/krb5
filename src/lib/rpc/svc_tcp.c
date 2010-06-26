@@ -175,7 +175,7 @@ svctcp_create(
 	sin.sin_family = AF_INET;
 	if (bindresvport(sock, &sin)) {
 		sin.sin_port = 0;
-		(void)bind(sock, (struct sockaddr *)&sin, len);
+		(void)bind(sock, (struct sockaddr *)&sin, sizeof(sin));
 	}
 	if (getsockname(sock, (struct sockaddr *)&addr, &len) != 0) {
 		perror("svc_tcp.c - cannot getsockname");
