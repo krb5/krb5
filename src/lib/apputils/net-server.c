@@ -575,6 +575,20 @@ setup_a_rpc_listener(struct socksetup *data, struct sockaddr *addr)
     if (setreuseaddr(sock, 1) < 0)
         com_err(data->prog, errno,
                 "Cannot enable SO_REUSEADDR on fd %d", sock);
+#ifdef KRB5_USE_INET6
+    if (addr->sa_family == AF_INET6) {
+#ifdef IPV6_V6ONLY
+        if (setv6only(sock, 1))
+            com_err(data->prog, errno,
+                    "setsockopt(%d,IPV6_V6ONLY,1) failed", sock);
+        else
+            com_err(data->prog, 0, "setsockopt(%d,IPV6_V6ONLY,1) worked",
+                    sock);
+#else
+        krb5_klog_syslog(LOG_INFO, "no IPV6_V6ONLY socket option support");
+#endif /* IPV6_V6ONLY */
+    }
+#endif /* KRB5_USE_INET6 */
     if (bind(sock, addr, socklen(addr)) == -1) {
         com_err(data->prog, errno,
                 "Cannot bind RPC server socket on %s", paddr(addr));
@@ -671,6 +685,9 @@ static int
 setup_rpc_listener_ports(struct socksetup *data)
 {
     struct sockaddr_in sin4;
+#ifdef KRB5_USE_INET6
+    struct sockaddr_in6 sin6;
+#endif
     int i;
     struct rpc_svc_data svc;
 
@@ -681,24 +698,54 @@ setup_rpc_listener_ports(struct socksetup *data)
 #endif
     sin4.sin_addr.s_addr = INADDR_ANY;
 
+#ifdef KRB5_USE_INET6
+    memset(&sin6, 0, sizeof(sin6));
+    sin6.sin6_family = AF_INET6;
+#ifdef HAVE_SA_LEN
+    sin6.sin6_len = sizeof(sin6);
+#endif
+    sin6.sin6_addr = in6addr_any;
+#endif
+
     FOREACH_ELT (rpc_svc_data, i, svc) {
         int s4;
+#ifdef KRB5_USE_INET6
+        int s6;
+#endif
 
         set_sa_port((struct sockaddr *)&sin4, htons(svc.port));
         s4 = setup_a_rpc_listener(data, (struct sockaddr *)&sin4);
         if (s4 < 0)
             return -1;
+
+        if (add_rpc_listener_fd(data, &svc, s4) == NULL)
+            close(s4);
         else {
-            if (add_rpc_listener_fd(data, &svc, s4) == NULL)
-                close(s4);
+            FD_SET(s4, &sstate.rfds);
+            if (s4 >= sstate.max)
+                sstate.max = s4 + 1;
+            krb5_klog_syslog(LOG_INFO, "listening on fd %d: rpc %s",
+                             s4, paddr((struct sockaddr *)&sin4));
+        }
+
+#ifdef KRB5_USE_INET6
+        if (ipv6_enabled()) {
+            set_sa_port((struct sockaddr *)&sin6, htons(svc.port));
+            s6 = setup_a_tcp_listener(data, (struct sockaddr *)&sin6);
+            if (s6 < 0)
+                return -1;
+
+            if (add_rpc_listener_fd(data, &svc, s6) == NULL)
+                close(s6);
             else {
-                FD_SET(s4, &sstate.rfds);
-                if (s4 >= sstate.max)
-                    sstate.max = s4 + 1;
+                FD_SET(s6, &sstate.rfds);
+                if (s6 >= sstate.max)
+                    sstate.max = s6 + 1;
                 krb5_klog_syslog(LOG_INFO, "listening on fd %d: rpc %s",
-                                 s4, paddr((struct sockaddr *)&sin4));
+                                 s6, paddr((struct sockaddr *)&sin6));
             }
         }
+#endif
     }
     FD_ZERO(&rpc_listenfds);
     rpc_listenfds = svc_fdset;

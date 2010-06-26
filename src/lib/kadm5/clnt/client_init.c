@@ -40,6 +40,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <fake-addrinfo.h>
 #include <k5-int.h> /* for KRB5_ADM_DEFAULT_PORT */
 #include <krb5.h>
 #ifdef __STDC__
@@ -78,6 +79,9 @@ gic_iter(kadm5_server_handle_t handle, enum init_type init_type,
          krb5_ccache ccache, krb5_principal client, char *pass,
          char *svcname, char *realm, char *full_svcname,
          unsigned int full_svcname_len);
+
+static kadm5_ret_t
+connect_to_server(const char *hostname, int port, int *fd);
 
 static kadm5_ret_t
 setup_gss(kadm5_server_handle_t handle, kadm5_config_params *params_in,
@@ -151,8 +155,6 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
          kadm5_config_params *params_in, krb5_ui_4 struct_version,
          krb5_ui_4 api_version, char **db_args, void **server_handle)
 {
-    struct sockaddr_in addr;
-    struct hostent *hp;
     int fd;
 
     krb5_boolean iprop_enable;
@@ -271,20 +273,9 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
                           sizeof(full_svcname));
     if (code)
         goto error;
-    /*
-     * We have ticket; open the RPC connection.
-     */
 
-    hp = gethostbyname(handle->params.admin_server);
-    if (hp == (struct hostent *) NULL) {
-        code = KADM5_BAD_SERVER_NAME;
-        goto cleanup;
-    }
-
-    /*
-     * If the service_name and client_name are iprop-centric,
-     * we need to clnttcp_create to the appropriate RPC prog.
-     */
+    /* If the service_name and client_name are iprop-centric, use the iprop
+     * port and RPC identifiers. */
     iprop_enable = (service_name != NULL &&
                     strstr(service_name, KIPROP_SVC_NAME) != NULL &&
                     strstr(client_name, KIPROP_SVC_NAME) != NULL);
@@ -298,13 +289,11 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
         rpc_vers = KADMVERS;
     }
 
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family = hp->h_addrtype;
-    (void) memcpy(&addr.sin_addr, hp->h_addr, sizeof(addr.sin_addr));
-    addr.sin_port = htons((u_short) port);
+    code = connect_to_server(handle->params.admin_server, port, &fd);
+    if (code)
+        goto error;
 
-    fd = RPC_ANYSOCK;
-    handle->clnt = clnttcp_create(&addr, rpc_prog, rpc_vers, &fd, 0, 0);
+    handle->clnt = clnttcp_create(NULL, rpc_prog, rpc_vers, &fd, 0, 0);
     if (handle->clnt == NULL) {
         code = KADM5_RPC_ERROR;
 #ifdef DEBUG
@@ -559,6 +548,49 @@ error:
     krb5_free_cred_contents(ctx, &outcreds);
     if (opt)
         krb5_get_init_creds_opt_free(ctx, opt);
+    return code;
+}
+
+/* Set *fd to a socket connected to hostname and port. */
+static kadm5_ret_t
+connect_to_server(const char *hostname, int port, int *fd)
+{
+    struct addrinfo hint, *addrs, *a;
+    char portbuf[32];
+    int err, s;
+    kadm5_ret_t code;
+
+    /* Look up the server's addresses. */
+    (void) snprintf(portbuf, sizeof(portbuf), "%d", port);
+    memset(&hint, 0, sizeof(hint));
+    hint.ai_socktype = SOCK_STREAM;
+#ifdef AI_NUMERICSERV
+    hint.ai_flags = AI_NUMERICSERV;
+#endif
+    err = getaddrinfo(hostname, portbuf, &hint, &addrs);
+    if (err != 0)
+        return KADM5_CANT_RESOLVE;
+
+    /* Try to connect to each address until we succeed. */
+    for (a = addrs; a != NULL; a = a->ai_next) {
+        s = socket(a->ai_family, a->ai_socktype, 0);
+        if (s == -1) {
+            code = KADM5_FAILURE;
+            goto cleanup;
+        }
+        err = connect(s, a->ai_addr, a->ai_addrlen);
+        if (err == 0) {
+            *fd = s;
+            code = 0;
+            goto cleanup;
+        }
+        close(s);
+    }
+
+    /* We didn't succeed on any address. */
+    code = KADM5_RPC_ERROR;
+cleanup:
+    freeaddrinfo(addrs);
     return code;
 }
 

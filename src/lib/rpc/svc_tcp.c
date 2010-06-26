@@ -116,6 +116,17 @@ struct tcp_conn {  /* kept in xprt->xp_p1 */
 	char verf_body[MAX_AUTH_BYTES];
 };
 
+static u_short
+getport(struct sockaddr *addr)
+{
+    if (addr->sa_family == AF_INET)
+	return ntohs(((struct sockaddr_in *) addr)->sin_port);
+    else if (addr->sa_family == AF_INET6)
+	return ntohs(((struct sockaddr_in6 *) addr)->sin6_port);
+    else
+	return 0;
+}
+
 /*
  * Usage:
  *	xprt = svctcp_create(sock, send_buf_size, recv_buf_size);
@@ -145,8 +156,9 @@ svctcp_create(
 	bool_t madesock = FALSE;
 	register SVCXPRT *xprt;
 	register struct tcp_rendezvous *r;
-	struct sockaddr_in addr;
-	int len = sizeof(struct sockaddr_in);
+	struct sockaddr_in sin;
+	struct sockaddr_storage addr;
+	socklen_t len = sizeof(addr);
 
 	if (sock == RPC_ANYSOCK) {
 		if ((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
@@ -156,14 +168,14 @@ svctcp_create(
 		set_cloexec_fd(sock);
 		madesock = TRUE;
 	}
-	memset(&addr, 0, sizeof (addr));
+	memset(&sin, 0, sizeof(sin));
 #if HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
-	addr.sin_len = sizeof(addr);
+	sin.sin_len = sizeof(sin);
 #endif
-	addr.sin_family = AF_INET;
-	if (bindresvport(sock, &addr)) {
-		addr.sin_port = 0;
-		(void)bind(sock, (struct sockaddr *)&addr, len);
+	sin.sin_family = AF_INET;
+	if (bindresvport(sock, &sin)) {
+		sin.sin_port = 0;
+		(void)bind(sock, (struct sockaddr *)&sin, len);
 	}
 	if (getsockname(sock, (struct sockaddr *)&addr, &len) != 0) {
 		perror("svc_tcp.c - cannot getsockname");
@@ -194,7 +206,7 @@ svctcp_create(
 	xprt->xp_auth = NULL;
 	xprt->xp_verf = gssrpc__null_auth;
 	xprt->xp_ops = &svctcp_rendezvous_op;
-	xprt->xp_port = ntohs(addr.sin_port);
+	xprt->xp_port = getport((struct sockaddr *) &addr);
 	xprt->xp_sock = sock;
 	xprt->xp_laddrlen = 0;
 	xprt_register(xprt);
@@ -274,7 +286,7 @@ rendezvous_request(
         SOCKET sock;
 	struct tcp_rendezvous *r;
 	struct sockaddr_in addr, laddr;
-	int len, llen;
+	socklen_t len, llen;
 
 	r = (struct tcp_rendezvous *)xprt->xp_p1;
     again:

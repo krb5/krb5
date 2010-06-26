@@ -351,6 +351,8 @@ static Tcl_DString *unparse_err(kadm5_ret_t code)
         code_string = "KADM5_BAD_SERVER_NAME"; break;
     case KADM5_MISSING_KRB5_CONF_PARAMS:
         code_string = "KADM5_MISSING_KRB5_CONF_PARAMS"; break;
+    case KADM5_XDR_FAILURE: code_string = "KADM5_XDR_FAILURE"; break;
+    case KADM5_CANT_RESOLVE: code_string = "KADM5_CANT_RESOLVE"; break;
 
 
     case OSA_ADB_DUP: code_string = "OSA_ADB_DUP"; break;

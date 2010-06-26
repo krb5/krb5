@@ -33,6 +33,7 @@
 /*
  * alt_prof.c - Implement alternate profile file handling.
  */
+#include "fake-addrinfo.h"
 #include "k5-int.h"
 #include <kadm5/admin.h>
 #include "adm_proto.h"
@@ -882,7 +883,8 @@ kadm5_get_admin_service_name(krb5_context ctx,
 {
     krb5_error_code ret;
     kadm5_config_params params_in, params_out;
-    struct hostent *hp;
+    struct addrinfo hint, *ai = NULL;
+    int err;
 
     memset(&params_in, 0, sizeof(params_in));
     memset(&params_out, 0, sizeof(params_out));
@@ -898,8 +900,10 @@ kadm5_get_admin_service_name(krb5_context ctx,
         goto err_params;
     }
 
-    hp = gethostbyname(params_out.admin_server);
-    if (hp == NULL) {
+    memset(&hint, 0, sizeof(hint));
+    hint.ai_flags = AI_CANONNAME;
+    err = getaddrinfo(params_out.admin_server, NULL, &hint, &ai);
+    if (err != 0) {
         ret = KADM5_CANT_RESOLVE;
         krb5_set_error_message(ctx, ret,
                                "Cannot resolve address of admin server \"%s\" "
@@ -907,13 +911,15 @@ kadm5_get_admin_service_name(krb5_context ctx,
                                realm_in);
         goto err_params;
     }
-    if (strlen(hp->h_name) + sizeof("kadmin/") > maxlen) {
+    if (strlen(ai->ai_canonname) + sizeof("kadmin/") > maxlen) {
         ret = ENOMEM;
         goto err_params;
     }
-    snprintf(admin_name, maxlen, "kadmin/%s", hp->h_name);
+    snprintf(admin_name, maxlen, "kadmin/%s", ai->ai_canonname);
 
 err_params:
+    if (ai != NULL)
+        freeaddrinfo(ai);
     kadm5_free_config_params(ctx, &params_out);
     return ret;
 }

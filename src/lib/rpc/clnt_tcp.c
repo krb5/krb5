@@ -150,7 +150,7 @@ clnttcp_create(
 	/*
 	 * If no port number given ask the pmap for one
 	 */
-	if (raddr->sin_port == 0) {
+	if (raddr != NULL && raddr->sin_port == 0) {
 		u_short port;
 		if ((port = pmap_getport(raddr, prog, vers, IPPROTO_TCP)) == 0) {
 			mem_free((caddr_t)ct, sizeof(struct ct_data));
@@ -185,7 +185,10 @@ clnttcp_create(
 	ct->ct_sock = *sockp;
 	ct->ct_wait.tv_usec = 0;
 	ct->ct_waitset = FALSE;
-	ct->ct_addr = *raddr;
+	if (raddr == NULL)
+	    memset(&ct->ct_addr, 0, sizeof(ct->ct_addr));
+	else
+	    ct->ct_addr = *raddr;
 
 	/*
 	 * Initialize call message
