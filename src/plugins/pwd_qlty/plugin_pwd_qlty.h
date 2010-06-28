@@ -13,6 +13,7 @@
 
 #define PWD_QLTY_KRB 0
 #define PWD_QLTY_X 1
+#define PWD_QLTY_DYN 33
 
 /* PWD_QLTY API */
 typedef struct {

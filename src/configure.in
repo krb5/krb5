@@ -1123,6 +1123,7 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	plugins/pa
 	plugins/pa/encrypted_challenge
 	plugin_core
+	plugin_dynamic
 
 	clients clients/klist clients/kinit clients/kvno
 	clients/kdestroy clients/kpasswd clients/ksu

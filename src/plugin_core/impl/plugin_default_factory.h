@@ -11,7 +11,7 @@
 #include "plugin_pwd_qlty_X_impl.h"
 
 
-factory_handle plugin_default_factory_get_instance(void);
+factory_handle plugin_factory_get_instance(void);
 
 
 #endif /* PLUGIN_DEFAULT_FACTORY_H_ */

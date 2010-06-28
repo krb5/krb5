@@ -1,0 +1,11 @@
+plugin_dyn_factory.so plugin_dyn_factory.po $(OUTPRE)plugin_dyn_factory.$(OBJEXT): \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/plugin_core/plugin_factory.h \
+  $(top_srcdir)/plugin_core/plugin_manager.h \
+  $(top_srcdir)/plugin_dynamic/plugin_dyn_factory.h \
+  plugin_dyn_factory.c
+plugin_pwd_qlty_DYN_impl.so plugin_pwd_qlty_DYN_impl.po $(OUTPRE)plugin_pwd_qlty_DYN_impl.$(OBJEXT): \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) \
+  $(top_srcdir)/plugins/pwd_qlty/plugin_pwd_qlty_DYN/plugin_pwd_qlty_DYN_impl.h \
+  $(top_srcdir)/plugin_core/plugin_manager.h \
+  $(top_srcdir)/plugin_core/plugin_factory.h \
+  plugin_pwd_qlty_DYN_impl.c

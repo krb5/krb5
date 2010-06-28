@@ -1,0 +1,42 @@
+mydir=plugin_dynamic
+BUILDTOP=$(REL)..
+RELDIR=../plugin_dynamic
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+DEFS=
+
+LOCALINCLUDES = -I$(srcdir)/../include/krb5  -I$(srcdir)/. \
+		-I$(srcdir)/../plugin_core  \
+		-I$(srcdir)/../plugins/pwd_qlty -I$(srcdir)/../plugins/pwd_qlty/plugin_pwd_qlty_DYN \
+		-I$(srcdir)/../util/profile  -I./../lib/kadm5/
+
+LIBBASE= plugin_dynamic
+LIBMAJOR=0
+LIBMINOR=0
+SO_EXT=.so
+
+# LIBS_UTILS = -lyaml
+# LIBS_UTILS = -lprofile
+LIBS_UTILS =
+# $(BUILDTOP)/util/profile/libprofile.so
+
+SHLIB_DIRS=-L$(TOPLIBD) 
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+STOBJLISTS=OBJS.ST
+
+SHLIB_EXPLIBS=  $(LIBS_UTILS)
+ 
+STLIBOBJS= plugin_dyn_factory.o $(srcdir)/../plugins/pwd_qlty/plugin_pwd_qlty_DYN/plugin_pwd_qlty_DYN_impl.o	
+
+SRCS= plugin_dyn_factory.c $(srcdir)/../plugins/pwd_qlty/plugin_pwd_qlty_DYN/plugin_pwd_qlty_DYN_impl.c
+
+all-unix:: all-liblinks
+install-unix:: install-libs
+clean-unix:: clean-libs clean-libobjs clean-liblinks
+
+clean::
+	$(RM) lib$(LIBBASE)$(SO_EXT)
+
+@lib_frag@
+@libobj_frag@
+

@@ -1,24 +1,20 @@
 /*
- * plugin_default_factory.c
+ * plugin_dyn_factory.c
  *
  */
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "plugin_manager.h"
-#include "plugin_factory.h"
-#include "plugin_pa_impl.h"
-#include "plugin_default_factory.h"
+#include <plugin_manager.h>
+#include <plugin_factory.h>
+#include <plugin_dyn_factory.h>
 
-static plugin_factory* _default_factory_instance = NULL;
+static plugin_factory* _dyn_factory_instance = NULL;
 
-/* built-in plugins */
-static plugin_descr  plugin_default_factory_table[] = {
-        {"plugin_pwd_qlty_X",   plugin_pwd_qlty_X_create},
-        {"plugin_pwd_qlty_krb", plugin_pwd_qlty_krb_create},
-        {"plugin_encrypted_challenge_pa", plugin_encrypted_challenge_pa_create},
-        {"plugin_ldap_audit", NULL},
+/* dynamic  plugins */
+static plugin_descr  plugin_dyn_factory_table[] = {
+        {"plugin_pwd_qlty_DYN",   plugin_pwd_qlty_DYN_create},
         {NULL,NULL}
 };
 
@@ -27,7 +23,7 @@ static void
 _get_factory_content (const char* container[]) {
     plugin_descr *ptr = NULL;
     int i = 0;
-    for( ptr = plugin_default_factory_table; ptr->plugin_name != NULL; ptr++,i++) {
+    for( ptr = plugin_dyn_factory_table; ptr->plugin_name != NULL; ptr++,i++) {
         container[i] = ptr->plugin_name;
     }
 }
@@ -41,7 +37,7 @@ _create_api (const char* plugin_name)
     memset(&handle, 0, sizeof(handle));
     if(plugin_name){
         handle.api = NULL;
-        for( ptr = plugin_default_factory_table; ptr->plugin_name != NULL; ptr++) {
+        for( ptr = plugin_dyn_factory_table; ptr->plugin_name != NULL; ptr++) {
             if (strcmp(ptr->plugin_name, plugin_name) == 0) {
                 handle = ptr->plugin_creator();
                 break;
@@ -55,15 +51,15 @@ _create_api (const char* plugin_name)
 factory_handle
 plugin_factory_get_instance()
 {
-    plugin_factory* instance = _default_factory_instance;
+    plugin_factory* instance = _dyn_factory_instance;
     factory_handle handle;
 
-    if(_default_factory_instance == NULL) {
+    if(_dyn_factory_instance == NULL) {
         instance = (plugin_factory*) malloc(sizeof(plugin_factory));
         memset(instance, 0, sizeof(plugin_factory));
         instance->get_factory_content = _get_factory_content;
         instance->create_api = _create_api;
-        _default_factory_instance = instance;
+        _dyn_factory_instance = instance;
     }
     handle.api = instance;
     return (handle);

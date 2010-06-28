@@ -65,6 +65,12 @@ passwd_check(kadm5_server_handle_t srv_handle,
 
         ret = plugin_pwd_qlty_check(plugin_handle,
                                     srv_handle, password, use_policy, pol, principal);
+
+        plugin_handle = plugin_manager_get_service(srv_handle->context->pl_handle,
+                                                   "plugin_pwd_qlty", PWD_QLTY_DYN);
+
+        ret = plugin_pwd_qlty_check(plugin_handle,
+                                    srv_handle, password, use_policy, pol, principal);
     }
     return ret;
 }

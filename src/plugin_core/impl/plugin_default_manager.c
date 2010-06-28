@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <dlfcn.h>
 #include <plugin_manager.h>
 #include <plugin_factory.h>
 #include "plugin_default_manager.h"
@@ -16,17 +17,34 @@
 #endif
 
 static plugin_factory_descr _table[] = {
-        {"plugin_default_factory", plugin_default_factory_get_instance},
+        {"plugin_default_factory", plugin_factory_get_instance},
         {NULL, NULL}
 };
 
 static factory_handle
-_load_factory (const char* factory_name, const char* factory_type)
+_load_dynamic_factory (const char* factory_name, const char* path)
+{
+    factory_handle handle;
+    void *h_dl = dlopen(path, RTLD_LAZY);
+    factory_handle (*plugin_d_factory_get_instance)() = NULL;
+#ifdef DEBUG_PLUGINS
+    printf("plugins:  _load_dynamic_factory %s\n", factory_name);
+#endif
+    if(h_dl){
+        plugin_d_factory_get_instance = dlsym(h_dl, "plugin_factory_get_instance");
+        handle = plugin_d_factory_get_instance();
+    }
+
+    return handle;
+}
+
+static factory_handle
+_load_static_factory (const char* factory_name)
 {
     factory_handle handle;
     plugin_factory_descr *ptr = NULL;
 #ifdef DEBUG_PLUGINS
-    printf("plugins:  _load_factory\n");
+    printf("plugins:  _load_static_factory %s\n", factory_name);
 #endif
 
     handle.api = NULL;
@@ -38,7 +56,28 @@ _load_factory (const char* factory_name, const char* factory_type)
     }
     return handle;
 }
+#define BUILTIN_TYPE "builtin"
+#define DYNAMIC_TYPE "dynamic"
+#define EMPTY_STR ""
 
+static factory_handle
+_load_factory(const char* factory_name, const char* factory_type, const char* factory_path)
+{
+    factory_handle handle;
+    if(strncmp(factory_type, BUILTIN_TYPE, strlen(BUILTIN_TYPE)) == 0){
+        handle = _load_static_factory(factory_name);
+    } else if(strncmp(factory_type, DYNAMIC_TYPE, strlen(DYNAMIC_TYPE)) == 0){
+        handle = _load_dynamic_factory(factory_name, factory_path);
+    } else {
+        if (factory_type)
+            printf("plugins: unknown factory_type %s\n", factory_type);
+        else {
+            printf("plugins: no factory_type found. Defaulting to built-in\n");
+            handle = _load_static_factory(factory_name);
+        }
+    }
+    return handle;
+}
 static registry_data*
 _create_registry()
 {
@@ -83,11 +122,12 @@ _search_registry (registry_data* data, const char* api_name)
 }
 
 static plhandle
-_create_api(const char* plugin_name, const char* factory_name,
-            const char* factory_type, const char* plugin_id /*, config_node* properties*/)
+_create_api(const char* plugin_name, const char* plugin_id,
+            const char* factory_name, const char* factory_type, const char* factory_path
+            /*, config_node* properties*/)
 {
     plhandle p_handle;
-    factory_handle f_handle = _load_factory(factory_name, factory_type);
+    factory_handle f_handle = _load_factory(factory_name, factory_type, factory_path);
 #ifdef DEBUG_PLUGINS
     printf("plugins:  _create_api\n");
 #endif
@@ -164,6 +204,7 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
     const char* plugin_api = NULL;
     const char* factory_name = NULL;
     const char* factory_type = NULL;
+    const char* factory_path = NULL;
     const char* plugin_name = NULL;
     const char* plugin_type = NULL;
     const char* plugin_id = NULL;
@@ -182,6 +223,8 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
                     factory_name = q->node_value.str_value;
                 } else if(strcmp(q->node_name, "factory_type") == 0) {
                     factory_type = q->node_value.str_value;
+                } else if(strcmp(q->node_name, "factory_path") == 0) {
+                    factory_path = q->node_value.str_value;
                 } else if(strcmp(q->node_name, "plugin_name") == 0) {
                     plugin_name = q->node_value.str_value;
                 } else if(strcmp(q->node_name, "plugin_id") == 0) {
@@ -200,11 +243,13 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
     printf("factory_type=%s\n", factory_type);
     printf("plugin_name=%s\n", plugin_name);
     printf("plugin_type=%s\n", plugin_type);
+    printf("plugin_path=%s\n", plugin_path);
     printf("plugin_id=%s\n", plugin_id);
     printf("**End**\n");
 #endif
 
-    handle = _create_api(plugin_name, factory_name, factory_type/*, plugin_id*//*, properties*/);
+    handle = _create_api(plugin_name, plugin_id,
+                         factory_name, factory_type, factory_path /*, properties*/);
     if(handle.api != NULL) {
         ret = _register_api(mdata->registry,plugin_api, plugin_type, handle);
         if (ret != API_REGISTER_OK) {
@@ -263,12 +308,12 @@ _configure_krb5(manager_data* data, const char* path)
     profile_filespec_t *files = NULL;
     profile_t profile;
     const char  *hierarchy[4];
-    char **factory_name, **factory_type, **plugin_name, **plugin_type;
+    char **factory_name, **factory_type, **factory_path, **plugin_name, **plugin_type;
     char** plugin_id;
     char** plugin_api;
+    char *f_path = NULL;
     plhandle handle;
     char **pl_list, *pl_l;
-
 
     retval = krb5_get_default_config_files(&files);
 #if 0
@@ -310,7 +355,7 @@ _configure_krb5(manager_data* data, const char* path)
 #endif
 
     i=0;
-    while (pl_l = pl_list[i++]){
+    while ((pl_l = pl_list[i++])){
 
 #ifdef DEBUG_PLUGINS
         printf("plugins: nickname in conf file: '%s'\n", pl_l);
@@ -349,18 +394,30 @@ _configure_krb5(manager_data* data, const char* path)
         hierarchy[3] = 0;
         retval = profile_get_values(profile, hierarchy, &factory_type);
 
+        /* factory_path */
+        hierarchy[2] = "plugin_factory_path";
+        hierarchy[3] = 0;
+        retval = profile_get_values(profile, hierarchy, &factory_path);
+        if(!retval)
+           f_path = *factory_path;
+        else
+           f_path = NULL;
+
+
 #ifdef DEBUG_PLUGINS
-        printf("plugins:  >>>\n");
+        printf("ZH plugins:  >>>\n");
         printf("api=%s\n", *plugin_api);
         printf("factory=%s\n", *factory_name);
         printf("factory_type=%s\n", *factory_type);
+        if (f_path) printf("factory_path=%s\n", f_path);
         printf("plugin_name=%s\n", *plugin_name);
         printf("plugin_type=%s\n",*plugin_type);
         printf("plugin_id=%s\n", *plugin_id);
         printf("<<< plugins\n");
 #endif
 
-        handle = _create_api(*plugin_name, *factory_name, *factory_type ,*plugin_id/*, properties*/);
+        handle = _create_api(*plugin_name, *plugin_id,
+                             *factory_name, *factory_type, f_path /*, properties*/);
         if(handle.api != NULL) {
             retval = _register_api(mdata->registry,*plugin_api, *plugin_type, handle);
             if(retval != API_REGISTER_OK) {
