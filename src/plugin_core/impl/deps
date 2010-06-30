@@ -3,12 +3,12 @@ plugin_default_manager.so plugin_default_manager.po $(OUTPRE)plugin_default_mana
   $(top_srcdir)/plugin_core/plugin_manager.h \
   $(top_srcdir)/plugin_core/krb5_parser.h \
   $(top_srcdir)/plugin_core/impl/plugin_default_manager.h \
-  $(top_srcdir)/plugin_core/impl/plugin_default_factory.h \
+  $(top_srcdir)/plugin_core/impl/plugin_default_loader.h \
   plugin_default_manager.c
-plugin_default_factory.so plugin_default_factory.po $(OUTPRE)plugin_default_factory.$(OBJEXT): \
-  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/plugin_core/plugin_factory.h \
+plugin_default_loader.so plugin_default_loader.po $(OUTPRE)plugin_default_loader.$(OBJEXT): \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/plugin_core/plugin_loader.h \
   $(top_srcdir)/plugin_core/plugin_manager.h \
   $(top_srcdir)/plugins/pa/encrypted_challenge/plugin_pa_impl.h \
   $(top_srcdir)/plugin_core/impl/plugin_default_manager.h \
-  $(top_srcdir)/plugin_core/impl/plugin_default_factory.h \
-  plugin_default_factory.c
+  $(top_srcdir)/plugin_core/impl/plugin_default_loader.h \
+  plugin_default_loader.c

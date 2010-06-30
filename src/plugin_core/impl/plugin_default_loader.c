@@ -1,5 +1,5 @@
 /*
- * plugin_default_factory.c
+ * plugin_default_loader.c
  *
  */
 #include <string.h>
@@ -7,14 +7,14 @@
 #include <stdlib.h>
 
 #include "plugin_manager.h"
-#include "plugin_factory.h"
+#include "plugin_loader.h"
 #include "plugin_pa_impl.h"
-#include "plugin_default_factory.h"
+#include "plugin_default_loader.h"
 
-static plugin_factory* _default_factory_instance = NULL;
+static plugin_loader* _default_loader_instance = NULL;
 
 /* built-in plugins */
-static plugin_descr  plugin_default_factory_table[] = {
+static plugin_descr  plugin_default_loader_table[] = {
         {"plugin_pwd_qlty_X",   plugin_pwd_qlty_X_create},
         {"plugin_pwd_qlty_krb", plugin_pwd_qlty_krb_create},
         {"plugin_encrypted_challenge_pa", plugin_encrypted_challenge_pa_create},
@@ -22,12 +22,12 @@ static plugin_descr  plugin_default_factory_table[] = {
         {NULL,NULL}
 };
 
-/* Factory API implementation */
+/* Loader API implementation */
 static void
-_get_factory_content (const char* container[]) {
+_get_loader_content (const char* container[]) {
     plugin_descr *ptr = NULL;
     int i = 0;
-    for( ptr = plugin_default_factory_table; ptr->plugin_name != NULL; ptr++,i++) {
+    for( ptr = plugin_default_loader_table; ptr->plugin_name != NULL; ptr++,i++) {
         container[i] = ptr->plugin_name;
     }
 }
@@ -41,7 +41,7 @@ _create_api (const char* plugin_name)
     memset(&handle, 0, sizeof(handle));
     if(plugin_name){
         handle.api = NULL;
-        for( ptr = plugin_default_factory_table; ptr->plugin_name != NULL; ptr++) {
+        for( ptr = plugin_default_loader_table; ptr->plugin_name != NULL; ptr++) {
             if (strcmp(ptr->plugin_name, plugin_name) == 0) {
                 handle = ptr->plugin_creator();
                 break;
@@ -52,18 +52,18 @@ _create_api (const char* plugin_name)
 }
 
 
-factory_handle
-plugin_factory_get_instance()
+loader_handle
+plugin_loader_get_instance()
 {
-    plugin_factory* instance = _default_factory_instance;
-    factory_handle handle;
+    plugin_loader* instance = _default_loader_instance;
+    loader_handle handle;
 
-    if(_default_factory_instance == NULL) {
-        instance = (plugin_factory*) malloc(sizeof(plugin_factory));
-        memset(instance, 0, sizeof(plugin_factory));
-        instance->get_factory_content = _get_factory_content;
+    if(_default_loader_instance == NULL) {
+        instance = (plugin_loader*) malloc(sizeof(plugin_loader));
+        memset(instance, 0, sizeof(plugin_loader));
+        instance->get_loader_content = _get_loader_content;
         instance->create_api = _create_api;
-        _default_factory_instance = instance;
+        _default_loader_instance = instance;
     }
     handle.api = instance;
     return (handle);

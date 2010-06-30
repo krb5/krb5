@@ -1,7 +1,7 @@
 plugin_manager.so plugin_manager.po $(OUTPRE)plugin_manager.$(OBJEXT): \
   $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/plugin_core/plugin_manager.h \
   plugin_manager.c
-plugin_factory.so plugin_factory.po $(OUTPRE)plugin_factory.$(OBJEXT): \
-  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/plugin_core/plugin_factory.h \
+plugin_loader.so plugin_loader.po $(OUTPRE)plugin_loader.$(OBJEXT): \
+  $(BUILDTOP)/include/krb5/krb5.h $(COM_ERR_DEPS) $(top_srcdir)/plugin_core/plugin_loader.h \
   $(top_srcdir)/plugin_core/plugin_manager.h \
-  plugin_factory.c
+  plugin_loader.c

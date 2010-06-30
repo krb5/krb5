@@ -226,14 +226,14 @@ check-unix::
 	echo '}' >> ./t_an.conf
 	echo '[plugins]' >> ./t_an.conf
 	echo 'plugin_prng = {' >> ./t_an.conf
-	echo 'plugin_factory_name = plugin_default_factory' >> ./t_an.conf
-	echo 'plugin_factory_type = static' >> ./t_an.conf
+	echo 'plugin_loader_name = plugin_default_loader' >> ./t_an.conf
+	echo 'plugin_loader_type = static' >> ./t_an.conf
 	echo 'plugin_name =  plugin_yarrow_prng' >> ./t_an.conf
 	echo 'plugin_type = service' >> ./t_an.conf
 	echo ' }' >> ./t_an.conf
 	echo 'plugin_pa = {' >> ./t_an.conf
-	echo 'plugin_factory_name = plugin_default_factory' >> ./t_an.conf
-	echo 'plugin_factory_type = static' >> ./t_an.conf
+	echo 'plugin_loader_name = plugin_default_loader' >> ./t_an.conf
+	echo 'plugin_loader_type = static' >> ./t_an.conf
 	echo 'plugin_name = plugin_encrypted_challenge_pa' >> ./t_an.conf
 	echo 'plugin_type = service' >> ./t_an.conf
 	echo '}' >> ./t_an.conf

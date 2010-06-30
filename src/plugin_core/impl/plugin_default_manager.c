@@ -7,50 +7,50 @@
 #include <stdio.h>
 #include <dlfcn.h>
 #include <plugin_manager.h>
-#include <plugin_factory.h>
+#include <plugin_loader.h>
 #include "plugin_default_manager.h"
-#include "plugin_default_factory.h"
+#include "plugin_default_loader.h"
 #ifdef CONFIG_IN_YAML
 #include "yaml_parser.h"
 #else
 #include "krb5_parser.h"
 #endif
 
-static plugin_factory_descr _table[] = {
-        {"plugin_default_factory", plugin_factory_get_instance},
+static plugin_loader_descr _table[] = {
+        {"plugin_default_loader", plugin_loader_get_instance},
         {NULL, NULL}
 };
 
-static factory_handle
-_load_dynamic_factory (const char* factory_name, const char* path)
+static loader_handle
+_load_dynamic_loader (const char* loader_name, const char* path)
 {
-    factory_handle handle;
+    loader_handle handle;
     void *h_dl = dlopen(path, RTLD_LAZY);
-    factory_handle (*plugin_d_factory_get_instance)() = NULL;
+    loader_handle (*plugin_d_loader_get_instance)() = NULL;
 #ifdef DEBUG_PLUGINS
-    printf("plugins:  _load_dynamic_factory %s\n", factory_name);
+    printf("plugins:  _load_dynamic_loader %s\n", loader_name);
 #endif
     if(h_dl){
-        plugin_d_factory_get_instance = dlsym(h_dl, "plugin_factory_get_instance");
-        handle = plugin_d_factory_get_instance();
+        plugin_d_loader_get_instance = dlsym(h_dl, "plugin_loader_get_instance");
+        handle = plugin_d_loader_get_instance();
     }
 
     return handle;
 }
 
-static factory_handle
-_load_static_factory (const char* factory_name)
+static loader_handle
+_load_static_loader (const char* loader_name)
 {
-    factory_handle handle;
-    plugin_factory_descr *ptr = NULL;
+    loader_handle handle;
+    plugin_loader_descr *ptr = NULL;
 #ifdef DEBUG_PLUGINS
-    printf("plugins:  _load_static_factory %s\n", factory_name);
+    printf("plugins:  _load_static_loader %s\n", loader_name);
 #endif
 
     handle.api = NULL;
-    for( ptr = _table; ptr->factory_name != NULL; ptr++) {
-        if (strcmp(ptr->factory_name, factory_name) == 0) {
-            handle = ptr->factory_creator();
+    for( ptr = _table; ptr->loader_name != NULL; ptr++) {
+        if (strcmp(ptr->loader_name, loader_name) == 0) {
+            handle = ptr->loader_creator();
             break;
         }
     }
@@ -60,20 +60,20 @@ _load_static_factory (const char* factory_name)
 #define DYNAMIC_TYPE "dynamic"
 #define EMPTY_STR ""
 
-static factory_handle
-_load_factory(const char* factory_name, const char* factory_type, const char* factory_path)
+static loader_handle
+_load_loader(const char* loader_name, const char* loader_type, const char* loader_path)
 {
-    factory_handle handle;
-    if(strncmp(factory_type, BUILTIN_TYPE, strlen(BUILTIN_TYPE)) == 0){
-        handle = _load_static_factory(factory_name);
-    } else if(strncmp(factory_type, DYNAMIC_TYPE, strlen(DYNAMIC_TYPE)) == 0){
-        handle = _load_dynamic_factory(factory_name, factory_path);
+    loader_handle handle;
+    if(strncmp(loader_type, BUILTIN_TYPE, strlen(BUILTIN_TYPE)) == 0){
+        handle = _load_static_loader(loader_name);
+    } else if(strncmp(loader_type, DYNAMIC_TYPE, strlen(DYNAMIC_TYPE)) == 0){
+        handle = _load_dynamic_loader(loader_name, loader_path);
     } else {
-        if (factory_type)
-            printf("plugins: unknown factory_type %s\n", factory_type);
+        if (loader_type)
+            printf("plugins: unknown loader_type %s\n", loader_type);
         else {
-            printf("plugins: no factory_type found. Defaulting to built-in\n");
-            handle = _load_static_factory(factory_name);
+            printf("plugins: no loader_type found. Defaulting to built-in\n");
+            handle = _load_static_loader(loader_name);
         }
     }
     return handle;
@@ -123,11 +123,11 @@ _search_registry (registry_data* data, const char* api_name)
 
 static plhandle
 _create_api(const char* plugin_name, const char* plugin_id,
-            const char* factory_name, const char* factory_type, const char* factory_path
+            const char* loader_name, const char* loader_type, const char* loader_path
             /*, config_node* properties*/)
 {
     plhandle p_handle;
-    factory_handle f_handle = _load_factory(factory_name, factory_type, factory_path);
+    loader_handle f_handle = _load_loader(loader_name, loader_type, loader_path);
 #ifdef DEBUG_PLUGINS
     printf("plugins:  _create_api\n");
 #endif
@@ -202,9 +202,9 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
     config_node* p = NULL;
     config_node* properties = NULL;
     const char* plugin_api = NULL;
-    const char* factory_name = NULL;
-    const char* factory_type = NULL;
-    const char* factory_path = NULL;
+    const char* loader_name = NULL;
+    const char* loader_type = NULL;
+    const char* loader_path = NULL;
     const char* plugin_name = NULL;
     const char* plugin_type = NULL;
     const char* plugin_id = NULL;
@@ -219,12 +219,12 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
         } else if(strcmp(p->node_name, "constructor") == 0) {
             config_node* q = NULL;
             for(q = p->node_value.seq_value.start; q != NULL; q = q->next) {
-                if(strcmp(q->node_name, "factory_name") == 0) {
-                    factory_name = q->node_value.str_value;
-                } else if(strcmp(q->node_name, "factory_type") == 0) {
-                    factory_type = q->node_value.str_value;
-                } else if(strcmp(q->node_name, "factory_path") == 0) {
-                    factory_path = q->node_value.str_value;
+                if(strcmp(q->node_name, "loader_name") == 0) {
+                    loader_name = q->node_value.str_value;
+                } else if(strcmp(q->node_name, "loader_type") == 0) {
+                    loader_type = q->node_value.str_value;
+                } else if(strcmp(q->node_name, "loader_path") == 0) {
+                    loader_path = q->node_value.str_value;
                 } else if(strcmp(q->node_name, "plugin_name") == 0) {
                     plugin_name = q->node_value.str_value;
                 } else if(strcmp(q->node_name, "plugin_id") == 0) {
@@ -239,8 +239,8 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
 #ifdef DEBUG_PLUGINS
     printf("**Start**\n");
     printf("api=%s\n", plugin_api);
-    printf("factory=%s\n", factory_name);
-    printf("factory_type=%s\n", factory_type);
+    printf("loader=%s\n", loader_name);
+    printf("loader_type=%s\n", loader_type);
     printf("plugin_name=%s\n", plugin_name);
     printf("plugin_type=%s\n", plugin_type);
     printf("plugin_path=%s\n", plugin_path);
@@ -249,22 +249,22 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
 #endif
 
     handle = _create_api(plugin_name, plugin_id,
-                         factory_name, factory_type, factory_path /*, properties*/);
+                         loader_name, loader_type, loader_path /*, properties*/);
     if(handle.api != NULL) {
         ret = _register_api(mdata->registry,plugin_api, plugin_type, handle);
         if (ret != API_REGISTER_OK) {
 #ifdef DEBUG_PLUGINS
-            printf("Failed to register %s for %s(factory=%s,plugin_type=%s)\n",
-                    plugin_name, plugin_api, factory_name, plugin_type);
+            printf("Failed to register %s for %s(loader=%s,plugin_type=%s)\n",
+                    plugin_name, plugin_api, loader_name, plugin_type);
 #endif
         }
         else
-            printf("SUCCESS to register %s for %s(factory=%s,plugin_type=%s)\n",
-                    plugin_name, plugin_api, factory_name, plugin_type);
+            printf("SUCCESS to register %s for %s(loader=%s,plugin_type=%s)\n",
+                    plugin_name, plugin_api, loader_name, plugin_type);
     } else {
 #ifdef DEBUG_PLUGINS
-        printf("Failed to configure plugin: api=%s, plugin_name=%s,factory=%s\n",
-                plugin_api, plugin_name, factory_name);
+        printf("Failed to configure plugin: api=%s, plugin_name=%s,loader=%s\n",
+                plugin_api, plugin_name, loader_name);
 #endif
     }
     return ret;
@@ -308,7 +308,7 @@ _configure_krb5(manager_data* data, const char* path)
     profile_filespec_t *files = NULL;
     profile_t profile;
     const char  *hierarchy[4];
-    char **factory_name, **factory_type, **factory_path, **plugin_name, **plugin_type;
+    char **loader_name, **loader_type, **loader_path, **plugin_name, **plugin_type;
     char** plugin_id;
     char** plugin_api;
     char *f_path = NULL;
@@ -384,22 +384,22 @@ _configure_krb5(manager_data* data, const char* path)
         hierarchy[3] = 0;
         retval = profile_get_values(profile, hierarchy, &plugin_id);
 
-        /* factory_name */
-        hierarchy[2] = "plugin_factory_name";
+        /* loader_name */
+        hierarchy[2] = "plugin_loader_name";
         hierarchy[3] = 0;
-        retval = profile_get_values(profile, hierarchy, &factory_name);
+        retval = profile_get_values(profile, hierarchy, &loader_name);
 
-        /* factory_type */
-        hierarchy[2] = "plugin_factory_type";
+        /* loader_type */
+        hierarchy[2] = "plugin_loader_type";
         hierarchy[3] = 0;
-        retval = profile_get_values(profile, hierarchy, &factory_type);
+        retval = profile_get_values(profile, hierarchy, &loader_type);
 
-        /* factory_path */
-        hierarchy[2] = "plugin_factory_path";
+        /* loader_path */
+        hierarchy[2] = "plugin_loader_path";
         hierarchy[3] = 0;
-        retval = profile_get_values(profile, hierarchy, &factory_path);
+        retval = profile_get_values(profile, hierarchy, &loader_path);
         if(!retval)
-           f_path = *factory_path;
+           f_path = *loader_path;
         else
            f_path = NULL;
 
@@ -407,9 +407,9 @@ _configure_krb5(manager_data* data, const char* path)
 #ifdef DEBUG_PLUGINS
         printf("ZH plugins:  >>>\n");
         printf("api=%s\n", *plugin_api);
-        printf("factory=%s\n", *factory_name);
-        printf("factory_type=%s\n", *factory_type);
-        if (f_path) printf("factory_path=%s\n", f_path);
+        printf("loader=%s\n", *loader_name);
+        printf("loader_type=%s\n", *loader_type);
+        if (f_path) printf("loader_path=%s\n", f_path);
         printf("plugin_name=%s\n", *plugin_name);
         printf("plugin_type=%s\n",*plugin_type);
         printf("plugin_id=%s\n", *plugin_id);
@@ -417,13 +417,13 @@ _configure_krb5(manager_data* data, const char* path)
 #endif
 
         handle = _create_api(*plugin_name, *plugin_id,
-                             *factory_name, *factory_type, f_path /*, properties*/);
+                             *loader_name, *loader_type, f_path /*, properties*/);
         if(handle.api != NULL) {
             retval = _register_api(mdata->registry,*plugin_api, *plugin_type, handle);
             if(retval != API_REGISTER_OK) {
 #ifdef DEBUG_PLUGINS
-                printf("plugins: Failed to register %s for %s(factory=%s,plugin_type=%s) ret=%i\n",
-                       *plugin_name, *plugin_api, *factory_name, *plugin_type, retval);
+                printf("plugins: Failed to register %s for %s(loader=%s,plugin_type=%s) ret=%i\n",
+                       *plugin_name, *plugin_api, *loader_name, *plugin_type, retval);
 #endif
             } else {
 #ifdef DEBUG_PLUGINS
@@ -432,8 +432,8 @@ _configure_krb5(manager_data* data, const char* path)
             }
         } else {
 #ifdef DEBUG_PLUGINS
-            printf("plugins: Failed to configure plugin: api=%s, plugin_name=%s,factory=%s\n",
-                    *plugin_api, *plugin_name, *factory_name);
+            printf("plugins: Failed to configure plugin: api=%s, plugin_name=%s,loader=%s\n",
+                    *plugin_api, *plugin_name, *loader_name);
 #endif
         }
 

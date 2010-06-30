@@ -26,9 +26,9 @@ STOBJLISTS=OBJS.ST
 
 SHLIB_EXPLIBS=  $(LIBS_UTILS)
  
-STLIBOBJS= plugin_dyn_factory.o $(srcdir)/../plugins/pwd_qlty/plugin_pwd_qlty_DYN/plugin_pwd_qlty_DYN_impl.o	
+STLIBOBJS= plugin_dyn_loader.o $(srcdir)/../plugins/pwd_qlty/plugin_pwd_qlty_DYN/plugin_pwd_qlty_DYN_impl.o	
 
-SRCS= plugin_dyn_factory.c $(srcdir)/../plugins/pwd_qlty/plugin_pwd_qlty_DYN/plugin_pwd_qlty_DYN_impl.c
+SRCS= plugin_dyn_loader.c $(srcdir)/../plugins/pwd_qlty/plugin_pwd_qlty_DYN/plugin_pwd_qlty_DYN_impl.c
 
 all-unix:: all-liblinks
 install-unix:: install-libs

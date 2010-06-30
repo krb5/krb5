@@ -14,9 +14,9 @@ LOCALINCLUDES = -I$(srcdir)/../../include/krb5  -I$(srcdir)/. 	\
 
 LIBBASE=plugin_impl
 
-STLIBOBJS= plugin_default_factory.o plugin_default_manager.o
+STLIBOBJS= plugin_default_loader.o plugin_default_manager.o
 
-SRCS= plugin_default_factory.c plugin_default_manager.c
+SRCS= plugin_default_loader.c plugin_default_manager.c
 
 STOBJLISTS=OBJS.ST
 

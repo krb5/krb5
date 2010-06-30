@@ -1,2 +1,2 @@
-plugin_factory_get_instance
+plugin_loader_get_instance
 plugin_pwd_qlty_DYN_create

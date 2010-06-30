@@ -1,4 +1,4 @@
-get_factory_content
+get_loader_content
 plugin_manager_configure
 plugin_manager_get_service
 plugin_manager_start

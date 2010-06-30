@@ -1,2 +1,2 @@
-plugin_default_factory_get_instance
+plugin_default_loader_get_instance
 plugin_default_manager_get_instance

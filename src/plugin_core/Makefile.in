@@ -22,9 +22,9 @@ STOBJLISTS=OBJS.ST
 
 SHLIB_EXPLIBS=  $(LIBS_UTILS)
  
-STLIBOBJS= plugin_manager.o plugin_factory.o krb5_parser.o	
+STLIBOBJS= plugin_manager.o plugin_loader.o krb5_parser.o	
 
-SRCS= plugin_manager.c plugin_factory.c krb5_parser.c
+SRCS= plugin_manager.c plugin_loader.c krb5_parser.c
 
 all-unix:: all-liblinks
 install-unix:: install-libs

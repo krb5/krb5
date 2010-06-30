@@ -6,6 +6,6 @@ plugin_pwd_qlty_krb_impl.so plugin_pwd_qlty_krb_impl.po $(OUTPRE)plugin_pwd_qlty
   $(top_srcdir)/plugins/pwd_qlty/plugin_pwd_qlty_krb/plugin_pwd_qlty_krb_impl.h \
   $(top_srcdir)/lib/kadm5/admin.h \
   $(top_srcdir)/plugin_core/plugin_manager.h \
-  $(top_srcdir)/plugin_core/plugin_factory.h \
+  $(top_srcdir)/plugin_core/plugin_loader.h \
   plugin_pwd_qlty_krb_impl.c
 

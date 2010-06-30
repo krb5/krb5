@@ -91,12 +91,6 @@
 #    endif
 #endif
 
-/* Plugin manager */
-//#include <plugin_manager.h>
-//#include <plugin_factory.h>
-//#include "plugin_default_manager.h"
-//#include "plugin_default_factory.h"
-
 /*
  * Begin "k5-config.h"
  */
