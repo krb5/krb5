@@ -439,6 +439,65 @@ delete_fd(struct connection *xconn)
     free(xconn);
 }
 
+/*
+ * Create a socket and bind it to addr.  Ensure the socket will work with
+ * select().  Set the socket cloexec, reuseaddr, and if applicable v6-only.
+ * Does not call listen().  Returns -1 on failure after logging an error.
+ */
+static int
+create_server_socket(struct socksetup *data, struct sockaddr *addr, int type)
+{
+    int sock;
+
+    sock = socket(addr->sa_family, type, 0);
+    if (sock == -1) {
+        data->retval = errno;
+        com_err(data->prog, errno, "Cannot create TCP server socket on %s",
+                paddr(addr));
+        return -1;
+    }
+    set_cloexec_fd(sock);
+
+#ifndef _WIN32                  /* Windows FD_SETSIZE is a count. */
+    if (sock >= FD_SETSIZE) {
+        close(sock);
+        com_err(data->prog, 0, "TCP socket fd number %d (for %s) too high",
+                sock, paddr(addr));
+        return -1;
+    }
+#endif
+
+    if (setreuseaddr(sock, 1) < 0) {
+        com_err(data->prog, errno,
+                "Cannot enable SO_REUSEADDR on fd %d", sock);
+    }
+
+#ifdef KRB5_USE_INET6
+    if (addr->sa_family == AF_INET6) {
+#ifdef IPV6_V6ONLY
+        if (setv6only(sock, 1))
+            com_err(data->prog, errno, "setsockopt(%d,IPV6_V6ONLY,1) failed",
+                    sock);
+        else
+            com_err(data->prog, 0, "setsockopt(%d,IPV6_V6ONLY,1) worked",
+                    sock);
+#else
+        krb5_klog_syslog(LOG_INFO, "no IPV6_V6ONLY socket option support");
+#endif /* IPV6_V6ONLY */
+    }
+#endif /* KRB5_USE_INET6 */
+
+    if (bind(sock, addr, socklen(addr)) == -1) {
+        data->retval = errno;
+        com_err(data->prog, errno, "Cannot bind server socket on %s",
+                paddr(addr));
+        close(sock);
+        return -1;
+    }
+
+    return sock;
+}
+
 static struct connection *
 add_rpc_listener_fd(struct socksetup *data, struct rpc_svc_data *svc, int sock)
 {
@@ -500,44 +559,9 @@ setup_a_tcp_listener(struct socksetup *data, struct sockaddr *addr)
 {
     int sock;
 
-    sock = socket(addr->sa_family, SOCK_STREAM, 0);
-    if (sock == -1) {
-        com_err(data->prog, errno, "Cannot create TCP server socket on %s",
-                paddr(addr));
+    sock = create_server_socket(data, addr, SOCK_STREAM);
+    if (sock == -1)
         return -1;
-    }
-    set_cloexec_fd(sock);
-#ifndef _WIN32
-    if (sock >= FD_SETSIZE) {
-        close(sock);
-        com_err(data->prog, 0, "TCP socket fd number %d (for %s) too high",
-                sock, paddr(addr));
-        return -1;
-    }
-#endif
-    if (setreuseaddr(sock, 1) < 0)
-        com_err(data->prog, errno,
-                "Cannot enable SO_REUSEADDR on fd %d", sock);
-#ifdef KRB5_USE_INET6
-    if (addr->sa_family == AF_INET6) {
-#ifdef IPV6_V6ONLY
-        if (setv6only(sock, 1))
-            com_err(data->prog, errno, "setsockopt(%d,IPV6_V6ONLY,1) failed",
-                    sock);
-        else
-            com_err(data->prog, 0, "setsockopt(%d,IPV6_V6ONLY,1) worked",
-                    sock);
-#else
-        krb5_klog_syslog(LOG_INFO, "no IPV6_V6ONLY socket option support");
-#endif /* IPV6_V6ONLY */
-    }
-#endif /* KRB5_USE_INET6 */
-    if (bind(sock, addr, socklen(addr)) == -1) {
-        com_err(data->prog, errno,
-                "Cannot bind TCP server socket on %s", paddr(addr));
-        close(sock);
-        return -1;
-    }
     if (listen(sock, 5) < 0) {
         com_err(data->prog, errno, "Cannot listen on TCP server socket on %s",
                 paddr(addr));
@@ -554,53 +578,6 @@ setup_a_tcp_listener(struct socksetup *data, struct sockaddr *addr)
     if (setnolinger(sock)) {
         com_err(data->prog, errno, "disabling SO_LINGER on TCP socket on %s",
                 paddr(addr));
-        close(sock);
-        return -1;
-    }
-    return sock;
-}
-
-/* Returns -1 or socket fd.  */
-static int
-setup_a_rpc_listener(struct socksetup *data, struct sockaddr *addr)
-{
-    int sock;
-
-    sock = socket(addr->sa_family, SOCK_STREAM, 0);
-    if (sock == -1) {
-        com_err(data->prog, errno, "Cannot create RPC server socket on %s",
-                paddr(addr));
-        return -1;
-    }
-    set_cloexec_fd(sock);
-#ifndef _WIN32
-    if (sock >= FD_SETSIZE) {
-        close(sock);
-        com_err(data->prog, 0, "RPC socket fd number %d (for %s) too high",
-                sock, paddr(addr));
-        return -1;
-    }
-#endif
-    if (setreuseaddr(sock, 1) < 0)
-        com_err(data->prog, errno,
-                "Cannot enable SO_REUSEADDR on fd %d", sock);
-#ifdef KRB5_USE_INET6
-    if (addr->sa_family == AF_INET6) {
-#ifdef IPV6_V6ONLY
-        if (setv6only(sock, 1))
-            com_err(data->prog, errno,
-                    "setsockopt(%d,IPV6_V6ONLY,1) failed", sock);
-        else
-            com_err(data->prog, 0, "setsockopt(%d,IPV6_V6ONLY,1) worked",
-                    sock);
-#else
-        krb5_klog_syslog(LOG_INFO, "no IPV6_V6ONLY socket option support");
-#endif /* IPV6_V6ONLY */
-    }
-#endif /* KRB5_USE_INET6 */
-    if (bind(sock, addr, socklen(addr)) == -1) {
-        com_err(data->prog, errno,
-                "Cannot bind RPC server socket on %s", paddr(addr));
         close(sock);
         return -1;
     }
@@ -723,7 +700,7 @@ setup_rpc_listener_ports(struct socksetup *data)
 #endif
 
         set_sa_port((struct sockaddr *)&sin4, htons(svc.port));
-        s4 = setup_a_rpc_listener(data, (struct sockaddr *)&sin4);
+        s4 = create_server_socket(data, (struct sockaddr *)&sin4, SOCK_STREAM);
         if (s4 < 0)
             return -1;
 
@@ -740,7 +717,8 @@ setup_rpc_listener_ports(struct socksetup *data)
 #ifdef KRB5_USE_INET6
         if (ipv6_enabled()) {
             set_sa_port((struct sockaddr *)&sin6, htons(svc.port));
-            s6 = setup_a_tcp_listener(data, (struct sockaddr *)&sin6);
+            s6 = create_server_socket(data, (struct sockaddr *)&sin6,
+                                      SOCK_STREAM);
             if (s6 < 0)
                 return -1;
 
@@ -826,38 +804,11 @@ setup_udp_port_1(struct socksetup *data, struct sockaddr *addr,
     u_short port;
 
     FOREACH_ELT (udp_port_data, i, port) {
-        sock = socket (addr->sa_family, SOCK_DGRAM, 0);
-        if (sock == -1) {
-            data->retval = errno;
-            com_err(data->prog, data->retval,
-                    "Cannot create server socket for port %d address %s",
-                    port, haddrbuf);
-            return 1;
-        }
-        set_cloexec_fd(sock);
-#ifdef KRB5_USE_INET6
-        if (addr->sa_family == AF_INET6) {
-#ifdef IPV6_V6ONLY
-            if (setv6only(sock, 1))
-                com_err(data->prog, errno,
-                        "setsockopt(%d,IPV6_V6ONLY,1) failed", sock);
-            else
-                com_err(data->prog, 0, "setsockopt(%d,IPV6_V6ONLY,1) worked",
-                        sock);
-#else
-            krb5_klog_syslog(LOG_INFO, "no IPV6_V6ONLY socket option support");
-#endif /* IPV6_V6ONLY */
-        }
-#endif
         set_sa_port(addr, htons(port));
-        if (bind (sock, (struct sockaddr *)addr, socklen (addr)) == -1) {
-            data->retval = errno;
-            com_err(data->prog, data->retval,
-                    "Cannot bind server socket to port %d address %s",
-                    port, haddrbuf);
-            close(sock);
+        sock = create_server_socket(data, addr, SOCK_DGRAM);
+        if (sock == -1)
             return 1;
-        }
+
 #if !(defined(CMSG_SPACE) && defined(HAVE_STRUCT_CMSGHDR) && \
       (defined(IP_PKTINFO) || defined(IPV6_PKTINFO)))
         assert(pktinfo == 0);
