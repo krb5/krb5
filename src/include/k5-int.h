@@ -1515,7 +1515,7 @@ struct _krb5_context {
     krb5_boolean allow_weak_crypto;
 
     /* PLUGIN manager HANDLE */
-    plugin_manager *pl_handle;
+    plugin_manager *pl_manager;
 };
 
 /* could be used in a table to find an etype and initialize a block */

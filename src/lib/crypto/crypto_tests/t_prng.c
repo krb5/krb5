@@ -48,32 +48,7 @@ int main () {
     krb5_data input, output;
     unsigned int source_id, seed_length;
     unsigned int i;
-//#if 0
-    krb5_context ctx;
-    plugin_manager* default_manager;
-    static plugin_manager* plugin_mngr_instance = NULL;
 
-//    ret = krb5int_initialize_library();
-    //if (ret) return ret;
-
-    ctx = calloc(1, sizeof(struct _krb5_context));
-    if (!ctx) return ENOMEM;
-
-    /* Plugin initialization */
-    plugin_default_manager_get_instance(&plugin_mngr_instance);
-    set_plugin_manager_instance(&ctx->pl_handle,  plugin_mngr_instance);
-    plugin_manager_configure(ctx->pl_handle, "");
-    plugin_manager_start(ctx->pl_handle);
-/*
-
-        default_manager = plugin_default_manager_get_instance();
-        set_plugin_manager_instance(default_manager);
-
-        plugin_manager_configure("");
-        plugin_manager_start();
-*/
-
-//#endif
     while (1) {
         /* Read source*/
         if (scanf ("%u", &source_id ) == EOF )

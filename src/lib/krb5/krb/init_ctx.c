@@ -179,9 +179,9 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
 
     /* Plugin initialization */
     plugin_default_manager_get_instance(&plugin_mngr_instance);
-    set_plugin_manager_instance(&ctx->pl_handle,  plugin_mngr_instance);
-    plugin_manager_configure(ctx->pl_handle, conf_path);
-    plugin_manager_start(ctx->pl_handle);
+    set_plugin_manager_instance(&ctx->pl_manager,  plugin_mngr_instance);
+    plugin_manager_configure(ctx->pl_manager, conf_path);
+    plugin_manager_start(ctx->pl_manager);
 
 
     /* initialize the prng (not well, but passable) */
