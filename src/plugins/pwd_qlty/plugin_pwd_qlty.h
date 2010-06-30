@@ -11,14 +11,9 @@
 #include <admin.h>
 #include <server_internal.h>
 
-#define PWD_QLTY_KRB 0
-#define PWD_QLTY_X 1
-#define PWD_QLTY_DYN 33
-
 /* PWD_QLTY API */
 typedef struct {
 	int version;
-	int plugin_id;
 	kadm5_ret_t (*pwd_qlty_init)(kadm5_server_handle_t);
 	void (*pwd_qlty_cleanup)();
 	kadm5_ret_t (*pwd_qlty_check)(kadm5_server_handle_t, char*,

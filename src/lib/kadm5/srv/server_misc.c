@@ -43,6 +43,11 @@ adb_policy_close(kadm5_server_handle_t handle)
 
 /* some of this is stolen from gatekeeper ... */
 /* passwd_check -  returns KADM5_OK if password passes the validation.*/
+
+#define PWD_QLTY_KRB 0
+#define PWD_QLTY_X 1
+#define PWD_QLTY_DYN 33
+
 kadm5_ret_t
 passwd_check(kadm5_server_handle_t srv_handle,
              char *password, int use_policy, kadm5_policy_ent_t pol,

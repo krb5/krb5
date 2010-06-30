@@ -8,12 +8,9 @@
 
 #include <k5-int.h>
 
-void set_plugin_manager_instance(plugin_manager** _instance,plugin_manager*);
-
-/* Utility functions */
-int plugin_manager_configure(plugin_manager* _instance,const char*);
-void plugin_manager_start(plugin_manager* _instance);
-void plugin_manager_stop(plugin_manager* _instance);
-plhandle plugin_manager_get_service(plugin_manager* _instance,const char*, const int);
+plhandle plugin_manager_get_service(plugin_manager* instance,const char*, const int);
+int plugin_manager_configure(plugin_manager* instance,const char*);
+void plugin_manager_start(plugin_manager* instance);
+void plugin_manager_stop(plugin_manager* instance);
 
 #endif /* PLUGIN_MANAGER_H_ */

@@ -16,9 +16,9 @@ _plugin_pwd_qlty_check(kadm5_server_handle_t srv_handle,
 {
 
 
-#ifdef DEBUG_PLUGINS
+//#ifdef DEBUG_PLUGINS
     printf("Plugin pwd qlty DYNAMIC >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
-#endif
+// #endif
     return 0;
 
 }
@@ -43,7 +43,6 @@ plugin_pwd_qlty_DYN_create()
 
         memset(api, 0, sizeof(plugin_pwd_qlty));
         api->version = 1;
-        api->plugin_id = PWD_QLTY_DYN;
         api->pwd_qlty_init    = _plugin_pwd_qlty_init;
         api->pwd_qlty_check   = _plugin_pwd_qlty_check;
         api->pwd_qlty_cleanup = _plugin_pwd_qlty_clean;

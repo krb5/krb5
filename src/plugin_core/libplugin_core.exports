@@ -1,7 +1,6 @@
 get_factory_content
 plugin_manager_configure
 plugin_manager_get_service
-set_plugin_manager_instance
 plugin_manager_start
 plugin_manager_stop
 create_api
