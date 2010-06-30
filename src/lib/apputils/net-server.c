@@ -88,7 +88,8 @@ set_sa_port(struct sockaddr *addr, int port)
     }
 }
 
-static int ipv6_enabled()
+static int
+ipv6_enabled()
 {
 #ifdef KRB5_USE_INET6
     static int result = -1;
@@ -159,7 +160,8 @@ set_pktinfo(int sock, int family)
 }
 
 
-static const char *paddr (struct sockaddr *sa)
+static const char *
+paddr(struct sockaddr *sa)
 {
     static char buf[100];
     char portbuf[10];
@@ -281,7 +283,8 @@ static SET(struct rpc_svc_data) rpc_svc_data;
 static struct select_state sstate;
 static fd_set rpc_listenfds;
 
-krb5_error_code add_udp_port(int port)
+krb5_error_code
+add_udp_port(int port)
 {
     int i;
     void *tmp;
@@ -299,7 +302,8 @@ krb5_error_code add_udp_port(int port)
     return 0;
 }
 
-krb5_error_code add_tcp_port(int port)
+krb5_error_code
+add_tcp_port(int port)
 {
     int i;
     void *tmp;
@@ -317,8 +321,8 @@ krb5_error_code add_tcp_port(int port)
     return 0;
 }
 
-krb5_error_code add_rpc_service(int port, u_long prognum, u_long versnum,
-                                void (*dispatch)())
+krb5_error_code
+add_rpc_service(int port, u_long prognum, u_long versnum, void (*dispatch)())
 {
     int i;
     void *tmp;
@@ -356,8 +360,8 @@ struct socksetup {
 };
 
 static struct connection *
-add_fd (struct socksetup *data, int sock, enum conn_type conntype,
-        void (*service)(void *handle, struct connection *, const char *, int))
+add_fd(struct socksetup *data, int sock, enum conn_type conntype,
+       void (*service)(void *handle, struct connection *, const char *, int))
 {
     struct connection *newconn;
     void *tmp;
@@ -391,33 +395,38 @@ add_fd (struct socksetup *data, int sock, enum conn_type conntype,
     return newconn;
 }
 
-static void process_packet(void *handle, struct connection *, const char *, int);
-static void accept_tcp_connection(void *handle, struct connection *, const char *, int);
-static void process_tcp_connection(void *handle, struct connection *, const char *, int);
-static void accept_rpc_connection(void *handle, struct connection *, const char *, int);
-static void process_rpc_connection(void *handle, struct connection *, const char *, int);
+static void process_packet(void *handle, struct connection *, const char *,
+                           int);
+static void accept_tcp_connection(void *handle, struct connection *,
+                                  const char *, int);
+static void process_tcp_connection(void *handle, struct connection *,
+                                   const char *, int);
+static void accept_rpc_connection(void *handle, struct connection *,
+                                  const char *, int);
+static void process_rpc_connection(void *handle, struct connection *,
+                                   const char *, int);
 
 static struct connection *
-add_udp_fd (struct socksetup *data, int sock, int pktinfo)
+add_udp_fd(struct socksetup *data, int sock, int pktinfo)
 {
     return add_fd(data, sock, pktinfo ? CONN_UDP_PKTINFO : CONN_UDP,
                   process_packet);
 }
 
 static struct connection *
-add_tcp_listener_fd (struct socksetup *data, int sock)
+add_tcp_listener_fd(struct socksetup *data, int sock)
 {
     return add_fd(data, sock, CONN_TCP_LISTENER, accept_tcp_connection);
 }
 
 static struct connection *
-add_tcp_data_fd (struct socksetup *data, int sock)
+add_tcp_data_fd(struct socksetup *data, int sock)
 {
     return add_fd(data, sock, CONN_TCP, process_tcp_connection);
 }
 
 static void
-delete_fd (struct connection *xconn)
+delete_fd(struct connection *xconn)
 {
     struct connection *conn;
     int i;
@@ -431,7 +440,7 @@ delete_fd (struct connection *xconn)
 }
 
 static struct connection *
-add_rpc_listener_fd (struct socksetup *data, struct rpc_svc_data *svc, int sock)
+add_rpc_listener_fd(struct socksetup *data, struct rpc_svc_data *svc, int sock)
 {
     struct connection *conn;
 
@@ -459,7 +468,7 @@ add_rpc_listener_fd (struct socksetup *data, struct rpc_svc_data *svc, int sock)
 }
 
 static struct connection *
-add_rpc_data_fd (struct socksetup *data, int sock)
+add_rpc_data_fd(struct socksetup *data, int sock)
 {
     return add_fd(data, sock, CONN_RPC, process_rpc_connection);
 }
@@ -648,7 +657,7 @@ setup_tcp_listener_ports(struct socksetup *data)
 #endif /* KRB5_USE_INET6 */
         }
 
-        /* Sockets are created, prepare to listen on them.  */
+        /* Sockets are created, prepare to listen on them. */
         if (s4 >= 0) {
             if (add_tcp_listener_fd(data, s4) == NULL)
                 close(s4);
@@ -752,7 +761,8 @@ setup_rpc_listener_ports(struct socksetup *data)
     return 0;
 }
 
-#if defined(CMSG_SPACE) && defined(HAVE_STRUCT_CMSGHDR) && (defined(IP_PKTINFO) || defined(IPV6_PKTINFO))
+#if defined(CMSG_SPACE) && defined(HAVE_STRUCT_CMSGHDR) && \
+    (defined(IP_PKTINFO) || defined(IPV6_PKTINFO))
 union pktinfo {
 #ifdef HAVE_STRUCT_IN6_PKTINFO
     struct in6_pktinfo pi6;
@@ -848,15 +858,15 @@ setup_udp_port_1(struct socksetup *data, struct sockaddr *addr,
             close(sock);
             return 1;
         }
-#if !(defined(CMSG_SPACE) && defined(HAVE_STRUCT_CMSGHDR) && (defined(IP_PKTINFO) || defined(IPV6_PKTINFO)))
+#if !(defined(CMSG_SPACE) && defined(HAVE_STRUCT_CMSGHDR) && \
+      (defined(IP_PKTINFO) || defined(IPV6_PKTINFO)))
         assert(pktinfo == 0);
 #endif
         if (pktinfo) {
             r = set_pktinfo(sock, addr->sa_family);
             if (r) {
-                com_err(data->prog, r,
-                        "Cannot request packet info for udp socket address %s port %d",
-                        haddrbuf, port);
+                com_err(data->prog, r, "Cannot request packet info for "
+                        "udp socket address %s port %d", haddrbuf, port);
                 close(sock);
                 return 1;
             }
@@ -933,7 +943,8 @@ setup_udp_port(void *P_data, struct sockaddr *addr)
 }
 
 #if 1
-static void klog_handler(const void *data, size_t len)
+static void
+klog_handler(const void *data, size_t len)
 {
     static char buf[BUFSIZ];
     static int bufoffset;
@@ -982,7 +993,8 @@ static int network_reconfiguration_needed = 0;
 #ifdef HAVE_STRUCT_RT_MSGHDR
 #include <net/route.h>
 
-static char *rtm_type_name(int type)
+static char *
+rtm_type_name(int type)
 {
     switch (type) {
     case RTM_ADD: return "RTM_ADD";
@@ -1005,8 +1017,9 @@ static char *rtm_type_name(int type)
     }
 }
 
-static void process_routing_update(void *handle, struct connection *conn,
-                                   const char *prog, int selflags)
+static void
+process_routing_update(void *handle, struct connection *conn, const char *prog,
+                       int selflags)
 {
     int n_read;
     struct rt_msghdr rtm;
@@ -1097,8 +1110,8 @@ static void process_routing_update(void *handle, struct connection *conn,
 #endif
             break;
         default:
-            krb5_klog_syslog(LOG_INFO,
-                             "unhandled routing message type %d, will reconfigure just for the fun of it",
+            krb5_klog_syslog(LOG_INFO, "unhandled routing message type %d, "
+                             "will reconfigure just for the fun of it",
                              rtm.rtm_type);
             network_reconfiguration_needed = 1;
             break;
@@ -1137,7 +1150,7 @@ setup_network(void *handle, const char *prog)
     FD_ZERO(&sstate.xfds);
     sstate.max = 0;
 
-/*    krb5int_debug_sendto_kdc = 1; */
+    /* krb5int_debug_sendto_kdc = 1; */
     krb5int_sendtokdc_debug_handler = klog_handler;
 
     setup_data.prog = prog;
@@ -1146,10 +1159,12 @@ setup_network(void *handle, const char *prog)
 #ifdef HAVE_STRUCT_RT_MSGHDR
     setup_routing_socket(&setup_data);
 #endif
-    /* To do: Use RFC 2292 interface (or follow-on) and IPV6_PKTINFO,
-       so we might need only one UDP socket; fall back to binding
-       sockets on each address only if IPV6_PKTINFO isn't
-       supported.  */
+    /*
+     * To do: Use RFC 2292 interface (or follow-on) and IPV6_PKTINFO,
+     * so we might need only one UDP socket; fall back to binding
+     * sockets on each address only if IPV6_PKTINFO isn't
+     * supported.
+     */
     setup_data.udp_flags = UDP_DO_IPV4 | UDP_DO_IPV6;
     setup_udp_pktinfo_ports(&setup_data);
     if (setup_data.udp_flags) {
@@ -1168,7 +1183,8 @@ setup_network(void *handle, const char *prog)
     return 0;
 }
 
-void init_addr(krb5_fulladdr *faddr, struct sockaddr *sa)
+void
+init_addr(krb5_fulladdr *faddr, struct sockaddr *sa)
 {
     switch (sa->sa_family) {
     case AF_INET:
@@ -1277,7 +1293,8 @@ recv_from_to(int s, void *buf, size_t len, int flags,
                 return r;
             }
 #endif
-#if defined(KRB5_USE_INET6) && defined(IPV6_PKTINFO)&& defined(HAVE_STRUCT_IN6_PKTINFO)
+#if defined(KRB5_USE_INET6) && defined(IPV6_PKTINFO) && \
+    defined(HAVE_STRUCT_IN6_PKTINFO)
             if (cmsgptr->cmsg_level == IPPROTO_IPV6
                 && cmsgptr->cmsg_type == IPV6_PKTINFO
                 && *tolen >= sizeof(struct sockaddr_in6)) {
@@ -1353,7 +1370,8 @@ send_to_from(int s, void *buf, size_t len, int flags,
         msg.msg_controllen = CMSG_SPACE(sizeof(struct in_pktinfo));
         break;
 #endif
-#if defined(KRB5_USE_INET6) && defined(IPV6_PKTINFO) && defined(HAVE_STRUCT_IN6_PKTINFO)
+#if defined(KRB5_USE_INET6) && defined(IPV6_PKTINFO) && \
+    defined(HAVE_STRUCT_IN6_PKTINFO)
     case AF_INET6:
         if (fromlen != sizeof(struct sockaddr_in6))
             goto use_sendto;
@@ -1362,7 +1380,8 @@ send_to_from(int s, void *buf, size_t len, int flags,
         cmsgptr->cmsg_len = CMSG_LEN(sizeof(struct in6_pktinfo));
         {
             struct in6_pktinfo *p = (struct in6_pktinfo *)CMSG_DATA(cmsgptr);
-            const struct sockaddr_in6 *from6 = (const struct sockaddr_in6 *)from;
+            const struct sockaddr_in6 *from6 =
+                (const struct sockaddr_in6 *)from;
             p->ipi6_addr = from6->sin6_addr;
             /*
              * Because of the possibility of asymmetric routing, we
@@ -1386,9 +1405,9 @@ send_to_from(int s, void *buf, size_t len, int flags,
 #endif
 }
 
-static void process_packet(void *handle,
-                           struct connection *conn, const char *prog,
-                           int selflags)
+static void
+process_packet(void *handle, struct connection *conn, const char *prog,
+               int selflags)
 {
     int cc;
     socklen_t saddr_len, daddr_len;
@@ -1412,9 +1431,11 @@ static void process_packet(void *handle,
                       &auxaddr);
     if (cc == -1) {
         if (errno != EINTR
-            /* This is how Linux indicates that a previous
-               transmission was refused, e.g., if the client timed out
-               before getting the response packet.  */
+            /*
+             * This is how Linux indicates that a previous transmission was
+             * refused, e.g., if the client timed out before getting the
+             * response packet.
+             */
             && errno != ECONNREFUSED
         )
             com_err(prog, errno, "while receiving from network");
@@ -1434,22 +1455,24 @@ static void process_packet(void *handle,
 #endif
 
     if (daddr_len == 0 && conn->type == CONN_UDP) {
-        /* If the PKTINFO option isn't set, this socket should be
-           bound to a specific local address.  This info probably
-           should've been saved in our socket data structure at setup
-           time.  */
+        /*
+         * If the PKTINFO option isn't set, this socket should be bound to a
+         * specific local address.  This info probably should've been saved in
+         * our socket data structure at setup time.
+         */
         daddr_len = sizeof(daddr);
         if (getsockname(port_fd, (struct sockaddr *)&daddr, &daddr_len) != 0)
             daddr_len = 0;
-        /* On failure, keep going anyways.  */
+        /* On failure, keep going anyways. */
     }
 
     request.length = cc;
     request.data = pktbuf;
     faddr.address = &addr;
     init_addr(&faddr, ss2sa(&saddr));
-    /* this address is in net order */
-    if ((retval = dispatch(handle, ss2sa(&daddr), &faddr, &request, &response, 0))) {
+    /* This address is in net order. */
+    retval = dispatch(handle, ss2sa(&daddr), &faddr, &request, &response, 0);
+    if (retval) {
         com_err(prog, retval, "while dispatching (udp)");
         return;
     }
@@ -1460,10 +1483,8 @@ static void process_packet(void *handle,
                       (struct sockaddr *)&daddr, daddr_len,
                       &auxaddr);
     if (cc == -1) {
-        /*
-         * Note that the local address (daddr*) has no port number
-         * info associated with it.
-         */
+        /* Note that the local address (daddr*) has no port number
+         * info associated with it. */
         char saddrbuf[NI_MAXHOST], sportbuf[NI_MAXSERV];
         char daddrbuf[NI_MAXHOST];
         int e = errno;
@@ -1494,9 +1515,11 @@ static void process_packet(void *handle,
 static int tcp_or_rpc_data_counter;
 static int max_tcp_or_rpc_data_connections = 45;
 
-static void kill_tcp_or_rpc_connection(void *, struct connection *, int isForcedClose);
+static void kill_tcp_or_rpc_connection(void *, struct connection *,
+                                       int isForcedClose);
 
-static int kill_lru_tcp_or_rpc_connection(void *handle, struct connection *newconn)
+static int
+kill_lru_tcp_or_rpc_connection(void *handle, struct connection *newconn)
 {
     struct connection *oldest_tcp = NULL;
     struct connection *c;
@@ -1527,9 +1550,9 @@ static int kill_lru_tcp_or_rpc_connection(void *handle, struct connection *newco
     return fd;
 }
 
-static void accept_tcp_connection(void *handle,
-                                  struct connection *conn, const char *prog,
-                                  int selflags)
+static void
+accept_tcp_connection(void *handle, struct connection *conn, const char *prog,
+                      int selflags)
 {
     int s;
     struct sockaddr_storage addr_s;
@@ -1607,7 +1630,8 @@ static void accept_tcp_connection(void *handle,
 }
 
 static void
-kill_tcp_or_rpc_connection(void *handle, struct connection *conn, int isForcedClose)
+kill_tcp_or_rpc_connection(void *handle, struct connection *conn,
+                           int isForcedClose)
 {
     assert(conn->type == CONN_TCP || conn->type == CONN_RPC);
     assert(conn->fd != -1);
@@ -1626,12 +1650,14 @@ kill_tcp_or_rpc_connection(void *handle, struct connection *conn, int isForcedCl
         )
             sstate.max--;
 
-    /* In the non-forced case, the RPC runtime will close the descriptor for us */
+    /* In the non-forced case, the RPC runtime will close the descriptor for
+     * us. */
     if (conn->type == CONN_TCP || isForcedClose) {
         close(conn->fd);
     }
 
-    /* For RPC connections, call into RPC runtime to flush out any internal state */
+    /* For RPC connections, call into RPC runtime to flush out any internal
+     * state. */
     if (conn->type == CONN_RPC && isForcedClose) {
         fd_set fds;
 
@@ -1642,7 +1668,8 @@ kill_tcp_or_rpc_connection(void *handle, struct connection *conn, int isForcedCl
 
         if (FD_ISSET(conn->fd, &svc_fdset)) {
             krb5_klog_syslog(LOG_ERR,
-                             "descriptor %d closed but still in svc_fdset", conn->fd);
+                             "descriptor %d closed but still in svc_fdset",
+                             conn->fd);
         }
     }
 
@@ -1663,8 +1690,8 @@ queue_tcp_outgoing_response(struct connection *conn)
 }
 
 static void
-process_tcp_connection(void *handle,
-                       struct connection *conn, const char *prog, int selflags)
+process_tcp_connection(void *handle, struct connection *conn, const char *prog,
+                       int selflags)
 {
     int isForcedClose = 1; /* not used now, but for completeness */
 
@@ -1696,26 +1723,26 @@ process_tcp_connection(void *handle,
             }
         }
         if (conn->u.tcp.sgnum == 0) {
-            /* finished sending */
-            /* We should go back to reading, though if we sent a
-               FIELD_TOOLONG error in reply to a length with the high
-               bit set, RFC 4120 says we have to close the TCP
-               stream.  */
+            /*
+             * Finished sending.  We should go back to reading, though if we
+             * sent a FIELD_TOOLONG error in reply to a length with the high
+             * bit set, RFC 4120 says we have to close the TCP stream.
+             */
             isForcedClose = 0;
             goto kill_tcp_connection;
         }
     } else if (selflags & SSF_READ) {
-        /* Read message length and data into one big buffer, already
-           allocated at connect time.  If we have a complete message,
-           we stop reading, so we should only be here if there is no
-           data in the buffer, or only an incomplete message.  */
+        /*
+         * Read message length and data into one big buffer, already allocated
+         * at connect time.  If we have a complete message, we stop reading, so
+         * we should only be here if there is no data in the buffer, or only an
+         * incomplete message.
+         */
         size_t len;
         ssize_t nread;
         if (conn->u.tcp.offset < 4) {
-            /* msglen has not been computed */
-            /* XXX Doing at least two reads here, letting the kernel
-               worry about buffering.  It'll be faster when we add
-               code to manage the buffer here.  */
+            /* msglen has not been computed.  XXX Doing at least two reads
+             * here, letting the kernel worry about buffering. */
             len = 4 - conn->u.tcp.offset;
             nread = SOCKET_READ(conn->fd,
                                 conn->u.tcp.buffer + conn->u.tcp.offset, len);
@@ -1731,15 +1758,16 @@ process_tcp_connection(void *handle,
                 conn->u.tcp.msglen = load_32_be(p);
                 if (conn->u.tcp.msglen > conn->u.tcp.bufsiz - 4) {
                     krb5_error_code err;
-                    /* message too big */
-                    krb5_klog_syslog(LOG_ERR, "TCP client %s wants %lu bytes, cap is %lu",
-                                     conn->u.tcp.addrbuf, (unsigned long) conn->u.tcp.msglen,
+                    /* Message too big. */
+                    krb5_klog_syslog(LOG_ERR, "TCP client %s wants %lu bytes, "
+                                     "cap is %lu", conn->u.tcp.addrbuf,
+                                     (unsigned long) conn->u.tcp.msglen,
                                      (unsigned long) conn->u.tcp.bufsiz - 4);
                     /* XXX Should return an error.  */
                     err = make_toolong_error (handle, &conn->u.tcp.response);
                     if (err) {
-                        krb5_klog_syslog(LOG_ERR,
-                                         "error constructing KRB_ERR_FIELD_TOOLONG error! %s",
+                        krb5_klog_syslog(LOG_ERR, "error constructing "
+                                         "KRB_ERR_FIELD_TOOLONG error! %s",
                                          error_message(err));
                         goto kill_tcp_connection;
                     }
@@ -1747,7 +1775,7 @@ process_tcp_connection(void *handle,
                 }
             }
         } else {
-            /* msglen known */
+            /* msglen known. */
             krb5_data request;
             krb5_error_code err;
             struct sockaddr_storage local_saddr;
@@ -1757,22 +1785,20 @@ process_tcp_connection(void *handle,
             len = conn->u.tcp.msglen - (conn->u.tcp.offset - 4);
             nread = SOCKET_READ(conn->fd,
                                 conn->u.tcp.buffer + conn->u.tcp.offset, len);
-            if (nread < 0)
-                /* error */
+            if (nread < 0)      /* error */
                 goto kill_tcp_connection;
-            if (nread == 0)
-                /* eof */
+            if (nread == 0)     /* eof */
                 goto kill_tcp_connection;
             conn->u.tcp.offset += nread;
             if (conn->u.tcp.offset < conn->u.tcp.msglen + 4)
                 return;
-            /* have a complete message, and exactly one message */
+            /* Have a complete message, and exactly one message. */
             request.length = conn->u.tcp.msglen;
             request.data = conn->u.tcp.buffer + 4;
 
-            if (getsockname(conn->fd, ss2sa(&local_saddr), &local_saddrlen) == 0) {
+            if (getsockname(conn->fd, ss2sa(&local_saddr),
+                            &local_saddrlen) == 0)
                 local_saddrp = ss2sa(&local_saddr);
-            }
 
             err = dispatch(handle, local_saddrp, &conn->u.tcp.faddr,
                            &request, &conn->u.tcp.response, 1);
@@ -1793,14 +1819,15 @@ kill_tcp_connection:
     kill_tcp_or_rpc_connection(handle, conn, isForcedClose);
 }
 
-static void service_conn(void *handle,
-                         struct connection *conn, const char *prog,
-                         int selflags)
+static void
+service_conn(void *handle, struct connection *conn, const char *prog,
+             int selflags)
 {
     conn->service(handle, conn, prog, selflags);
 }
 
-static int getcurtime(struct timeval *tvp)
+static int
+getcurtime(struct timeval *tvp)
 {
 #ifdef _WIN32
     struct _timeb tb;
@@ -1814,16 +1841,15 @@ static int getcurtime(struct timeval *tvp)
 }
 
 krb5_error_code
-listen_and_process(void *handle, const char *prog,
-                   void (*reset)(void))
+listen_and_process(void *handle, const char *prog, void (*reset)(void))
 {
-    int                 nfound;
+    int nfound;
     /* This struct contains 3 fd_set objects; on some platforms, they
        can be rather large.  Making this static avoids putting all
        that junk on the stack.  */
     static struct select_state sout;
-    int                 i, sret, netchanged = 0;
-    krb5_error_code     err;
+    int i, sret, netchanged = 0;
+    krb5_error_code err;
 
     if (conns == (struct connection **) NULL)
         return KDC5_NONET;
@@ -1836,12 +1862,11 @@ listen_and_process(void *handle, const char *prog,
         }
 
         if (network_reconfiguration_needed) {
-            /* No point in re-logging what we've just logged.  */
+            /* No point in re-logging what we've just logged. */
             if (netchanged == 0)
                 krb5_klog_syslog(LOG_INFO, "network reconfiguration needed");
-            /* It might be tidier to add a timer-callback interface to
-               the control loop here, but for this one use, it's not a
-               big deal.  */
+            /* It might be tidier to add a timer-callback interface to the
+             * control loop, but for this one use, it's not a big deal. */
             err = getcurtime(&sstate.end_time);
             if (err) {
                 com_err(prog, err, "while getting the time");
@@ -1917,10 +1942,11 @@ closedown_network_sockets()
                 svc_destroy(conn->u.rpc.transp);
         }
         DEL (connections, i);
-        /* There may also be per-connection data in the tcp structure
-           (tcp.buffer, tcp.response) that we're not freeing here.
-           That should only happen if we quit with a connection in
-           progress.  */
+        /*
+         * There may also be per-connection data in the tcp structure
+         * (tcp.buffer, tcp.response) that we're not freeing here.  That should
+         * only happen if we quit with a connection in progress.
+         */
         free(conn);
     }
 }
@@ -1935,8 +1961,9 @@ closedown_network()
     FREE_SET_DATA(rpc_svc_data);
 }
 
-static void accept_rpc_connection(void *handle, struct connection *conn,
-                                  const char *prog, int selflags)
+static void
+accept_rpc_connection(void *handle, struct connection *conn, const char *prog,
+                      int selflags)
 {
     struct socksetup sockdata;
     fd_set fds;
@@ -1950,23 +1977,17 @@ static void accept_rpc_connection(void *handle, struct connection *conn,
     sockdata.prog = prog;
     sockdata.retval = 0;
 
-    /*
-     * Service the woken RPC listener descriptor.
-     */
+    /* Service the woken RPC listener descriptor. */
     FD_ZERO(&fds);
     FD_SET(conn->fd, &fds);
 
     svc_getreqset(&fds);
 
-    /*
-     * Scan svc_fdset for any new connections.
-     */
+    /* Scan svc_fdset for any new connections. */
     for (s = 0; s < FD_SETSIZE; s++) {
         /* sstate.rfds |= svc_fdset & ~(rpc_listenfds | sstate.rfds) */
-        if (FD_ISSET(s, &svc_fdset)
-            && !FD_ISSET(s, &rpc_listenfds)
-            && !FD_ISSET(s, &sstate.rfds))
-        {
+        if (FD_ISSET(s, &svc_fdset) && !FD_ISSET(s, &rpc_listenfds)
+            && !FD_ISSET(s, &sstate.rfds)) {
             struct connection *newconn;
             struct sockaddr_storage addr_s;
             struct sockaddr *addr = (struct sockaddr *)&addr_s;
@@ -1984,11 +2005,13 @@ static void accept_rpc_connection(void *handle, struct connection *conn,
 
             if (getpeername(s, addr, &addrlen) ||
                 getnameinfo(addr, addrlen,
-                            newconn->u.tcp.addrbuf, sizeof(newconn->u.tcp.addrbuf),
+                            newconn->u.tcp.addrbuf,
+                            sizeof(newconn->u.tcp.addrbuf),
                             tmpbuf, sizeof(tmpbuf),
-                            NI_NUMERICHOST | NI_NUMERICSERV))
-                strlcpy(newconn->u.tcp.addrbuf, "???", sizeof(newconn->u.tcp.addrbuf));
-            else {
+                            NI_NUMERICHOST | NI_NUMERICSERV)) {
+                strlcpy(newconn->u.tcp.addrbuf, "???",
+                        sizeof(newconn->u.tcp.addrbuf));
+            } else {
                 char *p, *end;
                 p = newconn->u.tcp.addrbuf;
                 end = p + sizeof(newconn->u.tcp.addrbuf);
@@ -1999,8 +2022,8 @@ static void accept_rpc_connection(void *handle, struct connection *conn,
                 }
             }
 #if 0
-            krb5_klog_syslog(LOG_INFO, "accepted RPC connection on socket %d from %s",
-                             s, newconn->u.tcp.addrbuf);
+            krb5_klog_syslog(LOG_INFO, "accepted RPC connection on socket %d "
+                             "from %s", s, newconn->u.tcp.addrbuf);
 #endif
 
             newconn->u.tcp.addr_s = addr_s;
@@ -2020,8 +2043,9 @@ static void accept_rpc_connection(void *handle, struct connection *conn,
     }
 }
 
-static void process_rpc_connection(void *handle, struct connection *conn,
-                                   const char *prog, int selflags)
+static void
+process_rpc_connection(void *handle, struct connection *conn, const char *prog,
+                       int selflags)
 {
     fd_set fds;
 
