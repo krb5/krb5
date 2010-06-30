@@ -236,7 +236,7 @@ struct connection {
     (((int)(set.max + incr) < set.max                                   \
       || (((size_t)((int)(set.max + incr) * sizeof(set.data[0]))        \
            / sizeof(set.data[0]))                                       \
-          != (set.max + incr)))                                         \
+          != (size_t)(set.max + incr)))                                 \
      ? 0                          /* overflow */                        \
      : ((tmpptr = realloc(set.data,                                     \
                           (int)(set.max + incr) * sizeof(set.data[0]))) \
@@ -322,7 +322,7 @@ add_tcp_port(int port)
 }
 
 krb5_error_code
-add_rpc_service(int port, u_long prognum, u_long versnum, void (*dispatch)())
+add_rpc_service(int port, u_long prognum, u_long versnum, void (*dispatchfn)())
 {
     int i;
     void *tmp;
@@ -333,7 +333,7 @@ add_rpc_service(int port, u_long prognum, u_long versnum, void (*dispatch)())
         return EINVAL;
     svc.prognum = prognum;
     svc.versnum = versnum;
-    svc.dispatch = dispatch;
+    svc.dispatch = dispatchfn;
 
     FOREACH_ELT (rpc_svc_data, i, val) {
         if (val.port == port)
@@ -1504,7 +1504,7 @@ process_packet(void *handle, struct connection *conn, const char *prog,
                 saddrbuf, sportbuf, daddrbuf);
         return;
     }
-    if (cc != response->length) {
+    if ((size_t)cc != response->length) {
         com_err(prog, 0, "short reply write %d vs %d\n",
                 response->length, cc);
     }
@@ -1591,7 +1591,7 @@ accept_tcp_connection(void *handle, struct connection *conn, const char *prog,
         p = newconn->u.tcp.addrbuf;
         end = p + sizeof(newconn->u.tcp.addrbuf);
         p += strlen(p);
-        if (end - p > 2 + strlen(tmpbuf)) {
+        if ((size_t)(end - p) > 2 + strlen(tmpbuf)) {
             *p++ = '.';
             strlcpy(p, tmpbuf, end - p);
         }
@@ -1711,8 +1711,8 @@ process_tcp_connection(void *handle, struct connection *conn, const char *prog,
         }
         while (nwrote) {
             sg_buf *sgp = conn->u.tcp.sgp;
-            if (nwrote < SG_LEN(sgp)) {
-                SG_ADVANCE(sgp, nwrote);
+            if ((size_t)nwrote < SG_LEN(sgp)) {
+                SG_ADVANCE(sgp, (size_t)nwrote);
                 nwrote = 0;
             } else {
                 nwrote -= SG_LEN(sgp);
@@ -2016,7 +2016,7 @@ accept_rpc_connection(void *handle, struct connection *conn, const char *prog,
                 p = newconn->u.tcp.addrbuf;
                 end = p + sizeof(newconn->u.tcp.addrbuf);
                 p += strlen(p);
-                if (end - p > 2 + strlen(tmpbuf)) {
+                if ((size_t)(end - p) > 2 + strlen(tmpbuf)) {
                     *p++ = '.';
                     strlcpy(p, tmpbuf, end - p);
                 }
