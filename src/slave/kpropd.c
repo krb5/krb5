@@ -235,10 +235,35 @@ static void resync_alarm(int sn)
     gfd = -1;
 }
 
+/* Use getaddrinfo to determine a wildcard listener address, preferring
+ * IPv6 if available. */
+static int
+get_wildcard_addr(struct addrinfo **res)
+{
+    struct addrinfo hints;
+    int error;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
+#ifdef AI_ADDRCONFIG
+    /* Try to avoid IPv6 if the host has no IPv6 interface addresses. */
+    hints.ai_flags |= AI_ADDRCONFIG;
+#endif
+#ifdef KRB5_USE_INET6
+    hints.ai_family = AF_INET6;
+    error = getaddrinfo(NULL, port, &hints, res);
+    if (error == 0)
+        return 0;
+#endif
+    hints.ai_family = AF_INET;
+    return getaddrinfo(NULL, port, &hints, res);
+}
+
 int do_standalone(iprop_role iproprole)
 {
     struct  sockaddr_in     frominet;
-    struct addrinfo hints, *res;
+    struct addrinfo *res;
     int     finet, s;
     GETPEERNAME_ARG3_TYPE fromlen;
     int ret, error, val;
@@ -249,12 +274,7 @@ int do_standalone(iprop_role iproprole)
 
 retry:
 
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-
-    error = getaddrinfo(NULL, port, &hints, &res);
+    error = get_wildcard_addr(&res);
     if (error != 0) {
         (void) fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(error));
         exit(1);
@@ -270,11 +290,12 @@ retry:
     if (setsockopt(finet, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) < 0)
         com_err(progname, errno, "while setting SO_REUSEADDR option");
 
-#ifdef IPV6_V6ONLY
-    /* Typically, res will be the IPv6 wildcard address.  Some systems, such as
-     * the *BSDs, don't accept IPv4 connections on this address by default. */
+#if defined(KRB5_USE_INET6) && defined(IPV6_V6ONLY)
+    /* Make sure dual-stack support is enabled on IPv6 listener sockets if
+     * possible. */
     val = 0;
-    if (setsockopt(finet, IPPROTO_IPV6, IPV6_V6ONLY, &val, sizeof(val)) < 0)
+    if (res->ai_family == AF_INET6 &&
+        setsockopt(finet, IPPROTO_IPV6, IPV6_V6ONLY, &val, sizeof(val)) < 0)
         com_err(progname, errno, "while unsetting IPV6_V6ONLY option");
 #endif
 
