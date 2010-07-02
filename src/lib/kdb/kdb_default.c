@@ -233,23 +233,6 @@ out:
     return retval;
 }
 
-krb5_error_code
-krb5_def_store_mkey(krb5_context   context,
-                    char           *keyfile,
-                    krb5_principal mname,
-                    krb5_kvno      kvno,
-                    krb5_keyblock  *key,
-                    char           *master_pwd)
-{
-    krb5_keylist_node list;
-
-    list.kvno = kvno;
-    list.keyblock = *key;
-    list.next = NULL;
-    return krb5_def_store_mkey_list(context, keyfile, mname, &list,
-                                    master_pwd);
-}
-
 static krb5_error_code
 krb5_db_def_fetch_mkey_stash(krb5_context   context,
                              const char *keyfile,

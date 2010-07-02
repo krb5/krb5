@@ -688,14 +688,6 @@ krb5_dbe_def_search_enctype( krb5_context kcontext,
                              krb5_key_data **kdatap);
 
 krb5_error_code
-krb5_def_store_mkey( krb5_context context,
-                     char *keyfile,
-                     krb5_principal mname,
-                     krb5_kvno kvno,
-                     krb5_keyblock *key,
-                     char *master_pwd);
-
-krb5_error_code
 krb5_def_store_mkey_list( krb5_context context,
                           char *keyfile,
                           krb5_principal mname,
@@ -1122,19 +1114,6 @@ typedef struct _kdb_vftabl {
      */
     krb5_error_code (*get_master_key_list)(krb5_context kcontext,
                                            krb5_keylist_node **keylist);
-
-    /*
-     * Optional with default: Save a master keyblock into the stash file
-     * db_arg.  master_pwd indicates the password used to derive the keyblock,
-     * if it is known.  mname is the name of the master principal for the
-     * realm.
-     *
-     * The default implementation ignores master_pwd and saves the master key
-     * in a keytab-format file.
-     */
-    krb5_error_code (*store_master_key)(krb5_context kcontext, char *db_arg,
-                                        krb5_principal mname, krb5_kvno kvno,
-                                        krb5_keyblock *key, char *master_pwd);
 
     /*
      * Optional with default: Retrieve a master keyblock from the stash file

@@ -260,8 +260,6 @@ kdb_setup_opt_functions(db_library lib)
         lib->vftabl.dbe_search_enctype = krb5_dbe_def_search_enctype;
     if (lib->vftabl.change_pwd == NULL)
         lib->vftabl.change_pwd = krb5_dbe_def_cpw;
-    if (lib->vftabl.store_master_key == NULL)
-        lib->vftabl.store_master_key = krb5_def_store_mkey;
     if (lib->vftabl.promote_db == NULL)
         lib->vftabl.promote_db = krb5_def_promote_db;
     if (lib->vftabl.decrypt_key_data == NULL)
@@ -1132,16 +1130,13 @@ krb5_db_store_master_key(krb5_context kcontext,
                          krb5_kvno kvno,
                          krb5_keyblock * key, char *master_pwd)
 {
-    krb5_error_code status = 0;
-    kdb_vftabl *v;
+    krb5_keylist_node list;
 
-    status = get_vftabl(kcontext, &v);
-    if (status)
-        return status;
-    if (v->store_master_key == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
-    return v->store_master_key(kcontext, keyfile, mname, kvno, key,
-                               master_pwd);
+    list.kvno = kvno;
+    list.keyblock = *key;
+    list.next = NULL;
+    return krb5_db_store_master_key_list(kcontext, keyfile, mname, &list,
+                                         master_pwd);
 }
 
 krb5_error_code
