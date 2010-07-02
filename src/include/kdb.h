@@ -902,8 +902,8 @@ typedef struct _kdb_vftabl {
      * init_module.  This function may return an error if the database already
      * exists.  Used by kdb5_util create.
      */
-    krb5_error_code (*db_create)(krb5_context kcontext, char *conf_section,
-                                 char **db_args);
+    krb5_error_code (*create)(krb5_context kcontext, char *conf_section,
+                              char **db_args);
 
     /*
      * Optional: Destroy a database.  conf_section and db_args have the same
@@ -911,8 +911,8 @@ typedef struct _kdb_vftabl {
      * usage, the database is destroyed while open, so the module should handle
      * that.
      */
-    krb5_error_code (*db_destroy)(krb5_context kcontext, char *conf_section,
-                                  char **db_args);
+    krb5_error_code (*destroy)(krb5_context kcontext, char *conf_section,
+                               char **db_args);
 
     /*
      * Optional: Set *age to the last modification time of the database.  Used
@@ -923,8 +923,8 @@ typedef struct _kdb_vftabl {
      * effectively expire immediately.  Another option is to supply the current
      * time, which will cause lookaside cache entries to last for one second.
      */
-    krb5_error_code (*db_get_age)(krb5_context kcontext, char *db_name,
-                                  time_t *age);
+    krb5_error_code (*get_age)(krb5_context kcontext, char *db_name,
+                               time_t *age);
 
     /*
      * Optional: Lock the database, with semantics depending on the mode
@@ -941,10 +941,10 @@ typedef struct _kdb_vftabl {
      * KRB5_PLUGIN_OP_NOTSUPP; note that this is *not* the usual "operation
      * not supported" error code.
      */
-    krb5_error_code (*db_lock)(krb5_context kcontext, int mode);
+    krb5_error_code (*lock)(krb5_context kcontext, int mode);
 
     /* Optional: Release a lock created with db_lock. */
-    krb5_error_code (*db_unlock)(krb5_context kcontext);
+    krb5_error_code (*unlock)(krb5_context kcontext);
 
     /*
      * Mandatory: Fill in *entries with the entry for the principal search_for.
@@ -1008,11 +1008,11 @@ typedef struct _kdb_vftabl {
      * the module should return the entry for the cross-realm TGS of the
      * referred-to realm.
      */
-    krb5_error_code (*db_get_principal)(krb5_context kcontext,
-                                        krb5_const_principal search_for,
-                                        unsigned int flags,
-                                        krb5_db_entry *entries, int *nentries,
-                                        krb5_boolean *more);
+    krb5_error_code (*get_principal)(krb5_context kcontext,
+                                     krb5_const_principal search_for,
+                                     unsigned int flags,
+                                     krb5_db_entry *entries, int *nentries,
+                                     krb5_boolean *more);
 
     /*
      * Mandatory: Free the memory associated with principal entries.  Do not
@@ -1021,8 +1021,8 @@ typedef struct _kdb_vftabl {
      * allocate associated memory); thus, a plugin must allocate each field
      * of a principal entry separately.
      */
-    krb5_error_code (*db_free_principal)(krb5_context kcontext,
-                                         krb5_db_entry *entry, int count);
+    krb5_error_code (*free_principal)(krb5_context kcontext,
+                                      krb5_db_entry *entry, int count);
 
     /*
      * Optional: Create or modify one or more principal entries.  All callers
@@ -1036,18 +1036,18 @@ typedef struct _kdb_vftabl {
      * they are specified in the mask, so it is acceptable for a module to
      * ignore the mask and update the entire entry.
      */
-    krb5_error_code (*db_put_principal)(krb5_context kcontext,
-                                        krb5_db_entry *entries, int *nentries,
-                                        char **db_args);
+    krb5_error_code (*put_principal)(krb5_context kcontext,
+                                     krb5_db_entry *entries, int *nentries,
+                                     char **db_args);
 
     /*
      * Optional: Delete the entry for the principal search_for.  If the
      * principal does not exist, set *nentries to 0 and return success; if it
      * did exist, set *nentries to 1.
      */
-    krb5_error_code (*db_delete_principal)(krb5_context kcontext,
-                                           krb5_const_principal search_for,
-                                           int *nentries);
+    krb5_error_code (*delete_principal)(krb5_context kcontext,
+                                        krb5_const_principal search_for,
+                                        int *nentries);
 
     /*
      * Optional: For each principal entry in the database, invoke func with the
@@ -1055,17 +1055,17 @@ typedef struct _kdb_vftabl {
      * module may narrow the iteration to principal names matching that regular
      * expression; a module may alternatively ignore match_entry.
      */
-    krb5_error_code (*db_iterate)(krb5_context kcontext,
-                                  char *match_entry,
-                                  int (*func)(krb5_pointer, krb5_db_entry *),
-                                  krb5_pointer func_arg);
+    krb5_error_code (*iterate)(krb5_context kcontext,
+                               char *match_entry,
+                               int (*func)(krb5_pointer, krb5_db_entry *),
+                               krb5_pointer func_arg);
 
     /*
      * Optional: Create a password policy entry.  Return an error if the policy
      * already exists.
      */
-    krb5_error_code (*db_create_policy)(krb5_context kcontext,
-                                        osa_policy_ent_t policy);
+    krb5_error_code (*create_policy)(krb5_context kcontext,
+                                     osa_policy_ent_t policy);
 
     /*
      * Optional: If a password policy entry exists with the name name, allocate
@@ -1074,15 +1074,15 @@ typedef struct _kdb_vftabl {
      * success, or return an error (existing module implementations are not
      * consistent).
      */
-    krb5_error_code (*db_get_policy)(krb5_context kcontext, char *name,
-                                     osa_policy_ent_t *policy, int *cnt);
+    krb5_error_code (*get_policy)(krb5_context kcontext, char *name,
+                                  osa_policy_ent_t *policy, int *cnt);
 
     /*
      * Optional: Modify an existing password policy entry to match the values
      * in policy.  Return an error if the policy does not already exist.
      */
-    krb5_error_code (*db_put_policy)(krb5_context kcontext,
-                                     osa_policy_ent_t policy);
+    krb5_error_code (*put_policy)(krb5_context kcontext,
+                                  osa_policy_ent_t policy);
 
     /*
      * Optional: For each password policy entry in the database, invoke func
@@ -1090,32 +1090,32 @@ typedef struct _kdb_vftabl {
      * the module may narrow the iteration to policy names matching that
      * regular expression; a module may alternatively ignore match_entry.
      */
-    krb5_error_code (*db_iter_policy)(krb5_context kcontext, char *match_entry,
-                                      osa_adb_iter_policy_func func,
-                                      void *data);
+    krb5_error_code (*iter_policy)(krb5_context kcontext, char *match_entry,
+                                   osa_adb_iter_policy_func func,
+                                   void *data);
 
     /*
      * Optional: Delete the password policy entry with the name policy.  Return
      * an error if the entry does not exist.
      */
-    krb5_error_code (*db_delete_policy)(krb5_context kcontext, char *policy);
+    krb5_error_code (*delete_policy)(krb5_context kcontext, char *policy);
 
     /* Optional: Free a policy entry returned by db_get_policy. */
-    void (*db_free_policy)(krb5_context kcontext, osa_policy_ent_t val);
+    void (*free_policy)(krb5_context kcontext, osa_policy_ent_t val);
 
     /*
      * Mandatory: Has the semantics of realloc(ptr, size).  Callers use this to
      * allocate memory for new or changed principal entries, so the module
      * should expect to potentially see this memory in db_free_principal.
      */
-    void *(*db_alloc)(krb5_context kcontext, void *ptr, size_t size);
+    void *(*alloc)(krb5_context kcontext, void *ptr, size_t size);
 
     /*
      * Mandatory: Has the semantics of free(ptr).  Callers use this to free
      * fields from a principal entry (such as key data) before changing it in
      * place, and in some cases to free data they allocated with db_alloc.
      */
-    void (*db_free)(krb5_context kcontext, void *ptr);
+    void (*free)(krb5_context kcontext, void *ptr);
 
     /*
      * Optional with default: Inform the module of the master key.  The module
@@ -1230,14 +1230,14 @@ typedef struct _kdb_vftabl {
      * set.
      *
      * The default implementation uses the keyblock master_key to encrypt each
-     * new key, via the function dbekd_encrypt_key_data.
+     * new key, via the function encrypt_key_data.
      */
-    krb5_error_code (*db_change_pwd)(krb5_context context,
-                                     krb5_keyblock *master_key,
-                                     krb5_key_salt_tuple *ks_tuple,
-                                     int ks_tuple_count, char *passwd,
-                                     int new_kvno, krb5_boolean keepold,
-                                     krb5_db_entry *db_entry);
+    krb5_error_code (*change_pwd)(krb5_context context,
+                                  krb5_keyblock *master_key,
+                                  krb5_key_salt_tuple *ks_tuple,
+                                  int ks_tuple_count, char *passwd,
+                                  int new_kvno, krb5_boolean keepold,
+                                  krb5_db_entry *db_entry);
 
     /*
      * Optional with default: Promote a temporary database to be the live one.
@@ -1264,11 +1264,11 @@ typedef struct _kdb_vftabl {
      * stored, unencrypted, in key_data_contents[1], with length given by
      * key_data_length[1].
      */
-    krb5_error_code (*dbekd_decrypt_key_data)(krb5_context kcontext,
-                                              const krb5_keyblock *mkey,
-                                              const krb5_key_data *key_data,
-                                              krb5_keyblock *dbkey,
-                                              krb5_keysalt *keysalt);
+    krb5_error_code (*decrypt_key_data)(krb5_context kcontext,
+                                        const krb5_keyblock *mkey,
+                                        const krb5_key_data *key_data,
+                                        krb5_keyblock *dbkey,
+                                        krb5_keysalt *keysalt);
 
     /*
      * Optional with default: Encrypt dbkey with master keyblock mkey, placing
@@ -1280,12 +1280,11 @@ typedef struct _kdb_vftabl {
      * in key_data_contents[1] and its length in key_data_length[1].  If
      * keysalt is not specified, key_data_ver is set to 1.
      */
-    krb5_error_code (*dbekd_encrypt_key_data)(krb5_context kcontext,
-                                              const krb5_keyblock *mkey,
-                                              const krb5_keyblock *dbkey,
-                                              const krb5_keysalt *keysalt,
-                                              int keyver,
-                                              krb5_key_data *key_data);
+    krb5_error_code (*encrypt_key_data)(krb5_context kcontext,
+                                        const krb5_keyblock *mkey,
+                                        const krb5_keyblock *dbkey,
+                                        const krb5_keysalt *keysalt,
+                                        int keyver, krb5_key_data *key_data);
 
     /*
      * Optional: Perform an operation on input data req with output stored in
@@ -1344,8 +1343,8 @@ typedef struct _kdb_vftabl {
      *     not.  If this method is not implemented, all S4U2Proxy delegation
      *     requests will be rejected.  Do not place any data in rep.
      */
-    krb5_error_code (*db_invoke)(krb5_context context, unsigned int method,
-                                 const krb5_data *req, krb5_data *rep);
+    krb5_error_code (*invoke)(krb5_context context, unsigned int method,
+                              const krb5_data *req, krb5_data *rep);
 } kdb_vftabl;
 
 #endif /* !defined(_WIN32) */

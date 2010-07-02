@@ -198,7 +198,7 @@ krb5_db2_lockout_audit(krb5_context context,
     }
 
     if (need_update) {
-        code = krb5_db2_db_put_principal(context, entry, &nentries, NULL);
+        code = krb5_db2_put_principal(context, entry, &nentries, NULL);
         if (code != 0)
             return code;
     }

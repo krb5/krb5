@@ -4,7 +4,7 @@ krb5_ldap_close
 krb5_ldap_db_init
 krb5_ldap_lib_init
 krb5_ldap_lib_cleanup
-krb5_ldap_db_get_age
+krb5_ldap_get_age
 krb5_ldap_read_server_params
 krb5_ldap_put_principal
 krb5_ldap_get_principal

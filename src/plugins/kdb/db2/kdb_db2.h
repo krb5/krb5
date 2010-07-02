@@ -55,56 +55,52 @@ typedef struct _krb5_db2_context {
 #define KDB2_LOCK_EXT ".ok"
 #define KDB2_TEMP_LOCK_EXT "~.ok"
 
-krb5_error_code krb5_db2_db_init(krb5_context);
-krb5_error_code krb5_db2_db_fini(krb5_context);
-krb5_error_code krb5_db2_db_get_age(krb5_context, char *, time_t *);
-krb5_error_code krb5_db2_db_rename(krb5_context, char *, char *, int );
-krb5_error_code krb5_db2_db_get_principal(krb5_context, krb5_const_principal,
-                                          krb5_db_entry *, int *,
-                                          krb5_boolean *);
-krb5_error_code krb5_db2_db_free_principal(krb5_context, krb5_db_entry *, int);
-krb5_error_code krb5_db2_db_put_principal(krb5_context, krb5_db_entry *,
-                                          int *, char **db_args);
-krb5_error_code krb5_db2_db_iterate_ext(krb5_context,
-                                        krb5_error_code (*)(krb5_pointer,
-                                                            krb5_db_entry *),
-                                        krb5_pointer, int, int);
-krb5_error_code krb5_db2_db_iterate(krb5_context, char *,
-                                    krb5_error_code (*)(krb5_pointer,
-                                                        krb5_db_entry *),
-                                    krb5_pointer);
-krb5_error_code krb5_db2_db_set_nonblocking(krb5_context, krb5_boolean,
-                                            krb5_boolean *);
-krb5_boolean krb5_db2_db_set_lockmode(krb5_context, krb5_boolean);
-krb5_error_code krb5_db2_db_open_database(krb5_context);
-krb5_error_code krb5_db2_db_close_database(krb5_context);
+krb5_error_code krb5_db2_init(krb5_context);
+krb5_error_code krb5_db2_fini(krb5_context);
+krb5_error_code krb5_db2_get_age(krb5_context, char *, time_t *);
+krb5_error_code krb5_db2_rename(krb5_context, char *, char *, int );
+krb5_error_code krb5_db2_get_principal(krb5_context, krb5_const_principal,
+                                       krb5_db_entry *, int *, krb5_boolean *);
+krb5_error_code krb5_db2_free_principal(krb5_context, krb5_db_entry *, int);
+krb5_error_code krb5_db2_put_principal(krb5_context, krb5_db_entry *, int *,
+                                       char **db_args);
+krb5_error_code krb5_db2_iterate_ext(krb5_context,
+                                     krb5_error_code (*)(krb5_pointer,
+                                                         krb5_db_entry *),
+                                     krb5_pointer, int, int);
+krb5_error_code krb5_db2_iterate(krb5_context, char *,
+                                 krb5_error_code (*)(krb5_pointer,
+                                                     krb5_db_entry *),
+                                 krb5_pointer);
+krb5_error_code krb5_db2_set_nonblocking(krb5_context, krb5_boolean,
+                                         krb5_boolean *);
+krb5_boolean krb5_db2_set_lockmode(krb5_context, krb5_boolean);
+krb5_error_code krb5_db2_open_database(krb5_context);
+krb5_error_code krb5_db2_close_database(krb5_context);
 
 krb5_error_code
-krb5_db2_db_set_mkey_list(krb5_context context, krb5_keylist_node *keylist);
+krb5_db2_set_mkey_list(krb5_context context, krb5_keylist_node *keylist);
 
 krb5_error_code
-krb5_db2_db_get_mkey_list(krb5_context context, krb5_keylist_node **keylist);
+krb5_db2_get_mkey_list(krb5_context context, krb5_keylist_node **keylist);
 
 krb5_error_code
-krb5_db2_db_put_principal(krb5_context context, krb5_db_entry *entries,
-                          register int *nentries, char **db_args);
+krb5_db2_put_principal(krb5_context context, krb5_db_entry *entries,
+                       register int *nentries, char **db_args);
 
 krb5_error_code
-krb5_db2_db_delete_principal(krb5_context context,
-                             krb5_const_principal searchfor, int *nentries);
+krb5_db2_delete_principal(krb5_context context, krb5_const_principal searchfor,
+                          int *nentries);
 
 krb5_error_code krb5_db2_lib_init(void);
 krb5_error_code krb5_db2_lib_cleanup(void);
-krb5_error_code krb5_db2_db_unlock(krb5_context);
+krb5_error_code krb5_db2_unlock(krb5_context);
 
 krb5_error_code
 krb5_db2_promote_db(krb5_context kcontext, char *conf_section, char **db_args);
 
 krb5_error_code
-krb5_db2_db_set_option(krb5_context kcontext, int option, void *value );
-
-krb5_error_code
-krb5_db2_db_lock(krb5_context context, int in_mode);
+krb5_db2_lock(krb5_context context, int in_mode);
 
 krb5_error_code
 krb5_db2_open(krb5_context kcontext, char *conf_section, char **db_args,
