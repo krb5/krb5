@@ -72,18 +72,6 @@ krb5_error_code kdb_init_master(kadm5_server_handle_t handle,
     if (ret)
         goto done;
 
-#if 0 /************** Begin IFDEF'ed OUT *******************************/
-    /*
-     * krb5_db_fetch_mkey_list will verify mkey so don't call
-     * krb5_db_verify_master_key()
-     */
-    if ((ret = krb5_db_verify_master_key(handle->context, master_princ,
-                                         IGNORE_VNO, &master_keyblock))) {
-        krb5_db_fini(handle->context);
-        return ret;
-    }
-#endif /**************** END IFDEF'ed OUT *******************************/
-
     if ((ret = krb5_db_fetch_mkey_list(handle->context, master_princ,
                                        &master_keyblock, mkvno, &master_keylist))) {
         krb5_db_fini(handle->context);

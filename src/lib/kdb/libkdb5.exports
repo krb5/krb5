@@ -27,7 +27,6 @@ krb5_db_setup_mkey_name
 krb5_db_unlock
 krb5_db_store_master_key
 krb5_db_store_master_key_list
-krb5_db_verify_master_key
 krb5_dbe_apw
 krb5_dbe_ark
 krb5_dbe_cpw

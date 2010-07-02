@@ -1082,6 +1082,7 @@ dump_db(argc, argv)
     kdb_log_context     *log_ctx;
     char                **db_args = 0; /* XXX */
     unsigned int        ipropx_version = IPROPX_VERSION_0;
+    krb5_keylist_node *mkeys;
 
     /*
      * Parse the arguments.
@@ -1185,15 +1186,15 @@ dump_db(argc, argv)
                         "while reading master key");
                 exit(1);
             }
-            retval = krb5_db_verify_master_key(util_context,
-                                               master_princ,
-                                               IGNORE_VNO,
-                                               &master_keyblock);
+            retval = krb5_db_fetch_mkey_list(util_context, master_princ,
+                                             &master_keyblock, IGNORE_VNO,
+                                             &mkeys);
             if (retval) {
                 com_err(progname, retval,
                         "while verifying master key");
                 exit(1);
             }
+            krb5_db_free_mkey_list(util_context, mkeys);
         }
         new_master_keyblock.enctype = global_params.enctype;
         if (new_master_keyblock.enctype == ENCTYPE_UNKNOWN)

@@ -423,23 +423,6 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
                 rdp->realm_mpname, realm);
         goto whoops;
     }
-#if 0 /************** Begin IFDEF'ed OUT *******************************/
-    /*
-     * Commenting krb5_db_verify_master_key out because it requires the most
-     * current mkey which may not be the case here.  The call to
-     * krb5_db_fetch_mkey_list() will end up verifying that the mkey is viable
-     * anyway.
-     */
-    /* Verify the master key */
-    if ((kret = krb5_db_verify_master_key(rdp->realm_context,
-                                          rdp->realm_mprinc,
-                                          IGNORE_VNO,
-                                          &rdp->realm_mkey))) {
-        kdc_err(rdp->realm_context, kret,
-                "while verifying master key for realm %s", realm);
-        goto whoops;
-    }
-#endif /**************** END IFDEF'ed OUT *******************************/
 
     if ((kret = krb5_db_fetch_mkey_list(rdp->realm_context, rdp->realm_mprinc,
                                         &rdp->realm_mkey, mkvno, &rdp->mkey_list))) {

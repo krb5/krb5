@@ -252,8 +252,6 @@ kdb_setup_opt_functions(db_library lib)
         lib->vftabl.get_master_key_list = kdb_def_get_mkey_list;
     if (lib->vftabl.fetch_master_key == NULL)
         lib->vftabl.fetch_master_key = krb5_db_def_fetch_mkey;
-    if (lib->vftabl.verify_master_key == NULL)
-        lib->vftabl.verify_master_key = krb5_def_verify_master_key;
     if (lib->vftabl.fetch_master_key_list == NULL)
         lib->vftabl.fetch_master_key_list = krb5_def_fetch_mkey_list;
     if (lib->vftabl.store_master_key_list == NULL)
@@ -1275,23 +1273,6 @@ clean_n_exit:
         krb5_db_free(context, tmp_key.contents);
     }
     return retval;
-}
-
-krb5_error_code
-krb5_db_verify_master_key(krb5_context     kcontext,
-                          krb5_principal   mprinc,
-                          krb5_kvno        kvno,
-                          krb5_keyblock  * mkey)
-{
-    krb5_error_code status = 0;
-    kdb_vftabl *v;
-
-    status = get_vftabl(kcontext, &v);
-    if (status)
-        return status;
-    if (v->verify_master_key == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
-    return v->verify_master_key(kcontext, mprinc, kvno, mkey);
 }
 
 krb5_error_code

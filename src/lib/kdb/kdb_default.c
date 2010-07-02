@@ -434,63 +434,6 @@ krb5_db_def_fetch_mkey(krb5_context   context,
         return 0;
 }
 
-/*
- * Note, this verifies that the input mkey is currently protecting all the mkeys
- */
-krb5_error_code
-krb5_def_verify_master_key(krb5_context    context,
-                           krb5_principal  mprinc,
-                           krb5_kvno       kvno,
-                           krb5_keyblock   *mkey)
-{
-    krb5_error_code retval;
-    krb5_db_entry master_entry;
-    int nprinc;
-    krb5_boolean more;
-    krb5_keyblock tempkey;
-
-    nprinc = 1;
-    if ((retval = krb5_db_get_principal(context, mprinc,
-                                        &master_entry, &nprinc, &more)))
-        return(retval);
-
-    if (nprinc != 1) {
-        if (nprinc)
-            krb5_db_free_principal(context, &master_entry, nprinc);
-        return(KRB5_KDB_NOMASTERKEY);
-    } else if (more) {
-        krb5_db_free_principal(context, &master_entry, nprinc);
-        return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
-    }
-
-    if ((retval = krb5_dbe_decrypt_key_data(context, mkey,
-                                            &master_entry.key_data[0],
-                                            &tempkey, NULL))) {
-        krb5_db_free_principal(context, &master_entry, nprinc);
-        return retval;
-    }
-
-    if (mkey->length != tempkey.length ||
-        memcmp((char *)mkey->contents,
-               (char *)tempkey.contents,mkey->length)) {
-        retval = KRB5_KDB_BADMASTERKEY;
-    }
-
-    if (kvno != IGNORE_VNO &&
-        kvno != (krb5_kvno) master_entry.key_data->key_data_kvno) {
-        retval = KRB5_KDB_BADMASTERKEY;
-        krb5_set_error_message (context, retval,
-                                "User specified mkeyVNO (%u) does not match master key princ's KVNO (%u)",
-                                kvno, master_entry.key_data->key_data_kvno);
-    }
-
-    zap((char *)tempkey.contents, tempkey.length);
-    free(tempkey.contents);
-    krb5_db_free_principal(context, &master_entry, nprinc);
-
-    return retval;
-}
-
 krb5_error_code
 krb5_def_fetch_mkey_list(krb5_context        context,
                          krb5_principal        mprinc,

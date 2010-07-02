@@ -476,10 +476,6 @@ krb5_error_code krb5_db_fetch_mkey  ( krb5_context   context,
                                       krb5_kvno     *kvno,
                                       krb5_data     *salt,
                                       krb5_keyblock *key);
-krb5_error_code krb5_db_verify_master_key ( krb5_context   kcontext,
-                                            krb5_principal mprinc,
-                                            krb5_kvno      kvno,
-                                            krb5_keyblock  *mkey );
 krb5_error_code
 krb5_db_fetch_mkey_list( krb5_context    context,
                          krb5_principal  mname,
@@ -715,12 +711,6 @@ krb5_db_def_fetch_mkey( krb5_context   context,
                         krb5_keyblock *key,
                         krb5_kvno     *kvno,
                         char          *db_args);
-
-krb5_error_code
-krb5_def_verify_master_key( krb5_context   context,
-                            krb5_principal mprinc,
-                            krb5_kvno      kvno,
-                            krb5_keyblock *mkey);
 
 krb5_error_code
 krb5_def_fetch_mkey_list( krb5_context            context,
@@ -1163,28 +1153,18 @@ typedef struct _kdb_vftabl {
                                         char *db_args);
 
     /*
-     * Optional with default: Verify that the keyblock mkey is a valid master
-     * key for the realm.  This function used to be used by the KDC and
-     * kadmind, but is now used only by kdb5_util dump -mkey_convert.
-     *
-     * The default implementation retrieves the master key principal and
-     * attempts to decrypt its key with mkey.  This only works for the current
-     * master keyblock.
-     */
-    krb5_error_code (*verify_master_key)(krb5_context kcontext,
-                                         krb5_principal mprinc, krb5_kvno kvno,
-                                         krb5_keyblock *mkey);
-
-    /*
      * Optional with default: Given a keyblock for some version of the
      * database's master key, fetch the decrypted master key values from the
      * database and store the list into *mkeys_list.  The caller will free
      * *mkeys_list using a libkdb5 function which uses the standard free()
      * function, so the module must not use a custom allocator.
      *
-     * The default implementation tries the key against the current master key
-     * data and all KRB5_TL_MKEY_AUX values, which contain copies of the master
-     * keys encrypted with old master keys.
+     * The caller may not know the version number of the master key it has, in
+     * which case it will pass IGNORE_VNO.
+     *
+     * The default implementation ignores kvno and tries the key against the
+     * current master key data and all KRB5_TL_MKEY_AUX values, which contain
+     * copies of the master keys encrypted with old master keys.
      */
     krb5_error_code (*fetch_master_key_list)(krb5_context kcontext,
                                              krb5_principal mname,

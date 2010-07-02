@@ -491,16 +491,6 @@ static int open_db_and_mkey()
             return(0);
         }
     }
-#if 0 /************** Begin IFDEF'ed OUT *******************************/
-    /* krb5_db_fetch_mkey_list will verify the mkey */
-    if ((retval = krb5_db_verify_master_key(util_context, master_princ,
-                                            master_kvno, &master_keyblock))) {
-        com_err(progname, retval, "while verifying master key");
-        exit_status++;
-        krb5_free_keyblock_contents(util_context, &master_keyblock);
-        return(1);
-    }
-#endif /**************** END IFDEF'ed OUT *******************************/
 
     if ((retval = krb5_db_fetch_mkey_list(util_context, master_princ,
                                           &master_keyblock, master_kvno,
