@@ -254,7 +254,7 @@ krb5_error_code
 krb5_ldap_db_get_age(krb5_context, char *, time_t *);
 
 krb5_error_code
-krb5_ldap_lib_init(void);
+krb5_ldap_lib_init(int dal_version);
 
 krb5_error_code
 krb5_ldap_lib_cleanup(void);

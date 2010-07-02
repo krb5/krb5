@@ -311,7 +311,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library *libptr)
     memcpy(&lib->vftabl, vftabl_addr, sizeof(kdb_vftabl));
     kdb_setup_opt_functions(lib);
 
-    status = lib->vftabl.init_library();
+    status = lib->vftabl.init_library(KRB5_KDB_DAL_VERSION);
     if (status)
         goto cleanup;
 
@@ -408,7 +408,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library * lib)
     memcpy(&(*lib)->vftabl, vftabl_addrs[0], sizeof(kdb_vftabl));
     kdb_setup_opt_functions(*lib);
 
-    if ((status = (*lib)->vftabl.init_library()))
+    if ((status = (*lib)->vftabl.init_library(KRB5_KDB_DAL_VERSION)))
         goto clean_n_exit;
 
 clean_n_exit:

@@ -201,9 +201,12 @@ WRAP_K (krb5_db2_invoke,
         (kcontext, method, request, response));
 
 static krb5_error_code
-hack_init ()
+hack_init (int dal_version)
 {
     krb5_error_code c;
+
+    if (dal_version != KRB5_KDB_DAL_VERSION)
+        return KRB5_KDB_DBTYPE_MISMATCH;
     c = krb5int_mutex_alloc (&krb5_db2_mutex);
     if (c)
         return c;

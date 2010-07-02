@@ -72,6 +72,10 @@
 
 #include <krb5.h>
 
+/* This version will be incremented when incompatible changes are made to the
+ * KDB API, and will be kept in sync with the libkdb major version. */
+#define KRB5_KDB_API_VERSION 5
+
 /* Salt types */
 #define KRB5_KDB_SALTTYPE_NORMAL        0
 #define KRB5_KDB_SALTTYPE_V4            1
@@ -860,6 +864,13 @@ krb5_dbe_free_tl_data(krb5_context, krb5_tl_data *);
 #define KRB5_KDB_OPT_SET_LOCK_MODE      1
 
 /*
+ * This number indicates the date of the last incompatible change to the
+ * DAL.  It is passed to init_library to allow KDB modules to detect when
+ * they are being loaded by an incompatible version of the KDC.
+ */
+#define KRB5_KDB_DAL_VERSION 20100701
+
+/*
  * A krb5_context can hold one database object.  Modules should use
  * context->dal_handle->db_context to store state associated with the database
  * object.
@@ -886,7 +897,7 @@ typedef struct _kdb_vftabl {
      * Mandatory: Invoked after the module library is loaded, when the first DB
      * using the module is opened, across all contexts.
      */
-    krb5_error_code (*init_library)(void);
+    krb5_error_code (*init_library)(int dal_version);
 
     /*
      * Mandatory: Invoked before the module library is unloaded, after the last
