@@ -74,7 +74,6 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_ldap, kdb_function_table) = {
     /* optional functions */
     /* set_master_key_list */               krb5_ldap_set_mkey_list,
     /* get_master_key_list */               krb5_ldap_get_mkey_list,
-    /* setup_master_key_name */             NULL,
     /* store_master_key */                  NULL,
     /* fetch_master_key */                  NULL /* krb5_ldap_fetch_mkey */,
     /* verify_master_key */                 NULL /* krb5_ldap_verify_master_key */,

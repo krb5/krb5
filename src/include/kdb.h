@@ -1151,12 +1151,6 @@ typedef struct _kdb_vftabl {
     krb5_error_code (*get_master_key_list)(krb5_context kcontext,
                                            krb5_keylist_node **keylist);
 
-    /* This function has no entry point in libkdb5; leave it as NULL. */
-    krb5_error_code (*setup_master_key_name)(krb5_context kcontext,
-                                             char *keyname, char *realm,
-                                             char **fullname,
-                                             krb5_principal *principal);
-
     /*
      * Optional with default: Save a master keyblock into the stash file
      * db_arg.  master_pwd indicates the password used to derive the keyblock,

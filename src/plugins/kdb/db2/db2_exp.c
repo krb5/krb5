@@ -246,7 +246,7 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_db2, kdb_function_table) = {
     /* db_free */                                krb5_db2_free,
     /* set_master_key_list */                    wrap_krb5_db2_db_set_mkey_list,
     /* get_master_key_list */                    wrap_krb5_db2_db_get_mkey_list,
-    /* blah blah blah */ 0,0,0,0,0,0,0,0,
+    /* blah blah blah */ 0,0,0,0,0,0,0,
     /* promote_db */                             wrap_krb5_db2_promote_db,
     0, 0,
     /* invoke */                                 wrap_krb5_db2_invoke
