@@ -773,8 +773,8 @@ get_entry_data(krb5_context context,
             if (krb5_dbe_find_enctype(context, entry, request->ktype[i],
                                       -1, 0, &entry_key) != 0)
                 continue;
-            if (krb5_dbekd_decrypt_key_data(context, mkey_ptr,
-                                            entry_key, &keys[k], NULL) != 0) {
+            if (krb5_dbe_decrypt_key_data(context, mkey_ptr, entry_key,
+                                          &keys[k], NULL) != 0) {
                 if (keys[k].contents != NULL)
                     krb5_free_keyblock_contents(context, &keys[k]);
                 memset(&keys[k], 0, sizeof(keys[k]));
@@ -1474,8 +1474,8 @@ verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
                                               -1, 0, &client_key)))
             goto cleanup;
 
-        if ((retval = krb5_dbekd_decrypt_key_data(context, mkey_ptr,
-                                                  client_key, &key, NULL)))
+        if ((retval = krb5_dbe_decrypt_key_data(context, mkey_ptr, client_key,
+                                                &key, NULL)))
             goto cleanup;
 
         key.enctype = enc_data->enctype;
@@ -2156,10 +2156,9 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
                     return retval;
                 }
                 /* convert server.key into a real key */
-                retval = krb5_dbekd_decrypt_key_data(kdc_context,
-                                                     mkey_ptr,
-                                                     assoc_key, &encrypting_key,
-                                                     NULL);
+                retval = krb5_dbe_decrypt_key_data(kdc_context, mkey_ptr,
+                                                   assoc_key, &encrypting_key,
+                                                   NULL);
                 if (retval) {
                     kdc_err(kdc_context, retval,
                             "snk4 pulling out key entry");
@@ -2819,8 +2818,8 @@ static krb5_error_code verify_pkinit_request(
          * Unfortunately this key is stored encrypted even though it's
          * not sensitive...
          */
-        krtn = krb5_dbekd_decrypt_key_data(context, mkey_ptr,
-                                           key_data, &decrypted_key, NULL);
+        krtn = krb5_dbe_decrypt_key_data(context, mkey_ptr, key_data,
+                                         &decrypted_key, NULL);
         if(krtn) {
             kdcPkinitDebug("verify_pkinit_request: error decrypting cert hash block\n");
             break;

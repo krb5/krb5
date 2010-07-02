@@ -292,9 +292,9 @@ add_princ(context, str_newprinc)
             goto error;
         }
 
-        if ((retval = krb5_dbekd_encrypt_key_data(context,&master_keyblock,
-                                                  &key, NULL, 1,
-                                                  newentry.key_data))) {
+        if ((retval = krb5_dbe_encrypt_key_data(context, &master_keyblock,
+                                                &key, NULL, 1,
+                                                newentry.key_data))) {
             com_err(progname, retval, "while encrypting key for '%s'",
                     princ_name);
             free(key.contents);

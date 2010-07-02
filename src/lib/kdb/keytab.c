@@ -185,8 +185,8 @@ krb5_ktkdb_get_entry(in_context, id, principal, kvno, enctype, entry)
         goto error;
 
 
-    kerror = krb5_dbekd_decrypt_key_data(context, master_key,
-                                         key_data, &entry->key, NULL);
+    kerror = krb5_dbe_decrypt_key_data(context, master_key, key_data,
+                                       &entry->key, NULL);
     if (kerror)
         goto error;
 

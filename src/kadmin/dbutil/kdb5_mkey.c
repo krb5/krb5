@@ -90,7 +90,7 @@ add_new_mkey(krb5_context context, krb5_db_entry *master_entry,
 
     /* alloc enough space to hold new and existing key_data */
     /*
-     * The encrypted key is malloc'ed by krb5_dbekd_encrypt_key_data and
+     * The encrypted key is malloc'ed by krb5_dbe_encrypt_key_data and
      * krb5_key_data key_data_contents is a pointer to this key.  Using some
      * logic from master_key_convert().
      */
@@ -105,10 +105,9 @@ add_new_mkey(krb5_context context, krb5_db_entry *master_entry,
 
     /* Note, mkey does not have salt */
     /* add new mkey encrypted with itself to mkey princ entry */
-    if ((retval = krb5_dbekd_encrypt_key_data(context, new_mkey,
-                                              new_mkey, NULL,
-                                              (int) new_mkey_kvno,
-                                              &master_entry->key_data[0]))) {
+    if ((retval = krb5_dbe_encrypt_key_data(context, new_mkey, new_mkey, NULL,
+                                            (int) new_mkey_kvno,
+                                            &master_entry->key_data[0]))) {
         return (retval);
     }
     /* the mvkno should be that of the newest mkey */
@@ -156,11 +155,9 @@ add_new_mkey(krb5_context context, krb5_db_entry *master_entry,
 
         memset(&tmp_key_data, 0, sizeof(tmp_key_data));
         /* encrypt the new mkey with the older mkey */
-        retval = krb5_dbekd_encrypt_key_data(context, &keylist_node->keyblock,
-                                             new_mkey,
-                                             NULL, /* no keysalt */
-                                             (int) new_mkey_kvno,
-                                             &tmp_key_data);
+        retval = krb5_dbe_encrypt_key_data(context, &keylist_node->keyblock,
+                                           new_mkey, NULL, (int) new_mkey_kvno,
+                                           &tmp_key_data);
         if (retval)
             goto clean_n_exit;
 
@@ -171,11 +168,10 @@ add_new_mkey(krb5_context context, krb5_db_entry *master_entry,
         /*
          * Store old key in master_entry keydata past the new mkey
          */
-        retval = krb5_dbekd_encrypt_key_data(context, new_mkey,
-                                             &keylist_node->keyblock,
-                                             NULL, /* no keysalt */
-                                             (int) keylist_node->kvno,
-                                             &master_entry->key_data[i]);
+        retval = krb5_dbe_encrypt_key_data(context, new_mkey,
+                                           &keylist_node->keyblock,
+                                           NULL, (int) keylist_node->kvno,
+                                           &master_entry->key_data[i]);
         if (retval)
             goto clean_n_exit;
     }

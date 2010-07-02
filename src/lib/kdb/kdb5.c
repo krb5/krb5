@@ -267,9 +267,9 @@ kdb_setup_opt_functions(db_library lib)
     if (lib->vftabl.promote_db == NULL)
         lib->vftabl.promote_db = krb5_def_promote_db;
     if (lib->vftabl.dbekd_decrypt_key_data == NULL)
-        lib->vftabl.dbekd_decrypt_key_data = krb5_dbekd_def_decrypt_key_data;
+        lib->vftabl.dbekd_decrypt_key_data = krb5_dbe_def_decrypt_key_data;
     if (lib->vftabl.dbekd_encrypt_key_data == NULL)
-        lib->vftabl.dbekd_encrypt_key_data = krb5_dbekd_def_encrypt_key_data;
+        lib->vftabl.dbekd_encrypt_key_data = krb5_dbe_def_encrypt_key_data;
 }
 
 #ifdef STATIC_PLUGINS
@@ -2308,11 +2308,11 @@ clean_n_exit:
 }
 
 krb5_error_code
-krb5_dbekd_decrypt_key_data( krb5_context         kcontext,
-                             const krb5_keyblock        * mkey,
-                             const krb5_key_data        * key_data,
-                             krb5_keyblock      * dbkey,
-                             krb5_keysalt       * keysalt)
+krb5_dbe_decrypt_key_data( krb5_context         kcontext,
+                           const krb5_keyblock        * mkey,
+                           const krb5_key_data        * key_data,
+                           krb5_keyblock      * dbkey,
+                           krb5_keysalt       * keysalt)
 {
     krb5_error_code status = 0;
     kdb_vftabl *v;
@@ -2324,12 +2324,12 @@ krb5_dbekd_decrypt_key_data( krb5_context         kcontext,
 }
 
 krb5_error_code
-krb5_dbekd_encrypt_key_data( krb5_context                 kcontext,
-                             const krb5_keyblock        * mkey,
-                             const krb5_keyblock        * dbkey,
-                             const krb5_keysalt         * keysalt,
-                             int                          keyver,
-                             krb5_key_data              * key_data)
+krb5_dbe_encrypt_key_data( krb5_context                 kcontext,
+                           const krb5_keyblock        * mkey,
+                           const krb5_keyblock        * dbkey,
+                           const krb5_keysalt         * keysalt,
+                           int                          keyver,
+                           krb5_key_data              * key_data)
 {
     krb5_error_code status = 0;
     kdb_vftabl *v;

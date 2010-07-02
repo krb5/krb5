@@ -489,9 +489,9 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
      *
      *  server_keyblock is later used to generate auth data signatures
      */
-    if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, mkey_ptr,
-                                               server_key, &server_keyblock,
-                                               NULL))) {
+    if ((errcode = krb5_dbe_decrypt_key_data(kdc_context, mkey_ptr,
+                                             server_key, &server_keyblock,
+                                             NULL))) {
         status = "DECRYPT_SERVER_KEY";
         goto errout;
     }
@@ -537,9 +537,9 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
 
     /* convert client.key_data into a real key */
-    if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context, mkey_ptr,
-                                               client_key, &client_keyblock,
-                                               NULL))) {
+    if ((errcode = krb5_dbe_decrypt_key_data(kdc_context, mkey_ptr,
+                                             client_key, &client_keyblock,
+                                             NULL))) {
         status = "DECRYPT_CLIENT_KEY";
         goto errout;
     }

@@ -675,10 +675,9 @@ tgt_again:
          * Convert server.key into a real key
          * (it may be encrypted in the database)
          */
-        if ((errcode = krb5_dbekd_decrypt_key_data(kdc_context,
-                                                   mkey_ptr,
-                                                   server_key, &encrypting_key,
-                                                   NULL))) {
+        if ((errcode = krb5_dbe_decrypt_key_data(kdc_context, mkey_ptr,
+                                                 server_key, &encrypting_key,
+                                                 NULL))) {
             status = "DECRYPT_SERVER_KEY";
             goto cleanup;
         }

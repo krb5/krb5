@@ -213,8 +213,8 @@ kdb_get_hist_key(kadm5_server_handle_t handle, krb5_keyblock *hist_keyblock,
     if (ret)
         goto done;
 
-    ret = krb5_dbekd_decrypt_key_data(handle->context, mkey,
-                                      &kdb.key_data[0], hist_keyblock, NULL);
+    ret = krb5_dbe_decrypt_key_data(handle->context, mkey, &kdb.key_data[0],
+                                    hist_keyblock, NULL);
     if (ret)
         goto done;
 

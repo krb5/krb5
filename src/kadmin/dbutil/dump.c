@@ -302,9 +302,8 @@ krb5_error_code master_key_convert(context, db_entry)
             retval = krb5_dbe_find_mkey(context, master_keylist, db_entry, &tmp_mkey);
             if (retval)
                 return retval;
-            retval = krb5_dbekd_decrypt_key_data(context, tmp_mkey,
-                                                 key_data, &v5plainkey,
-                                                 &keysalt);
+            retval = krb5_dbe_decrypt_key_data(context, tmp_mkey, key_data,
+                                               &v5plainkey, &keysalt);
             if (retval)
                 return retval;
 
@@ -313,10 +312,9 @@ krb5_error_code master_key_convert(context, db_entry)
             key_ptr = &v5plainkey;
             kvno = (krb5_kvno) key_data->key_data_kvno;
 
-            retval = krb5_dbekd_encrypt_key_data(context, &new_master_keyblock,
-                                                 key_ptr, &keysalt,
-                                                 (int) kvno,
-                                                 &new_key_data);
+            retval = krb5_dbe_encrypt_key_data(context, &new_master_keyblock,
+                                               key_ptr, &keysalt, (int) kvno,
+                                               &new_key_data);
             if (retval)
                 return retval;
             krb5_free_keyblock_contents(context, &v5plainkey);

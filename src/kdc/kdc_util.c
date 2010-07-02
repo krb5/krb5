@@ -512,9 +512,8 @@ kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
         goto errout;
     }
     if ((*key = (krb5_keyblock *)malloc(sizeof **key))) {
-        retval = krb5_dbekd_decrypt_key_data(kdc_context, mkey_ptr,
-                                             server_key,
-                                             *key, NULL);
+        retval = krb5_dbe_decrypt_key_data(kdc_context, mkey_ptr, server_key,
+                                           *key, NULL);
     } else
         retval = ENOMEM;
     retval = krb5_c_enctype_compare(kdc_context, ticket->enc_part.enctype,

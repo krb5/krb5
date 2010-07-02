@@ -2322,12 +2322,8 @@ kdb_ldap_tgt_keysalt_iterate(krb5_key_salt_tuple *ksent, krb5_pointer ptr)
 
     if (!(kret = krb5_c_make_random_key(context, ksent->ks_enctype,
                                         &key))) {
-        kret = krb5_dbekd_encrypt_key_data(context,
-                                           iargs->rblock->key,
-                                           &key,
-                                           NULL,
-                                           1,
-                                           &entry->key_data[ind]);
+        kret = krb5_dbe_encrypt_key_data(context, iargs->rblock->key, &key,
+                                         NULL, 1, &entry->key_data[ind]);
         krb5_free_keyblock_contents(context, &key);
     }
     /*}*/
@@ -2441,9 +2437,9 @@ kdb_ldap_create_principal(krb5_context context, krb5_principal princ,
                 goto cleanup;
             }
             kvno = 1; /* New key is getting set */
-            retval = krb5_dbekd_encrypt_key_data(context, master_keyblock,
-                                                 &key, NULL, kvno,
-                                                 &entry.key_data[entry.n_key_data - 1]);
+            retval = krb5_dbe_encrypt_key_data(context, master_keyblock,
+                                               &key, NULL, kvno,
+                                               &entry.key_data[entry.n_key_data - 1]);
             krb5_free_keyblock_contents(context, &key);
             if (retval) {
                 goto cleanup;
@@ -2477,9 +2473,9 @@ kdb_ldap_create_principal(krb5_context context, krb5_principal princ,
         memset(entry.key_data, 0, sizeof(krb5_key_data));
         entry.n_key_data++;
         kvno = 1; /* New key is getting set */
-        retval = krb5_dbekd_encrypt_key_data(context, pblock->key,
-                                             master_keyblock, NULL, kvno,
-                                             &entry.key_data[entry.n_key_data - 1]);
+        retval = krb5_dbe_encrypt_key_data(context, pblock->key,
+                                           master_keyblock, NULL, kvno,
+                                           &entry.key_data[entry.n_key_data - 1]);
         if (retval) {
             goto cleanup;
         }

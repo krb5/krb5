@@ -977,18 +977,15 @@ check_pw_reuse(krb5_context context,
     krb5_error_code ret;
 
     for (x = 0; x < n_new_key_data; x++) {
-        ret = krb5_dbekd_decrypt_key_data(context,
-                                          mkey,
-                                          &(new_key_data[x]),
-                                          &newkey, NULL);
+        ret = krb5_dbe_decrypt_key_data(context, mkey, &(new_key_data[x]),
+                                        &newkey, NULL);
         if (ret)
             return(ret);
         for (y = 0; y < n_pw_hist_data; y++) {
             for (z = 0; z < pw_hist_data[y].n_key_data; z++) {
-                ret = krb5_dbekd_decrypt_key_data(context,
-                                                  hist_keyblock,
-                                                  &pw_hist_data[y].key_data[z],
-                                                  &histkey, NULL);
+                ret = krb5_dbe_decrypt_key_data(context, hist_keyblock,
+                                                &pw_hist_data[y].key_data[z],
+                                                &histkey, NULL);
                 if (ret)
                     return(ret);
 
@@ -1047,17 +1044,14 @@ int create_history_entry(krb5_context context, krb5_keyblock *mkey,
     memset(hist->key_data, 0, n_key_data*sizeof(krb5_key_data));
 
     for (i = 0; i < n_key_data; i++) {
-        ret = krb5_dbekd_decrypt_key_data(context,
-                                          mkey,
-                                          &key_data[i],
-                                          &key, &salt);
+        ret = krb5_dbe_decrypt_key_data(context, mkey, &key_data[i], &key,
+                                        &salt);
         if (ret)
             return ret;
 
-        ret = krb5_dbekd_encrypt_key_data(context, hist_key,
-                                          &key, &salt,
-                                          key_data[i].key_data_kvno,
-                                          &hist->key_data[i]);
+        ret = krb5_dbe_encrypt_key_data(context, hist_key, &key, &salt,
+                                        key_data[i].key_data_kvno,
+                                        &hist->key_data[i]);
         if (ret)
             return ret;
 
@@ -1731,9 +1725,8 @@ kadm5_setv4key_principal(void *server_handle,
         goto done;
 
     /* use tmp_key_data as temporary location and reallocate later */
-    ret = krb5_dbekd_encrypt_key_data(handle->context, act_mkey,
-                                      keyblock, &keysalt, kvno + 1,
-                                      &tmp_key_data);
+    ret = krb5_dbe_encrypt_key_data(handle->context, act_mkey, keyblock,
+                                    &keysalt, kvno + 1, &tmp_key_data);
     if (ret) {
         goto done;
     }
@@ -1935,12 +1928,10 @@ kadm5_setkey_principal_3(void *server_handle,
         if (ret)
             goto done;
 
-        ret = krb5_dbekd_encrypt_key_data(handle->context,
-                                          act_mkey,
-                                          &keyblocks[i],
-                                          n_ks_tuple ? &keysalt : NULL,
-                                          kvno + 1,
-                                          &tmp_key_data);
+        ret = krb5_dbe_encrypt_key_data(handle->context, act_mkey,
+                                        &keyblocks[i],
+                                        n_ks_tuple ? &keysalt : NULL, kvno + 1,
+                                        &tmp_key_data);
         if (ret)
             goto done;
 
@@ -2120,9 +2111,8 @@ static int decrypt_key_data(krb5_context context, krb5_keyblock *mkey,
     memset(keys, 0, n_key_data*sizeof(krb5_keyblock));
 
     for (i = 0; i < n_key_data; i++) {
-        ret = krb5_dbekd_decrypt_key_data(context, mkey,
-                                          &key_data[i],
-                                          &keys[i], NULL);
+        ret = krb5_dbe_decrypt_key_data(context, mkey, &key_data[i], &keys[i],
+                                        NULL);
         if (ret) {
             for (; i >= 0; i--) {
                 if (keys[i].contents) {
@@ -2218,9 +2208,8 @@ kadm5_ret_t kadm5_decrypt_key(void *server_handle,
         }
     }
 
-    if ((ret = krb5_dbekd_decrypt_key_data(handle->context,
-                                           mkey_ptr, key_data,
-                                           keyblock, keysalt)))
+    if ((ret = krb5_dbe_decrypt_key_data(handle->context, mkey_ptr, key_data,
+                                         keyblock, keysalt)))
         return ret;
 
     /*

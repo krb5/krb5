@@ -186,9 +186,8 @@ add_key_rnd(context, master_key, ks_tuple, ks_tuple_count, db_entry, kvno)
         /* db library will free this. Since, its a so, it could actually be using different memory management
            function. So, its better if the memory is allocated by the db's malloc. So, a temporary memory is used
            here which will later be copied to the db_entry */
-        retval = krb5_dbekd_encrypt_key_data(context, master_key,
-                                             &key, NULL, kvno,
-                                             &tmp_key_data);
+        retval = krb5_dbe_encrypt_key_data(context, master_key, &key, NULL,
+                                           kvno, &tmp_key_data);
 
         krb5_free_keyblock_contents(context, &key);
         if( retval )
@@ -464,9 +463,9 @@ add_key_pwd(context, master_key, ks_tuple, ks_tuple_count, passwd,
 
         /* memory allocation to be done by db. So, use temporary block and later copy
            it to the memory allocated by db */
-        retval = krb5_dbekd_encrypt_key_data(context, master_key, &key,
-                                             (const krb5_keysalt *)&key_salt,
-                                             kvno, &tmp_key_data);
+        retval = krb5_dbe_encrypt_key_data(context, master_key, &key,
+                                           (const krb5_keysalt *)&key_salt,
+                                           kvno, &tmp_key_data);
         if (key_salt.data.data)
             free(key_salt.data.data);
         free(key.contents);

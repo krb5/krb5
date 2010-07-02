@@ -281,8 +281,8 @@ check_princ(context, str_princ)
         goto errout;
     }
 
-    if ((retval = krb5_dbekd_decrypt_key_data(context, &master_keyblock,
-                                              kdbe.key_data, &db_key, NULL))) {
+    if ((retval = krb5_dbe_decrypt_key_data(context, &master_keyblock,
+                                            kdbe.key_data, &db_key, NULL))) {
         com_err(progname, retval, "while decrypting key for '%s'", princ_name);
         goto errout;
     }

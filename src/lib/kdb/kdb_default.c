@@ -463,9 +463,9 @@ krb5_def_verify_master_key(krb5_context    context,
         return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
     }
 
-    if ((retval = krb5_dbekd_decrypt_key_data(context, mkey,
-                                              &master_entry.key_data[0],
-                                              &tempkey, NULL))) {
+    if ((retval = krb5_dbe_decrypt_key_data(context, mkey,
+                                            &master_entry.key_data[0],
+                                            &tempkey, NULL))) {
         krb5_db_free_principal(context, &master_entry, nprinc);
         return retval;
     }
@@ -534,9 +534,8 @@ krb5_def_fetch_mkey_list(krb5_context        context,
      */
 
     if (mkey->enctype == master_entry.key_data[0].key_data_type[0]) {
-        if (krb5_dbekd_decrypt_key_data(context, mkey,
-                                        &master_entry.key_data[0],
-                                        &cur_mkey, NULL) == 0) {
+        if (krb5_dbe_decrypt_key_data(context, mkey, &master_entry.key_data[0],
+                                      &cur_mkey, NULL) == 0) {
             found_key = TRUE;
         }
     }
@@ -549,9 +548,9 @@ krb5_def_fetch_mkey_list(krb5_context        context,
         for (aux_data_entry = mkey_aux_data_list; aux_data_entry != NULL;
              aux_data_entry = aux_data_entry->next) {
 
-            if (krb5_dbekd_decrypt_key_data(context, mkey,
-                                             &aux_data_entry->latest_mkey,
-                                             &cur_mkey, NULL) == 0) {
+            if (krb5_dbe_decrypt_key_data(context, mkey,
+                                          &aux_data_entry->latest_mkey,
+                                          &cur_mkey, NULL) == 0) {
                 found_key = TRUE;
                 break;
             }
@@ -596,10 +595,9 @@ krb5_def_fetch_mkey_list(krb5_context        context,
             memset(*mkey_list_node, 0, sizeof(krb5_keylist_node));
         }
         key_data = &master_entry.key_data[i];
-        retval = krb5_dbekd_decrypt_key_data(context, &cur_mkey,
-                                             key_data,
-                                             &((*mkey_list_node)->keyblock),
-                                             NULL);
+        retval = krb5_dbe_decrypt_key_data(context, &cur_mkey, key_data,
+                                           &((*mkey_list_node)->keyblock),
+                                           NULL);
         if (retval)
             goto clean_n_exit;
 

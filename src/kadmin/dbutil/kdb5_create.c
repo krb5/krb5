@@ -403,12 +403,9 @@ tgt_keysalt_iterate(ksent, ptr)
         ind = iargs->dbentp->n_key_data-1;
         if (!(kret = krb5_c_make_random_key(context, ksent->ks_enctype,
                                             &key))) {
-            kret = krb5_dbekd_encrypt_key_data(context,
-                                               iargs->rblock->key,
-                                               &key,
-                                               NULL,
-                                               1,
-                                               &iargs->dbentp->key_data[ind]);
+            kret = krb5_dbe_encrypt_key_data(context, iargs->rblock->key,
+                                             &key, NULL, 1,
+                                             &iargs->dbentp->key_data[ind]);
             krb5_free_keyblock_contents(context, &key);
         }
     }
@@ -462,9 +459,9 @@ add_principal(context, princ, op, pblock)
         else
             mkey_kvno = 1;  /* Default */
         entry.attributes |= KRB5_KDB_DISALLOW_ALL_TIX;
-        if ((retval = krb5_dbekd_encrypt_key_data(context, pblock->key,
-                                                  &master_keyblock, NULL,
-                                                  mkey_kvno, entry.key_data)))
+        if ((retval = krb5_dbe_encrypt_key_data(context, pblock->key,
+                                                &master_keyblock, NULL,
+                                                mkey_kvno, entry.key_data)))
             return retval;
         /*
          * There should always be at least one "active" mkey so creating the

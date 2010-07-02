@@ -516,19 +516,19 @@ krb5_db_setup_mkey_name ( krb5_context context,
                           krb5_principal *principal);
 
 krb5_error_code
-krb5_dbekd_decrypt_key_data( krb5_context         context,
-                             const krb5_keyblock        * mkey,
-                             const krb5_key_data        * key_data,
-                             krb5_keyblock      * dbkey,
-                             krb5_keysalt       * keysalt);
+krb5_dbe_decrypt_key_data( krb5_context         context,
+                           const krb5_keyblock        * mkey,
+                           const krb5_key_data        * key_data,
+                           krb5_keyblock      * dbkey,
+                           krb5_keysalt       * keysalt);
 
 krb5_error_code
-krb5_dbekd_encrypt_key_data( krb5_context                 context,
-                             const krb5_keyblock        * mkey,
-                             const krb5_keyblock        * dbkey,
-                             const krb5_keysalt         * keysalt,
-                             int                          keyver,
-                             krb5_key_data              * key_data);
+krb5_dbe_encrypt_key_data( krb5_context                 context,
+                           const krb5_keyblock        * mkey,
+                           const krb5_keyblock        * dbkey,
+                           const krb5_keysalt         * keysalt,
+                           int                          keyver,
+                           krb5_key_data              * key_data);
 
 krb5_error_code
 krb5_dbe_fetch_act_key_list(krb5_context          context,
@@ -749,34 +749,19 @@ krb5_error_code
 krb5_def_promote_db(krb5_context, char *, char **);
 
 krb5_error_code
-krb5_dbekd_def_decrypt_key_data( krb5_context             context,
-                                 const krb5_keyblock    * mkey,
-                                 const krb5_key_data    * key_data,
-                                 krb5_keyblock          * dbkey,
-                                 krb5_keysalt           * keysalt);
+krb5_dbe_def_decrypt_key_data( krb5_context             context,
+                               const krb5_keyblock    * mkey,
+                               const krb5_key_data    * key_data,
+                               krb5_keyblock          * dbkey,
+                               krb5_keysalt           * keysalt);
 
 krb5_error_code
-krb5_dbekd_def_encrypt_key_data( krb5_context             context,
-                                 const krb5_keyblock    * mkey,
-                                 const krb5_keyblock    * dbkey,
-                                 const krb5_keysalt     * keysalt,
-                                 int                      keyver,
-                                 krb5_key_data          * key_data);
-
-krb5_error_code
-krb5_dbekd_def_decrypt_key_data( krb5_context     context,
-                                 const krb5_keyblock    * mkey,
-                                 const krb5_key_data    * key_data,
-                                 krb5_keyblock  * dbkey,
-                                 krb5_keysalt   * keysalt);
-
-krb5_error_code
-krb5_dbekd_def_encrypt_key_data( krb5_context             context,
-                                 const krb5_keyblock    * mkey,
-                                 const krb5_keyblock    * dbkey,
-                                 const krb5_keysalt     * keysalt,
-                                 int                      keyver,
-                                 krb5_key_data          * key_data);
+krb5_dbe_def_encrypt_key_data( krb5_context             context,
+                               const krb5_keyblock    * mkey,
+                               const krb5_keyblock    * dbkey,
+                               const krb5_keysalt     * keysalt,
+                               int                      keyver,
+                               krb5_key_data          * key_data);
 
 krb5_error_code
 krb5_db_create_policy( krb5_context kcontext,
