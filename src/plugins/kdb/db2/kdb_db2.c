@@ -925,7 +925,7 @@ cleanup:
 /*
   Free stuff returned by krb5_db2_get_principal.
 */
-krb5_error_code
+void
 krb5_db2_free_principal(krb5_context context, krb5_db_entry *entries,
                         int nentries)
 {

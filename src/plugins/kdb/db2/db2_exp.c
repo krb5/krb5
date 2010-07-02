@@ -125,11 +125,11 @@ WRAP_K (krb5_db2_get_principal,
          int * i,
          krb5_boolean *b),
         (ctx, p, d, i, b));
-WRAP_K (krb5_db2_free_principal,
-        (krb5_context ctx,
-         krb5_db_entry *d,
-         int i),
-        (ctx, d, i));
+WRAP_VOID (krb5_db2_free_principal,
+           (krb5_context ctx,
+            krb5_db_entry *d,
+            int i),
+           (ctx, d, i));
 WRAP_K (krb5_db2_put_principal,
         (krb5_context ctx,
          krb5_db_entry *d,

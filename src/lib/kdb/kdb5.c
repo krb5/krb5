@@ -776,7 +776,7 @@ krb5_db_get_principal_ext(krb5_context kcontext,
                             more);
 }
 
-krb5_error_code
+void
 krb5_db_free_principal(krb5_context kcontext, krb5_db_entry * entry, int count)
 {
     krb5_error_code status = 0;
@@ -784,10 +784,8 @@ krb5_db_free_principal(krb5_context kcontext, krb5_db_entry * entry, int count)
 
     status = get_vftabl(kcontext, &v);
     if (status)
-        return status;
-    if (v->free_principal == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
-    return v->free_principal(kcontext, entry, count);
+        return;
+    v->free_principal(kcontext, entry, count);
 }
 
 static void
@@ -1113,7 +1111,7 @@ krb5_db_fetch_mkey_list(krb5_context     context,
     return v->fetch_master_key_list(context, mname, mkey, mkvno, mkey_list);
 }
 
-krb5_error_code
+void
 krb5_db_free_mkey_list(krb5_context    context,
                        krb5_keylist_node  *mkey_list)
 {
@@ -1125,8 +1123,6 @@ krb5_db_free_mkey_list(krb5_context    context,
         krb5_free_keyblock_contents(context, &prev->keyblock);
         krb5_xfree(prev);
     }
-
-    return 0;
 }
 
 krb5_error_code

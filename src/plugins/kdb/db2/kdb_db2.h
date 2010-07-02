@@ -61,7 +61,7 @@ krb5_error_code krb5_db2_get_age(krb5_context, char *, time_t *);
 krb5_error_code krb5_db2_rename(krb5_context, char *, char *, int );
 krb5_error_code krb5_db2_get_principal(krb5_context, krb5_const_principal,
                                        krb5_db_entry *, int *, krb5_boolean *);
-krb5_error_code krb5_db2_free_principal(krb5_context, krb5_db_entry *, int);
+void krb5_db2_free_principal(krb5_context, krb5_db_entry *, int);
 krb5_error_code krb5_db2_put_principal(krb5_context, krb5_db_entry *, int *,
                                        char **db_args);
 krb5_error_code krb5_db2_iterate_ext(krb5_context,

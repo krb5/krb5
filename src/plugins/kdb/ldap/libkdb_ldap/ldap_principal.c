@@ -122,7 +122,7 @@ krb5_dbe_free_contents(krb5_context context, krb5_db_entry *entry)
 }
 
 
-krb5_error_code
+void
 krb5_ldap_free_principal(krb5_context kcontext, krb5_db_entry *entries,
                          int nentries)
 {

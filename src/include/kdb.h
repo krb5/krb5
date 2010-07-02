@@ -434,9 +434,8 @@ krb5_error_code krb5_db_get_principal_ext ( krb5_context kcontext,
                                             krb5_db_entry *entries,
                                             int *nentries,
                                             krb5_boolean *more );
-krb5_error_code krb5_db_free_principal ( krb5_context kcontext,
-                                         krb5_db_entry *entry,
-                                         int count );
+void krb5_db_free_principal ( krb5_context kcontext, krb5_db_entry *entry,
+                              int count );
 krb5_error_code krb5_db_put_principal ( krb5_context kcontext,
                                         krb5_db_entry *entries,
                                         int *nentries);
@@ -454,8 +453,6 @@ krb5_error_code krb5_db_set_mkey_list( krb5_context context,
 krb5_error_code krb5_db_get_mkey_list( krb5_context kcontext,
                                        krb5_keylist_node ** keylist);
 
-krb5_error_code krb5_db_free_master_key ( krb5_context kcontext,
-                                          krb5_keyblock *key );
 krb5_error_code krb5_db_store_master_key  ( krb5_context kcontext,
                                             char *keyfile,
                                             krb5_principal mname,
@@ -483,7 +480,7 @@ krb5_db_fetch_mkey_list( krb5_context    context,
                          krb5_kvno             mkvno,
                          krb5_keylist_node  **mkeys_list );
 
-krb5_error_code
+void
 krb5_db_free_mkey_list( krb5_context         context,
                         krb5_keylist_node  *mkey_list );
 
@@ -1011,8 +1008,8 @@ typedef struct _kdb_vftabl {
      * allocate associated memory); thus, a plugin must allocate each field
      * of a principal entry separately.
      */
-    krb5_error_code (*free_principal)(krb5_context kcontext,
-                                      krb5_db_entry *entry, int count);
+    void (*free_principal)(krb5_context kcontext, krb5_db_entry *entry,
+                           int count);
 
     /*
      * Optional: Create or modify one or more principal entries.  All callers

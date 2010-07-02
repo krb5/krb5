@@ -104,7 +104,7 @@ krb5_ldap_get_principal(krb5_context , krb5_const_principal ,
 krb5_error_code
 krb5_ldap_delete_principal(krb5_context, krb5_const_principal, int *);
 
-krb5_error_code
+void
 krb5_ldap_free_principal(krb5_context, krb5_db_entry *, int );
 
 krb5_error_code
