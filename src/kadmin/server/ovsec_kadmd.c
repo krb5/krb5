@@ -89,7 +89,6 @@ gss_name_t gss_changepw_name = NULL, gss_oldchangepw_name = NULL;
 gss_name_t gss_kadmin_name = NULL;
 void *global_server_handle;
 
-extern krb5_keyblock master_keyblock;
 extern krb5_keylist_node  *master_keylist;
 
 char *build_princ_name(char *name, char *realm);
@@ -431,12 +430,7 @@ int main(int argc, char *argv[])
         krb5_klog_syslog(LOG_ERR, "Can't set kdb keytab's internal context.");
         goto kterr;
     }
-    /* XXX master_keyblock is in guts of lib/kadm5/server_kdb.c */
-    ret = krb5_db_set_mkey(hctx, &master_keyblock);
-    if (ret) {
-        krb5_klog_syslog(LOG_ERR, "Can't set master key for kdb keytab.");
-        goto kterr;
-    }
+    /* XXX master_keylist is in guts of lib/kadm5/server_kdb.c */
     ret = krb5_db_set_mkey_list(hctx, master_keylist);
     if (ret) {
         krb5_klog_syslog(LOG_ERR, "Can't set master key list for kdb keytab.");

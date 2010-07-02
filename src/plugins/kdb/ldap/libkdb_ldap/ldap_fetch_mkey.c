@@ -32,68 +32,6 @@
 #include "ldap_main.h"
 #include "kdb_ldap.h"
 
-/*
- * get the master key from the database specific context
- */
-
-krb5_error_code
-krb5_ldap_get_mkey(krb5_context context, krb5_keyblock **key)
-{
-    kdb5_dal_handle             *dal_handle=NULL;
-    krb5_ldap_context           *ldap_context=NULL;
-
-    /* Clear the global error string */
-    krb5_clear_error_message(context);
-
-    dal_handle = context->dal_handle;
-    ldap_context = (krb5_ldap_context *) dal_handle->db_context;
-
-    if (ldap_context == NULL || ldap_context->lrparams == NULL)
-        return KRB5_KDB_DBNOTINITED;
-
-    *key = &ldap_context->lrparams->mkey;
-    return 0;
-}
-
-
-/*
- * set the master key into the database specific context
- */
-
-krb5_error_code
-krb5_ldap_set_mkey(krb5_context context, char *pwd, krb5_keyblock *key)
-{
-    kdb5_dal_handle             *dal_handle=NULL;
-    krb5_ldap_context           *ldap_context=NULL;
-    krb5_ldap_realm_params      *r_params = NULL;
-
-    /* Clear the global error string */
-    krb5_clear_error_message(context);
-
-    dal_handle = context->dal_handle;
-    ldap_context = (krb5_ldap_context *) dal_handle->db_context;
-
-    if (ldap_context == NULL || ldap_context->lrparams == NULL)
-        return KRB5_KDB_DBNOTINITED;
-
-    r_params = ldap_context->lrparams;
-
-    if (r_params->mkey.contents) {
-        free (r_params->mkey.contents);
-        r_params->mkey.contents=NULL;
-    }
-
-    r_params->mkey.magic = key->magic;
-    r_params->mkey.enctype = key->enctype;
-    r_params->mkey.length = key->length;
-    r_params->mkey.contents = malloc(key->length);
-    if (r_params->mkey.contents == NULL)
-        return ENOMEM;
-
-    memcpy(r_params->mkey.contents, key->contents, key->length);
-    return 0;
-}
-
 krb5_error_code
 krb5_ldap_get_mkey_list(krb5_context context, krb5_keylist_node **key_list)
 {

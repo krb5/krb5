@@ -447,13 +447,6 @@ krb5_error_code krb5_db_iterate ( krb5_context kcontext,
                                   char *match_entry,
                                   int (*func) (krb5_pointer, krb5_db_entry *),
                                   krb5_pointer func_arg );
-krb5_error_code krb5_db_set_master_key_ext ( krb5_context kcontext,
-                                             char *pwd,
-                                             krb5_keyblock *key );
-krb5_error_code krb5_db_set_mkey ( krb5_context context,
-                                   krb5_keyblock *key);
-krb5_error_code krb5_db_get_mkey ( krb5_context kcontext,
-                                   krb5_keyblock **key );
 
 krb5_error_code krb5_db_set_mkey_list( krb5_context context,
                                        krb5_keylist_node * keylist);
@@ -736,15 +729,8 @@ krb5_def_fetch_mkey_list( krb5_context            context,
                           krb5_kvno             mkvno,
                           krb5_keylist_node  **mkeys_list);
 
-krb5_error_code kdb_def_set_mkey ( krb5_context kcontext,
-                                   char *pwd,
-                                   krb5_keyblock *key );
-
 krb5_error_code kdb_def_set_mkey_list ( krb5_context kcontext,
                                         krb5_keylist_node *keylist );
-
-krb5_error_code kdb_def_get_mkey ( krb5_context kcontext,
-                                   krb5_keyblock **key );
 
 krb5_error_code kdb_def_get_mkey_list ( krb5_context kcontext,
                                         krb5_keylist_node **keylist );
@@ -1145,26 +1131,6 @@ typedef struct _kdb_vftabl {
      * place, and in some cases to free data they allocated with db_alloc.
      */
     void (*db_free)(krb5_context kcontext, void *ptr);
-
-    /*
-     * Optional with default: Inform the module of the master key.  The module
-     * may remember an alias to the provided memory.  This function is called
-     * at startup by the KDC and kadmind; both supply a NULL pwd argument.  The
-     * module should not need to use a remembered master key value, so current
-     * modules do nothing with it besides return it from get_master_key, which
-     * is never used.  The default implementation does nothing.
-     */
-    krb5_error_code (*set_master_key)(krb5_context kcontext, char *pwd,
-                                      krb5_keyblock *key);
-
-    /*
-     * Optional with default: Retrieve an alias to the master keyblock as
-     * previously set by set_master_key.  This function is not used.  The
-     * default implementation returns success without modifying *key, which
-     * would be an invalid implementation if it were ever used.
-     */
-    krb5_error_code (*get_master_key)(krb5_context kcontext,
-                                      krb5_keyblock **key);
 
     /*
      * Optional with default: Inform the module of the master key.  The module

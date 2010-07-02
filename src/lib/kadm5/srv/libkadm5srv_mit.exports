@@ -84,7 +84,6 @@ krb5_string_to_flags
 krb5_string_to_keysalts
 krb5_match_config_pattern
 master_db
-master_keyblock
 master_keylist
 master_princ
 osa_free_princ_ent

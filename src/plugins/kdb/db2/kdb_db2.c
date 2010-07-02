@@ -438,36 +438,6 @@ krb5_db2_db_fini(krb5_context context)
     return retval;
 }
 
-/*
- * Set/Get the master key associated with the database
- */
-krb5_error_code
-krb5_db2_db_set_mkey(krb5_context context, krb5_keyblock *key)
-{
-    krb5_db2_context *db_ctx;
-
-    if (!k5db2_inited(context))
-        return (KRB5_KDB_DBNOTINITED);
-
-    db_ctx = context->dal_handle->db_context;
-    db_ctx->db_master_key = key;
-    return 0;
-}
-
-krb5_error_code
-krb5_db2_db_get_mkey(krb5_context context, krb5_keyblock **key)
-{
-    krb5_db2_context *db_ctx;
-
-    if (!k5db2_inited(context))
-        return (KRB5_KDB_DBNOTINITED);
-
-    db_ctx = context->dal_handle->db_context;
-    *key = db_ctx->db_master_key;
-
-    return 0;
-}
-
 krb5_error_code
 krb5_db2_db_set_mkey_list(krb5_context context, krb5_keylist_node *key_list)
 {
@@ -1331,13 +1301,6 @@ krb5_db2_destroy(krb5_context context, char *conf_section, char **db_args)
 
     db_ctx = context->dal_handle->db_context;
     return destroy_db(context, db_ctx->db_name);
-}
-
-krb5_error_code
-krb5_db2_set_master_key_ext(krb5_context context,
-                            char *pwd, krb5_keyblock * key)
-{
-    return krb5_db2_db_set_mkey(context, key);
 }
 
 void   *

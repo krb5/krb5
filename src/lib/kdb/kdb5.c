@@ -246,12 +246,8 @@ clean_n_exit:
 static void
 kdb_setup_opt_functions(db_library lib)
 {
-    if (lib->vftabl.set_master_key == NULL)
-        lib->vftabl.set_master_key = kdb_def_set_mkey;
     if (lib->vftabl.set_master_key_list == NULL)
         lib->vftabl.set_master_key_list = kdb_def_set_mkey_list;
-    if (lib->vftabl.get_master_key == NULL)
-        lib->vftabl.get_master_key = kdb_def_get_mkey;
     if (lib->vftabl.get_master_key_list == NULL)
         lib->vftabl.get_master_key_list = kdb_def_get_mkey_list;
     if (lib->vftabl.fetch_master_key == NULL)
@@ -1078,25 +1074,6 @@ krb5_db_iterate(krb5_context kcontext,
 }
 
 krb5_error_code
-krb5_db_set_master_key_ext(krb5_context kcontext,
-                           char *pwd, krb5_keyblock * key)
-{
-    krb5_error_code status = 0;
-    kdb_vftabl *v;
-
-    status = get_vftabl(kcontext, &v);
-    if (status)
-        return status;
-    return v->set_master_key(kcontext, pwd, key);
-}
-
-krb5_error_code
-krb5_db_set_mkey(krb5_context context, krb5_keyblock * key)
-{
-    return krb5_db_set_master_key_ext(context, NULL, key);
-}
-
-krb5_error_code
 krb5_db_set_mkey_list(krb5_context kcontext,
                       krb5_keylist_node * keylist)
 {
@@ -1107,18 +1084,6 @@ krb5_db_set_mkey_list(krb5_context kcontext,
     if (status)
         return status;
     return v->set_master_key_list(kcontext, keylist);
-}
-
-krb5_error_code
-krb5_db_get_mkey(krb5_context kcontext, krb5_keyblock ** key)
-{
-    krb5_error_code status = 0;
-    kdb_vftabl *v;
-
-    status = get_vftabl(kcontext, &v);
-    if (status)
-        return status;
-    return v->get_master_key(kcontext, key);
 }
 
 krb5_error_code

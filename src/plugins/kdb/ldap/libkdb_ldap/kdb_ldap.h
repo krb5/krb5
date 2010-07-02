@@ -264,11 +264,6 @@ krb5_ldap_alloc( krb5_context kcontext,  void *ptr, size_t size );
 
 void
 krb5_ldap_free( krb5_context kcontext, void *ptr );
-krb5_error_code
-krb5_ldap_get_mkey(krb5_context, krb5_keyblock **);
-
-krb5_error_code
-krb5_ldap_set_mkey(krb5_context, char *, krb5_keyblock *);
 
 krb5_error_code
 krb5_ldap_get_mkey_list (krb5_context context, krb5_keylist_node **key_list);

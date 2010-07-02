@@ -106,7 +106,7 @@ void usage()
     exit(1);
 }
 
-extern krb5_keyblock master_keyblock;
+krb5_keyblock master_keyblock;
 krb5_kvno   master_kvno; /* fetched */
 extern krb5_keylist_node *master_keylist;
 extern krb5_principal master_princ;

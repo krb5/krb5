@@ -174,13 +174,6 @@ WRAP_VOID (krb5_db2_free_policy,
            ( krb5_context kcontext, osa_policy_ent_t entry ),
            (kcontext, entry));
 
-WRAP_K (krb5_db2_set_master_key_ext,
-        ( krb5_context kcontext, char *pwd, krb5_keyblock *key),
-        (kcontext, pwd, key));
-WRAP_K (krb5_db2_db_get_mkey,
-        ( krb5_context context, krb5_keyblock **key),
-        (context, key));
-
 WRAP_K (krb5_db2_db_set_mkey_list,
         ( krb5_context kcontext, krb5_keylist_node *keylist),
         (kcontext, keylist));
@@ -251,8 +244,6 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_db2, kdb_function_table) = {
     /* db_free_policy */                         wrap_krb5_db2_free_policy,
     /* db_alloc */                               krb5_db2_alloc,
     /* db_free */                                krb5_db2_free,
-    /* set_master_key */                         wrap_krb5_db2_set_master_key_ext,
-    /* get_master_key */                         wrap_krb5_db2_db_get_mkey,
     /* set_master_key_list */                    wrap_krb5_db2_db_set_mkey_list,
     /* get_master_key_list */                    wrap_krb5_db2_db_get_mkey_list,
     /* blah blah blah */ 0,0,0,0,0,0,0,0,

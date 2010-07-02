@@ -1458,11 +1458,6 @@ krb5_ldap_free_realm_params(krb5_ldap_realm_params *rparams)
             krb5_xfree(rparams->tl_data);
         }
 
-        if (rparams->mkey.contents) {
-            memset(rparams->mkey.contents, 0, rparams->mkey.length);
-            krb5_xfree(rparams->mkey.contents);
-        }
-
         krb5_xfree(rparams);
     }
     return;

@@ -130,7 +130,9 @@ extern kadm5_config_params global_params;
 
 static void print_realm_params(krb5_ldap_realm_params *rparams, int mask);
 static int kdb_ldap_create_principal (krb5_context context, krb5_principal
-                                      princ, enum ap_op op, struct realm_info *pblock);
+                                      princ, enum ap_op op,
+                                      struct realm_info *pblock,
+                                      const krb5_keyblock *master_keyblock);
 
 
 static char *strdur(time_t duration);
@@ -511,15 +513,6 @@ kdb5_ldap_create(int argc, char *argv[])
         mkey_password = pw_str;
     }
 
-    rparams->mkey.enctype = global_params.enctype;
-    /* We are sure that 'mkey_password' is a regular string ... */
-    rparams->mkey.length = strlen(mkey_password) + 1;
-    rparams->mkey.contents = (krb5_octet *)strdup(mkey_password);
-    if (rparams->mkey.contents == NULL) {
-        retval = ENOMEM;
-        goto cleanup;
-    }
-
     rparams->realm_name = strdup(global_params.realm);
     if (rparams->realm_name == NULL) {
         retval = ENOMEM;
@@ -646,7 +639,7 @@ kdb5_ldap_create(int argc, char *argv[])
             goto err_nomsg;
         }
 
-        retval = krb5_c_string_to_key(util_context, rparams->mkey.enctype,
+        retval = krb5_c_string_to_key(util_context, global_params.enctype,
                                       &pwd, &master_salt, &master_keyblock);
 
         if (master_salt.data)
@@ -658,17 +651,6 @@ kdb5_ldap_create(int argc, char *argv[])
         }
 
     }
-
-    rblock.key = &master_keyblock;
-    ldap_context->lrparams->mkey = master_keyblock;
-    ldap_context->lrparams->mkey.contents = (krb5_octet *) malloc
-        (master_keyblock.length);
-    if (ldap_context->lrparams->mkey.contents == NULL) {
-        retval = ENOMEM;
-        goto cleanup;
-    }
-    memcpy (ldap_context->lrparams->mkey.contents, master_keyblock.contents,
-            master_keyblock.length);
 
     /* Create special principals inside the realm subtree */
     {
@@ -695,14 +677,18 @@ kdb5_ldap_create(int argc, char *argv[])
 
         /* Create 'K/M' ... */
         rblock.flags |= KRB5_KDB_DISALLOW_ALL_TIX;
-        if ((retval = kdb_ldap_create_principal(util_context, master_princ, MASTER_KEY, &rblock))) {
+        if ((retval = kdb_ldap_create_principal(util_context, master_princ,
+                                                MASTER_KEY, &rblock,
+                                                &master_keyblock))) {
             com_err(progname, retval, "while adding entries to the database");
             goto err_nomsg;
         }
 
         /* Create 'krbtgt' ... */
         rblock.flags = 0; /* reset the flags */
-        if ((retval = kdb_ldap_create_principal(util_context, &tgt_princ, TGT_KEY, &rblock))) {
+        if ((retval = kdb_ldap_create_principal(util_context, &tgt_princ,
+                                                TGT_KEY, &rblock,
+                                                &master_keyblock))) {
             com_err(progname, retval, "while adding entries to the database");
             goto err_nomsg;
         }
@@ -715,7 +701,8 @@ kdb5_ldap_create(int argc, char *argv[])
         }
         rblock.max_life = ADMIN_LIFETIME;
         rblock.flags = KRB5_KDB_DISALLOW_TGT_BASED;
-        if ((retval = kdb_ldap_create_principal(util_context, p, TGT_KEY, &rblock))) {
+        if ((retval = kdb_ldap_create_principal(util_context, p, TGT_KEY,
+                                                &rblock, &master_keyblock))) {
             krb5_free_principal(util_context, p);
             com_err(progname, retval, "while adding entries to the database");
             goto err_nomsg;
@@ -731,7 +718,8 @@ kdb5_ldap_create(int argc, char *argv[])
         rblock.max_life = CHANGEPW_LIFETIME;
         rblock.flags = KRB5_KDB_DISALLOW_TGT_BASED |
             KRB5_KDB_PWCHANGE_SERVICE;
-        if ((retval = kdb_ldap_create_principal(util_context, p, TGT_KEY, &rblock))) {
+        if ((retval = kdb_ldap_create_principal(util_context, p, TGT_KEY,
+                                                &rblock, &master_keyblock))) {
             krb5_free_principal(util_context, p);
             com_err(progname, retval, "while adding entries to the database");
             goto err_nomsg;
@@ -746,7 +734,8 @@ kdb5_ldap_create(int argc, char *argv[])
         }
         rblock.max_life = global_params.max_life;
         rblock.flags = 0;
-        if ((retval = kdb_ldap_create_principal(util_context, p, TGT_KEY, &rblock))) {
+        if ((retval = kdb_ldap_create_principal(util_context, p, TGT_KEY,
+                                                &rblock, &master_keyblock))) {
             krb5_free_principal(util_context, p);
             com_err(progname, retval, "while adding entries to the database");
             goto err_nomsg;
@@ -775,7 +764,8 @@ kdb5_ldap_create(int argc, char *argv[])
 
         rblock.max_life = ADMIN_LIFETIME;
         rblock.flags = KRB5_KDB_DISALLOW_TGT_BASED;
-        if ((retval = kdb_ldap_create_principal(util_context, temp_p, TGT_KEY, &rblock))) {
+        if ((retval = kdb_ldap_create_principal(util_context, temp_p, TGT_KEY,
+                                                &rblock, &master_keyblock))) {
             krb5_free_principal(util_context, p);
             com_err(progname, retval, "while adding entries to the database");
             goto err_nomsg;
@@ -2352,7 +2342,8 @@ kdb_ldap_tgt_keysalt_iterate(krb5_key_salt_tuple *ksent, krb5_pointer ptr)
  */
 static int
 kdb_ldap_create_principal(krb5_context context, krb5_principal princ,
-                          enum ap_op op, struct realm_info *pblock)
+                          enum ap_op op, struct realm_info *pblock,
+                          const krb5_keyblock *master_keyblock)
 {
     int              retval=0, currlen=0, princtype = 2 /* Service Principal */;
     unsigned char    *curr=NULL;
@@ -2450,8 +2441,7 @@ kdb_ldap_create_principal(krb5_context context, krb5_principal princ,
                 goto cleanup;
             }
             kvno = 1; /* New key is getting set */
-            retval = krb5_dbekd_encrypt_key_data(context,
-                                                 &ldap_context->lrparams->mkey,
+            retval = krb5_dbekd_encrypt_key_data(context, master_keyblock,
                                                  &key, NULL, kvno,
                                                  &entry.key_data[entry.n_key_data - 1]);
             krb5_free_keyblock_contents(context, &key);
@@ -2488,8 +2478,7 @@ kdb_ldap_create_principal(krb5_context context, krb5_principal princ,
         entry.n_key_data++;
         kvno = 1; /* New key is getting set */
         retval = krb5_dbekd_encrypt_key_data(context, pblock->key,
-                                             &ldap_context->lrparams->mkey,
-                                             NULL, kvno,
+                                             master_keyblock, NULL, kvno,
                                              &entry.key_data[entry.n_key_data - 1]);
         if (retval) {
             goto cleanup;

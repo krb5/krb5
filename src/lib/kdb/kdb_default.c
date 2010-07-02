@@ -617,21 +617,6 @@ clean_n_exit:
     return retval;
 }
 
-krb5_error_code kdb_def_set_mkey ( krb5_context kcontext,
-                                   char *pwd,
-                                   krb5_keyblock *key )
-{
-    /* printf("default set master key\n"); */
-    return 0;
-}
-
-krb5_error_code kdb_def_get_mkey ( krb5_context kcontext,
-                                   krb5_keyblock **key )
-{
-    /* printf("default get master key\n"); */
-    return 0;
-}
-
 krb5_error_code kdb_def_set_mkey_list ( krb5_context kcontext,
                                         krb5_keylist_node *keylist )
 {

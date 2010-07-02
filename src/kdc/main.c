@@ -448,11 +448,6 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
         goto whoops;
     }
 
-    if ((kret = krb5_db_set_mkey(rdp->realm_context, &rdp->realm_mkey))) {
-        kdc_err(rdp->realm_context, kret,
-                "while setting master key for realm %s", realm);
-        goto whoops;
-    }
     kret = krb5_db_set_mkey_list(rdp->realm_context, rdp->mkey_list);
     if (kret) {
         kdc_err(rdp->realm_context, kret,
