@@ -1133,21 +1133,6 @@ typedef struct _kdb_vftabl {
     void (*db_free_policy)(krb5_context kcontext, osa_policy_ent_t val);
 
     /*
-     * Optional: Convert an error code returned by a module function (casted
-     * from krb5_error_code to long) into a string.  If this function is
-     * implemented, libkdb5 will invoke it and call krb5_set_error_message with
-     * the result.  This function may never return NULL.
-     *
-     * This function is not productively implemented in current modules, and it
-     * is better for a module to simply call krb5_set_error_message inside
-     * modules when appropriate.
-     */
-    const char *(*errcode_2_string)(krb5_context kcontext, long err_code);
-
-    /* Optional: Free an error string returned by errcode_2_string. */
-    void (*release_errcode_string)(krb5_context kcontext, const char *msg);
-
-    /*
      * Mandatory: Has the semantics of realloc(ptr, size).  Callers use this to
      * allocate memory for new or changed principal entries, so the module
      * should expect to potentially see this memory in db_free_principal.

@@ -311,12 +311,6 @@ krb5_ldap_lock( krb5_context, int );
 krb5_error_code
 krb5_ldap_unlock( krb5_context );
 
-const char *
-krb5_ldap_errcode_2_string( krb5_context, long );
-
-void
-krb5_ldap_release_errcode_string (krb5_context, const char *);
-
 #ifndef HAVE_LDAP_INITIALIZE
 int
 ldap_initialize(LDAP **, char *);

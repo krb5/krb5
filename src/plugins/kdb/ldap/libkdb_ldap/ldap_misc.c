@@ -1530,18 +1530,6 @@ krb5_ldap_unlock(krb5_context kcontext)
     return status;
 }
 
-const char *
-krb5_ldap_errcode_2_string(krb5_context kcontext, long err_code)
-{
-    return krb5_get_error_message(kcontext, err_code);
-}
-
-void
-krb5_ldap_release_errcode_string(krb5_context kcontext, const char *msg)
-{
-    krb5_free_error_message(kcontext, msg);
-}
-
 
 /*
  * Get the number of times an object has been referred to in a realm. this is
