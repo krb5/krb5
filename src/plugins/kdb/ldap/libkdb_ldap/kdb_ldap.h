@@ -311,12 +311,6 @@ krb5_ldap_lock( krb5_context, int );
 krb5_error_code
 krb5_ldap_unlock( krb5_context );
 
-krb5_error_code
-krb5_ldap_supported_realms( krb5_context, char ** );
-
-krb5_error_code
-krb5_ldap_free_supported_realms( krb5_context, char ** );
-
 const char *
 krb5_ldap_errcode_2_string( krb5_context, long );
 

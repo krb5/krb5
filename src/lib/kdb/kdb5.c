@@ -1120,38 +1120,6 @@ krb5_db_iterate(krb5_context kcontext,
 }
 
 krb5_error_code
-krb5_supported_realms(krb5_context kcontext, char **realms)
-{
-    krb5_error_code status = 0;
-    kdb_vftabl *v;
-
-    status = get_vftabl(kcontext, &v);
-    if (status)
-        return status;
-    if (v->db_supported_realms == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
-    status = v->db_supported_realms(kcontext, realms);
-    get_errmsg(kcontext, status);
-    return status;
-}
-
-krb5_error_code
-krb5_free_supported_realms(krb5_context kcontext, char **realms)
-{
-    krb5_error_code status = 0;
-    kdb_vftabl *v;
-
-    status = get_vftabl(kcontext, &v);
-    if (status)
-        return status;
-    if (v->db_free_supported_realms == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
-    status = v->db_free_supported_realms(kcontext, realms);
-    get_errmsg(kcontext, status);
-    return status;
-}
-
-krb5_error_code
 krb5_db_set_master_key_ext(krb5_context kcontext,
                            char *pwd, krb5_keyblock * key)
 {

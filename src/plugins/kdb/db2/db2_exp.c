@@ -249,8 +249,6 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_db2, kdb_function_table) = {
     /* db_iter_policy */                         wrap_krb5_db2_iter_policy,
     /* db_delete_policy */                       wrap_krb5_db2_delete_policy,
     /* db_free_policy */                         wrap_krb5_db2_free_policy,
-    /* db_supported_realms */                    NULL,
-    /* db_free_supported_realms */               NULL,
     /* errcode_2_string */                       NULL,
     /* release_errcode_string */                 NULL,
     /* db_alloc */                               krb5_db2_alloc,

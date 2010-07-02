@@ -1530,22 +1530,6 @@ krb5_ldap_unlock(krb5_context kcontext)
     return status;
 }
 
-krb5_error_code
-krb5_ldap_supported_realms(krb5_context kcontext, char **realms)
-{
-    krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
-    krb5_set_error_message(kcontext, status, "LDAP %s", error_message(status));
-    return status;
-}
-
-krb5_error_code
-krb5_ldap_free_supported_realms(krb5_context kcontext, char **realms)
-{
-    krb5_error_code status = KRB5_PLUGIN_OP_NOTSUPP;
-    krb5_set_error_message(kcontext, status, "LDAP %s", error_message(status));
-    return status;
-}
-
 const char *
 krb5_ldap_errcode_2_string(krb5_context kcontext, long err_code)
 {

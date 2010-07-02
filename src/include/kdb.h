@@ -447,10 +447,6 @@ krb5_error_code krb5_db_iterate ( krb5_context kcontext,
                                   char *match_entry,
                                   int (*func) (krb5_pointer, krb5_db_entry *),
                                   krb5_pointer func_arg );
-krb5_error_code krb5_supported_realms ( krb5_context kcontext,
-                                        char **realms );
-krb5_error_code krb5_free_supported_realms ( krb5_context kcontext,
-                                             char **realms );
 krb5_error_code krb5_db_set_master_key_ext ( krb5_context kcontext,
                                              char *pwd,
                                              krb5_keyblock *key );
@@ -868,7 +864,7 @@ krb5_dbe_free_tl_data(krb5_context, krb5_tl_data *);
  * DAL.  It is passed to init_library to allow KDB modules to detect when
  * they are being loaded by an incompatible version of the KDC.
  */
-#define KRB5_KDB_DAL_VERSION 20100701
+#define KRB5_KDB_DAL_VERSION 20100702
 
 /*
  * A krb5_context can hold one database object.  Modules should use
@@ -1135,17 +1131,6 @@ typedef struct _kdb_vftabl {
 
     /* Optional: Free a policy entry returned by db_get_policy. */
     void (*db_free_policy)(krb5_context kcontext, osa_policy_ent_t val);
-
-    /*
-     * Optional: Fill in *realms with an array of realm names.  This function
-     * is not used or implemented.
-     */
-    krb5_error_code (*db_supported_realms)(krb5_context kcontext,
-                                           char **realms);
-
-    /* Optional: Free a realm list returned by db_supported_realms. */
-    krb5_error_code (*db_free_supported_realms)(krb5_context kcontext,
-                                                char **realms);
 
     /*
      * Optional: Convert an error code returned by a module function (casted

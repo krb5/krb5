@@ -69,8 +69,6 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_ldap, kdb_function_table) = {
     /* db_iter_policy */                    krb5_ldap_iterate_password_policy,
     /* db_delete_policy */                  krb5_ldap_delete_password_policy,
     /* db_free_policy */                    krb5_ldap_free_password_policy,
-    /* db_supported_realms */               krb5_ldap_supported_realms,
-    /* db_free_supported_realms */          krb5_ldap_free_supported_realms,
     /* errcode_2_string */                  krb5_ldap_errcode_2_string,
     /* release_errcode_string */            krb5_ldap_release_errcode_string,
     /* db_alloc */                          krb5_ldap_alloc,

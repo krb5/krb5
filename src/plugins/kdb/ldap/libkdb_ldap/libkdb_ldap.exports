@@ -43,8 +43,6 @@ disjoint_members
 krb5_ldap_delete_realm_1
 krb5_ldap_lock
 krb5_ldap_unlock
-krb5_ldap_supported_realms
-krb5_ldap_free_supported_realms
 krb5_ldap_errcode_2_string
 krb5_ldap_release_errcode_string
 krb5_ldap_create
