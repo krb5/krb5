@@ -316,6 +316,7 @@ krb5_ldap_lib_init(int dal_version)
 {
     if (dal_version != KRB5_KDB_DAL_VERSION)
         return KRB5_KDB_DBTYPE_MISMATCH;
+    return 0;
 }
 
 krb5_error_code
