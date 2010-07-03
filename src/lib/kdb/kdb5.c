@@ -246,10 +246,6 @@ clean_n_exit:
 static void
 kdb_setup_opt_functions(db_library lib)
 {
-    if (lib->vftabl.set_master_key_list == NULL)
-        lib->vftabl.set_master_key_list = kdb_def_set_mkey_list;
-    if (lib->vftabl.get_master_key_list == NULL)
-        lib->vftabl.get_master_key_list = kdb_def_get_mkey_list;
     if (lib->vftabl.fetch_master_key == NULL)
         lib->vftabl.fetch_master_key = krb5_db_def_fetch_mkey;
     if (lib->vftabl.fetch_master_key_list == NULL)
@@ -260,8 +256,6 @@ kdb_setup_opt_functions(db_library lib)
         lib->vftabl.dbe_search_enctype = krb5_dbe_def_search_enctype;
     if (lib->vftabl.change_pwd == NULL)
         lib->vftabl.change_pwd = krb5_dbe_def_cpw;
-    if (lib->vftabl.promote_db == NULL)
-        lib->vftabl.promote_db = krb5_def_promote_db;
     if (lib->vftabl.decrypt_key_data == NULL)
         lib->vftabl.decrypt_key_data = krb5_dbe_def_decrypt_key_data;
     if (lib->vftabl.encrypt_key_data == NULL)
@@ -1062,7 +1056,7 @@ krb5_db_iterate(krb5_context kcontext,
     if (status)
         return status;
     if (v->iterate == NULL)
-        return 0;
+        return KRB5_PLUGIN_OP_NOTSUPP;
     return v->iterate(kcontext, match_entry, func, func_arg);
 }
 
@@ -1076,6 +1070,8 @@ krb5_db_set_mkey_list(krb5_context kcontext,
     status = get_vftabl(kcontext, &v);
     if (status)
         return status;
+    if (v->set_master_key_list == NULL)
+        return KRB5_PLUGIN_OP_NOTSUPP;
     return v->set_master_key_list(kcontext, keylist);
 }
 
@@ -2256,24 +2252,25 @@ krb5_error_code
 krb5_db_promote(krb5_context kcontext, char **db_args)
 {
     krb5_error_code status = 0;
-    char   *section = NULL;
+    char *section = NULL;
     kdb_vftabl *v;
+
+    status = get_vftabl(kcontext, &v);
+    if (status)
+        return status;
+    if (v->promote_db == NULL)
+        return KRB5_PLUGIN_OP_NOTSUPP;
 
     section = kdb_get_conf_section(kcontext);
     if (section == NULL) {
         status = KRB5_KDB_SERVER_INTERNAL_ERR;
-        krb5_set_error_message (kcontext, status,
-                                "unable to determine configuration section for realm %s\n",
-                                kcontext->default_realm);
-        goto clean_n_exit;
+        krb5_set_error_message(kcontext, status, "Unable to determine "
+                               "configuration section for realm %s\n",
+                               kcontext->default_realm);
+        return status;
     }
 
-    status = get_vftabl(kcontext, &v);
-    if (status)
-        goto clean_n_exit;
     status = v->promote_db(kcontext, section, db_args);
-
-clean_n_exit:
     free(section);
     return status;
 }

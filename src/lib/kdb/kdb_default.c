@@ -540,24 +540,3 @@ clean_n_exit:
         krb5_dbe_free_key_list(context, mkey_list_head);
     return retval;
 }
-
-krb5_error_code kdb_def_set_mkey_list ( krb5_context kcontext,
-                                        krb5_keylist_node *keylist )
-{
-    /* printf("default set master key\n"); */
-    return 0;
-}
-
-krb5_error_code kdb_def_get_mkey_list ( krb5_context kcontext,
-                                        krb5_keylist_node **keylist )
-{
-    /* printf("default get master key\n"); */
-    return 0;
-}
-
-krb5_error_code krb5_def_promote_db (krb5_context kcontext,
-                                     char *s, char **args)
-{
-    /* printf("default promote_db\n"); */
-    return KRB5_PLUGIN_OP_NOTSUPP;
-}

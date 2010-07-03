@@ -708,12 +708,6 @@ krb5_def_fetch_mkey_list( krb5_context            context,
                           krb5_kvno             mkvno,
                           krb5_keylist_node  **mkeys_list);
 
-krb5_error_code kdb_def_set_mkey_list ( krb5_context kcontext,
-                                        krb5_keylist_node *keylist );
-
-krb5_error_code kdb_def_get_mkey_list ( krb5_context kcontext,
-                                        krb5_keylist_node **keylist );
-
 krb5_error_code
 krb5_dbe_def_cpw( krb5_context    context,
                   krb5_keyblock       * master_key,
@@ -723,9 +717,6 @@ krb5_dbe_def_cpw( krb5_context    context,
                   int                     new_kvno,
                   krb5_boolean    keepold,
                   krb5_db_entry * db_entry);
-
-krb5_error_code
-krb5_def_promote_db(krb5_context, char *, char **);
 
 krb5_error_code
 krb5_dbe_def_decrypt_key_data( krb5_context             context,
@@ -1096,20 +1087,18 @@ typedef struct _kdb_vftabl {
     void (*free)(krb5_context kcontext, void *ptr);
 
     /*
-     * Optional with default: Inform the module of the master key.  The module
-     * may remember an alias to the provided memory.  This function is called
-     * at startup by the KDC and kadmind with the value returned by
-     * fetch_master_key_list.  The default implementation does nothing.
+     * Optional: Inform the module of the master key list.  The module may
+     * remember an alias to the provided memory.  This function is called at
+     * startup by the KDC and kadmind with the value returned by
+     * fetch_master_key_list.
      */
     krb5_error_code (*set_master_key_list)(krb5_context kcontext,
                                            krb5_keylist_node *keylist);
 
     /*
-     * Optional with default: Retrieve an alias to the master key list as
-     * previously set by set_master_key_list.  This function is used by the KDB
-     * keytab implementation in libkdb5, which is used by kadmind.  The default
-     * implementation returns success without modifying *keylist, which is an
-     * invalid implementation.
+     * Optional: Retrieve an alias to the master key list as previously set by
+     * set_master_key_list.  This function is used by the KDB keytab
+     * implementation in libkdb5, which is used by kadmind.
      */
     krb5_error_code (*get_master_key_list)(krb5_context kcontext,
                                            krb5_keylist_node **keylist);
@@ -1195,13 +1184,10 @@ typedef struct _kdb_vftabl {
                                   krb5_db_entry *db_entry);
 
     /*
-     * Optional with default: Promote a temporary database to be the live one.
-     * kdb5_util load opens the database with the "temporary" db_arg and then
-     * invokes this function when the load is complete, thus replacing the live
+     * Optional: Promote a temporary database to be the live one.  kdb5_util
+     * load opens the database with the "temporary" db_arg and then invokes
+     * this function when the load is complete, thus replacing the live
      * database with no loss of read availability.
-     *
-     * The default implementation returns KRB5_PLUGIN_OP_NOTSUPP; kdb5_util
-     * dump recognizes and ignores this error code.
      */
     krb5_error_code (*promote_db)(krb5_context context, char *conf_section,
                                   char **db_args);
