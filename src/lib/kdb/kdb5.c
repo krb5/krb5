@@ -167,40 +167,39 @@ krb5_dbe_free_tl_data(krb5_context context, krb5_tl_data *tl_data)
     }
 }
 
-/* Caller must free result*/
-
-static char *
-kdb_get_conf_section(krb5_context kcontext)
+/* Set *section to the appropriate section to use for a database module's
+ * profile queries.  The caller must free the result. */
+static krb5_error_code
+get_conf_section(krb5_context context, char **section)
 {
-    krb5_error_code status = 0;
-    char   *result = NULL;
-    char   *value = NULL;
+    krb5_error_code status;
+    char *result = NULL;
+    char *value = NULL;
 
-    if (kcontext->default_realm == NULL)
-        return NULL;
-    /* The profile has to have been initialized.  If the profile was
-       not initialized, expect nothing less than a crash.  */
-    status = profile_get_string(kcontext->profile,
+    *section = NULL;
+
+    if (context->default_realm == NULL) {
+        krb5_set_error_message(context, KRB5_KDB_SERVER_INTERNAL_ERR,
+                               "No default realm set; cannot initialize KDB");
+        return KRB5_KDB_SERVER_INTERNAL_ERR;
+    }
+    status = profile_get_string(context->profile,
                                 /* realms */
                                 KDB_REALM_SECTION,
-                                kcontext->default_realm,
+                                context->default_realm,
                                 /* under the realm name, database_module */
                                 KDB_MODULE_POINTER,
                                 /* default value is the realm name itself */
-                                kcontext->default_realm,
+                                context->default_realm,
                                 &value);
-
-    if (status) {
-        /* some problem */
-        result = strdup(kcontext->default_realm);
-        /* let NULL be handled by the caller */
-    } else {
-        result = strdup(value);
-        /* free profile string */
-        profile_release_string(value);
-    }
-
-    return result;
+    if (status)
+        return status;
+    result = strdup(value);
+    profile_release_string(value);
+    if (result == NULL)
+        return ENOMEM;
+    *section = result;
+    return 0;
 }
 
 static char *
@@ -575,27 +574,18 @@ get_vftabl(krb5_context kcontext, kdb_vftabl **vftabl_ptr)
 krb5_error_code
 krb5_db_open(krb5_context kcontext, char **db_args, int mode)
 {
-    krb5_error_code status = 0;
-    char   *section = NULL;
+    krb5_error_code status;
+    char *section;
     kdb_vftabl *v;
-
-    section = kdb_get_conf_section(kcontext);
-    if (section == NULL) {
-        status = KRB5_KDB_SERVER_INTERNAL_ERR;
-        krb5_set_error_message (kcontext, status,
-                                "unable to determine configuration section for realm %s\n",
-                                kcontext->default_realm ? kcontext->default_realm : "[UNSET]");
-        goto clean_n_exit;
-    }
 
     status = get_vftabl(kcontext, &v);
     if (status)
-        goto clean_n_exit;
+        return status;
+    status = get_conf_section(kcontext, &section);
+    if (status)
+        return status;
     status = v->init_module(kcontext, section, db_args, mode);
-
-clean_n_exit:
-    if (section)
-        free(section);
+    free(section);
     return status;
 }
 
@@ -609,31 +599,20 @@ krb5_db_inited(krb5_context kcontext)
 krb5_error_code
 krb5_db_create(krb5_context kcontext, char **db_args)
 {
-    krb5_error_code status = 0;
-    char   *section = NULL;
+    krb5_error_code status;
+    char *section;
     kdb_vftabl *v;
-
-    section = kdb_get_conf_section(kcontext);
-    if (section == NULL) {
-        status = KRB5_KDB_SERVER_INTERNAL_ERR;
-        krb5_set_error_message (kcontext, status,
-                                "unable to determine configuration section for realm %s\n",
-                                kcontext->default_realm);
-        goto clean_n_exit;
-    }
 
     status = get_vftabl(kcontext, &v);
     if (status)
-        goto clean_n_exit;
-    if (v->create == NULL) {
-        status = KRB5_PLUGIN_OP_NOTSUPP;
-        goto clean_n_exit;
-    }
+        return status;
+    if (v->create == NULL)
+        return KRB5_PLUGIN_OP_NOTSUPP;
+    status = get_conf_section(kcontext, &section);
+    if (status)
+        return status;
     status = v->create(kcontext, section, db_args);
-
-clean_n_exit:
-    if (section)
-        free(section);
+    free(section);
     return status;
 }
 
@@ -659,31 +638,20 @@ krb5_db_fini(krb5_context kcontext)
 krb5_error_code
 krb5_db_destroy(krb5_context kcontext, char **db_args)
 {
-    krb5_error_code status = 0;
-    char   *section = NULL;
+    krb5_error_code status;
+    char *section;
     kdb_vftabl *v;
-
-    section = kdb_get_conf_section(kcontext);
-    if (section == NULL) {
-        status = KRB5_KDB_SERVER_INTERNAL_ERR;
-        krb5_set_error_message (kcontext, status,
-                                "unable to determine configuration section for realm %s\n",
-                                kcontext->default_realm);
-        goto clean_n_exit;
-    }
 
     status = get_vftabl(kcontext, &v);
     if (status)
-        goto clean_n_exit;
-    if (v->destroy == NULL) {
-        status = KRB5_PLUGIN_OP_NOTSUPP;
-        goto clean_n_exit;
-    }
+        return status;
+    if (v->destroy == NULL)
+        return KRB5_PLUGIN_OP_NOTSUPP;
+    status = get_conf_section(kcontext, &section);
+    if (status)
+        return status;
     status = v->destroy(kcontext, section, db_args);
-
-clean_n_exit:
-    if (section)
-        free(section);
+    free(section);
     return status;
 }
 
@@ -2248,8 +2216,8 @@ krb5_db_free_policy(krb5_context kcontext, osa_policy_ent_t policy)
 krb5_error_code
 krb5_db_promote(krb5_context kcontext, char **db_args)
 {
-    krb5_error_code status = 0;
-    char *section = NULL;
+    krb5_error_code status;
+    char *section;
     kdb_vftabl *v;
 
     status = get_vftabl(kcontext, &v);
@@ -2257,16 +2225,9 @@ krb5_db_promote(krb5_context kcontext, char **db_args)
         return status;
     if (v->promote_db == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
-
-    section = kdb_get_conf_section(kcontext);
-    if (section == NULL) {
-        status = KRB5_KDB_SERVER_INTERNAL_ERR;
-        krb5_set_error_message(kcontext, status, "Unable to determine "
-                               "configuration section for realm %s\n",
-                               kcontext->default_realm);
+    status = get_conf_section(kcontext, &section);
+    if (status)
         return status;
-    }
-
     status = v->promote_db(kcontext, section, db_args);
     free(section);
     return status;
