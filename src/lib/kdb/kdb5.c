@@ -292,7 +292,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library *libptr)
         krb5_set_error_message(kcontext, KRB5_KDB_DBTYPE_NOTFOUND,
                                "Unable to find requested database type: %s",
                                lib_name);
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
     }
 
     lib = calloc(1, sizeof(*lib));
@@ -634,7 +634,7 @@ krb5_db_create(krb5_context kcontext, char **db_args)
     if (status)
         goto clean_n_exit;
     if (v->create == NULL) {
-        status = KRB5_KDB_DBTYPE_NOSUP;
+        status = KRB5_PLUGIN_OP_NOTSUPP;
         goto clean_n_exit;
     }
     status = v->create(kcontext, section, db_args);
@@ -685,7 +685,7 @@ krb5_db_destroy(krb5_context kcontext, char **db_args)
     if (status)
         goto clean_n_exit;
     if (v->destroy == NULL) {
-        status = KRB5_KDB_DBTYPE_NOSUP;
+        status = KRB5_PLUGIN_OP_NOTSUPP;
         goto clean_n_exit;
     }
     status = v->destroy(kcontext, section, db_args);
@@ -706,7 +706,7 @@ krb5_db_get_age(krb5_context kcontext, char *db_name, time_t * t)
     if (status)
         return status;
     if (v->get_age == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
     return v->get_age(kcontext, db_name, t);
 }
 
@@ -720,7 +720,7 @@ krb5_db_lock(krb5_context kcontext, int lock_mode)
     if (status)
         return status;
     if (v->lock == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
     return v->lock(kcontext, lock_mode);
 }
 
@@ -734,7 +734,7 @@ krb5_db_unlock(krb5_context kcontext)
     if (status)
         return status;
     if (v->unlock == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
     return v->unlock(kcontext);
 }
 
@@ -751,7 +751,7 @@ krb5_db_get_principal(krb5_context kcontext,
     if (status)
         return status;
     if (v->get_principal == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
     return v->get_principal(kcontext, search_for, 0, entries, nentries, more);
 }
 
@@ -769,7 +769,7 @@ krb5_db_get_principal_ext(krb5_context kcontext,
     if (status)
         return status;
     if (v->get_principal == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
     return v->get_principal(kcontext, search_for, flags, entries, nentries,
                             more);
 }
@@ -878,7 +878,7 @@ krb5int_put_principal_no_log(krb5_context kcontext,
     if (status)
         return status;
     if (v->put_principal == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
     status = extract_db_args_from_tl_data(kcontext, &entries->tl_data,
                                           &entries->n_tl_data,
                                           &db_args);
@@ -949,7 +949,7 @@ krb5_db_put_principal(krb5_context kcontext,
     }
 
     if (v->put_principal == NULL) {
-        status = KRB5_KDB_DBTYPE_NOSUP;
+        status = KRB5_PLUGIN_OP_NOTSUPP;
         goto err_lock;
     }
 
@@ -986,7 +986,7 @@ krb5int_delete_principal_no_log(krb5_context kcontext,
     if (status)
         return status;
     if (v->delete_principal == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
     return v->delete_principal(kcontext, search_for, nentries);
 }
 
@@ -1033,7 +1033,7 @@ krb5_db_delete_principal(krb5_context kcontext,
     }
 
     if (v->delete_principal == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
 
     status = v->delete_principal(kcontext, search_for, nentries);
 
@@ -1089,7 +1089,7 @@ krb5_db_get_mkey_list(krb5_context kcontext, krb5_keylist_node ** keylist)
     if (status)
         return status;
     if (v->get_master_key_list == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
     return v->get_master_key_list(kcontext, keylist);
 }
 
@@ -1153,7 +1153,7 @@ krb5_db_store_master_key_list(krb5_context kcontext,
     if (status)
         return status;
     if (v->store_master_key_list == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
     return v->store_master_key_list(kcontext, keyfile, mname, keylist,
                                     master_pwd);
 }
@@ -2178,7 +2178,7 @@ krb5_db_create_policy(krb5_context kcontext, osa_policy_ent_t policy)
     if (status)
         return status;
     if (v->create_policy == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
     return v->create_policy(kcontext, policy);
 }
 
@@ -2193,7 +2193,7 @@ krb5_db_get_policy(krb5_context kcontext, char *name,
     if (status)
         return status;
     if (v->get_policy == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
     return v->get_policy(kcontext, name, policy, cnt);
 }
 
@@ -2207,7 +2207,7 @@ krb5_db_put_policy(krb5_context kcontext, osa_policy_ent_t policy)
     if (status)
         return status;
     if (v->put_policy == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
     return v->put_policy(kcontext, policy);
 }
 
@@ -2236,7 +2236,7 @@ krb5_db_delete_policy(krb5_context kcontext, char *policy)
     if (status)
         return status;
     if (v->delete_policy == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
     return v->delete_policy(kcontext, policy);
 }
 
@@ -2342,6 +2342,6 @@ krb5_db_invoke(krb5_context kcontext,
     if (status)
         return status;
     if (v->invoke == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
     return v->invoke(kcontext, method, req, rep);
 }

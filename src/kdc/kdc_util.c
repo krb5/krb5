@@ -2294,7 +2294,7 @@ check_allowed_to_delegate_to(krb5_context context,
                           KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE,
                           &req_data,
                           &rep_data);
-    if (code == KRB5_KDB_DBTYPE_NOSUP) {
+    if (code == KRB5_PLUGIN_OP_NOTSUPP) {
         code = KRB5KDC_ERR_POLICY;
     }
 
@@ -2380,7 +2380,7 @@ kdc_check_transited_list(krb5_context context,
                           KRB5_KDB_METHOD_CHECK_TRANSITED_REALMS,
                           &req_data,
                           &rep_data);
-    if (code == KRB5_KDB_DBTYPE_NOSUP) {
+    if (code == KRB5_PLUGIN_OP_NOTSUPP) {
         code = 0;
     }
 

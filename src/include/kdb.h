@@ -824,7 +824,7 @@ krb5_dbe_free_tl_data(krb5_context, krb5_tl_data *);
  * Some module functions are mandatory for KDC operation; others are optional
  * or apply only to administrative operations.  If a function is optional, a
  * module can leave the function pointer as NULL.  Alternatively, modules can
- * return KRB5_KDB_DBTYPE_NOSUP when asked to perform an inapplicable action.
+ * return KRB5_PLUGIN_OP_NOTSUPP when asked to perform an inapplicable action.
  *
  * Some module functions have default implementations which will call back into
  * the vtable interface.  Leave these functions as NULL to use the default
@@ -916,9 +916,8 @@ typedef struct _kdb_vftabl {
      *
      * Used by the "kadmin lock" command, incremental propagation, and
      * kdb5_util dump.  Incremental propagation support requires shared locks
-     * to operate.  kdb5_util dump will work if the module returns
-     * KRB5_PLUGIN_OP_NOTSUPP; note that this is *not* the usual "operation
-     * not supported" error code.
+     * to operate.  kdb5_util dump will continue unlocked if the module returns
+     * KRB5_PLUGIN_OP_NOTSUPP.
      */
     krb5_error_code (*lock)(krb5_context kcontext, int mode);
 
@@ -1201,9 +1200,8 @@ typedef struct _kdb_vftabl {
      * invokes this function when the load is complete, thus replacing the live
      * database with no loss of read availability.
      *
-     * The default implementation returns KRB5_PLUGIN_OP_NOTSUPP (which is
-     * *not* the usual "operation not supported" error code); kdb5_util dump
-     * recognizes and ignores this error code.
+     * The default implementation returns KRB5_PLUGIN_OP_NOTSUPP; kdb5_util
+     * dump recognizes and ignores this error code.
      */
     krb5_error_code (*promote_db)(krb5_context context, char *conf_section,
                                   char **db_args);
@@ -1244,7 +1242,7 @@ typedef struct _kdb_vftabl {
 
     /*
      * Optional: Perform an operation on input data req with output stored in
-     * rep.  Return KRB5_KDB_DBTYPE_NOSUP if the module does not implement the
+     * rep.  Return KRB5_PLUGIN_OP_NOTSUPP if the module does not implement the
      * method.  Defined methods are:
      *
      * KRB5_KDB_METHOD_SIGN_AUTH_DATA: req contains a krb5_sign_auth_data_req
@@ -1260,7 +1258,7 @@ typedef struct _kdb_vftabl {
      * KRB5_KDB_METHOD_CHECK_TRANSITED_REALMS: req contains a
      *     kdb_check_transited_realms_req structure.  Perform a policy check on
      *     a cross-realm ticket's transited field and return an error (other
-     *     than KRB5_KDB_DBTYPE_NOSUP) if the check fails.  Leave rep alone.
+     *     than KRB5_PLUGIN_OP_NOTSUPP) if the check fails.  Leave rep alone.
      *
      * KRB5_KDB_METHOD_CHECK_POLICY_AS: req contains a kdb_check_policy_as_req
      *     structure.  Perform a policy check on an AS request, in addition to

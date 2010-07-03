@@ -741,7 +741,7 @@ handle_kdb_authdata (krb5_context context,
                               FALSE);        /* !ignore_kdc_issued */
         if (code != 0)
             krb5_free_authdata(context, db_authdata);
-    } else if (code == KRB5_KDB_DBTYPE_NOSUP)
+    } else if (code == KRB5_PLUGIN_OP_NOTSUPP)
         code = 0;
 
     return code;

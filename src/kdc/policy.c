@@ -95,7 +95,7 @@ against_local_policy_as(register krb5_kdc_req *request, krb5_db_entry client,
                           KRB5_KDB_METHOD_CHECK_POLICY_AS,
                           &req_data,
                           &rep_data);
-    if (code == KRB5_KDB_DBTYPE_NOSUP)
+    if (code == KRB5_PLUGIN_OP_NOTSUPP)
         return 0;
 
     *status = rep.status;
@@ -153,7 +153,7 @@ against_local_policy_tgs(register krb5_kdc_req *request, krb5_db_entry server,
                           KRB5_KDB_METHOD_CHECK_POLICY_TGS,
                           &req_data,
                           &rep_data);
-    if (code == KRB5_KDB_DBTYPE_NOSUP)
+    if (code == KRB5_PLUGIN_OP_NOTSUPP)
         return 0;
 
     *status = rep.status;

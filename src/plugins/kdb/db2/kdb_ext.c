@@ -80,7 +80,7 @@ krb5_db2_invoke(krb5_context context,
                 const krb5_data *req,
                 krb5_data *rep)
 {
-    krb5_error_code code = KRB5_KDB_DBTYPE_NOSUP;
+    krb5_error_code code = KRB5_PLUGIN_OP_NOTSUPP;
 
     switch (method) {
     case KRB5_KDB_METHOD_CHECK_POLICY_AS:
