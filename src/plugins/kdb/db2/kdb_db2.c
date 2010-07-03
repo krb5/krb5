@@ -932,7 +932,6 @@ krb5_db2_free_principal(krb5_context context, krb5_db_entry *entries,
     register int i;
     for (i = 0; i < nentries; i++)
         krb5_dbe_free_contents(context, &entries[i]);
-    return 0;
 }
 
 /*
