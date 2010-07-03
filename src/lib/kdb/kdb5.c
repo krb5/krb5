@@ -42,7 +42,6 @@
 #include <k5-int.h>
 #include <osconf.h>
 #include "kdb5.h"
-#include <assert.h>
 #include "kdb_log.h"
 #include "kdb5int.h"
 
@@ -592,7 +591,6 @@ krb5_db_open(krb5_context kcontext, char **db_args, int mode)
     status = get_vftabl(kcontext, &v);
     if (status)
         goto clean_n_exit;
-    assert(v->init_module != NULL);
     status = v->init_module(kcontext, section, db_args, mode);
 
 clean_n_exit:
@@ -650,7 +648,6 @@ krb5_db_fini(krb5_context kcontext)
         return 0;
 
     v = &kcontext->dal_handle->lib_handle->vftabl;
-    assert(v->fini_module != NULL);
     status = v->fini_module(kcontext);
 
     if (status)
