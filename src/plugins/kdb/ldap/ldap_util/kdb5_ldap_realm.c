@@ -852,11 +852,11 @@ kdb5_ldap_create(int argc, char *argv[])
         else
             mkey_kvno = 1;  /* Default */
 
-        retval = krb5_def_store_mkey(util_context,
-                                     global_params.stash_file,
-                                     master_princ,
-                                     mkey_kvno,
-                                     &master_keyblock, NULL);
+        retval = krb5_db_store_master_key(util_context,
+                                          global_params.stash_file,
+                                          master_princ,
+                                          mkey_kvno,
+                                          &master_keyblock, NULL);
         if (retval) {
             com_err(progname, errno, "while storing key");
             printf("Warning: couldn't stash master key.\n");
