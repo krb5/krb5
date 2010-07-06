@@ -850,18 +850,9 @@ destroy_db(krb5_context context, char *dbname)
     return retval1;
 }
 
-/*
- * look up a principal in the data base.
- * returns number of entries found, and whether there were
- * more than requested.
- */
-
 krb5_error_code
-krb5_db2_get_principal(krb5_context context,
-                       krb5_const_principal searchfor,
-                       krb5_db_entry *entries, /* filled in */
-                       int *nentries, /* how much room/how many found */
-                       krb5_boolean *more) /* are there more? */
+krb5_db2_get_principal(krb5_context context, krb5_const_principal searchfor,
+                       unsigned int flags, krb5_db_entry **entry)
 {
     krb5_db2_context *db_ctx;
     krb5_error_code retval;
@@ -870,9 +861,7 @@ krb5_db2_get_principal(krb5_context context,
     krb5_data keydata, contdata;
     int     trynum, dbret;
 
-    *more = FALSE;
-    *nentries = 0;
-
+    *entry = NULL;
     if (!k5db2_inited(context))
         return KRB5_KDB_DBNOTINITED;
 
@@ -898,22 +887,20 @@ krb5_db2_get_principal(krb5_context context,
     key.size = keydata.length;
 
     db = db_ctx->db;
-    dbret = (*db->get) (db, &key, &contents, 0);
+    dbret = (*db->get)(db, &key, &contents, 0);
     retval = errno;
     krb5_free_data_contents(context, &keydata);
     switch (dbret) {
     case 1:
-        retval = 0;
+        retval = KRB5_KDB_NOENTRY;
+        /* Fall through. */
     case -1:
     default:
-        *nentries = 0;
         goto cleanup;
     case 0:
         contdata.data = contents.data;
         contdata.length = contents.size;
-        retval = krb5_decode_princ_contents(context, &contdata, entries);
-        if (!retval)
-            *nentries = 1;
+        retval = krb5_decode_princ_entry(context, &contdata, entry);
         break;
     }
 
@@ -922,34 +909,18 @@ cleanup:
     return retval;
 }
 
-/*
-  Free stuff returned by krb5_db2_get_principal.
-*/
+/* Free an entry returned by krb5_db2_get_principal. */
 void
-krb5_db2_free_principal(krb5_context context, krb5_db_entry *entries,
-                        int nentries)
+krb5_db2_free_principal(krb5_context context, krb5_db_entry *entry)
 {
-    register int i;
-    for (i = 0; i < nentries; i++)
-        krb5_dbe_free_contents(context, &entries[i]);
+    krb5_dbe_free(context, entry);
 }
 
-/*
-  Stores the *"nentries" entry structures pointed to by "entries" in the
-  database.
-
-  *"nentries" is updated upon return to reflect the number of records
-  acutally stored; the first *"nstored" records will have been stored in the
-  database (even if an error occurs).
-
-*/
-
 krb5_error_code
-krb5_db2_put_principal(krb5_context context, krb5_db_entry *entries,
-                       int *nentries, /* number of entry structs to update */
+krb5_db2_put_principal(krb5_context context, krb5_db_entry *entry,
                        char **db_args)
 {
-    int     i, n, dbret;
+    int     dbret;
     DB     *db;
     DBT     key, contents;
     krb5_data contdata, keydata;
@@ -965,8 +936,6 @@ krb5_db2_put_principal(krb5_context context, krb5_db_entry *entries,
         return EINVAL;
     }
 
-    n = *nentries;
-    *nentries = 0;
     if (!k5db2_inited(context))
         return KRB5_KDB_DBNOTINITED;
 
@@ -980,47 +949,35 @@ krb5_db2_put_principal(krb5_context context, krb5_db_entry *entries,
         return retval;
     }
 
-    /* for each one, stuff temps, and do replace/append */
-    for (i = 0; i < n; i++) {
-        retval = krb5_encode_princ_contents(context, &contdata, entries);
-        if (retval)
-            break;
-        contents.data = contdata.data;
-        contents.size = contdata.length;
-        retval = krb5_encode_princ_dbkey(context, &keydata, entries->princ);
-        if (retval) {
-            krb5_free_data_contents(context, &contdata);
-            break;
-        }
-
-        key.data = keydata.data;
-        key.size = keydata.length;
-        dbret = (*db->put) (db, &key, &contents, 0);
-        retval = dbret ? errno : 0;
-        krb5_free_data_contents(context, &keydata);
+    retval = krb5_encode_princ_entry(context, &contdata, entry);
+    if (retval)
+        goto cleanup;
+    contents.data = contdata.data;
+    contents.size = contdata.length;
+    retval = krb5_encode_princ_dbkey(context, &keydata, entry->princ);
+    if (retval) {
         krb5_free_data_contents(context, &contdata);
-        if (retval)
-            break;
-        entries++;              /* bump to next struct */
+        goto cleanup;
     }
 
+    key.data = keydata.data;
+    key.size = keydata.length;
+    dbret = (*db->put)(db, &key, &contents, 0);
+    retval = dbret ? errno : 0;
+    krb5_free_data_contents(context, &keydata);
+    krb5_free_data_contents(context, &contdata);
+
+cleanup:
     (void) krb5_db2_end_update(context);
     (void) krb5_db2_unlock(context); /* unlock database */
-    *nentries = i;
     return (retval);
 }
 
-/*
- * delete a principal from the data base.
- * returns number of entries removed
- */
-
 krb5_error_code
-krb5_db2_delete_principal(krb5_context context, krb5_const_principal searchfor,
-                          int *nentries) /* how many found & deleted */
+krb5_db2_delete_principal(krb5_context context, krb5_const_principal searchfor)
 {
     krb5_error_code retval;
-    krb5_db_entry entry;
+    krb5_db_entry *entry;
     krb5_db2_context *db_ctx;
     DB     *db;
     DBT     key, contents;
@@ -1050,31 +1007,29 @@ krb5_db2_delete_principal(krb5_context context, krb5_const_principal searchfor,
     switch (dbret) {
     case 1:
         retval = KRB5_KDB_NOENTRY;
+        /* Fall through. */
     case -1:
     default:
-        *nentries = 0;
         goto cleankey;
     case 0:
         ;
     }
-    memset(&entry, 0, sizeof(entry));
     contdata.data = contents.data;
     contdata.length = contents.size;
-    retval = krb5_decode_princ_contents(context, &contdata, &entry);
+    retval = krb5_decode_princ_entry(context, &contdata, &entry);
     if (retval)
         goto cleankey;
-    *nentries = 1;
 
     /* Clear encrypted key contents */
-    for (i = 0; i < entry.n_key_data; i++) {
-        if (entry.key_data[i].key_data_length[0]) {
-            memset(entry.key_data[i].key_data_contents[0], 0,
-                   (unsigned) entry.key_data[i].key_data_length[0]);
+    for (i = 0; i < entry->n_key_data; i++) {
+        if (entry->key_data[i].key_data_length[0]) {
+            memset(entry->key_data[i].key_data_contents[0], 0,
+                   (unsigned) entry->key_data[i].key_data_length[0]);
         }
     }
 
-    retval = krb5_encode_princ_contents(context, &contdata, &entry);
-    krb5_dbe_free_contents(context, &entry);
+    retval = krb5_encode_princ_entry(context, &contdata, entry);
+    krb5_dbe_free(context, entry);
     if (retval)
         goto cleankey;
 
@@ -1105,7 +1060,7 @@ krb5_db2_iterate_ext(krb5_context context,
     DB     *db;
     DBT     key, contents;
     krb5_data contdata;
-    krb5_db_entry entries;
+    krb5_db_entry *entry;
     krb5_error_code retval;
     int     dbret;
     void   *cookie;
@@ -1142,14 +1097,14 @@ krb5_db2_iterate_ext(krb5_context context,
 
         contdata.data = contents.data;
         contdata.length = contents.size;
-        retval = krb5_decode_princ_contents(context, &contdata, &entries);
+        retval = krb5_decode_princ_entry(context, &contdata, &entry);
         if (retval)
             break;
         retval = k5_mutex_unlock(krb5_db2_mutex);
         if (retval)
             break;
-        retval = (*func) (func_arg, &entries);
-        krb5_dbe_free_contents(context, &entries);
+        retval = (*func)(func_arg, entry);
+        krb5_dbe_free(context, entry);
         retval2 = k5_mutex_lock(krb5_db2_mutex);
         /* Note: If re-locking fails, the wrapper in db2_exp.c will
            still try to unlock it again.  That would be a bug.  Fix
@@ -1319,11 +1274,11 @@ krb5_db2_create_policy(krb5_context context, osa_policy_ent_t policy)
 
 krb5_error_code
 krb5_db2_get_policy(krb5_context context,
-                    char *name, osa_policy_ent_t * policy, int *cnt)
+                    char *name, osa_policy_ent_t *policy)
 {
     krb5_db2_context *dbc = context->dal_handle->db_context;
 
-    return osa_adb_get_policy(dbc->policy_db, name, policy, cnt);
+    return osa_adb_get_policy(dbc->policy_db, name, policy);
 }
 
 krb5_error_code
@@ -1450,9 +1405,8 @@ krb5_db2_merge_nra_iterator(krb5_pointer ptr, krb5_db_entry *entry)
     struct nra_context *nra = (struct nra_context *)ptr;
     kdb5_dal_handle *dal_handle = nra->kcontext->dal_handle;
     krb5_error_code retval;
-    int n_entries = 0, changed;
-    krb5_db_entry s_entry;
-    krb5_boolean more;
+    int changed;
+    krb5_db_entry *s_entry;
     krb5_db2_context *dst_db;
 
     memset(&s_entry, 0, sizeof(s_entry));
@@ -1461,23 +1415,21 @@ krb5_db2_merge_nra_iterator(krb5_pointer ptr, krb5_db_entry *entry)
     dal_handle->db_context = nra->db_context;
 
     /* look up the new principal in the old DB */
-    retval = krb5_db2_get_principal(nra->kcontext, entry->princ, &s_entry,
-                                    &n_entries, &more);
-    if (retval != 0 || n_entries == 0) {
+    retval = krb5_db2_get_principal(nra->kcontext, entry->princ, 0, &s_entry);
+    if (retval != 0) {
         /* principal may be newly created, so ignore */
         dal_handle->db_context = dst_db;
         return 0;
     }
 
     /* merge non-replicated attributes from the old entry in */
-    krb5_db2_merge_principal(nra->kcontext, &s_entry, entry, &changed);
+    krb5_db2_merge_principal(nra->kcontext, s_entry, entry, &changed);
 
     dal_handle->db_context = dst_db;
 
     /* if necessary, commit the modified new entry to the new DB */
     if (changed) {
-        retval = krb5_db2_put_principal(nra->kcontext, entry, &n_entries,
-                                        NULL);
+        retval = krb5_db2_put_principal(nra->kcontext, entry, NULL);
     } else {
         retval = 0;
     }

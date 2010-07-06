@@ -2113,13 +2113,12 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
     /* We already know that the policy is inside the realm container. */
     if (polname) {
         osa_policy_ent_t   pwdpol;
-        int                cnt=0;
         krb5_timestamp     last_pw_changed;
         krb5_ui_4          pw_max_life;
 
         memset(&pwdpol, 0, sizeof(pwdpol));
 
-        if ((st=krb5_ldap_get_password_policy(context, polname, &pwdpol, &cnt)) != 0)
+        if ((st=krb5_ldap_get_password_policy(context, polname, &pwdpol)) != 0)
             goto cleanup;
         pw_max_life = pwdpol->pw_max_life;
         free (pwdpol);

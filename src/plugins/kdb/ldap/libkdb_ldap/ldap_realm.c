@@ -322,9 +322,8 @@ krb5_ldap_delete_realm (krb5_context context, char *lrealm)
                 for (i = 0; values[i] != NULL; ++i) {
                     krb5_parse_name(context, values[i], &principal);
                     if (principal_in_realm_2(principal, lrealm) == 0) {
-                        int nent = 0;
-                        if ((st=krb5_ldap_delete_principal(context, principal,
-                                                           &nent)) != LDAP_SUCCESS)
+                        st=krb5_ldap_delete_principal(context, principal);
+                        if (st && st != KRB5_KDB_NOENTRY)
                             goto cleanup;
                     }
                     krb5_free_principal(context, principal);

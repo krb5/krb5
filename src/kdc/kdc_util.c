@@ -243,7 +243,7 @@ find_pa_data(krb5_pa_data **padata, krb5_preauthtype pa_type)
 krb5_error_code
 kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
                     krb5_data *pkt, krb5_ticket **ticket,
-                    krb5_db_entry *krbtgt, int *nprincs,
+                    krb5_db_entry **krbtgt_ptr,
                     krb5_keyblock **tgskey,
                     krb5_keyblock **subkey,
                     krb5_pa_data **pa_tgs_req)
@@ -259,8 +259,9 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
     krb5_authenticator  * authenticator = NULL;
     krb5_checksum       * his_cksum = NULL;
     krb5_kvno             kvno = 0;
+    krb5_db_entry       * krbtgt = NULL;
 
-    *nprincs = 0;
+    *krbtgt_ptr = NULL;
     *tgskey = NULL;
 
     tmppa = find_pa_data(request->padata, KRB5_PADATA_AP_REQ);
@@ -304,7 +305,7 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 #endif
 
     if ((retval = kdc_get_server_key(apreq->ticket, 0, foreign_server,
-                                     krbtgt, nprincs, tgskey, &kvno)))
+                                     &krbtgt, tgskey, &kvno)))
         goto cleanup_auth_context;
     /*
      * We do not use the KDB keytab because other parts of the TGS need the TGT key.
@@ -409,11 +410,15 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
             if (!(retval = encode_krb5_kdc_req_body(request, &scratch)))
                 retval = comp_cksum(kdc_context, scratch, *ticket, his_cksum);
             krb5_free_data(kdc_context, scratch);
+            if (retval)
+                goto cleanup_authenticator;
         }
     }
 
-    if (retval == 0)
-        *pa_tgs_req = tmppa;
+    *pa_tgs_req = tmppa;
+    *krbtgt_ptr = krbtgt;
+    krbtgt = NULL;
+
 cleanup_authenticator:
     krb5_free_authenticator(kdc_context, authenticator);
 
@@ -430,6 +435,7 @@ cleanup:
         *tgskey = NULL;
     }
     krb5_free_ap_req(kdc_context, apreq);
+    krb5_db_free_principal(kdc_context, krbtgt);
     return retval;
 }
 
@@ -442,38 +448,30 @@ cleanup:
  */
 krb5_error_code
 kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
-                   krb5_boolean match_enctype, krb5_db_entry *server,
-                   int *nprincs, krb5_keyblock **key, krb5_kvno *kvno)
+                   krb5_boolean match_enctype, krb5_db_entry **server_ptr,
+                   krb5_keyblock **key, krb5_kvno *kvno)
 {
     krb5_error_code       retval;
-    krb5_boolean          more, similar;
+    krb5_boolean          similar;
     krb5_key_data       * server_key;
     krb5_keyblock       * mkey_ptr;
+    krb5_db_entry       * server = NULL;
 
-    *nprincs = 1;
+    *server_ptr = NULL;
 
-    retval = krb5_db_get_principal_ext(kdc_context,
-                                       ticket->server,
-                                       flags,
-                                       server,
-                                       nprincs,
-                                       &more);
-    if (retval) {
-        return(retval);
-    }
-    if (more) {
-        return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
-    } else if (*nprincs != 1) {
+    retval = krb5_db_get_principal(kdc_context, ticket->server, flags,
+                                   &server);
+    if (retval == KRB5_KDB_NOENTRY) {
         char *sname;
-
         if (!krb5_unparse_name(kdc_context, ticket->server, &sname)) {
             limit_string(sname);
             krb5_klog_syslog(LOG_ERR,"TGS_REQ: UNKNOWN SERVER: server='%s'",
                              sname);
             free(sname);
         }
-        return(KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN);
-    }
+        return KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
+    } else if (retval)
+        return retval;
     if (server->attributes & KRB5_KDB_DISALLOW_SVR ||
         server->attributes & KRB5_KDB_DISALLOW_ALL_TIX) {
         retval = KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
@@ -526,12 +524,10 @@ kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
     }
     (*key)->enctype = ticket->enc_part.enctype;
     *kvno = server_key->key_data_kvno;
+    *server_ptr = server;
+    server = NULL;
 errout:
-    if (retval != 0) {
-        krb5_db_free_principal(kdc_context, server, *nprincs);
-        *nprincs = 0;
-    }
-
+    krb5_db_free_principal(kdc_context, server);
     return retval;
 }
 
@@ -1725,28 +1721,6 @@ rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep)
 }
 
 krb5_error_code
-get_principal_locked (krb5_context kcontext,
-                      krb5_const_principal search_for,
-                      krb5_db_entry *entries, int *nentries,
-                      krb5_boolean *more)
-{
-    return krb5_db_get_principal (kcontext, search_for, entries, nentries,
-                                  more);
-}
-
-krb5_error_code
-get_principal (krb5_context kcontext,
-               krb5_const_principal search_for,
-               krb5_db_entry *entries, int *nentries, krb5_boolean *more)
-{
-    /* Eventually this will be used to manage locking while looking up
-       principals in the database.  */
-    return get_principal_locked (kcontext, search_for, entries, nentries,
-                                 more);
-}
-
-
-krb5_error_code
 sign_db_authdata (krb5_context context,
                   unsigned int flags,
                   krb5_const_principal client_princ,
@@ -2122,17 +2096,15 @@ kdc_process_s4u2self_req(krb5_context context,
                          krb5_keyblock *tgs_session,
                          krb5_timestamp kdc_time,
                          krb5_pa_s4u_x509_user **s4u_x509_user,
-                         krb5_db_entry *princ,
-                         int *nprincs,
+                         krb5_db_entry **princ_ptr,
                          const char **status)
 {
     krb5_error_code             code;
     krb5_pa_data                *pa_data;
-    krb5_boolean                more;
     int                         flags;
+    krb5_db_entry               *princ;
 
-    *nprincs = 0;
-    memset(princ, 0, sizeof(*princ));
+    *princ_ptr = NULL;
 
     pa_data = find_pa_data(request->padata, KRB5_PADATA_S4U_X509_USER);
     if (pa_data != NULL) {
@@ -2227,23 +2199,14 @@ kdc_process_s4u2self_req(krb5_context context,
         krb5_data e_data;
 
         e_data.data = NULL;
-        *nprincs = 1;
-        code = krb5_db_get_principal_ext(context,
-                                         (*s4u_x509_user)->user_id.user,
-                                         KRB5_KDB_FLAG_INCLUDE_PAC,
-                                         princ, nprincs, &more);
-        if (code) {
-            *status = "LOOKING_UP_S4U2SELF_PRINCIPAL";
-            *nprincs = 0;
-            return code; /* caller can free for_user */
-        }
-
-        if (more) {
-            *status = "NON_UNIQUE_S4U2SELF_PRINCIPAL";
-            return KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE;
-        } else if (*nprincs != 1) {
+        code = krb5_db_get_principal(context, (*s4u_x509_user)->user_id.user,
+                                     KRB5_KDB_FLAG_INCLUDE_PAC, &princ);
+        if (code == KRB5_KDB_NOENTRY) {
             *status = "UNKNOWN_S4U2SELF_PRINCIPAL";
             return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
+        } else if (code) {
+            *status = "LOOKING_UP_S4U2SELF_PRINCIPAL";
+            return code; /* caller can free for_user */
         }
 
         memset(&no_server, 0, sizeof(no_server));
@@ -2251,9 +2214,12 @@ kdc_process_s4u2self_req(krb5_context context,
         code = validate_as_request(request, *princ,
                                    no_server, kdc_time, status, &e_data);
         if (code) {
+            krb5_db_free_principal(context, princ);
             krb5_free_data_contents(context, &e_data);
             return code;
         }
+
+        *princ_ptr = princ;
     }
 
     return 0;
@@ -2654,7 +2620,7 @@ kdc_get_ticket_endtime(krb5_context context,
 
     life = until - starttime;
 
-    if (client->max_life != 0)
+    if (client != NULL && client->max_life != 0)
         life = min(life, client->max_life);
     if (server->max_life != 0)
         life = min(life, server->max_life);

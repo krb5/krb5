@@ -76,11 +76,9 @@ int main(int argc, char **argv)
             else
                 printf("released\n");
         } else if (strcmp(*argv, "get") == 0) {
-            int cnt = 1;
             argc--; argv++;
             if (!argc) usage();
-            if ((ret = krb5_db_get_policy(context, *argv,
-                                          &entry, &cnt)) ) {
+            if ((ret = krb5_db_get_policy(context, *argv, &entry))) {
                 com_err(whoami, ret, "while getting policy");
             } else {
                 printf("retrieved\n");

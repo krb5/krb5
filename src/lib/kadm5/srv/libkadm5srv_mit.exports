@@ -55,7 +55,6 @@ kadm5_setv4key_principal
 kadm5_unlock
 kdb_delete_entry
 kdb_free_entry
-kdb_get_entry
 kdb_init_hist
 kdb_init_master
 kdb_iter_entry

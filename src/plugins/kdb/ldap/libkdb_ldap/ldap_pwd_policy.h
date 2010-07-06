@@ -33,7 +33,7 @@
 #define _LDAP_KRBPWDPOLICY_H_
 
 krb5_error_code
-krb5_ldap_get_password_policy(krb5_context, char *, osa_policy_ent_t *, int *);
+krb5_ldap_get_password_policy(krb5_context, char *, osa_policy_ent_t *);
 
 krb5_error_code
 krb5_ldap_create_password_policy(krb5_context, osa_policy_ent_t);

@@ -71,11 +71,9 @@ lookup_lockout_policy(krb5_context context,
 
     if (adb.policy != NULL) {
         osa_policy_ent_t policy = NULL;
-        int count = 0;
 
-        code = krb5_ldap_get_password_policy(context, adb.policy,
-                                             &policy, &count);
-        if (code == 0 && count == 1) {
+        code = krb5_ldap_get_password_policy(context, adb.policy, &policy);
+        if (code == 0) {
             *pw_max_fail = policy->pw_max_fail;
             *pw_failcnt_interval = policy->pw_failcnt_interval;
             *pw_lockout_duration = policy->pw_lockout_duration;
@@ -147,7 +145,6 @@ krb5_ldap_lockout_audit(krb5_context context,
     krb5_kvno max_fail = 0;
     krb5_deltat failcnt_interval = 0;
     krb5_deltat lockout_duration = 0;
-    int nentries = 1;
 
     SETUP_CONTEXT();
 
@@ -198,7 +195,7 @@ krb5_ldap_lockout_audit(krb5_context context,
     }
 
     if (entry->mask) {
-        code = krb5_ldap_put_principal(context, entry, &nentries, NULL);
+        code = krb5_ldap_put_principal(context, entry, NULL);
         if (code != 0)
             return code;
     }

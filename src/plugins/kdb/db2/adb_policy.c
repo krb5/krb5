@@ -184,7 +184,7 @@ error:
  */
 krb5_error_code
 osa_adb_get_policy(osa_adb_policy_t db, char *name,
-                   osa_policy_ent_t *entry, int *cnt)
+                   osa_policy_ent_t *entry)
 {
     DBT                 dbkey;
     DBT                 dbdata;
@@ -193,8 +193,6 @@ osa_adb_get_policy(osa_adb_policy_t db, char *name,
     char                *aligned_data;
 
     OPENLOCK(db, KRB5_DB_LOCKMODE_SHARED);
-
-    *cnt = 1;
 
     if(name == NULL) {
         ret = EINVAL;
@@ -206,8 +204,7 @@ osa_adb_get_policy(osa_adb_policy_t db, char *name,
     dbdata.size = 0;
     switch((db->db->get(db->db, &dbkey, &dbdata, 0))) {
     case 1:
-        ret = 0;
-        *cnt = 0;
+        ret = KRB5_KDB_NOENTRY;
         goto error;
     case 0:
         break;

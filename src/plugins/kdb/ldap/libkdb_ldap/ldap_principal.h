@@ -95,17 +95,17 @@ extern struct timeval timeout;
 extern char *policyclass[];
 
 krb5_error_code
-krb5_ldap_put_principal(krb5_context, krb5_db_entry *, int *, char **);
+krb5_ldap_put_principal(krb5_context, krb5_db_entry *, char **);
 
 krb5_error_code
 krb5_ldap_get_principal(krb5_context , krb5_const_principal ,
-                        unsigned int, krb5_db_entry *, int *, krb5_boolean *);
+                        unsigned int, krb5_db_entry **);
 
 krb5_error_code
-krb5_ldap_delete_principal(krb5_context, krb5_const_principal, int *);
+krb5_ldap_delete_principal(krb5_context, krb5_const_principal);
 
 void
-krb5_ldap_free_principal(krb5_context, krb5_db_entry *, int );
+krb5_ldap_free_principal(krb5_context, krb5_db_entry *);
 
 krb5_error_code
 krb5_ldap_iterate(krb5_context, char *,

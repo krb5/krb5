@@ -110,7 +110,7 @@ krb5_keyblock master_keyblock;
 krb5_kvno   master_kvno; /* fetched */
 extern krb5_keylist_node *master_keylist;
 extern krb5_principal master_princ;
-krb5_db_entry master_entry;
+krb5_db_entry *master_entry = NULL;
 int     valid_master_key = 0;
 
 char *progname;
@@ -397,8 +397,6 @@ void set_dbname(argc, argv)
 static int open_db_and_mkey()
 {
     krb5_error_code retval;
-    int nentries;
-    krb5_boolean more;
     krb5_data scratch, pwd, seed;
 
     dbactive = FALSE;
@@ -421,21 +419,9 @@ static int open_db_and_mkey()
         exit_status++;
         return(1);
     }
-    nentries = 1;
-    if ((retval = krb5_db_get_principal(util_context, master_princ,
-                                        &master_entry, &nentries, &more))) {
+    if ((retval = krb5_db_get_principal(util_context, master_princ, 0,
+                                        &master_entry))) {
         com_err(progname, retval, "while retrieving master entry");
-        exit_status++;
-        (void) krb5_db_fini(util_context);
-        return(1);
-    } else if (more) {
-        com_err(progname, KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE,
-                "while retrieving master entry");
-        exit_status++;
-        (void) krb5_db_fini(util_context);
-        return(1);
-    } else if (!nentries) {
-        com_err(progname, KRB5_KDB_NOENTRY, "while retrieving master entry");
         exit_status++;
         (void) krb5_db_fini(util_context);
         return(1);
@@ -549,9 +535,7 @@ add_random_key(argc, argv)
 {
     krb5_error_code ret;
     krb5_principal princ;
-    krb5_db_entry dbent;
-    int n;
-    krb5_boolean more;
+    krb5_db_entry *dbent;
     krb5_timestamp now;
 
     krb5_key_salt_tuple *keysalts = NULL;
@@ -582,22 +566,9 @@ add_random_key(argc, argv)
         exit_status++;
         return;
     }
-    n = 1;
-    ret = krb5_db_get_principal(util_context, princ, &dbent,
-                                &n, &more);
+    ret = krb5_db_get_principal(util_context, princ, 0, &dbent);
     if (ret) {
         com_err(me, ret, "while fetching principal %s", pr_str);
-        exit_status++;
-        return;
-    }
-    if (n != 1) {
-        fprintf(stderr, "principal %s not found\n", pr_str);
-        exit_status++;
-        return;
-    }
-    if (more) {
-        fprintf(stderr, "principal %s not unique\n", pr_str);
-        krb5_db_free_principal(util_context, &dbent, 1);
         exit_status++;
         return;
     }
@@ -618,41 +589,40 @@ add_random_key(argc, argv)
         free_keysalts = 1;
 
     /* Find the mkey used to protect the existing keys */
-    ret = krb5_dbe_find_mkey(util_context, master_keylist, &dbent, &tmp_mkey);
+    ret = krb5_dbe_find_mkey(util_context, master_keylist, dbent, &tmp_mkey);
     if (ret) {
         com_err(me, ret, "while finding mkey");
+        krb5_db_free_principal(util_context, dbent);
         exit_status++;
         return;
     }
 
-    ret = krb5_dbe_ark(util_context, tmp_mkey,
-                       keysalts, num_keysalts,
-                       &dbent);
+    ret = krb5_dbe_ark(util_context, tmp_mkey, keysalts, num_keysalts, dbent);
     if (free_keysalts)
         free(keysalts);
     if (ret) {
         com_err(me, ret, "while randomizing principal %s", pr_str);
-        krb5_db_free_principal(util_context, &dbent, 1);
+        krb5_db_free_principal(util_context, dbent);
         exit_status++;
         return;
     }
-    dbent.attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;
+    dbent->attributes &= ~KRB5_KDB_REQUIRES_PWCHANGE;
     ret = krb5_timeofday(util_context, &now);
     if (ret) {
         com_err(me, ret, "while getting time");
-        krb5_db_free_principal(util_context, &dbent, 1);
+        krb5_db_free_principal(util_context, dbent);
         exit_status++;
         return;
     }
-    ret = krb5_dbe_update_last_pwd_change(util_context, &dbent, now);
+    ret = krb5_dbe_update_last_pwd_change(util_context, dbent, now);
     if (ret) {
         com_err(me, ret, "while setting changetime");
-        krb5_db_free_principal(util_context, &dbent, 1);
+        krb5_db_free_principal(util_context, dbent);
         exit_status++;
         return;
     }
-    ret = krb5_db_put_principal(util_context, &dbent, &n);
-    krb5_db_free_principal(util_context, &dbent, 1);
+    ret = krb5_db_put_principal(util_context, dbent);
+    krb5_db_free_principal(util_context, dbent);
     if (ret) {
         com_err(me, ret, "while saving principal %s", pr_str);
         exit_status++;

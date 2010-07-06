@@ -16,7 +16,6 @@ krb5_db_get_key_data_kvno
 krb5_db_get_mkey_list
 krb5_db_get_context
 krb5_db_get_principal
-krb5_db_get_principal_ext
 krb5_db_invoke
 krb5_db_iterate
 krb5_db_lock

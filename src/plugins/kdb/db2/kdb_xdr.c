@@ -47,15 +47,9 @@ krb5_encode_princ_dbkey(krb5_context context, krb5_data *key,
     return(retval);
 }
 
-void
-krb5_free_princ_dbkey(krb5_context context, krb5_data *key)
-{
-    (void) krb5_free_data_contents(context, key);
-}
-
 krb5_error_code
-krb5_encode_princ_contents(krb5_context context, krb5_data *content,
-                           krb5_db_entry *entry)
+krb5_encode_princ_entry(krb5_context context, krb5_data *content,
+                        krb5_db_entry *entry)
 {
     int                   i, j;
     unsigned int          unparse_princ_size;
@@ -229,29 +223,23 @@ epc_error:;
     return retval;
 }
 
-void
-krb5_free_princ_contents(krb5_context context, krb5_data *contents)
-{
-    krb5_free_data_contents(context, contents);
-    return;
-}
-
 krb5_error_code
-krb5_decode_princ_contents(krb5_context context, krb5_data *content,
-                           krb5_db_entry *entry)
+krb5_decode_princ_entry(krb5_context context, krb5_data *content,
+                        krb5_db_entry **entry_ptr)
 {
     int                   sizeleft, i;
     unsigned char       * nextloc;
     krb5_tl_data       ** tl_data;
     krb5_int16            i16;
-
+    krb5_db_entry       * entry;
     krb5_error_code retval;
 
-    /* Zero out entry and NULL pointers */
-    memset(entry, 0, sizeof(krb5_db_entry));
+    entry = k5alloc(sizeof(*entry), &retval);
+    if (entry == NULL)
+        return retval;
 
     /*
-     * undo the effects of encode_princ_contents.
+     * Reverse the encoding of encode_princ_entry.
      *
      * The first part is decoding the base type. If the base type is
      * bigger than the original base type then the additional fields
@@ -262,8 +250,10 @@ krb5_decode_princ_contents(krb5_context context, krb5_data *content,
     /* First do the easy stuff */
     nextloc = (unsigned char *)content->data;
     sizeleft = content->length;
-    if ((sizeleft -= KRB5_KDB_V1_BASE_LENGTH) < 0)
-        return KRB5_KDB_TRUNCATED_RECORD;
+    if ((sizeleft -= KRB5_KDB_V1_BASE_LENGTH) < 0) {
+        retval = KRB5_KDB_TRUNCATED_RECORD;
+        goto error_out;
+    }
 
     /* Base Length */
     krb5_kdb_decode_int16(nextloc, entry->len);
@@ -305,25 +295,28 @@ krb5_decode_princ_contents(krb5_context context, krb5_data *content,
     krb5_kdb_decode_int16(nextloc, entry->n_tl_data);
     nextloc += 2;
 
-    if (entry->n_tl_data < 0)
-        return KRB5_KDB_TRUNCATED_RECORD;
+    if (entry->n_tl_data < 0) {
+        retval = KRB5_KDB_TRUNCATED_RECORD;
+        goto error_out;
+    }
 
     /* # key_data strutures */
     krb5_kdb_decode_int16(nextloc, entry->n_key_data);
     nextloc += 2;
 
-    if (entry->n_key_data < 0)
-        return KRB5_KDB_TRUNCATED_RECORD;
+    if (entry->n_key_data < 0) {
+        retval = KRB5_KDB_TRUNCATED_RECORD;
+        goto error_out;
+    }
 
     /* Check for extra data */
     if (entry->len > KRB5_KDB_V1_BASE_LENGTH) {
         entry->e_length = entry->len - KRB5_KDB_V1_BASE_LENGTH;
-        if ((entry->e_data = (krb5_octet *)malloc(entry->e_length))) {
-            memcpy(entry->e_data, nextloc, entry->e_length);
-            nextloc += entry->e_length;
-        } else {
-            return ENOMEM;
-        }
+        entry->e_data = k5alloc(entry->e_length, &retval);
+        if (entry->e_data == NULL)
+            goto error_out;
+        memcpy(entry->e_data, nextloc, entry->e_length);
+        nextloc += entry->e_length;
     }
 
     /*
@@ -435,40 +428,36 @@ krb5_decode_princ_contents(krb5_context context, krb5_data *content,
             abort();
         }
     }
+    *entry_ptr = entry;
     return 0;
 
-error_out:;
-    krb5_dbe_free_contents(context, entry);
+error_out:
+    krb5_dbe_free(context, entry);
     return retval;
 }
 
 void
-krb5_dbe_free_contents(krb5_context context, krb5_db_entry *entry)
+krb5_dbe_free(krb5_context context, krb5_db_entry *entry)
 {
     krb5_tl_data        * tl_data_next;
     krb5_tl_data        * tl_data;
     int i, j;
 
-    if (entry->e_data)
-        free(entry->e_data);
-    if (entry->princ)
-        krb5_free_principal(context, entry->princ);
+    if (entry == NULL)
+        return;
+    free(entry->e_data);
+    krb5_free_principal(context, entry->princ);
     for (tl_data = entry->tl_data; tl_data; tl_data = tl_data_next) {
         tl_data_next = tl_data->tl_data_next;
-        if (tl_data->tl_data_contents)
-            free(tl_data->tl_data_contents);
+        free(tl_data->tl_data_contents);
         free(tl_data);
     }
     if (entry->key_data) {
         for (i = 0; i < entry->n_key_data; i++) {
             for (j = 0; j < entry->key_data[i].key_data_ver; j++) {
                 if (entry->key_data[i].key_data_length[j]) {
-                    if (entry->key_data[i].key_data_contents[j]) {
-                        memset(entry->key_data[i].key_data_contents[j],
-                               0,
-                               (unsigned) entry->key_data[i].key_data_length[j]);
-                        free (entry->key_data[i].key_data_contents[j]);
-                    }
+                    zapfree(entry->key_data[i].key_data_contents[j],
+                            entry->key_data[i].key_data_length[j]);
                 }
                 entry->key_data[i].key_data_contents[j] = NULL;
                 entry->key_data[i].key_data_length[j] = 0;
@@ -477,6 +466,5 @@ krb5_dbe_free_contents(krb5_context context, krb5_db_entry *entry)
         }
         free(entry->key_data);
     }
-    memset(entry, 0, sizeof(*entry));
-    return;
+    free(entry);
 }

@@ -84,12 +84,12 @@ extern krb5_error_code
 ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args);
 
 extern krb5_error_code
-ulog_conv_2logentry(krb5_context context, krb5_db_entry *entries,
-                    kdb_incr_update_t *updates, int nentries);
+ulog_conv_2logentry(krb5_context context, krb5_db_entry *entry,
+                    kdb_incr_update_t *update);
 
 extern krb5_error_code
-ulog_conv_2dbentry(krb5_context context, krb5_db_entry *entries,
-                   kdb_incr_update_t *updates, int nentries);
+ulog_conv_2dbentry(krb5_context context, krb5_db_entry **entry,
+                   kdb_incr_update_t *update);
 
 extern void ulog_free_entries(kdb_incr_update_t *updates, int no_of_updates);
 extern krb5_error_code ulog_set_role(krb5_context ctx, iprop_role role);

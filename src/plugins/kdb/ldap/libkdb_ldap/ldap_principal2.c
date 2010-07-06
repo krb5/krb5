@@ -100,8 +100,7 @@ aliases_ok(unsigned int flags)
 
 krb5_error_code
 krb5_ldap_get_principal(krb5_context context, krb5_const_principal searchfor,
-                        unsigned int flags, krb5_db_entry *entries,
-                        int *nentries, krb5_boolean *more)
+                        unsigned int flags, krb5_db_entry **entry_ptr)
 {
     char                        *user=NULL, *filter=NULL, **subtree=NULL;
     unsigned int                tree=0, ntrees=1, princlen=0;
@@ -113,14 +112,13 @@ krb5_ldap_get_principal(krb5_context context, krb5_const_principal searchfor,
     kdb5_dal_handle             *dal_handle=NULL;
     krb5_ldap_server_handle     *ldap_server_handle=NULL;
     krb5_principal              cprinc=NULL;
+    krb5_boolean                found=FALSE;
+    krb5_db_entry               *entry = NULL;
+
+    *entry_ptr = NULL;
 
     /* Clear the global error string */
     krb5_clear_error_message(context);
-
-    /* set initial values */
-    *nentries = 0;
-    *more = 0;
-    memset(entries, 0, sizeof(*entries));
 
     if (searchfor == NULL)
         return EINVAL;
@@ -131,7 +129,6 @@ krb5_ldap_get_principal(krb5_context context, krb5_const_principal searchfor,
     CHECK_LDAP_HANDLE(ldap_context);
 
     if (is_principal_in_realm(ldap_context, searchfor) != 0) {
-        *more = 0;
         krb5_set_error_message (context, st, "Principal does not belong to realm");
         goto cleanup;
     }
@@ -153,10 +150,10 @@ krb5_ldap_get_principal(krb5_context context, krb5_const_principal searchfor,
         goto cleanup;
 
     GET_HANDLE();
-    for (tree=0; tree < ntrees && *nentries == 0; ++tree) {
+    for (tree=0; tree < ntrees && !found; ++tree) {
 
         LDAP_SEARCH(subtree[tree], ldap_context->lrparams->search_scope, filter, principal_attributes);
-        for (ent=ldap_first_entry(ld, result); ent != NULL && *nentries == 0; ent=ldap_next_entry(ld, ent)) {
+        for (ent=ldap_first_entry(ld, result); ent != NULL && !found; ent=ldap_next_entry(ld, ent)) {
 
             /* get the associated directory user information */
             if ((values=ldap_get_values(ld, ent, "krbprincipalname")) != NULL) {
@@ -168,13 +165,13 @@ krb5_ldap_get_principal(krb5_context context, krb5_const_principal searchfor,
                  */
                 for (i=0; values[i] != NULL; ++i) {
                     if (strcmp(values[i], user) == 0) {
-                        *nentries = 1;
+                        found = TRUE;
                         break;
                     }
                 }
                 ldap_value_free(values);
 
-                if (*nentries == 0) /* no matching principal found */
+                if (!found) /* no matching principal found */
                     continue;
             }
 
@@ -189,31 +186,34 @@ krb5_ldap_get_principal(krb5_context context, krb5_const_principal searchfor,
                         if (st != 0)
                             goto cleanup;
                     } else /* No canonicalization, so don't return aliases. */
-                        *nentries = 0;
+                        found = FALSE;
                 }
                 ldap_value_free(values);
-                if (*nentries == 0)
+                if (!found)
                     continue;
             }
 
+            entry = k5alloc(sizeof(*entry), &st);
+            if (entry == NULL)
+                goto cleanup;
             if ((st = populate_krb5_db_entry(context, ldap_context, ld, ent,
                                              cprinc ? cprinc : searchfor,
-                                             entries)) != 0)
+                                             entry)) != 0)
                 goto cleanup;
         }
         ldap_msgfree(result);
         result = NULL;
     } /* for (tree=0 ... */
 
-    /* once done, put back the ldap handle */
-    krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
-    ldap_server_handle = NULL;
+    if (found) {
+        *entry_ptr = entry;
+        entry = NULL;
+    } else
+        st = KRB5_KDB_NOENTRY;
 
 cleanup:
     ldap_msgfree(result);
-
-    if (*nentries == 0 || st != 0)
-        krb5_dbe_free_contents(context, entries);
+    krb5_ldap_free_principal(context, entry);
 
     if (filter)
         free (filter);
@@ -494,10 +494,10 @@ tl_data2berval (krb5_tl_data *in, struct berval **out)
 }
 
 krb5_error_code
-krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entries,
-                        int *nentries, char **db_args)
+krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
+                        char **db_args)
 {
-    int                         i=0, l=0, kerberos_principal_object_type=0;
+    int                         l=0, kerberos_principal_object_type=0;
     krb5_error_code             st=0, tempst=0;
     LDAP                        *ld=NULL;
     LDAPMessage                 *result=NULL, *ent=NULL;
@@ -529,554 +529,574 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entries,
     /* get ldap handle */
     GET_HANDLE();
 
-    for (i=0; i < *nentries; ++i, ++entries) {
-        if (is_principal_in_realm(ldap_context, entries->princ) != 0) {
-            st = EINVAL;
-            krb5_set_error_message(context, st, "Principal does not belong to the default realm");
+    if (is_principal_in_realm(ldap_context, entry->princ) != 0) {
+        st = EINVAL;
+        krb5_set_error_message(context, st, "Principal does not belong to the default realm");
+        goto cleanup;
+    }
+
+    /* get the principal information to act on */
+    if (entry->princ) {
+        if (((st=krb5_unparse_name(context, entry->princ, &user)) != 0) ||
+            ((st=krb5_ldap_unparse_principal_name(user)) != 0))
             goto cleanup;
-        }
+    }
 
-        /* get the principal information to act on */
-        if (entries->princ) {
-            if (((st=krb5_unparse_name(context, entries->princ, &user)) != 0) ||
-                ((st=krb5_ldap_unparse_principal_name(user)) != 0))
-                goto cleanup;
-        }
+    /* Identity the type of operation, it can be
+     * add principal or modify principal.
+     * hack if the entry->mask has KRB_PRINCIPAL flag set
+     * then it is a add operation
+     */
+    if (entry->mask & KADM5_PRINCIPAL)
+        optype = ADD_PRINCIPAL;
+    else
+        optype = MODIFY_PRINCIPAL;
 
-        /* Identity the type of operation, it can be
-         * add principal or modify principal.
-         * hack if the entries->mask has KRB_PRINCIPAL flag set
-         * then it is a add operation
+    if (((st=krb5_get_princ_type(context, entry, &kerberos_principal_object_type)) != 0) ||
+        ((st=krb5_get_userdn(context, entry, &principal_dn)) != 0))
+        goto cleanup;
+
+    if ((st=process_db_args(context, db_args, &xargs, optype)) != 0)
+        goto cleanup;
+
+    if (entry->mask & KADM5_LOAD) {
+        int              tree = 0, ntrees = 0, princlen = 0, numlentries = 0;
+        char             **subtreelist = NULL, *filter = NULL;
+
+        /*  A load operation is special, will do a mix-in (add krbprinc
+         *  attrs to a non-krb object entry) if an object exists with a
+         *  matching krbprincipalname attribute so try to find existing
+         *  object and set principal_dn.  This assumes that the
+         *  krbprincipalname attribute is unique (only one object entry has
+         *  a particular krbprincipalname attribute).
          */
-        if (entries->mask & KADM5_PRINCIPAL)
-            optype = ADD_PRINCIPAL;
-        else
-            optype = MODIFY_PRINCIPAL;
+        if (user == NULL) {
+            /* must have principal name for search */
+            st = EINVAL;
+            krb5_set_error_message(context, st, "operation can not continue, principal name not found");
+            goto cleanup;
+        }
+        princlen = strlen(FILTER) + strlen(user) + 2 + 1;      /* 2 for closing brackets */
+        if ((filter = malloc(princlen)) == NULL) {
+            st = ENOMEM;
+            goto cleanup;
+        }
+        snprintf(filter, princlen, FILTER"%s))", user);
 
-        if (((st=krb5_get_princ_type(context, entries, &kerberos_principal_object_type)) != 0) ||
-            ((st=krb5_get_userdn(context, entries, &principal_dn)) != 0))
+        /* get the current subtree list */
+        if ((st = krb5_get_subtree_info(ldap_context, &subtreelist, &ntrees)) != 0)
             goto cleanup;
 
-        if ((st=process_db_args(context, db_args, &xargs, optype)) != 0)
-            goto cleanup;
-
-        if (entries->mask & KADM5_LOAD) {
-            int              tree = 0, ntrees = 0, princlen = 0, numlentries = 0;
-            char             **subtreelist = NULL, *filter = NULL;
-
-            /*  A load operation is special, will do a mix-in (add krbprinc
-             *  attrs to a non-krb object entry) if an object exists with a
-             *  matching krbprincipalname attribute so try to find existing
-             *  object and set principal_dn.  This assumes that the
-             *  krbprincipalname attribute is unique (only one object entry has
-             *  a particular krbprincipalname attribute).
-             */
-            if (user == NULL) {
-                /* must have principal name for search */
-                st = EINVAL;
-                krb5_set_error_message(context, st, "operation can not continue, principal name not found");
-                goto cleanup;
+        found_entry = FALSE;
+        /* search for entry with matching krbprincipalname attribute */
+        for (tree = 0; found_entry == FALSE && tree < ntrees; ++tree) {
+            result = NULL;
+            if (principal_dn == NULL) {
+                LDAP_SEARCH_1(subtreelist[tree], ldap_context->lrparams->search_scope, filter, principal_attributes, IGNORE_STATUS);
+            } else {
+                /* just look for entry with principal_dn */
+                LDAP_SEARCH_1(principal_dn, LDAP_SCOPE_BASE, filter, principal_attributes, IGNORE_STATUS);
             }
-            princlen = strlen(FILTER) + strlen(user) + 2 + 1;      /* 2 for closing brackets */
-            if ((filter = malloc(princlen)) == NULL) {
-                st = ENOMEM;
-                goto cleanup;
-            }
-            snprintf(filter, princlen, FILTER"%s))", user);
-
-            /* get the current subtree list */
-            if ((st = krb5_get_subtree_info(ldap_context, &subtreelist, &ntrees)) != 0)
-                goto cleanup;
-
-            found_entry = FALSE;
-            /* search for entry with matching krbprincipalname attribute */
-            for (tree = 0; found_entry == FALSE && tree < ntrees; ++tree) {
-                result = NULL;
-                if (principal_dn == NULL) {
-                    LDAP_SEARCH_1(subtreelist[tree], ldap_context->lrparams->search_scope, filter, principal_attributes, IGNORE_STATUS);
-                } else {
-                    /* just look for entry with principal_dn */
-                    LDAP_SEARCH_1(principal_dn, LDAP_SCOPE_BASE, filter, principal_attributes, IGNORE_STATUS);
-                }
-                if (st == LDAP_SUCCESS) {
-                    numlentries = ldap_count_entries(ld, result);
-                    if (numlentries > 1) {
-                        ldap_msgfree(result);
-                        free(filter);
-                        st = EINVAL;
-                        krb5_set_error_message(context, st,
-                                               "operation can not continue, more than one entry with principal name \"%s\" found",
-                                               user);
-                        goto cleanup;
-                    } else if (numlentries == 1) {
-                        found_entry = TRUE;
-                        if (principal_dn == NULL) {
-                            ent = ldap_first_entry(ld, result);
-                            if (ent != NULL) {
-                                /* setting principal_dn will cause that entry to be modified further down */
-                                if ((principal_dn = ldap_get_dn(ld, ent)) == NULL) {
-                                    ldap_get_option (ld, LDAP_OPT_RESULT_CODE, &st);
-                                    st = set_ldap_error (context, st, 0);
-                                    ldap_msgfree(result);
-                                    free(filter);
-                                    goto cleanup;
-                                }
+            if (st == LDAP_SUCCESS) {
+                numlentries = ldap_count_entries(ld, result);
+                if (numlentries > 1) {
+                    ldap_msgfree(result);
+                    free(filter);
+                    st = EINVAL;
+                    krb5_set_error_message(context, st,
+                                           "operation can not continue, more than one entry with principal name \"%s\" found",
+                                           user);
+                    goto cleanup;
+                } else if (numlentries == 1) {
+                    found_entry = TRUE;
+                    if (principal_dn == NULL) {
+                        ent = ldap_first_entry(ld, result);
+                        if (ent != NULL) {
+                            /* setting principal_dn will cause that entry to be modified further down */
+                            if ((principal_dn = ldap_get_dn(ld, ent)) == NULL) {
+                                ldap_get_option (ld, LDAP_OPT_RESULT_CODE, &st);
+                                st = set_ldap_error (context, st, 0);
+                                ldap_msgfree(result);
+                                free(filter);
+                                goto cleanup;
                             }
                         }
                     }
-                    if (result)
-                        ldap_msgfree(result);
-                } else if (st != LDAP_NO_SUCH_OBJECT) {
-                    /* could not perform search, return with failure */
-                    st = set_ldap_error (context, st, 0);
-                    free(filter);
-                    goto cleanup;
                 }
-                /*
-                 * If it isn't found then assume a standalone princ entry is to
-                 * be created.
-                 */
-            } /* end for (tree = 0; principal_dn == ... */
-
-            free(filter);
-
-            if (found_entry == FALSE && principal_dn != NULL) {
-                /*
-                 * if principal_dn is null then there is code further down to
-                 * deal with setting standalone_principal_dn.  Also note that
-                 * this will set create_standalone_prinicipal true for
-                 * non-mix-in entries which is okay if loading from a dump.
-                 */
-                create_standalone_prinicipal = TRUE;
-                standalone_principal_dn = strdup(principal_dn);
-                CHECK_NULL(standalone_principal_dn);
+                if (result)
+                    ldap_msgfree(result);
+            } else if (st != LDAP_NO_SUCH_OBJECT) {
+                /* could not perform search, return with failure */
+                st = set_ldap_error (context, st, 0);
+                free(filter);
+                goto cleanup;
             }
-        } /* end if (entries->mask & KADM5_LOAD */
-
-        /* time to generate the DN information with the help of
-         * containerdn, principalcontainerreference or
-         * realmcontainerdn information
-         */
-        if (principal_dn == NULL && xargs.dn == NULL) { /* creation of standalone principal */
-            /* get the subtree information */
-            if (entries->princ->length == 2 && entries->princ->data[0].length == strlen("krbtgt") &&
-                strncmp(entries->princ->data[0].data, "krbtgt", entries->princ->data[0].length) == 0) {
-                /* if the principal is a inter-realm principal, always created in the realm container */
-                subtree = strdup(ldap_context->lrparams->realmdn);
-            } else if (xargs.containerdn) {
-                if ((st=checkattributevalue(ld, xargs.containerdn, NULL, NULL, NULL)) != 0) {
-                    if (st == KRB5_KDB_NOENTRY || st == KRB5_KDB_CONSTRAINT_VIOLATION) {
-                        int ost = st;
-                        st = EINVAL;
-                        snprintf(errbuf, sizeof(errbuf), "'%s' not found: ",
-                                 xargs.containerdn);
-                        prepend_err_str(context, errbuf, st, ost);
-                    }
-                    goto cleanup;
-                }
-                subtree = strdup(xargs.containerdn);
-            } else if (ldap_context->lrparams->containerref && strlen(ldap_context->lrparams->containerref) != 0) {
-                /*
-                 * Here the subtree should be changed with
-                 * principalcontainerreference attribute value
-                 */
-                subtree = strdup(ldap_context->lrparams->containerref);
-            } else {
-                subtree = strdup(ldap_context->lrparams->realmdn);
-            }
-            CHECK_NULL(subtree);
-
-            if (asprintf(&standalone_principal_dn, "krbprincipalname=%s,%s",
-                         user, subtree) < 0)
-                standalone_principal_dn = NULL;
-            CHECK_NULL(standalone_principal_dn);
             /*
-             * free subtree when you are done using the subtree
-             * set the boolean create_standalone_prinicipal to TRUE
+             * If it isn't found then assume a standalone princ entry is to
+             * be created.
+             */
+        } /* end for (tree = 0; principal_dn == ... */
+
+        free(filter);
+
+        if (found_entry == FALSE && principal_dn != NULL) {
+            /*
+             * if principal_dn is null then there is code further down to
+             * deal with setting standalone_principal_dn.  Also note that
+             * this will set create_standalone_prinicipal true for
+             * non-mix-in entries which is okay if loading from a dump.
              */
             create_standalone_prinicipal = TRUE;
-            free(subtree);
-            subtree = NULL;
+            standalone_principal_dn = strdup(principal_dn);
+            CHECK_NULL(standalone_principal_dn);
+        }
+    } /* end if (entry->mask & KADM5_LOAD */
+
+    /* time to generate the DN information with the help of
+     * containerdn, principalcontainerreference or
+     * realmcontainerdn information
+     */
+    if (principal_dn == NULL && xargs.dn == NULL) { /* creation of standalone principal */
+        /* get the subtree information */
+        if (entry->princ->length == 2 && entry->princ->data[0].length == strlen("krbtgt") &&
+            strncmp(entry->princ->data[0].data, "krbtgt", entry->princ->data[0].length) == 0) {
+            /* if the principal is a inter-realm principal, always created in the realm container */
+            subtree = strdup(ldap_context->lrparams->realmdn);
+        } else if (xargs.containerdn) {
+            if ((st=checkattributevalue(ld, xargs.containerdn, NULL, NULL, NULL)) != 0) {
+                if (st == KRB5_KDB_NOENTRY || st == KRB5_KDB_CONSTRAINT_VIOLATION) {
+                    int ost = st;
+                    st = EINVAL;
+                    snprintf(errbuf, sizeof(errbuf), "'%s' not found: ",
+                             xargs.containerdn);
+                    prepend_err_str(context, errbuf, st, ost);
+                }
+                goto cleanup;
+            }
+            subtree = strdup(xargs.containerdn);
+        } else if (ldap_context->lrparams->containerref && strlen(ldap_context->lrparams->containerref) != 0) {
+            /*
+             * Here the subtree should be changed with
+             * principalcontainerreference attribute value
+             */
+            subtree = strdup(ldap_context->lrparams->containerref);
+        } else {
+            subtree = strdup(ldap_context->lrparams->realmdn);
+        }
+        CHECK_NULL(subtree);
+
+        if (asprintf(&standalone_principal_dn, "krbprincipalname=%s,%s",
+                     user, subtree) < 0)
+            standalone_principal_dn = NULL;
+        CHECK_NULL(standalone_principal_dn);
+        /*
+         * free subtree when you are done using the subtree
+         * set the boolean create_standalone_prinicipal to TRUE
+         */
+        create_standalone_prinicipal = TRUE;
+        free(subtree);
+        subtree = NULL;
+    }
+
+    /*
+     * If the DN information is presented by the user, time to
+     * validate the input to ensure that the DN falls under
+     * any of the subtrees
+     */
+    if (xargs.dn_from_kbd == TRUE) {
+        /* make sure the DN falls in the subtree */
+        int              tre=0, dnlen=0, subtreelen=0, ntrees=0;
+        char             **subtreelist=NULL;
+        char             *dn=NULL;
+        krb5_boolean     outofsubtree=TRUE;
+
+        if (xargs.dn != NULL) {
+            dn = xargs.dn;
+        } else if (xargs.linkdn != NULL) {
+            dn = xargs.linkdn;
+        } else if (standalone_principal_dn != NULL) {
+            /*
+             * Even though the standalone_principal_dn is constructed
+             * within this function, there is the containerdn input
+             * from the user that can become part of the it.
+             */
+            dn = standalone_principal_dn;
         }
 
-        /*
-         * If the DN information is presented by the user, time to
-         * validate the input to ensure that the DN falls under
-         * any of the subtrees
-         */
-        if (xargs.dn_from_kbd == TRUE) {
-            /* make sure the DN falls in the subtree */
-            int              tre=0, dnlen=0, subtreelen=0, ntrees=0;
-            char             **subtreelist=NULL;
-            char             *dn=NULL;
-            krb5_boolean     outofsubtree=TRUE;
+        /* get the current subtree list */
+        if ((st = krb5_get_subtree_info(ldap_context, &subtreelist, &ntrees)) != 0)
+            goto cleanup;
 
-            if (xargs.dn != NULL) {
-                dn = xargs.dn;
-            } else if (xargs.linkdn != NULL) {
-                dn = xargs.linkdn;
-            } else if (standalone_principal_dn != NULL) {
-                /*
-                 * Even though the standalone_principal_dn is constructed
-                 * within this function, there is the containerdn input
-                 * from the user that can become part of the it.
-                 */
-                dn = standalone_principal_dn;
-            }
-
-            /* get the current subtree list */
-            if ((st = krb5_get_subtree_info(ldap_context, &subtreelist, &ntrees)) != 0)
-                goto cleanup;
-
-            for (tre=0; tre<ntrees; ++tre) {
-                if (subtreelist[tre] == NULL || strlen(subtreelist[tre]) == 0) {
+        for (tre=0; tre<ntrees; ++tre) {
+            if (subtreelist[tre] == NULL || strlen(subtreelist[tre]) == 0) {
+                outofsubtree = FALSE;
+                break;
+            } else {
+                dnlen = strlen (dn);
+                subtreelen = strlen(subtreelist[tre]);
+                if ((dnlen >= subtreelen) && (strcasecmp((dn + dnlen - subtreelen), subtreelist[tre]) == 0)) {
                     outofsubtree = FALSE;
                     break;
-                } else {
-                    dnlen = strlen (dn);
-                    subtreelen = strlen(subtreelist[tre]);
-                    if ((dnlen >= subtreelen) && (strcasecmp((dn + dnlen - subtreelen), subtreelist[tre]) == 0)) {
-                        outofsubtree = FALSE;
-                        break;
-                    }
-                }
-            }
-
-            for (tre=0; tre < ntrees; ++tre) {
-                free(subtreelist[tre]);
-            }
-
-            if (outofsubtree == TRUE) {
-                st = EINVAL;
-                krb5_set_error_message(context, st, "DN is out of the realm subtree");
-                goto cleanup;
-            }
-
-            /*
-             * dn value will be set either by dn, linkdn or the standalone_principal_dn
-             * In the first 2 cases, the dn should be existing and in the last case we
-             * are supposed to create the ldap object. so the below should not be
-             * executed for the last case.
-             */
-
-            if (standalone_principal_dn == NULL) {
-                /*
-                 * If the ldap object is missing, this results in an error.
-                 */
-
-                /*
-                 * Search for krbprincipalname attribute here.
-                 * This is to find if a kerberos identity is already present
-                 * on the ldap object, in which case adding a kerberos identity
-                 * on the ldap object should result in an error.
-                 */
-                char  *attributes[]={"krbticketpolicyreference", "krbprincipalname", NULL};
-
-                LDAP_SEARCH_1(dn, LDAP_SCOPE_BASE, 0, attributes, IGNORE_STATUS);
-                if (st == LDAP_SUCCESS) {
-                    ent = ldap_first_entry(ld, result);
-                    if (ent != NULL) {
-                        if ((values=ldap_get_values(ld, ent, "krbticketpolicyreference")) != NULL) {
-                            ldap_value_free(values);
-                        }
-
-                        if ((values=ldap_get_values(ld, ent, "krbprincipalname")) != NULL) {
-                            krb_identity_exists = TRUE;
-                            ldap_value_free(values);
-                        }
-                    }
-                    ldap_msgfree(result);
-                } else {
-                    st = set_ldap_error(context, st, OP_SEARCH);
-                    goto cleanup;
                 }
             }
         }
 
-        /*
-         * If xargs.dn is set then the request is to add a
-         * kerberos principal on a ldap object, but if
-         * there is one already on the ldap object this
-         * should result in an error.
-         */
+        for (tre=0; tre < ntrees; ++tre) {
+            free(subtreelist[tre]);
+        }
 
-        if (xargs.dn != NULL && krb_identity_exists == TRUE) {
+        if (outofsubtree == TRUE) {
             st = EINVAL;
-            snprintf(errbuf, sizeof(errbuf), "ldap object is already kerberized");
-            krb5_set_error_message(context, st, "%s", errbuf);
+            krb5_set_error_message(context, st, "DN is out of the realm subtree");
             goto cleanup;
         }
 
-        if (xargs.linkdn != NULL) {
+        /*
+         * dn value will be set either by dn, linkdn or the standalone_principal_dn
+         * In the first 2 cases, the dn should be existing and in the last case we
+         * are supposed to create the ldap object. so the below should not be
+         * executed for the last case.
+         */
+
+        if (standalone_principal_dn == NULL) {
             /*
-             * link information can be changed using modprinc.
-             * However, link information can be changed only on the
-             * standalone kerberos principal objects. A standalone
-             * kerberos principal object is of type krbprincipal
-             * structural objectclass.
-             *
-             * NOTE: kerberos principals on an ldap object can't be
-             * linked to other ldap objects.
+             * If the ldap object is missing, this results in an error.
              */
-            if (optype == MODIFY_PRINCIPAL &&
-                kerberos_principal_object_type != KDB_STANDALONE_PRINCIPAL_OBJECT) {
-                st = EINVAL;
+
+            /*
+             * Search for krbprincipalname attribute here.
+             * This is to find if a kerberos identity is already present
+             * on the ldap object, in which case adding a kerberos identity
+             * on the ldap object should result in an error.
+             */
+            char  *attributes[]={"krbticketpolicyreference", "krbprincipalname", NULL};
+
+            LDAP_SEARCH_1(dn, LDAP_SCOPE_BASE, 0, attributes, IGNORE_STATUS);
+            if (st == LDAP_SUCCESS) {
+                ent = ldap_first_entry(ld, result);
+                if (ent != NULL) {
+                    if ((values=ldap_get_values(ld, ent, "krbticketpolicyreference")) != NULL) {
+                        ldap_value_free(values);
+                    }
+
+                    if ((values=ldap_get_values(ld, ent, "krbprincipalname")) != NULL) {
+                        krb_identity_exists = TRUE;
+                        ldap_value_free(values);
+                    }
+                }
+                ldap_msgfree(result);
+            } else {
+                st = set_ldap_error(context, st, OP_SEARCH);
+                goto cleanup;
+            }
+        }
+    }
+
+    /*
+     * If xargs.dn is set then the request is to add a
+     * kerberos principal on a ldap object, but if
+     * there is one already on the ldap object this
+     * should result in an error.
+     */
+
+    if (xargs.dn != NULL && krb_identity_exists == TRUE) {
+        st = EINVAL;
+        snprintf(errbuf, sizeof(errbuf), "ldap object is already kerberized");
+        krb5_set_error_message(context, st, "%s", errbuf);
+        goto cleanup;
+    }
+
+    if (xargs.linkdn != NULL) {
+        /*
+         * link information can be changed using modprinc.
+         * However, link information can be changed only on the
+         * standalone kerberos principal objects. A standalone
+         * kerberos principal object is of type krbprincipal
+         * structural objectclass.
+         *
+         * NOTE: kerberos principals on an ldap object can't be
+         * linked to other ldap objects.
+         */
+        if (optype == MODIFY_PRINCIPAL &&
+            kerberos_principal_object_type != KDB_STANDALONE_PRINCIPAL_OBJECT) {
+            st = EINVAL;
+            snprintf(errbuf, sizeof(errbuf),
+                     "link information can not be set/updated as the kerberos principal belongs to an ldap object");
+            krb5_set_error_message(context, st, "%s", errbuf);
+            goto cleanup;
+        }
+        /*
+         * Check the link information. If there is already a link
+         * existing then this operation is not allowed.
+         */
+        {
+            char **linkdns=NULL;
+            int  j=0;
+
+            if ((st=krb5_get_linkdn(context, entry, &linkdns)) != 0) {
                 snprintf(errbuf, sizeof(errbuf),
-                         "link information can not be set/updated as the kerberos principal belongs to an ldap object");
+                         "Failed getting object references");
                 krb5_set_error_message(context, st, "%s", errbuf);
                 goto cleanup;
             }
-            /*
-             * Check the link information. If there is already a link
-             * existing then this operation is not allowed.
-             */
-            {
-                char **linkdns=NULL;
-                int  j=0;
-
-                if ((st=krb5_get_linkdn(context, entries, &linkdns)) != 0) {
-                    snprintf(errbuf, sizeof(errbuf),
-                             "Failed getting object references");
-                    krb5_set_error_message(context, st, "%s", errbuf);
-                    goto cleanup;
-                }
-                if (linkdns != NULL) {
-                    st = EINVAL;
-                    snprintf(errbuf, sizeof(errbuf),
-                             "kerberos principal is already linked "
-                             "to a ldap object");
-                    krb5_set_error_message(context, st, "%s", errbuf);
-                    for (j=0; linkdns[j] != NULL; ++j)
-                        free (linkdns[j]);
-                    free (linkdns);
-                    goto cleanup;
-                }
-            }
-
-            establish_links = TRUE;
-        }
-
-        if (entries->mask & KADM5_LAST_SUCCESS) {
-            memset(strval, 0, sizeof(strval));
-            if ((strval[0]=getstringtime(entries->last_success)) == NULL)
-                goto cleanup;
-            if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbLastSuccessfulAuth", LDAP_MOD_REPLACE, strval)) != 0) {
-                free (strval[0]);
-                goto cleanup;
-            }
-            free (strval[0]);
-        }
-
-        if (entries->mask & KADM5_LAST_FAILED) {
-            memset(strval, 0, sizeof(strval));
-            if ((strval[0]=getstringtime(entries->last_failed)) == NULL)
-                goto cleanup;
-            if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbLastFailedAuth", LDAP_MOD_REPLACE, strval)) != 0) {
-                free (strval[0]);
-                goto cleanup;
-            }
-            free(strval[0]);
-        }
-
-        if (entries->mask & KADM5_FAIL_AUTH_COUNT) {
-            krb5_kvno fail_auth_count;
-
-            fail_auth_count = entries->fail_auth_count;
-            if (entries->mask & KADM5_FAIL_AUTH_COUNT_INCREMENT)
-                fail_auth_count++;
-
-            st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
-                                           LDAP_MOD_REPLACE,
-                                           fail_auth_count);
-            if (st != 0)
-                goto cleanup;
-        } else if (entries->mask & KADM5_FAIL_AUTH_COUNT_INCREMENT) {
-            int attr_mask = 0;
-            krb5_boolean has_fail_count;
-
-            /* Check if the krbLoginFailedCount attribute exists.  (Through
-             * krb5 1.8.1, it wasn't set in new entries.) */
-            st = krb5_get_attributes_mask(context, entries, &attr_mask);
-            if (st != 0)
-                goto cleanup;
-            has_fail_count = ((attr_mask & KDB_FAIL_AUTH_COUNT_ATTR) != 0);
-
-            /*
-             * If the client library and server supports RFC 4525,
-             * then use it to increment by one the value of the
-             * krbLoginFailedCount attribute. Otherwise, assert the
-             * (provided) old value by deleting it before adding.
-             */
-#ifdef LDAP_MOD_INCREMENT
-            if (ldap_server_handle->server_info->modify_increment &&
-                has_fail_count) {
-                st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
-                                               LDAP_MOD_INCREMENT, 1);
-                if (st != 0)
-                    goto cleanup;
-            } else {
-#endif /* LDAP_MOD_INCREMENT */
-                if (has_fail_count) {
-                    st = krb5_add_int_mem_ldap_mod(&mods,
-                                                   "krbLoginFailedCount",
-                                                   LDAP_MOD_DELETE,
-                                                   entries->fail_auth_count);
-                    if (st != 0)
-                        goto cleanup;
-                }
-                st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
-                                               LDAP_MOD_ADD,
-                                               entries->fail_auth_count + 1);
-                if (st != 0)
-                    goto cleanup;
-#ifdef LDAP_MOD_INCREMENT
-            }
-#endif
-        } else if (optype == ADD_PRINCIPAL) {
-            /* Initialize krbLoginFailedCount in new entries to help avoid a
-             * race during the first failed login. */
-            st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
-                                           LDAP_MOD_ADD, 0);
-        }
-
-        if (entries->mask & KADM5_MAX_LIFE) {
-            if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbmaxticketlife", LDAP_MOD_REPLACE, entries->max_life)) != 0)
-                goto cleanup;
-        }
-
-        if (entries->mask & KADM5_MAX_RLIFE) {
-            if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbmaxrenewableage", LDAP_MOD_REPLACE,
-                                              entries->max_renewable_life)) != 0)
-                goto cleanup;
-        }
-
-        if (entries->mask & KADM5_ATTRIBUTES) {
-            if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbticketflags", LDAP_MOD_REPLACE,
-                                              entries->attributes)) != 0)
-                goto cleanup;
-        }
-
-        if (entries->mask & KADM5_PRINCIPAL) {
-            memset(strval, 0, sizeof(strval));
-            strval[0] = user;
-            if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbprincipalname", LDAP_MOD_REPLACE, strval)) != 0)
-                goto cleanup;
-        }
-
-        if (entries->mask & KADM5_PRINC_EXPIRE_TIME) {
-            memset(strval, 0, sizeof(strval));
-            if ((strval[0]=getstringtime(entries->expiration)) == NULL)
-                goto cleanup;
-            if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbprincipalexpiration", LDAP_MOD_REPLACE, strval)) != 0) {
-                free (strval[0]);
-                goto cleanup;
-            }
-            free (strval[0]);
-        }
-
-        if (entries->mask & KADM5_PW_EXPIRATION) {
-            memset(strval, 0, sizeof(strval));
-            if ((strval[0]=getstringtime(entries->pw_expiration)) == NULL)
-                goto cleanup;
-            if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpasswordexpiration",
-                                              LDAP_MOD_REPLACE,
-                                              strval)) != 0) {
-                free (strval[0]);
-                goto cleanup;
-            }
-            free (strval[0]);
-        }
-
-        if (entries->mask & KADM5_POLICY) {
-            memset(&princ_ent, 0, sizeof(princ_ent));
-            for (tl_data=entries->tl_data; tl_data; tl_data=tl_data->tl_data_next) {
-                if (tl_data->tl_data_type == KRB5_TL_KADM_DATA) {
-                    /* FIX ME: I guess the princ_ent should be freed after this call */
-                    if ((st = krb5_lookup_tl_kadm_data(tl_data, &princ_ent)) != 0) {
-                        goto cleanup;
-                    }
-                }
-            }
-
-            if (princ_ent.aux_attributes & KADM5_POLICY) {
-                memset(strval, 0, sizeof(strval));
-                if ((st = krb5_ldap_name_to_policydn (context, princ_ent.policy, &polname)) != 0)
-                    goto cleanup;
-                strval[0] = polname;
-                if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpwdpolicyreference", LDAP_MOD_REPLACE, strval)) != 0)
-                    goto cleanup;
-            } else {
+            if (linkdns != NULL) {
                 st = EINVAL;
-                krb5_set_error_message(context, st, "Password policy value null");
+                snprintf(errbuf, sizeof(errbuf),
+                         "kerberos principal is already linked "
+                         "to a ldap object");
+                krb5_set_error_message(context, st, "%s", errbuf);
+                for (j=0; linkdns[j] != NULL; ++j)
+                    free (linkdns[j]);
+                free (linkdns);
                 goto cleanup;
             }
-        } else if (entries->mask & KADM5_LOAD && found_entry == TRUE) {
-            /*
-             * a load is special in that existing entries must have attrs that
-             * removed.
-             */
-
-            if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpwdpolicyreference", LDAP_MOD_REPLACE, NULL)) != 0)
-                goto cleanup;
         }
 
-        if (entries->mask & KADM5_POLICY_CLR) {
-            if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpwdpolicyreference", LDAP_MOD_DELETE, NULL)) != 0)
+        establish_links = TRUE;
+    }
+
+    if (entry->mask & KADM5_LAST_SUCCESS) {
+        memset(strval, 0, sizeof(strval));
+        if ((strval[0]=getstringtime(entry->last_success)) == NULL)
+            goto cleanup;
+        if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbLastSuccessfulAuth", LDAP_MOD_REPLACE, strval)) != 0) {
+            free (strval[0]);
+            goto cleanup;
+        }
+        free (strval[0]);
+    }
+
+    if (entry->mask & KADM5_LAST_FAILED) {
+        memset(strval, 0, sizeof(strval));
+        if ((strval[0]=getstringtime(entry->last_failed)) == NULL)
+            goto cleanup;
+        if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbLastFailedAuth", LDAP_MOD_REPLACE, strval)) != 0) {
+            free (strval[0]);
+            goto cleanup;
+        }
+        free(strval[0]);
+    }
+
+    if (entry->mask & KADM5_FAIL_AUTH_COUNT) {
+        krb5_kvno fail_auth_count;
+
+        fail_auth_count = entry->fail_auth_count;
+        if (entry->mask & KADM5_FAIL_AUTH_COUNT_INCREMENT)
+            fail_auth_count++;
+
+        st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
+                                       LDAP_MOD_REPLACE,
+                                       fail_auth_count);
+        if (st != 0)
+            goto cleanup;
+    } else if (entry->mask & KADM5_FAIL_AUTH_COUNT_INCREMENT) {
+        int attr_mask = 0;
+        krb5_boolean has_fail_count;
+
+        /* Check if the krbLoginFailedCount attribute exists.  (Through
+         * krb5 1.8.1, it wasn't set in new entries.) */
+        st = krb5_get_attributes_mask(context, entry, &attr_mask);
+        if (st != 0)
+            goto cleanup;
+        has_fail_count = ((attr_mask & KDB_FAIL_AUTH_COUNT_ATTR) != 0);
+
+        /*
+         * If the client library and server supports RFC 4525,
+         * then use it to increment by one the value of the
+         * krbLoginFailedCount attribute. Otherwise, assert the
+         * (provided) old value by deleting it before adding.
+         */
+#ifdef LDAP_MOD_INCREMENT
+        if (ldap_server_handle->server_info->modify_increment &&
+            has_fail_count) {
+            st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
+                                           LDAP_MOD_INCREMENT, 1);
+            if (st != 0)
                 goto cleanup;
+        } else {
+#endif /* LDAP_MOD_INCREMENT */
+            if (has_fail_count) {
+                st = krb5_add_int_mem_ldap_mod(&mods,
+                                               "krbLoginFailedCount",
+                                               LDAP_MOD_DELETE,
+                                               entry->fail_auth_count);
+                if (st != 0)
+                    goto cleanup;
+            }
+            st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
+                                           LDAP_MOD_ADD,
+                                           entry->fail_auth_count + 1);
+            if (st != 0)
+                goto cleanup;
+#ifdef LDAP_MOD_INCREMENT
+        }
+#endif
+    } else if (optype == ADD_PRINCIPAL) {
+        /* Initialize krbLoginFailedCount in new entries to help avoid a
+         * race during the first failed login. */
+        st = krb5_add_int_mem_ldap_mod(&mods, "krbLoginFailedCount",
+                                       LDAP_MOD_ADD, 0);
+    }
+
+    if (entry->mask & KADM5_MAX_LIFE) {
+        if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbmaxticketlife", LDAP_MOD_REPLACE, entry->max_life)) != 0)
+            goto cleanup;
+    }
+
+    if (entry->mask & KADM5_MAX_RLIFE) {
+        if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbmaxrenewableage", LDAP_MOD_REPLACE,
+                                          entry->max_renewable_life)) != 0)
+            goto cleanup;
+    }
+
+    if (entry->mask & KADM5_ATTRIBUTES) {
+        if ((st=krb5_add_int_mem_ldap_mod(&mods, "krbticketflags", LDAP_MOD_REPLACE,
+                                          entry->attributes)) != 0)
+            goto cleanup;
+    }
+
+    if (entry->mask & KADM5_PRINCIPAL) {
+        memset(strval, 0, sizeof(strval));
+        strval[0] = user;
+        if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbprincipalname", LDAP_MOD_REPLACE, strval)) != 0)
+            goto cleanup;
+    }
+
+    if (entry->mask & KADM5_PRINC_EXPIRE_TIME) {
+        memset(strval, 0, sizeof(strval));
+        if ((strval[0]=getstringtime(entry->expiration)) == NULL)
+            goto cleanup;
+        if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbprincipalexpiration", LDAP_MOD_REPLACE, strval)) != 0) {
+            free (strval[0]);
+            goto cleanup;
+        }
+        free (strval[0]);
+    }
+
+    if (entry->mask & KADM5_PW_EXPIRATION) {
+        memset(strval, 0, sizeof(strval));
+        if ((strval[0]=getstringtime(entry->pw_expiration)) == NULL)
+            goto cleanup;
+        if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpasswordexpiration",
+                                          LDAP_MOD_REPLACE,
+                                          strval)) != 0) {
+            free (strval[0]);
+            goto cleanup;
+        }
+        free (strval[0]);
+    }
+
+    if (entry->mask & KADM5_POLICY) {
+        memset(&princ_ent, 0, sizeof(princ_ent));
+        for (tl_data=entry->tl_data; tl_data; tl_data=tl_data->tl_data_next) {
+            if (tl_data->tl_data_type == KRB5_TL_KADM_DATA) {
+                /* FIX ME: I guess the princ_ent should be freed after this call */
+                if ((st = krb5_lookup_tl_kadm_data(tl_data, &princ_ent)) != 0) {
+                    goto cleanup;
+                }
+            }
         }
 
-        if (entries->mask & KADM5_KEY_DATA || entries->mask & KADM5_KVNO) {
-            krb5_kvno mkvno;
-
-            if ((st=krb5_dbe_lookup_mkvno(context, entries, &mkvno)) != 0)
+        if (princ_ent.aux_attributes & KADM5_POLICY) {
+            memset(strval, 0, sizeof(strval));
+            if ((st = krb5_ldap_name_to_policydn (context, princ_ent.policy, &polname)) != 0)
                 goto cleanup;
-            bersecretkey = krb5_encode_krbsecretkey (entries->key_data,
-                                                     entries->n_key_data, mkvno);
+            strval[0] = polname;
+            if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpwdpolicyreference", LDAP_MOD_REPLACE, strval)) != 0)
+                goto cleanup;
+        } else {
+            st = EINVAL;
+            krb5_set_error_message(context, st, "Password policy value null");
+            goto cleanup;
+        }
+    } else if (entry->mask & KADM5_LOAD && found_entry == TRUE) {
+        /*
+         * a load is special in that existing entries must have attrs that
+         * removed.
+         */
 
-            if ((st=krb5_add_ber_mem_ldap_mod(&mods, "krbprincipalkey",
-                                              LDAP_MOD_REPLACE | LDAP_MOD_BVALUES, bersecretkey)) != 0)
+        if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpwdpolicyreference", LDAP_MOD_REPLACE, NULL)) != 0)
+            goto cleanup;
+    }
+
+    if (entry->mask & KADM5_POLICY_CLR) {
+        if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbpwdpolicyreference", LDAP_MOD_DELETE, NULL)) != 0)
+            goto cleanup;
+    }
+
+    if (entry->mask & KADM5_KEY_DATA || entry->mask & KADM5_KVNO) {
+        krb5_kvno mkvno;
+
+        if ((st=krb5_dbe_lookup_mkvno(context, entry, &mkvno)) != 0)
+            goto cleanup;
+        bersecretkey = krb5_encode_krbsecretkey (entry->key_data,
+                                                 entry->n_key_data, mkvno);
+
+        if ((st=krb5_add_ber_mem_ldap_mod(&mods, "krbprincipalkey",
+                                          LDAP_MOD_REPLACE | LDAP_MOD_BVALUES, bersecretkey)) != 0)
+            goto cleanup;
+
+        if (!(entry->mask & KADM5_PRINCIPAL)) {
+            memset(strval, 0, sizeof(strval));
+            if ((strval[0]=getstringtime(entry->pw_expiration)) == NULL)
+                goto cleanup;
+            if ((st=krb5_add_str_mem_ldap_mod(&mods,
+                                              "krbpasswordexpiration",
+                                              LDAP_MOD_REPLACE, strval)) != 0) {
+                free (strval[0]);
+                goto cleanup;
+            }
+            free (strval[0]);
+        }
+
+        /* Update last password change whenever a new key is set */
+        {
+            krb5_timestamp last_pw_changed;
+            if ((st=krb5_dbe_lookup_last_pwd_change(context, entry,
+                                                    &last_pw_changed)) != 0)
                 goto cleanup;
 
-            if (!(entries->mask & KADM5_PRINCIPAL)) {
-                memset(strval, 0, sizeof(strval));
-                if ((strval[0]=getstringtime(entries->pw_expiration)) == NULL)
-                    goto cleanup;
-                if ((st=krb5_add_str_mem_ldap_mod(&mods,
-                                                  "krbpasswordexpiration",
-                                                  LDAP_MOD_REPLACE, strval)) != 0) {
-                    free (strval[0]);
-                    goto cleanup;
-                }
+            memset(strval, 0, sizeof(strval));
+            if ((strval[0] = getstringtime(last_pw_changed)) == NULL)
+                goto cleanup;
+
+            if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbLastPwdChange",
+                                              LDAP_MOD_REPLACE, strval)) != 0) {
                 free (strval[0]);
+                goto cleanup;
             }
+            free (strval[0]);
+        }
 
-            /* Update last password change whenever a new key is set */
-            {
-                krb5_timestamp last_pw_changed;
-                if ((st=krb5_dbe_lookup_last_pwd_change(context, entries,
-                                                        &last_pw_changed)) != 0)
-                    goto cleanup;
+    } /* Modify Key data ends here */
 
-                memset(strval, 0, sizeof(strval));
-                if ((strval[0] = getstringtime(last_pw_changed)) == NULL)
-                    goto cleanup;
-
-                if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbLastPwdChange",
-                                                  LDAP_MOD_REPLACE, strval)) != 0) {
-                    free (strval[0]);
-                    goto cleanup;
-                }
-                free (strval[0]);
+    /* Set tl_data */
+    if (entry->tl_data != NULL) {
+        int count = 0;
+        struct berval **ber_tl_data = NULL;
+        krb5_tl_data *ptr;
+        for (ptr = entry->tl_data; ptr != NULL; ptr = ptr->tl_data_next) {
+            if (ptr->tl_data_type == KRB5_TL_LAST_PWD_CHANGE
+#ifdef SECURID
+                || ptr->tl_data_type == KRB5_TL_DB_ARGS
+#endif
+                || ptr->tl_data_type == KRB5_TL_KADM_DATA
+                || ptr->tl_data_type == KDB_TL_USER_INFO
+                || ptr->tl_data_type == KRB5_TL_CONSTRAINED_DELEGATION_ACL)
+                continue;
+            count++;
+        }
+        if (count != 0) {
+            int j;
+            ber_tl_data = (struct berval **) calloc (count + 1,
+                                                     sizeof (struct berval*));
+            if (ber_tl_data == NULL) {
+                st = ENOMEM;
+                goto cleanup;
             }
-
-        } /* Modify Key data ends here */
-
-        /* Set tl_data */
-        if (entries->tl_data != NULL) {
-            int count = 0;
-            struct berval **ber_tl_data = NULL;
-            krb5_tl_data *ptr;
-            for (ptr = entries->tl_data; ptr != NULL; ptr = ptr->tl_data_next) {
+            for (j = 0, ptr = entry->tl_data; ptr != NULL; ptr = ptr->tl_data_next) {
+                /* Ignore tl_data that are stored in separate directory
+                 * attributes */
                 if (ptr->tl_data_type == KRB5_TL_LAST_PWD_CHANGE
 #ifdef SECURID
                     || ptr->tl_data_type == KRB5_TL_DB_ARGS
@@ -1085,156 +1105,134 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entries,
                     || ptr->tl_data_type == KDB_TL_USER_INFO
                     || ptr->tl_data_type == KRB5_TL_CONSTRAINED_DELEGATION_ACL)
                     continue;
-                count++;
+                if ((st = tl_data2berval (ptr, &ber_tl_data[j])) != 0)
+                    break;
+                j++;
             }
-            if (count != 0) {
-                int j;
-                ber_tl_data = (struct berval **) calloc (count + 1,
-                                                         sizeof (struct berval*));
-                if (ber_tl_data == NULL) {
-                    st = ENOMEM;
-                    goto cleanup;
+            if (st != 0) {
+                for (j = 0; ber_tl_data[j] != NULL; j++) {
+                    free (ber_tl_data[j]->bv_val);
+                    free (ber_tl_data[j]);
                 }
-                for (j = 0, ptr = entries->tl_data; ptr != NULL; ptr = ptr->tl_data_next) {
-                    /* Ignore tl_data that are stored in separate directory
-                     * attributes */
-                    if (ptr->tl_data_type == KRB5_TL_LAST_PWD_CHANGE
-#ifdef SECURID
-                        || ptr->tl_data_type == KRB5_TL_DB_ARGS
-#endif
-                        || ptr->tl_data_type == KRB5_TL_KADM_DATA
-                        || ptr->tl_data_type == KDB_TL_USER_INFO
-                        || ptr->tl_data_type == KRB5_TL_CONSTRAINED_DELEGATION_ACL)
-                        continue;
-                    if ((st = tl_data2berval (ptr, &ber_tl_data[j])) != 0)
-                        break;
-                    j++;
-                }
-                if (st != 0) {
-                    for (j = 0; ber_tl_data[j] != NULL; j++) {
-                        free (ber_tl_data[j]->bv_val);
-                        free (ber_tl_data[j]);
-                    }
-                    free (ber_tl_data);
-                    goto cleanup;
-                }
-                ber_tl_data[count] = NULL;
-                if ((st=krb5_add_ber_mem_ldap_mod(&mods, "krbExtraData",
-                                                  LDAP_MOD_REPLACE | LDAP_MOD_BVALUES,
-                                                  ber_tl_data)) != 0)
-                    goto cleanup;
+                free (ber_tl_data);
+                goto cleanup;
             }
+            ber_tl_data[count] = NULL;
+            if ((st=krb5_add_ber_mem_ldap_mod(&mods, "krbExtraData",
+                                              LDAP_MOD_REPLACE | LDAP_MOD_BVALUES,
+                                              ber_tl_data)) != 0)
+                goto cleanup;
         }
+    }
 
-        /* Directory specific attribute */
-        if (xargs.tktpolicydn != NULL) {
-            int tmask=0;
+    /* Directory specific attribute */
+    if (xargs.tktpolicydn != NULL) {
+        int tmask=0;
 
-            if (strlen(xargs.tktpolicydn) != 0) {
-                st = checkattributevalue(ld, xargs.tktpolicydn, "objectclass", policyclass, &tmask);
-                CHECK_CLASS_VALIDITY(st, tmask, "ticket policy object value: ");
+        if (strlen(xargs.tktpolicydn) != 0) {
+            st = checkattributevalue(ld, xargs.tktpolicydn, "objectclass", policyclass, &tmask);
+            CHECK_CLASS_VALIDITY(st, tmask, "ticket policy object value: ");
 
-                strval[0] = xargs.tktpolicydn;
-                strval[1] = NULL;
-                if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbticketpolicyreference", LDAP_MOD_REPLACE, strval)) != 0)
-                    goto cleanup;
+            strval[0] = xargs.tktpolicydn;
+            strval[1] = NULL;
+            if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbticketpolicyreference", LDAP_MOD_REPLACE, strval)) != 0)
+                goto cleanup;
 
-            } else {
-                /* if xargs.tktpolicydn is a empty string, then delete
-                 * already existing krbticketpolicyreference attr */
-                if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbticketpolicyreference", LDAP_MOD_DELETE, NULL)) != 0)
-                    goto cleanup;
-            }
-
-        }
-
-        if (establish_links == TRUE) {
-            memset(strval, 0, sizeof(strval));
-            strval[0] = xargs.linkdn;
-            if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbObjectReferences", LDAP_MOD_REPLACE, strval)) != 0)
+        } else {
+            /* if xargs.tktpolicydn is a empty string, then delete
+             * already existing krbticketpolicyreference attr */
+            if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbticketpolicyreference", LDAP_MOD_DELETE, NULL)) != 0)
                 goto cleanup;
         }
 
-        /*
-         * in case mods is NULL then return
-         * not sure but can happen in a modprinc
-         * so no need to return an error
-         * addprinc will at least have the principal name
-         * and the keys passed in
-         */
-        if (mods == NULL)
+    }
+
+    if (establish_links == TRUE) {
+        memset(strval, 0, sizeof(strval));
+        strval[0] = xargs.linkdn;
+        if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbObjectReferences", LDAP_MOD_REPLACE, strval)) != 0)
+            goto cleanup;
+    }
+
+    /*
+     * in case mods is NULL then return
+     * not sure but can happen in a modprinc
+     * so no need to return an error
+     * addprinc will at least have the principal name
+     * and the keys passed in
+     */
+    if (mods == NULL)
+        goto cleanup;
+
+    if (create_standalone_prinicipal == TRUE) {
+        memset(strval, 0, sizeof(strval));
+        strval[0] = "krbprincipal";
+        strval[1] = "krbprincipalaux";
+        strval[2] = "krbTicketPolicyAux";
+
+        if ((st=krb5_add_str_mem_ldap_mod(&mods, "objectclass", LDAP_MOD_ADD, strval)) != 0)
             goto cleanup;
 
-        if (create_standalone_prinicipal == TRUE) {
-            memset(strval, 0, sizeof(strval));
-            strval[0] = "krbprincipal";
-            strval[1] = "krbprincipalaux";
-            strval[2] = "krbTicketPolicyAux";
-
-            if ((st=krb5_add_str_mem_ldap_mod(&mods, "objectclass", LDAP_MOD_ADD, strval)) != 0)
-                goto cleanup;
-
-            st = ldap_add_ext_s(ld, standalone_principal_dn, mods, NULL, NULL);
-            if (st == LDAP_ALREADY_EXISTS && entries->mask & KADM5_LOAD) {
-                /* a load operation must replace an existing entry */
-                st = ldap_delete_ext_s(ld, standalone_principal_dn, NULL, NULL);
-                if (st != LDAP_SUCCESS) {
-                    snprintf(errbuf, sizeof(errbuf), "Principal delete failed (trying to replace entry): %s",
-                             ldap_err2string(st));
-                    st = translate_ldap_error (st, OP_ADD);
-                    krb5_set_error_message(context, st, "%s", errbuf);
-                    goto cleanup;
-                } else {
-                    st = ldap_add_ext_s(ld, standalone_principal_dn, mods, NULL, NULL);
-                }
-            }
+        st = ldap_add_ext_s(ld, standalone_principal_dn, mods, NULL, NULL);
+        if (st == LDAP_ALREADY_EXISTS && entry->mask & KADM5_LOAD) {
+            /* a load operation must replace an existing entry */
+            st = ldap_delete_ext_s(ld, standalone_principal_dn, NULL, NULL);
             if (st != LDAP_SUCCESS) {
-                snprintf(errbuf, sizeof(errbuf), "Principal add failed: %s", ldap_err2string(st));
+                snprintf(errbuf, sizeof(errbuf), "Principal delete failed (trying to replace entry): %s",
+                         ldap_err2string(st));
                 st = translate_ldap_error (st, OP_ADD);
                 krb5_set_error_message(context, st, "%s", errbuf);
                 goto cleanup;
+            } else {
+                st = ldap_add_ext_s(ld, standalone_principal_dn, mods, NULL, NULL);
             }
-        } else {
-            /*
-             * Here existing ldap object is modified and can be related
-             * to any attribute, so always ensure that the ldap
-             * object is extended with all the kerberos related
-             * objectclasses so that there are no constraint
-             * violations.
-             */
-            {
-                char *attrvalues[] = {"krbprincipalaux", "krbTicketPolicyAux", NULL};
-                int p, q, r=0, amask=0;
-
-                if ((st=checkattributevalue(ld, (xargs.dn) ? xargs.dn : principal_dn,
-                                            "objectclass", attrvalues, &amask)) != 0)
-                    goto cleanup;
-
-                memset(strval, 0, sizeof(strval));
-                for (p=1, q=0; p<=2; p<<=1, ++q) {
-                    if ((p & amask) == 0)
-                        strval[r++] = attrvalues[q];
-                }
-                if (r != 0) {
-                    if ((st=krb5_add_str_mem_ldap_mod(&mods, "objectclass", LDAP_MOD_ADD, strval)) != 0)
-                        goto cleanup;
-                }
-            }
-            if (xargs.dn != NULL)
-                st=ldap_modify_ext_s(ld, xargs.dn, mods, NULL, NULL);
-            else
-                st = ldap_modify_ext_s(ld, principal_dn, mods, NULL, NULL);
-
-            if (st != LDAP_SUCCESS) {
-                snprintf(errbuf, sizeof(errbuf), "User modification failed: %s", ldap_err2string(st));
-                st = translate_ldap_error (st, OP_MOD);
-                krb5_set_error_message(context, st, "%s", errbuf);
-                goto cleanup;
-            }
-
-            if (entries->mask & KADM5_FAIL_AUTH_COUNT_INCREMENT)
-                entries->fail_auth_count++;
         }
+        if (st != LDAP_SUCCESS) {
+            snprintf(errbuf, sizeof(errbuf), "Principal add failed: %s", ldap_err2string(st));
+            st = translate_ldap_error (st, OP_ADD);
+            krb5_set_error_message(context, st, "%s", errbuf);
+            goto cleanup;
+        }
+    } else {
+        /*
+         * Here existing ldap object is modified and can be related
+         * to any attribute, so always ensure that the ldap
+         * object is extended with all the kerberos related
+         * objectclasses so that there are no constraint
+         * violations.
+         */
+        {
+            char *attrvalues[] = {"krbprincipalaux", "krbTicketPolicyAux", NULL};
+            int p, q, r=0, amask=0;
+
+            if ((st=checkattributevalue(ld, (xargs.dn) ? xargs.dn : principal_dn,
+                                        "objectclass", attrvalues, &amask)) != 0)
+                goto cleanup;
+
+            memset(strval, 0, sizeof(strval));
+            for (p=1, q=0; p<=2; p<<=1, ++q) {
+                if ((p & amask) == 0)
+                    strval[r++] = attrvalues[q];
+            }
+            if (r != 0) {
+                if ((st=krb5_add_str_mem_ldap_mod(&mods, "objectclass", LDAP_MOD_ADD, strval)) != 0)
+                    goto cleanup;
+            }
+        }
+        if (xargs.dn != NULL)
+            st=ldap_modify_ext_s(ld, xargs.dn, mods, NULL, NULL);
+        else
+            st = ldap_modify_ext_s(ld, principal_dn, mods, NULL, NULL);
+
+        if (st != LDAP_SUCCESS) {
+            snprintf(errbuf, sizeof(errbuf), "User modification failed: %s", ldap_err2string(st));
+            st = translate_ldap_error (st, OP_MOD);
+            krb5_set_error_message(context, st, "%s", errbuf);
+            goto cleanup;
+        }
+
+        if (entry->mask & KADM5_FAIL_AUTH_COUNT_INCREMENT)
+            entry->fail_auth_count++;
     }
 
 cleanup:
@@ -1269,7 +1267,6 @@ cleanup:
 
     ldap_mods_free(mods, 1);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);
-    *nentries = i;
     return(st);
 }
 

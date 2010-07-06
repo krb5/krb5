@@ -175,7 +175,7 @@ kdb_get_hist_key(kadm5_server_handle_t handle, krb5_keyblock *hist_keyblock,
                  krb5_kvno *hist_kvno)
 {
     krb5_error_code ret;
-    krb5_db_entry kdb;
+    krb5_db_entry *kdb;
     krb5_keyblock *mkey;
 
     /* Fetch the history principal, creating it if necessary. */
@@ -189,27 +189,26 @@ kdb_get_hist_key(kadm5_server_handle_t handle, krb5_keyblock *hist_keyblock,
     if (ret)
         return ret;
 
-    if (kdb.n_key_data <= 0) {
+    if (kdb->n_key_data <= 0) {
         ret = KRB5_KDB_NO_MATCHING_KEY;
         krb5_set_error_message(handle->context, ret,
                                "History entry contains no key data");
         goto done;
     }
 
-    ret = krb5_dbe_find_mkey(handle->context, master_keylist, &kdb,
-                             &mkey);
+    ret = krb5_dbe_find_mkey(handle->context, master_keylist, kdb, &mkey);
     if (ret)
         goto done;
 
-    ret = krb5_dbe_decrypt_key_data(handle->context, mkey, &kdb.key_data[0],
+    ret = krb5_dbe_decrypt_key_data(handle->context, mkey, &kdb->key_data[0],
                                     hist_keyblock, NULL);
     if (ret)
         goto done;
 
-    *hist_kvno = kdb.key_data[0].key_data_kvno;
+    *hist_kvno = kdb->key_data[0].key_data_kvno;
 
 done:
-    kdb_free_entry(handle, &kdb, NULL);
+    kdb_free_entry(handle, kdb, NULL);
     return ret;
 }
 
@@ -223,7 +222,7 @@ done:
  *
  *              handle          (r) the server_handle
  *              principal       (r) the principal to get
- *              kdb             (w) krb5_db_entry to fill in
+ *              kdb             (w) krb5_db_entry to create
  *              adb             (w) osa_princ_ent_rec to fill in
  *
  * when the caller is done with kdb and adb, kdb_free_entry must be
@@ -233,27 +232,21 @@ done:
  */
 krb5_error_code
 kdb_get_entry(kadm5_server_handle_t handle,
-              krb5_principal principal, krb5_db_entry *kdb,
+              krb5_principal principal, krb5_db_entry **kdb_ptr,
               osa_princ_ent_rec *adb)
 {
     krb5_error_code ret;
-    int nprincs;
-    krb5_boolean more;
     krb5_tl_data tl_data;
     XDR xdrs;
+    krb5_db_entry *kdb;
 
-    ret = krb5_db_get_principal(handle->context, principal, kdb, &nprincs,
-                                &more);
+    *kdb_ptr = NULL;
+
+    ret = krb5_db_get_principal(handle->context, principal, 0, &kdb);
+    if (ret == KRB5_KDB_NOENTRY)
+        return(KADM5_UNK_PRINC);
     if (ret)
         return(ret);
-
-    if (more) {
-        krb5_db_free_principal(handle->context, kdb, nprincs);
-        return(KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE);
-    } else if (nprincs != 1) {
-        krb5_db_free_principal(handle->context, kdb, nprincs);
-        return(KADM5_UNK_PRINC);
-    }
 
     if (adb) {
         memset(adb, 0, sizeof(*adb));
@@ -274,7 +267,7 @@ kdb_get_entry(kadm5_server_handle_t handle,
                data will get stored correctly. */
 
             adb->admin_history_kvno = INITIAL_HIST_KVNO;
-
+            *kdb_ptr = kdb;
             return(ret);
         }
 
@@ -282,12 +275,13 @@ kdb_get_entry(kadm5_server_handle_t handle,
                       tl_data.tl_data_length, XDR_DECODE);
         if (! xdr_osa_princ_ent_rec(&xdrs, adb)) {
             xdr_destroy(&xdrs);
-            krb5_db_free_principal(handle->context, kdb, 1);
+            krb5_db_free_principal(handle->context, kdb);
             return(KADM5_XDR_FAILURE);
         }
         xdr_destroy(&xdrs);
     }
 
+    *kdb_ptr = kdb;
     return(0);
 }
 
@@ -314,7 +308,7 @@ kdb_free_entry(kadm5_server_handle_t handle,
 
 
     if (kdb)
-        krb5_db_free_principal(handle->context, kdb, 1);
+        krb5_db_free_principal(handle->context, kdb);
 
     if (adb) {
         xdrmem_create(&xdrs, NULL, 0, XDR_FREE);
@@ -351,7 +345,6 @@ kdb_put_entry(kadm5_server_handle_t handle,
     krb5_int32 now;
     XDR xdrs;
     krb5_tl_data tl_data;
-    int one;
 
     ret = krb5_timeofday(handle->context, &now);
     if (ret)
@@ -378,12 +371,10 @@ kdb_put_entry(kadm5_server_handle_t handle,
     if (ret)
         return(ret);
 
-    one = 1;
-
     /* we are always updating TL data */
     kdb->mask |= KADM5_TL_DATA;
 
-    ret = krb5_db_put_principal(handle->context, kdb, &one);
+    ret = krb5_db_put_principal(handle->context, kdb);
     if (ret)
         return(ret);
 
@@ -393,11 +384,11 @@ kdb_put_entry(kadm5_server_handle_t handle,
 krb5_error_code
 kdb_delete_entry(kadm5_server_handle_t handle, krb5_principal name)
 {
-    int one = 1;
     krb5_error_code ret;
 
-    ret = krb5_db_delete_principal(handle->context, name, &one);
-
+    ret = krb5_db_delete_principal(handle->context, name);
+    if (ret == KRB5_KDB_NOENTRY)
+        ret = 0;
     return ret;
 }
 

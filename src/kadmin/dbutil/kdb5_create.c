@@ -421,47 +421,49 @@ add_principal(context, princ, op, pblock)
     struct realm_info *pblock;
 {
     krb5_error_code       retval;
-    krb5_db_entry         entry;
+    krb5_db_entry         *entry;
     krb5_kvno             mkey_kvno;
     krb5_timestamp        now;
     struct iterate_args   iargs;
-    int                   nentries = 1;
     krb5_actkvno_node     actkvno;
 
-    memset(&entry, 0, sizeof(entry));
+    entry = krb5_db_alloc(context, NULL, sizeof(*entry));
+    if (entry == NULL)
+        return ENOMEM;
+    memset(entry, 0, sizeof(*entry));
 
-    entry.len = KRB5_KDB_V1_BASE_LENGTH;
-    entry.attributes = pblock->flags;
-    entry.max_life = pblock->max_life;
-    entry.max_renewable_life = pblock->max_rlife;
-    entry.expiration = pblock->expiration;
+    entry->len = KRB5_KDB_V1_BASE_LENGTH;
+    entry->attributes = pblock->flags;
+    entry->max_life = pblock->max_life;
+    entry->max_renewable_life = pblock->max_rlife;
+    entry->expiration = pblock->expiration;
 
-    if ((retval = krb5_copy_principal(context, princ, &entry.princ)))
+    if ((retval = krb5_copy_principal(context, princ, &entry->princ)))
         goto error_out;
 
     if ((retval = krb5_timeofday(context, &now)))
         goto error_out;
 
-    if ((retval = krb5_dbe_update_mod_princ_data(context, &entry,
+    if ((retval = krb5_dbe_update_mod_princ_data(context, entry,
                                                  now, &db_create_princ)))
         goto error_out;
 
     switch (op) {
     case MASTER_KEY:
-        if ((entry.key_data=(krb5_key_data*)malloc(sizeof(krb5_key_data)))
+        if ((entry->key_data=(krb5_key_data*)malloc(sizeof(krb5_key_data)))
             == NULL)
             goto error_out;
-        memset(entry.key_data, 0, sizeof(krb5_key_data));
-        entry.n_key_data = 1;
+        memset(entry->key_data, 0, sizeof(krb5_key_data));
+        entry->n_key_data = 1;
 
         if (global_params.mask & KADM5_CONFIG_KVNO)
             mkey_kvno = global_params.kvno; /* user specified */
         else
             mkey_kvno = 1;  /* Default */
-        entry.attributes |= KRB5_KDB_DISALLOW_ALL_TIX;
+        entry->attributes |= KRB5_KDB_DISALLOW_ALL_TIX;
         if ((retval = krb5_dbe_encrypt_key_data(context, pblock->key,
                                                 &master_keyblock, NULL,
-                                                mkey_kvno, entry.key_data)))
+                                                mkey_kvno, entry->key_data)))
             return retval;
         /*
          * There should always be at least one "active" mkey so creating the
@@ -471,18 +473,18 @@ add_principal(context, princ, op, pblock)
         actkvno.act_kvno = mkey_kvno;
         /* earliest possible time in case system clock is set back */
         actkvno.act_time = 0;
-        if ((retval = krb5_dbe_update_actkvno(context, &entry, &actkvno)))
+        if ((retval = krb5_dbe_update_actkvno(context, entry, &actkvno)))
             return retval;
 
         /* so getprinc shows the right kvno */
-        if ((retval = krb5_dbe_update_mkvno(context, &entry, mkey_kvno)))
+        if ((retval = krb5_dbe_update_mkvno(context, entry, mkey_kvno)))
             return retval;
 
         break;
     case TGT_KEY:
         iargs.ctx = context;
         iargs.rblock = pblock;
-        iargs.dbentp = &entry;
+        iargs.dbentp = entry;
         /*
          * Iterate through the key/salt list, ignoring salt types.
          */
@@ -499,13 +501,13 @@ add_principal(context, princ, op, pblock)
         break;
     }
 
-    entry.mask = (KADM5_KEY_DATA | KADM5_PRINCIPAL | KADM5_ATTRIBUTES |
-                  KADM5_MAX_LIFE | KADM5_MAX_RLIFE | KADM5_TL_DATA |
-                  KADM5_PRINC_EXPIRE_TIME);
+    entry->mask = (KADM5_KEY_DATA | KADM5_PRINCIPAL | KADM5_ATTRIBUTES |
+                   KADM5_MAX_LIFE | KADM5_MAX_RLIFE | KADM5_TL_DATA |
+                   KADM5_PRINC_EXPIRE_TIME);
 
-    retval = krb5_db_put_principal(context, &entry, &nentries);
+    retval = krb5_db_put_principal(context, entry);
 
-error_out:;
-    krb5_db_free_principal(context, &entry, 1);
+error_out:
+    krb5_db_free_principal(context, entry);
     return retval;
 }

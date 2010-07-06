@@ -173,7 +173,6 @@ kadm5_delete_policy(void *server_handle, kadm5_policy_t name)
     kadm5_server_handle_t handle = server_handle;
     osa_policy_ent_t            entry;
     int                         ret;
-    int                         cnt=1;
 
     CHECK_HANDLE(server_handle);
 
@@ -183,10 +182,11 @@ kadm5_delete_policy(void *server_handle, kadm5_policy_t name)
         return EINVAL;
     if(strlen(name) == 0)
         return KADM5_BAD_POLICY;
-    if((ret = krb5_db_get_policy(handle->context, name, &entry,&cnt)))
-        return ret;
-    if( cnt != 1 )
+    ret = krb5_db_get_policy(handle->context, name, &entry);
+    if (ret == KRB5_KDB_NOENTRY)
         return KADM5_UNK_POLICY;
+    else if (ret)
+        return ret;
 
     if(entry->policy_refcnt != 0) {
         krb5_db_free_policy(handle->context, entry);
@@ -220,7 +220,6 @@ kadm5_modify_policy_internal(void *server_handle,
     kadm5_server_handle_t handle = server_handle;
     osa_policy_ent_t    p;
     int                 ret;
-    int                 cnt=1;
 
     CHECK_HANDLE(server_handle);
 
@@ -231,10 +230,11 @@ kadm5_modify_policy_internal(void *server_handle,
     if((mask & KADM5_POLICY))
         return KADM5_BAD_MASK;
 
-    if ((ret = krb5_db_get_policy(handle->context, entry->policy, &p, &cnt)))
-        return ret;
-    if (cnt != 1)
+    ret = krb5_db_get_policy(handle->context, entry->policy, &p);
+    if (ret == KRB5_KDB_NOENTRY)
         return KADM5_UNK_POLICY;
+    else if (ret)
+        return ret;
 
     if ((mask & KADM5_PW_MAX_LIFE))
         p->pw_max_life = entry->pw_max_life;
@@ -289,7 +289,6 @@ kadm5_get_policy(void *server_handle, kadm5_policy_t name,
     osa_policy_ent_t            t;
     int                         ret;
     kadm5_server_handle_t handle = server_handle;
-    int                         cnt=1;
 
     CHECK_HANDLE(server_handle);
 
@@ -299,11 +298,11 @@ kadm5_get_policy(void *server_handle, kadm5_policy_t name,
         return EINVAL;
     if(strlen(name) == 0)
         return KADM5_BAD_POLICY;
-    if((ret = krb5_db_get_policy(handle->context, name, &t, &cnt)))
-        return ret;
-
-    if( cnt != 1 )
+    ret = krb5_db_get_policy(handle->context, name, &t);
+    if (ret == KRB5_KDB_NOENTRY)
         return KADM5_UNK_POLICY;
+    else if (ret)
+        return ret;
 
     if ((entry->policy = strdup(t->name)) == NULL) {
         krb5_db_free_policy(handle->context, t);

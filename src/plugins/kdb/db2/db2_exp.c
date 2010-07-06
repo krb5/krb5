@@ -120,27 +120,22 @@ WRAP_K (krb5_db2_unlock, (krb5_context ctx), (ctx));
 WRAP_K (krb5_db2_get_principal,
         (krb5_context ctx,
          krb5_const_principal p,
-         unsigned int flags,
-         krb5_db_entry *d,
-         int * i,
-         krb5_boolean *b),
-        (ctx, p, d, i, b));
+         unsigned int f,
+         krb5_db_entry **d),
+        (ctx, p, f, d));
 WRAP_VOID (krb5_db2_free_principal,
            (krb5_context ctx,
-            krb5_db_entry *d,
-            int i),
-           (ctx, d, i));
+            krb5_db_entry *d),
+           (ctx, d));
 WRAP_K (krb5_db2_put_principal,
         (krb5_context ctx,
          krb5_db_entry *d,
-         int *i,
          char **db_args),
-        (ctx, d, i, db_args));
+        (ctx, d, db_args));
 WRAP_K (krb5_db2_delete_principal,
         (krb5_context context,
-         krb5_const_principal searchfor,
-         int *nentries),
-        (context, searchfor, nentries));
+         krb5_const_principal searchfor),
+        (context, searchfor));
 
 WRAP_K (krb5_db2_iterate,
         (krb5_context ctx, char *s,
@@ -155,9 +150,8 @@ WRAP_K (krb5_db2_create_policy,
 WRAP_K (krb5_db2_get_policy,
         ( krb5_context kcontext,
           char *name,
-          osa_policy_ent_t *policy,
-          int *cnt),
-        (kcontext, name, policy, cnt));
+          osa_policy_ent_t *policy),
+        (kcontext, name, policy));
 WRAP_K (krb5_db2_put_policy,
         ( krb5_context kcontext, osa_policy_ent_t policy ),
         (kcontext, policy));

@@ -353,8 +353,6 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
         goto cleanup;
 
     for (i = 0; i < no_of_updates; i++) {
-        int nentry = 1;
-
         if (!upd->kdb_commit)
             continue;
 
@@ -379,9 +377,7 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
 
             free(dbprincstr);
 
-            retval = krb5int_delete_principal_no_log(context,
-                                                     dbprinc,
-                                                     &nentry);
+            retval = krb5int_delete_principal_no_log(context, dbprinc);
 
             if (dbprinc) {
                 krb5_free_principal(context, dbprinc);
@@ -400,15 +396,13 @@ ulog_replay(krb5_context context, kdb_incr_result_t *incr_ret, char **db_args)
 
             (void) memset(entry, 0, sizeof (krb5_db_entry));
 
-            if ((retval = ulog_conv_2dbentry(context, entry, upd, 1)))
+            if ((retval = ulog_conv_2dbentry(context, &entry, upd)))
                 goto cleanup;
 
-            retval = krb5int_put_principal_no_log(context, entry,
-                                                  &nentry);
+            retval = krb5int_put_principal_no_log(context, entry);
 
             if (entry) {
-                krb5_db_free_principal(context, entry, nentry);
-                free(entry);
+                krb5_db_free_principal(context, entry);
                 entry = NULL;
             }
             if (retval)

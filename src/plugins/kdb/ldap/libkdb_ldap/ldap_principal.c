@@ -123,13 +123,12 @@ krb5_dbe_free_contents(krb5_context context, krb5_db_entry *entry)
 
 
 void
-krb5_ldap_free_principal(krb5_context kcontext, krb5_db_entry *entries,
-                         int nentries)
+krb5_ldap_free_principal(krb5_context kcontext, krb5_db_entry *entry)
 {
-    register int i;
-    for (i = 0; i < nentries; i++)
-        krb5_dbe_free_contents(kcontext, &entries[i]);
-    return 0;
+    if (entry == NULL)
+        return;
+    krb5_dbe_free_contents(kcontext, entry);
+    free(entry);
 }
 
 krb5_error_code
@@ -230,7 +229,7 @@ cleanup:
  */
 krb5_error_code
 krb5_ldap_delete_principal(krb5_context context,
-                           krb5_const_principal searchfor, int *nentries)
+                           krb5_const_principal searchfor)
 {
     char                      *user=NULL, *DN=NULL, *strval[10] = {NULL};
     LDAPMod                   **mods=NULL;
@@ -242,21 +241,20 @@ krb5_ldap_delete_principal(krb5_context context,
     kdb5_dal_handle           *dal_handle=NULL;
     krb5_ldap_context         *ldap_context=NULL;
     krb5_ldap_server_handle   *ldap_server_handle=NULL;
-    krb5_db_entry             entries;
-    krb5_boolean              more=0;
+    krb5_db_entry             *entry = NULL;
 
     /* Clear the global error string */
     krb5_clear_error_message(context);
 
     SETUP_CONTEXT();
     /* get the principal info */
-    if ((st=krb5_ldap_get_principal(context, searchfor, 0, &entries, nentries, &more)) != 0 || *nentries == 0)
+    if ((st=krb5_ldap_get_principal(context, searchfor, 0, &entry)))
         goto cleanup;
 
-    if (((st=krb5_get_princ_type(context, &entries, &(ptype))) != 0) ||
-        ((st=krb5_get_attributes_mask(context, &entries, &(attrsetmask))) != 0) ||
-        ((st=krb5_get_princ_count(context, &entries, &(pcount))) != 0) ||
-        ((st=krb5_get_userdn(context, &entries, &(DN))) != 0))
+    if (((st=krb5_get_princ_type(context, entry, &(ptype))) != 0) ||
+        ((st=krb5_get_attributes_mask(context, entry, &(attrsetmask))) != 0) ||
+        ((st=krb5_get_princ_count(context, entry, &(pcount))) != 0) ||
+        ((st=krb5_get_userdn(context, entry, &(DN))) != 0))
         goto cleanup;
 
     if (DN == NULL) {
@@ -356,8 +354,7 @@ cleanup:
         free (secretkey);
     }
 
-    if (st == 0)
-        krb5_ldap_free_principal(context, &entries, *nentries);
+    krb5_ldap_free_principal(context, entry);
 
     ldap_mods_free(mods, 1);
     krb5_ldap_put_handle_to_pool(ldap_context, ldap_server_handle);

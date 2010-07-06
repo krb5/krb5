@@ -2081,9 +2081,7 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
      */
 
     {
-        int npr = 1;
-        krb5_boolean more;
-        krb5_db_entry assoc;
+        krb5_db_entry *assoc;
         krb5_key_data  *assoc_key;
         krb5_principal newp;
         int probeslot;
@@ -2105,9 +2103,8 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
             krb5_princ_component(kdc_context,newp,probeslot)->data = sam_ptr->name;
             krb5_princ_component(kdc_context,newp,probeslot)->length =
                 strlen(sam_ptr->name);
-            npr = 1;
-            retval = get_principal(kdc_context, newp, &assoc, &npr, &more);
-            if(!retval && npr) {
+            retval = krb5_db_get_principal(kdc_context, newp, 0, &assoc);
+            if(retval == 0) {
                 sc.sam_type = sam_ptr->sam_type;
                 break;
             }
@@ -2123,8 +2120,8 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
         if (sc.sam_type) {
             /* so use assoc to get the key out! */
             {
-                if ((retval = krb5_dbe_find_mkey(context, master_keylist, &assoc,
-                                                 &mkey_ptr))) {
+                if ((retval = krb5_dbe_find_mkey(context, master_keylist,
+                                                 assoc, &mkey_ptr))) {
                     krb5_keylist_node *tmp_mkey_list;
                     /* try refreshing the mkey list in case it's been updated */
                     if (krb5_db_fetch_mkey_list(context, master_princ,
@@ -2133,7 +2130,7 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
                         krb5_dbe_free_key_list(context, master_keylist);
                         master_keylist = tmp_mkey_list;
                         if ((retval = krb5_dbe_find_mkey(context, master_keylist,
-                                                         &assoc, &mkey_ptr))) {
+                                                         assoc, &mkey_ptr))) {
                             return (retval);
                         }
                     } else {
@@ -2142,7 +2139,7 @@ get_sam_edata(krb5_context context, krb5_kdc_req *request,
                 }
 
                 /* here's what do_tgs_req does */
-                retval = krb5_dbe_find_enctype(kdc_context, &assoc,
+                retval = krb5_dbe_find_enctype(kdc_context, assoc,
                                                ENCTYPE_DES_CBC_RAW,
                                                KRB5_KDB_SALTTYPE_NORMAL,
                                                0,    /* Get highest kvno */

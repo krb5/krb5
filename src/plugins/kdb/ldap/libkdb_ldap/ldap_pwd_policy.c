@@ -226,8 +226,7 @@ cleanup:
 
 static krb5_error_code
 krb5_ldap_get_password_policy_from_dn(krb5_context context, char *pol_name,
-                                      char *pol_dn, osa_policy_ent_t *policy,
-                                      int *cnt)
+                                      char *pol_dn, osa_policy_ent_t *policy)
 {
     krb5_error_code             st=0, tempst=0;
     LDAP                        *ld=NULL;
@@ -247,7 +246,6 @@ krb5_ldap_get_password_policy_from_dn(krb5_context context, char *pol_name,
     SETUP_CONTEXT();
     GET_HANDLE();
 
-    *cnt = 0;
     *(policy) = (osa_policy_ent_t) malloc(sizeof(osa_policy_ent_rec));
     if (*policy == NULL) {
         st = ENOMEM;
@@ -256,7 +254,6 @@ krb5_ldap_get_password_policy_from_dn(krb5_context context, char *pol_name,
     memset(*policy, 0, sizeof(osa_policy_ent_rec));
 
     LDAP_SEARCH(pol_dn, LDAP_SCOPE_BASE, "(objectclass=krbPwdPolicy)", password_policy_attributes);
-    *cnt = 1;
 #if 0 /************** Begin IFDEF'ed OUT *******************************/
     (*policy)->name = strdup(name);
     CHECK_NULL((*policy)->name);
@@ -302,7 +299,7 @@ cleanup:
  */
 krb5_error_code
 krb5_ldap_get_password_policy(krb5_context context, char *name,
-                              osa_policy_ent_t *policy, int *cnt)
+                              osa_policy_ent_t *policy)
 {
     krb5_error_code             st = 0;
     char                        *policy_dn = NULL;
@@ -320,7 +317,8 @@ krb5_ldap_get_password_policy(krb5_context context, char *name,
     if (st != 0)
         goto cleanup;
 
-    st = krb5_ldap_get_password_policy_from_dn(context, name, policy_dn, policy, cnt);
+    st = krb5_ldap_get_password_policy_from_dn(context, name, policy_dn,
+                                               policy);
 
 cleanup:
     if (policy_dn != NULL)

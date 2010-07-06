@@ -205,7 +205,7 @@ extern krb5_boolean     dbactive;
 extern int              exit_status;
 extern krb5_context     util_context;
 extern kadm5_config_params global_params;
-extern krb5_db_entry      master_entry;
+extern krb5_db_entry      *master_entry;
 
 /* Strings */
 
@@ -1235,7 +1235,7 @@ dump_db(argc, argv)
          * get new master key vno that will be used to protect princs, used
          * later on.
          */
-        new_mkvno = get_next_kvno(util_context, &master_entry);
+        new_mkvno = get_next_kvno(util_context, master_entry);
     }
 
     kret = 0;
@@ -1517,7 +1517,7 @@ process_k5beta_record(fname, kcontext, filep, flags, linenop)
 {
     int                 nmatched;
     int                 retval;
-    krb5_db_entry       dbent;
+    krb5_db_entry       *dbent;
     int                 name_len, mod_name_len, key_len;
     int                 alt_key_len, salt_len, alt_salt_len;
     char                *name;
@@ -1534,16 +1534,19 @@ process_k5beta_record(fname, kcontext, filep, flags, linenop)
     try2read = (char *) NULL;
     (*linenop)++;
     retval = 1;
-    memset(&dbent, 0, sizeof(dbent));
+    dbent = krb5_db_alloc(kcontext, NULL, sizeof(*dbent));
+    if (dbent == NULL)
+        return(1);
+    memset(dbent, 0, sizeof(*dbent));
 
     /* Make sure we've got key_data entries */
-    if (krb5_dbe_create_key_data(kcontext, &dbent) ||
-        krb5_dbe_create_key_data(kcontext, &dbent)) {
-        krb5_db_free_principal(kcontext, &dbent, 1);
+    if (krb5_dbe_create_key_data(kcontext, dbent) ||
+        krb5_dbe_create_key_data(kcontext, dbent)) {
+        krb5_db_free_principal(kcontext, dbent);
         return(1);
     }
-    pkey = &dbent.key_data[0];
-    akey = &dbent.key_data[1];
+    pkey = &dbent->key_data[0];
+    akey = &dbent->key_data[1];
 
     /*
      * Match the sizes.  6 tokens to match.
@@ -1618,17 +1621,17 @@ process_k5beta_record(fname, kcontext, filep, flags, linenop)
             /* Read principal attributes */
             if (!error && (fscanf(filep,
                                   "\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t%u\t",
-                                  &tmpint1, &dbent.max_life,
-                                  &dbent.max_renewable_life,
-                                  &tmpint2, &dbent.expiration,
-                                  &dbent.pw_expiration, &last_pwd_change,
-                                  &dbent.last_success, &dbent.last_failed,
+                                  &tmpint1, &dbent->max_life,
+                                  &dbent->max_renewable_life,
+                                  &tmpint2, &dbent->expiration,
+                                  &dbent->pw_expiration, &last_pwd_change,
+                                  &dbent->last_success, &dbent->last_failed,
                                   &tmpint3) != 10)) {
                 try2read = read_pr_data1;
                 error++;
             }
             pkey->key_data_kvno = tmpint1;
-            dbent.fail_auth_count = tmpint3;
+            dbent->fail_auth_count = tmpint3;
             /* Read modifier name */
             if (!error && read_string(filep,
                                       mod_name,
@@ -1639,7 +1642,7 @@ process_k5beta_record(fname, kcontext, filep, flags, linenop)
             }
             /* Read second set of attributes */
             if (!error && (fscanf(filep, "\t%u\t%u\t%u\t",
-                                  &mod_date, &dbent.attributes,
+                                  &mod_date, &dbent->attributes,
                                   &tmpint1) != 3)) {
                 try2read = read_pr_data2;
                 error++;
@@ -1718,22 +1721,20 @@ process_k5beta_record(fname, kcontext, filep, flags, linenop)
             if (!error) {
                 if (!(kret = krb5_parse_name(kcontext,
                                              name,
-                                             &dbent.princ))) {
+                                             &dbent->princ))) {
                     if (!(kret = krb5_parse_name(kcontext,
                                                  mod_name,
                                                  &mod_princ))) {
                         if (!(kret =
                               krb5_dbe_update_mod_princ_data(kcontext,
-                                                             &dbent,
+                                                             dbent,
                                                              mod_date,
                                                              mod_princ)) &&
                             !(kret =
                               krb5_dbe_update_last_pwd_change(kcontext,
-                                                              &dbent,
+                                                              dbent,
                                                               last_pwd_change))) {
-                            int one = 1;
-
-                            dbent.len = KRB5_KDB_V1_BASE_LENGTH;
+                            dbent->len = KRB5_KDB_V1_BASE_LENGTH;
                             pkey->key_data_ver = (pkey->key_data_type[1] || pkey->key_data_length[1]) ?
                                 2 : 1;
                             akey->key_data_ver = (akey->key_data_type[1] || akey->key_data_length[1]) ?
@@ -1742,22 +1743,20 @@ process_k5beta_record(fname, kcontext, filep, flags, linenop)
                                  akey->key_data_type[0]) &&
                                 (pkey->key_data_type[1] ==
                                  akey->key_data_type[1]))
-                                dbent.n_key_data--;
+                                dbent->n_key_data--;
                             else if ((akey->key_data_type[0] == 0)
                                      && (akey->key_data_length[0] == 0)
                                      && (akey->key_data_type[1] == 0)
                                      && (akey->key_data_length[1] == 0))
-                                dbent.n_key_data--;
+                                dbent->n_key_data--;
 
-                            dbent.mask = KADM5_LOAD | KADM5_PRINCIPAL | KADM5_ATTRIBUTES |
+                            dbent->mask = KADM5_LOAD | KADM5_PRINCIPAL | KADM5_ATTRIBUTES |
                                 KADM5_MAX_LIFE | KADM5_MAX_RLIFE | KADM5_KEY_DATA |
                                 KADM5_PRINC_EXPIRE_TIME | KADM5_LAST_SUCCESS |
                                 KADM5_LAST_FAILED | KADM5_FAIL_AUTH_COUNT;
 
                             if ((kret = krb5_db_put_principal(kcontext,
-                                                              &dbent,
-                                                              &one)) ||
-                                (one != 1)) {
+                                                              dbent))) {
                                 fprintf(stderr, store_err_fmt,
                                         fname, *linenop, name,
                                         error_message(kret));
@@ -1768,7 +1767,7 @@ process_k5beta_record(fname, kcontext, filep, flags, linenop)
                                     fprintf(stderr, add_princ_fmt, name);
                                 retval = 0;
                             }
-                            dbent.n_key_data = 2;
+                            dbent->n_key_data = 2;
                         }
                         krb5_free_principal(kcontext, mod_princ);
                     }
@@ -1793,7 +1792,7 @@ process_k5beta_record(fname, kcontext, filep, flags, linenop)
             fprintf(stderr, no_mem_fmt, fname, *linenop);
         }
 
-        krb5_db_free_principal(kcontext, &dbent, 1);
+        krb5_db_free_principal(kcontext, dbent);
         if (mod_name)
             free(mod_name);
         if (name)
@@ -1822,11 +1821,11 @@ process_k5beta6_record(fname, kcontext, filep, flags, linenop)
     int                 *linenop;
 {
     int                 retval;
-    krb5_db_entry       dbentry;
+    krb5_db_entry       *dbentry;
     krb5_int32          t1, t2, t3, t4, t5, t6, t7, t8, t9;
     int                 nread;
     int                 error;
-    int                 i, j, one;
+    int                 i, j;
     char                *name;
     krb5_key_data       *kp, *kdatap;
     krb5_tl_data        **tlp, *tl;
@@ -1835,7 +1834,10 @@ process_k5beta6_record(fname, kcontext, filep, flags, linenop)
     const char          *try2read;
 
     try2read = (char *) NULL;
-    memset(&dbentry, 0, sizeof(dbentry));
+    dbentry = krb5_db_alloc(kcontext, NULL, sizeof(*dbentry));
+    if (dbentry == NULL)
+        return(1);
+    memset(dbentry, 0, sizeof(*dbentry));
     (*linenop)++;
     retval = 1;
     name = (char *) NULL;
@@ -1850,12 +1852,12 @@ process_k5beta6_record(fname, kcontext, filep, flags, linenop)
             error++;
 
         /* Get memory for and form tagged data linked list */
-        tlp = &dbentry.tl_data;
+        tlp = &dbentry->tl_data;
         for (i=0; i<t3; i++) {
             if ((*tlp = (krb5_tl_data *) malloc(sizeof(krb5_tl_data)))) {
                 memset(*tlp, 0, sizeof(krb5_tl_data));
                 tlp = &((*tlp)->tl_data_next);
-                dbentry.n_tl_data++;
+                dbentry->n_tl_data++;
             }
             else {
                 error++;
@@ -1873,37 +1875,37 @@ process_k5beta6_record(fname, kcontext, filep, flags, linenop)
             error++;
 
         if (!error) {
-            dbentry.len = t1;
-            dbentry.n_key_data = t4;
-            dbentry.e_length = t5;
+            dbentry->len = t1;
+            dbentry->n_key_data = t4;
+            dbentry->e_length = t5;
             if (kp) {
                 memset(kp, 0, (size_t) (t4*sizeof(krb5_key_data)));
-                dbentry.key_data = kp;
+                dbentry->key_data = kp;
                 kp = (krb5_key_data *) NULL;
             }
             if (op) {
                 memset(op, 0, (size_t) t5);
-                dbentry.e_data = op;
+                dbentry->e_data = op;
                 op = (krb5_octet *) NULL;
             }
 
             /* Read in and parse the principal name */
             if (!read_string(filep, name, t2, linenop) &&
-                !(kret = krb5_parse_name(kcontext, name, &dbentry.princ))) {
+                !(kret = krb5_parse_name(kcontext, name, &dbentry->princ))) {
 
                 /* Get the fixed principal attributes */
                 nread = fscanf(filep, "%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\t",
                                &t2, &t3, &t4, &t5, &t6, &t7, &t8, &t9);
                 if (nread == 8) {
-                    dbentry.attributes = (krb5_flags) t2;
-                    dbentry.max_life = (krb5_deltat) t3;
-                    dbentry.max_renewable_life = (krb5_deltat) t4;
-                    dbentry.expiration = (krb5_timestamp) t5;
-                    dbentry.pw_expiration = (krb5_timestamp) t6;
-                    dbentry.last_success = (krb5_timestamp) t7;
-                    dbentry.last_failed = (krb5_timestamp) t8;
-                    dbentry.fail_auth_count = (krb5_kvno) t9;
-                    dbentry.mask = KADM5_LOAD | KADM5_PRINCIPAL | KADM5_ATTRIBUTES |
+                    dbentry->attributes = (krb5_flags) t2;
+                    dbentry->max_life = (krb5_deltat) t3;
+                    dbentry->max_renewable_life = (krb5_deltat) t4;
+                    dbentry->expiration = (krb5_timestamp) t5;
+                    dbentry->pw_expiration = (krb5_timestamp) t6;
+                    dbentry->last_success = (krb5_timestamp) t7;
+                    dbentry->last_failed = (krb5_timestamp) t8;
+                    dbentry->fail_auth_count = (krb5_kvno) t9;
+                    dbentry->mask = KADM5_LOAD | KADM5_PRINCIPAL | KADM5_ATTRIBUTES |
                         KADM5_MAX_LIFE | KADM5_MAX_RLIFE |
                         KADM5_PRINC_EXPIRE_TIME | KADM5_LAST_SUCCESS |
                         KADM5_LAST_FAILED | KADM5_FAIL_AUTH_COUNT;
@@ -1922,8 +1924,8 @@ process_k5beta6_record(fname, kcontext, filep, flags, linenop)
                  * it at dump time has almost as good an effect, so
                  * that's what I did.  [krb5-admin/89]
                  */
-                if (!error && dbentry.n_tl_data) {
-                    for (tl = dbentry.tl_data; tl; tl = tl->tl_data_next) {
+                if (!error && dbentry->n_tl_data) {
+                    for (tl = dbentry->tl_data; tl; tl = tl->tl_data_next) {
                         nread = fscanf(filep, "%d\t%d\t", &t1, &t2);
                         if (nread == 2) {
                             tl->tl_data_type = (krb5_int16) t1;
@@ -1947,7 +1949,7 @@ process_k5beta6_record(fname, kcontext, filep, flags, linenop)
                                      * Assuming aux_attributes will always be
                                      * there
                                      */
-                                    dbentry.mask |= KADM5_AUX_ATTRIBUTES;
+                                    dbentry->mask |= KADM5_AUX_ATTRIBUTES;
 
                                     /* test for an actual policy reference */
                                     memset(&osa_princ_ent, 0, sizeof(osa_princ_ent));
@@ -1957,7 +1959,7 @@ process_k5beta6_record(fname, kcontext, filep, flags, linenop)
                                         (osa_princ_ent.aux_attributes & KADM5_POLICY) &&
                                         osa_princ_ent.policy != NULL) {
 
-                                        dbentry.mask |= KADM5_POLICY;
+                                        dbentry->mask |= KADM5_POLICY;
                                         kdb_free_entry(NULL, NULL, &osa_princ_ent);
                                     }
                                     xdr_destroy(&xdrs);
@@ -1980,13 +1982,13 @@ process_k5beta6_record(fname, kcontext, filep, flags, linenop)
                         }
                     }
                     if (!error)
-                        dbentry.mask |= KADM5_TL_DATA;
+                        dbentry->mask |= KADM5_TL_DATA;
                 }
 
                 /* Get the key data */
-                if (!error && dbentry.n_key_data) {
-                    for (i=0; !error && (i<dbentry.n_key_data); i++) {
-                        kdatap = &dbentry.key_data[i];
+                if (!error && dbentry->n_key_data) {
+                    for (i=0; !error && (i<dbentry->n_key_data); i++) {
+                        kdatap = &dbentry->key_data[i];
                         nread = fscanf(filep, "%d\t%d\t", &t1, &t2);
                         if (nread == 2) {
                             kdatap->key_data_ver = (krb5_int16) t1;
@@ -2028,14 +2030,14 @@ process_k5beta6_record(fname, kcontext, filep, flags, linenop)
                         }
                     }
                     if (!error)
-                        dbentry.mask |= KADM5_KEY_DATA;
+                        dbentry->mask |= KADM5_KEY_DATA;
                 }
 
                 /* Get the extra data */
-                if (!error && dbentry.e_length) {
+                if (!error && dbentry->e_length) {
                     if (read_octet_string(filep,
-                                          dbentry.e_data,
-                                          (int) dbentry.e_length)) {
+                                          dbentry->e_data,
+                                          (int) dbentry->e_length)) {
                         try2read = read_econtents;
                         error++;
                     }
@@ -2056,10 +2058,7 @@ process_k5beta6_record(fname, kcontext, filep, flags, linenop)
                  * We have either read in all the data or choked.
                  */
                 if (!error) {
-                    one = 1;
-                    if ((kret = krb5_db_put_principal(kcontext,
-                                                      &dbentry,
-                                                      &one))) {
+                    if ((kret = krb5_db_put_principal(kcontext, dbentry))) {
                         fprintf(stderr, store_err_fmt,
                                 fname, *linenop,
                                 name, error_message(kret));
@@ -2092,7 +2091,7 @@ process_k5beta6_record(fname, kcontext, filep, flags, linenop)
             free(kp);
         if (name)
             free(name);
-        krb5_db_free_principal(kcontext, &dbentry, 1);
+        krb5_db_free_principal(kcontext, dbentry);
     }
     else {
         if (nread == EOF)

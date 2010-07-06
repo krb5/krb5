@@ -87,10 +87,8 @@ krb5_error_code osa_adb_create_policy(osa_adb_policy_t db,
                                       osa_policy_ent_t entry);
 krb5_error_code osa_adb_destroy_policy(osa_adb_policy_t db,
                                        char * name);
-krb5_error_code osa_adb_get_policy(osa_adb_policy_t db,
-                                   char * name,
-                                   osa_policy_ent_t *entry,
-                                   int *cnt);
+krb5_error_code osa_adb_get_policy(osa_adb_policy_t db, char *name,
+                                   osa_policy_ent_t *entry);
 krb5_error_code osa_adb_put_policy(osa_adb_policy_t db,
                                    osa_policy_ent_t entry);
 krb5_error_code osa_adb_iter_policy(osa_adb_policy_t db,

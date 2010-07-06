@@ -63,16 +63,14 @@ kdc_process_tgs_req (krb5_kdc_req *,
                      const krb5_fulladdr *,
                      krb5_data *,
                      krb5_ticket **,
-                     krb5_db_entry *krbtgt,
-                     int *nprincs,
+                     krb5_db_entry **krbtgt_ptr,
                      krb5_keyblock **, krb5_keyblock **,
                      krb5_pa_data **pa_tgs_req);
 
 krb5_error_code
 kdc_get_server_key (krb5_ticket *, unsigned int,
                     krb5_boolean match_enctype,
-                    krb5_db_entry *, int *,
-                    krb5_keyblock **, krb5_kvno *);
+                    krb5_db_entry **, krb5_keyblock **, krb5_kvno *);
 
 int
 validate_as_request (krb5_kdc_req *, krb5_db_entry,
@@ -236,16 +234,6 @@ void kdc_free_lookaside(krb5_context);
 /* kdc_util.c */
 void reset_for_hangup(void);
 
-krb5_error_code
-get_principal_locked (krb5_context kcontext,
-                      krb5_const_principal search_for,
-                      krb5_db_entry *entries, int *nentries,
-                      krb5_boolean *more);
-krb5_error_code
-get_principal (krb5_context kcontext,
-               krb5_const_principal search_for,
-               krb5_db_entry *entries, int *nentries, krb5_boolean *more);
-
 krb5_boolean
 include_pac_p(krb5_context context, krb5_kdc_req *request);
 
@@ -281,8 +269,7 @@ kdc_process_s4u2self_req (krb5_context context,
                           krb5_keyblock *tgs_session,
                           krb5_timestamp kdc_time,
                           krb5_pa_s4u_x509_user **s4u2self_req,
-                          krb5_db_entry *princ,
-                          int *nprincs,
+                          krb5_db_entry **princ_ptr,
                           const char **status);
 
 krb5_error_code

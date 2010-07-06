@@ -60,9 +60,9 @@ krb5_error_code krb5_db2_fini(krb5_context);
 krb5_error_code krb5_db2_get_age(krb5_context, char *, time_t *);
 krb5_error_code krb5_db2_rename(krb5_context, char *, char *, int );
 krb5_error_code krb5_db2_get_principal(krb5_context, krb5_const_principal,
-                                       krb5_db_entry *, int *, krb5_boolean *);
-void krb5_db2_free_principal(krb5_context, krb5_db_entry *, int);
-krb5_error_code krb5_db2_put_principal(krb5_context, krb5_db_entry *, int *,
+                                       unsigned int, krb5_db_entry **);
+void krb5_db2_free_principal(krb5_context, krb5_db_entry *);
+krb5_error_code krb5_db2_put_principal(krb5_context, krb5_db_entry *,
                                        char **db_args);
 krb5_error_code krb5_db2_iterate_ext(krb5_context,
                                      krb5_error_code (*)(krb5_pointer,
@@ -85,12 +85,8 @@ krb5_error_code
 krb5_db2_get_mkey_list(krb5_context context, krb5_keylist_node **keylist);
 
 krb5_error_code
-krb5_db2_put_principal(krb5_context context, krb5_db_entry *entries,
-                       register int *nentries, char **db_args);
-
-krb5_error_code
-krb5_db2_delete_principal(krb5_context context, krb5_const_principal searchfor,
-                          int *nentries);
+krb5_db2_delete_principal(krb5_context context,
+                          krb5_const_principal searchfor);
 
 krb5_error_code krb5_db2_lib_init(void);
 krb5_error_code krb5_db2_lib_cleanup(void);
@@ -122,8 +118,7 @@ krb5_error_code
 krb5_db2_create_policy(krb5_context context, osa_policy_ent_t entry);
 
 krb5_error_code krb5_db2_get_policy(krb5_context kcontext,
-                                    char *name, osa_policy_ent_t *policy,
-                                    int *cnt);
+                                    char *name, osa_policy_ent_t *policy);
 
 krb5_error_code krb5_db2_put_policy(krb5_context kcontext,
                                     osa_policy_ent_t policy);

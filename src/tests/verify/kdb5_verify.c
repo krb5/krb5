@@ -68,7 +68,6 @@ usage(who, status)
 
 krb5_keyblock master_keyblock;
 krb5_principal master_princ;
-krb5_db_entry master_entry;
 krb5_encrypt_block master_encblock;
 krb5_pointer master_random;
 char *str_master_princ;
@@ -230,12 +229,10 @@ check_princ(context, str_princ)
     char * str_princ;
 {
     krb5_error_code retval;
-    krb5_db_entry kdbe;
+    krb5_db_entry *kdbe = NULL;
     krb5_keyblock pwd_key, db_key;
     krb5_data pwd, salt;
     krb5_principal princ;
-    krb5_boolean more;
-    int nprincs = 1;
     /* char *str_mod_name; */
     char princ_name[4096];
 
@@ -267,22 +264,15 @@ check_princ(context, str_princ)
     }
     krb5_free_data_contents(context, &salt);
 
-    if ((retval = krb5_db_get_principal(context, princ, &kdbe,
-                                        &nprincs, &more))) {
+    if ((retval = krb5_db_get_principal(context, princ, 0, &kdbe))) {
         com_err(progname, retval, "while attempting to verify principal's existence");
         krb5_free_principal(context, princ);
         goto out;
     }
     krb5_free_principal(context, princ);
 
-    if (nprincs != 1) {
-        com_err(progname, 0, "Found %d entries db entry for %s.\n", nprincs,
-                princ_name);
-        goto errout;
-    }
-
     if ((retval = krb5_dbe_decrypt_key_data(context, &master_keyblock,
-                                            kdbe.key_data, &db_key, NULL))) {
+                                            kdbe->key_data, &db_key, NULL))) {
         com_err(progname, retval, "while decrypting key for '%s'", princ_name);
         goto errout;
     }
@@ -292,7 +282,7 @@ check_princ(context, str_princ)
         fprintf (stderr, "\tKey types do not agree (%d expected, %d from db)\n",
                  pwd_key.enctype, db_key.enctype);
     errout:
-        krb5_db_free_principal(context, &kdbe, nprincs);
+        krb5_db_free_principal(context, kdbe);
         return(-1);
     }
     else {
@@ -307,25 +297,25 @@ check_princ(context, str_princ)
     free(pwd_key.contents);
     free(db_key.contents);
 
-    if (kdbe.key_data[0].key_data_kvno != 1) {
+    if (kdbe->key_data[0].key_data_kvno != 1) {
         fprintf(stderr,"\tkvno did not match stored value for %s.\n", princ_name);
         goto errout;
     }
 
-    if (kdbe.max_life != mblock.max_life) {
+    if (kdbe->max_life != mblock.max_life) {
         fprintf(stderr, "\tmax life did not match stored value for %s.\n",
                 princ_name);
         goto errout;
     }
 
-    if (kdbe.max_renewable_life != mblock.max_rlife) {
+    if (kdbe->max_renewable_life != mblock.max_rlife) {
         fprintf(stderr,
                 "\tmax renewable life did not match stored value for %s.\n",
                 princ_name);
         goto errout;
     }
 
-    if (kdbe.expiration != mblock.expiration) {
+    if (kdbe->expiration != mblock.expiration) {
         fprintf(stderr, "\texpiration time did not match stored value for %s.\n",
                 princ_name);
         goto errout;
@@ -345,14 +335,14 @@ check_princ(context, str_princ)
   }
 */
 
-    if (kdbe.attributes != mblock.flags) {
+    if (kdbe->attributes != mblock.flags) {
         fprintf(stderr, "\tAttributes did not match stored value for %s.\n",
                 princ_name);
         goto errout;
     }
 
 out:
-    krb5_db_free_principal(context, &kdbe, nprincs);
+    krb5_db_free_principal(context, kdbe);
 
     return(0);
 }
@@ -364,11 +354,10 @@ set_dbname_help(context, pname, dbname)
     char *dbname;
 {
     krb5_error_code retval;
-    int nentries;
-    krb5_boolean more;
     krb5_data pwd, scratch;
     char *args[2];
     krb5_keylist_node *mkeys;
+    krb5_db_entry *master_entry;
 
     /* assemble & parse the master key name */
 
@@ -428,19 +417,9 @@ set_dbname_help(context, pname, dbname)
         return(1);
     }
     krb5_db_free_mkey_list(context, mkeys);
-    nentries = 1;
-    if ((retval = krb5_db_get_principal(context, master_princ, &master_entry,
-                                        &nentries, &more))) {
+    if ((retval = krb5_db_get_principal(context, master_princ, 0,
+                                        &master_entry))) {
         com_err(pname, retval, "while retrieving master entry");
-        (void) krb5_db_fini(context);
-        return(1);
-    } else if (more) {
-        com_err(pname, KRB5KDC_ERR_PRINCIPAL_NOT_UNIQUE,
-                "while retrieving master entry");
-        (void) krb5_db_fini(context);
-        return(1);
-    } else if (!nentries) {
-        com_err(pname, KRB5_KDB_NOENTRY, "while retrieving master entry");
         (void) krb5_db_fini(context);
         return(1);
     }
@@ -466,12 +445,12 @@ set_dbname_help(context, pname, dbname)
         (void) krb5_db_fini(context);
         return(1);
     }
-    mblock.max_life = master_entry.max_life;
-    mblock.max_rlife = master_entry.max_renewable_life;
-    mblock.expiration = master_entry.expiration;
+    mblock.max_life = master_entry->max_life;
+    mblock.max_rlife = master_entry->max_renewable_life;
+    mblock.expiration = master_entry->expiration;
     /* don't set flags, master has some extra restrictions */
-    mblock.mkvno = master_entry.key_data[0].key_data_kvno;
+    mblock.mkvno = master_entry->key_data[0].key_data_kvno;
 
-    krb5_db_free_principal(context, &master_entry, nentries);
+    krb5_db_free_principal(context, master_entry);
     return 0;
 }

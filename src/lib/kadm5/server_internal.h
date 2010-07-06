@@ -77,8 +77,8 @@ krb5_error_code     kdb_get_hist_key(kadm5_server_handle_t handle,
                                      krb5_keyblock *hist_keyblock,
                                      krb5_kvno *hist_kvno);
 krb5_error_code     kdb_get_entry(kadm5_server_handle_t handle,
-                                  krb5_principal principal, krb5_db_entry *kdb,
-                                  osa_princ_ent_rec *adb);
+                                  krb5_principal principal,
+                                  krb5_db_entry **kdb, osa_princ_ent_rec *adb);
 krb5_error_code     kdb_free_entry(kadm5_server_handle_t handle,
                                    krb5_db_entry *kdb, osa_princ_ent_rec *adb);
 krb5_error_code     kdb_put_entry(kadm5_server_handle_t handle,

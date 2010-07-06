@@ -108,11 +108,10 @@ int process_ov_principal(fname, kcontext, filep, verbose, linenop)
     krb5_error_code         ret;
     krb5_tl_data            tl_data;
     krb5_principal          princ;
-    krb5_db_entry           kdb;
+    krb5_db_entry           *kdb = NULL;
     char                    *current = 0;
     char                    *cp;
-    int                     x, one;
-    krb5_boolean            more;
+    int                     x;
     char                    line[LINESIZE];
 
     if (fgets(line, LINESIZE, filep) == (char *) NULL) {
@@ -187,16 +186,15 @@ int process_ov_principal(fname, kcontext, filep, verbose, linenop)
     tl_data.tl_data_length = xdr_getpos(&xdrs);
     tl_data.tl_data_contents = (krb5_octet *) xdralloc_getdata(&xdrs);
 
-    one = 1;
-    ret = krb5_db_get_principal(kcontext, princ, &kdb, &one, &more);
+    ret = krb5_db_get_principal(kcontext, princ, 0, &kdb);
     if (ret)
         goto done;
 
-    ret = krb5_dbe_update_tl_data(kcontext, &kdb, &tl_data);
+    ret = krb5_dbe_update_tl_data(kcontext, kdb, &tl_data);
     if (ret)
         goto done;
 
-    ret = krb5_db_put_principal(kcontext, &kdb, &one);
+    ret = krb5_db_put_principal(kcontext, kdb);
     if (ret)
         goto done;
 
@@ -208,5 +206,6 @@ done:
     free(current);
     krb5_free_principal(kcontext, princ);
     osa_free_princ_ent(rec);
+    krb5_db_free_principal(kcontext, kdb);
     return ret;
 }

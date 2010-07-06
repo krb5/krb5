@@ -2345,7 +2345,6 @@ kdb_ldap_create_principal(krb5_context context, krb5_principal princ,
     unsigned char    *curr=NULL;
     krb5_tl_data     *tl_data=NULL;
     krb5_db_entry    entry;
-    int              nentry=1;
     long             mask = 0;
     krb5_keyblock    key;
     int              kvno = 0;
@@ -2497,7 +2496,7 @@ kdb_ldap_create_principal(krb5_context context, krb5_principal princ,
         break;
     } /* end of switch */
 
-    retval = krb5_ldap_put_principal(context, &entry, &nentry, NULL);
+    retval = krb5_ldap_put_principal(context, &entry, NULL);
     if (retval) {
         com_err(NULL, retval, "while adding entries to database");
         goto cleanup;

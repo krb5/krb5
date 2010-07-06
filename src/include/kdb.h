@@ -425,23 +425,13 @@ krb5_error_code krb5_db_lock ( krb5_context kcontext, int lock_mode );
 krb5_error_code krb5_db_unlock ( krb5_context kcontext );
 krb5_error_code krb5_db_get_principal ( krb5_context kcontext,
                                         krb5_const_principal search_for,
-                                        krb5_db_entry *entries,
-                                        int *nentries,
-                                        krb5_boolean *more );
-krb5_error_code krb5_db_get_principal_ext ( krb5_context kcontext,
-                                            krb5_const_principal search_for,
-                                            unsigned int flags,
-                                            krb5_db_entry *entries,
-                                            int *nentries,
-                                            krb5_boolean *more );
-void krb5_db_free_principal ( krb5_context kcontext, krb5_db_entry *entry,
-                              int count );
+                                        unsigned int flags,
+                                        krb5_db_entry **entry );
+void krb5_db_free_principal ( krb5_context kcontext, krb5_db_entry *entry );
 krb5_error_code krb5_db_put_principal ( krb5_context kcontext,
-                                        krb5_db_entry *entries,
-                                        int *nentries);
+                                        krb5_db_entry *entry );
 krb5_error_code krb5_db_delete_principal ( krb5_context kcontext,
-                                           krb5_principal search_for,
-                                           int *nentries );
+                                           krb5_principal search_for );
 krb5_error_code krb5_db_iterate ( krb5_context kcontext,
                                   char *match_entry,
                                   int (*func) (krb5_pointer, krb5_db_entry *),
@@ -740,8 +730,7 @@ krb5_db_create_policy( krb5_context kcontext,
 krb5_error_code
 krb5_db_get_policy ( krb5_context kcontext,
                      char *name,
-                     osa_policy_ent_t *policy,
-                     int *nentries);
+                     osa_policy_ent_t *policy );
 
 krb5_error_code
 krb5_db_put_policy( krb5_context kcontext,
@@ -916,16 +905,8 @@ typedef struct _kdb_vftabl {
     krb5_error_code (*unlock)(krb5_context kcontext);
 
     /*
-     * Mandatory: Fill in *entries with the entry for the principal search_for.
-     * The module must allocate each entry field separately, as callers may
-     * free individual fields using db_free.  If the principal is not found,
-     * set *nentries to 0 and return success.
-     *
-     * The nentries and more arguments appear to be intended to account for
-     * multiple entries for a principal, but this functionality is neither
-     * implemented nor used.  *nentries is set to 1 by all callers and should
-     * be set to 0 or 1 on return; *more sould be set to FALSE on return.
-     * Callers will typically error out if modules behave otherwise.
+     * Mandatory: Set *entry to an allocated entry for the principal
+     * search_for.  If the principal is not found, return KRB5_KDB_NOENTRY.
      *
      * The meaning of flags are as follows (some of these may be processed by
      * db_invoke methods such as KRB5_KDB_METHOD_SIGN_AUTH_DATA rather than by
@@ -980,23 +961,19 @@ typedef struct _kdb_vftabl {
     krb5_error_code (*get_principal)(krb5_context kcontext,
                                      krb5_const_principal search_for,
                                      unsigned int flags,
-                                     krb5_db_entry *entries, int *nentries,
-                                     krb5_boolean *more);
+                                     krb5_db_entry **entry);
 
     /*
-     * Mandatory: Free the memory associated with principal entries.  Do not
-     * free entry itself.  All callers ignore the return value.  Entries may
-     * have been constructed by the caller (using the db_alloc function to
-     * allocate associated memory); thus, a plugin must allocate each field
-     * of a principal entry separately.
+     * Mandatory: Free a database entry.  The entry may have been constructed
+     * by the caller (using the db_alloc function to allocate associated
+     * memory); thus, a plugin must allocate each field of a principal entry
+     * separately.
      */
-    void (*free_principal)(krb5_context kcontext, krb5_db_entry *entry,
-                           int count);
+    void (*free_principal)(krb5_context kcontext, krb5_db_entry *entry);
 
     /*
-     * Optional: Create or modify one or more principal entries.  All callers
-     * operate on a single entry.  db_args communicates command-line arguments
-     * for module-specific flags.
+     * Optional: Create or modify a principal entry.  db_args communicates
+     * command-line arguments for module-specific flags.
      *
      * The mask field of an entry indicates the changed fields.  Mask values
      * are defined in kadmin's admin.h header.  If KADM5_PRINCIPAL is set in
@@ -1006,17 +983,14 @@ typedef struct _kdb_vftabl {
      * ignore the mask and update the entire entry.
      */
     krb5_error_code (*put_principal)(krb5_context kcontext,
-                                     krb5_db_entry *entries, int *nentries,
-                                     char **db_args);
+                                     krb5_db_entry *entry, char **db_args);
 
     /*
      * Optional: Delete the entry for the principal search_for.  If the
-     * principal does not exist, set *nentries to 0 and return success; if it
-     * did exist, set *nentries to 1.
+     * principal did not exist, return KRB5_KDB_NOENTRY.
      */
     krb5_error_code (*delete_principal)(krb5_context kcontext,
-                                        krb5_const_principal search_for,
-                                        int *nentries);
+                                        krb5_const_principal search_for);
 
     /*
      * Optional: For each principal entry in the database, invoke func with the
@@ -1037,14 +1011,11 @@ typedef struct _kdb_vftabl {
                                      osa_policy_ent_t policy);
 
     /*
-     * Optional: If a password policy entry exists with the name name, allocate
-     * a policy entry in *policy, fill it in with the policy information, and
-     * set *cnt to 1.  If the entry does not exist, set *cnt to 0 and return
-     * success, or return an error (existing module implementations are not
-     * consistent).
+     * Optional: Set *policy to the policy entry of the specified name.  If the
+     * entry does not exist, return KRB5_KDB_NOENTRY.
      */
     krb5_error_code (*get_policy)(krb5_context kcontext, char *name,
-                                  osa_policy_ent_t *policy, int *cnt);
+                                  osa_policy_ent_t *policy);
 
     /*
      * Optional: Modify an existing password policy entry to match the values
