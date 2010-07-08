@@ -6,22 +6,12 @@
 #include <string.h>
 #include "plugin_loader.h"
 
-void
-get_loader_content (loader_handle handle, const char* container[])
+krb5_error_code
+plugin_loader_create_api (loader_handle handle, const char* plugin_name, plhandle *pl_handle)
 {
     plugin_loader* loader = (plugin_loader*) handle.api;
     if (loader != NULL) {
-        return loader->get_loader_content(container);
+        *pl_handle = loader->create_api(plugin_name);
     }
-    return;
-}
-
-plhandle
-create_api (loader_handle handle, const char* plugin_name)
-{
-    plugin_loader* loader = (plugin_loader*) handle.api;
-    if (loader != NULL) {
-        return loader->create_api(plugin_name);
-    }
-    return;
+    return 0;
 }

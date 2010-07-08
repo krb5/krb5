@@ -5,7 +5,7 @@
 #include "plugin_manager.h"
 #include <k5-int.h>
 
-int
+krb5_error_code
 plugin_manager_configure(plugin_manager* instance,const char* path)
 {
     if (instance != NULL) {
@@ -14,22 +14,26 @@ plugin_manager_configure(plugin_manager* instance,const char* path)
     return 0;
 }
 
-void plugin_manager_start(plugin_manager* instance)
+krb5_error_code
+plugin_manager_start(plugin_manager* instance)
 {
     if (instance != NULL) {
         instance->start(instance->data);
     }
+    return 0;
 }
 
-void plugin_manager_stop(plugin_manager* instance)
+krb5_error_code
+plugin_manager_stop(plugin_manager* instance)
 {
     if (instance != NULL) {
         instance->stop(instance->data);
     }
+    return 0;
 }
 
-plhandle
-plugin_manager_get_service(plugin_manager* instance, const char* service_name, const int pl_id)
+krb5_error_code
+plugin_manager_get_service(plugin_manager* instance, const char* service_name, const char *pl_id, plhandle *pl_handle)
 {
     plhandle handle;
     if (instance != NULL) {
@@ -37,5 +41,6 @@ plugin_manager_get_service(plugin_manager* instance, const char* service_name, c
     } else {
         handle.api = NULL;
     }
-    return handle;
+    *pl_handle = handle;
+    return 0;
 }

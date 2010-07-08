@@ -17,8 +17,6 @@ static plugin_loader* _default_loader_instance = NULL;
 static plugin_descr  plugin_default_loader_table[] = {
         {"plugin_pwd_qlty_X",   plugin_pwd_qlty_X_create},
         {"plugin_pwd_qlty_krb", plugin_pwd_qlty_krb_create},
-        {"plugin_encrypted_challenge_pa", plugin_encrypted_challenge_pa_create},
-        {"plugin_ldap_audit", NULL},
         {NULL,NULL}
 };
 

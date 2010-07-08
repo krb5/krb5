@@ -44,10 +44,6 @@ adb_policy_close(kadm5_server_handle_t handle)
 /* some of this is stolen from gatekeeper ... */
 /* passwd_check -  returns KADM5_OK if password passes the validation.*/
 
-#define PWD_QLTY_KRB 0
-#define PWD_QLTY_X 1
-#define PWD_QLTY_DYN 33
-
 kadm5_ret_t
 passwd_check(kadm5_server_handle_t srv_handle,
              char *password, int use_policy, kadm5_policy_ent_t pol,
@@ -59,20 +55,20 @@ passwd_check(kadm5_server_handle_t srv_handle,
     if (srv_handle != NULL && srv_handle->context != NULL &&
         srv_handle->context->pl_manager != NULL ){
 
-        plugin_handle = plugin_manager_get_service(srv_handle->context->pl_manager,
-                                                   "plugin_pwd_qlty", PWD_QLTY_KRB);
+        ret = plugin_manager_get_service(srv_handle->context->pl_manager,
+                                                   "plugin_pwd_qlty", PWD_QLTY_KRB, &plugin_handle);
 
         ret = plugin_pwd_qlty_check(plugin_handle,
                                     srv_handle, password, use_policy, pol, principal);
 
-        plugin_handle = plugin_manager_get_service(srv_handle->context->pl_manager,
-                                                   "plugin_pwd_qlty", PWD_QLTY_X);
+        ret = plugin_manager_get_service(srv_handle->context->pl_manager,
+                                                   "plugin_pwd_qlty", PWD_QLTY_X, &plugin_handle);
 
         ret = plugin_pwd_qlty_check(plugin_handle,
                                     srv_handle, password, use_policy, pol, principal);
 
-        plugin_handle = plugin_manager_get_service(srv_handle->context->pl_manager,
-                                                   "plugin_pwd_qlty", PWD_QLTY_DYN);
+        ret = plugin_manager_get_service(srv_handle->context->pl_manager,
+                                                   "plugin_pwd_qlty", PWD_QLTY_DYN, &plugin_handle);
 
         ret = plugin_pwd_qlty_check(plugin_handle,
                                     srv_handle, password, use_policy, pol, principal);

@@ -157,15 +157,19 @@ _plugin_pwd_qlty_clean()
 plhandle
 plugin_pwd_qlty_krb_create()
 {
-        plhandle handle;
-        plugin_pwd_qlty* api = malloc(sizeof(plugin_pwd_qlty));
+    plhandle handle;
+    plugin_pwd_qlty* api = malloc(sizeof(plugin_pwd_qlty));
 
-        memset(api, 0, sizeof(plugin_pwd_qlty));
-        api->version = 1;
-        api->pwd_qlty_init    = _plugin_pwd_qlty_init;
-        api->pwd_qlty_check   = _plugin_pwd_qlty_check;
-        api->pwd_qlty_cleanup = _plugin_pwd_qlty_clean;
-        handle.api = api;
+    memset(&handle, 0, sizeof(handle));
+    strncpy(handle.plugin_name, PWD_QLTY_KRB, PWD_QLTY_KRB_LEN);
 
-        return handle;
+    memset(api, 0, sizeof(plugin_pwd_qlty));
+    api->version = 1;
+    strncpy(api->plugin_id, PWD_QLTY_KRB, PWD_QLTY_KRB_LEN);
+    api->pwd_qlty_init    = _plugin_pwd_qlty_init;
+    api->pwd_qlty_check   = _plugin_pwd_qlty_check;
+    api->pwd_qlty_cleanup = _plugin_pwd_qlty_clean;
+    handle.api = api;
+
+    return handle;
 }

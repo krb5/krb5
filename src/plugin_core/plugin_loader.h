@@ -27,8 +27,6 @@ typedef struct {
 	plhandle (*create_api)(const char*);
 } plugin_loader;
 
-/* Utility functions */
-void get_loader_content(loader_handle handle, const char* container[]);
-plhandle create_api(loader_handle handle, const char* plugin_name);
+krb5_error_code plugin_loader_create_api(loader_handle handle, const char* plugin_name, plhandle *);
 
 #endif /* PLUGIN_LOADER_H_ */

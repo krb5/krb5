@@ -1,9 +1,8 @@
-get_loader_content
 plugin_manager_configure
 plugin_manager_get_service
 plugin_manager_start
 plugin_manager_stop
-create_api
+plugin_loader_create_api
 krb5_plugin_iterator_create
 krb5_plugin_iterator
 krb5_plugin_iterator_free

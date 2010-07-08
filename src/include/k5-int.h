@@ -1426,8 +1426,9 @@ typedef struct _kdb5_dal_handle kdb5_dal_handle;
 struct _kdb_log_context;
 
 /* Plugin API ----  PLUGIN HANDLE */
+#define MAX_PL_NAME_LEN 64
 typedef struct _plhandle{
-    int plugin_id;
+    char plugin_name[MAX_PL_NAME_LEN];
     void *api;
     struct _plhandle *next;
 } plhandle;
@@ -1454,7 +1455,7 @@ typedef struct {
         void (*configure)(manager_data *  data, const char*);
         void (*start)(manager_data * data);
         void (*stop)(manager_data * data);
-        plhandle (*getService)(manager_data * data, const char*, const int pl_id);
+        plhandle (*getService)(manager_data * data, const char*, const char pl_id[MAX_PL_NAME_LEN]);
 } plugin_manager;
 
 /* Plugin API ----  PLUGIN HANDLE ----- END*/

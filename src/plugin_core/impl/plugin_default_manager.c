@@ -122,7 +122,7 @@ _search_registry (registry_data* data, const char* api_name)
 }
 
 static plhandle
-_create_api(const char* plugin_name, const char* plugin_id,
+_create_api(const char* plugin_name,
             const char* loader_name, const char* loader_type, const char* loader_path
             /*, config_node* properties*/)
 {
@@ -131,8 +131,7 @@ _create_api(const char* plugin_name, const char* plugin_id,
 #ifdef DEBUG_PLUGINS
     printf("plugins:  _create_api\n");
 #endif
-    p_handle = create_api(f_handle, plugin_name);
-    p_handle.plugin_id = atoi(plugin_id);
+    plugin_loader_create_api(f_handle, plugin_name, &p_handle);
 
     return(p_handle);
 }
@@ -181,7 +180,7 @@ _register_api(registry_data* data, const char* api_name,
         next = (plhandle*) malloc(sizeof(plhandle));
         memset(next, 0, sizeof(plhandle));
         next->api = handle.api;
-        next->plugin_id = handle.plugin_id;
+        strncpy(next->plugin_name, handle.plugin_name, strlen(handle.plugin_name));
         if(entry->first == NULL) {
             entry->first = next;
             entry->last = next;
@@ -207,7 +206,6 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
     const char* loader_path = NULL;
     const char* plugin_name = NULL;
     const char* plugin_type = NULL;
-    const char* plugin_id = NULL;
     plhandle handle;
     int ret = API_REGISTER_FAILED;
 
@@ -227,8 +225,6 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
                     loader_path = q->node_value.str_value;
                 } else if(strcmp(q->node_name, "plugin_name") == 0) {
                     plugin_name = q->node_value.str_value;
-                } else if(strcmp(q->node_name, "plugin_id") == 0) {
-                    plugin_id = q->node_value.str_value;
                 }
 
             }
@@ -244,11 +240,10 @@ _configure_plugin_yaml(manager_data* mdata, config_node* plugin_node)
     printf("plugin_name=%s\n", plugin_name);
     printf("plugin_type=%s\n", plugin_type);
     printf("plugin_path=%s\n", plugin_path);
-    printf("plugin_id=%s\n", plugin_id);
     printf("**End**\n");
 #endif
 
-    handle = _create_api(plugin_name, plugin_id,
+    handle = _create_api(plugin_name,
                          loader_name, loader_type, loader_path /*, properties*/);
     if(handle.api != NULL) {
         ret = _register_api(mdata->registry,plugin_api, plugin_type, handle);
@@ -302,26 +297,18 @@ _configure_krb5(manager_data* data, const char* path)
 {
     manager_data* mdata = (manager_data*) data;
     krb5_error_code retval;
-    char *plugin;
     void *iter;
     int i = 0;
     profile_filespec_t *files = NULL;
     profile_t profile;
     const char  *hierarchy[4];
-    char **loader_name, **loader_type, **loader_path, **plugin_name, **plugin_type;
-    char** plugin_id;
+    char **loader_name, **loader_type, **loader_path, **plugin_name, **plugin_type, **plugin_version;
     char** plugin_api;
     char *f_path = NULL;
     plhandle handle;
     char **pl_list, *pl_l;
 
     retval = krb5_get_default_config_files(&files);
-#if 0
-    if (files)
-        free_filespecs(files);
-    if (retval)
-        ctx->profile = 0;
-#endif
 
     if (retval == ENOENT)
         return; // KRB5_CONFIG_CANTOPEN;
@@ -344,16 +331,6 @@ _configure_krb5(manager_data* data, const char* path)
         return;
     }
 
-#if 0
-    while (iter && pl_list[i]) {
-        if ((retval = krb5_plugin_iterator(profile, &iter, &plugin))) {
-            com_err("krb5_PLUGIN_iterator", retval, 0);
-            krb5_plugin_iterator_free(profile, &iter);
-            return;
-        }
-        if (plugin) {
-#endif
-
     i=0;
     while ((pl_l = pl_list[i++])){
 
@@ -362,7 +339,6 @@ _configure_krb5(manager_data* data, const char* path)
 #endif
         hierarchy[0] = "plugins";
         hierarchy[1] = pl_l;
-        //hierarchy[1] = plugin;
 
         /* plugin_name */
         hierarchy[2] = "plugin_api";
@@ -379,10 +355,10 @@ _configure_krb5(manager_data* data, const char* path)
         hierarchy[3] = 0;
         retval = profile_get_values(profile, hierarchy, &plugin_type);
 
-        /* plugin_id */
-        hierarchy[2] = "plugin_id";
+        /* plugin_version */
+        hierarchy[2] = "plugin_version";
         hierarchy[3] = 0;
-        retval = profile_get_values(profile, hierarchy, &plugin_id);
+        retval = profile_get_values(profile, hierarchy, &plugin_version);
 
         /* loader_name */
         hierarchy[2] = "plugin_loader_name";
@@ -405,18 +381,17 @@ _configure_krb5(manager_data* data, const char* path)
 
 
 #ifdef DEBUG_PLUGINS
-        printf("ZH plugins:  >>>\n");
+        printf("plugins:  >>>\n");
         printf("api=%s\n", *plugin_api);
         printf("loader=%s\n", *loader_name);
         printf("loader_type=%s\n", *loader_type);
         if (f_path) printf("loader_path=%s\n", f_path);
         printf("plugin_name=%s\n", *plugin_name);
         printf("plugin_type=%s\n",*plugin_type);
-        printf("plugin_id=%s\n", *plugin_id);
         printf("<<< plugins\n");
 #endif
 
-        handle = _create_api(*plugin_name, *plugin_id,
+        handle = _create_api(*plugin_name,
                              *loader_name, *loader_type, f_path /*, properties*/);
         if(handle.api != NULL) {
             retval = _register_api(mdata->registry,*plugin_api, *plugin_type, handle);
@@ -456,7 +431,7 @@ _stop(manager_data* data)
 }
 
 static plhandle
-_getService(manager_data* data, const char* service_name, int plugin_id)
+_getService(manager_data* data, const char* service_name, const char* plugin_name)
 {
     plhandle *handle;
     manager_data* mdata = (manager_data*) data;
@@ -465,12 +440,12 @@ _getService(manager_data* data, const char* service_name, int plugin_id)
     memset(&handle, 0, sizeof handle);
     if(entry) {
         for(handle = entry->first; handle != NULL; handle = handle->next) {
-            if (handle->plugin_id == plugin_id)
+            if (!strncmp(handle->plugin_name, plugin_name, strlen(plugin_name)))
                 break;
         }
         if (handle == NULL) {
 #ifdef DEBUG_PLUGINS
-            printf("service %s:%d is not registered \n", service_name, plugin_id);
+            printf("service %s:%s is not registered \n", service_name, plugin_name);
 #endif
         }
 
@@ -493,7 +468,7 @@ _init_data()
     return data;
 }
 
-plugin_manager*
+krb5_error_code
 plugin_default_manager_get_instance(plugin_manager** plugin_mngr_instance)
 {
     plugin_manager* instance = NULL;
@@ -519,5 +494,5 @@ plugin_default_manager_get_instance(plugin_manager** plugin_mngr_instance)
         instance->getService = _getService;
         *plugin_mngr_instance = instance;
     }
-    return (*plugin_mngr_instance);
+    return 0;
 }

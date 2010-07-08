@@ -8,6 +8,6 @@
 
 #include <plugin_manager.h>
 
-plugin_manager* plugin_default_manager_get_instance(plugin_manager** plugin_mngr_instance);
+krb5_error_code plugin_default_manager_get_instance(plugin_manager** plugin_mngr_instance);
 
 #endif /* PLUGIN_DEFAULT_MANAGER_H_ */
