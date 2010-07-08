@@ -130,6 +130,8 @@
 #define KRB5_KDB_FLAG_USER_TO_USER              0x00000800
 /* Cross-realm */
 #define KRB5_KDB_FLAG_CROSS_REALM               0x00001000
+/* Allow in-realm aliases */
+#define KRB5_KDB_FLAG_ALIAS_OK                  0x00002000
 
 #define KRB5_KDB_FLAGS_S4U                      ( KRB5_KDB_FLAG_PROTOCOL_TRANSITION | \
                                                   KRB5_KDB_FLAG_CONSTRAINED_DELEGATION )
@@ -913,19 +915,17 @@ typedef struct _kdb_vftabl {
      * db_get_principal):
      *
      * KRB5_KDB_FLAG_CANONICALIZE: Set by the KDC when looking up entries for
-     *     an AS or TGS request with canonicalization requested.  Affects
-     *     whether the module should return out-of-realm referrals and aliases
-     *     (see below).
+     *     an AS or TGS request with canonicalization requested.  Determines
+     *     whether the module should return out-of-realm referrals.
      *
-     * KRB5_KDB_INCLUDE_PAC: Set by the KDC during an AS request when the
+     * KRB5_KDB_FLAG_INCLUDE_PAC: Set by the KDC during an AS request when the
      *     client requested PAC information during padata, and during most TGS
      *     requests.  Indicates that the module should include PAC information
      *     when generating authorization data.
      *
      * KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY: Set by the KDC when looking up the
      *     client entry in an AS request.  Affects how the module should return
-     *     out-of-realm referrals and whether the module should return in-realm
-     *     aliases (see below).
+     *     out-of-realm referrals.
      *
      * KRB5_KDB_FLAG_MAP_PRINCIPALS: Set by the KDC when looking up the client
      *     entry during TGS requests, except for S4U TGS requests and requests
@@ -946,10 +946,14 @@ typedef struct _kdb_vftabl {
      *     during a TGS request, if the client principal is not part of the
      *     realm being served.
      *
-     * A module can return in-realm aliases if KRB5_KDB_FLAG_CANONICALIZE is
-     * set, or if KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY is not set (because
-     * aliases are always okay for TGS requests).  To return an in-realm alias,
-     * fill in a different value for entries->princ than the one requested.
+     * KRB5_KDB_FLAG_ALIAS_OK: Set by the KDC for server principal lookups and
+     *     for AS request client principal lookups with canonicalization
+     *     requested; also set by the admin interface.  Determines whether the
+     *     module should return in-realm aliases.
+     *
+     * A module can return in-realm aliases if KRB5_KDB_FLAG_ALIAS_OK is set.
+     * To return an in-realm alias, fill in a different value for
+     * entries->princ than the one requested.
      *
      * A module can return out-of-realm referrals if KRB5_KDB_FLAG_CANONICALIZE
      * is set.  For AS request clients (KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY is

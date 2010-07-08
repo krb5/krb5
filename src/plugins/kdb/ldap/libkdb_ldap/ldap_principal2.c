@@ -70,30 +70,6 @@ berval2tl_data(struct berval *in, krb5_tl_data **out)
     return 0;
 }
 
-/* Return true if it's okay to return aliases according to flags. */
-static krb5_boolean
-aliases_ok(unsigned int flags)
-{
-    /*
-     * The current DAL does not have a flag to indicate whether
-     * aliases are okay.  For service name lookups (AS or TGT path),
-     * we can always return aliases.  For client name lookups, we can
-     * only return aliases if the client passed the canonicalize flag.
-     * We abuse the CLIENT_REFERRALS_ONLY flag to detect client name
-     * lookups.
-     *
-     * This method has the side effect of permitting aliases for
-     * lookups by administrative interfaces (e.g. kadmin).  Since we
-     * don't have explicit admin support for aliases yet, this is
-     * okay.
-     */
-    if (!(flags & KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY))
-        return TRUE;
-    if (flags & KRB5_KDB_FLAG_CANONICALIZE)
-        return TRUE;
-    return FALSE;
-}
-
 /*
  * look up a principal in the directory.
  */
@@ -178,7 +154,7 @@ krb5_ldap_get_principal(krb5_context context, krb5_const_principal searchfor,
             if ((values=ldap_get_values(ld, ent, "krbcanonicalname")) != NULL) {
                 if (values[0] && strcmp(values[0], user) != 0) {
                     /* We matched an alias, not the canonical name. */
-                    if (aliases_ok(flags)) {
+                    if (flags & KRB5_KDB_FLAG_ALIAS_OK) {
                         st = krb5_ldap_parse_principal_name(values[0], &cname);
                         if (st != 0)
                             goto cleanup;

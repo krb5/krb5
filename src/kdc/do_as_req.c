@@ -195,6 +195,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         krb5_princ_type(kdc_context,
                         request->client) == KRB5_NT_ENTERPRISE_PRINCIPAL) {
         setflag(c_flags, KRB5_KDB_FLAG_CANONICALIZE);
+        setflag(c_flags, KRB5_KDB_FLAG_ALIAS_OK);
     }
     if (include_pac_p(kdc_context, request)) {
         setflag(c_flags, KRB5_KDB_FLAG_INCLUDE_PAC);
@@ -237,6 +238,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
 #endif
 
     s_flags = 0;
+    setflag(s_flags, KRB5_KDB_FLAG_ALIAS_OK);
     if (isflagset(request->kdc_options, KDC_OPT_CANONICALIZE)) {
         setflag(s_flags, KRB5_KDB_FLAG_CANONICALIZE);
     }
