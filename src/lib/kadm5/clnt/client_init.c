@@ -391,12 +391,10 @@ get_init_creds(kadm5_server_handle_t handle, char *client_name,
                unsigned int full_svcname_len)
 {
     kadm5_ret_t code;
-    krb5_principal client;
-    krb5_ccache ccache;
+    krb5_principal client = NULL;
+    krb5_ccache ccache = NULL;
     char svcname[BUFSIZ];
 
-    client = NULL;
-    ccache = NULL;
     /* NULL svcname means use host-based. */
     if (svcname_in == NULL) {
         code = kadm5_get_admin_service_name(handle->context,
@@ -463,6 +461,7 @@ get_init_creds(kadm5_server_handle_t handle, char *client_name,
         code = KADM5_SECURE_PRINC_MISSING;
 
 error:
+    krb5_free_principal(handle->context, client);
     if (ccache != NULL && init_type != INIT_CREDS)
         krb5_cc_close(handle->context, ccache);
     return code;
