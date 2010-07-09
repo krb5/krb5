@@ -191,6 +191,7 @@ osa_adb_get_policy(osa_adb_policy_t db, char *name,
     char                *aligned_data = NULL;
     osa_policy_ent_t    entry = NULL;
 
+    *entry_ptr = NULL;
     OPENLOCK(db, KRB5_DB_LOCKMODE_SHARED);
 
     if(name == NULL) {
