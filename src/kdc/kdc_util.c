@@ -2267,37 +2267,16 @@ kdc_check_transited_list(krb5_context context,
                          const krb5_data *realm2)
 {
     krb5_error_code             code;
-    kdb_check_transited_realms_req      req;
-    krb5_data                   req_data;
-    krb5_data                   rep_data;
 
-    /* First check using krb5.conf */
+    /* Check using krb5.conf */
     code = krb5_check_transited_list(kdc_context, trans, realm1, realm2);
     if (code)
         return code;
 
-    memset(&req, 0, sizeof(req));
-
-    req.tr_contents             = trans;
-    req.client_realm            = realm1;
-    req.server_realm            = realm2;
-
-    req_data.data = (void *)&req;
-    req_data.length = sizeof(req);
-
-    rep_data.data = NULL;
-    rep_data.length = 0;
-
-    code = krb5_db_invoke(context,
-                          KRB5_KDB_METHOD_CHECK_TRANSITED_REALMS,
-                          &req_data,
-                          &rep_data);
-    if (code == KRB5_PLUGIN_OP_NOTSUPP) {
+    /* Check against the KDB module. */
+    code = krb5_db_check_transited_realms(context, trans, realm1, realm2);
+    if (code == KRB5_PLUGIN_OP_NOTSUPP)
         code = 0;
-    }
-
-    assert(rep_data.length == 0);
-
     return code;
 }
 

@@ -2247,6 +2247,24 @@ krb5_db_sign_authdata(krb5_context kcontext, unsigned int flags,
 }
 
 krb5_error_code
+krb5_db_check_transited_realms(krb5_context kcontext,
+                               const krb5_data *tr_contents,
+                               const krb5_data *client_realm,
+                               const krb5_data *server_realm)
+{
+    krb5_error_code status;
+    kdb_vftabl *v;
+
+    status = get_vftabl(kcontext, &v);
+    if (status)
+        return status;
+    if (v->check_transited_realms == NULL)
+        return KRB5_PLUGIN_OP_NOTSUPP;
+    return v->check_transited_realms(kcontext, tr_contents, client_realm,
+                                     server_realm);
+}
+
+krb5_error_code
 krb5_db_invoke(krb5_context kcontext,
                unsigned int method,
                const krb5_data *req,

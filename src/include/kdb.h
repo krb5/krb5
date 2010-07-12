@@ -323,20 +323,12 @@ extern char *krb5_mkey_pwd_prompt2;
 #define KRB5_DB_LOCKMODE_PERMANENT    0x0008
 
 /* db_invoke methods */
-#define KRB5_KDB_METHOD_CHECK_TRANSITED_REALMS          0x00000020
 #define KRB5_KDB_METHOD_CHECK_POLICY_AS                 0x00000030
 #define KRB5_KDB_METHOD_CHECK_POLICY_TGS                0x00000040
 #define KRB5_KDB_METHOD_AUDIT_AS                        0x00000050
 #define KRB5_KDB_METHOD_AUDIT_TGS                       0x00000060
 #define KRB5_KDB_METHOD_REFRESH_POLICY                  0x00000070
 #define KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE       0x00000080
-
-typedef struct _kdb_check_transited_realms_req {
-    krb5_magic magic;
-    const krb5_data *tr_contents;
-    const krb5_data *client_realm;
-    const krb5_data *server_realm;
-} kdb_check_transited_realms_req;
 
 typedef struct _kdb_check_policy_as_req {
     krb5_magic magic;
@@ -651,6 +643,11 @@ krb5_error_code krb5_db_sign_authdata(krb5_context kcontext,
                                       krb5_timestamp authtime,
                                       krb5_authdata **tgt_auth_data,
                                       krb5_authdata ***signed_auth_data);
+
+krb5_error_code krb5_db_check_transited_realms(krb5_context kcontext,
+                                               const krb5_data *tr_contents,
+                                               const krb5_data *client_realm,
+                                               const krb5_data *server_realm);
 
 krb5_error_code krb5_db_invoke ( krb5_context kcontext,
                                  unsigned int method,
@@ -1256,15 +1253,19 @@ typedef struct _kdb_vftabl {
                                      krb5_authdata ***signed_auth_data);
 
     /*
+     * Optional: Perform a policy check on a cross-realm ticket's transited
+     * field and return an error (other than KRB5_PLUGIN_OP_NOTSUPP) if the
+     * check fails.
+     */
+    krb5_error_code (*check_transited_realms)(krb5_context kcontext,
+                                              const krb5_data *tr_contents,
+                                              const krb5_data *client_realm,
+                                              const krb5_data *server_realm);
+
+    /*
      * Optional: Perform an operation on input data req with output stored in
      * rep.  Return KRB5_PLUGIN_OP_NOTSUPP if the module does not implement the
      * method.  Defined methods are:
-     *
-     *
-     * KRB5_KDB_METHOD_CHECK_TRANSITED_REALMS: req contains a
-     *     kdb_check_transited_realms_req structure.  Perform a policy check on
-     *     a cross-realm ticket's transited field and return an error (other
-     *     than KRB5_PLUGIN_OP_NOTSUPP) if the check fails.  Leave rep alone.
      *
      * KRB5_KDB_METHOD_CHECK_POLICY_AS: req contains a kdb_check_policy_as_req
      *     structure.  Perform a policy check on an AS request, in addition to
