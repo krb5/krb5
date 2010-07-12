@@ -2223,6 +2223,30 @@ krb5_db_set_context(krb5_context context, void *db_context)
 }
 
 krb5_error_code
+krb5_db_sign_authdata(krb5_context kcontext, unsigned int flags,
+                      krb5_const_principal client_princ, krb5_db_entry *client,
+                      krb5_db_entry *server, krb5_db_entry *krbtgt,
+                      krb5_keyblock *client_key, krb5_keyblock *server_key,
+                      krb5_keyblock *krbtgt_key, krb5_keyblock *session_key,
+                      krb5_timestamp authtime, krb5_authdata **tgt_auth_data,
+                      krb5_authdata ***signed_auth_data)
+{
+    krb5_error_code status = 0;
+    kdb_vftabl *v;
+
+    *signed_auth_data = NULL;
+    status = get_vftabl(kcontext, &v);
+    if (status)
+        return status;
+    if (v->sign_authdata == NULL)
+        return KRB5_PLUGIN_OP_NOTSUPP;
+    return v->sign_authdata(kcontext, flags, client_princ, client, server,
+                            krbtgt, client_key, server_key, krbtgt_key,
+                            session_key, authtime, tgt_auth_data,
+                            signed_auth_data);
+}
+
+krb5_error_code
 krb5_db_invoke(krb5_context kcontext,
                unsigned int method,
                const krb5_data *req,

@@ -23,6 +23,7 @@ krb5_db_put_principal
 krb5_db_set_context
 krb5_db_set_mkey_list
 krb5_db_setup_mkey_name
+krb5_db_sign_authdata
 krb5_db_unlock
 krb5_db_store_master_key
 krb5_db_store_master_key_list

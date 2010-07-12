@@ -246,21 +246,6 @@ return_enc_padata(krb5_context context,
                   krb5_boolean is_referral);
 
 krb5_error_code
-sign_db_authdata (krb5_context context,
-                  unsigned int flags,
-                  krb5_const_principal client_princ,
-                  krb5_db_entry *client,
-                  krb5_db_entry *server,
-                  krb5_db_entry *krbtgt,
-                  krb5_keyblock *client_key,
-                  krb5_keyblock *server_key,
-                  krb5_keyblock *krbtgt_key,
-                  krb5_timestamp authtime,
-                  krb5_authdata **tgs_authdata,
-                  krb5_keyblock *session_key,
-                  krb5_authdata ***ret_authdata);
-
-krb5_error_code
 kdc_process_s4u2self_req (krb5_context context,
                           krb5_kdc_req *request,
                           krb5_const_principal client_princ,

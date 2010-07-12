@@ -323,7 +323,6 @@ extern char *krb5_mkey_pwd_prompt2;
 #define KRB5_DB_LOCKMODE_PERMANENT    0x0008
 
 /* db_invoke methods */
-#define KRB5_KDB_METHOD_SIGN_AUTH_DATA                  0x00000010
 #define KRB5_KDB_METHOD_CHECK_TRANSITED_REALMS          0x00000020
 #define KRB5_KDB_METHOD_CHECK_POLICY_AS                 0x00000030
 #define KRB5_KDB_METHOD_CHECK_POLICY_TGS                0x00000040
@@ -331,26 +330,6 @@ extern char *krb5_mkey_pwd_prompt2;
 #define KRB5_KDB_METHOD_AUDIT_TGS                       0x00000060
 #define KRB5_KDB_METHOD_REFRESH_POLICY                  0x00000070
 #define KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE       0x00000080
-
-typedef struct _kdb_sign_auth_data_req {
-    krb5_magic magic;
-    unsigned int flags;                 /* KRB5_KDB flags */
-    krb5_const_principal client_princ;  /* Client name used in ticket */
-    krb5_db_entry *client;              /* DB entry for client principal */
-    krb5_db_entry *server;              /* DB entry for server principal */
-    krb5_db_entry *krbtgt;              /* DB entry for ticket granting service principal */
-    krb5_keyblock *client_key;          /* Reply key, valid for AS-REQ only */
-    krb5_keyblock *server_key;          /* Key used to generate server signature */
-    krb5_timestamp authtime;            /* Authtime of TGT */
-    krb5_authdata **auth_data;          /* Authorization data from TGT */
-    krb5_keyblock *session_key;         /* Reply session key */
-    krb5_keyblock *krbtgt_key;          /* Key used to decrypt TGT, valid for TGS-REQ only */
-} kdb_sign_auth_data_req;
-
-typedef struct _kdb_sign_auth_data_rep {
-    krb5_magic magic;
-    krb5_authdata **auth_data;          /* Signed authorization data */
-} kdb_sign_auth_data_rep;
 
 typedef struct _kdb_check_transited_realms_req {
     krb5_magic magic;
@@ -659,11 +638,24 @@ krb5_db_get_key_data_kvno( krb5_context    context,
                            int             count,
                            krb5_key_data * data);
 
+krb5_error_code krb5_db_sign_authdata(krb5_context kcontext,
+                                      unsigned int flags,
+                                      krb5_const_principal client_princ,
+                                      krb5_db_entry *client,
+                                      krb5_db_entry *server,
+                                      krb5_db_entry *krbtgt,
+                                      krb5_keyblock *client_key,
+                                      krb5_keyblock *server_key,
+                                      krb5_keyblock *krbtgt_key,
+                                      krb5_keyblock *session_key,
+                                      krb5_timestamp authtime,
+                                      krb5_authdata **tgt_auth_data,
+                                      krb5_authdata ***signed_auth_data);
+
 krb5_error_code krb5_db_invoke ( krb5_context kcontext,
                                  unsigned int method,
                                  const krb5_data *req,
                                  krb5_data *rep );
-
 
 /* default functions. Should not be directly called */
 /*
@@ -796,7 +788,7 @@ krb5_dbe_free_tl_data(krb5_context, krb5_tl_data *);
  * DAL.  It is passed to init_library to allow KDB modules to detect when
  * they are being loaded by an incompatible version of the KDC.
  */
-#define KRB5_KDB_DAL_VERSION 20100702
+#define KRB5_KDB_DAL_VERSION 20100712
 
 /*
  * A krb5_context can hold one database object.  Modules should use
@@ -1202,19 +1194,72 @@ typedef struct _kdb_vftabl {
                                         int keyver, krb5_key_data *key_data);
 
     /*
+     * Optional: Generate signed authorization data, such as a Windows PAC, for
+     * the ticket to be returned to the client.  Place the signed authorization
+     * data, if any, in *signed_auth_data.  This function will be invoked for
+     * an AS request if the client included padata requesting a PAC.  This
+     * function will be invoked for a TGS request if there is authorization
+     * data in the TGT, if the client is from another realm, or if the TGS
+     * request is an S4U2Self or S4U2Proxy request.  This function will not be
+     * invoked during TGS requests if the server principal has the
+     * no_auth_data_required attribute set.  Input parameters are:
+     *
+     *   flags: The flags used to look up the client principal.
+     *
+     *   client_princ: For S4U2Proxy TGS requests, the client principal
+     *     requested by the service; for regular TGS requests, the
+     *     possibly-canonicalized client principal.
+     *
+     *   client: The DB entry of the client.  For S4U2Self, this will be the DB
+     *     entry for the client principal requested by the service).
+     *
+     *   server: The DB entry of the service principal.
+     *
+     *   krbtgt: For TGS requests, the DB entry of the (possibly foreign)
+     *     ticket granting service of the TGT.  For AS requests, the DB entry
+     *     of the service principal.
+     *
+     *   client_key: The reply key for the KDC request, before any FAST armor
+     *     is applied.  For AS requests, this may be the client's long-term key
+     *     or a key chosen by a preauth mechanism.  For TGS requests, this may
+     *     be the subkey found in the AP-REQ or the session key of the TGT.
+     *
+     *   server_key: The server key used to encrypt the returned ticket.
+     *
+     *   krbtgt_key: For TGS requests, the key of the (possibly foreign) ticket
+     *     granting service of the TGT.  for AS requests, the service
+     *     principal's key.
+     *
+     *   session_key: The session key of the ticket being granted to the
+     *     requestor.
+     *
+     *   authtime: The timestamp of the original client authentication time.
+     *     For AS requests, this is the current time.  For TGS requests, this
+     *     is the authtime of the subject ticket (TGT or S4U2Proxy evidence
+     *     ticket).
+     *
+     *   tgt_auth_data: For TGS requests, the authorization data present in the
+     *     subject ticket.  For AS requests, NULL.
+     */
+    krb5_error_code (*sign_authdata)(krb5_context kcontext,
+                                     unsigned int flags,
+                                     krb5_const_principal client_princ,
+                                     krb5_db_entry *client,
+                                     krb5_db_entry *server,
+                                     krb5_db_entry *krbtgt,
+                                     krb5_keyblock *client_key,
+                                     krb5_keyblock *server_key,
+                                     krb5_keyblock *krbtgt_key,
+                                     krb5_keyblock *session_key,
+                                     krb5_timestamp authtime,
+                                     krb5_authdata **tgt_auth_data,
+                                     krb5_authdata ***signed_auth_data);
+
+    /*
      * Optional: Perform an operation on input data req with output stored in
      * rep.  Return KRB5_PLUGIN_OP_NOTSUPP if the module does not implement the
      * method.  Defined methods are:
      *
-     * KRB5_KDB_METHOD_SIGN_AUTH_DATA: req contains a krb5_sign_auth_data_req
-     *     structure.  Generate signed authorization data, such as a Windows
-     *     PAC, for the ticket to be returned to the client.  Place the signed
-     *     authorization data in rep using a krb5_sign_auth_data_rep structure.
-     *     This function will be invoked for an AS request if the client
-     *     included padata requesting a PAC.  This function will be invoked for
-     *     a TGS request if there is authorization data in the TGT, if the
-     *     client is from another realm, or if the TGS request is an S4U2Self
-     *     or S4U2Proxy request.
      *
      * KRB5_KDB_METHOD_CHECK_TRANSITED_REALMS: req contains a
      *     kdb_check_transited_realms_req structure.  Perform a policy check on

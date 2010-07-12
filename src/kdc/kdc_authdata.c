@@ -680,7 +680,7 @@ handle_kdb_authdata (krb5_context context,
                      krb5_enc_tkt_part *enc_tkt_reply)
 {
     krb5_error_code code;
-    krb5_authdata **db_authdata = NULL;
+    krb5_authdata **tgt_authdata, **db_authdata = NULL;
     krb5_boolean tgs_req = (request->msg_type == KRB5_TGS_REQ);
     krb5_const_principal actual_client;
 
@@ -720,19 +720,12 @@ handle_kdb_authdata (krb5_context context,
     else
         actual_client = enc_tkt_reply->client;
 
-    code = sign_db_authdata(context,
-                            flags,
-                            actual_client,
-                            client,
-                            server,
-                            krbtgt,
-                            client_key,
-                            server_key, /* U2U or server key */
-                            krbtgt_key,
-                            enc_tkt_reply->times.authtime,
-                            tgs_req ? enc_tkt_request->authorization_data : NULL,
-                            enc_tkt_reply->session,
-                            &db_authdata);
+    tgt_authdata = tgs_req ? enc_tkt_request->authorization_data : NULL;
+    code = krb5_db_sign_authdata(context, flags, actual_client, client,
+                                 server, krbtgt, client_key, server_key,
+                                 krbtgt_key, enc_tkt_reply->session,
+                                 enc_tkt_reply->times.authtime, tgt_authdata,
+                                 &db_authdata);
     if (code == 0) {
         code = merge_authdata(context,
                               db_authdata,

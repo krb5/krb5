@@ -1720,60 +1720,6 @@ rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep)
     return;
 }
 
-krb5_error_code
-sign_db_authdata (krb5_context context,
-                  unsigned int flags,
-                  krb5_const_principal client_princ,
-                  krb5_db_entry *client,
-                  krb5_db_entry *server,
-                  krb5_db_entry *krbtgt,
-                  krb5_keyblock *client_key,
-                  krb5_keyblock *server_key,
-                  krb5_keyblock *krbtgt_key,
-                  krb5_timestamp authtime,
-                  krb5_authdata **tgs_authdata,
-                  krb5_keyblock *session_key,
-                  krb5_authdata ***ret_authdata)
-{
-    krb5_error_code code;
-    kdb_sign_auth_data_req req;
-    kdb_sign_auth_data_rep rep;
-    krb5_data req_data;
-    krb5_data rep_data;
-
-    *ret_authdata = NULL;
-
-    memset(&req, 0, sizeof(req));
-    memset(&rep, 0, sizeof(rep));
-
-    req.flags                   = flags;
-    req.client_princ            = client_princ;
-    req.client                  = client;
-    req.server                  = server;
-    req.krbtgt                  = krbtgt;
-    req.client_key              = client_key;
-    req.server_key              = server_key;
-    req.authtime                = authtime;
-    req.auth_data               = tgs_authdata;
-    req.session_key             = session_key;
-    req.krbtgt_key              = krbtgt_key;
-
-    req_data.data = (void *)&req;
-    req_data.length = sizeof(req);
-
-    rep_data.data = (void *)&rep;
-    rep_data.length = sizeof(rep);
-
-    code = krb5_db_invoke(context,
-                          KRB5_KDB_METHOD_SIGN_AUTH_DATA,
-                          &req_data,
-                          &rep_data);
-
-    *ret_authdata = rep.auth_data;
-
-    return code;
-}
-
 static krb5_error_code
 verify_for_user_checksum(krb5_context context,
                          krb5_keyblock *key,
