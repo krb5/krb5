@@ -296,6 +296,11 @@ has_modify_increment(krb5_context, char *);
 krb5_error_code
 krb5_ldap_free_server_context_params(krb5_ldap_context *ldap_context);
 
+krb5_error_code
+krb5_ldap_check_policy_as(krb5_context kcontext, krb5_kdc_req *request,
+                          krb5_db_entry *client, krb5_db_entry *server,
+                          krb5_timestamp kdc_time, const char **status,
+                          krb5_data *e_data);
 
 /* DAL functions */
 

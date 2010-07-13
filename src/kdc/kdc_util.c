@@ -1051,9 +1051,13 @@ validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
         return(KDC_ERR_MUST_USE_USER2USER);
     }
 
-    /*
-     * Check against local policy
-     */
+    /* Perform KDB module policy checks. */
+    errcode = krb5_db_check_policy_as(kdc_context, request, &client, &server,
+                                      kdc_time, status, e_data);
+    if (errcode && errcode != KRB5_PLUGIN_OP_NOTSUPP)
+        return errcode;
+
+    /* Check against local policy. */
     errcode = against_local_policy_as(request, client, server,
                                       kdc_time, status, e_data);
     if (errcode)
@@ -1468,9 +1472,13 @@ validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
         return KRB_ERR_GENERIC;
     }
 
-    /*
-     * Check local policy
-     */
+    /* Perform KDB module policy checks. */
+    errcode = krb5_db_check_policy_tgs(kdc_context, request, &server,
+                                       ticket, status, e_data);
+    if (errcode && errcode != KRB5_PLUGIN_OP_NOTSUPP)
+        return errcode;
+
+    /* Check local policy. */
     errcode = against_local_policy_tgs(request, server, ticket,
                                        status, e_data);
     if (errcode)

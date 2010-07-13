@@ -84,6 +84,8 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_ldap, kdb_function_table) = {
     /* encrypt_key_data */                  NULL,
     /* sign_authdata */                     NULL,
     /* check_transited_realms */            NULL,
+    /* check_policy_as */                   krb5_ldap_check_policy_as,
+    /* check_policy_tgs */                  NULL,
     /* invoke */                            krb5_ldap_invoke,
 
 };

@@ -527,3 +527,17 @@ kldap_ensure_initialized(void)
 {
     return CALL_INIT_FUNCTION (kldap_init_fn);
 }
+
+krb5_error_code
+krb5_ldap_check_policy_as(krb5_context kcontext, krb5_kdc_req *request,
+                          krb5_db_entry *client, krb5_db_entry *server,
+                          krb5_timestamp kdc_time, const char **status,
+                          krb5_data *e_data)
+{
+    krb5_error_code retval;
+
+    retval = krb5_ldap_lockout_check_policy(kcontext, client, kdc_time);
+    if (retval == KRB5KDC_ERR_CLIENT_REVOKED)
+        *status = "LOCKED_OUT";
+    return retval;
+}

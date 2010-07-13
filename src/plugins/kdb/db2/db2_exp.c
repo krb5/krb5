@@ -180,6 +180,12 @@ WRAP_K (krb5_db2_promote_db,
         ( krb5_context kcontext, char *conf_section, char **db_args ),
         (kcontext, conf_section, db_args));
 
+WRAP_K (krb5_db2_check_policy_as,
+        (krb5_context kcontext, krb5_kdc_req *request, krb5_db_entry *client,
+         krb5_db_entry *server, krb5_timestamp kdc_time, const char **status,
+         krb5_data *e_data),
+        (kcontext, request, client, server, kdc_time, status, e_data));
+
 WRAP_K (krb5_db2_invoke,
         (krb5_context kcontext,
          unsigned int method,
@@ -243,5 +249,7 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_db2, kdb_function_table) = {
     /* blah blah blah */ 0,0,0,0,0,
     /* promote_db */                    wrap_krb5_db2_promote_db,
     0, 0, 0, 0,
+    /* check_policy_as */               wrap_krb5_db2_check_policy_as,
+    0,
     /* invoke */                        wrap_krb5_db2_invoke
 };

@@ -2265,6 +2265,45 @@ krb5_db_check_transited_realms(krb5_context kcontext,
 }
 
 krb5_error_code
+krb5_db_check_policy_as(krb5_context kcontext, krb5_kdc_req *request,
+                        krb5_db_entry *client, krb5_db_entry *server,
+                        krb5_timestamp kdc_time, const char **status,
+                        krb5_data *e_data)
+{
+    krb5_error_code ret;
+    kdb_vftabl *v;
+
+    *status = NULL;
+    *e_data = empty_data();
+    ret = get_vftabl(kcontext, &v);
+    if (ret)
+        return ret;
+    if (v->check_policy_as == NULL)
+        return KRB5_PLUGIN_OP_NOTSUPP;
+    return v->check_policy_as(kcontext, request, client, server, kdc_time,
+                              status, e_data);
+}
+
+krb5_error_code
+krb5_db_check_policy_tgs(krb5_context kcontext, krb5_kdc_req *request,
+                         krb5_db_entry *server, krb5_ticket *ticket,
+                         const char **status, krb5_data *e_data)
+{
+    krb5_error_code ret;
+    kdb_vftabl *v;
+
+    *status = NULL;
+    *e_data = empty_data();
+    ret = get_vftabl(kcontext, &v);
+    if (ret)
+        return ret;
+    if (v->check_policy_tgs == NULL)
+        return KRB5_PLUGIN_OP_NOTSUPP;
+    return v->check_policy_tgs(kcontext, request, server, ticket, status,
+                               e_data);
+}
+
+krb5_error_code
 krb5_db_invoke(krb5_context kcontext,
                unsigned int method,
                const krb5_data *req,

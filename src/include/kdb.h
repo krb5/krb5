@@ -323,39 +323,10 @@ extern char *krb5_mkey_pwd_prompt2;
 #define KRB5_DB_LOCKMODE_PERMANENT    0x0008
 
 /* db_invoke methods */
-#define KRB5_KDB_METHOD_CHECK_POLICY_AS                 0x00000030
-#define KRB5_KDB_METHOD_CHECK_POLICY_TGS                0x00000040
 #define KRB5_KDB_METHOD_AUDIT_AS                        0x00000050
 #define KRB5_KDB_METHOD_AUDIT_TGS                       0x00000060
 #define KRB5_KDB_METHOD_REFRESH_POLICY                  0x00000070
 #define KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE       0x00000080
-
-typedef struct _kdb_check_policy_as_req {
-    krb5_magic magic;
-    krb5_kdc_req *request;
-    krb5_db_entry *client;
-    krb5_db_entry *server;
-    krb5_timestamp kdc_time;
-} kdb_check_policy_as_req;
-
-typedef struct _kdb_check_policy_as_rep {
-    krb5_magic magic;
-    const char *status;
-    krb5_data e_data;
-} kdb_check_policy_as_rep;
-
-typedef struct _kdb_check_policy_tgs_req {
-    krb5_magic magic;
-    krb5_kdc_req *request;
-    krb5_db_entry *server;
-    krb5_ticket *ticket;
-} kdb_check_policy_tgs_req;
-
-typedef struct _kdb_check_policy_tgs_rep {
-    krb5_magic magic;
-    const char *status;
-    krb5_data e_data;
-} kdb_check_policy_tgs_rep;
 
 typedef struct _kdb_audit_as_req {
     krb5_magic magic;
@@ -648,6 +619,21 @@ krb5_error_code krb5_db_check_transited_realms(krb5_context kcontext,
                                                const krb5_data *tr_contents,
                                                const krb5_data *client_realm,
                                                const krb5_data *server_realm);
+
+krb5_error_code krb5_db_check_policy_as(krb5_context kcontext,
+                                        krb5_kdc_req *request,
+                                        krb5_db_entry *client,
+                                        krb5_db_entry *server,
+                                        krb5_timestamp kdc_time,
+                                        const char **status,
+                                        krb5_data *e_data);
+
+krb5_error_code krb5_db_check_policy_tgs(krb5_context kcontext,
+                                         krb5_kdc_req *request,
+                                         krb5_db_entry *server,
+                                         krb5_ticket *ticket,
+                                         const char **status,
+                                         krb5_data *e_data);
 
 krb5_error_code krb5_db_invoke ( krb5_context kcontext,
                                  unsigned int method,
@@ -1263,23 +1249,43 @@ typedef struct _kdb_vftabl {
                                               const krb5_data *server_realm);
 
     /*
+     * Optional: Perform a policy check on an AS request, in addition to the
+     * standard policy checks.  Return 0 if the AS request is allowed.  If the
+     * AS request is not allowed:
+     *   - Place a short string literal into *status.
+     *   - If desired, place data into e_data.  Any data placed here will be
+     *     freed by the caller using the standard free function.
+     *   - Return an appropriate error (such as KDC_ERR_POLICY).
+     */
+    krb5_error_code (*check_policy_as)(krb5_context kcontext,
+                                       krb5_kdc_req *request,
+                                       krb5_db_entry *client,
+                                       krb5_db_entry *server,
+                                       krb5_timestamp kdc_time,
+                                       const char **status,
+                                       krb5_data *e_data);
+
+    /*
+     * Optional: Perform a policy check on a TGS request, in addition to the
+     * standard policy checks.  Return 0 if the TGS request is allowed.  If the
+     * TGS request is not allowed:
+     *   - Place a short string literal into *status.
+     *   - If desired, place data into e_data.  Any data placed here will be
+     *     freed by the caller using the standard free function.
+     *   - Return an appropriate error (such as KDC_ERR_POLICY).
+     * The input parameter ticket contains the TGT used in the TGS request.
+     */
+    krb5_error_code (*check_policy_tgs)(krb5_context kcontext,
+                                        krb5_kdc_req *request,
+                                        krb5_db_entry *server,
+                                        krb5_ticket *ticket,
+                                        const char **status,
+                                        krb5_data *e_data);
+
+    /*
      * Optional: Perform an operation on input data req with output stored in
      * rep.  Return KRB5_PLUGIN_OP_NOTSUPP if the module does not implement the
      * method.  Defined methods are:
-     *
-     * KRB5_KDB_METHOD_CHECK_POLICY_AS: req contains a kdb_check_policy_as_req
-     *     structure.  Perform a policy check on an AS request, in addition to
-     *     the standard policy checks.  Return 0 if the AS request is allowed
-     *     or an appropriate error (such as KDC_ERR_POLICY) if it is
-     *     disallowed.  Place in rep a kdb_check_policy_as_rep structure
-     *     containing a status string and e_data value to return to the client
-     *     if the policy check fails.  The status string may be NULL, but must
-     *     not contain allocated data as it will not be freed.  The e_data
-     *     structure may be empty; if not, it will be freed by the caller using
-     *     the standard free function.
-     *
-     * KRB5_KDB_METHOD_CHECK_POLICY_TGS: Same as above, except the structures
-     *     are kdb_check_policy_tgs_req and kdb_check_policy_tgs_rep.
      *
      * KRB5_KDB_METHOD_AUDIT_AS: req contains a kdb_audit_as_req structure.
      *     Informs the module of a successful or unsuccessful AS request.  Do
