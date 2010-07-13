@@ -323,28 +323,8 @@ extern char *krb5_mkey_pwd_prompt2;
 #define KRB5_DB_LOCKMODE_PERMANENT    0x0008
 
 /* db_invoke methods */
-#define KRB5_KDB_METHOD_AUDIT_AS                        0x00000050
-#define KRB5_KDB_METHOD_AUDIT_TGS                       0x00000060
 #define KRB5_KDB_METHOD_REFRESH_POLICY                  0x00000070
 #define KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE       0x00000080
-
-typedef struct _kdb_audit_as_req {
-    krb5_magic magic;
-    krb5_kdc_req *request;
-    krb5_db_entry *client;
-    krb5_db_entry *server;
-    krb5_timestamp authtime;
-    krb5_error_code error_code;
-} kdb_audit_as_req;
-
-typedef struct _kdb_audit_tgs_req {
-    krb5_magic magic;
-    krb5_kdc_req *request;
-    krb5_const_principal client;
-    krb5_db_entry *server;
-    krb5_timestamp authtime;
-    krb5_error_code error_code;
-} kdb_audit_tgs_req;
 
 typedef struct _kdb_check_allowed_to_delegate_req {
     krb5_magic magic;
@@ -635,6 +615,13 @@ krb5_error_code krb5_db_check_policy_tgs(krb5_context kcontext,
                                          const char **status,
                                          krb5_data *e_data);
 
+krb5_error_code krb5_db_audit_as_req(krb5_context kcontext,
+                                     krb5_kdc_req *request,
+                                     krb5_db_entry *client,
+                                     krb5_db_entry *server,
+                                     krb5_timestamp authtime,
+                                     krb5_error_code error_code);
+
 krb5_error_code krb5_db_invoke ( krb5_context kcontext,
                                  unsigned int method,
                                  const krb5_data *req,
@@ -771,7 +758,7 @@ krb5_dbe_free_tl_data(krb5_context, krb5_tl_data *);
  * DAL.  It is passed to init_library to allow KDB modules to detect when
  * they are being loaded by an incompatible version of the KDC.
  */
-#define KRB5_KDB_DAL_VERSION 20100712
+#define KRB5_KDB_DAL_VERSION 20100713
 
 /*
  * A krb5_context can hold one database object.  Modules should use
@@ -1283,16 +1270,22 @@ typedef struct _kdb_vftabl {
                                         krb5_data *e_data);
 
     /*
+     * Optional: This method informs the module of a successful or unsuccessful
+     * AS request.  The resulting error code is currently ignored by the KDC.
+     */
+    krb5_error_code (*audit_as_req)(krb5_context kcontext,
+                                    krb5_kdc_req *request,
+                                    krb5_db_entry *client,
+                                    krb5_db_entry *server,
+                                    krb5_timestamp authtime,
+                                    krb5_error_code error_code);
+
+    /* Note: there is currently no method for auditing TGS requests. */
+
+    /*
      * Optional: Perform an operation on input data req with output stored in
      * rep.  Return KRB5_PLUGIN_OP_NOTSUPP if the module does not implement the
      * method.  Defined methods are:
-     *
-     * KRB5_KDB_METHOD_AUDIT_AS: req contains a kdb_audit_as_req structure.
-     *     Informs the module of a successful or unsuccessful AS request.  Do
-     *     not place any data in rep.
-     *
-     * KRB5_KDB_METHOD_AUDIT_TGS: Same as above, except req contains a
-     *     kdb_audit_tgs_req structure.
      *
      * KRB5_KDB_METHOD_REFRESH_POLICY: req and rep are NULL.  Informs the
      *     module that the KDC received a request to reload configuration

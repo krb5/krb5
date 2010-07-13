@@ -2356,6 +2356,8 @@ log_as_req(const krb5_fulladdr *from,
                          ktypestr, fromstring, status,
                          cname2, sname2, emsg ? ", " : "", emsg ? emsg : "");
     }
+    (void) krb5_db_audit_as_req(kdc_context, request, client, server,
+                                authtime, errcode);
 #if 0
     /* Sun (OpenSolaris) version would probably something like this.
        The client and server names passed can be null, unlike in the
@@ -2363,33 +2365,6 @@ log_as_req(const krb5_fulladdr *from,
        used, but the real address could be an IPv6 address.  */
     audit_krb5kdc_as_req(some in_addr *, (in_port_t)from->port, 0,
                          cname, sname, errcode);
-#endif
-#if 1
-    {
-        kdb_audit_as_req        req;
-        krb5_data               req_data;
-        krb5_data               rep_data;
-
-        memset(&req, 0, sizeof(req));
-
-        req.request             = request;
-        req.client              = client;
-        req.server              = server;
-        req.authtime            = authtime;
-        req.error_code          = errcode;
-
-        req_data.data = (void *)&req;
-        req_data.length = sizeof(req);
-
-        rep_data.data = NULL;
-        rep_data.length = 0;
-
-        (void) krb5_db_invoke(kdc_context,
-                              KRB5_KDB_METHOD_AUDIT_AS,
-                              &req_data,
-                              &rep_data);
-        assert(rep_data.length == 0);
-    }
 #endif
 }
 

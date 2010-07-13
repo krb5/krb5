@@ -541,3 +541,11 @@ krb5_ldap_check_policy_as(krb5_context kcontext, krb5_kdc_req *request,
         *status = "LOCKED_OUT";
     return retval;
 }
+
+krb5_error_code
+krb5_ldap_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,
+                       krb5_db_entry *client, krb5_db_entry *server,
+                       krb5_timestamp authtime, krb5_error_code error_code)
+{
+    return krb5_ldap_lockout_audit(kcontext, client, authtime, error_code);
+}

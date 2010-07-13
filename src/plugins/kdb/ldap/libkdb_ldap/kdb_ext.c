@@ -35,23 +35,6 @@
 #include "kdb_ldap.h"
 
 static krb5_error_code
-krb5_ldap_audit_as(krb5_context context,
-                   unsigned int method,
-                   const krb5_data *request,
-                   krb5_data *response)
-{
-    const kdb_audit_as_req *req;
-    krb5_error_code code;
-
-    req = (const kdb_audit_as_req *)request->data;
-
-    code = krb5_ldap_lockout_audit(context, req->client,
-                                   req->authtime, req->error_code);
-
-    return code;
-}
-
-static krb5_error_code
 krb5_ldap_check_allowed_to_delegate(krb5_context context,
                                     unsigned int method,
                                     const krb5_data *request,
@@ -94,9 +77,6 @@ krb5_ldap_invoke(krb5_context context,
     krb5_error_code code = KRB5_PLUGIN_OP_NOTSUPP;
 
     switch (method) {
-    case KRB5_KDB_METHOD_AUDIT_AS:
-        code = krb5_ldap_audit_as(context, method, req, rep);
-        break;
     case KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE:
         code = krb5_ldap_check_allowed_to_delegate(context, method, req, rep);
         break;

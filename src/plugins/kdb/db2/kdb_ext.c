@@ -34,38 +34,11 @@
 #include <errno.h>
 #include "kdb_db2.h"
 
-static krb5_error_code
-krb5_db2_audit_as(krb5_context context,
-                  unsigned int method,
-                  const krb5_data *request,
-                  krb5_data *response)
-{
-    const kdb_audit_as_req *req;
-    krb5_error_code code;
-
-    req = (const kdb_audit_as_req *)request->data;
-
-    code = krb5_db2_lockout_audit(context, req->client,
-                                  req->authtime, req->error_code);
-
-    return code;
-}
-
 krb5_error_code
 krb5_db2_invoke(krb5_context context,
                 unsigned int method,
                 const krb5_data *req,
                 krb5_data *rep)
 {
-    krb5_error_code code = KRB5_PLUGIN_OP_NOTSUPP;
-
-    switch (method) {
-    case KRB5_KDB_METHOD_AUDIT_AS:
-        code = krb5_db2_audit_as(context, method, req, rep);
-        break;
-    default:
-        break;
-    }
-
-    return code;
+    return KRB5_PLUGIN_OP_NOTSUPP;
 }
