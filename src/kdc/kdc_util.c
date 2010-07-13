@@ -2356,8 +2356,8 @@ log_as_req(const krb5_fulladdr *from,
                          ktypestr, fromstring, status,
                          cname2, sname2, emsg ? ", " : "", emsg ? emsg : "");
     }
-    (void) krb5_db_audit_as_req(kdc_context, request, client, server,
-                                authtime, errcode);
+    krb5_db_audit_as_req(kdc_context, request, client, server, authtime,
+                         errcode);
 #if 0
     /* Sun (OpenSolaris) version would probably something like this.
        The client and server names passed can be null, unlike in the

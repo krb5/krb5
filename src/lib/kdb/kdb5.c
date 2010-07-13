@@ -2303,7 +2303,7 @@ krb5_db_check_policy_tgs(krb5_context kcontext, krb5_kdc_req *request,
                                e_data);
 }
 
-krb5_error_code
+void
 krb5_db_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,
                      krb5_db_entry *client, krb5_db_entry *server,
                      krb5_timestamp authtime, krb5_error_code error_code)
@@ -2312,12 +2312,9 @@ krb5_db_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,
     kdb_vftabl *v;
 
     status = get_vftabl(kcontext, &v);
-    if (status)
-        return status;
-    if (v->audit_as_req == NULL)
-        return KRB5_PLUGIN_OP_NOTSUPP;
-    return v->audit_as_req(kcontext, request, client, server, authtime,
-                           error_code);
+    if (status || v->audit_as_req == NULL)
+        return;
+    v->audit_as_req(kcontext, request, client, server, authtime, error_code);
 }
 
 krb5_error_code

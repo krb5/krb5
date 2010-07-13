@@ -615,12 +615,9 @@ krb5_error_code krb5_db_check_policy_tgs(krb5_context kcontext,
                                          const char **status,
                                          krb5_data *e_data);
 
-krb5_error_code krb5_db_audit_as_req(krb5_context kcontext,
-                                     krb5_kdc_req *request,
-                                     krb5_db_entry *client,
-                                     krb5_db_entry *server,
-                                     krb5_timestamp authtime,
-                                     krb5_error_code error_code);
+void krb5_db_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,
+                          krb5_db_entry *client, krb5_db_entry *server,
+                          krb5_timestamp authtime, krb5_error_code error_code);
 
 krb5_error_code krb5_db_invoke ( krb5_context kcontext,
                                  unsigned int method,
@@ -1271,14 +1268,11 @@ typedef struct _kdb_vftabl {
 
     /*
      * Optional: This method informs the module of a successful or unsuccessful
-     * AS request.  The resulting error code is currently ignored by the KDC.
+     * AS request.
      */
-    krb5_error_code (*audit_as_req)(krb5_context kcontext,
-                                    krb5_kdc_req *request,
-                                    krb5_db_entry *client,
-                                    krb5_db_entry *server,
-                                    krb5_timestamp authtime,
-                                    krb5_error_code error_code);
+    void (*audit_as_req)(krb5_context kcontext, krb5_kdc_req *request,
+                         krb5_db_entry *client, krb5_db_entry *server,
+                         krb5_timestamp authtime, krb5_error_code error_code);
 
     /* Note: there is currently no method for auditing TGS requests. */
 

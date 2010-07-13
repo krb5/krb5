@@ -186,11 +186,11 @@ WRAP_K (krb5_db2_check_policy_as,
          krb5_data *e_data),
         (kcontext, request, client, server, kdc_time, status, e_data));
 
-WRAP_K (krb5_db2_audit_as_req,
-        (krb5_context kcontext, krb5_kdc_req *request, krb5_db_entry *client,
-         krb5_db_entry *server, krb5_timestamp authtime,
-         krb5_error_code error_code),
-        (kcontext, request, client, server, authtime, error_code));
+WRAP_VOID (krb5_db2_audit_as_req,
+           (krb5_context kcontext, krb5_kdc_req *request,
+            krb5_db_entry *client, krb5_db_entry *server,
+            krb5_timestamp authtime, krb5_error_code error_code),
+           (kcontext, request, client, server, authtime, error_code));
 
 WRAP_K (krb5_db2_invoke,
         (krb5_context kcontext,
