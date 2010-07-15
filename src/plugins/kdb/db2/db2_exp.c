@@ -258,5 +258,6 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_db2, kdb_function_table) = {
     /* check_policy_as */               wrap_krb5_db2_check_policy_as,
     0,
     /* audit_as_req */                  wrap_krb5_db2_audit_as_req,
+    0,
     /* invoke */                        wrap_krb5_db2_invoke
 };

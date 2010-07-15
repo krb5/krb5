@@ -323,7 +323,6 @@ extern char *krb5_mkey_pwd_prompt2;
 #define KRB5_DB_LOCKMODE_PERMANENT    0x0008
 
 /* db_invoke methods */
-#define KRB5_KDB_METHOD_REFRESH_POLICY                  0x00000070
 #define KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE       0x00000080
 
 typedef struct _kdb_check_allowed_to_delegate_req {
@@ -619,6 +618,8 @@ void krb5_db_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,
                           krb5_db_entry *client, krb5_db_entry *server,
                           krb5_timestamp authtime, krb5_error_code error_code);
 
+void krb5_db_refresh_config(krb5_context kcontext);
+
 krb5_error_code krb5_db_invoke ( krb5_context kcontext,
                                  unsigned int method,
                                  const krb5_data *req,
@@ -755,7 +756,7 @@ krb5_dbe_free_tl_data(krb5_context, krb5_tl_data *);
  * DAL.  It is passed to init_library to allow KDB modules to detect when
  * they are being loaded by an incompatible version of the KDC.
  */
-#define KRB5_KDB_DAL_VERSION 20100713
+#define KRB5_KDB_DAL_VERSION 20100714
 
 /*
  * A krb5_context can hold one database object.  Modules should use
@@ -1277,13 +1278,15 @@ typedef struct _kdb_vftabl {
     /* Note: there is currently no method for auditing TGS requests. */
 
     /*
+     * Optional: This method informs the module of a request to reload
+     * configuration or other state (that is, the KDC received a SIGHUP).
+     */
+    void (*refresh_config)(krb5_context kcontext);
+
+    /*
      * Optional: Perform an operation on input data req with output stored in
      * rep.  Return KRB5_PLUGIN_OP_NOTSUPP if the module does not implement the
      * method.  Defined methods are:
-     *
-     * KRB5_KDB_METHOD_REFRESH_POLICY: req and rep are NULL.  Informs the
-     *     module that the KDC received a request to reload configuration
-     *     (that is, a SIGHUP).
      *
      * KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE: req contains a
      *     kdb_check_allowed_to_delegate_req structure.  Perform a policy check

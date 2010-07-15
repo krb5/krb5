@@ -2317,6 +2317,18 @@ krb5_db_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,
     v->audit_as_req(kcontext, request, client, server, authtime, error_code);
 }
 
+void
+krb5_db_refresh_config(krb5_context kcontext)
+{
+    krb5_error_code status;
+    kdb_vftabl *v;
+
+    status = get_vftabl(kcontext, &v);
+    if (status || v->refresh_config == NULL)
+        return;
+    v->refresh_config(kcontext);
+}
+
 krb5_error_code
 krb5_db_invoke(krb5_context kcontext,
                unsigned int method,

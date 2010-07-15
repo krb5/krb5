@@ -2688,7 +2688,5 @@ void reset_for_hangup()
     int k;
 
     for (k = 0; k < kdc_numrealms; k++)
-        krb5_db_invoke(kdc_realmlist[k]->realm_context,
-                       KRB5_KDB_METHOD_REFRESH_POLICY,
-                       NULL, NULL);
+        krb5_db_refresh_config(kdc_realmlist[k]->realm_context);
 }
