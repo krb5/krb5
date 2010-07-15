@@ -54,7 +54,6 @@ SRCS= \
 	$(srcdir)/adb_openclose.c \
 	$(srcdir)/adb_policy.c \
 	$(srcdir)/kdb_db2.c \
-	$(srcdir)/kdb_ext.c \
 	$(srcdir)/pol_xdr.c \
 	$(srcdir)/db2_exp.c \
 	$(srcdir)/lockout.c
@@ -65,7 +64,6 @@ STLIBOBJS= \
 	adb_openclose.o \
 	adb_policy.o \
 	kdb_db2.o \
-	kdb_ext.o \
 	pol_xdr.o \
 	db2_exp.o \
 	lockout.o

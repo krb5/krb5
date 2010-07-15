@@ -2180,47 +2180,19 @@ kdc_process_s4u2self_req(krb5_context context,
 }
 
 static krb5_error_code
-check_allowed_to_delegate_to(krb5_context context,
-                             krb5_const_principal client,
+check_allowed_to_delegate_to(krb5_context context, krb5_const_principal client,
                              const krb5_db_entry *server,
                              krb5_const_principal proxy)
 {
-    kdb_check_allowed_to_delegate_req   req;
-    krb5_data                   req_data;
-    krb5_data                   rep_data;
-    krb5_error_code             code;
-
     /* Can't get a TGT (otherwise it would be unconstrained delegation) */
-    if (krb5_is_tgs_principal(proxy)) {
+    if (krb5_is_tgs_principal(proxy))
         return KRB5KDC_ERR_POLICY;
-    }
 
     /* Must be in same realm */
-    if (!krb5_realm_compare(context, server->princ, proxy)) {
+    if (!krb5_realm_compare(context, server->princ, proxy))
         return KRB5KDC_ERR_POLICY;
-    }
 
-    req.server = server;
-    req.proxy = proxy;
-    req.client = client;
-
-    req_data.data = (void *)&req;
-    req_data.length = sizeof(req);
-
-    rep_data.data = NULL;
-    rep_data.length = 0;
-
-    code = krb5_db_invoke(context,
-                          KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE,
-                          &req_data,
-                          &rep_data);
-    if (code == KRB5_PLUGIN_OP_NOTSUPP) {
-        code = KRB5KDC_ERR_POLICY;
-    }
-
-    assert(rep_data.length == 0);
-
-    return code;
+    return krb5_db_check_allowed_to_delegate(context, client, server, proxy);
 }
 
 krb5_error_code
@@ -2432,7 +2404,6 @@ log_tgs_req(const krb5_fulladdr *from,
 
     /* OpenSolaris: audit_krb5kdc_tgs_req(...)  or
        audit_krb5kdc_tgs_req_2ndtktmm(...) */
-    /* ... krb5_db_invoke ... */
 }
 
 void

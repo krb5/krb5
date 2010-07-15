@@ -192,13 +192,6 @@ WRAP_VOID (krb5_db2_audit_as_req,
             krb5_timestamp authtime, krb5_error_code error_code),
            (kcontext, request, client, server, authtime, error_code));
 
-WRAP_K (krb5_db2_invoke,
-        (krb5_context kcontext,
-         unsigned int method,
-         const krb5_data *request,
-         krb5_data *response),
-        (kcontext, method, request, response));
-
 static krb5_error_code
 hack_init (int dal_version)
 {
@@ -258,6 +251,5 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_db2, kdb_function_table) = {
     /* check_policy_as */               wrap_krb5_db2_check_policy_as,
     0,
     /* audit_as_req */                  wrap_krb5_db2_audit_as_req,
-    0,
-    /* invoke */                        wrap_krb5_db2_invoke
+    0, 0
 };

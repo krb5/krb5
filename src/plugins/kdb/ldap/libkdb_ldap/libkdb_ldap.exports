@@ -46,4 +46,4 @@ krb5_ldap_set_mkey_list
 krb5_ldap_get_mkey_list
 krb5_ldap_check_policy_as
 krb5_ldap_audit_as_req
-krb5_ldap_invoke
+krb5_ldap_check_allowed_to_delegate

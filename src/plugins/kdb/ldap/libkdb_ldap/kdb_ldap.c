@@ -549,3 +549,34 @@ krb5_ldap_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,
 {
     (void) krb5_ldap_lockout_audit(kcontext, client, authtime, error_code);
 }
+
+krb5_error_code
+krb5_ldap_check_allowed_to_delegate(krb5_context context,
+                                    krb5_const_principal client,
+                                    const krb5_db_entry *server,
+                                    krb5_const_principal proxy)
+{
+    krb5_error_code code;
+    krb5_tl_data *tlp;
+
+    code = KRB5KDC_ERR_POLICY;
+
+    for (tlp = server->tl_data; tlp != NULL; tlp = tlp->tl_data_next) {
+        krb5_principal acl;
+
+        if (tlp->tl_data_type != KRB5_TL_CONSTRAINED_DELEGATION_ACL)
+            continue;
+
+        if (krb5_parse_name(context, (char *)tlp->tl_data_contents, &acl) != 0)
+            continue;
+
+        if (krb5_principal_compare(context, proxy, acl)) {
+            code = 0;
+            krb5_free_principal(context, acl);
+            break;
+        }
+        krb5_free_principal(context, acl);
+    }
+
+    return code;
+}

@@ -88,6 +88,6 @@ kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_ldap, kdb_function_table) = {
     /* check_policy_tgs */                  NULL,
     /* audit_as_req */                      krb5_ldap_audit_as_req,
     /* refresh_config */                    NULL,
-    /* invoke */                            krb5_ldap_invoke,
+    /* check_allowed_to_delegate */         krb5_ldap_check_allowed_to_delegate
 
 };

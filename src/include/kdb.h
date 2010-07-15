@@ -322,16 +322,6 @@ extern char *krb5_mkey_pwd_prompt2;
 #define KRB5_DB_LOCKMODE_DONTBLOCK    0x0004
 #define KRB5_DB_LOCKMODE_PERMANENT    0x0008
 
-/* db_invoke methods */
-#define KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE       0x00000080
-
-typedef struct _kdb_check_allowed_to_delegate_req {
-    krb5_magic magic;
-    const krb5_db_entry *server;
-    krb5_const_principal proxy;
-    krb5_const_principal client;
-} kdb_check_allowed_to_delegate_req;
-
 /* libkdb.spec */
 krb5_error_code krb5_db_setup_lib_handle(krb5_context kcontext);
 krb5_error_code krb5_db_open( krb5_context kcontext, char **db_args, int mode );
@@ -620,10 +610,10 @@ void krb5_db_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,
 
 void krb5_db_refresh_config(krb5_context kcontext);
 
-krb5_error_code krb5_db_invoke ( krb5_context kcontext,
-                                 unsigned int method,
-                                 const krb5_data *req,
-                                 krb5_data *rep );
+krb5_error_code krb5_db_check_allowed_to_delegate(krb5_context kcontext,
+                                                  krb5_const_principal client,
+                                                  const krb5_db_entry *server,
+                                                  krb5_const_principal proxy);
 
 /* default functions. Should not be directly called */
 /*
@@ -1282,24 +1272,20 @@ typedef struct _kdb_vftabl {
     void (*refresh_config)(krb5_context kcontext);
 
     /*
-     * Optional: Perform an operation on input data req with output stored in
-     * rep.  Return KRB5_PLUGIN_OP_NOTSUPP if the module does not implement the
-     * method.  Defined methods are:
-     *
-     * KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE: req contains a
-     *     kdb_check_allowed_to_delegate_req structure.  Perform a policy check
-     *     on server being allowed to obtain tickets from client to proxy.
-     *     (Note that proxy is the target of the delegation, not the delegating
-     *     service; the term "proxy" is from the viewpoint of the delegating
-     *     service asking another service to perform some of its work in the
-     *     authentication context of the client.  This terminology comes from
-     *     the Microsoft S4U protocol documentation.)  Return 0 if policy
-     *     allows it, or an appropriate error (such as KRB5KDC_ERR_POLICY) if
-     *     not.  If this method is not implemented, all S4U2Proxy delegation
-     *     requests will be rejected.  Do not place any data in rep.
+     * Optional: Perform a policy check on server being allowed to obtain
+     * tickets from client to proxy.  (Note that proxy is the target of the
+     * delegation, not the delegating service; the term "proxy" is from the
+     * viewpoint of the delegating service asking another service to perform
+     * some of its work in the authentication context of the client.  This
+     * terminology comes from the Microsoft S4U protocol documentation.)
+     * Return 0 if policy allows it, or an appropriate error (such as
+     * KRB5KDC_ERR_POLICY) if not.  If this method is not implemented, all
+     * S4U2Proxy delegation requests will be rejected.
      */
-    krb5_error_code (*invoke)(krb5_context context, unsigned int method,
-                              const krb5_data *req, krb5_data *rep);
+    krb5_error_code (*check_allowed_to_delegate)(krb5_context context,
+                                                 krb5_const_principal client,
+                                                 const krb5_db_entry *server,
+                                                 krb5_const_principal proxy);
 } kdb_vftabl;
 
 #endif /* !defined(_WIN32) */

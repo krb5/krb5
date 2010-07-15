@@ -2330,18 +2330,18 @@ krb5_db_refresh_config(krb5_context kcontext)
 }
 
 krb5_error_code
-krb5_db_invoke(krb5_context kcontext,
-               unsigned int method,
-               const krb5_data *req,
-               krb5_data *rep)
+krb5_db_check_allowed_to_delegate(krb5_context kcontext,
+                                  krb5_const_principal client,
+                                  const krb5_db_entry *server,
+                                  krb5_const_principal proxy)
 {
-    krb5_error_code status = 0;
+    krb5_error_code ret;
     kdb_vftabl *v;
 
-    status = get_vftabl(kcontext, &v);
-    if (status)
-        return status;
-    if (v->invoke == NULL)
+    ret = get_vftabl(kcontext, &v);
+    if (ret)
+        return ret;
+    if (v->check_allowed_to_delegate == NULL)
         return KRB5_PLUGIN_OP_NOTSUPP;
-    return v->invoke(kcontext, method, req, rep);
+    return v->check_allowed_to_delegate(kcontext, client, server, proxy);
 }

@@ -307,6 +307,12 @@ krb5_ldap_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,
                        krb5_db_entry *client, krb5_db_entry *server,
                        krb5_timestamp authtime, krb5_error_code error_code);
 
+krb5_error_code
+krb5_ldap_check_allowed_to_delegate(krb5_context context,
+                                    krb5_const_principal client,
+                                    const krb5_db_entry *server,
+                                    krb5_const_principal proxy);
+
 /* DAL functions */
 
 
@@ -336,12 +342,5 @@ krb5_ldap_lockout_audit(krb5_context context,
                         krb5_db_entry *entry,
                         krb5_timestamp stamp,
                         krb5_error_code status);
-
-/* kdb_ext.c */
-krb5_error_code
-krb5_ldap_invoke(krb5_context context,
-                 unsigned int method,
-                 const krb5_data *req,
-                 krb5_data *rep);
 
 #endif
