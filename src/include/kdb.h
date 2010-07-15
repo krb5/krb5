@@ -870,9 +870,7 @@ typedef struct _kdb_vftabl {
      * Mandatory: Set *entry to an allocated entry for the principal
      * search_for.  If the principal is not found, return KRB5_KDB_NOENTRY.
      *
-     * The meaning of flags are as follows (some of these may be processed by
-     * db_invoke methods such as KRB5_KDB_METHOD_SIGN_AUTH_DATA rather than by
-     * db_get_principal):
+     * The meaning of flags are as follows:
      *
      * KRB5_KDB_FLAG_CANONICALIZE: Set by the KDC when looking up entries for
      *     an AS or TGS request with canonicalization requested.  Determines
@@ -881,7 +879,7 @@ typedef struct _kdb_vftabl {
      * KRB5_KDB_FLAG_INCLUDE_PAC: Set by the KDC during an AS request when the
      *     client requested PAC information during padata, and during most TGS
      *     requests.  Indicates that the module should include PAC information
-     *     when generating authorization data.
+     *     when its sign_authdata method is invoked.
      *
      * KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY: Set by the KDC when looking up the
      *     client entry in an AS request.  Affects how the module should return
