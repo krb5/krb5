@@ -908,7 +908,10 @@ typedef struct _kdb_vftabl {
      * also set), the module should do so by simply filling in an out-of-realm
      * name in entries->princ and setting all other fields to NULL.  Otherwise,
      * the module should return the entry for the cross-realm TGS of the
-     * referred-to realm.
+     * referred-to realm.  For TGS referals, the module can also include
+     * tl-data of type KRB5_TL_SERVER_REFERRAL containing ASN.1-encoded Windows
+     * referral data as documented in draft-ietf-krb-wg-kerberos-referrals-11
+     * appendix A; this will be returned to the client as encrypted padata.
      */
     krb5_error_code (*get_principal)(krb5_context kcontext,
                                      krb5_const_principal search_for,
