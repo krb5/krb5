@@ -650,6 +650,7 @@ kdb5_ldap_create(int argc, char *argv[])
             goto err_nomsg;
         }
 
+        rblock.key = &master_keyblock;
     }
 
     /* Create special principals inside the realm subtree */
