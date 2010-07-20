@@ -82,8 +82,8 @@ const struct krb5_cksumtypes krb5int_cksumtypes_list[] = {
 
     { CKSUMTYPE_HMAC_MD5_ARCFOUR,
       "hmac-md5-rc4", { "hmac-md5-enc", "hmac-md5-earcfour" },
-      "Microsoft HMAC MD5 (RC4 key)",
-      &krb5int_enc_arcfour, &krb5int_hash_md5,
+      "Microsoft HMAC MD5",
+      NULL, &krb5int_hash_md5,
       krb5int_hmacmd5_checksum, NULL,
       16, 16, 0 },
 
@@ -100,8 +100,8 @@ const struct krb5_cksumtypes krb5int_cksumtypes_list[] = {
       20, 12, 0 },
 
     { CKSUMTYPE_MD5_HMAC_ARCFOUR,
-      "md5-hmac-rc4", { 0 }, "Microsoft MD5 HMAC (RC4 key)",
-      &krb5int_enc_arcfour, &krb5int_hash_md5,
+      "md5-hmac-rc4", { 0 }, "Microsoft MD5 HMAC",
+      NULL, &krb5int_hash_md5,
       krb5int_hmacmd5_checksum, NULL,
       16, 16, 0 },
 };
