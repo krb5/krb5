@@ -662,6 +662,11 @@ int main () {
 AC_MSG_RESULT($ac_cv_printf_positional)
 
 
+# for t_locate_kdc test
+
+AC_PATH_PROG(DIG, dig, false)
+AC_PATH_PROG(NSLOOKUP, nslookup, false)
+
 # for kadmin
 
 AC_PROG_YACC

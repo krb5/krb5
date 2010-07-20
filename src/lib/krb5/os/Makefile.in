@@ -189,7 +189,9 @@ lclint-localaddr: localaddr.c
 	$(LCLINT) $(LCLINTOPTS) $(CPPFLAGS) $(LOCALINCLUDES) $(DEFS) \
 		-DTEST $(srcdir)/localaddr.c
 
-check-unix:: $(TEST_PROGS)
+check-unix:: check-unix-stdconf check-unix-locate check-unix-antoln
+
+check-unix-stdconf:: t_std_conf
 	KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\
 	$(KRB5_RUN_ENV) $(VALGRIND) ./t_std_conf  -d -s NEW.DEFAULT.REALM -d \
 		-k IGGY.ORG -k DEFAULT_REALM.TST \
@@ -198,17 +200,29 @@ check-unix:: $(TEST_PROGS)
 		-r pgp.good.idea -r no_domain > test.out
 	cmp test.out $(srcdir)/ref_std_conf.out
 	$(RM) test.out
-	KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\
-	if test "$(OFFLINE)" != yes; then \
-	  $(KRB5_RUN_ENV) $(VALGRIND) ./t_locate_kdc ATHENA.MIT.EDU; \
+
+# The following can be overriden on the make command line if needed:
+LOCREALM = ATHENA.MIT.EDU
+SRVNAME = _kerberos._udp.athena.mit.edu.
+DIGPAT = '^_kerberos.*srv'
+NSPAT = '^_kerberos.*service'
+DIG = @DIG@
+NSLOOKUP = @NSLOOKUP@
+
+check-unix-locate:: t_locate_kdc
+	if [ "$(OFFLINE)" = no ] && \
+	    $(DIG) $(SRVNAME) srv | grep -i $(DIGPAT) || \
+	    $(NSLOOKUP) -q=srv $(SRVNAME) | grep -i $(NSPAT); then \
+	    KRB5_CONFIG=$(srcdir)/td_krb5.conf ; export KRB5_CONFIG ;\
+	    $(KRB5_RUN_ENV) $(VALGRIND) ./t_locate_kdc $(LOCREALM); \
 	else \
-	  echo SKIPPING t_locate_kdc TEST WHILE OFFLINE; \
+	    echo '*** WARNING: skipped t_locate_kdc test: known DNS name not found'; \
 	fi
 
 #
 # Do some aname-to-lname testing.
 #
-check-unix::
+check-unix-antoln:: t_an_to_ln
 	echo '[libdefaults]' > ./t_an.conf
 	echo '	default_realm = r' >> ./t_an.conf
 	echo '[realms]' >> ./t_an.conf
