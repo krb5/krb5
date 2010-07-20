@@ -740,7 +740,7 @@ int gss_krb5int_lib_init(void)
     printf("gss_krb5int_lib_init\n");
 #endif
 
-    add_error_table(&et_ggss_error_table);
+    add_error_table(&et_k5g_error_table);
 
 #ifndef LEAN_CLIENT
     err = k5_mutex_finish_init(&gssint_krb5_keytab_lock);
