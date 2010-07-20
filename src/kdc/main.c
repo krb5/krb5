@@ -728,6 +728,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
             break;
         case 'P':
             pid_file = optarg;
+            break;
         case 'p':
             if (default_udp_ports)
                 free(default_udp_ports);
