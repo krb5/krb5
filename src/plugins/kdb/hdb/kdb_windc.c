@@ -173,7 +173,7 @@ kh_get_tgs_key(krb5_context context,
     krb5_error_code code;
     krb5_principal tgsname = NULL;
     krb5_key_data *krbtgt_key = NULL;
-    krb5_db_entry krbtgt;
+    krb5_db_entry *krbtgt;
 
     memset(&krbtgt, 0, sizeof(krbtgt));
     krbtgt_keyblock->contents = NULL;
@@ -195,7 +195,7 @@ kh_get_tgs_key(krb5_context context,
         goto cleanup;
 
     code = krb5_dbe_find_enctype(context,
-                                 &krbtgt,
+                                 krbtgt,
                                  -1,    /* ignore enctype */
                                  -1,    /* ignore salttype */
                                  0,     /* highest kvno */
@@ -216,7 +216,7 @@ kh_get_tgs_key(krb5_context context,
         goto cleanup;
 
 cleanup:
-    kh_kdb_free_entry(context, KH_DB_CONTEXT(context), &krbtgt);
+    kh_kdb_free_entry(context, KH_DB_CONTEXT(context), krbtgt);
     krb5_free_principal(context, tgsname);
 
     return code;
@@ -224,13 +224,20 @@ cleanup:
 
 krb5_error_code
 kh_db_sign_auth_data(krb5_context context,
-                     unsigned int method,
-                     const krb5_data *req_data,
-                     krb5_data *rep_data)
+                     unsigned int flags,
+                     krb5_const_principal client_princ,
+                     krb5_db_entry *client,
+                     krb5_db_entry *server,
+                     krb5_db_entry *krbtgt,
+                     krb5_keyblock *client_key,
+                     krb5_keyblock *server_key,
+                     krb5_keyblock *krbtgt_key,
+                     krb5_keyblock *session_key,
+                     krb5_timestamp authtime,
+                     krb5_authdata **tgt_auth_data,
+                     krb5_authdata ***signed_auth_data)
 {
     kh_db_context *kh = KH_DB_CONTEXT(context);
-    kdb_sign_auth_data_req *req = (kdb_sign_auth_data_req *)req_data->data;
-    kdb_sign_auth_data_rep *rep = (kdb_sign_auth_data_rep *)rep_data->data;
     heim_pac hpac = NULL;
     heim_octet_string pac_data;
     krb5_boolean is_as_req;
@@ -241,31 +248,32 @@ kh_db_sign_auth_data(krb5_context context,
     EncryptionKey krbtgt_hkey;
     krb5_keyblock krbtgt_kkey;
 
+    *signed_auth_data = NULL;
+
     if (kh->windc == NULL)
         return KRB5_KDB_DBTYPE_NOSUP; /* short circuit */
 
-    memset(rep, 0, sizeof(*rep));
     memset(&krbtgt_kkey, 0, sizeof(krbtgt_kkey));
     pac_data.data = NULL;
 
-    is_as_req = ((req->flags & KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY) != 0);
+    is_as_req = ((flags & KRB5_KDB_FLAG_CLIENT_REFERRALS_ONLY) != 0);
 
     /* Prefer canonicalised name from client entry */
-    if (req->client != NULL) {
-        client_hprinc = KH_DB_ENTRY(req->client)->entry.principal;
+    if (client != NULL) {
+        client_hprinc = KH_DB_ENTRY(client)->entry.principal;
     } else {
-        code = kh_marshal_Principal(context, req->client_princ, &client_hprinc);
+        code = kh_marshal_Principal(context, client_princ, &client_hprinc);
         if (code != 0)
             goto cleanup;
     }
 
-    KH_MARSHAL_KEY(req->server_key, &server_hkey);
-    KH_MARSHAL_KEY(req->krbtgt_key, &krbtgt_hkey);
+    KH_MARSHAL_KEY(server_key, &server_hkey);
+    KH_MARSHAL_KEY(krbtgt_key, &krbtgt_hkey);
 
     if (!is_as_req) {
         /* find the existing PAC, if present */
         code = krb5int_find_authdata(context,
-                                     req->auth_data,
+                                     tgt_auth_data,
                                      NULL,
                                      KRB5_AUTHDATA_WIN2K_PAC,
                                      &authdata);
@@ -273,10 +281,9 @@ kh_db_sign_auth_data(krb5_context context,
             goto cleanup;
     }
 
-    if ((is_as_req && (req->flags & KRB5_KDB_FLAG_INCLUDE_PAC)) ||
-        (authdata == NULL && req->client != NULL)) {
-        code = kh_windc_pac_generate(context, kh,
-                                     KH_DB_ENTRY(req->client), &hpac);
+    if ((is_as_req && (flags & KRB5_KDB_FLAG_INCLUDE_PAC)) ||
+        (authdata == NULL && client != NULL)) {
+        code = kh_windc_pac_generate(context, kh, KH_DB_ENTRY(client), &hpac);
         if (code != 0)
             goto cleanup;
     } else if (authdata != NULL) {
@@ -299,20 +306,19 @@ kh_db_sign_auth_data(krb5_context context,
          * ticket rather than a TGT; we must verify the server and KDC
          * signatures to assert that the server did not forge the PAC.
          */
-        if (req->flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION) {
-            code = kh_pac_verify(context, hpac, req->authtime,
+        if (flags & KRB5_KDB_FLAG_CONSTRAINED_DELEGATION) {
+            code = kh_pac_verify(context, hpac, authtime,
                                  client_hprinc, &server_hkey, &krbtgt_hkey);
         } else {
-            code = kh_pac_verify(context, hpac, req->authtime,
+            code = kh_pac_verify(context, hpac, authtime,
                                  client_hprinc, &krbtgt_hkey, NULL);
         }
         if (code != 0)
             goto cleanup;
 
         code = kh_windc_pac_verify(context, kh, client_hprinc,
-                                   req->client ?
-                                   KH_DB_ENTRY(req->client) : NULL,
-                                   KH_DB_ENTRY(req->server),
+                                   client ? KH_DB_ENTRY(client) : NULL,
+                                   KH_DB_ENTRY(server),
                                    &hpac);
         if (code != 0)
             goto cleanup;
@@ -325,17 +331,17 @@ kh_db_sign_auth_data(krb5_context context,
      * In the cross-realm case, krbtgt_hkey refers to the cross-realm
      * TGS key, so we need to explicitly lookup our TGS key.
      */
-    if (req->flags & KRB5_KDB_FLAG_CROSS_REALM) {
+    if (flags & KRB5_KDB_FLAG_CROSS_REALM) {
         assert(!is_as_req);
 
-        code = kh_get_tgs_key(context, kh, req->server->princ, &krbtgt_kkey);
+        code = kh_get_tgs_key(context, kh, server->princ, &krbtgt_kkey);
         if (code != 0)
             goto cleanup;
 
         KH_MARSHAL_KEY(&krbtgt_kkey, &krbtgt_hkey);
     }
 
-    code = kh_pac_sign(context, hpac, req->authtime, client_hprinc,
+    code = kh_pac_sign(context, hpac, authtime, client_hprinc,
                        &server_hkey, &krbtgt_hkey, &pac_data);
     if (code != 0)
         goto cleanup;
@@ -367,12 +373,12 @@ kh_db_sign_auth_data(krb5_context context,
     code = krb5_encode_authdata_container(context,
                                           KRB5_AUTHDATA_IF_RELEVANT,
                                           authdata,
-                                          &rep->auth_data);
+                                          signed_auth_data);
     if (code != 0)
         goto cleanup;
 
 cleanup:
-    if (req->client == NULL)
+    if (client == NULL)
         kh_free_Principal(context, client_hprinc);
     kh_pac_free(context, hpac);
     if (pac_data.data != NULL)
@@ -486,16 +492,16 @@ kh_marshall_HostAddresses(krb5_context context,
 
 krb5_error_code
 kh_db_check_policy_as(krb5_context context,
-                      unsigned int method,
-                      const krb5_data *req_data,
-                      krb5_data *rep_data)
+                      krb5_kdc_req *request,
+                      krb5_db_entry *client,
+                      krb5_db_entry *server,
+                      krb5_timestamp kdc_time,
+                      const char **status,
+                      krb5_data *e_data)
 {
     kh_db_context *kh = KH_DB_CONTEXT(context);
-    kdb_check_policy_as_req *req = (kdb_check_policy_as_req *)req_data->data;
-    kdb_check_policy_as_rep *rep = (kdb_check_policy_as_rep *)rep_data->data;
     krb5_error_code code;
-    heim_octet_string e_data;
-    krb5_kdc_req *kkdcreq = req->request;
+    heim_octet_string he_data;
     KDC_REQ hkdcreq;
     Principal *hclient = NULL;
     Principal *hserver = NULL;
@@ -507,19 +513,19 @@ kh_db_check_policy_as(krb5_context context,
     memset(&hkdcreq, 0, sizeof(hkdcreq));
 
     hkdcreq.pvno = KRB5_PVNO;
-    hkdcreq.msg_type = kkdcreq->msg_type;
+    hkdcreq.msg_type = request->msg_type;
     hkdcreq.padata = NULL; /* FIXME */
     code = kh_marshal_KDCOptions(context,
-                                 kkdcreq->kdc_options,
+                                 request->kdc_options,
                                  &hkdcreq.req_body.kdc_options);
     if (code != 0)
         goto cleanup;
 
-    code = kh_marshal_Principal(context, kkdcreq->client, &hclient);
+    code = kh_marshal_Principal(context, request->client, &hclient);
     if (code != 0)
         goto cleanup;
 
-    code = kh_marshal_Principal(context, kkdcreq->server, &hserver);
+    code = kh_marshal_Principal(context, request->server, &hserver);
     if (code != 0)
         goto cleanup;
 
@@ -527,16 +533,16 @@ kh_db_check_policy_as(krb5_context context,
     hkdcreq.req_body.realm = hserver->realm;
     hkdcreq.req_body.sname = &hserver->name;
 
-    from  = kkdcreq->from;  hkdcreq.req_body.from = &from;
-    till  = kkdcreq->till;  hkdcreq.req_body.till = &till;
-    rtime = kkdcreq->rtime; hkdcreq.req_body.rtime = &rtime;
+    from  = request->from;  hkdcreq.req_body.from = &from;
+    till  = request->till;  hkdcreq.req_body.till = &till;
+    rtime = request->rtime; hkdcreq.req_body.rtime = &rtime;
 
-    hkdcreq.req_body.nonce     = kkdcreq->nonce;
-    hkdcreq.req_body.etype.len = kkdcreq->nktypes;
-    hkdcreq.req_body.etype.val = kkdcreq->ktype;
+    hkdcreq.req_body.nonce     = request->nonce;
+    hkdcreq.req_body.etype.len = request->nktypes;
+    hkdcreq.req_body.etype.val = request->ktype;
 
     code = kh_marshall_HostAddresses(context,
-                                     kkdcreq->addresses,
+                                     request->addresses,
                                      &hkdcreq.req_body.addresses);
     if (code != 0)
         goto cleanup;
@@ -545,11 +551,11 @@ kh_db_check_policy_as(krb5_context context,
     /* FIXME hkdcreq.req_body.additional_tickets */
 
     code = kh_windc_client_access(context, kh,
-                                  KH_DB_ENTRY(req->client),
-                                  &hkdcreq, &e_data);
+                                  KH_DB_ENTRY(client),
+                                  &hkdcreq, &he_data);
 
-    rep->e_data.data   = e_data.data;
-    rep->e_data.length = e_data.length;
+    e_data->data   = he_data.data;
+    e_data->length = he_data.length;
 
 cleanup:
     kh_free_HostAddresses(context, hkdcreq.req_body.addresses);

@@ -40,8 +40,10 @@
 #include "kdb_hdb.h"
 
 static krb5_error_code
-kh_init(void)
+kh_init(int dal_version)
 {
+    if (dal_version != KRB5_KDB_DAL_VERSION)
+        return KRB5_KDB_DBTYPE_MISMATCH;
     return 0;
 }
 
@@ -92,7 +94,7 @@ kh_map_error(heim_error_code code)
         code = KRB5_KDB_NOMASTERKEY;
         break;
     case HDB_ERR_MANDATORY_OPTION:
-        code = KRB5_KDB_DBTYPE_NOSUP;
+        code = KRB5_PLUGIN_OP_NOTSUPP;
         break;
     default:
         break;
@@ -190,7 +192,7 @@ kh_db_context_init(krb5_context context,
                                 (void **)&hdb_interface_version,
                                 &errinfo) == 0 &&
         *hdb_interface_version != HDB_INTERFACE_VERSION) {
-        code = KRB5_KDB_DBTYPE_NOSUP;
+        code = KRB5_PLUGIN_OP_NOTSUPP;
         goto cleanup;
     }
 
@@ -413,7 +415,7 @@ kh_hdb_rename(krb5_context context,
     heim_error_code hcode;
 
     if (kh->hdb->hdb_rename == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
 
     hcode = (*kh->hdb->hdb_rename)(kh->hcontext, kh->hdb, name);
 
@@ -462,18 +464,6 @@ kh_hdb_unseal_key(krb5_context context,
     return kh_map_error(hcode);
 }
 
-static krb5_error_code
-kh_hdb_set_master_key(krb5_context context,
-                      kh_db_context *kh,
-                      EncryptionKey *key)
-{
-    heim_error_code hcode;
-
-    hcode = (*kh->hdb_set_master_key)(kh->hcontext, kh->hdb, key);
-
-    return kh_map_error(hcode);
-}
-
 void
 kh_hdb_free_entry(krb5_context context,
                   kh_db_context *kh,
@@ -491,6 +481,8 @@ kh_kdb_free_entry(krb5_context context,
     krb5_tl_data *tl_data = NULL;
     int i, j;
 
+    if (entry == NULL)
+        return;
     if (entry->e_data != NULL) {
         assert(entry->e_length == sizeof(hdb_entry_ex));
         kh_hdb_free_entry(context, kh, KH_DB_ENTRY(entry));
@@ -525,7 +517,7 @@ kh_kdb_free_entry(krb5_context context,
         free(entry->key_data);
     }
 
-    memset(entry, 0, sizeof(*entry));
+    free(entry);
 }
 
 static krb5_error_code
@@ -537,7 +529,7 @@ kh_db_create(krb5_context context,
     krb5_error_code code;
 
     if (kh == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
 
     code = k5_mutex_lock(kh->lock);
     if (code != 0)
@@ -551,22 +543,6 @@ kh_db_create(krb5_context context,
 }
 
 static krb5_error_code
-kh_db_destroy(krb5_context context,
-              char *conf_section,
-              char **db_args)
-{
-    return KRB5_KDB_DBTYPE_NOSUP;
-}
-
-static krb5_error_code
-kh_db_get_age(krb5_context context,
-              char *db_name,
-              time_t *age)
-{
-    return KRB5_KDB_DBTYPE_NOSUP;
-}
-
-static krb5_error_code
 kh_db_lock(krb5_context context, int kmode)
 {
     kh_db_context *kh = KH_DB_CONTEXT(context);
@@ -574,7 +550,7 @@ kh_db_lock(krb5_context context, int kmode)
     enum hdb_lockop hmode;
 
     if (kh == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
 
     code = k5_mutex_lock(kh->lock);
     if (code != 0)
@@ -599,7 +575,7 @@ kh_db_unlock(krb5_context context)
     krb5_error_code code;
 
     if (kh == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
 
     code = k5_mutex_lock(kh->lock);
     if (code != 0)
@@ -617,11 +593,13 @@ kh_get_principal(krb5_context context,
                  kh_db_context *kh,
                  krb5_const_principal princ,
                  unsigned int hflags,
-                 krb5_db_entry *kentry)
+                 krb5_db_entry **kentry)
 {
     krb5_error_code code;
     Principal *hprinc = NULL;
     hdb_entry_ex *hentry = NULL;
+
+    *kentry = NULL;
 
     code = kh_marshal_Principal(context, princ, &hprinc);
     if (code != 0)
@@ -648,8 +626,8 @@ kh_get_principal(krb5_context context,
 
     code = kh_unmarshal_hdb_entry(context, &hentry->entry, kentry);
     if (code == 0) {
-        kentry->e_length = sizeof(*hentry);
-        kentry->e_data = (krb5_octet *)hentry;
+        (*kentry)->e_length = sizeof(*hentry);
+        (*kentry)->e_data = (krb5_octet *)hentry;
     } else {
         kh_hdb_free_entry(context, kh, hentry);
         free(hentry);
@@ -682,15 +660,18 @@ static krb5_error_code
 kh_get_master_key_principal(krb5_context context,
                             kh_db_context *kh,
                             krb5_const_principal princ,
-                            krb5_db_entry *kentry,
-                            int *nentries)
+                            krb5_db_entry **kentry_ptr)
 {
     krb5_error_code code;
     krb5_key_data *key_data;
     krb5_timestamp now;
+    krb5_db_entry *kentry;
 
-    memset(kentry, 0, sizeof(*kentry));
-    *nentries = 0;
+    *kentry_ptr = NULL;
+
+    kentry = k5alloc(sizeof(*kentry), &code);
+    if (kentry == NULL)
+        return code;
 
     kentry->magic = KRB5_KDB_MAGIC_NUMBER;
     kentry->len = KRB5_KDB_V1_BASE_LENGTH;
@@ -725,7 +706,7 @@ kh_get_master_key_principal(krb5_context context,
     key_data->key_data_kvno         = 1;
     key_data->key_data_type[0]      = ENCTYPE_UNKNOWN;
 
-    *nentries = 1;
+    *kentry_ptr = kentry;
 
     return 0;
 }
@@ -734,24 +715,19 @@ static krb5_error_code
 kh_db_get_principal(krb5_context context,
                     krb5_const_principal princ,
                     unsigned int kflags,
-                    krb5_db_entry *kentry,
-                    int *nentries,
-                    krb5_boolean *more)
+                    krb5_db_entry **kentry)
 {
     krb5_error_code code;
     kh_db_context *kh = KH_DB_CONTEXT(context);
     unsigned int hflags;
 
-    *nentries = 0;
-    *more = FALSE;
-    memset(kentry, 0, sizeof(*kentry));
+    *kentry = NULL;
 
     if (kh == NULL)
         return KRB5_KDB_DBNOTINITED;
 
     if (kh_is_master_key_principal(context, princ))
-        return kh_get_master_key_principal(context, kh, princ,
-                                           kentry, nentries);
+        return kh_get_master_key_principal(context, kh, princ, kentry);
 
     code = k5_mutex_lock(kh->lock);
     if (code != 0)
@@ -769,41 +745,25 @@ kh_db_get_principal(krb5_context context,
         hflags |= HDB_F_GET_ANY;
 
     code = kh_get_principal(context, kh, princ, hflags, kentry);
-    switch (code) {
-    case 0:
-        *nentries = 1;
-        break;
-    case KRB5_KDB_NOENTRY:
-        code = 0;
-        break;
-    default:
-        break;
-    }
-
     k5_mutex_unlock(kh->lock);
 
     return code;
 }
 
-static krb5_error_code
+static void
 kh_db_free_principal(krb5_context context,
-                     krb5_db_entry *entry,
-                     int count)
+                     krb5_db_entry *entry)
 {
     kh_db_context *kh = KH_DB_CONTEXT(context);
     krb5_error_code code;
-    int i;
 
     code = k5_mutex_lock(kh->lock);
     if (code != 0)
-        return code;
+        return;
 
-    for (i = 0; i < count; i++)
-        kh_kdb_free_entry(context, kh, &entry[i]);
+    kh_kdb_free_entry(context, kh, entry);
 
     k5_mutex_unlock(kh->lock);
-
-    return 0;
 }
 
 static krb5_error_code
@@ -861,13 +821,11 @@ cleanup:
 
 static krb5_error_code
 kh_db_put_principal(krb5_context context,
-                    krb5_db_entry *entries,
-                    int *nentries,
+                    krb5_db_entry *entry,
                     char **db_args)
 {
     krb5_error_code code;
     kh_db_context *kh = KH_DB_CONTEXT(context);
-    int i;
 
     if (kh == NULL)
         return KRB5_KDB_DBNOTINITED;
@@ -876,11 +834,7 @@ kh_db_put_principal(krb5_context context,
     if (code != 0)
         return code;
 
-    for (i = 0; i < *nentries; i++) {
-        code = kh_put_principal(context, kh, &entries[i]);
-        if (code != 0)
-            break;
-    }
+    code = kh_put_principal(context, kh, entry);
 
     k5_mutex_unlock(kh->lock);
 
@@ -915,8 +869,7 @@ kh_delete_principal(krb5_context context,
 
 static krb5_error_code
 kh_db_delete_principal(krb5_context context,
-                       krb5_const_principal princ,
-                       int *nentries)
+                       krb5_const_principal princ)
 {
     krb5_error_code code;
     kh_db_context *kh = KH_DB_CONTEXT(context);
@@ -929,8 +882,6 @@ kh_db_delete_principal(krb5_context context,
         return code;
 
     code = kh_delete_principal(context, kh, princ);
-
-    *nentries = (code == 0) ? 1 : 0;
 
     k5_mutex_unlock(kh->lock);
 
@@ -963,11 +914,11 @@ kh_db_iterate(krb5_context context,
 
     code = kh_hdb_firstkey(context, kh, hflags, &hentry);
     while (code == 0) {
-        krb5_db_entry kentry;
+        krb5_db_entry *kentry;
 
         if (kh_unmarshal_hdb_entry(context, &hentry.entry, &kentry) == 0) {
-            code = (*func)(func_arg, &kentry);
-            kh_kdb_free_entry(context, kh, &kentry);
+            code = (*func)(func_arg, kentry);
+            kh_kdb_free_entry(context, kh, kentry);
         }
 
         kh_hdb_free_entry(context, kh, &hentry);
@@ -979,14 +930,12 @@ kh_db_iterate(krb5_context context,
     }
 
     if (code == KRB5_KDB_NOENTRY) {
-        krb5_db_entry kentry;
-        int nentries;
+        krb5_db_entry *kentry;
 
         /* Return the fake master key principal */
-        if (kh_get_master_key_principal(context, kh, NULL,
-                                        &kentry, &nentries) == 0) {
-            code = (*func)(func_arg, &kentry);
-            kh_kdb_free_entry(context, kh, &kentry);
+        if (kh_get_master_key_principal(context, kh, NULL, &kentry) == 0) {
+            code = (*func)(func_arg, kentry);
+            kh_kdb_free_entry(context, kh, kentry);
         }
 
         code = 0;
@@ -1047,59 +996,6 @@ kh_db_free(krb5_context context, void *ptr)
 }
 
 static krb5_error_code
-kh_set_master_key(krb5_context context,
-                  char *pwd,
-                  krb5_keyblock *kkey)
-{
-    kh_db_context *kh = KH_DB_CONTEXT(context);
-    krb5_error_code code;
-    EncryptionKey hkey;
-
-    if (kh == NULL)
-        return KRB5_KDB_DBNOTINITED;
-
-    if (kkey->enctype == ENCTYPE_UNKNOWN)
-        return 0;
-
-    code = k5_mutex_lock(kh->lock);
-    if (code != 0)
-        return code;
-
-    KH_MARSHAL_KEY(kkey, &hkey);
-
-    code = kh_hdb_set_master_key(context, kh, &hkey);
-
-    k5_mutex_unlock(kh->lock);
-
-    return code;
-}
-
-static krb5_error_code
-kh_get_master_key(krb5_context context,
-                  krb5_keyblock **pkey)
-{
-    krb5_error_code code;
-    krb5_keyblock *key;
-
-    /*
-     * The Heimdal master key interface is opaque; we can't
-     * return the master key without poking into internal data
-     * structures that would make this bridge even more brittle.
-     * So, we just return a dummy key.
-     */
-    key = k5alloc(sizeof(krb5_keyblock), &code);
-    if (code != 0)
-        return code;
-
-    key->magic = KV5M_KEYBLOCK;
-    key->enctype = ENCTYPE_UNKNOWN;
-
-    *pkey = key;
-
-    return 0;
-}
-
-static krb5_error_code
 kh_promote_db(krb5_context context,
               char *conf_section,
               char **db_args)
@@ -1112,7 +1008,7 @@ kh_promote_db(krb5_context context,
         return KRB5_KDB_DBNOTINITED;
 
     if (kh->hdb->hdb_name == NULL)
-        return KRB5_KDB_DBTYPE_NOSUP;
+        return KRB5_PLUGIN_OP_NOTSUPP;
 
     if (asprintf(&name, "%s~", kh->hdb->hdb_name) < 0)
         return ENOMEM;
@@ -1195,7 +1091,7 @@ kh_dbekd_decrypt_key_data(krb5_context context,
         return KRB5_KDB_DBNOTINITED;
 
     if (mkey->enctype != ENCTYPE_UNKNOWN)
-        code = krb5_dbekd_def_decrypt_key_data(context, mkey, key_data,
+        code = krb5_dbe_def_decrypt_key_data(context, mkey, key_data,
                                                kkey, keysalt);
     else
         code = kh_decrypt_key(context, kh, key_data, kkey, keysalt);
@@ -1271,8 +1167,8 @@ kh_dbekd_encrypt_key_data(krb5_context context,
 
     /* For migration */
     if (mkey->enctype != ENCTYPE_UNKNOWN)
-        code = krb5_dbekd_def_encrypt_key_data(context, mkey, kkey,
-                                               keysalt, keyver, key_data);
+        code = krb5_dbe_def_encrypt_key_data(context, mkey, kkey,
+                                             keysalt, keyver, key_data);
     else
         code = kh_encrypt_key(context, kh, kkey, keysalt, keyver, key_data);
 
@@ -1285,19 +1181,17 @@ kh_dbekd_encrypt_key_data(krb5_context context,
 
 static krb5_error_code
 kh_db_check_allowed_to_delegate(krb5_context context,
-                                unsigned int method,
-                                const krb5_data *req_data,
-                                krb5_data *rep_data)
+                                krb5_const_principal client,
+                                const krb5_db_entry *server,
+                                krb5_const_principal proxy)
 {
-    kdb_check_allowed_to_delegate_req *req;
     krb5_error_code code;
     hdb_entry_ex *hentry;
     HDB_extension *ext;
     HDB_Ext_Constrained_delegation_acl *acl;
     unsigned int i;
 
-    req = (kdb_check_allowed_to_delegate_req *)req_data->data;
-    hentry = KH_DB_ENTRY(req->server);
+    hentry = KH_DB_ENTRY(server);
     ext = kh_hdb_find_extension(&hentry->entry,
                                 choice_HDB_extension_data_allowed_to_delegate_to);
 
@@ -1310,7 +1204,7 @@ kh_db_check_allowed_to_delegate(krb5_context context,
             krb5_principal princ;
 
             if (kh_unmarshal_Principal(context, &acl->val[i], &princ) == 0) {
-                if (krb5_principal_compare(context, req->proxy, princ)) {
+                if (krb5_principal_compare(context, proxy, princ)) {
                     code = 0;
                     krb5_free_principal(context, princ);
                     break;
@@ -1323,51 +1217,6 @@ kh_db_check_allowed_to_delegate(krb5_context context,
     return code;
 }
 
-static struct _kh_invoke_fn {
-    unsigned int method;
-    krb5_error_code (*function)(krb5_context, unsigned int,
-                                const krb5_data *, krb5_data *);
-} kh_invoke_vtable[] = {
-    { KRB5_KDB_METHOD_CHECK_POLICY_AS,           kh_db_check_policy_as },
-    { KRB5_KDB_METHOD_SIGN_AUTH_DATA,            kh_db_sign_auth_data },
-    { KRB5_KDB_METHOD_CHECK_ALLOWED_TO_DELEGATE, kh_db_check_allowed_to_delegate },
-};
-
-static krb5_error_code
-kh_db_invoke(krb5_context context,
-             unsigned int method,
-             const krb5_data *req,
-             krb5_data *rep)
-{
-    kh_db_context *kh = KH_DB_CONTEXT(context);
-    size_t i;
-    krb5_error_code code;
-
-    if (kh == NULL)
-        return KRB5_KDB_DBNOTINITED;
-
-    code = k5_mutex_lock(kh->lock);
-    if (code != 0)
-        return code;
-
-    code = KRB5_KDB_DBTYPE_NOSUP;
-
-    for (i = 0;
-         i < sizeof(kh_invoke_vtable) / sizeof(kh_invoke_vtable[0]);
-         i++) {
-        struct _kh_invoke_fn *fn = &kh_invoke_vtable[i];
-
-        if (fn->method == method) {
-            code = (*fn->function)(context, method, req, rep);
-            break;
-        }
-    }
-
-    k5_mutex_unlock(kh->lock);
-
-    return code;
-}
-
 kdb_vftabl kdb_function_table = {
     1,
     0,
@@ -1376,8 +1225,8 @@ kdb_vftabl kdb_function_table = {
     kh_init_module,
     kh_fini_module,
     kh_db_create,
-    kh_db_destroy,
-    kh_db_get_age,
+    NULL, /* destroy */
+    NULL, /* get_age */
     kh_db_lock,
     kh_db_unlock,
     kh_db_get_principal,
@@ -1385,32 +1234,29 @@ kdb_vftabl kdb_function_table = {
     kh_db_put_principal,
     kh_db_delete_principal,
     kh_db_iterate,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    NULL, /* create_policy */
+    NULL, /* get_policy */
+    NULL, /* put_policy */
+    NULL, /* iter_policy */
+    NULL, /* delete_policy */
+    NULL, /* free_policy */
     kh_db_alloc,
     kh_db_free,
-    kh_set_master_key,
-    kh_get_master_key,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
+    NULL, /* set_master_key_list */
+    NULL, /* get_master_key_list */
     kh_fetch_master_key,
-    NULL,
     kh_fetch_master_key_list,
-    NULL,
-    NULL,
-    NULL,
+    NULL, /* store_master_key_list */
+    NULL, /* dbe_search_enctype */
+    NULL, /* change_pwd */
     kh_promote_db,
     kh_dbekd_decrypt_key_data,
     kh_dbekd_encrypt_key_data,
-    kh_db_invoke,
+    kh_db_sign_auth_data,
+    NULL, /* check_transited_realms */
+    kh_db_check_policy_as,
+    NULL, /* check_policy_tgs */
+    NULL, /* audit_as_req */
+    NULL, /* refresh_config */
+    kh_db_check_allowed_to_delegate
 };

@@ -743,13 +743,16 @@ cleanup:
 krb5_error_code
 kh_unmarshal_hdb_entry(krb5_context context,
                        const hdb_entry *hentry,
-                       krb5_db_entry *kentry)
+                       krb5_db_entry **kentry_ptr)
 {
     kh_db_context *kh = KH_DB_CONTEXT(context);
+    krb5_db_entry *kentry;
     krb5_error_code code;
     unsigned int i;
 
-    memset(kentry, 0, sizeof(*kentry));
+    kentry = k5alloc(sizeof(*kentry), &code);
+    if (kentry == NULL)
+        return code;
 
     kentry->magic = KRB5_KDB_MAGIC_NUMBER;
     kentry->len = KRB5_KDB_V1_BASE_LENGTH;
@@ -801,9 +804,10 @@ kh_unmarshal_hdb_entry(krb5_context context,
         kentry->n_key_data++;
     }
 
-cleanup:
-    if (code != 0)
-        kh_kdb_free_entry(context, kh, kentry);
+    *kentry_ptr = kentry;
+    kentry = NULL;
 
+cleanup:
+    kh_kdb_free_entry(context, kh, kentry);
     return code;
 }
