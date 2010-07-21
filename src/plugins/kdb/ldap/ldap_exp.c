@@ -47,7 +47,7 @@
  */
 
 kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_ldap, kdb_function_table) = {
-    1,                                      /* major version number 1 */
+    KRB5_KDB_DAL_MAJOR_VERSION,             /* major version number */
     0,                                      /* minor version number 0 */
     /* init_library */                      krb5_ldap_lib_init,
     /* fini_library */                      krb5_ldap_lib_cleanup,

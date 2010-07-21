@@ -742,11 +742,10 @@ krb5_dbe_free_tl_data(krb5_context, krb5_tl_data *);
 #define KRB5_KDB_OPT_SET_LOCK_MODE      1
 
 /*
- * This number indicates the date of the last incompatible change to the
- * DAL.  It is passed to init_library to allow KDB modules to detect when
- * they are being loaded by an incompatible version of the KDC.
+ * This number indicates the date of the last incompatible change to the DAL.
+ * The maj_ver field of the module's vtable structure must match this version.
  */
-#define KRB5_KDB_DAL_VERSION 20100714
+#define KRB5_KDB_DAL_MAJOR_VERSION 2
 
 /*
  * A krb5_context can hold one database object.  Modules should use
@@ -775,7 +774,7 @@ typedef struct _kdb_vftabl {
      * Mandatory: Invoked after the module library is loaded, when the first DB
      * using the module is opened, across all contexts.
      */
-    krb5_error_code (*init_library)(int dal_version);
+    krb5_error_code (*init_library)(void);
 
     /*
      * Mandatory: Invoked before the module library is unloaded, after the last

@@ -40,10 +40,8 @@
 #include "kdb_hdb.h"
 
 static krb5_error_code
-kh_init(int dal_version)
+kh_init(void)
 {
-    if (dal_version != KRB5_KDB_DAL_VERSION)
-        return KRB5_KDB_DBTYPE_MISMATCH;
     return 0;
 }
 
@@ -1218,7 +1216,7 @@ kh_db_check_allowed_to_delegate(krb5_context context,
 }
 
 kdb_vftabl kdb_function_table = {
-    1,
+    KRB5_KDB_DAL_MAJOR_VERSION,
     0,
     kh_init,
     kh_fini,

@@ -193,12 +193,10 @@ WRAP_VOID (krb5_db2_audit_as_req,
            (kcontext, request, client, server, authtime, error_code));
 
 static krb5_error_code
-hack_init (int dal_version)
+hack_init (void)
 {
     krb5_error_code c;
 
-    if (dal_version != KRB5_KDB_DAL_VERSION)
-        return KRB5_KDB_DBTYPE_MISMATCH;
     c = krb5int_mutex_alloc (&krb5_db2_mutex);
     if (c)
         return c;
@@ -219,7 +217,7 @@ hack_cleanup (void)
  */
 
 kdb_vftabl PLUGIN_SYMBOL_NAME(krb5_db2, kdb_function_table) = {
-    1,                                      /* major version number 1 */
+    KRB5_KDB_DAL_MAJOR_VERSION,             /* major version number */
     0,                                      /* minor version number 0 */
     /* init_library */                  hack_init,
     /* fini_library */                  hack_cleanup,

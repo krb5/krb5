@@ -312,10 +312,8 @@ krb5_ldap_rebind(krb5_ldap_context *ldap_context,
  *     DAL API functions
  */
 krb5_error_code
-krb5_ldap_lib_init(int dal_version)
+krb5_ldap_lib_init()
 {
-    if (dal_version != KRB5_KDB_DAL_VERSION)
-        return KRB5_KDB_DBTYPE_MISMATCH;
     return 0;
 }
 
