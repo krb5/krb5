@@ -488,7 +488,7 @@ main(int argc, char *argv[])
         gp_is_static = 0;
     }
 
-    if ((retval = krb5_ldap_lib_init(KRB5_KDB_DAL_VERSION)) != 0) {
+    if ((retval = krb5_ldap_lib_init()) != 0) {
         com_err(progname, retval, "while initializing error handling");
         exit_status++;
         goto cleanup;
