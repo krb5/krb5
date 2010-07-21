@@ -135,7 +135,7 @@ kdb5_stash(argc, argv)
     }
 
     retval = krb5_db_open(context, db5util_db_args,
-                          KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_OTHER);
+                          KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN);
     if (retval) {
         com_err(progname, retval, "while initializing the database '%s'",
                 dbname);
