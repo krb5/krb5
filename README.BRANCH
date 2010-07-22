@@ -1,0 +1,175 @@
+This branch demonstrates a possible krb5 plugin infrastructure.
+
+----- Design -----
+
+The design decisions made in this infrastructure are:
+
+1. Configuration for plugin module discovery and filtering
+
+Built-in modules are automatically discoverable after being registered
+by the consumer.  Dynamic modules must be explicitly configured in
+order to be discoverable.  The discoverable set of modules can be
+filtered by either enabling a specific set of modules by name, or
+disabling modules by name.
+
+The profile schema used in this branch is:
+
+  [preauth]
+  interfacename = {
+    # May take multiple values; only named plugins will be enabled.
+    enable_only = name
+
+    # May take multiple values; named plugins will be disabled.
+    disable = name
+
+    # Establishes a mapping from a module name to a dynamic object.
+    module = modname:pathname
+  }
+
+The expectation is that the profile library will gain include-file
+support so that mappings for dynamic objects can be specified in
+profile fragments which are owned by the OS packages which implement
+the module.  Filtering rules are expected to be specified in the main
+krb5.conf by the system administrator.
+
+2. Consumer-facing API
+
+Each pluggable interface has a corresponding consumer-facing API.  The
+API consists of:
+
+* An interface-specific handle type, encapsulating the type of a
+  plugin module and possibly a resource instantiating that type (e.g a
+  keytab identifier).
+
+* An interface-specific loader function, which creates a handle or a
+  list of handles.  Lists of handles would be used by one-to-many
+  pluggable interfaces where the consumer wants to consult all
+  available modules.
+
+3. Producer-facing dynamic module ABI
+
+A dynamic object can implement one or more plugin modules.  To
+implement a plugin module, a dynamic object exports a symbol named
+<interfacename>_<modulename>_init.
+
+Module init functions accept as arguments a krb5_context, a major
+version, a minor version, and a pointer to a caller-allocated vtable
+(passed as an abstract type).  Major versions correspond to complete
+revisions of the vtable, while minor versions indicate extensions of a
+vtable type.
+
+Based on the major version, the init function casts the vtable pointer
+to the correct interface-specific type, and then fills in fields of
+that vtable, stopping as indicated by the minor version.
+
+4. Framework
+
+The following functions are used by interface-specific loader
+functions:
+
+* k5_plugin_load: Given a numeric interface ID and a module name,
+  return the init function for the named module.
+
+* k5_plugin_load_all: Given a numeric interface ID, return the init
+  functions of all modules for that interface.
+
+The following function is used by pluggable interface consumers:
+
+* k5_plugin_register: Registers a built-in plugin module under a
+  specified interface ID and plugin name.
+
+----- Branch walkthrough -----
+
+The domain-independent framework code lives in:
+
+  * include/k5-int.h -- framework declarations and context fields
+  * lib/krb5/krb/plugin.c -- the framework implementation
+  * lib/krb5/krb/init_ctx.c -- krb5_free_context addition
+
+The framework is demonstrated with a password quality pluggable
+interface used by libkadm5srv.  The code for this interface lives in:
+
+  * lib/kadm5/server_internal.h -- declarations for consumer API
+  * lib/kadm5/srv/pwqual.c -- consumer API implementation
+  * lib/kadm5/srv/pwqual_dict.c -- built-in module using dictionary
+  * lib/kadm5/srv/pwqual_policy.c -- built-in module using policy
+  * lib/kadm5/srv/server_misc.c -- consumer logic
+  * lib/kadm5/srv/server_dict.c -- removed (logic moved to pwqual_dict.c)
+  * lib/kadm5/srv/svr_principal.c -- some call sites adjusted
+  * lib/kadm5/srv/server_init.c -- some call sites adjusted
+
+There is also a sample dynamic plugin implementation in the directory
+pwqual_combo (at the top level, not under src).  This code simulates a
+third-party plugin and so uses its own (not very good) build system.
+The module rejects passwords which are combinations of two words from
+the dictionary file.
+
+----- Trying out the code -----
+
+These steps demonstrate the functioning of the code.
+
+1. Build the branch normally and install it somewhere.
+
+2. cd into the pwqual_combo directory and build it with "make
+   -I/path/to/install/include".  The Makefile probably only works on
+   Linux-based operating systems.
+
+3. Go back to the main build directory and run "make testrealm" to
+   create a functioning environment.
+
+4. Add the following configuration to testdir/krb5.master.conf to make
+   pwqual_combo discoverable:
+
+     [plugins]
+     pwqual = {
+       module = combo:/path/to/pwqual_combo.so
+     }
+
+5. Create a file /tmp/dict containing the lines "books" and "sharks".
+   In the realm definition for KRBTEST.COM in krb5.master.conf, add
+   the setting "dict_file = /tmp/dict".
+
+6. Run kadmin.local and create a policy with "addpol -minlength 4
+testpolicy".  Associated it with the principal user with "modprinc
+-policy testpolicy user".
+
+7. Inside kadmin.local, try some password change with "cpw user".  You
+should be able to see that all three password quality modules are
+functioning: you won't be able to set passwords shorter than four
+characters long (the policy module), or the passwords "books" or
+"sharks" (the dict module), or passwords named "sharksbooks" or
+"bookssharks" (the combo module).
+
+8. Quit out of kadmin.local and edit testdir/krb5.master.conf again.
+Play with the filtering rules by adding, alongside the "module"
+directive, one or more assignments for enable_only and/or disable.
+For instance, if you disable the policy module, you should find that
+(upon restarting kadmin.local) you can set passwords shorter than four
+characters again.
+
+----- What's wrong with this branch -----
+
+The krb5 code on this branch is mostly complete, but as a
+demonstration branch it is not perfect.  Problems include:
+
+* In some cases (marked by XXX comments), overly vague error codes are
+  returned where new error codes should have been created.  This is
+  because the krb5 trunk's krb5 error table is currently full, and
+  rectifying that problem is out of scope for the branch.
+
+* Opening and closing password quality plugins should perhaps be
+  hidden by the password quality consumer API--that is, the open
+  method should be invoked by the loader, and the close method by
+  k5_pwqual_free_handles.  Currently the responsibility for invoking
+  these methods rests with the consumer code in server_misc.c.
+
+* At Tom's suggestion, new internal functions with external linkage
+  are using the prefix "k5_" instead of "krb5int_".  This practice
+  should be validated by the dev community (and perhaps made uniform
+  in the code base, although that would result in a lot of churn) or
+  abandoned.
+
+* The decisions about what is a typedef and what is a simple structure
+  type are kind of haphazard, erring on the side of using typedefs.
+
+* The Hesiod support in server_misc.c was ripped out.

@@ -292,7 +292,7 @@ kadm5_create_principal_3(void *server_handle,
         have_polent = TRUE;
     }
     if (password) {
-        ret = passwd_check(handle, password, have_polent, &polent,
+        ret = passwd_check(handle, password, have_polent ? &polent : NULL,
                            entry->principal);
         if (ret)
             goto cleanup;
@@ -1341,8 +1341,8 @@ kadm5_chpass_principal_3(void *server_handle,
         have_pol = 1;
     }
 
-    if ((ret = passwd_check(handle, password, adb.aux_attributes &
-                            KADM5_POLICY, &pol, principal)))
+    if ((ret = passwd_check(handle, password, have_pol ? &pol : NULL,
+                            principal)))
         goto done;
 
     ret = krb5_dbe_find_act_mkey(handle->context, master_keylist,

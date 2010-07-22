@@ -168,6 +168,7 @@ typedef INT64_TYPE krb5_int64;
  */
 #include <errno.h>
 #include "krb5.h"
+#include <krb5/plugin.h>
 #include "profile.h"
 
 #include "port-sockets.h"
@@ -205,12 +206,14 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_DEFAULT_PRINCIPAL_EXPIRATION   "default_principal_expiration"
 #define KRB5_CONF_DEFAULT_PRINCIPAL_FLAGS        "default_principal_flags"
 #define KRB5_CONF_DICT_FILE                   "dict_file"
+#define KRB5_CONF_DISABLE                     "disable"
 #define KRB5_CONF_DISABLE_LAST_SUCCESS        "disable_last_success"
 #define KRB5_CONF_DISABLE_LOCKOUT             "disable_lockout"
 #define KRB5_CONF_DNS_LOOKUP_KDC              "dns_lookup_kdc"
 #define KRB5_CONF_DNS_LOOKUP_REALM            "dns_lookup_realm"
 #define KRB5_CONF_DNS_FALLBACK                "dns_fallback"
 #define KRB5_CONF_DOMAIN_REALM                "domain_realm"
+#define KRB5_CONF_ENABLE_ONLY                 "enable_only"
 #define KRB5_CONF_EXTRA_ADDRESSES             "extra_addresses"
 #define KRB5_CONF_FORWARDABLE                 "forwardable"
 #define KRB5_CONF_HOST_BASED_SERVICES         "host_based_services"
@@ -245,9 +248,11 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_MASTER_KDC                  "master_kdc"
 #define KRB5_CONF_MAX_LIFE                    "max_life"
 #define KRB5_CONF_MAX_RENEWABLE_LIFE          "max_renewable_life"
+#define KRB5_CONF_MODULE                      "module"
 #define KRB5_CONF_NOADDRESSES                 "noaddresses"
 #define KRB5_CONF_NO_HOST_REFERRAL            "no_host_referral"
 #define KRB5_CONF_PERMITTED_ENCTYPES          "permitted_enctypes"
+#define KRB5_CONF_PLUGINS                     "plugins"
 #define KRB5_CONF_PREAUTH_MODULE_DIR          "preauth_module_dir"
 #define KRB5_CONF_PREFERRED_PREAUTH_TYPES     "preferred_preauth_types"
 #define KRB5_CONF_PROXIABLE                   "proxiable"
@@ -1424,6 +1429,56 @@ krb5_authdata_free_internal(krb5_context kcontext,
                             krb5_authdata_context context, const char *module,
                             void *ptr);
 
+/* Plugin framework */
+
+/*
+ * A linked list entry mapping a module name to a module init function.  The
+ * entry may also include a dynamic object handle so that it can be released
+ * when the context is destroyed.
+ */
+struct plugin_mapping {
+    char *modname;
+    krb5_plugin_init_fn module;
+    struct plugin_file_handle *dyn_handle;
+    struct plugin_mapping *next;
+};
+
+/* Holds krb5_context information about each pluggable interface. */
+struct plugin_interface {
+    struct plugin_mapping *modules;
+    krb5_boolean configured;
+};
+
+/* A list of plugin interface IDs.  Make sure to increment
+ * PLUGIN_NUM_INTERFACES when a new interface is added. */
+#define PLUGIN_INTERFACE_PWQUAL 0
+#define PLUGIN_NUM_INTERFACES   1
+
+/* Retrieve the plugin module of type interface_id and name modname,
+ * storing the result into module. */
+krb5_error_code
+k5_plugin_load(krb5_context context, int interface_id, const char *modname,
+               krb5_plugin_init_fn *module);
+
+/* Retrieve all plugin modules of type interface_id, storing the result
+ * into modules.  Free the result with k5_plugin_free_handles. */
+krb5_error_code
+k5_plugin_load_all(krb5_context context, int interface_id,
+                   krb5_plugin_init_fn **modules);
+
+/* Release a module list allocated by k5_plugin_load_all. */
+void
+k5_plugin_free_modules(krb5_context context, krb5_plugin_init_fn *modules);
+
+/* Register a plugin module of type interface_id and name modname. */
+krb5_error_code
+k5_plugin_register(krb5_context context, int interface_id, const char *modname,
+                   krb5_plugin_init_fn module);
+
+/* Destroy the module state within context; used by krb5_free_context. */
+void
+k5_plugin_free_context(krb5_context context);
+
 struct _kdb5_dal_handle;        /* private, in kdb5.h */
 typedef struct _kdb5_dal_handle kdb5_dal_handle;
 struct _kdb_log_context;
@@ -1478,6 +1533,8 @@ struct _krb5_context {
 
     krb5_trace_callback trace_callback;
     void *trace_callback_data;
+
+    struct plugin_interface plugins[PLUGIN_NUM_INTERFACES];
 };
 
 /* could be used in a table to find an etype and initialize a block */

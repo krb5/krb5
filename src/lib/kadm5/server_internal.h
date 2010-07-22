@@ -22,6 +22,7 @@
 #include    <errno.h>
 #include    <kdb.h>
 #include    <kadm5/admin.h>
+#include    <krb5/plugin.h>
 #include    "admin_internal.h"
 
 /*
@@ -33,6 +34,9 @@
  */
 #define INITIAL_HIST_KVNO 2
 
+/* A pwqual_handle represents a password quality plugin module. */
+typedef struct pwqual_handle_st *pwqual_handle;
+
 typedef struct _kadm5_server_handle_t {
     krb5_ui_4       magic_number;
     krb5_ui_4       struct_version;
@@ -42,6 +46,7 @@ typedef struct _kadm5_server_handle_t {
     kadm5_config_params  params;
     struct _kadm5_server_handle_t *lhandle;
     char **db_args;
+    pwqual_handle   *qual_handles;
 } kadm5_server_handle_rec, *kadm5_server_handle_t;
 
 #define OSA_ADB_PRINC_VERSION_1  0x12345C01
@@ -65,8 +70,7 @@ typedef struct _osa_princ_ent_t {
 kadm5_ret_t    adb_policy_init(kadm5_server_handle_t handle);
 kadm5_ret_t    adb_policy_close(kadm5_server_handle_t handle);
 kadm5_ret_t    passwd_check(kadm5_server_handle_t handle,
-                            char *pass, int use_policy,
-                            kadm5_policy_ent_t policy,
+                            const char *pass, kadm5_policy_ent_t policy,
                             krb5_principal principal);
 kadm5_ret_t    principal_exists(krb5_principal principal);
 krb5_error_code     kdb_init_master(kadm5_server_handle_t handle,
@@ -90,9 +94,8 @@ krb5_error_code     kdb_iter_entry(kadm5_server_handle_t handle,
                                    void (*iter_fct)(void *, krb5_principal),
                                    void *data);
 
-int                 init_dict(kadm5_config_params *);
-int                 find_word(const char *word);
-void                destroy_dict(void);
+kadm5_ret_t         init_pwqual(kadm5_server_handle_t handle);
+void                destroy_pwqual(kadm5_server_handle_t handle);
 
 /* XXX this ought to be in libkrb5.a, but isn't */
 kadm5_ret_t krb5_copy_key_data_contents(krb5_context context,
@@ -152,5 +155,45 @@ bool_t          xdr_osa_princ_ent_rec(XDR *xdrs, osa_princ_ent_t objp);
 
 void
 osa_free_princ_ent(osa_princ_ent_t val);
+
+/*** Password quality plugin consumer interface ***/
+
+/* Load the available password quality plugins and store the result into
+ * *handles.  Free the result with k5_pwqual_free_handles. */
+krb5_error_code
+k5_pwqual_load(krb5_context context, pwqual_handle **handles);
+
+/* Release a handle list allocated by k5_pwqual_load.  All modules must have
+ * been closed by the caller. */
+krb5_error_code
+k5_pwqual_free_handles(krb5_context context, pwqual_handle *handles);
+
+/* Initialize a password quality plugin, possibly using the realm's configured
+ * dictionary filename. */
+krb5_error_code
+k5_pwqual_open(krb5_context context, pwqual_handle handle,
+               const char *dict_file);
+
+/* Check a password using a password quality plugin. */
+krb5_error_code
+k5_pwqual_check(krb5_context context, pwqual_handle handle,
+                const char *password, kadm5_policy_ent_t policy,
+                krb5_principal princ);
+
+/* Release the memory used by a password quality plugin. */
+void
+k5_pwqual_close(krb5_context context, pwqual_handle handle);
+
+/*** Init functions for built-in password quality modules ***/
+
+/* The dict module checks passwords against the realm's dictionary. */
+krb5_error_code
+pwqual_dict_init(krb5_context context, int maj_ver, int min_ver,
+                 krb5_plugin_vtable vtable);
+
+/* The policy module enforces password policy constraints. */
+krb5_error_code
+pwqual_policy_init(krb5_context context, int maj_ver, int min_ver,
+                   krb5_plugin_vtable vtable);
 
 #endif /* __KADM5_SERVER_INTERNAL_H__ */

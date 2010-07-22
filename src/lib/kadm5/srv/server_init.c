@@ -317,7 +317,7 @@ kadm5_ret_t kadm5_init(krb5_context context, char *client_name, char *pass,
         return ret;
     }
 
-    ret = init_dict(&handle->params);
+    ret = init_pwqual(handle);
     if (ret) {
         krb5_db_fini(handle->context);
         krb5_free_principal(handle->context, handle->current_caller);
@@ -337,7 +337,7 @@ kadm5_ret_t kadm5_destroy(void *server_handle)
 
     CHECK_HANDLE(server_handle);
 
-    destroy_dict();
+    destroy_pwqual(handle);
 
     adb_policy_close(handle);
     krb5_db_fini(handle->context);
