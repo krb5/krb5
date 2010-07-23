@@ -5,6 +5,8 @@
  * $Header$
  */
 
+/* Password quality module to look up paswords within the realm dictionary. */
+
 #if !defined(lint) && !defined(__CODECENTER__)
 static char *rcsid = "$Header$";
 #endif
