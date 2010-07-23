@@ -196,3 +196,8 @@ demonstration branch it is not perfect.  Problems include:
   typedefs.  The vtable definition would then be very concise, with
   only one line per method.  This would be consistent with how the
   existing preauth pluggable interfaces are declared.
+
+* Filtering should probably be applied to module mappings before
+  dynamic modules are opened, since dlopen() is not always a cheap
+  operation.  This is an implementation detail of the
+  domain-independent plugin framework.
