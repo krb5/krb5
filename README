@@ -82,6 +82,37 @@ additional measures include:
   crypto
 * easier kadmin history key changes
 
+Major changes in 1.8.3
+----------------------
+
+* Behavior Change:
+
+    GSS-API context expiration -- the gss_wrap and gss_unwrap
+    functions no longer check for ticket expiration.  Applications
+    wishing to enforce ticket lifetimes should check using the
+    gss_inquire_context function.  The previous behavior of checking
+    for ticket expiration produced results that were not expected by
+    application developers, and could lead to poor user experience.
+
+* Fix an interoperability issue when the Microsoft HMAC-MD5 checksum
+  type was used with non-RC4 keys.
+
+* Fix an interoperability issue with ephemeral Diffie-Hellman key
+  exchange in PKINIT that would happen for less than 1% of
+  transactions.
+
+krb5-1.8.3 changes by ticket ID
+-------------------------------
+
+6345    no kdb5_util stash equivalent with LDAP database
+6738    PKINIT DH exchange occasionally produces mismatch
+6739    Behavior change: gssapi context expiration
+6740    kadmin ktadd may display wrong name of default keytab
+6744    only test t_locate_kdc if known-good DNS name is present
+6745    Add correct error table when initializing gss-krb5
+6750    krb5kdc doesn't parse the -P command-line option correctly
+6751    Allow Microsoft HMAC-MD5 checksum types to use non-RC4 keys
+
 Major changes in 1.8.2
 ----------------------
 
@@ -405,6 +436,7 @@ reports, suggestions, and valuable resources:
     Michael Calmer
     Ravi Channavajhala
     Srinivas Cheruku
+    Leonardo Chiquitto
     Howard Chu
     Andrea Cirulli
     Christopher D. Clausen
