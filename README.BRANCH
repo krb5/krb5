@@ -14,7 +14,7 @@ disabling modules by name.
 
 The profile schema used in this branch is:
 
-  [preauth]
+  [plugins]
   interfacename = {
     # May take multiple values; only named plugins will be enabled.
     enable_only = name
@@ -173,3 +173,26 @@ demonstration branch it is not perfect.  Problems include:
   type are kind of haphazard, erring on the side of using typedefs.
 
 * The Hesiod support in server_misc.c was ripped out.
+
+* The framework does not allow built-in modules to be registered for a
+  pluggable interface after the first load operation for that
+  interface.  This constraint is probably fine, but if it needs to be
+  revisited, the framework's data model will need to be made a little
+  more complicated to allow it.
+
+* For brevity, vtable constructor functions are called "init"
+  functions in the code.  That name may be too vague, and may fool
+  module implementors into thinking the init function is responsible
+  for more than just vtable construction (such as the initialization
+  of private module data).  This may need to be renamed to something
+  more specific like "initvt".
+
+* The pwqual vtable declarations put function signatures directly into
+  the vtable structure definition, with comments describing each
+  function's contract alongside the signature.  This is consistent
+  with how the existing DAL pluggable interface is declared.  An
+  alternative would be to create typedefs for each function signature
+  and place the comments describing the function contract with the
+  typedefs.  The vtable definition would then be very concise, with
+  only one line per method.  This would be consistent with how the
+  existing preauth pluggable interfaces are declared.
