@@ -180,16 +180,6 @@ demonstration branch it is not perfect.  Problems include:
   revisited, the framework's data model will need to be made a little
   more complicated to allow it.
 
-* The pwqual vtable declarations put function signatures directly into
-  the vtable structure definition, with comments describing each
-  function's contract alongside the signature.  This is consistent
-  with how the existing DAL pluggable interface is declared.  An
-  alternative would be to create typedefs for each function signature
-  and place the comments describing the function contract with the
-  typedefs.  The vtable definition would then be very concise, with
-  only one line per method.  This would be consistent with how the
-  existing preauth pluggable interfaces are declared.
-
 * Filtering should probably be applied to module mappings before
   dynamic modules are opened, since dlopen() is not always a cheap
   operation.  This is an implementation detail of the

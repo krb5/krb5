@@ -39,22 +39,33 @@
 /* An abstract type for password quality module data. */
 typedef struct krb5_pwqual_moddata_st *krb5_pwqual_moddata;
 
+/*** Method type declarations ***/
+
+/* Optional: Initialize module data.  dictfile is the realm's configured
+ * dictionary filename. */
+typedef krb5_error_code
+(*krb5_pwqual_open_fn)(krb5_context context, const char *dict_file,
+                       krb5_pwqual_moddata *data);
+
+/* Mandatory: Check a password for the principal princ, possibly making use
+ * of the password policy given by policy.  Return an error if the password
+ * check fails. */
+typedef krb5_error_code
+(*krb5_pwqual_check_fn)(krb5_context context, krb5_pwqual_moddata data,
+                        const char *password, kadm5_policy_ent_t policy,
+                        krb5_principal princ);
+
+/* Optional: Release resources used by module data. */
+typedef void
+(*krb5_pwqual_close_fn)(krb5_context context, krb5_pwqual_moddata data);
+
+/*** vtable declarations **/
+
 /* Password quality plugin vtable for major version 1. */
 typedef struct krb5_pwqual_vtable_st {
-    /* Optional: Initialize module data.  dictfile is the realm's configured
-     * dictionary filename. */
-    krb5_error_code (*open)(krb5_context context, const char *dict_file,
-                            krb5_pwqual_moddata *data);
-
-    /* Mandatory: Check a password for the principal princ, possibly making use
-     * of the password policy given by policy.  Return an error if the password
-     * check fails. */
-    krb5_error_code (*check)(krb5_context context, krb5_pwqual_moddata data,
-                             const char *password, kadm5_policy_ent_t policy,
-                             krb5_principal princ);
-
-    /* Optional: Release resources used by module data. */
-    void (*close)(krb5_context context, krb5_pwqual_moddata data);
+    krb5_pwqual_open_fn open;
+    krb5_pwqual_check_fn check;
+    krb5_pwqual_close_fn close;
 } *krb5_pwqual_vtable;
 
 #endif /* KRB5_PWQUAL_PLUGIN_H */
