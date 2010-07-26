@@ -50,8 +50,8 @@ typedef struct krb5_pwqual_vtable_st {
      * of the password policy given by policy.  Return an error if the password
      * check fails. */
     krb5_error_code (*check)(krb5_context context, krb5_pwqual_moddata data,
-			     const char *password, kadm5_policy_ent_t policy,
-			     krb5_principal princ);
+                             const char *password, kadm5_policy_ent_t policy,
+                             krb5_principal princ);
 
     /* Optional: Release resources used by module data. */
     void (*close)(krb5_context context, krb5_pwqual_moddata data);

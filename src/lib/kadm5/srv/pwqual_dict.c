@@ -212,11 +212,11 @@ dict_check(krb5_context context, krb5_pwqual_moddata data,
     n = krb5_princ_size(handle->context, princ);
     cp = krb5_princ_realm(handle->context, princ)->data;
     if (strcasecmp(cp, password) == 0)
-	return KADM5_PASS_Q_DICT;
+        return KADM5_PASS_Q_DICT;
     for (i = 0; i < n; i++) {
-	cp = krb5_princ_component(handle->context, princ, i)->data;
-	if (strcasecmp(cp, password) == 0)
-	    return KADM5_PASS_Q_DICT;
+        cp = krb5_princ_component(handle->context, princ, i)->data;
+        if (strcasecmp(cp, password) == 0)
+            return KADM5_PASS_Q_DICT;
     }
     return 0;
 }

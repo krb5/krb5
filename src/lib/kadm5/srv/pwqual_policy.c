@@ -37,33 +37,33 @@
 /* Implement the password quality check module. */
 static krb5_error_code
 policy_check(krb5_context context, krb5_pwqual_moddata data,
-	     const char *password, kadm5_policy_ent_t policy,
-	     krb5_principal princ)
+             const char *password, kadm5_policy_ent_t policy,
+             krb5_principal princ)
 {
     int nupper = 0, nlower = 0, ndigit = 0, npunct = 0, nspec = 0;
     const char *s;
     unsigned char c;
 
     if (policy == NULL)
-	return (*password == '\0') ? KADM5_PASS_Q_TOOSHORT : 0;
+        return (*password == '\0') ? KADM5_PASS_Q_TOOSHORT : 0;
 
     if(strlen(password) < (size_t)policy->pw_min_length)
-	return KADM5_PASS_Q_TOOSHORT;
+        return KADM5_PASS_Q_TOOSHORT;
     s = password;
     while ((c = (unsigned char)*s++)) {
-	if (islower(c))
-	    nlower = 1;
-	else if (isupper(c))
-	    nupper = 1;
-	else if (isdigit(c))
-	    ndigit = 1;
-	else if (ispunct(c))
-	    npunct = 1;
-	else
-	    nspec = 1;
+        if (islower(c))
+            nlower = 1;
+        else if (isupper(c))
+            nupper = 1;
+        else if (isdigit(c))
+            ndigit = 1;
+        else if (ispunct(c))
+            npunct = 1;
+        else
+            nspec = 1;
     }
     if ((nupper + nlower + ndigit + npunct + nspec) < policy->pw_min_classes)
-	return KADM5_PASS_Q_CLASS;
+        return KADM5_PASS_Q_CLASS;
     return 0;
 }
 

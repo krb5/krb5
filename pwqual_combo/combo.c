@@ -106,7 +106,7 @@ destroy_dict(combo_moddata dict)
 
 static krb5_error_code
 combo_open(krb5_context context, const char *dict_file,
-	   krb5_pwqual_moddata *data)
+           krb5_pwqual_moddata *data)
 {
     krb5_error_code ret;
     combo_moddata dict;
@@ -134,28 +134,28 @@ combo_open(krb5_context context, const char *dict_file,
 
 static krb5_error_code
 combo_check(krb5_context context, krb5_pwqual_moddata data,
-	    const char *password, kadm5_policy_ent_t policy,
-	    krb5_principal princ)
+            const char *password, kadm5_policy_ent_t policy,
+            krb5_principal princ)
 {
     combo_moddata dict = (combo_moddata)data;
     size_t i, j, len, pwlen;
     const char *remainder;
 
     if (dict->word_list == NULL)
-	return 0;
+        return 0;
 
     pwlen = strlen(password);
     for (i = 0; i < dict->word_count; i++) {
-	len = strlen(dict->word_list[i]);
-	if (len >= pwlen)
-	    continue;
-	if (strncasecmp(password, dict->word_list[i], len) != 0)
-	    continue;
-	remainder = password + len;
-	for (i = 0; i < dict->word_count; i++) {
-	    if (strcasecmp(remainder, dict->word_list[i]) == 0)
-		return KADM5_PASS_Q_DICT;
-	}
+        len = strlen(dict->word_list[i]);
+        if (len >= pwlen)
+            continue;
+        if (strncasecmp(password, dict->word_list[i], len) != 0)
+            continue;
+        remainder = password + len;
+        for (i = 0; i < dict->word_count; i++) {
+            if (strcasecmp(remainder, dict->word_list[i]) == 0)
+                return KADM5_PASS_Q_DICT;
+        }
     }
 
     return 0;

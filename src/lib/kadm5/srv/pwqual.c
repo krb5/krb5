@@ -47,26 +47,26 @@ k5_pwqual_load(krb5_context context, pwqual_handle **handles)
 
     ret = k5_plugin_load_all(context, PLUGIN_INTERFACE_PWQUAL, &modules);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     /* Allocate a large enough list of handles. */
     for (count = 0; modules[count] != NULL; count++);
     list = k5alloc((count + 1) * sizeof(*list), &ret);
     if (list == NULL)
-	goto cleanup;
+        goto cleanup;
 
     /* For each module, allocate a handle and initialize its vtable.  Skip
      * modules which don't successfully initialize. */
     count = 0;
     for (mod = modules; *mod != NULL; mod++) {
-	handle = k5alloc(sizeof(*handle), &ret);
-	if (handle == NULL)
-	    goto cleanup;
-	ret = (*mod)(context, 1, 1, (krb5_plugin_vtable)&handle->vt);
-	if (ret == 0)
-	    list[count++] = handle;
-	else
-	    free(handle);
+        handle = k5alloc(sizeof(*handle), &ret);
+        if (handle == NULL)
+            goto cleanup;
+        ret = (*mod)(context, 1, 1, (krb5_plugin_vtable)&handle->vt);
+        if (ret == 0)
+            list[count++] = handle;
+        else
+            free(handle);
     }
 
     *handles = list;
@@ -91,7 +91,7 @@ k5_pwqual_open(krb5_context context, pwqual_handle handle,
                const char *dict_file)
 {
     if (handle->data != NULL)
-	return EINVAL;
+        return EINVAL;
     if (handle->vt.open == NULL)
         return 0;
     return handle->vt.open(context, dict_file, &handle->data);
@@ -99,8 +99,8 @@ k5_pwqual_open(krb5_context context, pwqual_handle handle,
 
 krb5_error_code
 k5_pwqual_check(krb5_context context, pwqual_handle handle,
-		const char *password, kadm5_policy_ent_t policy,
-		krb5_principal princ)
+                const char *password, kadm5_policy_ent_t policy,
+                krb5_principal princ)
 {
     return handle->vt.check(context, handle->data, password, policy, princ);
 }
