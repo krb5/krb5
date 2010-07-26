@@ -184,16 +184,16 @@ k5_pwqual_check(krb5_context context, pwqual_handle handle,
 void
 k5_pwqual_close(krb5_context context, pwqual_handle handle);
 
-/*** Init functions for built-in password quality modules ***/
+/*** initvt functions for built-in password quality modules ***/
 
 /* The dict module checks passwords against the realm's dictionary. */
 krb5_error_code
-pwqual_dict_init(krb5_context context, int maj_ver, int min_ver,
-                 krb5_plugin_vtable vtable);
+pwqual_dict_initvt(krb5_context context, int maj_ver, int min_ver,
+                   krb5_plugin_vtable vtable);
 
 /* The policy module enforces password policy constraints. */
 krb5_error_code
-pwqual_policy_init(krb5_context context, int maj_ver, int min_ver,
-                   krb5_plugin_vtable vtable);
+pwqual_policy_initvt(krb5_context context, int maj_ver, int min_ver,
+                     krb5_plugin_vtable vtable);
 
 #endif /* __KADM5_SERVER_INTERNAL_H__ */

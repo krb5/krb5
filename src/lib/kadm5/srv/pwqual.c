@@ -41,7 +41,7 @@ krb5_error_code
 k5_pwqual_load(krb5_context context, pwqual_handle **handles)
 {
     krb5_error_code ret;
-    krb5_plugin_init_fn *modules = NULL, *mod;
+    krb5_plugin_initvt_fn *modules = NULL, *mod;
     size_t count;
     pwqual_handle *list = NULL, handle = NULL;
 

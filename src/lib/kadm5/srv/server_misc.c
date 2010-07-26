@@ -41,12 +41,12 @@ init_pwqual(kadm5_server_handle_t handle)
     const char *dict_file = NULL;
 
     ret = k5_plugin_register(handle->context, PLUGIN_INTERFACE_PWQUAL,
-                             "dict", pwqual_dict_init);
+                             "dict", pwqual_dict_initvt);
     if (ret != 0)
         return ret;
 
     ret = k5_plugin_register(handle->context, PLUGIN_INTERFACE_PWQUAL,
-                             "policy", pwqual_policy_init);
+                             "policy", pwqual_policy_initvt);
     if (ret != 0)
         return ret;
 

@@ -168,8 +168,8 @@ combo_close(krb5_context context, krb5_pwqual_moddata data)
 }
 
 krb5_error_code
-pwqual_combo_init(krb5_context context, int maj_ver, int min_ver,
-		  krb5_plugin_vtable vtable)
+pwqual_combo_initvt(krb5_context context, int maj_ver, int min_ver,
+                    krb5_plugin_vtable vtable)
 {
     krb5_pwqual_vtable vt;
 

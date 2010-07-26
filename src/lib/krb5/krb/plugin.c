@@ -62,8 +62,8 @@ free_plugin_mapping(struct plugin_mapping *map)
  */
 static krb5_error_code
 register_module(krb5_context context, struct plugin_interface *interface,
-		const char *modname, krb5_plugin_init_fn module,
-		struct plugin_file_handle *dyn_handle)
+                const char *modname, krb5_plugin_initvt_fn module,
+                struct plugin_file_handle *dyn_handle)
 {
     struct plugin_mapping *map, **pmap;
 
@@ -142,20 +142,20 @@ open_and_register(krb5_context context, struct plugin_interface *interface,
 {
     krb5_error_code ret;
     struct plugin_file_handle *handle;
-    void (*init_fn)();
+    void (*initvt_fn)();
 
     ret = krb5int_open_plugin(modpath, &handle, &context->err);
     if (ret != 0)
 	return ret;
 
-    ret = krb5int_get_plugin_func(handle, symname, &init_fn, &context->err);
+    ret = krb5int_get_plugin_func(handle, symname, &initvt_fn, &context->err);
     if (ret != 0) {
 	krb5int_close_plugin(handle);
 	return ret;
     }
 
     ret = register_module(context, interface, modname,
-			  (krb5_plugin_init_fn)init_fn, handle);
+                          (krb5_plugin_initvt_fn)initvt_fn, handle);
     if (ret != 0)
 	krb5int_close_plugin(handle);
     return ret;
@@ -173,7 +173,7 @@ register_dyn_modules(krb5_context context, struct plugin_interface *interface,
 	ret = parse_modstr(context, *modules, &modname, &modpath);
 	if (ret != 0)
 	    return ret;
-	if (asprintf(&symname, "%s_%s_init", iname, modname) < 0) {
+        if (asprintf(&symname, "%s_%s_initvt", iname, modname) < 0) {
 	    free(modname);
 	    free(modpath);
 	    return ENOMEM;
@@ -286,7 +286,7 @@ cleanup:
 
 krb5_error_code
 k5_plugin_load(krb5_context context, int interface_id, const char *modname,
-               krb5_plugin_init_fn *module)
+               krb5_plugin_initvt_fn *module)
 {
     krb5_error_code ret;
     struct plugin_interface *interface = get_interface(context, interface_id);
@@ -308,12 +308,12 @@ k5_plugin_load(krb5_context context, int interface_id, const char *modname,
 
 krb5_error_code
 k5_plugin_load_all(krb5_context context, int interface_id,
-                   krb5_plugin_init_fn **modules)
+                   krb5_plugin_initvt_fn **modules)
 {
     krb5_error_code ret;
     struct plugin_interface *interface = get_interface(context, interface_id);
     struct plugin_mapping *map;
-    krb5_plugin_init_fn *list;
+    krb5_plugin_initvt_fn *list;
     size_t count;
 
     if (interface == NULL)
@@ -330,7 +330,7 @@ k5_plugin_load_all(krb5_context context, int interface_id,
     if (list == NULL)
 	return ENOMEM;
 
-    /* Place each module's init function into list. */
+    /* Place each module's initvt function into list. */
     count = 0;
     for (map = interface->modules; map != NULL; map = map->next)
 	list[count++] = map->module;
@@ -341,14 +341,14 @@ k5_plugin_load_all(krb5_context context, int interface_id,
 }
 
 void
-k5_plugin_free_modules(krb5_context context, krb5_plugin_init_fn *modules)
+k5_plugin_free_modules(krb5_context context, krb5_plugin_initvt_fn *modules)
 {
     free(modules);
 }
 
 krb5_error_code
 k5_plugin_register(krb5_context context, int interface_id, const char *modname,
-                   krb5_plugin_init_fn module)
+                   krb5_plugin_initvt_fn module)
 {
     struct plugin_interface *interface = get_interface(context, interface_id);
 

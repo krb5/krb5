@@ -1432,13 +1432,13 @@ krb5_authdata_free_internal(krb5_context kcontext,
 /* Plugin framework */
 
 /*
- * A linked list entry mapping a module name to a module init function.  The
+ * A linked list entry mapping a module name to a module initvt function.  The
  * entry may also include a dynamic object handle so that it can be released
  * when the context is destroyed.
  */
 struct plugin_mapping {
     char *modname;
-    krb5_plugin_init_fn module;
+    krb5_plugin_initvt_fn module;
     struct plugin_file_handle *dyn_handle;
     struct plugin_mapping *next;
 };
@@ -1458,22 +1458,22 @@ struct plugin_interface {
  * storing the result into module. */
 krb5_error_code
 k5_plugin_load(krb5_context context, int interface_id, const char *modname,
-               krb5_plugin_init_fn *module);
+               krb5_plugin_initvt_fn *module);
 
 /* Retrieve all plugin modules of type interface_id, storing the result
  * into modules.  Free the result with k5_plugin_free_handles. */
 krb5_error_code
 k5_plugin_load_all(krb5_context context, int interface_id,
-                   krb5_plugin_init_fn **modules);
+                   krb5_plugin_initvt_fn **modules);
 
 /* Release a module list allocated by k5_plugin_load_all. */
 void
-k5_plugin_free_modules(krb5_context context, krb5_plugin_init_fn *modules);
+k5_plugin_free_modules(krb5_context context, krb5_plugin_initvt_fn *modules);
 
 /* Register a plugin module of type interface_id and name modname. */
 krb5_error_code
 k5_plugin_register(krb5_context context, int interface_id, const char *modname,
-                   krb5_plugin_init_fn module);
+                   krb5_plugin_initvt_fn module);
 
 /* Destroy the module state within context; used by krb5_free_context. */
 void

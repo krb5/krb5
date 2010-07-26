@@ -50,17 +50,17 @@ API consists of:
 
 A dynamic object can implement one or more plugin modules.  To
 implement a plugin module, a dynamic object exports a symbol named
-<interfacename>_<modulename>_init.
+<interfacename>_<modulename>_initvt.
 
-Module init functions accept as arguments a krb5_context, a major
+Module initvt functions accept as arguments a krb5_context, a major
 version, a minor version, and a pointer to a caller-allocated vtable
 (passed as an abstract type).  Major versions correspond to complete
 revisions of the vtable, while minor versions indicate extensions of a
 vtable type.
 
-Based on the major version, the init function casts the vtable pointer
-to the correct interface-specific type, and then fills in fields of
-that vtable, stopping as indicated by the minor version.
+Based on the major version, the initvt function casts the vtable
+pointer to the correct interface-specific type, and then fills in
+fields of that vtable, stopping as indicated by the minor version.
 
 4. Framework
 
@@ -68,9 +68,9 @@ The following functions are used by interface-specific loader
 functions:
 
 * k5_plugin_load: Given a numeric interface ID and a module name,
-  return the init function for the named module.
+  return the initvt function for the named module.
 
-* k5_plugin_load_all: Given a numeric interface ID, return the init
+* k5_plugin_load_all: Given a numeric interface ID, return the initvt
   functions of all modules for that interface.
 
 The following function is used by pluggable interface consumers:
@@ -179,13 +179,6 @@ demonstration branch it is not perfect.  Problems include:
   interface.  This constraint is probably fine, but if it needs to be
   revisited, the framework's data model will need to be made a little
   more complicated to allow it.
-
-* For brevity, vtable constructor functions are called "init"
-  functions in the code.  That name may be too vague, and may fool
-  module implementors into thinking the init function is responsible
-  for more than just vtable construction (such as the initialization
-  of private module data).  This may need to be renamed to something
-  more specific like "initvt".
 
 * The pwqual vtable declarations put function signatures directly into
   the vtable structure definition, with comments describing each
