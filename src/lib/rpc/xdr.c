@@ -145,7 +145,7 @@ xdr_u_int(XDR *xdrs, u_int *up)
 		if (!XDR_GETLONG(xdrs, (long *) &l))
 			return (FALSE);
 
-		if (l > UINT_MAX)
+		if ((uint32_t)l > UINT_MAX)
 			return (FALSE);
 
 		*up = (u_int) l;
