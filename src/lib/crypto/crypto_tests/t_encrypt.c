@@ -75,6 +75,79 @@ static int compare_results(krb5_data *d1, krb5_data *d2)
     return 0;
 }
 
+
+static void dump_data(const char *label, const krb5_data *d)
+{
+    int need_terminate = 0;
+    unsigned int i;
+
+    /* magic */
+    if (label) printf("------------- %s ------------\n",label);
+    for (i=0; i < d->length; i++) {
+	need_terminate = 1;
+	printf(" %02x",(unsigned char )d->data[i]);
+	if ((i & 0xf) == 0xf) {
+	    printf("\n");
+	    need_terminate = 0;
+	}
+    }
+    if (need_terminate) printf("\n");
+    printf("-------------------------------\n");
+}
+
+
+static void dump_encdata(const char *label, const krb5_enc_data *encData)
+{
+   /* magic, enctype, kvno */
+   dump_data(label, &encData->ciphertext);
+}
+
+static void dump_keyblock(const char *label, const krb5_keyblock *keyblock)
+{
+   krb5_data d;
+   /* magic, enctype */
+   d.data = (char *)keyblock->contents;
+   d.length = keyblock->length;
+   dump_data(label, &d);
+}
+
+
+static char *iov_flag_string(krb5_cryptotype flag)
+{
+   switch (flag) {
+   case KRB5_CRYPTO_TYPE_EMPTY:
+	return "KRB5_CRYPTO_TYPE_EMPTY";
+   case KRB5_CRYPTO_TYPE_HEADER:
+	return "KRB5_CRYPTO_TYPE_HEADER";
+   case KRB5_CRYPTO_TYPE_DATA:
+	return "KRB5_CRYPTO_TYPE_DATA";
+   case KRB5_CRYPTO_TYPE_SIGN_ONLY:
+	return "KRB5_CRYPTO_TYPE_SIGN_ONLY";
+   case KRB5_CRYPTO_TYPE_PADDING:
+	return "KRB5_CRYPTO_TYPE_PADDING";
+   case KRB5_CRYPTO_TYPE_TRAILER:
+	return "KRB5_CRYPTO_TYPE_TRAILER";
+   case KRB5_CRYPTO_TYPE_CHECKSUM:
+	return "KRB5_CRYPTO_TYPE_CHECKSUM";
+   case KRB5_CRYPTO_TYPE_STREAM:
+	return "KRB5_CRYPTO_TYPE_STREAM";
+    default:
+	break;
+   }
+   return "Unknown!!";
+}
+
+static void dump_iov(const char *label, const krb5_crypto_iov *iov, int count)
+{
+    int i;
+    if(label) printf("************* %s ************\n",label);
+    printf(" %d elements\n", count);
+    for (i=0; i < count; i++) {
+	dump_data(iov_flag_string(iov[i].flags), &iov[i].data);
+    }
+}
+
+
 int
 main ()
 {
@@ -121,6 +194,7 @@ main ()
               krb5_init_keyblock (context, enctype, 0, &keyblock));
         test ("Generating random keyblock",
               krb5_c_make_random_key (context, enctype, keyblock));
+	dump_keyblock("Keyblock", keyblock);
         test ("Creating opaque key from keyblock",
               krb5_k_create_key (context, keyblock, &key));
 
@@ -134,6 +208,7 @@ main ()
         /* Encrypt, decrypt, and see if we got the plaintext back again. */
         test ("Encrypting (c)",
               krb5_c_encrypt (context, keyblock, 7, 0, &in, &enc_out));
+	dump_encdata("Encrypt_c out", &enc_out);
         test ("Decrypting",
               krb5_c_decrypt (context, keyblock, 7, 0, &enc_out, &check));
         test ("Comparing", compare_results (&in, &check));
@@ -142,6 +217,7 @@ main ()
         memset(out.data, 0, out.length);
         test ("Encrypting (k)",
               krb5_k_encrypt (context, key, 7, 0, &in, &enc_out));
+	dump_encdata("Encrypt_k out", &enc_out);
         test ("Decrypting",
               krb5_k_decrypt (context, key, 7, 0, &enc_out, &check));
         test ("Comparing", compare_results (&in, &check));
@@ -196,6 +272,7 @@ main ()
             /* Encrypt and decrypt in place, and check the result. */
             test("iov encrypting (c)",
                  krb5_c_encrypt_iov(context, keyblock, 7, 0, iov, 5));
+	    dump_iov("Encrypt_c iov", iov, 5);
             assert(iov[1].data.length == in.length);
             test("iov decrypting",
                  krb5_c_decrypt_iov(context, keyblock, 7, 0, iov, 5));
@@ -206,6 +283,7 @@ main ()
             test("iov encrypting (k)",
                  krb5_k_encrypt_iov(context, key, 7, 0, iov, 5));
             assert(iov[1].data.length == in.length);
+	    dump_iov("Encrypt_k iov", iov, 5);
             test("iov decrypting",
                  krb5_k_decrypt_iov(context, key, 7, 0, iov, 5));
             test("Comparing results",
@@ -219,8 +297,10 @@ main ()
               krb5_c_init_state (context, keyblock, 7, &state));
         test ("Encrypting with state",
               krb5_c_encrypt (context, keyblock, 7, &state, &in, &enc_out));
+	dump_encdata("Encrypt_c state", &enc_out);
         test ("Encrypting again with state",
               krb5_c_encrypt (context, keyblock, 7, &state, &in2, &enc_out2));
+	dump_encdata("Encrypt_c state2", &enc_out2);
         test ("free_state",
               krb5_c_free_state (context, keyblock, &state));
         test ("init_state",
@@ -251,6 +331,7 @@ main ()
     check.length = 2048;
     test ("Encrypting with RC4 key usage 8",
           krb5_c_encrypt (context, keyblock, 8, 0, &in, &enc_out));
+    dump_encdata("Encrypt rc4 fallback", &enc_out);
     test ("Decrypting with RC4 key usage 9",
           krb5_c_decrypt (context, keyblock, 9, 0, &enc_out, &check));
     test ("Comparing", compare_results (&in, &check));

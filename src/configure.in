@@ -125,6 +125,28 @@ AC_MSG_RESULT("k5crypto will use \'$withval\'")
 ], withval=builtin)
 AC_CONFIG_COMMANDS(CRYPTO_IMPL, , CRYPTO_IMPL=$CRYPTO_IMPL)
 AC_SUBST(CRYPTO_IMPL)
+#PKG_CHECK_MODULES(CRYPTO_IMPL, $CRYPTO_IMPL, [ withval != builtin ], )
+case "$withval" in
+openssl)
+  AC_CHECK_LIB(crypto, PKCS7_get_signer_info)
+  CRYPTO_IMPL_LIBS=
+  CRYPTO_IMPL_CFLAGS=
+   ;;
+builtin)
+  CRYPTO_IMPL_LIBS=
+  CRYPTO_IMPL_CFLAGS=
+   ;;
+nss)
+  CRYPTO_IMPL_CFLAGS=`pkg-config --cflags $CRYPTO_IMPL`
+  CRYPTO_IMPL_LIBS="-lnss3 $(pkg-config --libs nss-util)"
+  ;;
+*)
+  CRYPTO_IMPL_CFLAGS=`pkg-config --cflags $CRYPTO_IMPL`
+  CRYPTO_IMPL_LIBS=`pkg-config --libs $CRYPTO_IMPL`
+  ;;
+esac
+AC_SUBST(CRYPTO_IMPL_CFLAGS)
+AC_SUBST(CRYPTO_IMPL_LIBS)
 
 # --with-kdc-kdb-update makes the KDC update the database with last request
 # information and failure information.
