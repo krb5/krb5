@@ -421,6 +421,8 @@ typedef struct _krb5_crypto_iov {
 #define ENCTYPE_AES256_CTS_HMAC_SHA1_96 0x0012
 #define ENCTYPE_ARCFOUR_HMAC    0x0017
 #define ENCTYPE_ARCFOUR_HMAC_EXP 0x0018
+#define ENCTYPE_CAMELLIA128_CCM_128 -66 /* Camellia CCM mode, 128-bit key */
+#define ENCTYPE_CAMELLIA256_CCM_128 -67 /* Camellia CCM mode, 256-bit key */
 #define ENCTYPE_UNKNOWN         0x01ff
 
 #define CKSUMTYPE_CRC32         0x0001
@@ -435,6 +437,8 @@ typedef struct _krb5_crypto_iov {
 #define CKSUMTYPE_HMAC_SHA1_DES3        0x000c
 #define CKSUMTYPE_HMAC_SHA1_96_AES128   0x000f
 #define CKSUMTYPE_HMAC_SHA1_96_AES256   0x0010
+#define CKSUMTYPE_CMAC_128_CAMELLIA128  -66  /* CMAC, 128-bit Camellia key */
+#define CKSUMTYPE_CMAC_128_CAMELLIA256  -67  /* CMAC, 256-bit Camellia key */
 #define CKSUMTYPE_MD5_HMAC_ARCFOUR -137 /*Microsoft netlogon cksumtype*/
 #define CKSUMTYPE_HMAC_MD5_ARCFOUR -138 /*Microsoft md5 hmac cksumtype*/
 

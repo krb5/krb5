@@ -95,3 +95,4 @@ krb5int_MD5Final
 krb5int_aes_decrypt
 krb5int_enc_des3
 krb5int_arcfour_gsscrypt
+krb5int_camellia_cbc_mac

@@ -104,6 +104,18 @@ const struct krb5_cksumtypes krb5int_cksumtypes_list[] = {
       NULL, &krb5int_hash_md5,
       krb5int_hmacmd5_checksum, NULL,
       16, 16, 0 },
+
+    { CKSUMTYPE_CMAC_128_CAMELLIA128,
+      "cmac-128-camellia128", { 0 }, "CMAC Camellia128 key",
+      &krb5int_enc_camellia128_ctr, NULL,
+      krb5int_dk_cmac_checksum, NULL,
+      16, 16, 0 },
+
+    { CKSUMTYPE_CMAC_128_CAMELLIA256,
+      "cmac-128-camellia256", { 0 }, "CMAC Camellia256 key",
+      &krb5int_enc_camellia256_ctr, NULL,
+      krb5int_dk_cmac_checksum, NULL,
+      16, 16, 0 },
 };
 
 const size_t krb5int_cksumtypes_length =
