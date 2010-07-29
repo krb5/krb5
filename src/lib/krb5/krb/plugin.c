@@ -133,62 +133,6 @@ parse_modstr(krb5_context context, const char *modstr,
     return 0;
 }
 
-/* Open a dynamic object at modpath, look up symname within it, and register
- * the resulting init function as modname. */
-static krb5_error_code
-open_and_register(krb5_context context, struct plugin_interface *interface,
-                  const char *modname, const char *modpath,
-                  const char *symname)
-{
-    krb5_error_code ret;
-    struct plugin_file_handle *handle;
-    void (*initvt_fn)();
-
-    ret = krb5int_open_plugin(modpath, &handle, &context->err);
-    if (ret != 0)
-        return ret;
-
-    ret = krb5int_get_plugin_func(handle, symname, &initvt_fn, &context->err);
-    if (ret != 0) {
-        krb5int_close_plugin(handle);
-        return ret;
-    }
-
-    ret = register_module(context, interface, modname,
-                          (krb5_plugin_initvt_fn)initvt_fn, handle);
-    if (ret != 0)
-        krb5int_close_plugin(handle);
-    return ret;
-}
-
-/* Register the plugins given by the profile strings in modules. */
-static krb5_error_code
-register_dyn_modules(krb5_context context, struct plugin_interface *interface,
-                     const char *iname, char **modules)
-{
-    krb5_error_code ret;
-    char *modname = NULL, *modpath = NULL, *symname = NULL;
-
-    for (; *modules != NULL; modules++) {
-        ret = parse_modstr(context, *modules, &modname, &modpath);
-        if (ret != 0)
-            return ret;
-        if (asprintf(&symname, "%s_%s_initvt", iname, modname) < 0) {
-            free(modname);
-            free(modpath);
-            return ENOMEM;
-        }
-        /* XXX should errors here be fatal, or just ignore the module? */
-        ret = open_and_register(context, interface, modname, modpath, symname);
-        free(modname);
-        free(modpath);
-        free(symname);
-        if (ret != 0)
-            return ret;
-    }
-    return 0;
-}
-
 /* Return true if value is found in list. */
 static krb5_boolean
 find_in_list(char **list, const char *value)
@@ -200,17 +144,25 @@ find_in_list(char **list, const char *value)
     return FALSE;
 }
 
-/* Remove any registered modules whose names are not present in enable. */
+/* Return true if module is not filtered out by enable or disable lists. */
+static krb5_boolean
+module_enabled(const char *modname, char **enable, char **disable)
+{
+    return ((enable == NULL || find_in_list(enable, modname)) &&
+            (disable == NULL || !find_in_list(disable, modname)));
+}
+
+/* Remove any registered modules whose names are filtered out. */
 static void
-filter_enable(krb5_context context, struct plugin_interface *interface,
-              char **enable)
+filter_builtins(krb5_context context, struct plugin_interface *interface,
+                char **enable, char **disable)
 {
     struct plugin_mapping *map, **pmap;
 
     pmap = &interface->modules;
     while (*pmap != NULL) {
         map = *pmap;
-        if (!find_in_list(enable, map->modname)) {
+        if (!module_enabled(map->modname, enable, disable)) {
             *pmap = map->next;
             free_plugin_mapping(map);
         } else
@@ -218,22 +170,53 @@ filter_enable(krb5_context context, struct plugin_interface *interface,
     }
 }
 
-/* Remove any registered modules whose names are present in disable. */
-static void
-filter_disable(krb5_context context, struct plugin_interface *interface,
-               char **disable)
+/* Register the plugin module given by the profile string mod. */
+static krb5_error_code
+register_dyn_module(krb5_context context, struct plugin_interface *interface,
+                    const char *iname, const char *modstr, char **enable,
+                    char **disable)
 {
-    struct plugin_mapping *map, **pmap;
+    krb5_error_code ret;
+    char *modname = NULL, *modpath = NULL, *symname = NULL;
+    struct plugin_file_handle *handle = NULL;
+    void (*initvt_fn)();
 
-    pmap = &interface->modules;
-    while (*pmap != NULL) {
-        map = *pmap;
-        if (find_in_list(disable, map->modname)) {
-            *pmap = map->next;
-            free_plugin_mapping(map);
-        } else
-            pmap = &map->next;
+    /* Parse out the module name and path, and make sure it is enabled. */
+    ret = parse_modstr(context, modstr, &modname, &modpath);
+    if (ret != 0)
+        goto cleanup;
+    if (!module_enabled(modname, enable, disable))
+        goto cleanup;
+
+    /* Construct the initvt symbol name for this interface and module. */
+    if (asprintf(&symname, "%s_%s_initvt", iname, modname) < 0) {
+        symname = NULL;
+        ret = ENOMEM;
+        goto cleanup;
     }
+
+    /* Open the plugin and resolve the initvt symbol. */
+    ret = krb5int_open_plugin(modpath, &handle, &context->err);
+    if (ret != 0)
+        goto cleanup;
+    ret = krb5int_get_plugin_func(handle, symname, &initvt_fn, &context->err);
+    if (ret != 0)
+        goto cleanup;
+
+    /* Create a mapping for the module. */
+    ret = register_module(context, interface, modname,
+                          (krb5_plugin_initvt_fn)initvt_fn, handle);
+    if (ret != 0)
+        goto cleanup;
+    handle = NULL;              /* Now owned by the module mapping. */
+
+cleanup:
+    free(modname);
+    free(modpath);
+    free(symname);
+    if (handle != NULL)
+        krb5int_close_plugin(handle);
+    return ret;
 }
 
 /* Ensure that a plugin interface is configured.  id is assumed to be valid. */
@@ -243,7 +226,7 @@ configure_interface(krb5_context context, int id)
     krb5_error_code ret;
     struct plugin_interface *interface = &context->plugins[id];
     const char *iname = interface_names[id];
-    char **modules = NULL, **enable = NULL, **disable = NULL;
+    char **modules = NULL, **enable = NULL, **disable = NULL, **mod;
     static const char *path[4];
 
     if (interface->configured)
@@ -266,15 +249,16 @@ configure_interface(krb5_context context, int id)
     if (ret != 0 && ret != PROF_NO_RELATION)
         goto cleanup;
 
-    if (modules != NULL) {
-        ret = register_dyn_modules(context, interface, iname, modules);
+    /* Remove built-in modules which are filtered out by configuration. */
+    filter_builtins(context, interface, enable, disable);
+
+    /* Create mappings for dynamic modules which aren't filtered out. */
+    for (mod = modules; mod && *mod; mod++) {
+        ret = register_dyn_module(context, interface, iname, *mod,
+                                  enable, disable);
         if (ret != 0)
             return ret;
     }
-    if (enable != NULL)
-        filter_enable(context, interface, enable);
-    if (disable != NULL)
-        filter_disable(context, interface, disable);
 
     ret = 0;
 cleanup:

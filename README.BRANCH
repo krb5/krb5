@@ -111,11 +111,11 @@ These steps demonstrate the functioning of the code.
 1. Build the branch normally and install it somewhere.
 
 2. cd into the pwqual_combo directory and build it with "make
-   -I/path/to/install/include".  The Makefile probably only works on
-   Linux-based operating systems.
+   INCLUDES=-I/path/to/install/include".  The Makefile probably only
+   works on Linux-based operating systems.
 
 3. Go back to the main build directory and run "make testrealm" to
-   create a functioning environment.
+   spawn a shell within a functioning environment.
 
 4. Add the following configuration to testdir/krb5.master.conf to make
    pwqual_combo discoverable:
@@ -130,22 +130,24 @@ These steps demonstrate the functioning of the code.
    the setting "dict_file = /tmp/dict".
 
 6. Run kadmin.local and create a policy with "addpol -minlength 4
-testpolicy".  Associated it with the principal user with "modprinc
--policy testpolicy user".
+   testpolicy".  Associated it with the principal user with "modprinc
+   -policy testpolicy user".
 
 7. Inside kadmin.local, try some password change with "cpw user".  You
-should be able to see that all three password quality modules are
-functioning: you won't be able to set passwords shorter than four
-characters long (the policy module), or the passwords "books" or
-"sharks" (the dict module), or passwords named "sharksbooks" or
-"bookssharks" (the combo module).
+   should be able to see that all three password quality modules are
+   functioning: you won't be able to set passwords shorter than four
+   characters long (the policy module), or the passwords "books" or
+   "sharks" (the dict module), or passwords named "sharksbooks" or
+   "bookssharks" (the combo module).
 
 8. Quit out of kadmin.local and edit testdir/krb5.master.conf again.
-Play with the filtering rules by adding, alongside the "module"
-directive, one or more assignments for enable_only and/or disable.
-For instance, if you disable the policy module, you should find that
-(upon restarting kadmin.local) you can set passwords shorter than four
-characters again.
+   Play with the filtering rules by adding, alongside the "module"
+   directive, one or more assignments for enable_only and/or disable.
+   For instance, if you disable the policy module, you should find
+   that (upon restarting kadmin.local) you can set passwords shorter
+   than four characters again.
+
+9. Exit out of the shell to quit out of the test environment.
 
 ----- What's wrong with this branch -----
 
@@ -179,8 +181,3 @@ demonstration branch it is not perfect.  Problems include:
   interface.  This constraint is probably fine, but if it needs to be
   revisited, the framework's data model will need to be made a little
   more complicated to allow it.
-
-* Filtering should probably be applied to module mappings before
-  dynamic modules are opened, since dlopen() is not always a cheap
-  operation.  This is an implementation detail of the
-  domain-independent plugin framework.
