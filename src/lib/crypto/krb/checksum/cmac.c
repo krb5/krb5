@@ -79,6 +79,7 @@ leftshift_onebit(unsigned char *input, unsigned char *output)
     }
 }
 
+/* Generate subkeys K1 and K2 as described in RFC 4493 figure 2.2. */
 static krb5_error_code
 generate_subkey(const struct krb5_enc_provider *enc,
                 krb5_key key,
@@ -92,16 +93,17 @@ generate_subkey(const struct krb5_enc_provider *enc,
     krb5_data d;
     krb5_error_code ret;
 
+    /* L := encrypt(K, const_Zero) */
     memset(Z, 0, sizeof(Z));
     iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[0].data = make_data(Z, sizeof(Z));
-
     d = make_data(L, BLOCK_SIZE);
-
+    /* cbc-mac is the same as block encrypt if invoked on a single block. */
     ret = enc->cbc_mac(key, iov, 1, NULL, &d);
     if (ret != 0)
         return ret;
 
+    /* K1 := (MSB(L) == 0) ? L << 1 : (L << 1) XOR const_Rb */
     if ((L[0] & 0x80) == 0) {
         leftshift_onebit(L, K1);
     } else {
@@ -109,6 +111,7 @@ generate_subkey(const struct krb5_enc_provider *enc,
         xor_128(tmp, const_Rb, K1);
     }
 
+    /* K2 := (MSB(K1) == 0) ? K1 << 1 : (K1 << 1) XOR const_Rb */
     if ((K1[0] & 0x80) == 0) {
         leftshift_onebit(K1, K2);
     } else {
@@ -119,6 +122,7 @@ generate_subkey(const struct krb5_enc_provider *enc,
     return 0;
 }
 
+/* Pad out lastb with a 1 bit followed by 0 bits, placing the result in pad. */
 static void
 padding(unsigned char *lastb, unsigned char *pad, int length)
 {
@@ -138,7 +142,7 @@ padding(unsigned char *lastb, unsigned char *pad, int length)
 
 /*
  * Implementation of CMAC algorithm. When used with AES, this function
- * is compatible with RFC 4493.
+ * is compatible with RFC 4493 figure 2.3.
  */
 krb5_error_code
 krb5int_cmac_checksum(const struct krb5_enc_provider *enc, krb5_key key,
@@ -152,7 +156,6 @@ krb5int_cmac_checksum(const struct krb5_enc_provider *enc, krb5_key key,
     krb5_error_code ret;
     struct iov_block_state iov_state;
     unsigned int length;
-    krb5_data ivec;
     krb5_crypto_iov iov[1];
     krb5_data d;
 
@@ -168,12 +171,15 @@ krb5int_cmac_checksum(const struct krb5_enc_provider *enc, krb5_key key,
             length += piov->data.length;
     }
 
+    /* Step 1. */
     ret = generate_subkey(enc, key, K1, K2);
     if (ret != 0)
         return ret;
 
+    /* Step 2. */
     n = (length + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
+    /* Step 3. */
     if (n == 0) {
         n = 1;
         flag = 0;
@@ -184,24 +190,23 @@ krb5int_cmac_checksum(const struct krb5_enc_provider *enc, krb5_key key,
     iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[0].data = make_data(input, BLOCK_SIZE);
 
+    /* Step 5 (we'll do step 4 in a bit). */
     memset(Y, 0, BLOCK_SIZE);
-
-    ivec = make_data(Y, BLOCK_SIZE);
     d = make_data(Y, BLOCK_SIZE);
 
+    /* Step 6 (all but last block). */
     IOV_BLOCK_STATE_INIT(&iov_state);
     iov_state.include_sign_only = 1;
-
     for (i = 0; i < n - 1; i++) {
         krb5int_c_iov_get_block(input, BLOCK_SIZE, data, num_data, &iov_state);
 
-        ret = enc->cbc_mac(key, iov, 1, &ivec, &d);
+        ret = enc->cbc_mac(key, iov, 1, &d, &d);
         if (ret != 0)
             return ret;
     }
 
+    /* Step 4. */
     krb5int_c_iov_get_block(input, BLOCK_SIZE, data, num_data, &iov_state);
-
     if (flag) {
         /* last block is complete block */
         xor_128(input, K1, M_last);
@@ -210,9 +215,9 @@ krb5int_cmac_checksum(const struct krb5_enc_provider *enc, krb5_key key,
         xor_128(padded, K2, M_last);
     }
 
+    /* Step 6 (last block). */
     iov[0].data = make_data(M_last, BLOCK_SIZE);
-
-    ret = enc->cbc_mac(key, iov, 1, &ivec, &d);
+    ret = enc->cbc_mac(key, iov, 1, &d, &d);
     if (ret != 0)
         return ret;
 

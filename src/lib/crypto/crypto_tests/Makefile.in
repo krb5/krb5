@@ -19,6 +19,7 @@ EXTRADEPSRCS=\
 	$(srcdir)/t_encrypt.c	\
 	$(srcdir)/t_prf.c 	\
 	$(srcdir)/t_prng.c	\
+	$(srcdir)/t_cmac.c	\
 	$(srcdir)/t_hmac.c	\
 	$(srcdir)/t_pkcs5.c	\
 	$(srcdir)/t_cts.c	\
@@ -43,7 +44,7 @@ EXTRADEPSRCS=\
 # NOTE: The t_cksum known checksum values are primarily for regression
 # testing.  They are not derived a priori, but are known to produce
 # checksums that interoperate.
-check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac \
+check-unix:: t_nfold t_encrypt t_prf t_prng t_cmac t_hmac \
 		t_cksum4 t_cksum5 \
 		aes-test  \
 		camellia-test  \
@@ -53,6 +54,7 @@ check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac \
 	$(RUN_SETUP) $(VALGRIND) ./t_encrypt
 	$(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output && \
 	diff t_prng.output $(srcdir)/t_prng.expected
+	$(RUN_SETUP) $(VALGRIND) ./t_cmac
 	$(RUN_SETUP) $(VALGRIND) ./t_hmac
 	$(RUN_SETUP) $(VALGRIND) ./t_prf <$(srcdir)/t_prf.in >t_prf.output
 	diff t_prf.output $(srcdir)/t_prf.expected
@@ -89,6 +91,9 @@ t_prf$(EXEEXT): t_prf.$(OBJEXT) $(SUPPORT_DEPLIB)
 
 t_prng$(EXEEXT): t_prng.$(OBJEXT) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_prng.$(OBJEXT)  -lk5crypto -lcom_err $(SUPPORT_LIB)
+
+t_cmac$(EXEEXT): t_cmac.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ t_cmac.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
 
 t_hmac$(EXEEXT): t_hmac.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_hmac.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
@@ -147,8 +152,8 @@ ytest: ytest.o shs.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 
 clean::
 	$(RM) t_nfold.o t_nfold nfold.$(OBJEXT) t_encrypt t_encrypt.o \
-		t_prng.o t_prng t_hmac.o t_hmac t_pkcs5.o t_pkcs5 pbkdf2.o \
-		t_prf t_prf.o \
+		t_prng.o t_prng t_cmac.o t_cmac t_hmac.o t_hmac \
+		t_pkcs5.o t_pkcs5 pbkdf2.o t_prf t_prf.o \
 		aes-test.o aes-test vt.txt vk.txt kresults.out \
 		t_cksum.o t_cksum \
 		t_crc.o t_crc t_cts.o t_cts \
