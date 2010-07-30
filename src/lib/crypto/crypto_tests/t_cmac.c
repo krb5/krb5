@@ -1,8 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * lib/crypto/t_hmac.c
+ * lib/crypto/t_cmac.c
  *
- * Copyright 2001,2002 by the Massachusetts Institute of Technology.
+ * Copyright 2010 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -32,9 +32,10 @@
  * them.
  *
  * Ideally we would test AES-CMAC against the expected results in RFC 4493,
- * instead of results we generated ourselves.  This was done manually, but is
- * not convenient to do automatically since the AES-128 enc provider has no
- * cbc_mac method and therefore cannot be used with krb5int_cmac_checksum.
+ * instead of Camellia-CMAC against results we generated ourselves.  This has
+ * been done manually, but is not convenient to do automatically since the
+ * AES-128 enc provider has no cbc_mac method and therefore cannot be used with
+ * krb5int_cmac_checksum.
  */
 
 #include "k5-int.h"
@@ -85,15 +86,15 @@ static unsigned char cmac4[] = {
 
 static void
 check_result(const char *name, const unsigned char *result,
-	     const unsigned char *expected)
+             const unsigned char *expected)
 {
     int i;
 
     for (i = 0; i < 16; i++) {
-	if (result[i] != expected[i]) {
-	    fprintf(stderr, "CMAC test vector failure: %s\n", name);
-	    exit(1);
-	}
+        if (result[i] != expected[i]) {
+            fprintf(stderr, "CMAC test vector failure: %s\n", name);
+            exit(1);
+        }
     }
 }
 
@@ -126,12 +127,12 @@ main(int argc, char **argv)
     assert(krb5int_cmac_checksum(enc, key, &iov, 1, &result) == 0);
     check_result("example 2", resultbuf, cmac2);
 
-    /* Example 1. */
+    /* Example 3. */
     iov.data.length = 40;
     assert(krb5int_cmac_checksum(enc, key, &iov, 1, &result) == 0);
     check_result("example 3", resultbuf, cmac3);
 
-    /* Example 1. */
+    /* Example 4. */
     iov.data.length = 64;
     assert(krb5int_cmac_checksum(enc, key, &iov, 1, &result) == 0);
     check_result("example 4", resultbuf, cmac4);
