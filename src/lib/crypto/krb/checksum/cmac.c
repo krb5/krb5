@@ -94,9 +94,9 @@ generate_subkey(const struct krb5_enc_provider *enc,
 
     memset(Z, 0, sizeof(Z));
     iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
-    iov[0].data = make_data((char *)Z, sizeof(Z));
+    iov[0].data = make_data(Z, sizeof(Z));
 
-    d = make_data((char *)L, BLOCK_SIZE);
+    d = make_data(L, BLOCK_SIZE);
 
     ret = enc->cbc_mac(key, iov, 1, NULL, &d);
     if (ret != 0)
@@ -182,12 +182,12 @@ krb5int_cmac_checksum(const struct krb5_enc_provider *enc, krb5_key key,
     }
 
     iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
-    iov[0].data = make_data((char *)input, BLOCK_SIZE);
+    iov[0].data = make_data(input, BLOCK_SIZE);
 
     memset(Y, 0, BLOCK_SIZE);
 
-    ivec = make_data((char *)Y, BLOCK_SIZE);
-    d = make_data((char *)Y, BLOCK_SIZE);
+    ivec = make_data(Y, BLOCK_SIZE);
+    d = make_data(Y, BLOCK_SIZE);
 
     IOV_BLOCK_STATE_INIT(&iov_state);
     iov_state.include_sign_only = 1;
@@ -210,7 +210,7 @@ krb5int_cmac_checksum(const struct krb5_enc_provider *enc, krb5_key key,
         xor_128(padded, K2, M_last);
     }
 
-    iov[0].data = make_data((char *)M_last, BLOCK_SIZE);
+    iov[0].data = make_data(M_last, BLOCK_SIZE);
 
     ret = enc->cbc_mac(key, iov, 1, &ivec, &d);
     if (ret != 0)

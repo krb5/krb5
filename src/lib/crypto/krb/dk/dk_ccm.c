@@ -269,7 +269,7 @@ ccm_encrypt(const struct krb5_keytypes *ktp,
     size_t adata_len = 0;
     char adata_len_buf[6];
     unsigned char B0[16], Ctr[16];
-    krb5_data counter = make_data((char *)Ctr, sizeof(Ctr));
+    krb5_data counter = make_data(Ctr, sizeof(Ctr));
 
     header_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_HEADER);
 
@@ -328,7 +328,7 @@ ccm_encrypt(const struct krb5_keytypes *ktp,
         goto cleanup;
 
     sign_data[num_sign_data].flags = KRB5_CRYPTO_TYPE_HEADER;
-    sign_data[num_sign_data].data = make_data((char *)B0, sizeof(B0));
+    sign_data[num_sign_data].data = make_data(B0, sizeof(B0));
     ret = format_B0(&sign_data[num_sign_data].data, &header->data, trailer_len,
                     (krb5_ui_8)adata_len, (krb5_ui_8)payload_len);
     if (ret != 0)
@@ -439,7 +439,7 @@ ccm_decrypt(const struct krb5_keytypes *ktp,
     char adata_len_buf[6];
     unsigned char B0[16], Ctr[16];
     krb5_data made_cksum = empty_data();
-    krb5_data counter = make_data((char *)Ctr, sizeof(Ctr));
+    krb5_data counter = make_data(Ctr, sizeof(Ctr));
 
     header_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_HEADER);
 
@@ -493,7 +493,7 @@ ccm_decrypt(const struct krb5_keytypes *ktp,
         goto cleanup;
 
     sign_data[num_sign_data].flags = KRB5_CRYPTO_TYPE_HEADER;
-    sign_data[num_sign_data].data = make_data((char *)B0, sizeof(B0));
+    sign_data[num_sign_data].data = make_data(B0, sizeof(B0));
     ret = format_B0(&sign_data[num_sign_data].data, &header->data, trailer_len,
                     (krb5_ui_8)adata_len, (krb5_ui_8)payload_len);
     if (ret != 0)
