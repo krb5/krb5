@@ -94,8 +94,8 @@ krb5int_camellia_encrypt_ctr(krb5_key key,
     input_pos.ignore_header = output_pos.ignore_header = 1;
     input_pos.pad_to_boundary = output_pos.pad_to_boundary = 1;
 
-    assert(ivec != NULL);
-
+    if (ivec == NULL)
+	return EINVAL;
     if (ivec->length != BLOCK_SIZE)
         return KRB5_BAD_MSIZE;
 

@@ -89,4 +89,24 @@ find_enctype(krb5_enctype enctype)
     return &krb5int_enctypes_list[i];
 }
 
+/* This belongs with the declaration of struct krb5_enc_provider... but not
+ * while that's still in k5-int.h. */
+/* Encrypt one block of plaintext in place. */
+static inline krb5_error_code
+encrypt_block(const struct krb5_enc_provider *enc, krb5_key key,
+              krb5_data *block)
+{
+    krb5_crypto_iov iov;
+
+    /* Verify that block is the right length. */
+    if (block->length != enc->block_size)
+        return EINVAL;
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    iov.data = *block;
+    if (enc->cbc_mac != NULL)   /* One-block cbc-mac with no ivec. */
+        return enc->cbc_mac(key, &iov, 1, NULL, block);
+    else                        /* Assume cbc-mode encrypt. */
+        return enc->encrypt(key, 0, &iov, 1);
+}
+
 #endif

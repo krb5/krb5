@@ -62,23 +62,26 @@ krb5int_aes_string_to_key(const struct krb5_keytypes *enc,
                           const krb5_data *params, krb5_keyblock *key);
 
 krb5_error_code
-krb5int_peppered_string_to_key(const struct krb5_keytypes *enc,
-                               const krb5_data *string, const krb5_data *salt,
-                               const krb5_data *params, krb5_keyblock *key);
+krb5int_camellia_ccm_string_to_key(const struct krb5_keytypes *enc,
+                                   const krb5_data *string,
+                                   const krb5_data *salt,
+                                   const krb5_data *params,
+                                   krb5_keyblock *key);
 
-#define krb5int_camellia_ccm_string_to_key  krb5int_peppered_string_to_key
+enum deriv_alg {
+    DERIVE_RFC3961,             /* RFC 3961 section 5.1 */
+    DERIVE_SP800_108_CMAC       /* NIST SP 800-108 with CMAC as PRF */
+};
 
 krb5_error_code
 krb5int_derive_keyblock(const struct krb5_enc_provider *enc,
-                        krb5_key inkey,
-                        krb5_keyblock *outkey,
-                        const krb5_data *in_constant);
+                        krb5_key inkey, krb5_keyblock *outkey,
+                        const krb5_data *in_constant, enum deriv_alg alg);
 
 krb5_error_code
 krb5int_derive_key(const struct krb5_enc_provider *enc,
-                   krb5_key inkey,
-                   krb5_key *outkey,
-                   const krb5_data *in_constant);
+                   krb5_key inkey, krb5_key *outkey,
+                   const krb5_data *in_constant, enum deriv_alg alg);
 
 krb5_error_code
 krb5int_dk_checksum(const struct krb5_cksumtypes *ctp,
@@ -89,7 +92,7 @@ krb5int_dk_checksum(const struct krb5_cksumtypes *ctp,
 krb5_error_code
 krb5int_derive_random(const struct krb5_enc_provider *enc,
                       krb5_key inkey, krb5_data *outrnd,
-                      const krb5_data *in_constant);
+                      const krb5_data *in_constant, enum deriv_alg alg);
 
 unsigned int
 krb5int_dk_ccm_crypto_length(const struct krb5_keytypes *ktp,

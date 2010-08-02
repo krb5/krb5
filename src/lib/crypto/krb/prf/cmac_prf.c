@@ -49,7 +49,8 @@ krb5int_dk_cmac_prf(const struct krb5_keytypes *ktp, krb5_key key,
     iov.data = *in;
 
     /* Derive a key using the PRF constant. */
-    ret = krb5int_derive_key(ktp->enc, key, &kp, &prfconst);
+    ret = krb5int_derive_key(ktp->enc, key, &kp, &prfconst,
+                             DERIVE_SP800_108_CMAC);
     if (ret != 0)
         goto cleanup;
 

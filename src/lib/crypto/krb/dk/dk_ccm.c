@@ -410,7 +410,7 @@ krb5int_dk_ccm_encrypt(const struct krb5_keytypes *ktp,
 
     d1.data[4] = 0xCC;
 
-    ret = krb5int_derive_key(ktp->enc, key, &kc, &d1);
+    ret = krb5int_derive_key(ktp->enc, key, &kc, &d1, DERIVE_SP800_108_CMAC);
     if (ret != 0)
         return ret;
 
@@ -587,7 +587,7 @@ krb5int_dk_ccm_decrypt(const struct krb5_keytypes *ktp,
 
     d1.data[4] = 0xCC;
 
-    ret = krb5int_derive_key(ktp->enc, key, &kc, &d1);
+    ret = krb5int_derive_key(ktp->enc, key, &kc, &d1, DERIVE_SP800_108_CMAC);
     if (ret != 0)
         return ret;
 

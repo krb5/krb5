@@ -191,7 +191,7 @@ krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
         myalloc = TRUE;
     }
 
-    ret = krb5int_derive_keyblock(enc, tkey, outkey, &input);
+    ret = krb5int_derive_keyblock(enc, tkey, outkey, &input, DERIVE_RFC3961);
     if (ret) {
         if (myalloc) {
             free(outkey->contents);
@@ -222,7 +222,8 @@ dr(const struct krb5_enc_provider *enc, const krb5_keyblock *inkey,
     ret = krb5_k_create_key(NULL, inkey, &key);
     if (ret != 0)
         return ret;
-    ret = krb5int_derive_random(enc, key, &outdata, in_constant);
+    ret = krb5int_derive_random(enc, key, &outdata, in_constant,
+                                DERIVE_RFC3961);
     krb5_k_free_key(NULL, key);
     return ret;
 }

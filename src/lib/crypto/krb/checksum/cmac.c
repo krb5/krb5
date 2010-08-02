@@ -86,20 +86,15 @@ generate_subkey(const struct krb5_enc_provider *enc,
                 unsigned char *K1,
                 unsigned char *K2)
 {
-    unsigned char Z[BLOCK_SIZE];
     unsigned char L[BLOCK_SIZE];
     unsigned char tmp[BLOCK_SIZE];
-    krb5_crypto_iov iov[1];
     krb5_data d;
     krb5_error_code ret;
 
     /* L := encrypt(K, const_Zero) */
-    memset(Z, 0, sizeof(Z));
-    iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
-    iov[0].data = make_data(Z, sizeof(Z));
+    memset(L, 0, sizeof(L));
     d = make_data(L, BLOCK_SIZE);
-    /* cbc-mac is the same as block encrypt if invoked on a single block. */
-    ret = enc->cbc_mac(key, iov, 1, NULL, &d);
+    ret = encrypt_block(enc, key, &d);
     if (ret != 0)
         return ret;
 

@@ -57,7 +57,7 @@ krb5int_dk_checksum(const struct krb5_cksumtypes *ctp,
     datain = make_data(constantdata, K5CLENGTH);
     store_32_be(usage, constantdata);
     constantdata[4] = (char) 0x99;
-    ret = krb5int_derive_key(enc, key, &kc, &datain);
+    ret = krb5int_derive_key(enc, key, &kc, &datain, DERIVE_RFC3961);
     if (ret)
         return ret;
 
