@@ -130,12 +130,18 @@ cleanup:
 }
 
 /*
- * NIST SP800-108 KDF in feedback mode with CMAC as PRF
+ * NIST SP800-108 KDF in feedback mode (section 5.2).
+ * Parameters:
+ *   - CMAC (with enc as the enc provider) is the PRF.
+ *   - A block counter of four bytes is used.
+ *   - Label is the key derivation constant.
+ *   - Context is empty.
+ *   - Four bytes are used to encode the output length in the PRF input.
  */
 static krb5_error_code
-derive_random_sp800_cmac(const struct krb5_enc_provider *enc,
-                         krb5_key inkey, krb5_data *outrnd,
-                         const krb5_data *in_constant)
+derive_random_sp800_108_cmac(const struct krb5_enc_provider *enc,
+                             krb5_key inkey, krb5_data *outrnd,
+                             const krb5_data *in_constant)
 {
     size_t blocksize, keybytes, n;
     krb5_crypto_iov iov[6];
@@ -155,38 +161,40 @@ derive_random_sp800_cmac(const struct krb5_enc_provider *enc,
     if (ret)
         return ret;
 
-    /* K(i-1) */
+    /* K(i-1): the previous block of PRF output, initially all-zeros. */
     iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[0].data = prf;
-    /* [i]2 */
+    /* [i]2: four-byte big-endian binary string giving the block counter */
     iov[1].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[1].data = make_data(ibuf, sizeof(ibuf));
-    /* Label */
+    /* Label: the fixed derived-key input */
     iov[2].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[2].data = *in_constant;
-    /* 0x00 */
+    /* 0x00: separator byte */
     iov[3].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[3].data = make_data("", 1);
-    /* Context */
+    /* Context: (unused) */
     iov[4].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[4].data = empty_data();
-    /* [L]2 */
+    /* [L]2: four-byte big-endian binary string giving the output length */
     iov[5].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[5].data = make_data(Lbuf, sizeof(Lbuf));
     store_32_be(outrnd->length, Lbuf);
 
     for (i = 1, n = 0; n < keybytes; i++) {
+        /* Update the block counter. */
         store_32_be(i, ibuf);
 
+        /* Compute a CMAC checksum, storing the result into K(i-1). */
         ret = krb5int_cmac_checksum(enc, inkey, iov, 6, &prf);
         if (ret)
             goto cleanup;
 
+        /* Copy the result into the appropriate part of the output buffer. */
         if (keybytes - n <= blocksize) {
             memcpy(outrnd->data + n, prf.data, keybytes - n);
             break;
         }
-
         memcpy(outrnd->data + n, prf.data, blocksize);
         n += blocksize;
     }
@@ -205,7 +213,7 @@ krb5int_derive_random(const struct krb5_enc_provider *enc,
     case DERIVE_RFC3961:
         return derive_random_rfc3961(enc, inkey, outrnd, in_constant);
     case DERIVE_SP800_108_CMAC:
-        return derive_random_sp800_cmac(enc, inkey, outrnd, in_constant);
+        return derive_random_sp800_108_cmac(enc, inkey, outrnd, in_constant);
     default:
         return EINVAL;
     }
