@@ -29,11 +29,11 @@
 #include "aead.h"
 
 /*
- * Implement AEAD_AES_{128,256}_CCM as described in section 5.3 of RFC 5116.
- *
- * This is the CCM mode as described in NIST 800-38C, with a 12 byte nonce
- * and 16 byte checksum. Multiple buffers of the same type are logically
- * concatenated.
+ * Implement CCM-mode AEAD as described in section 5.3 and 5.4 of RFC 5116.
+ * This is the CCM mode as described in NIST SP800-38C, with a 12 byte nonce
+ * and 16 byte checksum.  Multiple buffers of the same type are logically
+ * concatenated.  The underlying enc provider must have a 16-byte block size,
+ * must have a counter-mode encrypt method, and must have a cbc_mac method.
  *
  * The IOV should be laid out as follows:
  *
@@ -41,8 +41,8 @@
  *
  * SIGN_DATA and PADDING may be absent.
  *
- * Upon decryption, one can pass in explicit buffers as for encryption, or
- * one can pass in STREAM, being the concatenation of HEADER | DATA | TRAILER.
+ * Upon decryption, one can pass in explicit buffers as for encryption, or one
+ * can pass in STREAM, being the concatenation of HEADER | DATA | TRAILER.
  *
  *    STREAM | SIGN_DATA | DATA
  *
@@ -57,18 +57,9 @@
  *
  * Again as required by the CCM specification, SIGN_DATA is processed before
  * DATA for the purpose of checksumming.
- *
- * Because the base keys are compatible with RFC 3962, the two encryption
- * types defined here (ENCTYPE_AES128_CCM_128 and ENCTYPE_AES256_CCM_128)
- * are most useful in conjunction with RFC 4537.
  */
 
 #define K5CLENGTH 5 /* 32 bit net byte order integer + one byte seed */
-
-#define CCM_FLAG_MASK_Q                 0x07
-#define CCM_FLAG_MASK_T                 0x38
-#define CCM_FLAG_ADATA                  0x40
-#define CCM_FLAG_RESERVED               0x80
 
 unsigned int
 krb5int_dk_ccm_crypto_length(const struct krb5_keytypes *ktp,
@@ -96,6 +87,11 @@ krb5int_dk_ccm_crypto_length(const struct krb5_keytypes *ktp,
     return length;
 }
 
+/*
+ * Encode the length of the additional data according to NIST SP800-38C section
+ * A.2.2.  The size of the encoding will be 0, 2, 6, or 10 bytes depending on
+ * the length value.
+ */
 static krb5_error_code
 encode_a_len(krb5_data *a, krb5_ui_8 adata_len)
 {
@@ -118,10 +114,12 @@ encode_a_len(krb5_data *a, krb5_ui_8 adata_len)
 
     switch (len) {
     case 2:
+	/* Two raw bytes; first byte will not be 0xFF. */
         p[0] = (adata_len >> 8) & 0xFF;
         p[1] = (adata_len     ) & 0xFF;
         break;
     case 6:
+	/* FF FE followed by four bytes. */
         p[0] = 0xFF;
         p[1] = 0xFE;
         p[2] = (adata_len >> 24) & 0xFF;
@@ -130,6 +128,7 @@ encode_a_len(krb5_data *a, krb5_ui_8 adata_len)
         p[5] = (adata_len      ) & 0xFF;
         break;
     case 10:
+	/* FF FF followed by eight bytes. */
         p[0] = 0xFF;
         p[1] = 0xFF;
         p[2] = (adata_len >> 56) & 0xFF;
@@ -149,8 +148,8 @@ encode_a_len(krb5_data *a, krb5_ui_8 adata_len)
 }
 
 /*
- * format_B0() allows the tradeoff between nonce and payload length to
- * be parameterized by replacing the crypto_length() callback
+ * Encode the first 16-byte block of CBC-MAC input according to NIST SP800-38C
+ * section A.2.1.  n (the nonce length) is given by nonce->length.
  */
 static krb5_error_code
 format_B0(krb5_data *B0,            /* B0 */
@@ -166,35 +165,37 @@ format_B0(krb5_data *B0,            /* B0 */
     if (B0->length != 16)
         return KRB5_BAD_MSIZE;
 
-    /* SP800-38C A.1: Length Requirements */
+    /* Section A.1: Length Requirements */
 
-    /* t is an elements of {4, 6, 8, 10, 12, 14, 16} */
+    /* t is an element of {4, 6, 8, 10, 12, 14, 16}. */
     if (trailer_len % 2 ||
         (trailer_len < 4 || trailer_len > 16))
         return KRB5_BAD_MSIZE;
 
-    /* n is an element of {7, 8, 9, 10, 11, 12, 13} */
+    /* n is an element of {7, 8, 9, 10, 11, 12, 13}. */
     if (nonce->length < 7 || nonce->length > 13)
         return KRB5_BAD_MSIZE;
 
     q = 15 - nonce->length;
 
-    /* P consists of fewer than 2^(8q) octets */
+    /* P consists of fewer than 2^(8q) octets. */
     if (payload_len >= (1UL << (8 * q)))
         return KRB5_BAD_MSIZE;
 
-    /* SP800-38C A.1: Formatting of the Control Information and the Nonce */
+    /* Encode the flags octet. */
     flags = q - 1;
     flags |= (((trailer_len - 2) / 2) << 3);
     if (adata_len != 0)
-        flags |= CCM_FLAG_ADATA;
+        flags |= (1 << 6);
 
     p = (unsigned char *)B0->data;
     p[i++] = flags;
 
+    /* Next comes the nonce (n bytes). */
     memcpy(&p[i], nonce->data, nonce->length);
     i += nonce->length;
 
+    /* The final q bytes are the payload length. */
     for (; i < B0->length; i++) {
         register krb5_octet s;
 
@@ -207,23 +208,25 @@ format_B0(krb5_data *B0,            /* B0 */
 }
 
 /*
- * Format initial counter block. Counter may be chained
- * across invocations.
+ * Encode the initial counter block according to NIST SP800-38C section A.3.
+ * The counter value may be chained across krb5_k_encrypt invocations via the
+ * cipher_state parameter; otherwise it begins at 0.
  */
 static krb5_error_code
-format_Ctr0(krb5_data *counter,
-            const krb5_data *nonce,
-            const krb5_data *state,
+format_Ctr0(krb5_data *counter, const krb5_data *nonce, const krb5_data *state,
             unsigned int n)
 {
     krb5_octet q; /* counter length */
 
     assert(n >= 7 && n <= 13);
 
+    /* First byte is q-1 in the lowest three bits. */
     q = 15 - n;
     counter->data[0] = q - 1;
+    /* Next comes the nonce (n bytes). */
     memcpy(&counter->data[1], nonce->data, n);
 
+    /* Finally, the counter value. */
     if (state != NULL)
         memcpy(&counter->data[1 + n], &state->data[1 + n], q);
     else
@@ -232,9 +235,9 @@ format_Ctr0(krb5_data *counter,
     return 0;
 }
 
+/* Return true if the payload length is valid given the nonce length n. */
 static krb5_boolean
-valid_payload_length_p(const struct krb5_keytypes *ktp,
-                       unsigned int n,
+valid_payload_length_p(const struct krb5_keytypes *ktp, unsigned int n,
                        unsigned int payload_len)
 {
     unsigned int block_size = ktp->enc->block_size;
@@ -252,16 +255,13 @@ valid_payload_length_p(const struct krb5_keytypes *ktp,
     return (nblocks <= maxblocks);
 }
 
+/* Encrypt and authenticate data according to NIST SP800-38C section 6.1. */
 static krb5_error_code
-ccm_encrypt(const struct krb5_keytypes *ktp,
-            krb5_key kc,
-            krb5_keyusage usage,
-            const krb5_data *state,
-            krb5_crypto_iov *data,
-            size_t num_data)
+ccm_encrypt(const struct krb5_keytypes *ktp, krb5_key kc,
+	    const krb5_data *state, krb5_crypto_iov *data, size_t num_data)
 {
     krb5_error_code ret;
-    krb5_crypto_iov *header, *trailer, *sign_data = NULL;
+    krb5_crypto_iov *header, *trailer, *sign_data = NULL, cksum;
     size_t i, num_sign_data = 0;
     unsigned int header_len;
     unsigned int trailer_len;
@@ -313,37 +313,38 @@ ccm_encrypt(const struct krb5_keytypes *ktp,
     header->data.length = header_len;
     trailer->data.length = trailer_len;
 
-    /* Initialize nonce */
+    /* Choose a random nonce. */
     ret = krb5_c_random_make_octets(NULL, &header->data);
     if (ret != 0)
         goto cleanup;
 
-    /* Initialize counter block */
+    /* Encode the first counter block. */
     ret = format_Ctr0(&counter, &header->data, state, header_len);
     if (ret != 0)
         goto cleanup;
 
+    /* Create a list of CBC-MAC input blocks. */
     sign_data = k5alloc((num_data + 1) * sizeof(krb5_crypto_iov), &ret);
     if (sign_data == NULL)
         goto cleanup;
 
-    sign_data[num_sign_data].flags = KRB5_CRYPTO_TYPE_HEADER;
-    sign_data[num_sign_data].data = make_data(B0, sizeof(B0));
-    ret = format_B0(&sign_data[num_sign_data].data, &header->data, trailer_len,
+    /* Format the initial control/nonce block. */
+    sign_data[0].flags = KRB5_CRYPTO_TYPE_HEADER;
+    sign_data[0].data = make_data(B0, sizeof(B0));
+    ret = format_B0(&sign_data[0].data, &header->data, trailer_len,
                     (krb5_ui_8)adata_len, (krb5_ui_8)payload_len);
     if (ret != 0)
         goto cleanup;
-    num_sign_data++;
 
-    /* Include length of associated data in CBC-MAC */
-    sign_data[num_sign_data].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
-    sign_data[num_sign_data].data = make_data(adata_len_buf, sizeof(adata_len_buf));
-    ret = encode_a_len(&sign_data[num_sign_data].data, (krb5_ui_8)adata_len);
+    /* Format the length of associated data. */
+    sign_data[1].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
+    sign_data[1].data = make_data(adata_len_buf, sizeof(adata_len_buf));
+    ret = encode_a_len(&sign_data[1].data, (krb5_ui_8)adata_len);
     if (ret != 0)
         goto cleanup;
-    num_sign_data++;
+    num_sign_data = 2;
 
-    /* Reorder input IOV so SIGN_ONLY data is before DATA */
+    /* Reorder input IOV so SIGN_ONLY data is before DATA. */
     for (i = 0; i < num_data; i++) {
         if (data[i].flags == KRB5_CRYPTO_TYPE_SIGN_ONLY)
             sign_data[num_sign_data++] = data[i];
@@ -356,44 +357,39 @@ ccm_encrypt(const struct krb5_keytypes *ktp,
     assert(ktp->enc->encrypt != NULL);
     assert(ktp->enc->cbc_mac != NULL);
 
-    /* Make checksum and place in trailer */
-    ret = ktp->enc->cbc_mac(kc, sign_data, num_sign_data, NULL, &trailer->data);
+    /* Make checksum and place in trailer. */
+    ret = ktp->enc->cbc_mac(kc, sign_data, num_sign_data, NULL,
+			    &trailer->data);
     if (ret != 0)
         goto cleanup;
 
-    /* Encrypt checksum in trailer */
-    {
-        krb5_crypto_iov cksum[1];
+    /* Encrypt checksum in trailer using the first counter block. */
+    cksum.flags = KRB5_CRYPTO_TYPE_DATA;
+    cksum.data = trailer->data;
+    ret = ktp->enc->encrypt(kc, &counter, &cksum, 1);
+    if (ret != 0)
+	goto cleanup;
 
-        cksum[0].flags = KRB5_CRYPTO_TYPE_DATA;
-        cksum[0].data = trailer->data;
-
-        ret = ktp->enc->encrypt(kc, &counter, cksum, 1);
-        if (ret != 0)
-            goto cleanup;
-    }
-
-    /* Don't encrypt B0 (header), but encrypt everything else */
+    /* Encrypt everything but B0 (header) in subsequent counter blocks. */
     ret = ktp->enc->encrypt(kc, &counter, data, num_data);
     if (ret != 0)
         goto cleanup;
 
+    /* Store the counter block as cipher state.  Subsequent encryptions will
+     * reuse the counter value but will generate a fresh nonce. */
     if (state != NULL)
         memcpy(state->data, counter.data, counter.length);
 
 cleanup:
     free(sign_data);
-
     return ret;
 }
 
+/* Derive an encryption key based on usage and CCM-encrypt data. */
 krb5_error_code
-krb5int_dk_ccm_encrypt(const struct krb5_keytypes *ktp,
-                       krb5_key key,
-                       krb5_keyusage usage,
-                       const krb5_data *state,
-                       krb5_crypto_iov *data,
-                       size_t num_data)
+krb5int_dk_ccm_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
+                       krb5_keyusage usage, const krb5_data *state,
+                       krb5_crypto_iov *data, size_t num_data)
 {
     unsigned char constantdata[K5CLENGTH];
     krb5_error_code ret;
@@ -414,23 +410,20 @@ krb5int_dk_ccm_encrypt(const struct krb5_keytypes *ktp,
     if (ret != 0)
         return ret;
 
-    ret = ccm_encrypt(ktp, kc, usage, state, data, num_data);
+    ret = ccm_encrypt(ktp, kc, state, data, num_data);
 
     krb5_k_free_key(NULL, kc);
 
     return ret;
 }
 
+/* Decrypt and verify data according to NIST SP800-38C section 6.2. */
 static krb5_error_code
-ccm_decrypt(const struct krb5_keytypes *ktp,
-            krb5_key kc,
-            krb5_keyusage usage,
-            const krb5_data *state,
-            krb5_crypto_iov *data,
-            size_t num_data)
+ccm_decrypt(const struct krb5_keytypes *ktp, krb5_key kc,
+	    const krb5_data *state, krb5_crypto_iov *data, size_t num_data)
 {
     krb5_error_code ret;
-    krb5_crypto_iov *header, *trailer, *sign_data = NULL;
+    krb5_crypto_iov *header, *trailer, *sign_data = NULL, got_cksum;
     size_t i, num_sign_data = 0;
     unsigned int header_len;
     unsigned int trailer_len;
@@ -483,30 +476,31 @@ ccm_decrypt(const struct krb5_keytypes *ktp,
         goto cleanup;
     }
 
-    /* Initialize counter block */
+    /* Encode the first counter block. */
     ret = format_Ctr0(&counter, &header->data, state, header_len);
     if (ret != 0)
         goto cleanup;
 
+    /* Create a list of CBC-MAC input blocks. */
     sign_data = k5alloc((num_data + 1) * sizeof(krb5_crypto_iov), &ret);
     if (sign_data == NULL)
         goto cleanup;
 
-    sign_data[num_sign_data].flags = KRB5_CRYPTO_TYPE_HEADER;
-    sign_data[num_sign_data].data = make_data(B0, sizeof(B0));
-    ret = format_B0(&sign_data[num_sign_data].data, &header->data, trailer_len,
+    /* Format the initial control/nonce block. */
+    sign_data[0].flags = KRB5_CRYPTO_TYPE_HEADER;
+    sign_data[0].data = make_data(B0, sizeof(B0));
+    ret = format_B0(&sign_data[0].data, &header->data, trailer_len,
                     (krb5_ui_8)adata_len, (krb5_ui_8)payload_len);
     if (ret != 0)
         goto cleanup;
-    num_sign_data++;
 
-    /* Include length of associated data in CBC-MAC */
-    sign_data[num_sign_data].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
-    sign_data[num_sign_data].data = make_data(adata_len_buf, sizeof(adata_len_buf));
-    ret = encode_a_len(&sign_data[num_sign_data].data, (krb5_ui_8)adata_len);
+    /* Format the length of associated data. */
+    sign_data[1].flags = KRB5_CRYPTO_TYPE_SIGN_ONLY;
+    sign_data[1].data = make_data(adata_len_buf, sizeof(adata_len_buf));
+    ret = encode_a_len(&sign_data[1].data, (krb5_ui_8)adata_len);
     if (ret != 0)
         goto cleanup;
-    num_sign_data++;
+    num_sign_data = 2;
 
     assert(ktp->enc->decrypt != NULL);
     assert(ktp->enc->cbc_mac != NULL);
@@ -516,19 +510,14 @@ ccm_decrypt(const struct krb5_keytypes *ktp,
         goto cleanup;
     made_cksum.length = trailer_len;
 
-    /* Decrypt checksum from trailer */
-    {
-        krb5_crypto_iov got_cksum[1];
+    /* Decrypt checksum from trailer using the first counter block. */
+    got_cksum.flags = KRB5_CRYPTO_TYPE_DATA;
+    got_cksum.data = trailer->data;
+    ret = ktp->enc->decrypt(kc, &counter, &got_cksum, 1);
+    if (ret != 0)
+	goto cleanup;
 
-        got_cksum[0].flags = KRB5_CRYPTO_TYPE_DATA;
-        got_cksum[0].data = trailer->data;
-
-        ret = ktp->enc->decrypt(kc, &counter, got_cksum, 1);
-        if (ret != 0)
-            goto cleanup;
-    }
-
-    /* Don't decrypt B0 (header), but decrypt everything else */
+    /* Decrypt everything but B0 (header) in subsequent counter blocks. */
     ret = ktp->enc->decrypt(kc, &counter, data, num_data);
     if (ret != 0)
         goto cleanup;
@@ -543,17 +532,20 @@ ccm_decrypt(const struct krb5_keytypes *ktp,
             sign_data[num_sign_data++] = data[i];
     }
 
-    /* Now, calculate hash for comparison (including B0) */
+    /* Calculate CBC-MAC for comparison (including B0). */
     ret = ktp->enc->cbc_mac(kc, sign_data, num_sign_data, NULL, &made_cksum);
     if (ret != 0)
         goto cleanup;
 
     if (made_cksum.length != trailer->data.length ||
-        memcmp(made_cksum.data, trailer->data.data, trailer->data.length) != 0) {
+        memcmp(made_cksum.data, trailer->data.data,
+	       trailer->data.length) != 0) {
         ret = KRB5KRB_AP_ERR_BAD_INTEGRITY;
         goto cleanup;
     }
 
+    /* Store the counter block as cipher state.  Subsequent decryptions will
+     * reuse the counter value but will generate a fresh nonce. */
     if (state != NULL)
         memcpy(state->data, counter.data, counter.length);
 
@@ -564,13 +556,11 @@ cleanup:
     return ret;
 }
 
+/* Derive an encryption key based on usage and CCM-decrypt data. */
 krb5_error_code
-krb5int_dk_ccm_decrypt(const struct krb5_keytypes *ktp,
-                       krb5_key key,
-                       krb5_keyusage usage,
-                       const krb5_data *state,
-                       krb5_crypto_iov *data,
-                       size_t num_data)
+krb5int_dk_ccm_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
+                       krb5_keyusage usage, const krb5_data *state,
+                       krb5_crypto_iov *data, size_t num_data)
 {
     unsigned char constantdata[K5CLENGTH];
     krb5_error_code ret;
@@ -591,7 +581,7 @@ krb5int_dk_ccm_decrypt(const struct krb5_keytypes *ktp,
     if (ret != 0)
         return ret;
 
-    ret = ccm_decrypt(ktp, kc, usage, state, data, num_data);
+    ret = ccm_decrypt(ktp, kc, state, data, num_data);
 
     krb5_k_free_key(NULL, kc);
 
