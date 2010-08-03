@@ -68,24 +68,6 @@ krb5int_aes_crypto_length(const struct krb5_keytypes *ktp,
     }
 }
 
-unsigned int
-krb5int_camellia_crypto_length(const struct krb5_keytypes *ktp,
-                               krb5_cryptotype type)
-{
-    switch (type) {
-    case KRB5_CRYPTO_TYPE_HEADER:
-        return ktp->enc->block_size;
-    case KRB5_CRYPTO_TYPE_PADDING:
-        return 0;
-    case KRB5_CRYPTO_TYPE_TRAILER:
-    case KRB5_CRYPTO_TYPE_CHECKSUM:
-        return 96 / 8;
-    default:
-        assert(0 && "invalid cryptotype passed to krb5int_camellia_crypto_length");
-        return 0;
-    }
-}
-
 krb5_error_code
 krb5int_dk_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
                    krb5_keyusage usage, const krb5_data *ivec,

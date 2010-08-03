@@ -37,10 +37,6 @@ unsigned int
 krb5int_aes_crypto_length(const struct krb5_keytypes *ktp,
                           krb5_cryptotype type);
 
-unsigned int
-krb5int_camellia_crypto_length(const struct krb5_keytypes *ktp,
-                               krb5_cryptotype type);
-
 krb5_error_code
 krb5int_dk_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
                    krb5_keyusage usage, const krb5_data *ivec,
