@@ -34,9 +34,9 @@ static void
 xorblock(unsigned char *out, const unsigned char *in)
 {
     int z;
-    for (z = 0; z < BLOCK_SIZE/4; z++) {
-        unsigned char *outptr = &out[z*4];
-        unsigned char *inptr = (unsigned char *)&in[z*4];
+    for (z = 0; z < BLOCK_SIZE / 4; z++) {
+        unsigned char *outptr = &out[z * 4];
+        unsigned char *inptr = (unsigned char *)&in[z * 4];
         /*
          * Use unaligned accesses.  On x86, this will probably still be faster
          * than multiple byte accesses for unaligned data, and for aligned data
@@ -51,7 +51,7 @@ xorblock(unsigned char *out, const unsigned char *in)
          * conditionalize on CPU type, as that may be hard to determine
          * automatically.
          */
-        store_32_n (load_32_n(outptr) ^ load_32_n(inptr), outptr);
+        store_32_n(load_32_n(outptr) ^ load_32_n(inptr), outptr);
     }
 }
 
@@ -70,13 +70,11 @@ static inline void putctrblockno(krb5_ui_8 blockno,
 }
 
 /*
- * ivec must be a correctly formatted counter block per SP800-38C A.3
+ * ivec must be a correctly formatted counter block per NIST SP800-38C A.3.
  */
 static krb5_error_code
-krb5int_camellia_encrypt_ctr(krb5_key key,
-                             const krb5_data *ivec,
-                             krb5_crypto_iov *data,
-                             size_t num_data)
+krb5int_camellia_encrypt_ctr(krb5_key key, const krb5_data *ivec,
+                             krb5_crypto_iov *data, size_t num_data)
 {
     camellia_ctx ctx;
     unsigned char ctr[BLOCK_SIZE];
@@ -90,7 +88,7 @@ krb5int_camellia_encrypt_ctr(krb5_key key,
     IOV_BLOCK_STATE_INIT(&input_pos);
     IOV_BLOCK_STATE_INIT(&output_pos);
 
-    /* Don't encrypt the header (B0), and use zero instead of IOV padding */
+    /* Don't encrypt the header (B0), and use zero instead of IOV padding. */
     input_pos.ignore_header = output_pos.ignore_header = 1;
     input_pos.pad_to_boundary = output_pos.pad_to_boundary = 1;
 
@@ -107,8 +105,8 @@ krb5int_camellia_encrypt_ctr(krb5_key key,
         unsigned char storage[BLOCK_SIZE], *block;
         unsigned char ectr[BLOCK_SIZE];
 
-        if (!krb5int_c_iov_get_block_nocopy(storage, BLOCK_SIZE,
-                                            data, num_data, &input_pos, &block))
+        if (!krb5int_c_iov_get_block_nocopy(storage, BLOCK_SIZE, data,
+					    num_data, &input_pos, &block))
             break;
 
         if (camellia_enc_blk(ctr, ectr, &ctx) != camellia_good)
@@ -127,11 +125,9 @@ krb5int_camellia_encrypt_ctr(krb5_key key,
 }
 
 krb5_error_code
-krb5int_camellia_cbc_mac(krb5_key key,
-                         const krb5_crypto_iov *data,
-                         size_t num_data,
-                         const krb5_data *iv,
-                         krb5_data *output)
+krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
+                         size_t num_data, const krb5_data *iv,
+			 krb5_data *output)
 {
     camellia_ctx ctx;
     unsigned char blockY[BLOCK_SIZE];
@@ -153,7 +149,7 @@ krb5int_camellia_cbc_mac(krb5_key key,
 
     /*
      * The CCM header may not fit in a block, because it includes a variable
-     * length encoding of the associated data length. This encoding plus the
+     * length encoding of the associated data length.  This encoding plus the
      * associated data itself is padded to the block size.
      */
     iov_state.include_sign_only = 1;
@@ -162,7 +158,8 @@ krb5int_camellia_cbc_mac(krb5_key key,
     for (;;) {
         unsigned char blockB[BLOCK_SIZE];
 
-        if (!krb5int_c_iov_get_block(blockB, BLOCK_SIZE, data, num_data, &iov_state))
+        if (!krb5int_c_iov_get_block(blockB, BLOCK_SIZE, data, num_data,
+				     &iov_state))
             break;
 
         xorblock(blockB, blockY);
@@ -178,8 +175,8 @@ krb5int_camellia_cbc_mac(krb5_key key,
 }
 
 static krb5_error_code
-krb5int_camellia_init_state_ctr (const krb5_keyblock *key, krb5_keyusage usage,
-                                 krb5_data *state)
+krb5int_camellia_init_state_ctr(const krb5_keyblock *key, krb5_keyusage usage,
+				krb5_data *state)
 {
     return alloc_data(state, 16);
 }

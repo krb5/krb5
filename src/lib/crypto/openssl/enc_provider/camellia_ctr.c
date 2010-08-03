@@ -39,9 +39,9 @@ static void
 xorblock(unsigned char *out, const unsigned char *in)
 {
     int z;
-    for (z = 0; z < CAMELLIA_BLOCK_SIZE/4; z++) {
-        unsigned char *outptr = &out[z*4];
-        unsigned char *inptr = (unsigned char *)&in[z*4];
+    for (z = 0; z < CAMELLIA_BLOCK_SIZE / 4; z++) {
+        unsigned char *outptr = &out[z * 4];
+        unsigned char *inptr = (unsigned char *)&in[z * 4];
         /*
          * Use unaligned accesses.  On x86, this will probably still be faster
          * than multiple byte accesses for unaligned data, and for aligned data
@@ -56,7 +56,7 @@ xorblock(unsigned char *out, const unsigned char *in)
          * conditionalize on CPU type, as that may be hard to determine
          * automatically.
          */
-        store_32_n (load_32_n(outptr) ^ load_32_n(inptr), outptr);
+        store_32_n(load_32_n(outptr) ^ load_32_n(inptr), outptr);
     }
 }
 
@@ -64,10 +64,8 @@ xorblock(unsigned char *out, const unsigned char *in)
  * ivec must be a correctly formatted counter block per SP800-38C A.3
  */
 static krb5_error_code
-krb5int_camellia_encrypt_ctr(krb5_key key,
-                             const krb5_data *ivec,
-                             krb5_crypto_iov *data,
-                             size_t num_data)
+krb5int_camellia_encrypt_ctr(krb5_key key, const krb5_data *ivec,
+                             krb5_crypto_iov *data, size_t num_data)
 {
     CAMELLIA_KEY enck;
     unsigned char ctr[CAMELLIA_BLOCK_SIZE];
@@ -97,14 +95,18 @@ krb5int_camellia_encrypt_ctr(krb5_key key,
         unsigned int num = 0;
 
         if (!krb5int_c_iov_get_block_nocopy(storage, CAMELLIA_BLOCK_SIZE,
-                                            data, num_data, &input_pos, &block))
+                                            data, num_data, &input_pos,
+					    &block))
             break;
 
-        /* We should not need to initialise ectr because we're on a block boundary. */
-        Camellia_ctr128_encrypt(block, block, CAMELLIA_BLOCK_SIZE, &enck, ctr, ectr, &num);
+        /* We should not need to initialise ectr because we're on a block
+	 * boundary. */
+        Camellia_ctr128_encrypt(block, block, CAMELLIA_BLOCK_SIZE, &enck, ctr,
+				ectr, &num);
         assert(num == 0);
         krb5int_c_iov_put_block_nocopy(data, num_data, storage,
-                                       CAMELLIA_BLOCK_SIZE, &output_pos, block);
+				       CAMELLIA_BLOCK_SIZE, &output_pos,
+				       block);
     }
 
     if (ivec != NULL)
@@ -114,11 +116,9 @@ krb5int_camellia_encrypt_ctr(krb5_key key,
 }
 
 static krb5_error_code
-krb5int_camellia_cbc_mac(krb5_key key,
-                         const krb5_crypto_iov *data,
-                         size_t num_data,
-                         const krb5_data *iv,
-                         krb5_data *output)
+krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
+                         size_t num_data, const krb5_data *iv,
+			 krb5_data *output)
 {
     CAMELLIA_KEY enck;
     unsigned char blockY[CAMELLIA_BLOCK_SIZE];
@@ -148,7 +148,8 @@ krb5int_camellia_cbc_mac(krb5_key key,
     for (;;) {
         unsigned char blockB[CAMELLIA_BLOCK_SIZE];
 
-        if (!krb5int_c_iov_get_block(blockB, CAMELLIA_BLOCK_SIZE, data, num_data, &iov_state))
+        if (!krb5int_c_iov_get_block(blockB, CAMELLIA_BLOCK_SIZE, data,
+				     num_data, &iov_state))
             break;
 
         xorblock(blockB, blockY);

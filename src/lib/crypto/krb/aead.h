@@ -256,7 +256,7 @@ krb5int_c_iov_put_block_nocopy(const krb5_crypto_iov *data,
         if (p == storage) {
             memcpy(iov->data.data + iov_state->data_pos, storage + j, nbytes);
         } else {
-            /* Validate we correctly paired with a call to get_block_nocopy() */
+            /* Ensure correctly paired with a call to get_block_nocopy(). */
             assert(j == 0);
             assert(nbytes == 0 || nbytes == block_size);
         }

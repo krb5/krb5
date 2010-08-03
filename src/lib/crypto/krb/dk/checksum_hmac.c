@@ -69,4 +69,3 @@ krb5int_dk_checksum(const struct krb5_cksumtypes *ctp,
     krb5_k_free_key(NULL, kc);
     return ret;
 }
-

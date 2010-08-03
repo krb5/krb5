@@ -223,4 +223,3 @@ krb5int_cmac_checksum(const struct krb5_enc_provider *enc, krb5_key key,
 
     return 0;
 }
-
