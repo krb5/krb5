@@ -38,22 +38,11 @@ krb5int_dk_cmac_checksum(const struct krb5_cksumtypes *ctp,
                          const krb5_crypto_iov *data, size_t num_data,
                          krb5_data *output)
 {
-    const struct krb5_keytypes *ktp;
-    const struct krb5_enc_provider *enc;
+    const struct krb5_enc_provider *enc = ctp->enc;
     krb5_error_code ret;
     unsigned char constantdata[K5CLENGTH];
     krb5_data datain;
     krb5_key kc;
-
-    /* Use the key's enctype (more flexible than setting an enctype in ctp). */
-    ktp = find_enctype(key->keyblock.enctype);
-    if (ktp == NULL)
-        return KRB5_BAD_ENCTYPE;
-    enc = ktp->enc;
-    if (key->keyblock.length != enc->keylength)
-        return KRB5_BAD_KEYSIZE;
-    if (ctp->compute_size != enc->block_size)
-        return KRB5_BAD_MSIZE;
 
     /* Derive the key. */
     datain = make_data(constantdata, K5CLENGTH);
