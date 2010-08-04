@@ -1,0 +1,117 @@
+This branch adds two encryption types to krb5, based on Camellia-128
+and Camellia-256 in CCM mode.  The enctypes are specified in:
+
+  http://tools.ietf.org/html/draft-kanno-krbwg-camellia-ccm
+
+This branch incorporates some of the code from
+users/lhoward/camellia-ccm, which in turn incorporates code from
+users/lhoward/aes-ccm and branches/camellia-cts.
+
+The changes on this branch touch many files.  Here is a high-level
+overview of the additions:
+
+  * Declarations and build system changes associated with adding any
+    new enctype and enc provider.
+
+  * enc-provider implementations for Camellia-128/256 in counter-mode
+    for the OpenSSL and built-in libk5crypto back ends.
+
+  * Token encryption and decryption implementations for CCM-mode
+    enctypes.
+
+  * A CMAC checksum implementation using derived keys.
+
+  * A new key derivation algorithm, using NIST SP800-108 with CMAC.
+    krb5int_derive_random now takes an algorithm parameter so that it
+    can be used for both RFC 3961 and NIST SP800-108 key derivation.
+
+  * The PBKDF2 string-to-key implementation is extended to support
+    peppers, and is used for the Camellia enctypes.
+
+  * An identity random-to-key implementation for Camellia (same as for
+    AES or any other modern cipher).
+
+  * A PRF implementation for the new enctypes which derives a key and
+    invokes CMAC to generate the output block.
+
+  * The IOV block processing functions are moved from aead.c to aead.h
+    so that the inline no-copy variants can be used in concert with
+    the special flags.
+
+  * There is now an encrypt_block helper function to perform
+    single-block encryptions using the underlying block cipher when
+    the enc-provider might be either a CBC-mode or counter-mode
+    provider.
+
+Following is a file-by-file list of the branch changes:
+
+Declarations, build system, etc.
+* include/krb5/krb5.hin: enctypes, cksumtypes
+* include/k5-int.h: camellia cmac function for test program use
+* configure.in: add camellia back-end directory
+* windows/identity/plugins/krb5/lang/en_us/langres.rc: camellia CCM entries
+* windows/identity/plugins/krb5/datarep.c: Camellia CCM entries
+* lib/crypto/Makefile.in: add camellia back-end directory
+* lib/krb5/krb/init_ctx.c: add camellia enctype family
+* util/collected-client-lib/Makefile.in: add camellia back-end directory
+
+OpenSSL implementation
+* lib/crypto/openssl/enc_provider/camellia_ctr.c: enc provider implementation
+* lib/crypto/openssl/enc_provider/Makefile.in: add camellia_ctr.c
+* lib/crypto/openssl/enc_provider/enc_provider.h: add enc provider declaration
+* lib/crypto/openssl/camellia/Makefile.in: build system dummy
+* lib/crypto/openssl/camellia/deps: build system dummy
+
+Builtin implementation
+* lib/crypto/builtin/enc_provider/camellia_ctr.c: enc provider implementation
+* lib/crypto/builtin/enc_provider/Makefile.in: add camellia_ctr.c
+* lib/crypto/builtin/enc_provider/enc_provider.h: add enc provider declaration
+* lib/crypto/builtin/Makefile.in: add camellia subdir
+* lib/crypto/builtin/camellia/Makefile.in: build system for block cipher
+* lib/crypto/builtin/camellia/deps: dependencies for block cipher
+* lib/crypto/builtin/camellia/camellia-gen.c: test program (XXX license)
+* lib/crypto/builtin/camellia/camellia.c: block cipher implementation
+* lib/crypto/builtin/camellia/camellia.h: block cipher declarations
+* lib/crypto/builtin/enc_provider/aes.c: iov_next_block call site changes
+* lib/crypto/builtin/des/f_aead.c: iov_next_block call site changes
+* lib/crypto/builtin/des/d3_aead.c: iov_next_block call site changes
+
+crypto/krb additions
+* lib/crypto/krb/rand2key/Makefile.in: add camellia_randkey.c
+* lib/crypto/krb/rand2key/rand2key.h: add krb5int_camellia_make_key()
+* lib/crypto/krb/rand2key/camellia_rand2key.c: camellia rand2key (same as AES)
+* lib/crypto/krb/Makefile.in: add include for camellia from back end
+* lib/crypto/krb/cksumtypes.c: add checksum types
+* lib/crypto/krb/etypes.c: add enctypes
+* lib/crypto/krb/cksumtypes.h: add krb5int_cmac_checksum declaration
+* lib/crypto/krb/dk/checksum.c: renamed to checksum_hmac.c
+* lib/crypto/krb/dk/derive.c: add derive_random_sp800_108_cmac support
+* lib/crypto/krb/dk/dk_ccm.c: CCM enctype implementation with derived keys
+* lib/crypto/krb/dk/Makefile.in: add new source files
+* lib/crypto/krb/dk/stringtokey.c: add pepper variant of AES string-to-key
+* lib/crypto/krb/dk/dk.h: declarations for new functions; parameterize derive
+* lib/crypto/krb/dk/checksum_cmac.c: CMAC derived-key checksum implementation
+* lib/crypto/krb/dk/dk_aead.c: key derivation call site changes
+* lib/crypto/krb/dk/checksum_hmac.c: renamed from checksum.c
+* lib/crypto/krb/prf/Makefile.in: add cmac_prf.c
+* lib/crypto/krb/prf/prf_int.h: add krb5int_dk_cmac_prf declaration
+* lib/crypto/krb/prf/cmac_prf.c: PRF implementation, derives key and calls CMAC
+* lib/crypto/krb/prf/dk_prf.c: key derivation call site changes
+* lib/crypto/krb/checksum/Makefile.in: add cmac.c
+* lib/crypto/krb/checksum/cmac.c: CMAC checksum implementation
+* lib/crypto/krb/aead.c: block processing moved to aead.h
+* lib/crypto/krb/aead.h: block processing moved from aead.c
+* lib/crypto/krb/combine_keys.c: key derivation call site changes
+
+Tests
+* tests/dejagnu/config/default.exp: Camellia test pass
+* lib/crypto/crypto_tests/Makefile.in: add camellia-test and t_cmac
+* lib/crypto/crypto_tests/t_encrypt.c: add camellia enctypes
+* lib/crypto/crypto_tests/camellia-expect-vt.txt: data file for vector test
+* lib/crypto/crypto_tests/t_short.c: add camellia enctypes
+* lib/crypto/crypto_tests/camellia-test.c: camellia vector test program
+* lib/crypto/crypto_tests/t_cmac.c: CMAC vector test program
+* lib/crypto/crypto_tests/vectors.c: key derivation call site changes
+* lib/krb5/krb/t_etypes.c: test case for enctype parsing of camellia name
+* util/k5test.py: camellia test pass
+* lib/crypto/libk5crypto.exports: export CMAC function used by vector test
