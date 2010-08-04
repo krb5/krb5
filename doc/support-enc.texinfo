@@ -27,6 +27,12 @@ AES-256 CTS mode with 96-bit SHA-1 HMAC
 @item aes128-cts-hmac-sha1-96
 @itemx aes128-cts
 AES-128 CTS mode with 96-bit SHA-1 HMAC
+@item camellia256-ccm-128
+@itemx camellia256-ccm
+Camellia-256 CCM mode
+@item camellia128-ccm-128
+@itemx camellia128-ccm
+Camellia-128 CCM mode
 @item arcfour-hmac 
 @itemx rc4-hmac
 @itemx arcfour-hmac-md5
