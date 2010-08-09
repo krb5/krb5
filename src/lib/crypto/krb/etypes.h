@@ -52,6 +52,14 @@ typedef krb5_error_code (*prf_func)(const struct krb5_keytypes *ktp,
                                     krb5_key key,
                                     const krb5_data *in, krb5_data *out);
 
+typedef krb5_error_code (*init_state_func)(const struct krb5_keytypes *ktp,
+                                           const krb5_keyblock *key,
+                                           krb5_keyusage keyusage,
+                                           krb5_data *out_state);
+
+typedef void (*free_state_func)(const struct krb5_keytypes *ktp,
+                                krb5_data *state);
+
 struct krb5_keytypes {
     krb5_enctype etype;
     char *name;
@@ -65,6 +73,8 @@ struct krb5_keytypes {
     crypt_func decrypt;
     str2key_func str2key;
     prf_func prf;
+    init_state_func init_state;
+    free_state_func free_state;
     krb5_cksumtype required_ctype;
     krb5_flags flags;
 };
@@ -108,5 +118,13 @@ encrypt_block(const struct krb5_enc_provider *enc, krb5_key key,
     else                        /* Assume cbc-mode encrypt. */
         return enc->encrypt(key, 0, &iov, 1);
 }
+
+krb5_error_code
+krb5int_init_state_enc(const struct krb5_keytypes *ktp,
+                       const krb5_keyblock *key, krb5_keyusage keyusage,
+                       krb5_data *out_state);
+
+void
+krb5int_free_state_enc(const struct krb5_keytypes *ktp, krb5_data *state);
 
 #endif

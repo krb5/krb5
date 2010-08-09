@@ -115,3 +115,11 @@ krb5int_dk_cmac_checksum(const struct krb5_cksumtypes *ctp,
                          krb5_key key, krb5_keyusage usage,
                          const krb5_crypto_iov *data, size_t num_data,
                          krb5_data *output);
+
+krb5_error_code
+krb5int_dk_ccm_init_state(const struct krb5_keytypes *ktp,
+                          const krb5_keyblock *key, krb5_keyusage usage,
+                          krb5_data *out_state);
+
+void
+krb5int_dk_ccm_free_state(const struct krb5_keytypes *ktp, krb5_data *state);

@@ -228,7 +228,7 @@ format_Ctr0(krb5_data *counter, const krb5_data *nonce, const krb5_data *state,
 
     /* Finally, the counter value. */
     if (state != NULL)
-        memcpy(&counter->data[1 + n], &state->data[1 + n], q);
+        memcpy(&counter->data[1 + n], state->data, q);
     else
         memset(&counter->data[1 + n], 0, q);
 
@@ -375,10 +375,10 @@ ccm_encrypt(const struct krb5_keytypes *ktp, krb5_key kc,
     if (ret != 0)
         goto cleanup;
 
-    /* Store the counter block as cipher state.  Subsequent encryptions will
-     * reuse the counter value but will generate a fresh nonce. */
+    /* Store the counter value as cipher state.  Subsequent encryptions will
+     * generate a fresh nonce. */
     if (state != NULL)
-        memcpy(state->data, counter.data, counter.length);
+        memcpy(state->data, counter.data + 1 + header_len, 15 - header_len);
 
 cleanup:
     free(sign_data);
@@ -544,10 +544,10 @@ ccm_decrypt(const struct krb5_keytypes *ktp, krb5_key kc,
         goto cleanup;
     }
 
-    /* Store the counter block as cipher state.  Subsequent decryptions will
-     * reuse the counter value but will generate a fresh nonce. */
+    /* Store the counter value as cipher state.  Subsequent encryptions will
+     * generate a fresh nonce. */
     if (state != NULL)
-        memcpy(state->data, counter.data, counter.length);
+        memcpy(state->data, counter.data + 1 + header_len, 15 - header_len);
 
 cleanup:
     free(made_cksum.data);
@@ -588,3 +588,23 @@ krb5int_dk_ccm_decrypt(const struct krb5_keytypes *ktp, krb5_key key,
     return ret;
 }
 
+krb5_error_code
+krb5int_dk_ccm_init_state(const struct krb5_keytypes *ktp,
+                          const krb5_keyblock *key, krb5_keyusage usage,
+                          krb5_data *out_state)
+{
+    unsigned int header_len;
+
+    /* The cipher state is the q-byte block counter value. */
+    header_len = ktp->crypto_length(ktp, KRB5_CRYPTO_TYPE_HEADER);
+    return alloc_data(out_state, 15 - header_len);
+}
+
+void
+krb5int_dk_ccm_free_state(const struct krb5_keytypes *ktp,
+                          krb5_data *state)
+{
+    free(state->data);
+    state->data = NULL;
+    state->length = 0;
+}

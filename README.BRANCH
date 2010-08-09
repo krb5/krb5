@@ -38,6 +38,9 @@ overview of the additions:
     so that the inline no-copy variants can be used in concert with
     the special flags.
 
+  * Enctypes can now manage cipher state.  Non-CCM enctypes delegate
+    this job to the encryption provider methods.
+
   * There is now an encrypt_block helper function to perform
     single-block encryptions using the underlying block cipher when
     the enc-provider might be either a CBC-mode or counter-mode
@@ -82,7 +85,8 @@ crypto/krb additions
 * lib/crypto/krb/rand2key/camellia_rand2key.c: camellia rand2key (same as AES)
 * lib/crypto/krb/Makefile.in: add include for camellia from back end
 * lib/crypto/krb/cksumtypes.c: add checksum types
-* lib/crypto/krb/etypes.c: add enctypes
+* lib/crypto/krb/etypes.h: add init_state/free_state methods to enctype struct
+* lib/crypto/krb/etypes.c: add new enctypes; add init_state/free_state methods
 * lib/crypto/krb/cksumtypes.h: add krb5int_cmac_checksum declaration
 * lib/crypto/krb/dk/checksum.c: renamed to checksum_hmac.c
 * lib/crypto/krb/dk/derive.c: add derive_random_sp800_108_cmac support
@@ -102,6 +106,7 @@ crypto/krb additions
 * lib/crypto/krb/aead.c: block processing moved to aead.h
 * lib/crypto/krb/aead.h: block processing moved from aead.c
 * lib/crypto/krb/combine_keys.c: key derivation call site changes
+* lib/crypto/krb/state.c: use enctype init_state/free_state methods
 
 Tests
 * tests/dejagnu/config/default.exp: Camellia test pass
