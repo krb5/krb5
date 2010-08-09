@@ -49,7 +49,7 @@ check-unix:: t_nfold t_encrypt t_prf t_prng t_cmac t_hmac \
 		aes-test  \
 		camellia-test  \
 		t_mddriver4 t_mddriver \
-		t_crc t_cts t_short t_str2key
+		t_crc t_cts t_short t_str2key t_camellia_ccm
 	$(RUN_SETUP) $(VALGRIND) ./t_nfold
 	$(RUN_SETUP) $(VALGRIND) ./t_encrypt
 	$(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output && \
