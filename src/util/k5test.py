@@ -119,7 +119,7 @@ keyword arguments:
 
 * start_kdc=False: Don't start the KDC.  Implies get_creds=False.
 
-* start_kadmin=False: Don't start kadmind.
+* start_kadmind=False: Don't start kadmind.
 
 * get_creds=False: Don't get user credentials.
 
