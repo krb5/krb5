@@ -106,48 +106,69 @@ krb5_init_creds_set_password(krb5_context context,
 
 /* Return the password expiry time indicated by enc_part2.  Set *is_last_req
  * if the information came from a last_req value. */
-static krb5_timestamp
-get_expiry_time(krb5_enc_kdc_rep_part *enc_part2, krb5_boolean *is_last_req)
+static void
+get_expiry_times(krb5_enc_kdc_rep_part *enc_part2, krb5_timestamp *pw_exp,
+                 krb5_timestamp *acct_exp, krb5_boolean *is_last_req)
 {
     krb5_last_req_entry **last_req;
+    krb5_int32 lr_type;
 
+    *pw_exp = 0;
+    *acct_exp = 0;
     *is_last_req = FALSE;
+
+    /* Look for last-req entries for password or account expiration. */
     if (enc_part2->last_req) {
         for (last_req = enc_part2->last_req; *last_req; last_req++) {
-            if ((*last_req)->lr_type == KRB5_LRQ_ALL_PW_EXPTIME ||
-                (*last_req)->lr_type == KRB5_LRQ_ONE_PW_EXPTIME) {
+            lr_type = (*last_req)->lr_type;
+            if (lr_type == KRB5_LRQ_ALL_PW_EXPTIME ||
+                lr_type == KRB5_LRQ_ONE_PW_EXPTIME) {
                 *is_last_req = TRUE;
-                return (*last_req)->value;
+                *pw_exp = (*last_req)->value;
+            } else if (lr_type == KRB5_LRQ_ALL_ACCT_EXPTIME ||
+                       lr_type == KRB5_LRQ_ONE_ACCT_EXPTIME) {
+                *is_last_req = TRUE;
+                *acct_exp = (*last_req)->value;
             }
         }
     }
-    return enc_part2->key_exp;
+
+    /* If we didn't find any, use the ambiguous key_exp field. */
+    if (*is_last_req == FALSE)
+        *pw_exp = enc_part2->key_exp;
 }
 
-/* Send an appropriate warning to prompter if as_reply indicates that the
- * password is going to expiry soon. */
+/*
+ * Send an appropriate warning prompter if as_reply indicates that the password
+ * is going to expire soon.  If an expire callback was provided, use that
+ * instead.
+ */
 static void
-warn_pw_expiry(krb5_context context, krb5_prompter_fct prompter, void *data,
+warn_pw_expiry(krb5_context context, krb5_get_init_creds_opt *options,
+               krb5_prompter_fct prompter, void *data,
                const char *in_tkt_service, krb5_kdc_rep *as_reply)
 {
     krb5_error_code ret;
-    krb5_timestamp exp_time, now;
+    krb5_timestamp pw_exp, acct_exp, now;
     krb5_boolean is_last_req;
     krb5_deltat delta;
+    krb5_gic_opt_ext *opte;
     char ts[256], banner[1024];
+
+    get_expiry_times(as_reply->enc_part2, &pw_exp, &acct_exp, &is_last_req);
+
+    ret = krb5int_gic_opt_to_opte(context, options, &opte, 0, "");
+    if (ret == 0 && opte->opt_private->expire_cb != NULL) {
+        krb5_expire_callback_func *cb = opte->opt_private->expire_cb;
+        void *cb_data = opte->opt_private->expire_data;
+
+        /* Invoke the expire callback and don't send prompter warnings. */
+        (*cb)(context, cb_data, pw_exp, acct_exp, is_last_req);
+        return;
+    }
 
     /* Don't warn if the password is being changed. */
     if (in_tkt_service && strcmp(in_tkt_service, "kadmin/changepw") == 0)
-        return;
-
-    /* Get the current time and password expiry time. */
-    if (as_reply->enc_part2 == NULL)
-        return;
-    ret = krb5_timeofday(context, &now);
-    if (ret != 0)
-        return;
-    exp_time = get_expiry_time(as_reply->enc_part2, &is_last_req);
-    if (exp_time == 0)
         return;
 
     /*
@@ -155,18 +176,21 @@ warn_pw_expiry(krb5_context context, krb5_prompter_fct prompter, void *data,
      * to warn.  Otherwise, warn only if the expiry time is less than a week
      * from now.
      */
+    ret = krb5_timeofday(context, &now);
+    if (ret != 0)
+        return;
     if (!is_last_req &&
-        (exp_time < now || (exp_time - now) > 7 * 24 * 60 * 60))
+        (pw_exp < now || (pw_exp - now) > 7 * 24 * 60 * 60))
         return;
 
     if (!prompter)
         return;
 
-    ret = krb5_timestamp_to_string(exp_time, ts, sizeof(ts));
+    ret = krb5_timestamp_to_string(pw_exp, ts, sizeof(ts));
     if (ret != 0)
         return;
 
-    delta = exp_time - now;
+    delta = pw_exp - now;
     if (delta < 3600) {
         snprintf(banner, sizeof(banner),
                  "Warning: Your password will expire in less than one hour "
@@ -418,7 +442,8 @@ krb5_get_init_creds_password(krb5_context context,
 
 cleanup:
     if (ret == 0)
-        warn_pw_expiry(context, prompter, data, in_tkt_service, as_reply);
+        warn_pw_expiry(context, options, prompter, data, in_tkt_service,
+                       as_reply);
 
     if (chpw_opts)
         krb5_get_init_creds_opt_free(context, chpw_opts);

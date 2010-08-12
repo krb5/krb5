@@ -480,3 +480,22 @@ krb5_get_init_creds_opt_get_fast_flags(krb5_context context,
     *out_flags = opte->opt_private->fast_flags;
     return retval;
 }
+
+krb5_error_code KRB5_CALLCONV
+krb5_get_init_creds_opt_set_expire_callback(krb5_context context,
+                                            krb5_get_init_creds_opt *opt,
+                                            krb5_expire_callback_func cb,
+                                            void *data)
+{
+    krb5_error_code retval = 0;
+    krb5_gic_opt_ext *opte;
+
+    retval = krb5int_gic_opt_to_opte(context, opt, &opte, 0,
+                                     "krb5_get_init_creds_opt_set_"
+                                     "expire_callback");
+    if (retval)
+        return retval;
+    opte->opt_private->expire_cb = cb;
+    opte->opt_private->expire_data = data;
+    return retval;
+}
