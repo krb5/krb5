@@ -123,28 +123,24 @@ AC_HELP_STRING([--with-crypto-impl=IMPL], [use specified crypto implementation @
 [CRYPTO_IMPL=$withval
 AC_MSG_RESULT("k5crypto will use \'$withval\'")
 ], withval=builtin)
-AC_CONFIG_COMMANDS(CRYPTO_IMPL, , CRYPTO_IMPL=$CRYPTO_IMPL)
-AC_SUBST(CRYPTO_IMPL)
-#PKG_CHECK_MODULES(CRYPTO_IMPL, $CRYPTO_IMPL, [ withval != builtin ], )
+CRYPTO_IMPL_LIBS=
+CRYPTO_IMPL_CFLAGS=
 case "$withval" in
+builtin)
+  ;;
 openssl)
   AC_CHECK_LIB(crypto, PKCS7_get_signer_info)
-  CRYPTO_IMPL_LIBS=
-  CRYPTO_IMPL_CFLAGS=
-   ;;
-builtin)
-  CRYPTO_IMPL_LIBS=
-  CRYPTO_IMPL_CFLAGS=
-   ;;
+  ;;
 nss)
-  CRYPTO_IMPL_CFLAGS=`pkg-config --cflags $CRYPTO_IMPL`
+  CRYPTO_IMPL_CFLAGS=`pkg-config --cflags nss`
   CRYPTO_IMPL_LIBS="-lnss3 $(pkg-config --libs nss-util)"
   ;;
 *)
-  CRYPTO_IMPL_CFLAGS=`pkg-config --cflags $CRYPTO_IMPL`
-  CRYPTO_IMPL_LIBS=`pkg-config --libs $CRYPTO_IMPL`
+  AC_MSG_ERROR([Unknown crypto implementation $withval])
   ;;
 esac
+AC_CONFIG_COMMANDS(CRYPTO_IMPL, , CRYPTO_IMPL=$CRYPTO_IMPL)
+AC_SUBST(CRYPTO_IMPL)
 AC_SUBST(CRYPTO_IMPL_CFLAGS)
 AC_SUBST(CRYPTO_IMPL_LIBS)
 
