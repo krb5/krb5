@@ -1,0 +1,51 @@
+mydir=lib/crypto/nss/enc_provider
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
+LOCALINCLUDES = -I$(srcdir)/../des 	\
+		-I$(srcdir)/../arcfour \
+		-I$(srcdir)/../aes 	\
+		-I$(srcdir)/../../krb 			\
+		-I$(srcdir)/../../krb/rand2key	 	\
+		-I$(srcdir)/.. -I$(srcdir)/.  \
+		@CRYPTO_IMPL_CFLAGS@
+DEFS=
+
+##DOS##BUILDTOP = ..\..\..\..
+##DOS##PREFIXDIR=enc_provider
+##DOS##OBJFILE=..\$(OUTPRE)enc_prov.lst
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+STLIBOBJS= \
+	enc_gen.o 	\
+	des.o 	\
+	des3.o 	\
+	rc4.o 	\
+	aes.o 
+
+OBJS= \
+	$(OUTPRE)enc_gen.$(OBJEXT) 	\
+	$(OUTPRE)des.$(OBJEXT) 	\
+	$(OUTPRE)des3.$(OBJEXT) 	\
+	$(OUTPRE)aes.$(OBJEXT) 	\
+	$(OUTPRE)rc4.$(OBJEXT)
+
+SRCS= \
+	$(srcdir)/enc_gen.c 	\
+	$(srcdir)/des.c 	\
+	$(srcdir)/des3.c 	\
+	$(srcdir)/aes.c 	\
+	$(srcdir)/rc4.c
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs
+
+includes:: depend
+
+depend:: $(SRCS)
+
+clean-unix:: clean-libobjs
+
+@libobj_frag@
+
