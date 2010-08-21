@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 2010 Red Hat, Inc.
  *
@@ -27,7 +28,5 @@
 #include "sechash.h"
 #include "k5-int.h"
 
-krb5_error_code k5_nss_gen_hash(HASH_HashType hashType, unsigned int icount, 
-	    const krb5_data *input,
-	    krb5_data *output);
-
+krb5_error_code k5_nss_gen_hash(HASH_HashType hashType, unsigned int icount,
+                                const krb5_data *input, krb5_data *output);

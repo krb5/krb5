@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 2010 Red Hat, Inc.
  *
@@ -31,7 +32,6 @@
 static krb5_error_code
 k5_md5_hash(const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
 {
-    
     return k5_nss_gen_hash(HASH_AlgMD5, data, num_data, output);
 }
 

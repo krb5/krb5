@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/nss/pbkdf2.c
  *
@@ -24,8 +25,7 @@
  * or implied warranty.
  *
  *
- * Implementation of PBKDF2 from RFC 2898.
- * Not currently used; likely to be used when we get around to AES support.
+ * Implementation of PBKDF2 using NSS.
  */
 
 #include <ctype.h>
@@ -36,8 +36,8 @@
 
 
 krb5_error_code
-krb5int_pbkdf2_hmac_sha1 (const krb5_data *out, unsigned long count,
-			  const krb5_data *pass, const krb5_data *salt)
+krb5int_pbkdf2_hmac_sha1(const krb5_data *out, unsigned long count,
+                         const krb5_data *pass, const krb5_data *salt)
 {
 
     PK11SlotInfo *slot = NULL;
@@ -45,18 +45,18 @@ krb5int_pbkdf2_hmac_sha1 (const krb5_data *out, unsigned long count,
     PK11SymKey *symKey = NULL;
     SECItem saltItem, pwItem;
     const SECItem *keydata = NULL;
-    SECOidTag  pbeAlg = SEC_OID_PKCS5_PBKDF2;
-    SECOidTag  cipherAlg = SEC_OID_AES_256_CBC; 
-    SECOidTag  prfAlg = SEC_OID_HMAC_SHA1;
+    SECOidTag pbeAlg = SEC_OID_PKCS5_PBKDF2;
+    SECOidTag cipherAlg = SEC_OID_AES_256_CBC;
+    SECOidTag prfAlg = SEC_OID_HMAC_SHA1;
     krb5_error_code ret;
 
     ret = k5_nss_init();
-    if (ret) return ret;
+    if (ret)
+        return ret;
 
     slot = PK11_GetBestSlot(PK11_AlgtagToMechanism(pbeAlg), NULL);
-    if (slot == NULL) {
-	return k5_nss_map_last_error();
-    }
+    if (slot == NULL)
+        return k5_nss_map_last_error();
 
     saltItem.type = siBuffer;
     saltItem.data = (unsigned char *)salt->data;
@@ -68,10 +68,10 @@ krb5int_pbkdf2_hmac_sha1 (const krb5_data *out, unsigned long count,
      * Kerberos already had to solve it's crypto agility issues, so the
      * algid is just and extra step we need that we will throw away */
     algid = PK11_CreatePBEV2AlgorithmID(pbeAlg, cipherAlg, prfAlg,
-					out->length, count, &saltItem);
+                                        out->length, count, &saltItem);
     if (algid == NULL) {
-	ret = k5_nss_map_last_error();
-	goto loser;
+        ret = k5_nss_map_last_error();
+        goto loser;
     }
 
     pwItem.type = siBuffer;
@@ -80,38 +80,36 @@ krb5int_pbkdf2_hmac_sha1 (const krb5_data *out, unsigned long count,
 
     symKey = PK11_PBEKeyGen(slot, algid, &pwItem, PR_FALSE, NULL);
     if (symKey == NULL) {
-	ret = k5_nss_map_last_error();
-	goto loser;
+        ret = k5_nss_map_last_error();
+        goto loser;
     }
-    /* at this point we should return symKey as a key, but kerberos is
-     * still passing bits around instead of key handles */
+
+    /* At this point we should return symKey as a key, but kerberos is
+     * still passing bits around instead of key handles. */
     PK11_ExtractKeyValue(symKey);
 
     /* keydata here is a const * and is valid as long as the key has not been
      * destroyed. */
     keydata = PK11_GetKeyData(symKey);
     if (keydata == NULL) {
-	ret = k5_nss_map_last_error();
-	goto loser;
+        ret = k5_nss_map_last_error();
+        goto loser;
     }
 
     if (out->length != keydata->len) {
-	ret = -1; /* XXXXX */
-	goto loser;
+        ret = -1; /* XXXXX */
+        goto loser;
     }
     memcpy(out->data, keydata->data, keydata->len);
     ret = 0;
 
 loser:
-    if (symKey) {
-	PK11_FreeSymKey(symKey);
-    }
-    if (algid) {
-	SECOID_DestroyAlgorithmID(algid, PR_TRUE);
-    }
-    if (slot) {
-	PK11_FreeSlot(slot);
-    }
-    
+    if (symKey)
+        PK11_FreeSymKey(symKey);
+    if (algid)
+        SECOID_DestroyAlgorithmID(algid, PR_TRUE);
+    if (slot)
+        PK11_FreeSlot(slot);
+
     return ret;
 }

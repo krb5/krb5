@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/nss/enc_provider/aes.c
  *
@@ -33,46 +34,42 @@
 
 
 krb5_error_code
-krb5int_aes_encrypt(krb5_key key,
-		        const krb5_data *ivec,
-		        krb5_crypto_iov *data,
-		        size_t num_data)
+krb5int_aes_encrypt(krb5_key key, const krb5_data *ivec,
+                    krb5_crypto_iov *data, size_t num_data)
 {
-    int ret;
+    krb5_error_code ret;
+
     ret = k5_nss_gen_import(key, CKM_AES_CBC, CKA_ENCRYPT);
-    if (ret != 0) {
-	return ret;
-    }
-    return k5_nss_gen_cts_iov(key, CKM_AES_CBC, CKA_ENCRYPT, 
-				ivec, data, num_data);
+    if (ret != 0)
+        return ret;
+    return k5_nss_gen_cts_iov(key, CKM_AES_CBC, CKA_ENCRYPT,
+                              ivec, data, num_data);
 }
 
 krb5_error_code
-krb5int_aes_decrypt(krb5_key key,
-		        const krb5_data *ivec,
-		        krb5_crypto_iov *data,
-		        size_t num_data)
+krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec,
+                    krb5_crypto_iov *data, size_t num_data)
 {
-    int ret;
+    krb5_error_code ret;
+
     ret = k5_nss_gen_import(key, CKM_AES_CBC, CKA_DECRYPT);
-    if (ret != 0) {
-	return ret;
-    }
-    return k5_nss_gen_cts_iov(key, CKM_AES_CBC, CKA_DECRYPT, 
-				ivec, data, num_data);
+    if (ret != 0)
+        return ret;
+    return k5_nss_gen_cts_iov(key, CKM_AES_CBC, CKA_DECRYPT,
+                              ivec, data, num_data);
 }
 
 /*
  * perhaps we should store the NSS context in the krb5_data state here?
  */
 static krb5_error_code
-aes_init_state (const krb5_keyblock *key, krb5_keyusage usage,
-			krb5_data *state)
+aes_init_state(const krb5_keyblock *key, krb5_keyusage usage,
+               krb5_data *state)
 {
     state->length = 16;
     state->data = (void *) malloc(16);
     if (state->data == NULL)
-	return ENOMEM;
+        return ENOMEM;
     memset(state->data, 0, state->length);
     return 0;
 }

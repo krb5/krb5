@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/nss/enc_provider/enc_gen.c
  *
@@ -26,7 +27,7 @@
  */
 
 /* compile options (should move to configure)... */
-#define USE_OPAQUE_KEYS 1 
+#define USE_OPAQUE_KEYS 1
 #define DO_FAST_XOR 1
 /*#define FAKE_FIPS 1  */
 
@@ -49,65 +50,61 @@
 #define MAX_BLOCK_SIZE 64
 
 
-krb5_error_code  
-k5_nss_map_error(int nss_error) 
-{ 
-     /* currently KRB5 does not define a full set CRYPTO failures.
-      * for now just use KRB5_CRYPTO_INTERNAL. We really should return
-      * errors for Not logged in, and maybe a few others */
-     return KRB5_CRYPTO_INTERNAL;
+krb5_error_code
+k5_nss_map_error(int nss_error)
+{
+    /* Currently KRB5 does not define a full set of CRYPTO failures.
+     * for now just use KRB5_CRYPTO_INTERNAL.  We really should return
+     * errors for Not logged in, and maybe a few others. */
+    return KRB5_CRYPTO_INTERNAL;
 }
 
-krb5_error_code  
-k5_nss_map_last_error() { 
-    return k5_nss_map_error(PORT_GetError()); 
+krb5_error_code
+k5_nss_map_last_error(void)
+{
+    return k5_nss_map_error(PORT_GetError());
 }
 
 static NSSInitContext *krb5_nss_init = NULL;
 
 /*
- * krb5 doesn't have a call into the crypto engine to initialize it, so 
- * we do it here. This code will try to piggyback on any application 
- * initialization done to NSS. Otherwise get get our one library init context.
+ * krb5 doesn't have a call into the crypto engine to initialize it, so we do
+ * it here.  This code will try to piggyback on any application initialization
+ * done to NSS.  Otherwise get our one library init context.
  */
 krb5_error_code
-k5_nss_init()
+k5_nss_init(void)
 {
 #ifdef LINUX
-   /* default to the system NSS */
+    /* Default to the system NSS. */
 #define NSS_KRB5_CONFIGDIR  "sql:/etc/pki/nssdb"
 #define NSS_KRB5_FLAGS   0
 #else
-   /* other platforms don't have a system NSS defined yet, do a nodb init */
+    /* Other platforms don't have a system NSS defined yet, do a nodb init. */
 #define NSS_KRB5_CONFIGDIR  NULL
 #define NSS_KRB5_FLAGS NSS_INIT_NOMODDB|NSS_INIT_NOCERTDB
 #endif
-   if (krb5_nss_init) {
-	/* we've already initialized NSS */
-	return 0;
-   }
-   if (NSS_IsInitialized()) {
-	/* someone else has initialized NSS */
-	return 0;
-   }
-   krb5_nss_init = NSS_InitContext(NSS_KRB5_CONFIGDIR, "", "", "", NULL,
-		    NSS_INIT_READONLY|NSS_INIT_NOROOTINIT|NSS_KRB5_FLAGS);
-   if (!krb5_nss_init) {
-	return k5_nss_map_last_error();
-   }
-   return 0;
+    if (krb5_nss_init)          /* We've already initialized NSS. */
+        return 0;
+    if (NSS_IsInitialized())    /* Someone else has initialized NSS. */
+        return 0;
+    krb5_nss_init = NSS_InitContext(NSS_KRB5_CONFIGDIR, "", "", "", NULL,
+                                    NSS_INIT_READONLY | NSS_INIT_NOROOTINIT |
+                                    NSS_KRB5_FLAGS);
+    if (!krb5_nss_init)
+        return k5_nss_map_last_error();
+    return 0;
 }
-  
 
 PK11Context *
 k5_nss_create_context(krb5_key krb_key, CK_MECHANISM_TYPE mechanism,
-		      CK_ATTRIBUTE_TYPE operation, SECItem * param)
+                      CK_ATTRIBUTE_TYPE operation, SECItem * param)
 {
 #ifdef USE_OPAQUE_KEYS
     PK11SymKey *key = (PK11SymKey *)krb_key->cache;
 
-    return  PK11_CreateContextBySymKey(mechanism, operation, key, param);
-#else 
+    return PK11_CreateContextBySymKey(mechanism, operation, key, param);
+#else
     PK11Context *ctx = NULL;
     PK11SlotInfo *slot;
     SECItem key;
@@ -115,45 +112,43 @@ k5_nss_create_context(krb5_key krb_key, CK_MECHANISM_TYPE mechanism,
     key.data = krb_key->keyblock.contents;
     key.len = krb_key->keyblock.length;
     slot = PK11_GetBestSlot(mechanism, NULL);
-    if (slot == NULL) {
-	return NULL;
-    }
-    ctx = PK11_CreateContextByRawKey(slot,mechanism, PK11_OriginGenerated, 
-		operation, &key, param, NULL);
+    if (slot == NULL)
+        return NULL;
+    ctx = PK11_CreateContextByRawKey(slot,mechanism, PK11_OriginGenerated,
+                operation, &key, param, NULL);
     PK11_FreeSlot(slot);
     return ctx;
 #endif
 }
 
 static void inline
-xor(unsigned char *x,  unsigned char *y, int size)
+xor(unsigned char *x, unsigned char *y, int size)
 {
     int i;
+
 #ifdef DO_FAST_XOR
 #define ALIGNED(x,type) (!(((size_t)(x))&(sizeof(type)-1)))
-    if (ALIGNED(x,unsigned long) && ALIGNED(y, unsigned long) 
-	&& ALIGNED(size, unsigned long)) {
-	unsigned long *ux = (unsigned long *)x;
-	unsigned long *uy = (unsigned long *)y;
-	for (i=0; i < (int)(size/sizeof(unsigned long)); i++) {
-	    *ux++ ^= *uy++;
-	}
-	return;
+    if (ALIGNED(x,unsigned long) && ALIGNED(y, unsigned long)
+        && ALIGNED(size, unsigned long)) {
+        unsigned long *ux = (unsigned long *)x;
+        unsigned long *uy = (unsigned long *)y;
+        for (i=0; i < (int)(size/sizeof(unsigned long)); i++) {
+            *ux++ ^= *uy++;
+        }
+        return;
     }
 #endif
     for (i=0; i < size; i++) {
-	*x++ ^= *y++;
+        *x++ ^= *y++;
     }
 }
 
 krb5_error_code
-k5_nss_gen_block_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech, 
-		        CK_ATTRIBUTE_TYPE operation,
-		        const krb5_data *ivec,
-		        krb5_crypto_iov *data,
-		        size_t num_data)
+k5_nss_gen_block_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
+                     CK_ATTRIBUTE_TYPE operation, const krb5_data *ivec,
+                     krb5_crypto_iov *data, size_t num_data)
 {
-    int             ret = 0;
+    krb5_error_code ret = 0;
     PK11Context *ctx = NULL;
     SECStatus rv;
     SECItem *param = NULL;
@@ -167,7 +162,6 @@ k5_nss_gen_block_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
     int lastblock = -1;
     int currentblock;
 
-
     IOV_BLOCK_STATE_INIT(&input_pos);
     IOV_BLOCK_STATE_INIT(&output_pos);
 
@@ -175,97 +169,88 @@ k5_nss_gen_block_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
     assert(blocksize <= sizeof(storage));
 
     if (ivec && ivec->data) {
-	iv.data = (unsigned char *)ivec->data;
-	iv.len = ivec->length;
-	if (operation == CKA_DECRYPT) {
-	    int i, inputlength;
+        iv.data = (unsigned char *)ivec->data;
+        iv.len = ivec->length;
+        if (operation == CKA_DECRYPT) {
+            int i, inputlength;
 
-	    /* count the blocks so we know which block is last */
-	    for (i=0, inputlength=0; i < (int)num_data; i++) {
-		krb5_crypto_iov *iov=&data[i];
+            /* Count the blocks so we know which block is last. */
+            for (i = 0, inputlength = 0; i < (int)num_data; i++) {
+                krb5_crypto_iov *iov = &data[i];
 
-		if (ENCRYPT_IOV(iov)) {
-		    inputlength += iov->data.length;
-		}
-	    }
-	    lastblock = (inputlength/blocksize) -1;
-	}
+                if (ENCRYPT_IOV(iov))
+                    inputlength += iov->data.length;
+            }
+            lastblock = (inputlength/blocksize) -1;
+        }
     } else {
-	memset(iv0, 0, sizeof(iv0));
-	iv.data = iv0;
-	iv.len = blocksize;
+        memset(iv0, 0, sizeof(iv0));
+        iv.data = iv0;
+        iv.len = blocksize;
     }
     param = PK11_ParamFromIV(mech, &iv);
 
     ctx = k5_nss_create_context(krb_key, mech, operation, param);
     if (ctx == NULL) {
-	ret = k5_nss_map_last_error();
-	goto done;
+        ret = k5_nss_map_last_error();
+        goto done;
     }
 
     for (currentblock = 0;;currentblock++) {
-        ptr = iov_next_block(storage, blocksize, data, num_data,
-                             &input_pos);
+        ptr = iov_next_block(storage, blocksize, data, num_data, &input_pos);
         if (ptr == NULL)
             break;
 
-	lastptr = NULL;
+        lastptr = NULL;
 
-	/* only set if we are decrypting */
-	if (lastblock == currentblock) {
-	    memcpy(ivec->data, ptr, blocksize);
-	}
+        /* only set if we are decrypting */
+        if (lastblock == currentblock)
+            memcpy(ivec->data, ptr, blocksize);
 
-	rv = PK11_CipherOp(ctx, ptr, &length, blocksize, ptr, blocksize);
-	if (rv != SECSuccess) {
-	    ret = k5_nss_map_last_error();
-	    break;
-	}
+        rv = PK11_CipherOp(ctx, ptr, &length, blocksize, ptr, blocksize);
+        if (rv != SECSuccess) {
+            ret = k5_nss_map_last_error();
+            break;
+        }
 
-	lastptr = ptr;
+        lastptr = ptr;
         iov_store_block(data, num_data, ptr, storage, blocksize,
                         &output_pos);
     }
-    
+
     if (lastptr && ivec && ivec->data && operation == CKA_ENCRYPT) {
-	memcpy(ivec->data, lastptr, blocksize);
+        memcpy(ivec->data, lastptr, blocksize);
     }
 done:
-    if (ctx) {
+    if (ctx)
          PK11_Finalize(ctx);
-    }
-
-    if (param) {
-	SECITEM_FreeItem(param, PR_TRUE);
-    }
+    if (param)
+        SECITEM_FreeItem(param, PR_TRUE);
     return ret;
 }
 
 krb5_error_code
 k5_nss_stream_init_state(krb5_data *new_state)
 {
-   new_state->data = NULL;
-   new_state->length = 0;
-   return 0;
+    new_state->data = NULL;
+    new_state->length = 0;
+    return 0;
 }
 
 krb5_error_code
 k5_nss_stream_free_state(krb5_data *state)
 {
-   if (state->length == (unsigned)-1 && state->data) {
-	PK11_Finalize((PK11Context *)state->data);
-   }
-   return 0;
+    if (state->length == (unsigned)-1 && state->data)
+        PK11_Finalize((PK11Context *)state->data);
+    return 0;
 }
 
 krb5_error_code
 k5_nss_gen_stream_iov(krb5_key krb_key, krb5_data *state,
-			CK_MECHANISM_TYPE mech, 
-		        CK_ATTRIBUTE_TYPE operation,
-		        krb5_crypto_iov *data,
-		        size_t num_data)
+                      CK_MECHANISM_TYPE mech, CK_ATTRIBUTE_TYPE operation,
+                      krb5_crypto_iov *data, size_t num_data)
 {
-    int             ret = 0;
+    int ret = 0;
     PK11Context *ctx = NULL;
     SECStatus rv;
     SECItem  param;
@@ -276,51 +261,50 @@ k5_nss_gen_stream_iov(krb5_key krb_key, krb5_data *state,
     param.len = 0;
 
     if (state && state->data) {
-	ctx = (PK11Context *)state->data;
+        ctx = (PK11Context *)state->data;
     } else {
         ctx = k5_nss_create_context(krb_key, mech, operation, &param);
-	if (state && ctx) {
-	    state->data = (char *)ctx;
-	    state->length = -1; /* you don't get to copy this, */
-			        /* blow up if you try */
-	}
+        if (state && ctx) {
+            state->data = (char *)ctx;
+            state->length = -1; /* you don't get to copy this, */
+                                /* blow up if you try */
+        }
     }
     if (ctx == NULL) {
-	ret = k5_nss_map_last_error();
-	goto done;
+        ret = k5_nss_map_last_error();
+        goto done;
     }
 
     for (i=0; i < (int)num_data; i++) {
-	int return_length;
-	iov = &data[i];
-	if (iov->data.length <= 0) break;
+        int return_length;
+        iov = &data[i];
+        if (iov->data.length <= 0)
+            break;
 
-	if (ENCRYPT_IOV(iov)) {
-	    rv = PK11_CipherOp(ctx, (unsigned char *)iov->data.data, 
-		&return_length, iov->data.length, 
-		(unsigned char *)iov->data.data, iov->data.length);
-	    if (rv != SECSuccess) {
-		ret = k5_nss_map_last_error();
-		goto done;
-	    }
-	    iov->data.length = return_length;
-	}
+        if (ENCRYPT_IOV(iov)) {
+            rv = PK11_CipherOp(ctx, (unsigned char *)iov->data.data,
+                               &return_length, iov->data.length,
+                               (unsigned char *)iov->data.data,
+                               iov->data.length);
+            if (rv != SECSuccess) {
+                ret = k5_nss_map_last_error();
+                goto done;
+            }
+            iov->data.length = return_length;
+        }
     }
 done:
-    if (!state && ctx) {
+    if (!state && ctx)
          PK11_Finalize(ctx);
-    }
     return ret;
 }
 
 krb5_error_code
-k5_nss_gen_cts_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech, 
-		        CK_ATTRIBUTE_TYPE operation,
-		        const krb5_data *ivec,
-		        krb5_crypto_iov *data,
-		        size_t num_data)
+k5_nss_gen_cts_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
+                   CK_ATTRIBUTE_TYPE operation, const krb5_data *ivec,
+                   krb5_crypto_iov *data, size_t num_data)
 {
-    int             ret = 0;
+    krb5_error_code ret = 0;
     PK11Context *ctx = NULL;
     SECStatus rv;
     SECItem *param = NULL;
@@ -346,167 +330,163 @@ k5_nss_gen_cts_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
     assert(blocksize <= sizeof(storage));
 
     if (ivec) {
-	iv.data = (unsigned char *)ivec->data;
-	iv.len = ivec->length;
+        iv.data = (unsigned char *)ivec->data;
+        iv.len = ivec->length;
     } else {
-	memset(iv0, 0, sizeof(iv0));
-	iv.data = iv0;
-	iv.len = blocksize;
+        memset(iv0, 0, sizeof(iv0));
+        iv.data = iv0;
+        iv.len = blocksize;
     }
     param = PK11_ParamFromIV(mech, &iv);
 
-    for (i=0, input_length=0; i < (int)num_data; i++) {
-	krb5_crypto_iov *iov=&data[i];
+    for (i = 0, input_length = 0; i < (int)num_data; i++) {
+        krb5_crypto_iov *iov = &data[i];
 
-	if (ENCRYPT_IOV(iov)) {
-	    input_length += iov->data.length;
-	}
+        if (ENCRYPT_IOV(iov))
+            input_length += iov->data.length;
     }
-    /* must be at least a block or we fail */
+    /* Must be at least a block or we fail. */
     if (input_length < blocksize) {
-	ret = -1;
-	goto done;
+        ret = EINVAL;
+        goto done;
     }
 
     bulk_length = (input_length / blocksize)*blocksize;
     remainder = input_length - bulk_length;
-    /* do the block swap even if the input data is aligned, only
-     * drop it if we are encrypting exactly one block */
+    /* Do the block swap even if the input data is aligned, only
+     * drop it if we are encrypting exactly one block. */
     if (remainder == 0 && bulk_length != blocksize) {
-	remainder = blocksize;
-	bulk_length -= blocksize;
+        remainder = blocksize;
+        bulk_length -= blocksize;
     }
 
     ctx = k5_nss_create_context(krb_key, mech, operation, param);
     if (ctx == NULL) {
-	ret = k5_nss_map_last_error();
-	goto done;
+        ret = k5_nss_map_last_error();
+        goto done;
     }
 
-    /* now we bulk encrypt each block in the loop. We need to know where
-     * to stop to do special processing. For single block operations
-     * we stop at the end. For all others we stop and the last second to last
-     * block (counting partial blocks). For decrypt operations we need to save
-     * cn-2 so we stop at the third to last block if it exists, Otherwise
-     * cn-2 = the iv */
+    /* Now we bulk encrypt each block in the loop.  We need to know where to
+     * stop to do special processing.  For single block operations we stop at
+     * the end.  For all others we stop and the last second to last block
+     * (counting partial blocks).  For decrypt operations we need to save cn-2
+     * so we stop at the third to last block if it exists, otherwise cn-2 = the
+     * iv. */
     lastblock = bulk_length;
     if (remainder) {
-	/* we need to process the last full block and last partitial block
-	 * differently */
-    	lastblock = bulk_length - blocksize;
-	if (operation == CKA_DECRYPT) {
-	    if (bulk_length > blocksize) {
-		/* stop at cn-2 so we can save it before going on */
-		lastblock = bulk_length - 2*blocksize;
-	    } else {
-		/* iv is cn-2, save it now, cn - 2 */
-		memcpy(recover1, iv.data, blocksize);
-		memcpy(recover2, iv.data, blocksize);
-	    }
-	}
-    } 
+        /* We need to process the last full block and last partitial block
+         * differently. */
+        lastblock = bulk_length - blocksize;
+        if (operation == CKA_DECRYPT) {
+            if (bulk_length > blocksize) {
+                /* Stop at cn-2 so we can save it before going on. */
+                lastblock = bulk_length - 2*blocksize;
+            } else {
+                /* iv is cn-2, save it now, cn - 2. */
+                memcpy(recover1, iv.data, blocksize);
+                memcpy(recover2, iv.data, blocksize);
+            }
+        }
+    }
     for (length = 0; length < lastblock; length += blocksize) {
         ptr = iov_next_block(storage, blocksize, data, num_data,
                              &input_pos);
         if (ptr == NULL)
             break;
 
-	rv = PK11_CipherOp(ctx, ptr, &len, blocksize, ptr, blocksize);
-	if (rv != SECSuccess) {
-	    ret = k5_nss_map_last_error();
-	    break;
-	}
+        rv = PK11_CipherOp(ctx, ptr, &len, blocksize, ptr, blocksize);
+        if (rv != SECSuccess) {
+            ret = k5_nss_map_last_error();
+            break;
+        }
 
         iov_store_block(data, num_data, ptr, storage, blocksize,
                         &output_pos);
     }
     if (remainder) {
-	if (operation == CKA_DECRYPT) {
-	    if (bulk_length > blocksize) {
-		/* we need to save cn-2 */
-        	ptr = iov_next_block(storage, blocksize, data, num_data,
-                             &input_pos);
-		if (ptr == NULL)
-		    goto done; /* shouldn't happen */
+        if (operation == CKA_DECRYPT) {
+            if (bulk_length > blocksize) {
+                /* we need to save cn-2 */
+                ptr = iov_next_block(storage, blocksize, data, num_data,
+                                     &input_pos);
+                if (ptr == NULL)
+                    goto done; /* shouldn't happen */
 
-		/* save cn-2 */
-		memcpy(recover1, ptr, blocksize);
-		memcpy(recover2, ptr, blocksize);
+                /* save cn-2 */
+                memcpy(recover1, ptr, blocksize);
+                memcpy(recover2, ptr, blocksize);
 
-		/* now process it as normal */
-		rv = PK11_CipherOp(ctx, ptr, &len, blocksize, ptr, blocksize);
-		if (rv != SECSuccess) {
-		    ret = k5_nss_map_last_error();
-		    goto done;
-		}
+                /* now process it as normal */
+                rv = PK11_CipherOp(ctx, ptr, &len, blocksize, ptr, blocksize);
+                if (rv != SECSuccess) {
+                    ret = k5_nss_map_last_error();
+                    goto done;
+                }
 
-		iov_store_block(data, num_data, ptr, storage, blocksize,
-                        &output_pos);
-	    }
-	}
-	/* fetch the last 2 blocks */
-	memset(block1, 0, blocksize); /* last block, could be partial */
-	krb5int_c_iov_get_block(block2, blocksize, data, num_data, &input_pos);
-	krb5int_c_iov_get_block(block1, remainder, data, num_data, &input_pos);
-	if (operation == CKA_DECRYPT) {
-	    /* recover1 and recover2 are xor values to recover the true
-	     * underlying data of the last 2 decrypts. This keeps us from having
-	     * to try to reset our IV to do the final decryption. */
-	    /* currently: block1 is cn || 0, block2 is cn-1. 
-	     * recover1 & recover2 is set to cn-2 */
-	    /* recover2 recovers pn || c' from p'n-1. The raw decrypted block 
-	     * will be p'n-1 xor with cn-2 while pn || c' = p'n-1 xor cn || 0.
-	     * recover2 is cn-2 xor cn || 0, so we can simple xor recover1 
-	     * with the raw decrypted block */
-	    /* recover1 recovers pn-1 from the raw decryption of cn || c'. 
-	     * the raw decrypt of cn || c' = p'n xor cn-1 while 
-	     * pn-1 = p'n xor cn-2
- 	     * recover1 is cn-2 xor cn-1, so we can simple xor recover 2 with 
-	     * the raw decrypt of cn||c' to get pn-1 */
-	    xor(recover1, block2, blocksize);
-	    xor(recover2, block1, blocksize);
-	    if (ivec && ivec->data) {
-		memcpy(ivec->data, block2, blocksize);
-	    }
-	}
-	rv = PK11_CipherOp(ctx, block2, &len, blocksize, block2, blocksize);
-	if (rv != SECSuccess) {
-	    ret = k5_nss_map_last_error();
-	    goto done;
-	}
-	if (operation == CKA_DECRYPT) {
-	    /* block2 now has p'n-1 xor cn-2 */
-	    xor(block2, recover2, blocksize);
-	    /* block 2 now has pn || c' */
-	    /* copy c' into cn || c' */
-	    memcpy(block1+remainder, block2+remainder, blocksize-remainder);
-	}
-	rv = PK11_CipherOp(ctx, block1, &len, blocksize, block1, blocksize);
-	if (rv != SECSuccess) {
-	    ret = k5_nss_map_last_error();
-	    goto done;
-	}
-	if (operation == CKA_DECRYPT) {
-	    /* block1 now has p'n xor cn-1 */
-	    xor(block1, recover1, blocksize);
-	   /* block 1 now has pn-1 */
-	} else {
-	    if (ivec && ivec->data) {
-		memcpy(ivec->data, block1, blocksize);
-	    }
-	}
-	krb5int_c_iov_put_block(data,num_data, block1, blocksize, &output_pos);
-	krb5int_c_iov_put_block(data,num_data, block2, remainder, &output_pos);
+                iov_store_block(data, num_data, ptr, storage, blocksize,
+                                &output_pos);
+            }
+        }
+        /* fetch the last 2 blocks */
+        memset(block1, 0, blocksize); /* last block, could be partial */
+        krb5int_c_iov_get_block(block2, blocksize, data, num_data, &input_pos);
+        krb5int_c_iov_get_block(block1, remainder, data, num_data, &input_pos);
+        if (operation == CKA_DECRYPT) {
+            /* recover1 and recover2 are xor values to recover the true
+             * underlying data of the last 2 decrypts. This keeps us from
+             * having to try to reset our IV to do the final decryption. */
+            /* Currently: block1 is cn || 0, block2 is cn-1.
+             * recover1 & recover2 is set to cn-2. */
+            /* recover2 recovers pn || c' from p'n-1. The raw decrypted block
+             * will be p'n-1 xor with cn-2 while pn || c' = p'n-1 xor cn || 0.
+             * recover2 is cn-2 xor cn || 0, so we can simple xor recover1
+             * with the raw decrypted block. */
+            /* recover1 recovers pn-1 from the raw decryption of cn || c'.
+             * the raw decrypt of cn || c' = p'n xor cn-1 while
+             * pn-1 = p'n xor cn-2
+             * recover1 is cn-2 xor cn-1, so we can simple xor recover 2 with
+             * the raw decrypt of cn||c' to get pn-1. */
+            xor(recover1, block2, blocksize);
+            xor(recover2, block1, blocksize);
+            if (ivec && ivec->data)
+                memcpy(ivec->data, block2, blocksize);
+        }
+        rv = PK11_CipherOp(ctx, block2, &len, blocksize, block2, blocksize);
+        if (rv != SECSuccess) {
+            ret = k5_nss_map_last_error();
+            goto done;
+        }
+        if (operation == CKA_DECRYPT) {
+            /* block2 now has p'n-1 xor cn-2. */
+            xor(block2, recover2, blocksize);
+            /* block 2 now has pn || c'. */
+            /* copy c' into cn || c'. */
+            memcpy(block1 + remainder, block2 + remainder,
+                   blocksize - remainder);
+        }
+        rv = PK11_CipherOp(ctx, block1, &len, blocksize, block1, blocksize);
+        if (rv != SECSuccess) {
+            ret = k5_nss_map_last_error();
+            goto done;
+        }
+        if (operation == CKA_DECRYPT) {
+            /* block1 now has p'n xor cn-1 */
+            xor(block1, recover1, blocksize);
+           /* block 1 now has pn-1 */
+        } else {
+            if (ivec && ivec->data) {
+                memcpy(ivec->data, block1, blocksize);
+            }
+        }
+        krb5int_c_iov_put_block(data,num_data, block1, blocksize, &output_pos);
+        krb5int_c_iov_put_block(data,num_data, block2, remainder, &output_pos);
     }
 
 done:
-    if (ctx) {
+    if (ctx)
          PK11_Finalize(ctx);
-    }
-
-    if (param) {
-	SECITEM_FreeItem(param, PR_TRUE);
-    }
+    if (param)
+        SECITEM_FreeItem(param, PR_TRUE);
     return ret;
 }
 
@@ -517,17 +497,17 @@ k5_nss_gen_cleanup(krb5_key krb_key)
     PK11SymKey *key = (PK11SymKey *)krb_key->cache;
 
     if (key) {
-	PK11_FreeSymKey(key);
+        PK11_FreeSymKey(key);
         krb_key->cache = NULL;
-    } 
+    }
 #endif
 }
 
 krb5_error_code
-k5_nss_gen_import(krb5_key krb_key, CK_MECHANISM_TYPE mech, 
-		        CK_ATTRIBUTE_TYPE operation)
+k5_nss_gen_import(krb5_key krb_key, CK_MECHANISM_TYPE mech,
+                  CK_ATTRIBUTE_TYPE operation)
 {
-    int             ret = 0;
+    krb5_error_code ret = 0;
 #ifdef USE_OPAQUE_KEYS
     PK11SymKey *key = (PK11SymKey *)krb_key->cache;
     PK11SlotInfo   *slot = NULL;
@@ -545,48 +525,51 @@ k5_nss_gen_import(krb5_key krb_key, CK_MECHANISM_TYPE mech,
     SECStatus rv;
 #endif
 
-    if (key) { return 0; }
+    if (key)
+        return 0;
 
     ret = k5_nss_init();
-    if (ret) return ret;
+    if (ret)
+        return ret;
 
     slot = PK11_GetBestSlot(mech, NULL);
     if (slot == NULL) {
-	ret = k5_nss_map_last_error();
-	goto done;
+        ret = k5_nss_map_last_error();
+        goto done;
     }
     raw_key.data = krb_key->keyblock.contents;
     raw_key.len = krb_key->keyblock.length;
 
 #ifdef FAKE_FIPS
-    /* first, fetch a wrapping key */
+    /* First, fetch a wrapping key. */
     wrapping_index = PK11_GetCurrentWrapIndex(slot);
     series = PK11_GetSlotSeries(slot);
-    wrapping_key =PK11_GetWrapKey(slot, wrapping_index, 
-		CKM_INVALID_MECHANISM, series, NULL);
+    wrapping_key = PK11_GetWrapKey(slot, wrapping_index,
+                                   CKM_INVALID_MECHANISM, series, NULL);
     if (wrapping_key == NULL) {
-	/* one doesn't exist, create one */
-	mechanism = PK11_GetBestWrapMechanism(slot);
-	keyLength = PK11_GetBestKeyLength(slot, mechanism);
-	wrapping_key = PK11_TokenKeyGenWithFlags(slot, mechanism, NULL, 
-				keyLength, NULL, CKF_UNWRAP|CKF_ENCRYPT, 0,
-				NULL);
-	if (!wrapping_key) {
-	    ret = k5_nss_map_last_error();
-	    goto done;
-	}
-	PK11_SetWrapKey(slot, wrapping_index, wrapping_key);
+        /* One doesn't exist, create one. */
+        mechanism = PK11_GetBestWrapMechanism(slot);
+        keyLength = PK11_GetBestKeyLength(slot, mechanism);
+        wrapping_key = PK11_TokenKeyGenWithFlags(slot, mechanism, NULL,
+                                                 keyLength, NULL,
+                                                 CKF_UNWRAP | CKF_ENCRYPT, 0,
+                                                 NULL);
+        if (!wrapping_key) {
+            ret = k5_nss_map_last_error();
+            goto done;
+        }
+        PK11_SetWrapKey(slot, wrapping_index, wrapping_key);
     }
 
-    /* now encrypt the data with the wrapping key */
+    /* Now encrypt the data with the wrapping key. */
     mechanism = PK11_GetMechanism(wrapping_key);
     params.data = NULL;
     params.len = 0;
-    ctx = PK11_CreateContextBySymKey(mechanism, CKA_ENCRYPT, 
-				     wrapping_key, &params);
+    ctx = PK11_CreateContextBySymKey(mechanism, CKA_ENCRYPT,
+                                     wrapping_key, &params);
     if (ctx == NULL) {
-	ret = k5_nss_map_last_error();
-	goto done;
+        ret = k5_nss_map_last_error();
+        goto done;
     }
 
     wrapped_key.data = wrapped_key_data;
@@ -600,55 +583,52 @@ k5_nss_gen_import(krb5_key krb_key, CK_MECHANISM_TYPE mech,
      * will use the length parameter to appropriately set the key.
      */
     if ((raw_key.len % blocksize) != 0) {
-	int keyblocks = (raw_key.len +(blocksize-1))/blocksize;
-	keyLength = keyblocks * blocksize;
-	assert(keyLength <= sizeof(padded_key_data));
-	memset(padded_key_data, 0, keyLength);
-	memcpy(padded_key_data,raw_key.data, raw_key.len);
-	raw_key.data = padded_key_data;
+        int keyblocks = (raw_key.len + (blocksize - 1)) / blocksize;
+        keyLength = keyblocks * blocksize;
+        assert(keyLength <= sizeof(padded_key_data));
+        memset(padded_key_data, 0, keyLength);
+        memcpy(padded_key_data, raw_key.data, raw_key.len);
+        raw_key.data = padded_key_data;
     }
-    rv = PK11_CipherOp(ctx, wrapped_key.data, (int *)&wrapped_key.len, 
-		sizeof(wrapped_key_data), raw_key.data, keyLength);
+    rv = PK11_CipherOp(ctx, wrapped_key.data, (int *)&wrapped_key.len,
+                       sizeof(wrapped_key_data), raw_key.data, keyLength);
     if (keyLength != raw_key.len) {
-	/* clear our copy of the key bits */
-	memset(padded_key_data, 0, keyLength);
+        /* Clear our copy of the key bits. */
+        memset(padded_key_data, 0, keyLength);
     }
     if (rv != SECSuccess) {
-	ret = k5_nss_map_last_error();
-	goto done;
+        ret = k5_nss_map_last_error();
+        goto done;
     }
     PK11_Finalize(ctx);
     ctx = NULL;
 
-    /* now now we have a 'wrapped' version of the, we can import it into
+    /* Now now we have a 'wrapped' version of the, we can import it into
      * the token without running afoul with FIPS. */
-    key = PK11_UnwrapSymKey(wrapping_key, mechanism, &params, &wrapped_key, 
-			mech, operation, raw_key.len);
+    key = PK11_UnwrapSymKey(wrapping_key, mechanism, &params, &wrapped_key,
+                        mech, operation, raw_key.len);
 #else
-    key = PK11_ImportSymKey(slot, mech, PK11_OriginGenerated, operation, 
-			    &raw_key, NULL);
+    key = PK11_ImportSymKey(slot, mech, PK11_OriginGenerated, operation,
+                            &raw_key, NULL);
 #endif
     if (key == NULL) {
-	ret = k5_nss_map_last_error();
-	goto done;
+        ret = k5_nss_map_last_error();
+        goto done;
     }
     krb_key->cache = (void *) key;
 
 done:
-    if (slot) {
-	PK11_FreeSlot(slot);
-    }
+    if (slot)
+        PK11_FreeSlot(slot);
 #ifdef FAKE_FIPS
-    if (ctx) {
-	PK11_Finalize(ctx);
-    }
-    if (wrapping_key) {
-	PK11_FreeSymKey(wrapping_key);
-    }
+    if (ctx)
+        PK11_Finalize(ctx);
+    if (wrapping_key)
+        PK11_FreeSymKey(wrapping_key);
 #endif
 
 #else
     ret = k5_nss_init();
-#endif    
+#endif
     return ret;
 }

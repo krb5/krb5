@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/des/des_int.h
  *
@@ -53,7 +54,7 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-/* only do the whole thing once	 */
+/* only do the whole thing once  */
 #ifndef DES_INTERNAL_DEFS
 #define DES_INTERNAL_DEFS
 
@@ -91,7 +92,7 @@
 #define DES_UINT32 unsigned long
 #endif
 
-typedef unsigned char des_cblock[8] 	/* crypto-block size */
+typedef unsigned char des_cblock[8]     /* crypto-block size */
 KRB5INT_DES_DEPRECATED;
 
 /*
@@ -119,11 +120,11 @@ typedef des_cblock mit_des_cblock;
 typedef des_key_schedule mit_des_key_schedule;
 
 /* Triple-DES structures */
-typedef mit_des_cblock		mit_des3_cblock[3];
-typedef mit_des_key_schedule	mit_des3_key_schedule[3];
+typedef mit_des_cblock          mit_des3_cblock[3];
+typedef mit_des_key_schedule    mit_des3_key_schedule[3];
 
-#define MIT_DES_ENCRYPT	1
-#define MIT_DES_DECRYPT	0
+#define MIT_DES_ENCRYPT 1
+#define MIT_DES_DECRYPT 0
 
 typedef struct mit_des_ran_key_seed {
     krb5_encrypt_block eblock;
@@ -132,22 +133,22 @@ typedef struct mit_des_ran_key_seed {
 
 /* the first byte of the key is already in the keyblock */
 
-#define MIT_DES_BLOCK_LENGTH 		(8*sizeof(krb5_octet))
-#define	MIT_DES_CBC_CRC_PAD_MINIMUM	CRC32_CKSUM_LENGTH
+#define MIT_DES_BLOCK_LENGTH            (8*sizeof(krb5_octet))
+#define MIT_DES_CBC_CRC_PAD_MINIMUM     CRC32_CKSUM_LENGTH
 /* This used to be 8*sizeof(krb5_octet) */
-#define MIT_DES_KEYSIZE		 	8
+#define MIT_DES_KEYSIZE                 8
 
-#define MIT_DES_CBC_CKSUM_LENGTH	(4*sizeof(krb5_octet))
+#define MIT_DES_CBC_CKSUM_LENGTH        (4*sizeof(krb5_octet))
 
 /*
  * Check if k5-int.h has been included before us.  If so, then check to see
  * that our view of the DES key size is the same as k5-int.h's.
  */
-#ifdef	KRB5_MIT_DES_KEYSIZE
-#if	MIT_DES_KEYSIZE != KRB5_MIT_DES_KEYSIZE
+#ifdef  KRB5_MIT_DES_KEYSIZE
+#if     MIT_DES_KEYSIZE != KRB5_MIT_DES_KEYSIZE
 error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
-#endif	/* MIT_DES_KEYSIZE != KRB5_MIT_DES_KEYSIZE */
-#endif	/* KRB5_MIT_DES_KEYSIZE */
+#endif  /* MIT_DES_KEYSIZE != KRB5_MIT_DES_KEYSIZE */
+#endif  /* KRB5_MIT_DES_KEYSIZE */
 #endif /* KRB5_MIT_DES__ */
 /*
  * End "mit-des.h"
@@ -163,9 +164,9 @@ extern int mit_des_check_key_parity (mit_des_cblock );
 /* string2key.c */
 extern krb5_error_code mit_des_string_to_key
     ( const krb5_encrypt_block *,
-	       krb5_keyblock *, const krb5_data *, const krb5_data *);
+               krb5_keyblock *, const krb5_data *, const krb5_data *);
 extern krb5_error_code mit_des_string_to_key_int
-	(krb5_keyblock *, const krb5_data *, const krb5_data *);
+        (krb5_keyblock *, const krb5_data *, const krb5_data *);
 
 /* weak_key.c */
 extern int mit_des_is_weak_key (mit_des_cblock );
@@ -185,4 +186,4 @@ extern unsigned long swap_long_bytes_bit_number (unsigned long );
 /* XXX depends on FILE being a #define! */
 extern void test_set (FILE *, const char *, int, const char *, int);
 #endif
-#endif	/*DES_INTERNAL_DEFS*/
+#endif  /*DES_INTERNAL_DEFS*/

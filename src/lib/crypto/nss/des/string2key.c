@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * lib/crypto/openssl/des/string2key.c
  *
@@ -29,8 +30,8 @@
 #include "nss_gen.h"
 
 krb5_error_code
-mit_des_string_to_key_int (krb5_keyblock *key,
-			   const krb5_data *pw, const krb5_data *salt)
+mit_des_string_to_key_int(krb5_keyblock *key, const krb5_data *pw,
+                          const krb5_data *salt)
 {
     PK11SlotInfo *slot = NULL;
     PK11SymKey *symKey = NULL;
@@ -38,16 +39,17 @@ mit_des_string_to_key_int (krb5_keyblock *key,
     SECItem paramsItem;
     CK_PBE_PARAMS pbe_params;
     CK_MECHANISM_TYPE pbeMech = CKM_NETSCAPE_PBE_SHA1_DES_CBC;
-    krb5_error_code ret = -1;
+    krb5_error_code ret;
     SECItem *keyData;
 
-    ret=k5_nss_init();
-    if (ret) return ret;
+    ret = k5_nss_init();
+    if (ret)
+        return ret;
 
     slot = PK11_GetBestSlot(pbeMech, NULL);
     if (slot == NULL) {
-	ret = k5_nss_map_last_error();
-	goto loser;
+        ret = k5_nss_map_last_error();
+        goto loser;
     }
 
     pwItem.data = (unsigned char *)pw->data;
@@ -58,28 +60,26 @@ mit_des_string_to_key_int (krb5_keyblock *key,
     paramsItem.data = (unsigned char *)&pbe_params;
     paramsItem.len = sizeof(pbe_params);
 
-    symKey = PK11_RawPBEKeyGen(slot, pbeMech, &paramsItem, &pwItem, 
-				PR_FALSE, NULL);
+    symKey = PK11_RawPBEKeyGen(slot, pbeMech, &paramsItem, &pwItem,
+                               PR_FALSE, NULL);
     if (symKey == NULL) {
-	ret = k5_nss_map_last_error();
-	goto loser;
+        ret = k5_nss_map_last_error();
+        goto loser;
     }
     PK11_ExtractKeyValue(symKey);
     keyData = PK11_GetKeyData(symKey);
     if (!keyData) {
-	ret = k5_nss_map_last_error();
-	goto loser;
+        ret = k5_nss_map_last_error();
+        goto loser;
     }
     key->length = keyData->len;
     memcpy(key->contents, keyData->data, key->length);
     ret = 0;
 
 loser:
-    if (symKey) {
-	PK11_FreeSymKey(symKey);
-    }
-    if (slot) {
-	PK11_FreeSlot(slot);
-    }
+    if (symKey)
+        PK11_FreeSymKey(symKey);
+    if (slot)
+        PK11_FreeSlot(slot);
     return ret;
 }

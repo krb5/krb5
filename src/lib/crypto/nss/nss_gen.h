@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  *
  * Copyright (C) 2003, 2007, 2008, 2009 by the Massachusetts Institute of Technology.
@@ -34,64 +35,62 @@
 #define MAX_BLOCK_SIZE 64
 
 /*
- * common nss utils
+ * Common nss utils
  */
-/* Make sure NSS is properly initialized */
+
+/* Make sure NSS is properly initialized. */
 krb5_error_code k5_nss_init(void);
 
-/* import a key into NSS and store the handle in krb5_key */
+/* Import a key into NSS and store the handle in krb5_key. */
 krb5_error_code
-k5_nss_gen_import(krb5_key key, CK_MECHANISM_TYPE mech, 
-		        CK_ATTRIBUTE_TYPE operation);
-/* clean up an imported key */
+k5_nss_gen_import(krb5_key key, CK_MECHANISM_TYPE mech,
+                  CK_ATTRIBUTE_TYPE operation);
+
+/* Clean up an imported key. */
 void
 k5_nss_gen_cleanup(krb5_key key);
 
-/* create a new crypto/hash/sign context from a krb5_key */
+/* Create a new crypto/hash/sign context from a krb5_key. */
 PK11Context *
 k5_nss_create_context(krb5_key krb_key, CK_MECHANISM_TYPE mechanism,
-			CK_ATTRIBUTE_TYPE operation, SECItem * param);
+                      CK_ATTRIBUTE_TYPE operation, SECItem * param);
 
-/* mapp and NSS error into a krb5_error_code */
-krb5_error_code k5_nss_map_error (int nss_error);
-krb5_error_code k5_nss_map_last_error (void);
+/* Map an NSS error into a krb5_error_code. */
+krb5_error_code k5_nss_map_error(int nss_error);
+krb5_error_code k5_nss_map_last_error(void);
 
-
-/*
- * common encryption functions
- */
-/* encrypt/decrypt block modes except cts using iov */
-krb5_error_code
-k5_nss_gen_block_iov(krb5_key key, CK_MECHANISM_TYPE mech, 
-		        CK_ATTRIBUTE_TYPE operation,
-		        const krb5_data *ivec,
-		        krb5_crypto_iov *data,
-		        size_t num_data);
-/* encrypt/decrypt stream modes using iov */
-krb5_error_code
-k5_nss_gen_stream_iov(krb5_key key, krb5_data *state,
-			CK_MECHANISM_TYPE mech, 
-		        CK_ATTRIBUTE_TYPE operation,
-		        krb5_crypto_iov *data,
-		        size_t num_data);
-/* encrypt/decrypt block modes using cts */
-krb5_error_code
-k5_nss_gen_cts_iov(krb5_key key, CK_MECHANISM_TYPE mech, 
-		        CK_ATTRIBUTE_TYPE operation,
-		        const krb5_data *ivec,
-		        krb5_crypto_iov *data,
-		        size_t num_data);
-
-/* stream state management calls */
-krb5_error_code
-k5_nss_stream_init_state(krb5_data *new_state);
-krb5_error_code
-k5_nss_stream_free_state(krb5_data *state);
 
 /*
- * common hash functions
+ * Common encryption functions
  */
-/* all hash modes */
-krb5_error_code 
+
+/* Encrypt/decrypt block modes except cts using iov. */
+krb5_error_code
+k5_nss_gen_block_iov(krb5_key key, CK_MECHANISM_TYPE mech,
+                     CK_ATTRIBUTE_TYPE operation, const krb5_data *ivec,
+                     krb5_crypto_iov *data, size_t num_data);
+
+/* Encrypt/decrypt stream modes using iov. */
+krb5_error_code
+k5_nss_gen_stream_iov(krb5_key key, krb5_data *state, CK_MECHANISM_TYPE mech,
+                      CK_ATTRIBUTE_TYPE operation, krb5_crypto_iov *data,
+                      size_t num_data);
+
+/* Encrypt/decrypt block modes using cts. */
+krb5_error_code
+k5_nss_gen_cts_iov(krb5_key key, CK_MECHANISM_TYPE mech,
+                   CK_ATTRIBUTE_TYPE operation, const krb5_data *ivec,
+                   krb5_crypto_iov *data, size_t num_data);
+
+/* Stream state management calls. */
+krb5_error_code k5_nss_stream_init_state(krb5_data *new_state);
+krb5_error_code k5_nss_stream_free_state(krb5_data *state);
+
+/*
+ * Common hash functions
+ */
+
+/* All hash modes. */
+krb5_error_code
 k5_nss_gen_hash(HASH_HashType hashType, const krb5_crypto_iov *data,
-			size_t num_data, krb5_data *output);
+                size_t num_data, krb5_data *output);

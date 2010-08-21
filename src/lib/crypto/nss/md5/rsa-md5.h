@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* lib/crypto/openssl/md5/rsa-md5.h
  *
  * Copyright (C) 2009 by the Massachusetts Institute of Technology.
@@ -77,7 +78,8 @@ typedef struct {
 } krb5_MD5_CTX;
 
 extern void krb5int_MD5Init(krb5_MD5_CTX *);
-extern void krb5int_MD5Update(krb5_MD5_CTX *,const unsigned char *,unsigned int);
+extern void krb5int_MD5Update(krb5_MD5_CTX *, const unsigned char *,
+                              unsigned int);
 extern void krb5int_MD5Final(krb5_MD5_CTX *);
 
 #define    RSA_MD5_CKSUM_LENGTH            16

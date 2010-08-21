@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright (C) 2010 Red Hat, Inc.
  *
@@ -31,34 +32,36 @@
 
 krb5_error_code
 k5_nss_gen_hash(HASH_HashType hashType, const krb5_crypto_iov *data,
-	    size_t num_data, krb5_data *output)
+                size_t num_data, krb5_data *output)
 {
     unsigned int i;
     HASHContext *ctx;
     krb5_error_code ret;
 
     ret = k5_nss_init();
-    if (ret) return ret;
+    if (ret)
+        return ret;
 
     if (output->length != HASH_ResultLen(hashType))
-	return(KRB5_CRYPTO_INTERNAL);
+        return KRB5_CRYPTO_INTERNAL;
 
     ctx = HASH_Create(hashType);
-    if (!ctx) 
-	return(ENOMEM);
+    if (!ctx)
+        return ENOMEM;
 
     HASH_Begin(ctx);
     for (i=0; i < num_data; i++) {
-	const krb5_crypto_iov *iov = &data[i];
+        const krb5_crypto_iov *iov = &data[i];
 
-	if (iov->data.length && SIGN_IOV(iov))
-	    HASH_Update(ctx, (unsigned char *) iov->data.data, 
-			iov->data.length);
+        if (iov->data.length && SIGN_IOV(iov)) {
+            HASH_Update(ctx, (unsigned char *) iov->data.data,
+                        iov->data.length);
+        }
     }
 
-    HASH_End(ctx, (unsigned char *)output->data, 
-		&output->length, output->length);
+    HASH_End(ctx, (unsigned char *)output->data,
+             &output->length, output->length);
 
-    return(0);
+    return 0;
 }
 

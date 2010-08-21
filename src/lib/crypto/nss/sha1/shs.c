@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* lib/crypto/openssl/sha1/shs.c
  *
  * Copyright (C) 2009 by the Massachusetts Institute of Technology.
@@ -32,40 +33,36 @@
 void shsInit(SHS_INFO *shsInfo)
 {
     if (k5_nss_init()) {
-	shsInfo->nss_ctxt = NULL;
-	return;
+        shsInfo->nss_ctxt = NULL;
+        return;
     }
     shsInfo->nss_ctxt = PK11_CreateDigestContext(SEC_OID_SHA1);
-    if (shsInfo->nss_ctxt == NULL) {
-	return;
-    }
+    if (shsInfo->nss_ctxt == NULL)
+        return;
     PK11_DigestBegin((PK11Context *)shsInfo->nss_ctxt);
 }
 
 /* Update SHS for a block of data */
 void shsUpdate(SHS_INFO *shsInfo, const SHS_BYTE *buffer, unsigned int count)
 {
-   if (shsInfo->nss_ctxt == NULL) {
-	return;
-   }
-   PK11_DigestOp((PK11Context *)shsInfo->nss_ctxt, buffer, count);
+    if (shsInfo->nss_ctxt == NULL)
+        return;
+    PK11_DigestOp((PK11Context *)shsInfo->nss_ctxt, buffer, count);
 }
 
 
 /* Final wrapup - pad to SHS_DATASIZE-byte boundary with the bit pattern
-   1 0* (64-bit count of bits processed, MSB-first) */
+ * 1 0* (64-bit count of bits processed, MSB-first) */
 void shsFinal(SHS_INFO *shsInfo)
 {
-   if (shsInfo->nss_ctxt == NULL) {
-	return;
-   }
-   PK11_DigestFinal((PK11Context *)shsInfo->nss_ctxt, shsInfo->digestBuf, 
-		&shsInfo->digestLen, sizeof (shsInfo->digestBuf));
-   /* since there is not separate cleanup step, free the context now. 
+   if (shsInfo->nss_ctxt == NULL)
+        return;
+   PK11_DigestFinal((PK11Context *)shsInfo->nss_ctxt, shsInfo->digestBuf,
+                    &shsInfo->digestLen, sizeof (shsInfo->digestBuf));
+   /* Since there is not separate cleanup step, free the context now.
     * (otherwise we could have reused the context for another MD5 operation
     * in the future).
     */
    PK11_DestroyContext((PK11Context *)shsInfo->nss_ctxt, PR_TRUE);
    shsInfo->nss_ctxt = NULL;
 }
-
