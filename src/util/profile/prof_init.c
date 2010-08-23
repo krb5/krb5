@@ -27,7 +27,7 @@ profile_init(const_profile_filespec_t *files, profile_t *ret_profile)
     const_profile_filespec_t *fs;
     profile_t profile;
     prf_file_t  new_file, last = 0;
-    errcode_t retval = 0;
+    errcode_t retval = 0, access_retval = 0;
 
     profile = malloc(sizeof(struct _profile_t));
     if (!profile)
@@ -43,7 +43,12 @@ profile_init(const_profile_filespec_t *files, profile_t *ret_profile)
         for (fs = files; !PROFILE_LAST_FILESPEC(*fs); fs++) {
             retval = profile_open_file(*fs, &new_file);
             /* if this file is missing, skip to the next */
-            if (retval == ENOENT || retval == EACCES || retval == EPERM) {
+            if (retval == ENOENT) {
+                continue;
+            }
+            /* If we can't read this file, remember it but keep going. */
+            if (retval == EACCES || retval == EPERM) {
+                access_retval = retval;
                 continue;
             }
             if (retval) {
@@ -58,11 +63,11 @@ profile_init(const_profile_filespec_t *files, profile_t *ret_profile)
         }
         /*
          * If last is still null after the loop, then all the files were
-         * missing, so return the appropriate error.
+         * missing or unreadable, so return the appropriate error.
          */
         if (!last) {
             profile_release(profile);
-            return ENOENT;
+            return access_retval ? access_retval : ENOENT;
         }
     }
 
