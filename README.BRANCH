@@ -46,7 +46,3 @@ order of priority:
 * The code could perhaps benefit from organizational simplification,
   such as eliminating the many small files for enc and hash providers
   (since all of their logic is in enc_gen.c and hash_gen.c anyway).
-
-* k5_ is used as a prefix for private symbols visible to the linker.
-  This may be acceptable as an emerging namespace practice (see the
-  plugins2 branch) but it needs to be validated.
