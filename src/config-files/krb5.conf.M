@@ -60,6 +60,16 @@ multiple values.  Here is an example of the INI-style format used by
 .sp
 
 .PP
+.I krb5.conf
+can include other files using the directives "include FILENAME" or
+"includedir DIRNAME", which must occur at the beginning of a line.
+FILENAME or DIRNAME should be an absolute path.  The named file or
+directory must exist and be readable.  Including a directory includes
+all files within the directory whose names consist solely of
+alphanumeric characters, dashes, or underscores.  Included profile
+fragments should begin with a section header.
+
+.PP
 The following sections are currently used in the 
 .I krb5.conf
 file:
