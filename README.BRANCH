@@ -165,12 +165,6 @@ demonstration branch it is not perfect.  Problems include:
   k5_pwqual_free_handles.  Currently the responsibility for invoking
   these methods rests with the consumer code in server_misc.c.
 
-* At Tom's suggestion, new internal functions with external linkage
-  are using the prefix "k5_" instead of "krb5int_".  This practice
-  should be validated by the dev community (and perhaps made uniform
-  in the code base, although that would result in a lot of churn) or
-  abandoned.
-
 * The decisions about what is a typedef and what is a simple structure
   type are kind of haphazard, erring on the side of using typedefs.
 
