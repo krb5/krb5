@@ -219,8 +219,8 @@ static errcode_t parse_include_file(char *filename, struct parse_state *state)
     return retval;
 }
 
-/* Return non-zero if filename contains only alphanumeric characters and
- * underscores. */
+/* Return non-zero if filename contains only alphanumeric characters, dashes,
+ * and underscores. */
 static int valid_name(const char *filename)
 {
     const char *p;
