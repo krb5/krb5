@@ -70,14 +70,6 @@ static void parse_quoted_string(char *str)
 }
 
 
-static errcode_t parse_init_state(struct parse_state *state)
-{
-    state->state = STATE_INIT_COMMENT;
-    state->group_level = 0;
-
-    return profile_create_node("(root)", 0, &state->root_section);
-}
-
 static errcode_t parse_std_line(char *line, struct parse_state *state)
 {
     char    *cp, ch, *tag, *value;
@@ -205,16 +197,24 @@ static errcode_t parse_std_line(char *line, struct parse_state *state)
     return 0;
 }
 
-/* Parse lines from filename as if they were part of the profile file. */
+/* Open and parse an included profile file. */
 static errcode_t parse_include_file(char *filename, struct parse_state *state)
 {
     FILE    *fp;
     errcode_t retval = 0;
+    struct parse_state incstate;
+
+    /* Create a new state so that fragments are syntactically independent,
+     * sharing the root section with the existing state. */
+    incstate.state = STATE_INIT_COMMENT;
+    incstate.group_level = 0;
+    incstate.root_section = state->root_section;
+    incstate.current_section = NULL;
 
     fp = fopen(filename, "r");
     if (fp == NULL)
         return PROF_FAIL_INCLUDE_FILE;
-    retval = parse_file(fp, state);
+    retval = parse_file(fp, &incstate);
     fclose(fp);
     return retval;
 }
@@ -233,10 +233,9 @@ static int valid_name(const char *filename)
 }
 
 /*
- * Parse lines from files in dirname as if they were part of the profile file.
- * Only files with names consisting entirely of alphanumeric chracters and
- * underscores are parsed, in order to avoid parsing editor backup files,
- * .rpmsave files, and the like.
+ * Include files within dirname.  Only files with names consisting entirely of
+ * alphanumeric chracters, dashes, and underscores are included, in order to
+ * avoid including editor backup files, .rpmsave files, and the like.
  */
 static errcode_t parse_include_dir(char *dirname, struct parse_state *state)
 {
@@ -371,9 +370,15 @@ errcode_t profile_parse_file(FILE *f, struct profile_node **root)
     errcode_t retval;
 
     *root = NULL;
-    retval = parse_init_state(&state);
+
+    /* Initialize parsing state with a new root node. */
+    state.state = STATE_INIT_COMMENT;
+    state.group_level = 0;
+    state.current_section = NULL;
+    retval = profile_create_node("(root)", 0, &state.root_section);
     if (retval)
         return retval;
+
     retval = parse_file(f, &state);
     if (retval) {
         profile_free_node(state.root_section);

@@ -67,7 +67,8 @@ FILENAME or DIRNAME should be an absolute path.  The named file or
 directory must exist and be readable.  Including a directory includes
 all files within the directory whose names consist solely of
 alphanumeric characters, dashes, or underscores.  Included profile
-fragments should begin with a section header.
+files are syntactically independent of their parents, so each included
+file must begin with a section header.
 
 .PP
 The following sections are currently used in the 

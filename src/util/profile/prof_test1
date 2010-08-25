@@ -203,9 +203,41 @@ proc test4 {} {
     puts "OK: test4: include and includedir directives"
 }
 
+proc test5 {} {
+    global wd verbose
+
+    # Test syntactic independence of included profile files.
+    catch [file delete $wd/testinc.ini]
+    set f [open "$wd/testinc.ini" w]
+    puts $f {[sec1]}
+    puts $f "var = {"
+    puts $f "a = 1"
+    puts $f "include testinc2.ini"
+    puts $f "c = 3"
+    puts $f "}"
+    close $f
+    catch [file delete $wd/testinc2.ini]
+    set f [open "$wd/testinc2.ini" w]
+    puts $f {[sec2]}
+    puts $f "b = 2"
+    close $f
+    set p [profile_init_path $wd/testinc.ini]
+    set a [profile_get_values $p {sec1 var a}]
+    set b [profile_get_values $p {sec2 b}]
+    set c [profile_get_values $p {sec1 var c}]
+    if $verbose { puts "Read values [concat $a $b $c] from profile" }
+    if { $a != 1 || $b != 2 || $c != 3 } {
+	puts stderr, "Error: test5: Wrong results from profile"
+	exit 1
+    }
+
+    puts "OK: test5: syntax independence of included files"
+}
+
 test1
 test2
 test3
 test4
+test5
 
 exit 0
