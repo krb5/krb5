@@ -386,6 +386,9 @@ t_princ: $(T_PRINC_OBJS) $(KRB5_BASE_DEPLIBS)
 t_etypes: $(T_ETYPES_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_etypes $(T_ETYPES_OBJS) $(KRB5_BASE_LIBS)
 
+t_expire_warn: t_expire_warn.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_expire_warn.o $(KRB5_BASE_LIBS)
+
 TEST_PROGS= t_walk_rtree t_kerb t_ser t_deltat t_expand t_authdata t_pac \
 	t_princ t_etypes
 
@@ -425,6 +428,9 @@ check-unix:: $(TEST_PROGS)
 	$(RUN_SETUP) $(VALGRIND) ./t_pac
 	$(RUN_SETUP) $(VALGRIND) ./t_princ
 	$(RUN_SETUP) $(VALGRIND) ./t_etypes
+
+check-pytests:: t_expire_warn
+	$(RUNPYTEST) $(srcdir)/t_expire_warn.py $(PYTESTFLAGS)
 
 clean::
 	$(RM) $(OUTPRE)t_walk_rtree$(EXEEXT) $(OUTPRE)t_walk_rtree.$(OBJEXT) \

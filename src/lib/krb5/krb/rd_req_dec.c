@@ -44,7 +44,14 @@
  *
  *  server specifies the expected server's name for the ticket; if NULL, then
  *  any server will be accepted if the key can be found, and the caller should
- *  verify that the principal is something it trusts.
+ *  verify that the principal is something it trusts. With the exception of the
+ *  kdb keytab, the ticket's server field need not match the name passed in for
+ *  server. All that is required is that the ticket be encrypted with a key
+ *  from the keytab associated with the specified server principal. This
+ *  permits the KDC to have a set of aliases for the server without keeping
+ *  this information consistent with the server. So, when server is non-null,
+ *  the principal expected by the application needs to be consistent with the
+ *  local keytab, but not with the informational name in the ticket.
  *
  *  rcache specifies a replay detection cache used to store authenticators and
  *  server names

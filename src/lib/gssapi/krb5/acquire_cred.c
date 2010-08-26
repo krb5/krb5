@@ -103,19 +103,18 @@ gss_krb5int_register_acceptor_identity(OM_uint32 *minor_status,
                                        const gss_OID desired_object,
                                        gss_buffer_t value)
 {
-    char *new, *old;
+    char *new = NULL, *old;
     int err;
 
     err = gss_krb5int_initialize_library();
     if (err != 0)
         return GSS_S_FAILURE;
 
-    if (value->value == NULL)
-        return GSS_S_FAILURE;
-
-    new = strdup((char *)value->value);
-    if (new == NULL)
-        return GSS_S_FAILURE;
+    if (value->value != NULL) {
+        new = strdup((char *)value->value);
+        if (new == NULL)
+            return GSS_S_FAILURE;
+    }
 
     err = k5_mutex_lock(&gssint_krb5_keytab_lock);
     if (err) {
@@ -125,8 +124,7 @@ gss_krb5int_register_acceptor_identity(OM_uint32 *minor_status,
     old = krb5_gss_keytab;
     krb5_gss_keytab = new;
     k5_mutex_unlock(&gssint_krb5_keytab_lock);
-    if (old != NULL)
-        free(old);
+    free(old);
     return GSS_S_COMPLETE;
 }
 

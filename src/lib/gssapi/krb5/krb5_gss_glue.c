@@ -253,7 +253,7 @@ krb5_gss_register_acceptor_identity(const char *keytab)
     OM_uint32 minor_status;
     gss_buffer_desc req_buffer;
 
-    req_buffer.length = strlen(keytab);
+    req_buffer.length = (keytab == NULL) ? 0 : strlen(keytab);
     req_buffer.value = (char *)keytab;
 
     major_status = gssspi_mech_invoke(&minor_status,

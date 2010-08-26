@@ -88,6 +88,17 @@ prepare_error_as(struct kdc_request_state *, krb5_kdc_req *,
                  int, krb5_data *, krb5_principal, krb5_data **,
                  const char *);
 
+/* Determine the key-expiration value according to RFC 4120 section 5.4.2. */
+static krb5_timestamp
+get_key_exp(krb5_db_entry *entry)
+{
+    if (entry->expiration == 0)
+        return entry->pw_expiration;
+    if (entry->pw_expiration == 0)
+        return entry->expiration;
+    return min(entry->expiration, entry->pw_expiration);
+}
+
 /*ARGSUSED*/
 krb5_error_code
 process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
@@ -541,7 +552,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         goto errout;
     }
     reply_encpart.nonce = request->nonce;
-    reply_encpart.key_exp = client->expiration;
+    reply_encpart.key_exp = get_key_exp(client);
     reply_encpart.flags = enc_tkt_reply.flags;
     reply_encpart.server = ticket_reply.server;
 
