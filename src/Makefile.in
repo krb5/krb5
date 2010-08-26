@@ -445,6 +445,7 @@ ETOUT =	\
 	$(INC)asn1_err.h $(ET)asn1_err.c \
 	$(INC)kdb5_err.h $(ET)kdb5_err.c \
 	$(INC)krb5_err.h $(ET)krb5_err.c \
+	$(INC)k5e1_err.h $(ET)k5e1_err.c \
 	$(INC)kv5m_err.h $(ET)kv5m_err.c \
 	$(INC)krb524_err.h $(ET)krb524_err.c \
 	$(PR)prof_err.h $(PR)prof_err.c \
@@ -501,6 +502,8 @@ $(INC)kdb5_err.h: $(AH) $(ET)kdb5_err.et
 	$(AWK) -f $(AH) outfile=$@ $(ET)kdb5_err.et
 $(INC)krb5_err.h: $(AH) $(ET)krb5_err.et
 	$(AWK) -f $(AH) outfile=$@ $(ET)krb5_err.et
+$(INC)k5e1_err.h: $(AH) $(ET)k5e1_err.et
+	$(AWK) -f $(AH) outfile=$@ $(ET)k5e1_err.et
 $(INC)kv5m_err.h: $(AH) $(ET)kv5m_err.et
 	$(AWK) -f $(AH) outfile=$@ $(ET)kv5m_err.et
 $(INC)krb524_err.h: $(AH) $(ET)krb524_err.et
@@ -524,6 +527,8 @@ $(ET)kdb5_err.c: $(AC) $(ET)kdb5_err.et
 	$(AWK) -f $(AC) outfile=$@ $(ET)kdb5_err.et
 $(ET)krb5_err.c: $(AC) $(ET)krb5_err.et
 	$(AWK) -f $(AC) outfile=$@ $(ET)krb5_err.et
+$(ET)k5e1_err.c: $(AC) $(ET)k5e1_err.et
+	$(AWK) -f $(AC) outfile=$@ $(ET)k5e1_err.et
 $(ET)kv5m_err.c: $(AC) $(ET)kv5m_err.et
 	$(AWK) -f $(AC) outfile=$@ $(ET)kv5m_err.et
 $(ET)krb524_err.c: $(AC) $(ET)krb524_err.et
@@ -541,8 +546,8 @@ $(CE)test1.c: $(AC) $(CE)test1.et
 $(CE)test2.c: $(AC) $(CE)test2.et
 	$(AWK) -f $(AC) outfile=$@ $(CE)test2.et
 
-KRBHDEP = $(INC)krb5\krb5.hin $(INC)krb5_err.h $(INC)kdb5_err.h \
-	$(INC)kv5m_err.h $(INC)krb524_err.h $(INC)asn1_err.h
+KRBHDEP = $(INC)krb5\krb5.hin $(INC)krb5_err.h $(INC)k5e1_err.h \
+	$(INC)kdb5_err.h $(INC)kv5m_err.h $(INC)krb524_err.h $(INC)asn1_err.h
 
 $(INC)krb5\krb5.h: $(KRBHDEP)
 	rm -f $@
