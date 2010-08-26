@@ -154,11 +154,6 @@ These steps demonstrate the functioning of the code.
 The krb5 code on this branch is mostly complete, but as a
 demonstration branch it is not perfect.  Problems include:
 
-* In some cases (marked by XXX comments), overly vague error codes are
-  returned where new error codes should have been created.  This is
-  because the krb5 trunk's krb5 error table is currently full, and
-  rectifying that problem is out of scope for the branch.
-
 * Opening and closing password quality plugins should perhaps be
   hidden by the password quality consumer API--that is, the open
   method should be invoked by the loader, and the close method by

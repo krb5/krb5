@@ -235,7 +235,7 @@ pwqual_dict_initvt(krb5_context context, int maj_ver, int min_ver,
     krb5_pwqual_vtable vt;
 
     if (maj_ver != 1)
-        return EINVAL; /* XXX create error code */
+        return KRB5_PLUGIN_VER_NOTSUPP;
     vt = (krb5_pwqual_vtable)vtable;
     vt->open = dict_open;
     vt->check = dict_check;
