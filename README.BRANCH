@@ -46,6 +46,10 @@ API consists of:
   pluggable interfaces where the consumer wants to consult all
   available modules.
 
+* Wrapper functions for each plugin method.  Each wrapper function
+  should typically accept a krb5_context, a handle, and the specific
+  method arguments.
+
 3. Producer-facing dynamic module ABI
 
 A dynamic object can implement one or more plugin modules.  To
