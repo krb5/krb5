@@ -26,6 +26,24 @@
  *
  *
  * Declarations for password quality plugin module implementors.
+ *
+ * The password quality pluggable interface currently has only one supported
+ * major version, which is 1.  Major version 1 has a current minor version
+ * number of 1.
+ *
+ * Password quality plugin modules should define a function named
+ * pwqual_<modulename>_initvt.  The initvt function should:
+ *
+ * - Check that the supplied maj_ver number is supported by the module, or
+ *   return KRB5_PLUGIN_VER_NOTSUPP if it is not.
+ *
+ * - Cast the vtable pointer as appropriate for maj_ver:
+ *     maj_ver == 1: Cast to krb5_pwqual_vtable
+ *
+ * - Initialize the methods of the vtable, stopping as appropriate for the
+ *   supplied min_ver.  Optional methods may be left uninitialized.
+ *
+ * Memory for the vtable is allocated by the caller, not by the module.
  */
 
 #ifndef KRB5_PWQUAL_PLUGIN_H
@@ -66,6 +84,7 @@ typedef struct krb5_pwqual_vtable_st {
     krb5_pwqual_open_fn open;
     krb5_pwqual_check_fn check;
     krb5_pwqual_close_fn close;
+    /* Minor version 1 ends here. */
 } *krb5_pwqual_vtable;
 
 #endif /* KRB5_PWQUAL_PLUGIN_H */

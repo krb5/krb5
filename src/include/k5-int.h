@@ -1431,7 +1431,70 @@ krb5_authdata_free_internal(krb5_context kcontext,
                             krb5_authdata_context context, const char *module,
                             void *ptr);
 
-/* Plugin framework */
+/*** Plugin framework ***/
+
+/*
+ * This framework can be used to create pluggable interfaces.  Not all existing
+ * pluggable interface use this framework, but new ones should.  A new
+ * pluggable interface entails:
+ *
+ * - An interface ID definition in the list of #defines below.
+ *
+ * - A name in the interface_names array in lib/krb5/krb/plugins.c.
+ *
+ * - An installed public header file in include/krb5.  The public header should
+ *   include <krb5/plugin.h> and should declare a vtable structure for each
+ *   supported major version of the interface.
+ *
+ * - A consumer API implementation, located within the code unit which makes
+ *   use of the pluggable interface.  The consumer API should consist of:
+ *
+ *   . An interface-specific handle type which contains a vtable structure for
+ *     the module (or a union of several such structures, if there are multiple
+ *     supported major versions) and, optionally, resource data bound to the
+ *     handle.
+ *
+ *   . An interface-specific loader function which creates a handle or list of
+ *     handles.  A list of handles would be created if the interface is a
+ *     one-to-many interface where the consumer wants to consult all available
+ *     modules; a single handle would be created for an interface where the
+ *     consumer wants to consult a specific module.  The loader function should
+ *     use k5_plugin_load or k5_plugin_load_all to produce one or a list of
+ *     vtable initializer functions, and should use those functions to fill in
+ *     the vtable structure for the module (if necessary, trying each supported
+ *     major version starting from the most recent).  The loader function can
+ *     also bind resource data into the handle based on caller arguments, if
+ *     appropriate.
+ *
+ *   . For each plugin method, a wrapper function which accepts a krb5_context,
+ *     a plugin handle, and the method arguments.  Wrapper functions should
+ *     invoke the method function contained in the handle's vtable.
+ *
+ * - Possibly, built-in implementations of the interface, also located within
+ *   the code unit which makes use of the interface.  Built-in implementations
+ *   must be registered with k5_plugin_register before the first call to
+ *   k5_plugin_load or k5_plugin_load_all.
+ *
+ * A pluggable interface should have one or more currently supported major
+ * versions, starting at 1.  Each major version should have a current minor
+ * version, also starting at 1.  If new methods are added to a vtable, the
+ * minor version should be incremented and the vtable stucture should document
+ * where each minor vtable version ends.  If method signatures for a vtable are
+ * changed, the major version should be incremented.
+ *
+ * Plugin module implementations (either built-in or dynamically loaded) should
+ * define a function named <interfacename>_<modulename>_initvt, matching the
+ * signature of krb5_plugin_initvt_fn as declared in include/krb5/plugin.h.
+ * The initvt function should check the given maj_ver argument against its own
+ * supported major versions, cast the vtable pointer to the appropriate
+ * interface-specific vtable type, and fill in the vtable methods, stopping as
+ * appropriate for the given min_ver.  Memory for the vtable structure is
+ * allocated by the caller, not by the module.
+ *
+ * Dynamic plugin modules are registered with the framework through the
+ * [plugins] section of the profile, as described in the admin documentation
+ * and krb5.conf man page.
+ */
 
 /*
  * A linked list entry mapping a module name to a module initvt function.  The
