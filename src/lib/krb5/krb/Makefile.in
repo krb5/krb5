@@ -353,7 +353,7 @@ T_PAC_OBJS= t_pac.o pac.o pac_sign.o copy_data.o
 
 T_PRINC_OBJS= t_princ.o parse.o unparse.o
 
-T_ETYPES_OBJS= t_etypes.o init_ctx.o etype_list.o
+T_ETYPES_OBJS= t_etypes.o init_ctx.o etype_list.o plugin.o
 
 t_walk_rtree: $(T_WALK_RTREE_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_walk_rtree $(T_WALK_RTREE_OBJS) $(KRB5_BASE_LIBS)
