@@ -25,7 +25,7 @@
  * or implied warranty.
  *
  *
- * Consumer interface for password quality plugins
+ * Consumer interface for password quality plugins.
  */
 
 #include "k5-int.h"
@@ -38,7 +38,8 @@ struct pwqual_handle_st {
 };
 
 krb5_error_code
-k5_pwqual_load(krb5_context context, pwqual_handle **handles)
+k5_pwqual_load(krb5_context context, pwqual_handle **handles,
+               const char *dict_file)
 {
     krb5_error_code ret;
     krb5_plugin_initvt_fn *modules = NULL, *mod;
@@ -55,60 +56,60 @@ k5_pwqual_load(krb5_context context, pwqual_handle **handles)
     if (list == NULL)
         goto cleanup;
 
-    /* For each module, allocate a handle and initialize its vtable.  Skip
-     * modules which don't successfully initialize. */
+    /* For each module, allocate a handle, initialize its vtable, and bind the
+     * dictionary filename. */
     count = 0;
     for (mod = modules; *mod != NULL; mod++) {
         handle = k5alloc(sizeof(*handle), &ret);
         if (handle == NULL)
             goto cleanup;
         ret = (*mod)(context, 1, 1, (krb5_plugin_vtable)&handle->vt);
-        if (ret == 0)
-            list[count++] = handle;
-        else
+        if (ret != 0) {         /* Failed vtable init is non-fatal. */
             free(handle);
+            continue;
+        }
+        handle->data = NULL;
+        if (handle->vt.open != NULL) {
+            ret = handle->vt.open(context, dict_file, &handle->data);
+            if (ret != 0)       /* Failed dictionary binding is fatal. */
+                goto cleanup;
+        }
+        list[count++] = handle;
+        list[count] = NULL;
+        handle = NULL;
     }
+    list[count] = NULL;
 
     *handles = list;
     list = NULL;
 
 cleanup:
+    free(handle);
     k5_plugin_free_modules(context, modules);
     k5_pwqual_free_handles(context, list);
     return ret;
 }
 
-krb5_error_code
+void
 k5_pwqual_free_handles(krb5_context context, pwqual_handle *handles)
 {
-    /* It's the caller's responsibility to close each handle, so all of the
-     * module data should be freed by now, leaving only the list itself. */
+    pwqual_handle *hp, handle;
+
+    if (handles == NULL)
+        return;
+    for (hp = handles; *hp != NULL; hp++) {
+        handle = *hp;
+        if (handle->vt.close != NULL)
+            handle->vt.close(context, handle->data);
+    }
     free(handles);
 }
 
 krb5_error_code
-k5_pwqual_open(krb5_context context, pwqual_handle handle,
-               const char *dict_file)
-{
-    if (handle->data != NULL)
-        return EINVAL;
-    if (handle->vt.open == NULL)
-        return 0;
-    return handle->vt.open(context, dict_file, &handle->data);
-}
-
-krb5_error_code
 k5_pwqual_check(krb5_context context, pwqual_handle handle,
-                const char *password, kadm5_policy_ent_t policy,
+                const char *password, const char *policy_name,
                 krb5_principal princ)
 {
-    return handle->vt.check(context, handle->data, password, policy, princ);
-}
-
-void
-k5_pwqual_close(krb5_context context, pwqual_handle handle)
-{
-    if (handle->vt.close)
-        handle->vt.close(context, handle->data);
-    handle->data = NULL;
+    return handle->vt.check(context, handle->data, password, policy_name,
+                            princ);
 }

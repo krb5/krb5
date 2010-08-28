@@ -29,7 +29,9 @@ RELDIR=kadm5/srv
 
 SRCS =	$(srcdir)/pwqual.c \
 	$(srcdir)/pwqual_dict.c \
-	$(srcdir)/pwqual_policy.c \
+	$(srcdir)/pwqual_empty.c \
+	$(srcdir)/pwqual_hesiod.c \
+	$(srcdir)/pwqual_princ.c \
 	$(srcdir)/svr_policy.c \
 	$(srcdir)/svr_principal.c \
 	$(srcdir)/server_acl.c \
@@ -42,7 +44,9 @@ SRCS =	$(srcdir)/pwqual.c \
 
 OBJS =	pwqual.$(OBJEXT) \
 	pwqual_dict.$(OBJEXT) \
-	pwqual_policy.$(OBJECT) \
+	pwqual_empty.$(OBJEXT) \
+	pwqual_hesiod.$(OBJEXT) \
+	pwqual_princ.$(OBJEXT) \
 	svr_policy.$(OBJEXT) \
 	svr_principal.$(OBJEXT) \
 	server_acl.$(OBJEXT) \
@@ -56,7 +60,9 @@ OBJS =	pwqual.$(OBJEXT) \
 STLIBOBJS = \
 	pwqual.o \
 	pwqual_dict.o \
-	pwqual_policy.o \
+	pwqual_empty.o \
+	pwqual_hesiod.o \
+	pwqual_princ.o \
 	svr_policy.o \
 	svr_principal.o \
 	server_acl.o \

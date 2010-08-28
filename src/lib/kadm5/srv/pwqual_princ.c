@@ -1,6 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * lib/kadm5/srv/pwqual_policy.c
+ * lib/kadm5/srv/pwqual_princ.c
  *
  * Copyright (C) 2010 by the Massachusetts Institute of Technology.
  * All rights reserved.
@@ -25,57 +25,48 @@
  * or implied warranty.
  *
  *
- * Password quality module to enforce password policy
+ * Password quality module to check passwords against principal components.
  */
 
 #include "k5-platform.h"
 #include <krb5/pwqual_plugin.h>
-#include <kadm5/admin.h>
-#include <ctype.h>
 #include "server_internal.h"
 
-/* Implement the password quality check module. */
 static krb5_error_code
-policy_check(krb5_context context, krb5_pwqual_moddata data,
-             const char *password, kadm5_policy_ent_t policy,
-             krb5_principal princ)
+princ_check(krb5_context context, krb5_pwqual_moddata data,
+            const char *password, const char *policy_name,
+            krb5_principal princ)
 {
-    int nupper = 0, nlower = 0, ndigit = 0, npunct = 0, nspec = 0;
-    const char *s;
-    unsigned char c;
+    int i, n;
+    char *cp;
 
-    if (policy == NULL)
-        return (*password == '\0') ? KADM5_PASS_Q_TOOSHORT : 0;
+    /* Don't check for principals with no password policy. */
+    if (policy_name == NULL)
+        return 0;
 
-    if(strlen(password) < (size_t)policy->pw_min_length)
-        return KADM5_PASS_Q_TOOSHORT;
-    s = password;
-    while ((c = (unsigned char)*s++)) {
-        if (islower(c))
-            nlower = 1;
-        else if (isupper(c))
-            nupper = 1;
-        else if (isdigit(c))
-            ndigit = 1;
-        else if (ispunct(c))
-            npunct = 1;
-        else
-            nspec = 1;
+    /* Check against components of the principal. */
+    n = krb5_princ_size(handle->context, princ);
+    cp = krb5_princ_realm(handle->context, princ)->data;
+    if (strcasecmp(cp, password) == 0)
+        return KADM5_PASS_Q_DICT;
+    for (i = 0; i < n; i++) {
+        cp = krb5_princ_component(handle->context, princ, i)->data;
+        if (strcasecmp(cp, password) == 0)
+            return KADM5_PASS_Q_DICT;
     }
-    if ((nupper + nlower + ndigit + npunct + nspec) < policy->pw_min_classes)
-        return KADM5_PASS_Q_CLASS;
+
     return 0;
 }
 
 krb5_error_code
-pwqual_policy_initvt(krb5_context context, int maj_ver, int min_ver,
-                     krb5_plugin_vtable vtable)
+pwqual_princ_initvt(krb5_context context, int maj_ver, int min_ver,
+                   krb5_plugin_vtable vtable)
 {
     krb5_pwqual_vtable vt;
 
     if (maj_ver != 1)
         return KRB5_PLUGIN_VER_NOTSUPP;
     vt = (krb5_pwqual_vtable)vtable;
-    vt->check = policy_check;
+    vt->check = princ_check;
     return 0;
 }

@@ -158,31 +158,22 @@ osa_free_princ_ent(osa_princ_ent_t val);
 
 /*** Password quality plugin consumer interface ***/
 
-/* Load the available password quality plugins and store the result into
- * *handles.  Free the result with k5_pwqual_free_handles. */
+/* Load all available password quality plugin modules, bind each module to the
+ * realm's dictionary file, and store the result into *handles.  Free the
+ * result with k5_pwqual_free_handles. */
 krb5_error_code
-k5_pwqual_load(krb5_context context, pwqual_handle **handles);
-
-/* Release a handle list allocated by k5_pwqual_load.  All modules must have
- * been closed by the caller. */
-krb5_error_code
-k5_pwqual_free_handles(krb5_context context, pwqual_handle *handles);
-
-/* Initialize a password quality plugin, possibly using the realm's configured
- * dictionary filename. */
-krb5_error_code
-k5_pwqual_open(krb5_context context, pwqual_handle handle,
+k5_pwqual_load(krb5_context context, pwqual_handle **handles,
                const char *dict_file);
 
-/* Check a password using a password quality plugin. */
+/* Release a handle list allocated by k5_pwqual_load. */
+void
+k5_pwqual_free_handles(krb5_context context, pwqual_handle *handles);
+
+/* Check a password using a password quality plugin module. */
 krb5_error_code
 k5_pwqual_check(krb5_context context, pwqual_handle handle,
-                const char *password, kadm5_policy_ent_t policy,
+                const char *password, const char *policy_name,
                 krb5_principal princ);
-
-/* Release the memory used by a password quality plugin. */
-void
-k5_pwqual_close(krb5_context context, pwqual_handle handle);
 
 /*** initvt functions for built-in password quality modules ***/
 
@@ -191,9 +182,20 @@ krb5_error_code
 pwqual_dict_initvt(krb5_context context, int maj_ver, int min_ver,
                    krb5_plugin_vtable vtable);
 
-/* The policy module enforces password policy constraints. */
+/* The empty module rejects empty passwords (even with no password policy). */
 krb5_error_code
-pwqual_policy_initvt(krb5_context context, int maj_ver, int min_ver,
+pwqual_empty_initvt(krb5_context context, int maj_ver, int min_ver,
+                    krb5_plugin_vtable vtable);
+
+/* The hesiod module checks passwords against GECOS fields from Hesiod passwd
+ * information (only if the tree was built with Hesiod support). */
+krb5_error_code
+pwqual_hesiod_initvt(krb5_context context, int maj_ver, int min_ver,
                      krb5_plugin_vtable vtable);
+
+/* The princ module checks passwords against principal components. */
+krb5_error_code
+pwqual_princ_initvt(krb5_context context, int maj_ver, int min_ver,
+                    krb5_plugin_vtable vtable);
 
 #endif /* __KADM5_SERVER_INTERNAL_H__ */

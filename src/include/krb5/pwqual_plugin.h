@@ -51,8 +51,6 @@
 
 #include <krb5/krb5.h>
 #include <krb5/plugin.h>
-#include <kadm5/admin.h>
-#include <kdb.h>
 
 /* An abstract type for password quality module data. */
 typedef struct krb5_pwqual_moddata_st *krb5_pwqual_moddata;
@@ -65,12 +63,14 @@ typedef krb5_error_code
 (*krb5_pwqual_open_fn)(krb5_context context, const char *dict_file,
                        krb5_pwqual_moddata *data);
 
-/* Mandatory: Check a password for the principal princ, possibly making use
- * of the password policy given by policy.  Return an error if the password
- * check fails. */
+/*
+ * Mandatory: Check a password for the principal princ, which has an associated
+ * password policy named policy_name (or no associated policy if policy_name is
+ * NULL).  Return an error if the password check fails.
+ */
 typedef krb5_error_code
 (*krb5_pwqual_check_fn)(krb5_context context, krb5_pwqual_moddata data,
-                        const char *password, kadm5_policy_ent_t policy,
+                        const char *password, const char *policy_name,
                         krb5_principal princ);
 
 /* Optional: Release resources used by module data. */
