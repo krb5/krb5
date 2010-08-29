@@ -96,7 +96,9 @@ interface used by libkadm5srv.  The code for this interface lives in:
   * lib/kadm5/server_internal.h -- declarations for consumer API
   * lib/kadm5/srv/pwqual.c -- consumer API implementation
   * lib/kadm5/srv/pwqual_dict.c -- built-in module using dictionary
-  * lib/kadm5/srv/pwqual_policy.c -- built-in module using policy
+  * lib/kadm5/srv/pwqual_empty.c -- built-in module rejecting empty
+  * lib/kadm5/srv/pwqual_hesiod.c -- built-in module using Hesiod
+  * lib/kadm5/srv/pwqual_princ.c -- built-in module using principal
   * lib/kadm5/srv/server_misc.c -- consumer logic
   * lib/kadm5/srv/server_dict.c -- removed (logic moved to pwqual_dict.c)
   * lib/kadm5/srv/svr_principal.c -- some call sites adjusted
@@ -133,23 +135,22 @@ These steps demonstrate the functioning of the code.
    In the realm definition for KRBTEST.COM in krb5.master.conf, add
    the setting "dict_file = /tmp/dict".
 
-6. Run kadmin.local and create a policy with "addpol -minlength 4
-   testpolicy".  Associated it with the principal user with "modprinc
-   -policy testpolicy user".
+6. Run kadmin.local and create a policy with "addpol testpolicy".
+   Associate it with the principal user with "modprinc -policy
+   testpolicy user".
 
 7. Inside kadmin.local, try some password change with "cpw user".  You
-   should be able to see that all three password quality modules are
-   functioning: you won't be able to set passwords shorter than four
-   characters long (the policy module), or the passwords "books" or
-   "sharks" (the dict module), or passwords named "sharksbooks" or
-   "bookssharks" (the combo module).
+   should be able to see that all password quality modules are
+   functioning: you won't be able to set an empty password (the empty
+   module), the password "user" (the princ module) or the passwords
+   "books" or "sharks" (the dict module), or passwords named
+   "sharksbooks" or "bookssharks" (the combo module).
 
 8. Quit out of kadmin.local and edit testdir/krb5.master.conf again.
    Play with the filtering rules by adding, alongside the "module"
    directive, one or more assignments for enable_only and/or disable.
-   For instance, if you disable the policy module, you should find
-   that (upon restarting kadmin.local) you can set passwords shorter
-   than four characters again.
+   For instance, if you disable the empty module, you should find that
+   (upon restarting kadmin.local) you can set an empty password.
 
 9. Exit out of the shell to quit out of the test environment.
 
@@ -158,16 +159,14 @@ These steps demonstrate the functioning of the code.
 The krb5 code on this branch is mostly complete, but as a
 demonstration branch it is not perfect.  Problems include:
 
-* Opening and closing password quality plugins should perhaps be
-  hidden by the password quality consumer API--that is, the open
-  method should be invoked by the loader, and the close method by
-  k5_pwqual_free_handles.  Currently the responsibility for invoking
-  these methods rests with the consumer code in server_misc.c.
+* There is an unresolved issue in the password quality interface
+  related to error codes.  Modules are not supposed to have to track
+  <kadm5/admin.h> since that header file has poor stability
+  guarantees, but error codes like KADM5_Q_DICT are only defined
+  there.
 
 * The decisions about what is a typedef and what is a simple structure
   type are kind of haphazard, erring on the side of using typedefs.
-
-* The Hesiod support in server_misc.c was ripped out.
 
 * The framework does not allow built-in modules to be registered for a
   pluggable interface after the first load operation for that
