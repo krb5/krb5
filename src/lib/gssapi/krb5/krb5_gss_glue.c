@@ -133,6 +133,8 @@ gss_krb5_import_cred(OM_uint32 *minor_status,
     if (cred == NULL)
         return GSS_S_CALL_INACCESSIBLE_WRITE;
 
+    *cred = GSS_C_NO_CREDENTIAL;
+
     req.id = id;
     req.keytab_principal = keytab_principal;
     req.keytab = keytab;
