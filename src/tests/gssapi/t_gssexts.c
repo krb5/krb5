@@ -338,6 +338,8 @@ getDefaultCred(OM_uint32 *minor,
         }
 
     out:
+        if (code)
+            *minor = code;
         krb5_free_principal(context, keytab_principal);
         krb5_cc_close(context, ccache);
         krb5_kt_close(context, keytab);
@@ -359,7 +361,7 @@ getDefaultCred(OM_uint32 *minor,
         (void) gss_release_oid_set(&tmp_minor, &actual_mechs);
     }
 
-   return major;
+    return major;
 }
 
 int main(int argc, char *argv[])
