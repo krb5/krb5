@@ -148,8 +148,10 @@ gssspi_set_cred_option(OM_uint32 *minor_status,
 					      &mech_cred,
 					      desired_object,
 					      value);
-	if (status != GSS_S_COMPLETE)
+	if (status != GSS_S_COMPLETE) {
+	    map_error(minor_status, mech);
 	    return status;
+	}
 
 	if (mech_cred != GSS_C_NO_CREDENTIAL) {
 	    status = alloc_union_cred(minor_status,
@@ -161,7 +163,7 @@ gssspi_set_cred_option(OM_uint32 *minor_status,
 	    *cred_handle = (gss_cred_id_t)union_cred;
 	}
     } else {
-	union_cred = (gss_union_cred_t) *cred_handle;
+	union_cred = (gss_union_cred_t)*cred_handle;
 
 	for (i = 0; i < union_cred->count; i++) {
 	    mech = gssint_get_mechanism(&union_cred->mechs_array[i]);
