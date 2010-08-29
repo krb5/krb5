@@ -1007,7 +1007,7 @@ OM_uint32 KRB5_CALLCONV gss_krb5int_get_tkt_flags
 
 OM_uint32 KRB5_CALLCONV gss_krb5int_copy_ccache
 (OM_uint32 *minor_status,
- gss_cred_id_t cred_handle,
+ gss_cred_id_t *cred_handle,
  const gss_OID desired_oid,
  const gss_buffer_t value);
 
@@ -1025,6 +1025,12 @@ OM_uint32 KRB5_CALLCONV gss_krb5int_ccache_name
   const gss_OID,
   const gss_buffer_t);
 
+#define GSS_KRB5_INQ_SSPI_SESSION_KEY_OID_LENGTH 11
+#define GSS_KRB5_INQ_SSPI_SESSION_KEY_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x05"
+
+OM_uint32
+gss_krb5int_inq_session_key(OM_uint32 *, const gss_ctx_id_t, const gss_OID, gss_buffer_set_t *);
+
 #define GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID_LENGTH 11
 #define GSS_KRB5_SET_ALLOWABLE_ENCTYPES_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x04"
 
@@ -1033,15 +1039,9 @@ struct krb5_gss_set_allowable_enctypes_req {
     krb5_enctype *ktypes;
 };
 
-#define GSS_KRB5_INQ_SSPI_SESSION_KEY_OID_LENGTH 11
-#define GSS_KRB5_INQ_SSPI_SESSION_KEY_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x05"
-
-OM_uint32
-gss_krb5int_inq_session_key(OM_uint32 *, const gss_ctx_id_t, const gss_OID, gss_buffer_set_t *);
-
 OM_uint32 KRB5_CALLCONV
 gss_krb5int_set_allowable_enctypes(OM_uint32 *minor_status,
-                                   gss_cred_id_t cred,
+                                   gss_cred_id_t *cred,
                                    const gss_OID desired_oid,
                                    const gss_buffer_t value);
 
@@ -1091,7 +1091,7 @@ gss_krb5int_extract_authz_data_from_sec_context(OM_uint32 *minor_status,
 #define GSS_KRB5_SET_CRED_RCACHE_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x0b"
 
 OM_uint32
-gss_krb5int_set_cred_rcache(OM_uint32 *, gss_cred_id_t, const gss_OID, const gss_buffer_t);
+gss_krb5int_set_cred_rcache(OM_uint32 *, gss_cred_id_t *, const gss_OID, const gss_buffer_t);
 
 #define GSS_KRB5_EXTRACT_AUTHTIME_FROM_SEC_CONTEXT_OID_LENGTH 11
 #define GSS_KRB5_EXTRACT_AUTHTIME_FROM_SEC_CONTEXT_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x0c"
@@ -1101,6 +1101,21 @@ gss_krb5int_extract_authtime_from_sec_context(OM_uint32 *,
                                               const gss_ctx_id_t,
                                               const gss_OID,
                                               gss_buffer_set_t *);
+
+#define GSS_KRB5_IMPORT_CRED_OID_LENGTH 11
+#define GSS_KRB5_IMPORT_CRED_OID "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x0d"
+
+struct krb5_gss_import_cred_req {
+    krb5_ccache id;
+    krb5_principal keytab_principal;
+    krb5_keytab keytab;
+};
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5int_import_cred(OM_uint32 *minor_status,
+                        gss_cred_id_t *cred,
+                        const gss_OID desired_oid,
+                        const gss_buffer_t value);
 
 #ifdef _GSS_STATIC_LINK
 int gss_krb5int_lib_init(void);
