@@ -933,6 +933,16 @@ fail:
     return (retval);
 }
 
+/* Convert an API error code to a protocol error code. */
+static int
+errcode_to_protocol(krb5_error_code code)
+{
+    int protcode;
+
+    protcode = code - ERROR_TABLE_BASE_krb5;
+    return (protcode >= 0 && protcode <= 128) ? protcode : KRB_ERR_GENERIC;
+}
+
 /*
  * Routines that validate a AS request; checks a lot of things.  :-)
  *
@@ -947,7 +957,8 @@ validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
                     krb5_db_entry server, krb5_timestamp kdc_time,
                     const char **status, krb5_data *e_data)
 {
-    int         errcode;
+    int errcode;
+    krb5_error_code ret;
 
     /*
      * If an option is set that is only allowed in TGS requests, complain.
@@ -1052,10 +1063,10 @@ validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
     }
 
     /* Perform KDB module policy checks. */
-    errcode = krb5_db_check_policy_as(kdc_context, request, &client, &server,
-                                      kdc_time, status, e_data);
-    if (errcode && errcode != KRB5_PLUGIN_OP_NOTSUPP)
-        return errcode;
+    ret = krb5_db_check_policy_as(kdc_context, request, &client, &server,
+                                  kdc_time, status, e_data);
+    if (ret && ret != KRB5_PLUGIN_OP_NOTSUPP)
+        return errcode_to_protocol(ret);
 
     /* Check against local policy. */
     errcode = against_local_policy_as(request, client, server,
@@ -1244,8 +1255,9 @@ validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
                      krb5_ticket *ticket, krb5_timestamp kdc_time,
                      const char **status, krb5_data *e_data)
 {
-    int         errcode;
-    int         st_idx = 0;
+    int errcode;
+    int st_idx = 0;
+    krb5_error_code ret;
 
     /*
      * If an illegal option is set, ignore it.
@@ -1473,10 +1485,10 @@ validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
     }
 
     /* Perform KDB module policy checks. */
-    errcode = krb5_db_check_policy_tgs(kdc_context, request, &server,
-                                       ticket, status, e_data);
-    if (errcode && errcode != KRB5_PLUGIN_OP_NOTSUPP)
-        return errcode;
+    ret = krb5_db_check_policy_tgs(kdc_context, request, &server,
+                                   ticket, status, e_data);
+    if (ret && ret != KRB5_PLUGIN_OP_NOTSUPP)
+        return errcode_to_protocol(ret);
 
     /* Check local policy. */
     errcode = against_local_policy_tgs(request, server, ticket,
