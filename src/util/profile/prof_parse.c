@@ -241,7 +241,7 @@ static errcode_t parse_include_dir(char *dirname, struct parse_state *state)
 {
     DIR     *dir;
     char    *pathname;
-    errcode_t retval;
+    errcode_t retval = 0;
     struct dirent *ent;
 
     dir = opendir(dirname);
@@ -250,14 +250,17 @@ static errcode_t parse_include_dir(char *dirname, struct parse_state *state)
     while ((ent = readdir(dir)) != NULL) {
         if (!valid_name(ent->d_name))
             continue;
-        if (asprintf(&pathname, "%s/%s", dirname, ent->d_name) < 0)
-            return ENOMEM;
+        if (asprintf(&pathname, "%s/%s", dirname, ent->d_name) < 0) {
+            retval = ENOMEM;
+            break;
+        }
         retval = parse_include_file(pathname, state);
         free(pathname);
         if (retval)
-            return retval;
+            break;
     }
-    return 0;
+    closedir(dir);
+    return retval;
 }
 
 static errcode_t parse_line(char *line, struct parse_state *state)
