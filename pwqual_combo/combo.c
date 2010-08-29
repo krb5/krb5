@@ -31,6 +31,7 @@
 
 #include <krb5.h>
 #include <krb5/pwqual_plugin.h>
+#include <kadm5/admin.h> /* XXX */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -134,7 +135,7 @@ combo_open(krb5_context context, const char *dict_file,
 
 static krb5_error_code
 combo_check(krb5_context context, krb5_pwqual_moddata data,
-            const char *password, kadm5_policy_ent_t policy,
+            const char *password, const char *policy_name,
             krb5_principal princ)
 {
     combo_moddata dict = (combo_moddata)data;
