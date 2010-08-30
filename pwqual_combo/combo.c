@@ -31,7 +31,6 @@
 
 #include <krb5.h>
 #include <krb5/pwqual_plugin.h>
-#include <kadm5/admin.h> /* XXX */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
