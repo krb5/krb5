@@ -132,6 +132,34 @@ parse_modstr(krb5_context context, const char *modstr,
     return 0;
 }
 
+/*
+ * Convert a possibly relative pathname for a shared object to an absolute
+ * path.  Non-absolute pathnames will be treated as relative to the system
+ * plugins directory.
+ */
+static krb5_error_code
+expand_relative_modpath(const char *modpath, char **full_modpath_out)
+{
+    char *fullpath;
+
+    *full_modpath_out = NULL;
+
+    /* XXX Unix-specific path handling for now. */
+    if (*modpath == '/') {
+        /* We already have an absolute path. */
+        fullpath = strdup(modpath);
+        if (fullpath == NULL)
+            return ENOMEM;
+    } else {
+        /* Append the relative path to the system plugins directory. */
+        if (asprintf(&fullpath, "%s/%s", LIBDIR "/krb5/plugins", modpath) < 0)
+            return ENOMEM;
+    }
+
+    *full_modpath_out = fullpath;
+    return 0;
+}
+
 /* Return true if value is found in list. */
 static krb5_boolean
 find_in_list(char **list, const char *value)
@@ -176,12 +204,16 @@ register_dyn_module(krb5_context context, struct plugin_interface *interface,
                     char **disable)
 {
     krb5_error_code ret;
-    char *modname = NULL, *modpath = NULL, *symname = NULL;
+    char *modname = NULL, *modpath = NULL, *full_modpath = NULL;
+    char *symname = NULL;
     struct plugin_file_handle *handle = NULL;
     void (*initvt_fn)();
 
     /* Parse out the module name and path, and make sure it is enabled. */
     ret = parse_modstr(context, modstr, &modname, &modpath);
+    if (ret != 0)
+        goto cleanup;
+    ret = expand_relative_modpath(modpath, &full_modpath);
     if (ret != 0)
         goto cleanup;
     if (!module_enabled(modname, enable, disable))
@@ -195,7 +227,7 @@ register_dyn_module(krb5_context context, struct plugin_interface *interface,
     }
 
     /* Open the plugin and resolve the initvt symbol. */
-    ret = krb5int_open_plugin(modpath, &handle, &context->err);
+    ret = krb5int_open_plugin(full_modpath, &handle, &context->err);
     if (ret != 0)
         goto cleanup;
     ret = krb5int_get_plugin_func(handle, symname, &initvt_fn, &context->err);
@@ -212,6 +244,7 @@ register_dyn_module(krb5_context context, struct plugin_interface *interface,
 cleanup:
     free(modname);
     free(modpath);
+    free(full_modpath);
     free(symname);
     if (handle != NULL)
         krb5int_close_plugin(handle);
