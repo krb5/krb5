@@ -35,12 +35,15 @@
 static krb5_error_code
 empty_check(krb5_context context, krb5_pwqual_moddata data,
             const char *password, const char *policy_name,
-            krb5_principal princ)
+            krb5_principal princ, const char **languages)
 {
     /* Unlike other built-in modules, this one operates even for principals
      * with no password policy. */
-    if (*password == '\0')
+    if (*password == '\0') {
+        krb5_set_error_message(context, KADM5_PASS_Q_TOOSHORT,
+                               "Empty passwords are not allowed");
         return KADM5_PASS_Q_TOOSHORT;
+    }
     return 0;
 }
 

@@ -135,7 +135,7 @@ combo_open(krb5_context context, const char *dict_file,
 static krb5_error_code
 combo_check(krb5_context context, krb5_pwqual_moddata data,
             const char *password, const char *policy_name,
-            krb5_principal princ)
+            krb5_principal princ, const char **languages)
 {
     combo_moddata dict = (combo_moddata)data;
     size_t i, j, len, pwlen;
@@ -153,8 +153,12 @@ combo_check(krb5_context context, krb5_pwqual_moddata data,
             continue;
         remainder = password + len;
         for (i = 0; i < dict->word_count; i++) {
-            if (strcasecmp(remainder, dict->word_list[i]) == 0)
+            if (strcasecmp(remainder, dict->word_list[i]) == 0) {
+                krb5_set_error_message(context, KADM5_PASS_Q_DICT,
+                                       "Password may not be a pair of "
+                                       "dictionary words");
                 return KADM5_PASS_Q_DICT;
+            }
         }
     }
 

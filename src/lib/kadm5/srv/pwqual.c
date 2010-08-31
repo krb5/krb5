@@ -111,5 +111,5 @@ k5_pwqual_check(krb5_context context, pwqual_handle handle,
                 krb5_principal princ)
 {
     return handle->vt.check(context, handle->data, password, policy_name,
-                            princ);
+                            princ, NULL);
 }

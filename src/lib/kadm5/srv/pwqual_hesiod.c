@@ -94,7 +94,7 @@ str_check_gecos(char *gecos, const char *pwstr)
 static krb5_error_code
 hesiod_check(krb5_context context, krb5_pwqual_moddata data,
              const char *password, const char *policy_name,
-             krb5_principal princ)
+             krb5_principal princ, const char **languages)
 {
 #ifdef HESIOD
     extern struct passwd *hes_getpwnam();
@@ -108,12 +108,12 @@ hesiod_check(krb5_context context, krb5_pwqual_moddata data,
 
     n = krb5_princ_size(handle->context, princ);
     for (i = 0; i < n; i++) {
-        cp = krb5_princ_component(handle->context, princ, i)->data;
-        if (strcasecmp(cp, password) == 0)
-            return KADM5_PASS_Q_DICT;
         ent = hes_getpwnam(cp);
-        if (ent && ent->pw_gecos && str_check_gecos(ent->pw_gecos, password))
+        if (ent && ent->pw_gecos && str_check_gecos(ent->pw_gecos, password)) {
+            krb5_set_error_message(context, KADM5_PASS_Q_DICT,
+                                   "Password maynot match user information.");
             return KADM5_PASS_Q_DICT;
+        }
     }
 #endif /* HESIOD */
     return 0;

@@ -67,16 +67,24 @@ typedef krb5_error_code
 /*
  * Mandatory: Check a password for the principal princ, which has an associated
  * password policy named policy_name (or no associated policy if policy_name is
- * NULL).  Return one of the following errors if the password check fails:
+ * NULL).  The parameter languages, if not NULL, contains a null-terminated
+ * list of client-specified language tags as defined in RFC 5646.  The method
+ * should return one of the following errors if the password fails quality
+ * standards:
  *
- * - KADM5_PASS_Q_TOOSHORT
- * - KADM5_PASS_Q_CLASS
- * - KADM5_PASS_Q_DICT
+ * - KADM5_PASS_Q_TOOSHORT: password should be longer
+ * - KADM5_PASS_Q_CLASS:    password must have more character classes
+ * - KADM5_PASS_Q_DICT:     password contains dictionary words
+ * - KADM5_PASS_Q_GENERIC:  unspecified quality failure
+ *
+ * The module should also set an extended error message with
+ * krb5_set_error_message().  The message may be localized according to one of
+ * the language tags in languages.
  */
 typedef krb5_error_code
 (*krb5_pwqual_check_fn)(krb5_context context, krb5_pwqual_moddata data,
                         const char *password, const char *policy_name,
-                        krb5_principal princ);
+                        krb5_principal princ, const char **languages);
 
 /* Optional: Release resources used by module data. */
 typedef void

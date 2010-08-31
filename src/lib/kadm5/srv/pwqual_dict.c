@@ -214,7 +214,7 @@ dict_open(krb5_context context, const char *dict_file,
 static krb5_error_code
 dict_check(krb5_context context, krb5_pwqual_moddata data,
            const char *password, const char *policy_name,
-           krb5_principal princ)
+           krb5_principal princ, const char **languages)
 {
     dict_moddata dict = (dict_moddata)data;
 
