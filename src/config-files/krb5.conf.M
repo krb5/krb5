@@ -721,9 +721,9 @@ section:
 .SS pwqual interface
 
 The pwqual subsection controls modules for the password quality
-interface.  In addition to any registered dynamic modules, the
-following built-in modules exist (and may be disabled with the disable
-tag):
+interface, which is used to reject weak passwords when passwords are
+changed.  In addition to any registered dynamic modules, the following
+built-in modules exist (and may be disabled with the disable tag):
 
 .IP dict
 Checks against the realm dictionary file

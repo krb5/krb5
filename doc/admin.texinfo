@@ -1129,8 +1129,9 @@ section:
 
 @node pwqual interface, , plugins, plugins
 
-The pwqual subsection controls modules for the password quality inter‐
-face.  In addition to any registered dynamic modules, the following
+The pwqual subsection controls modules for the password quality
+interface, which is used to reject weak passwords when passwords are
+changed.  In addition to any registered dynamic modules, the following
 built-in modules exist (and may be disabled with the disable tag):
 
 @table @b
