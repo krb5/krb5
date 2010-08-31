@@ -110,6 +110,9 @@ Contains default values for database specific parameters.
 
 .IP [dbmodules]
 Contains database specific parameters used by the database library.
+
+.ip [plugins]
+Contains plugin module registration and filtering parameters.
 .PP 
 Each of these sections will be covered in more details in the following
 sections.
@@ -682,6 +685,59 @@ is whitespace-separated. The LDAP server is specified by a LDAP URI.
 .IP ldap_conns_per_server
 This LDAP specific tag indicates the number of connections to be maintained per
 LDAP server.
+
+.SH PLUGINS SECTION
+
+Tags in the [plugins] section can be used to register dynamic plugin
+modules and to turn modules on and off.  Not every krb5 pluggable
+interface uses the [plugins] section; the ones that do are documented
+here.
+
+.PP
+Each pluggable interface corresponds to a subsection of [plugins].
+All subsections support the same tags:
+
+.IP module
+This tag may have multiple values.  Each value is a string of the form
+"modulename:pathname", which causes the shared object located at
+pathname to be registered as a dynamic module named modulename for the
+pluggable interface.  If pathname is not an absolute path, it will be
+treated as relative to the "krb5/plugins" subdirectory of the krb5
+library directory.
+
+.IP enable_only
+This tag may have multiple values.  If there are values for this tag,
+then only the named modules will be enabled for the pluggable
+interface.
+
+.IP disable
+This tag may have multiple values.  If there are values for this tag,
+then the named modules will be disabled for the pluggable interface.
+
+.PP
+The following subsections are currently supported within the [plugins]
+section:
+
+.SS pwqual interface
+
+The pwqual subsection controls modules for the password quality
+interface.  In addition to any registered dynamic modules, the
+following built-in modules exist (and may be disabled with the disable
+tag):
+
+.IP dict
+Checks against the realm dictionary file
+
+.IP empty
+Rejects empty passwords
+
+.IP hesiod
+Checks against user information stored in Hesiod (only if Kerberos was
+built with Hesiod support)
+
+.IP princ
+Checks against components of the principal name
+
 .SH FILES 
 /etc/krb5.conf
 .SH SEE ALSO
