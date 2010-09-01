@@ -89,6 +89,10 @@ client to determine the intermediate realms which may be used in
 cross-realm authentication.  It is also used by the end-service when
 checking the transited field for trusted intermediate realms.
 
+@itemx plugins
+Contains tags to register dynamic plugin modules and to turn modules on
+and off.
+
 @ignore
 this doesn't seem to be used
 @itemx kdc

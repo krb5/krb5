@@ -31,6 +31,7 @@
 #include "k5-int.h"
 
 const char *interface_names[PLUGIN_NUM_INTERFACES] = {
+    "pwqual"
 };
 
 /* Return the context's interface structure for id, or NULL if invalid. */

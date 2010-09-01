@@ -1,22 +1,38 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
+ * Copyright (C) 2010 by the Massachusetts Institute of Technology.
+ * All rights reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ *
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ *
+ * check_against_policy code is originally (see top-level NOTICE file for
+ * license):
+ *
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved
  *
- * $Header$
  */
-
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
 
 #include    "k5-int.h"
 #include    <kdb.h>
 #include    <ctype.h>
 #include    <pwd.h>
-
-/* for strcasecmp */
-#include    <string.h>
-
 #include    "server_internal.h"
 
 kadm5_ret_t
@@ -37,147 +53,99 @@ adb_policy_close(kadm5_server_handle_t handle)
     return KADM5_OK;
 }
 
-#ifdef HESIOD
-/* stolen from v4sever/kadm_funcs.c */
-static char *
-reverse(str)
-    char    *str;
+kadm5_ret_t
+init_pwqual(kadm5_server_handle_t handle)
 {
-    static char newstr[80];
-    char    *p, *q;
-    int     i;
+    krb5_error_code ret;
+    pwqual_handle *list;
+    const char *dict_file = NULL;
 
-    i = strlen(str);
-    if (i >= sizeof(newstr))
-        i = sizeof(newstr)-1;
-    p = str+i-1;
-    q = newstr;
-    q[i]='\0';
-    for(; i > 0; i--)
-        *q++ = *p--;
+    /* Register the built-in password quality modules. */
+    ret = k5_plugin_register(handle->context, PLUGIN_INTERFACE_PWQUAL,
+                             "dict", pwqual_dict_initvt);
+    if (ret != 0)
+        return ret;
+    ret = k5_plugin_register(handle->context, PLUGIN_INTERFACE_PWQUAL,
+                             "empty", pwqual_empty_initvt);
+    if (ret != 0)
+        return ret;
+    ret = k5_plugin_register(handle->context, PLUGIN_INTERFACE_PWQUAL,
+                             "hesiod", pwqual_hesiod_initvt);
+    if (ret != 0)
+        return ret;
+    ret = k5_plugin_register(handle->context, PLUGIN_INTERFACE_PWQUAL,
+                             "princ", pwqual_princ_initvt);
+    if (ret != 0)
+        return ret;
 
-    return(newstr);
+    /* Load all available password quality modules. */
+    if (handle->params.mask & KADM5_CONFIG_DICT_FILE)
+        dict_file = handle->params.dict_file;
+    ret = k5_pwqual_load(handle->context, &list, dict_file);
+    if (ret != 0)
+        return ret;
+
+    handle->qual_handles = list;
+    return 0;
 }
-#endif /* HESIOD */
 
-#if 0
-static int
-lower(str)
-    char    *str;
+/* Check that a password meets the quality constraints given in pol. */
+static kadm5_ret_t
+check_against_policy(kadm5_server_handle_t handle, const char *password,
+                     kadm5_policy_ent_t pol)
 {
-    register char   *cp;
-    int     effect=0;
+    int hasupper = 0, haslower = 0, hasdigit = 0, haspunct = 0, hasspec = 0;
+    int c, nclasses;
 
-    for (cp = str; *cp; cp++) {
-        if (isupper(*cp)) {
-            *cp = tolower(*cp);
-            effect++;
-        }
+    /* Check against the policy's minimum length. */
+    if (strlen(password) < (size_t)pol->pw_min_length)
+        return KADM5_PASS_Q_TOOSHORT;
+
+    /* Check against the policy's minimum number of character classes. */
+    while ((c = (unsigned char)*password++) != '\0') {
+        if (islower(c))
+            haslower = 1;
+        else if (isupper(c))
+            hasupper = 1;
+        else if (isdigit(c))
+            hasdigit = 1;
+        else if (ispunct(c))
+            haspunct = 1;
+        else
+            hasspec = 1;
     }
-    return(effect);
+    nclasses = hasupper + haslower + hasdigit + haspunct + hasspec;
+    if (nclasses < pol->pw_min_classes)
+        return KADM5_PASS_Q_CLASS;
+    return KADM5_OK;
 }
-#endif
 
-#ifdef HESIOD
-static int
-str_check_gecos(gecos, pwstr)
-    char    *gecos;
-    char    *pwstr;
+/* Check a password against all available password quality plugin modules
+ * and against policy. */
+kadm5_ret_t
+passwd_check(kadm5_server_handle_t handle, const char *password,
+             kadm5_policy_ent_t policy, krb5_principal princ)
 {
-    char            *cp, *ncp, *tcp;
+    krb5_error_code ret;
+    pwqual_handle *h;
+    const char *polname = (policy == NULL) ? NULL : policy->policy;
 
-    for (cp = gecos; *cp; ) {
-        /* Skip past punctuation */
-        for (; *cp; cp++)
-            if (isalnum(*cp))
-                break;
-        /* Skip to the end of the word */
-        for (ncp = cp; *ncp; ncp++)
-            if (!isalnum(*ncp) && *ncp != '\'')
-                break;
-        /* Delimit end of word */
-        if (*ncp)
-            *ncp++ = '\0';
-        /* Check word to see if it's the password */
-        if (*cp) {
-            if (!strcasecmp(pwstr, cp))
-                return 1;
-            tcp = reverse(cp);
-            if (!strcasecmp(pwstr, tcp))
-                return 1;
-            cp = ncp;
-        } else
-            break;
+    if (policy != NULL) {
+        ret = check_against_policy(handle, password, policy);
+        if (ret != 0)
+            return ret;
+    }
+    for (h = handle->qual_handles; *h != NULL; h++) {
+        ret = k5_pwqual_check(handle->context, *h, password, polname, princ);
+        if (ret != 0)
+            return ret;
     }
     return 0;
 }
-#endif /* HESIOD */
 
-/* some of this is stolen from gatekeeper ... */
-kadm5_ret_t
-passwd_check(kadm5_server_handle_t handle,
-             char *password, int use_policy, kadm5_policy_ent_t pol,
-             krb5_principal principal)
+void
+destroy_pwqual(kadm5_server_handle_t handle)
 {
-    int     nupper = 0,
-        nlower = 0,
-        ndigit = 0,
-        npunct = 0,
-        nspec = 0;
-    char    c, *s, *cp;
-#ifdef HESIOD
-    extern  struct passwd *hes_getpwnam();
-    struct  passwd *ent;
-#endif
-
-    if(use_policy) {
-        if(strlen(password) < pol->pw_min_length)
-            return KADM5_PASS_Q_TOOSHORT;
-        s = password;
-        while ((c = *s++)) {
-            if (islower((unsigned char) c)) {
-                nlower = 1;
-                continue;
-            }
-            else if (isupper((unsigned char) c)) {
-                nupper = 1;
-                continue;
-            } else if (isdigit((unsigned char) c)) {
-                ndigit = 1;
-                continue;
-            } else if (ispunct((unsigned char) c)) {
-                npunct = 1;
-                continue;
-            } else {
-                nspec = 1;
-                continue;
-            }
-        }
-        if ((nupper + nlower + ndigit + npunct + nspec) < pol->pw_min_classes)
-            return KADM5_PASS_Q_CLASS;
-        if((find_word(password) == KADM5_OK))
-            return KADM5_PASS_Q_DICT;
-        else {
-            int i, n = krb5_princ_size(handle->context, principal);
-            cp = krb5_princ_realm(handle->context, principal)->data;
-            if (strcasecmp(cp, password) == 0)
-                return KADM5_PASS_Q_DICT;
-            for (i = 0; i < n ; i++) {
-                cp = krb5_princ_component(handle->context, principal, i)->data;
-                if (strcasecmp(cp, password) == 0)
-                    return KADM5_PASS_Q_DICT;
-#ifdef HESIOD
-                ent = hes_getpwnam(cp);
-                if (ent && ent->pw_gecos)
-                    if (str_check_gecos(ent->pw_gecos, password))
-                        return KADM5_PASS_Q_DICT; /* XXX new error code? */
-#endif
-            }
-            return KADM5_OK;
-        }
-    } else {
-        if (strlen(password) < 1)
-            return KADM5_PASS_Q_TOOSHORT;
-    }
-    return KADM5_OK;
+    k5_pwqual_free_handles(handle->context, handle->qual_handles);
+    handle->qual_handles = NULL;
 }
