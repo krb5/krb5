@@ -32,7 +32,13 @@
  * number of 1.
  *
  * Password quality plugin modules should define a function named
- * pwqual_<modulename>_initvt.  The initvt function should:
+ * pwqual_<modulename>_initvt, matching the signature:
+ *
+ *   krb5_error_code
+ *   pwqual_modname_initvt(krb5_context context, int maj_ver, int min_ver,
+ *                         krb5_plugin_vtable vtable);
+ *
+ * The initvt function should:
  *
  * - Check that the supplied maj_ver number is supported by the module, or
  *   return KRB5_PLUGIN_VER_NOTSUPP if it is not.
