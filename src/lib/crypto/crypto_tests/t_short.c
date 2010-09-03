@@ -109,6 +109,8 @@ test_enctype(krb5_enctype enctype)
         free(input.ciphertext.data);
         free(output.data);
     }
+    krb5int_c_free_keyblock_contents (NULL, &keyblock);
+
 }
 
 int
