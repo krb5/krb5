@@ -38,13 +38,15 @@ struct pwqual_handle_st {
 };
 
 krb5_error_code
-k5_pwqual_load(krb5_context context, pwqual_handle **handles,
-               const char *dict_file)
+k5_pwqual_load(krb5_context context, const char *dict_file,
+               pwqual_handle **handles_out)
 {
     krb5_error_code ret;
     krb5_plugin_initvt_fn *modules = NULL, *mod;
     size_t count;
     pwqual_handle *list = NULL, handle = NULL;
+
+    *handles_out = NULL;
 
     ret = k5_plugin_load_all(context, PLUGIN_INTERFACE_PWQUAL, &modules);
     if (ret != 0)
@@ -81,7 +83,7 @@ k5_pwqual_load(krb5_context context, pwqual_handle **handles,
     }
     list[count] = NULL;
 
-    *handles = list;
+    *handles_out = list;
     list = NULL;
 
 cleanup:

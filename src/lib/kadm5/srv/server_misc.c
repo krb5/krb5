@@ -81,7 +81,7 @@ init_pwqual(kadm5_server_handle_t handle)
     /* Load all available password quality modules. */
     if (handle->params.mask & KADM5_CONFIG_DICT_FILE)
         dict_file = handle->params.dict_file;
-    ret = k5_pwqual_load(handle->context, &list, dict_file);
+    ret = k5_pwqual_load(handle->context, dict_file, &list);
     if (ret != 0)
         return ret;
 

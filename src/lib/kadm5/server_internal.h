@@ -159,11 +159,11 @@ osa_free_princ_ent(osa_princ_ent_t val);
 /*** Password quality plugin consumer interface ***/
 
 /* Load all available password quality plugin modules, bind each module to the
- * realm's dictionary file, and store the result into *handles.  Free the
+ * realm's dictionary file, and store the result into *handles_out.  Free the
  * result with k5_pwqual_free_handles. */
 krb5_error_code
-k5_pwqual_load(krb5_context context, pwqual_handle **handles,
-               const char *dict_file);
+k5_pwqual_load(krb5_context context, const char *dict_file,
+               pwqual_handle **handles_out);
 
 /* Release a handle list allocated by k5_pwqual_load. */
 void
