@@ -66,6 +66,7 @@ k5_pwqual_load(krb5_context context, pwqual_handle **handles,
         ret = (*mod)(context, 1, 1, (krb5_plugin_vtable)&handle->vt);
         if (ret != 0) {         /* Failed vtable init is non-fatal. */
             free(handle);
+            handle = NULL;
             continue;
         }
         handle->data = NULL;
