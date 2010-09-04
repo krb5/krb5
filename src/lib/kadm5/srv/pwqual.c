@@ -83,6 +83,7 @@ k5_pwqual_load(krb5_context context, const char *dict_file,
     }
     list[count] = NULL;
 
+    ret = 0;
     *handles_out = list;
     list = NULL;
 
