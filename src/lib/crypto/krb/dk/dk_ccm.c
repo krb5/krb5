@@ -28,6 +28,8 @@
 #include "dk.h"
 #include "aead.h"
 
+#ifdef CAMELLIA_CCM
+
 /*
  * Implement CCM-mode AEAD as described in section 5.3 and 5.4 of RFC 5116.
  * This is the CCM mode as described in NIST SP800-38C, with a 12 byte nonce
@@ -608,3 +610,5 @@ krb5int_dk_ccm_free_state(const struct krb5_keytypes *ktp,
     state->data = NULL;
     state->length = 0;
 }
+
+#endif /* CAMELLIA_CCM */

@@ -185,6 +185,7 @@ krb5int_aes_string_to_key(const struct krb5_keytypes *ktp,
                                 DERIVE_RFC3961);
 }
 
+#ifdef CAMELLIA_CCM
 krb5_error_code
 krb5int_camellia_ccm_string_to_key(const struct krb5_keytypes *ktp,
                                    const krb5_data *string,
@@ -197,4 +198,4 @@ krb5int_camellia_ccm_string_to_key(const struct krb5_keytypes *ktp,
     return pbkdf2_string_to_key(ktp, string, salt, &pepper, params, key,
                                 DERIVE_SP800_108_CMAC);
 }
-
+#endif

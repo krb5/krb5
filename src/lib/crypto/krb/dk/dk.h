@@ -66,7 +66,9 @@ krb5int_camellia_ccm_string_to_key(const struct krb5_keytypes *enc,
 
 enum deriv_alg {
     DERIVE_RFC3961,             /* RFC 3961 section 5.1 */
+#ifdef CAMELLIA_CCM
     DERIVE_SP800_108_CMAC       /* NIST SP 800-108 with CMAC as PRF */
+#endif
 };
 
 krb5_error_code

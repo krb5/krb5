@@ -39,6 +39,8 @@
 
 #include "k5-int.h"
 
+#ifdef CAMELLIA_CCM
+
 static krb5_keyblock key_128 = {
     KV5M_KEYBLOCK,
     ENCTYPE_CAMELLIA128_CCM_128,
@@ -248,9 +250,12 @@ verify_cksum(krb5_context context)
     }
 }
 
+#endif /* CAMELLIA_CCM */
+
 int
 main(int argc, char **argv)
 {
+#ifdef CAMELLIA_CCM
     krb5_context context = NULL;
     krb5_data seed = string2data("seed");
 
@@ -263,5 +268,6 @@ main(int argc, char **argv)
         verify_enc(context);
         verify_cksum(context);
     }
+#endif /* CAMELLIA_CCM */
     return 0;
 }

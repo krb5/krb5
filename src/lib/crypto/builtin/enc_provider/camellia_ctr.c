@@ -30,6 +30,8 @@
 #include <aead.h>
 #include <rand2key.h>
 
+#ifdef CAMELLIA_CCM
+
 static void
 xorblock(unsigned char *out, const unsigned char *in)
 {
@@ -204,3 +206,20 @@ const struct krb5_enc_provider krb5int_enc_camellia256_ctr = {
     krb5int_default_free_state,
     NULL
 };
+
+#else /* CAMELLIA_CCM */
+
+/* These won't be used, but is still in the export table. */
+
+krb5_error_code
+krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
+                         size_t num_data, const krb5_data *iv,
+			 krb5_data *output)
+{
+    return EINVAL;
+}
+
+const struct krb5_enc_provider krb5int_enc_camellia128_ctr = {
+};
+
+#endif /* CAMELLIA_CCM */

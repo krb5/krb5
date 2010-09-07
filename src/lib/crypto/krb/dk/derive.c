@@ -129,6 +129,8 @@ cleanup:
     return ret;
 }
 
+#ifdef CAMELLIA_CCM
+
 /*
  * NIST SP800-108 KDF in feedback mode (section 5.2).
  * Parameters:
@@ -204,6 +206,8 @@ cleanup:
     return ret;
 }
 
+#endif /* CAMELLIA_CCM */
+
 krb5_error_code
 krb5int_derive_random(const struct krb5_enc_provider *enc,
                       krb5_key inkey, krb5_data *outrnd,
@@ -212,8 +216,10 @@ krb5int_derive_random(const struct krb5_enc_provider *enc,
     switch (alg) {
     case DERIVE_RFC3961:
         return derive_random_rfc3961(enc, inkey, outrnd, in_constant);
+#ifdef CAMELLIA_CCM
     case DERIVE_SP800_108_CMAC:
         return derive_random_sp800_108_cmac(enc, inkey, outrnd, in_constant);
+#endif
     default:
         return EINVAL;
     }

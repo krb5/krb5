@@ -164,6 +164,7 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_init_state_enc, krb5int_free_state_enc,
       CKSUMTYPE_HMAC_SHA1_96_AES256,
       0 /*flags*/ },
+#ifdef CAMELLIA_CCM
     { ENCTYPE_CAMELLIA128_CCM_128,
       "camellia128-ccm-128", { "camellia128-ccm" },
       "Camellia-128 CCM mode with 128-bit MAC",
@@ -186,6 +187,7 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_dk_ccm_init_state, krb5int_dk_ccm_free_state,
       CKSUMTYPE_CMAC_128_CAMELLIA256,
       0 /*flags */ },
+#endif /* CAMELLIA_CCM */
 };
 
 const int krb5int_enctypes_length =

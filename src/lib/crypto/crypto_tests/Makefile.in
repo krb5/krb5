@@ -31,6 +31,7 @@ EXTRADEPSRCS=\
 	$(srcdir)/t_mddriver.c	\
 	$(srcdir)/t_kperf.c	\
 	$(srcdir)/t_short.c	\
+	$(srcdir)/t_str2key.c	\
 	$(srcdir)/ytest.c	
 
 ##DOSBUILDTOP = ..\..\..
@@ -67,7 +68,8 @@ check-unix:: t_nfold t_encrypt t_prf t_prng t_cmac t_hmac \
 	$(RUN_SETUP) $(VALGRIND) ./aes-test > vt.txt
 	cmp vt.txt $(srcdir)/expect-vt.txt
 	$(RUN_SETUP) $(VALGRIND) ./camellia-test > camellia-vt.txt
-	cmp camellia-vt.txt $(srcdir)/camellia-expect-vt.txt
+# Enable this when Camellia-CCM becomes unconditional.
+#	cmp camellia-vt.txt $(srcdir)/camellia-expect-vt.txt
 	$(RUN_SETUP) $(VALGRIND) $(C)t_mddriver4 -x
 	$(RUN_SETUP) $(VALGRIND) $(C)t_mddriver -x
 	$(RUN_SETUP) $(VALGRIND) ./t_short

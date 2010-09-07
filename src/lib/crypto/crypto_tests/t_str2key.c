@@ -158,6 +158,7 @@ struct test {
           "\x57\x18\x48\xB7\x84\xA3\xD6\xBD\xC3\x46\x58\x9A\x3E\x39\x3F\x9E" }
     },
 
+#ifdef CAMELLIA_CCM
     /* The same inputs applied to camellia-ccm enctypes. */
     { 
         ENCTYPE_CAMELLIA128_CCM_128,
@@ -278,6 +279,7 @@ struct test {
           "\x6A\x1F\x10\xE5\x74\x4E\x32\xDD\x33\x49\x03\xA8\xEB\xD1\x42\x7E"
           "\x4C\x8D\x3D\x6D\xA5\x76\x77\x50\x4C\x38\x4C\x24\x33\x0B\x60\x3D" }
     }
+#endif /* CAMELLIA_CCM */
 };
 
 static void
