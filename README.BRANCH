@@ -7,6 +7,13 @@ This branch incorporates some of the code from
 users/lhoward/camellia-ccm, which in turn incorporates code from
 users/lhoward/aes-ccm and branches/camellia-cts.
 
+Because no IANA assignments exist yet for the krb5 enctypes, it is
+necessary at build time to pick local-use enctype and cksumtype values
+to enable this code.  This is best done at configure time with
+something like:
+
+  ./configure CPPFLAGS='-DENCTYPE_CAMELLIA128_CCM_128=-66 -DENCTYPE_CAMELLIA256_CCM_128=-67 -DCKSUMTYPE_CMAC_128_CAMELLIA128=-66 -DCKSUMTYPE_CMAC_128_CAMELLIA256=-67'
+
 The changes on this branch touch many files.  Here is a high-level
 overview of the additions:
 
@@ -111,11 +118,13 @@ crypto/krb additions
 Tests
 * tests/dejagnu/config/default.exp: Camellia test pass
 * lib/crypto/crypto_tests/Makefile.in: add camellia-test and t_cmac
-* lib/crypto/crypto_tests/t_encrypt.c: add camellia enctypes
 * lib/crypto/crypto_tests/camellia-expect-vt.txt: data file for vector test
-* lib/crypto/crypto_tests/t_short.c: add camellia enctypes
 * lib/crypto/crypto_tests/camellia-test.c: camellia vector test program
+* lib/crypto/crypto_tests/t_encrypt.c: add camellia enctypes
+* lib/crypto/crypto_tests/t_camellia_ccm.c: camellia enctype vector tests
+* lib/crypto/crypto_tests/t_short.c: add camellia enctypes
 * lib/crypto/crypto_tests/t_cmac.c: CMAC vector test program
+* lib/crypto/crypto_tests/t_str2key.c: string-to-key vector tests
 * lib/crypto/crypto_tests/vectors.c: key derivation call site changes
 * lib/krb5/krb/t_etypes.c: test case for enctype parsing of camellia name
 * util/k5test.py: camellia test pass
