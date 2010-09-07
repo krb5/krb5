@@ -11,20 +11,26 @@ PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
 STLIBOBJS=\
-	checksum.o	\
+	checksum_hmac.o	\
+	checksum_cmac.o	\
 	dk_aead.o	\
+	dk_ccm.o	\
 	derive.o	\
 	stringtokey.o
 
 OBJS=\
-	$(OUTPRE)checksum.$(OBJEXT)	\
+	$(OUTPRE)checksum_hmac.$(OBJEXT)\
+	$(OUTPRE)checksum_cmac.$(OBJEXT)\
 	$(OUTPRE)dk_aead.$(OBJEXT)	\
+	$(OUTPRE)dk_ccm.$(OBJEXT)	\
 	$(OUTPRE)derive.$(OBJEXT)	\
 	$(OUTPRE)stringtokey.$(OBJEXT)
 
 SRCS=\
-	$(srcdir)/checksum.c	\
+	$(srcdir)/checksum_hmac.c	\
+	$(srcdir)/checksum_cmac.c	\
 	$(srcdir)/dk_aead.c	\
+	$(srcdir)/dk_ccm.c	\
 	$(srcdir)/derive.c	\
 	$(srcdir)/stringtokey.c
 

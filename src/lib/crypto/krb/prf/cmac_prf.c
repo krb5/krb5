@@ -1,9 +1,9 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * lib/crypto/krb/prf/prf_int.h
+ * lib/crypto/krb/prf/cmac_prf.c
  *
- * Copyright 1987, 1988, 1990, 2002 by the Massachusetts Institute of
- * Technology.  All Rights Reserved.
+ * Copyright (C) 2010 by the Massachusetts Institute of Technology.
+ * All rights reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -23,28 +23,47 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
+ *
+ *
+ *
+ * This file contains an implementation of the RFC 3961 PRF for
+ *simplified profile enctypes.
  */
 
-#ifndef PRF_INTERNAL_DEFS
-#define PRF_INTERNAL_DEFS
+#include "prf_int.h"
+#include <dk.h>
 
-#include "k5-int.h"
-#include "etypes.h"
-
-krb5_error_code
-krb5int_arcfour_prf(const struct krb5_keytypes *ktp, krb5_key key,
-                    const krb5_data *in, krb5_data *out);
-
-krb5_error_code
-krb5int_des_prf(const struct krb5_keytypes *ktp, krb5_key key,
-                const krb5_data *in, krb5_data *out);
-
-krb5_error_code
-krb5int_dk_prf(const struct krb5_keytypes *ktp, krb5_key key,
-               const krb5_data *in, krb5_data *out);
+#ifdef CAMELLIA_CCM
 
 krb5_error_code
 krb5int_dk_cmac_prf(const struct krb5_keytypes *ktp, krb5_key key,
-                    const krb5_data *in, krb5_data *out);
+                    const krb5_data *in, krb5_data *out)
+{
+    krb5_crypto_iov iov;
+    krb5_data prfconst = make_data("prf", 3);
+    krb5_key kp = NULL;
+    krb5_error_code ret;
 
-#endif  /*PRF_INTERNAL_DEFS*/
+    if (ktp->prf_length != ktp->enc->block_size)
+        return KRB5_BAD_MSIZE;
+
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    iov.data = *in;
+
+    /* Derive a key using the PRF constant. */
+    ret = krb5int_derive_key(ktp->enc, key, &kp, &prfconst,
+                             DERIVE_SP800_108_CMAC);
+    if (ret != 0)
+        goto cleanup;
+
+    /* PRF is CMAC of input */
+    ret = krb5int_cmac_checksum(ktp->enc, kp, &iov, 1, out);
+    if (ret != 0)
+        goto cleanup;
+
+cleanup:
+    krb5_k_free_key(NULL, kp);
+    return ret;
+}
+
+#endif /* CAMELLIA_CCM */

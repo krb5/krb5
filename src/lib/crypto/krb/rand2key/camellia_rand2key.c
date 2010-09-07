@@ -1,9 +1,8 @@
-/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * lib/crypto/krb/prf/prf_int.h
+ * lib/crypto/krb/rand2key/camellia_rand2key.c
  *
- * Copyright 1987, 1988, 1990, 2002 by the Massachusetts Institute of
- * Technology.  All Rights Reserved.
+ * Copyright (c) 2009
+ * NTT (Nippon Telegraph and Telephone Corporation) . All rights reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -25,26 +24,20 @@
  * or implied warranty.
  */
 
-#ifndef PRF_INTERNAL_DEFS
-#define PRF_INTERNAL_DEFS
 
-#include "k5-int.h"
-#include "etypes.h"
+#include "rand2key.h"
 
 krb5_error_code
-krb5int_arcfour_prf(const struct krb5_keytypes *ktp, krb5_key key,
-                    const krb5_data *in, krb5_data *out);
+krb5int_camellia_make_key(const krb5_data *randombits, krb5_keyblock *key)
+{
+    if (key->length != 16 && key->length != 32)
+        return(KRB5_BAD_KEYSIZE);
+    if (randombits->length != key->length)
+        return(KRB5_CRYPTO_INTERNAL);
 
-krb5_error_code
-krb5int_des_prf(const struct krb5_keytypes *ktp, krb5_key key,
-                const krb5_data *in, krb5_data *out);
+    key->magic = KV5M_KEYBLOCK;
 
-krb5_error_code
-krb5int_dk_prf(const struct krb5_keytypes *ktp, krb5_key key,
-               const krb5_data *in, krb5_data *out);
+    memcpy(key->contents, randombits->data, randombits->length);
 
-krb5_error_code
-krb5int_dk_cmac_prf(const struct krb5_keytypes *ktp, krb5_key key,
-                    const krb5_data *in, krb5_data *out);
-
-#endif  /*PRF_INTERNAL_DEFS*/
+    return(0);
+}

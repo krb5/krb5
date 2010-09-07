@@ -10,13 +10,15 @@ DEFS=
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-STLIBOBJS= aes_rand2key.o des_rand2key.o des3_rand2key.o rc4_rand2key.o
+STLIBOBJS= aes_rand2key.o des_rand2key.o des3_rand2key.o rc4_rand2key.o camellia_rand2key.o
 
 OBJS=   $(OUTPRE)aes_rand2key.$(OBJEXT) $(OUTPRE)des_rand2key.$(OBJEXT) \
-	$(OUTPRE)des3_rand2key.$(OBJEXT) $(OUTPRE)rc4_rand2key.$(OBJEXT)
+	$(OUTPRE)des3_rand2key.$(OBJEXT) $(OUTPRE)rc4_rand2key.$(OBJEXT) \
+	$(OUTPRE)camellia_rand2key.$(OBJEXT)
 
 SRCS= $(srcdir)/aes_rand2key.c $(srcdir)/des_rand2key.c \
-	$(srcdir)/des3_rand2key.c $(srcdir)/rc4_rand2key.c
+	$(srcdir)/des3_rand2key.c $(srcdir)/rc4_rand2key.c \
+	$(srcdir)/camellia_rand2key.c
 
 ##DOS##LIBOBJS = $(OBJS)
 

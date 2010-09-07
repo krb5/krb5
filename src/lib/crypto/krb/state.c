@@ -36,6 +36,22 @@
 #include "k5-int.h"
 #include "etypes.h"
 
+/* Most enctypes delegate cipher state handling to the enc provider by using
+ * this function as their init_state methods. */
+krb5_error_code
+krb5int_init_state_enc(const struct krb5_keytypes *ktp,
+                       const krb5_keyblock *key, krb5_keyusage keyusage,
+                       krb5_data *out_state)
+{
+    return ktp->enc->init_state(key, keyusage, out_state);
+}
+
+void
+krb5int_free_state_enc(const struct krb5_keytypes *ktp, krb5_data *state)
+{
+    (void)ktp->enc->free_state(state);
+}
+
 krb5_error_code KRB5_CALLCONV
 krb5_c_init_state (krb5_context context, const krb5_keyblock *key,
                    krb5_keyusage keyusage, krb5_data *new_state)
@@ -45,7 +61,7 @@ krb5_c_init_state (krb5_context context, const krb5_keyblock *key,
     ktp = find_enctype(key->enctype);
     if (ktp == NULL)
         return KRB5_BAD_ENCTYPE;
-    return ktp->enc->init_state(key, keyusage, new_state);
+    return ktp->init_state(ktp, key, keyusage, new_state);
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -57,5 +73,6 @@ krb5_c_free_state(krb5_context context, const krb5_keyblock *key,
     ktp = find_enctype(key->enctype);
     if (ktp == NULL)
         return KRB5_BAD_ENCTYPE;
-    return ktp->enc->free_state(state);
+    ktp->free_state(ktp, state);
+    return 0;
 }

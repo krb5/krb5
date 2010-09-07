@@ -1,15 +1,14 @@
-/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * lib/crypto/krb/prf/prf_int.h
+ * lib/crypto/krb/dk/checksum_cmac.c
  *
- * Copyright 1987, 1988, 1990, 2002 by the Massachusetts Institute of
- * Technology.  All Rights Reserved.
+ * Copyright 2010 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
  *   It is the responsibility of any person or organization contemplating
  *   export to obtain such a license before exporting.
- *
+ * 
  * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
  * distribute this software and its documentation for any purpose and
  * without fee is hereby granted, provided that the above copyright
@@ -25,26 +24,43 @@
  * or implied warranty.
  */
 
-#ifndef PRF_INTERNAL_DEFS
-#define PRF_INTERNAL_DEFS
-
 #include "k5-int.h"
 #include "etypes.h"
+#include "dk.h"
+#include "aead.h"
+#include "cksumtypes.h"
+
+#define K5CLENGTH 5 /* 32 bit net byte order integer + one byte seed */
+
+#ifdef CAMELLIA_CCM
 
 krb5_error_code
-krb5int_arcfour_prf(const struct krb5_keytypes *ktp, krb5_key key,
-                    const krb5_data *in, krb5_data *out);
+krb5int_dk_cmac_checksum(const struct krb5_cksumtypes *ctp,
+                         krb5_key key, krb5_keyusage usage,
+                         const krb5_crypto_iov *data, size_t num_data,
+                         krb5_data *output)
+{
+    const struct krb5_enc_provider *enc = ctp->enc;
+    krb5_error_code ret;
+    unsigned char constantdata[K5CLENGTH];
+    krb5_data datain;
+    krb5_key kc;
 
-krb5_error_code
-krb5int_des_prf(const struct krb5_keytypes *ktp, krb5_key key,
-                const krb5_data *in, krb5_data *out);
+    /* Derive the key. */
+    datain = make_data(constantdata, K5CLENGTH);
+    store_32_be(usage, constantdata);
+    constantdata[4] = (char) 0x99;
+    ret = krb5int_derive_key(enc, key, &kc, &datain, DERIVE_SP800_108_CMAC);
+    if (ret != 0)
+        return ret;
 
-krb5_error_code
-krb5int_dk_prf(const struct krb5_keytypes *ktp, krb5_key key,
-               const krb5_data *in, krb5_data *out);
+    /* Hash the data. */
+    ret = krb5int_cmac_checksum(enc, kc, data, num_data, output);
+    if (ret != 0)
+        memset(output->data, 0, output->length);
 
-krb5_error_code
-krb5int_dk_cmac_prf(const struct krb5_keytypes *ktp, krb5_key key,
-                    const krb5_data *in, krb5_data *out);
+    krb5_k_free_key(NULL, kc);
+    return ret;
+}
 
-#endif  /*PRF_INTERNAL_DEFS*/
+#endif /* CAMELLIA_CCM */
