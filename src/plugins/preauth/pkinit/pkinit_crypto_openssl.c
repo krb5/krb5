@@ -1319,8 +1319,11 @@ cms_signeddata_verify(krb5_context context,
         default:
             retval = KRB5KDC_ERR_INVALID_CERTIFICATE;
         }
-        X509_NAME_oneline(X509_get_subject_name(
-                              reqctx->received_cert), buf, sizeof(buf));
+        if (reqctx->received_cert == NULL)
+            strlcpy(buf, "(none)", sizeof(buf));
+        else
+            X509_NAME_oneline(X509_get_subject_name(reqctx->received_cert),
+                              buf, sizeof(buf));
         pkiDebug("problem with cert DN = %s (error=%d) %s\n", buf, j,
                  X509_verify_cert_error_string(j));
         krb5_set_error_message(context, retval, "%s\n",
