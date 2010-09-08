@@ -197,10 +197,10 @@ g_initialize.so g_initialize.po $(OUTPRE)g_initialize.$(OBJEXT): \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/locate_plugin.h \
-  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h ../generic/gssapi_err_generic.h \
-  ../krb5/gssapi_err_krb5.h ../krb5/gssapi_krb5.h g_initialize.c \
-  mechglue.h mglueP.h
+  $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
+  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
+  ../generic/gssapi_err_generic.h ../krb5/gssapi_err_krb5.h \
+  ../krb5/gssapi_krb5.h g_initialize.c mechglue.h mglueP.h
 g_inq_context.so g_inq_context.po $(OUTPRE)g_inq_context.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_ext.h $(COM_ERR_DEPS) \
