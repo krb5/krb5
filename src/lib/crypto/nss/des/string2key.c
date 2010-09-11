@@ -54,6 +54,7 @@ mit_des_string_to_key_int(krb5_keyblock *key, const krb5_data *pw,
 
     pwItem.data = (unsigned char *)pw->data;
     pwItem.len = pw->length;
+    memset(&pbe_params, 0, sizeof(pbe_params));
     pbe_params.pSalt = (unsigned char *)salt->data;
     pbe_params.ulSaltLen = salt->length;
     pbe_params.ulIteration = 1;
