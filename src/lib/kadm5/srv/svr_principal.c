@@ -1531,8 +1531,8 @@ kadm5_randkey_principal_3(void *server_handle,
          * key. */
         if (keepold)
             return KADM5_PROTECT_PRINCIPAL;
-        ks_tuple = n_ks_tuple ? ks_tuple : handle->params.keysalts,
-            n_ks_tuple = 1;
+        ks_tuple = n_ks_tuple ? ks_tuple : handle->params.keysalts;
+        n_ks_tuple = 1;
     }
 
     if ((ret = kdb_get_entry(handle, principal, &kdb, &adb)))
