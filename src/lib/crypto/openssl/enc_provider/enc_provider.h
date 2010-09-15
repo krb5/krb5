@@ -39,3 +39,8 @@ extern const struct krb5_enc_provider krb5int_enc_camellia128_ctr;
 extern const struct krb5_enc_provider krb5int_enc_camellia256_ctr;
 #endif
 
+#include <openssl/aes.h>
+#define aes_ctx AES_KEY
+#define krb5int_aes_enc_key(key, klen, ctx) AES_set_encrypt_key(key, klen * 8, ctx)
+#define aes_enc_blk AES_encrypt
+

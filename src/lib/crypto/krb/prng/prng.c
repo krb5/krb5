@@ -1,6 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * Copyright (C) 2001, 2002, 2004, 2007, 2008 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2001, 2002, 2004, 2007, 2008, 2010 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  *
@@ -24,107 +24,63 @@
  * or implied warranty.
  */
 
-#include "k5-int.h"
-#include "enc_provider.h"
-#include <assert.h>
-#include "k5-thread.h"
+#include "prng.h"
 
+#ifdef FORTUNA
+#include "fortuna.h"
+const struct krb5_prng_provider *prng = &krb5int_prng_fortuna;
+#else
 #include "yarrow.h"
-static Yarrow_CTX y_ctx;
-#define yarrow_lock krb5int_yarrow_lock
-k5_mutex_t yarrow_lock = K5_MUTEX_PARTIAL_INITIALIZER;
+const struct krb5_prng_provider *prng = &krb5int_prng_yarrow;
+#endif
 
-/* Helper function to estimate entropy based on sample length
- * and where it comes from.
+/*
+ * krb5int_prng_init - Returns 0 on success
  */
-
-static size_t
-entropy_estimate(unsigned int randsource, size_t length)
-{
-    switch (randsource) {
-    case KRB5_C_RANDSOURCE_OLDAPI:
-        return 4 * length;
-    case KRB5_C_RANDSOURCE_OSRAND:
-        return 8 * length;
-    case KRB5_C_RANDSOURCE_TRUSTEDPARTY:
-        return 4 * length;
-    case KRB5_C_RANDSOURCE_TIMING:
-        return 2;
-    case KRB5_C_RANDSOURCE_EXTERNAL_PROTOCOL:
-        return 0;
-    default:
-        abort();
-    }
-    return 0;
-}
-
 int krb5int_prng_init(void)
 {
-    unsigned i, source_id;
-    int yerr;
-
-    yerr = k5_mutex_finish_init(&yarrow_lock);
-    if (yerr)
-        return yerr;
-
-    yerr = krb5int_yarrow_init (&y_ctx, NULL);
-    if (yerr != YARROW_OK && yerr != YARROW_NOT_SEEDED)
-        return KRB5_CRYPTO_INTERNAL;
-
-    for (i=0; i < KRB5_C_RANDSOURCE_MAX; i++ ) {
-        if (krb5int_yarrow_new_source(&y_ctx, &source_id) != YARROW_OK)
-            return KRB5_CRYPTO_INTERNAL;
-        assert (source_id == i);
-    }
-
-    return 0;
+    int err = 0;
+    err = prng->init();
+    return err;
 }
 
+/*
+ * krb5_c_random_add_entropy - Returns 0 on success
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_add_entropy(krb5_context context, unsigned int randsource,
                           const krb5_data *data)
 {
-    int yerr;
-
-    /* Make sure the mutex got initialized.  */
-    yerr = krb5int_crypto_init();
-    if (yerr)
-        return yerr;
-    /* Now, finally, feed in the data.  */
-    yerr = krb5int_yarrow_input(&y_ctx, randsource,
-                                data->data, data->length,
-                                entropy_estimate(randsource, data->length));
-    if (yerr != YARROW_OK)
-        return KRB5_CRYPTO_INTERNAL;
-    return 0;
+    krb5_error_code err = 0;
+    err = prng->add_entropy(context, randsource, data);
+    return err;
 }
 
+/*
+ * krb5_c_random_seed - Returns 0 on success
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_seed(krb5_context context, krb5_data *data)
 {
     return krb5_c_random_add_entropy(context, KRB5_C_RANDSOURCE_OLDAPI, data);
 }
 
+/*
+ * krb5_c_random_make_octets -  Returns 0 on success
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_make_octets(krb5_context context, krb5_data *data)
 {
-    int yerr;
-    yerr = krb5int_yarrow_output(&y_ctx, data->data, data->length);
-    if (yerr == YARROW_NOT_SEEDED) {
-        yerr = krb5int_yarrow_reseed(&y_ctx, YARROW_SLOW_POOL);
-        if (yerr == YARROW_OK)
-            yerr = krb5int_yarrow_output(&y_ctx, data->data, data->length);
-    }
-    if (yerr != YARROW_OK)
-        return KRB5_CRYPTO_INTERNAL;
-    return 0;
+    krb5_error_code err = 0;
+    err = prng->make_octets(context, data);
+    return err;
 }
 
 void
 krb5int_prng_cleanup (void)
 {
-    krb5int_yarrow_final (&y_ctx);
-    k5_mutex_destroy(&yarrow_lock);
+    prng->cleanup();
+    return;
 }
 
 
@@ -157,15 +113,17 @@ krb5_c_random_os_entropy(krb5_context context, int strong, int *success)
  * read.
  */
 
+/* 
+ * read_entropy_from_device - Returns 0 on success
+ */
 static int
 read_entropy_from_device(krb5_context context, const char *device)
 {
     krb5_data data;
     struct stat sb;
     int fd;
-    unsigned char buf[YARROW_SLOW_THRESH/8], *bp;
+    unsigned char buf[ENTROPY_BUFSIZE], *bp;
     int left;
-
     fd = open (device, O_RDONLY);
     if (fd == -1)
         return 0;
@@ -192,6 +150,9 @@ read_entropy_from_device(krb5_context context, const char *device)
                                       &data) == 0);
 }
 
+/* 
+ * krb5_c_random_os_entropy - Returns 0 on success
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_os_entropy(krb5_context context, int strong, int *success)
 {
@@ -213,3 +174,4 @@ krb5_c_random_os_entropy(krb5_context context, int strong, int *success)
 }
 
 #endif /*Windows or pre-OSX Mac*/
+

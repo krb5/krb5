@@ -1,9 +1,9 @@
-mydir=lib/crypto/krb/yarrow
-BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/.. \
-		-I$(srcdir)/../../@CRYPTO_IMPL@		\
-		-I$(srcdir)/../../@CRYPTO_IMPL@/sha1 	\
-		-I$(srcdir)/../../@CRYPTO_IMPL@/enc_provider
+mydir=lib/crypto/krb/prng/yarrow
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../.. \
+		-I$(srcdir)/../../../@CRYPTO_IMPL@		\
+		-I$(srcdir)/../../../@CRYPTO_IMPL@/sha1 	\
+		-I$(srcdir)/../../../@CRYPTO_IMPL@/enc_provider
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
@@ -13,14 +13,17 @@ DEFS=
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-STLIBOBJS=\
+STLIBOBJS= \
+	prng_yarrow.o \
 	yarrow.o \
 	ycipher.o
-OBJS=\
+OBJS= \
+	$(OUTPRE)prng_yarrow.$(OBJEXT) \
 	$(OUTPRE)yarrow.$(OBJEXT) \
 	$(OUTPRE)ycipher.$(OBJEXT)
 
 SRCS=\
+	$(srcdir)/prng_yarrow.c \
 	$(srcdir)/yarrow.c \
 	$(srcdir)/ycipher.c 
 
@@ -34,5 +37,6 @@ depend:: $(SRCS)
 
 clean-unix:: clean-libobjs
 
+@lib_frag@
 @libobj_frag@
 

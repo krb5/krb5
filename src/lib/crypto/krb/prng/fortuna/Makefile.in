@@ -1,0 +1,47 @@
+mydir=lib/crypto/krb/prng/fortuna
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../.. \
+		-I$(srcdir)/../../../@CRYPTO_IMPL@		\
+		-I$(srcdir)/../../../@CRYPTO_IMPL@/sha2 	\
+		-I$(srcdir)/../../../@CRYPTO_IMPL@/aes 	\
+		-I$(srcdir)/../../../@CRYPTO_IMPL@/enc_provider
+DEFS=
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+STLIBOBJS= \
+	prng_fortuna.o entropy.o
+OBJS= \
+	$(OUTPRE)prng_fortuna.$(OBJEXT) \
+	$(OUTPRE)entropy.$(OBJEXT)
+
+SRCS=\
+	$(srcdir)/entropy.c \
+	$(srcdir)/prng_fortuna.c 
+
+all-unix:: all-libobjs
+
+includes:: depend
+
+depend:: $(SRCS)
+
+t_fortuna: t_fortuna.$(OBJEXT) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o t_fortuna t_fortuna.$(OBJEXT) -lcom_err $(SUPPORT_LIB) $(CRYPTO_DEPLIB)
+
+# t_fortuna: t_fortuna.$(OBJEXT) prng_fortuna.so entropy.so  $(CRYPTO_DEPLIB)  $(SUPPORT_DEPLIB)
+#	$(CC_LINK) -o $@ t_fortuna.$(OBJEXT) ../prng.so $(SUPPORT_LIB)  prng_fortuna.so entropy.so $(srcdir)/../../../@CRYPTO_IMPL@/sha2/sha256.so $(srcdir)/../../../@CRYPTO_IMPL@/aes/aeskey.$(OBJEXT) $(srcdir)/../../../@CRYPTO_IMPL@/aes/aes-gen.$(OBJEXT)  $(CRYPTO_DEPLIB)  $(SUPPORT_DEPLIB)
+
+
+check-unix:: t_fortuna
+	$(RUN_SETUP) $(VALGRIND) ./t_fortuna
+
+clean::
+	$(RM) t_fortuna$(EXEEXT) t_fortuna.$(OBJEXT)
+
+
+clean-unix:: clean-libobjs
+
+@lib_frag@
+@libobj_frag@
+

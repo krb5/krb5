@@ -22,9 +22,10 @@ STOBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST				\
 	@CRYPTO_IMPL@/enc_provider/OBJS.ST				\
 	@CRYPTO_IMPL@/hash_provider/OBJS.ST				\
 	krb/checksum/OBJS.ST krb/prf/OBJS.ST krb/rand2key/OBJS.ST	\
-	krb/old/OBJS.ST krb/raw/OBJS.ST krb/yarrow/OBJS.ST		\
+	krb/old/OBJS.ST krb/raw/OBJS.ST krb/prng/OBJS.ST krb/prng/@PRNG_ALG@/OBJS.ST	\
 	@CRYPTO_IMPL@/md4/OBJS.ST @CRYPTO_IMPL@/md5/OBJS.ST		\
 	@CRYPTO_IMPL@/sha1/OBJS.ST					\
+	@CRYPTO_IMPL@/sha2/OBJS.ST					\
 	krb/arcfour/OBJS.ST						\
 	@CRYPTO_IMPL@/aes/OBJS.ST @CRYPTO_IMPL@/des/OBJS.ST		\
 	@CRYPTO_IMPL@/camellia/OBJS.ST krb/OBJS.ST			\
@@ -34,9 +35,10 @@ SUBDIROBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST				\
 	@CRYPTO_IMPL@/enc_provider/OBJS.ST				\
 	@CRYPTO_IMPL@/hash_provider/OBJS.ST				\
 	krb/checksum/OBJS.ST krb/prf/OBJS.ST krb/rand2key/OBJS.ST	\
-	krb/old/OBJS.ST krb/raw/OBJS.ST krb/yarrow/OBJS.ST		\
+	krb/old/OBJS.ST krb/raw/OBJS.ST krb/prng/OBJS.ST krb/prng/@PRNG_ALG@/OBJS.ST	\
 	@CRYPTO_IMPL@/md4/OBJS.ST @CRYPTO_IMPL@/md5/OBJS.ST		\
 	@CRYPTO_IMPL@/sha1/OBJS.ST					\
+	@CRYPTO_IMPL@/sha2/OBJS.ST					\
 	krb/arcfour/OBJS.ST						\
 	@CRYPTO_IMPL@/aes/OBJS.ST @CRYPTO_IMPL@/des/OBJS.ST		\
 	@CRYPTO_IMPL@/camellia/OBJS.ST krb/OBJS.ST			\

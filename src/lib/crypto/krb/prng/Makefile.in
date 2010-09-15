@@ -1,0 +1,41 @@
+mydir=lib/crypto/krb/prng
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
+SUBDIRS= @PRNG_ALG@
+LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/../../@CRYPTO_IMPL@/enc_provider \
+		-I$(srcdir)/../../@CRYPTO_IMPL@/hash_provider				\
+		-I$(srcdir)/@PRNG_ALG@ 			\
+		-I$(srcdir)/../../@CRYPTO_IMPL@/ 		\
+		-I$(srcdir)/../../@CRYPTO_IMPL@/aes 	\
+		-I$(srcdir)/../../@CRYPTO_IMPL@/sha1 -I$(srcdir)/../../@CRYPTO_IMPL@/sha2
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+DEFS=
+
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+STLIBOBJS=\
+	prng.o
+
+OBJS=\
+	$(OUTPRE)prng.$(OBJEXT)
+
+SRCS=\
+	$(srcdir)/prng.c
+
+STOBJLISTS= OBJS.ST  @PRNG_ALG@/OBJS.ST 
+
+SUBDIROBJLISTS=  @PRNG_ALG@/OBJS.ST 
+
+
+all-unix:: all-libobjs
+includes:: depend
+
+depend:: $(SRCS)
+
+clean-unix:: clean-libobjs
+
+@lib_frag@
+@libobj_frag@
+

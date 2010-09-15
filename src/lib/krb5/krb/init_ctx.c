@@ -108,12 +108,12 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
 {
     krb5_context ctx = 0;
     krb5_error_code retval;
+    int tmp;
     struct {
         krb5_int32 now, now_usec;
         long pid;
     } seed_data;
     krb5_data seed;
-    int tmp;
 
     /* Verify some assumptions.  If the assumptions hold and the
        compiler is optimizing, this should result in no code being

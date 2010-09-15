@@ -1,11 +1,12 @@
 mydir=lib/crypto/krb
 BUILDTOP=$(REL)..$(S)..$(S)..
 SUBDIRS= arcfour checksum crc32 dk \
-	prf rand2key old raw yarrow 
+	prf rand2key old raw prng 
 LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/../@CRYPTO_IMPL@/enc_provider -I$(srcdir)/dk	\
 		-I$(srcdir)/../@CRYPTO_IMPL@/hash_provider				\
 		-I$(srcdir)/prf -I$(srcdir)/rand2key		 			\
-		-I$(srcdir)/old -I$(srcdir)/raw -I$(srcdir)/yarrow 			\
+		-I$(srcdir)/old -I$(srcdir)/raw -I$(srcdir)/prng/@PRNG_ALG@		\
+		-I$(srcdir)/prng		\
 		-I$(srcdir)/../@CRYPTO_IMPL@/ -I$(srcdir)/../@CRYPTO_IMPL@/des		\
 		-I$(srcdir)/../@CRYPTO_IMPL@/aes -I$(srcdir)/arcfour 	\
 		-I$(srcdir)/../@CRYPTO_IMPL@/camellia \
@@ -54,7 +55,6 @@ STLIBOBJS=\
 	nfold.o			\
 	old_api_glue.o		\
 	prf.o			\
-	prng.o			\
 	random_to_key.o		\
 	state.o 		\
 	string_to_cksumtype.o	\
@@ -94,7 +94,6 @@ OBJS=\
 	$(OUTPRE)nfold.$(OBJEXT)		\
 	$(OUTPRE)old_api_glue.$(OBJEXT)		\
 	$(OUTPRE)prf.$(OBJEXT) 			\
-	$(OUTPRE)prng.$(OBJEXT)			\
 	$(OUTPRE)random_to_key.$(OBJEXT)	\
 	$(OUTPRE)state.$(OBJEXT) 		\
 	$(OUTPRE)string_to_cksumtype.$(OBJEXT)	\
@@ -133,7 +132,6 @@ SRCS=\
 	$(srcdir)/old_api_glue.c	\
 	$(srcdir)/prf.c 		\
 	$(srcdir)/cf2.c 		\
-	$(srcdir)/prng.c		\
 	$(srcdir)/random_to_key.c	\
 	$(srcdir)/state.c 		\
 	$(srcdir)/string_to_cksumtype.c	\
@@ -144,11 +142,11 @@ SRCS=\
 
 STOBJLISTS=arcfour/OBJS.ST checksum/OBJS.ST crc32/OBJS.ST	\
 	dk/OBJS.ST prf/OBJS.ST rand2key/OBJS.ST			\
-	old/OBJS.ST raw/OBJS.ST  yarrow/OBJS.ST  OBJS.ST
+	old/OBJS.ST raw/OBJS.ST  prng/@PRNG_ALG@/OBJS.ST prng/OBJS.ST OBJS.ST
 
 SUBDIROBJLISTS=arcfour/OBJS.ST checksum/OBJS.ST crc32/OBJS.ST	\
 	dk/OBJS.ST prf/OBJS.ST rand2key/OBJS.ST			\
-	old/OBJS.ST raw/OBJS.ST  yarrow/OBJS.ST 
+	old/OBJS.ST raw/OBJS.ST  prng/@PRNG_ALG@/OBJS.ST prng/OBJS.ST OBJS.ST 
 
 ##DOS##LIBOBJS = $(OBJS)
 
@@ -184,8 +182,8 @@ all-windows::
 	cd ..\raw
 	@echo Making in crypto\raw
 	$(MAKE) -$(MFLAGS)
-	cd ..\yarrow
-	@echo Making in crypto\yarrow
+	cd ..\prng
+	@echo Making in crypto\prng
 	$(MAKE) -$(MFLAGS)
 	cd ..
 
@@ -214,8 +212,8 @@ clean-windows::
 	cd ..\raw
 	@echo Making clean in crypto\raw
 	$(MAKE) -$(MFLAGS) clean
-	cd ..\yarrow
-	@echo Making clean in crypto\yarrow
+	cd ..\prng
+	@echo Making clean in crypto\prng
 	$(MAKE) -$(MFLAGS) clean
 	cd ..
 
@@ -244,8 +242,8 @@ check-windows::
 	cd ..\raw
 	@echo Making check in crypto\raw
 	$(MAKE) -$(MFLAGS) check
-	cd ..\yarrow
-	@echo Making check in crypto\yarrow
+	cd ..\prng
+	@echo Making check in crypto\prng
 	$(MAKE) -$(MFLAGS) check
 	cd ..
 

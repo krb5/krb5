@@ -13,6 +13,8 @@
 #include <yhash.h>
 #include "ycipher.h"
 
+extern const struct krb5_prng_provider krb5int_prng_yarrow;
+
 /* These error codes are returned by the functions below. */
 
 #define YARROW_OK                1  /* All is well */
