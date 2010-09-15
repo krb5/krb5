@@ -1,6 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * Copyright 2006, 2009 by the Massachusetts Institute of Technology.
+ * Copyright 2006, 2009, 2010 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -549,17 +549,23 @@ static krb5_error_code
 kdb_free_lib_handle(krb5_context kcontext)
 {
     krb5_error_code status = 0;
+    krb5_keylist_node *old_keylist = kcontext->dal_handle->master_keylist;
 
     status = kdb_free_library(kcontext->dal_handle->lib_handle);
     if (status)
         return status;
-
+    /* The dal_handle holds an alias to the most recent mkey_list*/
+    if (kcontext->dal_handle->free_keylist) {
+        kcontext->dal_handle->master_keylist = NULL; /*force freeing*/
+        krb5_db_free_mkey_list(kcontext, old_keylist);
+    }
+    krb5_free_principal(kcontext, kcontext->dal_handle->master_princ);
     free(kcontext->dal_handle);
     kcontext->dal_handle = NULL;
     return 0;
 }
 
-static krb5_error_code
+static  krb5_error_code
 get_vftabl(krb5_context kcontext, kdb_vftabl **vftabl_ptr)
 {
     krb5_error_code status;
@@ -989,35 +995,6 @@ krb5_db_iterate(krb5_context kcontext,
 }
 
 krb5_error_code
-krb5_db_set_mkey_list(krb5_context kcontext,
-                      krb5_keylist_node * keylist)
-{
-    krb5_error_code status = 0;
-    kdb_vftabl *v;
-
-    status = get_vftabl(kcontext, &v);
-    if (status)
-        return status;
-    if (v->set_master_key_list == NULL)
-        return KRB5_PLUGIN_OP_NOTSUPP;
-    return v->set_master_key_list(kcontext, keylist);
-}
-
-krb5_error_code
-krb5_db_get_mkey_list(krb5_context kcontext, krb5_keylist_node ** keylist)
-{
-    krb5_error_code status = 0;
-    kdb_vftabl *v;
-
-    status = get_vftabl(kcontext, &v);
-    if (status)
-        return status;
-    if (v->get_master_key_list == NULL)
-        return KRB5_PLUGIN_OP_NOTSUPP;
-    return v->get_master_key_list(kcontext, keylist);
-}
-
-krb5_error_code
 krb5_db_fetch_mkey_list(krb5_context     context,
                         krb5_principal        mname,
                         const krb5_keyblock * mkey,
@@ -1026,11 +1003,28 @@ krb5_db_fetch_mkey_list(krb5_context     context,
 {
     kdb_vftabl *v;
     krb5_error_code status = 0;
+    krb5_keylist_node *local_keylist;
 
     status = get_vftabl(context, &v);
     if (status)
         return status;
-    return v->fetch_master_key_list(context, mname, mkey, mkvno, mkey_list);
+    if (!context->dal_handle->master_princ) {
+        status = krb5_copy_principal(context, mname, &context->dal_handle->master_princ);
+        if (status)
+            return status;
+    }
+    if (mkey_list == NULL)
+        mkey_list = &local_keylist;
+    status =  v->fetch_master_key_list(context, mname, mkey, mkvno, mkey_list);
+    if (status == 0) {
+        /* The dal_handle holds an alias to the most recent master_keylist*/
+        krb5_keylist_node *old_keylist = context->dal_handle->master_keylist;
+        context->dal_handle->master_keylist = *mkey_list;
+        if (context->dal_handle->free_keylist)
+            krb5_db_free_mkey_list(context, old_keylist);
+        context->dal_handle->free_keylist = (mkey_list == &local_keylist);
+    }
+    return status;
 }
 
 void
@@ -1039,6 +1033,19 @@ krb5_db_free_mkey_list(krb5_context    context,
 {
     krb5_keylist_node *cur, *prev;
 
+    /*
+     * The dal_handle holds onto the most recent master
+     * keylist that has been fetched throughout the lifetime of the context; if
+     * this function is called on that keylist, then the dal_handle is updated to
+     * indicate that the keylist should be freed on next call to
+     * krb5_db_fetch_mkey_list() or when the database is closed. Otherwise, the
+     * master_keylist is freed. Either way, the caller must not access this master
+     * keylist after calling this function.
+     */
+    if (context&& context->dal_handle->master_keylist == mkey_list) {
+        context->dal_handle->free_keylist = 1;
+        return;
+    }
     for (cur = mkey_list; cur != NULL;) {
         prev = cur;
         cur = cur->next;
@@ -2177,6 +2184,27 @@ krb5_db_promote(krb5_context kcontext, char **db_args)
     return status;
 }
 
+static krb5_error_code
+decrypt_iterator(krb5_context kcontext,
+                 const krb5_key_data        * key_data,
+                 krb5_keyblock      * dbkey,
+                 krb5_keysalt       * keysalt)
+{
+    krb5_error_code status = 0;
+    kdb_vftabl *v;
+    krb5_keylist_node *n = kcontext->dal_handle->master_keylist;
+    status = get_vftabl(kcontext, &v);
+    if (status)
+        return status;
+    for (;n; n = n->next) {
+        krb5_clear_error_message(kcontext);
+        status= v->decrypt_key_data(kcontext, &n->keyblock, key_data, dbkey, keysalt);
+        if (status == 0)
+            return 0;
+    }
+    return status;
+}
+
 krb5_error_code
 krb5_dbe_decrypt_key_data( krb5_context         kcontext,
                            const krb5_keyblock        * mkey,
@@ -2186,11 +2214,24 @@ krb5_dbe_decrypt_key_data( krb5_context         kcontext,
 {
     krb5_error_code status = 0;
     kdb_vftabl *v;
-
+    krb5_keylist_node *n = kcontext->dal_handle->master_keylist;
     status = get_vftabl(kcontext, &v);
     if (status)
         return status;
-    return v->decrypt_key_data(kcontext, mkey, key_data, dbkey, keysalt);
+    if (mkey ||!n)
+        return v->decrypt_key_data(kcontext, mkey, key_data, dbkey, keysalt);
+    status = decrypt_iterator(kcontext, key_data, dbkey, keysalt);
+    if (status == 0)
+        return 0;
+    if (kcontext->dal_handle->master_keylist) {
+        /* Try reloading master keys*/
+        krb5_keyblock *cur_mkey = &kcontext->dal_handle->master_keylist->keyblock;
+        if (krb5_db_fetch_mkey_list(kcontext, kcontext->dal_handle->master_princ,
+                                    cur_mkey, -1, NULL) == 0) {
+            return decrypt_iterator(kcontext, key_data, dbkey, keysalt);
+        }
+    }
+    return status;
 }
 
 krb5_error_code

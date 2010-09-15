@@ -430,12 +430,6 @@ int main(int argc, char *argv[])
         krb5_klog_syslog(LOG_ERR, "Can't set kdb keytab's internal context.");
         goto kterr;
     }
-    /* XXX master_keylist is in guts of lib/kadm5/server_kdb.c */
-    ret = krb5_db_set_mkey_list(hctx, master_keylist);
-    if (ret) {
-        krb5_klog_syslog(LOG_ERR, "Can't set master key list for kdb keytab.");
-        goto kterr;
-    }
     ret = krb5_kt_register(context, &krb5_kt_kdb_ops);
     if (ret) {
         krb5_klog_syslog(LOG_ERR, "Can't register kdb keytab.");

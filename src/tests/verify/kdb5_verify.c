@@ -272,7 +272,7 @@ check_princ(context, str_princ)
     }
     krb5_free_principal(context, princ);
 
-    if ((retval = krb5_dbe_decrypt_key_data(context, &master_keyblock,
+    if ((retval = krb5_dbe_decrypt_key_data(context, NULL,
                                             kdbe->key_data, &db_key, NULL))) {
         com_err(progname, retval, "while decrypting key for '%s'", princ_name);
         goto errout;

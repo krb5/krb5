@@ -454,7 +454,6 @@ kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
     krb5_error_code       retval;
     krb5_boolean          similar;
     krb5_key_data       * server_key;
-    krb5_keyblock       * mkey_ptr;
     krb5_db_entry       * server = NULL;
 
     *server_ptr = NULL;
@@ -478,27 +477,6 @@ kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
         goto errout;
     }
 
-    if ((retval = krb5_dbe_find_mkey(kdc_context, master_keylist, server,
-                                     &mkey_ptr))) {
-        krb5_keylist_node *tmp_mkey_list;
-        /* try refreshing master key list */
-        /* XXX it would nice if we had the mkvno here for optimization */
-        if (krb5_db_fetch_mkey_list(kdc_context, master_princ,
-                                    &master_keyblock, 0, &tmp_mkey_list) == 0) {
-            krb5_dbe_free_key_list(kdc_context, master_keylist);
-            master_keylist = tmp_mkey_list;
-            retval = krb5_db_set_mkey_list(kdc_context, master_keylist);
-            if (retval)
-                goto errout;
-            if ((retval = krb5_dbe_find_mkey(kdc_context, master_keylist,
-                                             server, &mkey_ptr))) {
-                goto errout;
-            }
-        } else {
-            goto errout;
-        }
-    }
-
     retval = krb5_dbe_find_enctype(kdc_context, server,
                                    match_enctype ? ticket->enc_part.enctype : -1,
                                    -1, (krb5_int32)ticket->enc_part.kvno,
@@ -510,7 +488,7 @@ kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
         goto errout;
     }
     if ((*key = (krb5_keyblock *)malloc(sizeof **key))) {
-        retval = krb5_dbe_decrypt_key_data(kdc_context, mkey_ptr, server_key,
+        retval = krb5_dbe_decrypt_key_data(kdc_context, NULL, server_key,
                                            *key, NULL);
     } else
         retval = ENOMEM;

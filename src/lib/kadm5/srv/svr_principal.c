@@ -38,7 +38,7 @@ extern  krb5_keylist_node  *master_keylist;
 extern  krb5_actkvno_node  *active_mkey_list;
 extern  krb5_db_entry       master_db;
 
-static int decrypt_key_data(krb5_context context, krb5_keyblock *mkey,
+static int decrypt_key_data(krb5_context context,
                             int n_key_data, krb5_key_data *key_data,
                             krb5_keyblock **keyblocks, int *n_keys);
 
@@ -933,17 +933,16 @@ done:
  */
 static kadm5_ret_t
 check_pw_reuse(krb5_context context,
-               krb5_keyblock *mkey,
                krb5_keyblock *hist_keyblock,
                int n_new_key_data, krb5_key_data *new_key_data,
                unsigned int n_pw_hist_data, osa_pw_hist_ent *pw_hist_data)
 {
-    int x, y, z;
+    unsigned int x, y, z;
     krb5_keyblock newkey, histkey;
     krb5_error_code ret;
 
     for (x = 0; x < n_new_key_data; x++) {
-        ret = krb5_dbe_decrypt_key_data(context, mkey, &(new_key_data[x]),
+        ret = krb5_dbe_decrypt_key_data(context, NULL, &(new_key_data[x]),
                                         &newkey, NULL);
         if (ret)
             return(ret);
@@ -996,7 +995,7 @@ check_pw_reuse(krb5_context context,
  * set to n_key_data.
  */
 static
-int create_history_entry(krb5_context context, krb5_keyblock *mkey,
+int create_history_entry(krb5_context context,
                          krb5_keyblock *hist_key, int n_key_data,
                          krb5_key_data *key_data, osa_pw_hist_ent *hist)
 {
@@ -1010,7 +1009,7 @@ int create_history_entry(krb5_context context, krb5_keyblock *mkey,
     memset(hist->key_data, 0, n_key_data*sizeof(krb5_key_data));
 
     for (i = 0; i < n_key_data; i++) {
-        ret = krb5_dbe_decrypt_key_data(context, mkey, &key_data[i], &key,
+        ret = krb5_dbe_decrypt_key_data(context, NULL, &key_data[i], &key,
                                         &salt);
         if (ret)
             return ret;
@@ -1394,13 +1393,13 @@ kadm5_chpass_principal_3(void *server_handle,
             goto done;
 
         ret = create_history_entry(handle->context,
-                                   act_mkey, &hist_keyblock,
+                                   &hist_keyblock,
                                    kdb_save->n_key_data,
                                    kdb_save->key_data, &hist);
         if (ret)
             goto done;
 
-        ret = check_pw_reuse(handle->context, act_mkey, &hist_keyblock,
+        ret = check_pw_reuse(handle->context, &hist_keyblock,
                              kdb->n_key_data, kdb->key_data,
                              1, &hist);
         if (ret)
@@ -1410,7 +1409,7 @@ kadm5_chpass_principal_3(void *server_handle,
             /* If hist_kvno has changed since the last password change, we
              * can't check the history. */
             if (adb.admin_history_kvno == hist_kvno) {
-                ret = check_pw_reuse(handle->context, act_mkey, &hist_keyblock,
+                ret = check_pw_reuse(handle->context, &hist_keyblock,
                                      kdb->n_key_data, kdb->key_data,
                                      adb.old_key_len, adb.old_keys);
                 if (ret)
@@ -1533,7 +1532,7 @@ kadm5_randkey_principal_3(void *server_handle,
         if (keepold)
             return KADM5_PROTECT_PRINCIPAL;
         ks_tuple = n_ks_tuple ? ks_tuple : handle->params.keysalts,
-        n_ks_tuple = 1;
+            n_ks_tuple = 1;
     }
 
     if ((ret = kdb_get_entry(handle, principal, &kdb, &adb)))
@@ -1598,7 +1597,7 @@ kadm5_randkey_principal_3(void *server_handle,
     kdb->fail_auth_count = 0;
 
     if (keyblocks) {
-        ret = decrypt_key_data(handle->context, act_mkey,
+        ret = decrypt_key_data(handle->context,
                                kdb->n_key_data, kdb->key_data,
                                keyblocks, n_keys);
         if (ret)
@@ -2007,7 +2006,6 @@ kadm5_get_principal_keys(void *server_handle /* IN */,
     osa_princ_ent_rec           adb;
     kadm5_ret_t                 ret;
     kadm5_server_handle_t       handle = server_handle;
-    krb5_keyblock               *mkey_ptr;
 
     if (keyblocks)
         *keyblocks = NULL;
@@ -2021,26 +2019,7 @@ kadm5_get_principal_keys(void *server_handle /* IN */,
         return(ret);
 
     if (keyblocks) {
-        if ((ret = krb5_dbe_find_mkey(handle->context, master_keylist, kdb,
-                                      &mkey_ptr))) {
-            krb5_keylist_node *tmp_mkey_list;
-            /* try refreshing master key list */
-            /* XXX it would nice if we had the mkvno here for optimization */
-            if (krb5_db_fetch_mkey_list(handle->context, master_princ,
-                                        &master_keyblock, 0,
-                                        &tmp_mkey_list) == 0) {
-                krb5_dbe_free_key_list(handle->context, master_keylist);
-                master_keylist = tmp_mkey_list;
-                if ((ret = krb5_dbe_find_mkey(handle->context, master_keylist,
-                                              kdb, &mkey_ptr))) {
-                    goto done;
-                }
-            } else {
-                goto done;
-            }
-        }
-
-        ret = decrypt_key_data(handle->context, mkey_ptr,
+        ret = decrypt_key_data(handle->context,
                                kdb->n_key_data, kdb->key_data,
                                keyblocks, n_keys);
         if (ret)
@@ -2057,11 +2036,11 @@ done:
 
 /*
  * Allocate an array of n_key_data krb5_keyblocks, fill in each
- * element with the results of decrypting the nth key in key_data with
- * mkey, and if n_keys is not NULL fill it in with the
+ * element with the results of decrypting the nth key in key_data,
+ * and if n_keys is not NULL fill it in with the
  * number of keys decrypted.
  */
-static int decrypt_key_data(krb5_context context, krb5_keyblock *mkey,
+static int decrypt_key_data(krb5_context context,
                             int n_key_data, krb5_key_data *key_data,
                             krb5_keyblock **keyblocks, int *n_keys)
 {
@@ -2074,7 +2053,7 @@ static int decrypt_key_data(krb5_context context, krb5_keyblock *mkey,
     memset(keys, 0, n_key_data*sizeof(krb5_keyblock));
 
     for (i = 0; i < n_key_data; i++) {
-        ret = krb5_dbe_decrypt_key_data(context, mkey, &key_data[i], &keys[i],
+        ret = krb5_dbe_decrypt_key_data(context, NULL, &key_data[i], &keys[i],
                                         NULL);
         if (ret) {
             for (; i >= 0; i--) {
@@ -2171,7 +2150,7 @@ kadm5_ret_t kadm5_decrypt_key(void *server_handle,
         }
     }
 
-    if ((ret = krb5_dbe_decrypt_key_data(handle->context, mkey_ptr, key_data,
+    if ((ret = krb5_dbe_decrypt_key_data(handle->context, NULL, key_data,
                                          keyblock, keysalt)))
         return ret;
 
