@@ -1767,7 +1767,7 @@ crypto_retrieve_X509_sans(krb5_context context,
 {
     krb5_error_code retval = EINVAL;
     char buf[DN_BUF_LEN];
-    int p = 0, u = 0, d = 0;
+    int p = 0, u = 0, d = 0, l;
     krb5_principal *princs = NULL;
     krb5_principal *upns = NULL;
     unsigned char **dnss = NULL;
@@ -1787,14 +1787,14 @@ crypto_retrieve_X509_sans(krb5_context context,
                       buf, sizeof(buf));
     pkiDebug("%s: looking for SANs in cert = %s\n", __FUNCTION__, buf);
 
-    if ((i = X509_get_ext_by_NID(cert, NID_subject_alt_name, -1)) >= 0) {
+    if ((l = X509_get_ext_by_NID(cert, NID_subject_alt_name, -1)) >= 0) {
         X509_EXTENSION *ext = NULL;
         GENERAL_NAMES *ialt = NULL;
         GENERAL_NAME *gen = NULL;
         int ret = 0;
         unsigned int num_sans = 0;
 
-        if (!(ext = X509_get_ext(cert, i)) || !(ialt = X509V3_EXT_d2i(ext))) {
+        if (!(ext = X509_get_ext(cert, l)) || !(ialt = X509V3_EXT_d2i(ext))) {
             pkiDebug("%s: found no subject alt name extensions\n",
                      __FUNCTION__);
             goto cleanup;
