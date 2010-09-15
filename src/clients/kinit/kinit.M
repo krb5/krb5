@@ -137,10 +137,12 @@ file.  The name and location of the keytab file may be specified with
 the
 .B \-t
 .I keytab_file
-option; otherwise the default name and location will be used. By default a host ticket is requested but any principal may be specified. On a KDC, the special keytab location
+option; otherwise the default name and location will be used.  By
+default a host ticket is requested but any principal may be
+specified. On a KDC, the special keytab location
 .B KDB:
 can be used to indicate that kinit should open the KDC database and
-look up the key directly. This permits an administrator to obtain
+look up the key directly.  This permits an administrator to obtain
 tickets as any principal that supports password-based authentication.
 .TP
 \fB-n\fP

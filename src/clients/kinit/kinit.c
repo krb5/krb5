@@ -448,7 +448,7 @@ k5_begin(opts, k5)
         com_err(progname, code, "while initializing Kerberos 5 library");
         return 0;
     }
-errctx = k5->ctx;
+    errctx = k5->ctx;
     if (opts->k5_cache_name)
     {
         code = krb5_cc_resolve(k5->ctx, opts->k5_cache_name, &k5->cc);
@@ -654,7 +654,8 @@ k5_kinit(opts, k5)
             code = kinit_kdb_init(&k5->ctx,
                                   krb5_princ_realm(k5->ctx, k5->me)->data);
             if (code != 0) {
-                com_err(progname, code, "while setting up KDB keytab for realm %s",
+                com_err(progname, code,
+                        "while setting up KDB keytab for realm %s",
                         krb5_princ_realm(k5->ctx, k5->me)->data);
                 goto cleanup;
             }

@@ -38,33 +38,34 @@
 #include <kdb_kt.h>
 #include "extern.h"
 
-/**Server handle*/
-static void * server_handle;
+/** Server handle */
+static void *server_handle;
 
 /**
- *@internal  Initialize KDB for given realm
+ * @internal  Initialize KDB for given realm
  * @param context pointer to context that will be re-initialized
  * @@param realm name of realm to initialize
  */
 krb5_error_code
-kinit_kdb_init (krb5_context *pcontext, char *realm)
+kinit_kdb_init(krb5_context *pcontext, char *realm)
 {
-  kadm5_config_params config;
-  krb5_error_code retval = 0;
-  if (*pcontext)
-    krb5_free_context(*pcontext);
-  memset(&config, 0, sizeof config);
-  retval = kadm5_init_krb5_context(pcontext);
-  if (retval)
+    kadm5_config_params config;
+    krb5_error_code retval = 0;
+
+    if (*pcontext)
+        krb5_free_context(*pcontext);
+    memset(&config, 0, sizeof config);
+    retval = kadm5_init_krb5_context(pcontext);
+    if (retval)
+        return retval;
+    config.mask = KADM5_CONFIG_REALM;
+    config.realm = realm;
+    retval = kadm5_init(*pcontext, "kinit", NULL /*pass*/,
+                        "kinit", &config,
+                        KADM5_STRUCT_VERSION, KADM5_API_VERSION_3, NULL,
+                        &server_handle);
+    if (retval)
+        return retval;
+    retval = krb5_kt_register(*pcontext, &krb5_kt_kdb_ops);
     return retval;
-  config.mask = KADM5_CONFIG_REALM;
-  config.realm = realm;
-  retval = kadm5_init(*pcontext, "kinit", NULL /*pass*/,
-		      "kinit", &config,
-		      KADM5_STRUCT_VERSION, KADM5_API_VERSION_3, NULL,
-		      &server_handle);
-  if (retval)
-      return retval;
-  retval = krb5_kt_register(*pcontext, &krb5_kt_kdb_ops);
-  return retval;
 }
