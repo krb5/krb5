@@ -76,17 +76,21 @@ krb5_dbe_def_decrypt_key_data( krb5_context     context,
     krb5_enc_data         cipher;
     krb5_data             plain;
 
+    if (!mkey)
+        return KRB5_KDB_BADSTORED_MKEY;
     ptr = key_data->key_data_contents[0];
 
     if (ptr) {
         krb5_kdb_decode_int16(ptr, tmplen);
         ptr += 2;
 
+        if (tmplen < 0)
+            return EINVAL;
         cipher.enctype = ENCTYPE_UNKNOWN;
         cipher.ciphertext.length = key_data->key_data_length[0]-2;
-        cipher.ciphertext.data = ptr;
+        cipher.ciphertext.data = (char *) ptr;
         plain.length = key_data->key_data_length[0]-2;
-        if ((plain.data = (krb5_octet *) malloc(plain.length)) == NULL)
+        if ((plain.data =  malloc(plain.length)) == NULL)
             return(ENOMEM);
 
         if ((retval = krb5_c_decrypt(context, mkey, 0 /* XXX */, 0,
@@ -101,7 +105,7 @@ krb5_dbe_def_decrypt_key_data( krb5_context     context,
            to make sure that there are enough bytes, but I can't do
            any better than that. */
 
-        if (tmplen > plain.length) {
+        if ((unsigned int) tmplen >  plain.length) {
             free(plain.data);
             return(KRB5_CRYPTO_INTERNAL);
         }
@@ -109,7 +113,7 @@ krb5_dbe_def_decrypt_key_data( krb5_context     context,
         dbkey->magic = KV5M_KEYBLOCK;
         dbkey->enctype = key_data->key_data_type[0];
         dbkey->length = tmplen;
-        dbkey->contents = plain.data;
+        dbkey->contents = (krb5_octet *) plain.data;
     }
 
     /* Decode salt data */
