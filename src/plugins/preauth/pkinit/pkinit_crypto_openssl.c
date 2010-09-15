@@ -2005,6 +2005,7 @@ crypto_check_cert_eku(krb5_context context,
             pkiDebug("%s: found acceptable EKU, checking for digitalSignature\n", __FUNCTION__);
 
             /* check that digitalSignature KeyUsage is present */
+            X509_check_ca(reqctx->received_cert);
             if ((usage = X509_get_ext_d2i(reqctx->received_cert,
                                           NID_key_usage, NULL, NULL))) {
 
@@ -4551,6 +4552,7 @@ check_kus:
     }
 
     /* Make sure usage exists before checking bits */
+    X509_check_ca(x);
     usage = X509_get_ext_d2i(x, NID_key_usage, NULL, NULL);
     if (usage) {
         if (!ku_reject(x, X509v3_KU_DIGITAL_SIGNATURE))
