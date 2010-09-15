@@ -90,7 +90,7 @@ krb5_dbe_def_decrypt_key_data( krb5_context     context,
         cipher.ciphertext.length = key_data->key_data_length[0]-2;
         cipher.ciphertext.data = (char *) ptr;
         plain.length = key_data->key_data_length[0]-2;
-        if ((plain.data =  malloc(plain.length)) == NULL)
+        if ((plain.data = malloc(plain.length)) == NULL)
             return(ENOMEM);
 
         if ((retval = krb5_c_decrypt(context, mkey, 0 /* XXX */, 0,
