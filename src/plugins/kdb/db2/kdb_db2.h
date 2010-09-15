@@ -43,7 +43,6 @@ typedef struct _krb5_db2_context {
     int                 db_locks_held;  /* Number of times locked       */
     int                 db_lock_mode;   /* Last lock mode, e.g. greatest*/
     krb5_boolean        db_nb_locks;    /* [Non]Blocking lock modes     */
-    krb5_keylist_node *db_master_key_list;  /* Master key list of database */
     osa_adb_policy_t    policy_db;
     krb5_boolean        tempdb;
     krb5_boolean        disable_last_success;
@@ -77,12 +76,6 @@ krb5_error_code krb5_db2_set_nonblocking(krb5_context, krb5_boolean,
 krb5_boolean krb5_db2_set_lockmode(krb5_context, krb5_boolean);
 krb5_error_code krb5_db2_open_database(krb5_context);
 krb5_error_code krb5_db2_close_database(krb5_context);
-
-krb5_error_code
-krb5_db2_set_mkey_list(krb5_context context, krb5_keylist_node *keylist);
-
-krb5_error_code
-krb5_db2_get_mkey_list(krb5_context context, krb5_keylist_node **keylist);
 
 krb5_error_code
 krb5_db2_delete_principal(krb5_context context,

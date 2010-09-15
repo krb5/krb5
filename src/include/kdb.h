@@ -1013,23 +1013,6 @@ typedef struct _kdb_vftabl {
     void (*free)(krb5_context kcontext, void *ptr);
 
     /*
-     * Optional: Inform the module of the master key list.  The module may
-     * remember an alias to the provided memory.  This function is called at
-     * startup by the KDC and kadmind with the value returned by
-     * fetch_master_key_list.
-     */
-    krb5_error_code (*set_master_key_list)(krb5_context kcontext,
-                                           krb5_keylist_node *keylist);
-
-    /*
-     * Optional: Retrieve an alias to the master key list as previously set by
-     * set_master_key_list.  This function is used by the KDB keytab
-     * implementation in libkdb5, which is used by kadmind.
-     */
-    krb5_error_code (*get_master_key_list)(krb5_context kcontext,
-                                           krb5_keylist_node **keylist);
-
-    /*
      * Optional with default: Retrieve a master keyblock from the stash file
      * db_args, filling in *key and *kvno.  mname is the name of the master
      * principal for the realm.
