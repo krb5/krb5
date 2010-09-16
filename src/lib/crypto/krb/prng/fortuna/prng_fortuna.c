@@ -58,6 +58,9 @@
 #include "fortuna.h"
 #include "k5-int.h"
 
+#include "k5-thread.h"
+k5_mutex_t fortuna_lock = K5_MUTEX_PARTIAL_INITIALIZER;
+
 /*
  * Why Fortuna-like: There does not seem to be any definitive reference
  * on Fortuna in the net.  Instead this implementation is based on
@@ -135,6 +138,7 @@ int (*entropy_collector[])(krb5_context context, unsigned char buf[], int buflen
 #define MD_CTX			SHA256_CTX
 #define CIPH_CTX		aes_ctx
 
+/* Genarator - block cipher in CTR mode */
 struct fortuna_state
 {
     unsigned char	counter[CIPH_BLOCK];
@@ -197,15 +201,22 @@ md_result(MD_CTX * ctx, unsigned char *dst)
 /*
  * initialize state
  */
-static void
+static  krb5_error_code
 init_state(FState * st)
 {
     int	i;
+    krb5_error_code ret = 0;
+
+    ret = k5_mutex_finish_init(&fortuna_lock);
+    if (ret)
+        return ret;
 
     memset(st, 0, sizeof(*st));
     for (i = 0; i < NUM_POOLS; i++)
 	md_init(&st->pool[i]);
     st->pid = getpid();
+
+    return 0;
 }
 
 /*
@@ -459,7 +470,7 @@ extract_data(FState * st, unsigned count, unsigned char *dst)
 static FState	main_state;
 static int	init_done;
 static int	have_entropy;
-static int resend_bytes;
+static int      resend_bytes;
 
 #define FORTUNA_RESEED_BYTE	10000
 
@@ -493,51 +504,86 @@ fortuna_reseed(void)
 static int
 fortuna_init(void)
 {
+    krb5_error_code ret = 0;
+
     if (!init_done) {
-	init_state(&main_state);
-	init_done = 1;
+        ret = init_state(&main_state);
+        if (ret == 0)
+            init_done = 1;
     }
     if (!have_entropy)
 	have_entropy = fortuna_reseed();
     return (init_done && have_entropy);
 }
 
-static void
+static  krb5_error_code
 fortuna_seed(const unsigned char *indata, int size)
 {
+    krb5_error_code ret = 0;
+
     fortuna_init();
+
+    ret = k5_mutex_lock(&fortuna_lock);
+    if (ret)
+        return FORTUNA_LOCKING;
+
     add_entropy(&main_state, indata, size);
     if (size >= INIT_BYTES)
 	have_entropy = 1;
+
+    k5_mutex_unlock(&fortuna_lock);
+
+    return FORTUNA_OK;
 }
 
 static int
 fortuna_bytes(unsigned char *outdata, int size)
 {
-    if (!fortuna_init())
+    krb5_error_code ret = 0;
+
+    if (!fortuna_init()){
 	return FORTUNA_FAIL;
+    }
+    ret = k5_mutex_lock(&fortuna_lock);
+    if (ret)
+        return FORTUNA_LOCKING;
+
     resend_bytes += size;
     if (resend_bytes > FORTUNA_RESEED_BYTE || resend_bytes < size) {
 	resend_bytes = 0;
 	fortuna_reseed();
     }
     extract_data(&main_state, size, outdata);
+
+    k5_mutex_unlock(&fortuna_lock);
+
     return FORTUNA_OK;
 }
 
 static void
 fortuna_cleanup(void)
 {
+    krb5_error_code ret = 0;
+    ret = k5_mutex_lock(&fortuna_lock);
+
     init_done = 0;
     have_entropy = 0;
     memset(&main_state, 0, sizeof(main_state));
+
+    if (!ret)
+        k5_mutex_unlock(&fortuna_lock);
+
+    k5_mutex_destroy(&fortuna_lock);
 }
 
 static krb5_error_code
 fortuna_add_entropy(krb5_context context, unsigned int randsource,
                           const krb5_data *indata)
 {
-    fortuna_seed((const unsigned char *)indata->data, indata->length);
+    krb5_error_code ret = 0;
+    ret = fortuna_seed((const unsigned char *)indata->data, indata->length);
+    if (ret != FORTUNA_OK)
+        return KRB5_CRYPTO_INTERNAL;
     return 0;
 }
 
@@ -558,3 +604,4 @@ const struct krb5_prng_provider krb5int_prng_fortuna = {
     fortuna_init,
     fortuna_cleanup
 };
+

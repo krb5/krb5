@@ -53,5 +53,6 @@ k5_entropy_uid(krb5_context context, unsigned char* buf, int buflen);
 
 #define FORTUNA_OK                1  /* All is well */
 #define FORTUNA_FAIL              0  /* generic failure */
+#define FORTUNA_LOCKING          -12
 
-#endif /* FORTUNA_H */
+#endif
