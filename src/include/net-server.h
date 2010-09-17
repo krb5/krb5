@@ -43,7 +43,7 @@ krb5_error_code add_udp_port(int port);
 krb5_error_code add_tcp_port(int port);
 krb5_error_code add_rpc_service(int port, u_long prognum, u_long versnum,
                                 void (*dispatch)());
-krb5_error_code setup_network(void *handle, const char *prog);
+krb5_error_code setup_network(void *handle, const char *prog, int no_reconfig);
 krb5_error_code listen_and_process(void *handle, const char *prog,
                                    void (*reset)(void));
 void closedown_network(void);

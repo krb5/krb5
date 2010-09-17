@@ -393,7 +393,7 @@ int main(int argc, char *argv[])
             : 0)
 #endif
 #undef server_handle
-        || (ret = setup_network(global_server_handle, whoami))) {
+        || (ret = setup_network(global_server_handle, whoami, 0))) {
         const char *e_txt = krb5_get_error_message (context, ret);
         krb5_klog_syslog(LOG_ERR, "%s: %s while initializing network, aborting",
                          whoami, e_txt);

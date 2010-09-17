@@ -808,6 +808,7 @@ setup_udp_port_1(struct socksetup *data, struct sockaddr *addr,
         sock = create_server_socket(data, addr, SOCK_DGRAM);
         if (sock == -1)
             return 1;
+        setnbio(sock);
 
 #if !(defined(CMSG_SPACE) && defined(HAVE_STRUCT_CMSGHDR) && \
       (defined(IP_PKTINFO) || defined(IPV6_PKTINFO)))
@@ -1092,7 +1093,7 @@ extern int krb5int_debug_sendto_kdc;
 extern void (*krb5int_sendtokdc_debug_handler)(const void*, size_t);
 
 krb5_error_code
-setup_network(void *handle, const char *prog)
+setup_network(void *handle, const char *prog, int no_reconfig)
 {
     struct socksetup setup_data;
 
@@ -1108,7 +1109,8 @@ setup_network(void *handle, const char *prog)
     setup_data.retval = 0;
     krb5_klog_syslog (LOG_INFO, "setting up network...");
 #ifdef HAVE_STRUCT_RT_MSGHDR
-    setup_routing_socket(&setup_data);
+    if (!no_reconfig)
+        setup_routing_socket(&setup_data);
 #endif
     /*
      * To do: Use RFC 2292 interface (or follow-on) and IPV6_PKTINFO,
@@ -1381,7 +1383,7 @@ process_packet(void *handle, struct connection *conn, const char *prog,
                       (struct sockaddr *)&daddr, &daddr_len,
                       &auxaddr);
     if (cc == -1) {
-        if (errno != EINTR
+        if (errno != EINTR && errno != EAGAIN
             /*
              * This is how Linux indicates that a previous transmission was
              * refused, e.g., if the client timed out before getting the
@@ -1837,7 +1839,7 @@ listen_and_process(void *handle, const char *prog, void (*reset)(void))
         if (sret == 0 && netchanged) {
             network_reconfiguration_needed = 0;
             closedown_network_sockets();
-            err = setup_network(handle, prog);
+            err = setup_network(handle, prog, 0);
             if (err) {
                 com_err(prog, err, "while reinitializing network");
                 return err;
