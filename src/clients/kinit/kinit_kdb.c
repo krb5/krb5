@@ -52,8 +52,10 @@ kinit_kdb_init(krb5_context *pcontext, char *realm)
     kadm5_config_params config;
     krb5_error_code retval = 0;
 
-    if (*pcontext)
+    if (*pcontext) {
         krb5_free_context(*pcontext);
+        *pcontext = NULL;
+    }
     memset(&config, 0, sizeof config);
     retval = kadm5_init_krb5_context(pcontext);
     if (retval)
