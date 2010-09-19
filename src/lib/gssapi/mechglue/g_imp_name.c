@@ -173,6 +173,35 @@ allocation_failure:
     return (major_status);
 }
 
+static OM_uint32
+importCompositeName(OM_uint32 *minor_status,
+                    gss_buffer_t name_buf,
+                    gss_name_attribute_t *pAttributes)
+{
+    OM_uint32 status, tmpMinor;
+    gss_name_attribute_t head = NULL, *pNext = &head;
+    size_t remain = name_buf->length;
+    unsigned char *p = (unsigned char *)name_buf->value;
+
+    *pAttributes = NULL;
+
+    do {
+        gss_name_attribute_t attr;
+
+        status = gssint_name_attribute_internalize(minor_status, &attr, &pNext,
+                                                   &p, &remain);
+        if (GSS_ERROR(status))
+            break;
+    } while (remain != 0);
+
+    if (GSS_ERROR(status))
+        gssint_release_name_attributes(&tmpMinor, &head);
+    else
+        *pAttributes = head;
+
+    return status;
+}
+
 /*
  * GSS export name constants
  */
@@ -191,6 +220,7 @@ importExportName(minor, unionName)
     gss_mechanism mech;
     OM_uint32 major, mechOidLen, nameLen, curLength;
     unsigned int bytes;
+    int composite;
 
     expName.value = unionName->external_name->value;
     expName.length = unionName->external_name->length;
@@ -204,6 +234,8 @@ importExportName(minor, unionName)
 	return (GSS_S_DEFECTIVE_TOKEN);
     if (buf[1] != 0x01 && buf[1] != 0x02)
 	return (GSS_S_DEFECTIVE_TOKEN);
+
+    composite = (buf[1] == 0x02);
 
     buf += expNameTokIdLen;
 
@@ -252,7 +284,7 @@ importExportName(minor, unionName)
      * if we create it; so if mech->gss_export_name == NULL, we must
      * have created it.
      */
-    if (mech->gss_export_name) {
+    if (composite ? mech->gss_export_name_composite : mech->gss_export_name) {
 	major = mech->gss_import_name(minor,
 				      &expName, (gss_OID)GSS_C_NT_EXPORT_NAME,
 				      &unionName->mech_name);
@@ -309,7 +341,7 @@ importExportName(minor, unionName)
      * and length) there's the name itself, though null-terminated;
      * this null terminator should also not be there, but it is.
      */
-    if (nameLen > 0 && *buf == '\0') {
+    if (!composite && nameLen > 0 && *buf == '\0') {
 	OM_uint32 nameTypeLen;
 	/* next two bytes are the name oid */
 	if (nameLen < nameTypeLenLen)
@@ -362,5 +394,15 @@ importExportName(minor, unionName)
     if (major != GSS_S_COMPLETE) {
 	map_errcode(minor);
     }
+
+    if (composite) {
+        expName.length = curLength - nameLen;
+        expName.value = buf + nameLen;
+
+        major = importCompositeName(minor, &expName, &unionName->attributes);
+        if (major != GSS_S_COMPLETE)
+            return major;
+    }
+
     return major;
 } /* importExportName */

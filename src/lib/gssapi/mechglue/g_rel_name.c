@@ -80,6 +80,10 @@ gss_name_t *		input_name;
 	gss_release_oid(minor_status, &union_name->mech_type);
     }
 
+    if (union_name->attributes) {
+        gssint_release_name_attributes(minor_status, &union_name->attributes);
+    }
+
     free(union_name);
 
     return(GSS_S_COMPLETE);

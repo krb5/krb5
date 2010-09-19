@@ -20,6 +20,7 @@ do {								\
 	(o1)->length = (o2)->length;				\
 } while (0)
 
+
 /*
  * Array of context IDs typed by mechanism OID
  */
@@ -28,6 +29,18 @@ typedef struct gss_ctx_id_struct {
 	gss_OID			mech_type;
 	gss_ctx_id_t		internal_ctx_id;
 } gss_union_ctx_id_desc, *gss_union_ctx_id_t;
+
+/*
+ * Imported name attribute state.
+ */
+typedef struct gss_name_attribute_desc_struct {
+    gss_buffer_desc attribute;
+    int authenticated;
+    int complete;
+    gss_buffer_set_desc values;
+    gss_buffer_set_desc display_values;
+    struct gss_name_attribute_desc_struct *next;
+} gss_name_attribute_desc, *gss_name_attribute_t;
 
 /*
  * Generic GSSAPI names.  A name can either be a generic name, or a
@@ -43,6 +56,7 @@ typedef struct gss_name_struct {
 	 */
 	gss_OID			mech_type;
 	gss_name_t		mech_name;
+        gss_name_attribute_t    attributes;
 } gss_union_name_desc, *gss_union_name_t;
 
 /*
@@ -772,5 +786,42 @@ gssint_unwrap_aead (gss_mechanism,	/* mech */
    that it will use com_err.  */
 #define map_errcode(MINORP) \
     (*(MINORP) = gssint_mecherrmap_map_errcode(*(MINORP)))
+
+/*
+ * Union name attribute support.
+ */
+
+#define NAME_FLAG_AUTHENTICATED     0x1
+#define NAME_FLAG_COMPLETE          0x2
+
+OM_uint32
+gssint_release_name_attribute(OM_uint32 *minor_status,
+                              gss_name_attribute_t *pAttribute);
+OM_uint32
+gssint_get_name_attribute(OM_uint32 *minor_status,
+                          gss_name_attribute_t attributes,
+                          gss_buffer_t attr_name,
+                          int *authenticated,
+                          int *complete,
+                          gss_buffer_t value,
+                          gss_buffer_t display_value,
+                          int *more);
+
+OM_uint32
+gssint_name_attribute_internalize(OM_uint32 *minor_status,
+                                  gss_name_attribute_t *pAttr,
+                                  gss_name_attribute_t **pNext,
+                                  unsigned char **pBuffer,
+                                  size_t *pRemain);
+
+OM_uint32
+gssint_release_name_attributes(OM_uint32 *minor_status,
+                               gss_name_attribute_t *pAttributes);
+
+OM_uint32
+gssint_export_internal_name_composite(OM_uint32 *minor_status,
+                                      const gss_OID mech_type,
+                                      const gss_name_t internal_name,
+                                      gss_buffer_t name_buf);
 
 #endif /* _GSS_MECHGLUEP_H */

@@ -59,14 +59,17 @@ gss_export_name_composite(OM_uint32 *minor_status,
     if (mech == NULL)
         return GSS_S_BAD_NAME;
 
-    if (mech->gss_export_name_composite == NULL)
-        return GSS_S_UNAVAILABLE;
-
-    status = (*mech->gss_export_name_composite)(minor_status,
-                                                union_name->mech_name,
-                                                exp_composite_name);
-    if (status != GSS_S_COMPLETE)
-        map_error(minor_status, mech);
-
+    if (mech->gss_export_name_composite != NULL) {
+        status = (*mech->gss_export_name_composite)(minor_status,
+                                                    union_name->mech_name,
+                                                    exp_composite_name);
+        if (status != GSS_S_COMPLETE)
+            map_error(minor_status, mech);
+    } else {
+        status = gssint_export_internal_name_composite(minor_status,
+                                                       union_name->mech_type,
+                                                       union_name->mech_name,
+                                                       exp_composite_name);
+    }
     return status;
 }

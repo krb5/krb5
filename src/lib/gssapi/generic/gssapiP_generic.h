@@ -115,6 +115,7 @@ typedef UINT64_TYPE gssint_uint64;
 #define g_delete_cred_id        gssint_g_delete_cred_id
 #define g_delete_ctx_id         gssint_g_delete_ctx_id
 #define g_delete_lucidctx_id    gssint_g_delete_lucidctx_id
+#define g_duplicate_buffer      gssint_g_duplicate_buffer
 #define g_make_string_buffer    gssint_g_make_string_buffer
 #define g_token_size            gssint_g_token_size
 #define g_make_token_header     gssint_g_make_token_header
@@ -160,6 +161,7 @@ int g_delete_ctx_id (g_set *vdb, gss_ctx_id_t ctx);
 int g_delete_lucidctx_id (g_set *vdb, void *lctx);
 
 int g_make_string_buffer (const char *str, gss_buffer_t buffer);
+int g_duplicate_buffer(const gss_buffer_t src, gss_buffer_t dst);
 
 unsigned int g_token_size (const gss_OID_desc * mech, unsigned int body_size);
 

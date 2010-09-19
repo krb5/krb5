@@ -63,6 +63,18 @@ gss_get_name_attribute(OM_uint32 *minor_status,
 
     union_name = (gss_union_name_t)name;
 
+    if (union_name->attributes != NULL) {
+        status = gssint_get_name_attribute(minor_status,
+                                           union_name->attributes,
+                                           attr_name,
+                                           authenticated,
+                                           complete,
+                                           value,
+                                           display_value,
+                                           more);
+        return status;
+    }
+
     if (union_name->mech_type == GSS_C_NO_OID)
         return GSS_S_UNAVAILABLE;
 
