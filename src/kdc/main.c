@@ -564,13 +564,16 @@ create_workers(int num)
 
     /* Create child worker processes; return in each child. */
     krb5_klog_syslog(LOG_INFO, "creating %d worker processes", num);
-    pids = malloc(num * sizeof(pid_t));
+    pids = calloc(num, sizeof(pid_t));
     if (pids == NULL)
         return ENOMEM;
     for (i = 0; i < num; i++) {
         pid = fork();
-        if (pid == 0)
+        if (pid == 0) {
+            /* Return control to main() in the new worker process. */
+            free(pids);
             return 0;
+        }
         if (pid == -1) {
             /* Couldn't fork enough times. */
             status = errno;
@@ -581,10 +584,10 @@ create_workers(int num)
         pids[i] = pid;
     }
 
-    /* Supervise the child processes. */
+    /* Supervise the worker processes. */
     numleft = num;
     while (!signal_requests_exit) {
-        /* Wait until a child process exits or we get a signal. */
+        /* Wait until a worker process exits or we get a signal. */
         pid = wait(&status);
         if (pid >= 0) {
             krb5_klog_syslog(LOG_ERR, "worker %ld exited with status %d",
@@ -596,8 +599,8 @@ create_workers(int num)
                     pids[i] = -1;
             }
 
-            /* When one process exits, terminate them all, so that KDC crashes
-             * behave similarly with or without worker processes. */
+            /* When one worker process exits, terminate them all, so that KDC
+             * crashes behave similarly with or without worker processes. */
             break;
         }
 
