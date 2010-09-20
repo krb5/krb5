@@ -200,7 +200,8 @@ krb5_gss_import_name(minor_status, input_name_buffer,
             uid = atoi(tmp);
             goto do_getpwuid;
 #endif
-        } else if (g_OID_equal(input_name_type, gss_nt_exported_name)) {
+        } else if (g_OID_equal(input_name_type, gss_nt_exported_name) ||
+                   g_OID_equal(input_name_type, GSS_C_NT_COMPOSITE_EXPORT)) {
 #define BOUNDS_CHECK(cp, end, n) do { if ((end) - (cp) < (n)) goto fail_name; } while (0)
             cp = (unsigned char *)tmp;
             end = cp + input_name_buffer->length;
@@ -210,8 +211,17 @@ krb5_gss_import_name(minor_status, input_name_buffer,
                 goto fail_name;
             switch (*cp++) {
             case 0x01:
+                if (g_OID_equal(input_name_type, GSS_C_NT_COMPOSITE_EXPORT))
+                    goto fail_name;
                 break;
             case 0x02:
+                /*
+                 * We should check for GSS_C_NT_COMPOSITE_EXPORT, but we shipped
+                 * 1.8 and that would break interoperability. The composite name
+                 * is meant for interprocess communication only, but there may
+                 * be different versions of MIT Kerberos installed on a single
+                 * machine.
+                 */
                 has_ad++;
                 break;
             default:

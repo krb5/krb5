@@ -206,7 +206,8 @@ testExportImportName(OM_uint32 *minor,
 
     printf("\n");
 
-    major = gss_import_name(minor, &exported_name, gss_nt_exported_name,
+    major = gss_import_name(minor, &exported_name,
+                            GSS_C_NT_COMPOSITE_EXPORT,
                             &imported_name);
     if (GSS_ERROR(major)) {
         displayStatus("gss_import_name", major, *minor);
