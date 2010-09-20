@@ -26,13 +26,92 @@
 
 #include "mglueP.h"
 
+static OM_uint32
+duplicateNameAttribute(OM_uint32 *minor_status,
+                       gss_name_attribute_t src,
+                       gss_name_attribute_t *pDst)
+{
+    OM_uint32 tmpMinor;
+    gss_name_attribute_t dst;
+    size_t i;
+
+    dst = calloc(1, sizeof(gss_name_attribute_desc));
+    if (dst == NULL)
+        goto alloc_fail;
+
+    if (!g_duplicate_buffer(&src->attribute, &dst->attribute))
+        goto alloc_fail;
+
+    dst->authenticated = src->authenticated;
+    dst->complete = src->complete;
+
+    if (src->values.count > 0) {
+        dst->values.elements = calloc(src->values.count,
+                                      sizeof(gss_buffer_desc));
+        if (dst->values.elements == NULL)
+            goto alloc_fail;
+
+        dst->display_values.elements = calloc(src->values.count,
+                                              sizeof(gss_buffer_desc));
+        if (dst->display_values.elements == NULL)
+            goto alloc_fail;
+
+        for (i = 0; i < src->values.count; i++) {
+            if (!g_duplicate_buffer(&src->values.elements[i],
+                                    &dst->values.elements[i]))
+                goto alloc_fail;
+            if (!g_duplicate_buffer(&src->display_values.elements[i],
+                                    &dst->display_values.elements[i]))
+                goto alloc_fail;
+        }
+    }
+
+    *pDst = dst;
+    return GSS_S_COMPLETE;
+
+alloc_fail:
+    gssint_release_name_attribute(&tmpMinor, &dst);
+    *minor_status = ENOMEM;
+    return GSS_S_FAILURE;
+}
+
+OM_uint32
+gssint_duplicate_name_attributes(OM_uint32 *minor_status,
+                                 gss_name_attribute_t srcAttrs,
+                                 gss_name_attribute_t *pDstAttrs)
+{
+    gss_name_attribute_t srcAttr;
+    gss_name_attribute_t dstAttrHead = NULL, *pDstAttr = &dstAttrHead;
+    OM_uint32 status, tmpMinor;
+
+    for (srcAttr = srcAttrs; srcAttr != NULL; srcAttr = srcAttr->next) {
+        gss_name_attribute_t dstAttr;
+
+        status = duplicateNameAttribute(minor_status, srcAttr, &dstAttr);
+        if (GSS_ERROR(status))
+            goto cleanup;
+
+        *pDstAttr = dstAttr;
+        pDstAttr = &dstAttr->next;
+    }
+
+    *pDstAttrs = dstAttrHead;
+    status = GSS_S_COMPLETE;
+
+cleanup:
+    if (GSS_ERROR(status))
+        gssint_release_name_attributes(&tmpMinor, &dstAttrHead);
+
+    return status;
+}
+
 OM_uint32
 gssint_release_name_attribute(OM_uint32 *minor_status,
-                              gss_name_attribute_t *pAttribute)
+                              gss_name_attribute_t *pAttr)
 {
     OM_uint32 tmpMinor;
     size_t i;
-    gss_name_attribute_t attr = *pAttribute;
+    gss_name_attribute_t attr = *pAttr;
 
     if (attr != NULL) {
         gss_release_buffer(&tmpMinor, &attr->attribute);
@@ -42,7 +121,7 @@ gssint_release_name_attribute(OM_uint32 *minor_status,
             gss_release_buffer(&tmpMinor, &attr->display_values.elements[i]);
         }
         free(attr);
-        *pAttribute = NULL;
+        *pAttr = NULL;
     }
 
     return GSS_S_COMPLETE;
@@ -62,21 +141,7 @@ gssint_get_name_attribute(OM_uint32 *minor_status,
     int i = *more;
     OM_uint32 tmpMinor;
 
-    if (authenticated != NULL)
-        *authenticated = 0;
-    if (complete != NULL)
-        *complete = 0;
     *more = 0;
-
-    if (value != NULL) {
-        value->value = NULL;
-        value->length = 0;
-    }
-
-    if (display_value != NULL) {
-        display_value->value = NULL;
-        display_value->length = 0;
-    }
 
     for (attr = attributes; attr != NULL; attr = attr->next) {
         if (attr->attribute.length == attr_name->length &&
@@ -94,25 +159,51 @@ gssint_get_name_attribute(OM_uint32 *minor_status,
     else if ((size_t)i >= attr->values.count)
         return GSS_S_UNAVAILABLE;
 
-    if (value != NULL &&
-        !g_duplicate_buffer(&attr->values.elements[i], value)) {
-        *minor_status = ENOMEM;
-        return GSS_S_FAILURE;
+    if (attr->values.count > 0) {
+        if (value != NULL &&
+            !g_duplicate_buffer(&attr->values.elements[i], value)) {
+            *minor_status = ENOMEM;
+            return GSS_S_FAILURE;
+        }
+        if (display_value != NULL &&
+            !g_duplicate_buffer(&attr->display_values.elements[i],
+                                display_value)) {
+            gss_release_buffer(&tmpMinor, value);
+            return GSS_S_FAILURE;
+        }
     }
-    if (display_value != NULL &&
-        !g_duplicate_buffer(&attr->display_values.elements[i], display_value)) {
-        gss_release_buffer(&tmpMinor, value);
-        return GSS_S_FAILURE;
-    }
-    *authenticated = attr->authenticated;
-    *complete = attr->complete;
 
+    if (authenticated != NULL)
+        *authenticated = attr->authenticated;
+    if (complete != NULL)
+        *complete = attr->complete;
     if (attr->values.count > (size_t)++i)
         *more = i;
 
     return GSS_S_COMPLETE;
 }
 
+/*
+ * An encoded attribute looks like
+ *
+ *      uint32      attribute name length
+ *      char[]      attribute name data
+ *      uint32      attribute flags
+ *      uint32      value count
+ *      value[]     values
+ *
+ * where a value is:
+ *
+ *      uint32      value length
+ *      char[]      value data
+ *      uint32      display value length
+ *      char[]      display value data
+ *
+ * The encoding of a set of attributes consists of the attribute
+ * count following by the encoding of each attribute.
+ *
+ * All integers are big-endian.
+ */
 static size_t
 nameAttributeSize(gss_name_attribute_t attr)
 {
@@ -143,6 +234,8 @@ nameAttributeExternalize(OM_uint32 *minor_status,
     unsigned char *p = *pBuffer;
     size_t i, remain = *pRemain;
 
+    assert(remain >= nameAttributeSize(attr));
+
     if (attr->authenticated)
         flags |= NAME_FLAG_AUTHENTICATED;
     if (attr->complete)
@@ -171,48 +264,46 @@ nameAttributeExternalize(OM_uint32 *minor_status,
     return GSS_S_COMPLETE;
 }
 
-#define CHECK_REMAIN(len)   do {    \
-    if ((remain) < len) {           \
-        status = GSS_S_BAD_NAME;    \
-        goto cleanup;               \
-    }                               \
-  } while (0)
-
 static OM_uint32
 internalizeBuffer(OM_uint32 *minor_status,
                   gss_buffer_desc *buffer,
                   unsigned char **pBuffer,
                   size_t *pRemain)
 {
-    OM_uint32 status;
     unsigned char *p = *pBuffer;
     size_t remain = *pRemain;
 
-    CHECK_REMAIN(4);
+    if (remain < 4)
+        return GSS_S_BAD_NAME;
+
     TREAD_INT(p, buffer->length, 1);
     remain -= 4;
 
-    CHECK_REMAIN(buffer->length);
+    if (remain < buffer->length)
+        return GSS_S_BAD_NAME;
 
     /* Attribute name */
     buffer->value = malloc(buffer->length + 1);
     if (buffer->value == NULL) {
         *minor_status = ENOMEM;
-        status = GSS_S_FAILURE;
-        goto cleanup;
+        return GSS_S_FAILURE;
     }
+
     memcpy(buffer->value, p, buffer->length);
     ((char *)buffer->value)[buffer->length] = '\0';
 
-    p += buffer->length;
-    remain -= buffer->length;
+    *pBuffer = p + buffer->length;
+    *pRemain = remain - buffer->length;
 
-    *pBuffer = p;
-    *pRemain = remain;
-
-cleanup:
-    return status;
+    return GSS_S_COMPLETE;
 }
+
+#define CHECK_REMAIN(len)   do {    \
+    if ((remain) < len) {           \
+        status = GSS_S_BAD_NAME;    \
+        goto cleanup;               \
+    }                               \
+  } while (0)
 
 OM_uint32
 gssint_name_attribute_internalize(OM_uint32 *minor_status,
@@ -306,7 +397,7 @@ addNameAttribute(OM_uint32 *minor_status,
                  gss_mechanism mech,
                  gss_name_t internal_name,
                  gss_buffer_t attribute_name,
-                 gss_name_attribute_t *pAttribute,
+                 gss_name_attribute_t *pAttr,
                  gss_name_attribute_t **pNext)
 {
     gss_name_attribute_t attr = NULL;
@@ -316,6 +407,12 @@ addNameAttribute(OM_uint32 *minor_status,
 
     attr = calloc(1, sizeof(*attr));
     if (attr == NULL) {
+        *minor_status = ENOMEM;
+        status = GSS_S_FAILURE;
+        goto cleanup;
+    }
+
+    if (!g_duplicate_buffer(attribute_name, &attr->attribute)) {
         *minor_status = ENOMEM;
         status = GSS_S_FAILURE;
         goto cleanup;
@@ -357,7 +454,7 @@ addNameAttribute(OM_uint32 *minor_status,
         assert(display_values == &attr->display_values);
     }
 
-    *pAttribute = attr;
+    *pAttr = attr;
 
     if (pNext != NULL) {
         assert(*pNext != NULL);
@@ -375,9 +472,9 @@ cleanup:
 
 OM_uint32
 gssint_release_name_attributes(OM_uint32 *minor_status,
-                               gss_name_attribute_t *pAttributes)
+                               gss_name_attribute_t *pAttrs)
 {
-    gss_name_attribute_t attributes = *pAttributes;
+    gss_name_attribute_t attributes = *pAttrs;
     OM_uint32 tmpMinor;
 
     if (attributes != NULL) {
@@ -389,7 +486,7 @@ gssint_release_name_attributes(OM_uint32 *minor_status,
             attributes = next;
         } while (attributes != NULL);
 
-        *pAttributes = NULL;
+        *pAttrs = NULL;
     }
 
     return GSS_S_COMPLETE;
@@ -467,6 +564,7 @@ gssint_export_internal_name_composite(OM_uint32 *minor_status,
     }
 
     remain = expName.length;
+    remain += 4; /* attribute count */
 
     for (i = 0; i < attrNames->count; i++) {
         status = addNameAttribute(minor_status,
@@ -496,6 +594,9 @@ gssint_export_internal_name_composite(OM_uint32 *minor_status,
 
     p += expName.length;
     remain -= expName.length;
+
+    TWRITE_INT(p, attrNames->count, 1);
+    remain -= 4;
 
     for (attr = head; attr != NULL; attr = head->next) {
         status = nameAttributeExternalize(minor_status,

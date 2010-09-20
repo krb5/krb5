@@ -50,16 +50,35 @@ gss_inquire_name(OM_uint32 *minor_status,
     if (MN_mech != NULL)
         *MN_mech = GSS_C_NO_OID;
 
+    if (name_is_MN != NULL)
+        name_is_MN = 0;
+
     if (attrs != NULL)
         *attrs = GSS_C_NO_BUFFER_SET;
 
     *minor_status = 0;
     union_name = (gss_union_name_t)name;
 
+    if (union_name->attributes != NULL) {
+        gss_name_attribute_t attr;
+
+        status = GSS_S_COMPLETE;
+
+        for (attr = union_name->attributes; attr != NULL; attr = attr->next) {
+            status = gss_add_buffer_set_member(minor_status, &attr->attribute,
+                                               attrs);
+            if (GSS_ERROR(status))
+                break;
+        }
+
+        if (GSS_ERROR(status))
+            gss_release_buffer_set(&tmp, attrs);
+
+        return status;
+    }
+
     if (union_name->mech_type == GSS_C_NO_OID) {
         /* We don't yet support non-mechanism attributes */
-        if (name_is_MN != NULL)
-            name_is_MN = 0;
         *minor_status = 0;
         return GSS_S_COMPLETE;
     }

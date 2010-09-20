@@ -408,6 +408,8 @@ GSS_DLLIMP extern gss_OID GSS_C_NT_ANONYMOUS;
  */
 GSS_DLLIMP extern gss_OID GSS_C_NT_EXPORT_NAME;
 
+GSS_DLLIMP extern gss_OID GSS_C_NT_COMPOSITE_EXPORT;
+
 /* Function Prototypes */
 
 OM_uint32 KRB5_CALLCONV

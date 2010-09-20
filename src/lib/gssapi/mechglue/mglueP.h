@@ -51,7 +51,7 @@ typedef struct gss_name_struct {
 	gss_OID			name_type;
 	gss_buffer_t		external_name;
 	/*
-	 * These last two fields are only filled in for mechanism
+	 * These next two fields are only filled in for mechanism
 	 * names.
 	 */
 	gss_OID			mech_type;
@@ -823,5 +823,10 @@ gssint_export_internal_name_composite(OM_uint32 *minor_status,
                                       const gss_OID mech_type,
                                       const gss_name_t internal_name,
                                       gss_buffer_t name_buf);
+
+OM_uint32
+gssint_duplicate_name_attributes(OM_uint32 *minor_status,
+                                 gss_name_attribute_t srcAttrs,
+                                 gss_name_attribute_t *pDstAttrs);
 
 #endif /* _GSS_MECHGLUEP_H */

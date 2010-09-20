@@ -36,7 +36,12 @@
 #include <errno.h>
 
 /* local function to import GSS_C_EXPORT_NAME names */
-static OM_uint32 importExportName(OM_uint32 *, gss_union_name_t);
+static OM_uint32
+importExportName(OM_uint32 *minor_status,
+		 gss_union_name_t union_name,
+		 gss_OID *mech_type,
+		 gss_name_t *mech_name,
+		 gss_name_attribute_t *attrs);
 
 static OM_uint32
 val_imp_name_args(
@@ -109,6 +114,7 @@ gss_name_t *		output_name;
     union_name->mech_name = 0;
     union_name->name_type = 0;
     union_name->external_name = 0;
+    union_name->attributes = NULL;
 
     /*
      * All we do here is record the external name and name_type.
@@ -144,8 +150,13 @@ gss_name_t *		output_name;
      * do however make this an MN for names of GSS_C_NT_EXPORT_NAME type.
      */
     if (input_name_type != GSS_C_NULL_OID &&
-	g_OID_equal(input_name_type, GSS_C_NT_EXPORT_NAME)) {
-	major_status = importExportName(minor_status, union_name);
+	(g_OID_equal(input_name_type, GSS_C_NT_EXPORT_NAME) ||
+	 g_OID_equal(input_name_type, GSS_C_NT_COMPOSITE_EXPORT))) {
+	major_status = importExportName(minor_status,
+					union_name,
+					&union_name->mech_type,
+					&union_name->mech_name,
+					&union_name->attributes);
 	if (major_status != GSS_S_COMPLETE)
 	    goto allocation_failure;
     }
@@ -182,8 +193,15 @@ importCompositeName(OM_uint32 *minor_status,
     gss_name_attribute_t head = NULL, *pNext = &head;
     size_t remain = name_buf->length;
     unsigned char *p = (unsigned char *)name_buf->value;
+    ssize_t attrCount;
 
     *pAttributes = NULL;
+
+    if (remain < 4)
+        return GSS_S_BAD_NAME;
+
+    TREAD_INT(p, attrCount, 1);
+    remain -= 4;
 
     do {
         gss_name_attribute_t attr;
@@ -192,7 +210,12 @@ importCompositeName(OM_uint32 *minor_status,
                                                    &p, &remain);
         if (GSS_ERROR(status))
             break;
+
+        attrCount--;
     } while (remain != 0);
+
+    if (attrCount != 0)
+        status = GSS_S_BAD_NAME;
 
     if (GSS_ERROR(status))
         gssint_release_name_attributes(&tmpMinor, &head);
@@ -210,15 +233,18 @@ static const unsigned int mechOidLenLen = 2;
 static const unsigned int nameTypeLenLen = 2;
 
 static OM_uint32
-importExportName(minor, unionName)
-    OM_uint32 *minor;
-    gss_union_name_t unionName;
+importExportName(OM_uint32 *minor,
+		 gss_union_name_t unionName,
+		 gss_OID *mech_type,
+		 gss_name_t *mech_name,
+		 gss_name_attribute_t *attributes)
 {
     gss_OID_desc mechOid;
     gss_buffer_desc expName;
     unsigned char *buf;
     gss_mechanism mech;
-    OM_uint32 major, mechOidLen, nameLen, curLength;
+    OM_uint32 major, tmpMinor;
+    OM_uint32 mechOidLen, nameLen, curLength;
     unsigned int bytes;
     int composite;
 
@@ -236,6 +262,15 @@ importExportName(minor, unionName)
 	return (GSS_S_DEFECTIVE_TOKEN);
 
     composite = (buf[1] == 0x02);
+    /*
+     * MIT 1.8 emits composite tokens with GSS_C_NT_EXPORT, because
+     * GSS_C_NT_COMPOSITE_EXPORT was not defined then. So accept
+     * this, but if the new OID is specified, require composite
+     * tokens.
+     */
+    if (g_OID_equal(unionName->name_type, GSS_C_NT_COMPOSITE_EXPORT) &&
+	composite == 0)
+	return (GSS_S_DEFECTIVE_TOKEN);
 
     buf += expNameTokIdLen;
 
@@ -286,15 +321,20 @@ importExportName(minor, unionName)
      */
     if (composite ? mech->gss_export_name_composite : mech->gss_export_name) {
 	major = mech->gss_import_name(minor,
-				      &expName, (gss_OID)GSS_C_NT_EXPORT_NAME,
-				      &unionName->mech_name);
+				      &expName,
+				      composite
+					? (gss_OID)GSS_C_NT_COMPOSITE_EXPORT
+					: (gss_OID)GSS_C_NT_EXPORT_NAME,
+				      mech_name);
 	if (major != GSS_S_COMPLETE)
 	    map_error(minor, mech);
 	else {
 	    major = generic_gss_copy_oid(minor, &mechOid,
-					 &unionName->mech_type);
-	    if (major != GSS_S_COMPLETE)
+					 mech_type);
+	    if (major != GSS_S_COMPLETE) {
+		gssint_release_internal_name(&tmpMinor, &mechOid, mech_name);
 		map_errcode(minor);
+	    }
 	}
 	return (major);
     }
@@ -325,7 +365,9 @@ importExportName(minor, unionName)
     /*
      * we use < here because bad code in rpcsec_gss rounds up exported
      * name token lengths and pads with nulls, otherwise != would be
-     * appropriate
+     * appropriate, for the non-composite name case (the composite
+     * name is appended to the end of the simple name, so an equality
+     * check would be inappropriate)
      */
     curLength += nameLen;   /* this is the total length */
     if (expName.length < curLength)
@@ -384,25 +426,80 @@ importExportName(minor, unionName)
     expName.length = nameLen;
     expName.value = nameLen ? (void *)buf : NULL;
     major = mech->gss_import_name(minor, &expName,
-				  GSS_C_NULL_OID, &unionName->mech_name);
+				  GSS_C_NULL_OID, mech_name);
     if (major != GSS_S_COMPLETE) {
 	map_error(minor, mech);
 	return (major);
     }
 
-    major = generic_gss_copy_oid(minor, &mechOid, &unionName->mech_type);
+    major = generic_gss_copy_oid(minor, &mechOid, mech_type);
     if (major != GSS_S_COMPLETE) {
 	map_errcode(minor);
+	gssint_release_internal_name(&tmpMinor, &mechOid, mech_name);
+	return (major);
     }
 
-    if (composite) {
-        expName.length = curLength - nameLen;
-        expName.value = buf + nameLen;
+    if (composite && attributes != NULL) {
+	expName.length = unionName->external_name->length - curLength;
+	expName.value = buf + nameLen;
 
-        major = importCompositeName(minor, &expName, &unionName->attributes);
-        if (major != GSS_S_COMPLETE)
-            return major;
+	major = importCompositeName(minor, &expName, attributes);
+	if (major != GSS_S_COMPLETE) {
+	    gssint_release_internal_name(&tmpMinor, &mechOid, mech_name);
+	    return (major);
+	}
     }
 
     return major;
 } /* importExportName */
+
+OM_uint32
+gssint_import_internal_name(OM_uint32 *minor_status,
+			    gss_OID mech_type,
+			    gss_union_name_t union_name,
+			    gss_name_t *internal_name)
+{
+    OM_uint32           status, tmpMinor;
+    gss_mechanism       mech;
+
+    /*
+     * This path allows us to take advantage of internal import-
+     * export name semantics (for use with self-exported composite
+     * names). Otherwise, a mechanism that supports naming extensions
+     * but not gss_export_name_composite will fail parsing a
+     * composite name.
+     */
+    if (union_name->name_type != GSS_C_NULL_OID &&
+	(g_OID_equal(union_name->name_type, GSS_C_NT_EXPORT_NAME) ||
+	 g_OID_equal(union_name->name_type, GSS_C_NT_COMPOSITE_EXPORT))) {
+	gss_OID actualMech = GSS_C_NO_OID;
+	status = importExportName(minor_status,
+				  union_name,
+				  &actualMech,
+				  internal_name,
+				  NULL);
+	if (status == GSS_S_COMPLETE &&
+	    !g_OID_equal(mech_type, actualMech)) {
+	    gssint_release_internal_name(&tmpMinor, mech_type, internal_name);
+	    status = GSS_S_BAD_MECH;
+	}
+
+	return (status);
+    }
+
+    mech = gssint_get_mechanism (mech_type);
+    if (mech == NULL)
+        return (GSS_S_BAD_MECH);
+
+    if (mech->gss_import_name == NULL)
+        return (GSS_S_UNAVAILABLE);
+
+    status = mech->gss_import_name(minor_status,
+                                   union_name->external_name,
+                                   union_name->name_type,
+                                   internal_name);
+    if (status != GSS_S_COMPLETE)
+        map_error(minor_status, mech);
+
+    return (status);
+}

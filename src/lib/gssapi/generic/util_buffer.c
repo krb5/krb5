@@ -46,6 +46,12 @@ int g_make_string_buffer(const char *str, gss_buffer_t buffer)
 
 int g_duplicate_buffer(const gss_buffer_t src, gss_buffer_t dst)
 {
+    if (src->value == NULL) {
+        dst->value = NULL;
+        dst->length = 0;
+        return 1;
+    }
+
     dst->value = malloc(src->length);
     if (dst->value == NULL) {
         dst->length = 0;
@@ -55,5 +61,5 @@ int g_duplicate_buffer(const gss_buffer_t src, gss_buffer_t dst)
     memcpy(dst->value, src->value, src->length);
     dst->length = src->length;
 
-    return 0;
+    return 1;
 }

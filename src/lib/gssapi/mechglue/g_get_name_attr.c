@@ -58,6 +58,14 @@ gss_get_name_attribute(OM_uint32 *minor_status,
         *authenticated = 0;
     if (complete != NULL)
         *complete = 0;
+    if (value != NULL) {
+        value->value = NULL;
+        value->length = 0;
+    }
+    if (display_value != NULL) {
+        display_value->value = NULL;
+        display_value->length = 0;
+    }
 
     *minor_status = 0;
 
@@ -66,7 +74,7 @@ gss_get_name_attribute(OM_uint32 *minor_status,
     if (union_name->attributes != NULL) {
         status = gssint_get_name_attribute(minor_status,
                                            union_name->attributes,
-                                           attr_name,
+                                           attr,
                                            authenticated,
                                            complete,
                                            value,

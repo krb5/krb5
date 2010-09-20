@@ -97,6 +97,7 @@ gss_name_t *output_name;
 		out_union->name_type = 0;
 		out_union->external_name = 0;
 		out_union->loopback = out_union;
+		out_union->attributes = NULL;
 
 		/* Allocate the buffer for the user specified representation */
 		if (gssint_create_copy_buffer(in_union->external_name,
@@ -112,7 +113,13 @@ gss_name_t *output_name;
 			goto allocation_failure;
 		    }
 		}
-
+		if (in_union->attributes) {
+			major_status = gssint_duplicate_name_attributes(minor_status,
+							in_union->attributes,
+							&out_union->attributes);
+			if (major_status != GSS_S_COMPLETE)
+				goto allocation_failure;
+		}
 	}
 
 	/*

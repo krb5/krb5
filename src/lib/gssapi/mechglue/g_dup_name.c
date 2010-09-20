@@ -80,6 +80,7 @@ gss_name_t *dest_name;
 	dest_union->mech_name = 0;
 	dest_union->name_type = 0;
 	dest_union->external_name = 0;
+	dest_union->attributes = NULL;
 
 	/* Now copy the external representaion */
 	if (gssint_create_copy_buffer(src_union->external_name,
@@ -116,6 +117,13 @@ gss_name_t *dest_name;
 			goto allocation_failure;
 	}
 
+	if (src_union->attributes) {
+		major_status = gssint_duplicate_name_attributes(minor_status,
+							src_union->attributes,
+							&dest_union->attributes);
+		if (major_status != GSS_S_COMPLETE)
+			goto allocation_failure;
+	}
 
 	dest_union->loopback = dest_union;
 	*dest_name = (gss_name_t)dest_union;
