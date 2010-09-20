@@ -779,6 +779,12 @@ main(argc, argv)
             mechanism = "{ 1 3 6 1 5 5 2 }";
         } else if (strcmp(*argv, "-krb5") == 0) {
             mechanism = "{ 1 3 5 1 5 2 }";
+        } else if (strcmp(*argv, "-eap") == 0) {
+            mechanism = "{ 1 3 6 1 4 1 5322 21 1 }";
+        } else if (strcmp(*argv, "-eap-aes128") == 0) {
+            mechanism = "{ 1 3 6 1 4 1 5322 21 1 17 }";
+        } else if (strcmp(*argv, "-eap-aes256") == 0) {
+            mechanism = "{ 1 3 6 1 4 1 5322 21 1 18 }";
 #ifdef _WIN32
         } else if (strcmp(*argv, "-threads") == 0) {
             argc--;
