@@ -12,26 +12,26 @@ directory the file resides.  One common use is to place a
 file in root's home directory, thereby granting system administrators
 remote root access to the host via Kerberos.
 .SH EXAMPLES
-Suppose the user "janedoe" had a 
+Suppose the user "alice" had a 
 .B .k5login
 file in her home directory containing the following line:
 .sp
 .nf
 .in +1i
-johndoe@FUBAR.ORG
+bob@FUBAR.ORG
 .in -1i
 .fi
 .sp
-This would allow her husband "johndoe" to use any of the Kerberos
-network applications, such as
+This would allow "bob" to use any of the Kerberos network
+applications, such as
 .IR telnet (1),
 .IR rlogin (1),
 .IR rsh (1),
 and
 .IR rcp (1),
-to access her account, using his own Kerberos tickets.
+to access alice's account, using bob's Kerberos tickets.
 .PP
-Let us further suppose that "janedoe" is a system administrator.  She
+Let us further suppose that "alice" is a system administrator.  Alice
 and the other system administrators would have their principals in
 root's
 .B .k5login
@@ -39,17 +39,16 @@ file on each host:
 .sp
 .nf
 .in +1i
-janedoe@BLEEP.COM
+alice@BLEEP.COM
 joeadmin/root@BLEEP.COM
 .in -1i
 .fi
 .sp
 This would allow either system administrator to log in to these hosts
 using their Kerberos tickets instead of having to type the root
-password.  Note that because "janedoe"'s husband retains the Kerberos
-tickets for his own principal, "johndoe@FUBAR.ORG", he would not have
-any of the privileges that require his wife's tickets, such as root
-access to any of her site's hosts, or the ability to change her
-password.
+password.  Note that because "bob" retains the Kerberos tickets for
+his own principal, "bob@FUBAR.ORG", he would not have any of the
+privileges that require alice's tickets, such as root access to any of
+the site's hosts, or the ability to change alice's password.
 .SH SEE ALSO
 telnet(1), rlogin(1), rsh(1), rcp(1), ksu(1), telnetd(8), klogind(8)
