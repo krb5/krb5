@@ -311,7 +311,7 @@ main(int argc, char *argv[])
      */
     progname = (strrchr(argv[0], '/') ? strrchr(argv[0], '/')+1 : argv[0]);
 
-    retval = krb5_init_context(&util_context);
+    retval = kadm5_init_krb5_context(&util_context);
     set_com_err_hook(extended_com_err_fn);
     if (retval) {
         com_err (progname, retval, "while initializing Kerberos code");
