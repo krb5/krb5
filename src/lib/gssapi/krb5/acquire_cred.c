@@ -227,7 +227,8 @@ acquire_init_cred(krb5_context context,
 {
     krb5_error_code code;
     krb5_ccache ccache;
-    krb5_principal princ = NULL, tmp_princ;
+    krb5_principal ccache_princ = NULL, tmp_princ;
+    krb5_const_principal cred_princ = NULL;
     krb5_cc_cursor cur;
     krb5_creds creds;
     int got_endtime;
@@ -355,8 +356,14 @@ acquire_init_cred(krb5_context context,
         return GSS_S_CRED_UNAVAIL;
     }
 
-    /* get out the principal name and see if it matches */
-    code = krb5_cc_get_principal(context, ccache, &princ);
+    /*
+     * Credentials cache principal must match either the acceptor principal
+     * name or the desired_princ argument (they may be the same).
+     */
+    if (cred->name != NULL && desired_princ == NULL)
+        desired_princ = cred->name->princ;
+
+    code = krb5_cc_get_principal(context, ccache, &ccache_princ);
     if (code != 0) {
         krb5_cc_close(context, ccache);
         *minor_status = code;
@@ -364,27 +371,33 @@ acquire_init_cred(krb5_context context,
     }
 
     if (desired_princ != NULL) {
-        if (!krb5_principal_compare(context, princ, desired_princ)) {
-            krb5_free_principal(context, princ);
+        if (!krb5_principal_compare(context, ccache_princ, desired_princ)) {
+            krb5_free_principal(context, ccache_princ);
             krb5_cc_close(context, ccache);
             *minor_status = KG_CCACHE_NOMATCH;
             return GSS_S_CRED_UNAVAIL;
         }
-        krb5_free_principal(context, princ);
-        princ = desired_princ;
-    } else {
-        assert(cred->name == NULL);
+    }
 
-        if ((code = kg_init_name(context, princ, NULL,
+    /*
+     * If we are acquiring initiator-only default credentials, then set
+     * cred->name to the credentials cache principal name.
+     */
+    if (cred->name == NULL) {
+        if ((code = kg_init_name(context, ccache_princ, NULL,
                                  KG_INIT_NAME_NO_COPY | KG_INIT_NAME_INTERN,
                                  &cred->name))) {
-            krb5_free_principal(context, princ);
+            krb5_free_principal(context, ccache_princ);
             krb5_cc_close(context, ccache);
             *minor_status = code;
             return GSS_S_FAILURE;
         }
-        /* princ is now owned by cred->name, it need not be freed here */
+    } else {
+        krb5_free_principal(context, ccache_princ);
     }
+
+    assert(cred->name->princ != NULL);
+    cred_princ = cred->name->princ;
 
     if (password != GSS_C_NO_BUFFER) {
         /* stash the password for later */
@@ -426,11 +439,11 @@ acquire_init_cred(krb5_context context,
     got_endtime = 0;
 
     code = krb5_build_principal_ext(context, &tmp_princ,
-                                    krb5_princ_realm(context, princ)->length,
-                                    krb5_princ_realm(context, princ)->data,
+                                    krb5_princ_realm(context, cred_princ)->length,
+                                    krb5_princ_realm(context, cred_princ)->data,
                                     KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,
-                                    krb5_princ_realm(context, princ)->length,
-                                    krb5_princ_realm(context, princ)->data,
+                                    krb5_princ_realm(context, cred_princ)->length,
+                                    krb5_princ_realm(context, cred_princ)->data,
                                     0);
     if (code) {
         krb5_cc_close(context, ccache);
