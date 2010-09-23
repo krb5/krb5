@@ -106,11 +106,21 @@ cleanup:
     return status;
 }
 
+/*
+ * This differs from gssspi_set_cred_option() as shipped in 1.7, in that
+ * it can return a cred handle. To denote this change we have changed the
+ * name of the function from gssspi_set_cred_option() to gss_set_cred_option().
+ * However, the dlsym() entry point is still gssspi_set_cred_option(). This
+ * fixes a separate issue, namely that a dynamically loaded mechanism could
+ * not itself call set_cred_option() without calling its own implementation
+ * instead of the mechanism glue's. (This is useful where a mechanism wishes
+ * to export a mechanism-specific API that is a wrapper around this function.)
+ */
 OM_uint32 KRB5_CALLCONV
-gssspi_set_cred_option(OM_uint32 *minor_status,
-	               gss_cred_id_t *cred_handle,
-	               const gss_OID desired_object,
-	               const gss_buffer_t value)
+gss_set_cred_option(OM_uint32 *minor_status,
+	            gss_cred_id_t *cred_handle,
+	            const gss_OID desired_object,
+	            const gss_buffer_t value)
 {
     gss_union_cred_t	union_cred;
     gss_mechanism	mech;
@@ -193,4 +203,24 @@ gssspi_set_cred_option(OM_uint32 *minor_status,
     }
 
     return status;
+}
+
+/*
+ * Provide this for backward ABI compatibility, but remove it from the
+ * header.
+ */
+OM_uint32 KRB5_CALLCONV
+gssspi_set_cred_option(OM_uint32 *minor_status,
+	               gss_cred_id_t cred,
+	               const gss_OID desired_object,
+	               const gss_buffer_t value);
+
+OM_uint32 KRB5_CALLCONV
+gssspi_set_cred_option(OM_uint32 *minor_status,
+	               gss_cred_id_t cred,
+	               const gss_OID desired_object,
+	               const gss_buffer_t value)
+{
+    return gss_set_cred_option(minor_status, &cred,
+                               desired_object, value);
 }

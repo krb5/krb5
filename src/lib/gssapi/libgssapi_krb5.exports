@@ -100,6 +100,7 @@ gss_wrap_aead
 gss_wrap_iov
 gss_wrap_iov_length
 gss_wrap_size_limit
+gss_set_cred_option
 gssspi_set_cred_option
 gssspi_mech_invoke
 krb5_gss_dbg_client_expcreds
