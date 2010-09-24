@@ -51,6 +51,7 @@ SRCS = \
 	$(srcdir)/g_rel_name.c \
 	$(srcdir)/g_rel_name_mapping.c \
 	$(srcdir)/g_rel_oid_set.c \
+	$(srcdir)/g_saslname.c \
 	$(srcdir)/g_seal.c \
 	$(srcdir)/g_set_context_option.c \
 	$(srcdir)/g_set_cred_option.c \
@@ -107,6 +108,7 @@ OBJS = \
 	$(OUTPRE)g_rel_name.$(OBJEXT) \
 	$(OUTPRE)g_rel_name_mapping.$(OBJEXT) \
 	$(OUTPRE)g_rel_oid_set.$(OBJEXT) \
+	$(OUTPRE)g_saslname.$(OBJEXT) \
 	$(OUTPRE)g_seal.$(OBJEXT) \
 	$(OUTPRE)g_set_context_option.$(OBJEXT) \
 	$(OUTPRE)g_set_cred_option.$(OBJEXT) \
@@ -163,6 +165,7 @@ STLIBOBJS = \
 	g_rel_name.o \
 	g_rel_name_mapping.o \
 	g_rel_oid_set.o \
+	g_saslname.o \
 	g_seal.o \
 	g_set_context_option.o \
 	g_set_cred_option.o \

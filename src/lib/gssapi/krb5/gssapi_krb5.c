@@ -630,6 +630,44 @@ krb5_gssspi_mech_invoke (OM_uint32 *minor_status,
     return GSS_S_UNAVAILABLE;
 }
 
+#define GS2_KRB5_SASL_NAME      "GS2-KRB5"
+#define GS2_KRB5_SASL_NAME_LEN  (sizeof(GS2_KRB5_SASL_NAME) - 1)
+
+static OM_uint32
+krb5_gss_inquire_mech_for_saslname(OM_uint32 *minor_status,
+                                   const gss_buffer_t sasl_mech_name,
+                                   gss_OID *mech_type)
+{
+    if (sasl_mech_name->length == GS2_KRB5_SASL_NAME_LEN &&
+        memcmp(sasl_mech_name->value,
+               GS2_KRB5_SASL_NAME, GS2_KRB5_SASL_NAME_LEN) == 0) {
+        *mech_type = (gss_OID)gss_mech_krb5;
+        return GSS_S_COMPLETE;
+    }
+
+    return GSS_S_BAD_MECH;
+}
+
+static OM_uint32
+krb5_gss_inquire_saslname_for_mech(OM_uint32 *minor_status,
+                                   const gss_OID desired_mech,
+                                   gss_buffer_t sasl_mech_name,
+                                   gss_buffer_t mech_name,
+                                   gss_buffer_t mech_description)
+{
+    OM_uint32 status;
+
+    sasl_mech_name->value = strdup(GS2_KRB5_SASL_NAME);
+    if (sasl_mech_name->value == NULL) {
+        *minor_status = ENOMEM;
+        return GSS_S_FAILURE;
+    }
+
+    sasl_mech_name->length = GS2_KRB5_SASL_NAME_LEN;
+
+    return status;
+}
+
 static struct gss_config krb5_mechanism = {
     { GSS_MECH_KRB5_OID_LENGTH, GSS_MECH_KRB5_OID },
     NULL,
@@ -701,6 +739,8 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_release_any_name_mapping,
     krb5_gss_pseudo_random,
     NULL,               /* set_neg_mechs */
+    krb5_gss_inquire_mech_for_saslname,
+    krb5_gss_inquire_saslname_for_mech,
 };
 
 static struct gss_config_ext krb5_mechanism_ext = {

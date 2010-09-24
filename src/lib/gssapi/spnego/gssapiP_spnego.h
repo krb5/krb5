@@ -565,6 +565,24 @@ spnego_gss_set_neg_mechs
 	const gss_OID_set mech_list
 );
 
+OM_uint32
+spnego_gss_inquire_mech_for_saslname
+(
+	OM_uint32 *minor_status,
+	const gss_buffer_t sasl_mech_name,
+	gss_OID *mech_type
+);
+
+OM_uint32
+spnego_inquire_saslname_for_mech
+(
+	OM_uint32 *minor_status,
+	const gss_OID desired_mech,
+	gss_buffer_t sasl_mech_name,
+	gss_buffer_t mech_name,
+	gss_buffer_t mech_description
+);
+
 #ifdef	__cplusplus
 }
 #endif

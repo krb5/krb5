@@ -2258,10 +2258,10 @@ spnego_gss_set_cred_option(
 
 	mcred = (spcred == NULL) ? GSS_C_NO_CREDENTIAL : spcred->mcred;
 
-	ret = gssspi_set_cred_option(minor_status,
-				     &mcred,
-				     desired_object,
-				     value);
+	ret = gss_set_cred_option(minor_status,
+				  &mcred,
+				  desired_object,
+				  value);
 	if (ret == GSS_S_COMPLETE && spcred == NULL) {
 		/*
 		 * If the mechanism allocated a new credential handle, then
@@ -2684,6 +2684,47 @@ spnego_gss_set_neg_mechs(OM_uint32 *minor_status,
 	ret = generic_gss_copy_oid_set(minor_status, mech_list,
 				       &spcred->neg_mechs);
 	return (ret);
+}
+
+#define SPNEGO_SASL_NAME	"SPNEGO"
+#define SPNEGO_SASL_NAME_LEN	(sizeof(SPNEGO_SASL_NAME) - 1)
+
+OM_uint32
+spnego_gss_inquire_mech_for_saslname(OM_uint32 *minor_status,
+                                     const gss_buffer_t sasl_mech_name,
+                                     gss_OID *mech_type)
+{
+	if (sasl_mech_name->length == SPNEGO_SASL_NAME_LEN &&
+	    memcmp(sasl_mech_name->value, SPNEGO_SASL_NAME,
+		   SPNEGO_SASL_NAME_LEN) == 0) {
+		*mech_type = (gss_OID)gss_mech_spnego;
+		return (GSS_S_COMPLETE);
+	}
+
+	return (GSS_S_BAD_MECH);
+}
+
+OM_uint32
+spnego_inquire_saslname_for_mech(OM_uint32 *minor_status,
+                                 const gss_OID desired_mech,
+                                 gss_buffer_t sasl_mech_name,
+                                 gss_buffer_t mech_name,
+                                 gss_buffer_t mech_description)
+{
+	OM_uint32 status;
+
+	if (!g_OID_equal(desired_mech, gss_mech_spnego))
+		return (GSS_S_BAD_MECH);
+
+	sasl_mech_name->value = strdup(SPNEGO_SASL_NAME);
+	if (sasl_mech_name->value == NULL) {
+		*minor_status = ENOMEM;
+		return (GSS_S_FAILURE);
+	}
+
+	sasl_mech_name->length = SPNEGO_SASL_NAME_LEN;
+
+	return (status);
 }
 
 /*
