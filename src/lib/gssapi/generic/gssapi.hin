@@ -898,7 +898,8 @@ GSS_DLLIMP extern gss_const_OID GSS_C_MA_CTX_TRANS;
 /*
  * RFC 5801
  */
-OM_uint32 KRB5_CALLCONV gss_inquire_saslname_for_mech(
+OM_uint32 KRB5_CALLCONV
+gss_inquire_saslname_for_mech(
     OM_uint32 *,        /* minor_status */
     const gss_OID,      /* desired_mech */
     gss_buffer_t,       /* sasl_mech_name */
@@ -906,7 +907,8 @@ OM_uint32 KRB5_CALLCONV gss_inquire_saslname_for_mech(
     gss_buffer_t        /* mech_description */
 );
 
-OM_uint32 KRB5_CALLCONV gss_inquire_mech_for_saslname(
+OM_uint32 KRB5_CALLCONV
+gss_inquire_mech_for_saslname(
     OM_uint32 *,        /* minor_status */
     const gss_buffer_t, /* sasl_mech_name */
     gss_OID *           /* mech_type */
