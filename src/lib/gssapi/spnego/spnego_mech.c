@@ -2700,7 +2700,8 @@ spnego_gss_inquire_mech_for_saslname(OM_uint32 *minor_status,
 	if (sasl_mech_name->length == SPNEGO_SASL_NAME_LEN &&
 	    memcmp(sasl_mech_name->value, SPNEGO_SASL_NAME,
 		   SPNEGO_SASL_NAME_LEN) == 0) {
-		*mech_type = (gss_OID)gss_mech_spnego;
+		if (mech_type != NULL)
+			*mech_type = (gss_OID)gss_mech_spnego;
 		return (GSS_S_COMPLETE);
 	}
 
@@ -2717,17 +2718,10 @@ spnego_gss_inquire_saslname_for_mech(OM_uint32 *minor_status,
 	if (!g_OID_equal(desired_mech, gss_mech_spnego))
 		return (GSS_S_BAD_MECH);
 
+	(void) g_make_string_buffer(SPNEGO_SASL_NAME, sasl_mech_name);
 	(void) g_make_string_buffer("spnego", mech_name);
 	(void) g_make_string_buffer("Simple and Protected GSS-API "
 				    "Negotiation Mechanism", mech_description);
-
-	sasl_mech_name->value = strdup(SPNEGO_SASL_NAME);
-	if (sasl_mech_name->value == NULL) {
-		*minor_status = ENOMEM;
-		return (GSS_S_FAILURE);
-	}
-
-	sasl_mech_name->length = SPNEGO_SASL_NAME_LEN;
 
 	return (GSS_S_COMPLETE);
 }

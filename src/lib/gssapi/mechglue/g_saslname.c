@@ -124,19 +124,20 @@ OM_uint32 KRB5_CALLCONV gss_inquire_saslname_for_mech(
 
     *minor_status = 0;
 
-    if (sasl_mech_name == GSS_C_NO_BUFFER ||
-        mech_name == GSS_C_NO_BUFFER ||
-        mech_description == GSS_C_NO_BUFFER)
-        return GSS_S_CALL_INACCESSIBLE_WRITE;
+    if (sasl_mech_name != GSS_C_NO_BUFFER) {
+        sasl_mech_name->length = 0;
+        sasl_mech_name->value = NULL;
+    }
 
-    sasl_mech_name->length = 0;
-    sasl_mech_name->value = NULL;
+    if (mech_name != GSS_C_NO_BUFFER) {
+        mech_name->length = 0;
+        mech_name->value = NULL;
+    }
 
-    mech_name->length = 0;
-    mech_name->value = NULL;
-
-    mech_description->length = 0;
-    mech_description->value = NULL;
+    if (mech_description != GSS_C_NO_BUFFER) {
+        mech_description->length = 0;
+        mech_description->value = NULL;
+    }
 
     mech = gssint_get_mechanism(desired_mech);
     if (mech != NULL && mech->gss_inquire_saslname_for_mech != NULL) {
@@ -147,8 +148,11 @@ OM_uint32 KRB5_CALLCONV gss_inquire_saslname_for_mech(
                                                      mech_description);
     }
     if (status == GSS_S_BAD_MECH) {
-        status = oidToSaslNameAlloc(minor_status, desired_mech,
-                                    sasl_mech_name);
+        if (sasl_mech_name != GSS_C_NO_BUFFER)
+            status = oidToSaslNameAlloc(minor_status, desired_mech,
+                                        sasl_mech_name);
+        else
+            status = GSS_S_COMPLETE;
     }
 
     return status;
@@ -166,11 +170,10 @@ OM_uint32 KRB5_CALLCONV gss_inquire_mech_for_saslname(
     if (minor_status == NULL)
         return GSS_S_CALL_INACCESSIBLE_WRITE;
 
-    if (mech_type == NULL)
-        return GSS_S_CALL_INACCESSIBLE_WRITE;
-
     *minor_status = 0;
-    *mech_type = GSS_C_NO_OID;
+
+    if (mech_type != NULL)
+        *mech_type = GSS_C_NO_OID;
 
     status = gss_indicate_mechs(minor_status, &mechSet);
     if (status != GSS_S_COMPLETE)
@@ -194,7 +197,8 @@ OM_uint32 KRB5_CALLCONV gss_inquire_mech_for_saslname(
                           mappedName) == GSS_S_COMPLETE &&
             memcmp(sasl_mech_name->value, mappedName,
                    OID_SASL_NAME_LENGTH) == 0) {
-            *mech_type = &mech->mech_type;
+            if (mech_type != NULL)
+                *mech_type = &mech->mech_type;
             status = GSS_S_COMPLETE;
             break;
         }

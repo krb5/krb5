@@ -644,12 +644,14 @@ krb5_gss_inquire_mech_for_saslname(OM_uint32 *minor_status,
     if (sasl_mech_name->length == GS2_KRB5_SASL_NAME_LEN &&
         memcmp(sasl_mech_name->value,
                GS2_KRB5_SASL_NAME, GS2_KRB5_SASL_NAME_LEN) == 0) {
-        *mech_type = (gss_OID)gss_mech_krb5;
+        if (mech_type != NULL)
+            *mech_type = (gss_OID)gss_mech_krb5;
         return GSS_S_COMPLETE;
     } else if (sasl_mech_name->length == GS2_IAKERB_SASL_NAME_LEN &&
         memcmp(sasl_mech_name->value,
                GS2_IAKERB_SASL_NAME, GS2_IAKERB_SASL_NAME_LEN) == 0) {
-        *mech_type = (gss_OID)gss_mech_iakerb;
+        if (mech_type != NULL)
+            *mech_type = (gss_OID)gss_mech_iakerb;
         return GSS_S_COMPLETE;
     }
 
