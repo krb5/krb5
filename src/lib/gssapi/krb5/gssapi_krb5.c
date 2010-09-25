@@ -630,8 +630,8 @@ krb5_gssspi_mech_invoke (OM_uint32 *minor_status,
     return GSS_S_UNAVAILABLE;
 }
 
-#define GS2_KRB5_SASL_NAME      "GS2-KRB5"
-#define GS2_KRB5_SASL_NAME_LEN  (sizeof(GS2_KRB5_SASL_NAME) - 1)
+#define GS2_KRB5_SASL_NAME        "GS2-KRB5"
+#define GS2_KRB5_SASL_NAME_LEN    (sizeof(GS2_KRB5_SASL_NAME) - 1)
 
 #define GS2_IAKERB_SASL_NAME      "GS2-IAKERB"
 #define GS2_IAKERB_SASL_NAME_LEN  (sizeof(GS2_IAKERB_SASL_NAME) - 1)
@@ -641,6 +641,8 @@ krb5_gss_inquire_mech_for_saslname(OM_uint32 *minor_status,
                                    const gss_buffer_t sasl_mech_name,
                                    gss_OID *mech_type)
 {
+    *minor_status = 0;
+
     if (sasl_mech_name->length == GS2_KRB5_SASL_NAME_LEN &&
         memcmp(sasl_mech_name->value,
                GS2_KRB5_SASL_NAME, GS2_KRB5_SASL_NAME_LEN) == 0) {
@@ -665,6 +667,8 @@ krb5_gss_inquire_saslname_for_mech(OM_uint32 *minor_status,
                                    gss_buffer_t mech_name,
                                    gss_buffer_t mech_description)
 {
+    *minor_status = 0;
+
     if (g_OID_equal(desired_mech, gss_mech_iakerb)) {
         g_make_string_buffer(GS2_IAKERB_SASL_NAME, sasl_mech_name);
         g_make_string_buffer("iakerb", mech_name);
@@ -686,6 +690,11 @@ krb5_gss_inquire_attrs_for_mech(OM_uint32 *minor_status,
                                 gss_OID_set *known_mech_attrs)
 {
     OM_uint32 major, tmpMinor;
+
+    if (mech_attrs == NULL) {
+        *minor_status = 0;
+        return GSS_S_COMPLETE;
+    }
 
     major = gss_create_empty_oid_set(minor_status, mech_attrs);
     if (GSS_ERROR(major))

@@ -164,10 +164,8 @@ OM_uint32 gss_inquire_attrs_for_mech(
 
     *minor = 0;
 
-    if (mech_attrs == NULL)
-        return GSS_S_CALL_INACCESSIBLE_WRITE;
-
-    *mech_attrs = GSS_C_NO_OID_SET;
+    if (mech_attrs != NULL)
+        *mech_attrs = GSS_C_NO_OID_SET;
 
     if (known_mech_attrs != NULL)
         *known_mech_attrs = GSS_C_NO_OID_SET;
@@ -182,7 +180,7 @@ OM_uint32 gss_inquire_attrs_for_mech(
             return status;
     }
 
-    if (mech != gssint_get_mechanism(NULL)) {
+    if (mech_attrs != NULL && mech != gssint_get_mechanism(NULL)) {
         if (*mech_attrs == GSS_C_NO_OID_SET) {
             status = generic_gss_create_empty_oid_set(minor, mech_attrs);
             if (GSS_ERROR(status))

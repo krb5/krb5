@@ -2715,6 +2715,8 @@ spnego_gss_inquire_saslname_for_mech(OM_uint32 *minor_status,
                                      gss_buffer_t mech_name,
                                      gss_buffer_t mech_description)
 {
+	*minor_status = 0;
+
 	if (!g_OID_equal(desired_mech, gss_mech_spnego))
 		return (GSS_S_BAD_MECH);
 
@@ -2732,7 +2734,13 @@ spnego_gss_inquire_attrs_for_mech(OM_uint32 *minor_status,
 				  gss_OID_set *mech_attrs,
 				  gss_OID_set *known_mech_attrs)
 {
-    OM_uint32 major, tmpMinor;
+	OM_uint32 major, tmpMinor;
+
+	/* known_mech_attrs is handled by mechglue */
+	*minor_status = 0;
+
+	if (mech_attrs == NULL)
+	    return (GSS_S_COMPLETE);
 
 	major = gss_create_empty_oid_set(minor_status, mech_attrs);
 	if (GSS_ERROR(major))
