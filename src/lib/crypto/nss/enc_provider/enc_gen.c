@@ -49,6 +49,9 @@
 #define MAX_KEY_LENGTH 64
 #define MAX_BLOCK_SIZE 64
 
+static NSSInitContext *k5_nss_ctx = NULL;
+static pid_t k5_nss_pid = 0;
+static k5_mutex_t k5_nss_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 
 krb5_error_code
 k5_nss_map_error(int nss_error)
@@ -65,34 +68,64 @@ k5_nss_map_last_error(void)
     return k5_nss_map_error(PORT_GetError());
 }
 
-static NSSInitContext *krb5_nss_init = NULL;
+int
+krb5int_crypto_impl_init(void)
+{
+    return k5_mutex_finish_init(&k5_nss_lock);
+}
+
+void
+krb5int_crypto_impl_cleanup(void)
+{
+    k5_mutex_destroy(&k5_nss_lock);
+}
 
 /*
  * krb5 doesn't have a call into the crypto engine to initialize it, so we do
  * it here.  This code will try to piggyback on any application initialization
  * done to NSS.  Otherwise get our one library init context.
  */
+#define NSS_KRB5_CONFIGDIR "sql:/etc/pki/nssdb"
 krb5_error_code
 k5_nss_init(void)
 {
-#ifdef LINUX
-    /* Default to the system NSS. */
-#define NSS_KRB5_CONFIGDIR  "sql:/etc/pki/nssdb"
-#define NSS_KRB5_FLAGS   0
-#else
-    /* Other platforms don't have a system NSS defined yet, do a nodb init. */
-#define NSS_KRB5_CONFIGDIR  NULL
-#define NSS_KRB5_FLAGS NSS_INIT_NOMODDB|NSS_INIT_NOCERTDB
-#endif
-    if (krb5_nss_init)          /* We've already initialized NSS. */
-        return 0;
-    if (NSS_IsInitialized())    /* Someone else has initialized NSS. */
-        return 0;
-    krb5_nss_init = NSS_InitContext(NSS_KRB5_CONFIGDIR, "", "", "", NULL,
-                                    NSS_INIT_READONLY | NSS_INIT_NOROOTINIT |
-                                    NSS_KRB5_FLAGS);
-    if (!krb5_nss_init)
-        return k5_nss_map_last_error();
+    PRUint32 flags = NSS_INIT_READONLY | NSS_INIT_NOROOTINIT;
+    krb5_error_code ret;
+    SECStatus rv;
+    pid_t pid;
+
+    ret = k5_mutex_lock(&k5_nss_lock);
+    if (ret)
+        return ret;
+
+    pid = getpid();
+    if (k5_nss_ctx != NULL) {
+        /* Do nothing if the existing context is still good. */
+        if (k5_nss_pid == pid)
+            goto cleanup;
+
+        /* We've forked since the last init, and need to reinitialize. */
+        rv = NSS_ShutdownContext(k5_nss_ctx);
+        k5_nss_ctx = NULL;
+        if (rv != SECSuccess) {
+            ret = k5_nss_map_last_error();
+            goto cleanup;
+        }
+    }
+    k5_nss_ctx = NSS_InitContext(NSS_KRB5_CONFIGDIR, "", "", "", NULL, flags);
+    if (k5_nss_ctx == NULL) {
+        /* There may be no system database; try again without it. */
+        flags |= NSS_INIT_NOMODDB | NSS_INIT_NOCERTDB;
+        k5_nss_ctx = NSS_InitContext(NULL, "", "", "", NULL, flags);
+        if (k5_nss_ctx == NULL) {
+            ret = k5_nss_map_last_error();
+            goto cleanup;
+        }
+    }
+    k5_nss_pid = pid;
+
+cleanup:
+    k5_mutex_unlock(&k5_nss_lock);
     return 0;
 }
 

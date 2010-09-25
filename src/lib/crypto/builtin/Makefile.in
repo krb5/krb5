@@ -26,14 +26,17 @@ EXTRADEPSRCS= $(srcdir)/t_cf2.c
 
 STLIBOBJS=\
 	hmac.o	\
-	pbkdf2.o		
+	init.o	\
+	pbkdf2.o
 
 OBJS=\
 	$(OUTPRE)hmac.$(OBJEXT)	\
-	$(OUTPRE)pbkdf2.$(OBJEXT)		
+	$(OUTPRE)init.$(OBJEXT)	\
+	$(OUTPRE)pbkdf2.$(OBJEXT)
 
 SRCS=\
 	$(srcdir)/hmac.c	\
+	$(srcdir)/init.c	\
 	$(srcdir)/pbkdf2.c	
 
 STOBJLISTS= des/OBJS.ST md4/OBJS.ST 	\
