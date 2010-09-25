@@ -583,6 +583,15 @@ spnego_gss_inquire_saslname_for_mech
 	gss_buffer_t mech_description
 );
 
+OM_uint32
+spnego_gss_inquire_attrs_for_mech
+(
+	OM_uint32 *minor_status,
+	gss_const_OID mech,
+	gss_OID_set *mech_attrs,
+	gss_OID_set *known_mech_attrs
+);
+
 #ifdef	__cplusplus
 }
 #endif

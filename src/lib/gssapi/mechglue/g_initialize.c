@@ -794,6 +794,8 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
         /* draft-ietf-sasl-gs2 */
         GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_saslname_for_mech);
         GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_mech_for_saslname);
+        /* RFC 5587 */
+        GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_attrs_for_mech);
 
 	assert(mech_type != GSS_C_NO_OID);
 
