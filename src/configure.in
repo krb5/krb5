@@ -134,6 +134,7 @@ openssl)
 nss)
   CRYPTO_IMPL_CFLAGS=`pkg-config --cflags nss`
   CRYPTO_IMPL_LIBS="-lnss3 $(pkg-config --libs nss-util)"
+  AC_DEFINE(CRYPTO_IMPL_NSS,1,[Define if crypto implementation is NSS])
   ;;
 *)
   AC_MSG_ERROR([Unknown crypto implementation $withval])
