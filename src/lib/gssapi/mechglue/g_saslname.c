@@ -188,7 +188,9 @@ OM_uint32 KRB5_CALLCONV gss_inquire_mech_for_saslname(
                                                         mech_type);
             if (status == GSS_S_COMPLETE)
                 break;
-        } else if (sasl_mech_name->length == OID_SASL_NAME_LENGTH &&
+        }
+        if (status == GSS_S_BAD_MECH &&
+            sasl_mech_name->length == OID_SASL_NAME_LENGTH &&
             oidToSaslName(&tmpMinor, &mechSet->elements[i],
                           mappedName) == GSS_S_COMPLETE &&
             memcmp(sasl_mech_name->value, mappedName,
