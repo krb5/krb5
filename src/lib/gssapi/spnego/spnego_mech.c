@@ -2716,6 +2716,10 @@ spnego_gss_inquire_saslname_for_mech(OM_uint32 *minor_status,
 	if (!g_OID_equal(desired_mech, gss_mech_spnego))
 		return (GSS_S_BAD_MECH);
 
+	(void) g_make_string_buffer("spnego", mech_name);
+	(void) g_make_string_buffer("Simple and Protected GSS-API "
+				    "Negotiation Mechanism", mech_description);
+
 	sasl_mech_name->value = strdup(SPNEGO_SASL_NAME);
 	if (sasl_mech_name->value == NULL) {
 		*minor_status = ENOMEM;

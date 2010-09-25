@@ -655,6 +655,9 @@ krb5_gss_inquire_saslname_for_mech(OM_uint32 *minor_status,
                                    gss_buffer_t mech_name,
                                    gss_buffer_t mech_description)
 {
+    (void) g_make_string_buffer("krb5", mech_name);
+    (void) g_make_string_buffer("Kerberos 5 GSS-API Mechanism", mech_description);
+
     sasl_mech_name->value = strdup(GS2_KRB5_SASL_NAME);
     if (sasl_mech_name->value == NULL) {
         *minor_status = ENOMEM;

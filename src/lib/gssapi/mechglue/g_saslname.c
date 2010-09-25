@@ -181,11 +181,10 @@ OM_uint32 KRB5_CALLCONV gss_inquire_mech_for_saslname(
         char mappedName[OID_SASL_NAME_LENGTH + 1];
 
         mech = gssint_get_mechanism(&mechSet->elements[i]);
-
         if (mech != NULL && mech->gss_inquire_mech_for_saslname != NULL) {
             status = mech->gss_inquire_mech_for_saslname(minor_status,
-                                                        sasl_mech_name,
-                                                        mech_type);
+                                                         sasl_mech_name,
+                                                         mech_type);
             if (status == GSS_S_COMPLETE)
                 break;
         }
@@ -195,6 +194,7 @@ OM_uint32 KRB5_CALLCONV gss_inquire_mech_for_saslname(
                           mappedName) == GSS_S_COMPLETE &&
             memcmp(sasl_mech_name->value, mappedName,
                    OID_SASL_NAME_LENGTH) == 0) {
+            *mech_type = &mech->mech_type;
             status = GSS_S_COMPLETE;
             break;
         }
