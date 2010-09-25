@@ -272,6 +272,8 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_release_any_name_mapping,
 	spnego_gss_pseudo_random,
 	spnego_gss_set_neg_mechs,
+	spnego_gss_inquire_saslname_for_mech,
+	spnego_gss_inquire_mech_for_saslname,
 };
 
 static struct gss_config_ext spnego_mechanism_ext =
@@ -2705,11 +2707,11 @@ spnego_gss_inquire_mech_for_saslname(OM_uint32 *minor_status,
 }
 
 OM_uint32
-spnego_inquire_saslname_for_mech(OM_uint32 *minor_status,
-                                 const gss_OID desired_mech,
-                                 gss_buffer_t sasl_mech_name,
-                                 gss_buffer_t mech_name,
-                                 gss_buffer_t mech_description)
+spnego_gss_inquire_saslname_for_mech(OM_uint32 *minor_status,
+                                     const gss_OID desired_mech,
+                                     gss_buffer_t sasl_mech_name,
+                                     gss_buffer_t mech_name,
+                                     gss_buffer_t mech_description)
 {
 	OM_uint32 status;
 

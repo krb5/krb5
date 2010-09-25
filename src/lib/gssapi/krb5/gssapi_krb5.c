@@ -739,8 +739,8 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_release_any_name_mapping,
     krb5_gss_pseudo_random,
     NULL,               /* set_neg_mechs */
-    krb5_gss_inquire_mech_for_saslname,
     krb5_gss_inquire_saslname_for_mech,
+    krb5_gss_inquire_mech_for_saslname,
 };
 
 static struct gss_config_ext krb5_mechanism_ext = {
