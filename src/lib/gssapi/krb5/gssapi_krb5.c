@@ -655,8 +655,6 @@ krb5_gss_inquire_saslname_for_mech(OM_uint32 *minor_status,
                                    gss_buffer_t mech_name,
                                    gss_buffer_t mech_description)
 {
-    OM_uint32 status;
-
     sasl_mech_name->value = strdup(GS2_KRB5_SASL_NAME);
     if (sasl_mech_name->value == NULL) {
         *minor_status = ENOMEM;
@@ -665,7 +663,7 @@ krb5_gss_inquire_saslname_for_mech(OM_uint32 *minor_status,
 
     sasl_mech_name->length = GS2_KRB5_SASL_NAME_LEN;
 
-    return status;
+    return GSS_S_COMPLETE;
 }
 
 static struct gss_config krb5_mechanism = {

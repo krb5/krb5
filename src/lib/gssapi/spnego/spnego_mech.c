@@ -2713,8 +2713,6 @@ spnego_gss_inquire_saslname_for_mech(OM_uint32 *minor_status,
                                      gss_buffer_t mech_name,
                                      gss_buffer_t mech_description)
 {
-	OM_uint32 status;
-
 	if (!g_OID_equal(desired_mech, gss_mech_spnego))
 		return (GSS_S_BAD_MECH);
 
@@ -2726,7 +2724,7 @@ spnego_gss_inquire_saslname_for_mech(OM_uint32 *minor_status,
 
 	sasl_mech_name->length = SPNEGO_SASL_NAME_LEN;
 
-	return (status);
+	return (GSS_S_COMPLETE);
 }
 
 /*
