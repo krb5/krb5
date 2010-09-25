@@ -384,23 +384,6 @@ OM_uint32 KRB5_CALLCONV gss_release_any_name_mapping
     gss_any_t *		/* input */
 );
 
-/*
- * draft-ietf-sasl-gs2-xx
- */
-OM_uint32 KRB5_CALLCONV gss_inquire_saslname_for_mech(
-    OM_uint32 *,        /* minor_status */
-    const gss_OID,      /* desired_mech */
-    gss_buffer_t,       /* sasl_mech_name */
-    gss_buffer_t,       /* mech_name */
-    gss_buffer_t        /* mech_description */
-);
-
-OM_uint32 KRB5_CALLCONV gss_inquire_mech_for_saslname(
-    OM_uint32 *,        /* minor_status */
-    const gss_buffer_t, /* sasl_mech_name */
-    gss_OID *           /* mech_type */
-);
-
 #ifdef __cplusplus
 }
 #endif

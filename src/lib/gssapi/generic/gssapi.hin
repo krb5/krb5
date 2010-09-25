@@ -833,7 +833,9 @@ gss_set_neg_mechs(
 /* XXXX This is a necessary evil until the spec is fixed */
 #define GSS_S_CRED_UNAVAIL GSS_S_FAILURE
 
-/* RFC 5587 */
+/*
+ * RFC 5587
+ */
 typedef const gss_buffer_desc *gss_const_buffer_t;
 typedef const struct gss_channel_bindings_struct *gss_const_channel_bindings_t;
 typedef const struct gss_ctx_id_struct gss_const_ctx_id_t;
@@ -892,5 +894,22 @@ GSS_DLLIMP extern gss_const_OID GSS_C_MA_CBINDINGS;
 GSS_DLLIMP extern gss_const_OID GSS_C_MA_PFS;
 GSS_DLLIMP extern gss_const_OID GSS_C_MA_COMPRESS;
 GSS_DLLIMP extern gss_const_OID GSS_C_MA_CTX_TRANS;
+
+/*
+ * RFC 5801
+ */
+OM_uint32 KRB5_CALLCONV gss_inquire_saslname_for_mech(
+    OM_uint32 *,        /* minor_status */
+    const gss_OID,      /* desired_mech */
+    gss_buffer_t,       /* sasl_mech_name */
+    gss_buffer_t,       /* mech_name */
+    gss_buffer_t        /* mech_description */
+);
+
+OM_uint32 KRB5_CALLCONV gss_inquire_mech_for_saslname(
+    OM_uint32 *,        /* minor_status */
+    const gss_buffer_t, /* sasl_mech_name */
+    gss_OID *           /* mech_type */
+);
 
 #endif /* _GSSAPI_H_ */
