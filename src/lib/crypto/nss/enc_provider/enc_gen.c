@@ -53,6 +53,12 @@ static NSSInitContext *k5_nss_ctx = NULL;
 static pid_t k5_nss_pid = 0;
 static k5_mutex_t k5_nss_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 
+struct stream_state {
+    struct stream_state *loopback;  /* To detect copying */
+    pid_t pid;                      /* To detect use across fork */
+    PK11Context *ctx;
+};
+
 krb5_error_code
 k5_nss_map_error(int nss_error)
 {
@@ -265,16 +271,27 @@ done:
 krb5_error_code
 k5_nss_stream_init_state(krb5_data *new_state)
 {
-    new_state->data = NULL;
-    new_state->length = 0;
+    struct stream_state *sstate;
+
+    /* Create a state structure with an uninitialized context. */
+    sstate = calloc(1, sizeof(*sstate));
+    if (sstate == NULL)
+        return ENOMEM;
+    sstate->loopback = NULL;
+    new_state->data = (char *) sstate;
+    new_state->length = sizeof(*sstate);
     return 0;
 }
 
 krb5_error_code
 k5_nss_stream_free_state(krb5_data *state)
 {
-    if (state->length == (unsigned)-1 && state->data)
-        PK11_Finalize((PK11Context *)state->data);
+    struct stream_state *sstate = (struct stream_state *) state->data;
+
+    /* Clean up the OpenSSL context if it was initialized. */
+    if (sstate && sstate->loopback == sstate)
+        PK11_Finalize(sstate->ctx);
+    free(sstate);
     return 0;
 }
 
@@ -288,24 +305,29 @@ k5_nss_gen_stream_iov(krb5_key krb_key, krb5_data *state,
     SECStatus rv;
     SECItem  param;
     krb5_crypto_iov *iov;
+    struct stream_state *sstate = NULL;
     int i;
 
     param.data = NULL;
     param.len = 0;
 
-    if (state && state->data) {
-        ctx = (PK11Context *)state->data;
-    } else {
+    sstate = (state == NULL) ? NULL : (struct stream_state *) state->data;
+    if (sstate == NULL || sstate->loopback == NULL) {
         ctx = k5_nss_create_context(krb_key, mech, operation, &param);
-        if (state && ctx) {
-            state->data = (char *)ctx;
-            state->length = -1; /* you don't get to copy this, */
-                                /* blow up if you try */
+        if (ctx == NULL) {
+            ret = k5_nss_map_last_error();
+            goto done;
         }
-    }
-    if (ctx == NULL) {
-        ret = k5_nss_map_last_error();
-        goto done;
+        if (sstate) {
+            sstate->loopback = sstate;
+            sstate->pid = getpid();
+            sstate->ctx = ctx;
+        }
+    } else {
+        /* Cipher state can't be copied or used across a fork. */
+        if (sstate->loopback != sstate || sstate->pid != getpid())
+            return EINVAL;
+        ctx = sstate->ctx;
     }
 
     for (i=0; i < (int)num_data; i++) {
