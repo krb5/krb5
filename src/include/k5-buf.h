@@ -68,34 +68,34 @@ struct k5buf {
     size_t xx_len;
 };
 
-/* Initialize a k5buf using a fixed-sized, existing buffer.  SPACE
+/** Initialize a k5buf using a fixed-sized, existing buffer.  SPACE
    must be more than zero, or an assertion failure will result. */
 void krb5int_buf_init_fixed(struct k5buf *buf, char *data, size_t space);
 
-/* Initialize a k5buf using an internally allocated dynamic buffer.
+/** Initialize a k5buf using an internally allocated dynamic buffer.
    The buffer contents must be freed with krb5int_free_buf. */
 void krb5int_buf_init_dynamic(struct k5buf *buf);
 
-/* Add a C string to BUF. */
+/** Add a C string to BUF. */
 void krb5int_buf_add(struct k5buf *buf, const char *data);
 
-/* Add a counted set of bytes to BUF.  If is okay for DATA[0..LEN-1]
+/** Add a counted set of bytes to BUF.  It is okay for DATA[0..LEN-1]
    to contain null bytes if you are prepared to deal with that in the
    output (use krb5int_buf_len to retrieve the length of the output). */
 void krb5int_buf_add_len(struct k5buf *buf, const char *data, size_t len);
 
-/* Add sprintf-style formatted data to BUF. */
+/** Add sprintf-style formatted data to BUF. */
 void krb5int_buf_add_fmt(struct k5buf *buf, const char *fmt, ...)
 #if !defined(__cplusplus) && (__GNUC__ > 2)
     __attribute__((__format__(__printf__, 2, 3)))
 #endif
     ;
 
-/* Truncate BUF.  LEN must be between 0 and the existing buffer
+/** Truncate BUF.  LEN must be between 0 and the existing buffer
    length, or an assertion failure will result. */
 void krb5int_buf_truncate(struct k5buf *buf, size_t len);
 
-/* Retrieve the byte array value of BUF, or NULL if there has been an
+/** Retrieve the byte array value of BUF, or NULL if there has been an
    allocation failure or the fixed buffer ran out of room.
 
    The byte array will be a C string unless binary data was added with
@@ -110,13 +110,13 @@ void krb5int_buf_truncate(struct k5buf *buf, size_t len);
    krb5int_buf_truncate may invalidate the byte array address. */
 char *krb5int_buf_data(struct k5buf *buf);
 
-/* Retrieve the length of BUF, or -1 if there has been an allocation
+/** Retrieve the length of BUF, or -1 if there has been an allocation
    failure or the fixed buffer ran out of room.  The length is equal
    to strlen(krb5int_buf_data(buf)) unless binary data was added with
    krb5int_buf_add_len. */
 ssize_t krb5int_buf_len(struct k5buf *buf);
 
-/* Free the storage used in the dynamic buffer BUF.  The caller may
+/** Free the storage used in the dynamic buffer BUF.  The caller may
    choose to take responsibility for freeing the return value of
    krb5int_buf_data instead of using this function.  If BUF is a fixed
    buffer, an assertion failure will result.  It is unnecessary
