@@ -996,10 +996,11 @@ proc kadmin_test { } {
     }
 
     # now test that we can kinit with principals/passwords.
+    # We defer kdestroying until after kpasswd at least once to test FAST automatic use in kpasswd
     if {![kadmin_add testprinc1/instance thisisatest] \
 	    || ![kinit testprinc1/instance thisisatest 0] \
-	    || ![kdestroy] \
 	    || ![kpasswd_cpw testprinc1/instance thisisatest anothertest] \
+	    || ![kdestroy] \
 	    || ![kinit testprinc1/instance anothertest 0] \
 	    || ![kdestroy] \
 	    || ![kpasswd_cpw testprinc1/instance anothertest goredsox] \
