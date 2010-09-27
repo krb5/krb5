@@ -46,8 +46,9 @@ gss_inquire_sec_context_by_oid
 gss_krb5_ccache_name
 gss_krb5_copy_ccache
 gss_krb5_export_lucid_sec_context
-gss_krb5_get_tkt_flags
 gss_krb5_free_lucid_sec_context
+gss_krb5_get_tkt_flags
+gss_krb5_import_cred
 gss_krb5_set_allowable_enctypes
 gss_krb5_set_cred_rcache
 gss_krb5int_make_seal_token_v3
@@ -99,6 +100,7 @@ gss_wrap_aead
 gss_wrap_iov
 gss_wrap_iov_length
 gss_wrap_size_limit
+gss_set_cred_option
 gssspi_set_cred_option
 gssspi_mech_invoke
 krb5_gss_dbg_client_expcreds

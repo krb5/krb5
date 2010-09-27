@@ -115,10 +115,9 @@ OM_uint32 KRB5_CALLCONV gss_set_sec_context_option
 	 const gss_OID /*desired_object*/,
 	 const gss_buffer_t /*value*/);
 
-/* XXX do these really belong in this header? */
-OM_uint32 KRB5_CALLCONV gssspi_set_cred_option
+OM_uint32 KRB5_CALLCONV gss_set_cred_option
 	(OM_uint32 * /*minor_status*/,
-	 gss_cred_id_t /*cred*/,
+	 gss_cred_id_t * /*cred*/,
 	 const gss_OID /*desired_object*/,
 	 const gss_buffer_t /*value*/);
 

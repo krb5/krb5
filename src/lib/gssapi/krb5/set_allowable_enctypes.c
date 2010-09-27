@@ -61,7 +61,7 @@
 
 OM_uint32 KRB5_CALLCONV
 gss_krb5int_set_allowable_enctypes(OM_uint32 *minor_status,
-                                   gss_cred_id_t cred_handle,
+                                   gss_cred_id_t *cred_handle,
                                    const gss_OID desired_oid,
                                    const gss_buffer_t value)
 {
@@ -81,16 +81,7 @@ gss_krb5int_set_allowable_enctypes(OM_uint32 *minor_status,
     req = (struct krb5_gss_set_allowable_enctypes_req *)value->value;
 
     /* verify and valildate cred handle */
-    if (cred_handle == GSS_C_NO_CREDENTIAL) {
-        kerr = KRB5_NOCREDS_SUPPLIED;
-        goto error_out;
-    }
-    major_status = krb5_gss_validate_cred(&temp_status, cred_handle);
-    if (GSS_ERROR(major_status)) {
-        kerr = temp_status;
-        goto error_out;
-    }
-    cred = (krb5_gss_cred_id_t) cred_handle;
+    cred = (krb5_gss_cred_id_t) *cred_handle;
 
     if (req->ktypes) {
         for (i = 0; i < req->num_ktypes && req->ktypes[i]; i++) {

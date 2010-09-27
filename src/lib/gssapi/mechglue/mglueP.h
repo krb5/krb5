@@ -396,7 +396,7 @@ typedef struct gss_config {
 	OM_uint32       (*gssspi_set_cred_option)
     	(
     		    OM_uint32 *,	/* minor_status */
-    		    gss_cred_id_t,      /* cred_handle */
+    		    gss_cred_id_t *,    /* cred_handle */
     		    const gss_OID,      /* OID */
     		    const gss_buffer_t	/* value */
     		    );
