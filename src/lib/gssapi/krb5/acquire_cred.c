@@ -228,12 +228,11 @@ acquire_init_cred(krb5_context context,
     krb5_error_code code;
     krb5_ccache ccache;
     krb5_principal ccache_princ = NULL, tmp_princ;
-    krb5_const_principal cred_princ = NULL;
     krb5_cc_cursor cur;
     krb5_creds creds;
     int got_endtime;
     int caller_provided_ccache_name = 0;
-    krb5_data password_data;
+    krb5_data password_data, *cred_princ_realm;
 
     cred->ccache = NULL;
 
@@ -397,7 +396,7 @@ acquire_init_cred(krb5_context context,
     }
 
     assert(cred->name->princ != NULL);
-    cred_princ = cred->name->princ;
+    cred_princ_realm = krb5_princ_realm(context, cred->name->princ);
 
     if (password != GSS_C_NO_BUFFER) {
         /* stash the password for later */
@@ -439,11 +438,11 @@ acquire_init_cred(krb5_context context,
     got_endtime = 0;
 
     code = krb5_build_principal_ext(context, &tmp_princ,
-                                    krb5_princ_realm(context, cred_princ)->length,
-                                    krb5_princ_realm(context, cred_princ)->data,
+                                    cred_princ_realm->length,
+                                    cred_princ_realm->data,
                                     KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,
-                                    krb5_princ_realm(context, cred_princ)->length,
-                                    krb5_princ_realm(context, cred_princ)->data,
+                                    cred_princ_realm->length,
+                                    cred_princ_realm->data,
                                     0);
     if (code) {
         krb5_cc_close(context, ccache);
