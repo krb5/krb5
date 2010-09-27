@@ -857,7 +857,7 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
                                                        input_token,
                                                        input_chan_bindings,
                                                        src_name,
-                                                       mech_type,
+                                                       NULL,
                                                        output_token,
                                                        ret_flags,
                                                        time_rec,
@@ -868,6 +868,8 @@ iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
             ctx->gssc = NULL;
             iakerb_release_context(ctx);
         }
+        if (mech_type != NULL)
+            *mech_type = (gss_OID)gss_mech_krb5;
     }
 
 cleanup:
@@ -988,12 +990,12 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
                                                      (gss_cred_id_t) kcred,
                                                      &ctx->gssc,
                                                      target_name,
-                                                     GSS_C_NULL_OID,
+                                                     (gss_OID)gss_mech_iakerb,
                                                      req_flags,
                                                      time_req,
                                                      input_chan_bindings,
                                                      input_token,
-                                                     actual_mech_type,
+                                                     NULL,
                                                      output_token,
                                                      ret_flags,
                                                      time_rec,
@@ -1003,6 +1005,8 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
             ctx->gssc = GSS_C_NO_CONTEXT;
             iakerb_release_context(ctx);
         }
+        if (actual_mech_type != NULL)
+            *actual_mech_type = (gss_OID)gss_mech_krb5;
     } else {
         if (actual_mech_type != NULL)
             *actual_mech_type = (gss_OID)gss_mech_iakerb;
@@ -1024,4 +1028,3 @@ cleanup:
 
     return major_status;
 }
-
