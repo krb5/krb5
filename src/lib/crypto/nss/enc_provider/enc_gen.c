@@ -118,7 +118,7 @@ k5_nss_init(void)
             goto cleanup;
         }
     }
-    k5_nss_ctx = NULL;
+    k5_nss_ctx = NSS_InitContext(NSS_KRB5_CONFIGDIR, "", "", "", NULL, flags);
     if (k5_nss_ctx == NULL) {
         /* There may be no system database; try again without it. */
         flags |= NSS_INIT_NOMODDB | NSS_INIT_NOCERTDB;
