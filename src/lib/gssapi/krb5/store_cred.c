@@ -60,6 +60,17 @@ has_unexpired_creds(krb5_gss_cred_id_t kcred,
     return (GSS_ERROR(major_status) || time_rec);
 }
 
+static int
+cc_equal_p(krb5_context context,
+           const krb5_ccache cc1,
+           const krb5_ccache cc2)
+{
+    return !strcmp(krb5_cc_get_type(context, cc1),
+                   krb5_cc_get_type(context, cc2))
+        && !strcmp(krb5_cc_get_name(context, cc1),
+                   krb5_cc_get_name(context, cc2));
+}
+
 static OM_uint32
 copy_initiator_creds(OM_uint32 *minor_status,
                      gss_cred_id_t input_cred_handle,
@@ -113,11 +124,14 @@ copy_initiator_creds(OM_uint32 *minor_status,
         goto cleanup;
     }
 
-    code = krb5_cc_copy_creds(context, kcred->ccache, ccache);
-    if (code != 0) {
-        *minor_status = code;
-        major_status = GSS_S_FAILURE;
-        goto cleanup;
+    /* Only copy creds to a different credentials cache, otherwise NOOP */
+    if (!cc_equal_p(context, kcred->ccache, ccache)) {
+        code = krb5_cc_copy_creds(context, kcred->ccache, ccache);
+        if (code != 0) {
+            *minor_status = code;
+            major_status = GSS_S_FAILURE;
+            goto cleanup;
+        }
     }
 
     *minor_status = 0;
