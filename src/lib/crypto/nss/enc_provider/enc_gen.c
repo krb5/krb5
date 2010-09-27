@@ -262,7 +262,7 @@ k5_nss_gen_block_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
     }
 done:
     if (ctx)
-         PK11_Finalize(ctx);
+        PK11_DestroyContext(ctx, PR_TRUE);
     if (param)
         SECITEM_FreeItem(param, PR_TRUE);
     return ret;
@@ -290,7 +290,7 @@ k5_nss_stream_free_state(krb5_data *state)
 
     /* Clean up the OpenSSL context if it was initialized. */
     if (sstate && sstate->loopback == sstate)
-        PK11_Finalize(sstate->ctx);
+        PK11_DestroyContext(sstate->ctx, PR_TRUE);
     free(sstate);
     return 0;
 }
@@ -350,7 +350,7 @@ k5_nss_gen_stream_iov(krb5_key krb_key, krb5_data *state,
     }
 done:
     if (!state && ctx)
-         PK11_Finalize(ctx);
+        PK11_DestroyContext(ctx, PR_TRUE);
     return ret;
 }
 
@@ -539,7 +539,7 @@ k5_nss_gen_cts_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
 
 done:
     if (ctx)
-         PK11_Finalize(ctx);
+        PK11_DestroyContext(ctx, PR_TRUE);
     if (param)
         SECITEM_FreeItem(param, PR_TRUE);
     return ret;
@@ -655,7 +655,7 @@ k5_nss_gen_import(krb5_key krb_key, CK_MECHANISM_TYPE mech,
         ret = k5_nss_map_last_error();
         goto done;
     }
-    PK11_Finalize(ctx);
+    PK11_DestroyContext(ctx, PR_TRUE);
     ctx = NULL;
 
     /* Now now we have a 'wrapped' version of the, we can import it into
@@ -677,7 +677,7 @@ done:
         PK11_FreeSlot(slot);
 #ifdef FAKE_FIPS
     if (ctx)
-        PK11_Finalize(ctx);
+        PK11_DestroyContext(ctx, PR_TRUE);
     if (wrapping_key)
         PK11_FreeSymKey(wrapping_key);
 #endif
