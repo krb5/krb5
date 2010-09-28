@@ -4,7 +4,6 @@
 #include "fortuna.h"
 #include "k5-int.h"
 
-
 #ifndef min
 #define min(a, b)       ((a) < (b) ? (a) : (b))
 #endif
@@ -69,3 +68,14 @@ k5_entropy_uid(krb5_context context, unsigned char* buf, int buflen)
     memcpy(buf, &uid, uidlen);
     return 0;
 }
+
+#ifdef TEST_FORTUNA
+int
+test_entr(krb5_context context, unsigned char* buf, int buflen)
+{
+    char buf1[4] = "abc";
+    memset(buf, 0, buflen);
+    memcpy(buf, buf1, min(buflen,4));
+    return 0;
+}
+#endif

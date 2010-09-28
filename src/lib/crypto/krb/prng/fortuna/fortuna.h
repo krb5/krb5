@@ -51,6 +51,10 @@ k5_entropy_pid(krb5_context context, unsigned char* buf, int buflen);
 krb5_error_code
 k5_entropy_uid(krb5_context context, unsigned char* buf, int buflen);
 
+#ifdef TEST_FORTUNA
+int test_entr(krb5_context context, unsigned char* buf, int buflen);
+#endif
+
 #define FORTUNA_OK                1  /* All is well */
 #define FORTUNA_FAIL              0  /* generic failure */
 #define FORTUNA_LOCKING          -12

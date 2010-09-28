@@ -1,4 +1,3 @@
-/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* prng_fortuna.c */
 /*
  * fortuna.c
@@ -58,6 +57,7 @@
 #include "fortuna.h"
 #include "k5-int.h"
 
+
 #include "k5-thread.h"
 k5_mutex_t fortuna_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 
@@ -89,7 +89,6 @@ k5_mutex_t fortuna_lock = K5_MUTEX_PARTIAL_INITIALIZER;
  * results, but continuing with old state.
  */
 
-
 /*
  * Algorithm parameters
  */
@@ -111,10 +110,14 @@ k5_mutex_t fortuna_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 /* Entropy gathering */
 int (*entropy_collector[])(krb5_context context, unsigned char buf[], int buflen) =
 {
+#ifndef TEST_FORTUNA
     k5_entropy_dev_random,
     k5_entropy_dev_urandom,
     k5_entropy_pid,
     k5_entropy_uid
+#else
+    test_entr
+#endif
 };
 
 /*
@@ -167,13 +170,13 @@ typedef struct fortuna_state FState;
 static void
 ciph_init(CIPH_CTX * ctx /*out*/, const unsigned char *key, int klen)
 {
-    krb5int_aes_enc_key(key, klen, ctx); 
+    krb5int_aes_enc_key(key, klen, ctx);
 }
 
 static void
-ciph_encrypt(CIPH_CTX * ctx, const unsigned char *in, unsigned char *out)
+ciph_encrypt(CIPH_CTX *ctx, const unsigned char *in, unsigned char *out)
 {
-    aes_enc_blk(in, out,  ctx);
+    aes_enc_blk(in, out, ctx);
 }
 
 static void
@@ -425,11 +428,14 @@ extract_data(FState * st, unsigned count, unsigned char *dst)
     unsigned	block_nr = 0;
     pid_t	pid = getpid();
 
+#ifndef TEST_FORTUNA
     /* Should we reseed? */
     if (st->pool0_bytes >= POOL0_FILL || st->reseed_count == 0)
 	if (enough_time_passed(st))
 	    reseed(st);
-
+#else
+    ciph_init(&st->ciph, st->key, BLOCK);
+#endif
     /* Do some randomization on first call */
     if (!st->tricks_done)
 	startup_tricks(st);

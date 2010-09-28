@@ -141,6 +141,15 @@ if test "$withval" = fortuna; then
 	AC_DEFINE(FORTUNA,1,[Define if Fortuna PRNG is selected])
 fi
 
+AC_ARG_ENABLE([fortuna-test],
+	[  --enable-fortuna-test  build to test Fortuna PRNG],,enableval=no)
+if test "$enableval" = yes ; then
+	PRNG_FORTUNA_TEST="yes"
+	AC_DEFINE(TEST_FORTUNA,1,[Create a special build to test Fortuna PRNG])
+	AC_CONFIG_COMMANDS(PRNG_FORTUNA_TEST, , PRNG_FORTUNA_TEST=$PRNG_FORTUNA_TEST)
+	AC_SUBST(PRNG_FORTUNA_TEST)
+fi
+
 # --with-kdc-kdb-update makes the KDC update the database with last request
 # information and failure information.
 

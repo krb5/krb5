@@ -29,12 +29,18 @@ depend:: $(SRCS)
 t_fortuna: t_fortuna.$(OBJEXT) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o t_fortuna t_fortuna.$(OBJEXT) -lcom_err $(SUPPORT_LIB) $(CRYPTO_DEPLIB)
 
-# t_fortuna: t_fortuna.$(OBJEXT) prng_fortuna.so entropy.so  $(CRYPTO_DEPLIB)  $(SUPPORT_DEPLIB)
-#	$(CC_LINK) -o $@ t_fortuna.$(OBJEXT) ../prng.so $(SUPPORT_LIB)  prng_fortuna.so entropy.so $(srcdir)/../../../@CRYPTO_IMPL@/sha2/sha256.so $(srcdir)/../../../@CRYPTO_IMPL@/aes/aeskey.$(OBJEXT) $(srcdir)/../../../@CRYPTO_IMPL@/aes/aes-gen.$(OBJEXT)  $(CRYPTO_DEPLIB)  $(SUPPORT_DEPLIB)
+t_fortuna_make_oct: t_fortuna_make_oct.$(OBJEXT) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o t_fortuna_make_oct t_fortuna_make_oct.$(OBJEXT) -lcom_err $(SUPPORT_LIB) $(CRYPTO_DEPLIB)
 
-
-check-unix:: t_fortuna
+check-unix:: t_fortuna t_fortuna_make_oct
+# ifdef TEST_FORTUNA
+ifeq ("@PRNG_FORTUNA_TEST@","yes")
+	$(RUN_SETUP) $(VALGRIND) ./t_fortuna_make_oct > t_fortuna_make_oct.result && \
+	diff t_fortuna_make_oct.result t_fortuna_make_oct.expected
+else
 	$(RUN_SETUP) $(VALGRIND) ./t_fortuna
+	$(RUN_SETUP) $(VALGRIND) ./t_fortuna_make_oct > t_fortuna_make_oct.result
+endif
 
 clean::
 	$(RM) t_fortuna$(EXEEXT) t_fortuna.$(OBJEXT)
