@@ -151,10 +151,9 @@ krb5int_hmac(const struct krb5_hash_provider *hash, krb5_key key,
     }
     rv = PK11_DigestFinal(ctx, (unsigned char *) output->data, &output->length,
                           output->length);
-    ctx = NULL;
     if (rv != SECSuccess)
         goto fail;
-
+    PK11_DestroyContext(ctx, PR_TRUE);
     return 0;
 fail:
     ret = k5_nss_map_last_error();

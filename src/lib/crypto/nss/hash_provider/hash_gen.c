@@ -61,6 +61,7 @@ k5_nss_gen_hash(HASH_HashType hashType, const krb5_crypto_iov *data,
 
     HASH_End(ctx, (unsigned char *)output->data,
              &output->length, output->length);
+    HASH_Destroy(ctx);
 
     return 0;
 }
