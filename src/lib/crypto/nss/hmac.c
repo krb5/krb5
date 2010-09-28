@@ -159,7 +159,7 @@ krb5int_hmac(const struct krb5_hash_provider *hash, krb5_key key,
 fail:
     ret = k5_nss_map_last_error();
     if (ctx)
-        PK11_Finalize(ctx);
+        PK11_DestroyContext(ctx, PR_TRUE);
     return ret;
 }
 
