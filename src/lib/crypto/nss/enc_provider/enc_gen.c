@@ -27,7 +27,6 @@
  */
 
 /* compile options (should move to configure)... */
-#define USE_OPAQUE_KEYS 1
 #define DO_FAST_XOR 1
 /*#define FAKE_FIPS 1  */
 
@@ -38,11 +37,6 @@
 #include "aead.h"
 #include "seccomon.h"
 #include "pk11pub.h"
-#ifndef USE_OPAQUE_KEYS
-/* use of this function is discouraged */
-#define PK11_CreateContextByRawKey __PK11_CreateContextByRawKey
-#include "pk11priv.h"
-#endif
 #include "nss.h"
 
 /* 512 bits is bigger than anything defined to date */
@@ -139,25 +133,9 @@ PK11Context *
 k5_nss_create_context(krb5_key krb_key, CK_MECHANISM_TYPE mechanism,
                       CK_ATTRIBUTE_TYPE operation, SECItem * param)
 {
-#ifdef USE_OPAQUE_KEYS
     PK11SymKey *key = (PK11SymKey *)krb_key->cache;
 
     return PK11_CreateContextBySymKey(mechanism, operation, key, param);
-#else
-    PK11Context *ctx = NULL;
-    PK11SlotInfo *slot;
-    SECItem key;
-
-    key.data = krb_key->keyblock.contents;
-    key.len = krb_key->keyblock.length;
-    slot = PK11_GetBestSlot(mechanism, NULL);
-    if (slot == NULL)
-        return NULL;
-    ctx = PK11_CreateContextByRawKey(slot,mechanism, PK11_OriginGenerated,
-                operation, &key, param, NULL);
-    PK11_FreeSlot(slot);
-    return ctx;
-#endif
 }
 
 static void inline
@@ -548,14 +526,12 @@ done:
 void
 k5_nss_gen_cleanup(krb5_key krb_key)
 {
-#ifdef USE_OPAQUE_KEYS
     PK11SymKey *key = (PK11SymKey *)krb_key->cache;
 
     if (key) {
         PK11_FreeSymKey(key);
         krb_key->cache = NULL;
     }
-#endif
 }
 
 krb5_error_code
@@ -563,7 +539,6 @@ k5_nss_gen_import(krb5_key krb_key, CK_MECHANISM_TYPE mech,
                   CK_ATTRIBUTE_TYPE operation)
 {
     krb5_error_code ret = 0;
-#ifdef USE_OPAQUE_KEYS
     PK11SymKey *key = (PK11SymKey *)krb_key->cache;
     PK11SlotInfo   *slot = NULL;
     SECItem    raw_key;
@@ -682,8 +657,5 @@ done:
         PK11_FreeSymKey(wrapping_key);
 #endif
 
-#else
-    ret = k5_nss_init();
-#endif
     return ret;
 }
