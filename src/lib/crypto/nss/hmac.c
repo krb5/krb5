@@ -71,38 +71,12 @@
 static CK_MECHANISM_TYPE
 digest_to_hmac(const struct krb5_hash_provider *hash)
 {
-#ifdef NSS_LOOKUP_STRING
-    SECOidTag hashTag, hmacTag;
-    SECOidData *oid;
-#endif
-
     /* use strcmp so we don't confuse SHA1 with SHA128 */
     /* handle the obvious cases first */
     if (!strcmp(hash->hash_name, "SHA1"))
         return CKM_SHA_1_HMAC;
     if (!strcmp(hash->hash_name, "MD5"))
         return CKM_MD5_HMAC;
-    /* the following coudes needs HASH_GetHMACOidTagByHashOidTag() to be
-     * exported before it will work */
-#ifdef NSS_LOOKUP_STRING
-    /* See if the currently loaded version of NSS recognizes this hash */
-    hmacTag = SEC_OID_UNKNOWN;
-    for (hashTag=1; (oid=SECOID_FindOIDByTag(hashTag)) != NULL; hashTag++) {
-        if (oid->mechanism == CKM_INVALID_MECHANISM)
-            continue;
-        if (!strcasecmp(oid->desc, hash->hash_name))
-            continue;
-        /* now map the hash oid to an hmac oid */
-        hmacTag = HASH_GetHMACOidTagByHashOidTag(hashTag);
-                  HASH_GetHMACOidTagByHashOidTag
-        if (hmacTag != SEC_OID_UNKNOWN)
-            break;
-    }
-    oid = SECOID_FindOIDByTag(hmacTag);
-    if (oid) {
-        return oid->mechanism;
-    }
-#endif
     return CKM_INVALID_MECHANISM;
 }
 
