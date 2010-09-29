@@ -26,10 +26,6 @@
  * or implied warranty.
  */
 
-/* compile options (should move to configure)... */
-#define DO_FAST_XOR 1
-/*#define FAKE_FIPS 1  */
-
 #include "k5-int.h"
 #include "nss_gen.h"
 #include "enc_provider.h"
@@ -143,7 +139,6 @@ xor(unsigned char *x, unsigned char *y, int size)
 {
     int i;
 
-#ifdef DO_FAST_XOR
 #define ALIGNED(x,type) (!(((size_t)(x))&(sizeof(type)-1)))
     if (ALIGNED(x,unsigned long) && ALIGNED(y, unsigned long)
         && ALIGNED(size, unsigned long)) {
@@ -154,7 +149,6 @@ xor(unsigned char *x, unsigned char *y, int size)
         }
         return;
     }
-#endif
     for (i=0; i < size; i++) {
         *x++ ^= *y++;
     }
