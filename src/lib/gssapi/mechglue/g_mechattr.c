@@ -134,8 +134,11 @@ OM_uint32 gss_indicate_mechs_by_attrs(
             testMechAttrsKnown(critical_mech_attrs, knownAttrs)) {
             status = gss_add_oid_set_member(minor, &allMechs->elements[i],
                                             mechs);
-            if (GSS_ERROR(status))
+            if (GSS_ERROR(status)) {
+                gss_release_oid_set(&tmpMinor, &supportedAttrs);
+                gss_release_oid_set(&tmpMinor, &knownAttrs);
                 goto cleanup;
+            }
         }
 
         gss_release_oid_set(&tmpMinor, &supportedAttrs);
