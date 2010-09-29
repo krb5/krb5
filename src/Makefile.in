@@ -9,6 +9,7 @@ mydir=.
 #	plugins/authdata/greet
 SUBDIRS=util include lib \
 	@ldap_plugin_dir@ \
+	plugins/kadm5_hook/test \
 	plugins/kdb/db2 \
 	plugins/preauth/pkinit \
 	plugins/preauth/encrypted_challenge \
