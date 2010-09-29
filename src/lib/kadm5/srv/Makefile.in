@@ -28,6 +28,7 @@ SHLIB_RDIRS=$(KRB5_LIBDIR)
 RELDIR=kadm5/srv
 
 SRCS =	$(srcdir)/pwqual.c \
+	$(srcdir)/kadm5_hook.c \
 	$(srcdir)/pwqual_dict.c \
 	$(srcdir)/pwqual_empty.c \
 	$(srcdir)/pwqual_hesiod.c \
@@ -47,6 +48,7 @@ OBJS =	pwqual.$(OBJEXT) \
 	pwqual_empty.$(OBJEXT) \
 	pwqual_hesiod.$(OBJEXT) \
 	pwqual_princ.$(OBJEXT) \
+	kadm5_hook.$(OBJEXT) \
 	svr_policy.$(OBJEXT) \
 	svr_principal.$(OBJEXT) \
 	server_acl.$(OBJEXT) \
@@ -63,6 +65,7 @@ STLIBOBJS = \
 	pwqual_empty.o \
 	pwqual_hesiod.o \
 	pwqual_princ.o \
+	kadm5_hook.o \
 	svr_policy.o \
 	svr_principal.o \
 	server_acl.o \

@@ -37,6 +37,8 @@
 /* A pwqual_handle represents a password quality plugin module. */
 typedef struct pwqual_handle_st *pwqual_handle;
 
+typedef struct kadm5_hook_handle_st *kadm5_hook_handle;
+
 typedef struct _kadm5_server_handle_t {
     krb5_ui_4       magic_number;
     krb5_ui_4       struct_version;
@@ -47,6 +49,7 @@ typedef struct _kadm5_server_handle_t {
     struct _kadm5_server_handle_t *lhandle;
     char **db_args;
     pwqual_handle   *qual_handles;
+    kadm5_hook_handle *hook_handles;
 } kadm5_server_handle_rec, *kadm5_server_handle_t;
 
 #define OSA_ADB_PRINC_VERSION_1  0x12345C01
@@ -197,5 +200,57 @@ pwqual_hesiod_initvt(krb5_context context, int maj_ver, int min_ver,
 krb5_error_code
 pwqual_princ_initvt(krb5_context context, int maj_ver, int min_ver,
                     krb5_plugin_vtable vtable);
+
+/** @{
+ * @name kadm5_hook plugin support
+ */
+
+/**Load all kadm5_hook plugins*/
+krb5_error_code
+k5_kadm5_hook_load(krb5_context context,
+                   kadm5_hook_handle **handles_out);
+
+/** Free handles allocated by k5_kadm5_hook_load()*/
+void
+k5_kadm5_hook_free_handles(krb5_context context, kadm5_hook_handle *handles);
+
+/**Call the chpass entry point on every kadm5_hook in @a handles*/
+kadm5_ret_t
+k5_kadm5_hook_chpass (krb5_context context,
+                      kadm5_hook_handle *handles,
+                      int stage, krb5_principal princ,
+                      krb5_boolean keepold,
+                      int n_ks_tuple,
+                      krb5_key_salt_tuple *ks_tuple,
+                      const char *newpass);
+
+/** Call the create entry point for kadm5_hook_plugins*/
+kadm5_ret_t
+k5_kadm5_hook_create (krb5_context context,
+                      kadm5_hook_handle *handles,
+                      int stage,
+                      kadm5_principal_ent_t princ, long mask,
+                      int n_ks_tuple,
+                      krb5_key_salt_tuple *ks_tuple,
+                      const char *newpass);
+
+/** Call modify kadm5_hook entry point*/
+kadm5_ret_t
+k5_kadm5_hook_modify (krb5_context context,
+                      kadm5_hook_handle *handles,
+                      int stage,
+                      kadm5_principal_ent_t princ, long mask);
+
+/** call remove kadm5_hook entry point*/
+kadm5_ret_t
+k5_kadm5_hook_remove (krb5_context context,
+                      kadm5_hook_handle *handles,
+                      int stage,
+                      krb5_principal princ);
+
+/** @}*/
+
+
+
 
 #endif /* __KADM5_SERVER_INTERNAL_H__ */

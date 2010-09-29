@@ -1517,7 +1517,8 @@ struct plugin_interface {
 /* A list of plugin interface IDs.  Make sure to increment
  * PLUGIN_NUM_INTERFACES when a new interface is added. */
 #define PLUGIN_INTERFACE_PWQUAL 0
-#define PLUGIN_NUM_INTERFACES   1
+#define PLUGIN_INTERFACE_KADM5_HOOK 1
+#define PLUGIN_NUM_INTERFACES   2
 
 /* Retrieve the plugin module of type interface_id and name modname,
  * storing the result into module. */

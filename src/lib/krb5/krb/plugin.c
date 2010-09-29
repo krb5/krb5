@@ -31,7 +31,8 @@
 #include "k5-int.h"
 
 const char *interface_names[PLUGIN_NUM_INTERFACES] = {
-    "pwqual"
+    "pwqual",
+    "kadm5_hook"
 };
 
 /* Return the context's interface structure for id, or NULL if invalid. */
