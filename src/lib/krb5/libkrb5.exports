@@ -102,6 +102,7 @@ initialize_asn1_error_table
 initialize_k524_error_table
 initialize_kdb5_error_table
 initialize_krb5_error_table
+initialize_k5e1_error_table
 initialize_kv5m_error_table
 initialize_prof_error_table
 k5_plugin_free_modules
