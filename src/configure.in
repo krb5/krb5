@@ -1105,6 +1105,7 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	kdc slave config-files gen-manpages include
 
 	plugins/locate/python
+	plugins/kadm5_hook/test
 	plugins/kdb/db2
 	plugins/kdb/db2/libdb2
 	plugins/kdb/db2/libdb2/hash

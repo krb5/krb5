@@ -1,0 +1,37 @@
+mydir=plugins/kadm5_hook/test
+BUILDTOP=$(REL)..$(S)..$(S)..
+KRB5_RUN_ENV = @KRB5_RUN_ENV@
+KRB5_CONFIG_SETUP = KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf ; export KRB5_CONFIG ;
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+DEFS=@DEFS@
+
+LOCALINCLUDES = -I../../../include/krb5 -I.
+
+LIBBASE=kadm5_hook_test
+LIBMAJOR=0
+LIBMINOR=0
+SO_EXT=.so
+RELDIR=../plugins/kadm5_hook/test
+# Depends on libk5crypto and libkrb5
+SHLIB_EXPDEPS = \
+	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+	$(TOPLIBD)/libkrb5$(SHLIBEXT)
+SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(LIBS)
+
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+STOBJLISTS=OBJS.ST
+STLIBOBJS=main.o
+
+SRCS= $(srcdir)/main.c
+
+all-unix:: all-liblinks
+install-unix::
+clean-unix:: clean-libs clean-libobjs
+
+clean::
+	$(RM) lib$(LIBBASE)$(SO_EXT)
+
+@libnover_frag@
+@libobj_frag@
