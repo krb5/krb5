@@ -5,43 +5,16 @@ from tags/krb5-1-8-final) by Robert Relyea.
 Identified issues with this branch include, in roughly decreasing
 order of priority:
 
+* If NSS is used before a fork, the child cannot make use of NSS
+  without performing a successful shutdown, which can't happen if
+  there are any outstanding NSS objects.  This is an ongoing area of
+  discussion.
+
+* Cached handles in krb5_key objects must be wrapped in a structure
+  which remembers the current pid, so that they won't be used after a
+  fork.
+
 * The copyright and license statements on new code are problematic.
-
-* k5_nss_init fails on Ubuntu.  More generally, it makes the
-  assumption that the NSS library should be initialized with
-  "sql:/etc/pki/nssdb" on Linux platforms, which is apparently not a
-  universal convention, and with no DB on other platforms.
-
-* If k5_nss_init fails, the Yarrow code crashes out with a seg fault
-  during library initialization.  This is because the Yarrow interface
-  to the SHA1 hash implementation has no error path (because there are
-  no failure cases in a direct implementation, assuming well-formed
-  input).  The upshot is that HASH_Init() fails silently without
-  initializing the context length field, and HASH_Final() passes the
-  uninitialized length field as an argument to memcpy().
-
-* k5_nss_gen_stream_iov sets state->length to -1 to protect against
-  copying of the state structure by the caller, on the assumption that
-  an app trying to copy the state will gracefully fail to allocate
-  (unsigned int)-1 bytes of memory.  This is an invalid assumption;
-  64-bit platforms can often allocate that much memory.  A better
-  approach is to use a loopback pointer to detect copying, as in
-  lib/crypto/openssl/enc_provider/rc4.c.
-
-* There are several ifdefs which are not documented or supported in
-  configure:
-
-  - NSS_LOOKUP_STRING in hmac.c: This code appears to be
-    non-functional.
-
-  - USE_OPAQUE_KEYS in enc_gen.c (defined by default)
-
-  - FAKE_FIPS in enc_gen.c
-
-  - DO_FAST_XOR in enc_gen.c (defined by default); the affected code
-    should probably be factored out with xorblock() from various
-    places in the built-in back end, into an inline function in a
-    utility header file somewhere.
 
 * The code could perhaps benefit from organizational simplification,
   such as eliminating the many small files for enc and hash providers
