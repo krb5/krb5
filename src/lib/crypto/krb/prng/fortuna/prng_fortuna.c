@@ -312,16 +312,16 @@ reseed(FState * st)
 	    break;
 	n >>= 1;
     }
-
     /* add old key into mix too */
     md_update(&key_md, st->key, BLOCK);
 
+#ifndef TEST_FORTUNA
     /* add pid to make output diverse after fork() */
     md_update(&key_md, (const unsigned char *)&st->pid, sizeof(st->pid));
+#endif
 
     /* now we have new key */
     md_result(&key_md, st->key);
-
     /* use new key */
     ciph_init(&st->ciph, st->key, BLOCK);
 
@@ -428,14 +428,11 @@ extract_data(FState * st, unsigned count, unsigned char *dst)
     unsigned	block_nr = 0;
     pid_t	pid = getpid();
 
-#ifndef TEST_FORTUNA
     /* Should we reseed? */
     if (st->pool0_bytes >= POOL0_FILL || st->reseed_count == 0)
 	if (enough_time_passed(st))
 	    reseed(st);
-#else
-    ciph_init(&st->ciph, st->key, BLOCK);
-#endif
+
     /* Do some randomization on first call */
     if (!st->tricks_done)
 	startup_tricks(st);

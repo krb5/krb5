@@ -13,7 +13,6 @@ k5_entropy_from_device(krb5_context context, const char *device, unsigned char* 
 {
     struct stat sb;
     int fd;
-    //unsigned char buf[ENTROPY_BUFSIZE], *bp;
     unsigned char *bp;
     size_t left;
     fd = open(device, O_RDONLY);
@@ -42,12 +41,14 @@ k5_entropy_from_device(krb5_context context, const char *device, unsigned char* 
 krb5_error_code
 k5_entropy_dev_random(krb5_context context, unsigned char* buf, int buflen)
 {
+    memset(buf, 0, buflen);
     return k5_entropy_from_device(context,"/dev/random", buf, buflen);
 }
 
 krb5_error_code
 k5_entropy_dev_urandom(krb5_context context, unsigned char* buf, int buflen)
 {
+    memset(buf, 0, buflen);
     return k5_entropy_from_device(context,"/dev/urandom", buf, buflen);
 }
 
@@ -56,6 +57,7 @@ k5_entropy_pid(krb5_context context, unsigned char* buf, int buflen)
 {
     pid_t pid = getpid(); 
     int pidlen = min(buflen,(int)sizeof(&pid));
+    memset(buf, 0, buflen);
     memcpy(buf, &pid, pidlen);
     return 0;
 }
@@ -65,6 +67,7 @@ k5_entropy_uid(krb5_context context, unsigned char* buf, int buflen)
 {
     pid_t uid = getuid(); 
     int uidlen=min(buflen,(int)sizeof(&uid));
+    memset(buf, 0, buflen);
     memcpy(buf, &uid, uidlen);
     return 0;
 }
@@ -73,9 +76,9 @@ k5_entropy_uid(krb5_context context, unsigned char* buf, int buflen)
 int
 test_entr(krb5_context context, unsigned char* buf, int buflen)
 {
-    char buf1[4] = "abc";
+    char buf1[26] = "Seed To Test Fortuna PRNG";
     memset(buf, 0, buflen);
-    memcpy(buf, buf1, min(buflen,4));
+    memcpy(buf, buf1, min(buflen, 26));
     return 0;
 }
 #endif

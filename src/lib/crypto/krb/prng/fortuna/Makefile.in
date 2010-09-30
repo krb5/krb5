@@ -43,7 +43,7 @@ else
 endif
 
 clean::
-	$(RM) t_fortuna$(EXEEXT) t_fortuna.$(OBJEXT)
+	$(RM) t_fortuna$(EXEEXT) t_fortuna.$(OBJEXT)  t_fortuna_make_oct.result  t_fortuna_make_oct$(EXEEXT)  t_fortuna_make_oct.$(OBJEXT)
 
 
 clean-unix:: clean-libobjs
