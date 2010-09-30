@@ -156,7 +156,7 @@ proc test4 {} {
     exec echo "include does-not-exist" >$wd/testinc.ini
     catch { profile_init_path $wd/testinc.ini } err
     if $verbose { puts "Got error message $err" }
-    if { $err ne "Included profile file could not be read" } {
+    if ![string equal $err "Included profile file could not be read"] {
 	puts stderr "Error: test4: Did not get expected error when including nonexistent file."
 	exit 1
     }
@@ -166,7 +166,7 @@ proc test4 {} {
     exec echo "includedir does-not-exist" >$wd/testinc.ini
     catch { profile_init_path $wd/testinc.ini } err
     if $verbose { puts "Got error message $err" }
-    if { $err ne "Included profile directory could not be read" } {
+    if ![string equal $err "Included profile directory could not be read"] {
 	puts stderr "Error: test4: Did not get expected error when including nonexistent directory."
 	exit 1
     }
@@ -177,7 +177,7 @@ proc test4 {} {
     set p [profile_init_path $wd/testinc.ini]
     set x [profile_get_values $p {{test section 1} bar}]
     if $verbose { puts "Read $x from included profile" }
-    if { [lindex $x 0] ne "foo" } {
+    if ![string equal [lindex $x 0] "foo"] {
 	puts stderr "Error: test4: Did not get expected result from included profile."
 	exit 1
     }
@@ -194,7 +194,7 @@ proc test4 {} {
     set p [profile_init_path $wd/testinc.ini]
     set x [profile_get_values $p {{test section 1} bar}]
     if $verbose { puts "Read $x from included directory" }
-    if { $x ne "foo foo" } {
+    if ![string equal $x "foo foo"] {
 	puts stderr, "Error: test4: Did not get expected result from included directory."
 	exit 1
     }

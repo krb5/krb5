@@ -104,7 +104,6 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     krb5_keyblock session_key;
     krb5_timestamp rtime;
     krb5_keyblock *reply_key = NULL;
-    krb5_keyblock *mkey_ptr;
     krb5_key_data  *server_key;
     char *cname = 0, *sname = 0, *altcname = 0;
     krb5_last_req_entry *nolrarray[2], nolrentry;
@@ -625,31 +624,11 @@ tgt_again:
             goto cleanup;
         }
 
-        if ((errcode = krb5_dbe_find_mkey(kdc_context, master_keylist, server,
-                                          &mkey_ptr))) {
-            krb5_keylist_node *tmp_mkey_list;
-            /* try refreshing master key list */
-            /* XXX it would nice if we had the mkvno here for optimization */
-            if (krb5_db_fetch_mkey_list(kdc_context, master_princ,
-                                        &master_keyblock, 0, &tmp_mkey_list) == 0) {
-                krb5_dbe_free_key_list(kdc_context, master_keylist);
-                master_keylist = tmp_mkey_list;
-                if ((errcode = krb5_dbe_find_mkey(kdc_context, master_keylist,
-                                                  server, &mkey_ptr))) {
-                    status = "FINDING_MASTER_KEY";
-                    goto cleanup;
-                }
-            } else {
-                status = "FINDING_MASTER_KEY";
-                goto cleanup;
-            }
-        }
-
         /*
          * Convert server.key into a real key
          * (it may be encrypted in the database)
          */
-        if ((errcode = krb5_dbe_decrypt_key_data(kdc_context, mkey_ptr,
+        if ((errcode = krb5_dbe_decrypt_key_data(kdc_context, NULL,
                                                  server_key, &encrypting_key,
                                                  NULL))) {
             status = "DECRYPT_SERVER_KEY";

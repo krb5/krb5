@@ -43,4 +43,8 @@ krb5_error_code
 krb5int_dk_prf(const struct krb5_keytypes *ktp, krb5_key key,
                const krb5_data *in, krb5_data *out);
 
+krb5_error_code
+krb5int_dk_cmac_prf(const struct krb5_keytypes *ktp, krb5_key key,
+                    const krb5_data *in, krb5_data *out);
+
 #endif  /*PRF_INTERNAL_DEFS*/

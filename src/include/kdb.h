@@ -350,11 +350,6 @@ krb5_error_code krb5_db_iterate ( krb5_context kcontext,
                                   int (*func) (krb5_pointer, krb5_db_entry *),
                                   krb5_pointer func_arg );
 
-krb5_error_code krb5_db_set_mkey_list( krb5_context context,
-                                       krb5_keylist_node * keylist);
-
-krb5_error_code krb5_db_get_mkey_list( krb5_context kcontext,
-                                       krb5_keylist_node ** keylist);
 
 krb5_error_code krb5_db_store_master_key  ( krb5_context kcontext,
                                             char *keyfile,
@@ -382,7 +377,9 @@ krb5_db_fetch_mkey_list( krb5_context    context,
                          const krb5_keyblock * mkey,
                          krb5_kvno             mkvno,
                          krb5_keylist_node  **mkeys_list );
-
+/**
+ * Free a master keylist.
+ */
 void
 krb5_db_free_mkey_list( krb5_context         context,
                         krb5_keylist_node  *mkey_list );
@@ -411,6 +408,10 @@ krb5_db_setup_mkey_name ( krb5_context context,
                           char **fullname,
                           krb5_principal *principal);
 
+/**
+ * Decrypts the key given in @@a key_data. If @a mkey is specified, that
+ * master key is used. If @a mkey is NULL, then all master keys are tried.
+ */
 krb5_error_code
 krb5_dbe_decrypt_key_data( krb5_context         context,
                            const krb5_keyblock        * mkey,
@@ -1010,23 +1011,6 @@ typedef struct _kdb_vftabl {
      * place, and in some cases to free data they allocated with db_alloc.
      */
     void (*free)(krb5_context kcontext, void *ptr);
-
-    /*
-     * Optional: Inform the module of the master key list.  The module may
-     * remember an alias to the provided memory.  This function is called at
-     * startup by the KDC and kadmind with the value returned by
-     * fetch_master_key_list.
-     */
-    krb5_error_code (*set_master_key_list)(krb5_context kcontext,
-                                           krb5_keylist_node *keylist);
-
-    /*
-     * Optional: Retrieve an alias to the master key list as previously set by
-     * set_master_key_list.  This function is used by the KDB keytab
-     * implementation in libkdb5, which is used by kadmind.
-     */
-    krb5_error_code (*get_master_key_list)(krb5_context kcontext,
-                                           krb5_keylist_node **keylist);
 
     /*
      * Optional with default: Retrieve a master keyblock from the stash file

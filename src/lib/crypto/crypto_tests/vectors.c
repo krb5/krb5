@@ -213,13 +213,13 @@ extern struct krb5_enc_provider krb5int_enc_aes128, krb5int_enc_aes256;
 
 void DK (krb5_keyblock *out, krb5_keyblock *in, const krb5_data *usage) {
     krb5_error_code r;
-    r = krb5int_derive_key (enc, in, out, usage);
+    r = krb5int_derive_key (enc, in, out, usage, DERIVE_RFC3961);
     CHECK;
 }
 
 void DR (krb5_data *out, krb5_keyblock *in, const krb5_data *usage) {
     krb5_error_code r;
-    r = krb5int_derive_random (enc, in, out, usage);
+    r = krb5int_derive_random (enc, in, out, usage, DERIVE_RFC3961);
     CHECK;
 }
 

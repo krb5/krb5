@@ -75,7 +75,10 @@ int main () {
 
             free (input.data);
             input.data = NULL;
+        } else {
+            prfsz = 0;
         }
+
         for (; prfsz > 0; prfsz--) {
             printf ("%02x",
                     (unsigned int) ((unsigned char ) output.data[output.length-prfsz]));

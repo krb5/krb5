@@ -1516,7 +1516,9 @@ struct plugin_interface {
 
 /* A list of plugin interface IDs.  Make sure to increment
  * PLUGIN_NUM_INTERFACES when a new interface is added. */
-#define PLUGIN_NUM_INTERFACES   0
+#define PLUGIN_INTERFACE_PWQUAL 0
+#define PLUGIN_INTERFACE_KADM5_HOOK 1
+#define PLUGIN_NUM_INTERFACES   2
 
 /* Retrieve the plugin module of type interface_id and name modname,
  * storing the result into module. */
@@ -2674,6 +2676,30 @@ krb5int_aes_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 krb5_error_code
 krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
                     size_t num_data);
+
+krb5_error_code
+krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
+                         size_t num_data, const krb5_data *iv,
+                         krb5_data *output);
+
+#if 0
+/*
+ * There are no IANA assignments for these enctypes or cksumtypes yet.  They
+ * must be defined to local-use negative numbers at build time for Camellia-CCM
+ * support to function at the moment.  If one is defined, they should all be
+ * defined.  When IANA assignments exist, these definitions should move to the
+ * appropriate places in krb5.hin and all CAMELLIA_CCM conditional code should
+ * be made unconditional.
+ */
+#define ENCTYPE_CAMELLIA128_CCM_128 -XXX /* Camellia CCM mode, 128-bit key */
+#define ENCTYPE_CAMELLIA256_CCM_128 -YYY /* Camellia CCM mode, 256-bit key */
+#define CKSUMTYPE_CMAC_128_CAMELLIA128  -XXX  /* CMAC, 128-bit Camellia key */
+#define CKSUMTYPE_CMAC_128_CAMELLIA256  -YYY  /* CMAC, 256-bit Camellia key */
+#endif
+
+#ifdef ENCTYPE_CAMELLIA128_CCM_128
+#define CAMELLIA_CCM
+#endif
 
 struct _krb5_kt {       /* should move into k5-int.h */
     krb5_magic magic;

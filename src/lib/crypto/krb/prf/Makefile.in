@@ -14,13 +14,13 @@ DEFS=
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-STLIBOBJS= des_prf.o dk_prf.o rc4_prf.o
+STLIBOBJS= des_prf.o dk_prf.o rc4_prf.o cmac_prf.o
 
 OBJS=   $(OUTPRE)des_prf.$(OBJEXT) $(OUTPRE)dk_prf.$(OBJEXT) \
-	$(OUTPRE)rc4_prf.$(OBJEXT) 
+	$(OUTPRE)rc4_prf.$(OBJEXT) $(OUTPRE)cmac_prf.$(OBJEXT)
 
 SRCS= $(srcdir)/des_prf.c $(srcdir)/dk_prf.c \
-	$(srcdir)/rc4_prf.c 
+	$(srcdir)/rc4_prf.c  $(srcdir)/cmac_prf.c
 
 ##DOS##LIBOBJS = $(OBJS)
 

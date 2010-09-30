@@ -63,7 +63,7 @@ utils.so utils.po $(OUTPRE)utils.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   ss_internal.h utils.c
 options.so options.po $(OUTPRE)options.$(OBJEXT): $(BUILDTOP)/include/ss/ss_err.h \
   $(COM_ERR_DEPS) copyright.h options.c ss.h
-cmd_tbl.lex.o: cmd_tbl.lex.c
+cmd_tbl.lex.o: cmd_tbl.lex.c ct.tab.h
 ct.tab.o: $(BUILDTOP)/include/ss/ss_err.h $(COM_ERR_DEPS) \
   ct.tab.c ss.h
 ss_err.so ss_err.po $(OUTPRE)ss_err.$(OBJEXT): $(COM_ERR_DEPS) \

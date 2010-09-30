@@ -31,6 +31,7 @@
 #include "autoconf.h"
 #include "k5-platform.h"        /* for asprintf */
 #include <krb5.h>
+#include "extern.h"
 #include <string.h>
 #include <stdio.h>
 #include <time.h>
@@ -649,6 +650,17 @@ k5_kinit(opts, k5)
 
     if ((opts->action == INIT_KT) && opts->keytab_name)
     {
+        if (strncmp(opts->keytab_name, "KDB:", 3) == 0) {
+            code = kinit_kdb_init(&k5->ctx,
+                                  krb5_princ_realm(k5->ctx, k5->me)->data);
+            if (code != 0) {
+                com_err(progname, code,
+                        "while setting up KDB keytab for realm %s",
+                        krb5_princ_realm(k5->ctx, k5->me)->data);
+                goto cleanup;
+            }
+        }
+
         code = krb5_kt_resolve(k5->ctx, opts->keytab_name, &keytab);
         if (code != 0) {
             com_err(progname, code, "resolving keytab %s",

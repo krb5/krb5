@@ -87,7 +87,8 @@ krb5int_dk_string_to_key(const struct krb5_keytypes *ktp,
     indata.length = kerberos_len;
     indata.data = (char *) kerberos;
 
-    ret = krb5int_derive_keyblock(enc, foldkey, keyblock, &indata);
+    ret = krb5int_derive_keyblock(enc, foldkey, keyblock, &indata,
+                                  DERIVE_RFC3961);
     if (ret != 0)
         memset(keyblock->contents, 0, keyblock->length);
 
@@ -103,18 +104,18 @@ cleanup:
 #define DEFAULT_ITERATION_COUNT         4096 /* was 0xb000L in earlier drafts */
 #define MAX_ITERATION_COUNT             0x1000000L
 
-krb5_error_code
-krb5int_aes_string_to_key(const struct krb5_keytypes *ktp,
-                          const krb5_data *string,
-                          const krb5_data *salt,
-                          const krb5_data *params,
-                          krb5_keyblock *key)
+static krb5_error_code
+pbkdf2_string_to_key(const struct krb5_keytypes *ktp, const krb5_data *string,
+                     const krb5_data *salt, const krb5_data *pepper,
+                     const krb5_data *params, krb5_keyblock *key,
+                     enum deriv_alg deriv_alg)
 {
     unsigned long iter_count;
     krb5_data out;
     static const krb5_data usage = { KV5M_DATA, 8, "kerberos" };
     krb5_key tempkey = NULL;
     krb5_error_code err;
+    krb5_data sandp = empty_data();
 
     if (params) {
         unsigned char *p = (unsigned char *) params->data;
@@ -142,6 +143,18 @@ krb5int_aes_string_to_key(const struct krb5_keytypes *ktp,
     if (out.length != 16 && out.length != 32)
         return KRB5_CRYPTO_INTERNAL;
 
+    if (pepper != NULL) {
+        err = alloc_data(&sandp, pepper->length + 1 + salt->length);
+        if (err)
+            return err;
+
+        memcpy(sandp.data, pepper->data, pepper->length);
+        sandp.data[pepper->length] = '\0';
+        memcpy(&sandp.data[pepper->length + 1], salt->data, salt->length);
+
+        salt = &sandp;
+    }
+
     err = krb5int_pbkdf2_hmac_sha1 (&out, iter_count, string, salt);
     if (err)
         goto cleanup;
@@ -150,11 +163,39 @@ krb5int_aes_string_to_key(const struct krb5_keytypes *ktp,
     if (err)
         goto cleanup;
 
-    err = krb5int_derive_keyblock(ktp->enc, tempkey, key, &usage);
+    err = krb5int_derive_keyblock(ktp->enc, tempkey, key, &usage, deriv_alg);
 
 cleanup:
+    if (sandp.data)
+        free(sandp.data);
     if (err)
         memset (out.data, 0, out.length);
     krb5_k_free_key (NULL, tempkey);
     return err;
 }
+
+krb5_error_code
+krb5int_aes_string_to_key(const struct krb5_keytypes *ktp,
+                          const krb5_data *string,
+                          const krb5_data *salt,
+                          const krb5_data *params,
+                          krb5_keyblock *key)
+{
+    return pbkdf2_string_to_key(ktp, string, salt, NULL, params, key,
+                                DERIVE_RFC3961);
+}
+
+#ifdef CAMELLIA_CCM
+krb5_error_code
+krb5int_camellia_ccm_string_to_key(const struct krb5_keytypes *ktp,
+                                   const krb5_data *string,
+                                   const krb5_data *salt,
+                                   const krb5_data *params,
+                                   krb5_keyblock *key)
+{
+    krb5_data pepper = string2data(ktp->name);
+
+    return pbkdf2_string_to_key(ktp, string, salt, &pepper, params, key,
+                                DERIVE_SP800_108_CMAC);
+}
+#endif

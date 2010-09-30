@@ -18,7 +18,6 @@ krb5_db_fini
 krb5_db_free_principal
 krb5_db_get_age
 krb5_db_get_key_data_kvno
-krb5_db_get_mkey_list
 krb5_db_get_context
 krb5_db_get_principal
 krb5_db_iterate
@@ -26,7 +25,6 @@ krb5_db_lock
 krb5_db_put_principal
 krb5_db_refresh_config
 krb5_db_set_context
-krb5_db_set_mkey_list
 krb5_db_setup_mkey_name
 krb5_db_sign_authdata
 krb5_db_unlock

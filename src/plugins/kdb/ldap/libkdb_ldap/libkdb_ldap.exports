@@ -42,8 +42,6 @@ krb5_ldap_delete_realm_1
 krb5_ldap_lock
 krb5_ldap_unlock
 krb5_ldap_create
-krb5_ldap_set_mkey_list
-krb5_ldap_get_mkey_list
 krb5_ldap_check_policy_as
 krb5_ldap_audit_as_req
 krb5_ldap_check_allowed_to_delegate

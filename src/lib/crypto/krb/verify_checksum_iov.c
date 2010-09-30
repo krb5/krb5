@@ -43,6 +43,12 @@ krb5_k_verify_checksum_iov(krb5_context context,
     krb5_data computed;
     krb5_crypto_iov *checksum;
 
+    if (checksum_type == 0) {
+        ret = krb5int_c_mandatory_cksumtype(context, key->keyblock.enctype,
+                                            &checksum_type);
+        if (ret != 0)
+            return ret;
+    }
     ctp = find_cksumtype(checksum_type);
     if (ctp == NULL)
         return KRB5_BAD_ENCTYPE;
