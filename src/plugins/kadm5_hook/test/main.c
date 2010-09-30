@@ -41,7 +41,7 @@
 
 static void
 log_call(krb5_context context,
-         const char * function,
+         const char *function,
          int stage,
          krb5_principal princ)
 {
@@ -51,14 +51,13 @@ log_call(krb5_context context,
     assert(ret == 0);
     printf("%s: stage %s principal %s\n",
            function,
-           (stage == KADM5_HOOK_STAGE_PRECOMMIT)? "precommit"
-           :"postcommit",
+           (stage == KADM5_HOOK_STAGE_PRECOMMIT) ? "precommit" : "postcommit",
            unparsed);
     if (unparsed)
         krb5_free_unparsed_name(context, unparsed);
 }
 
-static     kadm5_ret_t
+static kadm5_ret_t
 chpass(krb5_context context,
        kadm5_hook_modinfo *modinfo,
        int stage,
@@ -72,7 +71,7 @@ chpass(krb5_context context,
 }
 
 
-static     kadm5_ret_t
+static kadm5_ret_t
 create(krb5_context context,
        kadm5_hook_modinfo *modinfo,
        int stage,
