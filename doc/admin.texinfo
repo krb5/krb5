@@ -757,16 +757,17 @@ for this is not currently compiled in by default.
 The local name will be formulated from @i{exp}.
 
 The format for @i{exp} is
-@code{[@i{n}:$@i{d}..@i{string}](@i{regexp})s/@i{pattern}/@i{replacement}/g}.
+@code{[@i{n}:@i{string}](@i{regexp})s/@i{pattern}/@i{replacement}/g}.
 The integer @i{n} indicates how many components the target principal
-should have.  If this matches, then a string will be formed by putting
-together the components of the principal in the order indicated by each
-integer @i{d}, and the arbitrary string @i{string} (i.e. if the
+should have.  If this matches, then a string will be formed from
+@i{string}, substituting the realm of the principal for @code{$0} and
+the @i{n}'th component of the principal for @code{$@i{n}} (e.g. if the
 principal was @value{RANDOMUSER}/admin then [2:$2$1foo] would result in
-the string "admin@value{RANDOMUSER}foo".  If this string matches
-@i{regexp}, then the @code{s//[g]} substitution command will be run over the
-string.  The optional g will cause the substitution to be global over
-the string, instead of replacing only the first match in the string.
+the string "admin@value{RANDOMUSER}foo").  If this string matches
+@i{regexp}, then the @code{s//[g]} substitution command will be run over
+the string.  The optional g will cause the substitution to be global
+over the string, instead of replacing only the first match in the
+string.
 
 @item DEFAULT
 The principal name will be used as the local user name.  If the
@@ -781,13 +782,11 @@ For example:
 @group
 [realms]
     @value{PRIMARYREALM} = @{
-        auth_to_local = @{
-            RULE:[2:$1](@value{RANDOMUSER})s/^.*$/guest/
-            RULE:[2:$1;$2](^.*;admin$)s/;admin$//
-            RULE:[2:$2](^.*;root)s/^.*$/root/
-            DEFAULT
-            @}
-        @}
+        auth_to_local = RULE:[2:$1](@value{RANDOMUSER})s/^.*$/guest/
+        auth_to_local = RULE:[2:$1;$2](^.*;admin$)s/;admin$//
+        auth_to_local = RULE:[2:$2](^.*;root)s/^.*$/root/
+        auto_to_local = DEFAULT
+    @}
 @end group
 @end smallexample
 
