@@ -233,8 +233,10 @@ k5_nss_gen_block_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
         memcpy(ivec->data, lastptr, blocksize);
     }
 done:
-    if (ctx)
+    if (ctx) {
+        PK11_Finalize(ctx);
         PK11_DestroyContext(ctx, PR_TRUE);
+    }
     if (param)
         SECITEM_FreeItem(param, PR_TRUE);
     return ret;
@@ -261,8 +263,10 @@ k5_nss_stream_free_state(krb5_data *state)
     struct stream_state *sstate = (struct stream_state *) state->data;
 
     /* Clean up the OpenSSL context if it was initialized. */
-    if (sstate && sstate->loopback == sstate)
+    if (sstate && sstate->loopback == sstate) {
+        PK11_Finalize(sstate->ctx);
         PK11_DestroyContext(sstate->ctx, PR_TRUE);
+    }
     free(sstate);
     return 0;
 }
@@ -321,8 +325,10 @@ k5_nss_gen_stream_iov(krb5_key krb_key, krb5_data *state,
         }
     }
 done:
-    if (!state && ctx)
+    if (!state && ctx) {
+        PK11_Finalize(ctx);
         PK11_DestroyContext(ctx, PR_TRUE);
+    }
     return ret;
 }
 
@@ -510,8 +516,10 @@ k5_nss_gen_cts_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
     }
 
 done:
-    if (ctx)
+    if (ctx) {
+        PK11_Finalize(ctx);
         PK11_DestroyContext(ctx, PR_TRUE);
+    }
     if (param)
         SECITEM_FreeItem(param, PR_TRUE);
     return ret;
@@ -624,6 +632,7 @@ k5_nss_gen_import(krb5_key krb_key, CK_MECHANISM_TYPE mech,
         ret = k5_nss_map_last_error();
         goto done;
     }
+    PK11_Finalize(ctx);
     PK11_DestroyContext(ctx, PR_TRUE);
     ctx = NULL;
 
@@ -645,8 +654,10 @@ done:
     if (slot)
         PK11_FreeSlot(slot);
 #ifdef FAKE_FIPS
-    if (ctx)
+    if (ctx) {
+        PK11_Finalize(ctx);
         PK11_DestroyContext(ctx, PR_TRUE);
+    }
     if (wrapping_key)
         PK11_FreeSymKey(wrapping_key);
 #endif
