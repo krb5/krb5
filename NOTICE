@@ -173,7 +173,8 @@ src/lib/crypto/aes has the following copyright:
                          --------------------
 
 Portions contributed by Red Hat, including the pre-authentication
-plug-ins framework, contain the following copyright:
+plug-ins framework and the NSS crypto implementation, contain the
+following copyright:
 
   Copyright (c) 2006 Red Hat, Inc.
   Portions copyright (c) 2006 Massachusetts Institute of Technology
