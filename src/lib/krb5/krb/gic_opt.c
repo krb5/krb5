@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #include "k5-int.h"
 #include "int-proto.h"
-#include "k5-buf.h"
 
 static void
 init_common(krb5_get_init_creds_opt *opt)
@@ -432,23 +431,25 @@ krb5_get_init_creds_opt_set_fast_ccache_name(krb5_context context,
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_get_init_creds_opt_set_fast_ccache(
-    krb5_context context,
-    krb5_get_init_creds_opt *opt,
-    krb5_ccache ccache)
+krb5_get_init_creds_opt_set_fast_ccache(krb5_context context,
+                                        krb5_get_init_creds_opt *opt,
+                                        krb5_ccache ccache)
 {
     krb5_error_code retval = 0;
     struct k5buf buf;
     char *cc_name;
+
     krb5int_buf_init_dynamic(&buf);
     krb5int_buf_add(&buf, krb5_cc_get_type(context, ccache));
     krb5int_buf_add(&buf, ":");
     krb5int_buf_add(&buf, krb5_cc_get_name(context, ccache));
     cc_name = krb5int_buf_data(&buf);
     if (cc_name)
-        retval =  krb5_get_init_creds_opt_set_fast_ccache_name(context, opt, cc_name);
-    else retval = ENOMEM;
-        krb5int_free_buf(&buf);
+        retval = krb5_get_init_creds_opt_set_fast_ccache_name(context, opt,
+                                                              cc_name);
+    else
+        retval = ENOMEM;
+    krb5int_free_buf(&buf);
     return retval;
 }
 

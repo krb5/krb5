@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
        - the name corresponding to the ruid of the process
 
        otherwise, it's an error.
-       We always attempt to open  the default ccache in order to use FAST if
+       We always attempt to open the default ccache in order to use FAST if
        possible.
     */
     ret = krb5_cc_default(context, &ccache);
@@ -94,12 +94,13 @@ int main(int argc, char *argv[])
         com_err(argv[0], ret, "getting principal from ccache");
         exit(1);
     } else {
-        if (princ != NULL)
-            ret = krb5_get_init_creds_opt_set_fast_ccache(context, opts, ccache);
-        else ret = 0;
-        if (ret) {
-            com_err(argv[0], ret, "while setting default ccache name");
-            exit(1);
+        if (princ != NULL) {
+            ret = krb5_get_init_creds_opt_set_fast_ccache(context, opts,
+                                                          ccache);
+            if (ret) {
+                com_err(argv[0], ret, "while setting FAST ccache");
+                exit(1);
+            }
         }
     }
     ret = krb5_cc_close(context, ccache);
