@@ -254,6 +254,12 @@ kadm5_create_principal_3(void *server_handle,
     if (entry == NULL)
         return EINVAL;
 
+    /* Use default keysalts if caller did not provide any. */
+    if (n_ks_tuple == 0) {
+        ks_tuple = handle->params.keysalts;
+        n_ks_tuple = handle->params.num_keysalts;
+    }
+
     /*
      * Check to see if the principal exists
      */
@@ -371,17 +377,13 @@ kadm5_create_principal_3(void *server_handle,
         goto cleanup;
 
     if (password) {
-        ret = krb5_dbe_cpw(handle->context, act_mkey,
-                           n_ks_tuple?ks_tuple:handle->params.keysalts,
-                           n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
+        ret = krb5_dbe_cpw(handle->context, act_mkey, ks_tuple, n_ks_tuple,
                            password, (mask & KADM5_KVNO)?entry->kvno:1,
                            FALSE, kdb);
     } else {
         /* Null password means create with random key (new in 1.8). */
         ret = krb5_dbe_crk(handle->context, &master_keyblock,
-                           n_ks_tuple?ks_tuple:handle->params.keysalts,
-                           n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
-                           FALSE, kdb);
+                           ks_tuple, n_ks_tuple, FALSE, kdb);
     }
     if (ret)
         goto cleanup;
@@ -393,8 +395,7 @@ kadm5_create_principal_3(void *server_handle,
 
     ret = k5_kadm5_hook_create(handle->context, handle->hook_handles,
                                KADM5_HOOK_STAGE_PRECOMMIT, entry, mask,
-                               n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
-                               n_ks_tuple?ks_tuple:handle->params.keysalts, password);
+                               n_ks_tuple, ks_tuple, password);
     if (ret)
         goto cleanup;
 
@@ -447,8 +448,7 @@ kadm5_create_principal_3(void *server_handle,
 
     (void) k5_kadm5_hook_create(handle->context, handle->hook_handles,
                                 KADM5_HOOK_STAGE_POSTCOMMIT, entry, mask,
-                                n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
-                                n_ks_tuple?ks_tuple:handle->params.keysalts, password);
+                                n_ks_tuple, ks_tuple, password);
 
 cleanup:
     krb5_db_free_principal(handle->context, kdb);
@@ -1354,6 +1354,12 @@ kadm5_chpass_principal_3(void *server_handle,
                                 principal, hist_princ)) == TRUE)
         return KADM5_PROTECT_PRINCIPAL;
 
+    /* Use default keysalts if caller did not provide any. */
+    if (n_ks_tuple == 0) {
+        ks_tuple = handle->params.keysalts;
+        n_ks_tuple = handle->params.num_keysalts;
+    }
+
     if ((ret = kdb_get_entry(handle, principal, &kdb, &adb)))
         return(ret);
 
@@ -1378,9 +1384,7 @@ kadm5_chpass_principal_3(void *server_handle,
     if (ret)
         goto done;
 
-    ret = krb5_dbe_cpw(handle->context, act_mkey,
-                       n_ks_tuple?ks_tuple:handle->params.keysalts,
-                       n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
+    ret = krb5_dbe_cpw(handle->context, act_mkey, ks_tuple, n_ks_tuple,
                        password, 0 /* increment kvno */,
                        keepold, kdb);
     if (ret)
@@ -1503,9 +1507,7 @@ kadm5_chpass_principal_3(void *server_handle,
 
     ret = k5_kadm5_hook_chpass(handle->context, handle->hook_handles,
                                KADM5_HOOK_STAGE_PRECOMMIT, principal, keepold,
-                               n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
-                               n_ks_tuple?ks_tuple:handle->params.keysalts,
-                               password);
+                               n_ks_tuple, ks_tuple, password);
     if (ret)
         goto done;
 
@@ -1513,10 +1515,8 @@ kadm5_chpass_principal_3(void *server_handle,
         goto done;
 
     (void) k5_kadm5_hook_chpass(handle->context, handle->hook_handles,
-                                KADM5_HOOK_STAGE_POSTCOMMIT, principal, keepold,
-                                n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
-                                n_ks_tuple?ks_tuple:handle->params.keysalts,
-                                password);
+                                KADM5_HOOK_STAGE_POSTCOMMIT, principal,
+                                keepold, n_ks_tuple, ks_tuple, password);
     ret = KADM5_OK;
 done:
     if (!hist_added && hist.key_data)
@@ -1564,6 +1564,12 @@ kadm5_randkey_principal_3(void *server_handle,
 
     CHECK_HANDLE(server_handle);
 
+    /* Use default keysalts if caller did not provide any. */
+    if (n_ks_tuple == 0) {
+        ks_tuple = handle->params.keysalts;
+        n_ks_tuple = handle->params.num_keysalts;
+    }
+
     krb5_clear_error_message(handle->context);
 
     if (principal == NULL)
@@ -1573,7 +1579,6 @@ kadm5_randkey_principal_3(void *server_handle,
          * key. */
         if (keepold)
             return KADM5_PROTECT_PRINCIPAL;
-        ks_tuple = n_ks_tuple ? ks_tuple : handle->params.keysalts;
         n_ks_tuple = 1;
     }
 
@@ -1585,11 +1590,8 @@ kadm5_randkey_principal_3(void *server_handle,
     if (ret)
         goto done;
 
-    ret = krb5_dbe_crk(handle->context, act_mkey,
-                       n_ks_tuple?ks_tuple:handle->params.keysalts,
-                       n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
-                       keepold,
-                       kdb);
+    ret = krb5_dbe_crk(handle->context, act_mkey, ks_tuple, n_ks_tuple,
+                       keepold, kdb);
     if (ret)
         goto done;
 
@@ -1652,19 +1654,15 @@ kadm5_randkey_principal_3(void *server_handle,
 
     ret = k5_kadm5_hook_chpass(handle->context, handle->hook_handles,
                                KADM5_HOOK_STAGE_PRECOMMIT, principal, keepold,
-                               n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
-                               n_ks_tuple?ks_tuple:handle->params.keysalts,
-                               NULL);
+                               n_ks_tuple, ks_tuple, NULL);
     if (ret)
         goto done;
     if ((ret = kdb_put_entry(handle, kdb, &adb)))
         goto done;
 
     (void) k5_kadm5_hook_chpass(handle->context, handle->hook_handles,
-                                KADM5_HOOK_STAGE_POSTCOMMIT, principal, keepold,
-                                n_ks_tuple?n_ks_tuple:handle->params.num_keysalts,
-                                n_ks_tuple?ks_tuple:handle->params.keysalts,
-                                NULL);
+                                KADM5_HOOK_STAGE_POSTCOMMIT, principal,
+                                keepold, n_ks_tuple, ks_tuple, NULL);
     ret = KADM5_OK;
 done:
     kdb_free_entry(handle, kdb, &adb);
