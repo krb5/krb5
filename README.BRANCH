@@ -13,9 +13,3 @@ order of priority:
 * Cached handles in krb5_key objects must be wrapped in a structure
   which remembers the current pid, so that they won't be used after a
   fork.
-
-* The copyright and license statements on new code are problematic.
-
-* The code could perhaps benefit from organizational simplification,
-  such as eliminating the many small files for enc and hash providers
-  (since all of their logic is in enc_gen.c and hash_gen.c anyway).
