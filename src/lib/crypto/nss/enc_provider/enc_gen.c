@@ -56,6 +56,11 @@ struct stream_state {
     PK11Context *ctx;
 };
 
+struct cached_key {
+    pid_t pid;                  /* To detect use across fork */
+    PK11SymKey *symkey;
+};
+
 krb5_error_code
 k5_nss_map_error(int nss_error)
 {
@@ -134,11 +139,12 @@ cleanup:
 
 PK11Context *
 k5_nss_create_context(krb5_key krb_key, CK_MECHANISM_TYPE mechanism,
-                      CK_ATTRIBUTE_TYPE operation, SECItem * param)
+                      CK_ATTRIBUTE_TYPE operation, SECItem *param)
 {
-    PK11SymKey *key = (PK11SymKey *)krb_key->cache;
+    struct cached_key *ckey = krb_key->cache;
 
-    return PK11_CreateContextBySymKey(mechanism, operation, key, param);
+    return PK11_CreateContextBySymKey(mechanism, operation, ckey->symkey,
+                                      param);
 }
 
 static void inline
@@ -535,10 +541,11 @@ done:
 void
 k5_nss_gen_cleanup(krb5_key krb_key)
 {
-    PK11SymKey *key = (PK11SymKey *)krb_key->cache;
+    struct cached_key *ckey = krb_key->cache;
 
-    if (key) {
-        PK11_FreeSymKey(key);
+    if (ckey) {
+        PK11_FreeSymKey(ckey->symkey);
+        free(ckey);
         krb_key->cache = NULL;
     }
 }
@@ -548,9 +555,11 @@ k5_nss_gen_import(krb5_key krb_key, CK_MECHANISM_TYPE mech,
                   CK_ATTRIBUTE_TYPE operation)
 {
     krb5_error_code ret = 0;
-    PK11SymKey *key = (PK11SymKey *)krb_key->cache;
-    PK11SlotInfo   *slot = NULL;
-    SECItem    raw_key;
+    pid_t pid = getpid();
+    struct cached_key *ckey = krb_key->cache;
+    PK11SymKey *symkey;
+    PK11SlotInfo *slot = NULL;
+    SECItem raw_key;
 #ifdef FAKE_FIPS
     PK11SymKey *wrapping_key = NULL;
     PK11Context *ctx = NULL;
@@ -564,12 +573,24 @@ k5_nss_gen_import(krb5_key krb_key, CK_MECHANISM_TYPE mech,
     SECStatus rv;
 #endif
 
-    if (key)
+    if (ckey && ckey->pid == pid)
         return 0;
 
     ret = k5_nss_init();
     if (ret)
         return ret;
+
+    if (ckey) {
+        /* Discard the no-longer-valid symkey and steal its container. */
+        PK11_FreeSymKey(ckey->symkey);
+        ckey->symkey = NULL;
+        krb_key->cache = NULL;
+    } else {
+        /* Allocate a new container. */
+        ckey = k5alloc(sizeof(*ckey), &ret);
+        if (ckey == NULL)
+            return ret;
+    }
 
     slot = PK11_GetBestSlot(mech, NULL);
     if (slot == NULL) {
@@ -645,19 +666,23 @@ k5_nss_gen_import(krb5_key krb_key, CK_MECHANISM_TYPE mech,
 
     /* Now now we have a 'wrapped' version of the, we can import it into
      * the token without running afoul with FIPS. */
-    key = PK11_UnwrapSymKey(wrapping_key, mechanism, &params, &wrapped_key,
-                        mech, operation, raw_key.len);
+    symkey = PK11_UnwrapSymKey(wrapping_key, mechanism, &params, &wrapped_key,
+                               mech, operation, raw_key.len);
 #else
-    key = PK11_ImportSymKey(slot, mech, PK11_OriginGenerated, operation,
-                            &raw_key, NULL);
+    symkey = PK11_ImportSymKey(slot, mech, PK11_OriginGenerated, operation,
+                               &raw_key, NULL);
 #endif
-    if (key == NULL) {
+    if (symkey == NULL) {
         ret = k5_nss_map_last_error();
         goto done;
     }
-    krb_key->cache = (void *) key;
+    ckey->pid = pid;
+    ckey->symkey = symkey;
+    krb_key->cache = ckey;
+    ckey = NULL;
 
 done:
+    free(ckey);
     if (slot)
         PK11_FreeSlot(slot);
 #ifdef FAKE_FIPS
