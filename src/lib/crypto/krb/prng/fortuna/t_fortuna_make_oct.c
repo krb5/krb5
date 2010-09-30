@@ -35,7 +35,7 @@
 #include "fortuna.h"
 #include <k5-int.h>
 
-#define LEN_TEST_BUF 1024 * 1024
+#define LEN_TEST_BUF 4096
 static int len = LEN_TEST_BUF;
 
 static void hex_print( FILE* f, const char* var, void* data, size_t size );
