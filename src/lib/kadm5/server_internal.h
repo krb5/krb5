@@ -205,16 +205,16 @@ pwqual_princ_initvt(krb5_context context, int maj_ver, int min_ver,
  * @name kadm5_hook plugin support
  */
 
-/**Load all kadm5_hook plugins*/
+/** Load all kadm5_hook plugins. */
 krb5_error_code
 k5_kadm5_hook_load(krb5_context context,
                    kadm5_hook_handle **handles_out);
 
-/** Free handles allocated by k5_kadm5_hook_load()*/
+/** Free handles allocated by k5_kadm5_hook_load(). */
 void
 k5_kadm5_hook_free_handles(krb5_context context, kadm5_hook_handle *handles);
 
-/**Call the chpass entry point on every kadm5_hook in @a handles*/
+/** Call the chpass entry point on every kadm5_hook in @a handles. */
 kadm5_ret_t
 k5_kadm5_hook_chpass (krb5_context context,
                       kadm5_hook_handle *handles,
@@ -224,7 +224,7 @@ k5_kadm5_hook_chpass (krb5_context context,
                       krb5_key_salt_tuple *ks_tuple,
                       const char *newpass);
 
-/** Call the create entry point for kadm5_hook_plugins*/
+/** Call the create entry point for kadm5_hook_plugins. */
 kadm5_ret_t
 k5_kadm5_hook_create (krb5_context context,
                       kadm5_hook_handle *handles,
@@ -234,14 +234,14 @@ k5_kadm5_hook_create (krb5_context context,
                       krb5_key_salt_tuple *ks_tuple,
                       const char *newpass);
 
-/** Call modify kadm5_hook entry point*/
+/** Call modify kadm5_hook entry point. */
 kadm5_ret_t
 k5_kadm5_hook_modify (krb5_context context,
                       kadm5_hook_handle *handles,
                       int stage,
                       kadm5_principal_ent_t princ, long mask);
 
-/** call remove kadm5_hook entry point*/
+/** Call remove kadm5_hook entry point. */
 kadm5_ret_t
 k5_kadm5_hook_remove (krb5_context context,
                       kadm5_hook_handle *handles,
@@ -249,8 +249,5 @@ k5_kadm5_hook_remove (krb5_context context,
                       krb5_principal princ);
 
 /** @}*/
-
-
-
 
 #endif /* __KADM5_SERVER_INTERNAL_H__ */

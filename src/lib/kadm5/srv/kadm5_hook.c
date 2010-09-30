@@ -24,8 +24,7 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  */
-/* Consumer interface for kadm5_hook plugins*/
-
+/* Consumer interface for kadm5_hook plugins. */
 
 #include "k5-int.h"
 #include "server_internal.h"
@@ -59,7 +58,8 @@ k5_kadm5_hook_load(krb5_context context,
     if (list == NULL)
         goto cleanup;
 
-    /* For each module, allocate a handle, initialize its vtable, and initialize the module*/
+    /* For each module, allocate a handle, initialize its vtable, and
+     * initialize the module. */
     count = 0;
     for (mod = modules; *mod != NULL; mod++) {
         handle = k5alloc(sizeof(*handle), &ret);
@@ -73,8 +73,8 @@ k5_kadm5_hook_load(krb5_context context,
         }
         handle->data = NULL;
         if (handle->vt.init != NULL) {
-            ret = handle->vt.init(context,  &handle->data);
-            if (ret != 0)       /* Failed dictionary binding is fatal. */
+            ret = handle->vt.init(context, &handle->data);
+            if (ret != 0)       /* Failed initialization is fatal. */
                 goto cleanup;
         }
         list[count++] = handle;
@@ -116,9 +116,11 @@ log_failure(krb5_context context,
             krb5_error_code ret)
 {
     const char *e = krb5_get_error_message(context, ret);
-    if (e)
+
+    if (e) {
         krb5_klog_syslog(LOG_ERR, "kadm5_hook %s failed postcommit %s: %s",
                          name, function, e);
+    }
     krb5_free_error_message(context, e);
 }
 
@@ -132,19 +134,17 @@ log_failure(krb5_context context,
         if (ret) {                                                      \
             if (stage == KADM5_HOOK_STAGE_PRECOMMIT)                    \
                 return ret;                                             \
-            else log_failure(context, h->vt.name, #operation, ret);     \
+            else                                                        \
+                log_failure(context, h->vt.name, #operation, ret);      \
         }                                                               \
     }
 
 
 kadm5_ret_t
-k5_kadm5_hook_chpass (krb5_context context,
-                      kadm5_hook_handle *handles,
-                      int stage, krb5_principal princ,
-                      krb5_boolean keepold,
-                      int n_ks_tuple,
-                      krb5_key_salt_tuple *ks_tuple,
-                      const char *newpass)
+k5_kadm5_hook_chpass(krb5_context context, kadm5_hook_handle *handles,
+                     int stage, krb5_principal princ, krb5_boolean keepold,
+                     int n_ks_tuple, krb5_key_salt_tuple *ks_tuple,
+                     const char *newpass)
 {
     ITERATE(chpass, (context, h->data,
                      stage, princ, keepold,
@@ -153,13 +153,10 @@ k5_kadm5_hook_chpass (krb5_context context,
 }
 
 kadm5_ret_t
-k5_kadm5_hook_create (krb5_context context,
-                      kadm5_hook_handle *handles,
-                      int stage,
-                      kadm5_principal_ent_t princ, long mask,
-                      int n_ks_tuple,
-                      krb5_key_salt_tuple *ks_tuple,
-                      const char *newpass)
+k5_kadm5_hook_create(krb5_context context, kadm5_hook_handle *handles,
+                     int stage, kadm5_principal_ent_t princ, long mask,
+                     int n_ks_tuple, krb5_key_salt_tuple *ks_tuple,
+                     const char *newpass)
 {
     ITERATE(create, (context, h->data,
                      stage, princ, mask, n_ks_tuple, ks_tuple, newpass));
@@ -167,23 +164,17 @@ k5_kadm5_hook_create (krb5_context context,
 }
 
 kadm5_ret_t
-k5_kadm5_hook_modify (krb5_context context,
-                      kadm5_hook_handle *handles,
-                      int stage,
-                      kadm5_principal_ent_t princ, long mask)
+k5_kadm5_hook_modify(krb5_context context, kadm5_hook_handle *handles,
+                     int stage, kadm5_principal_ent_t princ, long mask)
 {
-    ITERATE(modify, (context, h->data,
-                     stage, princ, mask));
+    ITERATE(modify, (context, h->data, stage, princ, mask));
     return 0;
 }
 
 kadm5_ret_t
-k5_kadm5_hook_remove (krb5_context context,
-                      kadm5_hook_handle *handles,
-                      int stage,
-                      krb5_principal princ)
+k5_kadm5_hook_remove(krb5_context context, kadm5_hook_handle *handles,
+                     int stage, krb5_principal princ)
 {
-    ITERATE(remove, (context, h->data,
-                     stage, princ));
+    ITERATE(remove, (context, h->data, stage, princ));
     return 0;
 }

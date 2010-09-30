@@ -56,7 +56,7 @@
 
 /**
  * Whether the operation is being run before or after the database
- * update
+ * update.
  */
 enum kadm5_hook_stage {
     /** In this stage, any plugin failure prevents following plugins from
@@ -66,31 +66,31 @@ enum kadm5_hook_stage {
     KADM5_HOOK_STAGE_POSTCOMMIT
 };
 
-/** Opaque module data pointer*/
+/** Opaque module data pointer. */
 typedef struct kadm5_hook_modinfo_st kadm5_hook_modinfo;
 
 /**
- * Interface for the v1 virtual table for the kadm5_hook plugin
+ * Interface for the v1 virtual table for the kadm5_hook plugin.
  * All entry points are optional. The name field must be provided.
  */
 typedef struct kadm5_hook_vtable_1_st {
 
-    /** A text string identifying the plugin for logging messages*/
+    /** A text string identifying the plugin for logging messages. */
     char *name;
 
-    /** Initialize a plugin module
+    /** Initialize a plugin module.
      * @param modinfo returns newly allocated module info for future
-     * calls. Cleaned up by the fini() function.
+     * calls.  Cleaned up by the fini() function.
      */
     kadm5_ret_t (*init)(krb5_context, kadm5_hook_modinfo **modinfo);
 
-    /** Clean up a module and free @a modinfo*/
+    /** Clean up a module and free @a modinfo. */
     void (*fini)(krb5_context, kadm5_hook_modinfo *modinfo);
 
     /** Indicates that the password is being changed.
      * @param stage is an integer from #kadm5_hook_stage enumeration
      * @param keepold is true if existing keys are being kept.
-     * */
+     */
     kadm5_ret_t (*chpass)(krb5_context,
                           kadm5_hook_modinfo *modinfo,
                           int stage,
@@ -99,7 +99,7 @@ typedef struct kadm5_hook_vtable_1_st {
                           krb5_key_salt_tuple *ks_tuple,
                           const char *newpass);
 
-    /** Indicate a principal is created*/
+    /** Indicate a principal is created. */
     kadm5_ret_t (*create)(krb5_context,
                           kadm5_hook_modinfo *,
                           int stage,
@@ -107,20 +107,19 @@ typedef struct kadm5_hook_vtable_1_st {
                           int n_ks_tuple,
                           krb5_key_salt_tuple *ks_tuple,
                           const char *password);
-    /** Modify a principal*/
+
+    /** Modify a principal. */
     kadm5_ret_t (*modify)(krb5_context,
                           kadm5_hook_modinfo *,
                           int stage,
                           kadm5_principal_ent_t, long mask);
 
+    /** Indicate a principal is deleted. */
+    kadm5_ret_t (*remove)(krb5_context,
+                          kadm5_hook_modinfo *modinfo,
+                          int stage, krb5_principal);
 
-    /** Indicate a principal is deleted*/
-    kadm5_ret_t (* remove) (krb5_context,
-                            kadm5_hook_modinfo *modinfo,
-                            int stage, krb5_principal
-    );
-
-    /*End of minor version 1*/
-}kadm5_hook_vftable_1;
+    /* End of minor version 1. */
+} kadm5_hook_vftable_1;
 
 #endif /*H_KRB5_KADM5_HOOK_PLUGIN*/
