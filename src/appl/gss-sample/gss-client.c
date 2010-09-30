@@ -175,7 +175,7 @@ client_establish_context(int s, char *service_name, OM_uint32 gss_flags,
         gss_name_t target_name;
         OM_uint32 maj_stat, min_stat, init_sec_min_stat;
         int token_flags;
-        gss_cred_id_t cred;
+        gss_cred_id_t cred = GSS_C_NO_CREDENTIAL;
         gss_name_t gss_username = GSS_C_NO_NAME;
         gss_OID_set_desc mechs, *mechsp = GSS_C_NO_OID_SET;
 
