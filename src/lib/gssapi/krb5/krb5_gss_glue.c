@@ -108,10 +108,44 @@ gss_krb5_copy_ccache(OM_uint32 *minor_status,
     req_buffer.value = out_ccache;
     req_buffer.length = sizeof(out_ccache);
 
-    major_status = gssspi_set_cred_option(minor_status,
-                                          cred_handle,
-                                          (gss_OID)&req_oid,
-                                          &req_buffer);
+    major_status = gss_set_cred_option(minor_status,
+                                       &cred_handle,
+                                       (gss_OID)&req_oid,
+                                       &req_buffer);
+
+    return major_status;
+}
+
+OM_uint32 KRB5_CALLCONV
+gss_krb5_import_cred(OM_uint32 *minor_status,
+                     krb5_ccache id,
+                     krb5_principal keytab_principal,
+                     krb5_keytab keytab,
+                     gss_cred_id_t *cred)
+{
+    static const gss_OID_desc req_oid = {
+        GSS_KRB5_IMPORT_CRED_OID_LENGTH,
+        GSS_KRB5_IMPORT_CRED_OID };
+    OM_uint32 major_status;
+    struct krb5_gss_import_cred_req req;
+    gss_buffer_desc req_buffer;
+
+    if (cred == NULL)
+        return GSS_S_CALL_INACCESSIBLE_WRITE;
+
+    *cred = GSS_C_NO_CREDENTIAL;
+
+    req.id = id;
+    req.keytab_principal = keytab_principal;
+    req.keytab = keytab;
+
+    req_buffer.value = &req;
+    req_buffer.length = sizeof(req);
+
+    major_status = gss_set_cred_option(minor_status,
+                                       cred,
+                                       (gss_OID)&req_oid,
+                                       &req_buffer);
 
     return major_status;
 }
@@ -189,10 +223,10 @@ gss_krb5_set_allowable_enctypes(OM_uint32 *minor_status,
     req_buffer.length = sizeof(req);
     req_buffer.value = &req;
 
-    major_status = gssspi_set_cred_option(minor_status,
-                                          cred,
-                                          (gss_OID)&req_oid,
-                                          &req_buffer);
+    major_status = gss_set_cred_option(minor_status,
+                                       &cred,
+                                       (gss_OID)&req_oid,
+                                       &req_buffer);
 
     return major_status;
 }
@@ -363,10 +397,10 @@ gss_krb5_set_cred_rcache(OM_uint32 *minor_status,
     req_buffer.length = sizeof(rcache);
     req_buffer.value = rcache;
 
-    major_status = gssspi_set_cred_option(minor_status,
-                                          cred,
-                                          (gss_OID)&req_oid,
-                                          &req_buffer);
+    major_status = gss_set_cred_option(minor_status,
+                                       &cred,
+                                       (gss_OID)&req_oid,
+                                       &req_buffer);
 
     return major_status;
 }

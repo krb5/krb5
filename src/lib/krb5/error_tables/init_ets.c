@@ -37,6 +37,7 @@ krb5_init_ets (krb5_context context)
 
     if (inited == 0) {
         initialize_krb5_error_table();
+        initialize_k5e1_error_table();
         initialize_kv5m_error_table();
         initialize_kdb5_error_table();
         initialize_asn1_error_table();

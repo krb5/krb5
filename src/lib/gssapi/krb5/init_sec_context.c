@@ -1012,6 +1012,8 @@ krb5_gss_init_sec_context_ext(
         mech_type = (gss_OID) gss_mech_krb5_old;
     } else if (g_OID_equal(mech_type, gss_mech_krb5_wrong)) {
         mech_type = (gss_OID) gss_mech_krb5_wrong;
+    } else if (g_OID_equal(mech_type, gss_mech_iakerb)) {
+        mech_type = (gss_OID) gss_mech_iakerb;
     } else {
         k5_mutex_unlock(&cred->lock);
         if (claimant_cred_handle == GSS_C_NO_CREDENTIAL)

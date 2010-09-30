@@ -28,6 +28,11 @@ for realm in multipass_realms(create_host=False):
     realm.kinit('user/fast', fastpw, flags=['-T', realm.ccache])
     realm.klist('user/fast@%s' % realm.realm)
 
+    # Test kinit against kdb keytab
+    realm.run_as_master([kinit, "-k", "-t",
+                         "KDB:", realm.user_princ])
+
+
     # Test kdestroy and klist of a non-existent ccache.
     realm.run_as_client([kdestroy])
     output = realm.run_as_client([klist], expected_code=1)

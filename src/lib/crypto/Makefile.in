@@ -27,7 +27,7 @@ STOBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST				\
 	@CRYPTO_IMPL@/sha1/OBJS.ST					\
 	krb/arcfour/OBJS.ST						\
 	@CRYPTO_IMPL@/aes/OBJS.ST @CRYPTO_IMPL@/des/OBJS.ST		\
-	krb/OBJS.ST							\
+	@CRYPTO_IMPL@/camellia/OBJS.ST krb/OBJS.ST			\
 	@CRYPTO_IMPL@/OBJS.ST
 
 SUBDIROBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST				\
@@ -39,7 +39,7 @@ SUBDIROBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST				\
 	@CRYPTO_IMPL@/sha1/OBJS.ST					\
 	krb/arcfour/OBJS.ST						\
 	@CRYPTO_IMPL@/aes/OBJS.ST @CRYPTO_IMPL@/des/OBJS.ST		\
-	krb/OBJS.ST							\
+	@CRYPTO_IMPL@/camellia/OBJS.ST krb/OBJS.ST			\
 	@CRYPTO_IMPL@/OBJS.ST
 
 # No dependencies.  Record places to find this shared object if the target

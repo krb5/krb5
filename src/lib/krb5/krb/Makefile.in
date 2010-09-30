@@ -74,6 +74,7 @@ STLIBOBJS= \
 	pac.o		\
 	pac_sign.o	\
 	parse.o		\
+	plugin.o	\
 	pr_to_salt.o	\
 	preauth2.o	\
 	gic_opt_set_pa.o	\
@@ -173,6 +174,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)pac.$(OBJEXT)		\
 	$(OUTPRE)pac_sign.$(OBJEXT)	\
 	$(OUTPRE)parse.$(OBJEXT)	\
+	$(OUTPRE)plugin.$(OBJEXT)	\
 	$(OUTPRE)pr_to_salt.$(OBJEXT)	\
 	$(OUTPRE)preauth2.$(OBJEXT)	\
 	$(OUTPRE)gic_opt_set_pa.$(OBJEXT)	\
@@ -273,6 +275,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/pac.c		\
 	$(srcdir)/pac_sign.c	\
 	$(srcdir)/parse.c	\
+	$(srcdir)/plugin.c	\
 	$(srcdir)/pr_to_salt.c	\
 	$(srcdir)/preauth2.c	\
 	$(srcdir)/gic_opt_set_pa.c	\
@@ -350,7 +353,7 @@ T_PAC_OBJS= t_pac.o pac.o pac_sign.o copy_data.o
 
 T_PRINC_OBJS= t_princ.o parse.o unparse.o
 
-T_ETYPES_OBJS= t_etypes.o init_ctx.o etype_list.o
+T_ETYPES_OBJS= t_etypes.o init_ctx.o etype_list.o plugin.o
 
 t_walk_rtree: $(T_WALK_RTREE_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_walk_rtree $(T_WALK_RTREE_OBJS) $(KRB5_BASE_LIBS)

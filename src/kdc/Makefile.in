@@ -70,6 +70,9 @@ check-unix:: rtest
 	cmp test.out $(srcdir)/rtest.good
 	$(RM) test.out
 
+check-pytests::
+	$(RUNPYTEST) $(srcdir)/t_workers.py $(PYTESTFLAGS)
+
 install::
 	$(INSTALL_PROGRAM) krb5kdc ${DESTDIR}$(SERVER_BINDIR)/krb5kdc
 	$(INSTALL_DATA) $(srcdir)/krb5kdc.M ${DESTDIR}$(SERVER_MANDIR)/krb5kdc.8

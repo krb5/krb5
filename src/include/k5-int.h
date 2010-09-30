@@ -168,6 +168,7 @@ typedef INT64_TYPE krb5_int64;
  */
 #include <errno.h>
 #include "krb5.h"
+#include <krb5/plugin.h>
 #include "profile.h"
 
 #include "port-sockets.h"
@@ -205,12 +206,14 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_DEFAULT_PRINCIPAL_EXPIRATION   "default_principal_expiration"
 #define KRB5_CONF_DEFAULT_PRINCIPAL_FLAGS        "default_principal_flags"
 #define KRB5_CONF_DICT_FILE                   "dict_file"
+#define KRB5_CONF_DISABLE                     "disable"
 #define KRB5_CONF_DISABLE_LAST_SUCCESS        "disable_last_success"
 #define KRB5_CONF_DISABLE_LOCKOUT             "disable_lockout"
 #define KRB5_CONF_DNS_LOOKUP_KDC              "dns_lookup_kdc"
 #define KRB5_CONF_DNS_LOOKUP_REALM            "dns_lookup_realm"
 #define KRB5_CONF_DNS_FALLBACK                "dns_fallback"
 #define KRB5_CONF_DOMAIN_REALM                "domain_realm"
+#define KRB5_CONF_ENABLE_ONLY                 "enable_only"
 #define KRB5_CONF_EXTRA_ADDRESSES             "extra_addresses"
 #define KRB5_CONF_FORWARDABLE                 "forwardable"
 #define KRB5_CONF_HOST_BASED_SERVICES         "host_based_services"
@@ -245,9 +248,11 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_MASTER_KDC                  "master_kdc"
 #define KRB5_CONF_MAX_LIFE                    "max_life"
 #define KRB5_CONF_MAX_RENEWABLE_LIFE          "max_renewable_life"
+#define KRB5_CONF_MODULE                      "module"
 #define KRB5_CONF_NOADDRESSES                 "noaddresses"
 #define KRB5_CONF_NO_HOST_REFERRAL            "no_host_referral"
 #define KRB5_CONF_PERMITTED_ENCTYPES          "permitted_enctypes"
+#define KRB5_CONF_PLUGINS                     "plugins"
 #define KRB5_CONF_PREAUTH_MODULE_DIR          "preauth_module_dir"
 #define KRB5_CONF_PREFERRED_PREAUTH_TYPES     "preferred_preauth_types"
 #define KRB5_CONF_PROXIABLE                   "proxiable"
@@ -1427,6 +1432,120 @@ krb5_authdata_free_internal(krb5_context kcontext,
                             krb5_authdata_context context, const char *module,
                             void *ptr);
 
+/*** Plugin framework ***/
+
+/*
+ * This framework can be used to create pluggable interfaces.  Not all existing
+ * pluggable interface use this framework, but new ones should.  A new
+ * pluggable interface entails:
+ *
+ * - An interface ID definition in the list of #defines below.
+ *
+ * - A name in the interface_names array in lib/krb5/krb/plugins.c.
+ *
+ * - An installed public header file in include/krb5.  The public header should
+ *   include <krb5/plugin.h> and should declare a vtable structure for each
+ *   supported major version of the interface.
+ *
+ * - A consumer API implementation, located within the code unit which makes
+ *   use of the pluggable interface.  The consumer API should consist of:
+ *
+ *   . An interface-specific handle type which contains a vtable structure for
+ *     the module (or a union of several such structures, if there are multiple
+ *     supported major versions) and, optionally, resource data bound to the
+ *     handle.
+ *
+ *   . An interface-specific loader function which creates a handle or list of
+ *     handles.  A list of handles would be created if the interface is a
+ *     one-to-many interface where the consumer wants to consult all available
+ *     modules; a single handle would be created for an interface where the
+ *     consumer wants to consult a specific module.  The loader function should
+ *     use k5_plugin_load or k5_plugin_load_all to produce one or a list of
+ *     vtable initializer functions, and should use those functions to fill in
+ *     the vtable structure for the module (if necessary, trying each supported
+ *     major version starting from the most recent).  The loader function can
+ *     also bind resource data into the handle based on caller arguments, if
+ *     appropriate.
+ *
+ *   . For each plugin method, a wrapper function which accepts a krb5_context,
+ *     a plugin handle, and the method arguments.  Wrapper functions should
+ *     invoke the method function contained in the handle's vtable.
+ *
+ * - Possibly, built-in implementations of the interface, also located within
+ *   the code unit which makes use of the interface.  Built-in implementations
+ *   must be registered with k5_plugin_register before the first call to
+ *   k5_plugin_load or k5_plugin_load_all.
+ *
+ * A pluggable interface should have one or more currently supported major
+ * versions, starting at 1.  Each major version should have a current minor
+ * version, also starting at 1.  If new methods are added to a vtable, the
+ * minor version should be incremented and the vtable stucture should document
+ * where each minor vtable version ends.  If method signatures for a vtable are
+ * changed, the major version should be incremented.
+ *
+ * Plugin module implementations (either built-in or dynamically loaded) should
+ * define a function named <interfacename>_<modulename>_initvt, matching the
+ * signature of krb5_plugin_initvt_fn as declared in include/krb5/plugin.h.
+ * The initvt function should check the given maj_ver argument against its own
+ * supported major versions, cast the vtable pointer to the appropriate
+ * interface-specific vtable type, and fill in the vtable methods, stopping as
+ * appropriate for the given min_ver.  Memory for the vtable structure is
+ * allocated by the caller, not by the module.
+ *
+ * Dynamic plugin modules are registered with the framework through the
+ * [plugins] section of the profile, as described in the admin documentation
+ * and krb5.conf man page.
+ */
+
+/*
+ * A linked list entry mapping a module name to a module initvt function.  The
+ * entry may also include a dynamic object handle so that it can be released
+ * when the context is destroyed.
+ */
+struct plugin_mapping {
+    char *modname;
+    krb5_plugin_initvt_fn module;
+    struct plugin_file_handle *dyn_handle;
+    struct plugin_mapping *next;
+};
+
+/* Holds krb5_context information about each pluggable interface. */
+struct plugin_interface {
+    struct plugin_mapping *modules;
+    krb5_boolean configured;
+};
+
+/* A list of plugin interface IDs.  Make sure to increment
+ * PLUGIN_NUM_INTERFACES when a new interface is added. */
+#define PLUGIN_INTERFACE_PWQUAL 0
+#define PLUGIN_INTERFACE_KADM5_HOOK 1
+#define PLUGIN_NUM_INTERFACES   2
+
+/* Retrieve the plugin module of type interface_id and name modname,
+ * storing the result into module. */
+krb5_error_code
+k5_plugin_load(krb5_context context, int interface_id, const char *modname,
+               krb5_plugin_initvt_fn *module);
+
+/* Retrieve all plugin modules of type interface_id, storing the result
+ * into modules.  Free the result with k5_plugin_free_handles. */
+krb5_error_code
+k5_plugin_load_all(krb5_context context, int interface_id,
+                   krb5_plugin_initvt_fn **modules);
+
+/* Release a module list allocated by k5_plugin_load_all. */
+void
+k5_plugin_free_modules(krb5_context context, krb5_plugin_initvt_fn *modules);
+
+/* Register a plugin module of type interface_id and name modname. */
+krb5_error_code
+k5_plugin_register(krb5_context context, int interface_id, const char *modname,
+                   krb5_plugin_initvt_fn module);
+
+/* Destroy the module state within context; used by krb5_free_context. */
+void
+k5_plugin_free_context(krb5_context context);
+
 struct _kdb5_dal_handle;        /* private, in kdb5.h */
 typedef struct _kdb5_dal_handle kdb5_dal_handle;
 struct _kdb_log_context;
@@ -1481,6 +1600,8 @@ struct _krb5_context {
 
     krb5_trace_callback trace_callback;
     void *trace_callback_data;
+
+    struct plugin_interface plugins[PLUGIN_NUM_INTERFACES];
 };
 
 /* could be used in a table to find an etype and initialize a block */
@@ -2557,6 +2678,30 @@ krb5int_aes_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 krb5_error_code
 krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
                     size_t num_data);
+
+krb5_error_code
+krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
+                         size_t num_data, const krb5_data *iv,
+                         krb5_data *output);
+
+#if 0
+/*
+ * There are no IANA assignments for these enctypes or cksumtypes yet.  They
+ * must be defined to local-use negative numbers at build time for Camellia-CCM
+ * support to function at the moment.  If one is defined, they should all be
+ * defined.  When IANA assignments exist, these definitions should move to the
+ * appropriate places in krb5.hin and all CAMELLIA_CCM conditional code should
+ * be made unconditional.
+ */
+#define ENCTYPE_CAMELLIA128_CCM_128 -XXX /* Camellia CCM mode, 128-bit key */
+#define ENCTYPE_CAMELLIA256_CCM_128 -YYY /* Camellia CCM mode, 256-bit key */
+#define CKSUMTYPE_CMAC_128_CAMELLIA128  -XXX  /* CMAC, 128-bit Camellia key */
+#define CKSUMTYPE_CMAC_128_CAMELLIA256  -YYY  /* CMAC, 256-bit Camellia key */
+#endif
+
+#ifdef ENCTYPE_CAMELLIA128_CCM_128
+#define CAMELLIA_CCM
+#endif
 
 struct _krb5_kt {       /* should move into k5-int.h */
     krb5_magic magic;

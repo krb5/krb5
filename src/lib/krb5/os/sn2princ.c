@@ -196,8 +196,8 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
         retval = krb5_build_principal(context, ret_princ, strlen(realm),
                                       realm, sname, remote_host,
                                       (char *)0);
-
-        krb5_princ_type(context, *ret_princ) = type;
+        if (retval == 0)
+            krb5_princ_type(context, *ret_princ) = type;
 
 #ifdef DEBUG_REFERRALS
         printf("krb5_sname_to_principal returning\n");

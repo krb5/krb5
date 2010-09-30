@@ -40,6 +40,21 @@ foo = baz
 
 then the second value of foo (baz) would never be read.
 
+The @code{krb5.conf} file can include other files using either of the
+following directives at the beginning of a line:
+
+@smallexample
+include @var{FILENAME}
+includedir @var{DIRNAME}
+@end smallexample
+
+@var{FILENAME} or @var{DIRNAME} should be an absolute path.  The named
+file or directory must exist and be readable.  Including a directory
+includes all files within the directory whose names consist solely of
+alphanumeric characters, dashes, or underscores.  Included profile files
+are syntactically independent of their parents, so each included file
+must begin with a section header.
+
 The @code{krb5.conf} file may contain any or all of the following 
 sections:
 
@@ -73,6 +88,10 @@ cross-realm authentication.  Entries in this section are used by the
 client to determine the intermediate realms which may be used in
 cross-realm authentication.  It is also used by the end-service when
 checking the transited field for trusted intermediate realms.
+
+@itemx plugins
+Contains tags to register dynamic plugin modules and to turn modules on
+and off.
 
 @ignore
 this doesn't seem to be used

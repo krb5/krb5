@@ -1,6 +1,7 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #include "prof_int.h"
 
+#include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
 #ifdef HAVE_STDLIB_H
@@ -8,6 +9,7 @@
 #endif
 #include <errno.h>
 #include <ctype.h>
+#include <dirent.h>
 
 #define SECTION_SEP_CHAR '/'
 
@@ -22,6 +24,8 @@ struct parse_state {
     struct profile_node *current_section;
 };
 
+static errcode_t parse_file(FILE *f, struct parse_state *state);
+
 static char *skip_over_blanks(char *cp)
 {
     while (*cp && isspace((int) (*cp)))
@@ -33,7 +37,7 @@ static void strip_line(char *line)
 {
     char *p = line + strlen(line);
     while (p > line && (p[-1] == '\n' || p[-1] == '\r'))
-        *p-- = 0;
+        *--p = 0;
 }
 
 static void parse_quoted_string(char *str)
@@ -65,14 +69,6 @@ static void parse_quoted_string(char *str)
     *to = '\0';
 }
 
-
-static errcode_t parse_init_state(struct parse_state *state)
-{
-    state->state = STATE_INIT_COMMENT;
-    state->group_level = 0;
-
-    return profile_create_node("(root)", 0, &state->root_section);
-}
 
 static errcode_t parse_std_line(char *line, struct parse_state *state)
 {
@@ -201,10 +197,86 @@ static errcode_t parse_std_line(char *line, struct parse_state *state)
     return 0;
 }
 
+/* Open and parse an included profile file. */
+static errcode_t parse_include_file(char *filename, struct parse_state *state)
+{
+    FILE    *fp;
+    errcode_t retval = 0;
+    struct parse_state incstate;
+
+    /* Create a new state so that fragments are syntactically independent,
+     * sharing the root section with the existing state. */
+    incstate.state = STATE_INIT_COMMENT;
+    incstate.group_level = 0;
+    incstate.root_section = state->root_section;
+    incstate.current_section = NULL;
+
+    fp = fopen(filename, "r");
+    if (fp == NULL)
+        return PROF_FAIL_INCLUDE_FILE;
+    retval = parse_file(fp, &incstate);
+    fclose(fp);
+    return retval;
+}
+
+/* Return non-zero if filename contains only alphanumeric characters, dashes,
+ * and underscores. */
+static int valid_name(const char *filename)
+{
+    const char *p;
+
+    for (p = filename; *p != '\0'; p++) {
+        if (!isalnum((unsigned char)*p) && *p != '-' && *p != '_')
+            return 0;
+    }
+    return 1;
+}
+
+/*
+ * Include files within dirname.  Only files with names consisting entirely of
+ * alphanumeric chracters, dashes, and underscores are included, in order to
+ * avoid including editor backup files, .rpmsave files, and the like.
+ */
+static errcode_t parse_include_dir(char *dirname, struct parse_state *state)
+{
+    DIR     *dir;
+    char    *pathname;
+    errcode_t retval = 0;
+    struct dirent *ent;
+
+    dir = opendir(dirname);
+    if (dir == NULL)
+        return PROF_FAIL_INCLUDE_DIR;
+    while ((ent = readdir(dir)) != NULL) {
+        if (!valid_name(ent->d_name))
+            continue;
+        if (asprintf(&pathname, "%s/%s", dirname, ent->d_name) < 0) {
+            retval = ENOMEM;
+            break;
+        }
+        retval = parse_include_file(pathname, state);
+        free(pathname);
+        if (retval)
+            break;
+    }
+    closedir(dir);
+    return retval;
+}
+
 static errcode_t parse_line(char *line, struct parse_state *state)
 {
     char    *cp;
 
+    if (strncmp(line, "include", 7) == 0 && isspace(line[7])) {
+        cp = skip_over_blanks(line + 7);
+        strip_line(cp);
+        return parse_include_file(cp, state);
+    }
+    if (strncmp(line, "includedir", 10) == 0 && isspace(line[10])) {
+        cp = skip_over_blanks(line + 10);
+        strip_line(cp);
+        return parse_include_dir(cp, state);
+    }
     switch (state->state) {
     case STATE_INIT_COMMENT:
         if (line[0] != '[')
@@ -221,29 +293,22 @@ static errcode_t parse_line(char *line, struct parse_state *state)
     return 0;
 }
 
-errcode_t profile_parse_file(FILE *f, struct profile_node **root)
+static errcode_t parse_file(FILE *f, struct parse_state *state)
 {
 #define BUF_SIZE        2048
     char *bptr;
     errcode_t retval;
-    struct parse_state state;
 
     bptr = malloc (BUF_SIZE);
     if (!bptr)
         return ENOMEM;
 
-    retval = parse_init_state(&state);
-    if (retval) {
-        free (bptr);
-        return retval;
-    }
     while (!feof(f)) {
         if (fgets(bptr, BUF_SIZE, f) == NULL)
             break;
 #ifndef PROFILE_SUPPORTS_FOREIGN_NEWLINES
-        retval = parse_line(bptr, &state);
+        retval = parse_line(bptr, state);
         if (retval) {
-            profile_free_node(state.root_section);
             free (bptr);
             return retval;
         }
@@ -286,9 +351,8 @@ errcode_t profile_parse_file(FILE *f, struct profile_node **root)
 
                 /* parse_line modifies contents of p */
                 newp = p + strlen (p) + 1;
-                retval = parse_line (p, &state);
+                retval = parse_line (p, state);
                 if (retval) {
-                    profile_free_node(state.root_section);
                     free (bptr);
                     return retval;
                 }
@@ -298,9 +362,32 @@ errcode_t profile_parse_file(FILE *f, struct profile_node **root)
         }
 #endif
     }
-    *root = state.root_section;
 
     free (bptr);
+    return 0;
+}
+
+errcode_t profile_parse_file(FILE *f, struct profile_node **root)
+{
+    struct parse_state state;
+    errcode_t retval;
+
+    *root = NULL;
+
+    /* Initialize parsing state with a new root node. */
+    state.state = STATE_INIT_COMMENT;
+    state.group_level = 0;
+    state.current_section = NULL;
+    retval = profile_create_node("(root)", 0, &state.root_section);
+    if (retval)
+        return retval;
+
+    retval = parse_file(f, &state);
+    if (retval) {
+        profile_free_node(state.root_section);
+        return retval;
+    }
+    *root = state.root_section;
     return 0;
 }
 

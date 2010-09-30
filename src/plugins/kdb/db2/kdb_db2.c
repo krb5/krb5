@@ -436,32 +436,7 @@ krb5_db2_fini(krb5_context context)
     return retval;
 }
 
-krb5_error_code
-krb5_db2_set_mkey_list(krb5_context context, krb5_keylist_node *key_list)
-{
-    krb5_db2_context *db_ctx;
 
-    if (!k5db2_inited(context))
-        return (KRB5_KDB_DBNOTINITED);
-
-    db_ctx = context->dal_handle->db_context;
-    db_ctx->db_master_key_list = key_list;
-    return 0;
-}
-
-krb5_error_code
-krb5_db2_get_mkey_list(krb5_context context, krb5_keylist_node **key_list)
-{
-    krb5_db2_context *db_ctx;
-
-    if (!k5db2_inited(context))
-        return (KRB5_KDB_DBNOTINITED);
-
-    db_ctx = context->dal_handle->db_context;
-    *key_list = db_ctx->db_master_key_list;
-
-    return 0;
-}
 
 /* Return successfully if the db2 name set in context can be opened. */
 static krb5_error_code

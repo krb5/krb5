@@ -2087,7 +2087,7 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
             goto cleanup;
 
         if (attr_present == TRUE) {
-            if ((mask & KDB_PRINC_EXPIRE_TIME_ATTR) == 1) {
+            if (mask & KDB_PRINC_EXPIRE_TIME_ATTR) {
                 if (expiretime < entry->expiration)
                     entry->expiration = expiretime;
             } else {
@@ -2127,7 +2127,7 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
             if ((st=krb5_dbe_lookup_last_pwd_change(context, entry, &last_pw_changed)) != 0)
                 goto cleanup;
 
-            if ((mask & KDB_PWD_EXPIRE_TIME_ATTR) == 1) {
+            if (mask & KDB_PWD_EXPIRE_TIME_ATTR) {
                 if ((last_pw_changed + pw_max_life) < entry->pw_expiration)
                     entry->pw_expiration = last_pw_changed + pw_max_life;
             } else

@@ -70,6 +70,10 @@ int main(int argc, char *argv[])
         com_err(argv[0], ret, "initializing kerberos library");
         exit(1);
     }
+    if ((ret = krb5_get_init_creds_opt_alloc(context, &opts))) {
+        com_err(argv[0], ret, "allocating krb5_get_init_creds_opt");
+        exit(1);
+    }
 
     /* in order, use the first of:
        - a name specified on the command line
@@ -77,40 +81,44 @@ int main(int argc, char *argv[])
        - the name corresponding to the ruid of the process
 
        otherwise, it's an error.
+       We always attempt to open the default ccache in order to use FAST if
+       possible.
     */
-
+    ret = krb5_cc_default(context, &ccache);
+    if (ret != 0) {
+        com_err(argv[0], ret, "opening default ccache");
+        exit(1);
+    }
+    ret = krb5_cc_get_principal(context, ccache, &princ);
+    if (ret != 0 && ret != KRB5_CC_NOTFOUND && ret != KRB5_FCC_NOFILE) {
+        com_err(argv[0], ret, "getting principal from ccache");
+        exit(1);
+    } else {
+        if (princ != NULL) {
+            ret = krb5_get_init_creds_opt_set_fast_ccache(context, opts,
+                                                          ccache);
+            if (ret) {
+                com_err(argv[0], ret, "while setting FAST ccache");
+                exit(1);
+            }
+        }
+    }
+    ret = krb5_cc_close(context, ccache);
+    if (ret != 0) {
+        com_err(argv[0], ret, "closing ccache");
+        exit(1);
+    }
     if (pname) {
+        krb5_free_principal(context, princ);
+        princ = NULL;
         if ((ret = krb5_parse_name(context, pname, &princ))) {
             com_err(argv[0], ret, "parsing client name");
             exit(1);
         }
-    } else {
-        ret = krb5_cc_default(context, &ccache);
-        if (ret != 0) {
-            com_err(argv[0], ret, "opening default ccache");
-            exit(1);
-        }
-
-        ret = krb5_cc_get_principal(context, ccache, &princ);
-        if (ret != 0 && ret != KRB5_CC_NOTFOUND && ret != KRB5_FCC_NOFILE) {
-            com_err(argv[0], ret, "getting principal from ccache");
-            exit(1);
-        }
-
-        ret = krb5_cc_close(context, ccache);
-        if (ret != 0) {
-            com_err(argv[0], ret, "closing ccache");
-            exit(1);
-        }
-
-        if (princ == NULL)
-            get_name_from_passwd_file(argv[0], context, &princ);
     }
+    if (princ == NULL)
+        get_name_from_passwd_file(argv[0], context, &princ);
 
-    if ((ret = krb5_get_init_creds_opt_alloc(context, &opts))) {
-        com_err(argv[0], ret, "allocating krb5_get_init_creds_opt");
-        exit(1);
-    }
     krb5_get_init_creds_opt_set_tkt_life(opts, 5*60);
     krb5_get_init_creds_opt_set_renew_life(opts, 0);
     krb5_get_init_creds_opt_set_forwardable(opts, 0);

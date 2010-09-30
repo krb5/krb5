@@ -63,6 +63,8 @@ kdb_check: kdc.conf krb5.conf
 check-pytests::
 	$(RUNPYTEST) $(srcdir)/t_general.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_anonpkinit.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_lockout.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_kadm5_hook.py $(PYTESTFLAGS)
 
 clean::
 	$(RM) kdc.conf

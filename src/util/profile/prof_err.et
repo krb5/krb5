@@ -60,7 +60,13 @@ error_code	PROF_EXISTS,		"Section already exists"
 error_code	PROF_BAD_BOOLEAN,		"Invalid boolean value"
 error_code	PROF_BAD_INTEGER,		"Invalid integer value"
 
+#
+# new error codes added at end to avoid changing values
+#
 error_code	PROF_MAGIC_FILE_DATA, "Bad magic value in profile_file_data_t"
-
+error_code	PROF_FAIL_INCLUDE_FILE,
+	"Included profile file could not be read"
+error_code	PROF_FAIL_INCLUDE_DIR,
+	"Included profile directory could not be read"
 
 end

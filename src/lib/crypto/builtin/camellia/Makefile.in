@@ -1,0 +1,50 @@
+thisconfigdir=../../../..
+myfulldir=lib/crypto/builtin/camellia
+mydir=lib/crypto/builtin/camellia
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../krb/dk \
+	 -I$(srcdir)/../../../../include -I$(srcdir)/../aes
+DEFS=
+
+##DOS##BUILDTOP = ..\..\..\..
+##DOS##PREFIXDIR=camellia
+##DOS##OBJFILE=..\$(OUTPRE)camellia.lst
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+STLIBOBJS=\
+	camellia.o
+
+OBJS=\
+	$(OUTPRE)camellia.$(OBJEXT)
+
+SRCS=\
+	$(srcdir)/camellia.c
+
+GEN_OBJS=\
+	$(OUTPRE)camellia.$(OBJEXT)
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs # camellia-gen
+
+includes:: depend
+
+depend:: $(SRCS)
+
+camellia-gen: camellia-gen.o $(GEN_OBJS)
+	$(CC_LINK) -I../../../../include $(LOCALINCLUDES) -o camellia-gen camellia-gen.o $(GEN_OBJS)
+
+run-camellia-gen: camellia-gen
+	./camellia-gen > kresults.out
+
+check:: run-camellia-gen
+
+
+clean-unix:: clean-libobjs
+
+clean::
+	-$(RM) camellia-gen camellia-gen.o kresults.out
+
+@libobj_frag@

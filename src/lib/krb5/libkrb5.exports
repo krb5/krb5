@@ -102,8 +102,13 @@ initialize_asn1_error_table
 initialize_k524_error_table
 initialize_kdb5_error_table
 initialize_krb5_error_table
+initialize_k5e1_error_table
 initialize_kv5m_error_table
 initialize_prof_error_table
+k5_plugin_free_modules
+k5_plugin_load
+k5_plugin_load_all
+k5_plugin_register
 krb524_convert_creds_kdc
 krb524_init_ets
 krb5_425_conv_principal
@@ -176,6 +181,7 @@ krb5_cc_default
 krb5_cc_default_name
 krb5_cc_destroy
 krb5_cc_dfl_ops
+krb5_cc_dup
 krb5_cc_end_seq_get
 krb5_cc_file_ops
 krb5_cc_gen_new
@@ -347,6 +353,7 @@ krb5_get_init_creds_opt_set_canonicalize
 krb5_get_init_creds_opt_set_change_password_prompt
 krb5_get_init_creds_opt_set_etype_list
 krb5_get_init_creds_opt_set_expire_callback
+krb5_get_init_creds_opt_set_fast_ccache
 krb5_get_init_creds_opt_set_fast_ccache_name
 krb5_get_init_creds_opt_set_fast_flags
 krb5_get_init_creds_opt_set_forwardable

@@ -147,8 +147,97 @@ proc test3 {} {
     puts "OK: test3: Clearing relation and adding one entry yields correct count."
 }
 
+# Exercise the include and includedir directives.
+proc test4 {} {
+    global wd verbose
+
+    # Test expected error message when including nonexistent file.
+    catch [file delete $wd/testinc.ini]
+    exec echo "include does-not-exist" >$wd/testinc.ini
+    catch { profile_init_path $wd/testinc.ini } err
+    if $verbose { puts "Got error message $err" }
+    if ![string equal $err "Included profile file could not be read"] {
+	puts stderr "Error: test4: Did not get expected error when including nonexistent file."
+	exit 1
+    }
+
+    # Test expected error message when including nonexistent directory.
+    catch [file delete $wd/testinc.ini]
+    exec echo "includedir does-not-exist" >$wd/testinc.ini
+    catch { profile_init_path $wd/testinc.ini } err
+    if $verbose { puts "Got error message $err" }
+    if ![string equal $err "Included profile directory could not be read"] {
+	puts stderr "Error: test4: Did not get expected error when including nonexistent directory."
+	exit 1
+    }
+
+    # Test including a file.
+    catch [file delete $wd/testinc.ini]
+    exec echo "include $wd/test2.ini" >$wd/testinc.ini
+    set p [profile_init_path $wd/testinc.ini]
+    set x [profile_get_values $p {{test section 1} bar}]
+    if $verbose { puts "Read $x from included profile" }
+    if ![string equal [lindex $x 0] "foo"] {
+	puts stderr "Error: test4: Did not get expected result from included profile."
+	exit 1
+    }
+    profile_release $p
+
+    # Test including a directory.  (Put two copies of test2.ini inside
+    # it and check that we get two values for one of the variables.)
+    catch [file delete -force $wd/test_include_dir]
+    exec mkdir $wd/test_include_dir
+    exec cp $wd/test2.ini $wd/test_include_dir/a
+    exec cp $wd/test2.ini $wd/test_include_dir/b
+    catch [file delete $wd/testinc.ini]
+    exec echo "includedir $wd/test_include_dir" >$wd/testinc.ini
+    set p [profile_init_path $wd/testinc.ini]
+    set x [profile_get_values $p {{test section 1} bar}]
+    if $verbose { puts "Read $x from included directory" }
+    if ![string equal $x "foo foo"] {
+	puts stderr, "Error: test4: Did not get expected result from included directory."
+	exit 1
+    }
+    profile_release $p
+
+    puts "OK: test4: include and includedir directives"
+}
+
+proc test5 {} {
+    global wd verbose
+
+    # Test syntactic independence of included profile files.
+    catch [file delete $wd/testinc.ini]
+    set f [open "$wd/testinc.ini" w]
+    puts $f {[sec1]}
+    puts $f "var = {"
+    puts $f "a = 1"
+    puts $f "include testinc2.ini"
+    puts $f "c = 3"
+    puts $f "}"
+    close $f
+    catch [file delete $wd/testinc2.ini]
+    set f [open "$wd/testinc2.ini" w]
+    puts $f {[sec2]}
+    puts $f "b = 2"
+    close $f
+    set p [profile_init_path $wd/testinc.ini]
+    set a [profile_get_values $p {sec1 var a}]
+    set b [profile_get_values $p {sec2 b}]
+    set c [profile_get_values $p {sec1 var c}]
+    if $verbose { puts "Read values [concat $a $b $c] from profile" }
+    if { $a != 1 || $b != 2 || $c != 3 } {
+	puts stderr, "Error: test5: Wrong results from profile"
+	exit 1
+    }
+
+    puts "OK: test5: syntax independence of included files"
+}
+
 test1
 test2
 test3
+test4
+test5
 
 exit 0

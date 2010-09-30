@@ -222,8 +222,9 @@ Scripts may use the following realm methods and attributes:
 
 * realm.create_kdb(): Create a new master KDB.
 
-* realm.start_kdc(): Start a krb5kdc with the realm's master KDC
-  environment.  Errors if a KDC is already running.
+* realm.start_kdc(args=[]): Start a krb5kdc with the realm's master
+  KDC environment.  Errors if a KDC is already running.  If args is
+  given, it contains a list of additional krb5kdc arguments.
 
 * realm.stop_kdc(): Stop the krb5kdc process.  Errors if no KDC is
   running.
@@ -818,10 +819,10 @@ class K5Realm(object):
         global kdb5_util
         self.run_as_master([kdb5_util, 'create', '-W', '-s', '-P', 'master'])
 
-    def start_kdc(self):
+    def start_kdc(self, args=[]):
         global krb5kdc
         assert(self._kdc_proc is None)
-        self._kdc_proc = _start_daemon([krb5kdc, '-n'], self.env_master,
+        self._kdc_proc = _start_daemon([krb5kdc, '-n'] + args, self.env_master,
                                         'starting...')
 
     def stop_kdc(self):
@@ -1012,6 +1013,17 @@ _passes = [
       {'master' : {'realms' : {'$realm' : {
                         'supported_enctypes' : 'aes128-cts:normal',
                         'master_key_type' : 'aes128-cts'}}}}),
+
+    # Exercise the camellia256-ccm enctype.
+# Enable when Camellia-CCM support becomes unconditional.
+#    ('camellia256', None,
+#      {'all' : {'libdefaults' : {
+#                    'default_tgs_enctypes' : 'camellia256-ccm',
+#                    'default_tkt_enctypes' : 'camellia256-ccm',
+#                    'permitted_enctypes' : 'camellia256-ccm'}}},
+#      {'master' : {'realms' : {'$realm' : {
+#                        'supported_enctypes' : 'camellia256-ccm:normal',
+#                        'master_key_type' : 'camellia256-ccm'}}}}),
 
     # Test a setup with modern principal keys but an old TGT key.
     ('aes256.destgt', 'des-cbc-crc:normal',

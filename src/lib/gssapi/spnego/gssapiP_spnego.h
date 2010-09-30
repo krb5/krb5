@@ -361,7 +361,7 @@ OM_uint32
 spnego_gss_set_cred_option
 (
 	OM_uint32 *minor_status,
-	gss_cred_id_t cred_handle,
+	gss_cred_id_t *cred_handle,
 	const gss_OID desired_object,
 	const gss_buffer_t value
 );

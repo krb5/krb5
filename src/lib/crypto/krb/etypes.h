@@ -52,6 +52,14 @@ typedef krb5_error_code (*prf_func)(const struct krb5_keytypes *ktp,
                                     krb5_key key,
                                     const krb5_data *in, krb5_data *out);
 
+typedef krb5_error_code (*init_state_func)(const struct krb5_keytypes *ktp,
+                                           const krb5_keyblock *key,
+                                           krb5_keyusage keyusage,
+                                           krb5_data *out_state);
+
+typedef void (*free_state_func)(const struct krb5_keytypes *ktp,
+                                krb5_data *state);
+
 struct krb5_keytypes {
     krb5_enctype etype;
     char *name;
@@ -65,6 +73,8 @@ struct krb5_keytypes {
     crypt_func decrypt;
     str2key_func str2key;
     prf_func prf;
+    init_state_func init_state;
+    free_state_func free_state;
     krb5_cksumtype required_ctype;
     krb5_flags flags;
 };
@@ -88,5 +98,33 @@ find_enctype(krb5_enctype enctype)
         return NULL;
     return &krb5int_enctypes_list[i];
 }
+
+/* This belongs with the declaration of struct krb5_enc_provider... but not
+ * while that's still in k5-int.h. */
+/* Encrypt one block of plaintext in place. */
+static inline krb5_error_code
+encrypt_block(const struct krb5_enc_provider *enc, krb5_key key,
+              krb5_data *block)
+{
+    krb5_crypto_iov iov;
+
+    /* Verify that block is the right length. */
+    if (block->length != enc->block_size)
+        return EINVAL;
+    iov.flags = KRB5_CRYPTO_TYPE_DATA;
+    iov.data = *block;
+    if (enc->cbc_mac != NULL)   /* One-block cbc-mac with no ivec. */
+        return enc->cbc_mac(key, &iov, 1, NULL, block);
+    else                        /* Assume cbc-mode encrypt. */
+        return enc->encrypt(key, 0, &iov, 1);
+}
+
+krb5_error_code
+krb5int_init_state_enc(const struct krb5_keytypes *ktp,
+                       const krb5_keyblock *key, krb5_keyusage keyusage,
+                       krb5_data *out_state);
+
+void
+krb5int_free_state_enc(const struct krb5_keytypes *ktp, krb5_data *state);
 
 #endif

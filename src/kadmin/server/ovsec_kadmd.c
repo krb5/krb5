@@ -393,7 +393,7 @@ int main(int argc, char *argv[])
             : 0)
 #endif
 #undef server_handle
-        || (ret = setup_network(global_server_handle, whoami))) {
+        || (ret = setup_network(global_server_handle, whoami, 0))) {
         const char *e_txt = krb5_get_error_message (context, ret);
         krb5_klog_syslog(LOG_ERR, "%s: %s while initializing network, aborting",
                          whoami, e_txt);
@@ -428,12 +428,6 @@ int main(int argc, char *argv[])
     ret = krb5_ktkdb_set_context(hctx);
     if (ret) {
         krb5_klog_syslog(LOG_ERR, "Can't set kdb keytab's internal context.");
-        goto kterr;
-    }
-    /* XXX master_keylist is in guts of lib/kadm5/server_kdb.c */
-    ret = krb5_db_set_mkey_list(hctx, master_keylist);
-    if (ret) {
-        krb5_klog_syslog(LOG_ERR, "Can't set master key list for kdb keytab.");
         goto kterr;
     }
     ret = krb5_kt_register(context, &krb5_kt_kdb_ops);

@@ -131,13 +131,19 @@ ticket cannot be renewed, even if the ticket is still within its
 renewable life.
 .TP
 \fB\-k\fP [\fB\-t\fP \fIkeytab_file\fP]
-requests a host ticket, obtained from a key in the local host's
+requests a ticket, obtained from a key in the local host's
 .I keytab
 file.  The name and location of the keytab file may be specified with
 the
 .B \-t
 .I keytab_file
-option; otherwise the default name and location will be used.
+option; otherwise the default name and location will be used.  By
+default a host ticket is requested but any principal may be
+specified. On a KDC, the special keytab location
+.B KDB:
+can be used to indicate that kinit should open the KDC database and
+look up the key directly.  This permits an administrator to obtain
+tickets as any principal that supports password-based authentication.
 .TP
 \fB-n\fP
 Requests anonymous processing.  Two types of anonymous principals are

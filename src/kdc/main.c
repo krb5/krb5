@@ -61,6 +61,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <sys/wait.h>
 
 #include "k5-int.h"
 #include "com_err.h"
@@ -93,6 +94,7 @@ static void initialize_realms (krb5_context, int, char **);
 static void finish_realms (void);
 
 static int nofork = 0;
+static int workers = 0;
 static const char *pid_file = NULL;
 static int rkey_init_done = 0;
 
@@ -431,12 +433,6 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
         goto whoops;
     }
 
-    kret = krb5_db_set_mkey_list(rdp->realm_context, rdp->mkey_list);
-    if (kret) {
-        kdc_err(rdp->realm_context, kret,
-                "while setting master key list for realm %s", realm);
-        goto whoops;
-    }
 
     /* Set up the keytab */
     if ((kret = krb5_ktkdb_resolve(rdp->realm_context, NULL,
@@ -529,6 +525,102 @@ setup_signal_handlers(void)
     return;
 }
 
+/*
+ * Kill the worker subprocesses given by pids[0..bound-1], skipping any which
+ * are set to -1, and wait for them to exit (so that we know the ports are no
+ * longer in use).  num_active must be the number of active (i.e. not -1) pids
+ * in the array.
+ */
+static void
+terminate_workers(pid_t *pids, int bound, int num_active)
+{
+    int i, status;
+    pid_t pid;
+
+    /* Kill the active worker pids. */
+    for (i = 0; i < bound; i++) {
+        if (pids[i] != -1)
+            kill(pids[i], SIGTERM);
+    }
+
+    /* Wait for them to exit. */
+    while (num_active > 0) {
+        pid = wait(&status);
+        if (pid >= 0)
+            num_active--;
+    }
+}
+
+/*
+ * Create num worker processes and return successfully in each child.  The
+ * parent process will act as a supervisor and will only return from this
+ * function in error cases.
+ */
+static krb5_error_code
+create_workers(int num)
+{
+    int i, status, numleft;
+    pid_t pid, *pids;
+
+    /* Create child worker processes; return in each child. */
+    krb5_klog_syslog(LOG_INFO, "creating %d worker processes", num);
+    pids = calloc(num, sizeof(pid_t));
+    if (pids == NULL)
+        return ENOMEM;
+    for (i = 0; i < num; i++) {
+        pid = fork();
+        if (pid == 0) {
+            /* Return control to main() in the new worker process. */
+            free(pids);
+            return 0;
+        }
+        if (pid == -1) {
+            /* Couldn't fork enough times. */
+            status = errno;
+            terminate_workers(pids, i, i);
+            free(pids);
+            return status;
+        }
+        pids[i] = pid;
+    }
+
+    /* Supervise the worker processes. */
+    numleft = num;
+    while (!signal_requests_exit) {
+        /* Wait until a worker process exits or we get a signal. */
+        pid = wait(&status);
+        if (pid >= 0) {
+            krb5_klog_syslog(LOG_ERR, "worker %ld exited with status %d",
+                             (long) pid, status);
+
+            /* Remove the pid from the table. */
+            for (i = 0; i < num; i++) {
+                if (pids[i] == pid)
+                    pids[i] = -1;
+            }
+
+            /* When one worker process exits, terminate them all, so that KDC
+             * crashes behave similarly with or without worker processes. */
+            break;
+        }
+
+        /* Propagate HUP signal to worker processes if we received one. */
+        if (signal_requests_reset) {
+            for (i = 0; i < num; i++) {
+                if (pids[i] != -1)
+                    kill(pids[i], SIGHUP);
+            }
+            signal_requests_reset = 0;
+        }
+    }
+    if (signal_requests_exit)
+        krb5_klog_syslog(LOG_INFO, "shutdown signal received in supervisor");
+
+    terminate_workers(pids, num, numleft);
+    free(pids);
+    exit(0);
+}
+
 static krb5_error_code
 setup_sam(void)
 {
@@ -538,11 +630,17 @@ setup_sam(void)
 static void
 usage(char *name)
 {
-    fprintf(stderr, "usage: %s [-x db_args]* [-d dbpathname] [-r dbrealmname]\n\t\t[-R replaycachename] [-m] [-k masterenctype] [-M masterkeyname]\n\t\t[-p port] [-P pid_file] [/]\n"
-            "\nwhere,\n\t[-x db_args]* - Any number of database specific arguments.  Look at\n"
-            "\t\t\teach database module documentation for supported\n\t\t\targuments\n",
+    fprintf(stderr,
+            "usage: %s [-x db_args]* [-d dbpathname] [-r dbrealmname]\n"
+            "\t\t[-R replaycachename] [-m] [-k masterenctype]\n"
+            "\t\t[-M masterkeyname] [-p port] [-P pid_file]\n"
+            "\t\t[-n] [-w numworkers] [/]\n\n"
+            "where,\n"
+            "\t[-x db_args]* - Any number of database specific arguments.\n"
+            "\t\t\tLook at each database module documentation for supported\n"
+            "\t\t\targuments\n",
             name);
-    return;
+    exit(1);
 }
 
 
@@ -615,7 +713,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
      * Loop through the option list.  Each time we encounter a realm name,
      * use the previously scanned options to fill in for defaults.
      */
-    while ((c = getopt(argc, argv, "x:r:d:mM:k:R:e:P:p:s:n4:X3")) != -1) {
+    while ((c = getopt(argc, argv, "x:r:d:mM:k:R:e:P:p:s:nw:4:X3")) != -1) {
         switch(c) {
         case 'x':
             db_args_size++;
@@ -697,6 +795,11 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
         case 'n':
             nofork++;                   /* don't detach from terminal */
             break;
+        case 'w':                       /* create multiple worker processes */
+            workers = atoi(optarg);
+            if (workers <= 0)
+                usage(argv[0]);
+            break;
         case 'k':                       /* enctype for master key */
             if (krb5_string_to_enctype(optarg, &menctype))
                 com_err(argv[0], 0, "invalid enctype %s", optarg);
@@ -728,7 +831,6 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
         case '?':
         default:
             usage(argv[0]);
-            exit(1);
         }
     }
 
@@ -811,6 +913,7 @@ finish_realms()
         finish_realm(kdc_realmlist[i]);
         kdc_realmlist[i] = 0;
     }
+    kdc_numrealms = 0;
 }
 
 /*
@@ -927,7 +1030,13 @@ int main(int argc, char **argv)
         }
     }
 
-    if ((retval = setup_network(NULL, kdc_progname))) {
+    /*
+     * Setup network listeners.  Disallow network reconfig in response to
+     * routing socket messages if we're using worker processes, since the
+     * children won't be able to re-open the listener sockets.  Hopefully our
+     * platform has pktinfo support and doesn't need reconfigs.
+     */
+    if ((retval = setup_network(NULL, kdc_progname, (workers > 0)))) {
     net_init_error:
         kdc_err(kcontext, retval, "while initializing network");
         finish_realms();
@@ -945,6 +1054,16 @@ int main(int argc, char **argv)
             finish_realms();
             return 1;
         }
+    }
+    if (workers > 0) {
+        finish_realms();
+        retval = create_workers(workers);
+        if (retval) {
+            kdc_err(kcontext, errno, "creating worker processes");
+            return 1;
+        }
+        /* We get here only in a worker child process; re-initialize realms. */
+        initialize_realms(kcontext, argc, argv);
     }
     krb5_klog_syslog(LOG_INFO, "commencing operation");
     if (nofork)

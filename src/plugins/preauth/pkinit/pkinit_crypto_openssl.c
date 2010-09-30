@@ -1230,7 +1230,7 @@ cms_signeddata_verify(krb5_context context,
         revoked = sk_X509_CRL_new_null();
         for (i = 0; i < size; i++)
             sk_X509_CRL_push(revoked, sk_X509_CRL_value(idctx->revoked, i));
-        size = sk_X509_num(p7->d.sign->crl);
+        size = sk_X509_CRL_num(p7->d.sign->crl);
         for (i = 0; i < size; i++)
             sk_X509_CRL_push(revoked, sk_X509_CRL_value(p7->d.sign->crl, i));
     }
@@ -1319,8 +1319,11 @@ cms_signeddata_verify(krb5_context context,
         default:
             retval = KRB5KDC_ERR_INVALID_CERTIFICATE;
         }
-        X509_NAME_oneline(X509_get_subject_name(
-                              reqctx->received_cert), buf, sizeof(buf));
+        if (reqctx->received_cert == NULL)
+            strlcpy(buf, "(none)", sizeof(buf));
+        else
+            X509_NAME_oneline(X509_get_subject_name(reqctx->received_cert),
+                              buf, sizeof(buf));
         pkiDebug("problem with cert DN = %s (error=%d) %s\n", buf, j,
                  X509_verify_cert_error_string(j));
         krb5_set_error_message(context, retval, "%s\n",
@@ -1764,7 +1767,7 @@ crypto_retrieve_X509_sans(krb5_context context,
 {
     krb5_error_code retval = EINVAL;
     char buf[DN_BUF_LEN];
-    int p = 0, u = 0, d = 0;
+    int p = 0, u = 0, d = 0, l;
     krb5_principal *princs = NULL;
     krb5_principal *upns = NULL;
     unsigned char **dnss = NULL;
@@ -1784,14 +1787,14 @@ crypto_retrieve_X509_sans(krb5_context context,
                       buf, sizeof(buf));
     pkiDebug("%s: looking for SANs in cert = %s\n", __FUNCTION__, buf);
 
-    if ((i = X509_get_ext_by_NID(cert, NID_subject_alt_name, -1)) >= 0) {
+    if ((l = X509_get_ext_by_NID(cert, NID_subject_alt_name, -1)) >= 0) {
         X509_EXTENSION *ext = NULL;
         GENERAL_NAMES *ialt = NULL;
         GENERAL_NAME *gen = NULL;
         int ret = 0;
         unsigned int num_sans = 0;
 
-        if (!(ext = X509_get_ext(cert, i)) || !(ialt = X509V3_EXT_d2i(ext))) {
+        if (!(ext = X509_get_ext(cert, l)) || !(ialt = X509V3_EXT_d2i(ext))) {
             pkiDebug("%s: found no subject alt name extensions\n",
                      __FUNCTION__);
             goto cleanup;
@@ -2002,6 +2005,7 @@ crypto_check_cert_eku(krb5_context context,
             pkiDebug("%s: found acceptable EKU, checking for digitalSignature\n", __FUNCTION__);
 
             /* check that digitalSignature KeyUsage is present */
+            X509_check_ca(reqctx->received_cert);
             if ((usage = X509_get_ext_d2i(reqctx->received_cert,
                                           NID_key_usage, NULL, NULL))) {
 
@@ -4548,6 +4552,7 @@ check_kus:
     }
 
     /* Make sure usage exists before checking bits */
+    X509_check_ca(x);
     usage = X509_get_ext_d2i(x, NID_key_usage, NULL, NULL);
     if (usage) {
         if (!ku_reject(x, X509v3_KU_DIGITAL_SIGNATURE))
@@ -4912,7 +4917,7 @@ load_cas_and_crls(krb5_context context,
                     continue;
             }
             if (flag != 0) {
-                sk_X509_push(ca_crls, X509_CRL_dup(xi->crl));
+                sk_X509_CRL_push(ca_crls, X509_CRL_dup(xi->crl));
             }
         }
     }
@@ -4942,7 +4947,7 @@ load_cas_and_crls(krb5_context context,
         }
         break;
     case CATYPE_CRLS:
-        if (sk_X509_num(ca_crls) == 0) {
+        if (sk_X509_CRL_num(ca_crls) == 0) {
             pkiDebug("no crls in file, %s\n", filename);
             if (id_cryptoctx->revoked == NULL)
                 sk_X509_CRL_free(ca_crls);

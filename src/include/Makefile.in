@@ -17,9 +17,10 @@ maybe-make-db.h-sys:
 maybe-make-db.h-redirect:
 	test -r db.h || echo '#include <@DB_HEADER@>' > db.h
 
-ET_HEADERS = adm_err.h asn1_err.h kdb5_err.h krb5_err.h
+ET_HEADERS = adm_err.h asn1_err.h kdb5_err.h krb5_err.h k5e1_err.h
 K5_ET_HEADERS = \
 	../lib/krb5/error_tables/krb5_err.h \
+	../lib/krb5/error_tables/k5e1_err.h \
 	../lib/krb5/error_tables/kdb5_err.h \
 	../lib/krb5/error_tables/kv5m_err.h \
 	../lib/krb5/error_tables/krb524_err.h \
@@ -103,7 +104,7 @@ private-and-public-decls: $(HEADERS_TO_CHECK)
 
 #
 # Build the error table include files:
-# asn1_err.h kdb5_err.h krb5_err.h kv5m_err.h krb524_err.h
+# asn1_err.h kdb5_err.h krb5_err.h k5e1_err.h kv5m_err.h krb524_err.h
 
 $(K5_ET_HEADERS): rebuild-error-tables
 	: $@
@@ -114,8 +115,8 @@ rebuild-error-tables:
 force:
 
 clean-unix::
-	$(RM) krb5/krb5.h krb5_err.h kdb5_err.h kv5m_err.h krb524_err.h \
-		asn1_err.h private-and-public-decls krb5.stamp
+	$(RM) krb5/krb5.h krb5_err.h k5e1_err.h kdb5_err.h kv5m_err.h \
+		krb524_err.h asn1_err.h private-and-public-decls krb5.stamp
 	$(RM) $(ET_HEADERS) autoconf.stamp
 
 clean-windows::
@@ -136,6 +137,8 @@ install-headers-unix install:: krb5/krb5.h profile.h
 	$(INSTALL_DATA) $(srcdir)/kdb.h $(DESTDIR)$(KRB5_INCDIR)$(S)kdb.h
 	$(INSTALL_DATA) krb5/krb5.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5$(S)krb5.h
 	$(INSTALL_DATA) $(srcdir)/krb5/locate_plugin.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5$(S)locate_plugin.h
+	$(INSTALL_DATA) $(srcdir)/krb5/plugin.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5$(S)plugin.h
+	$(INSTALL_DATA) $(srcdir)/krb5/pwqual_plugin.h $(DESTDIR)$(KRB5_INCDIR)$(S)krb5$(S)pwqual_plugin.h
 	$(INSTALL_DATA) profile.h $(DESTDIR)$(KRB5_INCDIR)$(S)profile.h
 	$(INSTALL_DATA) $(srcdir)/gssapi.h $(DESTDIR)$(KRB5_INCDIR)$(S)gssapi.h
 

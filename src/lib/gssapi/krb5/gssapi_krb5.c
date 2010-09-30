@@ -510,7 +510,7 @@ krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
  */
 static struct {
     gss_OID_desc oid;
-    OM_uint32 (*func)(OM_uint32 *, gss_cred_id_t, const gss_OID, const gss_buffer_t);
+    OM_uint32 (*func)(OM_uint32 *, gss_cred_id_t *, const gss_OID, const gss_buffer_t);
 } krb5_gssspi_set_cred_option_ops[] = {
     {
         {GSS_KRB5_COPY_CCACHE_OID_LENGTH, GSS_KRB5_COPY_CCACHE_OID},
@@ -524,11 +524,15 @@ static struct {
         {GSS_KRB5_SET_CRED_RCACHE_OID_LENGTH, GSS_KRB5_SET_CRED_RCACHE_OID},
         gss_krb5int_set_cred_rcache
     },
+    {
+        {GSS_KRB5_IMPORT_CRED_OID_LENGTH, GSS_KRB5_IMPORT_CRED_OID},
+        gss_krb5int_import_cred
+    },
 };
 
 static OM_uint32
 krb5_gssspi_set_cred_option(OM_uint32 *minor_status,
-                            gss_cred_id_t cred_handle,
+                            gss_cred_id_t *cred_handle,
                             const gss_OID desired_object,
                             const gss_buffer_t value)
 {
@@ -538,19 +542,19 @@ krb5_gssspi_set_cred_option(OM_uint32 *minor_status,
     if (minor_status == NULL)
         return GSS_S_CALL_INACCESSIBLE_WRITE;
 
-    *minor_status = 0;
+    if (cred_handle == NULL)
+        return GSS_S_CALL_INACCESSIBLE_WRITE;
 
-    if (cred_handle == GSS_C_NO_CREDENTIAL) {
-        *minor_status = (OM_uint32)KRB5_NOCREDS_SUPPLIED;
-        return GSS_S_NO_CRED;
-    }
+    *minor_status = 0;
 
     if (desired_object == GSS_C_NO_OID)
         return GSS_S_CALL_INACCESSIBLE_READ;
 
-    major_status = krb5_gss_validate_cred(minor_status, cred_handle);
-    if (GSS_ERROR(major_status))
-        return major_status;
+    if (*cred_handle != GSS_C_NO_CREDENTIAL) {
+        major_status = krb5_gss_validate_cred(minor_status, *cred_handle);
+        if (GSS_ERROR(major_status))
+            return major_status;
+    }
 
     for (i = 0; i < sizeof(krb5_gssspi_set_cred_option_ops)/
              sizeof(krb5_gssspi_set_cred_option_ops[0]); i++) {

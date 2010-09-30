@@ -91,12 +91,10 @@ krb5_dbe_def_search_enctype(kcontext, dbentp, start, ktype, stype, kvno, kdatap)
 
         /* Match this entry against the arguments. */
         if (ktype != -1) {
-            if ((ret = krb5_c_enctype_compare(kcontext, (krb5_enctype) ktype,
-                                              dbentp->key_data[i].key_data_type[0],
-                                              &similar)))
-
-                return(ret);
-            if (!similar)
+            ret = krb5_c_enctype_compare(kcontext, (krb5_enctype) ktype,
+                                         dbentp->key_data[i].key_data_type[0],
+                                         &similar);
+            if (ret != 0 || !similar)
                 continue;
         }
         if (stype >= 0 && db_stype != stype)

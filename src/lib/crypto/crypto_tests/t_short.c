@@ -41,6 +41,10 @@ krb5_enctype interesting_enctypes[] = {
     ENCTYPE_ARCFOUR_HMAC_EXP,
     ENCTYPE_AES256_CTS_HMAC_SHA1_96,
     ENCTYPE_AES128_CTS_HMAC_SHA1_96,
+#ifdef CAMELLIA_CCM
+    ENCTYPE_CAMELLIA128_CCM_128,
+    ENCTYPE_CAMELLIA256_CCM_128,
+#endif
     0
 };
 
@@ -109,6 +113,8 @@ test_enctype(krb5_enctype enctype)
         free(input.ciphertext.data);
         free(output.data);
     }
+    krb5int_c_free_keyblock_contents (NULL, &keyblock);
+
 }
 
 int

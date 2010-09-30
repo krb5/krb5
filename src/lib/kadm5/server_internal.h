@@ -22,6 +22,7 @@
 #include    <errno.h>
 #include    <kdb.h>
 #include    <kadm5/admin.h>
+#include    <krb5/plugin.h>
 #include    "admin_internal.h"
 
 /*
@@ -33,6 +34,11 @@
  */
 #define INITIAL_HIST_KVNO 2
 
+/* A pwqual_handle represents a password quality plugin module. */
+typedef struct pwqual_handle_st *pwqual_handle;
+
+typedef struct kadm5_hook_handle_st *kadm5_hook_handle;
+
 typedef struct _kadm5_server_handle_t {
     krb5_ui_4       magic_number;
     krb5_ui_4       struct_version;
@@ -42,6 +48,8 @@ typedef struct _kadm5_server_handle_t {
     kadm5_config_params  params;
     struct _kadm5_server_handle_t *lhandle;
     char **db_args;
+    pwqual_handle   *qual_handles;
+    kadm5_hook_handle *hook_handles;
 } kadm5_server_handle_rec, *kadm5_server_handle_t;
 
 #define OSA_ADB_PRINC_VERSION_1  0x12345C01
@@ -65,8 +73,7 @@ typedef struct _osa_princ_ent_t {
 kadm5_ret_t    adb_policy_init(kadm5_server_handle_t handle);
 kadm5_ret_t    adb_policy_close(kadm5_server_handle_t handle);
 kadm5_ret_t    passwd_check(kadm5_server_handle_t handle,
-                            char *pass, int use_policy,
-                            kadm5_policy_ent_t policy,
+                            const char *pass, kadm5_policy_ent_t policy,
                             krb5_principal principal);
 kadm5_ret_t    principal_exists(krb5_principal principal);
 krb5_error_code     kdb_init_master(kadm5_server_handle_t handle,
@@ -90,9 +97,8 @@ krb5_error_code     kdb_iter_entry(kadm5_server_handle_t handle,
                                    void (*iter_fct)(void *, krb5_principal),
                                    void *data);
 
-int                 init_dict(kadm5_config_params *);
-int                 find_word(const char *word);
-void                destroy_dict(void);
+kadm5_ret_t         init_pwqual(kadm5_server_handle_t handle);
+void                destroy_pwqual(kadm5_server_handle_t handle);
 
 /* XXX this ought to be in libkrb5.a, but isn't */
 kadm5_ret_t krb5_copy_key_data_contents(krb5_context context,
@@ -152,5 +158,96 @@ bool_t          xdr_osa_princ_ent_rec(XDR *xdrs, osa_princ_ent_t objp);
 
 void
 osa_free_princ_ent(osa_princ_ent_t val);
+
+/*** Password quality plugin consumer interface ***/
+
+/* Load all available password quality plugin modules, bind each module to the
+ * realm's dictionary file, and store the result into *handles_out.  Free the
+ * result with k5_pwqual_free_handles. */
+krb5_error_code
+k5_pwqual_load(krb5_context context, const char *dict_file,
+               pwqual_handle **handles_out);
+
+/* Release a handle list allocated by k5_pwqual_load. */
+void
+k5_pwqual_free_handles(krb5_context context, pwqual_handle *handles);
+
+/* Check a password using a password quality plugin module. */
+krb5_error_code
+k5_pwqual_check(krb5_context context, pwqual_handle handle,
+                const char *password, const char *policy_name,
+                krb5_principal princ);
+
+/*** initvt functions for built-in password quality modules ***/
+
+/* The dict module checks passwords against the realm's dictionary. */
+krb5_error_code
+pwqual_dict_initvt(krb5_context context, int maj_ver, int min_ver,
+                   krb5_plugin_vtable vtable);
+
+/* The empty module rejects empty passwords (even with no password policy). */
+krb5_error_code
+pwqual_empty_initvt(krb5_context context, int maj_ver, int min_ver,
+                    krb5_plugin_vtable vtable);
+
+/* The hesiod module checks passwords against GECOS fields from Hesiod passwd
+ * information (only if the tree was built with Hesiod support). */
+krb5_error_code
+pwqual_hesiod_initvt(krb5_context context, int maj_ver, int min_ver,
+                     krb5_plugin_vtable vtable);
+
+/* The princ module checks passwords against principal components. */
+krb5_error_code
+pwqual_princ_initvt(krb5_context context, int maj_ver, int min_ver,
+                    krb5_plugin_vtable vtable);
+
+/** @{
+ * @name kadm5_hook plugin support
+ */
+
+/** Load all kadm5_hook plugins. */
+krb5_error_code
+k5_kadm5_hook_load(krb5_context context,
+                   kadm5_hook_handle **handles_out);
+
+/** Free handles allocated by k5_kadm5_hook_load(). */
+void
+k5_kadm5_hook_free_handles(krb5_context context, kadm5_hook_handle *handles);
+
+/** Call the chpass entry point on every kadm5_hook in @a handles. */
+kadm5_ret_t
+k5_kadm5_hook_chpass (krb5_context context,
+                      kadm5_hook_handle *handles,
+                      int stage, krb5_principal princ,
+                      krb5_boolean keepold,
+                      int n_ks_tuple,
+                      krb5_key_salt_tuple *ks_tuple,
+                      const char *newpass);
+
+/** Call the create entry point for kadm5_hook_plugins. */
+kadm5_ret_t
+k5_kadm5_hook_create (krb5_context context,
+                      kadm5_hook_handle *handles,
+                      int stage,
+                      kadm5_principal_ent_t princ, long mask,
+                      int n_ks_tuple,
+                      krb5_key_salt_tuple *ks_tuple,
+                      const char *newpass);
+
+/** Call modify kadm5_hook entry point. */
+kadm5_ret_t
+k5_kadm5_hook_modify (krb5_context context,
+                      kadm5_hook_handle *handles,
+                      int stage,
+                      kadm5_principal_ent_t princ, long mask);
+
+/** Call remove kadm5_hook entry point. */
+kadm5_ret_t
+k5_kadm5_hook_remove (krb5_context context,
+                      kadm5_hook_handle *handles,
+                      int stage,
+                      krb5_principal princ);
+
+/** @}*/
 
 #endif /* __KADM5_SERVER_INTERNAL_H__ */

@@ -214,6 +214,7 @@ main(argc, argv)
         com_err(progname, retval, "while closing database");
         exit(1);
     }
+    krb5_free_keyblock_contents(context, &master_keyblock);
 
     if (str_master_princ) {
         krb5_free_unparsed_name(context, str_master_princ);
@@ -271,7 +272,7 @@ check_princ(context, str_princ)
     }
     krb5_free_principal(context, princ);
 
-    if ((retval = krb5_dbe_decrypt_key_data(context, &master_keyblock,
+    if ((retval = krb5_dbe_decrypt_key_data(context, NULL,
                                             kdbe->key_data, &db_key, NULL))) {
         com_err(progname, retval, "while decrypting key for '%s'", princ_name);
         goto errout;
@@ -452,5 +453,6 @@ set_dbname_help(context, pname, dbname)
     mblock.mkvno = master_entry->key_data[0].key_data_kvno;
 
     krb5_db_free_principal(context, master_entry);
+    free(args[0]);
     return 0;
 }

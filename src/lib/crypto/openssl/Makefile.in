@@ -1,6 +1,6 @@
 mydir=lib/crypto/openssl
 BUILDTOP=$(REL)..$(S)..$(S)..
-SUBDIRS=des aes	 md4 md5  sha1 enc_provider hash_provider
+SUBDIRS=camellia des aes md4 md5  sha1 enc_provider hash_provider
 LOCALINCLUDES = -I$(srcdir)/../krb 			\
 		-I$(srcdir)/../krb/hash_provider 	\
 		-I$(srcdir)/des 	\

@@ -7,7 +7,8 @@ LOCALINCLUDES = -I$(srcdir)/../krb -I$(srcdir)/../@CRYPTO_IMPL@/enc_provider 		\
 	-I$(srcdir)/../krb/crc32 -I$(srcdir)/../krb/old -I$(srcdir)/../krb/raw 	\
 	-I$(srcdir)/../@CRYPTO_IMPL@/aes -I$(srcdir)/../@CRYPTO_IMPL@/des 	\
 	-I$(srcdir)/../@CRYPTO_IMPL@/arcfour -I$(srcdir)/../@CRYPTO_IMPL@/sha1 	\
-	-I$(srcdir)/../@CRYPTO_IMPL@/md5 -I$(srcdir)/../@CRYPTO_IMPL@/md4 
+	-I$(srcdir)/../@CRYPTO_IMPL@/md5 -I$(srcdir)/../@CRYPTO_IMPL@/md4 \
+	-I$(srcdir)/../@CRYPTO_IMPL@/camellia
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -18,16 +19,19 @@ EXTRADEPSRCS=\
 	$(srcdir)/t_encrypt.c	\
 	$(srcdir)/t_prf.c 	\
 	$(srcdir)/t_prng.c	\
+	$(srcdir)/t_cmac.c	\
 	$(srcdir)/t_hmac.c	\
 	$(srcdir)/t_pkcs5.c	\
 	$(srcdir)/t_cts.c	\
 	$(srcdir)/vectors.c	\
 	$(srcdir)/aes-test.c	\
+	$(srcdir)/camellia-test.c	\
 	$(srcdir)/t_cksum.c	\
 	$(srcdir)/t_crc.c	\
 	$(srcdir)/t_mddriver.c	\
 	$(srcdir)/t_kperf.c	\
 	$(srcdir)/t_short.c	\
+	$(srcdir)/t_str2key.c	\
 	$(srcdir)/ytest.c	
 
 ##DOSBUILDTOP = ..\..\..
@@ -44,16 +48,18 @@ EXTRADEPSRCS=\
 #
 # We use the NSS PRNG when NSS is the crypto back end, so don't test
 # against the expected output for Yarrow.
-check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac \
+check-unix:: t_nfold t_encrypt t_prf t_prng t_cmac t_hmac \
 		t_cksum4 t_cksum5 \
 		aes-test  \
+		camellia-test  \
 		t_mddriver4 t_mddriver \
-		t_crc t_cts t_short
+		t_crc t_cts t_short t_str2key t_camellia_ccm
 	$(RUN_SETUP) $(VALGRIND) ./t_nfold
 	$(RUN_SETUP) $(VALGRIND) ./t_encrypt
 	if [ @CRYPTO_IMPL@ != nss ]; then \
 	  $(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output && \
 	  diff t_prng.output $(srcdir)/t_prng.expected; fi
+	$(RUN_SETUP) $(VALGRIND) ./t_cmac
 	$(RUN_SETUP) $(VALGRIND) ./t_hmac
 	$(RUN_SETUP) $(VALGRIND) ./t_prf <$(srcdir)/t_prf.in >t_prf.output
 	diff t_prf.output $(srcdir)/t_prf.expected
@@ -65,9 +71,14 @@ check-unix:: t_nfold t_encrypt t_prf t_prng t_hmac \
 	cmp vk.txt $(srcdir)/expect-vk.txt
 	$(RUN_SETUP) $(VALGRIND) ./aes-test > vt.txt
 	cmp vt.txt $(srcdir)/expect-vt.txt
+	$(RUN_SETUP) $(VALGRIND) ./camellia-test > camellia-vt.txt
+# Enable this when Camellia-CCM becomes unconditional.
+#	cmp camellia-vt.txt $(srcdir)/camellia-expect-vt.txt
 	$(RUN_SETUP) $(VALGRIND) $(C)t_mddriver4 -x
 	$(RUN_SETUP) $(VALGRIND) $(C)t_mddriver -x
 	$(RUN_SETUP) $(VALGRIND) ./t_short
+	$(RUN_SETUP) $(VALGRIND) ./t_str2key
+	$(RUN_SETUP) $(VALGRIND) ./t_camellia_ccm
 
 
 
@@ -88,6 +99,9 @@ t_prf$(EXEEXT): t_prf.$(OBJEXT) $(SUPPORT_DEPLIB)
 
 t_prng$(EXEEXT): t_prng.$(OBJEXT) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_prng.$(OBJEXT)  -lk5crypto -lcom_err $(SUPPORT_LIB)
+
+t_cmac$(EXEEXT): t_cmac.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ t_cmac.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
 
 t_hmac$(EXEEXT): t_hmac.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_hmac.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
@@ -124,6 +138,9 @@ t_crc: t_crc.o $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 aes-test: aes-test.$(OBJEXT) $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o aes-test aes-test.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
 
+camellia-test: camellia-test.$(OBJEXT) $(CRYPTO_DEPLIB)
+	$(CC_LINK) -o camellia-test camellia-test.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
+
 t_mddriver4.o: $(srcdir)/t_mddriver.c
 	$(CC) -DMD=4 $(ALL_CFLAGS) -o t_mddriver4.o -c $(srcdir)/t_mddriver.c
 
@@ -136,6 +153,12 @@ t_mddriver: t_mddriver.o  $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 t_kperf: t_kperf.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o t_kperf t_kperf.o  $(SUPPORT_LIB) $(CRYPTO_DEPLIB)
 
+t_str2key$(EXEEXT): t_str2key.$(OBJEXT) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ t_str2key.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
+
+t_camellia_ccm$(EXEEXT): t_camellia_ccm.$(OBJEXT) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ t_camellia_ccm.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
+
 ytest: ytest.o shs.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o ytest ytest.o  $(SUPPORT_LIB)  $(CRYPTO_DEPLIB)
 
@@ -143,14 +166,15 @@ ytest: ytest.o shs.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 
 clean::
 	$(RM) t_nfold.o t_nfold nfold.$(OBJEXT) t_encrypt t_encrypt.o \
-		t_prng.o t_prng t_hmac.o t_hmac t_pkcs5.o t_pkcs5 pbkdf2.o \
-		t_prf t_prf.o \
+		t_prng.o t_prng t_cmac.o t_cmac t_hmac.o t_hmac \
+		t_pkcs5.o t_pkcs5 pbkdf2.o t_prf t_prf.o \
 		aes-test.o aes-test vt.txt vk.txt kresults.out \
 		t_cksum.o t_cksum \
 		t_crc.o t_crc t_cts.o t_cts \
 		t_mddriver4.o t_mddriver4 t_mddriver.o t_mddriver \
 		t_cksum4 t_cksum4.o t_cksum5 t_cksum5.o \
-		t_kperf.o t_kperf t_short t_short.o \
+		t_kperf.o t_kperf t_short t_short.o t_str2key t_str2key.o \
+		t_camellia_ccm t_camellia_ccm.o \
 		t_mddriver$(EXEEXT) $(OUTPRE)t_mddriver.$(OBJEXT)
 
 	-$(RM) t_prng.output

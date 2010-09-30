@@ -410,6 +410,7 @@ salt.  The supported values for salts are as follows.
 * capaths::                     
 * dbdefaults::                  
 * dbmodules::                   
+* plugins::
 * pkinit client options::
 * Sample krb5.conf File::       
 @end menu
@@ -756,16 +757,17 @@ for this is not currently compiled in by default.
 The local name will be formulated from @i{exp}.
 
 The format for @i{exp} is
-@code{[@i{n}:$@i{d}..@i{string}](@i{regexp})s/@i{pattern}/@i{replacement}/g}.
+@code{[@i{n}:@i{string}](@i{regexp})s/@i{pattern}/@i{replacement}/g}.
 The integer @i{n} indicates how many components the target principal
-should have.  If this matches, then a string will be formed by putting
-together the components of the principal in the order indicated by each
-integer @i{d}, and the arbitrary string @i{string} (i.e. if the
+should have.  If this matches, then a string will be formed from
+@i{string}, substituting the realm of the principal for @code{$0} and
+the @i{n}'th component of the principal for @code{$@i{n}} (e.g. if the
 principal was @value{RANDOMUSER}/admin then [2:$2$1foo] would result in
-the string "admin@value{RANDOMUSER}foo".  If this string matches
-@i{regexp}, then the @code{s//[g]} substitution command will be run over the
-string.  The optional g will cause the substitution to be global over
-the string, instead of replacing only the first match in the string.
+the string "admin@value{RANDOMUSER}foo").  If this string matches
+@i{regexp}, then the @code{s//[g]} substitution command will be run over
+the string.  The optional g will cause the substitution to be global
+over the string, instead of replacing only the first match in the
+string.
 
 @item DEFAULT
 The principal name will be used as the local user name.  If the
@@ -780,13 +782,11 @@ For example:
 @group
 [realms]
     @value{PRIMARYREALM} = @{
-        auth_to_local = @{
-            RULE:[2:$1](@value{RANDOMUSER})s/^.*$/guest/
-            RULE:[2:$1;$2](^.*;admin$)s/;admin$//
-            RULE:[2:$2](^.*;root)s/^.*$/root/
-            DEFAULT
-            @}
-        @}
+        auth_to_local = RULE:[2:$1](@value{RANDOMUSER})s/^.*$/guest/
+        auth_to_local = RULE:[2:$1;$2](^.*;admin$)s/;admin$//
+        auth_to_local = RULE:[2:$2](^.*;root)s/^.*$/root/
+        auto_to_local = DEFAULT
+    @}
 @end group
 @end smallexample
 
@@ -1042,7 +1042,7 @@ This LDAP specific tag indicates the list of LDAP servers that the Kerberos serv
 This LDAP specific tag indicates the number of connections to be maintained per LDAP server. This value is used if the number of connections per LDAP server are not mentioned in the configuration section under [dbmodules]. The default value is 5.
 @end table
 
-@node dbmodules, pkinit client options, dbdefaults, krb5.conf
+@node dbmodules, plugins, dbdefaults, krb5.conf
 @subsection [dbmodules]
 
 Contains database specific parameters used by the database library. Each tag in the [dbmodules] section of the file names a configuration section for database specific parameters that can be referred to by a realm. The value of the tag is a subsection where the relations in that subsection define the database specific parameters.
@@ -1090,7 +1090,65 @@ This LDAP specific tags indicates the number of connections to be maintained per
 
 @end table
 
-@node pkinit client options, Sample krb5.conf File, dbmodules, krb5.conf
+@node plugins, pkinit client options, dbmodules, krb5.conf
+
+@menu
+* pwqual interface::             
+@end menu
+
+Tags in the [plugins] section can be used to register dynamic plugin
+modules and to turn modules on and off.  Not every krb5 pluggable
+interface uses the [plugins] section; the ones that do are documented
+here.
+
+Each pluggable interface corresponds to a subsection of [plugins].
+All subsections support the same tags:
+
+@table @b
+@itemx module
+This tag may have multiple values.  Each value is a string of the form
+"modulename:pathname", which causes the shared object located at
+pathname to be registered as a dynamic module named modulename for the
+pluggable interface.  If pathname is not an absolute path, it will be
+treated as relative to the "krb5/plugins" subdirectory of the krb5
+library directory.
+
+@itemx enable_only
+This tag may have multiple values.  If there are values for this tag,
+then only the named modules will be enabled for the pluggable
+interface.
+
+@itemx disable
+This tag may have multiple values.  If there are values for this tag,
+then the named modules will be disabled for the pluggable interface.
+@end table
+
+The following subsections are currently supported within the [plugins]
+section:
+
+@node pwqual interface, , plugins, plugins
+
+The pwqual subsection controls modules for the password quality
+interface, which is used to reject weak passwords when passwords are
+changed.  In addition to any registered dynamic modules, the following
+built-in modules exist (and may be disabled with the disable tag):
+
+@table @b
+@itemx dict
+Checks against the realm dictionary file
+
+@itemx empty
+Rejects empty passwords
+
+@itemx hesiod
+Checks against user information stored in Hesiod (only if Kerberos was
+built with Hesiod support)
+
+@itemx princ
+Checks against components of the principal name
+@end table
+
+@node pkinit client options, Sample krb5.conf File, plugins, krb5.conf
 @subsection pkinit options
 
 @menu
