@@ -2083,7 +2083,13 @@ krb5_error_code KRB5_CALLCONV
 krb5_auth_con_setsendsubkey(krb5_context, krb5_auth_context, krb5_keyblock *);
 
 krb5_error_code KRB5_CALLCONV
+krb5_auth_con_setsendsubkey_k(krb5_context, krb5_auth_context, krb5_key);
+
+krb5_error_code KRB5_CALLCONV
 krb5_auth_con_setrecvsubkey(krb5_context, krb5_auth_context, krb5_keyblock *);
+
+krb5_error_code KRB5_CALLCONV
+krb5_auth_con_setrecvsubkey_k(krb5_context, krb5_auth_context, krb5_key);
 
 #if KRB5_DEPRECATED
 KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV

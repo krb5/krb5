@@ -156,7 +156,9 @@ krb5_auth_con_setpermetypes
 krb5_auth_con_setports
 krb5_auth_con_setrcache
 krb5_auth_con_setrecvsubkey
+krb5_auth_con_setrecvsubkey_k
 krb5_auth_con_setsendsubkey
+krb5_auth_con_setsendsubkey_k
 krb5_auth_con_setuseruserkey
 krb5_auth_to_rep
 krb5_authdata_context_copy
