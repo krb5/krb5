@@ -270,9 +270,7 @@ struct gss_checksum_data {
     krb5_gss_ctx_ext_t exts;
 };
 
-#ifdef CFX_EXERCISE
 #include "../../krb5/krb/auth_con.h"
-#endif
 static krb5_error_code KRB5_CALLCONV
 make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
                    void *cksum_data, krb5_data **out)
@@ -284,6 +282,7 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
     krb5_data credmsg;
     unsigned int junk;
     krb5_data *finished = NULL;
+    krb5_key send_subkey;
 
     data->checksum_data.data = 0;
     credmsg.data = 0;
@@ -299,13 +298,22 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
 
         assert(data->cred->name != NULL);
 
+        /*
+         * RFC 4121 4.1.1 specifies forwarded credentials must be encrypted in
+         * the session key, but krb5_fwd_tgt_creds will use the send subkey if
+         * it's set in the auth context.  Null out the send subkey temporarily.
+         */
+        send_subkey = auth_context->send_subkey;
+        auth_context->send_subkey = NULL;
+
         code = krb5_fwd_tgt_creds(context, auth_context, 0,
                                   data->cred->name->princ, data->ctx->there->princ,
                                   data->cred->ccache, 1,
                                   &credmsg);
 
-        /* turn KRB5_AUTH_CONTEXT_DO_TIME back on */
+        /* Turn KRB5_AUTH_CONTEXT_DO_TIME back on and reset the send subkey. */
         krb5_auth_con_setflags(context, auth_context, con_flags);
+        auth_context->send_subkey = send_subkey;
 
         if (code) {
             /* don't fail here; just don't accept/do the delegation
