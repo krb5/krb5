@@ -155,6 +155,20 @@ This relation sets the maximum allowable amount of clockskew in seconds
 that the library will tolerate before assuming that a Kerberos message
 is invalid.  The default value is 300 seconds, or five minutes.
 
+.IP k5login_authoritative
+If the value of this relation is true (the default), principals must
+be listed in a local user's k5login file to be granted login access,
+if a k5login file exists.  If the value of this relation is false, a
+principal may still be granted login access through other mechanisms
+even if a k5login file exists but does not list the principal.
+
+.IP k5login_directory
+If set, the library will look for a local user's k5login file within
+the named directory, with a filename corresponding to the local
+username.  If not set, the library will look for k5login files in the
+user's home directory, with the filename .k5login.  For security
+reasons, k5login files must be owned by the local user or by root.
+
 .IP kdc_timesync 
 If the value of this relation is non-zero (the default), the library
 will compute the difference between the system clock and the time

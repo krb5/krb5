@@ -468,6 +468,20 @@ Sets the maximum allowable amount of clockskew in seconds that the
 library  will tolerate before assuming that a Kerberos message is
 invalid.  The default value is @value{DefaultClockskew}.
 
+@itemx k5login_authoritative
+If the value of this relation is true (the default), principals must
+be listed in a local user's k5login file to be granted login access,
+if a k5login file exists.  If the value of this relation is false, a
+principal may still be granted login access through other mechanisms
+even if a k5login file exists but does not list the principal.
+
+@itemx k5login_directory
+If set, the library will look for a local user's k5login file within the
+named directory, with a filename corresponding to the local username.
+If not set, the library will look for k5login files in the user's home
+directory, with the filename @code{.k5login}.  For security reasons,
+k5login files must be owned by the local user or by root.
+
 @itemx kdc_timesync
 If this is set to 1 (for true), then client machines will compute the
 difference between their time and the time returned by the KDC in the
