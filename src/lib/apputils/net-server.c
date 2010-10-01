@@ -1759,6 +1759,8 @@ process_tcp_connection(void *handle, struct connection *conn, const char *prog,
                 com_err(prog, err, "while dispatching (tcp)");
                 goto kill_tcp_connection;
             }
+            if (conn->u.tcp.response == NULL)
+                goto kill_tcp_connection;
         have_response:
             queue_tcp_outgoing_response(conn);
             FD_CLR(conn->fd, &sstate.rfds);

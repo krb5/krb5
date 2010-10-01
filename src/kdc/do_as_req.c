@@ -633,6 +633,8 @@ egress:
         if (status == 0) {
             status = emsg;
         }
+        if (errcode == KRB5KDC_ERR_DISCARD)
+            goto discard;
         errcode -= ERROR_TABLE_BASE_krb5;
         if (errcode < 0 || errcode > 128)
             errcode = KRB_ERR_GENERIC;
@@ -643,7 +645,7 @@ egress:
         status = 0;
     }
 
-    if (emsg)
+discard: if (emsg)
         krb5_free_error_message(kdc_context, emsg);
     if (enc_tkt_reply.authorization_data != NULL)
         krb5_free_authdata(kdc_context, enc_tkt_reply.authorization_data);
