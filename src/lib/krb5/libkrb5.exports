@@ -86,6 +86,8 @@ encode_krb5_pwd_sequence
 encode_krb5_s4u_userid
 encode_krb5_safe
 encode_krb5_sam_challenge
+encode_krb5_sam_challenge_2
+encode_krb5_sam_challenge_2_body
 encode_krb5_sam_key
 encode_krb5_sam_response
 encode_krb5_sam_response_2

@@ -1813,14 +1813,12 @@ encode_krb5_enc_sam_response_enc(const krb5_enc_sam_response_enc *,
 krb5_error_code
 encode_krb5_sam_response(const krb5_sam_response *, krb5_data **);
 
-#if 0 /* currently not compiled because we never use them */
 krb5_error_code
 encode_krb5_sam_challenge_2(const krb5_sam_challenge_2 * , krb5_data **);
 
 krb5_error_code
 encode_krb5_sam_challenge_2_body(const krb5_sam_challenge_2_body *,
                                  krb5_data **);
-#endif
 
 krb5_error_code
 encode_krb5_enc_sam_response_enc_2(const krb5_enc_sam_response_enc_2 *,

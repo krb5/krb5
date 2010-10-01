@@ -532,7 +532,6 @@ optional_sam_challenge(const void *p)
 DEFSEQTYPE(sam_challenge,krb5_sam_challenge,sam_challenge_fields,
            optional_sam_challenge);
 
-#if 0 /* encoders not used! */
 MAKE_ENCFN(asn1_encode_sequence_of_checksum, seq_of_checksum);
 static asn1_error_code
 asn1_encode_sam_challenge_2(asn1buf *buf, const krb5_sam_challenge_2 *val,
@@ -595,7 +594,7 @@ optional_sam_challenge_2_body(const void *p)
 }
 DEFSEQTYPE(sam_challenge_2_body,krb5_sam_challenge_2_body,sam_challenge_2_body_fields,
            optional_sam_challenge_2_body);
-#endif
+
 
 static const struct field_info sam_key_fields[] = {
     FIELDOF_NORM(krb5_sam_key, encryption_key, sam_key, 0),
@@ -1471,11 +1470,9 @@ MAKE_FULL_ENCODER(encode_krb5_pwd_data, pwd_data);
 MAKE_FULL_ENCODER(encode_krb5_padata_sequence, seq_of_pa_data);
 /* sam preauth additions */
 MAKE_FULL_ENCODER(encode_krb5_sam_challenge, sam_challenge);
-#if 0 /* encoders not used! */
 MAKE_FULL_ENCODER(encode_krb5_sam_challenge_2, sam_challenge_2);
 MAKE_FULL_ENCODER(encode_krb5_sam_challenge_2_body,
                   sam_challenge_2_body);
-#endif
 MAKE_FULL_ENCODER(encode_krb5_sam_key, sam_key);
 MAKE_FULL_ENCODER(encode_krb5_enc_sam_response_enc,
                   enc_sam_response_enc);
