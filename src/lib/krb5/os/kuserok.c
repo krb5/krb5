@@ -93,10 +93,10 @@ get_k5login_filename(krb5_context context, const char *luser,
 static enum result
 k5login_ok(krb5_context context, krb5_principal principal, const char *luser)
 {
-    int authoritative = TRUE;
+    int authoritative = TRUE, gobble;
     enum result result = REJECT;
     char *filename = NULL, *princname = NULL;
-    char gobble, *newline, linebuf[BUFSIZ], pwbuf[BUFSIZ];
+    char *newline, linebuf[BUFSIZ], pwbuf[BUFSIZ];
     struct stat sbuf;
     struct passwd pwx, *pwd;
     FILE *fp = NULL;
