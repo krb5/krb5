@@ -466,7 +466,7 @@ krb5_ac_warn_cxxflags_set=${WARN_CXXFLAGS+set}
 ])
 dnl
 AC_DEFUN(TRY_WARN_CC_FLAG,[dnl
-  cachevar=`echo "krb5_cv_cc_flag_$1" | sed s/[[^a-zA-Z0-9_]]/_/g`
+  cachevar=`echo "krb5_cv_cc_flag_$1" | sed -e s/=/_eq_/g -e s/-/_dash_/g -e s/[[^a-zA-Z0-9_]]/_/g`
   AC_CACHE_CHECK([if C compiler supports $1], [$cachevar],
   [# first try without, then with
   AC_TRY_COMPILE([], 1;,
@@ -565,7 +565,17 @@ if test "$GCC" = yes ; then
         TRY_WARN_CC_FLAG(-W$flag)
       fi
     done
-    #  missing-prototypes? maybe someday
+    # We require function declarations now.
+    #
+    # In some compiler versions -- e.g., "gcc version 4.2.1 (Apple
+    # Inc. build 5664)" -- the -Werror- option works, but the -Werror=
+    # version doesn't cause implicitly declared functions to be
+    # flagged as errors.  If neither works, -Wall implies
+    # -Wimplicit-function-declaration so don't bother.
+    TRY_WARN_CC_FLAG(-Werror-implicit-function-declaration)
+    if test "implicit-function-declaration_supported" = no; then
+      TRY_WARN_CC_FLAG(-Werror=implicit-function-declaration)
+    fi
     #
   fi
   if test "`uname -s`" = Darwin ; then
