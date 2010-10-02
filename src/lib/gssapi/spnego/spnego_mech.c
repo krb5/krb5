@@ -2258,10 +2258,10 @@ spnego_gss_set_cred_option(
 
 	mcred = (spcred == NULL) ? GSS_C_NO_CREDENTIAL : spcred->mcred;
 
-	ret = gssspi_set_cred_option(minor_status,
-				     &mcred,
-				     desired_object,
-				     value);
+	ret = gss_set_cred_option(minor_status,
+				  &mcred,
+				  desired_object,
+				  value);
 	if (ret == GSS_S_COMPLETE && spcred == NULL) {
 		/*
 		 * If the mechanism allocated a new credential handle, then
