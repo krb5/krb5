@@ -21,13 +21,15 @@ STLIBOBJS= \
 	des.o 	\
 	des3.o 	\
 	rc4.o 	\
-	aes.o 
+	aes.o 	\
+	camellia.o
 
 OBJS= \
 	$(OUTPRE)enc_gen.$(OBJEXT) 	\
 	$(OUTPRE)des.$(OBJEXT) 	\
 	$(OUTPRE)des3.$(OBJEXT) 	\
 	$(OUTPRE)aes.$(OBJEXT) 	\
+	$(OUTPRE)camellia.$(OBJEXT) 	\
 	$(OUTPRE)rc4.$(OBJEXT)
 
 SRCS= \
@@ -35,6 +37,7 @@ SRCS= \
 	$(srcdir)/des.c 	\
 	$(srcdir)/des3.c 	\
 	$(srcdir)/aes.c 	\
+	$(srcdir)/camellia.c 	\
 	$(srcdir)/rc4.c
 
 ##DOS##LIBOBJS = $(OBJS)

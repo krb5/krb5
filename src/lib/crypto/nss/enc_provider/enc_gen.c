@@ -221,8 +221,8 @@ k5_nss_gen_block_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
     }
 
     for (currentblock = 0;;currentblock++) {
-        ptr = iov_next_block(storage, blocksize, data, num_data, &input_pos);
-        if (ptr == NULL)
+        if (!krb5int_c_iov_get_block_nocopy(storage, blocksize, data, num_data,
+                                            &input_pos, &ptr))
             break;
 
         lastptr = NULL;
@@ -238,8 +238,8 @@ k5_nss_gen_block_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
         }
 
         lastptr = ptr;
-        iov_store_block(data, num_data, ptr, storage, blocksize,
-                        &output_pos);
+        krb5int_c_iov_put_block_nocopy(data, num_data, storage, blocksize,
+                                       &output_pos, ptr);
     }
 
     if (lastptr && ivec && ivec->data && operation == CKA_ENCRYPT) {
@@ -435,9 +435,8 @@ k5_nss_gen_cts_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
         }
     }
     for (length = 0; length < lastblock; length += blocksize) {
-        ptr = iov_next_block(storage, blocksize, data, num_data,
-                             &input_pos);
-        if (ptr == NULL)
+        if (!krb5int_c_iov_get_block_nocopy(storage, blocksize, data, num_data,
+                                            &input_pos, &ptr))
             break;
 
         rv = PK11_CipherOp(ctx, ptr, &len, blocksize, ptr, blocksize);
@@ -446,16 +445,16 @@ k5_nss_gen_cts_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
             break;
         }
 
-        iov_store_block(data, num_data, ptr, storage, blocksize,
-                        &output_pos);
+        krb5int_c_iov_put_block_nocopy(data, num_data, storage, blocksize,
+                                       &output_pos, ptr);
     }
     if (remainder) {
         if (operation == CKA_DECRYPT) {
             if (bulk_length > blocksize) {
                 /* we need to save cn-2 */
-                ptr = iov_next_block(storage, blocksize, data, num_data,
-                                     &input_pos);
-                if (ptr == NULL)
+                if (!krb5int_c_iov_get_block_nocopy(storage, blocksize, data,
+                                                    num_data, &input_pos,
+                                                    &ptr))
                     goto done; /* shouldn't happen */
 
                 /* save cn-2 */
@@ -469,8 +468,8 @@ k5_nss_gen_cts_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
                     goto done;
                 }
 
-                iov_store_block(data, num_data, ptr, storage, blocksize,
-                                &output_pos);
+                krb5int_c_iov_put_block_nocopy(data, num_data, storage,
+                                               blocksize, &output_pos, ptr);
             }
         }
         /* fetch the last 2 blocks */

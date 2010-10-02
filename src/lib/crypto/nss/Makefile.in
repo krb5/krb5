@@ -1,6 +1,6 @@
 mydir=lib/crypto/nss
 BUILDTOP=$(REL)..$(S)..$(S)..
-SUBDIRS=des aes	 md4 md5  sha1 enc_provider hash_provider
+SUBDIRS=des aes	camellia md4 md5  sha1 enc_provider hash_provider
 LOCALINCLUDES = -I$(srcdir)/../krb 			\
 		-I$(srcdir)/../krb/hash_provider 	\
 		-I$(srcdir)/des 	\
@@ -38,14 +38,16 @@ STOBJLISTS= des/OBJS.ST md4/OBJS.ST 	\
 	md5/OBJS.ST sha1/OBJS.ST 	\
 	enc_provider/OBJS.ST 		\
 	hash_provider/OBJS.ST 		\
-	aes/OBJS.ST 			\
+	aes/OBJS.ST			\
+	camellia/OBJS.ST		\
 	OBJS.ST
 
 SUBDIROBJLISTS= des/OBJS.ST md4/OBJS.ST 	\
 		md5/OBJS.ST sha1/OBJS.ST 	\
 		enc_provider/OBJS.ST 		\
 		hash_provider/OBJS.ST 		\
-		aes/OBJS.ST 
+		aes/OBJS.ST			\
+		camellia/OBJS.ST
 
 ##DOS##LIBOBJS = $(OBJS)
 
@@ -78,6 +80,9 @@ all-windows::
 	cd ..\aes
 	@echo Making in crypto\aes
 	$(MAKE) -$(MFLAGS)
+	cd ..\camellia
+	@echo Making in crypto\aes
+	$(MAKE) -$(MFLAGS)
 	cd ..
 
 clean-windows::
@@ -102,6 +107,9 @@ clean-windows::
 	cd ..\aes
 	@echo Making clean in crypto\aes
 	$(MAKE) -$(MFLAGS) clean
+	cd ..\camellia
+	@echo Making clean in crypto\aes
+	$(MAKE) -$(MFLAGS) clean
 	cd ..
 
 check-windows::
@@ -124,6 +132,9 @@ check-windows::
 	@echo Making check in crypto\enc_provider
 	$(MAKE) -$(MFLAGS) check
 	cd ..\aes
+	@echo Making check in crypto\aes
+	$(MAKE) -$(MFLAGS) check
+	cd ..\camellia
 	@echo Making check in crypto\aes
 	$(MAKE) -$(MFLAGS) check
 	cd ..
