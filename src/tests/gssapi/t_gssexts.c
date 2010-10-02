@@ -61,10 +61,8 @@ static gss_OID_desc spnego_mech = { 6, "\053\006\001\005\005\002" };
 
 static int use_spnego = 0;
 
-static void displayStatus_1(m, code, type)
-     char *m;
-     OM_uint32 code;
-     int type;
+static void
+displayStatus_1(char *m, OM_uint32 code, int type)
 {
      OM_uint32 maj_stat, min_stat;
      gss_buffer_desc msg;
@@ -83,10 +81,8 @@ static void displayStatus_1(m, code, type)
      }
 }
 
-static void displayStatus(msg, maj_stat, min_stat)
-     char *msg;
-     OM_uint32 maj_stat;
-     OM_uint32 min_stat;
+static void
+displayStatus(char *msg, OM_uint32 maj_stat, OM_uint32 min_stat)
 {
      displayStatus_1(msg, maj_stat, GSS_C_GSS_CODE);
      displayStatus_1(msg, min_stat, GSS_C_MECH_CODE);
@@ -141,10 +137,8 @@ displayOID(OM_uint32 *minor, gss_OID oid, char *tag)
 }
 
 static OM_uint32
-testPrf(OM_uint32 *minor,
-        gss_ctx_id_t initiatorContext,
-        gss_ctx_id_t acceptorContext,
-        int flags)
+testPrf(OM_uint32 *minor, gss_ctx_id_t initiatorContext,
+        gss_ctx_id_t acceptorContext, int flags)
 {
     gss_buffer_desc constant;
     OM_uint32 major, tmp_minor;
@@ -201,8 +195,7 @@ testPrf(OM_uint32 *minor,
 }
 
 static OM_uint32
-initAcceptSecContext(OM_uint32 *minor,
-                     gss_cred_id_t claimant_cred_handle,
+initAcceptSecContext(OM_uint32 *minor, gss_cred_id_t claimant_cred_handle,
                      gss_cred_id_t verifier_cred_handle,
                      gss_cred_id_t *deleg_cred_handle)
 {
@@ -289,9 +282,7 @@ initAcceptSecContext(OM_uint32 *minor,
 }
 
 static OM_uint32
-getDefaultCred(OM_uint32 *minor,
-               const char *keytab_name,
-               gss_OID_set mechs,
+getDefaultCred(OM_uint32 *minor, const char *keytab_name, gss_OID_set mechs,
                gss_cred_id_t *impersonator_cred_handle)
 {
     OM_uint32 major = GSS_S_FAILURE, tmp_minor;
@@ -364,7 +355,8 @@ getDefaultCred(OM_uint32 *minor,
     return major;
 }
 
-int main(int argc, char *argv[])
+int
+main(int argc, char *argv[])
 {
     OM_uint32 minor, major;
     gss_cred_id_t impersonator_cred_handle = GSS_C_NO_CREDENTIAL;
