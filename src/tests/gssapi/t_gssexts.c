@@ -324,7 +324,7 @@ getDefaultCred(OM_uint32 *minor, const char *keytab_name, gss_OID_set mechs,
                                      keytab,
                                      impersonator_cred_handle);
         if (GSS_ERROR(major)) {
-            displayStatus("gss_krb5_import_cred", major, minor);
+            displayStatus("gss_krb5_import_cred", major, *minor);
             goto out;
         }
 
@@ -347,7 +347,7 @@ getDefaultCred(OM_uint32 *minor, const char *keytab_name, gss_OID_set mechs,
                                  &actual_mechs,
                                  NULL);
         if (GSS_ERROR(major)) {
-            displayStatus("gss_acquire_cred", major, minor);
+            displayStatus("gss_acquire_cred", major, *minor);
         }
         (void) gss_release_oid_set(&tmp_minor, &actual_mechs);
     }
