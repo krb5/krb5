@@ -29,10 +29,76 @@
 #include <assert.h>
 #include "k5-thread.h"
 
-#include "yarrow.h"
-static Yarrow_CTX y_ctx;
 #define yarrow_lock krb5int_yarrow_lock
 k5_mutex_t yarrow_lock = K5_MUTEX_PARTIAL_INITIALIZER;
+
+#ifdef CRYPTO_IMPL_NSS
+
+/*
+ * Using Yarrow with NSS is a bit problematic because the MD5 contexts it holds
+ * open for the entropy pools would be invalidated by a fork(), causing us to
+ * lose the entropy contained therein.
+ *
+ * Therefore, use the NSS PRNG if NSS is the crypto implementation.  Doing this
+ * via ifdefs here is temporary until we come up with better build logic for
+ * it.
+ */
+
+#include "../nss/nss_gen.h"
+#include <pk11pub.h>
+
+/*
+ * NSS gathers its own OS entropy, so it doesn't really matter how much we read
+ * in krb5_c_random_os_entropy.  Use the same value as Yarrow (without using a
+ * Yarrow constant), so that we don't read too much from /dev/random.
+ */
+#define OS_ENTROPY_LEN 20
+
+int krb5int_prng_init(void)
+{
+    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_c_random_add_entropy(krb5_context context, unsigned int randsource,
+                          const krb5_data *data)
+{
+    krb5_error_code ret;
+
+    ret = k5_nss_init();
+    if (ret)
+        return ret;
+    if (PK11_RandomUpdate(data->data, data->length) != SECSuccess)
+        return k5_nss_map_last_error();
+    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_c_random_make_octets(krb5_context context, krb5_data *data)
+{
+    krb5_error_code ret;
+
+    ret = k5_nss_init();
+    if (ret)
+        return ret;
+    if (PK11_GenerateRandom((unsigned char *)data->data,
+                            data->length) != SECSuccess)
+        return k5_nss_map_last_error();
+    return 0;
+}
+
+void
+krb5int_prng_cleanup (void)
+{
+}
+
+#else /* CRYPTO_IMPL_NSS */
+
+#include "yarrow.h"
+static Yarrow_CTX y_ctx;
+
+/* Gather enough OS entropy per call to trigger a Yarrow reseed. */
+#define OS_ENTROPY_LEN (YARROW_SLOW_THRESH/8)
 
 /* Helper function to estimate entropy based on sample length
  * and where it comes from.
@@ -100,12 +166,6 @@ krb5_c_random_add_entropy(krb5_context context, unsigned int randsource,
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_c_random_seed(krb5_context context, krb5_data *data)
-{
-    return krb5_c_random_add_entropy(context, KRB5_C_RANDSOURCE_OLDAPI, data);
-}
-
-krb5_error_code KRB5_CALLCONV
 krb5_c_random_make_octets(krb5_context context, krb5_data *data)
 {
     int yerr;
@@ -127,6 +187,13 @@ krb5int_prng_cleanup (void)
     k5_mutex_destroy(&yarrow_lock);
 }
 
+#endif /* not CRYPTO_IMPL_NSS */
+
+krb5_error_code KRB5_CALLCONV
+krb5_c_random_seed(krb5_context context, krb5_data *data)
+{
+    return krb5_c_random_add_entropy(context, KRB5_C_RANDSOURCE_OLDAPI, data);
+}
 
 /*
  * Routines to get entropy from the OS.  For UNIX we try /dev/urandom
@@ -163,7 +230,7 @@ read_entropy_from_device(krb5_context context, const char *device)
     krb5_data data;
     struct stat sb;
     int fd;
-    unsigned char buf[YARROW_SLOW_THRESH/8], *bp;
+    unsigned char buf[OS_ENTROPY_LEN], *bp;
     int left;
 
     fd = open (device, O_RDONLY);

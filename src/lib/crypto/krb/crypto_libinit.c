@@ -14,7 +14,11 @@ extern void krb5int_prng_cleanup (void);
 
 int cryptoint_initialize_library (void)
 {
-    return krb5int_prng_init();
+    int err;
+    err = krb5int_prng_init();
+    if (err)
+        return err;
+    return krb5int_crypto_impl_init();
 }
 
 int krb5int_crypto_init(void)
@@ -30,5 +34,6 @@ void cryptoint_cleanup_library (void)
 {
     if (!INITIALIZER_RAN(cryptoint_initialize_library))
         return;
-    krb5int_prng_cleanup ();
+    krb5int_prng_cleanup();
+    krb5int_crypto_impl_cleanup();
 }

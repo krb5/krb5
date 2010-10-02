@@ -9,7 +9,8 @@ LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/../@CRYPTO_IMPL@/enc_provider -I$(srcdir
 		-I$(srcdir)/../@CRYPTO_IMPL@/ -I$(srcdir)/../@CRYPTO_IMPL@/des		\
 		-I$(srcdir)/../@CRYPTO_IMPL@/aes -I$(srcdir)/arcfour 	\
 		-I$(srcdir)/../@CRYPTO_IMPL@/camellia \
-		-I$(srcdir)/../@CRYPTO_IMPL@/sha1 -I$(srcdir)/../@CRYPTO_IMPL@
+		-I$(srcdir)/../@CRYPTO_IMPL@/sha1 -I$(srcdir)/../@CRYPTO_IMPL@ \
+		@CRYPTO_IMPL_CFLAGS@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=

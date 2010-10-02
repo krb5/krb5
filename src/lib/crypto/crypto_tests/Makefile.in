@@ -45,6 +45,9 @@ EXTRADEPSRCS=\
 # NOTE: The t_cksum known checksum values are primarily for regression
 # testing.  They are not derived a priori, but are known to produce
 # checksums that interoperate.
+#
+# We use the NSS PRNG when NSS is the crypto back end, so don't test
+# against the expected output for Yarrow.
 check-unix:: t_nfold t_encrypt t_prf t_prng t_cmac t_hmac \
 		t_cksum4 t_cksum5 \
 		aes-test  \
@@ -53,8 +56,9 @@ check-unix:: t_nfold t_encrypt t_prf t_prng t_cmac t_hmac \
 		t_crc t_cts t_short t_str2key t_camellia_ccm
 	$(RUN_SETUP) $(VALGRIND) ./t_nfold
 	$(RUN_SETUP) $(VALGRIND) ./t_encrypt
-	$(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output && \
-	diff t_prng.output $(srcdir)/t_prng.expected
+	if [ @CRYPTO_IMPL@ != nss ]; then \
+	  $(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output && \
+	  diff t_prng.output $(srcdir)/t_prng.expected; fi
 	$(RUN_SETUP) $(VALGRIND) ./t_cmac
 	$(RUN_SETUP) $(VALGRIND) ./t_hmac
 	$(RUN_SETUP) $(VALGRIND) ./t_prf <$(srcdir)/t_prf.in >t_prf.output

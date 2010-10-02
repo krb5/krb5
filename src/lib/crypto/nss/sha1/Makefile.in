@@ -1,0 +1,32 @@
+mydir=lib/crypto/nss/sha1
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
+DEFS=
+LOCALINCLUDES = -I$(srcdir)/.. @CRYPTO_IMPL_CFLAGS@
+
+##DOS##BUILDTOP = ..\..\..\..
+##DOS##PREFIXDIR=sha1
+##DOS##OBJFILE=..\$(OUTPRE)sha1.lst
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+STLIBOBJS= shs.o
+
+OBJS= $(OUTPRE)shs.$(OBJEXT) 
+
+SRCS= $(srcdir)/shs.c
+
+##DOS##LIBOBJS = $(OBJS)
+
+all-unix:: all-libobjs
+
+includes:: depend
+
+depend:: $(SRCS)
+
+clean::
+
+clean-unix:: clean-libobjs
+
+@libobj_frag@
+
