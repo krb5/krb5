@@ -47,9 +47,12 @@ k5_mutex_t yarrow_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 #include "../nss/nss_gen.h"
 #include <pk11pub.h>
 
-/* Gather 8K of OS entropy per call, enough to fill the additional data buffer
- * for the built-in PRNG and trigger a reseed. */
-#define OS_ENTROPY_LEN 8192
+/*
+ * NSS gathers its own OS entropy, so it doesn't really matter how much we read
+ * in krb5_c_random_os_entropy.  Use the same value as Yarrow (without using a
+ * Yarrow constant), so that we don't read too much from /dev/random.
+ */
+#define OS_ENTROPY_LEN 20
 
 int krb5int_prng_init(void)
 {
