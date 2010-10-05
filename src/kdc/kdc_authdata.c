@@ -495,7 +495,7 @@ merge_authdata (krb5_context context,
                 krb5_boolean copy,
                 krb5_boolean ignore_kdc_issued)
 {
-    size_t i, nadata = 0;
+    size_t i, j, nadata = 0;
     krb5_authdata **authdata = *out_authdata;
 
     if (in_authdata == NULL || in_authdata[0] == NULL)
@@ -529,16 +529,16 @@ merge_authdata (krb5_context context,
         in_authdata = tmp;
     }
 
-    for (i = 0; in_authdata[i] != NULL; i++) {
+    for (i = 0, j = 0; in_authdata[i] != NULL; i++) {
         if (ignore_kdc_issued &&
             is_kdc_issued_authdatum(context, in_authdata[i], 0)) {
             free(in_authdata[i]->contents);
             free(in_authdata[i]);
         } else
-            authdata[nadata + i] = in_authdata[i];
+            authdata[nadata + j++] = in_authdata[i];
     }
 
-    authdata[nadata + i] = NULL;
+    authdata[nadata + j] = NULL;
 
     free(in_authdata);
 
