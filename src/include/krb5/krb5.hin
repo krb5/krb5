@@ -2659,7 +2659,9 @@ krb5_copy_error_message(krb5_context, krb5_context);
  * time it is called after a failed call to a krb5 function using the
  * same context, and only when the error code passed in is the same as
  * that returned by the krb5 function.  Future versions may return the
- * same string for the second and following calls.
+ * same string for the second and following calls.  This function never
+ * returns NULL, so its result may be used unconditionally as a C
+ * string.
  *
  * The string returned by this function must be freed using
  * krb5_free_error_message.
