@@ -752,6 +752,14 @@ built with Hesiod support)
 .IP princ
 Checks against components of the principal name
 
+.SS kadm5_hook interface
+
+The kadm5_hook interface provides plugins with information on
+principal creation, modification, password changes and deletion. This
+interface can be used to write a plugin to synchronize MIT Kerberos
+with another database such as Active Directory. No plugins are built
+in for this interface.
+
 .SH FILES 
 /etc/krb5.conf
 .SH SEE ALSO

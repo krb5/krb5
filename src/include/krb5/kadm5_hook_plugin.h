@@ -48,6 +48,26 @@
  *
  * This interface depends on kadm5/admin.h. As such, the interface
  * does not provide strong guarantees of ABI stability.
+ *
+ * kadm5_hook plugins should:
+ * kadm5_hook_<modulename>_initvt, matching the signature:
+ *
+ *   krb5_error_code
+ *   kadm5_hook_modname_initvt(krb5_context context, int maj_ver, int min_ver,
+ *                         krb5_plugin_vtable vtable);
+ *
+ * The initvt function should:
+ *
+ * - Check that the supplied maj_ver number is supported by the module, or
+ *   return KRB5_PLUGIN_VER_NOTSUPP if it is not.
+ *
+ * - Cast the vtable pointer as appropriate for maj_ver:
+ *     maj_ver == 1: Cast to kadm5_hook_vftable_1
+ *
+ * - Initialize the methods of the vtable, stopping as appropriate for the
+ *   supplied min_ver.  Optional methods may be left uninitialized.
+ *
+ * Memory for the vtable is allocated by the caller, not by the module.
  */
 
 #include <krb5/krb5.h>

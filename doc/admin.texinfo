@@ -1105,9 +1105,11 @@ This LDAP specific tags indicates the number of connections to be maintained per
 @end table
 
 @node plugins, pkinit client options, dbmodules, krb5.conf
+@subsection Plugins
 
 @menu
 * pwqual interface::             
+* kadm5_hook interface::
 @end menu
 
 Tags in the [plugins] section can be used to register dynamic plugin
@@ -1140,7 +1142,8 @@ then the named modules will be disabled for the pluggable interface.
 The following subsections are currently supported within the [plugins]
 section:
 
-@node pwqual interface, , plugins, plugins
+@node pwqual interface, kadm5_hook interface, plugins, plugins
+@subsubsection pwqual interface
 
 The pwqual subsection controls modules for the password quality
 interface, which is used to reject weak passwords when passwords are
@@ -1161,6 +1164,14 @@ built with Hesiod support)
 @itemx princ
 Checks against components of the principal name
 @end table
+
+@node kadm5_hook interface,  , pwqual interface, plugins
+@subsubsection kadm5_hook interface
+The kadm5_hook interface provides plugins with information on
+principal creation, modification, password changes and deletion. This
+interface can be used to write a plugin to synchronize MIT Kerberos
+with another database such as Active Directory. No plugins are built
+in for this interface.
 
 @node pkinit client options, Sample krb5.conf File, plugins, krb5.conf
 @subsection pkinit options
