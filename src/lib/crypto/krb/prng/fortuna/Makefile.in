@@ -6,7 +6,7 @@ LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../.. \
 		-I$(srcdir)/../../../@CRYPTO_IMPL@/aes 	\
 		-I$(srcdir)/../../../@CRYPTO_IMPL@/enc_provider
 DEFS=
-
+RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
