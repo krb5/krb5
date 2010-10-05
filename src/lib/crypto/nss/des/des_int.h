@@ -157,6 +157,11 @@ error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
 #define mit_des_zeroblock krb5int_c_mit_des_zeroblock
 extern const mit_des_cblock mit_des_zeroblock;
 
+/* des_oldapis.c */
+extern krb5_error_code mit_afs_string_to_key(krb5_keyblock *keyblock,
+                                             const krb5_data *data,
+                                             const krb5_data *salt);
+
 /* key_parity.c */
 extern void mit_des_fixup_key_parity (mit_des_cblock );
 extern int mit_des_check_key_parity (mit_des_cblock );
