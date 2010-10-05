@@ -128,6 +128,7 @@ pwqual_hesiod_initvt(krb5_context context, int maj_ver, int min_ver,
     if (maj_ver != 1)
         return KRB5_PLUGIN_VER_NOTSUPP;
     vt = (krb5_pwqual_vtable)vtable;
+    vt->name = "hesiod";
     vt->check = hesiod_check;
     return 0;
 }

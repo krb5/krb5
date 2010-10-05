@@ -100,6 +100,7 @@ typedef void
 
 /* Password quality plugin vtable for major version 1. */
 typedef struct krb5_pwqual_vtable_st {
+    const char *name;           /* Mandatory: name of module. */
     krb5_pwqual_open_fn open;
     krb5_pwqual_check_fn check;
     krb5_pwqual_close_fn close;

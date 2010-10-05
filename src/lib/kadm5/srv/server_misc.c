@@ -33,7 +33,9 @@
 #include    <kdb.h>
 #include    <ctype.h>
 #include    <pwd.h>
+#include    <syslog.h>
 #include    "server_internal.h"
+#include    <adm_proto.h>
 
 kadm5_ret_t
 adb_policy_init(kadm5_server_handle_t handle)
@@ -137,8 +139,19 @@ passwd_check(kadm5_server_handle_t handle, const char *password,
     }
     for (h = handle->qual_handles; *h != NULL; h++) {
         ret = k5_pwqual_check(handle->context, *h, password, polname, princ);
-        if (ret != 0)
+        if (ret != 0) {
+            const char *e = krb5_get_error_message(handle->context, ret);
+            const char *modname = k5_pwqual_name(handle->context, *h);
+            char *princname;
+            if (krb5_unparse_name(handle->context, princ, &princname) != 0)
+                princname = NULL;
+            krb5_klog_syslog(LOG_ERR, "password quality module %s rejected "
+                             "password for %s: %s", modname,
+                             princname ? princname : "(can't unparse)", e);
+            krb5_free_error_message(handle->context, e);
+            free(princname);
             return ret;
+        }
     }
     return 0;
 }

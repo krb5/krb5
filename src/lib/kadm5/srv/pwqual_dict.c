@@ -247,6 +247,7 @@ pwqual_dict_initvt(krb5_context context, int maj_ver, int min_ver,
     if (maj_ver != 1)
         return KRB5_PLUGIN_VER_NOTSUPP;
     vt = (krb5_pwqual_vtable)vtable;
+    vt->name = "dict";
     vt->open = dict_open;
     vt->check = dict_check;
     vt->close = dict_close;

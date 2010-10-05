@@ -109,6 +109,12 @@ k5_pwqual_free_handles(krb5_context context, pwqual_handle *handles)
     free(handles);
 }
 
+const char *
+k5_pwqual_name(krb5_context context, pwqual_handle handle)
+{
+    return handle->vt.name;
+}
+
 krb5_error_code
 k5_pwqual_check(krb5_context context, pwqual_handle handle,
                 const char *password, const char *policy_name,

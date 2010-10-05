@@ -172,6 +172,10 @@ k5_pwqual_load(krb5_context context, const char *dict_file,
 void
 k5_pwqual_free_handles(krb5_context context, pwqual_handle *handles);
 
+/* Return the name of a password quality plugin module. */
+const char *
+k5_pwqual_name(krb5_context context, pwqual_handle handle);
+
 /* Check a password using a password quality plugin module. */
 krb5_error_code
 k5_pwqual_check(krb5_context context, pwqual_handle handle,
