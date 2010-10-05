@@ -204,7 +204,7 @@ WINMAKEFILES=Makefile \
 	lib\crypto\krb\raw\Makefile lib\crypto\krb\old\Makefile \
 	lib\crypto\@CRYPTO_IMPL@\sha1\Makefile lib\crypto\@CRYPTO_IMPL@\arcfour\Makefile \
 	lib\crypto\@CRYPTO_IMPL@\md4\Makefile lib\crypto\@CRYPTO_IMPL@\md5\Makefile \
-	lib\crypto\krb\yarrow\Makefile lib\crypto\@CRYPTO_IMPL@\aes\Makefile \
+	lib\crypto\krb\prng\Makefile lib\crypto\@CRYPTO_IMPL@\aes\Makefile \
 	lib\crypto\crypto_tests \
 	lib\gssapi\Makefile lib\gssapi\generic\Makefile \
 	lib\gssapi\krb5\Makefile lib\gssapi\mechglue\Makefile \
@@ -404,7 +404,8 @@ FILES= ./* \
 	lib/crypto/krb/old/* lib/crypto/krb/raw/* \
 	lib/crypto/@CRYPTO_IMPL@/sha1/* lib/crypto/@CRYPTO_IMPL@/arcfour/* \
 	lib/crypto/@CRYPTO_IMPL@/md4/* \
-	lib/crypto/@CRYPTO_IMPL@/md5/* lib/crypto/krb/yarrow/* \
+	lib/crypto/@CRYPTO_IMPL@/md5/* lib/crypto/krb/prng/* \
+	lib/crypto/krb/prng/@PRNG_ALG@/* \
 	lib/crypto/@CRYPTO_IMPL@/* lib/crypto/krb/* lib/crypto/crypto_tests \
 	lib/gssapi/* lib/gssapi/generic/* lib/gssapi/krb5/* \
 	lib/gssapi/mechglue/* lib/gssapi/spnego/* \

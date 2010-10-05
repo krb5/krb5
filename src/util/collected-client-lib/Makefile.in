@@ -52,7 +52,8 @@ STOBJLISTS= \
 	../../lib/crypto/@CRYPTO_IMPL@/arcfour/OBJS.ST \
 	../../lib/crypto/@CRYPTO_IMPL@/aes/OBJS.ST \
 	../../lib/crypto/@CRYPTO_IMPL@/camellia/OBJS.ST \
-	../../lib/crypto/krb/yarrow/OBJS.ST \
+	../../lib/crypto/krb/prng/OBJS.ST \
+	../../lib/crypto/krb/prng/@PRNG_ALG@/OBJS.ST \
 	../../lib/crypto/krb/OBJS.ST \
 	../../lib/crypto/@CRYPTO_IMPL@/OBJS.ST \
 	../../lib/crypto/OBJS.ST \

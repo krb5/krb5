@@ -74,12 +74,6 @@ int krb5int_yarrow_cipher_encrypt_block(CIPHER_CTX *ctx,
     krb5_crypto_iov iov;
     const struct krb5_enc_provider *enc = &yarrow_enc_provider;
 
-    /*
-       This can happen if ENOMEM in initializing the key
-       which happens on init or during reseeding
-    */
-    if (!ctx->key)
-        return YARROW_FAIL;
     memcpy(out, in, CIPHER_BLOCK_SIZE);
     iov.flags = KRB5_CRYPTO_TYPE_DATA;
     iov.data = make_data(out, CIPHER_BLOCK_SIZE);

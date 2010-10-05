@@ -3,7 +3,8 @@ BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../krb -I$(srcdir)/../@CRYPTO_IMPL@/enc_provider 		\
 	-I$(srcdir)/../@CRYPTO_IMPL@/hash_provider -I$(srcdir)/../krb/keyhash_provider 	\
 	-I$(srcdir)/../krb/dk -I$(srcdir)/../@CRYPTO_IMPL@/ 			\
-	-I$(srcdir)/../krb/yarrow 	\
+	-I$(srcdir)/../krb/prng 	\
+	-I$(srcdir)/../krb/prng/@PRNG_ALG@ 	\
 	-I$(srcdir)/../krb/crc32 -I$(srcdir)/../krb/old -I$(srcdir)/../krb/raw 	\
 	-I$(srcdir)/../@CRYPTO_IMPL@/aes -I$(srcdir)/../@CRYPTO_IMPL@/des 	\
 	-I$(srcdir)/../@CRYPTO_IMPL@/arcfour -I$(srcdir)/../@CRYPTO_IMPL@/sha1 	\
@@ -56,9 +57,13 @@ check-unix:: t_nfold t_encrypt t_prf t_prng t_cmac t_hmac \
 		t_crc t_cts t_short t_str2key t_camellia_ccm
 	$(RUN_SETUP) $(VALGRIND) ./t_nfold
 	$(RUN_SETUP) $(VALGRIND) ./t_encrypt
+ifeq ("@PRNG_ALG@","fortuna")
+		$(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output
+else 
 	if [ @CRYPTO_IMPL@ != nss ]; then \
-	  $(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output && \
-	  diff t_prng.output $(srcdir)/t_prng.expected; fi
+		$(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output && diff t_prng.output $(srcdir)/t_prng.expected; \
+	fi	
+endif
 	$(RUN_SETUP) $(VALGRIND) ./t_cmac
 	$(RUN_SETUP) $(VALGRIND) ./t_hmac
 	$(RUN_SETUP) $(VALGRIND) ./t_prf <$(srcdir)/t_prf.in >t_prf.output
