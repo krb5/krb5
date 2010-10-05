@@ -60,6 +60,7 @@ char     *principal_attributes[] = { "krbprincipalname",
                                      "logindisabled",
 #endif
                                      "krbLastPwdChange",
+                                     "krbLastAdminUnlock",
                                      "krbExtraData",
                                      "krbObjectReferences",
                                      "krbAllowedToDelegateTo",
@@ -80,6 +81,7 @@ static char *attributes_set[] = { "krbmaxticketlife",
                                   "krbLastSuccessfulAuth",
                                   "krbLastFailedAuth",
                                   "krbLoginFailedCount",
+                                  "krbLastAdminUnlock",
                                   NULL };
 
 void

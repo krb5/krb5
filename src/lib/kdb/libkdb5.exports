@@ -44,6 +44,7 @@ krb5_dbe_free_key_data_contents
 krb5_dbe_free_mkey_aux_list
 krb5_dbe_free_key_list
 krb5_dbe_get_mkvno
+krb5_dbe_lookup_last_admin_unlock
 krb5_dbe_lookup_last_pwd_change
 krb5_dbe_lookup_actkvno
 krb5_dbe_lookup_mkey_aux
@@ -52,6 +53,7 @@ krb5_dbe_lookup_mod_princ_data
 krb5_dbe_lookup_tl_data
 krb5_dbe_search_enctype
 krb5_dbe_update_actkvno
+krb5_dbe_update_last_admin_unlock
 krb5_dbe_update_last_pwd_change
 krb5_dbe_update_mkey_aux
 krb5_dbe_update_mkvno

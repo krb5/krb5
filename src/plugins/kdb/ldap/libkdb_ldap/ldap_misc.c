@@ -1997,6 +1997,20 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
         }
     }
 
+    /* LAST ADMIN UNLOCK */
+    {
+        krb5_timestamp unlock_time=0;
+        if ((st=krb5_ldap_get_time(ld, ent, "krbLastAdminUnlock",
+                                   &unlock_time, &attr_present)) != 0)
+            goto cleanup;
+        if (attr_present == TRUE) {
+            if ((st=krb5_dbe_update_last_admin_unlock(context, entry,
+                                                      unlock_time)))
+                goto cleanup;
+            mask |= KDB_LAST_ADMIN_UNLOCK_ATTR;
+        }
+    }
+
     /* ALLOWED TO DELEGATE TO */
     {
         char **a2d2 = NULL;

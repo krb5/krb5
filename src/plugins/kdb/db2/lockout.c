@@ -100,6 +100,13 @@ locked_check_p(krb5_context context,
                krb5_timestamp lockout_duration,
                krb5_db_entry *entry)
 {
+    krb5_timestamp unlock_time;
+
+    /* If the entry was unlocked since the last failure, it's not locked. */
+    if (krb5_dbe_lookup_last_admin_unlock(context, entry, &unlock_time) == 0 &&
+        entry->last_failed <= unlock_time)
+        return FALSE;
+
     if (max_fail == 0 || entry->fail_auth_count < max_fail)
         return FALSE;
 
@@ -147,6 +154,7 @@ krb5_db2_lockout_audit(krb5_context context,
     krb5_deltat lockout_duration = 0;
     krb5_db2_context *db_ctx = context->dal_handle->db_context;
     krb5_boolean need_update = FALSE;
+    krb5_timestamp unlock_time;
 
     switch (status) {
     case 0:
@@ -182,6 +190,13 @@ krb5_db2_lockout_audit(krb5_context context,
     } else if (!db_ctx->disable_lockout &&
                (status == KRB5KDC_ERR_PREAUTH_FAILED ||
                 status == KRB5KRB_AP_ERR_BAD_INTEGRITY)) {
+        if (krb5_dbe_lookup_last_admin_unlock(context, entry,
+                                              &unlock_time) == 0 &&
+            entry->last_failed <= unlock_time) {
+            /* Reset fail_auth_count after administrative unlock. */
+            entry->fail_auth_count = 0;
+        }
+
         if (failcnt_interval != 0 &&
             stamp > entry->last_failed + failcnt_interval) {
             /* Reset fail_auth_count after failcnt_interval. */

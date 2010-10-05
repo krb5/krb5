@@ -23,7 +23,7 @@
 #!/usr/bin/python
 from k5test import *
 
-realm = K5Realm(create_host=False)
+realm = K5Realm(create_host=False, start_kadmind=False)
 
 realm.run_kadminl('addpol -maxfailure 2 -failurecountinterval 5m lockout')
 realm.run_kadminl('modprinc +requires_preauth -policy lockout user')
@@ -43,6 +43,10 @@ output = realm.run_as_client([kinit, realm.user_princ], expected_code=1)
 if 'Clients credentials have been revoked while getting initial credentials' \
         not in output:
     fail('Expected lockout error message not seen in kinit output')
+
+# Check that modprinc -unlock allows a further attempt.
+output = realm.run_kadminl('modprinc -unlock user')
+realm.kinit(realm.user_princ, password('user'))
 
 success('Account lockout.')
 

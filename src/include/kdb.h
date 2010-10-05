@@ -238,6 +238,7 @@ typedef struct __krb5_key_salt_tuple {
 #define KRB5_TL_CONSTRAINED_DELEGATION_ACL 0x0400 /* Each entry is a permitted SPN */
 #define KRB5_TL_LM_KEY                  0x0500 /* LM OWF */
 #define KRB5_TL_X509_SUBJECT_ISSUER_NAME 0x0600 /* <I>IssuerDN<S>SubjectDN */
+#define KRB5_TL_LAST_ADMIN_UNLOCK       0x0700 /* Timestamp of admin unlock */
 
 /* version number for KRB5_TL_ACTKVNO data */
 #define KRB5_TL_ACTKVNO_VER     1
@@ -494,6 +495,11 @@ krb5_dbe_update_last_pwd_change( krb5_context     context,
                                  krb5_timestamp   stamp);
 
 krb5_error_code
+krb5_dbe_update_last_admin_unlock( krb5_context     context,
+                                   krb5_db_entry  * entry,
+                                   krb5_timestamp   stamp);
+
+krb5_error_code
 krb5_dbe_lookup_tl_data( krb5_context          context,
                          krb5_db_entry       * entry,
                          krb5_tl_data        * ret_tl_data);
@@ -521,6 +527,11 @@ krb5_error_code
 krb5_dbe_lookup_last_pwd_change( krb5_context          context,
                                  krb5_db_entry       * entry,
                                  krb5_timestamp      * stamp);
+
+krb5_error_code
+krb5_dbe_lookup_last_admin_unlock( krb5_context          context,
+                                   krb5_db_entry       * entry,
+                                   krb5_timestamp      * stamp);
 
 krb5_error_code
 krb5_dbe_delete_tl_data( krb5_context    context,

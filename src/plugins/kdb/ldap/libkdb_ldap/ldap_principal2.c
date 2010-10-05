@@ -1051,6 +1051,7 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
         int count = 0;
         struct berval **ber_tl_data = NULL;
         krb5_tl_data *ptr;
+        krb5_timestamp unlock_time;
         for (ptr = entry->tl_data; ptr != NULL; ptr = ptr->tl_data_next) {
             if (ptr->tl_data_type == KRB5_TL_LAST_PWD_CHANGE
 #ifdef SECURID
@@ -1058,7 +1059,8 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
 #endif
                 || ptr->tl_data_type == KRB5_TL_KADM_DATA
                 || ptr->tl_data_type == KDB_TL_USER_INFO
-                || ptr->tl_data_type == KRB5_TL_CONSTRAINED_DELEGATION_ACL)
+                || ptr->tl_data_type == KRB5_TL_CONSTRAINED_DELEGATION_ACL
+                || ptr->tl_data_type == KRB5_TL_LAST_ADMIN_UNLOCK)
                 continue;
             count++;
         }
@@ -1079,7 +1081,8 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
 #endif
                     || ptr->tl_data_type == KRB5_TL_KADM_DATA
                     || ptr->tl_data_type == KDB_TL_USER_INFO
-                    || ptr->tl_data_type == KRB5_TL_CONSTRAINED_DELEGATION_ACL)
+                    || ptr->tl_data_type == KRB5_TL_CONSTRAINED_DELEGATION_ACL
+                    || ptr->tl_data_type == KRB5_TL_LAST_ADMIN_UNLOCK)
                     continue;
                 if ((st = tl_data2berval (ptr, &ber_tl_data[j])) != 0)
                     break;
@@ -1098,6 +1101,22 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                                               LDAP_MOD_REPLACE | LDAP_MOD_BVALUES,
                                               ber_tl_data)) != 0)
                 goto cleanup;
+        }
+        if ((st=krb5_dbe_lookup_last_admin_unlock(context, entry,
+                                                  &unlock_time)) != 0)
+            goto cleanup;
+        if (unlock_time != 0) {
+            /* Update last admin unlock */
+            memset(strval, 0, sizeof(strval));
+            if ((strval[0] = getstringtime(unlock_time)) == NULL)
+                goto cleanup;
+
+            if ((st=krb5_add_str_mem_ldap_mod(&mods, "krbLastAdminUnlock",
+                                              LDAP_MOD_REPLACE, strval)) != 0) {
+                free (strval[0]);
+                goto cleanup;
+            }
+            free (strval[0]);
         }
     }
 

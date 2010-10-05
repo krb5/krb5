@@ -445,6 +445,13 @@ attributetype ( 2.16.840.1.113719.1.301.4.45.1
                 SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
                 SINGLE-VALUE)
 
+##### The time at which the principal was last administratively unlocked.
+
+attributetype ( 1.3.6.1.4.1.5322.21.2.5
+                NAME 'krbLastAdminUnlock'
+                EQUALITY generalizedTimeMatch
+                SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
+                SINGLE-VALUE)
 
 ##### This attribute holds the kerberos master key.
 ##### This can be used to encrypt principal keys. 
@@ -609,7 +616,7 @@ objectclass ( 2.16.840.1.113719.1.301.6.8.1
                 NAME 'krbPrincipalAux'
 		SUP top
                 AUXILIARY
-                MAY ( krbPrincipalName $ krbCanonicalName $ krbUPEnabled $ krbPrincipalKey $ krbTicketPolicyReference $ krbPrincipalExpiration $ krbPasswordExpiration $ krbPwdPolicyReference $ krbPrincipalType $ krbPwdHistory $ krbLastPwdChange $ krbPrincipalAliases $ krbLastSuccessfulAuth $ krbLastFailedAuth $ krbLoginFailedCount $ krbExtraData $ krbAllowedToDelegateTo ) )
+                MAY ( krbPrincipalName $ krbCanonicalName $ krbUPEnabled $ krbPrincipalKey $ krbTicketPolicyReference $ krbPrincipalExpiration $ krbPasswordExpiration $ krbPwdPolicyReference $ krbPrincipalType $ krbPwdHistory $ krbLastPwdChange $ krbLastAdminUnlock $ krbPrincipalAliases $ krbLastSuccessfulAuth $ krbLastFailedAuth $ krbLoginFailedCount $ krbExtraData $ krbAllowedToDelegateTo ) )
 
 
 ###### This class is used to create additional principals and stand alone principals.

@@ -82,7 +82,7 @@
 #define KDB_LAST_SUCCESS_ATTR                0x000800
 #define KDB_LAST_FAILED_ATTR                 0x001000
 #define KDB_FAIL_AUTH_COUNT_ATTR             0x002000
-#define KDB_LOCKED_TIME_ATTR                 0x004000
+#define KDB_LAST_ADMIN_UNLOCK_ATTR           0x004000
 
 /*
  * This is a private contract between krb5_ldap_lockout_audit()
