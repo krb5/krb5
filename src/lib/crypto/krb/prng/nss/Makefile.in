@@ -1,0 +1,31 @@
+mydir=lib/crypto/krb/prng/nss
+BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../.. \
+		-I$(srcdir)/../../../@CRYPTO_IMPL@
+DEFS=
+
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+
+STLIBOBJS=  prng_nss.o
+OBJS= \
+	$(OUTPRE)prng_nss.$(OBJEXT)
+
+SRCS=\
+	$(srcdir)/prng_nss.c 
+
+all-unix:: all-libobjs
+
+includes:: depend
+
+depend:: $(SRCS)
+
+clean::
+	$(RM) t_nss$(EXEEXT) t_nss.$(OBJEXT)  t_nss_make_oct.result  t_nss_make_oct$(EXEEXT)  t_nss_make_oct.$(OBJEXT)
+
+
+clean-unix:: clean-libobjs
+
+@lib_frag@
+@libobj_frag@
+
