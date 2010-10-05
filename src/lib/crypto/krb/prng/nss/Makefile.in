@@ -1,7 +1,7 @@
 mydir=lib/crypto/krb/prng/nss
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../.. \
-		-I$(srcdir)/../../../@CRYPTO_IMPL@
+		-I$(srcdir)/../../../@CRYPTO_IMPL@ @CRYPTO_IMPL_CFLAGS@
 DEFS=
 
 PROG_LIBPATH=-L$(TOPLIBD)
