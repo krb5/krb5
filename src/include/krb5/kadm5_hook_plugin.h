@@ -96,7 +96,7 @@ typedef struct kadm5_hook_modinfo_st kadm5_hook_modinfo;
 typedef struct kadm5_hook_vtable_1_st {
 
     /** A text string identifying the plugin for logging messages. */
-    char *name;
+    const char *name;
 
     /** Initialize a plugin module.
      * @param modinfo returns newly allocated module info for future
