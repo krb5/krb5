@@ -316,7 +316,7 @@ static struct mech_attr_info_desc {
     {
         oids+25,
         STRING_BUFFER("GSS_C_MA_CONF_PROT"),
-        STRING_BUFFER("Mechanism supports per-message confidentiality"
+        STRING_BUFFER("Mechanism supports per-message confidentiality "
                       "protection."),
     },
     {
