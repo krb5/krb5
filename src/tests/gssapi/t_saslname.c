@@ -52,7 +52,7 @@ displayStatus_1(char *m, OM_uint32 code, int type)
 }
 
 static void
-displayStatus(char *msg, OM_uint32 maj_stat, OM_unit32 min_stat)
+displayStatus(char *msg, OM_uint32 maj_stat, OM_uint32 min_stat)
 {
      displayStatus_1(msg, maj_stat, GSS_C_GSS_CODE);
      displayStatus_1(msg, min_stat, GSS_C_MECH_CODE);
