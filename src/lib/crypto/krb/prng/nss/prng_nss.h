@@ -1,6 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * lib/crypto/krb/prng/fortuna.h
+ * lib/crypto/krb/prng/nss/prng_nss.h
  *
  * Copyright 2010 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -25,8 +25,8 @@
  * or implied warranty.
  */
 
-#ifndef FORTUNA_H
-#define FORTUNA_H
+#ifndef PRNG_NSS_H
+#define PRNG_NSS_H
 
 #include "k5-int.h"
 #include "prng.h"

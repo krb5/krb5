@@ -1,7 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* prng_fortuna.c */
 /*
- * fortuna.c
+ * prng_fortuna.c
+ *
  *		Fortuna-like PRNG.
  *
  * Copyright (c) 2005 Marko Kreen

@@ -2,7 +2,7 @@
 /*
  * prng_nss.c
  *
- * Copyright (C) 2008, 2010 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2010 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  *

@@ -1,6 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * lib/crypto/krb/prng/fortuna.h
+ * lib/crypto/krb/prng/fortuna/fortuna.h
  *
  * Copyright 2010 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
