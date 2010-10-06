@@ -1237,4 +1237,3 @@ const char *fileName;
 	} /* while */
 	(void) fclose(confFile);
 } /* loadConfigFile */
-

@@ -210,8 +210,8 @@ GSS_DLLIMP gss_const_OID GSS_C_MA_PFS               = oids+32;
 GSS_DLLIMP gss_const_OID GSS_C_MA_COMPRESS          = oids+33;
 GSS_DLLIMP gss_const_OID GSS_C_MA_CTX_TRANS         = oids+34;
 
-static gss_OID_set_desc gss_ma_known_attrs_desc     = { 27, oids+8 };
-gss_OID_set gss_ma_known_attrs                      = &gss_ma_known_attrs_desc;
+static gss_OID_set_desc gss_ma_known_attrs_desc = { 27, oids+8 };
+gss_OID_set gss_ma_known_attrs = &gss_ma_known_attrs_desc;
 
 #define STRING_BUFFER(x)    { sizeof((x) - 1), (x) }
 
@@ -224,7 +224,8 @@ static struct mech_attr_info_desc {
     {
         oids+8,
         STRING_BUFFER("GSS_C_MA_MECH_CONCRETE"),
-        STRING_BUFFER("Mechanism is neither a pseudo-mechanism nor a composite mechanism."),
+        STRING_BUFFER("Mechanism is neither a pseudo-mechanism nor a "
+                      "composite mechanism."),
     },
     {
         oids+9,
@@ -269,32 +270,38 @@ static struct mech_attr_info_desc {
     {
         oids+17,
         STRING_BUFFER("GSS_C_MA_AUTH_INIT"),
-        STRING_BUFFER("Mechanism supports authentication of initiator to acceptor."),
+        STRING_BUFFER("Mechanism supports authentication of initiator to "
+                      "acceptor."),
     },
     {
         oids+18,
         STRING_BUFFER("GSS_C_MA_AUTH_TARG"),
-        STRING_BUFFER("Mechanism supports authentication of acceptor to initiator."),
+        STRING_BUFFER("Mechanism supports authentication of acceptor to "
+                      "initiator."),
     },
     {
         oids+19,
         STRING_BUFFER("GSS_C_MA_AUTH_INIT_INIT"),
-        STRING_BUFFER("Mechanism supports authentication of initiator using initial credentials."),
+        STRING_BUFFER("Mechanism supports authentication of initiator using "
+                      "initial credentials."),
     },
     {
         oids+20,
         STRING_BUFFER("GSS_C_MA_AUTH_TARG_INIT"),
-        STRING_BUFFER("Mechanism supports authentication of acceptor using initial credentials."),
+        STRING_BUFFER("Mechanism supports authentication of acceptor using "
+                      "initial credentials."),
     },
     {
         oids+21,
         STRING_BUFFER("GSS_C_MA_AUTH_INIT_ANON"),
-        STRING_BUFFER("Mechanism supports GSS_C_NT_ANONYMOUS as an initiator name."),
+        STRING_BUFFER("Mechanism supports GSS_C_NT_ANONYMOUS as an initiator "
+                      "name."),
     },
     {
         oids+22,
         STRING_BUFFER("GSS_C_MA_AUTH_TARG_ANON"),
-        STRING_BUFFER("Mechanism supports GSS_C_NT_ANONYMOUS as an acceptor name."),
+        STRING_BUFFER("Mechanism supports GSS_C_NT_ANONYMOUS as an acceptor "
+                      "name."),
     },
     {
         oids+23,
@@ -304,17 +311,19 @@ static struct mech_attr_info_desc {
     {
         oids+24,
         STRING_BUFFER("GSS_C_MA_INTEG_PROT"),
-        STRING_BUFFER("Mechanism supports per-message integrity proteciton."),
+        STRING_BUFFER("Mechanism supports per-message integrity protection."),
     },
     {
         oids+25,
         STRING_BUFFER("GSS_C_MA_CONF_PROT"),
-        STRING_BUFFER("Mechanism supports per-message confidentiality protection."),
+        STRING_BUFFER("Mechanism supports per-message confidentiality"
+                      "protection."),
     },
     {
         oids+26,
         STRING_BUFFER("GSS_C_MA_MIC"),
-        STRING_BUFFER("Mechanism supports Message Integrity Code (MIC) tokens."),
+        STRING_BUFFER("Mechanism supports Message Integrity Code (MIC) "
+                      "tokens."),
     },
     {
         oids+27,
@@ -324,7 +333,8 @@ static struct mech_attr_info_desc {
     {
         oids+28,
         STRING_BUFFER("GSS_C_MA_PROT_READY"),
-        STRING_BUFFER("Mechanism supports per-message proteciton prior to full context establishment."),
+        STRING_BUFFER("Mechanism supports per-message proteciton prior to "
+                      "full context establishment."),
     },
     {
         oids+29,
@@ -349,7 +359,8 @@ static struct mech_attr_info_desc {
     {
         oids+33,
         STRING_BUFFER("GSS_C_MA_COMPRESS"),
-        STRING_BUFFER("Mechanism supports compression of data inputs to gss_wrap()."),
+        STRING_BUFFER("Mechanism supports compression of data inputs to "
+                      "gss_wrap()."),
     },
     {
         oids+34,
@@ -358,7 +369,8 @@ static struct mech_attr_info_desc {
     },
 };
 
-OM_uint32 generic_gss_display_mech_attr(
+OM_uint32
+generic_gss_display_mech_attr(
       OM_uint32         *minor_status,
       gss_const_OID      mech_attr,
       gss_buffer_t       name,
@@ -389,7 +401,8 @@ OM_uint32 generic_gss_display_mech_attr(
                 return GSS_S_FAILURE;
             }
             if (short_desc != GSS_C_NO_BUFFER &&
-                !g_make_string_buffer((char *)mai->short_desc.value, short_desc)) {
+                !g_make_string_buffer((char *)mai->short_desc.value,
+                                      short_desc)) {
                 *minor_status = ENOMEM;
                 return GSS_S_FAILURE;
             }

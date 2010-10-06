@@ -821,13 +821,8 @@ dumpAttribute(OM_uint32 *minor,
         value.value = NULL;
         display_value.value = NULL;
 
-        major = gss_get_name_attribute(minor,
-                                       name,
-                                       attribute,
-                                       &authenticated,
-                                       &complete,
-                                       &value,
-                                       &display_value,
+        major = gss_get_name_attribute(minor, name, attribute, &authenticated,
+                                       &complete, &value, &display_value,
                                        &more);
         if (GSS_ERROR(major)) {
             display_status("gss_get_name_attribute", major, *minor);
@@ -865,11 +860,7 @@ enumerateAttributes(OM_uint32 *minor,
     gss_buffer_set_t attrs = GSS_C_NO_BUFFER_SET;
     unsigned int i;
 
-    major = gss_inquire_name(minor,
-                             name,
-                             &name_is_MN,
-                             &mech,
-                             &attrs);
+    major = gss_inquire_name(minor, name, &name_is_MN, &mech, &attrs);
     if (GSS_ERROR(major)) {
         display_status("gss_inquire_name", major, *minor);
         return major;

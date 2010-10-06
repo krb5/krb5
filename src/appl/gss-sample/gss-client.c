@@ -76,8 +76,10 @@ static gss_OID_desc gss_spnego_mechanism_oid_desc =
 static void
 usage()
 {
-    fprintf(stderr, "Usage: gss-client [-port port] [-mech mechanism] [-spnego] [-d]\n");
-    fprintf(stderr, "       [-seq] [-noreplay] [-nomutual] [-user user] [-pass pw]");
+    fprintf(stderr, "Usage: gss-client [-port port] [-mech mechanism] "
+            "[-spnego] [-d]\n");
+    fprintf(stderr, "       [-seq] [-noreplay] [-nomutual] [-user user] "
+            "[-pass pw]");
 #ifdef _WIN32
     fprintf(stderr, " [-threads num]");
 #endif
@@ -288,7 +290,8 @@ client_establish_context(int s, char *service_name, OM_uint32 gss_flags,
         do {
             maj_stat = gss_init_sec_context(&init_sec_min_stat,
                                             cred, gss_context,
-                                            target_name, mechs.elements, gss_flags, 0,
+                                            target_name, mechs.elements,
+                                            gss_flags, 0,
                                             NULL, /* channel bindings */
                                             token_ptr, NULL, /* mech type */
                                             &send_tok, ret_flags,

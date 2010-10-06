@@ -2767,10 +2767,11 @@ spnego_gss_inquire_attrs_for_mech(OM_uint32 *minor_status,
 	if (GSS_ERROR(major))
 		goto cleanup;
 
-#define MA_SUPPORTED(ma)    do { \
-	major = gss_add_oid_set_member(minor_status, (gss_OID)ma, mech_attrs);  \
-	if (GSS_ERROR(major))                                                   \
-		goto cleanup;                                                   \
+#define MA_SUPPORTED(ma)    do {					\
+		major = gss_add_oid_set_member(minor_status,		\
+					       (gss_OID)ma, mech_attrs); \
+		if (GSS_ERROR(major))					\
+			goto cleanup;					\
 	} while (0)
 
 	MA_SUPPORTED(GSS_C_MA_MECH_NEGO);

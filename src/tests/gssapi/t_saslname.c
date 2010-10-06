@@ -31,10 +31,8 @@
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_ext.h>
 
-static void displayStatus_1(m, code, type)
-     char *m;
-     OM_uint32 code;
-     int type;
+static void
+displayStatus_1(char *m, OM_uint32 code, int type)
 {
      OM_uint32 maj_stat, min_stat;
      gss_buffer_desc msg;
@@ -53,10 +51,8 @@ static void displayStatus_1(m, code, type)
      }
 }
 
-static void displayStatus(msg, maj_stat, min_stat)
-     char *msg;
-     OM_uint32 maj_stat;
-     OM_uint32 min_stat;
+static void
+displayStatus(char *msg, OM_uint32 maj_stat, OM_unit32 min_stat)
 {
      displayStatus_1(msg, maj_stat, GSS_C_GSS_CODE);
      displayStatus_1(msg, min_stat, GSS_C_MECH_CODE);
@@ -70,10 +66,7 @@ OM_uint32 dumpMechAttrs(OM_uint32 *minor, gss_OID mech)
     gss_OID_set known_attrs = GSS_C_NO_OID_SET;
     size_t i;
 
-    major = gss_inquire_attrs_for_mech(minor,
-                                       mech,
-                                       &mech_attrs,
-                                       &known_attrs);
+    major = gss_inquire_attrs_for_mech(minor, mech, &mech_attrs, &known_attrs);
     if (GSS_ERROR(major)) {
         displayStatus("gss_inquire_attrs_for_mech", major, *minor);
         return major;
@@ -156,19 +149,27 @@ int main(int argc, char *argv[])
             continue;
         }
 
-        printf("------------------------------------------------------------------------------\n");
-        printf("OID        : %.*s\n", (int)oidstr.length, (char *)oidstr.value);
-        printf("SASL mech  : %.*s\n", (int)sasl_mech_name.length, (char *)sasl_mech_name.value);
-        printf("Mech name  : %.*s\n", (int)mech_name.length, (char *)mech_name.value);
-        printf("Mech desc  : %.*s\n", (int)mech_description.length, (char *)mech_description.value);
+        printf("-------------------------------------------------------------"
+               "-----------------\n");
+        printf("OID        : %.*s\n", (int)oidstr.length,
+               (char *)oidstr.value);
+        printf("SASL mech  : %.*s\n", (int)sasl_mech_name.length,
+               (char *)sasl_mech_name.value);
+        printf("Mech name  : %.*s\n", (int)mech_name.length,
+               (char *)mech_name.value);
+        printf("Mech desc  : %.*s\n", (int)mech_description.length,
+               (char *)mech_description.value);
         dumpMechAttrs(&minor, &mechs->elements[i]);
-        printf("------------------------------------------------------------------------------\n");
+        printf("-------------------------------------------------------------"
+               "-----------------\n");
 
-        if (GSS_ERROR(gss_inquire_mech_for_saslname(&minor, &sasl_mech_name, &oid))) {
+        if (GSS_ERROR(gss_inquire_mech_for_saslname(&minor, &sasl_mech_name,
+                                                    &oid))) {
             displayStatus("gss_inquire_mech_for_saslname", major, minor);
         } else if (oid == GSS_C_NO_OID ||
             (oid->length != mechs->elements[i].length &&
-             memcmp(oid->elements, mechs->elements[i].elements, oid->length) != 0)) {
+             memcmp(oid->elements, mechs->elements[i].elements,
+                    oid->length) != 0)) {
             gss_release_buffer(&minor, &oidstr);
             (void) gss_oid_to_str(&minor, oid, &oidstr);
             fprintf(stderr, "Got different OID %.*s for mechanism %.*s\n",
