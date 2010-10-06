@@ -42,6 +42,7 @@ SRCS = \
 	$(srcdir)/g_inq_names.c \
 	$(srcdir)/g_map_name_to_any.c \
 	$(srcdir)/g_mech_invoke.c \
+	$(srcdir)/g_mechattr.c \
 	$(srcdir)/g_mechname.c \
 	$(srcdir)/g_oid_ops.c \
 	$(srcdir)/g_prf.c \
@@ -51,6 +52,7 @@ SRCS = \
 	$(srcdir)/g_rel_name.c \
 	$(srcdir)/g_rel_name_mapping.c \
 	$(srcdir)/g_rel_oid_set.c \
+	$(srcdir)/g_saslname.c \
 	$(srcdir)/g_seal.c \
 	$(srcdir)/g_set_context_option.c \
 	$(srcdir)/g_set_cred_option.c \
@@ -98,6 +100,7 @@ OBJS = \
 	$(OUTPRE)g_inq_names.$(OBJEXT) \
 	$(OUTPRE)g_map_name_to_any.$(OBJEXT) \
 	$(OUTPRE)g_mech_invoke.$(OBJEXT) \
+	$(OUTPRE)g_mechattr.$(OBJEXT) \
 	$(OUTPRE)g_mechname.$(OBJEXT) \
 	$(OUTPRE)g_oid_ops.$(OBJEXT) \
 	$(OUTPRE)g_prf.$(OBJEXT) \
@@ -107,6 +110,7 @@ OBJS = \
 	$(OUTPRE)g_rel_name.$(OBJEXT) \
 	$(OUTPRE)g_rel_name_mapping.$(OBJEXT) \
 	$(OUTPRE)g_rel_oid_set.$(OBJEXT) \
+	$(OUTPRE)g_saslname.$(OBJEXT) \
 	$(OUTPRE)g_seal.$(OBJEXT) \
 	$(OUTPRE)g_set_context_option.$(OBJEXT) \
 	$(OUTPRE)g_set_cred_option.$(OBJEXT) \
@@ -154,6 +158,7 @@ STLIBOBJS = \
 	g_inq_names.o \
 	g_map_name_to_any.o \
 	g_mech_invoke.o \
+	g_mechattr.o \
 	g_mechname.o \
 	g_oid_ops.o \
 	g_prf.o \
@@ -163,6 +168,7 @@ STLIBOBJS = \
 	g_rel_name.o \
 	g_rel_name_mapping.o \
 	g_rel_oid_set.o \
+	g_saslname.o \
 	g_seal.o \
 	g_set_context_option.o \
 	g_set_cred_option.o \

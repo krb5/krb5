@@ -67,6 +67,9 @@
 #include <strings.h>
 #endif
 
+static OM_uint32
+enumerateAttributes(OM_uint32 *minor, gss_name_t name, int noisy);
+
 static void
 usage()
 {
@@ -104,6 +107,7 @@ int     verbose = 0;
  * fails, an error message is displayed and -1 is returned; otherwise,
  * 0 is returned.
  */
+
 static int
 server_acquire_creds(char *service_name, gss_cred_id_t *server_creds)
 {
@@ -121,7 +125,7 @@ server_acquire_creds(char *service_name, gss_cred_id_t *server_creds)
     }
 
     maj_stat = gss_acquire_cred(&min_stat, server_name, 0,
-                                GSS_C_NULL_OID_SET, GSS_C_ACCEPT,
+                                GSS_C_NO_OID_SET, GSS_C_ACCEPT,
                                 server_creds, NULL, NULL);
     if (maj_stat != GSS_S_COMPLETE) {
         display_status("acquiring credentials", maj_stat, min_stat);
@@ -262,6 +266,7 @@ server_establish_context(int s, gss_cred_id_t server_creds,
             display_status("displaying name", maj_stat, min_stat);
             return -1;
         }
+        enumerateAttributes(&min_stat, client, TRUE);
         maj_stat = gss_release_name(&min_stat, &client);
         if (maj_stat != GSS_S_COMPLETE) {
             display_status("releasing name", maj_stat, min_stat);
@@ -410,7 +415,8 @@ sign_server(int s, gss_cred_id_t server_creds, int export)
     gss_buffer_desc client_name, xmit_buf, msg_buf;
     gss_ctx_id_t context;
     OM_uint32 maj_stat, min_stat;
-    int     i, conf_state, ret_flags;
+    int     i, conf_state;
+    OM_uint32 ret_flags;
     char   *cp;
     int     token_flags;
 
@@ -795,4 +801,78 @@ main(int argc, char **argv)
 #endif
 
     return 0;
+}
+
+static void
+dumpAttribute(OM_uint32 *minor,
+              gss_name_t name,
+              gss_buffer_t attribute,
+              int noisy)
+{
+    OM_uint32 major, tmp;
+    gss_buffer_desc value;
+    gss_buffer_desc display_value;
+    int authenticated = 0;
+    int complete = 0;
+    int more = -1;
+    unsigned int i;
+
+    while (more != 0) {
+        value.value = NULL;
+        display_value.value = NULL;
+
+        major = gss_get_name_attribute(minor, name, attribute, &authenticated,
+                                       &complete, &value, &display_value,
+                                       &more);
+        if (GSS_ERROR(major)) {
+            display_status("gss_get_name_attribute", major, *minor);
+            break;
+        }
+
+        printf("Attribute %.*s %s %s\n\n%.*s\n",
+               (int)attribute->length, (char *)attribute->value,
+               authenticated ? "Authenticated" : "",
+               complete ? "Complete" : "",
+               (int)display_value.length, (char *)display_value.value);
+
+        if (noisy) {
+            for (i = 0; i < value.length; i++) {
+                if ((i % 32) == 0)
+                    printf("\n");
+                printf("%02x", ((char *)value.value)[i] & 0xFF);
+            }
+            printf("\n\n");
+        }
+
+        gss_release_buffer(&tmp, &value);
+        gss_release_buffer(&tmp, &display_value);
+    }
+}
+
+static OM_uint32
+enumerateAttributes(OM_uint32 *minor,
+                    gss_name_t name,
+                    int noisy)
+{
+    OM_uint32 major, tmp;
+    int name_is_MN;
+    gss_OID mech = GSS_C_NO_OID;
+    gss_buffer_set_t attrs = GSS_C_NO_BUFFER_SET;
+    unsigned int i;
+
+    major = gss_inquire_name(minor, name, &name_is_MN, &mech, &attrs);
+    if (GSS_ERROR(major)) {
+        display_status("gss_inquire_name", major, *minor);
+        return major;
+    }
+
+    if (attrs != GSS_C_NO_BUFFER_SET) {
+        for (i = 0; i < attrs->count; i++)
+            dumpAttribute(minor, name, &attrs->elements[i], noisy);
+    }
+
+    gss_release_oid(&tmp, &mech);
+    gss_release_buffer_set(&tmp, &attrs);
+
+    return major;
 }

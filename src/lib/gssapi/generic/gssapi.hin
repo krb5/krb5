@@ -289,6 +289,8 @@ typedef int             gss_cred_usage_t;
      (((OM_uint32) 17ul) << GSS_C_ROUTINE_ERROR_OFFSET)
 #define GSS_S_NAME_NOT_MN \
      (((OM_uint32) 18ul) << GSS_C_ROUTINE_ERROR_OFFSET)
+#define GSS_S_BAD_MECH_ATTR \
+     (((OM_uint32) 19ul) << GSS_C_ROUTINE_ERROR_OFFSET)
 
 /*
  * Supplementary info bits:
@@ -830,5 +832,86 @@ gss_set_neg_mechs(
 
 /* XXXX This is a necessary evil until the spec is fixed */
 #define GSS_S_CRED_UNAVAIL GSS_S_FAILURE
+
+/*
+ * RFC 5587
+ */
+typedef const gss_buffer_desc *gss_const_buffer_t;
+typedef const struct gss_channel_bindings_struct *gss_const_channel_bindings_t;
+typedef const struct gss_ctx_id_struct gss_const_ctx_id_t;
+typedef const struct gss_cred_id_struct gss_const_cred_id_t;
+typedef const struct gss_name_struct gss_const_name_t;
+typedef const gss_OID_desc *gss_const_OID;
+typedef const gss_OID_set_desc *gss_const_OID_set;
+
+OM_uint32 KRB5_CALLCONV
+gss_indicate_mechs_by_attrs(
+    OM_uint32 *,        /* minor_status */
+    gss_const_OID_set,  /* desired_mech_attrs */
+    gss_const_OID_set,  /* except_mech_attrs */
+    gss_const_OID_set,  /* critical_mech_attrs */
+    gss_OID_set *);     /* mechs */
+
+OM_uint32 KRB5_CALLCONV
+gss_inquire_attrs_for_mech(
+    OM_uint32 *,        /* minor_status */
+    gss_const_OID,      /* mech */
+    gss_OID_set *,      /* mech_attrs */
+    gss_OID_set *);     /* known_mech_attrs */
+
+OM_uint32 KRB5_CALLCONV
+gss_display_mech_attr(
+    OM_uint32 *,        /* minor_status */
+    gss_const_OID,      /* mech_attr */
+    gss_buffer_t,       /* name */
+    gss_buffer_t,       /* short_desc */
+    gss_buffer_t);      /* long_desc */
+
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_MECH_CONCRETE;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_MECH_PSEUDO;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_MECH_COMPOSITE;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_MECH_NEGO;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_MECH_GLUE;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_NOT_MECH;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_DEPRECATED;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_NOT_DFLT_MECH;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_ITOK_FRAMED;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_AUTH_INIT;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_AUTH_TARG;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_AUTH_INIT_INIT;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_AUTH_TARG_INIT;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_AUTH_INIT_ANON;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_AUTH_TARG_ANON;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_DELEG_CRED;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_INTEG_PROT;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_CONF_PROT;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_MIC;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_WRAP;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_PROT_READY;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_REPLAY_DET;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_OOS_DET;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_CBINDINGS;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_PFS;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_COMPRESS;
+GSS_DLLIMP extern gss_const_OID GSS_C_MA_CTX_TRANS;
+
+/*
+ * RFC 5801
+ */
+OM_uint32 KRB5_CALLCONV
+gss_inquire_saslname_for_mech(
+    OM_uint32 *,        /* minor_status */
+    const gss_OID,      /* desired_mech */
+    gss_buffer_t,       /* sasl_mech_name */
+    gss_buffer_t,       /* mech_name */
+    gss_buffer_t        /* mech_description */
+);
+
+OM_uint32 KRB5_CALLCONV
+gss_inquire_mech_for_saslname(
+    OM_uint32 *,        /* minor_status */
+    const gss_buffer_t, /* sasl_mech_name */
+    gss_OID *           /* mech_type */
+);
 
 #endif /* _GSSAPI_H_ */

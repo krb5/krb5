@@ -122,6 +122,35 @@ static const gss_OID_desc const_oids[] = {
 
     /* GSS_C_INQ_SSPI_SESSION_KEY 1.2.840.113554.1.2.2.5.5 */
     {11, (void *)"\x2a\x86\x48\x86\xf7\x12\x01\x02\x02\x05\x05"},
+
+    /* RFC 5587 attributes, see below */
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x01"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x02"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x03"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x04"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x05"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x06"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x07"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x08"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x09"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x0a"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x0b"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x0c"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x0d"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x0e"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x0f"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x10"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x11"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x12"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x13"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x14"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x15"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x16"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x17"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x18"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x19"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x1a"},
+    {7, (void *)"\x2b\x06\x01\x05\x05\x0d\x1b"},
 };
 
 /* Here are the constants which point to the static structure above.
@@ -152,3 +181,234 @@ GSS_DLLIMP gss_OID GSS_C_NT_EXPORT_NAME         = oids+6;
 gss_OID gss_nt_exported_name                    = oids+6;
 
 GSS_DLLIMP gss_OID GSS_C_INQ_SSPI_SESSION_KEY   = oids+7;
+
+GSS_DLLIMP gss_const_OID GSS_C_MA_MECH_CONCRETE     = oids+8;
+GSS_DLLIMP gss_const_OID GSS_C_MA_MECH_PSEUDO       = oids+9;
+GSS_DLLIMP gss_const_OID GSS_C_MA_MECH_COMPOSITE    = oids+10;
+GSS_DLLIMP gss_const_OID GSS_C_MA_MECH_NEGO         = oids+11;
+GSS_DLLIMP gss_const_OID GSS_C_MA_MECH_GLUE         = oids+12;
+GSS_DLLIMP gss_const_OID GSS_C_MA_NOT_MECH          = oids+13;
+GSS_DLLIMP gss_const_OID GSS_C_MA_DEPRECATED        = oids+14;
+GSS_DLLIMP gss_const_OID GSS_C_MA_NOT_DFLT_MECH     = oids+15;
+GSS_DLLIMP gss_const_OID GSS_C_MA_ITOK_FRAMED       = oids+16;
+GSS_DLLIMP gss_const_OID GSS_C_MA_AUTH_INIT         = oids+17;
+GSS_DLLIMP gss_const_OID GSS_C_MA_AUTH_TARG         = oids+18;
+GSS_DLLIMP gss_const_OID GSS_C_MA_AUTH_INIT_INIT    = oids+19;
+GSS_DLLIMP gss_const_OID GSS_C_MA_AUTH_TARG_INIT    = oids+20;
+GSS_DLLIMP gss_const_OID GSS_C_MA_AUTH_INIT_ANON    = oids+21;
+GSS_DLLIMP gss_const_OID GSS_C_MA_AUTH_TARG_ANON    = oids+22;
+GSS_DLLIMP gss_const_OID GSS_C_MA_DELEG_CRED        = oids+23;
+GSS_DLLIMP gss_const_OID GSS_C_MA_INTEG_PROT        = oids+24;
+GSS_DLLIMP gss_const_OID GSS_C_MA_CONF_PROT         = oids+25;
+GSS_DLLIMP gss_const_OID GSS_C_MA_MIC               = oids+26;
+GSS_DLLIMP gss_const_OID GSS_C_MA_WRAP              = oids+27;
+GSS_DLLIMP gss_const_OID GSS_C_MA_PROT_READY        = oids+28;
+GSS_DLLIMP gss_const_OID GSS_C_MA_REPLAY_DET        = oids+29;
+GSS_DLLIMP gss_const_OID GSS_C_MA_OOS_DET           = oids+30;
+GSS_DLLIMP gss_const_OID GSS_C_MA_CBINDINGS         = oids+31;
+GSS_DLLIMP gss_const_OID GSS_C_MA_PFS               = oids+32;
+GSS_DLLIMP gss_const_OID GSS_C_MA_COMPRESS          = oids+33;
+GSS_DLLIMP gss_const_OID GSS_C_MA_CTX_TRANS         = oids+34;
+
+static gss_OID_set_desc gss_ma_known_attrs_desc = { 27, oids+8 };
+gss_OID_set gss_ma_known_attrs = &gss_ma_known_attrs_desc;
+
+#define STRING_BUFFER(x)    { sizeof((x) - 1), (x) }
+
+static struct mech_attr_info_desc {
+    gss_OID mech_attr;
+    gss_buffer_desc name;
+    gss_buffer_desc short_desc;
+    gss_buffer_desc long_desc;
+} mech_attr_info[] = {
+    {
+        oids+8,
+        STRING_BUFFER("GSS_C_MA_MECH_CONCRETE"),
+        STRING_BUFFER("Mechanism is neither a pseudo-mechanism nor a "
+                      "composite mechanism."),
+    },
+    {
+        oids+9,
+        STRING_BUFFER("GSS_C_MA_MECH_PSEUDO"),
+        STRING_BUFFER("Mechanism is a pseudo-mechanism"),
+    },
+    {
+        oids+10,
+        STRING_BUFFER("GSS_C_MA_MECH_COMPOSITE"),
+        STRING_BUFFER("Mechanism is a composite of other mechanisms."),
+    },
+    {
+        oids+11,
+        STRING_BUFFER("GSS_C_MA_MECH_NEGO"),
+        STRING_BUFFER("Mechanism negotiates other mechanisms."),
+    },
+    {
+        oids+12,
+        STRING_BUFFER("GSS_C_MA_MECH_GLUE"),
+        STRING_BUFFER("OID is not a mechanism but the GSS-API itself."),
+    },
+    {
+        oids+13,
+        STRING_BUFFER("GSS_C_MA_NOT_MECH"),
+        STRING_BUFFER("Known OID but not a mechanism OID."),
+    },
+    {
+        oids+14,
+        STRING_BUFFER("GSS_C_MA_DEPRECATED"),
+        STRING_BUFFER("Mechanism is deprecated."),
+    },
+    {
+        oids+15,
+        STRING_BUFFER("GSS_C_MA_NOT_DFLT_MECH"),
+        STRING_BUFFER("Mechanism must not be used as a default mechanism."),
+    },
+    {
+        oids+16,
+        STRING_BUFFER("GSS_C_MA_ITOK_FRAMED"),
+        STRING_BUFFER("Mechanism's initial contexts are properly framed."),
+    },
+    {
+        oids+17,
+        STRING_BUFFER("GSS_C_MA_AUTH_INIT"),
+        STRING_BUFFER("Mechanism supports authentication of initiator to "
+                      "acceptor."),
+    },
+    {
+        oids+18,
+        STRING_BUFFER("GSS_C_MA_AUTH_TARG"),
+        STRING_BUFFER("Mechanism supports authentication of acceptor to "
+                      "initiator."),
+    },
+    {
+        oids+19,
+        STRING_BUFFER("GSS_C_MA_AUTH_INIT_INIT"),
+        STRING_BUFFER("Mechanism supports authentication of initiator using "
+                      "initial credentials."),
+    },
+    {
+        oids+20,
+        STRING_BUFFER("GSS_C_MA_AUTH_TARG_INIT"),
+        STRING_BUFFER("Mechanism supports authentication of acceptor using "
+                      "initial credentials."),
+    },
+    {
+        oids+21,
+        STRING_BUFFER("GSS_C_MA_AUTH_INIT_ANON"),
+        STRING_BUFFER("Mechanism supports GSS_C_NT_ANONYMOUS as an initiator "
+                      "name."),
+    },
+    {
+        oids+22,
+        STRING_BUFFER("GSS_C_MA_AUTH_TARG_ANON"),
+        STRING_BUFFER("Mechanism supports GSS_C_NT_ANONYMOUS as an acceptor "
+                      "name."),
+    },
+    {
+        oids+23,
+        STRING_BUFFER("GSS_C_MA_DELEG_CRED"),
+        STRING_BUFFER("Mechanism supports credential delegation."),
+    },
+    {
+        oids+24,
+        STRING_BUFFER("GSS_C_MA_INTEG_PROT"),
+        STRING_BUFFER("Mechanism supports per-message integrity protection."),
+    },
+    {
+        oids+25,
+        STRING_BUFFER("GSS_C_MA_CONF_PROT"),
+        STRING_BUFFER("Mechanism supports per-message confidentiality"
+                      "protection."),
+    },
+    {
+        oids+26,
+        STRING_BUFFER("GSS_C_MA_MIC"),
+        STRING_BUFFER("Mechanism supports Message Integrity Code (MIC) "
+                      "tokens."),
+    },
+    {
+        oids+27,
+        STRING_BUFFER("GSS_C_MA_WRAP"),
+        STRING_BUFFER("Mechanism supports wrap tokens."),
+    },
+    {
+        oids+28,
+        STRING_BUFFER("GSS_C_MA_PROT_READY"),
+        STRING_BUFFER("Mechanism supports per-message proteciton prior to "
+                      "full context establishment."),
+    },
+    {
+        oids+29,
+        STRING_BUFFER("GSS_C_MA_REPLAY_DET"),
+        STRING_BUFFER("Mechanism supports replay detection."),
+    },
+    {
+        oids+30,
+        STRING_BUFFER("GSS_C_MA_OOS_DET"),
+        STRING_BUFFER("Mechanism supports out-of-sequence detection."),
+    },
+    {
+        oids+31,
+        STRING_BUFFER("GSS_C_MA_CBINDINGS"),
+        STRING_BUFFER("Mechanism supports channel bindings."),
+    },
+    {
+        oids+32,
+        STRING_BUFFER("GSS_C_MA_PFS"),
+        STRING_BUFFER("Mechanism supports Perfect Forward Security."),
+    },
+    {
+        oids+33,
+        STRING_BUFFER("GSS_C_MA_COMPRESS"),
+        STRING_BUFFER("Mechanism supports compression of data inputs to "
+                      "gss_wrap()."),
+    },
+    {
+        oids+34,
+        STRING_BUFFER("GSS_C_MA_CTX_TRANS"),
+        STRING_BUFFER("Mechanism supports security context export/import."),
+    },
+};
+
+OM_uint32
+generic_gss_display_mech_attr(
+      OM_uint32         *minor_status,
+      gss_const_OID      mech_attr,
+      gss_buffer_t       name,
+      gss_buffer_t       short_desc,
+      gss_buffer_t       long_desc)
+{
+    size_t i;
+
+    if (name != GSS_C_NO_BUFFER) {
+        name->length = 0;
+        name->value = NULL;
+    }
+    if (short_desc != GSS_C_NO_BUFFER) {
+        short_desc->length = 0;
+        short_desc->value = NULL;
+    }
+    if (long_desc != GSS_C_NO_BUFFER) {
+        long_desc->length = 0;
+        long_desc->value = NULL;
+    }
+    for (i = 0; i < sizeof(mech_attr_info)/sizeof(mech_attr_info[0]); i++) {
+        struct mech_attr_info_desc *mai = &mech_attr_info[i];
+
+        if (g_OID_equal(mech_attr, mai->mech_attr)) {
+            if (name != GSS_C_NO_BUFFER &&
+                !g_make_string_buffer((char *)mai->name.value, name)) {
+                *minor_status = ENOMEM;
+                return GSS_S_FAILURE;
+            }
+            if (short_desc != GSS_C_NO_BUFFER &&
+                !g_make_string_buffer((char *)mai->short_desc.value,
+                                      short_desc)) {
+                *minor_status = ENOMEM;
+                return GSS_S_FAILURE;
+            }
+            return GSS_S_COMPLETE;
+        }
+    }
+
+    return GSS_S_BAD_MECH_ATTR;
+}

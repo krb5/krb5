@@ -272,6 +272,9 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_release_any_name_mapping,
 	spnego_gss_pseudo_random,
 	spnego_gss_set_neg_mechs,
+	spnego_gss_inquire_saslname_for_mech,
+	spnego_gss_inquire_mech_for_saslname,
+	spnego_gss_inquire_attrs_for_mech,
 };
 
 static struct gss_config_ext spnego_mechanism_ext =
@@ -2257,11 +2260,27 @@ spnego_gss_set_cred_option(
 	gss_cred_id_t mcred;
 
 	mcred = (spcred == NULL) ? GSS_C_NO_CREDENTIAL : spcred->mcred;
-
 	ret = gss_set_cred_option(minor_status,
 				  &mcred,
 				  desired_object,
 				  value);
+	if (ret == GSS_S_COMPLETE && spcred == NULL) {
+		/*
+		 * If the mechanism allocated a new credential handle, then
+		 * we need to wrap it up in an SPNEGO credential handle.
+		 */
+
+		spcred = malloc(sizeof(spnego_gss_cred_id_rec));
+		if (spcred == NULL) {
+			gss_release_cred(&tmp_minor_status, &mcred);
+			*minor_status = ENOMEM;
+			return (GSS_S_FAILURE);
+		}
+		spcred->mcred = mcred;
+		spcred->neg_mechs = GSS_C_NULL_OID_SET;
+		*cred_handle = (gss_cred_id_t)spcred;
+	}
+
 	if (ret == GSS_S_COMPLETE && spcred == NULL) {
 		/*
 		 * If the mechanism allocated a new credential handle, then
@@ -2684,6 +2703,85 @@ spnego_gss_set_neg_mechs(OM_uint32 *minor_status,
 	ret = generic_gss_copy_oid_set(minor_status, mech_list,
 				       &spcred->neg_mechs);
 	return (ret);
+}
+
+#define SPNEGO_SASL_NAME	"SPNEGO"
+#define SPNEGO_SASL_NAME_LEN	(sizeof(SPNEGO_SASL_NAME) - 1)
+
+OM_uint32
+spnego_gss_inquire_mech_for_saslname(OM_uint32 *minor_status,
+                                     const gss_buffer_t sasl_mech_name,
+                                     gss_OID *mech_type)
+{
+	if (sasl_mech_name->length == SPNEGO_SASL_NAME_LEN &&
+	    memcmp(sasl_mech_name->value, SPNEGO_SASL_NAME,
+		   SPNEGO_SASL_NAME_LEN) == 0) {
+		if (mech_type != NULL)
+			*mech_type = (gss_OID)gss_mech_spnego;
+		return (GSS_S_COMPLETE);
+	}
+
+	return (GSS_S_BAD_MECH);
+}
+
+OM_uint32
+spnego_gss_inquire_saslname_for_mech(OM_uint32 *minor_status,
+                                     const gss_OID desired_mech,
+                                     gss_buffer_t sasl_mech_name,
+                                     gss_buffer_t mech_name,
+                                     gss_buffer_t mech_description)
+{
+	*minor_status = 0;
+
+	if (!g_OID_equal(desired_mech, gss_mech_spnego))
+		return (GSS_S_BAD_MECH);
+
+	if (!g_make_string_buffer(SPNEGO_SASL_NAME, sasl_mech_name) ||
+	    !g_make_string_buffer("spnego", mech_name) ||
+	    !g_make_string_buffer("Simple and Protected GSS-API "
+				  "Negotiation Mechanism", mech_description))
+		goto fail;
+
+	return (GSS_S_COMPLETE);
+
+fail:
+	*minor_status = ENOMEM;
+	return (GSS_S_FAILURE);
+}
+
+OM_uint32
+spnego_gss_inquire_attrs_for_mech(OM_uint32 *minor_status,
+				  gss_const_OID mech,
+				  gss_OID_set *mech_attrs,
+				  gss_OID_set *known_mech_attrs)
+{
+	OM_uint32 major, tmpMinor;
+
+	/* known_mech_attrs is handled by mechglue */
+	*minor_status = 0;
+
+	if (mech_attrs == NULL)
+	    return (GSS_S_COMPLETE);
+
+	major = gss_create_empty_oid_set(minor_status, mech_attrs);
+	if (GSS_ERROR(major))
+		goto cleanup;
+
+#define MA_SUPPORTED(ma)    do {					\
+		major = gss_add_oid_set_member(minor_status,		\
+					       (gss_OID)ma, mech_attrs); \
+		if (GSS_ERROR(major))					\
+			goto cleanup;					\
+	} while (0)
+
+	MA_SUPPORTED(GSS_C_MA_MECH_NEGO);
+	MA_SUPPORTED(GSS_C_MA_ITOK_FRAMED);
+
+cleanup:
+	if (GSS_ERROR(major))
+		gss_release_oid_set(&tmpMinor, mech_attrs);
+
+	return (major);
 }
 
 /*

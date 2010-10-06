@@ -791,6 +791,11 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_pseudo_random);
 	/* RFC 4178 (introduced in 1.8; gss_get_neg_mechs not implemented) */
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_set_neg_mechs);
+        /* draft-ietf-sasl-gs2 */
+        GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_saslname_for_mech);
+        GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_mech_for_saslname);
+        /* RFC 5587 */
+        GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_attrs_for_mech);
 
 	assert(mech_type != GSS_C_NO_OID);
 

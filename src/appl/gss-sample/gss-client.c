@@ -69,12 +69,17 @@
 #include "gss-misc.h"
 
 static int verbose = 1;
+static int spnego = 0;
+static gss_OID_desc gss_spnego_mechanism_oid_desc =
+        {6, (void *)"\x2b\x06\x01\x05\x05\x02"};
 
 static void
 usage()
 {
-    fprintf(stderr, "Usage: gss-client [-port port] [-mech mechanism] [-d]\n");
-    fprintf(stderr, "       [-seq] [-noreplay] [-nomutual] [-user user] [-pass pw]");
+    fprintf(stderr, "Usage: gss-client [-port port] [-mech mechanism] "
+            "[-spnego] [-d]\n");
+    fprintf(stderr, "       [-seq] [-noreplay] [-nomutual] [-user user] "
+            "[-pass pw]");
 #ifdef _WIN32
     fprintf(stderr, " [-threads num]");
 #endif
@@ -176,10 +181,17 @@ client_establish_context(int s, char *service_name, OM_uint32 gss_flags,
         gss_name_t gss_username = GSS_C_NO_NAME;
         gss_OID_set_desc mechs, *mechsp = GSS_C_NO_OID_SET;
 
-        if (oid != GSS_C_NO_OID) {
+        if (spnego) {
+            mechs.elements = &gss_spnego_mechanism_oid_desc;
+            mechs.count = 1;
+            mechsp = &mechs;
+        } else if (oid != GSS_C_NO_OID) {
             mechs.elements = oid;
             mechs.count = 1;
             mechsp = &mechs;
+        } else {
+            mechs.elements = NULL;
+            mechs.count = 0;
         }
 
         if (username != NULL) {
@@ -217,6 +229,20 @@ client_establish_context(int s, char *service_name, OM_uint32 gss_flags,
             display_status("acquiring creds", maj_stat, min_stat);
             gss_release_name(&min_stat, &gss_username);
             return -1;
+        }
+        if (spnego && oid != GSS_C_NO_OID) {
+            gss_OID_set_desc neg_mechs;
+
+            neg_mechs.elements = oid;
+            neg_mechs.count = 1;
+
+            maj_stat = gss_set_neg_mechs(&min_stat, cred, &neg_mechs);
+            if (maj_stat != GSS_S_COMPLETE) {
+                display_status("setting neg mechs", maj_stat, min_stat);
+                gss_release_name(&min_stat, &gss_username);
+                gss_release_cred(&min_stat, &cred);
+                return -1;
+            }
         }
         gss_release_name(&min_stat, &gss_username);
 
@@ -264,7 +290,8 @@ client_establish_context(int s, char *service_name, OM_uint32 gss_flags,
         do {
             maj_stat = gss_init_sec_context(&init_sec_min_stat,
                                             cred, gss_context,
-                                            target_name, oid, gss_flags, 0,
+                                            target_name, mechs.elements,
+                                            gss_flags, 0,
                                             NULL, /* channel bindings */
                                             token_ptr, NULL, /* mech type */
                                             &send_tok, ret_flags,
@@ -409,7 +436,7 @@ call_server(host, port, oid, service_name, gss_flags, auth_flag,
     char    *username;
     char    *password;
 {
-    gss_ctx_id_t context;
+    gss_ctx_id_t context = GSS_C_NO_CONTEXT;
     gss_buffer_desc in_buf, out_buf;
     int     s, state;
     OM_uint32 ret_flags;
@@ -523,7 +550,7 @@ call_server(host, port, oid, service_name, gss_flags, auth_flag,
     } else {
         /* Seal the message */
         in_buf.value = msg;
-        in_buf.length = strlen(msg);
+        in_buf.length = strlen((char *)in_buf.value);
     }
 
     for (i = 0; i < mcount; i++) {
@@ -611,6 +638,7 @@ call_server(host, port, oid, service_name, gss_flags, auth_flag,
     }
 
     (void) close(s);
+
     return 0;
 }
 
@@ -776,7 +804,7 @@ main(argc, argv)
         } else if (strcmp(*argv, "-iakerb") == 0) {
             mechanism = "{ 1 3 6 1 5 2 5 }";
         } else if (strcmp(*argv, "-spnego") == 0) {
-            mechanism = "{ 1 3 6 1 5 5 2 }";
+            spnego = 1;
         } else if (strcmp(*argv, "-krb5") == 0) {
             mechanism = "{ 1 3 5 1 5 2 }";
 #ifdef _WIN32
