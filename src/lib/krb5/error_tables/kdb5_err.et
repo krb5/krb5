@@ -83,5 +83,6 @@ ec KRB5_LOG_UNSTABLE,		"Update log is unstable"
 ec KRB5_LOG_CORRUPT,		"Update log is corrupt"
 ec KRB5_LOG_ERROR,		"Generic update log error"
 ec KRB5_KDB_DBTYPE_MISMATCH,    "Database module does not match KDC version"
+ec KRB5_KDB_POLICY_REF,		"Policy is in use"
 
 end

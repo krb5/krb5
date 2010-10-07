@@ -193,10 +193,10 @@ kadm5_delete_policy(void *server_handle, kadm5_policy_t name)
         return KADM5_POLICY_REF;
     }
     krb5_db_free_policy(handle->context, entry);
-    if ((ret = krb5_db_delete_policy(handle->context, name)))
-        return ret;
-    else
-        return KADM5_OK;
+    ret = krb5_db_delete_policy(handle->context, name);
+    if (ret == KRB5_KDB_POLICY_REF)
+        ret = KADM5_POLICY_REF;
+    return (ret == 0) ? KADM5_OK : ret;
 }
 
 kadm5_ret_t

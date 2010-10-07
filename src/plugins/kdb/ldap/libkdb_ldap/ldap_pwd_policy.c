@@ -214,11 +214,12 @@ populate_policy(krb5_context context,
     krb5_ldap_get_value(ld, ent, "krbpwdfailurecountinterval", &(pol_entry->pw_failcnt_interval));
     krb5_ldap_get_value(ld, ent, "krbpwdlockoutduration", &(pol_entry->pw_lockout_duration));
 
-    /* Get the reference count */
-    pol_dn = ldap_get_dn(ld, ent);
-    st = krb5_ldap_get_reference_count (context, pol_dn, "krbPwdPolicyReference",
-                                        &(pol_entry->policy_refcnt), ld);
-    ldap_memfree(pol_dn);
+    /*
+     * We don't store the policy refcnt, because principals might be maintained
+     * outside of kadmin.  Instead, we will check for principal references when
+     * policies are deleted.
+     */
+    pol_entry->policy_refcnt = 0;
 
 cleanup:
     return st;
@@ -329,7 +330,7 @@ cleanup:
 krb5_error_code
 krb5_ldap_delete_password_policy(krb5_context context, char *policy)
 {
-    int                         mask = 0;
+    int                         mask = 0, refcount;
     char                        *policy_dn = NULL, *class[] = {"krbpwdpolicy", NULL};
     krb5_error_code             st=0;
     LDAP                        *ld=NULL;
@@ -348,6 +349,13 @@ krb5_ldap_delete_password_policy(krb5_context context, char *policy)
     GET_HANDLE();
 
     st = krb5_ldap_name_to_policydn (context, policy, &policy_dn);
+    if (st != 0)
+        goto cleanup;
+
+    st = krb5_ldap_get_reference_count(context, policy_dn,
+                                       "krbPwdPolicyReference", &refcount, ld);
+    if (st == 0 && refcount != 0)
+        st = KRB5_KDB_POLICY_REF;
     if (st != 0)
         goto cleanup;
 
