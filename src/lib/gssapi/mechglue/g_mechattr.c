@@ -205,7 +205,8 @@ OM_uint32 gss_inquire_attrs_for_mech(
                                           known_mech_attrs);
         if (GSS_ERROR(status)) {
             gss_release_oid_set(&tmpMinor, mech_attrs);
-            *mech_attrs = GSS_C_NO_OID_SET;
+            if (mech_attrs != NULL)
+                *mech_attrs = GSS_C_NO_OID_SET;
         }
     }
 
