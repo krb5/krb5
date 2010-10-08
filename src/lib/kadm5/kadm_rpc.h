@@ -200,6 +200,13 @@ struct getprivs_ret {
 };
 typedef struct getprivs_ret getprivs_ret;
 
+struct purgekeys_arg {
+	krb5_ui_4 api_version;
+	krb5_principal princ;
+	int keepkvno;
+};
+typedef struct purgekeys_arg purgekeys_arg;
+
 #define KADM 2112
 #define KADMVERS 2
 #define CREATE_PRINCIPAL 1
@@ -265,6 +272,9 @@ extern  chrand_ret * chrand_principal3_2_svc(chrand3_arg *, struct svc_req *);
 #define SETKEY_PRINCIPAL3 21
 extern  generic_ret * setkey_principal3_2(setkey3_arg *, CLIENT *);
 extern  generic_ret * setkey_principal3_2_svc(setkey3_arg *, struct svc_req *);
+#define PURGEKEYS 22
+extern  generic_ret * purgekeys_2(purgekeys_arg *, CLIENT *);
+extern  generic_ret * purgekeys_2_svc(purgekeys_arg *, struct svc_req *);
 
 extern bool_t xdr_cprinc_arg ();
 extern bool_t xdr_cprinc3_arg ();
@@ -301,6 +311,7 @@ extern bool_t xdr_gpol_ret ();
 extern bool_t xdr_gpols_arg ();
 extern bool_t xdr_gpols_ret ();
 extern bool_t xdr_getprivs_ret ();
+extern bool_t xdr_purgekeys_arg ();
 
 
 #endif /* __KADM_RPC_H__ */

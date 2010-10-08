@@ -463,3 +463,26 @@ kadm5_ret_t kadm5_decrypt_key(void *server_handle,
 {
     return EINVAL;
 }
+
+kadm5_ret_t
+kadm5_purgekeys(void *server_handle,
+                krb5_principal princ,
+                int keepkvno)
+{
+    purgekeys_arg       arg;
+    generic_ret         *r;
+    kadm5_server_handle_t handle = server_handle;
+
+    CHECK_HANDLE(server_handle);
+
+    arg.princ = princ;
+    arg.keepkvno = keepkvno;
+    arg.api_version = handle->api_version;
+
+    if (princ == NULL)
+        return EINVAL;
+    r = purgekeys_2(&arg, handle->clnt);
+    if(r == NULL)
+        eret();
+    return r->code;
+}

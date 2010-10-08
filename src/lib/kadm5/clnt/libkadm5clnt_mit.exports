@@ -32,6 +32,7 @@ kadm5_init_with_skey
 kadm5_lock
 kadm5_modify_policy
 kadm5_modify_principal
+kadm5_purgekeys
 kadm5_randkey_principal
 kadm5_randkey_principal_3
 kadm5_rename_principal

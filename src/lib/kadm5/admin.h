@@ -508,6 +508,11 @@ kadm5_ret_t    kadm5_get_principal_keys(void *server_handle,
                                         krb5_keyblock **keyblocks,
                                         int *n_keys);
 
+
+kadm5_ret_t    kadm5_purgekeys(void *server_handle,
+                               krb5_principal principal,
+                               int keepkvno);
+
 KADM5INT_END_DECLS
 
 #endif /* __KADM5_ADMIN_H__ */

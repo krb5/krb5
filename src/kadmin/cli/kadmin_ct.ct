@@ -74,6 +74,9 @@ request kadmin_lock, "Lock database exclusively (use with extreme caution!)",
 request kadmin_unlock, "Release exclusive database lock",
 	unlock;
 
+request kadmin_purgekeys, "Purge previously retained old keys from a principal",
+	purgekeys;
+
 # list_requests is generic -- unrelated to Kerberos
 request	ss_list_requests, "List available requests.",
 	list_requests, lr, "?";

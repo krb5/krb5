@@ -956,6 +956,22 @@ bool_t xdr_getprivs_ret(XDR *xdrs, getprivs_ret *objp)
 }
 
 bool_t
+xdr_purgekeys_arg(XDR *xdrs, purgekeys_arg *objp)
+{
+	if (!xdr_ui_4(xdrs, &objp->api_version)) {
+		return (FALSE);
+	}
+	if (!xdr_krb5_principal(xdrs, &objp->princ)) {
+		return (FALSE);
+	}
+	if (!xdr_int(xdrs, &objp->keepkvno)) {
+	     return FALSE;
+	}
+
+	return (TRUE);
+}
+
+bool_t
 xdr_krb5_principal(XDR *xdrs, krb5_principal *objp)
 {
     int	    ret;

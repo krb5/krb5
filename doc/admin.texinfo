@@ -2586,10 +2586,10 @@ earlier than krb5-1.2.  See @ref{Supported Encryption Types} and
 @ref{Salts} for possible values.
 
 @item @b{-keepold}
-Keeps the previous kvno's keys around.  There is no easy way to delete
-the old keys, and this flag is usually not necessary except perhaps for
-TGS keys.  Don't use this flag unless you know what you're doing. This 
-option is not supported for the LDAP database
+Keeps the previous kvno's keys around.  This flag is usually not
+necessary except perhaps for TGS keys.  Don't use this flag unless you
+know what you're doing. This option is not supported for the LDAP
+database
 
 
 
@@ -4015,14 +4015,11 @@ well as the new key.  For example:
 @end group
 @end smallexample
 
-There is currently no way to remove the old key without running
-@code{change_password} without the @b{-keepold} flag (and thereby
-invalidating all existing TGTs).  After issuing this command, the old
-key is still valid and is still vulnerable to (for instance) brute force
-attacks.  To completely retire an old key or encryption type, it's
-therefore currently necessary to declare a flag day, run
-@code{change_password} without the @b{-keepold} flag, and force all
-users to acquire new tickets.
+After issuing this command, the old key is still valid and is still
+vulnerable to (for instance) brute force attacks.  To completely
+retire an old key or encryption type, run the @code{purgekeys} command
+to delete keys with older kvnos, ideally first making sure that all
+tickets issued with the old keys have expired.
 
 @node Configuring Kerberos with OpenLDAP back-end, Application Servers, Administrating the Kerberos Database, Top
 @chapter Configuring Kerberos with OpenLDAP back-end

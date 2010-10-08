@@ -562,8 +562,7 @@ enctype\-salttype pairs.  This will not function against kadmin
 daemons earlier than krb5\-1.2.
 .TP
 \fB\-keepold \fP 
-Keeps the previous kvno's keys around.  There is no
-easy way to delete the old keys, and this flag is usually not
+Keeps the previous kvno's keys around.  This flag is usually not
 necessary except perhaps for TGS keys.  Don't use this flag unless you
 know what you're doing. This option is not supported for the LDAP database.
 .nf
@@ -584,6 +583,18 @@ history)
 KADM5_PASS_TOOSOON (current password minimum life not
 expired)
 .RE
+.fi
+.TP
+\fBpurgekeys\fP [\fB-keepkvno\fP \fIoldest_kvno_to_keep\fP] \fIprincipal\fP
+purges previously retained old keys (e.g., from
+.B change_password
+.BR -keepold )
+from
+.IR principal .
+If
+.B -keepkvno
+is specified, then only purges keys with kvnos lower than
+.IR oldest_kvno_to_keep .
 .fi
 .TP
 \fBget_principal\fP [\fB-terse\fP] \fIprincipal\fP
@@ -922,9 +933,3 @@ OpenVision Kerberos administration program.
 .SH BUGS
 .PP
 Command output needs to be cleaned up.
-
-There is no way to delete a key kept around from a "\-keepold" option
-to a password-changing command, other than to do a password change
-without the "\-keepold" option, which will of course cause problems if
-the key is a TGS key.  There will be more powerful key-manipulation
-commands in the future.

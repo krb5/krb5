@@ -326,3 +326,18 @@ init_2(void *argp, CLIENT *clnt)
      }
      return (&clnt_res);
 }
+
+generic_ret *
+purgekeys_2(purgekeys_arg *argp, CLIENT *clnt)
+{
+     static generic_ret clnt_res;
+
+     memset(&clnt_res, 0, sizeof(clnt_res));
+     if (clnt_call(clnt, PURGEKEYS,
+		   (xdrproc_t) xdr_purgekeys_arg, (caddr_t) argp,
+		   (xdrproc_t) xdr_generic_ret, (caddr_t) &clnt_res,
+		   TIMEOUT) != RPC_SUCCESS) {
+	  return (NULL);
+     }
+     return (&clnt_res);
+}
