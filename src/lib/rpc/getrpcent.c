@@ -19,7 +19,7 @@ static  char sccsid[] = "@(#)getrpcent.c 1.9 87/08/11  Copyr 1984 Sun Micro";
  *       the documentation and/or other materials provided with the
  *       distribution.
  *
- *     * Neither the name of the “Oracle America, Inc.” nor the names of
+ *     * Neither the name of the "Oracle America, Inc." nor the names of
  *       its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *

@@ -17,7 +17,7 @@ static  char sccsid[] = "@(#)bindresvport.c	2.2 88/07/29 4.0 RPCSRC 1.8 88/02/08
  *       the documentation and/or other materials provided with the
  *       distribution.
  *
- *     * Neither the name of the “Oracle America, Inc.” nor the names of
+ *     * Neither the name of the "Oracle America, Inc." nor the names of
  *       its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *

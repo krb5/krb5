@@ -18,7 +18,7 @@ static  char sccsid[] = "@(#)getrpcport.c 1.3 87/08/11 SMI";
  *       the documentation and/or other materials provided with the
  *       distribution.
  *
- *     * Neither the name of the “Oracle America, Inc.” nor the names of
+ *     * Neither the name of the "Oracle America, Inc." nor the names of
  *       its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
  *
