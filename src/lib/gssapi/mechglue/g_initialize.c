@@ -195,25 +195,26 @@ gss_OID *oid;
  * a mech oid set, and only update it once the file has changed.
  */
 OM_uint32 KRB5_CALLCONV
-gss_indicate_mechs(minorStatus, mechSet)
+gss_indicate_mechs(minorStatus, mechSet_out)
 OM_uint32 *minorStatus;
-gss_OID_set *mechSet;
+gss_OID_set *mechSet_out;
 {
 	char *fileName;
 	struct stat fileInfo;
 	unsigned int i, j;
 	gss_OID curItem;
+	gss_OID_set mechSet;
 
 	/* Initialize outputs. */
 
 	if (minorStatus != NULL)
 		*minorStatus = 0;
 
-	if (mechSet != NULL)
-		*mechSet = GSS_C_NO_OID_SET;
+	if (mechSet_out != NULL)
+		*mechSet_out = GSS_C_NO_OID_SET;
 
 	/* Validate arguments. */
-	if (minorStatus == NULL || mechSet == NULL)
+	if (minorStatus == NULL || mechSet_out == NULL)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
 	*minorStatus = gssint_mechglue_initialize_library();
@@ -237,7 +238,7 @@ gss_OID_set *mechSet;
 	 * the mech set is created and it is up to date
 	 * so just copy it to caller
 	 */
-	if ((*mechSet =
+	if ((mechSet =
 		(gss_OID_set) malloc(sizeof (gss_OID_set_desc))) == NULL)
 	{
 		return (GSS_S_FAILURE);
@@ -252,25 +253,24 @@ gss_OID_set *mechSet;
 		return GSS_S_FAILURE;
 
 	/* allocate space for the oid structures */
-	if (((*mechSet)->elements =
+	if ((mechSet->elements =
 		(void*) calloc(g_mechSet.count, sizeof (gss_OID_desc)))
 		== NULL)
 	{
 		(void) k5_mutex_unlock(&g_mechSetLock);
-		free(*mechSet);
-		*mechSet = NULL;
+		free(mechSet);
 		return (GSS_S_FAILURE);
 	}
 
 	/* now copy the oid structures */
-	(void) memcpy((*mechSet)->elements, g_mechSet.elements,
+	(void) memcpy(mechSet->elements, g_mechSet.elements,
 		g_mechSet.count * sizeof (gss_OID_desc));
 
-	(*mechSet)->count = g_mechSet.count;
+	mechSet->count = g_mechSet.count;
 
 	/* still need to copy each of the oid elements arrays */
-	for (i = 0; i < (*mechSet)->count; i++) {
-		curItem = &((*mechSet)->elements[i]);
+	for (i = 0; i < mechSet->count; i++) {
+		curItem = &(mechSet->elements[i]);
 		curItem->elements =
 			(void *) malloc(g_mechSet.elements[i].length);
 		if (curItem->elements == NULL) {
@@ -280,16 +280,16 @@ gss_OID_set *mechSet;
 			 * each allocated gss_OID_desc
 			 */
 			for (j = 0; j < i; j++) {
-				free((*mechSet)->elements[j].elements);
+				free(mechSet->elements[j].elements);
 			}
-			free((*mechSet)->elements);
-			free(*mechSet);
-			*mechSet = NULL;
+			free(mechSet->elements);
+			free(mechSet);
 			return (GSS_S_FAILURE);
 		}
 		g_OID_copy(curItem, &g_mechSet.elements[i]);
 	}
 	(void) k5_mutex_unlock(&g_mechSetLock);
+	*mechSet_out = mechSet;
 	return (GSS_S_COMPLETE);
 } /* gss_indicate_mechs */
 
