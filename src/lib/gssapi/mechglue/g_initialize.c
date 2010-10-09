@@ -249,8 +249,10 @@ gss_OID_set *mechSet_out;
 	 * I'm copying it.
 	 */
 	*minorStatus = k5_mutex_lock(&g_mechSetLock);
-	if (*minorStatus)
+	if (*minorStatus) {
+		free(mechSet);
 		return GSS_S_FAILURE;
+	}
 
 	/* allocate space for the oid structures */
 	if ((mechSet->elements =
