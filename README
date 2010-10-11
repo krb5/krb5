@@ -62,3 +62,176 @@ Major changes in 1.9
 
 krb5-1.9 changes by ticket ID
 -----------------------------
+
+Acknowledgements
+----------------
+
+Past and present Sponsors of the MIT Kerberos Consortium:
+
+    Apple
+    Carnegie Mellon University
+    Centrify Corporation
+    Columbia University
+    Cornell University
+    The Department of Defense of the United States of America (DoD)
+    Google
+    Iowa State University
+    MIT
+    Michigan State University
+    Microsoft
+    The National Aeronautics and Space Administration
+        of the United States of America (NASA)
+    Network Appliance (NetApp)
+    Nippon Telephone and Telegraph (NTT)
+    Oracle
+    Pennsylvania State University
+    Red Hat
+    Stanford University
+    TeamF1, Inc.
+    The University of Alaska
+    The University of Michigan
+    The University of Pennsylvania
+
+Past and present members of the Kerberos Team at MIT:
+
+    Danilo Almeida
+    Jeffrey Altman
+    Justin Anderson
+    Richard Basch
+    Mitch Berger
+    Jay Berkenbilt
+    Andrew Boardman
+    Bill Bryant
+    Steve Buckley
+    Joe Calzaretta
+    John Carr
+    Mark Colan
+    Don Davis
+    Alexandra Ellwood
+    Dan Geer
+    Nancy Gilman
+    Matt Hancher
+    Thomas Hardjono
+    Sam Hartman
+    Paul Hill
+    Marc Horowitz
+    Eva Jacobus
+    Miroslav Jurisic
+    Barry Jaspan
+    Geoffrey King
+    Kevin Koch
+    John Kohl
+    HaoQi Li
+    Peter Litwack
+    Scott McGuire
+    Steve Miller
+    Kevin Mitchell
+    Cliff Neuman
+    Paul Park
+    Ezra Peisach
+    Chris Provenzano
+    Ken Raeburn
+    Jon Rochlis
+    Jeff Schiller
+    Jen Selby
+    Robert Silk
+    Bill Sommerfeld
+    Jennifer Steiner
+    Ralph Swick
+    Brad Thompson
+    Harry Tsai
+    Zhanna Tsitkova
+    Ted Ts'o
+    Marshall Vale
+    Tom Yu
+
+The following external contributors have provided code, patches, bug
+reports, suggestions, and valuable resources:
+
+    Brandon Allbery
+    Russell Allbery
+    Brian Almeida
+    Michael B Allen
+    Derek Atkins
+    David Bantz
+    Alex Baule
+    Arlene Berry
+    Jeff Blaine
+    Radoslav Bodo
+    Emmanuel Bouillon
+    Michael Calmer
+    Ravi Channavajhala
+    Srinivas Cheruku
+    Leonardo Chiquitto
+    Howard Chu
+    Andrea Cirulli
+    Christopher D. Clausen
+    Kevin Coffman
+    Simon Cooper
+    Sylvain Cortes
+    Nalin Dahyabhai
+    Roland Dowdeswell
+    Jason Edgecombe
+    Mark Eichin
+    Shawn M. Emery
+    Douglas E. Engert
+    Peter Eriksson
+    Ronni Feldt
+    JC Ferguson
+    William Fiveash
+    Ákos Frohner
+    Marcus Granado
+    Scott Grizzard
+    Steve Grubb
+    Philip Guenther
+    Jakob Haufe
+    Jeff Hodges
+    Love Hörnquist Åstrand
+    Ken Hornstein
+    Henry B. Hotz
+    Luke Howard
+    Jakub Hrozek
+    Shumon Huque
+    Jeffrey Hutzelman
+    Wyllys Ingersoll
+    Holger Isenberg
+    Joel Johnson
+    Mikkel Kruse
+    Volker Lendecke
+    Jan iankko Lieskovsky
+    Ryan Lynch
+    Franklyn Mendez
+    Markus Moeller
+    Paul Moore
+    Zbysek Mraz
+    Edward Murrell
+    Nikos Nikoleris
+    Dmitri Pal
+    Javier Palacios
+    Ezra Peisach
+    W. Michael Petullo
+    Mark Phalan
+    Robert Relyea
+    Martin Rex
+    Jason Rogers
+    Guillaume Rousse
+    Tom Shaw
+    Peter Shoults
+    Simo Sorce
+    Michael Ströder
+    Bjørn Tore Sund
+    Rathor Vipin
+    Jorgen Wahlsten
+    Max (Weijun) Wang
+    John Washington
+    Marcus Watts
+    Simon Wilkinson
+    Nicolas Williams
+    Ross Wilper
+    Xu Qiang
+    Hanz van Zijst
+
+The above is not an exhaustive list; many others have contributed in
+various ways to the MIT Kerberos development effort over the years.
+Other acknowledgments (for bug reports and patches) are in the
+doc/CHANGES file.

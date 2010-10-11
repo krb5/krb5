@@ -581,17 +581,3 @@ have the following copyright and permission notice:
   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-Acknowledgements for krb5-1.9
------------------------------
-
-Thanks to the members of the Kerberos V5 development team at MIT, both
-past and present: Danilo Almeida, Jeffrey Altman, Justin Anderson,
-Richard Basch, Jay Berkenbilt, Mitch Berger, Andrew Boardman, Joe
-Calzaretta, John Carr, Don Davis, Alexandra Ellwood, Nancy Gilman,
-Matt Hancher, Sam Hartman, Paul Hill, Marc Horowitz, Eva Jacobus,
-Miroslav Jurisic, Barry Jaspan, Geoffrey King, Kevin Koch, John Kohl,
-Peter Litwack, Scott McGuire, Kevin Mitchell, Cliff Neuman, Paul Park,
-Ezra Peisach, Chris Provenzano, Ken Raeburn, Jon Rochlis, Jeff
-Schiller, Jen Selby, Robert Silk, Brad Thompson, Harry Tsai, Zhanna
-Tsitkova, Ted Ts'o, Marshall Vale, Tom Yu.
