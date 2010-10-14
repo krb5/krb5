@@ -1,0 +1,10 @@
+\input texinfo
+@settitle Copyright and Other Legal Notices
+@paragraphindent 0
+@exampleindent 2
+@documentencoding UTF-8
+@set noticefile
+@node Top,  , (dir), (dir)
+@comment  node-name,  next,  previous,  up
+@include definitions.texinfo
+@include copyright.texinfo
