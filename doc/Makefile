@@ -151,3 +151,6 @@ tgz::
 	$(TAR) krb5-docs.tar admin.texinfo build.texinfo copyright.texinfo definitions.texinfo document-list.texinfo glossary.texinfo install.texinfo texinfo.tex user-guide.texinfo *-guide.ps *.info *.info-? *.html
 	$(GZIP) krb5-docs.tar
 	$(MV) krb5-docs.tar.gz krb5-docs.tgz
+
+../NOTICE: notice.texinfo definitions.texinfo copyright.texinfo
+	makeinfo --plaintext -o $@ notice.texinfo

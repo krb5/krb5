@@ -8,7 +8,11 @@
 @setchapternewpage odd                  @c chapter begins on next odd page
 @c @setchapternewpage on                   @c chapter begins on next page
 @c @smallbook                              @c Format for 7" X 9.25" paper
+@documentencoding UTF-8
 @c %**end of header
+@copying
+Copyright @copyright{} 1985-2010 by the Massachusetts Institute of Technology.
+@end copying
 
 @paragraphindent 0
 @iftex
@@ -34,16 +38,17 @@
 
 @page
 @vskip 0pt plus 1filll
-
+@insertcopying
 @end titlepage
 
-@node Top, Copyright, (dir), (dir)
+@node Top, Introduction, (dir), (dir)
 @comment  node-name,  next,  previous,  up
 
 @ifinfo
 This file documents how to install the @value{RELEASE} release of
 @value{PRODUCT}.
 
+@insertcopying
 @end ifinfo
 
 @c The master menu is updated using emacs19's M-x texinfo-all-menus-update
@@ -63,20 +68,16 @@ This file documents how to install the @value{RELEASE} release of
 @c ---------------------------------------------------------------------
 
 @menu
-* Copyright::                   
 * Introduction::                
 * Realm Configuration Decisions::  
 * Building Kerberos V5::        
 * Installing Kerberos V5::      
 * Upgrading Existing Kerberos V5 Installations::  
 * Bug Reports for Kerberos V5::  
+* Copyright::                   
 @end menu
 
-@node Copyright, Introduction, Top, Top
-@unnumbered Copyright
-@include copyright.texinfo
-
-@node Introduction, Realm Configuration Decisions, Copyright, Top
+@node Introduction, Realm Configuration Decisions, Top, Top
 @chapter Introduction
 
 @menu
@@ -1411,10 +1412,14 @@ lot of your application servers, and then change the default to include
 triple-DES and RC4.  We recommend that you always include
 @code{des-cbc-crc} in the default list.
 
-@node Bug Reports for Kerberos V5,  , Upgrading Existing Kerberos V5 Installations, Top
+@node Bug Reports for Kerberos V5, Copyright, Upgrading Existing Kerberos V5 Installations, Top
 @chapter Bug Reports for @value{PRODUCT}
 
 @include send-pr.texinfo
+
+@node Copyright,  , Bug Reports for Kerberos V5, Top
+@appendix Copyright
+@include copyright.texinfo
 
 @contents
 @bye

@@ -19,8 +19,8 @@
 @set RANDOMUSER johndoe
 @set RANDOMUSER1 jennifer
 @set RANDOMUSER2 david
-@set RELEASE 1.6
-@set PREVRELEASE 1.5
+@set RELEASE 1.9
+@set PREVRELEASE 1.8
 @set INSTALLDIR /usr/@value{LCPRODUCT}
 @set PREVINSTALLDIR @value{INSTALLDIR}
 @set ROOTDIR /usr/local
@@ -172,3 +172,21 @@ the following are based on variables in krb5/src/include/kerberosIV/krbports.h
 
 @comment lib/krb5/krb/vfy_increds.c
 @set DefaultVerifyApReqNofail not set
+
+@c copyright divider
+@macro cdivider
+@iftex
+@vskip 12pt
+@hrule
+@vskip 12pt
+@end iftex
+@ifinfo
+@center --------------------
+@sp 1
+@end ifinfo
+@ifhtml
+@html
+<hr>
+@end html
+@end ifhtml
+@end macro

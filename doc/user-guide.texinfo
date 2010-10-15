@@ -6,7 +6,11 @@
 @setchapternewpage odd                  @c chapter begins on next odd page
 @c @setchapternewpage on                   @c chapter begins on next page
 @c @smallbook                              @c Format for 7" X 9.25" paper
+@documentencoding UTF-8
 @c %**end of header
+@copying
+Copyright @copyright{} 1985-2010 by the Massachusetts Institute of Technology.
+@end copying
 
 @paragraphindent 0
 @iftex
@@ -32,14 +36,16 @@
 
 @page
 @vskip 0pt plus 1filll
-
+@insertcopying
 @end titlepage
 
 @comment  node-name,  next,  previous,  up
-@node Top, Copyright, (dir), (dir)
+@node Top, Introduction, (dir), (dir)
 
 @ifinfo
 This file describes how to use the @value{PRODUCT} client programs.
+
+@insertcopying
 @end ifinfo
 
 @c The master menu is updated using emacs19's M-x texinfo-all-menus-update
@@ -56,19 +62,14 @@ This file describes how to use the @value{PRODUCT} client programs.
 @c ---------------------------------------------------------------------
 
 @menu
-* Copyright::                   
 * Introduction::                
 * Kerberos V5 Tutorial::        
 * Kerberos V5 Reference::       
 * Kerberos Glossary::           
+* Copyright::                   
 @end menu
 
-@node Copyright, Introduction, Top, Top
-@unnumbered Copyright
-
-@include copyright.texinfo
-
-@node Introduction, Kerberos V5 Tutorial, Copyright, Top
+@node Introduction, Kerberos V5 Tutorial, Top, Top
 @chapter Introduction
 
 @ifset CYGNUS
@@ -1671,7 +1672,7 @@ Type @kbd{M-x manual-entry rsh} to read this manual page.
 @end html
 @end ifhtml
 
-@node rcp Reference, , rsh Reference, Kerberos V5 Reference
+@node rcp Reference,  , rsh Reference, Kerberos V5 Reference
 @section rcp Reference
 
 @iftex
@@ -1696,10 +1697,15 @@ Type @kbd{M-x manual-entry rcp} to read this manual page.
 @end html
 @end ifhtml
 
-@node Kerberos Glossary,  , Kerberos V5 Reference, Top
+@node Kerberos Glossary, Copyright, Kerberos V5 Reference, Top
 @appendix Kerberos Glossary
 
 @include glossary.texinfo
+
+@node Copyright,  , Kerberos Glossary, Top
+@appendix Copyright
+
+@include copyright.texinfo
 
 @contents
 @bye

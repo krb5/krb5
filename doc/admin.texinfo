@@ -8,7 +8,12 @@
 @setchapternewpage odd                  @c chapter begins on next odd page
 @c @setchapternewpage on                   @c chapter begins on next page
 @c @smallbook                              @c Format for 7" X 9.25" paper
+@documentencoding UTF-8
 @c %**end of header
+@copying
+Copyright @copyright{} 1985-2010 by the Massachusetts Institute of Technology.
+@end copying
+
 @paragraphindent 0
 @iftex
 @parskip 6pt plus 6pt
@@ -34,15 +39,17 @@
 
 @page
 @vskip 0pt plus 1filll
-
+@insertcopying
 @end titlepage
 
 @comment  node-name,  next,  previous,  up
-@node Top, Copyright, (dir), (dir)
+@node Top, Introduction, (dir), (dir)
 
 @ifinfo
 This document describes how to administrate a @value{PRODUCT}
 installation.
+
+@insertcopying
 @end ifinfo
 
 @c The master menu is updated using emacs19's M-x texinfo-all-menus-update
@@ -61,7 +68,6 @@ installation.
 @c ---------------------------------------------------------------------
 
 @menu
-* Copyright::                   
 * Introduction::                
 * How Kerberos Works::          
 * Configuration Files::         
@@ -72,14 +78,10 @@ installation.
 * Backups of Secure Hosts::     
 * Bug Reporting::               
 * Appendix::                    
+* Copyright::                   
 @end menu
 
-@node Copyright, Introduction, Top, Top
-@unnumbered Copyright
-@include copyright.texinfo
-
-
-@node Introduction, How Kerberos Works, Copyright, Top
+@node Introduction, How Kerberos Works, Top, Top
 @chapter Introduction
 
 @menu
@@ -410,8 +412,8 @@ salt.  The supported values for salts are as follows.
 * capaths::                     
 * dbdefaults::                  
 * dbmodules::                   
-* plugins::
-* pkinit client options::
+* plugins::                     
+* pkinit client options::       
 * Sample krb5.conf File::       
 @end menu
 
@@ -1108,8 +1110,8 @@ This LDAP specific tags indicates the number of connections to be maintained per
 @subsection Plugins
 
 @menu
-* pwqual interface::             
-* kadm5_hook interface::
+* pwqual interface::            
+* kadm5_hook interface::        
 @end menu
 
 Tags in the [plugins] section can be used to register dynamic plugin
@@ -1177,8 +1179,8 @@ in for this interface.
 @subsection pkinit options
 
 @menu
-* pkinit identity syntax::
-* pkinit krb5.conf options::
+* pkinit identity syntax::      
+* pkinit krb5.conf options::    
 @end menu
 
 The following are @b{pkinit-specific} options.
@@ -1531,7 +1533,7 @@ Here is an example of a generic @code{krb5.conf} file:
 @menu
 * kdcdefaults::                 
 * realms (kdc.conf)::           
-* pkinit kdc options::
+* pkinit kdc options::          
 * Sample kdc.conf File::        
 @end menu
 
@@ -1746,7 +1748,7 @@ This option defaults to @code{true}.
 @subsection pkinit options
 
 @menu
-* pkinit kdc.conf options::
+* pkinit kdc.conf options::     
 @end menu
 
 The following are @b{pkinit-specific} options.
@@ -2633,7 +2635,7 @@ passwords kept in the database.
 * Retrieving the List of Policies::  
 * Adding or Modifying Policies::  
 * Deleting Policies::           
-* Updating the History Key::
+* Updating the History Key::    
 @end menu
 
 @node Retrieving Policies, Retrieving the List of Policies, Policies, Policies
@@ -2781,6 +2783,7 @@ it.  The @code{delete_policy} command will fail if it is in use by any
 principals.
 
 @node Updating the History Key,  , Deleting Policies, Policies
+@subsection Updating the History Key
 
 If a policy specifies a number of old keys kept of two or more, the
 stored old keys are encrypted in a history key, which is found in the
@@ -4568,7 +4571,7 @@ Database from a Dump File}.)
 
 @include send-pr.texinfo
 
-@node Appendix,  , Bug Reporting, Top
+@node Appendix, Copyright, Bug Reporting, Top
 @appendix Appendix
 
 @menu
@@ -5537,6 +5540,10 @@ New Zealand Daylight Time.  (13 hours ahead of GMT.)
 @itemx idle
 International Date Line East.  (12 hours ahead of GMT.)
 @end table
+
+@node Copyright,  , Appendix, Top
+@appendix Copyright
+@include copyright.texinfo
 
 @contents
 @bye
