@@ -472,7 +472,7 @@ has_mandatory_for_kdc_authdata (krb5_context context,
 
     if (authdata != NULL) {
         for (i = 0; authdata[i] != NULL; i++) {
-            if (authdata[0]->ad_type == KRB5_AUTHDATA_MANDATORY_FOR_KDC) {
+            if (authdata[i]->ad_type == KRB5_AUTHDATA_MANDATORY_FOR_KDC) {
                 ret = TRUE;
                 break;
             }
