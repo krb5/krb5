@@ -1,11 +1,4 @@
 K5_AC_INIT([aclocal.m4])
-#
-# autoconf 2.49 defaults to a /dev/null cache file, which is what we
-# do not want for performance reasons. 
-if test "x$cache_file" = "x/dev/null"; then
-  cache_file=./config.cache
-  AC_CACHE_LOAD
-fi
 
 CONFIG_RULES
 KRB5_VERSION=K5_VERSION
