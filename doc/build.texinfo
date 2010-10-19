@@ -561,12 +561,10 @@ locate the KDCs, and @ref{Mapping Hostnames onto Kerberos Realms} for
 information about using DNS to determine the default realm.  By default,
 DNS lookups are enabled for the former but not for the latter.
 
-@item --enable-kdc-replay-cache
+@item --disable-kdc-lookaside-cache
 
-Enable a cache in the KDC to detect retransmitted messages, and resend
-the previous responses to them.  This protects against certain types of
-attempts to extract information from the KDC through some of the
-hardware preauthentication systems.
+Disables the cache in the KDC which detects retransmitted client
+requests and resends the previous responses to them.
 
 @item --with-system-et
 

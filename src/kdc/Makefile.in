@@ -1,11 +1,6 @@
 mydir=kdc
 BUILDTOP=$(REL)..
-# -DUSE_RCACHE - enable replay cache for KDC
-# -DNOCACHE    - disable lookaside cache, which is used to resend previous
-#                response to replay (i.e., *don't* define this if you
-#                define USE_RCACHE)
-# These are now set in configure.in.
-DEFINES = # -DNOCACHE
+DEFINES =
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD) $(KRB4_LIBPATH)
 KDB5_LIB_DEPS=$(DL_LIB) $(THREAD_LINKOPTS)

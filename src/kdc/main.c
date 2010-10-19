@@ -651,7 +651,6 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
     char                *db_name = (char *) NULL;
     char                *lrealm = (char *) NULL;
     char                *mkey_name = (char *) NULL;
-    char                *rcname = KDCRCACHE;
     krb5_error_code     retval;
     krb5_enctype        menctype = ENCTYPE_UNKNOWN;
     kdc_realm_t         *rdatap = NULL;
@@ -805,7 +804,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
                 com_err(argv[0], 0, "invalid enctype %s", optarg);
             break;
         case 'R':
-            rcname = optarg;
+            /* Replay cache name; defunct since we don't use a replay cache. */
             break;
         case 'P':
             pid_file = optarg;
@@ -859,17 +858,6 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
             kdc_numrealms++;
         }
     }
-
-#ifdef USE_RCACHE
-    /*
-     * Now handle the replay cache.
-     */
-    if ((retval = kdc_initialize_rcache(kcontext, rcname))) {
-        com_err(argv[0], retval, "while initializing KDC replay cache '%s'",
-                rcname);
-        exit(1);
-    }
-#endif
 
     /* Ensure that this is set for our first request. */
     kdc_active_realm = kdc_realmlist[0];
@@ -1080,9 +1068,6 @@ int main(int argc, char **argv)
     finish_realms();
     if (kdc_realmlist)
         free(kdc_realmlist);
-#ifdef USE_RCACHE
-    (void) krb5_rc_close(kcontext, kdc_rcache);
-#endif
 #ifndef NOCACHE
     kdc_free_lookaside(kcontext);
 #endif
