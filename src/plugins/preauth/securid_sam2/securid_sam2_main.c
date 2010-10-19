@@ -65,7 +65,7 @@ sam_get_db_entry(krb5_context context, krb5_principal client,
        *db_entry = NULL;
     retval = krb5_copy_principal(context, client, &newp);
     if (retval) {
-        krb5_set_error_message(context, retval,
+        com_err("krb5kdc", retval,
                                "copying client name for preauth probe");
         return retval;
     }
@@ -146,7 +146,7 @@ kdc_include_padata(krb5_context context, krb5_kdc_req *request,
     client_key = (krb5_keyblock *) client_keys_data->data;
     if (client_key->enctype == 0) {
         retval = KRB5KDC_ERR_ETYPE_NOSUPP;
-        krb5_set_error_message(context, retval, "No client keys found in processing SAM2 challenge");
+        com_err("krb5kdc", retval, "No client keys found in processing SAM2 challenge");
         goto cleanup;
     }
 
@@ -170,7 +170,7 @@ kdc_include_padata(krb5_context context, krb5_kdc_req *request,
 
         retval = encode_krb5_sam_challenge_2(&sc2, &encoded_challenge);
         if (retval) {
-            krb5_set_error_message(context, retval,
+            com_err("krb5kdc", retval,
                                    "while encoding SECURID SAM_CHALLENGE_2");
             goto cleanup;
         }
@@ -226,7 +226,7 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
 
     retval = decode_krb5_sam_response_2(&scratch, &sr2);
     if (retval) {
-        krb5_set_error_message(context,  retval, "while decoding "
+        com_err("krb5kdc",  retval, "while decoding "
                                "SAM_RESPONSE_2 in verify_sam_response_2");
         sr2 = NULL;
         goto cleanup;
@@ -243,7 +243,7 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
 #endif  /* ARL_SECURID_PREAUTH */
     default:
         retval = KRB5_PREAUTH_BAD_TYPE;
-        krb5_set_error_message(context, retval, "while verifying SAM 2 data");
+        com_err("krb5kdc", retval, "while verifying SAM 2 data");
         break;
     }
 
