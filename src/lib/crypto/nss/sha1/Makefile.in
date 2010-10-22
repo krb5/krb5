@@ -1,7 +1,8 @@
 mydir=lib/crypto/nss/sha1
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 DEFS=
-LOCALINCLUDES = -I$(srcdir)/.. @CRYPTO_IMPL_CFLAGS@
+CRYPTO_IMPL_CFLAGS=@CRYPTO_IMPL_CFLAGS@
+LOCALINCLUDES = -I$(srcdir)/.. $(CRYPTO_IMPL_CFLAGS)
 
 ##DOS##BUILDTOP = ..\..\..\..
 ##DOS##PREFIXDIR=sha1
