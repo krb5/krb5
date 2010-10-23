@@ -273,8 +273,8 @@ main (int argc, char *argv[])
      * performance issue you're chasing down, different values may be
      * of particular interest, so report all the info we've got.
      */
-    printf ("Overall run time with %d threads = %Lfs, %Lfms per iteration.\n",
-            n_threads, wallclock, 1000 * wallclock / iter_count);
+    printf ("Overall run time with %d threads = %Lfs, %.2Lfus per iteration.\n",
+            n_threads, wallclock, 1000000 * wallclock / iter_count);
     user = tvsub (finish.ru_utime, start.ru_utime);
     sys = tvsub (finish.ru_stime, start.ru_stime);
     total = user + sys;
@@ -287,7 +287,7 @@ main (int argc, char *argv[])
             100 * user / wallclock / n_threads,
             100 * sys / wallclock / n_threads,
             100 * total / wallclock / n_threads);
-    printf ("Total CPU use per iteration per thread: %Lfms\n",
-            1000 * total / n_threads / iter_count);
+    printf ("Total CPU use per iteration per thread: %.2Lfus\n",
+            1000000 * total / n_threads / iter_count);
     return 0;
 }
