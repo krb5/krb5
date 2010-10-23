@@ -993,7 +993,7 @@ unsigned int backoff_from_master(int *cnt) {
     btime = (unsigned int)(2<<(*cnt));
     if (btime > MAX_BACKOFF) {
         btime = MAX_BACKOFF;
-        *cnt--;
+        (*cnt)--;
     }
 
     return (btime);
