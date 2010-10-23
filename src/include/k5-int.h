@@ -3022,6 +3022,13 @@ krb5_error_code krb5int_parse_enctype_list(krb5_context context, char *profstr,
 #define krb5_set_error_message(ctx, code, ...)                          \
     krb5_set_error_message_fl(ctx, code, __FILE__, __LINE__, __VA_ARGS__)
 #endif
+void KRB5_CALLCONV_C
+krb5_set_error_message_fl (krb5_context ctx, krb5_error_code code,
+                           const char *file, int line, const char *fmt, ...)
+#ifdef __GNUC__
+    __attribute__((__format__(printf,5,6)))
+#endif
+    ;
 
 #ifndef DISABLE_TRACING
 /* Do not use these functions directly; see k5-trace.h. */
