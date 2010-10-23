@@ -55,6 +55,7 @@ bool_t	    xdr_gpol_ret(XDR *xdrs, gpol_ret *objp);
 bool_t      xdr_gpols_arg(XDR *xdrs, gpols_arg *objp);
 bool_t      xdr_gpols_ret(XDR *xdrs, gpols_ret *objp);
 bool_t      xdr_getprivs_ret(XDR *xdrs, getprivs_ret *objp);
+bool_t      xdr_purgekeys_arg(XDR *xdrs, purgekeys_arg *objp);
 bool_t	    xdr_krb5_principal(XDR *xdrs, krb5_principal *objp);
 bool_t	    xdr_krb5_octet(XDR *xdrs, krb5_octet *objp);
 bool_t	    xdr_krb5_int32(XDR *xdrs, krb5_int32 *objp);
