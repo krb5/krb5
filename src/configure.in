@@ -116,8 +116,6 @@ AC_HELP_STRING([--with-crypto-impl=IMPL], [use specified crypto implementation @
 [CRYPTO_IMPL=$withval
 AC_MSG_RESULT("k5crypto will use \'$withval\'")
 ], withval=builtin)
-CRYPTO_IMPL_LIBS=
-CRYPTO_IMPL_CFLAGS=
 case "$withval" in
 builtin)
   ;;
@@ -125,9 +123,24 @@ openssl)
   AC_CHECK_LIB(crypto, PKCS7_get_signer_info)
   ;;
 nss)
-  CRYPTO_IMPL_CFLAGS=`pkg-config --cflags nss`
-  CRYPTO_IMPL_LIBS="-lnss3 $(pkg-config --libs nss-util)"
+  if test "${CRYPTO_IMPL_CFLAGS+set}" != set; then
+    CRYPTO_IMPL_CFLAGS=`pkg-config --cflags nss`
+  fi
+  if test "${CRYPTO_IMPL_LIBS+set}" != set; then
+    CRYPTO_IMPL_LIBS="-lnss3 $(pkg-config --libs nss-util)"
+  fi
   AC_DEFINE(CRYPTO_IMPL_NSS,1,[Define if crypto implementation is NSS])
+  save_CFLAGS=$CFLAGS
+  CFLAGS="$CFLAGS $CRYPTO_IMPL_CFLAGS"
+  AC_COMPILE_IFELSE([
+#include <nss.h>
+#if NSS_VMAJOR < 3 || (NSS_VMAJOR == 3 && NSS_VMINOR < 12)
+#error
+#elif NSS_VMAJOR == 3 && NSS_VMINOR == 12 && NSS_VPATCH < 9
+#error
+#endif
+  ], [], [AC_MSG_ERROR([NSS version 3.12.9 or later required.])])
+  CFLAGS=$save_CFLAGS
   ;;
 *)
   AC_MSG_ERROR([Unknown crypto implementation $withval])
