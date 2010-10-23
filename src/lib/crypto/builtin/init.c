@@ -28,6 +28,8 @@
  * Built-in back-end library init functions
  */
 
+#include "k5-int.h"
+
 int
 krb5int_crypto_impl_init(void)
 {
