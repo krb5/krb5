@@ -70,4 +70,4 @@
 
 #define BRANDSTR RELTAG " " RELNAME " " RELDATE
 
-static char krb5_brand[] = "KRB5_BRAND: " BRANDSTR;
+char krb5_brand[] = "KRB5_BRAND: " BRANDSTR;
