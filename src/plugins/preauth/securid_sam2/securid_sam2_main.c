@@ -65,8 +65,7 @@ sam_get_db_entry(krb5_context context, krb5_principal client,
        *db_entry = NULL;
     retval = krb5_copy_principal(context, client, &newp);
     if (retval) {
-        com_err("krb5kdc", retval,
-                               "copying client name for preauth probe");
+        com_err("krb5kdc", retval, "copying client name for preauth probe");
         return retval;
     }
 
@@ -146,7 +145,8 @@ kdc_include_padata(krb5_context context, krb5_kdc_req *request,
     client_key = (krb5_keyblock *) client_keys_data->data;
     if (client_key->enctype == 0) {
         retval = KRB5KDC_ERR_ETYPE_NOSUPP;
-        com_err("krb5kdc", retval, "No client keys found in processing SAM2 challenge");
+        com_err("krb5kdc", retval,
+                "No client keys found in processing SAM2 challenge");
         goto cleanup;
     }
 
@@ -171,7 +171,7 @@ kdc_include_padata(krb5_context context, krb5_kdc_req *request,
         retval = encode_krb5_sam_challenge_2(&sc2, &encoded_challenge);
         if (retval) {
             com_err("krb5kdc", retval,
-                                   "while encoding SECURID SAM_CHALLENGE_2");
+                    "while encoding SECURID SAM_CHALLENGE_2");
             goto cleanup;
         }
 
@@ -226,8 +226,8 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
 
     retval = decode_krb5_sam_response_2(&scratch, &sr2);
     if (retval) {
-        com_err("krb5kdc",  retval, "while decoding "
-                               "SAM_RESPONSE_2 in verify_sam_response_2");
+        com_err("krb5kdc",  retval,
+                "while decoding SAM_RESPONSE_2 in verify_sam_response_2");
         sr2 = NULL;
         goto cleanup;
     }
@@ -256,9 +256,11 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
    * get enough preauth data from the client.  Do not set TGT flags here.
    */
 cleanup:
-    /*Note that e_data is an output even in error conditions. If we
-      successfully encode the output e_data, we return whatever error
-      is received above. Otherwise we return the encoding error.*/
+    /*
+     * Note that e_data is an output even in error conditions.  If we
+     * successfully encode the output e_data, we return whatever error is
+     * received above.  Otherwise we return the encoding error.
+     */
     saved_retval = retval;
     if (out_sc2) {
         krb5_pa_data pa_out;

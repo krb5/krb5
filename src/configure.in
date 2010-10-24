@@ -1095,10 +1095,10 @@ AC_SUBST(LDAP)
 sam2_plugin=""
 old_CFLAGS=$CFLAGS
 CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
-AC_CHECK_LIB(aceclnt, sd_init,[
-		      AC_MSG_NOTICE([Enabling RSA securID support])
-		      sam2_plugin=plugins/preauth/securid_sam2
-		      ])
+AC_CHECK_LIB(aceclnt, sd_init, [
+	     AC_MSG_NOTICE([Enabling RSA securID support])
+	     sam2_plugin=plugins/preauth/securid_sam2
+	     ])
 AC_SUBST(sam2_plugin)
 CFLAGS=$old_CFLAGS
 
