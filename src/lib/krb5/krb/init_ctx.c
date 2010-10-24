@@ -103,7 +103,8 @@ krb5_init_secure_context(krb5_context *context)
      * get rid of this silliness.
      */
     int my_false = (krb5_brand[0] == 0);
-    return init_common (context, TRUE, my_false);
+
+    return init_common(context, TRUE, my_false);
 }
 
 krb5_error_code
