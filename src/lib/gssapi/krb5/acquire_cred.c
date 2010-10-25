@@ -190,8 +190,7 @@ acquire_accept_cred(krb5_context context,
         krb5_kt_free_entry(context, &entry);
 
         assert(cred->name == NULL);
-        code = kg_init_name(context, desired_princ, NULL,
-                            KG_INIT_NAME_INTERN, &cred->name);
+        code = kg_init_name(context, desired_princ, NULL, 0, &cred->name);
         if (code) {
             *minor_status = code;
             return GSS_S_FAILURE;
@@ -384,8 +383,7 @@ acquire_init_cred(krb5_context context,
      */
     if (cred->name == NULL) {
         if ((code = kg_init_name(context, ccache_princ, NULL,
-                                 KG_INIT_NAME_NO_COPY | KG_INIT_NAME_INTERN,
-                                 &cred->name))) {
+                                 KG_INIT_NAME_NO_COPY, &cred->name))) {
             krb5_free_principal(context, ccache_princ);
             krb5_cc_close(context, ccache);
             *minor_status = code;
