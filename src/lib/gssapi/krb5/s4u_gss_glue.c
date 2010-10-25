@@ -228,6 +228,7 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
     code = krb5_cc_new_unique(context, "MEMORY", NULL, &cred->ccache);
     if (code != 0)
         goto cleanup;
+    cred->destroy_ccache = 1;
 
     code = krb5_cc_initialize(context, cred->ccache,
                               cred->proxy_cred ? impersonator_cred->name->princ :
