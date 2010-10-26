@@ -878,7 +878,7 @@ class K5Realm(object):
         if keytab is None:
             keytab = self.keytab
         output = self.run_as_client([klist, '-k', keytab])
-        if (('Keytab name: WRFILE:%s\n' % keytab) not in output or
+        if (('Keytab name: FILE:%s\n' % keytab) not in output or
             'KVNO Principal\n----' not in output or
             princ not in output):
             fail('Unexpected klist output.')

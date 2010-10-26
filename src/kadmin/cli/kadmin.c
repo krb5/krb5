@@ -536,15 +536,6 @@ kadmin_startup(int argc, char *argv[])
         exit(1);
     }
 
-    /* register the WRFILE keytab type and set it as the default */
-    {
-#define DEFAULT_KEYTAB "WRFILE:/etc/krb5.keytab"
-        /* XXX krb5_defkeyname is an internal library global and
-           should go away */
-        extern char *krb5_defkeyname;
-        krb5_defkeyname = DEFAULT_KEYTAB;
-    }
-
     retval = kadm5_init_iprop(handle, 0);
     if (retval) {
         com_err(whoami, retval, _("while mapping update log"));

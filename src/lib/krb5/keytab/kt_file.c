@@ -98,9 +98,6 @@ static krb5_error_code KRB5_CALLCONV
 krb5_ktfile_resolve(krb5_context, const char *, krb5_keytab *);
 
 static krb5_error_code KRB5_CALLCONV
-krb5_ktfile_wresolve(krb5_context, const char *, krb5_keytab *);
-
-static krb5_error_code KRB5_CALLCONV
 krb5_ktfile_get_name(krb5_context, krb5_keytab, char *, unsigned int);
 
 static krb5_error_code KRB5_CALLCONV
@@ -163,20 +160,20 @@ krb5_ktfileint_find_slot(krb5_context, krb5_keytab, krb5_int32 *,
  */
 
 static krb5_error_code
-ktfile_common_resolve(krb5_context context, const char *name,
-                      krb5_keytab *idptr, const struct _krb5_kt_ops *ops)
+krb5_ktfile_resolve(krb5_context context, const char *name,
+                    krb5_keytab *id_out)
 {
     krb5_ktfile_data *data = NULL;
     krb5_error_code err = ENOMEM;
     krb5_keytab id;
 
-    *idptr = NULL;
+    *id_out = NULL;
 
     id = calloc(1, sizeof(*id));
     if (id == NULL)
         return ENOMEM;
 
-    id->ops = ops;
+    id->ops = &krb5_ktf_ops;
     data = calloc(1, sizeof(krb5_ktfile_data));
     if (data == NULL)
         goto cleanup;
@@ -195,7 +192,7 @@ ktfile_common_resolve(krb5_context context, const char *name,
 
     id->data = (krb5_pointer) data;
     id->magic = KV5M_KEYTAB;
-    *idptr = id;
+    *id_out = id;
     return 0;
 cleanup:
     if (data)
@@ -203,12 +200,6 @@ cleanup:
     free(data);
     free(id);
     return err;
-}
-
-static krb5_error_code KRB5_CALLCONV
-krb5_ktfile_resolve(krb5_context context, const char *name, krb5_keytab *id)
-{
-    return ktfile_common_resolve(context, name, id, &krb5_ktf_writable_ops);
 }
 
 
@@ -737,8 +728,7 @@ krb5_ktf_keytab_internalize(krb5_context kcontext, krb5_pointer *argp, krb5_octe
     if (kret)
         goto cleanup;
 
-    if (keytab->ops != &krb5_ktf_writable_ops
-        && keytab->ops != &krb5_ktf_ops) {
+    if (keytab->ops != &krb5_ktf_ops) {
         kret = EINVAL;
         goto cleanup;
     }
@@ -788,17 +778,6 @@ cleanup:
         krb5_kt_close(kcontext, keytab);
     free(ktname);
     return kret;
-}
-
-/*
- * This is an implementation specific resolver.  It returns a keytab id
- * initialized with file keytab routines.
- */
-
-static krb5_error_code KRB5_CALLCONV
-krb5_ktfile_wresolve(krb5_context context, const char *name, krb5_keytab *id)
-{
-    return ktfile_common_resolve(context, name, id, &krb5_ktf_writable_ops);
 }
 
 
@@ -916,19 +895,21 @@ const struct _krb5_kt_ops krb5_ktf_ops = {
     krb5_ktfile_start_seq_get,
     krb5_ktfile_get_next,
     krb5_ktfile_end_get,
-    0,
-    0,
+    krb5_ktfile_add,
+    krb5_ktfile_remove,
     &krb5_ktfile_ser_entry
 };
 
 /*
- * krb5_ktf_writable_ops
+ * krb5_ktf_writable_ops -- this is the same as krb5_ktf_ops except for the
+ * prefix.  WRFILE should no longer be needed, but is effectively aliased to
+ * FILE for compatibility.
  */
 
 const struct _krb5_kt_ops krb5_ktf_writable_ops = {
     0,
     "WRFILE",   /* Prefix -- this string should not appear anywhere else! */
-    krb5_ktfile_wresolve,
+    krb5_ktfile_resolve,
     krb5_ktfile_get_name,
     krb5_ktfile_close,
     krb5_ktfile_get_entry,
