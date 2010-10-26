@@ -298,10 +298,12 @@ kg_unseal_v1(context, minor_status, ctx, ptr, bodysize, message_buffer,
             return(GSS_S_FAILURE);
         }
 
-        if ((code = kg_encrypt(context, ctx->seq, KG_USAGE_SEAL,
-                               (g_OID_equal(ctx->mech_used, gss_mech_krb5_old) ?
-                                ctx->seq->keyblock.contents : NULL),
-                               md5cksum.contents, md5cksum.contents, 16))) {
+        code = kg_encrypt_inplace(context, ctx->seq, KG_USAGE_SEAL,
+                                  (g_OID_equal(ctx->mech_used,
+                                               gss_mech_krb5_old) ?
+                                   ctx->seq->keyblock.contents : NULL),
+                                  md5cksum.contents, 16);
+        if (code) {
             krb5_free_checksum_contents(context, &md5cksum);
             if (toktype == KG_TOK_SEAL_MSG)
                 xfree(token.value);

@@ -211,10 +211,11 @@ make_seal_token_v1 (krb5_context context,
     case SGN_ALG_DES_MAC_MD5:
     case 3:
 
-        if ((code = kg_encrypt(context, seq, KG_USAGE_SEAL,
-                               (g_OID_equal(oid, gss_mech_krb5_old) ?
-                                seq->keyblock.contents : NULL),
-                               md5cksum.contents, md5cksum.contents, 16))) {
+        code = kg_encrypt_inplace(context, seq, KG_USAGE_SEAL,
+                                  (g_OID_equal(oid, gss_mech_krb5_old) ?
+                                   seq->keyblock.contents : NULL),
+                                  md5cksum.contents, 16);
+        if (code) {
             krb5_free_checksum_contents(context, &md5cksum);
             xfree (plain);
             xfree(t);

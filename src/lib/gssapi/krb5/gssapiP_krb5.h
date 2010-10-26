@@ -305,6 +305,12 @@ krb5_error_code kg_encrypt (krb5_context context,
                             krb5_pointer out,
                             unsigned int length);
 
+/* Encrypt length bytes at ptr in place, with the given key and usage.  If
+ * iv is not NULL, use it as the cipher state. */
+krb5_error_code kg_encrypt_inplace(krb5_context context, krb5_key key,
+                                   int usage, krb5_pointer iv,
+                                   krb5_pointer ptr, unsigned int length);
+
 krb5_error_code kg_encrypt_iov (krb5_context context,
                                 int proto, int dce_style,
                                 size_t ec, size_t rrc,
