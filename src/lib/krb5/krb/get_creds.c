@@ -432,11 +432,9 @@ complete(krb5_context context, krb5_tkt_creds_context ctx)
     ctx->reply_creds->authdata = ctx->authdata;
     ctx->authdata = NULL;
 
-    /* Cache the credential if desired. */
     if (!(ctx->req_options & KRB5_GC_NO_STORE)) {
-        code = krb5_cc_store_cred(context, ctx->ccache, ctx->reply_creds);
-        if (code != 0)
-            return code;
+        /* Try to cache the credential. */
+        (void) krb5_cc_store_cred(context, ctx->ccache, ctx->reply_creds);
     }
 
     /* If we were doing constrained delegation, make sure we got a forwardable
@@ -572,9 +570,7 @@ step_referrals(krb5_context context, krb5_tkt_creds_context ctx)
                                   &ctx->reply_creds->authdata);
         if (code != 0)
             return code;
-        code = krb5_cc_store_cred(context, ctx->ccache, ctx->reply_creds);
-        if (code != 0)
-            return code;
+        (void) krb5_cc_store_cred(context, ctx->ccache, ctx->reply_creds);
 
         /* The authdata in this TGT will be copied into subsequent TGTs or the
          * final credentials, so we don't need to request it again. */
@@ -909,9 +905,7 @@ step_get_tgt(krb5_context context, krb5_tkt_creds_context ctx)
         path_realm = find_realm_in_path(context, ctx, tgt_realm);
         if (path_realm != NULL) {
             /* We got a realm on the expected path, so we can cache it. */
-            code = krb5_cc_store_cred(context, ctx->ccache, ctx->cur_tgt);
-            if (code != 0)
-                return code;
+            (void) krb5_cc_store_cred(context, ctx->ccache, ctx->cur_tgt);
             if (path_realm == ctx->last_realm) {
                 /* We received a TGT for the target realm. */
                 TRACE_TKT_CREDS_TARGET_TGT(context, ctx->cur_tgt->server);
