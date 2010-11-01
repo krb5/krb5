@@ -60,8 +60,88 @@ beginning with krb5-1.8.
 Major changes in 1.9
 --------------------
 
+Code quality:
+
+* Python-based testing framework
+* DAL cleanup
+
+Developer experience:
+
+* NSS crypto back end
+
+Performance:
+
+* Account lockout performance improvements
+
+Administrator experience:
+
+* Trace logging
+* Plugin interface for password sync
+* Plugin interface for password quality checks
+* Configuration file validator
+* KDC support for SecurID preauthentication
+
+Protocol evolution:
+
+* IAKERB
+* Camellia encryption (experimental; disabled by default)
+
 krb5-1.9 changes by ticket ID
 -----------------------------
+
+2032    No advanced warning of password expiry
+5014    kadmin (and other utilities) should report enctypes as it takes them
+6647    Memory leak in kdc
+6672    Python test framework
+6679    Lazy history key creation
+6684    Simple kinit verbosity patch
+6686    IPv6 support for kprop and kpropd
+6688    mit-krb5-1.7 fails to compile against openssl-1.0.0
+6691    krb524 source code is missing from krb5-1.8 tarball
+6699    Validate and renew should work on non-TGT creds
+6700    Introduce new krb5_tkt_creds API
+6712    Add IAKERB mechanism and gss_acquire_cred_with_password
+6714    [patch] fix format errors in krb5-1.8.1
+6715    cksum_body exports
+6719    Add lockout-related performance tuning variables
+6720    Negative enctypes improperly read from keytabs
+6723    Negative enctypes improperly read from ccaches
+6732    checks for openpty() aren't made using -lutil
+6733    Make signedpath authdata visible via GSS naming exts
+6736    Add krb5_enctype_to_name() API
+6737    Trace logging
+6746    Make kadmin work over IPv6
+6749    DAL improvements
+6753    Fix XDR decoding of large values in xdr_u_int
+6755    Add GIC option for password/account expiration callback
+6756    KDC 1.6/1.7/1.8 Installation
+6758    Allow krb5_gss_register_acceptor_identity to unset keytab name
+6760    Fail properly when profile can't be accessed
+6761    add profile include support
+6762    key expiration computed incorrectly in libkdb_ldap
+6763    New plugin infrastructure
+6765    Password quality pluggable interface
+6769    clean up memory leak and potential unused variable in crypto tests
+6771    Fix memory leaks in kdb5_verify
+6772    Ensure valid key in krb5int_yarrow_cipher_encrypt_block
+6774    pkinit client cert matching can be disrupted by one of the
+        candidate certs
+6775    pkinit <KU> evaluation during certificate matching may fail
+6776    Typos in src/plugins/preauth/pkinit/pkinit_crypto_openssl.c
+6777    Segmentation fault in krb library (sn2princ.c) if realm not resolved
+6778    kdb: store mkey list in context and permit NULL mkey for
+        kdb_dbe_decrypt_key_data
+6779    kinit: add KDB keytab support
+6783    KDC worker processes feature
+6784    relicense Sun RPC to 3-clause BSD-style
+6785    Add gss_krb5_import_cred
+6786    kpasswd: if a credential cache is present, use FAST
+6791    kadm5_hook: new plugin interface
+6792    Implement k5login_directory and k5login_authoritative options
+6795    Propagate modprinc -unlock from master to slave KDCs
+6799    Performance issue in LDAP policy fetch
+6801    Fix leaks in get_init_creds interface
+6802    copyright notice updates
 
 Acknowledgements
 ----------------
@@ -177,6 +257,7 @@ reports, suggestions, and valuable resources:
     Douglas E. Engert
     Peter Eriksson
     Ronni Feldt
+    Bill Fellows
     JC Ferguson
     William Fiveash
     Ákos Frohner
@@ -184,6 +265,7 @@ reports, suggestions, and valuable resources:
     Scott Grizzard
     Steve Grubb
     Philip Guenther
+    Dominic Hargreaves
     Jakob Haufe
     Jeff Hodges
     Love Hörnquist Åstrand
@@ -195,6 +277,7 @@ reports, suggestions, and valuable resources:
     Jeffrey Hutzelman
     Wyllys Ingersoll
     Holger Isenberg
+    Pavel Jindra
     Joel Johnson
     Mikkel Kruse
     Volker Lendecke
@@ -214,6 +297,7 @@ reports, suggestions, and valuable resources:
     Robert Relyea
     Martin Rex
     Jason Rogers
+    Mike Roszkowski
     Guillaume Rousse
     Tom Shaw
     Peter Shoults
