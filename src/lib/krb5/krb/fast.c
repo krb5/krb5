@@ -182,11 +182,9 @@ krb5int_fast_as_armor(krb5_context context,
         if (retval != 0) {
             const char * errmsg;
             errmsg = krb5_get_error_message(context, retval);
-            if (errmsg) {
-                krb5_set_error_message(context, retval,
-                                       "%s constructing AP-REQ armor", errmsg);
-                krb5_free_error_message(context, errmsg);
-            }
+            krb5_set_error_message(context, retval,
+                                   "%s constructing AP-REQ armor", errmsg);
+            krb5_free_error_message(context, errmsg);
         }
     }
     if (ccache)

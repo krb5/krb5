@@ -291,12 +291,10 @@ load_authdata_plugins(krb5_context context)
                 ((initerr = (*server_init_proc)(context, &pctx)) != 0)) {
                 const char *emsg;
                 emsg = krb5_get_error_message(context, initerr);
-                if (emsg) {
-                    krb5_klog_syslog(LOG_ERR,
-                                     "authdata %s failed to initialize: %s",
-                                     ftable->name, emsg);
-                    krb5_free_error_message(context, emsg);
-                }
+                krb5_klog_syslog(LOG_ERR,
+                                 "authdata %s failed to initialize: %s",
+                                 ftable->name, emsg);
+                krb5_free_error_message(context, emsg);
                 memset(&authdata_systems[k], 0, sizeof(authdata_systems[k]));
 
                 continue;
@@ -329,12 +327,10 @@ load_authdata_plugins(krb5_context context)
                 ((initerr = (*server_init_proc)(context, &pctx)) != 0)) {
                 const char *emsg;
                 emsg = krb5_get_error_message(context, initerr);
-                if (emsg) {
-                    krb5_klog_syslog(LOG_ERR,
-                                     "authdata %s failed to initialize: %s",
-                                     ftable->name, emsg);
-                    krb5_free_error_message(context, emsg);
-                }
+                krb5_klog_syslog(LOG_ERR,
+                                 "authdata %s failed to initialize: %s",
+                                 ftable->name, emsg);
+                krb5_free_error_message(context, emsg);
                 memset(&authdata_systems[k], 0, sizeof(authdata_systems[k]));
 
                 continue;

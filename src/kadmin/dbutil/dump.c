@@ -2514,18 +2514,8 @@ load_db(argc, argv)
 
         if((kret = krb5_db_create(kcontext, db5util_db_args))) {
             const char *emsg = krb5_get_error_message(kcontext, kret);
-            /*
-             * See if something (like DAL KDB plugin) has set a specific error
-             * message and use that otherwise use default.
-             */
-
-            if (emsg != NULL) {
-                fprintf(stderr, "%s: %s\n", progname, emsg);
-                krb5_free_error_message (kcontext, emsg);
-            } else {
-                fprintf(stderr, dbcreaterr_fmt,
-                        progname, dbname, error_message(kret));
-            }
+            fprintf(stderr, "%s: %s\n", progname, emsg);
+            krb5_free_error_message (kcontext, emsg);
             exit_status++;
             if (dumpfile) fclose(f);
             return;
@@ -2538,18 +2528,8 @@ load_db(argc, argv)
         if ((kret = krb5_db_open(kcontext, db5util_db_args,
                                  KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN))) {
             const char *emsg = krb5_get_error_message(kcontext, kret);
-            /*
-             * See if something (like DAL KDB plugin) has set a specific
-             * error message and use that otherwise use default.
-             */
-
-            if (emsg != NULL) {
-                fprintf(stderr, "%s: %s\n", progname, emsg);
-                krb5_free_error_message (kcontext, emsg);
-            } else {
-                fprintf(stderr, dbinit_err_fmt,
-                        progname, error_message(kret));
-            }
+            fprintf(stderr, "%s: %s\n", progname, emsg);
+            krb5_free_error_message (kcontext, emsg);
             exit_status++;
             goto error;
         }

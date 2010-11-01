@@ -471,12 +471,10 @@ load_preauth_plugins(krb5_context context)
                         if (initerr) {
                             const char *emsg;
                             emsg = krb5_get_error_message(context, initerr);
-                            if (emsg) {
-                                krb5_klog_syslog(LOG_ERR,
-                                                 "preauth %s failed to initialize: %s",
-                                                 ftable->name, emsg);
-                                krb5_free_error_message(context, emsg);
-                            }
+                            krb5_klog_syslog(LOG_ERR,
+                                             "preauth %s failed to initialize: %s",
+                                             ftable->name, emsg);
+                            krb5_free_error_message(context, emsg);
                             memset(&preauth_systems[k], 0,
                                    sizeof(preauth_systems[k]));
 
