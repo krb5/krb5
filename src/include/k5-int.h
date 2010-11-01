@@ -2692,6 +2692,9 @@ krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
  * defined.  When IANA assignments exist, these definitions should move to the
  * appropriate places in krb5.hin and all CAMELLIA_CCM conditional code should
  * be made unconditional.
+ *
+ * The present code is experimental and may not be compatible with the
+ * standardized version.
  */
 #define ENCTYPE_CAMELLIA128_CCM_128 -XXX /* Camellia CCM mode, 128-bit key */
 #define ENCTYPE_CAMELLIA256_CCM_128 -YYY /* Camellia CCM mode, 256-bit key */
