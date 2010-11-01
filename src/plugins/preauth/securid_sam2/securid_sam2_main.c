@@ -122,6 +122,8 @@ kdc_include_padata(krb5_context context, krb5_kdc_req *request,
                    void *pa_module_context, krb5_pa_data *pa_data)
 {
     krb5_error_code retval;
+    krb5_data *client_keys_data = NULL;
+    krb5_keyblock *client_key = NULL;
     krb5_sam_challenge_2 sc2;
     krb5_sam_challenge_2_body sc2b;
     int sam_type = 0;             /* unknown */
@@ -137,6 +139,16 @@ kdc_include_padata(krb5_context context, krb5_kdc_req *request,
                               &sam_db_entry);
     if (retval)
         return retval;
+    retval = get_entry_proc(context, request, client,
+                            krb5plugin_preauth_keys, &client_keys_data);
+    if (retval)
+        goto cleanup;
+    client_key = (krb5_keyblock *) client_keys_data->data;
+    if (client_key->enctype == 0) {
+        retval = KRB5KDC_ERR_ETYPE_NOSUPP;
+        krb5_set_error_message(context, retval, "No client keys found in processing SAM2 challenge");
+        goto cleanup;
+    }
 
     if (sam_type == 0) {
         retval = KRB5_PREAUTH_BAD_TYPE;
@@ -152,7 +164,7 @@ kdc_include_padata(krb5_context context, krb5_kdc_req *request,
     switch (sam_type) {
 #ifdef ARL_SECURID_PREAUTH
     case PA_SAM_TYPE_SECURID:
-        retval = get_securid_edata_2(context, client, &sc2b, &sc2);
+        retval = get_securid_edata_2(context, client, client_key, &sc2b, &sc2);
         if (retval)
             goto cleanup;
 
@@ -181,6 +193,13 @@ cleanup:
     krb5_free_data(context, encoded_challenge);
     if (sam_db_entry)
         krb5_db_free_principal(context, sam_db_entry);
+    if (client_keys_data) {
+        while (client_key->enctype) {
+            krb5_free_keyblock_contents(context, client_key);
+            client_key++;
+        }
+        krb5_free_data(context, client_keys_data);
+    }
     return retval;
 }
 
@@ -192,7 +211,7 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
                    void *pa_module_context, void **opaque,
                    krb5_data **e_data, krb5_authdata ***authz_data)
 {
-    krb5_error_code retval;
+    krb5_error_code retval, saved_retval = 0;
     krb5_sam_response_2 *sr2 = NULL;
     krb5_data scratch, *scratch2;
     char *client_name = NULL;
@@ -237,7 +256,10 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
    * get enough preauth data from the client.  Do not set TGT flags here.
    */
 cleanup:
-    /*Note that e_data is an output even in error conditions.*/
+    /*Note that e_data is an output even in error conditions. If we
+      successfully encode the output e_data, we return whatever error
+      is received above. Otherwise we return the encoding error.*/
+    saved_retval = retval;
     if (out_sc2) {
         krb5_pa_data pa_out;
         krb5_pa_data *pa_array[2];
@@ -256,6 +278,8 @@ cleanup:
 encode_error:
     krb5_free_sam_response_2(context, sr2);
     free(client_name);
+    if (retval == 0)
+        retval = saved_retval;
     return retval;
 }
 
@@ -263,7 +287,7 @@ encode_error:
 static int
 kdc_preauth_flags(krb5_context context, krb5_preauthtype patype)
 {
-    return 0;
+    return PA_HARDWARE;
 }
 
 krb5_preauthtype supported_pa_types[] = {

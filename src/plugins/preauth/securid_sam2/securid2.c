@@ -266,17 +266,16 @@ cleanup:
 
 krb5_error_code
 get_securid_edata_2(krb5_context context, krb5_db_entry *client,
+                    krb5_keyblock *client_key,
                     krb5_sam_challenge_2_body *sc2b, krb5_sam_challenge_2 *sc2)
 {
     krb5_error_code retval;
     krb5_data scratch;
-    krb5_keyblock client_key;
     char *user = NULL;
     char *def_user = "<unknown user>";
     struct securid_track_data sid_track_data;
     krb5_data tmp_data;
 
-    client_key.contents = NULL;
     scratch.data = NULL;
     sc2b->sam_track_id.data = NULL;
 
@@ -291,6 +290,7 @@ get_securid_edata_2(krb5_context context, krb5_db_entry *client,
     sc2b->sam_response_prompt.data = PASSCODE_message;
     sc2b->sam_response_prompt.length = strlen(sc2b->sam_response_prompt.data);
     sc2b->sam_pk_for_sad.length = 0;
+            sc2b->sam_type = PA_SAM_TYPE_SECURID;
 
     sid_track_data.state = SECURID_STATE_INITIAL;
     sid_track_data.hostid = gethostid();
@@ -316,17 +316,10 @@ get_securid_edata_2(krb5_context context, krb5_db_entry *client,
     }
 
     /* Get the client's key */
-    if ((retval = get_securid_key(context, client, &client_key)) != 0) {
-        krb5_set_error_message(context, retval,
-                               "while getting SecurID SAM key in "
-                               "get_securid_edata_2 (%s)",
-                               user ? user : def_user);
-        goto cleanup;
-    }
-    sc2b->sam_etype = client_key.enctype;
+    sc2b->sam_etype = client_key->enctype;
 
     retval = securid_make_sam_challenge_2_and_cksum(context,
-                                                    sc2, sc2b, &client_key);
+                                                    sc2, sc2b, client_key);
     if (retval) {
         krb5_set_error_message(context, retval,
                                "while making SAM_CHALLENGE_2 checksum (%s)",
@@ -334,7 +327,6 @@ get_securid_edata_2(krb5_context context, krb5_db_entry *client,
     }
 
 cleanup:
-    krb5_free_keyblock_contents(context, &client_key);
     free(user);
     if (retval) {
         krb5_free_data_contents(context, &sc2b->sam_track_id);
@@ -486,7 +478,7 @@ verify_securid_data_2(krb5_context context, krb5_db_entry *client,
                                    "verify_securid_data_2 (%s)", user);
            goto cleanup;
         }
-        if (track_id_data.length <= sizeof (struct securid_track_data)) {
+        if (track_id_data.length < sizeof (struct securid_track_data)) {
             retval = KRB5KDC_ERR_PREAUTH_FAILED;
             krb5_set_error_message(context, retval,
                                    "Length of track data incorrect");
@@ -728,7 +720,7 @@ verify_securid_data_2(krb5_context context, krb5_db_entry *client,
                                  "for user %s", securid_user);
             *sc2_out = sc2p;
             sc2p = NULL;
-            retval = KRB5KDC_ERR_PREAUTH_FAILED;
+            retval = KRB5KDC_ERR_PREAUTH_REQUIRED;
             /*sc2_out is permitted as an output on error path*/
             goto cleanup;
         }

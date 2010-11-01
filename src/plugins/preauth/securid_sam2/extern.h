@@ -39,6 +39,7 @@ securid_make_sam_challenge_2_and_cksum(krb5_context context,
 
 krb5_error_code get_securid_edata_2(krb5_context context,
                                     krb5_db_entry *client,
+                                    krb5_keyblock *client_key,
                                     krb5_sam_challenge_2_body *sc2b,
                                     krb5_sam_challenge_2 *sc2);
 

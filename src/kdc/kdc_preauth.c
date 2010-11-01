@@ -1181,6 +1181,7 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
     case 0: /* in case of PA-PAC-REQUEST with no PA-ENC-TIMESTAMP */
     case KRB5KRB_AP_ERR_BAD_INTEGRITY:
     case KRB5KRB_AP_ERR_SKEW:
+    case KRB5KDC_ERR_PREAUTH_REQUIRED:
     case KRB5KDC_ERR_ETYPE_NOSUPP:
         /* rfc 4556 */
     case KRB5KDC_ERR_CLIENT_NOT_TRUSTED:
