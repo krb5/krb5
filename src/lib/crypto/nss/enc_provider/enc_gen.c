@@ -39,6 +39,7 @@
 #include "rand2key.h"
 #include "aead.h"
 #include "seccomon.h"
+#include "secmod.h"
 #include "pk11pub.h"
 #include "nss.h"
 
@@ -111,14 +112,15 @@ k5_nss_init(void)
         /* Do nothing if the existing context is still good. */
         if (k5_nss_pid == pid)
             goto cleanup;
-
-        /* We've forked since the last init, and need to reinitialize. */
-        rv = NSS_ShutdownContext(k5_nss_ctx);
-        k5_nss_ctx = NULL;
+        /* The caller has forked.  Restart the NSS modules.  This will
+         * invalidate all of our PKCS11 handles, which we're prepared for. */
+        rv = SECMOD_RestartModules(TRUE);
         if (rv != SECSuccess) {
             ret = k5_nss_map_last_error();
             goto cleanup;
         }
+        k5_nss_pid = pid;
+        goto cleanup;
     }
     k5_nss_ctx = NSS_InitContext(NSS_KRB5_CONFIGDIR, "", "", "", NULL, flags);
     if (k5_nss_ctx == NULL) {
