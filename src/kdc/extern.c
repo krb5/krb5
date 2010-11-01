@@ -37,6 +37,5 @@ int             kdc_numrealms = 0;
 kdc_realm_t     *kdc_active_realm = (kdc_realm_t *) NULL;
 krb5_data empty_string = {0, 0, ""};
 krb5_timestamp kdc_infinity = KRB5_INT32_MAX; /* XXX */
-krb5_rcache     kdc_rcache = (krb5_rcache) NULL;
 krb5_keyblock   psr_key;
 krb5_int32      max_dgram_reply_size = MAX_DGRAM_SIZE;

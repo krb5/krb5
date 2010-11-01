@@ -66,56 +66,10 @@
 #include "net-server.h"
 #include <limits.h>
 
-#ifdef USE_RCACHE
-static char *kdc_current_rcname = (char *) NULL;
-krb5_deltat rc_lifetime; /* See kdc_initialize_rcache() */
-#endif
-
 #ifdef KRBCONF_VAGUE_ERRORS
 const int vague_errors = 1;
 #else
 const int vague_errors = 0;
-#endif
-
-#ifdef USE_RCACHE
-/*
- * initialize the replay cache.
- */
-krb5_error_code
-kdc_initialize_rcache(krb5_context kcontext, char *rcache_name)
-{
-    krb5_error_code     retval;
-    char                *rcname;
-    char                *sname;
-
-    rcname = (rcache_name) ? rcache_name : kdc_current_rcname;
-
-    /* rc_lifetime used elsewhere to verify we're not */
-    /*  replaying really old data                     */
-    rc_lifetime = kcontext->clockskew;
-
-    if (!rcname)
-        rcname = KDCRCACHE;
-    if (!(retval = krb5_rc_resolve_full(kcontext, &kdc_rcache, rcname))) {
-        /* Recover or initialize the replay cache */
-        if (!(retval = krb5_rc_recover(kcontext, kdc_rcache)) ||
-            !(retval = krb5_rc_initialize(kcontext,
-                                          kdc_rcache,
-                                          kcontext->clockskew))
-        ) {
-            /* Expunge the replay cache */
-            if (!(retval = krb5_rc_expunge(kcontext, kdc_rcache))) {
-                sname = kdc_current_rcname;
-                kdc_current_rcname = strdup(rcname);
-                if (sname)
-                    free(sname);
-            }
-        }
-        if (retval)
-            krb5_rc_close(kcontext, kdc_rcache);
-    }
-    return(retval);
-}
 #endif
 
 /*
@@ -298,11 +252,6 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
     if ((retval = krb5_auth_con_setaddrs(kdc_context, auth_context, NULL,
                                          from->address)) )
         goto cleanup_auth_context;
-#ifdef USE_RCACHE
-    if ((retval = krb5_auth_con_setrcache(kdc_context, auth_context,
-                                          kdc_rcache)))
-        goto cleanup_auth_context;
-#endif
 
     if ((retval = kdc_get_server_key(apreq->ticket, 0, foreign_server,
                                      &krbtgt, tgskey, &kvno)))
@@ -317,36 +266,8 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
     if ((retval = krb5_rd_req_decoded_anyflag(kdc_context, &auth_context, apreq,
                                               apreq->ticket->server,
                                               kdc_active_realm->realm_keytab,
-                                              NULL, ticket))) {
-#ifdef USE_RCACHE
-        /*
-         * I'm not so sure that this is right, but it's better than nothing
-         * at all.
-         *
-         * If we choke in the rd_req because of the replay cache, then attempt
-         * to reinitialize the replay cache because somebody could have deleted
-         * it from underneath us (e.g. a cron job)
-         */
-        if ((retval == KRB5_RC_IO_IO) ||
-            (retval == KRB5_RC_IO_UNKNOWN)) {
-            (void) krb5_rc_close(kdc_context, kdc_rcache);
-            kdc_rcache = (krb5_rcache) NULL;
-            if (!(retval = kdc_initialize_rcache(kdc_context, (char *) NULL))) {
-                if ((retval = krb5_auth_con_setrcache(kdc_context, auth_context,
-                                                      kdc_rcache)) ||
-                    (retval = krb5_rd_req_decoded_anyflag(kdc_context, &auth_context,
-                                                          apreq, apreq->ticket->server,
-                                                          kdc_active_realm->realm_keytab,
-                                                          NULL, ticket))
-                )
-                    goto cleanup_auth_context;
-            }
-        } else
-            goto cleanup_auth_context;
-#else
+                                              NULL, ticket)))
         goto cleanup_auth_context;
-#endif
-    }
 
     /* "invalid flag" tickets can must be used to validate */
     if (isflagset((*ticket)->enc_part2->flags, TKT_FLG_INVALID)
@@ -423,10 +344,6 @@ cleanup_authenticator:
     krb5_free_authenticator(kdc_context, authenticator);
 
 cleanup_auth_context:
-    /* We do not want the free of the auth_context to close the rcache */
-#ifdef USE_RCACHE
-    (void)  krb5_auth_con_setrcache(kdc_context, auth_context, 0);
-#endif
     krb5_auth_con_free(kdc_context, auth_context);
 
 cleanup:

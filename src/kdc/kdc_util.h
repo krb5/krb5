@@ -138,9 +138,6 @@ dispatch (void *,
           krb5_data **,
           int);
 
-/* main.c */
-krb5_error_code kdc_initialize_rcache (krb5_context, char *);
-
 krb5_error_code
 setup_server_realm (krb5_principal);
 void

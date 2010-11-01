@@ -180,24 +180,12 @@ if test "$withval" = yes; then
 	AC_DEFINE(KRBCONF_KDC_MODIFIES_KDB,1,[Define if KDC should update database with each request])
 fi
 
-# Needed for hw-preauth replay detection on KDC.
-
-# USE_RCACHE enables the replay cache
-# NOCACHE disables the lookaside cache
-
-# The lookaside cache is checked first; if *exactly* the same message
-# comes in twice, e.g., because the (legitimate) client resent it,
-# the previous response will be resent.  Otherwise, the replay cache
-# is used to check for attempts to fake out the KDC.  Some hardware
-# preauth methods are weak enough that we *really* want to have this
-# checking turned on.
-
-AC_ARG_ENABLE([kdc-replay-cache],
-AC_HELP_STRING([--enable-kdc-replay-cache],[check for replayed/retransmitted KDC requests (recommended when hardware preauthentication is in use) @<:@disabled@:>@]), , enableval=yes)
-if test "$enableval" = yes ; then
-	AC_DEFINE(USE_RCACHE,1,[Define if the KDC should use a replay cache])
-else
-	AC_DEFINE(NOCACHE,1,[Define if the KDC should use no replay cache])
+AC_ARG_ENABLE([kdc-lookaside-cache],
+AC_HELP_STRING([--disable-kdc-lookaside-cache],
+               [Disable the cache which detects client retransmits]), ,
+               enableval=yes)
+if test "$enableval" = no ; then
+	AC_DEFINE(NOCACHE,1,[Define if the KDC should use no lookaside cache])
 fi
 KRB5_RUN_FLAGS
 
