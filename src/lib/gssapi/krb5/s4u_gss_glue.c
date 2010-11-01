@@ -50,8 +50,8 @@ kg_impersonate_name(OM_uint32 *minor_status,
     krb5_error_code code;
     krb5_creds in_creds, *out_creds = NULL;
 
+    *output_cred = NULL;
     memset(&in_creds, 0, sizeof(in_creds));
-    memset(&out_creds, 0, sizeof(out_creds));
 
     in_creds.client = user->princ;
     in_creds.server = impersonator_cred->name->princ;
@@ -161,7 +161,8 @@ krb5_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
                                        time_rec,
                                        context);
 
-    *output_cred_handle = (gss_cred_id_t)cred;
+    if (!GSS_ERROR(major_status))
+        *output_cred_handle = (gss_cred_id_t)cred;
 
     k5_mutex_unlock(&((krb5_gss_cred_id_t)impersonator_cred_handle)->lock);
     krb5_free_context(context);
@@ -183,6 +184,7 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
     krb5_error_code code;
     krb5_gss_cred_id_t cred = NULL;
 
+    *output_cred = NULL;
     k5_mutex_assert_locked(&impersonator_cred->lock);
 
     if (!kg_is_initiator_cred(impersonator_cred) ||
