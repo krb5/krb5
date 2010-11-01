@@ -1085,6 +1085,16 @@ else
 fi
 AC_SUBST(ldap_plugin_dir)
 AC_SUBST(LDAP)
+# This check is for plugins/preauth/securid_sam2
+sam2_plugin=""
+old_CFLAGS=$CFLAGS
+CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+AC_CHECK_LIB(aceclnt, sd_init,[
+		      AC_MSG_NOTICE([Enabling RSA securID support])
+		      sam2_plugin=plugins/preauth/securid_sam2
+		      ])
+AC_SUBST(sam2_plugin)
+CFLAGS=$old_CFLAGS
 
 # This checks is for plugins/locate/python, which isn't built by
 # default, so it's not a big deal that it isn't very good.  We should
