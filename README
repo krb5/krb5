@@ -68,6 +68,8 @@ Code quality:
 Developer experience:
 
 * NSS crypto back end
+* PRNG modularity
+* Fortuna-like PRNG
 
 Performance:
 
@@ -97,7 +99,6 @@ krb5-1.9 changes by ticket ID
 6684    Simple kinit verbosity patch
 6686    IPv6 support for kprop and kpropd
 6688    mit-krb5-1.7 fails to compile against openssl-1.0.0
-6691    krb524 source code is missing from krb5-1.8 tarball
 6699    Validate and renew should work on non-TGT creds
 6700    Introduce new krb5_tkt_creds API
 6712    Add IAKERB mechanism and gss_acquire_cred_with_password
@@ -106,7 +107,6 @@ krb5-1.9 changes by ticket ID
 6719    Add lockout-related performance tuning variables
 6720    Negative enctypes improperly read from keytabs
 6723    Negative enctypes improperly read from ccaches
-6732    checks for openpty() aren't made using -lutil
 6733    Make signedpath authdata visible via GSS naming exts
 6736    Add krb5_enctype_to_name() API
 6737    Trace logging
@@ -114,7 +114,6 @@ krb5-1.9 changes by ticket ID
 6749    DAL improvements
 6753    Fix XDR decoding of large values in xdr_u_int
 6755    Add GIC option for password/account expiration callback
-6756    KDC 1.6/1.7/1.8 Installation
 6758    Allow krb5_gss_register_acceptor_identity to unset keytab name
 6760    Fail properly when profile can't be accessed
 6761    add profile include support
@@ -136,12 +135,24 @@ krb5-1.9 changes by ticket ID
 6784    relicense Sun RPC to 3-clause BSD-style
 6785    Add gss_krb5_import_cred
 6786    kpasswd: if a credential cache is present, use FAST
+6787    S4U memory leak
 6791    kadm5_hook: new plugin interface
 6792    Implement k5login_directory and k5login_authoritative options
+6793    acquire_init_cred leaks interned name
 6795    Propagate modprinc -unlock from master to slave KDCs
+6796    segfault due to uninitialized variable in S4U
 6799    Performance issue in LDAP policy fetch
 6801    Fix leaks in get_init_creds interface
 6802    copyright notice updates
+6804    Remove KDC replay cache
+6805    securID code fixes
+6806    securID error handling fix
+6807    SecurID build support
+6809    gss_krb5int_make_seal_token_v3_iov fails to set conf_state
+6810    Better  libk5crypto NSS fork safety
+6811    Mark Camellia-CCM code as experimental
+6812    krb5_get_credentials should not fail due to inability to store
+        a credential in a cache
 
 Acknowledgements
 ----------------
