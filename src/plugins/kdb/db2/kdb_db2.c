@@ -309,13 +309,14 @@ open_db(krb5_db2_context *dbc, char *fname, int flags, int mode)
     hashi.lorder = 0;
     hashi.nelem = 1;
 
+    /* Try our best guess at the database type. */
     db = dbopen(fname, flags, mode,
                 dbc->hashfirst ? DB_HASH : DB_BTREE,
                 dbc->hashfirst ? (void *) &hashi : (void *) &bti);
-    if (db != NULL) {
-        free(fname);
-        return db;
-    }
+    if (db != NULL)
+        goto done;
+
+    /* If that was wrong, retry with the other type. */
     switch (errno) {
 #ifdef EFTYPE
     case EFTYPE:
@@ -324,12 +325,15 @@ open_db(krb5_db2_context *dbc, char *fname, int flags, int mode)
         db = dbopen(fname, flags, mode,
                     dbc->hashfirst ? DB_BTREE : DB_HASH,
                     dbc->hashfirst ? (void *) &bti : (void *) &hashi);
+        /* If that worked, update our guess for next time. */
         if (db != NULL)
             dbc->hashfirst = !dbc->hashfirst;
-    default:
-        free(fname);
-        return db;
+        break;
     }
+
+done:
+    free(fname);
+    return db;
 }
 
 /* Initialize the lock file and policy database fields of the DB2 context
