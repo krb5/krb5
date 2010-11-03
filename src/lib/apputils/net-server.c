@@ -224,7 +224,7 @@ struct connection {
 };
 
 
-#define SET(TYPE) struct { TYPE *data; int n, max; }
+#define SET(TYPE) struct { TYPE *data; size_t n, max; }
 
 /* Start at the top and work down -- this should allow for deletions
    without disrupting the iteration, since we delete by overwriting
@@ -233,13 +233,12 @@ struct connection {
     for (idx = set.n-1; idx >= 0 && (vvar = set.data[idx], 1); idx--)
 
 #define GROW_SET(set, incr, tmpptr)                                     \
-    (((int)(set.max + incr) < set.max                                   \
-      || (((size_t)((int)(set.max + incr) * sizeof(set.data[0]))        \
-           / sizeof(set.data[0]))                                       \
-          != (size_t)(set.max + incr)))                                 \
-     ? 0                          /* overflow */                        \
+    ((set.max + incr < set.max                                          \
+      || ((set.max + incr) * sizeof(set.data[0]) / sizeof(set.data[0])  \
+          != set.max + incr))                                           \
+     ? 0                         /* overflow */                         \
      : ((tmpptr = realloc(set.data,                                     \
-                          (int)(set.max + incr) * sizeof(set.data[0]))) \
+                          (set.max + incr) * sizeof(set.data[0])))      \
         ? (set.data = tmpptr, set.max += incr, 1)                       \
         : 0))
 
@@ -1127,7 +1126,7 @@ setup_network(void *handle, const char *prog, int no_reconfig)
     }
     setup_tcp_listener_ports(&setup_data);
     setup_rpc_listener_ports(&setup_data);
-    krb5_klog_syslog (LOG_INFO, "set up %d sockets", n_sockets);
+    krb5_klog_syslog (LOG_INFO, "set up %d sockets", (int)n_sockets);
     if (n_sockets == 0) {
         com_err(prog, 0, "no sockets set up?");
         exit (1);
@@ -1803,7 +1802,8 @@ listen_and_process(void *handle, const char *prog, void (*reset)(void))
        can be rather large.  Making this static avoids putting all
        that junk on the stack.  */
     static struct select_state sout;
-    int i, sret, netchanged = 0;
+    size_t i;
+    int sret, netchanged = 0;
     krb5_error_code err;
 
     if (conns == (struct connection **) NULL)
