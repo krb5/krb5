@@ -25,7 +25,6 @@ proc setup_slave {} {
     }
     if [catch {exec $KDB5_UTIL load -i $dumpfile} msg] {
 	send_user "slave load failed: $msg"
-	spawn_shell
 	error "slave load failed: $msg"
     }
 }
