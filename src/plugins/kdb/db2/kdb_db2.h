@@ -39,7 +39,6 @@ typedef struct _krb5_db2_context {
     krb5_boolean        hashfirst;      /* Try hash database type first */
     char *              db_lf_name;     /* Name of lock file            */
     int                 db_lf_file;     /* File descriptor of lock file */
-    time_t              db_lf_time;     /* Time last updated            */
     int                 db_locks_held;  /* Number of times locked       */
     int                 db_lock_mode;   /* Last lock mode, e.g. greatest*/
     krb5_boolean        db_nb_locks;    /* [Non]Blocking lock modes     */

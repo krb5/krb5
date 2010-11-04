@@ -264,15 +264,17 @@ cleanup:
     return status;
 }
 
-/* Return the concatenation of db_name and sfx. */
-static char *
-gen_dbsuffix(char *db_name, char *sfx)
+/* Set *out to the concatenation of db_name and sfx. */
+static krb5_error_code
+gen_dbsuffix(char *db_name, char *sfx, char **out)
 {
-    char *dbsuffix;
+    char *result;
 
-    if (asprintf(&dbsuffix, "%s%s", db_name, sfx) < 0)
-        return NULL;
-    return dbsuffix;
+    *out = NULL;
+    if (asprintf(&result, "%s%s", db_name, sfx) < 0)
+        return ENOMEM;
+    *out = result;
+    return 0;
 }
 
 /*
@@ -296,8 +298,7 @@ open_db(krb5_db2_context *dbc, char *fname, int flags, int mode)
     bti.compare = NULL;
     bti.prefix = NULL;
 
-    fname = (dbc->tempdb) ? gen_dbsuffix(fname, "~") : strdup(fname);
-    if (fname == NULL) {
+    if (gen_dbsuffix(fname, dbc->tempdb ? "~" : "", &fname) != 0) {
         errno = ENOMEM;
         return NULL;
     }
@@ -355,9 +356,10 @@ init_db2_context(krb5_context context)
 
     db_ctx->db = NULL;
 
-    if (!(filename = gen_dbsuffix(db_ctx->db_name, db_ctx->tempdb
-                                  ?KDB2_TEMP_LOCK_EXT:KDB2_LOCK_EXT)))
-        return ENOMEM;
+    retval = gen_dbsuffix(db_ctx->db_name, db_ctx->tempdb ?
+                          KDB2_TEMP_LOCK_EXT : KDB2_LOCK_EXT, &filename);
+    if (retval)
+        return retval;
     db_ctx->db_lf_name = filename;      /* so it gets freed by clear_context */
 
     /*
@@ -372,9 +374,6 @@ init_db2_context(krb5_context context)
     }
     set_cloexec_fd(db_ctx->db_lf_file);
     db_ctx->db_inited++;
-
-    if ((retval = krb5_db2_get_age(context, NULL, &db_ctx->db_lf_time)))
-        goto err_out;
 
     snprintf(policy_db_name, sizeof(policy_db_name), "%s%s.kadm5",
              db_ctx->db_name, db_ctx->tempdb ? "~" : "");
@@ -507,13 +506,7 @@ end_update(krb5_context context)
         }
     } else
         retval = errno;
-    if (!retval) {
-        if (fstat(db_ctx->db_lf_file, &st) == 0)
-            db_ctx->db_lf_time = st.st_mtime;
-        else
-            retval = errno;
-    }
-    return (retval);
+    return retval;
 }
 
 #define MAX_LOCK_TRIES 5
@@ -523,7 +516,6 @@ krb5_db2_lock(krb5_context context, int in_mode)
 {
     krb5_db2_context *db_ctx;
     int     krb5_lock_mode;
-    DB     *db;
     krb5_error_code retval;
     time_t  mod_time;
     int     mode, gotlock, tries;
@@ -578,14 +570,11 @@ krb5_db2_lock(krb5_context context, int in_mode)
     if ((retval = krb5_db2_get_age(context, NULL, &mod_time)))
         goto lock_error;
 
-    db = open_db(db_ctx, db_ctx->db_name,
-                 mode == KRB5_LOCKMODE_SHARED ? O_RDONLY : O_RDWR, 0600);
-    if (db) {
-        db_ctx->db_lf_time = mod_time;
-        db_ctx->db = db;
-    } else {
+    db_ctx->db = open_db(db_ctx, db_ctx->db_name,
+                         mode == KRB5_LOCKMODE_SHARED ? O_RDONLY : O_RDWR,
+                         0600);
+    if (db_ctx->db == NULL) {
         retval = errno;
-        db_ctx->db = NULL;
         goto lock_error;
     }
 
@@ -657,13 +646,11 @@ create_db(krb5_context context, char *db_name)
         return errno;
     (*db->close)(db);
 
-    db_name2 = db_ctx->tempdb ? gen_dbsuffix(db_name, "~") : strdup(db_name);
-    if (db_name2 == NULL)
-        return ENOMEM;
-    okname = gen_dbsuffix(db_name2, KDB2_LOCK_EXT);
-    if (!okname)
-        retval = ENOMEM;
-    else {
+    retval = gen_dbsuffix(db_name, db_ctx->tempdb ? "~" : "", &db_name2);
+    if (retval)
+        return retval;
+    retval = gen_dbsuffix(db_name2, KDB2_LOCK_EXT, &okname);
+    if (retval == 0) {
         fd = open(okname, O_CREAT | O_RDWR | O_TRUNC, 0600);
         if (fd < 0)
             retval = errno;
@@ -697,8 +684,7 @@ destroy_file_suffix(char *dbname, char *suffix)
     char    zbuf[BUFSIZ];
     int     dowrite;
 
-    filename = gen_dbsuffix(dbname, suffix);
-    if (filename == 0)
+    if (gen_dbsuffix(dbname, suffix, &filename) != 0)
         return ENOMEM;
     if ((fd = open(filename, O_RDWR, 0)) < 0) {
         free(filename);
@@ -1268,11 +1254,9 @@ krb5_db2_promote_db(krb5_context context, char *conf_section, char **db_args)
         goto clean_n_exit;
     }
 
-    temp_db_name = gen_dbsuffix(db_name, "~");
-    if (temp_db_name == NULL) {
-        status = ENOMEM;
+    status = gen_dbsuffix(db_name, "~", &temp_db_name);
+    if (status)
         goto clean_n_exit;
-    }
 
     for (db_argp = db_args; *db_argp; db_argp++) {
         if (!strcmp(*db_argp, "merge_nra")) {
@@ -1480,11 +1464,9 @@ krb5_db2_rename(krb5_context context, char *from, char *to, int merge_nra)
     if (retval)
         goto errout;
 
-    db_ctx->db_lf_name = gen_dbsuffix(db_ctx->db_name, KDB2_LOCK_EXT);
-    if (db_ctx->db_lf_name == NULL) {
-        retval = ENOMEM;
+    retval = gen_dbsuffix(db_ctx->db_name, KDB2_LOCK_EXT, &db_ctx->db_lf_name);
+    if (retval)
         goto errout;
-    }
     db_ctx->db_lf_file = open(db_ctx->db_lf_name, O_RDWR|O_CREAT, 0600);
     if (db_ctx->db_lf_file < 0) {
         retval = errno;
@@ -1494,15 +1476,9 @@ krb5_db2_rename(krb5_context context, char *from, char *to, int merge_nra)
 
     db_ctx->db_inited = 1;
 
-    retval = krb5_db2_get_age(context, NULL, &db_ctx->db_lf_time);
+    retval = gen_dbsuffix(from, KDB2_LOCK_EXT, &fromok);
     if (retval)
         goto errout;
-
-    fromok = gen_dbsuffix(from, KDB2_LOCK_EXT);
-    if (fromok == NULL) {
-        retval = ENOMEM;
-        goto errout;
-    }
 
     if ((retval = krb5_db2_lock(context, KRB5_LOCKMODE_EXCLUSIVE)))
         goto errfromok;
