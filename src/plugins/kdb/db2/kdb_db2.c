@@ -68,6 +68,11 @@
 
 #define KDB_DB2_DATABASE_NAME "database_name"
 
+#define SUFFIX_DB ""
+#define SUFFIX_LOCK ".ok"
+#define SUFFIX_POLICY ".kadm5"
+#define SUFFIX_POLICY_LOCK ".kadm5.lock"
+
 /*
  * Locking:
  *
@@ -147,44 +152,47 @@ get_db_opt(char *input, char **opt, char **val)
 
 /* Restore dbctx to the uninitialized state. */
 static void
-clear_context(krb5_db2_context *dbctx)
+ctx_clear(krb5_db2_context *dbc)
 {
     /*
      * Free any dynamically allocated memory.  File descriptors and locks
      * are the caller's problem.
      */
-    free(dbctx->db_lf_name);
-    free(dbctx->db_name);
+    free(dbc->db_lf_name);
+    free(dbc->db_name);
     /*
      * Clear the structure and reset the defaults.
      */
-    memset(dbctx, 0, sizeof(krb5_db2_context));
-    dbctx->db_name = NULL;
-    dbctx->db_nb_locks = FALSE;
-    dbctx->tempdb = FALSE;
+    memset(dbc, 0, sizeof(krb5_db2_context));
+    dbc->db = NULL;
+    dbc->db_lf_name = NULL;
+    dbc->db_lf_file = -1;
+    dbc->db_name = NULL;
+    dbc->db_nb_locks = FALSE;
+    dbc->tempdb = FALSE;
 }
 
-/* Set *db_ctx_out to the db2 database context for context.  If one does
- * not exist, create one in the uninitialized state. */
+/* Set *dbc_out to the db2 database context for context.  If one does not
+ * exist, create one in the uninitialized state. */
 static krb5_error_code
-get_context(krb5_context context, krb5_db2_context **db_ctx_out)
+ctx_get(krb5_context context, krb5_db2_context **dbc_out)
 {
-    krb5_db2_context *db_ctx;
+    krb5_db2_context *dbc;
     kdb5_dal_handle *dal_handle;
 
     dal_handle = context->dal_handle;
 
     if (dal_handle->db_context == NULL) {
-        db_ctx = (krb5_db2_context *) malloc(sizeof(krb5_db2_context));
-        if (db_ctx == NULL)
+        dbc = (krb5_db2_context *) malloc(sizeof(krb5_db2_context));
+        if (dbc == NULL)
             return ENOMEM;
         else {
-            memset(db_ctx, 0, sizeof(krb5_db2_context));
-            clear_context(db_ctx);
-            dal_handle->db_context = db_ctx;
+            memset(dbc, 0, sizeof(krb5_db2_context));
+            ctx_clear(dbc);
+            dal_handle->db_context = dbc;
         }
     }
-    *db_ctx_out = dal_handle->db_context;
+    *dbc_out = dal_handle->db_context;
     return 0;
 }
 
@@ -194,12 +202,12 @@ static krb5_error_code
 configure_context(krb5_context context, char *conf_section, char **db_args)
 {
     krb5_error_code status;
-    krb5_db2_context *db_ctx;
+    krb5_db2_context *dbc;
     char **t_ptr, *opt = NULL, *val = NULL, *pval = NULL;
     profile_t profile = KRB5_DB_GET_PROFILE(context);
     int bval;
 
-    status = get_context(context, &db_ctx);
+    status = ctx_get(context, &dbc);
     if (status != 0)
         return status;
 
@@ -208,18 +216,18 @@ configure_context(krb5_context context, char *conf_section, char **db_args)
         free(val);
         status = get_db_opt(*t_ptr, &opt, &val);
         if (opt && !strcmp(opt, "dbname")) {
-            db_ctx->db_name = strdup(val);
-            if (db_ctx->db_name == NULL) {
+            dbc->db_name = strdup(val);
+            if (dbc->db_name == NULL) {
                 status = ENOMEM;
                 goto cleanup;
             }
         }
         else if (!opt && !strcmp(val, "temporary")) {
-            db_ctx->tempdb = 1;
+            dbc->tempdb = 1;
         } else if (!opt && !strcmp(val, "merge_nra")) {
             ;
         } else if (opt && !strcmp(opt, "hash")) {
-            db_ctx->hashfirst = TRUE;
+            dbc->hashfirst = TRUE;
         } else {
             status = EINVAL;
             krb5_set_error_message(context, status,
@@ -229,7 +237,7 @@ configure_context(krb5_context context, char *conf_section, char **db_args)
         }
     }
 
-    if (db_ctx->db_name == NULL) {
+    if (dbc->db_name == NULL) {
         /* Check for database_name in the db_module section. */
         status = profile_get_string(profile, KDB_MODULE_SECTION, conf_section,
                                     KDB_DB2_DATABASE_NAME, NULL, &pval);
@@ -242,20 +250,20 @@ configure_context(krb5_context context, char *conf_section, char **db_args)
         }
         if (status != 0)
             goto cleanup;
-        db_ctx->db_name = strdup(pval);
+        dbc->db_name = strdup(pval);
     }
 
     status = profile_get_boolean(profile, KDB_MODULE_SECTION, conf_section,
                                  KRB5_CONF_DISABLE_LAST_SUCCESS, FALSE, &bval);
     if (status != 0)
         goto cleanup;
-    db_ctx->disable_last_success = bval;
+    dbc->disable_last_success = bval;
 
     status = profile_get_boolean(profile, KDB_MODULE_SECTION, conf_section,
                                  KRB5_CONF_DISABLE_LOCKOUT, FALSE, &bval);
     if (status != 0)
         goto cleanup;
-    db_ctx->disable_lockout = bval;
+    dbc->disable_lockout = bval;
 
 cleanup:
     free(opt);
@@ -264,29 +272,64 @@ cleanup:
     return status;
 }
 
-/* Set *out to the concatenation of db_name and sfx. */
+/*
+ * Set *out to one of the filenames used for the DB described by dbc.  sfx
+ * should be one of SUFFIX_DB, SUFFIX_LOCK, SUFFIX_POLICY, or
+ * SUFFIX_POLICY_LOCK.
+ */
 static krb5_error_code
-gen_dbsuffix(char *db_name, char *sfx, char **out)
+ctx_dbsuffix(krb5_db2_context *dbc, const char *sfx, char **out)
 {
     char *result;
+    const char *tilde;
 
     *out = NULL;
-    if (asprintf(&result, "%s%s", db_name, sfx) < 0)
+    tilde = dbc->tempdb ? "~" : "";
+    if (asprintf(&result, "%s%s%s", dbc->db_name, tilde, sfx) < 0)
         return ENOMEM;
     *out = result;
     return 0;
 }
 
+/* Generate all four files corresponding to dbc. */
+static krb5_error_code
+ctx_allfiles(krb5_db2_context *dbc, char **dbname_out, char **lockname_out,
+             char **polname_out, char **plockname_out)
+{
+    char *a = NULL, *b = NULL, *c = NULL, *d = NULL;
+
+    *dbname_out = *lockname_out = *polname_out = *plockname_out = NULL;
+    if (ctx_dbsuffix(dbc, SUFFIX_DB, &a))
+        goto error;
+    if (ctx_dbsuffix(dbc, SUFFIX_LOCK, &b))
+        goto error;
+    if (ctx_dbsuffix(dbc, SUFFIX_POLICY, &c))
+        goto error;
+    if (ctx_dbsuffix(dbc, SUFFIX_POLICY_LOCK, &d))
+        goto error;
+    *dbname_out = a;
+    *lockname_out = b;
+    *polname_out = c;
+    *plockname_out = d;
+    return 0;
+error:
+    free(a);
+    free(b);
+    free(c);
+    free(d);
+    return ENOMEM;
+}
+
 /*
- * Open the DB2 database given by fname (possibly modified by dbc->tempdb),
- * using the specified flags and mode, and return the resulting handle.  Try
- * both hash and btree database types; dbc->hashfirst determines which is
- * attempted first.  If dbc->hashfirst indicated the wrong type, update it to
- * indicate the correct type.
+ * Open the DB2 database described by dbc, using the specified flags and mode,
+ * and return the resulting handle.  Try both hash and btree database types;
+ * dbc->hashfirst determines which is attempted first.  If dbc->hashfirst
+ * indicated the wrong type, update it to indicate the correct type.
  */
 static DB *
-open_db(krb5_db2_context *dbc, char *fname, int flags, int mode)
+open_db(krb5_db2_context *dbc, int flags, int mode)
 {
+    char *fname = NULL;
     DB *db;
     BTREEINFO bti;
     HASHINFO hashi;
@@ -298,7 +341,7 @@ open_db(krb5_db2_context *dbc, char *fname, int flags, int mode)
     bti.compare = NULL;
     bti.prefix = NULL;
 
-    if (gen_dbsuffix(fname, dbc->tempdb ? "~" : "", &fname) != 0) {
+    if (ctx_dbsuffix(dbc, SUFFIX_DB, &fname) != 0) {
         errno = ENOMEM;
         return NULL;
     }
@@ -337,108 +380,168 @@ done:
     return db;
 }
 
-/* Initialize the lock file and policy database fields of the DB2 context
- * within context.  The db_name and tempdb fields must already be set. */
 static krb5_error_code
-init_db2_context(krb5_context context)
+ctx_unlock(krb5_context context, krb5_db2_context *dbc)
 {
-    char *filename = NULL;
-    krb5_db2_context *db_ctx;
     krb5_error_code retval;
-    char policy_db_name[1024], policy_lock_name[1024];
+    DB *db;
 
-    if (inited(context))
-        return 0;
-
-    retval = get_context(context, &db_ctx);
+    retval = osa_adb_release_lock(dbc->policy_db);
     if (retval)
         return retval;
 
-    db_ctx->db = NULL;
+    if (!dbc->db_locks_held) /* lock already unlocked */
+        return KRB5_KDB_NOTLOCKED;
 
-    retval = gen_dbsuffix(db_ctx->db_name, db_ctx->tempdb ?
-                          KDB2_TEMP_LOCK_EXT : KDB2_LOCK_EXT, &filename);
+    db = dbc->db;
+    if (--(dbc->db_locks_held) == 0) {
+        db->close(db);
+        dbc->db = NULL;
+        dbc->db_lock_mode = 0;
+
+        retval = krb5_lock_file(context, dbc->db_lf_file,
+                                KRB5_LOCKMODE_UNLOCK);
+    }
+    return retval;
+}
+
+#define MAX_LOCK_TRIES 5
+
+static krb5_error_code
+ctx_lock(krb5_context context, krb5_db2_context *dbc, int lockmode)
+{
+    krb5_error_code retval;
+    int kmode, tries;
+
+    if (lockmode == KRB5_DB_LOCKMODE_PERMANENT ||
+        lockmode == KRB5_DB_LOCKMODE_EXCLUSIVE)
+        kmode = KRB5_LOCKMODE_EXCLUSIVE;
+    else if (lockmode == KRB5_DB_LOCKMODE_SHARED)
+        kmode = KRB5_LOCKMODE_SHARED;
+    else
+        return EINVAL;
+
+    if (dbc->db_locks_held == 0 || dbc->db_lock_mode < kmode) {
+        /* Acquire or upgrade the lock. */
+        for (tries = 0; tries < MAX_LOCK_TRIES; tries++) {
+            retval = krb5_lock_file(context, dbc->db_lf_file,
+                                    kmode | KRB5_LOCKMODE_DONTBLOCK);
+            if (retval == 0)
+                break;
+            if (retval == EBADF && kmode == KRB5_LOCKMODE_EXCLUSIVE)
+                /* Tried to lock something we don't have write access to. */
+                return KRB5_KDB_CANTLOCK_DB;
+            sleep(1);
+        }
+        if (retval == EACCES)
+            return KRB5_KDB_CANTLOCK_DB;
+        else if (retval == EAGAIN || retval == EWOULDBLOCK)
+            return OSA_ADB_CANTLOCK_DB;
+        else if (retval)
+            return retval;
+
+        /* Open the DB (or re-open it for read/write). */
+        if (dbc->db != NULL)
+            dbc->db->close(dbc->db);
+        dbc->db = open_db(dbc,
+                          kmode == KRB5_LOCKMODE_SHARED ? O_RDONLY : O_RDWR,
+                          0600);
+        if (dbc->db == NULL) {
+            retval = errno;
+            dbc->db_locks_held = 0;
+            dbc->db_lock_mode = 0;
+            (void) osa_adb_release_lock(dbc->policy_db);
+            (void) krb5_lock_file(context, dbc->db_lf_file,
+                                  KRB5_LOCKMODE_UNLOCK);
+            return retval;
+        }
+
+        dbc->db_lock_mode = kmode;
+    }
+    dbc->db_locks_held++;
+
+    /* Acquire or upgrade the policy lock. */
+    retval = osa_adb_get_lock(dbc->policy_db, lockmode);
+    if (retval)
+        (void) ctx_unlock(context, dbc);
+    return retval;
+}
+
+/* Initialize the lock file and policy database fields of dbc.  The db_name and
+ * tempdb fields must already be set. */
+static krb5_error_code
+ctx_init(krb5_db2_context *dbc)
+{
+    krb5_error_code retval;
+    char *polname = NULL, *plockname = NULL;
+
+    retval = ctx_dbsuffix(dbc, SUFFIX_LOCK, &dbc->db_lf_name);
     if (retval)
         return retval;
-    db_ctx->db_lf_name = filename;      /* so it gets freed by clear_context */
 
     /*
      * should be opened read/write so that write locking can work with
      * POSIX systems
      */
-    if ((db_ctx->db_lf_file = open(filename, O_RDWR, 0666)) < 0) {
-        if ((db_ctx->db_lf_file = open(filename, O_RDONLY, 0666)) < 0) {
+    if ((dbc->db_lf_file = open(dbc->db_lf_name, O_RDWR, 0666)) < 0) {
+        if ((dbc->db_lf_file = open(dbc->db_lf_name, O_RDONLY, 0666)) < 0) {
             retval = errno;
-            goto err_out;
+            goto cleanup;
         }
     }
-    set_cloexec_fd(db_ctx->db_lf_file);
-    db_ctx->db_inited++;
+    set_cloexec_fd(dbc->db_lf_file);
+    dbc->db_inited++;
 
-    snprintf(policy_db_name, sizeof(policy_db_name), "%s%s.kadm5",
-             db_ctx->db_name, db_ctx->tempdb ? "~" : "");
-    snprintf(policy_lock_name, sizeof(policy_lock_name),
-             "%s.lock", policy_db_name);
+    retval = ctx_dbsuffix(dbc, SUFFIX_POLICY, &polname);
+    if (retval)
+        goto cleanup;
+    retval = ctx_dbsuffix(dbc, SUFFIX_POLICY_LOCK, &plockname);
+    if (retval)
+        goto cleanup;
+    retval = osa_adb_init_db(&dbc->policy_db, polname, plockname,
+                             OSA_ADB_POLICY_DB_MAGIC);
 
-    if ((retval = osa_adb_init_db(&db_ctx->policy_db, policy_db_name,
-                                  policy_lock_name, OSA_ADB_POLICY_DB_MAGIC)))
-    {
-        goto err_out;
-    }
-    return 0;
-
-err_out:
-    db_ctx->db = NULL;
-    clear_context(db_ctx);
-    return (retval);
-}
-
-/*
- * gracefully shut down database--must be called by ANY program that does
- * a krb5_db2_init
- */
-krb5_error_code
-krb5_db2_fini(krb5_context context)
-{
-    krb5_error_code retval = 0;
-    krb5_db2_context *db_ctx;
-
-    db_ctx = context->dal_handle->db_context;
-    if (inited(context)) {
-        if (close(db_ctx->db_lf_file))
-            retval = errno;
-        else
-            retval = 0;
-    }
-    if (db_ctx) {
-        if (db_ctx->policy_db) {
-            retval =
-                osa_adb_fini_db(db_ctx->policy_db, OSA_ADB_POLICY_DB_MAGIC);
-            if (retval)
-                return retval;
-        }
-
-        clear_context(db_ctx);
-        free(context->dal_handle->db_context);
-        context->dal_handle->db_context = NULL;
-    }
+cleanup:
+    free(polname);
+    free(plockname);
+    if (retval)
+        ctx_clear(dbc);
     return retval;
 }
 
+static void
+ctx_fini(krb5_db2_context *dbc)
+{
+    if (dbc->db_lf_file != -1)
+        (void) close(dbc->db_lf_file);
+    if (dbc->policy_db)
+        (void) osa_adb_fini_db(dbc->policy_db, OSA_ADB_POLICY_DB_MAGIC);
+    ctx_clear(dbc);
+    free(dbc);
+}
 
+krb5_error_code
+krb5_db2_fini(krb5_context context)
+{
+    if (context->dal_handle->db_context != NULL) {
+        ctx_fini(context->dal_handle->db_context);
+        context->dal_handle->db_context = NULL;
+    }
+    return 0;
+}
 
 /* Return successfully if the db2 name set in context can be opened. */
 static krb5_error_code
 check_openable(krb5_context context)
 {
     DB     *db;
-    krb5_db2_context *db_ctx;
+    krb5_db2_context *dbc;
 
-    db_ctx = context->dal_handle->db_context;
-    db = open_db(db_ctx, db_ctx->db_name, O_RDONLY, 0);
+    dbc = context->dal_handle->db_context;
+    db = open_db(dbc, O_RDONLY, 0);
     if (db == NULL)
         return errno;
-    (*db->close) (db);
+    db->close(db);
     return 0;
 }
 
@@ -451,254 +554,73 @@ check_openable(krb5_context context)
 krb5_error_code
 krb5_db2_get_age(krb5_context context, char *db_name, time_t *age)
 {
-    krb5_db2_context *db_ctx;
+    krb5_db2_context *dbc;
     struct stat st;
 
     if (!inited(context))
         return (KRB5_KDB_DBNOTINITED);
-    db_ctx = context->dal_handle->db_context;
+    dbc = context->dal_handle->db_context;
 
-    if (fstat(db_ctx->db_lf_file, &st) < 0)
+    if (fstat(dbc->db_lf_file, &st) < 0)
         *age = -1;
     else
         *age = st.st_mtime;
     return 0;
 }
 
-/*
- * Remove the semaphore file; indicates that database is currently
- * under renovation.
- *
- * This is only for use when moving the database out from underneath
- * the server (for example, during slave updates).
- */
-
-static krb5_error_code
-start_update(krb5_context context)
+/* Try to update the timestamp on dbc's lockfile. */
+static void
+ctx_update_age(krb5_db2_context *dbc)
 {
-    return 0;
-}
-
-static krb5_error_code
-end_update(krb5_context context)
-{
-    krb5_error_code retval;
-    krb5_db2_context *db_ctx;
     struct stat st;
-    time_t  now;
+    time_t now;
     struct utimbuf utbuf;
 
-    if (!inited(context))
-        return (KRB5_KDB_DBNOTINITED);
-
-    retval = 0;
-    db_ctx = context->dal_handle->db_context;
     now = time((time_t *) NULL);
-    if (fstat(db_ctx->db_lf_file, &st) == 0) {
-        if (st.st_mtime >= now) {
-            utbuf.actime = st.st_mtime + 1;
-            utbuf.modtime = st.st_mtime + 1;
-            if (utime(db_ctx->db_lf_name, &utbuf))
-                retval = errno;
-        } else {
-            if (utime(db_ctx->db_lf_name, (struct utimbuf *) NULL))
-                retval = errno;
-        }
+    if (fstat(dbc->db_lf_file, &st) != 0)
+        return;
+    if (st.st_mtime >= now) {
+        utbuf.actime = st.st_mtime + 1;
+        utbuf.modtime = st.st_mtime + 1;
+        (void) utime(dbc->db_lf_name, &utbuf);
     } else
-        retval = errno;
-    return retval;
+        (void) utime(dbc->db_lf_name, (struct utimbuf *) NULL);
 }
 
-#define MAX_LOCK_TRIES 5
-
 krb5_error_code
-krb5_db2_lock(krb5_context context, int in_mode)
+krb5_db2_lock(krb5_context context, int lockmode)
 {
-    krb5_db2_context *db_ctx;
-    int     krb5_lock_mode;
-    krb5_error_code retval;
-    time_t  mod_time;
-    int     mode, gotlock, tries;
-
-    switch (in_mode) {
-    case KRB5_DB_LOCKMODE_PERMANENT:
-        mode = KRB5_DB_LOCKMODE_EXCLUSIVE;
-        break;
-    case KRB5_DB_LOCKMODE_EXCLUSIVE:
-        mode = KRB5_LOCKMODE_EXCLUSIVE;
-        break;
-
-    case KRB5_DB_LOCKMODE_SHARED:
-        mode = KRB5_LOCKMODE_SHARED;
-        break;
-    default:
-        return EINVAL;
-    }
-
     if (!inited(context))
         return KRB5_KDB_DBNOTINITED;
-
-    db_ctx = context->dal_handle->db_context;
-    if (db_ctx->db_locks_held && (db_ctx->db_lock_mode >= mode)) {
-        /* No need to upgrade lock, just return */
-        db_ctx->db_locks_held++;
-        goto policy_lock;
-    }
-
-    if ((mode != KRB5_LOCKMODE_SHARED) && (mode != KRB5_LOCKMODE_EXCLUSIVE))
-        return KRB5_KDB_BADLOCKMODE;
-
-    krb5_lock_mode = mode | KRB5_LOCKMODE_DONTBLOCK;
-    for (gotlock = tries = 0; tries < MAX_LOCK_TRIES; tries++) {
-        retval = krb5_lock_file(context, db_ctx->db_lf_file, krb5_lock_mode);
-        if (retval == 0) {
-            gotlock++;
-            break;
-        } else if (retval == EBADF && mode == KRB5_DB_LOCKMODE_EXCLUSIVE)
-            /* tried to exclusive-lock something we don't have */
-            /* write access to */
-            return KRB5_KDB_CANTLOCK_DB;
-        sleep(1);
-    }
-    if (retval == EACCES)
-        return KRB5_KDB_CANTLOCK_DB;
-    else if (retval == EAGAIN || retval == EWOULDBLOCK)
-        return OSA_ADB_CANTLOCK_DB;
-    else if (retval != 0)
-        return retval;
-
-    if ((retval = krb5_db2_get_age(context, NULL, &mod_time)))
-        goto lock_error;
-
-    db_ctx->db = open_db(db_ctx, db_ctx->db_name,
-                         mode == KRB5_LOCKMODE_SHARED ? O_RDONLY : O_RDWR,
-                         0600);
-    if (db_ctx->db == NULL) {
-        retval = errno;
-        goto lock_error;
-    }
-
-    db_ctx->db_lock_mode = mode;
-    db_ctx->db_locks_held++;
-
-policy_lock:
-    if ((retval = osa_adb_get_lock(db_ctx->policy_db, in_mode))) {
-        krb5_db2_unlock(context);
-    }
-    return retval;
-
-lock_error:;
-    db_ctx->db_lock_mode = 0;
-    db_ctx->db_locks_held = 0;
-    krb5_db2_unlock(context);
-    return retval;
+    return ctx_lock(context, context->dal_handle->db_context, lockmode);
 }
 
 krb5_error_code
 krb5_db2_unlock(krb5_context context)
 {
-    krb5_db2_context *db_ctx;
-    DB     *db;
-    krb5_error_code retval;
-
     if (!inited(context))
         return KRB5_KDB_DBNOTINITED;
-
-    db_ctx = context->dal_handle->db_context;
-
-    if ((retval = osa_adb_release_lock(db_ctx->policy_db))) {
-        return retval;
-    }
-
-    if (!db_ctx->db_locks_held) /* lock already unlocked */
-        return KRB5_KDB_NOTLOCKED;
-    db = db_ctx->db;
-    if (--(db_ctx->db_locks_held) == 0) {
-        (*db->close) (db);
-        db_ctx->db = NULL;
-
-        retval = krb5_lock_file(context, db_ctx->db_lf_file,
-                                KRB5_LOCKMODE_UNLOCK);
-        db_ctx->db_lock_mode = 0;
-        return (retval);
-    }
-    return 0;
+    return ctx_unlock(context, context->dal_handle->db_context);
 }
 
-/* Create the database, assuming it's not there. */
+/* Zero out and unlink filename. */
 static krb5_error_code
-create_db(krb5_context context, char *db_name)
+destroy_file(char *filename)
 {
-    krb5_error_code retval = 0;
-    char   *okname;
-    char   *db_name2 = NULL;
-    int     fd;
-    krb5_db2_context *db_ctx;
-    DB     *db;
-    char    policy_db_name[1024], policy_lock_name[1024];
-
-    retval = get_context(context, &db_ctx);
-    if (retval != 0)
-        return retval;
-
-    db = open_db(db_ctx, db_name, O_RDWR | O_CREAT | O_EXCL, 0600);
-    if (db == NULL)
-        return errno;
-    (*db->close)(db);
-
-    retval = gen_dbsuffix(db_name, db_ctx->tempdb ? "~" : "", &db_name2);
-    if (retval)
-        return retval;
-    retval = gen_dbsuffix(db_name2, KDB2_LOCK_EXT, &okname);
-    if (retval == 0) {
-        fd = open(okname, O_CREAT | O_RDWR | O_TRUNC, 0600);
-        if (fd < 0)
-            retval = errno;
-        else
-            close(fd);
-        free(okname);
-    }
-
-    snprintf(policy_db_name, sizeof(policy_db_name), "%s.kadm5", db_name2);
-    snprintf(policy_lock_name, sizeof(policy_lock_name),
-             "%s.lock", policy_db_name);
-
-    retval = osa_adb_create_db(policy_db_name,
-                               policy_lock_name, OSA_ADB_POLICY_DB_MAGIC);
-    free(db_name2);
-    return retval;
-}
-
-/*
- * Destroy the database.  Zero's out all of the files, just to be sure.
- */
-static krb5_error_code
-destroy_file_suffix(char *dbname, char *suffix)
-{
-    char   *filename;
     struct stat statb;
-    int     nb, fd;
-    int     j;
-    off_t   pos;
-    char    buf[BUFSIZ];
-    char    zbuf[BUFSIZ];
-    int     dowrite;
+    int dowrite, j, nb, fd, retval;
+    off_t pos;
+    char buf[BUFSIZ], zbuf[BUFSIZ];
 
-    if (gen_dbsuffix(dbname, suffix, &filename) != 0)
-        return ENOMEM;
-    if ((fd = open(filename, O_RDWR, 0)) < 0) {
-        free(filename);
+    fd = open(filename, O_RDWR, 0);
+    if (fd < 0)
         return errno;
-    }
     set_cloexec_fd(fd);
     /* fstat() will probably not fail unless using a remote filesystem
      * (which is inappropriate for the kerberos database) so this check
      * is mostly paranoia.  */
-    if (fstat(fd, &statb) == -1) {
-        int     retval = errno;
-        free(filename);
-        return retval;
-    }
+    if (fstat(fd, &statb) == -1)
+        goto error;
     /*
      * Stroll through the file, reading in BUFSIZ chunks.  If everything
      * is zero, then we're done for that block, otherwise, zero the block.
@@ -712,11 +634,8 @@ destroy_file_suffix(char *dbname, char *suffix)
     while (pos < statb.st_size) {
         dowrite = 0;
         nb = read(fd, buf, BUFSIZ);
-        if (nb < 0) {
-            int     retval = errno;
-            free(filename);
-            return retval;
-        }
+        if (nb < 0)
+            goto error;
         for (j = 0; j < nb; j++) {
             if (buf[j] != '\0') {
                 dowrite = 1;
@@ -728,11 +647,8 @@ destroy_file_suffix(char *dbname, char *suffix)
         if (dowrite) {
             lseek(fd, pos, SEEK_SET);
             nb = write(fd, zbuf, j);
-            if (nb < 0) {
-                int     retval = errno;
-                free(filename);
-                return retval;
-            }
+            if (nb < 0)
+                goto error;
         }
         pos += nb;
     }
@@ -744,19 +660,94 @@ destroy_file_suffix(char *dbname, char *suffix)
 #endif
     close(fd);
 
-    if (unlink(filename)) {
-        free(filename);
-        return (errno);
+    if (unlink(filename))
+        return errno;
+    return 0;
+
+error:
+    retval = errno;
+    close(fd);
+    return retval;
+}
+
+/* Initialize dbc by locking and creating the DB.  If the DB already exists,
+ * clear it out if dbc->tempdb is set; otherwise return EEXIST. */
+static krb5_error_code
+ctx_create_db(krb5_context context, krb5_db2_context *dbc)
+{
+    krb5_error_code retval = 0;
+    char *dbname = NULL, *polname = NULL, *plockname = NULL;
+
+    retval = ctx_allfiles(dbc, &dbname, &dbc->db_lf_name, &polname,
+                          &plockname);
+    if (retval)
+        return retval;
+
+    dbc->db_lf_file = open(dbc->db_lf_name, O_CREAT | O_RDWR | O_TRUNC,
+                              0600);
+    if (dbc->db_lf_file < 0) {
+        retval = errno;
+        goto cleanup;
     }
-    free(filename);
-    return (0);
+    retval = krb5_lock_file(context, dbc->db_lf_file,
+                            KRB5_LOCKMODE_EXCLUSIVE | KRB5_LOCKMODE_DONTBLOCK);
+    if (retval != 0)
+        goto cleanup;
+    set_cloexec_fd(dbc->db_lf_file);
+    dbc->db_lock_mode = KRB5_LOCKMODE_EXCLUSIVE;
+    dbc->db_locks_held = 1;
+
+    if (dbc->tempdb) {
+        /* Temporary DBs are locked for their whole lifetime.  Since we have
+         * the lock, any remnant files can be safely destroyed. */
+        (void) destroy_file(dbname);
+        (void) unlink(polname);
+        (void) unlink(plockname);
+    }
+
+    dbc->db = open_db(dbc, O_RDWR | O_CREAT | O_EXCL, 0600);
+    if (dbc->db == NULL) {
+        retval = errno;
+        goto cleanup;
+    }
+
+    /* Create the policy database, initialize a handle to it, and lock it. */
+    retval = osa_adb_create_db(polname, plockname, OSA_ADB_POLICY_DB_MAGIC);
+    if (retval)
+        goto cleanup;
+    retval = osa_adb_init_db(&dbc->policy_db, polname, plockname,
+                             OSA_ADB_POLICY_DB_MAGIC);
+    if (retval)
+        goto cleanup;
+    retval = osa_adb_get_lock(dbc->policy_db, KRB5_DB_LOCKMODE_EXCLUSIVE);
+    if (retval)
+        goto cleanup;
+
+    dbc->db_inited = 1;
+
+cleanup:
+    if (retval) {
+        if (dbc->db != NULL)
+            dbc->db->close(dbc->db);
+        if (dbc->db_locks_held > 0) {
+            (void) krb5_lock_file(context, dbc->db_lf_file,
+                                  KRB5_LOCKMODE_UNLOCK);
+        }
+        if (dbc->db_lf_file >= 0)
+            close(dbc->db_lf_file);
+        ctx_clear(dbc);
+    }
+    free(dbname);
+    free(polname);
+    free(plockname);
+    return retval;
 }
 
 krb5_error_code
 krb5_db2_get_principal(krb5_context context, krb5_const_principal searchfor,
                        unsigned int flags, krb5_db_entry **entry)
 {
-    krb5_db2_context *db_ctx;
+    krb5_db2_context *dbc;
     krb5_error_code retval;
     DB     *db;
     DBT     key, contents;
@@ -767,11 +758,11 @@ krb5_db2_get_principal(krb5_context context, krb5_const_principal searchfor,
     if (!inited(context))
         return KRB5_KDB_DBNOTINITED;
 
-    db_ctx = context->dal_handle->db_context;
+    dbc = context->dal_handle->db_context;
 
     for (trynum = 0; trynum < KRB5_DB2_MAX_RETRY; trynum++) {
-        if ((retval = krb5_db2_lock(context, KRB5_LOCKMODE_SHARED))) {
-            if (db_ctx->db_nb_locks)
+        if ((retval = ctx_lock(context, dbc, KRB5_LOCKMODE_SHARED))) {
+            if (dbc->db_nb_locks)
                 return (retval);
             sleep(1);
             continue;
@@ -788,7 +779,7 @@ krb5_db2_get_principal(krb5_context context, krb5_const_principal searchfor,
     key.data = keydata.data;
     key.size = keydata.length;
 
-    db = db_ctx->db;
+    db = dbc->db;
     dbret = (*db->get)(db, &key, &contents, 0);
     retval = errno;
     krb5_free_data_contents(context, &keydata);
@@ -827,7 +818,7 @@ krb5_db2_put_principal(krb5_context context, krb5_db_entry *entry,
     DBT     key, contents;
     krb5_data contdata, keydata;
     krb5_error_code retval;
-    krb5_db2_context *db_ctx;
+    krb5_db2_context *dbc;
 
     krb5_clear_error_message (context);
     if (db_args) {
@@ -841,15 +832,11 @@ krb5_db2_put_principal(krb5_context context, krb5_db_entry *entry,
     if (!inited(context))
         return KRB5_KDB_DBNOTINITED;
 
-    db_ctx = context->dal_handle->db_context;
-    if ((retval = krb5_db2_lock(context, KRB5_LOCKMODE_EXCLUSIVE)))
+    dbc = context->dal_handle->db_context;
+    if ((retval = ctx_lock(context, dbc, KRB5_LOCKMODE_EXCLUSIVE)))
         return retval;
 
-    db = db_ctx->db;
-    if ((retval = start_update(context))) {
-        (void) krb5_db2_unlock(context);
-        return retval;
-    }
+    db = dbc->db;
 
     retval = krb5_encode_princ_entry(context, &contdata, entry);
     if (retval)
@@ -870,7 +857,7 @@ krb5_db2_put_principal(krb5_context context, krb5_db_entry *entry,
     krb5_free_data_contents(context, &contdata);
 
 cleanup:
-    (void) end_update(context);
+    ctx_update_age(dbc);
     (void) krb5_db2_unlock(context); /* unlock database */
     return (retval);
 }
@@ -880,7 +867,7 @@ krb5_db2_delete_principal(krb5_context context, krb5_const_principal searchfor)
 {
     krb5_error_code retval;
     krb5_db_entry *entry;
-    krb5_db2_context *db_ctx;
+    krb5_db2_context *dbc;
     DB     *db;
     DBT     key, contents;
     krb5_data keydata, contdata;
@@ -889,21 +876,16 @@ krb5_db2_delete_principal(krb5_context context, krb5_const_principal searchfor)
     if (!inited(context))
         return KRB5_KDB_DBNOTINITED;
 
-    db_ctx = context->dal_handle->db_context;
-    if ((retval = krb5_db2_lock(context, KRB5_LOCKMODE_EXCLUSIVE)))
+    dbc = context->dal_handle->db_context;
+    if ((retval = ctx_lock(context, dbc, KRB5_LOCKMODE_EXCLUSIVE)))
         return (retval);
-
-    if ((retval = start_update(context))) {
-        (void) krb5_db2_unlock(context);     /* unlock write lock */
-        return (retval);
-    }
 
     if ((retval = krb5_encode_princ_dbkey(context, &keydata, searchfor)))
         goto cleanup;
     key.data = keydata.data;
     key.size = keydata.length;
 
-    db = db_ctx->db;
+    db = dbc->db;
     dbret = (*db->get) (db, &key, &contents, 0);
     retval = errno;
     switch (dbret) {
@@ -948,55 +930,30 @@ cleankey:
     krb5_free_data_contents(context, &keydata);
 
 cleanup:
-    (void) end_update(context);
+    ctx_update_age(dbc);
     (void) krb5_db2_unlock(context); /* unlock write lock */
     return retval;
 }
 
-krb5_error_code
-krb5_db2_iterate_ext(krb5_context context,
-                     krb5_error_code(*func) (krb5_pointer, krb5_db_entry *),
-                     krb5_pointer func_arg, int backwards, int recursive)
+static krb5_error_code
+ctx_iterate(krb5_context context, krb5_db2_context *dbc,
+            krb5_error_code (*func)(krb5_pointer, krb5_db_entry *),
+            krb5_pointer func_arg)
 {
-    krb5_db2_context *db_ctx;
-    DB     *db;
-    DBT     key, contents;
+    DB *db;
+    DBT key, contents;
     krb5_data contdata;
     krb5_db_entry *entry;
-    krb5_error_code retval;
-    int     dbret;
-    void   *cookie;
+    krb5_error_code retval, retval2;
+    int dbret;
 
-    cookie = NULL;
-    if (!inited(context))
-        return KRB5_KDB_DBNOTINITED;
-
-    db_ctx = context->dal_handle->db_context;
-    retval = krb5_db2_lock(context, KRB5_LOCKMODE_SHARED);
-
+    retval = ctx_lock(context, dbc, KRB5_LOCKMODE_SHARED);
     if (retval)
         return retval;
 
-    db = db_ctx->db;
-    if (recursive && db->type != DB_BTREE) {
-        (void) krb5_db2_unlock(context);
-        return KRB5_KDB_UK_RERROR;      /* Not optimal, but close enough. */
-    }
-
-    if (!recursive) {
-        dbret = (*db->seq) (db, &key, &contents, backwards ? R_LAST : R_FIRST);
-    } else {
-#ifdef HAVE_BT_RSEQ
-        dbret = bt_rseq(db, &key, &contents, &cookie,
-                        backwards ? R_LAST : R_FIRST);
-#else
-        (void) krb5_db2_unlock(context);
-        return KRB5_KDB_UK_RERROR;      /* Not optimal, but close enough. */
-#endif
-    }
+    db = dbc->db;
+    dbret = db->seq(db, &key, &contents, R_FIRST);
     while (dbret == 0) {
-        krb5_error_code retval2;
-
         contdata.data = contents.data;
         contdata.length = contents.size;
         retval = krb5_decode_princ_entry(context, &contdata, &entry);
@@ -1017,18 +974,7 @@ krb5_db2_iterate_ext(krb5_context context,
             retval = retval2;
             break;
         }
-        if (!recursive) {
-            dbret = (*db->seq) (db, &key, &contents,
-                                backwards ? R_PREV : R_NEXT);
-        } else {
-#ifdef HAVE_BT_RSEQ
-            dbret = bt_rseq(db, &key, &contents, &cookie,
-                            backwards ? R_PREV : R_NEXT);
-#else
-            (void) krb5_db2_unlock(context);
-            return KRB5_KDB_UK_RERROR;  /* Not optimal, but close enough. */
-#endif
-        }
+        dbret = db->seq(db, &key, &contents, R_NEXT);
     }
     switch (dbret) {
     case 1:
@@ -1038,7 +984,7 @@ krb5_db2_iterate_ext(krb5_context context,
     default:
         retval = errno;
     }
-    (void) krb5_db2_unlock(context);
+    (void) ctx_unlock(context, dbc);
     return retval;
 }
 
@@ -1047,20 +993,23 @@ krb5_db2_iterate(krb5_context context, char *match_expr,
                  krb5_error_code(*func) (krb5_pointer, krb5_db_entry *),
                  krb5_pointer func_arg)
 {
-    return krb5_db2_iterate_ext(context, func, func_arg, 0, 0);
+    if (!inited(context))
+        return KRB5_KDB_DBNOTINITED;
+    return ctx_iterate(context, context->dal_handle->db_context, func,
+                       func_arg);
 }
 
 krb5_boolean
 krb5_db2_set_lockmode(krb5_context context, krb5_boolean mode)
 {
     krb5_boolean old;
-    krb5_db2_context *db_ctx;
+    krb5_db2_context *dbc;
 
-    db_ctx = context->dal_handle->db_context;
+    dbc = context->dal_handle->db_context;
     old = mode;
-    if (db_ctx) {
-        old = db_ctx->db_nb_locks;
-        db_ctx->db_nb_locks = mode;
+    if (dbc) {
+        old = dbc->db_nb_locks;
+        dbc->db_nb_locks = mode;
     }
     return old;
 }
@@ -1099,14 +1048,14 @@ krb5_db2_open(krb5_context context, char *conf_section, char **db_args,
     if (status != 0)
         return status;
 
-    return init_db2_context(context);
+    return ctx_init(context->dal_handle->db_context);
 }
 
 krb5_error_code
 krb5_db2_create(krb5_context context, char *conf_section, char **db_args)
 {
     krb5_error_code status = 0;
-    krb5_db2_context *db_ctx;
+    krb5_db2_context *dbc;
 
     krb5_clear_error_message(context);
     if (inited(context))
@@ -1116,24 +1065,23 @@ krb5_db2_create(krb5_context context, char *conf_section, char **db_args)
     if (status != 0)
         return status;
 
-    status = check_openable(context);
-    if (status == 0)
-        return EEXIST;
-
-    db_ctx = context->dal_handle->db_context;
-    status = create_db(context, db_ctx->db_name);
+    dbc = context->dal_handle->db_context;
+    status = ctx_create_db(context, dbc);
     if (status != 0)
         return status;
 
-    return init_db2_context(context);
+    if (!dbc->tempdb)
+        krb5_db2_unlock(context);
+
+    return 0;
 }
 
 krb5_error_code
 krb5_db2_destroy(krb5_context context, char *conf_section, char **db_args)
 {
-    krb5_error_code status = 0;
-    krb5_db2_context *db_ctx;
-    char *dbname, policy_db_name[1024], policy_lock_name[1024];
+    krb5_error_code status;
+    krb5_db2_context *dbc;
+    char *dbname = NULL, *lockname = NULL, *polname = NULL, *plockname = NULL;
 
     if (inited(context)) {
         status = krb5_db2_fini(context);
@@ -1150,25 +1098,29 @@ krb5_db2_destroy(krb5_context context, char *conf_section, char **db_args)
     if (status != 0)
         return status;
 
-    db_ctx = context->dal_handle->db_context;
-    dbname = db_ctx->db_name;
+    dbc = context->dal_handle->db_context;
 
-    status = destroy_file_suffix(dbname, "");
+    status = ctx_allfiles(dbc, &dbname, &lockname, &polname, &plockname);
     if (status)
-        return status;
-    status = destroy_file_suffix(dbname, KDB2_LOCK_EXT);
+        goto cleanup;
+    status = destroy_file(dbname);
     if (status)
-        return status;
-
-    snprintf(policy_db_name, sizeof(policy_db_name), "%s.kadm5", dbname);
-    snprintf(policy_lock_name, sizeof(policy_lock_name), "%s.lock",
-             policy_db_name);
-    status = osa_adb_destroy_db(policy_db_name, policy_lock_name,
-                                OSA_ADB_POLICY_DB_MAGIC);
+        goto cleanup;
+    status = unlink(lockname);
+    if (status)
+        goto cleanup;
+    status = osa_adb_destroy_db(polname, plockname, OSA_ADB_POLICY_DB_MAGIC);
     if (status)
         return status;
 
-    return krb5_db2_fini(context);
+    status = krb5_db2_fini(context);
+
+cleanup:
+    free(dbname);
+    free(lockname);
+    free(polname);
+    free(plockname);
+    return status;
 }
 
 void   *
@@ -1233,47 +1185,6 @@ krb5_db2_free_policy(krb5_context context, osa_policy_ent_t entry)
     osa_free_policy_ent(entry);
 }
 
-
-/* */
-
-krb5_error_code
-krb5_db2_promote_db(krb5_context context, char *conf_section, char **db_args)
-{
-    krb5_error_code status = 0;
-    char *db_name = NULL;
-    char *temp_db_name = NULL;
-    char **db_argp;
-    int merge_nra = 0;
-    krb5_db2_context *db_ctx = context->dal_handle->db_context;
-
-    krb5_clear_error_message (context);
-
-    db_name = strdup(db_ctx->db_name);
-    if (db_name == NULL) {
-        status = ENOMEM;
-        goto clean_n_exit;
-    }
-
-    status = gen_dbsuffix(db_name, "~", &temp_db_name);
-    if (status)
-        goto clean_n_exit;
-
-    for (db_argp = db_args; *db_argp; db_argp++) {
-        if (!strcmp(*db_argp, "merge_nra")) {
-            merge_nra++;
-            break;
-        }
-    }
-
-    status = krb5_db2_rename(context, temp_db_name, db_name, merge_nra);
-    if (status)
-        goto clean_n_exit;
-
-clean_n_exit:
-    free(db_name);
-    free(temp_db_name);
-    return status;
-}
 
 /*
  * Merge non-replicated attributes from src into dst, setting
@@ -1357,192 +1268,141 @@ krb5_db2_merge_nra_iterator(krb5_pointer ptr, krb5_db_entry *entry)
 
 /*
  * Merge non-replicated attributes (that is, lockout-related
- * attributes and negative TL data types) from the old database
- * into the new one.
- *
- * Note: src_db is locked on success.
+ * attributes and negative TL data types) from the real database
+ * into the temporary one.
  */
 static krb5_error_code
-krb5_db2_begin_nra_merge(krb5_context context,
-                         krb5_db2_context *src_db,
-                         krb5_db2_context *dst_db)
+ctx_merge_nra(krb5_context context, krb5_db2_context *dbc_temp,
+              krb5_db2_context *dbc_real)
 {
-    krb5_error_code retval;
-    kdb5_dal_handle *dal_handle = context->dal_handle;
     struct nra_context nra;
 
     nra.kcontext = context;
-    nra.db_context = dst_db;
-
-    assert(dal_handle->db_context == dst_db);
-    dal_handle->db_context = src_db;
-
-    retval = krb5_db2_lock(context, KRB5_LOCKMODE_EXCLUSIVE);
-    if (retval) {
-        dal_handle->db_context = dst_db;
-        return retval;
-    }
-
-    retval = krb5_db2_iterate_ext(context, krb5_db2_merge_nra_iterator,
-                                  &nra, 0, 0);
-    if (retval != 0)
-        (void) krb5_db2_unlock(context);
-
-    dal_handle->db_context = dst_db;
-
-    return retval;
+    nra.db_context = dbc_real;
+    return ctx_iterate(context, dbc_temp, krb5_db2_merge_nra_iterator, &nra);
 }
 
 /*
- * Finish merge of non-replicated attributes by unlocking
- * src_db.
+ * In the filesystem, promote the temporary database described by dbc_temp to
+ * the real database described by dbc_real.  Both must be exclusively locked.
  */
 static krb5_error_code
-krb5_db2_end_nra_merge(krb5_context context,
-                       krb5_db2_context *src_db,
-                       krb5_db2_context *dst_db)
+ctx_promote(krb5_context context, krb5_db2_context *dbc_temp,
+            krb5_db2_context *dbc_real)
 {
     krb5_error_code retval;
-    kdb5_dal_handle *dal_handle = context->dal_handle;
+    char *tdb = NULL, *tlock = NULL, *tpol = NULL, *tplock = NULL;
+    char *rdb = NULL, *rlock = NULL, *rpol = NULL, *rplock = NULL;
 
-    dal_handle->db_context = src_db;
-    retval = krb5_db2_unlock(context);
-    dal_handle->db_context = dst_db;
+    /* Generate all filenames of interest (including a few we don't need). */
+    retval = ctx_allfiles(dbc_temp, &tdb, &tlock, &tpol, &tplock);
+    if (retval)
+        return retval;
+    retval = ctx_allfiles(dbc_real, &rdb, &rlock, &rpol, &rplock);
+    if (retval)
+        goto cleanup;
 
+    /* Rename the principal and policy databases into place. */
+    if (rename(tdb, rdb)) {
+        retval = errno;
+        goto cleanup;
+    }
+    if (rename(tpol, rpol)) {
+        retval = errno;
+        goto cleanup;
+    }
+
+    ctx_update_age(dbc_real);
+
+    /* Release and remove the temporary DB lockfiles. */
+    (void) unlink(tlock);
+    (void) unlink(tplock);
+
+cleanup:
+    free(tdb);
+    free(tlock);
+    free(tpol);
+    free(tplock);
+    free(rdb);
+    free(rlock);
+    free(rpol);
+    free(rplock);
     return retval;
 }
 
-/* Retrieved from pre-DAL code base.  */
-/*
- * "Atomically" rename the database in a way that locks out read
- * access in the middle of the rename.
- *
- * Not perfect; if we crash in the middle of an update, we don't
- * necessarily know to complete the transaction the rename, but...
- *
- * Since the rename operation happens outside the init/fini bracket, we
- * have to go through the same stuff that we went through up in db_destroy.
- */
 krb5_error_code
-krb5_db2_rename(krb5_context context, char *from, char *to, int merge_nra)
+krb5_db2_promote_db(krb5_context context, char *conf_section, char **db_args)
 {
-    char *fromok;
     krb5_error_code retval;
-    krb5_db2_context *s_context, *db_ctx;
-    kdb5_dal_handle *dal_handle = context->dal_handle;
+    krb5_boolean merge_nra = FALSE, real_locked = FALSE;
+    krb5_db2_context *dbc_temp, *dbc_real = NULL;
+    char **db_argp;
 
-    s_context = dal_handle->db_context;
-    dal_handle->db_context = NULL;
-    retval = get_context(context, &db_ctx);
-    if (retval)
+    /* context must be initialized with an exclusively locked temp DB. */
+    if (!inited(context))
+        return KRB5_KDB_DBNOTINITED;
+    dbc_temp = context->dal_handle->db_context;
+    if (dbc_temp->db_lock_mode != KRB5_LOCKMODE_EXCLUSIVE)
+        return KRB5_KDB_NOTLOCKED;
+    if (!dbc_temp->tempdb)
+        return EINVAL;
+
+    /* Check db_args for whether we should merge non-replicated attributes. */
+    for (db_argp = db_args; *db_argp; db_argp++) {
+        if (!strcmp(*db_argp, "merge_nra")) {
+            merge_nra = TRUE;
+            break;
+        }
+    }
+
+    /* Make a db2 context for the real DB. */
+    dbc_real = k5alloc(sizeof(*dbc_real), &retval);
+    if (dbc_real == NULL)
         return retval;
+    ctx_clear(dbc_real);
 
-    /*
-     * Create the database if it does not already exist; the
-     * files must exist because krb5_db2_lock, called below,
-     * will fail otherwise.
-     */
-    retval = create_db(context, to);
-    if (retval != 0 && retval != EEXIST)
-        goto errout;
-
-    /*
-     * Set the database to the target, so that other processes sharing
-     * the target will stop their activity, and notice the new database.
-     */
-    db_ctx->db_name = strdup(to);
-    if (db_ctx->db_name == NULL) {
-        retval = ENOMEM;
-        goto errout;
-    }
-
-    retval = check_openable(context);
-    if (retval)
-        goto errout;
-
-    retval = init_db2_context(context);
-    if (retval)
-        goto errout;
-
-    retval = gen_dbsuffix(db_ctx->db_name, KDB2_LOCK_EXT, &db_ctx->db_lf_name);
-    if (retval)
-        goto errout;
-    db_ctx->db_lf_file = open(db_ctx->db_lf_name, O_RDWR|O_CREAT, 0600);
-    if (db_ctx->db_lf_file < 0) {
-        retval = errno;
-        goto errout;
-    }
-    set_cloexec_fd(db_ctx->db_lf_file);
-
-    db_ctx->db_inited = 1;
-
-    retval = gen_dbsuffix(from, KDB2_LOCK_EXT, &fromok);
-    if (retval)
-        goto errout;
-
-    if ((retval = krb5_db2_lock(context, KRB5_LOCKMODE_EXCLUSIVE)))
-        goto errfromok;
-
-    if ((retval = start_update(context)))
-        goto errfromok;
+    /* Try creating the real DB. */
+    dbc_real->db_name = strdup(dbc_temp->db_name);
+    if (dbc_real->db_name == NULL)
+        goto cleanup;
+    dbc_real->tempdb = FALSE;
+    retval = ctx_create_db(context, dbc_real);
+    if (retval == EEXIST) {
+        /* The real database already exists, so open and lock it. */
+        dbc_real->db_name = strdup(dbc_temp->db_name);
+        if (dbc_real->db_name == NULL)
+            goto cleanup;
+        dbc_real->tempdb = FALSE;
+        retval = ctx_init(dbc_real);
+        if (retval)
+            goto cleanup;
+        retval = ctx_lock(context, dbc_real, KRB5_DB_LOCKMODE_EXCLUSIVE);
+        if (retval)
+            goto cleanup;
+    } else if (retval)
+        goto cleanup;
+    real_locked = TRUE;
 
     if (merge_nra) {
-        if ((retval = krb5_db2_begin_nra_merge(context, s_context, db_ctx)))
-            goto errfromok;
+        retval = ctx_merge_nra(context, dbc_temp, dbc_real);
+        if (retval)
+            goto cleanup;
     }
 
-    if (rename(from, to)) {
-        retval = errno;
-        goto errfromok;
-    }
-    if (unlink(fromok)) {
-        retval = errno;
-        goto errfromok;
-    }
-
-    if (merge_nra) {
-        krb5_db2_end_nra_merge(context, s_context, db_ctx);
-    }
-
-    retval = end_update(context);
+    /* Perform filesystem manipulations for the promotion. */
+    retval = ctx_promote(context, dbc_temp, dbc_real);
     if (retval)
-        goto errfromok;
+        goto cleanup;
 
-    {
-        /* XXX moved so that NRA merge works */
-        /* Ugly brute force hack.
+    /* Unlock and finalize context since the temp DB is gone. */
+    (void) krb5_db2_unlock(context);
+    krb5_db2_fini(context);
 
-           Should be going through nice friendly helper routines for
-           this, but it's a mess of jumbled so-called interfaces right
-           now.  */
-        char    policy[2048], new_policy[2048];
-        assert (strlen(db_ctx->db_name) < 2000);
-        snprintf(policy, sizeof(policy), "%s.kadm5", db_ctx->db_name);
-        snprintf(new_policy, sizeof(new_policy),
-                 "%s~.kadm5", db_ctx->db_name);
-        if (0 != rename(new_policy, policy)) {
-            retval = errno;
-            goto errfromok;
-        }
-        strlcat(new_policy, ".lock",sizeof(new_policy));
-        (void) unlink(new_policy);
-    }
-
-errfromok:
-    free(fromok);
-errout:
-    if (dal_handle->db_context) {
-        if (db_ctx->db_lf_file >= 0) {
-            krb5_db2_unlock(context);
-            close(db_ctx->db_lf_file);
-        }
-        clear_context((krb5_db2_context *) dal_handle->db_context);
-        free(dal_handle->db_context);
-    }
-
-    dal_handle->db_context = s_context;
-    (void) krb5_db2_unlock(context); /* unlock saved context db */
-
+cleanup:
+    if (real_locked)
+        (void) ctx_unlock(context, dbc_real);
+    if (dbc_real)
+        ctx_fini(dbc_real);
     return retval;
 }
 

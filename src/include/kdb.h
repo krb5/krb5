@@ -800,14 +800,6 @@ typedef struct _kdb_vftabl {
      * command-line arguments for module-specific flags.  mode will be one of
      * KRB5_KDB_OPEN_{RW,RO} or'd with one of
      * KRB5_KDB_SRV_TYPE_{KDC,ADMIN,PASSWD,OTHER}.
-     *
-     * A db_args value of "temporary" is generated programattically by
-     * kdb5_util load.  If this db_args value is present, the module should
-     * open a side copy of the database suitable for loading in a propagation
-     * from master to slave.  This side copy will later be promoted with
-     * promote_db, allowing complete updates of the DB with no loss in read
-     * availability.  If the module cannot comply with this architecture, it
-     * should return an error.
      */
     krb5_error_code (*init_module)(krb5_context kcontext, char *conf_section,
                                    char **db_args, int mode);
@@ -823,6 +815,13 @@ typedef struct _kdb_vftabl {
      * database.  conf_section and db_args have the same meaning as in
      * init_module.  This function may return an error if the database already
      * exists.  Used by kdb5_util create.
+     *
+     * If db_args contains the value "temporary", the module should create an
+     * exclusively locked side copy of the database suitable for loading in a
+     * propagation from master to slave.  This side copy will later be promoted
+     * with promote_db, allowing complete updates of the DB with no loss in
+     * read availability.  If the module cannot comply with this architecture,
+     * it should return an error.
      */
     krb5_error_code (*create)(krb5_context kcontext, char *conf_section,
                               char **db_args);
@@ -1104,10 +1103,13 @@ typedef struct _kdb_vftabl {
                                   krb5_db_entry *db_entry);
 
     /*
-     * Optional: Promote a temporary database to be the live one.  kdb5_util
-     * load opens the database with the "temporary" db_arg and then invokes
-     * this function when the load is complete, thus replacing the live
-     * database with no loss of read availability.
+     * Optional: Promote a temporary database to be the live one.  context must
+     * be initialized with an exclusively locked database created with the
+     * "temporary" db_arg.  On success, the database object contained in
+     * context will be finalized.
+     *
+     * This method is used by kdb5_util load to replace the live database with
+     * minimal loss of read availability.
      */
     krb5_error_code (*promote_db)(krb5_context context, char *conf_section,
                                   char **db_args);

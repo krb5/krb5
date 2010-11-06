@@ -50,22 +50,14 @@ typedef struct _krb5_db2_context {
 
 #define KRB5_DB2_MAX_RETRY 5
 
-#define KDB2_LOCK_EXT ".ok"
-#define KDB2_TEMP_LOCK_EXT "~.ok"
-
 krb5_error_code krb5_db2_init(krb5_context);
 krb5_error_code krb5_db2_fini(krb5_context);
 krb5_error_code krb5_db2_get_age(krb5_context, char *, time_t *);
-krb5_error_code krb5_db2_rename(krb5_context, char *, char *, int );
 krb5_error_code krb5_db2_get_principal(krb5_context, krb5_const_principal,
                                        unsigned int, krb5_db_entry **);
 void krb5_db2_free_principal(krb5_context, krb5_db_entry *);
 krb5_error_code krb5_db2_put_principal(krb5_context, krb5_db_entry *,
                                        char **db_args);
-krb5_error_code krb5_db2_iterate_ext(krb5_context,
-                                     krb5_error_code (*)(krb5_pointer,
-                                                         krb5_db_entry *),
-                                     krb5_pointer, int, int);
 krb5_error_code krb5_db2_iterate(krb5_context, char *,
                                  krb5_error_code (*)(krb5_pointer,
                                                      krb5_db_entry *),

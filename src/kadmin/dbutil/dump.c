@@ -2522,41 +2522,29 @@ load_db(argc, argv)
         }
     }
     else {
-        /*
-         * Initialize the database.
-         */
-        if ((kret = krb5_db_open(kcontext, db5util_db_args,
-                                 KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN))) {
+        /* Initialize the database. */
+        kret = krb5_db_open(kcontext, db5util_db_args,
+                            KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_ADMIN);
+        if (kret) {
             const char *emsg = krb5_get_error_message(kcontext, kret);
             fprintf(stderr, "%s: %s\n", progname, emsg);
             krb5_free_error_message (kcontext, emsg);
             exit_status++;
             goto error;
         }
-    }
 
-
-    /*
-     * If an update restoration, make sure the db is left unusable if
-     * the update fails.
-     */
-    if ((kret = krb5_db_lock(kcontext,
-                             (flags & FLAG_UPDATE) ?
-                             KRB5_DB_LOCKMODE_PERMANENT :
-                             KRB5_DB_LOCKMODE_EXCLUSIVE))) {
-        /*
-         * Ignore a not supported error since there is nothing to do about it
-         * anyway.
-         */
-        if (kret != KRB5_PLUGIN_OP_NOTSUPP) {
+        /* Make sure the db is left unusable if the update fails, if the db
+         * supports locking. */
+        kret = krb5_db_lock(kcontext, KRB5_DB_LOCKMODE_PERMANENT);
+        if (kret == 0)
+            db_locked = 1;
+        else if (kret != KRB5_PLUGIN_OP_NOTSUPP) {
             fprintf(stderr, "%s: %s while permanently locking database\n",
                     progname, error_message(kret));
             exit_status++;
             goto error;
         }
     }
-    else
-        db_locked = 1;
 
     if (log_ctx && log_ctx->iproprole) {
         if (add_update)
