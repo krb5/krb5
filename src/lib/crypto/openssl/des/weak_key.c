@@ -34,6 +34,7 @@
  */
 
 #include "des_int.h"
+#include <openssl/des.h>
 
 /*
  * The following are the weak DES keys:
