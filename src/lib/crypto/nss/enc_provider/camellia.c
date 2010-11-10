@@ -39,10 +39,9 @@
 #include "aead.h"
 #include "nss_gen.h"
 
-#ifdef CAMELLIA_CCM
+#ifdef CAMELLIA
 
-/* XXX These won't work yet (they're just the AES functions, which aren't right
- * for CTR mode).  Will fix later. */
+/* XXX This still needs a cbc-mac function. */
 
 krb5_error_code
 krb5int_camellia_encrypt(krb5_key key, const krb5_data *ivec,
@@ -120,7 +119,7 @@ krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
     return EINVAL;
 }
 
-const struct krb5_enc_provider krb5int_enc_camellia128_ctr = {
+const struct krb5_enc_provider krb5int_enc_camellia128 = {
 };
 
 #endif

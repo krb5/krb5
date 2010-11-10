@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include "camellia.h"
 
-#ifdef CAMELLIA_CCM
+#ifdef CAMELLIA
 
 #define B 16U
 unsigned char key[16];
@@ -316,11 +316,11 @@ static void cts_test ()
     printf ("\n");
 }
 
-#endif /* CAMELLIA_CCM */
+#endif /* CAMELLIA */
 
 int main ()
 {
-#ifdef CAMELLIA_CCM
+#ifdef CAMELLIA
     init ();
     fips_test ();
 

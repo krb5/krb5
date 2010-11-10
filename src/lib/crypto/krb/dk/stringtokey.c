@@ -185,13 +185,13 @@ krb5int_aes_string_to_key(const struct krb5_keytypes *ktp,
                                 DERIVE_RFC3961);
 }
 
-#ifdef CAMELLIA_CCM
+#ifdef CAMELLIA
 krb5_error_code
-krb5int_camellia_ccm_string_to_key(const struct krb5_keytypes *ktp,
-                                   const krb5_data *string,
-                                   const krb5_data *salt,
-                                   const krb5_data *params,
-                                   krb5_keyblock *key)
+krb5int_camellia_string_to_key(const struct krb5_keytypes *ktp,
+                               const krb5_data *string,
+                               const krb5_data *salt,
+                               const krb5_data *params,
+                               krb5_keyblock *key)
 {
     krb5_data pepper = string2data(ktp->name);
 

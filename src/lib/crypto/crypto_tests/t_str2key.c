@@ -158,128 +158,128 @@ struct test {
           "\x57\x18\x48\xB7\x84\xA3\xD6\xBD\xC3\x46\x58\x9A\x3E\x39\x3F\x9E" }
     },
 
-#ifdef CAMELLIA_CCM
-    /* The same inputs applied to camellia-ccm enctypes. */
+#ifdef CAMELLIA
+    /* The same inputs applied to Camellia enctypes. */
     { 
-        ENCTYPE_CAMELLIA128_CCM_128,
+        ENCTYPE_CAMELLIA128_CTS_CMAC,
         "password",
         "ATHENA.MIT.EDUraeburn",
         { KV5M_DATA, 4, "\0\0\0\1" },
         { KV5M_DATA, 16,
-          "\xF0\x10\x02\xD2\xB1\xF9\xA1\xAD\xE2\x57\xEE\xF7\x52\x9C\x2A\x16" }
+          "\x01\xCD\x91\xED\x3E\x06\x7D\x3D\xA1\x3C\x13\xA4\xBB\xEC\xFC\xAE" }
     },
     { 
-        ENCTYPE_CAMELLIA256_CCM_128,
+        ENCTYPE_CAMELLIA256_CTS_CMAC,
         "password",
         "ATHENA.MIT.EDUraeburn",
         { KV5M_DATA, 4, "\0\0\0\1" },
         { KV5M_DATA, 32,
-          "\xD7\xEF\x37\xE2\xD1\x05\x5E\xB7\xD7\x6B\x06\x39\x6E\xF7\x00\x52"
-          "\x3D\xA4\xB0\xB7\xA0\x53\xF5\xCC\x5F\xAE\x4A\x39\xCF\xC5\x75\x0F" }
+          "\xC2\x21\x09\x04\x02\x9D\x7C\x23\xD4\x85\x7B\xA9\x6E\xC4\x8C\xE5"
+          "\x5F\xB6\x07\x69\x4A\xFC\x4F\xE4\xFD\x3A\x18\xB0\xD8\x02\x8D\xCB" }
     },
     { 
-        ENCTYPE_CAMELLIA128_CCM_128,
+        ENCTYPE_CAMELLIA128_CTS_CMAC,
         "password",
         "ATHENA.MIT.EDUraeburn",
         { KV5M_DATA, 4, "\0\0\0\2" },
         { KV5M_DATA, 16,
-          "\xDD\x74\x90\xC0\x57\x4A\x44\x6B\x10\x3A\xB3\x1B\x6D\xE4\x77\x4F" }
+          "\xF7\x45\xEE\x4A\xA0\x4B\x0E\xAC\x30\x82\x25\xF3\xDB\xE0\x6C\xB4" }
     },
     { 
-        ENCTYPE_CAMELLIA256_CCM_128,
+        ENCTYPE_CAMELLIA256_CTS_CMAC,
         "password",
         "ATHENA.MIT.EDUraeburn",
         { KV5M_DATA, 4, "\0\0\0\2" },
         { KV5M_DATA, 32,
-          "\x68\xC1\x64\x74\x09\x42\x8F\x59\x47\x9B\x26\xC3\x98\x6D\x5B\xB8"
-          "\x66\x1C\xDE\x3C\x66\x79\xA0\xF5\x2C\x89\x01\xBD\x78\xDC\xEB\xA2" }
+          "\x31\x79\x77\x0E\x5F\x2E\xDD\x28\xFE\x11\x21\xB9\x17\xCF\xA7\x48"
+          "\x0C\xA6\x73\x63\x67\x17\xFC\x74\xCB\x23\x4A\x84\x1B\xA9\x0F\xAF" }
     },
     { 
-        ENCTYPE_CAMELLIA128_CCM_128,
+        ENCTYPE_CAMELLIA128_CTS_CMAC,
         "password",
         "ATHENA.MIT.EDUraeburn",
         { KV5M_DATA, 4, "\0\0\x04\xB0" }, /* 1200 */
         { KV5M_DATA, 16,
-          "\x1A\xA9\x0A\xA6\x1E\x0B\x3C\xB8\x6A\xA5\xA7\x7E\xD8\x44\x9D\x3B" }
+          "\x12\xCA\xCB\x5B\xFD\xD2\x46\x88\xCF\x8C\x48\xFB\x01\x4E\x9F\xCD" }
     },
     { 
-        ENCTYPE_CAMELLIA256_CCM_128,
+        ENCTYPE_CAMELLIA256_CTS_CMAC,
         "password",
         "ATHENA.MIT.EDUraeburn",
         { KV5M_DATA, 4, "\0\0\x04\xB0" }, /* 1200 */
         { KV5M_DATA, 32,
-          "\xF8\x29\xBC\xE4\xBB\xB1\xA2\x4B\x01\xA0\xE8\xB1\xA7\x09\x52\x0A"
-          "\x61\x38\xE9\xAF\xE5\x13\x84\x59\xB2\x0B\xAC\xCA\xB2\x4D\x5F\xAA" }
+          "\xE8\x50\x13\x56\xD1\x94\x84\x7B\xB2\x92\x14\xF8\x8E\x76\xB6\x36"
+          "\x0B\x5C\x1F\x91\xB9\xE1\xD7\x9B\xD7\x99\x3A\x4B\x8E\x73\x0A\x55" }
     },
     { 
-        ENCTYPE_CAMELLIA128_CCM_128,
+        ENCTYPE_CAMELLIA128_CTS_CMAC,
         "password",
         "\x12\x34\x56\x78\x78\x56\x34\x12",
         { KV5M_DATA, 4, "\0\0\0\5" },
         { KV5M_DATA, 16,
-          "\x35\x70\xC6\x68\x0D\xC6\xE9\xB0\x2E\x01\x28\x8B\xD0\xD2\xB6\x9B" }
+          "\xE7\x88\xB8\x1C\x48\x92\x51\x89\x5A\x6D\x2A\xAE\x0B\x79\xAE\x50" }
     },
     { 
-        ENCTYPE_CAMELLIA256_CCM_128,
+        ENCTYPE_CAMELLIA256_CTS_CMAC,
         "password",
         "\x12\x34\x56\x78\x78\x56\x34\x12",
         { KV5M_DATA, 4, "\0\0\0\5" },
         { KV5M_DATA, 32,
-          "\x40\xB3\xB7\xC8\xF9\xC3\xB8\x65\x18\x10\xDC\x28\x42\x2D\x5F\x6D"
-          "\x10\xA6\xB3\xE9\xE1\x2A\x71\xFF\xA6\x35\x41\x08\x4A\xFA\x2C\xA2" }
+          "\xB5\x04\xFD\xB2\x5A\xE5\x77\x92\x02\xAE\xE2\x85\x4B\x7D\xE5\xFD"
+          "\xF3\x62\x7F\xEF\x7B\x48\x2F\xB4\x77\xD4\xFA\x9C\xE7\x31\x0E\xF0" }
     },
     { 
-        ENCTYPE_CAMELLIA128_CCM_128,
+        ENCTYPE_CAMELLIA128_CTS_CMAC,
         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
         "pass phrase equals block size",
         { KV5M_DATA, 4, "\0\0\x04\xB0" }, /* 1200 */
         { KV5M_DATA, 16,
-          "\xFF\x99\x18\x52\x84\x8E\x67\x50\x4C\x09\x4F\x94\x68\xC9\xD6\x05" }
+          "\xC4\x3F\x01\x7B\x6D\x13\x51\xF4\xD0\xBF\x0F\x4A\x75\xB1\xF1\xD2" }
     },
     { 
-        ENCTYPE_CAMELLIA256_CCM_128,
+        ENCTYPE_CAMELLIA256_CTS_CMAC,
         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
         "pass phrase equals block size",
         { KV5M_DATA, 4, "\0\0\x04\xB0" }, /* 1200 */
         { KV5M_DATA, 32,
-          "\x56\x5C\x0A\x29\xC0\x58\xCD\xDC\x3C\xD8\xA9\xF3\x0A\x92\xAA\xD7"
-          "\xFE\x30\xEA\xD4\x16\xC1\x51\xAA\x9B\x54\x75\x56\x62\xF0\x95\xDD" }
+          "\x38\xF7\xFC\x25\xD6\x7E\x41\xAC\xDD\xDB\xC0\x5F\x66\xAE\x11\x13"
+          "\x22\x53\x47\xDC\xBC\x24\x67\xF2\x09\xA9\x7E\x0A\xFB\x30\xDE\x9D" }
     },
     { 
-        ENCTYPE_CAMELLIA128_CCM_128,
+        ENCTYPE_CAMELLIA128_CTS_CMAC,
         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
         "pass phrase exceeds block size",
         { KV5M_DATA, 4, "\0\0\x04\xB0" }, /* 1200 */
         { KV5M_DATA, 16,
-          "\xAC\x83\x28\x64\x10\xA2\x8C\x76\x64\x79\x60\xF6\xA0\x37\x88\x03" }
+          "\xD9\xC3\x63\xF7\xED\x5E\x4B\x9A\x17\x8F\xF4\xD8\x4B\x3E\x51\x73" }
     },
     { 
-        ENCTYPE_CAMELLIA256_CCM_128,
+        ENCTYPE_CAMELLIA256_CTS_CMAC,
         "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
         "pass phrase exceeds block size",
         { KV5M_DATA, 4, "\0\0\x04\xB0" }, /* 1200 */
         { KV5M_DATA, 32,
-          "\xD3\x25\x4A\x5B\x45\x1F\x27\x9C\x1A\xD6\x29\x3E\x72\xF0\x69\x55"
-          "\xEB\xFF\x36\xB6\x47\xDF\x97\x48\x97\x18\xD7\x5C\xF0\x6C\x40\x7C" }
+          "\x0D\x88\xB2\xB3\x47\xD6\x79\xDA\xD2\xFF\xAE\x25\x6B\x64\xAD\x9A"
+          "\x0F\x09\xB9\x16\x5E\xA8\x32\xB4\x01\xB4\x55\x31\xB9\xE0\xE3\x05" }
     },
     { 
-        ENCTYPE_CAMELLIA128_CCM_128,
+        ENCTYPE_CAMELLIA128_CTS_CMAC,
         "\xf0\x9d\x84\x9e",
         "EXAMPLE.COMpianist",
         { KV5M_DATA, 4, "\0\0\0\x32" }, /* 50 */
         { KV5M_DATA, 16,
-          "\x5D\xBD\x71\x57\x09\x38\x59\x81\xDA\xAB\xA2\x8A\x43\x10\xD7\x20" }
+          "\xF1\x64\xCF\xBB\xC3\x27\xE1\x70\x34\x93\x40\x92\xDC\xEA\x61\x5B" }
     },
     { 
-        ENCTYPE_CAMELLIA256_CCM_128,
+        ENCTYPE_CAMELLIA256_CTS_CMAC,
         "\xf0\x9d\x84\x9e",
         "EXAMPLE.COMpianist",
         { KV5M_DATA, 4, "\0\0\0\x32" }, /* 50 */
         { KV5M_DATA, 32,
-          "\x6A\x1F\x10\xE5\x74\x4E\x32\xDD\x33\x49\x03\xA8\xEB\xD1\x42\x7E"
-          "\x4C\x8D\x3D\x6D\xA5\x76\x77\x50\x4C\x38\x4C\x24\x33\x0B\x60\x3D" }
+          "\xBC\xD7\x5F\x07\x22\x5F\x25\xEC\xD4\x35\xA1\x74\x68\xE9\xAD\x64"
+          "\x49\x83\x63\xF7\x87\xD1\xAE\xE9\x2A\xFE\xA9\xCB\x5C\x95\xEE\xAB" }
     }
-#endif /* CAMELLIA_CCM */
+#endif /* CAMELLIA */
 };
 
 static void
@@ -288,9 +288,9 @@ printkey(krb5_keyblock *keyblock)
     unsigned int i;
 
     for (i = 0; i < keyblock->length; i++) {
-        printf("%02X", keyblock->contents[i]);
-        if (i + 1 < keyblock->length)
-            printf(" ");
+        printf("\\x%02X", keyblock->contents[i]);
+/*        if (i + 1 < keyblock->length)
+          printf(" "); */
     }
     printf("\n");
 }

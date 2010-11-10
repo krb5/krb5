@@ -55,7 +55,7 @@ check-unix:: t_nfold t_encrypt t_prf t_prng t_cmac t_hmac \
 		aes-test  \
 		camellia-test  \
 		t_mddriver4 t_mddriver \
-		t_crc t_cts t_short t_str2key t_fork t_camellia_ccm
+		t_crc t_cts t_short t_str2key t_fork
 	$(RUN_SETUP) $(VALGRIND) ./t_nfold
 	$(RUN_SETUP) $(VALGRIND) ./t_encrypt
 	$(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output
@@ -75,14 +75,13 @@ check-unix:: t_nfold t_encrypt t_prf t_prng t_cmac t_hmac \
 	$(RUN_SETUP) $(VALGRIND) ./aes-test > vt.txt
 	cmp vt.txt $(srcdir)/expect-vt.txt
 	$(RUN_SETUP) $(VALGRIND) ./camellia-test > camellia-vt.txt
-# Enable this when Camellia-CCM becomes unconditional.
+# Enable this when Camellia becomes unconditional.
 #	cmp camellia-vt.txt $(srcdir)/camellia-expect-vt.txt
 	$(RUN_SETUP) $(VALGRIND) $(C)t_mddriver4 -x
 	$(RUN_SETUP) $(VALGRIND) $(C)t_mddriver -x
 	$(RUN_SETUP) $(VALGRIND) ./t_short
 	$(RUN_SETUP) $(VALGRIND) ./t_str2key
 	$(RUN_SETUP) $(VALGRIND) ./t_fork
-	$(RUN_SETUP) $(VALGRIND) ./t_camellia_ccm
 
 
 
@@ -163,9 +162,6 @@ t_str2key$(EXEEXT): t_str2key.$(OBJEXT) $(SUPPORT_DEPLIB)
 t_fork$(EXEEXT): t_fork.$(OBJEXT) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_fork.$(OBJEXT) -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
 
-t_camellia_ccm$(EXEEXT): t_camellia_ccm.$(OBJEXT) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_camellia_ccm.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
-
 ytest: ytest.o shs.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o ytest ytest.o  $(SUPPORT_LIB)  $(CRYPTO_DEPLIB)
 
@@ -181,7 +177,7 @@ clean::
 		t_mddriver4.o t_mddriver4 t_mddriver.o t_mddriver \
 		t_cksum4 t_cksum4.o t_cksum5 t_cksum5.o \
 		t_kperf.o t_kperf t_short t_short.o t_str2key t_str2key.o \
-		t_fork t_fork.o t_camellia_ccm t_camellia_ccm.o \
+		t_fork t_fork.o \
 		t_mddriver$(EXEEXT) $(OUTPRE)t_mddriver.$(OBJEXT)
 
 	-$(RM) t_prng.output
