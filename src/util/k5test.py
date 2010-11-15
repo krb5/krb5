@@ -177,7 +177,7 @@ Scripts may use the following functions and variables:
   - kadmind
   - kadmin
   - kadmin_local
-  - kdb5
+  - kdb5_util
   - ktutil
   - kinit
   - klist
