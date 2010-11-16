@@ -158,6 +158,7 @@ proc doit { } {
 
     # Launch slave kpropd.
     start_kpropd
+#    setup_kerberos_env slave
 #    send_user [list $KPROPD -S -d -P [expr 10 + $portbase] -s $tmppwd/srvtab -f $tmppwd/incoming-slave-datatrans -p $KDB5_UTIL -a $tmppwd/kpropd-acl]\n
 #    spawn_shell
     expect {
