@@ -1034,7 +1034,9 @@ void PRS(argv)
 
     (void) memset(&params, 0, sizeof (params));
 
-    retval = kadm5_init_krb5_context(&kpropd_context);
+    /* Since we may modify the KDB with ulog_replay(), we must read the KDC
+     * profile. */
+    retval = krb5int_init_context_kdc(&kpropd_context);
     if (retval) {
         com_err(argv[0], retval, "while initializing krb5");
         exit(1);
