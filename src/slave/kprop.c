@@ -188,7 +188,7 @@ void PRS(argc, argv)
 void get_tickets(context)
     krb5_context context;
 {
-    char   buf[BUFSIZ];
+    char   buf[BUFSIZ], *def_realm;
     krb5_error_code retval;
     static char tkstring[] = "/tmp/kproptktXXXXXX";
     krb5_keytab keytab = NULL;
@@ -205,11 +205,25 @@ void get_tickets(context)
     if (realm) {
         retval = krb5_set_principal_realm(context, my_principal, realm);
         if (retval) {
-            com_err(progname, errno,
-                    "while setting client principal realm");
+            com_err(progname, errno, "while setting client principal realm");
+            exit(1);
+        }
+    } else if (krb5_is_referral_realm(krb5_princ_realm(context,
+                                                       my_principal))) {
+        /* We're going to use this as a client principal, so it can't have the
+         * referral realm.  Use the default realm instead. */
+        retval = krb5_get_default_realm(context, &def_realm);
+        if (retval) {
+            com_err(progname, errno, "while getting default realm");
+            exit(1);
+        }
+        retval = krb5_set_principal_realm(context, my_principal, def_realm);
+        if (retval) {
+            com_err(progname, errno, "while setting client principal realm");
             exit(1);
         }
     }
+
 #if 0
     krb5_princ_type(context, my_principal) = KRB5_NT_PRINCIPAL;
 #endif
