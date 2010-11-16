@@ -963,7 +963,7 @@ With incremental propagation enabled, all programs on the master KDC
 that change the database also write information about the changes to
 an ``update log'' file, maintained as a circular buffer of a certain
 size.  A process on each slave KDC connects to a service on the master
-KDC (currently implmented in the @code{kadmind} server) and
+KDC (currently implemented in the @code{kadmind} server) and
 periodically requests the changes that have been made since the last
 check.  By default, this check is done every two minutes.  If the
 database has just been modified in the previous several seconds
