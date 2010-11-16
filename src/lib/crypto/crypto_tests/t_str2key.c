@@ -166,7 +166,7 @@ struct test {
         "ATHENA.MIT.EDUraeburn",
         { KV5M_DATA, 4, "\0\0\0\1" },
         { KV5M_DATA, 16,
-          "\x01\xCD\x91\xED\x3E\x06\x7D\x3D\xA1\x3C\x13\xA4\xBB\xEC\xFC\xAE" }
+          "\x57\xD0\x29\x72\x98\xFF\xD9\xD3\x5D\xE5\xA4\x7F\xB4\xBD\xE2\x4B" }
     },
     { 
         ENCTYPE_CAMELLIA256_CTS_CMAC,
@@ -174,8 +174,8 @@ struct test {
         "ATHENA.MIT.EDUraeburn",
         { KV5M_DATA, 4, "\0\0\0\1" },
         { KV5M_DATA, 32,
-          "\xC2\x21\x09\x04\x02\x9D\x7C\x23\xD4\x85\x7B\xA9\x6E\xC4\x8C\xE5"
-          "\x5F\xB6\x07\x69\x4A\xFC\x4F\xE4\xFD\x3A\x18\xB0\xD8\x02\x8D\xCB" }
+          "\xB9\xD6\x82\x8B\x20\x56\xB7\xBE\x65\x6D\x88\xA1\x23\xB1\xFA\xC6"
+          "\x82\x14\xAC\x2B\x72\x7E\xCF\x5F\x69\xAF\xE0\xC4\xDF\x2A\x6D\x2C" }
     },
     { 
         ENCTYPE_CAMELLIA128_CTS_CMAC,
@@ -183,7 +183,7 @@ struct test {
         "ATHENA.MIT.EDUraeburn",
         { KV5M_DATA, 4, "\0\0\0\2" },
         { KV5M_DATA, 16,
-          "\xF7\x45\xEE\x4A\xA0\x4B\x0E\xAC\x30\x82\x25\xF3\xDB\xE0\x6C\xB4" }
+          "\x73\xF1\xB5\x3A\xA0\xF3\x10\xF9\x3B\x1D\xE8\xCC\xAA\x0C\xB1\x52" }
     },
     { 
         ENCTYPE_CAMELLIA256_CTS_CMAC,
@@ -191,8 +191,8 @@ struct test {
         "ATHENA.MIT.EDUraeburn",
         { KV5M_DATA, 4, "\0\0\0\2" },
         { KV5M_DATA, 32,
-          "\x31\x79\x77\x0E\x5F\x2E\xDD\x28\xFE\x11\x21\xB9\x17\xCF\xA7\x48"
-          "\x0C\xA6\x73\x63\x67\x17\xFC\x74\xCB\x23\x4A\x84\x1B\xA9\x0F\xAF" }
+          "\x83\xFC\x58\x66\xE5\xF8\xF4\xC6\xF3\x86\x63\xC6\x5C\x87\x54\x9F"
+          "\x34\x2B\xC4\x7E\xD3\x94\xDC\x9D\x3C\xD4\xD1\x63\xAD\xE3\x75\xE3" }
     },
     { 
         ENCTYPE_CAMELLIA128_CTS_CMAC,
@@ -200,7 +200,7 @@ struct test {
         "ATHENA.MIT.EDUraeburn",
         { KV5M_DATA, 4, "\0\0\x04\xB0" }, /* 1200 */
         { KV5M_DATA, 16,
-          "\x12\xCA\xCB\x5B\xFD\xD2\x46\x88\xCF\x8C\x48\xFB\x01\x4E\x9F\xCD" }
+          "\x8E\x57\x11\x45\x45\x28\x55\x57\x5F\xD9\x16\xE7\xB0\x44\x87\xAA" }
     },
     { 
         ENCTYPE_CAMELLIA256_CTS_CMAC,
@@ -208,8 +208,8 @@ struct test {
         "ATHENA.MIT.EDUraeburn",
         { KV5M_DATA, 4, "\0\0\x04\xB0" }, /* 1200 */
         { KV5M_DATA, 32,
-          "\xE8\x50\x13\x56\xD1\x94\x84\x7B\xB2\x92\x14\xF8\x8E\x76\xB6\x36"
-          "\x0B\x5C\x1F\x91\xB9\xE1\xD7\x9B\xD7\x99\x3A\x4B\x8E\x73\x0A\x55" }
+          "\x77\xF4\x21\xA6\xF2\x5E\x13\x83\x95\xE8\x37\xE5\xD8\x5D\x38\x5B"
+          "\x4C\x1B\xFD\x77\x2E\x11\x2C\xD9\x20\x8C\xE7\x2A\x53\x0B\x15\xE6" }
     },
     { 
         ENCTYPE_CAMELLIA128_CTS_CMAC,
@@ -217,7 +217,7 @@ struct test {
         "\x12\x34\x56\x78\x78\x56\x34\x12",
         { KV5M_DATA, 4, "\0\0\0\5" },
         { KV5M_DATA, 16,
-          "\xE7\x88\xB8\x1C\x48\x92\x51\x89\x5A\x6D\x2A\xAE\x0B\x79\xAE\x50" }
+          "\x00\x49\x8F\xD9\x16\xBF\xC1\xC2\xB1\x03\x1C\x17\x08\x01\xB3\x81" }
     },
     { 
         ENCTYPE_CAMELLIA256_CTS_CMAC,
@@ -225,8 +225,8 @@ struct test {
         "\x12\x34\x56\x78\x78\x56\x34\x12",
         { KV5M_DATA, 4, "\0\0\0\5" },
         { KV5M_DATA, 32,
-          "\xB5\x04\xFD\xB2\x5A\xE5\x77\x92\x02\xAE\xE2\x85\x4B\x7D\xE5\xFD"
-          "\xF3\x62\x7F\xEF\x7B\x48\x2F\xB4\x77\xD4\xFA\x9C\xE7\x31\x0E\xF0" }
+          "\x11\x08\x3A\x00\xBD\xFE\x6A\x41\xB2\xF1\x97\x16\xD6\x20\x2F\x0A"
+          "\xFA\x94\x28\x9A\xFE\x8B\x27\xA0\x49\xBD\x28\xB1\xD7\x6C\x38\x9A" }
     },
     { 
         ENCTYPE_CAMELLIA128_CTS_CMAC,
@@ -234,7 +234,7 @@ struct test {
         "pass phrase equals block size",
         { KV5M_DATA, 4, "\0\0\x04\xB0" }, /* 1200 */
         { KV5M_DATA, 16,
-          "\xC4\x3F\x01\x7B\x6D\x13\x51\xF4\xD0\xBF\x0F\x4A\x75\xB1\xF1\xD2" }
+          "\x8B\xF6\xC3\xEF\x70\x9B\x98\x1D\xBB\x58\x5D\x08\x68\x43\xBE\x05" }
     },
     { 
         ENCTYPE_CAMELLIA256_CTS_CMAC,
@@ -242,8 +242,8 @@ struct test {
         "pass phrase equals block size",
         { KV5M_DATA, 4, "\0\0\x04\xB0" }, /* 1200 */
         { KV5M_DATA, 32,
-          "\x38\xF7\xFC\x25\xD6\x7E\x41\xAC\xDD\xDB\xC0\x5F\x66\xAE\x11\x13"
-          "\x22\x53\x47\xDC\xBC\x24\x67\xF2\x09\xA9\x7E\x0A\xFB\x30\xDE\x9D" }
+          "\x11\x9F\xE2\xA1\xCB\x0B\x1B\xE0\x10\xB9\x06\x7A\x73\xDB\x63\xED"
+          "\x46\x65\xB4\xE5\x3A\x98\xD1\x78\x03\x5D\xCF\xE8\x43\xA6\xB9\xB0" }
     },
     { 
         ENCTYPE_CAMELLIA128_CTS_CMAC,
@@ -251,7 +251,7 @@ struct test {
         "pass phrase exceeds block size",
         { KV5M_DATA, 4, "\0\0\x04\xB0" }, /* 1200 */
         { KV5M_DATA, 16,
-          "\xD9\xC3\x63\xF7\xED\x5E\x4B\x9A\x17\x8F\xF4\xD8\x4B\x3E\x51\x73" }
+          "\x57\x52\xAC\x8D\x6A\xD1\xCC\xFE\x84\x30\xB3\x12\x87\x1C\x2F\x74" }
     },
     { 
         ENCTYPE_CAMELLIA256_CTS_CMAC,
@@ -259,8 +259,8 @@ struct test {
         "pass phrase exceeds block size",
         { KV5M_DATA, 4, "\0\0\x04\xB0" }, /* 1200 */
         { KV5M_DATA, 32,
-          "\x0D\x88\xB2\xB3\x47\xD6\x79\xDA\xD2\xFF\xAE\x25\x6B\x64\xAD\x9A"
-          "\x0F\x09\xB9\x16\x5E\xA8\x32\xB4\x01\xB4\x55\x31\xB9\xE0\xE3\x05" }
+          "\x61\x4D\x5D\xFC\x0B\xA6\xD3\x90\xB4\x12\xB8\x9A\xE4\xD5\xB0\x88"
+          "\xB6\x12\xB3\x16\x51\x09\x94\x67\x9D\xDB\x43\x83\xC7\x12\x6D\xDF" }
     },
     { 
         ENCTYPE_CAMELLIA128_CTS_CMAC,
@@ -268,7 +268,7 @@ struct test {
         "EXAMPLE.COMpianist",
         { KV5M_DATA, 4, "\0\0\0\x32" }, /* 50 */
         { KV5M_DATA, 16,
-          "\xF1\x64\xCF\xBB\xC3\x27\xE1\x70\x34\x93\x40\x92\xDC\xEA\x61\x5B" }
+          "\xCC\x75\xC7\xFD\x26\x0F\x1C\x16\x58\x01\x1F\xCC\x0D\x56\x06\x16" }
     },
     { 
         ENCTYPE_CAMELLIA256_CTS_CMAC,
@@ -276,8 +276,8 @@ struct test {
         "EXAMPLE.COMpianist",
         { KV5M_DATA, 4, "\0\0\0\x32" }, /* 50 */
         { KV5M_DATA, 32,
-          "\xBC\xD7\x5F\x07\x22\x5F\x25\xEC\xD4\x35\xA1\x74\x68\xE9\xAD\x64"
-          "\x49\x83\x63\xF7\x87\xD1\xAE\xE9\x2A\xFE\xA9\xCB\x5C\x95\xEE\xAB" }
+          "\x16\x3B\x76\x8C\x6D\xB1\x48\xB4\xEE\xC7\x16\x3D\xF5\xAE\xD7\x0E"
+          "\x20\x6B\x68\xCE\xC0\x78\xBC\x06\x9E\xD6\x8A\x7E\xD3\x6B\x1E\xCC" }
     }
 #endif /* CAMELLIA */
 };
@@ -288,9 +288,13 @@ printkey(krb5_keyblock *keyblock)
     unsigned int i;
 
     for (i = 0; i < keyblock->length; i++) {
+#if 0                           /* For convenience when updating test cases. */
         printf("\\x%02X", keyblock->contents[i]);
-/*        if (i + 1 < keyblock->length)
-          printf(" "); */
+#else
+        printf("%02X", keyblock->contents[i]);
+        if (i + 1 < keyblock->length)
+          printf(" ");
+#endif
     }
     printf("\n");
 }
@@ -305,6 +309,7 @@ main(int argc, char **argv)
     size_t i;
     struct test *test;
     krb5_boolean verbose = FALSE;
+    int status = 0;
 
     if (argc >= 2 && strcmp(argv[1], "-v") == 0)
         verbose = TRUE;
@@ -328,9 +333,11 @@ main(int argc, char **argv)
         if (memcmp(keyblock->contents, test->expected_key.data,
                    keyblock->length) != 0) {
             printf("str2key test %d failed\n", (int)i);
-            exit(1);
+            status = 1;
+            if (!verbose)
+                break;
         }
         krb5_free_keyblock(context, keyblock);
     }
-    return 0;
+    return status;
 }

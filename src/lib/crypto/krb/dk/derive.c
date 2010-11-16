@@ -181,7 +181,7 @@ derive_random_sp800_108_cmac(const struct krb5_enc_provider *enc,
     /* [L]2: four-byte big-endian binary string giving the output length */
     iov[5].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[5].data = make_data(Lbuf, sizeof(Lbuf));
-    store_32_be(outrnd->length, Lbuf);
+    store_32_be(outrnd->length * 8, Lbuf);
 
     for (i = 1, n = 0; n < keybytes; i++) {
         /* Update the block counter. */
