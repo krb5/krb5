@@ -101,14 +101,13 @@ cleanup:
 }
 
 
-#define DEFAULT_ITERATION_COUNT         4096 /* was 0xb000L in earlier drafts */
 #define MAX_ITERATION_COUNT             0x1000000L
 
 static krb5_error_code
 pbkdf2_string_to_key(const struct krb5_keytypes *ktp, const krb5_data *string,
                      const krb5_data *salt, const krb5_data *pepper,
                      const krb5_data *params, krb5_keyblock *key,
-                     enum deriv_alg deriv_alg)
+                     enum deriv_alg deriv_alg, unsigned long def_iter_count)
 {
     unsigned long iter_count;
     krb5_data out;
@@ -129,7 +128,7 @@ pbkdf2_string_to_key(const struct krb5_keytypes *ktp, const krb5_data *string,
                 return KRB5_ERR_BAD_S2K_PARAMS;
         }
     } else
-        iter_count = DEFAULT_ITERATION_COUNT;
+        iter_count = def_iter_count;
 
     /* This is not a protocol specification constraint; this is an
        implementation limit, which should eventually be controlled by
@@ -182,7 +181,7 @@ krb5int_aes_string_to_key(const struct krb5_keytypes *ktp,
                           krb5_keyblock *key)
 {
     return pbkdf2_string_to_key(ktp, string, salt, NULL, params, key,
-                                DERIVE_RFC3961);
+                                DERIVE_RFC3961, 4096);
 }
 
 #ifdef CAMELLIA
@@ -196,6 +195,6 @@ krb5int_camellia_string_to_key(const struct krb5_keytypes *ktp,
     krb5_data pepper = string2data(ktp->name);
 
     return pbkdf2_string_to_key(ktp, string, salt, &pepper, params, key,
-                                DERIVE_SP800_108_CMAC);
+                                DERIVE_SP800_108_CMAC, 32768);
 }
 #endif
