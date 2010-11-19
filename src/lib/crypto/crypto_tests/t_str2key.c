@@ -283,17 +283,20 @@ struct test {
 };
 
 static void
-printkey(krb5_keyblock *keyblock)
+printhex(const char *head, void *data, size_t len)
 {
-    unsigned int i;
+    size_t i;
 
-    for (i = 0; i < keyblock->length; i++) {
+    printf("%s", head);
+    for (i = 0; i < len; i++) {
 #if 0                           /* For convenience when updating test cases. */
-        printf("\\x%02X", keyblock->contents[i]);
+        printf("\\x%02X", ((unsigned char*)data)[i]);
 #else
-        printf("%02X", keyblock->contents[i]);
-        if (i + 1 < keyblock->length)
-          printf(" ");
+        printf("%02X", ((unsigned char*)data)[i]);
+        if (i % 16 == 15 && i + 1 < len)
+            printf("\n%*s", (int)strlen(head), "");
+        else if (i + 1 < len)
+            printf(" ");
 #endif
     }
     printf("\n");
@@ -326,8 +329,14 @@ main(int argc, char **argv)
             exit(1);
         }
         if (verbose) {
-            printf("Test %02d: ", (int)i);
-            printkey(keyblock);
+            char buf[64];
+            krb5_enctype_to_name(test->enctype, FALSE, buf, sizeof(buf));
+            printf("\nTest %d:\n", (int)i);
+            printf("Enctype: %s\n", buf);
+            printf("String: %s\n", test->string);
+            printf("Salt: %s\n", test->salt);
+            printhex("Params: ", test->params.data, test->params.length);
+            printhex("Key: ", keyblock->contents, keyblock->length);
         }
         assert(keyblock->length == test->expected_key.length);
         if (memcmp(keyblock->contents, test->expected_key.data,

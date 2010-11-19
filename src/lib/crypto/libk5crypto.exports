@@ -97,4 +97,8 @@ krb5int_enc_des3
 krb5int_arcfour_gsscrypt
 krb5int_camellia_cbc_mac
 krb5int_cmac_checksum
+krb5int_enc_aes128
+krb5int_enc_aes256
 krb5int_enc_camellia128
+krb5int_enc_camellia256
+krb5int_derive_key

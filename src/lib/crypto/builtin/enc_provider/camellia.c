@@ -360,4 +360,7 @@ krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
 const struct krb5_enc_provider krb5int_enc_camellia128 = {
 };
 
+const struct krb5_enc_provider krb5int_enc_camellia256 = {
+};
+
 #endif /* CAMELLIA */
