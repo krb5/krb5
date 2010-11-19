@@ -41,9 +41,7 @@
 
 #ifdef CAMELLIA
 
-/* XXX This still needs a cbc-mac function. */
-
-krb5_error_code
+static krb5_error_code
 krb5int_camellia_encrypt(krb5_key key, const krb5_data *ivec,
 			 krb5_crypto_iov *data, size_t num_data)
 {
@@ -56,7 +54,7 @@ krb5int_camellia_encrypt(krb5_key key, const krb5_data *ivec,
                               ivec, data, num_data);
 }
 
-krb5_error_code
+static krb5_error_code
 krb5int_camellia_decrypt(krb5_key key, const krb5_data *ivec,
 			 krb5_crypto_iov *data, size_t num_data)
 {
@@ -67,6 +65,20 @@ krb5int_camellia_decrypt(krb5_key key, const krb5_data *ivec,
         return ret;
     return k5_nss_gen_cts_iov(key, CKM_CAMELLIA_CBC, CKA_DECRYPT,
                               ivec, data, num_data);
+}
+
+krb5_error_code
+krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
+                         size_t num_data, const krb5_data *ivec,
+                         krb5_data *output)
+{
+    krb5_error_code ret;
+
+    ret = k5_nss_gen_import(key, CKM_CAMELLIA_CBC, CKA_DECRYPT);
+    if (ret != 0)
+        return ret;
+    return k5_nss_gen_cbcmac_iov(key, CKM_CAMELLIA_CBC, ivec, data, num_data,
+                                 output);
 }
 
 /*

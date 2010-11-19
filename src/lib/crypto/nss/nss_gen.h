@@ -90,6 +90,12 @@ k5_nss_gen_cts_iov(krb5_key key, CK_MECHANISM_TYPE mech,
                    CK_ATTRIBUTE_TYPE operation, const krb5_data *ivec,
                    krb5_crypto_iov *data, size_t num_data);
 
+/* Compute a CBC-MAC. */
+krb5_error_code
+k5_nss_gen_cbcmac_iov(krb5_key key, CK_MECHANISM_TYPE mech,
+                      const krb5_data *ivec, const krb5_crypto_iov *data,
+                      size_t num_data, krb5_data *output);
+
 /* Stream state management calls. */
 krb5_error_code k5_nss_stream_init_state(krb5_data *new_state);
 krb5_error_code k5_nss_stream_free_state(krb5_data *state);
