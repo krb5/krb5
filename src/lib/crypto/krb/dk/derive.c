@@ -129,7 +129,7 @@ cleanup:
     return ret;
 }
 
-#ifdef CAMELLIA_CCM
+#ifdef CAMELLIA
 
 /*
  * NIST SP800-108 KDF in feedback mode (section 5.2).
@@ -181,7 +181,7 @@ derive_random_sp800_108_cmac(const struct krb5_enc_provider *enc,
     /* [L]2: four-byte big-endian binary string giving the output length */
     iov[5].flags = KRB5_CRYPTO_TYPE_DATA;
     iov[5].data = make_data(Lbuf, sizeof(Lbuf));
-    store_32_be(outrnd->length, Lbuf);
+    store_32_be(outrnd->length * 8, Lbuf);
 
     for (i = 1, n = 0; n < keybytes; i++) {
         /* Update the block counter. */
@@ -206,7 +206,7 @@ cleanup:
     return ret;
 }
 
-#endif /* CAMELLIA_CCM */
+#endif /* CAMELLIA */
 
 krb5_error_code
 krb5int_derive_random(const struct krb5_enc_provider *enc,
@@ -216,7 +216,7 @@ krb5int_derive_random(const struct krb5_enc_provider *enc,
     switch (alg) {
     case DERIVE_RFC3961:
         return derive_random_rfc3961(enc, inkey, outrnd, in_constant);
-#ifdef CAMELLIA_CCM
+#ifdef CAMELLIA
     case DERIVE_SP800_108_CMAC:
         return derive_random_sp800_108_cmac(enc, inkey, outrnd, in_constant);
 #endif

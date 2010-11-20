@@ -42,7 +42,7 @@
 #include "enc_provider.h"
 #include "cksumtypes.h"
 
-#ifdef CAMELLIA_CCM
+#ifdef CAMELLIA
 
 /* All examples use the following Camellia-128 key. */
 static unsigned char keybytes[] = {
@@ -100,23 +100,23 @@ check_result(const char *name, const unsigned char *result,
     }
 }
 
-#endif /* CAMELLIA_CCM */
+#endif /* CAMELLIA */
 
 int
 main(int argc, char **argv)
 {
-#ifdef CAMELLIA_CCM
+#ifdef CAMELLIA
     krb5_context context = NULL;
     krb5_keyblock keyblock;
     krb5_key key;
-    const struct krb5_enc_provider *enc = &krb5int_enc_camellia128_ctr;
+    const struct krb5_enc_provider *enc = &krb5int_enc_camellia128;
     krb5_crypto_iov iov;
     unsigned char resultbuf[16];
     krb5_data result = make_data(resultbuf, 16);
 
     /* Create the example key. */
     keyblock.magic = KV5M_KEYBLOCK;
-    keyblock.enctype = ENCTYPE_CAMELLIA128_CCM_128;
+    keyblock.enctype = ENCTYPE_CAMELLIA128_CTS_CMAC;
     keyblock.length = 16;
     keyblock.contents = keybytes;
     assert(krb5_k_create_key(context, &keyblock, &key) == 0);
@@ -144,6 +144,6 @@ main(int argc, char **argv)
 
     printf("All CMAC tests passed.\n");
     krb5_k_free_key(context, key);
-#endif /* CAMELLIA_CCM */
+#endif /* CAMELLIA */
     return 0;
 }

@@ -33,7 +33,7 @@
 #include "prf_int.h"
 #include <dk.h>
 
-#ifdef CAMELLIA_CCM
+#ifdef CAMELLIA
 
 krb5_error_code
 krb5int_dk_cmac_prf(const struct krb5_keytypes *ktp, krb5_key key,
@@ -66,4 +66,4 @@ cleanup:
     return ret;
 }
 
-#endif /* CAMELLIA_CCM */
+#endif /* CAMELLIA */

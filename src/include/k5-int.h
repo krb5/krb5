@@ -2687,23 +2687,23 @@ krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
 #if 0
 /*
  * There are no IANA assignments for these enctypes or cksumtypes yet.  They
- * must be defined to local-use negative numbers at build time for Camellia-CCM
+ * must be defined to local-use negative numbers at build time for Camellia
  * support to function at the moment.  If one is defined, they should all be
  * defined.  When IANA assignments exist, these definitions should move to the
- * appropriate places in krb5.hin and all CAMELLIA_CCM conditional code should
- * be made unconditional.
+ * appropriate places in krb5.hin and all CAMELLIA conditional code should be
+ * made unconditional.
  *
  * The present code is experimental and may not be compatible with the
  * standardized version.
  */
-#define ENCTYPE_CAMELLIA128_CCM_128 -XXX /* Camellia CCM mode, 128-bit key */
-#define ENCTYPE_CAMELLIA256_CCM_128 -YYY /* Camellia CCM mode, 256-bit key */
-#define CKSUMTYPE_CMAC_128_CAMELLIA128  -XXX  /* CMAC, 128-bit Camellia key */
-#define CKSUMTYPE_CMAC_128_CAMELLIA256  -YYY  /* CMAC, 256-bit Camellia key */
+#define ENCTYPE_CAMELLIA128_CTS_CMAC -XXX /* Camellia CTS mode, 128-bit key */
+#define ENCTYPE_CAMELLIA256_CTS_CMAC -YYY /* Camellia CTS mode, 256-bit key */
+#define CKSUMTYPE_CMAC_CAMELLIA128 -XXX   /* CMAC, 128-bit Camellia key */
+#define CKSUMTYPE_CMAC_CAMELLIA256 -YYY   /* CMAC, 256-bit Camellia key */
 #endif
 
-#ifdef ENCTYPE_CAMELLIA128_CCM_128
-#define CAMELLIA_CCM
+#ifdef ENCTYPE_CAMELLIA128_CTS_CMAC
+#define CAMELLIA
 #endif
 
 struct _krb5_kt {       /* should move into k5-int.h */

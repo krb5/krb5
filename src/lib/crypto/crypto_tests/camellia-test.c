@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include "k5-int.h"
 
-#ifdef CAMELLIA_CCM
+#ifdef CAMELLIA
 
 static char key[32];
 static char plain[16], cipher[16], zero[16];
@@ -125,11 +125,11 @@ static void vt_test()
     vt_test_1(32);
 }
 
-#endif /* CAMELLIA_CCM */
+#endif /* CAMELLIA */
 
 int main (int argc, char *argv[])
 {
-#ifdef CAMELLIA_CCM
+#ifdef CAMELLIA
     if (argc > 2 || (argc == 2 && strcmp(argv[1], "-k"))) {
 	fprintf(stderr,
 		"usage:\t%s -k\tfor variable-key tests\n"
@@ -142,6 +142,6 @@ int main (int argc, char *argv[])
 	vk_test();
     else
 	vt_test();
-#endif /* CAMELLIA_CCM */
+#endif /* CAMELLIA */
     return 0;
 }

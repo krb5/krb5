@@ -263,29 +263,29 @@ set passes {
     }
 }
 
-# Add to above when Camellia-CCM support becomes unconditional.
+# Add to above when Camellia support becomes unconditional.
 #    {
 #	camellia-only
 #	mode=udp
 #	des3_krbtgt=0
-#	{supported_enctypes=camellia256-ccm:normal}
-#	{permitted_enctypes(kdc)=camellia256-ccm}
-#	{permitted_enctypes(slave)=camellia256-ccm}
-#	{permitted_enctypes(client)=camellia256-ccm}
-#	{permitted_enctypes(server)=camellia256-ccm}
-#	{default_tgs_enctypes(kdc)=camellia256-ccm}
-#	{default_tgs_enctypes(slave)=camellia256-ccm}
-#	{default_tgs_enctypes(client)=camellia256-ccm}
-#	{default_tgs_enctypes(server)=camellia256-ccm}
-#	{default_tkt_enctypes(kdc)=camellia256-ccm}
-#	{default_tkt_enctypes(slave)=camellia256-ccm}
-#	{default_tkt_enctypes(client)=camellia256-ccm}
-#	{default_tkt_enctypes(server)=camellia256-ccm}
+#	{supported_enctypes=camellia256-cts:normal}
+#	{permitted_enctypes(kdc)=camellia256-cts}
+#	{permitted_enctypes(slave)=camellia256-cts}
+#	{permitted_enctypes(client)=camellia256-cts}
+#	{permitted_enctypes(server)=camellia256-cts}
+#	{default_tgs_enctypes(kdc)=camellia256-cts}
+#	{default_tgs_enctypes(slave)=camellia256-cts}
+#	{default_tgs_enctypes(client)=camellia256-cts}
+#	{default_tgs_enctypes(server)=camellia256-cts}
+#	{default_tkt_enctypes(kdc)=camellia256-cts}
+#	{default_tkt_enctypes(slave)=camellia256-cts}
+#	{default_tkt_enctypes(client)=camellia256-cts}
+#	{default_tkt_enctypes(server)=camellia256-cts}
 #	{allow_weak_crypto(kdc)=false}
 #	{allow_weak_crypto(slave)=false}
 #	{allow_weak_crypto(client)=false}
 #	{allow_weak_crypto(server)=false}
-#	{master_key_type=camellia256-ccm}
+#	{master_key_type=camellia256-cts}
 #	{dummy=[verbose -log "Camellia-256 enctype"]}
 #    }
 

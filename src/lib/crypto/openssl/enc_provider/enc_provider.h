@@ -34,8 +34,7 @@ extern const struct krb5_enc_provider krb5int_enc_aes128;
 extern const struct krb5_enc_provider krb5int_enc_aes256;
 extern const struct krb5_enc_provider krb5int_enc_aes128_ctr;
 extern const struct krb5_enc_provider krb5int_enc_aes256_ctr;
-#ifdef CAMELLIA_CCM
-extern const struct krb5_enc_provider krb5int_enc_camellia128_ctr;
-extern const struct krb5_enc_provider krb5int_enc_camellia256_ctr;
+#ifdef CAMELLIA
+extern const struct krb5_enc_provider krb5int_enc_camellia128;
+extern const struct krb5_enc_provider krb5int_enc_camellia256;
 #endif
-
