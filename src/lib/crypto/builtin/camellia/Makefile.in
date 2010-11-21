@@ -39,7 +39,8 @@ camellia-gen: camellia-gen.o $(GEN_OBJS)
 run-camellia-gen: camellia-gen
 	./camellia-gen > kresults.out
 
-check:: run-camellia-gen
+# Enable when Camellia support becomes unconditional.
+#check:: run-camellia-gen
 
 
 clean-unix:: clean-libobjs
