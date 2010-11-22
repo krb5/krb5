@@ -860,6 +860,7 @@ difftm(struct tm *a, struct tm *b)
 
 /* For get_date extern declaration compatibility check... yuck.  */
 #include <krb5.h>
+int yyparse(voide);
 
 time_t get_date(char *);
 
