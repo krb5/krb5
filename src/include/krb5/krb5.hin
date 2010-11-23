@@ -2381,10 +2381,10 @@ krb5_get_init_creds_opt_get_fast_flags(krb5_context context,
 #define KRB5_FAST_REQUIRED 1l<<0 /*!< Require KDC to support FAST*/
 
 typedef void
-krb5_expire_callback_func(krb5_context context, void *data,
-                          krb5_timestamp password_expiration,
-                          krb5_timestamp account_expiration,
-                          krb5_boolean is_last_req);
+(KRB5_CALLCONV *krb5_expire_callback_func)(krb5_context context, void *data,
+                                           krb5_timestamp password_expiration,
+                                           krb5_timestamp account_expiration,
+                                           krb5_boolean is_last_req);
 
 /**
  * Set a callback to receive password and account expiration times.
