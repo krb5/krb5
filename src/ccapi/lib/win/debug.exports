@@ -6,8 +6,5 @@
     krb5int_ipc_stream_data
     krb5int_ipc_stream_write
     krb5int_ipc_stream_new
-    
+
     ccs_authenticate
-    
-	    
-	
