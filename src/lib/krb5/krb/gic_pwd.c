@@ -159,7 +159,7 @@ warn_pw_expiry(krb5_context context, krb5_get_init_creds_opt *options,
 
     ret = krb5int_gic_opt_to_opte(context, options, &opte, 0, "");
     if (ret == 0 && opte->opt_private->expire_cb != NULL) {
-        krb5_expire_callback_func *cb = opte->opt_private->expire_cb;
+        krb5_expire_callback_func cb = opte->opt_private->expire_cb;
         void *cb_data = opte->opt_private->expire_data;
 
         /* Invoke the expire callback and don't send prompter warnings. */

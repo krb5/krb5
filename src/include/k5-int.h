@@ -1150,7 +1150,7 @@ typedef struct _krb5_gic_opt_private {
     char * fast_ccache_name;
     krb5_ccache out_ccache;
     krb5_flags fast_flags;
-    krb5_expire_callback_func *expire_cb;
+    krb5_expire_callback_func expire_cb;
     void *expire_data;
 } krb5_gic_opt_private;
 
