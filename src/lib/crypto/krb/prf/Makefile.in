@@ -2,14 +2,14 @@ mydir=lib/crypto/krb/prf
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/.. 		\
 		-I$(srcdir)/../dk			\
-		-I$(srcdir)/../../@CRYPTO_IMPL@ 	\
-		-I$(srcdir)/../../@CRYPTO_IMPL@/md5 	\
-		-I$(srcdir)/../../@CRYPTO_IMPL@/sha1 
+		-I$(srcdir)/../../$(CRYPTO_IMPL) 	\
+		-I$(srcdir)/../../$(CRYPTO_IMPL)/md5 	\
+		-I$(srcdir)/../../$(CRYPTO_IMPL)/sha1 
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=prf
-##DOS##OBJFILE=..\$(OUTPRE)prf.lst
+##DOS##PREFIXDIR = krb\prf
+##DOS##OBJFILE = ..\..\$(OUTPRE)prf.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

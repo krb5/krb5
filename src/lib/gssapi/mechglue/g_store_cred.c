@@ -53,14 +53,15 @@ val_store_cred_args(
 }
 
 
-OM_uint32 gss_store_cred(minor_status,
-			input_cred_handle,
-			cred_usage,
-			desired_mech,
-			overwrite_cred,
-			default_cred,
-			elements_stored,
-			cred_usage_stored)
+OM_uint32 KRB5_CALLCONV
+gss_store_cred(minor_status,
+	       input_cred_handle,
+	       cred_usage,
+	       desired_mech,
+	       overwrite_cred,
+	       default_cred,
+	       elements_stored,
+	       cred_usage_stored)
 
 OM_uint32		*minor_status;
 gss_cred_id_t	         input_cred_handle;

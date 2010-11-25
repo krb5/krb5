@@ -40,14 +40,6 @@ cc_int32 cci_os_ipc_thread_init (void)
 
 /* ------------------------------------------------------------------------ */
 
-void cci_os_ipc_thread_fini (void)
-{
-    /* k5_ipc_send_request handles all thread data for us */
-    return;
-}
-
-/* ------------------------------------------------------------------------ */
-
 cc_int32 cci_os_ipc (cc_int32      in_launch_server,
                      k5_ipc_stream in_request_stream,
                      k5_ipc_stream *out_reply_stream)

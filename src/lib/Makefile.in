@@ -35,10 +35,8 @@ clean-windows::
 ##WIN32##CLIBS = $(BUILDTOP)\util\et\$(OUTPRE)comerr.lib
 ##WIN32##PLIBS = $(BUILDTOP)\util\profile\$(OUTPRE)profile.lib
 ##WIN32##KLIBS = krb5\$(OUTPRE)krb5.lib crypto\$(OUTPRE)crypto.lib \
-##WIN32##	$(BUILDTOP)\util\profile\$(OUTPRE)profile.lib \
-##WIN32##	des425\$(OUTPRE)des425.lib
+##WIN32##	$(BUILDTOP)\util\profile\$(OUTPRE)profile.lib
 ##WIN32##GLIBS = gssapi\$(OUTPRE)gssapi.lib
-##WIN32##K4LIBS = krb4\$(OUTPRE)krb4.lib
 
 
 ##WIN32##SDEF = k5sprt32.def
@@ -46,7 +44,6 @@ clean-windows::
 ##WIN32##PDEF = xpprof32.def
 ##WIN32##KDEF = krb5_32.def
 ##WIN32##GDEF = gssapi32.def
-##WIN32##K4DEF = krb4_32.def
 
 
 
@@ -60,7 +57,6 @@ clean-windows::
 
 ##WIN32##S_GLUE=$(OUTPRE)support_glue.obj
 ##WIN32##K5_GLUE=$(OUTPRE)k5_glue.obj
-##WIN32##K4_GLUE=$(OUTPRE)k4_glue.obj
 ##WIN32##GSS_GLUE=$(OUTPRE)gss_glue.obj
 ##WIN32##COMERR_GLUE=$(OUTPRE)comerr_glue.obj
 ##WIN32##PROF_GLUE=$(OUTPRE)prof_glue.obj
@@ -70,7 +66,6 @@ clean-windows::
 ##WIN32##PGLUE=$(PROF_GLUE)
 ##WIN32##KGLUE=$(K5_GLUE)
 ##WIN32##GGLUE=$(GSS_GLUE)
-##WIN32##K4GLUE=$(K4_GLUE)
 
 ##WIN32##RCFLAGS=$(CPPFLAGS) -I$(top_srcdir) -D_WIN32 -DRES_ONLY
 
@@ -79,7 +74,6 @@ clean-windows::
 ##WIN32##PRES=$(PLIB:.lib=.res)
 ##WIN32##KRES=$(KLIB:.lib=.res)
 ##WIN32##GRES=$(GLIB:.lib=.res)
-##WIN32##K4RES=$(K4LIB:.lib=.res)
 
 ##WIN32##$(SRES): $(VERSIONRC)
 ##WIN32##	$(RC) $(RCFLAGS) -DSUPPORT_LIB -fo $@ -r $**
@@ -89,8 +83,6 @@ clean-windows::
 ##WIN32##	$(RC) $(RCFLAGS) -DPROF_LIB -fo $@ -r $**
 ##WIN32##$(KRES): $(KRB5RC)
 ##WIN32##	$(RC) $(RCFLAGS) -DKRB5_LIB -fo $@ -r $**
-##WIN32##$(K4RES): $(VERSIONRC)
-##WIN32##	$(RC) $(RCFLAGS) -DKRB4_LIB -fo $@ -r $**
 ##WIN32##$(GRES): $(VERSIONRC)
 ##WIN32##	$(RC) $(RCFLAGS) -DGSSAPI_LIB -fo $@ -r $**
 ##WIN32##$(KRB5RC): $(VERSIONRC)
@@ -98,7 +90,7 @@ clean-windows::
 ##WIN32##$(SLIB): $(SDEF) $(SLIBS) $(SGLUE) $(SRES)
 ##WIN32##	link $(WINDLLFLAGS) -def:$(SDEF) -out:$*.dll \
 ##WIN32##	  $(SLIBS) $(SGLUE) $(SRES) $(WINLIBS) $(SCLIB)
-##WIN32##        $(_VC_MANIFEST_EMBED_DLL)
+##WIN32##	$(_VC_MANIFEST_EMBED_DLL)
 ##WIN32##$(SDEF): ..\util\support\libkrb5support.exports
 ##WIN32##	echo EXPORTS > $(SDEF).new
 ##WIN32##	type ..\util\support\libkrb5support.exports >> $(SDEF).new
@@ -125,15 +117,8 @@ clean-windows::
 ##WIN32##	  $(GLIBS) $(GGLUE) $(GRES) $(KLIB) $(CLIB) $(SLIB) $(WINLIBS) $(SCLIB)
 ##WIN32##		$(_VC_MANIFEST_EMBED_DLL)
 
-##WIN32##$(K4LIB): $(K4DEF) $(K4LIBS) $(K4GLUE) $(K4RES) $(KLIB) $(CLIB) $(PLIB)
-##WIN32##	link $(WINDLLFLAGS) -def:$(K4DEF) -out:$*.dll \
-##WIN32##	  $(K4LIBS) $(K4GLUE) $(K4RES) $(KLIB) $(CLIB) $(PLIB) $(WINLIBS) $(SCLIB)
-##WIN32##  	$(_VC_MANIFEST_EMBED_DLL)
-
 ##WIN32##$(K5_GLUE): win_glue.c
 ##WIN32##	$(CC) $(ALL_CFLAGS) $(MITFLAGS) /c /DKRB5=1 /Fo$@ $**
-##WIN32##$(K4_GLUE): win_glue.c
-##WIN32##	$(CC) $(ALL_CFLAGS) /c /DKRB4=1 /Fo$@ $**
 ##WIN32##$(GSS_GLUE): win_glue.c
 ##WIN32##	$(CC) $(ALL_CFLAGS) /c /DGSSAPI=1 /Fo$@ $**
 ##WIN32##$(COMERR_GLUE): win_glue.c
@@ -145,7 +130,6 @@ clean-windows::
 
 ##WIN32### Build Convenience
 ##WIN32##comerr.lib: $(CLIB)
-##WIN32##krb4.lib:   $(K4LIB)
 ##WIN32##krb5.lib:   $(KLIB)
 ##WIN32##gssapi.lib: $(GLIB)
 ##WIN32##profile.lib: $(PLIB)
@@ -157,12 +141,6 @@ clean-windows::
 ##WIN32##	@echo Making in lib\krb5
 ##WIN32##	cd ..\krb5
 ##WIN32##	$(MAKE) -$(MFLAGS)
-##WIN32##	@echo Making in lib\des425
-##WIN32##	cd ..\des425
-##WIN32##	$(MAKE) -$(MFLAGS) 
-##WIN32##	@echo Making in lib\krb4
-##WIN32##	cd ..\krb4
-##WIN32##	$(MAKE) -$(MFLAGS) 
 ##WIN32##	@echo Making in lib\gssapi
 ##WIN32##	cd ..\gssapi
 ##WIN32##	$(MAKE) -$(MFLAGS) 
@@ -170,7 +148,7 @@ clean-windows::
 ##WIN32##	cd ..
 
 ##WIN32##all-windows:: lib-windows
-##WIN32##lib-windows:: krb5.lib gssapi.lib krb4.lib 
+##WIN32##lib-windows:: krb5.lib gssapi.lib
 
 ##WIN32##clean-windows::
 ##WIN32##	@echo Making clean in lib\crypto
@@ -178,12 +156,6 @@ clean-windows::
 ##WIN32##	$(MAKE) -$(MFLAGS) clean
 ##WIN32##	@echo Making clean in lib\krb5
 ##WIN32##	cd ..\krb5
-##WIN32##	$(MAKE) -$(MFLAGS) clean
-##WIN32##	@echo Making clean in lib\des425
-##WIN32##	cd ..\des425
-##WIN32##	$(MAKE) -$(MFLAGS) clean
-##WIN32##	@echo Making clean in lib\krb4
-##WIN32##	cd ..\krb4
 ##WIN32##	$(MAKE) -$(MFLAGS) clean
 ##WIN32##	@echo Making clean in lib\gssapi
 ##WIN32##	cd ..\gssapi

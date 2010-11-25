@@ -7,8 +7,8 @@ LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../krb/dk \
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=camellia
-##DOS##OBJFILE=..\$(OUTPRE)camellia.lst
+##DOS##PREFIXDIR = builtin\camellia
+##DOS##OBJFILE = ..\..\$(OUTPRE)camellia.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

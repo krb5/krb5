@@ -1143,7 +1143,7 @@ krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx)
     free(ctx);
 }
 
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_get(krb5_context context, krb5_tkt_creds_context ctx)
 {
     krb5_error_code code;

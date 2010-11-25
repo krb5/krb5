@@ -31,7 +31,7 @@
 #include <string.h>
 #include "gssapiP_krb5.h"
 
-OM_uint32 KRB5_CALLCONV
+OM_uint32
 gss_krb5int_ccache_name(OM_uint32 *minor_status,
                         const gss_OID desired_mech,
                         const gss_OID desired_object,

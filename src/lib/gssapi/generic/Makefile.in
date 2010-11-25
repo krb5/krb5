@@ -45,7 +45,7 @@ include_xom=@include_xom@
 ##DOS##include_stdint=rem
 ##DOS##include_inttypes=rem
 ##DOS##include_xom=rem
-gssapi.h: gssapi.hin $(BUILDTOP)/include/autoconf.h
+gssapi.h: gssapi.hin
 	@echo "Creating gssapi.h" ; \
 	h=gss$$$$; $(RM) $$h; \
 	(echo "/* This is the gssapi.h prologue. */"; \

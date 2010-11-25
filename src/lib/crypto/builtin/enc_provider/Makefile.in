@@ -10,8 +10,8 @@ LOCALINCLUDES = -I$(srcdir)/../des 	\
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=enc_provider
-##DOS##OBJFILE=..\$(OUTPRE)enc_prov.lst
+##DOS##PREFIXDIR = builtin\enc_provider
+##DOS##OBJFILE = ..\..\$(OUTPRE)enc_provider.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

@@ -60,10 +60,10 @@ make_external_lucid_ctx_v1(
  * Exported routines
  */
 
-OM_uint32 KRB5_CALLCONV
+OM_uint32
 gss_krb5int_export_lucid_sec_context(
     OM_uint32           *minor_status,
-    gss_ctx_id_t        context_handle,
+    const gss_ctx_id_t  context_handle,
     const gss_OID       desired_object,
     gss_buffer_set_t    *data_set)
 {

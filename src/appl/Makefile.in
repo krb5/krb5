@@ -3,4 +3,14 @@ BUILDTOP=$(REL)..
 
 SUBDIRS= sample simple user_user gss-sample
 
+all-windows:: 
+	@echo Making in gss-sample
+	cd gss-sample
+	$(MAKE) -$(MFLAGS)
+	cd ..
 
+clean-windows::
+	@echo Making clean in lib\crypto
+	cd gss-sample
+	$(MAKE) -$(MFLAGS) clean
+	cd ..

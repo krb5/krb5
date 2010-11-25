@@ -4,15 +4,15 @@ LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../arcfour
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=checksum
-##DOS##OBJFILE=..\$(OUTPRE)cksum.lst
+##DOS##PREFIXDIR = krb\checksum
+##DOS##OBJFILE = ..\..\$(OUTPRE)checksum.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
 STLIBOBJS= cbc.o cmac.o confounder.o hmac_md5.o unkeyed.o
 
-OBJS=	$(OUTPRE)cbc.$(OBJEXT) $(OUTPRE)cmac.$(OBJECT) \
+OBJS=	$(OUTPRE)cbc.$(OBJEXT) $(OUTPRE)cmac.$(OBJEXT) \
 	$(OUTPRE)confounder.$(OBJEXT) $(OUTPRE)hmac_md5.$(OBJEXT) \
 	$(OUTPRE)unkeyed.$(OBJEXT)
 

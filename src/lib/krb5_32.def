@@ -12,7 +12,6 @@
 ; PRIVATE   - Private entrypoint.  It should not be called by anything other
 ;             than gssapi32.dll or krb4_32.dll.
 ; GSSAPI    - Private entrypoint used by gssapi32.dll.
-; KRB4      - Private entrypoint used by krb4_32.dll.
 ; KRB5_CALLCONV_WRONG - entrypoint that should have used KRB5_CALLCONV, but
 ;                       did not due to developer error
 
@@ -258,17 +257,6 @@ EXPORTS
 	krb5int_accessor			@267	; INTERNAL (to end all internals)
 
 
-; Temporary exports (DO NOT USE)
-; DO NOT USE -- Currently required for krb4_32.dll
-;	des_ecb_encrypt				@3	; PRIVATE KRB4
-;	des_new_random_key			@6	; PRIVATE KRB4
-;	des_key_sched				@5 	; PRIVATE KRB4
-;	des_pcbc_encrypt			@7	; PRIVATE KRB4
-;	des_quad_cksum				@8	; PRIVATE KRB4
-;	des_string_to_key			@9	; PRIVATE KRB4
-;	des_init_random_number_generator	@4	; PRIVATE KRB4
-;	afs_string_to_key			@1	; PRIVATE KRB4
-
 ; DO NOT USE -- Currently required to implement gssapi32.dll
 	decode_krb5_ap_req			@2	; PRIVATE GSSAPI k5-int.h KRB5_CALLCONV_WRONG
 	krb5_externalize_opaque			@114	; PRIVATE GSSAPI k5-int.h
@@ -300,7 +288,7 @@ EXPORTS
 	krb5_free_error_message			@134
 	krb5_clear_error_message		@94
 
-; new in 1.7
+; new in 1.7-1.9
 	krb5_rd_rep_dce
 	krb5_mk_rep_dce
 	krb5_c_padding_length
@@ -309,3 +297,111 @@ EXPORTS
 	krb5_c_decrypt_iov
 	krb5_c_make_checksum_iov
 	krb5_c_verify_checksum_iov
+	krb5_allow_weak_crypto
+	krb5_anonymous_principal
+	krb5_anonymous_realm
+	krb5_auth_con_getkey_k
+	krb5_auth_con_getrecvsubkey_k
+	krb5_auth_con_getsendsubkey_k
+	krb5_auth_con_setrecvsubkey_k
+	krb5_auth_con_setsendsubkey_k
+	krb5_build_principal_alloc_va
+	krb5_c_crypto_length_iov
+	krb5_c_free_state
+	krb5_c_fx_cf2_simple
+	krb5_c_init_state
+	krb5_c_keylengths
+	krb5_c_random_add_entropy
+	krb5_c_random_os_entropy
+	krb5_c_random_to_key
+	krb5_cc_dup
+	krb5_cc_get_config
+	krb5_cc_set_config
+	krb5_copy_error_message
+	krb5_decode_authdata_container
+	krb5_encode_authdata_container
+	krb5_enctype_to_name
+	krb5_get_fallback_host_realm
+	krb5_get_init_creds_opt_get_fast_flags
+	krb5_get_init_creds_opt_set_anonymous
+	krb5_get_init_creds_opt_set_canonicalize
+	krb5_get_init_creds_opt_set_expire_callback
+	krb5_get_init_creds_opt_set_fast_ccache
+	krb5_get_init_creds_opt_set_fast_ccache_name
+	krb5_get_init_creds_opt_set_fast_flags
+	krb5_get_init_creds_opt_set_out_ccache
+	krb5_init_creds_free
+	krb5_init_creds_get
+	krb5_init_creds_get_creds
+	krb5_init_creds_get_error
+	krb5_init_creds_get_times
+	krb5_init_creds_init
+	krb5_init_creds_set_keytab
+	krb5_init_creds_set_password
+	krb5_init_creds_set_service
+	krb5_init_creds_step
+	krb5_is_config_principal
+	krb5_k_create_key
+	krb5_k_decrypt
+	krb5_k_decrypt_iov
+	krb5_k_encrypt
+	krb5_k_encrypt_iov
+	krb5_k_free_key
+	krb5_k_key_enctype
+	krb5_k_key_keyblock
+	krb5_k_make_checksum
+	krb5_k_make_checksum_iov
+	krb5_k_prf
+	krb5_k_reference_key
+	krb5_k_verify_checksum
+	krb5_k_verify_checksum_iov
+	krb5_make_authdata_kdc_issued
+	krb5_merge_authdata
+	krb5_pac_add_buffer
+	krb5_pac_free
+	krb5_pac_get_buffer
+	krb5_pac_get_types
+	krb5_pac_init
+	krb5_pac_parse
+	krb5_pac_verify
+	krb5_parse_name_flags
+	krb5_principal_compare_any_realm
+	krb5_principal_compare_flags
+	krb5_tkt_creds_free
+	krb5_tkt_creds_get
+	krb5_tkt_creds_get_creds
+	krb5_tkt_creds_get_times
+	krb5_tkt_creds_init
+	krb5_tkt_creds_step
+	krb5_unparse_name_flags
+	krb5_unparse_name_flags_ext
+	krb5_verify_authdata_kdc_issued
+
+; More internal symbols used by gssapi
+	decode_krb5_error				; PRIVATE GSSAPI
+	decode_krb5_iakerb_finished			; PRIVATE GSSAPI
+	decode_krb5_iakerb_header			; PRIVATE GSSAPI
+	encode_krb5_iakerb_finished			; PRIVATE GSSAPI
+	encode_krb5_iakerb_header			; PRIVATE GSSAPI
+	encode_krb5_ticket				; PRIVATE GSSAPI
+	krb5_auth_con_get_authdata_context		; PRIVATE GSSAPI
+	krb5_auth_con_set_authdata_context		; PRIVATE GSSAPI
+	krb5_authdata_context_copy			; PRIVATE GSSAPI
+	krb5_authdata_context_free			; PRIVATE GSSAPI
+	krb5_authdata_context_init			; PRIVATE GSSAPI
+	krb5_authdata_delete_attribute			; PRIVATE GSSAPI
+	krb5_authdata_export_attributes			; PRIVATE GSSAPI
+	krb5_authdata_export_authdata			; PRIVATE GSSAPI
+	krb5_authdata_export_internal			; PRIVATE GSSAPI
+	krb5_authdata_free_internal			; PRIVATE GSSAPI
+	krb5_authdata_get_attribute			; PRIVATE GSSAPI
+	krb5_authdata_get_attribute_types		; PRIVATE GSSAPI
+	krb5_authdata_import_attributes			; PRIVATE GSSAPI
+	krb5_authdata_set_attribute			; PRIVATE GSSAPI
+	krb5_free_iakerb_finished			; PRIVATE GSSAPI
+	krb5_free_iakerb_header				; PRIVATE GSSAPI
+	krb5_get_credentials_for_user			; PRIVATE GSSAPI
+	krb5_get_credentials_for_proxy			; PRIVATE GSSAPI
+	krb5_sendto_kdc					; PRIVATE GSSAPI
+	krb5int_copy_data_contents_add0			; PRIVATE GSSAPI
+	krb5int_free_data_list				; PRIVATE GSSAPI

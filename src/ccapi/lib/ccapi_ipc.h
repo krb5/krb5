@@ -30,7 +30,6 @@
 #include "cci_common.h"
 
 cc_int32 cci_ipc_thread_init (void);
-void cci_ipc_thread_fini (void);
 
 cc_int32 cci_ipc_send (enum cci_msg_id_t  in_request_name,
                        cci_identifier_t   in_identifier,

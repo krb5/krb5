@@ -105,8 +105,12 @@ $(OUTPRE)test_profile.exe:
 	$(CC) $(CFLAGS2) -o test_profile.exe test_profile.c prof_init.c \
 		prof_file.c prof_parse.c prof_tree.c /link /stack:16384
 
+##DOS##!if 0
 profile.h: prof_err.h profile.hin
 	cat $(srcdir)/profile.hin prof_err.h > $@
+##DOS##!endif
+##DOS##profile.h: prof_err.h profile.hin
+##DOS##	copy /b profile.hin+prof_err.h $@
 
 prof_err.h: $(srcdir)/prof_err.et
 

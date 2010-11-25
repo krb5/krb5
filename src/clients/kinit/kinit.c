@@ -650,6 +650,7 @@ k5_kinit(opts, k5)
 
     if ((opts->action == INIT_KT) && opts->keytab_name)
     {
+#ifndef _WIN32
         if (strncmp(opts->keytab_name, "KDB:", 3) == 0) {
             code = kinit_kdb_init(&k5->ctx,
                                   krb5_princ_realm(k5->ctx, k5->me)->data);
@@ -660,6 +661,7 @@ k5_kinit(opts, k5)
                 goto cleanup;
             }
         }
+#endif
 
         code = krb5_kt_resolve(k5->ctx, opts->keytab_name, &keytab);
         if (code != 0) {

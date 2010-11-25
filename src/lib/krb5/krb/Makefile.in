@@ -115,6 +115,7 @@ STLIBOBJS= \
 OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)addr_order.$(OBJEXT)	\
 	$(OUTPRE)addr_srch.$(OBJEXT)	\
+	$(OUTPRE)allow_weak.$(OBJEXT)	\
 	$(OUTPRE)appdefault.$(OBJEXT)	\
 	$(OUTPRE)auth_con.$(OBJEXT)	\
 	$(OUTPRE)authdata.$(OBJEXT)	\

@@ -195,16 +195,19 @@ typedef _W64 int         ssize_t;
  * Functions with slightly different names on the PC
  */
 #ifndef strcasecmp
-#define strcasecmp   stricmp
+#define strcasecmp   _stricmp
 #endif
 #ifndef strncasecmp
-#define strncasecmp  strnicmp
+#define strncasecmp  _strnicmp
 #endif
 
 /* VS2005 has deprecated strdup */
 #ifndef strdup
 #define strdup _strdup
 #endif
+
+/* Windows has its own name for reentrant strtok. */
+#define strtok_r strtok_s
 
 HINSTANCE get_lib_instance(void);
 

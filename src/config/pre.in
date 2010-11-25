@@ -411,6 +411,10 @@ TCL_RPATH	= @TCL_RPATH@
 TCL_MAYBE_RPATH = @TCL_MAYBE_RPATH@
 TCL_INCLUDES	= @TCL_INCLUDES@
 
+# Crypto and PRNG back-end selections
+CRYPTO_IMPL	= @CRYPTO_IMPL@
+PRNG_ALG	= @PRNG_ALG@
+
 # error table rules
 #
 ### /* these are invoked as $(...) foo.et, which works, but could be better */

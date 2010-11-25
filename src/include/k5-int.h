@@ -2347,10 +2347,10 @@ typedef struct _krb5int_access {
     /* Used for encrypted challenge fast factor*/
     krb5_error_code (*encode_enc_data)(const krb5_enc_data *, krb5_data **);
     krb5_error_code (*decode_enc_data)(const krb5_data *, krb5_enc_data **);
-    void (*free_enc_data)(krb5_context, krb5_enc_data *);
+    void (KRB5_CALLCONV *free_enc_data)(krb5_context, krb5_enc_data *);
     krb5_error_code (*encode_enc_ts)(const krb5_pa_enc_ts *, krb5_data **);
     krb5_error_code (*decode_enc_ts)(const krb5_data *, krb5_pa_enc_ts **);
-    void (*free_enc_ts)(krb5_context, krb5_pa_enc_ts *);
+    void (KRB5_CALLCONV *free_enc_ts)(krb5_context, krb5_pa_enc_ts *);
     krb5_error_code
     (*encrypt_helper)(krb5_context, const krb5_keyblock *, krb5_keyusage,
                       const krb5_data *, krb5_enc_data *);
@@ -2668,7 +2668,7 @@ void krb5int_dbgref_dump_principal(char *, krb5_principal);
 #endif
 
 /* Common hostname-parsing code. */
-krb5_error_code KRB5_CALLCONV
+krb5_error_code
 krb5int_clean_hostname(krb5_context, const char *, char *, size_t);
 
 krb5_error_code

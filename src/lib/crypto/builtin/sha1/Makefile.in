@@ -3,8 +3,8 @@ BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=sha1
-##DOS##OBJFILE=..\$(OUTPRE)sha1.lst
+##DOS##PREFIXDIR = builtin\sha1
+##DOS##OBJFILE = ..\..\$(OUTPRE)sha1.lst
 
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)

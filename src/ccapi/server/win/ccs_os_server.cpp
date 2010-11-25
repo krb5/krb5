@@ -25,7 +25,7 @@
  */
 
 #include "process.h"
-#include "windows.h" 
+#include "windows.h"
 
 extern "C" {
 #include "ccs_common.h"
@@ -49,10 +49,10 @@ const char*         sessID              = NULL; /* The logon session we are runn
 time_t              _sst                = 0;
 unsigned char*      pszNetworkAddress   = NULL;
 unsigned char*      pszStringBinding    = NULL;
-BOOL                bRpcHandleInited    = FALSE; 
+BOOL                bRpcHandleInited    = FALSE;
 _RPC_ASYNC_STATE*    rpcState            = NULL;
 
-/* Thread procedures can take only one void* argument.  We put all the args we want 
+/* Thread procedures can take only one void* argument.  We put all the args we want
    to pass into this struct and then pass a pointer to the struct: */
 struct RpcRcvArgs {
     char*               networkAddress;
@@ -70,9 +70,9 @@ struct RpcRcvArgs {
 /* Command line format:
    argv[0] Program name
    argv[1] session ID to use
-   argv[2] "D" Debug: go into infinite loop in ccs_os_server_initialize so process 
+   argv[2] "D" Debug: go into infinite loop in ccs_os_server_initialize so process
            can be attached in debugger.
-           Any other value: continue 
+           Any other value: continue
  */
 #define N_FIXED_ARGS 3
 #define SERVER_REPLY_RPC_HANDLE ccs_reply_IfHandle
@@ -85,7 +85,7 @@ void            printError(TCHAR* msg);
 void            setMySST()      {_sst = time(&_sst);}
 time_t          getMySST()      {return _sst;}
 RPC_STATUS      send_connection_reply(ccs_pipe_t in_pipe);
-void RPC_ENTRY  clientListener( _RPC_ASYNC_STATE*,    
+void RPC_ENTRY  clientListener( _RPC_ASYNC_STATE*,
                                 void* Context,
                                 RPC_ASYNC_EVENT Event);
 RPC_STATUS RPC_ENTRY sec_callback(  IN RPC_IF_ID *Interface,
@@ -94,13 +94,13 @@ RPC_STATUS      send_init(char* clientUUID);
 //DWORD alloc_name(LPSTR* pname, LPSTR postfix);
 
 
-/* The layout of the rest of this module:  
+/* The layout of the rest of this module:
 
    The four entrypoints defined in ccs_os_server.h:
       ccs_os_server_initialize
-      cc_int32 ccs_os_server_cleanup 
-      cc_int32 ccs_os_server_listen_loop 
-      cc_int32 ccs_os_server_send_reply 
+      cc_int32 ccs_os_server_cleanup
+      cc_int32 ccs_os_server_listen_loop
+      cc_int32 ccs_os_server_send_reply
 
    Other routines needed by those four.
  */
@@ -129,7 +129,7 @@ cc_int32 ccs_os_server_initialize (int argc, const char *argv[]) {
 #endif
 
         PO.Parse(opts, argc, (char**)argv);
-    
+
 //        while(*argv[2] == 'D') {}       /* Hang here to attach process with debugger. */
 
         if (hKernel32) {
@@ -141,7 +141,7 @@ cc_int32 ccs_os_server_initialize (int argc, const char *argv[]) {
                 bAdjustedShutdown = pSetProcessShutdownParameters(100, 0);
                 }
             }
-        cci_debug_printf("%s Shutdown Parameters", 
+        cci_debug_printf("%s Shutdown Parameters",
             bAdjustedShutdown ? "Adjusted" : "Did not adjust");
 
         err = Init::Initialize();
@@ -151,14 +151,14 @@ cc_int32 ccs_os_server_initialize (int argc, const char *argv[]) {
 //        if (opts.bShutdown) {
 //            status = shutdown_server(opts.pszEndpoint);
 //            }
-//        } 
+//        }
 //    else {
 //        status = startup_server(opts);
 //        }
 
     if (err) {
         Init::Cleanup();
-        fprintf(    stderr, "An error occured while %s the server (%u)\n", 
+        fprintf(    stderr, "An error occured while %s the server (%u)\n",
                     opts.bShutdown ? "shutting down" : "starting/running",
                     err);
         exit(cci_check_error (err));
@@ -171,9 +171,9 @@ cc_int32 ccs_os_server_initialize (int argc, const char *argv[]) {
 
 cc_int32 ccs_os_server_cleanup (int argc, const char *argv[]) {
     cc_int32 err = 0;
-    
+
     cci_debug_printf("%s for user <%s> shutting down.", argv[0], argv[1]);
-    
+
     return cci_check_error (err);
     }
 
@@ -194,7 +194,7 @@ cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]) {
 
     ParseOpts::Opts opts         = { 0 };
     ParseOpts       PO;
-    
+
     opts.cMinCalls  = 1;
     opts.cMaxCalls  = 20;
     opts.fDontWait  = TRUE;
@@ -206,14 +206,14 @@ cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]) {
 #endif
     PO.Parse(opts, argc, (char**)argv);
 
-        
+
     //++ debug stuff
     #define INFO_BUFFER_SIZE 32767
     TCHAR  infoBuf[INFO_BUFFER_SIZE];
     DWORD  bufCharCount = INFO_BUFFER_SIZE;
-    // Get and display the user name. 
+    // Get and display the user name.
     bufCharCount = INFO_BUFFER_SIZE;
-    if( !GetUserName( infoBuf, &bufCharCount ) )  printError( TEXT("GetUserName") ); 
+    if( !GetUserName( infoBuf, &bufCharCount ) )  printError( TEXT("GetUserName") );
     //--
 
     /* Sending the reply from within the request RPC handler doesn't seem to work.
@@ -242,7 +242,7 @@ cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]) {
             if (worklist_remove(&rpcmsg, &pipe, &buf, &serverStartTime)) {
                 uuid = ccs_win_pipe_getUuid(pipe);
 #if 0
-                cci_debug_printf("%s: processing WorkItem msg:%ld pipeUUID:<%s> pipeHandle:0x%X SST:%ld", 
+                cci_debug_printf("%s: processing WorkItem msg:%ld pipeUUID:<%s> pipeHandle:0x%X SST:%ld",
                     __FUNCTION__, rpcmsg, uuid, ccs_win_pipe_getHandle(pipe), serverStartTime);
 #endif
                 if (serverStartTime <= getMySST()) {
@@ -283,20 +283,20 @@ cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]) {
                             err = ccs_os_server_send_reply(pipe, stream);
                             break;
                         default:
-                            cci_debug_printf("Huh?  Received invalid message type %ld from UUID:<%s>", 
+                            cci_debug_printf("Huh?  Received invalid message type %ld from UUID:<%s>",
                                 rpcmsg, uuid);
                             break;
                         }
                     if (buf)        krb5int_ipc_stream_release(buf);
-                    /* Don't free uuid, which was allocated here.  A pointer to it is in the 
+                    /* Don't free uuid, which was allocated here.  A pointer to it is in the
                        rpcargs struct which was passed to connectionListener which will be
-                       received by ccapi_listen when the client exits.  ccapi_listen needs 
+                       received by ccapi_listen when the client exits.  ccapi_listen needs
                        the uuid to know which client to disconnect.
                      */
                     }
-                // Server's start time is different from what the client thinks.  
+                // Server's start time is different from what the client thinks.
                 // That means the server has rebooted since the client connected.
-                else {      
+                else {
                     cci_debug_printf("Whoops!  Server has rebooted since client established connection.");
                     }
                 }
@@ -361,7 +361,7 @@ void Usage(const char* argv0) {
 
 /* ------------------------------------------------------------------------ */
 /* The receive thread repeatedly issues RpcServerListen.
-   When a message arrives, it is handled in the RPC procedure.  
+   When a message arrives, it is handled in the RPC procedure.
  */
 void    receiveLoop(void* rpcargs) {
 
@@ -424,17 +424,17 @@ void    receiveLoop(void* rpcargs) {
         cci_debug_printf("%s is listening ...", __FUNCTION__);
 
         if (!info.isNT) {
-            status = RpcServerRegisterIf(ccs_request_ServerIfHandle,    // interface 
+            status = RpcServerRegisterIf(ccs_request_ServerIfHandle,    // interface
                                          NULL,                          // MgrTypeUuid
                                          NULL);                         // MgrEpv; null means use default
-            } 
+            }
         else {
             status = info.fRpcServerRegisterIfEx(ccs_request_ServerIfHandle,  // interface
                                          NULL,                          // MgrTypeUuid
                                          NULL,                          // MgrEpv; 0 means default
                                          RPC_IF_ALLOW_SECURE_ONLY,
                                          rcvargs->opts->cMaxCalls,
-                                         rcvargs->opts->bSecCallback ? 
+                                         rcvargs->opts->bSecCallback ?
                                          (RPC_IF_CALLBACK_FN*)sec_callback : 0 );
             }
 
@@ -447,7 +447,7 @@ void    receiveLoop(void* rpcargs) {
         if (!status) {
             if (rcvargs->opts->fDontWait) {
                 if (hEvent) SetEvent(hEvent);   // Ignore any error -- SetEvent is an optimization.
-                status = RpcMgmtWaitServerListen();  
+                status = RpcMgmtWaitServerListen();
                 }
             }
         }
@@ -456,7 +456,7 @@ void    receiveLoop(void* rpcargs) {
         if (hEvent) CloseHandle(hEvent);
         free_alloc_p(&event_name);
         free_alloc_p(&psd);
-        if (endpoint && (endpoint != rcvargs->opts->pszEndpoint)) 
+        if (endpoint && (endpoint != rcvargs->opts->pszEndpoint))
             free_alloc_p(&endpoint);
         }
 
@@ -474,7 +474,7 @@ void    receiveLoop(void* rpcargs) {
 
 /* ------------------------------------------------------------------------ */
 /* The connection listener thread waits forever for a call to the CCAPI_CLIENT_<UUID>
-   endpoint, ccapi_listen function to complete.  If the call completes or gets an 
+   endpoint, ccapi_listen function to complete.  If the call completes or gets an
    RPC exception, it means the client has disappeared.
 
    A separate connectionListener is started for each client that has connected to the server.
@@ -500,8 +500,8 @@ void    connectionListener(void* rpcargs) {
     rpcState->u.APC.hThread             = 0;
 
     /* [If in use] Free previous binding: */
-    if (bRpcHandleInited) {     
-        // Free previous binding (could have been used to call ccapi_listen 
+    if (bRpcHandleInited) {
+        // Free previous binding (could have been used to call ccapi_listen
         //  in a different client thread).
         // Don't check result or update status.
         RpcStringFree(&pszStringBinding);
@@ -522,7 +522,7 @@ void    connectionListener(void* rpcargs) {
 
     /* Set the binding handle that will be used to bind to the server. */
     if (!status) {
-        status = RpcBindingFromStringBinding(pszStringBinding, &SERVER_REPLY_RPC_HANDLE); 
+        status = RpcBindingFromStringBinding(pszStringBinding, &SERVER_REPLY_RPC_HANDLE);
         }
     if (!status) {bRpcHandleInited  = TRUE;}
 
@@ -535,7 +535,7 @@ void    connectionListener(void* rpcargs) {
         status = cci_check_error(RpcExceptionCode());
         }
     RpcEndExcept
-    
+
     rcvargs->status = status;
     }   // End connectionListener
 
@@ -548,10 +548,10 @@ void RPC_ENTRY clientListener(
 
     ccs_pipe_t pipe = ccs_win_pipe_new((char*)pAsync->UserInfo, NULL);
 
-    cci_debug_printf("%s(0x%X, ...) async routine for <0x%X:%s>!", 
+    cci_debug_printf("%s(0x%X, ...) async routine for <0x%X:%s>!",
         __FUNCTION__, pAsync, pAsync->UserInfo, pAsync->UserInfo);
 
-    worklist_add(   CCMSG_DISCONNECT, 
+    worklist_add(   CCMSG_DISCONNECT,
                     pipe,
                     NULL,               /* No payload with connect request */
                     (const time_t)0 );  /* No server session number with connect request */
@@ -564,7 +564,7 @@ void printError( TCHAR* msg ) {
     TCHAR* p;
 
     eNum = GetLastError( );
-    FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM | 
+    FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM |
          FORMAT_MESSAGE_IGNORE_INSERTS,
          NULL, eNum,
          MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
@@ -586,7 +586,7 @@ RPC_STATUS send_init(char* clientUUID) {
     RPC_STATUS      status;
     unsigned char * pszUuid             = NULL;
     unsigned char * pszOptions          = NULL;
- 
+
     /* Use a convenience function to concatenate the elements of */
     /* the string binding into the proper sequence.              */
     status = RpcStringBindingCompose(pszUuid,
@@ -605,7 +605,7 @@ RPC_STATUS send_init(char* clientUUID) {
 RPC_STATUS send_finish() {
     RPC_STATUS  status;
     /* Can't shut down client -- it runs listen function which  */
-    /* server uses to detect the client going away.             */              
+    /* server uses to detect the client going away.             */
 
     /*  The calls to the remote procedures are complete. */
     /*  Free the string and the binding handle           */
@@ -613,7 +613,7 @@ RPC_STATUS send_finish() {
     if (status) {return (status);}
 
     status = RpcBindingFree(&SERVER_REPLY_RPC_HANDLE);  // remote calls done; unbind
-    
+
     return (status);
     }
 
@@ -674,7 +674,7 @@ RPC_STATUS GetPeerName( RPC_BINDING_HANDLE hClient,
         // String binding only contains protocol sequence and client
         // address, and is not currently implemented for named pipes.
         Status = RpcStringBindingParse (pszStringBinding, NULL,
-                                        &pszProtSequence, &pszClientNetAddr, 
+                                        &pszProtSequence, &pszClientNetAddr,
                                         NULL, NULL);
         if (Status != RPC_S_OK)
             __leave;
@@ -686,13 +686,13 @@ RPC_STATUS GetPeerName( RPC_BINDING_HANDLE hClient,
     __finally {
         if (pszProtSequence)
             RpcStringFree (&pszProtSequence);
-        
+
         if (pszClientNetAddr)
             RpcStringFree (&pszClientNetAddr);
-        
+
         if (pszStringBinding)
             RpcStringFree (&pszStringBinding);
-        
+
         if (hServer)
             RpcBindingFree (&hServer);
     }
@@ -728,8 +728,8 @@ GetClientId(
         memset(info, 0, sizeof(client_auth_info));
     }
 
-    status = RpcBindingInqAuthClient(hClient, &authz_handle, 
-                                     info ? &server_principal : 0, 
+    status = RpcBindingInqAuthClient(hClient, &authz_handle,
+                                     info ? &server_principal : 0,
                                      &authn_level, &authn_svc, &authz_svc);
     if (status == RPC_S_OK)
     {
@@ -797,7 +797,7 @@ print_client_info(
                          "\tAuthentication Level:   %d\n"
                          "\tAuthentication Service: %d\n"
                          "\tAuthorization Service:  %d\n",
-                         __FUNCTION__, 
+                         __FUNCTION__,
                          info->server_principal,
                          info->authn_level,
                          info->authn_svc,
@@ -805,7 +805,7 @@ print_client_info(
         }
         cci_debug_printf("%s Client ID is \"%s\"", __FUNCTION__, client_id);
     } else {
-        cci_debug_printf("%s Error getting Client Info (%u = %s)", 
+        cci_debug_printf("%s Error getting Client Info (%u = %s)",
                      __FUNCTION__, client_status, rpc_error_to_string(client_status));
     }
 }
@@ -902,7 +902,7 @@ DWORD sid_check() {
         cci_debug_printf("%s SID **does not** match!", __FUNCTION__);
     else if (status == RPC_S_OK)
         cci_debug_printf("%s SID matches!", __FUNCTION__);
-    else 
+    else
         if (status) {
             cci_debug_printf("%s unrecognized error %u", __FUNCTION__, status);
             abort();

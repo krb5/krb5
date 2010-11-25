@@ -5,8 +5,8 @@ LOCALINCLUDES = -I$(srcdir)/../../krb/crc32 -I$(srcdir)/../md4 \
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=hash_provider
-##DOS##OBJFILE=..\$(OUTPRE)hash_pro.lst
+##DOS##PREFIXDIR = builtin\hash_provider
+##DOS##OBJFILE = ..\..\$(OUTPRE)hash_provider.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

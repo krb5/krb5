@@ -1,11 +1,11 @@
 mydir=lib/crypto/krb/rand2key
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/. -I$(srcdir)/../../@CRYPTO_IMPL@/des
+LOCALINCLUDES = -I$(srcdir)/. -I$(srcdir)/../../$(CRYPTO_IMPL)/des
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=rand2key
-##DOS##OBJFILE=..\$(OUTPRE)rand2key.lst
+##DOS##PREFIXDIR = krb\rand2key
+##DOS##OBJFILE= ..\..\$(OUTPRE)rand2key.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

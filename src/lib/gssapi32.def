@@ -97,3 +97,74 @@ EXPORTS
         gss_mech_set_krb5_both         	@43	DATA
 	GSS_KRB5_NT_PRINCIPAL_NAME     	@8 	DATA
 	gss_mech_krb5_wrong	       	@41	DATA	
+
+; Added in krb5 1.7-1.9
+	gss_acquire_cred_impersonate_name
+	gss_acquire_cred_with_password
+	gss_add_buffer_set_member
+	gss_add_cred_impersonate_name
+	gss_complete_auth_token
+	gss_create_empty_buffer_set
+	gss_delete_name_attribute
+	gss_display_mech_attr
+	gss_display_name_ext
+	gss_export_name_composite
+	gss_get_name_attribute
+	gss_indicate_mechs_by_attrs
+	gss_inquire_attrs_for_mech
+	gss_inquire_cred_by_oid
+	gss_inquire_mech_for_saslname
+	gss_inquire_name
+	gss_inquire_saslname_for_mech
+	gss_inquire_sec_context_by_oid
+	gsskrb5_extract_authtime_from_sec_context
+	gsskrb5_extract_authz_data_from_sec_context
+	gss_krb5_import_cred
+	gss_krb5_set_cred_rcache
+	gss_map_name_to_any
+	gss_pseudo_random
+	gss_release_any_name_mapping
+	gss_release_buffer_set
+	gss_release_iov_buffer
+	gss_set_cred_option
+	gss_set_name_attribute
+	gss_set_neg_mechs
+	gss_set_sec_context_option
+	gss_store_cred
+	gss_unwrap_aead
+	gss_unwrap_iov
+	gss_wrap_aead
+	gss_wrap_iov
+	gss_wrap_iov_length
+
+	GSS_C_INQ_SSPI_SESSION_KEY		DATA
+	GSS_C_MA_AUTH_INIT			DATA
+	GSS_C_MA_AUTH_INIT_ANON			DATA
+	GSS_C_MA_AUTH_INIT_INIT			DATA
+	GSS_C_MA_AUTH_TARG			DATA
+	GSS_C_MA_AUTH_TARG_ANON			DATA
+	GSS_C_MA_AUTH_TARG_INIT			DATA
+	GSS_C_MA_CBINDINGS			DATA
+	GSS_C_MA_COMPRESS			DATA
+	GSS_C_MA_CONF_PROT			DATA
+	GSS_C_MA_CTX_TRANS			DATA
+	GSS_C_MA_DELEG_CRED			DATA
+	GSS_C_MA_DEPRECATED			DATA
+	GSS_C_MA_INTEG_PROT			DATA
+	GSS_C_MA_ITOK_FRAMED			DATA
+	GSS_C_MA_MECH_COMPOSITE			DATA
+	GSS_C_MA_MECH_CONCRETE			DATA
+	GSS_C_MA_MECH_GLUE			DATA
+	GSS_C_MA_MECH_NEGO			DATA
+	GSS_C_MA_MECH_PSEUDO			DATA
+	GSS_C_MA_MIC				DATA
+	GSS_C_MA_NOT_DFLT_MECH			DATA
+	GSS_C_MA_NOT_MECH			DATA
+	GSS_C_MA_OOS_DET			DATA
+	GSS_C_MA_PFS				DATA
+	GSS_C_MA_PROT_READY			DATA
+	GSS_C_MA_REPLAY_DET			DATA
+	GSS_C_MA_WRAP				DATA
+	gss_mech_iakerb				DATA
+	gss_nt_exported_name			DATA
+	gss_nt_service_name_v2			DATA

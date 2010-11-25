@@ -184,7 +184,11 @@ main(argc, argv)
     }
 
     if (print_version) {
+#ifdef _WIN32                   /* No access to autoconf vars; fix somehow. */
+        printf("Kerberos for Windows\n");
+#else
         printf("%s version %s\n", PACKAGE_NAME, PACKAGE_VERSION);
+#endif
         exit(0);
     }
 

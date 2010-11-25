@@ -4,8 +4,8 @@ LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../.. -I$(srcdir)/../../krb
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=des
-##DOS##OBJFILE=..\$(OUTPRE)des.lst
+##DOS##PREFIXDIR = builtin\des
+##DOS##OBJFILE = ..\..\$(OUTPRE)des.lst
 
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)

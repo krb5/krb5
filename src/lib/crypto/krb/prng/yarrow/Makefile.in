@@ -1,14 +1,14 @@
 mydir=lib/crypto/krb/prng/yarrow
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../.. \
-		-I$(srcdir)/../../../@CRYPTO_IMPL@		\
-		-I$(srcdir)/../../../@CRYPTO_IMPL@/sha1 	\
-		-I$(srcdir)/../../../@CRYPTO_IMPL@/enc_provider
+		-I$(srcdir)/../../../$(CRYPTO_IMPL)		\
+		-I$(srcdir)/../../../$(CRYPTO_IMPL)/sha1 	\
+		-I$(srcdir)/../../../$(CRYPTO_IMPL)/enc_provider
 DEFS=
 
-##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=yarrow
-##DOS##OBJFILE=..\$(OUTPRE)yarrow.lst
+##DOS##BUILDTOP = ..\..\..\..\..
+##DOS##PREFIXDIR = krb\prng\yarrow
+##DOS##OBJFILE = ..\..\..\$(OUTPRE)yarrow.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

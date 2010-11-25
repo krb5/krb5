@@ -3,8 +3,8 @@ BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=crc32
-##DOS##OBJFILE=..\$(OUTPRE)crc32.lst
+##DOS##PREFIXDIR = krb\crc32
+##DOS##OBJFILE = ..\..\$(OUTPRE)crc32.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

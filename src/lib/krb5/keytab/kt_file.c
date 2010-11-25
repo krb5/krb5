@@ -159,7 +159,7 @@ krb5_ktfileint_find_slot(krb5_context, krb5_keytab, krb5_int32 *,
  * initialized with file keytab routines.
  */
 
-static krb5_error_code
+static krb5_error_code KRB5_CALLCONV
 krb5_ktfile_resolve(krb5_context context, const char *name,
                     krb5_keytab *id_out)
 {
