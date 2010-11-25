@@ -39,6 +39,7 @@ $(OUTPRE)gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c
 gssapi_err_generic.h: gssapi_err_generic.et
 gssapi_err_generic.c: gssapi_err_generic.et
 
+##DOS##!if 0
 include_stdint=@include_stdint@
 include_inttypes=@include_inttypes@
 include_xom=@include_xom@
@@ -55,6 +56,9 @@ gssapi.h: gssapi.hin
 	echo "/* End of gssapi.h prologue. */"&& \
 	cat $(srcdir)/gssapi.hin )> $$h && \
 	(set -x; $(MV) $$h $@) ; e=$$?; $(RM) $$h; exit $$e
+##DOS##!endif
+##DOS##gssapi.h: gssapi.hin
+##DOS##	$(CP) $** $@
 
 #if HasHashLibrary
 # UTIL_VALIDATE_SRC= $(srcdir)/util_validate.c
