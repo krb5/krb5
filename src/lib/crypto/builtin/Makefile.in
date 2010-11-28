@@ -1,4 +1,4 @@
-mydir=lib/crypto/builtin
+mydir=lib$(S)crypto$(S)builtin
 BUILDTOP=$(REL)..$(S)..$(S)..
 SUBDIRS=camellia des aes md4 md5 sha1 sha2 enc_provider hash_provider
 LOCALINCLUDES = -I$(srcdir)/../krb 			\
@@ -71,103 +71,6 @@ t_cf2$(EXEEXT): t_cf2.$(OBJEXT) $(SUPPORT_DEPLIB)
 
 clean::
 	$(RM)  t_cf2 t_cf2.o  t_cf2.output
-
-
-
-
-all-windows::
-	cd des
-	@echo Making in crypto\builtin\des
-	$(MAKE) -$(MFLAGS)
-	cd ..\md4
-	@echo Making in crypto\builtin\md4
-	$(MAKE) -$(MFLAGS)
-	cd ..\md5
-	@echo Making in crypto\builtin\md5
-	$(MAKE) -$(MFLAGS)
-	cd ..\sha1
-	@echo Making in crypto\builtin\sha1
-	$(MAKE) -$(MFLAGS)
-	cd ..\sha2
-	@echo Making in crypto\builtin\sha2
-	$(MAKE) -$(MFLAGS)
-	cd ..\hash_provider
-	@echo Making in crypto\builtin\hash_provider
-	$(MAKE) -$(MFLAGS)
-	cd ..\enc_provider
-	@echo Making in crypto\builtin\enc_provider
-	$(MAKE) -$(MFLAGS)
-	cd ..\aes
-	@echo Making in crypto\builtin\aes
-	$(MAKE) -$(MFLAGS)
-	cd ..\camellia
-	@echo Making in crypto\builtin\camellia
-	$(MAKE) -$(MFLAGS)
-	cd ..
-	@echo Making in crypto\builtin
-
-clean-windows::
-	cd des
-	@echo Making clean in crypto\builtin\des
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\md4
-	@echo Making clean in crypto\builtin\md4
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\md5
-	@echo Making clean in crypto\builtin\md5
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\sha1
-	@echo Making clean in crypto\builtin\sha1
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\sha2
-	@echo Making clean in crypto\builtin\sha2
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\hash_provider
-	@echo Making clean in crypto\builtin\hash_provider
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\enc_provider
-	@echo Making clean in crypto\builtin\enc_provider
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\aes
-	@echo Making clean in crypto\builtin\aes
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\camellia
-	@echo Making clean in crypto\builtin\camellia
-	$(MAKE) -$(MFLAGS) clean
-	cd ..
-	@echo Making clean in crypto\builtin
-
-check-windows::
-	cd des
-	@echo Making check in crypto\builtin\des
-	$(MAKE) -$(MFLAGS) check
-	cd ..\md4
-	@echo Making check in crypto\builtin\md4
-	$(MAKE) -$(MFLAGS) check
-	cd ..\md5
-	@echo Making check in crypto\builtin\md5
-	$(MAKE) -$(MFLAGS) check
-	cd ..\sha1
-	@echo Making check in crypto\builtin\sha1
-	$(MAKE) -$(MFLAGS) check
-	cd ..\sha2
-	@echo Making check in crypto\builtin\sha2
-	$(MAKE) -$(MFLAGS) check
-	cd ..\hash_provider
-	@echo Making check in crypto\builtin\hash_provider
-	$(MAKE) -$(MFLAGS) check
-	cd ..\enc_provider
-	@echo Making check in crypto\builtin\enc_provider
-	$(MAKE) -$(MFLAGS) check
-	cd ..\aes
-	@echo Making check in crypto\builtin\aes
-	$(MAKE) -$(MFLAGS) check
-	cd ..\camellia
-	@echo Making check in crypto\builtin\camellia
-	$(MAKE) -$(MFLAGS) check
-	cd ..
-	@echo Making check in crypto\builtin
-
 
 @lib_frag@
 @libobj_frag@

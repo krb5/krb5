@@ -1,4 +1,4 @@
-mydir=lib/crypto/builtin/md4
+mydir=lib$(S)crypto$(S)builtin$(S)md4
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)
 DEFS=

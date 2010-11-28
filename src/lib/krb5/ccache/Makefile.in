@@ -1,4 +1,4 @@
-mydir=lib/krb5/ccache
+mydir=lib$(S)krb5$(S)ccache
 BUILDTOP=$(REL)..$(S)..$(S)..
 SUBDIRS = # ccapi
 DEFS=

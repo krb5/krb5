@@ -1,4 +1,4 @@
-mydir=plugins/kdb/db2/libdb2/mpool
+mydir=plugins$(S)kdb$(S)db2$(S)libdb2$(S)mpool
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
 STLIBOBJS=mpool.o
 

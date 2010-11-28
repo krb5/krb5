@@ -1,6 +1,6 @@
 thisconfigdir=../../../..
 myfulldir=lib/crypto/builtin/camellia
-mydir=lib/crypto/builtin/camellia
+mydir=lib$(S)crypto$(S)builtin$(S)camellia
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../krb/dk \
 	 -I$(srcdir)/../../../../include -I$(srcdir)/../aes

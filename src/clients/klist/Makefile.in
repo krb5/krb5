@@ -1,4 +1,4 @@
-mydir=clients/klist
+mydir=clients$(S)klist
 BUILDTOP=$(REL)..$(S)..
 DEFS=
 

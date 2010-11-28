@@ -1,4 +1,4 @@
-mydir=lib/crypto/crypto_tests
+mydir=lib$(S)crypto$(S)crypto_tests
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../krb -I$(srcdir)/../$(CRYPTO_IMPL)/enc_provider \
 	-I$(srcdir)/../$(CRYPTO_IMPL)/hash_provider \

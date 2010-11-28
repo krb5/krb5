@@ -1,4 +1,4 @@
-mydir=lib/crypto/openssl/enc_provider
+mydir=lib$(S)crypto$(S)openssl$(S)enc_provider
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../des 	\
 		-I$(srcdir)/../arcfour \
@@ -8,10 +8,6 @@ LOCALINCLUDES = -I$(srcdir)/../des 	\
 		-I$(srcdir)/../../krb/rand2key	 	\
 		-I$(srcdir)/.. -I$(srcdir)/.
 DEFS=
-
-##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=enc_provider
-##DOS##OBJFILE=..\$(OUTPRE)enc_prov.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -39,8 +35,6 @@ SRCS= \
 	$(srcdir)/camellia.c 	\
 	$(srcdir)/rc4.c
 
-##DOS##LIBOBJS = $(OBJS)
-
 all-unix:: all-libobjs
 
 includes:: depend
@@ -50,4 +44,3 @@ depend:: $(SRCS)
 clean-unix:: clean-libobjs
 
 @libobj_frag@
-

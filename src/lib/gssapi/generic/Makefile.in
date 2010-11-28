@@ -1,4 +1,4 @@
-mydir=lib/gssapi/generic
+mydir=lib$(S)gssapi$(S)generic
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/..
 DEFS=

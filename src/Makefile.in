@@ -16,6 +16,7 @@ SUBDIRS=util include lib \
 	plugins/preauth/encrypted_challenge \
 	kdc kadmin slave clients appl tests \
 	config-files gen-manpages
+WINSUBDIRS=include util lib ccapi windows clients appl
 BUILDTOP=$(REL).
 LOCALINCLUDES = -I$(srcdir) 
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -45,31 +46,6 @@ config.status: $(top_srcdir)/config/shlib.conf
 ##DOS##!endif
 
 all-windows:: maybe-awk Makefile-windows
-	@echo Making autoconf.h in include
-	cd include
-	$(MAKE) -$(MFLAGS) autoconf.h
-	@echo Making in util
-	cd ..\util
-	$(MAKE) -$(MFLAGS)
-	@echo Making in include
-	cd ..\include
-	$(MAKE) -$(MFLAGS) 
-	@echo Making in lib
-	cd ..\lib
-	$(MAKE) -$(MFLAGS) 
-	@echo Making in ccapi
-	cd ..\ccapi
-	$(MAKE) -$(MFLAGS)
-	@echo Making in windows
-	cd ..\windows
-	$(MAKE) -$(MFLAGS) 
-	@echo Making in clients
-	cd ..\clients
-	$(MAKE) -$(MFLAGS)
-	@echo Making in appl
-	cd ..\appl
-	$(MAKE) -$(MFLAGS)
-	cd ..
 
 world::
 	date
@@ -370,26 +346,6 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 
 clean-windows:: Makefile-windows
-	@echo Making clean in util
-	cd util
-	$(MAKE) -$(MFLAGS) clean
-	@echo Making clean in include
-	cd ..\include
-	$(MAKE) -$(MFLAGS) clean
-	@echo Making clean in lib
-	cd ..\lib
-	$(MAKE) -$(MFLAGS) clean
-	@echo Making clean in windows
-	cd ..\windows
-	$(MAKE) -$(MFLAGS) clean
-	@echo Making clean in clients
-	cd ..\clients
-	$(MAKE) -$(MFLAGS) clean
-	@echo Making clean in appl
-	cd ..\appl
-	$(MAKE) -$(MFLAGS) clean
-	cd ..
-	@echo Making clean in root
 
 #
 # Renames DOS 8.3 filenames back to their proper, longer names.

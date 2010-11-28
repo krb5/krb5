@@ -1,4 +1,4 @@
-mydir=lib/crypto
+mydir=lib$(S)crypto
 BUILDTOP=$(REL)..$(S)..
 SUBDIRS= krb $(CRYPTO_IMPL) crypto_tests
 
@@ -73,30 +73,6 @@ libcrypto.lib:
 	libdir crypto.lib
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
-
-all-windows::
-	cd krb
-	@echo Making in crypto\krb
-	$(MAKE) -$(MFLAGS)
-	cd ..\$(CRYPTO_IMPL)
-	@echo Making in crypto\$(CRYPTO_IMPL)
-	$(MAKE) -$(MFLAGS)
-	cd ..\crypto_tests
-	@echo Making in crypto\crypto_tests
-	$(MAKE) -$(MFLAGS)
-	cd ..
-
-clean-windows::
-	cd krb
-	@echo Making in clean crypto\krb
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\$(CRYPTO_IMPL)
-	@echo Making clean in crypto\$(CRYPTO_IMPL)
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\crypto_tests
-	@echo Making clean in crypto\crypto_tests
-	$(MAKE) -$(MFLAGS) clean
-	cd ..
 
 @lib_frag@
 @libobj_frag@

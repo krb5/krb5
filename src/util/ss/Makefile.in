@@ -1,4 +1,4 @@
-mydir=util/ss
+mydir=util$(S)ss
 BUILDTOP=$(REL)..$(S)..
 SED = sed
 DEFS=

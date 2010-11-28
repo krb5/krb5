@@ -1,4 +1,4 @@
-mydir=util/profile
+mydir=util$(S)profile
 BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD) $(TCL_LIBPATH) -L.
 PROG_RPATH=$(KRB5_LIBDIR)$(TCL_RPATH)

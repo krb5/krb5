@@ -1,4 +1,4 @@
-mydir=appl/user_user
+mydir=appl$(S)user_user
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DDEBUG
 PROG_LIBPATH=-L$(TOPLIBD)

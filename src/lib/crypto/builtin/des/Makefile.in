@@ -1,4 +1,4 @@
-mydir=lib/crypto/builtin/des
+mydir=lib$(S)crypto$(S)builtin$(S)des
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../.. -I$(srcdir)/../../krb
 DEFS=

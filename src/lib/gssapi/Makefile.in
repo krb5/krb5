@@ -1,4 +1,4 @@
-mydir=lib/gssapi
+mydir=lib$(S)gssapi
 BUILDTOP=$(REL)..$(S)..
 SUBDIRS= generic krb5 spnego mechglue
 DEFS=-D_GSS_STATIC_LINK=1
@@ -55,37 +55,6 @@ merged-gssapi-header.h: $(EXPORTED_HEADERS)
 	$(MV) merged.tmp merged-gssapi-header.h
 verify-calling-conventions-gssapi: merged-gssapi-header.h
 	$(PERL) -w $(top_srcdir)/util/def-check.pl merged-gssapi-header.h $(srcdir)/../gssapi32.def
-
-all-windows::
-	cd generic
-	@echo Making in gssapi\generic
-	$(MAKE) -$(MFLAGS)
-	cd ..\krb5
-	@echo Making in gssapi\krb5
-	$(MAKE) -$(MFLAGS)
-	cd ..\mechglue
-	@echo Making in gssapi\mechglue
-	$(MAKE) -$(MFLAGS)
-	cd ..\spnego
-	@echo Making in gssapi\spnego
-	$(MAKE) -$(MFLAGS)
-	cd ..
-
-clean-windows::
-	cd generic
-	@echo Making clean in gssapi\generic
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\krb5
-	@echo Making clean in gssapi\krb5
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\mechglue
-	@echo Making clean in gssapi\mechglue
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\spnego
-	@echo Making clean in gssapi\spnego
-	$(MAKE) -$(MFLAGS) clean
-	cd ..
-	@echo Making clean in gssapi
 
 # These rules are an attempt to handle several different problems:
 #

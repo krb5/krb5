@@ -1,4 +1,4 @@
-mydir=util/send-pr
+mydir=util$(S)send-pr
 BUILDTOP=$(REL)..$(S)..
 #
 # Makefile for building a standalone send-pr.

@@ -1,4 +1,4 @@
-mydir=lib/crypto/krb/prf
+mydir=lib$(S)crypto$(S)krb$(S)prf
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/.. 		\
 		-I$(srcdir)/../dk			\

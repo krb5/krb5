@@ -1,4 +1,4 @@
-mydir=lib/krb5/os
+mydir=lib$(S)krb5$(S)os
 BUILDTOP=$(REL)..$(S)..$(S)..
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)

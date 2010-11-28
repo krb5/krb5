@@ -1,10 +1,6 @@
-mydir=lib/crypto/openssl/sha1
+mydir=lib$(S)crypto$(S)openssl$(S)sha1
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 DEFS=
-
-##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=sha1
-##DOS##OBJFILE=..\$(OUTPRE)sha1.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -15,15 +11,11 @@ OBJS= $(OUTPRE)shs.$(OBJEXT)
 
 SRCS= $(srcdir)/shs.c
 
-##DOS##LIBOBJS = $(OBJS)
-
 all-unix:: all-libobjs
 
 includes:: depend
 
 depend:: $(SRCS)
-
-clean::
 
 clean-unix:: clean-libobjs
 

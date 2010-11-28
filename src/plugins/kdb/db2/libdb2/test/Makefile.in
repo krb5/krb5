@@ -1,4 +1,4 @@
-mydir=plugins/kdb/db2/libdb2/test
+mydir=plugins$(S)kdb$(S)db2$(S)libdb2$(S)test
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
 
 FCTSH = @FCTSH@

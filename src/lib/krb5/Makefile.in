@@ -1,7 +1,8 @@
-mydir=lib/krb5
+mydir=lib$(S)krb5
 BUILDTOP=$(REL)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/ccache -I$(srcdir)/keytab -I$(srcdir)/rcache -I$(srcdir)/os -I$(srcdir)/unicode
 SUBDIRS= error_tables asn.1 ccache keytab krb os rcache unicode
+WINSUBDIRS= $(SUBDIRS) posix
 DEFS=
 
 ##DOSBUILDTOP = ..\..
@@ -67,67 +68,6 @@ clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 clean-windows::
 	$(RM) $(OUTPRE)krb5.lib krb5.bak
-
-all-windows::
-	cd asn.1
-	@echo Making in krb5\asn.1
-	$(MAKE) -$(MFLAGS)
-	cd ..\ccache
-	@echo Making in krb5\ccache
-	$(MAKE) -$(MFLAGS)
-	cd ..\error_tables
-	@echo Making in krb5\error_tables
-	$(MAKE) -$(MFLAGS)
-	cd ..\keytab
-	@echo Making in krb5\keytab
-	$(MAKE) -$(MFLAGS)
-	cd ..\krb
-	@echo Making in krb5\krb
-	$(MAKE) -$(MFLAGS)
-	cd ..\os
-	@echo Making in krb5\os
-	$(MAKE) -$(MFLAGS)
-	cd ..\posix
-	@echo Making in krb5\posix
-	$(MAKE) -$(MFLAGS)
-	cd ..\rcache
-	@echo Making in krb5\rcache
-	$(MAKE) -$(MFLAGS)
-	cd ..\unicode
-	@echo Making in krb5\unicode
-	$(MAKE) -$(MFLAGS)
-	cd ..
-
-clean-windows::
-	cd asn.1
-	@echo Making clean in krb5\asn.1
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\ccache
-	@echo Making clean in krb5\ccache
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\error_tables
-	@echo Making clean in krb5\error_tables
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\keytab
-	@echo Making clean in krb5\keytab
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\krb
-	@echo Making clean in krb5\krb
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\os
-	@echo Making clean in krb5\os
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\posix
-	@echo Making clean in krb5\posix
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\rcache
-	@echo Making clean in krb5\rcache
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\unicode
-	@echo Making clean in krb5\unicode
-	$(MAKE) -$(MFLAGS) clean
-	cd ..
-	@echo Making clean locally
 
 install-unix:: install-libs
 

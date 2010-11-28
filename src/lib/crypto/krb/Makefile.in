@@ -1,7 +1,6 @@
-mydir=lib/crypto/krb
+mydir=lib$(S)crypto$(S)krb
 BUILDTOP=$(REL)..$(S)..$(S)..
-SUBDIRS= arcfour checksum crc32 dk \
-	prf rand2key old raw prng 
+SUBDIRS= arcfour checksum crc32 dk prf rand2key old raw prng 
 LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/../$(CRYPTO_IMPL)/enc_provider \
 		-I$(srcdir)/dk -I$(srcdir)/../$(CRYPTO_IMPL)/hash_provider \
 		-I$(srcdir)/prf -I$(srcdir)/rand2key \
@@ -158,100 +157,6 @@ includes:: depend
 depend:: $(SRCS)
 
 clean-unix:: clean-libobjs
-
-all-windows::
-	cd arcfour
-	@echo Making in crypto\krb\arcfour
-	$(MAKE) -$(MFLAGS)
-	cd ..\crc32
-	@echo Making in crypto\krb\crc32
-	$(MAKE) -$(MFLAGS)
-	cd ..\checksum
-	@echo Making in crypto\krb\checksum
-	$(MAKE) -$(MFLAGS)
-	cd ..\dk
-	@echo Making in crypto\krb\dk
-	$(MAKE) -$(MFLAGS)
-	cd ..\prf
-	@echo Making in crypto\krb\prf
-	$(MAKE) -$(MFLAGS)
-	cd ..\rand2key
-	@echo Making in crypto\krb\rand2key
-	$(MAKE) -$(MFLAGS)
-	cd ..\old
-	@echo Making in crypto\krb\old
-	$(MAKE) -$(MFLAGS)
-	cd ..\raw
-	@echo Making in crypto\krb\raw
-	$(MAKE) -$(MFLAGS)
-	cd ..\prng
-	@echo Making in crypto\krb\prng
-	$(MAKE) -$(MFLAGS)
-	cd ..
-	@echo Making in crypto\krb
-
-clean-windows::
-	cd arcfour
-	@echo Making in clean crypto\krb\arcfour
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\crc32
-	@echo Making in clean crypto\krb\crc32
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\checksum
-	@echo Making clean in crypto\krb\checksum
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\dk
-	@echo Making clean in crypto\krb\dk
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\prf
-	@echo Making clean in crypto\krb\prf
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\rand2key
-	@echo Making clean in crypto\krb\rand2key
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\old
-	@echo Making clean in crypto\krb\old
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\raw
-	@echo Making clean in crypto\krb\raw
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\prng
-	@echo Making clean in crypto\krb\prng
-	$(MAKE) -$(MFLAGS) clean
-	cd ..
-	@echo Making clean in crypto\krb
-
-check-windows::
-	cd arcfour
-	@echo Making in check crypto\krb\arcfour
-	$(MAKE) -$(MFLAGS) check
-	cd ..\crc32
-	@echo Making in check crypto\krb\crc32
-	$(MAKE) -$(MFLAGS) check
-	cd ..\checksum
-	@echo Making check in crypto\krb\checksum
-	$(MAKE) -$(MFLAGS) check
-	cd ..\dk
-	@echo Making check in crypto\krb\dk
-	$(MAKE) -$(MFLAGS) check
-	cd ..\prf
-	@echo Making check in crypto\krb\prf
-	$(MAKE) -$(MFLAGS) check
-	cd ..\rand2key
-	@echo Making check in crypto\krb\rand2key
-	$(MAKE) -$(MFLAGS) check
-	cd ..\old
-	@echo Making check in crypto\krb\old
-	$(MAKE) -$(MFLAGS) check
-	cd ..\raw
-	@echo Making check in crypto\krb\raw
-	$(MAKE) -$(MFLAGS) check
-	cd ..\prng
-	@echo Making check in crypto\krb\prng
-	$(MAKE) -$(MFLAGS) check
-	cd ..
-	@echo Making check in crypto\krb
-
 
 @lib_frag@
 @libobj_frag@

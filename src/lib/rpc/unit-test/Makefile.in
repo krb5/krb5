@@ -1,4 +1,4 @@
-mydir=lib/rpc/unit-test
+mydir=lib$(S)rpc$(S)unit-test
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I.
 PROG_LIBPATH=-L$(TOPLIBD)

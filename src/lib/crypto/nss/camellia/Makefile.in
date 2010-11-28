@@ -2,14 +2,10 @@
 # system currently assumes that all modules have the same directory
 # structure.
 
-mydir=lib/crypto/nss/camellia
+mydir=lib$(S)crypto$(S)nss$(S)camellia
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../krb/dk  -I$(srcdir)/../../../../include
 DEFS=
-
-##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=camellia
-##DOS##OBJFILE=..\$(OUTPRE)camellia.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -21,20 +17,13 @@ OBJS=
 SRCS=
 
 
-##DOS##LIBOBJS = $(OBJS)
-
 all-unix:: all-libobjs 
 
 includes:: depend
 
 depend:: $(SRCS)
 
-check:: 
-
-
 clean-unix:: clean-libobjs
-
-clean::
 
 @libobj_frag@
 

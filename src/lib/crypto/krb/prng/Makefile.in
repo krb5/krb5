@@ -1,4 +1,4 @@
-mydir=lib/crypto/krb/prng
+mydir=lib$(S)crypto$(S)krb$(S)prng
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 SUBDIRS= $(PRNG_ALG)
 LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/../../$(CRYPTO_IMPL)/enc_provider \
@@ -40,27 +40,6 @@ includes:: depend
 depend:: $(SRCS)
 
 clean-unix:: clean-libobjs
-
-all-windows::
-	cd yarrow
-	@echo Making in crypto\krb\prng\yarrow
-	$(MAKE) -$(MFLAGS)
-	cd ..
-	@echo Making in crypto\krb\prng
-
-clean-windows::
-	cd yarrow
-	@echo Making clean in crypto\krb\prng\yarrow
-	$(MAKE) -$(MFLAGS) clean
-	cd ..
-	@echo Making clean in crypto\krb\prng
-
-check-windows::
-	cd yarrow
-	@echo Making check in crypto\krb\prng\yarrow
-	$(MAKE) -$(MFLAGS) check
-	cd ..
-	@echo Making check in crypto\krb\prng
 
 @lib_frag@
 @libobj_frag@

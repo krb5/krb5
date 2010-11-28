@@ -1,10 +1,6 @@
-mydir=lib/crypto/openssl/sha2
+mydir=lib$(S)crypto$(S)openssl$(S)sha2
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 DEFS=
-
-##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=sha2
-##DOS##OBJFILE=..\$(OUTPRE)sha256.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -15,15 +11,11 @@ OBJS= $(OUTPRE)sha256.$(OBJEXT)
 
 SRCS= $(srcdir)/sha256.c
 
-##DOS##LIBOBJS = $(OBJS)
-
 all-unix:: all-libobjs
 
 includes:: depend
 
 depend:: $(SRCS)
-
-clean::
 
 clean-unix:: clean-libobjs
 

@@ -1,4 +1,4 @@
-mydir=lib/crypto/builtin/md5
+mydir=lib$(S)crypto$(S)builtin$(S)md5
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 DEFS=
 

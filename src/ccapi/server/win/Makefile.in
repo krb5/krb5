@@ -106,4 +106,4 @@ clean::
 	if exist $(OUTPRE)*.map del $(OUTPRE)*.map
 	if exist $(OUTPRE)*.pdb del $(OUTPRE)*.pdb
 	if exist *.err del *.err
-    if exist $(SRCTMP) rm -rf $(SRCTMP)
+    if exist $(SRCTMP) rmdir /s /q $(SRCTMP)

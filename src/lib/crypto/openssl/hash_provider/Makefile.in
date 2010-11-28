@@ -1,12 +1,8 @@
-mydir=lib/crypto/openssl/hash_provider
+mydir=lib$(S)crypto$(S)openssl$(S)hash_provider
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/../../krb/crc32 -I$(srcdir)/../md4 \
 	-I$(srcdir)/../md5 -I$(srcdir)/../sha1 -I$(srcdir)/../../krb
 DEFS=
-
-##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=hash_provider
-##DOS##OBJFILE=..\$(OUTPRE)hash_pro.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -26,8 +22,6 @@ SRCS=	$(srcdir)/hash_crc32.c	\
 	$(srcdir)/hash_md4.c 	\
 	$(srcdir)/hash_md5.c 	\
 	$(srcdir)/hash_sha1.c
-
-##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
 

@@ -1,4 +1,4 @@
-mydir=lib/crypto/krb/prng/fortuna
+mydir=lib$(S)crypto$(S)krb$(S)prng$(S)fortuna
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../.. \
 		-I$(srcdir)/../../../$(CRYPTO_IMPL)		\

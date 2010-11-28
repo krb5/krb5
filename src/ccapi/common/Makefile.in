@@ -1,4 +1,4 @@
-mydir=ccapi/common
+mydir=ccapi$(S)common
 BUILDTOP=$(REL)..$(S)..
 SUBDIRS=unix
 

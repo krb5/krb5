@@ -1,4 +1,4 @@
-mydir=appl/simple/client
+mydir=appl$(S)simple$(S)client
 BUILDTOP=$(REL)..$(S)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

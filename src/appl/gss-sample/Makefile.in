@@ -1,4 +1,4 @@
-mydir=appl/gss-sample
+mydir=appl$(S)gss-sample
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DUSE_AUTOCONF_H -DGSSAPI_V2
 PROG_LIBPATH=-L$(TOPLIBD)

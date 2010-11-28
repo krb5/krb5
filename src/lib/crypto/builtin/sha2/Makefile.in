@@ -1,4 +1,4 @@
-mydir=lib/crypto/builtin/sha2
+mydir=lib$(S)crypto$(S)builtin$(S)sha2
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 DEFS=
 

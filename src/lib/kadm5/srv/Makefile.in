@@ -1,4 +1,4 @@
-mydir=lib/kadm5/srv
+mydir=lib$(S)kadm5$(S)srv
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(BUILDTOP)/include/kadm5 \
 	-I$(top_srcdir)/lib/gssapi/krb5 -I$(top_srcdir)/lib/gssapi/generic \

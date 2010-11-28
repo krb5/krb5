@@ -1,4 +1,4 @@
-mydir=plugins/kdb/ldap/ldap_util
+mydir=plugins$(S)kdb$(S)ldap$(S)ldap_util
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 DEFINES = -DKDB4_DISABLE
 DEFS=

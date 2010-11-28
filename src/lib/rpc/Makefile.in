@@ -1,4 +1,4 @@
-mydir=lib/rpc
+mydir=lib$(S)rpc
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DGSSAPI_KRB5 -DDEBUG_GSSAPI=0 -DGSSRPC__IMPL
 DEFS=

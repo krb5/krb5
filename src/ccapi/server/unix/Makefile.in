@@ -1,4 +1,4 @@
-mydir=ccapi/server/unix
+mydir=ccapi$(S)server$(S)unix
 BUILDTOP=$(REL)..$(S)..$(S)..
 
 STLIBOBJS=

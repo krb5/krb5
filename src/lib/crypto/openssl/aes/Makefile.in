@@ -2,14 +2,10 @@
 # system currently assumes that all modules have the same directory
 # structure.
 
-mydir=lib/crypto/openssl/aes
+mydir=lib$(S)crypto$(S)openssl$(S)aes
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../krb/dk  -I$(srcdir)/../../../../include
 DEFS=
-
-##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=aes
-##DOS##OBJFILE=..\$(OUTPRE)aes.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -20,21 +16,13 @@ OBJS=
 
 SRCS=
 
-
-##DOS##LIBOBJS = $(OBJS)
-
 all-unix:: all-libobjs 
 
 includes:: depend
 
 depend:: $(SRCS)
 
-check:: 
-
-
 clean-unix:: clean-libobjs
-
-clean::
 
 @libobj_frag@
 

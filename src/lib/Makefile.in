@@ -1,5 +1,6 @@
 mydir=lib
 SUBDIRS=crypto krb5 gssapi rpc kdb kadm5 apputils
+WINSUBDIRS=crypto krb5 gssapi
 BUILDTOP=$(REL)..
 
 all-unix::
@@ -134,31 +135,5 @@ clean-windows::
 ##WIN32##gssapi.lib: $(GLIB)
 ##WIN32##profile.lib: $(PLIB)
 
-##WIN32##all-windows:: 
-##WIN32##	@echo Making in lib\crypto
-##WIN32##	cd crypto
-##WIN32##	$(MAKE) -$(MFLAGS)
-##WIN32##	@echo Making in lib\krb5
-##WIN32##	cd ..\krb5
-##WIN32##	$(MAKE) -$(MFLAGS)
-##WIN32##	@echo Making in lib\gssapi
-##WIN32##	cd ..\gssapi
-##WIN32##	$(MAKE) -$(MFLAGS) 
-##WIN32##	@echo Making in lib
-##WIN32##	cd ..
-
-##WIN32##all-windows:: lib-windows
+##WIN32##all-windows:: all-recurse lib-windows
 ##WIN32##lib-windows:: krb5.lib gssapi.lib
-
-##WIN32##clean-windows::
-##WIN32##	@echo Making clean in lib\crypto
-##WIN32##	cd crypto
-##WIN32##	$(MAKE) -$(MFLAGS) clean
-##WIN32##	@echo Making clean in lib\krb5
-##WIN32##	cd ..\krb5
-##WIN32##	$(MAKE) -$(MFLAGS) clean
-##WIN32##	@echo Making clean in lib\gssapi
-##WIN32##	cd ..\gssapi
-##WIN32##	$(MAKE) -$(MFLAGS) clean
-##WIN32##	@echo Making clean in lib
-##WIN32##	cd ..

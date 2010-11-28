@@ -1,4 +1,4 @@
-mydir=lib/crypto/krb/prng/nss
+mydir=lib$(S)crypto$(S)krb$(S)prng$(S)nss
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
 CRYPTO_IMPL_CFLAGS=@CRYPTO_IMPL_CFLAGS@
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../.. \

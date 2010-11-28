@@ -1,4 +1,4 @@
-mydir=tests/gssapi
+mydir=tests$(S)gssapi
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DUSE_AUTOCONF_H
 PROG_LIBPATH=-L$(TOPLIBD)

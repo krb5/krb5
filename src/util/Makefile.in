@@ -1,12 +1,12 @@
 mydir=util
-##WIN32###Windows NMAKE doesn't like @ in make variable names, and on
-##WIN32### Windows we don't do the @FOO@ substitutions we do with UNIX
-##WIN32### configure scripts.  The set of subdirs to use is hard-coded
-##WIN32### below in the 'all-windows' target anyways, so just hide this.
+# Windows NMAKE doesn't like @ in make variable names, and on
+# Windows we don't do the @FOO@ substitutions we do with UNIX
+# configure scripts, so hide this.
 ##WIN32##!if 0
 SUBDIRS=support $(MAYBE_ET_@COM_ERR_VERSION@) $(MAYBE_SS_@SS_VERSION@) \
 	profile send-pr
 ##WIN32##!endif
+WINSUBDIRS=windows support et profile
 BUILDTOP=$(REL)..
 
 MAYBE_ET_k5 = et
@@ -20,32 +20,6 @@ clean-unix::
 	$(RM) -r $(FAKEPREFIX)
 
 NO_OUTDIR=1
-all-windows::
-	@echo Making in util\windows
-	cd windows
-	$(MAKE) -$(MFLAGS)
-	@echo Making in util\support
-	cd ..\support
-	$(MAKE) -$(MFLAGS)
-	@echo Making in util\et
-	cd ..\et
-	$(MAKE) -$(MFLAGS) 
-	@echo Making in util\profile
-	cd ..\profile
-	$(MAKE) -$(MFLAGS) 
-	cd ..
-
-clean-windows::
-	@echo Making clean in util\windows
-	cd windows
-	$(MAKE) -$(MFLAGS) clean
-	@echo Making clean in util\et
-	cd ..\et
-	$(MAKE) -$(MFLAGS) clean
-	@echo Making clean in util\profile
-	cd ..\profile
-	$(MAKE) -$(MFLAGS) clean
-	cd ..
 
 install::
 	@echo nothing to install in util

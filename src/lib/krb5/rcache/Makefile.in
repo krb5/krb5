@@ -1,4 +1,4 @@
-mydir=lib/krb5/rcache
+mydir=lib$(S)krb5$(S)rcache
 BUILDTOP=$(REL)..$(S)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

@@ -1,4 +1,4 @@
-mydir=kadmin/server
+mydir=kadmin$(S)server
 BUILDTOP=$(REL)..$(S)..
 KDB_DEP_LIB=$(DL_LIB) $(THREAD_LINKOPTS)
 DEFS=
