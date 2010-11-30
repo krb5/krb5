@@ -49,9 +49,8 @@ main(int argc, char **argv)
     krb5_keyblock kblock;
     krb5_key key;
     krb5_enctype enctype;
-    krb5_cksumtype cktype, *cktypelist;
+    krb5_cksumtype cktype;
     int blocksize, num_blocks, intf, op, i;
-    unsigned int count;
     size_t outlen, cklen;
     krb5_data block;
     krb5_enc_data outblock;
@@ -69,11 +68,6 @@ main(int argc, char **argv)
     blocksize = atoi(argv[3]);
     num_blocks = atoi(argv[4]);
 
-    /* Pick the first available keyed checksum type. */
-    krb5_c_keyed_checksum_types(NULL, enctype, &count, &cktypelist);
-    assert(count > 0);
-    cktype = cktypelist[0];
-
     block.data = "notrandom";
     block.length = 9;
     krb5_c_random_seed(NULL, &block);
@@ -89,6 +83,7 @@ main(int argc, char **argv)
     outblock.ciphertext.length = outlen;
     outblock.ciphertext.data = calloc(1, outlen);
 
+    krb5int_c_mandatory_cksumtype(NULL, enctype, &cktype);
     krb5_c_checksum_length(NULL, cktype, &cklen);
     sum.checksum_type = cktype;
     sum.length = cklen;

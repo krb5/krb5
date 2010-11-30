@@ -691,8 +691,6 @@ pkinit_server_return_padata(krb5_context context,
     krb5_reply_key_pack *key_pack = NULL;
     krb5_reply_key_pack_draft9 *key_pack9 = NULL;
     krb5_data *encoded_key_pack = NULL;
-    unsigned int num_types;
-    krb5_cksumtype *cksum_types = NULL;
 
     pkinit_kdc_context plgctx;
     pkinit_kdc_req_context reqctx;
@@ -882,14 +880,8 @@ pkinit_server_return_padata(krb5_context context,
                 retval = ENOMEM;
                 goto cleanup;
             }
-            /* retrieve checksums for a given enctype of the reply key */
-            retval = krb5_c_keyed_checksum_types(context,
-                                                 encrypting_key->enctype, &num_types, &cksum_types);
-            if (retval)
-                goto cleanup;
 
-            /* pick the first of acceptable enctypes for the checksum */
-            retval = krb5_c_make_checksum(context, cksum_types[0],
+            retval = krb5_c_make_checksum(context, 0,
                                           encrypting_key, KRB5_KEYUSAGE_TGS_REQ_AUTH_CKSUM,
                                           req_pkt, &key_pack->asChecksum);
             if (retval) {
@@ -1033,7 +1025,6 @@ cleanup:
         krb5_free_data(context, encoded_key_pack);
     free(dh_pubkey);
     free(server_key);
-    free(cksum_types);
 
     switch ((int)padata->pa_type) {
     case KRB5_PADATA_PK_AS_REQ:

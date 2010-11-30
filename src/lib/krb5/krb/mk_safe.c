@@ -59,10 +59,9 @@ krb5_mk_safe_basic(krb5_context context, const krb5_data *userdata,
     krb5_checksum safe_checksum;
     krb5_data *scratch1, *scratch2;
 
-    if (!krb5_c_valid_cksumtype(sumtype))
+    if (sumtype && !krb5_c_valid_cksumtype(sumtype))
         return KRB5_PROG_SUMTYPE_NOSUPP;
-    if (!krb5_c_is_coll_proof_cksum(sumtype)
-        || !krb5_c_is_keyed_cksum(sumtype))
+    if (sumtype && !krb5_c_is_keyed_cksum(sumtype))
         return KRB5KRB_AP_ERR_INAPP_CKSUM;
 
     safemsg.user_data = *userdata;
@@ -108,6 +107,30 @@ cleanup_checksum:
     memset(scratch1->data, 0, scratch1->length);
     krb5_free_data(context, scratch1);
     return retval;
+}
+
+/* Return the checksum type for the KRB-SAFE message, or 0 to use the enctype's
+ * mandatory checksum. */
+static krb5_cksumtype
+safe_cksumtype(krb5_context context, krb5_auth_context auth_context,
+               krb5_enctype enctype)
+{
+    krb5_error_code retval;
+    unsigned int nsumtypes, i;
+    krb5_cksumtype *sumtypes;
+
+    /* Use the auth context's safe_cksumtype if it is valid for the enctype.
+     * Otherwise return 0 for the mandatory checksum. */
+    retval = krb5_c_keyed_checksum_types(context, enctype, &nsumtypes,
+                                         &sumtypes);
+    if (retval != 0 || nsumtypes == 0)
+        return 0;
+    for (i = 0; i < nsumtypes; i++) {
+        if (auth_context->safe_cksumtype == sumtypes[i])
+            break;
+    }
+    krb5_free_cksumtypes(context, sumtypes);
+    return (i == nsumtypes) ? 0 : auth_context->safe_cksumtype;
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -195,31 +218,7 @@ krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
             }
         }
 
-        {
-            krb5_enctype enctype = krb5_k_key_enctype(context, key);
-            unsigned int nsumtypes;
-            unsigned int i;
-            krb5_cksumtype *sumtypes;
-            retval = krb5_c_keyed_checksum_types (context, enctype,
-                                                  &nsumtypes, &sumtypes);
-            if (retval) {
-                CLEANUP_DONE ();
-                goto error;
-            }
-            if (nsumtypes == 0) {
-                retval = KRB5_BAD_ENCTYPE;
-                krb5_free_cksumtypes (context, sumtypes);
-                CLEANUP_DONE ();
-                goto error;
-            }
-            for (i = 0; i < nsumtypes; i++)
-                if (auth_context->safe_cksumtype == sumtypes[i])
-                    break;
-            if (i == nsumtypes)
-                i = 0;
-            sumtype = sumtypes[i];
-            krb5_free_cksumtypes (context, sumtypes);
-        }
+        sumtype = safe_cksumtype(context, auth_context, key->keyblock.enctype);
         if ((retval = krb5_mk_safe_basic(context, userdata, key, &replaydata,
                                          plocal_fulladdr, premote_fulladdr,
                                          sumtype, outbuf))) {
