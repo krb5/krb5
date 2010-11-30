@@ -49,7 +49,8 @@ EHDRDIR=$(BUILDTOP)$(S)include$(S)gssapi
 EXPORTED_HEADERS= \
 	$(EHDRDIR)$(S)gssapi_krb5.h \
 	$(EHDRDIR)$(S)gssapi_generic.h \
-	$(EHDRDIR)$(S)gssapi.h
+	$(EHDRDIR)$(S)gssapi.h \
+	$(EHDRDIR)$(S)gssapi_ext.h
 merged-gssapi-header.h: $(EXPORTED_HEADERS)
 	cat $(EXPORTED_HEADERS) > merged.tmp
 	$(MV) merged.tmp merged-gssapi-header.h
