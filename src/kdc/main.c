@@ -279,8 +279,8 @@ handle_referral_params(krb5_realm_params *rparams,
 static krb5_error_code
 init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
            krb5_enctype def_enctype, char *def_udp_ports, char *def_tcp_ports,
-           krb5_boolean def_manual, char **db_args, char *no_refrls,
-           char *host_based_srvcs)
+           krb5_boolean def_manual, krb5_boolean def_restrict_anon,
+           char **db_args, char *no_refrls, char *host_based_srvcs)
 {
     krb5_error_code     kret;
     krb5_boolean        manual;
@@ -355,6 +355,11 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
         manual = FALSE;
     } else
         manual = def_manual;
+
+    if (rparams && rparams->realm_restrict_anon_valid)
+        rdp->realm_restrict_anon = rparams->realm_restrict_anon;
+    else
+        rdp->realm_restrict_anon = def_restrict_anon;
 
     /* Handle master key type */
     if (rparams && rparams->realm_enctype_valid)
@@ -655,6 +660,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
     krb5_enctype        menctype = ENCTYPE_UNKNOWN;
     kdc_realm_t         *rdatap = NULL;
     krb5_boolean        manual = FALSE;
+    krb5_boolean        def_restrict_anon;
     char                *default_udp_ports = 0;
     char                *default_tcp_ports = 0;
     krb5_pointer        aprof;
@@ -678,6 +684,9 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
         hierarchy[1] = KRB5_CONF_MAX_DGRAM_REPLY_SIZE;
         if (krb5_aprof_get_int32(aprof, hierarchy, TRUE, &max_dgram_reply_size))
             max_dgram_reply_size = MAX_DGRAM_SIZE;
+        hierarchy[1] = KRB5_CONF_RESTRICT_ANONYMOUS_TO_TGT;
+        if (krb5_aprof_get_boolean(aprof, hierarchy, TRUE, &def_restrict_anon))
+            def_restrict_anon = FALSE;
         hierarchy[1] = KRB5_CONF_NO_HOST_REFERRAL;
         if (krb5_aprof_get_string_all(aprof, hierarchy, &no_refrls))
             no_refrls = 0;
@@ -736,7 +745,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
                 if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {
                     if ((retval = init_realm(rdatap, optarg, mkey_name,
                                              menctype, default_udp_ports,
-                                             default_tcp_ports, manual, db_args,
+                                             default_tcp_ports, manual,
+                                             def_restrict_anon, db_args,
                                              no_refrls, host_based_srvcs))) {
                         fprintf(stderr,
                                 "%s: cannot initialize realm %s - see log file for details\n",
@@ -848,8 +858,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
         if ((rdatap = (kdc_realm_t *) malloc(sizeof(kdc_realm_t)))) {
             if ((retval = init_realm(rdatap, lrealm, mkey_name, menctype,
                                      default_udp_ports, default_tcp_ports,
-                                     manual, db_args, no_refrls,
-                                     host_based_srvcs))) {
+                                     manual, def_restrict_anon, db_args,
+                                     no_refrls, host_based_srvcs))) {
                 fprintf(stderr,"%s: cannot initialize realm %s - see log file for details\n",
                         argv[0], lrealm);
                 exit(1);

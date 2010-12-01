@@ -838,6 +838,21 @@ errcode_to_protocol(krb5_error_code code)
     return (protcode >= 0 && protcode <= 128) ? protcode : KRB_ERR_GENERIC;
 }
 
+/* Return -1 if the AS or TGS request is disallowed due to KDC policy on
+ * anonymous tickets. */
+static int
+check_anon(krb5_context context, krb5_principal client, krb5_principal server)
+{
+    /* If restrict_anon is set, reject requests from anonymous to principals
+     * other than the local TGT. */
+    if (restrict_anon &&
+        krb5_principal_compare_any_realm(context, client,
+                                         krb5_anonymous_principal()) &&
+        !krb5_principal_compare(context, server, tgs_server))
+        return -1;
+    return 0;
+}
+
 /*
  * Routines that validate a AS request; checks a lot of things.  :-)
  *
@@ -955,6 +970,11 @@ validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
     if (isflagset(server.attributes, KRB5_KDB_DISALLOW_SVR)) {
         *status = "SERVICE NOT ALLOWED";
         return(KDC_ERR_MUST_USE_USER2USER);
+    }
+
+    if (check_anon(kdc_context, request->client, request->server) != 0) {
+        *status = "ANONYMOUS NOT ALLOWED";
+        return(KDC_ERR_POLICY);
     }
 
     /* Perform KDB module policy checks. */
@@ -1377,6 +1397,12 @@ validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
         !isflagset(ticket->enc_part2->flags, TKT_FLG_PRE_AUTH)) {
         *status = "NO PREAUTH";
         return KRB_ERR_GENERIC;
+    }
+
+    if (check_anon(kdc_context, ticket->enc_part2->client,
+                   request->server) != 0) {
+        *status = "ANONYMOUS NOT ALLOWED";
+        return(KDC_ERR_POLICY);
     }
 
     /* Perform KDB module policy checks. */

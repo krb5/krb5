@@ -25,10 +25,23 @@ pkinit_krb5_conf = {
     }
 }
 
-realm = K5Realm(krb5_conf=pkinit_krb5_conf, create_user=False,
-                create_host=False)
+restrictive_kdc_conf = {
+    'all': { 'realms' : { '$realm' : {
+                'restrict_anonymous_to_tgt' : 'true' } } } }
+
+# In the basic test, anonymous is not restricted, so kvno should succeed.
+realm = K5Realm(krb5_conf=pkinit_krb5_conf, create_user=False)
 realm.addprinc('WELLKNOWN/ANONYMOUS')
 realm.kinit('@%s' % realm.realm, flags=['-n'])
 realm.klist('WELLKNOWN/ANONYMOUS@WELLKNOWN:ANONYMOUS')
+realm.run_as_client([kvno, realm.host_princ])
+realm.stop()
+
+# Now try again with anonymous restricted; kvno should fail.
+realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=restrictive_kdc_conf,
+                create_user=False)
+realm.addprinc('WELLKNOWN/ANONYMOUS')
+realm.kinit('@%s' % realm.realm, flags=['-n'])
+realm.run_as_client([kvno, realm.host_princ], expected_code=1)
 
 success('Anonymous PKINIT.')
