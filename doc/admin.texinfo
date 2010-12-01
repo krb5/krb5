@@ -1563,8 +1563,8 @@ current implementation has little protection against denial-of-service
 attacks), the standard port number assigned for Kerberos TCP traffic
 is port 88.
 
-@itemx restrict_anonymous_to_kdc
-This flag determines the default value of restrict_anonymous_to_kdc for
+@itemx restrict_anonymous_to_tgt
+This flag determines the default value of restrict_anonymous_to_tgt for
 realms.  The default value is @code{false}.
 @end table
 
