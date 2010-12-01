@@ -14,7 +14,7 @@ STLIBOBJS=\
 	checksum_hmac.o	\
 	checksum_cmac.o	\
 	dk_aead.o	\
-	dk_ccm.o	\
+	dk_cmac.o	\
 	derive.o	\
 	stringtokey.o
 
@@ -22,7 +22,7 @@ OBJS=\
 	$(OUTPRE)checksum_hmac.$(OBJEXT)\
 	$(OUTPRE)checksum_cmac.$(OBJEXT)\
 	$(OUTPRE)dk_aead.$(OBJEXT)	\
-	$(OUTPRE)dk_ccm.$(OBJEXT)	\
+	$(OUTPRE)dk_cmac.$(OBJEXT)	\
 	$(OUTPRE)derive.$(OBJEXT)	\
 	$(OUTPRE)stringtokey.$(OBJEXT)
 
@@ -30,7 +30,7 @@ SRCS=\
 	$(srcdir)/checksum_hmac.c	\
 	$(srcdir)/checksum_cmac.c	\
 	$(srcdir)/dk_aead.c	\
-	$(srcdir)/dk_ccm.c	\
+	$(srcdir)/dk_cmac.c	\
 	$(srcdir)/derive.c	\
 	$(srcdir)/stringtokey.c
 

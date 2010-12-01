@@ -45,7 +45,7 @@
 #include "etypes.h"
 #include "cksumtypes.h"
 
-#ifdef CAMELLIA_CCM
+#ifdef CAMELLIA
 
 #define BLOCK_SIZE 16
 
@@ -226,7 +226,7 @@ krb5int_cmac_checksum(const struct krb5_enc_provider *enc, krb5_key key,
     return 0;
 }
 
-#else /* CAMELLIA_CCM */
+#else /* CAMELLIA */
 
 /* This won't be used, but is still in the export table. */
 
@@ -238,4 +238,4 @@ krb5int_cmac_checksum(const struct krb5_enc_provider *enc, krb5_key key,
     return EINVAL;
 }
 
-#endif /* CAMELLIA_CCM */
+#endif /* CAMELLIA */

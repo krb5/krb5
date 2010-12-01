@@ -98,12 +98,12 @@ static struct {
         ENCTYPE_DES3_CBC_SHA1, 0 },
       0, 0
     },
-#ifdef CAMELLIA_CCM
+#ifdef CAMELLIA
     /* Family with enctype removed */
-    { "camellia -camellia256-ccm-128",
+    { "camellia -camellia256-cts-cmac",
       { 0 },
-      { ENCTYPE_CAMELLIA128_CCM_128, 0 },
-      { ENCTYPE_CAMELLIA128_CCM_128, 0 }
+      { ENCTYPE_CAMELLIA128_CTS_CMAC, 0 },
+      { ENCTYPE_CAMELLIA128_CTS_CMAC, 0 }
     },
 #endif
     /* Enctype followed by two families */

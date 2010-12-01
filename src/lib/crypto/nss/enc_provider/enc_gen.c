@@ -539,6 +539,76 @@ done:
     return ret;
 }
 
+krb5_error_code
+k5_nss_gen_cbcmac_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
+                      const krb5_data *ivec, const krb5_crypto_iov *data,
+                      size_t num_data, krb5_data *output)
+{
+    krb5_error_code ret = 0;
+    PK11Context *ctx = NULL;
+    SECStatus rv;
+    SECItem *param = NULL;
+    struct iov_block_state input_pos, output_pos;
+    unsigned char storage[MAX_BLOCK_SIZE];
+    unsigned char iv0[MAX_BLOCK_SIZE];
+    unsigned char *ptr = NULL, *lastptr = NULL;
+    SECItem iv;
+    size_t blocksize;
+    int length = 0;
+    int currentblock;
+
+    IOV_BLOCK_STATE_INIT(&input_pos);
+    IOV_BLOCK_STATE_INIT(&output_pos);
+
+    blocksize = PK11_GetBlockSize(mech, NULL);
+    assert(blocksize <= sizeof(storage));
+    if (output->length < blocksize)
+        return KRB5_BAD_MSIZE;
+
+    if (ivec && ivec->data) {
+        iv.data = (unsigned char *)ivec->data;
+        iv.len = ivec->length;
+    } else {
+        memset(iv0, 0, sizeof(iv0));
+        iv.data = iv0;
+        iv.len = blocksize;
+    }
+    param = PK11_ParamFromIV(mech, &iv);
+
+    ctx = k5_nss_create_context(krb_key, mech, CKA_ENCRYPT, param);
+    if (ctx == NULL) {
+        ret = k5_nss_map_last_error();
+        goto done;
+    }
+
+    lastptr = iv.data;
+    for (currentblock = 0;;currentblock++) {
+        if (!krb5int_c_iov_get_block_nocopy(storage, blocksize, data, num_data,
+                                            &input_pos, &ptr))
+            break;
+
+        lastptr = NULL;
+
+        rv = PK11_CipherOp(ctx, ptr, &length, blocksize, ptr, blocksize);
+        if (rv != SECSuccess) {
+            ret = k5_nss_map_last_error();
+            goto done;
+        }
+
+        lastptr = ptr;
+    }
+    memcpy(output->data, lastptr, blocksize);
+
+done:
+    if (ctx) {
+        PK11_Finalize(ctx);
+        PK11_DestroyContext(ctx, PR_TRUE);
+    }
+    if (param)
+        SECITEM_FreeItem(param, PR_TRUE);
+    return ret;
+}
+
 void
 k5_nss_gen_cleanup(krb5_key krb_key)
 {

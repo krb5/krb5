@@ -36,7 +36,8 @@
 
 #include "camellia.h"
 
-#ifdef CAMELLIA_CCM
+#include "k5-int.h" /* Only for CAMELLIA; remove later. */
+#ifdef CAMELLIA
 
 /* key constants */
 
@@ -1540,4 +1541,4 @@ camellia_dec_blk(const unsigned char in_blk[],  unsigned char out_blk[],
     return camellia_good;
 }
 
-#endif /* CAMELLIA_CCM */
+#endif /* CAMELLIA */

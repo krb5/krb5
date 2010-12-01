@@ -1014,16 +1014,16 @@ _passes = [
                         'supported_enctypes' : 'aes128-cts:normal',
                         'master_key_type' : 'aes128-cts'}}}}),
 
-    # Exercise the camellia256-ccm enctype.
-# Enable when Camellia-CCM support becomes unconditional.
+    # Exercise the camellia256-cts enctype.
+# Enable when Camellia support becomes unconditional.
 #    ('camellia256', None,
 #      {'all' : {'libdefaults' : {
-#                    'default_tgs_enctypes' : 'camellia256-ccm',
-#                    'default_tkt_enctypes' : 'camellia256-ccm',
-#                    'permitted_enctypes' : 'camellia256-ccm'}}},
+#                    'default_tgs_enctypes' : 'camellia256-cts',
+#                    'default_tkt_enctypes' : 'camellia256-cts',
+#                    'permitted_enctypes' : 'camellia256-cts'}}},
 #      {'master' : {'realms' : {'$realm' : {
-#                        'supported_enctypes' : 'camellia256-ccm:normal',
-#                        'master_key_type' : 'camellia256-ccm'}}}}),
+#                        'supported_enctypes' : 'camellia256-cts:normal',
+#                        'master_key_type' : 'camellia256-cts'}}}}),
 
     # Test a setup with modern principal keys but an old TGT key.
     ('aes256.destgt', 'des-cbc-crc:normal',

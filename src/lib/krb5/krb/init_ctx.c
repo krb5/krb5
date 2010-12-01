@@ -432,10 +432,10 @@ krb5int_parse_enctype_list(krb5_context context, char *profstr,
             mod_list(ENCTYPE_AES128_CTS_HMAC_SHA1_96, sel, weak, &list);
         } else if (strcasecmp(token, "rc4") == 0) {
             mod_list(ENCTYPE_ARCFOUR_HMAC, sel, weak, &list);
-#ifdef CAMELLIA_CCM
+#ifdef CAMELLIA
         } else if (strcasecmp(token, "camellia") == 0) {
-            mod_list(ENCTYPE_CAMELLIA256_CCM_128, sel, weak, &list);
-            mod_list(ENCTYPE_CAMELLIA128_CCM_128, sel, weak, &list);
+            mod_list(ENCTYPE_CAMELLIA256_CTS_CMAC, sel, weak, &list);
+            mod_list(ENCTYPE_CAMELLIA128_CTS_CMAC, sel, weak, &list);
 #endif
         } else if (krb5_string_to_enctype(token, &etype) == 0) {
             /* Set a specific enctype. */
