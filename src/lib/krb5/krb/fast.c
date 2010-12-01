@@ -213,7 +213,6 @@ krb5int_fast_prep_req(krb5_context context,
     krb5_data *encoded_fast_req = NULL;
     krb5_data *encoded_armored_req = NULL;
     krb5_data *local_encoded_result = NULL;
-    krb5_cksumtype cksumtype;
     krb5_data random_data;
     char random_buf[4];
 
@@ -249,15 +248,8 @@ krb5int_fast_prep_req(krb5_context context,
     }
     if (retval == 0)
         armored_req->armor = state->armor;
-    if (retval == 0)
-        retval = krb5int_c_mandatory_cksumtype(context,
-                                               state->armor_key->enctype,
-                                               &cksumtype);
-    /* DES enctypes have unkeyed mandatory checksums; need a keyed one. */
-    if (retval == 0 && !krb5_c_is_keyed_cksum(cksumtype))
-        cksumtype = CKSUMTYPE_RSA_MD5_DES;
     if (retval ==0)
-        retval = krb5_c_make_checksum(context, cksumtype, state->armor_key,
+        retval = krb5_c_make_checksum(context, 0, state->armor_key,
                                       KRB5_KEYUSAGE_FAST_REQ_CHKSUM,
                                       to_be_checksummed,
                                       &armored_req->req_checksum);

@@ -108,8 +108,8 @@ encrypt_block(const struct krb5_enc_provider *enc, krb5_key key,
 {
     krb5_crypto_iov iov;
 
-    /* Verify that block is the right length. */
-    if (block->length != enc->block_size)
+    /* Verify that this is a block cipher and block is the right length. */
+    if (block->length != enc->block_size || enc->block_size == 1)
         return EINVAL;
     iov.flags = KRB5_CRYPTO_TYPE_DATA;
     iov.data = *block;

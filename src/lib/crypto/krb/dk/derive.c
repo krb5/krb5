@@ -91,6 +91,8 @@ derive_random_rfc3961(const struct krb5_enc_provider *enc,
     blocksize = enc->block_size;
     keybytes = enc->keybytes;
 
+    if (blocksize == 1)
+        return KRB5_BAD_ENCTYPE;
     if (inkey->keyblock.length != enc->keylength || outrnd->length != keybytes)
         return KRB5_CRYPTO_INTERNAL;
 
