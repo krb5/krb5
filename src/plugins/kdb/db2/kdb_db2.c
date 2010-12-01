@@ -1206,6 +1206,7 @@ krb5_db2_destroy(krb5_context context, char *conf_section, char **db_args)
 {
     krb5_error_code status = 0;
     krb5_db2_context *db_ctx;
+    char *db_name;
 
     if (k5db2_inited(context)) {
         status = krb5_db2_fini(context);
@@ -1223,7 +1224,12 @@ krb5_db2_destroy(krb5_context context, char *conf_section, char **db_args)
         return status;
 
     db_ctx = context->dal_handle->db_context;
-    return destroy_db(context, db_ctx->db_name);
+    db_name = gen_dbsuffix(db_ctx->db_name, db_ctx->tempdb ? "~" : "");
+    if (db_name == NULL)
+        return ENOMEM;
+    status = destroy_db(context, db_name);
+    free(db_name);
+    return status;
 }
 
 void   *
