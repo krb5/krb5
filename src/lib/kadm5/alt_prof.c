@@ -1058,6 +1058,12 @@ krb5_read_realm_params(kcontext, realm, rparamp)
         rparams->realm_reject_bad_transit_valid = 1;
     }
 
+    hierarchy[2] = KRB5_CONF_RESTRICT_ANONYMOUS_TO_TGT;
+    if (!krb5_aprof_get_boolean(aprofile, hierarchy, TRUE, &bvalue)) {
+        rparams->realm_restrict_anon = bvalue;
+        rparams->realm_restrict_anon_valid = 1;
+    }
+
     hierarchy[2] = KRB5_CONF_NO_HOST_REFERRAL;
     if (!krb5_aprof_get_string_all(aprofile, hierarchy, &no_refrls))
         rparams->realm_no_host_referral = no_refrls;

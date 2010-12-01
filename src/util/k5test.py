@@ -181,6 +181,7 @@ Scripts may use the following functions and variables:
   - ktutil
   - kinit
   - klist
+  - kvno
   - kdestroy
   - kpasswd
   - t_inetd
@@ -1054,6 +1055,7 @@ kdb5_util = os.path.join(buildtop, 'kadmin', 'dbutil', 'kdb5_util')
 ktutil = os.path.join(buildtop, 'kadmin', 'ktutil', 'ktutil')
 kinit = os.path.join(buildtop, 'clients', 'kinit', 'kinit')
 klist = os.path.join(buildtop, 'clients', 'klist', 'klist')
+kvno = os.path.join(buildtop, 'clients', 'kvno', 'kvno')
 kdestroy = os.path.join(buildtop, 'clients', 'kdestroy', 'kdestroy')
 kpasswd = os.path.join(buildtop, 'clients', 'kpasswd', 'kpasswd')
 t_inetd = os.path.join(buildtop, 'tests', 'dejagnu', 't_inetd')

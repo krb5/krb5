@@ -1562,7 +1562,11 @@ If you wish to change this (which we do not recommend, because the
 current implementation has little protection against denial-of-service
 attacks), the standard port number assigned for Kerberos TCP traffic
 is port 88.
--@end table
+
+@itemx restrict_anonymous_to_kdc
+This flag determines the default value of restrict_anonymous_to_kdc for
+realms.  The default value is @code{false}.
+@end table
 
 @node realms (kdc.conf), pkinit kdc options, kdcdefaults, kdc.conf
 @subsection [realms]
@@ -1741,6 +1745,15 @@ separately for each realm, in case (for example) one realm has had the
 software on its application servers updated but another has not.
 
 This option defaults to @code{true}.
+
+@itemx restrict_anonymous_to_tgt
+A boolean value (@code{true}, @code{false}).  If set to @code{true}, the
+KDC will reject ticket requests from anonymous principals to service
+principals other than the realm's ticket-granting service.  This option
+allows anonymous PKINIT to be enabled for use as FAST armor tickets
+without allowing anonymous authentication to services.  By default, the
+value of restrict_anonymous_to_tgt as specified in the [kdcdefaults]
+section is used.
 
 @end table
 
