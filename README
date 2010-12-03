@@ -91,6 +91,7 @@ Protocol evolution:
 krb5-1.9 changes by ticket ID
 -----------------------------
 
+1219    mechanism to delete old keys should exist
 2032    No advanced warning of password expiry
 5014    kadmin (and other utilities) should report enctypes as it takes them
 6647    Memory leak in kdc
@@ -153,6 +154,17 @@ krb5-1.9 changes by ticket ID
 6811    Mark Camellia-CCM code as experimental
 6812    krb5_get_credentials should not fail due to inability to store
         a credential in a cache
+6815    Failed kdb5_util load removes real database
+6819    Handle referral realm in kprop client principal
+6820    Read KDC profile settings in kpropd
+6822    Implement Camellia-CTS-CMAC instead of Camellia-CCM
+6823    getdate.y: declare yyparse
+6824    Export krb5_tkt_creds_get
+6825    Add missing KRB5_CALLCONV in callback declaration
+6826    Fix Windows build
+6827    SA-2010-007 Checksum vulnerabilities (CVE-2010-1324 and others)
+6828    Install kadm5_hook_plugin.h
+6829    Implement restrict_anonymous_to_tgt realm flag
 
 Acknowledgements
 ----------------
