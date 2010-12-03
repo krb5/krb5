@@ -61,8 +61,6 @@
  */
 /* #pragma ident	"@(#)spnego_mech.c	1.7	04/09/28 SMI" */
 
-#include	<sys/param.h>
-#include	<unistd.h>
 #include	<assert.h>
 #include	<stdio.h>
 #include	<stdlib.h>
@@ -2417,7 +2415,7 @@ spnego_gss_complete_auth_token(
 OM_uint32
 spnego_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
 					 const gss_cred_id_t impersonator_cred_handle,
-					 gss_name_t desired_name,
+					 const gss_name_t desired_name,
 					 OM_uint32 time_req,
 					 gss_OID_set desired_mechs,
 					 gss_cred_usage_t cred_usage,

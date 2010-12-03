@@ -298,6 +298,7 @@ krb5_gss_register_acceptor_identity(const char *keytab)
     return major_status;
 }
 
+#ifndef _WIN32
 krb5_error_code
 krb5_gss_use_kdc_context(void)
 {
@@ -327,6 +328,7 @@ krb5_gss_use_kdc_context(void)
 
     return ret;
 }
+#endif
 
 /*
  * This API should go away and be replaced with an accessor

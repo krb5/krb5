@@ -1,4 +1,4 @@
-mydir=tests/resolve
+mydir=tests$(S)resolve
 BUILDTOP=$(REL)..$(S)..
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)

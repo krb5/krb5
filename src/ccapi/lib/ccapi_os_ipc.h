@@ -30,7 +30,6 @@
 #include "cci_common.h"
 
 cc_int32 cci_os_ipc_thread_init (void);
-void cci_os_ipc_thread_fini (void);
 
 cc_int32 cci_os_ipc (cc_int32      in_launch_server,
                      k5_ipc_stream in_request_stream,

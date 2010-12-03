@@ -1,4 +1,4 @@
-mydir=tests/verify
+mydir=tests$(S)verify
 BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

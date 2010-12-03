@@ -1,4 +1,4 @@
-mydir=tests/misc
+mydir=tests$(S)misc
 BUILDTOP=$(REL)..$(S)..
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)

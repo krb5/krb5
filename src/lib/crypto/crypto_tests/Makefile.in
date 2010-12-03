@@ -1,15 +1,16 @@
-mydir=lib/crypto/crypto_tests
+mydir=lib$(S)crypto$(S)crypto_tests
 BUILDTOP=$(REL)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/../krb -I$(srcdir)/../@CRYPTO_IMPL@/enc_provider 		\
-	-I$(srcdir)/../@CRYPTO_IMPL@/hash_provider -I$(srcdir)/../krb/keyhash_provider 	\
-	-I$(srcdir)/../krb/dk -I$(srcdir)/../@CRYPTO_IMPL@/ 			\
-	-I$(srcdir)/../krb/prng 	\
-	-I$(srcdir)/../krb/prng/@PRNG_ALG@ 	\
-	-I$(srcdir)/../krb/crc32 -I$(srcdir)/../krb/old -I$(srcdir)/../krb/raw 	\
-	-I$(srcdir)/../@CRYPTO_IMPL@/aes -I$(srcdir)/../@CRYPTO_IMPL@/des 	\
-	-I$(srcdir)/../@CRYPTO_IMPL@/arcfour -I$(srcdir)/../@CRYPTO_IMPL@/sha1 	\
-	-I$(srcdir)/../@CRYPTO_IMPL@/md5 -I$(srcdir)/../@CRYPTO_IMPL@/md4 \
-	-I$(srcdir)/../@CRYPTO_IMPL@/camellia
+LOCALINCLUDES = -I$(srcdir)/../krb -I$(srcdir)/../$(CRYPTO_IMPL)/enc_provider \
+	-I$(srcdir)/../$(CRYPTO_IMPL)/hash_provider \
+	-I$(srcdir)/../krb/keyhash_provider -I$(srcdir)/../krb/dk \
+	-I$(srcdir)/../$(CRYPTO_IMPL) -I$(srcdir)/../krb/prng \
+	-I$(srcdir)/../krb/prng/$(PRNG_ALG) -I$(srcdir)/../krb/crc32 \
+	-I$(srcdir)/../krb/old -I$(srcdir)/../krb/raw \
+	-I$(srcdir)/../$(CRYPTO_IMPL)/aes -I$(srcdir)/../$(CRYPTO_IMPL)/des \
+	-I$(srcdir)/../$(CRYPTO_IMPL)/arcfour \
+	-I$(srcdir)/../$(CRYPTO_IMPL)/sha1 \
+	-I$(srcdir)/../$(CRYPTO_IMPL)/md5 -I$(srcdir)/../$(CRYPTO_IMPL)/md4 \
+	-I$(srcdir)/../$(CRYPTO_IMPL)/camellia
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -39,13 +40,7 @@ EXTRADEPSRCS=\
 	$(srcdir)/t_fork.c	\
 	$(srcdir)/ytest.c	
 
-##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=$(OUTPRE)crypto.lib
-##DOSOBJFILE=$(OUTPRE)crypto.lst
-##DOSOBJFILELIST=@$(OUTPRE)crypto.lst @$(OUTPRE)des.lst @$(OUTPRE)md4.lst @$(OUTPRE)md5.lst @$(OUTPRE)sha1.lst @$(OUTPRE)arcfour.lst @$(OUTPRE)crc32.lst @$(OUTPRE)dk.lst @$(OUTPRE)old.lst @$(OUTPRE)raw.lst @$(OUTPRE)enc_prov.lst @$(OUTPRE)hash_pro.lst @$(OUTPRE)kh_pro.lst @$(OUTPRE)yarrow.lst @$(OUTPRE)aes.lst
-##DOSOBJFILEDEP =$(OUTPRE)crypto.lst $(OUTPRE)des.lst $(OUTPRE)md4.lst $(OUTPRE)md5.lst $(OUTPRE)sha1.lst $(OUTPRE)arcfour.lst $(OUTPRE)crc32.lst $(OUTPRE)dk.lst $(OUTPRE)old.lst $(OUTPRE)raw.lst $(OUTPRE)enc_prov.lst $(OUTPRE)hash_pro.lst $(OUTPRE)kh_pro.lst $(OUTPRE)aes.lst
-
-##DOS##LIBOBJS = $(OBJS)
+##DOS##BUILDTOP = ..\..\..
 
 # NOTE: The t_cksum known checksum values are primarily for regression
 # testing.  They are not derived a priori, but are known to produce
@@ -63,7 +58,7 @@ check-unix:: t_nfold t_encrypt t_decrypt t_prf t_prng t_cmac t_hmac \
 	$(RUN_SETUP) $(VALGRIND) ./t_encrypt
 	$(RUN_SETUP) $(VALGRIND) ./t_decrypt
 	$(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output
-	if [ @PRNG_ALG@ = yarrow ]; then \
+	if [ $(PRNG_ALG) = yarrow ]; then \
 		diff t_prng.output $(srcdir)/t_prng.expected; \
 	fi
 	$(RUN_SETUP) $(VALGRIND) ./t_cmac

@@ -13,7 +13,6 @@ extern "C" {
 #endif
 
 #include <gssapi/gssapi.h>
-#include <syslog.h>
 
 #define	SEC_CONTEXT_TOKEN 1
 #define	SPNEGO_SIZE_OF_INT 4

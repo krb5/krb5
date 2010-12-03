@@ -1,11 +1,11 @@
-mydir=lib/crypto/krb/dk
+mydir=lib$(S)crypto$(S)krb$(S)dk
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/..  -I$(srcdir)/../../@CRYPTO_IMPL@
+LOCALINCLUDES = -I$(srcdir)/..  -I$(srcdir)/../../$(CRYPTO_IMPL)
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=dk
-##DOS##OBJFILE=..\$(OUTPRE)dk.lst
+##DOS##PREFIXDIR = krb\dk
+##DOS##OBJFILE = ..\..\$(OUTPRE)dk.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

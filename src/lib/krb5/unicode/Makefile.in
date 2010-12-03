@@ -1,4 +1,4 @@
-mydir=lib/krb5/unicode
+mydir=lib$(S)krb5$(S)unicode
 BUILDTOP=$(REL)..$(S)..$(S)..
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)

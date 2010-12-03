@@ -114,7 +114,6 @@ static void cci_thread_fini (void)
 
     remove_error_table(&et_CAPI_error_table);
     cci_context_change_time_thread_fini ();
-    cci_ipc_thread_fini ();
 }
 
 

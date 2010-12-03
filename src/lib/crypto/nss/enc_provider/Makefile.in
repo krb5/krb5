@@ -1,17 +1,14 @@
-mydir=lib/crypto/nss/enc_provider
+mydir=lib$(S)crypto$(S)nss$(S)enc_provider
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
+CRYPTO_IMPL_CFLAGS=@CRYPTO_IMPL_CFLAGS@
 LOCALINCLUDES = -I$(srcdir)/../des 	\
 		-I$(srcdir)/../arcfour \
 		-I$(srcdir)/../aes 	\
 		-I$(srcdir)/../../krb 			\
 		-I$(srcdir)/../../krb/rand2key	 	\
 		-I$(srcdir)/.. -I$(srcdir)/.  \
-		@CRYPTO_IMPL_CFLAGS@
+		$(CRYPTO_IMPL_CFLAGS)
 DEFS=
-
-##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=enc_provider
-##DOS##OBJFILE=..\$(OUTPRE)enc_prov.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -39,8 +36,6 @@ SRCS= \
 	$(srcdir)/aes.c 	\
 	$(srcdir)/camellia.c 	\
 	$(srcdir)/rc4.c
-
-##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
 

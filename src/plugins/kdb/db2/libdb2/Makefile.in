@@ -1,4 +1,4 @@
-mydir=plugins/kdb/db2/libdb2
+mydir=plugins$(S)kdb$(S)db2$(S)libdb2
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 SUBDIRS=hash btree db mpool recno test
 

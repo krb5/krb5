@@ -1,4 +1,4 @@
-mydir=kadmin/cli
+mydir=kadmin$(S)cli
 BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

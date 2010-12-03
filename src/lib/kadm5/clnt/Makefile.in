@@ -1,4 +1,4 @@
-mydir=lib/kadm5/clnt
+mydir=lib$(S)kadm5$(S)clnt
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I$(BUILDTOP)/include/kadm5
 DEFS=

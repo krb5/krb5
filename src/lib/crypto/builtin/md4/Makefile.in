@@ -1,11 +1,11 @@
-mydir=lib/crypto/builtin/md4
+mydir=lib$(S)crypto$(S)builtin$(S)md4
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=md4
-##DOS##OBJFILE=..\$(OUTPRE)md4.lst
+##DOS##PREFIXDIR = builtin\md4
+##DOS##OBJFILE = ..\..\$(OUTPRE)md4.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

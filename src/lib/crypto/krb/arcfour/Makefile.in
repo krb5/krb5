@@ -1,12 +1,12 @@
-mydir=lib/crypto/krb/arcfour
+mydir=lib$(S)crypto$(S)krb$(S)arcfour
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../@CRYPTO_IMPL@ \
-	-I$(srcdir)/../../@CRYPTO_IMPL@/md4
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../$(CRYPTO_IMPL) \
+	-I$(srcdir)/../../$(CRYPTO_IMPL)/md4
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=arcfour
-##DOS##OBJFILE=..\$(OUTPRE)arcfour.lst
+##DOS##PREFIXDIR = krb\arcfour
+##DOS##OBJFILE = ..\..\$(OUTPRE)arcfour.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

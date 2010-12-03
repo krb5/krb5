@@ -1,4 +1,4 @@
-mydir=plugins/authdata/greet
+mydir=plugins$(S)authdata$(S)greet
 BUILDTOP=$(REL)..$(S)..$(S)..
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
 KRB5_CONFIG_SETUP = KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf ; export KRB5_CONFIG ;

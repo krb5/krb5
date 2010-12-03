@@ -1,4 +1,4 @@
-mydir=appl/simple/server
+mydir=appl$(S)simple$(S)server
 BUILDTOP=$(REL)..$(S)..$(S)..
 
 LOCALINCLUDES= -I.. -I$(srcdir)/..

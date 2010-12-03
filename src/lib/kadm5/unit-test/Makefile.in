@@ -1,4 +1,4 @@
-mydir=lib/kadm5/unit-test
+mydir=lib$(S)kadm5$(S)unit-test
 BUILDTOP=$(REL)..$(S)..$(S)..
 DEFINES =
 PROG_LIBPATH=-L$(TOPLIBD)

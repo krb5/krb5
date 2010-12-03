@@ -371,7 +371,7 @@ krb5_get_fallback_host_realm(krb5_context context,
  * Common code for krb5_get_host_realm and krb5_get_fallback_host_realm
  * to do basic sanity checks on supplied hostname.
  */
-krb5_error_code KRB5_CALLCONV
+krb5_error_code
 krb5int_clean_hostname(krb5_context context,
                        const char *host, char *local_host, size_t lhsize)
 {

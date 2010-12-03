@@ -1,11 +1,11 @@
 # makefile: Constructs the Kerberos for Windows CCAPI server.
 
 #BUILDTOP is krb5/src and is relative to krb5/src/ccapi/server/win, for making Makefile.
-BUILDTOP=..\..\..\      
+BUILDTOP=..\..\..
 CCAPI   = $(BUILDTOP)\CCAPI
 CO      = $(CCAPI)\common
 COWIN   = $(CCAPI)\common\win
-CCUTIL  = $(CCAPI)\common\win\OldCC             
+CCUTIL  = $(CCAPI)\common\win\OldCC
 SRVDIR  = $(CCAPI)\server
 SRVWIN  = $(SRVDIR)\win
 POSIX   = $(BUILDTOP)\lib\krb5\posix
@@ -93,17 +93,17 @@ copysrc :
 midl : ccs_request.h ccs_reply.h
 
 $(OUTPRE)ccapiserver.exe: $(OBJS)
-	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(LIBS) $(conlibsdll) $(conflags) 
+	$(LINK) $(LFLAGS) /map:$*.map /out:$@ $(OBJS) $(LIBS) $(conlibsdll) $(conflags)
 
-finish : 
+finish :
     @echo "Finished building ccapiserver.exe"
     cd
 
-clean:: 
+clean::
 	if exist $(OUTPRE)*.exe del $(OUTPRE)*.exe
 	if exist $(OUTPRE)*.obj del $(OUTPRE)*.obj
 	if exist $(OUTPRE)*.res del $(OUTPRE)*.res
 	if exist $(OUTPRE)*.map del $(OUTPRE)*.map
 	if exist $(OUTPRE)*.pdb del $(OUTPRE)*.pdb
 	if exist *.err del *.err
-    if exist $(SRCTMP) rm -rf $(SRCTMP)
+    if exist $(SRCTMP) rmdir /s /q $(SRCTMP)

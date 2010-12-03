@@ -1,4 +1,4 @@
-mydir=lib/krb5/asn.1
+mydir=lib$(S)krb5$(S)asn.1
 BUILDTOP=$(REL)..$(S)..$(S)..
 DEFS=
 

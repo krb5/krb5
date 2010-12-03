@@ -1,4 +1,4 @@
-mydir=lib/krb5/krb
+mydir=lib$(S)krb5$(S)krb
 BUILDTOP=$(REL)..$(S)..$(S)..
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -115,6 +115,7 @@ STLIBOBJS= \
 OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)addr_order.$(OBJEXT)	\
 	$(OUTPRE)addr_srch.$(OBJEXT)	\
+	$(OUTPRE)allow_weak.$(OBJEXT)	\
 	$(OUTPRE)appdefault.$(OBJEXT)	\
 	$(OUTPRE)auth_con.$(OBJEXT)	\
 	$(OUTPRE)authdata.$(OBJEXT)	\

@@ -1,4 +1,4 @@
-mydir=clients/kvno
+mydir=clients$(S)kvno
 BUILDTOP=$(REL)..$(S)..
 DEFS=
 

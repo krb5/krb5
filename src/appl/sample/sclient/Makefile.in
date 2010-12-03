@@ -1,4 +1,4 @@
-mydir=appl/sample/sclient
+mydir=appl$(S)sample$(S)sclient
 
 BUILDTOP=$(REL)..$(S)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)

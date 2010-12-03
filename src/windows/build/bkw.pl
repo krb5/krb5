@@ -687,11 +687,6 @@ sub main {
     system("rm -rf $out/a.tmp");                ## Clean up junk.
     system("rm -rf $out/ziptemp");              ## Clean up junk.
 
-    print "Now check for ntsecapitest.i.\n";
-    $dir    = "$wd\\athena\\auth\\krb5\\src\\windows";
-    chdir($dir)                                 or die "Fatal -- Couldn't cd to $dir";
-    print "Info -- chdir to ".`cd`."\n"         if ($verbose);
-
 # End logging:
     if ($odr->{logfile}->{def})   {$l->stop;}
 

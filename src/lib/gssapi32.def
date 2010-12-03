@@ -97,3 +97,74 @@ EXPORTS
         gss_mech_set_krb5_both         	@43	DATA
 	GSS_KRB5_NT_PRINCIPAL_NAME     	@8 	DATA
 	gss_mech_krb5_wrong	       	@41	DATA	
+
+; Added in krb5 1.7-1.9
+	gss_acquire_cred_impersonate_name		@70
+	gss_acquire_cred_with_password			@71
+	gss_add_buffer_set_member			@72
+	gss_add_cred_impersonate_name			@73
+	gss_complete_auth_token				@74
+	gss_create_empty_buffer_set			@75
+	gss_delete_name_attribute			@76
+	gss_display_mech_attr				@77
+	gss_display_name_ext				@78
+	gss_export_name_composite			@79
+	gss_get_name_attribute				@80
+	gss_indicate_mechs_by_attrs			@81
+	gss_inquire_attrs_for_mech			@82
+	gss_inquire_cred_by_oid				@83
+	gss_inquire_mech_for_saslname			@84
+	gss_inquire_name				@85
+	gss_inquire_saslname_for_mech			@86
+	gss_inquire_sec_context_by_oid			@87
+	gsskrb5_extract_authtime_from_sec_context	@88
+	gsskrb5_extract_authz_data_from_sec_context	@89
+	gss_krb5_import_cred				@90
+	gss_krb5_set_cred_rcache			@91
+	gss_map_name_to_any				@92
+	gss_pseudo_random				@93
+	gss_release_any_name_mapping			@94
+	gss_release_buffer_set				@95
+	gss_release_iov_buffer				@96
+	gss_set_cred_option				@97
+	gss_set_name_attribute				@98
+	gss_set_neg_mechs				@99
+	gss_set_sec_context_option			@100
+	gss_store_cred					@101
+	gss_unwrap_aead					@102
+	gss_unwrap_iov					@103
+	gss_wrap_aead					@104
+	gss_wrap_iov					@105
+	gss_wrap_iov_length				@106
+
+	GSS_C_INQ_SSPI_SESSION_KEY			@107	DATA
+	GSS_C_MA_AUTH_INIT				@108	DATA
+	GSS_C_MA_AUTH_INIT_ANON				@109	DATA
+	GSS_C_MA_AUTH_INIT_INIT				@110	DATA
+	GSS_C_MA_AUTH_TARG				@111	DATA
+	GSS_C_MA_AUTH_TARG_ANON				@112	DATA
+	GSS_C_MA_AUTH_TARG_INIT				@113	DATA
+	GSS_C_MA_CBINDINGS				@114	DATA
+	GSS_C_MA_COMPRESS				@115	DATA
+	GSS_C_MA_CONF_PROT				@116	DATA
+	GSS_C_MA_CTX_TRANS				@117	DATA
+	GSS_C_MA_DELEG_CRED				@118	DATA
+	GSS_C_MA_DEPRECATED				@119	DATA
+	GSS_C_MA_INTEG_PROT				@120	DATA
+	GSS_C_MA_ITOK_FRAMED				@121	DATA
+	GSS_C_MA_MECH_COMPOSITE				@122	DATA
+	GSS_C_MA_MECH_CONCRETE				@123	DATA
+	GSS_C_MA_MECH_GLUE				@124	DATA
+	GSS_C_MA_MECH_NEGO				@125	DATA
+	GSS_C_MA_MECH_PSEUDO				@126	DATA
+	GSS_C_MA_MIC					@127	DATA
+	GSS_C_MA_NOT_DFLT_MECH				@128	DATA
+	GSS_C_MA_NOT_MECH				@129	DATA
+	GSS_C_MA_OOS_DET				@130	DATA
+	GSS_C_MA_PFS					@131	DATA
+	GSS_C_MA_PROT_READY				@132	DATA
+	GSS_C_MA_REPLAY_DET				@133	DATA
+	GSS_C_MA_WRAP					@134	DATA
+	gss_mech_iakerb					@135	DATA
+	gss_nt_exported_name				@136	DATA
+	gss_nt_service_name_v2				@137	DATA

@@ -1242,7 +1242,7 @@ krb5_error_code decode_krb5_iakerb_finished
     cleanup(free);
 }
 
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5int_get_authdata_containee_types(krb5_context context,
                                      const krb5_authdata *authdata,
                                      unsigned int *num,

@@ -1,10 +1,10 @@
-mydir=lib/crypto/builtin/md5
+mydir=lib$(S)crypto$(S)builtin$(S)md5
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=md5
-##DOS##OBJFILE=..\$(OUTPRE)md5.lst
+##DOS##PREFIXDIR = builtin\md5
+##DOS##OBJFILE = ..\..\$(OUTPRE)md5.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

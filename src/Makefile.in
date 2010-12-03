@@ -16,6 +16,7 @@ SUBDIRS=util include lib \
 	plugins/preauth/encrypted_challenge \
 	kdc kadmin slave clients appl tests \
 	config-files gen-manpages
+WINSUBDIRS=include util lib ccapi windows clients appl
 BUILDTOP=$(REL).
 LOCALINCLUDES = -I$(srcdir) 
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -45,34 +46,6 @@ config.status: $(top_srcdir)/config/shlib.conf
 ##DOS##!endif
 
 all-windows:: maybe-awk Makefile-windows
-	@echo Making autoconf.h in include
-	cd include
-	$(MAKE) -$(MFLAGS) autoconf.h
-	@echo Making in util
-	cd ..\util
-	$(MAKE) -$(MFLAGS)
-	@echo Making in include
-	cd ..\include
-	$(MAKE) -$(MFLAGS) 
-	@echo Making in lib
-	cd ..\lib
-	$(MAKE) -$(MFLAGS) 
-	@echo Making in ccapi
-	cd ..\ccapi
-	$(MAKE) -$(MFLAGS)
-	@echo Making in windows
-	cd ..\windows
-	$(MAKE) -$(MFLAGS) 
-	@echo Making in clients
-	cd ..\clients
-	$(MAKE) -$(MFLAGS)
-	@echo Making in appl\gss-sample
-	cd ..\appl\gss-sample
-	$(MAKE) -$(MFLAGS)
-	@echo Making in appl\gssftp\ftp
-	cd ..\..\appl\gssftp\ftp
-	$(MAKE) -$(MFLAGS)
-	cd ..\..\..
 
 world::
 	date
@@ -185,8 +158,7 @@ config-windows:: Makefile-windows
 ##DOS##MKFDEP=$(WCONFIG_EXE) config\win-pre.in config\win-post.in
 
 WINMAKEFILES=Makefile \
-	appl\gss-sample\Makefile \
-	appl\gssftp\ftp\Makefile \
+	appl\Makefile appl\gss-sample\Makefile \
 	ccapi\Makefile \
 	ccapi\lib\win\Makefile \
 	ccapi\server\win\Makefile \
@@ -196,17 +168,19 @@ WINMAKEFILES=Makefile \
 	clients\kpasswd\Makefile clients\kvno\Makefile \
 	clients\kcpytkt\Makefile clients\kdeltkt\Makefile \
 	include\Makefile \
-	lib\Makefile lib\crypto\Makefile \
-	lib\crypto\krb\crc32\Makefile lib\crypto\@CRYPTO_IMPL@\des\Makefile \
-	lib\crypto\krb\dk\Makefile lib\crypto\@CRYPTO_IMPL@\enc_provider\Makefile \
-	lib\crypto\@CRYPTO_IMPL@\hash_provider\Makefile \
-	lib\crypto\krb\keyhash_provider\Makefile \
-	lib\crypto\krb\prf\Makefile lib\crypto\krb\rand2key\Makefile \
-	lib\crypto\krb\raw\Makefile lib\crypto\krb\old\Makefile \
-	lib\crypto\@CRYPTO_IMPL@\sha1\Makefile lib\crypto\@CRYPTO_IMPL@\arcfour\Makefile \
-	lib\crypto\@CRYPTO_IMPL@\md4\Makefile lib\crypto\@CRYPTO_IMPL@\md5\Makefile \
-	lib\crypto\krb\prng\Makefile lib\crypto\@CRYPTO_IMPL@\aes\Makefile \
-	lib\crypto\crypto_tests \
+	lib\Makefile lib\crypto\Makefile lib\crypto\krb\Makefile \
+	lib\crypto\krb\crc32\Makefile lib\crypto\krb\rand2key\Makefile \
+	lib\crypto\krb\prng\Makefile lib\crypto\krb\prng\yarrow\Makefile \
+	lib\crypto\krb\prf\Makefile lib\crypto\krb\checksum\Makefile \
+	lib\crypto\krb\old\Makefile lib\crypto\krb\raw\Makefile \
+	lib\crypto\krb\arcfour\Makefile lib\crypto\krb\dk\Makefile \
+	lib\crypto\builtin\Makefile lib\crypto\builtin\aes\Makefile \
+	lib\crypto\builtin\enc_provider\Makefile \
+	lib\crypto\builtin\des\Makefile lib\crypto\builtin\md5\Makefile \
+	lib\crypto\builtin\camellia\Makefile lib\crypto\builtin\md4\Makefile \
+	lib\crypto\builtin\hash_provider\Makefile \
+	lib\crypto\builtin\sha2\Makefile lib\crypto\builtin\sha1\Makefile \
+	lib\crypto\crypto_tests\Makefile \
 	lib\gssapi\Makefile lib\gssapi\generic\Makefile \
 	lib\gssapi\krb5\Makefile lib\gssapi\mechglue\Makefile \
 	lib\gssapi\spnego\Makefile \
@@ -232,9 +206,9 @@ WINMAKEFILES=Makefile \
 
 ##DOS##Makefile: Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##appl\gss-sample\Makefile: appl\gss-sample\Makefile.in $(MKFDEP)
+##DOS##appl\Makefile: appl\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##appl\gssftp\ftp\Makefile: appl\gssftp\ftp\Makefile.in $(MKFDEP)
+##DOS##appl\gss-sample\Makefile: appl\gss-sample\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##ccapi\Makefile: ccapi\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -268,35 +242,49 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\krb\crc32\Makefile: lib\crypto\krb\crc32\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\@CRYPTO_IMPL@\des\Makefile: lib\crypto\@CRYPTO_IMPL@\des\Makefile.in $(MKFDEP)
+##DOS##lib\crypto\krb\rand2key\Makefile: lib\crypto\krb\rand2key\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\krb\dk\Makefile: lib\crypto\krb\dk\Makefile.in $(MKFDEP)
+##DOS##lib\crypto\krb\prng\fortuna\Makefile: lib\crypto\krb\prng\fortuna\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\@CRYPTO_IMPL@\enc_provider\Makefile: lib\crypto\@CRYPTO_IMPL@\enc_provider\Makefile.in $(MKFDEP)
+##DOS##lib\crypto\krb\prng\yarrow\Makefile: lib\crypto\krb\prng\yarrow\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\@CRYPTO_IMPL@\hash_provider\Makefile: lib\crypto\@CRYPTO_IMPL@\hash_provider\Makefile.in $(MKFDEP)
+##DOS##lib\crypto\krb\prng\Makefile: lib\crypto\krb\prng\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\krb\keyhash_provider\Makefile: lib\crypto\krb\keyhash_provider\Makefile.in $(MKFDEP)
+##DOS##lib\crypto\krb\prf\Makefile: lib\crypto\krb\prf\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\@CRYPTO_IMPL@\sha1\Makefile: lib\crypto\@CRYPTO_IMPL@\sha1\Makefile.in $(MKFDEP)
+##DOS##lib\crypto\krb\checksum\Makefile: lib\crypto\krb\checksum\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\@CRYPTO_IMPL@\arcfour\Makefile: lib\crypto\@CRYPTO_IMPL@\arcfour\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\@CRYPTO_IMPL@\md4\Makefile: lib\crypto\@CRYPTO_IMPL@\md4\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\@CRYPTO_IMPL@\md5\Makefile: lib\crypto\md5\@CRYPTO_IMPL@\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\krb\yarrow\Makefile: lib\crypto\krb\yarrow\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\@CRYPTO_IMPL@\aes\Makefile: lib\crypto\@CRYPTO_IMPL@\aes\Makefile.in $(MKFDEP)
+##DOS##lib\crypto\krb\Makefile: lib\crypto\krb\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\krb\old\Makefile: lib\crypto\krb\old\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\krb\raw\Makefile: lib\crypto\krb\raw\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\krb\Makefile: lib\crypto\krb\Makefile.in $(MKFDEP)
+##DOS##lib\crypto\krb\arcfour\Makefile: lib\crypto\krb\arcfour\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\@CRYPTO_IMPL@\Makefile: lib\crypto\@CRYPTO_IMPL@\Makefile.in $(MKFDEP)
+##DOS##lib\crypto\krb\dk\Makefile: lib\crypto\krb\dk\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\crypto\builtin\aes\Makefile: lib\crypto\builtin\aes\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\crypto\builtin\enc_provider\Makefile: lib\crypto\builtin\enc_provider\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\crypto\builtin\des\Makefile: lib\crypto\builtin\des\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\crypto\builtin\md5\Makefile: lib\crypto\builtin\md5\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\crypto\builtin\camellia\Makefile: lib\crypto\builtin\camellia\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\crypto\builtin\md4\Makefile: lib\crypto\builtin\md4\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\crypto\builtin\hash_provider\Makefile: lib\crypto\builtin\hash_provider\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\crypto\builtin\sha2\Makefile: lib\crypto\builtin\sha2\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\crypto\builtin\sha1\Makefile: lib\crypto\builtin\sha1\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\crypto\builtin\Makefile: lib\crypto\builtin\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##lib\crypto\crypto_tests\Makefile: lib\crypto\crypto_tests\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\gssapi\Makefile: lib\gssapi\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -358,29 +346,6 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 
 clean-windows:: Makefile-windows
-	@echo Making clean in util
-	cd util
-	$(MAKE) -$(MFLAGS) clean
-	@echo Making clean in include
-	cd ..\include
-	$(MAKE) -$(MFLAGS) clean
-	@echo Making clean in lib
-	cd ..\lib
-	$(MAKE) -$(MFLAGS) clean
-	@echo Making clean in windows
-	cd ..\windows
-	$(MAKE) -$(MFLAGS) clean
-	@echo Making clean in clients
-	cd ..\clients
-	$(MAKE) -$(MFLAGS) clean
-	@echo Making clean in appl\gss-sample
-	cd ..\appl\gss-sample
-	$(MAKE) -$(MFLAGS) clean
-	@echo Making clean in appl\gssftp\ftp
-	cd ..\..\appl\gssftp\ftp
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\..\..
-	@echo Making clean in root
 
 #
 # Renames DOS 8.3 filenames back to their proper, longer names.
@@ -393,41 +358,43 @@ ren2long:
 # Macintosh sites from the source tree on Unix.
 #
 ZIP=zip
-FILES= ./* \
+FILES= ./* appl/* appl/gss-sample/* \
     clients/* clients/kdestroy/* clients/kinit/* clients/klist/* \
-	clients/kpasswd/* clients/kcpytkt/* clients/kdeltkt/* \
-	config/* include/* include/kerberosIV/* \
-	include/krb5/* include/krb5/stock/* include/sys/* lib/* \
-	lib/crypto/* lib/crypto/krb/crc32/* lib/crypto/@CRYPTO_IMPL@/des/* lib/crypto/krb/dk/* \
-	lib/crypto/@CRYPTO_IMPL@/enc_provider/* lib/crypto/@CRYPTO_IMPL@/hash_provider/* \
-	lib/crypto/krb/keyhash_provider/* \
-	lib/crypto/krb/prf/* lib/crypto/krb/rand2key/* \
-	lib/crypto/krb/old/* lib/crypto/krb/raw/* \
-	lib/crypto/@CRYPTO_IMPL@/sha1/* lib/crypto/@CRYPTO_IMPL@/arcfour/* \
-	lib/crypto/@CRYPTO_IMPL@/md4/* \
-	lib/crypto/@CRYPTO_IMPL@/md5/* lib/crypto/krb/prng/* \
-	lib/crypto/krb/prng/@PRNG_ALG@/* \
-	lib/crypto/@CRYPTO_IMPL@/* lib/crypto/krb/* lib/crypto/crypto_tests \
+	clients/kpasswd/* clients/kvno/* clients/kcpytkt/* clients/kdeltkt/* \
+	config/* include/* \
+	include/krb5/* lib/* lib/crypto/* lib/crypto/krb/* \
+	lib/crypto/krb/crc32/* lib/crypto/krb/rand2key/* \
+	lib/crypto/krb/prng/fortuna/* lib/crypto/krb/prng/nss/* \
+	lib/crypto/krb/prng/yarrow/* lib/crypto/krb/prng/* \
+	lib/crypto/krb/prf/* lib/crypto/krb/checksum/* lib/crypto/krb/old/* \
+	lib/crypto/krb/raw/* lib/crypto/krb/arcfour/* lib/crypto/krb/dk/* \
+	lib/crypto/builtin/aes/* lib/crypto/builtin/enc_provider/* \
+	lib/crypto/builtin/des/* lib/crypto/builtin/md5/* \
+	lib/crypto/builtin/camellia/* lib/crypto/builtin/md4/* \
+	lib/crypto/builtin/hash_provider/* lib/crypto/builtin/sha2/* \
+	lib/crypto/builtin/sha1/* lib/crypto/builtin/* \
+	lib/crypto/crypto_tests/* \
 	lib/gssapi/* lib/gssapi/generic/* lib/gssapi/krb5/* \
 	lib/gssapi/mechglue/* lib/gssapi/spnego/* \
 	lib/krb5/* lib/krb5/asn.1/* lib/krb5/krb/* \
 	lib/krb5/ccache/* lib/krb5/ccache/ccapi/* \
 	lib/krb5/error_tables/* \
-	lib/krb5/keytab/* lib/krb5/keytab/file/* lib/krb5/keytab/srvtab/* \
-	lib/krb5/os/* lib/krb5/posix/* lib/krb5/rcache/* \
-	util/* util/et/* util/profile/*
+	lib/krb5/keytab/* lib/krb5/os/* lib/krb5/posix/* lib/krb5/rcache/* \
+	lib/krb5/unicode/* lib/krb5/unicode/utbm/* lib/krb5/unicode/ure/* \
+	lib/krb5/unicode/ucdata/* \
+	util/* util/et/* util/profile/* util/support/*
 
 WINFILES= \
-    ccapi/common/* ccapi/common/win/* ccapi/common/win/OldCC/* \
+    ccapi/* ccapi/common/* ccapi/common/win/* ccapi/common/win/OldCC/* \
     ccapi/lib/* ccapi/lib/win/* ccapi/lib/win/OldCC/* \
     ccapi/server/* ccapi/server/win/* \
-    ccapi\test\* \
+    ccapi/test/* \
     util/windows/* windows/* windows/lib/* windows/cns/* \
 	windows/wintel/* windows/gss/* windows/gina/* windows/ms2mit/* \
 	windows/kfwlogon/*
 
 WINBINARYFILES=	windows/*/*.ico windows/*/*.doc windows/*/*.hlp \
-	windows/*/*.hpj windows/lib/*.lib
+	windows/*/*.hpj
 
 #
 # Part of building the PC release has to be done on Unix. This includes
@@ -456,7 +423,7 @@ ETOUT =	\
 	$(GK)gssapi_err_krb5.h $(GK)gssapi_err_krb5.c \
 	$(CCL)ccapi_err.h $(CCL)ccapi_err.c
 
-HOUT =	$(INC)krb5\krb5.h $(GG)gssapi.h $(PR)profile.h
+HOUT =	$(INC)krb5/krb5.h $(GG)gssapi.h $(PR)profile.h
 
 CLEANUP= Makefile $(ETOUT) $(HOUT) \
 	include/profile.h include/osconf.h \
@@ -549,10 +516,10 @@ $(CE)test1.c: $(AC) $(CE)test1.et
 $(CE)test2.c: $(AC) $(CE)test2.et
 	$(AWK) -f $(AC) outfile=$@ $(CE)test2.et
 
-KRBHDEP = $(INC)krb5\krb5.hin $(INC)krb5_err.h $(INC)k5e1_err.h \
+KRBHDEP = $(INC)krb5/krb5.hin $(INC)krb5_err.h $(INC)k5e1_err.h \
 	$(INC)kdb5_err.h $(INC)kv5m_err.h $(INC)krb524_err.h $(INC)asn1_err.h
 
-$(INC)krb5\krb5.h: $(KRBHDEP)
+$(INC)krb5/krb5.h: $(KRBHDEP)
 	rm -f $@
 	cat $(KRBHDEP) > $@
 $(PR)profile.h: $(PR)profile.hin $(PR)prof_err.h
@@ -584,6 +551,8 @@ distclean-windows:
 	config\rm.bat $(KBINDIR)\*.dll $(KBINDIR)\*.exe
 	@if exist $(KBINDIR)\nul rmdir $(KBINDIR)
 
+# Avoid using $(CP) here because the nul+ hack breaks implicit
+# destination filenames.
 install-windows::
 	@if "$(KRB_INSTALL_DIR)"=="" @echo KRB_INSTALL_DIR is not defined!  Please define it.
 	@if "$(KRB_INSTALL_DIR)"=="" @dir /b \nul\nul
@@ -594,31 +563,30 @@ install-windows::
 	@if not exist "$(KRB_INSTALL_DIR)\include\gssapi\$(NULL)" @mkdir "$(KRB_INSTALL_DIR)\include\gssapi"
 	@if not exist "$(KRB_INSTALL_DIR)\lib\$(NULL)" @mkdir "$(KRB_INSTALL_DIR)\lib"
 	@if not exist "$(KRB_INSTALL_DIR)\bin\$(NULL)" @mkdir "$(KRB_INSTALL_DIR)\bin"
-	$(CP) include\krb5.h "$(KRB_INSTALL_DIR)\include\."
-	$(CP) include\krb5\krb5.h "$(KRB_INSTALL_DIR)\include\krb5\."
-	$(CP) include\win-mac.h "$(KRB_INSTALL_DIR)\include\."
-	$(CP) include\profile.h "$(KRB_INSTALL_DIR)\include\."
-	$(CP) include\com_err.h "$(KRB_INSTALL_DIR)\include\."
-	$(CP) include\gssapi\gssapi.h "$(KRB_INSTALL_DIR)\include\gssapi\."
-	$(CP) include\gssapi\gssapi_krb5.h "$(KRB_INSTALL_DIR)\include\gssapi\."
-	$(CP) lib\$(OUTPRE)*.lib "$(KRB_INSTALL_DIR)\lib\."
-	$(CP) lib\$(OUTPRE)*.dll "$(KRB_INSTALL_DIR)\bin\."
-	$(CP) windows\cns\$(OUTPRE)krb5.exe "$(KRB_INSTALL_DIR)\bin\."
-	$(CP) windows\wintel\$(OUTPRE)telnet.exe "$(KRB_INSTALL_DIR)\bin\."
-	$(CP) windows\gss\$(OUTPRE)gss.exe "$(KRB_INSTALL_DIR)\bin\."
-	$(CP) appl\gss-sample\$(OUTPRE)gss-server.exe "$(KRB_INSTALL_DIR)\bin\."
-	$(CP) appl\gss-sample\$(OUTPRE)gss-client.exe "$(KRB_INSTALL_DIR)\bin\."
-	$(CP) windows\ms2mit\$(OUTPRE)ms2mit.exe "$(KRB_INSTALL_DIR)\bin\."
-	$(CP) appl\gssftp\ftp\$(OUTPRE)ftp.exe "$(KRB_INSTALL_DIR)\bin\."
-	$(CP) ccapi\lib\win\$(OUTPRE)ccapi.dll "$(KRB_INSTALL_DIR)\bin\."
-	$(CP) ccapi\server\win\$(OUTPRE)ccapiserver.exe "$(KRB_INSTALL_DIR)\bin\."
-	$(CP) clients\kvno\$(OUTPRE)kvno.exe "$(KRB_INSTALL_DIR)\bin\."
-	$(CP) clients\klist\$(OUTPRE)klist.exe "$(KRB_INSTALL_DIR)\bin\."
-	$(CP) clients\kinit\$(OUTPRE)kinit.exe "$(KRB_INSTALL_DIR)\bin\."
-	$(CP) clients\kdestroy\$(OUTPRE)kdestroy.exe "$(KRB_INSTALL_DIR)\bin\."
-	$(CP) clients\kcpytkt\$(OUTPRE)kcpytkt.exe "$(KRB_INSTALL_DIR)\bin\."
-	$(CP) clients\kdeltkt\$(OUTPRE)kdeltkt.exe "$(KRB_INSTALL_DIR)\bin\."
-	$(CP) clients\kpasswd\$(OUTPRE)kpasswd.exe "$(KRB_INSTALL_DIR)\bin\."
+	copy include\krb5.h "$(KRB_INSTALL_DIR)\include\."
+	copy include\krb5\krb5.h "$(KRB_INSTALL_DIR)\include\krb5\."
+	copy include\win-mac.h "$(KRB_INSTALL_DIR)\include\."
+	copy include\profile.h "$(KRB_INSTALL_DIR)\include\."
+	copy include\com_err.h "$(KRB_INSTALL_DIR)\include\."
+	copy include\gssapi\gssapi.h "$(KRB_INSTALL_DIR)\include\gssapi\."
+	copy include\gssapi\gssapi_krb5.h "$(KRB_INSTALL_DIR)\include\gssapi\."
+	copy include\gssapi\gssapi_ext.h "$(KRB_INSTALL_DIR)\include\gssapi\."
+	copy lib\$(OUTPRE)*.lib "$(KRB_INSTALL_DIR)\lib\."
+	copy lib\$(OUTPRE)*.dll "$(KRB_INSTALL_DIR)\bin\."
+	copy windows\cns\$(OUTPRE)krb5.exe "$(KRB_INSTALL_DIR)\bin\."
+	copy windows\gss\$(OUTPRE)gss.exe "$(KRB_INSTALL_DIR)\bin\."
+	copy appl\gss-sample\$(OUTPRE)gss-server.exe "$(KRB_INSTALL_DIR)\bin\."
+	copy appl\gss-sample\$(OUTPRE)gss-client.exe "$(KRB_INSTALL_DIR)\bin\."
+	copy windows\ms2mit\$(OUTPRE)ms2mit.exe "$(KRB_INSTALL_DIR)\bin\."
+	copy ccapi\lib\win\srctmp\$(OUTPRE)ccapi.dll "$(KRB_INSTALL_DIR)\bin\."
+	copy ccapi\server\win\srctmp\$(OUTPRE)ccapiserver.exe "$(KRB_INSTALL_DIR)\bin\."
+	copy clients\kvno\$(OUTPRE)kvno.exe "$(KRB_INSTALL_DIR)\bin\."
+	copy clients\klist\$(OUTPRE)klist.exe "$(KRB_INSTALL_DIR)\bin\."
+	copy clients\kinit\$(OUTPRE)kinit.exe "$(KRB_INSTALL_DIR)\bin\."
+	copy clients\kdestroy\$(OUTPRE)kdestroy.exe "$(KRB_INSTALL_DIR)\bin\."
+	copy clients\kcpytkt\$(OUTPRE)kcpytkt.exe "$(KRB_INSTALL_DIR)\bin\."
+	copy clients\kdeltkt\$(OUTPRE)kdeltkt.exe "$(KRB_INSTALL_DIR)\bin\."
+	copy clients\kpasswd\$(OUTPRE)kpasswd.exe "$(KRB_INSTALL_DIR)\bin\."
 
 install-unix:: 
 	$(INSTALL_SCRIPT) krb5-config \

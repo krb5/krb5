@@ -727,18 +727,6 @@ gssint_userok(
 	int *			/* user_ok */
 );
 
-OM_uint32
-gss_store_cred(
-	OM_uint32 *,		/* minor_status */
-	const gss_cred_id_t,	/* input_cred_handle */
-	gss_cred_usage_t,	/* cred_usage */
-	const gss_OID,		/* desired_mech */
-	OM_uint32,		/* overwrite_cred */
-	OM_uint32,		/* default_cred */
-	gss_OID_set *,		/* elements_stored */
-	gss_cred_usage_t *	/* cred_usage_stored */
-);
-
 int
 gssint_get_der_length(
 	unsigned char **,	/* buf */

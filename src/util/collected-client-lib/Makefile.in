@@ -1,4 +1,4 @@
-mydir=util/collected-client-lib
+mydir=util$(S)collected-client-lib
 BUILDTOP=$(REL)..$(S)..
 RELDIR=../util/collected-client-lib
 DEFS=

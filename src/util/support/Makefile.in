@@ -1,4 +1,4 @@
-mydir=util/support
+mydir=util$(S)support
 BUILDTOP=$(REL)..$(S)..
 RELDIR=../util/support
 DEFS=

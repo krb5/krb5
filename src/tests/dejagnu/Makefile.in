@@ -1,4 +1,4 @@
-mydir=tests/dejagnu
+mydir=tests$(S)dejagnu
 BUILDTOP=$(REL)..$(S)..
 RUNTEST = @RUNTEST@ $(DEJAFLAGS)
 RUNTESTFLAGS =

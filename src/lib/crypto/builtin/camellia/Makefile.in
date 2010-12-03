@@ -1,14 +1,14 @@
 thisconfigdir=../../../..
 myfulldir=lib/crypto/builtin/camellia
-mydir=lib/crypto/builtin/camellia
+mydir=lib$(S)crypto$(S)builtin$(S)camellia
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../krb/dk \
 	 -I$(srcdir)/../../../../include -I$(srcdir)/../aes
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=camellia
-##DOS##OBJFILE=..\$(OUTPRE)camellia.lst
+##DOS##PREFIXDIR = builtin\camellia
+##DOS##OBJFILE = ..\..\$(OUTPRE)camellia.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

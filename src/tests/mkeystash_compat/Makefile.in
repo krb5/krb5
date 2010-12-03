@@ -1,4 +1,4 @@
-mydir=tests/mkeystash_compat
+mydir=tests$(S)mkeystash_compat
 BUILDTOP=$(REL)..$(S)..
 
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf

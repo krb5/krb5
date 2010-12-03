@@ -1,6 +1,6 @@
-mydir=lib/crypto
+mydir=lib$(S)crypto
 BUILDTOP=$(REL)..$(S)..
-SUBDIRS= krb @CRYPTO_IMPL@ crypto_tests
+SUBDIRS= krb $(CRYPTO_IMPL) crypto_tests
 
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -19,44 +19,48 @@ LIBFINIFUNC=cryptoint_cleanup_library
 RELDIR=crypto
 
 STOBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST				\
-	@CRYPTO_IMPL@/enc_provider/OBJS.ST				\
-	@CRYPTO_IMPL@/hash_provider/OBJS.ST				\
+	$(CRYPTO_IMPL)/enc_provider/OBJS.ST				\
+	$(CRYPTO_IMPL)/hash_provider/OBJS.ST				\
 	krb/checksum/OBJS.ST krb/prf/OBJS.ST krb/rand2key/OBJS.ST	\
 	krb/old/OBJS.ST krb/raw/OBJS.ST krb/prng/OBJS.ST		\
-	krb/prng/@PRNG_ALG@/OBJS.ST					\
-	@CRYPTO_IMPL@/md4/OBJS.ST @CRYPTO_IMPL@/md5/OBJS.ST		\
-	@CRYPTO_IMPL@/sha1/OBJS.ST					\
-	@CRYPTO_IMPL@/sha2/OBJS.ST					\
+	krb/prng/$(PRNG_ALG)/OBJS.ST					\
+	$(CRYPTO_IMPL)/md4/OBJS.ST $(CRYPTO_IMPL)/md5/OBJS.ST		\
+	$(CRYPTO_IMPL)/sha1/OBJS.ST					\
+	$(CRYPTO_IMPL)/sha2/OBJS.ST					\
 	krb/arcfour/OBJS.ST						\
-	@CRYPTO_IMPL@/aes/OBJS.ST @CRYPTO_IMPL@/des/OBJS.ST		\
-	@CRYPTO_IMPL@/camellia/OBJS.ST krb/OBJS.ST			\
-	@CRYPTO_IMPL@/OBJS.ST
+	$(CRYPTO_IMPL)/aes/OBJS.ST $(CRYPTO_IMPL)/des/OBJS.ST		\
+	$(CRYPTO_IMPL)/camellia/OBJS.ST krb/OBJS.ST			\
+	$(CRYPTO_IMPL)/OBJS.ST
 
 SUBDIROBJLISTS=krb/crc32/OBJS.ST krb/dk/OBJS.ST				\
-	@CRYPTO_IMPL@/enc_provider/OBJS.ST				\
-	@CRYPTO_IMPL@/hash_provider/OBJS.ST				\
+	$(CRYPTO_IMPL)/enc_provider/OBJS.ST				\
+	$(CRYPTO_IMPL)/hash_provider/OBJS.ST				\
 	krb/checksum/OBJS.ST krb/prf/OBJS.ST krb/rand2key/OBJS.ST	\
 	krb/old/OBJS.ST krb/raw/OBJS.ST krb/prng/OBJS.ST		\
-	krb/prng/@PRNG_ALG@/OBJS.ST					\
-	@CRYPTO_IMPL@/md4/OBJS.ST @CRYPTO_IMPL@/md5/OBJS.ST		\
-	@CRYPTO_IMPL@/sha1/OBJS.ST					\
-	@CRYPTO_IMPL@/sha2/OBJS.ST					\
+	krb/prng/$(PRNG_ALG)/OBJS.ST					\
+	$(CRYPTO_IMPL)/md4/OBJS.ST $(CRYPTO_IMPL)/md5/OBJS.ST		\
+	$(CRYPTO_IMPL)/sha1/OBJS.ST					\
+	$(CRYPTO_IMPL)/sha2/OBJS.ST					\
 	krb/arcfour/OBJS.ST						\
-	@CRYPTO_IMPL@/aes/OBJS.ST @CRYPTO_IMPL@/des/OBJS.ST		\
-	@CRYPTO_IMPL@/camellia/OBJS.ST krb/OBJS.ST			\
-	@CRYPTO_IMPL@/OBJS.ST
+	$(CRYPTO_IMPL)/aes/OBJS.ST $(CRYPTO_IMPL)/des/OBJS.ST		\
+	$(CRYPTO_IMPL)/camellia/OBJS.ST krb/OBJS.ST			\
+	$(CRYPTO_IMPL)/OBJS.ST
 
 # No dependencies.  Record places to find this shared object if the target
 # link editor and loader support it.
 DEPLIBS=
+CRYPTO_LIBS=@CRYPTO_LIBS@
+CRYPTO_IMPL_LIBS=@CRYPTO_IMPL_LIBS@
 SHLIB_DIRS=-L$(TOPLIBD)
-SHLIB_EXPLIBS= $(SUPPORT_LIB) @CRYPTO_LIBS@ @CRYPTO_IMPL_LIBS@ $(LIBS)
+SHLIB_EXPLIBS= $(SUPPORT_LIB) $(CRYPTO_LIBS) $(CRYPTO_IMPL_LIBS) $(LIBS)
 SHLIB_EXPDEPLIBS= $(SUPPORT_DEPLIB)
 SHLIB_LDFLAGS= $(LDFLAGS) @SHLIB_RPATH_DIRS@
 SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
-##DOS##LIBOBJS = $(OBJS)
+##DOS##LIBNAME=$(OUTPRE)crypto.lib
+##DOS##OBJFILEDEP=$(OUTPRE)crc32.lst $(OUTPRE)rand2key.lst $(OUTPRE)yarrow.lst $(OUTPRE)prng.lst $(OUTPRE)prf.lst $(OUTPRE)checksum.lst $(OUTPRE)krb.lst $(OUTPRE)old.lst $(OUTPRE)raw.lst $(OUTPRE)arcfour.lst $(OUTPRE)dk.lst $(OUTPRE)aes.lst $(OUTPRE)enc_provider.lst $(OUTPRE)des.lst $(OUTPRE)md5.lst $(OUTPRE)camellia.lst $(OUTPRE)md4.lst $(OUTPRE)hash_provider.lst $(OUTPRE)sha2.lst $(OUTPRE)sha1.lst $(OUTPRE)builtin.lst
+##DOS##OBJFILELIST=@$(OUTPRE)crc32.lst @$(OUTPRE)rand2key.lst @$(OUTPRE)yarrow.lst @$(OUTPRE)prng.lst @$(OUTPRE)prf.lst @$(OUTPRE)checksum.lst @$(OUTPRE)krb.lst @$(OUTPRE)old.lst @$(OUTPRE)raw.lst @$(OUTPRE)arcfour.lst @$(OUTPRE)dk.lst @$(OUTPRE)aes.lst @$(OUTPRE)enc_provider.lst @$(OUTPRE)des.lst @$(OUTPRE)md5.lst @$(OUTPRE)camellia.lst @$(OUTPRE)md4.lst @$(OUTPRE)hash_provider.lst @$(OUTPRE)sha2.lst @$(OUTPRE)sha1.lst @$(OUTPRE)builtin.lst
 
 all-unix:: all-liblinks
 install-unix:: install-libs
@@ -69,30 +73,6 @@ libcrypto.lib:
 	libdir crypto.lib
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
-
-all-windows::
-	cd krb
-	@echo Making in crypto\krb
-	$(MAKE) -$(MFLAGS)
-	cd ..\@CRYPTO_IMPL@
-	@echo Making in crypto\@CRYPTO_IMPL@
-	$(MAKE) -$(MFLAGS)
-	cd ..\crypto_tests
-	@echo Making in crypto\crypto_tests
-	$(MAKE) -$(MFLAGS)
-	cd ..
-
-clean-windows::
-	cd krb
-	@echo Making in clean crypto\krb
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\@CRYPTO_IMPL@
-	@echo Making clean in crypto\@CRYPTO_IMPL@
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\crypto_tests
-	@echo Making clean in crypto\crypto_tests
-	$(MAKE) -$(MFLAGS) clean
-	cd ..
 
 @lib_frag@
 @libobj_frag@

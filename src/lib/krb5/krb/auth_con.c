@@ -601,7 +601,7 @@ krb5_auth_con_get_subkey_enctype(krb5_context context,
     return 0;
 }
 
-krb5_error_code KRB5_CALLCONV
+krb5_error_code
 krb5_auth_con_get_authdata_context(krb5_context context,
                                    krb5_auth_context auth_context,
                                    krb5_authdata_context *ad_context)
@@ -610,7 +610,7 @@ krb5_auth_con_get_authdata_context(krb5_context context,
     return 0;
 }
 
-krb5_error_code KRB5_CALLCONV
+krb5_error_code
 krb5_auth_con_set_authdata_context(krb5_context context,
                                    krb5_auth_context auth_context,
                                    krb5_authdata_context ad_context)

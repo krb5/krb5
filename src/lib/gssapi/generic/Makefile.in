@@ -1,4 +1,4 @@
-mydir=lib/gssapi/generic
+mydir=lib$(S)gssapi$(S)generic
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/..
 DEFS=
@@ -39,13 +39,14 @@ $(OUTPRE)gssapi_err_generic.$(OBJEXT): gssapi_err_generic.c
 gssapi_err_generic.h: gssapi_err_generic.et
 gssapi_err_generic.c: gssapi_err_generic.et
 
+##DOS##!if 0
 include_stdint=@include_stdint@
 include_inttypes=@include_inttypes@
 include_xom=@include_xom@
 ##DOS##include_stdint=rem
 ##DOS##include_inttypes=rem
 ##DOS##include_xom=rem
-gssapi.h: gssapi.hin $(BUILDTOP)/include/autoconf.h
+gssapi.h: gssapi.hin
 	@echo "Creating gssapi.h" ; \
 	h=gss$$$$; $(RM) $$h; \
 	(echo "/* This is the gssapi.h prologue. */"; \
@@ -55,6 +56,9 @@ gssapi.h: gssapi.hin $(BUILDTOP)/include/autoconf.h
 	echo "/* End of gssapi.h prologue. */"&& \
 	cat $(srcdir)/gssapi.hin )> $$h && \
 	(set -x; $(MV) $$h $@) ; e=$$?; $(RM) $$h; exit $$e
+##DOS##!endif
+##DOS##gssapi.h: gssapi.hin
+##DOS##	$(CP) $** $@
 
 #if HasHashLibrary
 # UTIL_VALIDATE_SRC= $(srcdir)/util_validate.c

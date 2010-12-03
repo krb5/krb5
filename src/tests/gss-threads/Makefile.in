@@ -1,6 +1,6 @@
 # Derived from appl/gss-sample, January 2005.
 
-mydir=tests/gss-threads
+mydir=tests$(S)gss-threads
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DUSE_AUTOCONF_H -DGSSAPI_V2
 PROG_LIBPATH=-L$(TOPLIBD)

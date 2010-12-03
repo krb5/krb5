@@ -1,12 +1,5 @@
-#ifdef KRB4
-#include <kerberosIV/krb.h>
-#endif
 #include "k5-int.h"
 
-#ifdef KRB4
-#include <kerberosIV/krb_err.h>
-#include <kerberosIV/kadm_err.h>
-#endif
 #ifdef KRB5
 #include "krb5_err.h"
 #include "kv5m_err.h"
@@ -374,24 +367,13 @@ control(int mode)
 	profile_library_finalizer();
 	break;
     }
-#elif defined KRB4
-    switch (mode){
-    case DLL_STARTUP:
-      add_error_table(&et_krb_error_table);
-      add_error_table(&et_kadm_error_table);
-      break;
-    case DLL_SHUTDOWN:
-      remove_error_table(&et_krb_error_table);
-      remove_error_table(&et_kadm_error_table);
-      break;
-    }
 #elif defined GSSAPI
     switch (mode) {
     case DLL_STARTUP:
-	gssint_lib_init__auxinit();
+	gssint_mechglue_init__auxinit();
 	break;
     case DLL_SHUTDOWN:
-	gssint_lib_fini();
+	gssint_mechglue_fini();
 	break;
     }
 #elif defined COMERR

@@ -91,7 +91,8 @@ testMechAttrsKnown(gss_const_OID_set critical,
     return 1;
 }
 
-OM_uint32 gss_indicate_mechs_by_attrs(
+OM_uint32 KRB5_CALLCONV
+gss_indicate_mechs_by_attrs(
       OM_uint32         *minor,
       gss_const_OID_set  desired_mech_attrs,
       gss_const_OID_set  except_mech_attrs,
@@ -154,7 +155,8 @@ cleanup:
     return status;
 }
 
-OM_uint32 gss_inquire_attrs_for_mech(
+OM_uint32 KRB5_CALLCONV
+gss_inquire_attrs_for_mech(
       OM_uint32         *minor,
       gss_const_OID      mech_oid,
       gss_OID_set       *mech_attrs,
@@ -213,7 +215,8 @@ OM_uint32 gss_inquire_attrs_for_mech(
     return GSS_S_COMPLETE;
 }
 
-OM_uint32 gss_display_mech_attr(
+OM_uint32 KRB5_CALLCONV
+gss_display_mech_attr(
       OM_uint32         *minor,
       gss_const_OID      mech_attr,
       gss_buffer_t       name,

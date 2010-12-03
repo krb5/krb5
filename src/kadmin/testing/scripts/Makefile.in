@@ -1,4 +1,4 @@
-mydir=kadmin/testing/scripts
+mydir=kadmin$(S)testing$(S)scripts
 BUILDTOP=$(REL)..$(S)..$(S)..
 PERL_PATH=@PERL_PATH@
 

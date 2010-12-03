@@ -1,4 +1,4 @@
-mydir=clients/kdestroy
+mydir=clients$(S)kdestroy
 BUILDTOP=$(REL)..$(S)..
 DEFS=
 

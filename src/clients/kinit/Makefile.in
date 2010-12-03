@@ -1,4 +1,4 @@
-mydir=clients/kinit
+mydir=clients$(S)kinit
 BUILDTOP=$(REL)..$(S)..
 DEFS=
 

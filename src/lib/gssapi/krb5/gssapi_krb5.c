@@ -590,10 +590,12 @@ static struct {
         {GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID_LENGTH, GSS_KRB5_FREE_LUCID_SEC_CONTEXT_OID},
         gss_krb5int_free_lucid_sec_context
     },
+#ifndef _WIN32
     {
         {GSS_KRB5_USE_KDC_CONTEXT_OID_LENGTH, GSS_KRB5_USE_KDC_CONTEXT_OID},
         krb5int_gss_use_kdc_context
     },
+#endif
 };
 
 static OM_uint32

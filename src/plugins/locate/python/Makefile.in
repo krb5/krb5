@@ -1,4 +1,4 @@
-mydir=plugins/locate/python
+mydir=plugins$(S)locate$(S)python
 BUILDTOP=$(REL)..$(S)..$(S)..
 
 LIBBASE=python

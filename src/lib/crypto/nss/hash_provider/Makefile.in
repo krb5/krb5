@@ -1,14 +1,11 @@
-mydir=lib/crypto/nss/hash_provider
+mydir=lib$(S)crypto$(S)nss$(S)hash_provider
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
+CRYPTO_IMPL_CFLAGS=@CRYPTO_IMPL_CFLAGS@
 LOCALINCLUDES = -I$(srcdir)/../../krb/crc32 -I$(srcdir)/../md4 \
 	-I$(srcdir)/.. -I$(srcdir)/../../krb \
-	@CRYPTO_IMPL_CFLAGS@
+	$(CRYPTO_IMPL_CFLAGS)
 
 DEFS=
-
-##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=hash_provider
-##DOS##OBJFILE=..\$(OUTPRE)hash_pro.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -31,8 +28,6 @@ SRCS=	$(srcdir)/hash_gen.c	\
 	$(srcdir)/hash_md4.c 	\
 	$(srcdir)/hash_md5.c 	\
 	$(srcdir)/hash_sha1.c
-
-##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
 

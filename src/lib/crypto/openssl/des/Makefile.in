@@ -1,11 +1,7 @@
-mydir=lib/crypto/openssl/des
+mydir=lib$(S)crypto$(S)openssl$(S)des
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../.. -I$(srcdir)/../../krb
 DEFS=
-
-##DOS##BUILDTOP = ..\..\..\..
-##DOS##PREFIXDIR=des
-##DOS##OBJFILE=..\$(OUTPRE)des.lst
 
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -28,19 +24,11 @@ SRCS=	$(srcdir)/f_parity.c	\
 	$(srcdir)/string2key.c
 
 
-##DOS##LIBOBJS = $(OBJS)
-
 all-unix:: all-libobjs
-
-check-unix:: 
 
 includes:: depend
 
 depend:: $(SRCS)
-
-check-windows::
-
-clean::
 
 clean-unix:: clean-libobjs
 

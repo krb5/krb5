@@ -9,7 +9,9 @@
 #endif
 #include <errno.h>
 #include <ctype.h>
+#ifndef _WIN32
 #include <dirent.h>
+#endif
 
 #define SECTION_SEP_CHAR '/'
 
@@ -239,6 +241,42 @@ static int valid_name(const char *filename)
  */
 static errcode_t parse_include_dir(char *dirname, struct parse_state *state)
 {
+#ifdef _WIN32
+    char *wildcard = NULL, *pathname;
+    WIN32_FIND_DATA ffd;
+    HANDLE handle;
+    errcode_t retval = 0;
+
+    if (asprintf(&wildcard, "%s\\*", dirname) < 0)
+        return ENOMEM;
+
+    handle = FindFirstFile(wildcard, &ffd);
+    if (handle == INVALID_HANDLE_VALUE) {
+        retval = PROF_FAIL_INCLUDE_DIR;
+        goto cleanup;
+    }
+
+    do {
+        if (!valid_name(ffd.cFileName))
+            continue;
+        if (asprintf(&pathname, "%s\\%s", dirname, ffd.cFileName) < 0) {
+            retval = ENOMEM;
+            break;
+        }
+        retval = parse_include_file(pathname, state);
+        free(pathname);
+        if (retval)
+            break;
+    } while (FindNextFile(handle, &ffd) != 0);
+
+    FindClose(handle);
+
+cleanup:
+    free(wildcard);
+    return retval;
+
+#else /* not _WIN32 */
+
     DIR     *dir;
     char    *pathname;
     errcode_t retval = 0;
@@ -261,6 +299,7 @@ static errcode_t parse_include_dir(char *dirname, struct parse_state *state)
     }
     closedir(dir);
     return retval;
+#endif /* not _WIN32 */
 }
 
 static errcode_t parse_line(char *line, struct parse_state *state)

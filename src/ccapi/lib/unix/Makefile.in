@@ -1,4 +1,4 @@
-mydir=ccapi/lib/unix
+mydir=ccapi$(S)lib$(S)unix
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES= -I$(srcdir)/.. -I$(srcdir)/../../common
 

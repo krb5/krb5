@@ -1,10 +1,10 @@
-mydir=lib/crypto/krb/prng/fortuna
+mydir=lib$(S)crypto$(S)krb$(S)prng$(S)fortuna
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../.. \
-		-I$(srcdir)/../../../@CRYPTO_IMPL@		\
-		-I$(srcdir)/../../../@CRYPTO_IMPL@/sha2 	\
-		-I$(srcdir)/../../../@CRYPTO_IMPL@/aes 	\
-		-I$(srcdir)/../../../@CRYPTO_IMPL@/enc_provider
+		-I$(srcdir)/../../../$(CRYPTO_IMPL)		\
+		-I$(srcdir)/../../../$(CRYPTO_IMPL)/sha2 	\
+		-I$(srcdir)/../../../$(CRYPTO_IMPL)/aes 	\
+		-I$(srcdir)/../../../$(CRYPTO_IMPL)/enc_provider
 DEFS=
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)

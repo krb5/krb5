@@ -1,4 +1,4 @@
-mydir=lib/gssapi/krb5
+mydir=lib$(S)gssapi$(S)krb5
 BUILDTOP=$(REL)..$(S)..$(S)..
 LOCALINCLUDES = -I. -I$(srcdir) -I$(srcdir)/.. -I../generic -I$(srcdir)/../generic -I../mechglue -I$(srcdir)/../mechglue
 DEFS=-D_GSS_STATIC_LINK=1
@@ -237,7 +237,8 @@ error_map.h: $(top_srcdir)/util/gen-map.pl \
 		VALUE="char *" \
 		COMPARE=compare_OM_uint32 \
 		FREEVALUE=free_string
-	$(MV) error_map.new error_map.h
+	$(RM) $@
+	$(MV) error_map.new $@
 
 clean-unix::
 	$(RM) $(BUILDTOP)/include/gssapi/gssapi_krb5.h

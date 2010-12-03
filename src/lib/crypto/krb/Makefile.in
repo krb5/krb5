@@ -1,26 +1,25 @@
-mydir=lib/crypto/krb
+mydir=lib$(S)crypto$(S)krb
 BUILDTOP=$(REL)..$(S)..$(S)..
-SUBDIRS= arcfour checksum crc32 dk \
-	prf rand2key old raw prng 
-LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/../@CRYPTO_IMPL@/enc_provider -I$(srcdir)/dk	\
-		-I$(srcdir)/../@CRYPTO_IMPL@/hash_provider				\
-		-I$(srcdir)/prf -I$(srcdir)/rand2key		 			\
+SUBDIRS= arcfour checksum crc32 dk prf rand2key old raw prng
+LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/../$(CRYPTO_IMPL)/enc_provider \
+		-I$(srcdir)/dk -I$(srcdir)/../$(CRYPTO_IMPL)/hash_provider \
+		-I$(srcdir)/prf -I$(srcdir)/rand2key \
 		-I$(srcdir)/old -I$(srcdir)/raw \
-		-I$(srcdir)/prng 		\
-		-I$(srcdir)/prng/@PRNG_ALG@ 		\
-		-I$(srcdir)/../@CRYPTO_IMPL@/ -I$(srcdir)/../@CRYPTO_IMPL@/des		\
-		-I$(srcdir)/../@CRYPTO_IMPL@/aes -I$(srcdir)/arcfour 	\
-		-I$(srcdir)/../@CRYPTO_IMPL@/camellia \
-		-I$(srcdir)/../@CRYPTO_IMPL@/sha1 -I$(srcdir)/../@CRYPTO_IMPL@
+		-I$(srcdir)/prng \
+		-I$(srcdir)/prng/$(PRNG_ALG) \
+		-I$(srcdir)/../$(CRYPTO_IMPL) \
+		-I$(srcdir)/../$(CRYPTO_IMPL)/des \
+		-I$(srcdir)/../$(CRYPTO_IMPL)/aes -I$(srcdir)/arcfour 	\
+		-I$(srcdir)/../$(CRYPTO_IMPL)/camellia \
+		-I$(srcdir)/../$(CRYPTO_IMPL)/sha1 \
+		-I$(srcdir)/../$(CRYPTO_IMPL)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
 
-##DOSBUILDTOP = ..\..\..
-##DOSLIBNAME=$(OUTPRE)crypto.lib
-##DOSOBJFILE=$(OUTPRE)crypto.lst
-##DOSOBJFILELIST=@$(OUTPRE)crypto.lst @$(OUTPRE)des.lst @$(OUTPRE)md4.lst @$(OUTPRE)md5.lst @$(OUTPRE)sha1.lst @$(OUTPRE)arcfour.lst @$(OUTPRE)crc32.lst @$(OUTPRE)dk.lst @$(OUTPRE)old.lst @$(OUTPRE)raw.lst @$(OUTPRE)enc_prov.lst @$(OUTPRE)hash_pro.lst @$(OUTPRE)cksum.lst @$(OUTPRE)yarrow.lst @$(OUTPRE)aes.lst
-##DOSOBJFILEDEP =$(OUTPRE)crypto.lst $(OUTPRE)des.lst $(OUTPRE)md4.lst $(OUTPRE)md5.lst $(OUTPRE)sha1.lst $(OUTPRE)arcfour.lst $(OUTPRE)crc32.lst $(OUTPRE)dk.lst $(OUTPRE)old.lst $(OUTPRE)raw.lst $(OUTPRE)enc_prov.lst $(OUTPRE)hash_pro.lst $(OUTPRE)cksum.lst $(OUTPRE)aes.lst
+##DOS##BUILDTOP = ..\..\..
+##DOS##PREFIXDIR = krb
+##DOS##OBJFILE = ..\$(OUTPRE)krb.lst
 
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
@@ -67,7 +66,7 @@ STLIBOBJS=\
 OBJS=\
 	$(OUTPRE)aead.$(OBJEXT)		 	\
 	$(OUTPRE)block_size.$(OBJEXT)		\
-	$(OUTPRE)cf2$(OBJEXT) 			\
+	$(OUTPRE)cf2.$(OBJEXT) 			\
 	$(OUTPRE)checksum_length.$(OBJEXT)	\
 	$(OUTPRE)cksumtype_to_string.$(OBJEXT)	\
 	$(OUTPRE)cksumtypes.$(OBJEXT)		\
@@ -83,7 +82,7 @@ OBJS=\
 	$(OUTPRE)encrypt_length.$(OBJEXT)	\
 	$(OUTPRE)enctype_util.$(OBJEXT)	\
 	$(OUTPRE)etypes.$(OBJEXT)		\
-	$(OUTPRE)key.$(OBJECT)			\
+	$(OUTPRE)key.$(OBJEXT)			\
 	$(OUTPRE)keyblocks.$(OBJEXT) 		\
 	$(OUTPRE)keyed_cksum.$(OBJEXT)		\
 	$(OUTPRE)keyed_checksum_types.$(OBJEXT)	\
@@ -98,6 +97,7 @@ OBJS=\
 	$(OUTPRE)random_to_key.$(OBJEXT)	\
 	$(OUTPRE)state.$(OBJEXT) 		\
 	$(OUTPRE)string_to_cksumtype.$(OBJEXT)	\
+	$(OUTPRE)string_to_key.$(OBJEXT)	\
 	$(OUTPRE)valid_cksumtype.$(OBJEXT)	\
 	$(OUTPRE)verify_checksum.$(OBJEXT)	\
 	$(OUTPRE)verify_checksum_iov.$(OBJEXT)
@@ -143,11 +143,11 @@ SRCS=\
 
 STOBJLISTS=arcfour/OBJS.ST checksum/OBJS.ST crc32/OBJS.ST	\
 	dk/OBJS.ST prf/OBJS.ST rand2key/OBJS.ST			\
-	old/OBJS.ST raw/OBJS.ST  prng/@PRNG_ALG@/OBJS.ST prng/OBJS.ST OBJS.ST
+	old/OBJS.ST raw/OBJS.ST  prng/$(PRNG_ALG)/OBJS.ST prng/OBJS.ST OBJS.ST
 
 SUBDIROBJLISTS=arcfour/OBJS.ST checksum/OBJS.ST crc32/OBJS.ST	\
 	dk/OBJS.ST prf/OBJS.ST rand2key/OBJS.ST			\
-	old/OBJS.ST raw/OBJS.ST  prng/@PRNG_ALG@/OBJS.ST prng/OBJS.ST  
+	old/OBJS.ST raw/OBJS.ST  prng/$(PRNG_ALG)/OBJS.ST prng/OBJS.ST
 
 ##DOS##LIBOBJS = $(OBJS)
 
@@ -157,97 +157,6 @@ includes:: depend
 depend:: $(SRCS)
 
 clean-unix:: clean-libobjs
-
-all-windows::
-	cd arcfour
-	@echo Making in crypto\arcfour
-	$(MAKE) -$(MFLAGS)
-	cd ..\crc32
-	@echo Making in crypto\crc32
-	$(MAKE) -$(MFLAGS)
-	cd ..\checksum
-	@echo Making in crypto\checksum
-	$(MAKE) -$(MFLAGS)
-	cd ..\dk
-	@echo Making in crypto\dk
-	$(MAKE) -$(MFLAGS)
-	cd ..\prf
-	@echo Making in crypto\prf
-	$(MAKE) -$(MFLAGS)
-	cd ..\rand2key
-	@echo Making in crypto\rand2key
-	$(MAKE) -$(MFLAGS)
-	cd ..\old
-	@echo Making in crypto\old
-	$(MAKE) -$(MFLAGS)
-	cd ..\raw
-	@echo Making in crypto\raw
-	$(MAKE) -$(MFLAGS)
-	cd ..\prng
-	@echo Making in crypto\prng
-	$(MAKE) -$(MFLAGS)
-	cd ..
-
-clean-windows::
-	cd arcfour
-	@echo Making in clean crypto\arcfour
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\crc32
-	@echo Making in clean crypto\crc32
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\checksum
-	@echo Making clean in crypto\checksum
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\dk
-	@echo Making clean in crypto\dk
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\prf
-	@echo Making clean in crypto\prf
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\rand2key
-	@echo Making clean in crypto\rand2key
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\old
-	@echo Making clean in crypto\old
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\raw
-	@echo Making clean in crypto\raw
-	$(MAKE) -$(MFLAGS) clean
-	cd ..\prng
-	@echo Making clean in crypto\prng
-	$(MAKE) -$(MFLAGS) clean
-	cd ..
-
-check-windows::
-	cd arcfour
-	@echo Making in check crypto\arcfour
-	$(MAKE) -$(MFLAGS) check
-	cd ..\crc32
-	@echo Making in check crypto\crc32
-	$(MAKE) -$(MFLAGS) check
-	cd ..\checksum
-	@echo Making check in crypto\checksum
-	$(MAKE) -$(MFLAGS) check
-	cd ..\dk
-	@echo Making check in crypto\dk
-	$(MAKE) -$(MFLAGS) check
-	cd ..\prf
-	@echo Making check in crypto\prf
-	$(MAKE) -$(MFLAGS) check
-	cd ..\rand2key
-	@echo Making check in crypto\rand2key
-	$(MAKE) -$(MFLAGS) check
-	cd ..\old
-	@echo Making check in crypto\old
-	$(MAKE) -$(MFLAGS) check
-	cd ..\raw
-	@echo Making check in crypto\raw
-	$(MAKE) -$(MFLAGS) check
-	cd ..\prng
-	@echo Making check in crypto\prng
-	$(MAKE) -$(MFLAGS) check
-	cd ..
-
 
 @lib_frag@
 @libobj_frag@

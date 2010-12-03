@@ -36,13 +36,6 @@ cc_int32 cci_ipc_thread_init (void)
 
 /* ------------------------------------------------------------------------ */
 
-void cci_ipc_thread_fini (void)
-{
-    cci_os_ipc_thread_fini ();
-}
-
-/* ------------------------------------------------------------------------ */
-
 static cc_int32 _cci_ipc_send (enum cci_msg_id_t  in_request_name,
                                cc_int32           in_launch_server,
                                cci_identifier_t   in_identifier,

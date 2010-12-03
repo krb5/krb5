@@ -9,7 +9,6 @@
 
 #include "cci_debugging.h"
 #include "CredentialsCache.h"
-#include "cci_stream.h"
 #include "win-utils.h"
 
 #include "ccs_request.h"
@@ -18,9 +17,9 @@
 
 extern cc_int32 cci_os_ipc_thread_init (void);
 extern cc_int32 cci_os_ipc_msg( cc_int32        in_launch_server,
-                                cci_stream_t    in_request_stream,
+                                k5_ipc_stream   in_request_stream,
                                 cc_int32        in_msg,
-                                cci_stream_t*   out_reply_stream);
+                                k5_ipc_stream*  out_reply_stream);
 
 static DWORD    dwTlsIndex;
 
@@ -68,8 +67,8 @@ RPC_STATUS send_test(char* endpoint) {
 int main(   int argc, char *argv[]) {
     cc_int32        err             = 0;
     cc_context_t    context         = NULL;
-    cci_stream_t    send_stream     = NULL;
-    cci_stream_t    reply_stream    = NULL;
+    k5_ipc_stream   send_stream     = NULL;
+    k5_ipc_stream   reply_stream    = NULL;
     char*           message         = "Hello, RPC!";
 
 
@@ -85,8 +84,9 @@ int main(   int argc, char *argv[]) {
         err = cci_os_ipc_thread_init();
         }
     if (!err) {
-        err = cci_stream_new  (&send_stream);
-        err = cci_stream_write(send_stream, message, 1+strlen(message));
+        err = krb5int_ipc_stream_new  (&send_stream);
+        err = krb5int_ipc_stream_write(send_stream, message,
+				       1+strlen(message));
         }
 
     if (!err) {

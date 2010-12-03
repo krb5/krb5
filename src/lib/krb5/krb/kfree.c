@@ -808,7 +808,8 @@ krb5_free_etype_list(krb5_context context,
         free(etypes);
     }
 }
-void krb5_free_fast_req(krb5_context context, krb5_fast_req *val)
+void KRB5_CALLCONV
+krb5_free_fast_req(krb5_context context, krb5_fast_req *val)
 {
     if (val == NULL)
         return;
@@ -816,7 +817,8 @@ void krb5_free_fast_req(krb5_context context, krb5_fast_req *val)
     free(val);
 }
 
-void krb5_free_fast_armor(krb5_context context, krb5_fast_armor *val)
+void KRB5_CALLCONV
+krb5_free_fast_armor(krb5_context context, krb5_fast_armor *val)
 {
     if (val == NULL)
         return;
@@ -824,7 +826,8 @@ void krb5_free_fast_armor(krb5_context context, krb5_fast_armor *val)
     free(val);
 }
 
-void krb5_free_fast_response(krb5_context context, krb5_fast_response *val)
+void KRB5_CALLCONV
+krb5_free_fast_response(krb5_context context, krb5_fast_response *val)
 {
     if (!val)
         return;
@@ -834,8 +837,8 @@ void krb5_free_fast_response(krb5_context context, krb5_fast_response *val)
     free(val);
 }
 
-void krb5_free_fast_finished
-(krb5_context context, krb5_fast_finished *val)
+void KRB5_CALLCONV
+krb5_free_fast_finished(krb5_context context, krb5_fast_finished *val)
 {
     if (!val)
         return;
@@ -844,7 +847,8 @@ void krb5_free_fast_finished
     free(val);
 }
 
-void krb5_free_typed_data(krb5_context context, krb5_typed_data **in)
+void
+krb5_free_typed_data(krb5_context context, krb5_typed_data **in)
 {
     int i = 0;
     if (in == NULL) return;
@@ -857,8 +861,8 @@ void krb5_free_typed_data(krb5_context context, krb5_typed_data **in)
     free(in);
 }
 
-void krb5_free_fast_armored_req(krb5_context context,
-                                krb5_fast_armored_req *val)
+void KRB5_CALLCONV
+krb5_free_fast_armored_req(krb5_context context, krb5_fast_armored_req *val)
 {
     if (val == NULL)
         return;

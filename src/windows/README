@@ -1,14 +1,15 @@
 	       Building & Running Kerberos 5 on Windows
 	       ----------------------------------------
 
-Kerberos 5 builds on Windows with MSVC++ 6.0, MSVS.NET, and 
-MSVS.NET 2003.  You will need the XP SP2 Platform SDK or 
-later; this SDK is required to define getaddrinfo.  It may or 
-may not build with other compilers or make utilities.
+This file documents how to build the standalone source distribution of
+Kerberos 5 on Windows.  The MIT Kerberos for Windows distribution
+contains additional components not present in the Kerberos 5 source
+code.
 
-These build instructions assume that you have the standalone source
-distribution of Kerberos 5 rather than the MIT Kerberos for Windows
-distribution (which includes a working Kerberos 4).
+To build Kerberos 5 on Windows, you will need the Windows SDK (XP SP2
+or later) and a version of Perl installed in the command-line path.
+Current versions of the Windows SDK require the .NET framework to be
+installed.
 
 There are two methods for building a Windows version of Kerberos 5.
 The traditional method involves starting on a Unix machine and
@@ -16,24 +17,21 @@ creating a distribution that can be built on Windows.  The second
 method works from the sources that come from the Unix distribution if
 you have certain Unix-type utilities (see below).
 
+After the Windows SDK is installed, you should be able to invoke an
+SDK command prompt via the start menu (All Programs -> Microsoft
+Windows SDK vX.Y -> Windows SDK X.Y Command Prompt).  Within this
+window, you can change the build target using the setenv command; run
+"setenv /?" or see the Windows SDK documentation for details.  At the
+current time, Kerberos 5 can only be built for the x64 target if the
+host platform is also 64-bit, because it compiles and runs programs
+during the build.
+
 IMPORTANT NOTE: By default, the sources are built with debug
 information and linked against the debug version of the Microsoft C
 Runtime library, which is not found on most Windows systems unless
 they have development tools.  To build a release version, you need to
 define NODEBUG either in the environment or the nmake command-line.
 
-To configuring the build environment execute first the compiler
-batch file, vcvars32.bat or vsvars32.bat, followed by the SDK
-batch file, setenv.bat.  For example, 
-
-  "c:\program files\microsoft visual studio .net 2003\common7\tools\vsvars32.bat"
-  "c:\program files\microsoft sdk\setenv.bat" /2000 /RETAIL
-
-or 
-
-  "c:\program files\microsoft visual studio\vc98\bin\vcvars32.bat"
-  "c:\program files\microsoft sdk\setenv.bat" /2000 /DEBUG
-  
 DNS Support: To support DNS lookups, you will need to define
 KRB5_DNS_LOOKUP, KRB5_DNS_LOOKUP_KDC, or KRB5_DNS_LOOKUP_REALMS.  When 
 any of the KRB5_DNS_LOOKUP definitions are used, the default build will use
@@ -98,9 +96,11 @@ Running Kerberos 5 Apps:
 
 Make sure you have a valid krb5.ini file.  That will look just like a
 Unix krb5.conf file.  You can place this file in the same directory as
-your krb5_32.dll or in your Windows directory.  You should then be
-able to run the applications that are built.  Note that Kerberos 5
-will not look for the krb5.ini file in your path.
+your krb5_32.dll (this will be the bin subdirectory of your install
+directory, if you did not move the binaries) or in your Windows
+directory (typically "C:\Windows").  You should then be able to run
+the applications that are built.  Note that Kerberos 5 will not look
+for the krb5.ini file in your path.
 
 
 krb5.ini File:
@@ -289,14 +289,6 @@ gss-server application built on Unix/Linux systems.  This client is not compatib
 with the Platform SDK/Samples/Security/SSPI/GSS/ samples which Microsoft has been
 shipping as of January 2004.  Revised versions of these samples are available upon 
 request to krbdev@mit.edu.  
-
-Kerberos 4 Library Support:
----------------------------
-
-The krb4_32.dll that is built (but not installed) is not supported.
-If you need Kerberos 4, you can use the krbv4w32.dll that MIT
-distributes as part of the MIT Kerberos for Windows distribution.
-
 
 More Information:
 ----------------

@@ -34,7 +34,36 @@ Makefile: Makefile.in $(BUILDTOP)\config\win-pre.in $(BUILDTOP)\config\win-post.
 	$(WCONFIG) $(BUILDTOP)\config < Makefile.in > Makefile
 !endif
 
-!if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
+# Recurse into subdirs if WINSUBDIRS or SUBDIRS is defined.  Makefiles
+# can depend on all-recurse, clean-recurse, or check-recurse to perform
+# actions after recursion.
+!if defined(SUBDIRS) && !defined(WINSUBDIRS)
+WINSUBDIRS=$(SUBDIRS)
+!endif
+!ifdef WINSUBDIRS
+
+all-recurse:
+	@for %d in ($(WINSUBDIRS)) do @(echo Making in $(mydir)\%d && \
+		pushd %d && $(MAKE) -$(MFLAGS) && popd) || exit 1
+	@echo Making in $(mydir)
+all-windows:: all-recurse
+
+clean-recurse::
+	@for %d in ($(WINSUBDIRS)) do @(echo Making clean in $(mydir)\%d && \
+		pushd %d && $(MAKE) -$(MFLAGS) clean && popd) || exit 1
+	@echo Making clean in $(mydir)
+clean-windows:: clean-recurse
+
+check-recurse::
+	@for %d in ($(WINSUBDIRS)) do @(echo Making check in $(mydir)\%d && \
+		pushd %d && $(MAKE) -$(MFLAGS) check && popd) || exit 1
+	@echo Making check in $(mydir)
+check-windows:: check-recurse
+
+!endif # WINSUBDIRS
+
+# Use 64-bit LIBNAME and OBJFILE on 64-bit platforms, if defined.
+!if ("$(CPU)" == "IA64") || ("$(CPU)" == "AMD64") || ("$(CPU)" == "ALPHA64")
 !if defined(WIN64LIBNAME)
 LIBNAME=$(WIN64LIBNAME)
 !endif
@@ -43,6 +72,7 @@ OBJFILE=$(WIN64OBJFILE)
 !endif
 !endif
 
+# Build a library if LIBNAME is defined.
 !if defined(LIBNAME)
 
 !if !defined(OBJFILELIST)
@@ -59,6 +89,7 @@ $(LIBNAME): $(OBJFILEDEP)
 !endif # LIBNAME
 
 
+# Build an object file list if OBJFILE is defined.
 !if defined(OBJFILE)
 all-windows:: $(OBJFILE)
 !if defined(LIBOBJS)
@@ -75,17 +106,6 @@ $(OBJFILE): $(LIBOBJS)
 
 check::
 check-windows::
-
-!if defined(LIBNAME)
-clean-windows::
-# NO LONGER NEEDED BECAUSE WE CLEAN OUT THE DIR...
-#	if exist $(LIBNAME) del $(LIBNAME)
-!endif
-!if defined(OBJFILE)
-clean-windows::
-# NO LONGER NEEDED BECAUSE WE CLEAN OUT THE DIR...
-#	if exist $(OBJFILE) del $(OBJFILE)
-!endif
 
 clean-windows:: clean-windows-files clean-windows-dir
 

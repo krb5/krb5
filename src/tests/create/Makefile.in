@@ -1,4 +1,4 @@
-mydir=tests/create
+mydir=tests$(S)create
 BUILDTOP=$(REL)..$(S)..
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

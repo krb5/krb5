@@ -1,4 +1,4 @@
-mydir=kadmin/dbutil
+mydir=kadmin$(S)dbutil
 BUILDTOP=$(REL)..$(S)..
 DEFS=
 LOCALINCLUDES = -I.

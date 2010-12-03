@@ -1,4 +1,4 @@
-mydir=lib/krb5/keytab
+mydir=lib$(S)krb5$(S)keytab
 BUILDTOP=$(REL)..$(S)..$(S)..
 DEFS=
 
