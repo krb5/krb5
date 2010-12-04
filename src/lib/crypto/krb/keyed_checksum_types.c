@@ -35,6 +35,13 @@ is_keyed_for(const struct krb5_cksumtypes *ctp,
 {
     if (ctp->flags & CKSUM_UNKEYED)
         return FALSE;
+    /* Stream ciphers do not play well with RFC 3961 key derivation, so be
+     * conservative with RC4. */
+    if ((ktp->etype == ENCTYPE_ARCFOUR_HMAC ||
+         ktp->etype == ENCTYPE_ARCFOUR_HMAC_EXP) &&
+        ctp->ctype != CKSUMTYPE_HMAC_MD5_ARCFOUR &&
+        ctp->ctype != CKSUMTYPE_MD5_HMAC_ARCFOUR)
+        return FALSE;
     return (!ctp->enc || ktp->enc == ctp->enc);
 }
 

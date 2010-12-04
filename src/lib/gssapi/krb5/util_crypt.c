@@ -119,10 +119,22 @@ kg_setup_keys(krb5_context context, krb5_gss_ctx_id_rec *ctx, krb5_key subkey,
     if (code != 0)
         return code;
 
-    code = (*kaccess.mandatory_cksumtype)(context, subkey->keyblock.enctype,
-                                          cksumtype);
-    if (code != 0)
-        return code;
+    switch (subkey->keyblock.enctype) {
+    case ENCTYPE_DES_CBC_MD4:
+        *cksumtype = CKSUMTYPE_RSA_MD4_DES;
+        break;
+    case ENCTYPE_DES_CBC_MD5:
+    case ENCTYPE_DES_CBC_CRC:
+        *cksumtype = CKSUMTYPE_RSA_MD5_DES;
+        break;
+    default:
+        code = (*kaccess.mandatory_cksumtype)(context,
+                                              subkey->keyblock.enctype,
+                                              cksumtype);
+        if (code != 0)
+            return code;
+        break;
+    }
 
     switch (subkey->keyblock.enctype) {
     case ENCTYPE_DES_CBC_MD5:

@@ -1578,7 +1578,9 @@ pa_sam_2(krb5_context context, krb5_kdc_req *request, krb5_pa_data *in_padata,
 
     cksum = sc2->sam_cksum;
 
-    while (*cksum) {
+    for (; *cksum; cksum++) {
+        if (!krb5_c_is_keyed_cksum((*cksum)->checksum_type))
+            continue;
         /* Check this cksum */
         retval = krb5_c_verify_checksum(context, as_key,
                                         KRB5_KEYUSAGE_PA_SAM_CHALLENGE_CKSUM,
@@ -1592,7 +1594,6 @@ pa_sam_2(krb5_context context, krb5_kdc_req *request, krb5_pa_data *in_padata,
         }
         if (valid_cksum)
             break;
-        cksum++;
     }
 
     if (!valid_cksum) {
