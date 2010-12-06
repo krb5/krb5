@@ -40,6 +40,8 @@ krb5_derive_key(const struct krb5_enc_provider *enc,
     keybytes = enc->keybytes;
     keylength = enc->keylength;
 
+    if (blocksize == 1)
+	return(KRB5_BAD_ENCTYPE);
     if ((inkey->length != keylength) ||
 	(outkey->length != keylength))
 	return(KRB5_CRYPTO_INTERNAL);

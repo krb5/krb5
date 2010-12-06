@@ -213,10 +213,29 @@ krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
 	for (i = 0; i < nsumtypes; i++)
 		if (auth_context->safe_cksumtype == sumtypes[i])
 			break;
-	if (i == nsumtypes)
-		i = 0;
-	sumtype = sumtypes[i];
 	krb5_free_cksumtypes (context, sumtypes);
+	if (i < nsumtypes)
+	    sumtype = auth_context->safe_cksumtype;
+	else {
+	    switch (keyblock->enctype) {
+	    case ENCTYPE_DES_CBC_MD4:
+		sumtype = CKSUMTYPE_RSA_MD4_DES;
+		break;
+	    case ENCTYPE_DES_CBC_MD5:
+	    case ENCTYPE_DES_CBC_CRC:
+		sumtype = CKSUMTYPE_RSA_MD5_DES;
+		break;
+	    default:
+		retval = krb5int_c_mandatory_cksumtype(context,
+						       keyblock->enctype,
+						       &sumtype);
+		if (retval) {
+		    CLEANUP_DONE();
+		    goto error;
+		}
+		break;
+	    }
+	}
     }
     if ((retval = krb5_mk_safe_basic(context, userdata, keyblock, &replaydata, 
 				     plocal_fulladdr, premote_fulladdr,

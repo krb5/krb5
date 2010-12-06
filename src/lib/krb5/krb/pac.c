@@ -524,6 +524,8 @@ k5_pac_verify_server_checksum(krb5_context context,
     checksum.checksum_type = load_32_le(p);
     checksum.length = checksum_data.length - PAC_SIGNATURE_DATA_LENGTH;
     checksum.contents = p + PAC_SIGNATURE_DATA_LENGTH;
+    if (!krb5_c_is_keyed_cksum(checksum.checksum_type))
+        return KRB5KRB_AP_ERR_INAPP_CKSUM;
 
     pac_data.length = pac->data.length;
     pac_data.data = malloc(pac->data.length);

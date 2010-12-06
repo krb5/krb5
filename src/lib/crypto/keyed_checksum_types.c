@@ -51,6 +51,16 @@ krb5_c_keyed_checksum_types(krb5_context context, krb5_enctype enctype,
 {
     unsigned int i, c;
 
+    if (enctype == ENCTYPE_ARCFOUR_HMAC ||
+	enctype == ENCTYPE_ARCFOUR_HMAC_EXP) {
+	*count = 2;
+	if ((*cksumtypes = malloc(2*sizeof(krb5_cksumtype))) == NULL)
+	    return(ENOMEM);
+	(*cksumtypes)[0] = CKSUMTYPE_HMAC_MD5_ARCFOUR;
+	(*cksumtypes)[1] = CKSUMTYPE_MD5_HMAC_ARCFOUR;
+	return(0);
+    }
+
     c = 0;
     for (i=0; i<krb5_cksumtypes_length; i++) {
 	if ((krb5_cksumtypes_list[i].keyhash &&
