@@ -158,6 +158,8 @@ kg_setup_keys(krb5_context context, krb5_gss_ctx_id_rec *ctx, krb5_key subkey,
         break;
     case ENCTYPE_ARCFOUR_HMAC:
     case ENCTYPE_ARCFOUR_HMAC_EXP:
+        /* RFC 4121 accidentally omits RC4-HMAC-EXP as a "not-newer" enctype,
+         * even though RFC 4757 treats it as one. */
         code = kg_copy_keys(context, ctx, subkey);
         if (code != 0)
             return code;
