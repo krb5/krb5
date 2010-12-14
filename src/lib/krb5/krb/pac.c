@@ -684,8 +684,16 @@ krb5_pac_verify(krb5_context context,
         return EINVAL;
 
     ret = k5_pac_verify_server_checksum(context, pac, server);
-    if (ret != 0)
+    if (ret == ENOENT) {
+        /*
+         * Apple Mac OS X Server Open Directory KDC (at least 10.6)
+         * appears to provide a PAC that lacks a server checksum.
+         */
+        pac->verified = FALSE;
         return ret;
+    } else if (ret != 0) {
+        return ret;
+    }
 
     if (privsvr != NULL) {
         ret = k5_pac_verify_kdc_checksum(context, pac, privsvr);
@@ -1094,6 +1102,16 @@ mspac_verify(krb5_context kcontext,
                            key,
                            NULL);
 
+    /*
+     * If the server checksum is not found, return success to
+     * krb5int_authdata_verify() to work around an apparent Open
+     * Directory bug.  Non-verified PACs won't be returned by
+     * mspac_get_attribute().
+     */
+    if (code == ENOENT && !pacctx->pac->verified) {
+        code = 0;
+    }
+
 #if 0
     /*
      * Now, we could return 0 and just set pac->verified to FALSE.
@@ -1268,6 +1286,11 @@ mspac_get_attribute(krb5_context kcontext,
 
     if (*more != -1 || pacctx->pac == NULL)
         return ENOENT;
+
+    /* If it didn't verify, pretend it didn't exist. */
+    if (!pacctx->pac->verified) {
+        return ENOENT;
+    }
 
     code = mspac_attr2type(attribute, &type);
     if (code != 0)
