@@ -32,6 +32,7 @@
 #endif
 #include <string.h>
 #include <errno.h>
+#include <time.h>
 
 #ifndef LEAN_CLIENT
 static OM_uint32
