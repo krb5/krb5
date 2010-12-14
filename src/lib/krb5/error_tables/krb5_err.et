@@ -344,7 +344,7 @@ error_code KRB5_CC_NOSUPP,      "Ccache function not supported: not implemented"
 error_code KRB5_DELTAT_BADFORMAT,	"Invalid format of Kerberos lifetime or clock skew string"
 
 error_code KRB5_PLUGIN_NO_HANDLE,	"Supplied data not handled by this plugin"
-error_code KRB5_PLUGIN_OP_NOTSUPP,  "Plugin does not support the operaton"
+error_code KRB5_PLUGIN_OP_NOTSUPP,  "Plugin does not support the operation"
 
 error_code KRB5_ERR_INVALID_UTF8,	"Invalid UTF-8 string"
 error_code KRB5_ERR_FAST_REQUIRED, "FAST protected pre-authentication required but not supported by KDC"
