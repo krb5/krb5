@@ -59,7 +59,10 @@ get_new_creds(krb5_context context, krb5_ccache ccache, krb5_creds *in_creds,
     if (code != 0)
 	return code;
 
-    /* Use it to get a new credential from the KDC. */
+    /* Use KDC options from old credential as well as requested options. */
+    kdcopt |= (old_creds.ticket_flags & KDC_TKT_COMMON_MASK);
+
+    /* Use the old credential to get a new credential from the KDC. */
     code = krb5_get_cred_via_tkt(context, &old_creds, kdcopt,
 				 old_creds.addresses, in_creds, &new_creds);
     krb5_free_cred_contents(context, &old_creds);
