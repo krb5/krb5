@@ -266,6 +266,7 @@ change_set_password(krb5_context context,
         callback_info.context = (void*) &callback_ctx;
         callback_info.pfn_callback = kpasswd_sendto_msg_callback;
         callback_info.pfn_cleanup = kpasswd_sendto_msg_cleanup;
+        krb5_free_data_contents(callback_ctx.context, &chpw_rep);
 
         if ((code = krb5int_sendto(callback_ctx.context,
                                    NULL,
