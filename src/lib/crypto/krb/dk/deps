@@ -40,7 +40,7 @@ dk_aead.so dk_aead.po $(OUTPRE)dk_aead.$(OBJEXT): $(BUILDTOP)/include/autoconf.h
   $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
   $(top_srcdir)/include/socket-utils.h dk.h dk_aead.c
-dk_ccm.so dk_ccm.po $(OUTPRE)dk_ccm.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+dk_cmac.so dk_cmac.po $(OUTPRE)dk_cmac.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../aead.h \
   $(srcdir)/../cksumtypes.h $(srcdir)/../etypes.h $(top_srcdir)/include/k5-buf.h \
@@ -51,7 +51,7 @@ dk_ccm.so dk_ccm.po $(OUTPRE)dk_ccm.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
   $(top_srcdir)/include/krb5/locate_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h dk.h dk_ccm.c
+  $(top_srcdir)/include/socket-utils.h dk.h dk_cmac.c
 derive.so derive.po $(OUTPRE)derive.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../cksumtypes.h \
