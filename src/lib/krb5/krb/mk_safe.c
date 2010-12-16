@@ -123,7 +123,7 @@ safe_cksumtype(krb5_context context, krb5_auth_context auth_context,
      * Otherwise return 0 for the mandatory checksum. */
     retval = krb5_c_keyed_checksum_types(context, enctype, &nsumtypes,
                                          &sumtypes);
-    if (retval != 0 || nsumtypes == 0)
+    if (retval != 0)
         return 0;
     for (i = 0; i < nsumtypes; i++) {
         if (auth_context->safe_cksumtype == sumtypes[i])
