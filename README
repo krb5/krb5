@@ -73,19 +73,35 @@ Developer experience:
 
 Performance:
 
-* Account lockout performance improvements
+* Account lockout performance improvements -- allow disabling of some
+  account lockout functionality to reduce the number of write
+  operations to the database during authentication
 
 Administrator experience:
 
-* Trace logging
-* Plugin interface for password sync
-* Plugin interface for password quality checks
+* Trace logging -- for easier diagnosis of configuration problems
+
+* Support for purging old keys (e.g. from "cpw -randkey -keepold")
+
+* Plugin interface for password sync -- based on proposed patches by
+  Russ Allbery that support his krb5-sync package
+
+* Plugin interface for password quality checks -- enables pluggable
+  password quality checks similar to Russ Allbery's krb5-strength
+  package
+
 * Configuration file validator
-* KDC support for SecurID preauthentication
+
+* KDC support for SecurID preauthentication -- This is the old SAM-2
+  protocol, implemented to support existing deployments, not the
+  in-progress FAST-OTP work.
 
 Protocol evolution:
 
-* IAKERB
+* IAKERB -- a mechanism for tunneling Kerberos KDC transactions over
+  GSS-API, enabling clients to authenticate to services even when the
+  clients cannot directly reach the KDC that serves the services.
+
 * Camellia encryption (experimental; disabled by default)
 
 krb5-1.9 changes by ticket ID
@@ -165,6 +181,11 @@ krb5-1.9 changes by ticket ID
 6827    SA-2010-007 Checksum vulnerabilities (CVE-2010-1324 and others)
 6828    Install kadm5_hook_plugin.h
 6829    Implement restrict_anonymous_to_tgt realm flag
+6838    Regression in renewable handling
+6839    handle MS PACs that lack server checksum
+6840    typo in plugin-related error message
+6841    memory leak in changepw.c
+6842    Ensure time() is prototyped in g_accept_sec_context.c
 
 Acknowledgements
 ----------------
