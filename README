@@ -62,6 +62,7 @@ Major changes in 1.9
 
 Code quality:
 
+* Fix MITKRB5-SA-2010-007 checksum vulnerabilities (CVE-2010-1324 and others)
 * Python-based testing framework
 * DAL cleanup
 
