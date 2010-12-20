@@ -198,7 +198,6 @@ populate_policy(krb5_context context,
                 osa_policy_ent_t pol_entry)
 {
     int st = 0;
-    char *pol_dn;
 
     pol_entry->name = strdup(pol_name);
     CHECK_NULL(pol_entry->name);

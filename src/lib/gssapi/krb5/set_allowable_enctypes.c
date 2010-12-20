@@ -70,7 +70,6 @@ gss_krb5int_set_allowable_enctypes(OM_uint32 *minor_status,
     OM_uint32 major_status;
     krb5_gss_cred_id_t cred;
     krb5_error_code kerr = 0;
-    OM_uint32 temp_status;
     struct krb5_gss_set_allowable_enctypes_req *req;
 
     /* Assume a failure */

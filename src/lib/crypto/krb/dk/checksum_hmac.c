@@ -38,7 +38,6 @@ krb5int_dk_checksum(const struct krb5_cksumtypes *ctp,
                     const krb5_crypto_iov *data, size_t num_data,
                     krb5_data *output)
 {
-    const struct krb5_keytypes *ktp;
     const struct krb5_enc_provider *enc = ctp->enc;
     krb5_error_code ret;
     unsigned char constantdata[K5CLENGTH];

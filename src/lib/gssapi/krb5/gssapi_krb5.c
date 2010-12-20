@@ -451,6 +451,7 @@ krb5_gss_inquire_cred_by_oid(OM_uint32 *minor_status,
 
 /*
  * gss_set_sec_context_option() methods
+ * (Disabled until we have something to populate the array.)
  */
 #if 0
 static struct {
@@ -466,7 +467,9 @@ krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
                                  const gss_OID desired_object,
                                  const gss_buffer_t value)
 {
+#if 0
     size_t i;
+#endif
 
     if (minor_status == NULL)
         return GSS_S_CALL_INACCESSIBLE_WRITE;
