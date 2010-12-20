@@ -18,7 +18,7 @@
 .\" M.I.T. makes no representations about the suitability of
 .\" this software for any purpose.  It is provided "as is" without express
 .\" or implied warranty.
-.\" "
+.\"
 .TH KRB5.CONF 5
 .SH NAME
 krb5.conf \- Kerberos configuration file
@@ -267,6 +267,13 @@ The default value for this flag is false.
 .IP proxiable
 If this flag is set, initial tickets by default will be proxiable.
 The default value for this flag is false.
+
+.IP rdns
+If set to false, prevent the use of reverse DNS resolution when
+translating hostnames into service principal names.  Defaults to
+true.  Setting this flag to false is more secure, but may force
+users to exclusively use fully qualified domain names when
+authenticating to services.
 
 .SH APPDEFAULTS SECTION
 
