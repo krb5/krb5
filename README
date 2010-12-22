@@ -60,17 +60,30 @@ beginning with krb5-1.8.
 Major changes in 1.9
 --------------------
 
+Additional background information on these changes may be found at
+
+    http://k5wiki.kerberos.org/wiki/Release_1.9
+
+and
+
+    http://k5wiki.kerberos.org/wiki/Category:Release_1.9_projects
+
 Code quality:
 
-* Fix MITKRB5-SA-2010-007 checksum vulnerabilities (CVE-2010-1324 and others)
-* Python-based testing framework
-* DAL cleanup
+* Fix MITKRB5-SA-2010-007 checksum vulnerabilities (CVE-2010-1324 and
+  others).
+
+* Add a Python-based testing framework.
+
+* Perform DAL cleanup.
 
 Developer experience:
 
-* NSS crypto back end
-* PRNG modularity
-* Fortuna-like PRNG
+* Add NSS crypto back end.
+
+* Improve PRNG modularity.
+
+* Add a Fortuna-like PRNG back end.
 
 Performance:
 
@@ -78,32 +91,42 @@ Performance:
   account lockout functionality to reduce the number of write
   operations to the database during authentication
 
+* Add support for multiple KDC worker processes.
+
 Administrator experience:
 
-* Trace logging -- for easier diagnosis of configuration problems
+* Add Trace logging support to ease the diagnosis of configuration
+  problems.
 
-* Support for purging old keys (e.g. from "cpw -randkey -keepold")
+* Add support for purging old keys (e.g. from "cpw -randkey -keepold").
 
-* Plugin interface for password sync -- based on proposed patches by
-  Russ Allbery that support his krb5-sync package
+* Add plugin interface for password sync -- based on proposed patches
+  by Russ Allbery that support his krb5-sync package
 
-* Plugin interface for password quality checks -- enables pluggable
-  password quality checks similar to Russ Allbery's krb5-strength
-  package
+* Add plugin interface for password quality checks -- enables
+  pluggable password quality checks similar to Russ Allbery's
+  krb5-strength package.
 
-* Configuration file validator
+* Add a configuration file validator script.
 
-* KDC support for SecurID preauthentication -- This is the old SAM-2
-  protocol, implemented to support existing deployments, not the
+* Add KDC support for SecurID preauthentication -- this is the old
+  SAM-2 protocol, implemented to support existing deployments, not the
   in-progress FAST-OTP work.
+
+* Add "cheat" capability for kinit when running on a KDC host.
 
 Protocol evolution:
 
-* IAKERB -- a mechanism for tunneling Kerberos KDC transactions over
-  GSS-API, enabling clients to authenticate to services even when the
-  clients cannot directly reach the KDC that serves the services.
+* Add support for IAKERB -- a mechanism for tunneling Kerberos KDC
+  transactions over GSS-API, enabling clients to authenticate to
+  services even when the clients cannot directly reach the KDC that
+  serves the services.
 
-* Camellia encryption (experimental; disabled by default)
+* Add support for Camellia encryption (experimental; disabled by
+  default).
+
+* Add GSS-API support for implementors of the SASL GS2 bridge
+  mechanism.
 
 krb5-1.9 changes by ticket ID
 -----------------------------
@@ -157,6 +180,7 @@ krb5-1.9 changes by ticket ID
 6791    kadm5_hook: new plugin interface
 6792    Implement k5login_directory and k5login_authoritative options
 6793    acquire_init_cred leaks interned name
+6794    krb5.conf manpage missing reference to rdns setting
 6795    Propagate modprinc -unlock from master to slave KDCs
 6796    segfault due to uninitialized variable in S4U
 6799    Performance issue in LDAP policy fetch
