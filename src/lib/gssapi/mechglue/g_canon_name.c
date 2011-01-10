@@ -64,7 +64,7 @@ const gss_OID mech_type;
 gss_name_t *output_name;
 {
 	gss_union_name_t in_union, out_union = NULL, dest_union = NULL;
-	OM_uint32 major_status = GSS_S_FAILURE;
+	OM_uint32 major_status = GSS_S_FAILURE, tmpmin;
 
 	major_status = val_canon_name_args(minor_status,
 					   input_name,
@@ -151,38 +151,20 @@ gss_name_t *output_name;
 	return (GSS_S_COMPLETE);
 
 allocation_failure:
-	/* do not delete the src name external name format */
-	if (output_name) {
-		if (out_union->external_name) {
-			if (out_union->external_name->value)
-				free(out_union->external_name->value);
-			free(out_union->external_name);
-		}
-		if (out_union->name_type)
-			(void) gss_release_oid(minor_status,
-					    &out_union->name_type);
-
-		dest_union = out_union;
-	} else
-		dest_union = in_union;
-
-	/*
-	 * delete the partially created mech specific name
-	 * applies for both src and dest which ever is being used for output
-	 */
-
-	if (dest_union->mech_name) {
-		(void) gssint_release_internal_name(minor_status,
-						dest_union->mech_type,
-						&dest_union->mech_name);
+	if (out_union) {
+	    /* Release the partly constructed out_union. */
+	    gss_name_t name = (gss_name_t)out_union;
+	    (void) gss_release_name(&tmpmin, &name);
+	} else if (!output_name) {
+	    /* Release only the mech name fields in in_union. */
+	    if (in_union->mech_name) {
+		(void) gssint_release_internal_name(&tmpmin,
+						    dest_union->mech_type,
+						    &dest_union->mech_name);
+	    }
+	    if (in_union->mech_type)
+		(void) gss_release_oid(&tmpmin, &dest_union->mech_type);
 	}
-
-	if (dest_union->mech_type)
-		(void) gss_release_oid(minor_status, &dest_union->mech_type);
-
-
-	if (output_name)
-		free(out_union);
 
 	return (major_status);
 } /**********  gss_canonicalize_name ********/
