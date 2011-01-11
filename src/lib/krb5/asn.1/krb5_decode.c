@@ -30,209 +30,7 @@
 #include "asn1_k_decode.h"
 #include "asn1_decode.h"
 #include "asn1_get.h"
-
-/* setup *********************************************************/
-/* set up variables */
-/*
- * the setup* macros can return, but are always used at function start
- * and thus need no malloc cleanup
- */
-#define setup_buf_only(type)                    \
-    asn1_error_code retval;                     \
-    asn1buf buf;                                \
-    type rep = NULL;                            \
-                                                \
-    *repptr = NULL;                             \
-    retval = asn1buf_wrap_data(&buf,code);      \
-    if (retval) return retval
-
-#define setup_no_tagnum(type)                   \
-    asn1_class asn1class;                       \
-    asn1_construction construction;             \
-    setup_buf_only(type)
-
-#define setup_no_length(type)                   \
-    asn1_tagnum tagnum;                         \
-    setup_no_tagnum(type)
-
-#define setup(type)                             \
-    unsigned int length;                        \
-    setup_no_length(type)
-
-/* helper macros for cleanup */
-#define clean_return(val) { retval = val; goto error_out; }
-
-/* alloc_field is the first thing to allocate storage that may need cleanup */
-#define alloc_field(var)                        \
-    var = calloc(1,sizeof(*var));               \
-    if ((var) == NULL) clean_return(ENOMEM)
-
-/*
- * Allocate a principal and initialize enough fields for
- * krb5_free_principal to have defined behavior.
- */
-#define alloc_principal(var)                    \
-    alloc_field(var);                           \
-    var->realm.data = NULL;                     \
-    var->data = NULL
-
-/* process encoding header ***************************************/
-/* decode tag and check that it == [APPLICATION tagnum] */
-#define check_apptag(tagexpect)                                         \
-    {                                                                   \
-        taginfo t1;                                                     \
-        retval = asn1_get_tag_2(&buf, &t1);                             \
-        if (retval) clean_return (retval);                              \
-        if (t1.asn1class != APPLICATION || t1.construction != CONSTRUCTED) \
-            clean_return(ASN1_BAD_ID);                                  \
-        if (t1.tagnum != (tagexpect)) clean_return(KRB5_BADMSGTYPE);    \
-        asn1class = t1.asn1class;                                       \
-        construction = t1.construction;                                 \
-        tagnum = t1.tagnum;                                             \
-    }
-
-
-
-/* process a structure *******************************************/
-
-/* decode an explicit tag and place the number in tagnum */
-#define next_tag_from_buf(buf)                  \
-    { taginfo t2;                               \
-        retval = asn1_get_tag_2(&(buf), &t2);   \
-        if (retval) clean_return(retval);       \
-        asn1class = t2.asn1class;               \
-        construction = t2.construction;         \
-        tagnum = t2.tagnum;                     \
-        indef = t2.indef;                       \
-        taglen = t2.length;                     \
-    }
-#define next_tag() next_tag_from_buf(subbuf)
-
-
-static asn1_error_code
-asn1_get_eoc_tag (asn1buf *buf)
-{
-    asn1_error_code retval;
-    taginfo t;
-
-    retval = asn1_get_tag_2(buf, &t);
-    if (retval)
-        return retval;
-    if (t.asn1class != UNIVERSAL || t.tagnum || t.indef)
-        return ASN1_MISSING_EOC;
-    return 0;
-}
-
-#define get_eoc()                               \
-    {                                           \
-        retval = asn1_get_eoc_tag(&subbuf);     \
-        if (retval) clean_return(retval);       \
-    }
-
-/* decode sequence header and initialize tagnum with the first field */
-#define begin_structure()                                       \
-    unsigned int taglen;                                        \
-    asn1buf subbuf;                                             \
-    int seqindef;                                               \
-    int indef;                                                  \
-    retval = asn1_get_sequence(&buf,&length,&seqindef);         \
-    if (retval) clean_return(retval);                           \
-    retval = asn1buf_imbed(&subbuf,&buf,length,seqindef);       \
-    if (retval) clean_return(retval);                           \
-    next_tag()
-
-#define end_structure()                                         \
-    retval = asn1buf_sync(&buf,&subbuf,asn1class,               \
-                          tagnum,length,indef,seqindef);        \
-    if (retval) clean_return(retval)
-
-/* process fields *******************************************/
-/* normal fields ************************/
-#define get_field_body(var,decoder)             \
-    retval = decoder(&subbuf,&(var));           \
-    if (retval) clean_return(retval);           \
-    if (indef) { get_eoc(); }                   \
-    next_tag()
-
-/*
- * error_if_bad_tag
- *
- * Checks that the next tag is the expected one; returns with an error
- * if not.
- */
-#define error_if_bad_tag(tagexpect)                                     \
-    if (tagnum != (tagexpect)) { clean_return ((tagnum < (tagexpect)) ? ASN1_MISPLACED_FIELD : ASN1_MISSING_FIELD); }
-
-/*
- * decode a field (<[UNIVERSAL id]> <length> <contents>)
- *  check that the id number == tagexpect then
- *  decode into var
- *  get the next tag
- */
-#define get_field(var,tagexpect,decoder)                                \
-    error_if_bad_tag(tagexpect);                                        \
-    if (asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)   \
-        clean_return(ASN1_BAD_ID);                                      \
-    get_field_body(var,decoder)
-
-/* decode (or skip, if not present) an optional field */
-#define opt_field(var,tagexpect,decoder)                                \
-    if (asn1buf_remains(&subbuf, seqindef)) {                           \
-        if (asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED) \
-            clean_return(ASN1_BAD_ID);                                  \
-        if (tagnum == (tagexpect)) {                                    \
-            get_field_body(var,decoder);                                \
-        }                                                               \
-    }
-
-/* field w/ accompanying length *********/
-#define get_lenfield_body(len,var,decoder)      \
-    retval = decoder(&subbuf,&(len),&(var));    \
-    if (retval) clean_return(retval);           \
-    if (indef) { get_eoc(); }                   \
-    next_tag()
-
-/* decode a field w/ its length (for string types) */
-#define get_lenfield(len,var,tagexpect,decoder)                         \
-    error_if_bad_tag(tagexpect);                                        \
-    if (asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED)   \
-        clean_return(ASN1_BAD_ID);                                      \
-    get_lenfield_body(len,var,decoder)
-
-/* decode an optional field w/ length */
-#define opt_lenfield(len,var,tagexpect,decoder)                         \
-    if (asn1buf_remains(&subbuf, seqindef)) {                           \
-        if (asn1class != CONTEXT_SPECIFIC || construction != CONSTRUCTED) \
-            clean_return(ASN1_BAD_ID);                                  \
-        if (tagnum == (tagexpect)) {                                    \
-            get_lenfield_body(len,var,decoder);                         \
-        }                                                               \
-    }
-
-
-/* clean up ******************************************************/
-/* finish up */
-/* to make things less painful, assume the cleanup is passed rep */
-#define cleanup(cleanup_routine)                \
-    *repptr = rep;                              \
-    return 0;                                   \
-error_out:                                      \
-if (rep)                                        \
-    cleanup_routine(rep);                       \
-return retval;
-
-#define cleanup_none()                          \
-    *repptr = rep;                              \
-    return 0;                                   \
-error_out:                                      \
-return retval;
-
-#define cleanup_manual()                        \
-    *repptr = rep;                              \
-    return 0;
-
-#define free_field(rep,f) free((rep)->f)
-#define clear_field(rep,f) (rep)->f = 0
+#include "krb5_decode_macros.h"
 
 #ifndef LEAN_CLIENT
 krb5_error_code
@@ -509,74 +307,6 @@ decode_krb5_ap_rep_enc_part(const krb5_data *code,
 error_out:
     krb5_free_ap_rep_enc_part(NULL, rep);
     return retval;
-}
-
-krb5_error_code
-decode_krb5_as_req(const krb5_data *code, krb5_kdc_req **repptr)
-{
-    setup_no_length(krb5_kdc_req *);
-    alloc_field(rep);
-    clear_field(rep,padata);
-    clear_field(rep,client);
-    clear_field(rep,server);
-    clear_field(rep,ktype);
-    clear_field(rep,addresses);
-    clear_field(rep,authorization_data.ciphertext.data);
-    clear_field(rep,unenc_authdata);
-    clear_field(rep,second_ticket);
-    clear_field(rep, kdc_state);
-
-    check_apptag(10);
-    retval = asn1_decode_kdc_req(&buf,rep);
-    if (retval) clean_return(retval);
-#ifdef KRB5_MSGTYPE_STRICT
-    if (rep->msg_type != KRB5_AS_REQ) clean_return(KRB5_BADMSGTYPE);
-#endif
-
-    cleanup_manual();
-error_out:
-    krb5_free_kdc_req(NULL, rep);
-    return retval;
-}
-
-krb5_error_code
-decode_krb5_tgs_req(const krb5_data *code, krb5_kdc_req **repptr)
-{
-    setup_no_length(krb5_kdc_req *);
-    alloc_field(rep);
-    clear_field(rep,padata);
-    clear_field(rep,client);
-    clear_field(rep,server);
-    clear_field(rep,ktype);
-    clear_field(rep,addresses);
-    clear_field(rep,authorization_data.ciphertext.data);
-    clear_field(rep,unenc_authdata);
-    clear_field(rep,second_ticket);
-    clear_field(rep, kdc_state);
-
-    check_apptag(12);
-    retval = asn1_decode_kdc_req(&buf,rep);
-    if (retval) clean_return(retval);
-#ifdef KRB5_MSGTYPE_STRICT
-    if (rep->msg_type != KRB5_TGS_REQ) clean_return(KRB5_BADMSGTYPE);
-#endif
-
-    cleanup_manual();
-error_out:
-    krb5_free_kdc_req(NULL, rep);
-    return retval;
-}
-
-krb5_error_code
-decode_krb5_kdc_req_body(const krb5_data *code, krb5_kdc_req **repptr)
-{
-    setup_buf_only(krb5_kdc_req *);
-    alloc_field(rep);
-
-    retval = asn1_decode_kdc_req_body(&buf,rep);
-    if (retval) clean_return(retval);
-
-    cleanup(free);
 }
 
 /*
@@ -1110,53 +840,8 @@ decode_krb5_etype_list(const krb5_data *code, krb5_etype_list **repptr)
     cleanup(free);
 }
 
-krb5_error_code decode_krb5_pa_fx_fast_request
-(const krb5_data *code, krb5_fast_armored_req **repptr)
-{
-    setup(krb5_fast_armored_req *);
-    alloc_field(rep);
-    clear_field(rep, armor);
-    {
-        int indef;
-        unsigned int taglen;
-        next_tag_from_buf(buf);
-        if (tagnum != 0)
-            clean_return(ASN1_BAD_ID);
-    }
-    {begin_structure();
-        opt_field(rep->armor, 0, asn1_decode_fast_armor_ptr);
-        get_field(rep->req_checksum, 1, asn1_decode_checksum);
-        get_field(rep->enc_part, 2, asn1_decode_encrypted_data);
-        end_structure();}
-    rep->magic = KV5M_FAST_ARMORED_REQ;
-    cleanup(free);
-}
-
-krb5_error_code decode_krb5_fast_req
-(const krb5_data *code, krb5_fast_req **repptr)
-{
-    setup(krb5_fast_req *);
-    alloc_field(rep);
-    alloc_field(rep->req_body);
-    clear_field(rep, req_body->padata);
-    {begin_structure();
-        get_field(rep->fast_options, 0, asn1_decode_krb5_flags);
-        opt_field(rep->req_body->padata, 1, asn1_decode_sequence_of_pa_data);
-        get_field(*(rep->req_body), 2, asn1_decode_kdc_req_body);
-        end_structure(); }
-    rep->magic  = KV5M_FAST_REQ;
-    cleanup_manual();
-error_out:
-    if (rep) {
-        if (rep->req_body)
-            krb5_free_kdc_req(0, rep->req_body);
-        free(rep);
-    }
-    return retval;
-}
-
-krb5_error_code decode_krb5_fast_response
-(const krb5_data *code, krb5_fast_response **repptr)
+krb5_error_code
+decode_krb5_fast_response(const krb5_data *code, krb5_fast_response **repptr)
 {
     setup(krb5_fast_response *);
 
@@ -1174,8 +859,8 @@ krb5_error_code decode_krb5_fast_response
     cleanup(free);
 }
 
-krb5_error_code decode_krb5_pa_fx_fast_reply
-(const krb5_data *code, krb5_enc_data **repptr)
+krb5_error_code
+decode_krb5_pa_fx_fast_reply(const krb5_data *code, krb5_enc_data **repptr)
 {
     setup(krb5_enc_data *);
     alloc_field(rep);
@@ -1218,8 +903,8 @@ decode_krb5_ad_signedpath(const krb5_data *code, krb5_ad_signedpath **repptr)
     cleanup(free);
 }
 
-krb5_error_code decode_krb5_iakerb_header
-(const krb5_data *code, krb5_iakerb_header **repptr)
+krb5_error_code
+decode_krb5_iakerb_header(const krb5_data *code, krb5_iakerb_header **repptr)
 {
     setup_buf_only(krb5_iakerb_header *);
     alloc_field(rep);
@@ -1230,8 +915,8 @@ krb5_error_code decode_krb5_iakerb_header
     cleanup(free);
 }
 
-krb5_error_code decode_krb5_iakerb_finished
-(const krb5_data *code, krb5_iakerb_finished **repptr)
+krb5_error_code
+decode_krb5_iakerb_finished(const krb5_data *code, krb5_iakerb_finished **repptr)
 {
     setup_buf_only(krb5_iakerb_finished *);
     alloc_field(rep);
@@ -1267,30 +952,6 @@ krb5int_get_authdata_containee_types(krb5_context context,
 }
 
 #ifndef DISABLE_PKINIT
-krb5_error_code
-decode_krb5_pa_pk_as_req(const krb5_data *code, krb5_pa_pk_as_req **repptr)
-{
-    setup_buf_only(krb5_pa_pk_as_req *);
-    alloc_field(rep);
-
-    retval = asn1_decode_pa_pk_as_req(&buf, rep);
-    if (retval) clean_return(retval);
-
-    cleanup(free);
-}
-
-krb5_error_code
-decode_krb5_pa_pk_as_req_draft9(const krb5_data *code,
-                                krb5_pa_pk_as_req_draft9 **repptr)
-{
-    setup_buf_only(krb5_pa_pk_as_req_draft9 *);
-    alloc_field(rep);
-
-    retval = asn1_decode_pa_pk_as_req_draft9(&buf, rep);
-    if (retval) clean_return(retval);
-
-    cleanup(free);
-}
 
 krb5_error_code
 decode_krb5_pa_pk_as_rep(const krb5_data *code, krb5_pa_pk_as_rep **repptr)
