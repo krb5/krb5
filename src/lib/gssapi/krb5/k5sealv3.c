@@ -159,7 +159,8 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
         store_64_be(ctx->seq_send, outbuf+8);
 
         memcpy(plain.data, message->value, message->length);
-        memset(plain.data + message->length, 'x', ec);
+        if (ec != 0)
+            memset(plain.data + message->length, 'x', ec);
         memcpy(plain.data + message->length + ec, outbuf, 16);
 
         cipher.ciphertext.data = (char *)outbuf + 16;
