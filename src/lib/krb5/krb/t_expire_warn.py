@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 # Copyright (C) 2010 by the Massachusetts Institute of Technology.
 # All rights reserved.
 #
@@ -20,7 +22,6 @@
 # this software for any purpose.  It is provided "as is" without express
 # or implied warranty.
 
-#!/usr/bin/python
 from k5test import *
 
 # Create a bare-bones KDC.
