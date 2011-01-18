@@ -1,6 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * lib/krb5/krb/rd_safe.c
+ * lib/krb5/krb/rd_safe.c - definition of krb5_rd_safe()
  *
  * Copyright 1990,1991,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -46,7 +46,7 @@
   returns system errors, integrity errors
 */
 static krb5_error_code
-krb5_rd_safe_basic(krb5_context context, const krb5_data *inbuf,
+rd_safe_basic(krb5_context context, const krb5_data *inbuf,
                    krb5_key key,
                    const krb5_address *recv_addr,
                    const krb5_address *sender_addr,
@@ -221,9 +221,9 @@ krb5_rd_safe(krb5_context context, krb5_auth_context auth_context,
         }
 
         memset(&replaydata, 0, sizeof(replaydata));
-        if ((retval = krb5_rd_safe_basic(context, inbuf, key,
-                                         plocal_fulladdr, premote_fulladdr,
-                                         &replaydata, outbuf))) {
+        if ((retval = rd_safe_basic(context, inbuf, key,
+                                    plocal_fulladdr, premote_fulladdr,
+                                    &replaydata, outbuf))) {
             CLEANUP_DONE();
             return retval;
         }
