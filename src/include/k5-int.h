@@ -3018,7 +3018,8 @@ krb5int_get_authdata_containee_types(krb5_context context,
                                      unsigned int *nad_types,
                                      krb5_authdatatype **ad_types);
 
-krb5_error_code krb5int_parse_enctype_list(krb5_context context, char *profstr,
+krb5_error_code krb5int_parse_enctype_list(krb5_context context,
+                                           const char *profkey, char *profstr,
                                            krb5_enctype *default_list,
                                            krb5_enctype **result);
 

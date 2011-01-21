@@ -149,6 +149,9 @@
 #define TRACE_GIC_PWD_MASTER(c) \
     TRACE(c, (c, "Retrying AS request with master KDC"))
 
+#define TRACE_ENCTYPE_LIST_UNKNOWN(c, profvar, name) \
+    TRACE(c, (c, "Unrecognized enctype name in {str}: {str}", profvar, name))
+
 #define TRACE_INIT_CREDS(c, princ) \
     TRACE(c, (c, "Getting initial credentials for {princ}", princ))
 #define TRACE_INIT_CREDS_AS_KEY_GAK(c, keyblock) \

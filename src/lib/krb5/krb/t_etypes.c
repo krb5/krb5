@@ -238,8 +238,8 @@ main(int argc, char **argv)
 
             if (tests[i].str != NULL) {
                 copy = strdup(tests[i].str);
-                ret = krb5int_parse_enctype_list(ctx, copy, tests[i].defaults,
-                                                 &list);
+                ret = krb5int_parse_enctype_list(ctx, "", copy,
+                                                 tests[i].defaults, &list);
                 if (ret != expected_err) {
                     com_err("krb5int_parse_enctype_list", ret, "");
                     return 2;
