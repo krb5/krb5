@@ -196,6 +196,7 @@ krb5_ldap_lockout_audit(krb5_context context,
             entry->last_failed <= unlock_time) {
             /* Reset fail_auth_count after administrative unlock. */
             entry->fail_auth_count = 0;
+            entry->mask |= KADM5_FAIL_AUTH_COUNT;
         }
 
         if (failcnt_interval != 0 &&
