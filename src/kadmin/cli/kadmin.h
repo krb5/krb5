@@ -37,6 +37,7 @@ extern int quit (void);
 extern void kadmin_lock(int argc, char *argv[]);
 extern void kadmin_unlock(int argc, char *argv[]);
 extern void kadmin_delprinc(int argc, char *argv[]);
+extern void kadmin_renameprinc(int argc, char *argv[]);
 extern void kadmin_cpw(int argc, char *argv[]);
 extern void kadmin_addprinc(int argc, char *argv[]);
 extern void kadmin_modprinc(int argc, char *argv[]);

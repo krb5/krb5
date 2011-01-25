@@ -4,21 +4,14 @@
  *
  * $Header$
  */
-#include <assert.h>
-#include        <sys/types.h>
+#include "k5-int.h"
 #include        <sys/time.h>
-#include        <errno.h>
 #include        <kadm5/admin.h>
 #include        <kdb.h>
-#include        <stdio.h>
-#include        <string.h>
 #include        "server_internal.h"
-#include        <stdarg.h>
-#include        <stdlib.h>
 #ifdef USE_PASSWORD_SERVER
 #include        <sys/wait.h>
 #include        <signal.h>
-
 #endif
 
 #include <krb5/kadm5_hook_plugin.h>
@@ -730,10 +723,12 @@ kadm5_ret_t
 kadm5_rename_principal(void *server_handle,
                        krb5_principal source, krb5_principal target)
 {
-    krb5_db_entry       *kdb;
-    osa_princ_ent_rec   adb;
-    int                 ret, i;
+    krb5_db_entry *kdb;
+    osa_princ_ent_rec adb;
+    int ret, i;
     kadm5_server_handle_t handle = server_handle;
+    krb5_int32 stype;
+    krb5_data sdata;
 
     CHECK_HANDLE(server_handle);
 
@@ -750,13 +745,52 @@ kadm5_rename_principal(void *server_handle,
     if ((ret = kdb_get_entry(handle, source, &kdb, &adb)))
         return ret;
 
-    /* this is kinda gross, but unavoidable */
+    /* Transform salts as necessary. */
+    for (i = 0; i < kdb->n_key_data; i++) {
+        sdata = empty_data();
+        if (kdb->key_data[i].key_data_ver > 1)
+            stype = kdb->key_data[i].key_data_type[1];
+        else
+            stype = KRB5_KDB_SALTTYPE_NORMAL;
 
-    for (i=0; i<kdb->n_key_data; i++) {
-        if ((kdb->key_data[i].key_data_ver == 1) ||
-            (kdb->key_data[i].key_data_type[1] == KRB5_KDB_SALTTYPE_NORMAL)) {
+        /* For salt types which compute a salt from the principal name, compute
+         * the salt based on the old principal name into sdata. */
+        switch (stype) {
+        case KRB5_KDB_SALTTYPE_NORMAL:
+            ret = krb5_principal2salt(handle->context, kdb->princ, &sdata);
+            if (ret)
+                goto done;
+            break;
+        case KRB5_KDB_SALTTYPE_NOREALM:
+            krb5_principal2salt_norealm(handle->context, kdb->princ, &sdata);
+            if (ret)
+                goto done;
+            break;
+        case KRB5_KDB_SALTTYPE_ONLYREALM:
+            ret = alloc_data(&sdata, kdb->princ->realm.length);
+            if (ret)
+                goto done;
+            memcpy(sdata.data, kdb->princ->realm.data,
+                   kdb->princ->realm.length);
+            break;
+        case KRB5_KDB_SALTTYPE_SPECIAL:
+        case KRB5_KDB_SALTTYPE_V4:
+        case KRB5_KDB_SALTTYPE_AFS3:
+            /* Don't compute a new salt.  Assume the realm doesn't change for
+             * V4 and AFS3. */
+            break;
+        default:
+            /* We don't recognize this salt type.  Be conservative. */
             ret = KADM5_NO_RENAME_SALT;
             goto done;
+        }
+        /* If we computed a salt, store it as an explicit salt. */
+        if (sdata.data != NULL) {
+            kdb->key_data[i].key_data_type[1] = KRB5_KDB_SALTTYPE_SPECIAL;
+            free(kdb->key_data[i].key_data_contents[1]);
+            kdb->key_data[i].key_data_contents[1] = (krb5_octet *)sdata.data;
+            kdb->key_data[i].key_data_length[1] = sdata.length;
+            kdb->key_data[i].key_data_ver = 2;
         }
     }
 

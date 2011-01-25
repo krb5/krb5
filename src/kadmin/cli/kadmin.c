@@ -645,6 +645,69 @@ cleanup:
     free(canon);
 }
 
+void
+kadmin_renameprinc(int argc, char *argv[])
+{
+    kadm5_ret_t retval;
+    krb5_principal oprinc = NULL, nprinc = NULL;
+    char *ocanon = NULL, *ncanon = NULL;
+    char reply[5];
+
+    if (!(argc == 3 || (argc == 4 && !strcmp("-force", argv[1])))) {
+        fprintf(stderr, "usage: rename_principal [-force] old_principal "
+                "new_principal\n");
+        return;
+    }
+    retval = kadmin_parse_name(argv[argc - 2], &oprinc);
+    if (retval) {
+        com_err("rename_principal", retval,
+                "while parsing old principal name");
+        goto cleanup;
+    }
+    retval = kadmin_parse_name(argv[argc - 1], &nprinc);
+    if (retval) {
+        com_err("rename_principal", retval,
+                "while parsing new principal name");
+        goto cleanup;
+    }
+    retval = krb5_unparse_name(context, oprinc, &ocanon);
+    if (retval) {
+        com_err("rename_principal", retval,
+                "while canonicalizing old principal");
+        goto cleanup;
+    }
+    retval = krb5_unparse_name(context, nprinc, &ncanon);
+    if (retval) {
+        com_err("rename_principal", retval,
+                "while canonicalizing new principal");
+        goto cleanup;
+    }
+    if (argc == 3) {
+        printf("Are you sure you want to rename the principal \"%s\" "
+               "to \"%s\"? (yes/no): ", ocanon, ncanon);
+        fgets(reply, sizeof(reply), stdin);
+        if (strcmp("yes\n", reply)) {
+            fprintf(stderr, "Principal \"%s\" not renamed\n", ocanon);
+            goto cleanup;
+        }
+    }
+    retval = kadm5_rename_principal(handle, oprinc, nprinc);
+    if (retval) {
+        com_err("rename_principal", retval,
+                "while renaming principal \"%s\" to \"%s\"", ocanon, ncanon);
+        goto cleanup;
+    }
+    printf("Principal \"%s\" renamed to \"%s\".\n"
+           "Make sure that you have removed the old principal from all ACLs "
+           "before reusing.\n", ocanon, ncanon);
+
+cleanup:
+    krb5_free_principal(context, nprinc);
+    krb5_free_principal(context, oprinc);
+    free(ncanon);
+    free(ocanon);
+}
+
 static void
 cpw_usage(const char *str)
 {

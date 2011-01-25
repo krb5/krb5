@@ -67,6 +67,7 @@ check-pytests::
 	$(RUNPYTEST) $(srcdir)/t_kadm5_hook.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_keyrollover.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_renew.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_renprinc.py $(PYTESTFLAGS)
 
 clean::
 	$(RM) kdc.conf
