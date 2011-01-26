@@ -41,6 +41,38 @@
 
 #include "pkinit_crypto_openssl.h"
 
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+/* Use CMS support present in OpenSSL 1.0 and later. */
+#include <openssl/cms.h>
+#define pkinit_CMS_free1_crls(_sk_x509crl) sk_X509_CRL_free((_sk_x509crl))
+#define pkinit_CMS_free1_certs(_sk_x509) sk_X509_free((_sk_x509))
+#define pkinit_CMS_SignerInfo_get_cert(_cms,_si,_x509_pp)       \
+    CMS_SignerInfo_get0_algs(_si,NULL,_x509_pp,NULL,NULL)
+#else
+/* Fake up CMS support using PKCS7. */
+#define pkinit_CMS_free1_crls(_stack_of_x509crls)   /* Don't free these */
+#define pkinit_CMS_free1_certs(_stack_of_x509certs) /* Don't free these */
+#define CMS_NO_SIGNER_CERT_VERIFY PKCS7_NOVERIFY
+#define CMS_NOATTR PKCS7_NOATTR
+#define CMS_ContentInfo PKCS7
+#define CMS_SignerInfo PKCS7_SIGNER_INFO
+#define d2i_CMS_ContentInfo d2i_PKCS7
+#define CMS_get0_type(_p7) ((_p7)->type)
+#define CMS_get0_content(_p7) (&((_p7)->d.other->value.octet_string))
+#define CMS_set1_signers_certs(_p7,_stack_of_x509,_uint)
+#define CMS_get0_SignerInfos PKCS7_get_signer_info
+#define stack_st_CMS_SignerInfo stack_st_PKCS7_SIGNER_INFO
+#undef  sk_CMS_SignerInfo_value
+#define sk_CMS_SignerInfo_value sk_PKCS7_SIGNER_INFO_value
+#define CMS_get0_eContentType(_p7) (_p7->d.sign->contents->type)
+#define CMS_verify PKCS7_verify
+#define CMS_get1_crls(_p7) (_p7->d.sign->crl)
+#define CMS_get1_certs(_p7) (_p7->d.sign->cert)
+#define CMS_ContentInfo_free(_p7) PKCS7_free(_p7)
+#define pkinit_CMS_SignerInfo_get_cert(_p7,_si,_x509_pp) \
+    (*_x509_pp) = PKCS7_cert_from_signer_info(_p7,_si)
+#endif
+
 static struct pkcs11_errstrings {
     short code;
     char *text;
@@ -1127,21 +1159,25 @@ cms_signeddata_verify(krb5_context context,
                       int *is_signed)
 {
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
-    PKCS7 *p7 = NULL;
+    CMS_ContentInfo *cms = NULL;
     BIO *out = NULL;
-    int flags = PKCS7_NOVERIFY;
+    int flags = CMS_NO_SIGNER_CERT_VERIFY;
     unsigned int i = 0;
     unsigned int vflags = 0, size = 0;
     const unsigned char *p = signed_data;
-    STACK_OF(PKCS7_SIGNER_INFO) *si_sk = NULL;
-    PKCS7_SIGNER_INFO *si = NULL;
+    STACK_OF(CMS_SignerInfo) *si_sk = NULL;
+    CMS_SignerInfo *si = NULL;
     X509 *x = NULL;
     X509_STORE *store = NULL;
     X509_STORE_CTX cert_ctx;
+    STACK_OF(X509) *signerCerts = NULL;
     STACK_OF(X509) *intermediateCAs = NULL;
+    STACK_OF(X509_CRL) *signerRevoked = NULL;
     STACK_OF(X509_CRL) *revoked = NULL;
     STACK_OF(X509) *verified_chain = NULL;
     ASN1_OBJECT *oid = NULL;
+    const ASN1_OBJECT *type = NULL, *etype = NULL;
+    ASN1_OCTET_STRING **octets;
     krb5_external_principal_identifier **krb5_verified_chain = NULL;
     krb5_data *authz = NULL;
     char buf[DN_BUF_LEN];
@@ -1157,8 +1193,8 @@ cms_signeddata_verify(krb5_context context,
     if (oid == NULL)
         goto cleanup;
 
-    /* decode received PKCS7 message */
-    if ((p7 = d2i_PKCS7(NULL, &p, (int)signed_data_len)) == NULL) {
+    /* decode received CMS message */
+    if ((cms = d2i_CMS_ContentInfo(NULL, &p, (int)signed_data_len)) == NULL) {
         unsigned long err = ERR_peek_error();
         krb5_set_error_message(context, retval, "%s\n",
                                ERR_error_string(err, NULL));
@@ -1168,37 +1204,39 @@ cms_signeddata_verify(krb5_context context,
     }
 
     /* Handle the case in pkinit anonymous where we get unsigned data. */
-    if (is_signed && !OBJ_cmp(p7->type, oid)) {
+    type = CMS_get0_type(cms);
+    if (is_signed && !OBJ_cmp(type, oid)) {
         unsigned char *d;
         *is_signed = 0;
-        if (p7->d.other->type != V_ASN1_OCTET_STRING) {
+        octets = CMS_get0_content(cms);
+        if (!octets || ((*octets)->type != V_ASN1_OCTET_STRING)) {
             retval = KRB5KDC_ERR_PREAUTH_FAILED;
             krb5_set_error_message(context, KRB5KDC_ERR_PREAUTH_FAILED,
                                    "Invalid pkinit packet: octet string "
                                    "expected");
             goto cleanup;
         }
-        *data_len = ASN1_STRING_length(p7->d.other->value.octet_string);
+        *data_len = ASN1_STRING_length(*octets);
         d = malloc(*data_len);
         if (d == NULL) {
             retval = ENOMEM;
             goto cleanup;
         }
-        memcpy(d, ASN1_STRING_data(p7->d.other->value.octet_string),
+        memcpy(d, ASN1_STRING_data(*octets),
                *data_len);
         *data = d;
         goto out;
     } else {
-        /* Verify that the received message is PKCS7 SignedData message. */
-        if (OBJ_obj2nid(p7->type) != NID_pkcs7_signed) {
-            pkiDebug("Expected id-signedData PKCS7 msg (received type = %d)\n",
-                     OBJ_obj2nid(p7->type));
+        /* Verify that the received message is CMS SignedData message. */
+        if (OBJ_obj2nid(type) != NID_pkcs7_signed) {
+            pkiDebug("Expected id-signedData CMS msg (received type = %d)\n",
+                     OBJ_obj2nid(type));
             krb5_set_error_message(context, retval, "wrong oid\n");
             goto cleanup;
         }
     }
 
-    /* setup to verify X509 certificate used to sign PKCS7 message */
+    /* setup to verify X509 certificate used to sign CMS message */
     if (!(store = X509_STORE_new()))
         goto cleanup;
 
@@ -1210,37 +1248,41 @@ cms_signeddata_verify(krb5_context context,
         X509_STORE_set_verify_cb_func(store, openssl_callback_ignore_crls);
     X509_STORE_set_flags(store, vflags);
 
-    /* get the signer's information from the PKCS7 message */
-    if ((si_sk = PKCS7_get_signer_info(p7)) == NULL)
+    /* get the signer's information from the CMS message */
+    CMS_set1_signers_certs(cms, NULL, 0);
+    if ((si_sk = CMS_get0_SignerInfos(cms)) == NULL)
         goto cleanup;
-    if ((si = sk_PKCS7_SIGNER_INFO_value(si_sk, 0)) == NULL)
+    if ((si = sk_CMS_SignerInfo_value(si_sk, 0)) == NULL)
         goto cleanup;
-    if ((x = PKCS7_cert_from_signer_info(p7, si)) == NULL)
+    pkinit_CMS_SignerInfo_get_cert(cms, si, &x);
+    if (x == NULL)
         goto cleanup;
 
     /* create available CRL information (get local CRLs and include CRLs
-     * received in the PKCS7 message
+     * received in the CMS message
      */
+    signerRevoked = CMS_get1_crls(cms);
     if (idctx->revoked == NULL)
-        revoked = p7->d.sign->crl;
-    else if (p7->d.sign->crl == NULL)
+        revoked = signerRevoked;
+    else if (signerRevoked == NULL)
         revoked = idctx->revoked;
     else {
         size = sk_X509_CRL_num(idctx->revoked);
         revoked = sk_X509_CRL_new_null();
         for (i = 0; i < size; i++)
             sk_X509_CRL_push(revoked, sk_X509_CRL_value(idctx->revoked, i));
-        size = sk_X509_CRL_num(p7->d.sign->crl);
+        size = sk_X509_CRL_num(signerRevoked);
         for (i = 0; i < size; i++)
-            sk_X509_CRL_push(revoked, sk_X509_CRL_value(p7->d.sign->crl, i));
+            sk_X509_CRL_push(revoked, sk_X509_CRL_value(signerRevoked, i));
     }
 
     /* create available intermediate CAs chains (get local intermediateCAs and
-     * include the CA chain received in the PKCS7 message
+     * include the CA chain received in the CMS message
      */
+    signerCerts = CMS_get1_certs(cms);
     if (idctx->intermediateCAs == NULL)
-        intermediateCAs = p7->d.sign->cert;
-    else if (p7->d.sign->cert == NULL)
+        intermediateCAs = signerCerts;
+    else if (signerCerts == NULL)
         intermediateCAs = idctx->intermediateCAs;
     else {
         size = sk_X509_num(idctx->intermediateCAs);
@@ -1249,9 +1291,9 @@ cms_signeddata_verify(krb5_context context,
             sk_X509_push(intermediateCAs,
                          sk_X509_value(idctx->intermediateCAs, i));
         }
-        size = sk_X509_num(p7->d.sign->cert);
+        size = sk_X509_num(signerCerts);
         for (i = 0; i < size; i++) {
-            sk_X509_push(intermediateCAs, sk_X509_value(p7->d.sign->cert, i));
+            sk_X509_push(intermediateCAs, sk_X509_value(signerCerts, i));
         }
     }
 
@@ -1329,10 +1371,10 @@ cms_signeddata_verify(krb5_context context,
         krb5_set_error_message(context, retval, "%s\n",
                                X509_verify_cert_error_string(j));
 #ifdef DEBUG_CERTCHAIN
-        size = sk_X509_num(p7->d.sign->cert);
+        size = sk_X509_num(signerCerts);
         pkiDebug("received cert chain of size %d\n", size);
         for (j = 0; j < size; j++) {
-            X509 *tmp_cert = sk_X509_value(p7->d.sign->cert, j);
+            X509 *tmp_cert = sk_X509_value(signerCerts, j);
             X509_NAME_oneline(X509_get_subject_name(tmp_cert), buf, sizeof(buf));
             pkiDebug("cert #%d: %s\n", j, buf);
         }
@@ -1348,11 +1390,12 @@ cms_signeddata_verify(krb5_context context,
 
     out = BIO_new(BIO_s_mem());
     if (cms_msg_type == CMS_SIGN_DRAFT9)
-        flags |= PKCS7_NOATTR;
-    if (PKCS7_verify(p7, NULL, store, NULL, out, flags)) {
+        flags |= CMS_NOATTR;
+    etype = CMS_get0_eContentType(cms);
+    if (CMS_verify(cms, NULL, store, NULL, out, flags)) {
         int valid_oid = 0;
 
-        if (!OBJ_cmp(p7->d.sign->contents->type, oid))
+        if (!OBJ_cmp(etype, oid))
             valid_oid = 1;
         else if (cms_msg_type == CMS_SIGN_DRAFT9) {
             /*
@@ -1364,18 +1407,18 @@ cms_signeddata_verify(krb5_context context,
             client_oid = pkinit_pkcs7type2oid(plgctx, CMS_SIGN_CLIENT);
             server_oid = pkinit_pkcs7type2oid(plgctx, CMS_SIGN_SERVER);
             rsa_oid = pkinit_pkcs7type2oid(plgctx, CMS_ENVEL_SERVER);
-            if (!OBJ_cmp(p7->d.sign->contents->type, client_oid) ||
-                !OBJ_cmp(p7->d.sign->contents->type, server_oid) ||
-                !OBJ_cmp(p7->d.sign->contents->type, rsa_oid))
+            if (!OBJ_cmp(etype, client_oid) ||
+                !OBJ_cmp(etype, server_oid) ||
+                !OBJ_cmp(etype, rsa_oid))
                 valid_oid = 1;
         }
 
         if (valid_oid)
-            pkiDebug("PKCS7 Verification successful\n");
+            pkiDebug("CMS Verification successful\n");
         else {
             pkiDebug("wrong oid in eContentType\n");
-            print_buffer(p7->d.sign->contents->type->data,
-                         (unsigned int)p7->d.sign->contents->type->length);
+            print_buffer(etype->data,
+                         (unsigned int)etype->length);
             retval = KRB5KDC_ERR_PREAUTH_FAILED;
             krb5_set_error_message(context, retval, "wrong oid\n");
             goto cleanup;
@@ -1391,13 +1434,13 @@ cms_signeddata_verify(krb5_context context,
         default:
             retval = KRB5KDC_ERR_INVALID_SIG;
         }
-        pkiDebug("PKCS7 Verification failure\n");
+        pkiDebug("CMS Verification failure\n");
         krb5_set_error_message(context, retval, "%s\n",
                                ERR_error_string(err, NULL));
         goto cleanup;
     }
 
-    /* transfer the data from PKCS7 message into return buffer */
+    /* transfer the data from CMS message into return buffer */
     for (size = 0;;) {
         int remain;
         retval = ENOMEM;
@@ -1452,12 +1495,16 @@ cleanup:
         BIO_free(out);
     if (store != NULL)
         X509_STORE_free(store);
-    if (p7 != NULL) {
-        if (idctx->intermediateCAs != NULL && p7->d.sign->cert)
+    if (cms != NULL) {
+        if (signerCerts != NULL)
+            pkinit_CMS_free1_certs(signerCerts);
+        if (idctx->intermediateCAs != NULL && signerCerts)
             sk_X509_free(intermediateCAs);
-        if (idctx->revoked != NULL && p7->d.sign->crl)
+        if (signerRevoked != NULL)
+            pkinit_CMS_free1_crls(signerRevoked);
+        if (idctx->revoked != NULL && signerRevoked)
             sk_X509_CRL_free(revoked);
-        PKCS7_free(p7);
+        CMS_ContentInfo_free(cms);
     }
     if (verified_chain != NULL)
         sk_X509_pop_free(verified_chain, X509_free);
