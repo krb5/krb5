@@ -398,7 +398,8 @@ remove_principal(char *keytab_str, krb5_keytab keytab,
     }
 
     /* set kvno to spec'ed value for SPEC, highest kvno otherwise */
-    kvno = entry.vno;
+    if (mode != SPEC)
+        kvno = entry.vno;
     krb5_kt_free_entry(context, &entry);
 
     code = krb5_kt_start_seq_get(context, keytab, &cursor);
