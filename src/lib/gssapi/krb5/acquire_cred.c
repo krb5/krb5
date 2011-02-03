@@ -354,13 +354,6 @@ acquire_init_cred(krb5_context context,
         return GSS_S_CRED_UNAVAIL;
     }
 
-    /*
-     * Credentials cache principal must match either the acceptor principal
-     * name or the desired_princ argument (they may be the same).
-     */
-    if (cred->name != NULL && desired_princ == NULL)
-        desired_princ = cred->name->princ;
-
     code = krb5_cc_get_principal(context, ccache, &ccache_princ);
     if (code != 0) {
         krb5_cc_close(context, ccache);
@@ -368,6 +361,7 @@ acquire_init_cred(krb5_context context,
         return GSS_S_FAILURE;
     }
 
+    /* Credentials cache principal must match the initiator name. */
     if (desired_princ != NULL) {
         if (!krb5_principal_compare(context, ccache_princ, desired_princ)) {
             krb5_free_principal(context, ccache_princ);
