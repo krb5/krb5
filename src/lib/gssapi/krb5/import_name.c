@@ -90,41 +90,34 @@ krb5_gss_import_name(minor_status, input_name_buffer,
     krb5_principal princ = NULL;
     krb5_error_code code;
     unsigned char *cp, *end;
-    char *tmp, *stringrep, *tmp2;
+    char *tmp = NULL, *tmp2 = NULL, *stringrep;
     ssize_t    length;
 #ifndef NO_PASSWORD
     struct passwd *pw;
 #endif
     int has_ad = 0;
     krb5_authdata_context ad_context = NULL;
-
-    code = krb5_gss_init_context(&context);
-    if (code) {
-        *minor_status = code;
-        return GSS_S_FAILURE;
-    }
-
-    /* set up default returns */
+    OM_uint32 status = GSS_S_FAILURE;
+    krb5_gss_name_t name;
 
     *output_name = NULL;
     *minor_status = 0;
 
-    /* Go find the appropriate string rep to pass into parse_name */
+    code = krb5_gss_init_context(&context);
+    if (code)
+        goto cleanup;
 
     if ((input_name_type != GSS_C_NULL_OID) &&
         (g_OID_equal(input_name_type, gss_nt_service_name) ||
          g_OID_equal(input_name_type, gss_nt_service_name_v2))) {
         char *service, *host;
 
-        if ((tmp =
-             xmalloc(input_name_buffer->length + 1)) == NULL) {
-            *minor_status = ENOMEM;
-            krb5_free_context(context);
-            return(GSS_S_FAILURE);
-        }
+        tmp = k5alloc(input_name_buffer->length + 1, &code);
+        if (tmp == NULL)
+            goto cleanup;
 
         memcpy(tmp, input_name_buffer->value, input_name_buffer->length);
-        tmp[input_name_buffer->length] = 0;
+        tmp[input_name_buffer->length] = '\0';
 
         service = tmp;
         if ((host = strchr(tmp, '@'))) {
@@ -134,37 +127,30 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 
         code = krb5_sname_to_principal(context, host, service, KRB5_NT_SRV_HST,
                                        &princ);
-
-        xfree(tmp);
+        if (code)
+            goto cleanup;
     } else if ((input_name_type != GSS_C_NULL_OID) &&
                (g_OID_equal(input_name_type, gss_nt_krb5_principal))) {
         krb5_principal input;
 
         if (input_name_buffer->length != sizeof(krb5_principal)) {
-            *minor_status = (OM_uint32) G_WRONG_SIZE;
-            krb5_free_context(context);
-            return(GSS_S_BAD_NAME);
+            code = G_WRONG_SIZE;
+            status = GSS_S_BAD_NAME;
+            goto cleanup;
         }
 
         input = *((krb5_principal *) input_name_buffer->value);
 
-        if ((code = krb5_copy_principal(context, input, &princ))) {
-            *minor_status = code;
-            save_error_info(*minor_status, context);
-            krb5_free_context(context);
-            return(GSS_S_FAILURE);
-        }
+        code = krb5_copy_principal(context, input, &princ);
+        if (code)
+            goto cleanup;
     } else if ((input_name_type != NULL) &&
                g_OID_equal(input_name_type, GSS_C_NT_ANONYMOUS)) {
         code = krb5_copy_principal(context, krb5_anonymous_principal(),
                                    &princ);
-        if (code != 0) {
-            krb5_free_context(context);
-            *minor_status = code;
-            return GSS_S_FAILURE;
-        }
-    }
-    else {
+        if (code)
+            goto cleanup;
+    } else {
 #ifndef NO_PASSWORD
         uid_t uid;
         struct passwd pwx;
@@ -173,17 +159,15 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 
         stringrep = NULL;
 
-        if ((tmp =
-             (char *) xmalloc(input_name_buffer->length + 1)) == NULL) {
-            *minor_status = ENOMEM;
-            krb5_free_context(context);
-            return(GSS_S_FAILURE);
-        }
-        tmp2 = 0;
+        tmp = k5alloc(input_name_buffer->length + 1, &code);
+        if (tmp == NULL)
+            goto cleanup;
+        tmp2 = NULL;
 
         memcpy(tmp, input_name_buffer->value, input_name_buffer->length);
-        tmp[input_name_buffer->length] = 0;
+        tmp[input_name_buffer->length] = '\0';
 
+        /* Find the appropriate string rep to pass into parse_name. */
         if ((input_name_type == GSS_C_NULL_OID) ||
             g_OID_equal(input_name_type, gss_nt_krb5_name) ||
             g_OID_equal(input_name_type, gss_nt_user_name)) {
@@ -195,13 +179,14 @@ krb5_gss_import_name(minor_status, input_name_buffer,
             if (k5_getpwuid_r(uid, &pwx, pwbuf, sizeof(pwbuf), &pw) == 0)
                 stringrep = pw->pw_name;
             else
-                *minor_status = (OM_uint32) G_NOUSER;
+                code = G_NOUSER;
         } else if (g_OID_equal(input_name_type, gss_nt_string_uid_name)) {
             uid = atoi(tmp);
             goto do_getpwuid;
 #endif
         } else if (g_OID_equal(input_name_type, gss_nt_exported_name)) {
-#define BOUNDS_CHECK(cp, end, n) do { if ((end) - (cp) < (n)) goto fail_name; } while (0)
+#define BOUNDS_CHECK(cp, end, n) \
+            do { if ((end) - (cp) < (n)) goto fail_name; } while (0)
             cp = (unsigned char *)tmp;
             end = cp + input_name_buffer->length;
 
@@ -244,13 +229,9 @@ krb5_gss_import_name(minor_status, input_name_buffer,
             length = (length << 8) | *cp++;
 
             BOUNDS_CHECK(cp, end, length);
-            tmp2 = malloc(length+1);
-            if (tmp2 == NULL) {
-                xfree(tmp);
-                *minor_status = ENOMEM;
-                krb5_free_context(context);
-                return GSS_S_FAILURE;
-            }
+            tmp2 = k5alloc(length + 1, &code);
+            if (tmp2 == NULL)
+                goto cleanup;
             strncpy(tmp2, (char *)cp, length);
             tmp2[length] = 0;
             stringrep = tmp2;
@@ -273,56 +254,40 @@ krb5_gss_import_name(minor_status, input_name_buffer,
             }
             assert(cp == end);
         } else {
-            xfree(tmp);
-            krb5_free_context(context);
-            return(GSS_S_BAD_NAMETYPE);
+            status = GSS_S_BAD_NAMETYPE;
+            goto cleanup;
         }
 
-        /* at this point, stringrep is set, or if not, *minor_status is. */
-
-        if (stringrep)
-            code = krb5_parse_name(context, (char *) stringrep, &princ);
-        else {
+        /* At this point, stringrep is set, or if not, code is. */
+        if (stringrep) {
+            code = krb5_parse_name(context, (char *)stringrep, &princ);
+            if (code)
+                goto cleanup;
+        } else {
         fail_name:
-            xfree(tmp);
-            if (tmp2)
-                xfree(tmp2);
-            krb5_free_context(context);
-            return(GSS_S_BAD_NAME);
+            status = GSS_S_BAD_NAME;
+            goto cleanup;
         }
-
-        if (tmp2)
-            xfree(tmp2);
-        xfree(tmp);
     }
 
-    /* at this point, a krb5 function has been called to set princ.  code
-       contains the return status */
-
-    if (code) {
-        *minor_status = (OM_uint32) code;
-        save_error_info(*minor_status, context);
-        krb5_authdata_context_free(context, ad_context);
-        krb5_free_context(context);
-        return(GSS_S_BAD_NAME);
-    }
-
-    /* save the name in the validation database */
+    /* Create a name and save it in the validation database. */
     code = kg_init_name(context, princ, ad_context,
-                        KG_INIT_NAME_INTERN | KG_INIT_NAME_NO_COPY,
-                        (krb5_gss_name_t *)output_name);
-    if (code != 0) {
-        *minor_status = (OM_uint32) code;
+                        KG_INIT_NAME_INTERN | KG_INIT_NAME_NO_COPY, &name);
+    if (code)
+        goto cleanup;
+    princ = NULL;
+    ad_context = NULL;
+    *output_name = (gss_name_t)name;
+    status = GSS_S_COMPLETE;
+
+cleanup:
+    *minor_status = (OM_uint32)code;
+    if (*minor_status)
         save_error_info(*minor_status, context);
-        krb5_free_principal(context, princ);
-        krb5_authdata_context_free(context, ad_context);
-        krb5_free_context(context);
-        return(GSS_S_FAILURE);
-    }
-
+    krb5_free_principal(context, princ);
+    krb5_authdata_context_free(context, ad_context);
     krb5_free_context(context);
-
-    /* return it */
-
-    return(GSS_S_COMPLETE);
+    free(tmp);
+    free(tmp2);
+    return status;
 }
