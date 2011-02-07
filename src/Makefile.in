@@ -752,3 +752,11 @@ mark-cstyle-krb5::
 mark-cstyle-bsd::
 	(cd $(top_srcdir) && $(FIND) $(BSDFILES) -print0 | $(XARGS) -0 \
 	$(PYTHON) util/krb5-mark-cstyle.py --cstyle=bsd)
+
+doxygen::
+	if test "which doxygen" != ""; then \
+		doxygen; \
+	else \
+		echo "Doxygen is not installed or incorrect PATH"; \
+	fi
+
