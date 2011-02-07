@@ -217,6 +217,7 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_EXTRA_ADDRESSES             "extra_addresses"
 #define KRB5_CONF_FORWARDABLE                 "forwardable"
 #define KRB5_CONF_HOST_BASED_SERVICES         "host_based_services"
+#define KRB5_CONF_IGNORE_ACCEPTOR_HOSTNAME    "ignore_acceptor_hostname"
 #define KRB5_CONF_IPROP_ENABLE                "iprop_enable"
 #define KRB5_CONF_IPROP_MASTER_ULOGSIZE       "iprop_master_ulogsize"
 #define KRB5_CONF_IPROP_PORT                  "iprop_port"
@@ -1600,6 +1601,7 @@ struct _krb5_context {
     struct _kdb_log_context *kdblog_context;
 
     krb5_boolean allow_weak_crypto;
+    krb5_boolean ignore_acceptor_hostname;
 
     krb5_trace_callback trace_callback;
     void *trace_callback_data;

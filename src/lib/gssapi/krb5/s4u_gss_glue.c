@@ -221,7 +221,8 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
 
     cred->tgt_expire = impersonator_cred->tgt_expire;
 
-    code = kg_init_name(context, subject_creds->client, NULL, 0, &cred->name);
+    code = kg_init_name(context, subject_creds->client, NULL, NULL, NULL, 0,
+                        &cred->name);
     if (code != 0)
         goto cleanup;
 

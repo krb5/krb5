@@ -556,6 +556,7 @@ krb5_set_time_offsets
 krb5_size_opaque
 krb5_skdc_timeout_1
 krb5_skdc_timeout_shift
+krb5_sname_match
 krb5_sname_to_principal
 krb5_string_to_deltat
 krb5_string_to_salttype

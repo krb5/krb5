@@ -33,11 +33,9 @@
 #include <stdarg.h>
 
 krb5_error_code
-kg_init_name(krb5_context context,
-             krb5_principal principal,
-             krb5_authdata_context ad_context,
-             krb5_flags flags,
-             krb5_gss_name_t *ret_name)
+kg_init_name(krb5_context context, krb5_principal principal,
+             char *service, char *host, krb5_authdata_context ad_context,
+             krb5_flags flags, krb5_gss_name_t *ret_name)
 {
     krb5_error_code code;
     krb5_gss_name_t name;
@@ -71,8 +69,23 @@ kg_init_name(krb5_context context,
             if (code != 0)
                 goto cleanup;
         }
+
+        code = ENOMEM;
+        if (service != NULL) {
+            name->service = strdup(service);
+            if (name->service == NULL)
+                goto cleanup;
+        }
+        if (host != NULL) {
+            name->host = strdup(host);
+            if (name->host == NULL)
+                goto cleanup;
+        }
+        code = 0;
     } else {
         name->princ = principal;
+        name->service = service;
+        name->host = host;
         name->ad_context = ad_context;
     }
 
@@ -100,6 +113,8 @@ kg_release_name(krb5_context context,
         if (flags & KG_INIT_NAME_INTERN)
             kg_delete_name((gss_name_t)*name);
         krb5_free_principal(context, (*name)->princ);
+        free((*name)->service);
+        free((*name)->host);
         krb5_authdata_context_free(context, (*name)->ad_context);
         k5_mutex_destroy(&(*name)->lock);
         free(*name);
@@ -121,7 +136,7 @@ kg_duplicate_name(krb5_context context,
     if (code != 0)
         return code;
 
-    code = kg_init_name(context, src->princ,
+    code = kg_init_name(context, src->princ, src->service, src->host,
                         src->ad_context, flags, dst);
 
     k5_mutex_unlock(&src->lock);
@@ -136,6 +151,45 @@ kg_compare_name(krb5_context context,
                 krb5_gss_name_t name2)
 {
     return krb5_principal_compare(context, name1->princ, name2->princ);
+}
+
+/* Determine the principal to use for an acceptor name, which is different from
+ * name->princ for host-based names. */
+krb5_boolean
+kg_acceptor_princ(krb5_context context, krb5_gss_name_t name,
+                  krb5_principal *princ_out)
+{
+    krb5_error_code code;
+    const char *host;
+    char *tmp = NULL;
+
+    *princ_out = NULL;
+    if (name == NULL)
+        return 0;
+
+    /* If it's not a host-based name, just copy name->princ. */
+    if (name->service == NULL)
+        return krb5_copy_principal(context, name->princ, princ_out);
+
+    if (name->host != NULL && name->princ->length == 2) {
+        /* If a host was given, we have to use the canonicalized form of it (as
+         * given by krb5_sname_to_principal) for backward compatibility. */
+        const krb5_data *d = &name->princ->data[1];
+        tmp = k5alloc(d->length + 1, &code);
+        if (tmp == NULL)
+            return ENOMEM;
+        memcpy(tmp, d->data, d->length);
+        tmp[d->length] = '\0';
+        host = tmp;
+    } else                      /* No host was given; use an empty string. */
+        host = "";
+
+    code = krb5_build_principal(context, princ_out, 0, "", name->service, host,
+                                (char *)NULL);
+    if (code == 0)
+        (*princ_out)->type = KRB5_NT_SRV_HST;
+    free(tmp);
+    return code;
 }
 
 static OM_uint32

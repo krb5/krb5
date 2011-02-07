@@ -101,6 +101,7 @@ STLIBOBJS= \
 	ser_princ.o	\
 	serialize.o	\
 	set_realm.o	\
+	sname_match.o	\
 	srv_dec_tkt.o	\
 	srv_rcache.o	\
 	str_conv.o	\
@@ -202,6 +203,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)ser_princ.$(OBJEXT)	\
 	$(OUTPRE)serialize.$(OBJEXT)	\
 	$(OUTPRE)set_realm.$(OBJEXT)	\
+	$(OUTPRE)sname_match.$(OBJEXT)	\
 	$(OUTPRE)srv_dec_tkt.$(OBJEXT)	\
 	$(OUTPRE)srv_rcache.$(OBJEXT)	\
 	$(OUTPRE)str_conv.$(OBJEXT)	\
@@ -303,6 +305,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/ser_princ.c	\
 	$(srcdir)/serialize.c	\
 	$(srcdir)/set_realm.c	\
+	$(srcdir)/sname_match.c	\
 	$(srcdir)/srv_dec_tkt.c	\
 	$(srcdir)/srv_rcache.c	\
 	$(srcdir)/str_conv.c	\

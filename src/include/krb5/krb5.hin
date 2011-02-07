@@ -4284,6 +4284,22 @@ krb5_error_code KRB5_CALLCONV
 krb5_sname_to_principal(krb5_context context, const char *hostname, const char *sname,
                         krb5_int32 type, krb5_principal *ret_princ);
 
+/** Return true if @a princ matches @a matching, false otherwise.
+ *
+ * A matching principal is a host-based principal with an empty realm and/or
+ * second data component (hostname).  Profile configuration may cause the
+ * hostname to be ignored even if it is present.  A principal matches a
+ * matching principal if the principal has the same non-empty (and non-ignored)
+ * components of the matching principal.
+ *
+ * If @a matching is NULL, return true.  If @a matching is not a matching
+ * principal, return the value of krb5_principal_compare(context, matching,
+ * princ).
+ */
+krb5_boolean KRB5_CALLCONV
+krb5_sname_match(krb5_context context, krb5_const_principal matching,
+                 krb5_const_principal princ);
+
 /**
  * @brief Change the password for an existing Kerberos account.
  *

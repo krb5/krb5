@@ -155,6 +155,15 @@ This relation sets the maximum allowable amount of clockskew in seconds
 that the library will tolerate before assuming that a Kerberos message
 is invalid.  The default value is 300 seconds, or five minutes.
 
+.IP ignore_acceptor_hostname
+When accepting GSSAPI or krb5 security contexts for host-based service
+principals, ignore any hostname passed by the calling application and
+allow any service principal present in the keytab which matches the
+service name and realm name (if given).  This option can improve the
+administrative flexibility of server applications on multi-homed
+hosts, but can compromise the security of virtual hosting
+environments.  The default value is false.
+
 .IP k5login_authoritative
 If the value of this relation is true (the default), principals must
 be listed in a local user's k5login file to be granted login access,

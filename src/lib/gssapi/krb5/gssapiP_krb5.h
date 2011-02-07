@@ -158,8 +158,10 @@ enum qop {
 /** internal types **/
 
 typedef struct _krb5_gss_name_rec {
-    krb5_principal princ; /* immutable */
-    k5_mutex_t lock; /* protects ad_context only for now */
+    krb5_principal princ;       /* immutable */
+    char *service;              /* immutable */
+    char *host;                 /* immutable */
+    k5_mutex_t lock;            /* protects ad_context only for now */
     krb5_authdata_context ad_context;
 } krb5_gss_name_rec, *krb5_gss_name_t;
 
@@ -893,11 +895,9 @@ int gss_krb5int_rotate_left (void *ptr, size_t bufsiz, size_t rc);
 #define KG_INIT_NAME_NO_COPY 0x2
 
 krb5_error_code
-kg_init_name(krb5_context context,
-             krb5_principal principal,
-             krb5_authdata_context ad_context,
-             krb5_flags flags,
-             krb5_gss_name_t *name);
+kg_init_name(krb5_context context, krb5_principal principal,
+             char *service, char *host, krb5_authdata_context ad_context,
+             krb5_flags flags, krb5_gss_name_t *name);
 
 krb5_error_code
 kg_release_name(krb5_context context,
@@ -914,6 +914,10 @@ krb5_boolean
 kg_compare_name(krb5_context context,
                 krb5_gss_name_t name1,
                 krb5_gss_name_t name2);
+
+krb5_boolean
+kg_acceptor_princ(krb5_context context, krb5_gss_name_t name,
+                  krb5_principal *princ_out);
 
 OM_uint32
 krb5_gss_display_name_ext(OM_uint32 *minor_status,

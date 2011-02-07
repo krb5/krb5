@@ -180,6 +180,13 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
         goto cleanup;
     ctx->allow_weak_crypto = tmp;
 
+    retval = profile_get_boolean(ctx->profile, KRB5_CONF_LIBDEFAULTS,
+                                 KRB5_CONF_IGNORE_ACCEPTOR_HOSTNAME, NULL, 0,
+                                 &tmp);
+    if (retval)
+        goto cleanup;
+    ctx->ignore_acceptor_hostname = tmp;
+
     /* initialize the prng (not well, but passable) */
     if ((retval = krb5_c_random_os_entropy( ctx, 0, NULL)) !=0)
         goto cleanup;

@@ -78,6 +78,44 @@ import_name_composite(krb5_context context,
     return 0;
 }
 
+/* Split a host-based name "service[@host]" into allocated strings
+ * placed in *service_out and *host_out (possibly NULL). */
+static krb5_error_code
+parse_hostbased(const char *str, size_t len,
+                char **service_out, char **host_out)
+{
+    const char *at;
+    size_t servicelen, hostlen;
+    char *service, *host = NULL;
+
+    *service_out = *host_out = NULL;
+
+    /* Find the bound of the service name and copy it. */
+    at = memchr(str, '@', len);
+    servicelen = (at == NULL) ? len : (size_t)(at - str);
+    service = xmalloc(servicelen + 1);
+    if (service == NULL)
+        return ENOMEM;
+    memcpy(service, str, servicelen);
+    service[servicelen] = '\0';
+
+    /* If present, copy the hostname. */
+    if (at != NULL) {
+        hostlen = len - servicelen - 1;
+        host = malloc(hostlen + 1);
+        if (host == NULL) {
+            free(service);
+            return ENOMEM;
+        }
+        memcpy(host, at + 1, hostlen);
+        host[hostlen] = '\0';
+    }
+
+    *service_out = service;
+    *host_out = host;
+    return 0;
+}
+
 OM_uint32
 krb5_gss_import_name(minor_status, input_name_buffer,
                      input_name_type, output_name)
@@ -90,7 +128,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
     krb5_principal princ = NULL;
     krb5_error_code code;
     unsigned char *cp, *end;
-    char *tmp = NULL, *tmp2 = NULL, *stringrep;
+    char *tmp = NULL, *tmp2 = NULL, *service = NULL, *host = NULL, *stringrep;
     ssize_t    length;
 #ifndef NO_PASSWORD
     struct passwd *pw;
@@ -110,21 +148,17 @@ krb5_gss_import_name(minor_status, input_name_buffer,
     if ((input_name_type != GSS_C_NULL_OID) &&
         (g_OID_equal(input_name_type, gss_nt_service_name) ||
          g_OID_equal(input_name_type, gss_nt_service_name_v2))) {
-        char *service, *host;
-
-        tmp = k5alloc(input_name_buffer->length + 1, &code);
-        if (tmp == NULL)
+        /* Split the name into service and host (or NULL). */
+        code = parse_hostbased(input_name_buffer->value,
+                               input_name_buffer->length, &service, &host);
+        if (code)
             goto cleanup;
 
-        memcpy(tmp, input_name_buffer->value, input_name_buffer->length);
-        tmp[input_name_buffer->length] = '\0';
-
-        service = tmp;
-        if ((host = strchr(tmp, '@'))) {
-            *host = '\0';
-            host++;
-        }
-
+        /*
+         * Compute the initiator target name.  In some cases this is a waste of
+         * getaddrinfo/getnameinfo queries, but computing the name when we need
+         * it would require a lot of code changes.
+         */
         code = krb5_sname_to_principal(context, host, service, KRB5_NT_SRV_HST,
                                        &princ);
         if (code)
@@ -271,12 +305,13 @@ krb5_gss_import_name(minor_status, input_name_buffer,
     }
 
     /* Create a name and save it in the validation database. */
-    code = kg_init_name(context, princ, ad_context,
+    code = kg_init_name(context, princ, service, host, ad_context,
                         KG_INIT_NAME_INTERN | KG_INIT_NAME_NO_COPY, &name);
     if (code)
         goto cleanup;
     princ = NULL;
     ad_context = NULL;
+    service = host = NULL;
     *output_name = (gss_name_t)name;
     status = GSS_S_COMPLETE;
 
@@ -289,5 +324,7 @@ cleanup:
     krb5_free_context(context);
     free(tmp);
     free(tmp2);
+    free(service);
+    free(host);
     return status;
 }

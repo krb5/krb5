@@ -128,6 +128,59 @@ gss_krb5int_register_acceptor_identity(OM_uint32 *minor_status,
     return GSS_S_COMPLETE;
 }
 
+/* Try to verify that keytab contains at least one entry for name.  Return 0 if
+ * it does, KRB5_KT_NOTFOUND if it doesn't, or another error as appropriate. */
+static krb5_error_code
+check_keytab(krb5_context context, krb5_keytab kt, krb5_gss_name_t name)
+{
+    krb5_error_code code;
+    krb5_keytab_entry ent;
+    krb5_kt_cursor cursor;
+    krb5_principal accprinc = NULL;
+    krb5_boolean match;
+    char *princname;
+
+    if (name->service == NULL) {
+        code = krb5_kt_get_entry(context, kt, name->princ, 0, 0, &ent);
+        if (code == 0)
+            krb5_kt_free_entry(context, &ent);
+        return code;
+    }
+
+    /* If we can't iterate through the keytab, skip this check. */
+    if (kt->ops->start_seq_get == NULL)
+        return 0;
+
+    /* Get the partial principal for the acceptor name. */
+    code = kg_acceptor_princ(context, name, &accprinc);
+    if (code)
+        return code;
+
+    /* Scan the keytab for host-based entries matching accprinc. */
+    code = krb5_kt_start_seq_get(context, kt, &cursor);
+    if (code)
+        goto cleanup;
+    while ((code = krb5_kt_next_entry(context, kt, &ent, &cursor)) == 0) {
+        match = krb5_sname_match(context, accprinc, ent.principal);
+        (void)krb5_free_keytab_entry_contents(context, &ent);
+        if (match)
+            break;
+    }
+    (void)krb5_kt_end_seq_get(context, kt, &cursor);
+    if (code == KRB5_KT_END) {
+        code = KRB5_KT_NOTFOUND;
+        if (krb5_unparse_name(context, accprinc, &princname) == 0) {
+            krb5_set_error_message(context, code, "No key table entry "
+                                   "found matching %s", princname);
+            free(princname);
+        }
+    }
+
+cleanup:
+    krb5_free_principal(context, accprinc);
+    return code;
+}
+
 /* get credentials corresponding to a key in the krb5 keytab.
    If successful, set the keytab-specific fields in cred
 */
@@ -135,13 +188,12 @@ gss_krb5int_register_acceptor_identity(OM_uint32 *minor_status,
 static OM_uint32
 acquire_accept_cred(krb5_context context,
                     OM_uint32 *minor_status,
-                    krb5_principal desired_princ,
+                    krb5_gss_name_t desired_name,
                     krb5_keytab req_keytab,
                     krb5_gss_cred_id_rec *cred)
 {
     krb5_error_code code;
     krb5_keytab kt;
-    krb5_keytab_entry entry;
 
     assert(cred->keytab == NULL);
 
@@ -174,8 +226,8 @@ acquire_accept_cred(krb5_context context,
         return GSS_S_CRED_UNAVAIL;
     }
 
-    if (desired_princ != NULL) {
-        code = krb5_kt_get_entry(context, kt, desired_princ, 0, 0, &entry);
+    if (desired_name != NULL) {
+        code = check_keytab(context, kt, desired_name);
         if (code) {
             krb5_kt_close(context, kt);
             if (code == KRB5_KT_NOTFOUND) {
@@ -187,18 +239,16 @@ acquire_accept_cred(krb5_context context,
                 *minor_status = code;
             return GSS_S_CRED_UNAVAIL;
         }
-        krb5_kt_free_entry(context, &entry);
 
         assert(cred->name == NULL);
-        code = kg_init_name(context, desired_princ, NULL, 0, &cred->name);
+        code = kg_duplicate_name(context, desired_name, 0, &cred->name);
         if (code) {
             *minor_status = code;
             return GSS_S_FAILURE;
         }
 
         /* Open the replay cache for this principal. */
-        code = krb5_get_server_rcache(context,
-                                      krb5_princ_component(context, desired_princ, 0),
+        code = krb5_get_server_rcache(context, &desired_name->princ->data[0],
                                       &cred->rcache);
         if (code) {
             *minor_status = code;
@@ -376,7 +426,7 @@ acquire_init_cred(krb5_context context,
      * cred->name to the credentials cache principal name.
      */
     if (cred->name == NULL) {
-        if ((code = kg_init_name(context, ccache_princ, NULL,
+        if ((code = kg_init_name(context, ccache_princ, NULL, NULL, NULL,
                                  KG_INIT_NAME_NO_COPY, &cred->name))) {
             krb5_free_principal(context, ccache_princ);
             krb5_cc_close(context, ccache);
@@ -511,9 +561,9 @@ acquire_cred(OM_uint32 *minor_status,
 {
     krb5_context context = NULL;
     krb5_gss_cred_id_t cred = NULL;
+    krb5_gss_name_t name = (krb5_gss_name_t)args->desired_name;
     OM_uint32 ret;
     krb5_error_code code = 0;
-    krb5_principal desired_princ = NULL;
 
     /* make sure all outputs are valid */
     *output_cred_handle = GSS_C_NO_CREDENTIAL;
@@ -536,7 +586,7 @@ acquire_cred(OM_uint32 *minor_status,
     cred->usage = args->cred_usage;
     cred->name = NULL;
     cred->iakerb_mech = args->iakerb;
-    cred->default_identity = (args->desired_name == GSS_C_NO_NAME);
+    cred->default_identity = (name == NULL);
 #ifndef LEAN_CLIENT
     cred->keytab = NULL;
 #endif /* LEAN_CLIENT */
@@ -558,18 +608,14 @@ acquire_cred(OM_uint32 *minor_status,
         goto error_out;
     }
 
-    if (args->desired_name != GSS_C_NO_NAME)
-        desired_princ = ((krb5_gss_name_t)args->desired_name)->princ;
-
 #ifndef LEAN_CLIENT
     /*
      * If requested, acquire credentials for accepting. This will fill
      * in cred->name if desired_princ is specified.
      */
     if (args->cred_usage == GSS_C_ACCEPT || args->cred_usage == GSS_C_BOTH) {
-        ret = acquire_accept_cred(context, minor_status,
-                                  desired_princ,
-                                  args->keytab, cred);
+        ret = acquire_accept_cred(context, minor_status, name, args->keytab,
+                                  cred);
         if (ret != GSS_S_COMPLETE)
             goto error_out;
     }
@@ -581,7 +627,8 @@ acquire_cred(OM_uint32 *minor_status,
      */
     if (args->cred_usage == GSS_C_INITIATE || args->cred_usage == GSS_C_BOTH) {
         ret = acquire_init_cred(context, minor_status, args->ccache,
-                                desired_princ, args->password, cred);
+                                name ? name->princ : NULL, args->password,
+                                cred);
         if (ret != GSS_S_COMPLETE)
             goto error_out;
     }

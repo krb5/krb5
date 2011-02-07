@@ -240,7 +240,8 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
 
         /* copy the client principle into it... */
         if ((retval =
-             kg_init_name(context, creds[0]->client, NULL, 0, &cred->name))) {
+             kg_init_name(context, creds[0]->client, NULL, NULL, NULL, 0,
+                          &cred->name))) {
             k5_mutex_destroy(&cred->lock);
             retval = ENOMEM; /* out of memory? */
             xfree(cred); /* clean up memory on failure */
@@ -472,6 +473,7 @@ kg_accept_krb5(minor_status, context_handle,
     krb5_flags ap_req_options = 0;
     krb5_enctype negotiated_etype;
     krb5_authdata_context ad_context = NULL;
+    krb5_principal accprinc = NULL;
 
     code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
     if (code) {
@@ -632,11 +634,15 @@ kg_accept_krb5(minor_status, context_handle,
         }
     }
 
-    if ((code = krb5_rd_req(context, &auth_context, &ap_req,
-                            cred->default_identity ? NULL : cred->name->princ,
-                            cred->keytab,
-                            &ap_req_options,
-                            &ticket))) {
+    if (!cred->default_identity) {
+        if ((code = kg_acceptor_princ(context, cred->name, &accprinc))) {
+            major_status = GSS_S_FAILURE;
+            goto fail;
+        }
+    }
+
+    if ((code = krb5_rd_req(context, &auth_context, &ap_req, accprinc,
+                            cred->keytab, &ap_req_options, &ticket))) {
         major_status = GSS_S_FAILURE;
         goto fail;
     }
@@ -918,7 +924,8 @@ kg_accept_krb5(minor_status, context_handle,
         major_status = GSS_S_FAILURE;
         goto fail;
     }
-    if ((code = kg_init_name(context, ticket->server, NULL, 0, &ctx->here))) {
+    if ((code = kg_init_name(context, ticket->server, NULL, NULL, NULL, 0,
+                             &ctx->here))) {
         major_status = GSS_S_FAILURE;
         goto fail;
     }
@@ -927,7 +934,7 @@ kg_accept_krb5(minor_status, context_handle,
         major_status = GSS_S_FAILURE;
         goto fail;
     }
-    if ((code = kg_init_name(context, authdat->client,
+    if ((code = kg_init_name(context, authdat->client, NULL, NULL,
                              ad_context, KG_INIT_NAME_NO_COPY, &ctx->there))) {
         major_status = GSS_S_FAILURE;
         goto fail;
@@ -1269,7 +1276,6 @@ fail:
         krb_error_data.error = code;
         (void) krb5_us_timeofday(context, &krb_error_data.stime,
                                  &krb_error_data.susec);
-        krb_error_data.server = cred->name ? cred->name->princ : NULL;
 
         code = krb5_mk_error(context, &krb_error_data, &scratch);
         if (code)

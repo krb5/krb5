@@ -405,3 +405,6 @@ EXPORTS
 	krb5_sendto_kdc					@381 ; PRIVATE GSSAPI
 	krb5int_copy_data_contents_add0			@382 ; PRIVATE GSSAPI
 	krb5int_free_data_list				@383 ; PRIVATE GSSAPI
+
+; new in 1.10
+	krb5_sname_match				@384

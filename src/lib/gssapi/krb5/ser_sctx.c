@@ -669,7 +669,7 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
                                            (krb5_pointer *) &princ,
                                            &bp, &remain);
             if (kret == 0) {
-                kret = kg_init_name(kcontext, princ, NULL,
+                kret = kg_init_name(kcontext, princ, NULL, NULL, NULL,
                                     KG_INIT_NAME_NO_COPY, &ctx->here);
                 if (kret)
                     krb5_free_principal(kcontext, princ);
@@ -681,7 +681,7 @@ kg_ctx_internalize(kcontext, argp, buffer, lenremain)
                                                (krb5_pointer *) &princ,
                                                &bp, &remain);
                 if (kret == 0) {
-                    kret = kg_init_name(kcontext, princ, NULL,
+                    kret = kg_init_name(kcontext, princ, NULL, NULL, NULL,
                                         KG_INIT_NAME_NO_COPY, &ctx->there);
                     if (kret)
                         krb5_free_principal(kcontext, princ);

@@ -86,102 +86,138 @@ negotiate_etype(krb5_context context,
                 int permitted_etypes_len,
                 krb5_enctype *negotiated_etype);
 
-static krb5_error_code
-rd_req_decrypt_tkt_part(krb5_context context, const krb5_ap_req *req,
-                        krb5_const_principal server, krb5_keytab keytab,
-                        krb5_keyblock *key)
+/* Return true if princ might match multiple principals. */
+static inline krb5_boolean
+is_matching(krb5_context context, krb5_const_principal princ)
 {
-    krb5_error_code       retval;
-    krb5_keytab_entry     ktent;
+    if (princ == NULL)
+        return TRUE;
+    return (princ->type == KRB5_NT_SRV_HST && princ->length == 2
+            && (princ->realm.length == 0 || princ->data[1].length == 0 ||
+                context->ignore_acceptor_hostname));
+}
 
-    retval = KRB5_KT_NOTFOUND;
+/* Decrypt the ticket in req using the key in ent. */
+static krb5_error_code
+try_one_entry(krb5_context context, const krb5_ap_req *req,
+              krb5_keytab_entry *ent, krb5_keyblock *keyblock_out)
+{
+    krb5_error_code ret;
+    krb5_principal tmp = NULL;
 
-#ifndef LEAN_CLIENT
-    if (server != NULL || keytab->ops->start_seq_get == NULL) {
-        retval = krb5_kt_get_entry(context, keytab,
-                                   server != NULL ? server : req->ticket->server,
-                                   req->ticket->enc_part.kvno,
-                                   req->ticket->enc_part.enctype, &ktent);
-        if (retval == 0) {
-            retval = krb5_decrypt_tkt_part(context, &ktent.key, req->ticket);
-            if (retval == 0) {
-                TRACE_RD_REQ_DECRYPT_SPECIFIC(context, ktent.principal,
-                                              &ktent.key);
-            }
-            if (retval == 0 && key != NULL)
-                retval = krb5_copy_keyblock_contents(context, &ktent.key, key);
+    /* Try decrypting the ticket with this entry's key. */
+    ret = krb5_decrypt_tkt_part(context, &ent->key, req->ticket);
+    if (ret)
+        return ret;
 
-            (void) krb5_free_keytab_entry_contents(context, &ktent);
+    /* Make a copy of the principal for the ticket server field. */
+    ret = krb5_copy_principal(context, ent->principal, &tmp);
+    if (ret)
+        return ret;
+
+    /* Make a copy of the decrypting key if requested by the caller. */
+    if (keyblock_out != NULL) {
+        ret = krb5_copy_keyblock_contents(context, &ent->key, keyblock_out);
+        if (ret) {
+            krb5_free_principal(context, tmp);
+            return ret;
         }
-    } else {
-        krb5_error_code code;
-        krb5_kt_cursor cursor;
+    }
 
-        code = krb5_kt_start_seq_get(context, keytab, &cursor);
-        if (code != 0) {
-            retval = code;
-            goto map_error;
-        }
+    /* Make req->ticket->server indicate the actual server principal. */
+    krb5_free_principal(context, req->ticket->server);
+    req->ticket->server = tmp;
 
-        while ((code = krb5_kt_next_entry(context, keytab,
-                                          &ktent, &cursor)) == 0) {
-            if (ktent.key.enctype != req->ticket->enc_part.enctype) {
-                (void) krb5_free_keytab_entry_contents(context, &ktent);
-                continue;
-            }
+    return 0;
+}
 
-            retval = krb5_decrypt_tkt_part(context, &ktent.key,
-                                           req->ticket);
+/* Decrypt the ticket in req using a principal looked up from keytab. */
+static krb5_error_code
+try_one_princ(krb5_context context, const krb5_ap_req *req,
+              krb5_const_principal princ, krb5_keytab keytab,
+              krb5_keyblock *keyblock_out)
+{
+    krb5_error_code ret;
+    krb5_keytab_entry ent;
 
-            if (retval == 0) {
-                krb5_principal tmp = NULL;
+    ret = krb5_kt_get_entry(context, keytab, princ,
+                            req->ticket->enc_part.kvno,
+                            req->ticket->enc_part.enctype, &ent);
+    if (ret)
+        return ret;
+    ret = try_one_entry(context, req, &ent, keyblock_out);
+    (void)krb5_free_keytab_entry_contents(context, &ent);
+    if (ret)
+        return ret;
 
-                TRACE_RD_REQ_DECRYPT_ANY(context, ktent.principal, &ktent.key);
-                /*
-                 * We overwrite ticket->server to be the principal
-                 * that we match in the keytab.  The reason for doing
-                 * this is that GSS-API and other consumers look at
-                 * that principal to make authorization decisions
-                 * about whether the appropriate server is contacted.
-                 * It might be cleaner to create a new API and store
-                 * the server in the auth_context, but doing so would
-                 * probably miss existing uses of the server. Instead,
-                 * perhaps an API should be created to retrieve the
-                 * server as it appeared in the ticket.
-                 */
-                retval = krb5_copy_principal(context, ktent.principal, &tmp);
-                if (retval == 0 && key != NULL)
-                    retval = krb5_copy_keyblock_contents(context, &ktent.key, key);
-                if (retval == 0) {
-                    krb5_free_principal(context, req->ticket->server);
-                    req->ticket->server = tmp;
-                } else {
-                    krb5_free_principal(context, tmp);
-                }
-                (void) krb5_free_keytab_entry_contents(context, &ktent);
+    TRACE_RD_REQ_DECRYPT_SPECIFIC(context, ent.principal, &ent.key);
+    return 0;
+}
+
+/*
+ * Decrypt the ticket in req using an entry in keytab matching server (if
+ * given).  Set req->ticket->server to the principal of the keytab entry used.
+ * Store the decrypting key in *keyblock_out if it is not NULL.
+ */
+static krb5_error_code
+decrypt_ticket(krb5_context context, const krb5_ap_req *req,
+               krb5_const_principal server, krb5_keytab keytab,
+               krb5_keyblock *keyblock_out)
+{
+    krb5_error_code ret;
+    krb5_keytab_entry ent;
+    krb5_kt_cursor cursor;
+
+#ifdef LEAN_CLIENT
+    return KRB5KRB_AP_WRONG_PRINC;
+#else
+    /* If we have an explicit server principal, try just that one. */
+    if (!is_matching(context, server))
+        return try_one_princ(context, req, server, keytab, keyblock_out);
+
+    if (keytab->ops->start_seq_get == NULL) {
+        /* We can't iterate over the keytab.  Try the principal asserted by the
+         * client if it's allowed by the server parameter. */
+        if (!krb5_sname_match(context, server, req->ticket->server))
+            return KRB5KRB_AP_WRONG_PRINC;
+        return try_one_princ(context, req, req->ticket->server, keytab,
+                             keyblock_out);
+    }
+
+    ret = krb5_kt_start_seq_get(context, keytab, &cursor);
+    if (ret)
+        goto cleanup;
+
+    while ((ret = krb5_kt_next_entry(context, keytab, &ent, &cursor)) == 0) {
+        if (ent.key.enctype == req->ticket->enc_part.enctype &&
+            krb5_sname_match(context, server, ent.principal)) {
+            ret = try_one_entry(context, req, &ent, keyblock_out);
+            if (ret == 0) {
+                TRACE_RD_REQ_DECRYPT_ANY(context, ent.principal, &ent.key);
+                (void)krb5_free_keytab_entry_contents(context, &ent);
                 break;
             }
-            (void) krb5_free_keytab_entry_contents(context, &ktent);
         }
 
-        code = krb5_kt_end_seq_get(context, keytab, &cursor);
-        if (code != 0)
-            retval = code;
+        (void)krb5_free_keytab_entry_contents(context, &ent);
     }
-#endif /* LEAN_CLIENT */
 
-map_error:
-    switch (retval) {
+    (void)krb5_kt_end_seq_get(context, keytab, &cursor);
+
+cleanup:
+    switch (ret) {
     case KRB5_KT_KVNONOTFOUND:
     case KRB5_KT_NOTFOUND:
+    case KRB5_KT_END:
     case KRB5KRB_AP_ERR_BAD_INTEGRITY:
-        retval = KRB5KRB_AP_WRONG_PRINC;
+        ret = KRB5KRB_AP_WRONG_PRINC;
         break;
     default:
         break;
     }
 
-    return retval;
+    return ret;
+#endif /* LEAN_CLIENT */
 }
 
 #if 0
@@ -215,7 +251,6 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
                    krb5_ticket **ticket, int check_valid_flag)
 {
     krb5_error_code       retval = 0;
-    krb5_principal_data   princ_data;
     krb5_enctype         *desired_etypes = NULL;
     int                   desired_etypes_len = 0;
     int                   rfc4537_etypes_len = 0;
@@ -225,19 +260,7 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
 
     decrypt_key.enctype = ENCTYPE_NULL;
     decrypt_key.contents = NULL;
-
     req->ticket->enc_part2 = NULL;
-    if (server && krb5_is_referral_realm(&server->realm)) {
-        char *realm;
-        princ_data = *server;
-        server = &princ_data;
-        retval = krb5_get_default_realm(context, &realm);
-        if (retval)
-            return retval;
-        princ_data.realm.data = realm;
-        princ_data.realm.length = strlen(realm);
-    }
-
 
     /* if (req->ap_options & AP_OPTS_USE_SESSION_KEY)
        do we need special processing here ?     */
@@ -255,9 +278,9 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
         krb5_k_free_key(context, (*auth_context)->key);
         (*auth_context)->key = NULL;
     } else {
-        if ((retval = rd_req_decrypt_tkt_part(context, req,
-                                              server, keytab,
-                                              check_valid_flag ? &decrypt_key : NULL)))
+        retval = decrypt_ticket(context, req, server, keytab,
+                                check_valid_flag ? &decrypt_key : NULL);
+        if (retval)
             goto cleanup;
     }
     TRACE_RD_REQ_TICKET(context, req->ticket->enc_part2->client,
@@ -545,8 +568,6 @@ cleanup:
     if (permitted_etypes != NULL &&
         permitted_etypes != (*auth_context)->permitted_etypes)
         free(permitted_etypes);
-    if (server == &princ_data)
-        krb5_free_default_realm(context, princ_data.realm.data);
     if (retval) {
         /* only free if we're erroring out...otherwise some
            applications will need the output. */
