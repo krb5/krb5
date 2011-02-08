@@ -292,7 +292,7 @@ typedef const krb5_principal_data *krb5_const_principal;
 /*
  * Referral-specific functions.
  */
-krb5_boolean KRB5_CALLCONV krb5_is_referral_realm(const krb5_data *);
+krb5_boolean KRB5_CALLCONV krb5_is_referral_realm(const krb5_data *r);
 
 /* Both these functions return constant storage that must not be freed. */
 const krb5_data *KRB5_CALLCONV krb5_anonymous_realm(void);
@@ -2806,8 +2806,8 @@ krb5_get_credentials_renew(krb5_context context, krb5_flags options,
  * @brief Format a @c KRB_AP_REQ message.
  *
  * @param context           Context structure [input, output]
- * @param auth_context       Authentication context, containing the checksum method to be used; a new authentication contextis returned if NULL is specified. [input, output]
- * @param in_data             Application data with a checksum to be included in the authenticator; specify NULL if no checksum is to be included [input]
+ * @param auth_context      Authentication context, containing the checksum method to be used; a new authentication contextis returned if NULL is specified. [input, output]
+ * @param in_data           Application data with a checksum to be included in the authenticator; specify NULL if no checksum is to be included [input]
  * @param   ap_req_options
  * @param   service
  * @param   hostname
@@ -4186,8 +4186,6 @@ krb5_timeofday(krb5_context context, register krb5_timestamp *timeret);
  * @param context           Context structure [input, output]
  * @param addr              Pointer to array of address pointers [output]
  *
- *
- *
  * Compile-time configuration flags indicate which protocol family addresses
  * can be returned.
  *
@@ -4207,7 +4205,6 @@ krb5_os_localaddr(krb5_context context, krb5_address ***addr);
  *
  * @param context           Context structure [input, output]
  * @param lrealm            Pointer to default realm [output]
- *
  *
  * Make sure to free the allocated memory when it is no longer needed.
  *
@@ -5611,7 +5608,7 @@ krb5_string_to_timestamp(char *string, krb5_timestamp *timestampp);
  * @brief Convert a string to a delta time value.
  *
  * @param string    Pointer to string to convert [input]
- * @param deltap   Pointer to delta time [output]
+ * @param deltatp   Pointer to delta time [output]
  *
  * @retval
  *  0 Success
@@ -5621,7 +5618,7 @@ krb5_string_to_timestamp(char *string, krb5_timestamp *timestampp);
  * Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
-krb5_string_to_deltat(char *string, krb5_deltat *deltap);
+krb5_string_to_deltat(char *string, krb5_deltat *deltatp);
 
 /**
  * @brief Convert a Kerberos encryption type value to a string.
@@ -6551,7 +6548,7 @@ krb5_vset_error_message(krb5_context, krb5_error_code, const char *, va_list)
 #endif
     ;
 void KRB5_CALLCONV
-krb5_copy_error_message(krb5_context, krb5_context);
+krb5_copy_error_message (krb5_context dest_ctx, krb5_context src_ctx);
 
 /**
  * @brief Get extended error information.
