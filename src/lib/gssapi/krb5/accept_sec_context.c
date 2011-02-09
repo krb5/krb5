@@ -583,6 +583,15 @@ kg_accept_krb5(minor_status, context_handle,
         goto fail;
     }
 
+    /* Limit the encryption types negotiated (if requested). */
+    if (cred->req_enctypes) {
+        if ((code = krb5_set_default_tgs_enctypes(context,
+                                                  cred->req_enctypes))) {
+            major_status = GSS_S_FAILURE;
+            goto fail;
+        }
+    }
+
     if ((code = krb5_rd_req(context, &auth_context, &ap_req,
                             cred->default_identity ? NULL : cred->name->princ,
                             cred->keytab,
