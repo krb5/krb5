@@ -115,7 +115,8 @@ dispatch(void *cb, struct sockaddr *local_saddr, const krb5_fulladdr *from,
         kdc_insert_lookaside(pkt, *response);
 #endif
 
-    if (is_tcp == 0 && (*response)->length > max_dgram_reply_size) {
+    if (is_tcp == 0 && *response != NULL &&
+        (*response)->length > max_dgram_reply_size) {
     too_big_for_udp:
         krb5_free_data(kdc_context, *response);
         retval = make_too_big_error(response);
