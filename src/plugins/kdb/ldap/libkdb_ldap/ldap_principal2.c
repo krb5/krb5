@@ -106,10 +106,10 @@ krb5_ldap_get_principal(context, searchfor, flags, entries, nentries, more)
     int *nentries;		/* how much room/how many found */
     krb5_boolean *more;		/* are there more? */
 {
-    char                        *user=NULL, *filter=NULL, **subtree=NULL;
+    char                        *user=NULL, *filter=NULL, *filtuser=NULL;
     unsigned int                tree=0, ntrees=1, princlen=0;
     krb5_error_code	        tempst=0, st=0;
-    char                        **values=NULL, *cname=NULL;
+    char                        **values=NULL, **subtree=NULL, *cname=NULL;
     LDAP	                *ld=NULL;
     LDAPMessage	                *result=NULL, *ent=NULL;
     krb5_ldap_context           *ldap_context=NULL;
@@ -145,12 +145,18 @@ krb5_ldap_get_principal(context, searchfor, flags, entries, nentries, more)
     if ((st=krb5_ldap_unparse_principal_name(user)) != 0)
 	goto cleanup;
 
-    princlen = strlen(FILTER) + strlen(user) + 2 + 1;      /* 2 for closing brackets */
+    filtuser = ldap_filter_correct(user);
+    if (filtuser == NULL) {
+        st = ENOMEM;
+        goto cleanup;
+    }
+
+    princlen = strlen(FILTER) + strlen(filtuser) + 2 + 1;  /* 2 for closing brackets */
     if ((filter = malloc(princlen)) == NULL) {
 	st = ENOMEM;
 	goto cleanup;
     }
-    snprintf(filter, princlen, FILTER"%s))", user);
+    snprintf(filter, princlen, FILTER"%s))", filtuser);
 
     if ((st = krb5_get_subtree_info(ldap_context, &subtree, &ntrees)) != 0)
 	goto cleanup;
@@ -233,6 +239,9 @@ cleanup:
 
     if (user)
 	free(user);
+
+    if (filtuser)
+	free(filtuser);
 
     if (cname)
 	free(cname);

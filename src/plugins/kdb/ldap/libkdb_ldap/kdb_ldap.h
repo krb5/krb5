@@ -101,14 +101,18 @@ extern void prepend_err_str (krb5_context ctx, const char *s, krb5_error_code er
 #define LDAP_SEARCH(base, scope, filter, attrs)   LDAP_SEARCH_1(base, scope, filter, attrs, CHECK_STATUS)
 
 #define LDAP_SEARCH_1(base, scope, filter, attrs, status_check)        \
-      do { \
-	  st = ldap_search_ext_s(ld, base, scope, filter, attrs, 0, NULL, NULL, &timelimit, LDAP_NO_LIMIT, &result); \
-	  if (translate_ldap_error(st, OP_SEARCH) == KRB5_KDB_ACCESS_ERROR) { \
-              tempst = krb5_ldap_rebind(ldap_context, &ldap_server_handle); \
-	      if (ldap_server_handle) \
-		  ld = ldap_server_handle->ldap_handle; \
-	  } \
-      }while (translate_ldap_error(st, OP_SEARCH) == KRB5_KDB_ACCESS_ERROR && tempst == 0); \
+    tempst = 0;								\
+    st = ldap_search_ext_s(ld, base, scope, filter, attrs, 0, NULL,	\
+			   NULL, &timelimit, LDAP_NO_LIMIT, &result);	\
+    if (translate_ldap_error(st, OP_SEARCH) == KRB5_KDB_ACCESS_ERROR) { \
+	tempst = krb5_ldap_rebind(ldap_context, &ldap_server_handle);	\
+	if (ldap_server_handle)						\
+	    ld = ldap_server_handle->ldap_handle;			\
+	if (tempst == 0)						\
+	    st = ldap_search_ext_s(ld, base, scope, filter, attrs, 0,	\
+				   NULL, NULL, &timelimit,		\
+				   LDAP_NO_LIMIT, &result);		\
+    }									\
       \
       if (status_check != IGNORE_STATUS) { \
         if (tempst != 0) { \

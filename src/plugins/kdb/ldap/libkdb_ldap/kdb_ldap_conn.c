@@ -296,6 +296,7 @@ krb5_ldap_rebind(ldap_context, ldap_server_handle)
 {
     krb5_ldap_server_handle     *handle = *ldap_server_handle;
 
+    ldap_unbind_ext_s(handle->ldap_handle, NULL, NULL);
     if ((ldap_initialize(&handle->ldap_handle, handle->server_info->server_name) != LDAP_SUCCESS)
 	|| (krb5_ldap_bind(ldap_context, handle) != LDAP_SUCCESS))
 	return krb5_ldap_request_next_handle_from_pool(ldap_context, ldap_server_handle);
