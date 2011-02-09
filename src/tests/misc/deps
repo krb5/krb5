@@ -9,6 +9,17 @@ $(OUTPRE)test_getsockname.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
 $(OUTPRE)test_cxx_krb5.$(OBJEXT): $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/krb5.h \
   $(SRCTOP)/include/krb5/locate_plugin.h test_cxx_krb5.cpp
+$(OUTPRE)test_cxx_k5int.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(SRCTOP)/include/k5-buf.h \
+  $(SRCTOP)/include/k5-err.h $(SRCTOP)/include/k5-gmt_mktime.h \
+  $(SRCTOP)/include/k5-int-pkinit.h $(SRCTOP)/include/k5-int.h \
+  $(SRCTOP)/include/k5-ipc_stream.h $(SRCTOP)/include/k5-platform.h \
+  $(SRCTOP)/include/k5-plugin.h $(SRCTOP)/include/k5-thread.h \
+  $(SRCTOP)/include/k5-utf8.h $(SRCTOP)/include/krb5.h \
+  $(SRCTOP)/include/krb5/locate_plugin.h $(SRCTOP)/include/krb5/preauth_plugin.h \
+  $(SRCTOP)/include/port-sockets.h $(SRCTOP)/include/socket-utils.h \
+  test_cxx_k5int.cpp
 $(OUTPRE)test_cxx_gss.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
   test_cxx_gss.cpp
 $(OUTPRE)test_cxx_rpc.$(OBJEXT): $(BUILDTOP)/include/gssapi/gssapi.h \
