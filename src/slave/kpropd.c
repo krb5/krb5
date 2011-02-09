@@ -422,11 +422,11 @@ retry:
 		    }
 
 		    close(s);
-		    if (iproprole == IPROP_SLAVE)
+		    if (iproprole == IPROP_SLAVE) {
 			close(finet);
- 
-		    if ((ret = WEXITSTATUS(status)) != 0)
-			return (ret);
+			if ((ret = WEXITSTATUS(status)) != 0)
+			  return (ret);
+		    }
 		}
 		if (iproprole == IPROP_SLAVE)
 		    break;
