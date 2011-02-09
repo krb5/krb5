@@ -271,6 +271,7 @@ process_chpw_request(context, server_handle, realm, keytab,
         salen = sizeof(*sin);
         break;
     }
+#ifdef KRB5_USE_INET6
     case ADDRTYPE_INET6: {
         struct sockaddr_in6 *sin6 = ss2sin6(&ss);
 
@@ -280,6 +281,7 @@ process_chpw_request(context, server_handle, realm, keytab,
         salen = sizeof(*sin6);
         break;
     }
+#endif
     default: {
         struct sockaddr *sa = ss2sa(&ss);
 
