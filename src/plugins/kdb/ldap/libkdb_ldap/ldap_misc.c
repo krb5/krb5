@@ -446,12 +446,11 @@ is_principal_in_realm(krb5_ldap_context *ldap_context,
      * portion, then the first portion of the principal name SHOULD be
      * "krbtgt".  All this check is done in the immediate block.
      */
-    if (searchfor->length == 2)
-        if ((strncasecmp(searchfor->data[0].data, "krbtgt",
-                         FIND_MAX(searchfor->data[0].length, strlen("krbtgt"))) == 0) &&
-            (strncasecmp(searchfor->data[1].data, defrealm,
-                         FIND_MAX(searchfor->data[1].length, defrealmlen)) == 0))
+    if (searchfor->length == 2) {
+        if (data_eq_string(searchfor->data[0], "krbtgt") &&
+            data_eq_string(searchfor->data[1], defrealm))
             return 0;
+    }
 
     /* first check the length, if they are not equal, then they are not same */
     if (strlen(defrealm) != searchfor->realm.length)
