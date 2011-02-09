@@ -510,7 +510,7 @@ try_fallback_realm(krb5_context context, krb5_tkt_creds_context ctx)
     krb5_free_data_contents(context, &ctx->server->realm);
     ctx->server->realm = string2data(hrealms[0]);
     free(hrealms);
-    TRACE_TKT_CREDS_FALLBACK(context, ctx->server->realm);
+    TRACE_TKT_CREDS_FALLBACK(context, &ctx->server->realm);
 
     /* Obtain a TGT for the new service realm. */
     ctx->getting_tgt_for = STATE_NON_REFERRAL;
