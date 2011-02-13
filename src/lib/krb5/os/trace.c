@@ -108,18 +108,18 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
         } else if (strcmp(tmpbuf, "long") == 0) {
             krb5int_buf_add_fmt(&buf, "%ld", va_arg(ap, long));
         } else if (strcmp(tmpbuf, "str") == 0) {
-	    p = va_arg(ap, const char *);
-	    krb5int_buf_add(&buf, (p == NULL) ? "(null)" : p);
+            p = va_arg(ap, const char *);
+            krb5int_buf_add(&buf, (p == NULL) ? "(null)" : p);
         } else if (strcmp(tmpbuf, "lenstr") == 0) {
             len = va_arg(ap, size_t);
-	    p = va_arg(ap, const char *);
+            p = va_arg(ap, const char *);
             if (p == NULL && len != 0)
                 krb5int_buf_add(&buf, "(null)");
             else
                 krb5int_buf_add_len(&buf, p, len);
         } else if (strcmp(tmpbuf, "hexlenstr") == 0) {
             len = va_arg(ap, size_t);
-	    p = va_arg(ap, const char *);
+            p = va_arg(ap, const char *);
             if (p == NULL && len != 0)
                 krb5int_buf_add(&buf, "(null)");
             else {
@@ -128,7 +128,7 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
             }
         } else if (strcmp(tmpbuf, "hashlenstr") == 0) {
             len = va_arg(ap, size_t);
-	    p = va_arg(ap, const char *);
+            p = va_arg(ap, const char *);
             if (p == NULL && len != 0)
                 krb5int_buf_add(&buf, "(null)");
             else {
@@ -156,29 +156,29 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
             } else
                 krb5int_buf_add_fmt(&buf, " %s:%s", addrbuf, portbuf);
         } else if (strcmp(tmpbuf, "data") == 0) {
-	    d = va_arg(ap, krb5_data *);
+            d = va_arg(ap, krb5_data *);
             if (d == NULL || (d->length != 0 && d->data == NULL))
                 krb5int_buf_add(&buf, "(null)");
             else
                 krb5int_buf_add_len(&buf, d->data, d->length);
         } else if (strcmp(tmpbuf, "hexdata") == 0) {
-	    d = va_arg(ap, krb5_data *);
+            d = va_arg(ap, krb5_data *);
             if (d == NULL)
                 krb5int_buf_add(&buf, "(null)");
             else
                 subfmt(context, &buf, "{hexlenstr}", d->length, d->data);
         } else if (strcmp(tmpbuf, "errno") == 0) {
-	    err = va_arg(ap, int);
-	    p = NULL;
+            err = va_arg(ap, int);
+            p = NULL;
 #ifdef HAVE_STRERROR_R
-	    if (strerror_r(err, tmpbuf, sizeof(tmpbuf)) == 0)
-		p = tmpbuf;
+            if (strerror_r(err, tmpbuf, sizeof(tmpbuf)) == 0)
+                p = tmpbuf;
 #endif
-	    if (p == NULL)
-		p = strerror(err);
+            if (p == NULL)
+                p = strerror(err);
             krb5int_buf_add_fmt(&buf, "%d/%s", err, p);
         } else if (strcmp(tmpbuf, "kerr") == 0) {
-	    kerr = va_arg(ap, krb5_error_code);
+            kerr = va_arg(ap, krb5_error_code);
             p = krb5_get_error_message(context, kerr);
             krb5int_buf_add_fmt(&buf, "%ld/%s", (long) kerr, p);
             krb5_free_error_message(context, p);
