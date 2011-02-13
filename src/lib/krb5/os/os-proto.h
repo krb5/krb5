@@ -31,9 +31,34 @@
 #ifndef KRB5_LIBOS_INT_PROTO__
 #define KRB5_LIBOS_INT_PROTO__
 
-struct addrlist;
-krb5_error_code krb5_locate_kdc(krb5_context, const krb5_data *,
-                                struct addrlist *, int, int, int);
+#include <krb5/locate_plugin.h>
+
+/* A single server hostname or address. */
+struct server_entry {
+    char *hostname;             /* NULL -> use addrlen/addr instead */
+    int port;                   /* Used only if hostname set */
+    int socktype;               /* May be 0 for UDP/TCP if hostname set */
+    int family;                 /* May be 0 (aka AF_UNSPEC) if hostname set */
+    size_t addrlen;
+    struct sockaddr_storage addr;
+};
+
+/* A list of server hostnames/addresses. */
+struct serverlist {
+    struct server_entry *servers;
+    size_t nservers;
+};
+#define SERVERLIST_INIT { NULL, 0 }
+
+krb5_error_code k5_locate_server(krb5_context, const krb5_data *realm,
+                                 struct serverlist *,
+                                 enum locate_service_type svc, int socktype);
+
+krb5_error_code k5_locate_kdc(krb5_context context, const krb5_data *realm,
+                              struct serverlist *serverlist, int get_masters,
+                              int socktype);
+
+void k5_free_serverlist(struct serverlist *);
 
 #ifdef HAVE_NETINET_IN_H
 krb5_error_code krb5_unpack_full_ipaddr(krb5_context,
@@ -60,15 +85,15 @@ int _krb5_use_dns_realm (krb5_context);
 int _krb5_use_dns_kdc (krb5_context);
 int _krb5_conf_boolean (const char *);
 
-krb5_error_code krb5int_sendto(krb5_context context, const krb5_data *message,
-                               const struct addrlist *addrs,
-                               struct sendto_callback_info* callback_info,
-                               krb5_data *reply, struct sockaddr *localaddr,
-                               socklen_t *localaddrlen,
-                               struct sockaddr *remoteaddr, socklen_t *remoteaddrlen,
-                               int *addr_used,
-                               int (*msg_handler)(krb5_context, const krb5_data *, void *),
-                               void *msg_handler_data);
+krb5_error_code k5_sendto(krb5_context context, const krb5_data *message,
+                          const struct serverlist *addrs,
+                          int socktype1, int socktype2,
+                          struct sendto_callback_info *callback_info,
+                          krb5_data *reply, struct sockaddr *remoteaddr,
+                          socklen_t *remoteaddrlen, int *server_used,
+                          int (*msg_handler)(krb5_context, const krb5_data *,
+                                             void *),
+                          void *msg_handler_data);
 
 krb5_error_code krb5int_get_fq_local_hostname(char *, size_t);
 

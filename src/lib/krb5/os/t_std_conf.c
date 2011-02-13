@@ -105,27 +105,30 @@ test_get_krbhst(krb5_context ctx, char *realm)
 static void
 test_locate_kdc(krb5_context ctx, char *realm)
 {
-    struct addrlist addrs;
-    int     i;
-    int     get_masters=0;
+    struct serverlist servers;
+    size_t i;
+    int get_masters = FALSE;
     krb5_data rlm;
     krb5_error_code retval;
 
     rlm.data = realm;
     rlm.length = strlen(realm);
-    retval = krb5_locate_kdc(ctx, &rlm, &addrs, get_masters, 0, 0);
+    retval = k5_locate_kdc(ctx, &rlm, &servers, get_masters, 0);
     if (retval) {
         com_err("krb5_locate_kdc", retval, 0);
         return;
     }
     printf("krb_locate_kdc(%s) returned:", realm);
-    for (i=0; i < addrs.naddrs; i++) {
-        struct addrinfo *ai = addrs.addrs[i].ai;
-        switch (ai->ai_family) {
+    for (i = 0; i < servers.nservers; i++) {
+        struct server_entry *entry = &servers.servers[i];
+        if (entry->hostname) {
+            printf(" host:%s/%d", entry->hostname, ntohs(entry->port));
+            continue;
+        }
+        switch (entry->family) {
         case AF_INET:
         {
-            struct sockaddr_in *s_sin;
-            s_sin = (struct sockaddr_in *) ai->ai_addr;
+            struct sockaddr_in *s_sin = (struct sockaddr_in *)&entry->addr;
             printf(" inet:%s/%d", inet_ntoa(s_sin->sin_addr),
                    ntohs(s_sin->sin_port));
         }
@@ -133,9 +136,8 @@ test_locate_kdc(krb5_context ctx, char *realm)
 #ifdef KRB5_USE_INET6
         case AF_INET6:
         {
-            struct sockaddr_in6 *s_sin6;
+            struct sockaddr_in6 *s_sin6 = (struct sockaddr_in6 *)&entry->addr;
             int j;
-            s_sin6 = (struct sockaddr_in6 *) ai->ai_addr;
             printf(" inet6");
             for (j = 0; j < 8; j++)
                 printf(":%x",
@@ -146,11 +148,11 @@ test_locate_kdc(krb5_context ctx, char *realm)
         }
 #endif
         default:
-            printf(" unknown-af-%d", ai->ai_family);
+            printf(" unknown-af-%d", entry->family);
             break;
         }
     }
-    krb5int_free_addrlist(&addrs);
+    k5_free_serverlist(&servers);
     printf("\n");
 }
 

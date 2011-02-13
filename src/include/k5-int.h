@@ -590,7 +590,6 @@ extern char *strdup (const char *);
 
 #include "k5-gmt_mktime.h"
 
-struct addrlist;
 struct sendto_callback_info;
 
 /* libos.spec */
@@ -620,33 +619,6 @@ krb5_os_hostaddr(krb5_context, const char *, krb5_address ***);
 
 krb5_error_code
 krb5int_get_domain_realm_mapping(krb5_context , const char *, char ***);
-
-/* N.B.: You need to include fake-addrinfo.h *before* k5-int.h if you're
-   going to use this structure.  */
-struct addrlist {
-    struct {
-#ifdef FAI_DEFINED
-        struct addrinfo *ai;
-#else
-        struct undefined_addrinfo *ai;
-#endif
-        void (*freefn)(void *);
-        void *data;
-    } *addrs;
-    size_t naddrs;
-    size_t space;
-};
-#define ADDRLIST_INIT { 0, 0, 0 }
-extern void krb5int_free_addrlist(struct addrlist *);
-extern int krb5int_grow_addrlist(struct addrlist *, int);
-extern int krb5int_add_host_to_list(struct addrlist *, const char *,
-                                    int, int, int, int);
-
-#include <krb5/locate_plugin.h>
-krb5_error_code
-krb5int_locate_server(krb5_context, const krb5_data *realm,
-                      struct addrlist *, enum locate_service_type svc,
-                      int sockettype, int family);
 
 struct derived_key {
     krb5_data constant;
@@ -2289,7 +2261,7 @@ void krb5int_free_srv_dns_data(struct srv_dns_entry *);
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 16
+#define KRB5INT_ACCESS_STRUCT_VERSION 17
 
 #ifndef ANAME_SZ
 struct ktext;                   /* from krb.h, for krb524 support */
@@ -2305,29 +2277,7 @@ typedef struct _krb5int_access {
     krb5_error_code (*auth_con_get_subkey_enctype)(krb5_context,
                                                    krb5_auth_context,
                                                    krb5_enctype *);
-    /* service location and communication */
-    krb5_error_code (*sendto_udp)(krb5_context, const krb5_data *msg,
-                                  const struct addrlist *,
-                                  struct sendto_callback_info *,
-                                  krb5_data *reply, struct sockaddr *,
-                                  socklen_t *, struct sockaddr *,
-                                  socklen_t *, int *,
-                                  int (*msg_handler)(krb5_context,
-                                                     const krb5_data *,
-                                                     void *),
-                                  void *msg_handler_data);
-    krb5_error_code (*add_host_to_list)(struct addrlist *lp,
-                                        const char *hostname,
-                                        int port, int secport,
-                                        int socktype, int family);
-    void (*free_addrlist)(struct addrlist *);
 
-    krb5_error_code (*make_srv_query_realm)(const krb5_data *realm,
-                                            const char *service,
-                                            const char *protocol,
-                                            struct srv_dns_entry **answers);
-    void (*free_srv_dns_data)(struct srv_dns_entry *);
-    int (*use_dns_kdc)(krb5_context);
     krb5_error_code (*clean_hostname)(krb5_context, const char *, char *,
                                       size_t);
 

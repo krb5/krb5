@@ -19,7 +19,7 @@ enum {
 
 const char *prog;
 
-struct addrlist al;
+struct serverlist sl;
 
 static void
 kfatal (krb5_error_code err)
@@ -48,25 +48,29 @@ stypename (int stype)
 static void
 print_addrs (void)
 {
-    int i;
+    size_t i;
+    int err;
 
-    int naddrs = al.naddrs;
-
-    printf ("%d addresses:\n", naddrs);
-    for (i = 0; i < naddrs; i++) {
-        int err;
-        struct addrinfo *ai = al.addrs[i].ai;
+    printf("%d servers:\n", (int)sl.nservers);
+    for (i = 0; i < sl.nservers; i++) {
+        struct server_entry *entry = &sl.servers[i];
         char hostbuf[NI_MAXHOST], srvbuf[NI_MAXSERV];
-        err = getnameinfo (ai->ai_addr, ai->ai_addrlen,
-                           hostbuf, sizeof (hostbuf),
-                           srvbuf, sizeof (srvbuf),
-                           NI_NUMERICHOST | NI_NUMERICSERV);
-        if (err)
-            printf ("%2d: getnameinfo returns error %d=%s\n",
-                    i, err, gai_strerror (err));
-        else
-            printf ("%2d: address %s\t%s\tport %s\n", i, hostbuf,
-                    stypename (ai->ai_socktype), srvbuf);
+
+        if (entry->hostname != NULL) {
+            printf("%2d: host %s\t%s\tport %d\n", (int)i, entry->hostname,
+                   stypename(entry->socktype), ntohs(entry->port));
+            continue;
+        }
+        err = getnameinfo((struct sockaddr *)&entry->addr, entry->addrlen,
+                          hostbuf, sizeof(hostbuf), srvbuf, sizeof(srvbuf),
+                          NI_NUMERICHOST | NI_NUMERICSERV);
+        if (err) {
+            printf("%2d: getnameinfo returns error %d=%s\n", (int)i, err,
+                   gai_strerror(err));
+        } else {
+            printf("%2d: address %s\t%s\tport %s\n", (int)i, hostbuf,
+                   stypename(entry->socktype), srvbuf);
+        }
     }
 }
 
@@ -116,22 +120,22 @@ main (int argc, char *argv[])
 
     switch (how) {
     case LOOKUP_CONF:
-        err = krb5_locate_srv_conf (ctx, &realm, "kdc", &al,
-                                    htons (88), htons (750));
+        err = krb5_locate_srv_conf(ctx, &realm, "kdc", &sl,
+                                   htons(88), htons(750));
         break;
 
     case LOOKUP_DNS:
-        err = locate_srv_dns_1 (&realm, "_kerberos", "_udp", &al, 0);
+        err = locate_srv_dns_1(&realm, "_kerberos", "_udp", &sl);
         break;
 
     case LOOKUP_WHATEVER:
-        err = krb5_locate_kdc (ctx, &realm, &al, master, 0, 0);
+        err = k5_locate_kdc(ctx, &realm, &sl, master, 0);
         break;
     }
     if (err) kfatal (err);
-    print_addrs ();
+    print_addrs();
 
-    krb5int_free_addrlist (&al);
-    krb5_free_context (ctx);
+    k5_free_serverlist(&sl);
+    krb5_free_context(ctx);
     return 0;
 }

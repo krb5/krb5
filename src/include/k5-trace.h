@@ -60,7 +60,7 @@
  *   {lenstr}      size_t and const char *, as a counted string
  *   {hexlenstr}   size_t and const char *, as hex bytes
  *   {hashlenstr}  size_t and const char *, as four-character hex hash
- *   {addrinfo}    struct addrinfo *, show socket type, address, port
+ *   {connstate}   struct conn_state *, show socket type, address, port
  *   {data}        krb5_data *, display as counted string
  *   {hexdata}     krb5_data *, display as hex bytes
  *   {errno}       int, display as number/errorstring
@@ -264,32 +264,34 @@
               rlm, (master) ? " (master)" : "", (tcp) ? " (tcp only)" : ""))
 #define TRACE_SENDTO_KDC_MASTER(c, master) \
     TRACE(c, (c, "Response was{str} from master KDC", (master) ? "" : " not"))
-#define TRACE_SENDTO_KDC_RESPONSE(c, addr) \
-    TRACE(c, (c, "Received answer from {addrinfo}", addr))
-#define TRACE_SENDTO_KDC_TCP_CONNECT(c, addr) \
-    TRACE(c, (c, "Initiating TCP connection to {addrinfo}", addr))
-#define TRACE_SENDTO_KDC_TCP_DISCONNECT(c, addr) \
-    TRACE(c, (c, "Terminating TCP connection to {addrinfo}", addr))
-#define TRACE_SENDTO_KDC_TCP_ERROR_CONNECT(c, addr, err) \
-    TRACE(c, (c, "TCP error connecting to {addrinfo}: {errno}", addr, err))
-#define TRACE_SENDTO_KDC_TCP_ERROR_RECV(c, addr, err) \
-    TRACE(c, (c, "TCP error receiving from {addrinfo}: {errno}", addr, err))
-#define TRACE_SENDTO_KDC_TCP_ERROR_RECV_LEN(c, addr, err) \
-    TRACE(c, (c, "TCP error receiving from {addrinfo}: {errno}", addr, err))
-#define TRACE_SENDTO_KDC_TCP_ERROR_SEND(c, addr, err) \
-    TRACE(c, (c, "TCP error sending to {addrinfo}: {errno}", addr, err))
-#define TRACE_SENDTO_KDC_TCP_SEND(c, addr) \
-    TRACE(c, (c, "Sending TCP request to {addrinfo}", addr))
-#define TRACE_SENDTO_KDC_UDP_ERROR_RECV(c, addr, err) \
-    TRACE(c, (c, "UDP error receiving from {addrinfo}: {errno}", addr, err))
-#define TRACE_SENDTO_KDC_UDP_ERROR_SEND_INITIAL(c, addr, err) \
-    TRACE(c, (c, "UDP error sending to {addrinfo}: {errno}", addr, err))
-#define TRACE_SENDTO_KDC_UDP_ERROR_SEND_RETRY(c, addr, err) \
-    TRACE(c, (c, "UDP error sending to {addrinfo}: {errno}", addr, err))
-#define TRACE_SENDTO_KDC_UDP_SEND_INITIAL(c, addr) \
-    TRACE(c, (c, "Sending initial UDP request to {addrinfo}", addr))
-#define TRACE_SENDTO_KDC_UDP_SEND_RETRY(c, addr) \
-    TRACE(c, (c, "Sending retry UDP request to {addrinfo}", addr))
+#define TRACE_SENDTO_KDC_RESOLVING(c, hostname) \
+    TRACE(c, (c, "Resolving hostname {str}", hostname))
+#define TRACE_SENDTO_KDC_RESPONSE(c, conn) \
+    TRACE(c, (c, "Received answer from {connstate}", conn))
+#define TRACE_SENDTO_KDC_TCP_CONNECT(c, conn) \
+    TRACE(c, (c, "Initiating TCP connection to {connstate}", conn))
+#define TRACE_SENDTO_KDC_TCP_DISCONNECT(c, conn) \
+    TRACE(c, (c, "Terminating TCP connection to {connstate}", conn))
+#define TRACE_SENDTO_KDC_TCP_ERROR_CONNECT(c, conn, err) \
+    TRACE(c, (c, "TCP error connecting to {connstate}: {errno}", conn, err))
+#define TRACE_SENDTO_KDC_TCP_ERROR_RECV(c, conn, err) \
+    TRACE(c, (c, "TCP error receiving from {connstate}: {errno}", conn, err))
+#define TRACE_SENDTO_KDC_TCP_ERROR_RECV_LEN(c, conn, err) \
+    TRACE(c, (c, "TCP error receiving from {connstate}: {errno}", conn, err))
+#define TRACE_SENDTO_KDC_TCP_ERROR_SEND(c, conn, err) \
+    TRACE(c, (c, "TCP error sending to {connstate}: {errno}", conn, err))
+#define TRACE_SENDTO_KDC_TCP_SEND(c, conn) \
+    TRACE(c, (c, "Sending TCP request to {connstate}", conn))
+#define TRACE_SENDTO_KDC_UDP_ERROR_RECV(c, conn, err) \
+    TRACE(c, (c, "UDP error receiving from {connstate}: {errno}", conn, err))
+#define TRACE_SENDTO_KDC_UDP_ERROR_SEND_INITIAL(c, conn, err) \
+    TRACE(c, (c, "UDP error sending to {connstate}: {errno}", conn, err))
+#define TRACE_SENDTO_KDC_UDP_ERROR_SEND_RETRY(c, conn, err) \
+    TRACE(c, (c, "UDP error sending to {connstate}: {errno}", conn, err))
+#define TRACE_SENDTO_KDC_UDP_SEND_INITIAL(c, conn) \
+    TRACE(c, (c, "Sending initial UDP request to {connstate}", conn))
+#define TRACE_SENDTO_KDC_UDP_SEND_RETRY(c, conn) \
+    TRACE(c, (c, "Sending retry UDP request to {connstate}", conn))
 
 #define TRACE_SEND_TGS_ETYPES(c, etypes) \
     TRACE(c, (c, "etypes requested in TGS request: {etypes}", etypes))

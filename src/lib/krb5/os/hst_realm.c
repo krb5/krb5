@@ -450,7 +450,7 @@ domain_heuristic(krb5_context context, const char *domain,
                  char **realm, int limit)
 {
     krb5_error_code retval = 0, r;
-    struct addrlist alist;
+    struct serverlist slist;
     krb5_data drealm;
     char *cp = NULL, *fqdn, *dot;
 
@@ -479,9 +479,9 @@ domain_heuristic(krb5_context context, const char *domain,
         drealm.data = cp;
 
         /* Find a kdc based on this part of the domain name. */
-        r = krb5_locate_kdc(context, &drealm, &alist, 0, SOCK_DGRAM, 0);
+        r = k5_locate_kdc(context, &drealm, &slist, FALSE, SOCK_DGRAM);
         if (!r) { /* Found a KDC! */
-            krb5int_free_addrlist(&alist);
+            k5_free_serverlist(&slist);
             *realm = strdup(cp);
             if (!*realm) {
                 retval = ENOMEM;

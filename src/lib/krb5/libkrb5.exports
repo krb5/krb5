@@ -107,6 +107,8 @@ initialize_krb5_error_table
 initialize_k5e1_error_table
 initialize_kv5m_error_table
 initialize_prof_error_table
+k5_free_serverlist
+k5_locate_kdc
 k5_plugin_free_modules
 k5_plugin_load
 k5_plugin_load_all
@@ -419,7 +421,6 @@ krb5_ktf_ops
 krb5_ktf_writable_ops
 krb5_kts_ops
 krb5_kuserok
-krb5_locate_kdc
 krb5_lock_file
 krb5_make_authdata_kdc_issued
 krb5_make_full_ipaddr
@@ -597,7 +598,6 @@ krb5int_copy_data_contents_add0
 krb5int_find_authdata
 krb5int_find_pa_data
 krb5int_foreach_localaddr
-krb5int_free_addrlist
 krb5int_free_data_list
 krb5int_get_authdata_containee_types
 krb5int_init_context_kdc

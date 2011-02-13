@@ -40,6 +40,7 @@
  */
 
 #include "k5-int.h"
+#include "cm.h"
 
 #ifndef DISABLE_TRACING
 
@@ -71,7 +72,7 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
     krb5_error_code kerr;
     size_t len, i;
     int err;
-    struct addrinfo *ai;
+    struct conn_state *cs;
     const krb5_data *d;
     krb5_data data;
     char addrbuf[NI_MAXHOST], portbuf[NI_MAXSERV], tmpbuf[200], *str;
@@ -136,24 +137,24 @@ trace_format(krb5_context context, const char *fmt, va_list ap)
                     krb5int_buf_add(&buf, str);
                 free(str);
             }
-        } else if (strcmp(tmpbuf, "addrinfo") == 0) {
-	    ai = va_arg(ap, struct addrinfo *);
-	    if (ai->ai_socktype == SOCK_DGRAM)
-		krb5int_buf_add(&buf, "dgram");
-	    else if (ai->ai_socktype == SOCK_STREAM)
-		krb5int_buf_add(&buf, "stream");
-	    else
-		krb5int_buf_add_fmt(&buf, "socktype%d", ai->ai_socktype);
+        } else if (strcmp(tmpbuf, "connstate") == 0) {
+            cs = va_arg(ap, struct conn_state *);
+            if (cs->socktype == SOCK_DGRAM)
+                krb5int_buf_add(&buf, "dgram");
+            else if (cs->socktype == SOCK_STREAM)
+                krb5int_buf_add(&buf, "stream");
+            else
+                krb5int_buf_add_fmt(&buf, "socktype%d", cs->socktype);
 
-	    if (getnameinfo(ai->ai_addr, ai->ai_addrlen,
+            if (getnameinfo((struct sockaddr *)&cs->addr, cs->addrlen,
                             addrbuf, sizeof(addrbuf), portbuf, sizeof(portbuf),
                             NI_NUMERICHOST|NI_NUMERICSERV) != 0) {
-		if (ai->ai_addr->sa_family == AF_UNSPEC)
-		    krb5int_buf_add(&buf, " AF_UNSPEC");
-		else
-		    krb5int_buf_add_fmt(&buf, " af%d", ai->ai_addr->sa_family);
-	    } else
-		krb5int_buf_add_fmt(&buf, " %s:%s", addrbuf, portbuf);
+                if (cs->family == AF_UNSPEC)
+                    krb5int_buf_add(&buf, " AF_UNSPEC");
+                else
+                    krb5int_buf_add_fmt(&buf, " af%d", cs->family);
+            } else
+                krb5int_buf_add_fmt(&buf, " %s:%s", addrbuf, portbuf);
         } else if (strcmp(tmpbuf, "data") == 0) {
 	    d = va_arg(ap, krb5_data *);
             if (d == NULL || (d->length != 0 && d->data == NULL))

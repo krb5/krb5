@@ -253,60 +253,20 @@ krb5int_debug_fprint (const char *fmt, ...)
 #endif
 }
 
-#define print_addrlist krb5int_print_addrlist
-static void
-print_addrlist (const struct addrlist *a)
-{
-    size_t i;
-    dprint("%d{", a->naddrs);
-    for (i = 0; i < a->naddrs; i++)
-        dprint("%s%p=%A", i ? "," : "", (void*)a->addrs[i].ai, a->addrs[i].ai);
-    dprint("}");
-}
-
 static int
-merge_addrlists (struct addrlist *dest, struct addrlist *src)
-{
-    /* Wouldn't it be nice if we could filter out duplicates?  The
-       alloc/free handling makes that pretty difficult though.  */
-    int err;
-    size_t i;
-
-    dprint("merging addrlists:\n\tlist1: ");
-    for (i = 0; i < dest->naddrs; i++)
-        dprint(" %A", dest->addrs[i].ai);
-    dprint("\n\tlist2: ");
-    for (i = 0; i < src->naddrs; i++)
-        dprint(" %A", src->addrs[i].ai);
-    dprint("\n");
-
-    err = krb5int_grow_addrlist (dest, src->naddrs);
-    if (err)
-        return err;
-    for (i = 0; i < src->naddrs; i++) {
-        dest->addrs[dest->naddrs + i] = src->addrs[i];
-        src->addrs[i].ai = 0;
-        src->addrs[i].freefn = 0;
-    }
-    dest->naddrs += i;
-    src->naddrs = 0;
-
-    dprint("\tout:   ");
-    for (i = 0; i < dest->naddrs; i++)
-        dprint(" %A", dest->addrs[i].ai);
-    dprint("\n");
-
-    return 0;
-}
-
-static int
-in_addrlist (struct addrinfo *thisaddr, struct addrlist *list)
+in_addrlist(struct server_entry *entry, struct serverlist *list)
 {
     size_t i;
-    for (i = 0; i < list->naddrs; i++) {
-        if (thisaddr->ai_addrlen == list->addrs[i].ai->ai_addrlen
-            && !memcmp(thisaddr->ai_addr, list->addrs[i].ai->ai_addr,
-                       thisaddr->ai_addrlen))
+    struct server_entry *le;
+
+    for (i = 0; i < list->nservers; i++) {
+        le = &list->servers[i];
+        if (entry->hostname != NULL && le->hostname != NULL &&
+            strcmp(entry->hostname, le->hostname) == 0)
+            return 1;
+        if (entry->hostname == NULL && le->hostname == NULL &&
+            entry->addrlen == le->addrlen &&
+            memcmp(&entry->addr, &le->addr, entry->addrlen) == 0)
             return 1;
     }
     return 0;
@@ -348,13 +308,13 @@ check_for_svc_unavailable (krb5_context context,
  */
 
 krb5_error_code
-krb5_sendto_kdc (krb5_context context, const krb5_data *message,
-                 const krb5_data *realm, krb5_data *reply,
-                 int *use_master, int tcp_only)
+krb5_sendto_kdc(krb5_context context, const krb5_data *message,
+                const krb5_data *realm, krb5_data *reply, int *use_master,
+                int tcp_only)
 {
-    krb5_error_code retval, retval2;
-    struct addrlist addrs;
-    int socktype1 = 0, socktype2 = 0, addr_used;
+    krb5_error_code retval, err;
+    struct serverlist servers;
+    int socktype1 = 0, socktype2 = 0, server_used;
 
     /*
      * find KDC location(s) for realm
@@ -390,8 +350,6 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
         context->udp_pref_limit = tmp;
     }
 
-    retval = (*use_master ? KRB5_KDC_UNREACH : KRB5_REALM_UNKNOWN);
-
     if (tcp_only)
         socktype1 = SOCK_STREAM, socktype2 = 0;
     else if (message->length <= (unsigned int) context->udp_pref_limit)
@@ -399,69 +357,44 @@ krb5_sendto_kdc (krb5_context context, const krb5_data *message,
     else
         socktype1 = SOCK_STREAM, socktype2 = SOCK_DGRAM;
 
-    retval = krb5_locate_kdc(context, realm, &addrs, *use_master, socktype1, 0);
-    if (socktype2) {
-        struct addrlist addrs2;
+    retval = k5_locate_kdc(context, realm, &servers, *use_master,
+                           tcp_only ? SOCK_STREAM : 0);
+    if (retval)
+        return retval;
 
-        retval2 = krb5_locate_kdc(context, realm, &addrs2, *use_master,
-                                  socktype2, 0);
-#if 0
-        if (retval2 == 0) {
-            (void) merge_addrlists(&addrs, &addrs2);
-            krb5int_free_addrlist(&addrs2);
-            retval = 0;
-        } else if (retval == KRB5_REALM_CANT_RESOLVE) {
-            retval = retval2;
+    retval = k5_sendto(context, message, &servers, socktype1, socktype2,
+                       NULL, reply, NULL, NULL, &server_used,
+                       check_for_svc_unavailable, &err);
+    if (retval == KRB5_KDC_UNREACH) {
+        if (err == KDC_ERR_SVC_UNAVAILABLE) {
+            retval = KRB5KDC_ERR_SVC_UNAVAILABLE;
+        } else {
+            krb5_set_error_message(context, retval,
+                                   "Cannot contact any KDC for realm '%.*s'",
+                                   realm->length, realm->data);
         }
-#else
-        retval = retval2;
+    }
+    if (retval)
+        goto cleanup;
+
+    /* Set use_master to 1 if we ended up talking to a master when we didn't
+     * explicitly request to. */
+    if (*use_master == 0) {
+        struct serverlist mservers;
+        struct server_entry *entry = &servers.servers[server_used];
+        retval = k5_locate_kdc(context, realm, &mservers, TRUE,
+                               entry->socktype);
         if (retval == 0) {
-            (void) merge_addrlists(&addrs, &addrs2);
-            krb5int_free_addrlist(&addrs2);
+            if (in_addrlist(entry, &mservers))
+                *use_master = 1;
+            k5_free_serverlist(&mservers);
         }
-#endif
+        TRACE_SENDTO_KDC_MASTER(context, *use_master);
+        retval = 0;
     }
 
-    if (addrs.naddrs > 0) {
-        krb5_error_code err = 0;
-
-        retval = krb5int_sendto (context, message, &addrs, 0, reply, 0, 0,
-                                 0, 0, &addr_used, check_for_svc_unavailable, &err);
-        switch (retval) {
-        case 0:
-            /*
-             * Set use_master to 1 if we ended up talking to a master when
-             * we didn't explicitly request to
-             */
-            if (*use_master == 0) {
-                struct addrlist addrs3;
-                retval = krb5_locate_kdc(context, realm, &addrs3, 1,
-                                         addrs.addrs[addr_used].ai->ai_socktype,
-                                         addrs.addrs[addr_used].ai->ai_family);
-                if (retval == 0) {
-                    if (in_addrlist(addrs.addrs[addr_used].ai, &addrs3))
-                        *use_master = 1;
-                    krb5int_free_addrlist (&addrs3);
-                }
-                TRACE_SENDTO_KDC_MASTER(context, *use_master);
-            }
-            krb5int_free_addrlist (&addrs);
-            return 0;
-        default:
-            break;
-            /* Cases here are for constructing useful error messages.  */
-        case KRB5_KDC_UNREACH:
-            if (err == KDC_ERR_SVC_UNAVAILABLE) {
-                retval = KRB5KDC_ERR_SVC_UNAVAILABLE;
-            } else {
-                krb5_set_error_message(context, retval,
-                                       "Cannot contact any KDC for realm '%.*s'",
-                                       realm->length, realm->data);
-            }
-            break;
-        }
-        krb5int_free_addrlist (&addrs);
-    }
+cleanup:
+    k5_free_serverlist(&servers);
     return retval;
 }
 
@@ -604,17 +537,24 @@ set_conn_state_msg_length (struct conn_state *state, const krb5_data *message)
     }
 }
 
-
-
-static void
-setup_connection (struct conn_state *state, struct addrinfo *ai,
-                  const krb5_data *message, char **udpbufp)
+static krb5_error_code
+add_connection(struct conn_state **conns, struct addrinfo *ai,
+               size_t server_index, const krb5_data *message, char **udpbufp)
 {
+    struct conn_state *state, **tailptr;
+
+    state = calloc(1, sizeof(*state));
+    if (state == NULL)
+        return ENOMEM;
     state->state = INITIALIZING;
     state->err = 0;
     state->x.out.sgp = state->x.out.sgbuf;
-    state->addr = ai;
+    state->socktype = ai->ai_socktype;
+    state->family = ai->ai_family;
+    state->addrlen = ai->ai_addrlen;
+    memcpy(&state->addr, ai->ai_addr, ai->ai_addrlen);
     state->fd = INVALID_SOCKET;
+    state->server_index = server_index;
     SG_SET(&state->x.out.sgbuf[1], 0, 0);
     if (ai->ai_socktype == SOCK_STREAM) {
         /*
@@ -637,34 +577,139 @@ setup_connection (struct conn_state *state, struct addrinfo *ai,
         state->service = service_udp_fd;
         set_conn_state_msg_length (state, message);
 
-        if (*udpbufp == 0) {
+        if (*udpbufp == NULL) {
             *udpbufp = malloc(krb5_max_dgram_size);
-            if (*udpbufp == 0) {
-                dperror("malloc(krb5_max_dgram_size)");
-                state->state = FAILED;
-                return;
-            }
+            if (*udpbufp == 0)
+                return ENOMEM;
         }
         state->x.in.buf = *udpbufp;
         state->x.in.bufsize = krb5_max_dgram_size;
     }
+
+    /* Chain the new state onto the tail of the list. */
+    for (tailptr = conns; *tailptr != NULL; tailptr = &(*tailptr)->next);
+    *tailptr = state;
+
+    return 0;
+}
+
+static int
+translate_ai_error (int err)
+{
+    switch (err) {
+    case 0:
+        return 0;
+    case EAI_BADFLAGS:
+    case EAI_FAMILY:
+    case EAI_SOCKTYPE:
+    case EAI_SERVICE:
+        /* All of these indicate bad inputs to getaddrinfo.  */
+        return EINVAL;
+    case EAI_AGAIN:
+        /* Translate to standard errno code.  */
+        return EAGAIN;
+    case EAI_MEMORY:
+        /* Translate to standard errno code.  */
+        return ENOMEM;
+#ifdef EAI_ADDRFAMILY
+    case EAI_ADDRFAMILY:
+#endif
+#if defined(EAI_NODATA) && EAI_NODATA != EAI_NONAME
+    case EAI_NODATA:
+#endif
+    case EAI_NONAME:
+        /* Name not known or no address data, but no error.  Do
+           nothing more.  */
+        return 0;
+#ifdef EAI_OVERFLOW
+    case EAI_OVERFLOW:
+        /* An argument buffer overflowed.  */
+        return EINVAL;          /* XXX */
+#endif
+#ifdef EAI_SYSTEM
+    case EAI_SYSTEM:
+        /* System error, obviously.  */
+        return errno;
+#endif
+    default:
+        /* An error code we haven't handled?  */
+        return EINVAL;
+    }
+}
+
+/*
+ * Resolve the entry in servers with index ind, adding connections to the list
+ * *conns.  Connections are added for each of socktype1 and (if not zero)
+ * socktype2.  message and udpbufp are used to initialize the connections; see
+ * add_connection above.  If no addresses are available for an entry but no
+ * internal name resolution failure occurs, return 0 without adding any new
+ * connections.
+ */
+static krb5_error_code
+resolve_server(krb5_context context, const struct serverlist *servers,
+               size_t ind, int socktype1, int socktype2,
+               const krb5_data *message, char **udpbufp,
+               struct conn_state **conns)
+{
+    krb5_error_code retval;
+    struct server_entry *entry = &servers->servers[ind];
+    struct addrinfo *addrs, *a, hint, ai;
+    int err, result;
+    char portbuf[64];
+
+    /* Skip any stray entries of socktypes we don't want. */
+    if (entry->socktype != 0 && entry->socktype != socktype1 &&
+        entry->socktype != socktype2)
+        return 0;
+
+    if (entry->hostname == NULL) {
+        ai.ai_socktype = entry->socktype;
+        ai.ai_family = entry->family;
+        ai.ai_addrlen = entry->addrlen;
+        ai.ai_addr = (struct sockaddr *)&entry->addr;
+        return add_connection(conns, &ai, ind, message, udpbufp);
+    }
+
+    memset(&hint, 0, sizeof(hint));
+    hint.ai_family = entry->family;
+    hint.ai_socktype = (entry->socktype != 0) ? entry->socktype : socktype1;
+#ifdef AI_NUMERICSERV
+    hint.ai_flags = AI_NUMERICSERV;
+#endif
+    result = snprintf(portbuf, sizeof(portbuf), "%d", ntohs(entry->port));
+    if (SNPRINTF_OVERFLOW(result, sizeof(portbuf)))
+        return EINVAL;
+    TRACE_SENDTO_KDC_RESOLVING(context, entry->hostname);
+    err = getaddrinfo(entry->hostname, portbuf, &hint, &addrs);
+    if (err)
+        return translate_ai_error(err);
+    /* Add each address with the preferred socktype. */
+    retval = 0;
+    for (a = addrs; a != 0 && retval == 0; a = a->ai_next)
+        retval = add_connection(conns, a, ind, message, udpbufp);
+    if (retval == 0 && entry->socktype == 0 && socktype2 != 0) {
+        /* Add each address again with the non-preferred socktype. */
+        for (a = addrs; a != 0 && retval == 0; a = a->ai_next) {
+            a->ai_socktype = socktype2;
+            retval = add_connection(conns, a, ind, message, udpbufp);
+        }
+    }
+    return retval;
 }
 
 static int
 start_connection(krb5_context context, struct conn_state *state,
                  struct select_state *selstate,
-                 struct sendto_callback_info *callback_info,
-                 krb5_data *callback_buffer)
+                 struct sendto_callback_info *callback_info)
 {
     int fd, e;
-    struct addrinfo *ai = state->addr;
 
     dprint("start_connection(@%p)\ngetting %s socket in family %d...", state,
-           ai->ai_socktype == SOCK_STREAM ? "stream" : "dgram", ai->ai_family);
-    fd = socket(ai->ai_family, ai->ai_socktype, 0);
+           state->socktype == SOCK_STREAM ? "stream" : "dgram", state->family);
+    fd = socket(state->family, state->socktype, 0);
     if (fd == INVALID_SOCKET) {
         state->err = SOCKET_ERRNO;
-        dprint("socket: %m creating with af %d\n", state->err, ai->ai_family);
+        dprint("socket: %m creating with af %d\n", state->err, state->family);
         return -1;              /* try other hosts */
     }
 #ifndef _WIN32 /* On Windows FD_SETSIZE is a count, not a max value.  */
@@ -677,7 +722,7 @@ start_connection(krb5_context context, struct conn_state *state,
 #endif
     set_cloexec_fd(fd);
     /* Make it non-blocking.  */
-    if (ai->ai_socktype == SOCK_STREAM) {
+    if (state->socktype == SOCK_STREAM) {
         static const int one = 1;
         static const struct linger lopt = { 0, 0 };
 
@@ -685,12 +730,11 @@ start_connection(krb5_context context, struct conn_state *state,
             dperror("sendto_kdc: ioctl(FIONBIO)");
         if (setsockopt(fd, SOL_SOCKET, SO_LINGER, &lopt, sizeof(lopt)))
             dperror("sendto_kdc: setsockopt(SO_LINGER)");
-        TRACE_SENDTO_KDC_TCP_CONNECT(context, ai);
+        TRACE_SENDTO_KDC_TCP_CONNECT(context, state);
     }
 
     /* Start connecting to KDC.  */
-    dprint(" fd %d; connecting to %A...\n", fd, ai);
-    e = connect(fd, ai->ai_addr, ai->ai_addrlen);
+    e = connect(fd, (struct sockaddr *)&state->addr, state->addrlen);
     if (e != 0) {
         /*
          * This is the path that should be followed for non-blocking
@@ -724,9 +768,8 @@ start_connection(krb5_context context, struct conn_state *state,
      */
     if (callback_info) {
 
-        e = callback_info->pfn_callback(state,
-                                        callback_info->context,
-                                        callback_buffer);
+        e = callback_info->pfn_callback(state, callback_info->context,
+                                        &state->callback_buffer);
         if (e != 0) {
             dprint("callback failed: %m\n", e);
             (void) closesocket(fd);
@@ -736,24 +779,20 @@ start_connection(krb5_context context, struct conn_state *state,
             return -3;
         }
 
-        dprint("callback %p (message=%d@%p)\n",
-               state,
-               callback_buffer->length,
-               callback_buffer->data);
-
-        set_conn_state_msg_length( state, callback_buffer );
+        set_conn_state_msg_length(state, &state->callback_buffer);
     }
 
-    if (ai->ai_socktype == SOCK_DGRAM) {
+    if (state->socktype == SOCK_DGRAM) {
         /* Send it now.  */
         ssize_t ret;
         sg_buf *sg = &state->x.out.sgbuf[0];
 
-        TRACE_SENDTO_KDC_UDP_SEND_INITIAL(context, ai);
+        TRACE_SENDTO_KDC_UDP_SEND_INITIAL(context, state);
         dprint("sending %d bytes on fd %d\n", SG_LEN(sg), state->fd);
         ret = send(state->fd, SG_BUF(sg), SG_LEN(sg), 0);
         if (ret < 0 || (size_t) ret != SG_LEN(sg)) {
-            TRACE_SENDTO_KDC_UDP_ERROR_SEND_INITIAL(context, ai, SOCKET_ERRNO);
+            TRACE_SENDTO_KDC_UDP_ERROR_SEND_INITIAL(context, state,
+                                                    SOCKET_ERRNO);
             dperror("sendto");
             (void) closesocket(state->fd);
             state->fd = INVALID_SOCKET;
@@ -763,21 +802,6 @@ start_connection(krb5_context context, struct conn_state *state,
             state->state = READING;
         }
     }
-#ifdef DEBUG
-    if (debug) {
-        struct sockaddr_storage ss;
-        socklen_t sslen = sizeof(ss);
-        if (getsockname(state->fd, (struct sockaddr *)&ss, &sslen) == 0) {
-            struct addrinfo hack_ai;
-            memset(&hack_ai, 0, sizeof(hack_ai));
-            hack_ai.ai_addr = (struct sockaddr *) &ss;
-            hack_ai.ai_addrlen = sslen;
-            hack_ai.ai_socktype = SOCK_DGRAM;
-            hack_ai.ai_family = ai->ai_family;
-            dprint("local socket address is %A\n", &hack_ai);
-        }
-    }
-#endif
     FD_SET(state->fd, &selstate->rfds);
     if (state->state == CONNECTING || state->state == WRITING)
         FD_SET(state->fd, &selstate->wfds);
@@ -799,8 +823,7 @@ start_connection(krb5_context context, struct conn_state *state,
 static int
 maybe_send(krb5_context context, struct conn_state *conn,
            struct select_state *selstate,
-           struct sendto_callback_info *callback_info,
-           krb5_data *callback_buffer)
+           struct sendto_callback_info *callback_info)
 {
     sg_buf *sg;
     ssize_t ret;
@@ -808,10 +831,8 @@ maybe_send(krb5_context context, struct conn_state *conn,
     dprint("maybe_send(@%p) state=%s type=%s\n", conn,
            state_strings[conn->state],
            conn->is_udp ? "udp" : "tcp");
-    if (conn->state == INITIALIZING) {
-        return start_connection(context, conn, selstate, callback_info,
-                                callback_buffer);
-    }
+    if (conn->state == INITIALIZING)
+        return start_connection(context, conn, selstate, callback_info);
 
     /* Did we already shut down this channel?  */
     if (conn->state == FAILED) {
@@ -819,7 +840,7 @@ maybe_send(krb5_context context, struct conn_state *conn,
         return -1;
     }
 
-    if (conn->addr->ai_socktype == SOCK_STREAM) {
+    if (conn->socktype == SOCK_STREAM) {
         dprint("skipping stream socket\n");
         /* The select callback will handle flushing any data we
            haven't written yet, and we only write it once.  */
@@ -828,12 +849,11 @@ maybe_send(krb5_context context, struct conn_state *conn,
 
     /* UDP - retransmit after a previous attempt timed out. */
     sg = &conn->x.out.sgbuf[0];
-    TRACE_SENDTO_KDC_UDP_SEND_RETRY(context, conn->addr);
+    TRACE_SENDTO_KDC_UDP_SEND_RETRY(context, conn);
     dprint("sending %d bytes on fd %d\n", SG_LEN(sg), conn->fd);
     ret = send(conn->fd, SG_BUF(sg), SG_LEN(sg), 0);
     if (ret < 0 || (size_t) ret != SG_LEN(sg)) {
-        TRACE_SENDTO_KDC_UDP_ERROR_SEND_INITIAL(context, conn->addr,
-                                                SOCKET_ERRNO);
+        TRACE_SENDTO_KDC_UDP_ERROR_SEND_RETRY(context, conn, SOCKET_ERRNO);
         dperror("send");
         /* Keep connection alive, we'll try again next pass.
 
@@ -907,7 +927,7 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
             /* Bad -- the KDC shouldn't be sending to us first.  */
             e = EINVAL /* ?? */;
         kill_conn:
-            TRACE_SENDTO_KDC_TCP_DISCONNECT(context, conn->addr);
+            TRACE_SENDTO_KDC_TCP_DISCONNECT(context, conn);
             kill_conn(conn, selstate, e);
             if (e == EINVAL) {
                 closesocket(conn->fd);
@@ -936,7 +956,7 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
          */
         e = get_so_error(conn->fd);
         if (e) {
-            TRACE_SENDTO_KDC_TCP_ERROR_CONNECT(context, conn->addr, e);
+            TRACE_SENDTO_KDC_TCP_ERROR_CONNECT(context, conn, e);
             dprint("socket error on write fd: %m", e);
             goto kill_conn;
         }
@@ -958,12 +978,12 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
                ((conn->x.out.sg_count == 2 ? SG_LEN(&conn->x.out.sgp[1]) : 0)
                 + SG_LEN(&conn->x.out.sgp[0])),
                conn->fd);
-        TRACE_SENDTO_KDC_TCP_SEND(context, conn->addr);
+        TRACE_SENDTO_KDC_TCP_SEND(context, conn);
         nwritten = SOCKET_WRITEV(conn->fd, conn->x.out.sgp,
                                  conn->x.out.sg_count, tmp);
         if (nwritten < 0) {
             e = SOCKET_ERRNO;
-            TRACE_SENDTO_KDC_TCP_ERROR_SEND(context, conn->addr, e);
+            TRACE_SENDTO_KDC_TCP_ERROR_SEND(context, conn, e);
             dprint("failed: %m\n", e);
             goto kill_conn;
         }
@@ -1018,7 +1038,7 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
                 e = nread ? SOCKET_ERRNO : ECONNRESET;
                 free(conn->x.in.buf);
                 conn->x.in.buf = 0;
-                TRACE_SENDTO_KDC_TCP_ERROR_RECV(context, conn->addr, e);
+                TRACE_SENDTO_KDC_TCP_ERROR_RECV(context, conn, e);
                 goto kill_conn;
             }
             conn->x.in.n_left -= nread;
@@ -1033,7 +1053,7 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
                                 conn->x.in.bufsizebytes + conn->x.in.bufsizebytes_read,
                                 4 - conn->x.in.bufsizebytes_read);
             if (nread < 0) {
-                TRACE_SENDTO_KDC_TCP_ERROR_RECV_LEN(context, conn->addr, e);
+                TRACE_SENDTO_KDC_TCP_ERROR_RECV_LEN(context, conn, e);
                 e = SOCKET_ERRNO;
                 goto kill_conn;
             }
@@ -1078,7 +1098,7 @@ service_udp_fd(krb5_context context, struct conn_state *conn,
 
     nread = recv(conn->fd, conn->x.in.buf, conn->x.in.bufsize, 0);
     if (nread < 0) {
-        TRACE_SENDTO_KDC_UDP_ERROR_RECV(context, conn->addr, SOCKET_ERRNO);
+        TRACE_SENDTO_KDC_UDP_ERROR_RECV(context, conn, SOCKET_ERRNO);
         kill_conn(conn, selstate, SOCKET_ERRNO);
         return 0;
     }
@@ -1086,15 +1106,23 @@ service_udp_fd(krb5_context context, struct conn_state *conn,
     return 1;
 }
 
-static int
-service_fds (krb5_context context,
-             struct select_state *selstate,
-             struct conn_state *conns, size_t n_conns, int *winning_conn,
-             struct select_state *seltemp,
-             int (*msg_handler)(krb5_context, const krb5_data *, void *),
-             void *msg_handler_data)
+static krb5_boolean
+service_fds(krb5_context context, struct select_state *selstate, int interval,
+            struct conn_state *conns, struct select_state *seltemp,
+            int (*msg_handler)(krb5_context, const krb5_data *, void *),
+            void *msg_handler_data, struct conn_state **winner_out)
 {
     int e, selret;
+    struct timeval now;
+    struct conn_state *state;
+
+    *winner_out = NULL;
+
+    e = getcurtime(&now);
+    if (e)
+        return 1;
+    selstate->end_time = now;
+    selstate->end_time.tv_sec += interval;
 
     e = 0;
     while (selstate->nfds > 0) {
@@ -1113,53 +1141,43 @@ service_fds (krb5_context context,
             return 0;
 
         /* Got something on a socket, process it.  */
-        for (i = 0; i <= (unsigned int)selstate->max && selret > 0 && i < n_conns; i++) {
+        for (state = conns; state != NULL; state = state->next) {
             int ssflags;
 
-            if (conns[i].fd == INVALID_SOCKET)
+            if (state->fd == INVALID_SOCKET)
                 continue;
             ssflags = 0;
-            if (FD_ISSET(conns[i].fd, &seltemp->rfds))
-                ssflags |= SSF_READ, selret--;
-            if (FD_ISSET(conns[i].fd, &seltemp->wfds))
-                ssflags |= SSF_WRITE, selret--;
-            if (FD_ISSET(conns[i].fd, &seltemp->xfds))
-                ssflags |= SSF_EXCEPTION, selret--;
+            if (FD_ISSET(state->fd, &seltemp->rfds))
+                ssflags |= SSF_READ;
+            if (FD_ISSET(state->fd, &seltemp->wfds))
+                ssflags |= SSF_WRITE;
+            if (FD_ISSET(state->fd, &seltemp->xfds))
+                ssflags |= SSF_EXCEPTION;
             if (!ssflags)
                 continue;
 
-            dprint("handling flags '%s%s%s' on fd %d (%A) in state %s\n",
-                   (ssflags & SSF_READ) ? "r" : "",
-                   (ssflags & SSF_WRITE) ? "w" : "",
-                   (ssflags & SSF_EXCEPTION) ? "x" : "",
-                   conns[i].fd, conns[i].addr,
-                   state_strings[(int) conns[i].state]);
-
-            if (conns[i].service(context, &conns[i], selstate, ssflags)) {
+            if (state->service(context, state, selstate, ssflags)) {
                 int stop = 1;
 
                 if (msg_handler != NULL) {
                     krb5_data reply;
 
-                    reply.data = conns[i].x.in.buf;
-                    reply.length = conns[i].x.in.pos - conns[i].x.in.buf;
+                    reply.data = state->x.in.buf;
+                    reply.length = state->x.in.pos - state->x.in.buf;
 
                     stop = (msg_handler(context, &reply, msg_handler_data) != 0);
                 }
 
                 if (stop) {
                     dprint("fd service routine says we're done\n");
-                    *winning_conn = i;
+                    *winner_out = state;
                     return 1;
                 }
             }
         }
     }
-    if (e != 0) {
-        dprint("select returned %m\n", e);
-        *winning_conn = -1;
+    if (e != 0)
         return 1;
-    }
     return 0;
 }
 
@@ -1186,59 +1204,34 @@ service_fds (krb5_context context,
  */
 
 krb5_error_code
-krb5int_sendto (krb5_context context, const krb5_data *message,
-                const struct addrlist *addrs,
-                struct sendto_callback_info* callback_info, krb5_data *reply,
-                struct sockaddr *localaddr, socklen_t *localaddrlen,
-                struct sockaddr *remoteaddr, socklen_t *remoteaddrlen,
-                int *addr_used,
-                /* return 0 -> keep going, 1 -> quit */
-                int (*msg_handler)(krb5_context, const krb5_data *, void *),
-                void *msg_handler_data)
+k5_sendto(krb5_context context, const krb5_data *message,
+          const struct serverlist *servers, int socktype1, int socktype2,
+          struct sendto_callback_info* callback_info, krb5_data *reply,
+          struct sockaddr *remoteaddr, socklen_t *remoteaddrlen,
+          int *server_used,
+          /* return 0 -> keep going, 1 -> quit */
+          int (*msg_handler)(krb5_context, const krb5_data *, void *),
+          void *msg_handler_data)
 {
-    int pass;
-    int delay_this_pass = 2;
+    int pass, delay;
     krb5_error_code retval;
-    struct conn_state *conns = NULL;
-    krb5_data *callback_data = NULL;
-    size_t i, n_conns = 0, host;
-    struct select_state *sel_state = NULL;
-    struct timeval now;
-    int winning_conn = -1, e = 0;
+    struct conn_state *conns = NULL, *state, **tailptr, *next, *winner;
+    size_t s;
+    struct select_state *sel_state = NULL, *seltemp;
     char *udpbuf = NULL;
-
-    if (message)
-        dprint("krb5int_sendto(message=%d@%p, addrlist=", message->length, message->data);
-    else
-        dprint("krb5int_sendto(callback=%p, addrlist=", callback_info);
-    print_addrlist(addrs);
-    dprint(")\n");
+    krb5_boolean done = FALSE;
 
     reply->data = 0;
     reply->length = 0;
 
-    conns = calloc(addrs->naddrs, sizeof(struct conn_state));
-    if (conns == NULL)
-        return ENOMEM;
-
-    if (callback_info) {
-        callback_data = calloc(addrs->naddrs, sizeof(krb5_data));
-        if (callback_data == NULL) {
-            retval = ENOMEM;
-            goto egress;
-        }
-    }
-
-    for (i = 0; i < addrs->naddrs; i++)
-        conns[i].fd = INVALID_SOCKET;
-
     /* One for use here, listing all our fds in use, and one for
-       temporary use in service_fds, for the fds of interest.  */
+     * temporary use in service_fds, for the fds of interest.  */
     sel_state = malloc(2 * sizeof(*sel_state));
     if (sel_state == NULL) {
         retval = ENOMEM;
-        goto egress;
+        goto cleanup;
     }
+    seltemp = &sel_state[1];
     sel_state->max = 0;
     sel_state->nfds = 0;
     sel_state->end_time.tv_sec = sel_state->end_time.tv_usec = 0;
@@ -1246,100 +1239,93 @@ krb5int_sendto (krb5_context context, const krb5_data *message,
     FD_ZERO(&sel_state->wfds);
     FD_ZERO(&sel_state->xfds);
 
-
-    /* Set up connections.  */
-    for (host = 0; host < addrs->naddrs; host++) {
-        setup_connection(&conns[host], addrs->addrs[host].ai, message,
-                         &udpbuf);
-    }
-    n_conns = addrs->naddrs;
-    for (pass = 0; pass < MAX_PASS; pass++) {
-        /* Possible optimization: Make only one pass if TCP only.
-           Stop making passes if all UDP ports are closed down.  */
-        dprint("pass %d delay=%d\n", pass, delay_this_pass);
-        for (host = 0; host < n_conns; host++) {
-            dprint("host %d\n", host);
-
-            /* Send to the host, wait for a response, then move on. */
-            if (maybe_send(context, &conns[host], sel_state, callback_info,
-                           (callback_info ? &callback_data[host] : NULL)))
+    /* First pass: resolve server hosts, communicate with resulting addresses
+     * of the preferred socktype, and wait 1s for an answer from each. */
+    for (s = 0; s < servers->nservers && !done; s++) {
+        /* Find the current tail pointer. */
+        for (tailptr = &conns; *tailptr != NULL; tailptr = &(*tailptr)->next);
+        retval = resolve_server(context, servers, s, socktype1, socktype2,
+                                message, &udpbuf, &conns);
+        if (retval)
+            goto cleanup;
+        for (state = *tailptr; state != NULL && !done; state = state->next) {
+            /* Contact each new connection whose socktype matches socktype1. */
+            if (state->socktype != socktype1)
                 continue;
+            if (maybe_send(context, state, sel_state, callback_info))
+                continue;
+            done = service_fds(context, sel_state, 1, conns, seltemp,
+                               msg_handler, msg_handler_data, &winner);
+        }
+    }
 
-            retval = getcurtime(&now);
-            if (retval)
-                goto egress;
-            sel_state->end_time = now;
-            sel_state->end_time.tv_sec += 1;
-            e = service_fds(context, sel_state, conns, host+1, &winning_conn,
-                            sel_state+1, msg_handler, msg_handler_data);
-            if (e)
-                break;
-            if (pass > 0 && sel_state->nfds == 0)
-                /*
-                 * After the first pass, if we close all fds, break
-                 * out right away.  During the first pass, it's okay,
-                 * we're probably about to open another connection.
-                 */
+    /* Complete the first pass by contacting servers of the non-preferred
+     * socktype (if given), waiting 1s for an answer from each. */
+    for (state = conns; state != NULL && !done; state = state->next) {
+        if (state->socktype != socktype2)
+            continue;
+        if (maybe_send(context, state, sel_state, callback_info))
+            continue;
+        done = service_fds(context, sel_state, 1, state, seltemp, msg_handler,
+                           msg_handler_data, &winner);
+    }
+
+    /* Wait for two seconds at the end of the first pass. */
+    if (!done) {
+        done = service_fds(context, sel_state, 2, conns, seltemp, msg_handler,
+                           msg_handler_data, &winner);
+    }
+
+    /* Make remaining passes over all of the connections. */
+    delay = 4;
+    for (pass = 1; pass < MAX_PASS && !done; pass++) {
+        for (state = conns; state != NULL && !done; state = state->next) {
+            if (maybe_send(context, state, sel_state, callback_info))
+                continue;
+            done = service_fds(context, sel_state, 1, conns, seltemp,
+                               msg_handler, msg_handler_data, &winner);
+            if (sel_state->nfds == 0)
                 break;
         }
-        if (e)
-            break;
-        retval = getcurtime(&now);
-        if (retval)
-            goto egress;
-        /* Possible optimization: Find a way to integrate this select
-           call with the last one from the above loop, if the loop
-           actually calls select.  */
-        sel_state->end_time.tv_sec += delay_this_pass;
-        e = service_fds(context, sel_state, conns, host+1, &winning_conn,
-                        sel_state+1, msg_handler, msg_handler_data);
-        if (e)
-            break;
+        /* Wait for the delay backoff at the end of this pass. */
+        if (!done) {
+            done = service_fds(context, sel_state, delay, conns, seltemp,
+                               msg_handler, msg_handler_data, &winner);
+        }
         if (sel_state->nfds == 0)
             break;
-        delay_this_pass *= 2;
+        delay *= 2;
     }
 
-    if (sel_state->nfds == 0) {
-        /* No addresses?  */
+    if (sel_state->nfds == 0 || !done || winner == NULL) {
         retval = KRB5_KDC_UNREACH;
-        goto egress;
-    }
-    if (e == 0 || winning_conn < 0) {
-        retval = KRB5_KDC_UNREACH;
-        goto egress;
+        goto cleanup;
     }
     /* Success!  */
-    TRACE_SENDTO_KDC_RESPONSE(context, conns[winning_conn].addr);
-    reply->data = conns[winning_conn].x.in.buf;
-    reply->length = (conns[winning_conn].x.in.pos
-                     - conns[winning_conn].x.in.buf);
-    dprint("returning %d bytes in buffer %p\n",
-           (int) reply->length, reply->data);
+    TRACE_SENDTO_KDC_RESPONSE(context, winner);
+    reply->data = winner->x.in.buf;
+    reply->length = winner->x.in.pos - winner->x.in.buf;
     retval = 0;
-    conns[winning_conn].x.in.buf = 0;
-    if (addr_used)
-        *addr_used = winning_conn;
-    if (localaddr != 0 && localaddrlen != 0 && *localaddrlen > 0)
-        (void) getsockname(conns[winning_conn].fd, localaddr, localaddrlen);
+    winner->x.in.buf = NULL;
+    if (server_used != NULL)
+        *server_used = winner->server_index;
+    if (remoteaddr != NULL && remoteaddrlen != 0 && *remoteaddrlen > 0)
+        (void)getpeername(winner->fd, remoteaddr, remoteaddrlen);
 
-    if (remoteaddr != 0 && remoteaddrlen != 0 && *remoteaddrlen > 0)
-        (void) getpeername(conns[winning_conn].fd, remoteaddr, remoteaddrlen);
-
-egress:
-    for (i = 0; i < n_conns; i++) {
-        if (conns[i].fd != INVALID_SOCKET)
-            closesocket(conns[i].fd);
-        if (conns[i].state == READING && conns[i].x.in.buf != udpbuf)
-            free(conns[i].x.in.buf);
+cleanup:
+    for (state = conns; state != NULL; state = next) {
+        next = state->next;
+        if (state->fd != INVALID_SOCKET)
+            closesocket(state->fd);
+        if (state->state == READING && state->x.in.buf != udpbuf)
+            free(state->x.in.buf);
         if (callback_info) {
             callback_info->pfn_cleanup(callback_info->context,
-                                       &callback_data[i]);
+                                       &state->callback_buffer);
         }
+        free(state);
     }
 
-    free(callback_data);
-    free(conns);
     if (reply->data != udpbuf)
         free(udpbuf);
     free(sel_state);

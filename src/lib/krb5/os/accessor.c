@@ -53,20 +53,8 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
             krb5int_access internals_temp;
 #endif
             S (arcfour_gsscrypt, krb5int_arcfour_gsscrypt),
-            S (free_addrlist, krb5int_free_addrlist),
             S (auth_con_get_subkey_enctype, krb5_auth_con_get_subkey_enctype),
-            S (sendto_udp, &krb5int_sendto),
-            S (add_host_to_list, krb5int_add_host_to_list),
 
-#ifdef KRB5_DNS_LOOKUP
-#define SC(FIELD, VAL)  S(FIELD, VAL)
-#else /* disable */
-#define SC(FIELD, VAL)  S(FIELD, 0)
-#endif
-            SC (make_srv_query_realm, krb5int_make_srv_query_realm),
-            SC (free_srv_dns_data, krb5int_free_srv_dns_data),
-            SC (use_dns_kdc, _krb5_use_dns_kdc),
-#undef SC
             S (clean_hostname, krb5int_clean_hostname),
 
             S (mandatory_cksumtype, krb5int_c_mandatory_cksumtype),

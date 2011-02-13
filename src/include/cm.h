@@ -62,7 +62,10 @@ struct conn_state {
     unsigned int is_udp : 1;
     int (*service)(krb5_context context, struct conn_state *,
                    struct select_state *, int);
-    struct addrinfo *addr;
+    int socktype;
+    int family;
+    size_t addrlen;
+    struct sockaddr_storage addr;
     struct {
         struct {
             sg_buf sgbuf[2];
@@ -72,6 +75,9 @@ struct conn_state {
         } out;
         struct incoming_krb5_message in;
     } x;
+    krb5_data callback_buffer;
+    size_t server_index;
+    struct conn_state *next;
 };
 
 struct sendto_callback_info {
