@@ -146,11 +146,12 @@ try_one_princ(krb5_context context, const krb5_ap_req *req,
     if (ret)
         return ret;
     ret = try_one_entry(context, req, &ent, keyblock_out);
+    if (ret == 0)
+        TRACE_RD_REQ_DECRYPT_SPECIFIC(context, ent.principal, &ent.key);
     (void)krb5_free_keytab_entry_contents(context, &ent);
     if (ret)
         return ret;
 
-    TRACE_RD_REQ_DECRYPT_SPECIFIC(context, ent.principal, &ent.key);
     return 0;
 }
 
