@@ -762,7 +762,8 @@ kadm5_rename_principal(void *server_handle,
                 goto done;
             break;
         case KRB5_KDB_SALTTYPE_NOREALM:
-            krb5_principal2salt_norealm(handle->context, kdb->princ, &sdata);
+            ret = krb5_principal2salt_norealm(handle->context, kdb->princ,
+                                              &sdata);
             if (ret)
                 goto done;
             break;
