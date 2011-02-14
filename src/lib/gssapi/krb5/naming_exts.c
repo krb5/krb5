@@ -186,7 +186,7 @@ kg_acceptor_princ(krb5_context context, krb5_gss_name_t name,
 
     code = krb5_build_principal(context, princ_out, 0, "", name->service, host,
                                 (char *)NULL);
-    if (code == 0)
+    if (*princ_out != NULL)
         (*princ_out)->type = KRB5_NT_SRV_HST;
     free(tmp);
     return code;
