@@ -52,7 +52,7 @@ krb5_error_code krb5int_hmacmd5_checksum(const struct krb5_cksumtypes *ctp,
         return KRB5_BAD_ENCTYPE;
     if (ctp->ctype == CKSUMTYPE_HMAC_MD5_ARCFOUR) {
 	/* Compute HMAC(key, "signaturekey\0") to get the signing key ks. */
-        ret = alloc_data(&ds, ctp->hash->blocksize);
+        ret = alloc_data(&ds, ctp->hash->hashsize);
 	if (ret != 0)
 	    goto cleanup;
 
