@@ -322,6 +322,7 @@ file_trace_cb(krb5_context context, const struct krb5_trace_info *info, void *da
 
     if (info == NULL) {
         /* Null info means destroy the callback data. */
+        close(*fd);
         free(fd);
         return;
     }
