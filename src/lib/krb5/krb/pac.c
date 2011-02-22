@@ -637,17 +637,8 @@ krb5_pac_verify(krb5_context context,
         return EINVAL;
 
     ret = k5_pac_verify_server_checksum(context, pac, server);
-    if (ret == ENOENT) {
-        /*
-         * Apple Mac OS X Server Open Directory KDC (at least 10.6)
-         * appears to provide a PAC that lacks a server checksum.
-         */
-        TRACE_MSPAC_NOSRVCKSUM(context);
-        pac->verified = FALSE;
+    if (ret != 0)
         return ret;
-    } else if (ret != 0) {
-        return ret;
-    }
 
     if (privsvr != NULL) {
         ret = k5_pac_verify_kdc_checksum(context, pac, privsvr);
@@ -804,35 +795,20 @@ mspac_verify(krb5_context kcontext,
     if (pacctx->pac == NULL)
         return EINVAL;
 
-    code = krb5_pac_verify(kcontext,
-                           pacctx->pac,
+    code = krb5_pac_verify(kcontext, pacctx->pac,
                            req->ticket->enc_part2->times.authtime,
-                           req->ticket->enc_part2->client,
-                           key,
-                           NULL);
+                           req->ticket->enc_part2->client, key, NULL);
+    if (code != 0)
+        TRACE_MSPAC_VERIFY_FAIL(kcontext, code);
 
     /*
-     * If the server checksum is not found, return success to
-     * krb5int_authdata_verify() to work around an apparent Open
-     * Directory bug.  Non-verified PACs won't be returned by
-     * mspac_get_attribute().
+     * If the above verification failed, don't fail the whole authentication,
+     * just don't mark the PAC as verified.  A checksum mismatch can occur if
+     * the PAC was copied from a cross-realm TGT by an ignorant KDC, and Apple
+     * Mac OS X Server Open Directory (as of 10.6) generates PACs with no
+     * server checksum at all.
      */
-    if (code == ENOENT && !pacctx->pac->verified) {
-        code = 0;
-    }
-
-#if 0
-    /*
-     * Now, we could return 0 and just set pac->verified to FALSE.
-     * Thoughts?
-     */
-    if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY) {
-        assert(pacctx->pac->verified == FALSE);
-        code = 0;
-    }
-#endif
-
-    return code;
+    return 0;
 }
 
 static void

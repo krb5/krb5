@@ -194,9 +194,8 @@
     TRACE(c, (c, "Negotiating for enctypes in authenticator: {etypes}", \
               etypes))
 
-#define TRACE_MSPAC_NOSRVCKSUM(c) \
-    TRACE(c, (c, "MS PAC lacks a server checksum.  "\
-              "Apple Open Directory bug?"))
+#define TRACE_MSPAC_VERIFY_FAIL(c, err) \
+    TRACE(c, (c, "PAC checksum verification failed: {kerr}", err))
 #define TRACE_MSPAC_DISCARD_UNVERF(c) \
     TRACE(c, (c, "Filtering out unverified MS PAC"))
 
