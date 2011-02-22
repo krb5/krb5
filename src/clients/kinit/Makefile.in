@@ -31,7 +31,7 @@ kinit: kinit.o kinit_kdb.o $(KRB5_BASE_DEPLIBS) $(KADMSRV_DEPLIBS)
 ##WIN32##	$(_VC_MANIFEST_EMBED_EXE)
 
 clean-unix::
-	$(RM) kinit.o kinit
+	$(RM) kinit.o kinit_kdb.o kinit
 
 install-unix::
 	for f in kinit; do \
