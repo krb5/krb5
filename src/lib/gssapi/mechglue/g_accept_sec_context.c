@@ -352,9 +352,14 @@ error_out:
 	    if (union_ctx_id->mech_type->elements)
 		free(union_ctx_id->mech_type->elements);
 	    free(union_ctx_id->mech_type);
-	    *context_handle = GSS_C_NO_CONTEXT;
+	}
+	if (union_ctx_id->internal_ctx_id && mech->gss_delete_sec_context) {
+	    mech->gss_delete_sec_context(&temp_minor_status,
+					 &union_ctx_id->internal_ctx_id,
+					 GSS_C_NO_BUFFER);
 	}
 	free(union_ctx_id);
+	*context_handle = GSS_C_NO_CONTEXT;
     }
 
     if (src_name)
