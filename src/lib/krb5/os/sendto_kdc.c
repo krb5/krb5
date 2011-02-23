@@ -694,6 +694,7 @@ resolve_server(krb5_context context, const struct serverlist *servers,
             retval = add_connection(conns, a, ind, message, udpbufp);
         }
     }
+    freeaddrinfo(addrs);
     return retval;
 }
 
