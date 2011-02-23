@@ -86,5 +86,6 @@ main(int argc, char **argv)
     krb5_get_init_creds_opt_free(ctx, opt);
     krb5_free_principal(ctx, client);
     krb5_free_cred_contents(ctx, &creds);
+    krb5_free_context(ctx);
     return 0;
 }
