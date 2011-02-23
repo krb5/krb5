@@ -575,7 +575,7 @@ kg_new_connection(
     ctx->magic = KG_CONTEXT;
     ctx_free = ctx;
     if ((code = krb5_auth_con_init(context, &ctx->auth_context)))
-        goto fail;
+        goto cleanup;
     krb5_auth_con_setflags(context, ctx->auth_context,
                            KRB5_AUTH_CONTEXT_DO_SEQUENCE);
 
@@ -583,7 +583,7 @@ kg_new_connection(
     if (cred->req_enctypes) {
         if ((code = krb5_set_default_tgs_enctypes(context,
                                                   cred->req_enctypes))) {
-            goto fail;
+            goto cleanup;
         }
     }
 
@@ -602,7 +602,7 @@ kg_new_connection(
         ctx->gss_flags |= GSS_C_MUTUAL_FLAG;
 
     if ((code = krb5_timeofday(context, &now)))
-        goto fail;
+        goto cleanup;
 
     if (time_req == 0 || time_req == GSS_C_INDEFINITE) {
         ctx->krb_times.endtime = 0;
@@ -611,15 +611,15 @@ kg_new_connection(
     }
 
     if ((code = kg_duplicate_name(context, cred->name, 0, &ctx->here)))
-        goto fail;
+        goto cleanup;
 
     if ((code = kg_duplicate_name(context, (krb5_gss_name_t)target_name, 0, &ctx->there)))
-        goto fail;
+        goto cleanup;
 
     code = get_credentials(context, cred, ctx->there, now,
                            ctx->krb_times.endtime, &k_cred);
     if (code)
-        goto fail;
+        goto cleanup;
 
     ctx->krb_times = k_cred->times;
 
@@ -634,7 +634,7 @@ kg_new_connection(
     if (generic_gss_copy_oid(minor_status, mech_type, &ctx->mech_used)
         != GSS_S_COMPLETE) {
         code = *minor_status;
-        goto fail;
+        goto cleanup;
     }
     /*
      * Now try to make it static if at all possible....
@@ -653,7 +653,7 @@ kg_new_connection(
                 major_status = GSS_S_NO_CRED;
             if (code == KRB5KRB_AP_ERR_TKT_EXPIRED)
                 major_status = GSS_S_CREDENTIALS_EXPIRED;
-            goto fail;
+            goto cleanup;
         }
 
         krb5_auth_con_getlocalseqnumber(context, ctx->auth_context, &seq_temp);
@@ -661,11 +661,11 @@ kg_new_connection(
         code = krb5_auth_con_getsendsubkey(context, ctx->auth_context,
                                            &keyblock);
         if (code != 0)
-            goto fail;
+            goto cleanup;
         code = krb5_k_create_key(context, keyblock, &ctx->subkey);
         krb5_free_keyblock(context, keyblock);
         if (code != 0)
-            goto fail;
+            goto cleanup;
     }
 
     ctx->enc = NULL;
@@ -673,24 +673,12 @@ kg_new_connection(
     ctx->have_acceptor_subkey = 0;
     code = kg_setup_keys(context, ctx, ctx->subkey, &ctx->cksumtype);
     if (code != 0)
-        goto fail;
-
-    /* at this point, the context is constructed and valid,
-       hence, releaseable */
-
-    /* intern the context handle */
-
-    if (! kg_save_ctx_id((gss_ctx_id_t) ctx)) {
-        code = G_VALIDATE_FAILED;
-        goto fail;
-    }
-    *context_handle = (gss_ctx_id_t) ctx;
-    ctx_free = 0;
+        goto cleanup;
 
     /* compute time_rec */
     if (time_rec) {
         if ((code = krb5_timeofday(context, &now)))
-            goto fail;
+            goto cleanup;
         *time_rec = ctx->krb_times.endtime - now;
     }
 
@@ -703,12 +691,19 @@ kg_new_connection(
     if (actual_mech_type)
         *actual_mech_type = mech_type;
 
+    /* At this point, the context is constructed and valid; intern it. */
+    if (! kg_save_ctx_id((gss_ctx_id_t) ctx)) {
+        code = G_VALIDATE_FAILED;
+        goto cleanup;
+    }
+
     /* return successfully */
 
-    *minor_status = 0;
+    *context_handle = (gss_ctx_id_t) ctx;
+    ctx_free = NULL;
     if (ctx->gss_flags & GSS_C_MUTUAL_FLAG) {
         ctx->established = 0;
-        return(GSS_S_CONTINUE_NEEDED);
+        major_status = GSS_S_CONTINUE_NEEDED;
     } else {
         ctx->seq_recv = ctx->seq_send;
         g_order_init(&(ctx->seqstate), ctx->seq_recv,
@@ -716,10 +711,10 @@ kg_new_connection(
                      (ctx->gss_flags & GSS_C_SEQUENCE_FLAG) != 0, ctx->proto);
         ctx->gss_flags |= GSS_C_PROT_READY_FLAG;
         ctx->established = 1;
-        return(GSS_S_COMPLETE);
+        major_status = GSS_S_COMPLETE;
     }
 
-fail:
+cleanup:
     krb5_free_creds(context, k_cred);
     if (ctx_free) {
         if (ctx_free->auth_context)
@@ -731,8 +726,7 @@ fail:
         if (ctx_free->subkey)
             krb5_k_free_key(context, ctx_free->subkey);
         xfree(ctx_free);
-    } else
-        (void)krb5_gss_delete_sec_context(minor_status, context_handle, NULL);
+    }
 
     *minor_status = code;
     return (major_status);
