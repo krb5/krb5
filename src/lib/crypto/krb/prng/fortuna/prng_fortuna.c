@@ -76,9 +76,7 @@
 
 #include "k5-int.h"
 #include "prng.h"
-#ifndef OPENSSL
 #include "aes.h"
-#endif
 #include "enc_provider.h"
 #include "sha2.h"
 #include "enc_provider.h"
@@ -189,7 +187,7 @@ inc_counter(struct fortuna_state *st)
 static void
 encrypt_counter(struct fortuna_state *st, unsigned char *dst)
 {
-    aes_enc_blk(st->counter, dst, &st->ciph);
+    krb5int_aes_enc_blk(st->counter, dst, &st->ciph);
     inc_counter(st);
 }
 

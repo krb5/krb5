@@ -1,7 +1,7 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/crypto/openssl/sha2/sha256.c
- *
- * Copyright (C) 2010 by the Massachusetts Institute of Technology.
+/* lib/crypto/openssl/stubs.c - OpenSSL stub functions */
+/*
+ * Copyright (C) 2011 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -24,5 +24,46 @@
  * or implied warranty.
  */
 
-#include "sha2.h"
+/*
+ * This file defines symbols which must be exported by libk5crypto because they
+ * are in the export list (for the sake of test programs), but which are not
+ * used when OpenSSL is the back end.
+ */
 
+#include "k5-int.h"
+
+/*
+ * These functions are used by the Fortuna PRNG and test program.  They are
+ * defined to OpenSSL equivalents when the OpenSSL back end headers are
+ * used.
+ */
+void krb5int_aes_enc_blk(void);
+void krb5int_aes_enc_key(void);
+void sha2Final(void);
+void sha2Init(void);
+void sha2Update(void);
+
+void krb5int_aes_enc_blk(void)
+{
+    abort();
+}
+
+void krb5int_aes_enc_key(void)
+{
+    abort();
+}
+
+void sha2Final(void)
+{
+    abort();
+}
+
+void sha2Init(void)
+{
+    abort();
+}
+
+void sha2Update(void)
+{
+    abort();
+}

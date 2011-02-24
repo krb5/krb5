@@ -1,8 +1,7 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/openssl/aes/aes.h - AES translation macros */
 /*
- * lib/crypto/openssl/sha2/sha2.h
- *
- * Copyright 2010 by the Massachusetts Institute of Technology.
+ * Copyright 2011 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -25,14 +24,15 @@
  * or implied warranty.
  */
 
-#ifndef _SHA2_DEFINED
+#ifndef _AES_H
+#define _AES_H
 
-#include <openssl/sha.h>
+/* This header maps some of the names of the built-in AES types and functions
+ * (those used by the Fortuna PRNG) to the OpenSSL equivalents. */
+#include <openssl/aes.h>
 
-#define _SHA2_DEFINED
+#define aes_ctx AES_KEY
+#define krb5int_aes_enc_key(k, len, ctx) AES_set_encrypt_key(k, 8*(len), ctx)
+#define krb5int_aes_enc_blk(in, out, ctx) AES_encrypt(in, out, ctx)
 
-#define sha2Init SHA256_Init
-#define sha2Update SHA256_Update 
-#define sha2Final SHA256_Final
-
-#endif /* _SHA2_DEFINED */
+#endif /* _AES_H */
