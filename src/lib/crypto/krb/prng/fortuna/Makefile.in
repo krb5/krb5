@@ -11,13 +11,11 @@ PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
 STLIBOBJS= \
-	prng_fortuna.o entropy.o
+	prng_fortuna.o
 OBJS= \
-	$(OUTPRE)prng_fortuna.$(OBJEXT) \
-	$(OUTPRE)entropy.$(OBJEXT)
+	$(OUTPRE)prng_fortuna.$(OBJEXT)
 
 SRCS=\
-	$(srcdir)/entropy.c \
 	$(srcdir)/prng_fortuna.c 
 
 all-unix:: all-libobjs
@@ -27,24 +25,15 @@ includes:: depend
 depend:: $(SRCS)
 
 t_fortuna: t_fortuna.$(OBJEXT) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o t_fortuna t_fortuna.$(OBJEXT) -lcom_err $(SUPPORT_LIB) $(CRYPTO_DEPLIB)
-
-t_fortuna_make_oct: t_fortuna_make_oct.$(OBJEXT) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o t_fortuna_make_oct t_fortuna_make_oct.$(OBJEXT) -lcom_err $(SUPPORT_LIB) $(CRYPTO_DEPLIB)
+	$(CC_LINK) -o t_fortuna t_fortuna.$(OBJEXT) -lcom_err $(SUPPORT_LIB) \
+		$(CRYPTO_DEPLIB)
 
 check-unix:: t_fortuna t_fortuna_make_oct
-# ifdef TEST_FORTUNA
-ifeq ("@PRNG_FORTUNA_TEST@","yes")
-	$(RUN_SETUP) $(VALGRIND) ./t_fortuna_make_oct > t_fortuna_make_oct.result && \
-	diff t_fortuna_make_oct.result t_fortuna_make_oct.expected
-else
-	$(RUN_SETUP) $(VALGRIND) ./t_fortuna
-	$(RUN_SETUP) $(VALGRIND) ./t_fortuna_make_oct > t_fortuna_make_oct.result
-endif
+	$(RUN_SETUP) $(VALGRIND) ./t_fortuna >t_fortuna.output
+	cmp t_fortuna.output $(srcdir)/t_fortuna.expected
 
 clean::
-	$(RM) t_fortuna$(EXEEXT) t_fortuna.$(OBJEXT)  t_fortuna_make_oct.result  t_fortuna_make_oct$(EXEEXT)  t_fortuna_make_oct.$(OBJEXT)
-
+	$(RM) t_fortuna t_fortuna.$(OBJEXT)
 
 clean-unix:: clean-libobjs
 

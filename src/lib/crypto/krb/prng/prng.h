@@ -44,6 +44,10 @@
 #define ENTROPY_BUFSIZE YARROW_SLOW_THRESH/8  /* SHA1 digest length*/
 #endif
 
+/* Used by PRNG implementations to gather OS entropy.  Returns true on
+ * success. */
+krb5_boolean k5_get_os_entropy(unsigned char *buf, size_t len);
+
 /* prng.h */
 struct krb5_prng_provider {
     char prng_name[8];
