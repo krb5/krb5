@@ -28,7 +28,7 @@ t_fortuna: t_fortuna.$(OBJEXT) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o t_fortuna t_fortuna.$(OBJEXT) -lcom_err $(SUPPORT_LIB) \
 		$(CRYPTO_DEPLIB)
 
-check-unix:: t_fortuna t_fortuna_make_oct
+check-unix:: t_fortuna
 	$(RUN_SETUP) $(VALGRIND) ./t_fortuna >t_fortuna.output
 	cmp t_fortuna.output $(srcdir)/t_fortuna.expected
 
