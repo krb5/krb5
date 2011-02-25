@@ -143,6 +143,7 @@ SRCS=\
 	$(srcdir)/state.c 		\
 	$(srcdir)/string_to_cksumtype.c	\
 	$(srcdir)/string_to_key.c	\
+	$(srcdir)/t_fortuna.c		\
 	$(srcdir)/valid_cksumtype.c	\
 	$(srcdir)/verify_checksum.c	\
 	$(srcdir)/verify_checksum_iov.c
