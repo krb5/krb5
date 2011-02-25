@@ -21,16 +21,19 @@ DEFS=
 STLIBOBJS=\
 	hmac.o	\
 	pbkdf2.o \
+	prng.o \
 	stubs.o
 
 OBJS=\
 	$(OUTPRE)hmac.$(OBJEXT)	\
 	$(OUTPRE)pbkdf2.$(OBJEXT) \
+	$(OUTPRE)prng.$(OBJEXT) \
 	$(OUTPRE)stubs.$(OBJEXT)
 
 SRCS=\
 	$(srcdir)/hmac.c	\
 	$(srcdir)/pbkdf2.c	\
+	$(srcdir)/prng.c	\
 	$(srcdir)/stubs.c
 
 STOBJLISTS= des/OBJS.ST md4/OBJS.ST 	\

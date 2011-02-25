@@ -1,9 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/nss/nss_prng.h - Declarations for NSS PRNG wrappers */
 /*
- * lib/crypto/krb/prng/nss/prng_nss.h
- *
- * Copyright 2010 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright (C) 2011 by the Massachusetts Institute of Technology.
+ * All rights reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -25,12 +24,13 @@
  * or implied warranty.
  */
 
-#ifndef PRNG_NSS_H
-#define PRNG_NSS_H
+#ifndef NSS_PRNG_H
+#define NSS_PRNG_H
 
-#include "k5-int.h"
-#include "prng.h"
+krb5_error_code
+k5_nss_prng_add_entropy(krb5_context context, const krb5_data *indata);
 
-extern const struct krb5_prng_provider krb5int_prng_nss;
+krb5_error_code
+k5_nss_prng_make_octets(krb5_context context, krb5_data *outdata);
 
-#endif
+#endif /* NSS_PRNG_H */

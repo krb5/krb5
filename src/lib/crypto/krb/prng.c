@@ -26,62 +26,13 @@
 
 #include "prng.h"
 
-#ifdef FORTUNA
-extern struct krb5_prng_provider krb5int_prng_fortuna;
-const struct krb5_prng_provider *prng = &krb5int_prng_fortuna;
-#elif defined(CRYPTO_IMPL_NSS)
-#include "prng_nss.h"
-const struct krb5_prng_provider *prng = &krb5int_prng_nss;
-#endif
-
-/*
- * krb5int_prng_init - Returns 0 on success
- */
-int
-krb5int_prng_init(void)
-{
-    return prng->init();
-}
-
-/*
- * krb5_c_random_add_entropy - Returns 0 on success
- */
-krb5_error_code KRB5_CALLCONV
-krb5_c_random_add_entropy(krb5_context context, unsigned int randsource,
-                          const krb5_data *data)
-{
-    return prng->add_entropy(context, randsource, data);
-}
-
-/*
- * krb5_c_random_seed - Returns 0 on success
- */
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_seed(krb5_context context, krb5_data *data)
 {
     return krb5_c_random_add_entropy(context, KRB5_C_RANDSOURCE_OLDAPI, data);
 }
 
-/*
- * krb5_c_random_make_octets -  Returns 0 on success
- */
-krb5_error_code KRB5_CALLCONV
-krb5_c_random_make_octets(krb5_context context, krb5_data *data)
-{
-    return prng->make_octets(context, data);
-}
-
-void
-krb5int_prng_cleanup(void)
-{
-    prng->cleanup();
-}
-
-
-/*
- * Routines to get entropy from the OS.  For UNIX we try /dev/urandom
- * and /dev/random.  Currently we don't do anything for Windows.
- */
+/* Routines to get entropy from the OS. */
 #if defined(_WIN32)
 
 krb5_boolean

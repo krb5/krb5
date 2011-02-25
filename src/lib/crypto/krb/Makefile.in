@@ -1,18 +1,18 @@
 mydir=lib$(S)crypto$(S)krb
 BUILDTOP=$(REL)..$(S)..$(S)..
-SUBDIRS= arcfour checksum crc32 dk prf rand2key old raw prng 
+SUBDIRS= arcfour checksum crc32 dk prf rand2key old raw 
 LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/../$(CRYPTO_IMPL)/enc_provider \
 		-I$(srcdir)/dk -I$(srcdir)/../$(CRYPTO_IMPL)/hash_provider \
 		-I$(srcdir)/prf -I$(srcdir)/rand2key \
 		-I$(srcdir)/old -I$(srcdir)/raw \
-		-I$(srcdir)/prng \
-		-I$(srcdir)/prng/$(PRNG_ALG) \
 		-I$(srcdir)/../$(CRYPTO_IMPL) \
 		-I$(srcdir)/../$(CRYPTO_IMPL)/des \
 		-I$(srcdir)/../$(CRYPTO_IMPL)/aes -I$(srcdir)/arcfour 	\
+		-I$(srcdir)/../$(CRYPTO_IMPL)/sha2 \
 		-I$(srcdir)/../$(CRYPTO_IMPL)/camellia \
 		-I$(srcdir)/../$(CRYPTO_IMPL)/sha1 \
 		-I$(srcdir)/../$(CRYPTO_IMPL)
+RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=
@@ -55,6 +55,8 @@ STLIBOBJS=\
 	nfold.o			\
 	old_api_glue.o		\
 	prf.o			\
+	prng.o			\
+	prng_$(PRNG_ALG).o	\
 	random_to_key.o		\
 	state.o 		\
 	string_to_cksumtype.o	\
@@ -94,6 +96,8 @@ OBJS=\
 	$(OUTPRE)nfold.$(OBJEXT)		\
 	$(OUTPRE)old_api_glue.$(OBJEXT)		\
 	$(OUTPRE)prf.$(OBJEXT) 			\
+	$(OUTPRE)prng.$(OBJEXT)			\
+	$(OUTPRE)prng_$(PRNG_ALG).$(OBJEXT)	\
 	$(OUTPRE)random_to_key.$(OBJEXT)	\
 	$(OUTPRE)state.$(OBJEXT) 		\
 	$(OUTPRE)string_to_cksumtype.$(OBJEXT)	\
@@ -132,6 +136,8 @@ SRCS=\
 	$(srcdir)/nfold.c		\
 	$(srcdir)/old_api_glue.c	\
 	$(srcdir)/prf.c 		\
+	$(srcdir)/prng.c 		\
+	$(srcdir)/prng_$(PRNG_ALG).c	\
 	$(srcdir)/cf2.c 		\
 	$(srcdir)/random_to_key.c	\
 	$(srcdir)/state.c 		\
@@ -143,11 +149,11 @@ SRCS=\
 
 STOBJLISTS=arcfour/OBJS.ST checksum/OBJS.ST crc32/OBJS.ST	\
 	dk/OBJS.ST prf/OBJS.ST rand2key/OBJS.ST			\
-	old/OBJS.ST raw/OBJS.ST  prng/$(PRNG_ALG)/OBJS.ST prng/OBJS.ST OBJS.ST
+	old/OBJS.ST raw/OBJS.ST OBJS.ST
 
 SUBDIROBJLISTS=arcfour/OBJS.ST checksum/OBJS.ST crc32/OBJS.ST	\
 	dk/OBJS.ST prf/OBJS.ST rand2key/OBJS.ST			\
-	old/OBJS.ST raw/OBJS.ST  prng/$(PRNG_ALG)/OBJS.ST prng/OBJS.ST  
+	old/OBJS.ST raw/OBJS.ST
 
 ##DOS##LIBOBJS = $(OBJS)
 
@@ -155,6 +161,15 @@ all-unix:: all-libobjs
 includes:: depend
 
 depend:: $(SRCS)
+
+check-unix:: t_fortuna
+	if [ $(PRNG_ALG) = fortuna ]; then \
+		$(RUN_SETUP) $(VALGRIND) ./t_fortuna > t_fortuna.output; \
+		cmp t_fortuna.output $(srcdir)/t_fortuna.expected; \
+	fi
+
+t_fortuna: t_fortuna.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
+	$(CC_LINK) -o t_fortuna t_fortuna.o $(K5CRYPTO_LIB) $(SUPPORT_LIB)
 
 clean-unix:: clean-libobjs
 

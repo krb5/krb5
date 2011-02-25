@@ -1,9 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/nss/prng.c - NSS prng functions */
 /*
- * lib/crypto/krb/prng/prng.h
- *
- * Copyright 2010 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright (C) 2011 by the Massachusetts Institute of Technology.
+ * All rights reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -25,23 +24,34 @@
  * or implied warranty.
  */
 
-
-#ifndef PRNG_H
-#define PRNG_H
-
 #include "k5-int.h"
+#include "nss_gen.h"
+#include "nss_prng.h"
+#include <pk11pub.h>
 
-/* Used by PRNG implementations to gather OS entropy.  Returns true on
- * success. */
-krb5_boolean k5_get_os_entropy(unsigned char *buf, size_t len);
+krb5_error_code
+k5_nss_prng_add_entropy(krb5_context context, const krb5_data *indata)
+{
+    krb5_error_code ret;
 
-/* prng.h */
-struct krb5_prng_provider {
-    char prng_name[8];
-    krb5_error_code (*make_octets)(krb5_context, krb5_data *);
-    krb5_error_code (*add_entropy)(krb5_context, unsigned int randsource, const krb5_data*);
-    int (*init)(void);
-    void (*cleanup)(void);
-};
+    ret = k5_nss_init();
+    if (ret)
+        return ret;
+    if (PK11_RandomUpdate(indata->data, indata->length) != SECSuccess)
+        return k5_nss_map_last_error();
+    return 0;
+}
 
-#endif
+krb5_error_code
+k5_nss_prng_make_octets(krb5_context context, krb5_data *outdata)
+{
+    krb5_error_code ret;
+
+    ret = k5_nss_init();
+    if (ret)
+        return ret;
+    if (PK11_GenerateRandom((unsigned char *)outdata->data,
+                            outdata->length) != SECSuccess)
+        return k5_nss_map_last_error();
+    return 0;
+}

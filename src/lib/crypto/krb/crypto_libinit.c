@@ -1,12 +1,10 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 #include <assert.h>
 #include "k5-int.h"
+#include "prng.h"
 
 MAKE_INIT_FUNCTION(cryptoint_initialize_library);
 MAKE_FINI_FUNCTION(cryptoint_cleanup_library);
-
-extern int krb5int_prng_init(void);
-extern void krb5int_prng_cleanup (void);
 
 /*
  * Initialize the crypto library.
@@ -15,7 +13,7 @@ extern void krb5int_prng_cleanup (void);
 int cryptoint_initialize_library (void)
 {
     int err;
-    err = krb5int_prng_init();
+    err = k5_prng_init();
     if (err)
         return err;
     return krb5int_crypto_impl_init();
@@ -34,6 +32,6 @@ void cryptoint_cleanup_library (void)
 {
     if (!INITIALIZER_RAN(cryptoint_initialize_library))
         return;
-    krb5int_prng_cleanup();
+    k5_prng_cleanup();
     krb5int_crypto_impl_cleanup();
 }

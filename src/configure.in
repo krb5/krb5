@@ -1123,8 +1123,7 @@ V5_AC_OUTPUT_MAKEFILE(.
 	lib/crypto/krb/old lib/crypto/krb/raw
         lib/crypto/$CRYPTO_IMPL/sha1
         lib/crypto/$CRYPTO_IMPL/sha2
-	lib/crypto/krb/arcfour lib/crypto/krb/prng
-	lib/crypto/krb/prng/$PRNG_ALG
+	lib/crypto/krb/arcfour
 	lib/crypto/$CRYPTO_IMPL/aes
 	lib/crypto/$CRYPTO_IMPL/camellia lib/crypto/crypto_tests
 

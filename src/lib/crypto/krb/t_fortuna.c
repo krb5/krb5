@@ -56,6 +56,9 @@
  * or implied warranty.
  */
 
+#include "k5-int.h"
+#ifdef FORTUNA
+
 /* Include most of prng_fortuna.c so we can test the PRNG internals. */
 #define TEST
 #include "prng_fortuna.c"
@@ -163,3 +166,13 @@ main(int argc, char **argv)
     head_tail_test(st);
     return 0;
 }
+
+#else /* FORTUNA */
+
+int
+main()
+{
+    return 0;
+}
+
+#endif /* FORTUNA */

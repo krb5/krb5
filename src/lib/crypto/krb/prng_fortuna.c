@@ -354,8 +354,8 @@ static struct fortuna_state main_state;
 static pid_t last_pid;
 static krb5_boolean have_entropy = FALSE;
 
-static int
-fortuna_init(void)
+int
+k5_prng_init(void)
 {
     krb5_error_code ret = 0;
     unsigned char osbuf[64];
@@ -374,17 +374,17 @@ fortuna_init(void)
     return 0;
 }
 
-static void
-fortuna_cleanup(void)
+void
+k5_prng_cleanup(void)
 {
     have_entropy = FALSE;
     zap(&main_state, sizeof(main_state));
     k5_mutex_destroy(&fortuna_lock);
 }
 
-static krb5_error_code
-fortuna_add_entropy(krb5_context context, unsigned int randsource,
-                    const krb5_data *indata)
+krb5_error_code KRB5_CALLCONV
+krb5_c_random_add_entropy(krb5_context context, unsigned int randsource,
+                          const krb5_data *indata)
 {
     krb5_error_code ret;
 
@@ -411,8 +411,8 @@ fortuna_add_entropy(krb5_context context, unsigned int randsource,
     return 0;
 }
 
-static krb5_error_code
-fortuna_make_octets(krb5_context context, krb5_data *outdata)
+krb5_error_code KRB5_CALLCONV
+krb5_c_random_make_octets(krb5_context context, krb5_data *outdata)
 {
     krb5_error_code ret;
     pid_t pid = getpid();
@@ -437,13 +437,5 @@ fortuna_make_octets(krb5_context context, krb5_data *outdata)
     k5_mutex_unlock(&fortuna_lock);
     return 0;
 }
-
-const struct krb5_prng_provider krb5int_prng_fortuna = {
-    "fortuna",
-    fortuna_make_octets,
-    fortuna_add_entropy,
-    fortuna_init,
-    fortuna_cleanup
-};
 
 #endif /* not TEST */

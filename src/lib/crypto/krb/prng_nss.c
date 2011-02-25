@@ -30,63 +30,34 @@
 #include <assert.h>
 #include "k5-thread.h"
 
-#ifdef CRYPTO_IMPL_NSS
-
 /*
- * Using Fortuna with NSS is a bit problematic because the MD5 contexts it
- * holds open for the entropy pools would be invalidated by a fork(), causing
- * us to lose the entropy contained therein.
- *
- * Therefore, use the NSS PRNG if NSS is the crypto implementation.
+ * This PRNG module should be used whenever the NSS crypto implementation is
+ * used.  The Fortuna module does not work with NSS because it needs to hold
+ * AES-256 and SHA-256 contexts across forks.
  */
 
-#include "../nss/nss_gen.h"
-#include <pk11pub.h>
+#include "nss_prng.h"
 
-static int
-nss_init(void)
+int
+k5_prng_init(void)
 {
     return 0;
 }
 
-static krb5_error_code
-nss_add_entropy(krb5_context context, unsigned int randsource,
-                          const krb5_data *data)
-{
-    krb5_error_code ret;
-
-    ret = k5_nss_init();
-    if (ret)
-        return ret;
-    if (PK11_RandomUpdate(data->data, data->length) != SECSuccess)
-        return k5_nss_map_last_error();
-    return 0;
-}
-
-static krb5_error_code
-nss_make_octets(krb5_context context, krb5_data *data)
-{
-    krb5_error_code ret;
-
-    ret = k5_nss_init();
-    if (ret)
-        return ret;
-    if (PK11_GenerateRandom((unsigned char *)data->data,
-                            data->length) != SECSuccess)
-        return k5_nss_map_last_error();
-    return 0;
-}
-
-static void
-nss_cleanup (void)
+void
+k5_prng_cleanup(void)
 {
 }
 
-const struct krb5_prng_provider krb5int_prng_nss = {
-    "nss",
-    nss_make_octets,
-    nss_add_entropy,
-    nss_init,
-    nss_cleanup
-};
-#endif
+krb5_error_code KRB5_CALLCONV
+krb5_c_random_add_entropy(krb5_context context, unsigned int randsource,
+                          const krb5_data *indata)
+{
+    return k5_nss_prng_add_entropy(context, indata);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_c_random_make_octets(krb5_context context, krb5_data *outdata)
+{
+    return k5_nss_prng_make_octets(context, outdata);
+}
