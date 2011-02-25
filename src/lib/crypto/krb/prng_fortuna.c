@@ -135,25 +135,25 @@ shad256_init(SHA256_CTX *ctx)
 
     /* Initialize the inner SHA-256 context and update it with a zero block. */
     memset(zero, 0, sizeof(zero));
-    sha2Init(ctx);
-    sha2Update(ctx, zero, sizeof(zero));
+    k5_sha256_init(ctx);
+    k5_sha256_update(ctx, zero, sizeof(zero));
 }
 
 static void
 shad256_update(SHA256_CTX *ctx, const unsigned char *data, int len)
 {
     /* Feed the input to the inner SHA-256 context. */
-    sha2Update(ctx, data, len);
+    k5_sha256_update(ctx, data, len);
 }
 
 static void
 shad256_result(SHA256_CTX *ctx, unsigned char *dst)
 {
     /* Finalize the inner context, then feed the result back through SHA256. */
-    sha2Final(dst, ctx);
-    sha2Init(ctx);
-    sha2Update(ctx, dst, SHA256_HASHSIZE);
-    sha2Final(dst, ctx);
+    k5_sha256_final(dst, ctx);
+    k5_sha256_init(ctx);
+    k5_sha256_update(ctx, dst, SHA256_HASHSIZE);
+    k5_sha256_final(dst, ctx);
 }
 
 /* Initialize state. */

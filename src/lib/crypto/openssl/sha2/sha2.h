@@ -31,8 +31,8 @@
 
 #define _SHA2_DEFINED
 
-#define sha2Init SHA256_Init
-#define sha2Update SHA256_Update 
-#define sha2Final SHA256_Final
+#define k5_sha256_init SHA256_Init
+#define k5_sha256_update SHA256_Update
+#define k5_sha256_final SHA256_Final
 
 #endif /* _SHA2_DEFINED */

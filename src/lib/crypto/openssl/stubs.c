@@ -39,9 +39,9 @@
  */
 void krb5int_aes_enc_blk(void);
 void krb5int_aes_enc_key(void);
-void sha2Final(void);
-void sha2Init(void);
-void sha2Update(void);
+void k5_sha256_final(void);
+void k5_sha256_init(void);
+void k5_sha256_update(void);
 
 void krb5int_aes_enc_blk(void)
 {
@@ -53,17 +53,17 @@ void krb5int_aes_enc_key(void)
     abort();
 }
 
-void sha2Final(void)
+void k5_sha256_final(void)
 {
     abort();
 }
 
-void sha2Init(void)
+void k5_sha256_init(void)
 {
     abort();
 }
 
-void sha2Update(void)
+void k5_sha256_update(void)
 {
     abort();
 }

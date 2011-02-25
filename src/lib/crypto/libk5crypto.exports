@@ -102,8 +102,8 @@ krb5int_enc_aes256
 krb5int_enc_camellia128
 krb5int_enc_camellia256
 krb5int_derive_key
-sha2Final
-sha2Init
-sha2Update
 krb5int_aes_enc_blk
 krb5int_aes_enc_key
+k5_sha256_final
+k5_sha256_init
+k5_sha256_update

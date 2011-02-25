@@ -1,4 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/builtin/sha2/sha2.h - SHA-256 declarations */
 /*
  * Copyright (c) 1995 - 2001 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
@@ -32,47 +33,10 @@
  * SUCH DAMAGE.
  */
 
-/* $Id$ */
-
-#ifndef HEIM_SHA_H
-#define HEIM_SHA_H 1
+#ifndef SHA2_H
+#define SHA2_H 1
 
 #include <k5-int.h>
-/*
-#include <stdlib.h>
-#include <string.h>
-#include <stddef.h>
-#ifdef KRB5
-#include <krb5-types.h>
-#endif
-*/
-#ifndef min
-#define min(a,b) (((a)>(b))?(b):(a))
-#endif
-
-/* Vector Crays doesn't have a good 32-bit type, or more precisely,
- * int32_t as defined by <bind/bitypes.h> isn't 32 bits, and we don't
- * want to depend in being able to redefine this type.  To cope with
- * this we have to clamp the result in some places to [0,2^32); no
- * need to do this on other machines.  Did I say this was a mess?
- */
-
-#ifdef _CRAY
-#define CRAYFIX(X) ((X) & 0xffffffff)
-#else
-#define CRAYFIX(X) (X)
-#endif
-
-static inline uint32_t
-cshift (uint32_t x, unsigned int n)
-{
-    x = CRAYFIX(x);
-    return CRAYFIX((x << n) | (x >> (32 - n)));
-}
-
-/*
- * SHA-2 256
- */
 
 #define SHA256_DIGEST_LENGTH 32
 
@@ -84,8 +48,8 @@ struct sha256state {
 
 typedef struct sha256state SHA256_CTX;
 
-void sha2Init (SHA256_CTX *);
-void sha2Update (SHA256_CTX *, const void *, size_t);
-void sha2Final (void *, SHA256_CTX *);
+void k5_sha256_init(SHA256_CTX *);
+void k5_sha256_update(SHA256_CTX *, const void *, size_t);
+void k5_sha256_final(void *, SHA256_CTX *);
 
-#endif /* HEIM_SHA_H */
+#endif /* SHA2_H */
