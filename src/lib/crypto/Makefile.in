@@ -59,8 +59,8 @@ SHLIB_LIBDIRS= @SHLIB_LIBDIRS@
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
 ##DOS##LIBNAME=$(OUTPRE)crypto.lib
-##DOS##OBJFILEDEP=$(OUTPRE)crc32.lst $(OUTPRE)rand2key.lst $(OUTPRE)yarrow.lst $(OUTPRE)prng.lst $(OUTPRE)prf.lst $(OUTPRE)checksum.lst $(OUTPRE)krb.lst $(OUTPRE)old.lst $(OUTPRE)raw.lst $(OUTPRE)arcfour.lst $(OUTPRE)dk.lst $(OUTPRE)aes.lst $(OUTPRE)enc_provider.lst $(OUTPRE)des.lst $(OUTPRE)md5.lst $(OUTPRE)camellia.lst $(OUTPRE)md4.lst $(OUTPRE)hash_provider.lst $(OUTPRE)sha2.lst $(OUTPRE)sha1.lst $(OUTPRE)builtin.lst
-##DOS##OBJFILELIST=@$(OUTPRE)crc32.lst @$(OUTPRE)rand2key.lst @$(OUTPRE)yarrow.lst @$(OUTPRE)prng.lst @$(OUTPRE)prf.lst @$(OUTPRE)checksum.lst @$(OUTPRE)krb.lst @$(OUTPRE)old.lst @$(OUTPRE)raw.lst @$(OUTPRE)arcfour.lst @$(OUTPRE)dk.lst @$(OUTPRE)aes.lst @$(OUTPRE)enc_provider.lst @$(OUTPRE)des.lst @$(OUTPRE)md5.lst @$(OUTPRE)camellia.lst @$(OUTPRE)md4.lst @$(OUTPRE)hash_provider.lst @$(OUTPRE)sha2.lst @$(OUTPRE)sha1.lst @$(OUTPRE)builtin.lst
+##DOS##OBJFILEDEP=$(OUTPRE)crc32.lst $(OUTPRE)rand2key.lst $(OUTPRE)fortuna.lst $(OUTPRE)prng.lst $(OUTPRE)prf.lst $(OUTPRE)checksum.lst $(OUTPRE)krb.lst $(OUTPRE)old.lst $(OUTPRE)raw.lst $(OUTPRE)arcfour.lst $(OUTPRE)dk.lst $(OUTPRE)aes.lst $(OUTPRE)enc_provider.lst $(OUTPRE)des.lst $(OUTPRE)md5.lst $(OUTPRE)camellia.lst $(OUTPRE)md4.lst $(OUTPRE)hash_provider.lst $(OUTPRE)sha2.lst $(OUTPRE)sha1.lst $(OUTPRE)builtin.lst
+##DOS##OBJFILELIST=@$(OUTPRE)crc32.lst @$(OUTPRE)rand2key.lst @$(OUTPRE)fortuna.lst @$(OUTPRE)prng.lst @$(OUTPRE)prf.lst @$(OUTPRE)checksum.lst @$(OUTPRE)krb.lst @$(OUTPRE)old.lst @$(OUTPRE)raw.lst @$(OUTPRE)arcfour.lst @$(OUTPRE)dk.lst @$(OUTPRE)aes.lst @$(OUTPRE)enc_provider.lst @$(OUTPRE)des.lst @$(OUTPRE)md5.lst @$(OUTPRE)camellia.lst @$(OUTPRE)md4.lst @$(OUTPRE)hash_provider.lst @$(OUTPRE)sha2.lst @$(OUTPRE)sha1.lst @$(OUTPRE)builtin.lst
 
 all-unix:: all-liblinks
 install-unix:: install-libs

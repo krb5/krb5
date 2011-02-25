@@ -10,6 +10,10 @@ RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
+##DOS##BUILDTOP = ..\..\..\..\..
+##DOS##PREFIXDIR = krb\prng\fortuna
+##DOS##OBJFILE = ..\..\..\$(OUTPRE)fortuna.lst
+
 STLIBOBJS= \
 	prng_fortuna.o
 OBJS= \
@@ -17,6 +21,8 @@ OBJS= \
 
 SRCS=\
 	$(srcdir)/prng_fortuna.c 
+
+##DOS##LIBOBJS = $(OBJS)
 
 all-unix:: all-libobjs
 
