@@ -37,17 +37,13 @@ EXTRADEPSRCS=\
 	$(srcdir)/t_short.c	\
 	$(srcdir)/t_str2key.c	\
 	$(srcdir)/t_derive.c	\
-	$(srcdir)/t_fork.c	\
-	$(srcdir)/ytest.c	
+	$(srcdir)/t_fork.c
 
 ##DOS##BUILDTOP = ..\..\..
 
 # NOTE: The t_cksum known checksum values are primarily for regression
 # testing.  They are not derived a priori, but are known to produce
 # checksums that interoperate.
-#
-# We use the NSS PRNG when NSS is the crypto back end, so don't test
-# against the expected output for Yarrow.
 check-unix:: t_nfold t_encrypt t_decrypt t_prf t_prng t_cmac t_hmac \
 		t_cksum4 t_cksum5 t_cksums \
 		aes-test  \
@@ -58,9 +54,6 @@ check-unix:: t_nfold t_encrypt t_decrypt t_prf t_prng t_cmac t_hmac \
 	$(RUN_SETUP) $(VALGRIND) ./t_encrypt
 	$(RUN_SETUP) $(VALGRIND) ./t_decrypt
 	$(RUN_SETUP) $(VALGRIND) ./t_prng <$(srcdir)/t_prng.seed >t_prng.output
-	if [ $(PRNG_ALG) = yarrow ]; then \
-		diff t_prng.output $(srcdir)/t_prng.expected; \
-	fi
 	$(RUN_SETUP) $(VALGRIND) ./t_cmac
 	$(RUN_SETUP) $(VALGRIND) ./t_hmac
 	$(RUN_SETUP) $(VALGRIND) ./t_prf <$(srcdir)/t_prf.in >t_prf.output
@@ -171,11 +164,6 @@ t_derive$(EXEEXT): t_derive.$(OBJEXT) $(SUPPORT_DEPLIB)
 
 t_fork$(EXEEXT): t_fork.$(OBJEXT) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_fork.$(OBJEXT) -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
-
-ytest: ytest.o shs.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o ytest ytest.o  $(SUPPORT_LIB)  $(CRYPTO_DEPLIB)
-
-
 
 clean::
 	$(RM) t_nfold.o t_nfold nfold.$(OBJEXT) t_encrypt t_encrypt.o \

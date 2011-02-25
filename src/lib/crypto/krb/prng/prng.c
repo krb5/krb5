@@ -32,9 +32,6 @@ const struct krb5_prng_provider *prng = &krb5int_prng_fortuna;
 #elif defined(CRYPTO_IMPL_NSS)
 #include "prng_nss.h"
 const struct krb5_prng_provider *prng = &krb5int_prng_nss;
-#else
-#include "yarrow.h"
-const struct krb5_prng_provider *prng = &krb5int_prng_yarrow;
 #endif
 
 /*
@@ -168,7 +165,7 @@ static krb5_boolean
 add_entropy_from_device(krb5_context context, const char *device)
 {
     krb5_data data;
-    unsigned char buf[ENTROPY_BUFSIZE];
+    unsigned char buf[64];
 
     if (!read_entropy_from_device(device, buf, sizeof(buf)))
         return FALSE;

@@ -246,8 +246,6 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\krb\prng\fortuna\Makefile: lib\crypto\krb\prng\fortuna\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\krb\prng\yarrow\Makefile: lib\crypto\krb\prng\yarrow\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\krb\prng\Makefile: lib\crypto\krb\prng\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\krb\prf\Makefile: lib\crypto\krb\prf\Makefile.in $(MKFDEP)
@@ -365,7 +363,7 @@ FILES= ./* appl/* appl/gss-sample/* \
 	include/krb5/* lib/* lib/crypto/* lib/crypto/krb/* \
 	lib/crypto/krb/crc32/* lib/crypto/krb/rand2key/* \
 	lib/crypto/krb/prng/fortuna/* lib/crypto/krb/prng/nss/* \
-	lib/crypto/krb/prng/yarrow/* lib/crypto/krb/prng/* \
+	lib/crypto/krb/prng/* \
 	lib/crypto/krb/prf/* lib/crypto/krb/checksum/* lib/crypto/krb/old/* \
 	lib/crypto/krb/raw/* lib/crypto/krb/arcfour/* lib/crypto/krb/dk/* \
 	lib/crypto/builtin/aes/* lib/crypto/builtin/enc_provider/* \

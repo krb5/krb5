@@ -31,19 +31,6 @@
 
 #include "k5-int.h"
 
-#if defined(FORTUNA)
-#define ENTROPY_BUFSIZE 32  /* SHA256 digest length */
-#elif defined(CRYPTO_IMPL_NSS)
-/*
- * NSS gathers its own OS entropy, so it doesn't really matter how much we read
- * in krb5_c_random_os_entropy.  Use the same value as Yarrow (without using a
- * Yarrow constant), so that we don't read too much from /dev/random.
- */
-#define ENTROPY_BUFSIZE 20
-#else
-#define ENTROPY_BUFSIZE YARROW_SLOW_THRESH/8  /* SHA1 digest length*/
-#endif
-
 /* Used by PRNG implementations to gather OS entropy.  Returns true on
  * success. */
 krb5_boolean k5_get_os_entropy(unsigned char *buf, size_t len);

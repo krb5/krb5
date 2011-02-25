@@ -33,9 +33,9 @@
 #ifdef CRYPTO_IMPL_NSS
 
 /*
- * Using Yarrow with NSS is a bit problematic because the MD5 contexts it holds
- * open for the entropy pools would be invalidated by a fork(), causing us to
- * lose the entropy contained therein.
+ * Using Fortuna with NSS is a bit problematic because the MD5 contexts it
+ * holds open for the entropy pools would be invalidated by a fork(), causing
+ * us to lose the entropy contained therein.
  *
  * Therefore, use the NSS PRNG if NSS is the crypto implementation.
  */
