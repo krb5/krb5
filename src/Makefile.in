@@ -170,7 +170,7 @@ WINMAKEFILES=Makefile \
 	include\Makefile \
 	lib\Makefile lib\crypto\Makefile lib\crypto\krb\Makefile \
 	lib\crypto\krb\crc32\Makefile lib\crypto\krb\rand2key\Makefile \
-	lib\crypto\krb\prng\Makefile lib\crypto\krb\prng\yarrow\Makefile \
+	lib\crypto\krb\prng\Makefile lib\crypto\krb\prng\fortuna\Makefile \
 	lib\crypto\krb\prf\Makefile lib\crypto\krb\checksum\Makefile \
 	lib\crypto\krb\old\Makefile lib\crypto\krb\raw\Makefile \
 	lib\crypto\krb\arcfour\Makefile lib\crypto\krb\dk\Makefile \
