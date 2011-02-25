@@ -77,9 +77,7 @@
 #include "k5-int.h"
 #include "prng.h"
 #include "aes.h"
-#include "enc_provider.h"
 #include "sha2.h"
-#include "enc_provider.h"
 
 /* The accumulator's number of pools. */
 #define NUM_POOLS 32
