@@ -499,6 +499,17 @@ static int open_db_and_mkey()
         return(1);
     }
 
+    if (global_params.iprop_enabled) {
+        if (ulog_map(util_context, global_params.iprop_logfile,
+                     global_params.iprop_ulogsize, FKCOMMAND,
+                     db5util_db_args)) {
+            fprintf(stderr, _("%s: Could not map log\n"),
+                    progname);
+            exit_status++;
+            return(1);
+        }
+    }
+
     valid_master_key = 1;
     dbactive = TRUE;
     return 0;
