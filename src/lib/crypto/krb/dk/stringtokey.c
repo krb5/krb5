@@ -35,7 +35,6 @@ krb5int_dk_string_to_key(const struct krb5_keytypes *ktp,
                          const krb5_data *string, const krb5_data *salt,
                          const krb5_data *parms, krb5_keyblock *keyblock)
 {
-    const struct krb5_enc_provider *enc = ktp->enc;
     krb5_error_code ret;
     size_t keybytes, keylength, concatlen;
     unsigned char *concat = NULL, *foldstring = NULL, *foldkeydata = NULL;
@@ -45,8 +44,8 @@ krb5int_dk_string_to_key(const struct krb5_keytypes *ktp,
 
     /* keyblock->length is checked by krb5int_derive_key. */
 
-    keybytes = enc->keybytes;
-    keylength = enc->keylength;
+    keybytes = ktp->enc->keybytes;
+    keylength = ktp->enc->keylength;
 
     concatlen = string->length + (salt ? salt->length : 0);
 
@@ -74,7 +73,7 @@ krb5int_dk_string_to_key(const struct krb5_keytypes *ktp,
     foldkeyblock.contents = foldkeydata;
     foldkeyblock.enctype = ktp->etype;
 
-    ret = enc->make_key(&indata, &foldkeyblock);
+    ret = ktp->rand2key(&indata, &foldkeyblock);
     if (ret != 0)
         goto cleanup;
 
@@ -87,7 +86,7 @@ krb5int_dk_string_to_key(const struct krb5_keytypes *ktp,
     indata.length = kerberos_len;
     indata.data = (char *) kerberos;
 
-    ret = krb5int_derive_keyblock(enc, foldkey, keyblock, &indata,
+    ret = krb5int_derive_keyblock(ktp->enc, foldkey, keyblock, &indata,
                                   DERIVE_RFC3961);
     if (ret != 0)
         memset(keyblock->contents, 0, keyblock->length);

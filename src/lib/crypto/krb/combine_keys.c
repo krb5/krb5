@@ -157,7 +157,7 @@ krb5int_c_combine_keys(krb5_context context, krb5_keyblock *key1,
     tkeyblock.length = keylength;
     tkeyblock.contents = output;
 
-    ret = (*enc->make_key)(&randbits, &tkeyblock);
+    ret = (*ktp->rand2key)(&randbits, &tkeyblock);
     if (ret)
         goto cleanup;
 

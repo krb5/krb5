@@ -28,7 +28,6 @@
 #include "enc_provider.h"
 #include "camellia.h"
 #include <aead.h>
-#include <rand2key.h>
 
 #ifdef CAMELLIA
 
@@ -329,7 +328,6 @@ const struct krb5_enc_provider krb5int_enc_camellia128 = {
     krb5int_camellia_encrypt,
     krb5int_camellia_decrypt,
     krb5int_camellia_cbc_mac,
-    krb5int_camellia_make_key,
     camellia_init_state,
     krb5int_default_free_state,
 };
@@ -340,7 +338,6 @@ const struct krb5_enc_provider krb5int_enc_camellia256 = {
     krb5int_camellia_encrypt,
     krb5int_camellia_decrypt,
     krb5int_camellia_cbc_mac,
-    krb5int_camellia_make_key,
     camellia_init_state,
     krb5int_default_free_state
 };

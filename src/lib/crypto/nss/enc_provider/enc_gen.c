@@ -36,7 +36,6 @@
 #include "k5-int.h"
 #include "nss_gen.h"
 #include "enc_provider.h"
-#include "rand2key.h"
 #include "aead.h"
 #include "seccomon.h"
 #include "secmod.h"

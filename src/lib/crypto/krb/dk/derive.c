@@ -252,7 +252,7 @@ krb5int_derive_keyblock(const struct krb5_enc_provider *enc,
         goto cleanup;
 
     /* Postprocess the key. */
-    ret = enc->make_key(&rawkey, outkey);
+    ret = krb5_c_random_to_key(NULL, inkey->keyblock.enctype, &rawkey, outkey);
 
 cleanup:
     zapfree(rawkey.data, enc->keybytes);

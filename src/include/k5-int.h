@@ -661,9 +661,6 @@ struct krb5_enc_provider {
                                size_t num_data, const krb5_data *ivec,
                                krb5_data *output);
 
-    krb5_error_code (*make_key)(const krb5_data *randombits,
-                                krb5_keyblock *key);
-
     krb5_error_code (*init_state)(const krb5_keyblock *key,
                                   krb5_keyusage keyusage,
                                   krb5_data *out_state);

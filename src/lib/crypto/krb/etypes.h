@@ -48,6 +48,9 @@ typedef krb5_error_code (*str2key_func)(const struct krb5_keytypes *ktp,
                                         const krb5_data *parm,
                                         krb5_keyblock *key);
 
+typedef krb5_error_code (*rand2key_func)(const krb5_data *randombits,
+                                         krb5_keyblock *key);
+
 typedef krb5_error_code (*prf_func)(const struct krb5_keytypes *ktp,
                                     krb5_key key,
                                     const krb5_data *in, krb5_data *out);
@@ -72,6 +75,7 @@ struct krb5_keytypes {
     crypt_func encrypt;
     crypt_func decrypt;
     str2key_func str2key;
+    rand2key_func rand2key;
     prf_func prf;
     init_state_func init_state;
     free_state_func free_state;
@@ -126,5 +130,14 @@ krb5int_init_state_enc(const struct krb5_keytypes *ktp,
 
 void
 krb5int_free_state_enc(const struct krb5_keytypes *ktp, krb5_data *state);
+
+krb5_error_code
+k5_rand2key_direct(const krb5_data *randombits, krb5_keyblock *keyblock);
+
+krb5_error_code
+k5_rand2key_des(const krb5_data *randombits, krb5_keyblock *keyblock);
+
+krb5_error_code
+k5_rand2key_des3(const krb5_data *randombits, krb5_keyblock *keyblock);
 
 #endif

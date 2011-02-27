@@ -136,7 +136,7 @@ krb5_c_fx_cf2_simple(krb5_context context,
         goto cleanup;
     keydata.data = prf1;
     keydata.length = keybytes;
-    retval = (*out_enctype->enc->make_key)(&keydata, out_key);
+    retval = (*out_enctype->rand2key)(&keydata, out_key);
     if (retval)
         goto cleanup;
 

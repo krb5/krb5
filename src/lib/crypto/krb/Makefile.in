@@ -1,10 +1,9 @@
 mydir=lib$(S)crypto$(S)krb
 BUILDTOP=$(REL)..$(S)..$(S)..
-SUBDIRS= arcfour checksum crc32 dk prf rand2key old raw 
+SUBDIRS= arcfour checksum crc32 dk prf old raw 
 LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/../$(CRYPTO_IMPL)/enc_provider \
 		-I$(srcdir)/dk -I$(srcdir)/../$(CRYPTO_IMPL)/hash_provider \
-		-I$(srcdir)/prf -I$(srcdir)/rand2key \
-		-I$(srcdir)/old -I$(srcdir)/raw \
+		-I$(srcdir)/prf -I$(srcdir)/old -I$(srcdir)/raw \
 		-I$(srcdir)/../$(CRYPTO_IMPL) \
 		-I$(srcdir)/../$(CRYPTO_IMPL)/des \
 		-I$(srcdir)/../$(CRYPTO_IMPL)/aes -I$(srcdir)/arcfour 	\
@@ -149,12 +148,10 @@ SRCS=\
 	$(srcdir)/verify_checksum_iov.c
 
 STOBJLISTS=arcfour/OBJS.ST checksum/OBJS.ST crc32/OBJS.ST	\
-	dk/OBJS.ST prf/OBJS.ST rand2key/OBJS.ST			\
-	old/OBJS.ST raw/OBJS.ST OBJS.ST
+	dk/OBJS.ST prf/OBJS.ST old/OBJS.ST raw/OBJS.ST OBJS.ST
 
 SUBDIROBJLISTS=arcfour/OBJS.ST checksum/OBJS.ST crc32/OBJS.ST	\
-	dk/OBJS.ST prf/OBJS.ST rand2key/OBJS.ST			\
-	old/OBJS.ST raw/OBJS.ST
+	dk/OBJS.ST prf/OBJS.ST old/OBJS.ST raw/OBJS.ST
 
 ##DOS##LIBOBJS = $(OBJS)
 

@@ -36,7 +36,6 @@
 #include "k5-int.h"
 #include "nss_gen.h"
 #include <aead.h>
-#include <rand2key.h>
 #include "des_int.h"
 
 
@@ -74,7 +73,6 @@ const struct krb5_enc_provider krb5int_enc_des = {
     k5_des_encrypt_iov,
     k5_des_decrypt_iov,
     NULL,
-    krb5int_des_make_key,
     krb5int_des_init_state,
     krb5int_default_free_state,
     k5_nss_gen_cleanup

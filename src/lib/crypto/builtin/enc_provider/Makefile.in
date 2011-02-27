@@ -5,7 +5,6 @@ LOCALINCLUDES = -I$(srcdir)/../des 	\
 		-I$(srcdir)/../aes 	\
 		-I$(srcdir)/../camellia 	\
 		-I$(srcdir)/../../krb 			\
-		-I$(srcdir)/../../krb/rand2key	 	\
 		-I$(srcdir)/.. -I$(srcdir)/. 
 DEFS=
 

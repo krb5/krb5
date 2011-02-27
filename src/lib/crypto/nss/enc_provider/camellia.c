@@ -35,7 +35,6 @@
 
 #include "k5-int.h"
 #include "enc_provider.h"
-#include "rand2key.h"
 #include "aead.h"
 #include "nss_gen.h"
 
@@ -102,7 +101,6 @@ const struct krb5_enc_provider krb5int_enc_camellia128 = {
     krb5int_camellia_encrypt,
     krb5int_camellia_decrypt,
     krb5int_camellia_cbc_mac,
-    krb5int_camellia_make_key,
     camellia_init_state,
     krb5int_default_free_state,
 };
@@ -113,7 +111,6 @@ const struct krb5_enc_provider krb5int_enc_camellia256 = {
     krb5int_camellia_encrypt,
     krb5int_camellia_decrypt,
     krb5int_camellia_cbc_mac,
-    krb5int_camellia_make_key,
     camellia_init_state,
     krb5int_default_free_state,
     k5_nss_gen_cleanup

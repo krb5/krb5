@@ -52,7 +52,6 @@
 
 #include "k5-int.h"
 #include <aead.h>
-#include <rand2key.h>
 #include <openssl/evp.h>
 #include "des_int.h"
 
@@ -196,7 +195,6 @@ const struct krb5_enc_provider krb5int_enc_des = {
     k5_des_encrypt,
     k5_des_decrypt,
     NULL,
-    krb5int_des_make_key,
     krb5int_des_init_state,
     krb5int_default_free_state
 };

@@ -35,7 +35,6 @@
 
 #include "k5-int.h"
 #include <aead.h>
-#include <rand2key.h>
 #include "nss_gen.h"
 
 #define RC4_KEY_SIZE 16
@@ -95,7 +94,6 @@ const struct krb5_enc_provider krb5int_enc_arcfour = {
     k5_arcfour_encrypt_iov,
     k5_arcfour_decrypt_iov,
     NULL,
-    krb5int_arcfour_make_key,
     k5_arcfour_init_state,
     k5_arcfour_free_state,
     k5_nss_gen_cleanup

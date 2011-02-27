@@ -37,7 +37,6 @@
 
 #include "k5-int.h"
 #include <aead.h>
-#include <rand2key.h>
 #include <openssl/evp.h>
 
 /*
@@ -164,7 +163,6 @@ const struct krb5_enc_provider krb5int_enc_arcfour = {
     k5_arcfour_docrypt,
     k5_arcfour_docrypt,
     NULL,
-    krb5int_arcfour_make_key,
     k5_arcfour_init_state,
     k5_arcfour_free_state
 };

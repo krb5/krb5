@@ -51,8 +51,8 @@ cksumtype_to_string.so cksumtype_to_string.po $(OUTPRE)cksumtype_to_string.$(OBJ
 cksumtypes.so cksumtypes.po $(OUTPRE)cksumtypes.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/enc_provider/enc_provider.h \
-  $(srcdir)/../builtin/hash_provider/hash_provider.h \
+  $(COM_ERR_DEPS) $(srcdir)/../openssl/enc_provider/enc_provider.h \
+  $(srcdir)/../openssl/hash_provider/hash_provider.h \
   $(srcdir)/dk/dk.h $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
@@ -193,8 +193,8 @@ enctype_util.so enctype_util.po $(OUTPRE)enctype_util.$(OBJEXT): \
   etypes.h
 etypes.so etypes.po $(OUTPRE)etypes.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
-  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../builtin/des/des_int.h \
-  $(srcdir)/../builtin/enc_provider/enc_provider.h $(srcdir)/../builtin/hash_provider/hash_provider.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../openssl/des/des_int.h \
+  $(srcdir)/../openssl/enc_provider/enc_provider.h $(srcdir)/../openssl/hash_provider/hash_provider.h \
   $(srcdir)/arcfour/arcfour.h $(srcdir)/dk/dk.h $(srcdir)/old/old.h \
   $(srcdir)/prf/prf_int.h $(srcdir)/raw/raw.h $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
@@ -355,16 +355,15 @@ prng.so prng.po $(OUTPRE)prng.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
 prng_fortuna.so prng_fortuna.po $(OUTPRE)prng_fortuna.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/uitypes.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
-  $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
-  $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
-  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
-  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
-  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
-  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  prng.h prng_fortuna.c
+  $(COM_ERR_DEPS) $(srcdir)/../openssl/aes/aes.h $(srcdir)/../openssl/sha2/sha2.h \
+  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
+  $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
+  $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
+  $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
+  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
+  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
+  $(top_srcdir)/include/socket-utils.h prng.h prng_fortuna.c
 cf2.so cf2.po $(OUTPRE)cf2.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \
@@ -379,7 +378,8 @@ cf2.so cf2.po $(OUTPRE)cf2.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
 random_to_key.so random_to_key.po $(OUTPRE)random_to_key.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(COM_ERR_DEPS) $(srcdir)/../openssl/des/des_int.h \
+  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
   $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
   $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
@@ -424,16 +424,16 @@ string_to_key.so string_to_key.po $(OUTPRE)string_to_key.$(OBJEXT): \
 t_fortuna.so t_fortuna.po $(OUTPRE)t_fortuna.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../builtin/aes/aes.h $(srcdir)/../builtin/aes/uitypes.h \
-  $(srcdir)/../builtin/sha2/sha2.h $(top_srcdir)/include/k5-buf.h \
-  $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
-  $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
-  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-plugin.h \
-  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-trace.h \
-  $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/authdata_plugin.h \
-  $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
-  $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
-  prng.h prng_fortuna.c t_fortuna.c
+  $(COM_ERR_DEPS) $(srcdir)/../openssl/aes/aes.h $(srcdir)/../openssl/sha2/sha2.h \
+  $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \
+  $(top_srcdir)/include/k5-gmt_mktime.h $(top_srcdir)/include/k5-int-pkinit.h \
+  $(top_srcdir)/include/k5-int.h $(top_srcdir)/include/k5-platform.h \
+  $(top_srcdir)/include/k5-plugin.h $(top_srcdir)/include/k5-thread.h \
+  $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
+  $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
+  $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
+  $(top_srcdir)/include/socket-utils.h prng.h prng_fortuna.c \
+  t_fortuna.c
 valid_cksumtype.so valid_cksumtype.po $(OUTPRE)valid_cksumtype.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \

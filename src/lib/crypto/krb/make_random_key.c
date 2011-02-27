@@ -65,7 +65,7 @@ krb5_c_make_random_key(krb5_context context, krb5_enctype enctype,
     random_key->enctype = enctype;
     random_key->length = keylength;
 
-    ret = (*enc->make_key)(&random_data, random_key);
+    ret = (*ktp->rand2key)(&random_data, random_key);
 
 cleanup:
     if (ret) {

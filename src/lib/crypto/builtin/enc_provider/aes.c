@@ -29,7 +29,6 @@
 #include "enc_provider.h"
 #include "aes.h"
 #include <aead.h>
-#include <rand2key.h>
 
 #define CHECK_SIZES 0
 
@@ -300,7 +299,6 @@ const struct krb5_enc_provider krb5int_enc_aes128 = {
     krb5int_aes_encrypt,
     krb5int_aes_decrypt,
     NULL,
-    krb5int_aes_make_key,
     aes_init_state,
     krb5int_default_free_state,
     aes_key_cleanup
@@ -312,7 +310,6 @@ const struct krb5_enc_provider krb5int_enc_aes256 = {
     krb5int_aes_encrypt,
     krb5int_aes_decrypt,
     NULL,
-    krb5int_aes_make_key,
     aes_init_state,
     krb5int_default_free_state,
     aes_key_cleanup

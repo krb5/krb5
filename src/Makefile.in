@@ -169,7 +169,7 @@ WINMAKEFILES=Makefile \
 	clients\kcpytkt\Makefile clients\kdeltkt\Makefile \
 	include\Makefile \
 	lib\Makefile lib\crypto\Makefile lib\crypto\krb\Makefile \
-	lib\crypto\krb\crc32\Makefile lib\crypto\krb\rand2key\Makefile \
+	lib\crypto\krb\crc32\Makefile \
 	lib\crypto\krb\prng\Makefile lib\crypto\krb\prng\fortuna\Makefile \
 	lib\crypto\krb\prf\Makefile lib\crypto\krb\checksum\Makefile \
 	lib\crypto\krb\old\Makefile lib\crypto\krb\raw\Makefile \
@@ -241,8 +241,6 @@ WINMAKEFILES=Makefile \
 ##DOS##lib\crypto\Makefile: lib\crypto\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\krb\crc32\Makefile: lib\crypto\krb\crc32\Makefile.in $(MKFDEP)
-##DOS##	$(WCONFIG) config < $@.in > $@
-##DOS##lib\crypto\krb\rand2key\Makefile: lib\crypto\krb\rand2key\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##lib\crypto\krb\prng\fortuna\Makefile: lib\crypto\krb\prng\fortuna\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
@@ -361,7 +359,7 @@ FILES= ./* appl/* appl/gss-sample/* \
 	clients/kpasswd/* clients/kvno/* clients/kcpytkt/* clients/kdeltkt/* \
 	config/* include/* \
 	include/krb5/* lib/* lib/crypto/* lib/crypto/krb/* \
-	lib/crypto/krb/crc32/* lib/crypto/krb/rand2key/* \
+	lib/crypto/krb/crc32/* \
 	lib/crypto/krb/prng/fortuna/* lib/crypto/krb/prng/nss/* \
 	lib/crypto/krb/prng/* \
 	lib/crypto/krb/prf/* lib/crypto/krb/checksum/* lib/crypto/krb/old/* \
