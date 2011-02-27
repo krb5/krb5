@@ -5,7 +5,6 @@ LOCALINCLUDES = -I$(srcdir)/../des 	\
 		-I$(srcdir)/../aes 	\
 		-I$(srcdir)/../camellia 	\
 		-I$(srcdir)/../../krb 			\
-		-I$(srcdir)/../../krb/rand2key	 	\
 		-I$(srcdir)/.. -I$(srcdir)/.
 DEFS=
 
@@ -23,7 +22,6 @@ OBJS= \
 	$(OUTPRE)des.$(OBJEXT) 	\
 	$(OUTPRE)des3.$(OBJEXT) 	\
 	$(OUTPRE)aes.$(OBJEXT) 	\
-	$(OUTPRE)aes_ctr.$(OBJEXT) 	\
 	$(OUTPRE)camellia.$(OBJEXT) 	\
 	$(OUTPRE)rc4.$(OBJEXT)
 
@@ -31,7 +29,6 @@ SRCS= \
 	$(srcdir)/des.c 	\
 	$(srcdir)/des3.c 	\
 	$(srcdir)/aes.c 	\
-	$(srcdir)/aes_ctr.c 	\
 	$(srcdir)/camellia.c 	\
 	$(srcdir)/rc4.c
 
