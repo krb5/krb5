@@ -13,17 +13,14 @@ PROG_RPATH=$(KRB5_LIBDIR)
 
 STLIBOBJS=\
 	arcfour.o	\
-	arcfour_aead.o	\
 	arcfour_s2k.o
 
 OBJS=\
 	$(OUTPRE)arcfour.$(OBJEXT)	\
-	$(OUTPRE)arcfour_aead.$(OBJEXT)	\
 	$(OUTPRE)arcfour_s2k.$(OBJEXT)
 
 SRCS=\
 	$(srcdir)/arcfour.c	\
-	$(srcdir)/arcfour_aead.c\
 	$(srcdir)/arcfour_s2k.c
 
 ##DOS##LIBOBJS = $(OBJS)

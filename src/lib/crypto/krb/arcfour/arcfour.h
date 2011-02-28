@@ -4,6 +4,9 @@
 
 #include "etypes.h"
 
+krb5_keyusage
+krb5int_arcfour_translate_usage(krb5_keyusage usage);
+
 unsigned int
 krb5int_arcfour_crypto_length(const struct krb5_keytypes *ktp,
                               krb5_cryptotype type);

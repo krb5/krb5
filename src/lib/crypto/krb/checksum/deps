@@ -40,8 +40,7 @@ confounder.so confounder.po $(OUTPRE)confounder.$(OBJEXT): \
 hmac_md5.so hmac_md5.po $(OUTPRE)hmac_md5.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../arcfour/arcfour-int.h \
-  $(srcdir)/../arcfour/arcfour.h $(srcdir)/../cksumtypes.h \
+  $(COM_ERR_DEPS) $(srcdir)/../arcfour/arcfour.h $(srcdir)/../cksumtypes.h \
   $(srcdir)/../etypes.h $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-err.h $(top_srcdir)/include/k5-gmt_mktime.h \
   $(top_srcdir)/include/k5-int-pkinit.h $(top_srcdir)/include/k5-int.h \
