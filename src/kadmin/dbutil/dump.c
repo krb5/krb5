@@ -1283,14 +1283,6 @@ dump_db(argc, argv)
         fprintf(arglist.ofile, "%s", dump->header);
 
         if (dump_sno) {
-            if (ulog_map(util_context, global_params.iprop_logfile,
-                         global_params.iprop_ulogsize, FKCOMMAND, db_args)) {
-                fprintf(stderr,
-                        _("%s: Could not map log\n"), progname);
-                exit_status++;
-                goto unlock_and_return;
-            }
-
             /*
              * We grab the lock twice (once again in the iterator call),
              * but that's ok since the lock func handles incr locks held.
