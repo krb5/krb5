@@ -59,6 +59,10 @@ while (<NM>) {
 }
 @found = sort @found;
 while ($#export >= 0 && $#found >= 0) {
+    if ($#export >= 1 && $export[0] eq $export[1]) {
+	print STDERR "Duplicate symbol in export list: $export[0]\n";
+	exit(1);
+    }
     if ($export[0] eq $found[0]) {
 #	print "ok $export[0]\n";
 	shift @export;
