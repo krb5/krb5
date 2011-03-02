@@ -103,15 +103,6 @@ static const char *objdirs[] = { KRB5_PLUGIN_BUNDLE_DIR,
 static const char *objdirs[] = { LIBDIR "/krb5/plugins/preauth", NULL };
 #endif
 
-/* XXX This is ugly and should be in a header file somewhere */
-#ifndef KRB5INT_DES_TYPES_DEFINED
-#define KRB5INT_DES_TYPES_DEFINED
-typedef unsigned char des_cblock[8];    /* crypto-block size */
-#endif
-typedef des_cblock mit_des_cblock;
-extern void mit_des_fixup_key_parity (mit_des_cblock );
-extern int mit_des_is_weak_key (mit_des_cblock );
-
 typedef struct _krb5_preauth_systems {
     const char *name;
     int         type;
