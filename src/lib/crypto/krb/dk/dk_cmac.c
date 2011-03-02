@@ -25,9 +25,7 @@
  */
 
 
-#include "k5-int.h"
-#include "dk.h"
-#include "aead.h"
+#include "crypto_int.h"
 
 #ifdef CAMELLIA
 

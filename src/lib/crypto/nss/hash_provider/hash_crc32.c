@@ -25,10 +25,7 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "k5-int.h"
-#include "crc-32.h"
-#include "hash_provider.h"
-#include "aead.h"
+#include "crypto_int.h"
 
 static krb5_error_code
 k5_crc32_hash(const krb5_crypto_iov *data, size_t num_data, krb5_data *output)

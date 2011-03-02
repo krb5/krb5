@@ -28,8 +28,7 @@
  * input.
  */
 
-#include "k5-int.h"
-#include "cksumtypes.h"
+#include "crypto_int.h"
 
 krb5_error_code
 krb5int_cbc_checksum(const struct krb5_cksumtypes *ctp,

@@ -25,11 +25,7 @@
  * or implied warranty.
  */
 
-#include "k5-int.h"
-#include "etypes.h"
-#include "cksumtypes.h"
-#include "dk.h"
-#include "aead.h"
+#include "crypto_int.h"
 
 krb5_crypto_iov *
 krb5int_c_locate_iov(krb5_crypto_iov *data, size_t num_data,

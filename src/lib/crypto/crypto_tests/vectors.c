@@ -37,7 +37,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include "hash_provider.h"
+#include "crypto_int.h"
 
 #define ASIZE(ARRAY) (sizeof(ARRAY)/sizeof(ARRAY[0]))
 

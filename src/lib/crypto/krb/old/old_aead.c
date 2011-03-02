@@ -25,10 +25,7 @@
  * or implied warranty.
  */
 
-
-#include "k5-int.h"
-#include "old.h"
-#include "aead.h"
+#include "crypto_int.h"
 
 unsigned int
 krb5int_old_crypto_length(const struct krb5_keytypes *ktp,

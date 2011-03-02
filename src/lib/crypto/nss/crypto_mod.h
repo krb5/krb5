@@ -1,9 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/nss/crypto_mod.h - NSS crypto module declarations */
 /*
- * lib/crypto/krb/prf/prf_int.h
- *
- * Copyright 1987, 1988, 1990, 2002 by the Massachusetts Institute of
- * Technology.  All Rights Reserved.
+ * Copyright (C) 2011 by the Massachusetts Institute of Technology.
+ * All rights reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -25,26 +24,16 @@
  * or implied warranty.
  */
 
-#ifndef PRF_INTERNAL_DEFS
-#define PRF_INTERNAL_DEFS
+/*
+ * This header is included from lib/crypto/krb/crypto_int.h to provide
+ * module-specific declarations.  It is not included directly from source
+ * files.
+ */
 
-#include "k5-int.h"
-#include "etypes.h"
+#ifndef CRYPTO_MOD_H
+#define CRYPTO_MOD_H
 
-krb5_error_code
-krb5int_arcfour_prf(const struct krb5_keytypes *ktp, krb5_key key,
-                    const krb5_data *in, krb5_data *out);
+/* Because the NSS crypto module doesn't work with the Fortuna PRNG, we don't
+ * need to declare anything here. */
 
-krb5_error_code
-krb5int_des_prf(const struct krb5_keytypes *ktp, krb5_key key,
-                const krb5_data *in, krb5_data *out);
-
-krb5_error_code
-krb5int_dk_prf(const struct krb5_keytypes *ktp, krb5_key key,
-               const krb5_data *in, krb5_data *out);
-
-krb5_error_code
-krb5int_dk_cmac_prf(const struct krb5_keytypes *ktp, krb5_key key,
-                    const krb5_data *in, krb5_data *out);
-
-#endif  /*PRF_INTERNAL_DEFS*/
+#endif /* CRYPTO_MOD_H */

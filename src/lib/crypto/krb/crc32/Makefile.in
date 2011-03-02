@@ -1,6 +1,7 @@
 mydir=lib$(S)crypto$(S)krb$(S)crc32
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 DEFS=
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../$(CRYPTO_IMPL)
 
 ##DOS##BUILDTOP = ..\..\..\..
 ##DOS##PREFIXDIR = krb\crc32

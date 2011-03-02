@@ -29,8 +29,7 @@
  * where xorkey is the key XOR'd with 0xf0 bytes.
  */
 
-#include "k5-int.h"
-#include "cksumtypes.h"
+#include "crypto_int.h"
 
 /* Derive a key by XOR with 0xF0 bytes. */
 static krb5_error_code

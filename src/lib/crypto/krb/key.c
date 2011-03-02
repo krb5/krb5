@@ -25,8 +25,7 @@
  * Functions for manipulating krb5_key structures
  */
 
-#include "k5-int.h"
-#include "etypes.h"
+#include "crypto_int.h"
 
 /*
  * The krb5_key data type wraps an exposed keyblock in an opaque data

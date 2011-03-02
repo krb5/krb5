@@ -30,8 +30,7 @@
  *simplified profile enctypes.
  */
 
-#include "prf_int.h"
-#include <dk.h>
+#include "crypto_int.h"
 
 krb5_error_code
 krb5int_dk_prf(const struct krb5_keytypes *ktp, krb5_key key,

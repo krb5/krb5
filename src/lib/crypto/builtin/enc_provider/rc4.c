@@ -7,9 +7,7 @@
  * #include STD_DISCLAIMER
  */
 
-#include "k5-int.h"
-#include "enc_provider.h"
-#include <aead.h>
+#include "crypto_int.h"
 
 typedef struct
 {

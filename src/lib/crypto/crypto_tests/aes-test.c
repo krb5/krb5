@@ -30,7 +30,7 @@
  */
 
 #include <stdio.h>
-#include "k5-int.h"
+#include "crypto_int.h"
 
 static char key[32];
 static char plain[16], cipher[16], zero[16];

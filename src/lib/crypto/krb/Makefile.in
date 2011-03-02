@@ -1,16 +1,7 @@
 mydir=lib$(S)crypto$(S)krb
 BUILDTOP=$(REL)..$(S)..$(S)..
 SUBDIRS= arcfour checksum crc32 dk prf old raw 
-LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/../$(CRYPTO_IMPL)/enc_provider \
-		-I$(srcdir)/dk -I$(srcdir)/../$(CRYPTO_IMPL)/hash_provider \
-		-I$(srcdir)/prf -I$(srcdir)/old -I$(srcdir)/raw \
-		-I$(srcdir)/../$(CRYPTO_IMPL) \
-		-I$(srcdir)/../$(CRYPTO_IMPL)/des \
-		-I$(srcdir)/../$(CRYPTO_IMPL)/aes -I$(srcdir)/arcfour 	\
-		-I$(srcdir)/../$(CRYPTO_IMPL)/sha2 \
-		-I$(srcdir)/../$(CRYPTO_IMPL)/camellia \
-		-I$(srcdir)/../$(CRYPTO_IMPL)/sha1 \
-		-I$(srcdir)/../$(CRYPTO_IMPL)
+LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/../$(CRYPTO_IMPL)
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)

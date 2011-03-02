@@ -1,8 +1,7 @@
 mydir=lib$(S)crypto$(S)nss$(S)hash_provider
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 CRYPTO_IMPL_CFLAGS=@CRYPTO_IMPL_CFLAGS@
-LOCALINCLUDES = -I$(srcdir)/../../krb/crc32 -I$(srcdir)/../md4 \
-	-I$(srcdir)/.. -I$(srcdir)/../../krb \
+LOCALINCLUDES = -I$(srcdir)/../../krb -I$(srcdir)/.. -I$(srcdir)/../md4 \
 	$(CRYPTO_IMPL_CFLAGS)
 
 DEFS=

@@ -31,8 +31,7 @@
  * Some black-box tests of crypto systems.  Make sure that we can decrypt things we encrypt, etc.
  */
 
-#include "k5-int.h"
-#include "etypes.h"
+#include "crypto_int.h"
 #include <stdio.h>
 
 /* What enctypes should we test?*/

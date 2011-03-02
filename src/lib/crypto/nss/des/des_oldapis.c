@@ -26,31 +26,11 @@
  *
  */
 
-#include "k5-int.h"
-#include "des_int.h"
-#include <ctype.h>
-
-const mit_des_cblock mit_des_zeroblock /* = all zero */;
-
-unsigned long
-mit_des_cbc_cksum(const krb5_octet *in, krb5_octet *out,
-                  unsigned long length, const mit_des_key_schedule schedule,
-                  const krb5_octet *ivec)
-{
-    /* Unsupported operation */
-    return KRB5_CRYPTO_INTERNAL;
-}
+#include "crypto_int.h"
 
 krb5_error_code
-mit_afs_string_to_key (krb5_keyblock *keyblock, const krb5_data *data,
-                       const krb5_data *salt)
+mit_afs_string_to_key(krb5_keyblock *keyblock, const krb5_data *data,
+                      const krb5_data *salt)
 {
-    return KRB5_CRYPTO_INTERNAL;
-}
-
-int
-mit_des_key_sched(mit_des_cblock k, mit_des_key_schedule schedule)
-{
-    /* Unsupported operation */
     return KRB5_CRYPTO_INTERNAL;
 }

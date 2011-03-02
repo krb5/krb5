@@ -1,10 +1,6 @@
 mydir=lib$(S)crypto$(S)krb$(S)prf
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/.. 		\
-		-I$(srcdir)/../dk			\
-		-I$(srcdir)/../../$(CRYPTO_IMPL) 	\
-		-I$(srcdir)/../../$(CRYPTO_IMPL)/md5 	\
-		-I$(srcdir)/../../$(CRYPTO_IMPL)/sha1 
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../$(CRYPTO_IMPL)
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..

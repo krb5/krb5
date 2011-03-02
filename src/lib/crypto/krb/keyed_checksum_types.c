@@ -25,9 +25,7 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "k5-int.h"
-#include "etypes.h"
-#include "cksumtypes.h"
+#include "crypto_int.h"
 
 static krb5_boolean
 is_keyed_for(const struct krb5_cksumtypes *ctp,

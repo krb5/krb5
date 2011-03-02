@@ -4,7 +4,7 @@
 
 mydir=lib$(S)crypto$(S)nss$(S)aes
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../krb/dk  -I$(srcdir)/../../../../include
+LOCALINCLUDES =
 DEFS=
 
 PROG_LIBPATH=-L$(TOPLIBD)

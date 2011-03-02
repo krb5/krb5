@@ -25,9 +25,8 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "k5-int.h"
+#include "crypto_int.h"
 #include "des_int.h"
-#include <aead.h>
 
 static krb5_error_code
 validate_and_schedule(krb5_key key, const krb5_data *ivec,

@@ -22,9 +22,9 @@
  * express or implied warranty.
  */
 
+#include "crypto_int.h"
 #include "des_int.h"
 #include "f_tables.h"
-#include "aead.h"
 
 void
 krb5int_des3_cbc_encrypt(krb5_crypto_iov *data, unsigned long num_data,

@@ -65,11 +65,10 @@ krb5int_c_copy_keyblock_contents
 krb5int_c_free_keyblock_contents
 krb5int_c_free_keyblock
 krb5int_c_init_keyblock
+krb5int_hash_md4
 krb5int_hash_md5
 krb5int_enc_arcfour
 krb5int_hmac
-mit_des_fixup_key_parity
-mit_des_is_weak_key
 krb5_k_create_key
 krb5_k_decrypt
 krb5_k_decrypt_iov
@@ -86,12 +85,6 @@ krb5_k_verify_checksum
 krb5_k_verify_checksum_iov
 mit_crc32
 krb5int_aes_encrypt
-krb5int_MD4Init
-krb5int_MD4Update
-krb5int_MD4Final
-krb5int_MD5Init
-krb5int_MD5Update
-krb5int_MD5Final
 krb5int_aes_decrypt
 krb5int_enc_des3
 krb5int_arcfour_gsscrypt

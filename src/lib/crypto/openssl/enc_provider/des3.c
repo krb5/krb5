@@ -49,13 +49,13 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "k5-int.h"
-#include "des_int.h"
-#include <aead.h>
+#include "crypto_int.h"
 #include <openssl/evp.h>
 
 
-#define DES_BLOCK_SIZE  8
+#define DES3_BLOCK_SIZE 8
+#define DES3_KEY_SIZE 24
+#define DES3_KEY_BYTES 21
 
 static krb5_error_code
 validate(krb5_key key, const krb5_data *ivec, const krb5_crypto_iov *data,
@@ -69,9 +69,9 @@ validate(krb5_key key, const krb5_data *ivec, const krb5_crypto_iov *data,
             input_length += iov->data.length;
     }
 
-    if (key->keyblock.length != KRB5_MIT_DES3_KEYSIZE)
+    if (key->keyblock.length != DES3_KEY_SIZE)
         return(KRB5_BAD_KEYSIZE);
-    if ((input_length%DES_BLOCK_SIZE) != 0)
+    if ((input_length%DES3_BLOCK_SIZE) != 0)
         return(KRB5_BAD_MSIZE);
     if (ivec && (ivec->length != 8))
         return(KRB5_BAD_MSIZE);
@@ -84,8 +84,8 @@ static krb5_error_code
 k5_des3_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
                 size_t num_data)
 {
-    int ret, olen = MIT_DES_BLOCK_LENGTH;
-    unsigned char iblock[MIT_DES_BLOCK_LENGTH], oblock[MIT_DES_BLOCK_LENGTH];
+    int ret, olen = DES3_BLOCK_SIZE;
+    unsigned char iblock[DES3_BLOCK_SIZE], oblock[DES3_BLOCK_SIZE];
     struct iov_block_state input_pos, output_pos;
     EVP_CIPHER_CTX ciph_ctx;
     krb5_boolean empty;
@@ -109,21 +109,21 @@ k5_des3_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 
     for (;;) {
 
-        if (!krb5int_c_iov_get_block(iblock, MIT_DES_BLOCK_LENGTH,
+        if (!krb5int_c_iov_get_block(iblock, DES3_BLOCK_SIZE,
                                      data, num_data, &input_pos))
             break;
 
         ret = EVP_EncryptUpdate(&ciph_ctx, oblock, &olen,
-                                (unsigned char *)iblock, MIT_DES_BLOCK_LENGTH);
+                                (unsigned char *)iblock, DES3_BLOCK_SIZE);
         if (!ret)
             break;
 
         krb5int_c_iov_put_block(data, num_data,
-                                oblock, MIT_DES_BLOCK_LENGTH, &output_pos);
+                                oblock, DES3_BLOCK_SIZE, &output_pos);
     }
 
     if (ivec != NULL)
-        memcpy(ivec->data, oblock, MIT_DES_BLOCK_LENGTH);
+        memcpy(ivec->data, oblock, DES3_BLOCK_SIZE);
 
     EVP_CIPHER_CTX_cleanup(&ciph_ctx);
 
@@ -139,8 +139,8 @@ static krb5_error_code
 k5_des3_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
                 size_t num_data)
 {
-    int ret, olen = MIT_DES_BLOCK_LENGTH;
-    unsigned char iblock[MIT_DES_BLOCK_LENGTH], oblock[MIT_DES_BLOCK_LENGTH];
+    int ret, olen = DES3_BLOCK_SIZE;
+    unsigned char iblock[DES3_BLOCK_SIZE], oblock[DES3_BLOCK_SIZE];
     struct iov_block_state input_pos, output_pos;
     EVP_CIPHER_CTX ciph_ctx;
     krb5_boolean empty;
@@ -164,21 +164,21 @@ k5_des3_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 
     for (;;) {
 
-        if (!krb5int_c_iov_get_block(iblock, MIT_DES_BLOCK_LENGTH,
+        if (!krb5int_c_iov_get_block(iblock, DES3_BLOCK_SIZE,
                                      data, num_data, &input_pos))
             break;
 
         ret = EVP_DecryptUpdate(&ciph_ctx, oblock, &olen,
-                                (unsigned char *)iblock, MIT_DES_BLOCK_LENGTH);
+                                (unsigned char *)iblock, DES3_BLOCK_SIZE);
         if (!ret)
             break;
 
-        krb5int_c_iov_put_block(data, num_data, oblock, MIT_DES_BLOCK_LENGTH,
+        krb5int_c_iov_put_block(data, num_data, oblock, DES3_BLOCK_SIZE,
                                 &output_pos);
     }
 
     if (ivec != NULL)
-        memcpy(ivec->data, iblock, MIT_DES_BLOCK_LENGTH);
+        memcpy(ivec->data, iblock, DES3_BLOCK_SIZE);
 
     EVP_CIPHER_CTX_cleanup(&ciph_ctx);
 
@@ -191,8 +191,8 @@ k5_des3_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 }
 
 const struct krb5_enc_provider krb5int_enc_des3 = {
-    DES_BLOCK_SIZE,
-    KRB5_MIT_DES3_KEY_BYTES, KRB5_MIT_DES3_KEYSIZE,
+    DES3_BLOCK_SIZE,
+    DES3_KEY_BYTES, DES3_KEY_SIZE,
     k5_des3_encrypt,
     k5_des3_decrypt,
     NULL,

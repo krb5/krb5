@@ -30,9 +30,7 @@
  *  an empty keyblock
  */
 
-
-#include "k5-int.h"
-#include <assert.h>
+#include "crypto_int.h"
 
 krb5_error_code
 krb5int_c_init_keyblock(krb5_context context, krb5_enctype enctype,

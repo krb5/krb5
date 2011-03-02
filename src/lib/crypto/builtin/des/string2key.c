@@ -28,7 +28,7 @@
  * Compute encryption key from salt and pass phrase.
  */
 
-#include "k5-int.h"
+#include "crypto_int.h"
 #include "des_int.h"
 
 krb5_error_code

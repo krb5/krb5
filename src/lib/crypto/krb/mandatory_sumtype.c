@@ -23,8 +23,7 @@
  * or implied warranty.
  */
 
-#include "k5-int.h"
-#include "etypes.h"
+#include "crypto_int.h"
 
 krb5_error_code
 krb5int_c_mandatory_cksumtype(krb5_context ctx, krb5_enctype etype,

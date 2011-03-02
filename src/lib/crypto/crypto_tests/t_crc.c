@@ -31,8 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "k5-int.h"
-#include "crc-32.h"
+#include "crypto_int.h"
 
 #define HEX 1
 #define STR 2

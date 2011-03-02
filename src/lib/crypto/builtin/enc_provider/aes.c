@@ -25,10 +25,8 @@
  * or implied warranty.
  */
 
-#include "k5-int.h"
-#include "enc_provider.h"
+#include "crypto_int.h"
 #include "aes.h"
-#include <aead.h>
 
 #define CHECK_SIZES 0
 

@@ -31,8 +31,7 @@
  * in the operating system's native PRNG quality.
  */
 
-#include "k5-int.h"
-#include "prng.h"
+#include "crypto_int.h"
 
 #define DEVICE "/dev/urandom"
 

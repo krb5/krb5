@@ -33,10 +33,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "k5-int.h"
+#include "crypto_int.h"
 #include "sechash.h"
 #include "nss_gen.h"
-#include "aead.h"
 
 krb5_error_code
 k5_nss_gen_hash(HASH_HashType hashType, const krb5_crypto_iov *data,

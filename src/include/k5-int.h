@@ -643,61 +643,6 @@ struct krb5_key_st {
     void *cache;
 };
 
-/* new encryption provider api */
-
-struct krb5_enc_provider {
-    /* keybytes is the input size to make_key;
-       keylength is the output size */
-    size_t block_size, keybytes, keylength;
-
-    krb5_error_code (*encrypt)(krb5_key key, const krb5_data *cipher_state,
-                               krb5_crypto_iov *data, size_t num_data);
-
-    krb5_error_code (*decrypt)(krb5_key key, const krb5_data *cipher_state,
-                               krb5_crypto_iov *data, size_t num_data);
-
-    /* May be NULL if the cipher is not used for a cbc-mac checksum. */
-    krb5_error_code (*cbc_mac)(krb5_key key, const krb5_crypto_iov *data,
-                               size_t num_data, const krb5_data *ivec,
-                               krb5_data *output);
-
-    krb5_error_code (*init_state)(const krb5_keyblock *key,
-                                  krb5_keyusage keyusage,
-                                  krb5_data *out_state);
-    krb5_error_code (*free_state)(krb5_data *state);
-
-    /* May be NULL if there is no key-derived data cached.  */
-    void (*key_cleanup)(krb5_key key);
-};
-
-struct krb5_hash_provider {
-    char hash_name[8];
-    size_t hashsize, blocksize;
-
-    krb5_error_code (*hash)(const krb5_crypto_iov *data, size_t num_data,
-                            krb5_data *output);
-};
-
-/*
- * in here to deal with stuff from lib/crypto
- */
-
-void krb5int_nfold(unsigned int inbits, const unsigned char *in,
-                   unsigned int outbits, unsigned char *out);
-
-krb5_error_code krb5int_hmac(const struct krb5_hash_provider *hash,
-                             krb5_key key, const krb5_crypto_iov *data,
-                             size_t num_data, krb5_data *output);
-
-krb5_error_code
-krb5int_hmac_keyblock(const struct krb5_hash_provider *hash,
-                      const krb5_keyblock *keyblock,
-                      const krb5_crypto_iov *data, size_t num_data,
-                      krb5_data *output);
-
-krb5_error_code krb5int_pbkdf2_hmac_sha1(const krb5_data *, unsigned long,
-                                         const krb5_data *, const krb5_data *);
-
 /* These crypto functions are used by GSSAPI via the accessor. */
 
 krb5_error_code
@@ -757,21 +702,6 @@ zapfree(void *ptr, size_t len)
     }
 }
 
-/* A definition of init_state for DES based encryption systems.
- * sets up an 8-byte IV of all zeros
- */
-
-krb5_error_code
-krb5int_des_init_state(const krb5_keyblock *key, krb5_keyusage keyusage,
-                       krb5_data *new_state);
-
-/*
- * normally to free a cipher_state you can just memset the length to zero and
- * free it.
- */
-krb5_error_code krb5int_default_free_state(krb5_data *state);
-
-
 /*
  * Combine two keys (normally used by the hardware preauth mechanism)
  */
@@ -789,13 +719,6 @@ krb5_error_code krb5int_c_copy_keyblock(krb5_context context,
 krb5_error_code krb5int_c_copy_keyblock_contents(krb5_context context,
                                                  const krb5_keyblock *from,
                                                  krb5_keyblock *to);
-
-/*
- * Internal - for cleanup.
- */
-extern void krb5int_prng_cleanup(void);
-extern void krb5int_crypto_impl_cleanup(void);
-
 
 #ifdef KRB5_OLD_CRYPTO
 /* old provider api */
@@ -2603,10 +2526,6 @@ extern krb5_error_code krb5int_translate_gai_error(int);
 extern krb5_error_code
 krb5int_c_mandatory_cksumtype(krb5_context, krb5_enctype, krb5_cksumtype *);
 
-extern int krb5int_crypto_init (void);
-extern int krb5int_prng_init(void);
-extern int krb5int_crypto_impl_init(void);
-
 /*
  * Referral definitions, debugging hooks, and subfunctions.
  */
@@ -2620,19 +2539,6 @@ void krb5int_dbgref_dump_principal(char *, krb5_principal);
 /* Common hostname-parsing code. */
 krb5_error_code
 krb5int_clean_hostname(krb5_context, const char *, char *, size_t);
-
-krb5_error_code
-krb5int_aes_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
-                    size_t num_data);
-
-krb5_error_code
-krb5int_aes_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
-                    size_t num_data);
-
-krb5_error_code
-krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
-                         size_t num_data, const krb5_data *iv,
-                         krb5_data *output);
 
 #if 0
 /*

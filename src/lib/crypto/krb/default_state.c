@@ -30,7 +30,7 @@
  * contains that default code.
  */
 
-#include "k5-int.h"
+#include "crypto_int.h"
 
 krb5_error_code krb5int_des_init_state
 (const krb5_keyblock *key, krb5_keyusage usage, krb5_data *new_state )

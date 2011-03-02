@@ -27,8 +27,7 @@
  * Unkeyed hash checksum implementation.
  */
 
-#include "k5-int.h"
-#include "cksumtypes.h"
+#include "crypto_int.h"
 
 krb5_error_code
 krb5int_unkeyed_checksum(const struct krb5_cksumtypes *ctp,

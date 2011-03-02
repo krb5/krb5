@@ -33,11 +33,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "k5-int.h"
+#include "crypto_int.h"
 #include "nss_gen.h"
-#include <aead.h>
-#include "des_int.h"
-
 
 static krb5_error_code
 k5_des3_encrypt_iov(krb5_key key, const krb5_data *ivec,

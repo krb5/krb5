@@ -1,8 +1,7 @@
 mydir=lib$(S)crypto$(S)nss$(S)des
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 CRYPTO_IMPL_CFLAGS=@CRYPTO_IMPL_CFLAGS@
-LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../.. -I$(srcdir)/../../krb \
-	$(CRYPTO_IMPL_CFLAGS)
+LOCALINCLUDES = -I$(srcdir)/../../krb -I$(srcdir)/.. $(CRYPTO_IMPL_CFLAGS)
 
 DEFS=
 
@@ -10,22 +9,17 @@ RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-
 STLIBOBJS= des_oldapis.o \
 	f_parity.o 	\
-	string2key.o	\
-	weak_key.o
+	string2key.o
 
 OBJS=	$(OUTPRE)f_parity.$(OBJEXT) 	\
 	$(OUTPRE)des_oldapis.$(OBJEXT) 	\
-	$(OUTPRE)string2key.$(OBJEXT)	\
-	$(OUTPRE)weak_key.$(OBJEXT)
+	$(OUTPRE)string2key.$(OBJEXT)
 
 SRCS=	$(srcdir)/f_parity.c	\
 	$(srcdir)/des_oldapis.c	\
-	$(srcdir)/weak_key.c	\
 	$(srcdir)/string2key.c
-
 
 all-unix:: all-libobjs
 

@@ -1,16 +1,7 @@
 mydir=lib$(S)crypto$(S)openssl
 BUILDTOP=$(REL)..$(S)..$(S)..
 SUBDIRS=camellia des aes md4 md5  sha1 sha2 enc_provider hash_provider
-LOCALINCLUDES = -I$(srcdir)/../krb 			\
-		-I$(srcdir)/../krb/hash_provider 	\
-		-I$(srcdir)/des 	\
-		-I$(srcdir)/aes 	\
-		-I$(srcdir)/sha1 	\
-		-I$(srcdir)/sha2 	\
-		-I$(srcdir)/md4 	\
-		-I$(srcdir)/md5	\
-		-I$(srcdir)/enc_provider	\
-		-I$(srcdir)/hash_provider 	
+LOCALINCLUDES = -I$(srcdir)/../krb -I$(srcdir)
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 DEFS=

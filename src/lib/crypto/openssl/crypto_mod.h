@@ -1,7 +1,7 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/crypto/openssl/md5/md5.c
- *
- * Copyright (C) 2009 by the Massachusetts Institute of Technology.
+/* lib/crypto/openssl/crypto_mod.h - OpenSSL crypto module declarations */
+/*
+ * Copyright (C) 2011 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -24,37 +24,23 @@
  * or implied warranty.
  */
 
-#include "k5-int.h"
-#include "rsa-md5.h"
-#include <openssl/evp.h>
-#include <openssl/md5.h>
+/*
+ * This header is included from lib/crypto/krb/crypto_int.h to provide
+ * module-specific declarations.  It is not included directly from source
+ * files.
+ */
 
-/* The routine krb5int_MD5Init initializes the message-digest context
-   mdContext. All fields are set to zero.
-*/
-void
-krb5int_MD5Init (krb5_MD5_CTX *mdContext)
-{
-    EVP_MD_CTX_init(&mdContext->ossl_md5_ctx);
-    EVP_DigestInit_ex(&mdContext->ossl_md5_ctx, EVP_md5(), NULL);
-}
+#ifndef CRYPTO_MOD_H
+#define CRYPTO_MOD_H
 
-/* The routine krb5int_MD5Update updates the message-digest context to
-   account for the presence of each of the characters inBuf[0..inLen-1]
-   in the message whose digest is being computed.
-*/
-void
-krb5int_MD5Update (krb5_MD5_CTX *mdContext, const unsigned char *inBuf, unsigned int inLen)
-{
-    EVP_DigestUpdate(&mdContext->ossl_md5_ctx, inBuf, inLen);
-}
+#include <openssl/aes.h>
+#include <openssl/sha.h>
 
-/* The routine krb5int_MD5Final terminates the message-digest computation and
-   ends with the desired message digest in mdContext->digest[0...15].
-*/
-void
-krb5int_MD5Final (krb5_MD5_CTX *mdContext)
-{
-    EVP_DigestFinal_ex(&mdContext->ossl_md5_ctx, mdContext->digest, NULL);
-    EVP_MD_CTX_cleanup(&mdContext->ossl_md5_ctx);
-}
+#define aes_ctx AES_KEY
+#define krb5int_aes_enc_key(k, len, ctx) AES_set_encrypt_key(k, 8*(len), ctx)
+#define krb5int_aes_enc_blk(in, out, ctx) AES_encrypt(in, out, ctx)
+#define k5_sha256_init SHA256_Init
+#define k5_sha256_update SHA256_Update
+#define k5_sha256_final SHA256_Final
+
+#endif /* CRYPTO_MOD_H */

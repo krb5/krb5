@@ -1,11 +1,6 @@
 mydir=lib$(S)crypto$(S)openssl$(S)enc_provider
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/../des 	\
-		-I$(srcdir)/../arcfour \
-		-I$(srcdir)/../aes 	\
-		-I$(srcdir)/../camellia 	\
-		-I$(srcdir)/../../krb 			\
-		-I$(srcdir)/.. -I$(srcdir)/.
+LOCALINCLUDES = -I$(srcdir)/../../krb -I$(srcdir)/..
 DEFS=
 
 PROG_LIBPATH=-L$(TOPLIBD)

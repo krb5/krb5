@@ -35,8 +35,7 @@
  */
 
 
-#include "k5-int.h"
-#include <aead.h>
+#include "crypto_int.h"
 #include <openssl/evp.h>
 
 /*

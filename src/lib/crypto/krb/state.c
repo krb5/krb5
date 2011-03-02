@@ -33,8 +33,7 @@
  * krb5_c_init_state and krb5_c_free_state used by clients of the
  * Kerberos crypto library.
  */
-#include "k5-int.h"
-#include "etypes.h"
+#include "crypto_int.h"
 
 /* Most enctypes delegate cipher state handling to the enc provider by using
  * this function as their init_state methods. */

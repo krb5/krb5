@@ -28,6 +28,8 @@
  * OpenSSL back-end library init functions
  */
 
+#include "crypto_int.h"
+
 int
 krb5int_crypto_impl_init(void)
 {

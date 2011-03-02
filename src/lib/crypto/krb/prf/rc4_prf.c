@@ -26,9 +26,7 @@
  *
  */
 
-#include "prf_int.h"
-#include "k5-int.h"
-#include <hash_provider/hash_provider.h>
+#include "crypto_int.h"
 
 krb5_error_code
 krb5int_arcfour_prf(const struct krb5_keytypes *ktp, krb5_key key,

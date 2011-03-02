@@ -1,7 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-#include <assert.h>
-#include "k5-int.h"
-#include "prng.h"
+#include "crypto_int.h"
 
 MAKE_INIT_FUNCTION(cryptoint_initialize_library);
 MAKE_FINI_FUNCTION(cryptoint_cleanup_library);

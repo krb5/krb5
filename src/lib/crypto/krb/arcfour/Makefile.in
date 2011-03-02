@@ -1,7 +1,6 @@
 mydir=lib$(S)crypto$(S)krb$(S)arcfour
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../$(CRYPTO_IMPL) \
-	-I$(srcdir)/../../$(CRYPTO_IMPL)/hash_provider
+LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../$(CRYPTO_IMPL)
 DEFS=
 
 ##DOS##BUILDTOP = ..\..\..\..

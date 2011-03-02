@@ -50,13 +50,12 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "k5-int.h"
-#include <aead.h>
+#include "crypto_int.h"
 #include <openssl/evp.h>
-#include "des_int.h"
 
-#define DES_BLOCK_SIZE  8
-#define DES_KEY_BYTES   7
+#define DES_BLOCK_SIZE 8
+#define DES_KEY_SIZE 8
+#define DES_KEY_BYTES 7
 
 static krb5_error_code
 validate(krb5_key key, const krb5_data *ivec, const krb5_crypto_iov *data,
@@ -70,7 +69,7 @@ validate(krb5_key key, const krb5_data *ivec, const krb5_crypto_iov *data,
             input_length += iov->data.length;
     }
 
-    if (key->keyblock.length != KRB5_MIT_DES_KEYSIZE)
+    if (key->keyblock.length != DES_KEY_SIZE)
         return(KRB5_BAD_KEYSIZE);
     if ((input_length%DES_BLOCK_SIZE) != 0)
         return(KRB5_BAD_MSIZE);
@@ -85,8 +84,8 @@ static krb5_error_code
 k5_des_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
                size_t num_data)
 {
-    int ret, olen = MIT_DES_BLOCK_LENGTH;
-    unsigned char iblock[MIT_DES_BLOCK_LENGTH], oblock[MIT_DES_BLOCK_LENGTH];
+    int ret, olen = DES_BLOCK_SIZE;
+    unsigned char iblock[DES_BLOCK_SIZE], oblock[DES_BLOCK_SIZE];
     struct iov_block_state input_pos, output_pos;
     EVP_CIPHER_CTX ciph_ctx;
     krb5_boolean empty;
@@ -109,21 +108,21 @@ k5_des_encrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 
     for (;;) {
 
-        if (!krb5int_c_iov_get_block(iblock, MIT_DES_BLOCK_LENGTH, data,
+        if (!krb5int_c_iov_get_block(iblock, DES_BLOCK_SIZE, data,
                                      num_data, &input_pos))
             break;
 
         ret = EVP_EncryptUpdate(&ciph_ctx, oblock, &olen,
-                                (unsigned char *)iblock, MIT_DES_BLOCK_LENGTH);
+                                (unsigned char *)iblock, DES_BLOCK_SIZE);
         if (!ret)
             break;
 
-        krb5int_c_iov_put_block(data, num_data, oblock, MIT_DES_BLOCK_LENGTH,
+        krb5int_c_iov_put_block(data, num_data, oblock, DES_BLOCK_SIZE,
                                 &output_pos);
     }
 
     if (ivec != NULL)
-        memcpy(ivec->data, oblock, MIT_DES_BLOCK_LENGTH);
+        memcpy(ivec->data, oblock, DES_BLOCK_SIZE);
 
     EVP_CIPHER_CTX_cleanup(&ciph_ctx);
 
@@ -139,8 +138,8 @@ static krb5_error_code
 k5_des_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
                size_t num_data)
 {
-    int ret, olen = MIT_DES_BLOCK_LENGTH;
-    unsigned char iblock[MIT_DES_BLOCK_LENGTH], oblock[MIT_DES_BLOCK_LENGTH];
+    int ret, olen = DES_BLOCK_SIZE;
+    unsigned char iblock[DES_BLOCK_SIZE], oblock[DES_BLOCK_SIZE];
     struct iov_block_state input_pos, output_pos;
     EVP_CIPHER_CTX ciph_ctx;
     krb5_boolean empty;
@@ -164,20 +163,20 @@ k5_des_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 
     for (;;) {
 
-        if (!krb5int_c_iov_get_block(iblock, MIT_DES_BLOCK_LENGTH,
+        if (!krb5int_c_iov_get_block(iblock, DES_BLOCK_SIZE,
                                      data, num_data, &input_pos))
             break;
 
         ret = EVP_DecryptUpdate(&ciph_ctx, oblock, &olen,
-                                iblock, MIT_DES_BLOCK_LENGTH);
+                                iblock, DES_BLOCK_SIZE);
         if (!ret) break;
 
         krb5int_c_iov_put_block(data, num_data, oblock,
-                                MIT_DES_BLOCK_LENGTH, &output_pos);
+                                DES_BLOCK_SIZE, &output_pos);
     }
 
     if (ivec != NULL)
-        memcpy(ivec->data, iblock, MIT_DES_BLOCK_LENGTH);
+        memcpy(ivec->data, iblock, DES_BLOCK_SIZE);
 
     EVP_CIPHER_CTX_cleanup(&ciph_ctx);
 
@@ -191,7 +190,7 @@ k5_des_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 
 const struct krb5_enc_provider krb5int_enc_des = {
     DES_BLOCK_SIZE,
-    DES_KEY_BYTES, KRB5_MIT_DES_KEYSIZE,
+    DES_KEY_BYTES, DES_KEY_SIZE,
     k5_des_encrypt,
     k5_des_decrypt,
     NULL,

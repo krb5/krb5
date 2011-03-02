@@ -31,10 +31,7 @@
  *pepper strings as input and return a combined key.
  */
 
-#include <k5-int.h>
-#include <assert.h>
-#include "etypes.h"
-
+#include "crypto_int.h"
 
 /*
  * Call the PRF function multiple times with the pepper prefixed with

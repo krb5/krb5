@@ -25,10 +25,7 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "k5-int.h"
-#ifdef HAVE_MEMORY_H
-#include <memory.h>
-#endif
+#include "crypto_int.h"
 
 /*
  * n-fold(k-bits):

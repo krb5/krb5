@@ -26,42 +26,34 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "k5-int.h"
-#include "shs.h"
-#include "hash_provider.h"
-#include "aead.h"
+#include "crypto_int.h"
+#include <openssl/evp.h>
+#include <openssl/sha.h>
 
 static krb5_error_code
 k5_sha1_hash(const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
 {
-    SHS_INFO ctx;
+    EVP_MD_CTX ctx;
     unsigned int i;
 
-    if (output->length != SHS_DIGESTSIZE)
-        return(KRB5_CRYPTO_INTERNAL);
+    if (output->length != SHA_DIGEST_LENGTH)
+        return KRB5_CRYPTO_INTERNAL;
 
-    shsInit(&ctx);
+    EVP_MD_CTX_init(&ctx);
+    EVP_DigestInit_ex(&ctx, EVP_sha1(), NULL);
     for (i = 0; i < num_data; i++) {
-        const krb5_crypto_iov *iov = &data[i];
-
-        if (SIGN_IOV(iov)) {
-            shsUpdate(&ctx, (unsigned char *) iov->data.data,
-                      iov->data.length);
-        }
+        const krb5_data *d = &data[i].data;
+        if (SIGN_IOV(&data[i]))
+            EVP_DigestUpdate(&ctx, (unsigned char *)d->data, d->length);
     }
-    shsFinal(&ctx);
-
-    if (ctx.digestLen > 0 && ctx.digestLen <= output->length){
-        output->length = ctx.digestLen;
-        memcpy(output->data, ctx.digestBuf,ctx.digestLen);
-    }
-
-    return(0);
+    EVP_DigestFinal_ex(&ctx, (unsigned char *)output->data, NULL);
+    EVP_MD_CTX_cleanup(&ctx);
+    return 0;
 }
 
 const struct krb5_hash_provider krb5int_hash_sha1 = {
     "SHA1",
-    SHS_DIGESTSIZE,
-    SHS_DATASIZE,
+    SHA_DIGEST_LENGTH,
+    64,
     k5_sha1_hash
 };

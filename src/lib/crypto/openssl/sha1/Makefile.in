@@ -2,14 +2,11 @@ mydir=lib$(S)crypto$(S)openssl$(S)sha1
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 DEFS=
 
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
+STLIBOBJS=
 
-STLIBOBJS= shs.o
+OBJS=
 
-OBJS= $(OUTPRE)shs.$(OBJEXT) 
-
-SRCS= $(srcdir)/shs.c
+SRCS=
 
 all-unix:: all-libobjs
 

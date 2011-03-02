@@ -43,9 +43,7 @@
  * ASCII encoding of the string "combine"
  */
 
-#include "k5-int.h"
-#include "etypes.h"
-#include "dk.h"
+#include "crypto_int.h"
 
 static krb5_error_code dr(const struct krb5_enc_provider *enc,
                           const krb5_keyblock *inkey, unsigned char *outdata,

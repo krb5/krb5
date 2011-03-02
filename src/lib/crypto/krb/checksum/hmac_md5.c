@@ -30,9 +30,7 @@
  * MD5-HMAC.
  */
 
-#include "k5-int.h"
-#include "cksumtypes.h"
-#include "arcfour.h"
+#include "crypto_int.h"
 
 krb5_error_code krb5int_hmacmd5_checksum(const struct krb5_cksumtypes *ctp,
                                          krb5_key key, krb5_keyusage usage,

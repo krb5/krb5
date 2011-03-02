@@ -30,8 +30,7 @@
  *simplified profile enctypes.
  */
 
-#include "prf_int.h"
-#include <dk.h>
+#include "crypto_int.h"
 
 #ifdef CAMELLIA
 

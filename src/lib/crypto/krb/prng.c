@@ -24,7 +24,7 @@
  * or implied warranty.
  */
 
-#include "prng.h"
+#include "crypto_int.h"
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_seed(krb5_context context, krb5_data *data)

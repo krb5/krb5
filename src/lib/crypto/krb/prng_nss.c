@@ -26,17 +26,14 @@
  * or implied warranty.
  */
 
-#include "prng.h"
-#include <assert.h>
-#include "k5-thread.h"
+#include "crypto_int.h"
+#include "nss_prng.h"
 
 /*
  * This PRNG module should be used whenever the NSS crypto implementation is
  * used.  The Fortuna module does not work with NSS because it needs to hold
  * AES-256 and SHA-256 contexts across forks.
  */
-
-#include "nss_prng.h"
 
 int
 k5_prng_init(void)

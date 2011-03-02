@@ -7,10 +7,7 @@
   of RSA Data Security)
 
 */
-#include "k5-int.h"
-#include "arcfour.h"
-#include "aead.h"
-#include "hash_provider/hash_provider.h"
+#include "crypto_int.h"
 
 #define CONFOUNDERLENGTH 8
 

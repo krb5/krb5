@@ -33,8 +33,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "k5-int.h"
-#include <aead.h>
+#include "crypto_int.h"
 #include "nss_gen.h"
 
 #define RC4_KEY_SIZE 16

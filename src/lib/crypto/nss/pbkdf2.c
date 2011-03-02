@@ -34,8 +34,7 @@
  */
 
 #include <ctype.h>
-#include "k5-int.h"
-#include "hash_provider.h"
+#include "crypto_int.h"
 #include "pk11pub.h"
 #include "nss_gen.h"
 

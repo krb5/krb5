@@ -58,7 +58,7 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "k5-int.h"
+#include "crypto_int.h"
 #include "des_int.h"
 #include <ctype.h>
 

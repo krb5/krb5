@@ -26,9 +26,7 @@
  */
 
 
-#include "k5-int.h"
-#include "raw.h"
-#include "aead.h"
+#include "crypto_int.h"
 
 unsigned int
 krb5int_raw_crypto_length(const struct krb5_keytypes *ktp,

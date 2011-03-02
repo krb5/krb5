@@ -1,8 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-#include "k5-int.h"
+#include "crypto_int.h"
 #include "k5-utf8.h"
-#include "hash_provider.h"
-#include "arcfour.h"
 
 krb5_error_code
 krb5int_arcfour_string_to_key(const struct krb5_keytypes *ktp,

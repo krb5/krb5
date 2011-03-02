@@ -25,8 +25,7 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "k5-int.h"
-#include "dk.h"
+#include "crypto_int.h"
 
 static krb5_key
 find_cached_dkey(struct derived_key *list, const krb5_data *constant)

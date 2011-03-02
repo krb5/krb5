@@ -24,11 +24,7 @@
  * or implied warranty.
  */
 
-#include "k5-int.h"
-#include "etypes.h"
-#include "dk.h"
-#include "aead.h"
-#include "cksumtypes.h"
+#include "crypto_int.h"
 
 #define K5CLENGTH 5 /* 32 bit net byte order integer + one byte seed */
 

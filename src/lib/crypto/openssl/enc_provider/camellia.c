@@ -25,10 +25,7 @@
  * or implied warranty.
  */
 
-#include "k5-int.h"
-#include "enc_provider.h"
-#include "aead.h"
-#include "hash_provider/hash_provider.h"
+#include "crypto_int.h"
 #include <openssl/evp.h>
 #include <openssl/camellia.h>
 #include <openssl/modes.h>

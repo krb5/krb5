@@ -29,14 +29,10 @@
  * Not currently used; likely to be used when we get around to AES support.
  */
 
-#include <ctype.h>
-#include "k5-int.h"
-#include "hash_provider.h"
-
+#include "crypto_int.h"
 #include <openssl/x509.h>
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
-
 
 krb5_error_code
 krb5int_pbkdf2_hmac_sha1 (const krb5_data *out, unsigned long count,

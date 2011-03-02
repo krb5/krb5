@@ -74,10 +74,7 @@
  * such as a KDC which can submit periodic entropy inputs to the PRNG.
  */
 
-#include "k5-int.h"
-#include "prng.h"
-#include "aes.h"
-#include "sha2.h"
+#include "crypto_int.h"
 
 /* The accumulator's number of pools. */
 #define NUM_POOLS 32

@@ -25,16 +25,7 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "k5-int.h"
-#include "enc_provider.h"
-#include "hash_provider.h"
-#include "etypes.h"
-#include "old.h"
-#include "raw.h"
-#include "dk.h"
-#include "prf_int.h"
-#include "arcfour.h"
-#include "des/des_int.h"
+#include "crypto_int.h"
 
 /* these will be linear searched.  if they ever get big, a binary
    search or hash table would be better, which means these would need

@@ -25,7 +25,7 @@
  * or implied warranty.
  */
 
-#include "des_int.h"
+#include "crypto_int.h"
 #include "pk11pub.h"
 #include "nss_gen.h"
 

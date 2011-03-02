@@ -35,7 +35,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "k5-int.h"
+#include "crypto_int.h"
 
 #define ASIZE(ARRAY) (sizeof(ARRAY)/sizeof(ARRAY[0]))
 

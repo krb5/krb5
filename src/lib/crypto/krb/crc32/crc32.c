@@ -28,8 +28,7 @@
  * CRC-32/AUTODIN-II routines
  */
 
-#include "k5-int.h"
-#include "crc-32.h"
+#include "crypto_int.h"
 
 /* This table and block of comments are taken from code labeled: */
 /*

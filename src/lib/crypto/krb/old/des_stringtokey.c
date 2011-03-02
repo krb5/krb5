@@ -25,15 +25,7 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "k5-int.h"
-#include "old.h"
-#include <des_int.h>
-
-/* XXX */
-extern krb5_error_code mit_des_string_to_key_int
-(krb5_keyblock * keyblock,
- const krb5_data * data,
- const krb5_data * salt);
+#include "crypto_int.h"
 
 krb5_error_code
 krb5int_des_string_to_key(const struct krb5_keytypes *ktp,

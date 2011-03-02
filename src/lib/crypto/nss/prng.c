@@ -24,7 +24,7 @@
  * or implied warranty.
  */
 
-#include "k5-int.h"
+#include "crypto_int.h"
 #include "nss_gen.h"
 #include "nss_prng.h"
 #include <pk11pub.h>

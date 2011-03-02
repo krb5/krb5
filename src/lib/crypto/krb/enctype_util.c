@@ -34,8 +34,7 @@
  * krb5_enctype_to_string()
  */
 
-#include "k5-int.h"
-#include "etypes.h"
+#include "crypto_int.h"
 
 krb5_boolean KRB5_CALLCONV
 krb5_c_valid_enctype(krb5_enctype etype)

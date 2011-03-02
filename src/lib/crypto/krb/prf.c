@@ -31,11 +31,7 @@
  *function yields krb5_c_prf_length bytes of output.
  */
 
-
-#include "k5-int.h"
-#include "etypes.h"
-
-#include <assert.h>
+#include "crypto_int.h"
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_prf_length(krb5_context context, krb5_enctype enctype, size_t *len)

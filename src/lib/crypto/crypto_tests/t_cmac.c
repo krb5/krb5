@@ -38,9 +38,7 @@
  * krb5int_cmac_checksum.
  */
 
-#include "k5-int.h"
-#include "enc_provider.h"
-#include "cksumtypes.h"
+#include "crypto_int.h"
 
 #ifdef CAMELLIA
 

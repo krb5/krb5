@@ -1,17 +1,13 @@
 mydir=lib$(S)crypto$(S)nss$(S)sha1
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 DEFS=
-CRYPTO_IMPL_CFLAGS=@CRYPTO_IMPL_CFLAGS@
-LOCALINCLUDES = -I$(srcdir)/.. $(CRYPTO_IMPL_CFLAGS)
+LOCALINCLUDES =
 
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
+STLIBOBJS=
 
-STLIBOBJS= shs.o
+OBJS=
 
-OBJS= $(OUTPRE)shs.$(OBJEXT) 
-
-SRCS= $(srcdir)/shs.c
+SRCS=
 
 all-unix:: all-libobjs
 

@@ -4,11 +4,8 @@
 
 mydir=lib$(S)crypto$(S)openssl$(S)camellia
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
-LOCALINCLUDES = -I$(srcdir)/.. -I$(srcdir)/../../krb/dk  -I$(srcdir)/../../../../include
+LOCALINCLUDES =
 DEFS=
-
-PROG_LIBPATH=-L$(TOPLIBD)
-PROG_RPATH=$(KRB5_LIBDIR)
 
 STLIBOBJS=
 

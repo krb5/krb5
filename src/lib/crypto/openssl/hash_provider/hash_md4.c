@@ -25,39 +25,34 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "k5-int.h"
-#include "rsa-md4.h"
-#include "hash_provider.h"
-#include "aead.h"
+#include "crypto_int.h"
+#include <openssl/evp.h>
+#include <openssl/md4.h>
 
 static krb5_error_code
 k5_md4_hash(const krb5_crypto_iov *data, size_t num_data, krb5_data *output)
 {
-    krb5_MD4_CTX ctx;
+    EVP_MD_CTX ctx;
     unsigned int i;
 
-    if (output->length != RSA_MD4_CKSUM_LENGTH)
-        return(KRB5_CRYPTO_INTERNAL);
+    if (output->length != MD4_DIGEST_LENGTH)
+        return KRB5_CRYPTO_INTERNAL;
 
-    krb5int_MD4Init(&ctx);
+    EVP_MD_CTX_init(&ctx);
+    EVP_DigestInit_ex(&ctx, EVP_md4(), NULL);
     for (i = 0; i < num_data; i++) {
-        const krb5_crypto_iov *iov = &data[i];
-
-        if (SIGN_IOV(iov)) {
-            krb5int_MD4Update(&ctx, (unsigned char *) iov->data.data,
-                              iov->data.length);
-        }
+        const krb5_data *d = &data[i].data;
+        if (SIGN_IOV(&data[i]))
+            EVP_DigestUpdate(&ctx, (unsigned char *)d->data, d->length);
     }
-    krb5int_MD4Final(&ctx);
-
-    memcpy(output->data, ctx.digest, RSA_MD4_CKSUM_LENGTH);
-
-    return(0);
+    EVP_DigestFinal_ex(&ctx, (unsigned char *)output->data, NULL);
+    EVP_MD_CTX_cleanup(&ctx);
+    return 0;
 }
 
 const struct krb5_hash_provider krb5int_hash_md4 = {
     "MD4",
-    RSA_MD4_CKSUM_LENGTH,
+    MD4_DIGEST_LENGTH,
     64,
     k5_md4_hash
 };

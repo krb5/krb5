@@ -33,11 +33,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "k5-int.h"
-#include "enc_provider.h"
-#include "aead.h"
+#include "crypto_int.h"
 #include "nss_gen.h"
-
 
 krb5_error_code
 krb5int_aes_encrypt(krb5_key key, const krb5_data *ivec,

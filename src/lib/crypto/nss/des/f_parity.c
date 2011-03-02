@@ -9,8 +9,7 @@
  * Mark Eichin -- Cygnus Support
  */
 
-
-#include "des_int.h"
+#include "crypto_int.h"
 
 /*
  * des_fixup_key_parity: Forces odd parity per byte; parity is bits
@@ -22,35 +21,11 @@
 #define parity_char(x) pstep(pstep(pstep((x),4),2),1)
 
 void
-mit_des_fixup_key_parity(mit_des_cblock key)
+mit_des_fixup_key_parity(unsigned char *key)
 {
     unsigned int i;
-    for (i=0; i<sizeof(mit_des_cblock); i++)
-    {
+    for (i = 0; i < 8; i++) {
         key[i] &= 0xfe;
         key[i] |= 1^parity_char(key[i]);
     }
-
-    return;
-}
-
-/*
- * des_check_key_parity: returns true iff key has the correct des parity.
- *                       See des_fix_key_parity for the definition of
- *                       correct des parity.
- */
-int
-mit_des_check_key_parity(mit_des_cblock key)
-{
-    unsigned int i;
-
-    for (i=0; i<sizeof(mit_des_cblock); i++)
-    {
-        if((key[i] & 1) == parity_char(0xfe&key[i]))
-        {
-            return 0;
-        }
-    }
-
-    return(1);
 }

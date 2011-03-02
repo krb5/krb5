@@ -39,11 +39,7 @@
  * WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "k5-int.h"
-#include "etypes.h"
-#include "aead.h"
-#include "etypes.h"
-#include "cksumtypes.h"
+#include "crypto_int.h"
 
 #ifdef CAMELLIA
 

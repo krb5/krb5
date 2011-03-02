@@ -22,9 +22,9 @@
  * express or implied warranty.
  */
 
+#include "crypto_int.h"
 #include "des_int.h"
 #include "f_tables.h"
-#include "aead.h"
 
 const mit_des_cblock mit_des_zeroblock /* = all zero */;
 

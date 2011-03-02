@@ -187,7 +187,6 @@ krb5_error_code mit_des_init_random_key(const krb5_encrypt_block *,
                                         krb5_pointer *);
 
 /* key_parity.c */
-void mit_des_fixup_key_parity(mit_des_cblock);
 int mit_des_check_key_parity(mit_des_cblock);
 
 /* key_sched.c */

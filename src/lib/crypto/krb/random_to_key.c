@@ -34,9 +34,7 @@
  * already been initialized and random_key->contents have been allocated
  * with the correct length.
  */
-#include "k5-int.h"
-#include "etypes.h"
-#include "des_int.h"
+#include "crypto_int.h"
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_to_key(krb5_context context, krb5_enctype enctype,

@@ -33,9 +33,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "k5-int.h"
-#include "enc_provider.h"
-#include "aead.h"
+#include "crypto_int.h"
 #include "nss_gen.h"
 
 #ifdef CAMELLIA

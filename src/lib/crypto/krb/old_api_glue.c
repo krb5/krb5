@@ -25,7 +25,7 @@
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
 
-#include "k5-int.h"
+#include "crypto_int.h"
 
 /*
  * The following functions were removed from the API in krb5 1.3 but

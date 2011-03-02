@@ -1,13 +1,7 @@
 mydir=lib$(S)crypto$(S)nss$(S)enc_provider
 BUILDTOP=$(REL)..$(S)..$(S)..$(S)..
 CRYPTO_IMPL_CFLAGS=@CRYPTO_IMPL_CFLAGS@
-LOCALINCLUDES = -I$(srcdir)/../des 	\
-		-I$(srcdir)/../arcfour \
-		-I$(srcdir)/../aes 	\
-		-I$(srcdir)/../../krb 			\
-		-I$(srcdir)/../../krb/rand2key	 	\
-		-I$(srcdir)/.. -I$(srcdir)/.  \
-		$(CRYPTO_IMPL_CFLAGS)
+LOCALINCLUDES = -I$(srcdir)/../../krb -I$(srcdir)/.. $(CRYPTO_IMPL_CFLAGS)
 DEFS=
 
 PROG_LIBPATH=-L$(TOPLIBD)

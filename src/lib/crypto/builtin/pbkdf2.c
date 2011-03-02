@@ -29,8 +29,7 @@
  */
 
 #include <ctype.h>
-#include "k5-int.h"
-#include "hash_provider.h"
+#include "crypto_int.h"
 
 /*
  * RFC 2898 specifies PBKDF2 in terms of an underlying pseudo-random
@@ -42,18 +41,18 @@
  * longer than the block size.)
  *
  * For efficiency, it is better to generate the key from the password
- * once at the beginning, so we specify prf_func in terms of a
+ * once at the beginning, so we specify prf_fn in terms of a
  * krb5_key first argument.  That might not be convenient for a PRF
  * which uses the password in some other way, so this might need to be
  * adjusted in the future.
  */
 
-typedef krb5_error_code (*prf_func)(krb5_key pass, krb5_data *salt,
-                                    krb5_data *out);
+typedef krb5_error_code (*prf_fn)(krb5_key pass, krb5_data *salt,
+                                  krb5_data *out);
 
 /* Not exported, for now.  */
 static krb5_error_code
-krb5int_pbkdf2 (prf_func prf, size_t hlen, krb5_key pass,
+krb5int_pbkdf2 (prf_fn prf, size_t hlen, krb5_key pass,
                 const krb5_data *salt, unsigned long count,
                 const krb5_data *output);
 
@@ -81,7 +80,7 @@ static void printd (const char *descr, krb5_data *d) {
 }
 
 static krb5_error_code
-F(char *output, char *u_tmp1, char *u_tmp2, prf_func prf, size_t hlen,
+F(char *output, char *u_tmp1, char *u_tmp2, prf_fn prf, size_t hlen,
   krb5_key pass, const krb5_data *salt, unsigned long count, int i)
 {
     unsigned char ibytes[4];
@@ -151,7 +150,7 @@ F(char *output, char *u_tmp1, char *u_tmp2, prf_func prf, size_t hlen,
 }
 
 static krb5_error_code
-krb5int_pbkdf2 (prf_func prf, size_t hlen, krb5_key pass,
+krb5int_pbkdf2 (prf_fn prf, size_t hlen, krb5_key pass,
                 const krb5_data *salt, unsigned long count,
                 const krb5_data *output)
 {
