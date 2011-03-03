@@ -36,6 +36,10 @@
 #include <k5-int.h>
 #include "sha2.h"
 
+#ifdef K5_BE
+#define WORDS_BIGENDIAN
+#endif
+
 #ifndef min
 #define min(a,b) (((a)>(b))?(b):(a))
 #endif
