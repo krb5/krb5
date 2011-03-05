@@ -1,6 +1,5 @@
 mydir=lib$(S)crypto$(S)krb
 BUILDTOP=$(REL)..$(S)..$(S)..
-SUBDIRS= arcfour checksum crc32 dk prf old raw 
 LOCALINCLUDES = -I$(srcdir) -I$(srcdir)/../$(CRYPTO_IMPL)
 RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -18,20 +17,34 @@ STLIBOBJS=\
 	aead.o		 	\
 	block_size.o		\
 	cf2.o 			\
+	checksum_cbc.o		\
+	checksum_confounder.o	\
+	checksum_dk_cmac.o	\
+	checksum_dk_hmac.o	\
+	checksum_hmac_md5.o	\
+	checksum_unkeyed.o	\
 	checksum_length.o	\
 	cksumtype_to_string.o	\
 	cksumtypes.o		\
+	cmac.o			\
 	coll_proof_cksum.o	\
 	combine_keys.o		\
+	crc32.o			\
 	crypto_length.o		\
 	crypto_libinit.o	\
 	default_state.o 	\
 	decrypt.o		\
 	decrypt_iov.o		\
+	derive.o		\
 	encrypt.o		\
 	encrypt_iov.o		\
 	encrypt_length.o	\
 	enctype_util.o		\
+	enc_dk_cmac.o		\
+	enc_dk_hmac.o		\
+	enc_old.o		\
+	enc_raw.o		\
+	enc_rc4.o		\
 	etypes.o		\
 	key.o			\
 	keyblocks.o 		\
@@ -45,9 +58,16 @@ STLIBOBJS=\
 	nfold.o			\
 	old_api_glue.o		\
 	prf.o			\
+	prf_cmac.o		\
+	prf_des.o		\
+	prf_dk.o		\
+	prf_rc4.o		\
 	prng.o			\
 	prng_$(PRNG_ALG).o	\
 	random_to_key.o		\
+	s2k_des.o		\
+	s2k_pbkdf2.o		\
+	s2k_rc4.o		\
 	state.o 		\
 	string_to_cksumtype.o	\
 	string_to_key.o		\
@@ -64,6 +84,7 @@ OBJS=\
 	$(OUTPRE)cksumtypes.$(OBJEXT)		\
 	$(OUTPRE)coll_proof_cksum.$(OBJEXT)	\
 	$(OUTPRE)combine_keys.$(OBJEXT)		\
+	$(OUTPRE)crc_32.$(OBJEXT)		\
 	$(OUTPRE)crypto_length.$(OBJEXT)	\
 	$(OUTPRE)crypto_libinit.$(OBJEXT)	\
 	$(OUTPRE)default_state.$(OBJEXT) 	\
@@ -72,7 +93,12 @@ OBJS=\
 	$(OUTPRE)encrypt.$(OBJEXT)		\
 	$(OUTPRE)encrypt_iov.$(OBJEXT)		\
 	$(OUTPRE)encrypt_length.$(OBJEXT)	\
-	$(OUTPRE)enctype_util.$(OBJEXT)	\
+	$(OUTPRE)enctype_util.$(OBJEXT)		\
+	$(OUTPRE)enc_dk_cmac.$(OBJEXT)		\
+	$(OUTPRE)enc_dk_hmac.$(OBJEXT)		\
+	$(OUTPRE)enc_old.$(OBJEXT)		\
+	$(OUTPRE)enc_raw.$(OBJEXT)		\
+	$(OUTPRE)enc_rc4.$(OBJEXT)		\
 	$(OUTPRE)etypes.$(OBJEXT)		\
 	$(OUTPRE)key.$(OBJEXT)			\
 	$(OUTPRE)keyblocks.$(OBJEXT) 		\
@@ -85,10 +111,17 @@ OBJS=\
 	$(OUTPRE)mandatory_sumtype.$(OBJEXT)	\
 	$(OUTPRE)nfold.$(OBJEXT)		\
 	$(OUTPRE)old_api_glue.$(OBJEXT)		\
-	$(OUTPRE)prf.$(OBJEXT) 			\
+	$(OUTPRE)prf.$(OBJEXT)			\
+	$(OUTPRE)prf_cmac.$(OBJEXT)		\
+	$(OUTPRE)prf_des.$(OBJEXT)		\
+	$(OUTPRE)prf_dk.$(OBJEXT)		\
+	$(OUTPRE)prf_rc4.$(OBJEXT)		\
 	$(OUTPRE)prng.$(OBJEXT)			\
 	$(OUTPRE)prng_$(PRNG_ALG).$(OBJEXT)	\
 	$(OUTPRE)random_to_key.$(OBJEXT)	\
+	$(OUTPRE)s2k_des.$(OBJEXT)		\
+	$(OUTPRE)s2k_pbkdf2.$(OBJEXT)		\
+	$(OUTPRE)s2k_rc4.$(OBJEXT)		\
 	$(OUTPRE)state.$(OBJEXT) 		\
 	$(OUTPRE)string_to_cksumtype.$(OBJEXT)	\
 	$(OUTPRE)string_to_key.$(OBJEXT)	\
@@ -104,6 +137,7 @@ SRCS=\
 	$(srcdir)/cksumtypes.c		\
 	$(srcdir)/coll_proof_cksum.c	\
 	$(srcdir)/combine_keys.c	\
+	$(srcdir)/crc32.c		\
 	$(srcdir)/crypto_length.c	\
 	$(srcdir)/crypto_libinit.c	\
 	$(srcdir)/default_state.c 	\
@@ -113,6 +147,11 @@ SRCS=\
 	$(srcdir)/encrypt_iov.c		\
 	$(srcdir)/encrypt_length.c	\
 	$(srcdir)/enctype_util.c	\
+	$(srcdir)/enc_dk_cmac.c		\
+	$(srcdir)/enc_dk_hmac.c		\
+	$(srcdir)/enc_old.c		\
+	$(srcdir)/enc_raw.c		\
+	$(srcdir)/enc_rc4.c		\
 	$(srcdir)/etypes.c		\
 	$(srcdir)/key.c			\
 	$(srcdir)/keyblocks.c 		\
@@ -125,11 +164,18 @@ SRCS=\
 	$(srcdir)/mandatory_sumtype.c	\
 	$(srcdir)/nfold.c		\
 	$(srcdir)/old_api_glue.c	\
-	$(srcdir)/prf.c 		\
+	$(srcdir)/prf.c			\
+	$(srcdir)/prf_cmac.c		\
+	$(srcdir)/prf_des.c		\
+	$(srcdir)/prf_dk.c		\
+	$(srcdir)/prf_rc4.c		\
 	$(srcdir)/prng.c 		\
 	$(srcdir)/prng_$(PRNG_ALG).c	\
 	$(srcdir)/cf2.c 		\
 	$(srcdir)/random_to_key.c	\
+	$(srcdir)/s2k_des.c		\
+	$(srcdir)/s2k_pbkdf2.c		\
+	$(srcdir)/s2k_rc4.c		\
 	$(srcdir)/state.c 		\
 	$(srcdir)/string_to_cksumtype.c	\
 	$(srcdir)/string_to_key.c	\
@@ -137,12 +183,6 @@ SRCS=\
 	$(srcdir)/valid_cksumtype.c	\
 	$(srcdir)/verify_checksum.c	\
 	$(srcdir)/verify_checksum_iov.c
-
-STOBJLISTS=arcfour/OBJS.ST checksum/OBJS.ST crc32/OBJS.ST	\
-	dk/OBJS.ST prf/OBJS.ST old/OBJS.ST raw/OBJS.ST OBJS.ST
-
-SUBDIROBJLISTS=arcfour/OBJS.ST checksum/OBJS.ST crc32/OBJS.ST	\
-	dk/OBJS.ST prf/OBJS.ST old/OBJS.ST raw/OBJS.ST
 
 ##DOS##LIBOBJS = $(OBJS)
 
