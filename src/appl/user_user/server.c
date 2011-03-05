@@ -84,16 +84,25 @@ int main(argc, argv)
 
         l_inaddr.sin_family = AF_INET;
         l_inaddr.sin_addr.s_addr = 0;
-        if (!(sp = getservbyname("uu-sample", "tcp"))) {
-            com_err("uu-server", 0, "can't find uu-sample/tcp service");
-            exit(3);
+        if (argc == 2) {
+            l_inaddr.sin_port = htons(atoi(argv[1]));
+        } else  {
+            if (!(sp = getservbyname("uu-sample", "tcp"))) {
+                com_err("uu-server", 0, "can't find uu-sample/tcp service");
+                exit(3);
+            }
+            l_inaddr.sin_port = sp->s_port;
         }
+
         (void) setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof (one));
-        l_inaddr.sin_port = sp->s_port;
         if (bind(sock, (struct sockaddr *)&l_inaddr, sizeof(l_inaddr))) {
             com_err("uu-server", errno, "binding socket");
             exit(3);
         }
+
+        printf("Server started\n");
+        fflush(stdout);
+
         if (listen(sock, 1) == -1) {
             com_err("uu-server", errno, "listening");
             exit(3);
