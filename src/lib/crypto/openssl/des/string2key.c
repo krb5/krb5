@@ -33,7 +33,18 @@ mit_des_string_to_key_int(krb5_keyblock *key, const krb5_data *pw,
                           const krb5_data *salt)
 {
     DES_cblock outkey;
-    DES_string_to_key(pw->data, &outkey);
+    char *str;
+    krb5_data s = (salt == NULL) ? empty_data() : *salt;
+
+    /* AFS string-to-key isn't implemented. */
+    if (s.length == SALT_TYPE_AFS_LENGTH)
+        return KRB5_CRYPTO_INTERNAL;
+
+    /* Concatenate password and salt. */
+    if (asprintf(&str, "%.*s%.*s", pw->length, pw->data, s.length, s.data) < 0)
+        return ENOMEM;
+    DES_string_to_key(str, &outkey);
+    free(str);
     if (key->length < sizeof(outkey))
         return KRB5_CRYPTO_INTERNAL;
     key->length = sizeof(outkey);

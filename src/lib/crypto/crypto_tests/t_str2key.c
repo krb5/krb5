@@ -37,6 +37,92 @@ struct test {
     krb5_data params;
     krb5_data expected_key;
 } test_cases[] = {
+    /* Test vectors from RFC 3961 appendix A.2. */
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "password",
+        "ATHENA.MIT.EDUraeburn",
+        { KV5M_DATA, 1, "\0" },
+        { KV5M_DATA, 8, "\xCB\xC2\x2F\xAE\x23\x52\x98\xE3" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "potatoe",
+        "WHITEHOUSE.GOVdanny",
+        { KV5M_DATA, 1, "\0" },
+        { KV5M_DATA, 8, "\xDF\x3D\x32\xA7\x4F\xD9\x2A\x01" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "\xF0\x9D\x84\x9E",
+        "EXAMPLE.COMpianist",
+        { KV5M_DATA, 1, "\0" },
+        { KV5M_DATA, 8, "\x4F\xFB\x26\xBA\xB0\xCD\x94\x13" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "\xC3\x9F",
+        "ATHENA.MIT.EDUJuri\xC5\xA1\x69\xC4\x87",
+        { KV5M_DATA, 1, "\0" },
+        { KV5M_DATA, 8, "\x62\xC8\x1A\x52\x32\xB5\xE6\x9D" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "11119999",
+        "AAAAAAAA",
+        { KV5M_DATA, 1, "\0" },
+        { KV5M_DATA, 8, "\x98\x40\x54\xd0\xf1\xa7\x3e\x31" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "NNNN6666",
+        "FFFFAAAA",
+        { KV5M_DATA, 1, "\0" },
+        { KV5M_DATA, 8, "\xC4\xBF\x6B\x25\xAD\xF7\xA4\xF8" }
+    },
+
+    /* Test vectors from RFC 3961 appendix A.4. */
+    {
+        ENCTYPE_DES3_CBC_SHA1,
+        "password",
+        "ATHENA.MIT.EDUraeburn",
+        { KV5M_DATA, 0, NULL },
+        { KV5M_DATA, 24, "\x85\x0B\xB5\x13\x58\x54\x8C\xD0\x5E\x86\x76\x8C"
+          "\x31\x3E\x3B\xFE\xF7\x51\x19\x37\xDC\xF7\x2C\x3E" }
+    },
+    {
+        ENCTYPE_DES3_CBC_SHA1,
+        "potatoe",
+        "WHITEHOUSE.GOVdanny",
+        { KV5M_DATA, 0, NULL },
+        { KV5M_DATA, 24, "\xDF\xCD\x23\x3D\xD0\xA4\x32\x04\xEA\x6D\xC4\x37"
+          "\xFB\x15\xE0\x61\xB0\x29\x79\xC1\xF7\x4F\x37\x7A" }
+    },
+    {
+        ENCTYPE_DES3_CBC_SHA1,
+        "penny",
+        "EXAMPLE.COMbuckaroo",
+        { KV5M_DATA, 0, NULL },
+        { KV5M_DATA, 24, "\x6D\x2F\xCD\xF2\xD6\xFB\xBC\x3D\xDC\xAD\xB5\xDA"
+          "\x57\x10\xA2\x34\x89\xB0\xD3\xB6\x9D\x5D\x9D\x4A" }
+    },
+    {
+        ENCTYPE_DES3_CBC_SHA1,
+        "\xC3\x9F",
+        "ATHENA.MIT.EDUJuri\xC5\xA1\x69\xC4\x87",
+        { KV5M_DATA, 0, NULL },
+        { KV5M_DATA, 24, "\x16\xD5\xA4\x0E\x1C\xE3\xBA\xCB\x61\xB9\xDC\xE0"
+          "\x04\x70\x32\x4C\x83\x19\x73\xA7\xB9\x52\xFE\xB0" }
+    },
+    {
+        ENCTYPE_DES3_CBC_SHA1,
+        "\xF0\x9D\x84\x9E",
+        "EXAMPLE.COMpianist",
+        { KV5M_DATA, 0, NULL },
+        { KV5M_DATA, 24, "\x85\x76\x37\x26\x58\x5D\xBC\x1C\xCE\x6E\xC4\x3E"
+          "\x1F\x75\x1F\x07\xF1\xC4\xCB\xB0\x98\xF4\x0B\x19" }
+    },
+
     /* Test vectors from RFC 3962 appendix B. */
     { 
         ENCTYPE_AES128_CTS_HMAC_SHA1_96,
