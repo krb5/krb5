@@ -147,6 +147,8 @@ $(OUTPRE)camellia-test.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/krb5/preauth_plugin.h \
   $(top_srcdir)/include/port-sockets.h $(top_srcdir)/include/socket-utils.h \
   camellia-test.c
+$(OUTPRE)t_cf2.$(OBJEXT): $(BUILDTOP)/include/krb5/krb5.h \
+  $(COM_ERR_DEPS) $(top_srcdir)/include/krb5.h t_cf2.c
 $(OUTPRE)t_cksum.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
   $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h \

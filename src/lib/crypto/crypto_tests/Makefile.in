@@ -19,6 +19,7 @@ EXTRADEPSRCS=\
 	$(srcdir)/vectors.c	\
 	$(srcdir)/aes-test.c	\
 	$(srcdir)/camellia-test.c	\
+	$(srcdir)/t_cf2.c	\
 	$(srcdir)/t_cksum.c	\
 	$(srcdir)/t_cksums.c	\
 	$(srcdir)/t_crc.c	\
@@ -39,7 +40,7 @@ check-unix:: t_nfold t_encrypt t_decrypt t_prf t_prng t_cmac t_hmac \
 		aes-test  \
 		camellia-test  \
 		t_mddriver4 t_mddriver \
-		t_crc t_cts t_short t_str2key t_derive t_fork
+		t_crc t_cts t_short t_str2key t_derive t_fork t_cf2
 	$(RUN_SETUP) $(VALGRIND) ./t_nfold
 	$(RUN_SETUP) $(VALGRIND) ./t_encrypt
 	$(RUN_SETUP) $(VALGRIND) ./t_decrypt
@@ -66,10 +67,8 @@ check-unix:: t_nfold t_encrypt t_decrypt t_prf t_prng t_cmac t_hmac \
 	$(RUN_SETUP) $(VALGRIND) ./t_str2key
 	$(RUN_SETUP) $(VALGRIND) ./t_derive
 	$(RUN_SETUP) $(VALGRIND) ./t_fork
-
-
-
-
+	$(RUN_SETUP) $(VALGRIND) ./t_cf2 <$(srcdir)/t_cf2.in >t_cf2.output
+	diff t_cf2.output $(srcdir)/t_cf2.expected
 #	$(RUN_SETUP) $(VALGRIND) ./t_pkcs5
 
 t_nfold$(EXEEXT): t_nfold.$(OBJEXT) nfold.$(OBJEXT) $(SUPPORT_DEPLIB)
@@ -155,6 +154,9 @@ t_derive$(EXEEXT): t_derive.$(OBJEXT) $(SUPPORT_DEPLIB)
 t_fork$(EXEEXT): t_fork.$(OBJEXT) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_fork.$(OBJEXT) -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
 
+t_cf2$(EXEEXT): t_cf2.$(OBJEXT) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ t_cf2.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
+
 clean::
 	$(RM) t_nfold.o t_nfold nfold.$(OBJEXT) t_encrypt t_encrypt.o \
 		t_decrypt.o t_decrypt t_prng.o t_prng t_cmac.o t_cmac \
@@ -165,7 +167,9 @@ clean::
 		t_cksum4 t_cksum4.o t_cksum5 t_cksum5.o t_cksums t_cksums.o \
 		t_kperf.o t_kperf t_short t_short.o t_str2key t_str2key.o \
 		t_derive t_derive.o t_fork t_fork.o \
-		t_mddriver$(EXEEXT) $(OUTPRE)t_mddriver.$(OBJEXT)
+		t_mddriver$(EXEEXT) $(OUTPRE)t_mddriver.$(OBJEXT) \
+		camellia-test camellia-test.o camellia-vt.txt \
+		t_cf2 t_cf2.o t_cf2.output
 
 	-$(RM) t_prng.output
 	-$(RM) t_prf.output
