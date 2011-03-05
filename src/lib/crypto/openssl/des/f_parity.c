@@ -31,5 +31,5 @@
 void
 mit_des_fixup_key_parity(unsigned char *key)
 {
-    DES_set_odd_parity(key);
+    DES_set_odd_parity((DES_cblock *)key);
 }
