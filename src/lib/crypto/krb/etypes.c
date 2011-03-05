@@ -41,7 +41,6 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_old_crypto_length, krb5int_old_encrypt, krb5int_old_decrypt,
       krb5int_des_string_to_key, k5_rand2key_des,
       krb5int_des_prf,
-      krb5int_init_state_enc, krb5int_free_state_enc,
       CKSUMTYPE_RSA_MD5_DES,
       ETYPE_WEAK },
     { ENCTYPE_DES_CBC_MD4,
@@ -51,7 +50,6 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_old_crypto_length, krb5int_old_encrypt, krb5int_old_decrypt,
       krb5int_des_string_to_key, k5_rand2key_des,
       krb5int_des_prf,
-      krb5int_init_state_enc, krb5int_free_state_enc,
       CKSUMTYPE_RSA_MD4_DES,
       ETYPE_WEAK },
     { ENCTYPE_DES_CBC_MD5,
@@ -61,7 +59,6 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_old_crypto_length, krb5int_old_encrypt, krb5int_old_decrypt,
       krb5int_des_string_to_key, k5_rand2key_des,
       krb5int_des_prf,
-      krb5int_init_state_enc, krb5int_free_state_enc,
       CKSUMTYPE_RSA_MD5_DES,
       ETYPE_WEAK },
     { ENCTYPE_DES_CBC_RAW,
@@ -71,7 +68,6 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_raw_crypto_length, krb5int_raw_encrypt, krb5int_raw_decrypt,
       krb5int_des_string_to_key, k5_rand2key_des,
       krb5int_des_prf,
-      krb5int_init_state_enc, krb5int_free_state_enc,
       0,
       ETYPE_WEAK },
     { ENCTYPE_DES3_CBC_RAW,
@@ -81,7 +77,6 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_raw_crypto_length, krb5int_raw_encrypt, krb5int_raw_decrypt,
       krb5int_dk_string_to_key, k5_rand2key_des3,
       NULL, /*PRF*/
-      krb5int_init_state_enc, krb5int_free_state_enc,
       0,
       ETYPE_WEAK },
 
@@ -93,7 +88,6 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_dk_crypto_length, krb5int_dk_encrypt, krb5int_dk_decrypt,
       krb5int_dk_string_to_key, k5_rand2key_des3,
       krb5int_dk_prf,
-      krb5int_init_state_enc, krb5int_free_state_enc,
       CKSUMTYPE_HMAC_SHA1_DES3,
       0 /*flags*/ },
 
@@ -104,7 +98,6 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_dk_crypto_length, krb5int_dk_encrypt, krb5int_dk_decrypt,
       krb5int_dk_string_to_key, k5_rand2key_des,
       NULL, /*PRF*/
-      krb5int_init_state_enc, krb5int_free_state_enc,
       0,
       ETYPE_WEAK },
     { ENCTYPE_ARCFOUR_HMAC,
@@ -116,7 +109,6 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_arcfour_crypto_length, krb5int_arcfour_encrypt,
       krb5int_arcfour_decrypt, krb5int_arcfour_string_to_key,
       k5_rand2key_direct, krb5int_arcfour_prf,
-      krb5int_init_state_enc, krb5int_free_state_enc,
       CKSUMTYPE_HMAC_MD5_ARCFOUR,
       0 /*flags*/ },
     { ENCTYPE_ARCFOUR_HMAC_EXP,
@@ -128,7 +120,6 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_arcfour_crypto_length, krb5int_arcfour_encrypt,
       krb5int_arcfour_decrypt, krb5int_arcfour_string_to_key,
       k5_rand2key_direct, krb5int_arcfour_prf,
-      krb5int_init_state_enc, krb5int_free_state_enc,
       CKSUMTYPE_HMAC_MD5_ARCFOUR,
       ETYPE_WEAK
     },
@@ -141,7 +132,6 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_aes_crypto_length, krb5int_dk_encrypt, krb5int_dk_decrypt,
       krb5int_aes_string_to_key, k5_rand2key_direct,
       krb5int_dk_prf,
-      krb5int_init_state_enc, krb5int_free_state_enc,
       CKSUMTYPE_HMAC_SHA1_96_AES128,
       0 /*flags*/ },
     { ENCTYPE_AES256_CTS_HMAC_SHA1_96,
@@ -152,7 +142,6 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_aes_crypto_length, krb5int_dk_encrypt, krb5int_dk_decrypt,
       krb5int_aes_string_to_key, k5_rand2key_direct,
       krb5int_dk_prf,
-      krb5int_init_state_enc, krb5int_free_state_enc,
       CKSUMTYPE_HMAC_SHA1_96_AES256,
       0 /*flags*/ },
 #ifdef CAMELLIA
@@ -165,7 +154,6 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_dk_cmac_encrypt, krb5int_dk_cmac_decrypt,
       krb5int_camellia_string_to_key, k5_rand2key_direct,
       krb5int_dk_cmac_prf,
-      krb5int_init_state_enc, krb5int_free_state_enc,
       CKSUMTYPE_CMAC_CAMELLIA128,
       0 /*flags*/ },
     { ENCTYPE_CAMELLIA256_CTS_CMAC,
@@ -177,7 +165,6 @@ const struct krb5_keytypes krb5int_enctypes_list[] = {
       krb5int_dk_cmac_encrypt, krb5int_dk_cmac_decrypt,
       krb5int_camellia_string_to_key, k5_rand2key_direct,
       krb5int_dk_cmac_prf,
-      krb5int_init_state_enc, krb5int_free_state_enc,
       CKSUMTYPE_CMAC_CAMELLIA256,
       0 /*flags */ },
 #endif /* CAMELLIA */

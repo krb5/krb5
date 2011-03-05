@@ -95,14 +95,6 @@ typedef krb5_error_code (*prf_func)(const struct krb5_keytypes *ktp,
                                     krb5_key key,
                                     const krb5_data *in, krb5_data *out);
 
-typedef krb5_error_code (*init_state_func)(const struct krb5_keytypes *ktp,
-                                           const krb5_keyblock *key,
-                                           krb5_keyusage keyusage,
-                                           krb5_data *out_state);
-
-typedef void (*free_state_func)(const struct krb5_keytypes *ktp,
-                                krb5_data *state);
-
 struct krb5_keytypes {
     krb5_enctype etype;
     char *name;
@@ -117,8 +109,6 @@ struct krb5_keytypes {
     str2key_func str2key;
     rand2key_func rand2key;
     prf_func prf;
-    init_state_func init_state;
-    free_state_func free_state;
     krb5_cksumtype required_ctype;
     krb5_flags flags;
 };
@@ -290,14 +280,6 @@ krb5_error_code krb5int_dk_prf(const struct krb5_keytypes *ktp, krb5_key key,
 krb5_error_code krb5int_dk_cmac_prf(const struct krb5_keytypes *ktp,
 				    krb5_key key, const krb5_data *in,
 				    krb5_data *out);
-
-/* State initialization/cleanup handlers */
-krb5_error_code krb5int_init_state_enc(const struct krb5_keytypes *ktp,
-				       const krb5_keyblock *key,
-				       krb5_keyusage keyusage,
-				       krb5_data *out_state);
-void krb5int_free_state_enc(const struct krb5_keytypes *ktp,
-			    krb5_data *state);
 
 /*** Prototypes for cksumtype handler functions ***/
 
