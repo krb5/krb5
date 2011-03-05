@@ -269,7 +269,7 @@ k5_nss_stream_init_state(krb5_data *new_state)
     return 0;
 }
 
-krb5_error_code
+void
 k5_nss_stream_free_state(krb5_data *state)
 {
     struct stream_state *sstate = (struct stream_state *) state->data;
@@ -280,7 +280,6 @@ k5_nss_stream_free_state(krb5_data *state)
         PK11_DestroyContext(sstate->ctx, PR_TRUE);
     }
     free(sstate);
-    return 0;
 }
 
 krb5_error_code

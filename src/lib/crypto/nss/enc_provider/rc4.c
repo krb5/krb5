@@ -67,10 +67,10 @@ k5_arcfour_decrypt_iov(krb5_key key, const krb5_data *state,
                                  data, num_data);
 }
 
-static krb5_error_code
+static void
 k5_arcfour_free_state(krb5_data *state)
 {
-    return k5_nss_stream_free_state(state);
+    (void)k5_nss_stream_free_state(state);
 }
 
 static krb5_error_code

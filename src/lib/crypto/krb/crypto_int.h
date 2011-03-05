@@ -54,7 +54,7 @@ struct krb5_enc_provider {
     krb5_error_code (*init_state)(const krb5_keyblock *key,
                                   krb5_keyusage keyusage,
                                   krb5_data *out_state);
-    krb5_error_code (*free_state)(krb5_data *state);
+    void (*free_state)(krb5_data *state);
 
     /* May be NULL if there is no key-derived data cached.  */
     void (*key_cleanup)(krb5_key key);
@@ -369,7 +369,7 @@ krb5_error_code krb5int_des_init_state(const krb5_keyblock *key,
                                        krb5_data *new_state);
 
 /* Default state cleanup handler (used by module enc providers). */
-krb5_error_code krb5int_default_free_state(krb5_data *state);
+void krb5int_default_free_state(krb5_data *state);
 
 /*** Input/output vector processing declarations **/
 

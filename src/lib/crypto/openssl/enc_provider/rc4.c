@@ -53,14 +53,7 @@ struct arcfour_state {
 #define RC4_KEY_SIZE 16
 #define RC4_BLOCK_SIZE 1
 
-/* Interface layer to kerb5 crypto layer */
-
-/* prototypes */
-static krb5_error_code
-k5_arcfour_free_state ( krb5_data *state);
-static krb5_error_code
-k5_arcfour_init_state (const krb5_keyblock *key,
-                       krb5_keyusage keyusage, krb5_data *new_state);
+/* Interface layer to krb5 crypto layer */
 
 /* The workhorse of the arcfour system,
  * this impliments the cipher
@@ -119,8 +112,8 @@ k5_arcfour_docrypt(krb5_key key,const krb5_data *state, krb5_crypto_iov *data,
     return 0;
 }
 
-static krb5_error_code
-k5_arcfour_free_state ( krb5_data *state)
+static void
+k5_arcfour_free_state(krb5_data *state)
 {
     struct arcfour_state *arcstate = (struct arcfour_state *) state->data;
 
@@ -128,12 +121,11 @@ k5_arcfour_free_state ( krb5_data *state)
     if (arcstate && arcstate->loopback == arcstate)
         EVP_CIPHER_CTX_cleanup(&arcstate->ctx);
     free(arcstate);
-    return 0;
 }
 
 static krb5_error_code
-k5_arcfour_init_state (const krb5_keyblock *key,
-                       krb5_keyusage keyusage, krb5_data *new_state)
+k5_arcfour_init_state(const krb5_keyblock *key,
+                      krb5_keyusage keyusage, krb5_data *new_state)
 {
     struct arcfour_state *arcstate;
 
