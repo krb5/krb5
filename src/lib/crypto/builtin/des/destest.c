@@ -56,6 +56,7 @@
  */
 
 #include "des_int.h"
+#include "crypto_int.h"
 #include <stdio.h>
 
 void convert (char *, unsigned char []);
@@ -98,7 +99,8 @@ main(argc, argv)
             fprintf(stderr, "des test: %s %s %s\n", block1, block2, block3);
             exit(1);
         }
-        mit_des_cbc_encrypt((const mit_des_cblock *) input, output2, 8,
+        mit_des_cbc_encrypt((const mit_des_cblock *) input,
+                            (mit_des_cblock *) output2, 8,
                             sched, zeroblock, 1);
 
         if (memcmp((char *)output2, (char *)output, 8)) {
@@ -113,7 +115,8 @@ main(argc, argv)
         /*
          * Now try decrypting....
          */
-        mit_des_cbc_encrypt((const mit_des_cblock *) output, output2, 8,
+        mit_des_cbc_encrypt((const mit_des_cblock *) output,
+                            (mit_des_cblock *) output2, 8,
                             sched, zeroblock, 0);
 
         if (memcmp((char *)output2, (char *)input, 8)) {
@@ -177,8 +180,6 @@ convert(text, cblock)
  * Fake out the DES library, for the purposes of testing.
  */
 
-#include "des_int.h"
-
 int
 mit_des_is_weak_key(key)
     mit_des_cblock key;
@@ -217,7 +218,7 @@ int
 mit_des_check_key_parity(key)
     register mit_des_cblock key;
 {
-    int i;
+    unsigned int i;
 
     for (i=0; i<sizeof(mit_des_cblock); i++) {
         if ((key[i] & 1) == parity_char(0xfe&key[i])) {
@@ -236,7 +237,7 @@ void
 mit_des_fixup_key_parity(key)
     register mit_des_cblock key;
 {
-    int i;
+    unsigned int i;
     for (i=0; i<sizeof(mit_des_cblock); i++)
     {
         key[i] &= 0xfe;
