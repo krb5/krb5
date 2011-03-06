@@ -51,7 +51,7 @@ static void printstringhex (const unsigned char *p) {
 
 static void rfc_tests ()
 {
-    int i;
+    unsigned i;
     struct {
         char *input;
         unsigned int n;
@@ -101,7 +101,7 @@ static void rfc_tests ()
 static void fold_kerberos(unsigned int nbytes)
 {
     unsigned char cipher_text[300];
-    int j;
+    unsigned int j;
 
     if (nbytes > 300)
         abort();
@@ -136,7 +136,7 @@ main(argc, argv)
     char *argv[];
 {
     unsigned char cipher_text[64];
-    int i, j;
+    unsigned int i, j;
 
     printf("N-fold\n");
     for (i=0; i<sizeof(nfold_in)/sizeof(char *); i++) {

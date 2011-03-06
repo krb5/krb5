@@ -202,7 +202,7 @@ static void MDTestSuite ()
 {
 #ifdef HAVE_TEST_SUITE
     struct md_test_entry *entry;
-    int i, num_tests = 0, num_failed = 0;
+    int num_tests = 0, num_failed = 0;
     unsigned char digest[16];
 
     printf ("MD%d test suite:\n\n", MD);

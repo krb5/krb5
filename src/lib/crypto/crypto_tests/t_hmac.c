@@ -57,7 +57,7 @@ static void check_error (int r, int line) {
 #endif
 
 static void printd (const char *descr, krb5_data *d) {
-    int i, j;
+    unsigned int i, j;
     const int r = 16;
 
     printf("%s (%d bytes):", descr, d->length);
@@ -139,7 +139,7 @@ static void test_hmac()
     char outbuf[20];
     char stroutbuf[80];
     krb5_error_code err;
-    int i, j;
+    unsigned int i, j;
     int lose = 0;
     struct k5buf buf;
 

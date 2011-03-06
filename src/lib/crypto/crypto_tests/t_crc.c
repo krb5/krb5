@@ -105,11 +105,12 @@ struct crc_trial trials[] = {
 
 #define NTRIALS (sizeof(trials) / sizeof(trials[0]))
 
+#if 0
 static void
 timetest(unsigned int nblk, unsigned int blksiz)
 {
     char *block;
-    int i;
+    unsigned int i;
     struct tms before, after;
     unsigned long cksum;
 
@@ -135,6 +136,7 @@ timetest(unsigned int nblk, unsigned int blksiz)
 
     free(block);
 }
+#endif
 
 static void gethexstr(char *data, size_t *outlen, unsigned char *outbuf,
                       size_t buflen)
@@ -158,7 +160,7 @@ static void gethexstr(char *data, size_t *outlen, unsigned char *outbuf,
 static void
 verify(void)
 {
-    int i;
+    unsigned int i;
     struct crc_trial trial;
     unsigned char buf[4];
     size_t len;
