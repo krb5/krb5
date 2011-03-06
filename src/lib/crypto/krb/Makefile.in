@@ -201,6 +201,7 @@ t_fortuna: t_fortuna.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
 	$(CC_LINK) -o t_fortuna t_fortuna.o $(K5CRYPTO_LIB) $(SUPPORT_LIB)
 
 clean-unix:: clean-libobjs
+	$(RM) t_fortuna.o t_fortuna t_fortuna.output
 
 @lib_frag@
 @libobj_frag@

@@ -36,7 +36,7 @@ check-unix:: t_sha256
 	$(RUN_SETUP) $(VALGRIND) $(C)t_sha256
 
 clean::
-	$(RM) t_sha256$(EXEEXT) t_sha256$(OBJEXT)
+	$(RM) t_sha256$(EXEEXT) t_sha256.$(OBJEXT)
 
 clean-unix:: clean-libobjs
 

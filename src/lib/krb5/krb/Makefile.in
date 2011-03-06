@@ -324,7 +324,8 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/t_expand.c	\
 	$(srcdir)/t_pac.c	\
 	$(srcdir)/t_princ.c	\
-	$(srcdir)/t_etypes.c
+	$(srcdir)/t_etypes.c    \
+	$(srcdir)/t_expire_warn.c
 
 # Someday, when we have a "maintainer mode", do this right:
 BISON=bison
@@ -442,6 +443,7 @@ clean::
 		$(OUTPRE)t_ser$(EXEEXT) $(OUTPRE)t_ser.$(OBJEXT)	\
 		$(OUTPRE)t_deltat$(EXEEXT) $(OUTPRE)t_deltat.$(OBJEXT) \
 		$(OUTPRE)t_expand$(EXEEXT) $(OUTPRE)t_expand.$(OBJEXT)  \
+	$(OUTPRE)t_expire_warn$(EXEEXT) $(OUTPRE)t_expire_warn.$(OBJEXT)  \
 		$(OUTPRE)t_etypes$(EXEEXT) $(OUTPRE)t_etypes.$(OBJEXT)	\
 		$(OUTPRE)t_pac$(EXEEXT) $(OUTPRE)t_pac.$(OBJEXT)	\
 		$(OUTPRE)t_princ$(EXEEXT) $(OUTPRE)t_princ.$(OBJEXT)	\
