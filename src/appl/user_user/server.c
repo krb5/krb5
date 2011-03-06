@@ -238,5 +238,14 @@ int main(argc, argv)
         return 7;
     }
 
+
+    krb5_free_data_contents(context, &msg);
+    krb5_free_data_contents(context, &pname_data);
+    /* tkt_data freed with creds */
+    krb5_free_cred_contents(context, &creds);
+    krb5_free_creds(context, new_creds);
+    krb5_cc_close(context, cc);
+    krb5_auth_con_free(context, auth_context);
+    krb5_free_context(context);
     return 0;
 }

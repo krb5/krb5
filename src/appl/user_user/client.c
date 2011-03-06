@@ -278,5 +278,17 @@ int main (int argc, char *argv[])
     }
 
     printf ("uu-client: server says \"%s\".\n", msg.data);
+
+
+    krb5_free_ticket(context, ticket);
+    krb5_free_host_realm(context, srealms);
+    free(hname);
+    krb5_free_cred_contents(context, &creds);
+    krb5_free_creds(context, new_creds);
+    krb5_free_data_contents(context, &msg);
+    krb5_free_data_contents(context, &reply);
+    krb5_cc_close(context, cc);
+    krb5_auth_con_free(context, auth_context);
+    krb5_free_context(context);
     return 0;
 }
