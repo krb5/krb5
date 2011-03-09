@@ -1,11 +1,11 @@
-/* #ident  "@(#)mglueP.h 1.2     96/01/18 SMI" */
+/* lib/gssapi/mechglue/mglueP.h */
 
 /*
- * This header contains the private mechglue definitions.
- *
  * Copyright (c) 1995, by Sun Microsystems, Inc.
  * All rights reserved.
  */
+
+/* This header contains the private mechglue definitions. */
 
 #ifndef _GSS_MECHGLUEP_H
 #define _GSS_MECHGLUEP_H

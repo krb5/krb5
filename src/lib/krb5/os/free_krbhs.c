@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/os/free_krbhs.c */
 /*
- * lib/krb5/os/free_krbhs.c
- *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,17 +22,11 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * krb5_free_krbhst() function
  */
 
 #include "k5-int.h"
 
-/*
-  Frees the storage taken by a host list returned by krb5_get_krbhst.
-*/
-
+/* Free the storage taken by a host list returned by krb5_get_krbhst. */
 krb5_error_code
 krb5_free_krbhst(krb5_context context, char *const *hostlist)
 {

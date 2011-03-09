@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* slave/kprop_sock.c */
 /*
- * slave/kprop_sock.c
- *
  * Copyright (C) 2010 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,10 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * sockaddr2krbaddr() utility function used by kprop and kpropd.
  */
+
+/* sockaddr2krbaddr() utility function used by kprop and kpropd */
 
 #include <stdlib.h>
 #include <sys/types.h>

@@ -1,7 +1,6 @@
 /* #pragma ident	"@(#)g_oid_ops.c	1.11	98/01/22 SMI" */
+/* lib/gssapi/mechglue/g_oid_ops.c - GSSAPI V2 interfaces to manipulate OIDs */
 /*
- * lib/gssapi/mechglue/g_oid_ops.c
- *
  * Copyright 1995, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,11 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- */
-
-/*
- * oid_ops.c - GSS-API V2 interfaces to manipulate OIDs
  */
 
 #include "mglueP.h"

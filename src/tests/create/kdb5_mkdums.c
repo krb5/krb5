@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* tests/create/kdb5_mkdums.c */
 /*
- * tests/create/kdb5_mkdums.c
- *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,7 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
+ */
+
+/*
  *
  * Edit a KDC database.
  */

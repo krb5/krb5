@@ -1,6 +1,5 @@
+/* kim/lib/kim_ui_gui_private.h */
 /*
- * $Header$
- *
  * Copyright 2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

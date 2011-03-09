@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/asn.1/asn1glue.h */
 /*
- * lib/krb5/asn.1/asn1glue.h
- *
  * Copyright 1989,1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,7 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
+ */
+
+/*
  *
  * Header file for some glue functions (macros, mostly)
  */

@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/ccache/ccdefops.c */
 /*
- * lib/krb5/ccache/ccdefops.c
- *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,11 +22,10 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Default credentials cache determination.  This is a separate file
- * so that the user can more easily override it.
  */
+
+/* Default credentials cache determination.  This is a separate file
+ * so that the user can more easily override it. */
 
 #include "k5-int.h"
 

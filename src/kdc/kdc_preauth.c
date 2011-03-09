@@ -1,9 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* kdc/kdc_preauth.c - Preauthentication routines for the KDC */
 /*
- * kdc/kdc_preauth.c
- *
- * Copyright 1995, 2003, 2007, 2009 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright 1995, 2003, 2007, 2009 by the Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -23,10 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- * Preauthentication routines for the KDC.
  */
-
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *

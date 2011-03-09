@@ -1,6 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/crypto/nss/enc_provider/rc4.c
- *
+/* lib/crypto/nss/enc_provider/rc4.c */
+/*
  * Copyright (c) 2010 Red Hat, Inc.
  * All Rights Reserved.
  *

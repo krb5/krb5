@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* plugins/locate/python/py-locate.c */
 /*
- * plugins/locate/python/py-locate.c
- *
  * Copyright 2006, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

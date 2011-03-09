@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/krb/make_checksum_iov.c */
 /*
- * lib/crypto/make_checksum_iov.c
- *
  * Copyright 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

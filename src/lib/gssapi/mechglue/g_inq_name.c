@@ -21,12 +21,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
 
-/*
- *  glue routine for gss_inquire_name
- */
+/* Glue routine for gss_inquire_name */
 
 #include "mglueP.h"
 

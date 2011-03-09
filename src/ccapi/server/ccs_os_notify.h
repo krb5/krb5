@@ -1,6 +1,5 @@
+/* ccapi/server/ccs_os_notify.h */
 /*
- * $Header$
- *
  * Copyright 2006-2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/os/dnssrv.c - Perform DNS SRV queries */
 /*
- * lib/krb5/os/dnssrv.c
- *
  * Copyright 1990,2000,2001,2002,2003 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,9 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * do DNS SRV RR queries
  */
 
 #include "autoconf.h"

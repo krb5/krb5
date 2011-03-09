@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/get_in_tkt.c */
 /*
- * lib/krb5/krb/get_in_tkt.c
- *
  * Copyright 1990,1991, 2003, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,8 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
  */
 
 #include <string.h>

@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* kdc/kdc_util.c - Utility functions for the KDC implementation */
 /*
- * kdc/kdc_util.c
- *
  * Copyright 1990,1991,2007,2008,2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,9 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Utility functions for the KDC implementation.
  */
 /*
  * Copyright (c) 2006-2008, Novell, Inc.

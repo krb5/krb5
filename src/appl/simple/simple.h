@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* appl/simple/simple.h */
 /*
- * appl/simple/simple.h
- *
  * Copyright 1988,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,8 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
+ */
+
+/*
  * Common definitions for the simple UDP-based Kerberos-mediated
  * server & client applications.
  */

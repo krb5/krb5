@@ -1,6 +1,5 @@
+/* lib/crypto/krb/cmac.c */
 /*
- * lib/crypto/krb/checksum/cmac.c
- *
  * Copyright 2010 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

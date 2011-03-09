@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/keytab/read_servi.c */
 /*
- * lib/krb5/keytab/read_servi.c
- *
  * Copyright 1990,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,8 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
+ */
+
+/*
  * This routine is designed to be passed to krb5_rd_req.
  * It is a convenience function that reads a key out of a keytab.
  * It handles all of the opening and closing of the keytab

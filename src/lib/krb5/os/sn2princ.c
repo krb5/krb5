@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/os/sn2princ.c */
 /*
- * lib/krb5/os/sn2princ.c
- *
  * Copyright 1991,2002 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,11 +22,10 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Convert a hostname and service name to a principal in the "standard"
- * form.
  */
+
+/* Convert a hostname and service name to a principal in the "standard"
+ * form. */
 
 #include "k5-int.h"
 #include "os-proto.h"

@@ -1,6 +1,5 @@
+/* kim/test/test_ui_plugin.c */
 /*
- * $Header$
- *
  * Copyright 2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

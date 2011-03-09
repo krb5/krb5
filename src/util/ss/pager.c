@@ -1,8 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* util/ss/pager.c - create a "more" running out of a file descriptor */
 /*
- * Pager: Routines to create a "more" running out of a particular file
- * descriptor.
- *
  * Copyright 1987, 1988 by MIT Student Information Processing Board
  *
  * For copyright information, see copyright.h.

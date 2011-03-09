@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* include/k5-trace.h */
 /*
- * include/k5-trace.h
- *
  * Copyright (C) 2010 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,8 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
+ */
+
+/*
  * This header contains trace macro definitions, which map trace points within
  * the code to krb5int_trace() calls with descriptive text strings.
  *

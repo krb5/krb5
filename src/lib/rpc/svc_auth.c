@@ -1,6 +1,4 @@
-#if !defined(lint) && defined(SCCSIDS)
-static char sccsid[] = "@(#)svc_auth.c	2.1 88/08/07 4.0 RPCSRC; from 1.19 87/08/11 Copyr 1984 Sun Micro";
-#endif
+/* lib/rpc/svc_auth.c */
 /*
  * Copyright (c) 2010, Oracle America, Inc.
  *

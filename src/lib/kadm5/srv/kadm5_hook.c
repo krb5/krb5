@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/kadm5/srv/kadm5_hook.c */
 /*
- * lib/kadm5/srv/kadm5_hook.c
- *
  * Copyright (C) 2010 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *

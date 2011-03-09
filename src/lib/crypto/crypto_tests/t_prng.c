@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/crypto_tests/t_prng.c */
 /*
- * lib/crypto/t_prng.c
- *
  * Copyright (C) 2001 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,7 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
+ */
+
+/*
  * This file contains tests for the PRNG code in Kerberos.  It reads
  * an input file, and writes an output file.  It is assumed that the
  * output file will be diffed against expected output to see whether

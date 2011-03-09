@@ -1,6 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/crypto/openssl/enc_provider/des3.c
- *
+/* lib/crypto/openssl/enc_provider/des3.c */
+/*
  * Copyright (C) 2009 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *

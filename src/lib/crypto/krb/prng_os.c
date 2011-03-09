@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/crypto/krb/prng/fortuna/prng_os.c - OS-native PRNG implementation */
+/* lib/crypto/krb/prng_os.c - OS-native PRNG implementation */
 /*
  * Copyright (C) 2011 by the Massachusetts Institute of Technology.
  * All rights reserved.

@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/krb/checksum_cbc.c */
 /*
- * lib/crypto/krb/checksum/cbc.c
- *
  * Copyright (C) 2009 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,10 +22,10 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- * CBC checksum, which computes the ivec resulting from CBC encryption of the
- * input.
  */
+
+/* CBC checksum, which computes the ivec resulting from CBC encryption of the
+ * input. */
 
 #include "crypto_int.h"
 

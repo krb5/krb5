@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/kadm5/srv/pwqual_princ.c */
 /*
- * lib/kadm5/srv/pwqual_princ.c
- *
  * Copyright (C) 2010 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,10 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Password quality module to check passwords against principal components.
  */
+
+/* Password quality module to check passwords against principal components */
 
 #include "k5-platform.h"
 #include <krb5/pwqual_plugin.h>

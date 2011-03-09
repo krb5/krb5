@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/os/an_to_ln.c */
 /*
- * lib/krb5/os/an_to_ln.c
- *
  * Copyright 1990,1991,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,9 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * krb5_aname_to_localname()
  */
 
 /*

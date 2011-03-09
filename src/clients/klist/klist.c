@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* clients/klist/klist.c - List contents of credential cache or keytab */
 /*
- * clients/klist/klist.c
- *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,9 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * List out the contents of your credential cache or keytab.
  */
 
 #include "autoconf.h"

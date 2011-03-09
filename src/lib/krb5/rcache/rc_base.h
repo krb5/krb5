@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/rcache/rc_base.h */
 /*
- * lib/krb5/rcache/rc_base.h
- *
  * This file of the Kerberos V5 software is derived from public-domain code
  * contributed by Daniel J. Bernstein, <brnstnd@acf10.nyu.edu>.
  *

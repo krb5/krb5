@@ -1,6 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/crypto/nss/hash_provider/hash_md5.c
- *
+/* lib/crypto/nss/hash_provider/hash_md5.c */
+/*
  * Copyright (c) 2010 Red Hat, Inc.
  * All Rights Reserved.
  *

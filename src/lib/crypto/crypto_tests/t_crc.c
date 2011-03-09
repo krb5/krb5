@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/crypto_tests/t_crc.c */
 /*
- * lib/crypto/crc32/t_crc.c
- *
  * Copyright 2002,2005 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,7 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
+ */
+
+/*
  * Sanity checks for CRC32.
  */
 #include <sys/times.h>

@@ -1,7 +1,7 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * Copyright 2000, 2002, 2003, 2007, 2008 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright 2000, 2002, 2003, 2007, 2008 by the Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -21,7 +21,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
 /*
  * Copyright 1993 by OpenVision Technologies, Inc.

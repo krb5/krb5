@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/kadm5/srv/pwqual_dict.c */
 /*
- * lib/kadm5/srv/pwqual_dict.c
- *
  * Copyright (C) 2010 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,15 +22,12 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- * Dictionary initialization and lookup code is (see top-level NOTICE file for
- * license):
- *
- * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved
- *
- *
- * Password quality module to look up passwords within the realm dictionary.
  */
+/*
+ * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved
+ */
+
+/* Password quality module to look up passwords within the realm dictionary. */
 
 #include "k5-platform.h"
 #include <krb5/pwqual_plugin.h>

@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/gssapi/krb5/k5sealv3.c */
 /*
- * lib/gssapi/krb5/k5sealv3.c
- *
  * Copyright 2003,2004,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,9 +22,8 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
  */
+
 /* draft-ietf-krb-wg-gssapi-cfx-05 */
 
 #include <assert.h>

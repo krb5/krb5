@@ -1,12 +1,13 @@
 /*
+ * Copyright (C) 1997 Cygnus Solutions.
+ *
+ * Author:  Michael Graff
+ */
+/*
  * Dialog box building for various numbers of (label, entry) fields.
  *
  * This code is somewhat hardcoded to build boxes for the krb5_get_init_creds()
  * function.
- *
- * Copyright (C) 1997 Cygnus Solutions.
- *
- * Author:  Michael Graff
  */
 
 #include <windows.h>

@@ -1,6 +1,5 @@
+/* windows/winlevel.h */
 /*
- * winlevel.h
- *
  * Copyright (C) 2006 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *

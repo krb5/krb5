@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/crypto/enc_provider/camellia.c - Camellia enc provider definition */
+/* lib/crypto/builtin/enc_provider/camellia.c - Camellia enc provider */
 /*
  * Copyright (C) 2009, 2010 by the Massachusetts Institute of Technology.
  * All rights reserved.

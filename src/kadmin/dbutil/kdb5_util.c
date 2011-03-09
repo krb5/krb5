@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* kadmin/dbutil/kdb5_util.c - Administer a KDC database */
 /*
- * admin/edit/kdb5_edit.c
- *
  * (C) Copyright 1990,1991, 1996, 2008, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,11 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Edit a KDC database.
  */
-
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -53,7 +48,6 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
-
 /*
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.

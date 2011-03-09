@@ -1,8 +1,4 @@
-/* @(#)getrpcent.c	2.2 88/07/29 4.0 RPCSRC */
-#if !defined(lint) && defined(SCCSIDS)
-static  char sccsid[] = "@(#)getrpcent.c 1.9 87/08/11  Copyr 1984 Sun Micro";
-#endif
-
+/* lib/rpc/getrpcent.c */
 /*
  * Copyright (c) 2010, Oracle America, Inc.
  *

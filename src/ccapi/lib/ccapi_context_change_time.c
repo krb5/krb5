@@ -1,6 +1,5 @@
+/* ccapi/lib/ccapi_context_change_time.c */
 /*
- * $Header$
- *
  * Copyright 2006, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

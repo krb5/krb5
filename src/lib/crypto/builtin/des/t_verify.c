@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/builtin/des/t_verify.c */
 /*
- * lib/crypto/des/verify.c
- *
  * Copyright 1988, 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,15 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Program to test the correctness of the DES library
- * implementation.
- *
- * exit returns  0 ==> success
- *              -1 ==> error
  */
-
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -56,6 +47,15 @@
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+
+/*
+ *
+ * Program to test the correctness of the DES library
+ * implementation.
+ *
+ * exit returns  0 ==> success
+ *              -1 ==> error
  */
 
 #include "k5-int.h"

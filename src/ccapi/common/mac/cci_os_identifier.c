@@ -1,6 +1,5 @@
+/* ccapi/common/mac/cci_os_identifier.c */
 /*
- * $Header$
- *
  * Copyright 2006 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

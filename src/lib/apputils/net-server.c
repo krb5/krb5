@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/apputils/net-server.c - Network code for krb5 servers (kdc, kadmind) */
 /*
- * lib/apputils/net-server.c
- *
  * Copyright 1990,2000,2007,2008,2009,2010 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
@@ -22,9 +21,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Network code for Kerberos v5 servers (kdc, kadmind).
  */
 
 #include "k5-int.h"

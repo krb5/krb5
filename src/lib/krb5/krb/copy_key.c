@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/copy_key.c */
 /*
- * lib/krb5/krb/copy_key.c
- *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,18 +22,14 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * krb5_copy_keyblock()
  */
 
 #include "k5-int.h"
 
-/*
- * Copy a keyblock, including alloc'ed storage.
- */
+/* Copy a keyblock, including alloc'ed storage. */
 krb5_error_code KRB5_CALLCONV
-krb5_copy_keyblock(krb5_context context, const krb5_keyblock *from, krb5_keyblock **to)
+krb5_copy_keyblock(krb5_context context, const krb5_keyblock *from,
+                   krb5_keyblock **to)
 {
     return krb5int_c_copy_keyblock(context, from, to);
 }

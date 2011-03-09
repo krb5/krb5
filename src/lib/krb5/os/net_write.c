@@ -1,9 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/os/net_write.c */
 /*
- * lib/krb5/os/net_write.c
- *
- * Copyright 1987, 1988, 1990, 2009 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright 1987, 1988, 1990, 2009 by the Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -23,7 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
 
 #include "k5-int.h"

@@ -1,13 +1,12 @@
+/* windows/cns/tktlist.c */
 /*
- * tktlist.c
- *
- * Handle all actions of the Kerberos ticket list.
- *
  * Copyright 1994 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <mit-copyright.h>.
  */
+
+/* Handle all actions of the Kerberos ticket list. */
 
 #if !defined(KRB5) && !defined(KRB4)
 #define KRB5 1

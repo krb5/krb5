@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* plugins/kdb/db2/kdb_db2.h */
 /*
- * lib/kdb/kdb_db2.h
- *
  * Copyright 1997 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,7 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
+ */
+
+/*
  *
  * KDC Database backend definitions for Berkely DB.
  */

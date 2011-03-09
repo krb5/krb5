@@ -1,6 +1,5 @@
+/* ccapi/common/win/OldCC/util.h */
 /*
- * $Header$
- *
  * Copyright 2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* clients/ksu/xmalloc.c - Exit-on-failure allocation wrappers */
 /*
- * clients/ksu/xmalloc.c
- *
  * Copyright 1999 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,9 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Perform simple allocation/copy operations, exiting on failure.
  */
 
 #include "ksu.h"

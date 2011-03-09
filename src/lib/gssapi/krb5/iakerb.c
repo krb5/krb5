@@ -21,7 +21,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
 #include "k5-int.h"
 #include "gssapiP_krb5.h"
@@ -789,9 +788,6 @@ iakerb_make_exts(iakerb_ctx_id_t ctx, krb5_gss_ctx_ext_rec *exts)
         exts->iakerb.conv = &ctx->conv;
 }
 
-/*
- *
- */
 OM_uint32
 iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
                               gss_ctx_id_t *context_handle,

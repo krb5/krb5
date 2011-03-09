@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/openssl/enc_provider/aes.c */
 /*
- * lib/crypto/openssl/enc_provider/aes.c
- *
  * Copyright (C) 2003, 2007, 2008, 2009 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *

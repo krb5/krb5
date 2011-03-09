@@ -1,7 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * krb5/authdata_plugin.h
- *
  * Copyright (C) 2007 Apple Inc.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -22,11 +20,10 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- * AuthorizationData plugin definitions for Kerberos 5.
  */
 
 /*
+ * Authorization data plugin definitions for Kerberos 5.
  * This is considered an INTERNAL interface at this time.
  *
  * Some work is needed before exporting it:

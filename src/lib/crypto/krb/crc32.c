@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/krb/crc32.c */
 /*
- * lib/crypto/crc32/crc.c
- *
  * Copyright 1990, 2002 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,18 +22,18 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
+ */
+/*
+ * Copyright (C) 1986 Gary S. Brown.  You may use this program, or
+ * code or tables extracted from it, as desired without restriction.
+ */
+
+/*
  *
  * CRC-32/AUTODIN-II routines
  */
 
 #include "crypto_int.h"
-
-/* This table and block of comments are taken from code labeled: */
-/*
- * Copyright (C) 1986 Gary S. Brown.  You may use this program, or
- * code or tables extracted from it, as desired without restriction.
- */
 
 /* First, the polynomial itself and its table of feedback terms.  The  */
 /* polynomial is                                                       */

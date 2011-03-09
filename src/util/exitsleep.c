@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* util/exitsleep.c */
 /*
- * util/exitsleep.c
- *
  * Copyright (C) 2003 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,7 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
+ */
+
+/*
  * Kludge to sleep 100ms prior to exit on Solaris 9 to work around a
  * pty bug.
  */

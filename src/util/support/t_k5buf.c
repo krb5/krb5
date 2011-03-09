@@ -1,8 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-
+/* util/support/t_k5buf.c - Test the k5buf string buffer module */
 /*
- * t_k5buf.c
- *
  * Copyright 2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -24,8 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- * Test the k5buf string buffer module.
  */
 
 #include "k5buf-int.h"

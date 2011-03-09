@@ -8,7 +8,8 @@
  * Trusted Information Systems makes no representation about the
  * suitability of this software for any purpose.  It is provided
  * "as is" without express or implied warranty.
- *
+ */
+/*
  * Copyright (C) 1994 Massachusetts Institute of Technology
  *
  * Export of this software from the United States of America may
@@ -29,7 +30,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
 
 /*****************************************************************************

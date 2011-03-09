@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* Copyright (c) 2002 Naval Research Laboratory (NRL/CCS) */
 /*
- * Copyright (c) 2002 Naval Research Laboratory (NRL/CCS)
- *
  * Permission to use, copy, modify and distribute this software and its
  * documentation is hereby granted, provided that both the copyright
  * notice and this permission notice appear in all copies of the software,
@@ -10,7 +9,9 @@
  * NRL ALLOWS FREE USE OF THIS SOFTWARE IN ITS "AS IS" CONDITION AND
  * DISCLAIMS ANY LIABILITY OF ANY KIND FOR ANY DAMAGES WHATSOEVER
  * RESULTING FROM THE USE OF THIS SOFTWARE.
- *
+ */
+
+/*
  * Key combination function.
  *
  * If Key1 and Key2 are two keys to be combined, the algorithm to combine

@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/kfree.c */
 /*
- * lib/krb5/free/f_addr.c
- *
  * Copyright 1990-1998, 2009 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
@@ -22,9 +21,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * krb5_free_address()
  */
 /*
  * Copyright (c) 2006-2008, Novell, Inc.

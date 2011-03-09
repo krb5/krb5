@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/os/write_msg.c - convenience sendauh/recvauth functions */
 /*
- * lib/krb5/os/write_msg.c
- *
  * Copyright 1991, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,22 +22,22 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * convenience sendauth/recvauth functions
  */
 
 #include "k5-int.h"
 #include <errno.h>
 #include "os-proto.h"
 
-/* Try to write a series of messages with as few write(v) system calls
-   as possible, to avoid Nagle/DelayedAck problems.  Cheating here a
-   little -- I know the only cases we have at the moment will send one
-   or two messages in a call.  Sending more will work, but not as
-   efficiently.  */
+/*
+ * Try to write a series of messages with as few write(v) system calls
+ * as possible, to avoid Nagle/DelayedAck problems.  Cheating here a
+ * little -- I know the only cases we have at the moment will send one
+ * or two messages in a call.  Sending more will work, but not as
+ * efficiently.
+ */
 krb5_error_code
-krb5int_write_messages(krb5_context context, krb5_pointer fdp, krb5_data *outbuf, int nbufs)
+krb5int_write_messages(krb5_context context, krb5_pointer fdp,
+                       krb5_data *outbuf, int nbufs)
 {
     int fd = *( (int *) fdp);
 

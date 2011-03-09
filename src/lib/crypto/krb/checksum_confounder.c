@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/krb/checksum_confounder.c */
 /*
- * lib/crypto/krb/checksum/confounder.c
- *
  * Copyright (C) 2009 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,7 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
+ */
+
+/*
  * Confounder checksum implementation, using tokens of the form:
  *   enc(xorkey, confounder | hash(confounder | data))
  * where xorkey is the key XOR'd with 0xf0 bytes.

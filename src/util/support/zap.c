@@ -1,8 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-
+/* util/support/zap.c */
 /*
- * zap.c
- *
  * Copyright 2009 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -24,7 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
+ */
+
+/*
  * krb5int_zap() is used by zap() (a static inline function defined in
  * k5-int.h) on non-Windows, non-gcc compilers, in order to prevent the
  * compiler from inlining and optimizing out the memset() call.

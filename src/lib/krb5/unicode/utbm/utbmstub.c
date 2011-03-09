@@ -1,6 +1,4 @@
-/* $OpenLDAP: pkg/ldap/libraries/liblunicode/utbm/utbmstub.c,v 1.8 2008/01/07 23:20:05 kurt Exp $ */
-/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
- *
+/*
  * Copyright 1998-2008 The OpenLDAP Foundation.
  * All rights reserved.
  *
@@ -33,7 +31,12 @@
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
  * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-/* $Id: utbmstub.c,v 1.1 1999/09/21 15:45:18 mleisher Exp $ */
+
+/*
+ * This work is part of OpenLDAP Software <http://www.openldap.org/>.
+ * $OpenLDAP: pkg/ldap/libraries/liblunicode/utbm/utbmstub.c,v 1.8 2008/01/07 23:20:05 kurt Exp $
+ * $Id: utbmstub.c,v 1.1 1999/09/21 15:45:18 mleisher Exp $
+ */
 
 #include "utbm.h"
 

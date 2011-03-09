@@ -1,6 +1,5 @@
+/* lib/rpc/svc_auth_gss.c */
 /*
-  svc_auth_gss.c
-
   Copyright (c) 2000 The Regents of the University of Michigan.
   All rights reserved.
 

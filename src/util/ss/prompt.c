@@ -1,9 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* util/ss/prompt.c */
 /*
- * prompt.c: Routines for retrieving and setting a prompt.
- *
- * util/ss/prompt.c
- *
  * Copyright 1987, 1988 by MIT Student Information Processing Board
  *
  * For copyright information, see copyright.h.

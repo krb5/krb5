@@ -22,9 +22,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/*
- *  glue routine for gss_release_cred
- */
+/* Glue routine for gss_release_cred */
 
 #include "mglueP.h"
 #include <stdio.h>

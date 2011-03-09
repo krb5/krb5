@@ -1,8 +1,34 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/keytab/kt_srvtab.c */
 /*
- * lib/krb5/keytab/srvtab/kts_resolv.c
- *
  * Copyright 1990,1991,2002,2007,2008 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ *
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ */
+/*
+ * Copyright (c) Hewlett-Packard Company 1991
+ * Released to the Massachusetts Institute of Technology for inclusion
+ * in the Kerberos source code distribution.
+ *
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -311,39 +337,7 @@ const struct _krb5_kt_ops krb5_kts_ops = {
     0
 };
 
-/*
- * formerly: lib/krb5/keytab/srvtab/kts_util.c
- *
- * Copyright (c) Hewlett-Packard Company 1991
- * Released to the Massachusetts Institute of Technology for inclusion
- * in the Kerberos source code distribution.
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- *
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- *
- *
- * This function contains utilities for the srvtab based implementation
- * of the keytab.  There are no public functions in this file.
- */
+/* formerly: lib/krb5/keytab/srvtab/kts_util.c */
 
 #include <stdio.h>
 

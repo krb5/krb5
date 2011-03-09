@@ -1,15 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * argv_parse.c --- utility function for parsing a string into a
- *      argc, argv array.
- *
- * This file defines a function argv_parse() which parsing a
- * passed-in string, handling double quotes and backslashes, and
- * creates an allocated argv vector which can be freed using the
- * argv_free() function.
- *
- * See argv_parse.h for the formal definition of the functions.
- *
  * Copyright 1999 by Theodore Ts'o.
  *
  * Permission to use, copy, modify, and distribute this software for
@@ -25,8 +15,20 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.  (Isn't
  * it sick that the U.S. culture of lawsuit-happy lawyers requires
  * this kind of disclaimer?)
- *
+ */
+
+/*
  * Version 1.1, modified 2/27/1999
+ *
+ * argv_parse.c --- utility function for parsing a string into a
+ *      argc, argv array.
+ *
+ * This file defines a function argv_parse() which parsing a
+ * passed-in string, handling double quotes and backslashes, and
+ * creates an allocated argv vector which can be freed using the
+ * argv_free() function.
+ *
+ * See argv_parse.h for the formal definition of the functions.
  */
 
 #include "prof_int.h"

@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/krb/encrypt_iov.c */
 /*
- * lib/crypto/encrypt_iov.c
- *
  * Copyright 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

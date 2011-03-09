@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/t_etypes.c - test program for krb5int_parse_enctype_list */
 /*
- * t_etypes.c -- test program for krb5int_parse_enctype_list
- *
  * Copyright 2009  by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

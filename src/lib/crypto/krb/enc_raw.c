@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/krb/enc_raw.c */
 /*
- * lib/crypto/raw/raw_aead.c
- *
  * Copyright 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

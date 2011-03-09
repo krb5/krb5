@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/ccache/cc_mslsa.c */
 /*
- * lib/krb5/ccache/cc_mslsa.c
- *
  * Copyright 2007 Secure Endpoints Inc.
  *
  * Copyright 2003,2004 by the Massachusetts Institute of Technology.

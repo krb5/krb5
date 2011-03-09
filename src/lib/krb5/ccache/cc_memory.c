@@ -1,9 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/ccache/cc_memory.c - Memory-based credential cache */
 /*
- * lib/krb5/ccache/cc_memory.c
- *
- * Copyright 1990,1991,2000,2004,2008 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright 1990,1991,2000,2004,2008 by the Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -23,10 +22,8 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * implementation of memory-based credentials cache
  */
+
 #include "cc-int.h"
 #include <errno.h>
 

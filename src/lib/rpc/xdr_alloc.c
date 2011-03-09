@@ -1,4 +1,4 @@
-/* @(#)xdr_mem.c	2.1 88/07/29 4.0 RPCSRC */
+/* lib/rpc/xdr_alloc.c */
 /*
  * Copyright (c) 2010, Oracle America, Inc.
  *
@@ -31,13 +31,8 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#if !defined(lint) && defined(SCCSIDS)
-static char sccsid[] = "@(#)xdr_mem.c 1.19 87/08/11 Copyr 1984 Sun Micro";
-#endif
-
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.
- *
  */
 
 #include <gssrpc/types.h>

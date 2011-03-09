@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/builtin/des/f_cbc.c */
 /*
- * lib/crypto/des/f_cbc.c
- *
  * Copyright (C) 1990 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,7 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
+ */
+
+/*
  * CBC functions; used only by the test programs at this time.  (krb5 uses the
  * functions in f_aead.c instead.)
  */

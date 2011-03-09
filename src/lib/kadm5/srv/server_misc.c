@@ -21,12 +21,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- * check_against_policy code is originally (see top-level NOTICE file for
- * license):
- *
+ */
+/*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved
- *
  */
 
 #include    "k5-int.h"

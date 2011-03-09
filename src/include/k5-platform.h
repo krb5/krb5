@@ -1,7 +1,6 @@
 /* -*- mode: c; indent-tabs-mode: nil -*- */
+/* include/k5-platform.h */
 /*
- * k5-platform.h
- *
  * Copyright 2003, 2004, 2005, 2007, 2008, 2009 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,8 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
+ */
+
+/*
  * Some platform-dependent definitions to sync up the C support level.
  * Some to a C99-ish level, some related utility code.
  *

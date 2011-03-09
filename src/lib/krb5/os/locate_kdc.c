@@ -1,9 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/os/locate_kdc.c - Get addresses for realm KDCs and other servers */
 /*
- * lib/krb5/os/locate_kdc.c
- *
- * Copyright 1990,2000,2001,2002,2003,2004,2006,2008 Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright 1990,2000,2001,2002,2003,2004,2006,2008 Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -23,9 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Get server hostnames or addresses for KDC.
  */
 
 #include "fake-addrinfo.h"

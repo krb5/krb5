@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/crypto/krb/prng/fortuna/t_fortuna.c - Fortuna test program */
+/* lib/crypto/krb/t_fortuna.c - Fortuna test program */
 /*
  * Copyright (c) 2007 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).

@@ -1,8 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-
+/* util/support/k5buf-int.h */
 /*
- * k5buf-int.h
- *
  * Copyright 2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -24,9 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- * Internal declarations for the k5buf string buffer module.
  */
+
+/* Internal declarations for the k5buf string buffer module */
 
 #ifndef K5BUF_INT_H
 #define K5BUF_INT_H

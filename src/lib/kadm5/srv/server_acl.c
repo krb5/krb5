@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/kadm5/srv/server_acl.c */
 /*
- * lib/kadm5/srv/server_acl.c
- *
  * Copyright 1995-2004, 2007, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,12 +22,8 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
 
-/*
- * srv_acl.c - Handle Kerberos ACL related functions.
- */
 #include <stdio.h>
 #include <syslog.h>
 #include <sys/param.h>

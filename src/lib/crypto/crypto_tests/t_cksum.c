@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/crypto_tests/t_cksum.c */
 /*
- * lib/crypto/md5/t_cksum.c
- *
  * Copyright 1995 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,12 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
 
-/*
- * t_cksum.c - Test checksum and checksum compatability for rsa-md[4,5]-des
- */
+/* Test checksum and checksum compatability for rsa-md[4,5]-des. */
 
 #include "k5-int.h"
 

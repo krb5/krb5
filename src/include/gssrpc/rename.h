@@ -1,6 +1,5 @@
+/* include/gssrpc/rename.h */
 /*
- * lib/rpc/rename.h
- *
  * Copyright (C) 2004 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -22,7 +21,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
+ */
+
+/*
  *
  * Namespace mangling for various purposes.
  *

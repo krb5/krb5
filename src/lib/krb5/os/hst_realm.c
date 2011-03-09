@@ -1,9 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/os/hst_realm.c */
 /*
- * lib/krb5/os/hst_realm.c
- *
- * Copyright 1990,1991,2002,2008,2009 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright 1990,1991,2002,2008,2009 by the Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -23,8 +22,13 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
+ */
+/*
+ * Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
+
+/*
  * krb5_get_host_realm()
  * krb5_get_fallback_host_realm()
  * krb5int_clean_hostname()
@@ -430,11 +434,6 @@ krb5int_clean_hostname(krb5_context context,
 #endif
     return 0;
 }
-
-/*
- * Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
- * Use is subject to license terms.
- */
 
 /*
  * Walk through the components of a domain.  At each stage determine

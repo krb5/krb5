@@ -1,6 +1,5 @@
+/* ccapi/lib/win/ccs_reply_proc.c */
 /*
- * $Header$
- *
  * Copyright 2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

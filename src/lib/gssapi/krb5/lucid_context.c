@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/gssapi/krb5/lucid_context.c */
 /*
- * lib/gssapi/krb5/lucid_context.c
- *
  * Copyright 2004, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,13 +22,10 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
 
-/*
- * lucid_context.c  -  Externalize a "lucid" security
- * context from a krb5_gss_ctx_id_rec structure.
- */
+/* Externalize a "lucid" security context from a krb5_gss_ctx_id_rec
+ * structure. */
 #include "gssapiP_krb5.h"
 #include "gssapi_krb5.h"
 

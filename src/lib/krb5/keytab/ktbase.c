@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/keytab/ktbase.c - Registration functions for keytab */
 /*
- * lib/krb5/keytab/ktbase.c
- *
  * Copyright 1990,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,8 +22,8 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
+ */
+/*
  * Copyright 2007 by Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person
@@ -46,8 +45,6 @@
  * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * Registration functions for keytab.
  */
 
 #include "k5-int.h"

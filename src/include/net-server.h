@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* include/net-server.h */
 /*
- * include/net-server.h
- *
  * Copyright (C) 2010 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,10 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Declarations for "API" of network listener/dispatcher in libapputils.
  */
+
+/* Declarations for "API" of network listener/dispatcher in libapputils. */
 
 #ifndef NET_SERVER_H
 #define NET_SERVER_H

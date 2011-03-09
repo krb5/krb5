@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* plugins/kdb/ldap/ldap_util/kdb5_ldap_realm.c */
 /*
- * kadmin/ldap_util/kdb5_ldap_realm.c
- *
  * Copyright 1990,1991,2001, 2002, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

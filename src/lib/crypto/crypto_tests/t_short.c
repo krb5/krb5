@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/crypto_tests/t_short.c */
 /*
- * lib/crypto/crypto_tests/t_short.c
- *
  * Copyright (C) 2009 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,7 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
+ */
+
+/*
  * Tests the outcome of decrypting overly short tokens.  This program can be
  * run under a tool like valgrind to detect bad memory accesses; when run
  * normally by the test suite, it verifies that each operation returns

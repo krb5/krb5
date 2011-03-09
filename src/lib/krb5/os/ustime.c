@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/os/ustime.c */
 /*
- * lib/krb5/os/ustime.c
- *
  * Copyright 1990,1991,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,7 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
+ */
+
+/*
  * krb5_crypto_us_timeofday() does all of the real work; however, we
  * handle the time offset adjustment here, since this is context
  * specific, and the crypto version of this call doesn't have access

@@ -1,15 +1,7 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/builtin/des/afsstring2key.c */
 /*
- * lib/crypto/des/string2key.c
- *
- * based on lib/crypto/des/string2key.c from MIT V5
- * and on lib/des/afs_string_to_key.c from UMD.
- * constructed by Mark Eichin, Cygnus Support, 1995.
- * made thread-safe by Ken Raeburn, MIT, 2001.
- */
-
-/*
- * Copyright 2001 by the Massachusetts Institute of Technology.
+ * Copyright 1989, 2001 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -31,7 +23,6 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  */
-
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -56,6 +47,34 @@
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
+/*
+ * Copyright (c) 1990 Regents of The University of Michigan.
+ * All Rights Reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software
+ * and its documentation for any purpose and without fee is hereby
+ * granted, provided that the above copyright notice appears in all
+ * copies and that both that copyright notice and this permission
+ * notice appear in supporting documentation, and that the name of
+ * The University of Michigan not be used in advertising or
+ * publicity pertaining to distribution of the software without
+ * specific, written prior permission. This software is supplied as
+ * is without expressed or implied warranties of any kind.
+ *
+ *      ITD Research Systems
+ *      University of Michigan
+ *      535 W. William Street
+ *      Ann Arbor, Michigan
+ *      +1-313-936-2652
+ *      netatalk@terminator.cc.umich.edu
+ */
+
+/*
+ * based on lib/crypto/des/string2key.c from MIT V5
+ * and on lib/des/afs_string_to_key.c from UMD.
+ * constructed by Mark Eichin, Cygnus Support, 1995.
+ * made thread-safe by Ken Raeburn, MIT, 2001.
  */
 
 #include "crypto_int.h"
@@ -158,33 +177,6 @@ mit_afs_string_to_key(krb5_keyblock *keyblock, const krb5_data *data,
 #endif
     return 0;
 }
-
-
-/* Portions of this code:
-   Copyright 1989 by the Massachusetts Institute of Technology
-*/
-
-/*
- * Copyright (c) 1990 Regents of The University of Michigan.
- * All Rights Reserved.
- *
- * Permission to use, copy, modify, and distribute this software
- * and its documentation for any purpose and without fee is hereby
- * granted, provided that the above copyright notice appears in all
- * copies and that both that copyright notice and this permission
- * notice appear in supporting documentation, and that the name of
- * The University of Michigan not be used in advertising or
- * publicity pertaining to distribution of the software without
- * specific, written prior permission. This software is supplied as
- * is without expressed or implied warranties of any kind.
- *
- *      ITD Research Systems
- *      University of Michigan
- *      535 W. William Street
- *      Ann Arbor, Michigan
- *      +1-313-936-2652
- *      netatalk@terminator.cc.umich.edu
- */
 
 static void krb5_afs_crypt_setkey (char*, char*, char(*)[48]);
 static void krb5_afs_encrypt (char*,char*,char (*)[48]);

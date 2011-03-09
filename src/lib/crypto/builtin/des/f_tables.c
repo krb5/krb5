@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/builtin/des/f_tables.c */
 /*
- * lib/crypto/des/f_tables.c
- *
  * Copyright (C) 1990 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,9 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- * DES implementation donated by Dennis Ferguson
  */
+
+/* DES implementation donated by Dennis Ferguson */
 
 /*
  * des_tables.c - precomputed tables used for the DES cipher function

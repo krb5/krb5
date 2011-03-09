@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/ccache/cc_file.c - File-based credential cache */
 /*
- * lib/krb5/ccache/cc_file.c
- *
  * Copyright 1990,1991,1992,1993,1994,2000,2004,2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -25,9 +24,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * implementation of file-based credentials cache
  */
 
 /*

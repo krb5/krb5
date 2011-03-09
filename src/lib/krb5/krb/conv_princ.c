@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/conv_princ.c */
 /*
- * lib/krb5/krb/conv_princ.c
- *
  * Copyright 1992 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,7 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
+ */
+
+/*
  * Build a principal from a V4 specification, or separate a V5
  * principal into name, instance, and realm.
  *

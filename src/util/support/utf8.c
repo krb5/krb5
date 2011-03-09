@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* util/support/utf8.c */
 /*
- * util/support/utf8.c
- *
  * Copyright 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -24,8 +23,7 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  */
-/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
- *
+/*
  * Copyright 1998-2008 The OpenLDAP Foundation.
  * All rights reserved.
  *
@@ -37,6 +35,9 @@
  * top-level directory of the distribution or, alternatively, at
  * <http://www.OpenLDAP.org/license.html>.
  */
+
+/* This work is part of OpenLDAP Software <http://www.openldap.org/>. */
+
 /* Basic UTF-8 routines
  *
  * These routines are "dumb".  Though they understand UTF-8,

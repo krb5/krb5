@@ -1,6 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/crypto/nss/hash_provider/hash_gen.h
- *
+/* lib/crypto/nss/hash_provider/hash_gen.h */
+/*
  * Copyright (c) 2010 Red Hat, Inc.
  * All Rights Reserved.
  *

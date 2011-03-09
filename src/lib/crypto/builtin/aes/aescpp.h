@@ -1,31 +1,32 @@
 /*
- -------------------------------------------------------------------------
- Copyright (c) 2001, Dr Brian Gladman <brg@gladman.uk.net>, Worcester, UK.
- All rights reserved.
+ * Copyright (c) 2001, Dr Brian Gladman <brg@gladman.uk.net>, Worcester, UK.
+ * All rights reserved.
+ *
+ * TERMS
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted subject to the following conditions:
+ *
+ *  1. Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *
+ *  2. Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *
+ *  3. The copyright holder's name must not be used to endorse or promote
+ *     any products derived from this software without his specific prior
+ *     written permission.
+ *
+ * This software is provided 'as is' with no express or implied warranties
+ * of correctness or fitness for purpose.
+ */
 
- TERMS
-
- Redistribution and use in source and binary forms, with or without
- modification, are permitted subject to the following conditions:
-
-  1. Redistributions of source code must retain the above copyright
-     notice, this list of conditions and the following disclaimer.
-
-  2. Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
-
-  3. The copyright holder's name must not be used to endorse or promote
-     any products derived from this software without his specific prior
-     written permission.
-
- This software is provided 'as is' with no express or implied warranties
- of correctness or fitness for purpose.
- -------------------------------------------------------------------------
- Issue Date: 21/01/2002
-
- This file contains the definitions required to use AES (Rijndael) in C++.
-*/
+/*
+ * Issue Date: 21/01/2002
+ *
+ * This file contains the definitions required to use AES (Rijndael) in C++.
+ */
 
 #ifndef _AESCPP_H
 #define _AESCPP_H

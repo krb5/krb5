@@ -22,7 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
 /*
  * Copyright 1996 by Sun Microsystems, Inc.
@@ -46,9 +45,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-/*
- *  glue routine for gss_acquire_cred_impersonate_name
- */
+/* Glue routine for gss_acquire_cred_impersonate_name */
 
 #include "mglueP.h"
 #include <stdio.h>

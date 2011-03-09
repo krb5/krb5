@@ -145,8 +145,7 @@ find_changed_attrs(krb5_db_entry *current, krb5_db_entry *new,
 }
 
 
-/*
- */
+/* Initialize *u with a copy of d.  Return 0 on success, -1 on failure. */
 static int
 data_to_utf8str(utf8str_t *u, krb5_data d)
 {

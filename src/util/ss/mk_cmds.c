@@ -1,9 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* util/ss/mk_cmds.c */
 /*
- * make_commands.c
- *
- * util/ss/mk_cmds.c
- *
  * Copyright 1987, 1988 by MIT Student Information Processing Board
  *
  * For copyright information, see copyright.h.

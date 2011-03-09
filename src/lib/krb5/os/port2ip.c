@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/os/port2ip.c - Split full address into IP address and port */
 /*
- * lib/krb5/os/port2ip.c
- *
  * Copyright 1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,9 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Take an ADDRPORT address and split into IP addr & port.
  */
 
 #include "k5-int.h"

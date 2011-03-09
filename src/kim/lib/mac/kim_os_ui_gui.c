@@ -1,6 +1,5 @@
+/* kim/lib/mac/kim_os_ui_gui.c */
 /*
- * $Header$
- *
  * Copyright 2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

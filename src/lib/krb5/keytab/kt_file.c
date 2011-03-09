@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/keytab/kt_file.c */
 /*
- * lib/krb5/keytab/kt_file.c
- *
  * Copyright 1990,1991,1995,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,7 +22,33 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
+ */
+/*
+ * Copyright (c) Hewlett-Packard Company 1991
+ * Released to the Massachusetts Institute of Technology for inclusion
+ * in the Kerberos source code distribution.
  *
+ * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ *
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
  */
 
 #ifndef LEAN_CLIENT
@@ -940,36 +965,9 @@ const krb5_kt_ops krb5_kt_dfl_ops = {
     &krb5_ktfile_ser_entry
 };
 
+/* Formerly lib/krb5/keytab/file/ktf_util.c */
+
 /*
- * lib/krb5/keytab/file/ktf_util.c
- *
- * Copyright (c) Hewlett-Packard Company 1991
- * Released to the Massachusetts Institute of Technology for inclusion
- * in the Kerberos source code distribution.
- *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
- *
- * Export of this software from the United States of America may
- *   require a specific license from the United States Government.
- *   It is the responsibility of any person or organization contemplating
- *   export to obtain such a license before exporting.
- *
- * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
- * distribute this software and its documentation for any purpose and
- * without fee is hereby granted, provided that the above copyright
- * notice appear in all copies and that both that copyright notice and
- * this permission notice appear in supporting documentation, and that
- * the name of M.I.T. not be used in advertising or publicity pertaining
- * to distribution of the software without specific, written prior
- * permission.  Furthermore if you modify this software you must label
- * your software as modified software and not distribute it in such a
- * fashion that it might be confused with the original M.I.T. software.
- * M.I.T. makes no representations about the suitability of
- * this software for any purpose.  It is provided "as is" without express
- * or implied warranty.
- *
- *
  * This function contains utilities for the file based implementation of
  * the keytab.  There are no public functions in this file.
  *

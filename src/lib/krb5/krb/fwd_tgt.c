@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/fwd_tgt.c */
 /*
- * lib/krb5/krb/get_in_tkt.c
- *
  * Copyright 1995 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

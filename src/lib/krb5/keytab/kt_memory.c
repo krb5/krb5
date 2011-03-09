@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/keytab/kt_memory.c */
 /*
- * lib/krb5/keytab/kt_memory.c
- *
  * Copyright 2007 by Secure Endpoints Inc.
  *
  * Permission is hereby granted, free of charge, to any person

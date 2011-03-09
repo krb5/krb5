@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* kadmin/dbutil/kdb5_destroy.c - Destroy a KDC database */
 /*
- * admin/destroy/kdb5_destroy.c
- *
  * Copyright 1990, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,11 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * kdb_dest(roy): destroy the named database.
- *
- * This version knows about DBM format databases.
  */
 
 #include "k5-int.h"

@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/crypto_tests/t_nfold.c - Test nfold implementation correctness */
 /*
- * lib/crypto/t_nfold.c
- *
  * Copyright 1988, 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,12 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Program to test the correctness of nfold implementation.
- *
- * exit returns  0 ==> success
- *              -1 ==> error
  */
 
 #include <stdio.h>

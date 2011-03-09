@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/init_keyblock.c - Set up an empty keyblock */
 /*
- * lib/krb5/krb/init_keyblock.c
- *
  * Copyright (C) 2002 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,13 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- *
- * krb5_init_keyblock- a function to set up
- *  an empty keyblock
  */
-
 
 #include "k5-int.h"
 #include <assert.h>
@@ -38,5 +31,5 @@ krb5_error_code KRB5_CALLCONV
 krb5_init_keyblock(krb5_context context, krb5_enctype enctype,
                    size_t length, krb5_keyblock **out)
 {
-    return krb5int_c_init_keyblock (context, enctype, length, out);
+    return krb5int_c_init_keyblock(context, enctype, length, out);
 }

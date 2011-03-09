@@ -1,7 +1,4 @@
-/*
- * ms2mit.c
- *
- */
+/* windows/ms2mit/ms2mit.c */
 /*
  * Copyright (C) 2003 by the Massachusetts Institute of Technology.
  * All rights reserved.
@@ -24,7 +21,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
 
 #include "krb5.h"

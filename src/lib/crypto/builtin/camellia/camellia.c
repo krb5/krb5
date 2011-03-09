@@ -1,5 +1,5 @@
-/* camellia.c ver 1.2.0
- *
+/* lib/crypto/builtin/camellia/camellia.c - Camellia version 1.2.0 */
+/*
  * Copyright (c) 2006,2007,2009
  * NTT (Nippon Telegraph and Telephone Corporation) . All rights reserved.
  *

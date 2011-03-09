@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/crypto/builtin/t_sha256.c */
+/* lib/crypto/builtin/sha2/t_sha256.c */
 /*
  * Copyright (c) 1995 - 2002 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).

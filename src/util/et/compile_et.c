@@ -1,11 +1,14 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- *
  * Copyright 1986, 1987, 1988
  * by MIT Student Information Processing Board.
  *
  * For copyright info, see "mit-sipb-copyright.h".
- *
+ */
+/*
+ * Copyright (c) 1987 Regents of the University of California.
+ * All rights reserved.  The Berkeley software License Agreement
+ * specifies the terms and conditions for redistribution.
  */
 
 #include <stdio.h>
@@ -287,11 +290,6 @@ int yyerror(s) char *s; {
 
 #ifdef NEED_STRCASECMP
 /* Need strcasecmp for this machine */
-/*
- * Copyright (c) 1987 Regents of the University of California.
- * All rights reserved.  The Berkeley software License Agreement
- * specifies the terms and conditions for redistribution.
- */
 
 /* based on @(#)strcasecmp.c    1.3 (Berkeley) 8/3/87 */
 

@@ -1,6 +1,7 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * Copyright (C) 1989,1990,1991,1992,1993,1994,1995,2000,2001, 2003,2006,2007,2008,2009 by the Massachusetts Institute of Technology,
+ * Copyright (C) 1989,1990,1991,1992,1993,1994,1995,2000,2001,
+ * 2003,2006,2007,2008,2009 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
  *
  * This software is being provided to you, the LICENSEE, by the
@@ -39,7 +40,6 @@
  * your software as modified software and not distribute it in such a
  * fashion that it might be confused with the original M.I.T. software.
  */
-
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -797,7 +797,6 @@ error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
  * Sandia National Laboratories also makes no representations about the
  * suitability of the modifications, or additions to this software for
  * any purpose.  It is provided "as is" without express or implied warranty.
- *
  */
 #ifndef KRB5_PREAUTH__
 #define KRB5_PREAUTH__

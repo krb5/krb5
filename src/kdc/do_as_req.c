@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* kdc/do_as_req.c */
 /*
- * kdc/do_as_req.c
- *
  * Portions Copyright (C) 2007 Apple Inc.
  * Copyright 1990,1991,2007,2008,2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

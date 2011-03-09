@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/enc_helper.c */
 /*
- * lib/krb5/krb/enc_helper.c
- *
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
  * All rights reserved.
@@ -25,9 +24,6 @@
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
- *
- * krb5_encrypt_helper()
- *
  */
 
 #include "k5-int.h"

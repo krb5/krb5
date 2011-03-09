@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/walk_rtree.c */
 /*
- * lib/krb5/krb/walk_rtree.c
- *
  * Copyright 1990,1991,2008,2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,7 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
+ */
+
+/*
  * krb5_walk_realm_tree()
  * krb5_free_realm_tree()
  *

@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/os/toffset.c - Manipulate time offset fields in os context */
 /*
- * lib/krb5/os/toffset.c
- *
  * Copyright 1995, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,8 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- * These routines manipulates the time offset fields in the os context.
  */
 
 #include "k5-int.h"

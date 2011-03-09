@@ -21,12 +21,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
 
-/*
- *  glue routine for gss_delete_name_attribute
- */
+/* Glue routine for gss_delete_name_attribute */
 
 #include "mglueP.h"
 

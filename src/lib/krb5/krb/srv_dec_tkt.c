@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/srv_dec_tkt.c */
 /*
- * lib/krb5/krb/srv_dec_tkt.c
- *
  * Copyright 2006, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,8 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
+ */
+
+/*
  * Server decrypt ticket via keytab or keyblock.
  *
  * Different from krb5_rd_req_decoded. (krb5/src/lib/krb5/krb/rd_req_dec.c)

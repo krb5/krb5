@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/gssapi/krb5/k5unsealiov.c */
 /*
- * lib/gssapi/krb5/k5unsealiov.c
- *
  * Copyright 2008, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,8 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
  */
 
 #include <assert.h>

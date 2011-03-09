@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* include/adm.h */
 /*
- * include/krb5/adm.h
- *
  * Copyright 1995,2001,2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,8 +22,8 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
+
 #ifndef KRB5_ADM_H__
 #define KRB5_ADM_H__
 

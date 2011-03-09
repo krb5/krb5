@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/crypto_tests/t_cmac.c */
 /*
- * lib/crypto/t_cmac.c
- *
  * Copyright 2010 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,8 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
+ */
+
+/*
  * Test vectors for CMAC.  Inputs are taken from RFC 4493 section 4.  Outputs
  * are changed for the use of Camellia-128 in place of AES-128.
  *

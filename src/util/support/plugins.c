@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* util/support/plugins.c - Plugin module support functions */
 /*
- * util/support/plugins.c
- *
  * Copyright 2006, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,9 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Plugin module support, and shims around dlopen/whatever.
  */
 
 #include "k5-plugin.h"

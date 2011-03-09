@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/gssapi/krb5/import_sec_context.c - Internalize the security context */
 /*
- * lib/gssapi/krb5/import_sec_context.c
- *
  * Copyright 1995,2004,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,12 +22,8 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
 
-/*
- * import_sec_context.c - Internalize the security context.
- */
 #include "gssapiP_krb5.h"
 /* for serialization initialization functions */
 #include "k5-int.h"

@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* include/CredentialsCache.h */
 /*
- * $Header$
- *
  * Copyright 1998-2006 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

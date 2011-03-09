@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/builtin/pbkdf2.c - Implementation of PBKDF2 from RFC 2898 */
 /*
- * lib/crypto/pbkdf2.c
- *
  * Copyright 2002, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,9 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Implementation of PBKDF2 from RFC 2898.
  */
 
 #include <ctype.h>

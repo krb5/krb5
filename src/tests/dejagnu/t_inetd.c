@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* tests/dejagnu/t_inetd.c */
 /*
- * tests/dejagnu/t_inetd.c
- *
  * Copyright 1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,15 +22,15 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
+ */
+
+/*
  * A simple program to simulate starting a process from inetd.
  *
  * Unlike a proper inetd situation, environment variables are passed
  * to the client.
  *
  * usage: t_inetd port program argv0 ...
- *
  */
 
 #include "autoconf.h"

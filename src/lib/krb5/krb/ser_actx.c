@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/ser_actx.c - Serialize krb5_auth_context structure */
 /*
- * lib/krb5/krb/ser_actx.c
- *
  * Copyright 1995, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,12 +22,8 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
 
-/*
- * ser_actx.c - Serialize krb5_auth_context structure.
- */
 #include "k5-int.h"
 #include "int-proto.h"
 #include "auth_con.h"

@@ -1,8 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * include/krb5/kadm5_hook_plugin.h
- */
-/*
  * Copyright (C) 2010 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *

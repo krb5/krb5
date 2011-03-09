@@ -1,6 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* arcfour.c
- *
+/* lib/crypto/builtin/enc_provider/rc4.c */
+/*
  * Copyright (c) 2000 by Computer Science Laboratory,
  *                       Rensselaer Polytechnic Institute
  *

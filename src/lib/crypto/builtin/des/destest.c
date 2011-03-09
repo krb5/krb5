@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/builtin/des/destest.c */
 /*
- * lib/crypto/des/destest.c
- *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,12 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Test a DES implementation against known inputs & outputs
  */
-
-
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -54,6 +48,8 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
+
+/* Test a DES implementation against known inputs & outputs. */
 
 #include "des_int.h"
 #include "crypto_int.h"

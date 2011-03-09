@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/crypto/crypto-tests/t_cksums.c - Test known checksum results */
+/* lib/crypto/crypto_tests/t_cksums.c - Test known checksum results */
 /*
  * Copyright (C) 2010 by the Massachusetts Institute of Technology.
  * All rights reserved.

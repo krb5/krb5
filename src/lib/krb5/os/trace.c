@@ -1,7 +1,6 @@
 /* -*- mode: c; indent-tabs-mode: nil -*- */
+/* lib/krb5/os/trace.c - k5trace implementation */
 /*
- * lib/krb5/krb/trace.c
- *
  * Copyright 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,11 +22,10 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- * k5trace implementation
  */
 
-/* k5trace is defined in k5-int.h as a macro or static inline function,
+/*
+ * k5trace is defined in k5-int.h as a macro or static inline function,
  * and is called like so:
  *
  *   void k5trace(krb5_context context, const char *fmt, ...)

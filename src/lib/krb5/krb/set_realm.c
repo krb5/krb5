@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/set_realm.c */
 /*
- * lib/krb5/krb/set_realm.c
- *
  * Copyright 1997 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

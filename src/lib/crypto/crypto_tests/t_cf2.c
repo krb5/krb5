@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/crypto_tests/t_cf2.c */
 /*
- * lib/crypto/t_cf2.c
- *
  * Copyright (C) 2004, 2009 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,18 +22,23 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
+ */
+
+/*
+ * This file contains tests for the KRB-FX-CF2 code in Kerberos, based on the
+ * PRF regression tests.  It reads an input file, and writes an output file.
+ * It is assumed that the output file will be diffed against expected output to
+ * see whether regression tests pass.  The input file is a very primitive
+ * format.
  *
- * This file contains tests for theKRB-FX-CF2 code in Kerberos, based
- *on the PRF regression tests.  It reads an input file, and writes an
- *output file.  It is assumed that the output file will be diffed
- *against expected output to see whether regression tests pass.  The
- *input file is a very primitive format.
- *First line: enctype
- *second line: key to pass to string2key; also used as salt
- *Third line: second key to pass to string2key
- *fourth line: pepper1
- *fifth line:  pepper2
- *scanf is used to read the file, so interior spaces are not permitted.  The program outputs the hex bytes of the key.
+ * Line 1: enctype
+ * Line 2: key to pass to string2key; also used as salt
+ * Line 3: second key to pass to string2key
+ * Line 4: pepper1
+ * Line 5: pepper2
+ *
+ * scanf is used to read the file, so interior spaces are not permitted.  The
+ * program outputs the hex bytes of the key.
  */
 #include <krb5.h>
 

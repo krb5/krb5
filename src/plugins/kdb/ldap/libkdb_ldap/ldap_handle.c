@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* plugins/kdb/ldap/libkdb_ldap/ldap_handle.c */
 /*
- * lib/kdb/kdb_ldap/ldap_handle.c
- *
  * Copyright (c) 2004-2005, Novell, Inc.
  * All rights reserved.
  *

@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/rcache/rcfns.c */
 /*
- * lib/krb5/rcache/rcfns.c
- *
  * Copyright 2001 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

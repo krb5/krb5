@@ -1,6 +1,5 @@
+/* ccapi/server/ccs_list_internal.c */
 /*
- * $Header$
- *
  * Copyright 2006, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

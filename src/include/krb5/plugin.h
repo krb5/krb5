@@ -1,7 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * <krb5/plugin.h>
- *
  * Copyright (C) 2010 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,10 +21,10 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Generic declarations for dynamic modules implementing krb5 plugin modules.
  */
+
+/* Generic declarations for dynamic modules implementing krb5 plugin
+ * modules. */
 
 #ifndef KRB5_PLUGIN_H
 #define KRB5_PLUGIN_H

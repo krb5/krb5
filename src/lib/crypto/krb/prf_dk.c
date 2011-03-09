@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/krb/prf_dk.c - RFC 3961 simplified profile PRF */
 /*
- * lib/crypto/krb/prf/dk_prf.c
- *
  * Copyright (C) 2004 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,11 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- *
- * This file contains an implementation of the RFC 3961 PRF for
- *simplified profile enctypes.
  */
 
 #include "crypto_int.h"

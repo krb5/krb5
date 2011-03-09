@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/ccache/cc-int.h */
 /*
- * lib/krb5/ccache/file/cc-int.h
- *
  * Copyright 1990,1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,11 +22,10 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * This file contains constant and function declarations used in the
- * file-based credential cache routines.
  */
+
+/* This file contains constant and function declarations used in the
+ * file-based credential cache routines. */
 
 #ifndef __KRB5_CCACHE_H__
 #define __KRB5_CCACHE_H__

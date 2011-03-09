@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* kdc/kdc_authdata.c - Authorization data routines for the KDC */
 /*
- * kdc/kdc_authdata.c
- *
  * Copyright (C) 2007 Apple Inc.  All Rights Reserved.
  * Copyright (C) 2008, 2009 by the Massachusetts Institute of Technology.
  *
@@ -23,8 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- * AuthorizationData routines for the KDC.
  */
 
 #include "k5-int.h"

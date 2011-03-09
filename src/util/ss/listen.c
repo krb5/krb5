@@ -1,9 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* util/ss/listen.c */
 /*
- * Listener loop for subsystem library libss.a.
- *
- *      util/ss/listen.c
- *
  * Copyright 1987, 1988 by MIT Student Information Processing Board
  *
  * For copyright information, see copyright.h.

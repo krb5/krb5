@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/krb/prf.c */
 /*
- * lib/crypto/prf.c
- *
  * Copyright (C) 2004 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,12 +22,12 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- *
- * This contains the implementation of krb5_c_prf, which  will find
- *the enctype-specific PRF and then generate pseudo-random data.  This
- *function yields krb5_c_prf_length bytes of output.
+ */
+
+/*
+ * This contains the implementation of krb5_c_prf, which will find the
+ * enctype-specific PRF and then generate pseudo-random data.  This function
+ * yields krb5_c_prf_length bytes of output.
  */
 
 #include "crypto_int.h"

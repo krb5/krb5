@@ -1,6 +1,5 @@
+/* ccapi/lib/ccapi_ccache.c */
 /*
- * $Header$
- *
  * Copyright 2006, 2007 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

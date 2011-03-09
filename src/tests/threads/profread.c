@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* tests/threads/profread.c */
 /*
- * test/threads/profread.c
- *
  * Copyright (C) 2009 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,8 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
+ */
+
+/*
  * krb5 profile data retrieval performance testing
  * initially contributed by Ken Raeburn
  */

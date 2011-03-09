@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* tests/dump.c */
 /*
- * tests/dump.c
- *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,10 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Dump out a krb5_data to stderr (for debugging purposes).
  */
+
+/* Dump a krb5_data to stderr (for debugging purposes). */
 
 #include <stdio.h>
 #include "krb5.h"

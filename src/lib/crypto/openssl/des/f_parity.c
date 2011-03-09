@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/openssl/des/f_parity.c */
 /*
- * lib/crypto/openssl/des/f_parity.c
- *
  * Copyright (C) 2009 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *

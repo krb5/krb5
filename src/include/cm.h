@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* include/cm.h */
 /*
- * include/cm.h
- *
  * Copyright 2002 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

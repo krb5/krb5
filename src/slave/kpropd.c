@@ -1,4 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* slave/kpropd.c */
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -26,8 +27,6 @@
  */
 
 /*
- * slave/kpropd.c
- *
  * Copyright 1990,1991,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

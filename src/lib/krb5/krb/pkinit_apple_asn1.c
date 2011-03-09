@@ -21,11 +21,11 @@
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
- *
  */
 
 /*
- * pkinit_apple_asn1.c - ASN.1 encode/decode routines for PKINIT, Mac OS X version
+ * pkinit_apple_asn1.c - ASN.1 encode/decode routines for PKINIT, Mac OS X
+ * version
  *
  * Created 19 May 2004 by Doug Mitchell.
  */

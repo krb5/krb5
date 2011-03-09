@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/gssapi/krb5/inq_names.c - Return nametypes supported by krb5 mech */
 /*
- * lib/gssapi/krb5/inq_names.c
- *
  * Copyright 1995 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,12 +22,8 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
 
-/*
- * inq_names.c - Return set of nametypes supported by the KRB5 mechanism.
- */
 #include "gssapiP_krb5.h"
 
 OM_uint32

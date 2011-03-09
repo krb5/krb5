@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* appl/sample/sample.h - Common declarations for sample client/server */
 /*
- * appl/sample/sample.h
- *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
@@ -22,9 +21,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Common definitions for the sample client/server.
  */
 
 #ifndef KRB5_SAMPLE__

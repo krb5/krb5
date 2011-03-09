@@ -1,6 +1,5 @@
+/* kim/lib/mac/kim_os_selection_hints.c */
 /*
- * $Header$
- *
  * Copyright 2006 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

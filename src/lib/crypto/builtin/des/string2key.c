@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/builtin/des/string2key.c */
 /*
- * lib/crypto/des/des_s2k.c
- *
  * Copyright 2004, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,10 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Compute encryption key from salt and pass phrase.
  */
+
+/* Compute encryption key from salt and pass phrase. */
 
 #include "crypto_int.h"
 #include "des_int.h"

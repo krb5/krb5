@@ -1,6 +1,4 @@
-/* $OpenLDAP: pkg/ldap/libraries/liblunicode/ure/ure.h,v 1.15 2008/01/07 23:20:05 kurt Exp $ */
-/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
- *
+/*
  * Copyright 1998-2008 The OpenLDAP Foundation.
  * All rights reserved.
  *
@@ -33,7 +31,12 @@
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
  * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-/* $Id: ure.h,v 1.2 1999/09/21 15:47:44 mleisher Exp $ */
+
+/*
+ * This work is part of OpenLDAP Software <http://www.openldap.org/>.
+ * $OpenLDAP: pkg/ldap/libraries/liblunicode/ure/ure.h,v 1.15 2008/01/07 23:20:05 kurt Exp $
+ * $Id: ure.h,v 1.2 1999/09/21 15:47:44 mleisher Exp $
+ */
 
 #ifndef _h_ure
 #define _h_ure

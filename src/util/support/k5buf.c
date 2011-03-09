@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* util/support/k5buf.c */
 /*
- * k5buf.c
- *
  * Copyright 2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,9 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- * Implement the k5buf string buffer module.
  */
+
+/* Implement the k5buf string buffer module. */
 
 /* Can't include krb5.h here, or k5-int.h which includes it, because
    krb5.h needs to be generated with error tables, after util/et,

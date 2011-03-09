@@ -1,13 +1,11 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* tests/hammer/pp.c */
 /*
- * tests/hammer/pp.c
- *
  * Copyright 1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * For copying and distribution information, please see the file
  * <krb5/copyright.h>.
- *
  */
 
 #include "krb5.h"

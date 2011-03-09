@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/builtin/des/des_int.h */
 /*
- * lib/crypto/des/des_int.h
- *
  * Copyright 1987, 1988, 1990, 2002 by the Massachusetts Institute of
  * Technology.  All Rights Reserved.
  *
@@ -23,11 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Private include file for the Data Encryption Standard library.
  */
-
 /*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
@@ -53,6 +48,8 @@
  * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
  * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  */
+
+/* Private include file for the Data Encryption Standard library. */
 
 /* only do the whole thing once  */
 #ifndef DES_INTERNAL_DEFS

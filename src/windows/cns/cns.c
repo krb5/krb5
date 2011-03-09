@@ -1,13 +1,14 @@
+/* windows/cns/cns.c */
 /*
- * cns.c
- *
- * Main routine of the Kerberos user interface.  Also handles
- * all dialog level management functions.
- *
  * Copyright 1994 by the Massachusetts Institute of Technology.
  *
  * For copying and distribution information, please see the file
  * <mit-copyright.h>.
+ */
+
+/*
+ * Main routine of the Kerberos user interface.  Also handles
+ * all dialog level management functions.
  */
 
 #include <windows.h>

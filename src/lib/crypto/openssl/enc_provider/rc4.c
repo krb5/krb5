@@ -1,8 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/*  lib/crypto/openssl/enc_provider/rc4.c
- *
- * #include STD_DISCLAIMER
- *
+/* lib/crypto/openssl/enc_provider/rc4.c */
+/*
  * Copyright (C) 2009 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -26,8 +24,7 @@
  * or implied warranty.
  */
 
-/* arcfour.c
- *
+/*
  * Copyright (c) 2000 by Computer Science Laboratory,
  *                       Rensselaer Polytechnic Institute
  *

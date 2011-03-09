@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/int-proto.h - Prototypes for libkrb5 internal functions */
 /*
- * lib/krb5/krb/int-proto.h
- *
  * Copyright 1990,1991 the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,11 +22,7 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Function prototypes for Kerberos V5 library internal functions.
  */
-
 
 #ifndef KRB5_INT_FUNC_PROTO__
 #define KRB5_INT_FUNC_PROTO__

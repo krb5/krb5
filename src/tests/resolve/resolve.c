@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* tests/resolve/resolve.c */
 /*
- * test/resolve/resolve.c
- *
  * Copyright 1995 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,8 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
+ */
+
+/*
  * A simple program to test the functionality of the resolver library.
  * It simply will try to get the IP address of the host, and then look
  * up the name from the address. If the resulting name does not contain the

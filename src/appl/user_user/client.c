@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* appl/user_user/client.c - Other end of user-user client/server pair */
 /*
- * appl/user_user/client.c
- *
  * Copyright 1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,9 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Other end of user-user client/server pair.
  */
 
 #include <sys/types.h>

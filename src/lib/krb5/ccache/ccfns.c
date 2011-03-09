@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/ccache/ccfns.c */
 /*
- * lib/krb5/ccache/ccfns.c
- *
  * Copyright 2000, 2007, 2008  by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

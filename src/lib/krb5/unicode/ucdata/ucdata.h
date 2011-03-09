@@ -1,6 +1,4 @@
-/* $OpenLDAP: pkg/ldap/libraries/liblunicode/ucdata/ucdata.h,v 1.21 2008/01/07 23:20:05 kurt Exp $ */
-/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
- *
+/*
  * Copyright 1998-2008 The OpenLDAP Foundation.
  * All rights reserved.
  *
@@ -32,7 +30,12 @@
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
  * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-/* $Id: ucdata.h,v 1.6 2001/01/02 18:46:20 mleisher Exp $ */
+
+/*
+ * This work is part of OpenLDAP Software <http://www.openldap.org/>.
+ * $OpenLDAP: pkg/ldap/libraries/liblunicode/ucdata/ucdata.h,v 1.21 2008/01/07 23:20:05 kurt Exp $
+ * $Id: ucdata.h,v 1.6 2001/01/02 18:46:20 mleisher Exp $
+ */
 
 #ifndef _h_ucdata
 #define _h_ucdata

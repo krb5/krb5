@@ -1,6 +1,4 @@
 /*
- * Header file for common error description library.
- *
  * Copyright 1988, Student Information Processing Board of the
  * Massachusetts Institute of Technology.
  *
@@ -9,6 +7,8 @@
  * For copyright and distribution info, see the documentation supplied
  * with this package.
  */
+
+/* Header file for common error description library. */
 
 #ifndef __COM_ERR_H
 

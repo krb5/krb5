@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/get_creds.c */
 /*
- * lib/krb5/krb/get_creds.c
- *
  * Copyright 1990, 2008, 2010 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,26 +22,20 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * krb5_get_credentials()
  */
 
-
-
 /*
-  Attempts to use the credentials cache or TGS exchange to get an additional
-  ticket for the
-  client identified by in_creds->client, the server identified by
-  in_creds->server, with options options, expiration date specified in
-  in_creds->times.endtime (0 means as long as possible), session key type
-  specified in in_creds->keyblock.enctype (if non-zero)
-
-  Any returned ticket and intermediate ticket-granting tickets are
-  stored in ccache.
-
-  returns errors from encryption routines, system errors
-*/
+ * Attempts to use the credentials cache or TGS exchange to get an additional
+ * ticket for the client identified by in_creds->client, the server identified
+ * by in_creds->server, with options options, expiration date specified in
+ * in_creds->times.endtime (0 means as long as possible), session key type
+ * specified in in_creds->keyblock.enctype (if non-zero)
+ *
+ * Any returned ticket and intermediate ticket-granting tickets are stored in
+ * ccache.
+ *
+ * Returns errors from encryption routines, system errors.
+ */
 
 #include "k5-int.h"
 #include "int-proto.h"

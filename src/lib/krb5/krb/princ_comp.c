@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/princ_comp.c - Compare two principals for equality */
 /*
- * lib/krb5/krb/princ_comp.c
- *
  * Copyright 1990,1991,2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,10 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * compare two principals, returning a krb5_boolean true if equal, false if
- * not.
  */
 
 #include "k5-int.h"

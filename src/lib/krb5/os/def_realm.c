@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/os/def_realm.c */
 /*
- * lib/krb5/os/def_realm.c
- *
  * Copyright 1990,1991,2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,8 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
+ */
+
+/*
  * krb5_get_default_realm(), krb5_set_default_realm(),
  * krb5_free_default_realm() functions.
  */

@@ -1,9 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* kadmin/dbutil/dump.c - Dump a KDC database */
 /*
- * kadmin/dbutil/dump.c
- *
- * Copyright 1990,1991,2001,2006,2008,2009 by the Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright 1990,1991,2001,2006,2008,2009 by the Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -23,9 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Dump a KDC database
  */
 /*
  * Copyright 2004 Sun Microsystems, Inc.  All rights reserved.

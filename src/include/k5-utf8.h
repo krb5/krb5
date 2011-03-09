@@ -39,8 +39,7 @@
  * your software as modified software and not distribute it in such a
  * fashion that it might be confused with the original M.I.T. software.
  */
-/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
- *
+/*
  * Copyright 1998-2008 The OpenLDAP Foundation.
  * All rights reserved.
  *
@@ -52,9 +51,7 @@
  * top-level directory of the distribution or, alternatively, at
  * <http://www.OpenLDAP.org/license.html>.
  */
-/* This notice applies to changes, created by or for Novell, Inc.,
- * to preexisting works for which notices appear elsewhere in this file.
- *
+/*
  * Copyright (C) 2000 Novell, Inc. All Rights Reserved.
  *
  * THIS WORK IS SUBJECT TO U.S. AND INTERNATIONAL COPYRIGHT LAWS AND TREATIES.
@@ -66,6 +63,7 @@
  * LICENSE, OR OTHER PRIOR WRITTEN CONSENT FROM NOVELL, COULD SUBJECT THE
  * PERPETRATOR TO CRIMINAL AND CIVIL LIABILITY.
  */
+/* This work is part of OpenLDAP Software <http://www.openldap.org/>. */
 
 #ifndef K5_UTF8_H
 #define K5_UTF8_H

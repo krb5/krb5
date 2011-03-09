@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/os/hostaddr.c - Return list of krb5 addresses for a hostname */
 /*
- * lib/krb5/os/hostaddr.c
- *
  * Copyright 1990,1991,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,9 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- * This routine returns a list of krb5 addresses given a hostname.
- *
  */
 
 #include "k5-int.h"
@@ -33,7 +29,8 @@
 #include "fake-addrinfo.h"
 
 krb5_error_code
-krb5_os_hostaddr(krb5_context context, const char *name, krb5_address ***ret_addrs)
+krb5_os_hostaddr(krb5_context context, const char *name,
+                 krb5_address ***ret_addrs)
 {
     krb5_error_code     retval;
     krb5_address        **addrs;

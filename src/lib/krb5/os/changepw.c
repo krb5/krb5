@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/os/changepw.c */
 /*
- * lib/krb5/os/changepw.c
- *
  * Copyright 1990,1999,2001,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,12 +22,13 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
+
 /*
  * krb5_set_password - Implements set password per RFC 3244
  * Added by Paul W. Nelson, Thursby Software Systems, Inc.
- * Modified by Todd Stecher, Isilon Systems, to use krb1.4 socket infrastructure
+ * Modified by Todd Stecher, Isilon Systems, to use krb1.4 socket
+ *  infrastructure
  */
 
 #include "fake-addrinfo.h"

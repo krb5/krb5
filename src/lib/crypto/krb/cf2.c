@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/krb/cf2.c */
 /*
- * lib/crypto/cf2.c
- *
  * Copyright (C) 2009 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,12 +22,11 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- *
- * Implement KRB_FX_CF2 function per
- *draft-ietf-krb-wg-preauth-framework-09.  Take two keys and two
- *pepper strings as input and return a combined key.
+ */
+
+/*
+ * Implement KRB_FX_CF2 function per draft-ietf-krb-wg-preauth-framework-09.
+ * Take two keys and two pepper strings as input and return a combined key.
  */
 
 #include "crypto_int.h"

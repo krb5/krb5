@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/ccache/cc_keyring.c */
 /*
- * lib/krb5/ccache/cc_keyring.c
- *
  * Copyright (c) 2006
  * The Regents of the University of Michigan
  * ALL RIGHTS RESERVED
@@ -29,11 +28,10 @@
  * OUT OF OR IN CONNECTION WITH THE USE OF THE SOFTWARE, EVEN
  * IF IT HAS BEEN OR IS HEREAFTER ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGES.
- *
  */
 /*
- * Copyright 1990,1991,1992,1993,1994,2000,2004 Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright 1990,1991,1992,1993,1994,2000,2004 Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
  * Original stdio support copyright 1995 by Cygnus Support.
  *

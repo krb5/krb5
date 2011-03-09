@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/os/init_os_ctx.c */
 /*
- * lib/krb5/os/init_ctx.c
- *
  * Copyright 1994, 2007, 2008, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,8 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- * krb5_init_contex()
  */
 
 #define NEED_WINDOWS

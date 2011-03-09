@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/os/sendto_kdc.c */
 /*
- * lib/krb5/os/sendto_kdc.c
- *
  * Copyright 1990,1991,2001,2002,2004,2005,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,11 +22,10 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Send packet to KDC for realm; wait for response, retransmitting
- * as necessary.
  */
+
+/* Send packet to KDC for realm; wait for response, retransmitting
+ * as necessary. */
 
 #include "fake-addrinfo.h"
 #include "k5-int.h"

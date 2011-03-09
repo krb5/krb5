@@ -1,6 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/crypto/openssl/hash/yhash.h
- *
+/* lib/crypto/openssl/hash_provider/hash_sha1.c */
+/*
  * Copyright (C) 1998 by the FundsXpress, INC.
  *
  * All rights reserved.

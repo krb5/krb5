@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/crypto_tests/t_pkcs5.c */
 /*
- * lib/crypto/t_pkcs5.c
- *
  * Copyright 2002 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,10 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Test vectors for PBKDF2 (from PKCS #5v2), based on RFC 3211.
  */
+
+/* Test vectors for PBKDF2 (from PKCS #5v2), based on RFC 3211. */
 
 #include <assert.h>
 #include <stdio.h>

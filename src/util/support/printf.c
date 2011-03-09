@@ -1,9 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* util/support/printf.c */
 /*
- * printf.c
- *
- * Copyright 2003, 2004, 2005, 2007, 2008 Massachusetts Institute of Technology.
- * All Rights Reserved.
+ * Copyright 2003, 2004, 2005, 2007, 2008 Massachusetts Institute of
+ * Technology.  All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -23,10 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Provide {,v}asprintf for platforms that don't have them.
  */
+
+/* Provide {,v}asprintf for platforms that don't have them. */
 
 #include "k5-platform.h"
 

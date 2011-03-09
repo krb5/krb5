@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/kadm5/logger.c */
 /*
- * lib/kadm/logger.c
- *
  * Copyright 1995, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,7 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
 
 /* KADM5 wants non-syslog log files to contain syslog-like entries */

@@ -1,6 +1,5 @@
+/* include/gssrpc/auth_gss.h */
 /*
-  auth_gssapi.h
-
   Copyright (c) 2000 The Regents of the University of Michigan.
   All rights reserved.
 

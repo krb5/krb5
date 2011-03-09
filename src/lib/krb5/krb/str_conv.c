@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/str_conv.c - Convert between strings and krb5 data types */
 /*
- * lib/kadm/str_conv.c
- *
  * Copyright 1995, 1999, 2007 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,11 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- */
-
-/*
- * str_conv.c - Convert between strings and Kerberos internal data.
  */
 
 /*

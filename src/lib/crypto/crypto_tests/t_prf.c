@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/crypto_tests/t_prf.c */
 /*
- * lib/crypto/t_prf.c
- *
  * Copyright (C) 2004 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,7 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
+ */
+
+/*
  * This file contains tests for the PRF code in Kerberos.  IT reads an
  * input file, and writes an output file.  It is assumed that the
  * output file will be diffed against expected output to see whether

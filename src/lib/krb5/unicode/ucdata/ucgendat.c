@@ -1,6 +1,4 @@
-/* $OpenLDAP: pkg/ldap/libraries/liblunicode/ucdata/ucgendat.c,v 1.43 2008/01/07 23:20:05 kurt Exp $ */
-/* This work is part of OpenLDAP Software <http://www.openldap.org/>.
- *
+/*
  * Copyright 1998-2008 The OpenLDAP Foundation.
  * All rights reserved.
  *
@@ -32,7 +30,12 @@
  * OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
  * THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-/* $Id: ucgendat.c,v 1.4 2001/01/02 18:46:20 mleisher Exp $" */
+
+/*
+ * This work is part of OpenLDAP Software <http://www.openldap.org/>.
+ * $OpenLDAP: pkg/ldap/libraries/liblunicode/ucdata/ucgendat.c,v 1.43 2008/01/07 23:20:05 kurt Exp $
+ * $Id: ucgendat.c,v 1.4 2001/01/02 18:46:20 mleisher Exp $"
+ */
 
 #include "k5-int.h"
 #include "k5-utf8.h"

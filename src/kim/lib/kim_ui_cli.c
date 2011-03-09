@@ -1,6 +1,5 @@
+/* kim/lib/kim_ui_cli.c */
 /*
- * $Header$
- *
  * Copyright 2008 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

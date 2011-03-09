@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/kdb/kdb_db2.c */
+/* plugins/kdb/db2/kdb_db2.c */
 /*
  * Copyright 1997,2006,2007-2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

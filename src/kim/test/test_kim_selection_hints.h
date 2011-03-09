@@ -1,6 +1,5 @@
+/* kim/test/test_kim_selection_hints.h */
 /*
- * $Header$
- *
  * Copyright 2006 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

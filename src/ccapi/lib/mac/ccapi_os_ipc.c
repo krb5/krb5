@@ -1,6 +1,5 @@
+/* ccapi/lib/mac/ccapi_os_ipc.c */
 /*
- * $Header$
- *
  * Copyright 2006 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

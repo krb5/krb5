@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/crypto/krb/prng/fortuna/prng_fortuna.c - Fortuna PRNG implementation */
+/* lib/crypto/krb/prng_fortuna.c - Fortuna PRNG implementation */
 /*
  * Copyright (c) 2005 Marko Kreen
  * All rights reserved.

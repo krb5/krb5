@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/crypto/dk/dk_cmac.c - Derived-key enctype functions using CMAC */
+/* lib/crypto/krb/enc_dk_cmac.c - Derived-key enctype functions using CMAC */
 /*
  * Copyright 2008, 2009, 2010 by the Massachusetts Institute of Technology.
  * All Rights Reserved.

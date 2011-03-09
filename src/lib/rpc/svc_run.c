@@ -1,8 +1,4 @@
-/* @(#)svc_run.c	2.1 88/07/29 4.0 RPCSRC */
-#if !defined(lint) && defined(SCCSIDS)
-static char sccsid[] = "@(#)svc_run.c 1.1 87/10/13 Copyr 1984 Sun Micro";
-#endif
-
+/* lib/rpc/svc_run.c */
 /*
  * Copyright (c) 2010, Oracle America, Inc.
  *

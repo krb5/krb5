@@ -1,6 +1,4 @@
-#if !defined(lint) && defined(SCCSIDS)
-static  char sccsid[] = "@(#)bindresvport.c	2.2 88/07/29 4.0 RPCSRC 1.8 88/02/08 SMI";
-#endif
+/* lib/rpc/bindresvport.c */
 /*
  * Copyright (c) 2010, Oracle America, Inc.
  *

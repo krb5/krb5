@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/kadm5/alt_prof.c */
 /*
- * lib/kadm/alt_prof.c
- *
  * Copyright 1995,2001,2008,2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,16 +22,13 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
 /*
  * Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
 
-/*
- * alt_prof.c - Implement alternate profile file handling.
- */
+/* Implement alternate profile file handling. */
 #include "fake-addrinfo.h"
 #include "k5-int.h"
 #include <kadm5/admin.h>

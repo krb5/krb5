@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/keytab/ktfns.c */
 /*
- * lib/krb5/keytab/ktfns.c
- *
  * Copyright 2001,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* plugins/kdb/hdb/kdb_hdb.h */
 /*
- * plugins/kdb/hdb/kdb_hdb.c
- *
  * Copyright 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,7 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
 
 #ifndef KRB5_KDB_HDB_H

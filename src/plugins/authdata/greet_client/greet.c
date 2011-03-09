@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* plugins/authdata/greet_client/greet.c - Sample authorization data plugin */
 /*
- * plugins/authdata/greet_client/
- *
  * Copyright 2009 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
@@ -22,9 +21,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Sample authorization data plugin
  */
 
 #include <string.h>

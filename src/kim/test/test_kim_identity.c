@@ -1,6 +1,5 @@
+/* kim/test/test_kim_identity.c */
 /*
- * $Header$
- *
  * Copyright 2006 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *

@@ -1,7 +1,4 @@
-/* @(#)getrpcport.c	2.1 88/07/29 4.0 RPCSRC */
-#if !defined(lint) && defined(SCCSIDS)
-static  char sccsid[] = "@(#)getrpcport.c 1.3 87/08/11 SMI";
-#endif
+/* lib/rpc/getrpcport.c */
 /*
  * Copyright (c) 2010, Oracle America, Inc.
  *

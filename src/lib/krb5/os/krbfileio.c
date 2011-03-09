@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/os/krbfileio.c */
 /*
- * lib/krb5/os/krbfileio.c
- *
  * Copyright (c) Hewlett-Packard Company 1991
  * Released to the Massachusetts Institute of Technology for inclusion
  * in the Kerberos source code distribution.

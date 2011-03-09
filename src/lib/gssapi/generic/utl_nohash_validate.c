@@ -21,12 +21,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
  */
 
-/*
- * stub functions for those without the hash library.
- */
+/* Stub functions for those without the hash library */
 
 #include "gssapiP_generic.h"
 

@@ -1,34 +1,35 @@
 /*
- -------------------------------------------------------------------------
- Copyright (c) 2001, Dr Brian Gladman <brg@gladman.uk.net>, Worcester, UK.
- All rights reserved.
+ * Copyright (c) 2001, Dr Brian Gladman <brg@gladman.uk.net>, Worcester, UK.
+ * All rights reserved.
+ *
+ * LICENSE TERMS
+ *
+ * The free distribution and use of this software in both source and binary
+ * form is allowed (with or without changes) provided that:
+ *
+ *   1. distributions of this source code include the above copyright
+ *      notice, this list of conditions and the following disclaimer;
+ *
+ *   2. distributions in binary form include the above copyright
+ *      notice, this list of conditions and the following disclaimer
+ *      in the documentation and/or other associated materials;
+ *
+ *   3. the copyright holder's name is not used to endorse products
+ *      built using this software without specific written permission.
+ *
+ * DISCLAIMER
+ *
+ * This software is provided 'as is' with no explcit or implied warranties
+ * in respect of any properties, including, but not limited to, correctness
+ * and fitness for purpose.
+ */
 
- LICENSE TERMS
-
- The free distribution and use of this software in both source and binary
- form is allowed (with or without changes) provided that:
-
-   1. distributions of this source code include the above copyright
-      notice, this list of conditions and the following disclaimer;
-
-   2. distributions in binary form include the above copyright
-      notice, this list of conditions and the following disclaimer
-      in the documentation and/or other associated materials;
-
-   3. the copyright holder's name is not used to endorse products
-      built using this software without specific written permission.
-
- DISCLAIMER
-
- This software is provided 'as is' with no explcit or implied warranties
- in respect of any properties, including, but not limited to, correctness
- and fitness for purpose.
- -------------------------------------------------------------------------
- Issue Date: 21/01/2002
-
- This file contains the code for implementing the key schedule for AES
- (Rijndael) for block and key sizes of 16, 20, 24, 28 and 32 bytes.
-*/
+/*
+ * Issue Date: 21/01/2002
+ *
+ * This file contains the code for implementing the key schedule for AES
+ * (Rijndael) for block and key sizes of 16, 20, 24, 28 and 32 bytes.
+ */
 
 #include "aesopt.h"
 

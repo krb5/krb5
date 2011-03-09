@@ -1,7 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
- * <krb5/preauth_plugin.h>
- *
  * Copyright (c) 2006 Red Hat, Inc.
  * Portions copyright (c) 2006 Massachusetts Institute of Technology
  * All Rights Reserved.
@@ -30,9 +28,9 @@
  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * Preauthentication plugin definitions for Kerberos 5.
  */
+
+/* Preauthentication plugin definitions for Kerberos 5 */
 
 #ifndef KRB5_PREAUTH_PLUGIN_H_INCLUDED
 #define KRB5_PREAUTH_PLUGIN_H_INCLUDED

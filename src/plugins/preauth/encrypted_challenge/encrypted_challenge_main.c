@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* plugins/preauth/encrypted_challenge/encrypted_challenge_main.c */
 /*
- * plugins/preauth/encrypted_challenge/encrypted_challenge.c
- *
  * Copyright (C) 2009 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -23,8 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
+ */
+
+/*
  * Implement Encrypted Challenge fast factor from
  * draft-ietf-krb-wg-preauth-framework
  */

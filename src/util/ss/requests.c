@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* util/ss/requests.c */
 /*
- * Various minor routines...
- *
  * Copyright 1987, 1988, 1989 by MIT
  *
  * For copyright information, see mit-sipb-copyright.h.

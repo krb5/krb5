@@ -1,6 +1,5 @@
+/* lib/rpc/gssrpcint.h */
 /*
- * lib/rpc/gssrpcint.h
- *
  * Copyright (C) 2008 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -22,9 +21,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * <<< Description >>>
  */
 
 #ifndef __GSSRPCINT_H__

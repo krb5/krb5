@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* include/foreachaddr.h */
 /*
- * include/foreachaddr.c
- *
  * Copyright 1990,1991,2000,2001,2002,2004 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,7 +22,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
+ */
+
+/*
  *
  * Iterate over the protocol addresses supported by this host, invoking
  * a callback function or three supplied by the caller.

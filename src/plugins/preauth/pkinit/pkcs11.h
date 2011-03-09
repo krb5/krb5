@@ -1,4 +1,4 @@
-/* pkcs11.h
+/*
    Copyright 2006 g10 Code GmbH
    Copyright 2006 Andreas Jellinghaus
 

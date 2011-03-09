@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* plugins/preauth/securid_sam2/securid2.c */
 /*
- * plugins/preauth/securid_sam2/securid2.c
- *
  * Copyright (C) 2010 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
@@ -24,9 +23,8 @@
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  */
-
 /*
-   * Copyright (c) 2002 Naval Research Laboratory (NRL/CCS)
+ * Copyright (c) 2002 Naval Research Laboratory (NRL/CCS)
  *
  * Permission to use, copy, modify and distribute this software and its
  * documentation is hereby granted, provided that both the copyright
@@ -36,8 +34,8 @@
  * NRL ALLOWS FREE USE OF THIS SOFTWARE IN ITS "AS IS" CONDITION AND
  * DISCLAIMS ANY LIABILITY OF ANY KIND FOR ANY DAMAGES WHATSOEVER
  * RESULTING FROM THE USE OF THIS SOFTWARE.
- *
  */
+
 #include "k5-int.h"
 #include <kdb.h>
 #include <stdio.h>

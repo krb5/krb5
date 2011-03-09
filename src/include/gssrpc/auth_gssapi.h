@@ -1,10 +1,6 @@
+/* include/gssrpc/auth_gssapi.h - GSS-API style auth parameters for RPC */
 /*
- * auth_gssapi.h, Protocol for GSS-API style authentication parameters for RPC
- *
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.
- *
- * $Id$
- *
  */
 
 #ifndef GSSRPC_AUTH_GSSAPI_H

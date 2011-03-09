@@ -1,7 +1,4 @@
-#ifndef RPC_NETDB_H
-#define RPC_NETDB_H
-
-/* @(#)netdb.h	2.1 88/07/29 3.9 RPCSRC */
+/* include/gssrpc/netdb.h */
 /*
  * Copyright (c) 2010, Oracle America, Inc.
  *
@@ -34,7 +31,13 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+/* @(#)netdb.h	2.1 88/07/29 3.9 RPCSRC */
 /*	@(#)rpc.h 1.8 87/07/24 SMI	*/
+
+#ifndef RPC_NETDB_H
+#define RPC_NETDB_H
+
 #include <gssrpc/types.h>
 /* since the gssrpc library requires that any application using it be
 built with these header files, I am making the decision that any app

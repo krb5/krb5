@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/crypto/krb/state.c */
 /*
- * lib/crypto/state.c
- *
  * Copyright (C) 2001 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *

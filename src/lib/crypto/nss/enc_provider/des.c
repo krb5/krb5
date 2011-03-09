@@ -1,6 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/crypto/nss/enc_provider/des.c
- *
+/* lib/crypto/nss/enc_provider/des.c */
+/*
  * Copyright (c) 2010 Red Hat, Inc.
  * All Rights Reserved.
  *

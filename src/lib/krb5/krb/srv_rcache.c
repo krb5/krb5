@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/srv_rcache.c - Acquire default replay cache for a server */
 /*
- * lib/krb5/krb/srv_rcache.c
- *
  * Copyright 1991 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
@@ -23,9 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
- *
- * Allocate & prepare a default replay cache for a server.
  */
 
 #include "k5-int.h"

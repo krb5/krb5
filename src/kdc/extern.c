@@ -1,7 +1,6 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* kdc/extern.c */
 /*
- * kdc/extern.c
- *
  * Copyright 1990 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
@@ -22,7 +21,9 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- *
+ */
+
+/*
  *
  * allocations of extern stuff
  */
