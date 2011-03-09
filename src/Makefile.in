@@ -749,6 +749,11 @@ mark-cstyle-bsd::
 	(cd $(top_srcdir) && $(FIND) $(BSDFILES) -print0 | $(XARGS) -0 \
 	$(PYTHON) util/krb5-mark-cstyle.py --cstyle=bsd)
 
+check-copyright:
+	(cd $(top_srcdir) && \
+	$(FIND) . \( -name '*.[ch]' -o -name '*.hin' \) -print0 | \
+	$(XARGS) -0 python util/krb5-check-copyright.py)
+
 doxygen::
 	if test "which doxygen" != ""; then \
 		doxygen; \
