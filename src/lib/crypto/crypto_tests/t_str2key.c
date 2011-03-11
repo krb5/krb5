@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/crypto/crypto_tests/t_str2key.c */
+/* lib/crypto/crypto_tests/t_str2key.c - String-to-key test vectors */
 /*
  * Copyright (C) 2010 by the Massachusetts Institute of Technology.
  * All rights reserved.
@@ -24,11 +24,6 @@
  * or implied warranty.
  */
 
-/*
- *
- * String-to-key test vectors
- */
-
 #include "k5-int.h"
 
 struct test {
@@ -38,6 +33,176 @@ struct test {
     krb5_data params;
     krb5_data expected_key;
 } test_cases[] = {
+    /* AFS string-to-key tests from old t_afss2k.c. */
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "",
+        "Sodium Chloride",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\xA4\xD0\xD0\x9B\x86\x92\xB0\xC2" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "M",
+        "Sodium Chloride",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\xF1\xF2\x9E\xAB\xD0\xEF\xDF\x73" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My",
+        "Sodium Chloride",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\xD6\x85\x61\xC4\xF2\x94\xF4\xA1" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My ",
+        "Sodium Chloride",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\xD0\xE3\xA7\x83\x94\x61\xE0\xD0" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My P",
+        "Sodium Chloride",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\xD5\x62\xCD\x94\x61\xCB\x97\xDF" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My Pa",
+        "Sodium Chloride",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\x9E\xA2\xA2\xEC\xA8\x8C\x6B\x8F" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My Pas",
+        "Sodium Chloride",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\xE3\x91\x6D\xD3\x85\xF1\x67\xC4" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My Pass",
+        "Sodium Chloride",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\xF4\xC4\x73\xC8\x8A\xE9\x94\x6D" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My Passw",
+        "Sodium Chloride",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\xA1\x9E\xB3\xAD\x6B\xE3\xAB\xD9" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My Passwo",
+        "Sodium Chloride",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\xAD\xA1\xCE\x10\x37\x83\xA7\x8C" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My Passwor",
+        "Sodium Chloride",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\xD3\x01\xD0\xF7\x3E\x7A\x49\x0B" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My Password",
+        "Sodium Chloride",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\xB6\x2A\x4A\xEC\x9D\x4C\x68\xDF" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "",
+        "NaCl",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\x61\xEF\xE6\x83\xE5\x8A\x6B\x98" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "M",
+        "NaCl",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\x68\xCD\x68\xAD\xC4\x86\xCD\xE5" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My",
+        "NaCl",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\x83\xA1\xC8\x86\x8F\x67\xD0\x62" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My ",
+        "NaCl",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\x9E\xC7\x8F\xA4\xA4\xB3\xE0\xD5" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My P",
+        "NaCl",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\xD9\x92\x86\x8F\x9D\x8C\x85\xE6" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My Pa",
+        "NaCl",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\xDA\xF2\x92\x83\xF4\x9B\xA7\xAD" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My Pas",
+        "NaCl",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\x91\xCD\xAD\xEF\x86\xDF\xD3\xA2" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My Pass",
+        "NaCl",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\x73\xD3\x67\x68\x8F\x6E\xE3\x73" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My Passw",
+        "NaCl",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\xC4\x61\x85\x9D\xAD\xF4\xDC\xB0" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My Passwo",
+        "NaCl",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\xE9\x02\x83\x16\x2C\xEC\xE0\x08" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My Passwor",
+        "NaCl",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\x61\xC8\x26\x29\xD9\x73\x6E\xB6" }
+    },
+    {
+        ENCTYPE_DES_CBC_CRC,
+        "My Password",
+        "NaCl",
+        { KV5M_DATA, 1, "\1" },
+        { KV5M_DATA, 8, "\x8C\xA8\x9E\xC4\xA8\xDC\x31\x73" }
+    },
+
     /* Test vectors from RFC 3961 appendix A.2. */
     {
         ENCTYPE_DES_CBC_CRC,

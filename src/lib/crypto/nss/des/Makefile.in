@@ -9,17 +9,11 @@ RUN_SETUP = @KRB5_RUN_ENV@
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
-STLIBOBJS= des_oldapis.o \
-	f_parity.o 	\
-	string2key.o
+STLIBOBJS= des_keys.o
 
-OBJS=	$(OUTPRE)f_parity.$(OBJEXT) 	\
-	$(OUTPRE)des_oldapis.$(OBJEXT) 	\
-	$(OUTPRE)string2key.$(OBJEXT)
+OBJS= $(OUTPRE)des_keys.$(OBJEXT)
 
-SRCS=	$(srcdir)/f_parity.c	\
-	$(srcdir)/des_oldapis.c	\
-	$(srcdir)/string2key.c
+SRCS= $(srcdir)/des_keys.c
 
 all-unix:: all-libobjs
 

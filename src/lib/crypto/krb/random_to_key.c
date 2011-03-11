@@ -92,7 +92,7 @@ k5_rand2key_des(const krb5_data *randombits, krb5_keyblock *keyblock)
      * 8 key bytes, then compute the parity bits. */
     memcpy(keyblock->contents, randombits->data, randombits->length);
     eighth_byte(keyblock->contents);
-    mit_des_fixup_key_parity(keyblock->contents);
+    k5_des_fixup_key_parity(keyblock->contents);
 
     return 0;
 }
@@ -112,7 +112,7 @@ k5_rand2key_des3(const krb5_data *randombits, krb5_keyblock *keyblock)
     for (i = 0; i < 3; i++) {
         memcpy(&keyblock->contents[i * 8], &randombits->data[i * 7], 7);
         eighth_byte(&keyblock->contents[i * 8]);
-        mit_des_fixup_key_parity(&keyblock->contents[i * 8]);
+        k5_des_fixup_key_parity(&keyblock->contents[i * 8]);
     }
     return 0;
 }

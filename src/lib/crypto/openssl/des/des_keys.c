@@ -1,7 +1,7 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/crypto/nss/des/des_oldapis.c */
+/* lib/crypto/openssl/des/des_keys.c - Key functions used by Kerberos code */
 /*
- * Copyright (C) 2009 by the Massachusetts Institute of Technology.
+ * Copyright (C) 2011 by the Massachusetts Institute of Technology.
  * All rights reserved.
  *
  * Export of this software from the United States of America may
@@ -25,10 +25,16 @@
  */
 
 #include "crypto_int.h"
+#include <openssl/des.h>
 
-krb5_error_code
-mit_afs_string_to_key(krb5_keyblock *keyblock, const krb5_data *data,
-                      const krb5_data *salt)
+void
+k5_des_fixup_key_parity(unsigned char *keybits)
 {
-    return KRB5_CRYPTO_INTERNAL;
+    DES_set_odd_parity((DES_cblock *)keybits);
+}
+
+krb5_boolean
+k5_des_is_weak_key(unsigned char *keybits)
+{
+    return DES_is_weak_key((DES_cblock *)keybits);
 }

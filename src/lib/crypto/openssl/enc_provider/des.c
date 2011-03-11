@@ -52,6 +52,7 @@
 
 #include "crypto_int.h"
 #include <openssl/evp.h>
+#include <openssl/des.h>
 
 #define DES_BLOCK_SIZE 8
 #define DES_KEY_SIZE 8
@@ -188,12 +189,50 @@ k5_des_decrypt(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
     return 0;
 }
 
+static krb5_error_code
+k5_des_cbc_mac(krb5_key key, const krb5_crypto_iov *data, size_t num_data,
+               const krb5_data *ivec, krb5_data *output)
+{
+    int ret;
+    struct iov_block_state iov_state;
+    DES_cblock blockY, blockB;
+    DES_key_schedule sched;
+    krb5_boolean empty;
+
+    ret = validate(key, ivec, data, num_data, &empty);
+    if (ret != 0)
+        return ret;
+
+    if (output->length != DES_BLOCK_SIZE)
+        return KRB5_BAD_MSIZE;
+
+    if (DES_set_key((DES_cblock *)key->keyblock.contents, &sched) != 0)
+        return KRB5_CRYPTO_INTERNAL;
+
+    if (ivec != NULL)
+        memcpy(blockY, ivec->data, DES_BLOCK_SIZE);
+    else
+        memset(blockY, 0, DES_BLOCK_SIZE);
+
+    IOV_BLOCK_STATE_INIT(&iov_state);
+    for (;;) {
+        if (!krb5int_c_iov_get_block(blockB, DES_BLOCK_SIZE, data, num_data,
+                                     &iov_state))
+            break;
+        store_64_n(load_64_n(blockB) ^ load_64_n(blockY), blockB);
+        DES_ecb_encrypt(&blockB, &blockY, &sched, 1);
+    }
+
+    memcpy(output->data, blockY, DES_BLOCK_SIZE);
+    return 0;
+}
+
 const struct krb5_enc_provider krb5int_enc_des = {
     DES_BLOCK_SIZE,
     DES_KEY_BYTES, DES_KEY_SIZE,
     k5_des_encrypt,
     k5_des_decrypt,
-    NULL,
+    k5_des_cbc_mac,
     krb5int_des_init_state,
     krb5int_default_free_state
 };

@@ -57,11 +57,24 @@ k5_des_decrypt_iov(krb5_key key,
 {
     krb5_error_code ret;
 
-    ret = k5_nss_gen_import(key, CKM_DES_CBC, CKA_ENCRYPT);
+    ret = k5_nss_gen_import(key, CKM_DES_CBC, CKA_DECRYPT);
     if (ret != 0)
         return ret;
     return k5_nss_gen_block_iov(key, CKM_DES_CBC, CKA_DECRYPT,
                                 ivec, data, num_data);
+}
+
+static krb5_error_code
+k5_des_cbc_mac(krb5_key key, const krb5_crypto_iov *data, size_t num_data,
+               const krb5_data *ivec, krb5_data *output)
+{
+    krb5_error_code ret;
+
+    ret = k5_nss_gen_import(key, CKM_DES_CBC, CKA_ENCRYPT);
+    if (ret != 0)
+        return ret;
+    return k5_nss_gen_cbcmac_iov(key, CKM_DES_CBC, ivec, data, num_data,
+                                 output);
 }
 
 const struct krb5_enc_provider krb5int_enc_des = {
@@ -69,7 +82,7 @@ const struct krb5_enc_provider krb5int_enc_des = {
     7, KRB5_MIT_DES_KEYSIZE,
     k5_des_encrypt_iov,
     k5_des_decrypt_iov,
-    NULL,
+    k5_des_cbc_mac,
     krb5int_des_init_state,
     krb5int_default_free_state,
     k5_nss_gen_cleanup

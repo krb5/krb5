@@ -432,16 +432,11 @@ extern const struct krb5_hash_provider krb5int_hash_sha1;
 
 /* Modules must implement the following functions. */
 
-/* Set the parity bits in a DES key. */
-void mit_des_fixup_key_parity(unsigned char *key);
+/* Set the parity bits to the correct values in keybits. */
+void k5_des_fixup_key_parity(unsigned char *keybits);
 
-/* Convert a password to a DES key (see RFC 3961). */
-krb5_error_code mit_afs_string_to_key(krb5_keyblock *keyblock,
-                                      const krb5_data *password,
-                                      const krb5_data *salt);
-krb5_error_code mit_des_string_to_key_int(krb5_keyblock *key,
-                                          const krb5_data *password,
-                                          const krb5_data *salt);
+/* Return true if keybits is a weak or semi-weak DES key. */
+krb5_boolean k5_des_is_weak_key(unsigned char *keybits);
 
 /* Compute an HMAC using the provided hash function, key, and data, storing the
  * result into output (caller-allocated). */
