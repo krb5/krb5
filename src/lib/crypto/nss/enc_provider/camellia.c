@@ -71,7 +71,7 @@ krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
 {
     krb5_error_code ret;
 
-    ret = k5_nss_gen_import(key, CKM_CAMELLIA_CBC, CKA_DECRYPT);
+    ret = k5_nss_gen_import(key, CKM_CAMELLIA_CBC, CKA_ENCRYPT);
     if (ret != 0)
         return ret;
     return k5_nss_gen_cbcmac_iov(key, CKM_CAMELLIA_CBC, ivec, data, num_data,

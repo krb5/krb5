@@ -55,7 +55,7 @@ k5_des3_decrypt_iov(krb5_key key, const krb5_data *ivec,
 {
    krb5_error_code ret;
 
-   ret = k5_nss_gen_import(key, CKM_DES3_CBC, CKA_ENCRYPT);
+   ret = k5_nss_gen_import(key, CKM_DES3_CBC, CKA_DECRYPT);
    if (ret != 0)
        return ret;
    return k5_nss_gen_block_iov(key, CKM_DES3_CBC, CKA_DECRYPT,
