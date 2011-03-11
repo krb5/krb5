@@ -62,8 +62,9 @@ krb5int_pbkdf2_hmac_sha1(const krb5_data *out, unsigned long count,
     if (slot == NULL)
         return k5_nss_map_last_error();
 
+    /* NSS treats a null saltItem.data as a request for a random salt. */
     saltItem.type = siBuffer;
-    saltItem.data = (unsigned char *)salt->data;
+    saltItem.data = (salt->data == NULL) ? "" : (unsigned char *)salt->data;
     saltItem.len = salt->length;
 
     /* PKCS 5 was designed to be DER encoded. Algid's carry all the
