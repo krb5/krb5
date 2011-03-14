@@ -351,7 +351,7 @@ asn1_get_eoc_tag (asn1buf *buf)
  * Like end_sequence_of(), but uses the different (non-shadowing)
  * variable names.
  */
-static asn1_error_code
+static inline asn1_error_code
 end_sequence_of_no_tagvars_helper(asn1buf *buf, asn1buf *seqbufp,
                                   int seqofindef)
 {

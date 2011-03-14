@@ -42,7 +42,7 @@ krb5_c_crypto_length(krb5_context context, krb5_enctype enctype,
         *size = 0;
         break;
     case KRB5_CRYPTO_TYPE_DATA:
-        *size = (size_t)~0; /* match Heimdal */
+        *size = (unsigned int)~0; /* match Heimdal */
         break;
     case KRB5_CRYPTO_TYPE_HEADER:
     case KRB5_CRYPTO_TYPE_PADDING:

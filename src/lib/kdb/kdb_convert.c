@@ -248,7 +248,8 @@ set_from_utf8str(krb5_data *d, utf8str_t u)
 static krb5_principal
 conv_princ_2db(krb5_context context, kdbe_princ_t *kdbe_princ)
 {
-    int i;
+    unsigned int i;
+    int j;
     krb5_principal princ;
     kdbe_data_t *components;
 
@@ -275,10 +276,10 @@ conv_princ_2db(krb5_context context, kdbe_princ_t *kdbe_princ)
         princ->data[i].data = NULL;
     princ->length = (krb5_int32)kdbe_princ->k_components.k_components_len;
 
-    for (i = 0; i < princ->length; i++) {
-        princ->data[i].magic = components[i].k_magic;
-        set_from_utf8str(&princ->data[i], components[i].k_data);
-        if (princ->data[i].data == NULL)
+    for (j = 0; j < princ->length; j++) {
+        princ->data[j].magic = components[j].k_magic;
+        set_from_utf8str(&princ->data[j], components[j].k_data);
+        if (princ->data[j].data == NULL)
             goto error;
     }
 
@@ -822,7 +823,8 @@ ulog_free_entries(kdb_incr_update_t *updates, int no_of_updates)
 {
 
     kdb_incr_update_t *upd;
-    int i, j, k, cnt;
+    unsigned int i, j;
+    int k, cnt;
 
     if (updates == NULL)
         return;

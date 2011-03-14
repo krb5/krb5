@@ -1125,8 +1125,6 @@ service_fds(krb5_context context, struct select_state *selstate, int interval,
 
     e = 0;
     while (selstate->nfds > 0) {
-        unsigned int i;
-
         e = krb5int_cm_call_select(selstate, seltemp, &selret);
         if (e == EINTR)
             continue;

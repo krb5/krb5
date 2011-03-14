@@ -417,8 +417,6 @@ seen_realm_before(krb5_context context, krb5_tkt_creds_context ctx,
 static krb5_error_code
 complete(krb5_context context, krb5_tkt_creds_context ctx)
 {
-    krb5_error_code code;
-
     TRACE_TKT_CREDS_COMPLETE(context, ctx->reply_creds->server);
 
     /* Note the authdata we asked for in the output creds. */

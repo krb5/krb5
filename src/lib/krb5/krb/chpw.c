@@ -78,7 +78,7 @@ krb5int_rd_chpw_rep(krb5_context context, krb5_auth_context auth_context,
                     krb5_data *packet, int *result_code, krb5_data *result_data)
 {
     char *ptr;
-    int plen, vno;
+    unsigned int plen, vno;
     krb5_data ap_rep;
     krb5_ap_rep_enc_part *ap_rep_enc;
     krb5_error_code ret;

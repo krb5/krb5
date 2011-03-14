@@ -61,7 +61,7 @@ xorblock(unsigned char *out, const unsigned char *in)
     int z;
     for (z = 0; z < BLOCK_SIZE/4; z++) {
         unsigned char *outptr = &out[z*4];
-        unsigned char *inptr = &in[z*4];
+        const unsigned char *inptr = &in[z*4];
         /*
          * Use unaligned accesses.  On x86, this will probably still be faster
          * than multiple byte accesses for unaligned data, and for aligned data
