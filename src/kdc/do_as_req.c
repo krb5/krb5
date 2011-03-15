@@ -741,6 +741,8 @@ prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request,
                     pad->contents = td[size]->data;
                     pad->length = td[size]->length;
                     pa[size] = pad;
+                    td[size]->data = NULL;
+                    td[size]->length = 0;
                 }
             krb5_free_typed_data(kdc_context, td);
         }
