@@ -124,34 +124,6 @@ WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
 @cdivider
 
-The implementation of the Yarrow pseudo-random number generator
-in @code{src/lib/crypto/krb/prng/yarrow} has the following copyright:
-
-@quotation
-Copyright 2000 by Zero-Knowledge Systems, Inc.
-
-Permission to use, copy, modify, distribute, and sell this software
-and its documentation for any purpose is hereby granted without fee,
-provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in
-supporting documentation, and that the name of Zero-Knowledge Systems,
-Inc. not be used in advertising or publicity pertaining to
-distribution of the software without specific, written prior
-permission.  Zero-Knowledge Systems, Inc. makes no representations
-about the suitability of this software for any purpose.  It is
-provided ``as is'' without express or implied warranty.
-
-ZERO-KNOWLEDGE SYSTEMS, INC. DISCLAIMS ALL WARRANTIES WITH REGARD TO
-THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS, IN NO EVENT SHALL ZERO-KNOWLEDGE SYSTEMS, INC. BE LIABLE FOR
-ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTUOUS ACTION, ARISING OUT
-OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-@end quotation
-
-@cdivider
-
 The implementation of the AES encryption algorithm in
 @code{src/lib/crypto/builtin/aes} has the following copyright:
 
