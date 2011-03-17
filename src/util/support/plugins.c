@@ -261,9 +261,6 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
 #ifdef RTLD_GROUP
                                       | RTLD_GROUP  /* group dependencies */
 #endif
-#ifdef RTLD_FIRST
-                                      | RTLD_FIRST  /* specified image only */
-#endif
                             );
             if (handle == NULL) {
                 const char *e = dlerror();
