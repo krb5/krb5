@@ -90,15 +90,15 @@ gss_userok(OM_uint32 *minor,
 
 	intName = (gss_union_name_t)name;
 
+	/* may need to import the name if this is not MN */
+	if (intName->mech_type == GSS_C_NO_OID)
+		return (GSS_S_FAILURE);
+	else
+		mechName = intName->mech_name;
+
 	mech = gssint_get_mechanism(intName->mech_type);
 	if (mech == NULL)
 		return (GSS_S_UNAVAILABLE);
-
-	/* may need to import the name if this is not MN */
-	if (intName->mech_type == NULL) {
-		return (GSS_S_FAILURE);
-	} else
-		mechName = intName->mech_name;
 
 	if (mech->gss_userok) {
 		major = mech->gss_userok(minor, mechName,
