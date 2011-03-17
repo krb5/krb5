@@ -728,6 +728,18 @@ gssint_register_mechinfo(gss_mech_info template)
 			(_mech)->_symbol = NULL; \
 	} while (0)
 
+/*
+ * If _symbol is undefined in the shared object but the shared object
+ * is linked against the mechanism glue, it's possible for dlsym() to
+ * return the mechanism glue implementation. Guard against that.
+ */
+#define GSS_ADD_DYNAMIC_METHOD_NOLOOP(_dl, _mech, _symbol)	\
+	do {							\
+		GSS_ADD_DYNAMIC_METHOD(_dl, _mech, _symbol);	\
+		if ((_mech)->_symbol == _symbol)		\
+		    (_mech)->_symbol = NULL;			\
+	} while (0)
+
 static gss_mechanism
 build_dynamicMech(void *dl, const gss_OID mech_type)
 {
@@ -738,68 +750,69 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
 		return NULL;
 	}
 
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_acquire_cred);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_release_cred);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_init_sec_context);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_accept_sec_context);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_process_context_token);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_delete_sec_context);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_context_time);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_get_mic);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_verify_mic);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_wrap);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_unwrap);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_display_status);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_indicate_mechs);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_compare_name);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_display_name);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_import_name);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_release_name);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_cred);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_add_cred);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_export_sec_context);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_import_sec_context);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_cred_by_mech);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_names_for_mech);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_context);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_acquire_cred);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_release_cred);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_init_sec_context);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_accept_sec_context);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_process_context_token);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_delete_sec_context);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_context_time);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_get_mic);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_verify_mic);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_wrap);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_unwrap);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_display_status);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_indicate_mechs);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_compare_name);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_display_name);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_import_name);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_release_name);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_inquire_cred);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_add_cred);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_export_sec_context);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_import_sec_context);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_inquire_cred_by_mech);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_inquire_names_for_mech);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_inquire_context);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_internal_release_oid);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_wrap_size_limit);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_pname_to_uid);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_userok);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_export_name);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_store_cred);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_sec_context_by_oid);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_cred_by_oid);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_set_sec_context_option);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_wrap_size_limit);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_pname_to_uid);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_userok);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_export_name);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_duplicate_name);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_store_cred);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_inquire_sec_context_by_oid);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_inquire_cred_by_oid);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_set_sec_context_option);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_set_cred_option);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_mech_invoke);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_wrap_aead);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_unwrap_aead);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_wrap_iov);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_unwrap_iov);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_wrap_iov_length);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_complete_auth_token);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gssspi_mech_invoke);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_wrap_aead);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_unwrap_aead);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_wrap_iov);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_unwrap_iov);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_wrap_iov_length);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_complete_auth_token);
 	/* Services4User (introduced in 1.8) */
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_acquire_cred_impersonate_name);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_add_cred_impersonate_name);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_acquire_cred_impersonate_name);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_add_cred_impersonate_name);
 	/* Naming extensions (introduced in 1.8) */
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_display_name_ext);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_name);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_get_name_attribute);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_set_name_attribute);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_delete_name_attribute);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_export_name_composite);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_map_name_to_any);
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_release_any_name_mapping);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_display_name_ext);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_inquire_name);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_get_name_attribute);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_set_name_attribute);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_delete_name_attribute);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_export_name_composite);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_map_name_to_any);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_release_any_name_mapping);
         /* RFC 4401 (introduced in 1.8) */
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_pseudo_random);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_pseudo_random);
 	/* RFC 4178 (introduced in 1.8; gss_get_neg_mechs not implemented) */
-	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_set_neg_mechs);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_set_neg_mechs);
         /* draft-ietf-sasl-gs2 */
-        GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_saslname_for_mech);
-        GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_mech_for_saslname);
+        GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_inquire_saslname_for_mech);
+        GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_inquire_mech_for_saslname);
         /* RFC 5587 */
-        GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_inquire_attrs_for_mech);
+        GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_inquire_attrs_for_mech);
 
 	assert(mech_type != GSS_C_NO_OID);
 
