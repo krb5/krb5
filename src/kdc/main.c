@@ -162,6 +162,8 @@ setup_server_realm(krb5_principal sprinc)
 static void
 finish_realm(kdc_realm_t *rdp)
 {
+    if (rdp->realm_name)
+        free(rdp->realm_name);
     if (rdp->realm_mpname)
         free(rdp->realm_mpname);
     if (rdp->realm_stash)
@@ -290,7 +292,11 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
         goto whoops;
     }
 
-    rdp->realm_name = realm;
+    rdp->realm_name = strdup(realm);
+    if (rdp->realm_name == NULL) {
+        kret = ENOMEM;
+        goto whoops;
+    }
     kret = krb5int_init_context_kdc(&rdp->realm_context);
     if (kret) {
         kdc_err(NULL, kret, "while getting context for realm %s", realm);
@@ -863,6 +869,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
             kdc_realmlist[0] = rdatap;
             kdc_numrealms++;
         }
+        krb5_free_default_realm(kcontext, lrealm);
     }
 
     /* Ensure that this is set for our first request. */
