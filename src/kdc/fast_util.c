@@ -338,6 +338,7 @@ kdc_fast_response_handle_padata(struct kdc_request_state *state,
         pa[0].length = encrypted_reply->length;
         pa[0].contents = (unsigned char *)  encrypted_reply->data;
         pa_array[0] = &pa[0];
+        krb5_free_pa_data(kdc_context, rep->padata);
         rep->padata = pa_array;
         pa_array = NULL;
         free(encrypted_reply);
