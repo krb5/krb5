@@ -354,7 +354,8 @@ krb5_error_code
 kdc_fast_handle_error (krb5_context context,
                        struct kdc_request_state *state,
                        krb5_kdc_req *request,
-                       krb5_pa_data  **in_padata, krb5_error *err);
+                       krb5_pa_data  **in_padata, krb5_error *err,
+                       krb5_data **fast_edata_out);
 
 krb5_error_code kdc_fast_handle_reply_key(struct kdc_request_state *state,
                                           krb5_keyblock *existing_key,
