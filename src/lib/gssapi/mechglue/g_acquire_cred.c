@@ -206,6 +206,8 @@ OM_uint32 *		time_rec;
 cleanup:
     if (GSS_ERROR(major))
 	gss_release_cred(&tmpMinor, (gss_cred_id_t *)&creds);
+    if (desired_mechs == GSS_C_NO_OID_SET)
+        generic_gss_release_oid_set(&tmpMinor, &mechs);
 
     return (major);
 }
