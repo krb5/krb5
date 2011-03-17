@@ -115,7 +115,6 @@ gss_cred_id_t *		d_cred;
     OM_uint32		status, temp_status, temp_minor_status;
     OM_uint32		temp_ret_flags = 0;
     gss_union_ctx_id_t	union_ctx_id;
-    gss_union_cred_t	union_cred;
     gss_cred_id_t	input_cred_handle = GSS_C_NO_CREDENTIAL;
     gss_cred_id_t	tmp_d_cred = GSS_C_NO_CREDENTIAL;
     gss_name_t		internal_name = GSS_C_NO_NAME;
@@ -181,11 +180,17 @@ gss_cred_id_t *		d_cred;
 
     /*
      * get the appropriate cred handle from the union cred struct.
-     * defaults to GSS_C_NO_CREDENTIAL if there is no cred, which will
-     * use the default credential.
      */
-    union_cred = (gss_union_cred_t) verifier_cred_handle;
-    input_cred_handle = gssint_get_mechanism_cred(union_cred, token_mech_type);
+    if (verifier_cred_handle != GSS_C_NO_CREDENTIAL) {
+	input_cred_handle =
+	    gssint_get_mechanism_cred((gss_union_cred_t)verifier_cred_handle,
+				      token_mech_type);
+	if (input_cred_handle == GSS_C_NO_CREDENTIAL) {
+	    /* verifier credential specified but no acceptor credential found */
+	    status = GSS_S_NO_CRED;
+	    goto error_out;
+	}
+    }
 
     /*
      * now select the approprate underlying mechanism routine and
