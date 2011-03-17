@@ -141,7 +141,7 @@ gss_name_t *output_name;
 
 	if ((major_status =
 		gssint_import_internal_name(minor_status, mech_type,
-						dest_union,
+						in_union,
 						&dest_union->mech_name)))
 		goto allocation_failure;
 

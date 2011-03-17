@@ -883,6 +883,7 @@ static struct gss_config krb5_mechanism = {
 #endif
     krb5_gss_userok,
     krb5_gss_export_name,
+    krb5_gss_duplicate_name,
     krb5_gss_store_cred,
     krb5_gss_inquire_sec_context_by_oid,
     krb5_gss_inquire_cred_by_oid,

@@ -223,6 +223,14 @@ OM_uint32 spnego_gss_release_name
 	gss_name_t *		/* input_name */
 );
 
+OM_uint32 spnego_gss_duplicate_name
+(
+	OM_uint32 *,		/* minor_status */
+	/* CSTYLED */
+	const gss_name_t, 	/* input_name */
+	gss_name_t *		/* output_name */
+);
+
 OM_uint32 spnego_gss_inquire_cred
 (
 	OM_uint32 *,		/* minor_status */
