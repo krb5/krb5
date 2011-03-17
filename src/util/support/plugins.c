@@ -255,13 +255,16 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
         }
 #endif /* USE_CFBUNDLE */
 
-#ifdef RTLD_GROUP
-#define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL | RTLD_GROUP)
-#else
-#define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL)
-#endif
         if (!err) {
-            handle = dlopen(filepath, PLUGIN_DLOPEN_FLAGS);
+            handle = dlopen(filepath, RTLD_NOW      /* bind now */
+                                      | RTLD_LOCAL  /* local symbols */
+#ifdef RTLD_GROUP
+                                      | RTLD_GROUP  /* group dependencies */
+#endif
+#ifdef RTLD_FIRST
+                                      | RTLD_FIRST  /* specified image only */
+#endif
+                            );
             if (handle == NULL) {
                 const char *e = dlerror();
                 if (e == NULL)
