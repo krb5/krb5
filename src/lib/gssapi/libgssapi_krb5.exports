@@ -103,6 +103,7 @@ gss_nt_service_name_v2
 gss_nt_string_uid_name
 gss_nt_user_name
 gss_oid_to_str
+gss_pname_to_uid
 gss_pseudo_random
 gss_process_context_token
 gss_release_any_name_mapping
@@ -125,6 +126,7 @@ gss_unseal
 gss_unwrap
 gss_unwrap_aead
 gss_unwrap_iov
+gss_userok
 gss_verify
 gss_verify_mic
 gss_wrap

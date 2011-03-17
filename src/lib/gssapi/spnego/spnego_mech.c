@@ -243,6 +243,8 @@ static struct gss_config spnego_mechanism =
 	spnego_gss_inquire_context,	/* gss_inquire_context */
 	NULL,				/* gss_internal_release_oid */
 	spnego_gss_wrap_size_limit,	/* gss_wrap_size_limit */
+	NULL,				/* gssd_pname_to_uid */
+	NULL,				/* gss_userok */
 	NULL,				/* gss_export_name */
 	NULL,				/* gss_store_cred */
  	spnego_gss_inquire_sec_context_by_oid, /* gss_inquire_sec_context_by_oid */

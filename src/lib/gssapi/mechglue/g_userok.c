@@ -68,10 +68,10 @@ out:
 
 
 OM_uint32
-gssint_userok(OM_uint32 *minor,
-	    const gss_name_t name,
-	    const char *user,
-	    int *user_ok)
+gss_userok(OM_uint32 *minor,
+	   const gss_name_t name,
+	   const char *user,
+	   int *user_ok)
 
 {
 	gss_mechanism mech;
@@ -100,11 +100,11 @@ gssint_userok(OM_uint32 *minor,
 	} else
 		mechName = intName->mech_name;
 
-	if (mech->gssint_userok) {
-		major = mech->gssint_userok(minor, mechName,
+	if (mech->gss_userok) {
+		major = mech->gss_userok(minor, mechName,
 				user, user_ok);
 		if (major != GSS_S_COMPLETE)
-		    map_error(minor_status, mech);
+		    map_error(minor, mech);
 	} else
 		major = compare_names(minor, intName->mech_type,
 				    name, user, user_ok);
