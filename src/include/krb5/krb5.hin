@@ -1,7 +1,8 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* General definitions for Kerberos version 5.*/
 /*
- * Copyright 1989,1990,1995,2001, 2003, 2007, 2011 by the Massachusetts
- * Institute of Technology.  All Rights Reserved.
+ * Copyright 1989,1990,1995,2001, 2003, 2007, 2011 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -3500,33 +3501,37 @@ krb5_error_code KRB5_CALLCONV
 krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
                        krb5_rcache *rcptr);
 
-/**
- * @brief Build a principal name using length-counted strings.
+/** Build a principal name using length-counted strings.
  *
- * @param context                       Context structure [input, output]
- * @param princ                         Principal name [input]
- * @param rlen                          Realm name length [input]
- * @param realm                         Realm name [input]
- * @param ...                           List of arguments specifying length and content for each argument
+ * @param context  Context structure [input, output]
+ * @param princ    Principal name [input]
+ * @param rlen     Realm name length [input]
+ * @param realm    Realm name [input]
+ * @param ...      List of arguments specifying length and content for each argument
  *
  * Make sure to free the allocated memory when it is no longer needed.
  *
  * @note krb5_build_principal() and krb5_build_principal_va() perform the same task.
- * krb5_build_principal() takes variadic arguments. krb5_build_principal_va() takes a pre-computed
- * @a varargs pointer.
+ * krb5_build_principal() takes variadic arguments.
+ * krb5_build_principal_va() takes a pre-computed @a varargs pointer.
+ *
+ * @code
+ * Example of how to build principal WELLKNOWN/ANONYMOUS@R
+ *     krb5_build_principal_ext(context, &principal, strlen("R"), "R",
+ *         strlen(KRB5_WELLKNOWN_NAMESTR), KRB5_WELLKNOWN_NAMESTR,
+ *         strlen(KRB5_ANONYMOUS_PRINCSTR), KRB5_ANONYMOUS_PRINCSTR, 0);
+ * @endcode
  *
  * @retval
  * 0  Success
  * @return
  * Kerberos error codes
- *
  */
 krb5_error_code KRB5_CALLCONV_C
 krb5_build_principal_ext(krb5_context context,  krb5_principal * princ,
                          unsigned int rlen, const char * realm, ...);
 
-/**
- * @brief Build a principal name using null-terminated strings.
+/** Build a principal name using null-terminated strings.
  *
  * @param context           Context structure [input, output]
  * @param princ              Principal name [output]
@@ -3537,8 +3542,14 @@ krb5_build_principal_ext(krb5_context context,  krb5_principal * princ,
  * Make sure to free the allocated memory when it is no longer needed.
  *
  * @note krb5_build_principal() and krb5_build_principal_va() perform the same task.
- * krb5_build_principal() takes variadic arguments. krb5_build_principal_va() takes a pre-computed
- * @a varargs pointer.
+ * krb5_build_principal() takes variadic arguments.
+ * krb5_build_principal_va() takes a pre-computed @a varargs pointer.
+ *
+ * @code
+ * Example of how to build principal H/S@R
+ *     krb5_build_principal(context, &principal,
+ *                          strlen("R"), "R", "H", "S", (char*)NULL);
+ * @endcode
  *
  * @retval
  * 0  Success
@@ -3555,8 +3566,7 @@ krb5_build_principal(krb5_context context,
 #endif
     ;
 #if KRB5_DEPRECATED
-/**
- * @brief Build a principal name, using a precomputed @c va_list.
+/** Build a principal name, using a precomputed @c va_list.
  *
  * @param context           Context structure [input, output]
  * @param princ             Principal structure [output]
@@ -3565,8 +3575,8 @@ krb5_build_principal(krb5_context context,
  * @param ...               @c va_list of arguments [input]
  *
  * @note krb5_build_principal() and krb5_build_principal_va() perform the same task.
- * krb5_build_principal() takes variadic arguments. krb5_build_principal_va() takes a pre-computed
- * @a varargs pointer.
+ * krb5_build_principal() takes variadic arguments.
+ * krb5_build_principal_va() takes a pre-computed @a varargs pointer.
  *
  * Make sure to free the allocated memory when it is no longer needed.
  *
@@ -3574,7 +3584,6 @@ krb5_build_principal(krb5_context context,
  * 0  Success
  * @return
  * Kerberos error codes
- *
  */
 KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV
 krb5_build_principal_va(krb5_context context,
@@ -3584,8 +3593,32 @@ krb5_build_principal_va(krb5_context context,
                         va_list ap);
 #endif
 
-/**
- * @brief Version of krb5_build_principal_va which allocates krb5_principal_data
+/** Build a principal name, using a precomputed variable argument list
+ *
+ * @param context           Context structure [input, output]
+ * @param princ             Principal structure. Locally allocated. [output]
+ * @param rlen              Realm name length [input]
+ * @param realm             Realm name [input]
+ * @param ap                @c va_list of arguments [input]
+ *
+ * Similar to krb5_build_principal() this function builds a principal name,
+ * but its name components are specified as va_list.
+ *
+ * Make sure to call krb5_free_principal() to deallocate the principal
+ * when it is no longer needed.
+ *
+ * @code
+ * Function usage example:
+ *   va_list ap;
+ *   va_start(ap, realm);
+ *   krb5_build_principal_alloc_va(context, princ, rlen, realm, ap);
+ *   va_end(ap);
+ * @endcode
+ *
+ * @retval
+ * 0  Success
+ * @return
+ * Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_build_principal_alloc_va(krb5_context context,
@@ -3607,7 +3640,6 @@ krb5_build_principal_alloc_va(krb5_context context,
  * 0  Success
  * @return
  * Kerberos error codes
- *
  */
 krb5_error_code KRB5_CALLCONV
 krb5_425_conv_principal(krb5_context context, const char *name,
