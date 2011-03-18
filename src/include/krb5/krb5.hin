@@ -3947,6 +3947,7 @@ krb5_cc_copy_creds(krb5_context context, krb5_ccache incc, krb5_ccache outcc);
  * @param data           data to be fetched; free with krb5_free_data_contents() [input,output]
  *
  * @code
+ * Example:
  *   krb5_data config_data;
  *   config_data.data = NULL;
  *   krb5_cc_get_config(context, ccache, target_principal, key, &config_data);
@@ -3975,6 +3976,7 @@ krb5_cc_get_config(krb5_context context, krb5_ccache id,
  * @note Existing configuration under the same key is over-written.
  *
  * @code
+ * Example:
  *   config_data.data = "yes";
  *   config_data.length = strlen(config_data.data);
  *   krb5_cc_set_config(context, id, principal,key, &config_data);
@@ -4014,21 +4016,18 @@ krb5_is_config_principal(krb5_context context, krb5_const_principal principal);
 void KRB5_CALLCONV
 krb5_free_principal(krb5_context context, krb5_principal val);
 
-/**
- * @brief Free an authenticator structure, including its pointer.
+/** Free an authenticator structure, including its pointer.
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to data structure to be freed [input, output]
  *
  * @return
  * None
- *
  */
 void KRB5_CALLCONV
 krb5_free_authenticator(krb5_context context, krb5_authenticator *val);
 
-/**
- * @brief Free an array of addresses and its pointer.
+/** Free an array of addresses and its pointer.
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to data structure to be freed [input,output]
@@ -4039,8 +4038,7 @@ krb5_free_authenticator(krb5_context context, krb5_authenticator *val);
 void KRB5_CALLCONV
 krb5_free_addresses(krb5_context context, krb5_address **val);
 
-/**
- * @brief Free an @c _krb5_auth_data structure.
+/** Free an @c _krb5_auth_data structure.
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to data structure to be freed [input, output]
@@ -4051,8 +4049,7 @@ krb5_free_addresses(krb5_context context, krb5_address **val);
 void KRB5_CALLCONV
 krb5_free_authdata(krb5_context context, krb5_authdata **val);
 
-/**
- * @brief Free a ticket.
+/** Free a ticket.
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to the data structure to be freed [input, output]
@@ -4063,60 +4060,53 @@ krb5_free_authdata(krb5_context context, krb5_authdata **val);
 void KRB5_CALLCONV
 krb5_free_ticket(krb5_context context, krb5_ticket *val);
 
-/**
- * @brief Free an error allocated by either krb5_read_error() or krb5_sendauth().
+/** Free an error allocated by either krb5_read_error() or krb5_sendauth().
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to data structure to be freed [input, output]
  *
  * @return
  * None
- *
  */
 void KRB5_CALLCONV
 krb5_free_error(krb5_context context, register krb5_error *val);
 
-/**
- * @brief Free a credentials structure and invalidate its pointer.
+/** Free a credentials structure and invalidate its pointer.
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to data structure to be freed [input, output]
  *
  * @return
  * None
- *
  */
 void KRB5_CALLCONV
 krb5_free_creds(krb5_context context, krb5_creds *val);
 
-/**
- * @brief Zero out the session key and free the credentials structure.
+/** Zero out the session key and free the credentials structure.
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to the data structure to be freed [input, output]
  *
  * @note The pointer val is not freed.
+ *
  * @return
  * None
  */
 void KRB5_CALLCONV
 krb5_free_cred_contents(krb5_context context, krb5_creds *val);
 
-/**
- * @brief Free a @a checksum structure and its pointer.
+/** Free a @a checksum structure and its pointer.
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to data structure to be freed [input, output]
  *
  * @return
  * None
- *
  */
 void KRB5_CALLCONV
 krb5_free_checksum(krb5_context context, register krb5_checksum *val);
 
-/**
- * @brief Free the contents of a @a checksum structure.
+/** Free the contents of a @a checksum structure.
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to data structure to be freed [input, output]
@@ -4129,8 +4119,7 @@ krb5_free_checksum(krb5_context context, register krb5_checksum *val);
 void KRB5_CALLCONV
 krb5_free_checksum_contents(krb5_context context, register krb5_checksum *val);
 
-/**
- * @brief Free the pointer @a val and zero the contents of the keyblock.
+/** Free the pointer @a val and zero the contents of the keyblock.
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to data structure to be freed [input, output]
@@ -4141,8 +4130,7 @@ krb5_free_checksum_contents(krb5_context context, register krb5_checksum *val);
 void KRB5_CALLCONV
 krb5_free_keyblock(krb5_context context, register krb5_keyblock *val);
 
-/**
- * @brief Free the contents of a keyblock.
+/** Free the contents of a keyblock.
  *
  * @param context           Context structure [input, output]
  * @param key               Pointer to data structure to be freed [input, output]
@@ -4155,8 +4143,7 @@ krb5_free_keyblock(krb5_context context, register krb5_keyblock *val);
 void KRB5_CALLCONV
 krb5_free_keyblock_contents(krb5_context context, register krb5_keyblock *key);
 
-/**
- * @brief Free the subkey keyblock (if set)and its pointer.
+/** Free the subkey keyblock (if set)and its pointer.
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to data structure to be freed [input, output]
@@ -4167,8 +4154,7 @@ krb5_free_keyblock_contents(krb5_context context, register krb5_keyblock *key);
 void KRB5_CALLCONV
 krb5_free_ap_rep_enc_part(krb5_context context, krb5_ap_rep_enc_part *val);
 
-/**
- * @brief Free storage associated with a @c krb5_data structure and its pointer.
+/** Free storage associated with a @c krb5_data structure and its pointer.
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to data structure to be freed [input, output]
@@ -4179,8 +4165,7 @@ krb5_free_ap_rep_enc_part(krb5_context context, krb5_ap_rep_enc_part *val);
 void KRB5_CALLCONV
 krb5_free_data(krb5_context context, krb5_data *val);
 
-/**
- * @brief Free the contents of a @c _krb5_data structure and zero the data field.
+/** Free the contents of a @c _krb5_data structure and zero the data field.
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to data structure to be freed [input, output]
@@ -4189,13 +4174,11 @@ krb5_free_data(krb5_context context, krb5_data *val);
  *
  * @return
  * None
- *
  */
 void KRB5_CALLCONV
 krb5_free_data_contents(krb5_context context, krb5_data *val);
 
-/**
- * @brief Free a simple character name string returned by krb5_unparse_name().
+/** Free a simple character name string returned by krb5_unparse_name().
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to name string to be freed [input, output]
@@ -4203,13 +4186,11 @@ krb5_free_data_contents(krb5_context context, krb5_data *val);
  * @note The pointer is not freed.
  * @return
  * None
- *
  */
 void KRB5_CALLCONV
 krb5_free_unparsed_name(krb5_context context, char *val);
 
-/**
- * @brief Free an array of checksum types.
+/** Free an array of checksum types.
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to checksum type to be freed [input, output]
@@ -4229,12 +4210,10 @@ krb5_free_cksumtypes(krb5_context context, krb5_cksumtype *val);
  * @param seconds           System timeofday, seconds portion [output]
  * @param microseconds      System timeofday, microseconds portion [output]
  *
- *
  * @retval
  * 0  Success
  * @return
  * Kerberos error codes
- *
  */
 krb5_error_code KRB5_CALLCONV
 krb5_us_timeofday(krb5_context context, krb5_timestamp *seconds, krb5_int32 *microseconds);
@@ -4245,14 +4224,12 @@ krb5_us_timeofday(krb5_context context, krb5_timestamp *seconds, krb5_int32 *mic
  * @param context           Context structure [input, output]
  * @param timeret           Pointer to @a timeofday field in timestamp
  *
- *
  * Make sure to free the allocated memory when it is no longer needed.
  *
  * @retval
  * 0  Success
  * @return
  * Kerberos error codes
- *
  */
 krb5_error_code KRB5_CALLCONV
 krb5_timeofday(krb5_context context, register krb5_timestamp *timeret);
@@ -4273,8 +4250,7 @@ krb5_timeofday(krb5_context context, register krb5_timestamp *timeret);
  * 0  Success
  * @return
  * Kerberos error codes
- *
-*/
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_os_localaddr(krb5_context context, krb5_address ***addr);
 
