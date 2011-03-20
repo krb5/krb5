@@ -779,16 +779,16 @@ krb5_gss_pname_to_uid(OM_uint32 *minor,
     code = krb5_aname_to_localname(context, kname->princ,
                                    sizeof(localname), localname);
     if (code != 0) {
-        *minor = code;
+        *minor = KRB5_NO_LOCALNAME;
         krb5_free_context(context);
         return GSS_S_FAILURE;
     }
 
     code = k5_getpwnam_r(localname, &pwx, pwbuf, sizeof(pwbuf), &pw);
-    if (code == 0)
+    if (code == 0 && pw != NULL)
         *uid = pw->pw_uid;
     else
-        *minor = errno;
+        *minor = KRB5_NO_LOCALNAME;
 
     krb5_free_context(context);
 
