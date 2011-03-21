@@ -43,8 +43,6 @@
 #include <mglueP.h>
 #include <gssapi/gssapi.h>
 
-static const char localLoginUserAttr[] = "local-login-user";
-
 static OM_uint32
 mech_userok(OM_uint32 *minor,
 	    const gss_union_name_t unionName,
@@ -88,8 +86,8 @@ attr_userok(OM_uint32 *minor,
 
 	*user_ok = 0;
 
-	attribute.length = sizeof(localLoginUserAttr) - 1;
-	attribute.value = (void *)localLoginUserAttr;
+	attribute.length = sizeof("local-login-user") - 1;
+	attribute.value = "local-login-user";
 
 	while (more != 0 && *user_ok == 0) {
 		gss_buffer_desc value;
