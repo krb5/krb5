@@ -100,8 +100,10 @@ attr_pname_to_uid(OM_uint32 *minor,
                                              &value,
                                              &display_value,
                                              &more);
-        if (GSS_ERROR(major))
+        if (GSS_ERROR(major)) {
+            map_error(minor, mech);
             break;
+        }
 
         localLoginUser = malloc(value.length + 1);
         if (localLoginUser == NULL) {
@@ -124,7 +126,8 @@ attr_pname_to_uid(OM_uint32 *minor,
             major = GSS_S_COMPLETE;
             *minor = 0;
             break;
-        }
+        } else
+            major = GSS_S_UNAVAILABLE;
     }
 #endif /* !NO_PASSWORD */
 
@@ -182,10 +185,13 @@ gss_pname_to_uid(OM_uint32 *minor,
 
     major = GSS_S_UNAVAILABLE;
 
-    if (mech->gss_pname_to_uid != NULL)
+    if (mech->gss_pname_to_uid != NULL) {
         major = mech->gss_pname_to_uid(minor, mechNameP, mech_type, uidp);
+        if (GSS_ERROR(major))
+            map_error(minor, mech);
+    }
 
-    if (major != GSS_S_COMPLETE)
+    if (GSS_ERROR(major))
         major = attr_pname_to_uid(minor, mech, mechNameP, uidp);
 
     if (mechName != GSS_C_NO_NAME)
