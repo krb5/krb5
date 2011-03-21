@@ -1174,7 +1174,11 @@ const char *fileName;
 			modOptions = NULL;
 		}
 
-		snprintf(sharedPath, sizeof(sharedPath), "%s%s", MECH_LIB_PREFIX, sharedLib);
+		if (sharedLib[0] == '/')
+			snprintf(sharedPath, sizeof(sharedPath), "%s", sharedLib);
+		else
+			snprintf(sharedPath, sizeof(sharedPath), "%s%s",
+				 MECH_LIB_PREFIX, sharedLib);
 
 		/*
 		 * are we creating a new mechanism entry or
