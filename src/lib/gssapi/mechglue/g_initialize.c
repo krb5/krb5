@@ -919,10 +919,8 @@ const gss_OID oid;
 
 	if (krb5int_open_plugin(aMech->uLibName, &dl, &errinfo) != 0 ||
 	    errinfo.code != 0) {
-#if 0
-		(void) syslog(LOG_INFO, "libgss dlopen(%s): %s\n",
-				aMech->uLibName, dlerror());
-#endif
+		if (errinfo.msg != NULL)
+			fprintf(stderr, "%s\n", errinfo.msg);
 		(void) k5_mutex_unlock(&g_mechListLock);
 		return ((gss_mechanism)NULL);
 	}
@@ -938,10 +936,8 @@ const gss_OID oid;
 	}
 	if (aMech->mech == NULL) {
 		(void) krb5int_close_plugin(dl);
-#if 0
-		(void) syslog(LOG_INFO, "unable to initialize mechanism"
+		fprintf(stderr, "unable to initialize mechanism"
 				" library [%s]\n", aMech->uLibName);
-#endif
 		(void) k5_mutex_unlock(&g_mechListLock);
 		return ((gss_mechanism)NULL);
 	}
