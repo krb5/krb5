@@ -48,6 +48,9 @@ gss_encapsulate_token(const gss_buffer_t input_token,
 
     tokenSize = g_token_size(token_oid, input_token->length);
 
+    assert(tokenSize > 2);
+    tokenSize -= 2; /* TOK_ID */
+
     output_token->value = malloc(tokenSize);
     if (output_token->value == NULL)
         return GSS_S_FAILURE;
