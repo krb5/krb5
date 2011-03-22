@@ -56,6 +56,7 @@ gss_encapsulate_token(const gss_buffer_t input_token,
 
     g_make_token_header(token_oid, input_token->length, &buf, -1);
     memcpy(buf, input_token->value, input_token->length);
+    output_token->length = tokenSize;
 
     return GSS_S_COMPLETE;
 }

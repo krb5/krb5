@@ -399,7 +399,7 @@ OM_uint32 KRB5_CALLCONV gss_decapsulate_token
     gss_buffer_t        /* output_token */
 );
 
-OM_uint32 KRB5_CALLCONV gss_oid_equal
+int KRB5_CALLCONV gss_oid_equal
 (
     const gss_OID,      /* first_oid */
     const gss_OID       /* second_oid */
