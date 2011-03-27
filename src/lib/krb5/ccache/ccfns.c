@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/krb5/ccache/ccfns.c */
+/* lib/krb5/ccache/ccfns.c - Dispatch methods for credentials cache code.*/
 /*
  * Copyright 2000, 2007, 2008  by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -22,10 +22,6 @@
  * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
- */
-
-/*
- * Dispatch methods for credentials cache code.
  */
 
 #include "k5-int.h"
@@ -226,7 +222,7 @@ build_conf_principals (krb5_context context, krb5_ccache id,
     ret = krb5_build_principal(context, &cred->server,
                                sizeof(conf_realm) - 1, conf_realm,
                                conf_name, name, pname, (char *)NULL);
-    free(pname);
+    krb5_free_unparsed_name(context, pname);
     if (ret) {
         krb5_free_principal(context, client);
         return ret;
@@ -235,16 +231,6 @@ build_conf_principals (krb5_context context, krb5_ccache id,
     krb5_free_principal(context, client);
     return ret;
 }
-
-/*!
- * \param context a Keberos context
- * \param principal principal to check if it a configuration principal
- *
- * \brief Return TRUE (non zero) if the principal is a configuration
- *        principal (generated part of krb5_cc_set_config()). Returns
- *        FALSE (zero) if not a configuration principal.
- *
- */
 
 krb5_boolean KRB5_CALLCONV
 krb5_is_config_principal (krb5_context context,
@@ -265,20 +251,6 @@ krb5_is_config_principal (krb5_context context,
 
     return TRUE;
 }
-
-/*!
- * \param context a Keberos context
- * \param id the credential cache to store the data for
- * \param principal configuration for a specific principal, if
- * NULL, global for the whole cache.
- * \param key name under which the configuraion is stored.
- * \param data data to store
- *
- * \brief Store some configuration for the credential cache in the
- *        cache.  Existing configuration under the same key is
- *        over-written.
- *
- */
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_set_config (krb5_context context, krb5_ccache id,
@@ -309,18 +281,6 @@ out:
     krb5_free_cred_contents(context, &cred);
     return ret;
 }
-
-/*!
- * \param context a Keberos context
- * \param id the credential cache to store the data for
- * \param principal configuration for a specific principal, if
- *        NULL, global for the whole cache.
- * \param key name under which the configuraion is stored.
- * \param data data to fetched, free with krb5_data_free()
- *
- * \brief Get some configuration for the credential cache in the cache.
- */
-
 
 krb5_error_code KRB5_CALLCONV
 krb5_cc_get_config (krb5_context context, krb5_ccache id,

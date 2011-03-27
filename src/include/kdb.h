@@ -756,8 +756,8 @@ krb5_dbe_free_tl_data(krb5_context, krb5_tl_data *);
 
 /*
  * A krb5_context can hold one database object.  Modules should use
- * context->dal_handle->db_context to store state associated with the database
- * object.
+ * krb5_db_set_context and krb5_db_get_context to store state associated with
+ * the database object.
  *
  * Some module functions are mandatory for KDC operation; others are optional
  * or apply only to administrative operations.  If a function is optional, a
