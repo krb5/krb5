@@ -105,7 +105,7 @@ attr_userok(OM_uint32 *minor,
 		if (GSS_ERROR(major))
 			break;
 
-		if (authenticated && complete &&
+		if (authenticated &&
 		    value.length == userLen &&
 		    memcmp(value.value, user, userLen) == 0)
 			*user_ok = 1;
