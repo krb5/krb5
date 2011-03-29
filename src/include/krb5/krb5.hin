@@ -2560,24 +2560,35 @@ krb5_kt_end_seq_get(krb5_context context, krb5_keytab keytab,
  * begin "func-proto.h"
  */
 
-/**
- * @brief Intialize a context structure.
+/** Create and intialize a context structure.
  *
- * @param context           Context structure [input, output]
+ * @param [out] context           Context structure
+ *
+ * The context must be released by calling krb5_free_context() routine when
+ * it is no longer needed.
+ *
+ * @warning Any program or module that needs the Kerberos code to not trust
+ * the environment must use krb5_init_secure_context(),
+ * or clean out the environment.
  *
  * @retval
  * 0 Success
  * @return
  * Kerberos error codes
  */
-
 krb5_error_code KRB5_CALLCONV
 krb5_init_context(krb5_context *context);
 
-/**
- * @brief Initialize a context structure, using only configuration files that are safe for a @c setuid program.
+/** Create and initialize a context structure using only configuration files.
  *
- * @param context           Context structure [input, output]
+ * @param [out] context           Context structure
+ *
+ * Initialize a context structure, using only configuration files that
+ * are safe for a @c setuid program.
+ * All information passed through the environment variables is ignored.
+ *
+ * The context must be released by calling krb5_free_context() routine when
+ * it is no longer needed.
  *
  * @retval
  * 0 Success
@@ -2587,10 +2598,12 @@ krb5_init_context(krb5_context *context);
 krb5_error_code KRB5_CALLCONV
 krb5_init_secure_context(krb5_context *context);
 
-/**
- * @brief Free a context structure.
+/** Free a context structure.
  *
- * @param context           Context structure [input, output]
+ * @param [in] context           Context structure
+ *
+ * This function frees a context that was created by krb5_init_context()
+ * or krb5_init_secure_context().
  *
  * @return
  * None
@@ -2598,13 +2611,13 @@ krb5_init_secure_context(krb5_context *context);
 void KRB5_CALLCONV
 krb5_free_context(krb5_context context);
 
-/**
- * @brief Copy a @c _krb5_context structure.
+/** Copy a @c _krb5_context structure.
  *
- * @param ctx           Context structure [input, output]
- * @param nctx_out
+ * @param [in]  ctx           Context structure
+ * @param [out] nctx_out      New "cloned" context structure
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * The newly created context must be released by calling krb5_free_context()
+ * routine when it is no longer needed.
  *
  * @retval
  * 0 Success
@@ -4051,11 +4064,9 @@ krb5_is_config_principal(krb5_context context, krb5_const_principal principal);
 /* krb5_free.c */
 /** Free a principal structure.
  *
- * @param context           Context structure [input, output]
- * @param val               Pointer to data structure to be freed [input,output]
+ * @param [in] context           Context structure
+ * @param [in] val               Pointer to data structure to be freed
  *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_principal(krb5_context context, krb5_principal val);
@@ -4117,8 +4128,8 @@ krb5_free_error(krb5_context context, register krb5_error *val);
 
 /** Free a credentials structure and invalidate its pointer.
  *
- * @param context           Context structure [input, output]
- * @param val               Pointer to data structure to be freed [input, output]
+ * @param [in] context           Context structure
+ * @param [in] val               Pointer to data structure to be freed
  *
  * @return
  * None
@@ -4128,8 +4139,8 @@ krb5_free_creds(krb5_context context, krb5_creds *val);
 
 /** Zero out the session key and free the credentials structure.
  *
- * @param context           Context structure [input, output]
- * @param val               Pointer to the data structure to be freed [input, output]
+ * @param [in] context           Context structure
+ * @param [in] val               Pointer to the data structure to be freed
  *
  * @note The pointer val is not freed.
  *
@@ -4395,31 +4406,29 @@ krb5_boolean KRB5_CALLCONV
 krb5_sname_match(krb5_context context, krb5_const_principal matching,
                  krb5_const_principal princ);
 
-/**
- * @brief Change the password for an existing Kerberos account.
+/** Change a password for an existing Kerberos account.
  *
- * @param context                 Context structure [input, output]
- * @param creds                   Kerberos credentials [input]
- * @param newpw                   New password [input]
- * @param result_code             A numeric error code [output]
- * @param result_code_string      String equivalent to @a result_code [output]
- * @param result_string           Change password response from the KDC [output]
+ * @param [in]  context                 Context structure
+ * @param [in]  creds                   Kerberos credentials to the kadmin/changepw service
+ * @param [in]  newpw                   New password
+ * @param [out] result_code             A numeric error code
+ * @param [out] result_code_string      (unused) String equivalent to @a result_code
+ * @param [out] result_string           Change password response from the KDC
  *
+ * Change the password for the existing principal identified by @a creds.
+ *
+ * The possible values of the output @a result_code are:
+ *
+ * @li KRB5_KPASSWD_SUCCESS   (0) - success
+ * @li KRB5_KPASSWD_MALFORMED (1) - Malformed request error
+ * @li KRB5_KPASSWD_HARDERROR (2) - Server error
+ * @li KRB5_KPASSWD_AUTHERROR (3) - Authentication error
+ * @li KRB5_KPASSWD_SOFTERROR (4) - Password change rejected
+ *
+ * @sa krb5_chpw_result_code_string()
  *
  * @retval
  * 0  Success
- * @retval
- *  KRB5KRB_AP_ERR_MODIFIED       Message stream modified
- * @retval
- *  KRB5KDC_ERR_BAD_PVNO          Requested protocol version not supported
- * @retval
- *  ENOMEM                        Insufficient memory
- * @retval
- *  SOCKET_ERRNO                  Error on socket
- * @retval
- *  ETIMEDOUT                     Connection timed out
- * @retval
- *  EHOSTUNREACH                  No route to host
  * @return
  * Kerberos error codes
  */
@@ -4442,20 +4451,9 @@ krb5_change_password(krb5_context context, krb5_creds *creds, char *newpw,
  * @note If @a change_password_for is NULL, the change is performed on the current
  * principal. If @a change_password_for is non-null, the change is performed on the
  * principal name passed in @a change_password_for.
+ *
  * @retval
  * 0  Success
- * @retval
- *  INVALID_SOCKET Invalid socket
- * @retval
- *  ECONNREFUSED Connection refused
- *  @retval
- * EHOSTUNREACH Host unreachable
- * @retval
- *  ECONNABORTED Connection aborted
- * @retval
- *  ETIMEDOUT Connection timed out
- * @retval
- *  ENOMEM Insufficient memory
  * @return
  * Kerberos error codes
  */
@@ -4481,18 +4479,6 @@ krb5_set_password(krb5_context context, krb5_creds *creds, char *newpw,
  *
  * @retval
  * 0  Success
- * @retval
- *  INVALID_SOCKET Invalid socket
- * @retval
- *  ECONNREFUSED Connection refused
- * @retval
- *  EHOSTUNREACH Host unreachable
- * @retval
- *  ECONNABORTED Connection aborted
- * @retval
- *  ETIMEDOUT Connection timed out
- * @retval
- *  ENOMEM Insufficient memory
  * @return
  * Kerberos error codes
  */
@@ -6633,61 +6619,78 @@ krb5_prompt_type* KRB5_CALLCONV
 krb5_get_prompt_types(krb5_context context);
 
 /* Error reporting */
+/** Set error message state in a context structure.
+ *
+ * @param [in,out] ctx           Context structure
+ * @param [in]     code          Error code
+ * @param [in]     fmt           Error string for the error code
+ * @param [in]     ...           printf(3) style parameters
+ */
 void KRB5_CALLCONV_C
-krb5_set_error_message(krb5_context, krb5_error_code, const char *, ...)
+krb5_set_error_message(krb5_context ctx, krb5_error_code code, const char *fmt, ...)
 #if !defined(__cplusplus) && (__GNUC__ > 2)
     __attribute__((__format__(__printf__, 3, 4)))
 #endif
     ;
+
+/** Set error message state in a context structure using a precomputed va_list.
+ *
+ * @param [in,out] ctx           Context structure
+ * @param [in]     code          Error code
+ * @param [in]     fmt           Error string for the error code
+ * @param [in]     args          @c va_list of arguments
+ */
 void KRB5_CALLCONV
-krb5_vset_error_message(krb5_context, krb5_error_code, const char *, va_list)
+krb5_vset_error_message(krb5_context  ctx, krb5_error_code code,
+                         const char *fmt, va_list args)
 #if !defined(__cplusplus) && (__GNUC__ > 2)
     __attribute__((__format__(__printf__, 3, 0)))
 #endif
     ;
-void KRB5_CALLCONV
-krb5_copy_error_message (krb5_context dest_ctx, krb5_context src_ctx);
 
-/**
- * @brief Get extended error information.
+/** Set the error message state of dest_ctx to that of src_ctx.
  *
- * @param ctx           Context structure [input, output]
- * @param code          Error code [input, output??]
+ * @param [in] dest_ctx    Context structure where the error message state is copied to
+ * @param [in] src_ctx     Context structure where the error message state is copied from
+ */
+void KRB5_CALLCONV
+krb5_copy_error_message(krb5_context dest_ctx, krb5_context src_ctx);
+
+/** Get error message state specific to the context.
  *
- * The behavior of krb5_get_error_message is only defined the first
+ * @param [in] ctx           Context structure
+ * @param [in] code          Error code
+ *
+ * The behavior of krb5_get_error_message() is only defined the first
  * time it is called after a failed call to a krb5 function using the
  * same context, and only when the error code passed in is the same as
- * that returned by the krb5 function.  Future versions may return the
- * same string for the second and following calls.  This function never
- * returns NULL, so its result may be used unconditionally as a C
- * string.
+ * that returned by the krb5 function.
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * This function never returns NULL, so its result may be used
+ * unconditionally as a C string.
  *
  * The string returned by this function must be freed using
- * krb5_free_error_message.
+ * krb5_free_error_message()
+ *
+ * @note Future versions may return the same string for the second
+ * and following calls.
  */
 const char * KRB5_CALLCONV
 krb5_get_error_message(krb5_context ctx, krb5_error_code code);
 
-/**
- * @brief Free an extended error message generated by krb5_get_error_message().
+/** Free an error message state generated by krb5_get_error_message().
  *
- * @param cxt           Context structure [input, output]
- * @param msg           Pointer to error message [input, output]
- *
- * @return
- * None
+ * @param [in] ctx           Context structure
+ * @param [in] msg           Pointer to error message
  */
 void KRB5_CALLCONV
 krb5_free_error_message(krb5_context cxt, const char *msg);
 
-/**
- * @brief Clear the extended error message state.
+/** Clear the error message state.
  *
- * @param ctx           Context structure [input, output]
- * @return
- * None
+ * @param [in,out] cxt           Context structure
+ *
+ * Similar to krb5_free_error_message() but @a ctx->msg is set to NULL.
  *
  * @todo link to extended message state
  */
