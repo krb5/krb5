@@ -186,13 +186,14 @@ krb5_ldap_get_principal(krb5_context context, krb5_const_principal searchfor,
         result = NULL;
     } /* for (tree=0 ... */
 
+cleanup:
     if (found) {
+        assert(st == 0);
         *entry_ptr = entry;
         entry = NULL;
-    } else
+    } else if (st == 0)
         st = KRB5_KDB_NOENTRY;
 
-cleanup:
     ldap_msgfree(result);
     krb5_ldap_free_principal(context, entry);
 
@@ -1397,4 +1398,17 @@ getstringtime(krb5_timestamp epochtime)
 
     strftime(strtime, 50, "%Y%m%d%H%M%SZ", &tme);
     return strtime;
+}
+
+krb5_boolean
+krb5_ldap_is_kerberos_attr(const char *attr)
+{
+    int i;
+
+    for (i = 0; i < principal_attributes[i] != NULL; i++) {
+        if (strcasecmp(principal_attributes[i], attr) == 0)
+            return TRUE;
+    }
+
+    return FALSE;
 }

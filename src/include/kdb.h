@@ -234,6 +234,7 @@ typedef struct __krb5_key_salt_tuple {
 #define KRB5_TL_LM_KEY                  0x0500 /* LM OWF */
 #define KRB5_TL_X509_SUBJECT_ISSUER_NAME 0x0600 /* <I>IssuerDN<S>SubjectDN */
 #define KRB5_TL_LAST_ADMIN_UNLOCK       0x0700 /* Timestamp of admin unlock */
+#define KRB5_TL_SAML_IDENTITY_BINDING   0x0800 /* SAML identity binding */
 
 /* version number for KRB5_TL_ACTKVNO data */
 #define KRB5_TL_ACTKVNO_VER     1

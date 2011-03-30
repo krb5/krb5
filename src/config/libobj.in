@@ -7,7 +7,9 @@
 # STLIBOBJS	list of .o objects; this must not contain variable
 #		references.
 
-.SUFFIXES: .c .so .po
+.SUFFIXES: .cpp .c .so .po
+.cpp.so:
+	$(CXX) $(PICFLAGS) -DSHARED $(ALL_CXXFLAGS) -c $< -o $*.so.o && $(MV) $*.so.o $*.so
 .c.so:
 	$(CC) $(PICFLAGS) -DSHARED $(ALL_CFLAGS) -c $< -o $*.so.o && $(MV) $*.so.o $*.so
 .c.po:

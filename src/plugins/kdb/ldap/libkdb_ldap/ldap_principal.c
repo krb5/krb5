@@ -90,8 +90,12 @@ krb5_dbe_free_contents(krb5_context context, krb5_db_entry *entry)
     krb5_tl_data        *tl_data=NULL;
     int i, j;
 
-    if (entry->e_data)
-        free(entry->e_data);
+    if (entry->e_data) {
+        krb5_ldap_entry *ldapent = (krb5_ldap_entry *)entry->e_data;
+        assert(entry->e_length == sizeof(*ldapent));
+        ldap_msgfree(ldapent->result);
+        free(ldapent);
+    }
     if (entry->princ)
         krb5_free_principal(context, entry->princ);
     for (tl_data = entry->tl_data; tl_data; tl_data = tl_data_next) {
@@ -209,7 +213,19 @@ krb5_ldap_iterate(krb5_context context, char *match_expr,
                 ldap_value_free(values);
             }
         } /* end of for (ent= ... */
-        ldap_msgfree(result);
+        if (st == 0) {
+            krb5_ldap_entry *ldapent = calloc(1, sizeof(*ldapent));
+            if (ldapent == NULL) {
+                st = ENOMEM;
+                goto cleanup;
+            }
+            ldapent->result = result;
+            ldapent->entry = ent;
+            entry.e_data = (krb5_octet *)ldapent;
+            entry.e_length = sizeof(*ldapent);
+        } else {
+            ldap_msgfree(result);
+        }
     } /* end of for (tree= ... */
 
 cleanup:

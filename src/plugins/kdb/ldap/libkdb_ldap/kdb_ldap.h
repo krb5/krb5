@@ -95,6 +95,8 @@ extern struct timeval timelimit;
     }                                                                   \
     ld = ldap_server_handle->ldap_handle;
 
+#define prepend_err_str krb5int_ldap_prepend_err_str
+
 extern int set_ldap_error (krb5_context ctx, int st, int op);
 extern void prepend_err_str (krb5_context ctx, const char *s, krb5_error_code err, krb5_error_code oerr);
 
@@ -231,6 +233,14 @@ typedef struct _krb5_ldap_context {
     krb5_context                  kcontext;   /* to set the error code and message */
 } krb5_ldap_context;
 
+
+#define KRB5_LDAP_ENTRY_MAGIC      ((krb5_magic)0xcafecafe)
+
+typedef struct _krb5_ldap_entry {
+    krb5_magic magic;
+    LDAPMessage *result;
+    LDAPMessage *entry;
+} krb5_ldap_entry;
 
 typedef struct {
     int           nkey;
