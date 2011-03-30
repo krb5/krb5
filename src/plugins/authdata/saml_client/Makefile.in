@@ -1,0 +1,41 @@
+thisconfigdir=../../..
+myfulldir=plugins/authdata/saml_client
+mydir=plugins/authdata/saml_client
+BUILDTOP=$(REL)..$(S)..$(S)..
+KRB5_RUN_ENV = @KRB5_RUN_ENV@
+KRB5_CONFIG_SETUP = KRB5_CONFIG=$(SRCTOP)/config-files/krb5.conf ; export KRB5_CONFIG ;
+PROG_LIBPATH=-L$(TOPLIBD)
+PROG_RPATH=$(KRB5_LIBDIR)
+MODULE_INSTALL_DIR = $(KRB5_AD_MODULE_DIR)
+DEFS=@DEFS@
+
+LOCALINCLUDES = -I../../../include/krb5
+
+LIBBASE=saml_client
+LIBMAJOR=0
+LIBMINOR=0
+SO_EXT=.so
+SHLIB_EXPDEPS = $(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+	$(TOPLIBD)/libkrb5$(SHLIBEXT)
+SAML_LIBS = -L/usr/local/lib -lsaml -lshibresolver -lshibsp -lxml-security-c -lxmltooling -lxerces-c
+SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(LIBS) $(SAML_LIBS)
+
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+STOBJLISTS=OBJS.ST
+STLIBOBJS= saml_authdata.o ../saml_server/saml_util.o ../saml_server/saml_trust.o
+
+SRCS=	saml_authdata.cpp ../saml_server/saml_util.cpp ../saml_server/saml_trust.cpp
+
+all-unix:: all-liblinks
+install-unix:: install-libs
+clean-unix:: clean-libs clean-libobjs
+
+clean::
+	$(RM) lib$(LIBBASE)$(SO_EXT)
+
+@libnover_frag@
+@libobj_frag@
+
+CC=$(CXX)
+CXXFLAGS=-g
