@@ -39,6 +39,10 @@
 #include "ldap_err.h"
 
 struct timeval timelimit = {300, 0};  /* 5 minutes */
+
+/* all attributes for KRB5_KDB_FLAG_INCLUDE_PAC */
+char     *all_attributes[]       = { "*", "subschemaSubentry", NULL };
+
 char     *principal_attributes[] = { "krbprincipalname",
                                      "krbcanonicalname",
                                      "objectclass",
@@ -213,19 +217,7 @@ krb5_ldap_iterate(krb5_context context, char *match_expr,
                 ldap_value_free(values);
             }
         } /* end of for (ent= ... */
-        if (st == 0) {
-            krb5_ldap_entry *ldapent = calloc(1, sizeof(*ldapent));
-            if (ldapent == NULL) {
-                st = ENOMEM;
-                goto cleanup;
-            }
-            ldapent->result = result;
-            ldapent->entry = ent;
-            entry.e_data = (krb5_octet *)ldapent;
-            entry.e_length = sizeof(*ldapent);
-        } else {
-            ldap_msgfree(result);
-        }
+        ldap_msgfree(result);
     } /* end of for (tree= ... */
 
 cleanup:

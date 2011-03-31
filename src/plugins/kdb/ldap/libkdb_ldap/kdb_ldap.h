@@ -43,7 +43,7 @@
    2.2.19 in Mac OS 10.4.7 seems to be buggy as well.  Version 2.2.24
    doesn't have this problem.  Other in-between versions have not been
    tested.  */
-#ifndef BUILD_WITH_BROKEN_LDAP
+#if 0
 # if defined(LDAP_API_FEATURE_X_OPENLDAP)
 #  if LDAP_VENDOR_VERSION < 20224
 #   error This code triggers bugs in old OpenLDAP implementations.  Please update to 2.2.24 or later.

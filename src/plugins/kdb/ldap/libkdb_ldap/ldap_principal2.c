@@ -42,6 +42,7 @@
 #include "ldap_err.h"
 #include <kadm5/admin.h>
 
+extern char* all_attributes[];
 extern char* principal_attributes[];
 extern char* max_pwd_life_attr[];
 
@@ -133,7 +134,8 @@ krb5_ldap_get_principal(krb5_context context, krb5_const_principal searchfor,
     GET_HANDLE();
     for (tree=0; tree < ntrees && !found; ++tree) {
 
-        LDAP_SEARCH(subtree[tree], ldap_context->lrparams->search_scope, filter, principal_attributes);
+        LDAP_SEARCH(subtree[tree], ldap_context->lrparams->search_scope, filter,
+                     (flags & KRB5_KDB_FLAG_INCLUDE_PAC) ? all_attributes : principal_attributes);
         for (ent=ldap_first_entry(ld, result); ent != NULL && !found; ent=ldap_next_entry(ld, ent)) {
 
             /* get the associated directory user information */
@@ -179,10 +181,26 @@ krb5_ldap_get_principal(krb5_context context, krb5_const_principal searchfor,
                 goto cleanup;
             if ((st = populate_krb5_db_entry(context, ldap_context, ld, ent,
                                              cprinc ? cprinc : searchfor,
-                                             entry)) != 0)
+                                             entry)) == 0)
+                break;
+            else
                 goto cleanup;
         }
-        ldap_msgfree(result);
+        if (found) {
+            krb5_ldap_entry *ldapent = calloc(1, sizeof(*ldapent));
+            if (ldapent == NULL) {
+                st = ENOMEM;
+                goto cleanup;
+            }
+            assert(ent != NULL);
+            ldapent->magic = KRB5_LDAP_ENTRY_MAGIC;
+            ldapent->result = result;
+            ldapent->entry = ent;
+            entry->e_data = (krb5_octet *)ldapent;
+            entry->e_length = sizeof(*ldapent);
+        } else {
+            ldap_msgfree(result);
+        }
         result = NULL;
     } /* for (tree=0 ... */
 
@@ -1405,7 +1423,7 @@ krb5_ldap_is_kerberos_attr(const char *attr)
 {
     int i;
 
-    for (i = 0; i < principal_attributes[i] != NULL; i++) {
+    for (i = 0; principal_attributes[i] != NULL; i++) {
         if (strcasecmp(principal_attributes[i], attr) == 0)
             return TRUE;
     }
