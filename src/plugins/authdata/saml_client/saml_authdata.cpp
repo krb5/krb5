@@ -185,22 +185,12 @@ static void saml_library_fini(void) __attribute__((__destructor__));
 
 static void saml_library_init(void)
 {
-    XMLToolingConfig& xmlconf = XMLToolingConfig::getConfig();
-    if (getenv("SAML_DEBUG"))
-        xmlconf.log_config("DEBUG");
-    else
-        xmlconf.log_config();
-
-    SAMLConfig &config = SAMLConfig::getConfig();
-    config.init();
-
     ShibbolethResolver::init();
 }
 
 static void saml_library_fini(void)
 {
-    SAMLConfig &config = SAMLConfig::getConfig();
-    config.term();
+    ShibbolethResolver::term();
 }
 
 static krb5_error_code
@@ -576,7 +566,7 @@ saml_verify_authdata(krb5_context kcontext,
                            NULL,
                            req->ticket->server,
                            enc_part->times.authtime,
-                           SAML_KRB_VERIFY_SESSION_KEY /*| SAML_KRB_VERIFY_TRUSTENGINE*/,
+                           SAML_KRB_VERIFY_SESSION_KEY | SAML_KRB_VERIFY_TRUSTENGINE,
                            &sc->verified);
     /* Squash KDC error codes */
     switch (code) {
@@ -705,6 +695,7 @@ saml_internalize(krb5_context kcontext,
     if (length != 0) {
         krb5_authdata ad_datum, *ad_data[2];
 
+        ad_datum.ad_type = KRB5_AUTHDATA_SAML;
         ad_datum.contents = bp;
         ad_datum.length = length;
 
@@ -742,6 +733,9 @@ saml_internalize(krb5_context kcontext,
             attr = attrs.next();
         }
         attrs.destroy();
+
+        bp += length;
+        remain -= length;
     }
 
     code = krb5_ser_unpack_int32(&verified, &bp, &remain);
