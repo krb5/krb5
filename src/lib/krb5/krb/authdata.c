@@ -571,7 +571,8 @@ krb5int_authdata_verify(krb5_context kcontext,
         if (module->ftable->import_authdata == NULL)
             continue;
 
-        if (kdc_issued_authdata != NULL) {
+        if (kdc_issued_authdata != NULL &&
+            (module->flags & AD_USAGE_KDC_ISSUED)) {
             code = krb5int_find_authdata(kcontext,
                                          kdc_issued_authdata,
                                          NULL,
@@ -584,9 +585,23 @@ krb5int_authdata_verify(krb5_context kcontext,
         }
 
         if (authdata == NULL) {
+            krb5_boolean ticket_usage = FALSE;
+            krb5_boolean authen_usage = FALSE;
+
+            /*
+             * Determine which authdata sources to interrogate based on the
+             * module's usage. This is important if the authdata is signed
+             * by the KDC with the TGT key (as the user can forge that in
+             * the AP-REQ).
+             */
+            if (module->flags & (AD_USAGE_AS_REQ | AD_USAGE_TGS_REQ))
+                ticket_usage = TRUE;
+            if (module->flags & AD_USAGE_AP_REQ)
+                authen_usage = TRUE;
+
             code = krb5int_find_authdata(kcontext,
-                                         ticket_authdata,
-                                         authen_authdata,
+                                         ticket_usage ? ticket_authdata : NULL,
+                                         authen_usage ? authen_authdata : NULL,
                                          module->ad_type,
                                          &authdata);
             if (code != 0)

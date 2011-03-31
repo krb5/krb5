@@ -78,6 +78,41 @@ import_name_composite(krb5_context context,
     return 0;
 }
 
+static krb5_error_code
+import_name_authdata(krb5_context context,
+                     gss_buffer_t data,
+                     krb5_authdatatype ad_type,
+                     krb5_authdata_context *pad_context)
+{
+    krb5_authdata_context ad_context;
+    krb5_error_code code;
+    krb5_authdata ad_datum;
+    krb5_authdata *ad_data[2];
+
+    code = krb5_authdata_context_init(context, &ad_context);
+    if (code != 0)
+        return code;
+
+    ad_datum.ad_type = ad_type;
+    ad_datum.contents = data->value;
+    ad_datum.length = data->length;
+
+    ad_data[0] = &ad_datum;
+    ad_data[1] = NULL;
+
+    code = krb5_authdata_import_authdata(context,
+                                         ad_context,
+                                         AD_USAGE_MASK,
+                                         ad_data);
+    if (code != 0) {
+        krb5_authdata_context_free(context, ad_context);
+        return code;
+    }
+
+    *pad_context = ad_context;
+    return 0;
+}
+
 /* Split a host-based name "service[@host]" into allocated strings
  * placed in *service_out and *host_out (possibly NULL). */
 static krb5_error_code
@@ -206,6 +241,8 @@ krb5_gss_import_name(minor_status, input_name_buffer,
             g_OID_equal(input_name_type, gss_nt_krb5_name) ||
             g_OID_equal(input_name_type, gss_nt_user_name)) {
             stringrep = (char *) tmp;
+        } else if (g_OID_equal(input_name_type, GSS_C_NT_SAML)) {
+            stringrep = "WELLKNOWN/NULL@WELLKNOWN:SAML";
 #ifndef NO_PASSWORD
         } else if (g_OID_equal(input_name_type, gss_nt_machine_uid_name)) {
             uid = *(uid_t *) input_name_buffer->value;
@@ -295,6 +332,12 @@ krb5_gss_import_name(minor_status, input_name_buffer,
         /* At this point, stringrep is set, or if not, code is. */
         if (stringrep) {
             code = krb5_parse_name(context, (char *)stringrep, &princ);
+            if (code == 0 &&
+                g_OID_equal(input_name_type, GSS_C_NT_SAML)) {
+                princ->type = KRB5_NT_WELLKNOWN;
+                code = import_name_authdata(context, input_name_buffer,
+                                            KRB5_AUTHDATA_SAML, &ad_context);
+            }
             if (code)
                 goto cleanup;
         } else {
@@ -328,3 +371,4 @@ cleanup:
     free(host);
     return status;
 }
+
