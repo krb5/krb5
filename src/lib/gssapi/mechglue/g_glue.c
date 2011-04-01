@@ -302,8 +302,13 @@ gss_name_t	*internal_name;
     if (mech == NULL)
 	return (GSS_S_BAD_MECH);
 
-    if (mech->gss_duplicate_name != NULL &&
-	union_name->mech_name != GSS_C_NO_NAME) {
+    /*
+     * If we are importing a name for the same mechanism, and the
+     * mechanism implements gss_duplicate_name, then use that.
+     */
+    if (union_name->mech_name != GSS_C_NO_NAME &&
+	g_OID_equal(union_name->mech_type, mech_type) &&
+	mech->gss_duplicate_name != NULL) {
 	status = mech->gss_duplicate_name(minor_status,
 					  union_name->mech_name,
 					  internal_name);
