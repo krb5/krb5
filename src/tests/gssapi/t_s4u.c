@@ -223,8 +223,8 @@ enumerateAttributes(OM_uint32 *minor,
 }
 
 static OM_uint32
-testGreetAuthzData(OM_uint32 *minor,
-                   gss_name_t *name)
+testSamlImpersonation(OM_uint32 *minor,
+                      gss_name_t *name)
 {
     OM_uint32 major, tmp_minor;
     gss_buffer_desc attr;
@@ -240,10 +240,16 @@ testGreetAuthzData(OM_uint32 *minor,
         return major;
     }
 
-    attr.value = "greet:greeting";
+    attr.value = "urn:ietf:params:gss-krb5:saml-assertion";
     attr.length = strlen((char *)attr.value);
 
-    value.value = "Hello, acceptor world!";
+    value.value = "<saml:Assertion xmlns:saml=\"urn:oasis:names:tc:SAML:2.0:assertion\" IssueInstant=\"2011-03-19T08:30:00Z\" ID=\"foo\" Version=\"2.0\">"
+        "<saml:Issuer>urn:mace:incommon:osu.edu</saml:Issuer>"
+        "<saml:AttributeStatement>"
+        "<saml:Attribute NameFormat=\"urn:oasis:names:tc:SAML:2.0:attrname-format:uri\" Name=\"urn:oid:1.3.6.1.4.1.5923.1.1.1.6\"><saml:AttributeValue>cantor.2@osu.edu</saml:AttributeValue></saml:Attribute>"
+        "</saml:AttributeStatement>"
+        "</saml:Assertion>";
+
     value.length = strlen((char *)value.value);
 
     major = gss_set_name_attribute(minor,
@@ -495,7 +501,7 @@ int main(int argc, char *argv[])
     printf("Protocol transition tests follow\n");
     printf("-----------------------------------\n\n");
 
-    major = testGreetAuthzData(&minor, &user);
+    major = testSamlImpersonation(&minor, &user);
     if (GSS_ERROR(major))
         goto out;
 
