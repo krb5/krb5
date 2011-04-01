@@ -223,6 +223,9 @@ greet_set_attribute(krb5_context kcontext,
     krb5_data data;
     krb5_error_code code;
 
+    if (!data_eq(*attribute, greet_attr))
+        return ENOENT;
+
     if (greet->greeting.data != NULL)
         return EEXIST;
 

@@ -2268,6 +2268,24 @@ krb5_cc_get_flags(krb5_context context, krb5_ccache cache, krb5_flags *flags);
 const char * KRB5_CALLCONV
 krb5_cc_get_type(krb5_context context, krb5_ccache cache);
 
+/** Move a credential cache.
+ *
+ * @param [in] context       Context structure
+ * @param [in] src           The credential cache to move the content from
+ * @param [in] dst           The credential cache to move the content to
+ *
+ * This function re-initializes @a dst and populates it with the credentials
+ * and default principal of @a src, and then, if successful, destroys @a src.
+ *
+ * krb5_ccache objects are locked internally, so no data corruption
+ * will result if this routine is called on the same credential caches
+ * in multiple threads.
+ *
+ * @retval
+ * 0 Sucess; @a src is freed.
+ * @return
+ * Kerberos error codes; @a src is still allocated, while @a dst is freed.
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_move(krb5_context context, krb5_ccache src, krb5_ccache dst);
 
@@ -2390,27 +2408,31 @@ typedef struct krb5_keytab_entry_st {
 struct _krb5_kt;
 typedef struct _krb5_kt *krb5_keytab;
 
-/**
- * @brief Return the key table prefix string.
+/** Return the type of a key table.
  *
- * @param context           Context structure [input, output]
- * @param keytab            Type of key table structure to be returned [output]
+ * @param [in] context           Context structure
+ * @param [in] keytab            Type of key table handle
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * The possible results might be  "FILE", "MEMORY" etc
  *
+ * @warning The returned value must not be freed by the caller.
+ *
+ * @return
+ * The key table prefix string.
  */
 const char * KRB5_CALLCONV
 krb5_kt_get_type(krb5_context context, krb5_keytab keytab);
 
-/**
- * @brief  Zeroes @a name and copies the key table name (including its prefix).
+/** Get key table name
  *
- * @param context           Context structure. [input/output]
- * @param keytab            Key table handle [input/out]
- * @param name              Key table name [input]
- * @param namelen           Maximum length to fill in name [output]
+ * @param [in]  context           Context structure
+ * @param [in]  keytab            Key table handle
+ * @param [out] name              Key table name
+ * @param [in]  namelen           Maximum length to fill in name
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * Zeroes @a name and then copies the key table name including its prefix and trailing delimeter.
+ *
+ * @sa MAX_KEYTAB_NAME_LEN
  *
  * @retval
  * 0 Success
@@ -2424,57 +2446,60 @@ krb5_error_code KRB5_CALLCONV
 krb5_kt_get_name(krb5_context context, krb5_keytab keytab, char *name,
                  unsigned int namelen);
 
-/**
- * @brief Close a key table, invalidate its handle, and release any other resources acquired during use of the key table.
+/** Close a key table.
  *
- * @param context           Context structure [input, output]
- * @param keytab            Key tablele handle [input, output]
+ * @param [in] context           Context structure
+ * @param [in] keytab            Key table handle
+ *
+ * Close a key table, invalidate its handle, and release any other resources
+ * acquired during use of the key table.
+ * Undo anything done by krb5_kt_resolve().
  *
  * @retval
- * 0 Success
- * @return
- * Kerberos error codes
- * @sa enctype
+ * 0
  */
 krb5_error_code KRB5_CALLCONV
 krb5_kt_close(krb5_context context, krb5_keytab keytab);
 
-/**
- * @brief Retrieve an entry from a key table that matches the @a keytab, @a principal, and @a vno.
+/** Get an entry from a key table.
  *
- * @param context       Context structure [input, output]
- * @param keytab        Key table handle [input, output]
- * @param principal     Principal name [input]
- * @param vno           Key version number [input]
- * @param enctype       Encryption type [input]
- * @param entry         Returned entry from key tablele [output]
+ * @param [in]  context       Context structure
+ * @param [in]  keytab        Key table handle
+ * @param [in]  principal     Principal name
+ * @param [in]  vno           Key version number
+ * @param [in]  enctype       Encryption type. Use zero for any enctype.
+ * @param [out] entry         Returned entry from key tablele
  *
- * @note If @a vno is zero, the function retrieves the first entry that
+ * Retrieve an entry from a key table that matches the @a keytab, @a principal, and @a vno.
+ * The @a entry must be freed with krb5_kt_free_entry() when it is no longer needed.
+ *
+ * @note If @a vno is zero, the function retrieves the highest-numbered-kvno  entry that
  * matches the specified principal.
- *
- *  Make sure to free the allocated memory when it is no longer needed.
  *
  * @retval
  * 0 Success
+ * @retval
+ * Kerberos error codes on failure
  * @return
- * Kerberos error codes
+ * On success retrieves the entry
  */
 krb5_error_code KRB5_CALLCONV
 krb5_kt_get_entry(krb5_context context, krb5_keytab keytab,
                   krb5_const_principal principal, krb5_kvno vno,
                   krb5_enctype enctype, krb5_keytab_entry *entry);
 
-/**
- * @brief Start a sequential retrieve of key table entries.
+/** Start a sequential retrieve of key table entries.
  *
- * @param context           Context structure [input, output]
- * @param keytab            Key table handle [input, output ]
- * @param cursor            Cursor [output]
+ * @param [in]  context           Context structure
+ * @param [in]  keytab            Key table handle
+ * @param [out] cursor            Cursor
  *
  * Prepare to read sequentially every key in the specified key table.
  * @a cursor is incremented for next call to krb5_kt_next_entry().
+ * The function krb5_kt_end_seq_get() should be called to release the cursor.
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * @sa krb5_kt_next_entry(), krb5_kt_end_seq_get()
+ *
  * @retval
  * 0 Success
  * @return
@@ -2484,23 +2509,25 @@ krb5_error_code KRB5_CALLCONV
 krb5_kt_start_seq_get(krb5_context context, krb5_keytab keytab,
                       krb5_kt_cursor *cursor);
 
-/**
- * @brief Retrieve the next entry from the key table.
+/** Retrieve the next entry from the key table.
  *
- * @param context           Context structure [input, output]
- * @param keytab            Key table handle [input, output]
- * @param entry             Returned key table entry [output]
- * @param cursor            Cursor (output]
-
+ * @param [in]  context           Context structure
+ * @param [in]  keytab            Key table handle
+ * @param [out] entry             Returned key table entry
+ * @param [in,out] cursor         The cursor created by krb5_kt_start_seq_get()
+ *                                and updated by successful runs of this routine
+ *
  * Return the next sequential entry in the specified key table and update @a cursor for
  * the next request.
  *
  * If the key table changes during the sequential get, an error is guaranteed.
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * @sa krb5_kt_start_seq_get(), krb5_kt_end_seq_get()
  *
  * @retval
  * 0 Success
+ * @retval
+ * KRB5_KT_END - if the last entry was reached
  * @return
  * Kerberos error codes
  */
@@ -2508,12 +2535,13 @@ krb5_error_code KRB5_CALLCONV
 krb5_kt_next_entry(krb5_context context, krb5_keytab keytab,
                    krb5_keytab_entry *entry, krb5_kt_cursor *cursor);
 
-/**
- * @brief Complete a series of sequential key table entry retrievals and invalidate @a cursor.
+/** Complete a series of sequential key table entry retrievals and invalidate @a cursor.
  *
- * @param context           Context structure [input, output]
- * @param keytab            Key table handle [input, output]
- * @param cursor            Cursor [output]
+ * @param [in]  context           Context structure
+ * @param [in]  keytab            Key table handle
+ * @param [out] cursor            Cursor
+ *
+ * This function should be called to release the cursor created by krb5_kt_start_seq_get()
  *
  * @retval
  * 0 Success
@@ -2532,24 +2560,35 @@ krb5_kt_end_seq_get(krb5_context context, krb5_keytab keytab,
  * begin "func-proto.h"
  */
 
-/**
- * @brief Intialize a context structure.
+/** Create and intialize a context structure.
  *
- * @param context           Context structure [input, output]
+ * @param [out] context           Context structure
+ *
+ * The context must be released by calling krb5_free_context() routine when
+ * it is no longer needed.
+ *
+ * @warning Any program or module that needs the Kerberos code to not trust
+ * the environment must use krb5_init_secure_context(),
+ * or clean out the environment.
  *
  * @retval
  * 0 Success
  * @return
  * Kerberos error codes
  */
-
 krb5_error_code KRB5_CALLCONV
 krb5_init_context(krb5_context *context);
 
-/**
- * @brief Initialize a context structure, using only configuration files that are safe for a @c setuid program.
+/** Create and initialize a context structure using only configuration files.
  *
- * @param context           Context structure [input, output]
+ * @param [out] context           Context structure
+ *
+ * Initialize a context structure, using only configuration files that
+ * are safe for a @c setuid program.
+ * All information passed through the environment variables is ignored.
+ *
+ * The context must be released by calling krb5_free_context() routine when
+ * it is no longer needed.
  *
  * @retval
  * 0 Success
@@ -2559,10 +2598,12 @@ krb5_init_context(krb5_context *context);
 krb5_error_code KRB5_CALLCONV
 krb5_init_secure_context(krb5_context *context);
 
-/**
- * @brief Free a context structure.
+/** Free a context structure.
  *
- * @param context           Context structure [input, output]
+ * @param [in] context           Context structure
+ *
+ * This function frees a context that was created by krb5_init_context()
+ * or krb5_init_secure_context().
  *
  * @return
  * None
@@ -2570,13 +2611,13 @@ krb5_init_secure_context(krb5_context *context);
 void KRB5_CALLCONV
 krb5_free_context(krb5_context context);
 
-/**
- * @brief Copy a @c _krb5_context structure.
+/** Copy a @c _krb5_context structure.
  *
- * @param ctx           Context structure [input, output]
- * @param nctx_out
+ * @param [in]  ctx           Context structure
+ * @param [out] nctx_out      New "cloned" context structure
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * The newly created context must be released by calling krb5_free_context()
+ * routine when it is no longer needed.
  *
  * @retval
  * 0 Success
@@ -3503,13 +3544,13 @@ krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
 
 /** Build a principal name using length-counted strings.
  *
- * @param context  Context structure [input, output]
- * @param princ    Principal name [input]
- * @param rlen     Realm name length [input]
- * @param realm    Realm name [input]
- * @param ...      List of arguments specifying length and content for each argument
+ * @param [in]  context  Context structure
+ * @param [out] princ    Principal name
+ * @param [in]  rlen     Realm name length
+ * @param [in]  realm    Realm name
+ * @param [in]  ...      List of arguments specifying length and content for each argument
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * Call krb5_free_principal() to free allocated memory for principal when it is no longer needed.
  *
  * @note krb5_build_principal() and krb5_build_principal_va() perform the same task.
  * krb5_build_principal() takes variadic arguments.
@@ -3533,13 +3574,13 @@ krb5_build_principal_ext(krb5_context context,  krb5_principal * princ,
 
 /** Build a principal name using null-terminated strings.
  *
- * @param context           Context structure [input, output]
- * @param princ              Principal name [output]
- * @param rlen              Realm name length [input]
- * @param realm             Realm name [input]
- * @param ...                 List of len1, sl1, len2, sl2...[input]
+ * @param [in]  context           Context structure
+ * @param [out] princ             Principal name
+ * @param [in]  rlen              Realm name length
+ * @param [in]  realm             Realm name
+ * @param [in]  ...               List of len1, sl1, len2, sl2...
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * Call krb5_free_principal() to free allocated memory for principal when it is no longer needed.
  *
  * @note krb5_build_principal() and krb5_build_principal_va() perform the same task.
  * krb5_build_principal() takes variadic arguments.
@@ -3568,17 +3609,17 @@ krb5_build_principal(krb5_context context,
 #if KRB5_DEPRECATED
 /** Build a principal name, using a precomputed @c va_list.
  *
- * @param context           Context structure [input, output]
- * @param princ             Principal structure [output]
- * @param rlen              Realm name length [input]
- * @param realm             Realm name [input]
- * @param ...               @c va_list of arguments [input]
+ * @param [in]  context           Context structure
+ * @param [out] princ             Principal structure
+ * @param [in]  rlen              Realm name length
+ * @param [in]  realm             Realm name
+ * @param [in]  ap                @c va_list of argument
  *
  * @note krb5_build_principal() and krb5_build_principal_va() perform the same task.
  * krb5_build_principal() takes variadic arguments.
  * krb5_build_principal_va() takes a pre-computed @a varargs pointer.
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * Call krb5_free_principal() to free allocated memory for principal when it is no longer needed.
  *
  * @retval
  * 0  Success
@@ -3595,11 +3636,11 @@ krb5_build_principal_va(krb5_context context,
 
 /** Build a principal name, using a precomputed variable argument list
  *
- * @param context           Context structure [input, output]
- * @param princ             Principal structure. Locally allocated. [output]
- * @param rlen              Realm name length [input]
- * @param realm             Realm name [input]
- * @param ap                @c va_list of arguments [input]
+ * @param [in]  context           Context structure
+ * @param [out] princ             Principal structure. Locally allocated.
+ * @param [in]  rlen              Realm name length
+ * @param [in]  realm             Realm name
+ * @param [in]  ap                @c va_list of arguments
  *
  * Similar to krb5_build_principal() this function builds a principal name,
  * but its name components are specified as va_list.
@@ -3695,19 +3736,25 @@ krb5_524_convert_creds(krb5_context context, krb5_creds *v5creds,
 #endif
 
 /* libkt.spec */
-/**
- * @brief Get a handle for a key table.
+
+/** Get a handle for a key table.
  *
- * @param context           Context structure [input, output]
- * @param name              Name of the key table [input]
- * @param ktid              Key table handle [output]
+ * @param [in]  context           Context structure
+ * @param [in]  name              Name of the key table
+ * @param [out] ktid              Key table handle
  *
- * Fill in a handle identifying the key table with the name @a string_name.
+ * Resolve the key table name @a name and fill in a handle identifying the key table.
  * The key table is not opened.
- * @note @a string_name must be of the form @c type:residual and @a type must be a type known to
- * the library.
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * @note @a name must be of the form @c type:residual, where @a type must be a type known
+ * to the library and @a residual portion should be specific to the particular keytab type.
+ *
+ * @sa krb5_kt_close()
+ *
+ * @code
+ *  Example: krb5_kt_resolve(context, "FILE:/tmp/filename",&ktid);
+ * @endcode
+ *
  * @retval
  * 0  Success
  * @return
@@ -3716,16 +3763,19 @@ krb5_524_convert_creds(krb5_context context, krb5_creds *v5creds,
 krb5_error_code KRB5_CALLCONV
 krb5_kt_resolve(krb5_context context, const char *name, krb5_keytab *ktid);
 
-/**
- * @brief Get default key table name.
+/** Get default key table name.
  *
- * @param context           Context structure [input, output]
- * @param name              Key table name to be resolved [input, output]
- * @param name_size         Size of @a name to return [input]
+ * @param [in]     context           Context structure
+ * @param [in,out] name              Key table name to be resolved
+ * @param [in]     name_size         Size of @a name to return
  *
- * Fill @a name with the first @a name_size bytes of the name of the default key table.
+ * Fill @a name with the first @a name_size bytes of the name of the
+ * default key table for the current user. The name is obtained either
+ * from the environment variable KRB5_KTNAME or from @a default_keytab_name
+ * entry in @a libdefaults section of krb5 configuration file or
+ * falls back on the default keytab name for the OS.
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * @sa MAX_KEYTAB_NAME_LEN
  *
  * @retval
  * 0 Success
@@ -3737,11 +3787,12 @@ krb5_kt_resolve(krb5_context context, const char *name, krb5_keytab *ktid);
 krb5_error_code KRB5_CALLCONV
 krb5_kt_default_name(krb5_context context, char *name, int name_size);
 
-/**
- * @brief Fill @a keytab with the default key table's @a handle.
+/** Resolve default key table.
  *
- * @param context           Context structure [input, output]
- * @param id                Key table handle [input, output]
+ * @param [in]  context           Context structure
+ * @param [in,out] id             Key table handle
+ *
+ * Fill @a keytab with the default key table's @a handle.
  *
  * @retval
  * 0  Success
@@ -3832,18 +3883,22 @@ krb5_principal2salt(krb5_context context,
 
 /* libcc.spec */
 
-/**
- * @brief Resolve a credentials cache name.
+/** Resolve a credentials cache name.
  *
- * @param context          Context structure [input, output]
- * @param name             Credentials cache name to be resolved [input]
- * @param cache            Credentials cache handle [output]
+ * @param [in]  context          Context structure
+ * @param [in]  name             Credentials cache name to be resolved
+ * @param [out] cache            Credentials cache handle
  *
- * Fills in @a ccache with a @a cache handle that corresponds to the name in @a name.
- * @a name must be of the form @c type=residual and @a type must be a type known to the library.
+ * Fills in @a cache with a @a cache handle that corresponds to the name in @a name.
+ * @a name should be of the form @c type:residual,
+ * and @a type must be a type known to the library.
+ * If the @a name does not contain a colon, interpret it as a file name.
  *
- * @li Typically, the type specifier prefix is followed by a colon, not an equal sign.
  * @li When necessary to accommodate file naming differences in @a OpenVMS, the type specifier prefix can be followed by an equal sign, not a colon.
+ *
+ * @code
+ * Example: krb5_cc_resolve(context, "MEMORY:C_", &cache);
+ * @endcode
  *
  * @retval
  * 0  Success
@@ -3853,22 +3908,27 @@ krb5_principal2salt(krb5_context context,
 krb5_error_code KRB5_CALLCONV
 krb5_cc_resolve(krb5_context context, const char *name, krb5_ccache *cache);
 
-/**
+/** Duplicate ccache handle.
+ *
+ * @param [in]  context          Context structure
+ * @param [in]  in               Credentials cache handle to be duplicated
+ * @param [out] out              Credentials cache handle
+ *
  * Create a new handle referring to the same cache as @a in.
  * The new handle and @a in can be closed independently.
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_dup(krb5_context context, krb5_ccache in, krb5_ccache *out);
 
-/**
- * @brief Return the name of the default credentials cache.
+/** Return the name of the default credentials cache.
  *
- * @param context       Context structure [input, output]
+ * @param [in] context       Context structure
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * Try the environment variable KRB5CCNAME first then, if it is not set,
+ * fall back on the default ccache name for the OS.
  *
  * @return
- * Name of default credentials cache
+ * Name of default credentials cache for the current user.
  */
 const char *KRB5_CALLCONV
 krb5_cc_default_name(krb5_context context);
@@ -3894,28 +3954,25 @@ krb5_cc_default_name(krb5_context context);
  *  0  Success
  * @retval
  *  KV5M_CONTEXT          Bad magic number for @c _krb5_context structure
- * @retval
- *  ENOMEM                Insufficient memory
  * @return
  * Kerberos error codes
- *
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_set_default_name(krb5_context context, const char *name);
 
-/**
- * @brief Resolve the default crendentials cache name.
+/** Resolve the default crendentials cache name.
  *
- * @param context           Context structure [input, output]
- * @param ccache            Pointer to credentials cache name [output]
+ * @param [in,out] context          Context structure
+ * @param [out]    ccache            Pointer to credentials cache name
  *
  * @retval
  * 0  Success
  * @retval
- * KV5M_CONTEXT      Bad magic number for @c _krb5_context structure
+ * KV5M_CONTEXT            Bad magic number for @c _krb5_context structure
+ * @retval
+ * KRB5_FCC_INTERNAL       The name of the default credentials cache cannot be obtained
  * @return
  * Kerberos error codes
- *
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_default(krb5_context context, krb5_ccache *ccache);
@@ -3967,20 +4024,13 @@ krb5_cc_get_config(krb5_context context, krb5_ccache id,
 
 /** Store some configuration for the credential cache in the cache.
  *
- * @param context         a Keberos context [input,output]
- * @param id              the credential cache to store the data for. [input]
- * @param principal       configuration for a specific principal; if NULL, global for the whole cache.[input]
- * @param key             name under which the configuraion is stored.[input]
- * @param data            data to store. [input]
+ * @param [in,out] context         a Keberos context
+ * @param [in]     id              the credential cache to store the data for.
+ * @param [in]     principal       configuration for a specific principal; if NULL, global for the whole cache.
+ * @param [in]     key             name under which the configuraion is stored.
+ * @param [in]     data            data to store. If NULL, old configuration is removed.
  *
  * @note Existing configuration under the same key is over-written.
- *
- * @code
- * Example:
- *   config_data.data = "yes";
- *   config_data.length = strlen(config_data.data);
- *   krb5_cc_set_config(context, id, principal,key, &config_data);
- * @endcode
  *
  * @retval
  * 0  Success
@@ -4007,11 +4057,9 @@ krb5_is_config_principal(krb5_context context, krb5_const_principal principal);
 /* krb5_free.c */
 /** Free a principal structure.
  *
- * @param context           Context structure [input, output]
- * @param val               Pointer to data structure to be freed [input,output]
+ * @param [in] context           Context structure
+ * @param [in] val               Pointer to data structure to be freed
  *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_principal(krb5_context context, krb5_principal val);
@@ -4073,8 +4121,8 @@ krb5_free_error(krb5_context context, register krb5_error *val);
 
 /** Free a credentials structure and invalidate its pointer.
  *
- * @param context           Context structure [input, output]
- * @param val               Pointer to data structure to be freed [input, output]
+ * @param [in] context           Context structure
+ * @param [in] val               Pointer to data structure to be freed
  *
  * @return
  * None
@@ -4084,8 +4132,8 @@ krb5_free_creds(krb5_context context, krb5_creds *val);
 
 /** Zero out the session key and free the credentials structure.
  *
- * @param context           Context structure [input, output]
- * @param val               Pointer to the data structure to be freed [input, output]
+ * @param [in] context           Context structure
+ * @param [in] val               Pointer to the data structure to be freed
  *
  * @note The pointer val is not freed.
  *
@@ -4351,31 +4399,29 @@ krb5_boolean KRB5_CALLCONV
 krb5_sname_match(krb5_context context, krb5_const_principal matching,
                  krb5_const_principal princ);
 
-/**
- * @brief Change the password for an existing Kerberos account.
+/** Change a password for an existing Kerberos account.
  *
- * @param context                 Context structure [input, output]
- * @param creds                   Kerberos credentials [input]
- * @param newpw                   New password [input]
- * @param result_code             A numeric error code [output]
- * @param result_code_string      String equivalent to @a result_code [output]
- * @param result_string           Change password response from the KDC [output]
+ * @param [in]  context                 Context structure
+ * @param [in]  creds                   Kerberos credentials to the kadmin/changepw service
+ * @param [in]  newpw                   New password
+ * @param [out] result_code             A numeric error code
+ * @param [out] result_code_string      (unused) String equivalent to @a result_code
+ * @param [out] result_string           Change password response from the KDC
  *
+ * Change the password for the existing principal identified by @a creds.
+ *
+ * The possible values of the output @a result_code are:
+ *
+ * @li KRB5_KPASSWD_SUCCESS   (0) - success
+ * @li KRB5_KPASSWD_MALFORMED (1) - Malformed request error
+ * @li KRB5_KPASSWD_HARDERROR (2) - Server error
+ * @li KRB5_KPASSWD_AUTHERROR (3) - Authentication error
+ * @li KRB5_KPASSWD_SOFTERROR (4) - Password change rejected
+ *
+ * @sa krb5_chpw_result_code_string()
  *
  * @retval
  * 0  Success
- * @retval
- *  KRB5KRB_AP_ERR_MODIFIED       Message stream modified
- * @retval
- *  KRB5KDC_ERR_BAD_PVNO          Requested protocol version not supported
- * @retval
- *  ENOMEM                        Insufficient memory
- * @retval
- *  SOCKET_ERRNO                  Error on socket
- * @retval
- *  ETIMEDOUT                     Connection timed out
- * @retval
- *  EHOSTUNREACH                  No route to host
  * @return
  * Kerberos error codes
  */
@@ -4398,20 +4444,9 @@ krb5_change_password(krb5_context context, krb5_creds *creds, char *newpw,
  * @note If @a change_password_for is NULL, the change is performed on the current
  * principal. If @a change_password_for is non-null, the change is performed on the
  * principal name passed in @a change_password_for.
+ *
  * @retval
  * 0  Success
- * @retval
- *  INVALID_SOCKET Invalid socket
- * @retval
- *  ECONNREFUSED Connection refused
- *  @retval
- * EHOSTUNREACH Host unreachable
- * @retval
- *  ECONNABORTED Connection aborted
- * @retval
- *  ETIMEDOUT Connection timed out
- * @retval
- *  ENOMEM Insufficient memory
  * @return
  * Kerberos error codes
  */
@@ -4437,18 +4472,6 @@ krb5_set_password(krb5_context context, krb5_creds *creds, char *newpw,
  *
  * @retval
  * 0  Success
- * @retval
- *  INVALID_SOCKET Invalid socket
- * @retval
- *  ECONNREFUSED Connection refused
- * @retval
- *  EHOSTUNREACH Host unreachable
- * @retval
- *  ECONNABORTED Connection aborted
- * @retval
- *  ETIMEDOUT Connection timed out
- * @retval
- *  ENOMEM Insufficient memory
  * @return
  * Kerberos error codes
  */
@@ -4472,7 +4495,7 @@ krb5_set_password_using_ccache(krb5_context context, krb5_ccache ccache,
  * Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
-krb5_get_profile(krb5_context, struct _profile_t * /* profile_t */ *);
+krb5_get_profile(krb5_context context, struct _profile_t * /* profile_t */ *);
 
 #if KRB5_DEPRECATED
 /**   @deprecated Replaced by krb5_get_init_creds_password() */
@@ -6589,61 +6612,78 @@ krb5_prompt_type* KRB5_CALLCONV
 krb5_get_prompt_types(krb5_context context);
 
 /* Error reporting */
+/** Set error message state in a context structure.
+ *
+ * @param [in,out] ctx           Context structure
+ * @param [in]     code          Error code
+ * @param [in]     fmt           Error string for the error code
+ * @param [in]     ...           printf(3) style parameters
+ */
 void KRB5_CALLCONV_C
-krb5_set_error_message(krb5_context, krb5_error_code, const char *, ...)
+krb5_set_error_message(krb5_context ctx, krb5_error_code code, const char *fmt, ...)
 #if !defined(__cplusplus) && (__GNUC__ > 2)
     __attribute__((__format__(__printf__, 3, 4)))
 #endif
     ;
+
+/** Set error message state in a context structure using a precomputed va_list.
+ *
+ * @param [in,out] ctx           Context structure
+ * @param [in]     code          Error code
+ * @param [in]     fmt           Error string for the error code
+ * @param [in]     args          @c va_list of arguments
+ */
 void KRB5_CALLCONV
-krb5_vset_error_message(krb5_context, krb5_error_code, const char *, va_list)
+krb5_vset_error_message(krb5_context  ctx, krb5_error_code code,
+                         const char *fmt, va_list args)
 #if !defined(__cplusplus) && (__GNUC__ > 2)
     __attribute__((__format__(__printf__, 3, 0)))
 #endif
     ;
-void KRB5_CALLCONV
-krb5_copy_error_message (krb5_context dest_ctx, krb5_context src_ctx);
 
-/**
- * @brief Get extended error information.
+/** Set the error message state of dest_ctx to that of src_ctx.
  *
- * @param ctx           Context structure [input, output]
- * @param code          Error code [input, output??]
+ * @param [in] dest_ctx    Context structure where the error message state is copied to
+ * @param [in] src_ctx     Context structure where the error message state is copied from
+ */
+void KRB5_CALLCONV
+krb5_copy_error_message(krb5_context dest_ctx, krb5_context src_ctx);
+
+/** Get error message state specific to the context.
  *
- * The behavior of krb5_get_error_message is only defined the first
+ * @param [in] ctx           Context structure
+ * @param [in] code          Error code
+ *
+ * The behavior of krb5_get_error_message() is only defined the first
  * time it is called after a failed call to a krb5 function using the
  * same context, and only when the error code passed in is the same as
- * that returned by the krb5 function.  Future versions may return the
- * same string for the second and following calls.  This function never
- * returns NULL, so its result may be used unconditionally as a C
- * string.
+ * that returned by the krb5 function.
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * This function never returns NULL, so its result may be used
+ * unconditionally as a C string.
  *
  * The string returned by this function must be freed using
- * krb5_free_error_message.
+ * krb5_free_error_message()
+ *
+ * @note Future versions may return the same string for the second
+ * and following calls.
  */
 const char * KRB5_CALLCONV
 krb5_get_error_message(krb5_context ctx, krb5_error_code code);
 
-/**
- * @brief Free an extended error message generated by krb5_get_error_message().
+/** Free an error message state generated by krb5_get_error_message().
  *
- * @param cxt           Context structure [input, output]
- * @param msg           Pointer to error message [input, output]
- *
- * @return
- * None
+ * @param [in] ctx           Context structure
+ * @param [in] msg           Pointer to error message
  */
 void KRB5_CALLCONV
 krb5_free_error_message(krb5_context cxt, const char *msg);
 
-/**
- * @brief Clear the extended error message state.
+/** Clear the error message state.
  *
- * @param ctx           Context structure [input, output]
- * @return
- * None
+ * @param [in,out] cxt           Context structure
+ *
+ * Similar to krb5_free_error_message() but @a ctx->msg is set to NULL.
  *
  * @todo link to extended message state
  */

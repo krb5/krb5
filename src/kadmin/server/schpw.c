@@ -330,15 +330,16 @@ process_chpw_request(context, server_handle, realm, keytab,
     case KADM5_PASS_REUSE:
     case KADM5_PASS_Q_CLASS:
     case KADM5_PASS_Q_DICT:
+    case KADM5_PASS_Q_GENERIC:
     case KADM5_PASS_TOOSOON:
-        numresult = KRB5_KPASSWD_HARDERROR;
+        numresult = KRB5_KPASSWD_SOFTERROR;
         break;
     case 0:
         numresult = KRB5_KPASSWD_SUCCESS;
         strlcpy(strresult, "", sizeof(strresult));
         break;
     default:
-        numresult = KRB5_KPASSWD_SOFTERROR;
+        numresult = KRB5_KPASSWD_HARDERROR;
         break;
     }
 
