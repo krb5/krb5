@@ -57,6 +57,8 @@ struct saml_context {
     krb5_boolean verified;
 };
 
+#define SC_RESOLVED(sc) ((sc)->attributes.size() != 0)
+
 extern "C" {
 static krb5_error_code
 saml_init(krb5_context kcontext, void **plugin_context);
@@ -181,6 +183,9 @@ saml_copy(krb5_context kcontext,
 
 static void saml_library_init(void) __attribute__((__constructor__));
 static void saml_library_fini(void) __attribute__((__destructor__));
+
+static krb5_boolean
+saml_is_assertion_attr(const krb5_data *attr);
 }
 
 static void saml_library_init(void)
@@ -211,6 +216,19 @@ saml_flags(krb5_context kcontext,
 static void
 saml_fini(krb5_context kcontext, void *plugin_context)
 {
+}
+
+static const krb5_data
+saml_assertion_attr = {
+    KV5M_DATA,
+    sizeof("urn:ietf:params:gss-krb5:saml-assertion") - 1,
+    (char *)"urn:ietf:params:gss-krb5:saml-assertion"
+};
+
+static krb5_boolean
+saml_is_assertion_attr(const krb5_data *attr)
+{
+    return data_eq(*attr, saml_assertion_attr);
 }
 
 static shibsp::Attribute *
@@ -340,9 +358,15 @@ saml_get_attribute_types(krb5_context kcontext,
     krb5_data *attrs;
 
     attrs = (krb5_data *)k5alloc(
-        (sc->attributes.size() + 1) * sizeof(krb5_data), &code);
+        (1 + sc->attributes.size() + 1) * sizeof(krb5_data), &code);
     if (code != 0)
         return code;
+
+    code = krb5int_copy_data_contents_add0(kcontext, &saml_assertion_attr, &attrs[i++]);
+    if (code != 0) {
+        free(attrs);
+        return code;
+    }
 
     for (vector<shibsp::Attribute*>::const_iterator a = sc->attributes.begin();
         a != sc->attributes.end();
@@ -413,18 +437,32 @@ saml_get_attribute(krb5_context kcontext,
 
     *more = 0;
 
-    attr = saml_get_attribute_object(kcontext, sc, attribute);
-    if (attr == NULL)
-        return ENOENT;
+    if (saml_is_assertion_attr(attribute)) {
+        string buf;
 
-    nvalues = attr->valueCount();
-    if (i == -1)
-        i = 0;
-    else if (i >= nvalues)
-        return ENOENT;
+        try {
+            XMLHelper::serialize(sc->assertion->marshall((DOMDocument *)NULL), buf);
+            data.length = buf.length();
+            data.data = (char *)buf.c_str();
+            nvalues = 1;
+            code = 0;
+        } catch (exception &e) {
+           return ASN1_PARSE_ERROR;
+        }
+    } else {
+        attr = saml_get_attribute_object(kcontext, sc, attribute);
+        if (attr == NULL)
+            return ENOENT;
 
-    data.data = (char *)attr->getSerializedValues()[*more].c_str();
-    data.length = strlen(data.data);
+        nvalues = attr->valueCount();
+        if (i == -1)
+            i = 0;
+        else if (i >= nvalues)
+            return ENOENT;
+
+        data.data = (char *)attr->getSerializedValues()[*more].c_str();
+        data.length = strlen(data.data);
+    }
 
     if (data.length != 0) {
         if (value != NULL) {
@@ -484,16 +522,37 @@ saml_set_attribute(krb5_context kcontext,
                    const krb5_data *value)
 {
     struct saml_context *sc = (struct saml_context *)request_context;
-    string attrStr(attribute->data, attribute->length);
-    vector <string> ids(1, attrStr);
-    shibsp::SimpleAttribute *attr = new SimpleAttribute(ids);
+    krb5_error_code code;
 
-    if (value->length != 0) {
-        string valueStr(value->data, value->length);
-        attr->getValues().push_back(valueStr);
+    if (saml_is_assertion_attr(attribute)) {
+        saml2::Assertion *assertion;
+        krb5_authdata ad;
+
+        if (SC_RESOLVED(sc))
+            return EINVAL;
+
+        ad.length = value->length;
+        ad.contents = (krb5_octet *)value->data;
+
+        code = saml_krb_decode_assertion(kcontext, &ad, &assertion);
+        if (code != 0)
+            return code;
+
+        delete sc->assertion;
+        sc->assertion = assertion;
+    } else {
+        string attrStr(attribute->data, attribute->length);
+        vector <string> ids(1, attrStr);
+        shibsp::SimpleAttribute *attr = new SimpleAttribute(ids);
+
+        if (value->length != 0) {
+            string valueStr(value->data, value->length);
+            attr->getValues().push_back(valueStr);
+        }
+
+        sc->attributes.push_back(attr);
     }
 
-    sc->attributes.push_back(attr);
     sc->verified = FALSE;
 
     return 0;
@@ -509,9 +568,17 @@ saml_delete_attribute(krb5_context kcontext,
     struct saml_context *sc = (struct saml_context *)request_context;
     int i;
 
-    i = saml_get_attribute_index(kcontext, sc, attribute);
-    if (i >= 0)
-        sc->attributes.erase(sc->attributes.begin() + i);
+    if (saml_is_assertion_attr(attribute)) {
+        if (SC_RESOLVED(sc))
+            return EINVAL;
+
+        delete sc->assertion;
+        sc->assertion = NULL;
+    } else {
+        i = saml_get_attribute_index(kcontext, sc, attribute);
+        if (i >= 0)
+            sc->attributes.erase(sc->attributes.begin() + i);
+    }
 
     sc->verified = FALSE;
 
@@ -766,7 +833,7 @@ saml_copy(krb5_context kcontext,
     if (src->assertion != NULL)
         dst->assertion = (saml2::Assertion *)((void *)src->assertion->clone());
 
-    if (src->attributes.size())
+    if (SC_RESOLVED(src))
         dst->attributes = saml_copy_attributes(src->attributes);
 
     dst->verified = src->verified;
