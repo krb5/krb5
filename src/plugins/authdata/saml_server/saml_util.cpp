@@ -611,13 +611,13 @@ saml_krb_verify(krb5_context context,
     if (assertion == NULL)
         return EINVAL;
 
-    subject = assertion->getSubject();
-    if (subject == NULL)
-        return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
-
     signature = assertion->getSignature();
     if (signature == NULL)
         return 0;
+
+    subject = assertion->getSubject();
+    if (subject == NULL)
+        return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
 
     /*
      * Verify any signatures present on the assertion.
