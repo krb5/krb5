@@ -358,14 +358,17 @@ saml_get_attribute_types(krb5_context kcontext,
     krb5_data *attrs;
 
     attrs = (krb5_data *)k5alloc(
-        (1 + sc->attributes.size() + 1) * sizeof(krb5_data), &code);
+        (sc->assertion != NULL ? 1 : 0 +
+         sc->attributes.size() + 1) * sizeof(krb5_data), &code);
     if (code != 0)
         return code;
 
-    code = krb5int_copy_data_contents_add0(kcontext, &saml_assertion_attr, &attrs[i++]);
-    if (code != 0) {
-        free(attrs);
-        return code;
+    if (sc->assertion != NULL) {
+        code = krb5int_copy_data_contents_add0(kcontext, &saml_assertion_attr, &attrs[i++]);
+        if (code != 0) {
+            free(attrs);
+            return code;
+        }
     }
 
     for (vector<shibsp::Attribute*>::const_iterator a = sc->attributes.begin();
@@ -439,6 +442,9 @@ saml_get_attribute(krb5_context kcontext,
 
     if (saml_is_assertion_attr(attribute)) {
         string buf;
+
+        if (sc->assertion == NULL)
+            return ENOENT;
 
         try {
             XMLHelper::serialize(sc->assertion->marshall((DOMDocument *)NULL), buf);
@@ -526,15 +532,16 @@ saml_set_attribute(krb5_context kcontext,
 
     if (saml_is_assertion_attr(attribute)) {
         saml2::Assertion *assertion;
-        krb5_authdata ad;
+        krb5_authdata ad_datum;
 
         if (SC_RESOLVED(sc))
             return EINVAL;
 
-        ad.length = value->length;
-        ad.contents = (krb5_octet *)value->data;
+        ad_datum.ad_type = KRB5_AUTHDATA_SAML;
+        ad_datum.length = value->length;
+        ad_datum.contents = (krb5_octet *)value->data;
 
-        code = saml_krb_decode_assertion(kcontext, &ad, &assertion);
+        code = saml_krb_decode_assertion(kcontext, &ad_datum, &assertion);
         if (code != 0)
             return code;
 
