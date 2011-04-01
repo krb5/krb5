@@ -70,6 +70,10 @@
 static OM_uint32
 enumerateAttributes(OM_uint32 *minor, gss_name_t name, int noisy);
 
+static OM_uint32
+kerberosProtocolTransition(OM_uint32 *minor,
+                           gss_name_t authenticatedInitiator);
+
 static void
 usage()
 {
@@ -161,7 +165,7 @@ server_acquire_creds(char *service_name, gss_cred_id_t *server_creds)
  * message is displayed and -1 is returned.
  */
 static int
-server_establish_context(int s, gss_cred_id_t server_creds,
+server_establish_context(int s, gss_cred_id_t server_creds, int s4u,
                          gss_ctx_id_t *context, gss_buffer_t client_name,
                          OM_uint32 *ret_flags)
 {
@@ -267,6 +271,8 @@ server_establish_context(int s, gss_cred_id_t server_creds,
             return -1;
         }
         enumerateAttributes(&min_stat, client, TRUE);
+        if (s4u)
+            kerberosProtocolTransition(&min_stat, client);
         maj_stat = gss_release_name(&min_stat, &client);
         if (maj_stat != GSS_S_COMPLETE) {
             display_status("releasing name", maj_stat, min_stat);
@@ -410,7 +416,7 @@ test_import_export_context(gss_ctx_id_t *context)
  * If any error occurs, -1 is returned.
  */
 static int
-sign_server(int s, gss_cred_id_t server_creds, int export)
+sign_server(int s, gss_cred_id_t server_creds, int export, int s4u)
 {
     gss_buffer_desc client_name, xmit_buf, msg_buf;
     gss_ctx_id_t context;
@@ -421,7 +427,7 @@ sign_server(int s, gss_cred_id_t server_creds, int export)
     int     token_flags;
 
     /* Establish a context with the client */
-    if (server_establish_context(s, server_creds, &context,
+    if (server_establish_context(s, server_creds, s4u, &context,
                                  &client_name, &ret_flags) < 0)
         return (-1);
 
@@ -619,6 +625,7 @@ struct _work_plan
     int     s;
     gss_cred_id_t server_creds;
     int     export;
+    int     s4u;
 };
 
 static void
@@ -629,7 +636,7 @@ worker_bee(void *param)
     /* this return value is not checked, because there's
      * not really anything to do if it fails
      */
-    sign_server(work->s, work->server_creds, work->export);
+    sign_server(work->s, work->server_creds, work->export, work->s4u);
     closesocket(work->s);
     free(work);
 
@@ -649,6 +656,7 @@ main(int argc, char **argv)
     int     once = 0;
     int     do_inetd = 0;
     int     export = 0;
+    int     s4u = 0;
 
     logfile = stdout;
     display_file = stdout;
@@ -679,6 +687,8 @@ main(int argc, char **argv)
             do_inetd = 1;
         } else if (strcmp(*argv, "-export") == 0) {
             export = 1;
+        } else if (strcmp(*argv, "-s4u") == 0) {
+            s4u = 1;
         } else if (strcmp(*argv, "-logfile") == 0) {
             argc--;
             argv++;
@@ -740,7 +750,7 @@ main(int argc, char **argv)
         close(1);
         close(2);
 
-        sign_server(0, server_creds, export);
+        sign_server(0, server_creds, export, s4u);
         close(0);
     } else {
         int     stmp;
@@ -875,4 +885,289 @@ enumerateAttributes(OM_uint32 *minor,
     gss_release_buffer_set(&tmp, &attrs);
 
     return major;
+}
+
+static OM_uint32
+displayCanonName(OM_uint32 *minor, gss_name_t name, char *tag)
+{
+    gss_name_t canon;
+    OM_uint32 major, tmp_minor;
+    gss_buffer_desc buf;
+
+    major = gss_canonicalize_name(minor, name,
+                                  (gss_OID)gss_mech_krb5, &canon);
+    if (GSS_ERROR(major)) {
+        display_status("gss_canonicalize_name", major, *minor);
+        return major;
+    }
+
+    major = gss_display_name(minor, canon, &buf, NULL);
+    if (GSS_ERROR(major)) {
+        display_status("gss_display_name", major, *minor);
+        gss_release_name(&tmp_minor, &canon);
+        return major;
+    }
+
+    printf("%s:\t%s\n", tag, (char *)buf.value);
+
+    gss_release_buffer(&tmp_minor, &buf);
+    gss_release_name(&tmp_minor, &canon);
+
+    return GSS_S_COMPLETE;
+}
+
+static OM_uint32
+displayOID(OM_uint32 *minor, gss_OID oid, char *tag)
+{
+    OM_uint32 major, tmp_minor;
+    gss_buffer_desc buf;
+
+    major = gss_oid_to_str(minor, oid, &buf);
+    if (GSS_ERROR(major)) {
+        display_status("gss_oid_to_str", major, *minor);
+        return major;
+    }
+
+    printf("%s:\t%s\n", tag, (char *)buf.value);
+
+    gss_release_buffer(&tmp_minor, &buf);
+
+    return GSS_S_COMPLETE;
+}
+
+static OM_uint32
+initAcceptSecContext(OM_uint32 *minor,
+                     gss_cred_id_t claimant_cred_handle,
+                     gss_cred_id_t verifier_cred_handle,
+                     gss_cred_id_t *deleg_cred_handle)
+{
+    OM_uint32 major, tmp_minor;
+    gss_buffer_desc token, tmp;
+    gss_ctx_id_t initiator_context = GSS_C_NO_CONTEXT;
+    gss_ctx_id_t acceptor_context = GSS_C_NO_CONTEXT;
+    gss_name_t source_name = GSS_C_NO_NAME;
+    gss_name_t target_name = GSS_C_NO_NAME;
+    OM_uint32 time_rec;
+    gss_OID mech = GSS_C_NO_OID;
+
+    token.value = NULL;
+    token.length = 0;
+
+    tmp.value = NULL;
+    tmp.length = 0;
+
+    *deleg_cred_handle = GSS_C_NO_CREDENTIAL;
+
+    major = gss_inquire_cred(minor, verifier_cred_handle,
+                             &target_name, NULL, NULL, NULL);
+    if (GSS_ERROR(major)) {
+        display_status("gss_inquire_cred", major, *minor);
+        return major;
+    }
+
+    displayCanonName(minor, target_name, "Target name");
+
+    mech = (gss_OID)gss_mech_krb5;
+    displayOID(minor, mech, "Target mech");
+
+    major = gss_init_sec_context(minor,
+                                 claimant_cred_handle,
+                                 &initiator_context,
+                                 target_name,
+                                 mech,
+                                 GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
+                                 GSS_C_INDEFINITE,
+                                 GSS_C_NO_CHANNEL_BINDINGS,
+                                 GSS_C_NO_BUFFER,
+                                 NULL,
+                                 &token,
+                                 NULL,
+                                 &time_rec);
+
+    if (target_name != GSS_C_NO_NAME)
+        (void) gss_release_name(&tmp_minor, &target_name);
+
+    if (GSS_ERROR(major)) {
+        display_status("gss_init_sec_context", major, *minor);
+        return major;
+    }
+
+    (void) gss_delete_sec_context(minor, &initiator_context, NULL);
+    mech = GSS_C_NO_OID;
+
+    major = gss_accept_sec_context(minor,
+                                   &acceptor_context,
+                                   verifier_cred_handle,
+                                   &token,
+                                   GSS_C_NO_CHANNEL_BINDINGS,
+                                   &source_name,
+                                   &mech,
+                                   &tmp,
+                                   NULL,
+                                   &time_rec,
+                                   deleg_cred_handle);
+
+    if (GSS_ERROR(major))
+        display_status("gss_accept_sec_context", major, *minor);
+    else {
+        displayCanonName(minor, source_name, "Source name");
+        displayOID(minor, mech, "Source mech");
+        enumerateAttributes(minor, source_name, 1);
+    }
+
+    (void) gss_release_name(&tmp_minor, &source_name);
+    (void) gss_delete_sec_context(&tmp_minor, &acceptor_context, NULL);
+    (void) gss_release_buffer(&tmp_minor, &token);
+    (void) gss_release_buffer(&tmp_minor, &tmp);
+    (void) gss_release_oid(&tmp_minor, &mech);
+
+    return major;
+}
+
+static OM_uint32
+constrainedDelegate(OM_uint32 *minor,
+                    gss_OID_set desired_mechs,
+                    gss_name_t target,
+                    gss_cred_id_t delegated_cred_handle,
+                    gss_cred_id_t verifier_cred_handle)
+{
+    OM_uint32 major, tmp_minor;
+    gss_ctx_id_t initiator_context = GSS_C_NO_CONTEXT;
+    gss_name_t cred_name = GSS_C_NO_NAME;
+    OM_uint32 time_rec, lifetime;
+    gss_cred_usage_t credUsage;
+    gss_buffer_desc token;
+    gss_OID_set mechs;
+
+    printf("Constrained delegation tests follow\n");
+    printf("-----------------------------------\n\n");
+
+    if (gss_inquire_cred(minor, verifier_cred_handle, &cred_name,
+                         &lifetime, &credUsage, NULL) == GSS_S_COMPLETE) {
+        displayCanonName(minor, cred_name, "Proxy name");
+        gss_release_name(&tmp_minor, &cred_name);
+    }
+    displayCanonName(minor, target, "Target name");
+    if (gss_inquire_cred(minor, delegated_cred_handle, &cred_name,
+                         &lifetime, &credUsage, &mechs) == GSS_S_COMPLETE) {
+        displayCanonName(minor, cred_name, "Delegated name");
+        displayOID(minor, &mechs->elements[0], "Delegated mech");
+        gss_release_name(&tmp_minor, &cred_name);
+    }
+
+    printf("\n");
+
+    major = gss_init_sec_context(minor,
+                                 delegated_cred_handle,
+                                 &initiator_context,
+                                 target,
+                                 mechs ? &mechs->elements[0] :
+                                 (gss_OID)gss_mech_krb5,
+                                 GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG,
+                                 GSS_C_INDEFINITE,
+                                 GSS_C_NO_CHANNEL_BINDINGS,
+                                 GSS_C_NO_BUFFER,
+                                 NULL,
+                                 &token,
+                                 NULL,
+                                 &time_rec);
+    if (GSS_ERROR(major))
+        display_status("gss_init_sec_context", major, *minor);
+
+    (void) gss_release_buffer(&tmp_minor, &token);
+    (void) gss_delete_sec_context(&tmp_minor, &initiator_context, NULL);
+    (void) gss_release_oid_set(&tmp_minor, &mechs);
+
+    return major;
+}
+
+static OM_uint32
+kerberosProtocolTransition(OM_uint32 *minor,
+                           gss_name_t authenticatedInitiator)
+{
+    OM_uint32 major, tmpMinor;
+    gss_cred_id_t impersonator_cred_handle = GSS_C_NO_CREDENTIAL;
+    gss_cred_id_t user_cred_handle = GSS_C_NO_CREDENTIAL;
+    gss_cred_id_t delegated_cred_handle = GSS_C_NO_CREDENTIAL;
+    gss_name_t user = GSS_C_NO_NAME;
+    gss_name_t target = GSS_C_NO_NAME;
+    gss_OID_set_desc mechs;
+    gss_OID_set actual_mechs = GSS_C_NO_OID_SET;
+
+    mechs.elements = (gss_OID)gss_mech_krb5;
+    mechs.count = 1;
+
+    /* get default cred */
+    major = gss_acquire_cred(minor,
+                             GSS_C_NO_NAME,
+                             GSS_C_INDEFINITE,
+                             &mechs,
+                             GSS_C_BOTH,
+                             &impersonator_cred_handle,
+                             &actual_mechs,
+                             NULL);
+    if (GSS_ERROR(major)) {
+        display_status("gss_acquire_cred", major, *minor);
+        goto out;
+    }
+
+    (void) gss_release_oid_set(minor, &actual_mechs);
+
+    printf("Protocol transition tests follow\n");
+    printf("-----------------------------------\n\n");
+
+    major = gss_canonicalize_name(minor, authenticatedInitiator,
+                                  (gss_OID)gss_mech_krb5, &user);
+    if (GSS_ERROR(major)) {
+        display_status("gss_canonicalize_name", major, *minor);
+        goto out;
+    }
+
+    /* get S4U2Self cred */
+    major = gss_acquire_cred_impersonate_name(minor,
+                                              impersonator_cred_handle,
+                                              user,
+                                              GSS_C_INDEFINITE,
+                                              &mechs,
+                                              GSS_C_INITIATE,
+                                              &user_cred_handle,
+                                              &actual_mechs,
+                                              NULL);
+    if (GSS_ERROR(major)) {
+        display_status("gss_acquire_cred_impersonate_name", major, *minor);
+        goto out;
+    }
+
+    major = initAcceptSecContext(minor,
+                                 user_cred_handle,
+                                 impersonator_cred_handle,
+                                 &delegated_cred_handle);
+    if (GSS_ERROR(major))
+        goto out;
+
+    printf("\n");
+
+    if (target != GSS_C_NO_NAME &&
+        delegated_cred_handle != GSS_C_NO_CREDENTIAL) {
+        major = constrainedDelegate(minor, &mechs, target,
+                                    delegated_cred_handle,
+                                    impersonator_cred_handle);
+    } else if (target != GSS_C_NO_NAME) {
+        fprintf(stderr, "Warning: no delegated credentials handle returned\n\n");
+        fprintf(stderr, "Verify:\n\n");
+        fprintf(stderr, " - The TGT for the impersonating service is forwardable\n");
+        fprintf(stderr, " - The T2A4D flag set on the impersonating service's UAC\n");
+        fprintf(stderr, " - The user is not marked sensitive and cannot be delegated\n");
+        fprintf(stderr, "\n");
+    }
+
+out:
+    (void) gss_release_name(&tmpMinor, &user);
+    (void) gss_release_name(&tmpMinor, &target);
+    (void) gss_release_cred(&tmpMinor, &delegated_cred_handle);
+    (void) gss_release_cred(&tmpMinor, &impersonator_cred_handle);
+    (void) gss_release_cred(&tmpMinor, &user_cred_handle);
+    (void) gss_release_oid_set(&tmpMinor, &actual_mechs);
+
+    return GSS_ERROR(major) ? 1 : 0;
 }
