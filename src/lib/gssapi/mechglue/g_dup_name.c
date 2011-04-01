@@ -109,8 +109,8 @@ gss_name_t *dest_name;
 		}
 
 		major_status = gssint_import_internal_name(minor_status,
-							dest_union->mech_type,
-							dest_union,
+							src_union->mech_type,
+							src_union,
 							&dest_union->mech_name);
 		if (major_status != GSS_S_COMPLETE)
 			goto allocation_failure;
