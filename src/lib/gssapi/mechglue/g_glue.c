@@ -283,6 +283,67 @@ OM_uint32 gssint_get_mech_type(OID, token)
     return (GSS_S_COMPLETE);
 }
 
+static OM_uint32
+import_internal_attributes(OM_uint32 *minor,
+			   gss_mechanism dmech,
+			   gss_union_name_t sname,
+			   gss_name_t dname)
+{
+    OM_uint32 major, tmpMinor;
+    gss_mechanism smech;
+    gss_buffer_set_t attrs = GSS_C_NO_BUFFER_SET;
+    size_t i;
+
+    if (sname->mech_name == GSS_C_NO_NAME)
+	return (GSS_S_UNAVAILABLE);
+
+    smech = gssint_get_mechanism (sname->mech_type);
+    if (smech == NULL)
+	return (GSS_S_BAD_MECH);
+
+    if (smech->gss_inquire_name == NULL ||
+	smech->gss_get_name_attribute == NULL)
+	return (GSS_S_UNAVAILABLE);
+
+    if (dmech->gss_set_name_attribute == NULL)
+	return (GSS_S_UNAVAILABLE);
+
+    major = smech->gss_inquire_name(minor, sname->mech_name,
+				    NULL, NULL, &attrs);
+    if (GSS_ERROR(major) || attrs == GSS_C_NO_BUFFER_SET) {
+	gss_release_buffer_set(&tmpMinor, &attrs);
+	return (major);
+    }
+
+    for (i = 0; i < attrs->count; i++) {
+	int more = -1;
+
+	while (more != 0) {
+	    gss_buffer_desc value, display_value;
+	    int authenticated, complete;
+
+	    major = smech->gss_get_name_attribute(minor, sname->mech_name,
+						  &attrs->elements[i],
+						  &authenticated, &complete,
+						  &value, &display_value,
+						  &more);
+	    if (GSS_ERROR(major))
+		continue;
+
+	    if (authenticated) {
+		dmech->gss_set_name_attribute(minor, dname, complete,
+					      &attrs->elements[i], &value);
+	    }
+
+	    gss_release_buffer(&tmpMinor, &value);
+	    gss_release_buffer(&tmpMinor, &display_value);
+	}
+    }
+
+    gss_release_buffer_set(&tmpMinor, &attrs);
+
+    return (GSS_S_COMPLETE);
+}
 
 /*
  *  Internal routines to get and release an internal mechanism name
@@ -295,7 +356,7 @@ gss_OID		mech_type;
 gss_union_name_t	union_name;
 gss_name_t	*internal_name;
 {
-    OM_uint32		status;
+    OM_uint32		status, tmpMinor;
     gss_mechanism	mech;
 
     mech = gssint_get_mechanism (mech_type);
@@ -325,8 +386,13 @@ gss_name_t	*internal_name;
 				   union_name->external_name,
 				   union_name->name_type,
 				   internal_name);
-    if (status != GSS_S_COMPLETE)
+    if (status == GSS_S_COMPLETE) {
+        /* Attempt to round-trip attributes */
+	(void) import_internal_attributes(&tmpMinor, mech,
+				          union_name, *internal_name);
+    } else {
 	map_error(minor_status, mech);
+    }
 
     return (status);
 }
