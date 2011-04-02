@@ -25,6 +25,7 @@
  */
 
 #include "k5-int.h"
+#include "int-proto.h"
 #include "cleanup.h"
 #include "auth_con.h"
 
@@ -250,8 +251,7 @@ krb5_rd_safe(krb5_context context, krb5_auth_context auth_context,
     }
 
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_SEQUENCE) {
-        if (!krb5int_auth_con_chkseqnum(context, auth_context,
-                                        replaydata.seq)) {
+        if (!k5_privsafe_check_seqnum(context, auth_context, replaydata.seq)) {
             retval =  KRB5KRB_AP_ERR_BADORDER;
             goto error;
         }
