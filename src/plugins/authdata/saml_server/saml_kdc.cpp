@@ -205,7 +205,7 @@ saml_kdc_build_subject_confirmation(krb5_context context,
     if (code != 0)
         return code;
 
-    if (flags & KRB5_KDB_FLAGS_S4U) {
+    if (flags & KRB5_KDB_FLAG_PROTOCOL_TRANSITION) {
         code = saml_krb_build_nameid(context, server->princ, &nameID);
         if (code != 0) {
             delete keyInfo;
@@ -309,7 +309,7 @@ saml_kdc_get_assertion(krb5_context context,
      * because it would refer to the service itself, not the client.
      */
     if (authdata == NULL &&
-        (flags & KRB5_KDB_FLAGS_S4U) == 0) {
+        (flags & KRB5_KDB_FLAG_PROTOCOL_TRANSITION) == 0) {
         code = krb5int_find_authdata(context,
                                      enc_tkt_request->authorization_data,
                                      NULL,
@@ -592,25 +592,26 @@ saml_kdc_verify_assertion(krb5_context context,
 
     memset(&key, 0, sizeof(key));
 
-    signature = assertion->getSignature();
-    if (signature != NULL) {
-        DSIGSignature *xmlSignature;
-
-        xmlSignature = signature->getXMLSignature();
-        if (xmlSignature != NULL) {
-            code = KDBKeyInfoResolver::resolveKerberosKey(context,
-                xmlSignature->getKeyInfoList(), &key);
-            if (code == 0)
-                usage |= SAML_KRB_VERIFY_TRUSTED_SERVICE;
-        }
-    }
-
     /*
      * Verify using PKI or potentially the server key if the server
      * is a trusted entity.
      */
-    if (fromTGT)
+    if (fromTGT) {
         usage |= SAML_KRB_VERIFY_KDC_VOUCHED;
+    } else {
+        signature = assertion->getSignature();
+        if (signature != NULL) {
+            DSIGSignature *xmlSignature;
+
+            xmlSignature = signature->getXMLSignature();
+            if (xmlSignature != NULL) {
+                code = KDBKeyInfoResolver::resolveKerberosKey(context,
+                    xmlSignature->getKeyInfoList(), &key);
+                if (code == 0)
+                    usage |= SAML_KRB_VERIFY_TRUSTED_SERVICE;
+            }
+        }
+    }
 
     code = saml_krb_verify(context,
                            assertion,
@@ -760,6 +761,38 @@ saml_kdc_encode(krb5_context context,
     return code;
 }
 
+/*
+ * Remove authdata that the KDC copied from the request. We will
+ * arbitrary what goes in the reply.
+ */
+static void
+saml_reset_authdata(krb5_context context,
+                    krb5_enc_tkt_part *enc_tkt_reply)
+{
+    size_t i = 0, nelems;
+    krb5_authdata **authdata = enc_tkt_reply->authorization_data;
+
+    if (authdata == NULL)
+        return;
+
+    for (nelems = 0; authdata[nelems] != NULL; nelems++)
+        ;
+
+    while (authdata[i] != NULL) {
+        if (authdata[i]->ad_type == KRB5_AUTHDATA_SAML) {
+            free(authdata[i]->contents);
+            free(authdata[i]);
+            memmove(&authdata[i], &authdata[i + 1], sizeof(krb5_authdata *) * (nelems - i ));
+        } else {
+            i++;
+        }
+    }
+
+    if (authdata[0] == NULL) {
+        krb5_free_authdata(context, enc_tkt_reply->authorization_data);
+        enc_tkt_reply->authorization_data = NULL;
+    }
+}
 
 krb5_error_code
 saml_authdata(krb5_context context,
@@ -781,6 +814,8 @@ saml_authdata(krb5_context context,
     saml2::Assertion *assertion = NULL;
     krb5_boolean vouch = FALSE;
     krb5_boolean fromTGT = FALSE;
+
+    saml_reset_authdata(context, enc_tkt_reply);
 
     if (request->msg_type != KRB5_TGS_REQ ||
         (server->attributes & KRB5_KDB_NO_AUTH_DATA_REQUIRED))
