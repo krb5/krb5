@@ -67,12 +67,17 @@
 #include <strings.h>
 #endif
 
+#define FLAG_EXPORT 1
+#define FLAG_S4U    2
+#define FLAG_ANON   4
+
 static OM_uint32
 enumerateAttributes(OM_uint32 *minor, gss_name_t name, int noisy);
 
 static OM_uint32
 kerberosProtocolTransition(OM_uint32 *minor,
-                           gss_name_t authenticatedInitiator);
+                           gss_name_t authenticatedInitiator,
+                           int flags);
 
 static void
 usage()
@@ -165,7 +170,7 @@ server_acquire_creds(char *service_name, gss_cred_id_t *server_creds)
  * message is displayed and -1 is returned.
  */
 static int
-server_establish_context(int s, gss_cred_id_t server_creds, int s4u,
+server_establish_context(int s, gss_cred_id_t server_creds, int flags,
                          gss_ctx_id_t *context, gss_buffer_t client_name,
                          OM_uint32 *ret_flags)
 {
@@ -271,8 +276,8 @@ server_establish_context(int s, gss_cred_id_t server_creds, int s4u,
             return -1;
         }
         enumerateAttributes(&min_stat, client, TRUE);
-        if (s4u)
-            kerberosProtocolTransition(&min_stat, client);
+        if (flags & FLAG_S4U)
+            kerberosProtocolTransition(&min_stat, client, flags);
         maj_stat = gss_release_name(&min_stat, &client);
         if (maj_stat != GSS_S_COMPLETE) {
             display_status("releasing name", maj_stat, min_stat);
@@ -282,7 +287,7 @@ server_establish_context(int s, gss_cred_id_t server_creds, int s4u,
         client_name->length = *ret_flags = 0;
 
         if (logfile)
-            fprintf(logfile, "Accepted unauthenticated connection.\n");
+            printf("Accepted unauthenticated connection.\n");
     }
 
     return 0;
@@ -416,7 +421,7 @@ test_import_export_context(gss_ctx_id_t *context)
  * If any error occurs, -1 is returned.
  */
 static int
-sign_server(int s, gss_cred_id_t server_creds, int export, int s4u)
+sign_server(int s, gss_cred_id_t server_creds, int flags)
 {
     gss_buffer_desc client_name, xmit_buf, msg_buf;
     gss_ctx_id_t context;
@@ -427,7 +432,7 @@ sign_server(int s, gss_cred_id_t server_creds, int export, int s4u)
     int     token_flags;
 
     /* Establish a context with the client */
-    if (server_establish_context(s, server_creds, s4u, &context,
+    if (server_establish_context(s, server_creds, flags, &context,
                                  &client_name, &ret_flags) < 0)
         return (-1);
 
@@ -438,7 +443,7 @@ sign_server(int s, gss_cred_id_t server_creds, int export, int s4u)
                (int) client_name.length, (char *) client_name.value);
         (void) gss_release_buffer(&min_stat, &client_name);
 
-        if (export) {
+        if (flags & FLAG_EXPORT) {
             for (i = 0; i < 3; i++)
                 if (test_import_export_context(&context))
                     return -1;
@@ -624,8 +629,7 @@ struct _work_plan
 {
     int     s;
     gss_cred_id_t server_creds;
-    int     export;
-    int     s4u;
+    int     flags;
 };
 
 static void
@@ -636,7 +640,7 @@ worker_bee(void *param)
     /* this return value is not checked, because there's
      * not really anything to do if it fails
      */
-    sign_server(work->s, work->server_creds, work->export, work->s4u);
+    sign_server(work->s, work->server_creds, work->flags);
     closesocket(work->s);
     free(work);
 
@@ -655,8 +659,7 @@ main(int argc, char **argv)
     u_short port = 4444;
     int     once = 0;
     int     do_inetd = 0;
-    int     export = 0;
-    int     s4u = 0;
+    int     flags = 0;
 
     logfile = stdout;
     display_file = stdout;
@@ -686,9 +689,11 @@ main(int argc, char **argv)
         } else if (strcmp(*argv, "-inetd") == 0) {
             do_inetd = 1;
         } else if (strcmp(*argv, "-export") == 0) {
-            export = 1;
+            flags |= FLAG_EXPORT;
         } else if (strcmp(*argv, "-s4u") == 0) {
-            s4u = 1;
+            flags |= FLAG_S4U;
+        } else if (strcmp(*argv, "-anon") == 0) {
+            flags |= FLAG_ANON;
         } else if (strcmp(*argv, "-logfile") == 0) {
             argc--;
             argv++;
@@ -750,7 +755,7 @@ main(int argc, char **argv)
         close(1);
         close(2);
 
-        sign_server(0, server_creds, export, s4u);
+        sign_server(0, server_creds, flags);
         close(0);
     } else {
         int     stmp;
@@ -775,7 +780,7 @@ main(int argc, char **argv)
                 }
 
                 work->server_creds = server_creds;
-                work->export = export;
+                work->flags = flags;
 
                 if (max_threads == 1) {
                     worker_bee((void *) work);
@@ -839,7 +844,7 @@ dumpAttribute(OM_uint32 *minor,
             break;
         }
 
-        printf("Attribute %.*s %s %s\n\n%.*s\n",
+        fprintf(logfile, "Attribute %.*s %s %s\n\n%.*s\n",
                (int)attribute->length, (char *)attribute->value,
                authenticated ? "Authenticated" : "",
                complete ? "Complete" : "",
@@ -848,10 +853,10 @@ dumpAttribute(OM_uint32 *minor,
         if (noisy) {
             for (i = 0; i < value.length; i++) {
                 if ((i % 32) == 0)
-                    printf("\n");
-                printf("%02x", ((char *)value.value)[i] & 0xFF);
+                    fprintf(logfile, "\n");
+                fprintf(logfile, "%02x", ((char *)value.value)[i] & 0xFF);
             }
-            printf("\n\n");
+            fprintf(logfile, "\n\n");
         }
 
         gss_release_buffer(&tmp, &value);
@@ -908,7 +913,7 @@ displayCanonName(OM_uint32 *minor, gss_name_t name, char *tag)
         return major;
     }
 
-    printf("%s:\t%s\n", tag, (char *)buf.value);
+    fprintf(logfile, "%s:\t%s\n", tag, (char *)buf.value);
 
     gss_release_buffer(&tmp_minor, &buf);
     gss_release_name(&tmp_minor, &canon);
@@ -928,7 +933,7 @@ displayOID(OM_uint32 *minor, gss_OID oid, char *tag)
         return major;
     }
 
-    printf("%s:\t%s\n", tag, (char *)buf.value);
+    fprintf(logfile, "%s:\t%s\n", tag, (char *)buf.value);
 
     gss_release_buffer(&tmp_minor, &buf);
 
@@ -1039,8 +1044,8 @@ constrainedDelegate(OM_uint32 *minor,
     gss_buffer_desc token;
     gss_OID_set mechs;
 
-    printf("Constrained delegation tests follow\n");
-    printf("-----------------------------------\n\n");
+    fprintf(logfile, "Constrained delegation tests follow\n");
+    fprintf(logfile, "-----------------------------------\n\n");
 
     if (gss_inquire_cred(minor, verifier_cred_handle, &cred_name,
                          &lifetime, &credUsage, NULL) == GSS_S_COMPLETE) {
@@ -1055,7 +1060,7 @@ constrainedDelegate(OM_uint32 *minor,
         gss_release_name(&tmp_minor, &cred_name);
     }
 
-    printf("\n");
+    fprintf(logfile, "\n");
 
     major = gss_init_sec_context(minor,
                                  delegated_cred_handle,
@@ -1083,16 +1088,21 @@ constrainedDelegate(OM_uint32 *minor,
 
 static OM_uint32
 kerberosProtocolTransition(OM_uint32 *minor,
-                           gss_name_t authenticatedInitiator)
+                           gss_name_t authenticatedInitiator,
+                           int flags)
 {
     OM_uint32 major, tmpMinor;
     gss_cred_id_t impersonator_cred_handle = GSS_C_NO_CREDENTIAL;
     gss_cred_id_t user_cred_handle = GSS_C_NO_CREDENTIAL;
     gss_cred_id_t delegated_cred_handle = GSS_C_NO_CREDENTIAL;
+    gss_name_t anonName = GSS_C_NO_NAME;
     gss_name_t user = GSS_C_NO_NAME;
     gss_name_t target = GSS_C_NO_NAME;
     gss_OID_set_desc mechs;
     gss_OID_set actual_mechs = GSS_C_NO_OID_SET;
+    gss_buffer_desc assertion = GSS_C_EMPTY_BUFFER;
+    gss_buffer_desc assertionAttr = GSS_C_EMPTY_BUFFER;
+    int authenticated = 0, complete;
 
     mechs.elements = (gss_OID)gss_mech_krb5;
     mechs.count = 1;
@@ -1113,14 +1123,48 @@ kerberosProtocolTransition(OM_uint32 *minor,
 
     (void) gss_release_oid_set(minor, &actual_mechs);
 
-    printf("Protocol transition tests follow\n");
-    printf("-----------------------------------\n\n");
+    fprintf(logfile, "Protocol transition tests follow\n");
+    fprintf(logfile, "-----------------------------------\n\n");
 
-    major = gss_canonicalize_name(minor, authenticatedInitiator,
+    assertionAttr.value = "urn:ietf:params:gss-eap:saml-aaa-assertion";
+    assertionAttr.length = strlen((char *)assertionAttr.value);
+
+    if (flags & FLAG_ANON) {
+        int more = -1;
+        gss_buffer_desc anonNameBuf;
+        gss_buffer_desc tmp = GSS_C_EMPTY_BUFFER;
+
+        (void) gss_get_name_attribute(minor, authenticatedInitiator,
+                                      &assertionAttr, &authenticated, &complete,
+                                      &assertion, &tmp, &more);
+        gss_release_buffer(&tmpMinor, &tmp);
+
+        anonNameBuf.value = KRB5_WELLKNOWN_NAMESTR "/" KRB5_ANONYMOUS_PRINCSTR "@" KRB5_ANONYMOUS_REALMSTR;
+        anonNameBuf.length = strlen((char *)anonNameBuf.value);
+
+        major = gss_import_name(minor, &anonNameBuf,
+                                GSS_C_NT_USER_NAME, &anonName);
+        if (GSS_ERROR(major)) {
+            display_status("gss_import_name", major, *minor);
+            goto out;
+        }
+    }
+
+    major = gss_canonicalize_name(minor,
+                                  (flags & FLAG_ANON) ? anonName : authenticatedInitiator,
                                   (gss_OID)gss_mech_krb5, &user);
     if (GSS_ERROR(major)) {
         display_status("gss_canonicalize_name", major, *minor);
         goto out;
+    }
+
+    if ((flags & FLAG_ANON) && authenticated && assertion.length != 0) {
+        major = gss_set_name_attribute(minor, user, complete,
+                                       &assertionAttr, &assertion);
+        if (GSS_ERROR(major)) {
+            display_status("gss_set_name_attribute", major, *minor);
+            goto out;
+        }
     }
 
     /* get S4U2Self cred */
@@ -1145,7 +1189,7 @@ kerberosProtocolTransition(OM_uint32 *minor,
     if (GSS_ERROR(major))
         goto out;
 
-    printf("\n");
+    fprintf(logfile, "\n");
 
     if (target != GSS_C_NO_NAME &&
         delegated_cred_handle != GSS_C_NO_CREDENTIAL) {
@@ -1164,10 +1208,12 @@ kerberosProtocolTransition(OM_uint32 *minor,
 out:
     (void) gss_release_name(&tmpMinor, &user);
     (void) gss_release_name(&tmpMinor, &target);
+    (void) gss_release_name(&tmpMinor, &anonName);
     (void) gss_release_cred(&tmpMinor, &delegated_cred_handle);
     (void) gss_release_cred(&tmpMinor, &impersonator_cred_handle);
     (void) gss_release_cred(&tmpMinor, &user_cred_handle);
     (void) gss_release_oid_set(&tmpMinor, &actual_mechs);
+    (void) gss_release_buffer(&tmpMinor, &assertion);
 
     return GSS_ERROR(major) ? 1 : 0;
 }
