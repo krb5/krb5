@@ -410,9 +410,6 @@ GSS_DLLIMP extern gss_OID GSS_C_NT_ANONYMOUS;
  */
 GSS_DLLIMP extern gss_OID GSS_C_NT_EXPORT_NAME;
 
-/* SAML assertion */
-GSS_DLLIMP extern gss_OID GSS_C_NT_SAML;
-
 /* Function Prototypes */
 
 OM_uint32 KRB5_CALLCONV

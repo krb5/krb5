@@ -1274,12 +1274,6 @@ krb5_authdata_context_free(krb5_context kcontext,
                            krb5_authdata_context context);
 
 krb5_error_code KRB5_CALLCONV
-krb5_authdata_import_authdata(krb5_context kcontext,
-                              krb5_authdata_context context,
-                              krb5_flags usage,
-                              krb5_authdata **import_authdata);
-
-krb5_error_code KRB5_CALLCONV
 krb5_authdata_export_authdata(krb5_context kcontext,
                               krb5_authdata_context context, krb5_flags usage,
                               krb5_authdata ***pauthdata);
