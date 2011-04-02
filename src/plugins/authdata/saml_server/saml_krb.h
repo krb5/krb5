@@ -52,8 +52,11 @@ extern "C" {
 #include <xmltooling/util/ParserPool.h>
 #include <xmltooling/util/DateTime.h>
 #include <xsec/framework/XSECException.hpp>
+#include <xsec/dsig/DSIGSignature.hpp>
 #include <xsec/dsig/DSIGKeyInfoValue.hpp>
 #include <xsec/dsig/DSIGKeyInfoName.hpp>
+#include <xsec/dsig/DSIGKeyInfoMgmtData.hpp>
+#include <xsec/enc/XSECKeyInfoResolver.hpp>
 #include <xsec/enc/XSECCryptoKeyHMAC.hpp>
 #include <xsec/enc/XSECCryptoException.hpp>
 #include <xsec/enc/OpenSSL/OpenSSLCryptoKeyHMAC.hpp>
@@ -71,8 +74,9 @@ using namespace xercesc;
 using namespace std;
 
 #define SAML_KRB_VERIFY_SESSION_KEY     0x1 /* signed with session key */
-#define SAML_KRB_VERIFY_TRUSTENGINE     0x2 /* signed with trusted key */
+#define SAML_KRB_VERIFY_TRUSTENGINE     0x2 /* signed with out-of-band key */
 #define SAML_KRB_VERIFY_KDC_VOUCHED     0x4 /* extracted from TGT */
+#define SAML_KRB_VERIFY_TRUSTED_SERVICE 0x8 /* signed by trusted service */
 
 #define SAML_KRB_USAGE_SESSION_KEY      1   /* derive from session key */
 #define SAML_KRB_USAGE_SERVER_KEY       2   /* derive from server key */
@@ -139,6 +143,7 @@ saml_krb_get_authtime(krb5_context context,
 krb5_error_code
 saml_krb_build_principal_keyinfo(krb5_context context,
                                  krb5_const_principal principal,
+                                 krb5_enctype enctype,
                                  KeyInfo **pKeyInfo);
 
 krb5_error_code

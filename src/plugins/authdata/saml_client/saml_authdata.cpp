@@ -194,7 +194,7 @@ static krb5_boolean didShibInit;
 
 static void saml_library_init(void)
 {
-    if (!SPConfig::getConfig().getFeatures()) {
+    if (!didShibInit && SPConfig::getConfig().getFeatures() == 0) {
         ShibbolethResolver::init();
         didShibInit = TRUE;
     }
@@ -202,8 +202,10 @@ static void saml_library_init(void)
 
 static void saml_library_fini(void)
 {
-    if (didShibInit)
+    if (didShibInit) {
         ShibbolethResolver::term();
+        didShibInit = FALSE;
+    }
 }
 
 static krb5_error_code
@@ -694,7 +696,8 @@ saml_size(krb5_context kcontext,
     DDF attrs(NULL);
 
     try {
-        XMLHelper::serialize(sc->assertion->marshall((DOMDocument *)NULL), assertion);
+        if (sc->assertion != NULL)
+            XMLHelper::serialize(sc->assertion->marshall((DOMDocument *)NULL), assertion);
         for (vector<shibsp::Attribute *>::const_iterator a = sc->attributes.begin();
             a != sc->attributes.end(); ++a) {
             DDF attr = (*a)->marshall();
@@ -728,13 +731,16 @@ saml_externalize(krb5_context kcontext,
     ostringstream sink;
 
     try {
-        XMLHelper::serialize(sc->assertion->marshall((DOMDocument *)NULL), assertion);
-        for (vector<shibsp::Attribute *>::const_iterator a = sc->attributes.begin();
-            a != sc->attributes.end(); ++a) {
-            DDF attr = (*a)->marshall();
-            attrs.add(attr);
+        if (sc->assertion != NULL)
+            XMLHelper::serialize(sc->assertion->marshall((DOMDocument *)NULL), assertion);
+        if (sc->attributes.size()) {
+            for (vector<shibsp::Attribute *>::const_iterator a = sc->attributes.begin();
+                a != sc->attributes.end(); ++a) {
+                DDF attr = (*a)->marshall();
+                attrs.add(attr);
+            }
+            sink << attrs;
         }
-        sink << attrs;
     } catch (exception &e) {
         return ASN1_PARSE_ERROR;
     }

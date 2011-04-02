@@ -232,7 +232,7 @@ saml_krb_map_subject(krb5_context context,
         code = KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
     }
 
-    return code; 
+    return code;
 }
 
 krb5_boolean
@@ -309,18 +309,23 @@ saml_krb_bind_subject_kdb(krb5_context context,
     }
 
     return code;
-} 
+}
 
 krb5_timestamp
 saml_krb_get_authtime(krb5_context context,
                       const saml2::Assertion *assertion)
 {
     krb5_timestamp ktime = 0;
-    const AuthnStatement *statement;
 
-    if (assertion->getAuthnStatements().size() == 1) {
-        statement = assertion->getAuthnStatements().front();
-        ktime = statement->getAuthnInstant()->getEpoch(false);
+    for (vector<AuthnStatement *>::const_iterator as = assertion->getAuthnStatements().begin();
+         as != assertion->getAuthnStatements().end();
+         as++)
+    {
+        krb5_timestamp astime;
+
+        astime  = (*as)->getAuthnInstant()->getEpoch(false);
+        if (astime > ktime)
+            ktime = astime;
     }
 
     return ktime;
@@ -329,14 +334,23 @@ saml_krb_get_authtime(krb5_context context,
 krb5_error_code
 saml_krb_build_principal_keyinfo(krb5_context context,
                                  krb5_const_principal principal,
+                                 krb5_enctype enctype,
                                  KeyInfo **pKeyInfo)
 {
     krb5_error_code code;
     XMLCh *unicodePrincipal;
     KeyName *keyName;
     KeyInfo *keyInfo;
+    char enctypeBuffer[32];
 
     *pKeyInfo = NULL;
+
+    if (enctype != ENCTYPE_NULL) {
+        code = krb5_enctype_to_name(enctype, FALSE,
+                                    enctypeBuffer, sizeof(enctypeBuffer));
+        if (code != 0)
+            return code;
+    }
 
     code = saml_krb_unparse_name_xmlch(context, principal, &unicodePrincipal);
     if (code != 0)
@@ -344,9 +358,19 @@ saml_krb_build_principal_keyinfo(krb5_context context,
 
     keyName = KeyNameBuilder::buildKeyName();
     keyName->setTextContent(unicodePrincipal);
+    delete unicodePrincipal;
 
     keyInfo = KeyInfoBuilder::buildKeyInfo();
     keyInfo->getKeyNames().push_back(keyName);
+
+    if (enctype != ENCTYPE_NULL) {
+        MgmtData *mgmtData;
+        xmltooling::auto_ptr_XMLCh mgmtDataValue(enctypeBuffer);
+
+        mgmtData = MgmtDataBuilder::buildMgmtData();
+        mgmtData->setTextContent(mgmtDataValue.get());
+        keyInfo->getMgmtDatas().push_back(mgmtData);
+    }
 
     *pKeyInfo = keyInfo;
 
@@ -459,10 +483,10 @@ saml_krb_verify_recipient(krb5_context context,
          sc != confs.end();
          sc++)
     {
-#if 0
-        const SubjectConfirmationDataType* data = dynamic_cast<const SubjectConfirmationDataType*>((*sc)->getSubjectConfirmationData());
-#else
+#ifdef __APPLE__
         const SubjectConfirmationDataType* data = (const SubjectConfirmationDataType *)((void *)(*sc)->getSubjectConfirmationData());
+#else
+        const SubjectConfirmationDataType* data = dynamic_cast<const SubjectConfirmationDataType*>((*sc)->getSubjectConfirmationData());
 #endif
 
         if (data == NULL || data->getRecipient() == NULL)
@@ -510,10 +534,16 @@ saml_krb_verify_signature(krb5_context context,
         SignatureValidator krbSigValidator;
         XSECCryptoKey *krbXmlKey;
 
-        /* Only KDC-issued assertions can be natively bound */
-        if (flags & SAML_KRB_VERIFY_SESSION_KEY) {
-            code = saml_krb_derive_key(context, key,
-                                       SAML_KRB_USAGE_SESSION_KEY, &krbXmlKey);
+        if (flags & (SAML_KRB_VERIFY_SESSION_KEY |
+                     SAML_KRB_VERIFY_TRUSTED_SERVICE)) {
+            unsigned int usage;
+
+            if (flags & SAML_KRB_VERIFY_SESSION_KEY)
+                usage = SAML_KRB_USAGE_SESSION_KEY;
+            else
+                usage = SAML_KRB_USAGE_SERVER_KEY;
+
+            code = saml_krb_derive_key(context, key, usage, &krbXmlKey);
             if (code != 0)
                 return code;
 
@@ -524,6 +554,7 @@ saml_krb_verify_signature(krb5_context context,
                 validSig = TRUE;
             } catch (ValidationException &v) {
             }
+            delete krbXmlKey;
         }
         if (validSig == FALSE &&
             (flags & SAML_KRB_VERIFY_TRUSTENGINE)) {
@@ -689,24 +720,24 @@ saml_krb_decode_assertion(krb5_context context,
         b = XMLObjectBuilder::getDefaultBuilder();
         elem = doc->getDocumentElement();
         xobj = b->buildOneFromElement(elem, true);
-#if 0
+#ifdef __APPLE__
+        *pAssertion = (saml2::Assertion*)((void *)xobj);
+#else
         *pAssertion = dynamic_cast<saml2::Assertion*>(xobj);
         if (*pAssertion == NULL) {
             fprintf(stderr, "%s\n", typeid(xobj).name());
             delete xobj;
             code = ASN1_PARSE_ERROR;
         }
-#else
-        *pAssertion = (saml2::Assertion*)((void *)xobj);
-        code = 0;
 #endif
+        code = 0;
     } catch (exception &e) {
         code = ASN1_PARSE_ERROR; /* XXX */
     }
 
     return code;
 }
- 
+
 krb5_error_code
 saml_krb_decode_assertion(krb5_context context,
                           krb5_authdata *authdata,

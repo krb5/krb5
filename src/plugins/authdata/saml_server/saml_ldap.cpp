@@ -120,7 +120,8 @@ saml_kdc_get_attribute(krb5_context context,
             XMLSize_t len;
             XMLByte *b64 = Base64::encode((XMLByte *)bv->bv_val,
                                           bv->bv_len, &len);
-            value->setTextContent(XMLString::transcode((char *)b64));
+            auto_ptr_XMLCh unistr((char *)b64);
+            value->setTextContent(unistr.get());
             delete b64;
         } else {
             auto_ptr_XMLCh unistr(bv->bv_val);
