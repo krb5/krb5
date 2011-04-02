@@ -110,10 +110,13 @@ saml_krb_build_nameid(krb5_context context,
                       krb5_const_principal principal,
                       NameID **pNameID);
 
+#define SAML_KRB_COMPARE_ANON   0x1
+
 krb5_boolean
 saml_krb_compare_principal(krb5_context context,
                            const XMLCh *unicodePrincipal,
-                           krb5_const_principal princ1);
+                           krb5_const_principal princ,
+                           int flags = 0);
 
 krb5_error_code
 saml_krb_map_subject(krb5_context context,

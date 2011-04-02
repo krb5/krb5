@@ -105,6 +105,7 @@ saml_krb_derive_key(krb5_context context,
     return code;
 }
 
+#if 0
 static char saml_krb_wk_string[]        = "WELLKNOWN";
 static char saml_krb_null_string[]      = "NULL";
 static char saml_krb_realm[]            = "WELLKNOWN:SAML";
@@ -119,6 +120,7 @@ saml_krb_is_saml_principal(krb5_context context,
         data_eq_string(principal->data[1], saml_krb_null_string) &&
         data_eq_string(principal->realm, saml_krb_realm);
 }
+#endif
 
 krb5_error_code
 saml_krb_unparse_name_xmlch(krb5_context context,
@@ -192,7 +194,8 @@ saml_krb_build_nameid(krb5_context context,
 krb5_boolean
 saml_krb_compare_principal(krb5_context context,
                            const XMLCh *unicodePrincipal,
-                           krb5_const_principal princ1)
+                           krb5_const_principal princ1,
+                           int flags)
 {
     krb5_boolean ret;
     krb5_principal princ2;
@@ -201,6 +204,16 @@ saml_krb_compare_principal(krb5_context context,
         return FALSE;
 
     ret = krb5_principal_compare(context, princ1, princ2);
+    if (ret == FALSE && (flags & SAML_KRB_COMPARE_ANON)) {
+        /*
+         * Return TRUE if the Kerberos principal is the anonymous
+         * principal for our realm.
+         */
+        if (krb5_realm_compare(context, princ1, princ2) &&
+            krb5_principal_compare_any_realm(context, princ1,
+                                             krb5_anonymous_principal()))
+            ret = TRUE;
+    }
 
     krb5_free_principal(context, princ2);
 
@@ -396,7 +409,8 @@ saml_krb_confirm_keyinfo(krb5_context context,
         KeyName *kn = (*ki)->getKeyNames().front();
         const XMLCh *knValue = kn->getTextContent();
 
-        if (saml_krb_compare_principal(context, knValue, principal)) {
+        if (saml_krb_compare_principal(context, knValue,
+                                       principal, SAML_KRB_COMPARE_ANON)) {
             *pConfirmed = TRUE;
             break;
         }
@@ -418,36 +432,32 @@ saml_krb_confirm_subject(krb5_context context,
     krb5_boolean confirmed = FALSE;
     krb5_boolean bound = FALSE;
 
-    for (vector<SubjectConfirmation *>::const_iterator sc = confs.begin();
-         sc != confs.end();
-         sc++)
-    {
-         const SubjectConfirmationData *subjectConfirmationData;
-         time_t ts;
+    if (krb5_principal_compare(context, principal,
+                               krb5_anonymous_principal())) {
+        confirmed = bound = TRUE;
+    } else {
+        for (vector<SubjectConfirmation *>::const_iterator sc = confs.begin();
+             sc != confs.end();
+             sc++) {
+            const SubjectConfirmationData *subjectConfirmationData;
+            time_t ts;
 
-         subjectConfirmationData = (SubjectConfirmationData *)((void *)(*sc)->getSubjectConfirmationData());
+            subjectConfirmationData = (SubjectConfirmationData *)((void *)(*sc)->getSubjectConfirmationData());
 
-         ts = subjectConfirmationData->getNotBefore()->getEpoch(false);
-         if (ts < authtime)
-            continue;
+            ts = subjectConfirmationData->getNotBefore()->getEpoch(false);
+            if (ts < authtime)
+                continue;
 
-#if 0
-         ts = subjectConfirmationData->getNotOnOrAfter()->getEpoch(false);
-         if (ts > endtime)
-             continue;
-#endif
+            if (XMLString::equals((*sc)->getMethod(), SubjectConfirmation::HOLDER_KEY)) {
+                code = saml_krb_confirm_keyinfo(context, *sc, principal, &confirmed);
+                if (code != 0)
+                    break;
 
-        if (XMLString::equals((*sc)->getMethod(), SubjectConfirmation::HOLDER_KEY)) {
-            code = saml_krb_confirm_keyinfo(context, *sc, principal, &confirmed);
-            if (code != 0)
+                bound = TRUE;
+            }
+            if (confirmed)
                 break;
-
-            bound = TRUE;
-        } else {
-            confirmed = saml_krb_is_saml_principal(context, principal);
         }
-        if (confirmed)
-            break;
     }
 
     *pConfirmed = confirmed;

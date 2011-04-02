@@ -368,7 +368,7 @@ saml_kdc_vouch(krb5_context context,
                krb5_enc_tkt_part *enc_tkt_reply,
                saml2::Assertion *assertion)
 {
-    krb5_boolean isSamlPrincipal;
+    krb5_boolean isAnonPrincipal;
     krb5_error_code code;
 
     code = saml_kdc_annotate_assertion(context, flags, client_princ,
@@ -378,7 +378,8 @@ saml_kdc_vouch(krb5_context context,
     if (code != 0)
         return code;
 
-    isSamlPrincipal = saml_krb_is_saml_principal(context, client_princ);
+    isAnonPrincipal = krb5_principal_compare_any_realm(context, client_princ,
+                                                       krb5_anonymous_principal());
 
     /*
      * We confirm the subject - that is, add the principal name to the
@@ -388,7 +389,7 @@ saml_kdc_vouch(krb5_context context,
      * the subject. In the case of no explicit mapping (the well known
      * SAML principal is used) then there is no subject confirmation.
      */
-    if (isSamlPrincipal ||
+    if (isAnonPrincipal ||
         !krb5_realm_compare(context, client_princ, tgs->princ))
         return 0;
 
