@@ -742,7 +742,7 @@ prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request,
 {
     krb5_error errpkt;
     krb5_error_code retval;
-    krb5_data *scratch, *fast_edata = NULL;
+    krb5_data *scratch = NULL, *fast_edata = NULL;
     krb5_pa_data **pa = NULL;
 
     errpkt.ctime = request->nonce;
