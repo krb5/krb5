@@ -65,15 +65,19 @@ val_imp_name_args(
     if (input_name_buffer == GSS_C_NO_BUFFER)
 	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME);
 
-    if (input_name_buffer->length == 0)
-	return GSS_S_BAD_NAME;
+    if (input_name_type == GSS_C_NO_OID ||
+	!g_OID_equal(input_name_type, GSS_C_NT_ANONYMOUS)) {
+	if (input_name_buffer->length == 0)
+	    return (GSS_S_BAD_NAME);
 
-    if (input_name_buffer->value == NULL)
-	return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME);
+	if (input_name_buffer->value == NULL)
+	    return (GSS_S_CALL_INACCESSIBLE_READ | GSS_S_BAD_NAME);
+    }
 
     return (GSS_S_COMPLETE);
 }
 
+static gss_buffer_desc emptyNameBuffer;
 
 OM_uint32 KRB5_CALLCONV
 gss_import_name(minor_status,
@@ -89,6 +93,9 @@ gss_name_t *		output_name;
 {
     gss_union_name_t	union_name;
     OM_uint32		tmp, major_status = GSS_S_FAILURE;
+
+    if (input_name_buffer == GSS_C_NO_BUFFER)
+	input_name_buffer = &emptyNameBuffer;
 
     major_status = val_imp_name_args(minor_status,
 				     input_name_buffer, input_name_type,
