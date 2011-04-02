@@ -151,7 +151,7 @@ is_cross_tgs_principal(krb5_const_principal principal)
             data_eq_string(*krb5_princ_component(kdc_context, principal, 0),
                            KRB5_TGS_NAME) &&
             !data_eq(*krb5_princ_component(kdc_context, principal, 1),
-                     *krb5_princ_realm(kcd_context, principal)));
+                     *krb5_princ_realm(kdc_context, principal)));
 }
 
 /*
