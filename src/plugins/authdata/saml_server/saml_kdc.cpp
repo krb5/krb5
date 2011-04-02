@@ -403,6 +403,20 @@ saml_kdc_vouch(krb5_context context,
 }
 
 static krb5_boolean
+saml_is_tgs_princ(krb5_context context,
+                  krb5_const_principal principal)
+{
+    if (krb5_princ_size(context, principal) != 2)
+        return FALSE;
+
+    if (!data_eq_string(*krb5_princ_component(context, principal, 0),
+                        (char *)KRB5_TGS_NAME))
+        return FALSE;
+
+    return TRUE;
+}
+
+static krb5_boolean
 saml_is_idp_princ(krb5_context context,
                   krb5_const_principal principal)
 {
@@ -746,6 +760,7 @@ saml_kdc_encode(krb5_context context,
     return code;
 }
 
+
 krb5_error_code
 saml_authdata(krb5_context context,
               unsigned int flags,
@@ -791,6 +806,16 @@ saml_authdata(krb5_context context,
                                          assertion, fromTGT, &vouch);
         if (code != 0)
             goto cleanup;
+
+        /*
+         * Don't include unverified assertions in TGTs, because we
+         * may trust them implicitly.
+         */
+        if (vouch == FALSE &&
+            saml_is_tgs_princ(context, server->princ)) {
+            delete assertion;
+            assertion = NULL;
+        }
     } else if (client != NULL) {
         code = saml_kdc_build_assertion(context, flags,
                                         client_princ, client,
