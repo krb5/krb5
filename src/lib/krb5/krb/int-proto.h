@@ -156,4 +156,8 @@ krb5_boolean
 k5_privsafe_check_seqnum(krb5_context ctx, krb5_auth_context ac,
                          krb5_ui_4 in_seq);
 
+krb5_error_code
+k5_privsafe_check_addrs(krb5_context context, krb5_auth_context ac,
+                        krb5_address *msg_s_addr, krb5_address *msg_r_addr);
+
 #endif /* KRB5_INT_FUNC_PROTO__ */

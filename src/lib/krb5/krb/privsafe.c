@@ -190,3 +190,77 @@ k5_privsafe_check_seqnum(krb5_context ctx, krb5_auth_context ac,
     }
     return 0;
 }
+
+/*
+ * Verify the sender and receiver addresses from a KRB-SAFE or KRB-PRIV message
+ * against the auth context.  msg_r_addr may be NULL, but msg_s_addr must not
+ * be.  The auth context's remote addr must be set.
+ */
+krb5_error_code
+k5_privsafe_check_addrs(krb5_context context, krb5_auth_context ac,
+                        krb5_address *msg_s_addr, krb5_address *msg_r_addr)
+{
+    krb5_error_code ret = 0;
+    krb5_address **our_addrs = NULL;
+    const krb5_address *local_addr, *remote_addr;
+    krb5_address local_fulladdr, remote_fulladdr;
+
+    local_fulladdr.contents = remote_fulladdr.contents = NULL;
+
+    /* Determine the remote comparison address. */
+    if (ac->remote_port != NULL) {
+        ret = krb5_make_fulladdr(context, ac->remote_addr, ac->remote_port,
+                                 &remote_fulladdr);
+        if (ret)
+            goto cleanup;
+        remote_addr = &remote_fulladdr;
+    } else
+        remote_addr = ac->remote_addr;
+
+    /* Determine the local comparison address (possibly NULL). */
+    if (ac->local_addr != NULL) {
+        if (ac->local_port != NULL) {
+            ret = krb5_make_fulladdr(context, ac->local_addr, ac->local_port,
+                                     &local_fulladdr);
+            if (ret)
+                goto cleanup;
+            local_addr = &local_fulladdr;
+        } else
+            local_addr = ac->local_addr;
+    } else
+        local_addr = NULL;
+
+    /* Check the remote address against the message's sender address. */
+    if (!krb5_address_compare(context, remote_addr, msg_s_addr)) {
+        ret = KRB5KRB_AP_ERR_BADADDR;
+        goto cleanup;
+    }
+
+    /* Receiver address is optional; only check it if supplied. */
+    if (msg_r_addr == NULL)
+        goto cleanup;
+
+    /* Check the message's receiver address against the local address, or
+     * against all local addresses if no specific local address is set. */
+    if (local_addr != NULL) {
+        if (!krb5_address_compare(context, local_addr, msg_r_addr)) {
+            ret = KRB5KRB_AP_ERR_BADADDR;
+            goto cleanup;
+        }
+    } else {
+        ret = krb5_os_localaddr(context, &our_addrs);
+        if (ret)
+            goto cleanup;
+
+        if (!krb5_address_search(context, msg_r_addr, our_addrs)) {
+            ret = KRB5KRB_AP_ERR_BADADDR;
+            goto cleanup;
+        }
+    }
+
+cleanup:
+    free(local_fulladdr.contents);
+    free(remote_fulladdr.contents);
+    krb5_free_addresses(context, our_addrs);
+    return ret;
+}
