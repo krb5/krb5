@@ -74,9 +74,17 @@ s4u_identify_user(krb5_context context,
 
     if (in_creds->client != NULL &&
         krb5_princ_type(context, in_creds->client) !=
-        KRB5_NT_ENTERPRISE_PRINCIPAL)
-        /* we already know the realm of the user */
-        return krb5_copy_principal(context, in_creds->client, canon_user);
+        KRB5_NT_ENTERPRISE_PRINCIPAL) {
+        int anonymous;
+
+        anonymous = krb5_principal_compare(context, in_creds->client,
+                                           krb5_anonymous_principal());
+
+        return krb5_copy_principal(context,
+                                   anonymous ? in_creds->server
+                                             : in_creds->client,
+                                   canon_user);
+    }
 
     memset(&creds, 0, sizeof(creds));
 
@@ -503,7 +511,7 @@ krb5_get_self_cred_from_kdc(krb5_context context,
 
     /* First, acquire a TGT to the user's realm. */
     code = krb5int_tgtname(context, user_realm,
-                        krb5_princ_realm(context, in_creds->server), &tgs);
+                           krb5_princ_realm(context, in_creds->server), &tgs);
     if (code != 0)
         goto cleanup;
 
