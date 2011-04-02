@@ -1137,7 +1137,6 @@ kerberosProtocolTransition(OM_uint32 *minor,
      */
     if (flags & FLAG_ANON) {
         int more = -1;
-        gss_buffer_desc anonNameBuf;
         gss_buffer_desc tmp = GSS_C_EMPTY_BUFFER;
 
         (void) gss_get_name_attribute(minor, authenticatedInitiator,
@@ -1145,11 +1144,8 @@ kerberosProtocolTransition(OM_uint32 *minor,
                                       &assertion, &tmp, &more);
         gss_release_buffer(&tmpMinor, &tmp);
 
-        anonNameBuf.value = KRB5_WELLKNOWN_NAMESTR "/" KRB5_ANONYMOUS_PRINCSTR "@" KRB5_ANONYMOUS_REALMSTR;
-        anonNameBuf.length = strlen((char *)anonNameBuf.value);
-
-        major = gss_import_name(minor, &anonNameBuf,
-                                GSS_C_NT_USER_NAME, &anonName);
+        major = gss_import_name(minor, GSS_C_NO_BUFFER,
+                                GSS_C_NT_ANONYMOUS, &anonName);
         if (GSS_ERROR(major)) {
             display_status("gss_import_name", major, *minor);
             goto out;
