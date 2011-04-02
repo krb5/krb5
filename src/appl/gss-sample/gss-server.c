@@ -1129,6 +1129,12 @@ kerberosProtocolTransition(OM_uint32 *minor,
     assertionAttr.value = "urn:ietf:params:gss-eap:saml-aaa-assertion";
     assertionAttr.length = strlen((char *)assertionAttr.value);
 
+    /*
+     * If we're doing anonymous S4U2Self, then create a new anonymous
+     * name and manually propagate the assertion. Otherwise, pass the
+     * name we received from gss_accept_sec_context() directly to
+     * gss_acquire_cred_impersonate_name().
+     */
     if (flags & FLAG_ANON) {
         int more = -1;
         gss_buffer_desc anonNameBuf;
