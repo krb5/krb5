@@ -32,6 +32,8 @@
 
 #include "../saml_server/saml_krb.h"
 
+#include <gssapi/gssapi_ext.h>
+
 #include <shibsp/exceptions.h>
 #include <shibsp/attribute/SimpleAttribute.h>
 #include <shibresolver/resolver.h>
@@ -228,18 +230,12 @@ saml_fini(krb5_context kcontext, void *plugin_context)
 {
 }
 
-static const krb5_data
-saml_assertion_attr = {
-    KV5M_DATA,
-    /* XXX this is for Moonshot interoperability demonstrability only */
-    sizeof("urn:ietf:params:gss-eap:saml-aaa-assertion") - 1,
-    (char *)"urn:ietf:params:gss-eap:saml-aaa-assertion"
-};
-
 static krb5_boolean
 saml_is_assertion_attr(const krb5_data *attr)
 {
-    return data_eq(*attr, saml_assertion_attr);
+    return (attr->length == GSS_C_ATTR_SAML_ASSERTION->length &&
+            memcmp(attr->data, GSS_C_ATTR_SAML_ASSERTION->value,
+                   GSS_C_ATTR_SAML_ASSERTION->length) == 0);
 }
 
 static shibsp::Attribute *
@@ -387,7 +383,12 @@ saml_get_attribute_types(krb5_context kcontext,
         return code;
 
     if (sc->assertion != NULL) {
-        code = krb5int_copy_data_contents_add0(kcontext, &saml_assertion_attr, &attrs[i++]);
+        krb5_data saml;
+
+        saml.length = GSS_C_ATTR_SAML_ASSERTION->length;
+        saml.data = (char *)GSS_C_ATTR_SAML_ASSERTION->value;
+
+        code = krb5int_copy_data_contents_add0(kcontext, &saml, &attrs[i++]);
         if (code != 0) {
             free(attrs);
             return code;

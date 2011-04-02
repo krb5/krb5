@@ -18,7 +18,7 @@ SO_EXT=.so
 SHLIB_EXPDEPS = $(TOPLIBD)/libk5crypto$(SHLIBEXT) \
 	$(TOPLIBD)/libkrb5$(SHLIBEXT)
 SAML_LIBS = -L/usr/local/lib -lsaml -lshibresolver -lshibsp -lxml-security-c -lxmltooling -lxerces-c
-SHLIB_EXPLIBS= -lkrb5 -lcom_err -lk5crypto $(SUPPORT_LIB) $(LIBS) $(SAML_LIBS)
+SHLIB_EXPLIBS= $(GSS_LIBS) $(KRB5_BASE_LIBS) $(SUPPORT_LIB) $(LIBS) $(SAML_LIBS)
 
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
