@@ -1,7 +1,38 @@
 /*
+ * Copyright (c) 2011, PADL Software Pty Ltd.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of PADL Software nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY PADL SOFTWARE AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL PADL SOFTWARE OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
+ */
+/*
  * plugins/authdata/saml_server/saml_kdc.cpp
  *
- * Copyright 2009 by the Massachusetts Institute of Technology.
+ * Portions Copyright 2009 by the Massachusetts Institute of Technology.
  *
  * Export of this software from the United States of America may
  *   require a specific license from the United States Government.
@@ -416,25 +447,6 @@ saml_is_tgs_princ(krb5_context context,
     return TRUE;
 }
 
-static krb5_boolean
-saml_is_idp_princ(krb5_context context,
-                  krb5_const_principal principal)
-{
-    if (krb5_princ_size(context, principal) != 2)
-        return FALSE;
-
-    if (!data_eq_string(*krb5_princ_component(context, principal, 0),
-                        (char *)"saml-idp"))
-        return FALSE;
-
-#if 0
-    if (!data_eq(*krb5_princ_component(context, principal, 1),
-                 *krb5_princ_realm(context, principal)));
-#endif
-
-    return TRUE;
-}
-
 class KDBKeyInfoResolver : public XSECKeyInfoResolver {
 
 public:
@@ -631,62 +643,6 @@ saml_kdc_verify_assertion(krb5_context context,
 }
 
 static krb5_error_code
-saml_kdc_build_signature(krb5_context context,
-                         krb5_const_principal keyOwner,
-                         krb5_keyblock *key,
-                         unsigned int usage,
-                         Signature **pSignature)
-{
-    krb5_error_code code;
-    KeyInfo *keyInfo;
-    XSECCryptoKey *xmlKey;
-    Signature *signature;
-    auto_ptr_XMLCh algorithm(URI_ID_HMAC_SHA512);
-
-    *pSignature = NULL;
-
-#if 0
-    krb5_principal idp;
-    krb5_key_data *p;
-    krb5_keyblock key2;
-    krb5_db_entry *entry;
-    code = krb5_parse_name(context, "saml-idp/MIT.DE.PADL.COM@MIT.DE.PADL.COM", &idp);
-    assert(!code);
-    usage = SAML_KRB_USAGE_SERVER_KEY;
-    code = krb5_db_get_principal(context, idp, 0, &entry);
-    assert(!code);
-    code = krb5_dbe_find_enctype(context, entry, -1, -1, 0, &p);
-    code = krb5_dbe_decrypt_key_data(context, NULL, p, &key2, NULL);
-
-    key = &key2;
-    keyOwner = idp;
-#endif
-
-    if (keyOwner != NULL) {
-        code = saml_krb_build_principal_keyinfo(context, keyOwner,
-                                                key->enctype, &keyInfo);
-        if (code != 0)
-            return code;
-    }
-
-    code = saml_krb_derive_key(context, key, usage, &xmlKey);
-    if (code != 0) {
-        delete keyInfo;
-        return code;
-    }
-
-    signature = SignatureBuilder::buildSignature();
-    signature->setSignatureAlgorithm(algorithm.get());
-    signature->setSigningKey(xmlKey);
-    if (keyOwner != NULL)
-        signature->setKeyInfo(keyInfo);
-
-    *pSignature = signature;
-
-    return 0;
-}
-
-static krb5_error_code
 saml_kdc_encode(krb5_context context,
                 unsigned int flags,
                 krb5_const_principal client_princ,
@@ -706,7 +662,7 @@ saml_kdc_encode(krb5_context context,
 
     try {
         if (sign) {
-            code = saml_kdc_build_signature(context, NULL,
+            code = saml_krb_build_signature(context, NULL,
                                             enc_tkt_reply->session,
                                             SAML_KRB_USAGE_SESSION_KEY,
                                             &signature);

@@ -27,12 +27,12 @@ STOBJLISTS=OBJS.ST
 STLIBOBJS= saml_kdc.o saml_ldap.o saml_util.o saml_trust.o
 SRCS=saml_kdc.cpp saml_ldap.cpp saml_util.cpp saml_trust.cpp
 
-all-unix:: all-liblinks
+all-unix:: all-liblinks saml_sign
 install-unix:: install-libs
 clean-unix:: clean-libs clean-libobjs
 
 clean::
-	$(RM) lib$(LIBBASE)$(SO_EXT)
+	$(RM) $(LIBBASE)$(SO_EXT) saml_sign
 
 @libnover_frag@
 @libobj_frag@
@@ -40,4 +40,11 @@ clean::
 # XXX for now
 CC=$(CXX)
 CXXFLAGS=-g -DGCC_HASCLASSVISIBILITY=1 -fvisibility=default
+
+saml_sign.o: saml_sign.cpp
+
+saml_sign: saml_sign.o $(STLIBOBJS)
+	$(CC_LINK) -o $@ saml_sign.o $(KRB5_BASE_LIBS) $(SAML_LIBS) saml_util.o saml_trust.o
+
+TEST_PROGS = saml_sign
 

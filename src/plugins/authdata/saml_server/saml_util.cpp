@@ -764,3 +764,60 @@ saml_krb_decode_assertion(krb5_context context,
     return saml_krb_decode_assertion(context, &data, pAssertion);
 }
 
+krb5_boolean
+saml_is_idp_princ(krb5_context context,
+                  krb5_const_principal principal)
+{
+    if (krb5_princ_size(context, principal) != 2)
+        return FALSE;
+
+    if (!data_eq_string(*krb5_princ_component(context, principal, 0),
+                        (char *)"saml-idp"))
+        return FALSE;
+
+#if 0
+    if (!data_eq(*krb5_princ_component(context, principal, 1),
+                 *krb5_princ_realm(context, principal)));
+#endif
+
+    return TRUE;
+}
+
+krb5_error_code
+saml_krb_build_signature(krb5_context context,
+                         krb5_const_principal keyOwner,
+                         krb5_keyblock *key,
+                         unsigned int usage,
+                         Signature **pSignature)
+{
+    krb5_error_code code;
+    KeyInfo *keyInfo;
+    XSECCryptoKey *xmlKey;
+    Signature *signature;
+    auto_ptr_XMLCh algorithm(URI_ID_HMAC_SHA512);
+
+    *pSignature = NULL;
+
+    if (keyOwner != NULL) {
+        code = saml_krb_build_principal_keyinfo(context, keyOwner,
+                                                key->enctype, &keyInfo);
+        if (code != 0)
+            return code;
+    }
+
+    code = saml_krb_derive_key(context, key, usage, &xmlKey);
+    if (code != 0) {
+        delete keyInfo;
+        return code;
+    }
+
+    signature = SignatureBuilder::buildSignature();
+    signature->setSignatureAlgorithm(algorithm.get());
+    signature->setSigningKey(xmlKey);
+    if (keyOwner != NULL)
+        signature->setKeyInfo(keyInfo);
+
+    *pSignature = signature;
+
+    return 0;
+}

@@ -208,6 +208,17 @@ saml_krb_decode_assertion(krb5_context context,
                           krb5_authdata *data,
                           saml2::Assertion **pAssertion);
 
+krb5_boolean
+saml_is_idp_princ(krb5_context context,
+                  krb5_const_principal principal);
+
+krb5_error_code
+saml_krb_build_signature(krb5_context context,
+                         krb5_const_principal keyOwner,
+                         krb5_keyblock *key,
+                         unsigned int usage,
+                         Signature **pSignature);
+
 /* Helper for transcoding krb5_data objects */
 class auto_ptr_krb5_data {
     MAKE_NONCOPYABLE(auto_ptr_krb5_data);
