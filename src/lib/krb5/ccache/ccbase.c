@@ -386,9 +386,13 @@ krb5_cc_move(krb5_context context, krb5_ccache src, krb5_ccache dst)
     if (!ret) {
         ret = krb5_cc_initialize(context, dst, princ);
     }
-    if (!ret) {
-        ret = krb5_cc_lock(context, dst);
+    if (ret) {
+        krb5_cc_unlock(context, src);
+        krb5_cccol_unlock(context);
+        return ret;
     }
+
+    ret = krb5_cc_lock(context, dst);
     if (!ret) {
         ret = krb5_cc_copy_creds(context, src, dst);
         krb5_cc_unlock(context, dst);
@@ -397,6 +401,8 @@ krb5_cc_move(krb5_context context, krb5_ccache src, krb5_ccache dst)
     krb5_cc_unlock(context, src);
     if (!ret) {
         ret = krb5_cc_destroy(context, src);
+    } else {
+        ret = krb5_cc_destroy(context, dst);
     }
     krb5_cccol_unlock(context);
     if (princ) {
