@@ -419,6 +419,11 @@ saml_krb_confirm_keyinfo(krb5_context context,
     return 0;
 }
 
+/*
+ * If the subject is not mapped to the anonymous Kerberos principal, and there
+ * exist subject confirmations, require that one matches the Kerberos principal
+ * name.
+ */
 krb5_error_code
 saml_krb_confirm_subject(krb5_context context,
                          const saml2::Subject *subject,
@@ -432,10 +437,10 @@ saml_krb_confirm_subject(krb5_context context,
     krb5_boolean confirmed = FALSE;
     krb5_boolean bound = FALSE;
 
-    if (krb5_principal_compare(context, principal,
-                               krb5_anonymous_principal())) {
-        confirmed = bound = TRUE;
-    } else {
+    if (!krb5_principal_compare(context, principal,
+                                krb5_anonymous_principal()) &&
+        confs.size() != 0) {
+
         for (vector<SubjectConfirmation *>::const_iterator sc = confs.begin();
              sc != confs.end();
              sc++) {
@@ -458,6 +463,8 @@ saml_krb_confirm_subject(krb5_context context,
             if (confirmed)
                 break;
         }
+    } else {
+        confirmed = bound = TRUE;
     }
 
     *pConfirmed = confirmed;
@@ -641,6 +648,7 @@ saml_krb_verify(krb5_context context,
     krb5_error_code code;
     krb5_boolean verified = FALSE;
     krb5_boolean bound = FALSE;
+    krb5_timestamp sauthtime;
     Signature *signature;
     Subject *subject;
 
@@ -670,11 +678,17 @@ saml_krb_verify(krb5_context context,
             return KRB5KRB_AP_ERR_MODIFIED;
     }
 
-    if (saml_krb_get_authtime(context, assertion) < authtime)
+    /*
+     * Authtime is optional (derived from AuthnStatements); if present,
+     * assert that it is on or after the ticket authtime.
+     */
+    sauthtime = saml_krb_get_authtime(context, assertion);
+    if (sauthtime != 0 && sauthtime < authtime)
         return KRB5KDC_ERR_CLIENT_NOTYET;
 
     /*
-     * Verify the assertion is appropriately bound to the ticket client
+     * Verify that the Subject in any SubjectConfirmationData matches
+     * matches the client principal.
      */
     code = saml_krb_confirm_subject(context, subject, client_princ,
                                     authtime, &verified, &bound);
