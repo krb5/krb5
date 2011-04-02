@@ -1101,7 +1101,6 @@ kerberosProtocolTransition(OM_uint32 *minor,
     gss_OID_set_desc mechs;
     gss_OID_set actual_mechs = GSS_C_NO_OID_SET;
     gss_buffer_desc assertion = GSS_C_EMPTY_BUFFER;
-    gss_buffer_desc assertionAttr = GSS_C_EMPTY_BUFFER;
     int authenticated = 0, complete;
 
     mechs.elements = (gss_OID)gss_mech_krb5;
@@ -1126,9 +1125,6 @@ kerberosProtocolTransition(OM_uint32 *minor,
     fprintf(logfile, "Protocol transition tests follow\n");
     fprintf(logfile, "-----------------------------------\n\n");
 
-    assertionAttr.value = "urn:ietf:params:gss-eap:saml-aaa-assertion";
-    assertionAttr.length = strlen((char *)assertionAttr.value);
-
     /*
      * If we're doing anonymous S4U2Self, then create a new anonymous
      * name and manually propagate the assertion. Otherwise, pass the
@@ -1140,7 +1136,8 @@ kerberosProtocolTransition(OM_uint32 *minor,
         gss_buffer_desc tmp = GSS_C_EMPTY_BUFFER;
 
         (void) gss_get_name_attribute(minor, authenticatedInitiator,
-                                      &assertionAttr, &authenticated, &complete,
+                                      GSS_C_ATTR_SAML_ASSERTION,
+                                      &authenticated, &complete,
                                       &assertion, &tmp, &more);
         gss_release_buffer(&tmpMinor, &tmp);
 
@@ -1162,7 +1159,8 @@ kerberosProtocolTransition(OM_uint32 *minor,
 
     if ((flags & FLAG_ANON) && authenticated && assertion.length != 0) {
         major = gss_set_name_attribute(minor, user, complete,
-                                       &assertionAttr, &assertion);
+                                       GSS_C_ATTR_SAML_ASSERTION,
+                                       &assertion);
         if (GSS_ERROR(major)) {
             display_status("gss_set_name_attribute", major, *minor);
             goto out;
