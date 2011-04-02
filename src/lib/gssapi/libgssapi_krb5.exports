@@ -48,6 +48,7 @@ gss_complete_auth_token
 gss_context_time
 gss_create_empty_buffer_set
 gss_create_empty_oid_set
+gss_decapsulate_token
 gss_delete_name_attribute
 gss_delete_sec_context
 gss_display_mech_attr
@@ -55,6 +56,7 @@ gss_display_name
 gss_display_name_ext
 gss_display_status
 gss_duplicate_name
+gss_encapsulate_token
 gss_export_name
 gss_export_name_composite
 gss_export_sec_context
@@ -102,6 +104,7 @@ gss_nt_service_name
 gss_nt_service_name_v2
 gss_nt_string_uid_name
 gss_nt_user_name
+gss_oid_equal
 gss_oid_to_str
 gss_pseudo_random
 gss_process_context_token

@@ -102,3 +102,11 @@ gssint_copy_oid_set(
 {
     return generic_gss_copy_oid_set(minor_status, oidset, new_oidset);
 }
+
+int
+gss_oid_equal(
+    const gss_OID first_oid,
+    const gss_OID second_oid)
+{
+    return g_OID_equal(first_oid, second_oid);
+}

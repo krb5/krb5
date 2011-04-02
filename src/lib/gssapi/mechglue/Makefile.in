@@ -19,12 +19,14 @@ SRCS = \
 	$(srcdir)/g_compare_name.c \
 	$(srcdir)/g_complete_auth_token.c \
 	$(srcdir)/g_context_time.c \
+	$(srcdir)/g_decapsulate_token.c \
 	$(srcdir)/g_delete_sec_context.c \
 	$(srcdir)/g_del_name_attr.c \
 	$(srcdir)/g_dsp_name.c \
 	$(srcdir)/g_dsp_name_ext.c \
 	$(srcdir)/g_dsp_status.c \
 	$(srcdir)/g_dup_name.c \
+	$(srcdir)/g_encapsulate_token.c \
 	$(srcdir)/g_exp_sec_context.c \
 	$(srcdir)/g_export_name.c \
 	$(srcdir)/g_export_name_comp.c \
@@ -77,12 +79,14 @@ OBJS = \
 	$(OUTPRE)g_compare_name.$(OBJEXT) \
 	$(OUTPRE)g_complete_auth_token.$(OBJEXT) \
 	$(OUTPRE)g_context_time.$(OBJEXT) \
+	$(OUTPRE)g_decapsulate_token.$(OBJEXT) \
 	$(OUTPRE)g_delete_sec_context.$(OBJEXT) \
 	$(OUTPRE)g_del_name_attr.$(OBJEXT) \
 	$(OUTPRE)g_dsp_name.$(OBJEXT) \
 	$(OUTPRE)g_dsp_name_ext.$(OBJEXT) \
 	$(OUTPRE)g_dsp_status.$(OBJEXT) \
 	$(OUTPRE)g_dup_name.$(OBJEXT) \
+	$(OUTPRE)g_encapsulate_token.$(OBJEXT) \
 	$(OUTPRE)g_exp_sec_context.$(OBJEXT) \
 	$(OUTPRE)g_export_name.$(OBJEXT) \
 	$(OUTPRE)g_export_name_comp.$(OBJEXT) \
@@ -135,12 +139,14 @@ STLIBOBJS = \
 	g_compare_name.o \
 	g_complete_auth_token.o \
 	g_context_time.o \
+	g_decapsulate_token.o \
 	g_delete_sec_context.o \
 	g_del_name_attr.o \
 	g_dsp_name.o \
 	g_dsp_name_ext.o \
 	g_dsp_status.o \
 	g_dup_name.o \
+	g_encapsulate_token.o \
 	g_exp_sec_context.o \
 	g_export_name.o \
 	g_export_name_comp.o \
