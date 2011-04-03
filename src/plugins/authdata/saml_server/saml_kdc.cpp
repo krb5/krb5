@@ -681,7 +681,6 @@ saml_kdc_encode(krb5_context context,
     }
 
     if (getenv("SAML_DEBUG_SERIALIZE")) {
-        fprintf(stderr, "[%zu]\n", buf.length());
         fprintf(stderr, "%s\n", buf.c_str());
     }
 
@@ -719,7 +718,7 @@ saml_kdc_encode(krb5_context context,
 
 /*
  * Remove authdata that the KDC copied from the request. We will
- * arbitrary what goes in the reply.
+ * arbitrate what goes in the reply.
  */
 static void
 saml_reset_authdata(krb5_context context,
