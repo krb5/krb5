@@ -25,10 +25,12 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-#include "crypto_int.h"
+void krb5int_nfold(unsigned int inbits, const unsigned char *in,
+                   unsigned int outbits, unsigned char *out);
 
 #define ASIZE(ARRAY) (sizeof(ARRAY)/sizeof(ARRAY[0]))
 
