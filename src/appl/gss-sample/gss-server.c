@@ -77,7 +77,8 @@ enumerateAttributes(OM_uint32 *minor, gss_name_t name, int noisy);
 static OM_uint32
 kerberosProtocolTransition(OM_uint32 *minor,
                            gss_name_t authenticatedInitiator,
-                           int flags);
+                           int flags,
+                           gss_name_t delegTargetName);
 
 static void
 usage()
@@ -88,6 +89,7 @@ usage()
 #endif
     fprintf(stderr, "\n");
     fprintf(stderr,
+            "       [-s4u [[-anon] [-deleg deleg_service_name]]\n"
             "       [-inetd] [-export] [-logfile file] [-keytab keytab]\n"
             "       service_name\n");
     exit(1);
@@ -146,6 +148,29 @@ server_acquire_creds(char *service_name, gss_cred_id_t *server_creds)
     return 0;
 }
 
+static int
+import_deleg_target(char *target, gss_name_t *target_name)
+{
+    gss_buffer_desc name_buf;
+    OM_uint32 maj_stat, min_stat;
+
+    *target_name = GSS_C_NO_NAME;
+
+    if (target == NULL)
+        return 0;
+
+    name_buf.value = target;
+    name_buf.length = strlen(target) + 1;
+    maj_stat = gss_import_name(&min_stat, &name_buf,
+                               (gss_OID) gss_nt_service_name, target_name);
+    if (maj_stat != GSS_S_COMPLETE) {
+        display_status("importing name", maj_stat, min_stat);
+        return -1;
+    }
+
+    return 0;
+ }
+
 /*
  * Function: server_establish_context
  *
@@ -171,6 +196,7 @@ server_acquire_creds(char *service_name, gss_cred_id_t *server_creds)
  */
 static int
 server_establish_context(int s, gss_cred_id_t server_creds, int flags,
+                         gss_name_t deleg_target,
                          gss_ctx_id_t *context, gss_buffer_t client_name,
                          OM_uint32 *ret_flags)
 {
@@ -276,8 +302,9 @@ server_establish_context(int s, gss_cred_id_t server_creds, int flags,
             return -1;
         }
         enumerateAttributes(&min_stat, client, TRUE);
-        if (flags & FLAG_S4U)
-            kerberosProtocolTransition(&min_stat, client, flags);
+        if (flags & FLAG_S4U) {
+            kerberosProtocolTransition(&min_stat, client, flags, deleg_target);
+        }
         maj_stat = gss_release_name(&min_stat, &client);
         if (maj_stat != GSS_S_COMPLETE) {
             display_status("releasing name", maj_stat, min_stat);
@@ -421,7 +448,7 @@ test_import_export_context(gss_ctx_id_t *context)
  * If any error occurs, -1 is returned.
  */
 static int
-sign_server(int s, gss_cred_id_t server_creds, int flags)
+sign_server(int s, gss_cred_id_t server_creds, int flags, gss_name_t deleg_target)
 {
     gss_buffer_desc client_name, xmit_buf, msg_buf;
     gss_ctx_id_t context;
@@ -432,8 +459,8 @@ sign_server(int s, gss_cred_id_t server_creds, int flags)
     int     token_flags;
 
     /* Establish a context with the client */
-    if (server_establish_context(s, server_creds, flags, &context,
-                                 &client_name, &ret_flags) < 0)
+    if (server_establish_context(s, server_creds, flags, deleg_target,
+                                 &context, &client_name, &ret_flags) < 0)
         return (-1);
 
     if (context == GSS_C_NO_CONTEXT) {
@@ -630,6 +657,7 @@ struct _work_plan
     int     s;
     gss_cred_id_t server_creds;
     int     flags;
+    gss_name_t deleg_target;
 };
 
 static void
@@ -640,7 +668,7 @@ worker_bee(void *param)
     /* this return value is not checked, because there's
      * not really anything to do if it fails
      */
-    sign_server(work->s, work->server_creds, work->flags);
+    sign_server(work->s, work->server_creds, work->flags, work->deleg_target);
     closesocket(work->s);
     free(work);
 
@@ -660,6 +688,8 @@ main(int argc, char **argv)
     int     once = 0;
     int     do_inetd = 0;
     int     flags = 0;
+    char    *deleg_target_name = NULL;
+    gss_name_t deleg_target = GSS_C_NO_NAME;
 
     logfile = stdout;
     display_file = stdout;
@@ -694,6 +724,12 @@ main(int argc, char **argv)
             flags |= FLAG_S4U;
         } else if (strcmp(*argv, "-anon") == 0) {
             flags |= FLAG_ANON;
+        } else if (strcmp(*argv, "-deleg") == 0) {
+            argc--;
+            argv++;
+            if (!argc)
+                usage();
+            deleg_target_name = *argv;
         } else if (strcmp(*argv, "-logfile") == 0) {
             argc--;
             argv++;
@@ -751,11 +787,14 @@ main(int argc, char **argv)
     if (server_acquire_creds(service_name, &server_creds) < 0)
         return -1;
 
+    if (import_deleg_target(deleg_target_name, &deleg_target) < 0)
+        return -1;
+
     if (do_inetd) {
         close(1);
         close(2);
 
-        sign_server(0, server_creds, flags);
+        sign_server(0, server_creds, flags, deleg_target);
         close(0);
     } else {
         int     stmp;
@@ -781,6 +820,7 @@ main(int argc, char **argv)
 
                 work->server_creds = server_creds;
                 work->flags = flags;
+                work->deleg_target = deleg_target;
 
                 if (max_threads == 1) {
                     worker_bee((void *) work);
@@ -810,6 +850,7 @@ main(int argc, char **argv)
     }
 
     (void) gss_release_cred(&min_stat, &server_creds);
+    (void) gss_release_name(&min_stat, &deleg_target);
 
 #ifdef _WIN32
     CleanupHandles();
@@ -1089,7 +1130,8 @@ constrainedDelegate(OM_uint32 *minor,
 static OM_uint32
 kerberosProtocolTransition(OM_uint32 *minor,
                            gss_name_t authenticatedInitiator,
-                           int flags)
+                           int flags,
+                           gss_name_t delegTargetName)
 {
     OM_uint32 major, tmpMinor;
     gss_cred_id_t impersonator_cred_handle = GSS_C_NO_CREDENTIAL;
@@ -1097,7 +1139,6 @@ kerberosProtocolTransition(OM_uint32 *minor,
     gss_cred_id_t delegated_cred_handle = GSS_C_NO_CREDENTIAL;
     gss_name_t anonName = GSS_C_NO_NAME;
     gss_name_t user = GSS_C_NO_NAME;
-    gss_name_t target = GSS_C_NO_NAME;
     gss_OID_set_desc mechs;
     gss_OID_set actual_mechs = GSS_C_NO_OID_SET;
     gss_buffer_desc assertion = GSS_C_EMPTY_BUFFER;
@@ -1191,12 +1232,12 @@ kerberosProtocolTransition(OM_uint32 *minor,
 
     fprintf(logfile, "\n");
 
-    if (target != GSS_C_NO_NAME &&
+    if (delegTargetName != GSS_C_NO_NAME &&
         delegated_cred_handle != GSS_C_NO_CREDENTIAL) {
-        major = constrainedDelegate(minor, &mechs, target,
+        major = constrainedDelegate(minor, &mechs, delegTargetName,
                                     delegated_cred_handle,
                                     impersonator_cred_handle);
-    } else if (target != GSS_C_NO_NAME) {
+    } else if (delegTargetName != GSS_C_NO_NAME) {
         fprintf(stderr, "Warning: no delegated credentials handle returned\n\n");
         fprintf(stderr, "Verify:\n\n");
         fprintf(stderr, " - The TGT for the impersonating service is forwardable\n");
@@ -1207,7 +1248,6 @@ kerberosProtocolTransition(OM_uint32 *minor,
 
 out:
     (void) gss_release_name(&tmpMinor, &user);
-    (void) gss_release_name(&tmpMinor, &target);
     (void) gss_release_name(&tmpMinor, &anonName);
     (void) gss_release_cred(&tmpMinor, &delegated_cred_handle);
     (void) gss_release_cred(&tmpMinor, &impersonator_cred_handle);
