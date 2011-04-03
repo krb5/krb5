@@ -2013,9 +2013,6 @@ krb5_encode_kdc_rep(krb5_context, krb5_msgtype, const krb5_enc_kdc_rep_part *,
                     int using_subkey, const krb5_keyblock *, krb5_kdc_rep *,
                     krb5_data ** );
 
-krb5_boolean
-krb5int_auth_con_chkseqnum(krb5_context ctx, krb5_auth_context ac,
-                           krb5_ui_4 in_seq);
 /*
  * [De]Serialization Handle and operations.
  */
