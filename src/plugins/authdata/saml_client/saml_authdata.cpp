@@ -521,7 +521,7 @@ saml_get_attribute(krb5_context kcontext,
         nvalues = attr->valueCount();
         if (i == -1)
             i = 0;
-        else if (i >= nvalues)
+        if (i >= nvalues)
             return ENOENT;
 
         data.data = (char *)attr->getSerializedValues()[*more].c_str();
