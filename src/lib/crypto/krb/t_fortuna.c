@@ -83,7 +83,8 @@ display(const unsigned char *data, size_t len)
 static void
 head_tail_test(struct fortuna_state *st)
 {
-    unsigned char buffer[1024 * 1024], c;
+    static unsigned char buffer[1024 * 1024];
+    unsigned char c;
     size_t i, len = sizeof(buffer);
     int bit, bits[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
     double res;
@@ -104,7 +105,7 @@ head_tail_test(struct fortuna_state *st)
         res = ((double)abs(len - bits[bit] * 2)) / (double)len;
         if (res > 0.005){
             fprintf(stderr,
-                    "Bit %d: %d zero, %d one exceeds 0.5%% variance (%lf)\n",
+                    "Bit %d: %d zero, %d one exceeds 0.5%% variance (%f)\n",
                     bit, (int)len - bits[bit], bits[bit], res);
             exit(1);
         }
