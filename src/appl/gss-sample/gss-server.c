@@ -314,7 +314,7 @@ server_establish_context(int s, gss_cred_id_t server_creds, int flags,
         client_name->length = *ret_flags = 0;
 
         if (logfile)
-            printf("Accepted unauthenticated connection.\n");
+            fprintf(logfile, "Accepted unauthenticated connection.\n");
     }
 
     return 0;
