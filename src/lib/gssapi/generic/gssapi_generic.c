@@ -413,7 +413,7 @@ generic_gss_display_mech_attr(
     return GSS_S_BAD_MECH_ATTR;
 }
 
-gss_buffer_desc const_attrs[] = {
+static gss_buffer_desc const_attrs[] = {
     { sizeof("local-login-user") - 1,
       "local-login-user" },
 };
