@@ -258,17 +258,9 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
 #endif /* USE_CFBUNDLE */
 
 #ifdef RTLD_GROUP
-# ifdef RTLD_NODELETE
-#  define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL | RTLD_GROUP | RTLD_NODELETE)
-# else
-#  define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL | RTLD_GROUP)
-# endif
+#define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL | RTLD_GROUP)
 #else
-# ifdef RTLD_NODELETE
-#  define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL | RTLD_NODELETE)
-# else
-#  define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL)
-# endif
+#define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL)
 #endif
         if (!err) {
             handle = dlopen(filepath, PLUGIN_DLOPEN_FLAGS);
