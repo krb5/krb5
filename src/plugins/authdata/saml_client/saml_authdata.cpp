@@ -554,7 +554,7 @@ saml_get_attribute(krb5_context kcontext,
 
 static ssize_t
 saml_get_attribute_index(krb5_context kcontext,
-                         struct saml_context *sc,                    
+                         struct saml_context *sc,
                          const krb5_data *attribute)
 {
     int i = 0;
@@ -656,7 +656,7 @@ saml_export_internal(krb5_context kcontext,
 
     *ptr = (void *)(sc->assertion->clone());
 
-    return 0; 
+    return 0;
 }
 
 void
