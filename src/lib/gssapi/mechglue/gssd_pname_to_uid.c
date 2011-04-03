@@ -76,13 +76,9 @@ attr_pname_to_uid(OM_uint32 *minor,
 #ifndef NO_PASSWORD
     OM_uint32 tmpMinor;
     int more = -1;
-    gss_buffer_desc attribute;
 
     if (mech->gss_get_name_attribute == NULL)
         return GSS_S_UNAVAILABLE;
-
-    attribute.length = sizeof("local-login-user") - 1;
-    attribute.value = "local-login-user";
 
     while (more != 0) {
         gss_buffer_desc value;
@@ -94,7 +90,7 @@ attr_pname_to_uid(OM_uint32 *minor,
 
         major = mech->gss_get_name_attribute(minor,
                                              mech_name,
-                                             &attribute,
+                                             GSS_C_ATTR_LOCAL_LOGIN_USER,
                                              &authenticated,
                                              &complete,
                                              &value,

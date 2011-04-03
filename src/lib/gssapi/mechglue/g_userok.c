@@ -82,12 +82,8 @@ attr_userok(OM_uint32 *minor,
 	OM_uint32 tmpMinor;
 	size_t userLen = strlen(user);
 	int more = -1;
-	gss_buffer_desc attribute;
 
 	*user_ok = 0;
-
-	attribute.length = sizeof("local-login-user") - 1;
-	attribute.value = "local-login-user";
 
 	while (more != 0 && *user_ok == 0) {
 		gss_buffer_desc value;
@@ -96,7 +92,7 @@ attr_userok(OM_uint32 *minor,
 
 		major = gss_get_name_attribute(minor,
 					       name,
-					       &attribute,
+					       GSS_C_ATTR_LOCAL_LOGIN_USER,
 					       &authenticated,
 					       &complete,
 					       &value,
