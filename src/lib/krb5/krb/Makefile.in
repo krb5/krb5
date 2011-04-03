@@ -79,6 +79,7 @@ STLIBOBJS= \
 	preauth2.o	\
 	gic_opt_set_pa.o	\
 	princ_comp.o	\
+	privsafe.o	\
 	rd_cred.o	\
 	rd_error.o	\
 	rd_priv.o	\
@@ -181,6 +182,7 @@ OBJS=	$(OUTPRE)addr_comp.$(OBJEXT)	\
 	$(OUTPRE)preauth2.$(OBJEXT)	\
 	$(OUTPRE)gic_opt_set_pa.$(OBJEXT)	\
 	$(OUTPRE)princ_comp.$(OBJEXT)	\
+	$(OUTPRE)privsafe.$(OBJEXT)	\
 	$(OUTPRE)rd_cred.$(OBJEXT)	\
 	$(OUTPRE)rd_error.$(OBJEXT)	\
 	$(OUTPRE)rd_priv.$(OBJEXT)	\
@@ -283,6 +285,7 @@ SRCS=	$(srcdir)/addr_comp.c	\
 	$(srcdir)/preauth2.c	\
 	$(srcdir)/gic_opt_set_pa.c	\
 	$(srcdir)/princ_comp.c	\
+	$(srcdir)/privsafe.c	\
 	$(srcdir)/rd_cred.c	\
 	$(srcdir)/rd_error.c	\
 	$(srcdir)/rd_priv.c	\
