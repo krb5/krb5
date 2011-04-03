@@ -354,15 +354,16 @@ saml_import_authdata(krb5_context kcontext,
                      krb5_const_principal issuer)
 {
     struct saml_context *sc = (struct saml_context *)request_context;
+    krb5_error_code code;
+    saml2::Assertion *assertion;
 
-    if (sc->assertion != NULL) {
-        delete sc->assertion;
-        sc->assertion = NULL;
+    code = saml_krb_decode_assertion(kcontext, authdata[0], &assertion);
+    if (code == 0) {
+        saml_unresolve(kcontext, sc);
+        sc->assertion = assertion;
     }
 
-    sc->verified = FALSE;
-
-    return saml_krb_decode_assertion(kcontext, authdata[0], &sc->assertion);
+    return code;
 }
 
 static void
@@ -377,6 +378,7 @@ saml_unresolve(krb5_context kcontext,
 
     delete sc->assertion;
     sc->assertion = NULL;
+    sc->verified = FALSE;
 }
 
 static void
@@ -611,9 +613,8 @@ saml_set_attribute(krb5_context kcontext,
         }
 
         sc->attributes.push_back(attr);
+        sc->verified = FALSE;
     }
-
-    sc->verified = FALSE;
 
     return 0;
 }
@@ -634,9 +635,8 @@ saml_delete_attribute(krb5_context kcontext,
         i = saml_get_attribute_index(kcontext, sc, attribute);
         if (i >= 0)
             sc->attributes.erase(sc->attributes.begin() + i);
+        sc->verified = FALSE;
     }
-
-    sc->verified = FALSE;
 
     return 0;
 }
