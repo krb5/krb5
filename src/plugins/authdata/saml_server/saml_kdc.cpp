@@ -472,8 +472,8 @@ KDBKeyInfoResolver::resolveKerberosKey(krb5_context context,
                                        krb5_keyblock *key)
 {
     krb5_error_code code;
-    const DSIGKeyInfoName *keyName;
-    const DSIGKeyInfoMgmtData *mgmtData;
+    const DSIGKeyInfoName *keyName = NULL;
+    const DSIGKeyInfoMgmtData *mgmtData = NULL;
     krb5_int32 enctype;
     char *princName = NULL;
     krb5_principal principal = NULL;
@@ -806,7 +806,13 @@ saml_authdata(krb5_context context,
             delete assertion;
             assertion = NULL;
         }
-    } else if (client != NULL) {
+    }
+
+    /*
+     * If we failed to verify the assertion, and we have information
+     * about the client, create a new one.
+     */
+    if (vouch == FALSE && client != NULL) {
         code = saml_kdc_build_assertion(context, flags,
                                         client_princ, client,
                                         server, tgs,
