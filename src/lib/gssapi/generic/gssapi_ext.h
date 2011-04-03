@@ -386,22 +386,22 @@ OM_uint32 KRB5_CALLCONV gss_release_any_name_mapping
 /* draft-josefsson-gss-capsulate */
 OM_uint32 KRB5_CALLCONV gss_encapsulate_token
 (
-    const gss_buffer_t, /* input_token */
-    const gss_OID,      /* token_oid */
-    const gss_buffer_t  /* output_token */
+    gss_const_buffer_t, /* input_token */
+    gss_const_OID,      /* token_oid */
+    gss_buffer_t        /* output_token */
 );
 
 OM_uint32 KRB5_CALLCONV gss_decapsulate_token
 (
-    const gss_buffer_t, /* input_token */
-    const gss_OID,      /* token_oid */
+    gss_const_buffer_t, /* input_token */
+    gss_const_OID,      /* token_oid */
     gss_buffer_t        /* output_token */
 );
 
 int KRB5_CALLCONV gss_oid_equal
 (
-    const gss_OID,      /* first_oid */
-    const gss_OID       /* second_oid */
+    gss_const_OID,      /* first_oid */
+    gss_const_OID       /* second_oid */
 );
 
 #ifdef __cplusplus
