@@ -116,7 +116,7 @@ main(int argc, char **argv)
 {
     struct fortuna_state test_state;
     struct fortuna_state *st = &test_state;
-    unsigned char buf[2 * 1024 * 1024];
+    static unsigned char buf[2 * 1024 * 1024];
     unsigned int i;
 
     /* Seed the generator with a known state. */
