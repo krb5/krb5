@@ -1023,13 +1023,6 @@ case $krb5_cv_host in
 esac
 AC_SUBST(SUPPORTLIB_MAJOR)
 
-# On the Mac we need CoreFoundation for UCS-2 conversion for RC4.
-case $krb5_cv_host in
-*-*-darwin* | *-*-rhapsody*) CRYPTO_LIBS="-framework CoreFoundation" ;;
-*)			     CRYPTO_LIBS="" ;;
-esac
-AC_SUBST(CRYPTO_LIBS)
-
 
 if test "$COM_ERR_VERSION" = k5 ; then
   K5_GEN_MAKEFILE(util/et)

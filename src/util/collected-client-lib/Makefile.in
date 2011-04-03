@@ -66,7 +66,7 @@ SHLIB_EXPDEPS =
 
 LIBS_UTILS=-lresolv
 # Add -lm if dumping thread stats, for sqrt.
-SHLIB_EXPLIBS= @CRYPTO_LIBS@ $(LIBS) $(DL_LIB) $(LIBS_UTILS)
+SHLIB_EXPLIBS= $(LIBS) $(DL_LIB) $(LIBS_UTILS)
 SHLIB_DIRS=
 SHLIB_RDIRS=
 
