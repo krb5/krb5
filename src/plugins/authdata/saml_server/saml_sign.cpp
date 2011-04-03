@@ -53,10 +53,17 @@ int main(int argc, char *argv[])
     krb5_authdata authdata;
     saml2::Assertion *assertion = NULL;
     string signedAssertionBuf;
+    int radius = 0;
 
     memset(&ent, 0, sizeof(ent));
     memset(&key, 0, sizeof(key));
     memset(&data, 0, sizeof(data));
+
+    if (argc > 1 && strcmp(argv[1], "-radius") == 0) {
+        radius = 1;
+        argc--;
+        argv++;
+    }
 
     if (argc > 4 || (argc > 1 && strcmp(argv[1], "-help") == 0)) {
         fprintf(stderr, "Usage: %s [assertion.xml|-] [idp-princ|-] [keytab|-]\n", argv[0]);
@@ -169,7 +176,39 @@ int main(int argc, char *argv[])
         goto cleanup;
     }
 
-    fprintf(stdout, "%s\n", signedAssertionBuf.c_str());
+    if (radius) {
+        /* Format assertion so that it can be loaded into FreeRADIUS */
+        size_t i, j, len = signedAssertionBuf.length();
+        const char *p = signedAssertionBuf.c_str();
+#define WRAP_LEN 200
+
+        for (i = 0, j = 0; i < len; i++) {
+            int esc = 0;
+            char c = p[i];
+
+            if ((j % WRAP_LEN) == 0) {
+                if (j)
+                    printf("\"\n");
+                printf("\t\tSAML-AAA-Assertion = \"");
+            }
+            if (c == '\n') {
+                esc++;
+                c = 'n';
+            } else if (c == '"') {
+                esc++;
+                c = '"';
+            }
+            if (esc) {
+                printf("\\");
+                j++;
+            }
+            printf("%c", c);
+            j++;
+        }
+        printf("\"\n");
+    } else {
+        printf("%s\n", signedAssertionBuf.c_str());
+    }
 
 cleanup:
     if (fp != stdin)
