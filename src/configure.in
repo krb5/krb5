@@ -192,8 +192,6 @@ AH_TEMPLATE([HAVE_STRUCT_SOCKADDR_STORAGE],
 [Define if "struct sockaddr_storage" is available.])
 
 AC_CONFIG_HEADERS(include/autoconf.h, [echo timestamp > include/autoconf.stamp])
-AC_PROG_INSTALL
-AC_PROG_AWK
 AC_PROG_LEX
 AC_C_CONST
 AC_HEADER_DIRENT
@@ -468,7 +466,6 @@ fi
 HAVE_YYLINENO
 CHECK_DIRENT
 AC_TYPE_UID_T
-AC_TYPE_MODE_T
 
 AC_CHECK_HEADER(termios.h,
 [AC_CHECK_FUNC([tcsetattr],
@@ -476,7 +473,6 @@ AC_CHECK_HEADER(termios.h,
 
 KRB5_SIGTYPE
 AC_CHECK_HEADERS(stdlib.h string.h stddef.h sys/types.h sys/file.h sys/param.h sys/stat.h sys/time.h netinet/in.h sys/uio.h sys/filio.h sys/select.h time.h paths.h errno.h)
-KRB5_AC_INET6
 
 # If compiling with IPv6 support, test if in6addr_any functions.
 # Irix 6.5.16 defines it, but lacks support in the C library.
@@ -704,7 +700,6 @@ ath_compat=compat,)
 # kadmin testing.
 AC_CHECK_PROG(have_RUNTEST,runtest,runtest)
 AC_CHECK_PROG(have_PERL,perl,perl)
-AC_KRB5_TCL	
 if test "$have_PERL" = perl -a "$have_RUNTEST" = runtest -a "$TCL_LIBS" != ""; then
  	DO_TEST=ok
 fi
