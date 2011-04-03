@@ -33,8 +33,8 @@
 #include "mglueP.h"
 
 OM_uint32
-gss_encapsulate_token(const gss_buffer_t input_token,
-                      const gss_OID token_oid,
+gss_encapsulate_token(gss_const_buffer_t input_token,
+                      gss_const_OID token_oid,
                       gss_buffer_t output_token)
 {
     unsigned int tokenSize;
