@@ -46,15 +46,11 @@ int quiet = 0;
 static int set_env_var (char *, char *);
 static void sweep_up (krb5_context, krb5_ccache);
 static char * ontty (void);
-#ifdef HAVE_STDARG_H
 static void print_status( const char *fmt, ...)
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7)
     __attribute__ ((__format__ (__printf__, 1, 2)))
 #endif
     ;
-#else
-static void print_status();
-#endif
 char * get_dir_of_file();
 
 /* Note -e and -a options are mutually exclusive */
@@ -943,27 +939,14 @@ get_params(optindex, pargc, pargv, params)
 }
 
 static
-#ifdef HAVE_STDARG_H
-void print_status( const char *fmt, ...)
-#else
-    void print_status (va_alist)
-    va_dcl
-#endif
+void print_status(const char *fmt, ...)
 {
     va_list ap;
-#ifndef HAVE_STDARG_H
-    char *fmt;
-    va_start (ap);
-    fmt = va_arg (ap, char*);
-    if (!quiet) vfprintf(stderr, fmt, ap);
-    va_end(ap);
-#else
     if (! quiet){
         va_start(ap, fmt);
         vfprintf(stderr, fmt, ap);
         va_end(ap);
     }
-#endif
 }
 
 

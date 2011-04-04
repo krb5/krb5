@@ -263,7 +263,7 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
 #define PLUGIN_DLOPEN_FLAGS (RTLD_NOW | RTLD_LOCAL)
 #endif
         if (!err) {
-            handle = dlopen(filepath, PLUGIN_DLOPEN_FLAGS | RTLD_NODELETE);
+            handle = dlopen(filepath, PLUGIN_DLOPEN_FLAGS);
             if (handle == NULL) {
                 const char *e = dlerror();
                 if (e == NULL)

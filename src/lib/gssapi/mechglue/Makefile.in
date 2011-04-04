@@ -69,7 +69,7 @@ SRCS = \
 	$(srcdir)/g_verify.c \
 	$(srcdir)/g_wrap_aead.c \
 	$(srcdir)/g_wrap_iov.c \
-	$(srcdir)/gssd_pname_to_uid.c \
+	$(srcdir)/gssd_pname_to_uid.c
 
 OBJS = \
 	$(OUTPRE)g_accept_sec_context.$(OBJEXT) \

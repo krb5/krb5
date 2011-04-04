@@ -178,10 +178,8 @@ OM_uint32 *		time_rec;
     } /* for */
 
     /* ensure that we have at least one credential element */
-    if (creds->count < 1) {
-	assert(GSS_ERROR(major));
+    if (creds->count < 1)
 	goto cleanup;
-    }
 
     /*
      * fill in output parameters

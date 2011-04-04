@@ -887,11 +887,10 @@ showLocalIdentity(OM_uint32 *minor, gss_name_t name)
     uid_t uid;
 
     major = gss_pname_to_uid(minor, name, GSS_C_NO_OID, &uid);
-    if (major == GSS_S_COMPLETE) {
-        printf("UID: %d\n", uid);
-    } else if (major != GSS_S_UNAVAILABLE) {
+    if (major == GSS_S_COMPLETE)
+        printf("UID: %lu\n", (unsigned long)uid);
+    else if (major != GSS_S_UNAVAILABLE)
         display_status("gss_pname_to_uid", major, *minor);
-    }
 
     return major;
 }

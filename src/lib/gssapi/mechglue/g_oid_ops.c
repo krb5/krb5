@@ -105,8 +105,8 @@ gssint_copy_oid_set(
 
 int
 gss_oid_equal(
-    const gss_OID first_oid,
-    const gss_OID second_oid)
+    gss_const_OID first_oid,
+    gss_const_OID second_oid)
 {
     return g_OID_equal(first_oid, second_oid);
 }

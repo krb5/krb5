@@ -726,49 +726,6 @@ AC_DEFUN(KRB5_AC_NEED_DAEMON, [
 KRB5_NEED_PROTO([#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif],daemon,1)])dnl
-dnl
-dnl Check if stdarg or varargs is available *and compiles*; prefer stdarg.
-dnl (This was sent to djm for incorporation into autoconf 3/12/1996.  KR)
-dnl
-AC_DEFUN(AC_HEADER_STDARG, [
-
-AC_MSG_CHECKING([for stdarg.h])
-AC_CACHE_VAL(ac_cv_header_stdarg_h,
-[AC_TRY_COMPILE([#include <stdarg.h>], [
-  } /* ac_try_compile will have started a function body */
-  int aoeu (char *format, ...) {
-    va_list v;
-    int i;
-    va_start (v, format);
-    i = va_arg (v, int);
-    va_end (v);
-],ac_cv_header_stdarg_h=yes,ac_cv_header_stdarg_h=no)])dnl
-AC_MSG_RESULT($ac_cv_header_stdarg_h)
-if test $ac_cv_header_stdarg_h = yes; then
-  AC_DEFINE(HAVE_STDARG_H, 1, [Define if stdarg available and compiles])
-else
-
-AC_MSG_CHECKING([for varargs.h])
-AC_CACHE_VAL(ac_cv_header_varargs_h,
-[AC_TRY_COMPILE([#include <varargs.h>],[
-  } /* ac_try_compile will have started a function body */
-  int aoeu (va_alist) va_dcl {
-    va_list v;
-    int i;
-    va_start (v);
-    i = va_arg (v, int);
-    va_end (v);
-],ac_cv_header_varargs_h=yes,ac_cv_header_varargs_h=no)])dnl
-AC_MSG_RESULT($ac_cv_header_varargs_h)
-if test $ac_cv_header_varargs_h = yes; then
-  AC_DEFINE(HAVE_VARARGS_H, 1, [Define if varargs available and compiles])
-else
-  AC_MSG_ERROR(Neither stdarg nor varargs compile?)
-fi
-
-fi dnl stdarg test failure
-
-])dnl
 
 dnl
 dnl KRB5_AC_NEED_LIBGEN --- check if libgen needs to be linked in for

@@ -52,7 +52,6 @@
 /* Test a DES implementation against known inputs & outputs. */
 
 #include "des_int.h"
-#include "crypto_int.h"
 #include <stdio.h>
 
 void convert (char *, unsigned char []);
