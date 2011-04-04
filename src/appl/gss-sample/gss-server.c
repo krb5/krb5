@@ -73,7 +73,8 @@
 
 static OM_uint32
 enumerateAttributes(OM_uint32 *minor, gss_name_t name, int noisy);
-
+static OM_uint32
+showLocalIdentity(OM_uint32 *minor, gss_name_t name);
 static OM_uint32
 kerberosProtocolTransition(OM_uint32 *minor,
                            gss_cred_id_t localCreds,
@@ -308,6 +309,7 @@ server_establish_context(int s, gss_cred_id_t server_creds, int flags,
             kerberosProtocolTransition(&min_stat, server_creds,
                                        client, flags, deleg_target);
         }
+        showLocalIdentity(&min_stat, client);
         maj_stat = gss_release_name(&min_stat, &client);
         if (maj_stat != GSS_S_COMPLETE) {
             display_status("releasing name", maj_stat, min_stat);
@@ -937,6 +939,7 @@ enumerateAttributes(OM_uint32 *minor,
 }
 
 static OM_uint32
+<<<<<<< HEAD
 displayCanonName(OM_uint32 *minor, gss_name_t name, char *tag)
 {
     gss_name_t canon;
@@ -1242,4 +1245,19 @@ out:
     (void) gss_release_buffer(&tmpMinor, &assertion);
 
     return GSS_ERROR(major) ? 1 : 0;
+}
+
+static OM_uint32
+showLocalIdentity(OM_uint32 *minor, gss_name_t name)
+{
+    OM_uint32 major;
+    uid_t uid;
+
+    major = gss_pname_to_uid(minor, name, GSS_C_NO_OID, &uid);
+    if (major == GSS_S_COMPLETE)
+        printf("UID: %lu\n", (unsigned long)uid);
+    else if (major != GSS_S_UNAVAILABLE)
+        display_status("gss_pname_to_uid", major, *minor);
+
+    return major;
 }

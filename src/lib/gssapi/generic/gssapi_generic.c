@@ -413,9 +413,12 @@ generic_gss_display_mech_attr(
     return GSS_S_BAD_MECH_ATTR;
 }
 
-gss_buffer_desc const_attrs[] = {
+static gss_buffer_desc const_attrs[] = {
+    { sizeof("local-login-user") - 1,
+      "local-login-user" },
     { sizeof("urn:ietf:params:gss-eap:saml-aaa-assertion") - 1,
-      "urn:ietf:params:gss-eap:saml-aaa-assertion" }
+      "urn:ietf:params:gss-eap:saml-aaa-assertion" },
 };
 
-GSS_DLLIMP gss_buffer_t GSS_C_ATTR_SAML_ASSERTION = &const_attrs[0];
+GSS_DLLIMP gss_buffer_t GSS_C_ATTR_LOCAL_LOGIN_USER = &const_attrs[0];
+GSS_DLLIMP gss_buffer_t GSS_C_ATTR_SAML_ASSERTION = &const_attrs[1];

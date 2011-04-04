@@ -65,9 +65,11 @@ SRCS = \
 	$(srcdir)/g_unseal.c \
 	$(srcdir)/g_unwrap_aead.c \
 	$(srcdir)/g_unwrap_iov.c \
+	$(srcdir)/g_userok.c \
 	$(srcdir)/g_verify.c \
 	$(srcdir)/g_wrap_aead.c \
-	$(srcdir)/g_wrap_iov.c
+	$(srcdir)/g_wrap_iov.c \
+	$(srcdir)/gssd_pname_to_uid.c
 
 OBJS = \
 	$(OUTPRE)g_accept_sec_context.$(OBJEXT) \
@@ -125,9 +127,11 @@ OBJS = \
 	$(OUTPRE)g_unseal.$(OBJEXT) \
 	$(OUTPRE)g_unwrap_aead.$(OBJEXT) \
 	$(OUTPRE)g_unwrap_iov.$(OBJEXT) \
+	$(OUTPRE)g_userok.$(OBJEXT) \
 	$(OUTPRE)g_verify.$(OBJEXT) \
 	$(OUTPRE)g_wrap_aead.$(OBJEXT) \
-	$(OUTPRE)g_wrap_iov.$(OBJEXT)
+	$(OUTPRE)g_wrap_iov.$(OBJEXT) \
+	$(OUTPRE)gssd_pname_to_uid.$(OBJEXT)
 
 STLIBOBJS = \
 	g_accept_sec_context.o \
@@ -185,9 +189,11 @@ STLIBOBJS = \
 	g_unseal.o \
 	g_unwrap_aead.o \
 	g_unwrap_iov.o \
+	g_userok.o \
 	g_verify.o \
 	g_wrap_aead.o \
-	g_wrap_iov.o
+	g_wrap_iov.o \
+	gssd_pname_to_uid.o
 
 EHDRDIR= $(BUILDTOP)$(S)include$(S)gssapi
 EXPORTED_HEADERS = mechglue.h
