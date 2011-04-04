@@ -412,3 +412,10 @@ generic_gss_display_mech_attr(
 
     return GSS_S_BAD_MECH_ATTR;
 }
+
+static gss_buffer_desc const_attrs[] = {
+    { sizeof("local-login-user") - 1,
+      "local-login-user" },
+};
+
+GSS_DLLIMP gss_buffer_t GSS_C_ATTR_LOCAL_LOGIN_USER = &const_attrs[0];

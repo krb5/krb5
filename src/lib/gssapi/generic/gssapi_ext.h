@@ -31,20 +31,21 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#if 0
 /*
  * Solaris extensions
  */
-int KRB5_CALLCONV gssd_pname_to_uid
-	(char *,
-	 gss_OID,
-	 gss_OID,
-	 uid_t *);
+OM_uint32 KRB5_CALLCONV
+gss_pname_to_uid
+	(OM_uint32 *minor,
+         const gss_name_t name,
+	 const gss_OID mech_type,
+	 uid_t *uidOut);
 
-int KRB5_CALLCONV __gss_userok
-	(const gss_name_t /*name*/,
-	 const char * /*username*/);
-#endif
+OM_uint32 KRB5_CALLCONV
+gss_userok(OM_uint32 *minor,
+           const gss_name_t name,
+           const char *user,
+           int *user_ok);
 
 OM_uint32 KRB5_CALLCONV
 gss_acquire_cred_with_password(
@@ -312,6 +313,8 @@ gss_add_cred_impersonate_name(
 /*
  * Naming extensions
  */
+GSS_DLLIMP extern gss_buffer_t GSS_C_ATTR_LOCAL_LOGIN_USER;
+
 OM_uint32 KRB5_CALLCONV gss_display_name_ext
 (
     OM_uint32 *,	/* minor_status */

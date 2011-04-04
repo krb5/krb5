@@ -84,6 +84,10 @@
 #include "gssapiP_krb5.h"
 #include "mglueP.h"
 
+#ifndef NO_PASSWORD
+#include <pwd.h>
+#endif
+
 /** exported constants defined in gssapi_krb5{,_nx}.h **/
 
 /* these are bogus, but will compile */
@@ -745,6 +749,87 @@ cleanup:
     return major;
 }
 
+#ifndef NO_PASSWORD
+static OM_uint32
+krb5_gss_pname_to_uid(OM_uint32 *minor,
+                      const gss_name_t pname,
+                      const gss_OID mech_type,
+                      uid_t *uid)
+{
+    krb5_context context;
+    krb5_error_code code;
+    krb5_gss_name_t kname;
+    char localname[BUFSIZ], pwbuf[BUFSIZ];
+    struct passwd pwx, *pw;
+
+    code = krb5_gss_init_context(&context);
+    if (code != 0) {
+        *minor = code;
+        return GSS_S_FAILURE;
+    }
+
+    if (!kg_validate_name(pname)) {
+        *minor = (OM_uint32)G_VALIDATE_FAILED;
+        krb5_free_context(context);
+        return GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME;
+    }
+
+    kname = (krb5_gss_name_t)pname;
+
+    code = krb5_aname_to_localname(context, kname->princ,
+                                   sizeof(localname), localname);
+    if (code != 0) {
+        *minor = KRB5_NO_LOCALNAME;
+        krb5_free_context(context);
+        return GSS_S_FAILURE;
+    }
+
+    code = k5_getpwnam_r(localname, &pwx, pwbuf, sizeof(pwbuf), &pw);
+    if (code == 0 && pw != NULL)
+        *uid = pw->pw_uid;
+    else
+        *minor = KRB5_NO_LOCALNAME;
+
+    krb5_free_context(context);
+
+    return (code == 0) ? GSS_S_COMPLETE : GSS_S_FAILURE;
+}
+#endif /* !NO_PASSWORD */
+
+static OM_uint32
+krb5_gss_userok(OM_uint32 *minor,
+                const gss_name_t pname,
+                const char *local_user,
+                int *user_ok)
+{
+    krb5_context context;
+    krb5_error_code code;
+    krb5_gss_name_t kname;
+
+    *minor = 0;
+    *user_ok = 0;
+
+    code = krb5_gss_init_context(&context);
+    if (code != 0) {
+        *minor = code;
+        return GSS_S_FAILURE;
+    }
+
+    if (!kg_validate_name(pname)) {
+        *minor = (OM_uint32)G_VALIDATE_FAILED;
+        krb5_free_context(context);
+        return GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME;
+    }
+
+    kname = (krb5_gss_name_t)pname;
+
+    *user_ok = krb5_kuserok(context, kname->princ, local_user);
+
+    krb5_free_context(context);
+
+    return GSS_S_COMPLETE;
+}
+
 static struct gss_config krb5_mechanism = {
     { GSS_MECH_KRB5_OID_LENGTH, GSS_MECH_KRB5_OID },
     NULL,
@@ -791,6 +876,12 @@ static struct gss_config krb5_mechanism = {
     krb5_gss_inquire_context,
     krb5_gss_internal_release_oid,
     krb5_gss_wrap_size_limit,
+#ifdef NO_PASSWORD
+    NULL,
+#else
+    krb5_gss_pname_to_uid,
+#endif
+    krb5_gss_userok,
     krb5_gss_export_name,
     krb5_gss_store_cred,
     krb5_gss_inquire_sec_context_by_oid,
