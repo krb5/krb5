@@ -355,6 +355,12 @@ typedef struct gss_config {
 		const gss_name_t,	/* input_name */
 		gss_buffer_t		/* exported_name */
 	/* */);
+        OM_uint32       (*gss_duplicate_name)
+	(
+		    OM_uint32*,		/* minor_status */
+		    const gss_name_t,	/* input_name */
+		    gss_name_t *	/* output_name */
+	/* */);
 	OM_uint32	(*gss_store_cred)
 	(
 		OM_uint32 *,		/* minor_status */

@@ -246,6 +246,7 @@ static struct gss_config spnego_mechanism =
 	NULL,				/* gssd_pname_to_uid */
 	NULL,				/* gss_userok */
 	NULL,				/* gss_export_name */
+	spnego_gss_duplicate_name,	/* gss_duplicate_name */
 	NULL,				/* gss_store_cred */
  	spnego_gss_inquire_sec_context_by_oid, /* gss_inquire_sec_context_by_oid */
  	spnego_gss_inquire_cred_by_oid,	/* gss_inquire_cred_by_oid */
@@ -1852,6 +1853,23 @@ spnego_gss_release_name(
 	status = gss_release_name(minor_status, input_name);
 
 	dsyslog("Leaving release_name\n");
+	return (status);
+}
+
+/*ARGSUSED*/
+OM_uint32
+spnego_gss_duplicate_name(
+			OM_uint32 *minor_status,
+			const gss_name_t input_name,
+			gss_name_t *output_name)
+{
+	OM_uint32 status;
+
+	dsyslog("Entering duplicate_name\n");
+
+	status = gss_duplicate_name(minor_status, input_name, output_name);
+
+	dsyslog("Leaving duplicate_name\n");
 	return (status);
 }
 
