@@ -1950,16 +1950,17 @@ typedef struct _krb5_cccol_cursor *krb5_cccol_cursor;
 #define KRB5_TC_OPENCLOSE               0x00000001
 #define KRB5_TC_NOTICKET                0x00000002
 
-/**
- * @brief Retrieve the name but not type of a credential cache.
+/** Retrieve the name but not type of a credential cache.
  *
- * @param context           Context structure [input, output]
- * @param cache            Credentials cache handle [input]
+ * @param [in] context          Context structure
+ * @param [in] cache            Credentials cache handle
  *
- * Returns the name of the credential cache as an alias that should not be
- * freed or modified by the caller.  This name does not include the type
- * portion, so cannot be used as input to krb5_cc_resolve().
- * Make sure to free the allocated memory when it is no longer needed.
+ * @warning Returns the name of the credential cache as an alias that
+ * should not be freed or modified by the caller.  This name does not
+ * include the type portion, so cannot be used as input to krb5_cc_resolve().
+ *
+ * @return
+ * On success - the name of the credential cache.
  */
 const char * KRB5_CALLCONV
 krb5_cc_get_name(krb5_context context, krb5_ccache cache);
@@ -1978,15 +1979,14 @@ krb5_cc_get_name(krb5_context context, krb5_ccache cache);
 krb5_error_code KRB5_CALLCONV
 krb5_cc_gen_new(krb5_context context, krb5_ccache *cache);
 
-/**
- * @brief Destroy an existing credentials cache and create a new credentials cache by the same name.
+/** Initialize credentials cache.
  *
- * @param context                      Context structure [input, output]
- * @param cache                       Credentials cache handle [input, output]
- * @param principal                    Primary principal name for the credentials cache [output]
+ * @param [in] context       Context structure
+ * @param [in] cache         Credentials cache handle
+ * @param [in] principal     Default principal name for the credentials cache
  *
- * Destroy an existing credentials cache and create a new credentials cache by the same name,
- * as specifed by @a cache for specified principal.
+ * Destroy an existing credentials cache and create a new credentials cache
+ * by the same name, as specifed by @a cache for specified @a principal.
  *
  * @note This function also modifies the specified credentials cache.
  *
@@ -2003,37 +2003,35 @@ krb5_error_code KRB5_CALLCONV
 krb5_cc_initialize(krb5_context context, krb5_ccache cache,
                    krb5_principal principal);
 
-/**
- * @brief Destroy a credentials cache.
+/** Destroy a credentials cache.
  *
- * @param context           Context structure [input, output]
- * @param cache            Credentials cache handle [input]
+ * @param [in] context          Context structure
+ * @param [in] cache            Credentials cache handle
  *
- * This function invalidates @a cache and releases any other resources
- * acquired during use of the credentials cache. @a cache must identify a valid credentials cache.
+ * This function closes and deletes @a cache and releases any other resources
+ * acquired during use of the credentials cache.
+ * @a cache must identify a valid credentials cache.
  *
- * @note After completion, do not use @a cache until it is reinitialized with krb5_cc_resolve() or krb5_cc_gen_new().
+ * @note After completion, @a cache may not be used. It may be reinitialized
+ * with krb5_cc_resolve() or krb5_cc_gen_new().
  *
  * @retval
- *  0  Success
+ * 0  Success
  * @return
- *  Permission errors
- *
- * @sa krb5_cc_gen_new()
+ * Permission errors
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_destroy(krb5_context context, krb5_ccache cache);
 
-/**
- * @brief  Close a credentials cache and invalidate its handle.
+/** Close a credentials cache and invalidate its handle.
  *
- * @param context                Context structure [input, output]
- * @param cache                  Credentials cache handle [input, output]
+ * @param [in] context                Context structure
+ * @param [in] cache                  Credentials cache handle
  *
- * @note Reinitialize @a cache with krb5_cc_resolve() or  krb5_cc_gen_new().
+ * @note Reinitialize @a cache with krb5_cc_resolve() or krb5_cc_gen_new().
  *
  * @retval
- *  0    Success
+ * 0  Success
  * @return
  * Kerberos error codes
  */
@@ -2096,19 +2094,18 @@ krb5_cc_retrieve_cred(krb5_context context, krb5_ccache cache,
                       krb5_flags flags, krb5_creds *mcreds,
                       krb5_creds *creds);
 
-/**
- * @brief Get the primary principal of a credentials cache.
+/** Get the primary principal of a credentials cache.
  *
- * @param context            Context structure [input, output]
- * @param cache              Credentials cache handle  [input]
- * @param principal          Primary principal [output]
+ * @param [in]  context            Context structure
+ * @param [in]  cache              Credentials cache handle
+ * @param [out] principal          Primary principal
  *
- * @note The primary principal is set by calling  krb5_cc_initialize().
+ * @note The primary principal is set by calling krb5_cc_initialize().
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * Use krb5_free_principal() to free @a principal when it is no longer needed.
  *
  * @retval
- *  0  Success
+ * 0  Success
  * @return
  * Kerberos error codes
  */
@@ -2254,13 +2251,10 @@ krb5_cc_set_flags(krb5_context context, krb5_ccache cache, krb5_flags flags);
 krb5_error_code KRB5_CALLCONV
 krb5_cc_get_flags(krb5_context context, krb5_ccache cache, krb5_flags *flags);
 
-/**
- * @brief Retrieve the type of a credential cache.
+/** Retrieve the type of a credential cache.
  *
- * @param context           Context structure [input, output]
- * @param cache             Credentials cache handle [input]
- *
- * Make sure to free the allocated memory when it is no longer needed.
+ * @param [in] context           Context structure
+ * @param [in] cache             Credentials cache handle
  *
  * @return The type of a credential cache as an alias that should not be
  * modified or freed by the caller.
@@ -2354,13 +2348,12 @@ krb5_cccol_lock(krb5_context context);
 krb5_error_code KRB5_CALLCONV
 krb5_cccol_unlock(krb5_context context);
 
-/**
- * @brief Create a new unique credentials cache of the specified type.
+/** Create a new unique credentials cache of the specified type.
  *
- * @param context           Context structure [input, output]
- * @param type              Credentials cache type [input, output]
- * @param hint              Unused
- * @param id                Credentials cache handle [output]
+ * @param [in]  context           Context structure
+ * @param [in]  type              Credentials cache type name
+ * @param [in]  hint              Unused
+ * @param [out] id                Credentials cache handle
  *
  * @retval
  * 0 Success
@@ -2408,7 +2401,7 @@ typedef struct krb5_keytab_entry_st {
 struct _krb5_kt;
 typedef struct _krb5_kt *krb5_keytab;
 
-/** Return the type of a key table.
+/** Return a type of a key table.
  *
  * @param [in] context           Context structure
  * @param [in] keytab            Type of key table handle
@@ -2423,14 +2416,15 @@ typedef struct _krb5_kt *krb5_keytab;
 const char * KRB5_CALLCONV
 krb5_kt_get_type(krb5_context context, krb5_keytab keytab);
 
-/** Get key table name
+/** Get a key table name
  *
  * @param [in]  context           Context structure
  * @param [in]  keytab            Key table handle
  * @param [out] name              Key table name
  * @param [in]  namelen           Maximum length to fill in name
  *
- * Zeroes @a name and then copies the key table name including its prefix and trailing delimeter.
+ * Zeroes @a name and then copies the key table name including
+ * its prefix and trailing delimeter.
  *
  * @sa MAX_KEYTAB_NAME_LEN
  *
@@ -2455,8 +2449,7 @@ krb5_kt_get_name(krb5_context context, krb5_keytab keytab, char *name,
  * acquired during use of the key table.
  * Undo anything done by krb5_kt_resolve().
  *
- * @retval
- * 0
+ * @retval 0
  */
 krb5_error_code KRB5_CALLCONV
 krb5_kt_close(krb5_context context, krb5_keytab keytab);
@@ -2470,18 +2463,17 @@ krb5_kt_close(krb5_context context, krb5_keytab keytab);
  * @param [in]  enctype       Encryption type. Use zero for any enctype.
  * @param [out] entry         Returned entry from key tablele
  *
- * Retrieve an entry from a key table that matches the @a keytab, @a principal, and @a vno.
+ * Retrieve an entry from a key table that matches the @a keytab, @a principal,
+ * and @a vno.
  * The @a entry must be freed with krb5_kt_free_entry() when it is no longer needed.
  *
- * @note If @a vno is zero, the function retrieves the highest-numbered-kvno  entry that
- * matches the specified principal.
+ * @note If @a vno is zero, the function retrieves the highest-numbered-kvno
+ * entry that matches the specified principal.
  *
  * @retval
  * 0 Success
  * @retval
  * Kerberos error codes on failure
- * @return
- * On success retrieves the entry
  */
 krb5_error_code KRB5_CALLCONV
 krb5_kt_get_entry(krb5_context context, krb5_keytab keytab,
@@ -2519,7 +2511,6 @@ krb5_kt_start_seq_get(krb5_context context, krb5_keytab keytab,
  *
  * Return the next sequential entry in the specified key table and update @a cursor for
  * the next request.
- *
  * If the key table changes during the sequential get, an error is guaranteed.
  *
  * @sa krb5_kt_start_seq_get(), krb5_kt_end_seq_get()
@@ -2564,7 +2555,7 @@ krb5_kt_end_seq_get(krb5_context context, krb5_keytab keytab,
  *
  * @param [out] context           Context structure
  *
- * The context must be released by calling krb5_free_context() routine when
+ * The context must be released by calling krb5_free_context() when
  * it is no longer needed.
  *
  * @warning Any program or module that needs the Kerberos code to not trust
@@ -2587,7 +2578,7 @@ krb5_init_context(krb5_context *context);
  * are safe for a @c setuid program.
  * All information passed through the environment variables is ignored.
  *
- * The context must be released by calling krb5_free_context() routine when
+ * The context must be released by calling krb5_free_context() when
  * it is no longer needed.
  *
  * @retval
@@ -2617,7 +2608,7 @@ krb5_free_context(krb5_context context);
  * @param [out] nctx_out      New "cloned" context structure
  *
  * The newly created context must be released by calling krb5_free_context()
- * routine when it is no longer needed.
+ * when it is no longer needed.
  *
  * @retval
  * 0 Success
@@ -2638,10 +2629,7 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out);
  * @retval
  *  0    Success
  * @retval
- *  ENOMEM Insufficient memory
- * @retval
  *  KRB5_PROG_ETYPE_NOSUPP Program lacks support for encryption type
-
  * @return
  * Kerberos error codes
  *
@@ -2661,26 +2649,19 @@ krb5_set_default_tgs_enctypes(krb5_context context, const krb5_enctype *etypes);
  * @retval
  *  0   Success
  * @retval
- *  ENOMEM Insufficient memory
- * @retval
  *  KRB5_PROG_ETYPE_NOSUPP Program lacks support for encryption type
  * @return
  * Kerberos error codes
  *
  * @sa enctype
- *
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_permitted_enctypes(krb5_context context, krb5_enctype **ktypes);
 
-/**
- * @brief Return a value indicating whether the client libraries support multithreading.
+/** Test whether the Kerberos library was built with multithread support.
  *
  * @retval
- *  TRUE  Client libraries are threadsafe
- * @retval
- *  FALSE Client libraries are not threadsafe
- *
+ * TRUE if the library is threadsafe; FALSE otherwise
  */
 krb5_boolean KRB5_CALLCONV
 krb5_is_thread_safe(void);
@@ -3256,9 +3237,7 @@ krb5_set_principal_realm(krb5_context context, krb5_principal principal,
  * @param addrlist          Address list to be searched. Specify NULL if there is no address list [input]
  *
  * @retval
- *  TRUE    @a addr is listed in @a addrlist, or @c addrlist is NULL
- * @retval
- *  FALSE    @a addr is not listed in @a addrlist
+ * TRUE if @a addr is listed in @a addrlist, or @c addrlist is NULL; FALSE otherwise
  */
 krb5_boolean KRB5_CALLCONV_WRONG
 krb5_address_search(krb5_context context, const krb5_address *addr,
@@ -3272,9 +3251,7 @@ krb5_address_search(krb5_context context, const krb5_address *addr,
  * @param addr2             Second address to be compared [input]
  *
  * @retval
- *  TRUE   The addresses are the same
- * @retval
- *  FALSE  The addresses are different
+ *  TRUE if the addresses are the same, FALSE otherwise
  */
 krb5_boolean KRB5_CALLCONV
 krb5_address_compare(krb5_context context, const krb5_address *addr1,
@@ -3298,48 +3275,73 @@ int KRB5_CALLCONV
 krb5_address_order(krb5_context context, const krb5_address *addr1,
                    const krb5_address *addr2);
 
-/**
- * @brief Compare the realms of two principals.
+/** Compare the realms of two principals.
  *
- * @param context           Context structure [input, output]
- * @param princ1            First principal [input]
- * @param princ2            Second principal [input]
+ * @param [in] context           Context structure
+ * @param [in] princ1            First principal
+ * @param [in] princ2            Second principal
  *
  * @retval
- *  TRUE     The realms are the same
- * @retval
- *  FALSE    The realms are the different
+ * TRUE if the realm names are the same; FALSE otherwise
  */
 krb5_boolean KRB5_CALLCONV
 krb5_realm_compare(krb5_context context, krb5_const_principal princ1,
                    krb5_const_principal princ2);
 
-/** Compare two principal names.
+/** Compare two principals.
  *
  * @param [in] context           Context structure
- * @param [in] princ1            First principal name
- * @param [in] princ2            Second principal name
+ * @param [in] princ1            First principal
+ * @param [in] princ2            Second principal
  *
  * @retval
- *  TRUE  The principal names are the same
- * @retval
- *  FALSE The principal names are not the same
+ * TRUE if the principals are the same; FALSE otherwise
  */
 krb5_boolean KRB5_CALLCONV
 krb5_principal_compare(krb5_context context,
                        krb5_const_principal princ1,
                        krb5_const_principal princ2);
 
+/** Compare two principals ignoring realm components.
+ *
+ * @param [in] context           Context structure
+ * @param [in] princ1            First principal
+ * @param [in] princ2            Second principal
+ *
+ * Similar to krb5_principal_compare() but do not compare the realm
+ * components of the principals
+ *
+ * @retval
+ * TRUE if the principals are the same; FALSE otherwise
+ */
 krb5_boolean KRB5_CALLCONV
 krb5_principal_compare_any_realm(krb5_context context,
                                  krb5_const_principal princ1,
                                  krb5_const_principal princ2);
 
-#define KRB5_PRINCIPAL_COMPARE_IGNORE_REALM  1
+#define KRB5_PRINCIPAL_COMPARE_IGNORE_REALM  1 /**< ignore realm component */
 #define KRB5_PRINCIPAL_COMPARE_ENTERPRISE    2 /**< UPNs as real principals */
 #define KRB5_PRINCIPAL_COMPARE_CASEFOLD      4 /**< case-insensitive */
 #define KRB5_PRINCIPAL_COMPARE_UTF8          8 /**< treat principals as UTF-8 */
 
+/** Compare two principals with additional flags.
+ *
+ * @param [in] context           Context structure
+ * @param [in] princ1            First principal
+ * @param [in] princ2            Second principal
+ * @param [in] flags             Flags
+ *
+ * Valid flags are:
+ * @li @c KRB5_PRINCIPAL_COMPARE_IGNORE_REALM - ignore realm component
+ * @li @c KRB5_PRINCIPAL_COMPARE_ENTERPRISE - UPNs as real principals
+ * @li @c KRB5_PRINCIPAL_COMPARE_CASEFOLD case-insensitive
+ * @li @c KRB5_PRINCIPAL_COMPARE_UTF8 - treat principals as UTF-8
+ *
+ * @sa krb5_principal_compare()
+ *
+ * @retval
+ * TRUE if the principal names are the same; FALSE otherwise
+ */
 krb5_boolean KRB5_CALLCONV
 krb5_principal_compare_flags(krb5_context context,
                              krb5_const_principal princ1,
@@ -3616,7 +3618,7 @@ krb5_build_principal_ext(krb5_context context,  krb5_principal * princ,
  * @param [in]  realm             Realm name
  * @param [in]  ...               List of len1, sl1, len2, sl2...
  *
- * Call krb5_free_principal() to free allocated memory for principal when it is no longer needed.
+ * Call krb5_free_principal() to free @a princ when it is no longer needed.
  *
  * @note krb5_build_principal() and krb5_build_principal_va() perform the same task.
  * krb5_build_principal() takes variadic arguments.
@@ -3655,7 +3657,7 @@ krb5_build_principal(krb5_context context,
  * krb5_build_principal() takes variadic arguments.
  * krb5_build_principal_va() takes a pre-computed @a varargs pointer.
  *
- * Call krb5_free_principal() to free allocated memory for principal when it is no longer needed.
+ * Use krb5_free_principal() to free @a princ when it is no longer needed.
  *
  * @retval
  * 0  Success
@@ -3681,8 +3683,7 @@ krb5_build_principal_va(krb5_context context,
  * Similar to krb5_build_principal() this function builds a principal name,
  * but its name components are specified as va_list.
  *
- * Make sure to call krb5_free_principal() to deallocate the principal
- * when it is no longer needed.
+ * Use krb5_free_principal() to deallocate the @a princ when it is no longer needed.
  *
  * @code
  * Function usage example:
@@ -4033,20 +4034,12 @@ krb5_cc_copy_creds(krb5_context context, krb5_ccache incc, krb5_ccache outcc);
 
 /** Get some configuration for the credential cache in the cache.
  *
- * @param context        a Keberos context [input]
- * @param id             the credential cache to store the data for [input]
- * @param principal      configuration for a specific principal, if NULL, global for the whole cache.[input]
- * @param key            name under which the configuraion is stored [input]
- * @param data           data to be fetched; free with krb5_free_data_contents() [input,output]
- *
- * @code
- * Example:
- *   krb5_data config_data;
- *   config_data.data = NULL;
- *   krb5_cc_get_config(context, ccache, target_principal, key, &config_data);
- *   ...
- *   krb5_free_data_contents(context, &config_data);
- * @endcode
+ * @param [in]     context     Context structure
+ * @param [in]     id          The credential cache to store the data for
+ * @param [in]     principal   Configuration for this principal;
+ *                             if NULL, global for the whole cache.
+ * @param [in]     key         Name under which the configuraion is stored
+ * @param [in,out] data        Data to be fetched; free with krb5_free_data_contents()
  *
  * @retval
  * 0  Success
@@ -4062,7 +4055,8 @@ krb5_cc_get_config(krb5_context context, krb5_ccache id,
  *
  * @param [in,out] context         a Keberos context
  * @param [in]     id              the credential cache to store the data for.
- * @param [in]     principal       configuration for a specific principal; if NULL, global for the whole cache.
+ * @param [in]     principal       configuration for a specific principal;
+ *                                 if NULL, global for the whole cache.
  * @param [in]     key             name under which the configuraion is stored.
  * @param [in]     data            data to store. If NULL, old configuration is removed.
  *
@@ -4080,12 +4074,12 @@ krb5_cc_set_config(krb5_context context, krb5_ccache id,
 
 /** Test whether a principal is a configuration principal.
  *
- * @param context        a Keberos context [input]
- * @param principal      principal to check if it a configuration principal [input]
+ * @param [in] context        a Keberos context
+ * @param [in] principal      principal to check if it a configuration principal
  *
- * @return Return TRUE (non zero) if the principal is a configuration
- *        principal (generated part of krb5_cc_set_config()). Returns
- *        FALSE (zero) if not a configuration principal.
+ * @return
+ *  TRUE (non zero) if the principal is a configuration principal
+ * (generated part of krb5_cc_set_config()); FALSE (zero) otherwise.
  */
 krb5_boolean KRB5_CALLCONV
 krb5_is_config_principal(krb5_context context, krb5_const_principal principal);
@@ -4102,8 +4096,8 @@ krb5_free_principal(krb5_context context, krb5_principal val);
 
 /** Free an authenticator structure, including its pointer.
  *
- * @param context           Context structure [input, output]
- * @param val               Pointer to data structure to be freed [input, output]
+ * @param [in] context           Context structure
+ * @param [in] val               Pointer to data structure to be freed
  *
  * @return
  * None
@@ -4113,8 +4107,8 @@ krb5_free_authenticator(krb5_context context, krb5_authenticator *val);
 
 /** Free an array of addresses and its pointer.
  *
- * @param context           Context structure [input, output]
- * @param val               Pointer to data structure to be freed [input,output]
+ * @param [in] context           Context structure
+ * @param [in] val               Pointer to data structure to be freed
  *
  * @return
  * None
@@ -4124,8 +4118,8 @@ krb5_free_addresses(krb5_context context, krb5_address **val);
 
 /** Free an @c _krb5_auth_data structure.
  *
- * @param context           Context structure [input, output]
- * @param val               Pointer to data structure to be freed [input, output]
+ * @param [in] context           Context structure
+ * @param [in] val               Pointer to data structure to be freed
  *
  * @return
  * None
@@ -4135,8 +4129,8 @@ krb5_free_authdata(krb5_context context, krb5_authdata **val);
 
 /** Free a ticket.
  *
- * @param context           Context structure [input, output]
- * @param val               Pointer to the data structure to be freed [input, output]
+ * @param [in] context           Context structure
+ * @param [in] val               Pointer to the data structure to be freed
  *
  * @return
  * None
@@ -4251,8 +4245,8 @@ krb5_free_data(krb5_context context, krb5_data *val);
 
 /** Free the contents of a @c _krb5_data structure and zero the data field.
  *
- * @param context           Context structure [input, output]
- * @param val               Pointer to data structure to be freed [input, output]
+ * @param [in] context           Context structure
+ * @param [in] val               Pointer to data structure to be freed
  *
  * @note The pointer is not freed.
  *
@@ -4386,24 +4380,18 @@ krb5_set_default_realm(krb5_context context, const char *lrealm);
 void KRB5_CALLCONV
 krb5_free_default_realm(krb5_context context, char *lrealm);
 
-/**
- * @brief Generate a full principal name from a service name.
+/** Generate a full principal name from a service name.
  *
- * @param context           Context structure [input, output]
- * @param hostname          Host name, or NULL to use local host [input]
- * @param sname             Service name [input]
- * @param type              Principal type: either @c KRB5_NT_SRV_HST or @c KRB5_NT_UNKNOWN [input]
- * @param ret_princ         Full principal name [output]
+ * @param [in]  context   Context structure
+ * @param [in]  hostname  Host name, or NULL to use local host
+ * @param [in]  sname     Service name, or NULL to use string @c host
+ * @param [in]  type      Principal type: @c KRB5_NT_SRV_HST or @c KRB5_NT_UNKNOWN
+ * @param [out] ret_princ Generated principal
  *
- * The full (multi-part) principal name tis used to authenticate the principal with the specified service on the
- * host, given a hostname @a hostname and a generic service name @a sname.
+ * This function converts a given @a hostname and @a sname into @a krb5_principal
+ * structure @a ret_princ.
  *
- * @a ret_princ holds the generated full principal name. The realm of the principal
- *  is determined internally by calling krb5_get_host_realm().
- *
- * Make sure to free the allocated memory when it is no longer needed.
- *
- * The principal type, @a type, controls how krb5_sname_to_principal() generates a principal name for a service.
+ * The @a type can be one of the following:
  *
  * @li @c KRB5_NT_SRV_HOST canonicalizes the host name (a fully
  * qualified lowercase @a hostname using the primary name and the
@@ -4414,6 +4402,8 @@ krb5_free_default_realm(krb5_context context, char *lrealm);
  * the form @a sname\/hostname\@LOCAL.REALM, but the @a hostname \b will \b not be
  * canonicalized first. It will appear exactly as it was passed in @a hostname.
  *
+ * Use krb5_free_principal to free @a ret_princ when it is no longer needed.
+ *
  * @retval
  * 0  Success
  * @return
@@ -4423,17 +4413,24 @@ krb5_error_code KRB5_CALLCONV
 krb5_sname_to_principal(krb5_context context, const char *hostname, const char *sname,
                         krb5_int32 type, krb5_principal *ret_princ);
 
-/** Return true if @a princ matches @a matching, false otherwise.
+/** Test whether a principal matches a matching principal.
  *
- * A matching principal is a host-based principal with an empty realm and/or
+ * @param [in]  context        Context structure
+ * @param [in]  matching       Matching principal
+ * @param [in]  princ          Principal to test
+ *
+ * @note A matching principal is a host-based principal with an empty realm and/or
  * second data component (hostname).  Profile configuration may cause the
- * hostname to be ignored even if it is present.  A principal matches a
- * matching principal if the principal has the same non-empty (and non-ignored)
- * components of the matching principal.
+ * hostname to be ignored even if it is present. A principal matches a
+ * matching principal if the former has the same non-empty (and non-ignored)
+ * components of the latter.
  *
- * If @a matching is NULL, return true.  If @a matching is not a matching
+ * If @a matching is NULL, return TRUE.  If @a matching is not a matching
  * principal, return the value of krb5_principal_compare(context, matching,
  * princ).
+ *
+ * @return
+ * TRUE if @a princ matches @a matching, FALSE otherwise.
  */
 krb5_boolean KRB5_CALLCONV
 krb5_sname_match(krb5_context context, krb5_const_principal matching,
@@ -4470,45 +4467,63 @@ krb5_change_password(krb5_context context, krb5_creds *creds, char *newpw,
                      int *result_code, krb5_data *result_code_string,
                      krb5_data *result_string);
 
-/**
- * @brief Implement set password according to RFC 3244, so that it is interoperable with MS Windows implementations.
+/** Set a password for a principal using specified credentials.
  *
- * @param context                Context structure [input, output]
- * @param creds                  Credentials [input
- * @param newpw                 New password [input]
- * @param change_password_for   Specific principal for password change  [input]
- * @param result_code           Pointer to result code returned by the remote system [output]
- * @param result_code_string    Pointer to result code translated into a readable message [output]
- * @param result_string         Pointer to result data returned from the remote system [output]
+ * @param [in,out] context            Context structure
+ * @param [in]  creds                 Credentials
+ * @param [in]  newpw                 New password
+ * @param [in]  change_password_for   Change the password for this principal
+ * @param [out] result_code           Numeric error code returned by the remote system
+ * @param [out] result_code_string    Error code translated into a readable message
+ * @param [out] result_string         Data returned from the remote system
  *
- * @note If @a change_password_for is NULL, the change is performed on the current
- * principal. If @a change_password_for is non-null, the change is performed on the
- * principal name passed in @a change_password_for.
+ * This function uses the credentials @a creds to set the password
+ * @a newpw for the principal @a change_password_for.
+ * It implements the set password operation of RFC 3244, for
+ * interoperability with Microsoft Windows implementations.
+ *
+ * @note If @a change_password_for is NULL, the change is performed on the
+ * current principal. If @a change_password_for is non-null, the change is
+ * performed on the principal name passed in @a change_password_for.
+ *
+ * The error code and strings are returned in @a result_code,
+ * @a result_code_string and @a result_string.
+ *
+ * @sa krb5_set_password_using_ccache()
  *
  * @retval
- * 0  Success
+ * 0  Success and result_code is set to KRB5_KPASSWD_SUCCESS.
  * @return
- * Kerberos error codes
+ * Kerberos error codes.
  */
 krb5_error_code KRB5_CALLCONV
 krb5_set_password(krb5_context context, krb5_creds *creds, char *newpw,
                   krb5_principal change_password_for, int *result_code,
                   krb5_data *result_code_string, krb5_data *result_string);
 
-/**
- * @brief Implement RFC 3244 set password (interoperable with MS Windows implementations) using the credentials cache instead of explicitly passed credentials.
+/** Set a password for a principal using cached credentials.
  *
- * @param context           Context structure [input, output]
- * @param ccache            Credentials cache [input]
- * @param newpw             New password [input]
- * @param change_password_for   Principal for which password is changed [input]
- * @param result_code           Pointer to result code returned from remote system [output]
- * @param result_code_string    Pointer to result code returned from remote system translated into a readable message [output]
- * @param result_string         Pointer to the result data returned from remote system [output]
+ * @param [in,out] context            Context structure
+ * @param [in]  ccache                Credentials cache
+ * @param [in]  newpw                 New password
+ * @param [in]  change_password_for   Change the password for this principal
+ * @param [out] result_code           Numeric error code returned by the remote system
+ * @param [out] result_code_string    Error code translated into a readable message
+ * @param [out] result_string         Data returned from the remote system
+ *
+ * This function uses the cached credentials from @a ccache to set the password
+ * @a newpw for the principal @a change_password_for.
+ * It implements RFC 3244 set password operation (interoperable with MS Windows
+ * implementations) using the credentials cache.
+ *
+ * The error code and strings are returned in @a result_code,
+ * @a result_code_string and @a result_string.
+ *
+ * @sa krb5_set_password()
  *
  * @note If @a change_password_for is set to NULL, the change is performed
- * on the current principal. If @a change_password_for is non null, the change is performed
- * on the specified principal.
+ * on the default principal in @a ccache. If @a change_password_for is non null,
+ * the change is performed on the specified principal.
  *
  * @retval
  * 0  Success
@@ -4538,7 +4553,7 @@ krb5_set_password_using_ccache(krb5_context context, krb5_ccache ccache,
  * Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
-krb5_get_profile(krb5_context context, struct _profile_t ** profile_t);
+krb5_get_profile(krb5_context context, struct _profile_t ** profile);
 
 #if KRB5_DEPRECATED
 /**   @deprecated Replaced by krb5_get_init_creds_password() */
@@ -5588,9 +5603,7 @@ krb5_free_host_realm(krb5_context context, char *const *realmlist);
  * .k5login, the @a luser is not authorized to log into an account.
  *
  * @retval
- *  TRUE User is authorized to log in
- * @retval
- *  FALSE User is not authorized to log in
+ * TRUE User is authorized to log in; FALSE otherwise
  */
 krb5_boolean KRB5_CALLCONV
 krb5_kuserok(krb5_context context, krb5_principal principal, const char *luser);
@@ -6722,7 +6735,7 @@ krb5_copy_error_message(krb5_context dest_ctx, krb5_context src_ctx);
 const char * KRB5_CALLCONV
 krb5_get_error_message(krb5_context ctx, krb5_error_code code);
 
-/** Free an error message state generated by krb5_get_error_message().
+/** Free an error message state generated by krb5_get_error_message.
  *
  * @param [in] ctx           Context structure
  * @param [in] msg           Pointer to error message
@@ -6845,7 +6858,12 @@ typedef void
                                      const struct krb5_trace_info *info,
                                      void *cb_data);
 
-/**
+/** Specify a callback function for trace events.
+ *
+ * @param [in,out] context      Context structure
+ * @param [in]     fn           Callback function name
+ * @param [in]     cb_data      Callback data
+ *
  * Specify a callback for trace events occurring in krb5 operations performed
  * within @a context.  @a fn will be invoked with @a context as the first
  * argument, @a cb_data as the last argument, and a pointer to a struct
@@ -6854,17 +6872,22 @@ typedef void
  * second argument to allow cleanup of @a cb_data.  Supply a NULL value for @a
  * fn to disable trace callbacks within @a context.
  *
- * @return Returns KRB5_TRACE_NOSUPP if tracing is not supported in the library (unless
- * @a fn is NULL).
+ * @return Returns KRB5_TRACE_NOSUPP if tracing is not supported in the library
+ * (unless @a fn is NULL).
  */
 krb5_error_code KRB5_CALLCONV
 krb5_set_trace_callback(krb5_context context, krb5_trace_callback fn,
                         void *cb_data);
 
-/**
+/** Specify a file name for directing trace events.
+ *
+ * @param [in,out] context      Context structure
+ * @param [in]     filename     File name
+ *
  * Open @a filename for appending (creating it, if necessary) and set up a
- * callback to write trace events to it.  Returns KRB5_TRACE_NOSUPP if tracing
- * is not supported in the library.
+ * callback to write trace events to it.
+ *
+ * @return  KRB5_TRACE_NOSUPP if tracing is not supported in the library.
  */
 krb5_error_code KRB5_CALLCONV
 krb5_set_trace_filename(krb5_context context, const char *filename);
