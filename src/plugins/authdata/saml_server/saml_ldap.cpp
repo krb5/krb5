@@ -75,16 +75,16 @@ extern "C" {
 }
 
 static const XMLCh urnOidPrefix[] = {'u','r','n',':','o','i','d',':',0};
-static const XMLCh xsdString[] = {'x','s','d',':','s','t','r','i','n','g',0};
-static const XMLCh xsdBase64Binary[] = {'x','s','d',':','b','a','s','e','6','4','B','i','n','a','r','y',0};
+static const XMLCh xsdString[] = {'s','t','r','i','n','g',0};
+static const XMLCh xsdBase64Binary[] = {'b','a','s','e','6','4','B','i','n','a','r','y',0};
 static const XMLCh x500EncodingAttr[] = {'E','n','c','o','d','i','n','g',0};
 static const XMLCh x500EncodingValue[] = {'L','D','A','P',0};
 
-
-static xmltooling::QName qXsdString(XSI_NS, xsdString, XSI_PREFIX);
-static xmltooling::QName qXsdBase64Binary(XSI_NS, xsdBase64Binary, XSI_PREFIX);
+static xmltooling::QName qXsdString(XSD_NS, xsdString, XSD_PREFIX);
+static xmltooling::QName qXsdBase64Binary(XSD_NS, xsdBase64Binary, XSD_PREFIX);
 static xmltooling::QName qX500Encoding(SAML20X500_NS, x500EncodingAttr, SAML20X500_PREFIX);
 
+/* XXX is this UTF-8 friendly? */
 static krb5_boolean
 is_not_printable(const struct berval *bv)
 {
@@ -142,12 +142,31 @@ saml_kdc_get_attribute(krb5_context context,
     attr->setAttribute(qX500Encoding, x500EncodingValue);
 
     for (int i = 0; vals[i] != NULL; i++) {
-        AttributeValue *value;
         struct berval *bv = vals[i];
+        const XMLObjectBuilder *builder = XMLObjectBuilder::getBuilder(
+                xmltooling::QName(samlconstants::SAML20_NS,
+                                  AttributeValue::LOCAL_NAME));
+        bool base64Encoded = is_not_printable(bv);
+        AttributeValue *value;
 
-        value = AttributeValueBuilder::buildAttributeValue();
+#ifdef __APPLE__
+        /* XXX why does dynamic_cast not work on OS X with dynamic libraries? */
+        value = (AttributeValue *)(void *)(builder->buildObject(samlconstants::SAML20_NS,
+                                           AttributeValue::LOCAL_NAME,
+                                           samlconstants::SAML20_PREFIX,
+                                           base64Encoded ? &qXsdBase64Binary : &qXsdString));
+#else
+        value = dynamic_cast<AttributeValue *>(builder->buildObject(samlconstants::SAML20_NS,
+                                               AttributeValue::LOCAL_NAME,
+                                               samlconstants::SAML20_PREFIX,
+                                               base64Encoded ? &qXsdBase64Binary : &qXsdString));
+        if (value == NULL) {
+            delete attr;
+            return EINVAL;
+        }
+#endif
 
-        if (is_not_printable(bv)) {
+        if (base64Encoded) {
             XMLSize_t len;
             XMLByte *b64 = Base64::encode((XMLByte *)bv->bv_val,
                                           bv->bv_len, &len);
