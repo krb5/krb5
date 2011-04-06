@@ -939,7 +939,6 @@ enumerateAttributes(OM_uint32 *minor,
 }
 
 static OM_uint32
-<<<<<<< HEAD
 displayCanonName(OM_uint32 *minor, gss_name_t name, char *tag)
 {
     gss_name_t canon;
