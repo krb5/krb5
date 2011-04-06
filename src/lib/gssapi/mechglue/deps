@@ -73,6 +73,14 @@ g_context_time.so g_context_time.po $(OUTPRE)g_context_time.$(OBJEXT): \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   ../generic/gssapi_err_generic.h g_context_time.c mechglue.h \
   mglueP.h
+g_decapsulate_token.so g_decapsulate_token.po $(OUTPRE)g_decapsulate_token.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_ext.h $(COM_ERR_DEPS) \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_ext.h \
+  $(srcdir)/../generic/gssapi_generic.h $(top_srcdir)/include/k5-buf.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
+  ../generic/gssapi_err_generic.h g_decapsulate_token.c \
+  mechglue.h mglueP.h
 g_delete_sec_context.so g_delete_sec_context.po $(OUTPRE)g_delete_sec_context.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_ext.h $(COM_ERR_DEPS) \
@@ -121,6 +129,14 @@ g_dup_name.so g_dup_name.po $(OUTPRE)g_dup_name.$(OBJEXT): \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   ../generic/gssapi_err_generic.h g_dup_name.c mechglue.h \
   mglueP.h
+g_encapsulate_token.so g_encapsulate_token.po $(OUTPRE)g_encapsulate_token.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_ext.h $(COM_ERR_DEPS) \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_ext.h \
+  $(srcdir)/../generic/gssapi_generic.h $(top_srcdir)/include/k5-buf.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
+  ../generic/gssapi_err_generic.h g_encapsulate_token.c \
+  mechglue.h mglueP.h
 g_exp_sec_context.so g_exp_sec_context.po $(OUTPRE)g_exp_sec_context.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_ext.h $(COM_ERR_DEPS) \
@@ -430,6 +446,14 @@ g_unwrap_iov.so g_unwrap_iov.po $(OUTPRE)g_unwrap_iov.$(OBJEXT): \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   ../generic/gssapi_err_generic.h g_unwrap_iov.c mechglue.h \
   mglueP.h
+g_userok.so g_userok.po $(OUTPRE)g_userok.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_ext.h $(COM_ERR_DEPS) \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_ext.h \
+  $(srcdir)/../generic/gssapi_generic.h $(top_srcdir)/include/k5-buf.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
+  ../generic/gssapi_err_generic.h g_userok.c mechglue.h \
+  mglueP.h
 g_verify.so g_verify.po $(OUTPRE)g_verify.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_ext.h $(COM_ERR_DEPS) \
@@ -454,3 +478,11 @@ g_wrap_iov.so g_wrap_iov.po $(OUTPRE)g_wrap_iov.$(OBJEXT): \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   ../generic/gssapi_err_generic.h g_wrap_iov.c mechglue.h \
   mglueP.h
+gssd_pname_to_uid.so gssd_pname_to_uid.po $(OUTPRE)gssd_pname_to_uid.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_ext.h $(COM_ERR_DEPS) \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_ext.h \
+  $(srcdir)/../generic/gssapi_generic.h $(top_srcdir)/include/k5-buf.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
+  ../generic/gssapi_err_generic.h gssd_pname_to_uid.c \
+  mechglue.h mglueP.h

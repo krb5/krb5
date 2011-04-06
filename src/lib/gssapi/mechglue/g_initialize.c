@@ -779,6 +779,7 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
 	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_pname_to_uid);
 	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_userok);
 	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_export_name);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_duplicate_name);
 	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_store_cred);
 	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_inquire_sec_context_by_oid);
 	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_inquire_cred_by_oid);
