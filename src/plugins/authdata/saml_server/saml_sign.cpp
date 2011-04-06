@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
             if ((j % WRAP_LEN) == 0) {
                 if (j)
                     printf("\"\n");
-                printf("\t\tSAML-AAA-Assertion = \"");
+                printf("\t\tSAML-AAA-Assertion %s= \"", j ? "+" : "");
             }
             if (c == '\n') {
                 esc++;
