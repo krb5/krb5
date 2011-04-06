@@ -77,7 +77,6 @@ static OM_uint32
 showLocalIdentity(OM_uint32 *minor, gss_name_t name);
 static OM_uint32
 kerberosProtocolTransition(OM_uint32 *minor,
-                           gss_cred_id_t localCreds,
                            gss_name_t authenticatedInitiator,
                            int flags,
                            gss_name_t delegTargetName);
@@ -122,7 +121,7 @@ int     verbose = 0;
  */
 
 static int
-server_acquire_creds(char *service_name, int flags, gss_cred_id_t *server_creds)
+server_acquire_creds(char *service_name, gss_cred_id_t *server_creds)
 {
     gss_buffer_desc name_buf;
     gss_name_t server_name;
@@ -138,8 +137,7 @@ server_acquire_creds(char *service_name, int flags, gss_cred_id_t *server_creds)
     }
 
     maj_stat = gss_acquire_cred(&min_stat, server_name, 0,
-                                GSS_C_NO_OID_SET,
-                                (flags & FLAG_S4U) ? GSS_C_BOTH : GSS_C_ACCEPT,
+                                GSS_C_NO_OID_SET, GSS_C_ACCEPT,
                                 server_creds, NULL, NULL);
     if (maj_stat != GSS_S_COMPLETE) {
         display_status("acquiring credentials", maj_stat, min_stat);
@@ -306,8 +304,7 @@ server_establish_context(int s, gss_cred_id_t server_creds, int flags,
         }
         enumerateAttributes(&min_stat, client, TRUE);
         if (flags & FLAG_S4U) {
-            kerberosProtocolTransition(&min_stat, server_creds,
-                                       client, flags, deleg_target);
+            kerberosProtocolTransition(&min_stat, client, flags, deleg_target);
         }
         showLocalIdentity(&min_stat, client);
         maj_stat = gss_release_name(&min_stat, &client);
@@ -789,7 +786,7 @@ main(int argc, char **argv)
 
     service_name = *argv;
 
-    if (server_acquire_creds(service_name, flags, &server_creds) < 0)
+    if (server_acquire_creds(service_name, &server_creds) < 0)
         return -1;
 
     if (import_deleg_target(deleg_target_name, &deleg_target) < 0)
@@ -1134,12 +1131,12 @@ constrainedDelegate(OM_uint32 *minor,
 
 static OM_uint32
 kerberosProtocolTransition(OM_uint32 *minor,
-                           gss_cred_id_t impersonator_cred_handle,
                            gss_name_t authenticatedInitiator,
                            int flags,
                            gss_name_t delegTargetName)
 {
     OM_uint32 major, tmpMinor;
+    gss_cred_id_t impersonator_cred_handle = GSS_C_NO_CREDENTIAL;
     gss_cred_id_t user_cred_handle = GSS_C_NO_CREDENTIAL;
     gss_cred_id_t delegated_cred_handle = GSS_C_NO_CREDENTIAL;
     gss_name_t anonName = GSS_C_NO_NAME;
@@ -1151,6 +1148,22 @@ kerberosProtocolTransition(OM_uint32 *minor,
 
     mechs.elements = (gss_OID)gss_mech_krb5;
     mechs.count = 1;
+
+    /* get default cred */
+    major = gss_acquire_cred(minor,
+                             GSS_C_NO_NAME,
+                             GSS_C_INDEFINITE,
+                             &mechs,
+                             GSS_C_BOTH,
+                             &impersonator_cred_handle,
+                             &actual_mechs,
+                             NULL);
+    if (GSS_ERROR(major)) {
+        display_status("gss_acquire_cred", major, *minor);
+        goto out;
+    }
+
+    (void) gss_release_oid_set(minor, &actual_mechs);
 
     fprintf(logfile, "Protocol transition tests follow\n");
     fprintf(logfile, "-----------------------------------\n\n");
@@ -1239,6 +1252,7 @@ out:
     (void) gss_release_name(&tmpMinor, &user);
     (void) gss_release_name(&tmpMinor, &anonName);
     (void) gss_release_cred(&tmpMinor, &delegated_cred_handle);
+    (void) gss_release_cred(&tmpMinor, &impersonator_cred_handle);
     (void) gss_release_cred(&tmpMinor, &user_cred_handle);
     (void) gss_release_oid_set(&tmpMinor, &actual_mechs);
     (void) gss_release_buffer(&tmpMinor, &assertion);
