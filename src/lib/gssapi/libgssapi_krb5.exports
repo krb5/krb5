@@ -43,6 +43,7 @@ gss_add_buffer_set_member
 gss_add_cred
 gss_add_cred_impersonate_name
 gss_add_oid_set_member
+gss_authorize_localname
 gss_canonicalize_name
 gss_compare_name
 gss_complete_auth_token

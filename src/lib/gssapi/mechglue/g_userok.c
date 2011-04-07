@@ -44,10 +44,10 @@
 #include <gssapi/gssapi.h>
 
 static OM_uint32
-mech_userok(OM_uint32 *minor,
-	    const gss_union_name_t unionName,
-	    const char *user,
-	    int *user_ok)
+mech_authorize_localname(OM_uint32 *minor,
+			 const gss_union_name_t unionName,
+			 gss_const_buffer_t user,
+			 int *user_ok)
 {
 	OM_uint32 major = GSS_S_UNAVAILABLE;
 	gss_mechanism mech;
@@ -60,8 +60,9 @@ mech_userok(OM_uint32 *minor,
 	if (mech == NULL)
 		return (GSS_S_UNAVAILABLE);
 
-	if (mech->gss_userok) {
-		major = mech->gss_userok(minor, unionName->mech_name, user, user_ok);
+	if (mech->gss_authorize_localname) {
+		major = mech->gss_authorize_localname(minor, unionName->mech_name,
+						      user, user_ok);
 		if (major != GSS_S_COMPLETE)
 			map_error(minor, mech);
 	}
@@ -73,14 +74,13 @@ mech_userok(OM_uint32 *minor,
  * Naming extensions based local login authorization.
  */
 static OM_uint32
-attr_userok(OM_uint32 *minor,
-	    const gss_name_t name,
-	    const char *user,
-	    int *user_ok)
+attr_authorize_localname(OM_uint32 *minor,
+			 const gss_name_t name,
+			 gss_const_buffer_t user,
+			 int *user_ok)
 {
 	OM_uint32 major = GSS_S_UNAVAILABLE;
 	OM_uint32 tmpMinor;
-	size_t userLen = strlen(user);
 	int more = -1;
 
 	*user_ok = 0;
@@ -102,8 +102,8 @@ attr_userok(OM_uint32 *minor,
 			break;
 
 		if (authenticated &&
-		    value.length == userLen &&
-		    memcmp(value.value, user, userLen) == 0)
+		    value.length == user->length &&
+		    memcmp(value.value, user->value, user->length) == 0)
 			*user_ok = 1;
 
 		gss_release_buffer(&tmpMinor, &value);
@@ -117,32 +117,27 @@ attr_userok(OM_uint32 *minor,
  * Equality based local login authorization.
  */
 static OM_uint32
-compare_names_userok(OM_uint32 *minor,
-		     const gss_OID mech_type,
-		     const gss_name_t name,
-		     const char *user,
-		     int *user_ok)
+compare_names_authorize_localname(OM_uint32 *minor,
+				 const gss_OID mech_type,
+				 const gss_name_t name,
+				 gss_const_buffer_t user,
+				 int *user_ok)
 {
 
 	OM_uint32 status, tmpMinor;
 	gss_name_t imported_name;
 	gss_name_t canon_name;
-	gss_buffer_desc gss_user;
 	int match = 0;
 
 	*user_ok = 0;
 
-	gss_user.value = (void *)user;
-	if (gss_user.value == NULL ||
-	    name == GSS_C_NO_NAME ||
-	    mech_type == GSS_C_NO_OID)
+	if (mech_type == GSS_C_NO_OID)
 		return (GSS_S_BAD_NAME);
-	gss_user.length = strlen(gss_user.value);
 
 	status = gss_import_name(minor,
-				&gss_user,
-				GSS_C_NT_USER_NAME,
-				&imported_name);
+				 (gss_buffer_t)user,
+				 GSS_C_NT_USER_NAME,
+				 &imported_name);
 	if (status != GSS_S_COMPLETE) {
 		goto out;
 	}
@@ -171,42 +166,77 @@ out:
 	return (status);
 }
 
-
 OM_uint32
-gss_userok(OM_uint32 *minor,
-	   const gss_name_t name,
-	   const char *user,
-	   int *user_ok)
+gss_authorize_localname(OM_uint32 *minor,
+			const gss_name_t name,
+			const gss_name_t user,
+			int *user_ok)
 
 {
 	OM_uint32 major;
 	gss_union_name_t unionName;
+	gss_union_name_t unionUser;
 
 	if (minor == NULL || user_ok == NULL)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
-	if (name == NULL || user == NULL)
+	if (name == GSS_C_NO_NAME || user == GSS_C_NO_NAME)
 		return (GSS_S_CALL_INACCESSIBLE_READ);
 
 	*user_ok = 0;
 	*minor = 0;
 
 	unionName = (gss_union_name_t)name;
+	unionUser = (gss_union_name_t)user;
+
+	if (unionUser->mech_type != GSS_C_NO_OID)
+		return (GSS_S_BAD_NAME);
 
 	/* If mech returns yes, we return yes */
-	major = mech_userok(minor, unionName, user, user_ok);
+	major = mech_authorize_localname(minor, unionName,
+					 unionUser->external_name, user_ok);
 	if (major == GSS_S_COMPLETE && *user_ok)
 		return (GSS_S_COMPLETE);
 
 	/* If attribute exists, we evaluate attribute */
-	if (attr_userok(minor, name, user, user_ok) == GSS_S_COMPLETE)
+	if (attr_authorize_localname(minor, name,
+				     unionUser->external_name,
+				     user_ok) == GSS_S_COMPLETE)
 		return (GSS_S_COMPLETE);
 
 	/* If mech returns unavail, we compare the local name */
 	if (major == GSS_S_UNAVAILABLE) {
-		major = compare_names_userok(minor, unionName->mech_type,
-					     name, user, user_ok);
+		major = compare_names_authorize_localname(minor,
+							  unionName->mech_type,
+					     		  name,
+							  unionUser->external_name,
+							  user_ok);
 	}
 
 	return (major);
-} /* gss_userok */
+}
+
+int
+gss_userok(const gss_name_t name,
+	   const char *user)
+{
+	OM_uint32 major, minor;
+	gss_buffer_desc userBuf;
+	gss_name_t userName;
+	int user_ok = 0;
+
+	userBuf.value = (void *)user;
+	userBuf.length = strlen(user);
+
+	major = gss_import_name(&minor, &userBuf, GSS_C_NO_OID, &userName);
+	if (GSS_ERROR(major))
+		return (0);
+
+	major = gss_authorize_localname(&minor, name, userName, &user_ok);
+	if (GSS_ERROR(major))
+		user_ok = 0;
+
+	(void) gss_release_name(&minor, &userName);
+
+	return (user_ok);
+}
