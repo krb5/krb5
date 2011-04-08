@@ -118,9 +118,11 @@ k5_kt_get_principal(krb5_context context, krb5_keytab keytab,
     krb5_keytab_entry kte;
 
     *princ_out = NULL;
+    if (keytab->ops->start_seq_get == NULL)
+        return KRB5_KT_NOTFOUND;
     ret = krb5_kt_start_seq_get(context, keytab, &cursor);
     if (ret)
-        return KRB5_KT_NOTFOUND;
+        return ret;
     ret = krb5_kt_next_entry(context, keytab, &kte, &cursor);
     (void)krb5_kt_end_seq_get(context, keytab, &cursor);
     if (ret)
