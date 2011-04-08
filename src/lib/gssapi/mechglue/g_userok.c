@@ -122,49 +122,32 @@ static OM_uint32
 compare_names_authorize_localname(OM_uint32 *minor,
 				 const gss_OID mech_type,
 				 const gss_name_t name,
-				 gss_const_buffer_t user,
+				 const gss_name_t user,
 				 int *user_ok)
 {
 
 	OM_uint32 status, tmpMinor;
-	gss_name_t imported_name;
 	gss_name_t canon_name;
 	int match = 0;
 
 	*user_ok = 0;
 
-	if (mech_type == GSS_C_NO_OID)
-		return (GSS_S_BAD_NAME);
-
-	status = gss_import_name(minor,
-				 (gss_buffer_t)user,
-				 GSS_C_NT_USER_NAME,
-				 &imported_name);
-	if (status != GSS_S_COMPLETE) {
-		goto out;
-	}
-
 	status = gss_canonicalize_name(minor,
-				    imported_name,
-				    mech_type,
-				    &canon_name);
-	if (status != GSS_S_COMPLETE) {
-		(void) gss_release_name(&tmpMinor, &imported_name);
-		goto out;
-	}
+				       user,
+				       mech_type,
+				       &canon_name);
+	if (status != GSS_S_COMPLETE)
+		return (status);
 
 	status = gss_compare_name(minor,
-				canon_name,
-				name,
-				&match);
-	(void) gss_release_name(&tmpMinor, &canon_name);
-	(void) gss_release_name(&tmpMinor, &imported_name);
-	if (status == GSS_S_COMPLETE) {
-		if (match)
-			*user_ok = 1; /* remote user is a-ok */
-	}
+				  canon_name,
+				  name,
+				  &match);
+	if (status == GSS_S_COMPLETE && match)
+		*user_ok = 1; /* remote user is a-ok */
 
-out:
+	(void) gss_release_name(&tmpMinor, &canon_name);
+
 	return (status);
 }
 
@@ -207,11 +190,12 @@ gss_authorize_localname(OM_uint32 *minor,
 		return (GSS_S_COMPLETE);
 
 	/* If mech returns unavail, we compare the local name */
-	if (major == GSS_S_UNAVAILABLE) {
+	if (major == GSS_S_UNAVAILABLE &&
+	    unionName->mech_type != GSS_C_NO_OID) {
 		major = compare_names_authorize_localname(minor,
 							  unionName->mech_type,
 					     		  name,
-							  unionUser->external_name,
+							  user,
 							  user_ok);
 	}
 
