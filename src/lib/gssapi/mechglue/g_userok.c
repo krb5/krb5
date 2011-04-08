@@ -60,9 +60,11 @@ mech_authorize_localname(OM_uint32 *minor,
 	if (mech == NULL)
 		return (GSS_S_UNAVAILABLE);
 
-	if (mech->gss_authorize_localname) {
-		major = mech->gss_authorize_localname(minor, unionName->mech_name,
-						      user, user_ok);
+	if (mech->gssspi_authorize_localname) {
+		major = mech->gssspi_authorize_localname(minor,
+							 unionName->mech_name,
+							 user,
+							 user_ok);
 		if (major != GSS_S_COMPLETE)
 			map_error(minor, mech);
 	}

@@ -342,7 +342,7 @@ typedef struct gss_config {
 		    const gss_OID,	/* mech_type */
 		    uid_t *		/* uid */
 	    );
-	OM_uint32		(*gss_authorize_localname)
+	OM_uint32		(*gssspi_authorize_localname)
 	(
 		    OM_uint32 *,	/* minor_status */
 		    const gss_name_t,	/* pname */
