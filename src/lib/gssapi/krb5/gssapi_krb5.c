@@ -800,6 +800,7 @@ static OM_uint32
 krb5_gss_authorize_localname(OM_uint32 *minor,
                              const gss_name_t pname,
                              gss_const_buffer_t local_user,
+                             gss_const_OID name_type,
                              int *user_ok)
 {
     krb5_context context;
@@ -808,6 +809,11 @@ krb5_gss_authorize_localname(OM_uint32 *minor,
     char *user;
 
     *user_ok = 0;
+
+    if (name_type != GSS_C_NO_OID &&
+        !g_OID_equal(name_type, GSS_C_NT_USER_NAME)) {
+        return GSS_S_BAD_NAMETYPE;
+    }
 
     if (!kg_validate_name(pname)) {
         *minor = (OM_uint32)G_VALIDATE_FAILED;
