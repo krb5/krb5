@@ -163,6 +163,7 @@ gss_authorize_localname(OM_uint32 *minor,
 	OM_uint32 major;
 	gss_union_name_t unionName;
 	gss_union_name_t unionUser;
+	int mechAvailable = 0;
 
 	if (minor == NULL)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
@@ -182,14 +183,16 @@ gss_authorize_localname(OM_uint32 *minor,
 	major = mech_authorize_localname(minor, unionName, unionUser);
 	if (major == GSS_S_COMPLETE)
 		return (GSS_S_COMPLETE);
+	else if (major != GSS_S_UNAVAILABLE)
+		mechAvailable = 1;
 
 	/* If attribute exists, we evaluate attribute */
 	major = attr_authorize_localname(minor, unionName, unionUser);
 	if (major == GSS_S_COMPLETE || major == GSS_S_UNAUTHORIZED)
 		return (major);
 
-	/* If mech returns unavail, we compare the local name */
-	if (major == GSS_S_UNAVAILABLE &&
+	/* If mech did not implement SPI, compare the local name */
+	if (mechAvailable == 0 &&
 	    unionName->mech_type != GSS_C_NO_OID) {
 		major = compare_names_authorize_localname(minor,
 							  unionName,
