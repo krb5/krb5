@@ -220,7 +220,7 @@ gss_userok(const gss_name_t name,
 	userBuf.value = (void *)user;
 	userBuf.length = strlen(user);
 
-	major = gss_import_name(&minor, &userBuf, GSS_C_NO_OID, &userName);
+	major = gss_import_name(&minor, &userBuf, GSS_C_NT_USER_NAME, &userName);
 	if (GSS_ERROR(major))
 		return (0);
 
