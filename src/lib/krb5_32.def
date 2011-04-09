@@ -408,3 +408,4 @@ EXPORTS
 
 ; new in 1.10
 	krb5_sname_match				@384
+	k5_kt_get_principal				@385 ; PRIVATE GSSAPI
