@@ -52,15 +52,14 @@ mech_authorize_localname(OM_uint32 *minor,
 	OM_uint32 major = GSS_S_UNAVAILABLE;
 	gss_mechanism mech;
 
-	/* may need to import the name if this is not MN */
 	if (unionName->mech_type == GSS_C_NO_OID)
-		return (GSS_S_FAILURE);
+		return (GSS_S_NAME_NOT_MN);
 
 	mech = gssint_get_mechanism(unionName->mech_type);
 	if (mech == NULL)
 		return (GSS_S_UNAVAILABLE);
 
-	if (mech->gssspi_authorize_localname) {
+	if (mech->gssspi_authorize_localname != NULL) {
 		major = mech->gssspi_authorize_localname(minor,
 							 unionName->mech_name,
 							 unionUser->external_name,
