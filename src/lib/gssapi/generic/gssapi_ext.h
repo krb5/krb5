@@ -48,8 +48,7 @@ gss_userok(const gss_name_t name,
 OM_uint32 KRB5_CALLCONV
 gss_authorize_localname(OM_uint32 *minor,
                         const gss_name_t name,
-                        const gss_name_t user,
-                        int *user_ok);
+                        const gss_name_t user);
 
 OM_uint32 KRB5_CALLCONV
 gss_acquire_cred_with_password(

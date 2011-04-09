@@ -347,8 +347,7 @@ typedef struct gss_config {
 		    OM_uint32 *,	/* minor_status */
 		    const gss_name_t,	/* pname */
 		    gss_const_buffer_t,	/* local user */
-		    gss_const_OID,	/* local nametype */
-		    int *		/* user ok? */
+		    gss_const_OID	/* local nametype */
 	/* */);
 	OM_uint32		(*gss_export_name)
 	(

@@ -800,15 +800,13 @@ static OM_uint32
 krb5_gss_authorize_localname(OM_uint32 *minor,
                              const gss_name_t pname,
                              gss_const_buffer_t local_user,
-                             gss_const_OID name_type,
-                             int *user_ok)
+                             gss_const_OID name_type)
 {
     krb5_context context;
     krb5_error_code code;
     krb5_gss_name_t kname;
     char *user;
-
-    *user_ok = 0;
+    int user_ok;
 
     if (name_type != GSS_C_NO_OID &&
         !g_OID_equal(name_type, GSS_C_NT_USER_NAME)) {
@@ -838,13 +836,13 @@ krb5_gss_authorize_localname(OM_uint32 *minor,
     memcpy(user, local_user->value, local_user->length);
     user[local_user->length] = '\0';
 
-    *user_ok = krb5_kuserok(context, kname->princ, user);
+    user_ok = krb5_kuserok(context, kname->princ, user);
 
     free(user);
     krb5_free_context(context);
 
     *minor = 0;
-    return GSS_S_COMPLETE;
+    return user_ok ? GSS_S_COMPLETE : GSS_S_UNAUTHORIZED;
 }
 
 static struct gss_config krb5_mechanism = {

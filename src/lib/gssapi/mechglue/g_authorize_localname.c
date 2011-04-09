@@ -46,8 +46,7 @@
 static OM_uint32
 mech_authorize_localname(OM_uint32 *minor,
 			 const gss_union_name_t unionName,
-			 const gss_union_name_t unionUser,
-			 int *user_ok)
+			 const gss_union_name_t unionUser)
 {
 	OM_uint32 major = GSS_S_UNAVAILABLE;
 	gss_mechanism mech;
@@ -63,8 +62,7 @@ mech_authorize_localname(OM_uint32 *minor,
 		major = mech->gssspi_authorize_localname(minor,
 							 unionName->mech_name,
 							 unionUser->external_name,
-							 unionUser->name_type,
-							 user_ok);
+							 unionUser->name_type);
 		if (major != GSS_S_COMPLETE)
 			map_error(minor, mech);
 	}
@@ -78,15 +76,11 @@ mech_authorize_localname(OM_uint32 *minor,
 static OM_uint32
 attr_authorize_localname(OM_uint32 *minor,
 			 const gss_name_t name,
-			 const gss_union_name_t unionUser,
-			 int *user_ok)
+			 const gss_union_name_t unionUser)
 {
-	OM_uint32 major = GSS_S_UNAVAILABLE;
-	OM_uint32 tmpMinor;
+	OM_uint32 major = GSS_S_UNAVAILABLE; /* attribute not present */
 	gss_buffer_t externalName;
 	int more = -1;
-
-	*user_ok = 0;
 
 	if (unionUser->name_type != GSS_C_NO_OID &&
 	    !g_OID_equal(unionUser->name_type, GSS_C_NT_USER_NAME))
@@ -95,26 +89,31 @@ attr_authorize_localname(OM_uint32 *minor,
 	externalName = unionUser->external_name;
 	assert(externalName != GSS_C_NO_BUFFER);
 
-	while (more != 0 && *user_ok == 0) {
+	while (more != 0 && major != GSS_S_COMPLETE) {
+		OM_uint32 tmpMajor, tmpMinor;
 		gss_buffer_desc value;
 		gss_buffer_desc display_value;
 		int authenticated = 0, complete = 0;
 
-		major = gss_get_name_attribute(minor,
-					       name,
-					       GSS_C_ATTR_LOCAL_LOGIN_USER,
-					       &authenticated,
-					       &complete,
-					       &value,
-					       &display_value,
-					       &more);
-		if (GSS_ERROR(major))
+		tmpMajor = gss_get_name_attribute(minor,
+						  name,
+						  GSS_C_ATTR_LOCAL_LOGIN_USER,
+						  &authenticated,
+						  &complete,
+						  &value,
+						  &display_value,
+						  &more);
+		if (GSS_ERROR(tmpMajor)) {
+			major = tmpMajor;
 			break;
+		}
 
 		if (authenticated &&
 		    value.length == externalName->length &&
 		    memcmp(value.value, externalName->value, externalName->length) == 0)
-			*user_ok = 1;
+			major = GSS_S_COMPLETE;
+		else
+			major = GSS_S_UNAUTHORIZED;
 
 		gss_release_buffer(&tmpMinor, &value);
 		gss_release_buffer(&tmpMinor, &display_value);
@@ -129,15 +128,12 @@ attr_authorize_localname(OM_uint32 *minor,
 static OM_uint32
 compare_names_authorize_localname(OM_uint32 *minor,
 				 const gss_union_name_t unionName,
-				 const gss_name_t user,
-				 int *user_ok)
+				 const gss_name_t user)
 {
 
 	OM_uint32 status, tmpMinor;
 	gss_name_t canonName;
 	int match = 0;
-
-	*user_ok = 0;
 
 	status = gss_canonicalize_name(minor,
 				       user,
@@ -150,8 +146,8 @@ compare_names_authorize_localname(OM_uint32 *minor,
 				  (gss_name_t)unionName,
 				  canonName,
 				  &match);
-	if (status == GSS_S_COMPLETE && match)
-		*user_ok = 1; /* remote user is a-ok */
+	if (status == GSS_S_COMPLETE && match == 0)
+		status = GSS_S_UNAUTHORIZED;
 
 	(void) gss_release_name(&tmpMinor, &canonName);
 
@@ -161,21 +157,19 @@ compare_names_authorize_localname(OM_uint32 *minor,
 OM_uint32
 gss_authorize_localname(OM_uint32 *minor,
 			const gss_name_t name,
-			const gss_name_t user,
-			int *user_ok)
+			const gss_name_t user)
 
 {
 	OM_uint32 major;
 	gss_union_name_t unionName;
 	gss_union_name_t unionUser;
 
-	if (minor == NULL || user_ok == NULL)
+	if (minor == NULL)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
 	if (name == GSS_C_NO_NAME || user == GSS_C_NO_NAME)
 		return (GSS_S_CALL_INACCESSIBLE_READ);
 
-	*user_ok = 0;
 	*minor = 0;
 
 	unionName = (gss_union_name_t)name;
@@ -185,23 +179,21 @@ gss_authorize_localname(OM_uint32 *minor,
 		return (GSS_S_BAD_NAME);
 
 	/* If mech returns yes, we return yes */
-	major = mech_authorize_localname(minor, unionName,
-					 unionUser, user_ok);
-	if (major == GSS_S_COMPLETE && *user_ok)
+	major = mech_authorize_localname(minor, unionName, unionUser);
+	if (major == GSS_S_COMPLETE)
 		return (GSS_S_COMPLETE);
 
 	/* If attribute exists, we evaluate attribute */
-	if (attr_authorize_localname(minor, unionName,
-				     unionUser, user_ok) == GSS_S_COMPLETE)
-		return (GSS_S_COMPLETE);
+	major = attr_authorize_localname(minor, unionName, unionUser);
+	if (major == GSS_S_COMPLETE || major == GSS_S_UNAUTHORIZED)
+		return (major);
 
 	/* If mech returns unavail, we compare the local name */
 	if (major == GSS_S_UNAVAILABLE &&
 	    unionName->mech_type != GSS_C_NO_OID) {
 		major = compare_names_authorize_localname(minor,
 							  unionName,
-							  unionUser,
-							  user_ok);
+							  unionUser);
 	}
 
 	return (major);
@@ -214,7 +206,6 @@ gss_userok(const gss_name_t name,
 	OM_uint32 major, minor;
 	gss_buffer_desc userBuf;
 	gss_name_t userName;
-	int user_ok = 0;
 
 	userBuf.value = (void *)user;
 	userBuf.length = strlen(user);
@@ -223,11 +214,9 @@ gss_userok(const gss_name_t name,
 	if (GSS_ERROR(major))
 		return (0);
 
-	major = gss_authorize_localname(&minor, name, userName, &user_ok);
-	if (GSS_ERROR(major))
-		user_ok = 0;
+	major = gss_authorize_localname(&minor, name, userName);
 
 	(void) gss_release_name(&minor, &userName);
 
-	return (user_ok);
+	return (major == GSS_S_COMPLETE);
 }
