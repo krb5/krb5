@@ -14,6 +14,7 @@ SRCS = \
 	$(srcdir)/g_acquire_cred.c \
 	$(srcdir)/g_acquire_cred_with_pw.c \
 	$(srcdir)/g_acquire_cred_imp_name.c \
+	$(srcdir)/g_authorize_localname.c \
 	$(srcdir)/g_buffer_set.c \
 	$(srcdir)/g_canon_name.c \
 	$(srcdir)/g_compare_name.c \
@@ -65,7 +66,6 @@ SRCS = \
 	$(srcdir)/g_unseal.c \
 	$(srcdir)/g_unwrap_aead.c \
 	$(srcdir)/g_unwrap_iov.c \
-	$(srcdir)/g_userok.c \
 	$(srcdir)/g_verify.c \
 	$(srcdir)/g_wrap_aead.c \
 	$(srcdir)/g_wrap_iov.c \
@@ -76,6 +76,7 @@ OBJS = \
 	$(OUTPRE)g_acquire_cred.$(OBJEXT) \
 	$(OUTPRE)g_acquire_cred_with_pw.$(OBJEXT) \
 	$(OUTPRE)g_acquire_cred_imp_name.$(OBJEXT) \
+	$(OUTPRE)g_authorize_localname.$(OBJEXT) \
 	$(OUTPRE)g_buffer_set.$(OBJEXT) \
 	$(OUTPRE)g_canon_name.$(OBJEXT) \
 	$(OUTPRE)g_compare_name.$(OBJEXT) \
@@ -127,7 +128,6 @@ OBJS = \
 	$(OUTPRE)g_unseal.$(OBJEXT) \
 	$(OUTPRE)g_unwrap_aead.$(OBJEXT) \
 	$(OUTPRE)g_unwrap_iov.$(OBJEXT) \
-	$(OUTPRE)g_userok.$(OBJEXT) \
 	$(OUTPRE)g_verify.$(OBJEXT) \
 	$(OUTPRE)g_wrap_aead.$(OBJEXT) \
 	$(OUTPRE)g_wrap_iov.$(OBJEXT) \
@@ -138,6 +138,7 @@ STLIBOBJS = \
 	g_acquire_cred.o \
 	g_acquire_cred_with_pw.o \
 	g_acquire_cred_imp_name.o \
+	g_authorize_localname.o \
 	g_buffer_set.o \
 	g_canon_name.o \
 	g_compare_name.o \
@@ -189,7 +190,6 @@ STLIBOBJS = \
 	g_unseal.o \
 	g_unwrap_aead.o \
 	g_unwrap_iov.o \
-	g_userok.o \
 	g_verify.o \
 	g_wrap_aead.o \
 	g_wrap_iov.o \
