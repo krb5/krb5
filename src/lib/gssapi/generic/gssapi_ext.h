@@ -41,10 +41,39 @@ gss_pname_to_uid
 	 const gss_OID mech_type,
 	 uid_t *uidOut);
 
+/** Determine whether a mechanism name is authorized to act as a username.
+ *
+ * @param [in] name      Mechanism name
+ * @param [in] username  System username
+ *
+ * This is a simple wrapper around gss_authorize_localname().  It only supports
+ * system usernames as local names, and cannot distinguish between lack of
+ * authorization and other errors.
+ *
+ * @retval 1 @a name is authorized to act as @a username
+ * @retval 0 @a name is not authorized or an error occurred
+ */
 int KRB5_CALLCONV
 gss_userok(const gss_name_t name,
            const char *username);
 
+/** Determine whether a mechanism name is authorized to act as a local name.
+ *
+ * @param [out] minor  Minor status code
+ * @param [in] name    Mechanism name
+ * @param [in] user    Local name
+ *
+ * @a name is a mechanism name, typically the result of a completed
+ * gss_accept_sec_context().  @a user is an internal name representing a local
+ * name, such as a name imported by gss_import_name() with an @a
+ * input_name_type of @c GSS_C_NT_USER_NAME.
+ *
+ * @return Return GSS_S_COMPLETE if @a name is authorized to act as @a user,
+ * GSS_S_UNAUTHORIZED if not, or an appropriate GSS error code if an error
+ * occured.
+ *
+ * @sa gss_userok
+ */
 OM_uint32 KRB5_CALLCONV
 gss_authorize_localname(OM_uint32 *minor,
                         const gss_name_t name,
