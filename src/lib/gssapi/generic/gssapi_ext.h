@@ -41,11 +41,14 @@ gss_pname_to_uid
 	 const gss_OID mech_type,
 	 uid_t *uidOut);
 
+int KRB5_CALLCONV
+gss_userok(const gss_name_t name,
+           const char *username);
+
 OM_uint32 KRB5_CALLCONV
-gss_userok(OM_uint32 *minor,
-           const gss_name_t name,
-           const char *user,
-           int *user_ok);
+gss_authorize_localname(OM_uint32 *minor,
+                        const gss_name_t name,
+                        const gss_name_t user);
 
 OM_uint32 KRB5_CALLCONV
 gss_acquire_cred_with_password(
