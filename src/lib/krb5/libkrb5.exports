@@ -108,6 +108,7 @@ initialize_k5e1_error_table
 initialize_kv5m_error_table
 initialize_prof_error_table
 k5_free_serverlist
+k5_kt_get_principal
 k5_locate_kdc
 k5_plugin_free_modules
 k5_plugin_load

@@ -88,6 +88,7 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
     krb5_timestamp now;
     krb5_deltat lifetime;
     krb5_gss_name_t ret_name;
+    krb5_principal princ;
     gss_OID_set mechs;
     OM_uint32 ret;
 
@@ -144,9 +145,24 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
         lifetime = GSS_C_INDEFINITE;
 
     if (name) {
-        if (cred->name &&
-            (code = kg_duplicate_name(context, cred->name,
-                                      KG_INIT_NAME_INTERN, &ret_name))) {
+        if (cred->name) {
+            code = kg_duplicate_name(context, cred->name, KG_INIT_NAME_INTERN,
+                                     &ret_name);
+        } else if ((cred->usage == GSS_C_ACCEPT || cred->usage == GSS_C_BOTH)
+                   && cred->keytab != NULL) {
+            /* This is a default acceptor cred; use a name from the keytab if
+             * we can. */
+            code = k5_kt_get_principal(context, cred->keytab, &princ);
+            if (code == 0) {
+                code = kg_init_name(context, princ, NULL, NULL, NULL,
+                                    KG_INIT_NAME_NO_COPY | KG_INIT_NAME_INTERN,
+                                    &ret_name);
+                if (code)
+                    krb5_free_principal(context, princ);
+            } else if (code == KRB5_KT_NOTFOUND)
+                code = 0;
+        }
+        if (code) {
             k5_mutex_unlock(&cred->lock);
             *minor_status = code;
             save_error_info(*minor_status, context);

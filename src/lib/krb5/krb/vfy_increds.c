@@ -20,27 +20,6 @@ nofail(krb5_context context, krb5_verify_init_creds_opt *options,
     return FALSE;
 }
 
-/* Set *server_out to the first principal name in keytab. */
-static krb5_error_code
-get_first_keytab_princ(krb5_context context, krb5_keytab keytab,
-                       krb5_principal *server_out)
-{
-    krb5_error_code ret;
-    krb5_kt_cursor cursor;
-    krb5_keytab_entry kte;
-
-    ret = krb5_kt_start_seq_get(context, keytab, &cursor);
-    if (ret)
-        return ret;
-    ret = krb5_kt_next_entry(context, keytab, &kte, &cursor);
-    (void)krb5_kt_end_seq_get(context, keytab, &cursor);
-    if (ret)
-        return ret;
-    ret = krb5_copy_principal(context, kte.principal, server_out);
-    krb5_kt_free_entry(context, &kte);
-    return ret;
-}
-
 static krb5_error_code
 copy_creds_except(krb5_context context, krb5_ccache incc,
                   krb5_ccache outcc, krb5_principal princ)
@@ -128,8 +107,8 @@ krb5_verify_init_creds(krb5_context context,
         if (ret)
             goto cleanup;
     } else {
-        /* Use the first principal name in the keytab. */
-        ret = get_first_keytab_princ(context, keytab, &server);
+        /* Use a principal name from the keytab. */
+        ret = k5_kt_get_principal(context, keytab, &server);
         if (ret) {
             /* There's no keytab, or it's empty, or we can't read it.
              * Allow this unless configuration demands verification. */
