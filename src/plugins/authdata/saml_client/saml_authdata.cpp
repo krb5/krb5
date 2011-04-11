@@ -220,8 +220,6 @@ saml_copy(krb5_context kcontext,
 static void saml_library_init(void) __attribute__((__constructor__));
 static void saml_library_fini(void) __attribute__((__destructor__));
 
-static krb5_boolean
-saml_is_assertion_attr(const krb5_data *attr);
 }
 
 static krb5_boolean didShibInit;
