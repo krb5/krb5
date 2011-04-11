@@ -342,12 +342,12 @@ typedef struct gss_config {
 		    const gss_OID,	/* mech_type */
 		    uid_t *		/* uid */
 	    );
-	OM_uint32		(*gss_userok)
+	OM_uint32		(*gssspi_authorize_localname)
 	(
 		    OM_uint32 *,	/* minor_status */
 		    const gss_name_t,	/* pname */
-		    const char *,	/* local user */
-		    int *		/* user ok? */
+		    gss_const_buffer_t,	/* local user */
+		    gss_const_OID	/* local nametype */
 	/* */);
 	OM_uint32		(*gss_export_name)
 	(
@@ -721,14 +721,6 @@ OM_uint32
 gssint_get_mechanisms(
 	char *mechArray[],		/* array to populate with mechs */
 	int arrayLen			/* length of passed in array */
-);
-
-OM_uint32
-gssint_userok(
-	OM_uint32 *,		/* minor */
-	const gss_name_t,	/* name */
-	const char *,		/* user */
-	int *			/* user_ok */
 );
 
 int
