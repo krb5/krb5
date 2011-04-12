@@ -185,12 +185,13 @@ krb5_gss_display_status(minor_status, status_value, status_type,
         }
 
         /* If this fails, there's not much we can do...  */
-        if (g_make_string_buffer(krb5_gss_get_error_message(status_value),
-                                 status_string) != 0)
+        if (!g_make_string_buffer(krb5_gss_get_error_message(status_value),
+                                  status_string)) {
             *minor_status = ENOMEM;
-        else
-            *minor_status = 0;
-        return 0;
+            return(GSS_S_FAILURE);
+        }
+        *minor_status = 0;
+        return(GSS_S_COMPLETE);
     } else {
         *minor_status = 0;
         return(GSS_S_BAD_STATUS);
