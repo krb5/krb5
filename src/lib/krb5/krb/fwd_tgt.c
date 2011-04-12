@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/krb5/krb/fwd_tgt.c */
+/* lib/krb5/krb/fwd_tgt.c Definition of krb5_fwd_tgt_creds() routine */
 /*
  * Copyright 1995 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -34,15 +34,10 @@
 
 /* Get a TGT for use at the remote host */
 krb5_error_code KRB5_CALLCONV
-krb5_fwd_tgt_creds(krb5_context context, krb5_auth_context auth_context, char *rhost, krb5_principal client, krb5_principal server, krb5_ccache cc, int forwardable, krb5_data *outbuf)
-
-
-
-
-
-
+krb5_fwd_tgt_creds(krb5_context context, krb5_auth_context auth_context,
+                   char *rhost, krb5_principal client, krb5_principal server,
+                   krb5_ccache cc, int forwardable, krb5_data *outbuf)
 /* Should forwarded TGT also be forwardable? */
-
 {
     krb5_replay_data replaydata;
     krb5_data * scratch = 0;

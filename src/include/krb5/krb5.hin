@@ -1993,11 +1993,7 @@ krb5_cc_gen_new(krb5_context context, krb5_ccache *cache);
  * @retval
  *  0  Success
  * @return
- *  System errors
- * @return
- *  Permission errors
- * @return
- * Kerberos error codes
+ *  System errors; Permission errors; Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_initialize(krb5_context context, krb5_ccache cache,
@@ -2028,7 +2024,7 @@ krb5_cc_destroy(krb5_context context, krb5_ccache cache);
  * @param [in] context                Context structure
  * @param [in] cache                  Credentials cache handle
  *
- * @note Reinitialize @a cache with krb5_cc_resolve() or krb5_cc_gen_new().
+ * @a cache may be reinitialized with krb5_cc_resolve() or krb5_cc_gen_new().
  *
  * @retval
  * 0  Success
@@ -2595,9 +2591,6 @@ krb5_init_secure_context(krb5_context *context);
  *
  * This function frees a context that was created by krb5_init_context()
  * or krb5_init_secure_context().
- *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_context(krb5_context context);
@@ -2690,9 +2683,6 @@ krb5_server_decrypt_ticket_keytab(krb5_context context, const krb5_keytab kt,
  *
  * @param context           Context structure [input, output]
  * @param tgts              Pointer to credentials to be freed [input, output]
- *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_tgt_creds(krb5_context context, krb5_creds **tgts);
@@ -3931,8 +3921,6 @@ krb5_principal2salt(krb5_context context,
  * and @a type must be a type known to the library.
  * If the @a name does not contain a colon, interpret it as a file name.
  *
- * @li When necessary to accommodate file naming differences in @a OpenVMS, the type specifier prefix can be followed by an equal sign, not a colon.
- *
  * @code
  * Example: krb5_cc_resolve(context, "MEMORY:C_", &cache);
  * @endcode
@@ -4098,9 +4086,6 @@ krb5_free_principal(krb5_context context, krb5_principal val);
  *
  * @param [in] context           Context structure
  * @param [in] val               Pointer to data structure to be freed
- *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_authenticator(krb5_context context, krb5_authenticator *val);
@@ -4109,9 +4094,6 @@ krb5_free_authenticator(krb5_context context, krb5_authenticator *val);
  *
  * @param [in] context           Context structure
  * @param [in] val               Pointer to data structure to be freed
- *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_addresses(krb5_context context, krb5_address **val);
@@ -4120,9 +4102,6 @@ krb5_free_addresses(krb5_context context, krb5_address **val);
  *
  * @param [in] context           Context structure
  * @param [in] val               Pointer to data structure to be freed
- *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_authdata(krb5_context context, krb5_authdata **val);
@@ -4131,9 +4110,6 @@ krb5_free_authdata(krb5_context context, krb5_authdata **val);
  *
  * @param [in] context           Context structure
  * @param [in] val               Pointer to the data structure to be freed
- *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_ticket(krb5_context context, krb5_ticket *val);
@@ -4142,9 +4118,6 @@ krb5_free_ticket(krb5_context context, krb5_ticket *val);
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to data structure to be freed [input, output]
- *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_error(krb5_context context, register krb5_error *val);
@@ -4153,9 +4126,6 @@ krb5_free_error(krb5_context context, register krb5_error *val);
  *
  * @param [in] context           Context structure
  * @param [in] val               Pointer to data structure to be freed
- *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_creds(krb5_context context, krb5_creds *val);
@@ -4166,9 +4136,6 @@ krb5_free_creds(krb5_context context, krb5_creds *val);
  * @param [in] val               Pointer to the data structure to be freed
  *
  * @note The pointer val is not freed.
- *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_cred_contents(krb5_context context, krb5_creds *val);
@@ -4177,9 +4144,6 @@ krb5_free_cred_contents(krb5_context context, krb5_creds *val);
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to data structure to be freed [input, output]
- *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_checksum(krb5_context context, register krb5_checksum *val);
@@ -4190,9 +4154,6 @@ krb5_free_checksum(krb5_context context, register krb5_checksum *val);
  * @param val               Pointer to data structure to be freed [input, output]
  *
  * @note The pointer is not freed.
- *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_checksum_contents(krb5_context context, register krb5_checksum *val);
@@ -4201,9 +4162,6 @@ krb5_free_checksum_contents(krb5_context context, register krb5_checksum *val);
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to data structure to be freed [input, output]
- *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_keyblock(krb5_context context, register krb5_keyblock *val);
@@ -4214,9 +4172,6 @@ krb5_free_keyblock(krb5_context context, register krb5_keyblock *val);
  * @param key               Pointer to data structure to be freed [input, output]
  *
  * @note The pointer is not freed.
- *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_keyblock_contents(krb5_context context, register krb5_keyblock *key);
@@ -4225,9 +4180,6 @@ krb5_free_keyblock_contents(krb5_context context, register krb5_keyblock *key);
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to data structure to be freed [input, output]
- *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_ap_rep_enc_part(krb5_context context, krb5_ap_rep_enc_part *val);
@@ -4236,9 +4188,6 @@ krb5_free_ap_rep_enc_part(krb5_context context, krb5_ap_rep_enc_part *val);
  *
  * @param context           Context structure [input, output]
  * @param val               Pointer to data structure to be freed [input, output]
- *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_data(krb5_context context, krb5_data *val);
@@ -4249,9 +4198,6 @@ krb5_free_data(krb5_context context, krb5_data *val);
  * @param [in] val               Pointer to data structure to be freed
  *
  * @note The pointer is not freed.
- *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_data_contents(krb5_context context, krb5_data *val);
@@ -4262,8 +4208,6 @@ krb5_free_data_contents(krb5_context context, krb5_data *val);
  * @param val               Pointer to name string to be freed [input, output]
  *
  * @note The pointer is not freed.
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_unparsed_name(krb5_context context, char *val);
@@ -4274,8 +4218,6 @@ krb5_free_unparsed_name(krb5_context context, char *val);
  * @param val               Pointer to checksum type to be freed [input, output]
  *
  * @note Make sure the checksum contents have already been freed.
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_cksumtypes(krb5_context context, krb5_cksumtype *val);
@@ -4373,9 +4315,6 @@ krb5_set_default_realm(krb5_context context, const char *lrealm);
  *
  * @param [in] context           Context structure (unused)
  * @param [in] lrealm            Realm to be freed
- *
- * @return
- * None
  */
 void KRB5_CALLCONV
 krb5_free_default_realm(krb5_context context, char *lrealm);
@@ -4564,7 +4503,7 @@ krb5_get_in_tkt_with_password(krb5_context context, krb5_flags options,
                               const char *password, krb5_ccache ccache,
                               krb5_creds *creds, krb5_kdc_rep **ret_as_reply);
 
-/** * @deprecated Replaced by krb5_get_init_creds() */
+/** @deprecated Replaced by krb5_get_init_creds() */
 KRB5_ATTR_DEPRECATED krb5_error_code KRB5_CALLCONV
 krb5_get_in_tkt_with_skey(krb5_context context, krb5_flags options,
                           krb5_address *const *addrs, krb5_enctype *ktypes,
@@ -5865,13 +5804,12 @@ krb5_deltat_to_string(krb5_deltat deltat, char *buffer, size_t buflen);
 #define KRB5_RECVAUTH_BADAUTHVERS       0x0002
 /* initial ticket api functions */
 
-/**
- * @brief Text for prompt used in prompter callback function.
+/** Text for prompt used in prompter callback function.
  */
 typedef struct _krb5_prompt {
-    char *prompt;
-    int hidden;
-    krb5_data *reply;
+    char *prompt;      /**< the prompt to show to the user */
+    int hidden;        /**< boolean; informative prompt or hidden (as for PIN or OTP) */
+    krb5_data *reply;  /**< must be allocated before call to any prompt routine */
 } krb5_prompt;
 
 /**
@@ -5935,218 +5873,216 @@ typedef struct _krb5_get_init_creds_opt {
 #define KRB5_GET_INIT_CREDS_OPT_SALT            0x0080
 #define KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT   0x0100
 #define KRB5_GET_INIT_CREDS_OPT_CANONICALIZE    0x0200
-#define KRB5_GET_INIT_CREDS_OPT_ANONYMOUS 0x0400
+#define KRB5_GET_INIT_CREDS_OPT_ANONYMOUS       0x0400
 
 
-/**
- * @brief Provide extended functionality to krb5_get_init_creds_opt_init() functionality
+/** Allocate a new extended krb5_get_init_creds_opt structure.
  *
- * @param context           Context structure [input, output]
- * @param opt               Pointer to @a opts field in @c _krb5_get_init_creds_opt [input]
+ * @param [in,out] context  Context structure
+ * @param [out]  opt  Pointer to @c _krb5_get_init_creds_opt structure to be allocated
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * The caller of this function must call krb5_get_init_creds_opt_free() to free @a opt
+ * when it is no longer needed.
  *
- * @sa getinitcreds
+ * @retval 0 - Success; Kerberos errors otherwise.
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_opt_alloc(krb5_context context,
                               krb5_get_init_creds_opt **opt);
 
-/**
- * @brief Free the extended options allocated by krb5_get_init_creds_opt_alloc().
+/** Free an extended krb5_get_init_creds_opt structure.
  *
- * @param context           Context structure [input, output]
- * @param opt               Pointer to extended options field in  @c _krb5_get_init_creds_opt [input]
+ * @param [in] context   Context structure (unused)
+ * @param [in] opt       Pointer to @c _krb5_get_init_creds_opt structure to be freed
  *
- * @return
- * None
+ * @sa krb5_get_init_creds_opt_alloc()
  */
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_free(krb5_context context,
                              krb5_get_init_creds_opt *opt);
 
-/**
- * @brief Set @a opt field of @c _krb5_get_init_creds_opt to zero.
+/** Initialize a krb5_get_init_creds_opt structure.
  *
- * @param opt           Pointer to @c _krb5_get_init_creds_opt [input, output]
+ * @param [in,out] opt   Pointer to krb5_get_init_creds_opt structure to be initialized
  *
- * @note Call this function on an options structure on which krb5_init_creds_opt_alloc() has been called.
+ * @warning Callers MUST NOT call krb5_get_init_creds_opt_init() after allocating an
+ * krb5_get_init_creds_opt structure using krb5_get_init_creds_opt_alloc().
+ * To do so will introduce memory leaks.
  *
- * Make sure to free the allocated memory when it is no longer needed.
- * @return
- *  None
+ * Sets @a opt->flag to KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT
  */
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_init(krb5_get_init_creds_opt *opt);
 
-/**
- * @brief Initialize the ticket lifetime field in @c _krb5_get_init_creds_opt.
+/** Initialize the ticket lifetime field in krb5_get_init_creds_opt structure.
  *
- * @param opt           Pointer to structure containing flags and options [input, output]
- * @param tkt_life      Ticket lifetime [input]
+ * @param [in,out] opt           Options
+ * @param [in]     tkt_life      Ticket lifetime
  *
- * Make sure to free the allocated memory when it is no longer needed.
- * @return
- *  None
+ * Sets KRB5_GET_INIT_CREDS_OPT_TKT_LIFE flag in @a opt
+ *
+ * The @a opt pointer supplied to this function must have been
+ * obtained using krb5_get_init_creds_opt_alloc()
  */
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_set_tkt_life(krb5_get_init_creds_opt *opt,
                                      krb5_deltat tkt_life);
 
-/**
- * @brief Set the ticket renewal lifetime field in @c _krb5_get_init_creds_opt.
+/** Set the ticket renewal lifetime field in krb5_get_init_creds_opt structure.
  *
- * @param opt               Pointer to @a options field [output]
- * @param renew_life        Ticket renewal lifetime [input]
+ * @param [in,out] opt               Pointer to @a options field
+ * @param [in]     renew_life        Ticket renewal lifetime
  *
- * Make sure to free the allocated memory when it is no longer needed.
- * @return
- *  None
+ * Sets KRB5_GET_INIT_CREDS_OPT_iRENEW_LIFE flag in @a opt
+ *
+ * The @a opt pointer supplied to this function must have been
+ * obtained using krb5_get_init_creds_opt_alloc()
  */
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_set_renew_life(krb5_get_init_creds_opt *opt,
                                        krb5_deltat renew_life);
 
-/**
- * @brief Set the forwardable field in @c _krb5_get_init_creds_opt.
+/** Set the forwardable field in krb5_get_init_creds_opt structure.
  *
- * @param opt               Pointer to options field [output]
- * @param forwardable       Flag indicating whether credentials are forwardable [input]
+ * @param [in,out] opt          Options
+ * @param [in]     forwardable  Flag indicating whether credentials are forwardable
  *
- * Make sure to free the allocated memory when it is no longer needed.
- * @return
- *  None
+ * Sets KRB5_GET_INIT_CREDS_OPT_FORWARDABLE flag in @a opt
+ * The @a opt pointer supplied to this function must have been
+ * obtained using krb5_get_init_creds_opt_alloc()
  */
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_set_forwardable(krb5_get_init_creds_opt *opt,
                                         int forwardable);
 
-/**
- * @brief Set the proxiable field in @c _krb5_get_init_creds_opt.
+/** Set the proxiable field in krb5_get_init_creds_opt structure.
  *
- * @param opt           Pointer to options field [output]
- * @param proxiable     Flag indicating whether credentials are proxiable [input]
+ * @param [in,out] opt           Options
+ * @param [in]     proxiable     Flag indicating whether credentials are proxiable
  *
- * Make sure to free the allocated memory when it is no longer needed.
- *
- * @return
- *  None
+ * Sets KRB5_GET_INIT_CREDS_OPT_PROXYABLE flag in @a opt
+ * The @a opt pointer supplied to this function must have been
+ * obtained using krb5_get_init_creds_opt_alloc()
  */
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_set_proxiable(krb5_get_init_creds_opt *opt,
                                       int proxiable);
 
+/** Set canonicalize flag in krb5_get_init_creds_opt structure.
+ *
+ * @param [in,out] opt               Options
+ * @param [in]     canonicalize      Boolean flag
+ *
+ * Sets KRB5_GET_INIT_CREDS_OPT_CANONICALIZE flag in @a opt
+ *
+ * The @a opt pointer supplied to this function must have been
+ * obtained using krb5_get_init_creds_opt_alloc()
+ */
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_set_canonicalize(krb5_get_init_creds_opt *opt,
                                          int canonicalize);
 
-/**
- * Request anonymous credentials from the KDC.  If the  client name looks like
- * "@REALM" (an empty principal name), then fully anonymous credentials are
- * requested.  If the client name looks like "name@REALM," then credentials
- * tied to a specific realm are requested.
+/** Set an anonymous flag in krb5_get_init_creds_opt structure.
  *
- * Credentials tied to a specific realm are not supported in this version.
+ * @param [in,out] opt               Options
+ * @param [in]     anonymous         Boolean flag
+ *
+ * This function may be used to request anonymous credentials from the KDC
+ * by setting @a anonymous to non-zero.
  *
  * Note that anonymous credentials are only a request; clients must verify that
  * credentials are anonymous if that is a requirement.
+ *
+ * Sets KRB5_GET_INIT_CREDS_OPT_ANONYMOUS flag in @a opt.
+ *
+ * The @a opt pointer supplied to this function must have been
+ * obtained using krb5_get_init_creds_opt_alloc()
  */
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_set_anonymous(krb5_get_init_creds_opt *opt,
                                       int anonymous);
 
-/**
- *@brief Set the encryption list field in the @c _krb5_get_init_creds_opt.
+/** Set an encryption list field in the krb5_get_init_creds_opt structure.
  *
- * @param opt                    Pointer to options field [output]
- * @param etype_list             Pointer to the encryption type to set [input]
- * @param etype_list_length      Length of the etype_list field [input]
+ * @param [in,out] opt                    Options
+ * @param [in]     etype_list             Pointer to the encryption type to set
+ * @param [in]     etype_list_length      Length of the etype_list field
  *
- * Make sure to free the allocated memory when it is no longer needed.
- *
- * @return
- *  None
- *
- * @sa enctype
+ * The @a opt pointer supplied to this function must have been
+ * obtained using krb5_get_init_creds_opt_alloc()
  */
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_set_etype_list(krb5_get_init_creds_opt *opt,
                                        krb5_enctype *etype_list,
                                        int etype_list_length);
 
-/**
- * @brief Set the address list in  @c _krb5_get_init_creds_opt.
+/** Set an address list field in krb5_get_init_creds_opt structure.
  *
- * @param opt               Pointer to options field [output]
- * @param addresses         Pointer to the address to set [input]
+ * @param [in,out] opt               Options
+ * @param [in]     addresses         Addresses to be stored in the ticket
  *
- * @return
- *  None
+ * Sets KRB5_GET_INIT_CREDS_OPT_ADDRESS_LIST flag in @a opt
  */
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_set_address_list(krb5_get_init_creds_opt *opt,
                                          krb5_address **addresses);
 
-/**
- * @brief Set the @a preauth_list field in @c _krb5_get_init_creds_opt.
+/** Set the preauth_list field in krb5_get_init_creds_opt structure.
  *
- * @param opt                       Pointer to options field [output]
- * @param preauth_list              Pointer to Pre-athentication type [input]
- * @param preauth_list_length       Length of @a preauth_list field [input]
+ * @param [in,out] opt                    Options
+ * @param [in]     preauth_list           Pointer to Pre-athentication type
+ * @param [in]     preauth_list_length    Length of @a preauth_list field
  *
- * @sa padata
+ * Sets KRB5_GET_INIT_CREDS_OPT_PREAUTH_LIST flag in @a opt
+ *
+ * The @a opt pointer supplied to this function must have been
+ * obtained using krb5_get_init_creds_opt_alloc()
  */
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_set_preauth_list(krb5_get_init_creds_opt *opt,
                                          krb5_preauthtype *preauth_list,
                                          int preauth_list_length);
 
+/** Set prompt for a salt field in krb5_get_init_creds_opt structure.
+ *
+ * @param [in,out] opt          Options
+ * @param [in]     salt         Salt data
+ *
+ * Sets KRB5_GET_INIT_CREDS_OPT_SALT flag in @a opt.
+ */
 void KRB5_CALLCONV
 krb5_get_init_creds_opt_set_salt(krb5_get_init_creds_opt *opt,
                                  krb5_data *salt);
 
-/**
- * @brief Set flag in @c _krb5_get_init_creds_opt that determines whether to prompt for a password
+/** Set prompt for a password flag in krb5_get_init_creds_opt structure.
  *
- * @param opt            Pointer to @c _krb5_get_init_creds_opt
- * @param prompt         Prompt to change password
+ * @param [in,out] opt            Options
+ * @param [in]     prompt         Boolean prompt to change password
  *
- * change for an expired password.
- *
- * @return
- * None
- * @sa getinitcreds
+ * Sets KRB5_GET_INIT_CREDS_OPT_CHG_PWD_PRMPT flag in @a opt.
  */
 void KRB5_CALLCONV
-krb5_get_init_creds_opt_set_change_password_prompt(krb5_get_init_creds_opt
-                                                   *opt, int prompt);
+krb5_get_init_creds_opt_set_change_password_prompt(krb5_get_init_creds_opt *opt,
+                                                   int prompt);
 
-/** @brief  Generic preauth option attribute/value pairs */
+/** Generic preauth option attribute/value pairs */
 typedef struct _krb5_gic_opt_pa_data {
     char *attr;
     char *value;
 } krb5_gic_opt_pa_data;
 
-/**
- * @brief Validate options passed to @a preauth plugins by krb5_get_init_creds_opt_alloc().
+/** Feed preauth plugins with the given options.
  *
- * @param context           Context structure [input, output]
- * @param opt               Pre options [input]
- * @param attr              Pre attribute [input]
- * @param value             Pre value [input]
- *
- * @retval
- * 0  Success
- * @return
- * Kerberos error codes
- *
- * Make sure to free the allocated memory when it is no longer needed.
+ * @param [in,out] context           Context structure
+ * @param [in]     opt               Pre options
+ * @param [in]     attr              Pre attribute
+ * @param [in]     value             Pre value
  *
  * This function allows the caller to supply options to preauth
  * plugins.  Preauth plugin modules are given a chance to look
- * at each option at the time this function is called in ordre
+ * at each option at the time this function is called in order
  * to check the validity of the option.
- * The 'opt' pointer supplied to this function must have been
+ * The @a opt pointer supplied to this function must have been
  * obtained using krb5_get_init_creds_opt_alloc()
  */
 krb5_error_code KRB5_CALLCONV
@@ -6154,48 +6090,86 @@ krb5_get_init_creds_opt_set_pa(krb5_context context,
                                krb5_get_init_creds_opt *opt, const char *attr,
                                const char *value);
 
-/**
- * This API sets a ccache name that will contain some TGT on calls to
- * t_init_creds functions.  If set, this ccache will be used for FAST
- * (draft-ietf-krb-wg-preauth-framework) to protect the AS-REQ from observation
- * and active attack.  If the fast_ccache_name is set, then FAST may be
- * required by the client library.  In this and future versions, FAST will be
- * used if available; krb5_get_init_creds_opt_set_fast_flags() may be used to
- * require that the request fail is FAST is unavailable.  In MIT Kerberos 1.7
- * setting the fast ccache at all required that FAST be present or the request
- * would fail.
+/** Set a location of FAST cache containing TGT based on cache name.
+ *
+ * @param [in,out] context             Context structure
+ * @param [in,out] opt                 Options
+ * @param [in]     fast_ccache_name    Credential cache name
+ *
+ * If the @a fast_ccache_name is set, then FAST may be
+ * required by the client library. Starting from MIT Kerberos version 1.8
+ * FAST is used if available; krb5_get_init_creds_opt_set_fast_flags()
+ * may be used to require that the request fail is FAST is unavailable.
+ * In version 1.7 setting the fast ccache at all required that FAST
+ * be present or the request would fail.
+ * The @a opt pointer supplied to this function must have been
+ * obtained using krb5_get_init_creds_opt_alloc()
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_opt_set_fast_ccache_name(krb5_context context,
                                              krb5_get_init_creds_opt *opt,
                                              const char *fast_ccache_name);
 
-/** Set the FAST ccache name as in
- * krb5_get_init_creds_opt_set_fast_ccache_name() but using a krb5_ccache
- * rather than a name.
+/** Set a location of FAST cache containing TGT based on krb5_ccache object.
+ *
+ * @param [in,out] context             Context structure
+ * @param [in,out] opt                 Options
+ * @param [in]     fast_ccache_name    Credential cache handle
+ *
+ * Set the FAST ccache name as in krb5_get_init_creds_opt_set_fast_ccache_name(),
+ * but using a krb5_ccache rather than a name.
+ * The @a opt pointer supplied to this function must have been
+ * obtained using krb5_get_init_creds_opt_alloc()
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_opt_set_fast_ccache(krb5_context context,
                                         krb5_get_init_creds_opt *opt,
                                         krb5_ccache fast_ccache_name);
 
-/**
- * Set a ccache where resulting credentials will be stored.  If set, then the
- * krb5_get_init_creds family of APIs will write out credentials to the given
- * ccache.  Setting an output ccache is desirable both because it simplifies
- * calling code and because it permits the krb5_get_init_creds APIs to write
- * out configuration information about the realm to the ccache.
+/** Set an output credentials cache in krb5_get_init_creds_opt structure.
+ *
+ * @param [in,out] context       Context structure
+ * @param [in,out] opt           Options
+ * @param [in]     ccache        Credential cache to use
+ *
+ * If set, then the krb5_get_init_creds family of APIs will write out credentials
+ * to the given ccache. Setting an output ccache is desirable both because it
+ * simplifies calling code and because it permits the krb5_get_init_creds APIs
+ * to write out configuration information about the realm to the ccache.
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_opt_set_out_ccache(krb5_context context,
                                        krb5_get_init_creds_opt *opt,
                                        krb5_ccache ccache);
 
+/** Store FAST flags in krb5_get_init_creds_opt structure.
+ *
+ * @param [in,out] context       Context structure
+ * @param [in,out] opt           Options
+ * @param [in]     flags         FAST flags (for example, KRB5_FAST_REQUIRED)
+ *
+ * This function may be used to require that the request fail if FAST is unavailable.
+ *
+ * @retval
+ * 0 - Success; Kerberos errors otherwise.
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_opt_set_fast_flags(krb5_context context,
                                        krb5_get_init_creds_opt *opt,
                                        krb5_flags flags);
 
+/** Obtain FAST flags from krb5_get_init_creds_opt structure.
+ *
+ * @param [in,out] context       Context structure
+ * @param [in]     opt           Options
+ * @param [out]    out_flags     FAST flags
+ *
+ * Get FAST @a out_flags from @a opt
+ * This function may be used to verify if KDC supports FAST.
+ *
+ * @retval
+ * 0 - Success; Kerberos errors otherwise.
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_opt_get_fast_flags(krb5_context context,
                                        krb5_get_init_creds_opt *opt,
@@ -6210,8 +6184,14 @@ typedef void
                                            krb5_timestamp account_expiration,
                                            krb5_boolean is_last_req);
 
-/**
- * @brief Set a callback to receive password and account expiration times.
+/** Set an expire callback in extended krb5_get_init_creds_opt structure.
+ *
+ * @param [in,out] context       Context structure
+ * @param [in,out] opt           Options structure
+ * @param [in]     cb            Callback function
+ * @param [in]     data          Data
+ *
+ * Set a callback to receive password and account expiration times.
  *
  * This option only applies to krb5_get_init_creds_password().  @a cb will be
  * invoked if and only if credentials are successfully acquired.  The callback
@@ -6236,7 +6216,7 @@ typedef void
  * caller's responsibility to avoid displaying a password expiry warning in
  * this case.
  *
- * Setting an expire callback with this API will cause
+ * @warning Setting an expire callback with this API will cause
  * krb5_get_init_creds_password() not to send password expiry warnings to the
  * prompter, as it ordinarily may.
  */
@@ -6246,20 +6226,22 @@ krb5_get_init_creds_opt_set_expire_callback(krb5_context context,
                                             krb5_expire_callback_func cb,
                                             void *data);
 
-/**
- * @brief Get initial credentials using a password.
+/** Get initial credentials using a password.
  *
- * @param context           Context structure [input, output]
- * @param creds             Pointer to credentials structure [output]
- * @param client            Client principal [input]
- * @param password          Password associated with initial credentials [input, output]
- * @param prompter          Pointer to password prompt routine [input]
- * @param data              Data for password prompt routine [input]
- * @param start_time        Time that credentials first became valid [input]
- * @param in_tkt_service    Pointer to output buffer containing the TGT [input]
- * @param k5_gic_options    Pointer to structure containing flags and options [input]
+ * @param [in]     context           Context structure
+ * @param [in,out] creds             Credentials structure to be filled in
+ * @param [in]     client            Client principal
+ * @param [in]     password          Password associated with initial credentials
+ * @param [in]     prompter          Pointer to password prompt routine
+ * @param [in]     data              Data for password prompt routine
+ * @param [in]     start_time        Time when a ticket should become valid; 0 means from now
+ * @param [in]     in_tkt_service    Service name to use while getting initial credentials
+ * @param [in]     k5_gic_options    Flags and options
  *
- *  Make sure to free the allocated memory when it is no longer needed.
+ * This function requests KDC for an initial credentials for @a client using
+ * @a password.
+ *
+ * @sa krb5_verify_init_creds()
  *
  * @retval
  *  0    Success
@@ -6438,26 +6420,25 @@ krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_get_times(krb5_context context, krb5_tkt_creds_context ctx,
                          krb5_ticket_times *times);
 
-/**
- * @brief Get initial credentials using a key table.
+/** Get initial credentials using a key table.
  *
- * @param context           Context structure [input, output]
- * @param creds             Pointer to credentials structure [output]
- * @param client            Client princiapl [input]
- * @param arg_keytab        Key table handle [input]
- * @param start_time        Time when a ticket becomes valid [input]
- * @param in_tkt_service    Requesting server's principal name [input]
- * @param k5_gic_options    Pointer to a structure containing flags and options [input]
+ * @param [in]  context           Context structure
+ * @param [in,out] creds          Credentials structure to be filled in
+ * @param [in]  client            Client principal to get initial credentials for
+ * @param [in]  arg_keytab        Key table handle
+ * @param [in]  start_time        Time when a ticket should become valid; 0 means from now
+ * @param [in]  in_tkt_service    Service name to use while getting initial credentials
+ * @param [in]  k5_gic_options    Flags and options
  *
- *  Make sure to free the allocated memory when it is no longer needed.
+ * This function requests initial credentials for @a client from KDC using a key
+ * stored in @a arg_keytab, or from the default keytab if @a arg_keytab is NULL.
+ *
+ * @sa krb5_verify_init_creds()
  *
  * @retval
- *  0 Success
- * @retval
- *  ENOMEM Insufficient memory
+ * 0 Success
  * @return
  * Kerberos error codes
- *
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_init_creds_keytab(krb5_context context, krb5_creds *creds,
