@@ -52,6 +52,7 @@ process_chpw_request(context, server_handle, realm, keytab,
 
     ret = 0;
     rep->length = 0;
+    rep->data = NULL;
 
     auth_context = NULL;
     changepw = NULL;
@@ -76,8 +77,13 @@ process_chpw_request(context, server_handle, realm, keytab,
     plen = (*ptr++ & 0xff);
     plen = (plen<<8) | (*ptr++ & 0xff);
 
-    if (plen != req->length)
-        return(KRB5KRB_AP_ERR_MODIFIED);
+    if (plen != req->length) {
+        ret = KRB5KRB_AP_ERR_MODIFIED;
+        numresult = KRB5_KPASSWD_MALFORMED;
+        strlcpy(strresult, "Request length was inconsistent",
+                sizeof(strresult));
+        goto chpwfail;
+    }
 
     /* verify version number */
 
@@ -531,6 +537,10 @@ cleanup:
     if (local_kaddrs != NULL)
         krb5_free_addresses(server_handle->context, local_kaddrs);
 
+    if ((*response)->data == NULL) {
+        free(*response);
+        *response = NULL;
+    }
     krb5_kt_close(server_handle->context, kt);
 
     return ret;
