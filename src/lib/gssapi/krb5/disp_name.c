@@ -46,11 +46,6 @@ krb5_gss_display_name(minor_status, input_name, output_name_buffer,
     output_name_buffer->length = 0;
     output_name_buffer->value = NULL;
 
-    if (! kg_validate_name(input_name)) {
-        *minor_status = (OM_uint32) G_VALIDATE_FAILED;
-        krb5_free_context(context);
-        return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
-    }
     if (krb5_princ_type(context, k5name->princ) == KRB5_NT_WELLKNOWN) {
         if (krb5_principal_compare(context, k5name->princ,
                                    krb5_anonymous_principal()))

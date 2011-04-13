@@ -103,12 +103,6 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
     if (acceptor_name)
         *acceptor_name = (gss_name_t) NULL;
 
-    /* validate the context handle */
-    if (! kg_validate_ctx_id(context_handle)) {
-        *minor_status = (OM_uint32) G_VALIDATE_FAILED;
-        return(GSS_S_NO_CONTEXT);
-    }
-
     ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
     if (! ctx->established) {
@@ -131,8 +125,7 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
 
     if (initiator_name) {
         if ((code = kg_duplicate_name(context,
-                                      ctx->initiate?ctx->here:ctx->there,
-                                      KG_INIT_NAME_INTERN,
+                                      ctx->initiate ? ctx->here : ctx->there,
                                       &initiator))) {
             *minor_status = code;
             save_error_info(*minor_status, context);
@@ -142,12 +135,10 @@ krb5_gss_inquire_context(minor_status, context_handle, initiator_name,
 
     if (acceptor_name) {
         if ((code = kg_duplicate_name(context,
-                                      ctx->initiate?ctx->there:ctx->here,
-                                      KG_INIT_NAME_INTERN,
+                                      ctx->initiate ? ctx->there : ctx->here,
                                       &acceptor))) {
             if (initiator)
-                kg_release_name(context, KG_INIT_NAME_INTERN,
-                                &initiator);
+                kg_release_name(context, &initiator);
             *minor_status = code;
             save_error_info(*minor_status, context);
             return(GSS_S_FAILURE);

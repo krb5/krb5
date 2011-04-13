@@ -609,10 +609,11 @@ kg_new_connection(
         ctx->krb_times.endtime = now + time_req;
     }
 
-    if ((code = kg_duplicate_name(context, cred->name, 0, &ctx->here)))
+    if ((code = kg_duplicate_name(context, cred->name, &ctx->here)))
         goto cleanup;
 
-    if ((code = kg_duplicate_name(context, (krb5_gss_name_t)target_name, 0, &ctx->there)))
+    if ((code = kg_duplicate_name(context, (krb5_gss_name_t)target_name,
+                                  &ctx->there)))
         goto cleanup;
 
     code = get_credentials(context, cred, ctx->there, now,
@@ -690,12 +691,6 @@ kg_new_connection(
     if (actual_mech_type)
         *actual_mech_type = mech_type;
 
-    /* At this point, the context is constructed and valid; intern it. */
-    if (! kg_save_ctx_id((gss_ctx_id_t) ctx)) {
-        code = G_VALIDATE_FAILED;
-        goto cleanup;
-    }
-
     /* return successfully */
 
     *context_handle = (gss_ctx_id_t) ctx;
@@ -719,9 +714,9 @@ cleanup:
         if (ctx_free->auth_context)
             krb5_auth_con_free(context, ctx_free->auth_context);
         if (ctx_free->here)
-            kg_release_name(context, 0, &ctx_free->here);
+            kg_release_name(context, &ctx_free->here);
         if (ctx_free->there)
-            kg_release_name(context, 0, &ctx_free->there);
+            kg_release_name(context, &ctx_free->there);
         if (ctx_free->subkey)
             krb5_k_free_key(context, ctx_free->subkey);
         xfree(ctx_free);
@@ -768,13 +763,6 @@ mutual_auth(
     code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
     if (code)
         goto fail;
-
-    /* validate the context handle */
-    /*SUPPRESS 29*/
-    if (! kg_validate_ctx_id(*context_handle)) {
-        *minor_status = (OM_uint32) G_VALIDATE_FAILED;
-        return(GSS_S_NO_CONTEXT);
-    }
 
     ctx = (krb5_gss_ctx_id_t) *context_handle;
 
@@ -969,16 +957,6 @@ krb5_gss_init_sec_context_ext(
     output_token->value = NULL;
     if (actual_mech_type)
         *actual_mech_type = NULL;
-
-    /* verify that the target_name is valid and usable */
-
-    if (! kg_validate_name(target_name)) {
-        *minor_status = (OM_uint32) G_VALIDATE_FAILED;
-        save_error_info(*minor_status, context);
-        if (*context_handle == GSS_C_NO_CONTEXT)
-            krb5_free_context(context);
-        return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME);
-    }
 
     /* verify the credential, or use the default */
     /*SUPPRESS 29*/

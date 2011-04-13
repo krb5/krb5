@@ -97,12 +97,6 @@ gss_krb5int_export_lucid_sec_context(
     if (kret)
         goto error_out;
 
-    /* Success!  Record the context and return the buffer */
-    if (! kg_save_lucidctx_id((void *)lctx)) {
-        kret = G_VALIDATE_FAILED;
-        goto error_out;
-    }
-
     rep.value = &lctx;
     rep.length = sizeof(lctx);
 
@@ -142,17 +136,10 @@ gss_krb5int_free_lucid_sec_context(
         goto error_out;
     }
 
-    /* Verify pointer is valid lucid context */
-    if (! kg_validate_lucidctx_id(kctx)) {
-        kret = G_VALIDATE_FAILED;
-        goto error_out;
-    }
-
     /* Determine version and call correct free routine */
     version = ((gss_krb5_lucid_context_version_t *)kctx)->version;
     switch (version) {
     case 1:
-        (void)kg_delete_lucidctx_id(kctx);
         free_external_lucid_ctx_v1((gss_krb5_lucid_context_v1_t*) kctx);
         break;
     default:

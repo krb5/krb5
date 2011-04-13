@@ -367,9 +367,6 @@ krb5_gss_inquire_sec_context_by_oid (OM_uint32 *minor_status,
 
     *data_set = GSS_C_NO_BUFFER_SET;
 
-    if (!kg_validate_ctx_id(context_handle))
-        return GSS_S_NO_CONTEXT;
-
     ctx = (krb5_gss_ctx_id_rec *) context_handle;
 
     if (!ctx->established)
@@ -485,15 +482,6 @@ krb5_gss_set_sec_context_option (OM_uint32 *minor_status,
 
     if (desired_object == GSS_C_NO_OID)
         return GSS_S_CALL_INACCESSIBLE_READ;
-
-    if (*context_handle != GSS_C_NO_CONTEXT) {
-        krb5_gss_ctx_id_rec *ctx;
-
-        if (!kg_validate_ctx_id(*context_handle))
-            return GSS_S_NO_CONTEXT;
-
-        ctx = (krb5_gss_ctx_id_rec *) context_handle;
-    }
 
 #if 0
     for (i = 0; i < sizeof(krb5_gss_set_sec_context_option_ops)/
@@ -768,12 +756,6 @@ krb5_gss_pname_to_uid(OM_uint32 *minor,
         return GSS_S_FAILURE;
     }
 
-    if (!kg_validate_name(pname)) {
-        *minor = (OM_uint32)G_VALIDATE_FAILED;
-        krb5_free_context(context);
-        return GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME;
-    }
-
     kname = (krb5_gss_name_t)pname;
 
     code = krb5_aname_to_localname(context, kname->princ,
@@ -811,11 +793,6 @@ krb5_gss_authorize_localname(OM_uint32 *minor,
     if (name_type != GSS_C_NO_OID &&
         !g_OID_equal(name_type, GSS_C_NT_USER_NAME)) {
         return GSS_S_BAD_NAMETYPE;
-    }
-
-    if (!kg_validate_name(pname)) {
-        *minor = (OM_uint32)G_VALIDATE_FAILED;
-        return GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME;
     }
 
     kname = (krb5_gss_name_t)pname;

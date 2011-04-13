@@ -245,25 +245,6 @@ extern g_set kg_vdb;
 extern k5_mutex_t gssint_krb5_keytab_lock;
 #endif /* LEAN_CLIENT */
 
-/* helper macros */
-
-#define kg_save_name(name)              g_save_name(&kg_vdb,name)
-#define kg_save_cred_id(cred)           g_save_cred_id(&kg_vdb,cred)
-#define kg_save_ctx_id(ctx)             g_save_ctx_id(&kg_vdb,ctx)
-#define kg_save_lucidctx_id(lctx)       g_save_lucidctx_id(&kg_vdb,lctx)
-
-#define kg_validate_name(name)          g_validate_name(&kg_vdb,name)
-#define kg_validate_cred_id(cred)       g_validate_cred_id(&kg_vdb,cred)
-#define kg_validate_ctx_id(ctx)         (g_validate_ctx_id(&kg_vdb,ctx) && \
-                                         ((krb5_gss_ctx_id_t)ctx)->magic == \
-                                         KG_CONTEXT)
-#define kg_validate_lucidctx_id(lctx)   g_validate_lucidctx_id(&kg_vdb,lctx)
-
-#define kg_delete_name(name)            g_delete_name(&kg_vdb,name)
-#define kg_delete_cred_id(cred)         g_delete_cred_id(&kg_vdb,cred)
-#define kg_delete_ctx_id(ctx)           g_delete_ctx_id(&kg_vdb,ctx)
-#define kg_delete_lucidctx_id(lctx)     g_delete_lucidctx_id(&kg_vdb,lctx)
-
 /** helper functions **/
 
 OM_uint32 kg_get_defcred
@@ -891,8 +872,7 @@ OM_uint32 gss_krb5int_unseal_token_v3(krb5_context *contextptr,
 int gss_krb5int_rotate_left (void *ptr, size_t bufsiz, size_t rc);
 
 /* naming_exts.c */
-#define KG_INIT_NAME_INTERN  0x1
-#define KG_INIT_NAME_NO_COPY 0x2
+#define KG_INIT_NAME_NO_COPY 0x1
 
 krb5_error_code
 kg_init_name(krb5_context context, krb5_principal principal,
@@ -900,14 +880,10 @@ kg_init_name(krb5_context context, krb5_principal principal,
              krb5_flags flags, krb5_gss_name_t *name);
 
 krb5_error_code
-kg_release_name(krb5_context context,
-                krb5_flags flags,
-                krb5_gss_name_t *name);
+kg_release_name(krb5_context context, krb5_gss_name_t *name);
 
 krb5_error_code
-kg_duplicate_name(krb5_context context,
-                  const krb5_gss_name_t src,
-                  krb5_flags flags,
+kg_duplicate_name(krb5_context context, const krb5_gss_name_t src,
                   krb5_gss_name_t *dst);
 
 krb5_boolean

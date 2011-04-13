@@ -44,12 +44,6 @@ krb5_gss_release_cred(minor_status, cred_handle)
         return(GSS_S_COMPLETE);
     }
 
-    if (! kg_delete_cred_id(*cred_handle)) {
-        *minor_status = (OM_uint32) G_VALIDATE_FAILED;
-        krb5_free_context(context);
-        return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_NO_CRED);
-    }
-
     cred = (krb5_gss_cred_id_t)*cred_handle;
 
     k5_mutex_destroy(&cred->lock);
@@ -75,7 +69,7 @@ krb5_gss_release_cred(minor_status, cred_handle)
     else
         code3 = 0;
     if (cred->name)
-        kg_release_name(context, 0, &cred->name);
+        kg_release_name(context, &cred->name);
 
     if (cred->req_enctypes)
         free(cred->req_enctypes);

@@ -60,14 +60,6 @@ gssapi.h: gssapi.hin
 ##DOS##gssapi.h: gssapi.hin
 ##DOS##	$(CP) $** $@
 
-#if HasHashLibrary
-# UTIL_VALIDATE_SRC= $(srcdir)/util_validate.c
-# UTIL_VALIDATE_OBJ= util_validate.$(OBJEXT)
-#else
-#UTIL_VALIDATE_SRC= $(srcdir)/utl_nohash_validate.c
-#UTIL_VALIDATE_OBJ= utl_nohash_validate.$(OBJEXT)
-#endif
-
 SRCS = \
 	$(srcdir)/disp_com_err_status.c \
 	$(srcdir)/disp_major_status.c \
@@ -81,7 +73,6 @@ SRCS = \
 	$(srcdir)/util_ordering.c \
 	$(srcdir)/util_set.c \
 	$(srcdir)/util_token.c \
-	$(srcdir)/util_validate.c \
 	gssapi_err_generic.c
 
 OBJS = \
@@ -97,7 +88,6 @@ OBJS = \
 	$(OUTPRE)util_ordering.$(OBJEXT) \
 	$(OUTPRE)util_set.$(OBJEXT) \
 	$(OUTPRE)util_token.$(OBJEXT) \
-	$(OUTPRE)util_validate.$(OBJEXT) \
 	$(OUTPRE)gssapi_err_generic.$(OBJEXT)
 
 STLIBOBJS = \
@@ -113,7 +103,6 @@ STLIBOBJS = \
 	util_ordering.o \
 	util_set.o \
 	util_token.o \
-	util_validate.o \
 	gssapi_err_generic.o
 
 EXPORTED_HEADERS= gssapi_generic.h gssapi_ext.h

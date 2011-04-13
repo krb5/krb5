@@ -258,11 +258,6 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
         *time_rec = cred->tgt_expire - now;
     }
 
-    if (!kg_save_cred_id((gss_cred_id_t)cred)) {
-        code = G_VALIDATE_FAILED;
-        goto cleanup;
-    }
-
     major_status = GSS_S_COMPLETE;
     *minor_status = 0;
     *output_cred = cred;
@@ -276,7 +271,7 @@ cleanup:
     if (GSS_ERROR(major_status) && cred != NULL) {
         k5_mutex_destroy(&cred->lock);
         krb5_cc_destroy(context, cred->ccache);
-        kg_release_name(context, 0, &cred->name);
+        kg_release_name(context, &cred->name);
         xfree(cred);
     }
 

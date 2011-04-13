@@ -53,11 +53,6 @@ krb5_gss_pseudo_random(OM_uint32 *minor_status,
     prf_out->length = 0;
     prf_out->value = NULL;
 
-    if (!kg_validate_ctx_id(context)) {
-        *minor_status = G_VALIDATE_FAILED;
-        return GSS_S_NO_CONTEXT;
-    }
-
     t.length = 0;
     t.data = NULL;
 

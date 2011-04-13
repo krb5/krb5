@@ -346,8 +346,8 @@ kg_accept_dce(minor_status, context_handle, verifier_cred_handle,
     ctx->established = 1;
 
     if (src_name) {
-        if ((code = kg_duplicate_name(ctx->k5_context, ctx->there,
-                                      KG_INIT_NAME_INTERN, &name))) {
+        code = kg_duplicate_name(ctx->k5_context, ctx->there, &name);
+        if (code) {
             major_status = GSS_S_FAILURE;
             goto fail;
         }
@@ -905,16 +905,6 @@ kg_accept_krb5(minor_status, context_handle,
     ctx->big_endian = bigend;
     ctx->cred_rcache = cred_rcache;
 
-    /* Intern the ctx pointer so that delete_sec_context works */
-    if (! kg_save_ctx_id((gss_ctx_id_t) ctx)) {
-        xfree(ctx);
-        ctx = 0;
-
-        code = G_VALIDATE_FAILED;
-        major_status = GSS_S_FAILURE;
-        goto fail;
-    }
-
     /* XXX move this into gss_name_t */
     if (        (code = krb5_merge_authdata(context,
                                             ticket->enc_part2->authorization_data,
@@ -1161,8 +1151,8 @@ kg_accept_krb5(minor_status, context_handle,
     /* set the return arguments */
 
     if (src_name) {
-        if ((code = kg_duplicate_name(context, ctx->there,
-                                      KG_INIT_NAME_INTERN, &name))) {
+        code = kg_duplicate_name(context, ctx->there, &name);
+        if (code) {
             major_status = GSS_S_FAILURE;
             goto fail;
         }
@@ -1183,15 +1173,8 @@ kg_accept_krb5(minor_status, context_handle,
     if (src_name)
         *src_name = (gss_name_t) name;
 
-    if (delegated_cred_handle) {
-        if (!kg_save_cred_id((gss_cred_id_t) deleg_cred)) {
-            major_status = GSS_S_FAILURE;
-            code = G_VALIDATE_FAILED;
-            goto fail;
-        }
-
+    if (delegated_cred_handle)
         *delegated_cred_handle = (gss_cred_id_t) deleg_cred;
-    }
 
     /* finally! */
 
@@ -1228,13 +1211,13 @@ fail:
         if (deleg_cred->ccache)
             (void)krb5_cc_close(context, deleg_cred->ccache);
         if (deleg_cred->name)
-            kg_release_name(context, 0, &deleg_cred->name);
+            kg_release_name(context, &deleg_cred->name);
         xfree(deleg_cred);
     }
     if (token.value)
         xfree(token.value);
     if (name) {
-        (void) kg_release_name(context, 0, &name);
+        (void) kg_release_name(context, &name);
     }
 
     *minor_status = code;

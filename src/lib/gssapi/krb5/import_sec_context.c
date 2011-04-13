@@ -109,13 +109,6 @@ krb5_gss_import_sec_context(minor_status, interprocess_token, context_handle)
     }
     krb5_free_context(context);
 
-    /* intern the context handle */
-    if (! kg_save_ctx_id((gss_ctx_id_t) ctx)) {
-        (void)krb5_gss_delete_sec_context(minor_status,
-                                          (gss_ctx_id_t *) &ctx, NULL);
-        *minor_status = (OM_uint32) G_VALIDATE_FAILED;
-        return(GSS_S_FAILURE);
-    }
     ctx->mech_used = krb5_gss_convert_static_mech_oid(ctx->mech_used);
 
     *context_handle = (gss_ctx_id_t) ctx;

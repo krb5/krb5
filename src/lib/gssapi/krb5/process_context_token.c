@@ -37,12 +37,6 @@ krb5_gss_process_context_token(minor_status, context_handle,
     krb5_gss_ctx_id_rec *ctx;
     OM_uint32 majerr;
 
-    /* validate the context handle */
-    if (! kg_validate_ctx_id(context_handle)) {
-        *minor_status = (OM_uint32) G_VALIDATE_FAILED;
-        return(GSS_S_NO_CONTEXT);
-    }
-
     ctx = (krb5_gss_ctx_id_t) context_handle;
 
     if (! ctx->established) {

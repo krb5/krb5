@@ -306,7 +306,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
 
     /* Create a name and save it in the validation database. */
     code = kg_init_name(context, princ, service, host, ad_context,
-                        KG_INIT_NAME_INTERN | KG_INIT_NAME_NO_COPY, &name);
+                        KG_INIT_NAME_NO_COPY, &name);
     if (code)
         goto cleanup;
     princ = NULL;

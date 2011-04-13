@@ -86,29 +86,20 @@ kg_init_name(krb5_context context, krb5_principal principal,
         name->ad_context = ad_context;
     }
 
-    if ((flags & KG_INIT_NAME_INTERN) &&
-        !kg_save_name((gss_name_t)name)) {
-        code = G_VALIDATE_FAILED;
-        goto cleanup;
-    }
-
     *ret_name = name;
 
 cleanup:
     if (code != 0)
-        kg_release_name(context, 0, &name);
+        kg_release_name(context, &name);
 
     return code;
 }
 
 krb5_error_code
 kg_release_name(krb5_context context,
-                krb5_flags flags,
                 krb5_gss_name_t *name)
 {
     if (*name != NULL) {
-        if (flags & KG_INIT_NAME_INTERN)
-            kg_delete_name((gss_name_t)*name);
         krb5_free_principal(context, (*name)->princ);
         free((*name)->service);
         free((*name)->host);
@@ -124,7 +115,6 @@ kg_release_name(krb5_context context,
 krb5_error_code
 kg_duplicate_name(krb5_context context,
                   const krb5_gss_name_t src,
-                  krb5_flags flags,
                   krb5_gss_name_t *dst)
 {
     krb5_error_code code;
@@ -134,7 +124,7 @@ kg_duplicate_name(krb5_context context,
         return code;
 
     code = kg_init_name(context, src->princ, src->service, src->host,
-                        src->ad_context, flags, dst);
+                        src->ad_context, 0, dst);
 
     k5_mutex_unlock(&src->lock);
 
@@ -284,12 +274,6 @@ krb5_gss_inquire_name(OM_uint32 *minor_status,
         return GSS_S_FAILURE;
     }
 
-    if (!kg_validate_name(name)) {
-        *minor_status = (OM_uint32)G_VALIDATE_FAILED;
-        krb5_free_context(context);
-        return GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME;
-    }
-
     kname = (krb5_gss_name_t)name;
 
     code = k5_mutex_lock(&kname->lock);
@@ -349,12 +333,6 @@ krb5_gss_get_name_attribute(OM_uint32 *minor_status,
     if (code != 0) {
         *minor_status = code;
         return GSS_S_FAILURE;
-    }
-
-    if (!kg_validate_name(name)) {
-        *minor_status = (OM_uint32)G_VALIDATE_FAILED;
-        krb5_free_context(context);
-        return GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME;
     }
 
     kname = (krb5_gss_name_t)name;
@@ -435,12 +413,6 @@ krb5_gss_set_name_attribute(OM_uint32 *minor_status,
         return GSS_S_FAILURE;
     }
 
-    if (!kg_validate_name(name)) {
-        *minor_status = (OM_uint32)G_VALIDATE_FAILED;
-        krb5_free_context(context);
-        return GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME;
-    }
-
     kname = (krb5_gss_name_t)name;
 
     code = k5_mutex_lock(&kname->lock);
@@ -496,12 +468,6 @@ krb5_gss_delete_name_attribute(OM_uint32 *minor_status,
         return GSS_S_FAILURE;
     }
 
-    if (!kg_validate_name(name)) {
-        *minor_status = (OM_uint32)G_VALIDATE_FAILED;
-        krb5_free_context(context);
-        return GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME;
-    }
-
     kname = (krb5_gss_name_t)name;
 
     code = k5_mutex_lock(&kname->lock);
@@ -552,12 +518,6 @@ krb5_gss_map_name_to_any(OM_uint32 *minor_status,
     if (code != 0) {
         *minor_status = code;
         return GSS_S_FAILURE;
-    }
-
-    if (!kg_validate_name(name)) {
-        *minor_status = (OM_uint32)G_VALIDATE_FAILED;
-        krb5_free_context(context);
-        return GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME;
     }
 
     kname = (krb5_gss_name_t)name;
@@ -615,12 +575,6 @@ krb5_gss_release_any_name_mapping(OM_uint32 *minor_status,
     if (code != 0) {
         *minor_status = code;
         return GSS_S_FAILURE;
-    }
-
-    if (!kg_validate_name(name)) {
-        *minor_status = (OM_uint32)G_VALIDATE_FAILED;
-        krb5_free_context(context);
-        return GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME;
     }
 
     kname = (krb5_gss_name_t)name;
@@ -682,12 +636,6 @@ krb5_gss_export_name_composite(OM_uint32 *minor_status,
     if (code != 0) {
         *minor_status = code;
         return GSS_S_FAILURE;
-    }
-
-    if (!kg_validate_name(name)) {
-        *minor_status = (OM_uint32)G_VALIDATE_FAILED;
-        krb5_free_context(context);
-        return GSS_S_CALL_BAD_STRUCTURE|GSS_S_BAD_NAME;
     }
 
     kname = (krb5_gss_name_t)name;

@@ -36,11 +36,6 @@ krb5_gss_validate_cred_1(OM_uint32 *minor_status, gss_cred_id_t cred_handle,
     krb5_error_code code;
     krb5_principal princ;
 
-    if (!kg_validate_cred_id(cred_handle)) {
-        *minor_status = (OM_uint32) G_VALIDATE_FAILED;
-        return(GSS_S_CALL_BAD_STRUCTURE|GSS_S_DEFECTIVE_CREDENTIAL);
-    }
-
     cred = (krb5_gss_cred_id_t) cred_handle;
 
     code = k5_mutex_lock(&cred->lock);

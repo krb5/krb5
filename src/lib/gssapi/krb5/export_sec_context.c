@@ -44,12 +44,6 @@ krb5_gss_export_sec_context(minor_status, context_handle, interprocess_token)
     retval = GSS_S_FAILURE;
     *minor_status = 0;
 
-    if (!kg_validate_ctx_id(*context_handle)) {
-        kret = (OM_uint32) G_VALIDATE_FAILED;
-        retval = GSS_S_NO_CONTEXT;
-        goto error_out;
-    }
-
     ctx = (krb5_gss_ctx_id_t) *context_handle;
     context = ctx->k5_context;
     kret = krb5_gss_ser_init(context);

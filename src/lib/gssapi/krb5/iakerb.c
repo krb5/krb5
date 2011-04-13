@@ -912,12 +912,6 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
     } else
         ctx = (iakerb_ctx_id_t)*context_handle;
 
-    if (!kg_validate_name(target_name)) {
-        *minor_status = G_VALIDATE_FAILED;
-        major_status = GSS_S_CALL_BAD_STRUCTURE | GSS_S_BAD_NAME;
-        goto cleanup;
-    }
-
     kname = (krb5_gss_name_t)target_name;
 
     if (claimant_cred_handle != GSS_C_NO_CREDENTIAL) {
