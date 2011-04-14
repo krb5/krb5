@@ -1351,6 +1351,10 @@ cleanup:
     if (local_kaddrs != NULL)
 	krb5_free_addresses(server_handle->context, local_kaddrs);
 
+    if ((*response)->data == NULL) {
+        free(*response);
+        *response = NULL;
+    }
     krb5_kt_close(server_handle->context, kt);
 
     return ret;

@@ -73,8 +73,13 @@ process_chpw_request(context, server_handle, realm, keytab,
     plen = (*ptr++ & 0xff);
     plen = (plen<<8) | (*ptr++ & 0xff);
 
-    if (plen != req->length)
-	return(KRB5KRB_AP_ERR_MODIFIED);
+    if (plen != req->length) {
+        ret = KRB5KRB_AP_ERR_MODIFIED;
+        numresult = KRB5_KPASSWD_MALFORMED;
+        strlcpy(strresult, "Request length was inconsistent",
+                sizeof(strresult));
+        goto chpwfail;
+    }
 
     /* verify version number */
 
