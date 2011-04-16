@@ -100,3 +100,4 @@ krb5int_aes_enc_key
 k5_sha256_final
 k5_sha256_init
 k5_sha256_update
+krb5int_nfold

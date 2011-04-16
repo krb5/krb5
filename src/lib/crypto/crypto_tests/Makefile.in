@@ -71,11 +71,8 @@ check-unix:: t_nfold t_encrypt t_decrypt t_prf t_prng t_cmac t_hmac \
 	diff t_cf2.output $(srcdir)/t_cf2.expected
 #	$(RUN_SETUP) $(VALGRIND) ./t_pkcs5
 
-t_nfold$(EXEEXT): t_nfold.$(OBJEXT) nfold.$(OBJEXT) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_nfold.$(OBJEXT) ../krb/nfold$(DYNOBJEXT) $(SUPPORT_LIB)
-
-nfold.$(OBJEXT): $(srcdir)/../krb/nfold.c
-	$(CC) -c $(ALL_CFLAGS) $(srcdir)/../krb/nfold.c
+t_nfold$(EXEEXT): t_nfold.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o $@ t_nfold.$(OBJEXT) -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
 
 t_encrypt$(EXEEXT): t_encrypt.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_encrypt.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
@@ -158,7 +155,7 @@ t_cf2$(EXEEXT): t_cf2.$(OBJEXT) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_cf2.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
 
 clean::
-	$(RM) t_nfold.o t_nfold nfold.$(OBJEXT) t_encrypt t_encrypt.o \
+	$(RM) t_nfold.o t_nfold t_encrypt t_encrypt.o \
 		t_decrypt.o t_decrypt t_prng.o t_prng t_cmac.o t_cmac \
 		t_hmac.o t_hmac t_pkcs5.o t_pkcs5 pbkdf2.o t_prf t_prf.o \
 		aes-test.o aes-test vt.txt vk.txt kresults.out \
