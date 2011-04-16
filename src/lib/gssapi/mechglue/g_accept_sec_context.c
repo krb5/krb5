@@ -122,7 +122,7 @@ gss_cred_id_t *		d_cred;
     gss_OID_desc	token_mech_type_desc;
     gss_OID		token_mech_type = &token_mech_type_desc;
     gss_OID		actual_mech = GSS_C_NO_OID;
-    gss_mechanism	mech;
+    gss_mechanism	mech = NULL;
 
     status = val_acc_sec_ctx_args(minor_status,
 				  context_handle,
