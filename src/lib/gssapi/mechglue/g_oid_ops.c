@@ -108,5 +108,8 @@ gss_oid_equal(
     gss_const_OID first_oid,
     gss_const_OID second_oid)
 {
+    /* GSS_C_NO_OID doesn't match itself, per draft-josefsson-gss-capsulate. */
+    if (first_oid == GSS_C_NO_OID || second_oid == GSS_C_NO_OID)
+	return 0;
     return g_OID_equal(first_oid, second_oid);
 }
