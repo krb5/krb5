@@ -535,10 +535,6 @@ dispatch(void *handle,
                                remote_faddr,
                                request,
                                *response);
-    if (ret) {
-        krb5_free_data(server_handle->context, *response);
-        *response = NULL;
-    }
 
 cleanup:
     if (local_kaddrs != NULL)
