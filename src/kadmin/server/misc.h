@@ -43,14 +43,6 @@ schpw_util_wrapper(void *server_handle, krb5_principal client,
 kadm5_ret_t check_min_life(void *server_handle, krb5_principal principal,
                            char *msg_ret, unsigned int msg_len);
 
-krb5_error_code process_chpw_request(krb5_context context,
-                                     void *server_handle,
-                                     char *realm,
-                                     krb5_keytab keytab,
-                                     krb5_fulladdr *local_faddr,
-                                     krb5_fulladdr *remote_faddr,
-                                     krb5_data *req, krb5_data *rep);
-
 void kadm_1(struct svc_req *, SVCXPRT *);
 void krb5_iprop_prog_1(struct svc_req *, SVCXPRT *);
 
