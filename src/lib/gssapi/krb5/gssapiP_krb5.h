@@ -469,8 +469,6 @@ OM_uint32 kg_fixup_padding_iov(OM_uint32 *minor_status,
         gss_iov_buffer_desc *iov,
         int iov_count);
 
-int kg_map_toktype(int proto, int toktype);
-
 krb5_boolean kg_integ_only_iov(gss_iov_buffer_desc *iov, int iov_count);
 
 krb5_error_code kg_allocate_iov(gss_iov_buffer_t iov, size_t size);

@@ -754,32 +754,6 @@ kg_fixup_padding_iov(OM_uint32 *minor_status, gss_iov_buffer_desc *iov,
     return GSS_S_COMPLETE;
 }
 
-int
-kg_map_toktype(int proto, int toktype)
-{
-    int toktype2;
-
-    if (proto)
-        switch (toktype) {
-        case KG_TOK_SIGN_MSG:
-            toktype2 = KG2_TOK_MIC_MSG;
-            break;
-        case KG_TOK_WRAP_MSG:
-            toktype2 = KG2_TOK_WRAP_MSG;
-            break;
-        case KG_TOK_DEL_CTX:
-            toktype2 = KG2_TOK_DEL_CTX;
-            break;
-        default:
-            toktype2 = toktype;
-            break;
-        }
-    else
-        toktype2 = toktype;
-
-    return toktype2;
-}
-
 krb5_boolean
 kg_integ_only_iov(gss_iov_buffer_desc *iov, int iov_count)
 {
