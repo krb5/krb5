@@ -6,10 +6,19 @@
 Copyright and Other Notices
 ---------------------------
 
-Copyright (C) 1985-2010 by the Massachusetts Institute of Technology
+Copyright (C) 1985-2011 by the Massachusetts Institute of Technology
 and its contributors.  All rights reserved.
 
 Please see the file named NOTICE for additional notices.
+
+MIT Kerberos is a project of the MIT Kerberos Consortium.  For more
+information about the Kerberos Consortium, see http://kerberos.org/
+
+For more information about the MIT Kerberos software, see
+    http://web.mit.edu/kerberos/
+
+People interested in participating in the MIT Kerberos development
+effort should visit http://k5wiki.kerberos.org/
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -42,9 +51,13 @@ If you are not able to use krb5-send-pr because you haven't been able
 compile and install Kerberos V5 on any platform, you may send mail to
 krb5-bugs@mit.edu.
 
+Please keep in mind that unencrypted e-mail is not secure. If you need
+to report a security vulnerability, or send sensitive information,
+please PGP-encrypt it to krbcore-security@mit.edu.
+
 You may view bug reports by visiting
 
-http://krbdev.mit.edu/rt/
+    http://krbdev.mit.edu/rt/
 
 and logging in as "guest" with password "guest".
 
@@ -56,6 +69,48 @@ krb5-1.7 release contains measures to encourage sites to migrate away
 from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
+
+Major changes in 1.9.1
+----------------------
+
+This is primarily a bugfix release.
+
+* Fix vulnerabilities:
+  ** kpropd denial of service [MITKRB5-SA-2011-001 CVE-2010-4022]
+  ** KDC denial of service attacks [MITKRB5-SA-2011-002
+     CVE-2011-0281 CVE-2011-0282 CVE-2011-0283]
+  ** KDC double-free when PKINIT enabled [MITKRB5-SA-2011-003
+     CVE-2011-0284]
+  ** kadmind frees invalid pointer [MITKRB5-SA-2011-004 CVE-2011-0285]
+
+* Interoperability:
+
+  ** Don't reject AP-REQ messages if their PAC doesn't validate;
+     suppress the PAC instead.
+
+  ** Correctly validate HMAC-MD5 checksums that use DES keys
+
+krb5-1.9.1 changes by ticket ID
+-------------------------------
+
+6596    [Michael Spang] Bug#561176: krb5-kdc-ldap: krb5kdc leaks file
+        descriptors
+6675    segfault in gss_export_sec_context
+6800    memory leak in kg_new_connection
+6847    Suppress camellia-gen in 1.9 make check
+6849    Fix edge case in LDAP last_admin_unlock processing
+6852    Make gss_krb5_set_allowable_enctypes work for the acceptor
+6856    Fix seg faulting trace log message for use of fallback realm
+6859    kpropd denial of service [MITKRB5-SA-2011-001 CVE-2010-4022]
+6860    KDC denial of service attacks [MITKRB5-SA-2011-002
+        CVE-2011-0281 CVE-2011-0282 CVE-2011-0283]
+6867    Trace logging file descriptor leak
+6869    hmac-md5 checksum doesn't work with DES keys
+6870    Don't reject AP-REQs based on PACs
+6871    "make distclean" leaves an object file behind.
+6875    kdb5_util mkey operations hit assertion when iprop is enabled
+6881    KDC double-free when PKINIT enabled [MITKRB5-SA-2011-003 CVE-2011-0284]
+6899    kadmind frees invalid pointer [MITKRB5-SA-2011-004 CVE-2011-0285]
 
 Major changes in 1.9
 --------------------
@@ -309,6 +364,7 @@ reports, suggestions, and valuable resources:
     Radoslav Bodo
     Emmanuel Bouillon
     Michael Calmer
+    Julien Chaffraix
     Ravi Channavajhala
     Srinivas Cheruku
     Leonardo Chiquitto
@@ -319,6 +375,7 @@ reports, suggestions, and valuable resources:
     Simon Cooper
     Sylvain Cortes
     Nalin Dahyabhai
+    Dennis Davis
     Roland Dowdeswell
     Jason Edgecombe
     Mark Eichin
@@ -352,13 +409,17 @@ reports, suggestions, and valuable resources:
     Mikkel Kruse
     Volker Lendecke
     Jan iankko Lieskovsky
+    Kevin Longfellow
     Ryan Lynch
+    Cameron Meadors
     Franklyn Mendez
     Markus Moeller
     Paul Moore
+    Keiichi Mori
     Zbysek Mraz
     Edward Murrell
     Nikos Nikoleris
+    Felipe Ortega
     Dmitri Pal
     Javier Palacios
     Ezra Peisach
@@ -372,6 +433,7 @@ reports, suggestions, and valuable resources:
     Tom Shaw
     Peter Shoults
     Simo Sorce
+    Michael Spang
     Michael Ströder
     Bjørn Tore Sund
     Rathor Vipin

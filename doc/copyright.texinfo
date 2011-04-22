@@ -2,7 +2,7 @@
 @begingroup
 @smallfonts @rm
 @end iftex
-Copyright @copyright{} 1985-2010 by the Massachusetts Institute of Technology.
+Copyright @copyright{} 1985-2011 by the Massachusetts Institute of Technology.
 
 All rights reserved.
 
