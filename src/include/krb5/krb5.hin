@@ -292,9 +292,23 @@ typedef const krb5_principal_data *krb5_const_principal;
  */
 krb5_boolean KRB5_CALLCONV krb5_is_referral_realm(const krb5_data *r);
 
-/* Both these functions return constant storage that must not be freed. */
-const krb5_data *KRB5_CALLCONV krb5_anonymous_realm(void);
-krb5_const_principal KRB5_CALLCONV krb5_anonymous_principal(void);
+/** Return an anonymous realm data.
+ *
+ * This function returns constant storage that must not be freed.
+ *
+ * @sa @c KRB5_ANONYMOUS_REALMSTR
+ */
+const krb5_data *KRB5_CALLCONV
+krb5_anonymous_realm(void);
+
+/** Build an anonymous principal.
+ *
+ * This function returns constant storage that must not be freed.
+ *
+ * @sa KRB5_ANONYMOUS_PRINCSTR
+ */
+krb5_const_principal KRB5_CALLCONV
+krb5_anonymous_principal(void);
 
 #define KRB5_ANONYMOUS_REALMSTR "WELLKNOWN:ANONYMOUS"
 #define KRB5_ANONYMOUS_PRINCSTR "ANONYMOUS" /* wellknown name type */
@@ -1949,19 +1963,23 @@ typedef struct _krb5_cccol_cursor *krb5_cccol_cursor;
 const char * KRB5_CALLCONV
 krb5_cc_get_name(krb5_context context, krb5_ccache cache);
 
-/**
- * @brief Generate a new handle for a specified (unopened) credentials cache.
+#if KRB5_DEPRECATED
+/** Generate a new handle for a specified (unopened) credentials cache.
  *
- * @param context           Context structure [input, output]
- * @param cache             Credentials cache handle [input, output]
+ * @param [in]  context           Context structure
+ * @param [in,out] cache          Credentials cache handle
  *
- * @retval
- *  0  Success
- * @return
- * Kerberos error codes
+ * @deprecated Replaced by krb5_cc_new_unique()
+ *
+ * This function generate a new credential chache whose name is guaranteed to be unique.
+ *
+ * @note In the case the credential file, the cache stays unopen, but the new filename is reserved.
+ *
+ * @retval 0  Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_gen_new(krb5_context context, krb5_ccache *cache);
+#endif /* KRB5_DEPRECATED /
 
 /** Initialize credentials cache.
  *
@@ -2093,61 +2111,54 @@ krb5_error_code KRB5_CALLCONV
 krb5_cc_get_principal(krb5_context context, krb5_ccache cache,
                       krb5_principal *principal);
 
-/**
- * @brief Prepare to sequentially read every credential in a credentials cache.
+/** Prepare to sequentially read every credential in a credentials cache.
  *
- * @param context           Context structure [input, output]
- * @param cache             Credentials cache handle [input]
- * @param cursor            Cursor [output]
+ * @param [in]  context           Context structure
+ * @param [in]  cache             Credentials cache handle
+ * @param [out] cursor            Cursor
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * krb5_cc_end_seq_get() must be called to complete the retreive operation.
  *
- * @retval
- *  0  Success
- * @return
- * Kerberos error codes
+ * @note If @a cache was modified between the time of the call to this function
+ * and the time of the final krb5_cc_end_seq_get(), the results are undefined.
+ *
+ * @retval 0  Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_start_seq_get(krb5_context context, krb5_ccache cache,
                       krb5_cc_cursor *cursor);
 
-/**
- * @brief Retrieve the next entry from the credentials cache.
+/** Retrieve the next entry from the credentials cache.
  *
- * @param context           Context structure [input, output]
- * @param cache             Credentials cache handle
- * @param cursor            Cursor  [input, output]
- * @param creds             Credentials cache entry corresponding to the cursor [output]
+ * @param [in]     context           Context structure
+ * @param [in]     cache             Credentials cache handle
+ * @param [in,out] cursor            Cursor
+ * @param [out]    creds             Credentials cache entry corresponding to the cursor
  *
- * @note The cursor value is updated when the function returns the credentials cache entry.
+ * @note The cursor value is updated upon successful completion of this function.
  * Subsequent calls to krb5_cc_next_cred() use the updated value.
  *
- * @sa krb5_end_seq_get()
+ * Use krb5_free_cred_contents() to free @a creds when it is no longer needed.
  *
- * @retval
- * 0 Success
- * @return
- * Error if there are no more cache entries
+ * @sa krb5_cc_start_seq_get(), krb5_end_seq_get()
+ *
+ * @retval 0  Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_next_cred(krb5_context context, krb5_ccache cache,
                   krb5_cc_cursor *cursor, krb5_creds *creds);
 
-/**
- * @brief Finish processing credentials cache entries and invalidate @a cursor.
+/** Finish a series of sequential processing credentials cache entries.
  *
- * @param context           Context structure [input, output]
- * @param cache             Credentials cache handle [input, output]
- * @param cursor            Cursor [input]
+ * @param [in]     context           Context structure
+ * @param [in]     cache             Credentials cache handle
+ * @param [in,out] cursor            Cursor that was created by krb5_cc_start_seq_get()
  *
- * @note  Use krb5_cc_start_seq_get() to create a new @a cursor for the next sequential read operation.
+ * This function finishes processing credentials cache entries and invalidates @a cursor.
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * @sa krb5_cc_next_cred()
  *
- * @retval
- * 0 Success
- * @return
- * Error if @a cursor is invalid
+ * @retval 0 (always)
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_end_seq_get(krb5_context context, krb5_ccache cache,
@@ -2212,21 +2223,16 @@ krb5_cc_remove_cred(krb5_context context, krb5_ccache cache, krb5_flags flags,
 krb5_error_code KRB5_CALLCONV
 krb5_cc_set_flags(krb5_context context, krb5_ccache cache, krb5_flags flags);
 
-/**
- * @brief Get @a flags from a credentials cache.
+/** Retrieve flags from a credentials cache structure.
  *
- * @param context           Context structure [input, output]
- * @param cache            Credentials cache handle [input]
- * @param flags             A bit mask representing the flags to get [input]
+ * @param [in]  context          Context structure
+ * @param [in]  cache            Credentials cache handle returned by
+ *                               krb5_cc_resolve() or krb5_cc_generate_new()
+ * @param [out] flags            Flag bit mask
  *
- * @todo what kind of flags?? link to list
+ * @warning For memory credential cache always returns KRB5_OK.
  *
- * Make sure to free the allocated memory when it is no longer needed.
- *
- * @retval
- * 0 Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise -  Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_get_flags(krb5_context context, krb5_ccache cache, krb5_flags *flags);
@@ -3203,12 +3209,15 @@ krb5_error_code KRB5_CALLCONV
 krb5_set_principal_realm(krb5_context context, krb5_principal principal,
                          const char *realm);
 
-/**
- * @brief Search @a addrlist for a specified address.
+/** Search a list of addresses for a specified address.
  *
- * @param context           Context structure [input, output]
- * @param addr              Address to search for [input]
- * @param addrlist          Address list to be searched. Specify NULL if there is no address list [input]
+ * @param context                (unused)
+ * @param [in] addr              Address to search for
+ * @param [in] addrlist          Address list to be searched.
+ *                               Specify NULL if there is no address list
+ *
+ * @note If @a addrlist contains only a NetBIOS addresses,
+ *       it will be treated as empty list.
  *
  * @retval
  * TRUE if @a addr is listed in @a addrlist, or @c addrlist is NULL; FALSE otherwise
@@ -3217,12 +3226,11 @@ krb5_boolean KRB5_CALLCONV_WRONG
 krb5_address_search(krb5_context context, const krb5_address *addr,
                     krb5_address *const *addrlist);
 
-/**
- * @brief Compare two Kerberos addresses.
+/** Compare two Kerberos addresses.
  *
- * @param context           Context structure [input, output]
- * @param addr1             First address to be compared [input]
- * @param addr2             Second address to be compared [input]
+ * @param context                (unused)
+ * @param [in] addr1             First address to be compared
+ * @param [in] addr2             Second address to be compared
  *
  * @retval
  *  TRUE if the addresses are the same, FALSE otherwise
@@ -3231,12 +3239,11 @@ krb5_boolean KRB5_CALLCONV
 krb5_address_compare(krb5_context context, const krb5_address *addr1,
                      const krb5_address *addr2);
 
-/**
- * @brief Return an ordering of the specified addresses.
+/** Return an ordering of the specified addresses.
  *
- * @param context           Context structure [input, output]
- * @param addr1             First address [input]
- * @param addr2             Second address [input]
+ * @param context                (unused)
+ * @param [in] addr1             First address
+ * @param [in] addr2             Second address
  *
  * @retval
  *  0 The two addresses are the same
@@ -3679,33 +3686,35 @@ krb5_build_principal_alloc_va(krb5_context context,
                               const char *realm,
                               va_list ap);
 
-/**
- * @brief Convert a Kerberos v4 principal to a Kerberos v5 principal.
+/** Convert a Kerberos V4 principal to a Kerberos V5 principal.
  *
- * @param context           Context structure [input, output]
- * @param name              Kerberos v4 name [input]
- * @param instance          Kerberos v4 instance [input]
- * @param realm             Kerberos v4 realm [input]
- * @param princ             Kerberos v5 principal name [output]
+ * @param [in]  context           Context structure
+ * @param [in]  name              V4 name
+ * @param [in]  instance          V4 instance
+ * @param [in]  realm             Realm
+ * @param [out] princ             V5 principal
  *
- * @retval
- * 0  Success
- * @return
- * Kerberos error codes
+ * This function builds a @a princ from V4 specification based on given input.
+ * @a name.instance@realm.
+ *
+ * Use krb5_free_principal() to free @a princ when it is no longer needed.
+ *
+ * @retval 0  Success; Otherwise -  Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_425_conv_principal(krb5_context context, const char *name,
                         const char *instance, const char *realm,
                         krb5_principal *princ);
 
-/**
- * @brief Convert a Kerberos v.5  principal to a Kerberos v.4 principal.
+/** Convert a Kerberos V5  principal to a Kerberos V4 principal.
  *
- * @param context           Context structure [input, output]
- * @param princ             Principal [input]
- * @param name              Principal's name [output]
- * @param inst              Principal's instance name [output]
- * @param realm             Principal's realm name [output]
+ * @param [in]  context           Context structure
+ * @param [in]  princ             V5 Principal
+ * @param [out] name              V4 principal's name to be filled in
+ * @param [out] inst              V4 principal's instance name to be filled in
+ * @param [out] realm             Principal's realm name to be filled in
+ *
+ * This function separates a V5 principal @a princ into @a name, @a instance, and @a realm.
  *
  * @retval
  *  0  Success
@@ -3715,7 +3724,6 @@ krb5_425_conv_principal(krb5_context context, const char *name,
  *  KRB5_CONFIG_CANTOPEN     Can't open or find Kerberos configuration file
  * @return
  * Kerberos error codes
- *
  */
 krb5_error_code KRB5_CALLCONV
 krb5_524_conv_principal(krb5_context context, krb5_const_principal princ,
@@ -3725,17 +3733,11 @@ krb5_524_conv_principal(krb5_context context, krb5_const_principal princ,
  */
 struct credentials;
 
-/**
- * @brief Convert a Kerberos v.5  principal to a Kerberos v.4 principal.
+/** Convert a Kerberos V5 credentials to a Kerberos V4 credentials
  *
- * @param context           Context structure [input, output]
- * @param v5creds           Version 5 credentials [input]
- * @param v4creds           Version 4 credentials   Principal's name [output]
+ * @note Not implemented
  *
- * @retval
- *  0  Success
- * @return
- * Kerberos error codes
+ * @retval  KRB524_KRB4_DISABLED (always)
  */
 int KRB5_CALLCONV
 krb5_524_convert_creds(krb5_context context, krb5_creds *v5creds,
@@ -3986,20 +3988,13 @@ krb5_cc_set_default_name(krb5_context context, const char *name);
 krb5_error_code KRB5_CALLCONV
 krb5_cc_default(krb5_context context, krb5_ccache *ccache);
 
-/**
- * @brief Copy a credentials cache.
+/** Copy a credentials cache.
  *
- * @param context           Context structure [input, output]
- * @param incc              Credentials cache to be copied [input]
- * @param outcc             Copy of credentials cache [output]
+ * @param [in]  context           Context structure
+ * @param [in]  incc              Credentials cache to be copied
+ * @param [out] outcc             Copy of credentials cache to be filled in
  *
- * Make sure to free the allocated memory when it is no longer needed.
- *
- * @retval
- * 0  Success
- * @return
- * Kerberos error codes
- *
+ * @retval 0  Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_copy_creds(krb5_context context, krb5_ccache incc, krb5_ccache outcc);
@@ -4118,8 +4113,8 @@ krb5_free_creds(krb5_context context, krb5_creds *val);
 
 /** Zero out the session key and free the credentials structure.
  *
- * @param [in] context           Context structure
- * @param [in] val               Pointer to the data structure to be freed
+ * @param [in]     context           Context structure
+ * @param [in,out] val               Pointer to the data structure to be freed
  *
  * @note The pointer val is not freed.
  */
@@ -5017,7 +5012,7 @@ krb5_auth_con_free(krb5_context context, krb5_auth_context auth_context);
  * @li @c KRB5_AUTH_CONTEXT_DO_SEQUENCE  Use sequence numbers
  * @li @c KRB5_AUTH_RET_SEQUENCE  Copy sequence numbers to output structure
  *
- * @retval - 0 (always)
+ * @retval 0 (always)
  */
 krb5_error_code KRB5_CALLCONV
 krb5_auth_con_setflags(krb5_context context, krb5_auth_context auth_context, krb5_int32 flags);
@@ -5035,7 +5030,7 @@ krb5_auth_con_setflags(krb5_context context, krb5_auth_context auth_context, krb
  * @li @c KRB5_AUTH_RET_SEQUENCE         Copy sequence numbers to output structure.
  *
  *
- * @retval - 0 (always)
+ * @retval 0 (always)
  */
 krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getflags(krb5_context context, krb5_auth_context auth_context, krb5_int32 *flags);
@@ -5060,9 +5055,9 @@ krb5_auth_con_set_checksum_func( krb5_context context,
 /** Get checksum_function related fields from krb5_auth_contex structure.
  *
  * @param context                (unused)
- * @param [in]  auth_context      Authentication context [input, output}
- * @param [out] func              Pointer to krb5 function that performs the checksum [output]
- * @param [out] data              Pointer to data [output]
+ * @param [in]  auth_context      Authentication context
+ * @param [out] func              Pointer to krb5 function that performs the checksum
+ * @param [out] data              Pointer to data
  *
  * @retval 0 (always)
  */
@@ -5110,7 +5105,7 @@ krb5_auth_con_getaddrs(krb5_context context, krb5_auth_context auth_context,
 /** Set local and remote port fields in a krb5_auth_context structure.
  *
  * @param [in]     context           Context structure
- * @param [in.out] auth_context      Authentication context
+ * @param [in,out] auth_context      Authentication context
  * @param [in]     local_port        Local port
  * @param [in]     remote_port       Remote port
  *
@@ -5168,7 +5163,7 @@ krb5_auth_con_getkey(krb5_context context, krb5_auth_context auth_context,
  * This function populates the output @a key with the
  * content of @a auth_context->send_subkey.
  *
- * @retval - 0 (always)
+ * @retval 0 (always)
  */
 krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getkey_k(krb5_context context, krb5_auth_context auth_context,
@@ -5198,7 +5193,7 @@ krb5_auth_con_getsendsubkey(krb5_context ctx, krb5_auth_context ac, krb5_keybloc
  * This function populates the output @a key with the
  * content of @a auth_context->send_subkey.
  *
- * @retval - 0 (always)
+ * @retval 0 (always)
  */
 krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getsendsubkey_k(krb5_context ctx, krb5_auth_context ac,
@@ -5228,7 +5223,7 @@ krb5_auth_con_getrecvsubkey(krb5_context ctx, krb5_auth_context ac, krb5_keybloc
  * This function populates the output @a key with the
  * content of @a auth_context->recv_subkey.
  *
- * @retval - 0 (always)
+ * @retval 0 (always)
  */
 krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getrecvsubkey_k(krb5_context ctx, krb5_auth_context ac, krb5_key *key);
@@ -5313,7 +5308,7 @@ krb5_auth_con_getremotesubkey(krb5_context context, krb5_auth_context auth_conte
  * The @c KRB5_AUTH_CONTEXT_DO_SEQUENCE flag must be set in @a auth_context
  * for this function to have an effect.
  *
- * @retval - 0 (always)
+ * @retval 0 (always)
  */
 krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getlocalseqnumber(krb5_context context, krb5_auth_context auth_context,
@@ -5330,7 +5325,7 @@ krb5_auth_con_getlocalseqnumber(krb5_context context, krb5_auth_context auth_con
  * The @c KRB5_AUTH_CONTEXT_DO_SEQUENCE flag must be set in @a auth_context
  * for this function to have an effect.
  *
- * @retval - 0 (always)
+ * @retval 0 (always)
  */
 krb5_error_code KRB5_CALLCONV
 krb5_auth_con_getremoteseqnumber(krb5_context context, krb5_auth_context auth_context,
@@ -5352,7 +5347,7 @@ krb5_auth_con_initivector(krb5_context context, krb5_auth_context auth_context);
  * @param [in,out] auth_context       Authentication context
  * @param [in]     rcache             Replay cache haddle
  *
- * @retval - 0 (always)
+ * @retval 0 (always)
  */
 krb5_error_code KRB5_CALLCONV
 krb5_auth_con_setrcache(krb5_context context, krb5_auth_context auth_context,
@@ -5366,7 +5361,7 @@ krb5_auth_con_setrcache(krb5_context context, krb5_auth_context auth_context,
  *
  * Set the output @a rcache to @a auth_context->rcache.
  *
- * @retval - 0 (always)
+ * @retval 0 (always)
  */
 krb5_error_code KRB5_CALLCONV_WRONG
 krb5_auth_con_getrcache(krb5_context context, krb5_auth_context auth_context,
@@ -5398,7 +5393,7 @@ krb5_auth_con_getauthenticator(krb5_context context, krb5_auth_context auth_cont
  * This function is used to override the default checksum types defined in the
  * configuration file.
  *
- * @retval - 0 (always)
+ * @retval 0 (always)
  */
 krb5_error_code KRB5_CALLCONV
 krb5_auth_con_set_req_cksumtype(krb5_context context, krb5_auth_context auth_context,
@@ -5454,17 +5449,19 @@ krb5_read_password(krb5_context context,
                    const char *prompt, const char *prompt2,
                    char *return_pwd, unsigned int *size_return);
 
-/**
- * @brief Convert a principal name to a local name.
+/** Convert a principal name to a local name.
  *
- * @param context           Context structure [input, output]
- * @param aname             Principal name [input]
- * @param lnsize_in         Maximum length name to be filled into @a lname [input]
- * @param lname             Local name [output]
+ * @param [in]  context           Context structure
+ * @param [in]  aname             Principal name
+ * @param [in]  lnsize_in         Maximum length name to be filled into @a lname
+ * @param [out] lname             Local name buffer to be filled in
+ *
+ * If @a aname isn't in one of the local realms an error is returned.
+ * If @a lnsize_in of @a lname is to small, an error is returned.
  *
  * Local names, rather than principal names, can be used by programs that
  * translate to an environment-specific  name (for example, a user account
- * name). The translation is  null-terminated in all non-error returns.
+ * name). The translation is null-terminated in all non-error returns.
  *
  * @retval
  * 0  Success
@@ -6808,10 +6805,15 @@ krb5_pac_verify(krb5_context context, const krb5_pac pac,
                 krb5_timestamp authtime, krb5_const_principal principal,
                 const krb5_keyblock *server, const krb5_keyblock *privsvr);
 
-/**
- * @brief Allows the appplication to override the profile's allow_weak_crypto setting.
+/** Allow the appplication to override the profile's allow_weak_crypto setting.
  *
- * Primarily for use by aklog.
+ * @param [in,out] context      Context structure
+ * @param [in]     enable       Boolean flag
+ *
+ * This function sets @a allow_weak_crypto field in @a context to @a enable.
+ * It is primarily for use by aklog.
+ *
+ * @retval 0  (always)
  */
 krb5_error_code KRB5_CALLCONV
 krb5_allow_weak_crypto(krb5_context context, krb5_boolean enable);
