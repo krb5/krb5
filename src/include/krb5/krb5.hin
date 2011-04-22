@@ -1979,7 +1979,7 @@ krb5_cc_get_name(krb5_context context, krb5_ccache cache);
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_gen_new(krb5_context context, krb5_ccache *cache);
-#endif /* KRB5_DEPRECATED /
+#endif /* KRB5_DEPRECATED */
 
 /** Initialize credentials cache.
  *
