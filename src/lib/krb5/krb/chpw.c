@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "k5-int.h"
+#include "int-proto.h"
 #include "auth_con.h"
 
 
@@ -73,166 +74,172 @@ cleanup:
     return(ret);
 }
 
-krb5_error_code
-krb5int_rd_chpw_rep(krb5_context context, krb5_auth_context auth_context,
-                    krb5_data *packet, int *result_code, krb5_data *result_data)
+/* Decode error_packet as a KRB-ERROR message and retrieve its e-data into
+ * *edata_out. */
+static krb5_error_code
+get_error_edata(krb5_context context, const krb5_data *error_packet,
+                krb5_data **edata_out)
 {
-    char *ptr;
-    unsigned int plen, vno;
-    krb5_data ap_rep;
-    krb5_ap_rep_enc_part *ap_rep_enc;
     krb5_error_code ret;
-    krb5_data cipherresult;
-    krb5_data clearresult;
     krb5_error *krberror = NULL;
-    krb5_replay_data replay;
-    krb5_keyblock *tmp;
 
-    if (packet->length < 4)
-        /* either this, or the server is printing bad messages,
-           or the caller passed in garbage */
-        return(KRB5KRB_AP_ERR_MODIFIED);
+    *edata_out = NULL;
 
-    ptr = packet->data;
+    ret = krb5_rd_error(context, error_packet, &krberror);
+    if (ret)
+        return ret;
 
-    /* verify length */
-
-    plen = (*ptr++ & 0xff);
-    plen = (plen<<8) | (*ptr++ & 0xff);
-
-    if (plen != packet->length) {
-        /*
-         * MS KDCs *may* send back a KRB_ERROR.  Although
-         * not 100% correct via RFC3244, it's something
-         * we can workaround here.
-         */
-        if (krb5_is_krb_error(packet)) {
-
-            if ((ret = krb5_rd_error(context, packet, &krberror)))
-                return(ret);
-
-            if (krberror->e_data.data  == NULL)
-                ret = ERROR_TABLE_BASE_krb5 + (krb5_error_code) krberror->error;
-            else
-                ret = KRB5KRB_AP_ERR_MODIFIED;
-            krb5_free_error(context, krberror);
-            return(ret);
-        } else {
-            return(KRB5KRB_AP_ERR_MODIFIED);
-        }
-    }
-
-
-    /* verify version number */
-
-    vno = (*ptr++ & 0xff);
-    vno = (vno<<8) | (*ptr++ & 0xff);
-
-    if (vno != 1)
-        return(KRB5KDC_ERR_BAD_PVNO);
-
-    /* read, check ap-rep length */
-
-    ap_rep.length = (*ptr++ & 0xff);
-    ap_rep.length = (ap_rep.length<<8) | (*ptr++ & 0xff);
-
-    if (ptr + ap_rep.length >= packet->data + packet->length)
-        return(KRB5KRB_AP_ERR_MODIFIED);
-
-    if (ap_rep.length) {
-        /* verify ap_rep */
-        ap_rep.data = ptr;
-        ptr += ap_rep.length;
-
-        /*
-         * Save send_subkey to later smash recv_subkey.
-         */
-        ret = krb5_auth_con_getsendsubkey(context, auth_context, &tmp);
-        if (ret)
-            return ret;
-
-        ret = krb5_rd_rep(context, auth_context, &ap_rep, &ap_rep_enc);
-        if (ret) {
-            krb5_free_keyblock(context, tmp);
-            return(ret);
-        }
-
-        krb5_free_ap_rep_enc_part(context, ap_rep_enc);
-
-        /* extract and decrypt the result */
-
-        cipherresult.data = ptr;
-        cipherresult.length = (packet->data + packet->length) - ptr;
-
-        /*
-         * Smash recv_subkey to be send_subkey, per spec.
-         */
-        ret = krb5_auth_con_setrecvsubkey(context, auth_context, tmp);
-        krb5_free_keyblock(context, tmp);
-        if (ret)
-            return ret;
-
-        ret = krb5_rd_priv(context, auth_context, &cipherresult, &clearresult,
-                           &replay);
-
-        if (ret)
-            return(ret);
-    } else {
-        cipherresult.data = ptr;
-        cipherresult.length = (packet->data + packet->length) - ptr;
-
-        if ((ret = krb5_rd_error(context, &cipherresult, &krberror)))
-            return(ret);
-
-        clearresult = krberror->e_data;
-    }
-
-    if (clearresult.length < 2) {
-        ret = KRB5KRB_AP_ERR_MODIFIED;
+    if (krberror->e_data.data == NULL) {
+        /* Return a krb5 error code based on the error number. */
+        ret = ERROR_TABLE_BASE_krb5 + (krb5_error_code)krberror->error;
         goto cleanup;
     }
 
-    ptr = clearresult.data;
-
-    *result_code = (*ptr++ & 0xff);
-    *result_code = (*result_code<<8) | (*ptr++ & 0xff);
-
-    if ((*result_code < KRB5_KPASSWD_SUCCESS) ||
-        (*result_code > KRB5_KPASSWD_INITIAL_FLAG_NEEDED)) {
-        ret = KRB5KRB_AP_ERR_MODIFIED;
-        goto cleanup;
-    }
-
-    /* all success replies should be authenticated/encrypted */
-
-    if ((ap_rep.length == 0) && (*result_code == KRB5_KPASSWD_SUCCESS)) {
-        ret = KRB5KRB_AP_ERR_MODIFIED;
-        goto cleanup;
-    }
-
-    result_data->length = (clearresult.data + clearresult.length) - ptr;
-
-    if (result_data->length) {
-        result_data->data = (char *) malloc(result_data->length);
-        if (result_data->data == NULL) {
-            ret = ENOMEM;
-            goto cleanup;
-        }
-        memcpy(result_data->data, ptr, result_data->length);
-    } else {
-        result_data->data = NULL;
-    }
-
-    ret = 0;
+    ret = krb5_copy_data(context, &krberror->e_data, edata_out);
 
 cleanup:
-    if (ap_rep.length) {
-        free(clearresult.data);
-    } else {
-        krb5_free_error(context, krberror);
+    krb5_free_error(context, krberror);
+    return ret;
+}
+
+/* Decode a reply to produce the clear-text output. */
+static krb5_error_code
+get_clear_result(krb5_context context, krb5_auth_context auth_context,
+                 const krb5_data *packet, krb5_data **clear_out,
+                 krb5_boolean *is_error_out)
+{
+    krb5_error_code ret;
+    char *ptr, *end = packet->data + packet->length;
+    unsigned int plen, vno, aplen;
+    krb5_data ap_rep, cipher, error;
+    krb5_ap_rep_enc_part *ap_rep_enc;
+    krb5_replay_data replay;
+    krb5_key send_subkey = NULL;
+    krb5_data clear = empty_data();
+
+    *clear_out = NULL;
+    *is_error_out = FALSE;
+
+    /* Check for an unframed KRB-ERROR (expected for RFC 3244 requests; also
+     * received from MS AD for version 1 requests). */
+    if (krb5_is_krb_error(packet)) {
+        *is_error_out = TRUE;
+        return get_error_edata(context, packet, clear_out);
     }
 
-    return(ret);
+    if (packet->length < 6)
+        return KRB5KRB_AP_ERR_MODIFIED;
+
+    /* Decode and verify the length. */
+    ptr = packet->data;
+    plen = (*ptr++ & 0xff);
+    plen = (plen << 8) | (*ptr++ & 0xff);
+    if (plen != packet->length)
+        return KRB5KRB_AP_ERR_MODIFIED;
+
+    /* Decode and verify the version number. */
+    vno = (*ptr++ & 0xff);
+    vno = (vno << 8) | (*ptr++ & 0xff);
+    if (vno != 1 && vno != 0xff80)
+        return KRB5KDC_ERR_BAD_PVNO;
+
+    /* Decode and check the AP-REP length. */
+    aplen = (*ptr++ & 0xff);
+    aplen = (aplen << 8) | (*ptr++ & 0xff);
+    if (aplen > end - ptr)
+        return KRB5KRB_AP_ERR_MODIFIED;
+
+    /* A zero-length AP-REQ indicates a framed KRB-ERROR response.  (Expected
+     * for protocol version 1; specified but unusual for RFC 3244 requests.) */
+    if (aplen == 0) {
+        *is_error_out = TRUE;
+        error = make_data(ptr, end - ptr);
+        return get_error_edata(context, &error, clear_out);
+    }
+
+    /* We have an AP-REP.  Save send_subkey to later smash recv_subkey. */
+    ret = krb5_auth_con_getsendsubkey_k(context, auth_context, &send_subkey);
+    if (ret)
+        return ret;
+
+    /* Verify the AP-REP. */
+    ap_rep = make_data(ptr, aplen);
+    ptr += ap_rep.length;
+    ret = krb5_rd_rep(context, auth_context, &ap_rep, &ap_rep_enc);
+    if (ret)
+        goto cleanup;
+    krb5_free_ap_rep_enc_part(context, ap_rep_enc);
+
+    /* Smash recv_subkey to be send_subkey, per spec. */
+    ret = krb5_auth_con_setrecvsubkey_k(context, auth_context, send_subkey);
+    if (ret)
+        goto cleanup;
+
+    /* Extract and decrypt the result. */
+    cipher = make_data(ptr, end - ptr);
+    ret = krb5_rd_priv(context, auth_context, &cipher, &clear, &replay);
+    if (ret)
+        goto cleanup;
+
+    ret = krb5_copy_data(context, &clear, clear_out);
+    if (ret)
+        goto cleanup;
+    *is_error_out = FALSE;
+
+cleanup:
+    krb5_k_free_key(context, send_subkey);
+    krb5_free_data_contents(context, &clear);
+    return ret;
+}
+
+krb5_error_code
+krb5int_rd_chpw_rep(krb5_context context, krb5_auth_context auth_context,
+                    krb5_data *packet, int *result_code_out,
+                    krb5_data *result_data_out)
+{
+    krb5_error_code ret;
+    krb5_data result_data, *clear = NULL;
+    krb5_boolean is_error;
+    char *ptr;
+    int result_code;
+
+    *result_code_out = 0;
+    *result_data_out = empty_data();
+
+    ret = get_clear_result(context, auth_context, packet, &clear, &is_error);
+    if (ret)
+        return ret;
+
+    if (clear->length < 2) {
+        ret = KRB5KRB_AP_ERR_MODIFIED;
+        goto cleanup;
+    }
+
+    /* Decode and check the result code. */
+    ptr = clear->data;
+    result_code = (*ptr++ & 0xff);
+    result_code = (result_code << 8) | (*ptr++ & 0xff);
+    if (result_code < KRB5_KPASSWD_SUCCESS ||
+        result_code > KRB5_KPASSWD_INITIAL_FLAG_NEEDED) {
+        ret = KRB5KRB_AP_ERR_MODIFIED;
+        goto cleanup;
+    }
+
+    /* Successful replies must not come from errors. */
+    if (is_error && result_code == KRB5_KPASSWD_SUCCESS) {
+        ret = KRB5KRB_AP_ERR_MODIFIED;
+        goto cleanup;
+    }
+
+    result_data = make_data(ptr, clear->data + clear->length - ptr);
+    ret = krb5int_copy_data_contents(context, &result_data, result_data_out);
+    if (ret)
+        goto cleanup;
+    *result_code_out = result_code;
+
+cleanup:
+    krb5_free_data(context, clear);
+    return ret;
 }
 
 krb5_error_code KRB5_CALLCONV
@@ -252,12 +259,21 @@ krb5_chpw_result_code_string(krb5_context context, int result_code,
     case KRB5_KPASSWD_SOFTERROR:
         *code_string = "Password change rejected";
         break;
+    case KRB5_KPASSWD_ACCESSDENIED:
+        *code_string = "Access denied";
+        break;
+    case KRB5_KPASSWD_BAD_VERSION:
+        *code_string = "Wrong protocol version";
+        break;
+    case KRB5_KPASSWD_INITIAL_FLAG_NEEDED:
+        *code_string = "Initial password required";
+        break;
     default:
         *code_string = "Password change failed";
         break;
     }
 
-    return(0);
+    return 0;
 }
 
 krb5_error_code
@@ -332,210 +348,4 @@ cleanup:
         packet->data = NULL;
     }
     return ret;
-}
-
-krb5_error_code
-krb5int_rd_setpw_rep(krb5_context context, krb5_auth_context auth_context,
-                     krb5_data *packet,
-                     int *result_code, krb5_data *result_data)
-{
-    char *ptr;
-    unsigned int message_length, version_number;
-    krb5_data ap_rep;
-    krb5_ap_rep_enc_part *ap_rep_enc;
-    krb5_error_code ret;
-    krb5_data cipherresult;
-    krb5_data clearresult;
-    krb5_keyblock *tmpkey;
-    /*
-    ** validate the packet length -
-    */
-    if (packet->length < 4)
-        return(KRB5KRB_AP_ERR_MODIFIED);
-
-    ptr = packet->data;
-
-    /*
-    ** see if it is an error
-    */
-    if (krb5_is_krb_error(packet)) {
-        krb5_error *krberror;
-        if ((ret = krb5_rd_error(context, packet, &krberror)))
-            return(ret);
-        if (krberror->e_data.data  == NULL) {
-            ret = ERROR_TABLE_BASE_krb5 + (krb5_error_code) krberror->error;
-            krb5_free_error(context, krberror);
-            return (ret);
-        }
-        clearresult = krberror->e_data;
-        krberror->e_data.data  = NULL; /*So we can free it later*/
-        krberror->e_data.length = 0;
-        krb5_free_error(context, krberror);
-        ap_rep.length = 0;
-
-    } else { /* Not an error*/
-
-        /*
-        ** validate the message length -
-        ** length is big endian
-        */
-        message_length = (((ptr[0] << 8)&0xff) | (ptr[1]&0xff));
-        ptr += 2;
-        /*
-        ** make sure the message length and packet length agree -
-        */
-        if (message_length != packet->length)
-            return(KRB5KRB_AP_ERR_MODIFIED);
-        /*
-        ** get the version number -
-        */
-        version_number = (((ptr[0] << 8)&0xff) | (ptr[1]&0xff));
-        ptr += 2;
-        /*
-        ** make sure we support the version returned -
-        */
-        /*
-        ** set password version is 0xff80, change password version is 1
-        */
-        if (version_number != 1 && version_number != 0xff80)
-            return(KRB5KDC_ERR_BAD_PVNO);
-        /*
-        ** now fill in ap_rep with the reply -
-        */
-        /*
-        ** get the reply length -
-        */
-        ap_rep.length = (((ptr[0] << 8)&0xff) | (ptr[1]&0xff));
-        ptr += 2;
-        /*
-        ** validate ap_rep length agrees with the packet length -
-        */
-        if (ptr + ap_rep.length >= packet->data + packet->length)
-            return(KRB5KRB_AP_ERR_MODIFIED);
-        /*
-        ** if data was returned, set the ap_rep ptr -
-        */
-        if (ap_rep.length) {
-            ap_rep.data = ptr;
-            ptr += ap_rep.length;
-
-            /*
-             * Save send_subkey to later smash recv_subkey.
-             */
-            ret = krb5_auth_con_getsendsubkey(context, auth_context, &tmpkey);
-            if (ret)
-                return ret;
-
-            ret = krb5_rd_rep(context, auth_context, &ap_rep, &ap_rep_enc);
-            if (ret) {
-                krb5_free_keyblock(context, tmpkey);
-                return(ret);
-            }
-
-            krb5_free_ap_rep_enc_part(context, ap_rep_enc);
-            /*
-            ** now decrypt the result -
-            */
-            cipherresult.data = ptr;
-            cipherresult.length = (packet->data + packet->length) - ptr;
-
-            /*
-             * Smash recv_subkey to be send_subkey, per spec.
-             */
-            ret = krb5_auth_con_setrecvsubkey(context, auth_context, tmpkey);
-            krb5_free_keyblock(context, tmpkey);
-            if (ret)
-                return ret;
-
-            ret = krb5_rd_priv(context, auth_context, &cipherresult, &clearresult,
-                               NULL);
-            if (ret)
-                return(ret);
-        } /*We got an ap_rep*/
-        else
-            return (KRB5KRB_AP_ERR_MODIFIED);
-    } /*Response instead of error*/
-
-    /*
-    ** validate the cleartext length
-    */
-    if (clearresult.length < 2) {
-        ret = KRB5KRB_AP_ERR_MODIFIED;
-        goto cleanup;
-    }
-    /*
-    ** now decode the result -
-    */
-    ptr = clearresult.data;
-
-    *result_code = (((ptr[0] << 8)&0xff) | (ptr[1]&0xff));
-    ptr += 2;
-
-    /*
-    ** result code 5 is access denied
-    */
-    if ((*result_code < KRB5_KPASSWD_SUCCESS) || (*result_code > 5)) {
-        ret = KRB5KRB_AP_ERR_MODIFIED;
-        goto cleanup;
-    }
-    /*
-    ** all success replies should be authenticated/encrypted
-    */
-    if ((ap_rep.length == 0) && (*result_code == KRB5_KPASSWD_SUCCESS)) {
-        ret = KRB5KRB_AP_ERR_MODIFIED;
-        goto cleanup;
-    }
-
-    if (result_data) {
-        result_data->length = (clearresult.data + clearresult.length) - ptr;
-
-        if (result_data->length) {
-            result_data->data = (char *) malloc(result_data->length);
-            if (result_data->data)
-                memcpy(result_data->data, ptr, result_data->length);
-        } else
-            result_data->data = NULL;
-    }
-    ret = 0;
-
-cleanup:
-    krb5_free_data_contents(context, &clearresult);
-    return(ret);
-}
-
-krb5_error_code
-krb5int_setpw_result_code_string(krb5_context context, int result_code,
-                                 const char **code_string)
-{
-    switch (result_code) {
-    case KRB5_KPASSWD_MALFORMED:
-        *code_string = "Malformed request error";
-        break;
-    case KRB5_KPASSWD_HARDERROR:
-        *code_string = "Server error";
-        break;
-    case KRB5_KPASSWD_AUTHERROR:
-        *code_string = "Authentication error";
-        break;
-    case KRB5_KPASSWD_SOFTERROR:
-        *code_string = "Password change rejected";
-        break;
-    case 5: /* access denied */
-        *code_string = "Access denied";
-        break;
-    case 6:     /* bad version */
-        *code_string = "Wrong protocol version";
-        break;
-    case 7: /* initial flag is needed */
-        *code_string = "Initial password required";
-        break;
-    case 0:
-        *code_string = "Success";
-        break;
-    default:
-        *code_string = "Password change failed";
-        break;
-    }
-
-    return(0);
 }

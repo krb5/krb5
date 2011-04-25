@@ -36,6 +36,7 @@
 #include "os-proto.h"
 #include "cm.h"
 #include "../krb/auth_con.h"
+#include "../krb/int-proto.h"
 
 #include <stdio.h>
 #include <errno.h>
@@ -300,18 +301,10 @@ change_set_password(krb5_context context,
                                            &remote_kaddr)))
             break;
 
-        if (set_password_for)
-            code = krb5int_rd_setpw_rep(callback_ctx.context,
-                                        callback_ctx.auth_context,
-                                        &chpw_rep,
-                                        &local_result_code,
-                                        result_string);
-        else
-            code = krb5int_rd_chpw_rep(callback_ctx.context,
-                                       callback_ctx.auth_context,
-                                       &chpw_rep,
-                                       &local_result_code,
-                                       result_string);
+        code = krb5int_rd_chpw_rep(callback_ctx.context,
+                                   callback_ctx.auth_context,
+                                   &chpw_rep, &local_result_code,
+                                   result_string);
 
         if (code) {
             if (code == KRB5KRB_ERR_RESPONSE_TOO_BIG && !use_tcp) {
@@ -327,15 +320,10 @@ change_set_password(krb5_context context,
             *result_code = local_result_code;
 
         if (result_code_string) {
-            if (set_password_for)
-                code = krb5int_setpw_result_code_string(callback_ctx.context,
-                                                        local_result_code,
-                                                        (const char **)&code_string);
-            else
-                code = krb5_chpw_result_code_string(callback_ctx.context,
-                                                    local_result_code,
-                                                    &code_string);
-            if(code)
+            code = krb5_chpw_result_code_string(callback_ctx.context,
+                                                local_result_code,
+                                                &code_string);
+            if (code)
                 goto cleanup;
 
             result_code_string->length = strlen(code_string);
