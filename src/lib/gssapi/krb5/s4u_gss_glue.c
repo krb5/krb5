@@ -218,7 +218,7 @@ kg_compose_deleg_cred(OM_uint32 *minor_status,
     cred->usage = GSS_C_INITIATE;
     cred->proxy_cred = !!(subject_creds->ticket_flags & TKT_FLG_FORWARDABLE);
 
-    cred->tgt_expire = impersonator_cred->tgt_expire;
+    cred->tgt_expire = subject_creds->times.endtime;
 
     code = kg_init_name(context, subject_creds->client, NULL, NULL, NULL, 0,
                         &cred->name);
