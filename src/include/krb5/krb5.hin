@@ -4362,7 +4362,7 @@ krb5_sname_match(krb5_context context, krb5_const_principal matching,
  * @param [in]  creds                   Kerberos credentials to the kadmin/changepw service
  * @param [in]  newpw                   New password
  * @param [out] result_code             A numeric error code
- * @param       result_code_string      (unused) String equivalent to @a result_code
+ * @param [out] result_code_string      String equivalent to @a result_code
  * @param [out] result_string           Change password response from the KDC
  *
  * Change the password for the existing principal identified by @a creds.
@@ -4374,8 +4374,6 @@ krb5_sname_match(krb5_context context, krb5_const_principal matching,
  * @li KRB5_KPASSWD_HARDERROR (2) - Server error
  * @li KRB5_KPASSWD_AUTHERROR (3) - Authentication error
  * @li KRB5_KPASSWD_SOFTERROR (4) - Password change rejected
- *
- * @sa krb5_chpw_result_code_string()
  *
  * @retval
  * 0  Success
