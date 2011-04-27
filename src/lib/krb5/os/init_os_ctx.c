@@ -385,9 +385,6 @@ krb5_os_init_context(krb5_context ctx, krb5_boolean kdc)
      * ignoring the error is a Bad Thing (tm).
      */
 
-    if (!retval) {
-        krb5_cc_set_default_name(ctx, NULL);
-
 #ifdef _WIN32
         /* We initialize winsock to version 1.1 but
          * we do not care if we succeed or fail.
