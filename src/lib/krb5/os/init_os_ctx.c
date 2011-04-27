@@ -380,20 +380,18 @@ krb5_os_init_context(krb5_context ctx, krb5_boolean kdc)
     ctx->preauth_context = NULL;
 
     retval = os_init_paths(ctx, kdc);
-    /*
-     * If there's an error in the profile, return an error.  Just
-     * ignoring the error is a Bad Thing (tm).
-     */
+    if (retval)
+        return retval;
 
 #ifdef _WIN32
-        /* We initialize winsock to version 1.1 but
-         * we do not care if we succeed or fail.
-         */
-        wVersionRequested = 0x0101;
-        WSAStartup (wVersionRequested, &wsaData);
+    /* We initialize winsock to version 1.1 but
+     * we do not care if we succeed or fail.
+     */
+    wVersionRequested = 0x0101;
+    WSAStartup (wVersionRequested, &wsaData);
 #endif /* _WIN32 */
-    }
-    return retval;
+
+    return 0;
 }
 
 krb5_error_code KRB5_CALLCONV
