@@ -147,8 +147,8 @@ typedef struct gss_krb5_lucid_context_v1 {
 } gss_krb5_lucid_context_v1_t;
 
 /*
- * Mask for determining the returned structure version.
- * See example below for usage.
+ * Mask for determining the version of a lucid context structure.  Callers
+ * should not require this.
  */
 typedef struct gss_krb5_lucid_context_version {
     OM_uint32       version;        /* Structure version number */
@@ -219,16 +219,9 @@ gss_krb5_set_allowable_enctypes(OM_uint32 *minor_status,
  * The caller must call gss_krb5_free_lucid_context() to free
  * the context and allocated resources when it is finished with it.
  *
- * 'version' is an integer indicating the highest version of lucid
- * context understood by the caller.  The highest version
- * understood by both the caller and the GSS implementation must
- * be returned.  The caller can determine which version of the
- * structure was actually returned by examining the version field
- * of the returned structure.  gss_krb5_lucid_context_version_t
- * may be used as a mask to examine the returned structure version.
- *
- * If there are no common versions, an error should be returned.
- * (XXX Need error definition(s))
+ * 'version' is an integer indicating the requested version of the lucid
+ * context.  If the implementation does not understand the requested version,
+ * it will return an error.
  *
  * For example:
  *      void *return_ctx;
@@ -240,17 +233,7 @@ gss_krb5_set_allowable_enctypes(OM_uint32 *minor_status,
  *      maj_stat = gss_krb5_export_lucid_sec_context(&min_stat,
  *                      ctx_handle, 1, &return_ctx);
  *      // Verify success
- *
- *      vers = ((gss_krb5_lucid_context_version_t *)return_ctx)->version;
- *      switch (vers) {
- *      case 1:
- *              ctx = (gss_krb5_lucid_context_v1_t *) return_ctx;
- *              break;
- *      default:
- *              // Error, unknown version returned
- *              break;
- *      }
- *
+ *      ctx = (gss_krb5_lucid_context_v1_t *) return_ctx;
  */
 
 OM_uint32 KRB5_CALLCONV
