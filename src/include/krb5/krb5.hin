@@ -1933,20 +1933,24 @@ struct _krb5_cccol_cursor;
 typedef struct _krb5_cccol_cursor *krb5_cccol_cursor;
 
 /* for retrieve_cred */
-#define KRB5_TC_MATCH_TIMES             0x00000001
-#define KRB5_TC_MATCH_IS_SKEY           0x00000002
-#define KRB5_TC_MATCH_FLAGS             0x00000004
-#define KRB5_TC_MATCH_TIMES_EXACT       0x00000008
-#define KRB5_TC_MATCH_FLAGS_EXACT       0x00000010
-#define KRB5_TC_MATCH_AUTHDATA          0x00000020
-#define KRB5_TC_MATCH_SRV_NAMEONLY      0x00000040
-#define KRB5_TC_MATCH_2ND_TKT           0x00000080
-#define KRB5_TC_MATCH_KTYPE             0x00000100
-#define KRB5_TC_SUPPORTED_KTYPES        0x00000200
+#define KRB5_TC_MATCH_TIMES        0x00000001 /**< The requested lifetime must be
+                                                   at least as great as that specified */
+#define KRB5_TC_MATCH_IS_SKEY      0x00000002 /**< The is_skey field must match exactly */
+#define KRB5_TC_MATCH_FLAGS        0x00000004 /**< All the flags set in the match credentials
+                                                   must be set in the cache credentials */
+#define KRB5_TC_MATCH_TIMES_EXACT  0x00000008 /**< All the time fields must match exactly */
+#define KRB5_TC_MATCH_FLAGS_EXACT  0x00000010 /**< All the flags must match exactly */
+#define KRB5_TC_MATCH_AUTHDATA     0x00000020 /**< The authorization data must match */
+#define KRB5_TC_MATCH_SRV_NAMEONLY 0x00000040 /**< Only the name portion
+                                                   of the principal name must match */
+#define KRB5_TC_MATCH_2ND_TKT      0x00000080 /**< The second ticket must match */
+#define KRB5_TC_MATCH_KTYPE        0x00000100 /**< The encryption key type must match */
+#define KRB5_TC_SUPPORTED_KTYPES   0x00000200 /**< The supported key types must match */
 
 /* for set_flags and other functions */
-#define KRB5_TC_OPENCLOSE               0x00000001
-#define KRB5_TC_NOTICKET                0x00000002
+#define KRB5_TC_OPENCLOSE          0x00000001 /**< Open and close the cache each time a
+                                                   credentials cache routine is called */
+#define KRB5_TC_NOTICKET           0x00000002
 
 /** Retrieve the name but not type of a credential cache.
  *
@@ -2028,6 +2032,8 @@ krb5_cc_destroy(krb5_context context, krb5_ccache cache);
  *
  * @a cache may be reinitialized with krb5_cc_resolve() or krb5_cc_gen_new().
  *
+ * @sa KRB5_TC_OPENCLOSE flag
+ *
  * @retval
  * 0  Success
  * @return
@@ -2036,56 +2042,56 @@ krb5_cc_destroy(krb5_context context, krb5_ccache cache);
 krb5_error_code KRB5_CALLCONV
 krb5_cc_close(krb5_context context, krb5_ccache cache);
 
-/**
- * @brief Store credentials in a specified credentials cache.
+/** Store credentials in a specified credentials cache.
  *
- * @param context            Context structure [input, output]
- * @param cache             Credentials cache handle [input]
- * @param creds              Credentials to be stored in cache [input]
+ * @param [in]     context            Context structure
+ * @param [in,out] cache              Credentials cache handle
+ * @param [in]     creds              Credentials to be stored in cache
+ *
+ * This function stores @a creds into @a cache.
+ * If @a creds->server and the server in the decoded ticket @a creds->ticket
+ * differ, both principals will be stored.
  *
  * @retval
  *  0  Success
- * @return
- *  Permission errors
- * @return
- *  Storage failure errors
- * @return
- * Kerberos error codes
+ * @return Permission errors; Storage failure errors; Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_store_cred(krb5_context context, krb5_ccache cache, krb5_creds *creds);
 
-/**
- * @brief Search a credentials cache for credentials matching @a mcreds and return it if found.
+/** Retrieve a specified credentials from a credentials cache.
  *
- * @param context            Context structure [input, output]
- * @param cache              Credentials cache handle [input]
- * @param mcreds             Credentials to match [input]
- * @param creds              Credentials that match the requested value [output]
- * @param flags            Search flags; values should be bitwise ORed together [input]
+ * @param [in]  context  Context structure
+ * @param [in]  cache    Credentials cache handle
+ * @param [in]  flags    Flags bit mask
+ * @param [in]  mcreds   Credentials to match
+ * @param [out] creds    Credentials that match the requested value
  *
- * Valid values for @a options are:
+ * This function searches a credentials cache for credentials matching @a mcreds
+ * and returns it if found.
  *
- * @li @c KRB5_TC_MATCH_TIMES          The requested lifetime must be at least as great as that specified.
- * @li @c KRB5_TC_MATCH_IS_SKEY        The @a is_skey field much match exactly.
- * @li @c KRB5_TC_MATCH_FLAGS          The set bits in @a mcreds must match in @a creds.
- * @li @c KRB5_TC_MATCH_TIMES_EXACT    The requested lifetime must match exactly.
- * @li @c KRB5_TC_MATCH_FLAGS_EXACT     All bits in @a mcreds must match exactly.
- * @li @c KRB5_TC_MATCH_AUTHDATA       The  data must match.
- * @li @c KRB5_TC_MATCH_SRV_NAMEONLY    Only the name portion of the principal name must match.
+ * Valid values for @a flags are:
  *
- * The realm field can be different. If this flag is not set, the entire principal name must match.
- * Valid values are:
- *
+ * @li @c KRB5_TC_MATCH_TIMES        The requested lifetime must be
+ *                                   at least as great as that specified.
+ * @li @c KRB5_TC_MATCH_IS_SKEY      The @a is_skey field much match exactly.
+ * @li @c KRB5_TC_MATCH_FLAGS        The flags in @a mcreds and @a creds must match
+ * @li @c KRB5_TC_MATCH_TIMES_EXACT  The requested lifetime must match exactly.
+ * @li @c KRB5_TC_MATCH_FLAGS_EXACT  Flags in @a mcreds and @a creds must match exactly.
+ * @li @c KRB5_TC_MATCH_AUTHDATA     The authorization data must match.
+ * @li @c KRB5_TC_MATCH_SRV_NAMEONLY Only the name portion of the principal name must
+ *                                   match. The realm field can be different.
+ *                                   If this flag is not set, the entire principal
+ *                                   name must match.
  * @li @c KRB5_TC_MATCH_2ND_TKT      The second tickets must match.
  * @li @c KRB5_TC_MATCH_KTYPE        The encryption key types must match.
- * @li @c KRB5_TC_MATCH_SUPPORTED_KTYPES   Check all matching entries that have any supported
- *                                         encryption type and return the one with the encryption
- *                                         type listed earliest.
- * @retval
- *  0  Success
- * @return
- *  Kerberos error codes
+ * @li @c KRB5_TC_MATCH_SUPPORTED_KTYPES Check all matching entries that have any supported
+ *                                       encryption type and return the one with the encryption
+ *                                       type listed earliest.
+ *
+ * Use krb5_free_cred_contents() to free @a creds when it is no longer needed.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_retrieve_cred(krb5_context context, krb5_ccache cache,
@@ -2142,7 +2148,7 @@ krb5_cc_start_seq_get(krb5_context context, krb5_ccache cache,
  *
  * @sa krb5_cc_start_seq_get(), krb5_end_seq_get()
  *
- * @retval 0  Success; Otherwise - Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_next_cred(krb5_context context, krb5_ccache cache,
@@ -2164,61 +2170,46 @@ krb5_error_code KRB5_CALLCONV
 krb5_cc_end_seq_get(krb5_context context, krb5_ccache cache,
                     krb5_cc_cursor *cursor);
 
-/**
- * @brief Remove credentials from a credentials cache.
+/** Remove credentials from a credentials cache.
  *
- * @param context               Context structure [input, output]
- * @param cache                 Credentials cache handle [input]
- * @param flags                 Search flags [input]
- * @param creds                 Credentials to be matched [input]
+ * @param [in] context               Context structure
+ * @param [in] cache                 Credentials cache handle
+ * @param [in] flags                 Bitwise-ORed search flags
+ * @param [in] creds                 Credentials to be matched
  *
- * Remove any credentials that match the principal name (@a cred->server) and the fields
- * in the credentials cache masked by @a which.
+ * @warning  This function is not implemented on UNIX'es. Returns KRB5_CC_NOSUPP.
  *
- *  Valid values for search flags are:
- * @li @c KRB5_TC_MATCH_TIMES         The requested lifetime is required to be at least as great as that specified.
+ * Valid values for search flags are:
+ * @li @c KRB5_TC_MATCH_TIMES         The requested lifetime is required to be at least
+ *                                    as great as that specified.
  * @li @c KRB5_TC_MATCH_IS_SKEY       The @a is_skey field much match exactly.
  * @li @c KRB5_TC_MATCH_FLAGS         The set bits in @a mcreds must match in @a creds.
  * @li @c KRB5_TC_MATCH_TIMES_EXACT   The requested lifetime must match exactly.
  * @li @c KRB5_TC_MATCH_FLAGS_EXACT   All bits in @a mcreds must match exactly.
  * @li @c KRB5_TC_MATCH_AUTHDATA      The authentication data must match.
- * @li @c KRB5_TC_MATCH_SRV_NAMEONLY   Only the name portion of the principal name must match.
+ * @li @c KRB5_TC_MATCH_SRV_NAMEONLY  Only the name portion of the principal name must match.
+ *                                    The realm field can be different. By default,
+ *                                    the entire principal name must match.
+ * @li @c KRB5_TC_MATCH_2ND_TKT       The second tickets must match.
+ * @li @c KRB5_TC_MATCH_KTYPE         The encryption key types must match.
+ * @li @c KRB5_TC_MATCH_SUPPORTED_KTYPES   Check all matching entries that have
+ *                                         any supported encryption type.
  *
- * The realm field can be different. By default, the entire principal name must match.
- *
- * @li @c KRB5_TC_MATCH_2ND_TKT        The second tickets must match.
- * @li @c KRB5_TC_MATCH_KTYPE          The encryption key types must match.
- * @li @c KRB5_TC_MATCH_SUPPORTED_KTYPES   Check all matching entries that have any supported encryption type.
- *
- * @note The values for @a flags should be bitwise-ORed together.
- *
- * @return
- *  No matches found
- * @return
- *  Data cannot be deleted
- * @return
- * Kerberos error codes
+ * @return No matches found; Data cannot be deleted; Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_remove_cred(krb5_context context, krb5_ccache cache, krb5_flags flags,
                     krb5_creds *creds);
 
-/**
- * @brief Set options flags on a credentials cache.
+/** Set options flags on a credentials cache.
  *
- * @param context           Context structure [input, output]
- * @param cache             Credentials cache handle [input, output
- * @param flags           Set behavior for opening and closing a @a cache.
+ * @param [in]     context   Context structure
+ * @param [in,out] cache     Credentials cache handle
+ * @param [in]     flags     Flag bit mask
  *
- * Set @a options to zero to clear a previously set @c KRB5_TC_OPENCLOSE flag.
+ * This function resets @a cache flags to @a flags.
  *
- * @note Turning on @c OPENCLOSE mode opens and closes the @a cache each time a credentials
- * cache routine is called. If this flag is not set, the @a cache stays open until  krb5_cc_close() is called.
- *
- * @retval
- * 0 Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_set_flags(krb5_context context, krb5_ccache cache, krb5_flags flags);
@@ -2232,7 +2223,7 @@ krb5_cc_set_flags(krb5_context context, krb5_ccache cache, krb5_flags flags);
  *
  * @warning For memory credential cache always returns KRB5_OK.
  *
- * @retval 0 Success; Otherwise -  Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_get_flags(krb5_context context, krb5_ccache cache, krb5_flags *flags);
@@ -2269,6 +2260,14 @@ krb5_cc_get_type(krb5_context context, krb5_ccache cache);
 krb5_error_code KRB5_CALLCONV
 krb5_cc_move(krb5_context context, krb5_ccache src, krb5_ccache dst);
 
+/** Return a timestamp of the last modification of the credentials cache.
+ *
+ * @param [in]  context            Context structure
+ * @param [in]  ccache             Credentials cache handle
+ * @param [out] change_time        The last change time of @a ccache
+ *
+ * If an error occurs, @a change_time is set to 0.
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_last_change_time(krb5_context context, krb5_ccache ccache,
                          krb5_timestamp *change_time);
@@ -2279,52 +2278,68 @@ krb5_cc_lock(krb5_context context, krb5_ccache ccache);
 krb5_error_code KRB5_CALLCONV
 krb5_cc_unlock(krb5_context context, krb5_ccache ccache);
 
-/**
- * @brief Prepare to iterate over a collection of credentials caches.
+/** Prepare to iterate over a collection of credentials caches.
  *
- * @param context           Context structure [input, output]
- * @param cursor            Cursor [input, output]
+ * @param [in]     context           Context structure
+ * @param [in,out] cursor            Cursor
  *
- * @retval
- * 0 Success
- * @return
- * Kerberos error codes
+ * Get a new cache iteration @a cursor that will iterate over all
+ * credentials caches independent of type.
+ *
+ * Use krb5_cccol_cursor_free() to release @a cursor when it is no longer needed.
+ *
+ * @sa krb5_cccol_cursor_next()
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cccol_cursor_new(krb5_context context, krb5_cccol_cursor *cursor);
 
-/**
- * @brief Get the next credentials cache in the collection.
+/** Get the next credentials cache in the collection.
  *
- * @param context           Context structure [input, output]
- * @param cursor            Cursor [input, output]
- * @param ccache            Credentials cache handle [input]
+ * @param [in]     context           Context structure
+ * @param [in,out] cursor            Cursor
+ * @param [out]    ccache            Credentials cache handle
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * @note When all caches are iterated over and the end of the list is reached,
+ * @a ccache is set to NULL.
  *
- * @retval
- * 0 Success
- * @return
- * Kerberos error codes
+ * Use krb5_cc_close() to close @a ccache when it is no longer needed.
+ *
+ * @sa krb5_cccol_cursor_new(), krb5_cccol_cursor_free()
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cccol_cursor_next(krb5_context context, krb5_cccol_cursor cursor,
                        krb5_ccache *ccache);
 
-/**
- * @brief Free a credentials cache collection cursor.
+/** Free a credentials cache collection cursor.
  *
- * @param context           Context structure [input, output]
- * @param cursor            Cursor [input]
+ * @param [in] context           Context structure
+ * @param [in] cursor            Cursor
  *
- * @retval
- * 0 Success
- * @return
- * Kerberos error codes
+ * @sa krb5_cccol_cursor_new(), krb5_cccol_cursor_next()
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_cccol_cursor_free(krb5_context context, krb5_cccol_cursor *cursor);
 
+/** Return a timestamp of the last modification for the cache collection.
+ *
+ * @param [in]  context            Context structure
+ * @param [out] change_time        Last modification timestamp
+ *
+ * This function will go through the whole list of the credentials caches.
+ * If the last modification time is successfully retrieved for the credentials
+ * in the collection, it will be evaluated for being the most recent timestamp.
+ * Otherwise, that particular cache will be ignored.
+ *
+ * If there are no credentials in the caches, @a change_time is set to 0.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_cccol_last_change_time(krb5_context context, krb5_timestamp *change_time);
 
@@ -3478,7 +3493,7 @@ krb5_error_code KRB5_CALLCONV
 krb5_copy_ticket(krb5_context context, const krb5_ticket *from, krb5_ticket **pto);
 
 /**
- * @brief Copy an array of authentication data structures.
+ * @brief Copy an array of authorization data structures.
  *
  * @param context          Context structure [input, output]
  * @param in_authdat       Array of @a authdata structures [input]
@@ -3699,7 +3714,7 @@ krb5_build_principal_alloc_va(krb5_context context,
  *
  * Use krb5_free_principal() to free @a princ when it is no longer needed.
  *
- * @retval 0  Success; Otherwise -  Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_425_conv_principal(krb5_context context, const char *name,
@@ -3944,22 +3959,13 @@ krb5_cc_dup(krb5_context context, krb5_ccache in, krb5_ccache *out);
 const char *KRB5_CALLCONV
 krb5_cc_default_name(krb5_context context);
 
-/**
- * @brief Set the default credentials cache name.
+/** Set the default credentials cache name.
  *
- * @param context           Context structure [input, output]
- * @param name              Default credentials cache name  [input, output]
+ * @param [in,out]  context           Context structure
+ * @param [in]      name              Default credentials cache name
  *
- * Passing a null pointer for @a name reverts the default credentials cache name to the system default.
- *
- * @note For OpenVMS only:
- * If a default name is not passed in the argument @a name, the default name is the
- * first valid entry of the following values:
- * @li @c KRB5CCNAME logical name
- * @li  the file @c krb5cc_\<PID\> in a [@c .TMP] directory in the user's login directory
- * (where \<@c PID\> is the user's process ID).
- *
- * @note The @a KRB5CCNAME logical name cannot be defined as a system-wide logical name.
+ * This function frees the old default credentials cache name and then
+ * sets it to @a name.
  *
  * @retval
  *  0  Success
@@ -4375,10 +4381,7 @@ krb5_sname_match(krb5_context context, krb5_const_principal matching,
  * @li KRB5_KPASSWD_AUTHERROR (3) - Authentication error
  * @li KRB5_KPASSWD_SOFTERROR (4) - Password change rejected
  *
- * @retval
- * 0  Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_change_password(krb5_context context, krb5_creds *creds, char *newpw,
@@ -5154,9 +5157,9 @@ krb5_auth_con_getkey(krb5_context context, krb5_auth_context auth_context,
 
 /** Get a copy of an encryption key from a krb5_auth_context structure.
  *
- * @param          ctx       (unused)
- * @param [in]     ac        Authentication context
- * @param [in,out] key       Output key structure to be filled in
+ * @param          ctx                 (unused)
+ * @param [in]     auth_context        Authentication context
+ * @param [in,out] key                 Output key structure to be filled in
  *
  * This function populates the output @a key with the
  * content of @a auth_context->send_subkey.
