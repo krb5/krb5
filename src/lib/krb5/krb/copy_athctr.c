@@ -55,7 +55,6 @@ krb5_copy_authenticator(krb5_context context, const krb5_authenticator *authfrom
     if (authfrom->subkey) {
         retval = krb5_copy_keyblock(context, authfrom->subkey, &tempto->subkey);
         if (retval) {
-            free(tempto->subkey);
             krb5_free_checksum(context, tempto->checksum);
             krb5_free_principal(context, tempto->client);
             free(tempto);
@@ -67,10 +66,9 @@ krb5_copy_authenticator(krb5_context context, const krb5_authenticator *authfrom
         retval = krb5_copy_authdata(context, authfrom->authorization_data,
                                     &tempto->authorization_data);
         if (retval) {
-            free(tempto->subkey);
+            krb5_free_keyblock(context, tempto->subkey);
             krb5_free_checksum(context, tempto->checksum);
             krb5_free_principal(context, tempto->client);
-            krb5_free_authdata(context, tempto->authorization_data);
             free(tempto);
             return retval;
         }
