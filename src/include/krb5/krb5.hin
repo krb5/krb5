@@ -2390,7 +2390,7 @@ typedef struct krb5_rc_st *krb5_rcache;
 
 typedef krb5_pointer krb5_kt_cursor;    /* XXX */
 
-/**  @brief Key table entry. */
+/** Key table entry. */
 typedef struct krb5_keytab_entry_st {
     krb5_magic magic;
     krb5_principal principal;   /**< principal of this key */
@@ -2552,11 +2552,11 @@ krb5_kt_end_seq_get(krb5_context context, krb5_keytab keytab,
  * begin "func-proto.h"
  */
 
-/** Create and intialize a context structure.
+/** Create and intialize a krb5_context structure.
  *
  * @param [out] context           Context structure
  *
- * The context must be released by calling krb5_free_context() when
+ * The @a context must be released by calling krb5_free_context() when
  * it is no longer needed.
  *
  * @warning Any program or module that needs the Kerberos code to not trust
@@ -2571,7 +2571,7 @@ krb5_kt_end_seq_get(krb5_context context, krb5_keytab keytab,
 krb5_error_code KRB5_CALLCONV
 krb5_init_context(krb5_context *context);
 
-/** Create and initialize a context structure using only configuration files.
+/** Create and initialize a krb5_context structure using only configuration files.
  *
  * @param [out] context           Context structure
  *
@@ -2579,7 +2579,7 @@ krb5_init_context(krb5_context *context);
  * are safe for a @c setuid program.
  * All information passed through the environment variables is ignored.
  *
- * The context must be released by calling krb5_free_context() when
+ * The @a context must be released by calling krb5_free_context() when
  * it is no longer needed.
  *
  * @retval
@@ -2590,17 +2590,17 @@ krb5_init_context(krb5_context *context);
 krb5_error_code KRB5_CALLCONV
 krb5_init_secure_context(krb5_context *context);
 
-/** Free a context structure.
+/** Free a krb5_context structure.
  *
  * @param [in] context           Context structure
  *
- * This function frees a context that was created by krb5_init_context()
+ * This function frees a @a context that was created by krb5_init_context()
  * or krb5_init_secure_context().
  */
 void KRB5_CALLCONV
 krb5_free_context(krb5_context context);
 
-/** Copy a @c _krb5_context structure.
+/** Copy a krb5_context structure.
  *
  * @param [in]  ctx           Context structure
  * @param [out] nctx_out      New "cloned" context structure
@@ -2683,11 +2683,12 @@ krb5_error_code KRB5_CALLCONV
 krb5_server_decrypt_ticket_keytab(krb5_context context, const krb5_keytab kt,
                                   krb5_ticket *ticket);
 
-/**
- * @brief Free credentials returned by krb5_get_cred().
+/** Free the storage assigned to array of credentials.
  *
- * @param context           Context structure [input, output]
- * @param tgts              Pointer to credentials to be freed [input, output]
+ * @param [in] context           Context structure
+ * @param [in] tgts              Array of credentials to be freed
+ *
+ * @note The last entry in the array @a tgts must be a NULL pointer.
  */
 void KRB5_CALLCONV
 krb5_free_tgt_creds(krb5_context context, krb5_creds **tgts);
@@ -3371,149 +3372,141 @@ krb5_error_code KRB5_CALLCONV
 krb5_init_keyblock(krb5_context context, krb5_enctype enctype,
                    size_t length, krb5_keyblock **out);
 
-/**
- * @brief Copy a @c _krb5_keyblock.
+/** Copy a keyblock.
  *
- * @param context           Context structure [input, output]
- * @param from               Keyblock to be copied [input]
- * @param to                 Pointer to copy of keyblock [output]
+ * @param [in]  context           Context structure
+ * @param [in]  from              Keyblock to be copied
+ * @param [out] to                Copy of keyblock @a from
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * This function copies the content of @a from to @a to
+ * Use krb5_free_keyblock() to free @a from when it is no longer needed.
  *
- * @retval
- * 0 Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_copy_keyblock(krb5_context context, const krb5_keyblock *from,
                    krb5_keyblock **to);
 
-/**
- * @brief Copy the contents of a keyblock.
+/** Copy the contents of a keyblock.
  *
- * @param context           Context structure [input, output]
- * @param from              Keyblock [input]
- * @param to                Pointer to copy of keyblock [output]
+ * @param [in]  context           Context structure
+ * @param [in]  from              Key to be copied
+ * @param [out] to                Output key
  *
- *  Make sure to free the allocated memory when it is no longer needed.
+ * This function copies @a from->contents to @a to.
+ * Use krb5_free_keyblock_contents() to zero out and free @a to
+ * when it is no longer needed.
  *
- * @retval
- * 0 Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_copy_keyblock_contents(krb5_context context, const krb5_keyblock *from,
                             krb5_keyblock *to);
 
-/**
- * @brief Copy a credentials structure.
+/** Copy a krb5_creds structure.
  *
- * @param context           Context structure [input, output]
- * @param incred            Credentials structure to be copied [input]
- * @param outcred           Pointer to copy of credentials structure [output]
+ * @param [in]  context           Context structure
+ * @param [in]  incred            Credentials structure to be copied
+ * @param [out] outcred           Copy of @a incred
  *
- * Make sure to free the allocated memory when it is no longer needed.
- * @retval
- * 0 Success
- * @return
- * Kerberos error codes
+ * This function copies the content of @a incred to @a outcred
+ * Use krb5_free_creds() to free @a outcred when it is no longer needed.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_copy_creds(krb5_context context, const krb5_creds *incred, krb5_creds **outcred);
 
-/**
- * @brief Copy a Kerberos data structure.
+/** Copy a krb5_data object.
  *
- * @param context           Context structure [input, output]
- * @param indata            Data structure to be copied [input]
- * @param outdata           Pointer to copy of data structure [output]
+ * @param [in]  context           Context structure
+ * @param [in]  indata            Data object to be copied
+ * @param [out] outdata           Copy of @a indata
  *
- * Make sure to free the allocated memory when it is no longer needed.
- * @retval
- * 0  Success
- * @return
- * Kerberos error codes
+ * This function copies the content of @a indata to @a outdata
+ * Use krb5_free_data() to free @a outdata when it is no longer needed.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_copy_data(krb5_context context, const krb5_data *indata, krb5_data **outdata);
 
-/**
- * @brief Copy a @c _krb5_principal structure.
+/** Copy a principal.
  *
- * @param context           Context structure [input, output]
- * @param inprinc           Principal to be copied [input]
- * @param outprinc          Pointer to copy of principal [output]
+ * @param [in]  context           Context structure
+ * @param [in]  inprinc           Principal to be copied
+ * @param [out] outprinc          Copy of @a inprinc
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * This function copies the content of @a inprinc to @a outprinc
+ * Use krb5_free_principal() to free @a outprinc when it is no longer needed.
  *
- * @retval
- * 0  Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_copy_principal(krb5_context context, krb5_const_principal inprinc,
                     krb5_principal *outprinc);
 
-/**
- * @brief Copy an array of addresses.
+/** Copy an array of addresses.
  *
- * @param context           Context structure [input, output]
- * @param inaddr            Array of addresses to be copied [input]
- * @param outaddr           Pointer to copy of array of addresses [output]
+ * @param [in]  context           Context structure
+ * @param [in]  inaddr            Array of addresses to be copied
+ * @param [out] outaddr           Copy of array of addresses
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * This function copies the content of @a inaddr to @a outaddr.
+ * Use krb5_free_addresses() to free @a outaddr when it is no longer needed.
  *
- * @retval
- * 0  Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_copy_addresses(krb5_context context, krb5_address *const *inaddr,
                     krb5_address ***outaddr);
 
-/**
- * @brief Copy a krb5_ticket structure.
+/** Copy a krb5_ticket structure.
  *
- * @param context           Context structure [input, output]
- * @param from              Ticket structure to be copied [input]
- * @param pto               Pointer to copy of ticket structure [output]
+ * @param [in]  context           Context structure
+ * @param [in]  from              Ticket to be copied
+ * @param [out] pto               Copy of ticket
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * This function copies the content of @a from to @a pto
+ * Use krb5_free_ticket() to free @a pto when it is no longer needed.
  *
- * @retval
- * 0  Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_copy_ticket(krb5_context context, const krb5_ticket *from, krb5_ticket **pto);
 
-/**
- * @brief Copy an array of authorization data structures.
+/** Copy an array of authorization data structures.
  *
- * @param context          Context structure [input, output]
- * @param in_authdat       Array of @a authdata structures [input]
- * @param out              Pointer to copy of array of @a authdata structures [output]
+ * @param [in]  context          Context structure
+ * @param [in]  in_authdat       Array of @a krb5_authdata structures
+ * @param [out] out              New array of @a krb5_authdata structures
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * This function copies the content of @a in_authdat to @a out
+ * Use krb5_free_authdata() to free @a out when it is no longer needed.
  *
- * @retval
- * 0  Success
- * @return
- * Kerberos error codes
+ * @note The last array entry in @a in_authdat must be a NULL pointer.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_copy_authdata(krb5_context context,
                    krb5_authdata *const *in_authdat, krb5_authdata ***out);
 
-/** @brief Merge two authdata arrays
+/** Merge two authdata arrays with fresh allocation.
+ *
+ * @param [in]  context          Context structure
+ * @param [in]  inauthdat1       1st array of @a krb5_authdata structures
+ * @param [in]  inauthdat2       2d array of @a krb5_authdata structures
+ * @param [out] outauthdat       New array of @a krb5_authdata structures
  *
  * Merge two authdata arrays, such as the array from a ticket
  * and authenticator.
+ * Use krb5_free_authdata() to free @a outauthdat when it is no longer needed.
+ *
+ * @note The last array entry in @a inauthdat1 and @a inauthdat2
+ * must be a NULL pointer.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_merge_authdata(krb5_context context,
@@ -3521,38 +3514,31 @@ krb5_merge_authdata(krb5_context context,
                     krb5_authdata * const *inauthdat2,
                     krb5_authdata ***outauthdat);
 
-/**
- * @brief Copy a @c _krb5_authenticator structure.
+/** Copy a krb5_authenticator srtucture.
  *
- * @param context           Context structure [input, output]
- * @param authfrom          Authentication structure to be copied [input]
- * @param authto            Copy of authentication structure [output]
+ * @param [in]  context           Context structure
+ * @param [in]  authfrom          krb5_authenticator structure to be copied
+ * @param [out] authto            Copy of krb5_authenticator structure
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * This function copies the content of @a authfrom to @a authto
+ * Use krb5_free_authenticator() to free @a authto when it is no longer needed.
  *
- * @retval
- * 0  Success
- * @return
- * Kerberos error codes
- *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_copy_authenticator(krb5_context context, const krb5_authenticator *authfrom,
                         krb5_authenticator **authto);
 
-/**
- * @brief Copy a @c _krb5_checksum structure.
+/**  Copy a krb5_checksum structure.
  *
- * @param context           Context structure [input, output]
- * @param ckfrom            Checksum to be copied [input]
- * @param ckto              Pointer to copy of checksum [output]
+ * @param [in]  context           Context structure
+ * @param [in]  ckfrom            Checksum to be copied
+ * @param [out] ckto              Copy of krb5_checksum structure
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * This function copies the content of @a ckfrom to @a ckto
+ * Use krb5_free_checksum() to free @a ckto when it is no longer needed.
  *
- * @retval
- * 0  Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_copy_checksum(krb5_context context, const krb5_checksum *ckfrom,
@@ -3830,22 +3816,20 @@ krb5_kt_default_name(krb5_context context, char *name, int name_size);
 krb5_error_code KRB5_CALLCONV
 krb5_kt_default(krb5_context context, krb5_keytab *id);
 
-/**
- * @brief Free the contents of a key table entry.
+/** Free the contents of a key table entry.
  *
- * @param context           Context structure [input, output]
- * @param entry             Key table entry whose contents are to be freed [input, output]
+ * @param [in] context           Context structure
+ * @param [in] entry             Key table entry whose contents are to be freed
  *
  * @note The pointer is not freed.
- * @retval
- * 0  Success
- * @return
- * Kerberos error codes
+ *
+ * @retval 0  Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
-krb5_free_keytab_entry_contents (krb5_context context, krb5_keytab_entry *entry);
+krb5_free_keytab_entry_contents(krb5_context context, krb5_keytab_entry *entry);
 
-/**
+/** Free the contents of a key table entry.
+ *
  * @warning  Use krb5_free_keytab_entry_contents instead; this does the same thing but is
  * misnamed and retained for backward compatability.
  */
@@ -3856,12 +3840,11 @@ krb5_kt_free_entry(krb5_context context, krb5_keytab_entry *entry);
 /* remove and add are functions, so that they can return NOWRITE
    if not a writable keytab */
 
-/**
- * @brief Remove an entry from a key table.
+/** Remove an entry from a key table.
  *
- * @param context           Context structure [input, output]
- * @param id                Key table handle [input]
- * @param entry             Entry to remove from key table [input]
+ * @param [in] context           Context structure
+ * @param [in] id                Key table handle
+ * @param [in] entry             Entry to remove from key table
  *
  * @retval
  * 0 Success
@@ -3873,12 +3856,11 @@ krb5_kt_free_entry(krb5_context context, krb5_keytab_entry *entry);
 krb5_error_code KRB5_CALLCONV
 krb5_kt_remove_entry(krb5_context context, krb5_keytab id, krb5_keytab_entry *entry);
 
-/**
- * @brief Add a new entry to a key table.
+/** Add a new entry to a key table.
  *
- * @param context           Context structure [input, output]
- * @param id                Key table handle [input]
- * @param entry             Entry to be added [input]
+ * @param [in] context           Context structure
+ * @param [in] id                Key table handle
+ * @param [in] entry             Entry to be added
  *
  * @retval
  * 0  Success
@@ -4060,35 +4042,47 @@ krb5_boolean KRB5_CALLCONV
 krb5_is_config_principal(krb5_context context, krb5_const_principal principal);
 
 /* krb5_free.c */
-/** Free a principal structure.
+/** Free the storage assigned to a principal.
  *
  * @param [in] context           Context structure
- * @param [in] val               Pointer to data structure to be freed
- *
+ * @param [in] val               Principal to be freed
  */
 void KRB5_CALLCONV
 krb5_free_principal(krb5_context context, krb5_principal val);
 
-/** Free an authenticator structure, including its pointer.
+/** Free a krb5_authenticator structure.
  *
- * @param [in] context           Context structure
- * @param [in] val               Pointer to data structure to be freed
+ * @param      context           (unused) Context structure
+ * @param [in] val               Pointer to authenticator structure to be freed
+ *
+ * This function frees the storage assigned to @a krb5_authenticator
+ * structure, and then @a val itself is released.
  */
 void KRB5_CALLCONV
 krb5_free_authenticator(krb5_context context, krb5_authenticator *val);
 
-/** Free an array of addresses and its pointer.
+/** Free the data stored in array of addresses.
  *
- * @param [in] context           Context structure
- * @param [in] val               Pointer to data structure to be freed
+ * @param      context           (unused) Context structure
+ * @param [in] val               Array of addresses to be freed
+ *
+ * This function frees the storage assigned to array of @a krb5_address
+ * structures, and then @a val itself is released.
+ *
+ * @note The last entry in the array must be a NULL pointer.
  */
 void KRB5_CALLCONV
 krb5_free_addresses(krb5_context context, krb5_address **val);
 
-/** Free an @c _krb5_auth_data structure.
+/** Free the storage assigned to array of authentication data.
  *
- * @param [in] context           Context structure
- * @param [in] val               Pointer to data structure to be freed
+ * @param      context           (unused) Context structure
+ * @param [in] val               Array of authentication data to be freed
+ *
+ * This function frees the storage assigned to array of @a krb5_authdata
+ * structures, and then @a val itself is released.
+ *
+ * @note The last entry in the array must be a NULL pointer.
  */
 void KRB5_CALLCONV
 krb5_free_authdata(krb5_context context, krb5_authdata **val);
@@ -4096,15 +4090,21 @@ krb5_free_authdata(krb5_context context, krb5_authdata **val);
 /** Free a ticket.
  *
  * @param [in] context           Context structure
- * @param [in] val               Pointer to the data structure to be freed
+ * @param [in] val               Ticket to be freed
+ *
+ * This function frees the storage assigned to @a krb5_ticket
+ * structure, and then @a val itself is released.
  */
 void KRB5_CALLCONV
 krb5_free_ticket(krb5_context context, krb5_ticket *val);
 
 /** Free an error allocated by either krb5_read_error() or krb5_sendauth().
  *
- * @param context           Context structure [input, output]
- * @param val               Pointer to data structure to be freed [input, output]
+ * @param [in] context           Context structure
+ * @param [in] val               Error data structure to be freed
+ *
+ * This function frees the storage assigned to @a krb5_error
+ * structure, and then @a val itself is released.
  */
 void KRB5_CALLCONV
 krb5_free_error(krb5_context context, register krb5_error *val);
@@ -4113,6 +4113,9 @@ krb5_free_error(krb5_context context, register krb5_error *val);
  *
  * @param [in] context           Context structure
  * @param [in] val               Pointer to data structure to be freed
+ *
+ * This function frees the storage assigned to @a krb5_creds
+ * structure, and then @a val itself is released.
  */
 void KRB5_CALLCONV
 krb5_free_creds(krb5_context context, krb5_creds *val);
@@ -4122,87 +4125,98 @@ krb5_free_creds(krb5_context context, krb5_creds *val);
  * @param [in]     context           Context structure
  * @param [in,out] val               Pointer to the data structure to be freed
  *
- * @note The pointer val is not freed.
+ * @note The pointer to @a val is not freed.
  */
 void KRB5_CALLCONV
 krb5_free_cred_contents(krb5_context context, krb5_creds *val);
 
-/** Free a @a checksum structure and its pointer.
+/** Free a krb5_checksum structure.
  *
- * @param context           Context structure [input, output]
- * @param val               Pointer to data structure to be freed [input, output]
+ * @param      context           (unused) Context structure
+ * @param [in] val               Pointer to data structure to be freed
+ *
+ * This function frees the contents of a @a val and then releases @a val itself.
  */
 void KRB5_CALLCONV
 krb5_free_checksum(krb5_context context, register krb5_checksum *val);
 
-/** Free the contents of a @a checksum structure.
+/** Free the contents of a krb5_checksum structure.
  *
- * @param context           Context structure [input, output]
- * @param val               Pointer to data structure to be freed [input, output]
+ * @param      context           (unused) Context structure
+ * @param [in] val               Checksum structure to be released
  *
- * @note The pointer is not freed.
+ * @note The pointer to @a val itself is not freed.
  */
 void KRB5_CALLCONV
 krb5_free_checksum_contents(krb5_context context, register krb5_checksum *val);
 
-/** Free the pointer @a val and zero the contents of the keyblock.
+/** Free the storage assigned to a keyblock.
  *
- * @param context           Context structure [input, output]
- * @param val               Pointer to data structure to be freed [input, output]
+ * @param [in] context           Context structure
+ * @param [in] val               Keyblock to be freed
+ *
+ * This function zeros out and frees the contents of a @a val and then
+ * releases @a val itself.
  */
 void KRB5_CALLCONV
 krb5_free_keyblock(krb5_context context, register krb5_keyblock *val);
 
-/** Free the contents of a keyblock.
+/** Zero out and free the contents of a keyblock.
  *
- * @param context           Context structure [input, output]
- * @param key               Pointer to data structure to be freed [input, output]
+ * @param [in] context           Context structure
+ * @param [in] key               Keyblock to be freed
  *
- * @note The pointer is not freed.
+ * @note The pointer to @a key itself is not freed.
  */
 void KRB5_CALLCONV
 krb5_free_keyblock_contents(krb5_context context, register krb5_keyblock *key);
 
-/** Free the subkey keyblock (if set)and its pointer.
- *
- * @param context           Context structure [input, output]
- * @param val               Pointer to data structure to be freed [input, output]
- */
-void KRB5_CALLCONV
-krb5_free_ap_rep_enc_part(krb5_context context, krb5_ap_rep_enc_part *val);
-
-/** Free storage associated with a @c krb5_data structure and its pointer.
- *
- * @param context           Context structure [input, output]
- * @param val               Pointer to data structure to be freed [input, output]
- */
-void KRB5_CALLCONV
-krb5_free_data(krb5_context context, krb5_data *val);
-
-/** Free the contents of a @c _krb5_data structure and zero the data field.
+/** Free the subkey keyblock.
  *
  * @param [in] context           Context structure
  * @param [in] val               Pointer to data structure to be freed
  *
- * @note The pointer is not freed.
+ * This function frees the storage assigned to the decrypted portion of an AP_REP
+ * message, and then @a val itself is released.
+ */
+void KRB5_CALLCONV
+krb5_free_ap_rep_enc_part(krb5_context context, krb5_ap_rep_enc_part *val);
+
+/** Free the storage assigned to a krb5_data object
+ *
+ * @param      context           (unused) Context structure
+ * @param [in] val               Pointer to data structure to be freed
+ *
+ * This function zeros out and frees the contents field of @a val and then
+ * frees @a val itself.
+ */
+void KRB5_CALLCONV
+krb5_free_data(krb5_context context, krb5_data *val);
+
+/** Zero out and free the contents of a krb5_data object
+ *
+ * @param      context           (unused) Context structure
+ * @param [in] val               Pointer to data structure to be freed
+ *
+ * @note The pointer to @a val itself is not freed.
  */
 void KRB5_CALLCONV
 krb5_free_data_contents(krb5_context context, krb5_data *val);
 
 /** Free a simple character name string returned by krb5_unparse_name().
  *
- * @param context           Context structure [input, output]
- * @param val               Pointer to name string to be freed [input, output]
+ * @param      context           (unused) Context structure
+ * @param [in] val               Pointer to name string to be freed
  *
- * @note The pointer is not freed.
+ * @note The pointer to @a val itself is not freed.
  */
 void KRB5_CALLCONV
 krb5_free_unparsed_name(krb5_context context, char *val);
 
 /** Free an array of checksum types.
  *
- * @param context           Context structure [input, output]
- * @param val               Pointer to checksum type to be freed [input, output]
+ * @param      context           (unused) Context structure
+ * @param [in] val               Array of checksum types to be freed
  *
  * @note Make sure the checksum contents have already been freed.
  */
@@ -4570,27 +4584,28 @@ krb5_rd_req(krb5_context context, krb5_auth_context *auth_context,
             krb5_keytab keytab, krb5_flags *ap_req_options,
             krb5_ticket **ticket);
 
-/**
- * @brief Retrieve a service key from a key table.
+/** Retrieve a service key from a key table.
  *
- * @param context           Context structure [input, output]
- * @param keyprocarg        Name of a key table or NULL to use default key table [input]
- * @param principal         Service principal [input]
- * @param vno               Key version number; use 0 to specify the key with the highest version number [input]
- * @param enctype           Key encryption type; use a keytype of 0 if encryption type does not matter [input]
- * @param key               Returned service key [output]
+ * @param [in]  context     Context structure
+ * @param [in]  keyprocarg  Name of a key table or NULL to use default key table
+ * @param [in]  principal   Service principal
+ * @param [in]  vno         Key version number; use 0 to specify the key with
+ *                          the highest version number
+ * @param [in]  enctype     Key encryption type; use a keytype of 0 if
+ *                          encryption type does not matter
+ * @param [out] key         Returned service key
  *
  * Open and search the specified key table for the entry identified by @a principal, @a enctype,
  * and @a vno. If no key is found, return an error code.
  *
- * The default key table is used, unless @a keyprocarg is non-null. @a keyprocarg designates a specific key table.
+ * The default key table is used, unless @a keyprocarg is non-null.
+ * @a keyprocarg designates a specific key table.
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * Use krb5_free_keyblock() to free @a key when it is no longer needed.
  *
  * @retval
  * 0 Success
- * @return
- * Kerberos error codes
+ * @return Kerberos error code if not found or @a keyprocarg is invalid.
  */
 krb5_error_code KRB5_CALLCONV
 krb5_kt_read_service_key(krb5_context context, krb5_pointer keyprocarg,
@@ -5515,7 +5530,7 @@ krb5_get_fallback_host_realm(krb5_context context,
 /** Free the memory allocated by krb5_get_host_realm().
  *
  * @param      context           Context structure (unused)
- * @param [in] realmlist         Pointer to list of realm names to be released
+ * @param [in] realmlist         List of the realm names to be released
  *
  * @retval
  * 0  Success
