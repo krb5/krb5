@@ -2112,35 +2112,6 @@ krb5int_generate_and_save_subkey(krb5_context, krb5_auth_context,
                                  krb5_keyblock * /* Old keyblock, not new!  */,
                                  krb5_enctype);
 
-/* set and change password helpers */
-
-krb5_error_code
-krb5int_mk_chpw_req(krb5_context context, krb5_auth_context auth_context,
-                    krb5_data *ap_req, char *passwd, krb5_data *packet);
-
-krb5_error_code
-krb5int_rd_chpw_rep(krb5_context context, krb5_auth_context auth_context,
-                    krb5_data *packet, int *result_code,
-                    krb5_data *result_data);
-
-krb5_error_code KRB5_CALLCONV
-krb5_chpw_result_code_string(krb5_context context, int result_code,
-                             char **result_codestr);
-
-krb5_error_code
-krb5int_mk_setpw_req(krb5_context context, krb5_auth_context auth_context,
-                     krb5_data *ap_req, krb5_principal targetprinc,
-                     char *passwd, krb5_data *packet);
-
-krb5_error_code
-krb5int_rd_setpw_rep(krb5_context context, krb5_auth_context auth_context,
-                     krb5_data *packet, int *result_code,
-                     krb5_data *result_data);
-
-krb5_error_code
-krb5int_setpw_result_code_string(krb5_context context, int result_code,
-                                 const char **result_codestr);
-
 struct srv_dns_entry {
     struct srv_dns_entry *next;
     int priority;
