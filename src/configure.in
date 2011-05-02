@@ -67,7 +67,7 @@ LIBUTIL=-lutil
 ])
 AC_SUBST(LIBUTIL)
 # for kdc
-AC_CHECK_HEADERS(syslog.h sys/select.h sys/sockio.h ifaddrs.h unistd.h)
+AC_CHECK_HEADERS(syslog.h sys/sockio.h ifaddrs.h unistd.h)
 AC_CHECK_FUNCS(openlog syslog closelog strftime vsprintf vasprintf vsnprintf)
 AC_CHECK_FUNCS(strlcpy)
 EXTRA_SUPPORT_SYMS=
@@ -472,7 +472,7 @@ AC_CHECK_HEADER(termios.h,
   AC_DEFINE(POSIX_TERMIOS,1,[Define if termios.h exists and tcsetattr exists]))])
 
 KRB5_SIGTYPE
-AC_CHECK_HEADERS(stdlib.h string.h stddef.h sys/types.h sys/file.h sys/param.h sys/stat.h sys/time.h netinet/in.h sys/uio.h sys/filio.h sys/select.h time.h paths.h errno.h)
+AC_CHECK_HEADERS(poll.h stdlib.h string.h stddef.h sys/types.h sys/file.h sys/param.h sys/stat.h sys/time.h netinet/in.h sys/uio.h sys/filio.h sys/select.h time.h paths.h errno.h)
 
 # If compiling with IPv6 support, test if in6addr_any functions.
 # Irix 6.5.16 defines it, but lacks support in the C library.

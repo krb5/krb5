@@ -24,11 +24,20 @@
  * or implied warranty.
  */
 
-/* Since fd_set is large on some platforms (8K on AIX 5.2), this
-   probably shouldn't be allocated in automatic storage.  */
+/*
+ * Since fd_set is large on some platforms (8K on AIX 5.2), this probably
+ * shouldn't be allocated in automatic storage.  Define USE_POLL and
+ * MAX_POLLFDS in the consumer of this header file to use poll state instead of
+ * select state.
+ */
 struct select_state {
-    int max, nfds;
+#ifdef USE_POLL
+    struct pollfd fds[MAX_POLLFDS];
+#else
+    int max;
     fd_set rfds, wfds, xfds;
+#endif
+    int nfds;
     struct timeval end_time;    /* magic: tv_sec==0 => never time out */
 };
 

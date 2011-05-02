@@ -32,6 +32,10 @@
 #ifndef KRB5_LIBOS_INT_PROTO__
 #define KRB5_LIBOS_INT_PROTO__
 
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+
 #include <krb5/locate_plugin.h>
 
 /* A single server hostname or address. */
@@ -100,6 +104,8 @@ krb5_error_code krb5int_get_fq_local_hostname(char *, size_t);
 
 /* The io vector is *not* const here, unlike writev()!  */
 int krb5int_net_writev (krb5_context, int, sg_buf *, int);
+
+int k5_getcurtime(struct timeval *tvp);
 
 #include "k5-thread.h"
 extern k5_mutex_t krb5int_us_time_mutex;

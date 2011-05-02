@@ -30,17 +30,16 @@
 #include "fake-addrinfo.h"
 #include "k5-int.h"
 
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#else
-#include <time.h>
-#endif
 #include "os-proto.h"
 #ifdef _WIN32
 #include <sys/timeb.h>
 #endif
 
-#ifdef _AIX
+#if defined(HAVE_POLL_H)
+#include <poll.h>
+#define USE_POLL
+#define MAX_POLLFDS 1024
+#elif defined(HAVE_SYS_SELECT_H)
 #include <sys/select.h>
 #endif
 
@@ -167,29 +166,6 @@ krb5int_debug_fprint (const char *fmt, ...)
             if (p == NULL)
                 p = strerror(err);
             putstr(p);
-            break;
-        case 'F':
-            /* %F => fd_set *, fd_set *, fd_set *, int */
-            rfds = va_arg(args, fd_set *);
-            wfds = va_arg(args, fd_set *);
-            xfds = va_arg(args, fd_set *);
-            maxfd = va_arg(args, int);
-
-            for (i = 0; i < maxfd; i++) {
-                int r = FD_ISSET(i, rfds);
-                int w = wfds && FD_ISSET(i, wfds);
-                int x = xfds && FD_ISSET(i, xfds);
-                if (r || w || x) {
-                    putf(" %d", i);
-                    if (r)
-                        putstr("r");
-                    if (w)
-                        putstr("w");
-                    if (x)
-                        putstr("x");
-                }
-            }
-            putstr(" ");
             break;
         case 's':
             /* %s => char * */
@@ -437,75 +413,154 @@ cleanup:
 
 #include "cm.h"
 
-static int
-getcurtime (struct timeval *tvp)
+/*
+ * Currently only sendto_kdc.c knows how to use poll(); the other candidate
+ * user, lib/apputils/net-server.c, is stuck using select() for the moment
+ * since it is entangled with the RPC library.  The following cm_* functions
+ * are not fully generic, are O(n^2) in the poll case, and are limited to
+ * handling 1024 connections (in order to maintain a constant-sized selstate).
+ * More rearchitecting would be appropriate before extending this support to
+ * the KDC and kadmind.
+ */
+
+static void
+cm_init_selstate(struct select_state *selstate)
 {
-#ifdef _WIN32
-    struct _timeb tb;
-    _ftime(&tb);
-    tvp->tv_sec = tb.time;
-    tvp->tv_usec = tb.millitm * 1000;
-    /* Can _ftime fail?  */
-    return 0;
-#else
-    if (gettimeofday(tvp, 0)) {
-        dperror("gettimeofday");
-        return errno;
-    }
-    return 0;
+    selstate->nfds = 0;
+    selstate->end_time.tv_sec = selstate->end_time.tv_usec = 0;
+#ifndef USE_POLL
+    selstate->max = 0;
+    selstate->nfds = 0;
+    FD_ZERO(&selstate->rfds);
+    FD_ZERO(&selstate->wfds);
+    FD_ZERO(&selstate->xfds);
 #endif
 }
 
-/*
- * Call select and return results.
- * Input: interesting file descriptors and absolute timeout
- * Output: select return value (-1 or num fds ready) and fd_sets
- * Return: 0 (for i/o available or timeout) or error code.
- */
-krb5_error_code
-krb5int_cm_call_select (const struct select_state *in,
-                        struct select_state *out, int *sret)
+static krb5_boolean
+cm_add_fd(struct select_state *selstate, int fd, unsigned int ssflags)
 {
-    struct timeval now, *timo;
-    krb5_error_code e;
+#ifdef USE_POLL
+    if (selstate->nfds >= MAX_POLLFDS)
+        return FALSE;
+    selstate->fds[selstate->nfds].fd = fd;
+    selstate->fds[selstate->nfds].events = 0;
+    if (ssflags & SSF_READ)
+        selstate->fds[selstate->nfds].events |= POLLIN;
+    if (ssflags & SSF_WRITE)
+        selstate->fds[selstate->nfds].events |= POLLOUT;
+#else
+#ifndef _WIN32  /* On Windows FD_SETSIZE is a count, not a max value. */
+    if (fd >= FD_SETSIZE)
+        return FALSE;
+#endif
+    if (ssflags & SSF_READ)
+        FD_SET(fd, &selstate->rfds);
+    if (ssflags & SSF_WRITE)
+        FD_SET(fd, &selstate->wfds);
+    if (ssflags & SSF_EXCEPTION)
+        FD_SET(fd, &selstate->xfds);
+    if (selstate->max <= fd)
+        selstate->max = fd + 1;
+#endif
+    selstate->nfds++;
+    return TRUE;
+}
 
-    *out = *in;
-    e = getcurtime(&now);
-    if (e)
-        return e;
-    if (out->end_time.tv_sec == 0)
-        timo = 0;
-    else {
-        timo = &out->end_time;
-        out->end_time.tv_sec -= now.tv_sec;
-        out->end_time.tv_usec -= now.tv_usec;
-        if (out->end_time.tv_usec < 0) {
-            out->end_time.tv_usec += 1000000;
-            out->end_time.tv_sec--;
-        }
-        if (out->end_time.tv_sec < 0) {
-            *sret = 0;
-            return 0;
-        }
+static void
+cm_remove_fd(struct select_state *selstate, int fd)
+{
+#ifdef USE_POLL
+    int i;
+
+    /* Find the FD in the array and move the last entry to its place. */
+    assert(selstate->nfds > 0);
+    for (i = 0; i < selstate->nfds && selstate->fds[i].fd != fd; i++);
+    assert(i < selstate->nfds);
+    selstate->fds[i] = selstate->fds[selstate->nfds - 1];
+#else
+    FD_CLR(fd, &selstate->rfds);
+    FD_CLR(fd, &selstate->wfds);
+    FD_CLR(fd, &selstate->xfds);
+    if (selstate->max == 1 + fd) {
+        while (selstate->max > 0
+               && ! FD_ISSET(selstate->max-1, &selstate->rfds)
+               && ! FD_ISSET(selstate->max-1, &selstate->wfds)
+               && ! FD_ISSET(selstate->max-1, &selstate->xfds))
+            selstate->max--;
+        dprint("new max_fd + 1 is %d\n", selstate->max);
     }
-    dprint("selecting on max=%d sockets [%F] timeout %t\n",
-           out->max,
-           &out->rfds, &out->wfds, &out->xfds, out->max,
-           timo);
-    *sret = select(out->max, &out->rfds, &out->wfds, &out->xfds, timo);
+#endif
+    selstate->nfds--;
+}
+
+static void
+cm_unset_write(struct select_state *selstate, int fd)
+{
+#ifdef USE_POLL
+    int i;
+
+    for (i = 0; i < selstate->nfds && selstate->fds[i].fd != fd; i++);
+    assert(i < selstate->nfds);
+    selstate->fds[i].events &= ~POLLOUT;
+#else
+    FD_CLR(fd, &selstate->wfds);
+#endif
+}
+
+static krb5_error_code
+cm_select_or_poll(const struct select_state *in, struct select_state *out,
+                  int *sret)
+{
+#ifdef USE_POLL
+    struct timeval now;
+    int e, timeout;
+
+    if (in->end_time.tv_sec == 0)
+        timeout = -1;
+    else {
+        e = k5_getcurtime(&now);
+        if (e)
+            return e;
+        timeout = (in->end_time.tv_sec - now.tv_sec) * 1000 +
+            (in->end_time.tv_usec - now.tv_usec) / 1000;
+    }
+    /* We don't need a separate copy of the selstate for poll, but use one
+     * anyone for consistency with the select wrapper. */
+    *out = *in;
+    *sret = poll(out->fds, out->nfds, timeout);
     e = SOCKET_ERRNO;
+    return (*sret < 0) ? e : 0;
+#else
+    /* Use the select wrapper from cm.c. */
+    return krb5int_cm_call_select(in, out, sret);
+#endif
+}
 
-    dprint("select returns %d", *sret);
-    if (*sret < 0)
-        dprint(", error = %E\n", e);
-    else if (*sret == 0)
-        dprint(" (timeout)\n");
-    else
-        dprint(":%F\n", &out->rfds, &out->wfds, &out->xfds, out->max);
+static unsigned int
+cm_get_ssflags(struct select_state *selstate, int fd)
+{
+    unsigned int ssflags = 0;
+#ifdef USE_POLL
+    int i;
 
-    if (*sret < 0)
-        return e;
-    return 0;
+    for (i = 0; i < selstate->nfds && selstate->fds[i].fd != fd; i++);
+    assert(i < selstate->nfds);
+    if (selstate->fds[i].revents & POLLIN)
+        ssflags |= SSF_READ;
+    if (selstate->fds[i].revents & POLLOUT)
+        ssflags |= SSF_WRITE;
+    if (selstate->fds[i].revents & POLLERR)
+        ssflags |= SSF_EXCEPTION;
+#else
+    if (FD_ISSET(fd, &selstate->rfds))
+        ssflags |= SSF_READ;
+    if (FD_ISSET(fd, &selstate->wfds))
+        ssflags |= SSF_WRITE;
+    if (FD_ISSET(fd, &selstate->xfds))
+        ssflags |= SSF_EXCEPTION;
+#endif
+    return ssflags;
 }
 
 static int service_tcp_fd(krb5_context context, struct conn_state *conn,
@@ -702,6 +757,7 @@ start_connection(krb5_context context, struct conn_state *state,
                  struct sendto_callback_info *callback_info)
 {
     int fd, e;
+    unsigned int ssflags;
 
     dprint("start_connection(@%p)\ngetting %s socket in family %d...", state,
            state->socktype == SOCK_STREAM ? "stream" : "dgram", state->family);
@@ -711,14 +767,6 @@ start_connection(krb5_context context, struct conn_state *state,
         dprint("socket: %m creating with af %d\n", state->err, state->family);
         return -1;              /* try other hosts */
     }
-#ifndef _WIN32 /* On Windows FD_SETSIZE is a count, not a max value.  */
-    if (fd >= FD_SETSIZE) {
-        closesocket(fd);
-        state->err = EMFILE;
-        dprint("socket: fd %d too high\n", fd);
-        return -1;
-    }
-#endif
     set_cloexec_fd(fd);
     /* Make it non-blocking.  */
     if (state->socktype == SOCK_STREAM) {
@@ -801,16 +849,15 @@ start_connection(krb5_context context, struct conn_state *state,
             state->state = READING;
         }
     }
-    FD_SET(state->fd, &selstate->rfds);
+    ssflags = SSF_READ | SSF_EXCEPTION;
     if (state->state == CONNECTING || state->state == WRITING)
-        FD_SET(state->fd, &selstate->wfds);
-    FD_SET(state->fd, &selstate->xfds);
-    if (selstate->max <= state->fd)
-        selstate->max = state->fd + 1;
-    selstate->nfds++;
-
-    dprint("new select vectors: %F\n",
-           &selstate->rfds, &selstate->wfds, &selstate->xfds, selstate->max);
+        ssflags |= SSF_WRITE;
+    if (!cm_add_fd(selstate, state->fd, ssflags)) {
+        (void) closesocket(state->fd);
+        state->fd = INVALID_SOCKET;
+        state->state = FAILED;
+        return -1;
+    }
 
     return 0;
 }
@@ -868,22 +915,11 @@ static void
 kill_conn(struct conn_state *conn, struct select_state *selstate, int err)
 {
     conn->state = FAILED;
-    shutdown(conn->fd, SHUTDOWN_BOTH);
-    FD_CLR(conn->fd, &selstate->rfds);
-    FD_CLR(conn->fd, &selstate->wfds);
-    FD_CLR(conn->fd, &selstate->xfds);
     conn->err = err;
+    shutdown(conn->fd, SHUTDOWN_BOTH);
+    cm_remove_fd(selstate, conn->fd);
     dprint("abandoning connection %d: %m\n", conn->fd, err);
     /* Fix up max fd for next select call.  */
-    if (selstate->max == 1 + conn->fd) {
-        while (selstate->max > 0
-               && ! FD_ISSET(selstate->max-1, &selstate->rfds)
-               && ! FD_ISSET(selstate->max-1, &selstate->wfds)
-               && ! FD_ISSET(selstate->max-1, &selstate->xfds))
-            selstate->max--;
-        dprint("new max_fd + 1 is %d\n", selstate->max);
-    }
-    selstate->nfds--;
 }
 
 /* Check socket for error.  */
@@ -1005,7 +1041,7 @@ service_tcp_fd(krb5_context context, struct conn_state *conn,
             /* Done writing, switch to reading.  */
             /* Don't call shutdown at this point because
              * some implementations cannot deal with half-closed connections.*/
-            FD_CLR(conn->fd, &selstate->wfds);
+            cm_unset_write(selstate, conn->fd);
             /* Q: How do we detect failures to send the remaining data
                to the remote side, since we're in non-blocking mode?
                Will we always get errors on the reading side?  */
@@ -1117,7 +1153,7 @@ service_fds(krb5_context context, struct select_state *selstate, int interval,
 
     *winner_out = NULL;
 
-    e = getcurtime(&now);
+    e = k5_getcurtime(&now);
     if (e)
         return 1;
     selstate->end_time = now;
@@ -1125,7 +1161,7 @@ service_fds(krb5_context context, struct select_state *selstate, int interval,
 
     e = 0;
     while (selstate->nfds > 0) {
-        e = krb5int_cm_call_select(selstate, seltemp, &selret);
+        e = cm_select_or_poll(selstate, seltemp, &selret);
         if (e == EINTR)
             continue;
         if (e != 0)
@@ -1143,13 +1179,7 @@ service_fds(krb5_context context, struct select_state *selstate, int interval,
 
             if (state->fd == INVALID_SOCKET)
                 continue;
-            ssflags = 0;
-            if (FD_ISSET(state->fd, &seltemp->rfds))
-                ssflags |= SSF_READ;
-            if (FD_ISSET(state->fd, &seltemp->wfds))
-                ssflags |= SSF_WRITE;
-            if (FD_ISSET(state->fd, &seltemp->xfds))
-                ssflags |= SSF_EXCEPTION;
+            ssflags = cm_get_ssflags(seltemp, state->fd);
             if (!ssflags)
                 continue;
 
@@ -1229,12 +1259,7 @@ k5_sendto(krb5_context context, const krb5_data *message,
         goto cleanup;
     }
     seltemp = &sel_state[1];
-    sel_state->max = 0;
-    sel_state->nfds = 0;
-    sel_state->end_time.tv_sec = sel_state->end_time.tv_usec = 0;
-    FD_ZERO(&sel_state->rfds);
-    FD_ZERO(&sel_state->wfds);
-    FD_ZERO(&sel_state->xfds);
+    cm_init_selstate(sel_state);
 
     /* First pass: resolve server hosts, communicate with resulting addresses
      * of the preferred socktype, and wait 1s for an answer from each. */
