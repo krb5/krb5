@@ -430,7 +430,6 @@ cm_init_selstate(struct select_state *selstate)
     selstate->end_time.tv_sec = selstate->end_time.tv_usec = 0;
 #ifndef USE_POLL
     selstate->max = 0;
-    selstate->nfds = 0;
     FD_ZERO(&selstate->rfds);
     FD_ZERO(&selstate->wfds);
     FD_ZERO(&selstate->xfds);
