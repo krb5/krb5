@@ -368,8 +368,7 @@ typedef struct _krb5_keyblock {
     krb5_octet *contents;
 } krb5_keyblock;
 
-/**
- * @brief Opaque identifier for a key.
+/** Opaque identifier for a key.
  *
  * Use with the krb5_k APIs for better
  * performance for repeated operations with the same key usage.  Key
@@ -1543,9 +1542,8 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 
 /* Time set */
 /**
- * @brief Ticket start time, end time, and renewal duration.
+ * Ticket start time, end time, and renewal duration.
  */
-
 typedef struct _krb5_ticket_times {
     krb5_timestamp authtime;    /**< Time at which KDC issued the initial ticket that corresponds to this ticket */
                                   /* XXX ? should ktime in KDC_REP == authtime
@@ -1555,7 +1553,7 @@ typedef struct _krb5_ticket_times {
     krb5_timestamp renew_till;  /**< Latest time at which renewal of ticket can be valid */
 } krb5_ticket_times;
 
-/**  @brief  structure for auth data */
+/**  Structure for auth data */
 typedef struct _krb5_authdata {
     krb5_magic magic;
     krb5_authdatatype ad_type; /**< ADTYPE */
@@ -1563,19 +1561,14 @@ typedef struct _krb5_authdata {
     krb5_octet *contents;      /**< Data */
 } krb5_authdata;
 
-/**  @brief  structure for transited encoding */
+/** Structure for transited encoding */
 typedef struct _krb5_transited {
     krb5_magic magic;
     krb5_octet tr_type;     /**< Transited encoding type */
     krb5_data tr_contents;  /**< Contents */
 } krb5_transited;
 
- /**
- * @brief  Encrypted part of ticket.
- * @sa tktflag
- * @sa enctype
- *
- */
+ /** Encrypted part of ticket. */
 typedef struct _krb5_enc_tkt_part {
     krb5_magic magic;
     /* to-be-encrypted portion */
@@ -1589,12 +1582,10 @@ typedef struct _krb5_enc_tkt_part {
 } krb5_enc_tkt_part;
 
 /**
- * @brief Ticket structure.
+ * Ticket structure.
  *
  * Ticket structure that holds the C representation of the ticket protocol
  * message and a pointer to the representation of @c _krb5_enc_tkt_part.
- *
- * @sa enctype
  */
 typedef struct _krb5_ticket {
     krb5_magic magic;
@@ -1606,15 +1597,10 @@ typedef struct _krb5_ticket {
 
 /* the unencrypted version */
 /**
- * @brief Ticket authenticator.
+ * Ticket authenticator.
  *
  * Ticket authenticator: the @c c representation of @c AP-REQ message with decrypted authenticator.
- *
- * @todo ers look up asn.1 types and reformat accordingly
- *
- * @sa aptops
  */
-
 typedef struct _krb5_authenticator {
     krb5_magic magic;
     krb5_principal client;              /**< client name/realm */
@@ -1626,6 +1612,9 @@ typedef struct _krb5_authenticator {
     krb5_authdata **authorization_data; /**< New add by Ari, auth data */
 } krb5_authenticator;
 
+/**
+ * Ticket authentication data.
+ */
 typedef struct _krb5_tkt_authent {
     krb5_magic magic;
     krb5_ticket *ticket;
@@ -1634,10 +1623,7 @@ typedef struct _krb5_tkt_authent {
 } krb5_tkt_authent;
 
 /**
- * @brief Credentials structure including ticket, session key, and lifetime info.
- *
- * @sa tktflag
- *
+ * Credentials structure including ticket, session key, and lifetime info.
  */
 typedef struct _krb5_creds {
     krb5_magic magic;
@@ -1656,16 +1642,14 @@ typedef struct _krb5_creds {
     krb5_authdata **authdata;           /**< authorization data */
 } krb5_creds;
 
-/**  @brief Last request entry */
+/** Last request entry */
 typedef struct _krb5_last_req_entry {
     krb5_magic magic;
     krb5_int32 lr_type;   /**< LR type */
     krb5_timestamp value;  /**< Timestamp */
 } krb5_last_req_entry;
 
-/**  @brief  Pre-authentication data
-  * @sa padata
-  */
+/** Pre-authentication data */
 typedef struct _krb5_pa_data {
     krb5_magic magic;
     krb5_preauthtype  pa_type; /**< Preauthentication data type */
@@ -1673,8 +1657,8 @@ typedef struct _krb5_pa_data {
     krb5_octet *contents;       /**< Data   */
 } krb5_pa_data;
 
-/* typed data */
-/**
+/** Typed data.
+ *
  * The FAST error handling logic currently assumes that this structure and
  * krb5_pa_data * can be safely cast to each other if this structure changes,
  * that code needs to be updated to copy.
@@ -1686,11 +1670,7 @@ typedef struct _krb5_typed_data {
     krb5_octet *data;
 } krb5_typed_data;
 
-/**
- * @brief Representation of KDC-REQ protocol message.
- *
- * @sa kdcopts
- */
+/** Representation of KDC-REQ protocol message. */
 typedef struct _krb5_kdc_req {
     krb5_magic magic;
     krb5_msgtype msg_type;              /**< krb5_kdc_req AS_REQ or TGS_REQ? */
@@ -1718,8 +1698,7 @@ typedef struct _krb5_kdc_req {
     void * kdc_state;
 } krb5_kdc_req;
 
-/**
- * @brief Representation of @c EncKDCRepPart protocol message.
+/** Representation of @c EncKDCRepPart protocol message.
  *
  * This is the cleartext message that is encrypted and inserted in @c KDC-REP.
  */
@@ -1739,10 +1718,7 @@ typedef struct _krb5_enc_kdc_rep_part {
     krb5_pa_data **enc_padata;          /**< Windows 2000 compat */
 } krb5_enc_kdc_rep_part;
 
-/** @brief Representation of  the @c KDC-REP protocol message.
- *
- * @sa padata
- */
+/** Representation of  the @c KDC-REP protocol message. */
 typedef struct _krb5_kdc_rep {
     krb5_magic magic;
     /* cleartext part: */
@@ -1769,8 +1745,7 @@ typedef struct _krb5_error {
     krb5_data e_data;                   /**< additional error-describing data */
 } krb5_error;
 
-/** @brief Authentication header. */
-
+/** Authentication header. */
 typedef struct _krb5_ap_req {
     krb5_magic magic;
     krb5_flags ap_options;              /**< requested options */
@@ -1778,18 +1753,16 @@ typedef struct _krb5_ap_req {
     krb5_enc_data authenticator;        /**< authenticator (already encrypted) */
 } krb5_ap_req;
 
-/**
- * @brief C representaton of AP-REP message.
- * The server's response to a client's request for mutual authentication.
+/** C representaton of AP-REP message.
  *
+ * The server's response to a client's request for mutual authentication.
  */
-
 typedef struct _krb5_ap_rep {
     krb5_magic magic;
     krb5_enc_data enc_part;             /**< Ciphertext of ApRepEncPart */
 } krb5_ap_rep;
 
-/** @brief Cleartext that is encrypted and put into @c _krb5_ap_rep.  */
+/** Cleartext that is encrypted and put into @c _krb5_ap_rep.  */
 typedef struct _krb5_ap_rep_enc_part {
     krb5_magic magic;
     krb5_timestamp ctime;               /**< client time, seconds portion */
@@ -1798,7 +1771,7 @@ typedef struct _krb5_ap_rep_enc_part {
     krb5_ui_4 seq_number;               /**< sequence #, optional */
 } krb5_ap_rep_enc_part;
 
-/** @brief Unused.  */
+/** Unused.  */
 typedef struct _krb5_response {
     krb5_magic magic;
     krb5_octet message_type;
@@ -1807,12 +1780,7 @@ typedef struct _krb5_response {
     krb5_timestamp request_time;   /**< When we made the request */
 } krb5_response;
 
-/**
- * @brief Credentials information inserted into @c EncKrbCredPart.
- *
- * @sa tktflag
- */
-
+/** Credentials information inserted into @c EncKrbCredPart. */
 typedef struct _krb5_cred_info {
     krb5_magic magic;
     krb5_keyblock *session;             /**< session key used to encrypt ticket */
@@ -1823,7 +1791,7 @@ typedef struct _krb5_cred_info {
     krb5_address **caddrs;              /**< array of ptrs to addresses */
 } krb5_cred_info;
 
-/**  @brief Cleartext credentials information.  */
+/** Cleartext credentials information.  */
 typedef struct _krb5_cred_enc_part {
     krb5_magic magic;
     krb5_int32 nonce;                   /**< nonce, optional */
@@ -1834,7 +1802,7 @@ typedef struct _krb5_cred_enc_part {
     krb5_cred_info **ticket_info;
 } krb5_cred_enc_part;
 
-/**  @brief Credentials data structure.*/
+/** Credentials data structure.*/
 typedef struct _krb5_cred {
     krb5_magic magic;
     krb5_ticket **tickets;              /**< tickets */
@@ -1842,7 +1810,7 @@ typedef struct _krb5_cred {
     krb5_cred_enc_part *enc_part2;      /**< unencrypted version, if available*/
 } krb5_cred;
 
-/** @brief Sandia password generation structure */
+/** Sandia password generation structure */
 typedef struct _passwd_phrase_element {
     krb5_magic magic;
     krb5_data *passwd;
@@ -1890,7 +1858,11 @@ typedef struct _krb5_pa_pac_req {
 #define KRB5_AUTH_CONTEXT_PERMIT_ALL    0x00000010
 #define KRB5_AUTH_CONTEXT_USE_SUBKEY    0x00000020
 
-/** @brief Sequence number and timestamp information output by krb5_read_priv() and krb5_read_safe().*/
+/** Replay data.
+ *
+ * Sequence number and timestamp information output by krb5_read_priv() and
+ * krb5_read_safe().
+ */
 typedef struct krb5_replay_data {
     krb5_timestamp      timestamp;   /**< Timestamp, seconds portion */
     krb5_int32          usec;        /**< Timestamp, microseconds portion */
@@ -2636,22 +2608,21 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out);
 krb5_error_code KRB5_CALLCONV
 krb5_set_default_tgs_enctypes(krb5_context context, const krb5_enctype *etypes);
 
-/**
- * @brief Return a list of supported encryption types.
+/** Return a list of supported encryption types.
  *
- * @param context           Context structure [input, output]
- * @param ktypes            Pointer to list of encryption types [output]
+ * @param [in]  context           Context structure
+ * @param [out] ktypes            Zero-terminated list of encryption types
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * This function returns the content of  @a context->tgs_etypes if it is non-NULL.
+ * Otherwise, the libdefaults profile string of permitted_enctypes, if it exists.
+ * Otherwise, the default enctype list that is defined as follows:
+ *     ENCTYPE_AES256_CTS_HMAC_SHA1_96, ENCTYPE_AES128_CTS_HMAC_SHA1_96,
+ *     ENCTYPE_DES3_CBC_SHA1, ENCTYPE_ARCFOUR_HMAC,
+ *     ENCTYPE_DES_CBC_CRC, ENCTYPE_DES_CBC_MD5, ENCTYPE_DES_CBC_MD4.
  *
- * @retval
- *  0   Success
- * @retval
- *  KRB5_PROG_ETYPE_NOSUPP Program lacks support for encryption type
- * @return
- * Kerberos error codes
+ * Use krb5_free_ktypes() to free @a ktypes when it is no longer needed.
  *
- * @sa enctype
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_permitted_enctypes(krb5_context context, krb5_enctype **ktypes);
@@ -3544,19 +3515,20 @@ krb5_error_code KRB5_CALLCONV
 krb5_copy_checksum(krb5_context context, const krb5_checksum *ckfrom,
                    krb5_checksum **ckto);
 
-/**
- * @brief Open a replay cache for server use.
+/** Generate a replay cache object for server use and open it.
  *
- * @param context           Context structure [input, output]
- * @param piece             Unique identifier for replay cache [input]
- * @param rcptr             Handle to an open rcache [output]
+ * @param [in]  context           Context structure
+ * @param [in]  piece             Unique identifier for replay cache
+ * @param [out] rcptr             Handle to an open rcache
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * This function generates a replay cache name, allocates memory for its
+ * handle @a rcptr, and then opens it. Unique identifier @a piece is used
+ * to differentiate this replay cache from the others on the system and
+ * typically it is the first component of the principal name of the caller.
+ * The handle @a rcptr should be closed with krb5_rc_close().
+ * Use krb5_rc_destroy() to destroy @a rcptr when it is no longer needed.
  *
- * @retval
- * 0  Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_server_rcache(krb5_context context, const krb5_data *piece,
@@ -4260,22 +4232,18 @@ krb5_us_timeofday(krb5_context context,
 krb5_error_code KRB5_CALLCONV
 krb5_timeofday(krb5_context context, register krb5_timestamp *timeret);
 
-/* get all the addresses of this host */
-/**
- * @brief Return all protocol addresses for this host.
+/** Return all protocol addresses for this host.
  *
- * @param context           Context structure [input, output]
- * @param addr              Pointer to array of address pointers [output]
+ * @param [in]  context       Context structure
+ * @param [out] addr          Array of krb5_address pointers.
+ *                            The last entry is a NULL pointer
  *
  * Compile-time configuration flags indicate which protocol family addresses
- * can be returned.
+ * can be returned. Both AF_INET and AF_INET6 are currently supported.
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * Use krb5_free_addresses() to free @a addr when it is no longer needed.
  *
- * @retval
- * 0  Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_os_localaddr(krb5_context context, krb5_address ***addr);
@@ -5601,204 +5569,159 @@ krb5_auth_con_genaddrs(krb5_context context, krb5_auth_context auth_context,
 krb5_error_code KRB5_CALLCONV
 krb5_set_real_time(krb5_context context, krb5_timestamp seconds, krb5_int32 microseconds);
 
-/**
- * @brief Return the time offsets from the OS context.
+/** Return the time offsets from the os context.
  *
- * @param context           Context structure [input, output]
- * @param seconds           Time offset from the OS context, seconds portion [output]
- * @param microseconds      Time offset from the OS context, microseconds portion [output]
+ * @param [in]  context           Context structure
+ * @param [out] seconds           Time offset from the OS context, seconds portion
+ * @param [out] microseconds      Time offset from the OS context, microseconds portion
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * This function returns the time offsets from @a context->os_context.
  *
- * @retval
- *  0  Success
- * @return
- * Kerberos error codes
+ * @retval 0  Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_time_offsets(krb5_context context, krb5_timestamp *seconds, krb5_int32 *microseconds);
 
 /* str_conv.c */
-/**
- * @brief Convert a string to an encryption type.
+/** Convert a string to an encryption type.
  *
- * @param string        Pointer to string to convert to an encryption type [input]
- * @param enctypep      Pointer to encryption type [output]
+ * @param [in]  string        String to convert to an encryption type
+ * @param [out] enctypep      Encryption type to be filled in
  *
- * @retval
- * 0 Success
- * @retval
- *  EINVAL Invalid parameter
- * @return
- * Kerberos error codes
- * @sa enctype
+ * @retval 0  Success; Otherwise - EINVAL
  */
 krb5_error_code KRB5_CALLCONV
 krb5_string_to_enctype(char *string, krb5_enctype *enctypep);
 
-/**
- * @brief Convert a string to a salt type.
+/** Convert a string to a salt type.
  *
- * @param string        Pointer to string to convert [input]
- * @param salttypep     Pointer to salt type [output]
+ * @param [in]  string        String to convert to an encryption type
+ * @param [out] salttypep     Salt type to be filled in
  *
- * @retval
- * 0 Success
- * @retval
- *  EINVAL Invalid parameter
- * @return
- * Kerberos error codes
+ * @retval 0  Success; Otherwise - EINVAL
  */
 krb5_error_code KRB5_CALLCONV
 krb5_string_to_salttype(char *string, krb5_int32 *salttypep);
 
-/**
- * @brief Convert a string to a checksum type.
+/** Convert a string to a checksum type.
  *
- * @param string        Pointer to the string value to be converted [input]
- * @param cksumtypep    Pointer to checksum type [output]
+ * @param [in]  string        String to be converted
+ * @param [out] cksumtypep    Checksum type to be filled in
  *
- * @retval
- * 0 Success
- * @retval
- * EINVAL Invalid parameter
- * @return
- * Kerberos error codes
- *
- * @sa cksumtype
+ * @retval 0  Success; Otherwise - EINVAL
  */
 krb5_error_code KRB5_CALLCONV
 krb5_string_to_cksumtype(char *string, krb5_cksumtype *cksumtypep);
 
-/**
- * @brief Convert a string to a timestamp.
+/** Convert a string to a timestamp.
  *
- * @param string        Pointer to string to convert [input]
- * @param timestampp    Pointer to timestamp [output]
+ * @param [in]  string        String to be converted
+ * @param [out] timestampp    Pointer to timestamp
  *
- * @retval
- *  0 Success
- * @retval
- *   EINVAL Invalid parameter
- * @return
- * Kerberos error codes
+ * @retval 0  Success; Otherwise - EINVAL
  */
 krb5_error_code KRB5_CALLCONV
 krb5_string_to_timestamp(char *string, krb5_timestamp *timestampp);
 
-/**
- * @brief Convert a string to a delta time value.
+/** Convert a string to a delta time value.
  *
- * @param string    Pointer to string to convert [input]
- * @param deltatp   Pointer to delta time [output]
+ * @param [in]  string    String to be converted
+ * @param [out] deltatp   Delta time to be filled in
  *
- * @retval
- * 0 Success
- * @retval
- *  EINVAL Invalid parameter
- * @retval
- * Kerberos error codes
+ * @retval 0  Success; Otherwise - KRB5_DELTAT_BADFORMAT
  */
 krb5_error_code KRB5_CALLCONV
 krb5_string_to_deltat(char *string, krb5_deltat *deltatp);
 
-/**
- * @brief Convert a Kerberos encryption type value to a string.
+/** Convert a Kerberos encryption type value to a string.
  *
- * @param enctype       Encrytion type value to convert [input]
- * @param buffer        Pointer to a buffer to hold encryption type string [output]
- * @param buflen        Maximum length of the string that can fit in @a buffer [input]
+ * @param [in]  enctype  Encrytion type value to convert
+ * @param [out] buffer   Buffer to hold encryption type string
+ * @param [in]  buflen   Maximum length of the string that can fit in @a buffer
  *
- * @retval
- *  0   Success
- * @retval
- *  ENOMEM   Insufficient memory
- * @return
- * Kerberos error codes
- *
- * @sa enctype
+ * @retval 0  Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_enctype_to_string(krb5_enctype enctype, char *buffer, size_t buflen);
 
+/** Convert a Kerberos encryption type value to a name
+ *
+ * @param [in]  enctype  Encrytion type value to convert
+ * @param [in]  shortest Flag
+ * @param [out] buffer   Buffer to hold encryption type string
+ * @param [in]  buflen   Maximum length of the string that can fit in @a buffer
+ *
+ * If @a shortest is FALSE, this function returns the enctype's canonical name
+ * (like "aes128-cts-hmac-sha1-96").  If @a shortest is TRUE, it return the enctype's
+ * shortest alias (like "aes128-cts").
+ *
+ * @retval 0  Success; Otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_enctype_to_name(krb5_enctype enctype, krb5_boolean shortest,
                      char *buffer, size_t buflen);
 
-/**
- * @brief Convert a @a salttype to a string.
+/** Convert a @a salttype to a string.
  *
- * @param salttype          Salttype to convert [input]
- * @param buffer            Pointer to buffer to receive the converted string [output]
- * @param buflen            Length of buffer [input]
+ * @param [in]  salttype          Salttype to convert
+ * @param [out] buffer            Buffer to receive the converted string
+ * @param [in]  buflen            Length of @a buffer
  *
- *@retval
- *  0  Success
- * @retval
- *  EINVAL Invalid parameter
- * @retval
- *  ENOMEM Insufficient memory (buffer length less than output size)
- * @return
- * Kerberos error codes
+ * @retval 0  Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_salttype_to_string(krb5_int32 salttype, char *buffer, size_t buflen);
 
-krb5_error_code KRB5_CALLCONV
-krb5_cksumtype_to_string(krb5_cksumtype cksumtype, char *buffer, size_t buflen);
-
-/**
- *@brief Convert a timestamp to a string.
+/** Convert a checksum type to a string.
  *
- * @param timestamp         Timestamp to be converted [input]
- * @param buffer            Buffer to hold converted timestamp [output]
- * @param buflen            Maximum length of buffer [input]
+ * @param [in]  cksumtype         Checksum type to be converted
+ * @param [out] buffer            Buffer to hold converted checksum type
+ * @param [in]  buflen            Maximum length of @a buffer
  *
  * The string is returned in the locale's appropriate date and time representation.
  *
- * @retval
- * 0 Success
- * @retval
- *  ENOMEM Insufficient memory
- * @return
- * Kerberos error codes
+ * @retval 0  Success; Otherwise - Kerberos error codes
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_cksumtype_to_string(krb5_cksumtype cksumtype, char *buffer, size_t buflen);
+
+/** Convert a timestamp to a string.
+ *
+ * @param [in]  timestamp         Timestamp to be converted
+ * @param [out] buffer            Buffer to hold converted timestamp
+ * @param [in]  buflen            Maximum length of buffer
+ *
+ * The string is returned in the locale's appropriate date and time representation.
+ *
+ * @retval 0  Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_timestamp_to_string(krb5_timestamp timestamp, char *buffer, size_t buflen);
 
-/**
- * @brief Convert a timestamp to a string, allowing optional padding in the output buffer.
+/** Convert a timestamp to a string, allowing optional padding in the output buffer.
  *
- * @param timestamp     Timestamp to convert [input]
- * @param buffer        Buffer to hold the converted timestamp [output]
- * @param buflen        Length of buffer [input]
- * @param pad           Optional value to pad @a buffer if converted timestamp does not fill it [input]
+ * @param [in]  timestamp     Timestamp to convert
+ * @param [out] buffer        Buffer to hold the converted timestamp
+ * @param [in]  buflen        Length of buffer
+ * @param [in]  pad           Optional value to pad @a buffer
+ *                            if converted timestamp does not fill it
  *
- * This function also tries multiple possible formats if the default locale-specific fails.
+ * This function also tries multiple possible formats if the default
+ * locale-specific fails.
  *
- * @retval
- *  0   Success
- * @retval
- *  ENOMEM   Insufficient memory
- * @return
- * Kerberos error codes
+ * @retval 0  Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
-krb5_timestamp_to_sfstring(krb5_timestamp timestamp, char *buffer, size_t buflen, char *pad);
+krb5_timestamp_to_sfstring(krb5_timestamp timestamp, char *buffer,
+                           size_t buflen, char *pad);
 
-/**
- * @brief Convert a relative time value to a string.
+/** Convert a relative time value to a string.
  *
- * @param deltat            Relative time value to convert [input]
- * @param buffer            Pointer to buffer to hold time string [output]
- * @param buflen            Maximum length of string that fits in @a buffer [input]
+ * @param [in]  deltat            Relative time value to convert
+ * @param [out] buffer            Buffer to hold time string
+ * @param [in]  buflen            Maximum length of string that fits in @a buffer
  *
- * @retval
- *  0   Success
- * @retval
- *  ENOMEM  Insufficient memory
- * @return
- * Kerberos error codes
+ * @retval 0  Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_deltat_to_string(krb5_deltat deltat, char *buffer, size_t buflen);
@@ -5812,8 +5735,7 @@ krb5_deltat_to_string(krb5_deltat deltat, char *buffer, size_t buflen);
 #define KRB5_RECVAUTH_BADAUTHVERS       0x0002
 /* initial ticket api functions */
 
-/** Text for prompt used in prompter callback function.
- */
+/** Text for prompt used in prompter callback function.  */
 typedef struct _krb5_prompt {
     char *prompt;      /**< the prompt to show to the user */
     int hidden;        /**< boolean; informative prompt or hidden (as for PIN or OTP) */
@@ -6456,58 +6378,58 @@ krb5_get_init_creds_keytab(krb5_context context, krb5_creds *creds,
 
 typedef struct _krb5_verify_init_creds_opt {
     krb5_flags flags;
-    int ap_req_nofail;
+    int ap_req_nofail; /**< boolean */
 } krb5_verify_init_creds_opt;
 
 #define KRB5_VERIFY_INIT_CREDS_OPT_AP_REQ_NOFAIL        0x0001
 
-/**
- * @brief Initialize the @a flags field in @c _krb5_verify_init_creds_opt.
+/** Initialize a @a flags field in krb5_verify_init_creds_opt structure.
  *
- * @param k5_vic_options       Pointer to options field [output]
+ * @param [out] k5_vic_options Pointer to krb5_verify_init_creds_opt structure
  *
- * @return
- *  None
+ * Sets @a k5_vic_options flags fiels to zero.
  */
 void KRB5_CALLCONV
 krb5_verify_init_creds_opt_init(krb5_verify_init_creds_opt *k5_vic_options);
 
-/**
- * @brief Initialize the @a ap_req_nofail field in @c _krb5_verify_init_creds_opt.
+/** Set a @a ap_req_nofail field in krb5_verify_init_creds_opt structure.
  *
- * @param k5_vic_options                   Pointer to  options field [output]
- * @param ap_req_nofail         Value to set for the ap_req_nofail field [input]
+ * @param [out] k5_vic_options  Pointer to krb5_verify_init_creds_opt structure
+ * @param [in]  ap_req_nofail   Boolean value to set for the ap_req_nofail field
  *
- * @return
- *  None
- * @todo is @c ap_req_nofail parameter description accurate?
+ * This function sets KRB5_VERIFY_INIT_CREDS_OPT_AP_REQ_NOFAIL flag and
+ * ap_req_nofail field to @a ap_req_nofail in @a k5_vic_options.
+ * If @a ap_req_nofail is FALSE and keytab is missing (empty or unreadable),
+ * krb5_verify_init_creds() will succeed even though verification cannot be
+ * performed.
+ * This function may be used to override the krb5 configuration setting for
+ * verify_ap_req_nofail attribute.
  */
 void KRB5_CALLCONV
-krb5_verify_init_creds_opt_set_ap_req_nofail(krb5_verify_init_creds_opt *
-                                             k5_vic_options,
+krb5_verify_init_creds_opt_set_ap_req_nofail(krb5_verify_init_creds_opt * k5_vic_options,
                                              int ap_req_nofail);
 
-/**
- * @brief  Verify initial credentials and store them in the credentials cache.
+/** Verify initial credentials and store them in the credentials cache.
  *
- * @param context              Context structure [input, output]
- * @param creds                Pointer to initial credentials [input]
- * @param ap_req_server        Server principal [input]
- * @param ap_req_keytab           Key table entry [input]
- * @param ccache                Pointer to credentials cache [input, output]
- * @param k5_vic_options        Pointer to structure containing flags and options [input]
+ * @param [in]  context        Context structure
+ * @param [in]  creds          Initial credentials to be verified
+ * @param [in]  server_arg     Server principal;
+ *                             if NULL - use a principal name from @a keytab_arg
+ * @param [in]  keytab_arg     Key table to verify @a creds against
+ * @param [out] ccache_arg     Credentials cache to store all fetched from KDC credentials
+ *                             if NULL - memory credential will be used and then destroyed.
+ * @param [in]  options        Pointer to krb5_verify_init_creds_opt structure
  *
- * @retval
- * 0 Success
- * @return
- * Kerberos error codes
  *
+ * @sa krb5_verify_init_creds_opt_set_ap_req_nofail() and
+ *     krb5_verify_init_creds_opt_init()
+ *
+ * @retval 0  Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_verify_init_creds(krb5_context context, krb5_creds *creds,
-                       krb5_principal ap_req_server, krb5_keytab ap_req_keytab,
-                       krb5_ccache *ccache,
-                       krb5_verify_init_creds_opt *k5_vic_options);
+                       krb5_principal server_arg, krb5_keytab keytab_arg,
+                       krb5_ccache *ccache_arg, krb5_verify_init_creds_opt *options);
 
 /** Get validated credentials from the KDC.
  *
