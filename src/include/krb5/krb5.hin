@@ -282,15 +282,21 @@ typedef const krb5_principal_data *krb5_const_principal;
      ? (princ)->data + (i)                      \
      : NULL)
 
-/*
- * Constants for realm referrals.
- */
+/** Constant for realm referrals. */
 #define        KRB5_REFERRAL_REALM      ""
 
 /*
  * Referral-specific functions.
  */
-krb5_boolean KRB5_CALLCONV krb5_is_referral_realm(const krb5_data *r);
+
+/** Check for a match with KRB5_REFERRAL_REALM.
+ *
+ * @param [in] r  Realm to check
+ *
+ * @retval TRUE if @a r is zero-length; Otherwise - FALSE
+ */
+krb5_boolean KRB5_CALLCONV
+krb5_is_referral_realm(const krb5_data *r);
 
 /** Return an anonymous realm data.
  *
@@ -1541,9 +1547,7 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
  */
 
 /* Time set */
-/**
- * Ticket start time, end time, and renewal duration.
- */
+/** Ticket start time, end time, and renewal duration. */
 typedef struct _krb5_ticket_times {
     krb5_timestamp authtime;    /**< Time at which KDC issued the initial ticket that corresponds to this ticket */
                                   /* XXX ? should ktime in KDC_REP == authtime
@@ -1553,7 +1557,7 @@ typedef struct _krb5_ticket_times {
     krb5_timestamp renew_till;  /**< Latest time at which renewal of ticket can be valid */
 } krb5_ticket_times;
 
-/**  Structure for auth data */
+/** Structure for auth data */
 typedef struct _krb5_authdata {
     krb5_magic magic;
     krb5_authdatatype ad_type; /**< ADTYPE */
@@ -1612,7 +1616,7 @@ typedef struct _krb5_authenticator {
     krb5_authdata **authorization_data; /**< New add by Ari, auth data */
 } krb5_authenticator;
 
-/**
+/*
  * Ticket authentication data.
  */
 typedef struct _krb5_tkt_authent {
@@ -1622,9 +1626,7 @@ typedef struct _krb5_tkt_authent {
     krb5_flags ap_options;
 } krb5_tkt_authent;
 
-/**
- * Credentials structure including ticket, session key, and lifetime info.
- */
+/** Credentials structure including ticket, session key, and lifetime info. */
 typedef struct _krb5_creds {
     krb5_magic magic;
     krb5_principal client;              /**< client's principal identifier */
@@ -1771,7 +1773,7 @@ typedef struct _krb5_ap_rep_enc_part {
     krb5_ui_4 seq_number;               /**< sequence #, optional */
 } krb5_ap_rep_enc_part;
 
-/** Unused.  */
+/* Unused */
 typedef struct _krb5_response {
     krb5_magic magic;
     krb5_octet message_type;
@@ -1810,14 +1812,20 @@ typedef struct _krb5_cred {
     krb5_cred_enc_part *enc_part2;      /**< unencrypted version, if available*/
 } krb5_cred;
 
-/** Sandia password generation structure */
+/*
+ * Sandia password generation structure
+ * Used by internal functions only
+ */
 typedef struct _passwd_phrase_element {
     krb5_magic magic;
     krb5_data *passwd;
     krb5_data *phrase;
 } passwd_phrase_element;
 
-/** @brief Password data.*/
+/*
+ * Password data.
+ * Used by internal functions only
+ */
 typedef struct _krb5_pwd_data {
     krb5_magic magic;
     int sequence_count;
@@ -2588,11 +2596,13 @@ krb5_free_context(krb5_context context);
 krb5_error_code KRB5_CALLCONV
 krb5_copy_context(krb5_context ctx, krb5_context *nctx_out);
 
-/**
- * @brief Set the default TGS (ticket granting service) encryption types for the context.
+/** Set default TGS encryption types in a krb5_context structure.
  *
- * @param context              Context structure [input, output]
- * @param etypes               Encryption type [input]
+ * @param [in,out] context              Context structure
+ * @param [in]     etypes               Encryption type(s) to set
+ *
+ * This function sets the default enctype list for TGS requests
+ * made using @a context to @a etypes.
  *
  * @note This overrides the default list (from config file or built-in).
  *
@@ -2602,8 +2612,6 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out);
  *  KRB5_PROG_ETYPE_NOSUPP Program lacks support for encryption type
  * @return
  * Kerberos error codes
- *
- * @sa enctype
  */
 krb5_error_code KRB5_CALLCONV
 krb5_set_default_tgs_enctypes(krb5_context context, const krb5_enctype *etypes);
@@ -2637,18 +2645,16 @@ krb5_is_thread_safe(void);
 
 /* libkrb.spec */
 
-/**
- * @brief Decrypt a ticket using the specified key table.
+/** Decrypt a ticket using the specified key table.
  *
- * @param context           Context structure [input, output]
- * @param kt                Key table [input]
- * @param ticket            Ticket [input, output]
+ * @param [in]     context           Context structure
+ * @param [in]     kt                Key table
+ * @param [in,out] ticket            Ticket to be decrypted
  *
- * @retval
- * 0 Success
- * @return
- * Kerberos error codes
+ * This function takes a @a ticket as input and decrypts it using the
+ * provided key data from @a kt. The result is placed into @a ticket->enc_part2.
  *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_server_decrypt_ticket_keytab(krb5_context context, const krb5_keytab kt,
@@ -3198,7 +3204,7 @@ krb5_set_principal_realm(krb5_context context, krb5_principal principal,
 
 /** Search a list of addresses for a specified address.
  *
- * @param context                (unused)
+ * @param context                Context structure
  * @param [in] addr              Address to search for
  * @param [in] addrlist          Address list to be searched.
  *                               Specify NULL if there is no address list
@@ -3215,7 +3221,7 @@ krb5_address_search(krb5_context context, const krb5_address *addr,
 
 /** Compare two Kerberos addresses.
  *
- * @param context                (unused)
+ * @param context                Context structure
  * @param [in] addr1             First address to be compared
  * @param [in] addr2             Second address to be compared
  *
@@ -3228,7 +3234,7 @@ krb5_address_compare(krb5_context context, const krb5_address *addr1,
 
 /** Return an ordering of the specified addresses.
  *
- * @param context                (unused)
+ * @param context                Context structure
  * @param [in] addr1             First address
  * @param [in] addr2             Second address
  *
@@ -3802,8 +3808,11 @@ krb5_free_keytab_entry_contents(krb5_context context, krb5_keytab_entry *entry);
 
 /** Free the contents of a key table entry.
  *
- * @warning  Use krb5_free_keytab_entry_contents instead; this does the same thing but is
- * misnamed and retained for backward compatability.
+ * @param [in] context           Context structure
+ * @param [in] entry             Key table entry to be freed
+ *
+ * @warning  Use krb5_free_keytab_entry_contents instead; this does the same
+ * thing but is misnamed and retained for backward compatability.
  */
 krb5_error_code KRB5_CALLCONV
 krb5_kt_free_entry(krb5_context context, krb5_keytab_entry *entry);
@@ -3846,17 +3855,13 @@ krb5_kt_remove_entry(krb5_context context, krb5_keytab id, krb5_keytab_entry *en
 krb5_error_code KRB5_CALLCONV
 krb5_kt_add_entry(krb5_context context, krb5_keytab id, krb5_keytab_entry *entry);
 
-/**
- * @brief Convert a principal name into the default salt for that principal.
+/** Convert a principal name into the default salt for that principal.
  *
- * @param context           Context structure [input, output]
- * @param pr                Principal name [input]
- * @param ret               Pointer to the default salt for given principal [output]
+ * @param [in]  context           Context structure
+ * @param [in]  pr                Principal name
+ * @param [out] ret               Default salt for @a pr to be filled in
  *
- * @retval
- * 0 Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV_WRONG
 krb5_principal2salt(krb5_context context,
@@ -4024,7 +4029,7 @@ krb5_free_principal(krb5_context context, krb5_principal val);
 
 /** Free a krb5_authenticator structure.
  *
- * @param      context           (unused) Context structure
+ * @param      context           Context structure
  * @param [in] val               Pointer to authenticator structure to be freed
  *
  * This function frees the storage assigned to @a krb5_authenticator
@@ -4035,7 +4040,7 @@ krb5_free_authenticator(krb5_context context, krb5_authenticator *val);
 
 /** Free the data stored in array of addresses.
  *
- * @param      context           (unused) Context structure
+ * @param      context           Context structure
  * @param [in] val               Array of addresses to be freed
  *
  * This function frees the storage assigned to array of @a krb5_address
@@ -4048,7 +4053,7 @@ krb5_free_addresses(krb5_context context, krb5_address **val);
 
 /** Free the storage assigned to array of authentication data.
  *
- * @param      context           (unused) Context structure
+ * @param      context           Context structure
  * @param [in] val               Array of authentication data to be freed
  *
  * This function frees the storage assigned to array of @a krb5_authdata
@@ -4104,7 +4109,7 @@ krb5_free_cred_contents(krb5_context context, krb5_creds *val);
 
 /** Free a krb5_checksum structure.
  *
- * @param      context           (unused) Context structure
+ * @param      context           Context structure
  * @param [in] val               Pointer to data structure to be freed
  *
  * This function frees the contents of a @a val and then releases @a val itself.
@@ -4114,7 +4119,7 @@ krb5_free_checksum(krb5_context context, register krb5_checksum *val);
 
 /** Free the contents of a krb5_checksum structure.
  *
- * @param      context           (unused) Context structure
+ * @param      context           Context structure
  * @param [in] val               Checksum structure to be released
  *
  * @note The pointer to @a val itself is not freed.
@@ -4156,7 +4161,7 @@ krb5_free_ap_rep_enc_part(krb5_context context, krb5_ap_rep_enc_part *val);
 
 /** Free the storage assigned to a krb5_data object
  *
- * @param      context           (unused) Context structure
+ * @param      context           Context structure
  * @param [in] val               Pointer to data structure to be freed
  *
  * This function zeros out and frees the contents field of @a val and then
@@ -4167,7 +4172,7 @@ krb5_free_data(krb5_context context, krb5_data *val);
 
 /** Zero out and free the contents of a krb5_data object
  *
- * @param      context           (unused) Context structure
+ * @param      context           Context structure
  * @param [in] val               Pointer to data structure to be freed
  *
  * @note The pointer to @a val itself is not freed.
@@ -4177,7 +4182,7 @@ krb5_free_data_contents(krb5_context context, krb5_data *val);
 
 /** Free a simple character name string returned by krb5_unparse_name().
  *
- * @param      context           (unused) Context structure
+ * @param      context           Context structure
  * @param [in] val               Pointer to name string to be freed
  *
  * @note The pointer to @a val itself is not freed.
@@ -4187,7 +4192,7 @@ krb5_free_unparsed_name(krb5_context context, char *val);
 
 /** Free an array of checksum types.
  *
- * @param      context           (unused) Context structure
+ * @param      context           Context structure
  * @param [in] val               Array of checksum types to be freed
  *
  * @note Make sure the checksum contents have already been freed.
@@ -4282,7 +4287,7 @@ krb5_set_default_realm(krb5_context context, const char *lrealm);
 
 /** Free the default realm string returned by krb5_get_default_realm().
  *
- * @param      context           (unused)
+ * @param      context           Context structure
  * @param [in] lrealm            Realm to be freed
  */
 void KRB5_CALLCONV
@@ -4986,7 +4991,7 @@ krb5_auth_con_free(krb5_context context, krb5_auth_context auth_context);
 
 /** Set a flags field in a krb5_auth_context structure.
  *
- * @param          context           (unused)
+ * @param          context           Context structure
  * @param [in,out] auth_context      Authentication context
  * @param [in]     flags             Flags bit mask
  *
@@ -5003,7 +5008,7 @@ krb5_auth_con_setflags(krb5_context context, krb5_auth_context auth_context, krb
 
 /** Retrieve a flags field from a krb5_auth_context structure.
  *
- * @param          context          (unused)
+ * @param          context          Context structure
  * @param [in]     auth_context     Authentication context
  * @param [out]    flags            Flags bit mask
  *
@@ -5021,7 +5026,7 @@ krb5_auth_con_getflags(krb5_context context, krb5_auth_context auth_context, krb
 
 /** Set checksum_function related fields in krb5_auth_contex structure.
  *
- * @param context                   (unused)
+ * @param context                   Context structure
  * @param [in,out] auth_context     Authentication context
  * @param [in]     func             Function to perform the checksum
  * @param [in]     data             Pointer to arbitrary to be received by @a func
@@ -5038,7 +5043,7 @@ krb5_auth_con_set_checksum_func( krb5_context context,
 
 /** Get checksum_function related fields from krb5_auth_contex structure.
  *
- * @param context                (unused)
+ * @param context                Context structure
  * @param [in]  auth_context      Authentication context
  * @param [out] func              Pointer to krb5 function that performs the checksum
  * @param [out] data              Pointer to data
@@ -5140,7 +5145,7 @@ krb5_auth_con_getkey(krb5_context context, krb5_auth_context auth_context,
 
 /** Get a copy of an encryption key from a krb5_auth_context structure.
  *
- * @param          ctx                 (unused)
+ * @param          context             Context structure
  * @param [in]     auth_context        Authentication context
  * @param [in,out] key                 Output key structure to be filled in
  *
@@ -5170,7 +5175,7 @@ krb5_auth_con_getsendsubkey(krb5_context ctx, krb5_auth_context ac, krb5_keybloc
 
 /** Get a copy of a send_subkey key from a krb5_auth_context structure.
  *
- * @param          ctx       (unused)
+ * @param          ctx       Context structure
  * @param [in]     ac        Authentication context
  * @param [in,out] key       Key structure to be filled in
  *
@@ -5185,7 +5190,7 @@ krb5_auth_con_getsendsubkey_k(krb5_context ctx, krb5_auth_context ac,
 
 /** Retrieve a recv_subkey keyblock from a krb5_auth_context structure.
  *
- * @param       ctx            (unused)
+ * @param       ctx            Context structure
  * @param [in]  ac             Authentication context
  * @param [out] keyblock       Key block structure
  *
@@ -5200,7 +5205,7 @@ krb5_auth_con_getrecvsubkey(krb5_context ctx, krb5_auth_context ac, krb5_keybloc
 
 /** Get a copy of a recv_subkey key from a krb5_auth_context structure.
  *
- * @param          ctx       (unused)
+ * @param          ctx       Context structure
  * @param [in]     ac        Authentication context
  * @param [in,out] key       Key block structure to be filled in
  *
@@ -5283,7 +5288,7 @@ krb5_auth_con_getremotesubkey(krb5_context context, krb5_auth_context auth_conte
 
 /** Retrieve a local sequence number from a krb5_auth_context structure.
  *
- * @param          context           (unused)
+ * @param          context           Context structure
  * @param [in]     auth_context      Authentication context
  * @param [in,out] seqnumber         Local sequence number to be filled in
  *
@@ -5300,7 +5305,7 @@ krb5_auth_con_getlocalseqnumber(krb5_context context, krb5_auth_context auth_con
 
 /** Retrieve a remote sequence number from a krb5_auth_context structure.
  *
- * @param          context           (unused)
+ * @param          context           Context structure
  * @param [in]     auth_context      Authentication context
  * @param [in,out] seqnumber         Remote sequence number to be filled in
  *
@@ -5327,7 +5332,7 @@ krb5_auth_con_initivector(krb5_context context, krb5_auth_context auth_context);
 
 /** Set the replay cache field in a krb5_auth_context structure.
  *
- * @param context                     (unused)
+ * @param context                     Context structure
  * @param [in,out] auth_context       Authentication context
  * @param [in]     rcache             Replay cache haddle
  *
@@ -5339,7 +5344,7 @@ krb5_auth_con_setrcache(krb5_context context, krb5_auth_context auth_context,
 
 /** Retrieve rcache field from a krb5_auth_context structure.
  *
- * @param          context          (unused)
+ * @param          context          Context structure
  * @param [in]     auth_context     Authentication context
  * @param [out]    rcache           Replay cache handle
  *
@@ -5369,7 +5374,7 @@ krb5_auth_con_getauthenticator(krb5_context context, krb5_auth_context auth_cont
 
 /** Set a checksum types field in a krb5_auth_context structure.
  *
- * @param context                     (unused)
+ * @param context                     Context structure
  * @param [in,out]  auth_context      Authentication context
  * @param [in]      cksumtype         Checksun type
  *
@@ -5497,7 +5502,7 @@ krb5_get_fallback_host_realm(krb5_context context,
 
 /** Free the memory allocated by krb5_get_host_realm().
  *
- * @param      context           Context structure (unused)
+ * @param      context           Context structure
  * @param [in] realmlist         List of the realm names to be released
  *
  * @retval
@@ -5548,26 +5553,25 @@ krb5_error_code KRB5_CALLCONV
 krb5_auth_con_genaddrs(krb5_context context, krb5_auth_context auth_context,
                        int infd, int flags);
 
-/**
- * @brief Set time offset field in a @c _krb5_context structure.
+/** Set time offset field in a krb5_context structure.
  *
- * @param context           Context structure [input, output]
- * @param seconds           Number of seconds to set in @c time_offset field in @a context [input]
- * @param microseconds      Number of microseconds to set in @c usec_offset field in context [input]
+ * @param [in] context           Context structure
+ * @param [in] seconds           Number of seconds to set in @c time_offset
+ *                               field in @a context
+ * @param [in] microseconds      Number of microseconds to set in @c usec_offset
+ *                               field in @a context
  *
  * Take the @a real @a time as input, and set the time offset fields in the
- * context structure so the @c krb5_time routines return the correct time, as corrected by the difference
- * between the system time and the @a real @a time as passed to this routine.
+ * context structure so the @c krb5_time routines return the correct time,
+ * as corrected by the difference between the system time and the @a real @a time as passed to this routine.
  *
  * Make sure to free the allocated memory when it is no longer needed.
  *
- * @retval
- *  0  Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
-krb5_set_real_time(krb5_context context, krb5_timestamp seconds, krb5_int32 microseconds);
+krb5_set_real_time(krb5_context context, krb5_timestamp seconds,
+                   krb5_int32 microseconds);
 
 /** Return the time offsets from the os context.
  *
@@ -5822,7 +5826,7 @@ krb5_get_init_creds_opt_alloc(krb5_context context,
 
 /** Free an extended krb5_get_init_creds_opt structure.
  *
- * @param      context   Context structure (unused)
+ * @param      context   Context structure
  * @param [in] opt       Pointer to @c _krb5_get_init_creds_opt structure to be freed
  *
  * @sa krb5_get_init_creds_opt_alloc()
@@ -6257,20 +6261,24 @@ struct _krb5_tkt_creds_context;
 typedef struct _krb5_tkt_creds_context *krb5_tkt_creds_context;
 
 /**
- * @brief Create a context to get credentials from a KDC's Ticket Granting Service.
+ * Create a context to get credentials from a KDC's Ticket Granting Service.
  *
  * @param[in]  context  A krb5 library context (see krb5_init_context())
  * @param[in]  ccache   A credentials cache containing the desired credentials
  *                      or a Ticket Granting Ticket (TGT) for the client realm.
  *                      TGT and service credentials may be stored into this
  *                      cache as they are acquired.
- * @param creds
+ * @param[in]  creds    Input credentials
  * @param[in]  options  KRB5_GC_* options for this request.
  * @param[out] ctx      The TGS acquisition context.
  *
  * The resulting TGS acquisition context can be used asynchronously with
  * krb5_tkt_creds_step() or synchronously with krb5_tkt_creds_get().  See also
  * krb5_get_credentials() for synchrous use.
+ *
+ * Use krb5_tkt_creds_free() to free @a ctx when it is no longer needed.
+ *
+ * @retval 0  Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_init(krb5_context context, krb5_ccache ccache,
@@ -6278,7 +6286,7 @@ krb5_tkt_creds_init(krb5_context context, krb5_ccache ccache,
                     krb5_tkt_creds_context *ctx);
 
 /**
- * @brief Synchronously obtain credentials within an acquisition context.
+ * Synchronously obtain credentials within an acquisition context.
  *
  * @param[in]  context  A krb5 library context (see krb5_init_context())
  * @param[in]  ctx      A TGS acquisition context (see krb5_tkt_creds_init())
@@ -6286,12 +6294,14 @@ krb5_tkt_creds_init(krb5_context context, krb5_ccache ccache,
  * This function repeatedly generates requests, sends them to the appropriate
  * realms' KDCs, and processes the replies until credentials are available for
  * retrieval with krb5_tkt_creds_get_creds().
+ *
+ * @retval 0  Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_get(krb5_context context, krb5_tkt_creds_context ctx);
 
 /**
- * @brief Retrieve credentials from an acquisition context, filling in @a creds.
+ * Retrieve credentials from an acquisition context, filling in @a creds.
  *
  * @param[in]  context  A krb5 library context (see krb5_init_context())
  * @param[in]  ctx      A TGS acquisition context (see krb5_tkt_creds_init())
@@ -6299,13 +6309,15 @@ krb5_tkt_creds_get(krb5_context context, krb5_tkt_creds_context ctx);
  *
  * The acquisition context must have completed obtaining credentials via either
  * krb5_tkt_creds_get() or krb5_tkt_creds_step().
+ *
+ * @retval 0  Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_get_creds(krb5_context context, krb5_tkt_creds_context ctx,
                          krb5_creds *creds);
 
 /**
- * @brief Release the resources used by an acquisition context.
+ * Release the resources used by an acquisition context.
  *
  * @param[in]  context  A krb5 library context (see krb5_init_context())
  * @param[in]  ctx      A TGS acquisition context (see krb5_tkt_creds_init())
@@ -6316,7 +6328,7 @@ krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx);
 #define KRB5_TKT_CREDS_STEP_FLAG_CONTINUE 0x1  /* More responses needed. */
 
 /**
- * @brief Process a response and generate the next request to acquire credentials.
+ * Process a response and generate the next request to acquire credentials.
  *
  * @param[in]  context  A krb5 library context (see krb5_init_context())
  * @param[in]  ctx      A TGS acquisition context (see krb5_tkt_creds_init())
@@ -6330,6 +6342,8 @@ krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx);
  * KRB5_TKT_CREDS_STEP_FLAG_CONTINUE.  In that case, the caller must transport
  * @a out to a KDC for @a realm and receive a response, which should be
  * provided as @a in to the next call.
+ *
+ * @retval 0  Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_step(krb5_context context, krb5_tkt_creds_context ctx,
@@ -6337,7 +6351,7 @@ krb5_tkt_creds_step(krb5_context context, krb5_tkt_creds_context ctx,
                     unsigned int *flags);
 
 /**
- * @brief Retrieve ticket times for obtained credentials, filling in @a times.
+ * Retrieve ticket times for obtained credentials, filling in @a times.
  *
  * @param[in]  context  A krb5 library context (see krb5_init_context())
  * @param[in]  ctx      A TGS acquisition context (see krb5_tkt_creds_init())
@@ -6345,6 +6359,8 @@ krb5_tkt_creds_step(krb5_context context, krb5_tkt_creds_context ctx,
  *
  * The acquisition context must have completed obtaining credentials via either
  * krb5_tkt_creds_get() or krb5_tkt_creds_step().
+ *
+ * @retval 0  Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_tkt_creds_get_times(krb5_context context, krb5_tkt_creds_context ctx,
@@ -6648,11 +6664,9 @@ krb5_free_error_message(krb5_context cxt, const char *msg);
 
 /** Clear the error message state.
  *
- * @param [in,out] cxt           Context structure
+ * @param [in,out] ctx           Context structure
  *
  * Similar to krb5_free_error_message() but @a ctx->msg is set to NULL.
- *
- * @todo link to extended message state
  */
 void KRB5_CALLCONV
 krb5_clear_error_message(krb5_context ctx);
