@@ -675,7 +675,7 @@ mspac_flags(krb5_context kcontext,
             krb5_authdatatype ad_type,
             krb5_flags *flags)
 {
-    *flags = AD_USAGE_KDC_ISSUED;
+    *flags = AD_USAGE_TGS_REQ;
 }
 
 static void
