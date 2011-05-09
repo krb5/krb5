@@ -643,8 +643,6 @@ struct krb5_key_st {
     void *cache;
 };
 
-/* These crypto functions are used by GSSAPI via the accessor. */
-
 krb5_error_code
 krb5int_arcfour_gsscrypt(const krb5_keyblock *keyblock, krb5_keyusage usage,
                          const krb5_data *kd_data, krb5_crypto_iov *data,

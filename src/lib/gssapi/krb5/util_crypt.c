@@ -102,7 +102,6 @@ kg_setup_keys(krb5_context context, krb5_gss_ctx_id_rec *ctx, krb5_key subkey,
               krb5_cksumtype *cksumtype)
 {
     krb5_error_code code;
-    krb5int_access kaccess;
 
     assert(ctx != NULL);
     assert(subkey != NULL);
@@ -115,12 +114,8 @@ kg_setup_keys(krb5_context context, krb5_gss_ctx_id_rec *ctx, krb5_key subkey,
         ctx->sealalg = -1;
     }
 
-    code = krb5int_accessor(&kaccess, KRB5INT_ACCESS_VERSION);
-    if (code != 0)
-        return code;
-
-    code = (*kaccess.mandatory_cksumtype)(context, subkey->keyblock.enctype,
-                                          cksumtype);
+    code = krb5int_c_mandatory_cksumtype(context, subkey->keyblock.enctype,
+                                         cksumtype);
     if (code != 0)
         return code;
 
@@ -316,15 +311,11 @@ kg_arcfour_docrypt(const krb5_keyblock *keyblock, int usage,
     krb5_error_code code;
     krb5_data kd = make_data((char *) kd_data, kd_data_len);
     krb5_crypto_iov kiov;
-    krb5int_access kaccess;
 
-    code = krb5int_accessor(&kaccess, KRB5INT_ACCESS_VERSION);
-    if (code)
-        return code;
     memcpy(output_buf, input_buf, input_len);
     kiov.flags = KRB5_CRYPTO_TYPE_DATA;
     kiov.data = make_data(output_buf, input_len);
-    return (*kaccess.arcfour_gsscrypt)(keyblock, usage, &kd, &kiov, 1);
+    return krb5int_arcfour_gsscrypt(keyblock, usage, &kd, &kiov, 1);
 }
 
 /* AEAD */
@@ -581,19 +572,15 @@ kg_arcfour_docrypt_iov(krb5_context context, const krb5_keyblock *keyblock,
 {
     krb5_error_code code;
     krb5_data kd = make_data((char *) kd_data, kd_data_len);
-    krb5int_access kaccess;
     krb5_crypto_iov *kiov = NULL;
     size_t kiov_len = 0;
 
-    code = krb5int_accessor (&kaccess, KRB5INT_ACCESS_VERSION);
-    if (code)
-        return code;
     code = kg_translate_iov(context, 0 /* proto */, 0 /* dce_style */,
                             0 /* ec */, 0 /* rrc */, keyblock->enctype,
                             iov, iov_count, &kiov, &kiov_len);
     if (code)
         return code;
-    code = (*kaccess.arcfour_gsscrypt)(keyblock, usage, &kd, kiov, kiov_len);
+    code = krb5int_arcfour_gsscrypt(keyblock, usage, &kd, kiov, kiov_len);
     free(kiov);
     return code;
 }
