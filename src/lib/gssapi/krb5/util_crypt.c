@@ -308,7 +308,6 @@ kg_arcfour_docrypt(const krb5_keyblock *keyblock, int usage,
                    const unsigned char *input_buf, size_t input_len,
                    unsigned char *output_buf)
 {
-    krb5_error_code code;
     krb5_data kd = make_data((char *) kd_data, kd_data_len);
     krb5_crypto_iov kiov;
 
@@ -657,13 +656,14 @@ void
 kg_release_iov(gss_iov_buffer_desc *iov, int iov_count)
 {
     int i;
-    OM_uint32 min_stat;
 
     assert(iov != GSS_C_NO_IOV_BUFFER);
 
     for (i = 0; i < iov_count; i++) {
         if (iov[i].type & GSS_IOV_BUFFER_FLAG_ALLOCATED) {
-            gss_release_buffer(&min_stat, &iov[i].buffer);
+            free(iov[i].buffer.value);
+            iov[i].buffer.length = 0;
+            iov[i].buffer.value = NULL;
             iov[i].type &= ~(GSS_IOV_BUFFER_FLAG_ALLOCATED);
         }
     }
@@ -677,7 +677,6 @@ kg_fixup_padding_iov(OM_uint32 *minor_status, gss_iov_buffer_desc *iov,
     gss_iov_buffer_t data = NULL;
     size_t padlength, relative_padlength;
     unsigned char *p;
-    OM_uint32 minor;
 
     data = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_DATA);
     padding = kg_locate_iov(iov, iov_count, GSS_IOV_BUFFER_TYPE_PADDING);
@@ -730,11 +729,7 @@ kg_fixup_padding_iov(OM_uint32 *minor_status, gss_iov_buffer_desc *iov,
 
     data->buffer.length -= relative_padlength;
 
-    if (padding->type & GSS_IOV_BUFFER_FLAG_ALLOCATED) {
-        gss_release_buffer(&minor, &padding->buffer);
-        padding->type &= ~(GSS_IOV_BUFFER_FLAG_ALLOCATED);
-    }
-
+    kg_release_iov(padding, 1);
     padding->buffer.length = 0;
     padding->buffer.value = NULL;
 
