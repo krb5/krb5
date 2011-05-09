@@ -3322,28 +3322,23 @@ krb5_principal_compare_flags(krb5_context context,
                              krb5_const_principal princ2,
                              int flags);
 
-/**
- * @brief Initialize an empty @c _krb5_keyblock.
+/** Initialize an empty @c _krb5_keyblock.
  *
- * @param context           Context structure [input, output]
- * @param enctype           Encryption type [input]
- * @param length            Length of keyblock [input]
- * @param out               Pointer to empty keyblock [output]
+ * @param [in]  context           Context structure
+ * @param [in]  enctype           Encryption type
+ * @param [in]  length            Length of keyblock
+ * @param [out] out               Pointer to empty keyblock
  *
  * Initialize a new keyblock and allocate storage
  * for the contents of the key, which will be freed along
  * with the keyblock when krb5_free_keyblock is called.
  * It is legal to pass in a length of 0, in which
  * case contents are left unallocated.
- *
- * Make sure to free the allocated memory when it is no longer needed.
+ * Use krb5_free_keyblock() to free @a out when it is no longer needed.
  *
  * @note If @a length is set to 0, contents are left unallocated.
  *
- * @retval
- * 0 Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_init_keyblock(krb5_context context, krb5_enctype enctype,
@@ -3356,7 +3351,7 @@ krb5_init_keyblock(krb5_context context, krb5_enctype enctype,
  * @param [out] to                Copy of keyblock @a from
  *
  * This function copies the content of @a from to @a to
- * Use krb5_free_keyblock() to free @a from when it is no longer needed.
+ * Use krb5_free_keyblock() to free @a to when it is no longer needed.
  *
  * @retval 0 Success; Otherwise - Kerberos error codes
  */
@@ -6212,47 +6207,146 @@ typedef struct _krb5_init_creds_context *krb5_init_creds_context;
 
 #define KRB5_INIT_CREDS_STEP_FLAG_CONTINUE 0x1  /* More responses needed */
 
+/** Free an initial credentials asynchronous context.
+ *
+ * @param [in] context      A krb5 library context
+ * @param [in] ctx          Initial credentials context to free.
+ */
 void KRB5_CALLCONV
 krb5_init_creds_free(krb5_context context, krb5_init_creds_context ctx);
 
+/** Acquire credentials asynchronously.
+ *
+ * @param [in]     context      A krb5 library context
+ * @param [in,out] ctx          Initial credentials context
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_init_creds_get(krb5_context context, krb5_init_creds_context ctx);
 
+/** Copy the acquired initial credentials contents.
+ *
+ * @param [in]  context       A krb5 library context
+ * @param [in]  ctx           Initial credentials context
+ * @param [out] creds         Copy of @a ctx->cred
+ *
+ * This function copies the acquired initial credentials from
+ * @a ctx->cred into @a creds.
+ * Use krb5_free_cred_contents() to free @a creds when it is no longer needed.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_init_creds_get_creds(krb5_context context, krb5_init_creds_context ctx,
                           krb5_creds *creds);
 
+/** Get the last error data from KDC while acquiring initial credentials.
+ *
+ * @param [in]  context  A krb5 library context
+ * @param [in]  ctx      Initial credentials context
+ * @param [out] error    If non-null, contains error packet returned from KDC
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_init_creds_get_error(krb5_context context, krb5_init_creds_context ctx,
                           krb5_error **error);
 
+/** Create a context for acquiring initial credentials.
+ *
+ * @param [in]  context      A krb5 library context
+ * @param [in]  client       Client principal to get initial credentials for.
+ *                           If NULL - the default principal is used
+ * @param [in]  prompter     Prompter
+ * @param [in]  data         Prompter data
+ * @param [in]  start_time   Time when credentials should become valid;
+ *                           0 means from now
+ * @param [in]  options      KRB5_GET_INIT_CREDS_OPT_ options for this request.
+ *                           If NULL - the default options are used
+ *                           (see krb5_get_init_creds_opt_init())
+ * @param [out] ctx          A new initial credentials context.
+ *
+ * This function initializes a new context for acquiring initial credentials
+ * asynchronously.
+ * Use krb5_init_creds_free() to free @a ctx when it is no longer needed.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_init_creds_init(krb5_context context, krb5_principal client,
                      krb5_prompter_fct prompter, void *data,
                      krb5_deltat start_time, krb5_get_init_creds_opt *options,
                      krb5_init_creds_context *ctx);
 
-krb5_error_code KRB5_CALLCONV
-krb5_init_creds_set_keyblock(krb5_context context, krb5_init_creds_context ctx,
-                             krb5_keyblock *keyblock);
-
+/** Specify a keytab to use for acquiring initial credentials.
+ *
+ * @param [in]      context  A krb5 library context
+ * @param [in,out]  ctx      Initial credentials context
+ * @param [in]      keytab   Key table handle
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_init_creds_set_keytab(krb5_context context, krb5_init_creds_context ctx,
                            krb5_keytab keytab);
 
+/** Perform the next step of asynchronous initial credentials acquisition.
+ *
+ * @param [in]     context  A krb5 library context
+ * @param [in,out] ctx      Initial credentials context
+ * @param [in]     in       KDC response (empty on the first call)
+ * @param [out]    out      Buffer to be sent by the caller to the KDC
+ *                          for the indicated @a realm.
+ * @param [out]    realm    The realm for which the next request should be sent
+ * @param [out]    flags    Indicates whether more responses are needed
+ *                          (see KRB5_INIT_CREDS_STEP_FLAG_CONTINUE )
+ *
+ * Once the credentials have been acquired, the @a out buffer is empty and
+ * @a flags is set to 0. If the request should be retried with TCP,
+ * KRB5KRB_ERR_RESPONSE_TOO_BIG is returned.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_init_creds_step(krb5_context context, krb5_init_creds_context ctx,
                      krb5_data *in, krb5_data *out, krb5_data *realm,
                      unsigned int *flags);
 
+/** Set a password for acquiring initial credentials.
+ *
+ * @param [in]      context       A krb5 library context
+ * @param [in,out]  ctx           Initial credentials context
+ * @param [in]      password      Password
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_init_creds_set_password(krb5_context context, krb5_init_creds_context ctx,
                              const char *password);
 
+/** Specify a requested service for the initial credentials.
+ *
+ * @param [in]      context       A krb5 library context
+ * @param [in,out]  ctx           Initial credentials context
+ * @param [in]      service       Requested service
+ *
+ * The old @a ctx->in_tkt_service is overriden by the new @a service.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_init_creds_set_service(krb5_context context, krb5_init_creds_context ctx,
                             const char *service);
 
+/** Retrieve the ticket times from the initial credentials context.
+ *
+ * @param [in]  context       A krb5 library context
+ * @param [in]  ctx           Initial credentials context
+ * @param [out] times         Ticket times for the acquired credentials
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_init_creds_get_times(krb5_context context, krb5_init_creds_context ctx,
                           krb5_ticket_times *times);
@@ -6274,7 +6368,7 @@ typedef struct _krb5_tkt_creds_context *krb5_tkt_creds_context;
  *
  * The resulting TGS acquisition context can be used asynchronously with
  * krb5_tkt_creds_step() or synchronously with krb5_tkt_creds_get().  See also
- * krb5_get_credentials() for synchrous use.
+ * krb5_get_credentials() for synchronous use.
  *
  * Use krb5_tkt_creds_free() to free @a ctx when it is no longer needed.
  *
