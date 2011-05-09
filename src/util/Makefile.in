@@ -4,7 +4,7 @@ mydir=util
 # configure scripts, so hide this.
 ##WIN32##!if 0
 SUBDIRS=support $(MAYBE_ET_@COM_ERR_VERSION@) $(MAYBE_SS_@SS_VERSION@) \
-	profile send-pr
+	profile send-pr gss-kernel-lib
 ##WIN32##!endif
 WINSUBDIRS=windows support et profile
 BUILDTOP=$(REL)..

@@ -1,0 +1,191 @@
+mydir=util/gss-kernel-lib
+BUILDTOP=$(REL)..$(S)..
+
+KRB5_RUN_ENV=@KRB5_RUN_ENV@
+
+DEFINES=-DKRB5_KERNEL
+ALL_CFLAGS=$(CFLAGS) $(DEFS) $(DEFINES) -I.
+
+SHLIB_EXPDEPS = \
+	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
+	$(TOPLIBD)/libkrb5$(SHLIBEXT)
+SHLIB_EXPLIBS=-lgssrpc -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(LIBS)
+
+STOBJLISTS=OBJS.ST
+
+SRCS= \
+	kernel_gss.c \
+	k5seal.c \
+	k5sealiov.c \
+	k5unseal.c \
+	k5unsealiov.c \
+	k5sealv3.c \
+	k5sealv3iov.c \
+	util_cksum.c \
+	util_crypt.c \
+	util_seqnum.c \
+	util_seed.c \
+	util_token.c \
+	util_set.c \
+	util_ordering.c
+
+EXTRADEPSRCS= t_kgss_common.c t_kgss_user.c t_kgss_kernel.c
+
+OBJS= \
+	kernel_gss.o \
+	k5seal.o \
+	k5sealiov.o \
+	k5unseal.o \
+	k5unsealiov.o \
+	k5sealv3.o \
+	k5sealv3iov.o \
+	util_cksum.o \
+	util_crypt.o \
+	util_seqnum.o \
+	util_seed.o \
+	util_token.o \
+	util_set.o \
+	util_ordering.o
+
+HEADERS= \
+	gssapiP_krb5.h \
+	gssapi_krb5.h \
+	gssapi_err_krb5.h \
+	gssapiP_generic.h \
+	gssapi_generic.h \
+	gssapi_err_generic.h \
+	gssapi_ext.h \
+	k5-int.h \
+	k5-int-pkinit.h \
+	k5-thread.h \
+	k5-platform.h \
+	k5-buf.h \
+	k5-trace.h \
+	k5-err.h \
+	k5-plugin.h \
+	k5-gmt_mktime.h \
+	krb5.h \
+	osconf.h \
+	autoconf.h \
+	port-sockets.h \
+	socket-utils.h \
+	krb5/preauth_plugin.h \
+	krb5/authdata_plugin.h
+
+check-pytests:: t_kgss_user t_kgss_kernel
+	$(RUNPYTEST) $(srcdir)/t_kgss.py $(PYTESTFLAGS)
+
+libkgss.a: $(OBJS)
+	$(RM) $@
+	$(AR) cq $@ $(OBJS)
+	$(RANLIB) $@
+
+t_kgss_user: t_kgss_user.o t_kgss_common.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_kgss_user t_kgss_user.o t_kgss_common.o $(GSS_LIBS) \
+		$(KRB5_BASE_LIBS)
+
+t_kgss_kernel: libkgss.a t_kgss_kernel.o t_kgss_common.o $(K5CRYPTO_DEPLIB)
+	$(CC_LINK) -o $@ t_kgss_kernel.o t_kgss_common.o libkgss.a \
+		$(K5CRYPTO_LIB)
+
+depend:: $(SRCS) $(HEADERS)
+
+clean::
+	$(RM) $(SRCS) $(HEADERS) libkgss.a testlog OBJS.SH
+	$(RM) -r krb5 testdir
+	$(RM) t_kgss_user.o t_kgss_kernel.o t_kgss_common.o
+	$(RM) t_kgss_user t_kgss_kernel
+
+GSS_KRB5=$(top_srcdir)/lib/gssapi/krb5
+GSS_KRB5_BUILD=$(BUILDTOP)/lib/gssapi/krb5
+GSS_GENERIC=$(top_srcdir)/lib/gssapi/generic
+GSS_GENERIC_BUILD=$(BUILDTOP)/lib/gssapi/generic
+INCLUDE=$(top_srcdir)/include
+INCLUDE_BUILD=$(BUILDTOP)/include
+
+# Rules to copy sources from their real homes in the source or build tree.
+# If we switch to requiring gnu make, we can use $(CP) $< $@ in these rules.
+k5seal.c: $(GSS_KRB5)/k5seal.c
+	$(CP) $(GSS_KRB5)/k5seal.c $@
+k5sealiov.c: $(GSS_KRB5)/k5sealiov.c
+	$(CP) $(GSS_KRB5)/k5sealiov.c $@
+k5unseal.c: $(GSS_KRB5)/k5unseal.c
+	$(CP) $(GSS_KRB5)/k5unseal.c $@
+k5unsealiov.c: $(GSS_KRB5)/k5unsealiov.c
+	$(CP) $(GSS_KRB5)/k5unsealiov.c $@
+k5sealv3.c: $(GSS_KRB5)/k5sealv3.c
+	$(CP) $(GSS_KRB5)/k5sealv3.c $@
+k5sealv3iov.c: $(GSS_KRB5)/k5sealv3iov.c
+	$(CP) $(GSS_KRB5)/k5sealv3iov.c $@
+util_cksum.c: $(GSS_KRB5)/util_cksum.c
+	$(CP) $(GSS_KRB5)/util_cksum.c $@
+util_crypt.c: $(GSS_KRB5)/util_crypt.c
+	$(CP) $(GSS_KRB5)/util_crypt.c $@
+util_seqnum.c: $(GSS_KRB5)/util_seqnum.c
+	$(CP) $(GSS_KRB5)/util_seqnum.c $@
+util_seed.c: $(GSS_KRB5)/util_seed.c
+	$(CP) $(GSS_KRB5)/util_seed.c $@
+util_token.c: $(GSS_GENERIC)/util_token.c
+	$(CP) $(GSS_GENERIC)/util_token.c $@
+util_set.c: $(GSS_GENERIC)/util_set.c
+	$(CP) $(GSS_GENERIC)/util_set.c $@
+util_ordering.c: $(GSS_GENERIC)/util_ordering.c
+	$(CP) $(GSS_GENERIC)/util_ordering.c $@
+
+# Rules to copy headers from their real homes in the source or build tree.
+gssapiP_krb5.h: $(GSS_KRB5)/gssapiP_krb5.h
+	$(CP) $(GSS_KRB5)/gssapiP_krb5.h $@
+gssapi_krb5.h: $(GSS_KRB5_BUILD)/gssapi_krb5.h
+	$(CP) $(GSS_KRB5_BUILD)/gssapi_krb5.h $@
+gssapi_err_krb5.h: $(GSS_KRB5_BUILD)/gssapi_err_krb5.h
+	$(CP) $(GSS_KRB5_BUILD)/gssapi_err_krb5.h $@
+gssapiP_generic.h: $(GSS_GENERIC)/gssapiP_generic.h
+	$(CP) $(GSS_GENERIC)/gssapiP_generic.h $@
+gssapi_generic.h: $(GSS_GENERIC)/gssapi_generic.h
+	$(CP) $(GSS_GENERIC)/gssapi_generic.h $@
+gssapi_err_generic.h: $(GSS_GENERIC_BUILD)/gssapi_err_generic.h
+	$(CP) $(GSS_GENERIC_BUILD)/gssapi_err_generic.h $@
+gssapi_ext.h: $(GSS_GENERIC)/gssapi_ext.h
+	$(CP) $(GSS_GENERIC)/gssapi_ext.h $@
+k5-int.h: $(INCLUDE)/k5-int.h
+	$(CP) $(INCLUDE)/k5-int.h $@
+k5-int-pkinit.h: $(INCLUDE)/k5-int-pkinit.h
+	$(CP) $(INCLUDE)/k5-int-pkinit.h $@
+k5-thread.h: $(INCLUDE)/k5-thread.h
+	$(CP) $(INCLUDE)/k5-thread.h $@
+k5-platform.h: $(INCLUDE)/k5-platform.h
+	$(CP) $(INCLUDE)/k5-platform.h $@
+k5-buf.h: $(INCLUDE)/k5-buf.h
+	$(CP) $(INCLUDE)/k5-buf.h $@
+k5-trace.h: $(INCLUDE)/k5-trace.h
+	$(CP) $(INCLUDE)/k5-trace.h $@
+k5-err.h: $(INCLUDE)/k5-err.h
+	$(CP) $(INCLUDE)/k5-err.h $@
+k5-plugin.h: $(INCLUDE)/k5-plugin.h
+	$(CP) $(INCLUDE)/k5-plugin.h $@
+k5-gmt_mktime.h: $(INCLUDE)/k5-gmt_mktime.h
+	$(CP) $(INCLUDE)/k5-gmt_mktime.h $@
+krb5.h: $(INCLUDE_BUILD)/krb5/krb5.h
+	$(CP) $(INCLUDE_BUILD)/krb5/krb5.h $@
+osconf.h: $(INCLUDE_BUILD)/osconf.h
+	$(CP) $(INCLUDE_BUILD)/osconf.h $@
+autoconf.h: $(INCLUDE_BUILD)/autoconf.h
+	$(CP) $(INCLUDE_BUILD)/autoconf.h $@
+port-sockets.h: $(INCLUDE)/port-sockets.h
+	$(CP) $(INCLUDE)/port-sockets.h $@
+socket-utils.h: $(INCLUDE)/socket-utils.h
+	$(CP) $(INCLUDE)/socket-utils.h $@
+krb5/preauth_plugin.h: krb5 $(INCLUDE)/krb5/preauth_plugin.h
+	$(CP) $(INCLUDE)/krb5/preauth_plugin.h krb5
+krb5/authdata_plugin.h: krb5 $(INCLUDE)/krb5/authdata_plugin.h
+	$(CP) $(INCLUDE)/krb5/authdata_plugin.h krb5
+
+krb5:
+	test -d krb5 || mkdir krb5
+
+LIBBASE=kgss
+LIBMAJOR=1
+LIBMINOR=0
+
+LIBINITFUNC=
+LIBFINIFUNC=

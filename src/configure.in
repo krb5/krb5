@@ -1160,5 +1160,5 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	tests tests/resolve tests/asn.1 tests/create tests/hammer
 	tests/verify tests/gssapi tests/dejagnu tests/threads tests/shlib
 	tests/gss-threads tests/misc tests/mkeystash_compat
-	util/collected-client-lib
+	util/gss-kernel-lib util/collected-client-lib
 )

@@ -1,0 +1,121 @@
+This directory is intended to help integrators of MIT krb5 code into
+the kernel by:
+
+1. Identifying the GSSAPI source files necessary for wrapping and
+unwrapping messages.
+
+2. Providing a test framework to ensuring that these source files do
+not grow addtional dependencies without alerting the developers.
+
+3. Providing code for importing a Lucid sec context.
+
+Nothing is built in this directory during "make all".  The following
+happens durng "make check":
+
+1. Sources and headers are copied here from other parts of the tree.
+
+2. Sources are compiled and built, together with some additional code
+in kernel_gss.c, into a static library named libkgss.a.  Sources are
+built with -DKRB5_KERNEL, which is used (very sparingly) to eliminate
+dependencies such as the code to save error messages.
+
+3. A test program is built in two parts: t_kgss_user is built against
+the regular ("user-space") GSSAPI libraries, and t_kgss_kernel is
+built against libkgss.a.
+
+4. A Python test executes t_kgss_user, which runs t_kgss_kernel in a
+child process and exercises the functionality of libkgss.a.
+
+Limitations
+-----------
+
+Lucid contexts are used to transport the acceptor context from
+user-space to kernel-space, because the code overhead of normal
+export/import is large (it requires the libkrb5 serialization
+framework).  Kernel integrators should be aware of two issues with
+Lucid contexts:
+
+1. They are not a flat data blob.  It is up to the user/kernelspace
+interface to define a format for transporting the lucid context
+structure.
+
+2. Lucid contexts do not convey the do-replay or do-sequence flags
+from the original context.  RPC security does not need replay or
+sequence detection, so the krb5_gss_import_lucid_sec_context
+implementation in kernel_gss.c simply assumes the flags should be
+turned off.  If the kernel GSS code is being used for a protocol which
+does need replay or sequence detection, those flags should be
+determined separately and set in the krb5 GSS context.
+
+Crypto library
+--------------
+
+libkgss.a does not include crypto code.  Almost all of the crypto
+library is required for a kernel integration, so it would not be
+productive to duplicate almost all of the crypto build infrastructure
+to demonstrate the kernel subset.
+
+A kernel integrator will almost certainly want to use the kernel's
+native PRNG instead of the default lib/crypto/krb/prng_fortuna.c, and
+may also wish to write a back end module implementing standard crypto
+primitives in terms of the kernel's crypto primitives, instead of
+using lib/crypto/builtin.
+
+A few pieces of crypto functionality can be omitted from a kernel
+subset.  String-to-key is not needed, and consequently neither is
+PBKDF2.  PRF is not needed, unless the integrator is adding
+krb5_gss_pseudo_random to the subset.  The enctype utility APIs are
+not needed.  DES and DES3 keys are only used via raw enctypes, so the
+functions in enc_old.c won't be reached.  Because of the way the
+crypto library uses vtables internally, removing the unreached code is
+not simply a matter of selecting source files, and it may be simpler
+to just leave the small amount of unreached code in.
+
+A complete inventory of crypto APIs used by the kernel subset can be
+made with:
+
+    nm libkgss.a | awk '/U .*_[ck]_/ {print $2}' | sort -u
+
+Currently, that list is:
+
+    krb5_c_block_size
+    krb5_c_checksum_length
+    krb5_c_crypto_length
+    krb5_c_make_checksum
+    krb5_c_padding_length
+    krb5_c_random_make_octets
+    krb5int_c_free_keyblock
+    krb5int_c_mandatory_cksumtype
+    krb5_k_create_key
+    krb5_k_decrypt
+    krb5_k_decrypt_iov
+    krb5_k_encrypt
+    krb5_k_encrypt_iov
+    krb5_k_free_key
+    krb5_k_key_keyblock
+    krb5_k_make_checksum
+    krb5_k_make_checksum_iov
+    krb5_k_verify_checksum
+    krb5_k_verify_checksum_iov
+
+Debugging test failures
+-----------------------
+
+If an error occurs in t_kgss_user, it can be debugged in the same way
+as any program running under the Python test framework.  Start by
+re-running the Python script with the -v flag, then add a --debug
+option for the failing command, then set breakpoints or step through
+the process execution as necessary.
+
+If an error occurs in t_kgss_kernel, it is harder to debug, since
+t_kgss_user runs it as a subprocess.  On Linux with gdb, it is
+possible to interactively debug t_kgss_kernel by starting an
+interactive gdb session for t_kgss_user and doing:
+
+    set follow-fork-mode child
+    break main
+    run
+    cont
+
+You should get a breakpoint in the main() of t_kgss_kernel and should
+be able to set breakpoints from there.

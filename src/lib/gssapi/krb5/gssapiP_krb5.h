@@ -1125,7 +1125,12 @@ krb5_gss_save_error_message(OM_uint32 minor_code, const char *format, ...)
 #define get_error_message krb5_gss_get_error_message
 #define save_error_string krb5_gss_save_error_string
 #define save_error_message krb5_gss_save_error_message
+#ifdef KRB5_KERNEL
+/* Error messages aren't needed in the kernel, so reduce dependencies. */
+#define save_error_info(x,y)
+#else
 #define save_error_info krb5_gss_save_error_info
+#endif
 extern void krb5_gss_delete_error_info(void *p);
 
 /* Prefix concatenated with Kerberos encryption type */
