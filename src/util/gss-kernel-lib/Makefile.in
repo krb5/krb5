@@ -4,7 +4,7 @@ BUILDTOP=$(REL)..$(S)..
 KRB5_RUN_ENV=@KRB5_RUN_ENV@
 
 DEFINES=-DKRB5_KERNEL
-ALL_CFLAGS=$(CFLAGS) $(DEFS) $(DEFINES) -I.
+ALL_CFLAGS=$(CFLAGS) $(DEFS) $(DEFINES) -I. -Igssapi
 
 SHLIB_EXPDEPS = \
 	$(TOPLIBD)/libk5crypto$(SHLIBEXT) \
@@ -48,13 +48,15 @@ OBJS= \
 	util_ordering.o
 
 HEADERS= \
+	gssapi/gssapi.h \
+	gssapi/gssapi_krb5.h \
+	gssapi/gssapi_ext.h \
+	gssapi.h \
 	gssapiP_krb5.h \
-	gssapi_krb5.h \
 	gssapi_err_krb5.h \
 	gssapiP_generic.h \
 	gssapi_generic.h \
 	gssapi_err_generic.h \
-	gssapi_ext.h \
 	k5-int.h \
 	k5-int-pkinit.h \
 	k5-thread.h \
@@ -94,7 +96,7 @@ depend:: $(SRCS) $(HEADERS)
 
 clean::
 	$(RM) $(SRCS) $(HEADERS) libkgss.a testlog OBJS.SH
-	$(RM) -r krb5 testdir
+	$(RM) -r gssapi krb5 testdir
 	$(RM) t_kgss_user.o t_kgss_kernel.o t_kgss_common.o
 	$(RM) t_kgss_user t_kgss_kernel
 
@@ -135,10 +137,16 @@ util_ordering.c: $(GSS_GENERIC)/util_ordering.c
 	$(CP) $(GSS_GENERIC)/util_ordering.c $@
 
 # Rules to copy headers from their real homes in the source or build tree.
+gssapi.h: $(INCLUDE)/gssapi.h
+	$(CP) $(INCLUDE)/gssapi.h $@
+gssapi/gssapi.h: gssapi $(GSS_GENERIC_BUILD)/gssapi.h
+	$(CP) $(GSS_GENERIC_BUILD)/gssapi.h $@
+gssapi/gssapi_krb5.h: gssapi $(GSS_KRB5_BUILD)/gssapi_krb5.h
+	$(CP) $(GSS_KRB5_BUILD)/gssapi_krb5.h $@
+gssapi/gssapi_ext.h: gssapi $(GSS_GENERIC)/gssapi_ext.h
+	$(CP) $(GSS_GENERIC)/gssapi_ext.h $@
 gssapiP_krb5.h: $(GSS_KRB5)/gssapiP_krb5.h
 	$(CP) $(GSS_KRB5)/gssapiP_krb5.h $@
-gssapi_krb5.h: $(GSS_KRB5_BUILD)/gssapi_krb5.h
-	$(CP) $(GSS_KRB5_BUILD)/gssapi_krb5.h $@
 gssapi_err_krb5.h: $(GSS_KRB5_BUILD)/gssapi_err_krb5.h
 	$(CP) $(GSS_KRB5_BUILD)/gssapi_err_krb5.h $@
 gssapiP_generic.h: $(GSS_GENERIC)/gssapiP_generic.h
@@ -147,8 +155,6 @@ gssapi_generic.h: $(GSS_GENERIC)/gssapi_generic.h
 	$(CP) $(GSS_GENERIC)/gssapi_generic.h $@
 gssapi_err_generic.h: $(GSS_GENERIC_BUILD)/gssapi_err_generic.h
 	$(CP) $(GSS_GENERIC_BUILD)/gssapi_err_generic.h $@
-gssapi_ext.h: $(GSS_GENERIC)/gssapi_ext.h
-	$(CP) $(GSS_GENERIC)/gssapi_ext.h $@
 k5-int.h: $(INCLUDE)/k5-int.h
 	$(CP) $(INCLUDE)/k5-int.h $@
 k5-int-pkinit.h: $(INCLUDE)/k5-int-pkinit.h
@@ -186,6 +192,8 @@ krb5/preauth_plugin.h: krb5 $(INCLUDE)/krb5/preauth_plugin.h
 krb5/authdata_plugin.h: krb5 $(INCLUDE)/krb5/authdata_plugin.h
 	$(CP) $(INCLUDE)/krb5/authdata_plugin.h $@
 
+gssapi:
+	test -d gssapi || mkdir gssapi
 krb5:
 	test -d krb5 || mkdir krb5
 
