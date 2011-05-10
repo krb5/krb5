@@ -69,6 +69,8 @@ HEADERS= \
 	autoconf.h \
 	port-sockets.h \
 	socket-utils.h \
+	krb5/krb5.h \
+	krb5/plugin.h \
 	krb5/preauth_plugin.h \
 	krb5/authdata_plugin.h
 
@@ -165,8 +167,8 @@ k5-plugin.h: $(INCLUDE)/k5-plugin.h
 	$(CP) $(INCLUDE)/k5-plugin.h $@
 k5-gmt_mktime.h: $(INCLUDE)/k5-gmt_mktime.h
 	$(CP) $(INCLUDE)/k5-gmt_mktime.h $@
-krb5.h: $(INCLUDE_BUILD)/krb5/krb5.h
-	$(CP) $(INCLUDE_BUILD)/krb5/krb5.h $@
+krb5.h: $(INCLUDE)/krb5.h
+	$(CP) $(INCLUDE)/krb5.h $@
 osconf.h: $(INCLUDE_BUILD)/osconf.h
 	$(CP) $(INCLUDE_BUILD)/osconf.h $@
 autoconf.h: $(INCLUDE_BUILD)/autoconf.h
@@ -175,10 +177,14 @@ port-sockets.h: $(INCLUDE)/port-sockets.h
 	$(CP) $(INCLUDE)/port-sockets.h $@
 socket-utils.h: $(INCLUDE)/socket-utils.h
 	$(CP) $(INCLUDE)/socket-utils.h $@
+krb5/krb5.h: krb5 $(INCLUDE_BUILD)/krb5/krb5.h
+	$(CP) $(INCLUDE_BUILD)/krb5/krb5.h $@
+krb5/plugin.h: krb5 $(INCLUDE)/krb5/plugin.h
+	$(CP) $(INCLUDE)/krb5/plugin.h $@
 krb5/preauth_plugin.h: krb5 $(INCLUDE)/krb5/preauth_plugin.h
-	$(CP) $(INCLUDE)/krb5/preauth_plugin.h krb5
+	$(CP) $(INCLUDE)/krb5/preauth_plugin.h $@
 krb5/authdata_plugin.h: krb5 $(INCLUDE)/krb5/authdata_plugin.h
-	$(CP) $(INCLUDE)/krb5/authdata_plugin.h krb5
+	$(CP) $(INCLUDE)/krb5/authdata_plugin.h $@
 
 krb5:
 	test -d krb5 || mkdir krb5
