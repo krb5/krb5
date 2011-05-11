@@ -75,7 +75,12 @@ HEADERS= \
 	krb5/krb5.h \
 	krb5/plugin.h \
 	krb5/preauth_plugin.h \
-	krb5/authdata_plugin.h
+	krb5/authdata_plugin.h \
+	profile.h \
+	$(MAYBE_COMERR_@COM_ERR_VERSION@)
+
+MAYBE_COMERR_k5 = com_err.h
+MAYBE_COMERR_sys =
 
 check-pytests:: t_kgss_user t_kgss_kernel
 	$(RUNPYTEST) $(srcdir)/t_kgss.py $(PYTESTFLAGS)
@@ -192,6 +197,10 @@ krb5/preauth_plugin.h: krb5 $(INCLUDE)/krb5/preauth_plugin.h
 	$(CP) $(INCLUDE)/krb5/preauth_plugin.h $@
 krb5/authdata_plugin.h: krb5 $(INCLUDE)/krb5/authdata_plugin.h
 	$(CP) $(INCLUDE)/krb5/authdata_plugin.h $@
+profile.h: $(INCLUDE_BUILD)/profile.h
+	$(CP) $(INCLUDE_BUILD)/profile.h $@
+com_err.h: $(INCLUDE_BUILD)/com_err.h
+	$(CP) $(INCLUDE_BUILD)/com_err.h $@
 
 gssapi:
 	test -d gssapi || mkdir gssapi
