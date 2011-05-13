@@ -6835,31 +6835,137 @@ krb5_verify_authdata_kdc_issued(krb5_context context,
 /*
  * Windows PAC
  */
+
+/* Microsoft defined types of data */
+#define PAC_LOGON_INFO        1  /**< Logon information */
+#define PAC_CREDENTIALS_INFO  2  /**< Credentials information */
+#define PAC_SERVER_CHECKSUM   6  /**< Server checksum */
+#define PAC_PRIVSVR_CHECKSUM  7  /**< KDC checksum */
+#define PAC_CLIENT_INFO       10 /**< Client name and ticket information */
+#define PAC_DELEGATION_INFO   11 /**< Client name and ticket information */
+#define PAC_UPN_DNS_INFO      12 /**< User principal name and DNS information */
+
+
+/** PAC data structure to convey authorization information */
 struct krb5_pac_data;
 typedef struct krb5_pac_data *krb5_pac;
 
+/** Add a buffer to the provided PAC and update header.
+ *
+ * @param [in]     context         Context structure
+ * @param [in,out] pac             PAC handle
+ * @param [in]     type            Type of data contained in @a data
+ * @param [in]     data            Buffer to add
+ *
+ * This function adds a new @a data to @a pac if there isn't already a buffer
+ * of this type in @a pac.
+ *
+ * The valid values of @type is one of the following:
+ * @li @c PAC_LOGON_INFO         -  Logon information
+ * @li @c PAC_CREDENTIALS_INFO   -  Credentials information
+ * @li @c PAC_SERVER_CHECKSUM    -  Server checksum
+ * @li @c PAC_PRIVSVR_CHECKSUM   -  KDC checksum
+ * @li @c PAC_CLIENT_INFO        -  Client name and ticket information
+ * @li @c PAC_DELEGATION_INFO    -  Constrained delegation information
+ * @li @c PAC_UPN_DNS_INFO       -  User principal name and DNS information
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_pac_add_buffer(krb5_context context, krb5_pac pac, krb5_ui_4 type,
                     const krb5_data *data);
 
+/** Free the storage assigned to a PAC.
+ *
+ * @param      context         Context structure
+ * @param [in] pac             PAC to be freed
+ *
+ * This function zeros out and frees the content of a @a pac and then
+ * releases @a pac itself.
+ */
 void KRB5_CALLCONV
 krb5_pac_free(krb5_context context, krb5_pac pac);
 
+/** Find a buffer in a PAC and copy data into output buffer.
+ *
+ * @param [in]     context     Context structure
+ * @param [in]     pac         PAC handle
+ * @param [in]     type        Type of the buffer to be copied
+ * @param [out]    data        Copy of a buffer to be filled in
+ *
+ * Use krb5_free_data_contents() to free @a data when it is no longer needed.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_pac_get_buffer(krb5_context context, krb5_pac pac, krb5_ui_4 type,
                     krb5_data *data);
 
+/** Return an array of the types of data in the PAC.
+ *
+ * @param [in]     context         Context structure
+ * @param [in,out] pac             PAC handle
+ * @param [out]    len             Number of entries in the @a types array.
+ * @param [out]    types           If non-null, contains an array of types
+ *
+ * Free @a types when it is no linger needed.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_pac_get_types(krb5_context context, krb5_pac pac, size_t *len,
                    krb5_ui_4 **types);
 
+/** Create and initialize Privilege Attribute Certificate (PAC).
+ *
+ * @param [in]  context         Context structure
+ * @param [out] pac             PAC handle
+ *
+ * Use krb5_pac_free() to free @a pac when it is no longer needed.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_pac_init(krb5_context context, krb5_pac *pac);
 
+/** Parse the supplied data into the newly allocated PAC.
+ *
+ * @param [in]  context         Context structure
+ * @param [in]  ptr             PAC buffer
+ * @param [in]  len             Size of @a ptr
+ * @param [out] pac             PAC handle
+ *
+ * Use krb5_pac_free() to free @a pac when it is no longer needed.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_pac_parse(krb5_context context, const void *ptr, size_t len,
                krb5_pac *pac);
 
+/** Verify a PAC.
+ *
+ * @param [in] context         Context structure
+ * @param [in] pac             PAC handle
+ * @param [in] authtime        Timestamp to be compared with one in @a pac
+ * @param [in] principal       If non-null, use it to validate PAC's client name
+ *                             and ticket information.
+ * @param [in] server          Compare it with PAC'c server checksum.
+ *                             Must not be NULL.
+ * @param [in] privsvr         If non-null, compare it with PAC'c KDC checksum
+ *
+ * This function validates @a pac against the supplied @a server, @a privsvr,
+ * @a principal and @a authtime and then, if successful, sets @a pac->verified
+ * to TRUE.
+ *
+ * @note A checksum mismatch can occur if the PAC was copied from a cross-realm
+ * TGT by an ignorant KDC; also Apple Mac OS X Server Open Directory (as of 10.6)
+ * generates PACs with no server checksum at all. One should consider not failing
+ * the whole authentication because of this reason, but, instead, marking PAC
+ * as not verified.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_pac_verify(krb5_context context, const krb5_pac pac,
                 krb5_timestamp authtime, krb5_const_principal principal,

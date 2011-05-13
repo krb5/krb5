@@ -73,14 +73,6 @@ struct krb5_pac_data {
 #define PAC_SIGNATURE_DATA_LENGTH   4U
 #define PAC_CLIENT_INFO_LENGTH      10U
 #define PAC_INFO_BUFFER_LENGTH  16
-/* ulType */
-#define PAC_LOGON_INFO          1
-#define PAC_CREDENTIALS_INFO    2
-#define PAC_SERVER_CHECKSUM     6
-#define PAC_PRIVSVR_CHECKSUM    7
-#define PAC_CLIENT_INFO         10
-#define PAC_DELEGATION_INFO     11
-#define PAC_UPN_DNS_INFO        12
 
 #define NT_TIME_EPOCH               11644473600LL
 
