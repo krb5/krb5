@@ -147,7 +147,6 @@ make_pa_for_user_checksum(krb5_context context,
     krb5_int32 name_type;
     char *p;
     krb5_data data;
-    krb5_cksumtype cksumtype;
 
     data.length = 4;
     for (i = 0; i < krb5_princ_size(context, req->user); i++) {
@@ -179,13 +178,8 @@ make_pa_for_user_checksum(krb5_context context,
 
     memcpy(p, req->auth_package.data, req->auth_package.length);
 
-    code = krb5int_c_mandatory_cksumtype(context, key->enctype, &cksumtype);
-    if (code != 0) {
-        free(data.data);
-        return code;
-    }
-
-    code = krb5_c_make_checksum(context, cksumtype, key,
+    /* Per spec, use hmac-md5 checksum regardless of key type. */
+    code = krb5_c_make_checksum(context, CKSUMTYPE_HMAC_MD5_ARCFOUR, key,
                                 KRB5_KEYUSAGE_APP_DATA_CKSUM, &data,
                                 cksum);
 
