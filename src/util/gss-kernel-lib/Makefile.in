@@ -94,9 +94,10 @@ t_kgss_user: t_kgss_user.o t_kgss_common.o $(GSS_DEPLIBS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_kgss_user t_kgss_user.o t_kgss_common.o $(GSS_LIBS) \
 		$(KRB5_BASE_LIBS)
 
-t_kgss_kernel: libkgss.a t_kgss_kernel.o t_kgss_common.o $(K5CRYPTO_DEPLIB)
+t_kgss_kernel: libkgss.a t_kgss_kernel.o t_kgss_common.o $(K5CRYPTO_DEPLIB) \
+	       $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o $@ t_kgss_kernel.o t_kgss_common.o libkgss.a \
-		$(K5CRYPTO_LIB)
+		$(K5CRYPTO_LIB) $(SUPPORT_LIB)
 
 depend:: $(SRCS) $(HEADERS)
 
