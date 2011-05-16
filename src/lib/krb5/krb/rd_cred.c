@@ -1,4 +1,29 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/* lib/krb5/krb/rd_cred.c - definition of krb5_rd_cred() */
+/*
+ * Copyright 1994-2009 by the Massachusetts Institute of Technology.
+ * All Rights Reserved.
+ *
+ * Export of this software from the United States of America may
+ *   require a specific license from the United States Government.
+ *   It is the responsibility of any person or organization contemplating
+ *   export to obtain such a license before exporting.
+ *
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of M.I.T. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ */
+
 #include "k5-int.h"
 #include "cleanup.h"
 #include "auth_con.h"
@@ -17,7 +42,7 @@ decrypt_credencdata(krb5_context context, krb5_cred *pcred,
                     krb5_key pkey, krb5_cred_enc_part *pcredenc)
 {
     krb5_cred_enc_part  * ppart = NULL;
-    krb5_error_code       retval;
+    krb5_error_code       retval = 0;
     krb5_data             scratch;
 
     scratch.length = pcred->enc_part.ciphertext.length;
@@ -38,7 +63,6 @@ decrypt_credencdata(krb5_context context, krb5_cred *pcred,
         goto cleanup;
 
     *pcredenc = *ppart;
-    retval = 0;
 
 cleanup:
     if (ppart != NULL) {
@@ -57,9 +81,9 @@ krb5_rd_cred_basic(krb5_context context, krb5_data *pcreddata,
                    krb5_key pkey, krb5_replay_data *replaydata,
                    krb5_creds ***pppcreds)
 {
-    krb5_error_code       retval;
-    krb5_cred           * pcred;
-    krb5_int32            ncreds;
+    krb5_error_code       retval = 0;
+    krb5_cred           * pcred = NULL;
+    krb5_int32            ncreds = 0;
     krb5_int32            i = 0;
     krb5_cred_enc_part    encpart;
 
@@ -160,20 +184,15 @@ cleanup_cred:
 
 /*
  * This functions takes as input an KRB_CRED message, validates it, and
- * outputs the nonce and an array of the forwarded credentials.
+ * outputs the array of the forwarded credentials and replay cache information
  */
 krb5_error_code KRB5_CALLCONV
 krb5_rd_cred(krb5_context context, krb5_auth_context auth_context,
              krb5_data *pcreddata, krb5_creds ***pppcreds,
              krb5_replay_data *outdata)
 {
-    krb5_error_code       retval;
-    krb5_key              key;
+    krb5_error_code       retval = 0;
     krb5_replay_data      replaydata;
-
-    /* Get key */
-    if ((key = auth_context->recv_subkey) == NULL)
-        key = auth_context->key;
 
     if (((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_TIME) ||
          (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_RET_SEQUENCE)) &&
@@ -185,19 +204,19 @@ krb5_rd_cred(krb5_context context, krb5_auth_context auth_context,
         (auth_context->rcache == NULL))
         return KRB5_RC_REQUIRED;
 
-
     /*
-     * If decrypting with the first key we try fails, perhaps the
-     * credentials are stored in the session key so try decrypting with
-     * that.
+     * If decrypting with the subsession key fails, perhaps the
+     * credentials are stored in the session key so try decrypting with that.
      */
-    if ((retval = krb5_rd_cred_basic(context, pcreddata, key,
-                                     &replaydata, pppcreds))) {
-        if ((retval = krb5_rd_cred_basic(context, pcreddata,
-                                         auth_context->key,
-                                         &replaydata, pppcreds))) {
-            return retval;
-        }
+     if (auth_context->recv_subkey == NULL ||
+         (retval = krb5_rd_cred_basic(context, pcreddata,
+                                      auth_context->recv_subkey,
+                                      &replaydata, pppcreds))) {
+         retval = krb5_rd_cred_basic(context, pcreddata,
+                                     auth_context->key,
+                                     &replaydata, pppcreds);
+         if (retval)
+             return retval;
     }
 
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) {
