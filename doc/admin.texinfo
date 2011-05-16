@@ -2434,6 +2434,11 @@ of the principal.  The quotes are necessary if there are multiple
 enctype-salttype pairs.  This will not function against kadmin daemons
 earlier than krb5-1.2.  See @ref{Supported Encryption Types} and
 @ref{Salts} for available types.
+
+@item -unlock
+Unlocks a locked principal (one which has received too many failed
+authentication attempts without enough time between them according to
+its password policy) so that it can successfully authenticate.
 @end table
 
 If you want to just use the default values, all you need to do is:
@@ -2778,6 +2783,22 @@ Requires at least @i{number} of character classes in a password.
 
 @item -history @i{number}
 Sets the number of past keys kept for a principal to @i{number}. This option is not supported for LDAP database.
+
+@item -maxfailure @i{maxnumber}
+Sets the maximum number of authentication failures before the principal
+is locked.  Authentication failures are only tracked for principals
+which require preauthentication.
+
+@item -failurecountinterval @i{failuretime}
+Sets the allowable time between authentication failures.  If an
+authentication failure happens after @i{failuretime} has elapsed since
+the previous failure, the number of authentication failures is reset to
+1.
+
+@item -lockoutduration @i{lockouttime}
+Sets the duration for which the principal is locked from authenticating
+if too many authentication failures occur without the specified failure
+count interval elapsing.
 @end table 
 @c **** An example here would be nice.  ****
 

@@ -526,6 +526,11 @@ Associates a Kerberos principal with a LDAP object. This option is honored only
 if the Kerberos principal is not already associated with a LDAP object. 
 .RE
 .TP
+.B \-unlock
+Unlocks a locked principal (one which has received too many failed
+authentication attempts without enough time between them according to
+its password policy) so that it can successfully authenticate.
+.TP
 ERRORS:
 KADM5_AUTH_MODIFY (requires "modify" privilege)
 KADM5_UNK_PRINC (principal does not exist)
@@ -689,6 +694,22 @@ sets the minimum number of character classes allowed in a password
 .TP
 \fB\-history\fP \fInumber\fP
 sets the number of past keys kept for a principal. This option is not supported for LDAP database
+.TP
+\fB\-maxfailure\fP \fImaxnumber\fP
+sets the maximum number of authentication failures before the
+principal is locked.  Authentication failures are only tracked for
+principals which require preauthentication.
+.TP
+\fB\-failurecountinterval\fP \fIfailuretime\fP
+sets the allowable time between authentication failures.  If an
+authentication failure happens after \fIfailuretime\fP has elapsed
+since the previous failure, the number of authentication failures is
+reset to 1.
+.TP
+\fB\-lockoutduration\fP \fIlockouttime\fP
+sets the duration for which the principal is locked from
+authenticating if too many authentication failures occur without the
+specified failure count interval elapsing.
 .sp
 .nf
 .TP
