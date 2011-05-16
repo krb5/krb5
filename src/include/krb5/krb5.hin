@@ -2895,28 +2895,36 @@ krb5_mk_rep(krb5_context context, krb5_auth_context auth_context, krb5_data *out
 krb5_error_code KRB5_CALLCONV
 krb5_mk_rep_dce(krb5_context context, krb5_auth_context auth_context, krb5_data *outbuf);
 
-/**
- * @brief Parse and decrypt a @c KRB5_AP_REP message.
+/** Parse and decrypt a @c KRB_AP_REP message.
  *
- * @param context            Context structure [input, output]
- * @param auth_context       Authentication context [input, output]
- * @param inbuf              AP-REP message [input]
- * @param repl               Parsed message [output]
+ * @param [in]      context            Context structure
+ * @param [in,out]  auth_context       Authentication context
+ * @param [in]      inbuf              AP-REP message
+ * @param [out]     repl               Decrypted reply message
  *
- * The keyblock stored in @c _krb5_auth_context is used to decrypt the message
- * after establishing any key preprocessing with krb5_process_key().
+ * This function parses, decrypts and verifies a message from @a inbuf and
+ * fills in @a repl with a pointer to allocated memory containing the fields
+ * from the encrypted response.
+ * Use krb5_free_ap_rep_enc_part() to free @a repl when it is no longer needed.
  *
- * Make sure to free the allocated memory when it is no longer needed.
- *
- * @retval
- * 0 Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_rd_rep(krb5_context context, krb5_auth_context auth_context,
             const krb5_data *inbuf, krb5_ap_rep_enc_part **repl);
 
+/** Parse and decrypt a @c KRB_AP_REP message for DCE RPC.
+ *
+ * @param [in]      context        Context structure
+ * @param [in,out]  auth_context   Authentication context
+ * @param [in]      inbuf          AP-REP message
+ * @param [out]     nonce          Sequence number from the decrypted reply
+ *
+ * This function parses, decrypts and verifies a message from @a inbuf and
+ * fills in @a nonce with a decrypted reply sequence number.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_rd_rep_dce(krb5_context context, krb5_auth_context auth_context,
                 const krb5_data *inbuf, krb5_ui_4 *nonce);
@@ -2937,104 +2945,111 @@ krb5_error_code KRB5_CALLCONV
 krb5_mk_error(krb5_context context, const krb5_error *dec_err,
               krb5_data *enc_err);
 
-/**
- * @brief Decode a @c KRB-ERROR message.
+/** Decode a @c KRB-ERROR message.
  *
- * @param context           Context structure [input, output]
- * @param enc_errbuf        Encoded error message [input]
- * @param dec_error         Decoded error message [output]
+ * @param [in]  context           Context structure
+ * @param [in]  enc_errbuf        Encoded error message
+ * @param [out] dec_error         Decoded error message
  *
- * @retval
- * 0 Success
- * @return
- * Kerberos error codes
+ * This function processes @c KRB-ERROR message @a enc_errbuf and returns
+ * an allocated structure @a dec_error containing the error message.
+ * Use krb5_free_error() to free @a dec_error when it is no longer needed.
  *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_rd_error(krb5_context context, const krb5_data *enc_errbuf,
               krb5_error **dec_error);
 
-/**
- * @brief Parse a @c KRB-SAFE message, verify its integrity, and store its data in the specified buffer.
+/** Process @c KRB-SAFE message.
  *
- * @param context           Context structure [input, output]
- * @param auth_context      Authentication structure [input, output]
- * @param inbuf             @c KRB-SAFE message to be parsed [input]
- * @param outbuf            Data parsed from @c KRB-SAFE message [output]
- * @param outdata           Sequence numbers if @c krb5_auth_context includes @c KRB5_AUTHCONTEXT_RET_SEQUENCE [input, output]
+ * @param [in]     context        Context structure
+ * @param [in,out] auth_context   Authentication structure
+ * @param [in]     inbuf          @c KRB-SAFE message to be parsed
+ * @param [out]    outbuf         Data parsed from @c KRB-SAFE message
+ * @param [out]    outdata        Replay data. Specify NULL if not needed
  *
- * The keyblock used to verify the integrity of the message is taken from the fields
- * @a local_subkey, @a remote_subkey, or @a keyblock in @c _krb5_auth_context. The @a keyblock
- * is chosen in the preceding order by the first one that is non-null.
+ * This function parses a @c KRB-SAFE message, verifies its integrity, and
+ * stores its data into @a outbuf.
  *
- * @a remote_addr and @a localaddr in @c _krb5_auth_context specify
+ * @note The @a outdata argument is required if KRB5_AUTH_CONTEXT_RET_TIME or
+ *       KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set in the @a auth_context.`
+ *
+ * @note The @a remote_addr argument in @a auth_context argument is mandatory.
+ *       It specifies the address of the sender. This address will be used
+ *       to verify the sender address in the KRB-SAFE message.
+ *
+ * The keyblock used to verify the integrity of the message is taken from the
+ * fields @a recv_subkey or @a key in @a auth_context.
+ * The keyblock is chosen in the preceding order by the first one that is non-null.
+ *
+ * @a remote_addr and @a localaddr in @a auth_context specify
  * the full addresses (host and port) of the sender and receiver, and must be of
  * type @c ADDRTYPE_ADDRPORT.
  *
- * The @a remote_addr argument is @a mandatory.  It specifies the address of the sender.
- * If the address of the sender in the message does not match @a remote_addr, the
- * error @c KRB5KRB_AP_ERR_BADADDR will be returned.
+ * If @a local_addr is non-null, then the address of the receiver in the message
+ * must match it. Otherwise, the receiver address in the message will be checked
+ * against the list of local addresses as returned by krb5_os_localaddr().
+ * If the check fails, an error is returned.
  *
- * If @a local_addr is non-null, then the address of the receiver in the message must
- * match it. If it is NULL, the receiver address in the message will be checked against the
- * list of local addresses as returned by krb5_os_localaddr(). If the check fails,
- * @c KRB5KRB_AP_ERR_BADARRD is returned.
+ * If KRB5_AUTH_CONTEXT_DO_SEQUENCE flag is set in @a auth_context
+ * the @a remote_seq_number field of @a auth_context is compared to the
+ * sequence number for the message, and error is returned
+ * if it does not match. Otherwise, the sequence number is not used.
  *
- * If the @a flags field in @c _krb5_auth_context indicates that sequence numbers
- * are to be used (if @c KRB5_AUTH_CONTEXT_DOSEQUENCE is set in it), the @c remote_seq_number field
- * of @c _krb5_auth_context is compared to the sequence number for the message, and
- * @c KRB5_KRB_AP_ERR_BADORDER is returned if it does not match. Otherwise, the sequence
- * number is not used.
- *
- * If timestamps are to be used (if @c KRB5_AUTH_CONTEXT_DO_TIME is set in @c _krb5_auth_context),
- *  then two additional checks are performed:
- *
+ * If KRB5_AUTH_CONTEXT_DO_TIME flag is set in @a auth_context,
+ * then two additional checks are performed:
  * @li The timestamp in the message must be within the permitted clock skew
- * (which is usually five minutes), or @c KRB5KRB_AP_ERR_SKEW is returned.
- * @li The message must not be a replayed message, according to @a rcache.
+ *     (which is usually five minutes), or error is returned.
+ * @li The message must not be a replayed message field in @a auth_context.
  *
- * Make sure to free the allocated memory when it is no longer needed
+ * Use krb5_free_data_contents() to free @a outbuf when it is no longer needed.
  *
- * @retval
- * 0 Success
- * @return
- * Kerberos error codes
- *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_rd_safe(krb5_context context, krb5_auth_context auth_context,
              const krb5_data *inbuf, krb5_data *outbuf,
              krb5_replay_data *outdata);
 
-/**
- * @brief Decode and decrypt a @c KRB-PRIV message.
+/** Process a @c KRB-PRIV message.
  *
- * @param context           Context structure [input, output]
- * @param auth_context      Authentication context [input, output]
- * @param inbuf             @c KRB-PRIV message[input]
- * @param outbuf            Application data stored in @c KRB_PRIV message [output]
- * @param outdata          Sequence numbers [input, output]
+ * @param [in]     context        Context structure
+ * @param [in,out] auth_context   Authentication structure
+ * @param [in]     inbuf          @c KRB-PRIV message to be parsed
+ * @param [out]    outbuf         Data parsed from @c KRB-PRIV message
+ * @param [out]    outdata        Replay data. Specify NULL if not needed
  *
- * The @a remote_addr field of @c _krb5_auth_context set by krb5_auth_con_setaddrs() is
- * @a mandatory; it specifies the address of the sender. If the address of the sender in the
- * message does not match the @a remote_addr, @c KRB5KRB_AP_ERR_BADADDR is returned.
+ * This function parses a @c KRB-PRIV message, verifies its integrity, and
+ * stores its data into @a outbuf.
  *
- * If @c local_addr field of @c _krb5_auth_context is non-null, the address of the
- * receiver in the message must match it. If @a local_addr is NULL, the receiver address in the
- * message will be checked against the list of local addresses as returned by krb5_os_localaddr().
+ * @note If the @c KRB5_AUTH_CONTEXT_RET_TIME or @c KRB5_AUTH_CONTEXT_RET_SEQUENCE
+ *       flag is set in @a auth_context, the @a outdata is required.
  *
- * The @a keyblock field of @c _krb5_auth_context specifies the key to be used to decrypt the message.
- * If the @a i_vector field is non-null, it is used as an initialization vector
- * for the decryption (if the encryption type of the message supports initialization vectors)
- * and its contents are replaced with the last block of encrypted data in the message.
+ * @note The @a remote_addr argument in @a auth_context argument is mandatory.
+ *       It specifies the address of the sender. This address will be used
+ *       to verify the sender address in the KRB-SAFE message.
  *
- * @a flags in @c _krb5_auth_context specify if timestamps (@c KRB5_AUTH_CONTEXT_DO_TIME)
- * and sequence numbers (@c KRB5_AUTH_CONTEXT_DO_SEQUENCE, @c KRB5_AUTHCONTEXT_RET_SEQUENCE) are used.
+ * The keyblock used to decrypt the data and verify the integrity of the message
+ * is taken from fields @a recv_subkey or @a key in @a auth_context.
+ * The keyblock is chosen in the preceding order by the first one that is non-null.
  *
- * @retval
- * 0 Success
- * @return
- * Kerberos error codes
+ * If @c local_addr field of @a auth_context is non-null, the address of the
+ * receiver in the message must match it. Otherwise, the receiver address in the
+ * message will be checked against the list of local addresses as returned by
+ * krb5_os_localaddr().
+ *
+ * If the @a i_vector field in @a auth_context is non-null, it is used as an
+ * initialization vector for the decryption (if the encryption type of
+ * the message supports initialization vectors) and its contents are replaced
+ * with the last block of encrypted data in the message.
+ *
+ * If KRB5_AUTH_CONTEXT_DO_SEQUENCE flag is set in @a auth_context
+ * the @a remote_seq_number field of @a auth_context is compared to the
+ * sequence number for the message, and error is returned
+ * if it does not match. Otherwise, the sequence number is not used.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_rd_priv(krb5_context context, krb5_auth_context auth_context,
@@ -4495,66 +4510,48 @@ krb5_get_in_tkt_with_keytab(krb5_context context, krb5_flags options,
 
 #endif /* KRB5_DEPRECATED */
 
-/**
- * @brief Parse a @c KRB5-AP-REQ message and return its contents.
+/** Parse and decrypt a @c KRB_AP_REQ message.
  *
- * @param context           Context structure [input, output]
- * @param auth_context      Authentication context [input, output]
- * @param inbuf             Holds the KRB-AP-REQ message to be parsed [input]
- * @param server            Expected server's principal name for the ticket
- * @param keytab            Key table containing decryption key [input]
- * @param ap_req_options    If non-null, the AP-REQ flags on output [input, output]
- * @param ticket            Returned ticket from the AP-REQ message. Use NULL to specify no ticket [output]
+ * @param [in]     context        Context structure
+ * @param [in,out] auth_context   Authentication context. A new authentication
+ *                                context is returned if NULL is specified
+ * @param [in]     inbuf          AP-REQ message to be parsed
+ * @param [in]     server         Server's principal for the @a ticket.
+ *                                Use NULL for the principal of the @a keytab
+ * @param [in]     keytab         Key table that contains a decryption key.
+ *                                Use NULL for the default key table.
+ * @param [out]    ap_req_options If non-null, the AP-REQ flags on output
+ * @param [out]    ticket         Returned ticket from the AP-REQ message.
+ *                                Use NULL to specify that no ticket needed.
  *
- * If @a ticket is set to non-null, it is modified to point to the ticket information.
+ * This function parses, decrypts and verifies a AP-REQ message from @a inbuf
+ * and stores the authenticator in @a auth_context.
  *
- * If @c _krb5_auth_context is set to NULL, an @c _krb5_auth_context is generated and freed internally
- * by the function.
+ * If a keyblock is present in the @a auth_context, it is used to decrypt
+ * the ticket in AP-REQ message. (This is useful for user-to-user authentication.)
+ * Otherwise, the decryption key is obtained from the @a keytab.
  *
- * If @a server is set to NULL, any server name with an appropriate key will be accepted.
- *  Make sure to verify that the server principal name matches some trust
- * criterion.
+ * The client specified in the decrypted authenticator must match the client
+ * specified in the @a ticket.
  *
- * If @a server is set to non-null and a @a replay detection cache has not
- * been established with @c _krb5_auth_context, an @c _krb5_auth_context is generated.
+ * If the @a remote_addr field of @a auth_context is set, the request must came
+ * from that address.
  *
- * If a @a keyblock is present in the @c _krb5_auth_context, it is used to decrypt the ticket
- * request and then must be freed with krb5_free_keyblock(). This is useful for
- * user-to-user authentication.
+ * If a replay cache handle is provided in the @a auth_context, the authenticator
+ * and @a ticket are verified against it. If no conflicts found, the new
+ * authenticator is then stored in the replay cash of @a auth_context.
  *
- * If no @a keyblock is specified, the key table uses an entry matching the requested @a keytype,
- * @a server, and @a version @a number.
+ * Various other checks are performed on the decoded data, including
+ * cross-realm policy, clockskew, and ticket validation times.
  *
- * The authenticator in the request is decrypted and stored in @c _krb5_auth_context.
- * The client specified in the decrypted authenticator is compared to the client
- * specified in the decoded ticket to ensure that the compare was performed.
+ * On success the authenticator, subkey, and remote sequence number of the
+ * request are stored in @a auth_context. If the @c AP_OPTS_MUTUAL_REQUIRED
+ * bit is set, the local sequence number is XORed with the remote sequence
+ * number in the request.
  *
- * If the @a remote_addr field of @c _krb5_auth_context is set, this routine checks
- * whether the request came from the right client.
+ * Use krb5_free_ticket() to free @a ticket when it is no longer needed.
  *
- * The replay cache is checked to see if the ticket and authenticator have been seen
- * and, if so, returns an error. If not, the ticket and authenticator are entered into
- * the replay cache.
- *
- * Various other checks are performed on the decoded data, including cross-realm policy,
- * clockskew, and ticket validation times.
- *
- * The @a keyblock, @a subkey, and @a sequence @a number of the request are
- * stored in @c _krb5_auth_context for future use.
- *
- * If the @c AP_OPTS_MUTUAL_REQUIRED bit is set, the local sequence number
- * is XORed with the remote sequence number in the request.
- *
- * @note  A new authentication context is returned if NULL is specified.
- *
- * @note If @a keytab is set to NULL, the default key table is used.
- *
- * @retval
- *  0    Success
- * @retval
- *  KRB5KRB-AP-ERRR-BADADDR Invalid address
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_rd_req(krb5_context context, krb5_auth_context *auth_context,
@@ -4612,7 +4609,7 @@ krb5_kt_read_service_key(krb5_context context, krb5_pointer keyprocarg,
  * @note The @a local_addr argument is mandatory.
  *
  * @note The @a outdata argument is required if KRB5_AUTH_CONTEXT_RET_TIME or
- *       KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set in the @a auth_context.`
+ *       KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set in the @a auth_context.
  *
  * If @c KRB5_AUTH_CONTEXT_DO_TIME flag is set in the @a auth_context, an entry
  * describing the message is entered in the replay cache @a auth_context->rcache
@@ -4632,11 +4629,11 @@ krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
 
 /** Format a @c KRB-PRIV message.
  *
- * @param [in]     context               Context structure
- * @param [in,out] auth_context          Authentication context
- * @param [in]     serdata               User data for @c KRB-PRIV message
- * @param [out]    outbuf                Formatted @c KRB-PRIV message
- * @param [out]    outdata               Replay cache handle
+ * @param [in]     context       Context structure
+ * @param [in,out] auth_context  Authentication context
+ * @param [in]     serdata       User data for @c KRB-PRIV message
+ * @param [out]    outbuf        Formatted @c KRB-PRIV message
+ * @param [out]    outdata       Replay cache handle. Specify NULL if not needed.
  *
  * This function is similar to krb5_mk_safe(), but the message is encrypted and
  * integrity-protected, not just integrity-protected.
@@ -4654,8 +4651,7 @@ krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
  * the last block of encrypted data upon return.
  *
  * @note If the @c KRB5_AUTH_CONTEXT_RET_TIME or @c KRB5_AUTH_CONTEXT_RET_SEQUENCE
- * flag is set in @a auth_context, the @a outdata is required. Otherwise it can be
- * NULL.
+ * flag is set in @a auth_context, the @a outdata is required.
  *
  * @note The flags from @a auth_context specify whether sequence numbers or
  * timestamps will be used to identify the message.
@@ -4853,14 +4849,18 @@ krb5_recvauth_version(krb5_context context,
  * @param [in,out] auth_context       Authentication context
  * @param [in]     ppcreds            NULL terminated array of credentials
  * @param [out]    ppdata             Encoded credentials
- * @param [out]    outdata            Replay cache handle
+ * @param [out]    outdata            Replay cache handle.
+ *                                    Specify NULL if not needed
  *
  * This function takes an array of credentials @a ppcreds and formats
  * a @c KRB-CRED message @a ppdata to pass to krb5_rd_cred().
  *
- * @note If the @c KRB5_AUTH_CONTEXT_RET_TIME or @c KRB5_AUTH_CONTEXT_RET_SEQUENCE
- * flag is set in @a auth_context, the @a outdata is required. Otherwise it can be
- * NULL.
+ * @note If the KRB5_AUTH_CONTEXT_RET_TIME or KRB5_AUTH_CONTEXT_RET_SEQUENCE
+ *       flag is set in @a auth_context, the @a outdata is required.
+ *
+ * The message will be decrypted and verified using the @a recv_subkey
+ * field of @a auth_context if it is non-null, or by the @a key field if
+ * @a recv_subkey is null or fails to decrypt the message.
  *
  * @retval
  *  0 Success
@@ -4905,29 +4905,27 @@ krb5_mk_1cred(krb5_context context, krb5_auth_context auth_context,
               krb5_creds *pcreds, krb5_data **ppdata,
               krb5_replay_data *outdata);
 
-/**
- * @brief Read a @c KRB-CRED message, validate it, and output the nonce and an array of the forwarded credentials.
+/** Read and validate a @c KRB-CRED message.
  *
- * @param context            Context structure [input, output]
- * @param auth_context       Authentication context [input, output}
- * @param pcreddata          @c KRB-CRED message [input]
- * @param pppcreds           Array of forwarded credentials [output]
- * @param outdata            Replay data information [output]
+ * @param [in]     context          Context structure
+ * @param [in,out] auth_context     Authentication context
+ * @param [in]     pcreddata        @c KRB-CRED message
+ * @param [out]    pppcreds         Array of forwarded credentials
+ * @param [out]    outdata          Replay data
+ *                                  Specify NULL if not needed.
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * @note The @a outdata argument is required if RB5_AUTH_CONTEXT_RET_TIME or
+ *       KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set in the @a auth_context.`
  *
- * @retval
- * 0 Success
- * @retval
- *  KRB5_RC_REQUIRED Message replay detection requires @a rcache parameter
- *  @retval
- *  KRB5KRB-AP-ERR-SKEW Clock skew too great
- * @retval
- *  KRB5KRB-AP-ERR-BADORDER Message out of order
- * @retval
- *  ENOMEM Insufficient memory
- * @return
- * Kerberos error codes
+ * The keyblock used to decrypt the data and verify the integrity of the message
+ * is taken from fields @a recv_subkey or @a key in @a auth_context.
+ * The keyblock is chosen in the preceding order by the first one that is non-null.
+ * However, if the first non-null key fails to decrypt the message, the second one
+ * will be used.
+ *
+ * Use krb5_free_tgt_creds() to free @a pppcreds when it is no longer needed.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_rd_cred(krb5_context context, krb5_auth_context auth_context,
@@ -5124,11 +5122,6 @@ krb5_auth_con_setports(krb5_context context, krb5_auth_context auth_context,
  * @param [in]     context          Context structure
  * @param [in,out] auth_context     Authentication context
  * @param [in]     keyblock         User key
- *
- * Use before calling krb5_rd_req_decode() for user-to-user
- * authentication when the server has the key and needs it to decrypt
- * the incoming request. Once decrypted, the temporary key is no longer
- * valid, and it is overwritten by the session key sent by the client.
  *
  * @retval 0 Success. Otherwise - Kerberos error codes
  */
