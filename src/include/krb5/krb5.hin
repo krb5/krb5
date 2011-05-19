@@ -490,49 +490,57 @@ enum {
 #define krb5_xc(ptr,args) ((*(ptr)) args)
 #endif
 
- /**
- * @brief Encrypt data using a key.
+ /** Encrypt data using a key.
  *
- * @param context                 Context structure [input, output]
- * @param key                     Key value from key table, ticket, etc. [input]
- * @param usage                   Key usage [input]
- * @param cipher_state            Cipher state [input]
- * @param input                   Data to be encrypted [input]
- * @param output                  Encrypted data [output]
+ * @param          context        Context structure
+ * @param [in]     key            Enryption key
+ * @param [in]     usage          Key usage (see KRB5_KEYUSAGE types)
+ * @param [in,out] cipher_state   Initial vector; specify NULL if not needed
+ * @param [in]     input          Data to be encrypted
+ * @param [out]    output         Encrypted data
  *
- * @retval
- *  0     Success
- * @retval
- * KRB5_BAD_ENCTYPE      Bad encryption type
- * @return
- * Kerberos error codes
+ * This function encrypts the data block @a input and stores the output
+ * into @a output. The actual encryption key will derive from @a key if
+ * key derivation is permitted for the encryption algorithm.
+ * @a cipher_state specifies the starting value for the encryption operation,
+ * and is updated with the state to be passed as input to the next operation.
  *
- * @sa enctype
+ * @note The caller must initialize @a output and allocate at least enough
+ * space for the result (using krb5_c_encrypt_length() to determine the amount
+ * of space needed). @a output->length will be set to the actual length of the
+ * ciphertext if it was larger.
  *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_encrypt(krb5_context context, const krb5_keyblock *key,
                krb5_keyusage usage, const krb5_data *cipher_state,
                const krb5_data *input, krb5_enc_data *output);
 
-/**
- * @brief Decrypt data using a key.
+/** Decrypt data using a key.
  *
- * @param context           Context structure [input, output]
- * @param key               Key value from key table, ticket, etc. [input]
- * @param usage             Key usage [input]
- * @param cipher_state      Cipher state [input]
- * @param input             Encrypted data [input]
- * @param output            Decrypted data [output]
+ * @param          context        Context structure
+ * @param [in]     key            Enryption key
+ * @param [in]     usage          Key usage (see KRB5_KEYUSAGE types)
+ * @param [in,out] cipher_state   Initial vector; specify NULL if not needed
+ * @param [in]     input          Encrypted data
+ * @param [out]    ouput          Decrypted data
  *
- * @retval
- * 0 Success
- * @retval
- * KRB5_BAD_ENCTYPE      Bad encryption type
- * @return
- * Kerberos error codes
+ * This function decrypts the data block @a input and stores the output
+ * into @a output. The actual decryption key will derive from @a key if
+ * key derivation is permitted for the encryption algorithm.
+ * @a cipher_state specifies the starting value for the decryption operation,
+ * and is updated with the state to be passed as input to the next operation.
  *
- * @sa keyusage
+ * @note The caller must initialize @a output and allocate at least enough
+ * space for the result. The usual practice is to allocate an output buffer
+ * as long as the ciphertext, and let krb5_c_decrypt() trim @a output->length.
+ * For some enctypes, the resulting output->length may include padding bytes
+ * (DES and DES3 enctypes do not have self-describing padding, so it is
+ * impossible to separate the plaintext from the padding based only on the
+ * ciphertext token).
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 
 krb5_error_code KRB5_CALLCONV
@@ -540,139 +548,111 @@ krb5_c_decrypt(krb5_context context, const krb5_keyblock *key,
                krb5_keyusage usage, const krb5_data *cipher_state,
                const krb5_enc_data *input, krb5_data *output);
 
-/**
- * @brief Compute the length of the ciphertext produced by encrypting @a inputlen bytes.
+/** Return encrypted data length.
  *
- * @param context               Context structure [input, output]
- * @param enctype               Encryption type [input]
- * @param inputlen              Length of encrypted data [input]
- * @param length                Length of unecrypted data [output]
+ * @param       context               Context structure
+ * @param [in]  enctype               Encryption type
+ * @param [in]  inputlen              Length of the data to be encrypted
+ * @param [out] length                Length of the encrypted data
  *
- * @retval
- * 0    Success
- * @retval
- * KRB5_BAD_ENCTYPE      Bad encryption type
- * @return
- * Kerberos error codes
+ * This function computes the length of the ciphertext produced by encrypting
+ * @a inputlen bytes and returns the length of the encrypted data including
+ * padding, confounder and checksum.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_encrypt_length(krb5_context context, krb5_enctype enctype,
                       size_t inputlen, size_t *length);
 
-/**
- * @brief Write the block size for the specified encryption type into the @a size_t pointed to by @a blocksize.
+/** Return cipher block size.
  *
- * @param context         Context structure [input, output]
- * @param enctype         Encryption type [input]
- * @param blocksize       Attribute of encryption system [output]
+ * @param       context         Context structure
+ * @param [in]  enctype         Encryption algorithm
+ * @param [out] blocksize       Block size for @a enctype
  *
- * @retval
- *  0   Success
- * @retval
- *  KRB5_BAD_ENCTYPE         Bad encryption type
- * @retval
- *  ENOMEM                   Insufficient memory
- * @return
- * Kerberos error codes
- *
- * @sa enctype
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_block_size(krb5_context context, krb5_enctype enctype,
                   size_t *blocksize);
 
-/**
- * @brief Write the length of the specified key to keylength.
+/** Return length of the specified key in bytes.
  *
- * @param context              Context structure [input, output]
- * @param enctype              Encryption type [input]
- * @param keybytes             Number of bytes required to make a key [input]
- * @param keylength            Length of final key
+ * @param       context              Context structure
+ * @param [in]  enctype              Encryption algorithm
+ * @param [out] keybytes             Number of bytes required to make a key
+ * @param [out] keylength            Length of final key
  *
- * @retval
- *  0  Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_keylengths(krb5_context context, krb5_enctype enctype,
                   size_t *keybytes, size_t *keylength);
 
-/**
- * @brief Initialize a new cipher state for @a enc_type in the specified @c _krb5_keyblock.
+/** Initialize a new cipher state.
  *
- * @param context             Context structure [input, output]
- * @param key                 Key [input]
- * @param usage               Usage [input]
- * @param new_state           New cipher state [output]
+ * @param       context             Context structure
+ * @param [in]  key                 Key
+ * @param [in]  usage               Key usage (see KRB5_KEYUSAGE types)
+ * @param [out] new_state           New cipher state
  *
- * @note @a new_state contains the new cipher state.
- *
- * @retval
- *  0  Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_init_state(krb5_context context, const krb5_keyblock *key,
                   krb5_keyusage usage, krb5_data *new_state);
 
-/**
- * @brief  Free a cipher state previously allocated by krb5_c_init_state().
+/** Free a cipher state previously allocated by krb5_c_init_state().
  *
- * @param context           Context structure [input, output]
- * @param key               Key [input]
- * @param state             Cipher state to be freed [input]
+ * @param      context           Context structure
+ * @param [in] key               Key
+ * @param [in] state             Cipher state to be freed
  *
- * @retval
- *  0  Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
-
 krb5_error_code KRB5_CALLCONV
 krb5_c_free_state(krb5_context context, const krb5_keyblock *key,
                   krb5_data *state);
 
-/**
- * @brief Generate pseudo-random bytes from @a input.
+/** Generate enctype-specific pseudo-random bytes.
  *
- * @param context           Context structure [input, output]
- * @param keyblock          Key [input]
- * @param input             Input data [input]
- * @param output            Output data [output]
+ * @param       context           Context structure
+ * @param [in]  keyblock          Key
+ * @param [in]  input             Input data
+ * @param [out] output            Output data
  *
- * @retval
- *  0  Success
- * @return
- * Kerberos error codes
+ * This function selects a pseudo-random function based on @a keyblock and
+ * computes its value over @a input, placing the result into @a output.
+ * The caller must preinitialize @a output and allocate space for the
+ * result, using krb5_c_prf_length() to determine the required length.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
-
 krb5_error_code KRB5_CALLCONV
-krb5_c_prf(krb5_context context, const krb5_keyblock *keyblock, krb5_data *input, krb5_data *output);
+krb5_c_prf(krb5_context context, const krb5_keyblock *keyblock,
+           krb5_data *input, krb5_data *output);
 
-/**
- * @brief Get the number of pseudo-random bytes output by krb5_c_prf() for the specified @a enctype.
+/** Get the output length of pseudo-random functions for a given encryption type.
  *
- * @param context           Context structure [input, output]
- * @param enctype           Encryption type [input]
- * @param len               Number of bytes for @a enctype [output]
+ * @param       context           Context structure
+ * @param [in]  enctype           Encryption type
+ * @param [out] len               Number of bytes for @a enctype
  *
- * Make sure to free the allocated memory when it is no longer needed.
- *
- * @retval
- *  0  Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
-
 krb5_error_code KRB5_CALLCONV
 krb5_c_prf_length(krb5_context context, krb5_enctype enctype, size_t *len);
 
-/**
- * @return Returns KRB-FX-CF2 in a newly allocated
- * keyblock on success or an error code on error.
+/**  Returns KRB-FX-CF2 in a newly allocated keyblock.
+ *
+ * @param       context   Context structure
+ * @param [in]  k1        KDC contribution key
+ * @param [in]  pepper1   String "PKINIT"
+ * @param [in]  k2        Reply key
+ * @param [in]  pepper2   String "KeyExchange"
+ * @param [out] out       Output key
  *
  * This function is simple in that it assumes
  * pepper1 and pepper2 are C strings with no
@@ -680,6 +660,9 @@ krb5_c_prf_length(krb5_context context, krb5_enctype enctype, size_t *len);
  * result will be the same as that of k1.  Both
  * of these assumptions are true of current
  * specs.
+ * Note that @a k1 and @a k2 can be of two different enctypes.
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_fx_cf2_simple(krb5_context context,
@@ -687,105 +670,84 @@ krb5_c_fx_cf2_simple(krb5_context context,
                      krb5_keyblock *k2, const char *pepper2,
                      krb5_keyblock **out);
 
-/**
- * @brief Create a key from @a random_key.
+/** Generate an enctype-specific random encryption key.
  *
- * @param context               Context structure [input, output]
- * @param enctype               Encryption type [input]
- * @param k5_random_key         Pointer to an allocated and initialized keyblock [output]
+ * @param       context        Context structure
+ * @param [in]  enctype        Encryption type of the generated key
+ * @param [out] k5_random_key  An allocated and initialized keyblock
  *
- * The @a length field in @c _krb5_c_keylength ensures that @a random_key->contents points to an allocated buffer
- * of the correct length.
+ * Use krb5_free_keyblock_contents() to free @a k5_random_key when
+ * no longer needed.
  *
- * Make sure to free the allocated memory when it is no longer needed.
- *
- * @retval
- *  0  Success
- * @retval
- *  KRB5_BAD_ENCTYPE         Bad encryption type
- * @retval
- *  ENOMEM                   Insufficient memory
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
-
 krb5_error_code KRB5_CALLCONV
 krb5_c_make_random_key(krb5_context context, krb5_enctype enctype,
                        krb5_keyblock *k5_random_key);
 
-/**
- * @param context               Context structure [input, output]
- * @param enctype               Encryption type [input]
- * @param random_data           Pointer to @c _krb5_data structure [input]
- * @param k5_random_key         Pointer to an allocated and initialized keyblock [output]
+/** Generate an enctype-specific key given random data.
  *
- * @retval
- * 0  Success
- * @return
- * Kerberos error codes
+ * @param       context               Context structure
+ * @param [in]  enctype               Encryption type
+ * @param [in]  random_data           Random input data
+ * @param [out] k5_random_key         Random key
+ *
+ * This function takes random input data @a random_data
+ * and produces a valid key @a k5_random_key for a given @a enctype.
+ *
+ * @note  It is assumed that @a k5_random_key has already been initialized and
+ * @a k5_random_key->contents has been allocated with the correct length.
+ *
+ * @sa  krb5_c_keylengths()
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_to_key(krb5_context context, krb5_enctype enctype,
                      krb5_data *random_data, krb5_keyblock *k5_random_key);
 
-/**
- * @brief Add entropy to the pseudo-random number generator.
+/** Add entropy to the pseudo-random number generator.
  *
- * @param context               Context structure [input, output]
- * @param randsource            Entropy source [input]
- * @param data                  Data [input, output]
+ * @param      context               Context structure
+ * @param [in] randsource            Entropy source
+ * @param [in] data                  Data
  *
- * @note  This might cause the @c PRNG to be reseeded, although this is not guaranteed.
+ * @note  This might cause the @c PRNG to be reseeded,
+ *        although this is not guaranteed.
  *
- * @retval
- *  0  Success
- * @return
- * Kerberos error codes
- *
- * @sa randsource
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_add_entropy(krb5_context context, unsigned int randsource,
                           const krb5_data *data);
 
-/**
- * @brief Generate pseudo-random bytes using entropy from OS.
+/** Generate pseudo-random bytes.
  *
- * @param context           Context structure [input, output]
- * @param data              Random data [output]
+ * @param       context           Context structure
+ * @param [out] data              Random data
  *
- * @a data->length specifies the number of bytes to generate and @a data->data points to an allocated buffer of the correct length.
+ * @a data->length specifies the number of bytes to generate and
+ * @a data->data points to an allocated buffer of the correct length.
  *
- * @retval
- *  0                            Success
- * @retval
- *  KRB5_CRYPTO_INTERNAL         Cryptosystem internal error
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_make_octets(krb5_context context, krb5_data *data);
 
-/**
- * @brief Collect entropy from the OS if possible.
+/** Collect entropy from the OS if possible.
  *
- * @a strong requests that as strong
- * of a source of entropy  as available be used.  Setting @a strong may
- * increase the probability of blocking and should not  be used for normal
- * applications.  Good uses include seeding the PRNG for kadmind
- * and realm setup.
+ * @param [in]  context            Context structure
+ * @param [in]  strong             Strongest available source of entropy
+ * @param [out] success            1 if OS provides entropy, 0 otherwise
  *
- * @param context            Context structure [input, output]
- * @param strong             Strongest available source of entropy [input]
- * @param success            1 if OS provides entropy, 0 if OS did not provide entropy [output]
+ * If @a strong is non-zero, this function attempts to use the strongest
+ * available source of entropy.
  *
- * @note If @a strong is non-zero, this function attempts to use the strongest available source of entropy.
+ * Setting @a strong may increase the probability of blocking and should not
+ * be used for normal applications.  Good uses include seeding the PRNG for
+ * kadmind and realm setup.
  *
- * @return
- *  If the OS provided and @a success is non-null,@a success is set to 1
- *
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_os_entropy(krb5_context context, int strong, int *success);
@@ -794,57 +756,41 @@ krb5_c_random_os_entropy(krb5_context context, int strong, int *success);
 krb5_error_code KRB5_CALLCONV
 krb5_c_random_seed(krb5_context context, krb5_data *data);
 
-/**
- * @brief Convert the specified string to a key, using the specified encryption type, salt value, and parameters.
+/** Convert a given string to a key.
  *
- * @param context                       Context structure [input, output]
- * @param enctype                       Encryption type [input]
- * @param string                        String to be converted [input]
- * @param salt                          Salt value [input]
- * @param key                           Generated key [output]
+ * @param       context                       Context structure
+ * @param [in]  enctype                       Encryption type
+ * @param [in]  string                        String to be converted
+ * @param [in]  salt                          Salt value
+ * @param [out] key                           Generated key
  *
- * @retval
- *  0    Success
- * @retval
- *  KRB5_BAD_ENCTYPE                Bad encryption type
- *  @retval
- *  KRB5_CRYPTO_INTERNAL            Cryptosystem internal error
- *  @retval
- * ENOMEM                          Insufficient memory
- * @return
- * Kerberos error codes
+ * This function converts @a string to a @a key of encryption type
+ * @a enctype, using the specified @a salt.
+ * The newly created @a key must be released by calling
+ * krb5_free_keyblock_contents() when it is no longer needed.
  *
- * @sa enctype
- * @sa salt
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_string_to_key(krb5_context context, krb5_enctype enctype,
                      const krb5_data *string, const krb5_data *salt,
                      krb5_keyblock *key);
 
-/**
- * @brief  Convert a string representation of a key into a @c _krb5_keyblock structure using a specified group of parameters.
+/** Convert a given string to a key with additional parameters.
  *
- * @param context           Context structure [input, output]
- * @param enctype           Encryption type [input]
- * @param string            String form of the key [input]
- * @param salt              Salt value used in the encryption [input]
- * @param params            Parameters to be used for this conversion [input]
- * @param key               Keyblock [output]
+ * @param       context                       Context structure
+ * @param [in]  enctype                       Encryption type
+ * @param [in]  string                        String to be converted
+ * @param [in]  salt                          Salt value
+ * @param [in]  params                        Parameters
+ * @param [out] key                           Generated key
  *
- * @retval
- * 0 Success
- * @retval
- *  KRB5_BAD_ENCTYPE Bad encryption type
- * @retval
- *  KRB5_CRYPTO_INTERNAL Cryptosystem internal error
- * @retval
- *  ENOMEM Insufficient memory
- * @return
- * Kerberos error codes
+ * This function is similar to krb5_c_string_to_key(), but takes
+ * additional parameters.
+ * The newly created @a key must be released by calling
+ * krb5_free_keyblock_contents() when it is no longer needed.
  *
- * @sa enctype
- * @sa salt
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_string_to_key_with_params(krb5_context context,
@@ -854,124 +800,84 @@ krb5_c_string_to_key_with_params(krb5_context context,
                                  const krb5_data *params,
                                  krb5_keyblock *key);
 
-/**
- * @brief Compare two encryption types.
+/** Compare two encryption types.
  *
- * @param context            Context structure [input, output]
- * @param e1                 First encryption type [input]
- * @param e2                 Second encryption type [input]
- * @param similar            @c TRUE if types are similar, @c FALSE if types are different [output]
+ * @param       context   Context structure
+ * @param [in]  e1        First encryption type
+ * @param [in]  e2        Second encryption type
+ * @param [out] similar   @c TRUE if types are similar, @c FALSE - otherwise
  *
- * @retval
- * TRUE  @a enctypes are similar
- * @retval
- * FALSE @a enctypes are different
- * @retval
- * KRB5_BAD_ENCTYPE     Bad encryption type
- * @return
- * Kerberos error codes
- *
- * @sa enctype
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_enctype_compare(krb5_context context, krb5_enctype e1, krb5_enctype e2,
                        krb5_boolean *similar);
 
-/**
- * @brief Compute a checksum.
+/** Compute a checksum.
  *
- * @param context                  Context structure [input, output]
- * @param cksumtype                Checksum type [input]
- * @param key                      Encryption key [input]
- * @param usage                    Usage [input]
- * @param input                    Input data [input]
- * @param cksum                    Checksum [output]
+ * @param       context      Context structure
+ * @param [in]  cksumtype    Checksum type; If 0 - use the mandatory checksum.
+ * @param [in]  key          Encryption key for a keyed checksum
+ * @param [in]  usage        @a key usage
+ * @param [in]  input        Input data
+ * @param [out] cksum        Generated checksum
  *
- * @retval
- * 0 Success
- * @retval
- *  KRB5_BAD_ENCTYPE Bad encryption type
- * @retval
- *  ENOMEM Insufficient memory
- * @return
- * Kerberos error codes
+ * The newly created @a cksum must be released by calling
+ * krb5_free_checksum_contents() when it is no longer needed.
  *
- * @sa cksumtype
+ * @sa krb5_c_verify_checksum()
+ *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
                      const krb5_keyblock *key, krb5_keyusage usage,
                      const krb5_data *input, krb5_checksum *cksum);
 
-/**
- * @brief Verify the checksum of data in @a cksum that was created with a @a key using the specified key usage.
+/** Verify a checksum.
  *
- * @param context              Context structure [input, output]
- * @param key                  Encryption key [input]
- * @param usage                Usage [input]
- * @param data                 Data [input]
- * @param cksum                Checksum to be verified [input]
- * @param valid                Non-zero for success, zero for failure [output]
+ * @param       context      Context structure
+ * @param [in]  key          Encryption key for a keyed checksum
+ * @param [in]  usage        @a key usage
+ * @param [in]  data         Data to be used to compute a new checksum
+ *                           using @a key to compare @a cksum against
+ * @param [in]  cksum        Checksum to be verified
+ * @param [out] valid        Non-zero for success, zero for failure
  *
- * @retval
- * Non-zero Success
- * @retval
- *  0  Failure
- * @retval
- *  KRB5_BAD_ENCTYPE    Bad encryption type
- * @retval
- *  KRB5_BAD_MSIZE      Message size is incompatible with encryption type
- * @return
- * Kerberos error codes
+ * This function verifies that @a cksum is a valid checksum for
+ * @a data.  If the checksum type of @a cksum is a keyed checksum, @a key
+ * and @a usage are used to verify the checksum.
  *
- * @sa keyusage
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_verify_checksum(krb5_context context, const krb5_keyblock *key,
                        krb5_keyusage usage, const krb5_data *data,
                        const krb5_checksum *cksum, krb5_boolean *valid);
 
-/**
- * @brief Output the checksum length produced by the specified checksum type.
+/** Return a checksum length produced by the specified checksum type.
  *
- * @param context               Context structure [input, output]
- * @param cksumtype             Checksum type [input]
- * @param length                Checksum length [output]
+ * @param       context               Context structure
+ * @param [in]  cksumtype             Checksum type
+ * @param [out] length                Checksum length
  *
- * @retval
- *  0                    Success
- * @retval
- *  KRB5_BAD_ENCTYPE      Bad encryption type
- * @return
- * Kerberos error codes
- *
- * @sa cksumtype
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_checksum_length(krb5_context context, krb5_cksumtype cksumtype,
                        size_t *length);
 
-/**
- * @brief Get list of checksum types that match a specified encryption type.
+/** Get a list of checksum types that match a specified encryption type.
  *
- * @param context           Context structure [input, output]
- * @param enctype           Encryption type [input]
- * @param count             Count of checksums matching the encryption type [output]
- * @param cksumtypes        List of matching checksums [output]
+ * @param       context     Context structure
+ * @param [in]  enctype     Encryption type
+ * @param [out] count       Count of checksums matching the encryption type
+ * @param [out] cksumtypes  Array of checksum types with encryption key
+ *                          types supported by @a enctype
  *
- * This returns only the checksum types that use key derivation.
+ * Use krb5_free_cksumtypes() to free @a cksumtypes when it is no longer needed.
  *
- * Make sure to free the allocated memory when it is no longer needed.
- *
- * @retval
- *  0   Success
- * @retval
- *  ENOMEM Insufficient memory
- * @return
- * Kerberos error codes
- *
- * @sa enctype
- * @sa cksumtype
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_c_keyed_checksum_types(krb5_context context, krb5_enctype enctype,
@@ -1035,58 +941,44 @@ krb5_c_keyed_checksum_types(krb5_context context, krb5_enctype enctype,
 #define KRB5_KEYUSAGE_ENC_CHALLENGE_KDC 55
 #define KRB5_KEYUSAGE_AS_REQ 56
 
-/**
- * @brief Verify that the specified encryption type is a valid Kerberos encryption type.
+/** Verify that a specified encryption type is a valid Kerberos encryption type.
  *
- * @param ktype           Encryption type [input]
+ * @param [in] ktype           Encryption type
  *
  * @retval
- *  0 invalid
- * @retval
- *  1  valid
- *
- * @sa enctype
+ * 0 - invalid;  1 - valid
  */
 krb5_boolean KRB5_CALLCONV
 krb5_c_valid_enctype(krb5_enctype ktype);
 
-/**
- * @brief Verify that specified checksum type is a valid Kerberos checksum type.
+/** Verify that specified checksum type is a valid Kerberos checksum type.
  *
  * @param ctype                        Checksum type [input]
  *
  * @retval
- *  0 invalid
- * @retval
- *  1  valid
+ * 0 - invalid;  1 - valid
  *
- * @sa cksumtype
  */
 krb5_boolean KRB5_CALLCONV
 krb5_c_valid_cksumtype(krb5_cksumtype ctype);
 
-/**
- * @brief Test whether a checksum type is collision-proof.
+/** Test whether a checksum type is collision-proof.
  *
- * @param ctype                        Checksum type [input]
+ * @param [in] ctype                        Checksum type
  *
  * @retval
- *   0 Not collision-proof, or checksum type is not in the list
- * @retval
- * 1  Success
+ * 0 Not collision-proof, or checksum type is not in the list; Otherwise - 1.
  */
 krb5_boolean KRB5_CALLCONV
 krb5_c_is_coll_proof_cksum(krb5_cksumtype ctype);
 
-/**
- * @brief Test whether a checksum type is keyed.
+/** Test whether a checksum type is keyed.
  *
- * @param ctype                    Checksum type [input]
+ * @param [in] ctype                    Checksum type
  *
  * @retval
- *  0       Checksum does not use derived keys, or checksum type is not in the list
- * @retval
- *  1       Checksum uses derived keys
+ * 0 Checksum does not use derived keys, or checksum type is not in the list;
+ * Otherwise - 1.
  */
 krb5_boolean KRB5_CALLCONV
 krb5_c_is_keyed_cksum(krb5_cksumtype ctype);
@@ -1144,9 +1036,7 @@ krb5_k_create_key(krb5_context context, const krb5_keyblock *key_data,
 void KRB5_CALLCONV
 krb5_k_reference_key(krb5_context context, krb5_key key);
 
-/**
- * @brief Decrement the reference count on a key and free it if it hits zero.
- */
+/** Decrement the reference count on a key and free it if it hits zero. */
 void KRB5_CALLCONV
 krb5_k_free_key(krb5_context context, krb5_key key);
 
@@ -1156,7 +1046,6 @@ krb5_k_key_keyblock(krb5_context context, krb5_key key,
                     krb5_keyblock **key_data);
 
 /** Retrieve the enctype of a krb5_key structure.  */
-
 krb5_enctype KRB5_CALLCONV
 krb5_k_key_enctype(krb5_context context, krb5_key key);
 
@@ -1910,9 +1799,7 @@ typedef struct _krb5_ccache *krb5_ccache;
 struct _krb5_cc_ops;
 typedef struct _krb5_cc_ops krb5_cc_ops;
 
-/**
- * @brief Cursor for iterating over all ccaches
- */
+/** Cursor for iterating over all ccaches */
 struct _krb5_cccol_cursor;
 typedef struct _krb5_cccol_cursor *krb5_cccol_cursor;
 
@@ -2725,55 +2612,42 @@ krb5_get_credentials(krb5_context context, krb5_flags options,
                      krb5_ccache ccache, krb5_creds *in_creds,
                      krb5_creds **out_creds);
 
-/**
- * @brief Contact the KDC to validate a credential.
+/** Contact the KDC to validate credentials.
  *
- * @param context             Context structure [input, output]
- * @param options             Unused
- * @param ccache              Credentials cache handle [input, output]
- * @param in_creds            Input credentials [input]
- * @param out_creds           Output credentials [output]
+ * @param [in]     context    Context structure
+ * @param          options    Unused
+ * @param [in,out] ccache     Credentials cache handle
+ * @param [in]     in_creds   Request credentials
+ * @param [out]    out_creds  Output credentials
  *
- * Make sure to free the allocated memory when it is no longer needed.
- * @retval
- *  0  Success
- * @retval
- *  ENOMEM Insufficient memory
- * @retval
- *  KRB5_PROG_ETYPE_NOSUPP Encryption type is not supported
- * @retval
- *  KRB5_KDCREP_MODIFIED KDC reply did not match expectations
- * @return
- *  Kerberos error codes
+ * This function gets a validated credential matching @a in_creds, by
+ * retrieving a matching credential from @a ccache and validating it with the
+ * credential's realm's KDC. Upon successful completion the result is placed in
+ * @a out_creds, the @a ccache is re-initialized and updated with a new ticket.
+ * Use krb5_free_creds() to free @a out when it is no longer needed.
  *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_credentials_validate(krb5_context context, krb5_flags options,
                               krb5_ccache ccache, krb5_creds *in_creds,
                               krb5_creds **out_creds);
 
-/**
- * @brief Contact the KDC to renew credentials for a context.
+/** Contact the KDC to renew credentials.
  *
- * @param context           Context structure [input, output]
- * @param options           Unused
- * @param ccache            Credentials cache handle [input, output]
- * @param in_creds          Input credentials [input]
- * @param out_creds         Output credentials [output]
+ * @param [in]     context    Context structure
+ * @param          options    Unused
+ * @param [in,out] ccache     Credentials cache handle
+ * @param [in]     in_creds   Request credentials
+ * @param [out]    out_creds  Output credentials
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * This function gets a renewed credential matching @a in_creds, by
+ * retrieving a matching credential from @a ccache and renewing it with the
+ * credential's realm's KDC. Upon successful completion the result is placed in
+ * @a out_creds, the @a ccache is re-initialized and updated with a new ticket.
+ * Use krb5_free_creds() to free @a out when it is no longer needed.
  *
- * @retval
- *  0  Success
- * @retval
- *  ENOMEM Insufficient memory
- * @retval
- *  KRB5_PROG_ETYPE_NOSUPP Encryption type is not supported
- * @retval
- *  KRB5_KDCREP_MODIFIED KDC reply did not match expectations
- * @return
- *  Kerberos error codes
- *
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_get_credentials_renew(krb5_context context, krb5_flags options,
@@ -3693,8 +3567,8 @@ krb5_build_principal_alloc_va(krb5_context context,
  * @param [in]  realm             Realm
  * @param [out] princ             V5 principal
  *
- * This function builds a @a princ from V4 specification based on given input.
- * @a name.instance@realm.
+ * This function builds a @a princ from V4 specification based on given input
+ * @a name.instance\@realm.
  *
  * Use krb5_free_principal() to free @a princ when it is no longer needed.
  *
@@ -4607,7 +4481,6 @@ krb5_kt_read_service_key(krb5_context context, krb5_pointer keyprocarg,
  * if the receiver's address is unknown, it can be replaced by NULL.
  *
  * @note The @a local_addr argument is mandatory.
- *
  * @note The @a outdata argument is required if KRB5_AUTH_CONTEXT_RET_TIME or
  *       KRB5_AUTH_CONTEXT_RET_SEQUENCE flag is set in the @a auth_context.
  *
@@ -4631,7 +4504,7 @@ krb5_mk_safe(krb5_context context, krb5_auth_context auth_context,
  *
  * @param [in]     context       Context structure
  * @param [in,out] auth_context  Authentication context
- * @param [in]     serdata       User data for @c KRB-PRIV message
+ * @param [in]     userdata      User data for @c KRB-PRIV message
  * @param [out]    outbuf        Formatted @c KRB-PRIV message
  * @param [out]    outdata       Replay cache handle. Specify NULL if not needed.
  *
@@ -4671,72 +4544,55 @@ krb5_mk_priv(krb5_context context, krb5_auth_context auth_context,
              const krb5_data *userdata, krb5_data *outbuf,
              krb5_replay_data *outdata);
 
- /**
- * @brief Send an authenticated message.
+/** Client function for @c sendauth protocol.
  *
- * @param context            Context structure [input, output]
- * @param auth_context       Authentication context [input, output}
- * @param fd                 Pointer to file descriptor that describes network socket [input]
- * @param appl_version       String that describes the application protocol version client is expected to use [input]
- * @param client             Client principal name; ignored if @a in_creds is non-null [input]
- * @param server             Server principal name; ignored if @a in_creds is non-null [input]
- * @param ap_req_options     Specifies @c KRB-AP-REQ flags [input]
- * @param in_data            Data to be sent to the server [input]
- * @param in_creds           Input credentials, or NULL [input]
- * @param ccache             Credentials cache [input, output]
- * @param error              If non-null, contains error packet returned from server [output]
- * @param rep_result         If non-null, contains result of mutual authentication exchange [output]
- * @param out_creds         If non-null, the retrieved credentials [output]
+ * @param [in]     context        Context structure
+ * @param [in,out] auth_context   Authentication context
+ * @param [in]     fd             File descriptor that describes network socket
+ * @param [in]     appl_version   Application protocol version to be matched
+ *                                with the receiver's application version
+ * @param [in]     client         Client principal name;
+ *                                ignored if @a in_creds is non-null
+ * @param [in]     server         Server principal name;
+ *                                ignored if @a in_creds is non-null
+ * @param [in]     ap_req_options AP_OPTS options
+ * @param [in]     in_data        Data to be sent to the server
+ * @param [in]     in_creds       Input credentials, or NULL to use @a ccache instead
+ * @param [in]     ccache         Credentials cache
+ * @param [out]    error          If non-null, contains KRB_ERROR message
+ *                                returned from server
+ * @param [out]    rep_result     If non-null and @a ap_req_options is
+ *                                AP_OPTS_MUTUAL_REQUIRED, contains the result
+ *                                of mutual authentication exchange
+ * @param [out]    out_creds      If non-null, the retrieved credentials
  *
- * Send an authenticated message from a client program to a server
- * program using the network connection specified by @a fd. In the MIT UNIX and
- * OpenVMS implementations, @a fd is a pointer to a network socket file descriptor.
- *
- * Valid values for @a ap_req_options are:
- * @li @c  AP_OPTS_USE_SESSION_KEY
- * @li @c AP_OPTS_MUTUAL_REQUIRED  Perform a mutual authentication exchange
- * @li @c AP_OPTS_USE_SUBKEY
+ * This function performs the exchange by sending and receiving messages over fd.
  *
  * If @a in_creds is NULL:
  * @li @a server must be non-null
- * @li @a client can be NULL. If @a client is NULL, the credentials cache default principal is used.
+ * @li @a client can be NULL. If @a client is NULL, the credentials cache
+ *      default principal is used.
  *
  * If @a in_creds is non-null, @a in_creds->client and @a in_creds->server must be
  * filled in. If the other structure fields are filled in with valid credentials,
  * @a in_creds->ticket.length must be zero.
  *
- * If @a rep_result is non-null, it is filled in with the result of the mutual
- * authentication exchange.
- *
  * If @a in_creds->ticket.length is nonzero, @a in_creds is used
  * as the credentials to send to the server, and @a ccache is ignored. Otherwise,
  * @a ccache is used.
  *
- * If @a out_creds, is non-null, it is filled in with the retrieved credentials.
- *
- * @a ccache specifies the credential cache to use @a only when @a in_creds is
+ * @a ccache specifies the credential cache to use only when @a in_creds is
  * NULL or @a in_creds->ticket.length is zero.
- *
- * If @a in_creds is NULL or @a in_creds->ticket.length is zero and @a ccache is NULL,
- * If the default credential cache does not contain the needed credentials,
- * the credentials will be retrieved from the KDC and stored in the credential cache.
- *
- * If mutual authentication is used and @a rep_result is non-null, the sequence number
- * for the server is in *rep_result-\>seq_number. If mutual authentication is not
- * used, there is no way to negotiate a sequence number for the server.
  *
  * If the server is using a different application protocol than that specified in
  * @a appl_version, an error will be returned.
  *
- * If an error occurs during the authenticated message exchange and @a error is non-null,
- * the error packet (if any)  sent from the server will be placed in it.
+ * Use krb5_free_creds() to free @a out_creds, krb5_free_ap_rep_enc_part() to free
+ * @a rep_result and krb5_free_error() to free @a error when they are no longer needed.
  *
- * Make sure to free the allocated memory when it is no longer needed.
+ * @sa krb5_recvauth()
  *
- * @retval
- *  0   Success
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_sendauth(krb5_context context, krb5_auth_context *auth_context,
@@ -4746,100 +4602,58 @@ krb5_sendauth(krb5_context context, krb5_auth_context *auth_context,
               krb5_error **error, krb5_ap_rep_enc_part **rep_result,
               krb5_creds **out_creds);
 
-/**
- * @brief Receive an authenticated message.
+/** Server function for @a sendauth protocol.
  *
- * @param context            Context structure [input, output]
- * @param auth_context       Authentication context [input, output}
- * @param fd                 Pointer to file descriptor of network socket [input]
- * @param appl_version       String describing the expected application protocol version. [input]
- * @param server             Server principal [input]
- * @param flags              Additional specifications; nonlibrary callers should use 0. [input]
- * @param keytab            Decryption key [input]
- * @param ticket              Ticket (optional); only filled in with client ticket data if non-null [output]
+ * @param [in]     context       Context structure
+ * @param [in,out] auth_context  Authentication context
+ * @param [in]     fd            File descriptor
+ * @param [in]     appl_version  Application protocol version to be matched
+ *                               against the client's application version
+ * @param [in]     server        Server principal; if NULL - any server principal
+ * @param [in]     flags         Additional specifications
+ * @param [in]     keytab        Decryption key
+ * @param [out]    ticket        Ticket (optional); only filled in with client
+ *                               ticket data if non-null
  *
- * This routine, paired with krb5_sendauth(), provides a way for client and server programs to
- * send authenticated messages to one another through network connections.
+ * This function performs the exchange by sending and receiving messages over fd.
  *
- * krb5_recvauth() engages in an authentication dialog with the client program running krb5_sendauth()
- * to authenticate the client to the server.
+ * Use krb5_free_ticket() to free @a ticket when it is no longer needed.
  *
- * Upon request from the client, krb5_recvauth() provides mutual authentication
- * to ensure the legitimacy of the server represented by krb5_recvauth().
+ * @sa krb5_sendauth()
  *
- * The @a fd argument is a pointer to the network connection. As in krb5_sendauth()
- * in the MIT UNIX and OpenVMS implementations, @a fd is a pointer to a file descriptor.
- *
- * @a server, @c _krb5_auth_context, and @a keytab are used to obtain the server's private key.
- *
- * @note
- * @li  if client uses a different application protocol than that specified in @a appl_version,
- * an error is returned and the authentication exchange is aborted.
- *
- * Make sure to free the allocated memory when it is no longer needed.
- *
- * @retval
- *  0   Success
- * @return
- * Kerberos error codes
- *
- * @todo link to flags?
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_recvauth(krb5_context context, krb5_auth_context *auth_context,
               krb5_pointer fd, char *appl_version, krb5_principal server,
               krb5_int32 flags, krb5_keytab keytab, krb5_ticket **ticket);
 
-/**
- * @brief Send authentication messages between client and server using the network.
+/** Server function for @a sendauth protocol with version parameter.
  *
- * @param context           Context structure [input, output]
- * @param auth_context       Authentication context [input, output}
- * @param fd                Socket from which to read the client response [input]
- * @param server            Verify the server principal is the same as  requested by client; if NULL, an error is returned and the exchange is aborted [input]
- * @param flags
- * @param keytab            Decryption key [input]
- * @param ticket            Optional, if non-null, filled with ticket data sent by the client [output]
- * @param version           Pointer to application version string [output]
+ * @param [in]     context       Context structure
+ * @param [in,out] auth_context  Authentication context
+ * @param [in]     fd            File descriptor
+ * @param [in]     appl_version  Application protocol version to be matched
+ *                               against the client's application version
+ * @param [in]     server        Server principal; if NULL - any server principal
+ * @param [in]     flags         Additional specifications
+ * @param [in]     keytab        Decryption key
+ * @param [out]    ticket        Ticket (optional); only filled in with client
+ *                               ticket data if non-null
+ * @param [out]    version       If not NULL, contains the @c sendauth version
  *
- * This routine provides a convenient means for client and server programs to send authenticated messages to
- * one another through network connections. (k5b5_sendauth() is the matching routine to krb5_recvauth_version() for the server.)
+ * This function is similar to krb5_recvauth() with the additional output
+ * information place into @a version buffer.
  *
- * krb5_recvauth_version() engages in an authentication dialog with the client program running
- * krb5_sendauth() to authenticate the client to the server. In addition, if requested by the client,
- * krb5_recvauth_version() provides mutual authentication to prove to the client that the server represented by
- * krb5_recvauth_version() is legitimate.
- *
- * @a fd  is a pointer to the network connection. As in krb5_sendauth(), in the MIT UNIX and
- * OpenVMS implementations, @a fd is a pointer to a file descriptor.
- *
- * The arguments @a server, @c _krb5_auth_context, and @a keytab are used by @c krb5_rd_req() to obtain the
- * server's private key.
- *
- * If server is non-null, the principal component of it is used to determine
- * the replay cache to use. Otherwise, @c krb5_recvauth_version uses the default
- * replay cache.
- *
- * Make sure to free the allocated memory when it is no longer needed.
- *
- * @retval
- * 0 Success
- * @retval
- * KRB5_SENDAUTH_BADAUTHVERS Bad sendauth version was sent
- * @retval
- * KRB5_SENDAUTH_BADAPPLVERS Bad application version was sent
- * @return
- * Kerberos error codes
+ * @retval 0 Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_recvauth_version(krb5_context context,
                       krb5_auth_context *auth_context,
-                      /* IN */
                       krb5_pointer fd,
                       krb5_principal server,
                       krb5_int32 flags,
                       krb5_keytab keytab,
-                      /* OUT */
                       krb5_ticket **ticket,
                       krb5_data *version);
 
@@ -5162,7 +4976,7 @@ krb5_auth_con_getkey_k(krb5_context context, krb5_auth_context auth_context,
 
 /** Retrieve a send_subkey keyblock from a krb5_auth_context structure.
  *
- * @param [in]  context       Context structure
+ * @param [in]  ctx           Context structure
  * @param [in]  ac            Authentication context
  * @param [out] keyblock      Key block structure.
  *
@@ -5525,7 +5339,7 @@ krb5_free_host_realm(krb5_context context, char *const *realmlist);
  * as a local user @a luser
  *
  * If there is either no local account for @a luser or @a principal does not
- * match luser@realm for any default relam or it is not recorded in the existing
+ * match luser\@realm for any default relam or it is not recorded in the existing
  * .k5login, the @a luser is not authorized to log into an account.
  *
  * @retval
@@ -5748,9 +5562,7 @@ typedef struct _krb5_prompt {
     krb5_data *reply;  /**< must be allocated before call to any prompt routine */
 } krb5_prompt;
 
-/**
- * @brief Pointer to a prompter callback function.
- */
+/** Pointer to a prompter callback function. */
 typedef krb5_error_code
 (KRB5_CALLCONV *krb5_prompter_fct)(krb5_context context, void *data,
                                    const char *name, const char *banner,
@@ -5782,9 +5594,7 @@ krb5_prompter_posix(krb5_context context, void *data, const char *name,
                     const char *banner, int num_prompts,
                     krb5_prompt prompts[]);
 
- /**
-  * @brief Store options for @c _krb5_get_init_creds
-  */
+ /** Store options for @c _krb5_get_init_creds */
 typedef struct _krb5_get_init_creds_opt {
     krb5_flags flags;
     krb5_deltat tkt_life;
@@ -6269,7 +6079,7 @@ krb5_init_creds_get_error(krb5_context context, krb5_init_creds_context ctx,
  * @param [in]  data         Prompter data
  * @param [in]  start_time   Time when credentials should become valid;
  *                           0 means from now
- * @param [in]  options      KRB5_GET_INIT_CREDS_OPT_ options for this request.
+ * @param [in]  options      KRB5_GET_INIT_CREDS_OPT options for this request.
  *                           If NULL - the default options are used
  *                           (see krb5_get_init_creds_opt_init())
  * @param [out] ctx          A new initial credentials context.
@@ -6614,19 +6424,12 @@ krb5_get_renewed_creds(krb5_context context, krb5_creds *creds,
                        krb5_principal client, krb5_ccache ccache,
                        char *in_tkt_service);
 
-/**
- * @brief Decode a formatted ticket.
+/** Decode a formatted ticket.
  *
- * @param code          Formatted ticket [input]
- * @param rep           Decoded ticket information [output]
+ * @param [in]  code          Formatted ticket
+ * @param [out] rep           Decoded ticket information
  *
- * @retval
- *  0 Success
- * @retval
- *   KRB5KDC_ERR_BAD_PVNO Bad key version number
- * @return
- * Kerberos error codes
- *
+ * @retval 0  Success; Otherwise - Kerberos error codes
  */
 krb5_error_code KRB5_CALLCONV
 krb5_decode_ticket(const krb5_data *code, krb5_ticket **rep);
@@ -6761,7 +6564,7 @@ krb5_get_error_message(krb5_context ctx, krb5_error_code code);
  * @param [in] msg           Pointer to error message
  */
 void KRB5_CALLCONV
-krb5_free_error_message(krb5_context cxt, const char *msg);
+krb5_free_error_message(krb5_context ctx, const char *msg);
 
 /** Clear the error message state.
  *
@@ -6853,7 +6656,7 @@ typedef struct krb5_pac_data *krb5_pac;
  * This function adds a new @a data to @a pac if there isn't already a buffer
  * of this type in @a pac.
  *
- * The valid values of @type is one of the following:
+ * The valid values of @a type is one of the following:
  * @li @c PAC_LOGON_INFO         -  Logon information
  * @li @c PAC_CREDENTIALS_INFO   -  Credentials information
  * @li @c PAC_SERVER_CHECKSUM    -  Server checksum
