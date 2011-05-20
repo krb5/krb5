@@ -831,13 +831,8 @@ typedef struct _kdb_vftabl {
                                char **db_args);
 
     /*
-     * Optional: Set *age to the last modification time of the database.  Used
-     * by the KDC lookaside cache to ensure that lookaside entries are not used
-     * if the database has changed since the entry was recorded.
-     *
-     * If this function is unimplemented, lookaside cache entries will
-     * effectively expire immediately.  Another option is to supply the current
-     * time, which will cause lookaside cache entries to last for one second.
+     * Deprecated: No longer used as of krb5 1.10; can be removed in the next
+     * DAL revision.  Modules should leave as NULL.
      */
     krb5_error_code (*get_age)(krb5_context kcontext, char *db_name,
                                time_t *age);
