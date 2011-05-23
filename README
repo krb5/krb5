@@ -1,4 +1,4 @@
-                  Kerberos Version 5, Release 1.7.1
+                  Kerberos Version 5, Release 1.7.2
 
                             Release Notes
                         The MIT Kerberos Team
@@ -7,20 +7,20 @@ Unpacking the Source Distribution
 ---------------------------------
 
 The source distribution of Kerberos 5 comes in a gzipped tarfile,
-krb5-1.7.1.tar.gz.  Instructions on how to extract the entire
+krb5-1.7.2.tar.gz.  Instructions on how to extract the entire
 distribution follow.
 
 If you have the GNU tar program and gzip installed, you can simply do:
 
-        gtar zxpf krb5-1.7.1.tar.gz
+        gtar zxpf krb5-1.7.2.tar.gz
 
 If you don't have GNU tar, you will need to get the FSF gzip
 distribution and use gzcat:
 
-        gzcat krb5-1.7.1.tar.gz | tar xpf -
+        gzcat krb5-1.7.2.tar.gz | tar xpf -
 
-Both of these methods will extract the sources into krb5-1.7.1/src and
-the documentation into krb5-1.7.1/doc.
+Both of these methods will extract the sources into krb5-1.7.2/src and
+the documentation into krb5-1.7.2/doc.
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -73,6 +73,42 @@ away from using single-DES cryptosystems.  Among these is a
 configuration variable that enables "weak" enctypes, but will default
 to "false" in the future.  Additional migration aids are planned for
 future releases.
+
+Major changes in 1.7.2
+----------------------
+
+This is primarily a bugfix release.
+
+* Fix vulnerabilities:
+  ** KDC denial of service [MITKRB5-SA-2010-001 CVE-2010-0283]
+  ** SPNEGO denial of service [MITKRB5-SA-2010-002 CVE-2010-0628]
+  ** KDC double free [MITKRB5-SA-2010-004 CVE-2010-1320]
+  ** GSS-API null pointer dereference [MITKRB5-SA-2010-005 CVE-2010-1321]
+  ** multiple checksum vulnerabilities [MITKRB5-SA-2010-007
+     CVE-2010-1324 CVE-2010-1323 CVE-2010-4021]
+  ** kpropd denial of service [MITKRB5-SA-2011-001 CVE-2010-4022]
+  ** KDC denial of service [MITKRB5-SA-2011-002 CVE-2011-0281 CVE-2011-0282]
+  ** KDC double-free (PKINIT) [MITKRB5-SA-2011-003 CVE-2011-0284]
+  ** kadmind frees invalid pointer [MITKRB5-SA-2011-004 CVE-2011-0285]
+
+* Fix the krb5-1.7 KDB master key migration support to handle pre-1.7
+  databases with master key kvno != 1
+
+Changes in krb5-1.7.2 by ticket ID
+----------------------------------
+6650    Handle migration from pre-1.7 databases with master key kvno != 1
+6664    MITKRB5-SA-2010-001 CVE-2010-0283 KDC denial of service (1.7 branch)
+6694    MITKRB5-SA-2010-002 CVE-2010-0628 denial of service in SPNEGO
+6727    CVE-2010-1320 KDC double free caused by ticket renewal
+        (MITKRB5-SA-2010-004)
+6728    memory leak in process_tgs_req in r23724
+6729    CVE-2010-1321 GSS-API lib null pointer deref (MITKRB5-SA-2010-005)
+6837    SA-2010-007 Checksum vulnerabilities (CVE-2010-1324 and others)
+6864    kpropd denial of service [MITKRB5-SA-2011-001 CVE-2010-4022]
+6865    KDC denial of service attacks [MITKRB5-SA-2011-002
+        CVE-2011-0281 CVE-2011-0282]
+6883    KDC double-free when PKINIT enabled [MITKRB5-SA-2011-003 CVE-2011-0284]
+6901    kadmind frees invalid pointer [MITKRB5-SA-2011-004 CVE-2011-0285]
 
 Major changes in 1.7.1
 ----------------------
@@ -636,7 +672,7 @@ Changes by ticket ID
 Copyright and Other Legal Notices
 ---------------------------------
 
-Copyright (C) 1985-2009 by the Massachusetts Institute of Technology.
+Copyright (C) 1985-2011 by the Massachusetts Institute of Technology.
 
 All rights reserved.
 
