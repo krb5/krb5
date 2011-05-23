@@ -6,7 +6,7 @@
 Copyright and Other Notices
 ---------------------------
 
-Copyright (C) 1985-2010 by the Massachusetts Institute of Technology
+Copyright (C) 1985-2011 by the Massachusetts Institute of Technology
 and its contributors.  All rights reserved.
 
 Please see the file named NOTICE for additional notices.
@@ -18,7 +18,7 @@ For more information about the MIT Kerberos software, see
     http://web.mit.edu/kerberos/
 
 People interested in participating in the MIT Kerberos development
-effort should see http://k5wiki.kerberos.org/
+effort should visit http://k5wiki.kerberos.org/
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -81,6 +81,55 @@ additional measures include:
 * new API to allow applications (e.g. AFS) to explicitly reenable weak
   crypto
 * easier kadmin history key changes
+
+Major changes in 1.8.4
+----------------------
+
+This is primarily a bugfix release.
+
+* Fix vulnerabilities:
+  ** KDC uninitialized pointer crash [MITKRB5-SA-2010-006 CVE-2010-1322]
+  ** kpropd denial of service [MITKRB5-SA-2011-001 CVE-2010-4022]
+  ** KDC denial of service attacks [MITKRB5-SA-2011-002
+     CVE-2011-0281 CVE-2011-0282 CVE-2011-0283]
+  ** KDC double-free when PKINIT enabled [MITKRB5-SA-2011-003
+     CVE-2011-0284]
+  ** kadmind frees invalid pointer [MITKRB5-SA-2011-004 CVE-2011-0285]
+
+* Interoperability:
+
+  ** Correctly encrypt GSSAPI forwarded credentials using the session
+     key, not a subkey.
+
+  ** Set NT-SRV-INST on TGS principal names as expected by some
+     Windows Server Domain Controllers.
+
+  ** Don't reject AP-REQ messages if their PAC doesn't validate;
+     suppress the PAC instead.
+
+  ** Correctly validate HMAC-MD5 checksums that use DES keys
+
+krb5-1.8.4 changes by ticket ID
+-------------------------------
+
+6701    syntax error in src/plugins/kdb/ldap/libkdb_ldap/kerberos.ldif
+6764    has_mandatory_for_kdc_authdata checks only first authdata element
+6768    GSSAPI forwarded credentials must be encrypted in session key
+6790    skip invalid enctypes instead of erroring out in
+        krb5_dbe_def_search_enctype
+6797    CVE-2010-1322 KDC uninitialized pointer crash in authorization
+        data handling (MITKRB5-SA-2010-006)
+6798    set NT-SRV-INST on TGS principal names
+6833    SA-2010-007 Checksum vulnerabilities (CVE-2010-1324 and others)
+6843    handle MS PACs that lack server checksum
+6853    Make gss_krb5_set_allowable_enctypes work for the acceptor (1.8 pullup)
+6861    kpropd denial of service [MITKRB5-SA-2011-001 CVE-2010-4022]
+6862    KDC denial of service attacks [MITKRB5-SA-2011-002
+        CVE-2011-0281 CVE-2011-0282]
+6876    hmac-md5 checksum doesn't work with DES keys
+6877    Don't reject AP-REQs based on PACs
+6882    KDC double-free when PKINIT enabled [MITKRB5-SA-2011-003 CVE-2011-0284]
+6900    kadmind frees invalid pointer [MITKRB5-SA-2011-004 CVE-2011-0285]
 
 Major changes in 1.8.3
 ----------------------
@@ -434,6 +483,7 @@ reports, suggestions, and valuable resources:
     Radoslav Bodo
     Emmanuel Bouillon
     Michael Calmer
+    Julien Chaffraix
     Ravi Channavajhala
     Srinivas Cheruku
     Leonardo Chiquitto
@@ -444,6 +494,7 @@ reports, suggestions, and valuable resources:
     Simon Cooper
     Sylvain Cortes
     Nalin Dahyabhai
+    Dennis Davis
     Roland Dowdeswell
     Jason Edgecombe
     Mark Eichin
@@ -451,13 +502,16 @@ reports, suggestions, and valuable resources:
     Douglas E. Engert
     Peter Eriksson
     Ronni Feldt
+    Bill Fellows
     JC Ferguson
     William Fiveash
     Ákos Frohner
     Marcus Granado
     Scott Grizzard
+    Helmut Grohne
     Steve Grubb
     Philip Guenther
+    Dominic Hargreaves
     Jakob Haufe
     Jeff Hodges
     Love Hörnquist Åstrand
@@ -469,17 +523,22 @@ reports, suggestions, and valuable resources:
     Jeffrey Hutzelman
     Wyllys Ingersoll
     Holger Isenberg
+    Pavel Jindra
     Joel Johnson
     Mikkel Kruse
     Volker Lendecke
     Jan iankko Lieskovsky
+    Kevin Longfellow
     Ryan Lynch
+    Cameron Meadors
     Franklyn Mendez
     Markus Moeller
     Paul Moore
+    Keiichi Mori
     Zbysek Mraz
     Edward Murrell
     Nikos Nikoleris
+    Felipe Ortega
     Dmitri Pal
     Javier Palacios
     Ezra Peisach
@@ -488,10 +547,12 @@ reports, suggestions, and valuable resources:
     Robert Relyea
     Martin Rex
     Jason Rogers
+    Mike Roszkowski
     Guillaume Rousse
     Tom Shaw
     Peter Shoults
     Simo Sorce
+    Michael Spang
     Michael Ströder
     Bjørn Tore Sund
     Rathor Vipin
