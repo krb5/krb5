@@ -24,7 +24,7 @@
  * or implied warranty.
  */
 
-#include "autoconf.h"
+#include "k5-int.h"
 #include <krb5.h>
 #include <com_err.h>
 #include <stdlib.h>
@@ -386,10 +386,9 @@ void do_ccache(name)
             continue;
         if (status_only) {
             if (exit_status && creds.server->length == 2 &&
-                strcmp(creds.server->realm.data, princ->realm.data) == 0 &&
-                strcmp((char *)creds.server->data[0].data, "krbtgt") == 0 &&
-                strcmp((char *)creds.server->data[1].data,
-                       princ->realm.data) == 0 &&
+                data_eq(creds.server->realm, princ->realm) &&
+                data_eq_string(creds.server->data[0], "krbtgt") &&
+                data_eq(creds.server->data[1], princ->realm) &&
                 creds.times.endtime > now)
                 exit_status = 0;
         } else {
