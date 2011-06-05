@@ -35,8 +35,7 @@ extern char const * const sys_errlist[];
 extern const int sys_nerr;
 #endif
 
-/*@null@*/ static struct et_list * _et_list = (struct et_list *) NULL;
-/*@null@*//*@only@*/static struct dynamic_et_list * et_list_dynamic;
+static struct et_list *et_list;
 static k5_mutex_t et_list_lock = K5_MUTEX_PARTIAL_INITIALIZER;
 static int terminated = 0;      /* for debugging shlib fini sequence errors */
 
@@ -64,7 +63,7 @@ int com_err_initialize(void)
 
 void com_err_terminate(void)
 {
-    struct dynamic_et_list *e, *enext;
+    struct et_list *e, *enext;
     if (! INITIALIZER_RAN(com_err_initialize) || PROGRAM_EXITING()) {
 #ifdef SHOW_INITFINI_FUNCS
         printf("com_err_terminate: skipping\n");
@@ -78,7 +77,7 @@ void com_err_terminate(void)
     k5_mutex_destroy(&com_err_hook_lock);
     if (k5_mutex_lock(&et_list_lock) != 0)
         return;
-    for (e = et_list_dynamic; e; e = enext) {
+    for (e = et_list; e; e = enext) {
         enext = e->next;
         free(e);
     }
@@ -113,12 +112,10 @@ get_thread_buffer ()
 
 const char * KRB5_CALLCONV
 error_message(long code)
-/*@modifies internalState@*/
 {
     unsigned long offset;
     unsigned long l_offset;
-    struct et_list *et;
-    struct dynamic_et_list *det;
+    struct et_list *e;
     unsigned long table_num;
     int started = 0;
     unsigned int divisor = 100;
@@ -165,23 +162,12 @@ error_message(long code)
     merr = k5_mutex_lock(&et_list_lock);
     if (merr)
         goto oops;
-    dprintf (("scanning static list for %x\n", table_num));
-    for (et = _et_list; et != NULL; et = et->next) {
-        if (et->table == NULL)
-            continue;
-        dprintf (("\t%x = %s\n", et->table->base & ERRCODE_MAX,
-                  et->table->msgs[0]));
-        if ((et->table->base & ERRCODE_MAX) == table_num) {
-            table = et->table;
-            goto found;
-        }
-    }
-    dprintf (("scanning dynamic list for %x\n", table_num));
-    for (det = et_list_dynamic; det != NULL; det = det->next) {
-        dprintf (("\t%x = %s\n", det->table->base & ERRCODE_MAX,
-                  det->table->msgs[0]));
-        if ((det->table->base & ERRCODE_MAX) == table_num) {
-            table = det->table;
+    dprintf(("scanning list for %x\n", table_num));
+    for (e = et_list; e != NULL; e = e->next) {
+        dprintf(("\t%x = %s\n", e->table->base & ERRCODE_MAX,
+                 e->table->msgs[0]));
+        if ((e->table->base & ERRCODE_MAX) == table_num) {
+            table = e->table;
             goto found;
         }
     }
@@ -282,42 +268,35 @@ oops:
     return(cp1);
 }
 
-/*@-incondefs@*/ /* _et_list is global on unix but not in header annotations */
 errcode_t KRB5_CALLCONV
-add_error_table(/*@dependent@*/ const struct error_table * et)
-/*@modifies _et_list,et_list_dynamic@*/
-/*@=incondefs@*/
+add_error_table(const struct error_table *et)
 {
-    struct dynamic_et_list *del;
+    struct et_list *e;
     int merr;
 
     if (CALL_INIT_FUNCTION(com_err_initialize))
         return 0;
 
-    del = (struct dynamic_et_list *)malloc(sizeof(struct dynamic_et_list));
-    if (del == NULL)
+    e = malloc(sizeof(struct et_list));
+    if (e == NULL)
         return ENOMEM;
 
-    del->table = et;
+    e->table = et;
 
     merr = k5_mutex_lock(&et_list_lock);
     if (merr) {
-        free(del);
+        free(e);
         return merr;
     }
-    del->next = et_list_dynamic;
-    et_list_dynamic = del;
+    e->next = et_list;
+    et_list = e;
     return k5_mutex_unlock(&et_list_lock);
 }
 
-/*@-incondefs@*/ /* _et_list is global on unix but not in header annotations */
 errcode_t KRB5_CALLCONV
-remove_error_table(const struct error_table * et)
-/*@modifies _et_list,et_list_dynamic@*/
-/*@=incondefs@*/
+remove_error_table(const struct error_table *et)
 {
-    struct dynamic_et_list **del;
-    struct et_list **el;
+    struct et_list **ep, *e;
     int merr;
 
     if (CALL_INIT_FUNCTION(com_err_initialize))
@@ -326,23 +305,15 @@ remove_error_table(const struct error_table * et)
     if (merr)
         return merr;
 
-    /* Remove the entry that matches the error table instance.  Prefer dynamic
-       entries, but if there are none, check for a static one too.  */
-    for (del = &et_list_dynamic; *del; del = &(*del)->next)
-        if ((*del)->table == et) {
-            /*@only@*/ struct dynamic_et_list *old = *del;
-            *del = old->next;
-            free (old);
+    /* Remove the entry that matches the error table instance. */
+    for (ep = &et_list; *ep; ep = &(*ep)->next) {
+        if ((*ep)->table == et) {
+            e = *ep;
+            *ep = e->next;
+            free(e);
             return k5_mutex_unlock(&et_list_lock);
         }
-    for (el = &_et_list; *el; el = &(*el)->next)
-        if ((*el)->table == et) {
-            struct et_list *old = *el;
-            *el = old->next;
-            old->next = NULL;
-            old->table = NULL;
-            return k5_mutex_unlock(&et_list_lock);
-        }
+    }
     k5_mutex_unlock(&et_list_lock);
     return ENOENT;
 }
