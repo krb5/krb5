@@ -475,13 +475,10 @@ begin_non_referral(krb5_context context, krb5_tkt_creds_context ctx)
 
 /***** STATE_REFERRALS *****/
 
-/*
- * Possibly retry a request in the fallback realm after a referral request
- * failure in the local realm.  Expects ctx->reply_code to be set to the error
- * from a referral request.
- */
+/* Possibly try a non-referral request after a referral request failure.
+ * Expects ctx->reply_code to be set to the error from a referral request. */
 static krb5_error_code
-try_fallback_realm(krb5_context context, krb5_tkt_creds_context ctx)
+try_fallback(krb5_context context, krb5_tkt_creds_context ctx)
 {
     krb5_error_code code;
     char **hrealms;
@@ -490,9 +487,10 @@ try_fallback_realm(krb5_context context, krb5_tkt_creds_context ctx)
     if (ctx->referral_count > 1)
         return ctx->reply_code;
 
-    /* Only fall back if the original request used the referral realm. */
+    /* If the request used a specified realm, make a non-referral request to
+     * that realm (in case it's a KDC which rejects KDC_OPT_CANONICALIZE). */
     if (!krb5_is_referral_realm(&ctx->req_server->realm))
-        return ctx->reply_code;
+        return begin_non_referral(context, ctx);
 
     if (ctx->server->length < 2) {
         /* We need a type/host format principal to find a fallback realm. */
@@ -505,10 +503,10 @@ try_fallback_realm(krb5_context context, krb5_tkt_creds_context ctx)
     if (code != 0)
         return code;
 
-    /* Give up if the fallback realm isn't any different. */
+    /* If the fallback realm isn't any different, use the existing TGT. */
     if (data_eq_string(ctx->server->realm, hrealms[0])) {
         krb5_free_host_realm(context, hrealms);
-        return ctx->reply_code;
+        return begin_non_referral(context, ctx);
     }
 
     /* Rewrite server->realm to be the fallback realm. */
@@ -545,9 +543,9 @@ step_referrals(krb5_context context, krb5_tkt_creds_context ctx)
     krb5_error_code code;
     const krb5_data *referral_realm;
 
-    /* Possibly retry with the fallback realm on error. */
+    /* Possibly try a non-referral fallback request on error. */
     if (ctx->reply_code != 0)
-        return try_fallback_realm(context, ctx);
+        return try_fallback(context, ctx);
 
     if (krb5_principal_compare(context, ctx->reply_creds->server,
                                ctx->server)) {
