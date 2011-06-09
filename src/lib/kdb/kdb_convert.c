@@ -585,7 +585,7 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry **entry,
     int i, j, cnt = 0, mod_time = 0, nattrs;
     krb5_principal dbprinc;
     char *dbprincstr = NULL;
-    krb5_tl_data *newtl = NULL;
+    krb5_tl_data newtl;
     krb5_error_code ret;
     unsigned int prev_n_keys = 0;
     krb5_boolean is_add;
@@ -732,40 +732,13 @@ ulog_conv_2dbentry(krb5_context context, krb5_db_entry **entry,
             break;
 
         case AT_TL_DATA: {
-            int t;
-
-            cnt = u.av_tldata.av_tldata_len;
-            newtl = calloc(cnt, sizeof (krb5_tl_data));
-            if (newtl == NULL)
-                return (ENOMEM);
-
-            for (j = 0, t = 0; j < cnt; j++) {
-                newtl[t].tl_data_type = (krb5_int16)u.av_tldata.av_tldata_val[j].tl_type;
-                newtl[t].tl_data_length = (krb5_int16)u.av_tldata.av_tldata_val[j].tl_data.tl_data_len;
-                newtl[t].tl_data_contents = malloc(newtl[t].tl_data_length * sizeof (krb5_octet));
-                if (newtl[t].tl_data_contents == NULL)
-                    /* XXX Memory leak: newtl
-                       and previously
-                       allocated elements.  */
-                    return (ENOMEM);
-
-                (void) memcpy(newtl[t].tl_data_contents, u.av_tldata.av_tldata_val[t].tl_data.tl_data_val, newtl[t].tl_data_length);
-                newtl[t].tl_data_next = NULL;
-                if (t > 0)
-                    newtl[t - 1].tl_data_next = &newtl[t];
-                t++;
-            }
-
-            if ((ret = krb5_dbe_update_tl_data(context, ent, newtl)))
-                return (ret);
-            for (j = 0; j < t; j++)
-                if (newtl[j].tl_data_contents) {
-                    free(newtl[j].tl_data_contents);
-                    newtl[j].tl_data_contents = NULL;
-                }
-            if (newtl) {
-                free(newtl);
-                newtl = NULL;
+            for (j = 0; j < (int)u.av_tldata.av_tldata_len; j++) {
+                newtl.tl_data_type = (krb5_int16)u.av_tldata.av_tldata_val[j].tl_type;
+                newtl.tl_data_length = (krb5_int16)u.av_tldata.av_tldata_val[j].tl_data.tl_data_len;
+                newtl.tl_data_contents = (krb5_octet *)u.av_tldata.av_tldata_val[j].tl_data.tl_data_val;
+                newtl.tl_data_next = NULL;
+                if ((ret = krb5_dbe_update_tl_data(context, ent, &newtl)))
+                    return (ret);
             }
             break;
 /* END CSTYLED */
