@@ -148,6 +148,7 @@ void krb5_gss_save_error_info(OM_uint32 minor_code, krb5_context ctx)
 void krb5_gss_delete_error_info(void *p)
 {
     gsserrmap_destroy(p);
+    free(p);
 }
 
 /**/
