@@ -428,6 +428,11 @@ complete(krb5_context context, krb5_tkt_creds_context ctx)
 
     TRACE_TKT_CREDS_COMPLETE(context, ctx->reply_creds->server);
 
+    /* Put the requested server principal in the output creds. */
+    krb5_free_principal(context, ctx->reply_creds->server);
+    ctx->reply_creds->server = ctx->req_server;
+    ctx->req_server = NULL;
+
     /* Note the authdata we asked for in the output creds. */
     ctx->reply_creds->authdata = ctx->authdata;
     ctx->authdata = NULL;
