@@ -196,7 +196,7 @@ gss_krb5_export_lucid_sec_context(OM_uint32 *minor_status,
     /* Clean up the context state (it is an error for
      * someone to attempt to use this context again)
      */
-    (void)krb5_gss_delete_sec_context(minor_status, context_handle, NULL);
+    (void)gss_delete_sec_context(minor_status, context_handle, NULL);
     *context_handle = GSS_C_NO_CONTEXT;
 
     generic_gss_release_buffer_set(&minor, &data_set);
