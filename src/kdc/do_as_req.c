@@ -689,7 +689,7 @@ prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request,
 {
     krb5_error errpkt;
     krb5_error_code retval;
-    krb5_data *scratch;
+    krb5_data *scratch, *fast_edata = NULL;
     krb5_pa_data **pa = NULL;
     krb5_typed_data **td = NULL;
     size_t size;
@@ -748,9 +748,12 @@ prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request,
         }
     }
     retval = kdc_fast_handle_error(kdc_context, rstate,
-                                   request, pa, &errpkt);
-    if (retval == 0)
+                                   request, pa, &errpkt, &fast_edata);
+    if (retval == 0) {
+        if (fast_edata != NULL)
+            errpkt.e_data = *fast_edata;
         retval = krb5_mk_error(kdc_context, &errpkt, scratch);
+    }
 
     free(errpkt.text.data);
     if (retval)
@@ -758,6 +761,7 @@ prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request,
     else
         *response = scratch;
     krb5_free_pa_data(kdc_context, pa);
+    krb5_free_data(kdc_context, fast_edata);
 
     return retval;
 }
