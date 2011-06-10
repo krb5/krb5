@@ -163,7 +163,7 @@ iprop_get_updates_1_svc(kdb_last_t *arg, struct svc_req *rqstp)
 	    free(client_name);
 	    free(service_name);
 	    krb5_klog_syslog(LOG_ERR,
-			     "%s: out of memory recording principal names",
+			     _("%s: out of memory recording principal names"),
 			     whoami);
 	    goto out;
 	}
@@ -290,7 +290,7 @@ ipropx_resync(uint32_t vers, struct svc_req *rqstp)
 	    free(client_name);
 	    free(service_name);
 	    krb5_klog_syslog(LOG_ERR,
-			     "%s: out of memory recording principal names",
+			     _("%s: out of memory recording principal names"),
 			     whoami);
 	    goto out;
 	}
@@ -476,8 +476,9 @@ check_iprop_rpcsec_auth(struct svc_req *rqstp)
      maj_stat = gss_inquire_context(&min_stat, ctx, NULL, &name,
 				    NULL, NULL, NULL, NULL, NULL);
      if (maj_stat != GSS_S_COMPLETE) {
-	  krb5_klog_syslog(LOG_ERR, "check_rpcsec_auth: "
-			   "failed inquire_context, stat=%u", maj_stat);
+	  krb5_klog_syslog(LOG_ERR,
+			   _("check_rpcsec_auth: failed inquire_context, "
+			     "stat=%u"), maj_stat);
 	  log_badauth(maj_stat, min_stat,
 		      &rqstp->rq_xprt->xp_raddr, NULL);
 	  goto fail_name;
@@ -508,8 +509,8 @@ check_iprop_rpcsec_auth(struct svc_req *rqstp)
 
 fail_princ:
      if (!success) {
-	 krb5_klog_syslog(LOG_ERR, "bad service principal %.*s%s",
-			  (int) slen, (char *) gss_str.value, sdots);
+	  krb5_klog_syslog(LOG_ERR, _("bad service principal %.*s%s"),
+			   (int) slen, (char *) gss_str.value, sdots);
      }
      gss_release_buffer(&min_stat, &gss_str);
      krb5_free_principal(kctx, princ);
@@ -531,8 +532,8 @@ krb5_iprop_prog_1(struct svc_req *rqstp,
     char *whoami = "krb5_iprop_prog_1";
 
     if (!check_iprop_rpcsec_auth(rqstp)) {
-	krb5_klog_syslog(LOG_ERR,
-			 "authentication attempt failed: %s, RPC authentication flavor %d",
+	krb5_klog_syslog(LOG_ERR, _("authentication attempt failed: %s, RPC "
+				    "authentication flavor %d"),
 			 inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr),
 			 rqstp->rq_cred.oa_flavor);
 	svcerr_weakauth(transp);

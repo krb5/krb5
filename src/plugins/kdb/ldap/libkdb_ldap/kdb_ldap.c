@@ -108,12 +108,13 @@ krb5_ldap_read_startup_information(krb5_context context)
 
     SETUP_CONTEXT();
     if ((retval=krb5_ldap_read_krbcontainer_params(context, &(ldap_context->krbcontainer)))) {
-        prepend_err_str (context, "Unable to read Kerberos container", retval, retval);
+        prepend_err_str(context, _("Unable to read Kerberos container"),
+                        retval, retval);
         goto cleanup;
     }
 
     if ((retval=krb5_ldap_read_realm_params(context, context->default_realm, &(ldap_context->lrparams), &mask))) {
-        prepend_err_str (context, "Unable to read Realm", retval, retval);
+        prepend_err_str(context, _("Unable to read Realm"), retval, retval);
         goto cleanup;
     }
 
@@ -239,8 +240,8 @@ cleanup:
     return ret;
 }
 
-#define ERR_MSG1 "Unable to check if SASL EXTERNAL mechanism is supported by LDAP server. Proceeding anyway ..."
-#define ERR_MSG2 "SASL EXTERNAL mechanism not supported by LDAP server. Can't perform certificate-based bind."
+#define ERR_MSG1 _("Unable to check if SASL EXTERNAL mechanism is supported by LDAP server. Proceeding anyway ...")
+#define ERR_MSG2 _("SASL EXTERNAL mechanism not supported by LDAP server. Can't perform certificate-based bind.")
 
 /* Function to check if a LDAP server supports the SASL external mechanism
  *Return values:
@@ -322,12 +323,13 @@ krb5_ldap_open(krb5_context context, char *conf_section, char **db_args,
                 free (opt);
                 free (val);
                 status = EINVAL;
-                krb5_set_error_message (context, status, "'binddn' missing");
+                krb5_set_error_message(context, status, _("'binddn' missing"));
                 goto clean_n_exit;
             }
             if (val == NULL) {
                 status = EINVAL;
-                krb5_set_error_message (context, status, "'binddn' value missing");
+                krb5_set_error_message(context, status,
+                                       _("'binddn' value missing"));
                 free(opt);
                 goto clean_n_exit;
             }
@@ -343,12 +345,13 @@ krb5_ldap_open(krb5_context context, char *conf_section, char **db_args,
                 free (opt);
                 free (val);
                 status = EINVAL;
-                krb5_set_error_message (context, status, "'nconns' missing");
+                krb5_set_error_message(context, status, _("'nconns' missing"));
                 goto clean_n_exit;
             }
             if (val == NULL) {
                 status = EINVAL;
-                krb5_set_error_message (context, status, "'nconns' value missing");
+                krb5_set_error_message(context, status,
+                                       _("'nconns' value missing"));
                 free(opt);
                 goto clean_n_exit;
             }
@@ -358,12 +361,14 @@ krb5_ldap_open(krb5_context context, char *conf_section, char **db_args,
                 free (opt);
                 free (val);
                 status = EINVAL;
-                krb5_set_error_message (context, status, "'bindpwd' missing");
+                krb5_set_error_message(context, status,
+                                       _("'bindpwd' missing"));
                 goto clean_n_exit;
             }
             if (val == NULL) {
                 status = EINVAL;
-                krb5_set_error_message (context, status, "'bindpwd' value missing");
+                krb5_set_error_message(context, status,
+                                       _("'bindpwd' value missing"));
                 free(opt);
                 goto clean_n_exit;
             }
@@ -377,7 +382,8 @@ krb5_ldap_open(krb5_context context, char *conf_section, char **db_args,
         } else if (opt && !strcmp(opt, "host")) {
             if (val == NULL) {
                 status = EINVAL;
-                krb5_set_error_message (context, status, "'host' value missing");
+                krb5_set_error_message(context, status,
+                                       _("'host' value missing"));
                 free(opt);
                 goto clean_n_exit;
             }
@@ -414,7 +420,8 @@ krb5_ldap_open(krb5_context context, char *conf_section, char **db_args,
         } else if (opt && !strcmp(opt, "cert")) {
             if (val == NULL) {
                 status = EINVAL;
-                krb5_set_error_message (context, status, "'cert' value missing");
+                krb5_set_error_message(context, status,
+                                       _("'cert' value missing"));
                 free(opt);
                 goto clean_n_exit;
             }
@@ -449,10 +456,12 @@ krb5_ldap_open(krb5_context context, char *conf_section, char **db_args,
                  * temporary is passed in when kdb5_util load without -update is done.
                  * This is unsupported by the LDAP plugin.
                  */
-                krb5_set_error_message (context, status,
-                                        "open of LDAP directory aborted, plugin requires -update argument");
+                krb5_set_error_message(context, status,
+                                       _("open of LDAP directory aborted, "
+                                         "plugin requires -update argument"));
             } else {
-                krb5_set_error_message (context, status, "unknown option \'%s\'",
+                krb5_set_error_message (context, status,
+                                        _("unknown option \'%s\'"),
                                         opt?opt:val);
             }
             free(opt);
@@ -473,7 +482,8 @@ krb5_ldap_open(krb5_context context, char *conf_section, char **db_args,
             krb5_ldap_free_ldap_context(ldap_context);
         ldap_context = NULL;
         dal_handle->db_context = NULL;
-        prepend_err_str (context, "Error reading LDAP server params: ", status, status);
+        prepend_err_str(context, _("Error reading LDAP server params: "),
+                        status, status);
         goto clean_n_exit;
     }
     if ((status=krb5_ldap_db_init(context, ldap_context)) != 0) {

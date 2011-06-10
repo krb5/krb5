@@ -103,16 +103,15 @@ krb5_rc_io_mkstemp(krb5_context context, krb5_rc_iostuff *d, char *dir)
     retval = fstat(d->fd, &stbuf);
     if (retval) {
         krb5_set_error_message(context, retval,
-                               "Cannot fstat replay cache file %s: %s",
+                               _("Cannot fstat replay cache file %s: %s"),
                                d->fn, strerror(errno));
         return KRB5_RC_IO_UNKNOWN;
     }
     if (stbuf.st_mode & 077) {
         krb5_set_error_message(context, retval,
-                               "Insecure mkstemp() file mode "
-                               "for replay cache file %s; "
-                               "try running this program "
-                               "with umask 077 ", d->fn);
+                               _("Insecure mkstemp() file mode for replay "
+                                 "cache file %s; try running this program "
+                                 "with umask 077 "), d->fn);
         return KRB5_RC_IO_UNKNOWN;
     }
 #endif
@@ -143,13 +142,13 @@ rc_map_errno (krb5_context context, int e, const char *fn,
     case EROFS:
     case EEXIST:
         krb5_set_error_message(context, KRB5_RC_IO_PERM,
-                               "Cannot %s replay cache file %s: %s",
+                               _("Cannot %s replay cache file %s: %s"),
                                operation, fn, strerror(e));
         return KRB5_RC_IO_PERM;
 
     default:
         krb5_set_error_message(context, KRB5_RC_IO_UNKNOWN,
-                               "Cannot %s replay cache: %s",
+                               _("Cannot %s replay cache: %s"),
                                operation, strerror(e));
         return KRB5_RC_IO_UNKNOWN;
     }
@@ -269,14 +268,15 @@ krb5_rc_io_open_internal(krb5_context context, krb5_rc_iostuff *d, char *fn,
     }
     /* check that non other can read/write/execute the file */
     if (sb1.st_mode & 077) {
-        krb5_set_error_message(context, retval, "Insecure file mode "
-                               "for replay cache file %s", d->fn);
+        krb5_set_error_message(context, retval,
+                               _("Insecure file mode for replay cache file "
+                                 "%s"), d->fn);
         return KRB5_RC_IO_UNKNOWN;
     }
     /* owned by me */
     if (sb1.st_uid != geteuid()) {
         retval = KRB5_RC_IO_PERM;
-        krb5_set_error_message(context, retval, "rcache not owned by %d",
+        krb5_set_error_message(context, retval, _("rcache not owned by %d"),
                                (int)geteuid());
         goto cleanup;
     }
@@ -400,18 +400,18 @@ krb5_rc_io_write(krb5_context context, krb5_rc_iostuff *d, krb5_pointer buf,
         case EFBIG:
         case ENOSPC:
             krb5_set_error_message (context, KRB5_RC_IO_SPACE,
-                                    "Can't write to replay cache: %s",
+                                    _("Can't write to replay cache: %s"),
                                     strerror(errno));
             return KRB5_RC_IO_SPACE;
         case EIO:
             krb5_set_error_message (context, KRB5_RC_IO_IO,
-                                    "Can't write to replay cache: %s",
+                                    _("Can't write to replay cache: %s"),
                                     strerror(errno));
             return KRB5_RC_IO_IO;
         case EBADF:
         default:
             krb5_set_error_message (context, KRB5_RC_IO_UNKNOWN,
-                                    "Can't write to replay cache: %s",
+                                    _("Can't write to replay cache: %s"),
                                     strerror(errno));
             return KRB5_RC_IO_UNKNOWN;
         }
@@ -433,7 +433,7 @@ krb5_rc_io_sync(krb5_context context, krb5_rc_iostuff *d)
         case EIO: return KRB5_RC_IO_IO;
         default:
             krb5_set_error_message(context, KRB5_RC_IO_UNKNOWN,
-                                   "Cannot sync replay cache file: %s",
+                                   _("Cannot sync replay cache file: %s"),
                                    strerror(errno));
             return KRB5_RC_IO_UNKNOWN;
         }
@@ -453,7 +453,7 @@ krb5_rc_io_read(krb5_context context, krb5_rc_iostuff *d, krb5_pointer buf,
         case EBADF:
         default:
             krb5_set_error_message(context, KRB5_RC_IO_UNKNOWN,
-                                   "Can't read from replay cache: %s",
+                                   _("Can't read from replay cache: %s"),
                                    strerror(errno));
             return KRB5_RC_IO_UNKNOWN;
         }
@@ -485,20 +485,20 @@ krb5_rc_io_destroy(krb5_context context, krb5_rc_iostuff *d)
         {
         case EIO:
             krb5_set_error_message(context, KRB5_RC_IO_IO,
-                                   "Can't destroy replay cache: %s",
+                                   _("Can't destroy replay cache: %s"),
                                    strerror(errno));
             return KRB5_RC_IO_IO;
         case EPERM:
         case EBUSY:
         case EROFS:
             krb5_set_error_message(context, KRB5_RC_IO_PERM,
-                                   "Can't destroy replay cache: %s",
+                                   _("Can't destroy replay cache: %s"),
                                    strerror(errno));
             return KRB5_RC_IO_PERM;
         case EBADF:
         default:
             krb5_set_error_message(context, KRB5_RC_IO_UNKNOWN,
-                                   "Can't destroy replay cache: %s",
+                                   _("Can't destroy replay cache: %s"),
                                    strerror(errno));
             return KRB5_RC_IO_UNKNOWN;
         }

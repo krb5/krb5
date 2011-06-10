@@ -1050,30 +1050,30 @@ sam_challenge_banner(krb5_int32 sam_type)
 
     switch (sam_type) {
     case PA_SAM_TYPE_ENIGMA:    /* Enigma Logic */
-        label = "Challenge for Enigma Logic mechanism";
+        label = _("Challenge for Enigma Logic mechanism");
         break;
     case PA_SAM_TYPE_DIGI_PATH: /*  Digital Pathways */
     case PA_SAM_TYPE_DIGI_PATH_HEX: /*  Digital Pathways */
-        label = "Challenge for Digital Pathways mechanism";
+        label = _("Challenge for Digital Pathways mechanism");
         break;
     case PA_SAM_TYPE_ACTIVCARD_DEC: /*  Digital Pathways */
     case PA_SAM_TYPE_ACTIVCARD_HEX: /*  Digital Pathways */
-        label = "Challenge for Activcard mechanism";
+        label = _("Challenge for Activcard mechanism");
         break;
     case PA_SAM_TYPE_SKEY_K0:   /*  S/key where  KDC has key 0 */
-        label = "Challenge for Enhanced S/Key mechanism";
+        label = _("Challenge for Enhanced S/Key mechanism");
         break;
     case PA_SAM_TYPE_SKEY:      /*  Traditional S/Key */
-        label = "Challenge for Traditional S/Key mechanism";
+        label = _("Challenge for Traditional S/Key mechanism");
         break;
     case PA_SAM_TYPE_SECURID:   /*  Security Dynamics */
-        label = "Challenge for Security Dynamics mechanism";
+        label = _("Challenge for Security Dynamics mechanism");
         break;
     case PA_SAM_TYPE_SECURID_PREDICT:   /* predictive Security Dynamics */
-        label = "Challenge for Security Dynamics mechanism";
+        label = _("Challenge for Security Dynamics mechanism");
         break;
     default:
-        label = "Challenge from authentication server";
+        label = _("Challenge from authentication server");
         break;
     }
 
@@ -1161,7 +1161,7 @@ pa_sam_2(krb5_context context, krb5_kdc_req *request, krb5_pa_data *in_padata,
     }
 
     snprintf(name, sizeof(name), "%.*s",
-             SAMDATA(sc2b->sam_type_name, "SAM Authentication",
+             SAMDATA(sc2b->sam_type_name, _("SAM Authentication"),
                      sizeof(name) - 1));
 
     snprintf(banner, sizeof(banner), "%.*s",

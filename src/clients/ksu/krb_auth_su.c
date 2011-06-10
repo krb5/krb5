@@ -63,7 +63,7 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
 
 
     if ((retval= krb5_copy_principal(context,  client_pname, &client))){
-        com_err(prog_name, retval,"while copying client principal");
+        com_err(prog_name, retval, _("while copying client principal"));
         return (FALSE) ;
     }
 
@@ -75,7 +75,7 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
     if ((retval = krb5_sname_to_principal(context, hostname, NULL,
                                           KRB5_NT_SRV_HST, &server))){
         com_err(prog_name, retval,
-                "while creating server %s principal name", hostname);
+                _("while creating server %s principal name"), hostname);
         krb5_free_principal(context, client);
         return (FALSE) ;
     }
@@ -100,14 +100,14 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
     /* check to see if the local tgt is in the cache */
 
     if ((retval= krb5_copy_principal(context,  client, &tgtq.client))){
-        com_err(prog_name, retval,"while copying client principal");
+        com_err(prog_name, retval, _("while copying client principal"));
         return (FALSE) ;
     }
 
     if ((retval = ksu_tgtname(context,  krb5_princ_realm(context, client),
                               krb5_princ_realm(context, client),
                               &tgtq.server))){
-        com_err(prog_name, retval, "while creating tgt for local realm");
+        com_err(prog_name, retval, _("while creating tgt for local realm"));
         krb5_free_principal(context, client);
         krb5_free_principal(context, server);
         return (FALSE) ;
@@ -123,8 +123,7 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
     if (retval){
         if ((retval != KRB5_CC_NOTFOUND) &&
             (retval != KRB5KRB_AP_ERR_TKT_EXPIRED)){
-            com_err(prog_name, retval,
-                    "while retrieving creds from cache");
+            com_err(prog_name, retval, _("while retrieving creds from cache"));
             return (FALSE) ;
         }
     } else{
@@ -135,13 +134,15 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
 
 #ifdef GET_TGT_VIA_PASSWD
         if (krb5_seteuid(0)||krb5_seteuid(target_uid)) {
-            com_err("ksu", errno, "while switching to target uid");
+            com_err("ksu", errno, _("while switching to target uid"));
             return FALSE;
         }
 
 
-        fprintf(stderr,"WARNING: Your password may be exposed if you enter it here and are logged \n");
-        fprintf(stderr,"         in remotely using an unsecure (non-encrypted) channel. \n");
+        fprintf(stderr, _("WARNING: Your password may be exposed if you enter "
+                          "it here and are logged \n"));
+        fprintf(stderr, _("         in remotely using an unsecure "
+                          "(non-encrypted) channel. \n"));
 
         /*get the ticket granting ticket, via passwd(promt for passwd)*/
         if (krb5_get_tkt_via_passwd (context, &cc, client, tgtq.server,
@@ -152,13 +153,14 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
         }
         *path_passwd = 1;
         if (krb5_seteuid(0)) {
-            com_err("ksu", errno, "while reclaiming root uid");
+            com_err("ksu", errno, _("while reclaiming root uid"));
             return FALSE;
         }
 
 #else
         plain_dump_principal (context, client);
-        fprintf(stderr,"does not have any appropriate tickets in the cache.\n");
+        fprintf(stderr,
+                _("does not have any appropriate tickets in the cache.\n"));
         return FALSE;
 
 #endif /* GET_TGT_VIA_PASSWD */
@@ -166,18 +168,18 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
     }
 
     if ((retval= krb5_copy_principal(context, client, &in_creds.client))){
-        com_err(prog_name, retval,"while copying client principal");
+        com_err(prog_name, retval, _("while copying client principal"));
         return (FALSE) ;
     }
 
     if ((retval= krb5_copy_principal(context, server, &in_creds.server))){
-        com_err(prog_name, retval,"while copying client principal");
+        com_err(prog_name, retval, _("while copying client principal"));
         return (FALSE) ;
     }
 
     if ((retval = krb5_get_credentials(context, 0, cc, &in_creds,
                                        &out_creds))){
-        com_err(prog_name, retval, "while getting credentials from kdc");
+        com_err(prog_name, retval, _("while getting credentials from kdc"));
         return (FALSE);
     }
 
@@ -194,7 +196,7 @@ krb5_boolean krb5_auth_check(context, client_pname, hostname, options,
                                     NULL /*output ccache*/,
                                     &vfy_opts);
     if (retval) {
-        com_err(prog_name, retval, "while verifying ticket for server");
+        com_err(prog_name, retval, _("while verifying ticket for server"));
         return (FALSE);
     }
 
@@ -220,12 +222,12 @@ krb5_boolean krb5_fast_auth(context, client, server, target_user, cc)
     memset(&tgt, 0, sizeof(tgt));
 
     if ((retval= krb5_copy_principal(context, client, &tgtq.client))){
-        com_err(prog_name, retval,"while copying client principal");
+        com_err(prog_name, retval, _("while copying client principal"));
         return (FALSE) ;
     }
 
     if ((retval= krb5_copy_principal(context, server, &tgtq.server))){
-        com_err(prog_name, retval,"while copying client principal");
+        com_err(prog_name, retval, _("while copying client principal"));
         return (FALSE) ;
     }
 
@@ -233,7 +235,7 @@ krb5_boolean krb5_fast_auth(context, client, server, target_user, cc)
                                         KRB5_TC_MATCH_SRV_NAMEONLY | KRB5_TC_SUPPORTED_KTYPES,
                                         &tgtq, &tgt))){
         if (auth_debug)
-            com_err(prog_name, retval,"While Retrieving credentials");
+            com_err(prog_name, retval, _("while Retrieving credentials"));
         return (FALSE) ;
 
     }
@@ -243,7 +245,7 @@ krb5_boolean krb5_fast_auth(context, client, server, target_user, cc)
                                     NULL /*output ccache*/,
                                     &vfy_opts);
     if (retval){
-        com_err(prog_name, retval, "while verifing ticket for server");
+        com_err(prog_name, retval, _("while verifying ticket for server"));
         return (FALSE);
     }
 
@@ -271,24 +273,24 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
     *zero_password = FALSE;
 
     if ((code = krb5_unparse_name(context, client, &client_name))) {
-        com_err (prog_name, code, "when unparsing name");
+        com_err (prog_name, code, _("when unparsing name"));
         return (FALSE);
     }
 
     memset(&my_creds, 0, sizeof(my_creds));
 
     if ((code = krb5_copy_principal(context, client, &my_creds.client))){
-        com_err (prog_name, code, "while copying principal");
+        com_err (prog_name, code, _("while copying principal"));
         return (FALSE);
     }
 
     if ((code = krb5_copy_principal(context, server, &my_creds.server))){
-        com_err (prog_name, code, "while copying principal");
+        com_err (prog_name, code, _("while copying principal"));
         return (FALSE);
     }
 
     if ((code = krb5_timeofday(context, &now))) {
-        com_err(prog_name, code, "while getting time of day");
+        com_err(prog_name, code, _("while getting time of day"));
         return (FALSE);
     }
 
@@ -301,12 +303,12 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
     } else
         my_creds.times.renew_till = 0;
 
-    result = snprintf(prompt, sizeof(prompt), "Kerberos password for %s: ",
+    result = snprintf(prompt, sizeof(prompt), _("Kerberos password for %s: "),
                       client_name);
     if (SNPRINTF_OVERFLOW(result, sizeof(prompt))) {
-        fprintf (stderr,
-                 "principal name %s too long for internal buffer space\n",
-                 client_name);
+        fprintf(stderr,
+                _("principal name %s too long for internal buffer space\n"),
+                client_name);
         return FALSE;
     }
 
@@ -314,14 +316,14 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
 
     code = krb5_read_password(context, prompt, 0, password, &pwsize);
     if (code ) {
-        com_err(prog_name, code, "while reading password for '%s'\n",
+        com_err(prog_name, code, _("while reading password for '%s'\n"),
                 client_name);
         memset(password, 0, sizeof(password));
         return (FALSE);
     }
 
     if ( pwsize == 0) {
-        fprintf(stderr, "No password given\n");
+        fprintf(stderr, _("No password given\n"));
         *zero_password = TRUE;
         memset(password, 0, sizeof(password));
         return (FALSE);
@@ -335,9 +337,9 @@ krb5_boolean krb5_get_tkt_via_passwd (context, ccache, client, server,
 
     if (code) {
         if (code == KRB5KRB_AP_ERR_BAD_INTEGRITY)
-            fprintf (stderr, "%s: Password incorrect\n", prog_name);
+            fprintf(stderr, _("%s: Password incorrect\n"), prog_name);
         else
-            com_err (prog_name, code, "while getting initial credentials");
+            com_err(prog_name, code, _("while getting initial credentials"));
         return (FALSE);
     }
     return (TRUE);
@@ -353,7 +355,8 @@ void dump_principal (context, str, p)
     krb5_error_code retval;
 
     if ((retval = krb5_unparse_name(context, p, &stname))) {
-        fprintf(stderr, " %s while unparsing name\n", error_message(retval));
+        fprintf(stderr, _(" %s while unparsing name\n"),
+                error_message(retval));
     }
     fprintf(stderr, " %s: %s\n", str, stname);
 }
@@ -365,8 +368,10 @@ void plain_dump_principal (context, p)
     char * stname;
     krb5_error_code retval;
 
-    if ((retval = krb5_unparse_name(context, p, &stname)))
-        fprintf(stderr, " %s while unparsing name\n", error_message(retval));
+    if ((retval = krb5_unparse_name(context, p, &stname))) {
+        fprintf(stderr, _(" %s while unparsing name\n"),
+                error_message(retval));
+    }
     fprintf(stderr, "%s ", stname);
 }
 

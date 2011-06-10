@@ -856,8 +856,8 @@ cms_signeddata_create(krb5_context context,
     ASN1_OBJECT *oid = NULL;
 
     if (id_cryptoctx->my_certs == NULL) {
-        krb5_set_error_message(context, EINVAL, "cms_signdata_create called "
-                               "with no certificates");
+        krb5_set_error_message(context, EINVAL, _("cms_signdata_create called "
+                                                  "with no certificates"));
         return EINVAL;
     }
     /* Start creating PKCS7 data. */
@@ -1211,9 +1211,9 @@ cms_signeddata_verify(krb5_context context,
         octets = CMS_get0_content(cms);
         if (!octets || ((*octets)->type != V_ASN1_OCTET_STRING)) {
             retval = KRB5KDC_ERR_PREAUTH_FAILED;
-            krb5_set_error_message(context, KRB5KDC_ERR_PREAUTH_FAILED,
-                                   "Invalid pkinit packet: octet string "
-                                   "expected");
+            krb5_set_error_message(context, retval,
+                                   _("Invalid pkinit packet: octet string "
+                                     "expected"));
             goto cleanup;
         }
         *data_len = ASN1_STRING_length(*octets);
@@ -1231,7 +1231,7 @@ cms_signeddata_verify(krb5_context context,
         if (OBJ_obj2nid(type) != NID_pkcs7_signed) {
             pkiDebug("Expected id-signedData CMS msg (received type = %d)\n",
                      OBJ_obj2nid(type));
-            krb5_set_error_message(context, retval, "wrong oid\n");
+            krb5_set_error_message(context, retval, _("wrong oid\n"));
             goto cleanup;
         }
     }
@@ -3912,7 +3912,7 @@ pkinit_get_certs_pkcs12(krb5_context context,
         int r = 0;
         char prompt_string[128];
         char prompt_reply[128];
-        char prompt_prefix[] = "Pass phrase for";
+        char *prompt_prefix = _("Pass phrase for");
 
         pkiDebug("Initial PKCS12_parse with no password failed\n");
 
@@ -5764,6 +5764,6 @@ pkinit_pkcs11_code_to_text(int err)
             break;
     if (pkcs11_errstrings[i].text != NULL)
         return (pkcs11_errstrings[i].text);
-    snprintf(uc, sizeof(uc), "unknown code 0x%x", err);
+    snprintf(uc, sizeof(uc), _("unknown code 0x%x"), err);
     return (uc);
 }

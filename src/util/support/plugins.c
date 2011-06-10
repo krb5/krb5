@@ -174,7 +174,7 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
         if (stat (filepath, &statbuf) < 0) {
             err = errno;
             Tprintf ("stat(%s): %s\n", filepath, strerror (err));
-            krb5int_set_error(ep, err, "unable to find plugin [%s]: %s",
+            krb5int_set_error(ep, err, _("unable to find plugin [%s]: %s"),
                               filepath, strerror(err));
         }
     }
@@ -267,10 +267,10 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
             if (handle == NULL) {
                 const char *e = dlerror();
                 if (e == NULL)
-                    e = "unknown failure";
+                    e = _("unknown failure");
                 Tprintf ("dlopen(%s): %s\n", filepath, e);
                 err = ENOENT; /* XXX */
-                krb5int_set_error(ep, err, "unable to load plugin [%s]: %s",
+                krb5int_set_error(ep, err, _("unable to load plugin [%s]: %s"),
                                   filepath, e);
             }
         }
@@ -293,7 +293,7 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
         if (handle == NULL) {
             Tprintf ("Unable to load dll: %s\n", filepath);
             err = ENOENT; /* XXX */
-            krb5int_set_error (ep, err, "unable to load DLL [%s]", filepath);
+            krb5int_set_error(ep, err, _("unable to load DLL [%s]"), filepath);
         }
 
         if (!err) {
@@ -309,7 +309,7 @@ krb5int_open_plugin (const char *filepath, struct plugin_file_handle **h, struct
 
     if (!err && !got_plugin) {
         err = ENOENT;  /* no plugin or no way to load plugins */
-        krb5int_set_error (ep, err, "plugin unavailable: %s", strerror(err));
+        krb5int_set_error(ep, err, _("plugin unavailable: %s"), strerror(err));
     }
 
     if (!err) {

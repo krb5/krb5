@@ -458,8 +458,8 @@ load_preauth_plugins(krb5_context context)
                         if (initerr) {
                             const char *emsg;
                             emsg = krb5_get_error_message(context, initerr);
-                            krb5_klog_syslog(LOG_ERR,
-                                             "preauth %s failed to initialize: %s",
+                            krb5_klog_syslog(LOG_ERR, _("preauth %s failed to "
+                                                        "initialize: %s"),
                                              ftable->name, emsg);
                             krb5_free_error_message(context, emsg);
                             memset(&preauth_systems[k], 0,
@@ -949,9 +949,9 @@ get_preauth_hint_list(krb5_kdc_req *request, krb5_db_entry *client,
         pa++;
     }
     if (pa_data[0] == 0) {
-        krb5_klog_syslog (LOG_INFO,
-                          "%spreauth required but hint list is empty",
-                          hw_only ? "hw" : "");
+        krb5_klog_syslog(LOG_INFO,
+                         _("%spreauth required but hint list is empty"),
+                         hw_only ? "hw" : "");
     }
     /*
      * If we fail to get the cookie it is probably

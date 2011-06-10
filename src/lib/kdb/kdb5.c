@@ -180,7 +180,8 @@ get_conf_section(krb5_context context, char **section)
 
     if (context->default_realm == NULL) {
         krb5_set_error_message(context, KRB5_KDB_SERVER_INTERNAL_ERR,
-                               "No default realm set; cannot initialize KDB");
+                               _("No default realm set; cannot initialize "
+                                 "KDB"));
         return KRB5_KDB_SERVER_INTERNAL_ERR;
     }
     status = profile_get_string(context->profile,
@@ -282,7 +283,7 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library *libptr)
 #endif
     if (!vftabl_addr) {
         krb5_set_error_message(kcontext, KRB5_KDB_DBTYPE_NOTFOUND,
-                               "Unable to find requested database type: %s",
+                               _("Unable to find requested database type: %s"),
                                lib_name);
         return KRB5_PLUGIN_OP_NOTSUPP;
     }
@@ -364,9 +365,10 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library *lib)
                                             &(*lib)->dl_dir_handle, &kcontext->err))) {
         const char *err_str = krb5_get_error_message(kcontext, status);
         status = KRB5_KDB_DBTYPE_NOTFOUND;
-        krb5_set_error_message (kcontext, status,
-                                "Unable to find requested database type: %s", err_str);
-        krb5_free_error_message (kcontext, err_str);
+        krb5_set_error_message(kcontext, status,
+                               _("Unable to find requested database type: %s"),
+                               err_str);
+        krb5_free_error_message(kcontext, err_str);
         goto clean_n_exit;
     }
 
@@ -374,18 +376,20 @@ kdb_load_library(krb5_context kcontext, char *lib_name, db_library *lib)
                                                &vftabl_addrs, &kcontext->err))) {
         const char *err_str = krb5_get_error_message(kcontext, status);
         status = KRB5_KDB_DBTYPE_INIT;
-        krb5_set_error_message (kcontext, status,
-                                "plugin symbol 'kdb_function_table' lookup failed: %s", err_str);
-        krb5_free_error_message (kcontext, err_str);
+        krb5_set_error_message(kcontext, status,
+                               _("plugin symbol 'kdb_function_table' lookup "
+                                 "failed: %s"), err_str);
+        krb5_free_error_message(kcontext, err_str);
         goto clean_n_exit;
     }
 
     if (vftabl_addrs[0] == NULL) {
         /* No plugins! */
         status = KRB5_KDB_DBTYPE_NOTFOUND;
-        krb5_set_error_message (kcontext, status,
-                                _("Unable to load requested database module '%s': plugin symbol 'kdb_function_table' not found"),
-                                lib_name);
+        krb5_set_error_message(kcontext, status,
+                               _("Unable to load requested database module "
+                                 "'%s': plugin symbol 'kdb_function_table' "
+                                 "not found"), lib_name);
         goto clean_n_exit;
     }
 
@@ -1709,8 +1713,8 @@ krb5_dbe_lookup_mkey_aux(krb5_context context, krb5_db_entry *entry,
             }
         } else {
             krb5_set_error_message(context, KRB5_KDB_BAD_VERSION,
-                                   "Illegal version number for KRB5_TL_MKEY_AUX %d\n",
-                                   version);
+                                   _("Illegal version number for "
+                                     "KRB5_TL_MKEY_AUX %d\n"), version);
             return (KRB5_KDB_BAD_VERSION);
         }
     }
@@ -1860,9 +1864,9 @@ krb5_dbe_lookup_actkvno(krb5_context context, krb5_db_entry *entry,
                 next_tuple += ACTKVNO_TUPLE_SIZE;
             }
         } else {
-            krb5_set_error_message (context, KRB5_KDB_BAD_VERSION,
-                                    "Illegal version number for KRB5_TL_ACTKVNO %d\n",
-                                    version);
+            krb5_set_error_message(context, KRB5_KDB_BAD_VERSION,
+                                   _("Illegal version number for "
+                                     "KRB5_TL_ACTKVNO %d\n"), version);
             return (KRB5_KDB_BAD_VERSION);
         }
     }

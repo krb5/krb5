@@ -299,15 +299,13 @@ process_chpw_request(krb5_context context, void *server_handle, char *realm,
             targetp = clientstr;
         }
 
-        krb5_klog_syslog(LOG_NOTICE, "setpw request from %s by %.*s%s for %.*s%s: %s",
-                         addrbuf,
-                         (int) clen, clientstr, cdots,
-                         (int) tlen, targetp, tdots,
+        krb5_klog_syslog(LOG_NOTICE, _("setpw request from %s by %.*s%s for "
+                                       "%.*s%s: %s"), addrbuf, (int) clen,
+                         clientstr, cdots, (int) tlen, targetp, tdots,
                          errmsg ? errmsg : "success");
     } else {
-        krb5_klog_syslog(LOG_NOTICE, "chpw request from %s for %.*s%s: %s",
-                         addrbuf,
-                         (int) clen, clientstr, cdots,
+        krb5_klog_syslog(LOG_NOTICE, _("chpw request from %s for %.*s%s: %s"),
+                         addrbuf, (int) clen, clientstr, cdots,
                          errmsg ? errmsg : "success");
     }
     switch (ret) {
@@ -484,7 +482,7 @@ dispatch(void *handle,
 
     ret = krb5_kt_resolve(server_handle->context, "KDB:", &kt);
     if (ret != 0) {
-        krb5_klog_syslog(LOG_ERR, "chpw: Couldn't open admin keytab %s",
+        krb5_klog_syslog(LOG_ERR, _("chpw: Couldn't open admin keytab %s"),
                          krb5_get_error_message(server_handle->context, ret));
         goto cleanup;
     }

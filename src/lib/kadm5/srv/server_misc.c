@@ -142,8 +142,9 @@ passwd_check(kadm5_server_handle_t handle, const char *password,
             char *princname;
             if (krb5_unparse_name(handle->context, princ, &princname) != 0)
                 princname = NULL;
-            krb5_klog_syslog(LOG_ERR, "password quality module %s rejected "
-                             "password for %s: %s", modname,
+            krb5_klog_syslog(LOG_ERR,
+                             _("password quality module %s rejected password "
+                               "for %s: %s"), modname,
                              princname ? princname : "(can't unparse)", e);
             krb5_free_error_message(handle->context, e);
             free(princname);

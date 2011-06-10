@@ -1792,23 +1792,28 @@ spnego_gss_display_status(
 	switch (status_value) {
 	    case ERR_SPNEGO_NO_MECHS_AVAILABLE:
 		/* CSTYLED */
-		*status_string = make_err_msg("SPNEGO cannot find mechanisms to negotiate");
+		*status_string = make_err_msg(_("SPNEGO cannot find "
+						"mechanisms to negotiate"));
 		break;
 	    case ERR_SPNEGO_NO_CREDS_ACQUIRED:
 		/* CSTYLED */
-		*status_string = make_err_msg("SPNEGO failed to acquire creds");
+		*status_string = make_err_msg(_("SPNEGO failed to acquire "
+						"creds"));
 		break;
 	    case ERR_SPNEGO_NO_MECH_FROM_ACCEPTOR:
 		/* CSTYLED */
-		*status_string = make_err_msg("SPNEGO acceptor did not select a mechanism");
+		*status_string = make_err_msg(_("SPNEGO acceptor did not "
+						"select a mechanism"));
 		break;
 	    case ERR_SPNEGO_NEGOTIATION_FAILED:
 		/* CSTYLED */
-		*status_string = make_err_msg("SPNEGO failed to negotiate a mechanism");
+		*status_string = make_err_msg(_("SPNEGO failed to negotiate a "
+						"mechanism"));
 		break;
 	    case ERR_SPNEGO_NO_TOKEN_FROM_ACCEPTOR:
 		/* CSTYLED */
-		*status_string = make_err_msg("SPNEGO acceptor did not return a valid token");
+		*status_string = make_err_msg(_("SPNEGO acceptor did not "
+						"return a valid token"));
 		break;
 	    default:
 		status_string->length = 0;

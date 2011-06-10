@@ -366,13 +366,17 @@ krb5_boolean fcmd_resolve(fcmd, out_fcmd, out_err)
     }else{
         /* must be either full path or just the cmd name */
         if (strchr(fcmd, '/')){
-            asprintf(&err,"Error: bad entry - %s in %s file, must be either full path or just the cmd name\n", fcmd, KRB5_USERS_NAME);
+            asprintf(&err, _("Error: bad entry - %s in %s file, must be "
+                             "either full path or just the cmd name\n"),
+                     fcmd, KRB5_USERS_NAME);
             *out_err = err;
             return FALSE;
         }
 
 #ifndef CMD_PATH
-        asprintf(&err,"Error: bad entry - %s in %s file, since %s is just the cmd name, CMD_PATH must be defined \n", fcmd, KRB5_USERS_NAME, fcmd);
+        asprintf(&err, _("Error: bad entry - %s in %s file, since %s is just "
+                         "the cmd name, CMD_PATH must be defined \n"),
+                 fcmd, KRB5_USERS_NAME, fcmd);
         *out_err = err;
         return FALSE;
 #else
@@ -385,7 +389,8 @@ krb5_boolean fcmd_resolve(fcmd, out_fcmd, out_err)
         tc = get_first_token (path_ptr, &lp);
 
         if (! tc){
-            asprintf(&err,"Error: bad entry - %s in %s file, CMD_PATH contains no paths \n",  fcmd, KRB5_USERS_NAME);
+            asprintf(&err, _("Error: bad entry - %s in %s file, CMD_PATH "
+                             "contains no paths \n"), fcmd, KRB5_USERS_NAME);
             *out_err = err;
             return FALSE;
         }
@@ -393,7 +398,8 @@ krb5_boolean fcmd_resolve(fcmd, out_fcmd, out_err)
         i=0;
         do{
             if (*tc != '/'){  /* must be full path */
-                asprintf(&err,"Error: bad path %s in CMD_PATH for %s must start with '/' \n",tc, KRB5_USERS_NAME );
+                asprintf(&err, _("Error: bad path %s in CMD_PATH for %s must "
+                                 "start with '/' \n"), tc, KRB5_USERS_NAME );
                 *out_err = err;
                 return FALSE;
             }
@@ -508,7 +514,7 @@ krb5_boolean find_first_cmd_that_exists(fcmd_arr, cmd_out, err_out)
 
     if (retbool == FALSE ){
         krb5int_buf_init_dynamic(&buf);
-        krb5int_buf_add(&buf, "Error: not found -> ");
+        krb5int_buf_add(&buf, _("Error: not found -> "));
         for(j= 0; j < i; j ++)
             krb5int_buf_add_fmt(&buf, " %s ", fcmd_arr[j]);
         krb5int_buf_add(&buf, "\n");
@@ -714,9 +720,8 @@ void init_auth_names(pw_dir)
                   pw_dir, sep, KRB5_USERS_NAME);
     if (SNPRINTF_OVERFLOW(r1, sizeof(k5login_path)) ||
         SNPRINTF_OVERFLOW(r2, sizeof(k5users_path))) {
-        fprintf (stderr,
-                 "home directory name `%s' too long, can't search for .k5login\n",
-                 pw_dir);
+        fprintf(stderr, _("home directory name `%s' too long, can't search "
+                          "for .k5login\n"), pw_dir);
         exit (1);
     }
 }

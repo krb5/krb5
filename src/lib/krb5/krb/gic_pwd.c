@@ -46,7 +46,8 @@ krb5_get_as_key_password(krb5_context context,
         if ((ret = krb5_unparse_name(context, client, &clientstr)))
             return(ret);
 
-        snprintf(promptstr, sizeof(promptstr), "Password for %s", clientstr);
+        snprintf(promptstr, sizeof(promptstr), _("Password for %s"),
+                 clientstr);
         free(clientstr);
 
         prompt.prompt = promptstr;
@@ -193,15 +194,15 @@ warn_pw_expiry(krb5_context context, krb5_get_init_creds_opt *options,
     delta = pw_exp - now;
     if (delta < 3600) {
         snprintf(banner, sizeof(banner),
-                 "Warning: Your password will expire in less than one hour "
-                 "on %s", ts);
+                 _("Warning: Your password will expire in less than one hour "
+                   "on %s"), ts);
     } else if (delta < 86400*2) {
         snprintf(banner, sizeof(banner),
-                 "Warning: Your password will expire in %d hour%s on %s",
+                 _("Warning: Your password will expire in %d hour%s on %s"),
                  delta / 3600, delta < 7200 ? "" : "s", ts);
     } else {
         snprintf(banner, sizeof(banner),
-                 "Warning: Your password will expire in %d days on %s",
+                 _("Warning: Your password will expire in %d days on %s"),
                  delta / 86400, ts);
     }
 
@@ -346,17 +347,17 @@ krb5_get_init_creds_password(krb5_context context,
                                       &use_master, NULL)))
         goto cleanup;
 
-    prompt[0].prompt = "Enter new password";
+    prompt[0].prompt = _("Enter new password");
     prompt[0].hidden = 1;
     prompt[0].reply = &pw0;
     prompt_types[0] = KRB5_PROMPT_TYPE_NEW_PASSWORD;
 
-    prompt[1].prompt = "Enter it again";
+    prompt[1].prompt = _("Enter it again");
     prompt[1].hidden = 1;
     prompt[1].reply = &pw1;
     prompt_types[1] = KRB5_PROMPT_TYPE_NEW_PASSWORD_AGAIN;
 
-    strlcpy(banner, "Password expired.  You must change it now.",
+    strlcpy(banner, _("Password expired.  You must change it now."),
             sizeof(banner));
 
     for (tries = 3; tries; tries--) {
@@ -375,11 +376,11 @@ krb5_get_init_creds_password(krb5_context context,
         if (strcmp(pw0.data, pw1.data) != 0) {
             ret = KRB5_LIBOS_BADPWDMATCH;
             snprintf(banner, sizeof(banner),
-                     "%s.  Please try again.", error_message(ret));
+                     _("%s.  Please try again."), error_message(ret));
         } else if (pw0.length == 0) {
             ret = KRB5_CHPW_PWDNULL;
             snprintf(banner, sizeof(banner),
-                     "%s.  Please try again.", error_message(ret));
+                     _("%s.  Please try again."), error_message(ret));
         } else {
             int result_code;
             krb5_data code_string;
@@ -414,7 +415,8 @@ krb5_get_init_creds_password(krb5_context context,
             if (result_string.length > (sizeof(banner)-100))
                 result_string.length = sizeof(banner)-100;
 
-            snprintf(banner, sizeof(banner), "%.*s%s%.*s.  Please try again.\n",
+            snprintf(banner, sizeof(banner),
+                     _("%.*s%s%.*s.  Please try again.\n"),
                      (int) code_string.length, code_string.data,
                      result_string.length ? ": " : "",
                      (int) result_string.length,

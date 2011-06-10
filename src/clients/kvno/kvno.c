@@ -27,7 +27,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "autoconf.h"
+#include "k5-platform.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -40,9 +40,9 @@ static char *prog;
 
 static void xusage()
 {
-    fprintf(stderr, "usage: %s [-C] [-u] [-c ccache] [-e etype]\n", prog);
-    fprintf(stderr, "\t[-k keytab] [-S sname] [-U for_user [-P]]\n");
-    fprintf(stderr, "\tservice1 service2 ...\n");
+    fprintf(stderr, _("usage: %s [-C] [-u] [-c ccache] [-e etype]\n"), prog);
+    fprintf(stderr, _("\t[-k keytab] [-S sname] [-U for_user [-P]]\n"));
+    fprintf(stderr, _("\tservice1 service2 ...\n"));
     exit(1);
 }
 
@@ -96,14 +96,16 @@ int main(int argc, char *argv[])
         case 'S':
             sname = optarg;
             if (unknown == 1){
-                fprintf(stderr, "Options -u and -S are mutually exclusive\n");
+                fprintf(stderr,
+                        _("Options -u and -S are mutually exclusive\n"));
                 xusage();
             }
             break;
         case 'u':
             unknown = 1;
             if (sname){
-                fprintf(stderr, "Options -u and -S are mutually exclusive\n");
+                fprintf(stderr,
+                        _("Options -u and -S are mutually exclusive\n"));
                 xusage();
             }
             break;
@@ -118,12 +120,12 @@ int main(int argc, char *argv[])
 
     if (proxy) {
         if (keytab_name == NULL) {
-            fprintf(stderr, "Option -P (constrained delegation) "
-                    "requires keytab to be specified\n");
+            fprintf(stderr, _("Option -P (constrained delegation) "
+                              "requires keytab to be specified\n"));
             xusage();
         } else if (for_user == NULL) {
-            fprintf(stderr, "Option -P (constrained delegation) requires "
-                    "option -U (protocol transition)\n");
+            fprintf(stderr, _("Option -P (constrained delegation) requires "
+                              "option -U (protocol transition)\n"));
             xusage();
         }
     }
@@ -167,14 +169,14 @@ static void do_v5_kvno (int count, char *names[],
 
     ret = krb5_init_context(&context);
     if (ret) {
-        com_err(prog, ret, "while initializing krb5 library");
+        com_err(prog, ret, _("while initializing krb5 library"));
         exit(1);
     }
 
     if (etypestr) {
         ret = krb5_string_to_enctype(etypestr, &etype);
         if (ret) {
-            com_err(prog, ret, "while converting etype");
+            com_err(prog, ret, _("while converting etype"));
             exit(1);
         }
     } else {
@@ -186,14 +188,14 @@ static void do_v5_kvno (int count, char *names[],
     else
         ret = krb5_cc_default(context, &ccache);
     if (ret) {
-        com_err(prog, ret, "while opening ccache");
+        com_err(prog, ret, _("while opening ccache"));
         exit(1);
     }
 
     if (keytab_name) {
         ret = krb5_kt_resolve(context, keytab_name, &keytab);
         if (ret) {
-            com_err(prog, ret, "resolving keytab %s", keytab_name);
+            com_err(prog, ret, _("resolving keytab %s"), keytab_name);
             exit(1);
         }
     }
@@ -203,14 +205,14 @@ static void do_v5_kvno (int count, char *names[],
                                     KRB5_PRINCIPAL_PARSE_ENTERPRISE,
                                     &for_user_princ);
         if (ret) {
-            com_err(prog, ret, "while parsing principal name %s", for_user);
+            com_err(prog, ret, _("while parsing principal name %s"), for_user);
             exit(1);
         }
     }
 
     ret = krb5_cc_get_principal(context, ccache, &me);
     if (ret) {
-        com_err(prog, ret, "while getting client principal name");
+        com_err(prog, ret, _("while getting client principal name"));
         exit(1);
     }
 
@@ -236,8 +238,10 @@ static void do_v5_kvno (int count, char *names[],
             ret = krb5_parse_name(context, names[i], &server);
         }
         if (ret) {
-            if (!quiet)
-                com_err(prog, ret, "while parsing principal name %s", names[i]);
+            if (!quiet) {
+                com_err(prog, ret, _("while parsing principal name %s"),
+                        names[i]);
+            }
             goto error;
         }
         if (unknown == 1) {
@@ -246,9 +250,8 @@ static void do_v5_kvno (int count, char *names[],
 
         ret = krb5_unparse_name(context, server, &princ);
         if (ret) {
-            com_err(prog, ret,
-                    "while formatting parsed principal name for '%s'",
-                    names[i]);
+            com_err(prog, ret, _("while formatting parsed principal name for "
+                                 "'%s'"), names[i]);
             goto error;
         }
 
@@ -258,7 +261,7 @@ static void do_v5_kvno (int count, char *names[],
             if (!proxy &&
                 !krb5_principal_compare(context, me, server)) {
                 com_err(prog, EINVAL,
-                        "client and server principal names must match");
+                        _("client and server principal names must match"));
                 goto error;
             }
 
@@ -275,14 +278,14 @@ static void do_v5_kvno (int count, char *names[],
         }
 
         if (ret) {
-            com_err(prog, ret, "while getting credentials for %s", princ);
+            com_err(prog, ret, _("while getting credentials for %s"), princ);
             goto error;
         }
 
         /* we need a native ticket */
         ret = krb5_decode_ticket(&out_creds->ticket, &ticket);
         if (ret) {
-            com_err(prog, ret, "while decoding ticket for %s", princ);
+            com_err(prog, ret, _("while decoding ticket for %s"), princ);
             goto error;
         }
 
@@ -293,12 +296,13 @@ static void do_v5_kvno (int count, char *names[],
                     fprintf(stderr, "%s: kvno = %d, keytab entry invalid\n",
                             princ, ticket->enc_part.kvno);
                 }
-                com_err(prog, ret, "while decrypting ticket for %s", princ);
+                com_err(prog, ret, _("while decrypting ticket for %s"), princ);
                 goto error;
             }
-            if (!quiet)
-                printf("%s: kvno = %d, keytab entry valid\n",
+            if (!quiet) {
+                printf(_("%s: kvno = %d, keytab entry valid\n"),
                        princ, ticket->enc_part.kvno);
+            }
             if (proxy) {
                 krb5_free_creds(context, out_creds);
                 out_creds = NULL;
@@ -314,13 +318,13 @@ static void do_v5_kvno (int count, char *names[],
                                                      &out_creds);
                 if (ret) {
                     com_err(prog, ret,
-                            "%s: constrained delegation failed", princ);
+                            _("%s: constrained delegation failed"), princ);
                     goto error;
                 }
             }
         } else {
             if (!quiet)
-                printf("%s: kvno = %d\n", princ, ticket->enc_part.kvno);
+                printf(_("%s: kvno = %d\n"), princ, ticket->enc_part.kvno);
         }
 
         continue;

@@ -684,7 +684,8 @@ tgt_again:
                               subject_tkt,
                               &enc_tkt_reply);
     if (errcode) {
-        krb5_klog_syslog(LOG_INFO, "TGS_REQ : handle_authdata (%d)", errcode);
+        krb5_klog_syslog(LOG_INFO, _("TGS_REQ : handle_authdata (%d)"),
+                         errcode);
         status = "HANDLE_AUTHDATA";
         goto cleanup;
     }
@@ -751,29 +752,24 @@ tgt_again:
         if (errcode == 0) {
             setflag (enc_tkt_reply.flags, TKT_FLG_TRANSIT_POLICY_CHECKED);
         } else if (errcode == KRB5KRB_AP_ERR_ILL_CR_TKT)
-            krb5_klog_syslog (LOG_INFO,
-                              "bad realm transit path from '%s' to '%s' "
-                              "via '%.*s%s'",
-                              cname ? cname : "<unknown client>",
-                              sname ? sname : "<unknown server>",
-                              tlen,
-                              enc_tkt_reply.transited.tr_contents.data,
-                              tdots);
+            krb5_klog_syslog(LOG_INFO, _("bad realm transit path from '%s' "
+                                         "to '%s' via '%.*s%s'"),
+                             cname ? cname : "<unknown client>",
+                             sname ? sname : "<unknown server>", tlen,
+                             enc_tkt_reply.transited.tr_contents.data, tdots);
         else {
             emsg = krb5_get_error_message(kdc_context, errcode);
-            krb5_klog_syslog (LOG_ERR,
-                              "unexpected error checking transit from "
-                              "'%s' to '%s' via '%.*s%s': %s",
-                              cname ? cname : "<unknown client>",
-                              sname ? sname : "<unknown server>",
-                              tlen,
-                              enc_tkt_reply.transited.tr_contents.data,
-                              tdots, emsg);
+            krb5_klog_syslog(LOG_ERR, _("unexpected error checking transit "
+                                        "from '%s' to '%s' via '%.*s%s': %s"),
+                             cname ? cname : "<unknown client>",
+                             sname ? sname : "<unknown server>", tlen,
+                             enc_tkt_reply.transited.tr_contents.data, tdots,
+                             emsg);
             krb5_free_error_message(kdc_context, emsg);
             emsg = NULL;
         }
     } else
-        krb5_klog_syslog (LOG_INFO, "not checking transit path");
+        krb5_klog_syslog(LOG_INFO, _("not checking transit path"));
     if (reject_bad_transit
         && !isflagset (enc_tkt_reply.flags, TKT_FLG_TRANSIT_POLICY_CHECKED)) {
         errcode = KRB5KDC_ERR_POLICY;

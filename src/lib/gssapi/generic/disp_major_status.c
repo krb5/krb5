@@ -34,18 +34,18 @@
 
 #define GSS_ERROR_STR(value, array, select, min, max, num)              \
     (((select(value) < (min)) || (select(value) > (max))) ? NULL :      \
-     (array)[num(value)])
+     _((array)[num(value)]))
 
 /**/
 
 static const char * const calling_error_string[] = {
     NULL,
-    "A required input parameter could not be read",
-    "A required input parameter could not be written",
-    "A parameter was malformed",
+    N_("A required input parameter could not be read"),
+    N_("A required input parameter could not be written"),
+    N_("A parameter was malformed"),
 };
 
-static const char * const calling_error = "calling error";
+static const char * const calling_error = N_("calling error");
 
 #define GSS_CALLING_ERROR_STR(x)                                        \
     GSS_ERROR_STR((x), calling_error_string, GSS_CALLING_ERROR,         \
@@ -56,25 +56,25 @@ static const char * const calling_error = "calling error";
 
 static const char * const routine_error_string[] = {
     NULL,
-    "An unsupported mechanism was requested",
-    "An invalid name was supplied",
-    "A supplied name was of an unsupported type",
-    "Incorrect channel bindings were supplied",
-    "An invalid status code was supplied",
-    "A token had an invalid signature",
-    "No credentials were supplied",
-    "No context has been established",
-    "A token was invalid",
-    "A credential was invalid",
-    "The referenced credentials have expired",
-    "The context has expired",
-    "Miscellaneous failure",
-    "The quality-of-protection requested could not be provided",
-    "The operation is forbidden by the local security policy",
-    "The operation or option is not available",
+    N_("An unsupported mechanism was requested"),
+    N_("An invalid name was supplied"),
+    N_("A supplied name was of an unsupported type"),
+    N_("Incorrect channel bindings were supplied"),
+    N_("An invalid status code was supplied"),
+    N_("A token had an invalid signature"),
+    N_("No credentials were supplied"),
+    N_("No context has been established"),
+    N_("A token was invalid"),
+    N_("A credential was invalid"),
+    N_("The referenced credentials have expired"),
+    N_("The context has expired"),
+    N_("Miscellaneous failure"),
+    N_("The quality-of-protection requested could not be provided"),
+    N_("The operation is forbidden by the local security policy"),
+    N_("The operation or option is not available"),
 };
 
-static const char * const routine_error = "routine error";
+static const char * const routine_error = N_("routine error");
 
 #define GSS_ROUTINE_ERROR_STR(x)                                \
     GSS_ERROR_STR((x), routine_error_string, GSS_ROUTINE_ERROR, \
@@ -86,13 +86,13 @@ static const char * const routine_error = "routine error";
 /* this becomes overly gross after about 4 strings */
 
 static const char * const sinfo_string[] = {
-    "The routine must be called again to complete its function",
-    "The token was a duplicate of an earlier token",
-    "The token's validity period has expired",
-    "A later token has already been processed",
+    N_("The routine must be called again to complete its function"),
+    N_("The token was a duplicate of an earlier token"),
+    N_("The token's validity period has expired"),
+    N_("A later token has already been processed"),
 };
 
-static const char * const sinfo_code = "supplementary info code";
+static const char * const sinfo_code = N_("supplementary info code");
 
 #define LSBGET(x) ((((x)^((x)-1))+1)>>1)
 #define LSBMASK(n) ((1<<(n))^((1<<(n))-1))
@@ -103,8 +103,8 @@ static const char * const sinfo_code = "supplementary info code";
 
 /**/
 
-static const char * const no_error = "No error";
-static const char * const unknown_error = "Unknown %s (field = %d)";
+static const char * const no_error = N_("No error");
+static const char * const unknown_error = N_("Unknown %s (field = %d)");
 
 /**/
 
@@ -116,7 +116,7 @@ display_unknown(kind, value, buffer)
 {
     char *str;
 
-    if (asprintf(&str, unknown_error, kind, value) < 0)
+    if (asprintf(&str, _(unknown_error), kind, value) < 0)
         return(0);
 
     buffer->length = strlen(str);
@@ -140,7 +140,7 @@ static OM_uint32 display_calling(minor_status, code, status_string)
             return(GSS_S_FAILURE);
         }
     } else {
-        if (! display_unknown(calling_error, GSS_CALLING_ERROR_FIELD(code),
+        if (! display_unknown(_(calling_error), GSS_CALLING_ERROR_FIELD(code),
                               status_string)) {
             *minor_status = ENOMEM;
             return(GSS_S_FAILURE);
@@ -165,7 +165,7 @@ static OM_uint32 display_routine(minor_status, code, status_string)
             return(GSS_S_FAILURE);
         }
     } else {
-        if (! display_unknown(routine_error, GSS_ROUTINE_ERROR_FIELD(code),
+        if (! display_unknown(_(routine_error), GSS_ROUTINE_ERROR_FIELD(code),
                               status_string)) {
             *minor_status = ENOMEM;
             return(GSS_S_FAILURE);
@@ -190,7 +190,7 @@ static OM_uint32 display_bit(minor_status, code, status_string)
             return(GSS_S_FAILURE);
         }
     } else {
-        if (! display_unknown(sinfo_code, 1<<code, status_string)) {
+        if (! display_unknown(_(sinfo_code), 1<<code, status_string)) {
             *minor_status = ENOMEM;
             return(GSS_S_FAILURE);
         }

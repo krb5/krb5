@@ -53,7 +53,7 @@ krb5_ldap_create_policy(krb5_context context, krb5_ldap_policy_params *policy,
     /* validate the input parameters */
     if (policy == NULL || policy->policy == NULL) {
         st = EINVAL;
-        krb5_set_error_message (context, st, "Ticket Policy Name missing");
+        krb5_set_error_message(context, st, _("Ticket Policy Name missing"));
         goto cleanup;
     }
 
@@ -129,7 +129,7 @@ krb5_ldap_modify_policy(krb5_context context, krb5_ldap_policy_params *policy,
     /* validate the input parameters */
     if (policy == NULL || policy->policy==NULL) {
         st = EINVAL;
-        krb5_set_error_message (context, st, "Ticket Policy Name missing");
+        krb5_set_error_message(context, st, _("Ticket Policy Name missing"));
         goto cleanup;
     }
 
@@ -141,7 +141,7 @@ krb5_ldap_modify_policy(krb5_context context, krb5_ldap_policy_params *policy,
 
     /* the policydn object should be of the krbTicketPolicy object class */
     st = checkattributevalue(ld, policy_dn, "objectClass", attrvalues, &objectmask);
-    CHECK_CLASS_VALIDITY(st, objectmask, "ticket policy object: ");
+    CHECK_CLASS_VALIDITY(st, objectmask, _("ticket policy object: "));
 
     if ((objectmask & 0x02) == 0) { /* add krbticketpolicyaux to the object class list */
         memset(strval, 0, sizeof(strval));
@@ -206,7 +206,8 @@ krb5_ldap_read_policy(krb5_context context, char *policyname,
     /* validate the input parameters */
     if (policyname == NULL  || policy == NULL) {
         st = EINVAL;
-        krb5_set_error_message(context, st, "Ticket Policy Object information missing");
+        krb5_set_error_message(context, st,
+                               _("Ticket Policy Object information missing"));
         goto cleanup;
     }
 
@@ -218,7 +219,7 @@ krb5_ldap_read_policy(krb5_context context, char *policyname,
 
     /* the policydn object should be of the krbTicketPolicy object class */
     st = checkattributevalue(ld, policy_dn, "objectClass", attrvalues, &objectmask);
-    CHECK_CLASS_VALIDITY(st, objectmask, "ticket policy object: ");
+    CHECK_CLASS_VALIDITY(st, objectmask, _("ticket policy object: "));
 
     /* Initialize ticket policy structure */
     lpolicy =(krb5_ldap_policy_params *) malloc(sizeof(krb5_ldap_policy_params));
@@ -293,7 +294,7 @@ krb5_ldap_delete_policy(krb5_context context, char *policyname)
 
     if (policyname == NULL) {
         st = EINVAL;
-        prepend_err_str (context,"Ticket Policy Object DN missing",st,st);
+        prepend_err_str(context, _("Ticket Policy Object DN missing"), st, st);
         goto cleanup;
     }
 
@@ -319,7 +320,9 @@ krb5_ldap_delete_policy(krb5_context context, char *policyname)
         }
     } else {
         st = EINVAL;
-        prepend_err_str (context,"Delete Failed: One or more Principals associated with the Ticket Policy",st,st);
+        prepend_err_str(context,
+                        _("Delete Failed: One or more Principals associated "
+                          "with the Ticket Policy"), st, st);
         goto cleanup;
     }
 
@@ -426,7 +429,8 @@ krb5_ldap_list(krb5_context context, char ***list, char *objectclass,
     /* check if the containerdn exists */
     if (containerdn) {
         if ((st=checkattributevalue(ld, containerdn, NULL, NULL, NULL)) != 0) {
-            prepend_err_str (context, "Error reading container object: ", st, st);
+            prepend_err_str(context, _("Error reading container object: "),
+                            st, st);
             goto cleanup;
         }
     }

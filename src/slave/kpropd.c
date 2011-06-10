@@ -173,10 +173,10 @@ kadm5_get_kiprop_host_srv_name(krb5_context context,
 static void usage()
 {
     fprintf(stderr,
-            "\nUsage: %s [-r realm] [-s srvtab] [-dS] [-f slave_file]\n",
+            _("\nUsage: %s [-r realm] [-s srvtab] [-dS] [-f slave_file]\n"),
             progname);
-    fprintf(stderr, "\t[-F kerberos_db_file ] [-p kdb5_util_pathname]\n");
-    fprintf(stderr, "\t[-x db_args]* [-P port] [-a acl_file]\n");
+    fprintf(stderr, _("\t[-F kerberos_db_file ] [-p kdb5_util_pathname]\n"));
+    fprintf(stderr, _("\t[-x db_args]* [-P port] [-a acl_file]\n"));
     exit(1);
 }
 
@@ -275,19 +275,19 @@ retry:
 
     error = get_wildcard_addr(&res);
     if (error != 0) {
-        (void) fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(error));
+        (void) fprintf(stderr, _("getaddrinfo: %s\n"), gai_strerror(error));
         exit(1);
     }
 
     finet = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (finet < 0) {
-        com_err(progname, errno, "while obtaining socket");
+        com_err(progname, errno, _("while obtaining socket"));
         exit(1);
     }
 
     val = 1;
     if (setsockopt(finet, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val)) < 0)
-        com_err(progname, errno, "while setting SO_REUSEADDR option");
+        com_err(progname, errno, _("while setting SO_REUSEADDR option"));
 
 #if defined(KRB5_USE_INET6) && defined(IPV6_V6ONLY)
     /* Make sure dual-stack support is enabled on IPv6 listener sockets if
@@ -295,7 +295,7 @@ retry:
     val = 0;
     if (res->ai_family == AF_INET6 &&
         setsockopt(finet, IPPROTO_IPV6, IPV6_V6ONLY, &val, sizeof(val)) < 0)
-        com_err(progname, errno, "while unsetting IPV6_V6ONLY option");
+        com_err(progname, errno, _("while unsetting IPV6_V6ONLY option"));
 #endif
 
     /*
@@ -331,7 +331,7 @@ retry:
         backoff_timer *= 2;
     }
     if ((ret = bind(finet, res->ai_addr, res->ai_addrlen)) < 0) {
-        com_err(progname, errno, "while binding listener socket");
+        com_err(progname, errno, _("while binding listener socket"));
         exit(1);
     }
     if (!debug && iproprole != IPROP_SLAVE)
@@ -342,7 +342,7 @@ retry:
         fclose(pidfile);
     } else
         com_err(progname, errno,
-                "while opening pid file %s for writing", PID_FILE);
+                _("while opening pid file %s for writing"), PID_FILE);
 #endif
     if (listen(finet, 5) < 0) {
         com_err(progname, errno, "in listen call");
@@ -355,7 +355,7 @@ retry:
         memset(&frominet, 0, sizeof(frominet));
         fromlen = sizeof(frominet);
         if (debug)
-            fprintf(stderr, "waiting for a kprop connection\n");
+            fprintf(stderr, _("waiting for a kprop connection\n"));
         s = accept(finet, (struct sockaddr *) &frominet, &fromlen);
 
         if (s < 0) {
@@ -389,7 +389,7 @@ retry:
             child_pid = fork();
         switch (child_pid) {
         case -1:
-            com_err(progname, errno, "while forking");
+            com_err(progname, errno, _("while forking"));
             exit(1);
         case 0:
             (void) close(finet);
@@ -461,8 +461,9 @@ void doit(fd)
 #ifdef ENOTSOCK
         if (errno == ENOTSOCK && fd == 0 && !standalone) {
             fprintf(stderr,
-                    "%s: Standard input does not appear to be a network socket.\n"
-                    "\t(Not run from inetd, and missing the -S option?)\n",
+                    _("%s: Standard input does not appear to be a network "
+                      "socket.\n"
+                      "\t(Not run from inetd, and missing the -S option?)\n"),
                     progname);
             exit(1);
         }
@@ -474,12 +475,12 @@ void doit(fd)
     if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (caddr_t) &on,
                    sizeof (on)) < 0) {
         com_err(progname, errno,
-                "while attempting setsockopt (SO_KEEPALIVE)");
+                _("while attempting setsockopt (SO_KEEPALIVE)"));
     }
 
     if (getnameinfo((const struct sockaddr *) &from, fromlen,
                     host, sizeof(host), NULL, 0, 0) == 0) {
-        syslog(LOG_INFO, "Connection from %s", host);
+        syslog(LOG_INFO, _("Connection from %s"), host);
         if (debug)
             printf("Connection from %s\n", host);
     }
@@ -504,12 +505,13 @@ void doit(fd)
                     "While unparsing client name");
             exit(1);
         }
-        if (debug)
+        if (debug) {
             fprintf(stderr,
-                    "Rejected connection from unauthorized principal %s\n",
+                    _("Rejected connection from unauthorized principal %s\n"),
                     name);
+        }
         syslog(LOG_WARNING,
-               "Rejected connection from unauthorized principal %s",
+               _("Rejected connection from unauthorized principal %s"),
                name);
         free(name);
         exit(1);
@@ -520,33 +522,32 @@ void doit(fd)
     retval = krb5_lock_file(kpropd_context, lock_fd,
                             KRB5_LOCKMODE_EXCLUSIVE|KRB5_LOCKMODE_DONTBLOCK);
     if (retval) {
-        com_err(progname, retval, "while trying to lock '%s'",
+        com_err(progname, retval, _("while trying to lock '%s'"),
                 temp_file_name);
         exit(1);
     }
     if ((database_fd = open(temp_file_name,
                             O_WRONLY|O_CREAT|O_TRUNC, 0600)) < 0) {
-        com_err(progname, errno,
-                "while opening database file, '%s'",
+        com_err(progname, errno, _("while opening database file, '%s'"),
                 temp_file_name);
         exit(1);
     }
     recv_database(kpropd_context, fd, database_fd, &confmsg);
     if (rename(temp_file_name, file)) {
-        com_err(progname, errno, "While renaming %s to %s",
+        com_err(progname, errno, _("while renaming %s to %s"),
                 temp_file_name, file);
         exit(1);
     }
     retval = krb5_lock_file(kpropd_context, lock_fd, KRB5_LOCKMODE_SHARED);
     if (retval) {
-        com_err(progname, retval, "while downgrading lock on '%s'",
+        com_err(progname, retval, _("while downgrading lock on '%s'"),
                 temp_file_name);
         exit(1);
     }
     load_database(kpropd_context, kdb5_util, file);
     retval = krb5_lock_file(kpropd_context, lock_fd, KRB5_LOCKMODE_UNLOCK);
     if (retval) {
-        com_err(progname, retval, "while unlocking '%s'", temp_file_name);
+        com_err(progname, retval, _("while unlocking '%s'"), temp_file_name);
         exit(1);
     }
     (void)close(lock_fd);
@@ -558,14 +559,13 @@ void doit(fd)
     retval = krb5_write_message(kpropd_context, (void *) &fd, &confmsg);
     if (retval) {
         krb5_free_data_contents(kpropd_context, &confmsg);
-        com_err(progname, retval,
-                "while sending # of received bytes");
+        com_err(progname, retval, _("while sending # of received bytes"));
         exit(1);
     }
     krb5_free_data_contents(kpropd_context, &confmsg);
     if (close(fd) < 0) {
         com_err(progname, errno,
-                "while trying to close database file");
+                _("while trying to close database file"));
         exit(1);
     }
 
@@ -782,7 +782,7 @@ reinit:
         incr_ret = iprop_get_updates_1(&mylast, handle->clnt);
         if (incr_ret == (kdb_incr_result_t *)NULL) {
             clnt_perror(handle->clnt,
-                        "iprop_get_updates call failed");
+                        _("iprop_get_updates call failed"));
             if (server_handle)
                 kadm5_destroy((void *)server_handle);
             server_handle = (void *)NULL;
@@ -806,7 +806,7 @@ reinit:
                 if (full_ret == (kdb_fullresync_result_t *)
                     NULL) {
                     clnt_perror(handle->clnt,
-                                "iprop_full_resync call failed");
+                                _("iprop_full_resync call failed"));
                     if (server_handle)
                         kadm5_destroy((void *)
                                       server_handle);
@@ -1037,7 +1037,7 @@ void PRS(argv)
      * profile. */
     retval = krb5int_init_context_kdc(&kpropd_context);
     if (retval) {
-        com_err(argv[0], retval, "while initializing krb5");
+        com_err(argv[0], retval, _("while initializing krb5"));
         exit(1);
     }
 
@@ -1130,7 +1130,7 @@ void PRS(argv)
                     new_db_args = realloc(db_args,
                                           (db_args_size+2)*sizeof(*db_args));
                     if (new_db_args == NULL) {
-                        com_err(argv[0], errno, "copying db args");
+                        com_err(argv[0], errno, _("copying db args"));
                         exit(1);
                     }
                     db_args = new_db_args;
@@ -1169,14 +1169,14 @@ void PRS(argv)
                                      KRB5_NT_SRV_HST, &server);
     if (retval) {
         com_err(progname, retval,
-                "While trying to construct my service name");
+                _("while trying to construct my service name"));
         exit(1);
     }
     if (realm) {
         retval = krb5_set_principal_realm(kpropd_context, server, realm);
         if (retval) {
             com_err(progname, errno,
-                    "while constructing my service realm");
+                    _("while constructing my service realm"));
             exit(1);
         }
     }
@@ -1185,7 +1185,7 @@ void PRS(argv)
      */
     if (asprintf(&temp_file_name, "%s%s", file, tmp) < 0) {
         com_err(progname, ENOMEM,
-                "while allocating filename for temp file");
+                _("while allocating filename for temp file"));
         exit(1);
     }
 
@@ -1234,7 +1234,7 @@ kerberos_authenticate(context, fd, clientp, etype, my_sin)
 
     sin_length = sizeof(r_sin);
     if (getsockname(fd, (struct sockaddr *) &r_sin, &sin_length)) {
-        com_err(progname, errno, "while getting local socket address");
+        com_err(progname, errno, _("while getting local socket address"));
         exit(1);
     }
 
@@ -1246,7 +1246,7 @@ kerberos_authenticate(context, fd, clientp, etype, my_sin)
 
         retval = krb5_unparse_name(context, server, &name);
         if (retval) {
-            com_err(progname, retval, "While unparsing client name");
+            com_err(progname, retval, _("while unparsing client name"));
             exit(1);
         }
         printf("krb5_recvauth(%d, %s, %s, ...)\n", fd, kprop_version, name);
@@ -1255,7 +1255,7 @@ kerberos_authenticate(context, fd, clientp, etype, my_sin)
 
     retval = krb5_auth_con_init(context, &auth_context);
     if (retval) {
-        syslog(LOG_ERR, "Error in krb5_auth_con_ini: %s",
+        syslog(LOG_ERR, _("Error in krb5_auth_con_ini: %s"),
                error_message(retval));
         exit(1);
     }
@@ -1263,7 +1263,7 @@ kerberos_authenticate(context, fd, clientp, etype, my_sin)
     retval = krb5_auth_con_setflags(context, auth_context,
                                     KRB5_AUTH_CONTEXT_DO_SEQUENCE);
     if (retval) {
-        syslog(LOG_ERR, "Error in krb5_auth_con_setflags: %s",
+        syslog(LOG_ERR, _("Error in krb5_auth_con_setflags: %s"),
                error_message(retval));
         exit(1);
     }
@@ -1271,7 +1271,7 @@ kerberos_authenticate(context, fd, clientp, etype, my_sin)
     retval = krb5_auth_con_setaddrs(context, auth_context, receiver_addr,
                                     sender_addr);
     if (retval) {
-        syslog(LOG_ERR, "Error in krb5_auth_con_setaddrs: %s",
+        syslog(LOG_ERR, _("Error in krb5_auth_con_setaddrs: %s"),
                error_message(retval));
         exit(1);
     }
@@ -1279,7 +1279,8 @@ kerberos_authenticate(context, fd, clientp, etype, my_sin)
     if (srvtab) {
         retval = krb5_kt_resolve(context, srvtab, &keytab);
         if (retval) {
-            syslog(LOG_ERR, "Error in krb5_kt_resolve: %s", error_message(retval));
+            syslog(LOG_ERR, _("Error in krb5_kt_resolve: %s"),
+                   error_message(retval));
             exit(1);
         }
     }
@@ -1287,13 +1288,14 @@ kerberos_authenticate(context, fd, clientp, etype, my_sin)
     retval = krb5_recvauth(context, &auth_context, (void *) &fd,
                            kprop_version, server, 0, keytab, &ticket);
     if (retval) {
-        syslog(LOG_ERR, "Error in krb5_recvauth: %s", error_message(retval));
+        syslog(LOG_ERR, _("Error in krb5_recvauth: %s"),
+               error_message(retval));
         exit(1);
     }
 
     retval = krb5_copy_principal(context, ticket->enc_part2->client, clientp);
     if (retval) {
-        syslog(LOG_ERR, "Error in krb5_copy_prinicpal: %s",
+        syslog(LOG_ERR, _("Error in krb5_copy_prinicpal: %s"),
                error_message(retval));
         exit(1);
     }
@@ -1306,17 +1308,17 @@ kerberos_authenticate(context, fd, clientp, etype, my_sin)
 
         retval = krb5_unparse_name(context, *clientp, &name);
         if (retval) {
-            com_err(progname, retval, "While unparsing client name");
+            com_err(progname, retval, _("while unparsing client name"));
             exit(1);
         }
 
         retval = krb5_enctype_to_string(*etype, etypebuf, sizeof(etypebuf));
         if (retval) {
-            com_err(progname, retval, "While unparsing ticket etype");
+            com_err(progname, retval, _("while unparsing ticket etype"));
             exit(1);
         }
 
-        printf("authenticated client: %s (etype == %s)\n", name, etypebuf);
+        printf(_("authenticated client: %s (etype == %s)\n"), name, etypebuf);
         free(name);
     }
 
@@ -1401,7 +1403,7 @@ recv_database(context, fd, database_fd, confmsg)
     if (retval) {
         send_error(context, fd, retval, "while reading database size");
         com_err(progname, retval,
-                "while reading size of database from client");
+                _("while reading size of database from client"));
         exit(1);
     }
     if (krb5_is_krb_error(&inbuf))
@@ -1412,7 +1414,7 @@ recv_database(context, fd, database_fd, confmsg)
                    "while decoding database size");
         krb5_free_data_contents(context, &inbuf);
         com_err(progname, retval,
-                "while decoding database size from client");
+                _("while decoding database size from client"));
         exit(1);
     }
     memcpy(&database_size, outbuf.data, sizeof(database_size));
@@ -1427,7 +1429,7 @@ recv_database(context, fd, database_fd, confmsg)
     if (retval) {
         send_error(context, fd, retval,
                    "failed while initializing i_vector");
-        com_err(progname, retval, "while initializing i_vector");
+        com_err(progname, retval, _("while initializing i_vector"));
         exit(1);
     }
 
@@ -1554,22 +1556,20 @@ recv_error(context, inbuf)
     retval = krb5_rd_error(context, inbuf, &error);
     if (retval) {
         com_err(progname, retval,
-                "while decoding error packet from client");
+                _("while decoding error packet from client"));
         exit(1);
     }
     if (error->error == KRB_ERR_GENERIC) {
         if (error->text.data)
-            fprintf(stderr,
-                    "Generic remote error: %s\n",
-                    error->text.data);
+            fprintf(stderr, _("Generic remote error: %s\n"), error->text.data);
     } else if (error->error) {
         com_err(progname,
                 (krb5_error_code) error->error + ERROR_TABLE_BASE_krb5,
-                "signaled from server");
-        if (error->text.data)
-            fprintf(stderr,
-                    "Error text from client: %s\n",
+                _("signaled from server"));
+        if (error->text.data) {
+            fprintf(stderr, _("Error text from client: %s\n"),
                     error->text.data);
+        }
     }
     krb5_free_error(context, error);
     exit(1);
@@ -1623,8 +1623,7 @@ load_database(context, kdb_util, database_file_name)
 
     switch(child_pid = fork()) {
     case -1:
-        com_err(progname, errno, "while trying to fork %s",
-                kdb_util);
+        com_err(progname, errno, _("while trying to fork %s"), kdb_util);
         exit(1);
     case 0:
         if (!debug) {
@@ -1643,23 +1642,21 @@ load_database(context, kdb_util, database_file_name)
             retval = 0;
         if (!debug)
             dup2(save_stderr, 2);
-        com_err(progname, retval, "while trying to exec %s",
-                kdb_util);
+        com_err(progname, retval, _("while trying to exec %s"), kdb_util);
         _exit(1);
         /*NOTREACHED*/
     default:
         if (debug)
             printf("Child PID is %d\n", child_pid);
         if (wait(&waitb) < 0) {
-            com_err(progname, errno, "while waiting for %s",
-                    kdb_util);
+            com_err(progname, errno, _("while waiting for %s"), kdb_util);
             exit(1);
         }
     }
 
     error_ret = WEXITSTATUS(waitb);
     if (error_ret) {
-        com_err(progname, 0, "%s returned a bad exit status (%d)",
+        com_err(progname, 0, _("%s returned a bad exit status (%d)"),
                 kdb_util, error_ret);
         exit(1);
     }

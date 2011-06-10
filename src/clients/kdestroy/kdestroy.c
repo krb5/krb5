@@ -24,7 +24,7 @@
  * or implied warranty.
  */
 
-#include "autoconf.h"
+#include "k5-platform.h"
 #include <krb5.h>
 #include <com_err.h>
 #include <string.h>
@@ -55,9 +55,9 @@ static void usage()
 {
 #define KRB_AVAIL_STRING(x) ((x)?"available":"not available")
 
-    fprintf(stderr, "Usage: %s [-q] [-c cache_name]\n", progname);
-    fprintf(stderr, "\t-q quiet mode\n");
-    fprintf(stderr, "\t-c specify name of credentials cache\n");
+    fprintf(stderr, _("Usage: %s [-q] [-c cache_name]\n"), progname);
+    fprintf(stderr, _("\t-q quiet mode\n"));
+    fprintf(stderr, _("\t-c specify name of credentials cache\n"));
     exit(2);
 }
 
@@ -84,14 +84,14 @@ main(argc, argv)
             break;
         case 'c':
             if (cache_name) {
-                fprintf(stderr, "Only one -c option allowed\n");
+                fprintf(stderr, _("Only one -c option allowed\n"));
                 errflg++;
             } else {
                 cache_name = optarg;
             }
             break;
         case '4':
-            fprintf(stderr, "Kerberos 4 is no longer supported\n");
+            fprintf(stderr, _("Kerberos 4 is no longer supported\n"));
             exit(3);
             break;
         case '5':
@@ -112,32 +112,32 @@ main(argc, argv)
 
     retval = krb5_init_context(&kcontext);
     if (retval) {
-        com_err(progname, retval, "while initializing krb5");
+        com_err(progname, retval, _("while initializing krb5"));
         exit(1);
     }
 
     if (cache_name) {
         code = krb5_cc_resolve (kcontext, cache_name, &cache);
         if (code != 0) {
-            com_err (progname, code, "while resolving %s", cache_name);
+            com_err(progname, code, _("while resolving %s"), cache_name);
             exit(1);
         }
     } else {
         code = krb5_cc_default(kcontext, &cache);
         if (code) {
-            com_err(progname, code, "while getting default ccache");
+            com_err(progname, code, _("while getting default ccache"));
             exit(1);
         }
     }
 
     code = krb5_cc_destroy (kcontext, cache);
     if (code != 0) {
-        com_err (progname, code, "while destroying cache");
+        com_err (progname, code, _("while destroying cache"));
         if (code != KRB5_FCC_NOFILE) {
             if (quiet)
-                fprintf(stderr, "Ticket cache NOT destroyed!\n");
+                fprintf(stderr, _("Ticket cache NOT destroyed!\n"));
             else {
-                fprintf(stderr, "Ticket cache %cNOT%c destroyed!\n",
+                fprintf(stderr, _("Ticket cache %cNOT%c destroyed!\n"),
                         BELL_CHAR, BELL_CHAR);
             }
             errflg = 1;

@@ -678,7 +678,7 @@ negotiate_etype(krb5_context context,
                                        enctype_name,
                                        sizeof(enctype_name)) == 0)
                 krb5_set_error_message(context, KRB5_NOPERM_ETYPE,
-                                       "Encryption type %s not permitted",
+                                       _("Encryption type %s not permitted"),
                                        enctype_name);
             return KRB5_NOPERM_ETYPE;
         }

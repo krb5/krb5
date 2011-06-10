@@ -179,7 +179,7 @@ krb5int_fast_as_armor(krb5_context context,
             const char * errmsg;
             errmsg = krb5_get_error_message(context, retval);
             krb5_set_error_message(context, retval,
-                                   "%s constructing AP-REQ armor", errmsg);
+                                   _("%s constructing AP-REQ armor"), errmsg);
             krb5_free_error_message(context, errmsg);
         }
     }
@@ -319,7 +319,7 @@ decrypt_fast_reply(krb5_context context,
         const char * errmsg;
         errmsg = krb5_get_error_message(context, retval);
         krb5_set_error_message(context, retval,
-                               "%s while decrypting FAST reply", errmsg);
+                               _("%s while decrypting FAST reply"), errmsg);
         krb5_free_error_message(context, errmsg);
     }
     if (retval == 0)
@@ -327,8 +327,9 @@ decrypt_fast_reply(krb5_context context,
     if (retval == 0) {
         if (local_resp->nonce != state->nonce) {
             retval = KRB5_KDCREP_MODIFIED;
-            krb5_set_error_message(context, retval, "nonce modified in FAST "
-                                   "response: KDC response modified");
+            krb5_set_error_message(context, retval,
+                                   _("nonce modified in FAST response: "
+                                     "KDC response modified"));
         }
     }
     if (retval == 0) {
@@ -397,8 +398,8 @@ krb5int_fast_process_error(krb5_context context,
                                                KRB5_PADATA_FX_ERROR);
             if (fx_error_pa == NULL) {
                 krb5_set_error_message(context, KRB5KDC_ERR_PREAUTH_FAILED,
-                                       "Expecting FX_ERROR pa-data inside "
-                                       "FAST container");
+                                       _("Expecting FX_ERROR pa-data inside "
+                                         "FAST container"));
                 retval = KRB5KDC_ERR_PREAUTH_FAILED;
             }
         }
@@ -451,7 +452,7 @@ krb5int_fast_process_error(krb5_context context,
             }
             krb5_free_pa_data(context, result);
             krb5_set_error_message(context, retval,
-                                   "Error decoding padata in error reply");
+                                   _("Error decoding padata in error reply"));
             return retval;
         }
     }
@@ -479,8 +480,9 @@ krb5int_fast_process_response(krb5_context context,
     if (retval == 0) {
         if (fast_response->finished == 0) {
             retval = KRB5_KDCREP_MODIFIED;
-            krb5_set_error_message(context, retval, "FAST response missing "
-                                   "finish message in KDC reply");
+            krb5_set_error_message(context, retval,
+                                   _("FAST response missing finish message "
+                                     "in KDC reply"));
         }
     }
     if (retval == 0)
@@ -494,7 +496,7 @@ krb5int_fast_process_response(krb5_context context,
     if (retval == 0 && cksum_valid == 0) {
         retval = KRB5_KDCREP_MODIFIED;
         krb5_set_error_message(context, retval,
-                               "ticket modified in KDC reply");
+                               _("Ticket modified in KDC reply"));
     }
     if (retval == 0) {
         krb5_free_principal(context, resp->client);

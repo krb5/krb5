@@ -51,7 +51,7 @@ princ_check(krb5_context context, krb5_pwqual_moddata data,
         cp = krb5_princ_component(handle->context, princ, i)->data;
         if (strcasecmp(cp, password) == 0) {
             krb5_set_error_message(context, KADM5_PASS_Q_DICT,
-                                   "Password may not match principal name");
+                                   _("Password may not match principal name"));
             return KADM5_PASS_Q_DICT;
         }
     }

@@ -158,25 +158,25 @@ gss_buffer_t outStr;
 
 	/* take care of the success value first */
 	if (status == GSS_S_COMPLETE)
-		errStr = "The routine completed successfully";
+	    errStr = _("The routine completed successfully");
 	else if (*msgCtxt == 0 && (oneVal = GSS_CALLING_ERROR(status))) {
 		switch (oneVal) {
 		case GSS_S_CALL_INACCESSIBLE_READ:
-			errStr = "A required input parameter"
-				" could not be read";
+			errStr = _("A required input parameter could not be "
+				   "read");
 			break;
 
 		case GSS_S_CALL_INACCESSIBLE_WRITE:
-			errStr = "A required output parameter"
-				" could not be written";
+			errStr = _("A required output parameter could not be "
+				   "written");
 			break;
 
 		case GSS_S_CALL_BAD_STRUCTURE:
-			errStr = "A parameter was malformed";
+			errStr = _("A parameter was malformed");
 			break;
 
 		default:
-			errStr = "An invalid status code was supplied";
+			errStr = _("An invalid status code was supplied");
 			break;
 		}
 
@@ -192,89 +192,86 @@ gss_buffer_t outStr;
 		(oneVal = GSS_ROUTINE_ERROR(status))) {
 		switch (oneVal) {
 		case GSS_S_BAD_MECH:
-			errStr = "An unsupported mechanism"
-				" was requested";
+			errStr = _("An unsupported mechanism was requested");
 			break;
 
 		case GSS_S_BAD_NAME:
-			errStr = "An invalid name was supplied";
+			errStr = _("An invalid name was supplied");
 			break;
 
 		case GSS_S_BAD_NAMETYPE:
-			errStr = "A supplied name was of an"
-				" unsupported type";
+			errStr = _("A supplied name was of an unsupported "
+				   "type");
 			break;
 
 		case GSS_S_BAD_BINDINGS:
-			errStr = "Incorrect channel bindings"
-				" were supplied";
+			errStr = _("Incorrect channel bindings were supplied");
 			break;
 
 		case GSS_S_BAD_SIG: /* same as GSS_S_BAD_MIC: */
-			errStr = "A token had an invalid Message"
-				" Integrity Check (MIC)";
+			errStr = _("A token had an invalid Message Integrity "
+				   "Check (MIC)");
 			break;
 
 		case GSS_S_NO_CRED:
-			errStr = "No credentials were supplied, or the"
-				" credentials were unavailable or"
-				" inaccessible";
+			errStr = _("No credentials were supplied, or the "
+				   "credentials were unavailable or "
+				   "inaccessible");
 			break;
 
 		case GSS_S_NO_CONTEXT:
-			errStr = "No context has been established";
+			errStr = _("No context has been established");
 			break;
 
 		case GSS_S_DEFECTIVE_TOKEN:
-			errStr = "Invalid token was supplied";
+			errStr = _("Invalid token was supplied");
 			break;
 
 		case GSS_S_DEFECTIVE_CREDENTIAL:
-			errStr = "Invalid credential was supplied";
+			errStr = _("Invalid credential was supplied");
 			break;
 
 		case GSS_S_CREDENTIALS_EXPIRED:
-			errStr = "The referenced credential has"
-				" expired";
+			errStr = _("The referenced credential has expired");
 			break;
 
 		case GSS_S_CONTEXT_EXPIRED:
-			errStr = "The referenced context has expired";
+			errStr = _("The referenced context has expired");
 			break;
 
 		case GSS_S_FAILURE:
-			errStr = "Unspecified GSS failure.  Minor code"
-				" may provide more information";
+			errStr = _("Unspecified GSS failure.  Minor code "
+				   "may provide more information");
 			break;
 
 		case GSS_S_BAD_QOP:
-			errStr = "The quality-of-protection (QOP) "
-				"requested could not be provided";
+			errStr = _("The quality-of-protection (QOP) "
+				   "requested could not be provided");
 			break;
 
 		case GSS_S_UNAUTHORIZED:
-			errStr = "The operation is forbidden by local"
-				" security policy";
+			errStr = _("The operation is forbidden by local "
+				   " security policy");
 			break;
 
 		case GSS_S_UNAVAILABLE:
-			errStr = "The operation or option is not"
-				" available or unsupported";
+			errStr = _("The operation or option is not "
+				   "available or unsupported");
 			break;
 
 		case GSS_S_DUPLICATE_ELEMENT:
-			errStr = "The requested credential element"
-				" already exists";
+			errStr = _("The requested credential element "
+				   "already exists");
 			break;
 
 		case GSS_S_NAME_NOT_MN:
-			errStr = "The provided name was not mechanism"
-				" specific (MN)";
+			errStr = _("The provided name was not mechanism "
+				   "specific (MN)");
 			break;
 
 		case GSS_S_BAD_STATUS:
 		default:
-			errStr = "An invalid status code was supplied";
+			errStr = _("An invalid status code was supplied");
 		}
 
 		/* we must determine if the caller should call us again */
@@ -311,32 +308,30 @@ gss_buffer_t outStr;
 
 		switch (currErr) {
 		case GSS_S_CONTINUE_NEEDED:
-			errStr = "The routine must be called again to"
-				" complete its function";
+			errStr = _("The routine must be called again to "
+				   "complete its function");
 			break;
 
 		case GSS_S_DUPLICATE_TOKEN:
-			errStr = "The token was a duplicate of an"
-				" earlier token";
+			errStr = _("The token was a duplicate of an earlier "
+				   "token");
 			break;
 
 		case GSS_S_OLD_TOKEN:
-			errStr = "The token's validity period"
-				" has expired";
+			errStr = _("The token's validity period has expired");
 			break;
 
 		case GSS_S_UNSEQ_TOKEN:
-			errStr = "A later token has already been"
-				" processed";
+			errStr = _("A later token has already been processed");
 			break;
 
 		case GSS_S_GAP_TOKEN:
-			errStr = "An expected per-message token was"
-				" not received";
+			errStr = _("An expected per-message token was not "
+				   "received");
 			break;
 
 		default:
-			errStr = "An invalid status code was supplied";
+			errStr = _("An invalid status code was supplied");
 		}
 
 		/*

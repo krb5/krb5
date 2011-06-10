@@ -622,8 +622,8 @@ k5_locate_server(krb5_context context, const krb5_data *realm,
     if (al.nservers == 0) {       /* No good servers */
         k5_free_serverlist(&al);
         krb5_set_error_message(context, KRB5_REALM_CANT_RESOLVE,
-                               "Cannot resolve servers for KDC in "
-                               "realm \"%.*s\"", realm->length, realm->data);
+                               _("Cannot resolve servers for KDC in realm "
+                                 "\"%.*s\""), realm->length, realm->data);
         return KRB5_REALM_CANT_RESOLVE;
     }
     *serverlist = al;

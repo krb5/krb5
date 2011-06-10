@@ -425,8 +425,9 @@ pkinit_server_verify_padata(krb5_context context,
         if (!krb5_principal_compare(context, request->client,
                                     krb5_anonymous_principal())) {
             retval = KRB5KDC_ERR_PREAUTH_FAILED;
-            krb5_set_error_message(context, retval, "Pkinit request not "
-                                   "signed, but client not anonymous.");
+            krb5_set_error_message(context, retval,
+                                   _("Pkinit request not signed, but client "
+                                     "not anonymous."));
             goto cleanup;
         }
     }
@@ -457,7 +458,9 @@ pkinit_server_verify_padata(krb5_context context,
         } else if (!is_signed) {
             /*Anonymous pkinit requires DH*/
             retval = KRB5KDC_ERR_PREAUTH_FAILED;
-            krb5_set_error_message(context, retval, "Anonymous pkinit without DH public value not supported.");
+            krb5_set_error_message(context, retval,
+                                   _("Anonymous pkinit without DH public "
+                                     "value not supported."));
             goto cleanup;
         }
         /*
@@ -1087,7 +1090,7 @@ pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
     if (retval != 0 || NULL == plgctx->idopts->identity) {
         retval = EINVAL;
         krb5_set_error_message(context, retval,
-                               "No pkinit_identity supplied for realm %s",
+                               _("No pkinit_identity supplied for realm %s"),
                                plgctx->realmname);
         goto errout;
     }
@@ -1098,7 +1101,7 @@ pkinit_init_kdc_profile(krb5_context context, pkinit_kdc_context plgctx)
     if (retval != 0 || NULL == plgctx->idopts->anchors) {
         retval = EINVAL;
         krb5_set_error_message(context, retval,
-                               "No pkinit_anchors supplied for realm %s",
+                               _("No pkinit_anchors supplied for realm %s"),
                                plgctx->realmname);
         goto errout;
     }
@@ -1280,8 +1283,9 @@ pkinit_server_plugin_init(krb5_context context, void **blob,
 
     if (j == 0) {
         retval = EINVAL;
-        krb5_set_error_message(context, retval, "No realms configured "
-                               "correctly for pkinit support");
+        krb5_set_error_message(context, retval,
+                               _("No realms configured correctly for pkinit "
+                                 "support"));
         goto errout;
     }
 

@@ -39,7 +39,7 @@ empty_check(krb5_context context, krb5_pwqual_moddata data,
      * with no password policy. */
     if (*password == '\0') {
         krb5_set_error_message(context, KADM5_PASS_Q_TOOSHORT,
-                               "Empty passwords are not allowed");
+                               _("Empty passwords are not allowed"));
         return KADM5_PASS_Q_TOOSHORT;
     }
     return 0;

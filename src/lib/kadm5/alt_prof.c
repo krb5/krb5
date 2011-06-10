@@ -902,9 +902,9 @@ kadm5_get_admin_service_name(krb5_context ctx,
     if (err != 0) {
         ret = KADM5_CANT_RESOLVE;
         krb5_set_error_message(ctx, ret,
-                               "Cannot resolve address of admin server \"%s\" "
-                               "for realm \"%s\"", params_out.admin_server,
-                               realm_in);
+                               _("Cannot resolve address of admin server "
+                                 "\"%s\" for realm \"%s\""),
+                               params_out.admin_server, realm_in);
         goto err_params;
     }
     if (strlen(ai->ai_canonname) + sizeof("kadmin/") > maxlen) {

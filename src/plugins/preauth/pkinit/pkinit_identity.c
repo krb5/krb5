@@ -415,8 +415,8 @@ process_option_identity(krb5_context context,
             pkiDebug("%s: Unsupported type while processing '%s'\n",
                      __FUNCTION__, value);
             krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
-                                   "Unsupported type while processing '%s'\n",
-                                   value);
+                                   _("Unsupported type while processing "
+                                     "'%s'\n"), value);
             return KRB5_PREAUTH_FAILED;
         }
     } else {
@@ -449,7 +449,8 @@ process_option_identity(krb5_context context,
         break;
     default:
         krb5_set_error_message(context, KRB5_PREAUTH_FAILED,
-                               "Internal error parsing X509_user_identity\n");
+                               _("Internal error parsing "
+                                 "X509_user_identity\n"));
         retval = EINVAL;
         break;
     }

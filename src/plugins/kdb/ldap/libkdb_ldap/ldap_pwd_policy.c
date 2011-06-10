@@ -76,7 +76,8 @@ krb5_ldap_create_password_policy(krb5_context context, osa_policy_ent_t policy)
     rdns = ldap_explode_dn(policy_dn, 1);
     if (rdns == NULL) {
         st = EINVAL;
-        krb5_set_error_message(context, st, "Invalid password policy DN syntax");
+        krb5_set_error_message(context, st,
+                               _("Invalid password policy DN syntax"));
         goto cleanup;
     }
 

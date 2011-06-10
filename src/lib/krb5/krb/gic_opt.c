@@ -288,8 +288,8 @@ krb5int_gic_opt_to_opte(krb5_context context,
             return gic_opte_copy(context, opt, opte);
         } else {
             krb5int_set_error(&context->err, EINVAL,
-                              "%s: attempt to convert non-extended krb5_get_init_creds_opt",
-                              where);
+                              _("%s: attempt to convert non-extended "
+                                "krb5_get_init_creds_opt"), where);
             return EINVAL;
         }
     }

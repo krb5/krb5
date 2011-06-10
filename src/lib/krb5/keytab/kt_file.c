@@ -395,8 +395,9 @@ krb5_ktfile_get_entry(krb5_context context, krb5_keytab id,
         else {
             kerror = KRB5_KT_NOTFOUND;
             if (krb5_unparse_name(context, principal, &princname) == 0) {
-                krb5_set_error_message(context, kerror, "No key table entry "
-                                       "found for %s", princname);
+                krb5_set_error_message(context, kerror,
+                                       _("No key table entry found for %s"),
+                                       princname);
                 free(princname);
             }
         }
@@ -822,7 +823,8 @@ krb5_ktfile_add(krb5_context context, krb5_keytab id, krb5_keytab_entry *entry)
         /* Iterator(s) active -- no changes.  */
         KTUNLOCK(id);
         krb5_set_error_message(context, KRB5_KT_IOERR,
-                               "Cannot change keytab with keytab iterators active");
+                               _("Cannot change keytab with keytab iterators "
+                                 "active"));
         return KRB5_KT_IOERR;   /* XXX */
     }
     if ((retval = krb5_ktfileint_openw(context, id))) {
@@ -857,7 +859,8 @@ krb5_ktfile_remove(krb5_context context, krb5_keytab id, krb5_keytab_entry *entr
         /* Iterator(s) active -- no changes.  */
         KTUNLOCK(id);
         krb5_set_error_message(context, KRB5_KT_IOERR,
-                               "Cannot change keytab with keytab iterators active");
+                               _("Cannot change keytab with keytab iterators "
+                                 "active"));
         return KRB5_KT_IOERR;   /* XXX */
     }
 
@@ -1056,7 +1059,7 @@ krb5_ktfileint_open(krb5_context context, krb5_keytab id, int mode)
                 return EMFILE;
             case ENOENT:
                 krb5_set_error_message(context, ENOENT,
-                                       "Key table file '%s' not found",
+                                       _("Key table file '%s' not found"),
                                        KTFILENAME(id));
                 return ENOENT;
             default:

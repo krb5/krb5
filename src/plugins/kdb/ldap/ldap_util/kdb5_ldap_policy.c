@@ -67,7 +67,8 @@ init_ldap_realm(int argc, char *argv[])
         retval = krb5_ldap_read_krbcontainer_params (util_context,
                                                      &(ldap_context->krbcontainer));
         if (retval != 0) {
-            com_err(progname, retval, "while reading kerberos container information");
+            com_err(progname, retval,
+                    _("while reading kerberos container information"));
             goto cleanup;
         }
     }
@@ -127,7 +128,7 @@ kdb5_ldap_create_policy(int argc, char *argv[])
             date = get_date(argv[i]);
             if (date == (time_t)(-1)) {
                 retval = EINVAL;
-                com_err (me, retval, "while providing time specification");
+                com_err(me, retval, _("while providing time specification"));
                 goto err_nomsg;
             }
 
@@ -141,7 +142,7 @@ kdb5_ldap_create_policy(int argc, char *argv[])
             date = get_date(argv[i]);
             if (date == (time_t)(-1)) {
                 retval = EINVAL;
-                com_err (me, retval, "while providing time specification");
+                com_err(me, retval, _("while providing time specification"));
                 goto err_nomsg;
             }
 
@@ -266,7 +267,7 @@ kdb5_ldap_create_policy(int argc, char *argv[])
             policyparams->policy = strdup(argv[i]);
             if (policyparams->policy == NULL) {
                 retval = ENOMEM;
-                com_err(me, retval, "while creating policy object");
+                com_err(me, retval, _("while creating policy object"));
                 goto err_nomsg;
             }
         }
@@ -277,7 +278,7 @@ kdb5_ldap_create_policy(int argc, char *argv[])
         goto err_usage;
 
     if ((retval = init_ldap_realm (argc, argv))) {
-        com_err(me, retval, "while reading realm information");
+        com_err(me, retval, _("while reading realm information"));
         goto err_nomsg;
     }
 
@@ -302,7 +303,7 @@ cleanup:
 
     if (retval) {
         if (!no_msg)
-            com_err(me, retval, "while creating policy object");
+            com_err(me, retval, _("while creating policy object"));
 
         exit_status++;
     }
@@ -346,7 +347,7 @@ kdb5_ldap_destroy_policy(int argc, char *argv[])
             policy = strdup(argv[i]);
             if (policy == NULL) {
                 retval = ENOMEM;
-                com_err(me, retval, "while destroying policy object");
+                com_err(me, retval, _("while destroying policy object"));
                 goto err_nomsg;
             }
         }
@@ -356,8 +357,9 @@ kdb5_ldap_destroy_policy(int argc, char *argv[])
         goto err_usage;
 
     if (!force) {
-        printf("This will delete the policy object '%s', are you sure?\n", policy);
-        printf("(type 'yes' to confirm)? ");
+        printf(_("This will delete the policy object '%s', are you sure?\n"),
+               policy);
+        printf(_("(type 'yes' to confirm)? "));
 
         if (fgets(buf, sizeof(buf), stdin) == NULL) {
             retval = EINVAL;
@@ -404,7 +406,7 @@ cleanup:
 
     if (retval) {
         if (!no_msg)
-            com_err(me, retval, "while destroying policy object");
+            com_err(me, retval, _("while destroying policy object"));
 
         exit_status++;
     }
@@ -470,7 +472,7 @@ kdb5_ldap_modify_policy(int argc, char *argv[])
             policy = strdup(argv[i]);
             if (policy == NULL) {
                 retval = ENOMEM;
-                com_err(me, retval, "while modifying policy object");
+                com_err(me, retval, _("while modifying policy object"));
                 goto err_nomsg;
             }
         }
@@ -484,7 +486,8 @@ kdb5_ldap_modify_policy(int argc, char *argv[])
 
     retval = krb5_ldap_read_policy(util_context, policy, &policyparams, &in_mask);
     if (retval) {
-        com_err(me, retval, "while reading information of policy '%s'", policy);
+        com_err(me, retval, _("while reading information of policy '%s'"),
+                policy);
         goto err_nomsg;
     }
 
@@ -500,7 +503,7 @@ kdb5_ldap_modify_policy(int argc, char *argv[])
             date = get_date(argv[i]);
             if (date == (time_t)(-1)) {
                 retval = EINVAL;
-                com_err (me, retval, "while providing time specification");
+                com_err(me, retval, _("while providing time specification"));
                 goto err_nomsg;
             }
 
@@ -514,7 +517,7 @@ kdb5_ldap_modify_policy(int argc, char *argv[])
             date = get_date(argv[i]);
             if (date == (time_t)(-1)) {
                 retval = EINVAL;
-                com_err (me, retval, "while providing time specification");
+                com_err(me, retval, _("while providing time specification"));
                 goto err_nomsg;
             }
 
@@ -659,7 +662,7 @@ cleanup:
 
     if (retval) {
         if (!no_msg)
-            com_err(me, retval, "while modifying policy object");
+            com_err(me, retval, _("while modifying policy object"));
 
         exit_status++;
     }
@@ -688,7 +691,7 @@ kdb5_ldap_view_policy(int argc, char *argv[])
 
     policy = strdup(argv[1]);
     if (policy == NULL) {
-        com_err(me, ENOMEM, "while viewing policy");
+        com_err(me, ENOMEM, _("while viewing policy"));
         exit_status++;
         goto cleanup;
     }
@@ -697,7 +700,7 @@ kdb5_ldap_view_policy(int argc, char *argv[])
         goto cleanup;
 
     if ((retval = krb5_ldap_read_policy(util_context, policy, &policyparams, &mask))) {
-        com_err(me, retval, "while viewing policy '%s'", policy);
+        com_err(me, retval, _("while viewing policy '%s'"), policy);
         exit_status++;
         goto cleanup;
     }
@@ -835,7 +838,7 @@ cleanup:
     }
 
     if (retval) {
-        com_err(me, retval, "while listing policy objects");
+        com_err(me, retval, _("while listing policy objects"));
         exit_status++;
     }
 

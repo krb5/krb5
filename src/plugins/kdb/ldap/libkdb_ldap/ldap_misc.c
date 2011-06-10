@@ -84,8 +84,8 @@ prof_get_integer_def(krb5_context ctx, const char *conf_section,
                                KDB_MODULE_SECTION, conf_section, name,
                                0, &out_temp);
     if (err) {
-        krb5_set_error_message (ctx, err, "Error reading '%s' attribute: %s",
-                                name, error_message(err));
+        krb5_set_error_message(ctx, err, _("Error reading '%s' attribute: %s"),
+                               name, error_message(err));
         return err;
     }
     if (out_temp != 0) {
@@ -96,8 +96,8 @@ prof_get_integer_def(krb5_context ctx, const char *conf_section,
                                KDB_MODULE_DEF_SECTION, name, 0,
                                dfl, &out_temp);
     if (err) {
-        krb5_set_error_message (ctx, err, "Error reading '%s' attribute: %s",
-                                name, error_message(err));
+        krb5_set_error_message(ctx, err, _("Error reading '%s' attribute: %s"),
+                               name, error_message(err));
         return err;
     }
     *out = out_temp;
@@ -116,7 +116,7 @@ prof_get_boolean_def(krb5_context ctx, const char *conf_section,
     err = profile_get_boolean(ctx->profile, KDB_MODULE_SECTION, conf_section,
                               name, -1, &out_temp);
     if (err) {
-        krb5_set_error_message(ctx, err, "Error reading '%s' attribute: %s",
+        krb5_set_error_message(ctx, err, _("Error reading '%s' attribute: %s"),
                                name, error_message(err));
         return err;
     }
@@ -127,7 +127,7 @@ prof_get_boolean_def(krb5_context ctx, const char *conf_section,
     err = profile_get_boolean(ctx->profile, KDB_MODULE_DEF_SECTION, name, 0,
                               dfl, &out_temp);
     if (err) {
-        krb5_set_error_message(ctx, err, "Error reading '%s' attribute: %s",
+        krb5_set_error_message(ctx, err, _("Error reading '%s' attribute: %s"),
                                name, error_message(err));
         return err;
     }
@@ -147,8 +147,8 @@ prof_get_string_def(krb5_context ctx, const char *conf_section,
                               KDB_MODULE_SECTION, conf_section, name,
                               0, out);
     if (err) {
-        krb5_set_error_message (ctx, err, "Error reading '%s' attribute: %s",
-                                name, error_message(err));
+        krb5_set_error_message(ctx, err, _("Error reading '%s' attribute: %s"),
+                               name, error_message(err));
         return err;
     }
     if (*out != 0)
@@ -157,8 +157,8 @@ prof_get_string_def(krb5_context ctx, const char *conf_section,
                               KDB_MODULE_DEF_SECTION, name, 0,
                               0, out);
     if (err) {
-        krb5_set_error_message (ctx, err, "Error reading '%s' attribute: %s",
-                                name, error_message(err));
+        krb5_set_error_message(ctx, err, _("Error reading '%s' attribute: %s"),
+                               name, error_message(err));
         return err;
     }
     return 0;
@@ -224,8 +224,8 @@ krb5_ldap_read_server_params(krb5_context context, char *conf_section,
 
     if (ldap_context->max_server_conns < 2) {
         st = EINVAL;
-        krb5_set_error_message (context, st,
-                                "Minimum connections required per server is 2");
+        krb5_set_error_message(context, st, _("Minimum connections required "
+                                              "per server is 2"));
         goto cleanup;
     }
 
@@ -299,7 +299,8 @@ krb5_ldap_read_server_params(krb5_context context, char *conf_section,
 
         if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, conf_section,
                                    KRB5_CONF_LDAP_SERVERS, NULL, &tempval)) != 0) {
-            krb5_set_error_message (context, st, "Error reading 'ldap_servers' attribute");
+            krb5_set_error_message(context, st, _("Error reading "
+                                                  "'ldap_servers' attribute"));
             goto cleanup;
         }
 

@@ -554,7 +554,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
                               NULL, /* enc_tkt_request */
                               &enc_tkt_reply);
     if (errcode) {
-        krb5_klog_syslog(LOG_INFO, "AS_REQ : handle_authdata (%d)", errcode);
+        krb5_klog_syslog(LOG_INFO, _("AS_REQ : handle_authdata (%d)"),
+                         errcode);
         status = "HANDLE_AUTHDATA";
         goto errout;
     }

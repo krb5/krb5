@@ -111,7 +111,8 @@ hesiod_check(krb5_context context, krb5_pwqual_moddata data,
         ent = hes_getpwnam(cp);
         if (ent && ent->pw_gecos && str_check_gecos(ent->pw_gecos, password)) {
             krb5_set_error_message(context, KADM5_PASS_Q_DICT,
-                                   "Password maynot match user information.");
+                                   _("Password may not match user "
+                                     "information."));
             return KADM5_PASS_Q_DICT;
         }
     }

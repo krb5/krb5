@@ -248,28 +248,28 @@ krb5_chpw_result_code_string(krb5_context context, int result_code,
 {
     switch (result_code) {
     case KRB5_KPASSWD_MALFORMED:
-        *code_string = "Malformed request error";
+        *code_string = _("Malformed request error");
         break;
     case KRB5_KPASSWD_HARDERROR:
-        *code_string = "Server error";
+        *code_string = _("Server error");
         break;
     case KRB5_KPASSWD_AUTHERROR:
-        *code_string = "Authentication error";
+        *code_string = _("Authentication error");
         break;
     case KRB5_KPASSWD_SOFTERROR:
-        *code_string = "Password change rejected";
+        *code_string = _("Password change rejected");
         break;
     case KRB5_KPASSWD_ACCESSDENIED:
-        *code_string = "Access denied";
+        *code_string = _("Access denied");
         break;
     case KRB5_KPASSWD_BAD_VERSION:
-        *code_string = "Wrong protocol version";
+        *code_string = _("Wrong protocol version");
         break;
     case KRB5_KPASSWD_INITIAL_FLAG_NEEDED:
-        *code_string = "Initial password required";
+        *code_string = _("Initial password required");
         break;
     default:
-        *code_string = "Password change failed";
+        *code_string = _("Password change failed");
         break;
     }
 

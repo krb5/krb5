@@ -33,6 +33,7 @@
 
 #include <krb5/krb5.h>
 #include <krb5/preauth_plugin.h>
+#include <k5-platform.h>
 #include <k5-int-pkinit.h>
 #include <profile.h>
 #include "pkinit_accessor.h"

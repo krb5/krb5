@@ -118,8 +118,7 @@ krb5_preauth_supply_preauth_data(krb5_context context,
     if (context->preauth_context == NULL) {
         retval = EINVAL;
         krb5int_set_error(&context->err, retval,
-                          "krb5_preauth_supply_preauth_data: "
-                          "Unable to initialize preauth context");
+                          _("Unable to initialize preauth context"));
         return retval;
     }
 
@@ -136,7 +135,8 @@ krb5_preauth_supply_preauth_data(krb5_context context,
              (krb5_get_init_creds_opt *)opte, attr, value);
         if (retval) {
             emsg = krb5_get_error_message(context, retval);
-            krb5int_set_error(&context->err, retval, "Preauth plugin %s: %s",
+            krb5int_set_error(&context->err, retval,
+                              _("Preauth plugin %s: %s"),
                               context->preauth_context->modules[i].name, emsg);
             krb5_free_error_message(context, emsg);
             break;

@@ -299,14 +299,14 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
     }
     kret = krb5int_init_context_kdc(&rdp->realm_context);
     if (kret) {
-        kdc_err(NULL, kret, "while getting context for realm %s", realm);
+        kdc_err(NULL, kret, _("while getting context for realm %s"), realm);
         goto whoops;
     }
 
     kret = krb5_read_realm_params(rdp->realm_context, rdp->realm_name,
                                   &rparams);
     if (kret) {
-        kdc_err(rdp->realm_context, kret, "while reading realm parameters");
+        kdc_err(rdp->realm_context, kret, _("while reading realm parameters"));
         goto whoops;
     }
 
@@ -397,8 +397,8 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
 
     /* Set the default realm of this context */
     if ((kret = krb5_set_default_realm(rdp->realm_context, realm))) {
-        kdc_err(rdp->realm_context, kret, "while setting default realm to %s",
-                realm);
+        kdc_err(rdp->realm_context, kret,
+                _("while setting default realm to %s"), realm);
         goto whoops;
     }
 
@@ -406,7 +406,7 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
     kdb_open_flags = KRB5_KDB_OPEN_RW | KRB5_KDB_SRV_TYPE_KDC;
     if ((kret = krb5_db_open(rdp->realm_context, db_args, kdb_open_flags))) {
         kdc_err(rdp->realm_context, kret,
-                "while initializing database for realm %s", realm);
+                _("while initializing database for realm %s"), realm);
         goto whoops;
     }
 
@@ -415,7 +415,7 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
                                         rdp->realm_name, (char **) NULL,
                                         &rdp->realm_mprinc))) {
         kdc_err(rdp->realm_context, kret,
-                "while setting up master key name %s for realm %s",
+                _("while setting up master key name %s for realm %s"),
                 rdp->realm_mpname, realm);
         goto whoops;
     }
@@ -428,7 +428,7 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
                                    FALSE, rdp->realm_stash,
                                    &mkvno, NULL, &rdp->realm_mkey))) {
         kdc_err(rdp->realm_context, kret,
-                "while fetching master key %s for realm %s",
+                _("while fetching master key %s for realm %s"),
                 rdp->realm_mpname, realm);
         goto whoops;
     }
@@ -436,7 +436,7 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
     if ((kret = krb5_db_fetch_mkey_list(rdp->realm_context, rdp->realm_mprinc,
                                         &rdp->realm_mkey, mkvno, &rdp->mkey_list))) {
         kdc_err(rdp->realm_context, kret,
-                "while fetching master keys list for realm %s", realm);
+                _("while fetching master keys list for realm %s"), realm);
         goto whoops;
     }
 
@@ -445,7 +445,7 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
     if ((kret = krb5_ktkdb_resolve(rdp->realm_context, NULL,
                                    &rdp->realm_keytab))) {
         kdc_err(rdp->realm_context, kret,
-                "while resolving kdb keytab for realm %s", realm);
+                _("while resolving kdb keytab for realm %s"), realm);
         goto whoops;
     }
 
@@ -454,7 +454,7 @@ init_realm(kdc_realm_t *rdp, char *realm, char *def_mpname,
                                      strlen(realm), realm, KRB5_TGS_NAME,
                                      realm, (char *) NULL))) {
         kdc_err(rdp->realm_context, kret,
-                "while building TGS name for realm %s", realm);
+                _("while building TGS name for realm %s"), realm);
         goto whoops;
     }
 
@@ -570,7 +570,7 @@ create_workers(int num)
     pid_t pid, *pids;
 
     /* Create child worker processes; return in each child. */
-    krb5_klog_syslog(LOG_INFO, "creating %d worker processes", num);
+    krb5_klog_syslog(LOG_INFO, _("creating %d worker processes"), num);
     pids = calloc(num, sizeof(pid_t));
     if (pids == NULL)
         return ENOMEM;
@@ -597,7 +597,7 @@ create_workers(int num)
         /* Wait until a worker process exits or we get a signal. */
         pid = wait(&status);
         if (pid >= 0) {
-            krb5_klog_syslog(LOG_ERR, "worker %ld exited with status %d",
+            krb5_klog_syslog(LOG_ERR, _("worker %ld exited with status %d"),
                              (long) pid, status);
 
             /* Remove the pid from the table. */
@@ -620,8 +620,10 @@ create_workers(int num)
             signal_requests_reset = 0;
         }
     }
-    if (signal_requests_exit)
-        krb5_klog_syslog(LOG_INFO, "shutdown signal received in supervisor");
+    if (signal_requests_exit) {
+        krb5_klog_syslog(LOG_INFO,
+                         _("shutdown signal received in supervisor"));
+    }
 
     terminate_workers(pids, num, numleft);
     free(pids);
@@ -638,14 +640,14 @@ static void
 usage(char *name)
 {
     fprintf(stderr,
-            "usage: %s [-x db_args]* [-d dbpathname] [-r dbrealmname]\n"
-            "\t\t[-R replaycachename] [-m] [-k masterenctype]\n"
-            "\t\t[-M masterkeyname] [-p port] [-P pid_file]\n"
-            "\t\t[-n] [-w numworkers] [/]\n\n"
-            "where,\n"
-            "\t[-x db_args]* - Any number of database specific arguments.\n"
-            "\t\t\tLook at each database module documentation for supported\n"
-            "\t\t\targuments\n",
+            _("usage: %s [-x db_args]* [-d dbpathname] [-r dbrealmname]\n"
+              "\t\t[-R replaycachename] [-m] [-k masterenctype]\n"
+              "\t\t[-M masterkeyname] [-p port] [-P pid_file]\n"
+              "\t\t[-n] [-w numworkers] [/]\n\n"
+              "where,\n"
+              "\t[-x db_args]* - Any number of database specific arguments.\n"
+              "\t\t\tLook at each database module documentation for "
+              "\t\t\tsupported arguments\n"),
             name);
     exit(1);
 }
@@ -707,14 +709,14 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
     if (default_udp_ports == 0) {
         default_udp_ports = strdup(DEFAULT_KDC_UDP_PORTLIST);
         if (default_udp_ports == 0) {
-            fprintf(stderr," KDC cannot initialize. Not enough memory\n");
+            fprintf(stderr, _(" KDC cannot initialize. Not enough memory\n"));
             exit(1);
         }
     }
     if (default_tcp_ports == 0) {
         default_tcp_ports = strdup(DEFAULT_KDC_TCP_PORTLIST);
         if (default_tcp_ports == 0) {
-            fprintf(stderr," KDC cannot initialize. Not enough memory\n");
+            fprintf(stderr, _(" KDC cannot initialize. Not enough memory\n"));
             exit(1);
         }
     }
@@ -731,8 +733,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
                 char **temp = realloc( db_args, sizeof(char*) * (db_args_size+1)); /* one for NULL */
                 if( temp == NULL )
                 {
-                    fprintf(stderr,"%s: KDC cannot initialize. Not enough memory\n",
-                            argv[0]);
+                    fprintf(stderr, _("%s: KDC cannot initialize. Not enough "
+                                      "memory\n"), argv[0]);
                     exit(1);
                 }
 
@@ -750,8 +752,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
                                              default_tcp_ports, manual,
                                              def_restrict_anon, db_args,
                                              no_refrls, host_based_srvcs))) {
-                        fprintf(stderr,
-                                "%s: cannot initialize realm %s - see log file for details\n",
+                        fprintf(stderr, _("%s: cannot initialize realm %s - "
+                                          "see log file for details\n"),
                                 argv[0], optarg);
                         exit(1);
                     }
@@ -761,8 +763,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
                 }
                 else
                 {
-                    fprintf(stderr,"%s: cannot initialize realm %s. Not enough memory\n",
-                            argv[0], optarg);
+                    fprintf(stderr, _("%s: cannot initialize realm %s. Not "
+                                      "enough memory\n"), argv[0], optarg);
                     exit(1);
                 }
             }
@@ -773,9 +775,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
              */
             if( db_name == NULL ) {
                 if (asprintf(&db_name, "dbname=%s", optarg) < 0) {
-                    fprintf(stderr,
-                            "%s: KDC cannot initialize. Not enough memory\n",
-                            argv[0]);
+                    fprintf(stderr, _("%s: KDC cannot initialize. Not enough "
+                                      "memory\n"), argv[0]);
                     exit(1);
                 }
             }
@@ -785,8 +786,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
                 char **temp = realloc( db_args, sizeof(char*) * (db_args_size+1)); /* one for NULL */
                 if( temp == NULL )
                 {
-                    fprintf(stderr,"%s: KDC cannot initialize. Not enough memory\n",
-                            argv[0]);
+                    fprintf(stderr, _("%s: KDC cannot initialize. Not enough "
+                                      "memory\n"), argv[0]);
                     exit(1);
                 }
 
@@ -813,7 +814,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
             break;
         case 'k':                       /* enctype for master key */
             if (krb5_string_to_enctype(optarg, &menctype))
-                com_err(argv[0], 0, "invalid enctype %s", optarg);
+                com_err(argv[0], 0, _("invalid enctype %s"), optarg);
             break;
         case 'R':
             /* Replay cache name; defunct since we don't use a replay cache. */
@@ -826,7 +827,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
                 free(default_udp_ports);
             default_udp_ports = strdup(optarg);
             if (!default_udp_ports) {
-                fprintf(stderr," KDC cannot initialize. Not enough memory\n");
+                fprintf(stderr, _(" KDC cannot initialize. Not enough "
+                                  "memory\n"));
                 exit(1);
             }
 #if 0 /* not yet */
@@ -852,8 +854,9 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
         /* no realm specified, use default realm */
         if ((retval = krb5_get_default_realm(kcontext, &lrealm))) {
             com_err(argv[0], retval,
-                    "while attempting to retrieve default realm");
-            fprintf (stderr, "%s: %s, attempting to retrieve default realm\n",
+                    _("while attempting to retrieve default realm"));
+            fprintf (stderr,
+                     _("%s: %s, attempting to retrieve default realm\n"),
                      argv[0], krb5_get_error_message(kcontext, retval));
             exit(1);
         }
@@ -862,8 +865,8 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
                                      default_udp_ports, default_tcp_ports,
                                      manual, def_restrict_anon, db_args,
                                      no_refrls, host_based_srvcs))) {
-                fprintf(stderr,"%s: cannot initialize realm %s - see log file for details\n",
-                        argv[0], lrealm);
+                fprintf(stderr, _("%s: cannot initialize realm %s - see log "
+                                  "file for details\n"), argv[0], lrealm);
                 exit(1);
             }
             kdc_realmlist[0] = rdatap;
@@ -955,7 +958,7 @@ int main(int argc, char **argv)
 
     if (!(kdc_realmlist = (kdc_realm_t **) malloc(sizeof(kdc_realm_t *) *
                                                   KRB5_KDC_MAX_REALMS))) {
-        fprintf(stderr, "%s: cannot get memory for realm list\n", argv[0]);
+        fprintf(stderr, _("%s: cannot get memory for realm list\n"), argv[0]);
         exit(1);
     }
     memset(kdc_realmlist, 0,
@@ -969,7 +972,7 @@ int main(int argc, char **argv)
      */
     retval = krb5int_init_context_kdc(&kcontext);
     if (retval) {
-        com_err(argv[0], retval, "while initializing krb5");
+        com_err(argv[0], retval, _("while initializing krb5"));
         exit(1);
     }
     krb5_klog_init(kcontext, "kdc", argv[0], 1);
@@ -994,7 +997,7 @@ int main(int argc, char **argv)
 
     retval = setup_sam();
     if (retval) {
-        kdc_err(kcontext, retval, "while initializing SAM");
+        kdc_err(kcontext, retval, _("while initializing SAM"));
         finish_realms();
         return 1;
     }
@@ -1039,19 +1042,19 @@ int main(int argc, char **argv)
      */
     if ((retval = setup_network(NULL, kdc_progname, (workers > 0)))) {
     net_init_error:
-        kdc_err(kcontext, retval, "while initializing network");
+        kdc_err(kcontext, retval, _("while initializing network"));
         finish_realms();
         return 1;
     }
     if (!nofork && daemon(0, 0)) {
-        kdc_err(kcontext, errno, "while detaching from tty");
+        kdc_err(kcontext, errno, _("while detaching from tty"));
         finish_realms();
         return 1;
     }
     if (pid_file != NULL) {
         retval = write_pid_file(pid_file);
         if (retval) {
-            kdc_err(kcontext, retval, "while creating PID file");
+            kdc_err(kcontext, retval, _("while creating PID file"));
             finish_realms();
             return 1;
         }
@@ -1060,21 +1063,21 @@ int main(int argc, char **argv)
         finish_realms();
         retval = create_workers(workers);
         if (retval) {
-            kdc_err(kcontext, errno, "creating worker processes");
+            kdc_err(kcontext, errno, _("creating worker processes"));
             return 1;
         }
         /* We get here only in a worker child process; re-initialize realms. */
         initialize_realms(kcontext, argc, argv);
     }
-    krb5_klog_syslog(LOG_INFO, "commencing operation");
+    krb5_klog_syslog(LOG_INFO, _("commencing operation"));
     if (nofork)
-        fprintf(stderr, "%s: starting...\n", kdc_progname);
+        fprintf(stderr, _("%s: starting...\n"), kdc_progname);
     if ((retval = listen_and_process(0, kdc_progname, reset_for_hangup))) {
-        kdc_err(kcontext, retval, "while processing network requests");
+        kdc_err(kcontext, retval, _("while processing network requests"));
         errout++;
     }
     closedown_network();
-    krb5_klog_syslog(LOG_INFO, "shutting down");
+    krb5_klog_syslog(LOG_INFO, _("shutting down"));
     unload_preauth_plugins(kcontext);
     unload_authdata_plugins(kcontext);
     krb5_klog_close(kdc_context);

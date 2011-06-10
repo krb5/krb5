@@ -100,7 +100,7 @@ ulog_sync_header(kdb_hlog_t *ulog)
         /*
          * Couldn't sync to disk, let's panic
          */
-        syslog(LOG_ERR, "ulog_sync_header: could not sync to disk");
+        syslog(LOG_ERR, _("ulog_sync_header: could not sync to disk"));
         abort();
     }
 }

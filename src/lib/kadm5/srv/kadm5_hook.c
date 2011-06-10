@@ -116,7 +116,7 @@ log_failure(krb5_context context,
 {
     const char *e = krb5_get_error_message(context, ret);
 
-    krb5_klog_syslog(LOG_ERR, "kadm5_hook %s failed postcommit %s: %s",
+    krb5_klog_syslog(LOG_ERR, _("kadm5_hook %s failed postcommit %s: %s"),
                      name, function, e);
     krb5_free_error_message(context, e);
 }

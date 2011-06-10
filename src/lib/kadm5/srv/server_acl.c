@@ -87,10 +87,12 @@ static int acl_debug_level = 0;
  */
 static const char *acl_catchall_entry = NULL;
 
-static const char *acl_line2long_msg = "%s: line %d too long, truncated";
-static const char *acl_op_bad_msg = "Unrecognized ACL operation '%c' in %s";
-static const char *acl_syn_err_msg = "%s: syntax error at line %d <%10s...>";
-static const char *acl_cantopen_msg = "%s while opening ACL file %s";
+static const char *acl_line2long_msg = N_("%s: line %d too long, truncated");
+static const char *acl_op_bad_msg = N_("Unrecognized ACL operation '%c' in "
+                                       "%s");
+static const char *acl_syn_err_msg = N_("%s: syntax error at line %d "
+                                        "<%10s...>");
+static const char *acl_cantopen_msg = N_("%s while opening ACL file %s");
 
 
 /*
@@ -132,7 +134,8 @@ kadm5int_acl_get_line(fp, lnp)
         if (i == sizeof acl_buf && (i--, !feof(fp))) {
             int c1 = acl_buf[i], c2;
 
-            krb5_klog_syslog(LOG_ERR, acl_line2long_msg, acl_acl_file, *lnp);
+            krb5_klog_syslog(LOG_ERR, _(acl_line2long_msg), acl_acl_file,
+                             *lnp);
             while ((c2 = fgetc(fp)) != EOF) {
                 if (c2 == '\n') {
                     if (c1 != '\\')
@@ -208,7 +211,7 @@ kadm5int_acl_parse_line(lp)
                     }
                 }
                 if (!found) {
-                    krb5_klog_syslog(LOG_ERR, acl_op_bad_msg, *op, lp);
+                    krb5_klog_syslog(LOG_ERR, _(acl_op_bad_msg), *op, lp);
                     opok = 0;
                 }
             }
@@ -497,7 +500,7 @@ kadm5int_acl_load_acl_file()
             *aentpp = kadm5int_acl_parse_line(alinep);
             /* If syntax error, then fall out */
             if (!*aentpp) {
-                krb5_klog_syslog(LOG_ERR, acl_syn_err_msg,
+                krb5_klog_syslog(LOG_ERR, _(acl_syn_err_msg),
                                  acl_acl_file, alineno, alinep);
                 retval = 0;
                 break;
@@ -522,7 +525,7 @@ kadm5int_acl_load_acl_file()
         }
     }
     else {
-        krb5_klog_syslog(LOG_ERR, acl_cantopen_msg,
+        krb5_klog_syslog(LOG_ERR, _(acl_cantopen_msg),
                          error_message(errno), acl_acl_file);
         if (acl_catchall_entry &&
             (acl_list_head = kadm5int_acl_parse_line(acl_catchall_entry))) {

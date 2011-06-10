@@ -231,7 +231,7 @@ configure_context(krb5_context context, char *conf_section, char **db_args)
         } else {
             status = EINVAL;
             krb5_set_error_message(context, status,
-                                   "Unsupported argument \"%s\" for db2",
+                                   _("Unsupported argument \"%s\" for db2"),
                                    opt ? opt : val);
             goto cleanup;
         }
@@ -824,7 +824,7 @@ krb5_db2_put_principal(krb5_context context, krb5_db_entry *entry,
     if (db_args) {
         /* DB2 does not support db_args DB arguments for principal */
         krb5_set_error_message(context, EINVAL,
-                               "Unsupported argument \"%s\" for db2",
+                               _("Unsupported argument \"%s\" for db2"),
                                db_args[0]);
         return EINVAL;
     }

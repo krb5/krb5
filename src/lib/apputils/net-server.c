@@ -365,7 +365,7 @@ add_fd(struct socksetup *data, int sock, enum conn_type conntype,
     if (sock >= FD_SETSIZE) {
         data->retval = EMFILE;  /* XXX */
         com_err(data->prog, 0,
-                "file descriptor number %d too high", sock);
+                _("file descriptor number %d too high"), sock);
         return 0;
     }
 #endif
@@ -373,12 +373,12 @@ add_fd(struct socksetup *data, int sock, enum conn_type conntype,
     if (newconn == NULL) {
         data->retval = ENOMEM;
         com_err(data->prog, ENOMEM,
-                "cannot allocate storage for connection info");
+                _("cannot allocate storage for connection info"));
         return 0;
     }
     if (!ADD(connections, newconn, tmp)) {
         data->retval = ENOMEM;
-        com_err(data->prog, ENOMEM, "cannot save socket info");
+        com_err(data->prog, ENOMEM, _("cannot save socket info"));
         free(newconn);
         return 0;
     }
@@ -447,7 +447,7 @@ create_server_socket(struct socksetup *data, struct sockaddr *addr, int type)
     sock = socket(addr->sa_family, type, 0);
     if (sock == -1) {
         data->retval = errno;
-        com_err(data->prog, errno, "Cannot create TCP server socket on %s",
+        com_err(data->prog, errno, _("Cannot create TCP server socket on %s"),
                 paddr(addr));
         return -1;
     }
@@ -456,7 +456,7 @@ create_server_socket(struct socksetup *data, struct sockaddr *addr, int type)
 #ifndef _WIN32                  /* Windows FD_SETSIZE is a count. */
     if (sock >= FD_SETSIZE) {
         close(sock);
-        com_err(data->prog, 0, "TCP socket fd number %d (for %s) too high",
+        com_err(data->prog, 0, _("TCP socket fd number %d (for %s) too high"),
                 sock, paddr(addr));
         return -1;
     }
@@ -464,27 +464,27 @@ create_server_socket(struct socksetup *data, struct sockaddr *addr, int type)
 
     if (setreuseaddr(sock, 1) < 0) {
         com_err(data->prog, errno,
-                "Cannot enable SO_REUSEADDR on fd %d", sock);
+                _("Cannot enable SO_REUSEADDR on fd %d"), sock);
     }
 
 #ifdef KRB5_USE_INET6
     if (addr->sa_family == AF_INET6) {
 #ifdef IPV6_V6ONLY
         if (setv6only(sock, 1))
-            com_err(data->prog, errno, "setsockopt(%d,IPV6_V6ONLY,1) failed",
-                    sock);
+            com_err(data->prog, errno,
+                    _("setsockopt(%d,IPV6_V6ONLY,1) failed"), sock);
         else
-            com_err(data->prog, 0, "setsockopt(%d,IPV6_V6ONLY,1) worked",
+            com_err(data->prog, 0, _("setsockopt(%d,IPV6_V6ONLY,1) worked"),
                     sock);
 #else
-        krb5_klog_syslog(LOG_INFO, "no IPV6_V6ONLY socket option support");
+        krb5_klog_syslog(LOG_INFO, _("no IPV6_V6ONLY socket option support"));
 #endif /* IPV6_V6ONLY */
     }
 #endif /* KRB5_USE_INET6 */
 
     if (bind(sock, addr, socklen(addr)) == -1) {
         data->retval = errno;
-        com_err(data->prog, errno, "Cannot bind server socket on %s",
+        com_err(data->prog, errno, _("Cannot bind server socket on %s"),
                 paddr(addr));
         close(sock);
         return -1;
@@ -504,7 +504,8 @@ add_rpc_listener_fd(struct socksetup *data, struct rpc_svc_data *svc, int sock)
 
     conn->u.rpc.transp = svctcp_create(sock, 0, 0);
     if (conn->u.rpc.transp == NULL) {
-        krb5_klog_syslog(LOG_ERR, "Cannot create RPC service: %s; continuing",
+        krb5_klog_syslog(LOG_ERR,
+                         _("Cannot create RPC service: %s; continuing"),
                          strerror(errno));
         delete_fd(conn);
         return NULL;
@@ -512,7 +513,8 @@ add_rpc_listener_fd(struct socksetup *data, struct rpc_svc_data *svc, int sock)
 
     if (!svc_register(conn->u.rpc.transp, svc->prognum, svc->versnum,
                       svc->dispatch, 0)) {
-        krb5_klog_syslog(LOG_ERR, "Cannot register RPC service: %s; continuing",
+        krb5_klog_syslog(LOG_ERR,
+                         _("Cannot register RPC service: %s; continuing"),
                          strerror(errno));
         delete_fd(conn);
         return NULL;
@@ -558,21 +560,21 @@ setup_a_tcp_listener(struct socksetup *data, struct sockaddr *addr)
     if (sock == -1)
         return -1;
     if (listen(sock, 5) < 0) {
-        com_err(data->prog, errno, "Cannot listen on TCP server socket on %s",
-                paddr(addr));
+        com_err(data->prog, errno,
+                _("Cannot listen on TCP server socket on %s"), paddr(addr));
         close(sock);
         return -1;
     }
     if (setnbio(sock)) {
         com_err(data->prog, errno,
-                "cannot set listening tcp socket on %s non-blocking",
+                _("cannot set listening tcp socket on %s non-blocking"),
                 paddr(addr));
         close(sock);
         return -1;
     }
     if (setnolinger(sock)) {
-        com_err(data->prog, errno, "disabling SO_LINGER on TCP socket on %s",
-                paddr(addr));
+        com_err(data->prog, errno,
+                _("disabling SO_LINGER on TCP socket on %s"), paddr(addr));
         close(sock);
         return -1;
     }
@@ -637,7 +639,7 @@ setup_tcp_listener_ports(struct socksetup *data)
                 FD_SET(s4, &sstate.rfds);
                 if (s4 >= sstate.max)
                     sstate.max = s4 + 1;
-                krb5_klog_syslog(LOG_INFO, "listening on fd %d: tcp %s",
+                krb5_klog_syslog(LOG_INFO, _("listening on fd %d: tcp %s"),
                                  s4, paddr((struct sockaddr *)&sin4));
             }
         }
@@ -650,12 +652,12 @@ setup_tcp_listener_ports(struct socksetup *data)
                 FD_SET(s6, &sstate.rfds);
                 if (s6 >= sstate.max)
                     sstate.max = s6 + 1;
-                krb5_klog_syslog(LOG_INFO, "listening on fd %d: tcp %s",
+                krb5_klog_syslog(LOG_INFO, _("listening on fd %d: tcp %s"),
                                  s6, paddr((struct sockaddr *)&sin6));
             }
             if (s4 < 0)
                 krb5_klog_syslog(LOG_INFO,
-                                 "assuming IPv6 socket accepts IPv4");
+                                 _("assuming IPv6 socket accepts IPv4"));
         }
 #endif
     }
@@ -705,7 +707,7 @@ setup_rpc_listener_ports(struct socksetup *data)
             FD_SET(s4, &sstate.rfds);
             if (s4 >= sstate.max)
                 sstate.max = s4 + 1;
-            krb5_klog_syslog(LOG_INFO, "listening on fd %d: rpc %s",
+            krb5_klog_syslog(LOG_INFO, _("listening on fd %d: rpc %s"),
                              s4, paddr((struct sockaddr *)&sin4));
         }
 
@@ -723,7 +725,7 @@ setup_rpc_listener_ports(struct socksetup *data)
                 FD_SET(s6, &sstate.rfds);
                 if (s6 >= sstate.max)
                     sstate.max = s6 + 1;
-                krb5_klog_syslog(LOG_INFO, "listening on fd %d: rpc %s",
+                krb5_klog_syslog(LOG_INFO, _("listening on fd %d: rpc %s"),
                                  s6, paddr((struct sockaddr *)&sin6));
             }
         }
@@ -812,15 +814,16 @@ setup_udp_port_1(struct socksetup *data, struct sockaddr *addr,
         if (pktinfo) {
             r = set_pktinfo(sock, addr->sa_family);
             if (r) {
-                com_err(data->prog, r, "Cannot request packet info for "
-                        "udp socket address %s port %d", haddrbuf, port);
+                com_err(data->prog, r,
+                        _("Cannot request packet info for udp socket address "
+                          "%s port %d"), haddrbuf, port);
                 close(sock);
                 return 1;
             }
         }
-        krb5_klog_syslog (LOG_INFO, "listening on fd %d: udp %s%s", sock,
-                          paddr((struct sockaddr *)addr),
-                          pktinfo ? " (pktinfo)" : "");
+        krb5_klog_syslog(LOG_INFO, _("listening on fd %d: udp %s%s"), sock,
+                         paddr((struct sockaddr *)addr),
+                         pktinfo ? " (pktinfo)" : "");
         if (add_udp_fd (data, sock, pktinfo) == 0) {
             close(sock);
             return 1;
@@ -861,7 +864,7 @@ setup_udp_port(void *P_data, struct sockaddr *addr)
         {
             static int first = 1;
             if (first) {
-                krb5_klog_syslog (LOG_INFO, "skipping local ipv6 addresses");
+                krb5_klog_syslog(LOG_INFO, _("skipping local ipv6 addresses"));
                 first = 0;
             }
             return 0;
@@ -881,9 +884,9 @@ setup_udp_port(void *P_data, struct sockaddr *addr)
         return 0;
 #endif
     default:
-        krb5_klog_syslog (LOG_INFO,
-                          "skipping unrecognized local address family %d",
-                          addr->sa_family);
+        krb5_klog_syslog(LOG_INFO,
+                         _("skipping unrecognized local address family %d"),
+                         addr->sa_family);
         return 0;
     }
     return setup_udp_port_1(data, addr, haddrbuf, 0);
@@ -984,14 +987,14 @@ process_routing_update(void *handle, struct connection *conn, const char *prog,
                 n_read < RS(rtm_version) ||
                 n_read < RS(rtm_msglen)) {
                 krb5_klog_syslog(LOG_ERR,
-                                 "short read (%d/%d) from routing socket",
+                                 _("short read (%d/%d) from routing socket"),
                                  n_read, (int) sizeof(rtm));
                 return;
             }
         }
 #if 0
         krb5_klog_syslog(LOG_INFO,
-                         "got routing msg type %d(%s) v%d",
+                         _("got routing msg type %d(%s) v%d"),
                          rtm.rtm_type, rtm_type_name(rtm.rtm_type),
                          rtm.rtm_version);
 #endif
@@ -1000,7 +1003,7 @@ process_routing_update(void *handle, struct connection *conn, const char *prog,
                thrown away?  */
         } else if (rtm.rtm_msglen != n_read) {
             krb5_klog_syslog(LOG_ERR,
-                             "read %d from routing socket but msglen is %d",
+                             _("read %d from routing socket but msglen is %d"),
                              n_read, rtm.rtm_msglen);
         }
         switch (rtm.rtm_type) {
@@ -1057,8 +1060,9 @@ process_routing_update(void *handle, struct connection *conn, const char *prog,
 #endif
             break;
         default:
-            krb5_klog_syslog(LOG_INFO, "unhandled routing message type %d, "
-                             "will reconfigure just for the fun of it",
+            krb5_klog_syslog(LOG_INFO,
+                             _("unhandled routing message type %d, "
+                               "will reconfigure just for the fun of it"),
                              rtm.rtm_type);
             network_reconfiguration_needed = 1;
             break;
@@ -1072,10 +1076,10 @@ setup_routing_socket(struct socksetup *data)
     int sock = socket(PF_ROUTE, SOCK_RAW, 0);
     if (sock < 0) {
         int e = errno;
-        krb5_klog_syslog(LOG_INFO, "couldn't set up routing socket: %s",
+        krb5_klog_syslog(LOG_INFO, _("couldn't set up routing socket: %s"),
                          strerror(e));
     } else {
-        krb5_klog_syslog(LOG_INFO, "routing socket is fd %d", sock);
+        krb5_klog_syslog(LOG_INFO, _("routing socket is fd %d"), sock);
         add_fd(data, sock, CONN_ROUTING, process_routing_update);
         setnbio(sock);
         FD_SET(sock, &sstate.rfds);
@@ -1102,7 +1106,7 @@ setup_network(void *handle, const char *prog, int no_reconfig)
 
     setup_data.prog = prog;
     setup_data.retval = 0;
-    krb5_klog_syslog (LOG_INFO, "setting up network...");
+    krb5_klog_syslog(LOG_INFO, _("setting up network..."));
 #ifdef HAVE_STRUCT_RT_MSGHDR
     if (!no_reconfig)
         setup_routing_socket(&setup_data);
@@ -1122,9 +1126,9 @@ setup_network(void *handle, const char *prog, int no_reconfig)
     }
     setup_tcp_listener_ports(&setup_data);
     setup_rpc_listener_ports(&setup_data);
-    krb5_klog_syslog (LOG_INFO, "set up %d sockets", (int)n_sockets);
+    krb5_klog_syslog (LOG_INFO, _("set up %d sockets"), (int)n_sockets);
     if (n_sockets == 0) {
-        com_err(prog, 0, "no sockets set up?");
+        com_err(prog, 0, _("no sockets set up?"));
         exit (1);
     }
 
@@ -1386,7 +1390,7 @@ process_packet(void *handle, struct connection *conn, const char *prog,
              */
             && errno != ECONNREFUSED
         )
-            com_err(prog, errno, "while receiving from network");
+            com_err(prog, errno, _("while receiving from network"));
         return;
     }
     if (!cc)
@@ -1421,7 +1425,7 @@ process_packet(void *handle, struct connection *conn, const char *prog,
     /* This address is in net order. */
     retval = dispatch(handle, ss2sa(&daddr), &faddr, &request, &response, 0);
     if (retval) {
-        com_err(prog, retval, "while dispatching (udp)");
+        com_err(prog, retval, _("while dispatching (udp)"));
         return;
     }
     if (response == NULL)
@@ -1448,12 +1452,12 @@ process_packet(void *handle, struct connection *conn, const char *prog,
             strlcpy(saddrbuf, "?", sizeof(saddrbuf));
             strlcpy(sportbuf, "?", sizeof(sportbuf));
         }
-        com_err(prog, e, "while sending reply to %s/%s from %s",
+        com_err(prog, e, _("while sending reply to %s/%s from %s"),
                 saddrbuf, sportbuf, daddrbuf);
         return;
     }
     if ((size_t)cc != response->length) {
-        com_err(prog, 0, "short reply write %d vs %d\n",
+        com_err(prog, 0, _("short reply write %d vs %d\n"),
                 response->length, cc);
     }
     krb5_free_data(get_context(handle), response);
@@ -1473,7 +1477,7 @@ kill_lru_tcp_or_rpc_connection(void *handle, struct connection *newconn)
     struct connection *c;
     int i, fd = -1;
 
-    krb5_klog_syslog(LOG_INFO, "too many connections");
+    krb5_klog_syslog(LOG_INFO, _("too many connections"));
 
     FOREACH_ELT (connections, i, c) {
         if (c->type != CONN_TCP && c->type != CONN_RPC)
@@ -1489,7 +1493,7 @@ kill_lru_tcp_or_rpc_connection(void *handle, struct connection *newconn)
             oldest_tcp = c;
     }
     if (oldest_tcp != NULL) {
-        krb5_klog_syslog(LOG_INFO, "dropping %s fd %d from %s",
+        krb5_klog_syslog(LOG_INFO, _("dropping %s fd %d from %s"),
                          c->type == CONN_RPC ? "rpc" : "tcp",
                          oldest_tcp->fd, oldest_tcp->u.tcp.addrbuf);
         fd = oldest_tcp->fd;
@@ -1559,7 +1563,8 @@ accept_tcp_connection(void *handle, struct connection *conn, const char *prog,
         kill_lru_tcp_or_rpc_connection(handle, newconn);
 
     if (newconn->u.tcp.buffer == 0) {
-        com_err(prog, errno, "allocating buffer for new TCP session from %s",
+        com_err(prog, errno,
+                _("allocating buffer for new TCP session from %s"),
                 newconn->u.tcp.addrbuf);
         delete_fd(newconn);
         close(s);
@@ -1616,7 +1621,7 @@ kill_tcp_or_rpc_connection(void *handle, struct connection *conn,
 
         if (FD_ISSET(conn->fd, &svc_fdset)) {
             krb5_klog_syslog(LOG_ERR,
-                             "descriptor %d closed but still in svc_fdset",
+                             _("descriptor %d closed but still in svc_fdset"),
                              conn->fd);
         }
     }
@@ -1707,15 +1712,17 @@ process_tcp_connection(void *handle, struct connection *conn, const char *prog,
                 if (conn->u.tcp.msglen > conn->u.tcp.bufsiz - 4) {
                     krb5_error_code err;
                     /* Message too big. */
-                    krb5_klog_syslog(LOG_ERR, "TCP client %s wants %lu bytes, "
-                                     "cap is %lu", conn->u.tcp.addrbuf,
+                    krb5_klog_syslog(LOG_ERR,
+                                     _("TCP client %s wants %lu bytes, "
+                                       "cap is %lu"), conn->u.tcp.addrbuf,
                                      (unsigned long) conn->u.tcp.msglen,
                                      (unsigned long) conn->u.tcp.bufsiz - 4);
                     /* XXX Should return an error.  */
                     err = make_toolong_error (handle, &conn->u.tcp.response);
                     if (err) {
-                        krb5_klog_syslog(LOG_ERR, "error constructing "
-                                         "KRB_ERR_FIELD_TOOLONG error! %s",
+                        krb5_klog_syslog(LOG_ERR,
+                                         _("error constructing "
+                                           "KRB_ERR_FIELD_TOOLONG error! %s"),
                                          error_message(err));
                         goto kill_tcp_connection;
                     }
@@ -1751,7 +1758,7 @@ process_tcp_connection(void *handle, struct connection *conn, const char *prog,
             err = dispatch(handle, local_saddrp, &conn->u.tcp.faddr,
                            &request, &conn->u.tcp.response, 1);
             if (err) {
-                com_err(prog, err, "while dispatching (tcp)");
+                com_err(prog, err, _("while dispatching (tcp)"));
                 goto kill_tcp_connection;
             }
             if (conn->u.tcp.response == NULL)
@@ -1814,13 +1821,15 @@ listen_and_process(void *handle, const char *prog, void (*reset)(void))
 
         if (network_reconfiguration_needed) {
             /* No point in re-logging what we've just logged. */
-            if (netchanged == 0)
-                krb5_klog_syslog(LOG_INFO, "network reconfiguration needed");
+            if (netchanged == 0) {
+                krb5_klog_syslog(LOG_INFO,
+                                 _("network reconfiguration needed"));
+            }
             /* It might be tidier to add a timer-callback interface to the
              * control loop, but for this one use, it's not a big deal. */
             err = getcurtime(&sstate.end_time);
             if (err) {
-                com_err(prog, err, "while getting the time");
+                com_err(prog, err, _("while getting the time"));
                 continue;
             }
             sstate.end_time.tv_sec += 3;
@@ -1831,7 +1840,7 @@ listen_and_process(void *handle, const char *prog, void (*reset)(void))
         err = krb5int_cm_call_select(&sstate, &sout, &sret);
         if (err) {
             if (err != EINTR)
-                com_err(prog, err, "while selecting for network input(1)");
+                com_err(prog, err, _("while selecting for network input(1)"));
             continue;
         }
         if (sret == 0 && netchanged) {
@@ -1839,14 +1848,16 @@ listen_and_process(void *handle, const char *prog, void (*reset)(void))
             closedown_network_sockets();
             err = setup_network(handle, prog, 0);
             if (err) {
-                com_err(prog, err, "while reinitializing network");
+                com_err(prog, err, _("while reinitializing network"));
                 return err;
             }
             netchanged = 0;
         }
         if (sret == -1) {
-            if (errno != EINTR)
-                com_err(prog, errno, "while selecting for network input(2)");
+            if (errno != EINTR) {
+                com_err(prog, errno,
+                        _("while selecting for network input(2)"));
+            }
             continue;
         }
         nfound = sret;
@@ -1862,7 +1873,7 @@ listen_and_process(void *handle, const char *prog, void (*reset)(void))
                 service_conn(handle, conns[i], prog, sflags);
         }
     }
-    krb5_klog_syslog(LOG_INFO, "shutdown signal received");
+    krb5_klog_syslog(LOG_INFO, _("shutdown signal received"));
     return 0;
 }
 
@@ -1877,7 +1888,7 @@ closedown_network_sockets()
 
     FOREACH_ELT (connections, i, conn) {
         if (conn->fd >= 0) {
-            krb5_klog_syslog(LOG_INFO, "closing down fd %d", conn->fd);
+            krb5_klog_syslog(LOG_INFO, _("closing down fd %d"), conn->fd);
             (void) close(conn->fd);
             if (conn->type == CONN_RPC) {
                 fd_set fds;

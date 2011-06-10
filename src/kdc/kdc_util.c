@@ -225,7 +225,7 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
 
     if (isflagset(apreq->ap_options, AP_OPTS_USE_SESSION_KEY) ||
         isflagset(apreq->ap_options, AP_OPTS_MUTUAL_REQUIRED)) {
-        krb5_klog_syslog(LOG_INFO, "TGS_REQ: SESSION KEY or MUTUAL");
+        krb5_klog_syslog(LOG_INFO, _("TGS_REQ: SESSION KEY or MUTUAL"));
         retval = KRB5KDC_ERR_POLICY;
         goto cleanup;
     }
@@ -307,7 +307,7 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
         !find_pa_data(request->padata, KRB5_PADATA_FOR_USER)) {
         if (is_local_principal((*ticket)->enc_part2->client)) {
             /* someone in a foreign realm claiming to be local */
-            krb5_klog_syslog(LOG_INFO, "PROCESS_TGS: failed lineage check");
+            krb5_klog_syslog(LOG_INFO, _("PROCESS_TGS: failed lineage check"));
             retval = KRB5KDC_ERR_POLICY;
             goto cleanup_authenticator;
         }
@@ -377,8 +377,8 @@ kdc_get_server_key(krb5_ticket *ticket, unsigned int flags,
         char *sname;
         if (!krb5_unparse_name(kdc_context, ticket->server, &sname)) {
             limit_string(sname);
-            krb5_klog_syslog(LOG_ERR,"TGS_REQ: UNKNOWN SERVER: server='%s'",
-                             sname);
+            krb5_klog_syslog(LOG_ERR,
+                             _("TGS_REQ: UNKNOWN SERVER: server='%s'"), sname);
             free(sname);
         }
         return KRB5KDC_ERR_S_PRINCIPAL_UNKNOWN;
@@ -2247,13 +2247,13 @@ log_as_req(const krb5_fulladdr *from,
         /* success */
         char rep_etypestr[128];
         rep_etypes2str(rep_etypestr, sizeof(rep_etypestr), reply);
-        krb5_klog_syslog(LOG_INFO,
-                         "AS_REQ (%s) %s: ISSUE: authtime %d, %s, %s for %s",
+        krb5_klog_syslog(LOG_INFO, _("AS_REQ (%s) %s: ISSUE: authtime %d, %s, "
+                                     "%s for %s"),
                          ktypestr, fromstring, authtime,
                          rep_etypestr, cname2, sname2);
     } else {
         /* fail */
-        krb5_klog_syslog(LOG_INFO, "AS_REQ (%s) %s: %s: %s for %s%s%s",
+        krb5_klog_syslog(LOG_INFO, _("AS_REQ (%s) %s: %s: %s for %s%s%s"),
                          ktypestr, fromstring, status,
                          cname2, sname2, emsg ? ", " : "", emsg ? emsg : "");
     }
@@ -2301,31 +2301,28 @@ log_tgs_req(const krb5_fulladdr *from,
        name (useful), and doesn't log ktypestr (probably not
        important).  */
     if (errcode != KRB5KDC_ERR_SERVER_NOMATCH) {
-        krb5_klog_syslog(LOG_INFO,
-                         "TGS_REQ (%s) %s: %s: authtime %d, %s%s %s for %s%s%s",
-                         ktypestr,
-                         fromstring, status, authtime,
-                         rep_etypestr,
+        krb5_klog_syslog(LOG_INFO, _("TGS_REQ (%s) %s: %s: authtime %d, %s%s "
+                                     "%s for %s%s%s"),
+                         ktypestr, fromstring, status, authtime, rep_etypestr,
                          !errcode ? "," : "",
                          cname ? cname : "<unknown client>",
                          sname ? sname : "<unknown server>",
-                         errcode ? ", " : "",
-                         errcode ? emsg : "");
+                         errcode ? ", " : "", errcode ? emsg : "");
         if (s4u_name) {
             assert(isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION) ||
                    isflagset(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION));
             if (isflagset(c_flags, KRB5_KDB_FLAG_PROTOCOL_TRANSITION))
                 krb5_klog_syslog(LOG_INFO,
-                                 "... PROTOCOL-TRANSITION s4u-client=%s",
+                                 _("... PROTOCOL-TRANSITION s4u-client=%s"),
                                  s4u_name);
             else if (isflagset(c_flags, KRB5_KDB_FLAG_CONSTRAINED_DELEGATION))
                 krb5_klog_syslog(LOG_INFO,
-                                 "... CONSTRAINED-DELEGATION s4u-client=%s",
+                                 _("... CONSTRAINED-DELEGATION s4u-client=%s"),
                                  s4u_name);
         }
     } else
-        krb5_klog_syslog(LOG_INFO,
-                         "TGS_REQ %s: %s: authtime %d, %s for %s, 2nd tkt client %s",
+        krb5_klog_syslog(LOG_INFO, _("TGS_REQ %s: %s: authtime %d, %s for %s, "
+                                     "2nd tkt client %s"),
                          fromstring, status, authtime,
                          cname ? cname : "<unknown client>",
                          sname ? sname : "<unknown server>",
@@ -2341,10 +2338,10 @@ log_tgs_alt_tgt(krb5_principal p)
     char *sname;
     if (krb5_unparse_name(kdc_context, p, &sname)) {
         krb5_klog_syslog(LOG_INFO,
-                         "TGS_REQ: issuing alternate <un-unparseable> TGT");
+                         _("TGS_REQ: issuing alternate <un-unparseable> TGT"));
     } else {
         limit_string(sname);
-        krb5_klog_syslog(LOG_INFO, "TGS_REQ: issuing TGT %s", sname);
+        krb5_klog_syslog(LOG_INFO, _("TGS_REQ: issuing TGT %s"), sname);
         free(sname);
     }
     /* OpenSolaris: audit_krb5kdc_tgs_req_alt_tgt(...) */

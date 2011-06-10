@@ -192,7 +192,7 @@ kdb_get_hist_key(kadm5_server_handle_t handle, krb5_keyblock *hist_keyblock,
     if (kdb->n_key_data <= 0) {
         ret = KRB5_KDB_NO_MATCHING_KEY;
         krb5_set_error_message(handle->context, ret,
-                               "History entry contains no key data");
+                               _("History entry contains no key data"));
         goto done;
     }
 

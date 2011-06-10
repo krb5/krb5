@@ -1240,7 +1240,7 @@ krb5_fcc_open_file (krb5_context context, krb5_ccache id, int mode)
         case ENOENT:
             retval = KRB5_FCC_NOFILE;
             krb5_set_error_message(context, retval,
-                                   "Credentials cache file '%s' not found",
+                                   _("Credentials cache file '%s' not found"),
                                    data->filename);
             return retval;
         default:
@@ -2517,8 +2517,8 @@ krb5_fcc_interpret(krb5_context context, int errnum)
     default:
         retval = KRB5_CC_IO;            /* XXX */
         krb5_set_error_message(context, retval,
-                               "Credentials cache I/O operation failed (%s)",
-                               strerror(errnum));
+                               _("Credentials cache I/O operation failed "
+                                 "(%s)"), strerror(errnum));
     }
     return retval;
 }

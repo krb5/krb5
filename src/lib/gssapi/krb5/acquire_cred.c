@@ -169,8 +169,9 @@ check_keytab(krb5_context context, krb5_keytab kt, krb5_gss_name_t name)
     if (code == KRB5_KT_END) {
         code = KRB5_KT_NOTFOUND;
         if (krb5_unparse_name(context, accprinc, &princname) == 0) {
-            krb5_set_error_message(context, code, "No key table entry "
-                                   "found matching %s", princname);
+            krb5_set_error_message(context, code,
+                                   _("No key table entry found matching %s"),
+                                   princname);
             free(princname);
         }
     }

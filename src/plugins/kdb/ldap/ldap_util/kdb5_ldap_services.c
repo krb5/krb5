@@ -1915,13 +1915,15 @@ kdb5_ldap_stash_service_password(int argc, char **argv)
         if (strcmp (argv[1], "-f") == 0) {
             if (((file_name = strdup (argv[2])) == NULL) ||
                 ((service_object = strdup (argv[3])) == NULL)) {
-                com_err(me, ENOMEM, "while setting service object password");
+                com_err(me, ENOMEM,
+                        _("while setting service object password"));
                 goto cleanup;
             }
         } else if (strcmp (argv[2], "-f") == 0) {
             if (((file_name = strdup (argv[3])) == NULL) ||
                 ((service_object = strdup (argv[1])) == NULL)) {
-                com_err(me, ENOMEM, "while setting service object password");
+                com_err(me, ENOMEM,
+                        _("while setting service object password"));
                 goto cleanup;
             }
         } else {
@@ -1929,7 +1931,7 @@ kdb5_ldap_stash_service_password(int argc, char **argv)
             goto cleanup;
         }
         if (file_name == NULL) {
-            com_err(me, ENOMEM, "while setting service object password");
+            com_err(me, ENOMEM, _("while setting service object password"));
             goto cleanup;
         }
     } else { /* argc == 2 */
@@ -1937,7 +1939,7 @@ kdb5_ldap_stash_service_password(int argc, char **argv)
 
         service_object = strdup (argv[1]);
         if (service_object == NULL) {
-            com_err(me, ENOMEM, "while setting service object password");
+            com_err(me, ENOMEM, _("while setting service object password"));
             goto cleanup;
         }
 
@@ -1952,7 +1954,8 @@ kdb5_ldap_stash_service_password(int argc, char **argv)
                 /* Stash file path neither in krb5.conf nor on command line */
                 file_name = strdup(DEF_SERVICE_PASSWD_FILE);
                 if (file_name == NULL) {
-                    com_err(me, ENOMEM, "while setting service object password");
+                    com_err(me, ENOMEM,
+                            _("while setting service object password"));
                     goto cleanup;
                 }
                 goto done;
@@ -1972,25 +1975,21 @@ done:
         memset(passwd, 0, sizeof (passwd));
         passwd_len = sizeof (passwd);
 
-        /* size of prompt = strlen of servicedn + strlen("Password for \" \"") */
-        assert (sizeof (prompt1) > (strlen (service_object)
-                                    + sizeof ("Password for \" \"")));
-        snprintf(prompt1, sizeof(prompt1), "Password for \"%s\"", service_object);
+        snprintf(prompt1, sizeof(prompt1), _("Password for \"%s\""),
+                 service_object);
 
-        /* size of prompt = strlen of servicedn + strlen("Re-enter Password for \" \"") */
-        assert (sizeof (prompt2) > (strlen (service_object)
-                                    + sizeof ("Re-enter Password for \" \"")));
-        snprintf(prompt2, sizeof(prompt2), "Re-enter password for \"%s\"", service_object);
+        snprintf(prompt2, sizeof(prompt2), _("Re-enter password for \"%s\""),
+                 service_object);
 
         ret = krb5_read_password(util_context, prompt1, prompt2, passwd, &passwd_len);
         if (ret != 0) {
-            com_err(me, ret, "while setting service object password");
+            com_err(me, ret, _("while setting service object password"));
             memset(passwd, 0, sizeof (passwd));
             goto cleanup;
         }
 
         if (passwd_len == 0) {
-            printf("%s: Invalid password\n", me);
+            printf(_("%s: Invalid password\n"), me);
             memset(passwd, 0, MAX_SERVICE_PASSWD_LEN);
             goto cleanup;
         }
@@ -2005,7 +2004,8 @@ done:
 
         ret = tohex(pwd, &hexpasswd);
         if (ret != 0) {
-            com_err(me, ret, "Failed to convert the password to hexadecimal");
+            com_err(me, ret,
+                    _("Failed to convert the password to hexadecimal"));
             memset(passwd, 0, passwd_len);
             goto cleanup;
         }
@@ -2018,7 +2018,7 @@ done:
     old_mode = umask(0177);
     pfile = fopen(file_name, "a+");
     if (pfile == NULL) {
-        com_err(me, errno, "Failed to open file %s: %s", file_name,
+        com_err(me, errno, _("Failed to open file %s: %s"), file_name,
                 strerror (errno));
         goto cleanup;
     }
@@ -2039,12 +2039,14 @@ done:
         if (feof(pfile)) {
             /* If the service object dn is not present in the service password file */
             if (fprintf(pfile, "%s#{HEX}%s\n", service_object, hexpasswd.data) < 0) {
-                com_err(me, errno, "Failed to write service object password to file");
+                com_err(me, errno,
+                        _("Failed to write service object password to file"));
                 fclose(pfile);
                 goto cleanup;
             }
         } else {
-            com_err(me, errno, "Error reading service object password file");
+            com_err(me, errno,
+                    _("Error reading service object password file"));
             fclose(pfile);
             goto cleanup;
         }
@@ -2060,7 +2062,7 @@ done:
 
         /* Create a new file with the extension .tmp */
         if (asprintf(&tmp_file,"%s.tmp",file_name) < 0) {
-            com_err(me, ENOMEM, "while setting service object password");
+            com_err(me, ENOMEM, _("while setting service object password"));
             fclose(pfile);
             goto cleanup;
         }
@@ -2069,7 +2071,7 @@ done:
         newfile = fopen(tmp_file, "w");
         umask (omask);
         if (newfile == NULL) {
-            com_err(me, errno, "Error creating file %s", tmp_file);
+            com_err(me, errno, _("Error creating file %s"), tmp_file);
             fclose(pfile);
             goto cleanup;
         }
@@ -2080,7 +2082,8 @@ done:
             if (((str = strstr(line, service_object)) != NULL) &&
                 (line[strlen(service_object)] == '#')) {
                 if (fprintf(newfile, "%s#{HEX}%s\n", service_object, hexpasswd.data) < 0) {
-                    com_err(me, errno, "Failed to write service object password to file");
+                    com_err(me, errno, _("Failed to write service object "
+                                         "password to file"));
                     fclose(newfile);
                     unlink(tmp_file);
                     fclose(pfile);
@@ -2088,7 +2091,8 @@ done:
                 }
             } else {
                 if (fprintf (newfile, "%s", line) < 0) {
-                    com_err(me, errno, "Failed to write service object password to file");
+                    com_err(me, errno, _("Failed to write service object "
+                                         "password to file"));
                     fclose(newfile);
                     unlink(tmp_file);
                     fclose(pfile);
@@ -2098,7 +2102,8 @@ done:
         }
 
         if (!feof(pfile)) {
-            com_err(me, errno, "Error reading service object password file");
+            com_err(me, errno,
+                    _("Error reading service object password file"));
             fclose(newfile);
             unlink(tmp_file);
             fclose(pfile);
@@ -2112,8 +2117,8 @@ done:
 
         ret = rename(tmp_file, file_name);
         if (ret != 0) {
-            com_err(me, errno, "Failed to write service object password to "
-                    "file");
+            com_err(me, errno,
+                    _("Failed to write service object password to file"));
             goto cleanup;
         }
     }

@@ -4,15 +4,10 @@
  *
  */
 
-#include <stdio.h>
+#include <k5-platform.h>
 #include <gssrpc/rpc.h>
 #include <gssapi/gssapi_krb5.h> /* for gss_nt_krb5_name */
 #include <syslog.h>
-#include <string.h>
-#include "autoconf.h"
-#ifdef HAVE_MEMORY_H
-#include <memory.h>
-#endif
 #include <kadm5/kadm_rpc.h>
 #include <krb5.h>
 #include <kadm5/admin.h>
@@ -269,8 +264,8 @@ check_rpcsec_auth(struct svc_req *rqstp)
      maj_stat = gss_inquire_context(&min_stat, ctx, NULL, &name,
 				    NULL, NULL, NULL, NULL, NULL);
      if (maj_stat != GSS_S_COMPLETE) {
-	  krb5_klog_syslog(LOG_ERR, "check_rpcsec_auth: "
-			   "failed inquire_context, stat=%u", maj_stat);
+	  krb5_klog_syslog(LOG_ERR, _("check_rpcsec_auth: failed "
+				      "inquire_context, stat=%u"), maj_stat);
 	  log_badauth(maj_stat, min_stat,
 		      &rqstp->rq_xprt->xp_raddr, NULL);
 	  goto fail_name;
@@ -305,7 +300,7 @@ check_rpcsec_auth(struct svc_req *rqstp)
 
 fail_princ:
      if (!success) {
-	 krb5_klog_syslog(LOG_ERR, "bad service principal %.*s%s",
+	 krb5_klog_syslog(LOG_ERR, _("bad service principal %.*s%s"),
 			  (int) slen, (char *) gss_str.value, sdots);
      }
      gss_release_buffer(&min_stat, &gss_str);
@@ -326,9 +321,8 @@ gss_to_krb5_name_1(struct svc_req *rqstp, krb5_context ctx, gss_name_t gss_name,
 
      status = gss_display_name(&minor_stat, gss_name, gss_str, &gss_type);
      if ((status != GSS_S_COMPLETE) || (gss_type != gss_nt_krb5_name)) {
-	  krb5_klog_syslog(LOG_ERR,
-			   "gss_to_krb5_name: "
-			   "failed display_name status %d", status);
+	  krb5_klog_syslog(LOG_ERR, _("gss_to_krb5_name: failed display_name "
+				      "status %d"), status);
 	  log_badauth(status, minor_stat,
 		      &rqstp->rq_xprt->xp_raddr, NULL);
 	  return 0;

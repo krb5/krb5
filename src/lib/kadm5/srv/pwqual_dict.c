@@ -102,15 +102,16 @@ init_dict(dict_moddata dict, const char *dict_file)
     struct stat sb;
 
     if (dict_file == NULL) {
-        krb5_klog_syslog(LOG_INFO, "No dictionary file specified, continuing "
-                         "without one.");
+        krb5_klog_syslog(LOG_INFO,
+                         _("No dictionary file specified, continuing without "
+                           "one."));
         return KADM5_OK;
     }
     if ((fd = open(dict_file, O_RDONLY)) == -1) {
         if (errno == ENOENT) {
             krb5_klog_syslog(LOG_ERR,
-                             "WARNING!  Cannot find dictionary file %s, "
-                             "continuing without one.", dict_file);
+                             _("WARNING!  Cannot find dictionary file %s, "
+                               "continuing without one."), dict_file);
             return KADM5_OK;
         } else
             return errno;

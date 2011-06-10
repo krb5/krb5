@@ -95,7 +95,7 @@ kdb5_stash(argc, argv)
         if (krb5_enctype_to_name(master_keyblock.enctype, FALSE,
                                  tmp, sizeof(tmp)))
             com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP,
-                    "while setting up enctype %d", master_keyblock.enctype);
+                    _("while setting up enctype %d"), master_keyblock.enctype);
         else
             com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP, "%s", tmp);
         exit_status++; return;
@@ -114,7 +114,7 @@ kdb5_stash(argc, argv)
                                     &mkey_kvno,
                                     NULL, &master_keyblock);
         if (retval) {
-            com_err(progname, retval, "while reading master key");
+            com_err(progname, retval, _("while reading master key"));
             exit_status++; return;
         }
 
@@ -122,17 +122,17 @@ kdb5_stash(argc, argv)
                                          &master_keyblock, mkey_kvno,
                                          &master_keylist);
         if (retval) {
-            com_err(progname, retval, "while getting master key list");
+            com_err(progname, retval, _("while getting master key list"));
             exit_status++; return;
         }
     } else {
-        printf("Using existing stashed keys to update stash file.\n");
+        printf(_("Using existing stashed keys to update stash file.\n"));
     }
 
     retval = krb5_db_store_master_key_list(util_context, keyfile, master_princ,
                                            master_keylist, NULL);
     if (retval) {
-        com_err(progname, errno, "while storing key");
+        com_err(progname, errno, _("while storing key"));
         exit_status++; return;
     }
 

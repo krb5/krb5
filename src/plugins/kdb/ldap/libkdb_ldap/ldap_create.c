@@ -218,11 +218,13 @@ krb5_ldap_create(krb5_context context, char *conf_section, char **db_args)
                  * temporary is passed in when kdb5_util load without -update is done.
                  * This is unsupported by the LDAP plugin.
                  */
-                krb5_set_error_message (context, status,
-                                        "creation of LDAP entries aborted, plugin requires -update argument");
+                krb5_set_error_message(context, status,
+                                       _("creation of LDAP entries aborted, "
+                                         "plugin requires -update argument"));
             } else {
-                krb5_set_error_message (context, status, "unknown option \'%s\'",
-                                        opt?opt:val);
+                krb5_set_error_message(context, status,
+                                       _("unknown option \'%s\'"),
+                                       opt?opt:val);
             }
             free(opt);
             free(val);
@@ -365,7 +367,8 @@ cleanup:
         rc = krb5_ldap_delete_krbcontainer(context,
                                            ((kparams.DN != NULL) ? &kparams : NULL));
         krb5_set_error_message(context, rc,
-                               "could not complete roll-back, error deleting Kerberos Container");
+                               _("could not complete roll-back, error "
+                                 "deleting Kerberos Container"));
     }
 
     /* should call krb5_ldap_free_krbcontainer_params() but can't */

@@ -24,9 +24,8 @@
  */
 
 #include <krb5.h>
+#include <k5-platform.h>
 #include <ss/ss.h>
-#include <stdio.h>
-#include <string.h>
 #include "kadmin.h"
 
 extern ss_request_table kadmin_cmds;
@@ -45,7 +44,7 @@ main(int argc, char *argv[])
     request = kadmin_startup(argc, argv);
     sci_idx = ss_create_invocation(whoami, "5.0", NULL, &kadmin_cmds, &retval);
     if (retval) {
-        ss_perror(sci_idx, retval, "creating invocation");
+        ss_perror(sci_idx, retval, _("creating invocation"));
         exit(1);
     }
     if (request) {
