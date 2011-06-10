@@ -34,7 +34,7 @@ all:: admin-guide-full install-guide-full user-guide-full clean-temp-ps clean-te
 admin-guide-full:: admin-guide admin-guide-info admin-guide-html
 
 .PHONY: admin-guide
-admin-guide:: admin-guide.ps
+admin-guide:: admin-guide.ps admin-guide.pdf
 
 admin-guide.ps: $(ADMIN_DEPS)
 	$(DVI) admin.texinfo
@@ -59,7 +59,7 @@ krb5-admin.info: $(ADMIN_DEPS)
 install-guide-full:: install-guide install-guide-info install-guide-html
 
 .PHONY: install-guide
-install-guide:: install-guide.ps
+install-guide:: install-guide.ps install-guide.pdf
 
 install-guide.ps: $(INSTALL_DEPS)
 	$(DVI) install.texinfo
@@ -84,7 +84,7 @@ krb5-install.info: $(INSTALL_DEPS)
 user-guide-full:: user-guide user-guide-info user-guide-html
 
 .PHONY: user-guide
-user-guide:: user-guide.ps
+user-guide:: user-guide.ps user-guide.pdf
 
 user-guide.ps: $(USER_GUIDE_DEPS)
 	$(DVI) user-guide.texinfo
