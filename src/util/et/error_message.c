@@ -185,7 +185,11 @@ found:
     if (table->n_msgs <= (unsigned int) offset)
         goto no_table_found;
 
-    return table->msgs[offset];
+    /* If there's a string at the end of the table, it's a text domain. */
+    if (table->msgs[table->n_msgs] != NULL)
+        return dgettext(table->msgs[table->n_msgs], table->msgs[offset]);
+    else
+        return table->msgs[offset];
 
 no_table_found:
     k5_mutex_unlock(&et_list_lock);
@@ -290,6 +294,12 @@ add_error_table(const struct error_table *et)
     }
     e->next = et_list;
     et_list = e;
+
+    /* If there are two strings at the end of the table, they are a text domain
+     * and locale dir, and we are supposed to call bindtextdomain. */
+    if (et->msgs[et->n_msgs] != NULL && et->msgs[et->n_msgs + 1] != NULL)
+        bindtextdomain(et->msgs[et->n_msgs], et->msgs[et->n_msgs + 1]);
+
     return k5_mutex_unlock(&et_list_lock);
 }
 

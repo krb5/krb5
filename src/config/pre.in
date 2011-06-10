@@ -330,6 +330,7 @@ KRB5_DEPLIB	= $(TOPLIBD)/libkrb5$(DEPLIBEXT)
 CRYPTO_DEPLIB	= $(TOPLIBD)/libk5crypto$(DEPLIBEXT)
 COM_ERR_DEPLIB	= $(COM_ERR_DEPLIB-@COM_ERR_VERSION@)
 COM_ERR_DEPLIB-sys = # empty
+COM_ERR_DEPLIB-intlsys = # empty
 COM_ERR_DEPLIB-k5 = $(TOPLIBD)/libcom_err$(DEPLIBEXT)
 SUPPORT_LIBNAME=krb5support
 SUPPORT_DEPLIB	= $(TOPLIBD)/lib$(SUPPORT_LIBNAME)$(DEPLIBEXT)
@@ -356,6 +357,7 @@ KADMCLNT_DEPLIBS	= $(KADMCLNT_DEPLIB) $(KADM_COMM_DEPLIBS)
 COM_ERR_VERSION = @COM_ERR_VERSION@
 COM_ERR_DEPS	= $(COM_ERR_DEPS-@COM_ERR_VERSION@)
 COM_ERR_DEPS-sys =
+COM_ERR_DEPS-intlsys =
 COM_ERR_DEPS-k5	= $(BUILDTOP)/include/com_err.h
 SS_VERSION	= @SS_VERSION@
 SS_DEPS		= $(SS_DEPS-@SS_VERSION@)
@@ -421,7 +423,9 @@ PRNG_ALG	= @PRNG_ALG@
 ### /* these are invoked as $(...) foo.et, which works, but could be better */
 COMPILE_ET= $(COMPILE_ET-@COM_ERR_VERSION@)
 COMPILE_ET-sys= compile_et
-COMPILE_ET-k5= $(BUILDTOP)/util/et/compile_et -d $(top_srcdir)/util/et
+COMPILE_ET-intlsys= compile_et --textdomain mit-krb5
+COMPILE_ET-k5= $(BUILDTOP)/util/et/compile_et -d $(top_srcdir)/util/et \
+	--textdomain mit-krb5
 
 .SUFFIXES:  .h .c .et .ct
 

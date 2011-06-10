@@ -81,6 +81,7 @@ HEADERS= \
 
 MAYBE_COMERR_k5 = com_err.h
 MAYBE_COMERR_sys =
+MAYBE_COMERR_intlsys =
 
 check-pytests:: t_kgss_user t_kgss_kernel
 	$(RUNPYTEST) $(srcdir)/t_kgss.py $(PYTESTFLAGS)

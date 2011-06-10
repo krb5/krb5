@@ -1417,6 +1417,7 @@ AC_ARG_WITH([system-et],
 AC_HELP_STRING(--with-system-et,use system compile_et and -lcom_err @<:@default: build and install a local version@:>@))
 AC_MSG_CHECKING(which version of com_err to use)
 if test "x$with_system_et" = xyes ; then
+  # This will be changed to "intlsys" if textdomain support is present.
   COM_ERR_VERSION=sys
   AC_MSG_RESULT(system)
 else
@@ -1445,11 +1446,29 @@ EOF
       		 ],[ &et_foo_error_table; ],:,
 		 [AC_MSG_ERROR(cannot use et_foo_error_table)])
   # Anything else we need to test for?
-  rm -f conf$$e.et conf$$e.c conf$$e.h
+  rm -f conf$$e.c conf$$e.h
   krb5_cv_compile_et_useful=yes
   ])
+  AC_CACHE_CHECK(whether compile_et supports --textdomain,
+                 krb5_cv_compile_et_textdomain,[
+  krb5_cv_compile_et_textdomain=no
+  if compile_et --textdomain=xyzw conf$$e.et >/dev/null 2>&1 ; then
+    if grep -q xyzw conf$$e.c; then
+      krb5_cv_compile_et_textdomain=yes
+    fi
+  fi
+  rm -f conf$$e.c conf$$e.h
+  ])
+  if test "$krb5_cv_compile_et_textdomain" = yes; then
+    COM_ERR_VERSION=intlsys
+  fi
+  rm -f conf$$e.et
 fi
 AC_SUBST(COM_ERR_VERSION)
+if test "$COM_ERR_VERSION" = k5 -o "$COM_ERR_VERSION" = intlsys; then
+  AC_DEFINE(HAVE_COM_ERR_INTL,1,
+            [Define if com_err has compatible gettext support])
+fi
 ])
 AC_DEFUN([KRB5_AC_CHOOSE_SS],[
 AC_ARG_WITH(system-ss,

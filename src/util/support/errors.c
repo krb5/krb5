@@ -172,6 +172,10 @@ krb5int_get_error (struct errinfo *ep, long code)
         return ep->scratch_buf;
     }
     r = fptr(code);
+#ifndef HAVE_COM_ERR_INTL
+    /* Translate com_err results here if libcom_err won't do it. */
+    r = _(r);
+#endif
     if (r == NULL) {
         unlock();
         goto format_number;

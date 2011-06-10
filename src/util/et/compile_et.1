@@ -8,6 +8,13 @@
 compile_et \- error table compiler
 .SH SYNOPSIS
 .B compile_et
+[
+.B \-\-textdomain
+.I domain
+[
+.B \-\-localedir
+.I dir
+] ]
 file
 .SH DESCRIPTION
 .B Compile_et
@@ -61,6 +68,17 @@ the ``.et'' suffix replaced by ``.c'' and ``.h''.
 
 A ``#'' in the source file is treated as a comment character, and all
 remaining text to the end of the source line will be ignored.
+
+If a text domain is provided with the
+.B \-\-textdomain
+option, error messages will be looked up in the specified domain with
+.BR gettext .
+If a locale directory is also provided with the
+.B \-\-localedir
+option, the text domain will be bound to the specified locale
+directory with
+.B bindtextdomain
+when the error table is initialized.
 
 .SH BUGS
 

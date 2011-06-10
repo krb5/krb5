@@ -117,6 +117,8 @@ c2n["_"]=63
 	print "extern void initialize_" table_name "_error_table (void);" > outfile
 	print "#endif" > outfile
 	print "" > outfile
+	print "#define N_(x) (x)" > outfile
+	print "" > outfile
 	print "/* Lclint doesn't handle null annotations on arrays" > outfile
 	print "   properly, so we need this typedef in each" > outfile
 	print "   generated .c file.  */" > outfile
@@ -136,7 +138,7 @@ c2n["_"]=63
 
 (continuation == 1) && ($0 ~ /"[ \t]*$/) {
 #	printf "\t\t\"%s,\n", $0 > outfile
-	printf "\t%s,\n", cont_buf $0 > outfile
+	printf "\tN_(%s),\n", cont_buf $0 > outfile
 	continuation = 0;
 }
 
@@ -152,7 +154,7 @@ c2n["_"]=63
 	    text = text FS $i
 	}
 	text=substr(text,2,length(text)-1);
-	printf "\t%s,\n", text > outfile
+	printf "\tN_(%s),\n", text > outfile
 	table_item_count++
 }
 
@@ -179,7 +181,7 @@ c2n["_"]=63
 
 { 
 	if (skipone) {
-	    printf "\t%s,\n", $0 > outfile
+	    printf "\tN_(%s),\n", $0 > outfile
 	}
 	skipone=0
 }
@@ -187,6 +189,13 @@ END {
 	if (table_item_count > 256) {
 	    print "Error table too large!" | "cat 1>&2"
 	    exit 1
+	}
+	# Put text domain and/or localedir at the end of the list.
+	if (textdomain) {
+	    printf "    \"%s\", /* Text domain */\n", textdomain > outfile
+	    if (localedir) {
+		printf "    \"%s\", /* Locale dir */\n", localedir > outfile
+	    }
 	}
 	print "    0" > outfile
 	print "};" > outfile

@@ -42,7 +42,7 @@ $(BUILDTOP)/.depend-verify-et: depend-verify-et-$(COM_ERR_VERSION)
 depend-verify-et-k5:
 	@if test -r $(BUILDTOP)/.depend-verify-et; then :; \
 		else (set -x; touch $(BUILDTOP)/.depend-verify-et); fi
-depend-verify-et-sys:
+depend-verify-et-sys depend-verify-et-intlsys:
 	@echo 1>&2 error: cannot build dependencies using system et package
 	@exit 1
 $(BUILDTOP)/.depend-verify-ss: depend-verify-ss-$(SS_VERSION)
