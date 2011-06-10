@@ -1,0 +1,33 @@
+mydir=po
+BUILDTOP=$(REL)..
+VER=@PACKAGE_VERSION@
+
+DOMAIN=mit-krb5
+POTFILE=$(srcdir)/$(DOMAIN).pot
+XGETTEXT=xgettext --foreign-user --package-name=mit-krb5 \
+	--package-version=$(VER) --copyright-holder=MIT
+# This is a placeholder until we have an actual translation.
+CATALOGS=en_US.mo
+
+.SUFFIXES: .po .mo
+.po.mo:
+	msgfmt -o $@ $<
+
+all:: $(CATALOGS)
+
+update-po: csrcs
+	$(XGETTEXT) -k_ -kN_ -o $(POTFILE) -f csrcs
+
+csrcs: always
+	find $(top_srcdir) -name "*.c" -print > $@
+
+always:
+
+install::
+	for c in $(CATALOGS); do \
+	  lang=`basename $$c .mo`; \
+	  $(top_srcdir)/config/mkinstalldirs \
+	    $(DESTDIR)$(KRB5_LOCALEDIR)/$$lang/LC_MESSAGES; \
+	  install -c $$c \
+	    $(DESTDIR)$(KRB5_LOCALEDIR)/$$lang/LC_MESSAGES/$(DOMAIN).mo; \
+	done

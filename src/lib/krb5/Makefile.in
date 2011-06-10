@@ -3,7 +3,7 @@ BUILDTOP=$(REL)..$(S)..
 LOCALINCLUDES = -I$(srcdir)/ccache -I$(srcdir)/keytab -I$(srcdir)/rcache -I$(srcdir)/os -I$(srcdir)/unicode
 SUBDIRS= error_tables asn.1 ccache keytab krb os rcache unicode
 WINSUBDIRS= $(SUBDIRS) posix
-DEFS=
+DEFS=-DLOCALEDIR=\"$(KRB5_LOCALEDIR)\"
 
 ##DOSBUILDTOP = ..\..
 ##DOSLIBNAME=$(OUTPRE)krb5.lib

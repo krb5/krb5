@@ -32,10 +32,6 @@
 #ifndef K5_ERR_H
 #define K5_ERR_H
 
-#ifndef _
-#define _(X) (X)
-#endif
-
 #if defined(_MSDOS) || defined(_WIN32)
 #include <win-mac.h>
 #endif

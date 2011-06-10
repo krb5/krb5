@@ -36,6 +36,7 @@
  * + consistent getpwnam/getpwuid interfaces
  * + va_copy fudged if not provided
  * + [v]asprintf
+ * + _, N_, dgettext, bindtextdomain, setlocale (for localization)
  */
 
 #ifndef K5_PLATFORM_H
@@ -1010,9 +1011,23 @@ extern int krb5int_mkstemp(char *);
 
 extern void krb5int_zap(void *ptr, size_t len);
 
-/* Fudge for future adoption of gettext or the like.  */
-#ifndef _
-#define _(X) (X)
+/*
+ * Localization macros.  If we have gettext, define _ appropriately for
+ * translating a string.  If we do not have gettext, define _, bindtextdomain,
+ * and setlocale as no-ops.  N_ is always a no-op; it marks a string for
+ * extraction to pot files but does not translate it.
+ */
+#ifdef ENABLE_NLS
+#include <libintl.h>
+#include <locale.h>
+#define KRB5_TEXTDOMAIN "mit-krb5"
+#define _(s) dgettext(KRB5_TEXTDOMAIN, s)
+#else
+#define _(s) s
+#define dgettext(d, m) m
+#define bindtextdomain(p, d)
+#define setlocale(c, l)
 #endif
+#define N_(s) s
 
 #endif /* K5_PLATFORM_H */

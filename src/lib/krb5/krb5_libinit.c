@@ -41,6 +41,8 @@ int krb5int_lib_init(void)
     add_error_table(&et_asn1_error_table);
     add_error_table(&et_k524_error_table);
 
+    bindtextdomain(KRB5_TEXTDOMAIN, LOCALEDIR);
+
     err = krb5int_rc_finish_init();
     if (err)
         return err;

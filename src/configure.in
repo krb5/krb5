@@ -66,6 +66,12 @@ AC_CHECK_LIB(util,main,[AC_DEFINE(HAVE_LIBUTIL,1,[Define if the util library is 
 LIBUTIL=-lutil
 ])
 AC_SUBST(LIBUTIL)
+
+AC_CHECK_HEADER(libintl.h, [
+	AC_SEARCH_LIBS(dgettext, intl, [
+		AC_DEFINE(ENABLE_NLS, 1,
+			[Define if translation functions should be used.])])])
+
 # for kdc
 AC_CHECK_HEADERS(syslog.h sys/sockio.h ifaddrs.h unistd.h)
 AC_CHECK_FUNCS(openlog syslog closelog strftime vsprintf vasprintf vsnprintf)
@@ -1161,4 +1167,5 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	tests/verify tests/gssapi tests/dejagnu tests/threads tests/shlib
 	tests/gss-threads tests/misc tests/mkeystash_compat
 	util/gss-kernel-lib util/collected-client-lib
+	po
 )
