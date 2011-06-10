@@ -643,6 +643,9 @@ foreach i $runvarlist {
 	verbose "savelist $envvars_tosave"
 	lappend krb5_init_vars $i
     }
+    # Make sure we don't get confused by translated messages.
+    lappend envvars_tosave "LC_MESSAGES"
+    lappend krb5_init_vars "LC_MESSAGES=C"
 }
 set envstackp 0
 envstack_push
