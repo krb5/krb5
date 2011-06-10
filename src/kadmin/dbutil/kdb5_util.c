@@ -198,6 +198,7 @@ int main(argc, argv)
     int cmd_argc;
     krb5_error_code retval;
 
+    setlocale(LC_MESSAGES, "");
     set_com_err_hook(extended_com_err_fn);
 
     /*

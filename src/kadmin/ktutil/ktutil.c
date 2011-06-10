@@ -45,6 +45,7 @@ int main(argc, argv)
     krb5_error_code retval;
     int sci_idx;
 
+    setlocale(LC_MESSAGES, "");
     retval = krb5_init_context(&kcontext);
     if (retval) {
         com_err(argv[0], retval, _("while initializing krb5"));

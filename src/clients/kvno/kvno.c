@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     char *sname = NULL, *for_user = NULL;
     int canon = 0, unknown = 0, proxy = 0;
 
-
+    setlocale(LC_MESSAGES, "");
     set_com_err_hook (extended_com_err_fn);
 
     prog = strrchr(argv[0], '/');

@@ -109,6 +109,7 @@ main(argc, argv)
     char *name;
     int mode;
 
+    setlocale(LC_MESSAGES, "");
     progname = GET_PROGNAME(argv[0]);
 
     name = NULL;

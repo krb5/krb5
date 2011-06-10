@@ -59,6 +59,7 @@ int main(int argc, char *argv[])
     int result_code;
     krb5_data result_code_string, result_string;
 
+    setlocale(LC_MESSAGES, "");
     if (argc > 2) {
         fprintf(stderr, _("usage: %s [principal]\n"), argv[0]);
         exit(1);

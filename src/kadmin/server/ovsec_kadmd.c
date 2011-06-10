@@ -246,6 +246,7 @@ int main(int argc, char *argv[])
 
     kdb_log_context *log_ctx;
 
+    setlocale(LC_MESSAGES, "");
     setvbuf(stderr, NULL, _IONBF, 0);
 
     /* This is OID value the Krb5_Name NameType */

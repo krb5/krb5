@@ -96,6 +96,7 @@ main(argc, argv)
     krb5_creds *my_creds;
     krb5_auth_context auth_context;
 
+    setlocale(LC_MESSAGES, "");
     retval = krb5_init_context(&context);
     if (retval) {
         com_err(argv[0], retval, _("while initializing krb5"));

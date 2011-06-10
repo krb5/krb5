@@ -782,6 +782,7 @@ main(argc, argv)
     struct k5_data k5;
     int authed_k5 = 0;
 
+    setlocale(LC_MESSAGES, "");
     progname = GET_PROGNAME(argv[0]);
 
     /* Ensure we can be driven from a pipe */

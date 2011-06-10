@@ -261,6 +261,7 @@ main(int argc, char *argv[])
     /*
      * Ensure that "progname" is set before calling com_err.
      */
+    setlocale(LC_MESSAGES, "");
     progname = (strrchr(argv[0], '/') ? strrchr(argv[0], '/')+1 : argv[0]);
 
     retval = kadm5_init_krb5_context(&util_context);

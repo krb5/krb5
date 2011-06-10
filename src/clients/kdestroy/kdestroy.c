@@ -75,6 +75,7 @@ main(argc, argv)
     int errflg = 0;
     int quiet = 0;
 
+    setlocale(LC_MESSAGES, "");
     progname = GET_PROGNAME(argv[0]);
 
     while ((c = getopt(argc, argv, "54qc:")) != -1) {

@@ -495,7 +495,7 @@ main(int argc, char **argv)
     kdb_hlog_t          *ulog = NULL;
     char                **db_args = NULL; /* XXX */
 
-    (void) setlocale(LC_ALL, "");
+    setlocale(LC_MESSAGES, "");
 
 #if !defined(TEXT_DOMAIN)
 #define TEXT_DOMAIN "SYS_TEST"
