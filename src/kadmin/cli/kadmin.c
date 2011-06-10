@@ -1638,12 +1638,17 @@ kadmin_parse_policy_args(int argc, char *argv[], kadm5_policy_ent_t policy,
             if (++i > argc - 2)
                 return -1;
             else {
-                date = get_date(argv[i]);
                 /* Allow bare numbers for compatibility with 1.8-1.9. */
-                if (date == (time_t)-1 && isdigit(*argv[i]))
-                    policy->pw_failcnt_interval = atoi(argv[i]);
-                else
+                date = get_date(argv[i]);
+                if (date != (time_t)-1)
                     policy->pw_failcnt_interval = date - now;
+                else if (isdigit(*argv[i]))
+                    policy->pw_failcnt_interval = atoi(argv[i]);
+                else {
+                    fprintf(stderr, _("Invalid date specification \"%s\".\n"),
+                            argv[i]);
+                    return -1;
+                }
                 *mask |= KADM5_PW_FAILURE_COUNT_INTERVAL;
                 continue;
             }
@@ -1652,12 +1657,17 @@ kadmin_parse_policy_args(int argc, char *argv[], kadm5_policy_ent_t policy,
             if (++i > argc - 2)
                 return -1;
             else {
-                date = get_date(argv[i]);
                 /* Allow bare numbers for compatibility with 1.8-1.9. */
-                if (date == (time_t)-1 && isdigit(*argv[i]))
-                    policy->pw_lockout_duration = atoi(argv[i]);
-                else
+                date = get_date(argv[i]);
+                if (date != (time_t)-1)
                     policy->pw_lockout_duration = date - now;
+                else if (isdigit(*argv[i]))
+                    policy->pw_lockout_duration = atoi(argv[i]);
+                else {
+                    fprintf(stderr, _("Invalid date specification \"%s\".\n"),
+                            argv[i]);
+                    return -1;
+                }
                 *mask |= KADM5_PW_LOCKOUT_DURATION;
                 continue;
             }
