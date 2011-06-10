@@ -379,7 +379,7 @@ krb5int_rd_setpw_rep(krb5_context context, krb5_auth_context auth_context,
         ** validate the message length -
         ** length is big endian
         */
-        message_length = (((ptr[0] << 8)&0xff) | (ptr[1]&0xff));
+        message_length = (((ptr[0]&0xff) << 8) | (ptr[1]&0xff));
         ptr += 2;
         /*
         ** make sure the message length and packet length agree -
@@ -389,7 +389,7 @@ krb5int_rd_setpw_rep(krb5_context context, krb5_auth_context auth_context,
         /*
         ** get the version number -
         */
-        version_number = (((ptr[0] << 8)&0xff) | (ptr[1]&0xff));
+        version_number = (((ptr[0]&0xff) << 8) | (ptr[1]&0xff));
         ptr += 2;
         /*
         ** make sure we support the version returned -
@@ -405,7 +405,7 @@ krb5int_rd_setpw_rep(krb5_context context, krb5_auth_context auth_context,
         /*
         ** get the reply length -
         */
-        ap_rep.length = (((ptr[0] << 8)&0xff) | (ptr[1]&0xff));
+        ap_rep.length = (((ptr[0]&0xff) << 8) | (ptr[1]&0xff));
         ptr += 2;
         /*
         ** validate ap_rep length agrees with the packet length -
@@ -468,7 +468,7 @@ krb5int_rd_setpw_rep(krb5_context context, krb5_auth_context auth_context,
     */
     ptr = clearresult.data;
 
-    *result_code = (((ptr[0] << 8)&0xff) | (ptr[1]&0xff));
+    *result_code = (((ptr[0]&0xff) << 8) | (ptr[1]&0xff));
     ptr += 2;
 
     /*
