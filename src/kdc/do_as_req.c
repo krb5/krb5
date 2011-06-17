@@ -616,8 +616,7 @@ errout:
     /* fall through */
 
 egress:
-    if (pa_context)
-        free_padata_context(kdc_context, &pa_context);
+    free_padata_context(kdc_context, pa_context);
     if (as_encrypting_key)
         krb5_free_keyblock(kdc_context, as_encrypting_key);
     if (errcode)

@@ -116,8 +116,8 @@ static krb5_error_code
 kdc_include_padata(krb5_context context, krb5_kdc_req *request,
                    struct _krb5_db_entry_new *client,
                    struct _krb5_db_entry_new *server,
-                   preauth_get_entry_data_proc get_entry_proc,
-                   void *pa_module_context, krb5_pa_data *pa_data)
+                   krb5_kdcpreauth_get_data_fn get_entry_proc,
+                   krb5_kdcpreauth_moddata moddata, krb5_pa_data *pa_data)
 {
     krb5_error_code retval;
     krb5_data *client_keys_data = NULL;
@@ -138,7 +138,7 @@ kdc_include_padata(krb5_context context, krb5_kdc_req *request,
     if (retval)
         return retval;
     retval = get_entry_proc(context, request, client,
-                            krb5plugin_preauth_keys, &client_keys_data);
+                            krb5_kdcpreauth_keys, &client_keys_data);
     if (retval)
         goto cleanup;
     client_key = (krb5_keyblock *) client_keys_data->data;
@@ -206,8 +206,9 @@ static krb5_error_code
 kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
                    krb5_data *req_pkt, krb5_kdc_req *request,
                    krb5_enc_tkt_part *enc_tkt_reply, krb5_pa_data *pa_data,
-                   preauth_get_entry_data_proc get_entry_proc,
-                   void *pa_module_context, void **opaque,
+                   krb5_kdcpreauth_get_data_fn get_entry_proc,
+                   krb5_kdcpreauth_moddata moddata,
+                   krb5_kdcpreauth_modreq *modreq_out,
                    krb5_data **e_data, krb5_authdata ***authz_data)
 {
     krb5_error_code retval, saved_retval = 0;
@@ -294,14 +295,23 @@ kdc_preauth_flags(krb5_context context, krb5_preauthtype patype)
 krb5_preauthtype supported_pa_types[] = {
     KRB5_PADATA_SAM_RESPONSE_2, 0};
 
-struct krb5plugin_preauth_server_ftable_v1 preauthentication_server_1 = {
-    "SAM2",
-    &supported_pa_types[0],
-    NULL,
-    NULL,
-    kdc_preauth_flags,
-    kdc_include_padata,
-    kdc_verify_preauth,
-    NULL,
-    NULL
-};
+krb5_error_code
+kdcpreauth_securid_sam2_initvt(krb5_context context, int maj_ver, int min_ver,
+                               krb5_plugin_vtable vtable);
+
+krb5_error_code
+kdcpreauth_securid_sam2_initvt(krb5_context context, int maj_ver, int min_ver,
+                               krb5_plugin_vtable vtable)
+{
+    krb5_kdcpreauth_vtable vt;
+
+    if (maj_ver != 1)
+        return KRB5_PLUGIN_VER_NOTSUPP;
+    vt = (krb5_kdcpreauth_vtable)vtable;
+    vt->name = "securid_sam2";
+    vt->pa_type_list = supported_pa_types;
+    vt->flags = kdc_preauth_flags;
+    vt->edata = kdc_include_padata;
+    vt->verify = kdc_verify_preauth;
+    return 0;
+}

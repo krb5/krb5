@@ -50,10 +50,12 @@ pkinit_server_plugin_fini_realm(krb5_context context,
                                 pkinit_kdc_context plgctx);
 
 static void
-pkinit_server_plugin_fini(krb5_context context, void *blob);
+pkinit_server_plugin_fini(krb5_context context,
+                          krb5_kdcpreauth_moddata moddata);
 
 static pkinit_kdc_context
-pkinit_find_realm_context(krb5_context context, void *pa_plugin_context,
+pkinit_find_realm_context(krb5_context context,
+                          krb5_kdcpreauth_moddata moddata,
                           krb5_principal princ);
 
 static krb5_error_code
@@ -97,12 +99,12 @@ cleanup:
 
 static krb5_error_code
 pkinit_server_get_edata(krb5_context context,
-                        krb5_kdc_req * request,
-                        struct _krb5_db_entry_new * client,
-                        struct _krb5_db_entry_new * server,
-                        preauth_get_entry_data_proc server_get_entry_data,
-                        void *pa_plugin_context,
-                        krb5_pa_data * data)
+                        krb5_kdc_req *request,
+                        struct _krb5_db_entry_new *client,
+                        struct _krb5_db_entry_new *server,
+                        krb5_kdcpreauth_get_data_fn server_get_entry_data,
+                        krb5_kdcpreauth_moddata moddata,
+                        krb5_pa_data *data)
 {
     krb5_error_code retval = 0;
     pkinit_kdc_context plgctx = NULL;
@@ -123,8 +125,7 @@ pkinit_server_get_edata(krb5_context context,
      * If we don't have a realm context for the given realm,
      * don't tell the client that we support pkinit!
      */
-    plgctx = pkinit_find_realm_context(context, pa_plugin_context,
-                                       request->server);
+    plgctx = pkinit_find_realm_context(context, moddata, request->server);
     if (plgctx == NULL)
         retval = EINVAL;
 
@@ -292,9 +293,9 @@ pkinit_server_verify_padata(krb5_context context,
                             krb5_kdc_req * request,
                             krb5_enc_tkt_part * enc_tkt_reply,
                             krb5_pa_data * data,
-                            preauth_get_entry_data_proc server_get_entry_data,
-                            void *pa_plugin_context,
-                            void **pa_request_context,
+                            krb5_kdcpreauth_get_data_fn server_get_entry_data,
+                            krb5_kdcpreauth_moddata moddata,
+                            krb5_kdcpreauth_modreq *modreq_out,
                             krb5_data **e_data,
                             krb5_authdata ***authz_data)
 {
@@ -328,11 +329,10 @@ pkinit_server_verify_padata(krb5_context context,
         return EINVAL;
     }
 
-    if (pa_plugin_context == NULL || e_data == NULL)
+    if (moddata == NULL || e_data == NULL)
         return EINVAL;
 
-    plgctx = pkinit_find_realm_context(context, pa_plugin_context,
-                                       request->server);
+    plgctx = pkinit_find_realm_context(context, moddata, request->server);
     if (plgctx == NULL)
         return 0;
 
@@ -562,7 +562,7 @@ pkinit_server_verify_padata(krb5_context context,
     }
     /* remember to set the PREAUTH flag in the reply */
     enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
-    *pa_request_context = reqctx;
+    *modreq_out = (krb5_kdcpreauth_modreq)reqctx;
     reqctx = NULL;
 
 cleanup:
@@ -668,9 +668,9 @@ pkinit_server_return_padata(krb5_context context,
                             struct _krb5_key_data * client_key,
                             krb5_keyblock * encrypting_key,
                             krb5_pa_data ** send_pa,
-                            preauth_get_entry_data_proc server_get_entry_data,
-                            void *pa_plugin_context,
-                            void **pa_request_context)
+                            krb5_kdcpreauth_get_data_fn server_get_entry_data,
+                            krb5_kdcpreauth_moddata moddata,
+                            krb5_kdcpreauth_modreq modreq)
 {
     krb5_error_code retval = 0;
     krb5_data scratch = {0, 0, NULL};
@@ -708,20 +708,19 @@ pkinit_server_return_padata(krb5_context context,
     if (padata->length <= 0 || padata->contents == NULL)
         return 0;
 
-    if (pa_request_context == NULL || *pa_request_context == NULL) {
+    if (modreq == NULL) {
         pkiDebug("missing request context \n");
         return EINVAL;
     }
 
-    plgctx = pkinit_find_realm_context(context, pa_plugin_context,
-                                       request->server);
+    plgctx = pkinit_find_realm_context(context, moddata, request->server);
     if (plgctx == NULL) {
         pkiDebug("Unable to locate correct realm context\n");
         return ENOENT;
     }
 
     pkiDebug("pkinit_return_padata: entered!\n");
-    reqctx = (pkinit_kdc_req_context)*pa_request_context;
+    reqctx = (pkinit_kdc_req_context)modreq;
 
     if (encrypting_key->contents) {
         free(encrypting_key->contents);
@@ -1169,13 +1168,14 @@ errout:
 }
 
 static pkinit_kdc_context
-pkinit_find_realm_context(krb5_context context, void *pa_plugin_context,
+pkinit_find_realm_context(krb5_context context,
+                          krb5_kdcpreauth_moddata moddata,
                           krb5_principal princ)
 {
     int i;
-    pkinit_kdc_context *realm_contexts = pa_plugin_context;
+    pkinit_kdc_context *realm_contexts = (pkinit_kdc_context *)moddata;
 
-    if (pa_plugin_context == NULL)
+    if (moddata == NULL)
         return NULL;
 
     for (i = 0; realm_contexts[i] != NULL; i++) {
@@ -1254,7 +1254,8 @@ errout:
 }
 
 static int
-pkinit_server_plugin_init(krb5_context context, void **blob,
+pkinit_server_plugin_init(krb5_context context,
+                          krb5_kdcpreauth_moddata *moddata_out,
                           const char **realmnames)
 {
     krb5_error_code retval = ENOMEM;
@@ -1289,13 +1290,15 @@ pkinit_server_plugin_init(krb5_context context, void **blob,
         goto errout;
     }
 
-    *blob = realm_contexts;
+    *moddata_out = (krb5_kdcpreauth_moddata)realm_contexts;
     retval = 0;
     pkiDebug("%s: returning context at %p\n", __FUNCTION__, realm_contexts);
 
 errout:
-    if (retval)
-        pkinit_server_plugin_fini(context, realm_contexts);
+    if (retval) {
+        pkinit_server_plugin_fini(context,
+                                  (krb5_kdcpreauth_moddata)realm_contexts);
+    }
 
     return retval;
 }
@@ -1316,9 +1319,10 @@ pkinit_server_plugin_fini_realm(krb5_context context, pkinit_kdc_context plgctx)
 }
 
 static void
-pkinit_server_plugin_fini(krb5_context context, void *blob)
+pkinit_server_plugin_fini(krb5_context context,
+                          krb5_kdcpreauth_moddata moddata)
 {
-    pkinit_kdc_context *realm_contexts = blob;
+    pkinit_kdc_context *realm_contexts = (pkinit_kdc_context *)moddata;
     int i;
 
     if (realm_contexts == NULL)
@@ -1379,18 +1383,26 @@ pkinit_fini_kdc_req_context(krb5_context context, void *ctx)
     free(reqctx);
 }
 
-/* Only necessary for static plugin linking support. */
-#include "k5-plugin.h"
+krb5_error_code
+kdcpreauth_pkinit_initvt(krb5_context context, int maj_ver, int min_ver,
+                         krb5_plugin_vtable vtable);
 
-struct krb5plugin_preauth_server_ftable_v1
-PLUGIN_SYMBOL_NAME(krb5_pkinit, preauthentication_server_1) = {
-    "pkinit",                   /* name */
-    supported_server_pa_types,  /* pa_type_list */
-    pkinit_server_plugin_init,  /* (*init_proc) */
-    pkinit_server_plugin_fini,  /* (*fini_proc) */
-    pkinit_server_get_flags,    /* (*flags_proc) */
-    pkinit_server_get_edata,    /* (*edata_proc) */
-    pkinit_server_verify_padata,/* (*verify_proc) */
-    pkinit_server_return_padata,/* (*return_proc) */
-    NULL,                       /* (*freepa_reqcontext_proc) */
-};
+krb5_error_code
+kdcpreauth_pkinit_initvt(krb5_context context, int maj_ver, int min_ver,
+                         krb5_plugin_vtable vtable)
+{
+    krb5_kdcpreauth_vtable vt;
+
+    if (maj_ver != 1)
+        return KRB5_PLUGIN_VER_NOTSUPP;
+    vt = (krb5_kdcpreauth_vtable)vtable;
+    vt->name = "pkinit";
+    vt->pa_type_list = supported_server_pa_types;
+    vt->init = pkinit_server_plugin_init;
+    vt->fini = pkinit_server_plugin_fini;
+    vt->flags = pkinit_server_get_flags;
+    vt->edata = pkinit_server_get_edata;
+    vt->verify = pkinit_server_verify_padata;
+    vt->return_padata = pkinit_server_return_padata;
+    return 0;
+}

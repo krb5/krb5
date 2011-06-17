@@ -79,9 +79,6 @@ krb5_copy_context(krb5_context ctx, krb5_context *nctx_out)
     nctx->prompt_types = NULL;
     nctx->os_context.default_ccname = NULL;
 
-    memset(&nctx->preauth_plugins, 0, sizeof(nctx->preauth_plugins));
-    nctx->preauth_context = NULL;
-
     memset(&nctx->libkrb5_plugins, 0, sizeof(nctx->libkrb5_plugins));
     nctx->vtbl = NULL;
     nctx->locate_fptrs = NULL;

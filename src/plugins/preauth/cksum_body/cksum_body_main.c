@@ -80,18 +80,18 @@ client_get_flags(krb5_context kcontext, krb5_preauthtype pa_type)
 
 static krb5_error_code
 client_process(krb5_context kcontext,
-               void *client_plugin_context,
-               void *client_request_context,
+               krb5_clpreauth_moddata moddata,
+               krb5_clpreauth_modreq modreq,
                krb5_get_init_creds_opt *opt,
-               preauth_get_client_data_proc client_get_data_proc,
-               struct _krb5_preauth_client_rock *rock,
+               krb5_clpreauth_get_data_fn client_get_data_proc,
+               krb5_clpreauth_rock rock,
                krb5_kdc_req *request,
                krb5_data *encoded_request_body,
                krb5_data *encoded_previous_request,
                krb5_pa_data *pa_data,
                krb5_prompter_fct prompter,
                void *prompter_data,
-               preauth_get_as_key_proc gak_fct,
+               krb5_clpreauth_get_as_key_fn gak_fct,
                void *gak_data,
                krb5_data *salt, krb5_data *s2kparams,
                krb5_keyblock *as_key,
@@ -229,7 +229,7 @@ client_process(krb5_context kcontext,
 
 static krb5_error_code
 client_gic_opt(krb5_context kcontext,
-               void *plugin_context,
+               krb5_clpreauth_moddata moddata,
                krb5_get_init_creds_opt *opt,
                const char *attr,
                const char *value)
@@ -243,7 +243,8 @@ client_gic_opt(krb5_context kcontext,
 
 /* Initialize and tear down the server-side module, and do stat tracking. */
 static krb5_error_code
-server_init(krb5_context kcontext, void **module_context, const char **realmnames)
+server_init(krb5_context kcontext, krb5_kdcpreauth_moddata *moddata_out,
+            const char **realmnames)
 {
     struct server_stats *stats;
     stats = malloc(sizeof(struct server_stats));
@@ -251,14 +252,14 @@ server_init(krb5_context kcontext, void **module_context, const char **realmname
         return ENOMEM;
     stats->successes = 0;
     stats->failures = 0;
-    *module_context = stats;
+    *moddata_out = (krb5_kdcpreauth_moddata)stats;
     return 0;
 }
 static void
-server_fini(krb5_context kcontext, void *module_context)
+server_fini(krb5_context kcontext, krb5_kdcpreauth_moddata moddata)
 {
     struct server_stats *stats;
-    stats = module_context;
+    stats = (struct server_stats *)moddata;
     if (stats != NULL) {
 #ifdef DEBUG
         fprintf(stderr, "Total: %d clients failed, %d succeeded.\n",
@@ -275,8 +276,8 @@ server_get_edata(krb5_context kcontext,
                  krb5_kdc_req *request,
                  struct _krb5_db_entry_new *client,
                  struct _krb5_db_entry_new *server,
-                 preauth_get_entry_data_proc server_get_entry_data,
-                 void *pa_module_context,
+                 krb5_kdcpreauth_get_data_fn server_get_entry_data,
+                 krb5_kdcpreauth_moddata moddata,
                  krb5_pa_data *data)
 {
     krb5_data *key_data;
@@ -287,7 +288,7 @@ server_get_edata(krb5_context kcontext,
     /* Retrieve the client's keys. */
     key_data = NULL;
     if ((*server_get_entry_data)(kcontext, request, client,
-                                 krb5plugin_preauth_keys, &key_data) != 0) {
+                                 krb5_kdcpreauth_keys, &key_data) != 0) {
 #ifdef DEBUG
         fprintf(stderr, "Error retrieving client keys.\n");
 #endif
@@ -335,9 +336,9 @@ server_verify(krb5_context kcontext,
               krb5_kdc_req *request,
               krb5_enc_tkt_part *enc_tkt_reply,
               krb5_pa_data *data,
-              preauth_get_entry_data_proc server_get_entry_data,
-              void *pa_module_context,
-              void **pa_request_context,
+              krb5_kdcpreauth_get_data_fn server_get_entry_data,
+              krb5_kdcpreauth_moddata moddata,
+              krb5_kdcpreauth_modreq *modreq_out,
               krb5_data **e_data,
               krb5_authdata ***authz_data)
 {
@@ -356,7 +357,7 @@ server_verify(krb5_context kcontext,
     test_svr_req_ctx *svr_req_ctx;
     krb5_authdata **my_authz_data = NULL;
 
-    stats = pa_module_context;
+    stats = (struct server_stats *)moddata;
 
 #ifdef DEBUG
     fprintf(stderr, "cksum_body: server_verify\n");
@@ -392,7 +393,7 @@ server_verify(krb5_context kcontext,
     /* Pull up the client's keys. */
     key_data = NULL;
     if ((*server_get_entry_data)(kcontext, request, client,
-                                 krb5plugin_preauth_keys, &key_data) != 0) {
+                                 krb5_kdcpreauth_keys, &key_data) != 0) {
 #ifdef DEBUG
         fprintf(stderr, "Error retrieving client keys.\n");
 #endif
@@ -449,7 +450,7 @@ server_verify(krb5_context kcontext,
      * will probably work if it's us on both ends, though. */
     req_body = NULL;
     if ((*server_get_entry_data)(kcontext, request, client,
-                                 krb5plugin_preauth_request_body,
+                                 krb5_kdcpreauth_request_body,
                                  &req_body) != 0) {
         krb5_free_keyblock(kcontext, key);
         stats->failures++;
@@ -572,7 +573,7 @@ server_verify(krb5_context kcontext,
                 svr_req_ctx);
 #endif
     }
-    *pa_request_context = svr_req_ctx;
+    *modreq_out = (krb5_kdcpreauth_modreq)svr_req_ctx;
 
     /* Note that preauthentication succeeded. */
     enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
@@ -591,9 +592,9 @@ server_return(krb5_context kcontext,
               struct _krb5_key_data *client_key,
               krb5_keyblock *encrypting_key,
               krb5_pa_data **send_pa,
-              preauth_get_entry_data_proc server_get_entry_data,
-              void *pa_module_context,
-              void **pa_request_context)
+              krb5_kdcpreauth_get_data_fn server_get_entry_data,
+              krb5_kdcpreauth_moddata moddata,
+              krb5_kdcpreauth_modreq modreq)
 {
     /* We don't need to send data back on the return trip. */
     *send_pa = NULL;
@@ -601,34 +602,32 @@ server_return(krb5_context kcontext,
 }
 
 /* Test server request context freeing */
-static krb5_error_code
-server_free_reqctx(krb5_context kcontext,
-                   void *pa_module_context,
-                   void **pa_request_context)
+static void
+server_free_modreq(krb5_context kcontext,
+                   krb5_kdcpreauth_moddata moddata,
+                   krb5_kdcpreauth_modreq modreq)
 {
     test_svr_req_ctx *svr_req_ctx;
 #ifdef DEBUG
-    fprintf(stderr, "server_free_reqctx: entered!\n");
+    fprintf(stderr, "server_free_modreq: entered!\n");
 #endif
-    if (pa_request_context == NULL)
-        return 0;
+    if (modreq == NULL)
+        return;
 
-    svr_req_ctx = *pa_request_context;
+    svr_req_ctx = (test_svr_req_ctx *)modreq;
     if (svr_req_ctx == NULL)
-        return 0;
+        return;
 
     if (svr_req_ctx->value1 != 111111 || svr_req_ctx->value2 != 222222) {
-        fprintf(stderr, "server_free_reqctx: got invalid req context "
+        fprintf(stderr, "server_free_modreq: got invalid req context "
                 "at %p with values %d and %d\n",
                 svr_req_ctx, svr_req_ctx->value1, svr_req_ctx->value2);
-        return EINVAL;
+        return;
     }
 #ifdef DEBUG
-    fprintf(stderr, "server_free_reqctx: freeing context at %p\n", svr_req_ctx);
+    fprintf(stderr, "server_free_modreq: freeing context at %p\n", svr_req_ctx);
 #endif
     free(svr_req_ctx);
-    *pa_request_context = NULL;
-    return 0;
 }
 
 static int
@@ -644,28 +643,47 @@ static krb5_preauthtype supported_server_pa_types[] = {
     KRB5_PADATA_CKSUM_BODY_REQ, 0,
 };
 
-struct krb5plugin_preauth_client_ftable_v1 preauthentication_client_1 = {
-    "cksum_body",                           /* name */
-    &supported_client_pa_types[0],          /* pa_type_list */
-    NULL,                                   /* enctype_list */
-    NULL,                                   /* plugin init function */
-    NULL,                                   /* plugin fini function */
-    client_get_flags,                       /* get flags function */
-    NULL,                                   /* request init function */
-    NULL,                                   /* request fini function */
-    client_process,                         /* process function */
-    NULL,                                   /* try_again function */
-    client_gic_opt                          /* get init creds opt function */
-};
+krb5_error_code
+clpreauth_cksum_body_initvt(krb5_context context, int maj_ver,
+                            int min_ver, krb5_plugin_vtable vtable);
+krb5_error_code
+kdcpreauth_cksum_body_initvt(krb5_context context, int maj_ver,
+                             int min_ver, krb5_plugin_vtable vtable);
 
-struct krb5plugin_preauth_server_ftable_v1 preauthentication_server_1 = {
-    "cksum_body",
-    &supported_server_pa_types[0],
-    server_init,
-    server_fini,
-    server_get_flags,
-    server_get_edata,
-    server_verify,
-    server_return,
-    server_free_reqctx
-};
+krb5_error_code
+clpreauth_cksum_body_initvt(krb5_context context, int maj_ver,
+                            int min_ver, krb5_plugin_vtable vtable)
+{
+    krb5_clpreauth_vtable vt;
+
+    if (maj_ver != 1)
+        return KRB5_PLUGIN_VER_NOTSUPP;
+    vt = (krb5_clpreauth_vtable)vtable;
+    vt->name = "cksum_body";
+    vt->pa_type_list = supported_client_pa_types;
+    vt->flags = client_get_flags;
+    vt->process = client_process;
+    vt->gic_opts = client_gic_opt;
+    return 0;
+}
+
+krb5_error_code
+kdcpreauth_cksum_body_initvt(krb5_context context, int maj_ver,
+                             int min_ver, krb5_plugin_vtable vtable)
+{
+    krb5_kdcpreauth_vtable vt;
+
+    if (maj_ver != -1)
+        return KRB5_PLUGIN_VER_NOTSUPP;
+    vt = (krb5_kdcpreauth_vtable)vtable;
+    vt->name = "cksum_body";
+    vt->pa_type_list = supported_server_pa_types;
+    vt->init = server_init;
+    vt->fini = server_fini;
+    vt->flags = server_get_flags;
+    vt->edata = server_get_edata;
+    vt->verify = server_verify;
+    vt->return_padata = server_return;
+    vt->free_modreq = server_free_modreq;
+    return 0;
+}

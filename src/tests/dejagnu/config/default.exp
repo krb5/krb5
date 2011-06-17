@@ -918,7 +918,7 @@ proc setup_krb5_conf { {type client} } {
     global mode
     global portbase
     global KRB5_DB_MODULE_DIR
-    global KRB5_PA_MODULE_DIR
+    global MODULE_DIR
     global srcdir
 
     set pkinit_certs [findfile "[pwd]/$srcdir/pkinit-certs" "[pwd]/$srcdir/pkinit-certs" "$srcdir/pkinit-certs"]
@@ -950,7 +950,7 @@ proc setup_krb5_conf { {type client} } {
 	if { $mode == "tcp" } {
 	    puts $conffile "	udp_preference_limit = 1"
 	}
-	puts $conffile "	preauth_module_dir = $tmppwd/../../../util/fakedest$KRB5_PA_MODULE_DIR"
+	puts $conffile "	plugin_base_dir = $tmppwd/../../../util/fakedest$MODULE_DIR"
 	puts $conffile ""
 	puts $conffile "\[realms\]"
 	puts $conffile "	$REALMNAME = \{"

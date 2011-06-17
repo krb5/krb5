@@ -809,48 +809,11 @@ error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
  * expanded in the future as new types of requests are defined which
  * may require other things to be passed through. */
 struct krb5int_fast_request_state;
-typedef struct _krb5_preauth_client_rock {
-    krb5_magic      magic;
+struct krb5_clpreauth_rock_st {
+    krb5_magic magic;
     krb5_enctype *etype;
     struct krb5int_fast_request_state *fast_state;
-} krb5_preauth_client_rock;
-
-/* This structure lets us keep track of all of the modules which are loaded,
- * turning the list of modules and their lists of implemented preauth types
- * into a single list which we can walk easily. */
-typedef struct _krb5_preauth_context {
-    int n_modules;
-    struct _krb5_preauth_context_module {
-        /* Which of the possibly more than one preauth types which the
-         * module supports we're using at this point in the list. */
-        krb5_preauthtype pa_type;
-        /* Encryption types which the client claims to support -- we
-         * copy them directly into the krb5_kdc_req structure during
-         * krb5_preauth_prepare_request(). */
-        krb5_enctype *enctypes;
-        /* The plugin's per-plugin context and a function to clear it. */
-        void *plugin_context;
-        preauth_client_plugin_fini_proc client_fini;
-        /* The module's table, and some of its members, copied here for
-         * convenience when we populated the list. */
-        struct krb5plugin_preauth_client_ftable_v1 *ftable;
-        const char *name;
-        int flags, use_count;
-        preauth_client_process_proc client_process;
-        preauth_client_tryagain_proc client_tryagain;
-        preauth_client_supply_gic_opts_proc client_supply_gic_opts;
-        preauth_client_request_init_proc client_req_init;
-        preauth_client_request_fini_proc client_req_fini;
-        /* The per-request context which the client_req_init() function
-         * might allocate, which we'll need to clean up later by
-         * calling the client_req_fini() function. */
-        void *request_context;
-        /* A pointer to the request_context pointer.  All modules within
-         * a plugin will point at the request_context of the first
-         * module within the plugin. */
-        void **request_context_pp;
-    } *modules;
-} krb5_preauth_context;
+};
 
 typedef struct _krb5_pa_enc_ts {
     krb5_timestamp      patimestamp;
@@ -1121,7 +1084,7 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
                 krb5_data *s2kparams, krb5_enctype *etype,
                 krb5_keyblock *as_key, krb5_prompter_fct prompter,
                 void *prompter_data, krb5_gic_get_as_key_fct gak_fct,
-                void *gak_data, krb5_preauth_client_rock *get_data_rock,
+                void *gak_data, krb5_clpreauth_rock preauth_rock,
                 krb5_gic_opt_ext *opte);
 
 krb5_error_code KRB5_CALLCONV
@@ -1134,7 +1097,7 @@ krb5_do_preauth_tryagain(krb5_context context, krb5_kdc_req *request,
                          krb5_enctype *etype, krb5_keyblock *as_key,
                          krb5_prompter_fct prompter, void *prompter_data,
                          krb5_gic_get_as_key_fct gak_fct, void *gak_data,
-                         krb5_preauth_client_rock *get_data_rock,
+                         krb5_clpreauth_rock preauth_rock,
                          krb5_gic_opt_ext *opte);
 
 void KRB5_CALLCONV krb5_init_preauth_context(krb5_context);
@@ -1411,9 +1374,11 @@ struct plugin_interface {
 
 /* A list of plugin interface IDs.  Make sure to increment
  * PLUGIN_NUM_INTERFACES when a new interface is added. */
-#define PLUGIN_INTERFACE_PWQUAL 0
-#define PLUGIN_INTERFACE_KADM5_HOOK 1
-#define PLUGIN_NUM_INTERFACES   2
+#define PLUGIN_INTERFACE_PWQUAL      0
+#define PLUGIN_INTERFACE_KADM5_HOOK  1
+#define PLUGIN_INTERFACE_CLPREAUTH   2
+#define PLUGIN_INTERFACE_KDCPREAUTH  3
+#define PLUGIN_NUM_INTERFACES        4
 
 /* Retrieve the plugin module of type interface_id and name modname,
  * storing the result into module. */
@@ -1452,6 +1417,7 @@ k5_plugin_free_context(krb5_context context);
 struct _kdb5_dal_handle;        /* private, in kdb5.h */
 typedef struct _kdb5_dal_handle kdb5_dal_handle;
 struct _kdb_log_context;
+typedef struct krb5_preauth_context_st krb5_preauth_context;
 struct _krb5_context {
     krb5_magic      magic;
     krb5_enctype    *in_tkt_etypes;
@@ -1490,7 +1456,6 @@ struct _krb5_context {
     void (**locate_fptrs)(void);
 
     /* preauth module stuff */
-    struct plugin_dir_handle preauth_plugins;
     krb5_preauth_context *preauth_context;
 
     /* error detail info */

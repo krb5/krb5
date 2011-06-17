@@ -114,6 +114,7 @@ k5_plugin_free_modules
 k5_plugin_load
 k5_plugin_load_all
 k5_plugin_register
+k5_plugin_register_dyn
 krb524_convert_creds_kdc
 krb524_init_ets
 krb5_425_conv_principal

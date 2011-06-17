@@ -705,7 +705,7 @@ restart_init_creds_loop(krb5_context context, krb5_init_creds_context ctx,
     code = krb5int_fast_make_state(context, &ctx->fast_state);
     if (code != 0)
         goto cleanup;
-    ctx->get_data_rock.fast_state = ctx->fast_state;
+    ctx->preauth_rock.fast_state = ctx->fast_state;
     krb5_preauth_request_context_init(context);
     if (ctx->encoded_request_body) {
         krb5_free_data(context, ctx->encoded_request_body);
@@ -837,8 +837,8 @@ krb5_init_creds_init(krb5_context context,
 
     opte = ctx->opte;
 
-    ctx->get_data_rock.magic = CLIENT_ROCK_MAGIC;
-    ctx->get_data_rock.etype = &ctx->etype;
+    ctx->preauth_rock.magic = CLIENT_ROCK_MAGIC;
+    ctx->preauth_rock.etype = &ctx->etype;
 
     /* Initialise request parameters as per krb5_get_init_creds() */
     ctx->request->kdc_options = context->kdc_default_options;
@@ -1116,7 +1116,7 @@ init_creds_step_request(krb5_context context,
                                ctx->prompter_data,
                                ctx->gak_fct,
                                ctx->gak_data,
-                               &ctx->get_data_rock,
+                               &ctx->preauth_rock,
                                ctx->opte);
         if (code != 0)
             goto cleanup;
@@ -1141,7 +1141,7 @@ init_creds_step_request(krb5_context context,
                                             ctx->prompter_data,
                                             ctx->gak_fct,
                                             ctx->gak_data,
-                                            &ctx->get_data_rock,
+                                            &ctx->preauth_rock,
                                             ctx->opte);
         } else {
             /* No preauth supplied, so can't query the plugins. */
@@ -1373,7 +1373,7 @@ init_creds_step_reply(krb5_context context,
                            ctx->prompter_data,
                            ctx->gak_fct,
                            ctx->gak_data,
-                           &ctx->get_data_rock,
+                           &ctx->preauth_rock,
                            ctx->opte);
     if (code != 0)
         goto cleanup;

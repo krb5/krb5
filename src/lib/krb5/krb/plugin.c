@@ -28,7 +28,9 @@
 
 const char *interface_names[PLUGIN_NUM_INTERFACES] = {
     "pwqual",
-    "kadm5_hook"
+    "kadm5_hook",
+    "clpreauth",
+    "kdcpreauth"
 };
 
 /* Return the context's interface structure for id, or NULL if invalid. */

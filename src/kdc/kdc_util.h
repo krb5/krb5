@@ -170,9 +170,9 @@ get_preauth_hint_list (krb5_kdc_req * request,
                        krb5_db_entry *client,
                        krb5_db_entry *server,
                        krb5_data *e_data);
-krb5_error_code
+void
 load_preauth_plugins(krb5_context context);
-krb5_error_code
+void
 unload_preauth_plugins(krb5_context context);
 
 krb5_error_code
@@ -189,8 +189,8 @@ return_padata (krb5_context context, krb5_db_entry *client,
                krb5_key_data *client_key, krb5_keyblock *encrypting_key,
                void **padata_context);
 
-krb5_error_code
-free_padata_context (krb5_context context, void **padata_context);
+void
+free_padata_context(krb5_context context, void *padata_context);
 
 krb5_pa_data *
 find_pa_data (krb5_pa_data **padata, krb5_preauthtype pa_type);

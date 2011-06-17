@@ -915,7 +915,7 @@ _default_krb5_conf = {
         'libdefaults' : {
             'default_realm' : '$realm',
             'dns_lookup_kdc' : 'false',
-            'preauth_module_dir' : '$plugins/preauth'
+            'plugin_base_dir' : '$plugins'
         },
         'realms' : {
             '$realm' : {
