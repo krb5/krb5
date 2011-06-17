@@ -256,6 +256,7 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_NO_HOST_REFERRAL            "no_host_referral"
 #define KRB5_CONF_PERMITTED_ENCTYPES          "permitted_enctypes"
 #define KRB5_CONF_PLUGINS                     "plugins"
+#define KRB5_CONF_PLUGIN_BASE_DIR             "plugin_base_dir"
 #define KRB5_CONF_PREAUTH_MODULE_DIR          "preauth_module_dir"
 #define KRB5_CONF_PREFERRED_PREAUTH_TYPES     "preferred_preauth_types"
 #define KRB5_CONF_PROXIABLE                   "proxiable"
@@ -1435,6 +1436,15 @@ krb5_error_code
 k5_plugin_register(krb5_context context, int interface_id, const char *modname,
                    krb5_plugin_initvt_fn module);
 
+/*
+ * Register a plugin module which is part of the krb5 tree but is built as a
+ * dynamic plugin.  Look for the module in modsubdir relative to the
+ * context->base_plugin_dir.
+ */
+krb5_error_code
+k5_plugin_register_dyn(krb5_context context, int interface_id,
+                       const char *modname, const char *modsubdir);
+
 /* Destroy the module state within context; used by krb5_free_context. */
 void
 k5_plugin_free_context(krb5_context context);
@@ -1496,6 +1506,7 @@ struct _krb5_context {
     void *trace_callback_data;
 
     struct plugin_interface plugins[PLUGIN_NUM_INTERFACES];
+    char *plugin_base_dir;
 };
 
 /* could be used in a table to find an etype and initialize a block */

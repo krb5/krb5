@@ -284,6 +284,11 @@ true.  Setting this flag to false is more secure, but may force
 users to exclusively use fully qualified domain names when
 authenticating to services.
 
+.IP plugin_base_dir
+If set, determines the base directory where krb5 plugins are located.
+The default value is the "krb5/plugins" subdirectory of the krb5
+library directory.
+
 .SH APPDEFAULTS SECTION
 
 Each tag in the [appdefaults] section names a Kerberos V5 application
@@ -732,8 +737,7 @@ This tag may have multiple values.  Each value is a string of the form
 "modulename:pathname", which causes the shared object located at
 pathname to be registered as a dynamic module named modulename for the
 pluggable interface.  If pathname is not an absolute path, it will be
-treated as relative to the "krb5/plugins" subdirectory of the krb5
-library directory.
+treated as relative to the plugin base directory.
 
 .IP enable_only
 This tag may have multiple values.  If there are values for this tag,

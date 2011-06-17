@@ -136,25 +136,26 @@ parse_modstr(krb5_context context, const char *modstr,
  * plugins directory.
  */
 static krb5_error_code
-expand_relative_modpath(const char *modpath, char **full_modpath_out)
+expand_relative_modpath(krb5_context context, const char *modpath,
+                        char **full_modpath_out)
 {
-    char *fullpath;
+    char *path;
 
     *full_modpath_out = NULL;
 
     /* XXX Unix-specific path handling for now. */
     if (*modpath == '/') {
         /* We already have an absolute path. */
-        fullpath = strdup(modpath);
-        if (fullpath == NULL)
+        path = strdup(modpath);
+        if (path == NULL)
             return ENOMEM;
     } else {
         /* Append the relative path to the system plugins directory. */
-        if (asprintf(&fullpath, "%s/%s", LIBDIR "/krb5/plugins", modpath) < 0)
+        if (asprintf(&path, "%s/%s", context->plugin_base_dir, modpath) < 0)
             return ENOMEM;
     }
 
-    *full_modpath_out = fullpath;
+    *full_modpath_out = path;
     return 0;
 }
 
@@ -195,27 +196,14 @@ filter_builtins(krb5_context context, struct plugin_interface *interface,
     }
 }
 
-/* Register the plugin module given by the profile string mod. */
 static krb5_error_code
 register_dyn_module(krb5_context context, struct plugin_interface *interface,
-                    const char *iname, const char *modstr, char **enable,
-                    char **disable)
+                    const char *iname, const char *modname, const char *path)
 {
     krb5_error_code ret;
-    char *modname = NULL, *modpath = NULL, *full_modpath = NULL;
     char *symname = NULL;
     struct plugin_file_handle *handle = NULL;
     void (*initvt_fn)();
-
-    /* Parse out the module name and path, and make sure it is enabled. */
-    ret = parse_modstr(context, modstr, &modname, &modpath);
-    if (ret != 0)
-        goto cleanup;
-    ret = expand_relative_modpath(modpath, &full_modpath);
-    if (ret != 0)
-        goto cleanup;
-    if (!module_enabled(modname, enable, disable))
-        goto cleanup;
 
     /* Construct the initvt symbol name for this interface and module. */
     if (asprintf(&symname, "%s_%s_initvt", iname, modname) < 0) {
@@ -225,7 +213,7 @@ register_dyn_module(krb5_context context, struct plugin_interface *interface,
     }
 
     /* Open the plugin and resolve the initvt symbol. */
-    ret = krb5int_open_plugin(full_modpath, &handle, &context->err);
+    ret = krb5int_open_plugin(path, &handle, &context->err);
     if (ret != 0)
         goto cleanup;
     ret = krb5int_get_plugin_func(handle, symname, &initvt_fn, &context->err);
@@ -240,12 +228,37 @@ register_dyn_module(krb5_context context, struct plugin_interface *interface,
     handle = NULL;              /* Now owned by the module mapping. */
 
 cleanup:
-    free(modname);
-    free(modpath);
-    free(full_modpath);
     free(symname);
     if (handle != NULL)
         krb5int_close_plugin(handle);
+    return ret;
+}
+
+/* Register the plugin module given by the profile string mod, if enabled
+ * according to the values of enable and disable. */
+static krb5_error_code
+register_dyn_mapping(krb5_context context, struct plugin_interface *interface,
+                     const char *iname, const char *modstr, char **enable,
+                     char **disable)
+{
+    krb5_error_code ret;
+    char *modname = NULL, *modpath = NULL, *fullpath = NULL;
+
+    /* Parse out the module name and path, and make sure it is enabled. */
+    ret = parse_modstr(context, modstr, &modname, &modpath);
+    if (ret != 0)
+        goto cleanup;
+    ret = expand_relative_modpath(context, modpath, &fullpath);
+    if (ret != 0)
+        goto cleanup;
+    if (!module_enabled(modname, enable, disable))
+        goto cleanup;
+    ret = register_dyn_module(context, interface, iname, modname, fullpath);
+
+cleanup:
+    free(modname);
+    free(modpath);
+    free(fullpath);
     return ret;
 }
 
@@ -284,8 +297,8 @@ configure_interface(krb5_context context, int id)
 
     /* Create mappings for dynamic modules which aren't filtered out. */
     for (mod = modules; mod && *mod; mod++) {
-        ret = register_dyn_module(context, interface, iname, *mod,
-                                  enable, disable);
+        ret = register_dyn_mapping(context, interface, iname, *mod,
+                                   enable, disable);
         if (ret != 0)
             return ret;
     }
@@ -378,6 +391,27 @@ k5_plugin_register(krb5_context context, int interface_id, const char *modname,
         return EINVAL;
 
     return register_module(context, interface, modname, module, NULL);
+}
+
+krb5_error_code
+k5_plugin_register_dyn(krb5_context context, int interface_id,
+                       const char *modname, const char *modsubdir)
+{
+    krb5_error_code ret;
+    struct plugin_interface *interface = get_interface(context, interface_id);
+    char *path;
+
+    /* Disallow registering plugins after load. */
+    if (interface == NULL || interface->configured)
+        return EINVAL;
+    if (asprintf(&path, "%s/%s/%s%s", context->plugin_base_dir, modsubdir,
+                 modname, PLUGIN_EXT) < 0)
+        return ENOMEM;
+
+    ret = register_dyn_module(context, interface,
+                              interface_names[interface_id], modname, path);
+    free(path);
+    return ret;
 }
 
 void

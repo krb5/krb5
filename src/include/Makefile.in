@@ -65,8 +65,9 @@ PROCESS_REPLACE = -e "s+@KRB5RCTMPDIR+$(KRB5RCTMPDIR)+" \
 		  -e "s+@SBINDIR+$(SBINDIR)+" \
 		  -e "s+@MODULEDIR+$(MODULE_DIR)+" \
 		  -e "s+@GSSMODULEDIR+$(GSS_MODULE_DIR)+" \
-	-e 's+@LOCALSTATEDIR+$(LOCALSTATEDIR)+' \
-	-e 's+@SYSCONFDIR+$(SYSCONFDIR)+' 
+		  -e 's+@LOCALSTATEDIR+$(LOCALSTATEDIR)+' \
+		  -e 's+@SYSCONFDIR+$(SYSCONFDIR)+' \
+		  -e 's+@DYNOBJEXT+$(DYNOBJEXT)+'
 
 OSCONFSRC = $(srcdir)/osconf.hin
 

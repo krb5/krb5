@@ -59,6 +59,9 @@
 #define DEFAULT_LNAME_FILENAME  "@PREFIX/lib/krb5.aname"
 #endif /* _WINDOWS  */
 
+#define DEFAULT_PLUGIN_BASE_DIR "@LIBDIR/krb5/plugins"
+#define PLUGIN_EXT              "@DYNOBJEXT"
+
 #define DEFAULT_KDB_FILE        "@LOCALSTATEDIR/krb5kdc/principal"
 #define DEFAULT_KEYFILE_STUB    "@LOCALSTATEDIR/krb5kdc/.k5."
 #define KRB5_DEFAULT_ADMIN_ACL  "@LOCALSTATEDIR/krb5kdc/krb5_adm.acl"

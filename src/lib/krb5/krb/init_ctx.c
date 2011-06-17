@@ -230,6 +230,13 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
                         &tmp);
     ctx->library_options = tmp ? KRB5_LIBOPT_SYNC_KDCTIME : 0;
 
+    retval = profile_get_string(ctx->profile, KRB5_CONF_LIBDEFAULTS,
+                                KRB5_CONF_PLUGIN_BASE_DIR, 0,
+                                DEFAULT_PLUGIN_BASE_DIR,
+                                &ctx->plugin_base_dir);
+    if (retval)
+        goto cleanup;
+
     /*
      * We use a default file credentials cache of 3.  See
      * lib/krb5/krb/ccache/file/fcc.h for a description of the
