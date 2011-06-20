@@ -166,6 +166,15 @@ typedef struct _krb5_keysalt {
     krb5_data             data;                 /* Length, data */
 } krb5_keysalt;
 
+/*
+ * A principal database entry.  Extensions to this structure currently use the
+ * tl_data list.  The e_data and e_length fields are not used by any calling
+ * code except kdb5_util dump and load, which marshal and unmarshal the array
+ * in the dump record.  KDB modules may use these fields internally as long as
+ * they set e_length appropriately (non-zero if the data should be marshalled
+ * across dump and load, zero if not) and handle null e_data values in
+ * caller-constructed principal entries.
+ */
 typedef struct _krb5_db_entry_new {
     krb5_magic            magic;                /* NOT saved */
     krb5_ui_2             len;
