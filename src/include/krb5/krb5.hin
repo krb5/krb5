@@ -1808,11 +1808,9 @@ typedef struct krb5_replay_data {
 /** Generate the remote network address and the remote port. */
 #define KRB5_AUTH_CONTEXT_GENERATE_REMOTE_FULL_ADDR 0x00000008
 
-/* type of function used as a callback to generate checksum data for
- * mk_req */
-
+/** Type of function used as a callback to generate checksum data for mk_req */
 typedef krb5_error_code
-(KRB5_CALLCONV * krb5_mk_req_checksum_func) (krb5_context, krb5_auth_context , void *,
+(KRB5_CALLCONV * krb5_mk_req_checksum_func)(krb5_context, krb5_auth_context , void *,
                                              krb5_data **);
 
 /*
@@ -2285,7 +2283,7 @@ typedef struct krb5_rc_st *krb5_rcache;
 
 typedef krb5_pointer krb5_kt_cursor;    /* XXX */
 
-/** Key table entry. */
+/** A key table entry. */
 typedef struct krb5_keytab_entry_st {
     krb5_magic magic;
     krb5_principal principal;   /**< Principal of this key */
@@ -4861,7 +4859,7 @@ krb5_auth_con_setflags(krb5_context context, krb5_auth_context auth_context, krb
  * @retval 0 (always)
  */
 krb5_error_code KRB5_CALLCONV
-krb5_auth_con_getflags(krb5_context context, krb5_auth_context auth_
+krb5_auth_con_getflags(krb5_context context, krb5_auth_context auth_context,
                        krb5_int32 *flags);
 
 /**
