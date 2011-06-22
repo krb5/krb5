@@ -392,7 +392,7 @@ typedef void
  * server_pa_type_list.
  */
 typedef int
-(*krb5_kdcpreauth_flags_fn)(krb5_context context, krb5_preauthtype patype);
+(*krb5_kdcpreauth_flags_fn)(krb5_context context, krb5_preauthtype pa_type);
 
 /*
  * Optional: fill in pa_out->length and pa_out->contents with data to send to
@@ -446,7 +446,7 @@ typedef krb5_error_code
                              struct _krb5_key_data *client_keys,
                              krb5_keyblock *encrypting_key,
                              krb5_pa_data **send_pa_out,
-                             krb5_kdcpreauth_get_data_fn,
+                             krb5_kdcpreauth_get_data_fn get_data,
                              krb5_kdcpreauth_moddata moddata,
                              krb5_kdcpreauth_modreq modreq);
 
