@@ -1034,18 +1034,21 @@ should resume fetching incremental updates.  Thus, all the keytab and
 ACL setup previously described for @code{kprop} propagation is still
 needed.
 
-There are several known bugs and restrictions in the current
-implementation:
+There are several restrictions in the current implementation:
+
 @itemize
 @item
-The ``call out to @code{kprop}'' mechanism is a bit fragile; if the
-@code{kprop} propagation fails to connect for some reason, the process
-on the slave may hang waiting for it, and will need to be restarted.
+Changes to password policy objects are not propagated incrementally.
+Changes to which policy applies to a principal are propagated.
 @item
 The master and slave must be able to initiate TCP connections in both
-directions, without an intervening NAT.  They must also be able to
-communicate over IPv4, since MIT's kprop and RPC code does not
-currently support IPv6.
+directions, without an intervening NAT.
+@item
+If the slave has an IPv6 interface address but needs to accept
+connections over IPv4, the operating system needs ``dual stack'' support
+(i.e. the ability to accept IPv6 and IPv4 connections on a single IPv6
+listener socket).  At this time, all modern Unix-like operating systems
+have dual stack support except OpenBSD.
 @end itemize
 
 @menu
