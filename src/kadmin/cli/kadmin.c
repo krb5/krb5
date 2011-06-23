@@ -1428,7 +1428,7 @@ kadmin_getprinc(int argc, char *argv[])
     kadm5_principal_ent_rec dprinc;
     krb5_principal princ = NULL;
     krb5_error_code retval;
-    char *canon = NULL, *modcanon = NULL;
+    char *canon = NULL, *princstr = NULL, *modprincstr = NULL;
     int i;
     size_t j;
 
@@ -1455,18 +1455,18 @@ kadmin_getprinc(int argc, char *argv[])
         com_err("get_principal", retval, _("while retrieving \"%s\"."), canon);
         goto cleanup;
     }
-    retval = krb5_unparse_name(context, dprinc.principal, &canon);
+    retval = krb5_unparse_name(context, dprinc.principal, &princstr);
     if (retval) {
-        com_err("get_principal", retval, _("while canonicalizing principal"));
+        com_err("get_principal", retval, _("while unparsing principal"));
         goto cleanup;
     }
-    retval = krb5_unparse_name(context, dprinc.mod_name, &modcanon);
+    retval = krb5_unparse_name(context, dprinc.mod_name, &modprincstr);
     if (retval) {
-        com_err("get_principal", retval, _("while unparsing modname"));
+        com_err("get_principal", retval, _("while unparsing principal"));
         goto cleanup;
     }
     if (argc == 2) {
-        printf(_("Principal: %s\n"), canon);
+        printf(_("Principal: %s\n"), princstr);
         printf(_("Expiration date: %s\n"), dprinc.princ_expire_time ?
                strdate(dprinc.princ_expire_time) : _("[never]"));
         printf(_("Last password change: %s\n"), dprinc.last_pwd_change ?
@@ -1478,7 +1478,7 @@ kadmin_getprinc(int argc, char *argv[])
         printf(_("Maximum renewable life: %s\n"),
                strdur(dprinc.max_renewable_life));
         printf(_("Last modified: %s (%s)\n"), strdate(dprinc.mod_date),
-               modcanon);
+               modprincstr);
         printf(_("Last successful authentication: %s\n"),
                dprinc.last_success ? strdate(dprinc.last_success) :
                _("[never]"));
@@ -1518,8 +1518,8 @@ kadmin_getprinc(int argc, char *argv[])
     } else {
         printf("\"%s\"\t%d\t%d\t%d\t%d\t\"%s\"\t%d\t%d\t%d\t%d\t\"%s\""
                "\t%d\t%d\t%d\t%d\t%d",
-               canon, dprinc.princ_expire_time, dprinc.last_pwd_change,
-               dprinc.pw_expiration, dprinc.max_life, modcanon,
+               princstr, dprinc.princ_expire_time, dprinc.last_pwd_change,
+               dprinc.pw_expiration, dprinc.max_life, modprincstr,
                dprinc.mod_date, dprinc.attributes, dprinc.kvno,
                dprinc.mkvno, dprinc.policy ? dprinc.policy : "[none]",
                dprinc.max_renewable_life, dprinc.last_success,
@@ -1536,8 +1536,9 @@ kadmin_getprinc(int argc, char *argv[])
 cleanup:
     krb5_free_principal(context, princ);
     kadm5_free_principal_ent(handle, &dprinc);
-    free(modcanon);
     free(canon);
+    free(princstr);
+    free(modprincstr);
 }
 
 void
