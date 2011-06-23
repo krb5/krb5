@@ -1,0 +1,62 @@
+.. highlightlang:: c
+
+.. $composite.struct_reference($composite.name):
+
+
+
+#if $composite.short_description is not None and len($composite.short_description)
+	#set $title = $composite.name + ' - ' + $composite.short_description
+#else
+	#set $title = $composite.name
+#end if
+$title
+#echo ''.join(['=']*len($title)) #
+
+
+
+:polyvox:`Doxygen reference to $composite.name  <$composite.name>`
+
+..
+.. c:type:: $composite.name
+..
+
+$composite.long_description
+
+
+#if $composite.Id is not None and $composite.name is not 'krb5_trace_callback'
+
+
+#if len($composite.attributes)
+
+Members
+---------
+
+#else 
+
+#if $composite.type is not None
+typedef :c:type:`$composite.type` $composite.name
+#end if
+
+#end if
+
+#for $attr in $composite.attributes:    
+#if $attr.name is not None
+.. c:member:: $attr.type	$composite.name.$attr.name 
+
+                                             $attr.short_description
+#if $attr.long_description is not None
+                                             $attr.long_description		     
+#end if
+                               
+#end if
+#end for
+#end if
+
+
+Feedback
+----------
+
+#set $msg_subject = 'Documentation___' + $composite.name 
+
+Please, provide your feedback on this document at krb5-bugs@mit.edu?subject=$msg_subject
+ 
