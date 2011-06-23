@@ -401,8 +401,6 @@ krb5_cc_move(krb5_context context, krb5_ccache src, krb5_ccache dst)
     krb5_cc_unlock(context, src);
     if (!ret) {
         ret = krb5_cc_destroy(context, src);
-    } else {
-        ret = krb5_cc_destroy(context, dst);
     }
     krb5_cccol_unlock(context);
     if (princ) {
