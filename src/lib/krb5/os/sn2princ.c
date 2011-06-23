@@ -105,19 +105,12 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
                hostnames associated.  */
 
             memset(&hints, 0, sizeof(hints));
-            hints.ai_family = AF_INET;
-            hints.ai_flags = AI_CANONNAME;
-        try_getaddrinfo_again:
+            hints.ai_flags = AI_CANONNAME | AI_ADDRCONFIG;
             err = getaddrinfo(hostname, 0, &hints, &ai);
             if (err) {
 #ifdef DEBUG_REFERRALS
                 printf("sname_to_princ: probably punting due to bad hostname of %s\n",hostname);
 #endif
-                if (hints.ai_family == AF_INET) {
-                    /* Just in case it's an IPv6-only name.  */
-                    hints.ai_family = 0;
-                    goto try_getaddrinfo_again;
-                }
                 return KRB5_ERR_BAD_HOSTNAME;
             }
             remote_host = strdup(ai->ai_canonname ? ai->ai_canonname : hostname);
