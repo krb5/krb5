@@ -245,11 +245,7 @@ get_wildcard_addr(struct addrinfo **res)
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-#ifdef AI_ADDRCONFIG
-    /* Try to avoid IPv6 if the host has no IPv6 interface addresses. */
-    hints.ai_flags |= AI_ADDRCONFIG;
-#endif
+    hints.ai_flags = AI_PASSIVE | AI_ADDRCONFIG;
 #ifdef KRB5_USE_INET6
     hints.ai_family = AF_INET6;
     error = getaddrinfo(NULL, port, &hints, res);
