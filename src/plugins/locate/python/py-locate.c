@@ -302,6 +302,7 @@ lookup(void *blob, enum locate_service_type svc, const char *realm,
             return -1;
         }
         aihints.ai_socktype = thissocktype;
+        aihints.ai_flags = AI_ADDRCONFIG;
         x = getaddrinfo (hoststr, portstr, &aihints, &airesult);
         if (x != 0)
             continue;

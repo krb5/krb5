@@ -41,7 +41,7 @@ krb5_os_hostaddr(krb5_context context, const char *name,
         return KRB5_ERR_BAD_HOSTNAME;
 
     memset (&hints, 0, sizeof (hints));
-    hints.ai_flags = AI_NUMERICHOST;
+    hints.ai_flags = AI_NUMERICHOST | AI_ADDRCONFIG;
     /* We don't care what kind at this point, really, but without
        this, we can get back multiple sockaddrs per address, for
        SOCK_DGRAM, SOCK_STREAM, and SOCK_RAW.  I haven't checked if

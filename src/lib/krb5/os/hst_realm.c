@@ -107,7 +107,7 @@ get_fq_hostname(char *buf, size_t bufsize, const char *name)
     int err;
 
     memset (&hints, 0, sizeof (hints));
-    hints.ai_flags = AI_CANONNAME;
+    hints.ai_flags = AI_CANONNAME | AI_ADDRCONFIG;
     err = getaddrinfo (name, 0, &hints, &ai);
     if (err)
         return krb5int_translate_gai_error (err);

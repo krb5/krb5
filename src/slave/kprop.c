@@ -322,6 +322,7 @@ open_connection(krb5_context context, char *host, int *fd)
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = PF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_ADDRCONFIG;
     error = getaddrinfo(host, port, &hints, &answers);
     if (error != 0) {
         com_err(progname, 0, "%s: %s", host, gai_strerror(error));

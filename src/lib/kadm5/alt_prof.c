@@ -897,7 +897,7 @@ kadm5_get_admin_service_name(krb5_context ctx,
     }
 
     memset(&hint, 0, sizeof(hint));
-    hint.ai_flags = AI_CANONNAME;
+    hint.ai_flags = AI_CANONNAME | AI_ADDRCONFIG;
     err = getaddrinfo(params_out.admin_server, NULL, &hint, &ai);
     if (err != 0) {
         ret = KADM5_CANT_RESOLVE;

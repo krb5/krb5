@@ -125,6 +125,7 @@ main(int argc, char *argv[])
 
     memset(&aihints, 0, sizeof(aihints));
     aihints.ai_socktype = SOCK_STREAM;
+    aihints.ai_flags = AI_ADDRCONFIG;
     aierr = getaddrinfo(argv[1], portstr, &aihints, &ap);
     if (aierr) {
         fprintf(stderr, "%s: error looking up host '%s' port '%s'/tcp: %s\n",

@@ -563,8 +563,9 @@ connect_to_server(const char *hostname, int port, int *fd)
     (void) snprintf(portbuf, sizeof(portbuf), "%d", port);
     memset(&hint, 0, sizeof(hint));
     hint.ai_socktype = SOCK_STREAM;
+    hint.ai_flags = AI_ADDRCONFIG;
 #ifdef AI_NUMERICSERV
-    hint.ai_flags = AI_NUMERICSERV;
+    hint.ai_flags |= AI_NUMERICSERV;
 #endif
     err = getaddrinfo(hostname, portbuf, &hint, &addrs);
     if (err != 0)

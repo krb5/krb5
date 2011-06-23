@@ -184,7 +184,7 @@ static int add_admin_princs(void *handle, krb5_context context, char *realm)
         goto clean_and_exit;
     }
     memset(&ai_hints, 0, sizeof(ai_hints));
-    ai_hints.ai_flags = AI_CANONNAME;
+    ai_hints.ai_flags = AI_CANONNAME | AI_ADDRCONFIG;
     gai_error = getaddrinfo(localname, (char *)NULL, &ai_hints, &ai);
     if (gai_error) {
         ret = EINVAL;

@@ -725,8 +725,9 @@ resolve_server(krb5_context context, const struct serverlist *servers,
     memset(&hint, 0, sizeof(hint));
     hint.ai_family = entry->family;
     hint.ai_socktype = (entry->socktype != 0) ? entry->socktype : socktype1;
+    hint.ai_flags = AI_ADDRCONFIG;
 #ifdef AI_NUMERICSERV
-    hint.ai_flags = AI_NUMERICSERV;
+    hint.ai_flags |= AI_NUMERICSERV;
 #endif
     result = snprintf(portbuf, sizeof(portbuf), "%d", ntohs(entry->port));
     if (SNPRINTF_OVERFLOW(result, sizeof(portbuf)))
