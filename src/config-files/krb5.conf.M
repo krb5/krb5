@@ -780,6 +780,18 @@ interface can be used to write a plugin to synchronize MIT Kerberos
 with another database such as Active Directory. No plugins are built
 in for this interface.
 
+.SS clpreauth interface
+
+The clpreauth interface allows plugin modules to provide client
+preauthentication mechanisms.  There are no built-in modules for this
+interface.
+
+.SS kdcpreauth interface
+
+The kdcpreauth interface allows plugin modules to provide KDC
+preauthentication mechanisms.  There are no built-in modules for this
+interface.
+
 .SH FILES 
 /etc/krb5.conf
 .SH SEE ALSO
