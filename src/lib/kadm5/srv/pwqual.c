@@ -106,6 +106,7 @@ k5_pwqual_free_handles(krb5_context context, pwqual_handle *handles)
         handle = *hp;
         if (handle->vt.close != NULL)
             handle->vt.close(context, handle->data);
+        free(handle);
     }
     free(handles);
 }
