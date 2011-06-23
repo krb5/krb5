@@ -1663,7 +1663,9 @@ krb5_ldap_policydn_to_name(krb5_context context, char *policy_dn, char **name)
         LDAPDN dn;
         rdn = strndup(policy_dn, len2 - len1 - 1); /* 1 character for ',' */
 
-        if (ldap_str2dn (rdn, &dn, LDAP_DN_FORMAT_LDAPV3 | LDAP_DN_PEDANTIC) != 0) {
+        st = ldap_str2dn(rdn, &dn, LDAP_DN_FORMAT_LDAPV3 | LDAP_DN_PEDANTIC);
+        free(rdn);
+        if (st != 0) {
             st = EINVAL;
             goto cleanup;
         }
@@ -1677,7 +1679,7 @@ krb5_ldap_policydn_to_name(krb5_context context, char *policy_dn, char **name)
                 st = EINVAL;
         }
 
-        ldap_memfree (dn);
+        ldap_dnfree(dn);
     }
 #elif defined HAVE_LDAP_EXPLODE_DN
     {
@@ -1954,18 +1956,14 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
                                  &attr_present)) != 0)
         goto cleanup;
     if (attr_present == TRUE) {
-        krb5_tl_data  kadm_tl_data;
-
         mask |= KDB_PWD_POL_REF_ATTR;
 
         /* Ensure that the policy is inside the realm container */
         if ((st = krb5_ldap_policydn_to_name (context, pwdpolicydn, &polname)) != 0)
             goto cleanup;
 
-        if ((st = krb5_update_tl_kadm_data(polname, &kadm_tl_data)) != 0) {
+        if ((st = krb5_update_tl_kadm_data(context, entry, polname)) != 0)
             goto cleanup;
-        }
-        krb5_dbe_update_tl_data(context, entry, &kadm_tl_data);
     }
 
     /* KRBSECRETKEY */
@@ -2073,7 +2071,10 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
             for (i = 0; ber_tl_data[i] != NULL; i++) {
                 if ((st = berval2tl_data (ber_tl_data[i] , &ptr)) != 0)
                     break;
-                if ((st = krb5_dbe_update_tl_data(context, entry, ptr)) != 0)
+                st = krb5_dbe_update_tl_data(context, entry, ptr);
+                free(ptr->tl_data_contents);
+                free(ptr);
+                if (st != 0)
                     break;
             }
             ldap_value_free_len (ber_tl_data);
@@ -2134,7 +2135,7 @@ populate_krb5_db_entry(krb5_context context, krb5_ldap_context *ldap_context,
         if ((st=krb5_ldap_get_password_policy(context, polname, &pwdpol)) != 0)
             goto cleanup;
         pw_max_life = pwdpol->pw_max_life;
-        free (pwdpol);
+        krb5_ldap_free_password_policy(context, pwdpol);
 
         if (pw_max_life > 0) {
             if ((st=krb5_dbe_lookup_last_pwd_change(context, entry, &last_pw_changed)) != 0)

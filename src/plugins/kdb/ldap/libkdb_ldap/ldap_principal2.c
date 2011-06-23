@@ -1102,18 +1102,18 @@ krb5_ldap_put_principal(krb5_context context, krb5_db_entry *entry,
                     break;
                 j++;
             }
-            if (st != 0) {
-                for (j = 0; ber_tl_data[j] != NULL; j++) {
-                    free (ber_tl_data[j]->bv_val);
-                    free (ber_tl_data[j]);
-                }
-                free (ber_tl_data);
-                goto cleanup;
+            if (st == 0) {
+                ber_tl_data[count] = NULL;
+                st=krb5_add_ber_mem_ldap_mod(&mods, "krbExtraData",
+                                             LDAP_MOD_REPLACE |
+                                             LDAP_MOD_BVALUES, ber_tl_data);
             }
-            ber_tl_data[count] = NULL;
-            if ((st=krb5_add_ber_mem_ldap_mod(&mods, "krbExtraData",
-                                              LDAP_MOD_REPLACE | LDAP_MOD_BVALUES,
-                                              ber_tl_data)) != 0)
+            for (j = 0; ber_tl_data[j] != NULL; j++) {
+                free(ber_tl_data[j]->bv_val);
+                free(ber_tl_data[j]);
+            }
+            free(ber_tl_data);
+            if (st != 0)
                 goto cleanup;
         }
         if ((st=krb5_dbe_lookup_last_admin_unlock(context, entry,

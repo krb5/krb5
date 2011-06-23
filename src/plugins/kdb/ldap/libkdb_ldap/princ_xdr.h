@@ -56,6 +56,7 @@ krb5_error_code
 krb5_lookup_tl_kadm_data(krb5_tl_data *tl_data, osa_princ_ent_rec *princ_entry);
 
 krb5_error_code
-krb5_update_tl_kadm_data(char *, krb5_tl_data *);
+krb5_update_tl_kadm_data(krb5_context context, krb5_db_entry *entry,
+			 char *policy_dn);
 
 #endif

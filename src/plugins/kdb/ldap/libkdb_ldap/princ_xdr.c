@@ -200,33 +200,28 @@ krb5_lookup_tl_kadm_data(krb5_tl_data *tl_data, osa_princ_ent_rec *princ_entry)
 }
 
 krb5_error_code
-krb5_update_tl_kadm_data(policy_dn, new_tl_data)
-    char	        * policy_dn;
-    krb5_tl_data        * new_tl_data;
+krb5_update_tl_kadm_data(krb5_context context, krb5_db_entry *entry,
+			 char *policy_dn)
 {
     XDR xdrs;
-    osa_princ_ent_t princ_entry;
+    osa_princ_ent_rec princ_entry;
+    krb5_tl_data tl_data;
+    krb5_error_code retval;
 
-    if ((princ_entry = (osa_princ_ent_t) malloc(sizeof(osa_princ_ent_rec))) == NULL)
-	return ENOMEM;
-
-    memset(princ_entry, 0, sizeof(osa_princ_ent_rec));
-    princ_entry->admin_history_kvno = 2;
-    princ_entry->aux_attributes = KADM5_POLICY;
-    princ_entry->policy = policy_dn;
+    memset(&princ_entry, 0, sizeof(osa_princ_ent_rec));
+    princ_entry.admin_history_kvno = 2;
+    princ_entry.aux_attributes = KADM5_POLICY;
+    princ_entry.policy = policy_dn;
 
     xdralloc_create(&xdrs, XDR_ENCODE);
-    if (! ldap_xdr_osa_princ_ent_rec(&xdrs, princ_entry)) {
+    if (! ldap_xdr_osa_princ_ent_rec(&xdrs, &princ_entry)) {
 	xdr_destroy(&xdrs);
-	return(KADM5_XDR_FAILURE);
+	return KADM5_XDR_FAILURE;
     }
-    new_tl_data->tl_data_type = KRB5_TL_KADM_DATA;
-    new_tl_data->tl_data_length = xdr_getpos(&xdrs);
-    new_tl_data->tl_data_contents = (krb5_octet *)xdralloc_getdata(&xdrs);
-
-    /*
-      xdr_destroy(&xdrs);
-      ldap_osa_free_princ_ent(princ_entry);
-    */
-    return(0);
+    tl_data.tl_data_type = KRB5_TL_KADM_DATA;
+    tl_data.tl_data_length = xdr_getpos(&xdrs);
+    tl_data.tl_data_contents = (krb5_octet *)xdralloc_getdata(&xdrs);
+    retval = krb5_dbe_update_tl_data(context, entry, &tl_data);
+    xdr_destroy(&xdrs);
+    return retval;
 }
