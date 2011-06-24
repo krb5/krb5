@@ -3,6 +3,7 @@
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved
  */
 
+#include "k5-int.h"
 #include        <kadm5/admin.h>
 #include        <stdlib.h>
 #include        "server_internal.h"
@@ -36,12 +37,8 @@ kadm5_ret_t krb5_free_key_data_contents(context, key)
     int i, idx;
 
     idx = (key->key_data_ver == 1 ? 1 : 2);
-    for (i = 0; i < idx; i++) {
-        if (key->key_data_contents[i]) {
-            memset(key->key_data_contents[i], 0, key->key_data_length[i]);
-            free(key->key_data_contents[i]);
-        }
-    }
+    for (i = 0; i < idx; i++)
+        zapfree(key->key_data_contents[i], key->key_data_length[i]);
     return KADM5_OK;
 }
 
