@@ -1367,7 +1367,7 @@ kadm5_chpass_principal_3(void *server_handle,
     krb5_int32                  now;
     kadm5_policy_ent_rec        pol;
     osa_princ_ent_rec           adb;
-    krb5_db_entry               *kdb, *kdb_save;
+    krb5_db_entry               *kdb;
     int                         ret, ret2, last_pwd, hist_added;
     int                         have_pol = 0;
     kadm5_server_handle_t       handle = server_handle;
@@ -1398,16 +1398,19 @@ kadm5_chpass_principal_3(void *server_handle,
     if ((ret = kdb_get_entry(handle, principal, &kdb, &adb)))
         return(ret);
 
-    /* we are going to need the current keys after the new keys are set */
-    if ((ret = kdb_get_entry(handle, principal, &kdb_save, NULL))) {
-        kdb_free_entry(handle, kdb, &adb);
-        return(ret);
-    }
-
     if ((adb.aux_attributes & KADM5_POLICY)) {
         if ((ret = kadm5_get_policy(handle->lhandle, adb.policy, &pol)))
             goto done;
         have_pol = 1;
+
+        /* Create a password history entry before we change kdb's key_data. */
+        ret = kdb_get_hist_key(handle, &hist_keyblock, &hist_kvno);
+        if (ret)
+            goto done;
+        ret = create_history_entry(handle->context, &hist_keyblock,
+                                   kdb->n_key_data, kdb->key_data, &hist);
+        if (ret)
+            goto done;
     }
 
     if ((ret = passwd_check(handle, password, have_pol ? &pol : NULL,
@@ -1455,17 +1458,6 @@ kadm5_chpass_principal_3(void *server_handle,
             goto done;
         }
 #endif
-
-        ret = kdb_get_hist_key(handle, &hist_keyblock, &hist_kvno);
-        if (ret)
-            goto done;
-
-        ret = create_history_entry(handle->context,
-                                   &hist_keyblock,
-                                   kdb_save->n_key_data,
-                                   kdb_save->key_data, &hist);
-        if (ret)
-            goto done;
 
         ret = check_pw_reuse(handle->context, &hist_keyblock,
                              kdb->n_key_data, kdb->key_data,
@@ -1557,7 +1549,6 @@ done:
     if (!hist_added && hist.key_data)
         free_history_entry(handle->context, &hist);
     kdb_free_entry(handle, kdb, &adb);
-    kdb_free_entry(handle, kdb_save, NULL);
     krb5_free_keyblock_contents(handle->context, &hist_keyblock);
 
     if (have_pol && (ret2 = kadm5_free_policy_ent(handle->lhandle, &pol))
