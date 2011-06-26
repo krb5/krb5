@@ -780,17 +780,17 @@ interface can be used to write a plugin to synchronize MIT Kerberos
 with another database such as Active Directory. No plugins are built
 in for this interface.
 
-.SS clpreauth interface
+.SS clpreauth and kdcpreauth interfaces
 
-The clpreauth interface allows plugin modules to provide client
-preauthentication mechanisms.  There are no built-in modules for this
-interface.
+The clpreauth and kdcpreauth interfaces allows plugin modules to
+provide client and KDC preauthentication mechanisms.  The following
+built-in modules exist for these interfaces:
 
-.SS kdcpreauth interface
+.IP pkinit
+This module implements the PKINIT preauthentication mechanism.
 
-The kdcpreauth interface allows plugin modules to provide KDC
-preauthentication mechanisms.  There are no built-in modules for this
-interface.
+.IP encrypted_challenge
+This module implements the encrypted challenge FAST factor.
 
 .SH FILES 
 /etc/krb5.conf

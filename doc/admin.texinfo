@@ -1128,8 +1128,7 @@ This LDAP specific tags indicates the number of connections to be maintained per
 @menu
 * pwqual interface::            
 * kadm5_hook interface::        
-* clpreauth interface::        
-* kdcpreauth interface::        
+* clpreauth and kdcpreauth interfaces::        
 @end menu
 
 Tags in the [plugins] section can be used to register dynamic plugin
@@ -1185,7 +1184,7 @@ built with Hesiod support)
 Checks against components of the principal name
 @end table
 
-@node kadm5_hook interface, clpreauth interface, pwqual interface, plugins
+@node kadm5_hook interface, clpreauth and kdcpreauth interfaces, pwqual interface, plugins
 @subsubsection kadm5_hook interface
 The kadm5_hook interface provides plugins with information on
 principal creation, modification, password changes and deletion. This
@@ -1193,19 +1192,20 @@ interface can be used to write a plugin to synchronize MIT Kerberos
 with another database such as Active Directory. No plugins are built
 in for this interface.
 
-@node clpreauth interface, kdcpreauth interface, kadm5_hook interface, plugins
+@node clpreauth and kdcpreauth interfaces, , kadm5_hook interface, plugins
 @subsubsection clpreauth interface
 
-The clpreauth interface allows plugin modules to provide client
-preauthentication mechanisms.  There are no built-in modules for this
-interface.
+The clpreauth and kdcpreauth interfaces allows plugin modules to provide
+client and KDC preauthentication mechanisms.  The following built-in
+modules exist:
 
-@node kdcpreauth interface, , clpreauth interface, plugins
-@subsubsection kdcpreauth interface
+@table @b
+@itemx pkinit
+This module implements the PKINIT preauthentication mechanism.
 
-The kdcpreauth interface allows plugin modules to provide KDC
-preauthentication mechanisms.  There are no built-in modules for this
-interface.
+@itemx encrypted_challenge
+This module implements the encrypted challenge FAST factor.
+@end table
 
 @node pkinit client options, Sample krb5.conf File, plugins, krb5.conf
 @subsection pkinit options
