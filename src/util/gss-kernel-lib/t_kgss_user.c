@@ -378,13 +378,23 @@ main(int argc, char **argv)
 
     establish_contexts(argv[1], &initiator, &acceptor);
     start_child(&to_child, &from_child, &child_pid);
+
     send_lucid_context(acceptor, to_child);
+    read_ack(from_child);
     send_wrap_token(initiator, to_child);
+    read_ack(from_child);
     send_mic_token(initiator, to_child);
+    read_ack(from_child);
     send_iov_token(initiator, to_child);
+    read_ack(from_child);
+
     read_wrap_token(initiator, from_child);
+    send_ack(to_child);
     read_mic_token(initiator, from_child);
+    send_ack(to_child);
     read_iov_token(initiator, from_child);
+    send_ack(to_child);
+
     cleanup_context(initiator);
     close(to_child);
     close(from_child);

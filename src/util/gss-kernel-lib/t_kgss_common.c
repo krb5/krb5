@@ -82,3 +82,24 @@ read_data(int fd, void **data_out, size_t *len_out)
     *data_out = data;
     *len_out = len;
 }
+
+/*
+ * Acknowledgements are used to make the parent and child processes operate in
+ * lock-step.  That way, if the child fails, the parent isn't several steps
+ * ahead before it finds out.
+ */
+
+void
+send_ack(int fd)
+{
+    rewrite(fd, "ack", 3);
+}
+
+void
+read_ack(int fd)
+{
+    char buf[3];
+
+    reread(fd, buf, 3);
+    assert(memcmp(buf, "ack", 3) == 0);
+}

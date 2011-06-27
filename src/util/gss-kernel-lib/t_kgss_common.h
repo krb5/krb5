@@ -28,3 +28,5 @@ void rewrite(int fd, const void *data, size_t len);
 void reread(int fd, void *buf, size_t len);
 void send_data(int fd, const void *data, size_t len);
 void read_data(int fd, void **data_out, size_t *len_out);
+void send_ack(int fd);
+void read_ack(int fd);

@@ -273,12 +273,21 @@ main(int argc, char **argv)
     krb5_c_random_os_entropy(NULL, 0, &dummy);
 
     read_lucid_context(&acceptor);
+    send_ack(STDOUT_FILENO);
     read_wrap_token(acceptor);
+    send_ack(STDOUT_FILENO);
     read_mic_token(acceptor);
+    send_ack(STDOUT_FILENO);
     read_iov_token(acceptor);
+    send_ack(STDOUT_FILENO);
+
     send_wrap_token(acceptor);
+    read_ack(STDIN_FILENO);
     send_mic_token(acceptor);
+    read_ack(STDIN_FILENO);
     send_iov_token(acceptor);
+    read_ack(STDIN_FILENO);
+
     cleanup_context(acceptor);
     return 0;
 }
