@@ -384,6 +384,7 @@ main(int argc, char **argv)
     send_iov_token(initiator, to_child);
     read_wrap_token(initiator, from_child);
     read_mic_token(initiator, from_child);
+    read_iov_token(initiator, from_child);
     cleanup_context(initiator);
     close(to_child);
     close(from_child);
