@@ -176,7 +176,7 @@ marshal_lucid_context(const gss_krb5_lucid_context_v1_t *lctx,
     } else
         abort();
     assert(krb5int_buf_data(&buf) != NULL);
-    *data_out = krb5int_buf_data(&buf);
+    *data_out = (unsigned char *)krb5int_buf_data(&buf);
     *len_out = krb5int_buf_len(&buf);
 }
 
@@ -289,8 +289,6 @@ static void
 read_wrap_token(gss_ctx_id_t ctx, int fd)
 {
     OM_uint32 major, minor;
-    unsigned char *data;
-    size_t len;
     gss_buffer_desc wrapped, buf;
 
     read_data(fd, &wrapped.value, &wrapped.length);
@@ -306,8 +304,6 @@ static void
 read_mic_token(gss_ctx_id_t ctx, int fd)
 {
     OM_uint32 major, minor;
-    unsigned char *data;
-    size_t len;
     gss_buffer_desc mic, buf;
 
     read_data(fd, &mic.value, &mic.length);

@@ -30,6 +30,7 @@
  */
 
 #include "gssapiP_krb5.h"
+#include "kernel_gss.h"
 
 /* Normally defined in lib/gssapi/krb5/gssapi_krb5.c. */
 static const gss_OID_desc oid_array[] = {
@@ -44,7 +45,6 @@ static krb5_error_code
 lkey_to_key(const gss_krb5_lucid_key_t *lkey, krb5_key *key_out)
 {
     krb5_keyblock kb;
-    krb5_key key;
 
     kb.enctype = lkey->type;
     kb.length = lkey->length;

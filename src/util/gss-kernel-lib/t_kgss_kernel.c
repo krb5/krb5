@@ -33,6 +33,9 @@
 #include "k5-int.h"
 #include <unistd.h>
 #include "gssapi_krb5.h"
+#include "gssapiP_krb5.h"
+#include "kernel_gss.h"
+#include "t_kgss_common.h"
 
 /* If major represents an error, display an error message and exit. */
 static void
@@ -101,8 +104,6 @@ static void
 read_wrap_token(gss_ctx_id_t ctx)
 {
     OM_uint32 major, minor;
-    unsigned char *data;
-    size_t len;
     gss_buffer_desc wrapped, buf;
 
     read_data(STDIN_FILENO, &wrapped.value, &wrapped.length);
@@ -118,8 +119,6 @@ static void
 read_mic_token(gss_ctx_id_t ctx)
 {
     OM_uint32 major, minor;
-    unsigned char *data;
-    size_t len;
     gss_buffer_desc mic, buf;
 
     read_data(STDIN_FILENO, &mic.value, &mic.length);

@@ -27,6 +27,7 @@
 #include "k5-int.h"
 #include <unistd.h>
 #include <gssapi/gssapi_krb5.h>
+#include "t_kgss_common.h"
 
 /* Write len bytes of data to fd, aborting on failure. */
 void

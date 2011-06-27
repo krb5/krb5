@@ -6,9 +6,10 @@ $(OUTPRE)kernel_gss.$(OBJEXT): autoconf.h com_err.h \
   gssapiP_generic.h gssapiP_krb5.h gssapi_err_generic.h \
   gssapi_err_krb5.h gssapi_generic.h k5-buf.h k5-err.h \
   k5-gmt_mktime.h k5-int-pkinit.h k5-int.h k5-platform.h \
-  k5-plugin.h k5-thread.h k5-trace.h kernel_gss.c krb5.h \
-  krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h krb5/preauth_plugin.h \
-  osconf.h port-sockets.h profile.h socket-utils.h
+  k5-plugin.h k5-thread.h k5-trace.h kernel_gss.c kernel_gss.h \
+  krb5.h krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h \
+  krb5/preauth_plugin.h osconf.h port-sockets.h profile.h \
+  socket-utils.h
 $(OUTPRE)k5seal.$(OBJEXT): autoconf.h com_err.h gssapi/gssapi.h \
   gssapi/gssapi_ext.h gssapi/gssapi_krb5.h gssapiP_generic.h \
   gssapiP_krb5.h gssapi_err_generic.h gssapi_err_krb5.h \
@@ -106,7 +107,8 @@ $(OUTPRE)t_kgss_common.$(OBJEXT): autoconf.h com_err.h \
   k5-buf.h k5-err.h k5-gmt_mktime.h k5-int-pkinit.h k5-int.h \
   k5-platform.h k5-plugin.h k5-thread.h k5-trace.h krb5.h \
   krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h krb5/preauth_plugin.h \
-  osconf.h port-sockets.h profile.h socket-utils.h t_kgss_common.c
+  osconf.h port-sockets.h profile.h socket-utils.h t_kgss_common.c \
+  t_kgss_common.h
 $(OUTPRE)t_kgss_user.$(OBJEXT): autoconf.h com_err.h \
   gssapi/gssapi.h gssapi/gssapi_ext.h gssapi/gssapi_krb5.h \
   k5-buf.h k5-err.h k5-gmt_mktime.h k5-int-pkinit.h k5-int.h \
@@ -116,7 +118,10 @@ $(OUTPRE)t_kgss_user.$(OBJEXT): autoconf.h com_err.h \
   t_kgss_user.c
 $(OUTPRE)t_kgss_kernel.$(OBJEXT): autoconf.h com_err.h \
   gssapi/gssapi.h gssapi/gssapi_ext.h gssapi/gssapi_krb5.h \
-  k5-buf.h k5-err.h k5-gmt_mktime.h k5-int-pkinit.h k5-int.h \
-  k5-platform.h k5-plugin.h k5-thread.h k5-trace.h krb5.h \
+  gssapiP_generic.h gssapiP_krb5.h gssapi_err_generic.h \
+  gssapi_err_krb5.h gssapi_generic.h k5-buf.h k5-err.h \
+  k5-gmt_mktime.h k5-int-pkinit.h k5-int.h k5-platform.h \
+  k5-plugin.h k5-thread.h k5-trace.h kernel_gss.h krb5.h \
   krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h krb5/preauth_plugin.h \
-  osconf.h port-sockets.h profile.h socket-utils.h t_kgss_kernel.c
+  osconf.h port-sockets.h profile.h socket-utils.h t_kgss_common.h \
+  t_kgss_kernel.c
