@@ -1619,7 +1619,7 @@ proc start_tail { fname spawnid_var pid_var which standalone } {
     set spawnid $spawn_id
     set pid [exp_pid]
 
-    set markstr "===MARK $pid [clock format [clock seconds]] ==="
+    set markstr "===MARK $pid [exec date] ==="
     puts $f $markstr
     flush $f
 
