@@ -1149,9 +1149,13 @@ if test "x$enable_static" = xyes; then
 	KDB5_PLUGIN_DEPLIBS='$(TOPLIBD)/libkrb5_db2$(DEPLIBEXT)'
 	KDB5_PLUGIN_LIBS='-lkrb5_db2'
 	if test "x$OPENLDAP_PLUGIN" = xyes; then
-		KDB5_PLUGIN_DEBLIBS=$KDB5_PLUGIN_DEPLIBS' $(TOPLIBD)/libkrb5_ldap$(DEPLIBEXT)'
-		KDB5_PLUGIN_LIBS=$KDB_LUGIN_LIBS' -lkrb5_ldap'
+		KDB5_PLUGIN_DEBLIBS=$KDB5_PLUGIN_DEPLIBS' $(TOPLIBD)/libkrb5_ldap$(DEPLIBEXT) $(TOPLIBD)/libkdb_ldap$(DEPLIBEXT)'
+		KDB5_PLUGIN_LIBS=$KDB5_PLUGIN_LIBS' -lkrb5_kldap -lkdb_ldap $(LDAP_LIBS)'
 	fi
+	# kadm5srv_mit normally comes before kdb on the link line.  Add it
+	# again after the KDB plugins, since they depend on it for XDR stuff.
+	KDB5_PLUGIN_DEPLIBS=$KDB5_PLUGIN_DEPLIBS' $(TOPLIBD)/libkadm5srv_mit$(DEPLIBEXT)'
+	KDB5_PLUGIN_LIBS=$KDB5_PLUGIN_LIBS' -lkadm5srv_mit'
 
 	# avoid duplicate rules generation for AIX and such
 	SHLIBEXT=.so-nobuild

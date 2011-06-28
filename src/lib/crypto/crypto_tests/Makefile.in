@@ -71,40 +71,40 @@ check-unix:: t_nfold t_encrypt t_decrypt t_prf t_prng t_cmac t_hmac \
 	diff t_cf2.output $(srcdir)/t_cf2.expected
 #	$(RUN_SETUP) $(VALGRIND) ./t_pkcs5
 
-t_nfold$(EXEEXT): t_nfold.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_nfold.$(OBJEXT) -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
+t_nfold$(EXEEXT): t_nfold.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_nfold.$(OBJEXT) $(KRB5_BASE_LIBS)
 
-t_encrypt$(EXEEXT): t_encrypt.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_encrypt.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
+t_encrypt$(EXEEXT): t_encrypt.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_encrypt.$(OBJEXT) $(KRB5_BASE_LIBS)
 
-t_decrypt$(EXEEXT): t_decrypt.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_decrypt.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
+t_decrypt$(EXEEXT): t_decrypt.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_decrypt.$(OBJEXT) $(KRB5_BASE_LIBS)
 
-t_prf$(EXEEXT): t_prf.$(OBJEXT) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_prf.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
+t_prf$(EXEEXT): t_prf.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_prf.$(OBJEXT) $(KRB5_BASE_LIBS)
 
-t_prng$(EXEEXT): t_prng.$(OBJEXT) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_prng.$(OBJEXT)  -lk5crypto -lcom_err $(SUPPORT_LIB)
+t_prng$(EXEEXT): t_prng.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_prng.$(OBJEXT) $(KRB5_BASE_LIBS)
 
-t_cmac$(EXEEXT): t_cmac.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_cmac.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
+t_cmac$(EXEEXT): t_cmac.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_cmac.$(OBJEXT) $(KRB5_BASE_LIBS)
 
-t_hmac$(EXEEXT): t_hmac.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_hmac.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
+t_hmac$(EXEEXT): t_hmac.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_hmac.$(OBJEXT) $(KRB5_BASE_LIBS)
 
-#t_pkcs5$(EXEEXT): t_pkcs5.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
-#	$(CC_LINK) -o $@ t_pkcs5.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
+#t_pkcs5$(EXEEXT): t_pkcs5.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
+#	$(CC_LINK) -o $@ t_pkcs5.$(OBJEXT) $(KRB5_BASE_LIBS)
 
-vectors$(EXEEXT): vectors.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ vectors.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
+vectors$(EXEEXT): vectors.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ vectors.$(OBJEXT) $(KRB5_BASE_LIBS)
 
- t_cts$(EXEEXT): t_cts.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
+t_cts$(EXEEXT): t_cts.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_cts.$(OBJEXT) \
-		$(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
+		$(KRB5_BASE_LIBS)
 
-t_short$(EXEEXT): t_short.$(OBJEXT) $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
+t_short$(EXEEXT): t_short.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_short.$(OBJEXT) \
-		$(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
+		$(KRB5_BASE_LIBS)
 
 t_cksum4.o: $(srcdir)/t_cksum.c
 	$(CC) -DMD=4 $(ALL_CFLAGS) -o t_cksum4.o -c $(srcdir)/t_cksum.c
@@ -113,46 +113,46 @@ t_cksum5.o: $(srcdir)/t_cksum.c
 	$(CC) -DMD=5 $(ALL_CFLAGS) -o t_cksum5.o -c $(srcdir)/t_cksum.c
 
 t_cksum4: t_cksum4.o $(CRYTPO_DEPLIB)
-	$(CC_LINK) -o t_cksum4 t_cksum4.o $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(LIBS)
+	$(CC_LINK) -o t_cksum4 t_cksum4.o $(KRB5_BASE_LIBS)
 
 t_cksum5: t_cksum5.o $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o t_cksum5 t_cksum5.o $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(LIBS)
+	$(CC_LINK) -o t_cksum5 t_cksum5.o $(KRB5_BASE_LIBS)
 
 t_cksums: t_cksums.o $(CRYTPO_DEPLIB)
-	$(CC_LINK) -o t_cksums t_cksums.o -lkrb5 $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB) $(LIBS)
+	$(CC_LINK) -o t_cksums t_cksums.o -lkrb5 $(KRB5_BASE_LIBS)
 
-t_crc: t_crc.o $(CRYPTO_DEPLIB) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_crc.o $(K5CRYPTO_LIB) $(SUPPORT_LIB)
+t_crc: t_crc.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_crc.o $(KRB5_BASE_LIBS)
 
-aes-test: aes-test.$(OBJEXT) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o aes-test aes-test.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
+aes-test: aes-test.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o aes-test aes-test.$(OBJEXT) $(KRB5_BASE_LIBS)
 
 camellia-test: camellia-test.$(OBJEXT) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o camellia-test camellia-test.$(OBJEXT) $(K5CRYPTO_LIB) $(COM_ERR_LIB) $(SUPPORT_LIB)
+	$(CC_LINK) -o camellia-test camellia-test.$(OBJEXT) $(KRB5_BASE_LIBS)
 
 t_mddriver4.o: $(srcdir)/t_mddriver.c
 	$(CC) -DMD=4 $(ALL_CFLAGS) -o t_mddriver4.o -c $(srcdir)/t_mddriver.c
 
-t_mddriver4: t_mddriver4.o  $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -DMD4  -o t_mddriver4 t_mddriver4.o -lk5crypto $(SUPPORT_LIB)
+t_mddriver4: t_mddriver4.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -DMD4  -o t_mddriver4 t_mddriver4.o $(KRB5_BASE_LIBS)
 
-t_mddriver: t_mddriver.o  $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o t_mddriver t_mddriver.o -lk5crypto $(SUPPORT_LIB)
+t_mddriver: t_mddriver.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_mddriver t_mddriver.o $(KRB5_BASE_LIBS)
 
-t_kperf: t_kperf.o $(SUPPORT_DEPLIB) $(CRYPTO_DEPLIB)
-	$(CC_LINK) -o t_kperf t_kperf.o  $(SUPPORT_LIB) $(CRYPTO_DEPLIB)
+t_kperf: t_kperf.o $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o t_kperf t_kperf.o $(KRB5_BASE_LIBS)
 
-t_str2key$(EXEEXT): t_str2key.$(OBJEXT) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_str2key.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
+t_str2key$(EXEEXT): t_str2key.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_str2key.$(OBJEXT) $(KRB5_BASE_LIBS)
 
-t_derive$(EXEEXT): t_derive.$(OBJEXT) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_derive.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
+t_derive$(EXEEXT): t_derive.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_derive.$(OBJEXT) $(KRB5_BASE_LIBS)
 
-t_fork$(EXEEXT): t_fork.$(OBJEXT) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_fork.$(OBJEXT) -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
+t_fork$(EXEEXT): t_fork.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_fork.$(OBJEXT) $(KRB5_BASE_LIBS)
 
-t_cf2$(EXEEXT): t_cf2.$(OBJEXT) $(SUPPORT_DEPLIB)
-	$(CC_LINK) -o $@ t_cf2.$(OBJEXT)  -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB)
+t_cf2$(EXEEXT): t_cf2.$(OBJEXT) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_cf2.$(OBJEXT) $(KRB5_BASE_LIBS)
 
 clean::
 	$(RM) t_nfold.o t_nfold t_encrypt t_encrypt.o \

@@ -376,6 +376,8 @@ KDB5_LIB	= -lkdb5 $(KDB5_PLUGIN_LIBS)
 
 DL_LIB		= @DL_LIB@
 
+LDAP_LIBS	= @LDAP_LIBS@
+
 KRB5_LIB			= -lkrb5
 K5CRYPTO_LIB			= -lk5crypto
 COM_ERR_LIB			= -lcom_err

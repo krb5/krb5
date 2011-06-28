@@ -265,7 +265,7 @@ kdb_setup_opt_functions(db_library lib)
 
 extern kdb_vftabl krb5_db2_kdb_function_table;
 #ifdef ENABLE_LDAP
-extern kdb_vftabl krb5_db2_ldap_function_table;
+extern kdb_vftabl krb5_ldap_kdb_function_table;
 #endif
 
 static krb5_error_code

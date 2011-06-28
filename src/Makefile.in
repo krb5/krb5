@@ -8,10 +8,10 @@ mydir=.
 #	plugins/preauth/cksum_body
 #	plugins/authdata/greet
 SUBDIRS=util include lib \
-	@ldap_plugin_dir@ \
 	@sam2_plugin@ \
 	plugins/kadm5_hook/test \
 	plugins/kdb/db2 \
+	@ldap_plugin_dir@ \
 	plugins/preauth/pkinit \
 	plugins/preauth/encrypted_challenge \
 	kdc kadmin slave clients appl tests \

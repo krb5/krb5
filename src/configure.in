@@ -1066,7 +1066,7 @@ if test -n "$OPENLDAP_PLUGIN"; then
   K5_GEN_MAKEFILE(plugins/kdb/ldap)
   K5_GEN_MAKEFILE(plugins/kdb/ldap/ldap_util)
   K5_GEN_MAKEFILE(plugins/kdb/ldap/libkdb_ldap)
-  ldap_plugin_dir=plugins/kdb/ldap
+  ldap_plugin_dir='plugins/kdb/ldap plugins/kdb/ldap/ldap_util'
   LDAP=yes
 else
   LDAP=no
