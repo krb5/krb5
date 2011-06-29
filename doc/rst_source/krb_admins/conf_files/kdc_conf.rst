@@ -1,3 +1,5 @@
+.. _kdc_conf_label:
+
 kdc.conf
 ==============
 

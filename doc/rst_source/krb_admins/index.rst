@@ -17,7 +17,8 @@ Contents:
    :maxdepth: 2
 
    conf_files/index.rst
-   dns.rst   
+   dns.rst
+   realm_config/index.rst
    database/index.rst
    conf_ldap.rst
    appl_servers/index.rst

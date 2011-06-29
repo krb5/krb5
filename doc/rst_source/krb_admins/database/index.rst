@@ -23,6 +23,7 @@ The remote version authenticates to the KADM5 server using the service principal
    ldap_operations/index.rst
    xrealm_authn.rst
    change_tgtkey.rst
+   incr_db_prop.rst
 
 ------------
 
