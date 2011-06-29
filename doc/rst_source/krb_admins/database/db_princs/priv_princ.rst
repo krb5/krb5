@@ -1,7 +1,9 @@
+.. _privileges_label:
+
 Privileges
 ===============
 
-Administrative privileges for the Kerberos database are stored in the file *kadm5.acl*.
+Administrative privileges for the Kerberos database are stored in the file **kadm5.acl**.
 
 The format of the file is::
 
@@ -18,18 +20,20 @@ The permissions are represented by single letters; UPPER-CASE letters represent 
 === =====================================
 a    allows the addition of principals or policies in the database.
 A    disallows the addition of principals or policies in the database.
-d    allows the deletion of principals or policies in the database.
-D    disallows the deletion of principals or policies in the database.
-m    allows the modification of principals or policies in the database.
-M    disallows the modification of principals or policies in the database.
 c    allows the changing of passwords for principals in the database.
 C    disallows the changing of passwords for principals in the database.
+d    allows the deletion of principals or policies in the database.
+D    disallows the deletion of principals or policies in the database.
 i    allows inquiries to the database.
 I    disallows inquiries to the database.
 l    allows the listing of principals or policies in the database.
 L    disallows the listing of principals or policies in the database.
-s    allows the explicit setting of the key for a principal
-S    disallows the explicit setting of the key for a principal
+m    allows the modification of principals or policies in the database.
+M    disallows the modification of principals or policies in the database.
+p    allow the propagation of  the  principal  database.
+P    disallow the propagation of the principal database.
+u    allows the creation of one-component user principals  whose  password  can  be validated with PAM.
+U    negates the u privilege.
 \*   All privileges (admcil).
 x    All privileges (admcil); identical to "\*".
 === =====================================
@@ -39,7 +43,7 @@ x    All privileges (admcil); identical to "\*".
 The restrictions are a string of flags. Allowed restrictions are: 
 
 ======================== ============================
-[+ -]flagname              flag is forced to indicated value. The permissible flags are the same as the + and - flags for the kadmin addprinc and modprinc commands.
+[+\|-]flagname             flag is forced to indicated value. The permissible flags are the same as the + and - flags for the kadmin addprinc and modprinc commands.
 -clearpolicy               policy is forced to clear
 -policy *pol*              policy is forced to be *pol*
 -expire time
