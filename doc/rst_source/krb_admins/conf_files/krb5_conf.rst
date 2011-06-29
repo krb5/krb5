@@ -420,6 +420,7 @@ Plugins
 
     * pwqual interface
     * kadm5_hook interface
+    * clpreauth and kdcpreauth interfaces
 
 Tags in the **[plugins]** section can be used to register dynamic plugin modules and to turn modules on and off. Not every krb5 pluggable interface uses the [plugins] section; the ones that do are documented here.
 
@@ -454,6 +455,16 @@ kadm5_hook interface
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 The kadm5_hook interface provides plugins with information on principal creation, modification, password changes and deletion. This interface can be used to write a plugin to synchronize MIT Kerberos with another database such as Active Directory. No plugins are built in for this interface.
+
+clpreauth and kdcpreauth interfaces
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The clpreauth and kdcpreauth interfaces allow plugin modules to provide client and KDC preauthentication mechanisms.  The following built-in modules exist for these interfaces:
+
+pkinit
+    This module implements the PKINIT preauthentication mechanism.
+encrypted_challenge
+    This module implements the encrypted challenge FAST factor.
 
 PKINIT options
 -----------------
