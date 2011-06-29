@@ -782,7 +782,7 @@ in for this interface.
 
 .SS clpreauth and kdcpreauth interfaces
 
-The clpreauth and kdcpreauth interfaces allows plugin modules to
+The clpreauth and kdcpreauth interfaces allow plugin modules to
 provide client and KDC preauthentication mechanisms.  The following
 built-in modules exist for these interfaces:
 

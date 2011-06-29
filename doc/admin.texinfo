@@ -1195,7 +1195,7 @@ in for this interface.
 @node clpreauth and kdcpreauth interfaces, , kadm5_hook interface, plugins
 @subsubsection clpreauth interface
 
-The clpreauth and kdcpreauth interfaces allows plugin modules to provide
+The clpreauth and kdcpreauth interfaces allow plugin modules to provide
 client and KDC preauthentication mechanisms.  The following built-in
 modules exist:
 
