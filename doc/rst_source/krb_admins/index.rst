@@ -1,17 +1,14 @@
 For administrators
 ============================
 
-::
-
-   A collection of documents how to setup Kerberos in various environments.
-   Simple admin tasks
-   Installation
-   Configuration
-   Trobleshooting (errors etc)
-   Advanced topics
 
 Contents:
 ---------
+
+.. toctree::
+   :maxdepth: 1
+
+   install.rst
 
 .. toctree::
    :maxdepth: 2
@@ -30,7 +27,6 @@ Contents:
 
    troubleshoot.rst
    advanced/index.rst
-   install.rst
    various_envs.rst
 
 

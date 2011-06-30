@@ -1,3 +1,5 @@
+.. _db_prop_label:
+
 Database propagation
 =========================
 

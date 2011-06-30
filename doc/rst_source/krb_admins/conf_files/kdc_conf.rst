@@ -10,11 +10,11 @@ Structure
 
 The kdc.conf file is set up in the same format as the :ref:`krb5_conf_label` file. The kdc.conf file may contain any or all of the following three sections:
 
-================== ================================
-kdcdefaults_        Contains default values for overall behavior of the KDC.
-realms_             Contains subsections keyed by Kerberos realm names. Each subsection describes realm-specific information, including where to find the Kerberos servers for that realm.
-logging_            Contains relations which determine how Kerberos programs are to perform logging. 
-================== ================================
+==================== ================================
+:ref:`kdcdefaults`        Contains default values for overall behavior of the KDC.
+:ref:`kdc_realms`             Contains subsections keyed by Kerberos realm names. Each subsection describes realm-specific information, including where to find the Kerberos servers for that realm.
+:ref:`kdc_logging`            Contains relations which determine how Kerberos programs are to perform logging. 
+==================== ================================
 
 Sections
 -------------
@@ -23,6 +23,7 @@ Sections
 .. _kdcdefaults:
 
 **[kdcdefaults]**
+~~~~~~~~~~~~~~~~~~~~~~~
 
 The following relation is defined in the [kdcdefaults] section:
 
@@ -35,9 +36,10 @@ kdc_tcp_ports
 restrict_anonymous_to_tgt
     This flag determines the default value of restrict_anonymous_to_tgt for realms. The default value is false. 
 
-.. _realms:
+.. _kdc_realms:
 
 **[realms]**
+~~~~~~~~~~~~~~~
 
 Each tag in the [realms] section of the file names a Kerberos realm. The value of the tag is a subsection where the relations in that subsection define KDC parameters for that particular realm.
 
@@ -117,11 +119,12 @@ restrict_anonymous_to_tgt
     A boolean value (true, false). If set to true, the KDC will reject ticket requests from anonymous principals to service principals other than the realm's ticket-granting service. This option allows anonymous PKINIT to be enabled for use as FAST armor tickets without allowing anonymous authentication to services. By default, the value of restrict_anonymous_to_tgt as specified in the [kdcdefaults] section is used. 
 
 
-.. _logging:
+.. _kdc_logging:
 
 **[logging]**
+~~~~~~~~~~~~~~~~~~~~
 
-See *[logging]* section in :ref:`krb5_conf_label` 
+See :ref:`logging` section in :ref:`krb5_conf_label` 
 
 
 PKINIT options
@@ -129,7 +132,7 @@ PKINIT options
 
 .. note:: The following are pkinit-specific options. Note that these values may be specified in [kdcdefaults] as global defaults, or within a realm-specific subsection of [realms]. Also note that a realm-specific value over-rides, does not add to, a generic [kdcdefaults] specification. The search order is:
 
-   1. realm-specific subsection of realms_
+   1. realm-specific subsection of [realms]
 
                 [realms]
                     EXAMPLE.COM = {
@@ -138,7 +141,7 @@ PKINIT options
                     }
                 
 
-   2. generic value in the kdcdefaults_ section.
+   2. generic value in the [kdcdefaults] section.
 
                 [kdcdefaults]
                     pkinit_anchors = DIR\:/usr/local/generic_trusted_cas/

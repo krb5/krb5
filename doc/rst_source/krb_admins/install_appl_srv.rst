@@ -5,6 +5,8 @@ An application server is a host that provides one or more services over the netw
 
 If you have Kerberos V5 installed on all of your client machines, MIT recommends that you make your hosts secure, to take advantage of the security that Kerberos authentication affords. However, if you have some clients that do not have Kerberos V5 installed, you can run an insecure server, and still take advantage of Kerberos V5's single sign-on capability. 
 
+.. _kt_file_label:
+
 
 The Keytab File
 ----------------------

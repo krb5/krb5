@@ -1,3 +1,5 @@
+.. _db_operations_label:
+
 Operations on the Kerberos database
 =============================================
 

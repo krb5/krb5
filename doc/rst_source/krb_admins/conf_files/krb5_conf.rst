@@ -59,6 +59,7 @@ Sections
 .. _libdefaults:
 
 **[libdefaults]** 
+~~~~~~~~~~~~~~~~~~~
 
 The libdefaults section may contain any of the following relations:
 
@@ -147,6 +148,7 @@ rdns
 .. _appdefaults:
 
 **[appdefaults]**
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Each tag in the [appdefaults] section names a Kerberos V5 application or an option that is used by some Kerberos V5 application[s]. The value of the tag defines the default behaviors for that application.
 
@@ -175,6 +177,7 @@ The list of specifiable options for each application may be found in that applic
 .. _login:
 
 **[login]**
+~~~~~~~~~~~~~~~
 
 Each tag in the [login] section of the file is an option for *login.krb5*. This section may contain any of the following relations:
 
@@ -190,6 +193,7 @@ accept_passwd
 .. _realms:
 
 **[realms]**
+~~~~~~~~~~~~~~~~~
 
 Each tag in the [realms] section of the file is the name of a Kerberos realm. The value of the tag is a subsection with relations that define the properties of that particular realm. For each realm, the following tags may be specified in the realm's subsection:
 
@@ -239,6 +243,7 @@ auth_to_local
 .. _domain_realm:
 
 **[domain_realm]**
+~~~~~~~~~~~~~~~~~~~~~
 
 The [domain_realm] section provides a translation from a domain name or hostname to a Kerberos realm name. The tag name can be a host name, or a domain name, where domain names are indicated by a prefix of a period (.). The value of the relation is the Kerberos realm name for that particular host or domain. Host names and domain names should be in lower case.
 
@@ -256,6 +261,7 @@ maps *crash.mit.edu* into the TEST.ATHENA.MIT.EDU realm. All other hosts in the 
 .. _logging:
 
 **[logging]**
+~~~~~~~~~~~~~~~~~~~~~~~
 
 The [logging] section indicates how a particular entity is to perform its logging. The relations in this section assign one or more values to the entity name. Currently, the following entities are used:
 
@@ -300,6 +306,7 @@ In the following example, the logging messages from the KDC will go to the conso
 .. _capaths:
 
 **[capaths]**
+~~~~~~~~~~~~~~~~~~~~~~`
 
 In order to perform direct (non-hierarchical) cross-realm authentication, a database is needed to construct the authentication paths between the realms. This section defines that database.
 
@@ -364,6 +371,7 @@ This feature is not currently supported by DCE. DCE security servers can be used
 .. _dbdefaults:
 
 **[dbdefaults]**
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 The [dbdefaults] section provides default values for the database specific parameters. It can also specify the configuration section under dbmodules_ section for database specific parameters used by the database library.
 
@@ -387,6 +395,7 @@ ldap_conns_per_server
 .. _dbmodules:
 
 **[dbmodules]**
+~~~~~~~~~~~~~~~~~~
 
 Contains database specific parameters used by the database library. Each tag in the [dbmodules] section of the file names a configuration section for database specific parameters that can be referred to by a realm. The value of the tag is a subsection where the relations in that subsection define the database specific parameters.
 
@@ -454,12 +463,12 @@ princ
 kadm5_hook interface
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-The kadm5_hook interface provides plugins with information on principal creation, modification, password changes and deletion. This interface can be used to write a plugin to synchronize MIT Kerberos with another database such as Active Directory. No plugins are built in for this interface.
+The **kadm5_hook** interface provides plugins with information on principal creation, modification, password changes and deletion. This interface can be used to write a plugin to synchronize MIT Kerberos with another database such as Active Directory. No plugins are built in for this interface.
 
 clpreauth and kdcpreauth interfaces
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The clpreauth and kdcpreauth interfaces allow plugin modules to provide client and KDC preauthentication mechanisms.  The following built-in modules exist for these interfaces:
+The **clpreauth** and **kdcpreauth** interfaces allow plugin modules to provide client and KDC preauthentication mechanisms.  The following built-in modules exist for these interfaces:
 
 pkinit
     This module implements the PKINIT preauthentication mechanism.
