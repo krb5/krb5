@@ -48,7 +48,7 @@ Back on the Master KDC
 
 Now that the slave KDCs have copies of the Kerberos database, you can create stash files for them and start the krb5kdc daemon. 
 
-Finish Installing the Slave KDCs
+Finish installing the Slave KDCs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. toctree::

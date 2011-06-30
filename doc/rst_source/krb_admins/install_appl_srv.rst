@@ -8,7 +8,7 @@ If you have Kerberos V5 installed on all of your client machines, MIT recommends
 .. _kt_file_label:
 
 
-The Keytab File
+The keytab file
 ----------------------
 
 All Kerberos server machines need a *keytab* file, called */etc/krb5.keytab*, to authenticate to the KDC. The keytab file is an encrypted, local, on-disk copy of the host's key. The keytab file, like the stash file (See :ref:`create_db_label`) is a potential point-of-entry for a break-in, and if compromised, would allow unrestricted access to its host. The *keytab* file should be readable only by root, and should exist only on the machine's local disk. The file should not be part of any backup of the machine, unless access to the backup data is secured as tightly as access to the machine's root password itself.
@@ -35,7 +35,7 @@ For example, to generate a *keytab* file to allow the host *trillium.mit.edu* to
 
 If you generate the *keytab* file on another host, you need to get a copy of the *keytab* file onto the destination host (*trillium*, in the above example) without sending it unencrypted over the network.
 
-Some Advice about Secure Hosts
+Some advice about secure hosts
 --------------------------------------
 
 Kerberos V5 can protect your host from certain types of break-ins, but it is possible to install Kerberos V5 and still leave your host vulnerable to attack. Obviously an installation guide is not the place to try to include an exhaustive list of countermeasures for every possible attack, but it is worth noting some of the larger holes and how to close them.
