@@ -45,9 +45,12 @@ struct tinfo {
     int idx;
 };
 
+#define DEFAULT_N_THREADS   2
+#define DEFAULT_INTERVAL   20 /* 5 * 60 */
+
 int init_once = 0;
-int n_threads = 2;
-int interval = 20 /* 5 * 60 */;
+int n_threads = DEFAULT_N_THREADS;
+int interval = DEFAULT_INTERVAL;
 int *ip;
 
 static void wait_for_tick ()
@@ -131,8 +134,11 @@ static void usage(void)
     fprintf (stderr, "usage: %s [ options ]\n", prog);
     fprintf (stderr, "options:\n");
     fprintf (stderr, "\t-1\tcreate one rcache handle for process\n");
-    fprintf (stderr, "\t-t N\tnumber of threads to create\n");
-    fprintf (stderr, "\t-i N\tinterval to run test over, in seconds\n");
+    fprintf (stderr, "\t-t N\tnumber of threads to create (default: %d)\n",
+             DEFAULT_N_THREADS);
+    fprintf (stderr,
+             "\t-i N\tinterval to run test over, in seconds (default: %d)\n",
+             DEFAULT_INTERVAL);
     exit(1);
 }
 
