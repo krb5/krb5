@@ -41,6 +41,7 @@
 
 #include "k5-int.h"
 #include "com_err.h"
+#include "fake-addrinfo.h"
 #include "kprop.h"
 
 #ifndef GETSOCKNAME_ARG3_TYPE

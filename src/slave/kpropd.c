@@ -79,6 +79,7 @@
 
 #include "k5-int.h"
 #include "com_err.h"
+#include "fake-addrinfo.h"
 #include <errno.h>
 
 #include "kprop.h"
