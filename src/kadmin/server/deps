@@ -13,6 +13,7 @@ $(OUTPRE)kadm_rpc_svc.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/gssrpc/rename.h $(top_srcdir)/include/gssrpc/rpc.h \
   $(top_srcdir)/include/gssrpc/rpc_msg.h $(top_srcdir)/include/gssrpc/svc.h \
   $(top_srcdir)/include/gssrpc/svc_auth.h $(top_srcdir)/include/gssrpc/xdr.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   $(top_srcdir)/include/kdb.h $(top_srcdir)/include/krb5.h \
   $(top_srcdir)/include/krb5/plugin.h $(top_srcdir)/include/net-server.h \
   kadm_rpc_svc.c misc.h
@@ -28,7 +29,8 @@ $(OUTPRE)server_stubs.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/gssrpc/clnt.h $(top_srcdir)/include/gssrpc/rename.h \
   $(top_srcdir)/include/gssrpc/rpc.h $(top_srcdir)/include/gssrpc/rpc_msg.h \
   $(top_srcdir)/include/gssrpc/svc.h $(top_srcdir)/include/gssrpc/svc_auth.h \
-  $(top_srcdir)/include/gssrpc/xdr.h $(top_srcdir)/include/kdb.h \
+  $(top_srcdir)/include/gssrpc/xdr.h $(top_srcdir)/include/k5-platform.h \
+  $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/kdb.h \
   $(top_srcdir)/include/krb5.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/net-server.h misc.h server_stubs.c
 $(OUTPRE)ovsec_kadmd.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \

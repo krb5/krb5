@@ -74,11 +74,5 @@ util_token.so util_token.po $(OUTPRE)util_token.$(OBJEXT): \
   $(top_srcdir)/include/k5-thread.h gssapiP_generic.h \
   gssapi_err_generic.h gssapi_ext.h gssapi_generic.h \
   util_token.c
-util_validate.so util_validate.po $(OUTPRE)util_validate.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(COM_ERR_DEPS) $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-platform.h \
-  $(top_srcdir)/include/k5-thread.h gssapiP_generic.h \
-  gssapi_err_generic.h gssapi_ext.h gssapi_generic.h \
-  util_validate.c
 gssapi_err_generic.so gssapi_err_generic.po $(OUTPRE)gssapi_err_generic.$(OBJEXT): \
   $(COM_ERR_DEPS) gssapi_err_generic.c

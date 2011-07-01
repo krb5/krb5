@@ -33,6 +33,14 @@ g_acquire_cred_imp_name.so g_acquire_cred_imp_name.po \
   $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-thread.h ../generic/gssapi_err_generic.h \
   g_acquire_cred_imp_name.c mechglue.h mglueP.h
+g_authorize_localname.so g_authorize_localname.po $(OUTPRE)g_authorize_localname.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
+  $(BUILDTOP)/include/gssapi/gssapi_ext.h $(COM_ERR_DEPS) \
+  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_ext.h \
+  $(srcdir)/../generic/gssapi_generic.h $(top_srcdir)/include/k5-buf.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
+  ../generic/gssapi_err_generic.h g_authorize_localname.c \
+  mechglue.h mglueP.h
 g_buffer_set.so g_buffer_set.po $(OUTPRE)g_buffer_set.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssapi/gssapi_ext.h $(COM_ERR_DEPS) \
@@ -445,14 +453,6 @@ g_unwrap_iov.so g_unwrap_iov.po $(OUTPRE)g_unwrap_iov.$(OBJEXT): \
   $(srcdir)/../generic/gssapi_generic.h $(top_srcdir)/include/k5-buf.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   ../generic/gssapi_err_generic.h g_unwrap_iov.c mechglue.h \
-  mglueP.h
-g_userok.so g_userok.po $(OUTPRE)g_userok.$(OBJEXT): \
-  $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssapi/gssapi_ext.h $(COM_ERR_DEPS) \
-  $(srcdir)/../generic/gssapiP_generic.h $(srcdir)/../generic/gssapi_ext.h \
-  $(srcdir)/../generic/gssapi_generic.h $(top_srcdir)/include/k5-buf.h \
-  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
-  ../generic/gssapi_err_generic.h g_userok.c mechglue.h \
   mglueP.h
 g_verify.so g_verify.po $(OUTPRE)g_verify.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
