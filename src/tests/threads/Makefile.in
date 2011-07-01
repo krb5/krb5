@@ -13,9 +13,8 @@ SRCS=$(srcdir)/t_rcache.c \
 
 all::
 
-N = 4
 run-t_rcache: t_rcache
-	$(RUN_SETUP) $(VALGRIND) ./t_rcache -n $(N)
+	$(RUN_SETUP) $(VALGRIND) ./t_rcache
 
 t_rcache: t_rcache.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o t_rcache t_rcache.o $(KRB5_BASE_LIBS) $(THREAD_LINKOPTS)
