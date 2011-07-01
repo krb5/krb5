@@ -321,8 +321,9 @@ krb5_error_code krb5int_confounder_verify(const struct krb5_cksumtypes *ctp,
 /*** Key derivation functions ***/
 
 enum deriv_alg {
-    DERIVE_RFC3961,             /* RFC 3961 section 5.1 */
+    DERIVE_RFC3961              /* RFC 3961 section 5.1 */
 #ifdef CAMELLIA
+    ,                           /* C90 doesn't let enum list end w/comma */
     DERIVE_SP800_108_CMAC       /* NIST SP 800-108 with CMAC as PRF */
 #endif
 };

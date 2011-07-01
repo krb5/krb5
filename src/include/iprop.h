@@ -91,7 +91,7 @@ enum kdbe_attr_type_t {
 	AT_PW_POLICY = 16,
 	AT_PW_POLICY_SWITCH = 17,
 	AT_PW_HIST_KVNO = 18,
-	AT_PW_HIST = 19,
+	AT_PW_HIST = 19
 };
 typedef enum kdbe_attr_type_t kdbe_attr_type_t;
 
@@ -169,7 +169,7 @@ enum update_status_t {
 	UPDATE_FULL_RESYNC_NEEDED = 2,
 	UPDATE_BUSY = 3,
 	UPDATE_NIL = 4,
-	UPDATE_PERM_DENIED = 5,
+	UPDATE_PERM_DENIED = 5
 };
 typedef enum update_status_t update_status_t;
 
