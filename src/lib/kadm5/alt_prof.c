@@ -1161,9 +1161,11 @@ krb5_match_config_pattern(const char *string, const char *pattern)
     int len = strlen(pattern);
 
     for (ptr = strstr(string,pattern); ptr != 0; ptr = strstr(ptr+len,pattern)) {
-        if (ptr == string || isspace(*(ptr-1)) || *(ptr-1) ==',') {
+        if (ptr == string
+            || isspace((unsigned char)*(ptr-1))
+            || *(ptr-1) ==',') {
             next = *(ptr + len);
-            if (next == '\0' || isspace(next) || next ==',') {
+            if (next == '\0' || isspace((unsigned char)next) || next ==',') {
                 return TRUE;
             }
         }
