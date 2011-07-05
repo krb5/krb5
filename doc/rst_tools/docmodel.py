@@ -27,6 +27,7 @@ from Cheetah.Template import Template
 
 class Attribute(object):
     def __init__(self, **argkw):
+        self.definition = argkw.get('definition')
         self.name = argkw.get('name')
         self.type = argkw.get('type')
         self.typeId = argkw.get('typeId')
@@ -44,6 +45,7 @@ class Attribute(object):
 class CompositeType():
     def __init__(self, **argkw):
         self.category = 'composite'
+        self.definition = argkw.get('definition')
         self.name = argkw.get('name')
         self.Id = argkw.get('Id')
         self.active = argkw.get('active', False)

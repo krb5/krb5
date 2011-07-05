@@ -20,22 +20,21 @@ $title
 .. c:type:: $composite.name
 ..
 
+Declaration
+------------
+
+$composite.definition
+
 $composite.long_description
+ 
 
-
-#if $composite.Id is not None and $composite.name is not 'krb5_trace_callback'
+#if $composite.Id is not None 
 
 
 #if len($composite.attributes)
 
 Members
 ---------
-
-#else 
-
-#if $composite.type is not None
-typedef :c:type:`$composite.type` $composite.name
-#end if
 
 #end if
 

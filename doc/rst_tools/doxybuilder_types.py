@@ -99,8 +99,15 @@ class DoxyTypes(object):
         t_brief = self._get_brief_description(brief_node)
         details_node = node.xpath('./detaileddescription')[0]
         t_detailed = self._get_detailed_description(details_node)
+        # remove  macros
+        t_definition = re.sub('KRB5_CALLCONV_C', '', t_definition)
+        t_definition = re.sub('KRB5_CALLCONV', '', t_definition)
+        # handle fp
+        if t_type[1].find('(') >= 0:
+              t_type = (t_type[0],None)
 
         typedef_descr = {'category': 'composite',
+                         'definition': t_definition,
                          'name': t_name,
                          'Id': t_Id,
                          'type': t_type[1],
@@ -140,8 +147,12 @@ class DoxyTypes(object):
         v_brief = self._get_brief_description(brief_node)
         details_node = node.xpath('./detaileddescription')[0]
         detailed_description = self._get_detailed_description(details_node)
+        # remove  macros
+        v_definition = re.sub('KRB5_CALLCONV_C', '', v_definition)
+        v_definition = re.sub('KRB5_CALLCONV', '', v_definition)
         
         variable_descr = {'category': 'variable',
+                         'definition': v_definition,
                           'name': v_name,
                           'Id': v_Id,
                           'type': v_type[1],
