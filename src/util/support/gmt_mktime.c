@@ -18,6 +18,38 @@
 
 #include "k5-gmt_mktime.h"
 
+/*
+ * Use the nonstandard timegm() (if available) to convert broken-down
+ * UTC times into time_t values.  Use our custom gmt_mktime() if
+ * timegm() is not available.
+ *
+ * We use gmtime() (or gmtime_r()) when encoding ASN.1 GeneralizedTime
+ * values.  On systems where a "right" (leap-second-aware) time zone
+ * is configured, gmtime() adjusts for the presence of accumulated
+ * leap seconds in the input time_t value.  POSIX requires that time_t
+ * values omit leap seconds; systems configured to include leap
+ * seconds in their time_t values are non-conforming and will have
+ * difficulties exchanging timestamp information with other systems.
+ *
+ * We use krb5int_gmt_mktime() for decoding ASN.1 GeneralizedTime
+ * values.  If timegm() is not available, krb5int_gmt_mktime() won't
+ * be the inverse of gmtime() on a system that counts leap seconds.  A
+ * system configured with a "right" time zone probably has timegm()
+ * available; without it, an application would have no reliable way of
+ * converting broken-down UTC times into time_t values.
+ */
+time_t
+krb5int_gmt_mktime(struct tm *t)
+{
+#if HAVE_TIMEGM
+    return timegm(t);
+#else
+    return gmt_mktime(t);
+#endif
+}
+
+#if !HAVE_TIMEGM || TEST_LEAP
+
 /* take a struct tm, return seconds from GMT epoch */
 /* like mktime, this ignores tm_wday and tm_yday. */
 /* unlike mktime, this does not set them... it only passes a return value. */
@@ -39,7 +71,8 @@ static const int days_in_month[12] = {
 
 #define hasleapday(year) (year%400?(year%100?(year%4?0:1):0):1)
 
-time_t krb5int_gmt_mktime(struct tm *t)
+static time_t
+gmt_mktime(struct tm *t)
 {
     time_t accum;
 
@@ -94,6 +127,7 @@ time_t krb5int_gmt_mktime(struct tm *t)
 
     return accum;
 }
+#endif /* !HAVE_TIMEGM || TEST_LEAP */
 
 #ifdef TEST_LEAP
 int
