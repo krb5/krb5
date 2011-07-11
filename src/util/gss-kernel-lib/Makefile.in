@@ -15,7 +15,6 @@ SHLIB_EXPLIBS=-lgssrpc -lkrb5 -lk5crypto -lcom_err $(SUPPORT_LIB) $(LIBS)
 STOBJLISTS=OBJS.ST
 
 SRCS= \
-	kernel_gss.c \
 	k5seal.c \
 	k5sealiov.c \
 	k5unseal.c \
@@ -30,7 +29,7 @@ SRCS= \
 	util_set.c \
 	util_ordering.c
 
-EXTRADEPSRCS= t_kgss_common.c t_kgss_user.c t_kgss_kernel.c
+EXTRADEPSRCS= kernel_gss.c t_kgss_common.c t_kgss_user.c t_kgss_kernel.c
 
 OBJS= \
 	kernel_gss.o \
