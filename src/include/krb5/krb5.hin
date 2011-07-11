@@ -832,7 +832,7 @@ krb5_c_enctype_compare(krb5_context context, krb5_enctype e1, krb5_enctype e2,
                        krb5_boolean *similar);
 
 /**
- * Compute a checksum.
+ * Compute a checksum (operates on keyblock).
  *
  * @param [in]  context         Library context
  * @param [in]  cksumtype       Checksum type (0 for mandatory type)
@@ -849,6 +849,9 @@ krb5_c_enctype_compare(krb5_context context, krb5_enctype e1, krb5_enctype e2,
  * checksum type.  The newly created @a cksum must be released by calling
  * krb5_free_checksum_contents() when it is no longer needed.
  *
+ * @note This function is similar to krb5_k_make_checksum(), but operates
+ * on keyblock @a key.
+ *
  * @sa krb5_c_verify_checksum()
  *
  * @retval 0 Success; otherwise - Kerberos error codes
@@ -859,7 +862,7 @@ krb5_c_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
                      const krb5_data *input, krb5_checksum *cksum);
 
 /**
- * Verify a checksum.
+ * Verify a checksum (operates on keyblock).
  *
  * @param [in]  context         Library context
  * @param [in]  key             Encryption key for a keyed checksum
@@ -873,6 +876,9 @@ krb5_c_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
  * the checksum type of @a cksum is a keyed checksum, @a key is used to verify
  * the checksum.  The actual checksum key will be derived from @a key and @a
  * usage if key derivation is specified for the checksum type.
+ *
+ * @note This function is similar to krb5_k_verify_checksum(), but operates
+ * on keyblock @a key.
  *
  * @retval 0 Success; otherwise - Kerberos error codes
  */
@@ -1010,20 +1016,66 @@ krb5_boolean KRB5_CALLCONV
 krb5_c_is_keyed_cksum(krb5_cksumtype ctype);
 
 /* AEAD APIs */
-#define KRB5_CRYPTO_TYPE_EMPTY      0   /* [in] ignored */
-#define KRB5_CRYPTO_TYPE_HEADER     1   /* [out] header */
-#define KRB5_CRYPTO_TYPE_DATA       2   /* [in, out] plaintext */
-#define KRB5_CRYPTO_TYPE_SIGN_ONLY  3   /* [in] associated data */
-#define KRB5_CRYPTO_TYPE_PADDING    4   /* [out] padding */
-#define KRB5_CRYPTO_TYPE_TRAILER    5   /* [out] checksum for encrypt */
-#define KRB5_CRYPTO_TYPE_CHECKSUM   6   /* [out] checksum for MIC */
-#define KRB5_CRYPTO_TYPE_STREAM     7   /* [in] entire message */
 
+#define KRB5_CRYPTO_TYPE_EMPTY      0   /**< [in] ignored */
+#define KRB5_CRYPTO_TYPE_HEADER     1   /**< [out] header */
+#define KRB5_CRYPTO_TYPE_DATA       2   /**< [in, out] plaintext */
+#define KRB5_CRYPTO_TYPE_SIGN_ONLY  3   /**< [in] associated data */
+#define KRB5_CRYPTO_TYPE_PADDING    4   /**< [out] padding */
+#define KRB5_CRYPTO_TYPE_TRAILER    5   /**< [out] checksum for encrypt */
+#define KRB5_CRYPTO_TYPE_CHECKSUM   6   /**< [out] checksum for MIC */
+#define KRB5_CRYPTO_TYPE_STREAM     7   /**< [in] entire message without
+                                             decomposing the structure into
+                                             header, data and trailer buffers */
+
+/**
+ * Fill in a checksum element in IOV array (operates on keyblock)
+ *
+ * @param [in]     context         Library context
+ * @param [in]     cksumtype       Checksum type (0 for mandatory type)
+ * @param [in]     key             Encryption key for a keyed checksum
+ * @param [in]     usage           Key usage (see KRB5_KEYUSAGE types)
+ * @param [in,out] data            IOV array
+ * @param [in]     num_data        Size of @a data
+ *
+ * Create a checksum in the KRB5_CRYPTO_TYPE_CHECKSUM element over
+ * KRB5_CRYPTO_TYPE_DATA and KRB5_CRYPTO_TYPE_SIGN_ONLY chunks in @a data.
+ * Only the KRB5_CRYPTO_TYPE_CHECKSUM region is modified.
+ *
+ * @note This function is similar to krb5_k_make_checksum_iov(), but operates
+ * on keyblock @a key.
+ *
+ * @sa krb5_c_verify_checksum_iov()
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_c_make_checksum_iov(krb5_context context, krb5_cksumtype cksumtype,
                          const krb5_keyblock *key, krb5_keyusage usage,
                          krb5_crypto_iov *data, size_t num_data);
 
+/**
+ * Validate a checksum element in IOV array (operates on keyblock).
+ *
+ * @param [in]     context         Library context
+ * @param [in]     cksumtype       Checksum type (0 for mandatory type)
+ * @param [in]     key             Encryption key for a keyed checksum
+ * @param [in]     usage           Key usage (see KRB5_KEYUSAGE types)
+ * @param [in]     data            IOV array
+ * @param [in]     num_data        Size of @a data
+ * @param [out]    valid           Non-zero for success, zero for failure
+ *
+ * Confirm that the checksum in the KRB5_CRYPTO_TYPE_CHECKSUM element is a
+ * valid checksum of the KRB5_CRYPTO_TYPE_DATA and KRB5_CRYPTO_TYPE_SIGN_ONLY
+ * regions in the iov.
+ *
+ * @note This function is similar to krb5_k_verify_checksum_iov(), but operates
+ * on keyblock @a key.
+ *
+ * @sa krb5_c_make_checksum_iov()
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_c_verify_checksum_iov(krb5_context context, krb5_cksumtype cksumtype,
                            const krb5_keyblock *key, krb5_keyusage usage,
@@ -1040,18 +1092,68 @@ krb5_c_decrypt_iov(krb5_context context, const krb5_keyblock *key,
                    krb5_keyusage usage, const krb5_data *cipher_state,
                    krb5_crypto_iov *data, size_t num_data);
 
+/**
+ * Return a length of a message field specific to the encryption type.
+ *
+ * @param [in]  context      Library context
+ * @param [in]  enctype      Encryption type
+ * @param [in]  type         Type field (See KRB5_CRYPTO_TYPE types)
+ * @param [out] size         Length of the @a type specific to @a enctype
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_c_crypto_length(krb5_context context, krb5_enctype enctype,
                      krb5_cryptotype type, unsigned int *size);
 
+/**
+ * Fill in lengths for header, trailer and padding in a IOV array.
+ *
+ * @param [in]      context      Library context
+ * @param [in]      enctype      Encryption type
+ * @param [in,out]  data         IOV array
+ * @param [in]      num_data     Size of @a data
+ *
+ * Padding is set to the actual padding required based on the provided
+ * @a data buffers. Typically this API is used after setting up the data
+ * buffers and KRB5_CRYPTO_TYPE_SIGN_ONLY buffers, but before actually
+ * allocating header, trailer and padding.
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_c_crypto_length_iov(krb5_context context, krb5_enctype enctype,
                          krb5_crypto_iov *data, size_t num_data);
 
+/**
+ * Return a number of padding octets.
+ *
+ * @param [in]  context      Library context
+ * @param [in]  enctype      Encryption type
+ * @param [in]  data_length  Length of the plaintext to pad
+ * @param [out] size         Number of padding octets
+ *
+ * This function returns the number of the padding octets required to pad
+ * @a data_length octets of plaintext.
+ *
+ * @retval 0 Success; otherwise - KRB5_BAD_ENCTYPE
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_c_padding_length(krb5_context context, krb5_enctype enctype,
                       size_t data_length, unsigned int *size);
 
+/**
+ * Create a krb5_key from the enctype and key data in a keyblock.
+ *
+ * @param [in]  context      Library context
+ * @param [in]  key_data     Keyblock
+ * @param [out] out          Opaque key
+ *
+ * The reference count on a key @a out is set to 1.
+ * Use krb5_k_free_key() to free @a out when it is no longer needed.
+ *
+ * @retval 0 Success; otherwise - KRB5_BAD_ENCTYPE
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_k_create_key(krb5_context context, const krb5_keyblock *key_data,
                   krb5_key *out);
@@ -1092,30 +1194,136 @@ krb5_error_code KRB5_CALLCONV
 krb5_k_decrypt_iov(krb5_context context, krb5_key key, krb5_keyusage usage,
                    const krb5_data *cipher_state, krb5_crypto_iov *data,
                    size_t num_data);
-
+/**
+ * Compute a checksum (operates on opaque key).
+ *
+ * @param [in]  context         Library context
+ * @param [in]  cksumtype       Checksum type (0 for mandatory type)
+ * @param [in]  key             Encryption key for a keyed checksum
+ * @param [in]  usage           Key usage (see KRB5_KEYUSAGE types)
+ * @param [in]  input           Input data
+ * @param [out] cksum           Generated checksum
+ *
+ * This function computes a checksum of type @a cksumtype over @a input, using
+ * @a key if the checksum type is a keyed checksum.  If @a cksumtype is 0 and
+ * @a key is non-null, the checksum type will be the mandatory-to-implement
+ * checksum type for the key's encryption type.  The actual checksum key will
+ * be derived from @a key and @a usage if key derivation is specified for the
+ * checksum type.  The newly created @a cksum must be released by calling
+ * krb5_free_checksum_contents() when it is no longer needed.
+ *
+ * @note This function is similar to krb5_c_make_checksum(), but operates
+ * on opaque @a key.
+ *
+ * @sa krb5_c_verify_checksum()
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_k_make_checksum(krb5_context context, krb5_cksumtype cksumtype,
                      krb5_key key, krb5_keyusage usage, const krb5_data *input,
                      krb5_checksum *cksum);
 
+/**
+ * Fill in a checksum element in IOV array (operates on opaque key)
+ *
+ * @param [in]     context         Library context
+ * @param [in]     cksumtype       Checksum type (0 for mandatory type)
+ * @param [in]     key             Encryption key for a keyed checksum
+ * @param [in]     usage           Key usage (see KRB5_KEYUSAGE types)
+ * @param [in,out] data            IOV array
+ * @param [in]     num_data        Size of @a data
+ *
+ * Create a checksum in the KRB5_CRYPTO_TYPE_CHECKSUM element over
+ * KRB5_CRYPTO_TYPE_DATA and KRB5_CRYPTO_TYPE_SIGN_ONLY chunks in @a data.
+ * Only the KRB5_CRYPTO_TYPE_CHECKSUM region is modified.
+ *
+ * @note This function is similar to krb5_c_make_checksum_iov(), but operates
+ * on opaque @a key.
+ *
+ * @sa krb5_k_verify_checksum_iov()
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_k_make_checksum_iov(krb5_context context, krb5_cksumtype cksumtype,
                          krb5_key key, krb5_keyusage usage,
                          krb5_crypto_iov *data, size_t num_data);
 
+/**
+ * Verify a checksum (operates on opaque key).
+ *
+ * @param [in]  context         Library context
+ * @param [in]  key             Encryption key for a keyed checksum
+ * @param [in]  usage           @a key usage
+ * @param [in]  data            Data to be used to compute a new checksum
+ *                              using @a key to compare @a cksum against
+ * @param [in]  cksum           Checksum to be verified
+ * @param [out] valid           Non-zero for success, zero for failure
+ *
+ * This function verifies that @a cksum is a valid checksum for @a data.  If
+ * the checksum type of @a cksum is a keyed checksum, @a key is used to verify
+ * the checksum.  The actual checksum key will be derived from @a key and @a
+ * usage if key derivation is specified for the checksum type.
+ *
+ * @note This function is similar to krb5_c_verify_checksum(), but operates
+ * on opaque @a key.
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_k_verify_checksum(krb5_context context, krb5_key key, krb5_keyusage usage,
                        const krb5_data *data, const krb5_checksum *cksum,
                        krb5_boolean *valid);
 
+/**
+ * Validate a checksum element in IOV array (operates on opaque key).
+ *
+ * @param [in]     context         Library context
+ * @param [in]     cksumtype       Checksum type (0 for mandatory type)
+ * @param [in]     key             Encryption key for a keyed checksum
+ * @param [in]     usage           Key usage (see KRB5_KEYUSAGE types)
+ * @param [in]     data            IOV array
+ * @param [in]     num_data        Size of @a data
+ * @param [out]    valid           Non-zero for success, zero for failure
+ *
+ * Confirm that the checksum in the KRB5_CRYPTO_TYPE_CHECKSUM element is a
+ * valid checksum of the KRB5_CRYPTO_TYPE_DATA and KRB5_CRYPTO_TYPE_SIGN_ONLY
+ * regions in the iov.
+ *
+ * @note This function is similar to krb5_c_verify_checksum_iov(), but operates
+ * on opaque @a key.
+ *
+ * @sa krb5_k_make_checksum_iov()
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_k_verify_checksum_iov(krb5_context context, krb5_cksumtype cksumtype,
                            krb5_key key, krb5_keyusage usage,
                            const krb5_crypto_iov *data, size_t num_data,
                            krb5_boolean *valid);
 
+/**
+ * Generate enctype-specific pseudo-random bytes (operates on opaque key).
+ *
+ * @param [in]  context      Library context
+ * @param [in]  key          Key
+ * @param [in]  input        Input data
+ * @param [out] output       Output data
+ *
+ * This function selects a pseudo-random function based on @a key and
+ * computes its value over @a input, placing the result into @a output.
+ * The caller must preinitialize @a output and allocate space for the
+ * result.
+ *
+ * @note This function is similar to krb5_c_prf(), but operates
+ * on opaque @a key.
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
-krb5_k_prf(krb5_context context, krb5_key key, krb5_data *in, krb5_data *out);
+krb5_k_prf(krb5_context context, krb5_key key, krb5_data *input, krb5_data *output);
 
 #ifdef KRB5_OLD_CRYPTO
 /*
@@ -1810,8 +2018,8 @@ typedef struct krb5_replay_data {
 
 /** Type of function used as a callback to generate checksum data for mk_req */
 typedef krb5_error_code
-(KRB5_CALLCONV * krb5_mk_req_checksum_func)(krb5_context, krb5_auth_context , void *,
-                                             krb5_data **);
+(KRB5_CALLCONV * krb5_mk_req_checksum_func)(krb5_context, krb5_auth_context,
+                                            void *, krb5_data **);
 
 /*
  * end "safepriv.h"
@@ -1861,7 +2069,7 @@ typedef struct _krb5_cccol_cursor *krb5_cccol_cursor;
 #define KRB5_TC_NOTICKET           0x00000002
 
 /**
- * Retrieve the name but not type of a credential cache.
+ * Retrieve the name, but not type of a credential cache.
  *
  * @param [in] context          Library context
  * @param [in] cache            Credential cache handle
@@ -2160,9 +2368,29 @@ krb5_error_code KRB5_CALLCONV
 krb5_cc_last_change_time(krb5_context context, krb5_ccache ccache,
                          krb5_timestamp *change_time);
 
+/**
+ * Lock a credential cache.
+ *
+ * @param [in]  context         Library context
+ * @param [in]  ccache          Credential cache handle
+ *
+ * Use krb5_cc_unlock() to unlock the lock.
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_lock(krb5_context context, krb5_ccache ccache);
 
+/**
+ * Unlock a credential cache.
+ *
+ * @param [in]  context         Library context
+ * @param [in]  ccache          Credential cache handle
+ *
+ * This function unlocks the @a ccache locked by krb5_cc_lock().
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_cc_unlock(krb5_context context, krb5_ccache ccache);
 
@@ -2235,9 +2463,32 @@ krb5_cccol_cursor_free(krb5_context context, krb5_cccol_cursor *cursor);
 krb5_error_code KRB5_CALLCONV
 krb5_cccol_last_change_time(krb5_context context, krb5_timestamp *change_time);
 
+/**
+ * Acquire a global lock for credential caches.
+ *
+ * @param [in]  context         Library context
+ *
+ * This function locks the global credential cache collection, ensuring
+ * that no ccaches are added to or removed from it until the collection
+ * lock is released.
+ *
+ * Use krb5_cccol_unlock() to unlock the lock.
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
+
 krb5_error_code KRB5_CALLCONV
 krb5_cccol_lock(krb5_context context);
 
+/**
+ * Release a global lock for credential caches.
+ *
+ * @param [in]  context         Library context
+ *
+ * This function unlocks the lock from krb5_cccol_lock().
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_cccol_unlock(krb5_context context);
 
@@ -3170,7 +3421,7 @@ krb5_principal_compare(krb5_context context,
  * @param [in] princ1           First principal
  * @param [in] princ2           Second principal
  *
- * Similar to krb5_principal_compare() but do not compare the realm
+ * Similar to krb5_principal_compare(), but do not compare the realm
  * components of the principals.
  *
  * @retval
@@ -4002,7 +4253,7 @@ krb5_free_creds(krb5_context context, krb5_creds *val);
  * @param [in] context          Library context
  * @param [in] val              Credential structure to free contents of
  *
- * This function frees the contents of @a val but not the structure itself.
+ * This function frees the contents of @a val, but not the structure itself.
  */
 void KRB5_CALLCONV
 krb5_free_cred_contents(krb5_context context, krb5_creds *val);
@@ -4024,7 +4275,7 @@ krb5_free_checksum(krb5_context context, register krb5_checksum *val);
  * @param [in] context          Library context
  * @param [in] val              Checksum structure to free contents of
  *
- * This function frees the contents of @a val but not the structure itself.
+ * This function frees the contents of @a val, but not the structure itself.
  */
 void KRB5_CALLCONV
 krb5_free_checksum_contents(krb5_context context, register krb5_checksum *val);
@@ -4046,7 +4297,7 @@ krb5_free_keyblock(krb5_context context, register krb5_keyblock *val);
  * @param [in] context          Library context
  * @param [in] key              Keyblock to be freed
  *
- * This function frees the contents of @a key but not the structure itself.
+ * This function frees the contents of @a key, but not the structure itself.
  */
 void KRB5_CALLCONV
 krb5_free_keyblock_contents(krb5_context context, register krb5_keyblock *key);
@@ -4079,7 +4330,7 @@ krb5_free_data(krb5_context context, krb5_data *val);
  * @param [in] context          Library context
  * @param [in] val              Data structure to free contents of
  *
- * This function frees the contents of @a val but not the structure itself.
+ * This function frees the contents of @a val, but not the structure itself.
  */
 void KRB5_CALLCONV
 krb5_free_data_contents(krb5_context context, krb5_data *val);
@@ -4102,7 +4353,7 @@ krb5_free_unparsed_name(krb5_context context, char *val);
 void KRB5_CALLCONV
 krb5_free_cksumtypes(krb5_context context, krb5_cksumtype *val);
 
-/* From krb5/os but needed but by the outside world */
+/* From krb5/os, but needed by the outside world */
 /**
  * Retrieve the system time of day, in sec and ms, since the epoch.
  *
@@ -4593,7 +4844,7 @@ krb5_mk_priv(krb5_context context, krb5_auth_context auth_context,
  * server must be non-null; @a client may NULL to use the default principal of
  * @a ccache.
  *
- * @li If @a in_creds is non-null but does not contain a ticket, credentials
+ * @li If @a in_creds is non-null, but does not contain a ticket, credentials
  * for the exchange are obtained with krb5_get_credentials() using @a in_creds.
  * In this case, the values of @a client and @a server are unused.
  *
@@ -4801,7 +5052,7 @@ krb5_fwd_tgt_creds(krb5_context context, krb5_auth_context auth_context,
  * protecting messages once authentication has occurred.
  *
  * By default, flags for the context are set to enable the use of the replay
- * cache (KRB5_AUTH_CONTEXT_DO_TIME) but not sequence numbers.  Use
+ * cache (KRB5_AUTH_CONTEXT_DO_TIME), but not sequence numbers.  Use
  * krb5_auth_con_setflags() to change the flags.
  *
  * The allocated @a auth_context must be freed with krb5_auth_con_free() when
@@ -6961,3 +7212,4 @@ KRB5INT_END_DECLS
 #undef KRB5_ATTR_DEPRECATED
 
 #endif /* KRB5_GENERAL__ */
+
