@@ -102,6 +102,7 @@ class DoxyTypes(object):
         # remove  macros
         t_definition = re.sub('KRB5_CALLCONV_C', '', t_definition)
         t_definition = re.sub('KRB5_CALLCONV', '', t_definition)
+        t_definition = re.sub('\*', '\\*', t_definition)
         # handle fp
         if t_type[1].find('(') >= 0:
               t_type = (t_type[0],None)
@@ -150,6 +151,7 @@ class DoxyTypes(object):
         # remove  macros
         v_definition = re.sub('KRB5_CALLCONV_C', '', v_definition)
         v_definition = re.sub('KRB5_CALLCONV', '', v_definition)
+        v_definition = re.sub('\*', '\\*', v_definition)
         
         variable_descr = {'category': 'variable',
                          'definition': v_definition,
