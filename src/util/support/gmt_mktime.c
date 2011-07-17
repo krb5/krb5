@@ -18,6 +18,10 @@
 
 #include "k5-gmt_mktime.h"
 
+#if !HAVE_TIMEGM || TEST_LEAP
+static time_t gmt_mktime(struct tm *t);
+#endif
+
 /*
  * Use the nonstandard timegm() (if available) to convert broken-down
  * UTC times into time_t values.  Use our custom gmt_mktime() if
