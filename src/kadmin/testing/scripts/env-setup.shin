@@ -95,13 +95,13 @@ fi
 if [ "x$PS_ALL" = "x" ]; then
 	if ps auxww >/dev/null 2>&1; then
 		PS_ALL="ps auxww"
-		PS_PID="ps auxww"
+		PS_PID="ps uwwp"
 	elif ps -ef >/dev/null 2>&1; then
 		PS_ALL="ps -ef"
 		PS_PID="ps -fp"
 	else
 		PS_ALL="ps auxww"
-		PS_PID="ps auxww"
+		PS_PID="ps uwwp"
 		echo "WARNING!  Cannot auto-detect ps type, assuming BSD."
 	fi
 
