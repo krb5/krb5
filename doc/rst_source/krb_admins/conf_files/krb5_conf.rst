@@ -312,7 +312,7 @@ In the following example, the logging messages from the KDC will go to the conso
 .. _capaths:
 
 **[capaths]**
-~~~~~~~~~~~~~~~~~~~~~~`
+~~~~~~~~~~~~~~~~~~~~~~
 
 In order to perform direct (non-hierarchical) cross-realm authentication, a database is needed to construct the authentication paths between the realms. This section defines that database.
 
@@ -433,9 +433,9 @@ ldap_conns_per_server
 Plugins
 --------
 
-    * pwqual interface
-    * kadm5_hook interface
-    * clpreauth and kdcpreauth interfaces
+    * pwqual_ interface
+    * kadm5_hook_ interface
+    * clpreauth_ and kdcpreauth_ interfaces
 
 Tags in the **[plugins]** section can be used to register dynamic plugin modules and to turn modules on and off. Not every krb5 pluggable interface uses the [plugins] section; the ones that do are documented here.
 
@@ -450,7 +450,7 @@ disable
 
 The following subsections are currently supported within the [plugins] section:
 
-..
+.. _pwqual:
 
 pwqual interface
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -466,10 +466,16 @@ hesiod
 princ
     Checks against components of the principal name 
 
+.. _kadm5_hook:
+
 kadm5_hook interface
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 The **kadm5_hook** interface provides plugins with information on principal creation, modification, password changes and deletion. This interface can be used to write a plugin to synchronize MIT Kerberos with another database such as Active Directory. No plugins are built in for this interface.
+
+.. _clpreauth:
+
+.. _kdcpreauth:
 
 clpreauth and kdcpreauth interfaces
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
