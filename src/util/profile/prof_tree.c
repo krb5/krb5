@@ -382,9 +382,8 @@ errcode_t profile_get_node_parent(struct profile_node *section,
  * This is a general-purpose iterator for returning all nodes that
  * match the specified name array.
  */
-struct profile_iterator {
+struct profile_node_iterator {
     prf_magic_t             magic;
-    profile_t               profile;
     int                     flags;
     const char              *const *names;
     const char              *name;
@@ -399,7 +398,7 @@ errcode_t profile_node_iterator_create(profile_t profile,
                                        const char *const *names, int flags,
                                        void **ret_iter)
 {
-    struct profile_iterator *iter;
+    struct profile_node_iterator *iter;
     int     done_idx = 0;
 
     if (profile == 0)
@@ -414,11 +413,11 @@ errcode_t profile_node_iterator_create(profile_t profile,
         done_idx = 1;
     }
 
-    if ((iter = malloc(sizeof(struct profile_iterator))) == NULL)
+    iter = malloc(sizeof(*iter));
+    if (iter == NULL)
         return ENOMEM;
 
-    iter->magic = PROF_MAGIC_ITERATOR;
-    iter->profile = profile;
+    iter->magic = PROF_MAGIC_NODE_ITERATOR;
     iter->names = names;
     iter->flags = flags;
     iter->file = profile->first_file;
@@ -431,12 +430,12 @@ errcode_t profile_node_iterator_create(profile_t profile,
 
 void profile_node_iterator_free(void **iter_p)
 {
-    struct profile_iterator *iter;
+    struct profile_node_iterator *iter;
 
     if (!iter_p)
         return;
     iter = *iter_p;
-    if (!iter || iter->magic != PROF_MAGIC_ITERATOR)
+    if (!iter || iter->magic != PROF_MAGIC_NODE_ITERATOR)
         return;
     free(iter);
     *iter_p = 0;
@@ -449,17 +448,18 @@ void profile_node_iterator_free(void **iter_p)
  * (profile_node_iterator is not an exported interface), it should be
  * strdup()'ed.
  */
-errcode_t profile_node_iterator(void **iter_p, struct profile_node **ret_node,
+errcode_t profile_node_iterator(void **iter_p,
+                                struct profile_node **ret_node,
                                 char **ret_name, char **ret_value)
 {
-    struct profile_iterator         *iter = *iter_p;
+    struct profile_node_iterator    *iter = *iter_p;
     struct profile_node             *section, *p;
     const char                      *const *cpp;
     errcode_t                       retval;
     int                             skip_num = 0;
 
-    if (!iter || iter->magic != PROF_MAGIC_ITERATOR)
-        return PROF_MAGIC_ITERATOR;
+    if (!iter || iter->magic != PROF_MAGIC_NODE_ITERATOR)
+        return PROF_MAGIC_NODE_ITERATOR;
     if (iter->file && iter->file->magic != PROF_MAGIC_FILE)
         return PROF_MAGIC_FILE;
     if (iter->file && iter->file->data->magic != PROF_MAGIC_FILE_DATA)

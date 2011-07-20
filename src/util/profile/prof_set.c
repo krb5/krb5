@@ -89,6 +89,13 @@ profile_update_relation(profile_t profile, const char **names,
     void            *state;
     const char      **cpp;
 
+    if (profile->vt) {
+        if (!profile->vt->update_relation)
+            return PROF_UNSUPPORTED;
+        return profile->vt->update_relation(profile->cbdata, names, old_value,
+                                            new_value);
+    }
+
     retval = rw_setup(profile);
     if (retval)
         return retval;
@@ -141,6 +148,13 @@ profile_clear_relation(profile_t profile, const char **names)
     void            *state;
     const char      **cpp;
 
+    if (profile->vt) {
+        if (!profile->vt->update_relation)
+            return PROF_UNSUPPORTED;
+        return profile->vt->update_relation(profile->cbdata, names, NULL,
+                                            NULL);
+    }
+
     retval = rw_setup(profile);
     if (retval)
         return retval;
@@ -186,6 +200,12 @@ profile_rename_section(profile_t profile, const char **names,
     struct profile_node *section, *node;
     void            *state;
     const char      **cpp;
+
+    if (profile->vt) {
+        if (!profile->vt->rename_section)
+            return PROF_UNSUPPORTED;
+        return profile->vt->rename_section(profile->cbdata, names, new_name);
+    }
 
     retval = rw_setup(profile);
     if (retval)
@@ -239,6 +259,12 @@ profile_add_relation(profile_t profile, const char **names,
     struct profile_node *section;
     const char      **cpp;
     void            *state;
+
+    if (profile->vt) {
+        if (!profile->vt->add_relation)
+            return PROF_UNSUPPORTED;
+        return profile->vt->add_relation(profile->cbdata, names, new_value);
+    }
 
     retval = rw_setup(profile);
     if (retval)

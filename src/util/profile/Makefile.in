@@ -38,7 +38,7 @@ SRCS = $(srcdir)/prof_tree.c \
 	$(srcdir)/prof_init.c
 
 EXTRADEPSRCS=$(srcdir)/test_parse.c $(srcdir)/test_profile.c \
-	$(srcdir)/profile_tcl.c
+	$(srcdir)/test_vtable.c $(srcdir)/profile_tcl.c
 
 DEPLIBS = $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
 MLIBS = -lcom_err $(SUPPORT_LIB) $(LIBS)
@@ -93,6 +93,9 @@ test_profile: test_profile.$(OBJEXT) argv_parse.$(OBJEXT) $(OBJS) $(DEPLIBS)
 	$(CC_LINK) -o test_profile test_profile.$(OBJEXT) \
 		argv_parse.$(OBJEXT) $(OBJS) $(MLIBS)
 
+test_vtable: test_vtable.$(OBJEXT) $(OBJS) $(DEPLIBS)
+	$(CC_LINK) -o test_vtable test_vtable.$(OBJEXT) $(OBJS) $(MLIBS)
+
 .d: includes
 
 # NEED TO FIX!!
@@ -129,12 +132,13 @@ profile_tcl: profile_tcl.o $(PROF_DEPLIB) $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
 
 clean-unix:: clean-libs clean-libobjs
 	$(RM) $(PROGS) *.o *~ test_parse core prof_err.h \
-		prof_err.c test_profile profile.h profile_tcl
+		prof_err.c test_profile test_vtable profile.h profile_tcl
 
 clean-windows::
 	$(RM) $(PROFILE_HDR)
 
-check-unix:: test_parse test_profile
+check-unix:: test_parse test_profile test_vtable
+	$(KRB5_RUN_ENV) $(VALGRIND) ./test_vtable
 
 DO_TCL=@DO_TCL@
 check-unix:: check-unix-tcl-$(DO_TCL)

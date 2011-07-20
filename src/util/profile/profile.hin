@@ -118,6 +118,156 @@ long KRB5_CALLCONV profile_add_relation
 	(profile_t profile, const char **names,
 		   const char *new_value);
 
+/*
+ * profile_init_vtable allows a caller to create a profile-compatible object
+ * with a different back end.
+ */
+
+/*
+ * Mandatory: Look up all of the relations for names, placing the resulting
+ * values in *ret_values.  If no relations exist, return PROF_NO_RELATION, or
+ * PROF_NO_SECTION to indicate that one of the intermediate names does not
+ * exist as a section.  The list will be freed with free_values.
+ */
+typedef long
+(*profile_get_values_fn)(void *cbdata, const char *const *names,
+			 char ***ret_values);
+
+/* Mandatory: Free a list of strings returned by get_values. */
+typedef void
+(*profile_free_values_fn)(void *cbdata, char **values);
+
+/* Optional: Release any data associated with the profile. */
+typedef void
+(*profile_cleanup_fn)(void *cbdata);
+
+/*
+ * Optional (mandatory if cleanup is defined): Generate a new cbdata pointer
+ * for a copy of the profile.  If not implemented, the new profile will receive
+ * the same cbdata pointer as the old one.
+ */
+typedef long
+(*profile_copy_fn)(void *cbdata, void **ret_cbdata);
+
+/*
+ * Optional: Create an iterator handle.
+ *
+ * If flags contains PROFILE_ITER_LIST_SECTION, iterate over all of the
+ * relations and sections within names.  Otherwise, iterate over the relation
+ * values for names, or produce a single section result if names is a section.
+ *
+ * If flags contains PROFILE_ITER_SECTIONS_ONLY, produce only sections.
+ *
+ * If flags contains PROFILE_ITER_RELATIONS_ONLY, produce only relations.
+ */
+typedef long
+(*profile_iterator_create_fn)(void *cbdata, const char *const *names,
+			      int flags, void **ret_iter);
+
+/*
+ * Optional (mandatory if iterator_create is defined): Produce the next
+ * relation or section in an iteration.  If producing a section result, set
+ * *ret_value to NULL.  The returned strings will be freed with free_string.
+ */
+typedef long
+(*profile_iterator_fn)(void *cbdata, void *iter, char **ret_name,
+		       char **ret_value);
+
+/*
+ * Optional (mandatory if iterator_create is defined): Free the memory for an
+ * iterator.
+ */
+typedef void
+(*profile_iterator_free_fn)(void *cbdata, void *iter);
+
+/* Optional (mandatory if iterator is defined): Free a string value. */
+typedef void
+(*profile_free_string_fn)(void *cbdata, char *string);
+
+/*
+ * Optional: Determine if a profile is writable.  If not implemented, the
+ * profile is never writable.
+ */
+typedef long
+(*profile_writable_fn)(void *cbdata, int *writable);
+
+/*
+ * Optional: Determine if a profile is modified in memory relative to the
+ * persistent store.  If not implemented, the profile is assumed to never be
+ * modified.
+ */
+typedef long
+(*profile_modified_fn)(void *cbdata, int *modified);
+
+/*
+ * Optional: Change the value of a relation, or remove it if new_value is NULL.
+ * If old_value is set and the relation does not have that value, return
+ * PROF_NO_RELATION.
+ */
+typedef long
+(*profile_update_relation_fn)(void *cbdata, const char **names,
+			      const char *old_value, const char *new_value);
+
+/*
+ * Optional: Rename a section to new_name, or remove the section if new_name is
+ * NULL.
+ */
+typedef long
+(*profile_rename_section_fn)(void *cbdata, const char **names,
+			     const char *new_name);
+
+/*
+ * Optional: Add a new relation, or a new section if new_value is NULL.  Add
+ * any intermediate sections as necessary.
+ */
+typedef long
+(*profile_add_relation_fn)(void *cbdata, const char **names,
+			   const char *new_value);
+
+/*
+ * Optional: Flush any pending memory updates to the persistent store.  If
+ * implemented, this function will be called by profile_release as well as
+ * profile_flush, so make sure it's not inefficient to flush an unmodified
+ * profile.
+ */
+typedef long
+(*profile_flush_fn)(void *cbdata);
+
+struct profile_vtable {
+    int minor_ver;              /* Set this to 1. */
+
+    /* Methods needed for a basic read-only non-iterable profile (cleanup is
+     * optional). */
+    profile_get_values_fn get_values;
+    profile_free_values_fn free_values;
+    profile_cleanup_fn cleanup;
+    profile_copy_fn copy;
+
+    /* Methods for iterable profiles. */
+    profile_iterator_create_fn iterator_create;
+    profile_iterator_fn iterator;
+    profile_iterator_free_fn iterator_free;
+    profile_free_string_fn free_string;
+
+    /* Methods for writable profiles. */
+    profile_writable_fn writable;
+    profile_modified_fn modified;
+    profile_update_relation_fn update_relation;
+    profile_rename_section_fn rename_section;
+    profile_add_relation_fn add_relation;
+    profile_flush_fn flush;
+
+    /* End of minor version 1. */
+};
+
+/*
+ * Create a profile object whose operations will be performed using the
+ * function pointers in vtable.  cbdata will be supplied to each vtable
+ * function as the first argument.
+ */
+long KRB5_CALLCONV profile_init_vtable
+	(struct profile_vtable *vtable, void *cbdata, profile_t *ret_profile);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

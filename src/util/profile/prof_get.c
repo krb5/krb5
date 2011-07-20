@@ -128,6 +128,30 @@ void KRB5_CALLCONV profile_free_list(char **list)
     free(list);
 }
 
+/* Look up a relation in a vtable profile. */
+static errcode_t
+get_values_vt(profile_t profile, const char *const *names, char ***ret_values)
+{
+    errcode_t               retval;
+    char                    **vtvalues, **val;
+    struct profile_string_list values;
+
+    retval = profile->vt->get_values(profile->cbdata, names, &vtvalues);
+    if (retval)
+        return retval;
+
+    /* Copy the result into memory we can free. */
+    retval = init_list(&values);
+    if (retval == 0) {
+        for (val = vtvalues; *val; val++)
+            add_to_list(&values, *val);
+        end_list(&values, ret_values);
+    }
+
+    profile->vt->free_values(profile->cbdata, vtvalues);
+    return retval;
+}
+
 errcode_t KRB5_CALLCONV
 profile_get_values(profile_t profile, const char *const *names,
                    char ***ret_values)
@@ -136,6 +160,9 @@ profile_get_values(profile_t profile, const char *const *names,
     void                    *state;
     char                    *value;
     struct profile_string_list values;
+
+    if (profile->vt)
+        return get_values_vt(profile, names, ret_values);
 
     if ((retval = profile_node_iterator_create(profile, names,
                                                PROFILE_ITER_RELATIONS_ONLY,
@@ -165,23 +192,46 @@ cleanup:
     return retval;
 }
 
+/* Look up a relation in a vtable profile and return the first value in the
+ * result. */
+static errcode_t
+get_value_vt(profile_t profile, const char *const *names, char **ret_value)
+{
+    errcode_t               retval;
+    char                    **vtvalues;
+
+    retval = profile->vt->get_values(profile->cbdata, names, &vtvalues);
+    if (retval)
+        return retval;
+    *ret_value = strdup(*vtvalues);
+    if (*ret_value == NULL)
+        retval = ENOMEM;
+    profile->vt->free_values(profile->cbdata, vtvalues);
+    return retval;
+}
+
 /*
  * This function only gets the first value from the file; it is a
  * helper function for profile_get_string, profile_get_integer, etc.
  */
 errcode_t profile_get_value(profile_t profile, const char **names,
-                            const char **ret_value)
+                            char **ret_value)
 {
     errcode_t               retval;
     void                    *state;
     char                    *value;
 
-    if ((retval = profile_node_iterator_create(profile, names,
-                                               PROFILE_ITER_RELATIONS_ONLY,
-                                               &state)))
+    *ret_value = NULL;
+    if (profile->vt)
+        return get_value_vt(profile, names, ret_value);
+
+    retval = profile_iterator_create(profile, names,
+                                     PROFILE_ITER_RELATIONS_ONLY, &state);
+    if (retval)
         return retval;
 
-    if ((retval = profile_node_iterator(&state, 0, 0, &value)))
+    retval = profile_iterator(&state, NULL, &value);
+    if (retval)
         goto cleanup;
 
     if (value)
@@ -190,7 +240,7 @@ errcode_t profile_get_value(profile_t profile, const char **names,
         retval = PROF_NO_RELATION;
 
 cleanup:
-    profile_node_iterator_free(&state);
+    profile_iterator_free(&state);
     return retval;
 }
 
@@ -199,7 +249,7 @@ profile_get_string(profile_t profile, const char *name, const char *subname,
                    const char *subsubname, const char *def_val,
                    char **ret_string)
 {
-    const char      *value;
+    char            *value;
     errcode_t       retval;
     const char      *names[4];
 
@@ -209,19 +259,45 @@ profile_get_string(profile_t profile, const char *name, const char *subname,
         names[2] = subsubname;
         names[3] = 0;
         retval = profile_get_value(profile, names, &value);
-        if (retval == PROF_NO_SECTION || retval == PROF_NO_RELATION)
-            value = def_val;
-        else if (retval)
+        if (retval == 0) {
+            *ret_string = value;
+            return 0;
+        } else if (retval != PROF_NO_SECTION && retval != PROF_NO_RELATION)
             return retval;
-    } else
-        value = def_val;
+    }
 
-    if (value) {
-        *ret_string = strdup(value);
-        if (*ret_string == 0)
+    if (def_val) {
+        *ret_string = strdup(def_val);
+        if (*ret_string == NULL)
             return ENOMEM;
     } else
-        *ret_string = 0;
+        *ret_string = NULL;
+    return 0;
+}
+
+static errcode_t
+parse_int(const char *value, int *ret_int)
+{
+    char            *end_value;
+    long            ret_long;
+
+    if (value[0] == 0)
+        /* Empty string is no good.  */
+        return PROF_BAD_INTEGER;
+    errno = 0;
+    ret_long = strtol(value, &end_value, 10);
+
+    /* Overflow or underflow.  */
+    if ((ret_long == LONG_MIN || ret_long == LONG_MAX) && errno != 0)
+        return PROF_BAD_INTEGER;
+    /* Value outside "int" range.  */
+    if ((long) (int) ret_long != ret_long)
+        return PROF_BAD_INTEGER;
+    /* Garbage in string.  */
+    if (end_value != value + strlen (value))
+        return PROF_BAD_INTEGER;
+
+    *ret_int = ret_long;
     return 0;
 }
 
@@ -229,11 +305,9 @@ errcode_t KRB5_CALLCONV
 profile_get_integer(profile_t profile, const char *name, const char *subname,
                     const char *subsubname, int def_val, int *ret_int)
 {
-    const char      *value;
+    char            *value;
     errcode_t       retval;
     const char      *names[4];
-    char            *end_value;
-    long            ret_long;
 
     *ret_int = def_val;
     if (profile == 0)
@@ -250,25 +324,9 @@ profile_get_integer(profile_t profile, const char *name, const char *subname,
     } else if (retval)
         return retval;
 
-    if (value[0] == 0)
-        /* Empty string is no good.  */
-        return PROF_BAD_INTEGER;
-    errno = 0;
-    ret_long = strtol (value, &end_value, 10);
-
-    /* Overflow or underflow.  */
-    if ((ret_long == LONG_MIN || ret_long == LONG_MAX) && errno != 0)
-        return PROF_BAD_INTEGER;
-    /* Value outside "int" range.  */
-    if ((long) (int) ret_long != ret_long)
-        return PROF_BAD_INTEGER;
-    /* Garbage in string.  */
-    if (end_value != value + strlen (value))
-        return PROF_BAD_INTEGER;
-
-
-    *ret_int = ret_long;
-    return 0;
+    retval = parse_int(value, ret_int);
+    free(value);
+    return retval;
 }
 
 static const char *const conf_yes[] = {
@@ -310,7 +368,7 @@ errcode_t KRB5_CALLCONV
 profile_get_boolean(profile_t profile, const char *name, const char *subname,
                     const char *subsubname, int def_val, int *ret_boolean)
 {
-    const char      *value;
+    char            *value;
     errcode_t       retval;
     const char      *names[4];
 
@@ -330,7 +388,9 @@ profile_get_boolean(profile_t profile, const char *name, const char *subname,
     } else if (retval)
         return retval;
 
-    return profile_parse_boolean (value, ret_boolean);
+    retval = profile_parse_boolean(value, ret_boolean);
+    free(value);
+    return retval;
 }
 
 /*
@@ -346,19 +406,21 @@ profile_get_subsection_names(profile_t profile, const char **names,
     char                    *name;
     struct profile_string_list values;
 
-    if ((retval = profile_node_iterator_create(profile, names,
-                                               PROFILE_ITER_LIST_SECTION | PROFILE_ITER_SECTIONS_ONLY,
-                                               &state)))
+    if ((retval = profile_iterator_create(profile, names,
+                                          PROFILE_ITER_LIST_SECTION |
+                                          PROFILE_ITER_SECTIONS_ONLY,
+                                          &state)))
         return retval;
 
     if ((retval = init_list(&values)))
         return retval;
 
     do {
-        if ((retval = profile_node_iterator(&state, 0, &name, 0)))
+        if ((retval = profile_iterator(&state, &name, NULL)))
             goto cleanup;
         if (name)
             add_to_list(&values, name);
+        free(name);
     } while (state);
 
     end_list(&values, ret_names);
@@ -382,19 +444,21 @@ profile_get_relation_names(profile_t profile, const char **names,
     char                    *name;
     struct profile_string_list values;
 
-    if ((retval = profile_node_iterator_create(profile, names,
-                                               PROFILE_ITER_LIST_SECTION | PROFILE_ITER_RELATIONS_ONLY,
-                                               &state)))
+    if ((retval = profile_iterator_create(profile, names,
+                                          PROFILE_ITER_LIST_SECTION |
+                                          PROFILE_ITER_RELATIONS_ONLY,
+                                          &state)))
         return retval;
 
     if ((retval = init_list(&values)))
         return retval;
 
     do {
-        if ((retval = profile_node_iterator(&state, 0, &name, 0)))
+        if ((retval = profile_iterator(&state, &name, NULL)))
             goto cleanup;
         if (name && !is_list_member(&values, name))
             add_to_list(&values, name);
+        free(name);
     } while (state);
 
     end_list(&values, ret_names);
@@ -405,36 +469,80 @@ cleanup:
     return retval;
 }
 
+struct profile_iterator {
+    prf_magic_t magic;
+    profile_t profile;
+    void *idata;
+};
+
 errcode_t KRB5_CALLCONV
 profile_iterator_create(profile_t profile, const char *const *names, int flags,
                         void **ret_iter)
 {
-    return profile_node_iterator_create(profile, names, flags, ret_iter);
+    struct profile_iterator *iter;
+    errcode_t retval;
+
+    *ret_iter = NULL;
+    iter = malloc(sizeof(*iter));
+    if (iter == NULL)
+        return ENOMEM;
+    iter->magic = PROF_MAGIC_ITERATOR;
+    iter->profile = profile;
+
+    /* Create the underlying iterator representation using the vtable or the
+     * built-in node iterator. */
+    if (profile->vt) {
+        if (!profile->vt->iterator_create)
+            retval = PROF_UNSUPPORTED;
+        else
+            retval = profile->vt->iterator_create(profile->cbdata, names,
+                                                  flags, &iter->idata);
+    } else {
+        retval = profile_node_iterator_create(profile, names, flags,
+                                              &iter->idata);
+    }
+    if (retval) {
+        free(iter);
+        return retval;
+    }
+
+    *ret_iter = iter;
+    return 0;
 }
 
 void KRB5_CALLCONV
 profile_iterator_free(void **iter_p)
 {
-    profile_node_iterator_free(iter_p);
+    struct profile_iterator *iter;
+    profile_t profile;
+
+    if (!iter_p)
+        return;
+    iter = *iter_p;
+    if (!iter || iter->magic != PROF_MAGIC_ITERATOR)
+        return;
+    profile = iter->profile;
+    if (profile->vt)
+        profile->vt->iterator_free(profile->cbdata, iter->idata);
+    else
+        profile_node_iterator_free(&iter->idata);
+    free(iter);
+    *iter_p = NULL;
 }
 
-errcode_t KRB5_CALLCONV
-profile_iterator(void **iter_p, char **ret_name, char **ret_value)
+/* Make copies of name and value into *ret_name and *ret_value.  Handle null
+ * values of any argument. */
+static errcode_t
+set_results(const char *name, const char *value, char **ret_name,
+            char **ret_value)
 {
-    char *name, *value;
-    errcode_t       retval;
-
-    retval = profile_node_iterator(iter_p, 0, &name, &value);
-    if (retval)
-        return retval;
-
     if (ret_name) {
         if (name) {
             *ret_name = strdup(name);
             if (!*ret_name)
                 return ENOMEM;
         } else
-            *ret_name = 0;
+            *ret_name = NULL;
     }
     if (ret_value) {
         if (value) {
@@ -442,14 +550,54 @@ profile_iterator(void **iter_p, char **ret_name, char **ret_value)
             if (!*ret_value) {
                 if (ret_name) {
                     free(*ret_name);
-                    *ret_name = 0;
+                    *ret_name = NULL;
                 }
                 return ENOMEM;
             }
         } else
-            *ret_value = 0;
+            *ret_value = NULL;
     }
     return 0;
+}
+
+errcode_t KRB5_CALLCONV
+profile_iterator(void **iter_p, char **ret_name, char **ret_value)
+{
+    char *name, *value;
+    errcode_t       retval;
+    struct profile_iterator *iter = *iter_p;
+    profile_t profile;
+
+    if (iter->magic != PROF_MAGIC_ITERATOR)
+        return PROF_MAGIC_ITERATOR;
+    profile = iter->profile;
+
+    if (profile->vt) {
+        retval = profile->vt->iterator(profile->cbdata, iter->idata, &name,
+                                       &value);
+        if (retval)
+            return retval;
+        if (name == NULL) {
+            profile->vt->iterator_free(profile->cbdata, iter->idata);
+            free(iter);
+            *iter_p = NULL;
+        }
+        retval = set_results(name, value, ret_name, ret_value);
+        if (name)
+            profile->vt->free_string(profile->cbdata, name);
+        if (value)
+            profile->vt->free_string(profile->cbdata, value);
+        return retval;
+    }
+
+    retval = profile_node_iterator(&iter->idata, 0, &name, &value);
+    if (iter->idata == NULL) {
+        free(iter);
+        *iter_p = NULL;
+    }
+    if (retval)
+        return retval;
+    return set_results(name, value, ret_name, ret_value);
 }
 
 void KRB5_CALLCONV

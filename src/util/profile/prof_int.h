@@ -87,6 +87,10 @@ typedef struct _prf_file_t *prf_file_t;
 struct _profile_t {
 	prf_magic_t	magic;
 	prf_file_t	first_file;
+
+	/* If non-null, use vtable operations instead of native ones. */
+	struct profile_vtable *vt;
+	void		*cbdata;
 };
 
 /*
@@ -245,8 +249,7 @@ errcode_t profile_ser_internalize
 /* prof_get.c */
 
 errcode_t profile_get_value
-	(profile_t profile, const char **names,
-		    const char	**ret_value);
+	(profile_t profile, const char **names, char **ret_value);
 /* Others included from profile.h */
 
 /* prof_set.c -- included from profile.h */

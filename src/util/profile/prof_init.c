@@ -22,6 +22,44 @@
 typedef int32_t prof_int32;
 
 errcode_t KRB5_CALLCONV
+profile_init_vtable(struct profile_vtable *vtable, void *cbdata,
+                    profile_t *ret_profile)
+{
+    profile_t profile;
+    struct profile_vtable *vt_copy;
+
+    /* Check that the vtable's minor version is sane and that mandatory methods
+     * are implemented. */
+    if (vtable->minor_ver < 1 || !vtable->get_values || !vtable->free_values)
+        return EINVAL;
+    if (vtable->cleanup && !vtable->copy)
+        return EINVAL;
+    if (vtable->iterator_create &&
+        (!vtable->iterator || !vtable->iterator_free || !vtable->free_string))
+        return EINVAL;
+
+    profile = malloc(sizeof(*profile));
+    if (!profile)
+        return ENOMEM;
+    memset(profile, 0, sizeof(*profile));
+
+    vt_copy = malloc(sizeof(*vt_copy));
+    if (!vt_copy) {
+        free(profile);
+        return ENOMEM;
+    }
+    /* It's safe to just copy the caller's vtable for now.  If the minor
+     * version is bumped, we'll need to copy individual fields. */
+    *vt_copy = *vtable;
+
+    profile->vt = vt_copy;
+    profile->cbdata = cbdata;
+    profile->magic = PROF_MAGIC_PROFILE;
+    *ret_profile = profile;
+    return 0;
+}
+
+errcode_t KRB5_CALLCONV
 profile_init(const_profile_filespec_t *files, profile_t *ret_profile)
 {
     const_profile_filespec_t *fs;
@@ -93,6 +131,26 @@ profile_copy(profile_t old_profile, profile_t *new_profile)
     const_profile_filespec_t *files;
     prf_file_t file;
     errcode_t err;
+    void *cbdata;
+
+    /* For copies of vtable profiles, use the same vtable and perhaps a new
+     * cbdata pointer. */
+    if (old_profile->vt) {
+        if (old_profile->vt->copy) {
+            /* Make a copy of the cbdata for the new profile. */
+            err = old_profile->vt->copy(old_profile->cbdata, &cbdata);
+            if (err)
+                return err;
+            err = profile_init_vtable(old_profile->vt, cbdata, new_profile);
+            if (err && old_profile->vt->cleanup)
+                old_profile->vt->cleanup(cbdata);
+            return err;
+        } else {
+            /* Use the same vtable and cbdata as the old profile. */
+            return profile_init_vtable(old_profile->vt, old_profile->cbdata,
+                                       new_profile);
+        }
+    }
 
     /* The fields we care about are read-only after creation, so
        no locking is needed.  */
@@ -168,6 +226,14 @@ profile_is_writable(profile_t profile, int *writable)
 
     if (!writable)
         return EINVAL;
+    *writable = 0;
+
+    if (profile->vt) {
+        if (profile->vt->writable)
+            return profile->vt->writable(profile->cbdata, writable);
+        else
+            return 0;
+    }
 
     if (profile->first_file)
         *writable = profile_file_is_writable(profile->first_file);
@@ -183,6 +249,14 @@ profile_is_modified(profile_t profile, int *modified)
 
     if (!modified)
         return EINVAL;
+    *modified = 0;
+
+    if (profile->vt) {
+        if (profile->vt->modified)
+            return profile->vt->modified(profile->cbdata, modified);
+        else
+            return 0;
+    }
 
     if (profile->first_file)
         *modified = (profile->first_file->data->flags & PROFILE_FILE_DIRTY);
@@ -196,6 +270,12 @@ profile_flush(profile_t profile)
     if (!profile || profile->magic != PROF_MAGIC_PROFILE)
         return PROF_MAGIC_PROFILE;
 
+    if (profile->vt) {
+        if (profile->vt->flush)
+            return profile->vt->flush(profile->cbdata);
+        return 0;
+    }
+
     if (profile->first_file)
         return profile_flush_file(profile->first_file);
 
@@ -208,6 +288,9 @@ profile_flush_to_file(profile_t profile, const_profile_filespec_t outfile)
     if (!profile || profile->magic != PROF_MAGIC_PROFILE)
         return PROF_MAGIC_PROFILE;
 
+    if (profile->vt)
+        return PROF_UNSUPPORTED;
+
     if (profile->first_file)
         return profile_flush_file_to_file(profile->first_file,
                                           outfile);
@@ -218,6 +301,8 @@ profile_flush_to_file(profile_t profile, const_profile_filespec_t outfile)
 errcode_t KRB5_CALLCONV
 profile_flush_to_buffer(profile_t profile, char **buf)
 {
+    if (profile->vt)
+        return PROF_UNSUPPORTED;
     return profile_flush_file_data_to_buffer(profile->first_file->data, buf);
 }
 
@@ -235,9 +320,15 @@ profile_abandon(profile_t profile)
     if (!profile || profile->magic != PROF_MAGIC_PROFILE)
         return;
 
-    for (p = profile->first_file; p; p = next) {
-        next = p->next;
-        profile_free_file(p);
+    if (profile->vt) {
+        if (profile->vt->cleanup)
+            profile->vt->cleanup(profile->cbdata);
+        free(profile->vt);
+    } else {
+        for (p = profile->first_file; p; p = next) {
+            next = p->next;
+            profile_free_file(p);
+        }
     }
     profile->magic = 0;
     free(profile);
@@ -251,9 +342,17 @@ profile_release(profile_t profile)
     if (!profile || profile->magic != PROF_MAGIC_PROFILE)
         return;
 
-    for (p = profile->first_file; p; p = next) {
-        next = p->next;
-        profile_close_file(p);
+    if (profile->vt) {
+        if (profile->vt->flush)
+            profile->vt->flush(profile->cbdata);
+        if (profile->vt->cleanup)
+            profile->vt->cleanup(profile->cbdata);
+        free(profile->vt);
+    } else {
+        for (p = profile->first_file; p; p = next) {
+            next = p->next;
+            profile_close_file(p);
+        }
     }
     profile->magic = 0;
     free(profile);
