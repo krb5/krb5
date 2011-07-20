@@ -640,8 +640,10 @@ kg_accept_krb5(minor_status, context_handle,
         }
     }
 
-    if ((code = krb5_rd_req(context, &auth_context, &ap_req, accprinc,
-                            cred->keytab, &ap_req_options, &ticket))) {
+    code = krb5_rd_req(context, &auth_context, &ap_req, accprinc,
+                       cred->keytab, &ap_req_options, &ticket);
+    krb5_free_principal(context, accprinc);
+    if (code) {
         major_status = GSS_S_FAILURE;
         goto fail;
     }
