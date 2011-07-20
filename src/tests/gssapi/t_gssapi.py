@@ -69,10 +69,19 @@ output = realm.run_as_client(['./t_accname', 'host/-nomatch-',
 if 'Wrong principal in request' not in output:
     fail('Expected error message not seen in t_accname output')
 
+# Test krb5_gss_import_cred.
+realm.run_as_client(['./t_imp_cred', 'service1/barack'])
+realm.run_as_client(['./t_imp_cred', 'service1/barack', 'service1/barack'])
+realm.run_as_client(['./t_imp_cred', 'service1/andrew', 'service1/abraham'])
+output = realm.run_as_client(['./t_imp_cred', 'service2/dwight'],
+                             expected_code=1)
+if 'Wrong principal in request' not in output:
+    fail('Expected error message not seen in t_imp_cred output')
+
 realm.stop()
 
-# Re-run that last test with ignore_acceptor_hostname set and the
-# principal for the mismatching hostname in the keytab.
+# Re-run the last acceptor name test with ignore_acceptor_hostname set
+# and the principal for the mismatching hostname in the keytab.
 ignore_conf = { 'all' : { 'libdefaults' : {
             'ignore_acceptor_hostname' : 'true' } } }
 realm = K5Realm(krb5_conf=ignore_conf, start_kadmind=False)
@@ -81,6 +90,6 @@ realm.run_kadminl('xst host/-nomatch-')
 output = realm.run_as_client(['./t_accname', 'host/-nomatch-',
                               'host@%s' % socket.gethostname()])
 if 'host/-nomatch-' not in output:
-    fail('Expected error message not seen in t_accname output')
+    fail('Expected host/-nomatch- in t_accname output')
 
 success('GSSAPI tests.')
