@@ -1643,7 +1643,7 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 /** alternate authentication types */
 #define KRB5_ALTAUTH_ATT_CHALLENGE_RESPONSE     64
 
-/* authorization data types */
+/* authorization data types. See RFC 4120 section 5.2.6 */
 #define KRB5_AUTHDATA_IF_RELEVANT   1
 #define KRB5_AUTHDATA_KDC_ISSUED    4
 #define KRB5_AUTHDATA_AND_OR        5
@@ -6938,12 +6938,37 @@ krb5_free_error_message(krb5_context ctx, const char *msg);
 void KRB5_CALLCONV
 krb5_clear_error_message(krb5_context ctx);
 
+/**
+ * Unwrap authorization data.
+ *
+ * @param [in]  context         Library context
+ * @param [in]  type            KRB5_AUTHDATA type of @a container
+ * @param [in]  container       Authorization data to be decoded
+ * @param [out] authdata        List of decoded authorization data
+ *
+ * @sa krb5_encode_authdata_container()
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_decode_authdata_container(krb5_context context,
                                krb5_authdatatype type,
                                const krb5_authdata *container,
                                krb5_authdata ***authdata);
-
+/**
+ * Wrap authorization data in a container.
+ *
+ * @param [in]  context         Library context
+ * @param [in]  type            KRB5_AUTHDATA type of @a container
+ * @param [in]  authdata        List of authorization data to be encoded
+ * @param [out] container       List of encoded authorization data
+ *
+ * The result is returned in @a container as a single-element list.
+ *
+ * @sa krb5_decode_authdata_container()
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_encode_authdata_container(krb5_context context,
                                krb5_authdatatype type,
