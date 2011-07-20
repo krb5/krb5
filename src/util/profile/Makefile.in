@@ -1,5 +1,6 @@
 mydir=util$(S)profile
 BUILDTOP=$(REL)..$(S)..
+SUBDIRS=testmod
 PROG_LIBPATH=-L$(TOPLIBD) $(TCL_LIBPATH) -L.
 PROG_RPATH=$(KRB5_LIBDIR)$(TCL_RPATH)
 KRB5_RUN_ENV=@KRB5_RUN_ENV@
@@ -10,7 +11,7 @@ DEFS=
 
 LOCALINCLUDES=-I. $(TCL_INCLUDES)
 # for tcl.h
-DEFINES=-DHAS_STDARG
+DEFINES=-DHAS_STDARG -DLIBDIR=\"$(KRB5_LIBDIR)\"
 
 STLIBOBJS = \
 	prof_tree.o \
@@ -37,8 +38,9 @@ SRCS = $(srcdir)/prof_tree.c \
 	prof_err.c \
 	$(srcdir)/prof_init.c
 
-EXTRADEPSRCS=$(srcdir)/test_parse.c $(srcdir)/test_profile.c \
-	$(srcdir)/test_vtable.c $(srcdir)/profile_tcl.c
+EXTRADEPSRCS=$(srcdir)/test_load.c $(srcdir)/test_parse.c \
+	$(srcdir)/test_profile.c $(srcdir)/test_vtable.c \
+	$(srcdir)/profile_tcl.c
 
 DEPLIBS = $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
 MLIBS = -lcom_err $(SUPPORT_LIB) $(LIBS)
@@ -96,6 +98,12 @@ test_profile: test_profile.$(OBJEXT) argv_parse.$(OBJEXT) $(OBJS) $(DEPLIBS)
 test_vtable: test_vtable.$(OBJEXT) $(OBJS) $(DEPLIBS)
 	$(CC_LINK) -o test_vtable test_vtable.$(OBJEXT) $(OBJS) $(MLIBS)
 
+test_load: test_load.$(OBJEXT) $(SUPPORT_DEPLIB)
+	$(CC_LINK) -o test_load test_load.$(OBJEXT) $(OBJS) $(MLIBS)
+
+modtest.conf:
+	echo "module `pwd`/testmod/proftest$(DYNOBJEXT):teststring" > $@
+
 .d: includes
 
 # NEED TO FIX!!
@@ -131,14 +139,16 @@ profile_tcl: profile_tcl.o $(PROF_DEPLIB) $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
 		-L../et -L../.. -lprofile $(TCL_LIBS) $(MLIBS)
 
 clean-unix:: clean-libs clean-libobjs
-	$(RM) $(PROGS) *.o *~ test_parse core prof_err.h \
-		prof_err.c test_profile test_vtable profile.h profile_tcl
+	$(RM) $(PROGS) *.o *~ core prof_err.h profile.h prof_err.c
+	$(RM) test_load test_parse test_profile test_vtable profile_tcl
+	$(RM) modtest.conf
 
 clean-windows::
 	$(RM) $(PROFILE_HDR)
 
-check-unix:: test_parse test_profile test_vtable
+check-unix:: test_parse test_profile test_vtable test_load modtest.conf
 	$(KRB5_RUN_ENV) $(VALGRIND) ./test_vtable
+	$(KRB5_RUN_ENV) $(VALGRIND) ./test_load
 
 DO_TCL=@DO_TCL@
 check-unix:: check-unix-tcl-$(DO_TCL)

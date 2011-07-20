@@ -1103,7 +1103,7 @@ fi
 AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])
 V5_AC_OUTPUT_MAKEFILE(.
 
-	util util/support util/profile util/send-pr
+	util util/support util/profile util/profile/testmod util/send-pr
 
 	lib lib/kdb
 

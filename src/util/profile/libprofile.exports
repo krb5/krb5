@@ -12,7 +12,9 @@ profile_get_string
 profile_get_subsection_names
 profile_get_values
 profile_init
+profile_init_flags
 profile_init_path
+profile_init_vtable
 profile_iterator
 profile_iterator_create
 profile_iterator_free

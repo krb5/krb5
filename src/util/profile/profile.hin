@@ -23,6 +23,9 @@
 
 typedef struct _profile_t *profile_t;
 
+/* Used by profile_init_flags(). */
+#define PROFILE_INIT_ALLOW_MODULE       0x0001  /* Allow module declaration */
+
 /*
  * Used by the profile iterator in prof_get.c
  */
@@ -41,6 +44,9 @@ typedef const char * const_profile_filespec_list_t;	/* list of : separated paths
 
 long KRB5_CALLCONV profile_init
 	(const_profile_filespec_t *files, profile_t *ret_profile);
+
+long KRB5_CALLCONV profile_init_flags
+	(const_profile_filespec_t *files, int flags, profile_t *ret_profile);
 
 long KRB5_CALLCONV profile_init_path
 	(const_profile_filespec_list_t filelist, profile_t *ret_profile);
@@ -234,7 +240,8 @@ typedef long
 (*profile_flush_fn)(void *cbdata);
 
 struct profile_vtable {
-    int minor_ver;              /* Set this to 1. */
+    int minor_ver;              /* Set to structure minor version (currently 1)
+				 * if calling profile_init_vtable. */
 
     /* Methods needed for a basic read-only non-iterable profile (cleanup is
      * optional). */
@@ -267,6 +274,19 @@ struct profile_vtable {
  */
 long KRB5_CALLCONV profile_init_vtable
 	(struct profile_vtable *vtable, void *cbdata, profile_t *ret_profile);
+
+/*
+ * Dynamically loadable profile modules should define a function named
+ * "profile_module_init" matching the following signature.  The function should
+ * initialize the methods of the provided vtable structure, stopping at the
+ * field corresponding to vtable->minor_ver.  Do not change the value of
+ * vtable->minor_ver.  Unimplemented methods can be left uninitialized.  The
+ * function should supply a callback data pointer in *cb_ret; this pointer can
+ * be cleaned up via the vtable cleanup method.
+ */
+typedef long
+(*profile_module_init_fn)(const char *residual, struct profile_vtable *vtable,
+			  void **cb_ret);
 
 #ifdef __cplusplus
 }

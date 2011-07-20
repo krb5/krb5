@@ -70,5 +70,9 @@ error_code	PROF_FAIL_INCLUDE_DIR,
 	"Included profile directory could not be read"
 error_code	PROF_UNSUPPORTED, "Operation not supported on this profile"
 error_code	PROF_MAGIC_NODE_ITERATOR, "Bad magic value in profile iterator"
+error_code	PROF_MODULE, "Unexpected module declaration in profile"
+error_code	PROF_MODULE_SYNTAX,
+	"Invalid syntax of module declaration in profile"
+error_code	PROF_MODULE_INVALID, "Invalid profile module"
 
 end

@@ -325,8 +325,8 @@ os_init_paths(krb5_context ctx, krb5_boolean kdc)
         retval = add_kdc_config_file(&files);
 
     if (!retval) {
-        retval = profile_init((const_profile_filespec_t *) files,
-                              &ctx->profile);
+        retval = profile_init_flags((const_profile_filespec_t *) files,
+                                    PROFILE_INIT_ALLOW_MODULE, &ctx->profile);
 
 #ifdef KRB5_DNS_LOOKUP
         /* if none of the filenames can be opened use an empty profile */
@@ -405,7 +405,8 @@ krb5_set_config_files(krb5_context ctx, const char **filenames)
     krb5_error_code retval = 0;
     profile_t    profile;
 
-    retval = profile_init(filenames, &profile);
+    retval = profile_init_flags(filenames, PROFILE_INIT_ALLOW_MODULE,
+                                &profile);
     if (retval)
         return retval;
 

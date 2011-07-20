@@ -12,6 +12,7 @@
 
 #include "k5-thread.h"
 #include "k5-platform.h"
+#include "k5-plugin.h"
 #include "com_err.h"
 #include "profile.h"
 
@@ -79,6 +80,14 @@ typedef struct _prf_file_t *prf_file_t;
 #define PROFILE_FILE_DIRTY		0x0002
 #define PROFILE_FILE_SHARED		0x0004
 
+struct _prf_lib_handle_t {
+	k5_mutex_t lock;
+	int refcount;
+	struct plugin_file_handle *plugin_handle;
+};
+
+typedef struct _prf_lib_handle_t *prf_lib_handle_t;
+
 /*
  * This structure defines the high-level, user visible profile_t
  * object, which is used as a handle by users who need to query some
@@ -91,6 +100,7 @@ struct _profile_t {
 	/* If non-null, use vtable operations instead of native ones. */
 	struct profile_vtable *vt;
 	void		*cbdata;
+	prf_lib_handle_t lib_handle;
 };
 
 /*
@@ -111,7 +121,7 @@ struct _profile_t {
 /* profile_parse.c */
 
 errcode_t profile_parse_file
-	(FILE *f, struct profile_node **root);
+	(FILE *f, struct profile_node **root, char **ret_modspec);
 
 errcode_t profile_write_tree_file
 	(struct profile_node *root, FILE *dstfile);
@@ -201,14 +211,15 @@ errcode_t profile_rename_node
 errcode_t KRB5_CALLCONV profile_copy (profile_t, profile_t *);
 
 errcode_t profile_open_file
-	(const_profile_filespec_t file, prf_file_t *ret_prof);
+	(const_profile_filespec_t file, prf_file_t *ret_prof,
+	 char **ret_modspec);
 
-#define profile_update_file(P) profile_update_file_data((P)->data)
+#define profile_update_file(P, M) profile_update_file_data((P)->data, M)
 errcode_t profile_update_file_data
-	(prf_data_t profile);
-#define profile_update_file_locked(P) profile_update_file_data_locked((P)->data)
+	(prf_data_t profile, char **ret_modspec);
+#define profile_update_file_locked(P, M) profile_update_file_data_locked((P)->data, M)
 errcode_t profile_update_file_data_locked
-	(prf_data_t data);
+	(prf_data_t data, char **ret_modspec);
 
 #define profile_flush_file(P) (((P) && (P)->magic == PROF_MAGIC_FILE) ? profile_flush_file_data((P)->data) : PROF_MAGIC_FILE)
 errcode_t profile_flush_file_data

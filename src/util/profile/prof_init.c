@@ -21,9 +21,11 @@
 #endif
 typedef int32_t prof_int32;
 
-errcode_t KRB5_CALLCONV
-profile_init_vtable(struct profile_vtable *vtable, void *cbdata,
-                    profile_t *ret_profile)
+/* Create a vtable profile, possibly with a library handle.  The new profile
+ * takes ownership of the handle refcount on success. */
+static errcode_t
+init_module(struct profile_vtable *vtable, void *cbdata,
+            prf_lib_handle_t handle, profile_t *ret_profile)
 {
     profile_t profile;
     struct profile_vtable *vt_copy;
@@ -54,18 +56,117 @@ profile_init_vtable(struct profile_vtable *vtable, void *cbdata,
 
     profile->vt = vt_copy;
     profile->cbdata = cbdata;
+    profile->lib_handle = handle;
     profile->magic = PROF_MAGIC_PROFILE;
     *ret_profile = profile;
     return 0;
 }
 
+/* Parse modspec into the module path and residual string. */
+static errcode_t
+parse_modspec(const char *modspec, char **ret_path, char **ret_residual)
+{
+    const char *p, *prefix;
+    char *path, *residual;
+
+    *ret_path = *ret_residual = NULL;
+
+    p = strchr(modspec, ':');
+    if (p == NULL)
+        return PROF_MODULE_SYNTAX;
+
+    /* XXX Unix path handling for now. */
+    prefix = (*modspec == '/') ? "" : LIBDIR "/";
+    if (asprintf(&path, "%s%.*s", prefix, (int)(p - modspec), modspec) < 0)
+        return ENOMEM;
+
+    residual = strdup(p + 1);
+    if (residual == NULL) {
+        free(path);
+        return ENOMEM;
+    }
+
+    *ret_path = path;
+    *ret_residual = residual;
+    return 0;
+}
+
+/* Load a dynamic profile module as specified by modspec and create a vtable
+ * profile for it in *ret_profile. */
+static errcode_t
+init_load_module(const char *modspec, profile_t *ret_profile)
+{
+    char *modpath = NULL, *residual = NULL;
+    struct errinfo einfo = { 0 };
+    prf_lib_handle_t lib_handle = NULL;
+    struct plugin_file_handle *plhandle = NULL;
+    void *cbdata = NULL, (*fptr)();
+    int have_lock = 0, have_cbdata = 0;
+    struct profile_vtable vtable = { 1 };  /* Set minor_ver to 1, rest null. */
+    errcode_t err;
+    profile_module_init_fn initfn;
+
+    err = parse_modspec(modspec, &modpath, &residual);
+    if (err)
+        goto cleanup;
+
+    /* Allocate a reference-counted library handle container. */
+    lib_handle = malloc(sizeof(*lib_handle));
+    if (lib_handle == NULL)
+        goto cleanup;
+    err = k5_mutex_init(&lib_handle->lock);
+    if (err)
+        goto cleanup;
+    have_lock = 1;
+
+    /* Open the module and get its initializer. */
+    err = krb5int_open_plugin(modpath, &plhandle, &einfo);
+    if (err)
+        goto cleanup;
+    err = krb5int_get_plugin_func(plhandle, "profile_module_init", &fptr,
+                                  &einfo);
+    if (err == ENOENT)
+        err = PROF_MODULE_INVALID;
+    if (err)
+        goto cleanup;
+
+    /* Get the profile vtable and callback data pointer. */
+    initfn = (profile_module_init_fn)fptr;
+    err = (*initfn)(residual, &vtable, &cbdata);
+    if (err)
+        goto cleanup;
+    have_cbdata = 1;
+
+    /* Create a vtable profile with the information obtained. */
+    lib_handle->plugin_handle = plhandle;
+    lib_handle->refcount = 1;
+    err = init_module(&vtable, cbdata, lib_handle, ret_profile);
+
+cleanup:
+    free(modpath);
+    free(residual);
+    krb5int_clear_error(&einfo);
+    if (err) {
+        if (have_cbdata && vtable.cleanup)
+            vtable.cleanup(cbdata);
+        if (have_lock)
+            k5_mutex_destroy(&lib_handle->lock);
+        free(lib_handle);
+        if (plhandle)
+            krb5int_close_plugin(plhandle);
+    }
+    return err;
+}
+
 errcode_t KRB5_CALLCONV
-profile_init(const_profile_filespec_t *files, profile_t *ret_profile)
+profile_init_flags(const_profile_filespec_t *files, int flags,
+                   profile_t *ret_profile)
 {
     const_profile_filespec_t *fs;
     profile_t profile;
     prf_file_t  new_file, last = 0;
     errcode_t retval = 0, access_retval = 0;
+    char *modspec = NULL, **modspec_arg;
 
     profile = malloc(sizeof(struct _profile_t));
     if (!profile)
@@ -79,7 +180,18 @@ profile_init(const_profile_filespec_t *files, profile_t *ret_profile)
      */
     if ( files && !PROFILE_LAST_FILESPEC(*files) ) {
         for (fs = files; !PROFILE_LAST_FILESPEC(*fs); fs++) {
-            retval = profile_open_file(*fs, &new_file);
+            /* Allow a module declaration if it is permitted by flags and this
+             * is the first file parsed. */
+            modspec_arg = ((flags & PROFILE_INIT_ALLOW_MODULE) && !last) ?
+                &modspec : NULL;
+            retval = profile_open_file(*fs, &new_file, modspec_arg);
+            if (retval == PROF_MODULE && modspec) {
+                /* Stop parsing files and load a dynamic module instead. */
+                free(profile);
+                retval = init_load_module(modspec, ret_profile);
+                free(modspec);
+                return retval;
+            }
             /* if this file is missing, skip to the next */
             if (retval == ENOENT) {
                 continue;
@@ -113,6 +225,63 @@ profile_init(const_profile_filespec_t *files, profile_t *ret_profile)
     return 0;
 }
 
+errcode_t KRB5_CALLCONV
+profile_init(const_profile_filespec_t *files, profile_t *ret_profile)
+{
+    return profile_init_flags(files, 0, ret_profile);
+}
+
+errcode_t KRB5_CALLCONV
+profile_init_vtable(struct profile_vtable *vtable, void *cbdata,
+                    profile_t *ret_profile)
+{
+    return init_module(vtable, cbdata, NULL, ret_profile);
+}
+
+/* Copy a vtable profile. */
+static errcode_t
+copy_vtable_profile(profile_t profile, profile_t *ret_new_profile)
+{
+    errcode_t err;
+    void *cbdata;
+    profile_t new_profile;
+
+    *ret_new_profile = NULL;
+
+    if (profile->vt->copy) {
+        /* Make a copy of profile's cbdata for the new profile. */
+        err = profile->vt->copy(profile->cbdata, &cbdata);
+        if (err)
+            return err;
+        err = init_module(profile->vt, cbdata, profile->lib_handle,
+                          &new_profile);
+        if (err && profile->vt->cleanup)
+            profile->vt->cleanup(cbdata);
+    } else {
+        /* Use the same cbdata as the old profile. */
+        err = init_module(profile->vt, profile->cbdata, profile->lib_handle,
+                          &new_profile);
+    }
+    if (err)
+        return err;
+
+    /* Increment the refcount on the library handle if there is one. */
+    if (profile->lib_handle) {
+        err = k5_mutex_lock(&profile->lib_handle->lock);
+        if (err) {
+            /* Don't decrement the refcount we failed to increment. */
+            new_profile->lib_handle = NULL;
+            profile_abandon(new_profile);
+            return err;
+        }
+        profile->lib_handle->refcount++;
+        k5_mutex_unlock(&profile->lib_handle->lock);
+    }
+
+    *ret_new_profile = new_profile;
+    return 0;
+}
+
 #define COUNT_LINKED_LIST(COUNT, PTYPE, START, FIELD)   \
     {                                                   \
         size_t cll_counter = 0;                         \
@@ -131,26 +300,9 @@ profile_copy(profile_t old_profile, profile_t *new_profile)
     const_profile_filespec_t *files;
     prf_file_t file;
     errcode_t err;
-    void *cbdata;
 
-    /* For copies of vtable profiles, use the same vtable and perhaps a new
-     * cbdata pointer. */
-    if (old_profile->vt) {
-        if (old_profile->vt->copy) {
-            /* Make a copy of the cbdata for the new profile. */
-            err = old_profile->vt->copy(old_profile->cbdata, &cbdata);
-            if (err)
-                return err;
-            err = profile_init_vtable(old_profile->vt, cbdata, new_profile);
-            if (err && old_profile->vt->cleanup)
-                old_profile->vt->cleanup(cbdata);
-            return err;
-        } else {
-            /* Use the same vtable and cbdata as the old profile. */
-            return profile_init_vtable(old_profile->vt, old_profile->cbdata,
-                                       new_profile);
-        }
-    }
+    if (old_profile->vt)
+        return copy_vtable_profile(old_profile, new_profile);
 
     /* The fields we care about are read-only after creation, so
        no locking is needed.  */
@@ -208,8 +360,8 @@ profile_init_path(const_profile_filespec_list_t filepath,
     /* cap the array */
     filenames[i] = 0;
 
-    retval = profile_init((const_profile_filespec_t *) filenames,
-                          ret_profile);
+    retval = profile_init_flags((const_profile_filespec_t *) filenames, 0,
+                                ret_profile);
 
     /* count back down and free the entries */
     while(--i >= 0) free(filenames[i]);
@@ -316,6 +468,7 @@ void KRB5_CALLCONV
 profile_abandon(profile_t profile)
 {
     prf_file_t      p, next;
+    errcode_t       err;
 
     if (!profile || profile->magic != PROF_MAGIC_PROFILE)
         return;
@@ -323,6 +476,14 @@ profile_abandon(profile_t profile)
     if (profile->vt) {
         if (profile->vt->cleanup)
             profile->vt->cleanup(profile->cbdata);
+        if (profile->lib_handle) {
+            /* Decrement the refcount on the handle and maybe free it. */
+            err = k5_mutex_lock(&profile->lib_handle->lock);
+            if (!err && --profile->lib_handle->refcount == 0) {
+                krb5int_close_plugin(profile->lib_handle->plugin_handle);
+                free(profile->lib_handle);
+            }
+        }
         free(profile->vt);
     } else {
         for (p = profile->first_file; p; p = next) {
@@ -343,11 +504,11 @@ profile_release(profile_t profile)
         return;
 
     if (profile->vt) {
+        /* Flush the profile and then delegate to profile_abandon. */
         if (profile->vt->flush)
             profile->vt->flush(profile->cbdata);
-        if (profile->vt->cleanup)
-            profile->vt->cleanup(profile->cbdata);
-        free(profile->vt);
+        profile_abandon(profile);
+        return;
     } else {
         for (p = profile->first_file; p; p = next) {
             next = p->next;

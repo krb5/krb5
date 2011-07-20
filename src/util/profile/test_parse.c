@@ -31,7 +31,7 @@ int main(argc, argv)
         exit(1);
     }
 
-    retval = profile_parse_file(f, &root);
+    retval = profile_parse_file(f, &root, NULL);
     if (retval) {
         printf("profile_parse_file error %s\n",
                error_message((errcode_t) retval));

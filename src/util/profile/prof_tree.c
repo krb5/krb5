@@ -498,7 +498,7 @@ get_new_file:
                 *ret_value =0;
             return 0;
         }
-        if ((retval = profile_update_file_locked(iter->file))) {
+        if ((retval = profile_update_file_locked(iter->file, NULL))) {
             k5_mutex_unlock(&iter->file->data->lock);
             if (retval == ENOENT || retval == EACCES) {
                 /* XXX memory leak? */

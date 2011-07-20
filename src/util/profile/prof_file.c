@@ -193,7 +193,7 @@ profile_make_prf_data(const char *filename)
 }
 
 errcode_t profile_open_file(const_profile_filespec_t filespec,
-                            prf_file_t *ret_prof)
+                            prf_file_t *ret_prof, char **ret_modspec)
 {
     prf_file_t      prf;
     errcode_t       retval;
@@ -256,7 +256,7 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
     if (data) {
         data->refcount++;
         (void) k5_mutex_unlock(&g_shared_trees_mutex);
-        retval = profile_update_file_data(data);
+        retval = profile_update_file_data(data, NULL);
         free(expanded_filename);
         prf->data = data;
         *ret_prof = prf;
@@ -280,7 +280,7 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
         return retval;
     }
 
-    retval = profile_update_file(prf);
+    retval = profile_update_file(prf, ret_modspec);
     if (retval) {
         profile_close_file(prf);
         return retval;
@@ -303,7 +303,7 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
     return 0;
 }
 
-errcode_t profile_update_file_data_locked(prf_data_t data)
+errcode_t profile_update_file_data_locked(prf_data_t data, char **ret_modspec)
 {
     errcode_t retval;
 #ifdef HAVE_STAT
@@ -361,7 +361,7 @@ errcode_t profile_update_file_data_locked(prf_data_t data)
     set_cloexec_file(f);
     data->upd_serial++;
     data->flags &= PROFILE_FILE_SHARED;  /* FIXME same as '=' operator */
-    retval = profile_parse_file(f, &data->root);
+    retval = profile_parse_file(f, &data->root, ret_modspec);
     fclose(f);
     if (retval) {
         return retval;
@@ -374,14 +374,14 @@ errcode_t profile_update_file_data_locked(prf_data_t data)
     return 0;
 }
 
-errcode_t profile_update_file_data(prf_data_t data)
+errcode_t profile_update_file_data(prf_data_t data, char **ret_modspec)
 {
     errcode_t retval, retval2;
 
     retval = k5_mutex_lock(&data->lock);
     if (retval)
         return retval;
-    retval = profile_update_file_data_locked(data);
+    retval = profile_update_file_data_locked(data, ret_modspec);
     retval2 = k5_mutex_unlock(&data->lock);
     return retval ? retval : retval2;
 }
