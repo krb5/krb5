@@ -2695,6 +2695,9 @@ krb5_kt_end_seq_get(krb5_context context, krb5_keytab keytab,
  * begin "func-proto.h"
  */
 
+#define KRB5_INIT_CONTEXT_SECURE 0x1 /** Use secure context configuration */
+#define KRB5_INIT_CONTEXT_KDC    0x2 /** Use KDC configuration if available */
+
 /**
  * Create a krb5 library context.
  *
@@ -2733,6 +2736,26 @@ krb5_init_context(krb5_context *context);
  */
 krb5_error_code KRB5_CALLCONV
 krb5_init_secure_context(krb5_context *context);
+
+/**
+ * Create a krb5 library context using a specified profile.
+ *
+ * @param [in]  profile         Profile object (NULL to create default profile)
+ * @param [in]  flags           Context initialization flags
+ * @param [out] context         Library context
+ *
+ * Create a context structure, optionally using a specified profile and
+ * initialization flags.  If @a profile is NULL, the default profile will be
+ * created from config files.  If @a profile is non-null, a copy of it will be
+ * made for the new context; the caller should still clean up its copy.  Valid
+ * flag values are:
+ *
+ * @li @c KRB5_INIT_CONTEXT_SECURE Ignore environment variables
+ * @li @c KRB5_INIT_CONTEXT_KDC    Use KDC configuration if creating profile
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_init_context_profile(struct _profile_t *profile, krb5_flags flags,
+                          krb5_context *context);
 
 /**
  * Free a krb5 library context.

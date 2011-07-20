@@ -358,7 +358,7 @@ os_init_paths(krb5_context ctx, krb5_boolean kdc)
 }
 
 krb5_error_code
-krb5_os_init_context(krb5_context ctx, krb5_boolean kdc)
+krb5_os_init_context(krb5_context ctx, profile_t profile, krb5_flags flags)
 {
     krb5_os_context os_ctx;
     krb5_error_code    retval = 0;
@@ -378,7 +378,11 @@ krb5_os_init_context(krb5_context ctx, krb5_boolean kdc)
     PLUGIN_DIR_INIT(&ctx->libkrb5_plugins);
     ctx->preauth_context = NULL;
 
-    retval = os_init_paths(ctx, kdc);
+    /* Use the profile we were handed, or create one from config files. */
+    if (profile)
+        retval = profile_copy(profile, &ctx->profile);
+    else
+        retval = os_init_paths(ctx, (flags & KRB5_INIT_CONTEXT_KDC) != 0);
     if (retval)
         return retval;
 

@@ -385,6 +385,7 @@ krb5_get_tgs_ktypes
 krb5_get_time_offsets
 krb5_get_validated_creds
 krb5_init_context
+krb5_init_context_profile
 krb5_init_creds_free
 krb5_init_creds_get
 krb5_init_creds_get_creds

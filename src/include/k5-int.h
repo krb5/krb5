@@ -606,7 +606,8 @@ krb5_error_code krb5_sync_disk_file(krb5_context, FILE *fp);
 
 krb5_error_code krb5int_init_context_kdc(krb5_context *);
 
-krb5_error_code krb5_os_init_context(krb5_context, krb5_boolean);
+krb5_error_code krb5_os_init_context(krb5_context context, profile_t profile,
+                                     krb5_flags flags);
 
 void krb5_os_free_context(krb5_context);
 

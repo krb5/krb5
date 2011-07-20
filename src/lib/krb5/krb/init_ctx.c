@@ -72,17 +72,11 @@ extern krb5_error_code krb5_vercheck();
 extern void krb5_win_ccdll_load(krb5_context context);
 #endif
 
-static krb5_error_code init_common (krb5_context *, krb5_boolean, krb5_boolean);
+static krb5_error_code init_common(profile_t profile, krb5_flags flags,
+                                   krb5_context *context_out);
 
 krb5_error_code KRB5_CALLCONV
 krb5_init_context(krb5_context *context)
-{
-
-    return init_common (context, FALSE, FALSE);
-}
-
-krb5_error_code KRB5_CALLCONV
-krb5_init_secure_context(krb5_context *context)
 {
     /*
      * This is rather silly, but should improve our chances of
@@ -95,19 +89,26 @@ krb5_init_secure_context(krb5_context *context)
      * If someday we grow an API to actually return the string, we can
      * get rid of this silliness.
      */
-    int my_false = (krb5_brand[0] == 0);
+    int my_zero = (krb5_brand[0] == 0);
 
-    return init_common(context, TRUE, my_false);
+    return krb5_init_context_profile(NULL, my_zero, context);
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_init_secure_context(krb5_context *context)
+{
+    return krb5_init_context_profile(NULL, KRB5_INIT_CONTEXT_SECURE, context);
 }
 
 krb5_error_code
 krb5int_init_context_kdc(krb5_context *context)
 {
-    return init_common (context, FALSE, TRUE);
+    return krb5_init_context_profile(NULL, KRB5_INIT_CONTEXT_KDC, context);
 }
 
-static krb5_error_code
-init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
+krb5_error_code
+krb5_init_context_profile(profile_t profile, krb5_flags flags,
+                          krb5_context *context_out)
 {
     krb5_context ctx = 0;
     krb5_error_code retval;
@@ -145,7 +146,7 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
      * The context being NULL is ok.
      */
     krb5_win_ccdll_load(ctx);
-
+p
     /*
      * krb5_vercheck() is defined in win_glue.c, and this is
      * where we handle the timebomb and version server checks.
@@ -155,16 +156,16 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
         return retval;
 #endif
 
-    *context = 0;
+    *context_out = NULL;
 
     ctx = calloc(1, sizeof(struct _krb5_context));
     if (!ctx)
         return ENOMEM;
     ctx->magic = KV5M_CONTEXT;
 
-    ctx->profile_secure = secure;
+    ctx->profile_secure = (flags & KRB5_INIT_CONTEXT_SECURE) != 0;
 
-    if ((retval = krb5_os_init_context(ctx, kdc)))
+    if ((retval = krb5_os_init_context(ctx, profile, flags)) != 0)
         goto cleanup;
 
     retval = profile_get_boolean(ctx->profile, KRB5_CONF_LIBDEFAULTS,
@@ -254,10 +255,10 @@ init_common (krb5_context *context, krb5_boolean secure, krb5_boolean kdc)
     ctx->udp_pref_limit = -1;
     ctx->trace_callback = NULL;
 #ifndef DISABLE_TRACING
-    if (!secure)
+    if (!ctx->profile_secure)
         krb5int_init_trace(ctx);
 #endif
-    *context = ctx;
+    *context_out = ctx;
     return 0;
 
 cleanup:
