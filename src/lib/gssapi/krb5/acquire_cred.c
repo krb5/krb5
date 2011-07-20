@@ -834,6 +834,7 @@ gss_krb5int_import_cred(OM_uint32 *minor_status,
     struct acquire_cred_args args;
     krb5_gss_name_rec name;
     OM_uint32 time_rec;
+    krb5_error_code code;
 
     assert(value->length == sizeof(*req));
 
@@ -846,6 +847,11 @@ gss_krb5int_import_cred(OM_uint32 *minor_status,
 
     if (req->keytab_principal) {
         memset(&name, 0, sizeof(name));
+        code = k5_mutex_init(&name.lock);
+        if (code != 0) {
+            *minor_status = code;
+            return GSS_S_FAILURE;
+        }
         name.princ = req->keytab_principal;
         args.desired_name = (gss_name_t)&name;
     }
