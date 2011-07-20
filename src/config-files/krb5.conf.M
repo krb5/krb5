@@ -71,6 +71,18 @@ files are syntactically independent of their parents, so each included
 file must begin with a section header.
 
 .PP
+.I krb5.conf
+can cause configuration to be obtained from a loadable profile module
+by placing the directive "module MODULEPATH:RESIDUAL" at the beginning
+of a line before any section headers.  MODULEPATH may be relative to
+the library path of the krb5 installation, or it may be an absolute
+path.  RESIDUAL is provided to the module at initialization time.  If
+.I krb5.conf
+uses a module directive,
+.I kdc.conf
+should also use one if it exists.
+
+.PP
 The following sections are currently used in the 
 .I krb5.conf
 file:

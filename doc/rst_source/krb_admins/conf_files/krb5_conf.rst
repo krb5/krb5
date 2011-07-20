@@ -39,6 +39,12 @@ The krb5.conf file can include other files using either of the following directi
 
 *FILENAME* or *DIRNAME* should be an absolute path. The named file or directory must exist and be readable. Including a directory includes all files within the directory whose names consist solely of alphanumeric characters, dashes, or underscores. Included profile files are syntactically independent of their parents, so each included file must begin with a section header.
 
+The krb5.conf file can specify that configuration should be obtained from a loadable module, rather than the file itself, using the following directive at the beginning of a line before any section headers::
+
+     module MODULEPATH:RESIDUAL
+
+*MODULEPATH* may be relative to the library path of the krb5 installation, or it may be an absolute path.  *RESIDUAL* is provided to the module at initialization time.  If krb5.conf uses a module directive, kdc.conf should also use one if it exists.
+
 The krb5.conf file may contain any or all of the following sections:
 
 ============== =======================================================
