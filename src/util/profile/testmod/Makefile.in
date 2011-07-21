@@ -10,6 +10,9 @@ LIBMAJOR=0
 LIBMINOR=0
 SO_EXT=.so
 
+# No dependencies, but we have to put something here.
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+
 STOBJLISTS=OBJS.ST
 STLIBOBJS=testmod_main.o
 
