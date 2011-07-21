@@ -481,8 +481,11 @@ profile_abandon(profile_t profile)
             err = k5_mutex_lock(&profile->lib_handle->lock);
             if (!err && --profile->lib_handle->refcount == 0) {
                 krb5int_close_plugin(profile->lib_handle->plugin_handle);
+                k5_mutex_unlock(&profile->lib_handle->lock);
+                k5_mutex_destroy(&profile->lib_handle->lock);
                 free(profile->lib_handle);
-            }
+            } else if (!err)
+                k5_mutex_unlock(&profile->lib_handle->lock);
         }
         free(profile->vt);
     } else {
