@@ -16,7 +16,6 @@
 
 #if defined(HAVE_LIBEDIT)
 #include <editline/readline.h>
-#include <editline/history.h>
 #elif defined(HAVE_READLINE)
 #include <readline/readline.h>
 #include <readline/history.h>
