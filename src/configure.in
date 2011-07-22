@@ -1116,7 +1116,8 @@ fi
 RL_CFLAGS=
 RL_LIBS=
 if test "x$with_libedit" != xno; then
-  if RL_CFLAGS=`pkg-config --cflags libedit 2>&1`; then
+  if rl_cflags=`pkg-config --cflags libedit 2>&1`; then
+    RL_CFLAGS=$rl_cflags
     RL_LIBS=`pkg-config --libs libedit`
     AC_DEFINE([HAVE_LIBEDIT], 1, [Define if building with libedit.])
     AC_MSG_RESULT([using libedit])
