@@ -29,7 +29,7 @@
 
 krb5_error_code KRB5_CALLCONV
 krb5_k_encrypt(krb5_context context, krb5_key key,
-               krb5_keyusage usage, const krb5_data *ivec,
+               krb5_keyusage usage, const krb5_data *cipher_state,
                const krb5_data *input, krb5_enc_data *output)
 {
     const struct krb5_keytypes *ktp;
@@ -68,7 +68,7 @@ krb5_k_encrypt(krb5_context context, krb5_key key,
     iov[3].flags = KRB5_CRYPTO_TYPE_TRAILER;
     iov[3].data = make_data(iov[2].data.data + padding_len, trailer_len);
 
-    ret = ktp->encrypt(ktp, key, usage, ivec, iov, 4);
+    ret = ktp->encrypt(ktp, key, usage, cipher_state, iov, 4);
     if (ret != 0)
         zap(iov[1].data.data, iov[1].data.length);
     else
@@ -78,7 +78,7 @@ krb5_k_encrypt(krb5_context context, krb5_key key,
 
 krb5_error_code KRB5_CALLCONV
 krb5_c_encrypt(krb5_context context, const krb5_keyblock *keyblock,
-               krb5_keyusage usage, const krb5_data *ivec,
+               krb5_keyusage usage, const krb5_data *cipher_state,
                const krb5_data *input, krb5_enc_data *output)
 {
     krb5_key key;
@@ -87,7 +87,7 @@ krb5_c_encrypt(krb5_context context, const krb5_keyblock *keyblock,
     ret = krb5_k_create_key(context, keyblock, &key);
     if (ret != 0)
         return ret;
-    ret = krb5_k_encrypt(context, key, usage, ivec, input, output);
+    ret = krb5_k_encrypt(context, key, usage, cipher_state, input, output);
     krb5_k_free_key(context, key);
     return ret;
 }
