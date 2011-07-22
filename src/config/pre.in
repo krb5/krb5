@@ -369,9 +369,13 @@ SS_DEPS-k5	= $(BUILDTOP)/include/ss/ss.h $(BUILDTOP)/include/ss/ss_err.h
 # GEN_LIB is -lgen if needed for regexp
 GEN_LIB		= @GEN_LIB@
 
+# Editline or readline flags and libraries.
+RL_CFLAGS	= @RL_CFLAGS@
+RL_LIBS		= @RL_LIBS@
+
 SS_LIB		= $(SS_LIB-@SS_VERSION@)
 SS_LIB-sys	= @SS_LIB@
-SS_LIB-k5	= $(TOPLIBD)/libss.a
+SS_LIB-k5	= $(TOPLIBD)/libss.a $(RL_LIBS)
 KDB5_LIB	= -lkdb5 $(KDB5_PLUGIN_LIBS)
 
 DL_LIB		= @DL_LIB@

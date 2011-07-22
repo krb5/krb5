@@ -14,20 +14,43 @@
 #include <termios.h>
 #include <sys/param.h>
 
+#if defined(HAVE_LIBEDIT)
+#include <editline/readline.h>
+#include <editline/history.h>
+#elif defined(HAVE_READLINE)
+#include <readline/readline.h>
+#include <readline/history.h>
+#else
+#define NO_READLINE
+#endif
+
 static ss_data *current_info;
 static jmp_buf listen_jmpb;
 
-static RETSIGTYPE print_prompt()
+#ifdef NO_READLINE
+/* Dumb replacement for readline when we don't have support for a real one. */
+static char *readline(const char *prompt)
 {
     struct termios termbuf;
+    char input[BUFSIZ];
 
     if (tcgetattr(STDIN_FILENO, &termbuf) == 0) {
         termbuf.c_lflag |= ICANON|ISIG|ECHO;
         tcsetattr(STDIN_FILENO, TCSANOW, &termbuf);
     }
-    (void) fputs(current_info->prompt, stdout);
-    (void) fflush(stdout);
+    printf("%s", prompt);
+    fflush(stdout);
+    if (fgets(input, BUFSIZ, stdin) == NULL)
+        return NULL;
+    input[strcspn(input, "\r\n")] = '\0';
+    return strdup(input);
 }
+
+/* No-op replacement for add_history() when we have no readline support. */
+static void add_history(const char *line)
+{
+}
+#endif
 
 static RETSIGTYPE listen_int_handler(signo)
     int signo;
@@ -41,9 +64,7 @@ int ss_listen (sci_idx)
 {
     register char *cp;
     register ss_data *info;
-    char input[BUFSIZ];
-    char buffer[BUFSIZ];
-    char *volatile end = buffer;
+    char *input;
     int code;
     jmp_buf old_jmpb;
     ss_data *old_info = current_info;
@@ -88,8 +109,6 @@ int ss_listen (sci_idx)
     (void) sigsetmask(mask);
 #endif
     while(!info->abort) {
-        print_prompt();
-        *end = '\0';
 #ifdef POSIX_SIGNALS
         nsig.sa_handler = listen_int_handler;   /* fgets is not signal-safe */
         osig = csig;
@@ -98,29 +117,26 @@ int ss_listen (sci_idx)
             csig = osig;
 #else
         old_sig_cont = sig_cont;
-        sig_cont = signal(SIGCONT, print_prompt);
-        if (sig_cont == print_prompt)
+        sig_cont = signal(SIGCONT, listen_int_handler);
+        if (sig_cont == listen_int_handler)
             sig_cont = old_sig_cont;
 #endif
-        if (fgets(input, BUFSIZ, stdin) != input) {
+
+        input = readline(current_info->prompt);
+        if (input == NULL) {
             code = SS_ET_EOF;
             goto egress;
         }
-        cp = strchr(input, '\n');
-        if (cp) {
-            *cp = '\0';
-            if (cp == input)
-                continue;
-        }
+        add_history(input);
+
 #ifdef POSIX_SIGNALS
         sigaction(SIGCONT, &csig, (struct sigaction *)0);
 #else
         (void) signal(SIGCONT, sig_cont);
 #endif
-        for (end = input; *end; end++)
-            ;
 
         code = ss_execute_line (sci_idx, input);
+        free(input);
         if (code == SS_ET_COMMAND_NOT_FOUND) {
             register char *c = input;
             while (*c == ' ' || *c == '\t')

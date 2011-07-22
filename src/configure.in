@@ -1100,6 +1100,44 @@ if test "$ac_cv_lib_socket" = "yes" -a "$ac_cv_lib_nsl" = "yes"; then
 	AC_DEFINE(BROKEN_STREAMS_SOCKETS,1,[Define if socket can't be bound to 0.0.0.0])
 fi
 
+# Compile with libedit support in ss by default if available.  Compile
+# with readline only if asked, to avoid a default GPL dependency.
+# Building with readline also breaks the dejagnu test suite.
+AC_ARG_WITH([libedit],
+	    AC_HELP_STRING([--without-libedit], [do not compile with libedit]),
+	    [], [with_libedit=default])
+AC_ARG_WITH([readline],
+	    AC_HELP_STRING([--with-readline], [compile with GNU Readline]),
+	    [], [with_readline=no])
+AC_MSG_CHECKING([for readline support])
+if test "x$with_readline" = xyes; then
+  with_libedit=no
+fi
+RL_CFLAGS=
+RL_LIBS=
+if test "x$with_libedit" != xno; then
+  if RL_CFLAGS=`pkg-config --cflags libedit 2>&1`; then
+    RL_LIBS=`pkg-config --libs libedit`
+    AC_DEFINE([HAVE_LIBEDIT], 1, [Define if building with libedit.])
+    AC_MSG_RESULT([using libedit])
+  elif test "x$with_libedit" = yes; then
+    # We were explicitly asked for libedit and couldn't find it.
+    AC_MSG_ERROR([Could not detect libedit with pkg-config.])
+  else
+    AC_MSG_RESULT([not using any])
+  fi
+elif test "x$with_readline" = xyes; then
+  AC_MSG_RESULT([using GNU Readline])
+  AC_CHECK_LIB([readline], [main], :,
+	       AC_MSG_FAILURE([Cannot find readline library.]), [-lncurses])
+  AC_DEFINE([HAVE_READLINE], 1, [Define if building with GNU Readline.])
+  RL_LIBS='-lreadline -lhistory -lncurses'
+else
+  AC_MSG_RESULT([not using any])
+fi
+AC_SUBST([RL_CFLAGS])
+AC_SUBST([RL_LIBS])
+
 AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])
 V5_AC_OUTPUT_MAKEFILE(.
 

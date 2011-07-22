@@ -26,7 +26,7 @@ install-unix:: install-libs
 # hard coded ../et is so com_err.h works
 # CFLAGS= -g
 # CPPFLAGS= -I${INCDIR} -I. -I.. -I../et
-LOCALINCLUDES= -I. -I$(srcdir)/
+LOCALINCLUDES= -I. -I$(srcdir)/ $(RL_CFLAGS)
 
 # with ss_err.o first, ss_err.h should get rebuilt first too.  should not
 # be relying on this, though.
