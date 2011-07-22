@@ -85,12 +85,14 @@ alloc_union_cred(OM_uint32 *minor_status,
     if (status != GSS_S_COMPLETE)
 	goto cleanup;
 
-    status = mech->gss_display_name(minor_status,
-				    mech_name,
-				    &cred->auxinfo.name,
-				    &cred->auxinfo.name_type);
-    if (status != GSS_S_COMPLETE)
-	goto cleanup;
+    if (mech_name != GSS_C_NO_NAME) {
+	status = mech->gss_display_name(minor_status,
+					mech_name,
+					&cred->auxinfo.name,
+					&cred->auxinfo.name_type);
+	if (status != GSS_S_COMPLETE)
+	    goto cleanup;
+    }
 
     status = GSS_S_COMPLETE;
     *pcred = cred;
