@@ -845,6 +845,17 @@ gss_krb5int_import_cred(OM_uint32 *minor_status,
 
     memset(&args, 0, sizeof(args));
 
+    if (req->id && req->keytab)
+        args.cred_usage = GSS_C_BOTH;
+    else if (req->id)
+        args.cred_usage = GSS_C_INITIATE;
+    else if (req->keytab)
+        args.cred_usage = GSS_C_ACCEPT;
+    else {
+        *minor_status = EINVAL;
+        return GSS_S_FAILURE;
+    }
+
     if (req->keytab_principal) {
         memset(&name, 0, sizeof(name));
         code = k5_mutex_init(&name.lock);
@@ -859,17 +870,9 @@ gss_krb5int_import_cred(OM_uint32 *minor_status,
     args.ccache = req->id;
     args.keytab = req->keytab;
 
-    if (req->id && req->keytab)
-        args.cred_usage = GSS_C_BOTH;
-    else if (req->id)
-        args.cred_usage = GSS_C_INITIATE;
-    else if (req->keytab)
-        args.cred_usage = GSS_C_ACCEPT;
-    else {
-        *minor_status = EINVAL;
-        return GSS_S_FAILURE;
-    }
-
-    return acquire_cred(minor_status, &args, cred_handle, &time_rec);
+    code = acquire_cred(minor_status, &args, cred_handle, &time_rec);
+    if (req->keytab_principal)
+        k5_mutex_destroy(&name.lock);
+    return code;
 }
 
