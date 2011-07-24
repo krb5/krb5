@@ -150,7 +150,7 @@ krb5int_pbkdf2 (prf_fn prf, size_t hlen, krb5_key pass,
                 const krb5_data *salt, unsigned long count,
                 const krb5_data *output)
 {
-    int l, r, i;
+    int l, i;
     char *utmp1, *utmp2;
     char utmp3[20];             /* XXX length shouldn't be hardcoded! */
 
@@ -161,7 +161,6 @@ krb5int_pbkdf2 (prf_fn prf, size_t hlen, krb5_key pass,
         abort();
     /* Step 2.  */
     l = (output->length + hlen - 1) / hlen;
-    r = output->length - (l - 1) * hlen;
 
     utmp1 = /*output + dklen; */ malloc(hlen);
     if (utmp1 == NULL)

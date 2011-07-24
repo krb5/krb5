@@ -109,7 +109,7 @@ krb5int_utf8_normalize(
 		       krb5_data ** newdataptr,
 		       unsigned flags)
 {
-    int i, j, len, clen, outpos, ucsoutlen, outsize, last;
+    int i, j, len, clen, outpos, ucsoutlen, outsize;
     char *out = NULL, *outtmp, *s;
     krb5_ucs4 *ucs = NULL, *p, *ucsout = NULL;
     krb5_data *newdata;
@@ -265,7 +265,6 @@ krb5int_utf8_normalize(
 	if (i == len) {
 	    break;
 	}
-	last = i;
 
 	/* Allocate more space in out if necessary */
 	if (len - i >= outsize - outpos) {

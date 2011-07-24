@@ -173,7 +173,6 @@ krb5int_make_tgs_request_ext(krb5_context context,
     krb5_ticket *sec_ticket_arr[2];
     krb5_timestamp time_now;
     krb5_pa_data **combined_padata = NULL;
-    krb5_pa_data ap_req_padata;
     krb5_keyblock *local_subkey = NULL;
 
     assert (subkey != NULL);
@@ -248,8 +247,6 @@ krb5int_make_tgs_request_ext(krb5_context context,
         tgsreq.second_ticket = sec_ticket_arr;
     } else
         tgsreq.second_ticket = 0;
-
-    ap_req_padata.contents = NULL;
 
     /* encode the body; then checksum it */
     if ((retval = encode_krb5_kdc_req_body(&tgsreq, &scratch)))

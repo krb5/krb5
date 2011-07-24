@@ -161,7 +161,7 @@ krb5int_des_cbc_mac(const krb5_crypto_iov *data, unsigned long num_data,
     const unsigned DES_INT32 *kp;
     const unsigned char *ip;
     struct iov_block_state input_pos;
-    unsigned char storage[MIT_DES_BLOCK_LENGTH], *block = NULL, *ptr;
+    unsigned char storage[MIT_DES_BLOCK_LENGTH], *ptr;
 
     IOV_BLOCK_STATE_INIT(&input_pos);
     input_pos.include_sign_only = 1;
@@ -181,7 +181,6 @@ krb5int_des_cbc_mac(const krb5_crypto_iov *data, unsigned long num_data,
         if (!krb5int_c_iov_get_block_nocopy(storage, MIT_DES_BLOCK_LENGTH,
                                             data, num_data, &input_pos, &ptr))
             break;
-        block = ptr;
 
         /* Decompose this block and xor it with the previous ciphertext. */
         GET_HALF_BLOCK(temp, ptr);
