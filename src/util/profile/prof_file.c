@@ -258,10 +258,15 @@ errcode_t profile_open_file(const_profile_filespec_t filespec,
         (void) k5_mutex_unlock(&g_shared_trees_mutex);
         retval = profile_update_file_data(data, NULL);
         free(expanded_filename);
+        if (retval) {
+            profile_dereference_data(data);
+            free(prf);
+            return retval;
+        }
         prf->data = data;
         *ret_prof = prf;
         scan_shared_trees_unlocked();
-        return retval;
+        return 0;
     }
     (void) k5_mutex_unlock(&g_shared_trees_mutex);
     data = profile_make_prf_data(expanded_filename);
