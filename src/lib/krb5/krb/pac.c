@@ -451,7 +451,8 @@ k5_pac_validate_client(krb5_context context,
     if (ret != 0)
         return ret;
 
-    ret = krb5_parse_name_flags(context, pac_princname, 0, &pac_principal);
+    ret = krb5_parse_name_flags(context, pac_princname,
+                                KRB5_PRINCIPAL_PARSE_NO_REALM, &pac_principal);
     if (ret != 0) {
         free(pac_princname);
         return ret;
