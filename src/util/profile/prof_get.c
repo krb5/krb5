@@ -161,6 +161,9 @@ profile_get_values(profile_t profile, const char *const *names,
     char                    *value;
     struct profile_string_list values;
 
+    *ret_values = NULL;
+    if (!profile)
+        return PROF_NO_PROFILE;
     if (profile->vt)
         return get_values_vt(profile, names, ret_values);
 
@@ -222,6 +225,8 @@ errcode_t profile_get_value(profile_t profile, const char **names,
     char                    *value;
 
     *ret_value = NULL;
+    if (!profile)
+        return PROF_NO_PROFILE;
     if (profile->vt)
         return get_value_vt(profile, names, ret_value);
 
@@ -483,6 +488,9 @@ profile_iterator_create(profile_t profile, const char *const *names, int flags,
     errcode_t retval;
 
     *ret_iter = NULL;
+    if (!profile)
+        return PROF_NO_PROFILE;
+
     iter = malloc(sizeof(*iter));
     if (iter == NULL)
         return ENOMEM;
