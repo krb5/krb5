@@ -267,7 +267,7 @@ typedef krb5_principal_data * krb5_principal;
 /* NT 4 style name and SID */
 #define KRB5_NT_ENT_PRINCIPAL_AND_ID    -130
 
-/* constant version thereof: */
+/** Constant version of krb5_principal_data */
 typedef const krb5_principal_data *krb5_const_principal;
 
 #define krb5_princ_realm(context, princ) (&(princ)->realm)
@@ -329,7 +329,7 @@ krb5_anonymous_principal(void);
  * begin "hostaddr.h"
  */
 
-/** structure for address */
+/** Structure for address */
 typedef struct _krb5_address {
     krb5_magic magic;
     krb5_addrtype addrtype;
@@ -377,6 +377,7 @@ typedef struct _krb5_keyblock {
     krb5_octet *contents;
 } krb5_keyblock;
 
+struct krb5_key_st;
 /**
  * Opaque identifier for a key.
  *
@@ -385,7 +386,6 @@ typedef struct _krb5_keyblock {
  * within multiple threads, as they may contain mutable internal state and are
  * not mutex-protected.
  */
-struct krb5_key_st;
 typedef struct krb5_key_st *krb5_key;
 
 #ifdef KRB5_OLD_CRYPTO
@@ -412,8 +412,18 @@ typedef struct _krb5_enc_data {
     krb5_data ciphertext;
 } krb5_enc_data;
 
+/**
+ * Structure to describe a region of text to be encrypted or decrypted.
+ *
+ * The @a flags member describes the type of the iov.
+ * The @a data member points to the memory that will be manipulated.
+ * All iov APIs take a pointer to the first element of an array of krb5_crypto_iov's
+ * along with the size of that array. Buffer contents are manipulated in-place;
+ * data is overwritten. Callers must allocate the right number of krb5_crypto_iov
+ * structures before calling into an iov API.
+ */
 typedef struct _krb5_crypto_iov {
-    krb5_cryptotype flags;
+    krb5_cryptotype flags; /**< KRB5_CRYPTO_TYPE type of the iov */
     krb5_data data;
 } krb5_crypto_iov;
 
@@ -435,12 +445,12 @@ typedef struct _krb5_crypto_iov {
 #define ENCTYPE_RSA_ES_OAEP_ENV 0x000e  /**< RSA w/OEAP encryption, CMS enveloped data */
 #define ENCTYPE_DES3_CBC_ENV    0x000f  /**< DES-3 cbc mode, CMS enveloped data */
 
-#define ENCTYPE_DES3_CBC_SHA1   0x0010
-#define ENCTYPE_AES128_CTS_HMAC_SHA1_96 0x0011
-#define ENCTYPE_AES256_CTS_HMAC_SHA1_96 0x0012
-#define ENCTYPE_ARCFOUR_HMAC    0x0017
-#define ENCTYPE_ARCFOUR_HMAC_EXP 0x0018
-#define ENCTYPE_UNKNOWN         0x01ff
+#define ENCTYPE_DES3_CBC_SHA1           0x0010
+#define ENCTYPE_AES128_CTS_HMAC_SHA1_96 0x0011 /**< RFC 3962 */
+#define ENCTYPE_AES256_CTS_HMAC_SHA1_96 0x0012 /**< RFC 3962 */
+#define ENCTYPE_ARCFOUR_HMAC            0x0017
+#define ENCTYPE_ARCFOUR_HMAC_EXP        0x0018
+#define ENCTYPE_UNKNOWN                 0x01ff
 
 #define CKSUMTYPE_CRC32         0x0001
 #define CKSUMTYPE_RSA_MD4       0x0002
@@ -451,9 +461,11 @@ typedef struct _krb5_crypto_iov {
 #define CKSUMTYPE_RSA_MD5       0x0007
 #define CKSUMTYPE_RSA_MD5_DES   0x0008
 #define CKSUMTYPE_NIST_SHA      0x0009
-#define CKSUMTYPE_HMAC_SHA1_DES3        0x000c
-#define CKSUMTYPE_HMAC_SHA1_96_AES128   0x000f
-#define CKSUMTYPE_HMAC_SHA1_96_AES256   0x0010
+#define CKSUMTYPE_HMAC_SHA1_DES3      0x000c
+#define CKSUMTYPE_HMAC_SHA1_96_AES128 0x000f /**< RFC 3962. Used with
+                                                  ENCTYPE_AES128_CTS_HMAC_SHA1_96 */
+#define CKSUMTYPE_HMAC_SHA1_96_AES256 0x0010 /**< RFC 3962. Used with
+                                                  ENCTYPE_AES256_CTS_HMAC_SHA1_96 */
 #define CKSUMTYPE_MD5_HMAC_ARCFOUR -137 /*Microsoft netlogon cksumtype*/
 #define CKSUMTYPE_HMAC_MD5_ARCFOUR -138 /*Microsoft md5 hmac cksumtype*/
 
@@ -496,7 +508,7 @@ enum {
 #endif
 
 /**
- * Encrypt data using a key.
+ * Encrypt data using a key (operates on keyblock).
  *
  * @param [in]     context      Library context
  * @param [in]     key          Encryption key
@@ -524,7 +536,7 @@ krb5_c_encrypt(krb5_context context, const krb5_keyblock *key,
                const krb5_data *input, krb5_enc_data *output);
 
 /**
- * Decrypt data using a key.
+ * Decrypt data using a key (operates on keyblock).
  *
  * @param [in]     context      Library context
  * @param [in]     key          Encryption key
@@ -1082,11 +1094,71 @@ krb5_c_verify_checksum_iov(krb5_context context, krb5_cksumtype cksumtype,
                            const krb5_crypto_iov *data, size_t num_data,
                            krb5_boolean *valid);
 
+/**
+ * Encrypt data in place supporting AEAD (operates on keyblock).
+ *
+ * @param [in]     context         Library context
+ * @param [in]     keyblock        Encryption key
+ * @param [in]     usage           Key usage (see KRB5_KEYUSAGE types)
+ * @param [in]     cipher_state    Cipher state; specify NULL if not needed
+ * @param [in,out] data            IOV array. Modified in-place.
+ * @param [in]     num_data        Size of @a data
+ *
+ * This function encrypts the data block @a data and stores the output in-place.
+ * The actual encryption key will be derived from @a keyblock and @a usage
+ * if key derivation is specified for the encryption type.  If non-null, @a
+ * cipher_state specifies the beginning state for the encryption operation, and
+ * is updated with the state to be passed as input to the next operation.
+ * The caller must allocate the right number of krb5_crypto_iov
+ * structures before calling into this API.
+ *
+ * @note On return from a krb5_c_encrypt_iov() call, the @a data->length in the
+ * iov structure are adjusted to reflect actual lengths of the ciphertext used.
+ * For example, if the padding length is too large, the length will be reduced.
+ * Lengths are never increased.
+ *
+ * @note This function is similar to krb5_k_encrypt_iov(), but operates
+ * on keyblock @a keyblock.
+ *
+ * @sa krb5_c_decrypt_iov()
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
-krb5_c_encrypt_iov(krb5_context context, const krb5_keyblock *key,
+krb5_c_encrypt_iov(krb5_context context, const krb5_keyblock *keyblock,
                    krb5_keyusage usage, const krb5_data *cipher_state,
                    krb5_crypto_iov *data, size_t num_data);
 
+/**
+ * Decrypt data in place supporting AEAD (operates on keyblock).
+ *
+ * @param [in]     context         Library context
+ * @param [in]     keyblock        Encryption key
+ * @param [in]     usage           Key usage (see KRB5_KEYUSAGE types)
+ * @param [in]     cipher_state    Cipher state; specify NULL if not needed
+ * @param [in,out] data            IOV array. Modified in-place.
+ * @param [in]     num_data        Size of @a data
+ *
+ * This function decrypts the data block @a data and stores the output in-place.
+ * The actual decryption key will be derived from @a keyblock and @a usage
+ * if key derivation is specified for the encryption type.  If non-null, @a
+ * cipher_state specifies the beginning state for the decryption operation, and
+ * is updated with the state to be passed as input to the next operation.
+ * The caller must allocate the right number of krb5_crypto_iov
+ * structures before calling into this API.
+ *
+ * @note On return from a krb5_c_decrypt_iov() call, the @a data->length in the
+ * iov structure are adjusted to reflect actual lengths of the ciphertext used.
+ * For example, if the padding length is too large, the length will be reduced.
+ * Lengths are never increased.
+ *
+ * @note This function is similar to krb5_k_decrypt_iov(), but operates
+ * on keyblock @a keyblock.
+ *
+ * @sa krb5_c_decrypt_iov()
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_c_decrypt_iov(krb5_context context, const krb5_keyblock *key,
                    krb5_keyusage usage, const krb5_data *cipher_state,
@@ -1175,21 +1247,128 @@ krb5_k_key_keyblock(krb5_context context, krb5_key key,
 krb5_enctype KRB5_CALLCONV
 krb5_k_key_enctype(krb5_context context, krb5_key key);
 
+/**
+ * Encrypt data using a key (operates on opaque key).
+ *
+ * @param [in]     context      Library context
+ * @param [in]     key          Encryption key
+ * @param [in]     usage        Key usage (see KRB5_KEYUSAGE types)
+ * @param [in,out] cipher_state Cipher state; specify NULL if not needed
+ * @param [in]     input        Data to be encrypted
+ * @param [out]    output       Encrypted data
+ *
+ * This function encrypts the data block @a input and stores the output into @a
+ * output.  The actual encryption key will be derived from @a key and @a usage
+ * if key derivation is specified for the encryption type.  If non-null, @a
+ * cipher_state specifies the beginning state for the encryption operation, and
+ * is updated with the state to be passed as input to the next operation.
+ *
+ * @note The caller must initialize @a output and allocate at least enough
+ * space for the result (using krb5_c_encrypt_length() to determine the amount
+ * of space needed).  @a output->length will be set to the actual length of the
+ * ciphertext.
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_k_encrypt(krb5_context context, krb5_key key, krb5_keyusage usage,
                const krb5_data *cipher_state, const krb5_data *input,
                krb5_enc_data *output);
 
+/**
+ * Encrypt data in place supporting AEAD (operates on opaque key).
+ *
+ * @param [in]     context         Library context
+ * @param [in]     key             Encryption key
+ * @param [in]     usage           Key usage (see KRB5_KEYUSAGE types)
+ * @param [in]     cipher_state    Cipher state; specify NULL if not needed
+ * @param [in,out] data            IOV array. Modified in-place.
+ * @param [in]     num_data        Size of @a data
+ *
+ * This function encrypts the data block @a data and stores the output in-place.
+ * The actual encryption key will be derived from @a key and @a usage
+ * if key derivation is specified for the encryption type.  If non-null, @a
+ * cipher_state specifies the beginning state for the encryption operation, and
+ * is updated with the state to be passed as input to the next operation.
+ * The caller must allocate the right number of krb5_crypto_iov
+ * structures before calling into this API.
+ *
+ * @note On return from a krb5_c_encrypt_iov() call, the @a data->length in the
+ * iov structure are adjusted to reflect actual lengths of the ciphertext used.
+ * For example, if the padding length is too large, the length will be reduced.
+ * Lengths are never increased.
+ *
+ * @note This function is similar to krb5_c_encrypt_iov(), but operates
+ * on opaque key @a key.
+ *
+ * @sa krb5_k_decrypt_iov()
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_k_encrypt_iov(krb5_context context, krb5_key key, krb5_keyusage usage,
                    const krb5_data *cipher_state, krb5_crypto_iov *data,
                    size_t num_data);
 
+/**
+ * Decrypt data using a key (operates on opaque key).
+ *
+ * @param [in]     context      Library context
+ * @param [in]     key          Encryption key
+ * @param [in]     usage        Key usage (see KRB5_KEYUSAGE types)
+ * @param [in,out] cipher_state Cipher state; specify NULL if not needed
+ * @param [in]     input        Encrypted data
+ * @param [out]    output       Decrypted data
+ *
+ * This function decrypts the data block @a input and stores the output into @a
+ * output. The actual decryption key will be derived from @a key and @a usage
+ * if key derivation is specified for the encryption type.  If non-null, @a
+ * cipher_state specifies the beginning state for the decryption operation, and
+ * is updated with the state to be passed as input to the next operation.
+ *
+ * @note The caller must initialize @a output and allocate at least enough
+ * space for the result.  The usual practice is to allocate an output buffer as
+ * long as the ciphertext, and let krb5_c_decrypt() trim @a output->length.
+ * For some enctypes, the resulting @a output->length may include padding
+ * bytes.
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_k_decrypt(krb5_context context, krb5_key key, krb5_keyusage usage,
                const krb5_data *cipher_state, const krb5_enc_data *input,
                krb5_data *output);
 
+/**
+ * Decrypt data in place supporting AEAD (operates on opaque key).
+ *
+ * @param [in]     context         Library context
+ * @param [in]     key             Encryption key
+ * @param [in]     usage           Key usage (see KRB5_KEYUSAGE types)
+ * @param [in]     cipher_state    Cipher state; specify NULL if not needed
+ * @param [in,out] data            IOV array. Modified in-place.
+ * @param [in]     num_data        Size of @a data
+ *
+ * This function decrypts the data block @a data and stores the output in-place.
+ * The actual decryption key will be derived from @a key and @a usage
+ * if key derivation is specified for the encryption type.  If non-null, @a
+ * cipher_state specifies the beginning state for the decryption operation, and
+ * is updated with the state to be passed as input to the next operation.
+ * The caller must allocate the right number of krb5_crypto_iov
+ * structures before calling into this API.
+ *
+ * @note On return from a krb5_c_decrypt_iov() call, the @a data->length in the
+ * iov structure are adjusted to reflect actual lengths of the ciphertext used.
+ * For example, if the padding length is too large, the length will be reduced.
+ * Lengths are never increased.
+ *
+ * @note This function is similar to krb5_c_decrypt_iov(), but operates
+ * on opaque key @a key.
+ *
+ * @sa krb5_k_encrypt_iov()
+ *
+ * @retval 0 Success; otherwise - Kerberos error codes
+ */
 krb5_error_code KRB5_CALLCONV
 krb5_k_decrypt_iov(krb5_context context, krb5_key key, krb5_keyusage usage,
                    const krb5_data *cipher_state, krb5_crypto_iov *data,
@@ -1742,9 +1921,7 @@ typedef struct _krb5_authenticator {
     krb5_authdata **authorization_data; /**< authoriazation data */
 } krb5_authenticator;
 
-/*
- * Ticket authentication data.
- */
+/** Ticket authentication data. */
 typedef struct _krb5_tkt_authent {
     krb5_magic magic;
     krb5_ticket *ticket;
@@ -2030,15 +2207,16 @@ typedef krb5_error_code
  * begin "ccache.h"
  */
 
-typedef krb5_pointer    krb5_cc_cursor; /* cursor for sequential lookup */
+/** Cursor for sequential lookup */
+typedef krb5_pointer    krb5_cc_cursor;
 
 struct _krb5_ccache;
 typedef struct _krb5_ccache *krb5_ccache;
 struct _krb5_cc_ops;
 typedef struct _krb5_cc_ops krb5_cc_ops;
 
-/** Cursor for iterating over all ccaches */
 struct _krb5_cccol_cursor;
+/** Cursor for iterating over all ccaches */
 typedef struct _krb5_cccol_cursor *krb5_cccol_cursor;
 
 /* Flags for krb5_cc_retrieve_cred. */
@@ -2532,7 +2710,7 @@ typedef struct krb5_rc_st *krb5_rcache;
 /* XXX */
 #define MAX_KEYTAB_NAME_LEN 1100 /* Long enough for MAXPATHLEN + some extra */
 
-typedef krb5_pointer krb5_kt_cursor;    /* XXX */
+typedef krb5_pointer krb5_kt_cursor;
 
 /** A key table entry. */
 typedef struct krb5_keytab_entry_st {
@@ -2695,8 +2873,8 @@ krb5_kt_end_seq_get(krb5_context context, krb5_keytab keytab,
  * begin "func-proto.h"
  */
 
-#define KRB5_INIT_CONTEXT_SECURE 0x1 /** Use secure context configuration */
-#define KRB5_INIT_CONTEXT_KDC    0x2 /** Use KDC configuration if available */
+#define KRB5_INIT_CONTEXT_SECURE 0x1 /**< Use secure context configuration */
+#define KRB5_INIT_CONTEXT_KDC    0x2 /**< Use KDC configuration if available */
 
 /**
  * Create a krb5 library context.
@@ -5930,7 +6108,7 @@ krb5_prompter_posix(krb5_context context, void *data, const char *name,
                     const char *banner, int num_prompts,
                     krb5_prompt prompts[]);
 
- /** Store options for @c _krb5_get_init_creds */
+/** Store options for @c _krb5_get_init_creds */
 typedef struct _krb5_get_init_creds_opt {
     krb5_flags flags;
     krb5_deltat tkt_life;
@@ -7056,8 +7234,8 @@ krb5_verify_authdata_kdc_issued(krb5_context context,
 #define PAC_UPN_DNS_INFO      12 /**< User principal name and DNS information */
 
 
-/** PAC data structure to convey authorization information */
 struct krb5_pac_data;
+/** PAC data structure to convey authorization information */
 typedef struct krb5_pac_data *krb5_pac;
 
 /**
