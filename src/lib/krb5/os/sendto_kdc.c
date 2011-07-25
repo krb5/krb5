@@ -758,6 +758,8 @@ start_connection(krb5_context context, struct conn_state *state,
 {
     int fd, e;
     unsigned int ssflags;
+    static const int one = 1;
+    static const struct linger lopt = { 0, 0 };
 
     dprint("start_connection(@%p)\ngetting %s socket in family %d...", state,
            state->socktype == SOCK_STREAM ? "stream" : "dgram", state->family);
@@ -769,12 +771,9 @@ start_connection(krb5_context context, struct conn_state *state,
     }
     set_cloexec_fd(fd);
     /* Make it non-blocking.  */
+    if (ioctlsocket(fd, FIONBIO, (const void *) &one))
+        dperror("sendto_kdc: ioctl(FIONBIO)");
     if (state->socktype == SOCK_STREAM) {
-        static const int one = 1;
-        static const struct linger lopt = { 0, 0 };
-
-        if (ioctlsocket(fd, FIONBIO, (const void *) &one))
-            dperror("sendto_kdc: ioctl(FIONBIO)");
         if (setsockopt(fd, SOL_SOCKET, SO_LINGER, &lopt, sizeof(lopt)))
             dperror("sendto_kdc: setsockopt(SO_LINGER)");
         TRACE_SENDTO_KDC_TCP_CONNECT(context, state);
