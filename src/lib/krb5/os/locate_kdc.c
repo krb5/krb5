@@ -47,8 +47,6 @@
 #define MAXHOSTNAMELEN 64
 #endif
 
-#define MAX_DNS_NAMELEN (15*(MAXHOSTNAMELEN + 1)+1)
-
 #if KRB5_DNS_LOOKUP_KDC
 #define DEFAULT_LOOKUP_KDC 1
 #else
@@ -520,6 +518,7 @@ prof_locate_server(krb5_context context, const krb5_data *realm,
                              dflport1, dflport2);
 }
 
+#ifdef KRB5_DNS_LOOKUP
 static krb5_error_code
 dns_locate_server(krb5_context context, const krb5_data *realm,
                   struct serverlist *serverlist, enum locate_service_type svc,
@@ -565,6 +564,7 @@ dns_locate_server(krb5_context context, const krb5_data *realm,
     }
     return code;
 }
+#endif /* KRB5_DNS_LOOKUP */
 
 /*
  * Wrapper function for the various backends
