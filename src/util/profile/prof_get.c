@@ -544,28 +544,31 @@ static errcode_t
 set_results(const char *name, const char *value, char **ret_name,
             char **ret_value)
 {
-    if (ret_name) {
-        if (name) {
-            *ret_name = strdup(name);
-            if (!*ret_name)
-                return ENOMEM;
-        } else
-            *ret_name = NULL;
+    char *name_copy = NULL, *value_copy = NULL;
+
+    if (ret_name && name) {
+        name_copy = strdup(name);
+        if (name_copy == NULL)
+            goto oom;
     }
-    if (ret_value) {
-        if (value) {
-            *ret_value = strdup(value);
-            if (!*ret_value) {
-                if (ret_name) {
-                    free(*ret_name);
-                    *ret_name = NULL;
-                }
-                return ENOMEM;
-            }
-        } else
-            *ret_value = NULL;
+    if (ret_value && value) {
+        value_copy = strdup(value);
+        if (value_copy == NULL)
+            goto oom;
     }
+    if (ret_name)
+        *ret_name = name_copy;
+    if (ret_value)
+        *ret_value = value_copy;
     return 0;
+oom:
+    free(name_copy);
+    free(value_copy);
+    if (ret_name)
+        *ret_name = NULL;
+    if (ret_value)
+        *ret_value = NULL;
+    return ENOMEM;
 }
 
 errcode_t KRB5_CALLCONV
