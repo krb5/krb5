@@ -701,9 +701,7 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
                 host_based_srvcs = 0;
         }
 
-        /* aprof_init can return 0 with aprof == NULL */
-        if (aprof)
-            krb5_aprof_finish(aprof);
+        krb5_aprof_finish(aprof);
     }
 
     if (default_udp_ports == 0) {
