@@ -135,7 +135,6 @@ int ss_listen (sci_idx)
 #endif
 
         code = ss_execute_line (sci_idx, input);
-        free(input);
         if (code == SS_ET_COMMAND_NOT_FOUND) {
             register char *c = input;
             while (*c == ' ' || *c == '\t')
@@ -150,6 +149,7 @@ int ss_listen (sci_idx)
                       "Unknown request \"%s\".  Type \"?\" for a request list.",
                       c);
         }
+        free(input);
     }
     code = 0;
 egress:
