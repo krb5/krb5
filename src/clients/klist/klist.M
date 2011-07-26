@@ -101,6 +101,9 @@ file.
 .B \-K
 display the value of the encryption key in each keytab entry in the
 keytab file.
+.TP
+.B \-V
+display the Kerberos version number and exit.
 .PP
 If
 .I cache_name
