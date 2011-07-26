@@ -564,10 +564,6 @@ set_results(const char *name, const char *value, char **ret_name,
 oom:
     free(name_copy);
     free(value_copy);
-    if (ret_name)
-        *ret_name = NULL;
-    if (ret_value)
-        *ret_value = NULL;
     return ENOMEM;
 }
 
@@ -579,6 +575,10 @@ profile_iterator(void **iter_p, char **ret_name, char **ret_value)
     struct profile_iterator *iter = *iter_p;
     profile_t profile;
 
+    if (ret_name)
+        *ret_name = NULL;
+    if (ret_value)
+        *ret_value = NULL;
     if (iter->magic != PROF_MAGIC_ITERATOR)
         return PROF_MAGIC_ITERATOR;
     profile = iter->profile;
