@@ -401,7 +401,7 @@ t_vfy_increds: t_vfy_increds.o $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ t_vfy_increds.o $(KRB5_BASE_LIBS)
 
 TEST_PROGS= t_walk_rtree t_kerb t_ser t_deltat t_expand t_authdata t_pac \
-	t_princ t_etypes
+	t_princ t_etypes t_vfy_increds
 
 check-unix:: $(TEST_PROGS)
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
@@ -454,7 +454,8 @@ clean::
 		$(OUTPRE)t_etypes$(EXEEXT) $(OUTPRE)t_etypes.$(OBJEXT)	\
 		$(OUTPRE)t_pac$(EXEEXT) $(OUTPRE)t_pac.$(OBJEXT)	\
 		$(OUTPRE)t_princ$(EXEEXT) $(OUTPRE)t_princ.$(OBJEXT)	\
-	$(OUTPRE)t_authdata$(EXEEXT) $(OUTPRE)t_authdata.$(OBJEXT)
+	$(OUTPRE)t_authdata$(EXEEXT) $(OUTPRE)t_authdata.$(OBJEXT)	\
+	$(OUTPRE)t_vfy_increds$(EXEEXT) $(OUTPRE)t_vfy_increds.$(OBJEXT)
 
 @libobj_frag@
 
