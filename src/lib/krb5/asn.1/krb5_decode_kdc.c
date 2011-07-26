@@ -126,8 +126,8 @@ decode_krb5_pa_fx_fast_request(const krb5_data *code, krb5_fast_armored_req **re
     alloc_field(rep);
     clear_field(rep, armor);
     {
-        int indef;
-        unsigned int taglen;
+        int indef KRB5_ATTR_UNUSED;
+        unsigned int taglen KRB5_ATTR_UNUSED;
         next_tag_from_buf(buf);
         if (tagnum != 0)
             clean_return(ASN1_BAD_ID);

@@ -32,6 +32,12 @@
 #include "asn1_get.h"
 #include "asn1_misc.h"
 
+#if __GNUC__ >= 3
+#define KRB5_ATTR_UNUSED __attribute__((unused))
+#else
+#define KRB5_ATTR_UNUSED
+#endif
+
 /* setup *********************************************************/
 /* set up variables */
 /*
@@ -47,13 +53,13 @@
     retval = asn1buf_wrap_data(&buf,code);      \
     if (retval) return retval
 
-#define setup_no_tagnum(type)                   \
-    asn1_class asn1class;                       \
-    asn1_construction construction;             \
+#define setup_no_tagnum(type)                                    \
+    asn1_class asn1class KRB5_ATTR_UNUSED;                       \
+    asn1_construction construction KRB5_ATTR_UNUSED;             \
     setup_buf_only(type)
 
 #define setup_no_length(type)                   \
-    asn1_tagnum tagnum;                         \
+    asn1_tagnum tagnum KRB5_ATTR_UNUSED;        \
     setup_no_tagnum(type)
 
 #define setup(type)                             \
@@ -132,7 +138,7 @@ asn1_get_eoc_tag (asn1buf *buf)
 
 /* decode sequence header and initialize tagnum with the first field */
 #define begin_structure()                                       \
-    unsigned int taglen;                                        \
+    unsigned int taglen KRB5_ATTR_UNUSED;                       \
     asn1buf subbuf;                                             \
     int seqindef;                                               \
     int indef;                                                  \

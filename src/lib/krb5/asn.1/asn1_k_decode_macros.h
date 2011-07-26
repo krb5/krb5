@@ -32,15 +32,21 @@
 #include "asn1_get.h"
 #include "asn1_misc.h"
 
+#if __GNUC__ >= 3
+#define KRB5_ATTR_UNUSED __attribute__((unused))
+#else
+#define KRB5_ATTR_UNUSED
+#endif
+
 #define clean_return(val) { retval = val; goto error_out; }
 
 /* Declare useful decoder variables. */
-#define setup()                                 \
-    asn1_error_code retval;                     \
-    asn1_class asn1class;                       \
-    asn1_construction construction;             \
-    asn1_tagnum tagnum;                         \
-    unsigned int length, taglen
+#define setup()                                                  \
+    asn1_error_code retval;                                      \
+    asn1_class asn1class;                                        \
+    asn1_construction construction KRB5_ATTR_UNUSED;             \
+    asn1_tagnum tagnum;                                          \
+    unsigned int length, taglen KRB5_ATTR_UNUSED
 
 #define unused_var(x) if (0) { x = 0; x = x - x; }
 
@@ -262,7 +268,7 @@ asn1_get_eoc_tag (asn1buf *buf)
 #define begin_choice()                                          \
     asn1buf subbuf;                                             \
     int seqindef;                                               \
-    int indef;                                                  \
+    int indef KRB5_ATTR_UNUSED;                                 \
     taginfo t;                                                  \
     retval = asn1_get_tag_2(buf, &t);                           \
     if (retval) clean_return(retval);                           \
@@ -290,12 +296,12 @@ asn1_get_eoc_tag (asn1buf *buf)
  * meant to be called in an inner block that ends with a call to
  * end_sequence_of().
  */
-#define sequence_of(buf)                        \
-    unsigned int length, taglen;                \
-    asn1_class asn1class;                       \
-    asn1_construction construction;             \
-    asn1_tagnum tagnum;                         \
-    int indef;                                  \
+#define sequence_of(buf)                                \
+    unsigned int length, taglen KRB5_ATTR_UNUSED ;      \
+    asn1_class asn1class;                               \
+    asn1_construction construction KRB5_ATTR_UNUSED ;   \
+    asn1_tagnum tagnum;                                 \
+    int indef;                                          \
     sequence_of_common(buf)
 
 /*
