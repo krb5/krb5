@@ -939,7 +939,6 @@ unlock_princ(kadm5_principal_ent_t princ, long *mask, const char *caller)
  * Parse addprinc or modprinc arguments.  Some output fields may be
  * filled in on error.
  */
-#define KRB5_TL_DB_ARGS 0x7fff
 static int
 kadmin_parse_princ_args(int argc, char *argv[], kadm5_principal_ent_t oprinc,
                         long *mask, char **pass, krb5_boolean *randkey,

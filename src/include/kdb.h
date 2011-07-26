@@ -229,7 +229,6 @@ typedef struct __krb5_key_salt_tuple {
 #define KRB5_TL_RB1_CHALLENGE           0x0005
 #ifdef SECURID
 #define KRB5_TL_SECURID_STATE           0x0006
-#define KRB5_TL_DB_ARGS                 0x7fff
 #endif /* SECURID */
 #define KRB5_TL_USER_CERTIFICATE        0x0007
 #define KRB5_TL_MKVNO                   0x0008
@@ -243,6 +242,8 @@ typedef struct __krb5_key_salt_tuple {
 #define KRB5_TL_LM_KEY                  0x0500 /* LM OWF */
 #define KRB5_TL_X509_SUBJECT_ISSUER_NAME 0x0600 /* <I>IssuerDN<S>SubjectDN */
 #define KRB5_TL_LAST_ADMIN_UNLOCK       0x0700 /* Timestamp of admin unlock */
+
+#define KRB5_TL_DB_ARGS                 0x7fff
 
 /* version number for KRB5_TL_ACTKVNO data */
 #define KRB5_TL_ACTKVNO_VER     1

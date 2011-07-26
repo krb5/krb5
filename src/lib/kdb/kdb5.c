@@ -50,11 +50,6 @@
 #include "adb_err.h"
 
 /*
- * Type definitions
- */
-#define KRB5_TL_DB_ARGS                 0x7fff
-
-/*
  * internal static variable
  */
 

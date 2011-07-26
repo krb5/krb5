@@ -81,9 +81,6 @@
  * Create / Modify / Destroy / View / List realm(s)
  */
 
-/* Needed for getting the definition of KRB5_TL_DB_ARGS */
-#define SECURID
-
 #include <stdio.h>
 #include <k5-int.h>
 #include <kadm5/admin.h>
