@@ -21,6 +21,7 @@
   this software for any purpose.  It is provided "as is" without express
   or implied warranty.
 '''
+
 import sys
 import os
 import re
@@ -82,6 +83,8 @@ class DoxyTypes(object):
                     data = self._process_typedef_node(node)
                 elif kind == 'variable':
                     data = self._process_variable_node(node)
+                elif kind == 'define':
+                    data = self._process_define_node(node)
                 result.append(data)
         print "\nnumber of types processed ==> " , len(result)    
         return result
@@ -111,6 +114,7 @@ class DoxyTypes(object):
                          'definition': t_definition,
                          'name': t_name,
                          'Id': t_Id,
+                         'initializer': '',
                          'type': t_type[1],
                          'short_description': t_brief,
                          'long_description': t_detailed,
@@ -154,15 +158,54 @@ class DoxyTypes(object):
         v_definition = re.sub('\*', '\\*', v_definition)
         
         variable_descr = {'category': 'variable',
-                         'definition': v_definition,
+                          'definition': v_definition,
                           'name': v_name,
                           'Id': v_Id,
+                          'initializer': '',
                           'type': v_type[1],
                           'short_description': v_brief,
-                          'long_description': detailed_description
+                          'long_description': detailed_description,
+                          'attributes': list()
                           }
 
         return variable_descr
+
+    def _process_define_node(self, node):
+        d_name = node.xpath('./name/text()')[0]
+        print  d_name
+        d_initializer = ''
+        d_type = ''
+        if len(node.xpath('./initializer')) > 0:
+            len_ref = len(node.xpath('./initializer/ref'))
+            if len(node.xpath('./initializer/ref')) > 0:
+                d_type = self._process_type_node(node.xpath("./initializer/ref")[0])        
+            if len(d_type) > 0:
+                len_text = len(node.xpath('./initializer/text()'))
+                if len(node.xpath('./initializer/text()')[0]) > 0:
+                    d_initializer = node.xpath('./initializer/text()')[0] + d_type[1]
+                if len_text > 1:
+                    if node.xpath('./initializer/text()')[1] is not None:
+                        d_initializer = d_initializer + node.xpath('./initializer/text()')[1]
+            else: 
+                d_initializer = node.xpath('./initializer/text()')[0]
+        d_Id = node.attrib['id']
+        brief_node = node.xpath('./briefdescription')[0]
+        d_brief = self._get_brief_description(brief_node)
+        details_node = node.xpath('./detaileddescription')[0]
+        detailed_description = self._get_detailed_description(details_node)
+
+        define_descr = {'category': 'composite',
+                        'definition': '',
+                        'name': d_name,
+                        'Id': d_Id,
+                        'initializer': d_initializer,
+                        'type': '',
+                        'short_description': d_brief,
+                        'long_description': detailed_description,
+                        'attributes': list()
+                        }
+
+        return define_descr
 
 
     def _get_brief_description(self, node):
@@ -265,14 +308,14 @@ class DoxyTypesTest(DoxyTypes):
         super(DoxyTypesTest,self).__init__(xmlpath)
 
     def run_tests(self):
+        print "Process typedef's"
         self.test_process_typedef_node()
+        print "Process define's"
+        self.test_process_define_node()
         
-    # TESTS
-
     def test_run(self):
         filename = 'krb5_8hin.xml'
         self.run(filename)
-
         
     def test_process_variable_node(self):
         filename = 'struct__krb5__octet__data.xml'
@@ -289,10 +332,18 @@ class DoxyTypesTest(DoxyTypes):
             obj = DocModel(**t)
             self.save(obj, self.templates, target_dir)
 
-    def test_run_compound(self):
-        filename = 'struct__krb5__context.xml'
-        result = self.run_compound(filename)
-        
+    def test_process_define_node(self):
+        # run parser for define's
+        filename = 'krb5_8hin.xml'
+        result = self.run(filename, include=['define'])
+        target_dir = '%s/macros' % (self.target_dir)
+        if not os.path.exists(target_dir):
+            os.makedirs(target_dir, 0755)
+        for t in result:
+            obj = DocModel(**t)
+            tmpl = {'composite': 'define_document.tmpl'}
+            self.save(obj, tmpl, target_dir)
+
 if __name__ == '__main__':
     
     tester = DoxyTypesTest( xml_inpath, rst_outpath)

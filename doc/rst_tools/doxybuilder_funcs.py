@@ -302,7 +302,12 @@ class DoxyFuncs(XML2AST):
             if node.attributes['kind'] == 'return':
                 return None
         elif node.name == 'ref':
-            return ':c:func:' + '`' + value + '`'
+            if value.find('()') >= 0:
+                # functions
+                return ':c:func:' + '`' + value + '`'
+            else:
+                # macro's
+                return ':data:' + '`' + value + '`'
         elif node.name == 'emphasis':
             return '*' + value + '*'
         elif node.name == 'itemizedlist':

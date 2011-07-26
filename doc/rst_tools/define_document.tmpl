@@ -1,0 +1,43 @@
+.. highlightlang:: c
+
+.. $composite.macro_reference($composite.name):
+
+
+
+#if $composite.short_description is not None and len($composite.short_description)
+	#set $title = $composite.name + ' - ' + $composite.short_description
+#else
+	#set $title = $composite.name
+#end if
+$title
+#echo ''.join(['=']*len($title)) #
+
+
+
+:krb5doxy:`Doxygen reference to $composite.name  <$composite.name>`
+
+..
+.. data:: $composite.name
+..
+
+#echo ''.join(['=']*len($composite.name)) + '== ======================' #
+$composite.name       $composite.initializer
+#echo ''.join(['=']*len($composite.name)) + '== ======================' #
+
+
+$composite.long_description
+ 
+
+#if $composite.Id is not None 
+
+
+#end if
+
+
+Feedback
+----------
+
+#set $msg_subject = 'Documentation___' + $composite.name 
+
+Please, provide your feedback on this document at krb5-bugs@mit.edu?subject=$msg_subject
+ 

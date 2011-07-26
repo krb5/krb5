@@ -48,6 +48,7 @@ class CompositeType():
         self.definition = argkw.get('definition')
         self.name = argkw.get('name')
         self.Id = argkw.get('Id')
+        self.initializer = argkw.get('initializer')
         self.active = argkw.get('active', False)
         self.version = argkw.get('version')
         self.return_type = argkw.get('return_type')
@@ -82,6 +83,12 @@ class CompositeType():
     def struct_reference(self, name):
         result = re.sub(r'_', '-', name)
         result = '_%s-struct' % result
+        
+        return result
+
+    def macro_reference(self, name):
+        result = re.sub(r'_', '-', name)
+        result = '_%s-data' % result
         
         return result
 
