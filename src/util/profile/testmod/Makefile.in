@@ -10,6 +10,11 @@ LIBMAJOR=0
 LIBMINOR=0
 SO_EXT=.so
 
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+SHLIB_EXPLIBS=$(SUPPORT_LIB) $(LIBS)
+SHLIB_EXPDEPS=$(SUPPORT_DEPLIB)
+
 STOBJLISTS=OBJS.ST
 STLIBOBJS=testmod_main.o
 
@@ -18,6 +23,5 @@ SRCS=$(srcdir)/testmod_main.c
 check-unix:: proftest$(DYNOBJEXT)
 clean-unix:: clean-libs clean-libobjs
 
-@libnodeps_frag@
 @libnover_frag@
 @libobj_frag@
