@@ -89,11 +89,12 @@ full_cleanup(void *cbdata)
     assert(cbdata == &full_cbdata);
 }
 
-static void
+static long
 full_copy(void *cbdata, void **ret_cbdata)
 {
     assert(cbdata == &full_cbdata);
     *ret_cbdata = &full_cbdata;
+    return 0;
 }
 
 struct iterator {
@@ -202,6 +203,7 @@ static long
 full_flush(void *cbdata)
 {
     assert(cbdata == &full_cbdata);
+    return 0;
 }
 
 struct profile_vtable basic_vtable = {
