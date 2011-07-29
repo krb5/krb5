@@ -215,6 +215,5 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'krbdoc', u'MIT Kerberos Documentation',
-     [u'MIT'], 1)
+    ('krb_users/user_commands/kinit', 'kinit', u'obtain and cache Kerberos ticket-granting ticket', [u'MIT'], 1)
 ]
