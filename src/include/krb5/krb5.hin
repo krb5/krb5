@@ -967,7 +967,7 @@ krb5_c_keyed_checksum_types(krb5_context context, krb5_enctype enctype,
 #define KRB5_KEYUSAGE_PA_SAM_RESPONSE           27
 
 /* Defined in KDC referrals draft */
-/**
+/*
  * @note There is a conflict with the value of @c KRB5_KEYUSAGE_PA_REFERRAL:
  * it is used for hardware Pre-athentication @a and KDC referrals.
  */
@@ -3435,7 +3435,7 @@ krb5_parse_name(krb5_context context, const char *name, krb5_principal *nprincip
  *
  * The following flags are valid:
  * @li #KRB5_PRINCIPAL_PARSE_NO_REALM - no realm must be present in @a name
- * @li #KRB5_PRINCIPAL_PARSE_MUST_REALM - realm must be present in @a name
+ * @li #KRB5_PRINCIPAL_PARSE_REQUIRE_REALM - realm must be present in @a name
  * @li #KRB5_PRINCIPAL_PARSE_ENTERPRISE - create single-component enterprise
  *                                        principal
  *
