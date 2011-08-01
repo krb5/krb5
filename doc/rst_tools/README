@@ -46,16 +46,20 @@ Part A:    Transforming Doxygen XML output into reStructuredText (rst)  without 
 
 
 
-Part B:    Transforming Doxygen XML output into reStructuredText with the bridge to Doxygen HTML output.
+Part B:    Bridge to Doxygen HTML output.
 
-1.   In the Doxygen configuration file set option GENERATE_XML to YES. Also, set option GENERATE_TAGFILE to create a Doxygen tag file. For example, GENERATE_TAGFILE = /tmp/krb5doxy.tag. Generate Doxygen XML output;
+1. Transform Doxygen XML output into reStructuredText.
+   In src/Doxygen configuration file request genetation of the tag file and XML output:
+       GENERATE_TAGFILE       = krb5doxy.tag
+       GENERATE_XML           = YES
 
-2.    Modify Sphinx conf.py file to point to the “doxylink” extension and Doxygen tag file:
+2. Modify Sphinx conf.py file to point to the “doxylink” extension and Doxygen tag file:
+      extensions = ['sphinx.ext.autodoc', 'sphinxcontrib.doxylink']
+      doxylink = { ' krb5doxy' : ('/tmp/krb5doxy.tag, ' doxy_html_dir ') }
 
-extensions = ['sphinx.ext.autodoc', 'sphinxcontrib.doxylink']
-doxylink = { ' krb5doxy' : ('/tmp/krb5doxy.tag, ' doxy_html_dir ') }
-
-where doxy_html_dir is the location of the Doxygen HTML output
+   where doxy_html_dir is the location of the Doxygen HTML output
 
 3.  Continue with steps 3 - 6 of Part A.
+
+
 

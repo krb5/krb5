@@ -16,12 +16,12 @@ Contents:
 Topics in TODO list:
 ---------------------
 
-   Choosing backend: LDAP vs DB2
-   Validating Kerberos tickets
-   Cross-realm interaction with AD
-   Replication
-   Performance tuning tips
-   Error log messages
+#.   Choosing backend: LDAP vs DB2
+#.   Validating Kerberos tickets
+#.   Cross-realm interaction with AD
+#.   Replication
+#.   Performance tuning tips
+#.   Logging error messages
 
 ------------------
 
