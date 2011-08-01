@@ -222,4 +222,6 @@ man_pages = [
     ('krb_users/user_commands/klist', 'klist', u'list cached Kerberos tickets', [u'MIT'], 1),
     ('krb_users/user_commands/kdestroy', 'kdestroy', u'destroy Kerberos tickets', [u'MIT'], 1),
     ('krb_users/user_commands/kpasswd', 'kpasswd', u'change a user\'s Kerberos password', [u'MIT'], 1),
+    ('krb_users/user_commands/kvno', 'kvno', u'print key version numbers of Kerberos principals', [u'MIT'], 1),
+    ('krb_users/user_commands/ksu', 'ksu', u'Kerberized super-user', [u'MIT'], 1),
 ]

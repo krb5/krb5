@@ -5,10 +5,11 @@ klist - list cached Kerberos tickets
 SYNOPSIS
 ~~~~~~~~
 
-*klist*
+**klist**
       [**-e**] 
       [[**-c**] [**-f**] [**-s**] [**-a** [**-n**]]]
       [**-k**  [**-t**]  [**-K**]]
+      [**-V**]
       [*cache_name* | *keytab_name*]
 
 
@@ -65,6 +66,9 @@ OPTIONS
 
      **-K**
           Display the value of the encryption key in each *keytab* entry in the *keytab* file.
+
+     **-V**
+          Display the Kerberos version number and exit.
 
      If **cache_name** or **keytab_name** is not specified, *klist* will display the credentials in the default credentials cache or
      *keytab* file as appropriate. If the *KRB5CCNAME* environment variable is set, its value is used to name the default ticket cache.

@@ -11,6 +11,8 @@ User commands
    klist.rst
    kdestroy.rst
    kpasswd.rst
+   kvno.rst
+   ksu.rst
 
 
 ------------------
