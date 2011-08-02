@@ -646,23 +646,6 @@ The following tags are used in this section:
 This relation indicates the name of the configuration section under dbmodules
 for database specific parameters used by the loadable database library.
 
-.IP database_name
-This DB2-specific tag indicates the location of the database in the
-filesystem.
-
-.IP disable_last_success
-If set to true, suppresses KDC updates to the "Last successful
-authentication" field of principal entries requiring
-preauthentication.  Setting this flag may improve performance.
-(Principal entries which do not require preauthentication never update
-the "Last successful authentication" field.)
-
-.IP disable_lockout
-If set to true, suppresses KDC updates to the "Last failed
-authentication" and "Failed password attempts" fields of principal
-entries requiring preauthentication.  Setting this flag may improve
-performance, but also disables account lockout.
-
 .IP ldap_kerberos_container_dn 
 This LDAP specific tag indicates the DN of the container object where the realm
 objects will be located. This value is used if no object DN is mentioned in the
@@ -704,9 +687,26 @@ define the database specific parameters.
 .PP
 For each section, the following tags may be specified in the subsection:
 
+.IP database_name
+This DB2-specific tag indicates the location of the database in the
+filesystem.
+
 .IP db_library
 This tag indicates the name of the loadable database library.
 The value should be db2 for db2 database and kldap for LDAP database.
+
+.IP disable_last_success
+If set to true, suppresses KDC updates to the "Last successful
+authentication" field of principal entries requiring
+preauthentication.  Setting this flag may improve performance.
+(Principal entries which do not require preauthentication never update
+the "Last successful authentication" field.)
+
+.IP disable_lockout
+If set to true, suppresses KDC updates to the "Last failed
+authentication" and "Failed password attempts" fields of principal
+entries requiring preauthentication.  Setting this flag may improve
+performance, but also disables account lockout.
 
 .IP ldap_kerberos_container_dn 
 This LDAP specific tag indicates the DN of the container object where the realm
