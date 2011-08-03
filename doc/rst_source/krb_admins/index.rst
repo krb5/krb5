@@ -22,6 +22,7 @@ Contents:
 .. toctree::
    :maxdepth: 1
 
+   admin_commands/index.rst
    troubleshoot.rst
    advanced/index.rst
    various_envs.rst

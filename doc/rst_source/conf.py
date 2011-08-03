@@ -224,4 +224,6 @@ man_pages = [
     ('krb_users/user_commands/kpasswd', 'kpasswd', u'change a user\'s Kerberos password', [u'MIT'], 1),
     ('krb_users/user_commands/kvno', 'kvno', u'print key version numbers of Kerberos principals', [u'MIT'], 1),
     ('krb_users/user_commands/ksu', 'ksu', u'Kerberized super-user', [u'MIT'], 1),
+    ('krb_admins/admin_commands/krb5kdc', 'krb5kdc', u'Kerberos V5 KDC', [u'MIT'], 8),
+    ('krb_admins/admin_commands/kadmin_local', 'kadmin.local', u'Kerberos V5 database administration program', [u'MIT'], 8),
 ]

@@ -1,4 +1,4 @@
-.. _kdc_conf_label:
+.. _kdc.conf:
 
 kdc.conf
 ==============
@@ -8,7 +8,7 @@ The kdc.conf file contains KDC configuration information, including defaults use
 Structure
 --------------
 
-The kdc.conf file is set up in the same format as the :ref:`krb5_conf_label` file. The kdc.conf file may contain any or all of the following three sections:
+The kdc.conf file is set up in the same format as the :ref:`krb5.conf` file. The kdc.conf file may contain any or all of the following three sections:
 
 ==================== ================================
 :ref:`kdcdefaults`        Contains default values for overall behavior of the KDC.
@@ -124,7 +124,7 @@ restrict_anonymous_to_tgt
 **[logging]**
 ~~~~~~~~~~~~~~~~~~~~
 
-See :ref:`logging` section in :ref:`krb5_conf_label` 
+See :ref:`logging` section in :ref:`krb5.conf` 
 
 
 PKINIT options

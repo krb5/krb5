@@ -22,7 +22,7 @@ _kerberos-master._udp
 
     If you have only one KDC, or for whatever reason there is no accessible KDC that would get database changes faster than the others, you do not need to define this entry.
 _kerberos-adm._tcp
-    This should list port 749 on your master KDC. Support for it is not complete at this time, but it will eventually be used by the kadmin program and related utilities. For now, you will also need the admin_server entry in :ref:`krb5_conf_label`.
+    This should list port 749 on your master KDC. Support for it is not complete at this time, but it will eventually be used by the kadmin program and related utilities. For now, you will also need the admin_server entry in :ref:`krb5.conf`.
 _kpasswd._udp
     This should list port 464 on your master KDC. It is used when a user changes her password. 
 

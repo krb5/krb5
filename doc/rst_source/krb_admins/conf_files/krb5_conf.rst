@@ -1,4 +1,4 @@
-.. _krb5_conf_label:
+.. _krb5.conf:
 
 krb5.conf
 ==========

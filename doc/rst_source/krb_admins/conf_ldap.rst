@@ -88,7 +88,7 @@ Configuring Kerberos with OpenLDAP back-end
                 
 
 
-  For the sample krb5.conf file, refer to  :ref:`krb5_conf_sample_label`.  For more details, refer to :ref:`krb5_conf_label`
+  For the sample krb5.conf file, refer to  :ref:`krb5_conf_sample_label`.  For more details, refer to :ref:`krb5.conf`
 
 8. Create the realm using *kdb5_ldap_util* (see :ref:`ldap_create_realm_label`)::
 

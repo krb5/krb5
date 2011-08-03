@@ -8,7 +8,7 @@ Mapping hostnames onto Kerberos realms
 
 Mapping hostnames onto Kerberos realms is done in one of two ways.
 
-The first mechanism, which has been in use for years in MIT-based Kerberos distributions, works through a set of rules in the :ref:`krb5_conf_label` configuration file.  You can specify mappings for an entire domain or subdomain, and/or on a hostname-by-hostname basis. Since greater specificity takes precedence, you would do this by specifying the mappings for a given domain or subdomain and listing the exceptions.
+The first mechanism, which has been in use for years in MIT-based Kerberos distributions, works through a set of rules in the :ref:`krb5.conf` configuration file.  You can specify mappings for an entire domain or subdomain, and/or on a hostname-by-hostname basis. Since greater specificity takes precedence, you would do this by specifying the mappings for a given domain or subdomain and listing the exceptions.
 
 The second mechanism works by looking up the information in special TXT records in the Domain Name Service. This is currently not used by default because security holes could result if the DNS TXT records were spoofed. If this mechanism is enabled on the client, it will try to look up a TXT record for the DNS name formed by putting the prefix _kerberos in front of the hostname in question. If that record is not found, it will try using _kerberos and the host's domain name, then its parent domain, and so forth. So for the hostname *BOSTON.ENGINEERING.FOOBAR.COM*, the names looked up would be::
 

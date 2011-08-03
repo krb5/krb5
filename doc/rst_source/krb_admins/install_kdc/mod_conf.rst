@@ -3,7 +3,7 @@ Edit the configuration files
 
 Modify the configuration files, */etc/krb5.conf* and */usr/local/var/krb5kdc/kdc.conf* to reflect the correct information (such as the hostnames and realm name) for your realm. MIT recommends that you keep *krb5.conf* in */etc*.
 
-Most of the tags in the configuration have default values that will work well for most sites. There are some tags in the *krb5.conf* file whose values must be specified, and this section will explain those. For more information on Kerberos V5 configuration files see :ref:`krb5_conf_label` and :ref:`kdc_conf_label`.
+Most of the tags in the configuration have default values that will work well for most sites. There are some tags in the *krb5.conf* file whose values must be specified, and this section will explain those. For more information on Kerberos V5 configuration files see :ref:`krb5.conf` and :ref:`kdc.conf`.
 
 *krb5.conf*
 -------------
