@@ -226,4 +226,6 @@ man_pages = [
     ('krb_users/user_commands/ksu', 'ksu', u'Kerberized super-user', [u'MIT'], 1),
     ('krb_admins/admin_commands/krb5kdc', 'krb5kdc', u'Kerberos V5 KDC', [u'MIT'], 8),
     ('krb_admins/admin_commands/kadmin_local', 'kadmin.local', u'Kerberos V5 database administration program', [u'MIT'], 8),
+    ('krb_admins/admin_commands/kadmin', 'kadmin', u'Kerberos V5 database administration program', [u'MIT'], 1),
+    ('krb_admins/admin_commands/kprop', 'kprop', u'propagate a Kerberos V5 principal database to a slave server', [u'MIT'], 8),
 ]

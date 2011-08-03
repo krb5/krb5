@@ -9,6 +9,7 @@ Administration  programs
 
    krb5kdc.rst
    kadmin_local.rst
+   kprop.rst
 
 
 ------------
