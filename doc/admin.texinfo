@@ -533,6 +533,12 @@ HMAC SHA1 DES3
 Microsoft MD5 HMAC checksum type
 @end table
 
+@itemx preferred_preauth_types
+This allows you to set the preferred preauthentication types which the
+client will attempt before others which may be advertised by a KDC.  The
+default value for this setting is "17, 16, 15, 14", which forces libkrb5
+to attempt to use PKINIT if it is supported.
+
 @comment see lib/krb5/ccache/fcc.h
 @itemx ccache_type
 Use this parameter on systems which are DCE clients, to specify the
@@ -584,6 +590,16 @@ has no effect.
 @itemx dns_fallback
 General flag controlling the use of DNS for Kerberos information.  If
 both of the preceding options are specified, this option has no effect.
+
+@itemx realm_try_domains
+Indicate whether a host's domain components should be used to determine
+the Kerberos realm of the host.  The value of this variable is an
+integer: -1 means not to search, 0 means to try the host's domain
+itself, 1 means to also try the domain's immediate parent, and so forth.
+The library's usual mechanism for locating Kerberos realms is used to
+determine whether a domain is a valid realm--which may involve
+consulting DNS if dns_lookup_kdc is set.  The default is not to search
+domain components.
 
 @itemx extra_addresses
 This allows a computer to use multiple local addresses, in order to
@@ -1066,7 +1082,7 @@ This LDAP specific tag indicates the default bind DN for the Administration serv
 
 This LDAP specific tag indicates the file containing the stashed passwords (created by @code{kdb5_ldap_util stashsrvpw}) for the objects used by the Kerberos servers to bind to the LDAP server. This file must be kept secure. This value is used if no service password file is mentioned in the configuration section under [dbmodules].
 
-@itemx ldap_server
+@itemx ldap_servers
 
 This LDAP specific tag indicates the list of LDAP servers that the Kerberos servers can connect to. The list of LDAP servers is whitespace-separated. The LDAP server is specified by a LDAP URI. This value is used if no LDAP servers are mentioned in the configuration section under [dbmodules]. It is recommended to use the ldapi:// or ldaps:// interface and not to use ldap:// interface.
 
@@ -1114,7 +1130,7 @@ This LDAP specific tag indicates the default bind DN for the Administration serv
 @itemx ldap_service_password_file
 This LDAP specific tag indicates the file containing the stashed passwords (created by @code{kdb5_ldap_util stashsrvpw}) for the objects used by the Kerberos servers to bind to the LDAP server. This file must be kept secure.
 
-@itemx ldap_server
+@itemx ldap_servers
 This LDAP specific tag indicates the list of LDAP servers that the Kerberos servers can connect to. The list of LDAP servers is whitespace-separated. The LDAP server is specified by a LDAP URI. It is recommended to use ldapi:// or ldaps:// interface to connect to the LDAP server.
 
 @itemx ldap_conns_per_server

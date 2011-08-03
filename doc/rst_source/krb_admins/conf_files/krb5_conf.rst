@@ -115,6 +115,8 @@ kdc_timesync
     -138
         Microsoft MD5 HMAC checksum type 
 
+preferred_preauth_types
+    This allows you to set the preferred preauthentication types which the client will attempt before others which may be advertised by a KDC.  The default value for this setting is "17, 16, 15, 14", which forces libkrb5 to attempt to use PKINIT if it is supported.
 ccache_type
     Use this parameter on systems which are DCE clients, to specify the type of cache to be created by kinit, or when forwarded tickets are received. DCE and Kerberos can share the cache, but some versions of DCE do not support the default cache as created by this version of Kerberos. Use a value of 1 on DCE 1.0.3a systems, and a value of 2 on DCE 1.1 systems. The default value is 4. 
 dns_lookup_kdc
@@ -133,6 +135,8 @@ dns_fallback
     General flag controlling the use of DNS for Kerberos information. If both of the preceding options are specified, this option has no effect. 
 extra_addresses
     This allows a computer to use multiple local addresses, in order to allow Kerberos to work in a network that uses NATs. The addresses should be in a comma-separated list. 
+realm_try_domains
+    Indicate whether a host's domain components should be used to determine the Kerberos realm of the host.  The value of this variable is an integer: -1 means not to search, 0 means to try the host's domain itself, 1 means to also try the domain's immediate parent, and so forth. The library's usual mechanism for locating Kerberos realms is used to determine whether a domain is a valid realm--which may involve consulting DNS if dns_lookup_kdc is set.  The default is not to search domain components.
 udp_preference_limit
     When sending a message to the KDC, the library will try using TCP before UDP if the size of the message is above udp_preference_list. If the message is smaller than udp_preference_list, then UDP will be tried before TCP. Regardless of the size, both protocols will be tried if the first attempt fails. 
 verify_ap_req_nofail
@@ -393,7 +397,7 @@ ldap_kadmind_dn
     This LDAP specific tag indicates the default bind DN for the Administration server. The administration server does a login to the directory as this object. This object should have the rights to read and write the Kerberos data in the LDAP database. This value is used if the bind DN for the Administration server is not mentioned in the configuration section under dbmodules_. 
 ldap_service_password_file
     This LDAP specific tag indicates the file containing the stashed passwords (created by kdb5_ldap_util stashsrvpw) for the objects used by the Kerberos servers to bind to the LDAP server. This file must be kept secure. This value is used if no service password file is mentioned in the configuration section under dbmodules_. 
-ldap_server
+ldap_servers
     This LDAP specific tag indicates the list of LDAP servers that the Kerberos servers can connect to. The list of LDAP servers is whitespace-separated. The LDAP server is specified by a LDAP URI. This value is used if no LDAP servers are mentioned in the configuration section under dbmodules_. It is recommended to use the *ldapi://* or *ldaps://* interface and not to use *ldap://* interface. 
 ldap_conns_per_server
     This LDAP specific tag indicates the number of connections to be maintained per LDAP server. This value is used if the number of connections per LDAP server are not mentioned in the configuration section under dbmodules_. The default value is 5. 
@@ -423,7 +427,7 @@ ldap_kadmind_dn
     This LDAP specific tag indicates the default bind DN for the Administration server. The administration server does a login to the directory as this object. This object should have the rights to read and write the Kerberos data in the LDAP database. 
 ldap_service_password_file
     This LDAP specific tag indicates the file containing the stashed passwords (created by *kdb5_ldap_util stashsrvpw*) for the objects used by the Kerberos servers to bind to the LDAP server. This file must be kept secure. 
-ldap_server
+ldap_servers
     This LDAP specific tag indicates the list of LDAP servers that the Kerberos servers can connect to. The list of LDAP servers is whitespace-separated. The LDAP server is specified by a LDAP URI. It is recommended to use *ldapi://* or *ldaps://* interface to connect to the LDAP server. 
 ldap_conns_per_server
     This LDAP specific tags indicates the number of connections to be maintained per LDAP server. 
