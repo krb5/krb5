@@ -1,4 +1,6 @@
-krb5kdc - Kerberos V5 KDC
+.. _krb5kdc:
+
+krb5kdc(8)
 ===========================
 
 SYNOPSIS

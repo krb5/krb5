@@ -1,16 +1,20 @@
-kprop - propagate a Kerberos V5 principal database to a slave server
-=====================================================================
+.. _kprop:
+
+kprop(8)
+=========
+
 
 SYNOPSIS
 -------------
 
 **kprop**
-         [**-r** *realm*] 
-         [**-f** *file*] 
-         [**-d**] 
-         [**-P** *port*] 
-         [**-s** *keytab*] 
-         *slave_host*
+          [**-r** *realm*] 
+          [**-f** *file*] 
+          [**-d**] 
+          [**-P** *port*] 
+          [**-s** *keytab*] 
+          *slave_host*
+
 
 DESCRIPTION
 -------------
@@ -30,7 +34,7 @@ OPTIONS
               *KPROP_DEFAULT_FILE* (normally /usr/local/var/krb5kdc/slave_datatrans).
 
        **-P** *port*
-              Specifies the port to use to contact the kpropd server on the remote host.
+              Specifies the port to use to contact the :ref:`kpropd` server on the remote host.
 
        **-d**     
               Prints debugging information.

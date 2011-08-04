@@ -1,5 +1,6 @@
-kadmin - Kerberos V5 database administration program
-============================================================
+kadmin(1), kadmin.local(8)
+===========================
+
 
 SYNOPSYS
 --------------
