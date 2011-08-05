@@ -13,7 +13,9 @@ User commands
    kpasswd.rst
    kvno.rst
    ksu.rst
+   k5login.rst
    ../../krb_admins/admin_commands/kadmin_local.rst
+   ../../krb_admins/admin_commands/k5srvutil.rst
 
 
 ------------------

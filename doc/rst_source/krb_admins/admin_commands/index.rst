@@ -13,6 +13,9 @@ Administration  programs
    kpropd.rst
    kproplog.rst
    kdb5_util.rst
+   ktutil.rst
+   k5srvutil.rst
+   kadmind.rst
 
 ------------
 

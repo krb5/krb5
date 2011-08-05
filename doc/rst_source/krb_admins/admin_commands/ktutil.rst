@@ -1,0 +1,72 @@
+ktutil
+=============
+
+
+SYNOPSIS
+-------------
+
+**ktutil**
+
+DESCRIPTION
+-------------
+
+The *ktutil* command invokes a subshell from which an administrator can read, write, or edit entries in a Kerberos V5 keytab or V4 srvtab file.
+
+COMMANDS
+-------------
+
+       **list**   
+              Displays the current keylist.
+
+              Alias: **l**
+
+       **read_kt** *keytab*
+              Read the Kerberos V5 keytab file *keytab* into the current keylist.
+
+              Alias: **rkt**
+
+       **read_st** *srvtab*
+              Read the Kerberos V4 srvtab file *srvtab* into the current keylist.
+
+              Alias: **rst**
+
+       **write_kt** *keytab*
+              Write the current keylist into the Kerberos V5 keytab file *keytab*.
+
+              Alias: **wkt**
+
+       **write_st** *srvtab*
+              Write the current keylist into the Kerberos V4 srvtab file *srvtab*.
+
+              Alias: **wst**
+
+       **clear_list**
+              Clear the current keylist.
+
+              Alias: **clear**
+
+       **delete_entry** *slot*
+              Delete the entry in slot number *slot* from the current keylist.
+
+              Alias: *delent*
+
+       **add_entry** (**-key | -password)** **-p** *principal* **-k** *kvno* **-e** *enctype*
+              Add *principal* to keylist using key or password.
+
+              Alias: **addent**
+
+       **list_requests**
+              Displays a listing of available commands.
+
+              Aliases: **lr**, **?**
+
+       **quit**
+              Quits ktutil.
+
+              Aliases: **exit**, **q**
+
+SEE ALSO
+-------------
+
+       kadmin(8), kdb5_util(8)
+

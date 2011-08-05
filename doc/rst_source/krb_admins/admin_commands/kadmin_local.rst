@@ -685,7 +685,7 @@ principal.db            default name for Kerberos principal database
 NOTE: The above three files are specific to db2 database.
 
 ====================== =================================================
-kadm5.acl               File containing list of principals and their *kadmin* administrative privileges.  See kadmind(8) for a description.
+kadm5.acl               File containing list of principals and their *kadmin* administrative privileges.  See :ref:`kadmind(8)` for a description.
 kadm5.keytab            *keytab* file for *kadmin/admin* principal.
 kadm5.dict              file containing dictionary of strings explicitly disallowed as passwords.
 ====================== =================================================

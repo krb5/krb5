@@ -224,6 +224,7 @@ man_pages = [
     ('krb_users/user_commands/kpasswd', 'kpasswd', u'change a user\'s Kerberos password', [u'MIT'], 1),
     ('krb_users/user_commands/kvno', 'kvno', u'print key version numbers of Kerberos principals', [u'MIT'], 1),
     ('krb_users/user_commands/ksu', 'ksu', u'Kerberized super-user', [u'MIT'], 1),
+    ('krb_users/user_commands/k5login', '.k5login', u'Kerberos V5 acl file for host access', [u'MIT'], 5),
     ('krb_admins/admin_commands/krb5kdc', 'krb5kdc', u'Kerberos V5 KDC', [u'MIT'], 8),
     ('krb_admins/admin_commands/kadmin_local', 'kadmin.local', u'Kerberos V5 database administration program', [u'MIT'], 8),
     ('krb_admins/admin_commands/kadmin_local', 'kadmin', u'Kerberos V5 database administration program', [u'MIT'], 1),
@@ -231,4 +232,7 @@ man_pages = [
     ('krb_admins/admin_commands/kproplog', 'kproplog', u'display the contents of the Kerberos principal update log', [u'MIT'], 8),
     ('krb_admins/admin_commands/kpropd', 'kpropd', u'Kerberos V5 slave KDC update server', [u'MIT'], 8),
     ('krb_admins/admin_commands/kdb5_util', 'kdb5_util', u'Kerberos database maintenance utility', [u'MIT'], 8),
+    ('krb_admins/admin_commands/ktutil', 'ktutil', u'Kerberos keytab file maintenance utility', [u'MIT'], 1),
+    ('krb_admins/admin_commands/k5srvutil', 'k5srvutil', u'host key table (keytab) manipulation utility', [u'MIT'], 1),
+    ('krb_admins/admin_commands/kadmind', 'kadmind', u'KADM5 administration server', [u'MIT'], 8),
 ]
