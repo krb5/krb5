@@ -1,6 +1,6 @@
-.. _kprop:
+.. _kprop(8):
 
-kprop(8)
+kprop
 =========
 
 
@@ -34,7 +34,7 @@ OPTIONS
               *KPROP_DEFAULT_FILE* (normally /usr/local/var/krb5kdc/slave_datatrans).
 
        **-P** *port*
-              Specifies the port to use to contact the :ref:`kpropd` server on the remote host.
+              Specifies the port to use to contact the :ref:`kpropd(8)` server on the remote host.
 
        **-d**     
               Prints debugging information.

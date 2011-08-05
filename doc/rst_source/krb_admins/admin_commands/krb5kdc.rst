@@ -1,6 +1,6 @@
-.. _krb5kdc:
+.. _krb5kdc(8):
 
-krb5kdc(8)
+krb5kdc
 ===========================
 
 SYNOPSIS

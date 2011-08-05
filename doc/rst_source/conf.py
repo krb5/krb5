@@ -230,4 +230,5 @@ man_pages = [
     ('krb_admins/admin_commands/kprop', 'kprop', u'propagate a Kerberos V5 principal database to a slave server', [u'MIT'], 8),
     ('krb_admins/admin_commands/kproplog', 'kproplog', u'display the contents of the Kerberos principal update log', [u'MIT'], 8),
     ('krb_admins/admin_commands/kpropd', 'kpropd', u'Kerberos V5 slave KDC update server', [u'MIT'], 8),
+    ('krb_admins/admin_commands/kdb5_util', 'kdb5_util', u'Kerberos database maintenance utility', [u'MIT'], 8),
 ]

@@ -1,4 +1,4 @@
-kadmin(1), kadmin.local(8)
+kadmin, kadmin.local
 ===========================
 
 
@@ -44,7 +44,7 @@ and uses that service ticket to authenticate to KADM5.
 
 If the database is db2, the local client *kadmin.local*, is intended to run directly on the master KDC without Kerberos authentication.
 The local version provides all of the functionality of the now obsolete kdb5_edit(8), except for database dump and load, 
-which is now provided by the kdb5_util(8) utility.
+which is now provided by the :ref:`kdb5_util(8)` utility.
 
 If the database is LDAP, *kadmin.local* need not be run on the KDC.
 

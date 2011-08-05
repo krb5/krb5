@@ -1,6 +1,6 @@
-.. _kproplog:
+.. _kproplog(8):
 
-kproplog(8)
+kproplog
 ===========
 
 

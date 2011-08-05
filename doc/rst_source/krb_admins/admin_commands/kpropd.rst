@@ -1,6 +1,6 @@
-.. _kpropd:
+.. _kpropd(8):
 
-kpropd(8)
+kpropd
 ===========
 
 
@@ -20,11 +20,11 @@ DESCRIPTION
 -------------
 
 The *kpropd* command runs on the slave KDC server.  
-It listens for update requests made by the :ref:`kprop` program, and periodically requests incremental updates from the master KDC.
+It listens for update requests made by the :ref:`kprop(8)` program, and periodically requests incremental updates from the master KDC.
 
 When the slave receives a kprop request from the master, *kpropd* accepts the dumped KDC database and places it in a file, 
-and then runs kdb5_util(8) to load the dumped database into the active database which is used by :ref:`krb5kdc`.  
-Thus, the master Kerberos server can use :ref:`kprop` to propagate its database to the slave slavers.  
+and then runs :ref:`kdb5_util(8)` to load the dumped database into the active database which is used by :ref:`krb5kdc(8)`.  
+Thus, the master Kerberos server can use :ref:`kprop(8)` to propagate its database to the slave slavers.  
 Upon a successful download of the KDC database file, the slave Kerberos server will have an up-to-date KDC database.
 
 Normally, *kpropd* is invoked out of inetd(8).  This is done by adding a line to the *inetd.conf* file which looks like this::
@@ -35,7 +35,7 @@ However, *kpropd* can also run as a standalone daemon, if the *-S* option is tur
 This is done for debugging purposes, or if for some reason the system administrator just doesn't want to run it out of inetd(8).
 
 When the slave periodically requests incremental updates, *kpropd* updates its *principal.ulog* file with any updates from the master.  
-:ref:`kproplog` can be used to view a summary of the update entry log on the slave KDC.  
+:ref:`kproplog(8)` can be used to view a summary of the update entry log on the slave KDC.  
 Incremental propagation is not enabled by default; it can be enabled using the *iprop_enable* and *iprop_slave_poll* settings in :ref:`kdc.conf`).  
 The principal "kiprop/slavehostname@REALM" (where "slavehostname" is the name of the slave KDC host, 
 and "REALM" is the name of the Kerberos realm) must be present in the slave's keytab file.
@@ -51,7 +51,7 @@ OPTIONS
               (normally /usr/local/var/krb5kdc/from_master).
 
        **-p**
-              Allows the user to specify the pathname to the kdb5_util(8) program; by default the pathname used is *KPROPD_DEFAULT_KDB5_UTIL*
+              Allows the user to specify the pathname to the :ref:`kdb5_util(8)` program; by default the pathname used is *KPROPD_DEFAULT_KDB5_UTIL*
               (normally /usr/local/sbin/kdb5_util).
 
        **-S**     
@@ -75,7 +75,7 @@ FILES
 
 *kpropd.acl*  
             Access file for *kpropd*; the default location is KPROPD_ACL_FILE (normally /usr/local/var/krb5kdc/kpropd.acl).  
-            Each entry is a line containing the principal of a host from which the local machine will allow Kerberos database propagation via :ref:`kprop`.
+            Each entry is a line containing the principal of a host from which the local machine will allow Kerberos database propagation via :ref:`kprop(8)`.
 
 SEE ALSO
 ----------

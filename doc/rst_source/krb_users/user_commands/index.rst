@@ -13,6 +13,7 @@ User commands
    kpasswd.rst
    kvno.rst
    ksu.rst
+   ../../krb_admins/admin_commands/kadmin_local.rst
 
 
 ------------------

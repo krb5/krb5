@@ -12,7 +12,7 @@ Administration  programs
    kprop.rst
    kpropd.rst
    kproplog.rst
-
+   kdb5_util.rst
 
 ------------
 
