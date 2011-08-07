@@ -132,35 +132,6 @@ parse_modstr(krb5_context context, const char *modstr,
     return 0;
 }
 
-/*
- * Convert a possibly relative pathname for a shared object to an absolute
- * path.  Non-absolute pathnames will be treated as relative to the system
- * plugins directory.
- */
-static krb5_error_code
-expand_relative_modpath(krb5_context context, const char *modpath,
-                        char **full_modpath_out)
-{
-    char *path;
-
-    *full_modpath_out = NULL;
-
-    /* XXX Unix-specific path handling for now. */
-    if (*modpath == '/') {
-        /* We already have an absolute path. */
-        path = strdup(modpath);
-        if (path == NULL)
-            return ENOMEM;
-    } else {
-        /* Append the relative path to the system plugins directory. */
-        if (asprintf(&path, "%s/%s", context->plugin_base_dir, modpath) < 0)
-            return ENOMEM;
-    }
-
-    *full_modpath_out = path;
-    return 0;
-}
-
 /* Return true if value is found in list. */
 static krb5_boolean
 find_in_list(char **list, const char *value)
@@ -250,7 +221,8 @@ register_dyn_mapping(krb5_context context, struct plugin_interface *interface,
     ret = parse_modstr(context, modstr, &modname, &modpath);
     if (ret != 0)
         goto cleanup;
-    ret = expand_relative_modpath(context, modpath, &fullpath);
+    /* Treat non-absolute modpaths as relative to the plugin base directory. */
+    ret = k5_path_join(context->plugin_base_dir, modpath, &fullpath);
     if (ret != 0)
         goto cleanup;
     if (!module_enabled(modname, enable, disable))
