@@ -916,7 +916,7 @@ set_cloexec_file(FILE *f)
    allocate some storage pointed to by the va_list, and in that case
    we'll just lose.  If anyone cares, we could try to devise a test
    for that case.  */
-#define va_copy(dest, src)      memcmp(dest, src, sizeof(va_list))
+#define va_copy(dest, src)      memcpy(dest, src, sizeof(va_list))
 #endif
 
 /* Provide strlcpy/strlcat interfaces. */
