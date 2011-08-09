@@ -105,7 +105,7 @@ kg_impersonate_name(OM_uint32 *minor_status,
 
 /* The mechglue always passes null desired_mechs and actual_mechs. */
 OM_uint32
-krb5_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
+KRB5_CALLCONV krb5_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
                                        const gss_cred_id_t impersonator_cred_handle,
                                        const gss_name_t desired_name,
                                        OM_uint32 time_req,

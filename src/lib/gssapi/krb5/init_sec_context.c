@@ -1097,7 +1097,7 @@ krb5int_gss_use_kdc_context(OM_uint32 *minor_status,
 #endif
 
 OM_uint32
-krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
+KRB5_CALLCONV krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
                           context_handle, target_name, mech_type,
                           req_flags, time_req, input_chan_bindings,
                           input_token, actual_mech_type, output_token,

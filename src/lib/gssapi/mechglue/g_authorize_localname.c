@@ -39,7 +39,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <mglueP.h>
 #include <gssapi/gssapi.h>
 
@@ -154,7 +156,7 @@ compare_names_authorize_localname(OM_uint32 *minor,
 	return (status);
 }
 
-OM_uint32
+OM_uint32 KRB5_CALLCONV
 gss_authorize_localname(OM_uint32 *minor,
 			const gss_name_t name,
 			const gss_name_t user)
@@ -203,7 +205,7 @@ gss_authorize_localname(OM_uint32 *minor,
 }
 
 int
-gss_userok(const gss_name_t name,
+KRB5_CALLCONV gss_userok(const gss_name_t name,
 	   const char *user)
 {
 	OM_uint32 major, minor;

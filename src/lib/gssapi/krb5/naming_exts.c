@@ -251,7 +251,7 @@ kg_data_list_to_buffer_set_nocopy(krb5_data **pdata,
 }
 
 OM_uint32
-krb5_gss_inquire_name(OM_uint32 *minor_status,
+KRB5_CALLCONV krb5_gss_inquire_name(OM_uint32 *minor_status,
                       gss_name_t name,
                       int *name_is_MN,
                       gss_OID *MN_mech,
@@ -308,7 +308,7 @@ cleanup:
 }
 
 OM_uint32
-krb5_gss_get_name_attribute(OM_uint32 *minor_status,
+KRB5_CALLCONV krb5_gss_get_name_attribute(OM_uint32 *minor_status,
                             gss_name_t name,
                             gss_buffer_t attr,
                             int *authenticated,
@@ -392,7 +392,7 @@ krb5_gss_get_name_attribute(OM_uint32 *minor_status,
 }
 
 OM_uint32
-krb5_gss_set_name_attribute(OM_uint32 *minor_status,
+KRB5_CALLCONV krb5_gss_set_name_attribute(OM_uint32 *minor_status,
                             gss_name_t name,
                             int complete,
                             gss_buffer_t attr,
@@ -450,7 +450,7 @@ krb5_gss_set_name_attribute(OM_uint32 *minor_status,
 }
 
 OM_uint32
-krb5_gss_delete_name_attribute(OM_uint32 *minor_status,
+KRB5_CALLCONV krb5_gss_delete_name_attribute(OM_uint32 *minor_status,
                                gss_name_t name,
                                gss_buffer_t attr)
 {
@@ -500,7 +500,7 @@ krb5_gss_delete_name_attribute(OM_uint32 *minor_status,
 }
 
 OM_uint32
-krb5_gss_map_name_to_any(OM_uint32 *minor_status,
+KRB5_CALLCONV krb5_gss_map_name_to_any(OM_uint32 *minor_status,
                          gss_name_t name,
                          int authenticated,
                          gss_buffer_t type_id,
@@ -558,7 +558,7 @@ krb5_gss_map_name_to_any(OM_uint32 *minor_status,
 }
 
 OM_uint32
-krb5_gss_release_any_name_mapping(OM_uint32 *minor_status,
+KRB5_CALLCONV krb5_gss_release_any_name_mapping(OM_uint32 *minor_status,
                                   gss_name_t name,
                                   gss_buffer_t type_id,
                                   gss_any_t *input)
@@ -617,7 +617,7 @@ krb5_gss_release_any_name_mapping(OM_uint32 *minor_status,
 }
 
 OM_uint32
-krb5_gss_export_name_composite(OM_uint32 *minor_status,
+KRB5_CALLCONV krb5_gss_export_name_composite(OM_uint32 *minor_status,
                                gss_name_t name,
                                gss_buffer_t exp_composite_name)
 {

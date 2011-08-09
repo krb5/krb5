@@ -130,7 +130,7 @@ attr_pname_to_uid(OM_uint32 *minor,
     return major;
 }
 
-OM_uint32
+OM_uint32 KRB5_CALLCONV
 gss_pname_to_uid(OM_uint32 *minor,
                  const gss_name_t pname,
                  const gss_OID mech_type,

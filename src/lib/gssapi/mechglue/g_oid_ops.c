@@ -103,7 +103,7 @@ gssint_copy_oid_set(
     return generic_gss_copy_oid_set(minor_status, oidset, new_oidset);
 }
 
-int
+int KRB5_CALLCONV
 gss_oid_equal(
     gss_const_OID first_oid,
     gss_const_OID second_oid)

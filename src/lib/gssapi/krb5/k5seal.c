@@ -388,7 +388,7 @@ kg_seal(minor_status, context_handle, conf_req_flag, qop_req,
 }
 
 OM_uint32
-krb5_gss_wrap(minor_status, context_handle, conf_req_flag,
+KRB5_CALLCONV krb5_gss_wrap(minor_status, context_handle, conf_req_flag,
               qop_req, input_message_buffer, conf_state,
               output_message_buffer)
     OM_uint32           *minor_status;
@@ -405,7 +405,7 @@ krb5_gss_wrap(minor_status, context_handle, conf_req_flag,
 }
 
 OM_uint32
-krb5_gss_get_mic(minor_status, context_handle, qop_req,
+KRB5_CALLCONV krb5_gss_get_mic(minor_status, context_handle, qop_req,
                  message_buffer, message_token)
     OM_uint32           *minor_status;
     gss_ctx_id_t        context_handle;

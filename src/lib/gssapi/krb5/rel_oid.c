@@ -26,7 +26,7 @@
 
 #include "gssapiP_krb5.h"
 
-OM_uint32 krb5_gss_internal_release_oid (OM_uint32 *, /* minor_status */
+OM_uint32 KRB5_CALLCONV krb5_gss_internal_release_oid (OM_uint32 *, /* minor_status */
                                          gss_OID * /* oid */
 );
 
@@ -56,7 +56,7 @@ krb5_gss_release_oid(minor_status, oid)
 }
 
 OM_uint32
-krb5_gss_internal_release_oid(minor_status, oid)
+KRB5_CALLCONV krb5_gss_internal_release_oid(minor_status, oid)
     OM_uint32   *minor_status;
     gss_OID     *oid;
 {

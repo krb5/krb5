@@ -733,7 +733,7 @@ cleanup:
  * handles. The heuristic is similar to SPNEGO's delete_sec_context.
  */
 OM_uint32
-iakerb_gss_delete_sec_context(OM_uint32 *minor_status,
+KRB5_CALLCONV iakerb_gss_delete_sec_context(OM_uint32 *minor_status,
                               gss_ctx_id_t *context_handle,
                               gss_buffer_t output_token)
 {
@@ -789,7 +789,7 @@ iakerb_make_exts(iakerb_ctx_id_t ctx, krb5_gss_ctx_ext_rec *exts)
 }
 
 OM_uint32
-iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
+KRB5_CALLCONV iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
                               gss_ctx_id_t *context_handle,
                               gss_cred_id_t verifier_cred_handle,
                               gss_buffer_t input_token,
@@ -879,7 +879,7 @@ cleanup:
 }
 
 OM_uint32
-iakerb_gss_init_sec_context(OM_uint32 *minor_status,
+KRB5_CALLCONV iakerb_gss_init_sec_context(OM_uint32 *minor_status,
                             gss_cred_id_t claimant_cred_handle,
                             gss_ctx_id_t *context_handle,
                             gss_name_t target_name,

@@ -24,7 +24,7 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_release_cred(minor_status, cred_handle)
+KRB5_CALLCONV krb5_gss_release_cred(minor_status, cred_handle)
     OM_uint32 *minor_status;
     gss_cred_id_t *cred_handle;
 {

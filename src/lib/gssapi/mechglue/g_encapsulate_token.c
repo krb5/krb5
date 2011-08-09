@@ -32,7 +32,7 @@
 
 #include "mglueP.h"
 
-OM_uint32
+OM_uint32 KRB5_CALLCONV
 gss_encapsulate_token(gss_const_buffer_t input_token,
                       gss_const_OID token_oid,
                       gss_buffer_t output_token)

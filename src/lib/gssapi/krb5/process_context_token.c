@@ -28,7 +28,7 @@
  */
 
 OM_uint32
-krb5_gss_process_context_token(minor_status, context_handle,
+KRB5_CALLCONV krb5_gss_process_context_token(minor_status, context_handle,
                                token_buffer)
     OM_uint32 *minor_status;
     gss_ctx_id_t context_handle;

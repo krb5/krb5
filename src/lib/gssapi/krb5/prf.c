@@ -34,7 +34,7 @@
 #endif
 
 OM_uint32
-krb5_gss_pseudo_random(OM_uint32 *minor_status,
+KRB5_CALLCONV krb5_gss_pseudo_random(OM_uint32 *minor_status,
                        gss_ctx_id_t context,
                        int prf_key,
                        const gss_buffer_t prf_in,

@@ -24,7 +24,7 @@
 #include "gssapiP_krb5.h"
 
 OM_uint32
-krb5_gss_display_name(minor_status, input_name, output_name_buffer,
+KRB5_CALLCONV krb5_gss_display_name(minor_status, input_name, output_name_buffer,
                       output_name_type)
     OM_uint32 *minor_status;
     gss_name_t input_name;

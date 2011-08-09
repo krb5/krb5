@@ -74,7 +74,7 @@
 
 /* V2 interface */
 OM_uint32
-krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
+KRB5_CALLCONV krb5_gss_wrap_size_limit(minor_status, context_handle, conf_req_flag,
                          qop_req, req_output_size, max_input_size)
     OM_uint32           *minor_status;
     gss_ctx_id_t        context_handle;

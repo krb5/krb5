@@ -546,7 +546,7 @@ kg_unseal(minor_status, context_handle, input_token_buffer,
 }
 
 OM_uint32
-krb5_gss_unwrap(minor_status, context_handle,
+KRB5_CALLCONV krb5_gss_unwrap(minor_status, context_handle,
                 input_message_buffer, output_message_buffer,
                 conf_state, qop_state)
     OM_uint32           *minor_status;
@@ -565,7 +565,7 @@ krb5_gss_unwrap(minor_status, context_handle,
 }
 
 OM_uint32
-krb5_gss_verify_mic(minor_status, context_handle,
+KRB5_CALLCONV krb5_gss_verify_mic(minor_status, context_handle,
                     message_buffer, token_buffer,
                     qop_state)
     OM_uint32           *minor_status;
