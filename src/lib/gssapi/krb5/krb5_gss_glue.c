@@ -336,7 +336,7 @@ krb5_gss_use_kdc_context(void)
  */
 OM_uint32 KRB5_CALLCONV
 gsskrb5_extract_authz_data_from_sec_context(OM_uint32 *minor_status,
-                                            gss_ctx_id_t context_handle,
+                                            const gss_ctx_id_t context_handle,
                                             int ad_type,
                                             gss_buffer_t ad_data)
 {

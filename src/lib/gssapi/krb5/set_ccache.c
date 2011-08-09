@@ -36,7 +36,7 @@ OM_uint32
 gss_krb5int_ccache_name(OM_uint32 *minor_status,
                         const gss_OID desired_mech,
                         const gss_OID desired_object,
-                        gss_buffer_t value)
+                        const gss_buffer_t value)
 {
     char *old_name = NULL;
     OM_uint32 err = 0;
