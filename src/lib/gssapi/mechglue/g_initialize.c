@@ -102,6 +102,7 @@ gssint_mechglue_init(void)
 	err = gss_spnegoint_lib_init();
 #endif
 
+    err = gssint_mecherrmap_init();
 	return err;
 }
 
