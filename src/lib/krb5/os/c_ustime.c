@@ -83,6 +83,11 @@ krb5_crypto_us_timeofday(krb5_int32 *seconds, krb5_int32 *microseconds)
     if (err)
         return err;
 
+    /* It would probably be more efficient to remove this mutex and use
+       thread-local storage for last_time.  But that could result in
+       different threads getting the same value for time, which may be
+       a technical violation of spec. */
+
     err = k5_mutex_lock(&krb5int_us_time_mutex);
     if (err)
         return err;
@@ -94,16 +99,24 @@ krb5_crypto_us_timeofday(krb5_int32 *seconds, krb5_int32 *microseconds)
        On Windows, where we get millisecond accuracy currently, that's
        quite likely.  On UNIX, it appears that we always get new
        microsecond values, so this case should never trigger.  */
-    if ((now.sec == last_time.sec) && (now.usec <= last_time.usec)) {
-        /* Same as last time??? */
+
+    /* Check for case where previously usec rollover caused bump in sec,
+       putting now.sec in the past.  But don't just use '<' because we
+       need to properly handle the case where the administrator intentionally
+       adjusted time backwards. */
+    if ((now.sec == last_time.sec-1) ||
+        ((now.sec == last_time.sec) && (now.usec <= last_time.usec))) {
+        /* Correct 'now' to be exactly one microsecond later than 'last_time'.
+           Note that _because_ we perform this hack, 'now' may be _earlier_
+           than 'last_time', even though the system time is monotonically
+           increasing. */
+
+        now.sec = last_time.sec;
         now.usec = ++last_time.usec;
         if (now.usec >= 1000000) {
             ++now.sec;
             now.usec = 0;
         }
-        /* For now, we're not worrying about the case of enough
-           returns of the same value that we roll over now.sec, and
-           the next call still gets the previous now.sec value.  */
     }
     last_time.sec = now.sec;    /* Remember for next time */
     last_time.usec = now.usec;
