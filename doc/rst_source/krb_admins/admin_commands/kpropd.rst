@@ -7,7 +7,7 @@ kpropd
 SYNOPSIS
 ----------
 
-***kpropd***
+**kpropd**
           [ **-r** *realm* ] 
           [ **-f** *slave_dumpfile* ] 
           [ **-F** *principal_database* ] 
