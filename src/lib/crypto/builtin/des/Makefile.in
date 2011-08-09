@@ -26,7 +26,7 @@ STLIBOBJS=\
 
 OBJS=	$(OUTPRE)d3_aead.$(OBJEXT)	\
 	$(OUTPRE)d3_kysched.$(OBJEXT)	\
-	$(OUTPRE)des_keys.c.$(OBJEXT)	\
+	$(OUTPRE)des_keys.$(OBJEXT)	\
 	$(OUTPRE)f_aead.$(OBJEXT) 	\
 	$(OUTPRE)f_cksum.$(OBJEXT)	\
 	$(OUTPRE)f_parity.$(OBJEXT) 	\
