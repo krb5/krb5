@@ -168,3 +168,5 @@ EXPORTS
 	gss_mech_iakerb					@135	DATA
 	gss_nt_exported_name				@136	DATA
 	gss_nt_service_name_v2				@137	DATA
+; Added in 1.10
+    gss_pname_to_uid                @138

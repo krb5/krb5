@@ -410,3 +410,5 @@ EXPORTS
 	krb5_sname_match				@384
 	k5_kt_get_principal				@385 ; PRIVATE GSSAPI
 	krb5_init_context_profile			@386
+    krb5int_c_mandatory_cksumtype   @387 ; PRIVATE GSSAPI
+    krb5int_arcfour_gsscrypt        @388 ; PRIVATE GSSAPI
