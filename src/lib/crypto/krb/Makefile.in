@@ -79,17 +79,24 @@ OBJS=\
 	$(OUTPRE)aead.$(OBJEXT)		 	\
 	$(OUTPRE)block_size.$(OBJEXT)		\
 	$(OUTPRE)cf2.$(OBJEXT) 			\
-	$(OUTPRE)checksum_length.$(OBJEXT)	\
+	$(OUTPRE)checksum_cbc.$(OBJEXT)		\
+	$(OUTPRE)checksum_confounder.$(OBJEXT)	\
+	$(OUTPRE)checksum_dk_cmac.$(OBJEXT)	\
+	$(OUTPRE)checksum_dk_hmac.$(OBJEXT)	\
+	$(OUTPRE)checksum_hmac_md5.$(OBJEXT)	\
+	$(OUTPRE)checksum_unkeyed.$(OBJEXT)	\
+    $(OUTPRE)checksum_length.$(OBJEXT)	\
 	$(OUTPRE)cksumtype_to_string.$(OBJEXT)	\
 	$(OUTPRE)cksumtypes.$(OBJEXT)		\
 	$(OUTPRE)coll_proof_cksum.$(OBJEXT)	\
 	$(OUTPRE)combine_keys.$(OBJEXT)		\
-	$(OUTPRE)crc_32.$(OBJEXT)		\
+	$(OUTPRE)crc32.$(OBJEXT)		\
 	$(OUTPRE)crypto_length.$(OBJEXT)	\
 	$(OUTPRE)crypto_libinit.$(OBJEXT)	\
 	$(OUTPRE)default_state.$(OBJEXT) 	\
 	$(OUTPRE)decrypt.$(OBJEXT)		\
 	$(OUTPRE)decrypt_iov.$(OBJEXT)		\
+	$(OUTPRE)derive.$(OBJEXT)		\
 	$(OUTPRE)encrypt.$(OBJEXT)		\
 	$(OUTPRE)encrypt_iov.$(OBJEXT)		\
 	$(OUTPRE)encrypt_length.$(OBJEXT)	\
@@ -132,6 +139,13 @@ OBJS=\
 SRCS=\
 	$(srcdir)/aead.c		\
 	$(srcdir)/block_size.c		\
+	$(srcdir)/cf2.c 			\
+	$(srcdir)/checksum_cbc.c		\
+	$(srcdir)/checksum_confounder.c	\
+	$(srcdir)/checksum_dk_cmac.c	\
+	$(srcdir)/checksum_dk_hmac.c	\
+	$(srcdir)/checksum_hmac_md5.c	\
+	$(srcdir)/checksum_unkeyed.c	\
 	$(srcdir)/checksum_length.c	\
 	$(srcdir)/cksumtype_to_string.c	\
 	$(srcdir)/cksumtypes.c		\
@@ -143,6 +157,7 @@ SRCS=\
 	$(srcdir)/default_state.c 	\
 	$(srcdir)/decrypt.c		\
 	$(srcdir)/decrypt_iov.c		\
+	$(srcdir)/derive.c		\
 	$(srcdir)/encrypt.c		\
 	$(srcdir)/encrypt_iov.c		\
 	$(srcdir)/encrypt_length.c	\
