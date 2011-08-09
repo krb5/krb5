@@ -85,7 +85,7 @@ OBJS=\
 	$(OUTPRE)checksum_dk_hmac.$(OBJEXT)	\
 	$(OUTPRE)checksum_hmac_md5.$(OBJEXT)	\
 	$(OUTPRE)checksum_unkeyed.$(OBJEXT)	\
-    $(OUTPRE)checksum_length.$(OBJEXT)	\
+	$(OUTPRE)checksum_length.$(OBJEXT)	\
 	$(OUTPRE)cksumtype_to_string.$(OBJEXT)	\
 	$(OUTPRE)cksumtypes.$(OBJEXT)		\
 	$(OUTPRE)coll_proof_cksum.$(OBJEXT)	\

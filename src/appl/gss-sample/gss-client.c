@@ -114,11 +114,11 @@ connect_to_server(char *host, u_short port)
     struct sockaddr_in saddr;
     struct hostent *hp;
     int     s;
+
 #ifdef _WIN32
     WSADATA wsadata;
     int wsastartuperror = WSAStartup(0x202, &wsadata);
-    if (wsastartuperror)
-    {
+    if (wsastartuperror) {
         fprintf(stderr, "WSAStartup error: %x\n", wsastartuperror);
         return -1;
     }
