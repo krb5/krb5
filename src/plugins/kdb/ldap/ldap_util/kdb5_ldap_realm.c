@@ -538,7 +538,7 @@ kdb5_ldap_create(int argc, char *argv[])
         if (ldap_context->conf_section) {
             if ((retval=profile_get_string(util_context->profile,
                                            KDB_MODULE_SECTION, ldap_context->conf_section,
-                                           "ldap_kerberos_container_dn", NULL,
+                                           KRB5_CONF_LDAP_KERBEROS_CONTAINER_DN, NULL,
                                            &kparams.DN)) != 0) {
                 goto cleanup;
             }
@@ -546,7 +546,7 @@ kdb5_ldap_create(int argc, char *argv[])
         if (kparams.DN == NULL) {
             if ((retval=profile_get_string(util_context->profile,
                                            KDB_MODULE_DEF_SECTION,
-                                           "ldap_kerberos_container_dn", NULL,
+                                           KRB5_CONF_LDAP_KERBEROS_CONTAINER_DN, NULL,
                                            NULL, &kparams.DN)) != 0) {
                 goto cleanup;
             }

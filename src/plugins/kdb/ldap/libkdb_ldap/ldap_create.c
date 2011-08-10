@@ -258,7 +258,7 @@ krb5_ldap_create(krb5_context context, char *conf_section, char **db_args)
         if (ldap_context->conf_section) {
             if ((status = profile_get_string(context->profile,
                                              KDB_MODULE_SECTION, ldap_context->conf_section,
-                                             "ldap_kerberos_container_dn", NULL,
+                                             KRB5_CONF_LDAP_KERBEROS_CONTAINER_DN, NULL,
                                              &kparams.DN)) != 0) {
                 goto cleanup;
             }
@@ -266,7 +266,7 @@ krb5_ldap_create(krb5_context context, char *conf_section, char **db_args)
         if (kparams.DN == NULL) {
             if ((status = profile_get_string(context->profile,
                                              KDB_MODULE_DEF_SECTION,
-                                             "ldap_kerberos_container_dn", NULL,
+                                             KRB5_CONF_LDAP_KERBEROS_CONTAINER_DN, NULL,
                                              NULL, &kparams.DN)) != 0) {
                 goto cleanup;
             }

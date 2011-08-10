@@ -91,7 +91,7 @@ krb5_ldap_read_krbcontainer_params(krb5_context context,
     /* read kerberos containter location from [dbmodules] section of krb5.conf file */
     if (ldap_context->conf_section) {
         if ((st=profile_get_string(context->profile, KDB_MODULE_SECTION, ldap_context->conf_section,
-                                   "ldap_kerberos_container_dn", NULL,
+                                   KRB5_CONF_LDAP_KERBEROS_CONTAINER_DN, NULL,
                                    &cparams->DN)) != 0) {
             krb5_set_error_message(context, st,
                                    _("Error reading kerberos container "
@@ -103,7 +103,7 @@ krb5_ldap_read_krbcontainer_params(krb5_context context,
     /* read kerberos containter location from [dbdefaults] section of krb5.conf file */
     if (cparams->DN == NULL) {
         if ((st=profile_get_string(context->profile, KDB_MODULE_DEF_SECTION,
-                                   "ldap_kerberos_container_dn", NULL,
+                                   KRB5_CONF_LDAP_KERBEROS_CONTAINER_DN, NULL,
                                    NULL, &cparams->DN)) != 0) {
             krb5_set_error_message(context, st,
                                    _("Error reading kerberos container "

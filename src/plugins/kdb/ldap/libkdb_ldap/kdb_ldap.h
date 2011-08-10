@@ -146,10 +146,6 @@ extern void prepend_err_str (krb5_context ctx, const char *s, krb5_error_code er
 #define UNSTORE16_INT(ptr, val) (val = load_16_be(ptr))
 #define UNSTORE32_INT(ptr, val) (val = load_32_be(ptr))
 
-#define KRB5_CONF_KDC_BIND_DN "ldap_kdc_dn"
-#define KRB5_CONF_ADMIN_BIND_DN "ldap_kadmind_dn"
-#define KRB5_CONF_PWD_BIND_DN "ldap_passwd_dn"
-
 #define  KDB_TL_USER_INFO      0x7ffe
 
 #define KDB_TL_PRINCTYPE          0x01
