@@ -49,7 +49,6 @@ The krb5.conf file may contain any or all of the following sections:
 
 ============== =======================================================
 libdefaults_   Contains default values used by the Kerberos V5 library. 
-login_         Contains default values used by the Kerberos V5 login program. 
 appdefaults_   Contains default values that can be used by Kerberos V5 applications. 
 realms_        Contains subsections keyed by Kerberos realm names. Each subsection describes realm-specific information, including where to find the Kerberos servers for that realm. 
 domain_realm_  Contains relations which map domain names and subdomains onto Kerberos realm names. This is used by programs to determine what realm a host should be in, given its fully qualified domain name. 
@@ -69,90 +68,106 @@ Sections
 
 The libdefaults section may contain any of the following relations:
 
-default_keytab_name
-    This relation specifies the default keytab name to be used by application servers such as telnetd and rlogind. The default is */etc/krb5.keytab*. 
-default_realm
-    Identifies the default Kerberos realm for the client. Set its value to your Kerberos realm. If this is not specified and the TXT record lookup is enabled (see :ref:`udns_label`), then that information will be used to determine the default realm. If this tag is not set in this configuration file and there is no DNS information found, then an error will be returned. 
-default_tgs_enctypes
-    Identifies the supported list of session key encryption types that should be returned by the KDC. The list may be delimited with commas or whitespace. Kerberos supports many different encryption types, and support for more is planned in the future. (see :ref:`senct_label` for a list of the accepted values for this tag). The default value is aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4. 
-default_tkt_enctypes
-    Identifies the supported list of session key encryption types that should be requested by the client. The format is the same as for default_tgs_enctypes. The default value for this tag is aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4. 
-permitted_enctypes
-    Identifies all encryption types that are permitted for use in session key encryption. The default value for this tag is aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4. 
-allow_weak_crypto
+**allow_weak_crypto**
     If this is set to 0 (for false), then weak encryption types will be filtered out of the previous three lists (as noted in :ref:`senct_label`). The default value for this tag is false, which may cause authentication failures in existing Kerberos infrastructures that do not support strong crypto. Users in affected environments should set this tag to true until their infrastructure adopts stronger ciphers. 
-clockskew
-    Sets the maximum allowable amount of clockskew in seconds that the library will tolerate before assuming that a Kerberos message is invalid. The default value is 300 seconds, or five minutes. 
-k5login_authoritative
-    If the value of this relation is true (the default), principals must be listed in a local user's k5login file to be granted login access, if a k5login file exists. If the value of this relation is false, a principal may still be granted login access through other mechanisms even if a k5login file exists but does not list the principal. 
-k5login_directory
-    If set, the library will look for a local user's k5login file within the named directory, with a filename corresponding to the local username. If not set, the library will look for k5login files in the user's home directory, with the filename .k5login. For security reasons, k5login files must be owned by the local user or by root. 
-kdc_timesync
-    If this is set to 1 (for true), then client machines will compute the difference between their time and the time returned by the KDC in the timestamps in the tickets and use this value to correct for an inaccurate system clock. This corrective factor is only used by the Kerberos library. The default is 1. 
 
-| kdc_req_checksum_type
-| ap_req_checksum_type
-| safe_checksum_type
-
-    An integer which specifies the type of checksum to use. Used for compatability with DCE security servers which do not support the default RSA MD5 used by this version of Kerberos. The kdc_req_checksum_type is only used for DES keys. The ap_req_checksum_type defaults to the preferred checksum for the encryption type being used if unset. If set, then the selected checksum is used regardless of the type of key being used. The possible values and their meanings are as follows.
-
-    1
-        CRC32
-    2
-        RSA MD4
-    3
-        RSA MD4 DES
-    4
-        DES CBC
-    7
-        RSA MD5
-    8
-        RSA MD5 DES
-    9
-        NIST SHA
-    12
-        HMAC SHA1 DES3
-    -138
-        Microsoft MD5 HMAC checksum type 
-
-preferred_preauth_types
-    This allows you to set the preferred preauthentication types which the client will attempt before others which may be advertised by a KDC.  The default value for this setting is "17, 16, 15, 14", which forces libkrb5 to attempt to use PKINIT if it is supported.
-ccache_type
+**ccache_type**
     Use this parameter on systems which are DCE clients, to specify the type of cache to be created by kinit, or when forwarded tickets are received. DCE and Kerberos can share the cache, but some versions of DCE do not support the default cache as created by this version of Kerberos. Use a value of 1 on DCE 1.0.3a systems, and a value of 2 on DCE 1.1 systems. The default value is 4. 
-dns_lookup_kdc
+
+**clockskew**
+    Sets the maximum allowable amount of clockskew in seconds that the library will tolerate before assuming that a Kerberos message is invalid. The default value is 300 seconds, or five minutes. 
+
+**default_keytab_name**
+    This relation specifies the default keytab name to be used by application servers such as telnetd and rlogind. The default is */etc/krb5.keytab*. 
+**default_realm**
+    Identifies the default Kerberos realm for the client. Set its value to your Kerberos realm. If this is not specified and the TXT record lookup is enabled (see :ref:`udns_label`), then that information will be used to determine the default realm. If this tag is not set in this configuration file and there is no DNS information found, then an error will be returned. 
+
+**default_tgs_enctypes**
+    Identifies the supported list of session key encryption types that should be returned by the KDC. The list may be delimited with commas or whitespace. Kerberos supports many different encryption types, and support for more is planned in the future. (see :ref:`senct_label` for a list of the accepted values for this tag). The default value is *aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4*.
+
+**default_tkt_enctypes**
+    Identifies the supported list of session key encryption types that should be requested by the client. The format is the same as for default_tgs_enctypes. The default value for this tag is *aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4*. 
+
+**dns_fallback**
+    General flag controlling the use of DNS for Kerberos information. If both of the preceding options are specified, this option has no effect. 
+
+**dns_lookup_kdc**
     Indicate whether DNS SRV records should be used to locate the KDCs and other servers for a realm, if they are not listed in the information for the realm. (Note that the admin_server entry must be in the file, because the DNS implementation for it is incomplete.)
 
     Enabling this option does open up a type of denial-of-service attack, if someone spoofs the DNS records and redirects you to another server. However, it's no worse than a denial of service, because that fake KDC will be unable to decode anything you send it (besides the initial ticket request, which has no encrypted data), and anything the fake KDC sends will not be trusted without verification using some secret that it won't know.
 
     If this option is not specified but dns_fallback is, that value will be used instead. If neither option is specified, the behavior depends on configure-time options; if none were given, the default is to enable this option. If the DNS support is not compiled in, this entry has no effect. 
-dns_lookup_realm
+
+**dns_lookup_realm**
     Indicate whether DNS TXT records should be used to determine the Kerberos realm of a host.
 
     Enabling this option may permit a redirection attack, where spoofed DNS replies persuade a client to authenticate to the wrong realm, when talking to the wrong host (either by spoofing yet more DNS records or by intercepting the net traffic). Depending on how the client software manages hostnames, however, it could already be vulnerable to such attacks. We are looking at possible ways to minimize or eliminate this exposure. For now, we encourage more adventurous sites to try using Secure DNS.
 
     If this option is not specified but dns_fallback is, that value will be used instead. If neither option is specified, the behavior depends on configure-time options; if none were given, the default is to disable this option. If the DNS support is not compiled in, this entry has no effect. 
-dns_fallback
-    General flag controlling the use of DNS for Kerberos information. If both of the preceding options are specified, this option has no effect. 
-extra_addresses
+
+**extra_addresses**
     This allows a computer to use multiple local addresses, in order to allow Kerberos to work in a network that uses NATs. The addresses should be in a comma-separated list. 
-realm_try_domains
-    Indicate whether a host's domain components should be used to determine the Kerberos realm of the host.  The value of this variable is an integer: -1 means not to search, 0 means to try the host's domain itself, 1 means to also try the domain's immediate parent, and so forth. The library's usual mechanism for locating Kerberos realms is used to determine whether a domain is a valid realm--which may involve consulting DNS if dns_lookup_kdc is set.  The default is not to search domain components.
-udp_preference_limit
-    When sending a message to the KDC, the library will try using TCP before UDP if the size of the message is above udp_preference_list. If the message is smaller than udp_preference_list, then UDP will be tried before TCP. Regardless of the size, both protocols will be tried if the first attempt fails. 
-verify_ap_req_nofail
-    If this flag is set, then an attempt to get initial credentials will fail if the client machine does not have a keytab. The default for the flag is not set. 
-ticket_lifetime
-    The value of this tag is the default lifetime for initial tickets. The default value for the tag is 1 day. 
-renew_lifetime
-    The value of this tag is the default renewable lifetime for initial tickets. The default value for the tag is 0. 
-noaddresses
-    Setting this flag causes the initial Kerberos ticket to be addressless. The default for the flag is set. 
-forwardable
+
+**forwardable**
     If this flag is set, initial tickets by default will be forwardable. The default value for this flag is not set. 
-proxiable
+
+**k5login_authoritative**
+    If the value of this relation is true (the default), principals must be listed in a local user's k5login file to be granted login access, if a k5login file exists. If the value of this relation is false, a principal may still be granted login access through other mechanisms even if a k5login file exists but does not list the principal. 
+
+**k5login_directory**
+    If set, the library will look for a local user's k5login file within the named directory, with a filename corresponding to the local username. If not set, the library will look for k5login files in the user's home directory, with the filename .k5login. For security reasons, k5login files must be owned by the local user or by root. 
+
+**kdc_timesync**
+    If this is set to 1 (for true), then client machines will compute the difference between their time and the time returned by the KDC in the timestamps in the tickets and use this value to correct for an inaccurate system clock. This corrective factor is only used by the Kerberos library. The default is 1. 
+
+**kdc_req_checksum_type**
+
+**ap_req_checksum_type**
+
+**safe_checksum_type**
+
+    An integer which specifies the type of checksum to use. Used for compatability with DCE security servers which do not support the default RSA MD5 used by this version of Kerberos. The kdc_req_checksum_type is only used for DES keys. The ap_req_checksum_type defaults to the preferred checksum for the encryption type being used if unset. If set, then the selected checksum is used regardless of the type of key being used. The possible values and their meanings are as follows.
+
+    ======== ===============================
+    1        CRC32
+    2        RSA MD4
+    3        RSA MD4 DES
+    4        DES CBC
+    7        RSA MD5
+    8        RSA MD5 DES
+    9        NIST SHA
+    12       HMAC SHA1 DES3
+    -138     Microsoft MD5 HMAC checksum type 
+    ======== ===============================
+
+**noaddresses**
+    Setting this flag causes the initial Kerberos ticket to be addressless. The default for the flag is set. 
+
+**permitted_enctypes**
+    Identifies all encryption types that are permitted for use in session key encryption. The default value for this tag is *aes256-cts-hmac-sha1-96 aes128-cts-hmac-sha1-96 des3-cbc-sha1 arcfour-hmac-md5 des-cbc-crc des-cbc-md5 des-cbc-md4*. 
+
+**preferred_preauth_types**
+    This allows you to set the preferred preauthentication types which the client will attempt before others which may be advertised by a KDC.  The default value for this setting is "17, 16, 15, 14", which forces libkrb5 to attempt to use PKINIT if it is supported.
+
+**proxiable**
     If this flag is set, initial tickets by default will be proxiable. The default value for this flag is not set. 
-rdns
+
+**rdns**
     If set to false, prevent the use of reverse DNS resolution when translating hostnames into service principal names. Defaults to true. Setting this flag to false is more secure, but may force users to exclusively use fully qualified domain names when authenticating to services. 
+
+**realm_try_domains**
+    Indicate whether a host's domain components should be used to determine the Kerberos realm of the host.  The value of this variable is an integer: -1 means not to search, 0 means to try the host's domain itself, 1 means to also try the domain's immediate parent, and so forth. The library's usual mechanism for locating Kerberos realms is used to determine whether a domain is a valid realm--which may involve consulting DNS if *dns_lookup_kdc* is set.  The default is not to search domain components.
+
+**renew_lifetime**
+    The value of this tag is the default renewable lifetime for initial tickets. The default value for the tag is 0. 
+
+**ticket_lifetime**
+    The value of this tag is the default lifetime for initial tickets. The default value for the tag is 1 day. 
+
+**udp_preference_limit**
+    When sending a message to the KDC, the library will try using TCP before UDP if the size of the message is above *udp_preference_list*. If the message is smaller than *udp_preference_list*, then UDP will be tried before TCP. Regardless of the size, both protocols will be tried if the first attempt fails. 
+**verify_ap_req_nofail**
+    If this flag is set, then an attempt to get initial credentials will fail if the client machine does not have a keytab. The default for the flag is not set. 
 
 
 .. _appdefaults:
@@ -184,22 +199,6 @@ The above four ways of specifying the value of an option are shown in order of d
 
 The list of specifiable options for each application may be found in that application's man pages. The application defaults specified here are overridden by those specified in the realms_ section.
 
-.. _login:
-
-**[login]**
-~~~~~~~~~~~~~~~
-
-Each tag in the [login] section of the file is an option for *login.krb5*. This section may contain any of the following relations:
-
-krb5_get_tickets
-    Indicate whether or not to use a user's password to get V5 tickets. The default value is *true*. 
-krb_run_aklog
-    Indicate whether or not to run aklog. The default value is *false*. 
-aklog_path
-    Indicate where to find aklog. The default value is *$(prefix)/bin/aklog*. 
-accept_passwd
-    A true value will cause login not to accept plaintext passwords. The default value is false. This is not yet implemented. 
-
 .. _realms:
 
 **[realms]**
@@ -207,23 +206,11 @@ accept_passwd
 
 Each tag in the [realms] section of the file is the name of a Kerberos realm. The value of the tag is a subsection with relations that define the properties of that particular realm. For each realm, the following tags may be specified in the realm's subsection:
 
-kdc
-    The name or address of a host running a KDC for that realm. An optional port number, separated from the hostname by a colon, may be included. If the name or address contains colons (for example, if it is an IPv6 address), enclose it in square brackets to distinguish the colon from a port separator. For your computer to be able to communicate with the KDC for each realm, this tag must be given a value in each realm subsection in the configuration file, or there must be DNS SRV records specifying the KDCs (see :ref:`udns_label`). 
-master_kdc
-    Identifies the master KDC(s). Currently, this tag is used in only one case: If an attempt to get credentials fails because of an invalid password, the client software will attempt to contact the master KDC, in case the user's password has just been changed, and the updated database has not been propagated to the slave servers yet. 
-database_module
-    This relation indicates the name of the configuration section under [dbmodules] for database specific parameters used by the loadable database library. 
-admin_server
+
+**admin_server**
     Identifies the host where the administration server is running. Typically, this is the master Kerberos server. This tag must be given a value in order to communicate with the kadmin server for the realm. 
-default_domain
-    This tag is used for Kerberos 4 compatibility. Kerberos 4 does not require the entire hostname of a server to be in its principal like Kerberos 5 does. This tag provides the domain name needed to produce a full hostname when translating V4 principal names into V5 principal names. All servers in this realm are assumed to be in the domain given as the value of this tag 
-v4_instance_convert
-    This subsection allows the administrator to configure exceptions to the default_domain mapping rule. It contains V4 instances (the tag name) which should be translated to some specific hostname (the tag value) as the second component in a Kerberos V5 principal name. 
-v4_realm
-    This relation is used by the krb524 library routines when converting a V5 principal name to a V4 principal name. It is used when the V4 realm name and the V5 realm name are not the same, but still share the same principal names and passwords. The tag value is the Kerberos V4 realm name. 
-auth_to_local_names
-    This subsection allows you to set explicit mappings from principal names to local user names. The tag is the mapping name, and the value is the corresponding local user name. 
-auth_to_local
+
+**auth_to_local**
     This tag allows you to set a general rule for mapping principal names to local user names. It will be used if there is not an explicit mapping for the principal name that is being translated. The possible values are:
 
 
@@ -232,7 +219,7 @@ auth_to_local
     RULE:exp
         The local name will be formulated from exp.
 
-        The format for exp is [n:string](regexp)s/pattern/replacement/g. The integer n indicates how many components the target principal should have. If this matches, then a string will be formed from string, substituting the realm of the principal for $0 and the n'th component of the principal for $n (e.g. if the principal was johndoe/admin then [2:$2$1foo] would result in the string "adminjohndoefoo"). If this string matches regexp, then the s//[g] substitution command will be run over the string. The optional g will cause the substitution to be global over the string, instead of replacing only the first match in the string.
+        The format for exp is [n:string](regexp)s/pattern/replacement/g. The integer n indicates how many components the target principal should have. If this matches, then a string will be formed from string, substituting the realm of the principal for $0 and the n'th component of the principal for $n (e.g. if the principal was *johndoe/admin* then [2:$2$1foo] would result in the string "adminjohndoefoo"). If this string matches regexp, then the s//[g] substitution command will be run over the string. The optional g will cause the substitution to be global over the string, instead of replacing only the first match in the string.
 
     DEFAULT
         The principal name will be used as the local user name. If the principal has more than one component or is not in the default realm, this rule is not applicable and the conversion will fail. 
@@ -248,7 +235,28 @@ auth_to_local
                   }
               
 
-    would result in any principal without *root* or *admin* as the second component to be translated with the default rule. A principal with a second component of *admin* will become its first component. *root* will be used as the local name for any principal with a second component of *root*. The exception to these two rules are any principals johndoe/\*, which will always get the local name *guest*. 
+    would result in any principal without *root* or *admin* as the second component to be translated with the default rule. A principal with a second component of *admin* will become its first component. *root* will be used as the local name for any principal with a second component of *root*. The exception to these two rules are any principals *johndoe*/\*, which will always get the local name *guest*. 
+
+**auth_to_local_names**
+    This subsection allows you to set explicit mappings from principal names to local user names. The tag is the mapping name, and the value is the corresponding local user name. 
+
+**database_module**
+    This relation indicates the name of the configuration section under [dbmodules] for database specific parameters used by the loadable database library. 
+
+**default_domain**
+    This tag is used for Kerberos 4 compatibility. Kerberos 4 does not require the entire hostname of a server to be in its principal like Kerberos 5 does. This tag provides the domain name needed to produce a full hostname when translating V4 principal names into V5 principal names. All servers in this realm are assumed to be in the domain given as the value of this tag 
+
+**kdc**
+    The name or address of a host running a KDC for that realm. An optional port number, separated from the hostname by a colon, may be included. If the name or address contains colons (for example, if it is an IPv6 address), enclose it in square brackets to distinguish the colon from a port separator. For your computer to be able to communicate with the KDC for each realm, this tag must be given a value in each realm subsection in the configuration file, or there must be DNS SRV records specifying the KDCs (see :ref:`udns_label`). 
+
+**master_kdc**
+    Identifies the master KDC(s). Currently, this tag is used in only one case: If an attempt to get credentials fails because of an invalid password, the client software will attempt to contact the master KDC, in case the user's password has just been changed, and the updated database has not been propagated to the slave servers yet. 
+
+**v4_instance_convert**
+    This subsection allows the administrator to configure exceptions to the default_domain mapping rule. It contains V4 instances (the tag name) which should be translated to some specific hostname (the tag value) as the second component in a Kerberos V5 principal name. 
+
+**v4_realm**
+    This relation is used by the krb524 library routines when converting a V5 principal name to a V4 principal name. It is used when the V4 realm name and the V5 realm name are not the same, but still share the same principal names and passwords. The tag value is the Kerberos V4 realm name. 
 
 .. _domain_realm:
 
@@ -266,7 +274,7 @@ If no translation entry applies, the host's realm is considered to be the hostna
          example.com = EXAMPLE.COM
      
 
-maps *crash.mit.edu* into the TEST.ATHENA.MIT.EDU realm. All other hosts in the mit.edu domain will map by default to the ATHENA.MIT.EDU realm, and all hosts in the example.com domain will map by default into the EXAMPLE.COM realm. Note the entries for the hosts *mit.edu* and *example.com*. Without these entries, these hosts would be mapped into the Kerberos realms EDU and ORG, respectively.
+maps *crash.mit.edu* into the *TEST.ATHENA.MIT.EDU* realm. All other hosts in the *mit.edu* domain will map by default to the *ATHENA.MIT.EDU* realm, and all hosts in the example.com domain will map by default into the *EXAMPLE.COM* realm. Note the entries for the hosts *mit.edu* and *example.com*. Without these entries, these hosts would be mapped into the Kerberos realms EDU and ORG, respectively.
 
 .. _logging:
 
@@ -275,12 +283,12 @@ maps *crash.mit.edu* into the TEST.ATHENA.MIT.EDU realm. All other hosts in the 
 
 The [logging] section indicates how a particular entity is to perform its logging. The relations in this section assign one or more values to the entity name. Currently, the following entities are used:
 
-kdc
-    These entries specify how the KDC is to perform its logging. 
-admin_server
+**admin_server**
     These entries specify how the administrative server is to perform its logging. 
-default
+**default**
     These entries specify how to perform logging in the absence of explicit specifications otherwise. 
+**kdc**
+    These entries specify how the KDC is to perform its logging. 
 
 Values are of the following forms:
 
@@ -387,19 +395,24 @@ The [dbdefaults] section provides default values for the database specific param
 
 The following tags are used in this section:
 
-database_module
+**database_module**
     This relation indicates the name of the configuration section under the dbmodules_ for database specific parameters used by the loadable database library. 
-ldap_kerberos_container_dn
+
+**ldap_kerberos_container_dn**
     This LDAP specific tag indicates the DN of the container object where the realm objects will be located. This value is used if the container object is not mentioned in the configuration section under dbmodules_. 
-ldap_kdc_dn
+
+**ldap_kdc_dn**
     This LDAP specific tag indicates the default bind DN for the KDC server. The KDC server does a login to the directory as this object. This object should have the rights to read the Kerberos data in the LDAP database. This value is used if the bind DN for the KDC is not mentioned in the configuration section under dbmodules_. 
-ldap_kadmind_dn
+
+**ldap_kadmind_dn**
     This LDAP specific tag indicates the default bind DN for the Administration server. The administration server does a login to the directory as this object. This object should have the rights to read and write the Kerberos data in the LDAP database. This value is used if the bind DN for the Administration server is not mentioned in the configuration section under dbmodules_. 
 ldap_service_password_file
     This LDAP specific tag indicates the file containing the stashed passwords (created by kdb5_ldap_util stashsrvpw) for the objects used by the Kerberos servers to bind to the LDAP server. This file must be kept secure. This value is used if no service password file is mentioned in the configuration section under dbmodules_. 
-ldap_servers
+
+**ldap_servers**
     This LDAP specific tag indicates the list of LDAP servers that the Kerberos servers can connect to. The list of LDAP servers is whitespace-separated. The LDAP server is specified by a LDAP URI. This value is used if no LDAP servers are mentioned in the configuration section under dbmodules_. It is recommended to use the *ldapi://* or *ldaps://* interface and not to use *ldap://* interface. 
-ldap_conns_per_server
+
+**ldap_conns_per_server**
     This LDAP specific tag indicates the number of connections to be maintained per LDAP server. This value is used if the number of connections per LDAP server are not mentioned in the configuration section under dbmodules_. The default value is 5. 
 
 .. _dbmodules:
@@ -411,26 +424,38 @@ Contains database specific parameters used by the database library. Each tag in 
 
 For each section, the following tags may be specified in the subsection:
 
-db_library
-    This tag indicates the name of the loadable database library. The value should be db2 for DB2 database and kldap for LDAP database. 
-database_name
+**database_name**
     This DB2-specific tag indicates the location of the database in the filesystem. The default is */usr/local/var/krb5kdc/principal*. 
-disable_last_success
+
+**db_library**
+    This tag indicates the name of the loadable database library. The value should be *db2* for DB2 database and *kldap* for LDAP database. 
+
+**db_module_dir**
+    This tag controls where the plugin system looks for modules. The value should be an absolute path.
+
+**disable_last_success**
     If set to *true*, suppresses KDC updates to the *"Last successful authentication"* field of principal entries requiring preauthentication. Setting this flag may improve performance. (Principal entries which do not require preauthentication never update the "Last successful authentication" field.) 
-disable_lockout
+
+**disable_lockout**
     If set to *true*, suppresses KDC updates to the *"Last failed authentication"* and *"Failed password attempts"* fields of principal entries requiring preauthentication. Setting this flag may improve performance, but also disables account lockout. 
-ldap_kerberos_container_dn
-    This LDAP specific tag indicates the DN of the container object where the realm objects will be located. 
-ldap_kdc_dn
-    This LDAP specific tag indicates the default bind DN for the KDC server. The KDC server does a login to the directory as this object. This object should have the rights to read the Kerberos data in the LDAP database. 
-ldap_kadmind_dn
-    This LDAP specific tag indicates the default bind DN for the Administration server. The administration server does a login to the directory as this object. This object should have the rights to read and write the Kerberos data in the LDAP database. 
-ldap_service_password_file
-    This LDAP specific tag indicates the file containing the stashed passwords (created by *kdb5_ldap_util stashsrvpw*) for the objects used by the Kerberos servers to bind to the LDAP server. This file must be kept secure. 
-ldap_servers
-    This LDAP specific tag indicates the list of LDAP servers that the Kerberos servers can connect to. The list of LDAP servers is whitespace-separated. The LDAP server is specified by a LDAP URI. It is recommended to use *ldapi://* or *ldaps://* interface to connect to the LDAP server. 
-ldap_conns_per_server
+
+**ldap_conns_per_server**
     This LDAP specific tags indicates the number of connections to be maintained per LDAP server. 
+
+**ldap_kadmind_dn**
+    This LDAP specific tag indicates the default bind DN for the Administration server. The administration server does a login to the directory as this object. This object should have the rights to read and write the Kerberos data in the LDAP database. 
+
+**ldap_kdc_dn**
+    This LDAP specific tag indicates the default bind DN for the KDC server. The KDC server does a login to the directory as this object. This object should have the rights to read the Kerberos data in the LDAP database. 
+
+**ldap_kerberos_container_dn**
+    This LDAP specific tag indicates the DN of the container object where the realm objects will be located. 
+
+**ldap_servers**
+    This LDAP specific tag indicates the list of LDAP servers that the Kerberos servers can connect to. The list of LDAP servers is whitespace-separated. The LDAP server is specified by a LDAP URI. It is recommended to use *ldapi://* or *ldaps://* interface to connect to the LDAP server. 
+
+**ldap_service_password_file**
+    This LDAP specific tag indicates the file containing the stashed passwords (created by *kdb5_ldap_util stashsrvpw*) for the objects used by the Kerberos servers to bind to the LDAP server. This file must be kept secure. 
 
 .. _plugins:
 
@@ -445,12 +470,14 @@ Tags in the **[plugins]** section can be used to register dynamic plugin modules
 
 Each pluggable interface corresponds to a subsection of [plugins]. All subsections support the same tags:
 
-module
-    This tag may have multiple values. Each value is a string of the form "modulename:pathname", which causes the shared object located at pathname to be registered as a dynamic module named modulename for the pluggable interface. If pathname is not an absolute path, it will be treated as relative to the "krb5/plugins" subdirectory of the krb5 library directory. 
-enable_only
-    This tag may have multiple values. If there are values for this tag, then only the named modules will be enabled for the pluggable interface. 
-disable
+**disable**
     This tag may have multiple values. If there are values for this tag, then the named modules will be disabled for the pluggable interface. 
+
+**enable_only**
+    This tag may have multiple values. If there are values for this tag, then only the named modules will be enabled for the pluggable interface. 
+
+**module**
+    This tag may have multiple values. Each value is a string of the form "modulename:pathname", which causes the shared object located at pathname to be registered as a dynamic module named modulename for the pluggable interface. If pathname is not an absolute path, it will be treated as relative to the "krb5/plugins" subdirectory of the krb5 library directory. 
 
 The following subsections are currently supported within the [plugins] section:
 
@@ -461,13 +488,16 @@ pwqual interface
 
 The **pwqual** subsection controls modules for the password quality interface, which is used to reject weak passwords when passwords are changed. In addition to any registered dynamic modules, the following built-in modules exist (and may be disabled with the disable tag):
 
-dict
+**dict**
     Checks against the realm dictionary file 
-empty
+
+**empty**
     Rejects empty passwords 
-hesiod
+
+**hesiod**
     Checks against user information stored in Hesiod (only if Kerberos was built with Hesiod support) 
-princ
+
+**princ**
     Checks against components of the principal name 
 
 .. _kadm5_hook:
@@ -486,9 +516,10 @@ clpreauth and kdcpreauth interfaces
 
 The **clpreauth** and **kdcpreauth** interfaces allow plugin modules to provide client and KDC preauthentication mechanisms.  The following built-in modules exist for these interfaces:
 
-pkinit
+**pkinit**
     This module implements the PKINIT preauthentication mechanism.
-encrypted_challenge
+
+**encrypted_challenge**
     This module implements the encrypted challenge FAST factor.
 
 PKINIT options
@@ -574,40 +605,10 @@ PKINIT krb5.conf options
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-pkinit_identities
-    Specifies the location(s) to be used to find the user's X.509 identity information. This option may be specified multiple times. Each value is attempted in order until identity information is found and authentication is attempted. Note that these values are not used if the user specifies X509_user_identity on the command line.
-pkinit_anchors
+**pkinit_anchors**
     Specifies the location of trusted anchor (root) certificates which the client trusts to sign KDC certificates. This option may be specified multiple times. These values from the config file are not used if the user specifies X509_anchors on the command line.
-pkinit_pool
-    Specifies the location of intermediate certificates which may be used by the client to complete the trust chain between a KDC certificate and a trusted anchor. This option may be specified multiple times.
-pkinit_revoke
-    Specifies the location of Certificate Revocation List (CRL) information to be used by the client when verifying the validity of the KDC certificate presented. This option may be specified multiple times.
-pkinit_require_crl_checking
-    The default certificate verification process will always check the available revocation information to see if a certificate has been revoked. If a match is found for the certificate in a CRL, verification fails. If the certificate being verified is not listed in a CRL, or there is no CRL present for its issuing CA, and pkinit_require_crl_checking is false, then verification succeeds.
 
-    However, if pkinit_require_crl_checking is true and there is no CRL information available for the issuing CA, then verification fails.
-
-    pkinit_require_crl_checking should be set to true if the policy is such that up-to-date CRLs must be present for every CA.
-pkinit_dh_min_bits
-    Specifies the size of the Diffie-Hellman key the client will attempt to use. The acceptable values are currently 1024, 2048, and 4096. The default is 2048.
-pkinit_win2k
-    This flag specifies whether the target realm is assumed to support only the old, pre-RFC version of the protocol. The default is false.
-pkinit_win2k_require_binding
-    If this flag is set to true, it expects that the target KDC is patched to return a reply with a checksum rather than a nonce. The default is false.
-pkinit_eku_checking
-    This option specifies what Extended Key Usage value the KDC certificate presented to the client must contain. (Note that if the KDC certificate has the pkinit SubjectAlternativeName encoded as the Kerberos TGS name, EKU checking is not necessary since the issuing CA has certified this as a KDC certificate.) The values recognized in the krb5.conf file are:
-
-    kpKDC
-        This is the default value and specifies that the KDC must have the id-pkinit-KPKdc EKU as defined in :rfc:`4556`.
-    kpServerAuth
-        If kpServerAuth is specified, a KDC certificate with the id-kp-serverAuth EKU as used by Microsoft will be accepted.
-    none
-        If none is specified, then the KDC certificate will not be checked to verify it has an acceptable EKU. The use of this option is not recommended. 
-
-
-pkinit_kdc_hostname
-    The presense of this option indicates that the client is willing to accept a KDC certificate with a dNSName SAN (Subject Alternative Name) rather than requiring the id-pkinit-san as defined in :rfc:`4556`. This option may be specified multiple times. Its value should contain the acceptable hostname for the KDC (as contained in its certificate).
-pkinit_cert_match
+**pkinit_cert_match**
     Specifies matching rules that the client certificate must match before it is used to attempt pkinit authentication. If a user has multiple certificates available (on a smart card, or via other media), there must be exactly one certificate chosen before attempting pkinit authentication. This option may be specified multiple times. All the available certificates are checked against each rule in order until there is a match of exactly one certificate.
 
     The Subject and Issuer comparison strings are the :rfc:`2253` string representations from the certificate Subject DN and Issuer DN values.
@@ -653,8 +654,47 @@ pkinit_cert_match
               pkinit_cert_match = &&<EKU>msScLogin,clientAuth<ISSUER>.*DoE.*
               pkinit_cert_match = <EKU>msScLogin,clientAuth<KU>digitalSignature
               
+**pkinit_eku_checking**
+    This option specifies what Extended Key Usage value the KDC certificate presented to the client must contain. (Note that if the KDC certificate has the pkinit SubjectAlternativeName encoded as the Kerberos TGS name, EKU checking is not necessary since the issuing CA has certified this as a KDC certificate.) The values recognized in the krb5.conf file are:
 
-  
+    *kpKDC*
+        This is the default value and specifies that the KDC must have the id-pkinit-KPKdc EKU as defined in :rfc:`4556`.
+    *kpServerAuth*
+        If kpServerAuth is specified, a KDC certificate with the id-kp-serverAuth EKU as used by Microsoft will be accepted.
+    *none*
+        If none is specified, then the KDC certificate will not be checked to verify it has an acceptable EKU. The use of this option is not recommended. 
+
+**pkinit_dh_min_bits**
+    Specifies the size of the Diffie-Hellman key the client will attempt to use. The acceptable values are currently 1024, 2048, and 4096. The default is 2048.
+
+**pkinit_identities**
+    Specifies the location(s) to be used to find the user's X.509 identity information. This option may be specified multiple times. Each value is attempted in order until identity information is found and authentication is attempted. Note that these values are not used if the user specifies X509_user_identity on the command line.
+
+**pkinit_kdc_hostname**
+    The presense of this option indicates that the client is willing to accept a KDC certificate with a dNSName SAN (Subject Alternative Name) rather than requiring the id-pkinit-san as defined in :rfc:`4556`. This option may be specified multiple times. Its value should contain the acceptable hostname for the KDC (as contained in its certificate).
+
+**pkinit_longhorn**
+    If this flag is set to true, we are talking to the Longhorn KDC.
+
+**pkinit_pool**
+    Specifies the location of intermediate certificates which may be used by the client to complete the trust chain between a KDC certificate and a trusted anchor. This option may be specified multiple times.
+
+**pkinit_require_crl_checking**
+    The default certificate verification process will always check the available revocation information to see if a certificate has been revoked. If a match is found for the certificate in a CRL, verification fails. If the certificate being verified is not listed in a CRL, or there is no CRL present for its issuing CA, and *pkinit_require_crl_checking* is false, then verification succeeds.
+
+    However, if *pkinit_require_crl_checking* is true and there is no CRL information available for the issuing CA, then verification fails.
+
+    *pkinit_require_crl_checking* should be set to true if the policy is such that up-to-date CRLs must be present for every CA.
+
+**pkinit_revoke**
+    Specifies the location of Certificate Revocation List (CRL) information to be used by the client when verifying the validity of the KDC certificate presented. This option may be specified multiple times.
+
+**pkinit_win2k**
+    This flag specifies whether the target realm is assumed to support only the old, pre-RFC version of the protocol. The default is false.
+
+**pkinit_win2k_require_binding**
+    If this flag is set to true, it expects that the target KDC is patched to return a reply with a checksum rather than a nonce. The default is false.
+
 
 .. _krb5_conf_sample_label:
 
@@ -722,11 +762,16 @@ Here is an example of a generic krb5.conf file::
              ldap_conns_per_server = 5
      }
      
+FILES
+--------
 
---------------
+/etc/krb5.conf
 
-Feedback:
+SEE ALSO
+-----------
 
-Please, provide your feedback at krb5-bugs@mit.edu?subject=Documentation___conf_files
+syslog(3)
+
+
 
 
