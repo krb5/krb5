@@ -180,6 +180,7 @@ OM_uint32 *		time_rec;
     /* ensure that we have at least one credential element */
     if (creds->count < 1)
 	goto cleanup;
+    major = GSS_S_COMPLETE;
 
     /*
      * fill in output parameters
