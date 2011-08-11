@@ -2284,7 +2284,7 @@ KRB5_CALLCONV spnego_gss_set_cred_option(
 {
 	OM_uint32 ret;
 	OM_uint32 tmp_minor_status;
-	spnego_gss_cred_id_t spcred = (spnego_gss_cred_id_t)cred_handle;
+	spnego_gss_cred_id_t spcred = (spnego_gss_cred_id_t)*cred_handle;
 	gss_cred_id_t mcred;
 
 	mcred = (spcred == NULL) ? GSS_C_NO_CREDENTIAL : spcred->mcred;
