@@ -128,63 +128,63 @@ main(void)
     size_t i;
 
     for (i = 0; i < sizeof(split_tests) / sizeof(*split_tests); i++) {
-	ipath = split_tests[i].path;
+        ipath = split_tests[i].path;
 #ifdef WINDOWS_PATHS
-	edirname = split_tests[i].win_dirname;
-	ebasename = split_tests[i].win_basename;
+        edirname = split_tests[i].win_dirname;
+        ebasename = split_tests[i].win_basename;
 #else
-	edirname = split_tests[i].posix_dirname;
-	ebasename = split_tests[i].posix_basename;
+        edirname = split_tests[i].posix_dirname;
+        ebasename = split_tests[i].posix_basename;
 #endif
-	assert(k5_path_split(ipath, NULL, NULL) == 0);
-	assert(k5_path_split(ipath, &dirname, NULL) == 0);
-	free(dirname);
-	assert(k5_path_split(ipath, NULL, &basename) == 0);
-	free(basename);
-	assert(k5_path_split(ipath, &dirname, &basename) == 0);
-	if (strcmp(dirname, edirname) != 0) {
-	    fprintf(stderr, "Split test %d: dirname %s != expected %s\n",
-		    (int)i, dirname, edirname);
-	    status = 1;
-	}
-	if (strcmp(basename, ebasename) != 0) {
-	    fprintf(stderr, "Split test %d: basename %s != expected %s\n",
-		    (int)i, basename, ebasename);
-	    status = 1;
-	}
-	free(dirname);
-	free(basename);
+        assert(k5_path_split(ipath, NULL, NULL) == 0);
+        assert(k5_path_split(ipath, &dirname, NULL) == 0);
+        free(dirname);
+        assert(k5_path_split(ipath, NULL, &basename) == 0);
+        free(basename);
+        assert(k5_path_split(ipath, &dirname, &basename) == 0);
+        if (strcmp(dirname, edirname) != 0) {
+            fprintf(stderr, "Split test %d: dirname %s != expected %s\n",
+                    (int)i, dirname, edirname);
+            status = 1;
+        }
+        if (strcmp(basename, ebasename) != 0) {
+            fprintf(stderr, "Split test %d: basename %s != expected %s\n",
+                    (int)i, basename, ebasename);
+            status = 1;
+        }
+        free(dirname);
+        free(basename);
     }
 
     for (i = 0; i < sizeof(join_tests) / sizeof(*join_tests); i++) {
-	path1 = join_tests[i].path1;
-	path2 = join_tests[i].path2;
+        path1 = join_tests[i].path1;
+        path2 = join_tests[i].path2;
 #ifdef WINDOWS_PATHS
-	ejoined = join_tests[i].win_result;
+        ejoined = join_tests[i].win_result;
 #else
-	ejoined = join_tests[i].posix_result;
+        ejoined = join_tests[i].posix_result;
 #endif
-	assert(k5_path_join(path1, path2, &joined) == 0);
-	if (strcmp(joined, ejoined) != 0) {
-	    fprintf(stderr, "Join test %d: %s != expected %s\n",
-		    (int)i, joined, ejoined);
-	    status = 1;
-	}
+        assert(k5_path_join(path1, path2, &joined) == 0);
+        if (strcmp(joined, ejoined) != 0) {
+            fprintf(stderr, "Join test %d: %s != expected %s\n",
+                    (int)i, joined, ejoined);
+            status = 1;
+        }
         free(joined);
     }
 
     for (i = 0; i < sizeof(isabs_tests) / sizeof(*isabs_tests); i++) {
 #ifdef WINDOWS_PATHS
-	eresult = isabs_tests[i].win_result;
+        eresult = isabs_tests[i].win_result;
 #else
-	eresult = isabs_tests[i].posix_result;
+        eresult = isabs_tests[i].posix_result;
 #endif
-	result = k5_path_isabs(isabs_tests[i].path);
-	if (result != eresult) {
-	    fprintf(stderr, "isabs test %d: %d != expected %d\n",
-		    (int)i, result, eresult);
-	    status = 1;
-	}
+        result = k5_path_isabs(isabs_tests[i].path);
+        if (result != eresult) {
+            fprintf(stderr, "isabs test %d: %d != expected %d\n",
+                    (int)i, result, eresult);
+            status = 1;
+        }
     }
 
     return status;
