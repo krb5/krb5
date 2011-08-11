@@ -2456,7 +2456,7 @@ KRB5_CALLCONV spnego_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
 	OM_uint32 status;
 	gss_OID_set amechs = GSS_C_NULL_OID_SET;
 	spnego_gss_cred_id_t imp_spcred = NULL, out_spcred = NULL;
-	gss_cred_id_t mcred;
+	gss_cred_id_t imp_mcred, out_mcred;
 
 	dsyslog("Entering spnego_gss_acquire_cred_impersonate_name\n");
 
@@ -2466,10 +2466,10 @@ KRB5_CALLCONV spnego_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
 	if (time_rec)
 		*time_rec = 0;
 
+	imp_spcred = (spnego_gss_cred_id_t)impersonator_cred_handle;
+	imp_mcred = imp_spcred ? imp_spcred->mcred : GSS_C_NO_CREDENTIAL;
 	if (desired_mechs == GSS_C_NO_OID_SET) {
-		status = gss_inquire_cred(minor_status,
-					  impersonator_cred_handle,
-					  NULL, NULL,
+		status = gss_inquire_cred(minor_status, imp_mcred, NULL, NULL,
 					  NULL, &amechs);
 		if (status != GSS_S_COMPLETE)
 			return status;
@@ -2477,24 +2477,22 @@ KRB5_CALLCONV spnego_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
 		desired_mechs = amechs;
 	}
 
-	imp_spcred = (spnego_gss_cred_id_t)impersonator_cred_handle;
-	status = gss_acquire_cred_impersonate_name(minor_status,
-			imp_spcred ? imp_spcred->mcred : GSS_C_NO_CREDENTIAL,
-			desired_name, time_req,
-			desired_mechs, cred_usage,
-			&mcred, actual_mechs,
-			time_rec);
+	status = gss_acquire_cred_impersonate_name(minor_status, imp_mcred,
+						   desired_name, time_req,
+						   desired_mechs, cred_usage,
+						   &out_mcred, actual_mechs,
+						   time_rec);
 
 	if (amechs != GSS_C_NULL_OID_SET)
 		(void) gss_release_oid_set(minor_status, &amechs);
 
 	out_spcred = malloc(sizeof(spnego_gss_cred_id_rec));
 	if (out_spcred == NULL) {
-		gss_release_cred(minor_status, &mcred);
+		gss_release_cred(minor_status, &out_mcred);
 		*minor_status = ENOMEM;
 		return (GSS_S_FAILURE);
 	}
-	out_spcred->mcred = mcred;
+	out_spcred->mcred = out_mcred;
 	out_spcred->neg_mechs = GSS_C_NULL_OID_SET;
 	*output_cred_handle = (gss_cred_id_t)out_spcred;
 
