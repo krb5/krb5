@@ -170,6 +170,7 @@ main(void)
 		    (int)i, joined, ejoined);
 	    status = 1;
 	}
+        free(joined);
     }
 
     for (i = 0; i < sizeof(isabs_tests) / sizeof(*isabs_tests); i++) {
