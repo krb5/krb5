@@ -2720,8 +2720,13 @@ krb5int_build_principal_alloc_va(krb5_context context,
 static inline int
 data_eq(krb5_data d1, krb5_data d2)
 {
-    return (d1.length == d2.length
-            && !memcmp(d1.data, d2.data, d1.length));
+    return (d1.length == d2.length && !memcmp(d1.data, d2.data, d1.length));
+}
+
+static inline int
+data_eq_string (krb5_data d, const char *s)
+{
+    return (d.length == strlen(s) && !memcmp(d.data, s, d.length));
 }
 
 static inline krb5_data
@@ -2759,12 +2764,6 @@ alloc_data(krb5_data *data, unsigned int len)
     data->data = ptr;
     data->length = len;
     return 0;
-}
-
-static inline int
-data_eq_string (krb5_data d, char *s)
-{
-    return data_eq(d, string2data(s));
 }
 
 static inline int
