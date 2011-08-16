@@ -121,7 +121,7 @@ For each realm, the following tags may be specified in the [realms] subsection:
 **master_key_name**
     (String.) Specifies the name of the principal associated with the master key. The default is K/M. 
 **master_key_type**
-    (Key type string.) Specifies the master key's key type. The default value for this is des3-cbc-sha1. For a list of all possible values, see:ref:`senct_label`. 
+    (Key type string.) Specifies the master key's key type. The default value for this is des3-cbc-sha1. For a list of all possible values, see :ref:`Supported_Encryption_Types_and_Salts`. 
 **max_life**
     (Delta time string.) Specifes the maximum time period for which a ticket may be valid in this realm. The default value is 24 hours. 
 **max_renewable_life**
@@ -144,7 +144,7 @@ For each realm, the following tags may be specified in the [realms] subsection:
     A boolean value (true, false). If set to true, the KDC will reject ticket requests from anonymous principals to service principals other than the realm's ticket-granting service. This option allows anonymous PKINIT to be enabled for use as FAST armor tickets without allowing anonymous authentication to services. By default, the value of restrict_anonymous_to_tgt as specified in the [kdcdefaults] section is used. 
 
 **supported_enctypes**
-    List of key:salt strings. Specifies the default key/salt combinations of principals for this realm. Any principals created through kadmin will have keys of these types. The default value for this tag is aes256-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:normal des3-cbc-sha1:normal arcfour-hmac-md5:normal. For lists of possible values, see :ref:`senct_label` and :ref:`salts_label` 
+    List of key:salt strings. Specifies the default key/salt combinations of principals for this realm. Any principals created through kadmin will have keys of these types. The default value for this tag is aes256-cts-hmac-sha1-96:normal aes128-cts-hmac-sha1-96:normal des3-cbc-sha1:normal arcfour-hmac-md5:normal. For lists of possible values, see :ref:`Supported_Encryption_Types_and_Salts` 
 
 
 

@@ -18,7 +18,7 @@ The *ktadd* command takes the following switches
 
 ============================================= =================================================================
 -k[eytab] *keytab*                                Use keytab as the keytab file. Otherwise, *ktadd* will use the default keytab file (*/etc/krb5.keytab*).
--e *"enc:salt..."*                                Uses the specified list of enctype-salttype pairs for setting the key of the principal. The quotes are necessary if there are multiple enctype-salttype pairs. This will not function against kadmin daemons earlier than krb5-1.2. See :ref:`senct_label` and :ref:`salts_label` for all possible values.
+-e *"enc:salt..."*                                Uses the specified list of enctype-salttype pairs for setting the key of the principal. The quotes are necessary if there are multiple enctype-salttype pairs. This will not function against kadmin daemons earlier than krb5-1.2. See :ref:`Supported_Encryption_Types_and_Salts` for all possible values.
 -q                                                Run in quiet mode. This causes *ktadd* to display less verbose information.
 principal | -glob *principal expression*          Add principal, or all principals matching principal expression to the keytab. The rules for principal expression are the same as for the kadmin list_principals (see :ref:`get_list_princs`) command. 
 ============================================= =================================================================

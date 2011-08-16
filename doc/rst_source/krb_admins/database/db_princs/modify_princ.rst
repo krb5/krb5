@@ -114,7 +114,7 @@ Sets the key for the principal to a random value (*add_principal* only). MIT rec
 Sets the key of the principal to the specified string and does not prompt for a password (*add_principal* only). MIT does not recommend using this option. 
 
 *-e enc:salt...*
-Uses the specified list of enctype-salttype pairs for setting the key of the principal. The quotes are necessary if there are multiple enctype-salttype pairs. This will not function against kadmin daemons earlier than krb5-1.2. See :ref:`senct_label` and :ref:`salts_label` for available types.
+Uses the specified list of enctype-salttype pairs for setting the key of the principal. The quotes are necessary if there are multiple enctype-salttype pairs. This will not function against kadmin daemons earlier than krb5-1.2. See :ref:`Supported_Encryption_Types_and_Salts` for available types.
 
 
 If you want to just use the default values, all you need to do is::

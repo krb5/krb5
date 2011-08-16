@@ -10,7 +10,7 @@ The *change_password* option has the alias cpw. *change_password* takes the foll
 ========================= ============================================================
  -randkey                  Sets the key of the principal to a random value. 
  -pw *password*              Sets the password to the string password. MIT does not recommend using this option. 
- -e *enc:salt...*          Uses the specified list of enctype-salttype pairs for setting the key of the principal. The quotes are necessary if there are multiple enctype-salttype pairs. This will not function against kadmin daemons earlier than krb5-1.2. See :ref:`senct_label` and :ref:`salts_label` for possible values. 
+ -e *enc:salt...*          Uses the specified list of enctype-salttype pairs for setting the key of the principal. The quotes are necessary if there are multiple enctype-salttype pairs. This will not function against kadmin daemons earlier than krb5-1.2. See :ref:`Supported_Encryption_Types_and_Salts` for possible values. 
  -keepold                  Keeps the previous kvno's keys around. This flag is usually not necessary except perhaps for TGS keys. Don't use this flag unless you know what you're doing. This option is not supported for the LDAP database
 ========================= ============================================================
 

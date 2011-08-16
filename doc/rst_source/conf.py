@@ -235,5 +235,7 @@ man_pages = [
     ('krb_admins/admin_commands/ktutil', 'ktutil', u'Kerberos keytab file maintenance utility', [u'MIT'], 1),
     ('krb_admins/admin_commands/k5srvutil', 'k5srvutil', u'host key table (keytab) manipulation utility', [u'MIT'], 1),
     ('krb_admins/admin_commands/kadmind', 'kadmind', u'KADM5 administration server', [u'MIT'], 8),
-    ('krb_admins/admin_commands/kdb5_ldap_util', 'kdb5_ldap_util', u'kdb5_ldap_util - Kerberos configuration utility', [u'MIT'], 8),
+    ('krb_admins/admin_commands/kdb5_ldap_util', 'kdb5_ldap_util', u'Kerberos configuration utility', [u'MIT'], 8),
+    ('krb_admins/conf_files/krb5_conf', 'krb5.conf', u'Kerberos configuration file', [u'MIT'], 5),
+    ('krb_admins/conf_files/kdc_conf', 'kdc.conf', u'Kerberos V5 KDC configuration file', [u'MIT'], 5),
 ]

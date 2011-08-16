@@ -8,7 +8,6 @@ Configuration Files
    :maxdepth: 2
 
    enc_types.rst
-   salts.rst
    krb5_conf.rst
    kdc_conf.rst
 
