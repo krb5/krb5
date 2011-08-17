@@ -1,4 +1,6 @@
-k5srvutil - host key table (keytab) manipulation utility
+.. _k5srvutil(1):
+
+k5srvutil
 =============================================================
 
 SYNOPSIS

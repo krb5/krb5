@@ -9,10 +9,8 @@ A policy is a set of rules governing passwords. Policies can dictate minimum and
 .. toctree::
    :maxdepth: 1
 
-   retr_pol.rst
-   retr_list_pol.rst
    mod_pol.rst
-   del_pol.rst
+   retr_pol.rst
    update_histkey.rst
 
 

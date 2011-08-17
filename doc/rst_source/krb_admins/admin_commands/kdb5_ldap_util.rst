@@ -1,4 +1,6 @@
-kdb5_ldap_util - Kerberos configuration utility
+.. _kdb5_ldap_util(8):
+
+kdb5_ldap_util 
 ==================================================
 
 SYNOPSIS

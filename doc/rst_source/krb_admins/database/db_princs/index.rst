@@ -7,9 +7,8 @@ Each entry in the Kerberos database contains a Kerberos principal and the attrib
    :maxdepth: 2
 
 
+   modify_princ.rst
    info_princ.rst
    priv_princ.rst
-   modify_princ.rst
-   delete_princ.rst
    pass_princ.rst
 

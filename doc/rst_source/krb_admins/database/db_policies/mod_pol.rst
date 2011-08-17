@@ -1,33 +1,29 @@
-Adding or modifying policies
-====================================
+Adding, modifying and deleting policies
+===================================================
 
-To add a new policy, use the kadmin *add_policy* command, which requires the "add" administrative privilege. The syntax is::
+To add a new policy, use the *kadmin* **add_policy** command.
 
-     add_policy [options] policy_name
+To modify attributes of a principal, use the *kadmin* **modify_policy** command.
+
+To delete a policy, use the *kadmin* **delete_policy** command.
      
-*add_policy* has the alias **addpol**.
-
-To modify attributes of a principal, use the kadmin *modify_policy* command, which requires the "modify" administrative privilege. The syntax is::
-
-     modify_policy [options] policy_name
-     
-*modify_poilcy* has the alias **modpol**.
-
-|
-
-The *add_policy* and *modify_policy* commands take the following switches:
-
-========================= ==================================
--maxlife *time*           Sets the maximum lifetime of a password to time.
--minlife *time*           Sets the minimum lifetime of a password to time.
--minlength *length*       Sets the minimum length of a password to length characters.
--minclasses *number*       Requires at least number of character classes in a password.
--history *number*          Sets the number of past keys kept for a principal to number. This option is not supported for LDAP database. 
-========================= ==================================
-
-|
+.. include:: ../../admin_commands/kadmin_local.rst
+   :start-after:  _add_policy:
+   :end-before: _add_policy_end:
 
 .. note::  The policies are created under *realm* container in the LDAP database. 
+
+.. include:: ../../admin_commands/kadmin_local.rst
+   :start-after:  _modify_policy:
+   :end-before: _modify_policy_end:
+
+.. include:: ../../admin_commands/kadmin_local.rst
+   :start-after:  _delete_policy:
+   :end-before: _delete_policy_end:
+
+.. note::  You must cancel the policy from *all* principals before deleting it. The *delete_policy* command will fail if it is in use by any principals. 
+
+     
 
 
 ------------

@@ -1,9 +1,15 @@
+.. _kadmin(1):
+
+.. _kadmin.local(1):
+
 kadmin, kadmin.local
 ===========================
 
 
 SYNOPSYS
 --------------
+
+.. _kadmin_synopsys:
       
 **kadmin** 
          [ **-O** | **-N** ] 
@@ -25,6 +31,8 @@ SYNOPSYS
                  [**-x** *db_args*]
 
 
+.. _kadmin_synopsys_end:
+      
 DESCRIPTION
 ------------
 
@@ -57,11 +65,13 @@ See the :ref:`kdc.conf` documentation for other options for tuning incremental p
 OPTIONS
 ------------
 
+.. _kadmin_options:
+
        **-r** *realm*
-              Use realm as the default database realm.
+              Use *realm* as the default database realm.
 
        **-p** *principal*
-              Use  principal to authenticate.  Otherwise, *kadmin* will append "/admin" to the primary principal name of the default ccache, the
+              Use  *principal* to authenticate.  Otherwise, *kadmin* will append "/admin" to the primary principal name of the default ccache, the
               value of the *USER* environment variable, or the username as obtained with *getpwuid*, in order of preference.
 
        **-k**     
@@ -83,7 +93,7 @@ OPTIONS
 
        **-c** *credentials_cache*
               Use *credentials_cache* as the credentials cache.  The *credentials_cache* should contain a service ticket for the *kadmin/admin* service; 
-              it can be acquired with the kinit(1) program.  If this option is not specified, *kadmin* requests a new service ticket from
+              it can be acquired with the :ref:`kinit(1)` program.  If this option is not specified, *kadmin* requests a new service ticket from
               the KDC, and stores it in its own temporary ccache.
 
        **-w** *password*
@@ -124,14 +134,18 @@ OPTIONS
 
               **-x** bindpwd=<bind_password>
                      specifies the password for the above mentioned binddn. It is recommended not to use this option.  
-                     Instead, the password can be stashed using the stashsrvpw command of *kdb5_ldap_util*.
+                     Instead, the password can be stashed using the stashsrvpw command of :ref:`kdb5_ldap_util(8)`
+
+
+.. _kadmin_options_end:
 
 
 DATE FORMAT
 --------------
 
-Various commands in *kadmin* can take a variety of date formats, specifying durations or absolute times.  
-Examples of valid formats are::
+.. _date_format:
+
+Many of the *kadmin* commands take a duration or time as an argument. The date can appear in a wide variety of formats, such as::
 
               1 month ago
               2 hours ago
@@ -143,7 +157,7 @@ Examples of valid formats are::
               tomorrow
               now
               second Monday
-              a fortnight ago
+              fortnight ago
               3/31/92 10:00:07 PST
               January 23, 1987 10:05pm
               22:00 GMT
@@ -153,11 +167,31 @@ In that case the time specifier will be interpreted as relative.
 Specifying "ago" in a duration may result in unexpected behavior.
 
 
+The following is a list of all of the allowable keywords.
+
+========================== ============================================
+Months                      january, jan, february, feb, march, mar, april, apr, may, june, jun, july, jul, august, aug, september, sep, sept, october, oct, november, nov, december, dec 
+Days                        sunday, sun, monday, mon, tuesday, tues, tue, wednesday, wednes, wed, thursday, thurs, thur, thu, friday, fri, saturday, sat 
+Units                       year, month, fortnight, week, day, hour, minute, min, second, sec 
+Relative                    tomorrow, yesterday, today, now, last, this, next, first, second, third, fourth, fifth, sixth, seventh, eighth, ninth, tenth, eleventh, twelfth, ago 
+Time Zones                  kadmin recognizes abbreviations for most of the world's time zones. A complete listing appears in kadmin Time Zones. 
+12-hour Time Delimiters     am, pm
+========================== ============================================
+
+.. _date_format_end:
+
+
+
 COMMANDS
 -----------
 
+.. _add_principal:
+
+add_principal
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
        **add_principal** [options] *newprinc*
-              creates the principal newprinc, prompting twice for a password.  If no policy is specified with the *-policy* option, 
+              creates the principal *newprinc*, prompting twice for a password.  If no policy is specified with the *-policy* option, 
               and the policy named "default" exists, then that policy is assigned to the principal; 
               note that the assignment of the policy "default" only occurs automatically when a principal is first created, 
               so the policy "default" must already exist for the assignment to occur.
@@ -172,7 +206,9 @@ COMMANDS
               The options are:
 
               **-x** *db_princ_args*
-                     Denotes the database specific options. The options for LDAP database are:
+                     Denotes the database specific options. 
+
+                     The options for LDAP database are:
 
                      **-x** dn=<dn>
                             Specifies the LDAP object that will contain the Kerberos principal being created.
@@ -185,6 +221,13 @@ COMMANDS
 
                      **-x** tktpolicy=<policy>
                             Associates a ticket policy to the Kerberos principal.
+
+
+                    .. note:: 
+                            - *containerdn* and *linkdn* options cannot be specified with dn option.  
+                            - If *dn* or *containerdn* options are not specified while adding the principal, the principals are created under the prinicipal container configured in the realm or the realm container. 
+                            - *dn* and *containerdn* should be within the subtrees or principal container configured in the realm.
+
 
               **-expire** *expdate*
                      expiration date of the principal
@@ -294,22 +337,14 @@ COMMANDS
                      there are multiple enctype-salttype pairs.  This will not function against *kadmin* daemons earlier than krb5-1.2.
 
               EXAMPLE::
-
-                     kadmin: addprinc tlyu/admin
-                     WARNING: no policy specified for "tlyu/admin@BLEEP.COM";
-                     defaulting to no policy.
-                     Enter password for principal tlyu/admin@BLEEP.COM:
-                     Re-enter password for principal tlyu/admin@BLEEP.COM:
-                     Principal "tlyu/admin@BLEEP.COM" created.
-                     kadmin:
-
-                     kadmin: addprinc **-x** dn=cn=mwm_user,o=org mwm_user
-                     WARNING: no policy specified for "mwm_user@BLEEP.COM";
-                     defaulting to no policy.
-                     Enter password for principal mwm_user@BLEEP.COM:
-                     Re-enter password for principal mwm_user@BLEEP.COM:
-                     Principal "mwm_user@BLEEP.COM" created.
-                     kadmin:
+  
+                    kadmin: addprinc jennifer
+                    WARNING: no policy specified for "jennifer@ATHENA.MIT.EDU";
+                    defaulting to no policy.
+                    Enter password for principal jennifer@ATHENA.MIT.EDU:  <= Type the password.
+                    Re-enter password for principal jennifer@ATHENA.MIT.EDU:  <=Type it again.
+                    Principal "jennifer@ATHENA.MIT.EDU" created.
+                    kadmin:
 
 
               ERRORS::
@@ -320,30 +355,12 @@ COMMANDS
                      KADM5_UNK_POLICY (policy does not exist)
                      KADM5_PASS_Q_* (password quality violations)
 
-       **delete_principal** [ *-force* ] *principal*
-              Deletes the specified *principal* from the database.  This command prompts for deletion, unless the *-force* option is  given.  
+.. _add_principal_end:
 
-                 .. note:: This command requires the *delete* privilege.  
+.. _modify_principal:
 
-              Alias:: 
-
-                     delprinc
-
-
-              EXAMPLE::
-
-                     kadmin: delprinc mwm_user
-                     Are you sure you want to delete the principal
-                     "mwm_user@BLEEP.COM"? (yes/no): yes
-                     Principal "mwm_user@BLEEP.COM" deleted.
-                     Make sure that you have removed this principal from
-                     all ACLs before reusing.
-                     kadmin:
-
-              ERRORS::
-
-                     KADM5_AUTH_DELETE (reequires "delete" privilege)
-                     KADM5_UNK_PRINC (principal does not exist)
+modify_principal
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
        **modify_principal** [options] *principal*
               Modifies the specified principal, changing the fields as specified. The options are as above for *add_principal*, except that
@@ -359,7 +376,9 @@ COMMANDS
               The options are:
 
               **-x** *db_princ_args*
-                     Denotes the database specific options. The options for LDAP database are:
+                     Denotes the database specific options. 
+
+                     The options for LDAP database are:
 
                      **-x** tktpolicy=<policy>
                             Associates a ticket policy to the Kerberos principal.
@@ -368,7 +387,7 @@ COMMANDS
                             Associates  a  Kerberos principal with a LDAP object. This option is honored only if the Kerberos principal is not
                             already associated with a LDAP object.
 
-              *-unlock*
+              **-unlock**
                      Unlocks a locked principal (one which has received too many failed authentication attempts without  enough  time  between
                      them according to its password policy) so that it can successfully authenticate.
 
@@ -379,8 +398,37 @@ COMMANDS
                      KADM5_UNK_POLICY (policy does not exist) 
                      KADM5_BAD_MASK (shouldn't happen)
 
+.. _modify_principal_end:
+
+.. _delete_principal:
+
+delete_principal
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+       **delete_principal** [ *-force* ] *principal*
+              Deletes the specified *principal* from the database.  This command prompts for deletion, unless the *-force* option is  given.  
+
+                 .. note:: This command requires the *delete* privilege.  
+
+              Alias:: 
+
+                     delprinc
+
+
+              ERRORS::
+
+                     KADM5_AUTH_DELETE (reequires "delete" privilege)
+                     KADM5_UNK_PRINC (principal does not exist)
+
+.. _delete_principal_end:
+
+.. _change_password:
+
+change_password
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
        **change_password** [options] *principal*
-              Changes the password of principal.  Prompts for a new password if neither *-randkey* or *-pw* is specified.  
+              Changes the password of *principal*.  Prompts for a new password if neither *-randkey* or *-pw* is specified.  
 
                  .. note:: Requires  the  *changepw* privilege,  or that the principal that is running the program to be the same as the one changed.  
 
@@ -399,6 +447,7 @@ COMMANDS
               **-e** "enc:salt ..."
                      Uses the specified list of enctype-salttype pairs for setting the key of the principal.   The quotes are necessary if
                      there are multiple enctype-salttype pairs.  This will not function against *kadmin* daemons earlier than krb5-1.2.
+                     See :ref:`Supported_Encryption_Types_and_Salts` for possible values.
 
               **-keepold**
                      Keeps the previous kvno's keys around.  This flag is usually not necessary except perhaps for TGS keys.  Don't use this
@@ -422,13 +471,26 @@ COMMANDS
                      KADM5_PASS_TOOSOON (current password minimum life not
                      expired)
 
+
+.. _change_password_end:
+
+.. _purgekeys:
+
+purgekeys
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
        **purgekeys** [*-keepkvno oldest_kvno_to_keep* ] *principal*
               Purges previously retained old keys (e.g., from *change_password -keepold*) from *principal*.  
-              If *-keepkvno* is specified, then only purges keys with kvnos lower than oldest_kvno_to_keep.
+              If **-keepkvno** is specified, then only purges keys with kvnos lower than *oldest_kvno_to_keep*.
+
+.. _get_principal:
+
+get_principal
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
        **get_principal** [*-terse*] *principal*
               Gets  the  attributes of principal.  
-              With the *-terse* option, outputs fields as quoted tab-separated strings.  
+              With the **-terse** option, outputs fields as quoted tab-separated strings.  
  
                  .. note:: Requires the *inquire* privilege, or that the principal that is running the the program to be the same as the one being listed.  
 
@@ -455,16 +517,26 @@ COMMANDS
                      Key: vno 1, DES cbc mode with CRC-32, Version 4
                      Attributes:
                      Policy: [none]
+
+
                      kadmin: getprinc -terse systest
                      systest@BLEEP.COM   3    86400     604800    1
                      785926535 753241234 785900000
                      tlyu/admin@BLEEP.COM     786100034 0    0
                      kadmin:
 
+
               ERRORS::
 
                      KADM5_AUTH_GET (requires the get (inquire) privilege)
                      KADM5_UNK_PRINC (principal does not exist)
+
+.. _get_principal_end:
+
+.. _list_principals:
+
+list_principals
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
        **list_principals** [expression]
               Retrieves all or some principal names.  
@@ -488,6 +560,13 @@ COMMANDS
                      testuser@SECURE-TEST.OV.COM
                      kadmin:
 
+.. _list_principals_end:
+
+.. _add_policy:
+
+add_policy
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
        **add_policy** [options] *policy*
               Adds the named *policy* to the policy database.  
 
@@ -499,31 +578,31 @@ COMMANDS
 
               The following options are available:
 
-              *-maxlife time*
+              **-maxlife time**
                      sets the maximum lifetime of a password
 
-              *-minlife time*
+              **-minlife time**
                      sets the minimum lifetime of a password
 
-              *-minlength length*
+              **-minlength length**
                      sets the minimum length of a password
 
-              *-minclasses number*
+              **-minclasses number**
                      sets the minimum number of character classes allowed in a password
 
-              *-history number*
+              **-history number**
                      sets the number of past keys kept for a principal. This option is not supported for LDAP database
 
-              *-maxfailure maxnumber*
+              **-maxfailure maxnumber**
                      sets the maximum number of authentication failures before the principal is  locked.
                      Authentication failures are only tracked for principals which require preauthentication.
 
-              *-failurecountinterval failuretime*
+              **-failurecountinterval failuretime**
                      sets  the  allowable  time  between  authentication failures.  
                      If an authentication failure happens after *failuretime* has elapsed since the previous failure, 
                      the number of authentication failures is reset to 1.
 
-              *-lockoutduration lockouttime*
+              **-lockoutduration lockouttime**
                      sets the duration for which the principal is locked from authenticating if too many authentication failures occur without
                      the specified failure count interval elapsing.
 
@@ -538,11 +617,40 @@ COMMANDS
                      KADM5_AUTH_ADD (requires the add privilege)
                      KADM5_DUP (policy already exists)
 
+.. _add_policy_end:
+
+.. _modify_policy:
+
+modify_policy
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+       **modify_policy** [options] *policy*
+              modifies the named *policy*.  Options are as above for *add_policy*.  
+
+                 .. note:: Requires the *modify* privilege.  
+
+              Alias::
+
+                      modpol
+
+
+              ERRORS::
+
+                     KADM5_AUTH_MODIFY (requires the modify privilege)
+                     KADM5_UNK_POLICY (policy does not exist)
+
+.. _modify_policy_end:
+
+.. _delete_policy:
+
+delete_policy
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
        **delete_policy** [ *-force* ] *policy*
               deletes the named *policy*.  Prompts for confirmation before deletion.  
               The command will fail if the policy is in use by any principals.  
 
-                 ..note:: Requires the *delete* privilege.  
+                 .. note:: Requires the *delete* privilege.  
 
               Alias::
 
@@ -562,24 +670,16 @@ COMMANDS
                      KADM5_UNK_POLICY (policy does not exist)
                      KADM5_POLICY_REF (reference count on policy is not zero)
 
-       **modify_policy** [options] *policy*
-              modifies the named *policy*.  Options are as above for *add_policy*.  
+.. _delete_policy_end:
 
-                 .. note:: Requires the *modify* privilege.  
+.. _get_policy:
 
-              Alias::
+get_policy
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-                      modpol
-
-
-              ERRORS::
-
-                     KADM5_AUTH_MODIFY (requires the modify privilege)
-                     KADM5_UNK_POLICY (policy does not exist)
-
-       **get_policy** [ *-terse* ] *policy*
+       **get_policy** [ **-terse** ] *policy*
               displays the values of the named *policy*.  
-              With the *-terse* flag, outputs the fields as quoted strings separated by tabs.  
+              With the **-terse** flag, outputs the fields as quoted strings separated by tabs.  
 
                  .. note:: Requires the *inquire* privilege.  
 
@@ -599,14 +699,24 @@ COMMANDS
                      Minimum number of password character classes: 2
                      Number of old keys kept: 5
                      Reference count: 17
+
                      kadmin: get_policy -terse admin
                      admin     15552000  0    6    2    5    17
                      kadmin:
+
+The *Reference count* is the number of principals using that policy.
 
               ERRORS::
 
                      KADM5_AUTH_GET (requires the get privilege)
                      KADM5_UNK_POLICY (policy does not exist)
+
+.. _get_policy_end:
+
+.. _list_policies:
+
+list_policies
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
        **list_policies** [expression]
               Retrieves all or some policy names.  Expression is a shell-style glob expression that can contain the wild-card characters ?, \*, and []'s.  
@@ -627,10 +737,18 @@ COMMANDS
                      dict-only
                      once-a-min
                      test-pol-nopw
+
                      kadmin:  listpols t*
                      test-pol
                      test-pol-nopw
                      kadmin:
+
+.. _list_policies_end:
+
+.. _ktadd:
+
+ktadd
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
        **ktadd** [**-k** *keytab*] [**-q**] [**-e** *keysaltlist*] [**-norandkey**] [[*principal* | **-glob** *princ-exp*] [...]
               Adds a *principal* or all principals matching *princ-exp* to a *keytab*.  
@@ -646,7 +764,7 @@ COMMANDS
               multiple keys with the same encryption type but different salt types.  If the **-k** argument is not specified, the  default  *keytab*
               */etc/krb5.keytab* is used.  If the *-q* option is specified, less verbose status information is displayed.
 
-              The *-glob* option requires the *list* privilege.  *princ-exp* follows the same rules described for the *list_principals* command.
+              The **-glob** option requires the *list* privilege.  *princ-exp* follows the same rules described for the *list_principals* command.
 
 
               EXAMPLE::
@@ -656,6 +774,11 @@ COMMANDS
                           kvno 3, encryption type DES-CBC-CRC added to keytab
                           WRFILE:/tmp/foo-new-keytab
                      kadmin:
+
+.. _ktremove:
+
+ktremove
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
        **ktremove** [**-k** *keytab*] [**-q**] *principal* [*kvno* | *all* | *old*]
               Removes entries for the specified principal from a *keytab*.  Requires no permissions, since this does not require database
@@ -682,10 +805,10 @@ principal.db            default name for Kerberos principal database
 <dbname>.kadm5.lock     Lock file for the KADM5 administrative database.  This file works backwards from most other lock files. I.e., *kadmin* will exit with an error if this file does not exist.
 ====================== =================================================
 
-NOTE: The above three files are specific to db2 database.
+.. note::  The above three files are specific to db2 database.
 
 ====================== =================================================
-kadm5.acl               File containing list of principals and their *kadmin* administrative privileges.  See :ref:`kadmind(8)` for a description.
+kadm5.acl               File containing list of principals and their *kadmin* administrative privileges.  See kadmind(8) for a description.
 kadm5.keytab            *keytab* file for *kadmin/admin* principal.
 kadm5.dict              file containing dictionary of strings explicitly disallowed as passwords.
 ====================== =================================================

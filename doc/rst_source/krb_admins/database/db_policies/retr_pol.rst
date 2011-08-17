@@ -1,38 +1,25 @@
-Retrieving Policies
+Retrieving policies
 ========================
 
-To retrieve a policy, use the kadmin *get_policy* command, which requires the "inquire" administrative privilege. The syntax is::
+To retrieve a policy, use the *kadmin* **get_policy** command.
 
-     get_policy [-terse] policy
-     
+You can retrieve the list of policies with the *kadmin* **list_policies** command.
 
-The *get_policy* command has the alias **getpol**.
+.. include:: ../../admin_commands/kadmin_local.rst
+   :start-after:  _get_policy:
+   :end-before: _get_policy_end:
 
-For example::
 
-     kadmin: get_policy admin
-     Policy: admin
-     Maximum password life: 180 days 00:00:00
-     Minimum password life: 00:00:00
-     Minimum password length: 6
-     Minimum number of password character classes: 2
-     Number of old keys kept: 5
-     Reference count: 17
-     kadmin:
-     
+.. include:: ../../admin_commands/kadmin_local.rst
+   :start-after:  _list_policies:
+   :end-before: _list_policies_end:
 
-The reference count is the number of principals using that policy.
 
-The *get_policy* command has a *-terse* option, which lists each field as a quoted, tab-separated string. For example::
-
-     kadmin: get_policy -terse admin
-     admin   15552000        0       6       2       5       17
-     kadmin:
-     
 ------------
 
 Feedback:
 
 Please, provide your feedback at krb5-bugs@mit.edu?subject=Documentation___db_policies
+
 
 

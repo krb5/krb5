@@ -1,3 +1,5 @@
+.. _kinit(1):
+
 kinit - obtain and cache Kerberos ticket-granting ticket
 =========================================================
 

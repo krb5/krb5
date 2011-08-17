@@ -1,4 +1,6 @@
-kpasswd - change a user's Kerberos password
+.. _kpasswd(1):
+
+kpasswd
 ===============================================
 
 
