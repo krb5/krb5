@@ -94,7 +94,7 @@ main (argc, argv)
 
     krb5_ccache cc_source = NULL;
     const char * cc_source_tag = NULL;
-    uid_t source_gid, target_gid;
+    uid_t source_gid;
     const char * cc_source_tag_tmp = NULL;
     char * cc_target_tag_tmp=NULL;
     char * cmd = NULL, * exec_cmd = NULL;
@@ -356,7 +356,6 @@ main (argc, argv)
         exit(1);
     }
     target_uid = target_pwd->pw_uid;
-    target_gid = target_pwd->pw_gid;
 
     init_auth_names(target_pwd->pw_dir);
 
