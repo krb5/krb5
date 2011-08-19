@@ -1,3 +1,5 @@
+.. _ktutil(1):
+
 ktutil
 =============
 
@@ -64,6 +66,16 @@ COMMANDS
               Quits ktutil.
 
               Aliases: **exit**, **q**
+
+
+EXAMPLE: 
+
+      ktutil:  add_entry -password -p alice@BLEEP.COM -k 1 -e aes128-cts-hmac-sha1-96
+      Password for alice@BLEEP.COM:
+      ktutil:  add_entry -password -p alice@BLEEP.COM -k 1 -e aes256-cts-hmac-sha1-96
+      Password for alice@BLEEP.COM:
+      ktutil:  write_kt keytab
+      ktutil:
 
 SEE ALSO
 -------------

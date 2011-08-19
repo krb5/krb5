@@ -201,7 +201,7 @@ add_principal
 
               Aliases::
 
-                        addprinc and ank.  
+                        addprinc ank
 
               The options are:
 
@@ -369,9 +369,9 @@ modify_principal
 
                  .. note:: This command requires the *modify* privilege.  
 
-              Alias::
+              Alias:: 
 
-                     modprinc
+                        modprinc
 
               The options are:
 
@@ -750,21 +750,40 @@ list_policies
 ktadd
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-       **ktadd** [**-k** *keytab*] [**-q**] [**-e** *keysaltlist*] [**-norandkey**] [[*principal* | **-glob** *princ-exp*] [...]
-              Adds a *principal* or all principals matching *princ-exp* to a *keytab*.  
+       **ktadd**  [[*principal* | **-glob** *princ-exp*]
+              Adds a *principal* or all principals matching *princ-exp* to a keytab file.  
               It randomizes each principal's key in the process, to prevent a compromised admin account from reading out all of the keys from the database.  
-              However, *kadmin.local* has the *-norandkey* option, which leaves the keys and their version numbers unchanged, 
-              similar to the Kerberos V4 ext_srvtab command. That allows users to continue to use the passwords they know to login normally, 
-              while simultaneously allowing scripts to login to the same account using a *keytab*.  
-              There is no significant security risk added since *kadmin.local* must be run by root on the KDC anyway.
+              The rules for principal expression are the same as for the *kadmin* :ref:`list_principals` command. 
 
-                 .. note:: Requires  the  *inquire* and *changepw* privileges.  
+                 .. note:: Requires the  *inquire* and *changepw* privileges.  
+                           
+                           If you use the *-glob* option, it also requires the *list* administrative privilege. 
 
-              An entry for each of the principal's unique encryption types is added, ignoring
-              multiple keys with the same encryption type but different salt types.  If the **-k** argument is not specified, the  default  *keytab*
-              */etc/krb5.keytab* is used.  If the *-q* option is specified, less verbose status information is displayed.
+              The options are:
 
-              The **-glob** option requires the *list* privilege.  *princ-exp* follows the same rules described for the *list_principals* command.
+              **-k[eytab]**  *keytab*  
+                     Use *keytab* as the keytab file. Otherwise, *ktadd* will use the default keytab file (*/etc/krb5.keytab*).
+
+              **-e** *"enc:salt..."*
+                     Use the specified list of enctype-salttype pairs for setting the key of the principal. 
+                     The enctype-salttype pairs may be delimited with commas or whitespace.
+                     The quotes are necessary for whitespace-delimited list.
+                     If this option is not specified, then *supported_enctypes* from :ref:`krb5.conf` will be used.
+                     This will not function against kadmin daemons earlier than krb5-1.2. 
+                     See :ref:`Supported_Encryption_Types_and_Salts` for all possible values.
+
+              **-q**
+                     Run in quiet mode. This causes *ktadd* to display less verbose information.
+
+              **-norandkey**
+                     Do not randomize the keys. The keys and their version numbers stay unchanged.
+                     That allows users to continue to use the passwords they know to login normally, 
+                     while simultaneously allowing scripts to login to the same account using a *keytab*.  
+                     There is no significant security risk added since *kadmin.local* must be run by root on the KDC anyway.
+                     This option is only available in *kadmin.local* and cannot be specified in combination with *-e* option.
+
+
+              .. note:: An entry for each of the principal's unique encryption types is added, ignoring multiple keys with the same encryption type but different salt types.
 
 
               EXAMPLE::
@@ -775,25 +794,37 @@ ktadd
                           WRFILE:/tmp/foo-new-keytab
                      kadmin:
 
+.. _ktadd_end:
+
 .. _ktremove:
 
 ktremove
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-       **ktremove** [**-k** *keytab*] [**-q**] *principal* [*kvno* | *all* | *old*]
-              Removes entries for the specified principal from a *keytab*.  Requires no permissions, since this does not require database
-              access.  If the string "all" is specified, all entries for that principal are removed; if the string "old" is specified, all
-              entries for that principal except those with the highest kvno are removed.  Otherwise, the value specified is parsed as an integer, 
-              and all entries whose kvno match that integer are removed.  If the *-k*  argument is not specifeid, the default *keytab*
-              */etc/krb5.keytab* is used. If the *-q* option is specified, less verbose status information is displayed.
+       **ktremove**  *principal* [*kvno* | *all* | *old*]
+              Removes entries for the specified *principal* from a keytab.  Requires no permissions, since this does not require database access. 
 
+
+              If the string "all" is specified, all entries for that principal are removed; 
+              if the string "old" is specified, all entries for that principal except those with the highest kvno are removed.  
+              Otherwise, the value specified is parsed as an integer, and all entries whose *kvno* match that integer are removed.
+
+              The options are:
+
+              **-k[eytab]**  *keytab*  
+                     Use keytab as the keytab file. Otherwise, *ktremove* will use the default keytab file (*/etc/krb5.keytab*).
+
+              **-q**
+                     Run in quiet mode. This causes *ktremove* to display less verbose information.
 
               EXAMPLE::
 
-                     kadmin: ktremove -k /usr/local/var/krb5kdc/kadmind.keytab kadmin/admin
+                     kadmin: ktremove -k /usr/local/var/krb5kdc/kadmind.keytab kadmin/admin all
                      Entry for principal kadmin/admin with kvno 3 removed
                           from keytab WRFILE:/usr/local/var/krb5kdc/kadmind.keytab.
                      kadmin:
+
+.. _ktremove_end:
 
 
 FILES
