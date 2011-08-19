@@ -1077,7 +1077,6 @@ dump_db(argc, argv)
     char                *new_mkey_file = 0;
     bool_t              dump_sno = FALSE;
     kdb_log_context     *log_ctx;
-    char                **db_args = 0; /* XXX */
     unsigned int        ipropx_version = IPROPX_VERSION_0;
     krb5_keylist_node *mkeys;
 
