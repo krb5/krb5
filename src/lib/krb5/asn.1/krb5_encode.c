@@ -38,11 +38,10 @@
  *     retval: stores error codes returned from subroutines
  *     buf: the coding buffer
  *     length: length of the most-recently produced encoding
- *     sum: cumulative length of the entire encoding
  */
 #define krb5_setup()                            \
     asn1_error_code retval;                     \
-    unsigned int length, sum = 0;               \
+    unsigned int length;                        \
     asn1buf *buf=NULL;                          \
     krb5_data *tmpcode;                         \
                                                 \
@@ -70,7 +69,6 @@ encode_krb5_pa_pk_as_req(const krb5_pa_pk_as_req *rep, krb5_data **code)
     krb5_setup();
     retval = asn1_encode_pa_pk_as_req(buf,rep,&length);
     if (retval) goto error;
-    sum += length;
     krb5_cleanup();
 }
 
@@ -81,7 +79,6 @@ encode_krb5_pa_pk_as_req_draft9(const krb5_pa_pk_as_req_draft9 *rep,
     krb5_setup();
     retval = asn1_encode_pa_pk_as_req_draft9(buf,rep,&length);
     if (retval) goto error;
-    sum += length;
     krb5_cleanup();
 }
 
@@ -91,7 +88,6 @@ encode_krb5_pa_pk_as_rep(const krb5_pa_pk_as_rep *rep, krb5_data **code)
     krb5_setup();
     retval = asn1_encode_pa_pk_as_rep(buf,rep,&length);
     if (retval) goto error;
-    sum += length;
     krb5_cleanup();
 }
 
@@ -101,7 +97,6 @@ encode_krb5_pa_pk_as_rep_draft9(const krb5_pa_pk_as_rep_draft9 *rep, krb5_data *
     krb5_setup();
     retval = asn1_encode_pa_pk_as_rep_draft9(buf,rep,&length);
     if (retval) goto error;
-    sum += length;
     krb5_cleanup();
 }
 
@@ -111,7 +106,6 @@ encode_krb5_auth_pack(const krb5_auth_pack *rep, krb5_data **code)
     krb5_setup();
     retval = asn1_encode_auth_pack(buf,rep,&length);
     if (retval) goto error;
-    sum += length;
     krb5_cleanup();
 }
 
@@ -122,7 +116,6 @@ encode_krb5_auth_pack_draft9(const krb5_auth_pack_draft9 *rep,
     krb5_setup();
     retval = asn1_encode_auth_pack_draft9(buf,rep,&length);
     if (retval) goto error;
-    sum += length;
     krb5_cleanup();
 }
 
@@ -132,7 +125,6 @@ encode_krb5_kdc_dh_key_info(const krb5_kdc_dh_key_info *rep, krb5_data **code)
     krb5_setup();
     retval = asn1_encode_kdc_dh_key_info(buf,rep,&length);
     if (retval) goto error;
-    sum += length;
     krb5_cleanup();
 }
 
@@ -142,7 +134,6 @@ encode_krb5_reply_key_pack(const krb5_reply_key_pack *rep, krb5_data **code)
     krb5_setup();
     retval = asn1_encode_reply_key_pack(buf,rep,&length);
     if (retval) goto error;
-    sum += length;
     krb5_cleanup();
 }
 
@@ -153,7 +144,6 @@ encode_krb5_reply_key_pack_draft9(const krb5_reply_key_pack_draft9 *rep,
     krb5_setup();
     retval = asn1_encode_reply_key_pack_draft9(buf,rep,&length);
     if (retval) goto error;
-    sum += length;
     krb5_cleanup();
 }
 
@@ -164,7 +154,6 @@ encode_krb5_td_trusted_certifiers(
     krb5_setup();
     retval = asn1_encode_td_trusted_certifiers(buf,rep,&length);
     if (retval) goto error;
-    sum += length;
     krb5_cleanup();
 }
 
@@ -175,7 +164,6 @@ encode_krb5_td_dh_parameters(const krb5_algorithm_identifier **rep,
     krb5_setup();
     retval = asn1_encode_sequence_of_algorithm_identifier(buf,rep,&length);
     if (retval) goto error;
-    sum += length;
     krb5_cleanup();
 }
 #endif /* DISABLE_PKINIT */
@@ -186,6 +174,5 @@ encode_krb5_typed_data(const krb5_typed_data **rep, krb5_data **code)
     krb5_setup();
     retval = asn1_encode_sequence_of_typed_data(buf,rep,&length);
     if (retval) goto error;
-    sum += length;
     krb5_cleanup();
 }
