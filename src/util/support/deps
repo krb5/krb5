@@ -50,3 +50,6 @@ t_unal.so t_unal.po $(OUTPRE)t_unal.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
 zap.so zap.po $(OUTPRE)zap.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   zap.c
+path.so path.po $(OUTPRE)path.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
+  path.c
