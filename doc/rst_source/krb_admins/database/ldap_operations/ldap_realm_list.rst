@@ -1,18 +1,13 @@
 Listing available Kerberos realms
 ===============================================
 
-To display the list of the realms, use the **list** command.
+If you need to display the list of the realms, use the :ref:`kdb5_ldap_util(8)` **list** command as follows.
 
-|
+.. include:: ../../admin_commands/kdb5_ldap_util.rst
+   :start-after:  _kdb5_ldap_util_list:
+   :end-before: _kdb5_ldap_util_list_end:
+     
 
-For example::
-
-     shell% kdb5_ldap_util -D cn=admin,dc=example,dc=com -H ldaps://ldap-server1.mit.edu list
-     Password for "cn=admin,dc=example,dc=com":
-     ATHENA.MIT.EDU
-     OPENLDAP.MIT.EDU
-     MEDIA-LAB.MIT.EDU
-     shell%
      
 
 ------------
