@@ -3,36 +3,26 @@
 Operations on the Kerberos database
 =============================================
 
-The *kdb5_util command* is the primary tool for administrating the Kerberos database. The syntax is::
+The :ref:`kdb5_util(8)` command is the primary tool for administrating the Kerberos database.
 
-     kdb5_util command [kdb5_util_options] [command_options]
-     
+.. include:: ../../admin_commands/kdb5_util.rst
+   :start-after:  _kdb5_util_synopsys:
+   :end-before: _kdb5_util_synopsys_end:
 
-The *kdb5_util command* takes the following options, which **override the defaults** specified in the configuration files:
+**OPTIONS**
 
-========================== =============================================================
--r *realm*                     Specifies the the Kerberos realm of the database. 
--d *database_name*             Specifies the name under which the principal database is stored. 
--k *master_key_type*           Specifies the key type of the master key in the database. 
--M *master_key_name*          Specifies the principal name of the master key in the database. 
--m                           Indicates that the master database password should be read from the TTY rather than fetched from a file on disk. 
--sf *stash_file*              Specifies the stash file of the master database password 
--P *password*                  Specifies the master database password. MIT does not recommend using this option. 
-========================== =============================================================
-
-|
+.. include:: ../../admin_commands/kdb5_util.rst
+   :start-after:  _kdb5_util_options:
+   :end-before: _kdb5_util_options_end:
 
 .. toctree::
    :maxdepth: 1
-
 
    db2file.rst
    file2db.rst
    create_stash.rst
    create_destroy_db.rst
 
-
-     
 ------------
 
 Feedback:

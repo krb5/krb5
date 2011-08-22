@@ -1,30 +1,20 @@
 Dumping a Kerberos database to a file
 =============================================
 
-To dump a Kerberos database into a file, use the *kdb5_util dump* command on one of the KDCs. The syntax is:
+To dump a Kerberos database into a file, use the :ref:`kdb5_util(8)` **dump** command on one of the KDCs. 
 
-     kdb5_util dump [-old] [-b6] [-b7] [-ov]
-     [-verbose] [-mkey_convert] [-new_mkey_file] [filename
-     [principals...]]
+
+.. include:: ../../admin_commands/kdb5_util.rst
+   :start-after:  _kdb5_util_dump:
+   :end-before: _kdb5_util_dump_end:
+
+
+
      
-
-The kdb5_util dump command takes the following options
-
-================= ============================================================
--old               Causes the dump to be in the Kerberos 5 Beta 5 and earlier dump format ("kdb5_edit load_dump version 2.0"). 
--b6                Causes the dump to be in the Kerberos 5 Beta 6 format ("kdb5_edit load_dump version 3.0"). 
--b7                Causes the dump to be in the Kerberos 5 Beta 7 format ("kdbt_edit load_dump version 4"). 
--ov                Causes the dump to be in ovsec_adm_export format. Currently, the only way to preserve per-principal policy information is to use this in conjunction with a normal dump. 
--verbose           Causes the name of each principal and policy to be printed as it is dumped. 
--mkey_convert      Prompts for a new master password, and then dumps the database with all keys reencrypted in this new master key 
--new_mkey_file    Reads a new key from the default keytab and then dumps the database with all keys reencrypted in this new master key 
-================= ============================================================
-
-For example::
+EXAMPLES::
 
      shell% kdb5_util dump dumpfile
      shell%
-     
 
      shell% kbd5_util dump -verbose dumpfile
      kadmin/admin@ATHENA.MIT.EDU
@@ -35,10 +25,9 @@ For example::
      shell%
      
 
-If you specify which principals to dump, you must use the full principal, as in the following example. (The line beginning with => is a continuation of the previous line.)::
+If you specify which principals to dump, you must use the full principal, as in the following example::
 
-     shell% kdb5_util dump -verbose dumpfile K/M@ATHENA.MIT.EDU
-     => kadmin/admin@ATHENA.MIT.EDU
+     shell% kdb5_util dump -verbose dumpfile K/M@ATHENA.MIT.EDU kadmin/admin@ATHENA.MIT.EDU
      kadmin/admin@ATHENA.MIT.EDU
      K/M@ATHENA.MIT.EDU
      shell%

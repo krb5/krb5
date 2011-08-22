@@ -5,6 +5,8 @@ kdb5_util
 
 SYNOPSIS
 ---------------
+
+.. _kdb5_util_synopsys:
        
 **kdb5_util** 
             [**-r** *realm*] 
@@ -15,6 +17,8 @@ SYNOPSIS
             [**-sf** *stashfilename*] 
             [**-m**] 
             *command* [*command_options*]
+
+.. _kdb5_util_synopsys_end:
 
 DESCRIPTION
 ---------------
@@ -32,6 +36,8 @@ Note that some KDB plugins may not support all *kdb5_util* commands.
 COMMAND-LINE OPTIONS
 ----------------------
        
+.. _kdb5_util_options:
+
        **-r** *realm*
               specifies the Kerberos realm of the database; by default the realm returned by krb5_default_local_realm(3) is used.
 
@@ -57,19 +63,35 @@ COMMAND-LINE OPTIONS
        **-P** *password*
               specifies the master database password.  This option is not recommended.
 
+.. _kdb5_util_options_end:
+
 COMMANDS
 ---------------
        
+.. _kdb5_util_create:
+
        **create** [**-s**]
               Creates a new database.  If the *-s* option is specified, the stash file is also created.  This command fails if the database already exists.
               If the command is successful, the database is opened just as if it had already existed when the program was first run.
+
+.. _kdb5_util_create_end:
+
+.. _kdb5_util_destroy:
 
        **destroy** [**-f**]
               Destroys the database, first overwriting the disk sectors and then unlinking the files, after prompting the user for confirmation.
               With the *-f* argument, does not prompt the user.
 
+.. _kdb5_util_destroy_end:
+
+.. _kdb5_util_stash:
+
        **stash** [**-f** *keyfile*]
               Stores the master principal's keys in a stash file.  The *-f* argument can be used to override the *keyfile* specified at startup.
+
+.. _kdb5_util_stash_end:
+
+.. _kdb5_util_dump:
 
        **dump** [**-old|-b6|-b7|-ov|-r13**] [**-verbose**] [**-mkey_convert**] [**-new_mkey_file** *mkey_file*] [**-rev**] [**-recurse**] [*filename* [*principals*...]]
               Dumps the current Kerberos and KADM5 database into an ASCII file.  By default, the database is dumped in current format, "*kdb5_util*
@@ -86,7 +108,7 @@ COMMANDS
                      This  was  the  dump  format  produced  on releases prior to 1.2.2.
 
               **-ov**
-                     causes the dump to be in ovsec_adm_export format.
+                     causes the dump to be in *ovsec_adm_export* format.
 
               **-r13**
                      causes the dump to be in the Kerberos 5 1.3 format ("*kdb5_util* load_dump version 5").  
@@ -111,6 +133,9 @@ COMMANDS
                      in cases where database corruption has occured.
                      In  cases  of such corruption, this option will probably retrieve more principals than the *-rev* option will.
 
+.. _kdb5_util_dump_end:
+
+.. _kdb5_util_load:
 
        **load** [**-old|-b6|-b7|-ov|-r13**] [**-hash**] [**-verbose**] [**-update**] *filename dbname*
               Loads a database dump from the named file into the named database.  
@@ -139,10 +164,14 @@ COMMANDS
                      causes the name of each principal and policy to be printed as it is dumped.
 
               **-update**
-                     records from the dump file are added to or updated in the existing database; 
-                     otherwise, a new database  is  created  containing  only what is in the dump file and the old one destroyed upon successful completion.
+                     records from the dump file are added to or updated in the existing database.
+                     (This is useful in conjunction with an *ovsec_adm_export* format dump if you want to preserve per-principal policy information,
+                     since the current default format does not contain this data.)
+                     Otherwise, a new database is created containing only what is in the dump file and the old one destroyed upon successful completion.
 
               *dbname* is required and overrides the value specified on the command line or the default.
+
+.. _kdb5_util_load_end:
 
        **ark**
               Adds a random key.
@@ -168,14 +197,14 @@ COMMANDS
               Delete master keys from the K/M principal that are not used to protect any principals.
               This command can be used to remove old master keys from a K/M principal once all principal keys are protected by a newer master key.
 
-       **-f**     
-              does not prompt user.
+              **-f**     
+                     does not prompt user.
 
-       **-n**
-              do a dry run, shows master keys that would be purged, does not actually purge any keys.
+              **-n**
+                     do a dry run, shows master keys that would be purged, does not actually purge any keys.
 
-       **-v**
-              verbose output.
+              **-v**
+                     verbose output.
 
        **update_princ_encryption** [**-f**] [**-n**] [**-v**] [*princ-pattern*]
               Update all principal records (or only those matching the princ-pattern glob pattern)

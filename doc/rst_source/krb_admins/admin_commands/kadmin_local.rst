@@ -858,8 +858,3 @@ SEE ALSO
 kerberos(1), kpasswd(1), kadmind(8)
 
 
-BUGS
---------
-
-Command output needs to be cleaned up.
-
