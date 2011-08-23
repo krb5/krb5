@@ -40,12 +40,6 @@ eDirectory
    :maxdepth: 1
 
    edir_create_realm.rst
-   edir_mod_realm.rst
    edir_create_so.rst
-   edir_mod_so.rst
-   edir_get_so.rst
-   edir_del_so.rst
-   edir_so_list.rst
-   edir_so_pass.rst
 
 

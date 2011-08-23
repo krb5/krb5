@@ -23,7 +23,7 @@ COMMAND-LINE OPTIONS
 .. _kdb5_ldap_util_options:
 
 **-D** *user_dn*
-      Specifies the Distinguished name (DN) of the user who has sufficient rights to perform the operation on the LDAP server.
+      Specifies the Distinguished Name (DN) of the user who has sufficient rights to perform the operation on the LDAP server.
 
 **-w** *passwd*
       Specifies the password of *user_dn*.  This option is not recommended.
@@ -175,6 +175,8 @@ create
 
    Command options specific to eDirectory
 
+.. _kdb5_ldap_util_create_edir:
+
    **-kdcdn** *kdc_service_list*
        Specifies the list of KDC service objects serving the realm. 
        The list contains the DNs of the KDC service objects separated by colon(\:).
@@ -182,6 +184,8 @@ create
    **-admindn** *admin_service_list*
        Specifies the list of Administration service objects serving the realm. 
        The list contains the DNs of  the  Administration  service  objects  separated  by colon(\:).
+
+.. _kdb5_ldap_util_create_edir_end:
 
 EXAMPLE::
 
@@ -300,6 +304,8 @@ modify
 
    Command options specific to eDirectory
 
+.. _kdb5_ldap_util_modify_edir:
+
    **-kdcdn** *kdc_service_list*
               Specifies  the  list  of  KDC  service objects serving the realm. 
               The list contains the DNs of the KDC service objects separated by a colon (\:). 
@@ -325,6 +331,8 @@ modify
    **-addadmindn** *admin_service_list*
               Specifies the list of Administration service objects that need to be added to the existing list. 
               The list contains the DNs of the  Administration  service objects separated by a colon (:).
+
+.. _kdb5_ldap_util_modify_edir_end:
 
 EXAMPLE::
 
@@ -417,7 +425,7 @@ stashsrvpw
            Specifies the complete path of the service password file. By default, */usr/local/var/service_passwd* is used.
 
    *servicedn*
-           Specifies Distinguished name (DN) of the service object whose password is to be stored in file.
+           Specifies Distinguished Name (DN) of the service object whose password is to be stored in file.
 
 EXAMPLE::
 
@@ -608,13 +616,28 @@ list_policy
    **-r** *realm*
        Specifies the Kerberos realm of the database; by default the realm returned by krb5_default_local_realm(3) is used.
 
+EXAMPLE::
 
-   Commands Specific to eDirectory
+       kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu list_policy -r ATHENA.MIT.EDU
+       Password for "cn=admin,o=org":
+       tktpolicy
+       tmppolicy
+       userpolicy
+
+.. _kdb5_ldap_util_list_policy_end:
+
+
+Commands specific to eDirectory
+--------------------------------
+
+setsrvpw
+~~~~~~~~~~~~~~~~~~
+.. _kdb5_ldap_util_setsrvpw:
 
    **setsrvpw** 
-       [**-randpw\|-fileonly**] 
-       [**-f** *filename*] 
-       *service_dn*
+   [**-randpw\|-fileonly**] 
+   [**-f** *filename*] 
+   *service_dn*
        
        Allows an administrator to set password for service objects such as KDC and Administration server in eDirectory and store them in a file.  
        The  *-fileonly*  option stores the password in a file and not in the eDirectory object. Options:
@@ -632,22 +655,16 @@ list_policy
        Specifies complete path of the service password file. By default, */usr/local/var/service_passwd* is used.
 
    *service_dn*
-       Specifies Distinguished name (DN) of the service object whose password is to be set.
+       Specifies Distinguished Name (DN) of the service object whose password is to be set.
 
-EXAMPLES::
-
-       kdb5_ldap_util -D cn=admin,o=org -H ldaps://ldap-server1.mit.edu list_policy -r ATHENA.MIT.EDU
-       Password for "cn=admin,o=org":
-       tktpolicy
-       tmppolicy
-       userpolicy
+EXAMPLE::
 
        kdb5_ldap_util setsrvpw -D cn=admin,o=org setsrvpw -fileonly -f /home/andrew/conf_keyfile cn=service-kdc,o=org
        Password for "cn=admin,o=org":
        Password for "cn=service-kdc,o=org":
        Re-enter password for "cn=service-kdc,o=org":
 
-.. _kdb5_ldap_util_list_policy_end:
+.. _kdb5_ldap_util_setsrvpw_end:
 
 create_service
 ~~~~~~~~~~~~~~~~~~~
@@ -655,7 +672,7 @@ create_service
 .. _kdb5_ldap_util_create_service:
 
    **create_service** 
-   {**-kdc\|-admin**} 
+   {**-kdc\|-admin\|-pwd**} 
    [**-servicehost** *service_host_list*] 
    [**-realm** *realm_list*] 
    [**-randpw\|-fileonly**] 
@@ -668,6 +685,9 @@ create_service
 
    **-admin**
        Specifies the service is a Administration service
+
+   **-pwd**                                                   
+       Specifies the Password service
 
    **-servicehost** *service_host_list*
        Specifies the list of entries separated by a colon (\:). 
@@ -692,13 +712,14 @@ create_service
        Specifies the complete path of the file where the service object password is stashed.
 
    *service_dn*
-       Specifies Distinguished name (DN) of the Kerberos service to be created.
+       Specifies Distinguished Name (DN) of the Kerberos service to be created.
 
 EXAMPLE::
 
-       kdb5_ldap_util -D cn=admin,o=org create_service -kdc -randpw -f /home/andrew/conf_keyfile cn=service-kdc,o=org
+       shell% kdb5_ldap_util -D cn=admin,o=org create_service -kdc -randpw -f /home/andrew/conf_keyfile cn=service-kdc,o=org
        Password for "cn=admin,o=org":
        File does not exist. Creating the file /home/andrew/conf_keyfile...
+       shell% 
 
 .. _kdb5_ldap_util_create_service_end:
 
@@ -746,13 +767,14 @@ modify_service
        The list contains the name of the realms separated by a colon (\:).
 
    *service_dn*
-       Specifies Distinguished name (DN) of the Kerberos service to be modified.
+       Specifies Distinguished Name (DN) of the Kerberos service to be modified.
 
 EXAMPLE::
 
-       kdb5_ldap_util -D cn=admin,o=org modify_service -realm ATHENA.MIT.EDU cn=service-kdc,o=org
+       shell% kdb5_ldap_util -D cn=admin,o=org modify_service -realm ATHENA.MIT.EDU cn=service-kdc,o=org
        Password for "cn=admin,o=org":
        Changing rights for the service object. Please wait ... done
+       shell% 
 
 .. _kdb5_ldap_util_modify_service_end:
 
@@ -765,16 +787,17 @@ view_service
        Displays the attributes of a service.  Options:
 
    *service_dn*
-       Specifies Distinguished name (DN) of the Kerberos service to be viewed.
+       Specifies Distinguished Name (DN) of the Kerberos service to be viewed.
 
 EXAMPLE::
 
-       kdb5_ldap_util -D cn=admin,o=org view_service cn=service-kdc,o=org
+       shell% kdb5_ldap_util -D cn=admin,o=org view_service cn=service-kdc,o=org
        Password for "cn=admin,o=org":
        Service dn: cn=service-kdc,o=org
        Service type: kdc
        Service host list:
        Realm DN list: cn=ATHENA.MIT.EDU,cn=Kerberos,cn=Security
+       shell% 
 
 .. _kdb5_ldap_util_view_service_end:
 
@@ -794,15 +817,16 @@ destroy_service
        to the service_dn needs to be removed.
 
    *service_dn*
-       Specifies Distinguished name (DN) of the Kerberos service to be destroyed.
+       Specifies Distinguished Name (DN) of the Kerberos service to be destroyed.
 
 EXAMPLE::
 
-       kdb5_ldap_util -D cn=admin,o=org destroy_service cn=service-kdc,o=org
+       shell% kdb5_ldap_util -D cn=admin,o=org destroy_service cn=service-kdc,o=org
        Password for "cn=admin,o=org":
        This will delete the service object 'cn=service-kdc,o=org', are you sure?
        (type 'yes' to confirm)? yes
        ** service object 'cn=service-kdc,o=org' deleted.
+       shell% 
 
 .. _kdb5_ldap_util_destroy_service_end:
 
@@ -822,11 +846,12 @@ list_service
 
 EXAMPLE::
 
-       kdb5_ldap_util -D cn=admin,o=org list_service
+       shell% kdb5_ldap_util -D cn=admin,o=org list_service
        Password for "cn=admin,o=org":
        cn=service-kdc,o=org
        cn=service-adm,o=org
        cn=service-pwd,o=org
+       shell% 
 
 .. _kdb5_ldap_util_list_service_end:
 

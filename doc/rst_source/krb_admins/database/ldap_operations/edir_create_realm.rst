@@ -8,19 +8,15 @@ See :ref:`ldap_create_realm_label`
 
 The following are the eDirectory specific options
 
-==================================== ==============================================
--kdcdn *kdc_servce_list*               Specifies the list of KDC service objects serving the realm. The list contains the DNs of the KDC service objects separated by colon(:). 
--admindn *admin_service_list*           Specifies the list of Administration service objects serving the realm. The list contains the DNs of the Administration service objects separated by colon(:). 
-==================================== ==============================================
+.. include:: ../../admin_commands/kdb5_ldap_util.rst
+   :start-after:  _kdb5_ldap_util_create_edir:
+   :end-before: _kdb5_ldap_util_create_edir_end:
+     
 
-|
-
-For example::
+EXAMPLE::
 
      shell% kdb5_ldap_util -D cn=admin,dc=example,dc=com -H ldaps://ldap-server1.mit.edu create -sscope 2
      -subtree ou=users,dc=example,dc=com -kdcdn cn=krbkdc,dc=example,dc=com -admindn cn=krbadmin,dc=example,dc=com -r ATHENA.MIT.EDU
-
-
 
      Password for "cn=admin,dc=example,dc=com":
      Initializing database for realm 'ATHENA.MIT.EDU'
@@ -31,6 +27,18 @@ For example::
      shell%
      
 
+.. _edir_mod_realm_label:
+
+
+eDir: Modifying a Kerberos realm
+=================================
+
+See :ref:`ldap_mod_realm_label`
+
+.. include:: ../../admin_commands/kdb5_ldap_util.rst
+   :start-after:  _kdb5_ldap_util_modify_edir:
+   :end-before: _kdb5_ldap_util_modify_edir_end:
+     
 
 ------------
 
