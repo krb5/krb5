@@ -119,7 +119,7 @@ typedef void **iter_t; /* ick */
 %typemap(tcl8,in) char **nullterm {
     /* in char **nullterm */
     int n;
-    if (Tcl_SplitList(interp, Tcl_GetStringFromObj($input,NULL), &n, &$1) == TCL_ERROR) SWIG_fail;
+    if (Tcl_SplitList(interp, Tcl_GetStringFromObj($input,NULL), &n, (const char ***) &$1) == TCL_ERROR) SWIG_fail;
 }
 %typemap(tcl8,freearg) char **nullterm {
     /* freearg char **nullterm */
@@ -200,7 +200,7 @@ static errcode_t iter_create(profile_t p, const char **nullterm,
 {
     iter_t it;
     errcode_t err;
-    char **args;
+    const char **args;
 
     it = malloc(sizeof(*it));
     if (it == NULL)
@@ -233,7 +233,7 @@ static errcode_t iter_create(profile_t p, const char **nullterm,
 	*OUTPUT = it;
     return err;
 }
-static errcode_t iter_free(iter_t i)
+static void iter_free(iter_t i)
 {
     profile_iterator_free(i);
     free(i);

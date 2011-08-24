@@ -131,7 +131,7 @@ prof_err.o: prof_err.c
 
 # not built by default, but may be useful for testing
 $(srcdir)/profile_tcl.c: profile.swg
-#	(cd $(srcdir) && swig -tcl8 -o profile_tcl.c profile.swg)
+#	(cd $(srcdir) && swig -tcl8 -nosafe -o profile_tcl.c profile.swg)
 profile_tcl.o: $(srcdir)/profile_tcl.c profile.h
 profile_tcl: profile_tcl.o $(PROF_DEPLIB) $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
 	$(CC_LINK) -o profile_tcl profile_tcl.o \
