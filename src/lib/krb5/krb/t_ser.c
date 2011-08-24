@@ -41,7 +41,7 @@ can't safely dereference.  This test file used to make this mistake, often.";
 static void
 print_erep(krb5_octet *erep, size_t elen)
 {
-    int i, j;
+    unsigned int i, j;
 
     for (i=0; i<elen; ) {
         printf("%08d: ", i);

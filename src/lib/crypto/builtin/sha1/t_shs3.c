@@ -350,11 +350,11 @@ unsigned char results6[SHS_DIGESTSIZE] = {
 static void test6(void)
 {
     struct {
-        long pad1;
+        unsigned long pad1;
         SHS_INFO si1;
-        long pad2;
+        unsigned long pad2;
         SHS_INFO si2;
-        long pad3;
+        unsigned long pad3;
     } sdata;
     unsigned char digest[SHS_DIGESTSIZE];
     int failed;
@@ -481,11 +481,11 @@ unsigned int kfsize[] = {0,1,31,32,33,55,56,63};
 static void test7(void)
 {
     struct {
-        long pad1;
+        unsigned long pad1;
         SHS_INFO si1;
-        long pad2;
+        unsigned long pad2;
         SHS_INFO si2;
-        long pad3;
+        unsigned long pad3;
     } sdata;
     unsigned char digest[SHS_DIGESTSIZE];
     int failed;

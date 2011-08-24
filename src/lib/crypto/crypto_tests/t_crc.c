@@ -148,7 +148,7 @@ static void gethexstr(char *data, size_t *outlen, unsigned char *outbuf,
 
     inlen = strlen(data);
     *outlen = 0;
-    for (cp = data; cp - data < inlen; cp += 2) {
+    for (cp = data; (size_t) (cp - data) < inlen; cp += 2) {
         strncpy(buf, cp, 2);
         buf[2] = '\0';
         n = strtol(buf, NULL, 16);

@@ -209,7 +209,8 @@ main(int argc, char *argv[])
 {
     krb5_error_code ret = 0;
     krb5_context context;
-    int i, good = 1;
+    unsigned int i;
+    int good = 1;
 
     ret = krb5_init_context(&context);
     if (ret) exit(1);
