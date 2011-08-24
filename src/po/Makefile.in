@@ -48,3 +48,6 @@ install::
 	  install -c $$c \
 	    $(DESTDIR)$(KRB5_LOCALEDIR)/$$lang/LC_MESSAGES/$(DOMAIN).mo; \
 	done
+
+clean::
+	$(RM) $(CATALOGS)

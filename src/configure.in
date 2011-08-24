@@ -67,10 +67,13 @@ LIBUTIL=-lutil
 ])
 AC_SUBST(LIBUTIL)
 
+po=
 AC_CHECK_HEADER(libintl.h, [
 	AC_SEARCH_LIBS(dgettext, intl, [
+		po=po
 		AC_DEFINE(ENABLE_NLS, 1,
 			[Define if translation functions should be used.])])])
+AC_SUBST(po)
 
 # for kdc
 AC_CHECK_HEADERS(syslog.h sys/sockio.h ifaddrs.h unistd.h)
