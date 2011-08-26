@@ -155,7 +155,7 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
          kadm5_config_params *params_in, krb5_ui_4 struct_version,
          krb5_ui_4 api_version, char **db_args, void **server_handle)
 {
-    int fd;
+    int fd = -1;
 
     krb5_boolean iprop_enable;
     int port;
@@ -192,6 +192,7 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
     handle->struct_version = struct_version;
     handle->api_version = api_version;
     handle->clnt = 0;
+    handle->client_socket = -1;
     handle->cache_name = 0;
     handle->destroy_cache = 0;
     handle->context = 0;
@@ -301,7 +302,9 @@ init_any(krb5_context context, char *client_name, enum init_type init_type,
 #endif
         goto error;
     }
+    handle->client_socket = fd;
     handle->lhandle->clnt = handle->clnt;
+    handle->lhandle->client_socket = fd;
 
     /* now that handle->clnt is set, we can check the handle */
     if ((code = _kadm5_check_handle((void *) handle)))
@@ -372,6 +375,8 @@ error:
         AUTH_DESTROY(handle->clnt->cl_auth);
     if(handle->clnt)
         clnt_destroy(handle->clnt);
+    if (fd != -1)
+        close(fd);
 
     kadm5_free_config_params(handle->context, &handle->params);
 
@@ -796,6 +801,8 @@ kadm5_destroy(void *server_handle)
         AUTH_DESTROY(handle->clnt->cl_auth);
     if (handle->clnt)
         clnt_destroy(handle->clnt);
+    if (handle->client_socket != -1)
+        close(handle->client_socket);
     if (handle->lhandle)
         free (handle->lhandle);
 
