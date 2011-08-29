@@ -186,7 +186,7 @@ cleanup:
 */
 
 static OM_uint32
-KRB5_CALLCONV acquire_accept_cred(krb5_context context,
+acquire_accept_cred(krb5_context context,
                     OM_uint32 *minor_status,
                     krb5_gss_name_t desired_name,
                     krb5_keytab req_keytab,
@@ -726,8 +726,8 @@ gss_krb5int_set_cred_rcache(OM_uint32 *minor_status,
  * desired_mechs and actual_mechs, so we ignore those parameters.
  */
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_acquire_cred(minor_status, desired_name, time_req,
+OM_uint32 KRB5_CALLCONV
+krb5_gss_acquire_cred(minor_status, desired_name, time_req,
                       desired_mechs, cred_usage, output_cred_handle,
                       actual_mechs, time_rec)
     OM_uint32 *minor_status;
@@ -751,8 +751,8 @@ KRB5_CALLCONV krb5_gss_acquire_cred(minor_status, desired_name, time_req,
     return acquire_cred(minor_status, &args, output_cred_handle, time_rec);
 }
 
-OM_uint32
-KRB5_CALLCONV iakerb_gss_acquire_cred(minor_status, desired_name, time_req,
+OM_uint32 KRB5_CALLCONV
+iakerb_gss_acquire_cred(minor_status, desired_name, time_req,
                         desired_mechs, cred_usage, output_cred_handle,
                         actual_mechs, time_rec)
     OM_uint32 *minor_status;
@@ -776,8 +776,8 @@ KRB5_CALLCONV iakerb_gss_acquire_cred(minor_status, desired_name, time_req,
     return acquire_cred(minor_status, &args, output_cred_handle, time_rec);
 }
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_acquire_cred_with_password(OM_uint32 *minor_status,
+OM_uint32 KRB5_CALLCONV
+krb5_gss_acquire_cred_with_password(OM_uint32 *minor_status,
                                     const gss_name_t desired_name,
                                     const gss_buffer_t password,
                                     OM_uint32 time_req,
@@ -800,8 +800,8 @@ KRB5_CALLCONV krb5_gss_acquire_cred_with_password(OM_uint32 *minor_status,
     return acquire_cred(minor_status, &args, output_cred_handle, time_rec);
 }
 
-OM_uint32
-KRB5_CALLCONV iakerb_gss_acquire_cred_with_password(OM_uint32 *minor_status,
+OM_uint32 KRB5_CALLCONV
+iakerb_gss_acquire_cred_with_password(OM_uint32 *minor_status,
                                       const gss_name_t desired_name,
                                       const gss_buffer_t password,
                                       OM_uint32 time_req,

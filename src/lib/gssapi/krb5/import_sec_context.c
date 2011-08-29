@@ -64,8 +64,8 @@ krb5_gss_ser_init (krb5_context context)
     return 0;
 }
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_import_sec_context(minor_status, interprocess_token, context_handle)
+OM_uint32 KRB5_CALLCONV
+krb5_gss_import_sec_context(minor_status, interprocess_token, context_handle)
     OM_uint32           *minor_status;
     gss_buffer_t        interprocess_token;
     gss_ctx_id_t        *context_handle;

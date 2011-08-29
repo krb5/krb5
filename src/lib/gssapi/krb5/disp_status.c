@@ -153,8 +153,8 @@ void krb5_gss_delete_error_info(void *p)
 
 /**/
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_display_status(minor_status, status_value, status_type,
+OM_uint32 KRB5_CALLCONV
+krb5_gss_display_status(minor_status, status_value, status_type,
                         mech_type, message_context, status_string)
     OM_uint32 *minor_status;
     OM_uint32 status_value;

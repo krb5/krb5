@@ -26,9 +26,9 @@
 
 #include "gssapiP_krb5.h"
 
-OM_uint32 KRB5_CALLCONV krb5_gss_duplicate_name(OM_uint32  *minor_status,
-                                  const gss_name_t input_name,
-                                  gss_name_t *dest_name)
+OM_uint32 KRB5_CALLCONV
+krb5_gss_duplicate_name(OM_uint32 *minor_status, const gss_name_t input_name,
+                        gss_name_t *dest_name)
 {
     krb5_context context;
     krb5_error_code code;

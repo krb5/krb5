@@ -640,8 +640,8 @@ kg_unseal_iov(OM_uint32 *minor_status,
     return code;
 }
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_unwrap_iov(OM_uint32 *minor_status,
+OM_uint32 KRB5_CALLCONV
+krb5_gss_unwrap_iov(OM_uint32 *minor_status,
                     gss_ctx_id_t context_handle,
                     int *conf_state,
                     gss_qop_t *qop_state,

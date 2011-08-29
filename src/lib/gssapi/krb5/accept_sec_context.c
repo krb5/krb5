@@ -1296,7 +1296,7 @@ done:
 #endif /* LEAN_CLIENT */
 
 OM_uint32
-KRB5_CALLCONV krb5_gss_accept_sec_context_ext(
+krb5_gss_accept_sec_context_ext(
     OM_uint32 *minor_status,
     gss_ctx_id_t *context_handle,
     gss_cred_id_t verifier_cred_handle,
@@ -1339,8 +1339,8 @@ KRB5_CALLCONV krb5_gss_accept_sec_context_ext(
                           delegated_cred_handle, exts);
 }
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_accept_sec_context(minor_status, context_handle,
+OM_uint32 KRB5_CALLCONV
+krb5_gss_accept_sec_context(minor_status, context_handle,
                             verifier_cred_handle, input_token,
                             input_chan_bindings, src_name, mech_type,
                             output_token, ret_flags, time_rec,

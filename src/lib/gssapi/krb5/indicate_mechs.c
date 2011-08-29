@@ -28,8 +28,8 @@
 #include "gssapiP_krb5.h"
 #include "mglueP.h"
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_indicate_mechs(minor_status, mech_set)
+OM_uint32 KRB5_CALLCONV
+krb5_gss_indicate_mechs(minor_status, mech_set)
     OM_uint32 *minor_status;
     gss_OID_set *mech_set;
 {

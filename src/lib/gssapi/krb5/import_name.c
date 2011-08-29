@@ -116,8 +116,8 @@ parse_hostbased(const char *str, size_t len,
     return 0;
 }
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_import_name(minor_status, input_name_buffer,
+OM_uint32 KRB5_CALLCONV
+krb5_gss_import_name(minor_status, input_name_buffer,
                      input_name_type, output_name)
     OM_uint32 *minor_status;
     gss_buffer_t input_name_buffer;

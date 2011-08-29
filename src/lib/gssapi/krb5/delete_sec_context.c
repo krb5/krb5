@@ -27,8 +27,8 @@
  * $Id$
  */
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
+OM_uint32 KRB5_CALLCONV
+krb5_gss_delete_sec_context(minor_status, context_handle, output_token)
     OM_uint32 *minor_status;
     gss_ctx_id_t *context_handle;
     gss_buffer_t output_token;

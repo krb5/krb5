@@ -480,8 +480,7 @@ krb5_to_gss_cred(krb5_context context,
 
 /** declarations of internal name mechanism functions **/
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_acquire_cred
+OM_uint32 KRB5_CALLCONV krb5_gss_acquire_cred
 (OM_uint32*,       /* minor_status */
  gss_name_t,       /* desired_name */
  OM_uint32,        /* time_req */
@@ -492,8 +491,7 @@ KRB5_CALLCONV krb5_gss_acquire_cred
  OM_uint32*        /* time_rec */
 );
 
-OM_uint32
-KRB5_CALLCONV iakerb_gss_acquire_cred
+OM_uint32 KRB5_CALLCONV iakerb_gss_acquire_cred
 (OM_uint32*,       /* minor_status */
  gss_name_t,       /* desired_name */
  OM_uint32,        /* time_req */
@@ -504,8 +502,8 @@ KRB5_CALLCONV iakerb_gss_acquire_cred
  OM_uint32*        /* time_rec */
 );
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_acquire_cred_with_password(
+OM_uint32 KRB5_CALLCONV
+krb5_gss_acquire_cred_with_password(
     OM_uint32 *minor_status,
     const gss_name_t desired_name,
     const gss_buffer_t password,
@@ -516,8 +514,8 @@ KRB5_CALLCONV krb5_gss_acquire_cred_with_password(
     gss_OID_set *actual_mechs,
     OM_uint32 *time_rec);
 
-OM_uint32
-KRB5_CALLCONV iakerb_gss_acquire_cred_with_password(
+OM_uint32 KRB5_CALLCONV
+iakerb_gss_acquire_cred_with_password(
     OM_uint32 *minor_status,
     const gss_name_t desired_name,
     const gss_buffer_t password,
@@ -528,8 +526,7 @@ KRB5_CALLCONV iakerb_gss_acquire_cred_with_password(
     gss_OID_set *actual_mechs,
     OM_uint32 *time_rec);
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_release_cred
+OM_uint32 KRB5_CALLCONV krb5_gss_release_cred
 (OM_uint32*,       /* minor_status */
  gss_cred_id_t*    /* cred_handle */
 );
@@ -719,8 +716,7 @@ OM_uint32 KRB5_CALLCONV krb5_gss_wrap_iov
  int                        /* iov_count */
 );
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_wrap_iov_length
+OM_uint32 KRB5_CALLCONV krb5_gss_wrap_iov_length
 (OM_uint32 *,           /* minor_status */
  gss_ctx_id_t,              /* context_handle */
  int,                       /* conf_req_flag */
@@ -895,21 +891,21 @@ krb5_boolean
 kg_acceptor_princ(krb5_context context, krb5_gss_name_t name,
                   krb5_principal *princ_out);
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_display_name_ext(OM_uint32 *minor_status,
+OM_uint32 KRB5_CALLCONV
+krb5_gss_display_name_ext(OM_uint32 *minor_status,
                           gss_name_t name,
                           gss_OID display_as_name_type,
                           gss_buffer_t display_name);
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_inquire_name(OM_uint32 *minor_status,
+OM_uint32 KRB5_CALLCONV
+krb5_gss_inquire_name(OM_uint32 *minor_status,
                       gss_name_t name,
                       int *name_is_MN,
                       gss_OID *MN_mech,
                       gss_buffer_set_t *attrs);
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_get_name_attribute(OM_uint32 *minor_status,
+OM_uint32 KRB5_CALLCONV
+krb5_gss_get_name_attribute(OM_uint32 *minor_status,
                             gss_name_t name,
                             gss_buffer_t attr,
                             int *authenticated,
@@ -918,46 +914,46 @@ KRB5_CALLCONV krb5_gss_get_name_attribute(OM_uint32 *minor_status,
                             gss_buffer_t display_value,
                             int *more);
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_set_name_attribute(OM_uint32 *minor_status,
+OM_uint32 KRB5_CALLCONV
+krb5_gss_set_name_attribute(OM_uint32 *minor_status,
                             gss_name_t name,
                             int complete,
                             gss_buffer_t attr,
                             gss_buffer_t value);
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_delete_name_attribute(OM_uint32 *minor_status,
+OM_uint32 KRB5_CALLCONV
+krb5_gss_delete_name_attribute(OM_uint32 *minor_status,
                                gss_name_t name,
                                gss_buffer_t attr);
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_export_name_composite(OM_uint32 *minor_status,
+OM_uint32 KRB5_CALLCONV
+krb5_gss_export_name_composite(OM_uint32 *minor_status,
                                gss_name_t name,
                                gss_buffer_t exp_composite_name);
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_map_name_to_any(OM_uint32 *minor_status,
+OM_uint32 KRB5_CALLCONV
+krb5_gss_map_name_to_any(OM_uint32 *minor_status,
                          gss_name_t name,
                          int authenticated,
                          gss_buffer_t type_id,
                          gss_any_t *output);
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_release_any_name_mapping(OM_uint32 *minor_status,
+OM_uint32 KRB5_CALLCONV
+krb5_gss_release_any_name_mapping(OM_uint32 *minor_status,
                                   gss_name_t name,
                                   gss_buffer_t type_id,
                                   gss_any_t *input);
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_pseudo_random(OM_uint32 *minor_status,
+OM_uint32 KRB5_CALLCONV
+krb5_gss_pseudo_random(OM_uint32 *minor_status,
                        gss_ctx_id_t context,
                        int prf_key,
                        const gss_buffer_t prf_in,
                        ssize_t desired_output_len,
                        gss_buffer_t prf_out);
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_store_cred(OM_uint32 *minor_status,
+OM_uint32 KRB5_CALLCONV
+krb5_gss_store_cred(OM_uint32 *minor_status,
                     gss_cred_id_t input_cred_handle,
                     gss_cred_usage_t cred_usage,
                     const gss_OID desired_mech,
@@ -1141,8 +1137,8 @@ extern void krb5_gss_delete_error_info(void *p);
 
 /* IAKERB */
 
-OM_uint32
-KRB5_CALLCONV iakerb_gss_init_sec_context(OM_uint32 *minor_status,
+OM_uint32 KRB5_CALLCONV
+iakerb_gss_init_sec_context(OM_uint32 *minor_status,
                             gss_cred_id_t claimant_cred_handle,
                             gss_ctx_id_t *context_handle,
                             gss_name_t target_name,
@@ -1156,8 +1152,8 @@ KRB5_CALLCONV iakerb_gss_init_sec_context(OM_uint32 *minor_status,
                             OM_uint32 *ret_flags,
                             OM_uint32 *time_rec);
 
-OM_uint32
-KRB5_CALLCONV iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
+OM_uint32 KRB5_CALLCONV
+iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
                               gss_ctx_id_t *context_handler,
                               gss_cred_id_t verifier_cred_handle,
                               gss_buffer_t input_token,
@@ -1169,8 +1165,8 @@ KRB5_CALLCONV iakerb_gss_accept_sec_context(OM_uint32 *minor_status,
                               OM_uint32 *time_rec,
                               gss_cred_id_t *delegated_cred_handle);
 
-OM_uint32
-KRB5_CALLCONV iakerb_gss_delete_sec_context(OM_uint32 *minor_status,
+OM_uint32 KRB5_CALLCONV
+iakerb_gss_delete_sec_context(OM_uint32 *minor_status,
                               gss_ctx_id_t *context_handle,
                               gss_buffer_t output_token);
 

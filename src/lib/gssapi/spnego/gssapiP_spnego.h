@@ -346,8 +346,8 @@ OM_uint32 KRB5_CALLCONV spnego_gss_verify_mic
 	gss_qop_t *qop_state
 );
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_inquire_sec_context_by_oid
+OM_uint32 KRB5_CALLCONV
+spnego_gss_inquire_sec_context_by_oid
 (
 	OM_uint32 *minor_status,
 	const gss_ctx_id_t context_handle,
@@ -355,8 +355,8 @@ KRB5_CALLCONV spnego_gss_inquire_sec_context_by_oid
 	gss_buffer_set_t *data_set
 );
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_inquire_cred_by_oid
+OM_uint32 KRB5_CALLCONV
+spnego_gss_inquire_cred_by_oid
 (
 	OM_uint32 *minor_status,
 	const gss_cred_id_t cred_handle,
@@ -364,8 +364,8 @@ KRB5_CALLCONV spnego_gss_inquire_cred_by_oid
 	gss_buffer_set_t *data_set
 );
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_set_cred_option
+OM_uint32 KRB5_CALLCONV
+spnego_gss_set_cred_option
 (
 	OM_uint32 *minor_status,
 	gss_cred_id_t *cred_handle,
@@ -373,8 +373,8 @@ KRB5_CALLCONV spnego_gss_set_cred_option
 	const gss_buffer_t value
 );
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_set_sec_context_option
+OM_uint32 KRB5_CALLCONV
+spnego_gss_set_sec_context_option
 (
 	OM_uint32 *minor_status,
 	gss_ctx_id_t *context_handle,
@@ -444,16 +444,16 @@ OM_uint32 KRB5_CALLCONV spnego_gss_wrap_iov_length
 	int iov_count
 );
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_complete_auth_token
+OM_uint32 KRB5_CALLCONV
+spnego_gss_complete_auth_token
 (
 	OM_uint32 *minor_status,
 	const gss_ctx_id_t context_handle,
 	gss_buffer_t input_message_buffer
 );
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_acquire_cred_impersonate_name(
+OM_uint32 KRB5_CALLCONV
+spnego_gss_acquire_cred_impersonate_name(
     OM_uint32 *,	    /* minor_status */
     const gss_cred_id_t,    /* impersonator_cred_handle */
     const gss_name_t,	    /* desired_name */
@@ -464,8 +464,8 @@ KRB5_CALLCONV spnego_gss_acquire_cred_impersonate_name(
     gss_OID_set *,	    /* actual_mechs */
     OM_uint32 *);	    /* time_rec */
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_acquire_cred_with_password(
+OM_uint32 KRB5_CALLCONV
+spnego_gss_acquire_cred_with_password(
     OM_uint32 *minor_status,
     const gss_name_t desired_name,
     const gss_buffer_t password,
@@ -476,8 +476,8 @@ KRB5_CALLCONV spnego_gss_acquire_cred_with_password(
     gss_OID_set *actual_mechs,
     OM_uint32 *time_rec);
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_display_name_ext
+OM_uint32 KRB5_CALLCONV
+spnego_gss_display_name_ext
 (
 	OM_uint32 *minor_status,
 	gss_name_t name,
@@ -485,8 +485,8 @@ KRB5_CALLCONV spnego_gss_display_name_ext
 	gss_buffer_t display_name
 );
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_inquire_name
+OM_uint32 KRB5_CALLCONV
+spnego_gss_inquire_name
 (
 	OM_uint32 *minor_status,
 	gss_name_t name,
@@ -495,8 +495,8 @@ KRB5_CALLCONV spnego_gss_inquire_name
 	gss_buffer_set_t *attrs
 );
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_get_name_attribute
+OM_uint32 KRB5_CALLCONV
+spnego_gss_get_name_attribute
 (
 	OM_uint32 *minor_status,
 	gss_name_t name,
@@ -508,8 +508,8 @@ KRB5_CALLCONV spnego_gss_get_name_attribute
 	int *more
 );
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_set_name_attribute
+OM_uint32 KRB5_CALLCONV
+spnego_gss_set_name_attribute
 (
 	OM_uint32 *minor_status,
 	gss_name_t name,
@@ -518,24 +518,24 @@ KRB5_CALLCONV spnego_gss_set_name_attribute
 	gss_buffer_t value
 );
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_delete_name_attribute
+OM_uint32 KRB5_CALLCONV
+spnego_gss_delete_name_attribute
 (
 	OM_uint32 *minor_status,
 	gss_name_t name,
 	gss_buffer_t attr
 );
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_export_name_composite
+OM_uint32 KRB5_CALLCONV
+spnego_gss_export_name_composite
 (
 	OM_uint32 *minor_status,
 	gss_name_t name,
 	gss_buffer_t exp_composite_name
 );
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_map_name_to_any
+OM_uint32 KRB5_CALLCONV
+spnego_gss_map_name_to_any
 (
 	OM_uint32 *minor_status,
 	gss_name_t name,
@@ -544,8 +544,8 @@ KRB5_CALLCONV spnego_gss_map_name_to_any
 	gss_any_t *output
 );
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_release_any_name_mapping
+OM_uint32 KRB5_CALLCONV
+spnego_gss_release_any_name_mapping
 (
 	OM_uint32 *minor_status,
 	gss_name_t name,
@@ -553,8 +553,8 @@ KRB5_CALLCONV spnego_gss_release_any_name_mapping
 	gss_any_t *input
 );
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_pseudo_random
+OM_uint32 KRB5_CALLCONV
+spnego_gss_pseudo_random
 (
 	OM_uint32 *minor_status,
 	gss_ctx_id_t context,
@@ -564,24 +564,24 @@ KRB5_CALLCONV spnego_gss_pseudo_random
 	gss_buffer_t prf_out
 );
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_set_neg_mechs
+OM_uint32 KRB5_CALLCONV
+spnego_gss_set_neg_mechs
 (
 	OM_uint32 *minor_status,
 	gss_cred_id_t cred_handle,
 	const gss_OID_set mech_list
 );
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_inquire_mech_for_saslname
+OM_uint32 KRB5_CALLCONV
+spnego_gss_inquire_mech_for_saslname
 (
 	OM_uint32 *minor_status,
 	const gss_buffer_t sasl_mech_name,
 	gss_OID *mech_type
 );
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_inquire_saslname_for_mech
+OM_uint32 KRB5_CALLCONV
+spnego_gss_inquire_saslname_for_mech
 (
 	OM_uint32 *minor_status,
 	const gss_OID desired_mech,
@@ -590,8 +590,8 @@ KRB5_CALLCONV spnego_gss_inquire_saslname_for_mech
 	gss_buffer_t mech_description
 );
 
-OM_uint32
-KRB5_CALLCONV spnego_gss_inquire_attrs_for_mech
+OM_uint32 KRB5_CALLCONV
+spnego_gss_inquire_attrs_for_mech
 (
 	OM_uint32 *minor_status,
 	gss_const_OID mech,

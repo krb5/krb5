@@ -130,8 +130,8 @@ cleanup:
     return major_status;
 }
 
-OM_uint32
-KRB5_CALLCONV krb5_gss_store_cred(OM_uint32 *minor_status,
+OM_uint32 KRB5_CALLCONV
+krb5_gss_store_cred(OM_uint32 *minor_status,
                     gss_cred_id_t input_cred_handle,
                     gss_cred_usage_t cred_usage,
                     const gss_OID desired_mech,

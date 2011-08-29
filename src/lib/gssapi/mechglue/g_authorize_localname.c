@@ -204,8 +204,8 @@ gss_authorize_localname(OM_uint32 *minor,
 	return (major);
 }
 
-int
-KRB5_CALLCONV gss_userok(const gss_name_t name,
+int KRB5_CALLCONV
+gss_userok(const gss_name_t name,
 	   const char *user)
 {
 	OM_uint32 major, minor;
