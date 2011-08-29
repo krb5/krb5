@@ -47,7 +47,7 @@ check(OM_uint32 major, OM_uint32 minor, const char *fn)
 
     if (!GSS_ERROR(major))
         return;
-    fprintf(stderr, "fn: major %u, minor %u\n", major, minor);
+    fprintf(stderr, "%s: major %u, minor %u\n", fn, major, minor);
     gss_display_status(&tmpmin, minor, GSS_C_MECH_CODE, GSS_C_NULL_OID,
                        &msg_ctx, &msg);
     fprintf(stderr, "%.*s\n", (int)msg.length, (char *)msg.value);
