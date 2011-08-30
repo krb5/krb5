@@ -859,28 +859,29 @@ class K5Realm(object):
     def extract_keytab(self, princname, keytab):
         self.run_kadminl('ktadd -k %s -norandkey %s' % (keytab, princname))
 
-    def kinit(self, princname, password=None, flags=[]):
+    def kinit(self, princname, password=None, flags=[], **keywords):
         if password:
             input = password + "\n"
         else:
             input = None
-        self.run_as_client([kinit] + flags + [princname], input=input)
+        self.run_as_client([kinit] + flags + [princname], input=input,
+                           **keywords)
 
-    def klist(self, client_princ, service_princ=None, ccache=None):
+    def klist(self, client_princ, service_princ=None, ccache=None, **keywords):
         if service_princ is None:
             service_princ = self.krbtgt_princ
         if ccache is None:
             ccache = self.ccache
-        output = self.run_as_client([klist, ccache])
+        output = self.run_as_client([klist, ccache], **keywords)
         if (('Ticket cache: FILE:%s\n' % ccache) not in output or
             ('Default principal: %s\n' % client_princ) not in output or
             service_princ not in output):
             fail('Unexpected klist output.')
 
-    def klist_keytab(self, princ, keytab=None):
+    def klist_keytab(self, princ, keytab=None, **keywords):
         if keytab is None:
             keytab = self.keytab
-        output = self.run_as_client([klist, '-k', keytab])
+        output = self.run_as_client([klist, '-k', keytab], **keywords)
         if (('Keytab name: FILE:%s\n' % keytab) not in output or
             'KVNO Principal\n----' not in output or
             princ not in output):
