@@ -668,14 +668,13 @@ proc setup_runtime_env { } {
 }
 
 # get_hostname
-# This procedure will get the local hostname.  It sets the global
-# variables hostname (the full name) and domain (all but the first
-# part of the name).  Returns 1 on success, 0 on failure.
+# This procedure sets the global variale hostname to the local
+# hostname as seen by krb5_sname_to_principal.  Returns 1 on success,
+# 0 on failure.
 
 proc get_hostname { } {
     global RESOLVE
     global hostname
-    global domain
     global tmppwd
 
     if {[info exists hostname]} {
@@ -698,11 +697,8 @@ proc get_hostname { } {
     }
     close $file
     file delete $tmppwd/hostname
-    regexp "^\[^.\]*\\.(.*)$" $hostname foo domain
 
     set hostname [string tolower $hostname]
-    set domain [string tolower $domain]
-    verbose "hostname: $hostname; domain: $domain"
 
     return 1
 }
@@ -764,7 +760,6 @@ set ulog 0
 proc setup_kerberos_files { } {
     global REALMNAME
     global hostname
-    global domain
     global tmppwd
     global supported_enctypes
     global last_passname_conf
@@ -907,7 +902,6 @@ proc reset_kerberos_files { } {
 proc setup_krb5_conf { {type client} } {
     global tmppwd
     global hostname
-    global domain
     global REALMNAME
     global last_passname_conf
     global multipass_name
@@ -971,8 +965,7 @@ proc setup_krb5_conf { {type client} } {
 	puts $conffile "	\}"
 	puts $conffile ""
 	puts $conffile "\[domain_realm\]"
-	puts $conffile "	.$domain = $REALMNAME"
-	puts $conffile "	$domain = $REALMNAME"
+	puts $conffile "	$hostname = $REALMNAME"
 	puts $conffile ""
 	puts $conffile "\[logging\]"
 	puts $conffile "	admin_server = FILE:$tmppwd/kadmind5.log"

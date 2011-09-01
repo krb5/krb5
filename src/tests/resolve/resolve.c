@@ -152,29 +152,6 @@ main(argc, argv)
     else
         printf("FQDN: %s\n", fqdn);
 
-    /*
-     * The host name must have at least one '.' in the name, and
-     * if there is only one '.', it must not be at the end of the
-     * string.  (i.e., "foo." is not a FQDN)
-     */
-    ptr = strchr(fqdn, '.');
-    if (ptr == NULL || ptr[1] == '\0') {
-        fprintf(stderr,
-                "\nResolve library did not return a "
-                "fully qualified domain name.\n\n"
-                "If you are using /etc/hosts before DNS, "
-                "e.g. \"files\" is listed first\n"
-                "for \"hosts:\" in nsswitch.conf, ensure that "
-                "you have listed the FQDN\n"
-                "as the first name for the local host.\n\n"
-                "If this does not correct the problem, "
-                "you may have to reconfigure the kerberos\n"
-                "distribution to select a "
-                "different set of libraries using \n"
-                "--with-netlib[=libs]\n");
-        exit(3);
-    }
-
     if (!quiet)
         printf("Resolve library appears to have passed the test\n");
 
