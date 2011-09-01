@@ -913,12 +913,12 @@ maybe_send(krb5_context context, struct conn_state *conn,
 static void
 kill_conn(struct conn_state *conn, struct select_state *selstate, int err)
 {
+    dprint("abandoning connection %d: %m\n", conn->fd, err);
+    cm_remove_fd(selstate, conn->fd);
+    closesocket(conn->fd);
+    conn->fd = INVALID_SOCKET;
     conn->state = FAILED;
     conn->err = err;
-    shutdown(conn->fd, SHUTDOWN_BOTH);
-    cm_remove_fd(selstate, conn->fd);
-    dprint("abandoning connection %d: %m\n", conn->fd, err);
-    /* Fix up max fd for next select call.  */
 }
 
 /* Check socket for error.  */
