@@ -503,7 +503,7 @@ Valid starting     Expires            Service principal
 06/07/04 19:49:21  06/08/04 05:49:19  krbtgt/@value{PRIMARYREALM}@@@value{PRIMARYREALM}
 06/07/04 20:22:30  06/08/04 05:49:19  host/@value{RANDOMHOST1}.@value{PRIMARYDOMAIN}@@@value{PRIMARYREALM}
 06/07/04 20:24:18  06/08/04 05:49:19  krbtgt/@value{SECONDREALM}@@@value{PRIMARYREALM}
-06/07/04 20:24:18  06/08/04 05:49:19  host/@value{RANDOMHOST2}.@value{SECONDDOMAIN}@@@value{PRIMARYREALM}
+06/07/04 20:24:18  06/08/04 05:49:19  host/@value{RANDOMHOST2}.@value{SECONDDOMAIN}@@@value{SECONDREALM}
 @b{shell%}
 @end group
 @end smallexample

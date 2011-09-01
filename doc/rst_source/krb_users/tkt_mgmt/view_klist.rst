@@ -41,7 +41,7 @@ Suppose your Kerberos tickets allow you to log into a host in another domain, su
      06/07/04 19:49:21  06/08/04 05:49:19  krbtgt/ATHENA.MIT.EDU@ATHENA.MIT.EDU
      06/07/04 20:22:30  06/08/04 05:49:19  host/daffodil.mit.edu@ATHENA.MIT.EDU
      06/07/04 20:24:18  06/08/04 05:49:19  krbtgt/EXAMPLE.COM@ATHENA.MIT.EDU
-     06/07/04 20:24:18  06/08/04 05:49:19  host/trillium.example.com@ATHENA.MIT.EDU
+     06/07/04 20:24:18  06/08/04 05:49:19  host/trillium.example.com@EXAMPLE.COM
      shell%
 
 You can use the **-f** option to view the flags that apply to your tickets. The flags are:
