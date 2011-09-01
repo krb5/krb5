@@ -408,6 +408,23 @@ def _find_plugins():
             return dir
     fail('Cannot locate plugins; run "make fake-install" at %s.' % buildtop)
 
+# Return the local hostname as it will be canonicalized by
+# krb5_sname_to_principal.  We can't simply use socket.getfqdn()
+# because it explicitly prefers results containing periods and
+# krb5_sname_to_principal doesn't care.
+def _get_hostname():
+    hostname = socket.gethostname()
+    try:
+        ai = socket.getaddrinfo(hostname, None, 0, 0, 0,
+                                socket.AI_CANONNAME | socket.AI_ADDRCONFIG)
+    except socket.gaierror, (error, errstr):
+        fail('Local hostname "%s" does not resolve: %s.' % (hostname, errstr))
+    (family, socktype, proto, canonname, sockaddr) = ai[0]
+    try:
+        name = socket.getnameinfo(sockaddr, socket.NI_NAMEREQD)
+    except socket.gaierror:
+        return canonname.lower()
+    return name[0].lower()
 
 # Parse command line arguments, setting global option variables.  Also
 # sets the global variable args to the positional arguments, which may
@@ -1046,8 +1063,7 @@ buildtop = _find_buildtop()
 srctop = _find_srctop()
 plugins = _find_plugins()
 _runenv = _import_runenv()
-# This gets used for principal names, so force it to lower case.
-hostname = socket.getfqdn().lower()
+hostname = _get_hostname()
 null_input = open(os.devnull, 'r')
 
 krb5kdc = os.path.join(buildtop, 'kdc', 'krb5kdc')
