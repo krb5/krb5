@@ -1,0 +1,42 @@
+mydir=util$(S)k5ev
+BUILDTOP=$(REL)..$(S)..
+RELDIR=../util/k5ev
+DEFS=
+
+SED = sed
+
+LIBBASE=verto-k5ev
+LIBMAJOR=0
+LIBMINOR=0
+
+LOCALINCLUDES=-I. -I$(srcdir)/../verto
+
+# Turn off extra warnings since we're not going to clean up libev's code.
+WARN_CFLAGS=
+
+STLIBOBJS=verto-k5ev.o
+LIBOBJS=$(OUTPRE)verto-k5ev.$(OBJEXT)
+SRCS=verto-k5ev.c
+
+STOBJLISTS=OBJS.ST
+SHLIB_EXPLIBS= $(LIBS) -lverto -lm      # libm needed for ceil() currently.
+SHLIB_DIRS=-L$(TOPLIBD)
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+
+all-unix:: all-liblinks
+
+install-unix:: install-libs
+
+clean-unix:: clean-liblinks clean-libs clean-libobjs
+
+rename.h: $(srcdir)/Symbols.ev
+	$(RM) $@
+	$(SED) -e 's/.*/#define & k5&/' < $(srcdir)/Symbols.ev > $@
+
+clean::
+	$(RM) rename.h
+
+depend:: rename.h
+
+@lib_frag@
+@libobj_frag@

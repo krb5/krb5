@@ -4,7 +4,7 @@ mydir=util
 # configure scripts, so hide this.
 ##WIN32##!if 0
 SUBDIRS=support $(MAYBE_ET_@COM_ERR_VERSION@) $(MAYBE_SS_@SS_VERSION@) \
-	profile send-pr gss-kernel-lib
+	profile send-pr gss-kernel-lib $(MAYBE_VERTO_@VERTO_VERSION@)
 ##WIN32##!endif
 WINSUBDIRS=windows support et profile
 BUILDTOP=$(REL)..
@@ -14,6 +14,8 @@ MAYBE_SS_k5 = ss
 MAYBE_ET_sys =
 MAYBE_ET_intlsys =
 MAYBE_SS_sys =
+MAYBE_VERTO_sys =
+MAYBE_VERTO_k5 = verto k5ev
 
 all-recurse:
 

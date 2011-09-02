@@ -1142,10 +1142,38 @@ fi
 AC_SUBST([RL_CFLAGS])
 AC_SUBST([RL_LIBS])
 
+AC_ARG_WITH([system-verto],
+  [AC_HELP_STRING([--with-system-verto], [always use system verto library])],
+  [], [with_system_verto=default])
+VERTO_CFLAGS=
+VERTO_LIBS=-lverto
+VERTO_VERSION=k5
+if test "x$with_system_verto" != xno; then
+  if verto_cflags=`pkg-config --cflags libverto 2>&1`; then
+    VERTO_CFLAGS=$verto_cflags
+    VERTO_LIBS=`pkg-config --libs libverto`
+    VERTO_VERSION=sys
+  else
+    AC_CHECK_LIB([verto], [verto_run], [VERTO_VERSION=sys],
+      [if test "x$with_system_verto" = xyes; then
+        AC_MSG_ERROR([cannot detect system libverto])
+      fi])
+  fi
+fi
+if test "x$VERTO_VERSION" = xsys; then
+  AC_MSG_NOTICE([Using system libverto])
+else
+  AC_MSG_RESULT([Using built-in libverto])
+fi
+AC_SUBST([VERTO_CFLAGS])
+AC_SUBST([VERTO_LIBS])
+AC_SUBST([VERTO_VERSION])
+
 AC_CONFIG_FILES(krb5-config, [chmod +x krb5-config])
 V5_AC_OUTPUT_MAKEFILE(.
 
 	util util/support util/profile util/profile/testmod util/send-pr
+	util/verto util/k5ev
 
 	lib lib/kdb
 

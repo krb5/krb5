@@ -1,0 +1,45 @@
+mydir=util$(S)verto
+BUILDTOP=$(REL)..$(S)..
+RELDIR=../util/verto
+
+LIBBASE=verto
+LIBMAJOR=0
+LIBMINOR=0
+
+LOCALINCLUDES=-I$(srcdir)
+DEFINES=-DDEFAULT_LIBRARY=\"k5ev\"
+
+# Turn off extra warnings since we're not going to clean up libverto's code.
+WARN_CFLAGS=
+
+STLIBOBJS=verto.o
+LIBOBJS=$(OUTPRE)verto.$(OBJEXT)
+SRCS=verto.c
+
+STOBJLISTS=OBJS.ST
+SHLIB_EXPLIBS= $(DL_LIB)
+SHLIB_DIRS=
+SHLIB_RDIRS=$(KRB5_LIBDIR)
+
+VERTO_HDR=$(BUILDTOP)$(S)include$(S)verto.h
+
+all-unix:: all-liblinks includes
+
+install-unix:: install-libs
+
+clean-unix:: clean-liblinks clean-libs clean-libobjs
+	$(RM) $(VERTO_HDR)
+
+includes:: $(VERTO_HDR)
+
+$(VERTO_HDR): $(srcdir)/verto.h
+	$(RM) $@
+	$(CP) $(srcdir)/verto.h $@
+
+install::
+	$(INSTALL_DATA) $(srcdir)/verto.h $(DESTDIR)$(KRB5_INCDIR)/verto.h
+	$(INSTALL_DATA) $(srcdir)/verto-module.h \
+		$(DESTDIR)$(KRB5_INCDIR)/verto-module.h
+
+@lib_frag@
+@libobj_frag@

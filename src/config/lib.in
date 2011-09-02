@@ -54,7 +54,8 @@ lib$(LIBBASE)$(SHLIBEXT): lib$(LIBBASE)$(SHLIBVEXT)
 	$(LN_S) lib$(LIBBASE)$(SHLIBVEXT) $@
 
 binutils.versions: $(SHLIB_EXPORT_FILE) Makefile
-	echo >  binutils.versions "$(LIBBASE)_$(LIBMAJOR)_MIT {"
+	base=`echo "$(LIBBASE)" | sed -e 's/-/_/'`; \
+	echo >  binutils.versions "$${base}_$(LIBMAJOR)_MIT {"
 	sed  >> binutils.versions < $(SHLIB_EXPORT_FILE) "s/$$/;/"
 	echo >> binutils.versions "};"
 	echo >> binutils.versions "HIDDEN { local: __*; _rest*; _save*; *; };"
@@ -89,8 +90,9 @@ hpux10.exports: $(SHLIB_EXPORT_FILE) Makefile
 	  else :; fi; \
 	done; echo "$$a" >> hpux10.tmp
 	echo "+e errno" >> hpux10.tmp
-	echo "+e _GLOBAL__FD_lib$(LIBBASE)_$(LIBMAJOR)_$(LIBMINOR)" >> hpux10.tmp
-	echo "+e _GLOBAL__FI_lib$(LIBBASE)_$(LIBMAJOR)_$(LIBMINOR)" >> hpux10.tmp
+	base=`echo "$(LIBBASE)" | sed -e 's/-/_/'`; \
+	echo "+e _GLOBAL__FD_lib$${base}_$(LIBMAJOR)_$(LIBMINOR)" >> hpux10.tmp; \
+	echo "+e _GLOBAL__FI_lib$${base}_$(LIBMAJOR)_$(LIBMINOR)" >> hpux10.tmp
 	mv -f hpux10.tmp hpux10.exports
 
 lib$(LIBBASE)$(PFLIBEXT): $(PFOBJLISTS)

@@ -1,0 +1,5 @@
+# 
+# Generated makefile dependencies follow.
+#
+verto.so verto.po $(OUTPRE)verto.$(OBJEXT): $(BUILDTOP)/include/verto.h \
+  verto-module.h verto.c
