@@ -66,7 +66,6 @@ extern int daemon(int, int);
 void    setup_signal_handlers(iprop_role iproprole);
 void    request_exit(int);
 void    request_hup(int);
-void    reset_db(void);
 
 #ifdef POSIX_SIGNALS
 static struct sigaction s_action;
@@ -613,7 +612,7 @@ kterr:
     if (nofork)
         fprintf(stderr, _("%s: starting...\n"), whoami);
 
-    loop_listen_and_process(global_server_handle, whoami, reset_db);
+    loop_listen_and_process(global_server_handle, whoami, NULL);
     krb5_klog_syslog(LOG_INFO, _("finished, exiting"));
 
     /* Clean up memory, etc */
@@ -697,38 +696,6 @@ void setup_signal_handlers(iprop_role iproprole) {
 void request_hup(int signum)
 {
     signal_requests_reset = 1;
-    return;
-}
-
-/*
- * Function: reset_db
- *
- * Purpose: flushes the currently opened database files to disk.
- *
- * Arguments:
- * Requires:
- * Effects:
- *
- * Currently, just sets signal_requests_reset to 0.  The kdb and adb
- * libraries used to be sufficiently broken that it was prudent to
- * close and reopen the databases periodically.  They are no longer
- * that broken, so this function is not necessary.
- */
-void reset_db(void)
-{
-#ifdef notdef
-    kadm5_ret_t ret;
-    char *errmsg;
-
-    if (ret = kadm5_flush(global_server_handle)) {
-        krb5_klog_syslog(LOG_ERR, "FATAL ERROR!  %s while flushing databases.  "
-                         "Databases may be corrupt!  Aborting.",
-                         krb5_get_error_message (context, ret));
-        krb5_klog_close(context);
-        exit(3);
-    }
-#endif
-
     return;
 }
 
