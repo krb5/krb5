@@ -59,15 +59,6 @@
 
 #include    "misc.h"
 
-#ifdef PURIFY
-#include    "purify.h"
-
-int     signal_pure_report = 0;
-int     signal_pure_clear = 0;
-void    request_pure_report(int);
-void    request_pure_clear(int);
-#endif /* PURIFY */
-
 #if defined(NEED_DAEMON_PROTO)
 extern int daemon(int, int);
 #endif
@@ -262,9 +253,6 @@ int main(int argc, char *argv[])
     names[0].type = names[1].type = names[2].type = names[3].type =
         nt_krb5_name_oid;
 
-#ifdef PURIFY
-    purify_start_batch();
-#endif /* PURIFY */
     whoami = (strrchr(argv[0], '/') ? strrchr(argv[0], '/')+1 : argv[0]);
 
     nofork = 0;
@@ -668,12 +656,6 @@ void setup_signal_handlers(iprop_role iproprole) {
     (void) sigaction(SIGHUP, &s_action, (struct sigaction *) NULL);
     s_action.sa_handler = SIG_IGN;
     (void) sigaction(SIGPIPE, &s_action, (struct sigaction *) NULL);
-#ifdef PURIFY
-    s_action.sa_handler = request_pure_report;
-    (void) sigaction(SIGUSR1, &s_action, (struct sigaction *) NULL);
-    s_action.sa_handler = request_pure_clear;
-    (void) sigaction(SIGUSR2, &s_action, (struct sigaction *) NULL);
-#endif /* PURIFY */
 
     /*
      * IProp will fork for a full-resync, we don't want to
@@ -689,10 +671,6 @@ void setup_signal_handlers(iprop_role iproprole) {
     signal(SIGQUIT, request_exit);
     signal(SIGHUP, request_hup);
     signal(SIGPIPE, SIG_IGN);
-#ifdef PURIFY
-    signal(SIGUSR1, request_pure_report);
-    signal(SIGUSR2, request_pure_clear);
-#endif /* PURIFY */
 
     /*
      * IProp will fork for a full-resync, we don't want to
@@ -702,51 +680,6 @@ void setup_signal_handlers(iprop_role iproprole) {
         (void) signal(SIGCHLD, SIG_IGN);
 #endif /* POSIX_SIGNALS */
 }
-
-#ifdef PURIFY
-/*
- * Function: request_pure_report
- *
- * Purpose: sets flag saying the server got a signal and that it should
- *              dump a purify report when convenient.
- *
- * Arguments:
- * Requires:
- * Effects:
- * Modifies:
- *      sets signal_pure_report to one
- */
-
-void request_pure_report(int signum)
-{
-    krb5_klog_syslog(LOG_DEBUG, "Got signal to request a Purify report");
-    signal_pure_report = 1;
-    return;
-}
-
-/*
- * Function: request_pure_clear
- *
- * Purpose: sets flag saying the server got a signal and that it should
- *              dump a purify report when convenient, then clear the
- *              purify tables.
- *
- * Arguments:
- * Requires:
- * Effects:
- * Modifies:
- *      sets signal_pure_report to one
- *      sets signal_pure_clear to one
- */
-
-void request_pure_clear(int signum)
-{
-    krb5_klog_syslog(LOG_DEBUG, "Got signal to request a Purify report and clear the old Purify info");
-    signal_pure_report = 1;
-    signal_pure_clear = 1;
-    return;
-}
-#endif /* PURIFY */
 
 /*
  * Function: request_hup
