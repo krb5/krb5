@@ -379,19 +379,19 @@ int main(int argc, char *argv[])
     }
 
 #define server_handle ((kadm5_server_handle_t)global_server_handle)
-    if ((ret = add_udp_port(server_handle->params.kpasswd_port))
-        || (ret = add_tcp_port(server_handle->params.kpasswd_port))
-        || (ret = add_rpc_service(server_handle->params.kadmind_port,
+    if ((ret = loop_add_udp_port(server_handle->params.kpasswd_port))
+        || (ret = loop_add_tcp_port(server_handle->params.kpasswd_port))
+        || (ret = loop_add_rpc_service(server_handle->params.kadmind_port,
                                   KADM, KADMVERS, kadm_1))
 #ifndef DISABLE_IPROP
         || (server_handle->params.iprop_enabled
-            ? (ret = add_rpc_service(server_handle->params.iprop_port,
+            ? (ret = loop_add_rpc_service(server_handle->params.iprop_port,
                                      KRB5_IPROP_PROG, KRB5_IPROP_VERS,
                                      krb5_iprop_prog_1))
             : 0)
 #endif
 #undef server_handle
-        || (ret = setup_network(global_server_handle, whoami, 0))) {
+        || (ret = loop_setup_network(global_server_handle, whoami, 0))) {
         const char *e_txt = krb5_get_error_message (context, ret);
         krb5_klog_syslog(LOG_ERR, _("%s: %s while initializing network, "
                                     "aborting"), whoami, e_txt);
@@ -626,13 +626,13 @@ kterr:
     if (nofork)
         fprintf(stderr, _("%s: starting...\n"), whoami);
 
-    listen_and_process(global_server_handle, whoami, reset_db);
+    loop_listen_and_process(global_server_handle, whoami, reset_db);
     krb5_klog_syslog(LOG_INFO, _("finished, exiting"));
 
     /* Clean up memory, etc */
     svcauth_gssapi_unset_names();
     kadm5_destroy(global_server_handle);
-    closedown_network();
+    loop_closedown_network();
     kadm5int_acl_finish(context, 0);
     if(gss_changepw_name) {
         (void) gss_release_name(&OMret, &gss_changepw_name);

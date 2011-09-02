@@ -64,7 +64,7 @@
 
 volatile int signal_requests_exit = 0, signal_requests_reset = 0;
 
-static void closedown_network_sockets(void);
+static void loop_closedown_network_sockets(void);
 
 /* Misc utility routines.  */
 static void
@@ -279,7 +279,7 @@ static struct select_state sstate;
 static fd_set rpc_listenfds;
 
 krb5_error_code
-add_udp_port(int port)
+loop_add_udp_port(int port)
 {
     int i;
     void *tmp;
@@ -298,7 +298,7 @@ add_udp_port(int port)
 }
 
 krb5_error_code
-add_tcp_port(int port)
+loop_add_tcp_port(int port)
 {
     int i;
     void *tmp;
@@ -317,7 +317,8 @@ add_tcp_port(int port)
 }
 
 krb5_error_code
-add_rpc_service(int port, u_long prognum, u_long versnum, void (*dispatchfn)())
+loop_add_rpc_service(int port, u_long prognum,
+                     u_long versnum, void (*dispatchfn)())
 {
     int i;
     void *tmp;
@@ -1092,7 +1093,7 @@ extern int krb5int_debug_sendto_kdc;
 extern void (*krb5int_sendtokdc_debug_handler)(const void*, size_t);
 
 krb5_error_code
-setup_network(void *handle, const char *prog, int no_reconfig)
+loop_setup_network(void *handle, const char *prog, int no_reconfig)
 {
     struct socksetup setup_data;
 
@@ -1798,7 +1799,7 @@ getcurtime(struct timeval *tvp)
 }
 
 krb5_error_code
-listen_and_process(void *handle, const char *prog, void (*reset)(void))
+loop_listen_and_process(void *handle, const char *prog, void (*reset)(void))
 {
     int nfound;
     /* This struct contains 3 fd_set objects; on some platforms, they
@@ -1845,8 +1846,8 @@ listen_and_process(void *handle, const char *prog, void (*reset)(void))
         }
         if (sret == 0 && netchanged) {
             network_reconfiguration_needed = 0;
-            closedown_network_sockets();
-            err = setup_network(handle, prog, 0);
+            loop_closedown_network_sockets();
+            err = loop_setup_network(handle, prog, 0);
             if (err) {
                 com_err(prog, err, _("while reinitializing network"));
                 return err;
@@ -1878,7 +1879,7 @@ listen_and_process(void *handle, const char *prog, void (*reset)(void))
 }
 
 static void
-closedown_network_sockets()
+loop_closedown_network_sockets()
 {
     int i;
     struct connection *conn;
@@ -1914,9 +1915,9 @@ closedown_network_sockets()
 }
 
 void
-closedown_network()
+loop_closedown_network()
 {
-    closedown_network_sockets();
+    loop_closedown_network_sockets();
     FREE_SET_DATA(connections);
     FREE_SET_DATA(udp_port_data);
     FREE_SET_DATA(tcp_port_data);

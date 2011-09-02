@@ -1013,7 +1013,7 @@ int main(int argc, char **argv)
             port = strtol(cp, &cp, 10);
             if (cp == 0)
                 break;
-            retval = add_udp_port(port);
+            retval = loop_add_udp_port(port);
             if (retval)
                 goto net_init_error;
         }
@@ -1027,7 +1027,7 @@ int main(int argc, char **argv)
             port = strtol(cp, &cp, 10);
             if (cp == 0)
                 break;
-            retval = add_tcp_port(port);
+            retval = loop_add_tcp_port(port);
             if (retval)
                 goto net_init_error;
         }
@@ -1039,7 +1039,7 @@ int main(int argc, char **argv)
      * children won't be able to re-open the listener sockets.  Hopefully our
      * platform has pktinfo support and doesn't need reconfigs.
      */
-    if ((retval = setup_network(NULL, kdc_progname, (workers > 0)))) {
+    if ((retval = loop_setup_network(NULL, kdc_progname, (workers > 0)))) {
     net_init_error:
         kdc_err(kcontext, retval, _("while initializing network"));
         finish_realms();
@@ -1071,11 +1071,11 @@ int main(int argc, char **argv)
     krb5_klog_syslog(LOG_INFO, _("commencing operation"));
     if (nofork)
         fprintf(stderr, _("%s: starting...\n"), kdc_progname);
-    if ((retval = listen_and_process(0, kdc_progname, reset_for_hangup))) {
+    if ((retval = loop_listen_and_process(0, kdc_progname, reset_for_hangup))) {
         kdc_err(kcontext, retval, _("while processing network requests"));
         errout++;
     }
-    closedown_network();
+    loop_closedown_network();
     krb5_klog_syslog(LOG_INFO, _("shutting down"));
     unload_preauth_plugins(kcontext);
     unload_authdata_plugins(kcontext);
