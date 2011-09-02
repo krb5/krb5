@@ -59,12 +59,13 @@
 #include "fake-addrinfo.h"
 #include "net-server.h"
 
+#include <signal.h>
+
 /* XXX */
 #define KDC5_NONET                               (-1779992062L)
 
-volatile int signal_requests_exit = 0, signal_requests_reset = 0;
-
-static void loop_closedown_network_sockets(void);
+static int tcp_or_rpc_data_counter;
+static int max_tcp_or_rpc_data_connections = 45;
 
 /* Misc utility routines.  */
 static void
@@ -187,9 +188,9 @@ enum conn_type {
 
 /* Per-connection info.  */
 struct connection {
-    int fd;
+    void *handle;
+    const char *prog;
     enum conn_type type;
-    void (*service)(void *handle, struct connection *, const char *, int);
     union {
         /* Type-specific information.  */
         struct {
@@ -215,6 +216,7 @@ struct connection {
         } tcp;
         struct {
             SVCXPRT *transp;
+            int closed;
         } rpc;
     } u;
 };
@@ -250,33 +252,84 @@ struct connection {
 #define FREE_SET_DATA(set)                                      \
     (free(set.data), set.data = 0, set.max = 0, set.n = 0)
 
-
-/* Set<struct connection *> connections; */
-static SET(struct connection *) connections;
-#define n_sockets       connections.n
-#define conns           connections.data
-
-/* Set<u_short> udp_port_data, tcp_port_data; */
 /*
  * N.B.: The Emacs cc-mode indentation code seems to get confused if
  * the macro argument here is one word only.  So use "unsigned short"
  * instead of the "u_short" we were using before.
  */
-static SET(unsigned short) udp_port_data, tcp_port_data;
-
 struct rpc_svc_data {
     u_short port;
     u_long prognum;
     u_long versnum;
     void (*dispatch)();
 };
-
+static SET(unsigned short) udp_port_data, tcp_port_data;
 static SET(struct rpc_svc_data) rpc_svc_data;
+static SET(verto_ev *) events;
 
-#include "cm.h"
+static void
+do_break(verto_ctx *ctx, verto_ev *ev)
+{
+    krb5_klog_syslog(LOG_DEBUG, _("Got signal to request exit"));
+    verto_break(ctx);
+}
 
-static struct select_state sstate;
-static fd_set rpc_listenfds;
+struct sighup_context {
+    void *handle;
+    void (*reset)();
+};
+
+static void
+do_reset(verto_ctx *ctx, verto_ev *ev)
+{
+    struct sighup_context *sc = (struct sighup_context*) verto_get_private(ev);
+
+    krb5_klog_syslog(LOG_DEBUG, _("Got signal to reset"));
+    krb5_klog_reopen(get_context(sc->handle));
+    if (sc->reset)
+        sc->reset();
+}
+
+static void
+free_sighup_context(verto_ctx *ctx, verto_ev *ev)
+{
+    free(verto_get_private(ev));
+}
+
+verto_ctx *
+loop_init(verto_ev_type types, void *handle, void (*reset)())
+{
+    struct sighup_context *sc;
+    verto_ctx *ctx;
+    verto_ev  *ev;
+
+    types |= VERTO_EV_TYPE_IO;
+    types |= VERTO_EV_TYPE_SIGNAL;
+    types |= VERTO_EV_TYPE_TIMEOUT;
+    ctx = verto_default(NULL, types);
+    if (!verto_add_signal(ctx, VERTO_EV_FLAG_PERSIST, do_break, SIGINT)  ||
+        !verto_add_signal(ctx, VERTO_EV_FLAG_PERSIST, do_break, SIGTERM) ||
+        !verto_add_signal(ctx, VERTO_EV_FLAG_PERSIST, do_break, SIGQUIT) ||
+        !verto_add_signal(ctx, VERTO_EV_FLAG_PERSIST, VERTO_SIG_IGN, SIGPIPE))
+        goto error;
+
+    ev = verto_add_signal(ctx, VERTO_EV_FLAG_PERSIST, do_reset, SIGHUP);
+    if (!ev)
+        goto error;
+
+    sc = malloc(sizeof(*sc));
+    if (!sc)
+        goto error;
+    sc->handle = handle;
+    sc->reset = reset;
+
+    verto_set_private(ev, sc, free_sighup_context);
+    return ctx;
+
+error:
+    verto_free(ctx);
+    return NULL;
+}
 
 krb5_error_code
 loop_add_udp_port(int port)
@@ -348,6 +401,8 @@ loop_add_rpc_service(int port, u_long prognum,
 #include "foreachaddr.h"
 
 struct socksetup {
+    verto_ctx *ctx;
+    void *handle;
     const char *prog;
     krb5_error_code retval;
     int udp_flags;
@@ -355,12 +410,133 @@ struct socksetup {
 #define UDP_DO_IPV6 2
 };
 
-static struct connection *
+static void
+free_connection(struct connection *conn)
+{
+    if (!conn)
+        return;
+    if (conn->u.tcp.response)
+        krb5_free_data(get_context(conn->handle), conn->u.tcp.response);
+    if (conn->u.tcp.buffer)
+        free(conn->u.tcp.buffer);
+    if (conn->type == CONN_RPC_LISTENER && conn->u.rpc.transp != NULL)
+        svc_destroy(conn->u.rpc.transp);
+    free(conn);
+}
+
+static void
+remove_event_from_set(verto_ev *ev)
+{
+    verto_ev *tmp;
+    int i;
+
+    /* Remove the event from the events. */
+    FOREACH_ELT(events, i, tmp)
+        if (tmp == ev) {
+            DEL(events, i);
+            break;
+        }
+}
+
+static void
+free_socket(verto_ctx *ctx, verto_ev *ev)
+{
+    struct connection *conn = NULL;
+    fd_set fds;
+    int fd;
+
+    remove_event_from_set(ev);
+
+    fd = verto_get_fd(ev);
+    conn = verto_get_private(ev);
+
+    /* Close the file descriptor. */
+    krb5_klog_syslog(LOG_INFO, _("closing down fd %d"), fd);
+    if (fd >= 0 && (!conn || conn->type != CONN_RPC || conn->u.rpc.closed))
+        close(fd);
+
+    /* Free the connection struct. */
+    if (conn) {
+        switch (conn->type) {
+            case CONN_RPC:
+                if (conn->u.rpc.closed) {
+                    FD_ZERO(&fds);
+                    FD_SET(fd, &fds);
+                    svc_getreqset(&fds);
+                    if (FD_ISSET(fd, &svc_fdset)) {
+                        krb5_klog_syslog(LOG_ERR,
+                                         _("descriptor %d closed but still "
+                                           "in svc_fdset"),
+                                         fd);
+                    }
+                }
+                /* Fall through. */
+            case CONN_TCP:
+                tcp_or_rpc_data_counter--;
+                break;
+            default:
+                break;
+        }
+
+        free_connection(conn);
+    }
+}
+
+static verto_ev *
+make_event(verto_ctx *ctx, verto_ev_flag flags, verto_callback callback,
+           int sock, struct connection *conn, int addevent)
+{
+    verto_ev *ev, *tmp;
+
+    ev = verto_add_io(ctx, flags, callback, sock);
+    if (!ev) {
+        com_err(conn->prog, ENOMEM, _("cannot create io event"));
+        return NULL;
+    }
+
+    if (addevent) {
+        if (!ADD(events, ev, tmp)) {
+            com_err(conn->prog, ENOMEM, _("cannot save event"));
+            verto_del(ev);
+            return NULL;
+        }
+    }
+
+    verto_set_private(ev, conn, free_socket);
+    return ev;
+}
+
+static verto_ev *
+convert_event(verto_ctx *ctx, verto_ev *ev, verto_ev_flag flags,
+              verto_callback callback)
+{
+    struct connection *conn;
+    verto_ev *newev;
+    int sock;
+
+    conn = verto_get_private(ev);
+    sock = verto_get_fd(ev);
+    if (sock < 0)
+        return NULL;
+
+    newev = make_event(ctx, flags, callback, sock, conn, 1);
+
+    /* Delete the read event without closing the socket
+     * or freeing the connection struct. */
+    if (newev) {
+        verto_set_private(ev, NULL, NULL); /* Reset the destructor. */
+        remove_event_from_set(ev); /* Remove it from the set. */
+        verto_del(ev);
+    }
+
+    return newev;
+}
+
+static verto_ev *
 add_fd(struct socksetup *data, int sock, enum conn_type conntype,
-       void (*service)(void *handle, struct connection *, const char *, int))
+       verto_ev_flag flags, verto_callback callback, int addevent)
 {
     struct connection *newconn;
-    void *tmp;
 
 #ifndef _WIN32
     if (sock >= FD_SETSIZE) {
@@ -377,62 +553,43 @@ add_fd(struct socksetup *data, int sock, enum conn_type conntype,
                 _("cannot allocate storage for connection info"));
         return 0;
     }
-    if (!ADD(connections, newconn, tmp)) {
-        data->retval = ENOMEM;
-        com_err(data->prog, ENOMEM, _("cannot save socket info"));
-        free(newconn);
-        return 0;
-    }
-
     memset(newconn, 0, sizeof(*newconn));
+    newconn->handle = data->handle;
+    newconn->prog = data->prog;
     newconn->type = conntype;
-    newconn->fd = sock;
-    newconn->service = service;
-    return newconn;
+
+    return make_event(data->ctx, flags, callback, sock, newconn, addevent);
 }
 
-static void process_packet(void *handle, struct connection *, const char *,
-                           int);
-static void accept_tcp_connection(void *handle, struct connection *,
-                                  const char *, int);
-static void process_tcp_connection(void *handle, struct connection *,
-                                   const char *, int);
-static void accept_rpc_connection(void *handle, struct connection *,
-                                  const char *, int);
-static void process_rpc_connection(void *handle, struct connection *,
-                                   const char *, int);
+static void process_packet(verto_ctx *ctx, verto_ev *ev);
+static void accept_tcp_connection(verto_ctx *ctx, verto_ev *ev);
+static void process_tcp_connection_read(verto_ctx *ctx, verto_ev *ev);
+static void process_tcp_connection_write(verto_ctx *ctx, verto_ev *ev);
+static void accept_rpc_connection(verto_ctx *ctx, verto_ev *ev);
+static void process_rpc_connection(verto_ctx *ctx, verto_ev *ev);
 
-static struct connection *
+static verto_ev *
 add_udp_fd(struct socksetup *data, int sock, int pktinfo)
 {
     return add_fd(data, sock, pktinfo ? CONN_UDP_PKTINFO : CONN_UDP,
-                  process_packet);
+                  VERTO_EV_FLAG_IO_READ | VERTO_EV_FLAG_PERSIST,
+                  process_packet, 1);
 }
 
-static struct connection *
+static verto_ev *
 add_tcp_listener_fd(struct socksetup *data, int sock)
 {
-    return add_fd(data, sock, CONN_TCP_LISTENER, accept_tcp_connection);
+    return add_fd(data, sock, CONN_TCP_LISTENER,
+                  VERTO_EV_FLAG_IO_READ | VERTO_EV_FLAG_PERSIST,
+                  accept_tcp_connection, 1);
 }
 
-static struct connection *
-add_tcp_data_fd(struct socksetup *data, int sock)
+static verto_ev *
+add_tcp_read_fd(struct socksetup *data, int sock)
 {
-    return add_fd(data, sock, CONN_TCP, process_tcp_connection);
-}
-
-static void
-delete_fd(struct connection *xconn)
-{
-    struct connection *conn;
-    int i;
-
-    FOREACH_ELT(connections, i, conn)
-        if (conn == xconn) {
-            DEL(connections, i);
-            break;
-        }
-    free(xconn);
+    return add_fd(data, sock, CONN_TCP,
+                  VERTO_EV_FLAG_IO_READ | VERTO_EV_FLAG_PERSIST,
+                  process_tcp_connection_read, 1);
 }
 
 /*
@@ -494,21 +651,25 @@ create_server_socket(struct socksetup *data, struct sockaddr *addr, int type)
     return sock;
 }
 
-static struct connection *
+static verto_ev *
 add_rpc_listener_fd(struct socksetup *data, struct rpc_svc_data *svc, int sock)
 {
     struct connection *conn;
+    verto_ev *ev;
 
-    conn = add_fd(data, sock, CONN_RPC_LISTENER, accept_rpc_connection);
-    if (conn == NULL)
+    ev = add_fd(data, sock, CONN_RPC_LISTENER,
+                VERTO_EV_FLAG_IO_READ | VERTO_EV_FLAG_PERSIST,
+                accept_rpc_connection, 1);
+    if (ev == NULL)
         return NULL;
 
+    conn = verto_get_private(ev);
     conn->u.rpc.transp = svctcp_create(sock, 0, 0);
     if (conn->u.rpc.transp == NULL) {
         krb5_klog_syslog(LOG_ERR,
                          _("Cannot create RPC service: %s; continuing"),
                          strerror(errno));
-        delete_fd(conn);
+        verto_del(ev);
         return NULL;
     }
 
@@ -517,17 +678,19 @@ add_rpc_listener_fd(struct socksetup *data, struct rpc_svc_data *svc, int sock)
         krb5_klog_syslog(LOG_ERR,
                          _("Cannot register RPC service: %s; continuing"),
                          strerror(errno));
-        delete_fd(conn);
+        verto_del(ev);
         return NULL;
     }
 
-    return conn;
+    return ev;
 }
 
-static struct connection *
+static verto_ev *
 add_rpc_data_fd(struct socksetup *data, int sock)
 {
-    return add_fd(data, sock, CONN_RPC, process_rpc_connection);
+    return add_fd(data, sock, CONN_RPC,
+                  VERTO_EV_FLAG_IO_READ | VERTO_EV_FLAG_PERSIST,
+                  process_rpc_connection, 1);
 }
 
 static const int one = 1;
@@ -637,9 +800,6 @@ setup_tcp_listener_ports(struct socksetup *data)
             if (add_tcp_listener_fd(data, s4) == NULL)
                 close(s4);
             else {
-                FD_SET(s4, &sstate.rfds);
-                if (s4 >= sstate.max)
-                    sstate.max = s4 + 1;
                 krb5_klog_syslog(LOG_INFO, _("listening on fd %d: tcp %s"),
                                  s4, paddr((struct sockaddr *)&sin4));
             }
@@ -650,9 +810,6 @@ setup_tcp_listener_ports(struct socksetup *data)
                 close(s6);
                 s6 = -1;
             } else {
-                FD_SET(s6, &sstate.rfds);
-                if (s6 >= sstate.max)
-                    sstate.max = s6 + 1;
                 krb5_klog_syslog(LOG_INFO, _("listening on fd %d: tcp %s"),
                                  s6, paddr((struct sockaddr *)&sin6));
             }
@@ -704,13 +861,9 @@ setup_rpc_listener_ports(struct socksetup *data)
 
         if (add_rpc_listener_fd(data, &svc, s4) == NULL)
             close(s4);
-        else {
-            FD_SET(s4, &sstate.rfds);
-            if (s4 >= sstate.max)
-                sstate.max = s4 + 1;
+        else
             krb5_klog_syslog(LOG_INFO, _("listening on fd %d: rpc %s"),
                              s4, paddr((struct sockaddr *)&sin4));
-        }
 
 #ifdef KRB5_USE_INET6
         if (ipv6_enabled()) {
@@ -722,18 +875,13 @@ setup_rpc_listener_ports(struct socksetup *data)
 
             if (add_rpc_listener_fd(data, &svc, s6) == NULL)
                 close(s6);
-            else {
-                FD_SET(s6, &sstate.rfds);
-                if (s6 >= sstate.max)
-                    sstate.max = s6 + 1;
+            else
                 krb5_klog_syslog(LOG_INFO, _("listening on fd %d: rpc %s"),
                                  s6, paddr((struct sockaddr *)&sin6));
-            }
         }
 #endif
     }
-    FD_ZERO(&rpc_listenfds);
-    rpc_listenfds = svc_fdset;
+
     return 0;
 }
 
@@ -789,7 +937,7 @@ setup_udp_pktinfo_ports(struct socksetup *data)
 }
 #else /* no pktinfo compile-time support */
 static void
-setup_udp_pktinfo_ports(struct socksetup *data)
+setup_udp_pktinfo_ports(verto_ctx *ctx, struct socksetup *data)
 {
 }
 #endif
@@ -829,9 +977,6 @@ setup_udp_port_1(struct socksetup *data, struct sockaddr *addr,
             close(sock);
             return 1;
         }
-        FD_SET (sock, &sstate.rfds);
-        if (sock >= sstate.max)
-            sstate.max = sock + 1;
     }
     return 0;
 }
@@ -939,8 +1084,6 @@ scan_for_newlines:
 }
 #endif
 
-static int network_reconfiguration_needed = 0;
-
 #ifdef HAVE_STRUCT_RT_MSGHDR
 #include <net/route.h>
 
@@ -969,13 +1112,88 @@ rtm_type_name(int type)
 }
 
 static void
-process_routing_update(void *handle, struct connection *conn, const char *prog,
-                       int selflags)
+do_network_reconfig(verto_ctx *ctx, verto_ev *ev)
 {
-    int n_read;
-    struct rt_msghdr rtm;
+    struct connection *conn = verto_get_private(ev);
+    assert(loop_setup_network(ctx, conn->handle, conn->prog) == 0);
+}
 
-    while ((n_read = read(conn->fd, &rtm, sizeof(rtm))) > 0) {
+static int
+routing_update_needed(struct rt_msghdr *rtm)
+{
+    switch (rtm->rtm_type) {
+    case RTM_ADD:
+    case RTM_DELETE:
+    case RTM_NEWADDR:
+    case RTM_DELADDR:
+    case RTM_IFINFO:
+    case RTM_OLDADD:
+    case RTM_OLDDEL:
+        /*
+         * Some flags indicate routing table updates that don't
+         * indicate local address changes.  They may come from
+         * redirects, or ARP, etc.
+         *
+         * This set of symbols is just an initial guess based on
+         * some messages observed in real life; working out which
+         * other flags also indicate messages we should ignore,
+         * and which flags are portable to all system and thus
+         * don't need to be conditionalized, is left as a future
+         * exercise.
+         */
+#ifdef RTF_DYNAMIC
+        if (rtm->rtm_flags & RTF_DYNAMIC)
+            break;
+#endif
+#ifdef RTF_CLONED
+        if (rtm->rtm_flags & RTF_CLONED)
+            break;
+#endif
+#ifdef RTF_LLINFO
+        if (rtm->rtm_flags & RTF_LLINFO)
+            break;
+#endif
+#if 0
+        krb5_klog_syslog(LOG_DEBUG,
+                         "network reconfiguration message (%s) received",
+                         rtm_type_name(rtm->rtm_type));
+#endif
+        return 1;
+    case RTM_RESOLVE:
+#ifdef RTM_NEWMADDR
+    case RTM_NEWMADDR:
+    case RTM_DELMADDR:
+#endif
+    case RTM_MISS:
+    case RTM_REDIRECT:
+    case RTM_LOSING:
+    case RTM_GET:
+        /* Not interesting.  */
+#if 0
+        krb5_klog_syslog(LOG_DEBUG, "routing msg not interesting");
+#endif
+        break;
+    default:
+        krb5_klog_syslog(LOG_INFO,
+                         _("unhandled routing message type %d, "
+                           "will reconfigure just for the fun of it"),
+                         rtm->rtm_type);
+        return 1;
+    }
+
+    return 0;
+}
+
+static void
+process_routing_update(verto_ctx *ctx, verto_ev *ev)
+{
+    int n_read, fd;
+    struct rt_msghdr rtm;
+    struct connection *conn;
+
+    fd = verto_get_fd(ev);
+    conn = verto_get_private(ev);
+    while ((n_read = read(fd, &rtm, sizeof(rtm))) > 0) {
         if (n_read < sizeof(rtm)) {
             /* Quick hack to figure out if the interesting
                fields are present in a short read.
@@ -1007,73 +1225,31 @@ process_routing_update(void *handle, struct connection *conn, const char *prog,
                              _("read %d from routing socket but msglen is %d"),
                              n_read, rtm.rtm_msglen);
         }
-        switch (rtm.rtm_type) {
-        case RTM_ADD:
-        case RTM_DELETE:
-        case RTM_NEWADDR:
-        case RTM_DELADDR:
-        case RTM_IFINFO:
-        case RTM_OLDADD:
-        case RTM_OLDDEL:
-            /*
-             * Some flags indicate routing table updates that don't
-             * indicate local address changes.  They may come from
-             * redirects, or ARP, etc.
-             *
-             * This set of symbols is just an initial guess based on
-             * some messages observed in real life; working out which
-             * other flags also indicate messages we should ignore,
-             * and which flags are portable to all system and thus
-             * don't need to be conditionalized, is left as a future
-             * exercise.
-             */
-#ifdef RTF_DYNAMIC
-            if (rtm.rtm_flags & RTF_DYNAMIC)
-                break;
-#endif
-#ifdef RTF_CLONED
-            if (rtm.rtm_flags & RTF_CLONED)
-                break;
-#endif
-#ifdef RTF_LLINFO
-            if (rtm.rtm_flags & RTF_LLINFO)
-                break;
-#endif
-#if 0
-            krb5_klog_syslog(LOG_DEBUG,
-                             "network reconfiguration message (%s) received",
-                             rtm_type_name(rtm.rtm_type));
-#endif
-            network_reconfiguration_needed = 1;
-            break;
-        case RTM_RESOLVE:
-#ifdef RTM_NEWMADDR
-        case RTM_NEWMADDR:
-        case RTM_DELMADDR:
-#endif
-        case RTM_MISS:
-        case RTM_REDIRECT:
-        case RTM_LOSING:
-        case RTM_GET:
-            /* Not interesting.  */
-#if 0
-            krb5_klog_syslog(LOG_DEBUG, "routing msg not interesting");
-#endif
-            break;
-        default:
-            krb5_klog_syslog(LOG_INFO,
-                             _("unhandled routing message type %d, "
-                               "will reconfigure just for the fun of it"),
-                             rtm.rtm_type);
-            network_reconfiguration_needed = 1;
-            break;
+
+        if (routing_update_needed(&rtm)) {
+            /* Ideally we would use idle here instead of timeout. However, idle
+             * is not universally supported yet in all backends. So let's just
+             * use timeout for now to avoid locking into a loop. */
+            ev = verto_add_timeout(ctx, VERTO_EV_FLAG_NONE,
+                                   do_network_reconfig, 0);
+            verto_set_private(ev, conn, NULL);
+            assert(ev);
         }
     }
 }
+#endif
 
-static void
-setup_routing_socket(struct socksetup *data)
+krb5_error_code
+loop_setup_routing_socket(verto_ctx *ctx, void *handle, const char *progname)
 {
+#ifdef HAVE_STRUCT_RT_MSGHDR
+    struct socksetup data;
+
+    data.ctx = ctx;
+    data.handle = handle;
+    data.prog = progname;
+    data.retval = 0;
+
     int sock = socket(PF_ROUTE, SOCK_RAW, 0);
     if (sock < 0) {
         int e = errno;
@@ -1081,37 +1257,38 @@ setup_routing_socket(struct socksetup *data)
                          strerror(e));
     } else {
         krb5_klog_syslog(LOG_INFO, _("routing socket is fd %d"), sock);
-        add_fd(data, sock, CONN_ROUTING, process_routing_update);
         setnbio(sock);
-        FD_SET(sock, &sstate.rfds);
+        add_fd(&data, sock, CONN_ROUTING,
+               VERTO_EV_FLAG_IO_READ | VERTO_EV_FLAG_PERSIST,
+               process_routing_update, 0);
     }
-}
 #endif
+    return 0;
+}
 
 /* XXX */
-extern int krb5int_debug_sendto_kdc;
 extern void (*krb5int_sendtokdc_debug_handler)(const void*, size_t);
 
 krb5_error_code
-loop_setup_network(void *handle, const char *prog, int no_reconfig)
+loop_setup_network(verto_ctx *ctx, void *handle, const char *prog)
 {
     struct socksetup setup_data;
+    verto_ev *ev;
+    int i;
 
-    FD_ZERO(&sstate.rfds);
-    FD_ZERO(&sstate.wfds);
-    FD_ZERO(&sstate.xfds);
-    sstate.max = 0;
-
-    /* krb5int_debug_sendto_kdc = 1; */
     krb5int_sendtokdc_debug_handler = klog_handler;
 
+    /* Close any open connections. */
+    FOREACH_ELT(events, i, ev)
+        verto_del(ev);
+    events.n = 0;
+
+    setup_data.ctx = ctx;
+    setup_data.handle = handle;
     setup_data.prog = prog;
     setup_data.retval = 0;
     krb5_klog_syslog(LOG_INFO, _("setting up network..."));
-#ifdef HAVE_STRUCT_RT_MSGHDR
-    if (!no_reconfig)
-        setup_routing_socket(&setup_data);
-#endif
+
     /*
      * To do: Use RFC 2292 interface (or follow-on) and IPV6_PKTINFO,
      * so we might need only one UDP socket; fall back to binding
@@ -1127,8 +1304,8 @@ loop_setup_network(void *handle, const char *prog, int no_reconfig)
     }
     setup_tcp_listener_ports(&setup_data);
     setup_rpc_listener_ports(&setup_data);
-    krb5_klog_syslog (LOG_INFO, _("set up %d sockets"), (int)n_sockets);
-    if (n_sockets == 0) {
+    krb5_klog_syslog (LOG_INFO, _("set up %d sockets"), (int) events.n);
+    if (events.n == 0) {
         com_err(prog, 0, _("no sockets set up?"));
         exit (1);
     }
@@ -1359,8 +1536,7 @@ send_to_from(int s, void *buf, size_t len, int flags,
 }
 
 static void
-process_packet(void *handle, struct connection *conn, const char *prog,
-               int selflags)
+process_packet(verto_ctx *ctx, verto_ev *ev)
 {
     int cc;
     socklen_t saddr_len, daddr_len;
@@ -1371,8 +1547,13 @@ process_packet(void *handle, struct connection *conn, const char *prog,
     krb5_data request;
     krb5_data *response;
     char pktbuf[MAX_DGRAM_SIZE];
-    int port_fd = conn->fd;
+    int port_fd;
     union aux_addressing_info auxaddr;
+    struct connection *conn;
+
+    port_fd = verto_get_fd(ev);
+    conn = verto_get_private(ev);
+    assert(port_fd >= 0);
 
     response = NULL;
     saddr_len = sizeof(saddr);
@@ -1391,7 +1572,7 @@ process_packet(void *handle, struct connection *conn, const char *prog,
              */
             && errno != ECONNREFUSED
         )
-            com_err(prog, errno, _("while receiving from network"));
+            com_err(conn->prog, errno, _("while receiving from network"));
         return;
     }
     if (!cc)
@@ -1403,7 +1584,7 @@ process_packet(void *handle, struct connection *conn, const char *prog,
         if (getnameinfo(ss2sa(&daddr), daddr_len, addrbuf, sizeof(addrbuf),
                         0, 0, NI_NUMERICHOST))
             strlcpy(addrbuf, "?", sizeof(addrbuf));
-        com_err(prog, 0, "pktinfo says local addr is %s", addrbuf);
+        com_err(conn->prog, 0, _("pktinfo says local addr is %s"), addrbuf);
     }
 #endif
 
@@ -1424,9 +1605,10 @@ process_packet(void *handle, struct connection *conn, const char *prog,
     faddr.address = &addr;
     init_addr(&faddr, ss2sa(&saddr));
     /* This address is in net order. */
-    retval = dispatch(handle, ss2sa(&daddr), &faddr, &request, &response, 0);
+    retval = dispatch(conn->handle, ss2sa(&daddr),
+                      &faddr, &request, &response, 0);
     if (retval) {
-        com_err(prog, retval, _("while dispatching (udp)"));
+        com_err(conn->prog, retval, _("while dispatching (udp)"));
         return;
     }
     if (response == NULL)
@@ -1441,7 +1623,7 @@ process_packet(void *handle, struct connection *conn, const char *prog,
         char saddrbuf[NI_MAXHOST], sportbuf[NI_MAXSERV];
         char daddrbuf[NI_MAXHOST];
         int e = errno;
-        krb5_free_data(get_context(handle), response);
+        krb5_free_data(get_context(conn->handle), response);
         if (getnameinfo((struct sockaddr *)&daddr, daddr_len,
                         daddrbuf, sizeof(daddrbuf), 0, 0,
                         NI_NUMERICHOST) != 0) {
@@ -1453,69 +1635,72 @@ process_packet(void *handle, struct connection *conn, const char *prog,
             strlcpy(saddrbuf, "?", sizeof(saddrbuf));
             strlcpy(sportbuf, "?", sizeof(sportbuf));
         }
-        com_err(prog, e, _("while sending reply to %s/%s from %s"),
+        com_err(conn->prog, e, _("while sending reply to %s/%s from %s"),
                 saddrbuf, sportbuf, daddrbuf);
         return;
     }
     if ((size_t)cc != response->length) {
-        com_err(prog, 0, _("short reply write %d vs %d\n"),
+        com_err(conn->prog, 0, _("short reply write %d vs %d\n"),
                 response->length, cc);
     }
-    krb5_free_data(get_context(handle), response);
+    krb5_free_data(get_context(conn->handle), response);
     return;
 }
 
-static int tcp_or_rpc_data_counter;
-static int max_tcp_or_rpc_data_connections = 45;
-
-static void kill_tcp_or_rpc_connection(void *, struct connection *,
-                                       int isForcedClose);
-
 static int
-kill_lru_tcp_or_rpc_connection(void *handle, struct connection *newconn)
+kill_lru_tcp_or_rpc_connection(void *handle, verto_ev *newev)
 {
-    struct connection *oldest_tcp = NULL;
-    struct connection *c;
+    struct connection *c, *oldest_c = NULL;
+    verto_ev *ev, *oldest_ev = NULL;
     int i, fd = -1;
 
     krb5_klog_syslog(LOG_INFO, _("too many connections"));
 
-    FOREACH_ELT (connections, i, c) {
+    FOREACH_ELT (events, i, ev) {
+        if (ev == newev)
+            continue;
+
+        c = verto_get_private(ev);
+        if (!c)
+            continue;
         if (c->type != CONN_TCP && c->type != CONN_RPC)
             continue;
-        if (c == newconn)
-            continue;
 #if 0
-        krb5_klog_syslog(LOG_INFO, "fd %d started at %ld", c->fd,
+        krb5_klog_syslog(LOG_INFO, "fd %d started at %ld",
+                         verto_get_fd(oldest_ev),
                          c->u.tcp.start_time);
 #endif
-        if (oldest_tcp == NULL
-            || oldest_tcp->u.tcp.start_time > c->u.tcp.start_time)
-            oldest_tcp = c;
+        if (oldest_c == NULL
+            || oldest_c->u.tcp.start_time > c->u.tcp.start_time) {
+            oldest_ev = ev;
+            oldest_c = c;
+        }
     }
-    if (oldest_tcp != NULL) {
+    if (oldest_c != NULL) {
         krb5_klog_syslog(LOG_INFO, _("dropping %s fd %d from %s"),
                          c->type == CONN_RPC ? "rpc" : "tcp",
-                         oldest_tcp->fd, oldest_tcp->u.tcp.addrbuf);
-        fd = oldest_tcp->fd;
-        kill_tcp_or_rpc_connection(handle, oldest_tcp, 1);
+                         verto_get_fd(oldest_ev), oldest_c->u.tcp.addrbuf);
+        if (oldest_c->type == CONN_RPC)
+            oldest_c->u.rpc.closed = 1;
+        verto_del(oldest_ev);
     }
     return fd;
 }
 
 static void
-accept_tcp_connection(void *handle, struct connection *conn, const char *prog,
-                      int selflags)
+accept_tcp_connection(verto_ctx *ctx, verto_ev *ev)
 {
     int s;
     struct sockaddr_storage addr_s;
     struct sockaddr *addr = (struct sockaddr *)&addr_s;
     socklen_t addrlen = sizeof(addr_s);
     struct socksetup sockdata;
-    struct connection *newconn;
+    struct connection *newconn, *conn;
     char tmpbuf[10];
+    verto_ev *newev;
 
-    s = accept(conn->fd, addr, &addrlen);
+    conn = verto_get_private(ev);
+    s = accept(verto_get_fd(ev), addr, &addrlen);
     if (s < 0)
         return;
     set_cloexec_fd(s);
@@ -1527,12 +1712,17 @@ accept_tcp_connection(void *handle, struct connection *conn, const char *prog,
 #endif
     setnbio(s), setnolinger(s), setkeepalive(s);
 
-    sockdata.prog = prog;
+    sockdata.ctx = ctx;
+    sockdata.handle = conn->handle;
+    sockdata.prog = conn->prog;
     sockdata.retval = 0;
 
-    newconn = add_tcp_data_fd(&sockdata, s);
-    if (newconn == NULL)
+    newev = add_tcp_read_fd(&sockdata, s);
+    if (newev == NULL) {
+        close(s);
         return;
+    }
+    newconn = verto_get_private(newev);
 
     if (getnameinfo((struct sockaddr *)&addr_s, addrlen,
                     newconn->u.tcp.addrbuf, sizeof(newconn->u.tcp.addrbuf),
@@ -1561,15 +1751,13 @@ accept_tcp_connection(void *handle, struct connection *conn, const char *prog,
     newconn->u.tcp.start_time = time(0);
 
     if (++tcp_or_rpc_data_counter > max_tcp_or_rpc_data_connections)
-        kill_lru_tcp_or_rpc_connection(handle, newconn);
+        kill_lru_tcp_or_rpc_connection(conn->handle, newev);
 
     if (newconn->u.tcp.buffer == 0) {
-        com_err(prog, errno,
+        com_err(conn->prog, errno,
                 _("allocating buffer for new TCP session from %s"),
                 newconn->u.tcp.addrbuf);
-        delete_fd(newconn);
-        close(s);
-        tcp_or_rpc_data_counter--;
+        verto_del(newev);
         return;
     }
     newconn->u.tcp.offset = 0;
@@ -1577,92 +1765,126 @@ accept_tcp_connection(void *handle, struct connection *conn, const char *prog,
     init_addr(&newconn->u.tcp.faddr, ss2sa(&newconn->u.tcp.addr_s));
     SG_SET(&newconn->u.tcp.sgbuf[0], newconn->u.tcp.lenbuf, 4);
     SG_SET(&newconn->u.tcp.sgbuf[1], 0, 0);
-
-    FD_SET(s, &sstate.rfds);
-    if (sstate.max <= s)
-        sstate.max = s + 1;
 }
 
 static void
-kill_tcp_or_rpc_connection(void *handle, struct connection *conn,
-                           int isForcedClose)
+process_tcp_connection_read(verto_ctx *ctx, verto_ev *ev)
 {
-    assert(conn->type == CONN_TCP || conn->type == CONN_RPC);
-    assert(conn->fd != -1);
+    struct connection *conn;
+    ssize_t nread;
+    size_t len;
+    int sock;
 
-    if (conn->u.tcp.response)
-        krb5_free_data(get_context(handle), conn->u.tcp.response);
-    if (conn->u.tcp.buffer)
-        free(conn->u.tcp.buffer);
-    FD_CLR(conn->fd, &sstate.rfds);
-    FD_CLR(conn->fd, &sstate.wfds);
-    if (sstate.max == conn->fd + 1)
-        while (sstate.max > 0
-               && ! FD_ISSET(sstate.max-1, &sstate.rfds)
-               && ! FD_ISSET(sstate.max-1, &sstate.wfds)
-               /* && ! FD_ISSET(sstate.max-1, &sstate.xfds) */
-        )
-            sstate.max--;
+    conn = verto_get_private(ev);
+    sock = verto_get_fd(ev);
 
-    /* In the non-forced case, the RPC runtime will close the descriptor for
-     * us. */
-    if (conn->type == CONN_TCP || isForcedClose) {
-        close(conn->fd);
-    }
-
-    /* For RPC connections, call into RPC runtime to flush out any internal
-     * state. */
-    if (conn->type == CONN_RPC && isForcedClose) {
-        fd_set fds;
-
-        FD_ZERO(&fds);
-        FD_SET(conn->fd, &fds);
-
-        svc_getreqset(&fds);
-
-        if (FD_ISSET(conn->fd, &svc_fdset)) {
-            krb5_klog_syslog(LOG_ERR,
-                             _("descriptor %d closed but still in svc_fdset"),
-                             conn->fd);
+    /*
+     * Read message length and data into one big buffer, already allocated
+     * at connect time.  If we have a complete message, we stop reading, so
+     * we should only be here if there is no data in the buffer, or only an
+     * incomplete message.
+     */
+    if (conn->u.tcp.offset < 4) {
+        /* msglen has not been computed.  XXX Doing at least two reads
+         * here, letting the kernel worry about buffering. */
+        len = 4 - conn->u.tcp.offset;
+        nread = SOCKET_READ(sock,
+                            conn->u.tcp.buffer + conn->u.tcp.offset, len);
+        if (nread < 0) /* error */
+            goto kill_tcp_connection;
+        if (nread == 0) /* eof */
+            goto kill_tcp_connection;
+        conn->u.tcp.offset += nread;
+        if (conn->u.tcp.offset == 4) {
+            unsigned char *p = (unsigned char *)conn->u.tcp.buffer;
+            conn->u.tcp.msglen = load_32_be(p);
+            if (conn->u.tcp.msglen > conn->u.tcp.bufsiz - 4) {
+                krb5_error_code err;
+                /* Message too big. */
+                krb5_klog_syslog(LOG_ERR, _("TCP client %s wants %lu bytes, "
+                                 "cap is %lu"), conn->u.tcp.addrbuf,
+                                 (unsigned long) conn->u.tcp.msglen,
+                                 (unsigned long) conn->u.tcp.bufsiz - 4);
+                /* XXX Should return an error.  */
+                err = make_toolong_error (conn->handle,
+                                          &conn->u.tcp.response);
+                if (err) {
+                    krb5_klog_syslog(LOG_ERR, _("error constructing "
+                                     "KRB_ERR_FIELD_TOOLONG error! %s"),
+                                     error_message(err));
+                    goto kill_tcp_connection;
+                }
+                goto have_response;
+            }
         }
-    }
+    } else {
+        /* msglen known. */
+        krb5_data request;
+        krb5_error_code err;
+        struct sockaddr_storage local_saddr;
+        socklen_t local_saddrlen = sizeof(local_saddr);
+        struct sockaddr *local_saddrp = NULL;
 
-    conn->fd = -1;
-    delete_fd(conn);
-    tcp_or_rpc_data_counter--;
-}
+        len = conn->u.tcp.msglen - (conn->u.tcp.offset - 4);
+        nread = SOCKET_READ(sock,
+                            conn->u.tcp.buffer + conn->u.tcp.offset, len);
+        if (nread < 0) /* error */
+            goto kill_tcp_connection;
+        if (nread == 0) /* eof */
+            goto kill_tcp_connection;
+        conn->u.tcp.offset += nread;
+        if (conn->u.tcp.offset < conn->u.tcp.msglen + 4)
+            return;
+        /* Have a complete message, and exactly one message. */
+        request.length = conn->u.tcp.msglen;
+        request.data = conn->u.tcp.buffer + 4;
 
-static void
-queue_tcp_outgoing_response(struct connection *conn)
-{
-    store_32_be(conn->u.tcp.response->length, conn->u.tcp.lenbuf);
-    SG_SET(&conn->u.tcp.sgbuf[1], conn->u.tcp.response->data,
-           conn->u.tcp.response->length);
-    conn->u.tcp.sgp = conn->u.tcp.sgbuf;
-    conn->u.tcp.sgnum = 2;
-    FD_SET(conn->fd, &sstate.wfds);
-}
+        if (getsockname(sock, ss2sa(&local_saddr),
+                        &local_saddrlen) == 0)
+            local_saddrp = ss2sa(&local_saddr);
 
-static void
-process_tcp_connection(void *handle, struct connection *conn, const char *prog,
-                       int selflags)
-{
-    int isForcedClose = 1; /* not used now, but for completeness */
-
-    if (selflags & SSF_WRITE) {
-        ssize_t nwrote;
-        SOCKET_WRITEV_TEMP tmp;
-
-        nwrote = SOCKET_WRITEV(conn->fd, conn->u.tcp.sgp, conn->u.tcp.sgnum,
-                               tmp);
-        if (nwrote < 0) {
+        err = dispatch(conn->handle, local_saddrp, &conn->u.tcp.faddr,
+                       &request, &conn->u.tcp.response, 1);
+        if (err) {
+            com_err(conn->prog, err, _("while dispatching (tcp)"));
             goto kill_tcp_connection;
         }
-        if (nwrote == 0) {
-            /* eof */
-            isForcedClose = 0;
+        if (conn->u.tcp.response == NULL)
             goto kill_tcp_connection;
-        }
+    have_response:
+        /* Queue outgoing response. */
+        store_32_be(conn->u.tcp.response->length, conn->u.tcp.lenbuf);
+        SG_SET(&conn->u.tcp.sgbuf[1], conn->u.tcp.response->data,
+               conn->u.tcp.response->length);
+        conn->u.tcp.sgp = conn->u.tcp.sgbuf;
+        conn->u.tcp.sgnum = 2;
+
+        if (convert_event(ctx, ev,
+                          VERTO_EV_FLAG_IO_WRITE | VERTO_EV_FLAG_PERSIST,
+                          process_tcp_connection_write))
+            return;
+    }
+
+    return;
+
+kill_tcp_connection:
+    verto_del(ev);
+}
+
+static void
+process_tcp_connection_write(verto_ctx *ctx, verto_ev *ev)
+{
+    struct connection *conn;
+    SOCKET_WRITEV_TEMP tmp;
+    ssize_t nwrote;
+    int sock;
+
+    conn = verto_get_private(ev);
+    sock = verto_get_fd(ev);
+
+    nwrote = SOCKET_WRITEV(sock, conn->u.tcp.sgp,
+                           conn->u.tcp.sgnum, tmp);
+    if (nwrote > 0) { /* non-error and non-eof */
         while (nwrote) {
             sg_buf *sgp = conn->u.tcp.sgp;
             if ((size_t)nwrote < SG_LEN(sgp)) {
@@ -1676,354 +1898,133 @@ process_tcp_connection(void *handle, struct connection *conn, const char *prog,
                     abort();
             }
         }
-        if (conn->u.tcp.sgnum == 0) {
-            /*
-             * Finished sending.  We should go back to reading, though if we
-             * sent a FIELD_TOOLONG error in reply to a length with the high
-             * bit set, RFC 4120 says we have to close the TCP stream.
-             */
-            isForcedClose = 0;
-            goto kill_tcp_connection;
-        }
-    } else if (selflags & SSF_READ) {
-        /*
-         * Read message length and data into one big buffer, already allocated
-         * at connect time.  If we have a complete message, we stop reading, so
-         * we should only be here if there is no data in the buffer, or only an
-         * incomplete message.
-         */
-        size_t len;
-        ssize_t nread;
-        if (conn->u.tcp.offset < 4) {
-            /* msglen has not been computed.  XXX Doing at least two reads
-             * here, letting the kernel worry about buffering. */
-            len = 4 - conn->u.tcp.offset;
-            nread = SOCKET_READ(conn->fd,
-                                conn->u.tcp.buffer + conn->u.tcp.offset, len);
-            if (nread < 0)
-                /* error */
-                goto kill_tcp_connection;
-            if (nread == 0)
-                /* eof */
-                goto kill_tcp_connection;
-            conn->u.tcp.offset += nread;
-            if (conn->u.tcp.offset == 4) {
-                unsigned char *p = (unsigned char *)conn->u.tcp.buffer;
-                conn->u.tcp.msglen = load_32_be(p);
-                if (conn->u.tcp.msglen > conn->u.tcp.bufsiz - 4) {
-                    krb5_error_code err;
-                    /* Message too big. */
-                    krb5_klog_syslog(LOG_ERR,
-                                     _("TCP client %s wants %lu bytes, "
-                                       "cap is %lu"), conn->u.tcp.addrbuf,
-                                     (unsigned long) conn->u.tcp.msglen,
-                                     (unsigned long) conn->u.tcp.bufsiz - 4);
-                    /* XXX Should return an error.  */
-                    err = make_toolong_error (handle, &conn->u.tcp.response);
-                    if (err) {
-                        krb5_klog_syslog(LOG_ERR,
-                                         _("error constructing "
-                                           "KRB_ERR_FIELD_TOOLONG error! %s"),
-                                         error_message(err));
-                        goto kill_tcp_connection;
-                    }
-                    goto have_response;
-                }
-            }
-        } else {
-            /* msglen known. */
-            krb5_data request;
-            krb5_error_code err;
-            struct sockaddr_storage local_saddr;
-            socklen_t local_saddrlen = sizeof(local_saddr);
-            struct sockaddr *local_saddrp = NULL;
 
-            len = conn->u.tcp.msglen - (conn->u.tcp.offset - 4);
-            nread = SOCKET_READ(conn->fd,
-                                conn->u.tcp.buffer + conn->u.tcp.offset, len);
-            if (nread < 0)      /* error */
-                goto kill_tcp_connection;
-            if (nread == 0)     /* eof */
-                goto kill_tcp_connection;
-            conn->u.tcp.offset += nread;
-            if (conn->u.tcp.offset < conn->u.tcp.msglen + 4)
-                return;
-            /* Have a complete message, and exactly one message. */
-            request.length = conn->u.tcp.msglen;
-            request.data = conn->u.tcp.buffer + 4;
-
-            if (getsockname(conn->fd, ss2sa(&local_saddr),
-                            &local_saddrlen) == 0)
-                local_saddrp = ss2sa(&local_saddr);
-
-            err = dispatch(handle, local_saddrp, &conn->u.tcp.faddr,
-                           &request, &conn->u.tcp.response, 1);
-            if (err) {
-                com_err(prog, err, _("while dispatching (tcp)"));
-                goto kill_tcp_connection;
-            }
-            if (conn->u.tcp.response == NULL)
-                goto kill_tcp_connection;
-        have_response:
-            queue_tcp_outgoing_response(conn);
-            FD_CLR(conn->fd, &sstate.rfds);
-        }
-    } else
-        abort();
-
-    return;
-
-kill_tcp_connection:
-    kill_tcp_or_rpc_connection(handle, conn, isForcedClose);
-}
-
-static void
-service_conn(void *handle, struct connection *conn, const char *prog,
-             int selflags)
-{
-    conn->service(handle, conn, prog, selflags);
-}
-
-static int
-getcurtime(struct timeval *tvp)
-{
-#ifdef _WIN32
-    struct _timeb tb;
-    _ftime(&tb);
-    tvp->tv_sec = tb.time;
-    tvp->tv_usec = tb.millitm * 1000;
-    return 0;
-#else
-    return gettimeofday(tvp, 0) ? errno : 0;
-#endif
-}
-
-krb5_error_code
-loop_listen_and_process(void *handle, const char *prog, void (*reset)(void))
-{
-    int nfound;
-    /* This struct contains 3 fd_set objects; on some platforms, they
-       can be rather large.  Making this static avoids putting all
-       that junk on the stack.  */
-    static struct select_state sout;
-    size_t i;
-    int sret, netchanged = 0;
-    krb5_error_code err;
-
-    if (conns == (struct connection **) NULL)
-        return KDC5_NONET;
-
-    while (!signal_requests_exit) {
-        if (signal_requests_reset) {
-            krb5_klog_reopen(get_context(handle));
-            reset();
-            signal_requests_reset = 0;
-        }
-
-        if (network_reconfiguration_needed) {
-            /* No point in re-logging what we've just logged. */
-            if (netchanged == 0) {
-                krb5_klog_syslog(LOG_INFO,
-                                 _("network reconfiguration needed"));
-            }
-            /* It might be tidier to add a timer-callback interface to the
-             * control loop, but for this one use, it's not a big deal. */
-            err = getcurtime(&sstate.end_time);
-            if (err) {
-                com_err(prog, err, _("while getting the time"));
-                continue;
-            }
-            sstate.end_time.tv_sec += 3;
-            netchanged = 1;
-        } else
-            sstate.end_time.tv_sec = sstate.end_time.tv_usec = 0;
-
-        err = krb5int_cm_call_select(&sstate, &sout, &sret);
-        if (err) {
-            if (err != EINTR)
-                com_err(prog, err, _("while selecting for network input(1)"));
-            continue;
-        }
-        if (sret == 0 && netchanged) {
-            network_reconfiguration_needed = 0;
-            loop_closedown_network_sockets();
-            err = loop_setup_network(handle, prog, 0);
-            if (err) {
-                com_err(prog, err, _("while reinitializing network"));
-                return err;
-            }
-            netchanged = 0;
-        }
-        if (sret == -1) {
-            if (errno != EINTR) {
-                com_err(prog, errno,
-                        _("while selecting for network input(2)"));
-            }
-            continue;
-        }
-        nfound = sret;
-        for (i=0; i<n_sockets && nfound > 0; i++) {
-            int sflags = 0;
-            if (conns[i]->fd < 0)
-                abort();
-            if (FD_ISSET(conns[i]->fd, &sout.rfds))
-                sflags |= SSF_READ, nfound--;
-            if (FD_ISSET(conns[i]->fd, &sout.wfds))
-                sflags |= SSF_WRITE, nfound--;
-            if (sflags)
-                service_conn(handle, conns[i], prog, sflags);
-        }
+        /* If we still have more data to send, just return so that
+         * the main loop can call this function again when the socket
+         * is ready for more writing. */
+        if (conn->u.tcp.sgnum > 0)
+            return;
     }
-    krb5_klog_syslog(LOG_INFO, _("shutdown signal received"));
-    return 0;
-}
 
-static void
-loop_closedown_network_sockets()
-{
-    int i;
-    struct connection *conn;
-
-    if (conns == (struct connection **) NULL)
-        return;
-
-    FOREACH_ELT (connections, i, conn) {
-        if (conn->fd >= 0) {
-            krb5_klog_syslog(LOG_INFO, _("closing down fd %d"), conn->fd);
-            (void) close(conn->fd);
-            if (conn->type == CONN_RPC) {
-                fd_set fds;
-
-                FD_ZERO(&fds);
-                FD_SET(conn->fd, &fds);
-
-                svc_getreqset(&fds);
-            }
-        }
-        if (conn->type == CONN_RPC_LISTENER) {
-            if (conn->u.rpc.transp != NULL)
-                svc_destroy(conn->u.rpc.transp);
-        }
-        DEL (connections, i);
-        /*
-         * There may also be per-connection data in the tcp structure
-         * (tcp.buffer, tcp.response) that we're not freeing here.  That should
-         * only happen if we quit with a connection in progress.
-         */
-        free(conn);
-    }
+    /* Finished sending.  We should go back to reading, though if we
+     * sent a FIELD_TOOLONG error in reply to a length with the high
+     * bit set, RFC 4120 says we have to close the TCP stream. */
+    verto_del(ev);
 }
 
 void
-loop_closedown_network()
+loop_free(verto_ctx *ctx)
 {
-    loop_closedown_network_sockets();
-    FREE_SET_DATA(connections);
+    verto_free(ctx);
+    FREE_SET_DATA(events);
     FREE_SET_DATA(udp_port_data);
     FREE_SET_DATA(tcp_port_data);
     FREE_SET_DATA(rpc_svc_data);
 }
 
+static int
+have_event_for_fd(int fd)
+{
+    verto_ev *ev;
+    int i;
+
+    FOREACH_ELT(events, i, ev) {
+        if (verto_get_fd(ev) == fd)
+            return 1;
+    }
+
+    return 0;
+}
+
 static void
-accept_rpc_connection(void *handle, struct connection *conn, const char *prog,
-                      int selflags)
+accept_rpc_connection(verto_ctx *ctx, verto_ev *ev)
 {
     struct socksetup sockdata;
+    struct connection *conn;
     fd_set fds;
     register int s;
 
-    assert(selflags & SSF_READ);
+    conn = verto_get_private(ev);
 
-    if ((selflags & SSF_READ) == 0)
-        return;
-
-    sockdata.prog = prog;
+    sockdata.ctx = ctx;
+    sockdata.handle = conn->handle;
+    sockdata.prog = conn->prog;
     sockdata.retval = 0;
 
     /* Service the woken RPC listener descriptor. */
     FD_ZERO(&fds);
-    FD_SET(conn->fd, &fds);
-
+    FD_SET(verto_get_fd(ev), &fds);
     svc_getreqset(&fds);
 
     /* Scan svc_fdset for any new connections. */
     for (s = 0; s < FD_SETSIZE; s++) {
-        /* sstate.rfds |= svc_fdset & ~(rpc_listenfds | sstate.rfds) */
-        if (FD_ISSET(s, &svc_fdset) && !FD_ISSET(s, &rpc_listenfds)
-            && !FD_ISSET(s, &sstate.rfds)) {
-            struct connection *newconn;
-            struct sockaddr_storage addr_s;
-            struct sockaddr *addr = (struct sockaddr *)&addr_s;
-            socklen_t addrlen = sizeof(addr_s);
-            char tmpbuf[10];
+        struct sockaddr_storage addr_s;
+        struct sockaddr *addr = (struct sockaddr *) &addr_s;
+        socklen_t addrlen = sizeof(addr_s);
+        struct connection *newconn;
+        char tmpbuf[10];
+        verto_ev *newev;
 
-            newconn = add_rpc_data_fd(&sockdata, s);
-            if (newconn == NULL)
-                continue;
+        /* If we already have this fd, continue. */
+        if (!FD_ISSET(s, &svc_fdset) || have_event_for_fd(s))
+            continue;
 
-            set_cloexec_fd(s);
+        newev = add_rpc_data_fd(&sockdata, s);
+        if (newev == NULL)
+            continue;
+        newconn = verto_get_private(newev);
+
+        set_cloexec_fd(s);
 #if 0
-            setnbio(s), setnolinger(s), setkeepalive(s);
+        setnbio(s), setnolinger(s), setkeepalive(s);
 #endif
 
-            if (getpeername(s, addr, &addrlen) ||
-                getnameinfo(addr, addrlen,
-                            newconn->u.tcp.addrbuf,
-                            sizeof(newconn->u.tcp.addrbuf),
-                            tmpbuf, sizeof(tmpbuf),
-                            NI_NUMERICHOST | NI_NUMERICSERV)) {
-                strlcpy(newconn->u.tcp.addrbuf, "???",
-                        sizeof(newconn->u.tcp.addrbuf));
-            } else {
-                char *p, *end;
-                p = newconn->u.tcp.addrbuf;
-                end = p + sizeof(newconn->u.tcp.addrbuf);
-                p += strlen(p);
-                if ((size_t)(end - p) > 2 + strlen(tmpbuf)) {
-                    *p++ = '.';
-                    strlcpy(p, tmpbuf, end - p);
-                }
+        if (getpeername(s, addr, &addrlen) ||
+            getnameinfo(addr, addrlen,
+                        newconn->u.tcp.addrbuf,
+                        sizeof(newconn->u.tcp.addrbuf),
+                        tmpbuf, sizeof(tmpbuf),
+                        NI_NUMERICHOST | NI_NUMERICSERV)) {
+            strlcpy(newconn->u.tcp.addrbuf, "???",
+                    sizeof(newconn->u.tcp.addrbuf));
+        } else {
+            char *p, *end;
+            p = newconn->u.tcp.addrbuf;
+            end = p + sizeof(newconn->u.tcp.addrbuf);
+            p += strlen(p);
+            if ((size_t)(end - p) > 2 + strlen(tmpbuf)) {
+                *p++ = '.';
+                strlcpy(p, tmpbuf, end - p);
             }
+        }
 #if 0
-            krb5_klog_syslog(LOG_INFO, "accepted RPC connection on socket %d "
-                             "from %s", s, newconn->u.tcp.addrbuf);
+        krb5_klog_syslog(LOG_INFO, _("accepted RPC connection on socket %d "
+                         "from %s"), s, newconn->u.tcp.addrbuf);
 #endif
 
-            newconn->u.tcp.addr_s = addr_s;
-            newconn->u.tcp.addrlen = addrlen;
-            newconn->u.tcp.start_time = time(0);
+        newconn->u.tcp.addr_s = addr_s;
+        newconn->u.tcp.addrlen = addrlen;
+        newconn->u.tcp.start_time = time(0);
 
-            if (++tcp_or_rpc_data_counter > max_tcp_or_rpc_data_connections)
-                kill_lru_tcp_or_rpc_connection(handle, newconn);
+        if (++tcp_or_rpc_data_counter > max_tcp_or_rpc_data_connections)
+            kill_lru_tcp_or_rpc_connection(newconn->handle, newev);
 
-            newconn->u.tcp.faddr.address = &newconn->u.tcp.kaddr;
-            init_addr(&newconn->u.tcp.faddr, ss2sa(&newconn->u.tcp.addr_s));
-
-            FD_SET(s, &sstate.rfds);
-            if (sstate.max <= s)
-                sstate.max = s + 1;
-        }
+        newconn->u.tcp.faddr.address = &newconn->u.tcp.kaddr;
+        init_addr(&newconn->u.tcp.faddr, ss2sa(&newconn->u.tcp.addr_s));
     }
 }
 
 static void
-process_rpc_connection(void *handle, struct connection *conn, const char *prog,
-                       int selflags)
+process_rpc_connection(verto_ctx *ctx, verto_ev *ev)
 {
     fd_set fds;
 
-    assert(selflags & SSF_READ);
-
-    if ((selflags & SSF_READ) == 0)
-        return;
-
     FD_ZERO(&fds);
-    FD_SET(conn->fd, &fds);
-
+    FD_SET(verto_get_fd(ev), &fds);
     svc_getreqset(&fds);
 
-    if (!FD_ISSET(conn->fd, &svc_fdset))
-        kill_tcp_or_rpc_connection(handle, conn, 0);
+    if (!FD_ISSET(verto_get_fd(ev), &svc_fdset))
+        verto_del(ev);
 }
 
 #endif /* INET */

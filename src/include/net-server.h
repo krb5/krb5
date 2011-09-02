@@ -29,23 +29,27 @@
 #ifndef NET_SERVER_H
 #define NET_SERVER_H
 
+#include <verto.h>
+
 typedef struct _krb5_fulladdr {
     krb5_address *      address;
     krb5_ui_4           port;
 } krb5_fulladdr;
 
 /* exported from network.c */
-extern volatile int signal_requests_exit, signal_requests_reset;
 void init_addr(krb5_fulladdr *, struct sockaddr *);
+
+/* exported from net-server.c */
+verto_ctx *loop_init(verto_ev_type types, void *handle, void (*reset)());
 krb5_error_code loop_add_udp_port(int port);
 krb5_error_code loop_add_tcp_port(int port);
 krb5_error_code loop_add_rpc_service(int port, u_long prognum, u_long versnum,
                                      void (*dispatch)());
-krb5_error_code loop_setup_network(void *handle, const char *prog,
-                                   int no_reconfig);
-krb5_error_code loop_listen_and_process(void *handle, const char *prog,
-                                        void (*reset)(void));
-void loop_closedown_network(void);
+krb5_error_code loop_setup_routing_socket(verto_ctx *ctx, void *handle,
+                                          const char *progname);
+krb5_error_code loop_setup_network(verto_ctx *ctx, void *handle,
+                                   const char *progname);
+void loop_free(verto_ctx *ctx);
 
 /* to be supplied by the server application */
 
@@ -56,7 +60,7 @@ void loop_closedown_network(void);
  * The first, dispatch(), is for normal processing of a request.  The
  * second, make_toolong_error(), is obviously for generating an error
  * to send back when the incoming message is bigger than
- * loop_listen_and_process can accept.
+ * the main loop can accept.
  */
 krb5_error_code dispatch (void *handle,
                           struct sockaddr *local_addr,
