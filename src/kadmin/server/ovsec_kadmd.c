@@ -76,7 +76,6 @@ void    setup_signal_handlers(iprop_role iproprole);
 void    request_exit(int);
 void    request_hup(int);
 void    reset_db(void);
-void    sig_pipe(int);
 
 #ifdef POSIX_SIGNALS
 static struct sigaction s_action;
@@ -667,7 +666,7 @@ void setup_signal_handlers(iprop_role iproprole) {
     (void) sigaction(SIGQUIT, &s_action, (struct sigaction *) NULL);
     s_action.sa_handler = request_hup;
     (void) sigaction(SIGHUP, &s_action, (struct sigaction *) NULL);
-    s_action.sa_handler = sig_pipe;
+    s_action.sa_handler = SIG_IGN;
     (void) sigaction(SIGPIPE, &s_action, (struct sigaction *) NULL);
 #ifdef PURIFY
     s_action.sa_handler = request_pure_report;
@@ -689,7 +688,7 @@ void setup_signal_handlers(iprop_role iproprole) {
     signal(SIGTERM, request_exit);
     signal(SIGQUIT, request_exit);
     signal(SIGHUP, request_hup);
-    signal(SIGPIPE, sig_pipe);
+    signal(SIGPIPE, SIG_IGN);
 #ifdef PURIFY
     signal(SIGUSR1, request_pure_report);
     signal(SIGUSR2, request_pure_clear);
@@ -820,22 +819,6 @@ void request_exit(int signum)
 {
     krb5_klog_syslog(LOG_DEBUG, _("Got signal to request exit"));
     signal_requests_exit = 1;
-    return;
-}
-
-/*
- * Function: sig_pipe
- *
- * Purpose: SIGPIPE handler
- *
- * Effects: krb5_klog_syslogs a message that a SIGPIPE occurred and returns,
- * thus causing the read() or write() to fail and, presumable, the RPC
- * to recover.  Otherwise, the process aborts.
- */
-void sig_pipe(int unused)
-{
-    krb5_klog_syslog(LOG_NOTICE, _("Warning: Received a SIGPIPE; probably a "
-                                   "client aborted.  Continuing."));
     return;
 }
 
