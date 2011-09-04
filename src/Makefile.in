@@ -668,7 +668,10 @@ OTHEREXCLUDES = \
 	include/k5-platform.h \
 	include/gssrpc \
 	lib/apputils/dummy.c \
+	lib/crypto/crypto_tests/camellia-test.c \
 	lib/crypto/builtin/aes \
+	lib/crypto/builtin/camellia \
+	lib/crypto/builtin/sha2 \
 	lib/gssapi/generic/gssapiP_generic.h \
 	lib/gssapi/generic/gssapi_ext.h \
 	lib/gssapi/krb5/gssapiP_krb5.h \
@@ -698,7 +701,9 @@ OTHEREXCLUDES = \
 	util/et/com_err.h \
 	util/profile/prof_int.h \
 	util/profile/profile.hin \
-	util/profile/profile_tcl.c
+	util/profile/profile_tcl.c \
+	util/verto \
+	util/k5ev
 
 EXCLUDES = `for i in $(BSDFILES) $(OTHEREXCLUDES); do echo $$i; done | $(AWK) '{ print "-path", $$1, "-o" }'` -path /dev/null
 
