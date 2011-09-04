@@ -16,7 +16,7 @@ net-server.so net-server.po $(OUTPRE)net-server.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
   $(BUILDTOP)/include/gssrpc/types.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(top_srcdir)/include/adm_proto.h $(top_srcdir)/include/cm.h \
+  $(BUILDTOP)/include/verto.h $(COM_ERR_DEPS) $(top_srcdir)/include/adm_proto.h \
   $(top_srcdir)/include/fake-addrinfo.h $(top_srcdir)/include/foreachaddr.h \
   $(top_srcdir)/include/gssrpc/auth.h $(top_srcdir)/include/gssrpc/auth_gss.h \
   $(top_srcdir)/include/gssrpc/auth_unix.h $(top_srcdir)/include/gssrpc/clnt.h \
