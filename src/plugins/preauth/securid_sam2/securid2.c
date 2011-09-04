@@ -363,11 +363,11 @@ verify_securid_data_2(krb5_context context, krb5_db_entry *client,
 
     if ((sr2->sam_enc_nonce_or_sad.ciphertext.data == NULL) ||
         (sr2->sam_enc_nonce_or_sad.ciphertext.length <= 0)) {
-          retval = KRB5KDC_ERR_PREAUTH_FAILED;
-          krb5_set_error_message(context, retval,
-                                 "No preauth data supplied in "
-                                 "verify_securid_data_2 (%s)", user);
-          goto cleanup;
+        retval = KRB5KDC_ERR_PREAUTH_FAILED;
+        krb5_set_error_message(context, retval,
+                               "No preauth data supplied in "
+                               "verify_securid_data_2 (%s)", user);
+        goto cleanup;
     }
 
     retval = krb5_dbe_find_enctype(context, client,
@@ -463,7 +463,7 @@ verify_securid_data_2(krb5_context context, krb5_db_entry *client,
             com_err("krb5kdc", retval,
                     "while decrypting SecurID trackID in "
                     "verify_securid_data_2 (%s)", user);
-           goto cleanup;
+            goto cleanup;
         }
         if (track_id_data.length < sizeof (struct securid_track_data)) {
             retval = KRB5KDC_ERR_PREAUTH_FAILED;
@@ -682,11 +682,11 @@ verify_securid_data_2(krb5_context context, krb5_db_entry *client,
             retval = securid_encrypt_track_data_2(context, client, &tmp_data,
                                                   &sc2b.sam_track_id);
             if (retval) {
-                   com_err("krb5kdc", retval,
-                           "while encrypting SecurID track "
-                           "data for SAM_CHALLENGE_2 (%s)",
-                           securid_user);
-                   goto cleanup;
+                com_err("krb5kdc", retval,
+                        "while encrypting SecurID track "
+                        "data for SAM_CHALLENGE_2 (%s)",
+                        securid_user);
+                goto cleanup;
             }
             retval = securid_make_sam_challenge_2_and_cksum(context, sc2p,
                                                             &sc2b,

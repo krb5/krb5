@@ -165,12 +165,12 @@ static void run_iterations (struct resource_info *r)
 
     r->start_time = now ();
     for (i = 0; i < iter_count; i++) {
-	err = krb5_init_context(&ctx);
-	if (err) {
-	    com_err(prog, err, "initializing krb5 context");
-	    exit(1);
-	}
-	krb5_free_context(ctx);
+        err = krb5_init_context(&ctx);
+        if (err) {
+            com_err(prog, err, "initializing krb5 context");
+            exit(1);
+        }
+        krb5_free_context(ctx);
     }
     r->end_time = now ();
 }

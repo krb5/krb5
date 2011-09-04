@@ -61,7 +61,7 @@ sam_get_db_entry(krb5_context context, krb5_principal client,
     krb5_error_code retval;
 
     if (db_entry)
-       *db_entry = NULL;
+        *db_entry = NULL;
     retval = krb5_copy_principal(context, client, &newp);
     if (retval) {
         com_err("krb5kdc", retval, "copying client name for preauth probe");
@@ -71,45 +71,45 @@ sam_get_db_entry(krb5_context context, krb5_principal client,
     probeslot = krb5_princ_size(context, newp)++;
     ptr = realloc(krb5_princ_name(context, newp),
                   krb5_princ_size(context, newp) * sizeof(krb5_data));
-   if (ptr == NULL) {
-       retval = ENOMEM;
-       goto cleanup;
-   }
-   krb5_princ_name(context, newp) = ptr;
+    if (ptr == NULL) {
+        retval = ENOMEM;
+        goto cleanup;
+    }
+    krb5_princ_name(context, newp) = ptr;
 
-   for(sam_ptr = sam_inst_map; sam_ptr->name; sam_ptr++) {
-       if (*sam_type && *sam_type != sam_ptr->sam_type)
-           continue;
+    for(sam_ptr = sam_inst_map; sam_ptr->name; sam_ptr++) {
+        if (*sam_type && *sam_type != sam_ptr->sam_type)
+            continue;
 
-       krb5_princ_component(context,newp,probeslot)->data = sam_ptr->name;
-       krb5_princ_component(context,newp,probeslot)->length =
-           strlen(sam_ptr->name);
-       retval = krb5_db_get_principal(context, newp, 0, &assoc);
-       if (!retval)
-           break;
-   }
+        krb5_princ_component(context,newp,probeslot)->data = sam_ptr->name;
+        krb5_princ_component(context,newp,probeslot)->length =
+            strlen(sam_ptr->name);
+        retval = krb5_db_get_principal(context, newp, 0, &assoc);
+        if (!retval)
+            break;
+    }
 cleanup:
-   if (ptr) {
-       krb5_princ_component(context,newp,probeslot)->data = 0;
-       krb5_princ_component(context,newp,probeslot)->length = 0;
-       krb5_free_principal(context, newp);
-   }
-   if (probeslot)
-       krb5_princ_size(context, newp)--;
-   if (retval)
-       return retval;
-   if (sam_ptr->sam_type)  {
-       /* Found entry of type sam_ptr->sam_type */
-       if (sam_type)
-           *sam_type = sam_ptr->sam_type;
-       if (db_entry)
-           *db_entry = assoc;
-       else
-           krb5_db_free_principal(context, assoc);
-       return 0;
-   } else {
-       return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
-   }
+    if (ptr) {
+        krb5_princ_component(context,newp,probeslot)->data = 0;
+        krb5_princ_component(context,newp,probeslot)->length = 0;
+        krb5_free_principal(context, newp);
+    }
+    if (probeslot)
+        krb5_princ_size(context, newp)--;
+    if (retval)
+        return retval;
+    if (sam_ptr->sam_type)  {
+        /* Found entry of type sam_ptr->sam_type */
+        if (sam_type)
+            *sam_type = sam_ptr->sam_type;
+        if (db_entry)
+            *db_entry = assoc;
+        else
+            krb5_db_free_principal(context, assoc);
+        return 0;
+    } else {
+        return KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
+    }
 }
 
 static krb5_error_code
@@ -247,14 +247,16 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
         break;
     }
 
-  /*
-   * It is up to the method-specific verify routine to set the ticket flags to
-   * indicate TKT_FLG_HW_AUTH and/or TKT_FLG_PRE_AUTH.  Some methods may
-   * require more than one round of dialog with the client and must return
-   * successfully from their verify routine.  If does not set the TGT flags,
-   * the required_preauth conditions will not be met and it will try again to
-   * get enough preauth data from the client.  Do not set TGT flags here.
-   */
+    /*
+     * It is up to the method-specific verify routine to set the
+     * ticket flags to indicate TKT_FLG_HW_AUTH and/or
+     * TKT_FLG_PRE_AUTH.  Some methods may require more than one round
+     * of dialog with the client and must return successfully from
+     * their verify routine.  If does not set the TGT flags, the
+     * required_preauth conditions will not be met and it will try
+     * again to get enough preauth data from the client.  Do not set
+     * TGT flags here.
+     */
 cleanup:
     /*
      * Note that e_data is an output even in error conditions.  If we

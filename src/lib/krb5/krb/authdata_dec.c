@@ -105,7 +105,7 @@ grow_find_authdata(krb5_context context, struct find_authdata_context *fctx,
     }
     fctx->out[fctx->length+1] = NULL;
     retval = krb5int_copy_authdatum(context, elem,
-                            &fctx->out[fctx->length]);
+                                    &fctx->out[fctx->length]);
     if (retval == 0)
         fctx->length++;
     return retval;

@@ -1374,4 +1374,3 @@ krb5_gss_accept_sec_context(minor_status, context_handle,
                                            delegated_cred_handle,
                                            &exts);
 }
-

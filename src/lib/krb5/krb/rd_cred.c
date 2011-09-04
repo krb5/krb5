@@ -208,15 +208,15 @@ krb5_rd_cred(krb5_context context, krb5_auth_context auth_context,
      * If decrypting with the subsession key fails, perhaps the
      * credentials are stored in the session key so try decrypting with that.
      */
-     if (auth_context->recv_subkey == NULL ||
-         (retval = krb5_rd_cred_basic(context, pcreddata,
-                                      auth_context->recv_subkey,
-                                      &replaydata, pppcreds))) {
-         retval = krb5_rd_cred_basic(context, pcreddata,
-                                     auth_context->key,
-                                     &replaydata, pppcreds);
-         if (retval)
-             return retval;
+    if (auth_context->recv_subkey == NULL ||
+        (retval = krb5_rd_cred_basic(context, pcreddata,
+                                     auth_context->recv_subkey,
+                                     &replaydata, pppcreds))) {
+        retval = krb5_rd_cred_basic(context, pcreddata,
+                                    auth_context->key,
+                                    &replaydata, pppcreds);
+        if (retval)
+            return retval;
     }
 
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) {

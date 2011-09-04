@@ -875,4 +875,3 @@ gss_krb5int_import_cred(OM_uint32 *minor_status,
         k5_mutex_destroy(&name.lock);
     return code;
 }
-

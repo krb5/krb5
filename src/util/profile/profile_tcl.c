@@ -3363,4 +3363,3 @@ SWIGEXPORT int SWIG_init(Tcl_Interp *interp) {
 
   return TCL_OK;
 }
-

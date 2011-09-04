@@ -363,7 +363,7 @@ int main(int argc, char *argv[])
                          _("%s: could not initialize loop, aborting"),
                          whoami);
         fprintf(stderr, _("%s: could not initialize loop, aborting\n"),
-                        whoami);
+                whoami);
         kadm5_destroy(global_server_handle);
         krb5_klog_close(context);
         exit(1);
@@ -373,12 +373,12 @@ int main(int argc, char *argv[])
     if ((ret = loop_add_udp_port(server_handle->params.kpasswd_port))
         || (ret = loop_add_tcp_port(server_handle->params.kpasswd_port))
         || (ret = loop_add_rpc_service(server_handle->params.kadmind_port,
-                                  KADM, KADMVERS, kadm_1))
+                                       KADM, KADMVERS, kadm_1))
 #ifndef DISABLE_IPROP
         || (server_handle->params.iprop_enabled
             ? (ret = loop_add_rpc_service(server_handle->params.iprop_port,
-                                     KRB5_IPROP_PROG, KRB5_IPROP_VERS,
-                                     krb5_iprop_prog_1))
+                                          KRB5_IPROP_PROG, KRB5_IPROP_VERS,
+                                          krb5_iprop_prog_1))
             : 0)
 #endif
 #undef server_handle

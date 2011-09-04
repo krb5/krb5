@@ -72,7 +72,7 @@
 static int verbose = 1;
 static int spnego = 0;
 static gss_OID_desc gss_spnego_mechanism_oid_desc =
-        {6, (void *)"\x2b\x06\x01\x05\x05\x02"};
+{6, (void *)"\x2b\x06\x01\x05\x05\x02"};
 
 static void
 usage()

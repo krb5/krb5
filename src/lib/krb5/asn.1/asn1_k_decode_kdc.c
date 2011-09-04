@@ -25,7 +25,7 @@
  */
 
 #include "asn1_k_decode_macros.h"
- 
+
 asn1_error_code
 asn1_decode_kdc_req(asn1buf *buf, krb5_kdc_req *val)
 {
@@ -47,7 +47,7 @@ error_out:
     val->padata = NULL;
     return retval;
 }
-  
+
 asn1_error_code
 asn1_decode_kdc_req_body(asn1buf *buf, krb5_kdc_req *val)
 {

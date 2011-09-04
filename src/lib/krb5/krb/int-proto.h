@@ -29,7 +29,7 @@
 
 krb5_error_code
 krb5int_tgtname(krb5_context context, const krb5_data *, const krb5_data *,
-             krb5_principal *);
+                krb5_principal *);
 
 krb5_error_code
 krb5int_libdefault_boolean(krb5_context, const krb5_data *, const char *,

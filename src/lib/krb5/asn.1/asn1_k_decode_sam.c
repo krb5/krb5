@@ -270,4 +270,3 @@ error_out:
     krb5_free_predicted_sam_response_contents(NULL, val);
     return retval;
 }
-

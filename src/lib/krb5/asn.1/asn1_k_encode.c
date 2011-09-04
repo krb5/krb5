@@ -1419,7 +1419,7 @@ static unsigned int iakerb_finished_optional(const void *p)
 }
 
 DEFSEQTYPE(iakerb_finished, krb5_iakerb_finished, iakerb_finished_fields,
-iakerb_finished_optional);
+           iakerb_finished_optional);
 
 /* Exported complete encoders -- these produce a krb5_data with
    the encoding in the correct byte order.  */

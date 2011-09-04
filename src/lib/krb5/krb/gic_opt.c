@@ -228,8 +228,8 @@ krb5_get_init_creds_opt_free(krb5_context context,
 
 static krb5_error_code
 gic_opte_copy(krb5_context context,
-                      krb5_get_init_creds_opt *opt,
-                      krb5_gic_opt_ext **opte)
+              krb5_get_init_creds_opt *opt,
+              krb5_gic_opt_ext **opte)
 {
     krb5_gic_opt_ext *oe;
 

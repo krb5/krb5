@@ -1135,4 +1135,3 @@ krb5_gss_init_sec_context(minor_status, claimant_cred_handle,
                                          time_rec,
                                          &exts);
 }
-

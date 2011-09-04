@@ -51,6 +51,6 @@ main(int argc, char **argv)
     assert(krb5_cc_close(context, ccache) == 0);
 
     if (krb5_verify_init_creds(context, &creds, NULL, NULL, NULL, NULL) != 0)
-	return 1;
+        return 1;
     return 0;
 }

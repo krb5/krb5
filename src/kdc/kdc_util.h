@@ -144,7 +144,7 @@ kdc_err(krb5_context call_context, errcode_t code, const char *fmt, ...)
 #if !defined(__cplusplus) && (__GNUC__ > 2)
     __attribute__((__format__(__printf__, 3, 4)))
 #endif
-;
+    ;
 
 /* policy.c */
 int

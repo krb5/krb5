@@ -56,7 +56,7 @@ free_values(void *cbdata, char **values)
     char **v;
 
     for (v = values; *v; v++)
-	free(*v);
+        free(*v);
     free(values);
 }
 
@@ -83,11 +83,11 @@ copy(void *cbdata, void **ret_cbdata)
 
 long
 profile_module_init(const char *residual, struct profile_vtable *vtable,
-		    void **cb_ret);
+                    void **cb_ret);
 
 long
 profile_module_init(const char *residual, struct profile_vtable *vtable,
-		    void **cb_ret)
+                    void **cb_ret)
 {
     struct data *d;
 

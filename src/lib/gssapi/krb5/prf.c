@@ -132,4 +132,3 @@ cleanup:
     *minor_status = (OM_uint32)code;
     return (code == 0) ? GSS_S_COMPLETE : GSS_S_FAILURE;
 }
-

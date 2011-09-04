@@ -113,17 +113,17 @@ main(int argc, char *argv[])
     /* Acquire the krb5 objects we need. */
     ret = krb5_init_context(&context);
     if (ret)
-	exit_kerr(NULL, "krb5_init_context", ret);
+        exit_kerr(NULL, "krb5_init_context", ret);
     ret = krb5_cc_default(context, &cc);
     if (ret)
-	exit_kerr(context, "krb5_cc_default", ret);
+        exit_kerr(context, "krb5_cc_default", ret);
     ret = krb5_kt_default(context, &kt);
     if (ret)
-	exit_kerr(context, "krb5_kt_default", ret);
+        exit_kerr(context, "krb5_kt_default", ret);
     if (argc >= 3) {
-	ret = krb5_parse_name(context, argv[2], &princ);
-	if (ret)
-	    exit_kerr(context, "krb5_parse_name", ret);
+        ret = krb5_parse_name(context, argv[2], &princ);
+        if (ret)
+            exit_kerr(context, "krb5_parse_name", ret);
     }
 
     /* Get initiator cred. */

@@ -41,11 +41,11 @@
 #define clean_return(val) { retval = val; goto error_out; }
 
 /* Declare useful decoder variables. */
-#define setup()                                                  \
-    asn1_error_code retval;                                      \
-    asn1_class asn1class;                                        \
-    asn1_construction construction KRB5_ATTR_UNUSED;             \
-    asn1_tagnum tagnum;                                          \
+#define setup()                                         \
+    asn1_error_code retval;                             \
+    asn1_class asn1class;                               \
+    asn1_construction construction KRB5_ATTR_UNUSED;    \
+    asn1_tagnum tagnum;                                 \
     unsigned int length, taglen KRB5_ATTR_UNUSED
 
 #define unused_var(x) if (0) { x = 0; x = x - x; }

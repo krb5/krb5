@@ -76,4 +76,3 @@ asn1_decode_fast_finished_ptr(asn1buf *buf, krb5_fast_finished **valptr)
 {
     decode_ptr( krb5_fast_finished *, asn1_decode_fast_finished);
 }
-

@@ -60,7 +60,7 @@ free_values(void *cbdata, char **values)
     char **v;
 
     for (v = values; *v; v++)
-	free(*v);
+        free(*v);
     free(values);
 }
 
@@ -70,14 +70,14 @@ full_get_values(void *cbdata, const char *const *names, char ***ret_values)
     assert(cbdata == &full_cbdata);
     *ret_values = calloc(2, sizeof(*ret_values));
     if (names[0] == name_string)
-	(*ret_values)[0] = strdup("string result");
+        (*ret_values)[0] = strdup("string result");
     else if (names[0] == name_int)
-	(*ret_values)[0] = strdup("23");
+        (*ret_values)[0] = strdup("23");
     else if (names[0] == name_bool)
-	(*ret_values)[0] = strdup("on");
+        (*ret_values)[0] = strdup("on");
     else {
-	free(*ret_values);
-	return PROF_NO_RELATION;
+        free(*ret_values);
+        return PROF_NO_RELATION;
     }
     (*ret_values)[1] = NULL;
     return 0;
@@ -103,7 +103,7 @@ struct iterator {
 
 static long
 full_iterator_create(void *cbdata, const char *const *names, int flags,
-		     void **ret_iter)
+                     void **ret_iter)
 {
     struct iterator *iter;
 
@@ -124,14 +124,14 @@ full_iterator(void *cbdata, void *iter_arg, char **ret_name, char **ret_value)
     assert(cbdata == &full_cbdata);
     assert(iter->count >= 0 && iter->count <= 2);
     if (iter->count == 0) {
-	*ret_name = strdup("name1");
-	*ret_value = strdup("value1");
+        *ret_name = strdup("name1");
+        *ret_value = strdup("value1");
     } else if (iter->count == 1) {
-	*ret_name = strdup("name2");
-	*ret_value = NULL;
+        *ret_name = strdup("name2");
+        *ret_value = NULL;
     } else {
-	*ret_name = NULL;
-	*ret_value = NULL;
+        *ret_name = NULL;
+        *ret_value = NULL;
     }
     iter->count++;
     return 0;
@@ -141,7 +141,7 @@ static void
 full_iterator_free(void *cbdata, void *iter_arg)
 {
     struct iterator *iter = iter_arg;
-    
+
     assert(cbdata == &full_cbdata);
     assert(iter->count == 3);
     free(iter);
@@ -172,7 +172,7 @@ full_modified(void *cbdata, int *modified)
 
 static long
 full_update_relation(void *cbdata, const char **names,
-		     const char *old_value, const char *new_value)
+                     const char *old_value, const char *new_value)
 {
     assert(cbdata == &full_cbdata);
     assert(names == empty_names);
@@ -246,13 +246,13 @@ int main()
     assert(values[2] == NULL);
     profile_free_list(values);
     assert(profile_iterator_create(profile, NULL, 0, &iter) ==
-	   PROF_UNSUPPORTED);
+           PROF_UNSUPPORTED);
     assert(profile_is_writable(profile, &intval) == 0);
     assert(intval == 0);
     assert(profile_is_modified(profile, &intval) == 0);
     assert(intval == 0);
     assert(profile_update_relation(profile, NULL, NULL, NULL) ==
-	   PROF_UNSUPPORTED);
+           PROF_UNSUPPORTED);
     assert(profile_clear_relation(profile, NULL) == PROF_UNSUPPORTED);
     assert(profile_rename_section(profile, NULL, NULL) == PROF_UNSUPPORTED);
     assert(profile_add_relation(profile, NULL, NULL) == PROF_UNSUPPORTED);
@@ -261,14 +261,14 @@ int main()
 
     assert(profile_init_vtable(&full_vtable, &full_cbdata, &profile) == 0);
     assert(profile_get_string(profile, name_string, NULL, NULL, "wrong",
-			      &str) == 0);
+                              &str) == 0);
     assert(strcmp(str, "string result") == 0);
     profile_release_string(str);
     assert(profile_get_integer(profile, name_int, NULL, NULL, 24,
-			       &intval) == 0);
+                               &intval) == 0);
     assert(intval == 23);
     assert(profile_get_boolean(profile, name_bool, NULL, NULL, 0,
-			       &intval) == 0);
+                               &intval) == 0);
     assert(intval == 1);
     assert(profile_get_integer(profile, "xxx", NULL, NULL, 62, &intval) == 0);
     assert(intval == 62);
@@ -293,7 +293,7 @@ int main()
     assert(profile_is_modified(profile, &intval) == 0);
     assert(intval == 6);
     assert(profile_update_relation(profile, empty_names, name_string,
-				   NULL) == 0);
+                                   NULL) == 0);
     assert(profile_clear_relation(profile, empty_names) == 0);
     assert(profile_rename_section(profile, empty_names, name_int) == 0);
     assert(profile_add_relation(profile, empty_names, name_bool) == 0);

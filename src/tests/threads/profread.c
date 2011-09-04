@@ -168,22 +168,22 @@ static void run_iterations (struct resource_info *r)
 
     err = krb5_init_context(&ctx);
     if (err) {
-	com_err(prog, err, "initializing krb5 context");
-	exit(1);
+        com_err(prog, err, "initializing krb5 context");
+        exit(1);
     }
     err = krb5_get_profile(ctx, &prof);
     if (err) {
-	com_err(prog, err, "fetching profile from context");
-	exit(1);
+        com_err(prog, err, "fetching profile from context");
+        exit(1);
     }
     r->start_time = now ();
     for (i = 0; i < iter_count; i++) {
-	int ival;
-	err = profile_get_integer(prof, "one", "two", "three", 42, &ival);
-	if (err) {
-	    com_err(prog, err, "fetching value from profile");
-	    exit(1);
-	}
+        int ival;
+        err = profile_get_integer(prof, "one", "two", "three", 42, &ival);
+        if (err) {
+            com_err(prog, err, "fetching value from profile");
+            exit(1);
+        }
     }
     r->end_time = now ();
     profile_release (prof);

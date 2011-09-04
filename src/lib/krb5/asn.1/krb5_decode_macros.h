@@ -53,9 +53,9 @@
     retval = asn1buf_wrap_data(&buf,code);      \
     if (retval) return retval
 
-#define setup_no_tagnum(type)                                    \
-    asn1_class asn1class KRB5_ATTR_UNUSED;                       \
-    asn1_construction construction KRB5_ATTR_UNUSED;             \
+#define setup_no_tagnum(type)                           \
+    asn1_class asn1class KRB5_ATTR_UNUSED;              \
+    asn1_construction construction KRB5_ATTR_UNUSED;    \
     setup_buf_only(type)
 
 #define setup_no_length(type)                   \

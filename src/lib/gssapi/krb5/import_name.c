@@ -219,7 +219,7 @@ krb5_gss_import_name(minor_status, input_name_buffer,
             goto do_getpwuid;
 #endif
         } else if (g_OID_equal(input_name_type, gss_nt_exported_name)) {
-#define BOUNDS_CHECK(cp, end, n) \
+#define BOUNDS_CHECK(cp, end, n)                                        \
             do { if ((end) - (cp) < (n)) goto fail_name; } while (0)
             cp = (unsigned char *)tmp;
             end = cp + input_name_buffer->length;

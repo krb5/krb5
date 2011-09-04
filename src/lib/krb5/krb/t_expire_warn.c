@@ -30,7 +30,7 @@ static int exp_dummy, prompt_dummy;
 
 static krb5_error_code
 prompter_cb(krb5_context ctx, void *data, const char *name,
-	    const char *banner, int num_prompts, krb5_prompt prompts[])
+            const char *banner, int num_prompts, krb5_prompt prompts[])
 {
     /* Not expecting any actual prompts, only banners. */
     assert(num_prompts == 0);
@@ -41,7 +41,7 @@ prompter_cb(krb5_context ctx, void *data, const char *name,
 
 static void
 expire_cb(krb5_context ctx, void *data, krb5_timestamp password_expiration,
-	  krb5_timestamp account_expiration, krb5_boolean is_last_req)
+          krb5_timestamp account_expiration, krb5_boolean is_last_req)
 {
     printf("password_expiration = %ld\n", (long)password_expiration);
     printf("account_expiration = %ld\n", (long)account_expiration);
@@ -59,26 +59,26 @@ main(int argc, char **argv)
     krb5_creds creds;
 
     if (argc < 4) {
-	fprintf(stderr, "Usage: %s username password {1|0} [service]\n",
-		argv[0]);
-	return 1;
+        fprintf(stderr, "Usage: %s username password {1|0} [service]\n",
+                argv[0]);
+        return 1;
     }
     user = argv[1];
     password = argv[2];
     use_cb = atoi(argv[3]);
     if (argc >= 5)
-	service = argv[4];
+        service = argv[4];
 
     assert(krb5_init_context(&ctx) == 0);
     assert(krb5_get_init_creds_opt_alloc(ctx, &opt) == 0);
     if (use_cb) {
-	assert(krb5_get_init_creds_opt_set_expire_callback(ctx, opt, expire_cb,
-							   &exp_dummy) == 0);
+        assert(krb5_get_init_creds_opt_set_expire_callback(ctx, opt, expire_cb,
+                                                           &exp_dummy) == 0);
     }
     assert(krb5_parse_name(ctx, user, &client) == 0);
     assert(krb5_get_init_creds_password(ctx, &creds, client, password,
-					prompter_cb, &prompt_dummy, 0, service,
-					opt) == 0);
+                                        prompter_cb, &prompt_dummy, 0, service,
+                                        opt) == 0);
     krb5_get_init_creds_opt_free(ctx, opt);
     krb5_free_principal(ctx, client);
     krb5_free_cred_contents(ctx, &creds);

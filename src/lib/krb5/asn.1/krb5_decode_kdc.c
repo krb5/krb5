@@ -95,7 +95,7 @@ decode_krb5_kdc_req_body(const krb5_data *code, krb5_kdc_req **repptr)
 
     cleanup(free);
 }
-  
+
 krb5_error_code
 decode_krb5_fast_req(const krb5_data *code, krb5_fast_req **repptr)
 {
@@ -167,4 +167,3 @@ decode_krb5_pa_pk_as_req_draft9(const krb5_data *code,
     cleanup(free);
 }
 #endif /* DISABLE_PKINIT */
-

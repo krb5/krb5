@@ -177,7 +177,7 @@ OM_uint32 *		time_rec;
     /* for each requested mech attempt to obtain a credential */
     for (i = 0; i < mechs->count; i++) {
 	major = gss_add_cred_with_password(minor_status, (gss_cred_id_t)creds,
-			     desired_name, 
+			     desired_name,
 			     &mechs->elements[i],
 			     password,
 			     cred_usage, time_req, time_req, NULL,

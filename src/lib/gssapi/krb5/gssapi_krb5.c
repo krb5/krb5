@@ -647,8 +647,8 @@ krb5_gss_inquire_mech_for_saslname(OM_uint32 *minor_status,
             *mech_type = (gss_OID)gss_mech_krb5;
         return GSS_S_COMPLETE;
     } else if (sasl_mech_name->length == GS2_IAKERB_SASL_NAME_LEN &&
-        memcmp(sasl_mech_name->value,
-               GS2_IAKERB_SASL_NAME, GS2_IAKERB_SASL_NAME_LEN) == 0) {
+               memcmp(sasl_mech_name->value,
+                      GS2_IAKERB_SASL_NAME, GS2_IAKERB_SASL_NAME_LEN) == 0) {
         if (mech_type != NULL)
             *mech_type = (gss_OID)gss_mech_iakerb;
         return GSS_S_COMPLETE;
@@ -668,7 +668,8 @@ krb5_gss_inquire_saslname_for_mech(OM_uint32 *minor_status,
         if (!g_make_string_buffer(GS2_IAKERB_SASL_NAME, sasl_mech_name) ||
             !g_make_string_buffer("iakerb", mech_name) ||
             !g_make_string_buffer("Initial and Pass Through Authentication "
-                             "Kerberos Mechanism (IAKERB)", mech_description))
+                                  "Kerberos Mechanism (IAKERB)",
+                                  mech_description))
             goto fail;
     } else {
         if (!g_make_string_buffer(GS2_KRB5_SASL_NAME, sasl_mech_name) ||
@@ -703,10 +704,11 @@ krb5_gss_inquire_attrs_for_mech(OM_uint32 *minor_status,
     if (GSS_ERROR(major))
         goto cleanup;
 
-#define MA_SUPPORTED(ma)    do { \
-    major = gss_add_oid_set_member(minor_status, (gss_OID)ma, mech_attrs);  \
-    if (GSS_ERROR(major))                                                   \
-        goto cleanup;                                                       \
+#define MA_SUPPORTED(ma)    do {                                        \
+        major = gss_add_oid_set_member(minor_status, (gss_OID)ma,       \
+                                       mech_attrs);                     \
+        if (GSS_ERROR(major))                                           \
+            goto cleanup;                                               \
     } while (0)
 
     MA_SUPPORTED(GSS_C_MA_MECH_CONCRETE);

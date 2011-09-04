@@ -153,7 +153,7 @@ krb5int_fast_as_armor(krb5_context context,
                                  &ccache);
         if (retval == 0) {
             retval = krb5int_tgtname(context, target_realm, target_realm,
-                                  &target_principal);
+                                     &target_principal);
         }
         if (retval == 0) {
             krb5_data config_data;

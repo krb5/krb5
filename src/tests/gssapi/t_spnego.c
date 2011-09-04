@@ -122,7 +122,7 @@ displayOID(OM_uint32 *minor, gss_OID oid, char *tag)
 
 static OM_uint32
 initAcceptSecContext(OM_uint32 *minor,
-		     gss_name_t target_name,
+                     gss_name_t target_name,
                      gss_cred_id_t verifier_cred_handle)
 {
     OM_uint32 major;

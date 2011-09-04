@@ -1088,7 +1088,7 @@ kh_dbekd_decrypt_key_data(krb5_context context,
 
     if (mkey->enctype != ENCTYPE_UNKNOWN)
         code = krb5_dbe_def_decrypt_key_data(context, mkey, key_data,
-                                               kkey, keysalt);
+                                             kkey, keysalt);
     else
         code = kh_decrypt_key(context, kh, key_data, kkey, keysalt);
 

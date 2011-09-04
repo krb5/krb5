@@ -182,4 +182,3 @@ krb5_gss_store_cred(OM_uint32 *minor_status,
 
     return GSS_S_COMPLETE;
 }
-

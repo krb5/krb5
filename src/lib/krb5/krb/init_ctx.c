@@ -143,12 +143,12 @@ krb5_init_context_profile(profile_t profile, krb5_flags flags,
      * The context being NULL is ok.
      */
     krb5_win_ccdll_load(ctx);
-p
-    /*
-     * krb5_vercheck() is defined in win_glue.c, and this is
-     * where we handle the timebomb and version server checks.
-     */
-    retval = krb5_vercheck();
+    p
+        /*
+         * krb5_vercheck() is defined in win_glue.c, and this is
+         * where we handle the timebomb and version server checks.
+         */
+        retval = krb5_vercheck();
     if (retval)
         return retval;
 #endif

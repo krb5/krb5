@@ -86,7 +86,7 @@ krb5_merge_authdata(krb5_context context,
     if (inauthdat1) {
         for (nelems = 0; inauthdat1[nelems]; nelems++) {
             retval = krb5int_copy_authdatum(context, inauthdat1[nelems],
-                                    &tempauthdat[nelems]);
+                                            &tempauthdat[nelems]);
             if (retval) {
                 krb5_free_authdata(context, tempauthdat);
                 return retval;
@@ -97,7 +97,7 @@ krb5_merge_authdata(krb5_context context,
     if (inauthdat2) {
         for (nelems2 = 0; inauthdat2[nelems2]; nelems2++) {
             retval = krb5int_copy_authdatum(context, inauthdat2[nelems2],
-                                    &tempauthdat[nelems++]);
+                                            &tempauthdat[nelems++]);
             if (retval) {
                 krb5_free_authdata(context, tempauthdat);
                 return retval;

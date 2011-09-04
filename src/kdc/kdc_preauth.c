@@ -298,7 +298,7 @@ static preauth_system static_preauth_systems[] = {
 #endif
 };
 
-#define NUM_STATIC_PREAUTH_SYSTEMS (sizeof(static_preauth_systems) / \
+#define NUM_STATIC_PREAUTH_SYSTEMS (sizeof(static_preauth_systems) /    \
                                     sizeof(*static_preauth_systems))
 
 static preauth_system *preauth_systems;

@@ -69,7 +69,7 @@
 #define CMS_get1_crls(_p7) (_p7->d.sign->crl)
 #define CMS_get1_certs(_p7) (_p7->d.sign->cert)
 #define CMS_ContentInfo_free(_p7) PKCS7_free(_p7)
-#define pkinit_CMS_SignerInfo_get_cert(_p7,_si,_x509_pp) \
+#define pkinit_CMS_SignerInfo_get_cert(_p7,_si,_x509_pp)        \
     (*_x509_pp) = PKCS7_cert_from_signer_info(_p7,_si)
 #endif
 

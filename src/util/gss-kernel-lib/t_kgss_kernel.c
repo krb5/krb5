@@ -44,7 +44,7 @@ check(OM_uint32 major, OM_uint32 minor, const char *fn)
     if (!GSS_ERROR(major))
         return;
     fprintf(stderr, "t_kgss_kernel: %s: major %u, minor %u\n", fn, major,
-	    minor);
+            minor);
     /* libkgss doesn't have gss_display_status. */
     exit(1);
 }
@@ -175,7 +175,7 @@ send_wrap_token(gss_ctx_id_t ctx)
     buf.value = "kernelwrap";
     buf.length = 10;
     major = krb5_gss_wrap(&minor, ctx, 1, GSS_C_QOP_DEFAULT, &buf, NULL,
-			  &wrapped);
+                          &wrapped);
     check(major, minor, "krb5_gss_wrap");
     send_data(STDOUT_FILENO, wrapped.value, wrapped.length);
     free(wrapped.value);

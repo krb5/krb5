@@ -190,7 +190,7 @@ s4u2proxy_export_authdata(krb5_context kcontext,
 
     *out_authdata = authdata;
 
-    return 0; 
+    return 0;
 }
 
 static krb5_error_code
@@ -287,8 +287,8 @@ s4u2proxy_get_attribute(krb5_context kcontext,
                         const krb5_data *attribute,
                         krb5_boolean *authenticated,
                         krb5_boolean *complete,
-                        krb5_data *value, 
-                        krb5_data *display_value, 
+                        krb5_data *value,
+                        krb5_data *display_value,
                         int *more)
 {
     struct s4u2proxy_context *s4uctx = (struct s4u2proxy_context *)request_context;
@@ -423,7 +423,7 @@ s4u2proxy_size(krb5_context kcontext,
         if (code != 0)
             return code;
     }
-                            
+
     *sizep += sizeof(krb5_int32); /* authenticated flag */
 
     return code;
@@ -463,7 +463,7 @@ s4u2proxy_externalize(krb5_context kcontext,
         if (code != 0)
             return code;
     }
-    
+
     krb5_ser_pack_int32(s4uctx->authenticated, &bp, &remain); /* authenticated */
 
     *buffer = bp;
@@ -599,4 +599,3 @@ krb5plugin_authdata_client_ftable_v0 krb5int_s4u2proxy_authdata_client_ftable = 
     s4u2proxy_internalize,
     s4u2proxy_copy
 };
-

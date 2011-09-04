@@ -371,11 +371,11 @@ static struct mech_attr_info_desc {
 
 OM_uint32
 generic_gss_display_mech_attr(
-      OM_uint32         *minor_status,
-      gss_const_OID      mech_attr,
-      gss_buffer_t       name,
-      gss_buffer_t       short_desc,
-      gss_buffer_t       long_desc)
+    OM_uint32         *minor_status,
+    gss_const_OID      mech_attr,
+    gss_buffer_t       name,
+    gss_buffer_t       short_desc,
+    gss_buffer_t       long_desc)
 {
     size_t i;
 

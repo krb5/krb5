@@ -372,9 +372,9 @@ typedef INT64_TYPE krb5_int64;
 #define KDC_ERR_DIGEST_IN_SIGNED_DATA_NOT_ACCEPTED 80 /* bad digest algorithm in SignedData */
 #define KDC_ERR_PUBLIC_KEY_ENCRYPTION_NOT_SUPPORTED 81
 #define KRB_AP_ERR_IAKERB_KDC_NOT_FOUND         85 /* The IAKERB proxy could
-not find a KDC */
+                                                      not find a KDC */
 #define KRB_AP_ERR_IAKERB_KDC_NO_RESPONSE       86 /* The KDC did not respond
-to the IAKERB proxy */
+                                                      to the IAKERB proxy */
 
 /*
  * This structure is returned in the e-data field of the KRB-ERROR

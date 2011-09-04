@@ -46,7 +46,7 @@
  */
 static krb5_error_code
 get_new_creds(krb5_context context, krb5_ccache ccache, krb5_creds *in_creds,
-	      krb5_flags kdcopt, krb5_creds **out_creds)
+              krb5_flags kdcopt, krb5_creds **out_creds)
 {
     krb5_error_code code;
     krb5_creds old_creds, *new_creds = NULL;
@@ -55,19 +55,19 @@ get_new_creds(krb5_context context, krb5_ccache ccache, krb5_creds *in_creds,
 
     /* Retrieve an existing cached credential matching in_creds. */
     code = krb5_cc_retrieve_cred(context, ccache, KRB5_TC_SUPPORTED_KTYPES,
-				 in_creds, &old_creds);
+                                 in_creds, &old_creds);
     if (code != 0)
-	return code;
+        return code;
 
     /* Use KDC options from old credential as well as requested options. */
     kdcopt |= (old_creds.ticket_flags & KDC_TKT_COMMON_MASK);
 
     /* Use the old credential to get a new credential from the KDC. */
     code = krb5_get_cred_via_tkt(context, &old_creds, kdcopt,
-				 old_creds.addresses, in_creds, &new_creds);
+                                 old_creds.addresses, in_creds, &new_creds);
     krb5_free_cred_contents(context, &old_creds);
     if (code != 0)
-	return code;
+        return code;
 
     *out_creds = new_creds;
     return code;
@@ -80,7 +80,7 @@ get_new_creds(krb5_context context, krb5_ccache ccache, krb5_creds *in_creds,
  */
 static krb5_error_code
 gc_valrenew(krb5_context context, krb5_ccache ccache, krb5_creds *in_creds,
-	    krb5_flags kdcopt, krb5_creds **out_creds)
+            krb5_flags kdcopt, krb5_creds **out_creds)
 {
     krb5_error_code code;
     krb5_creds *new_creds = NULL;
@@ -89,7 +89,7 @@ gc_valrenew(krb5_context context, krb5_ccache ccache, krb5_creds *in_creds,
     /* Get the validated or renewed credential. */
     code = get_new_creds(context, ccache, in_creds, kdcopt, &new_creds);
     if (code != 0)
-	goto cleanup;
+        goto cleanup;
 
     /* Reinitialize the cache without changing its default principal. */
     code = krb5_cc_get_principal(context, ccache, &default_princ);
@@ -102,7 +102,7 @@ gc_valrenew(krb5_context context, krb5_ccache ccache, krb5_creds *in_creds,
     /* Store the validated or renewed cred in the now-empty cache. */
     code = krb5_cc_store_cred(context, ccache, new_creds);
     if (code != 0)
-	goto cleanup;
+        goto cleanup;
 
     *out_creds = new_creds;
     new_creds = NULL;
@@ -135,29 +135,29 @@ krb5_get_credentials_renew(krb5_context context, krb5_flags options,
  */
 static krb5_error_code
 get_valrenewed_creds(krb5_context context, krb5_creds *out_creds,
-		     krb5_principal client, krb5_ccache ccache,
-		     char *in_tkt_service, int kdcopt)
+                     krb5_principal client, krb5_ccache ccache,
+                     char *in_tkt_service, int kdcopt)
 {
     krb5_error_code code;
     krb5_creds in_creds, *new_creds;
     krb5_principal server = NULL;
 
     if (in_tkt_service != NULL) {
-	/* Parse in_tkt_service, but use the client's realm. */
-	code = krb5_parse_name(context, in_tkt_service, &server);
-	if (code != 0)
-	    goto cleanup;
-	krb5_free_data_contents(context, &server->realm);
-	code = krb5int_copy_data_contents(context, &client->realm,
-					  &server->realm);
-	if (code != 0)
-	    goto cleanup;
+        /* Parse in_tkt_service, but use the client's realm. */
+        code = krb5_parse_name(context, in_tkt_service, &server);
+        if (code != 0)
+            goto cleanup;
+        krb5_free_data_contents(context, &server->realm);
+        code = krb5int_copy_data_contents(context, &client->realm,
+                                          &server->realm);
+        if (code != 0)
+            goto cleanup;
     } else {
-	/* Use the TGT name for the client's realm. */
-	code = krb5int_tgtname(context, &client->realm, &client->realm,
-			       &server);
-	if (code != 0)
-	    goto cleanup;
+        /* Use the TGT name for the client's realm. */
+        code = krb5int_tgtname(context, &client->realm, &client->realm,
+                               &server);
+        if (code != 0)
+            goto cleanup;
     }
 
     memset(&in_creds, 0, sizeof(krb5_creds));
@@ -167,7 +167,7 @@ get_valrenewed_creds(krb5_context context, krb5_creds *out_creds,
     /* Get the validated or renewed credential from the KDC. */
     code = get_new_creds(context, ccache, &in_creds, kdcopt, &new_creds);
     if (code != 0)
-	goto cleanup;
+        goto cleanup;
 
     /* Fill in *out_creds and free the unwanted new_creds container. */
     *out_creds = *new_creds;
@@ -180,18 +180,18 @@ cleanup:
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_validated_creds(krb5_context context, krb5_creds *creds,
-			 krb5_principal client, krb5_ccache ccache,
-			 char *in_tkt_service)
+                         krb5_principal client, krb5_ccache ccache,
+                         char *in_tkt_service)
 {
     return get_valrenewed_creds(context, creds, client, ccache,
-				in_tkt_service, KDC_OPT_VALIDATE);
+                                in_tkt_service, KDC_OPT_VALIDATE);
 }
 
 krb5_error_code KRB5_CALLCONV
 krb5_get_renewed_creds(krb5_context context, krb5_creds *creds,
-		       krb5_principal client, krb5_ccache ccache,
-		       char *in_tkt_service)
+                       krb5_principal client, krb5_ccache ccache,
+                       char *in_tkt_service)
 {
     return get_valrenewed_creds(context, creds, client, ccache,
-				in_tkt_service, KDC_OPT_RENEW);
+                                in_tkt_service, KDC_OPT_RENEW);
 }

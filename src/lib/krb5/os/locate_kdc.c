@@ -186,8 +186,8 @@ add_host_to_list(struct serverlist *list, const char *hostname, int port,
 
 static krb5_error_code
 locate_srv_conf_1(krb5_context context, const krb5_data *realm,
-                       const char * name, struct serverlist *serverlist,
-                       int socktype, int udpport, int sec_udpport)
+                  const char * name, struct serverlist *serverlist,
+                  int socktype, int udpport, int sec_udpport)
 {
     const char  *realm_srv_names[4];
     char **hostlist, *host, *port, *cp;

@@ -2457,7 +2457,7 @@ kdc_handle_protected_negotiation(krb5_data *req_pkt, krb5_kdc_req *request,
     krb5_data *out = NULL;
     krb5_pa_data pa, *pa_in;
     pa_in = krb5int_find_pa_data(kdc_context, request->padata,
-                              KRB5_ENCPADATA_REQ_ENC_PA_REP);
+                                 KRB5_ENCPADATA_REQ_ENC_PA_REP);
     if (pa_in == NULL)
         return 0;
     pa.magic = KV5M_PA_DATA;
