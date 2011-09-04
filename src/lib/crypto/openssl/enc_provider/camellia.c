@@ -182,7 +182,7 @@ cts_encr(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
     krb5int_c_iov_get_block(dbuf, dlen, data, num_data, &input_pos);
 
     Camellia_set_key(key->keyblock.contents, NUM_BITS * key->keyblock.length,
-		     &enck);
+                     &enck);
 
     size = CRYPTO_cts128_encrypt((unsigned char *)dbuf, oblock, dlen, &enck,
                                  iv_cts, (cbc128_f)Camellia_cbc_encrypt);
@@ -236,7 +236,7 @@ cts_decr(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
     }
 
     Camellia_set_key(key->keyblock.contents, NUM_BITS * key->keyblock.length,
-		     &deck);
+                     &deck);
 
     krb5int_c_iov_get_block(dbuf, dlen, data, num_data, &input_pos);
 
@@ -262,7 +262,7 @@ cts_decr(krb5_key key, const krb5_data *ivec, krb5_crypto_iov *data,
 
 static krb5_error_code
 krb5int_camellia_encrypt(krb5_key key, const krb5_data *ivec,
-			 krb5_crypto_iov *data, size_t num_data)
+                         krb5_crypto_iov *data, size_t num_data)
 {
     int    ret = 0;
     int    nblocks = 0;
@@ -289,7 +289,7 @@ krb5int_camellia_encrypt(krb5_key key, const krb5_data *ivec,
 
 static krb5_error_code
 krb5int_camellia_decrypt(krb5_key key, const krb5_data *ivec,
-			 krb5_crypto_iov *data, size_t num_data)
+                         krb5_crypto_iov *data, size_t num_data)
 {
     int    ret = 0;
     int    nblocks = 0;
@@ -317,7 +317,7 @@ krb5int_camellia_decrypt(krb5_key key, const krb5_data *ivec,
 krb5_error_code
 krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
                          size_t num_data, const krb5_data *iv,
-			 krb5_data *output)
+                         krb5_data *output)
 {
     CAMELLIA_KEY enck;
     unsigned char blockY[CAMELLIA_BLOCK_SIZE];
@@ -340,7 +340,7 @@ krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
         unsigned char blockB[CAMELLIA_BLOCK_SIZE];
 
         if (!krb5int_c_iov_get_block(blockB, CAMELLIA_BLOCK_SIZE, data,
-				     num_data, &iov_state))
+                                     num_data, &iov_state))
             break;
 
         xorblock(blockB, blockY);
@@ -356,7 +356,7 @@ krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
 
 static krb5_error_code
 krb5int_camellia_init_state (const krb5_keyblock *key, krb5_keyusage usage,
-			     krb5_data *state)
+                             krb5_data *state)
 {
     state->length = 16;
     state->data = (void *) malloc(16);
@@ -392,7 +392,7 @@ const struct krb5_enc_provider krb5int_enc_camellia256 = {
 krb5_error_code
 krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
                          size_t num_data, const krb5_data *iv,
-			 krb5_data *output)
+                         krb5_data *output)
 {
     return EINVAL;
 }

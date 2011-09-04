@@ -43,7 +43,7 @@ mk_xorkey(krb5_key origkey, krb5_key *xorkey)
 
     xorbytes = malloc(origkey->keyblock.length);
     if (xorbytes == NULL)
-	return ENOMEM;
+        return ENOMEM;
     memcpy(xorbytes, origkey->keyblock.contents, origkey->keyblock.length);
     for (i = 0; i < origkey->keyblock.length; i++)
         xorbytes[i] ^= 0xf0;
@@ -85,13 +85,13 @@ krb5int_confounder_checksum(const struct krb5_cksumtypes *ctp,
     /* Hash the confounder, then the input data. */
     hash_iov = k5alloc((num_data + 1) * sizeof(krb5_crypto_iov), &ret);
     if (hash_iov == NULL)
-	goto cleanup;
+        goto cleanup;
     hash_iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
     hash_iov[0].data = conf;
     memcpy(hash_iov + 1, data, num_data * sizeof(krb5_crypto_iov));
     ret = ctp->hash->hash(hash_iov, num_data + 1, &hashval);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     /* Confounder and hash are in output buffer; encrypt them in place. */
     iov.flags = KRB5_CRYPTO_TYPE_DATA;
@@ -120,11 +120,11 @@ krb5_error_code krb5int_confounder_verify(const struct krb5_cksumtypes *ctp,
 
     plaintext = k5alloc(input->length, &ret);
     if (plaintext == NULL)
-	return ret;
+        return ret;
 
     ret = mk_xorkey(key, &xorkey);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     /* Decrypt the input checksum. */
     iov.flags = KRB5_CRYPTO_TYPE_DATA;
@@ -137,16 +137,16 @@ krb5_error_code krb5int_confounder_verify(const struct krb5_cksumtypes *ctp,
     /* Hash the confounder, then the input data. */
     hash_iov = k5alloc((num_data + 1) * sizeof(krb5_crypto_iov), &ret);
     if (hash_iov == NULL)
-	goto cleanup;
+        goto cleanup;
     hash_iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
     hash_iov[0].data = make_data(plaintext, blocksize);
     memcpy(hash_iov + 1, data, num_data * sizeof(krb5_crypto_iov));
     ret = alloc_data(&computed, hashsize);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
     ret = ctp->hash->hash(hash_iov, num_data + 1, &computed);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     /* Compare the decrypted hash to the computed one. */
     *valid = (memcmp(plaintext + blocksize, computed.data, hashsize) == 0);

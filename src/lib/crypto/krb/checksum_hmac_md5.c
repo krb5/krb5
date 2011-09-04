@@ -49,37 +49,37 @@ krb5_error_code krb5int_hmacmd5_checksum(const struct krb5_cksumtypes *ctp,
     if (key == NULL || key->keyblock.length > ctp->hash->blocksize)
         return KRB5_BAD_ENCTYPE;
     if (ctp->ctype == CKSUMTYPE_HMAC_MD5_ARCFOUR) {
-	/* Compute HMAC(key, "signaturekey\0") to get the signing key ks. */
+        /* Compute HMAC(key, "signaturekey\0") to get the signing key ks. */
         ret = alloc_data(&ds, ctp->hash->hashsize);
-	if (ret != 0)
-	    goto cleanup;
+        if (ret != 0)
+            goto cleanup;
 
-	iov.flags = KRB5_CRYPTO_TYPE_DATA;
-	iov.data = make_data("signaturekey", 13);
-	ret = krb5int_hmac(ctp->hash, key, &iov, 1, &ds);
-	if (ret)
-	    goto cleanup;
-	ks.length = key->keyblock.length;
-	ks.contents = (krb5_octet *) ds.data;
-	keyblock = &ks;
+        iov.flags = KRB5_CRYPTO_TYPE_DATA;
+        iov.data = make_data("signaturekey", 13);
+        ret = krb5int_hmac(ctp->hash, key, &iov, 1, &ds);
+        if (ret)
+            goto cleanup;
+        ks.length = key->keyblock.length;
+        ks.contents = (krb5_octet *) ds.data;
+        keyblock = &ks;
     } else  /* For md5-hmac, just use the key. */
-	keyblock = &key->keyblock;
+        keyblock = &key->keyblock;
 
     /* Compute the MD5 value of the input. */
     ms_usage = krb5int_arcfour_translate_usage(usage);
     store_32_le(ms_usage, t);
     hash_iov = k5alloc((num_data + 1) * sizeof(krb5_crypto_iov), &ret);
     if (hash_iov == NULL)
-	goto cleanup;
+        goto cleanup;
     hash_iov[0].flags = KRB5_CRYPTO_TYPE_DATA;
     hash_iov[0].data = make_data(t, 4);
     memcpy(hash_iov + 1, data, num_data * sizeof(krb5_crypto_iov));
     ret = alloc_data(&hashval, ctp->hash->hashsize);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
     ret = ctp->hash->hash(hash_iov, num_data + 1, &hashval);
     if (ret != 0)
-	goto cleanup;
+        goto cleanup;
 
     /* Compute HMAC(ks, md5value). */
     iov.flags = KRB5_CRYPTO_TYPE_DATA;

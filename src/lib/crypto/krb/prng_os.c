@@ -44,9 +44,9 @@ k5_prng_init(void)
      * okay. */
     fd = open(DEVICE, O_RDWR, 0);
     if (fd == -1)
-	fd = open(DEVICE, O_RDONLY, 0);
+        fd = open(DEVICE, O_RDONLY, 0);
     if (fd == -1)
-	return errno;
+        return errno;
     return 0;
 }
 
@@ -81,13 +81,13 @@ krb5_c_random_make_octets(krb5_context context, krb5_data *outdata)
     ssize_t count;
 
     while (len > 0) {
-	count = read(fd, buf, len);
-	if (count == 0)         /* Not expected from a random device. */
-	    return KRB5_CRYPTO_INTERNAL;
-	if (count == -1)
-	    return errno;
-	buf += count;
-	len -= count;
+        count = read(fd, buf, len);
+        if (count == 0)         /* Not expected from a random device. */
+            return KRB5_CRYPTO_INTERNAL;
+        if (count == -1)
+            return errno;
+        buf += count;
+        len -= count;
     }
     return 0;
 }

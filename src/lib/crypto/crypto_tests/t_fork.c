@@ -40,8 +40,8 @@ static void
 t(krb5_error_code code)
 {
     if (code != 0) {
-	fprintf(stderr, "Failure: %s\n", krb5_get_error_message(ctx, code));
-	exit(1);
+        fprintf(stderr, "Failure: %s\n", krb5_get_error_message(ctx, code));
+        exit(1);
     }
 }
 
@@ -103,11 +103,11 @@ main()
 
     /* If we're the parent, make sure the child succeeded. */
     if (pid != 0) {
-	assert(wait(&status) == pid);
-	if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
-	    fprintf(stderr, "Child failed with status %d\n", status);
-	    return 1;
-	}
+        assert(wait(&status) == pid);
+        if (!WIFEXITED(status) || WEXITSTATUS(status) != 0) {
+            fprintf(stderr, "Child failed with status %d\n", status);
+            return 1;
+        }
     }
 
     return 0;

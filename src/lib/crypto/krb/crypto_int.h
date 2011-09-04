@@ -173,65 +173,65 @@ extern const size_t krb5int_cksumtypes_length;
 
 /* Length */
 unsigned int krb5int_old_crypto_length(const struct krb5_keytypes *ktp,
-				       krb5_cryptotype type);
+                                       krb5_cryptotype type);
 unsigned int krb5int_raw_crypto_length(const struct krb5_keytypes *ktp,
-				       krb5_cryptotype type);
+                                       krb5_cryptotype type);
 unsigned int krb5int_arcfour_crypto_length(const struct krb5_keytypes *ktp,
-					   krb5_cryptotype type);
+                                           krb5_cryptotype type);
 unsigned int krb5int_dk_crypto_length(const struct krb5_keytypes *ktp,
-				      krb5_cryptotype type);
+                                      krb5_cryptotype type);
 unsigned int krb5int_aes_crypto_length(const struct krb5_keytypes *ktp,
-				       krb5_cryptotype type);
+                                       krb5_cryptotype type);
 unsigned int krb5int_camellia_crypto_length(const struct krb5_keytypes *ktp,
-					    krb5_cryptotype type);
+                                            krb5_cryptotype type);
 
 /* Encrypt */
 krb5_error_code krb5int_old_encrypt(const struct krb5_keytypes *ktp,
-				    krb5_key key, krb5_keyusage usage,
-				    const krb5_data *ivec,
-				    krb5_crypto_iov *data, size_t num_data);
+                                    krb5_key key, krb5_keyusage usage,
+                                    const krb5_data *ivec,
+                                    krb5_crypto_iov *data, size_t num_data);
 krb5_error_code krb5int_raw_encrypt(const struct krb5_keytypes *ktp,
-				    krb5_key key, krb5_keyusage usage,
-				    const krb5_data *ivec,
-				    krb5_crypto_iov *data, size_t num_data);
+                                    krb5_key key, krb5_keyusage usage,
+                                    const krb5_data *ivec,
+                                    krb5_crypto_iov *data, size_t num_data);
 krb5_error_code krb5int_arcfour_encrypt(const struct krb5_keytypes *ktp,
-					krb5_key key, krb5_keyusage usage,
-					const krb5_data *ivec,
-					krb5_crypto_iov *data,
-					size_t num_data);
+                                        krb5_key key, krb5_keyusage usage,
+                                        const krb5_data *ivec,
+                                        krb5_crypto_iov *data,
+                                        size_t num_data);
 krb5_error_code krb5int_dk_encrypt(const struct krb5_keytypes *ktp,
-				   krb5_key key, krb5_keyusage usage,
-				   const krb5_data *ivec,
-				   krb5_crypto_iov *data, size_t num_data);
+                                   krb5_key key, krb5_keyusage usage,
+                                   const krb5_data *ivec,
+                                   krb5_crypto_iov *data, size_t num_data);
 krb5_error_code krb5int_dk_cmac_encrypt(const struct krb5_keytypes *ktp,
-					krb5_key key, krb5_keyusage usage,
-					const krb5_data *ivec,
-					krb5_crypto_iov *data,
-					size_t num_data);
+                                        krb5_key key, krb5_keyusage usage,
+                                        const krb5_data *ivec,
+                                        krb5_crypto_iov *data,
+                                        size_t num_data);
 
 /* Decrypt */
 krb5_error_code krb5int_old_decrypt(const struct krb5_keytypes *ktp,
-				    krb5_key key, krb5_keyusage usage,
-				    const krb5_data *ivec,
-				    krb5_crypto_iov *data, size_t num_data);
+                                    krb5_key key, krb5_keyusage usage,
+                                    const krb5_data *ivec,
+                                    krb5_crypto_iov *data, size_t num_data);
 krb5_error_code krb5int_raw_decrypt(const struct krb5_keytypes *ktp,
-				    krb5_key key, krb5_keyusage usage,
-				    const krb5_data *ivec,
-				    krb5_crypto_iov *data, size_t num_data);
+                                    krb5_key key, krb5_keyusage usage,
+                                    const krb5_data *ivec,
+                                    krb5_crypto_iov *data, size_t num_data);
 krb5_error_code krb5int_arcfour_decrypt(const struct krb5_keytypes *ktp,
-					krb5_key key, krb5_keyusage usage,
-					const krb5_data *ivec,
-					krb5_crypto_iov *data,
-					size_t num_data);
+                                        krb5_key key, krb5_keyusage usage,
+                                        const krb5_data *ivec,
+                                        krb5_crypto_iov *data,
+                                        size_t num_data);
 krb5_error_code krb5int_dk_decrypt(const struct krb5_keytypes *ktp,
-				   krb5_key key, krb5_keyusage usage,
-				   const krb5_data *ivec,
-				   krb5_crypto_iov *data, size_t num_data);
+                                   krb5_key key, krb5_keyusage usage,
+                                   const krb5_data *ivec,
+                                   krb5_crypto_iov *data, size_t num_data);
 krb5_error_code krb5int_dk_cmac_decrypt(const struct krb5_keytypes *ktp,
-					krb5_key key, krb5_keyusage usage,
-					const krb5_data *ivec,
-					krb5_crypto_iov *data,
-					size_t num_data);
+                                        krb5_key key, krb5_keyusage usage,
+                                        const krb5_data *ivec,
+                                        krb5_crypto_iov *data,
+                                        size_t num_data);
 
 /* String to key */
 krb5_error_code krb5int_des_string_to_key(const struct krb5_keytypes *ktp,
@@ -240,46 +240,46 @@ krb5_error_code krb5int_des_string_to_key(const struct krb5_keytypes *ktp,
                                           const krb5_data *params,
                                           krb5_keyblock *key);
 krb5_error_code krb5int_arcfour_string_to_key(const struct krb5_keytypes *ktp,
-					      const krb5_data *string,
-					      const krb5_data *salt,
-					      const krb5_data *params,
-					      krb5_keyblock *key);
+                                              const krb5_data *string,
+                                              const krb5_data *salt,
+                                              const krb5_data *params,
+                                              krb5_keyblock *key);
 krb5_error_code krb5int_dk_string_to_key(const struct krb5_keytypes *enc,
-					 const krb5_data *string,
-					 const krb5_data *salt,
-					 const krb5_data *params,
-					 krb5_keyblock *key);
+                                         const krb5_data *string,
+                                         const krb5_data *salt,
+                                         const krb5_data *params,
+                                         krb5_keyblock *key);
 krb5_error_code krb5int_aes_string_to_key(const struct krb5_keytypes *enc,
-					  const krb5_data *string,
-					  const krb5_data *salt,
-					  const krb5_data *params,
-					  krb5_keyblock *key);
+                                          const krb5_data *string,
+                                          const krb5_data *salt,
+                                          const krb5_data *params,
+                                          krb5_keyblock *key);
 krb5_error_code krb5int_camellia_string_to_key(const struct krb5_keytypes *enc,
-					       const krb5_data *string,
-					       const krb5_data *salt,
-					       const krb5_data *params,
-					       krb5_keyblock *key);
+                                               const krb5_data *string,
+                                               const krb5_data *salt,
+                                               const krb5_data *params,
+                                               krb5_keyblock *key);
 
 /* Random to key */
 krb5_error_code k5_rand2key_direct(const krb5_data *randombits,
-				   krb5_keyblock *keyblock);
+                                   krb5_keyblock *keyblock);
 krb5_error_code k5_rand2key_des(const krb5_data *randombits,
-				krb5_keyblock *keyblock);
+                                krb5_keyblock *keyblock);
 krb5_error_code k5_rand2key_des3(const krb5_data *randombits,
-				 krb5_keyblock *keyblock);
+                                 krb5_keyblock *keyblock);
 
 /* Pseudo-random function */
 krb5_error_code krb5int_des_prf(const struct krb5_keytypes *ktp,
-				krb5_key key, const krb5_data *in,
-				krb5_data *out);
+                                krb5_key key, const krb5_data *in,
+                                krb5_data *out);
 krb5_error_code krb5int_arcfour_prf(const struct krb5_keytypes *ktp,
-				    krb5_key key, const krb5_data *in,
-				    krb5_data *out);
+                                    krb5_key key, const krb5_data *in,
+                                    krb5_data *out);
 krb5_error_code krb5int_dk_prf(const struct krb5_keytypes *ktp, krb5_key key,
-			       const krb5_data *in, krb5_data *out);
+                               const krb5_data *in, krb5_data *out);
 krb5_error_code krb5int_dk_cmac_prf(const struct krb5_keytypes *ktp,
-				    krb5_key key, const krb5_data *in,
-				    krb5_data *out);
+                                    krb5_key key, const krb5_data *in,
+                                    krb5_data *out);
 
 /*** Prototypes for cksumtype handler functions ***/
 
@@ -299,13 +299,13 @@ krb5_error_code krb5int_hmacmd5_checksum(const struct krb5_cksumtypes *ctp,
                                          size_t num_data,
                                          krb5_data *output);
 krb5_error_code krb5int_dk_checksum(const struct krb5_cksumtypes *ctp,
-				    krb5_key key, krb5_keyusage usage,
-				    const krb5_crypto_iov *data,
-				    size_t num_data, krb5_data *output);
+                                    krb5_key key, krb5_keyusage usage,
+                                    const krb5_crypto_iov *data,
+                                    size_t num_data, krb5_data *output);
 krb5_error_code krb5int_dk_cmac_checksum(const struct krb5_cksumtypes *ctp,
-					 krb5_key key, krb5_keyusage usage,
-					 const krb5_crypto_iov *data,
-					 size_t num_data, krb5_data *output);
+                                         krb5_key key, krb5_keyusage usage,
+                                         const krb5_crypto_iov *data,
+                                         size_t num_data, krb5_data *output);
 krb5_error_code krb5int_confounder_checksum(const struct krb5_cksumtypes *ctp,
                                             krb5_key key, krb5_keyusage usage,
                                             const krb5_crypto_iov *data,
@@ -329,17 +329,17 @@ enum deriv_alg {
 };
 
 krb5_error_code krb5int_derive_keyblock(const struct krb5_enc_provider *enc,
-					krb5_key inkey, krb5_keyblock *outkey,
-					const krb5_data *in_constant,
-					enum deriv_alg alg);
+                                        krb5_key inkey, krb5_keyblock *outkey,
+                                        const krb5_data *in_constant,
+                                        enum deriv_alg alg);
 krb5_error_code krb5int_derive_key(const struct krb5_enc_provider *enc,
-				   krb5_key inkey, krb5_key *outkey,
-				   const krb5_data *in_constant,
-				   enum deriv_alg alg);
+                                   krb5_key inkey, krb5_key *outkey,
+                                   const krb5_data *in_constant,
+                                   enum deriv_alg alg);
 krb5_error_code krb5int_derive_random(const struct krb5_enc_provider *enc,
-				      krb5_key inkey, krb5_data *outrnd,
-				      const krb5_data *in_constant,
-				      enum deriv_alg alg);
+                                      krb5_key inkey, krb5_data *outrnd,
+                                      const krb5_data *in_constant,
+                                      enum deriv_alg alg);
 
 /*** Miscellaneous prototypes ***/
 
@@ -399,17 +399,17 @@ struct iov_block_state {
                                          (_state)->pad_to_boundary = 0)
 
 krb5_crypto_iov *krb5int_c_locate_iov(krb5_crypto_iov *data, size_t num_data,
-				      krb5_cryptotype type);
+                                      krb5_cryptotype type);
 
 krb5_error_code krb5int_c_iov_decrypt_stream(const struct krb5_keytypes *ktp,
-					     krb5_key key,
-					     krb5_keyusage keyusage,
-					     const krb5_data *ivec,
-					     krb5_crypto_iov *data,
-					     size_t num_data);
+                                             krb5_key key,
+                                             krb5_keyusage keyusage,
+                                             const krb5_data *ivec,
+                                             krb5_crypto_iov *data,
+                                             size_t num_data);
 
 unsigned int krb5int_c_padding_length(const struct krb5_keytypes *ktp,
-				      size_t data_length);
+                                      size_t data_length);
 
 /*** Crypto module declarations ***/
 

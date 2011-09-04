@@ -35,7 +35,7 @@
 
 unsigned int
 krb5int_camellia_crypto_length(const struct krb5_keytypes *ktp,
-			       krb5_cryptotype type)
+                               krb5_cryptotype type)
 {
     switch (type) {
     case KRB5_CRYPTO_TYPE_HEADER:
@@ -54,7 +54,7 @@ krb5int_camellia_crypto_length(const struct krb5_keytypes *ktp,
 /* Derive encryption and integrity keys for CMAC-using enctypes. */
 static krb5_error_code
 derive_keys(const struct krb5_enc_provider *enc, krb5_key key,
-	    krb5_keyusage usage, krb5_key *ke_out, krb5_key *ki_out)
+            krb5_keyusage usage, krb5_key *ke_out, krb5_key *ki_out)
 {
     krb5_error_code ret;
     unsigned char buf[K5CLENGTH];
@@ -68,14 +68,14 @@ derive_keys(const struct krb5_enc_provider *enc, krb5_key key,
     buf[4] = 0xAA;
     ret = krb5int_derive_key(enc, key, &ke, &constant, DERIVE_SP800_108_CMAC);
     if (ret != 0)
-	return ret;
+        return ret;
 
     /* Derive the integrity key. */
     buf[4] = 0x55;
     ret = krb5int_derive_key(enc, key, &ki, &constant, DERIVE_SP800_108_CMAC);
     if (ret != 0) {
-	krb5_k_free_key(NULL, ke);
-	return ret;
+        krb5_k_free_key(NULL, ke);
+        return ret;
     }
 
     *ke_out = ke;
@@ -85,8 +85,8 @@ derive_keys(const struct krb5_enc_provider *enc, krb5_key key,
 
 krb5_error_code
 krb5int_dk_cmac_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
-			krb5_keyusage usage, const krb5_data *ivec,
-			krb5_crypto_iov *data, size_t num_data)
+                        krb5_keyusage usage, const krb5_data *ivec,
+                        krb5_crypto_iov *data, size_t num_data)
 {
     const struct krb5_enc_provider *enc = ktp->enc;
     krb5_error_code ret;
@@ -105,7 +105,7 @@ krb5int_dk_cmac_encrypt(const struct krb5_keytypes *ktp, krb5_key key,
         return KRB5_BAD_MSIZE;
     padding = krb5int_c_locate_iov(data, num_data, KRB5_CRYPTO_TYPE_PADDING);
     if (padding != NULL)
-	padding->data.length = 0;
+        padding->data.length = 0;
 
     /* Derive the encryption and integrity keys. */
     ret = derive_keys(enc, key, usage, &ke, &ki);

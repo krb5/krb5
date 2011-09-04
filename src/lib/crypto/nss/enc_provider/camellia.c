@@ -40,7 +40,7 @@
 
 static krb5_error_code
 krb5int_camellia_encrypt(krb5_key key, const krb5_data *ivec,
-			 krb5_crypto_iov *data, size_t num_data)
+                         krb5_crypto_iov *data, size_t num_data)
 {
     krb5_error_code ret;
 
@@ -53,7 +53,7 @@ krb5int_camellia_encrypt(krb5_key key, const krb5_data *ivec,
 
 static krb5_error_code
 krb5int_camellia_decrypt(krb5_key key, const krb5_data *ivec,
-			 krb5_crypto_iov *data, size_t num_data)
+                         krb5_crypto_iov *data, size_t num_data)
 {
     krb5_error_code ret;
 
@@ -121,7 +121,7 @@ const struct krb5_enc_provider krb5int_enc_camellia256 = {
 krb5_error_code
 krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
                          size_t num_data, const krb5_data *iv,
-			 krb5_data *output)
+                         krb5_data *output)
 {
     return EINVAL;
 }

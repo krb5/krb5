@@ -645,10 +645,10 @@ main(int argc, char **argv)
 
     for (i = 0; i < sizeof(test_cases) / sizeof(*test_cases); i++) {
         test = &test_cases[i];
-	kb.magic = KV5M_KEYBLOCK;
-	kb.enctype = test->enctype;
-	kb.length = test->keybits.length;
-	kb.contents = (unsigned char *)test->keybits.data;
+        kb.magic = KV5M_KEYBLOCK;
+        kb.enctype = test->enctype;
+        kb.length = test->keybits.length;
+        kb.contents = (unsigned char *)test->keybits.data;
         assert(alloc_data(&plain, test->ciphertext.length) == 0);
         enc.magic = KV5M_ENC_DATA;
         enc.enctype = test->enctype;
