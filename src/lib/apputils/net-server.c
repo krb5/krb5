@@ -486,7 +486,8 @@ static verto_ev *
 make_event(verto_ctx *ctx, verto_ev_flag flags, verto_callback callback,
            int sock, struct connection *conn, int addevent)
 {
-    verto_ev *ev, *tmp;
+    verto_ev *ev;
+    void *tmp;
 
     ev = verto_add_io(ctx, flags, callback, sock);
     if (!ev) {
