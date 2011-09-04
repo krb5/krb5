@@ -5,7 +5,9 @@
  */
 
 #include "iprop.h"
-#include "iprop.h"
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#endif
 
 bool_t
 xdr_int16_t (XDR *xdrs, int16_t *objp)
