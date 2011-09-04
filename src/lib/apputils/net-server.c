@@ -937,7 +937,7 @@ setup_udp_pktinfo_ports(struct socksetup *data)
 }
 #else /* no pktinfo compile-time support */
 static void
-setup_udp_pktinfo_ports(verto_ctx *ctx, struct socksetup *data)
+setup_udp_pktinfo_ports(struct socksetup *data)
 {
 }
 #endif
