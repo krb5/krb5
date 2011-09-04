@@ -148,14 +148,14 @@ pmap_unset(
 	rpcvers_t version)
 {
 	struct sockaddr_in myaddress;
-	int socket = -1;
+	int sock = -1;
 	register CLIENT *client;
 	struct pmap parms;
 	bool_t rslt;
 
 	get_myaddress(&myaddress);
 	client = clntudp_bufcreate(&myaddress, PMAPPROG, PMAPVERS,
-	    timeout, &socket, RPCSMALLMSGSIZE, RPCSMALLMSGSIZE);
+	    timeout, &sock, RPCSMALLMSGSIZE, RPCSMALLMSGSIZE);
 	if (client == (CLIENT *)NULL)
 		return (FALSE);
 	parms.pm_prog = program;
@@ -164,6 +164,6 @@ pmap_unset(
 	CLNT_CALL(client, PMAPPROC_UNSET, xdr_pmap, &parms, xdr_bool, &rslt,
 	    tottimeout);
 	CLNT_DESTROY(client);
-	(void)close(socket);
+	(void)close(sock);
 	return (rslt);
 }
