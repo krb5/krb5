@@ -1245,13 +1245,14 @@ loop_setup_routing_socket(verto_ctx *ctx, void *handle, const char *progname)
 {
 #ifdef HAVE_STRUCT_RT_MSGHDR
     struct socksetup data;
+    int sock;
 
     data.ctx = ctx;
     data.handle = handle;
     data.prog = progname;
     data.retval = 0;
 
-    int sock = socket(PF_ROUTE, SOCK_RAW, 0);
+    sock = socket(PF_ROUTE, SOCK_RAW, 0);
     if (sock < 0) {
         int e = errno;
         krb5_klog_syslog(LOG_INFO, _("couldn't set up routing socket: %s"),
