@@ -10,10 +10,6 @@
  * Use is subject to license terms.
  */
 
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "k5-int.h"

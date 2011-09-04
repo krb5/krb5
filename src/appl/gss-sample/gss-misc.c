@@ -44,10 +44,6 @@
  * or implied warranty.
  */
 
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
-
 #include <stdio.h>
 #ifdef _WIN32
 #include <windows.h>

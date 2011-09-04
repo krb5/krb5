@@ -5,10 +5,6 @@
  * $Header$
  */
 
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
-
 #include    <gssrpc/rpc.h>
 #include    <kadm5/admin.h>
 #include    <kadm5/kadm_rpc.h>

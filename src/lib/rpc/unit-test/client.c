@@ -5,10 +5,6 @@
  *
  */
 
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
-
 #include <stdio.h>
 #include <string.h>
 #include "autoconf.h"

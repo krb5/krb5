@@ -5,10 +5,6 @@
  * $Header$
  */
 
-#if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header$";
-#endif
-
 #include "autoconf.h"
 #if defined(HAVE_COMPILE) && defined(HAVE_STEP)
 #define SOLARIS_REGEXPS
