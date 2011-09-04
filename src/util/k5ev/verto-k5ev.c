@@ -34,6 +34,8 @@
 #include "rename.h"
 #include "autoconf.h"
 #define EV_STANDALONE 1
+/* Avoids using clock_gettime; we probably shouldn't have to do this. */
+#define EV_USE_REALTIME 0
 #define EV_FEATURES 0x5f        /* Everything but back ends */
 #ifdef HAVE_POLL_H
 #define EV_USE_POLL 1
