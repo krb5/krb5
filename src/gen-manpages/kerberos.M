@@ -1,4 +1,4 @@
-.\" Copyright 1989 by the Massachusetts Institute of Technology.
+.\" Copyright 1989, 2011 by the Massachusetts Institute of Technology.
 .\"
 .\" For copying and distribution information,
 .\" please see the file <mit-copyright.h>.
@@ -9,16 +9,7 @@ kerberos \- introduction to the Kerberos system
 .SH DESCRIPTION
 The Kerberos system authenticates individual users in a network
 environment.  After authenticating yourself to Kerberos, you can use
-network utilities such as
-.IR rlogin ,
-.IR rcp ,
-and
-.IR rsh
-without having to present passwords to remote hosts and without having
-to bother with
-.I \.rhosts
-files.  Note that these utilities will work without passwords only if
-the remote machines you deal with support the Kerberos system.
+Kerberos-enabled programs without having to present passwords.
 .PP
 If you enter your username and
 .I kinit
@@ -107,37 +98,66 @@ tickets when you
 .IR kinit .
 Once you have forwardable tickets, most Kerberos programs have a command
 line option to forward them to the remote host.
+.SH "ENVIRONMENT VARIABLES"
+Several environment variables affect the operation of Kerberos-enabled
+programs.  These include:
+.TP
+.B KRB5CCNAME
+Specifies the location of the credential cache, in the form
+\fITYPE\fP:\fIresidual\fP.  If no type prefix is present, the
+\fBFILE\fP type is assumed and \fIresidual\fP is the pathname of the
+cache file.  A collection of multiple caches may be used by specifying
+the \fBDIR\fP type and the pathname of a private directory (which must
+already exist).  The default cache file is /tmp/krb5cc_\fIuid\fP where
+\fIuid\fP is the decimal user ID of the user.
+.TP
+.B KRB5_KTNAME
+Specifies the location of the keytab file, in the form
+\fITYPE\fP:\fIresidual\fP.  If no type is present, the \fBFILE\fP type
+is assumed and \fIresidual\fP is the pathname of the keytab file.  The
+default keytab file is /etc/krb5.keytab.
+.TP
+.B KRB5_CONFIG
+Specifies the location of the Kerberos configuration file.  The
+default is /etc/krb5.conf.
+.TP
+.B KRB5_KDC_PROFILE
+Specifies the location of the KDC configuration file, which contains
+additional configuration directives for the Key Distribution Center
+daemon and associated programs.  The default is
+/usr/local/var/krb5kdc/kdc.conf.
+.TP
+.B KRB5RCACHETYPE
+Specifies the default type of replay cache to use for servers.  Valid
+types include "dfl" for the normal file type and "none" for no replay
+cache.
+.B KRB5RCACHEDIR
+Specifies the default directory for replay caches used by servers.
+The default is the value of the \fBTMPDIR\fP environment variable, or
+/var/tmp if \fBTMPDIR\fP is not set.
+.TP
+.B KRB5_TRACE
+Specifies a filename to write trace log output to.  Trace logs can
+help illuminate decisions made internally by the Kerberos libraries.
+The default is not to write trace log output anywhere.
 .PP
-Currently, Kerberos support is available for the following network
-services:
-.IR rlogin ,
-.IR rsh ,
-.IR rcp ,
-.IR telnet ,
-.IR ftp ,
-.I krdist
-(a Kerberized version of
-.IR rdist ),
-.I ksu
-(a Kerberized version of
-.IR su ),
-.IR login ,
-and
-.IR Xdm .
+Most environment variables are disabled for certain programs, such as
+login system programs and setuid programs, which are designed to be
+secure when run within an untrusted process environment.
 .SH "SEE ALSO"
-kdestroy(1), kinit(1), klist(1), kpasswd(1), rsh (1), rcp(1), rlogin(1),
-telnet(1), ftp(1), krdist(1), ksu(1), sclient(1), xdm(1), des_crypt(3),
-hash(3), krb5strings(3), krb5.conf(5), kdc.conf(5), kadmin(8),
-kadmind(8), kdb5_util(8), telnetd(8), ftpd(8), rdistd(8), sserver(8),
-klogind(8c), kshd(8c), login(8c)
+kdestroy(1), kinit(1), klist(1), kswitch(1), kpasswd(1), ksu(1),
+krb5.conf(5), kdc.conf(5), kadmin(1), kadmind(8), kdb5_util(8),
+krb5kdc(8)
 .SH BUGS
 .SH AUTHORS
 Steve Miller, MIT Project Athena/Digital Equipment Corporation
 .br
 Clifford Neuman, MIT Project Athena
+.br
+Greg Hudson, MIT Kerberos Consortium
 .SH HISTORY
-Kerberos was developed at MIT.  OpenVision rewrote and donated the
-administration server, which is used in the current version of Kerberos
-5.
+The MIT Kerberos 5 implementation was developed at MIT, with
+contributions from many outside parties.  It is currently maintained
+by the MIT Kerberos Consortium.
 .SH RESTRICTIONS
-Copyright 1985,1986,1989-1996,2002 Massachusetts Institute of Technology
+Copyright 1985,1986,1989-1996,2002,2011 Massachusetts Institute of Technology
