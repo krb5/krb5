@@ -262,6 +262,229 @@ acquire_accept_cred(krb5_context context,
 }
 #endif /* LEAN_CLIENT */
 
+#ifdef USE_KIM
+krb5_error_code
+get_ccache_kim(krb5_context context, krb5_principal desired_princ,
+               krb5_ccache *ccache_out)
+{
+    kim_error err;
+    kim_ccache kimccache = NULL;
+    kim_identity identity = NULL;
+    kim_credential_state state;
+    krb5_ccache ccache;
+
+    *ccache_out = NULL;
+
+    err = kim_identity_create_from_krb5_principal(&identity, context,
+                                                  desired_princ);
+    if (err)
+        goto cleanup;
+
+    err = kim_ccache_create_from_client_identity(&kimccache, identity);
+    if (err)
+        goto cleanup;
+
+    err = kim_ccache_get_state(kimccache, &state);
+    if (err)
+        goto cleanup;
+
+    if (state != kim_credentials_state_valid) {
+        if (state == kim_credentials_state_needs_validation) {
+            err = kim_ccache_validate(kimccache, KIM_OPTIONS_DEFAULT);
+            if (err)
+                goto cleanup;
+        } else {
+            kim_ccache_free(&kimccache);
+        }
+    }
+
+    if (!kimccache && kim_library_allow_automatic_prompting()) {
+        /* ccache does not already exist, create a new one. */
+        err = kim_ccache_create_new(&kimccache, identity, KIM_OPTIONS_DEFAULT);
+        if (err)
+            goto cleanup;
+    }
+
+    err = kim_ccache_get_krb5_ccache(kimccache, context, &ccache);
+    if (err)
+        goto cleanup;
+
+    *ccache_out = ccache;
+
+cleanup:
+    kim_ccache_free(&kimccache);
+    kim_identity_free(&identity);
+    return err;
+}
+#endif /* USE_KIM */
+
+#ifdef USE_LEASH
+static krb5_error_code
+get_ccache_leash(krb5_context context, krb5_principal desired_princ,
+                 krb5_ccache *ccache_out)
+{
+    krb5_error_code code;
+    krb5_ccache ccache;
+    char ccname[256] = "";
+
+    *ccache_out = NULL;
+
+    if (hLeashDLL == INVALID_HANDLE_VALUE) {
+        hLeashDLL = LoadLibrary(LEASH_DLL);
+        if (hLeashDLL != INVALID_HANDLE_VALUE) {
+            (FARPROC) pLeash_AcquireInitialTicketsIfNeeded =
+                GetProcAddress(hLeashDLL, "not_an_API_Leash_AcquireInitialTicketsIfNeeded");
+        }
+    }
+
+    if (pLeash_AcquireInitialTicketsIfNeeded) {
+        pLeash_AcquireInitialTicketsIfNeeded(context, desired_princ, ccname,
+                                             sizeof(ccname));
+        if (!ccname[0])
+            return KRB5_CC_NOTFOUND;
+
+        code = krb5_cc_resolve(context, ccname, &ccache);
+        if (code)
+            return code;
+    } else {
+        /* leash dll not available, open the default credential cache. */
+        code = krb5int_cc_default(context, &ccache);
+        if (code)
+            return code;
+    }
+
+    *ccache_out = ccache;
+    return 0;
+}
+#endif /* USE_LEASH */
+
+/* Prepare to acquire credentials into ccache using password at
+ * init_sec_context time.  On success, cred takes ownership of ccache. */
+static krb5_error_code
+prep_ccache(krb5_context context, krb5_gss_cred_id_rec *cred,
+            krb5_ccache ccache, krb5_principal desired_princ,
+            gss_buffer_t password)
+{
+    krb5_error_code code;
+    krb5_principal ccache_princ;
+    krb5_data password_data = make_data(password->value, password->length);
+
+    /* Check the ccache principal or initialize a new cache. */
+    code = krb5_cc_get_principal(context, ccache, &ccache_princ);
+    if (code == 0) {
+        if (!krb5_principal_compare(context, ccache_princ, desired_princ))
+            return KG_CCACHE_NOMATCH;
+    } else if (code == KRB5_FCC_NOFILE) {
+        /* Cache file does not exist; create and initialize one. */
+        code = krb5_cc_initialize(context, ccache, desired_princ);
+        if (code)
+            return code;
+    } else
+        return code;
+
+    /* Save the desired principal as the credential name if not already set. */
+    if (!cred->name) {
+        code = kg_init_name(context, desired_princ, NULL, NULL, NULL, 0,
+                            &cred->name);
+        if (code)
+            return code;
+    }
+
+    /* Stash the password for later. */
+    code = krb5int_copy_data_contents_add0(context, &password_data,
+                                           &cred->password);
+    if (code)
+        return code;
+
+    cred->ccache = ccache;
+    return 0;
+}
+
+/* Check ccache and scan it for its expiry time.  On success, cred takes
+ * ownership of ccache. */
+static krb5_error_code
+scan_ccache(krb5_context context, krb5_gss_cred_id_rec *cred,
+            krb5_ccache ccache, krb5_principal desired_princ)
+{
+    krb5_error_code code;
+    krb5_principal ccache_princ = NULL, tgt_princ = NULL;
+    krb5_data *realm;
+    krb5_cc_cursor cursor;
+    krb5_creds creds;
+    krb5_timestamp endtime;
+    int got_endtime = 0, is_tgt;
+
+    /* Turn off OPENCLOSE mode while extensive frobbing is going on. */
+    code = krb5_cc_set_flags(context, ccache, 0);
+    if (code)
+        return code;
+
+    code = krb5_cc_get_principal(context, ccache, &ccache_princ);
+    if (code != 0)
+        return code;
+
+    /* Credentials cache principal must match the initiator name. */
+    if (desired_princ != NULL &&
+        !krb5_principal_compare(context, ccache_princ, desired_princ)) {
+        code = KG_CCACHE_NOMATCH;
+        goto cleanup;
+    }
+
+    /* Save the ccache principal as the credential name if not already set. */
+    if (!cred->name) {
+        code = kg_init_name(context, ccache_princ, NULL, NULL, NULL,
+                            KG_INIT_NAME_NO_COPY, &cred->name);
+        if (code)
+            goto cleanup;
+        ccache_princ = NULL;
+    }
+
+    assert(cred->name->princ != NULL);
+    realm = krb5_princ_realm(context, cred->name->princ);
+    code = krb5_build_principal_ext(context, &tgt_princ,
+                                    realm->length, realm->data,
+                                    KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,
+                                    realm->length, realm->data,
+                                    0);
+    if (code)
+        return code;
+
+    /* If there's a tgt for the principal's local realm in here, use its expiry
+     * time.  Otherwise use the first key. */
+    code = krb5_cc_start_seq_get(context, ccache, &cursor);
+    if (code) {
+        krb5_free_principal(context, tgt_princ);
+        return code;
+    }
+    while (!(code = krb5_cc_next_cred(context, ccache, &cursor, &creds))) {
+        is_tgt = krb5_principal_compare(context, tgt_princ, creds.server);
+        endtime = creds.times.endtime;
+        krb5_free_cred_contents(context, &creds);
+        if (is_tgt || !got_endtime)
+            cred->tgt_expire = creds.times.endtime;
+        got_endtime = 1;
+        if (is_tgt)
+            break;
+    }
+    krb5_cc_end_seq_get(context, ccache, &cursor);
+    if (code && code != KRB5_CC_END)
+        goto cleanup;
+    code = 0;
+
+    if (!got_endtime) {         /* ccache is empty. */
+        code = KG_EMPTY_CCACHE;
+        goto cleanup;
+    }
+
+    (void)krb5_cc_set_flags(context, ccache, KRB5_TC_OPENCLOSE);
+    cred->ccache = ccache;
+
+cleanup:
+    krb5_free_principal(context, ccache_princ);
+    krb5_free_principal(context, tgt_princ);
+    return code;
+}
+
 /* get credentials corresponding to the default credential cache.
    If successful, set the ccache-specific fields in cred.
 */
@@ -275,269 +498,59 @@ acquire_init_cred(krb5_context context,
                   krb5_gss_cred_id_rec *cred)
 {
     krb5_error_code code;
-    krb5_ccache ccache;
-    krb5_principal ccache_princ = NULL, tmp_princ;
-    krb5_cc_cursor cur;
-    krb5_creds creds;
-    int got_endtime;
-    int caller_provided_ccache_name = 0;
-    krb5_data password_data, *cred_princ_realm;
+    krb5_ccache ccache = NULL;
+    int caller_ccname = 0;
 
     cred->ccache = NULL;
 
-    /* load the GSS ccache name into the kg_context */
-
+    /* Load the GSS ccache name, if specified, into the context. */
     if (GSS_ERROR(kg_sync_ccache_name(context, minor_status)))
         return GSS_S_FAILURE;
-
-    /* check to see if the caller provided a ccache name if so
-     * we will just use that and not search the cache collection */
-    if (GSS_ERROR(kg_caller_provided_ccache_name (minor_status, &caller_provided_ccache_name))) {
+    if (GSS_ERROR(kg_caller_provided_ccache_name(minor_status,
+                                                 &caller_ccname)))
         return GSS_S_FAILURE;
-    }
 
-#if defined(USE_KIM) || defined(USE_LEASH)
-    if (desired_princ && !caller_provided_ccache_name && !req_ccache) {
+    /* Pick a credential cache. */
+    if (req_ccache != NULL) {
+        code = krb5_cc_dup(context, req_ccache, &ccache);
+    } else if (caller_ccname) {
+        /* Caller's ccache name has been set as the context default. */
+        code = krb5int_cc_default(context, &ccache);
+    } else if (desired_princ) {
+        /* Try to find an appropriate ccache for the desired name. */
 #if defined(USE_KIM)
-        kim_error err = KIM_NO_ERROR;
-        kim_ccache kimccache = NULL;
-        kim_identity identity = NULL;
-        kim_credential_state state;
-
-        err = kim_identity_create_from_krb5_principal (&identity,
-                                                       context,
-                                                       desired_princ);
-
-        if (!err) {
-            err = kim_ccache_create_from_client_identity (&kimccache, identity);
-        }
-
-        if (!err) {
-            err = kim_ccache_get_state (kimccache, &state);
-        }
-
-        if (!err && state != kim_credentials_state_valid) {
-            if (state == kim_credentials_state_needs_validation) {
-                err = kim_ccache_validate (kimccache, KIM_OPTIONS_DEFAULT);
-            } else {
-                kim_ccache_free (&kimccache);
-                ccache = NULL;
-            }
-        }
-
-        if (!kimccache && kim_library_allow_automatic_prompting ()) {
-            /* ccache does not already exist, create a new one */
-            err = kim_ccache_create_new (&kimccache, identity,
-                                         KIM_OPTIONS_DEFAULT);
-        }
-
-        if (!err) {
-            err = kim_ccache_get_krb5_ccache (kimccache, context, &ccache);
-        }
-
-        kim_ccache_free (&kimccache);
-        kim_identity_free (&identity);
-
-        if (err) {
-            *minor_status = err;
-            return GSS_S_CRED_UNAVAIL;
-        }
-
+        code = get_ccache_kim(context, desired_princ, &ccache);
 #elif defined(USE_LEASH)
-        if ( hLeashDLL == INVALID_HANDLE_VALUE ) {
-            hLeashDLL = LoadLibrary(LEASH_DLL);
-            if ( hLeashDLL != INVALID_HANDLE_VALUE ) {
-                (FARPROC) pLeash_AcquireInitialTicketsIfNeeded =
-                    GetProcAddress(hLeashDLL, "not_an_API_Leash_AcquireInitialTicketsIfNeeded");
-            }
-        }
-
-        if ( pLeash_AcquireInitialTicketsIfNeeded ) {
-            char ccname[256]="";
-            pLeash_AcquireInitialTicketsIfNeeded(context, desired_princ, ccname, sizeof(ccname));
-            if (!ccname[0]) {
-                *minor_status = KRB5_CC_NOTFOUND;
-                return GSS_S_CRED_UNAVAIL;
-            }
-
-            if ((code = krb5_cc_resolve (context, ccname, &ccache))) {
-                *minor_status = code;
-                return GSS_S_CRED_UNAVAIL;
-            }
-        } else {
-            /* leash dll not available, open the default credential cache */
-
-            if ((code = krb5int_cc_default(context, &ccache))) {
-                *minor_status = code;
-                return GSS_S_CRED_UNAVAIL;
-            }
-        }
-#endif /* USE_LEASH */
+        code = get_ccache_leash(context, desired_princ, &ccache);
+#else
+        code = 0;
+#endif
     } else
-#endif /* USE_KIM || USE_LEASH */
-    {
-        if (req_ccache != NULL) {
-            /* Duplicate ccache handle */
-            code = krb5_cc_dup(context, req_ccache, &ccache);
-        } else {
-            /* Open the default credential cache */
-            code = krb5int_cc_default(context, &ccache);
-        }
+        code = 0;
+    if (code != 0) {
+        *minor_status = code;
+        return GSS_S_CRED_UNAVAIL;
+    }
+    if (ccache == NULL) {
+        code = krb5int_cc_default(context, &ccache);
         if (code != 0) {
             *minor_status = code;
             return GSS_S_CRED_UNAVAIL;
         }
     }
 
-    /* turn off OPENCLOSE mode while extensive frobbing is going on */
-    code = krb5_cc_set_flags(context, ccache, 0);
-    if (code == KRB5_FCC_NOFILE &&
-        password != GSS_C_NO_BUFFER && desired_princ != NULL) {
-        /* We will get initial creds later. */
-        code = krb5_cc_initialize(context, ccache, desired_princ);
-        if (code == 0)
-            code = krb5_cc_set_flags(context, ccache, 0);
-    }
+    if (password != GSS_C_NO_BUFFER && desired_princ != NULL)
+        code = prep_ccache(context, cred, ccache, desired_princ, password);
+    else
+        code = scan_ccache(context, cred, ccache, desired_princ);
     if (code != 0) {
         krb5_cc_close(context, ccache);
         *minor_status = code;
         return GSS_S_CRED_UNAVAIL;
     }
 
-    code = krb5_cc_get_principal(context, ccache, &ccache_princ);
-    if (code != 0) {
-        krb5_cc_close(context, ccache);
-        *minor_status = code;
-        return GSS_S_FAILURE;
-    }
-
-    /* Credentials cache principal must match the initiator name. */
-    if (desired_princ != NULL) {
-        if (!krb5_principal_compare(context, ccache_princ, desired_princ)) {
-            krb5_free_principal(context, ccache_princ);
-            krb5_cc_close(context, ccache);
-            *minor_status = KG_CCACHE_NOMATCH;
-            return GSS_S_CRED_UNAVAIL;
-        }
-    }
-
-    /*
-     * If we are acquiring initiator-only default credentials, then set
-     * cred->name to the credentials cache principal name.
-     */
-    if (cred->name == NULL) {
-        if ((code = kg_init_name(context, ccache_princ, NULL, NULL, NULL,
-                                 KG_INIT_NAME_NO_COPY, &cred->name))) {
-            krb5_free_principal(context, ccache_princ);
-            krb5_cc_close(context, ccache);
-            *minor_status = code;
-            return GSS_S_FAILURE;
-        }
-    } else {
-        krb5_free_principal(context, ccache_princ);
-    }
-
-    assert(cred->name->princ != NULL);
-    cred_princ_realm = krb5_princ_realm(context, cred->name->princ);
-
-    if (password != GSS_C_NO_BUFFER) {
-        /* stash the password for later */
-        password_data.length = password->length;
-        password_data.data = (char *)password->value;
-
-        code = krb5int_copy_data_contents_add0(context, &password_data,
-                                               &cred->password);
-        if (code != 0) {
-            krb5_cc_close(context, ccache);
-            *minor_status = code;
-            return GSS_S_FAILURE;
-        }
-
-        /* restore the OPENCLOSE flag */
-        code = krb5_cc_set_flags(context, ccache, KRB5_TC_OPENCLOSE);
-        if (code != 0) {
-            krb5_cc_close(context, ccache);
-            *minor_status = code;
-            return GSS_S_FAILURE;
-        }
-
-        cred->ccache = ccache;
-        return GSS_S_COMPLETE;
-    }
-
-    /* iterate over the ccache, find the tgt */
-
-    if ((code = krb5_cc_start_seq_get(context, ccache, &cur))) {
-        krb5_cc_close(context, ccache);
-        *minor_status = code;
-        return GSS_S_FAILURE;
-    }
-
-    /* this is hairy.  If there's a tgt for the principal's local realm
-       in here, that's what we want for the expire time.  But if
-       there's not, then we want to use the first key.  */
-
-    got_endtime = 0;
-
-    code = krb5_build_principal_ext(context, &tmp_princ,
-                                    cred_princ_realm->length,
-                                    cred_princ_realm->data,
-                                    KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME,
-                                    cred_princ_realm->length,
-                                    cred_princ_realm->data,
-                                    0);
-    if (code) {
-        krb5_cc_close(context, ccache);
-        *minor_status = code;
-        return GSS_S_FAILURE;
-    }
-    while (!(code = krb5_cc_next_cred(context, ccache, &cur, &creds))) {
-        if (krb5_principal_compare(context, tmp_princ, creds.server)) {
-            cred->tgt_expire = creds.times.endtime;
-            got_endtime = 1;
-            *minor_status = 0;
-            code = 0;
-            krb5_free_cred_contents(context, &creds);
-            break;
-        }
-        if (got_endtime == 0) {
-            cred->tgt_expire = creds.times.endtime;
-            got_endtime = 1;
-        }
-        krb5_free_cred_contents(context, &creds);
-    }
-    krb5_free_principal(context, tmp_princ);
-
-    if (code && code != KRB5_CC_END) {
-        /* this means some error occurred reading the ccache */
-        krb5_cc_end_seq_get(context, ccache, &cur);
-        krb5_cc_close(context, ccache);
-        *minor_status = code;
-        return GSS_S_FAILURE;
-    } else if (! got_endtime) {
-        /* this means the ccache was entirely empty */
-        krb5_cc_end_seq_get(context, ccache, &cur);
-        krb5_cc_close(context, ccache);
-        *minor_status = KG_EMPTY_CCACHE;
-        return GSS_S_FAILURE;
-    } else {
-        /* this means that we found an endtime to use. */
-        if ((code = krb5_cc_end_seq_get(context, ccache, &cur))) {
-            krb5_cc_close(context, ccache);
-            *minor_status = code;
-            return GSS_S_FAILURE;
-        }
-        if ((code = krb5_cc_set_flags(context, ccache, KRB5_TC_OPENCLOSE))) {
-            krb5_cc_close(context, ccache);
-            *minor_status = code;
-            return GSS_S_FAILURE;
-        }
-    }
-
-    /* the credentials match and are valid */
-
     cred->ccache = ccache;
-    /* minor_status is set while we are iterating over the ccache */
+    *minor_status = 0;
     return GSS_S_COMPLETE;
 }
 
