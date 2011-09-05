@@ -41,14 +41,8 @@ alloc_union_cred(OM_uint32 *minor_status,
     OM_uint32		status;
     OM_uint32		temp_minor_status;
     gss_union_cred_t	cred = NULL;
-    gss_name_t		mech_name = GSS_C_NO_NAME;
 
     *pcred = NULL;
-
-    if (mech->gss_inquire_cred == NULL) {
-	status = GSS_S_BAD_MECH;
-	goto cleanup;
-    }
 
     status = GSS_S_FAILURE;
 
@@ -74,33 +68,12 @@ alloc_union_cred(OM_uint32 *minor_status,
     if (status != GSS_S_COMPLETE)
         goto cleanup;
 
-    cred->auxinfo.creation_time = (OM_uint32)time(NULL);
-
-    status = mech->gss_inquire_cred(minor_status,
-				    mech_cred,
-				    &mech_name,
-				    &cred->auxinfo.time_rec,
-				    &cred->auxinfo.cred_usage,
-				    NULL);
-    if (status != GSS_S_COMPLETE)
-	goto cleanup;
-
-    if (mech_name != GSS_C_NO_NAME) {
-	status = mech->gss_display_name(minor_status,
-					mech_name,
-					&cred->auxinfo.name,
-					&cred->auxinfo.name_type);
-	if (status != GSS_S_COMPLETE)
-	    goto cleanup;
-    }
-
     status = GSS_S_COMPLETE;
     *pcred = cred;
 
 cleanup:
     if (status != GSS_S_COMPLETE)
 	gss_release_cred(&temp_minor_status, (gss_cred_id_t *)&cred);
-    mech->gss_release_name(&temp_minor_status, &mech_name);
 
     return status;
 }

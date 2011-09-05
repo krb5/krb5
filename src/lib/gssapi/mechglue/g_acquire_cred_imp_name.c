@@ -416,36 +416,6 @@ gss_add_cred_impersonate_name(OM_uint32 *minor_status,
 	goto errout;
     }
 
-    /* may need to set credential auxinfo strucutre */
-    if (union_cred->auxinfo.creation_time == 0) {
-	union_cred->auxinfo.creation_time = time(NULL);
-	union_cred->auxinfo.time_rec = time_rec;
-	union_cred->auxinfo.cred_usage = cred_usage;
-
-	/*
-	 * we must set the name; if name is not supplied
-	 * we must do inquire cred to get it
-	 */
-	if (internal_name == NULL) {
-	    if (mech->gss_inquire_cred == NULL ||
-		((status = mech->gss_inquire_cred(
-		      &temp_minor_status, cred,
-		      &allocated_name, NULL, NULL,
-		      NULL)) != GSS_S_COMPLETE))
-		goto errout;
-	    internal_name = allocated_name;
-	}
-
-	if (internal_name != GSS_C_NO_NAME) {
-	    status = mech->gss_display_name(&temp_minor_status, internal_name,
-					    &union_cred->auxinfo.name,
-					    &union_cred->auxinfo.name_type);
-
-	    if (status != GSS_S_COMPLETE)
-		goto errout;
-	}
-    }
-
     /* now add the new credential elements */
     new_mechs_array = (gss_OID)
 	malloc(sizeof (gss_OID_desc) * (union_cred->count+1));
@@ -536,11 +506,8 @@ errout:
 					   &mech->mech_type,
 					   &allocated_name);
 
-    if (input_cred_handle == GSS_C_NO_CREDENTIAL && union_cred) {
-	if (union_cred->auxinfo.name.value)
-	    free(union_cred->auxinfo.name.value);
+    if (input_cred_handle == GSS_C_NO_CREDENTIAL && union_cred)
 	free(union_cred);
-    }
 
     return (status);
 }

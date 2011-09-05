@@ -288,53 +288,7 @@ gss_cred_id_t *		d_cred;
 			goto error_out;
 		    }
 
-		    d_u_cred->auxinfo.creation_time = time(0);
-		    d_u_cred->auxinfo.time_rec = 0;
 		    d_u_cred->loopback = d_u_cred;
-
-		    internal_name = GSS_C_NO_NAME;
-
-		    if (mech->gss_inquire_cred) {
-			status = mech->gss_inquire_cred(minor_status,
-							tmp_d_cred,
-							&internal_name,
-							&d_u_cred->auxinfo.time_rec,
-							&d_u_cred->auxinfo.cred_usage,
-							NULL);
-			if (status != GSS_S_COMPLETE)
-			    map_error(minor_status, mech);
-		    }
-
-		    if (internal_name != GSS_C_NO_NAME) {
-			/* consumes internal_name regardless of success */
-			temp_status = gssint_convert_name_to_union_name(
-			    &temp_minor_status, mech,
-			    internal_name, &tmp_src_name);
-			if (temp_status != GSS_S_COMPLETE) {
-			    *minor_status = temp_minor_status;
-			    map_error(minor_status, mech);
-			    if (output_token->length)
-				(void) gss_release_buffer(
-				    &temp_minor_status,
-				    output_token);
-			    (void) gss_release_oid(&temp_minor_status,
-						   &actual_mech);
-			    free(d_u_cred->cred_array);
-			    free(d_u_cred);
-			    return (temp_status);
-			}
-
-			if (tmp_src_name != GSS_C_NO_NAME) {
-			    status = gss_display_name(
-				&temp_minor_status,
-				tmp_src_name,
-				&d_u_cred->auxinfo.name,
-				&d_u_cred->auxinfo.name_type);
-			    (void) gss_release_name(&temp_minor_status,
-						    &tmp_src_name);
-			}
-		    }
-
 		    *d_cred = (gss_cred_id_t)d_u_cred;
 		}
 	    }

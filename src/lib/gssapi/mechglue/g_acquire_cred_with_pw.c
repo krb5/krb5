@@ -416,19 +416,6 @@ gss_add_cred_with_password(minor_status, input_cred_handle,
 	goto errout;
     }
 
-    /* may need to set credential auxinfo strucutre */
-    if (union_cred->auxinfo.creation_time == 0) {
-	union_cred->auxinfo.creation_time = time(NULL);
-	union_cred->auxinfo.time_rec = time_rec;
-	union_cred->auxinfo.cred_usage = cred_usage;
-
-	status = mech->gss_display_name(&temp_minor_status, internal_name,
-					&union_cred->auxinfo.name,
-					&union_cred->auxinfo.name_type);
-	if (status != GSS_S_COMPLETE)
-	    goto errout;
-    }
-
     /* now add the new credential elements */
     new_mechs_array = (gss_OID)
 	malloc(sizeof (gss_OID_desc) * (union_cred->count+1));
@@ -519,11 +506,8 @@ errout:
 					   &mech->mech_type,
 					   &allocated_name);
 
-    if (input_cred_handle == GSS_C_NO_CREDENTIAL && union_cred) {
-	if (union_cred->auxinfo.name.value)
-	    free(union_cred->auxinfo.name.value);
+    if (input_cred_handle == GSS_C_NO_CREDENTIAL && union_cred)
 	free(union_cred);
-    }
 
     return (status);
 }

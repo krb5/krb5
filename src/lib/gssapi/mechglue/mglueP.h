@@ -55,17 +55,6 @@ typedef struct gss_mech_spec_name_t {
 } gss_mech_spec_name_desc, *gss_mech_spec_name;
 
 /*
- * Credential auxiliary info, used in the credential structure
- */
-typedef struct gss_union_cred_auxinfo {
-	gss_buffer_desc		name;
-	gss_OID			name_type;
-	OM_uint32		creation_time;
-	OM_uint32		time_rec;
-	int			cred_usage;
-} gss_union_cred_auxinfo;
-
-/*
  * Set of Credentials typed on mechanism OID
  */
 typedef struct gss_cred_id_struct {
@@ -73,7 +62,6 @@ typedef struct gss_cred_id_struct {
 	int			count;
 	gss_OID			mechs_array;
 	gss_cred_id_t		*cred_array;
-	gss_union_cred_auxinfo	auxinfo;
 } gss_union_cred_desc, *gss_union_cred_t;
 
 typedef	OM_uint32 (KRB5_CALLCONV *gss_acquire_cred_with_password_sfct)(
