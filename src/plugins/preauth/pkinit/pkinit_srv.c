@@ -40,7 +40,7 @@
 #include "../fast_factor.h"
 
 static krb5_error_code
-pkinit_init_kdc_req_context(krb5_context, void **blob);
+pkinit_init_kdc_req_context(krb5_context, pkinit_kdc_req_context *blob);
 
 static void
 pkinit_fini_kdc_req_context(krb5_context context, void *blob);
@@ -340,7 +340,7 @@ pkinit_server_verify_padata(krb5_context context,
     print_buffer_bin(data->contents, data->length, "/tmp/kdc_as_req");
 #endif
     /* create a per-request context */
-    retval = pkinit_init_kdc_req_context(context, (void **)&reqctx);
+    retval = pkinit_init_kdc_req_context(context, &reqctx);
     if (retval)
         goto cleanup;
     reqctx->pa_type = data->pa_type;
@@ -1336,7 +1336,7 @@ pkinit_server_plugin_fini(krb5_context context,
 }
 
 static krb5_error_code
-pkinit_init_kdc_req_context(krb5_context context, void **ctx)
+pkinit_init_kdc_req_context(krb5_context context, pkinit_kdc_req_context *ctx)
 {
     krb5_error_code retval = ENOMEM;
     pkinit_kdc_req_context reqctx = NULL;
