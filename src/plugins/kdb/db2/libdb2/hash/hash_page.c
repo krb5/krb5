@@ -1093,6 +1093,7 @@ overflow_page(hashp)
 	 * before being set, however, this loop will ALWAYS get executed
 	 * at least once, so freep is guaranteed to be set.
 	 */
+	freep = NULL;
 	first_page = hashp->hdr.last_freed >> (hashp->hdr.bshift + BYTE_SHIFT);
 	for (i = first_page; i <= free_page; i++) {
 		if (!(freep = fetch_bitmap(hashp, i)))

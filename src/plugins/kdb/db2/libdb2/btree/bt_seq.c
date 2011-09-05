@@ -269,7 +269,7 @@ __bt_seqadv(t, ep, flags)
 {
 	CURSOR *c;
 	PAGE *h;
-	indx_t idx;
+	indx_t idx = 0;
 	db_pgno_t pg;
 	int exact, rval;
 
@@ -818,7 +818,7 @@ bt_rseqadv(t, ep, rc, flags)
 {
 	CURSOR *c;
 	PAGE *h;
-	indx_t idx;
+	indx_t idx = 0;
 	db_pgno_t pg;
 	int status;
 	EPGNO *e;
