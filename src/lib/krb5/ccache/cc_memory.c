@@ -827,4 +827,5 @@ const krb5_cc_ops krb5_mcc_ops = {
     NULL, /* wasdefault */
     krb5_mcc_lock,
     krb5_mcc_unlock,
+    NULL, /* switch_to */
 };

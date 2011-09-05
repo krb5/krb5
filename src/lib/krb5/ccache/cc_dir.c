@@ -672,6 +672,30 @@ dcc_unlock(krb5_context context, krb5_ccache cache)
     return krb5_fcc_ops.unlock(context, data->fcc);
 }
 
+static krb5_error_code KRB5_CALLCONV
+dcc_switch_to(krb5_context context, krb5_ccache cache)
+{
+    dcc_data *data = cache->data;
+    char *primary_path = NULL, *dirname = NULL, *filename = NULL;
+    krb5_error_code ret;
+
+    ret = split_path(context, data->residual + 1, &dirname, &filename);
+    if (ret)
+        return ret;
+
+    ret = primary_pathname(dirname, &primary_path);
+    if (ret)
+        goto cleanup;
+
+    ret = write_primary_file(primary_path, filename);
+
+cleanup:
+    free(primary_path);
+    free(dirname);
+    free(filename);
+    return ret;
+}
+
 const krb5_cc_ops krb5_dcc_ops = {
     0,
     "DIR",
@@ -698,6 +722,7 @@ const krb5_cc_ops krb5_dcc_ops = {
     NULL, /* wasdefault */
     dcc_lock,
     dcc_unlock,
+    dcc_switch_to,
 };
 
 #endif /* not _WIN32 */

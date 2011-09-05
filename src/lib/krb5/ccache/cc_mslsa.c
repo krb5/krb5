@@ -2758,5 +2758,6 @@ const krb5_cc_ops krb5_lcc_ops = {
     NULL,
     NULL,
     NULL,
+    NULL,
 };
 #endif /* _WIN32 */

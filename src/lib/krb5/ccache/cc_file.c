@@ -2557,6 +2557,7 @@ const krb5_cc_ops krb5_fcc_ops = {
     NULL, /* wasdefault */
     krb5_fcc_lock,
     krb5_fcc_unlock,
+    NULL, /* switch_to */
 };
 
 #if defined(_WIN32)
@@ -2626,4 +2627,5 @@ const krb5_cc_ops krb5_cc_file_ops = {
     NULL, /* wasdefault */
     krb5_fcc_lock,
     krb5_fcc_unlock,
+    NULL, /* switch_to */
 };

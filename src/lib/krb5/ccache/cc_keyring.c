@@ -2073,6 +2073,7 @@ const krb5_cc_ops krb5_krcc_ops = {
     NULL, /* wasdefault */
     krb5_krcc_lock,
     krb5_krcc_unlock,
+    NULL, /* switch_to */
 };
 
 #else /* !USE_KEYRING_CCACHE */
@@ -2098,6 +2099,7 @@ const krb5_cc_ops krb5_krcc_ops = {
     NULL,
     NULL,
     NULL,                       /* added after 1.4 release */
+    NULL,
     NULL,
     NULL,
     NULL,

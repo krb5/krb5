@@ -418,6 +418,16 @@ krb5_cc_move(krb5_context context, krb5_ccache src, krb5_ccache dst)
     return ret;
 }
 
+krb5_boolean KRB5_CALLCONV
+krb5_cc_support_switch(krb5_context context, const char *type)
+{
+    const krb5_cc_ops *ops;
+    krb5_error_code err;
+
+    err = krb5int_cc_getops(context, type, &ops);
+    return (err ? FALSE : (ops->switch_to != NULL));
+}
+
 krb5_error_code
 k5_cc_mutex_init(k5_cc_mutex *m)
 {

@@ -358,3 +358,47 @@ cccol_pertype_next(krb5_context context,
 errout:
     return ret;
 }
+
+krb5_error_code
+krb5_cc_cache_match(krb5_context context, krb5_principal client,
+                    krb5_ccache *cache_out)
+{
+    krb5_error_code ret;
+    krb5_cccol_cursor cursor;
+    krb5_ccache cache;
+    krb5_principal princ;
+    char *name;
+    krb5_boolean eq;
+
+    *cache_out = NULL;
+    ret = krb5_cccol_cursor_new(context, &cursor);
+    if (ret)
+        return ret;
+
+    while ((ret = krb5_cccol_cursor_next(context, cursor, &cache)) == 0 &&
+           cache != NULL) {
+        ret = krb5_cc_get_principal(context, cache, &princ);
+        if (ret == 0) {
+            eq = krb5_principal_compare(context, princ, client);
+            krb5_free_principal(context, princ);
+            if (eq)
+                break;
+        }
+        krb5_cc_close(context, cache);
+    }
+    krb5_cccol_cursor_free(context, &cursor);
+    if (ret)
+        return ret;
+    if (cache == NULL) {
+        ret = krb5_unparse_name(context, client, &name);
+        if (ret == 0) {
+            krb5_set_error_message(context, KRB5_CC_NOTFOUND,
+                                   _("Can't find client principal %s in "
+                                     "cache collection"), name);
+            krb5_free_unparsed_name(context, name);
+        }
+        ret = KRB5_CC_NOTFOUND;
+    } else
+        *cache_out = cache;
+    return ret;
+}

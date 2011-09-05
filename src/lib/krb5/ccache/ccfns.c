@@ -33,6 +33,20 @@ krb5_cc_get_name(krb5_context context, krb5_ccache cache)
 }
 
 krb5_error_code KRB5_CALLCONV
+krb5_cc_get_full_name(krb5_context context, krb5_ccache cache,
+                      char **fullname_out)
+{
+    char *name;
+
+    *fullname_out = NULL;
+    if (asprintf(&name, "%s:%s", cache->ops->prefix,
+                 cache->ops->get_name(context, cache)) < 0)
+        return ENOMEM;
+    *fullname_out = name;
+    return 0;
+}
+
+krb5_error_code KRB5_CALLCONV
 krb5_cc_gen_new(krb5_context context, krb5_ccache *cache)
 {
     TRACE_CC_GEN_NEW(context, cache);
@@ -322,4 +336,12 @@ out:
     krb5_free_cred_contents(context, &cred);
     krb5_free_cred_contents(context, &mcred);
     return ret;
+}
+
+krb5_error_code KRB5_CALLCONV
+krb5_cc_switch(krb5_context context, krb5_ccache cache)
+{
+    if (cache->ops->switch_to == NULL)
+        return 0;
+    return cache->ops->switch_to(context, cache);
 }

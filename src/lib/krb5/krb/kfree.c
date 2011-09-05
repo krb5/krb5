@@ -522,6 +522,12 @@ krb5_free_unparsed_name(krb5_context context, char *val)
 }
 
 void KRB5_CALLCONV
+krb5_free_string(krb5_context context, char *val)
+{
+    free(val);
+}
+
+void KRB5_CALLCONV
 krb5_free_sam_challenge(krb5_context ctx, krb5_sam_challenge *sc)
 {
     if (!sc)
