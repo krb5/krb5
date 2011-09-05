@@ -74,6 +74,7 @@ krb5_dbe_def_search_enctype(kcontext, dbentp, start, ktype, stype, kvno, kdatap)
     }
 
     maxkvno = -1;
+    idx = -1;
     datap = (krb5_key_data *) NULL;
     for (i = *start; i < dbentp->n_key_data; i++) {
         krb5_boolean    similar;

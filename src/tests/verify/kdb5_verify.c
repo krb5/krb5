@@ -93,7 +93,7 @@ main(argc, argv)
     int num_to_check;
     char principal_string[BUFSIZ];
     char *suffix = 0;
-    size_t suffix_size;
+    size_t suffix_size = 0;
     int depth, errors;
 
     krb5_init_context(&context);

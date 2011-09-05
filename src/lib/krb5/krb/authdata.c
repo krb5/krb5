@@ -71,7 +71,7 @@ k5_ad_init_modules(krb5_context kcontext,
     int j, k = *module_count;
     krb5_error_code code;
     void *plugin_context = NULL;
-    void **rcpp;
+    void **rcpp = NULL;
 
     if (table->ad_type_list == NULL) {
 #ifdef DEBUG

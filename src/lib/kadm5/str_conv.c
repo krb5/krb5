@@ -261,7 +261,7 @@ krb5_string_to_keysalts(string, tupleseps, ksaltseps, dups, ksaltp, nksaltp)
 {
     krb5_error_code     kret;
     char                *kp, *sp, *ep;
-    char                sepchar, trailchar;
+    char                sepchar = 0, trailchar = 0;
     krb5_enctype        ktype;
     krb5_int32          stype;
     krb5_key_salt_tuple *savep;

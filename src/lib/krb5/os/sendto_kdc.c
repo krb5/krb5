@@ -1146,7 +1146,7 @@ service_fds(krb5_context context, struct select_state *selstate, int interval,
             int (*msg_handler)(krb5_context, const krb5_data *, void *),
             void *msg_handler_data, struct conn_state **winner_out)
 {
-    int e, selret;
+    int e, selret = 0;
     struct timeval now;
     struct conn_state *state;
 

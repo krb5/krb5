@@ -168,7 +168,7 @@ krb5int_make_tgs_request_ext(krb5_context context,
 {
     krb5_error_code retval;
     krb5_kdc_req tgsreq;
-    krb5_data *scratch, scratch2;
+    krb5_data *scratch, scratch2 = empty_data();
     krb5_ticket *sec_ticket = NULL;
     krb5_ticket *sec_ticket_arr[2];
     krb5_timestamp time_now;

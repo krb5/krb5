@@ -1652,7 +1652,7 @@ process_packet(verto_ctx *ctx, verto_ev *ev)
 static int
 kill_lru_tcp_or_rpc_connection(void *handle, verto_ev *newev)
 {
-    struct connection *c, *oldest_c = NULL;
+    struct connection *c = NULL, *oldest_c = NULL;
     verto_ev *ev, *oldest_ev = NULL;
     int i, fd = -1;
 

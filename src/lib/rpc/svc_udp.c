@@ -242,8 +242,8 @@ static bool_t svcudp_reply(
      register int slen;
      register bool_t stat = FALSE;
 
-     xdrproc_t xdr_results;
-     caddr_t xdr_location;
+     xdrproc_t xdr_results = NULL;
+     caddr_t xdr_location = 0;
      bool_t has_args;
 
      if (msg->rm_reply.rp_stat == MSG_ACCEPTED &&

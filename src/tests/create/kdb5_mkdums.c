@@ -97,7 +97,7 @@ main(argc, argv)
     int num_to_create;
     char principal_string[BUFSIZ];
     char *suffix = 0;
-    size_t suffix_size;
+    size_t suffix_size = 0;
     int depth;
 
     krb5_init_context(&test_context);

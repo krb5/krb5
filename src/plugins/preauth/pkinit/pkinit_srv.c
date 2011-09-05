@@ -306,7 +306,7 @@ pkinit_server_verify_padata(krb5_context context,
     krb5_auth_pack *auth_pack = NULL;
     krb5_auth_pack_draft9 *auth_pack9 = NULL;
     pkinit_kdc_context plgctx = NULL;
-    pkinit_kdc_req_context reqctx;
+    pkinit_kdc_req_context reqctx = NULL;
     krb5_preauthtype pa_type;
     krb5_checksum cksum = {0, 0, 0, NULL};
     krb5_data *der_req = NULL;
