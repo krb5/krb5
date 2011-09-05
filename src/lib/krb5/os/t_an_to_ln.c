@@ -6,7 +6,7 @@
 int
 main(int argc, char **argv)
 {
-    krb5_error_code     kret;
+    krb5_error_code     kret = 0;
     krb5_context        kcontext;
     krb5_principal      principal;
     char                *programname;

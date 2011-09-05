@@ -99,7 +99,7 @@ main(argc, argv)
 {
 	extern int optind;
 	extern char *optarg;
-	enum S command, state;
+	enum S command = COMMAND, state;
 	DB *dbp;
 	DBT data, key, keydata;
 	size_t len;
