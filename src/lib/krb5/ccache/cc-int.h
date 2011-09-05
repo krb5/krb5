@@ -112,4 +112,7 @@ k5_cc_mutex_force_unlock(k5_cc_mutex *m);
 krb5_error_code
 k5_cccol_force_unlock(void);
 
+krb5_error_code
+krb5int_fcc_new_unique(krb5_context context, char *template, krb5_ccache *id);
+
 #endif /* __KRB5_CCACHE_H__ */

@@ -1945,29 +1945,14 @@ krb5_fcc_end_seq_get(krb5_context context, krb5_ccache id, krb5_cc_cursor *curso
     return 0;
 }
 
-
-/*
- * Effects:
- * Creates a new file cred cache whose name is guaranteed to be
- * unique.  The name begins with the string TKT_ROOT (from fcc.h).
- * The cache is not opened, but the new filename is reserved.
- *
- * Returns:
- * The filled in krb5_ccache id.
- *
- * Errors:
- * KRB5_CC_NOMEM - there was insufficient memory to allocate the
- *              krb5_ccache.  id is undefined.
- * system errors (from open)
- */
-static krb5_error_code KRB5_CALLCONV
-krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
+/* Generate a unique file ccache using the given template (which will be
+ * modified to contain the actual name of the file). */
+krb5_error_code
+krb5int_fcc_new_unique(krb5_context context, char *template, krb5_ccache *id)
 {
     krb5_ccache lid;
     int ret;
     krb5_error_code    kret = 0;
-    char scratch[sizeof(TKT_ROOT)+6+1]; /* +6 for the scratch part, +1 for
-                                           NUL */
     krb5_fcc_data *data;
     krb5_int16 fcc_fvno = htons(context->fcc_default_format);
     krb5_int16 fcc_flen = 0;
@@ -1979,8 +1964,7 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
     if (kret)
         return kret;
 
-    (void) snprintf(scratch, sizeof(scratch), "%sXXXXXX", TKT_ROOT);
-    ret = mkstemp(scratch);
+    ret = mkstemp(template);
     if (ret == -1) {
         k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
         return krb5_fcc_interpret(context, errno);
@@ -1992,16 +1976,16 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
     if (data == NULL) {
         k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
         close(ret);
-        unlink(scratch);
+        unlink(template);
         return KRB5_CC_NOMEM;
     }
 
-    data->filename = strdup(scratch);
+    data->filename = strdup(template);
     if (data->filename == NULL) {
         k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
         free(data);
         close(ret);
-        unlink(scratch);
+        unlink(template);
         return KRB5_CC_NOMEM;
     }
 
@@ -2011,7 +1995,7 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
         free(data->filename);
         free(data);
         close(ret);
-        unlink(scratch);
+        unlink(template);
         return kret;
     }
     kret = k5_cc_mutex_lock(context, &data->lock);
@@ -2021,7 +2005,7 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
         free(data->filename);
         free(data);
         close(ret);
-        unlink(scratch);
+        unlink(template);
         return kret;
     }
 
@@ -2078,7 +2062,7 @@ krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
         free(data->filename);
         free(data);
         (void) close(ret);
-        (void) unlink(scratch);
+        (void) unlink(template);
         return KRB5_CC_NOMEM;
     }
     setptr->refcount = 1;
@@ -2116,6 +2100,30 @@ err_out:
     free(data->filename);
     free(data);
     return kret;
+}
+
+/*
+ * Effects:
+ * Creates a new file cred cache whose name is guaranteed to be
+ * unique.  The name begins with the string TKT_ROOT (from fcc.h).
+ * The cache is not opened, but the new filename is reserved.
+ *
+ * Returns:
+ * The filled in krb5_ccache id.
+ *
+ * Errors:
+ * KRB5_CC_NOMEM - there was insufficient memory to allocate the
+ *              krb5_ccache.  id is undefined.
+ * system errors (from open)
+ */
+static krb5_error_code KRB5_CALLCONV
+krb5_fcc_generate_new (krb5_context context, krb5_ccache *id)
+{
+    char scratch[sizeof(TKT_ROOT)+6+1]; /* +6 for the scratch part, +1 for
+                                           NUL */
+
+    (void) snprintf(scratch, sizeof(scratch), "%sXXXXXX", TKT_ROOT);
+    return krb5int_fcc_new_unique(context, scratch, id);
 }
 
 /*

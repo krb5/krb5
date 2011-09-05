@@ -35,4 +35,7 @@
 
 extern const krb5_cc_ops krb5_cc_file_ops;
 
+krb5_error_code krb5int_fcc_new_unique(krb5_context context, char *template,
+                                       krb5_ccache *id);
+
 #endif /* __KRB5_FILE_CCACHE__ */

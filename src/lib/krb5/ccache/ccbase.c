@@ -75,6 +75,13 @@ static struct krb5_cc_typelist cc_krcc_entry = { &krb5_krcc_ops, NEXT };
 #define NEXT &cc_krcc_entry
 #endif /* USE_KEYRING_CCACHE */
 
+#ifndef _WIN32
+extern const krb5_cc_ops krb5_dcc_ops;
+static struct krb5_cc_typelist cc_dcc_entry = { &krb5_dcc_ops, NEXT };
+#undef NEXT
+#define NEXT &cc_dcc_entry
+#endif /* not _WIN32 */
+
 
 #define INITIAL_TYPEHEAD (NEXT)
 static struct krb5_cc_typelist *cc_typehead = INITIAL_TYPEHEAD;

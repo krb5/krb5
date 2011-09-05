@@ -34,4 +34,5 @@ error_code KRB5_PLUGIN_VER_NOTSUPP, "Plugin does not support interface version"
 error_code KRB5_PLUGIN_BAD_MODULE_SPEC, "Invalid module specifier"
 error_code KRB5_PLUGIN_NAME_NOTFOUND, "Plugin module name not found"
 error_code KRB5KDC_ERR_DISCARD, "The KDC should discard this request"
+error_code KRB5_DCC_CANNOT_CREATE, "Can't create new subsidiary cache"
 end

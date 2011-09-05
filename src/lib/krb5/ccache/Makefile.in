@@ -24,6 +24,7 @@ STLIBOBJS= \
 	cccursor.o \
 	ccdefault.o \
 	ccdefops.o \
+	cc_dir.o \
 	cc_retr.o \
 	cc_file.o \
 	cc_memory.o \
@@ -36,6 +37,7 @@ OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
 	$(OUTPRE)cccursor.$(OBJEXT) \
 	$(OUTPRE)ccdefault.$(OBJEXT) \
 	$(OUTPRE)ccdefops.$(OBJEXT) \
+	$(OUTPRE)cc_dir.$(OBJEXT) \
 	$(OUTPRE)cc_retr.$(OBJEXT) \
 	$(OUTPRE)cc_file.$(OBJEXT) \
 	$(OUTPRE)cc_memory.$(OBJEXT) \
@@ -48,6 +50,7 @@ SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/cccursor.c \
 	$(srcdir)/ccdefault.c \
 	$(srcdir)/ccdefops.c \
+	$(srcdir)/cc_dir.c \
 	$(srcdir)/cc_retr.c \
 	$(srcdir)/cc_file.c \
 	$(srcdir)/cc_memory.c \
