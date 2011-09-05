@@ -33,6 +33,11 @@ STRLCPY_OBJ=@STRLCPY_OBJ@
 ##DOS##STRLCPY_ST_OBJ= strlcpy.o
 ##DOS##STRLCPY_OBJ= $(OUTPRE)strlcpy.$(OBJEXT)
 
+FNMATCH_ST_OBJ= @FNMATCH_ST_OBJ@
+FNMATCH_OBJ= @FNMATCH_OBJ@
+##DOS##FNMATCH_ST_OBJ= fnmatch.o
+##DOS##FNMATCH_OBJ= $(OUTPRE)fnmatch.$(OBJEXT)
+
 PRINTF_ST_OBJ= @PRINTF_ST_OBJ@
 PRINTF_OBJ= @PRINTF_OBJ@
 ##DOS##PRINTF_ST_OBJ= printf.o
@@ -66,6 +71,7 @@ STLIBOBJS= \
 	path.o \
 	$(IPC_ST_OBJ) \
 	$(STRLCPY_ST_OBJ) \
+	$(FNMATCH_ST_OBJ) \
 	$(PRINTF_ST_OBJ) \
 	$(MKSTEMP_ST_OBJ)
 
@@ -83,6 +89,7 @@ LIBOBJS= \
 	$(OUTPRE)path.$(OBJEXT) \
 	$(IPC_OBJ) \
 	$(STRLCPY_OBJ) \
+	$(FNMATCH_OBJ) \
 	$(PRINTF_OBJ) \
 	$(MKSTEMP_OBJ)
 
@@ -102,6 +109,7 @@ SRCS=\
 	$(srcdir)/utf8.c \
 	$(srcdir)/utf8_conv.c \
 	$(srcdir)/strlcpy.c \
+	$(srcdir)/fnmatch.c \
 	$(srcdir)/printf.c \
 	$(srcdir)/mkstemp.c \
 	$(srcdir)/t_k5buf.c \

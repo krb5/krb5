@@ -35,6 +35,8 @@
  * + shared library init/fini hooks
  * + consistent getpwnam/getpwuid interfaces
  * + va_copy fudged if not provided
+ * + strlcpy/strlcat
+ * + fnmatch
  * + [v]asprintf
  * + mkstemp
  * + zap (support function; macro is in k5-int.h)
@@ -54,6 +56,9 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
+#ifdef HAVE_FNMATCH_H
+#include <fnmatch.h>
+#endif
 
 #ifdef _WIN32
 #define CAN_COPY_VA_LIST
@@ -925,6 +930,20 @@ set_cloexec_file(FILE *f)
 #define strlcat krb5int_strlcat
 extern size_t krb5int_strlcpy(char *dst, const char *src, size_t siz);
 extern size_t krb5int_strlcat(char *dst, const char *src, size_t siz);
+#endif
+
+/* Provide fnmatch interface. */
+#ifndef HAVE_FNMATCH
+#define fnmatch k5_fnmatch
+int k5_fnmatch(const char *pattern, const char *string, int flags);
+#define FNM_NOMATCH     1       /* Match failed. */
+#define FNM_NOSYS       2       /* Function not implemented. */
+#define FNM_NORES       3       /* Out of resources */
+#define FNM_NOESCAPE    0x01    /* Disable backslash escaping. */
+#define FNM_PATHNAME    0x02    /* Slash must be matched by slash. */
+#define FNM_PERIOD      0x04    /* Period must be matched by period. */
+#define FNM_CASEFOLD    0x08    /* Pattern is matched case-insensitive */
+#define FNM_LEADING_DIR 0x10    /* Ignore /<tail> after Imatch. */
 #endif
 
 /* Provide [v]asprintf interfaces.  */

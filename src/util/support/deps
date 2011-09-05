@@ -35,6 +35,9 @@ utf8_conv.so utf8_conv.po $(OUTPRE)utf8_conv.$(OBJEXT): \
 strlcpy.so strlcpy.po $(OUTPRE)strlcpy.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   strlcpy.c
+fnmatch.so fnmatch.po $(OUTPRE)fnmatch.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
+  $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
+  fnmatch.c
 printf.so printf.po $(OUTPRE)printf.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   printf.c

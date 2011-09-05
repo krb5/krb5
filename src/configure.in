@@ -76,13 +76,29 @@ AC_CHECK_HEADER(libintl.h, [
 AC_SUBST(po)
 
 # for kdc
-AC_CHECK_HEADERS(syslog.h sys/sockio.h ifaddrs.h unistd.h)
+AC_CHECK_HEADERS(syslog.h sys/sockio.h ifaddrs.h unistd.h fnmatch.h)
 AC_CHECK_FUNCS(openlog syslog closelog strftime vsprintf vasprintf vsnprintf)
-AC_CHECK_FUNCS(strlcpy)
+AC_CHECK_FUNCS(strlcpy fnmatch)
+
 EXTRA_SUPPORT_SYMS=
-AC_CHECK_FUNC(strlcpy, [STRLCPY_ST_OBJ= STRLCPY_OBJ=], [STRLCPY_ST_OBJ=strlcpy.o STRLCPY_OBJ='$(OUTPRE)strlcpy.$(OBJEXT)' EXTRA_SUPPORT_SYMS="$EXTRA_SUPPORT_SYMS krb5int_strlcpy krb5int_strlcat"])
+AC_CHECK_FUNC(strlcpy,
+[STRLCPY_ST_OBJ=
+STRLCPY_OBJ=],
+[STRLCPY_ST_OBJ=strlcpy.o
+STRLCPY_OBJ='$(OUTPRE)strlcpy.$(OBJEXT)'
+EXTRA_SUPPORT_SYMS="$EXTRA_SUPPORT_SYMS krb5int_strlcpy krb5int_strlcat"])
 AC_SUBST(STRLCPY_OBJ)
 AC_SUBST(STRLCPY_ST_OBJ)
+
+AC_CHECK_FUNC(fnmatch,
+[FNMATCH_ST_OBJ=
+FNMATCH_OBJ=],
+[FNMATCH_ST_OBJ=fnmatch.o
+FNMATCH_OBJ='$(OUTPRE)fnmatch.$(OBJEXT)'
+EXTRA_SUPPORT_SYMS="$EXTRA_SUPPORT_SYMS k5_fnmatch"])
+AC_SUBST(FNMATCH_OBJ)
+AC_SUBST(FNMATCH_ST_OBJ)
+
 AC_CHECK_FUNC(vasprintf,
 [PRINTF_ST_OBJ=
 PRINTF_OBJ=],
