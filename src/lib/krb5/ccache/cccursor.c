@@ -181,7 +181,7 @@ krb5_cc_cache_match(krb5_context context, krb5_principal client,
 {
     krb5_error_code ret;
     krb5_cccol_cursor cursor;
-    krb5_ccache cache;
+    krb5_ccache cache = NULL;
     krb5_principal princ;
     char *name;
     krb5_boolean eq;

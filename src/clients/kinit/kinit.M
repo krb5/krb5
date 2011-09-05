@@ -182,7 +182,11 @@ option is not used, the default cache name and location are used.
 The default credentials cache may vary between systems.  If the
 .B KRB5CCNAME
 environment variable is set, its value is used to name the default
-ticket cache.  Any existing contents of the cache are destroyed by
+ticket cache.  If a principal name is specified and the type of the
+default credentials cache supports a collection (such as the DIR
+type), an existing cache containing credentials for the principal is
+selected or a new one is created and becomes the new primary cache.
+Otherwise, any existing contents of the default cache are destroyed by
 .IR kinit .
 .TP
 \fB\-S\fP \fIservice_name\fP
@@ -215,7 +219,12 @@ pre-authentication mechanism:
 uses the following environment variables:
 .TP "\w'.SM KRB5CCNAME\ \ 'u"
 .SM KRB5CCNAME
-Location of the Kerberos 5 credentials (ticket) cache.
+Location of the default Kerberos 5 credentials (ticket) cache, in the
+form \fItype\fP:\fIresidual\fP.  If no type prefix is present, the
+\fBFILE\fP type is assumed.  The type of the default cache may
+determine the availability of a cache collection; for instance, a
+default cache of type \fBDIR\fP causes caches within the directory to
+be present in the collection.
 .SH FILES
 .TP "\w'/tmp/krb5cc_[uid]\ \ 'u"
 /tmp/krb5cc_[uid]
@@ -227,4 +236,4 @@ default location for the local host's
 .B keytab
 file.
 .SH SEE ALSO
-klist(1), kdestroy(1), kerberos(1)
+klist(1), kdestroy(1), kswitch(1), kerberos(1)

@@ -5,6 +5,7 @@ SYNOPSIS
 ~~~~~~~~~~~~~
 
 *kdestroy*
+         [**-A**]
          [**-q**]
          [**-c** *cache_name*]
 
@@ -20,6 +21,10 @@ cache is not specified, the default credentials cache is destroyed.
 
 OPTIONS
 ~~~~~~~~~~~~~
+
+     **-A**
+        Destroys all caches in the collection, if a cache collection is
+        available.
 
      **-q**
         Run quietly. Normally *kdestroy* beeps if it fails to destroy the user's tickets. The *-q* flag suppresses this behavior.
@@ -45,7 +50,14 @@ ENVIRONMENT
 
 *kdestroy* uses the following environment variables:
 
-     **KRB5CCNAME**  - Location of the Kerberos 5 credentials (ticket) cache.
+     **KRB5CCNAME**
+          Location of the default Kerberos 5 credentials (ticket)
+          cache, in the form *type*:*residual*.  If no type prefix is
+          present, the **FILE** type is assumed.  The type of the
+          default cache may determine the availability of a cache
+          collection; for instance, a default cache of type **DIR**
+          causes caches within the directory to be present in the
+          collection.
 
 
 FILES

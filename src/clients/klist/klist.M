@@ -25,7 +25,7 @@
 .SH NAME
 klist \- list cached Kerberos tickets
 .SH SYNOPSIS
-\fBklist\fP [\fB\-e\fP] [[\fB\-c\fP] [\fB\-f\fP] 
+\fBklist\fP [\fB\-e\fP] [[\fB\-c\fP] [\fB\-l\fP] [\fB\-A\fP] [\fB\-f\fP] 
 [\fB\-s\fP] [\fB\-a\fP  [\fB\-n\fP]]]
 [\fB\-k\fP [\fB\-t\fP] [\fB\-K\fP]]
 [\fIcache_name\fP | \fIkeytab_name\fP]
@@ -49,6 +49,14 @@ neither
 nor
 .B \-k
 is specified.
+.TP
+.B \-l
+If a cache collection is available, displays a table summarizing the
+caches present in the collection.
+.TP
+.B \-A
+If a cache collection is available, displays the contents of all of
+the caches in the collection.
 .TP
 .B \-f
 shows the flags present in the credentials, using the following
@@ -119,7 +127,12 @@ ticket cache.
 uses the following environment variables:
 .TP "\w'.SM KRB5CCNAME\ \ 'u"
 .SM KRB5CCNAME
-Location of the Kerberos 5 credentials (ticket) cache.
+Location of the default Kerberos 5 credentials (ticket) cache, in the
+form \fItype\fP:\fIresidual\fP.  If no type prefix is present, the
+\fBFILE\fP type is assumed.  The type of the default cache may
+determine the availability of a cache collection; for instance, a
+default cache of type \fBDIR\fP causes caches within the directory to
+be present in the collection.
 .SH FILES
 .TP "\w'/tmp/krb5cc_[uid]\ \ 'u"
 /tmp/krb5cc_[uid]

@@ -129,8 +129,15 @@ OPTIONS
           use *cache_name* as the Kerberos 5  credentials  (ticket) cache  name  and  location;
           if this option is not used, the default cache name and location are used.
 
-          The default credentials cache may vary between systems.  If  the  **KRB5CCNAME**  environment  variable  is set, its
-          value is used to name the default  ticket  cache.   Any existing contents of the cache are destroyed by kinit.
+          The default credentials cache may vary between systems.  If
+          the **KRB5CCNAME** environment variable is set, its value is
+          used to name the default ticket cache.  If a principal name
+          is specified and the type of the default credentials cache
+          supports a collection (such as the DIR type), an existing
+          cache containing credentials for the principal is selected
+          or a new one is created and becomes the new primary cache.
+          Otherwise, any existing contents of the default cache are
+          destroyed by kinit.
 
      **-S** *service_name*
           specify an alternate service name to use  when  getting initial tickets.
@@ -162,7 +169,14 @@ ENVIRONMENT
 
 *kinit* uses the following environment variables:
 
-       **KRB5CCNAME**  Location of the Kerberos 5 credentials (ticket) cache.
+     **KRB5CCNAME**
+          Location of the default Kerberos 5 credentials (ticket)
+          cache, in the form *type*:*residual*.  If no type prefix is
+          present, the **FILE** type is assumed.  The type of the
+          default cache may determine the availability of a cache
+          collection; for instance, a default cache of type **DIR**
+          causes caches within the directory to be present in the
+          collection.
 
 
 FILES

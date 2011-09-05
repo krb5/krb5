@@ -55,7 +55,8 @@ static void usage()
 {
 #define KRB_AVAIL_STRING(x) ((x)?"available":"not available")
 
-    fprintf(stderr, _("Usage: %s [-q] [-c cache_name]\n"), progname);
+    fprintf(stderr, _("Usage: %s [-A] [-q] [-c cache_name]\n"), progname);
+    fprintf(stderr, _("\t-A destroy all credential caches in collection\n"));
     fprintf(stderr, _("\t-q quiet mode\n"));
     fprintf(stderr, _("\t-c specify name of credentials cache\n"));
     exit(2);
@@ -70,16 +71,21 @@ main(argc, argv)
     krb5_error_code retval;
     int c;
     krb5_ccache cache = NULL;
+    krb5_cccol_cursor cursor;
     char *cache_name = NULL;
     int code = 0;
     int errflg = 0;
     int quiet = 0;
+    int all = 0;
 
     setlocale(LC_MESSAGES, "");
     progname = GET_PROGNAME(argv[0]);
 
-    while ((c = getopt(argc, argv, "54qc:")) != -1) {
+    while ((c = getopt(argc, argv, "54Aqc:")) != -1) {
         switch (c) {
+        case 'A':
+            all = 1;
+            break;
         case 'q':
             quiet = 1;
             break;
@@ -115,6 +121,30 @@ main(argc, argv)
     if (retval) {
         com_err(progname, retval, _("while initializing krb5"));
         exit(1);
+    }
+
+    if (all) {
+        code = krb5_cccol_cursor_new(kcontext, &cursor);
+        if (code) {
+            com_err(progname, code, _("while listing credential caches"));
+            exit(1);
+        }
+        while ((code = krb5_cccol_cursor_next(kcontext, cursor,
+                                              &cache)) == 0 && cache != NULL) {
+            code = krb5_cc_get_full_name(kcontext, cache, &cache_name);
+            if (code) {
+                com_err(progname, code, _("composing ccache name"));
+                exit(1);
+            }
+            code = krb5_cc_destroy(kcontext, cache);
+            if (code && code != KRB5_FCC_NOFILE) {
+                com_err(progname, code, _("while destroying cache %s"),
+                        cache_name);
+            }
+            krb5_free_string(kcontext, cache_name);
+        }
+        krb5_cccol_cursor_free(kcontext, &cursor);
+        return 0;
     }
 
     if (cache_name) {

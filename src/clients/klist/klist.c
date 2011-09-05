@@ -54,7 +54,7 @@ extern int optind;
 
 int show_flags = 0, show_time = 0, status_only = 0, show_keys = 0;
 int show_etype = 0, show_addresses = 0, no_resolve = 0, print_version = 0;
-int show_adtype = 0;
+int show_adtype = 0, show_all = 0, list_all = 0;
 char *defname;
 char *progname;
 krb5_int32 now;
@@ -65,7 +65,11 @@ krb5_context kcontext;
 char * etype_string (krb5_enctype );
 void show_credential (krb5_creds *);
 
-void do_ccache (char *);
+void list_all_ccaches (void);
+int list_ccache (krb5_ccache);
+void show_all_ccaches (void);
+void do_ccache_name (char *);
+int do_ccache (krb5_ccache);
 void do_keytab (char *);
 void printtime (time_t);
 void one_addr (krb5_address *);
@@ -79,11 +83,13 @@ static void usage()
 {
 #define KRB_AVAIL_STRING(x) ((x)?"available":"not available")
 
-    fprintf(stderr, _("Usage: %s [-e] [-V] [[-c] [-d] [-f] [-s] [-a [-n]]] "
-                      "[-k [-t] [-K]] [name]\n"), progname);
+    fprintf(stderr, _("Usage: %s [-e] [-V] [[-c] [-l] [-A] [-d] [-f] [-s] "
+                      "[-a [-n]]] [-k [-t] [-K]] [name]\n"), progname);
     fprintf(stderr, _("\t-c specifies credentials cache\n"));
     fprintf(stderr, _("\t-k specifies keytab\n"));
     fprintf(stderr, _("\t   (Default is credentials cache)\n"));
+    fprintf(stderr, _("\t-l lists credential caches in collection\n"));
+    fprintf(stderr, _("\t-A shows content of all credential caches\n"));
     fprintf(stderr, _("\t-e shows the encryption type\n"));
     fprintf(stderr, _("\t-V shows the Kerberos version and exits\n"));
     fprintf(stderr, _("\toptions for credential caches:\n"));
@@ -115,7 +121,7 @@ main(argc, argv)
     name = NULL;
     mode = DEFAULT;
     /* V=version so v can be used for verbose later if desired.  */
-    while ((c = getopt(argc, argv, "dfetKsnack45V")) != -1) {
+    while ((c = getopt(argc, argv, "dfetKsnack45lAV")) != -1) {
         switch (c) {
         case 'd':
             show_adtype = 1;
@@ -155,6 +161,12 @@ main(argc, argv)
             break;
         case '5':
             break;
+        case 'l':
+            list_all = 1;
+            break;
+        case 'A':
+            show_all = 1;
+            break;
         case 'V':
             print_version = 1;
             break;
@@ -171,8 +183,11 @@ main(argc, argv)
     if (mode == DEFAULT || mode == CCACHE) {
         if (show_time || show_keys)
             usage();
+        if ((show_all && list_all) || (status_only && list_all))
+            usage();
     } else {
-        if (show_flags || status_only || show_addresses)
+        if (show_flags || status_only || show_addresses ||
+            show_all || list_all)
             usage();
     }
 
@@ -213,8 +228,12 @@ main(argc, argv)
             exit(1);
         }
 
-        if (mode == DEFAULT || mode == CCACHE)
-            do_ccache(name);
+        if (list_all)
+            list_all_ccaches();
+        else if (show_all)
+            show_all_ccaches();
+        else if (mode == DEFAULT || mode == CCACHE)
+            do_ccache_name(name);
         else
             do_keytab(name);
     }
@@ -306,20 +325,103 @@ void do_keytab(name)
     }
     exit(0);
 }
-void do_ccache(name)
-    char *name;
-{
-    krb5_ccache cache = NULL;
-    krb5_cc_cursor cur;
-    krb5_creds creds;
-    krb5_principal princ;
-    krb5_flags flags;
-    krb5_error_code code;
-    int exit_status = 0;
 
-    if (status_only)
-        /* exit_status is set back to 0 if a valid tgt is found */
-        exit_status = 1;
+void
+list_all_ccaches(void)
+{
+    krb5_error_code code;
+    krb5_ccache cache;
+    krb5_cccol_cursor cursor;
+    int exit_status;
+
+    code = krb5_cccol_cursor_new(kcontext, &cursor);
+    if (code) {
+        if (!status_only)
+            com_err(progname, code, _("while listing ccache collection"));
+        exit(1);
+    }
+
+    /* XXX Translating would disturb table alignment; skip for now. */
+    printf("%-30s %s\n", "Principal name", "Cache name");
+    printf("%-30s %s\n", "--------------", "----------");
+    exit_status = 1;
+    while (!(code = krb5_cccol_cursor_next(kcontext, cursor, &cache)) &&
+           cache != NULL) {
+        exit_status = list_ccache(cache) && exit_status;
+        krb5_cc_close(kcontext, cache);
+    }
+    krb5_cccol_cursor_free(kcontext, &cursor);
+    exit(exit_status);
+}
+
+int
+list_ccache(krb5_ccache cache)
+{
+    krb5_error_code code;
+    krb5_principal princ = NULL;
+    char *princname = NULL, *ccname = NULL;
+    int expired, status = 1;
+
+    code = krb5_cc_get_principal(kcontext, cache, &princ);
+    if (code)                   /* Uninitialized cache file, probably. */
+        goto cleanup;
+    code = krb5_unparse_name(kcontext, princ, &princname);
+    if (code)
+        goto cleanup;
+    code = krb5_cc_get_full_name(kcontext, cache, &ccname);
+    if (code)
+        goto cleanup;
+
+    status_only = 1;
+    expired = do_ccache(cache);
+
+    printf("%-30.30s %s", princname, ccname);
+    if (expired)
+        printf(" %s", _("(Expired)"));
+    printf("\n");
+
+    status = 0;
+cleanup:
+    krb5_free_principal(kcontext, princ);
+    free(princname);
+    free(ccname);
+    return status;
+}
+
+void
+show_all_ccaches(void)
+{
+    krb5_error_code code;
+    krb5_ccache cache;
+    krb5_cccol_cursor cursor;
+    krb5_boolean first;
+    int exit_status;
+
+    code = krb5_cccol_cursor_new(kcontext, &cursor);
+    if (code) {
+        if (!status_only)
+            com_err(progname, code, _("while listing ccache collection"));
+        exit(1);
+    }
+    exit_status = 1;
+    first = TRUE;
+    while (!(code = krb5_cccol_cursor_next(kcontext, cursor, &cache)) &&
+           cache != NULL) {
+        if (!first)
+            printf("\n");
+        first = FALSE;
+        exit_status = do_ccache(cache) && exit_status;
+        krb5_cc_close(kcontext, cache);
+    }
+    krb5_cccol_cursor_free(kcontext, &cursor);
+    exit(exit_status);
+}
+
+void
+do_ccache_name(char *name)
+{
+    krb5_error_code code;
+    krb5_ccache cache;
 
     if (name == NULL) {
         if ((code = krb5_cc_default(kcontext, &cache))) {
@@ -335,6 +437,21 @@ void do_ccache(name)
             exit(1);
         }
     }
+    exit(do_ccache(cache));
+}
+
+int
+do_ccache(krb5_ccache cache)
+{
+    krb5_cc_cursor cur;
+    krb5_creds creds;
+    krb5_principal princ;
+    krb5_flags flags;
+    krb5_error_code code;
+    int exit_status = 0;
+
+    /* For status_only, exit_status is reset to 0 if a valid tgt is found. */
+    exit_status = (status_only) ? 1 : 0;
 
     flags = 0;                          /* turns off OPENCLOSE mode */
     if ((code = krb5_cc_set_flags(kcontext, cache, flags))) {
@@ -355,17 +472,17 @@ void do_ccache(name)
                         krb5_cc_get_type(kcontext, cache),
                         krb5_cc_get_name(kcontext, cache));
         }
-        exit(1);
+        return 1;
     }
     if ((code = krb5_cc_get_principal(kcontext, cache, &princ))) {
         if (!status_only)
             com_err(progname, code, _("while retrieving principal name"));
-        exit(1);
+        return 1;
     }
     if ((code = krb5_unparse_name(kcontext, princ, &defname))) {
         if (!status_only)
             com_err(progname, code, _("while unparsing principal name"));
-        exit(1);
+        return 1;
     }
     if (!status_only) {
         printf(_("Ticket cache: %s:%s\nDefault principal: %s\n\n"),
@@ -383,7 +500,7 @@ void do_ccache(name)
     if ((code = krb5_cc_start_seq_get(kcontext, cache, &cur))) {
         if (!status_only)
             com_err(progname, code, _("while starting to retrieve tickets"));
-        exit(1);
+        return 1;
     }
     while (!(code = krb5_cc_next_cred(kcontext, cache, &cur, &creds))) {
         if (krb5_is_config_principal(kcontext, creds.server))
@@ -404,23 +521,23 @@ void do_ccache(name)
         if ((code = krb5_cc_end_seq_get(kcontext, cache, &cur))) {
             if (!status_only)
                 com_err(progname, code, _("while finishing ticket retrieval"));
-            exit(1);
+            return 1;
         }
         flags = KRB5_TC_OPENCLOSE;      /* turns on OPENCLOSE mode */
         if ((code = krb5_cc_set_flags(kcontext, cache, flags))) {
             if (!status_only)
                 com_err(progname, code, _("while closing ccache"));
-            exit(1);
+            return 1;
         }
 #ifdef KRB5_KRB4_COMPAT
         if (name == NULL && !status_only)
             do_v4_ccache(0);
 #endif
-        exit(exit_status);
+        return exit_status;
     } else {
         if (!status_only)
             com_err(progname, code, _("while retrieving a ticket"));
-        exit(1);
+        return 1;
     }
 }
 

@@ -1,6 +1,6 @@
-.\" clients/kdestroy/kdestroy.M
+.\" clients/kswitch/kswitch.M
 .\"
-.\" Copyright 1992 by the Massachusetts Institute of Technology.
+.\" Copyright 2011 by the Massachusetts Institute of Technology.
 .\"
 .\" Export of this software from the United States of America may
 .\"   require a specific license from the United States Government.
@@ -21,50 +21,28 @@
 .\" this software for any purpose.  It is provided "as is" without express
 .\" or implied warranty.
 .\" "
-.TH KDESTROY 1
+.TH KSWITCH 1
 .SH NAME
-kdestroy \- destroy Kerberos tickets
+kswitch \- switch primary credential cache
 .SH SYNOPSIS
-.B kdestroy
-[\fB\-A\fP] [\fB\-q\fP] [\fB\-c\fP \fIcache_name]
-.br
+\fBkswitch\fP {\fB\-c\fP \fIcachename\fP | \fB\-p\fP \fIprincipal\fP}
 .SH DESCRIPTION
-The
-.I kdestroy
-utility destroys the user's active Kerberos authorization tickets by
-writing zeros to the specified credentials cache that contains them.  If
-the credentials cache is not specified, the default credentials cache is
-destroyed.
+.I kswitch
+makes the specified credential cache the primary cache for the
+collection, if a cache collection is available.
 .SH OPTIONS
 .TP
-.B \-A
-Destroys all caches in the collection, if a cache collection is
-available.
-.B \-q
-Run quietly.  Normally
-.B kdestroy
-beeps if it fails to destroy the user's tickets.  The
-.B \-q
-flag suppresses this behavior.
+.B \-c
+.I cachename
+directly specifies the credential cache to be made primary.
 .TP
-\fB\-c\fP \fIcache_name\fP
-use
-.I cache_name
-as the credentials (ticket) cache name and location; if this option is
-not used, the default cache name and location are used.
-.sp
-The default credentials cache may vary between systems.  If the
-.SM KRB5CCNAME
-environment variable is set, its value is used to name the default
-ticket cache.
-.PP
-Most installations recommend that you place the
-.I kdestroy
-command in your
-.I .logout
-file, so that your tickets are destroyed automatically when you log out.
+.B \-p
+.I principal
+causes the cache collection to be searched for a cache containing
+credentials for \fIprincipal\fP.  If one is found, that collection is
+made primary.
 .SH ENVIRONMENT
-.B Kdestroy
+.B kswitch
 uses the following environment variables:
 .TP "\w'.SM KRB5CCNAME\ \ 'u"
 .SM KRB5CCNAME
@@ -80,10 +58,4 @@ be present in the collection.
 default location of Kerberos 5 credentials cache 
 ([uid] is the decimal UID of the user).
 .SH SEE ALSO
-kinit(1), klist(1), krb5(3)
-.SH BUGS
-.PP
-Only the tickets in the specified credentials cache are destroyed.
-Separate ticket caches are used to hold root instance and password
-changing tickets.  These should probably be destroyed too, or all of a
-user's tickets kept in a single credentials cache.
+kinit(1), kdestroy(1), klist(1), kerberos(1)

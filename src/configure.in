@@ -1239,7 +1239,7 @@ dnl	ccapi ccapi/lib ccapi/lib/unix ccapi/server ccapi/server/unix ccapi/test
 	plugins/authdata/greet_server
 
 	clients clients/klist clients/kinit clients/kvno
-	clients/kdestroy clients/kpasswd clients/ksu
+	clients/kdestroy clients/kpasswd clients/ksu clients/kswitch
 
 	kadmin kadmin/cli kadmin/dbutil kadmin/ktutil kadmin/server
 	kadmin/testing kadmin/testing/scripts kadmin/testing/util

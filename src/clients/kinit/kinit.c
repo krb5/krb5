@@ -133,6 +133,7 @@ struct k5_data
     krb5_ccache cc;
     krb5_principal me;
     char* name;
+    krb5_boolean switch_to_cache;
 };
 
 #ifdef GETOPT_LONG
@@ -438,6 +439,8 @@ k5_begin(opts, k5)
 {
     krb5_error_code code = 0;
     int flags = opts->enterprise ? KRB5_PRINCIPAL_PARSE_ENTERPRISE : 0;
+    krb5_ccache defcache;
+    const char *deftype;
 
     code = krb5_init_context(&k5->ctx);
     if (code) {
@@ -445,8 +448,18 @@ k5_begin(opts, k5)
         return 0;
     }
     errctx = k5->ctx;
-    if (opts->k5_cache_name)
-    {
+
+    /* Parse specified principal name now if we got one. */
+    if (opts->principal_name) {
+        if ((code = krb5_parse_name_flags(k5->ctx, opts->principal_name,
+                                          flags, &k5->me))) {
+            com_err(progname, code, _("when parsing name %s"),
+                    opts->principal_name);
+            return 0;
+        }
+    }
+
+    if (opts->k5_cache_name) {
         code = krb5_cc_resolve(k5->ctx, opts->k5_cache_name, &k5->cc);
         if (code != 0) {
             com_err(progname, code, _("resolving ccache %s"),
@@ -457,31 +470,48 @@ k5_begin(opts, k5)
             fprintf(stderr, _("Using specified cache: %s\n"),
                     opts->k5_cache_name);
         }
-    }
-    else
-    {
-        if ((code = krb5_cc_default(k5->ctx, &k5->cc))) {
+    } else {
+        if ((code = krb5_cc_default(k5->ctx, &defcache))) {
             com_err(progname, code, _("while getting default ccache"));
             return 0;
         }
-        if (opts->verbose) {
-            fprintf(stderr, _("Using default cache: %s\n"),
-                    krb5_cc_get_name(k5->ctx, k5->cc));
+        deftype = krb5_cc_get_type(k5->ctx, defcache);
+        if (k5->me != NULL && krb5_cc_support_switch(k5->ctx, deftype)) {
+            /* Use an existing cache for the specified principal if we can. */
+            code = krb5_cc_cache_match(k5->ctx, k5->me, &k5->cc);
+            if (code != 0 && code != KRB5_CC_NOTFOUND) {
+                com_err(progname, code, _("while searching for ccache for %s"),
+                        opts->principal_name);
+                krb5_cc_close(k5->ctx, defcache);
+                return 0;
+            }
+            if (code == KRB5_CC_NOTFOUND) {
+                code = krb5_cc_new_unique(k5->ctx, deftype, NULL, &k5->cc);
+                if (code) {
+                    com_err(progname, code, _("while generating new ccache"));
+                    krb5_cc_close(k5->ctx, defcache);
+                    return 0;
+                }
+                if (opts->verbose) {
+                    fprintf(stderr, _("Using new cache: %s\n"),
+                            krb5_cc_get_name(k5->ctx, k5->cc));
+                }
+            } else if (opts->verbose) {
+                fprintf(stderr, _("Using existing cache: %s\n"),
+                        krb5_cc_get_name(k5->ctx, k5->cc));
+            }
+            krb5_cc_close(k5->ctx, defcache);
+            k5->switch_to_cache = 1;
+        } else {
+            k5->cc = defcache;
+            if (opts->verbose) {
+                fprintf(stderr, _("Using default cache: %s\n"),
+                        krb5_cc_get_name(k5->ctx, k5->cc));
+            }
         }
     }
 
-    if (opts->principal_name)
-    {
-        /* Use specified name */
-        if ((code = krb5_parse_name_flags(k5->ctx, opts->principal_name,
-                                          flags, &k5->me))) {
-            com_err(progname, code, _("when parsing name %s"),
-                    opts->principal_name);
-            return 0;
-        }
-    }
-    else
-    {
+    if (!k5->me) {
         /* No principal name specified */
         if (opts->anonymous) {
             char *defrealm;
@@ -755,6 +785,14 @@ k5_kinit(opts, k5)
             fprintf(stderr, _("Stored credentials\n"));
     }
     notix = 0;
+
+    if (k5->switch_to_cache) {
+        code = krb5_cc_switch(k5->ctx, k5->cc);
+        if (code) {
+            com_err(progname, code, _("while switching to new ccache"));
+            goto cleanup;
+        }
+    }
 
 cleanup:
     if (options)

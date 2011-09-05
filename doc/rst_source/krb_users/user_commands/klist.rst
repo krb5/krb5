@@ -7,7 +7,7 @@ SYNOPSIS
 
 **klist**
       [**-e**] 
-      [[**-c**] [**-f**] [**-s**] [**-a** [**-n**]]]
+      [[**-c**] [**-l**] [**-A**] [**-f**] [**-s**] [**-a** [**-n**]]]
       [**-k**  [**-t**]  [**-K**]]
       [**-V**]
       [*cache_name* | *keytab_name*]
@@ -25,6 +25,14 @@ OPTIONS
      **-e**
           Displays the encryption types of the session key and the ticket for each credential in the credential cache,
           or each key in the keytab file.
+
+     **-l**
+          If a cache collection is available, displays a table
+          summarizing the caches present in the collection.
+
+     **-A**
+          If a cache collection is available, displays the contents of
+          all of the caches in the collection.
 
      **-c**
           List tickets held in a credentials cache. This is the default if neither *-c* nor *-k* is specified.
@@ -79,7 +87,14 @@ ENVIRONMENT
 
 *klist* uses the following environment variables:
 
-     **KRB5CCNAME** - Location of the Kerberos 5 credentials (ticket) cache.
+     **KRB5CCNAME**
+          Location of the default Kerberos 5 credentials (ticket)
+          cache, in the form *type*:*residual*.  If no type prefix is
+          present, the **FILE** type is assumed.  The type of the
+          default cache may determine the availability of a cache
+          collection; for instance, a default cache of type **DIR**
+          causes caches within the directory to be present in the
+          collection.
 
 
 FILES

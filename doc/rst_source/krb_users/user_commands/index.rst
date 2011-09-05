@@ -10,6 +10,7 @@ User commands
    kinit.rst
    klist.rst
    kdestroy.rst
+   kswitch.rst
    kpasswd.rst
    kvno.rst
    ksu.rst
