@@ -478,6 +478,10 @@ krb5_to_gss_cred(krb5_context context,
                  krb5_creds *creds,
                  krb5_gss_cred_id_t *out_cred);
 
+OM_uint32
+kg_cred_resolve(OM_uint32 *minor_status, krb5_context context,
+                gss_cred_id_t cred_handle, gss_name_t target_name);
+
 /** declarations of internal name mechanism functions **/
 
 OM_uint32 KRB5_CALLCONV krb5_gss_acquire_cred

@@ -914,16 +914,7 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
 
     kname = (krb5_gss_name_t)target_name;
 
-    if (claimant_cred_handle != GSS_C_NO_CREDENTIAL) {
-        major_status = krb5_gss_validate_cred_1(minor_status,
-                                                claimant_cred_handle,
-                                                ctx->k5c);
-        if (GSS_ERROR(major_status))
-            goto cleanup;
-
-        cred_locked = TRUE;
-        kcred = (krb5_gss_cred_id_t)claimant_cred_handle;
-    } else {
+    if (claimant_cred_handle == GSS_C_NO_CREDENTIAL) {
         major_status = krb5_gss_acquire_cred(minor_status, NULL,
                                              GSS_C_INDEFINITE,
                                              GSS_C_NULL_OID_SET,
@@ -931,8 +922,15 @@ iakerb_gss_init_sec_context(OM_uint32 *minor_status,
                                              &defcred, NULL, NULL);
         if (GSS_ERROR(major_status))
             goto cleanup;
-        kcred = (krb5_gss_cred_id_t)defcred;
+        claimant_cred_handle = defcred;
     }
+
+    major_status = kg_cred_resolve(minor_status, ctx->k5c,
+                                   claimant_cred_handle, target_name);
+    if (GSS_ERROR(major_status))
+        goto cleanup;
+    cred_locked = TRUE;
+    kcred = (krb5_gss_cred_id_t)claimant_cred_handle;
 
     major_status = GSS_S_FAILURE;
 

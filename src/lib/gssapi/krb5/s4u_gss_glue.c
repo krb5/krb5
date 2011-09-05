@@ -144,9 +144,8 @@ krb5_gss_acquire_cred_impersonate_name(OM_uint32 *minor_status,
         return GSS_S_FAILURE;
     }
 
-    major_status = krb5_gss_validate_cred_1(minor_status,
-                                            impersonator_cred_handle,
-                                            context);
+    major_status = kg_cred_resolve(minor_status, context,
+                                   impersonator_cred_handle, NULL);
     if (GSS_ERROR(major_status)) {
         krb5_free_context(context);
         return major_status;
