@@ -1,7 +1,7 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* lib/krb5/ccache/t_cccursor.c */
+/* lib/krb5/ccache/t_cccursor.c - Simple test harness for cccol API */
 /*
- * Copyright 2006 by the Massachusetts Institute of Technology.
+ * Copyright 2011 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -24,242 +24,47 @@
  * or implied warranty.
  */
 
-#include "autoconf.h"
-#include "krb5.h"
+/*
+ * Displays a list of caches returned by the cccol cursor.  The first argument,
+ * if given, is set to the default cache name for the context before iterating.
+ * Any remaining argments are resolved as caches and kept open during the
+ * iteration.
+ */
 
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-struct crlist {
-    char *ccname;
-    char *pname;
-};
-
-struct crlist crlist[] = {
-    { "foo", NULL },
-    { "MEMORY:env", "env" },
-    { "MEMORY:0", "foo0" },
-    { "MEMORY:1", "foo1" },
-    { "MEMORY:2", "foo2" },
-};
-#define NCRLIST (sizeof(crlist)/sizeof(struct crlist))
-
-struct chklist {
-    char *pfx;
-    char *res;
-};
-
-struct chklist chklist0[] = {
-    { NULL, NULL },
-    { NULL, NULL },
-    { "MEMORY", "2" },
-    { "MEMORY", "1" },
-    { "MEMORY", "0" },
-    { "MEMORY", "env" },
-};
-#define NCHKLIST0 (sizeof(chklist0)/sizeof(struct chklist))
-
-struct chklist chklist1[] = {
-    { "MEMORY", "env" },
-    { NULL, NULL },
-    { "MEMORY", "2" },
-    { "MEMORY", "1" },
-    { "MEMORY", "0" },
-};
-#define NCHKLIST1 (sizeof(chklist1)/sizeof(struct chklist))
-
-struct chklist chklist2[] = {
-    { "MEMORY", "env" },
-    { NULL, NULL },
-    { "MEMORY", "2" },
-    { "MEMORY", "1" },
-    { "MEMORY", "0" },
-};
-#define NCHKLIST2 (sizeof(chklist2)/sizeof(struct chklist))
-
-krb5_error_code
-cr_cache(krb5_context, const char *, const char *);
-
-krb5_error_code
-dest_cache(krb5_context, const char *, const char *);
-
-krb5_error_code
-do_chk(krb5_context, struct chklist *, int nmax, int *);
+#include "k5-int.h"
 
 int
-do_chk_one(const char *, const char *, struct chklist *);
-
-krb5_error_code
-cr_cache(krb5_context context, const char *ccname, const char *pname)
+main(int argc, char **argv)
 {
-    krb5_error_code ret;
-    krb5_principal princ = NULL;
-    krb5_ccache ccache = NULL;
-
-    ret = krb5_cc_resolve(context, ccname, &ccache);
-    if (ret)
-        goto errout;
-    if (pname != NULL) {
-        ret = krb5_parse_name(context, pname, &princ);
-        if (ret)
-            return ret;
-        ret = krb5_cc_initialize(context, ccache, princ);
-        if (ret)
-            goto errout;
-        printf("created cache %s with principal %s\n", ccname, pname);
-    } else
-        printf("created cache %s (uninitialized)\n", ccname);
-errout:
-    if (princ != NULL)
-        krb5_free_principal(context, princ);
-    if (ccache != NULL)
-        krb5_cc_close(context, ccache);
-    return ret;
-}
-
-krb5_error_code
-dest_cache(krb5_context context, const char *ccname, const char *pname)
-{
-    krb5_error_code ret;
-    krb5_ccache ccache = NULL;
-
-    ret = krb5_cc_resolve(context, ccname, &ccache);
-    if (ret)
-        goto errout;
-    if (pname != NULL) {
-        ret = krb5_cc_destroy(context, ccache);
-        if (ret)
-            return ret;
-        printf("Destroyed cache %s\n", ccname);
-    } else {
-        printf("Closed cache %s (uninitialized)\n", ccname);
-        ret = krb5_cc_close(context, ccache);
-    }
-errout:
-    return ret;
-}
-
-int
-do_chk_one(const char *prefix, const char *name, struct chklist *chk)
-{
-
-    if (chk->pfx == NULL)
-        return 0;
-    if (strcmp(chk->pfx, prefix) || strcmp(chk->res, name)) {
-        fprintf(stderr, "MATCH FAILED: expected %s:%s\n",
-                chk->pfx, chk->res);
-        return 1;
-    }
-    return 0;
-}
-
-krb5_error_code
-do_chk(
-    krb5_context context,
-    struct chklist *chklist,
-    int nmax,
-    int *good)
-{
-    krb5_error_code ret = 0;
-    krb5_cccol_cursor cursor = NULL;
-    krb5_ccache ccache;
-    const char *prefix, *name;
+    krb5_context ctx;
+    krb5_cccol_cursor cursor;
+    krb5_ccache cache, hold[64];
     int i;
+    char *name;
 
-    ret = krb5_cccol_cursor_new(context, &cursor);
-    if (ret) goto errout;
+    assert(krb5_init_context(&ctx) == 0);
+    if (argc > 1)
+        assert(krb5_cc_set_default_name(ctx, argv[1]) == 0);
 
-    i = 0;
-    printf(">>>\n");
-    for (i = 0; ; i++) {
-        ret = krb5_cccol_cursor_next(context, cursor, &ccache);
-        if (ret) goto errout;
-        if (ccache == NULL) {
-            printf("<<< end of list\n");
+    if (argc > 2) {
+        assert(argc < 60);
+        for (i = 2; i < argc; i++)
+            assert(krb5_cc_resolve(ctx, argv[i], &hold[i - 2]) == 0);
+    }
+
+    assert(krb5_cccol_cursor_new(ctx, &cursor) == 0);
+    while (1) {
+        assert(krb5_cccol_cursor_next(ctx, cursor, &cache) == 0);
+        if (cache == NULL)
             break;
-        }
-        prefix = krb5_cc_get_type(context, ccache);
-        name = krb5_cc_get_name(context, ccache);
-        printf("cursor: %s:%s\n", prefix, name);
-
-        if (i < nmax) {
-            if (do_chk_one(prefix, name, &chklist[i])) {
-                *good = 0;
-            }
-        }
-        ret = krb5_cc_close(context, ccache);
-        if (ret) goto errout;
+        assert(krb5_cc_get_full_name(ctx, cache, &name) == 0);
+        printf("%s\n", name);
+        krb5_free_string(ctx, name);
+        krb5_cc_close(ctx, cache);
     }
+    assert(krb5_cccol_cursor_free(ctx, &cursor) == 0);
 
-    if (i != nmax) {
-        fprintf(stderr, "total ccaches %d != expected ccaches %d\n", i, nmax);
-        *good = 0;
-    }
-
-errout:
-    if (cursor != NULL)
-        krb5_cccol_cursor_free(context, &cursor);
-    return ret;
-}
-
-int
-main(int argc, char *argv[])
-{
-    krb5_error_code ret = 0;
-    krb5_context context;
-    unsigned int i;
-    int good = 1;
-
-    ret = krb5_init_context(&context);
-    if (ret) exit(1);
-
-    for (i = 0; i < NCRLIST; i++) {
-        ret = cr_cache(context, crlist[i].ccname, crlist[i].pname);
-        if (ret) goto errout;
-    }
-
-#ifdef HAVE_SETENV
-    setenv("KRB5CCNAME", "foo", 1);
-#else
-    putenv("KRB5CCNAME=foo");
-#endif
-    printf("KRB5CCNAME=foo\n");
-    ret = do_chk(context, chklist0, NCHKLIST0, &good);
-    if (ret)
-        goto errout;
-
-#ifdef HAVE_SETENV
-    setenv("KRB5CCNAME", "MEMORY:env", 1);
-#else
-    putenv("KRB5CCNAME=MEMORY:env");
-#endif
-    printf("KRB5CCNAME=MEMORY:env\n");
-    ret = do_chk(context, chklist1, NCHKLIST1, &good);
-    if (ret)
-        goto errout;
-
-    ret = krb5_cc_set_default_name(context, "MEMORY:env");
-    if (ret)
-        goto errout;
-
-    printf("KRB5CCNAME=MEMORY:env, ccdefname=MEMORY:env\n");
-    ret = do_chk(context, chklist2, NCHKLIST2, &good);
-    if (ret)
-        goto errout;
-
-    for (i = 0; i < NCRLIST; i++) {
-        ret = dest_cache(context, crlist[i].ccname, crlist[i].pname);
-        if (ret) goto errout;
-    }
-
-errout:
-    krb5_free_context(context);
-    if (ret) {
-        com_err("main", ret, "");
-        exit(1);
-    } else {
-        exit(!good);
-    }
+    for (i = 2; i < argc; i++)
+        krb5_cc_close(ctx, hold[i - 2]);
+    return 0;
 }

@@ -101,11 +101,12 @@ T_CCCURSOR_OBJS = t_cccursor.o
 t_cccursor: $(T_CCCURSOR_OBJS) $(KRB5_BASE_DEPLIBS)
 	$(CC_LINK) -o $@ $(T_CCCURSOR_OBJS) $(KRB5_BASE_LIBS)
 
-check-unix:: t_cc t_cccursor
+check-unix:: t_cc
 	KRB5_CONFIG=$(srcdir)/t_krb5.conf ; export KRB5_CONFIG ;\
 	$(RUN_SETUP) $(VALGRIND) ./t_cc
-	KRB5_CONFIG=$(srcdir)/../krb/t_krb5.conf ; export KRB5_CONFIG ;\
-	$(RUN_SETUP) $(VALGRIND) ./t_cccursor
+
+check-pytests:: t_cccursor
+	$(RUNPYTEST) $(srcdir)/t_cccol.py $(PYTESTFLAGS)
 
 clean-unix::
 	$(RM) t_cc t_cc.o t_cccursor t_cccursor.o

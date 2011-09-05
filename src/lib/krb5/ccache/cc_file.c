@@ -324,7 +324,7 @@ static struct fcc_set *fccs = NULL;
 
 /* Iterator over file caches.  */
 struct krb5_fcc_ptcursor_data {
-    struct fcc_set *cur;
+    krb5_boolean first;
 };
 
 /* An off_t can be arbitrarily complex */
@@ -2332,71 +2332,53 @@ krb5_fcc_ptcursor_new(krb5_context context, krb5_cc_ptcursor *cursor)
     if (n == NULL)
         return ENOMEM;
     n->ops = &krb5_fcc_ops;
-    cdata = malloc(sizeof(struct krb5_fcc_ptcursor_data));
+    cdata = malloc(sizeof(*cdata));
     if (cdata == NULL) {
-        ret = ENOMEM;
-        goto errout;
+        free(n);
+        return ENOMEM;
     }
+    cdata->first = TRUE;
     n->data = cdata;
-    ret = k5_cc_mutex_lock(context, &krb5int_cc_file_mutex);
-    if (ret)
-        goto errout;
-    cdata->cur = fccs;
-    ret = k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
-    if (ret)
-        goto errout;
-
-errout:
-    if (ret) {
-        krb5_fcc_ptcursor_free(context, &n);
-    }
     *cursor = n;
     return ret;
 }
 
 static krb5_error_code KRB5_CALLCONV
-krb5_fcc_ptcursor_next(krb5_context context,
-                       krb5_cc_ptcursor cursor,
-                       krb5_ccache *ccache)
+krb5_fcc_ptcursor_next(krb5_context context, krb5_cc_ptcursor cursor,
+                       krb5_ccache *cache_out)
 {
-    krb5_error_code ret = 0;
-    struct krb5_fcc_ptcursor_data *cdata = NULL;
-    krb5_ccache n;
+    krb5_error_code ret;
+    struct krb5_fcc_ptcursor_data *cdata = cursor->data;
+    const char *defname, *residual;
+    krb5_ccache cache;
+    struct stat sb;
 
-    *ccache = NULL;
-    n = malloc(sizeof(*n));
-    if (n == NULL)
-        return ENOMEM;
+    *cache_out = NULL;
+    if (!cdata->first)
+        return 0;
+    cdata->first = FALSE;
 
-    cdata = cursor->data;
+    defname = krb5_cc_default_name(context);
+    if (!defname)
+        return 0;
 
-    ret = k5_cc_mutex_lock(context, &krb5int_cc_file_mutex);
+    /* Check if the default has type FILE or no type; find the residual. */
+    if (strncmp(defname, "FILE:", 5) == 0)
+        residual = defname + 5;
+    else if (strchr(defname + 2, ':') == NULL)  /* Skip drive prefix if any. */
+        residual = defname;
+    else
+        return 0;
+
+    /* Don't yield a nonexistent default file cache. */
+    if (stat(residual, &sb) != 0)
+        return 0;
+
+    ret = krb5_cc_resolve(context, defname, &cache);
     if (ret)
-        goto errout;
-
-    if (cdata->cur == NULL) {
-        k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
-        free(n);
-        n = NULL;
-        goto errout;
-    }
-
-    n->ops = &krb5_fcc_ops;
-    n->data = cdata->cur->data;
-    cdata->cur->refcount++;
-
-    cdata->cur = cdata->cur->next;
-
-    ret = k5_cc_mutex_unlock(context, &krb5int_cc_file_mutex);
-    if (ret)
-        goto errout;
-errout:
-    if (ret && n != NULL) {
-        free(n);
-        n = NULL;
-    }
-    *ccache = n;
-    return ret;
+        return ret;
+    *cache_out = cache;
+    return 0;
 }
 
 static krb5_error_code KRB5_CALLCONV
@@ -2405,8 +2387,7 @@ krb5_fcc_ptcursor_free(krb5_context context,
 {
     if (*cursor == NULL)
         return 0;
-    if ((*cursor)->data != NULL)
-        free((*cursor)->data);
+    free((*cursor)->data);
     free(*cursor);
     *cursor = NULL;
     return 0;
