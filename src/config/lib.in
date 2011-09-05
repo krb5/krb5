@@ -103,16 +103,18 @@ lib$(LIBBASE)$(PFLIBEXT): $(PFOBJLISTS)
 
 $(TOPLIBD)/lib$(LIBBASE)$(STLIBEXT): lib$(LIBBASE)$(STLIBEXT)
 	$(RM) $@
-	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIBBASE)$(STLIBEXT) .)
+	(cd $(TOPLIBD) && $(LN) $(RELDIR)/lib$(LIBBASE)$(STLIBEXT) .)
 $(TOPLIBD)/lib$(LIBBASE)$(SHLIBEXT): lib$(LIBBASE)$(SHLIBEXT)
 	$(RM) $@
-	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIBBASE)$(SHLIBEXT) .)
+	(cd $(TOPLIBD) && \
+	 $(LN_S) lib$(LIBBASE)$(SHLIBVEXT) lib$(LIBBASE)$(SHLIBEXT))
 $(TOPLIBD)/lib$(LIBBASE)$(SHLIBSEXT): lib$(LIBBASE)$(SHLIBSEXT)
 	$(RM) $@
-	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIBBASE)$(SHLIBSEXT) .)
+	(cd $(TOPLIBD) && \
+	 $(LN_S) lib$(LIBBASE)$(SHLIBVEXT) lib$(LIBBASE)$(SHLIBSEXT))
 $(TOPLIBD)/lib$(LIBBASE)$(SHLIBVEXT): lib$(LIBBASE)$(SHLIBVEXT)
 	$(RM) $@
-	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIBBASE)$(SHLIBVEXT) .)
+	(cd $(TOPLIBD) && $(LN) $(RELDIR)/lib$(LIBBASE)$(SHLIBVEXT) .)
 $(TOPLIBD)/lib$(LIBBASE)$(PFLIBEXT): lib$(LIBBASE)$(PFLIBEXT)
 	$(RM) $@
 	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/lib$(LIBBASE)$(PFLIBEXT) .)
