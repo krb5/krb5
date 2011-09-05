@@ -24,6 +24,9 @@ STLIBOBJS= \
 	cccursor.o \
 	ccdefault.o \
 	ccdefops.o \
+	ccselect.o \
+	ccselect_k5identity.o \
+	ccselect_realm.o \
 	cc_dir.o \
 	cc_retr.o \
 	cc_file.o \
@@ -37,6 +40,9 @@ OBJS=	$(OUTPRE)ccbase.$(OBJEXT) \
 	$(OUTPRE)cccursor.$(OBJEXT) \
 	$(OUTPRE)ccdefault.$(OBJEXT) \
 	$(OUTPRE)ccdefops.$(OBJEXT) \
+	$(OUTPRE)ccselect.$(OBJEXT) \
+	$(OUTPRE)ccselect_k5identity.$(OBJEXT) \
+	$(OUTPRE)ccselect_realm.$(OBJEXT) \
 	$(OUTPRE)cc_dir.$(OBJEXT) \
 	$(OUTPRE)cc_retr.$(OBJEXT) \
 	$(OUTPRE)cc_file.$(OBJEXT) \
@@ -50,6 +56,9 @@ SRCS=	$(srcdir)/ccbase.c \
 	$(srcdir)/cccursor.c \
 	$(srcdir)/ccdefault.c \
 	$(srcdir)/ccdefops.c \
+	$(srcdir)/ccselect.c \
+	$(srcdir)/ccselect_k5identity.c \
+	$(srcdir)/ccselect_realm.c \
 	$(srcdir)/cc_dir.c \
 	$(srcdir)/cc_retr.c \
 	$(srcdir)/cc_file.c \

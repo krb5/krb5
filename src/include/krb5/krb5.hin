@@ -4453,6 +4453,42 @@ krb5_error_code KRB5_CALLCONV
 krb5_cc_cache_match(krb5_context context, krb5_principal client,
                     krb5_ccache *cache_out);
 
+/**
+ * Select a credential cache to use with a server principal.
+ *
+ * @param [in]  context         Library context
+ * @param [in]  server          Server principal
+ * @param [out] cache_out       Credential cache handle
+ * @param [out] princ_out       Client principal
+ *
+ * Select a cache within the collection containing credentials most appropriate
+ * for use with @a server, according to configured rules and heuristics.
+ *
+ * Use krb5_cc_close() to release @a cache_out when it is no longer needed.
+ * Use krb5_free_principal() to release @a princ_out when it is no longer
+ * needed.  Note that @a princ_out is set in some error conditions.
+ *
+ * @return
+ * If an appropriate cache is found, 0 is returned, @a cache_out is set to the
+ * selected cache, and @a princ_out is set to the default principal of that
+ * cache.
+ *
+ * If the appropriate client principal can be authoritatively determined but
+ * the cache collection contains no credentials for that principal, then
+ * KRB5_CC_NOTFOUND is returned, @a cache_out is set to NULL, and @a princ_out
+ * is set to the appropriate client principal.
+ *
+ * If no configured mechanism can determine the appropriate cache or principal,
+ * KRB5_CC_NOTFOUND is returned and @a cache_out and @a princ_out are set to
+ * NULL.
+ *
+ * Any other error code indicates a fatal error in the processing of a cache
+ * selection mechanism.
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_cc_select(krb5_context context, krb5_principal server,
+               krb5_ccache *cache_out, krb5_principal *princ_out);
+
 /* krb5_free.c */
 /**
  * Free the storage assigned to a principal.

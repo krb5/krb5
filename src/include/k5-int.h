@@ -1378,7 +1378,8 @@ struct plugin_interface {
 #define PLUGIN_INTERFACE_KADM5_HOOK  1
 #define PLUGIN_INTERFACE_CLPREAUTH   2
 #define PLUGIN_INTERFACE_KDCPREAUTH  3
-#define PLUGIN_NUM_INTERFACES        4
+#define PLUGIN_INTERFACE_CCSELECT    4
+#define PLUGIN_NUM_INTERFACES        5
 
 /* Retrieve the plugin module of type interface_id and name modname,
  * storing the result into module. */
@@ -1418,6 +1419,7 @@ struct _kdb5_dal_handle;        /* private, in kdb5.h */
 typedef struct _kdb5_dal_handle kdb5_dal_handle;
 struct _kdb_log_context;
 typedef struct krb5_preauth_context_st krb5_preauth_context;
+struct ccselect_module_handle;
 struct _krb5_context {
     krb5_magic      magic;
     krb5_enctype    *in_tkt_etypes;
@@ -1457,6 +1459,9 @@ struct _krb5_context {
 
     /* preauth module stuff */
     krb5_preauth_context *preauth_context;
+
+    /* cache module stuff */
+    struct ccselect_module_handle **ccselect_handles;
 
     /* error detail info */
     struct errinfo err;

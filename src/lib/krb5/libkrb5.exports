@@ -107,6 +107,7 @@ initialize_krb5_error_table
 initialize_k5e1_error_table
 initialize_kv5m_error_table
 initialize_prof_error_table
+k5_ccselect_free_context
 k5_free_serverlist
 k5_kt_get_principal
 k5_locate_kdc
@@ -207,6 +208,7 @@ krb5_cc_remove_cred
 krb5_cc_resolve
 krb5_cc_retrieve_cred
 krb5_cc_retrieve_cred_default
+krb5_cc_select
 krb5_cc_set_config
 krb5_cc_set_default_name
 krb5_cc_set_flags

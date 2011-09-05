@@ -288,6 +288,7 @@ krb5_free_context(krb5_context ctx)
         ctx->trace_callback(ctx, NULL, ctx->trace_callback_data);
 #endif
 
+    k5_ccselect_free_context(ctx);
     k5_plugin_free_context(ctx);
     free(ctx->plugin_base_dir);
 

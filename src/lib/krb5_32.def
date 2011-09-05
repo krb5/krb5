@@ -417,3 +417,4 @@ EXPORTS
 	krb5_cc_support_switch				@391
 	krb5_cc_switch					@392
 	krb5_free_string				@393
+	krb5_cc_select					@394

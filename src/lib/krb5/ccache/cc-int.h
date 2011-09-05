@@ -115,4 +115,12 @@ k5_cccol_force_unlock(void);
 krb5_error_code
 krb5int_fcc_new_unique(krb5_context context, char *template, krb5_ccache *id);
 
+krb5_error_code
+ccselect_realm_initvt(krb5_context context, int maj_ver, int min_ver,
+                      krb5_plugin_vtable vtable);
+
+krb5_error_code
+ccselect_k5identity_initvt(krb5_context context, int maj_ver, int min_ver,
+                           krb5_plugin_vtable vtable);
+
 #endif /* __KRB5_CCACHE_H__ */

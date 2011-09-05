@@ -119,7 +119,29 @@
 #define TRACE_CC_STORE_TKT(c, cache, creds)                             \
     TRACE(c, (c, "Also storing {creds} based on ticket", creds))
 
-#define TRACE_FAST_ARMOR_CCACHE(c, ccache_name)                 \
+#define TRACE_CCSELECT_VTINIT_FAIL(c, ret)                              \
+    TRACE(c, (c, "ccselect module failed to init vtable: {kerr}", ret))
+#define TRACE_CCSELECT_INIT_FAIL(c, name, ret)                          \
+    TRACE(c, (c, "ccselect module {str} failed to init: {kerr}", name, ret))
+#define TRACE_CCSELECT_MODCHOICE(c, name, server, cache, princ)         \
+    TRACE(c, (c, "ccselect module {str} chose cache {ccache} with client " \
+              "principal {princ} for server principal {princ}", name, cache, \
+              princ, server))
+#define TRACE_CCSELECT_MODNOTFOUND(c, name, server, princ)              \
+    TRACE(c, (c, "ccselect module {str} chose client principal {princ} " \
+              "for server principal {princ} but found no cache", name, princ, \
+              server))
+#define TRACE_CCSELECT_MODFAIL(c, name, ret, server)                    \
+    TRACE(c, (c, "ccselect module {str} yielded error {kerr} for server " \
+              "principal {princ}", name, ret, server))
+#define TRACE_CCSELECT_NOTFOUND(c, server)                           \
+    TRACE(c, (c, "ccselect can't find appropriate cache for server " \
+              "principal {princ}", server))
+#define TRACE_CCSELECT_DEFAULT(c, cache, server)                        \
+    TRACE(c, (c, "ccselect choosing default cache {ccache} for server " \
+              "principal {princ}", cache, server))
+
+#define TRACE_FAST_ARMOR_CCACHE(c, ccache_name) \
     TRACE(c, (c, "FAST armor ccache: {str}", ccache_name))
 #define TRACE_FAST_ARMOR_CCACHE_KEY(c, keyblock)                        \
     TRACE(c, (c, "Armor ccache sesion key: {keyblock}", keyblock))
