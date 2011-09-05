@@ -299,7 +299,9 @@ kdb5_add_mkey(int argc, char *argv[])
         goto cleanup_return;
     }
 
-    retval = add_new_mkey(util_context, master_entry, &new_mkeyblock, 0);
+    new_mkey_kvno = get_next_kvno(util_context, master_entry);
+    retval = add_new_mkey(util_context, master_entry, &new_mkeyblock,
+                          new_mkey_kvno);
     if (retval) {
         com_err(progname, retval,
                 _("adding new master key to master principal"));
