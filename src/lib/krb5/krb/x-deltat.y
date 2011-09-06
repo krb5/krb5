@@ -37,6 +37,15 @@
    deltat.c, or do it manually.  */
 %{
 
+/*
+ * GCC optimizer will detect a variable used without being set in a YYERROR
+ * path.  As this is generated code, suppress the complaint.
+ */
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
+#endif
+
 #include <ctype.h>
 #include <errno.h>
 #include "k5-int.h"
@@ -61,14 +70,14 @@ struct param {
 #define MAX_MIN (MAX_TIME / 60)
 #define MIN_MIN (MIN_TIME / 60)
 
-/* An explanation of the tests being performed. 
-   We do not want to overflow a 32 bit integer with out manipulations, 
+/* An explanation of the tests being performed.
+   We do not want to overflow a 32 bit integer with out manipulations,
    even for testing for overflow. Therefore we rely on the following:
 
    The lex parser will not return a number > MAX_TIME (which is out 32
    bit limit).
 
-   Therefore, seconds (s) will require 
+   Therefore, seconds (s) will require
        MIN_TIME < s < MAX_TIME
 
    For subsequent tests, the logic is as follows:
@@ -76,7 +85,7 @@ struct param {
       If A < MAX_TIME and  B < MAX_TIME
 
       If we want to test if A+B < MAX_TIME, there are two cases
-        if (A > 0) 
+        if (A > 0)
          then A + B < MAX_TIME if B < MAX_TIME - A
 	else A + B < MAX_TIME  always.
 
@@ -97,7 +106,7 @@ struct param {
                           res = (a) + (b)
 
 
-#define OUT_D ((struct param *)tmv)->delta 
+#define OUT_D ((struct param *)tmv)->delta
 #define DO(D,H,M,S) \
  { \
      /* Overflow testing - this does not handle negative values well.. */ \
@@ -164,6 +173,10 @@ opt_s:
 
 %%
 
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
 static int
 mylex (krb5_int32 *intp, char **pp)
 {
@@ -196,10 +209,10 @@ mylex (krb5_int32 *intp, char **pp)
 	/* XXX assumes ASCII */
 	num = c - '0';
 	while (isdigit ((int) *P)) {
-	  if (num > MAX_TIME / 10) 
+	  if (num > MAX_TIME / 10)
 	    return OVERFLOW;
 	    num *= 10;
-	    if (num > MAX_TIME - (*P - '0')) 
+	    if (num > MAX_TIME - (*P - '0'))
 	      return OVERFLOW;
 	    num += *P++ - '0';
 	}
