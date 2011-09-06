@@ -83,7 +83,8 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
     gss_OID_set *mechanisms;
 {
     krb5_context context;
-    krb5_gss_cred_id_t defcred = GSS_C_NO_CREDENTIAL, cred;
+    gss_cred_id_t defcred = GSS_C_NO_CREDENTIAL;
+    krb5_gss_cred_id_t cred = NULL;
     krb5_error_code code;
     krb5_timestamp now;
     krb5_deltat lifetime;
@@ -104,12 +105,6 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
     if (name) *name = NULL;
     if (mechanisms) *mechanisms = NULL;
 
-    if ((code = krb5_timeofday(context, &now))) {
-        *minor_status = code;
-        ret = GSS_S_FAILURE;
-        goto fail;
-    }
-
     /* check for default credential */
     /*SUPPRESS 29*/
     if (cred_handle == GSS_C_NO_CREDENTIAL) {
@@ -121,13 +116,19 @@ krb5_gss_inquire_cred(minor_status, cred_handle, name, lifetime_ret,
         cred_handle = defcred;
     }
 
-    major = krb5_gss_validate_cred(minor_status, cred_handle);
+    major = kg_cred_resolve(minor_status, context, cred_handle, GSS_C_NO_NAME);
     if (GSS_ERROR(major)) {
         krb5_gss_release_cred(minor_status, &defcred);
         krb5_free_context(context);
         return(major);
     }
     cred = (krb5_gss_cred_id_t)cred_handle;
+
+    if ((code = krb5_timeofday(context, &now))) {
+        *minor_status = code;
+        ret = GSS_S_FAILURE;
+        goto fail;
+    }
 
     if (cred->tgt_expire > 0) {
         if ((lifetime = cred->tgt_expire - now) < 0)
