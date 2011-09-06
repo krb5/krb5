@@ -75,7 +75,7 @@ int
 main(int argc, char *argv[])
 {
     OM_uint32 minor, major;
-    gss_cred_id_t initiator_cred;
+    gss_cred_id_t initiator_cred = GSS_C_NO_CREDENTIAL;
     gss_buffer_desc buf;
     gss_name_t target_name, initiator_name = GSS_C_NO_NAME;
     gss_name_t real_initiator_name;
