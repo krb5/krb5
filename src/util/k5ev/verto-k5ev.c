@@ -29,7 +29,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include <verto.h>
+#include "verto-k5ev.h"
 #include <verto-module.h>
 #include "rename.h"
 #include "autoconf.h"
@@ -45,26 +45,26 @@
 #include "ev.c"
 
 static void
-libev_ctx_free(void *ctx)
+k5ev_ctx_free(void *ctx)
 {
     if (ctx != EV_DEFAULT)
         ev_loop_destroy(ctx);
 }
 
 static void
-libev_ctx_run(void *ctx)
+k5ev_ctx_run(void *ctx)
 {
     ev_run(ctx, 0);
 }
 
 static void
-libev_ctx_run_once(void *ctx)
+k5ev_ctx_run_once(void *ctx)
 {
     ev_run(ctx, EVRUN_ONCE);
 }
 
 static void
-libev_ctx_break(void *ctx)
+k5ev_ctx_break(void *ctx)
 {
     ev_break(ctx, EVBREAK_ONE);
 }
@@ -88,7 +88,7 @@ libev_callback(EV_P_ ev_watcher *w, int revents)
     return type ## w
 
 static void *
-libev_ctx_add(void *ctx, const verto_ev *ev, verto_ev_flag *flags)
+k5ev_ctx_add(void *ctx, const verto_ev *ev, verto_ev_flag *flags)
 {
     ev_io *iow = NULL;
     ev_timer *timerw = NULL;
@@ -122,7 +122,7 @@ libev_ctx_add(void *ctx, const verto_ev *ev, verto_ev_flag *flags)
 }
 
 static void
-libev_ctx_del(void *ctx, const verto_ev *ev, void *evpriv)
+k5ev_ctx_del(void *ctx, const verto_ev *ev, void *evpriv)
 {
     switch (verto_get_type(ev)) {
         case VERTO_EV_TYPE_IO:
@@ -142,24 +142,30 @@ libev_ctx_del(void *ctx, const verto_ev *ev, void *evpriv)
     free(evpriv);
 }
 
-static verto_ctx *verto_new_libev(void);
-static verto_ctx *verto_default_libev(void);
+static verto_ctx *verto_convert_k5ev(struct ev_loop* loop);
 
-VERTO_MODULE(libev, ev_loop_new,
+VERTO_MODULE(k5ev, NULL,
              VERTO_EV_TYPE_IO |
              VERTO_EV_TYPE_TIMEOUT |
              VERTO_EV_TYPE_IDLE |
              VERTO_EV_TYPE_SIGNAL |
              VERTO_EV_TYPE_CHILD);
 
-static verto_ctx *
-verto_new_libev()
+verto_ctx *
+verto_new_k5ev()
 {
-    return verto_convert(libev, ev_loop_new(EVFLAG_AUTO));
+    return verto_convert_k5ev(ev_loop_new(EVFLAG_AUTO));
 }
 
-static verto_ctx *
-verto_default_libev()
+verto_ctx *
+verto_default_k5ev()
 {
-    return verto_convert(libev, ev_default_loop(EVFLAG_AUTO));
+    return verto_convert_k5ev(ev_default_loop(EVFLAG_AUTO));
+}
+
+/* Don't export this since our underlying libev is hidden. */
+static verto_ctx *
+verto_convert_k5ev(struct ev_loop* loop)
+{
+    return verto_convert(k5ev, loop);
 }

@@ -1162,7 +1162,7 @@ AC_ARG_WITH([system-verto],
   [AC_HELP_STRING([--with-system-verto], [always use system verto library])],
   [], [with_system_verto=default])
 VERTO_CFLAGS=
-VERTO_LIBS=-lverto
+VERTO_LIBS="-lverto-k5ev -lverto"
 VERTO_VERSION=k5
 if test "x$with_system_verto" != xno; then
   if verto_cflags=`pkg-config --cflags libverto 2>&1`; then
@@ -1180,6 +1180,7 @@ if test "x$VERTO_VERSION" = xsys; then
   AC_MSG_NOTICE([Using system libverto])
 else
   AC_MSG_RESULT([Using built-in libverto])
+  AC_DEFINE([INTERNAL_VERTO],[1],[Define if using bundled libverto])
 fi
 AC_SUBST([VERTO_CFLAGS])
 AC_SUBST([VERTO_LIBS])

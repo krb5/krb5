@@ -23,11 +23,20 @@ SHLIB_EXPLIBS= $(LIBS) -lverto -lm      # libm needed for ceil() currently.
 SHLIB_DIRS=-L$(TOPLIBD)
 SHLIB_RDIRS=$(KRB5_LIBDIR)
 
-all-unix:: all-liblinks
+VERTO_K5EV_HDR=$(BUILDTOP)$(S)include$(S)verto-k5ev.h
+
+all-unix:: all-liblinks includes
 
 install-unix:: install-libs
 
 clean-unix:: clean-liblinks clean-libs clean-libobjs
+	$(RM) $(VERTO_K5EV_HDR)
+
+includes:: $(VERTO_K5EV_HDR)
+
+$(VERTO_K5EV_HDR): $(srcdir)/verto-k5ev.h
+	$(RM) $@
+	$(CP) $(srcdir)/verto-k5ev.h $@
 
 rename.h: $(srcdir)/Symbols.ev
 	$(RM) $@

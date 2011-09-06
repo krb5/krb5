@@ -1,8 +1,6 @@
 This directory builds a private libverto module using an embedded
 libev with renamed symbols (so we don't leak libev symbols into the
-namespace on platforms where we can't control the export list).  The
-module is not intended to be used directly by applications, so it has
-no header file.
+namespace on platforms where we can't control the export list).
 
 libev has built-in support for this kind of embedding, so we don't
 have to modify the libev sources.  Following libev's documentation,
