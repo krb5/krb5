@@ -39,9 +39,9 @@
 #define EV_FEATURES 0x5f        /* Everything but back ends */
 #ifdef HAVE_POLL_H
 #define EV_USE_POLL 1
-#else
-#define EV_USE_SELECT 1
 #endif
+/* ev.c explicitly disables poll() on Mac or FreeBSD; fall back to select(). */
+#define EV_USE_SELECT 1
 #include "ev.c"
 
 static void
