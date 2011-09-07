@@ -184,7 +184,7 @@ write_primary_file(const char *primary_path, const char *contents)
     krb5_error_code ret = KRB5_CC_IO;
     char *newpath = NULL;
     FILE *fp = NULL;
-    int fd = -1;
+    int fd = -1, status;
 
     if (asprintf(&newpath, "%s.XXXXXX", primary_path) < 0)
         return ENOMEM;
@@ -200,7 +200,9 @@ write_primary_file(const char *primary_path, const char *contents)
     fd = -1;
     if (fprintf(fp, "%s\n", contents) < 0)
         goto cleanup;
-    if (fclose(fp) == EOF)
+    status = fclose(fp);
+    fp = NULL;
+    if (status == EOF)
         goto cleanup;
     fp = NULL;
     if (rename(newpath, primary_path) != 0)
@@ -365,7 +367,7 @@ dcc_gen_new(krb5_context context, krb5_ccache *cache_out)
 {
     krb5_error_code ret;
     char *dirname = NULL, *template = NULL, *residual = NULL;
-    krb5_ccache fcc;
+    krb5_ccache fcc = NULL;
 
     *cache_out = NULL;
     ret = get_context_default_dir(context, &dirname);
@@ -390,9 +392,12 @@ dcc_gen_new(krb5_context context, krb5_ccache *cache_out)
     }
     ret = make_cache(residual, fcc, cache_out);
     if (ret)
-        krb5_fcc_ops.destroy(context, fcc);
+        goto cleanup;
+    fcc = NULL;
 
 cleanup:
+    if (fcc != NULL)
+        krb5_fcc_ops.destroy(context, fcc);
     free(dirname);
     free(template);
     free(residual);
