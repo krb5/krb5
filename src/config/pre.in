@@ -363,6 +363,10 @@ SS_VERSION	= @SS_VERSION@
 SS_DEPS		= $(SS_DEPS-@SS_VERSION@)
 SS_DEPS-sys	=
 SS_DEPS-k5	= $(BUILDTOP)/include/ss/ss.h $(BUILDTOP)/include/ss/ss_err.h
+VERTO_VERSION	= @VERTO_VERSION@
+VERTO_DEPS	= $(VERTO_DEPS-@VERTO_VERSION@)
+VERTO_DEPS-sys	=
+VERTO_DEPS-k5	= $(BUILDTOP)/include/verto.h
 
 # LIBS gets substituted in... e.g. -lnsl -lsocket
 

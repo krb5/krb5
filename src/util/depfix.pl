@@ -141,6 +141,7 @@ sub do_subs_2 {
     s;\$\(BUILDTOP\)/include/com_err.h ;\$(COM_ERR_DEPS) ;g;
     s;\$\(BUILDTOP\)/include/ss/ss.h \$\(BUILDTOP\)/include/ss/ss_err.h ;\$(SS_DEPS) ;g;
     s;\$\(BUILDTOP\)/include/db-config.h \$\(BUILDTOP\)/include/db.h ;\$(DB_DEPS) ;g;
+    s;\$\(BUILDTOP\)/include/verto.h ;\$(VERTO_DEPS) ;g;
 
     $_ = &uniquify($_);
 
