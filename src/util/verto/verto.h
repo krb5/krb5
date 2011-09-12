@@ -59,7 +59,8 @@ typedef enum {
     VERTO_EV_FLAG_PRIORITY_HIGH = 1 << 3,
     VERTO_EV_FLAG_IO_READ = 1 << 4,
     VERTO_EV_FLAG_IO_WRITE = 1 << 5,
-    _VERTO_EV_FLAG_MAX = VERTO_EV_FLAG_IO_WRITE
+    VERTO_EV_FLAG_REINITIABLE = 1 << 6,
+    _VERTO_EV_FLAG_MAX = VERTO_EV_FLAG_REINITIABLE
 } verto_ev_flag;
 
 typedef void (verto_callback)(verto_ctx *ctx, verto_ev *ev);
@@ -210,6 +211,20 @@ void
 verto_break(verto_ctx *ctx);
 
 /**
+ * Re-initializes the verto_ctx.
+ *
+ * This function deletes all events, except those which have set the
+ * VERTO_EV_FLAG_REINITIABLE flag. If you fork(), you MUST call this in the
+ * child process after the fork!
+ *
+ * @see verto_new()
+ * @see verto_default()
+ * @param ctx The verto_ctx to re-initialize.
+ */
+void
+verto_reinitialize(verto_ctx *ctx);
+
+/**
  * Adds a callback executed when a file descriptor is ready to be read/written.
  *
  * All verto_ev events are automatically freed when their parent verto_ctx is
@@ -345,9 +360,8 @@ verto_add_child(verto_ctx *ctx, verto_ev_flag flags,
  * @param ev The verto_ev
  * @param priv The private value to store
  * @param free The callback used to free the data or NULL
- * @return 1 on success or 0 on failure
  */
-int
+void
 verto_set_private(verto_ev *ev, void *priv, verto_callback *free);
 
 /**

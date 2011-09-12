@@ -37,6 +37,7 @@
         name ## _ctx_run, \
         name ## _ctx_run_once, \
         name ## _ctx_break, \
+        name ## _ctx_reinitialize, \
         name ## _ctx_add, \
         name ## _ctx_del \
     }; \
@@ -65,6 +66,7 @@ typedef struct {
     void  (*ctx_run)(void *ctx);
     void  (*ctx_run_once)(void *ctx);
     void  (*ctx_break)(void *ctx);
+    void  (*ctx_reinitialize)(void *ctx);
     void *(*ctx_add)(void *ctx, const verto_ev *ev, verto_ev_flag *flags);
     void  (*ctx_del)(void *ctx, const verto_ev *ev, void *evpriv);
 } verto_ctx_funcs;

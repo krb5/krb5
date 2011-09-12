@@ -70,6 +70,12 @@ k5ev_ctx_break(void *ctx)
 }
 
 static void
+k5ev_ctx_reinitialize(void *ctx)
+{
+    ev_loop_fork(ctx);
+}
+
+static void
 libev_callback(EV_P_ ev_watcher *w, int revents)
 {
     if (verto_get_type(w->data) == VERTO_EV_TYPE_CHILD)
@@ -127,14 +133,19 @@ k5ev_ctx_del(void *ctx, const verto_ev *ev, void *evpriv)
     switch (verto_get_type(ev)) {
         case VERTO_EV_TYPE_IO:
             ev_io_stop(ctx, evpriv);
+	    break;
         case VERTO_EV_TYPE_TIMEOUT:
             ev_timer_stop(ctx, evpriv);
+	    break;
         case VERTO_EV_TYPE_IDLE:
             ev_idle_stop(ctx, evpriv);
+	    break;
         case VERTO_EV_TYPE_SIGNAL:
             ev_signal_stop(ctx, evpriv);
+	    break;
         case VERTO_EV_TYPE_CHILD:
             ev_child_stop(ctx, evpriv);
+	    break;
         default:
             break;
     }
@@ -152,13 +163,13 @@ VERTO_MODULE(k5ev, NULL,
              VERTO_EV_TYPE_CHILD);
 
 verto_ctx *
-verto_new_k5ev()
+verto_new_k5ev(void)
 {
     return verto_convert_k5ev(ev_loop_new(EVFLAG_AUTO));
 }
 
 verto_ctx *
-verto_default_k5ev()
+verto_default_k5ev(void)
 {
     return verto_convert_k5ev(ev_default_loop(EVFLAG_AUTO));
 }
