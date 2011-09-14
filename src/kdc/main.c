@@ -509,15 +509,17 @@ on_monitor_sighup(int signo)
  * in the array.
  */
 static void
-terminate_workers(pid_t *pids, int bound, int num_active)
+terminate_workers(pid_t *pids, int bound)
 {
-    int i, status;
+    int i, status, num_active;
     pid_t pid;
 
     /* Kill the active worker pids. */
     for (i = 0; i < bound; i++) {
-        if (pids[i] != -1)
-            kill(pids[i], SIGTERM);
+        if (pids[i] == -1)
+            continue;
+        kill(pids[i], SIGTERM);
+        num_active++;
     }
 
     /* Wait for them to exit. */
@@ -537,7 +539,7 @@ static krb5_error_code
 create_workers(verto_ctx *ctx, int num)
 {
     krb5_error_code retval;
-    int i, status, numleft;
+    int i, status;
     pid_t pid, *pids;
 #ifdef POSIX_SIGNALS
     struct sigaction s_action;
@@ -590,7 +592,7 @@ create_workers(verto_ctx *ctx, int num)
         if (pid == -1) {
             /* Couldn't fork enough times. */
             status = errno;
-            terminate_workers(pids, i, i);
+            terminate_workers(pids, i);
             free(pids);
             return status;
         }
@@ -601,7 +603,6 @@ create_workers(verto_ctx *ctx, int num)
     loop_free(ctx);
 
     /* Supervise the worker processes. */
-    numleft = num;
     while (!signal_received) {
         /* Wait until a worker process exits or we get a signal. */
         pid = wait(&status);
@@ -633,7 +634,7 @@ create_workers(verto_ctx *ctx, int num)
         krb5_klog_syslog(LOG_INFO, _("signal %d received in supervisor"),
                          signal_received);
 
-    terminate_workers(pids, num, numleft);
+    terminate_workers(pids, num);
     free(pids);
     exit(0);
 }
