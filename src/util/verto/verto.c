@@ -561,7 +561,7 @@ verto_reinitialize(verto_ctx *ctx)
 
     /* Delete all events, but keep around the forkable ev structs */
     for (tmp = ctx->events; tmp; tmp = next) {
-        next = ctx->events->next;
+        next = tmp->next;
 
         if (tmp->flags & VERTO_EV_FLAG_REINITIABLE)
             ctx->funcs.ctx_del(ctx->modpriv, tmp, tmp->modpriv);
@@ -575,7 +575,7 @@ verto_reinitialize(verto_ctx *ctx)
     /* Recreate events that were marked forkable */
     for (tmp = ctx->events; tmp; tmp = tmp->next) {
         tmp->actual = tmp->flags;
-        tmp->modpriv = ctx->funcs.ctx_add(ctx, tmp, &tmp->actual);
+        tmp->modpriv = ctx->funcs.ctx_add(ctx->modpriv, tmp, &tmp->actual);
         assert(tmp->modpriv);
     }
 }

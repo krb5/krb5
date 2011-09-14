@@ -19,6 +19,7 @@ verto_get_signal
 verto_get_supported_types
 verto_get_type
 verto_new
+verto_reinitialize
 verto_run
 verto_run_once
 verto_set_default
