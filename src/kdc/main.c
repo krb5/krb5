@@ -550,6 +550,8 @@ create_workers(verto_ctx *ctx, int num)
     for (i = 0; i < num; i++) {
         pid = fork();
         if (pid == 0) {
+            verto_reinitialize(ctx);
+
             /* Return control to main() in the new worker process. */
             free(pids);
             return 0;

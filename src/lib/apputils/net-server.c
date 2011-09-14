@@ -580,7 +580,9 @@ static verto_ev *
 add_udp_fd(struct socksetup *data, int sock, int pktinfo)
 {
     return add_fd(data, sock, pktinfo ? CONN_UDP_PKTINFO : CONN_UDP,
-                  VERTO_EV_FLAG_IO_READ | VERTO_EV_FLAG_PERSIST,
+                  VERTO_EV_FLAG_IO_READ |
+                  VERTO_EV_FLAG_PERSIST |
+                  VERTO_EV_FLAG_REINITIABLE,
                   process_packet, 1);
 }
 
@@ -588,7 +590,9 @@ static verto_ev *
 add_tcp_listener_fd(struct socksetup *data, int sock)
 {
     return add_fd(data, sock, CONN_TCP_LISTENER,
-                  VERTO_EV_FLAG_IO_READ | VERTO_EV_FLAG_PERSIST,
+                  VERTO_EV_FLAG_IO_READ |
+                  VERTO_EV_FLAG_PERSIST |
+                  VERTO_EV_FLAG_REINITIABLE,
                   accept_tcp_connection, 1);
 }
 
@@ -666,7 +670,9 @@ add_rpc_listener_fd(struct socksetup *data, struct rpc_svc_data *svc, int sock)
     verto_ev *ev;
 
     ev = add_fd(data, sock, CONN_RPC_LISTENER,
-                VERTO_EV_FLAG_IO_READ | VERTO_EV_FLAG_PERSIST,
+                VERTO_EV_FLAG_IO_READ |
+                VERTO_EV_FLAG_PERSIST |
+                VERTO_EV_FLAG_REINITIABLE,
                 accept_rpc_connection, 1);
     if (ev == NULL)
         return NULL;
