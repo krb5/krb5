@@ -543,6 +543,26 @@ create_workers(verto_ctx *ctx, int num)
     struct sigaction s_action;
 #endif /* POSIX_SIGNALS */
 
+    /*
+     * Setup our signal handlers which will forward to the children.
+     * These handlers will be overriden in the child processes.
+     */
+#ifdef POSIX_SIGNALS
+    (void) sigemptyset(&s_action.sa_mask);
+    s_action.sa_flags = 0;
+    s_action.sa_handler = on_monitor_signal;
+    (void) sigaction(SIGINT, &s_action, (struct sigaction *) NULL);
+    (void) sigaction(SIGTERM, &s_action, (struct sigaction *) NULL);
+    (void) sigaction(SIGQUIT, &s_action, (struct sigaction *) NULL);
+    s_action.sa_handler = on_monitor_sighup;
+    (void) sigaction(SIGHUP, &s_action, (struct sigaction *) NULL);
+#else  /* POSIX_SIGNALS */
+    signal(SIGINT, on_monitor_signal);
+    signal(SIGTERM, on_monitor_signal);
+    signal(SIGQUIT, on_monitor_signal);
+    signal(SIGHUP, on_monitor_sighup);
+#endif /* POSIX_SIGNALS */
+
     /* Create child worker processes; return in each child. */
     krb5_klog_syslog(LOG_INFO, _("creating %d worker processes"), num);
     pids = calloc(num, sizeof(pid_t));
@@ -579,23 +599,6 @@ create_workers(verto_ctx *ctx, int num)
 
     /* We're going to use our own main loop here. */
     loop_free(ctx);
-
-    /* Setup our signal handlers which will forward to the children. */
-#ifdef POSIX_SIGNALS
-    (void) sigemptyset(&s_action.sa_mask);
-    s_action.sa_flags = 0;
-    s_action.sa_handler = on_monitor_signal;
-    (void) sigaction(SIGINT, &s_action, (struct sigaction *) NULL);
-    (void) sigaction(SIGTERM, &s_action, (struct sigaction *) NULL);
-    (void) sigaction(SIGQUIT, &s_action, (struct sigaction *) NULL);
-    s_action.sa_handler = on_monitor_sighup;
-    (void) sigaction(SIGHUP, &s_action, (struct sigaction *) NULL);
-#else  /* POSIX_SIGNALS */
-    signal(SIGINT, on_monitor_signal);
-    signal(SIGTERM, on_monitor_signal);
-    signal(SIGQUIT, on_monitor_signal);
-    signal(SIGHUP, on_monitor_sighup);
-#endif /* POSIX_SIGNALS */
 
     /* Supervise the worker processes. */
     numleft = num;
