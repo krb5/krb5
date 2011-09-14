@@ -367,6 +367,9 @@ VERTO_VERSION	= @VERTO_VERSION@
 VERTO_DEPS	= $(VERTO_DEPS-@VERTO_VERSION@)
 VERTO_DEPS-sys	=
 VERTO_DEPS-k5	= $(BUILDTOP)/include/verto.h
+VERTO_K5EV_DEPS	= $(VERTO_K5EV_DEPS-@VERTO_VERSION@)
+VERTO_K5EV_DEPS-sys =
+VERTO_K5EV_DEPS-k5 = $(BUILDTOP)/include/verto-k5ev.h
 
 # LIBS gets substituted in... e.g. -lnsl -lsocket
 
