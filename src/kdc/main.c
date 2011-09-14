@@ -505,13 +505,12 @@ on_monitor_sighup(int signo)
 /*
  * Kill the worker subprocesses given by pids[0..bound-1], skipping any which
  * are set to -1, and wait for them to exit (so that we know the ports are no
- * longer in use).  num_active must be the number of active (i.e. not -1) pids
- * in the array.
+ * longer in use).
  */
 static void
 terminate_workers(pid_t *pids, int bound)
 {
-    int i, status, num_active;
+    int i, status, num_active = 0;
     pid_t pid;
 
     /* Kill the active worker pids. */
