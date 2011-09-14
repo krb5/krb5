@@ -40,7 +40,7 @@ typedef struct _krb5_fulladdr {
 void init_addr(krb5_fulladdr *, struct sockaddr *);
 
 /* exported from net-server.c */
-verto_ctx *loop_init(verto_ev_type types, void *handle, void (*reset)());
+verto_ctx *loop_init(verto_ev_type types);
 krb5_error_code loop_add_udp_port(int port);
 krb5_error_code loop_add_tcp_port(int port);
 krb5_error_code loop_add_rpc_service(int port, u_long prognum, u_long versnum,
@@ -49,6 +49,8 @@ krb5_error_code loop_setup_routing_socket(verto_ctx *ctx, void *handle,
                                           const char *progname);
 krb5_error_code loop_setup_network(verto_ctx *ctx, void *handle,
                                    const char *progname);
+krb5_error_code loop_setup_signals(verto_ctx *ctx, void *handle,
+                                   void (*reset)());
 void loop_free(verto_ctx *ctx);
 
 /* to be supplied by the server application */

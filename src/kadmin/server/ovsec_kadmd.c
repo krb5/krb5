@@ -357,13 +357,25 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    ctx = loop_init(VERTO_EV_TYPE_SIGNAL, global_server_handle, NULL);
+    ctx = loop_init(VERTO_EV_TYPE_SIGNAL);
     if (!ctx) {
         krb5_klog_syslog(LOG_ERR,
                          _("%s: could not initialize loop, aborting"),
                          whoami);
         fprintf(stderr, _("%s: could not initialize loop, aborting\n"),
                 whoami);
+        kadm5_destroy(global_server_handle);
+        krb5_klog_close(context);
+        exit(1);
+    }
+
+    if ((ret = loop_setup_signals(ctx, global_server_handle, NULL))) {
+        const char *e_txt = krb5_get_error_message (context, ret);
+        krb5_klog_syslog(LOG_ERR, _("%s: %s while initializing signal "
+                                    "handlers, aborting"), whoami, e_txt);
+        fprintf(stderr, _("%s: %s while initializing signal "
+                          "handlers, aborting\n"), whoami, e_txt);
+        loop_free(ctx);
         kadm5_destroy(global_server_handle);
         krb5_klog_close(context);
         exit(1);

@@ -270,6 +270,20 @@ static SET(unsigned short) udp_port_data, tcp_port_data;
 static SET(struct rpc_svc_data) rpc_svc_data;
 static SET(verto_ev *) events;
 
+verto_ctx *
+loop_init(verto_ev_type types)
+{
+    types |= VERTO_EV_TYPE_IO;
+    types |= VERTO_EV_TYPE_SIGNAL;
+    types |= VERTO_EV_TYPE_TIMEOUT;
+
+#ifdef INTERNAL_VERTO
+    return verto_default_k5ev();
+#else
+    return verto_default(NULL, types);
+#endif
+}
+
 static void
 do_break(verto_ctx *ctx, verto_ev *ev)
 {
@@ -299,43 +313,30 @@ free_sighup_context(verto_ctx *ctx, verto_ev *ev)
     free(verto_get_private(ev));
 }
 
-verto_ctx *
-loop_init(verto_ev_type types, void *handle, void (*reset)())
+krb5_error_code
+loop_setup_signals(verto_ctx *ctx, void *handle, void (*reset)())
 {
     struct sighup_context *sc;
-    verto_ctx *ctx;
-    verto_ev  *ev;
+    verto_ev *ev;
 
-    types |= VERTO_EV_TYPE_IO;
-    types |= VERTO_EV_TYPE_SIGNAL;
-    types |= VERTO_EV_TYPE_TIMEOUT;
-#ifdef INTERNAL_VERTO
-    ctx = verto_default_k5ev();
-#else
-    ctx = verto_default(NULL, types);
-#endif
     if (!verto_add_signal(ctx, VERTO_EV_FLAG_PERSIST, do_break, SIGINT)  ||
         !verto_add_signal(ctx, VERTO_EV_FLAG_PERSIST, do_break, SIGTERM) ||
         !verto_add_signal(ctx, VERTO_EV_FLAG_PERSIST, do_break, SIGQUIT) ||
         !verto_add_signal(ctx, VERTO_EV_FLAG_PERSIST, VERTO_SIG_IGN, SIGPIPE))
-        goto error;
+        return ENOMEM;
 
     ev = verto_add_signal(ctx, VERTO_EV_FLAG_PERSIST, do_reset, SIGHUP);
     if (!ev)
-        goto error;
+        return ENOMEM;
 
     sc = malloc(sizeof(*sc));
     if (!sc)
-        goto error;
+        return ENOMEM;
+
     sc->handle = handle;
     sc->reset = reset;
-
     verto_set_private(ev, sc, free_sighup_context);
-    return ctx;
-
-error:
-    verto_free(ctx);
-    return NULL;
+    return 0;
 }
 
 krb5_error_code

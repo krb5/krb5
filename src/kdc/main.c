@@ -536,6 +536,7 @@ terminate_workers(pid_t *pids, int bound, int num_active)
 static krb5_error_code
 create_workers(verto_ctx *ctx, int num)
 {
+    krb5_error_code retval;
     int i, status, numleft;
     pid_t pid, *pids;
 #ifdef POSIX_SIGNALS
@@ -551,6 +552,16 @@ create_workers(verto_ctx *ctx, int num)
         pid = fork();
         if (pid == 0) {
             verto_reinitialize(ctx);
+            retval = loop_setup_signals(ctx, NULL, reset_for_hangup);
+            if (retval) {
+                krb5_klog_syslog(LOG_ERR, _("Unable to initialize signal "
+                                            "handlers in pid %d"), pid);
+                return retval;
+            }
+
+            /* Avoid race condition */
+            if (signal_received)
+                exit(0);
 
             /* Return control to main() in the new worker process. */
             free(pids);
@@ -984,7 +995,7 @@ int main(int argc, char **argv)
      */
     initialize_realms(kcontext, argc, argv);
 
-    ctx = loop_init(VERTO_EV_TYPE_NONE, NULL, reset_for_hangup);
+    ctx = loop_init(VERTO_EV_TYPE_NONE);
     if (!ctx) {
         kdc_err(kcontext, ENOMEM, _("while creating main loop"));
         finish_realms();
@@ -1043,6 +1054,12 @@ int main(int argc, char **argv)
         retval = loop_setup_routing_socket(ctx, NULL, kdc_progname);
         if (retval) {
             kdc_err(kcontext, retval, _("while initializing routing socket"));
+            finish_realms();
+            return 1;
+        }
+        retval = loop_setup_signals(ctx, NULL, reset_for_hangup);
+        if (retval) {
+            kdc_err(kcontext, retval, _("while initializing signal handlers"));
             finish_realms();
             return 1;
         }
