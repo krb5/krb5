@@ -51,7 +51,6 @@ AC_ARG_ENABLE([athena],
 # Begin autoconf tests for the Makefiles generated out of the top-level
 # configure.in...
 
-AC_CHECK_FUNCS(memmove)
 KRB5_BUILD_LIBOBJS
 KRB5_BUILD_LIBRARY
 KRB5_BUILD_PROGRAM
@@ -220,7 +219,7 @@ AC_CONFIG_HEADERS(include/autoconf.h, [echo timestamp > include/autoconf.stamp])
 AC_PROG_LEX
 AC_C_CONST
 AC_HEADER_DIRENT
-AC_CHECK_FUNCS(strdup setvbuf inet_ntoa inet_aton seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv gmtime_r localtime_r bswap16 bswap64 mkstemp getusershell access getcwd srand48 srand srandom stat strchr strerror strerror_r timegm)
+AC_CHECK_FUNCS(strdup setvbuf seteuid setresuid setreuid setegid setresgid setregid setsid flock fchmod chmod strftime strptime geteuid setenv unsetenv getenv gmtime_r localtime_r bswap16 bswap64 mkstemp getusershell access getcwd srand48 srand srandom stat strchr strerror strerror_r timegm)
 
 AC_CHECK_FUNC(mkstemp,
 [MKSTEMP_ST_OBJ=
@@ -233,7 +232,7 @@ AC_SUBST(MKSTEMP_ST_OBJ)
 AC_SUBST(EXTRA_SUPPORT_SYMS)
 
 DECLARE_SYS_ERRLIST
-AC_CHECK_HEADERS(unistd.h paths.h regex.h regexpr.h fcntl.h memory.h ifaddrs.h sys/filio.h byteswap.h machine/endian.h machine/byte_order.h sys/bswap.h endian.h pwd.h arpa/inet.h alloca.h dlfcn.h limits.h pthread.h semaphore.h)
+AC_CHECK_HEADERS(unistd.h paths.h regex.h regexpr.h fcntl.h memory.h ifaddrs.h sys/filio.h byteswap.h machine/endian.h machine/byte_order.h sys/bswap.h endian.h pwd.h arpa/inet.h alloca.h dlfcn.h limits.h)
 AC_CHECK_HEADER(regexp.h, [], [],
 [#define INIT char *sp = instring;
 #define GETC() (*sp++)
