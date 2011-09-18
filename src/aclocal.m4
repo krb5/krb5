@@ -3,26 +3,7 @@ AC_COPYRIGHT([Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 20
 Massachusetts Institute of Technology.
 ])
 dnl
-dnl Figure out the top of the source and build trees.  We depend on localdir
-dnl being a relative pathname; we could make it general later, but for now 
-dnl this is good enough.
-dnl
-dnl esyscmd([test -r aclocal.m4 && echo YES])
-define([fileexists],[dnl
-pushdef([x],esyscmd([if test -r $1; then echo YES;else echo NO; fi]))dnl
-dnl Strip out newline.
-ifelse(x,[YES
-],[YES],x,[NO
-],[NO],UNKNOWN)[]popdef([x])])
-define([K5_TOPDIR],dnl
-ifelse(fileexists(./aclocal.m4),YES,[.],[dnl
-ifelse(fileexists(../aclocal.m4),YES,[..],[dnl
-ifelse(fileexists(../../aclocal.m4),YES,[../..],[dnl
-ifelse(fileexists(../../../aclocal.m4),YES,[../../..],[dnl
-ifelse(fileexists(../../../../aclocal.m4),YES,[../../../..],[dnl
-errprint(__file__:__line__: Cannot find path to aclocal.m4[
-]) m4exit(1) dnl sometimes that does not work?
-builtin(m4exit,1)UNKNOWN])])])])]))
+define([K5_TOPDIR],[.])dnl
 dnl
 AC_DEFUN(V5_SET_TOPDIR,[dnl
 ac_reltopdir="K5_TOPDIR"
