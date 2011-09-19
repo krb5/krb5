@@ -207,6 +207,7 @@ asn1_decode_auth_pack(asn1buf *buf, krb5_auth_pack *val)
     val->pkAuthenticator.paChecksum.contents = NULL;
     val->supportedCMSTypes = NULL;
     val->clientDHNonce.data = NULL;
+    val->supportedKDFs = NULL;
     { begin_structure();
         get_field(val->pkAuthenticator, 0, asn1_decode_pk_authenticator);
         if (tagnum == 1) {
@@ -238,7 +239,8 @@ asn1_decode_auth_pack(asn1buf *buf, krb5_auth_pack *val)
             } else val->supportedCMSTypes = NULL;
         }
         opt_lenfield(val->clientDHNonce.length, val->clientDHNonce.data, 3, asn1_decode_octetstring);
-        end_structure();
+        opt_field(val->supportedKDFs, 4, asn1_decode_sequence_of_kdf_alg_id, NULL);
+                end_structure();
     }
     return 0;
 error_out:
@@ -255,6 +257,13 @@ error_out:
         free(val->supportedCMSTypes);
     }
     free(val->clientDHNonce.data);
+    if (val->supportedKDFs) {
+
+        for (i=0; val->supportedKDFs[i]; i++)
+            krb5_free_octet_data(NULL, val->supportedKDFs[i]);
+        free(val->supportedKDFs);
+        val->supportedKDFs = NULL;
+    }
     val->clientPublicValue = NULL;
     val->pkAuthenticator.paChecksum.contents = NULL;
     val->supportedCMSTypes = NULL;

@@ -447,31 +447,6 @@ error_out:
     retval = decoder(&seqbuf,&element);         \
     if (retval) clean_return(retval)
 
-static void *
-array_expand (void *array, int n_elts, size_t elt_size)
-{
-    size_t new_size;
-
-    if (n_elts <= 0)
-        return NULL;
-    if ((unsigned int) n_elts > SIZE_MAX / elt_size)
-        return NULL;
-    new_size = n_elts * elt_size;
-    if (new_size == 0)
-        return NULL;
-    if (new_size / elt_size != (unsigned int) n_elts)
-        return NULL;
-    return realloc(array, new_size);
-}
-
-#define array_append(array,size,element,type)                           \
-    {                                                                   \
-        void *new_array = array_expand(*(array), (size)+2, sizeof(type*)); \
-        if (new_array == NULL) clean_return(ENOMEM);                    \
-        *(array) = new_array;                                           \
-        (*(array))[(size)++] = elt;                                     \
-    }
-
 /*
  * Function body for array decoders.  freefn is expected to look like
  * a krb5_free_ function, so we pass a null first argument.
@@ -502,6 +477,32 @@ for (i = 0; i < size; i++)                                      \
     freefn(NULL,array[i]);                                      \
 free(array);                                                    \
 return retval
+
+static void *
+array_expand (void *array, int n_elts, size_t elt_size)
+{
+    size_t new_size;
+
+    if (n_elts <= 0)
+        return NULL;
+    if ((unsigned int) n_elts > SIZE_MAX / elt_size)
+        return NULL;
+    new_size = n_elts * elt_size;
+    if (new_size == 0)
+        return NULL;
+    if (new_size / elt_size != (unsigned int) n_elts)
+        return NULL;
+    return realloc(array, new_size);
+}
+
+#define array_append(array,size,element,type)                           \
+    {                                                                   \
+        void *new_array = array_expand(*(array), (size)+2, sizeof(type*)); \
+        if (new_array == NULL) clean_return(ENOMEM);                    \
+        *(array) = new_array;                                           \
+        (*(array))[(size)++] = elt;                                     \
+    }
+
 
 static void
 free_authdata_elt(void *dummy, krb5_authdata *val)
@@ -1347,22 +1348,33 @@ asn1_decode_sequence_of_trusted_ca(asn1buf *buf, krb5_trusted_ca ***val)
                       free_trusted_ca);
 }
 
+static asn1_error_code
+asn1_decode_kdf_alg_id_ptr( asn1buf *buf,
+                            krb5_octet_data **valptr)
+{
+    decode_ptr(krb5_octet_data *, asn1_decode_kdf_alg_id);
+}
+
 asn1_error_code
 asn1_decode_dh_rep_info(asn1buf *buf, krb5_dh_rep_info *val)
 {
     setup();
     val->dhSignedData.data = NULL;
     val->serverDHNonce.data = NULL;
+    val->kdfID = NULL;
     { begin_structure();
         get_implicit_octet_string(val->dhSignedData.length, val->dhSignedData.data, 0);
 
         opt_lenfield(val->serverDHNonce.length, val->serverDHNonce.data, 1, asn1_decode_octetstring);
+        opt_field(val->kdfID, 2, asn1_decode_kdf_alg_id_ptr, NULL);
         end_structure();
     }
     return 0;
 error_out:
     free(val->dhSignedData.data);
     free(val->serverDHNonce.data);
+    krb5_free_octet_data(NULL, val->kdfID);
+    val->kdfID = NULL;
     val->dhSignedData.data = NULL;
     val->serverDHNonce.data = NULL;
     return retval;
@@ -1716,4 +1728,27 @@ asn1_error_code
 asn1_decode_typed_data_ptr(asn1buf *buf, krb5_typed_data **valptr)
 {
     decode_ptr(krb5_typed_data *, asn1_decode_typed_data);
+}
+
+asn1_error_code
+asn1_decode_kdf_alg_id( asn1buf *buf, krb5_octet_data *val)
+{
+        setup();
+        val->data = NULL;
+    { begin_structure();
+        get_lenfield(val->length,val->data,0,asn1_decode_oid);
+        end_structure();
+    }
+    return 0;
+error_out:
+    free(val->data);
+    return retval;
+}
+
+ asn1_error_code
+asn1_decode_sequence_of_kdf_alg_id(asn1buf *buf,
+                                   krb5_octet_data ***val)
+{
+    decode_array_body(krb5_octet_data, asn1_decode_kdf_alg_id_ptr,
+                      krb5_free_octet_data);
 }
