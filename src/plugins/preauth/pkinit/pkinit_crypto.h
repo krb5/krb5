@@ -634,7 +634,7 @@ krb5_error_code pkinit_identity_set_prompter
 krb5_error_code
 pkinit_alg_agility_kdf(krb5_context context,
                        krb5_octet_data *secret,
-                       krb5_algorithm_identifier *alg_id,
+                       krb5_octet_data *alg_oid,
                        krb5_principal party_u_info,
                        krb5_principal party_v_info,
                        krb5_enctype enctype,

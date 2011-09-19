@@ -2172,28 +2172,28 @@ cleanup:
  */
 static krb5_error_code
 pkinit_alg_values(krb5_context context,
-                  krb5_algorithm_identifier *alg_id,
+                  const krb5_octet_data *alg_id,
                   size_t *hash_bytes,
                   const EVP_MD *(**func)(void))
 {
     *hash_bytes = 0;
     *func = NULL;
-    if ((alg_id->algorithm.length == krb5_pkinit_sha1_oid_len) &&
-        (0 == memcmp(alg_id->algorithm.data, &krb5_pkinit_sha1_oid,
+    if ((alg_id->length == krb5_pkinit_sha1_oid_len) &&
+        (0 == memcmp(alg_id->data, &krb5_pkinit_sha1_oid,
                      krb5_pkinit_sha1_oid_len))) {
         *hash_bytes = 20;
         *func = &EVP_sha1;
         return 0;
     }
-    else if ((alg_id->algorithm.length == krb5_pkinit_sha256_oid_len) &&
-        (0 == memcmp(alg_id->algorithm.data, krb5_pkinit_sha256_oid,
+    else if ((alg_id->length == krb5_pkinit_sha256_oid_len) &&
+        (0 == memcmp(alg_id->data, krb5_pkinit_sha256_oid,
                      krb5_pkinit_sha256_oid_len))) {
         *hash_bytes = 32;
         *func = &EVP_sha256;
         return 0;
     }
-    else if ((alg_id->algorithm.length == krb5_pkinit_sha512_oid_len) &&
-        (0 == memcmp(alg_id->algorithm.data, krb5_pkinit_sha512_oid,
+    else if ((alg_id->length == krb5_pkinit_sha512_oid_len) &&
+             (0 == memcmp(alg_id->data, krb5_pkinit_sha512_oid,
                      krb5_pkinit_sha512_oid_len))) {
         *hash_bytes = 32;
         *func = &EVP_sha512;
@@ -2227,7 +2227,7 @@ pkinit_alg_values(krb5_context context,
 krb5_error_code
 pkinit_alg_agility_kdf(krb5_context context,
                        krb5_octet_data *secret,
-                       krb5_algorithm_identifier *alg_id,
+                       krb5_octet_data *alg_oid,
                        krb5_principal party_u_info,
                        krb5_principal party_v_info,
                        krb5_enctype enctype,
@@ -2248,6 +2248,7 @@ pkinit_alg_agility_kdf(krb5_context context,
     krb5_pkinit_supp_pub_info supp_pub_info_fields;
     krb5_data *other_info = NULL;
     krb5_data *supp_pub_info = NULL;
+    krb5_algorithm_identifier alg_id;
     const EVP_MD *(*EVP_func)(void);
 
     /* initialize random_data here to make clean-up safe */
@@ -2266,7 +2267,7 @@ pkinit_alg_agility_kdf(krb5_context context,
     }
     memset (key_block->contents, 0, key_block->length);
 
-    if (0 != (retval = pkinit_alg_values(context, alg_id, &hash_len, &EVP_func)))
+    if (0 != (retval = pkinit_alg_values(context, alg_oid, &hash_len, &EVP_func)))
         goto cleanup;
 
     /* 1.  reps = keydatalen (K) / hash length (H) */
@@ -2297,7 +2298,10 @@ pkinit_alg_agility_kdf(krb5_context context,
         goto cleanup;
 
     /* Now encode the ASN.1 octet string for "OtherInfo" */
-    other_info_fields.algorithm_identifier = *alg_id;
+    memset(&alg_id, 0, sizeof alg_id);
+    alg_id.algorithm = *alg_oid; /*alias*/
+
+    other_info_fields.algorithm_identifier = alg_id;
     other_info_fields.party_u_info = party_u_info;
     other_info_fields.party_v_info = party_v_info;
     other_info_fields.supp_pub_info = *supp_pub_info;

@@ -149,7 +149,7 @@ main (int argc,
 	}
 
     /* call krb5_pkinit_alg_agility_kdf() with test vector values*/
-    if (0 != (retval = pkinit_alg_agility_kdf(context, &secret, &alg_id,
+    if (0 != (retval = pkinit_alg_agility_kdf(context, &secret, &alg_id.algorithm,
 					      u_principal, v_principal,
 					      enctype, &as_req, &pk_as_rep,
 					      &test_ticket, &key_block))) {
