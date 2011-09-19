@@ -197,7 +197,7 @@ OM_uint32 gssint_mecherrmap_map(OM_uint32 minor, const gss_OID_desc * oid)
     if (p != NULL) {
         k5_mutex_unlock(&mutex);
 #ifdef DEBUG
-        fprintf(f, "%s: found ", __func__);
+        fprintf(f, "%s: found ", __FUNCTION__);
         mecherror_print(me, f);
         fprintf(f, " in map as %lu\n", (unsigned long) *p);
         if (f != stderr) fclose(f);
@@ -234,7 +234,7 @@ OM_uint32 gssint_mecherrmap_map(OM_uint32 minor, const gss_OID_desc * oid)
             free(me_copy.mech.elements);
     }
 #ifdef DEBUG
-    fprintf(f, "%s: mapping ", __func__);
+    fprintf(f, "%s: mapping ", __FUNCTION__);
     mecherror_print(me, f);
     fprintf(f, " to %lu: err=%d\nnew map: ", (unsigned long) new_status, err);
     mecherrmap_printmap(&m, f);
