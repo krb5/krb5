@@ -60,7 +60,17 @@
 
 /* Local functions */
 static gss_mech_info searchMechList(const gss_OID);
+static void addConfigEntry(const char *oidStr, const char *oid, const char *sharedLib, const char *kernMod, const char *modOptions);
 static void loadConfigFile(const char *);
+#if defined(_WIN32)
+#ifndef MECH_KEY
+#define MECH_KEY "SOFTWARE\\gss\\mech"
+#endif
+static time_t getRegKeyModTime(HKEY hBaseKey, const char *keyPath);
+static time_t getRegConfigModTime(const char *keyPath);
+static void getRegKeyValue(HKEY key, const char *keyPath, const char *valueName, void **data, DWORD *dataLen);
+static void loadConfigFromRegistry(HKEY keyBase, const char *keyPath);
+#endif
 static void updateMechList(void);
 static void freeMechList(void);
 
@@ -568,6 +578,15 @@ gssint_get_mechanisms(char *mechArray[], int arrayLen)
 static void
 updateMechList(void)
 {
+#if defined(_WIN32)
+    time_t lastConfModTime = getRegConfigModTime(MECH_KEY);
+    if (g_confFileModTime < lastConfModTime)
+    {
+        g_confFileModTime = lastConfModTime;
+        loadConfigFromRegistry(HKEY_CURRENT_USER, MECH_KEY);
+        loadConfigFromRegistry(HKEY_LOCAL_MACHINE, MECH_KEY);
+    }
+#else /* _WIN32 */
 	char *fileName;
 	struct stat fileInfo;
 
@@ -582,6 +601,7 @@ updateMechList(void)
 #if 0
 	init_hardcoded();
 #endif
+#endif /* !_WIN32 */
 } /* updateMechList */
 
 #ifdef _GSS_STATIC_LINK
@@ -1026,7 +1046,6 @@ const gss_OID oid;
 	return ((gss_mech_info) NULL);
 } /* searchMechList */
 
-
 /*
  * loads the configuration file
  * this is called while having a mutex lock on the mechanism list
@@ -1036,16 +1055,9 @@ const gss_OID oid;
 static void loadConfigFile(fileName)
 const char *fileName;
 {
-	char buffer[BUFSIZ], *oidStr, *oid, *sharedLib, *kernMod, *endp;
-	char *modOptions;
-	char sharedPath[sizeof (MECH_LIB_PREFIX) + BUFSIZ];
-	char *tmpStr;
+	char *sharedLib, *kernMod, *modOptions, *oid, *endp;
+	char buffer[BUFSIZ], *oidStr;
 	FILE *confFile;
-	gss_OID mechOid;
-	gss_mech_info aMech, tmp;
-	OM_uint32 minor;
-	gss_buffer_desc oidBuf;
-
 	if ((confFile = fopen(fileName, "r")) == NULL) {
 		return;
 	}
@@ -1062,200 +1074,370 @@ const char *fileName;
 		 * the mechanism name
 		 */
 		oidStr = buffer;
-		for (oid = buffer; *oid && !isspace(*oid); oid++);
+		for (endp = buffer; *endp && !isspace(*endp); endp++);
 
 		/* Now find the first non-white-space character */
-		if (*oid) {
-			*oid = '\0';
-			oid++;
-			while (*oid && isspace(*oid))
-				oid++;
+		if (*endp) {
+			*endp = '\0';
+			endp++;
+			while (*endp && isspace(*endp))
+				endp++;
 		}
 
 		/*
 		 * If that's all, then this is a corrupt entry. Skip it.
 		 */
-		if (! *oid)
+		if (! *endp)
 			continue;
 
-		/* Find the end of the oid and make sure it is NULL-ended */
-		for (endp = oid; *endp && !isspace(*endp); endp++)
-			;
+	    /* Find the end of the oid and make sure it is NULL-ended */
+	    for (oid=endp; *endp && !isspace(*endp); endp++)
+		    ;
 
-		if (*endp) {
-			*endp = '\0';
-		}
+	    if (*endp) {
+		    *endp = '\0';
+            endp++;
+	    }
 
-		/*
-		 * check if an entry for this oid already exists
-		 * if it does, and the library is already loaded then
-		 * we can't modify it, so skip it
-		 */
-		oidBuf.value = (void *)oid;
-		oidBuf.length = strlen(oid);
-		if (generic_gss_str_to_oid(&minor, &oidBuf, &mechOid)
-			!= GSS_S_COMPLETE) {
-#if 0
-			(void) syslog(LOG_INFO, "invalid mechanism oid"
-					" [%s] in configuration file", oid);
-#endif
-			continue;
-		}
+	    /* Find the start of the shared lib name */
+	    for (sharedLib = endp; *sharedLib && isspace(*sharedLib);
+		    sharedLib++)
+		    ;
 
-		aMech = searchMechList(mechOid);
-		if (aMech && aMech->mech) {
-			generic_gss_release_oid(&minor, &mechOid);
-			continue;
-		}
+	    /*
+	     * Find the end of the shared lib name and make sure it is
+	     *  NULL-terminated.
+	     */
+	    for (endp = sharedLib; *endp && !isspace(*endp); endp++)
+		    ;
 
-		/* Find the start of the shared lib name */
-		for (sharedLib = endp+1; *sharedLib && isspace(*sharedLib);
-			sharedLib++)
-			;
+	    if (*endp) {
+		    *endp = '\0';
+            endp++;
+	    }
 
-		/*
-		 * If that's all, then this is a corrupt entry. Skip it.
-		 */
-		if (! *sharedLib) {
-			generic_gss_release_oid(&minor, &mechOid);
-			continue;
-		}
+	    /* Find the start of the optional kernel module lib name */
+	    for (kernMod = endp; *kernMod && isspace(*kernMod);
+		    kernMod++)
+		    ;
 
-		/*
-		 * Find the end of the shared lib name and make sure it is
-		 *  NULL-terminated.
-		 */
-		for (endp = sharedLib; *endp && !isspace(*endp); endp++)
-			;
+	    /*
+	     * If this item starts with a bracket "[", then
+	     * it is not a kernel module, but is a list of
+	     * options for the user module to parse later.
+	     */
+	    if (*kernMod && *kernMod != '[') {
+		    /*
+		     * Find the end of the shared lib name and make sure
+		     * it is NULL-terminated.
+		     */
+	        for (endp = kernMod; *endp && !isspace(*endp); endp++)
+		        ;
 
-		if (*endp) {
-			*endp = '\0';
-		}
+	        if (*endp) {
+		        *endp = '\0';
+                endp++;
+	        }
+	    } else
+		    kernMod = NULL;
 
-		/* Find the start of the optional kernel module lib name */
-		for (kernMod = endp+1; *kernMod && isspace(*kernMod);
-			kernMod++)
-			;
+	    /* Find the start of the optional module options list */
+	    for (modOptions = endp; *modOptions && isspace(*modOptions);
+		    modOptions++);
 
-		/*
-		 * If this item starts with a bracket "[", then
-		 * it is not a kernel module, but is a list of
-		 * options for the user module to parse later.
-		 */
-		if (*kernMod && *kernMod != '[') {
-			/*
-			 * Find the end of the shared lib name and make sure
-			 * it is NULL-terminated.
-			 */
-			for (endp = kernMod; *endp && !isspace(*endp); endp++)
-				;
-
-			if (*endp) {
-				*endp = '\0';
-			}
-		} else
-			kernMod = NULL;
-
-		/* Find the start of the optional module options list */
-		for (modOptions = endp+1; *modOptions && isspace(*modOptions);
-			modOptions++);
-
-		if (*modOptions == '[')  {
-			/* move past the opening bracket */
-			for (modOptions = modOptions+1;
+	    if (*modOptions == '[')  {
+		    /* move past the opening bracket */
+		    for (modOptions = modOptions+1;
 			    *modOptions && isspace(*modOptions);
 			    modOptions++);
 
-			/* Find the closing bracket */
-			for (endp = modOptions;
-				*endp && *endp != ']'; endp++);
+		    /* Find the closing bracket */
+		    for (endp = modOptions;
+			    *endp && *endp != ']'; endp++);
 
-			*endp = '\0';
-		} else {
-			modOptions = NULL;
-		}
+		    *endp = '\0';
+	    } else {
+		    modOptions = NULL;
+	    }
 
-		if (sharedLib[0] == '/')
-			snprintf(sharedPath, sizeof(sharedPath), "%s", sharedLib);
-		else
-			snprintf(sharedPath, sizeof(sharedPath), "%s%s",
-				 MECH_LIB_PREFIX, sharedLib);
-
-		/*
-		 * are we creating a new mechanism entry or
-		 * just modifying existing (non loaded) mechanism entry
-		 */
-		if (aMech) {
-			/*
-			 * delete any old values and set new
-			 * mechNameStr and mech_type are not modified
-			 */
-			if (aMech->kmodName) {
-				free(aMech->kmodName);
-				aMech->kmodName = NULL;
-			}
-
-			if (aMech->optionStr) {
-				free(aMech->optionStr);
-				aMech->optionStr = NULL;
-			}
-
-			if ((tmpStr = strdup(sharedPath)) != NULL) {
-				if (aMech->uLibName)
-					free(aMech->uLibName);
-				aMech->uLibName = tmpStr;
-			}
-
-			if (kernMod) /* this is an optional parameter */
-				aMech->kmodName = strdup(kernMod);
-
-			if (modOptions) /* optional module options */
-				aMech->optionStr = strdup(modOptions);
-
-			/* the oid is already set */
-			generic_gss_release_oid(&minor, &mechOid);
-			continue;
-		}
-
-		/* adding a new entry */
-		aMech = calloc(1, sizeof (struct gss_mech_config));
-		if (aMech == NULL) {
-			generic_gss_release_oid(&minor, &mechOid);
-			continue;
-		}
-		aMech->mech_type = mechOid;
-		aMech->uLibName = strdup(sharedPath);
-		aMech->mechNameStr = strdup(oidStr);
-		aMech->freeMech = 0;
-
-		/* check if any memory allocations failed - bad news */
-		if (aMech->uLibName == NULL || aMech->mechNameStr == NULL) {
-			if (aMech->uLibName)
-				free(aMech->uLibName);
-			if (aMech->mechNameStr)
-				free(aMech->mechNameStr);
-			generic_gss_release_oid(&minor, &mechOid);
-			free(aMech);
-			continue;
-		}
-		if (kernMod)	/* this is an optional parameter */
-			aMech->kmodName = strdup(kernMod);
-
-		if (modOptions)
-			aMech->optionStr = strdup(modOptions);
-		/*
-		 * add the new entry to the end of the list - make sure
-		 * that only complete entries are added because other
-		 * threads might currently be searching the list.
-		 */
-		tmp = g_mechListTail;
-		g_mechListTail = aMech;
-
-		if (tmp != NULL)
-			tmp->next = aMech;
-
-		if (g_mechList == NULL)
-			g_mechList = aMech;
+        addConfigEntry(oidStr, oid, sharedLib, kernMod, modOptions);
 	} /* while */
 	(void) fclose(confFile);
 } /* loadConfigFile */
+
+#if defined(_WIN32)
+
+static time_t
+filetimeToTimet(const FILETIME *ft)
+{
+    ULARGE_INTEGER ull;
+    ull.LowPart = ft->dwLowDateTime;
+    ull.HighPart = ft->dwHighDateTime;
+    return (time_t )(ull.QuadPart / 10000000ULL - 11644473600ULL);
+}
+
+static time_t
+getRegConfigModTime(const char *keyPath)
+{
+    time_t currentUserModTime = getRegKeyModTime(HKEY_CURRENT_USER, keyPath);
+    time_t localMachineModTime = getRegKeyModTime(HKEY_LOCAL_MACHINE, keyPath);
+    return currentUserModTime > localMachineModTime ? currentUserModTime : localMachineModTime;
+}
+
+static time_t
+getRegKeyModTime(HKEY hBaseKey, const char *keyPath)
+{
+    HKEY hConfigKey;
+    HRESULT rc;
+    int iSubKey = 0;
+    time_t modTime = 0, keyModTime;
+    FILETIME keyLastWriteTime;
+    char subKeyName[256];
+    if ((rc = RegOpenKeyEx(hBaseKey, keyPath, 0, KEY_ENUMERATE_SUB_KEYS,
+                           &hConfigKey)) != ERROR_SUCCESS) {
+        /* TODO: log error message */
+        return 0;
+    }
+    do {
+        int subKeyNameSize=256;
+        if ((rc = RegEnumKeyEx(hConfigKey, iSubKey++, subKeyName, &subKeyNameSize, NULL, NULL, NULL, &keyLastWriteTime)) != ERROR_SUCCESS) {
+            break;
+        }
+        keyModTime = filetimeToTimet(&keyLastWriteTime);
+        if (modTime < keyModTime) {
+            modTime = keyModTime;
+        }
+    } while (1);
+    RegCloseKey(hConfigKey);
+    return modTime;
+}
+
+static void
+getRegKeyValue(HKEY hKey, const char *keyPath, const char *valueName, void **data, DWORD* dataLen)
+{
+    DWORD sizeRequired=*dataLen;
+    HRESULT hr;
+    /* Get data length required */
+    if ((hr=RegGetValue(hKey, keyPath, valueName, RRF_RT_REG_SZ, NULL, NULL, &sizeRequired)) != ERROR_SUCCESS)
+    {
+        /* TODO: LOG registry error */
+        return;
+    }
+    /* adjust data buffer size if necessary */
+    if (*dataLen < sizeRequired)
+    {
+        *dataLen = sizeRequired;
+        *data = realloc(*data, sizeRequired);
+        if (!*data)
+        {
+            *dataLen = 0;
+            /* TODO: LOG OOM ERROR! */
+            return;
+        }
+    }
+    /* get data */
+    if ((hr=RegGetValue(hKey, keyPath, valueName, RRF_RT_REG_SZ, NULL, *data, &sizeRequired)) != ERROR_SUCCESS)
+    {
+        /* LOG registry error */
+        return;
+    }
+}
+
+static void
+loadConfigFromRegistry(HKEY hBaseKey, const char *keyPath)
+{
+    HKEY hConfigKey;
+    DWORD iSubKey, nSubKeys, maxSubKeyNameLen;
+    DWORD dataBufferSize, dataSizeRequired;
+    char *oidStr=NULL, *oid=NULL, *sharedLib=NULL, *kernMod=NULL, *modOptions=NULL;
+    DWORD oidStrLen=0, oidLen=0, sharedLibLen=0, kernModLen=0, modOptionsLen=0;
+    HRESULT rc;
+
+    if ((rc = RegOpenKeyEx(hBaseKey, keyPath, 0, KEY_ENUMERATE_SUB_KEYS|KEY_QUERY_VALUE,
+                           &hConfigKey)) != ERROR_SUCCESS) {
+        /* TODO: log registry error */
+        return;
+    }
+
+    if ((rc = RegQueryInfoKey(hConfigKey,
+        NULL, /* lpClass */
+        NULL, /* lpcClass */
+        NULL, /* lpReserved */
+        &nSubKeys,
+        &maxSubKeyNameLen,
+        NULL, /* lpcMaxClassLen */
+        NULL, /* lpcValues */
+        NULL, /* lpcMaxValueNameLen */
+        NULL, /* lpcMaxValueLen */
+        NULL, /* lpcbSecurityDescriptor */
+        NULL  /* lpftLastWriteTime */ )) != ERROR_SUCCESS) {
+        goto cleanup;
+    }
+    oidStr = malloc(++maxSubKeyNameLen);
+    if (!oidStr) {
+        goto cleanup;
+    }
+    for (iSubKey=0; iSubKey<nSubKeys; iSubKey++) {
+        oidStrLen = maxSubKeyNameLen;
+        if ((rc = RegEnumKeyEx(hConfigKey, iSubKey, oidStr, &oidStrLen, NULL, NULL, NULL, NULL)) != ERROR_SUCCESS) {
+            /* TODO: log registry error */
+            continue;
+        }
+        getRegKeyValue(hConfigKey, oidStr, "OID", &oid, &oidLen);
+        getRegKeyValue(hConfigKey, oidStr, "Shared Library", &sharedLib, &sharedLibLen);
+        getRegKeyValue(hConfigKey, oidStr, "Kernel Module", &kernMod, &kernModLen);
+        getRegKeyValue(hConfigKey, oidStr, "Options", &modOptions, &modOptionsLen);
+        addConfigEntry(oidStr, oid, sharedLib, kernMod, modOptions);
+    }
+cleanup:
+    RegCloseKey(hConfigKey);
+    if (oidStr) {
+        free(oidStr);
+    }
+    if (oid) {
+        free(oid);
+    }
+    if (sharedLib) {
+        free(sharedLib);
+    }
+    if (kernMod) {
+        free(kernMod);
+    }
+    if (modOptions) {
+        free(modOptions);
+    }
+}
+#endif
+
+static void
+addConfigEntry(const char *oidStr, const char *oid, const char *sharedLib, const char *kernMod, const char *modOptions)
+{
+#if defined(_WIN32)
+    const char *sharedPath;
+#else
+	char sharedPath[sizeof (MECH_LIB_PREFIX) + BUFSIZ];
+#endif
+	char *tmpStr;
+	gss_OID mechOid;
+	gss_mech_info aMech, tmp;
+	OM_uint32 minor;
+	gss_buffer_desc oidBuf;
+
+    if ((!oid) || (!oidStr)) {
+        return;
+    }
+	/*
+	 * check if an entry for this oid already exists
+	 * if it does, and the library is already loaded then
+	 * we can't modify it, so skip it
+	 */
+	oidBuf.value = (void *)oid;
+	oidBuf.length = strlen(oid);
+	if (generic_gss_str_to_oid(&minor, &oidBuf, &mechOid)
+		!= GSS_S_COMPLETE) {
+#if 0
+		(void) syslog(LOG_INFO, "invalid mechanism oid"
+				" [%s] in configuration file", oid);
+#endif
+			return;
+		}
+
+	aMech = searchMechList(mechOid);
+	if (aMech && aMech->mech) {
+		generic_gss_release_oid(&minor, &mechOid);
+		return;
+	}
+
+	/*
+	 * If that's all, then this is a corrupt entry. Skip it.
+	 */
+	if (! *sharedLib) {
+		generic_gss_release_oid(&minor, &mechOid);
+		return;
+	}
+#if defined(_WIN32)
+    sharedPath = sharedLib;
+#else
+	if (sharedLib[0] == '/')
+		snprintf(sharedPath, sizeof(sharedPath), "%s", sharedLib);
+	else
+		snprintf(sharedPath, sizeof(sharedPath), "%s%s",
+				MECH_LIB_PREFIX, sharedLib);
+#endif
+	/*
+	 * are we creating a new mechanism entry or
+	 * just modifying existing (non loaded) mechanism entry
+	 */
+	if (aMech) {
+		/*
+		 * delete any old values and set new
+		 * mechNameStr and mech_type are not modified
+		 */
+		if (aMech->kmodName) {
+			free(aMech->kmodName);
+			aMech->kmodName = NULL;
+		}
+
+		if (aMech->optionStr) {
+			free(aMech->optionStr);
+			aMech->optionStr = NULL;
+		}
+
+		if ((tmpStr = strdup(sharedPath)) != NULL) {
+			if (aMech->uLibName)
+				free(aMech->uLibName);
+			aMech->uLibName = tmpStr;
+		}
+
+		if (kernMod) /* this is an optional parameter */
+			aMech->kmodName = strdup(kernMod);
+
+		if (modOptions) /* optional module options */
+			aMech->optionStr = strdup(modOptions);
+
+		/* the oid is already set */
+		generic_gss_release_oid(&minor, &mechOid);
+		return;
+	}
+
+	/* adding a new entry */
+	aMech = calloc(1, sizeof (struct gss_mech_config));
+	if (aMech == NULL) {
+		generic_gss_release_oid(&minor, &mechOid);
+		return;
+	}
+	aMech->mech_type = mechOid;
+	aMech->uLibName = strdup(sharedPath);
+	aMech->mechNameStr = strdup(oidStr);
+	aMech->freeMech = 0;
+
+	/* check if any memory allocations failed - bad news */
+	if (aMech->uLibName == NULL || aMech->mechNameStr == NULL) {
+		if (aMech->uLibName)
+			free(aMech->uLibName);
+		if (aMech->mechNameStr)
+			free(aMech->mechNameStr);
+		generic_gss_release_oid(&minor, &mechOid);
+		free(aMech);
+		return;
+	}
+	if (kernMod)	/* this is an optional parameter */
+		aMech->kmodName = strdup(kernMod);
+
+	if (modOptions)
+		aMech->optionStr = strdup(modOptions);
+	/*
+	 * add the new entry to the end of the list - make sure
+	 * that only complete entries are added because other
+	 * threads might currently be searching the list.
+	 */
+	tmp = g_mechListTail;
+	g_mechListTail = aMech;
+
+	if (tmp != NULL)
+		tmp->next = aMech;
+
+	if (g_mechList == NULL)
+		g_mechList = aMech;
+}
+
