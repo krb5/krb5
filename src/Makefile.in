@@ -189,7 +189,7 @@ WINMAKEFILES=Makefile \
 	lib\krb5\rcache\Makefile \
 	lib\krb5\unicode\Makefile \
 	util\Makefile \
-	util\et\Makefile util\profile\Makefile \
+	util\et\Makefile util\profile\Makefile util\profile\testmod\Makefile \
 	util\support\Makefile \
 	util\windows\Makefile \
 	windows\Makefile windows\lib\Makefile \
@@ -296,6 +296,8 @@ WINMAKEFILES=Makefile \
 ##DOS##util\et\Makefile: util\et\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##util\profile\Makefile: util\profile\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##util\profile\testmod\Makefile: util\profile\testmod\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##util\support\Makefile: util\support\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
