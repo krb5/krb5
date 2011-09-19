@@ -173,6 +173,22 @@ typedef struct _krb5_pa_pk_as_rep {
     } u;
 } krb5_pa_pk_as_rep;
 
+/* SP80056A OtherInfo, for pkinit algorithm agility */
+typedef struct _krb5_sp80056a_other_info {
+    krb5_algorithm_identifier algorithm_identifier;
+    krb5_principal  party_u_info;
+    krb5_principal  party_v_info;
+    krb5_data supp_pub_info;
+} krb5_sp80056a_other_info;
+
+/* PkinitSuppPubInfo, for pkinit algorithm agility */
+typedef struct _krb5_pkinit_supp_pub_info {
+    krb5_enctype      enctype;
+    krb5_octet_data   as_req;
+    krb5_octet_data   pk_as_rep;
+    krb5_ticket *ticket;
+} krb5_pkinit_supp_pub_info;
+
 /*
  * Begin "asn1.h"
  */
@@ -222,6 +238,12 @@ encode_krb5_td_trusted_certifiers(const krb5_external_principal_identifier **,
 krb5_error_code
 encode_krb5_td_dh_parameters(const krb5_algorithm_identifier **,
                              krb5_data **code);
+
+krb5_error_code
+encode_krb5_sp80056a_other_info(const krb5_sp80056a_other_info *,  krb5_data **);
+
+krb5_error_code
+encode_krb5_pkinit_supp_pub_info(const krb5_pkinit_supp_pub_info *, krb5_data **);
 
 /*************************************************************************
  * Prototypes for pkinit asn.1 decode routines
