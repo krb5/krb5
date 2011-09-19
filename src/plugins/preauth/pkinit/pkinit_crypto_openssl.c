@@ -2143,7 +2143,7 @@ pkinit_octetstring2key(krb5_context context,
         goto cleanup;
 
     key_block->length = keylength;
-    key_block->contents = calloc(keylength, sizeof(unsigned char *));
+    key_block->contents = malloc(keylength);
     if (key_block->contents == NULL) {
         retval = ENOMEM;
         goto cleanup;
@@ -2156,9 +2156,9 @@ pkinit_octetstring2key(krb5_context context,
 
 cleanup:
     free(buf);
-    if (retval && key_block->contents != NULL && key_block->length != 0) {
-        memset(key_block->contents, 0, key_block->length);
-        key_block->length = 0;
+    // If this is an error return, free the allocated keyblock, if any
+    if (retval) {
+        krb5_free_keyblock_contents(context, key_block);
     }
 
     return retval;

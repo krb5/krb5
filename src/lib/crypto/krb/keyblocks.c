@@ -68,6 +68,7 @@ krb5int_c_free_keyblock_contents(krb5_context context, krb5_keyblock *key)
     if (key && key->contents) {
         zapfree(key->contents, key->length);
         key->contents = NULL;
+        key->length = 0;
     }
 }
 
