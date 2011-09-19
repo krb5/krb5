@@ -101,6 +101,7 @@ typedef _W64 int         ssize_t;
 #define MAXPATHLEN      256            /* Also for Windows temp files */
 #endif
 
+#ifdef KRB5_PRIVATE
 #define HAVE_NETINET_IN_H
 #define MSDOS_FILESYSTEM
 #define HAVE_STRING_H
@@ -118,6 +119,7 @@ typedef _W64 int         ssize_t;
 #define KRB5_USE_INET6
 #define NEED_INSIXADDR_ANY
 #define ENABLE_THREADS
+#endif
 
 #define WM_KERBEROS5_CHANGED "Kerberos5 Changed"
 #ifdef KRB4
@@ -158,10 +160,12 @@ typedef _W64 int         ssize_t;
 #define INI_RECENT_LOGINS "Recent Logins"
 #define INI_LOGIN       "Login"
 
+#ifdef KRB5_PRIVATE
 #define HAS_VOID_TYPE
 #define HAVE_STDARG_H
 #define HAVE_SYS_TYPES_H
 #define HAVE_STDLIB_H
+#endif
 
 /* This controls which encryption routines libcrypto will provide */
 #define PROVIDE_DES_CBC_MD5
