@@ -320,12 +320,12 @@ create_socket(u_short port)
     (void) setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *) &on, sizeof(on));
     if (bind(s, (struct sockaddr *) &saddr, sizeof(saddr)) < 0) {
         perror("binding socket");
-        (void) close(s);
+        (void) closesocket(s);
         return -1;
     }
     if (listen(s, 5) < 0) {
         perror("listening on socket");
-        (void) close(s);
+        (void) closesocket(s);
         return -1;
     }
     return s;
