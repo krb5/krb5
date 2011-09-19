@@ -89,6 +89,10 @@ asn1_error_code asn1_encode_octetstring(asn1buf *buf, unsigned int len,
  */
 #define asn1_encode_charstring asn1_encode_octetstring
 
+/**
+ * Encode @a val, an object identifier in compressed DER form without a tag or
+ * length. This function adds the OID tag and length.
+ */
 asn1_error_code asn1_encode_oid(asn1buf *buf, unsigned int len,
                                 const void *val, unsigned int *retlen);
 /*
