@@ -631,4 +631,23 @@ krb5_error_code pkinit_identity_set_prompter
 	krb5_prompter_fct prompter,			/* IN */
 	void *prompter_data);				/* IN */
 
+krb5_error_code
+pkinit_alg_agility_kdf(krb5_context context,
+                       krb5_octet_data *secret,
+                       krb5_algorithm_identifier *alg_id,
+                       krb5_principal party_u_info,
+                       krb5_principal party_v_info,
+                       krb5_enctype enctype,
+                       krb5_octet_data *as_req,
+                       krb5_octet_data *pk_as_rep,
+                       const krb5_ticket  *ticket,
+                       krb5_keyblock *key_block);
+
+extern const krb5_octet krb5_pkinit_sha1_oid[];
+extern const size_t krb5_pkinit_sha1_oid_len;
+extern const krb5_octet krb5_pkinit_sha256_oid[];
+extern const size_t krb5_pkinit_sha256_oid_len;
+extern const krb5_octet krb5_pkinit_sha512_oid[];
+extern const size_t  krb5_pkinit_sha512_oid_len;
+
 #endif	/* _PKINIT_CRYPTO_H */
