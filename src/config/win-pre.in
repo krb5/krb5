@@ -135,14 +135,16 @@ CCOPTS=-nologo /W3 $(PDB_OPTS) $(DLL_FILE_DEF)
 LOPTS=-nologo -incremental:no
 
 !if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
-CCLINKOPTION=/link bufferoverflowu.lib
-SCLIB=bufferoverflowu.lib
-DEBUGOPT=/Zi
+ENTRYPOINT=_DllMainCRTStartup
+#CCLINKOPTION=/link bufferoverflowu.lib
+#SCLIB=bufferoverflowu.lib
+#DEBUGOPT=/Zi
 !else
+ENTRYPOINT=_DLLMainCRTStartup@12
+!endif
 CCLINKOPTION=
 SCLIB=
 DEBUGOPT=/Zi
-!endif
 
 #if the compiler is vstudio 8, generate manifest
 !if exists("$(VCINSTALLDIR)\..\..\MICROSOFT VISUAL STUDIO 8")

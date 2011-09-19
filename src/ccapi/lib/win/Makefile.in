@@ -91,7 +91,7 @@ midl : ccs_request.h ccs_reply.h
 
 # Main program:
 $(OUTPRE)ccapi.dll: $(OBJS) ccapi.def
-	$(LINK) $(LFLAGS) -entry:_DllMainCRTStartup@12 -dll /map:$*.map /out:$@ /DEF:ccapi.def $(OBJS) \
+	$(LINK) $(LFLAGS) -entry:$(ENTRYPOINT) -dll /map:$*.map /out:$@ /DEF:ccapi.def $(OBJS) \
 	    /implib:ccapi.lib $(dllflags) $(LIBS) $(KFWLIB) $(SCLIB) rpcrt4.lib $(conlibsdll) $(conflags)
 
 ccapi.def:
