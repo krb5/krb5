@@ -288,7 +288,7 @@ static void read_file(file_name, in_buf)
 	perror("read");
 	exit(1);
     }
-    if (count < in_buf->length)
+    if (count < (int)in_buf->length)
 	printf("Warning, only read in %d bytes, expected %d\r\n",
 		count, (int) in_buf->length);
 }
@@ -454,7 +454,7 @@ int call_server(char *host, u_short port, gss_OID oid, char *service_name,
 	 in_buf.length = strlen(msg);
      }
 
-     for (i = 0; i < mcount; i++) {
+     for (i = 0; i < (size_t)mcount; i++) {
        if (wrap_flag) {
 	 maj_stat = gss_wrap(&min_stat, context, encrypt_flag, GSS_C_QOP_DEFAULT,
 			     &in_buf, &state, &out_buf);

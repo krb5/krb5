@@ -129,7 +129,7 @@ static int read_all(int s, char *buf, unsigned int nbyte)
  */
 int send_token(int s, int flags, gss_buffer_t tok)
 {
-     int len, ret;
+     int ret;
      unsigned char char_flags = (unsigned char) flags;
      unsigned char lenbuf[4];
 
@@ -365,7 +365,7 @@ void display_ctx_flags(flags)
 void print_token(tok)
      gss_buffer_t tok;
 {
-    int i;
+    size_t i;
     unsigned char *p = tok->value;
 
     if (!verbose)

@@ -709,8 +709,7 @@ fill_combo (HWND hDlg) {
 int
 gss_printf (const char *format, ...) {
     static char myprtfstr[4096];
-    int i, len, rc=0;
-    char *cp;
+    int rc=0;
     va_list ap;
 
     va_start(ap, format);
