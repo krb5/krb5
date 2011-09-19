@@ -106,7 +106,7 @@ main(int argc, char **argv)
 
     /* set-up the partyUInfo and partyVInfo principals */
     if ((0 != (retval = krb5_parse_name(context, party_u_name,
-                                        &u_principal)))
+                                        &u_principal))) ||
         (0 != (retval = krb5_parse_name(context, party_v_name,
                                         &v_principal)))) {
         printf("ERROR in pkinit_kdf_test: Error parsing names, retval = %d",
