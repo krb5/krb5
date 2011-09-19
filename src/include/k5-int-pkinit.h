@@ -188,7 +188,6 @@ typedef struct _krb5_pkinit_supp_pub_info {
     krb5_enctype      enctype;
     krb5_octet_data   as_req;
     krb5_octet_data   pk_as_rep;
-    krb5_ticket *ticket;
 } krb5_pkinit_supp_pub_info;
 
 /*

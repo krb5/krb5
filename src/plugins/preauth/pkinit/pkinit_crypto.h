@@ -640,7 +640,6 @@ pkinit_alg_agility_kdf(krb5_context context,
                        krb5_enctype enctype,
                        krb5_octet_data *as_req,
                        krb5_octet_data *pk_as_rep,
-                       const krb5_ticket  *ticket,
                        krb5_keyblock *key_block);
 
 extern const krb5_octet krb5_pkinit_sha1_oid[];

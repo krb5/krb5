@@ -2103,8 +2103,7 @@ pkinit_octetstring2key(krb5_context context,
                        unsigned char *key,
                        unsigned int dh_key_len,
                        krb5_keyblock *key_block)
-{
-    krb5_error_code retval;
+{   krb5_error_code retval;
     unsigned char *buf = NULL;
     unsigned char md[SHA_DIGEST_LENGTH];
     unsigned char counter;
@@ -2233,7 +2232,6 @@ pkinit_alg_agility_kdf(krb5_context context,
                        krb5_enctype enctype,
                        krb5_octet_data *as_req,
                        krb5_octet_data *pk_as_rep,
-                       const krb5_ticket *ticket,
                        krb5_keyblock *key_block)
 {
     krb5_error_code retval = 0;
@@ -2292,7 +2290,6 @@ pkinit_alg_agility_kdf(krb5_context context,
     supp_pub_info_fields.enctype = enctype;
     supp_pub_info_fields.as_req = *as_req;
     supp_pub_info_fields.pk_as_rep = *pk_as_rep;
-    supp_pub_info_fields.ticket = (krb5_ticket *) ticket;
     if (0 != ((retval = encode_krb5_pkinit_supp_pub_info(&supp_pub_info_fields,
                                                          &supp_pub_info))))
         goto cleanup;

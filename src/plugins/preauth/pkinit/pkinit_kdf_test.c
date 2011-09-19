@@ -59,26 +59,11 @@ char party_u_name [] = "lha@SU.SE";
 char party_v_name [] = "krbtgt/SU.SE@SU.SE";
 int enctype_value = 18;
 krb5_octet key_hex [] =
-  {0xC7, 0x62, 0x89, 0xEC, 0x4B, 0x28, 0xA6, 0x91,
-   0xFF, 0xCE, 0x80, 0xBB, 0xB7, 0xEC, 0x82, 0x41,
-   0x52, 0x3F, 0x99, 0xB1, 0x90, 0xCF, 0x2D, 0x34,
-   0x8F, 0x54, 0xA8, 0x65, 0x81, 0x2C, 0x32, 0x73};
+  {0xe6, 0xAB, 0x38, 0xC9, 0x41, 0x3E, 0x03, 0x5B,
+   0xB0, 0x79, 0x20, 0x1E, 0xD0, 0xB6, 0xB7, 0x3D,
+   0x8D, 0x49, 0xA8, 0x14, 0xA7, 0x37, 0xC0, 0x4E,
+   0xE6, 0x64, 0x96, 0x14, 0x20, 0x6F, 0x73, 0xAD};
 const krb5_data lha_data = DATA_FROM_STRING("lha");
-const krb5_principal_data ticket_server = {
-    0, /*magic*/
-    DATA_FROM_STRING("SU.SE"),
-    (krb5_data *) &lha_data,
-    1, 1};
-const krb5_ticket test_ticket = {
-    KV5M_TICKET,
-    (krb5_principal) &ticket_server,
-    {0, /*magic*/
-     18,
-     0,
-     DATA_FROM_STRING("hejhej") },
-    NULL};
-
-
 
 int
 main (int argc,
@@ -122,11 +107,11 @@ main (int argc,
 
     /* set-up the partyUInfo and partyVInfo principals */
     if ((0 != (retval = krb5_parse_name(context, party_u_name,
-					&u_principal)))
-	(0 != (retval = krb5_parse_name(context, party_v_name,
-					&v_principal)))) {
+                                        &u_principal)))
+        (0 != (retval = krb5_parse_name(context, party_v_name,
+                                        &v_principal)))) {
       printf("ERROR in pkinit_kdf_test: Error parsing names, retval = %d",
-	     retval);
+             retval);
       goto cleanup;
     }
 
@@ -142,20 +127,20 @@ main (int argc,
     /* set-up the key_block */
     if (0 != (retval = krb5_init_keyblock(context, enctype, max_keylen,
                                           &key_block_ptr))) {
-	  printf("ERROR in pkinit_kdf_test: can't init keybloc, retval = %d",
-		 retval);
-	  goto cleanup;
+          printf("ERROR in pkinit_kdf_test: can't init keybloc, retval = %d",
+                 retval);
+          goto cleanup;
 
-	}
+        }
 
-    /* call krb5_pkinit_alg_agility_kdf() with test vector values*/
+    /* call pkinit_alg_agility_kdf() with test vector values*/
     if (0 != (retval = pkinit_alg_agility_kdf(context, &secret, &alg_id.algorithm,
-					      u_principal, v_principal,
-					      enctype, &as_req, &pk_as_rep,
-					      &test_ticket, &key_block))) {
+                                              u_principal, v_principal,
+                                              enctype, &as_req, &pk_as_rep,
+                                              &key_block))) {
         printf("ERROR in pkinit_kdf_test: kdf call failed, retval = %d",
-	       retval);
-	goto cleanup;
+               retval);
+        goto cleanup;
     }
 
     /* compare key to expected key value */
@@ -171,13 +156,13 @@ main (int argc,
         }
 
     cleanup:
-	/* release all allocated resources, whether good or bad return */
-	if (secret.data)
-	  free(secret.data);
-	if (u_principal)
-	  free(u_principal);
-	if (v_principal)
-	  free(v_principal);
-		krb5_free_keyblock_contents(context, &key_block);
-	exit(retval);
+        /* release all allocated resources, whether good or bad return */
+        if (secret.data)
+          free(secret.data);
+        if (u_principal)
+          free(u_principal);
+        if (v_principal)
+          free(v_principal);
+                krb5_free_keyblock_contents(context, &key_block);
+        exit(retval);
 }

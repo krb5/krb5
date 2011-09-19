@@ -1466,7 +1466,6 @@ static const struct field_info pkinit_supp_pub_info_fields[] = {
     FIELDOF_NORM(krb5_pkinit_supp_pub_info, int32, enctype, 0),
     FIELDOF_STRING(krb5_pkinit_supp_pub_info, octetstring, as_req.data, as_req.length, 1),
     FIELDOF_STRING(krb5_pkinit_supp_pub_info, octetstring, pk_as_rep.data, pk_as_rep.length, 2),
-    FIELDOF_NORM(krb5_pkinit_supp_pub_info, ticket_ptr, ticket, 3),
 };
 
 DEFSEQTYPE(pkinit_supp_pub_info, krb5_pkinit_supp_pub_info, pkinit_supp_pub_info_fields, NULL);
