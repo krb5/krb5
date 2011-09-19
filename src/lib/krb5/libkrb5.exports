@@ -302,6 +302,7 @@ krb5_free_keytab_entry_contents
 krb5_free_krbhst
 krb5_free_ktypes
 krb5_free_last_req
+krb5_free_octet_data
 krb5_free_pa_data
 krb5_free_pa_enc_ts
 krb5_free_pa_for_user

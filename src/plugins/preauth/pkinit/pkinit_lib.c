@@ -163,6 +163,14 @@ free_krb5_auth_pack(krb5_auth_pack **in)
     free((*in)->pkAuthenticator.paChecksum.contents);
     if ((*in)->supportedCMSTypes != NULL)
         free_krb5_algorithm_identifiers(&((*in)->supportedCMSTypes));
+    if (*(*in)->supportedKDFs) {
+        krb5_octet_data **supportedKDFs =
+            (*in)->supportedKDFs;
+        unsigned i;
+        for (i = 0; supportedKDFs[i]; i++)
+            krb5_free_octet_data(NULL, supportedKDFs[i]);
+        free(supportedKDFs);
+    }
     free(*in);
 }
 
@@ -181,6 +189,7 @@ free_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in)
     if (*in == NULL) return;
     switch ((*in)->choice) {
     case choice_pa_pk_as_rep_dhInfo:
+        krb5_free_octet_data(NULL, (*in)->u.dh_Info.kdfID);
         free((*in)->u.dh_Info.dhSignedData.data);
         break;
     case choice_pa_pk_as_rep_encKeyPack:

@@ -4647,7 +4647,22 @@ void KRB5_CALLCONV
 krb5_free_data(krb5_context context, krb5_data *val);
 
 /**
- * Free the contents of a krb_data structure.
+ * @brief Free storage associated with a @c krb5_octet_data structure and its pointer.
+ *
+ * @param context           Context structure [input, output]
+ * @param val               Pointer to data structure to be freed [input, output]
+ *
+ * @return
+ * None
+ */
+void KRB5_CALLCONV
+krb5_free_octet_data(krb5_context context, krb5_octet_data *val);
+
+/**
+ * @brief Free the contents of a @c _krb5_data structure and zero the data field.
+ *
+ * @param context           Context structure [input, output]
+ * @param val               Pointer to data structure to be freed [input, output]
  *
  * @param [in] context          Library context
  * @param [in] val              Data structure to free contents of

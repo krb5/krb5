@@ -65,12 +65,13 @@ typedef struct _krb5_subject_pk_info {
     krb5_octet_data             subjectPublicKey; /* BIT STRING */
 } krb5_subject_pk_info;
 
-/* AuthPack */
+/** AuthPack  from RFC 4556*/
 typedef struct _krb5_auth_pack {
     krb5_pk_authenticator       pkAuthenticator;
     krb5_subject_pk_info        *clientPublicValue; /* Optional */
     krb5_algorithm_identifier   **supportedCMSTypes; /* Optional */
     krb5_octet_data             clientDHNonce; /* Optional */
+krb5_octet_data **supportedKDFs; /*< object identifiers of KDFs; OPTIONAL*/
 } krb5_auth_pack;
 
 /* AuthPack draft9 */
@@ -116,10 +117,11 @@ typedef struct _krb5_pa_pk_as_req {
     krb5_octet_data kdcPkId; /* Optional */
 } krb5_pa_pk_as_req;
 
-/* DHRepInfo */
+/** Pkinit DHRepInfo */
 typedef struct _krb5_dh_rep_info {
     krb5_octet_data dhSignedData;
     krb5_octet_data serverDHNonce; /* Optional */
+    krb5_octet_data *kdfID; /**< OID of selected KDF OPTIONAL*/
 } krb5_dh_rep_info;
 
 /* KDCDHKeyInfo */

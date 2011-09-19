@@ -236,6 +236,16 @@ krb5_free_data(krb5_context context, krb5_data *val)
     free(val);
 }
 
+
+void KRB5_CALLCONV
+krb5_free_octet_data(krb5_context context, krb5_octet_data *val)
+{
+    if (val == NULL)
+        return;
+    free(val->data);
+    free(val);
+}
+
 void KRB5_CALLCONV
 krb5_free_data_contents(krb5_context context, krb5_data *val)
 {
