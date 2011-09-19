@@ -408,7 +408,7 @@ krb5int_asn1_encode_a_thing(asn1buf *buf, const void *val,
         retval = krb5int_asn1_encode_a_thing(buf, val, a->basetype, &length);
         if (retval) return retval;
         sum = length;
-        retval = asn1_make_etag(buf, a->tagtype, a->tagval, sum, &length);
+        retval = asn1_make_tag(buf, a->tagtype, a->construction, a->tagval, sum, &length);
         if (retval) return retval;
         sum += length;
         *retlen = sum;

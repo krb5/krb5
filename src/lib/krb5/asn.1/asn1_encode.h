@@ -294,8 +294,8 @@ struct atype_info {
     /* atype_field */
     const struct field_info *field;
     /* atype_tagged_thing */
-    unsigned int tagval : 8, tagtype : 8;
-    /* atype_[u]int */
+    unsigned int tagval : 8, tagtype : 8, construction:8;
+        /* atype_[u]int */
     asn1_intmax (*loadint)(const void *);
     asn1_uintmax (*loaduint)(const void *);
 };
@@ -404,7 +404,7 @@ struct atype_info {
         return *(const aux_typedefname_##DESCNAME *)p;          \
     }                                                           \
     const struct atype_info krb5int_asn1type_##DESCNAME = {     \
-        atype_int, sizeof(CTYPENAME), 0, 0, 0, 0, 0, 0, 0, 0,   \
+        atype_int, sizeof(CTYPENAME), 0, 0, 0, 0, 0, 0, 0, 0, 0,        \
         loadint_##DESCNAME, 0,                                  \
     }
 #define DEFUINTTYPE(DESCNAME, CTYPENAME)                        \
@@ -416,7 +416,7 @@ struct atype_info {
     }                                                           \
     const struct atype_info krb5int_asn1type_##DESCNAME = {     \
         atype_uint, sizeof(CTYPENAME), 0, 0, 0, 0, 0, 0, 0, 0,  \
-        0, loaduint_##DESCNAME,                                 \
+        0, 0, loaduint_##DESCNAME,                               \
     }
 /* Pointers to other types, to be encoded as those other types.  */
 #ifdef POINTERS_ARE_ALL_THE_SAME
@@ -488,7 +488,17 @@ struct atype_info {
     typedef aux_typedefname_##BASEDESC aux_typedefname_##DESCNAME;      \
     const struct atype_info krb5int_asn1type_##DESCNAME = {             \
         atype_tagged_thing, sizeof(aux_typedefname_##DESCNAME),         \
-        0, 0, 0, &krb5int_asn1type_##BASEDESC, 0, 0, TAG, APPLICATION   \
+        0, 0, 0, &krb5int_asn1type_##BASEDESC, 0, 0, TAG, APPLICATION, CONSTRUCTED \
+    }
+
+/**
+ * An encoding wrapped in an octet string
+ */
+#define DEFOCTETWRAPTYPE(DESCNAME, BASEDESC)                           \
+    typedef aux_typedefname_##BASEDESC aux_typedefname_##DESCNAME;      \
+    const struct atype_info krb5int_asn1type_##DESCNAME = {             \
+        atype_tagged_thing, sizeof(aux_typedefname_##DESCNAME),         \
+        0, 0, 0, &krb5int_asn1type_##BASEDESC, 0, 0, ASN1_OCTETSTRING, UNIVERSAL, PRIMITIVE \
     }
 
 /*
