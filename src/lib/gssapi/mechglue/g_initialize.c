@@ -579,13 +579,12 @@ static void
 updateMechList(void)
 {
 #if defined(_WIN32)
-    time_t lastConfModTime = getRegConfigModTime(MECH_KEY);
-    if (g_confFileModTime < lastConfModTime)
-    {
-        g_confFileModTime = lastConfModTime;
-        loadConfigFromRegistry(HKEY_CURRENT_USER, MECH_KEY);
-        loadConfigFromRegistry(HKEY_LOCAL_MACHINE, MECH_KEY);
-    }
+	time_t lastConfModTime = getRegConfigModTime(MECH_KEY);
+	if (g_confFileModTime < lastConfModTime) {
+		g_confFileModTime = lastConfModTime;
+		loadConfigFromRegistry(HKEY_CURRENT_USER, MECH_KEY);
+		loadConfigFromRegistry(HKEY_LOCAL_MACHINE, MECH_KEY);
+	}
 #else /* _WIN32 */
 	char *fileName;
 	struct stat fileInfo;
@@ -1058,6 +1057,7 @@ const char *fileName;
 	char *sharedLib, *kernMod, *modOptions, *oid, *endp;
 	char buffer[BUFSIZ], *oidStr;
 	FILE *confFile;
+
 	if ((confFile = fopen(fileName, "r")) == NULL) {
 		return;
 	}
@@ -1090,77 +1090,77 @@ const char *fileName;
 		if (! *endp)
 			continue;
 
-	    /* Find the end of the oid and make sure it is NULL-ended */
-	    for (oid=endp; *endp && !isspace(*endp); endp++)
-		    ;
+		/* Find the end of the oid and make sure it is NULL-ended */
+		for (oid = endp; *endp && !isspace(*endp); endp++)
+			;
 
-	    if (*endp) {
-		    *endp = '\0';
-            endp++;
-	    }
+		if (*endp) {
+			*endp = '\0';
+			endp++;
+		}
 
-	    /* Find the start of the shared lib name */
-	    for (sharedLib = endp; *sharedLib && isspace(*sharedLib);
-		    sharedLib++)
-		    ;
+		/* Find the start of the shared lib name */
+		for (sharedLib = endp; *sharedLib && isspace(*sharedLib);
+		     sharedLib++)
+			;
 
-	    /*
-	     * Find the end of the shared lib name and make sure it is
-	     *  NULL-terminated.
-	     */
-	    for (endp = sharedLib; *endp && !isspace(*endp); endp++)
-		    ;
+		/*
+		 * Find the end of the shared lib name and make sure it is
+		 *  NULL-terminated.
+		 */
+		for (endp = sharedLib; *endp && !isspace(*endp); endp++)
+			;
 
-	    if (*endp) {
-		    *endp = '\0';
-            endp++;
-	    }
+		if (*endp) {
+			*endp = '\0';
+			endp++;
+		}
 
-	    /* Find the start of the optional kernel module lib name */
-	    for (kernMod = endp; *kernMod && isspace(*kernMod);
-		    kernMod++)
-		    ;
+		/* Find the start of the optional kernel module lib name */
+		for (kernMod = endp; *kernMod && isspace(*kernMod);
+		     kernMod++)
+			;
 
-	    /*
-	     * If this item starts with a bracket "[", then
-	     * it is not a kernel module, but is a list of
-	     * options for the user module to parse later.
-	     */
-	    if (*kernMod && *kernMod != '[') {
-		    /*
-		     * Find the end of the shared lib name and make sure
-		     * it is NULL-terminated.
-		     */
-	        for (endp = kernMod; *endp && !isspace(*endp); endp++)
-		        ;
+		/*
+		 * If this item starts with a bracket "[", then
+		 * it is not a kernel module, but is a list of
+		 * options for the user module to parse later.
+		 */
+		if (*kernMod && *kernMod != '[') {
+			/*
+			 * Find the end of the shared lib name and make sure
+			 * it is NULL-terminated.
+			 */
+			for (endp = kernMod; *endp && !isspace(*endp); endp++)
+				;
 
-	        if (*endp) {
-		        *endp = '\0';
-                endp++;
-	        }
-	    } else
-		    kernMod = NULL;
+			if (*endp) {
+				*endp = '\0';
+				endp++;
+			}
+		} else
+			kernMod = NULL;
 
-	    /* Find the start of the optional module options list */
-	    for (modOptions = endp; *modOptions && isspace(*modOptions);
-		    modOptions++);
+		/* Find the start of the optional module options list */
+		for (modOptions = endp; *modOptions && isspace(*modOptions);
+		     modOptions++);
 
-	    if (*modOptions == '[')  {
-		    /* move past the opening bracket */
-		    for (modOptions = modOptions+1;
-			    *modOptions && isspace(*modOptions);
-			    modOptions++);
+		if (*modOptions == '[')  {
+			/* move past the opening bracket */
+			for (modOptions = modOptions+1;
+			     *modOptions && isspace(*modOptions);
+			     modOptions++);
 
-		    /* Find the closing bracket */
-		    for (endp = modOptions;
-			    *endp && *endp != ']'; endp++);
+			/* Find the closing bracket */
+			for (endp = modOptions;
+			     *endp && *endp != ']'; endp++);
 
-		    *endp = '\0';
-	    } else {
-		    modOptions = NULL;
-	    }
+			*endp = '\0';
+		} else {
+			modOptions = NULL;
+		}
 
-        addConfigEntry(oidStr, oid, sharedLib, kernMod, modOptions);
+		addConfigEntry(oidStr, oid, sharedLib, kernMod, modOptions);
 	} /* while */
 	(void) fclose(confFile);
 } /* loadConfigFile */
@@ -1170,150 +1170,166 @@ const char *fileName;
 static time_t
 filetimeToTimet(const FILETIME *ft)
 {
-    ULARGE_INTEGER ull;
-    ull.LowPart = ft->dwLowDateTime;
-    ull.HighPart = ft->dwHighDateTime;
-    return (time_t )(ull.QuadPart / 10000000ULL - 11644473600ULL);
+	ULARGE_INTEGER ull;
+
+	ull.LowPart = ft->dwLowDateTime;
+	ull.HighPart = ft->dwHighDateTime;
+	return (time_t)(ull.QuadPart / 10000000ULL - 11644473600ULL);
 }
 
 static time_t
 getRegConfigModTime(const char *keyPath)
 {
-    time_t currentUserModTime = getRegKeyModTime(HKEY_CURRENT_USER, keyPath);
-    time_t localMachineModTime = getRegKeyModTime(HKEY_LOCAL_MACHINE, keyPath);
-    return currentUserModTime > localMachineModTime ? currentUserModTime : localMachineModTime;
+	time_t currentUserModTime = getRegKeyModTime(HKEY_CURRENT_USER,
+						     keyPath);
+	time_t localMachineModTime = getRegKeyModTime(HKEY_LOCAL_MACHINE,
+						      keyPath);
+
+	return currentUserModTime > localMachineModTime ? currentUserModTime :
+		localMachineModTime;
 }
 
 static time_t
 getRegKeyModTime(HKEY hBaseKey, const char *keyPath)
 {
-    HKEY hConfigKey;
-    HRESULT rc;
-    int iSubKey = 0;
-    time_t modTime = 0, keyModTime;
-    FILETIME keyLastWriteTime;
-    char subKeyName[256];
-    if ((rc = RegOpenKeyEx(hBaseKey, keyPath, 0, KEY_ENUMERATE_SUB_KEYS,
-                           &hConfigKey)) != ERROR_SUCCESS) {
-        /* TODO: log error message */
-        return 0;
-    }
-    do {
-        int subKeyNameSize=256;
-        if ((rc = RegEnumKeyEx(hConfigKey, iSubKey++, subKeyName, &subKeyNameSize, NULL, NULL, NULL, &keyLastWriteTime)) != ERROR_SUCCESS) {
-            break;
-        }
-        keyModTime = filetimeToTimet(&keyLastWriteTime);
-        if (modTime < keyModTime) {
-            modTime = keyModTime;
-        }
-    } while (1);
-    RegCloseKey(hConfigKey);
-    return modTime;
+	HKEY hConfigKey;
+	HRESULT rc;
+	int iSubKey = 0;
+	time_t modTime = 0, keyModTime;
+	FILETIME keyLastWriteTime;
+	char subKeyName[256];
+
+	if ((rc = RegOpenKeyEx(hBaseKey, keyPath, 0, KEY_ENUMERATE_SUB_KEYS,
+			       &hConfigKey)) != ERROR_SUCCESS) {
+		/* TODO: log error message */
+		return 0;
+	}
+	do {
+		int subKeyNameSize=256;
+		if ((rc = RegEnumKeyEx(hConfigKey, iSubKey++, subKeyName,
+				       &subKeyNameSize, NULL, NULL, NULL,
+				       &keyLastWriteTime)) != ERROR_SUCCESS) {
+			break;
+		}
+		keyModTime = filetimeToTimet(&keyLastWriteTime);
+		if (modTime < keyModTime) {
+			modTime = keyModTime;
+		}
+	} while (1);
+	RegCloseKey(hConfigKey);
+	return modTime;
 }
 
 static void
-getRegKeyValue(HKEY hKey, const char *keyPath, const char *valueName, void **data, DWORD* dataLen)
+getRegKeyValue(HKEY hKey, const char *keyPath, const char *valueName,
+	       void **data, DWORD* dataLen)
 {
-    DWORD sizeRequired=*dataLen;
-    HRESULT hr;
-    /* Get data length required */
-    if ((hr=RegGetValue(hKey, keyPath, valueName, RRF_RT_REG_SZ, NULL, NULL, &sizeRequired)) != ERROR_SUCCESS)
-    {
-        /* TODO: LOG registry error */
-        return;
-    }
-    /* adjust data buffer size if necessary */
-    if (*dataLen < sizeRequired)
-    {
-        *dataLen = sizeRequired;
-        *data = realloc(*data, sizeRequired);
-        if (!*data)
-        {
-            *dataLen = 0;
-            /* TODO: LOG OOM ERROR! */
-            return;
-        }
-    }
-    /* get data */
-    if ((hr=RegGetValue(hKey, keyPath, valueName, RRF_RT_REG_SZ, NULL, *data, &sizeRequired)) != ERROR_SUCCESS)
-    {
-        /* LOG registry error */
-        return;
-    }
+	DWORD sizeRequired=*dataLen;
+	HRESULT hr;
+	/* Get data length required */
+	if ((hr = RegGetValue(hKey, keyPath, valueName, RRF_RT_REG_SZ, NULL,
+			      NULL, &sizeRequired)) != ERROR_SUCCESS) {
+		/* TODO: LOG registry error */
+		return;
+	}
+	/* adjust data buffer size if necessary */
+	if (*dataLen < sizeRequired) {
+		*dataLen = sizeRequired;
+		*data = realloc(*data, sizeRequired);
+		if (!*data) {
+			*dataLen = 0;
+			/* TODO: LOG OOM ERROR! */
+			return;
+		}
+	}
+	/* get data */
+	if ((hr = RegGetValue(hKey, keyPath, valueName, RRF_RT_REG_SZ, NULL,
+			      *data, &sizeRequired)) != ERROR_SUCCESS) {
+		/* LOG registry error */
+		return;
+	}
 }
 
 static void
 loadConfigFromRegistry(HKEY hBaseKey, const char *keyPath)
 {
-    HKEY hConfigKey;
-    DWORD iSubKey, nSubKeys, maxSubKeyNameLen;
-    DWORD dataBufferSize, dataSizeRequired;
-    char *oidStr=NULL, *oid=NULL, *sharedLib=NULL, *kernMod=NULL, *modOptions=NULL;
-    DWORD oidStrLen=0, oidLen=0, sharedLibLen=0, kernModLen=0, modOptionsLen=0;
-    HRESULT rc;
+	HKEY hConfigKey;
+	DWORD iSubKey, nSubKeys, maxSubKeyNameLen;
+	DWORD dataBufferSize, dataSizeRequired;
+	char *oidStr = NULL, *oid = NULL, *sharedLib = NULL, *kernMod = NULL;
+	char *modOptions = NULL;
+	DWORD oidStrLen = 0, oidLen = 0, sharedLibLen = 0, kernModLen = 0;
+	DWORD modOptionsLen = 0;
+	HRESULT rc;
 
-    if ((rc = RegOpenKeyEx(hBaseKey, keyPath, 0, KEY_ENUMERATE_SUB_KEYS|KEY_QUERY_VALUE,
-                           &hConfigKey)) != ERROR_SUCCESS) {
-        /* TODO: log registry error */
-        return;
-    }
+	if ((rc = RegOpenKeyEx(hBaseKey, keyPath, 0,
+			       KEY_ENUMERATE_SUB_KEYS|KEY_QUERY_VALUE,
+			       &hConfigKey)) != ERROR_SUCCESS) {
+		/* TODO: log registry error */
+		return;
+	}
 
-    if ((rc = RegQueryInfoKey(hConfigKey,
-        NULL, /* lpClass */
-        NULL, /* lpcClass */
-        NULL, /* lpReserved */
-        &nSubKeys,
-        &maxSubKeyNameLen,
-        NULL, /* lpcMaxClassLen */
-        NULL, /* lpcValues */
-        NULL, /* lpcMaxValueNameLen */
-        NULL, /* lpcMaxValueLen */
-        NULL, /* lpcbSecurityDescriptor */
-        NULL  /* lpftLastWriteTime */ )) != ERROR_SUCCESS) {
-        goto cleanup;
-    }
-    oidStr = malloc(++maxSubKeyNameLen);
-    if (!oidStr) {
-        goto cleanup;
-    }
-    for (iSubKey=0; iSubKey<nSubKeys; iSubKey++) {
-        oidStrLen = maxSubKeyNameLen;
-        if ((rc = RegEnumKeyEx(hConfigKey, iSubKey, oidStr, &oidStrLen, NULL, NULL, NULL, NULL)) != ERROR_SUCCESS) {
-            /* TODO: log registry error */
-            continue;
-        }
-        getRegKeyValue(hConfigKey, oidStr, "OID", &oid, &oidLen);
-        getRegKeyValue(hConfigKey, oidStr, "Shared Library", &sharedLib, &sharedLibLen);
-        getRegKeyValue(hConfigKey, oidStr, "Kernel Module", &kernMod, &kernModLen);
-        getRegKeyValue(hConfigKey, oidStr, "Options", &modOptions, &modOptionsLen);
-        addConfigEntry(oidStr, oid, sharedLib, kernMod, modOptions);
-    }
+	if ((rc = RegQueryInfoKey(hConfigKey,
+		NULL, /* lpClass */
+		NULL, /* lpcClass */
+		NULL, /* lpReserved */
+		&nSubKeys,
+		&maxSubKeyNameLen,
+		NULL, /* lpcMaxClassLen */
+		NULL, /* lpcValues */
+		NULL, /* lpcMaxValueNameLen */
+		NULL, /* lpcMaxValueLen */
+		NULL, /* lpcbSecurityDescriptor */
+		NULL  /* lpftLastWriteTime */ )) != ERROR_SUCCESS) {
+		goto cleanup;
+	}
+	oidStr = malloc(++maxSubKeyNameLen);
+	if (!oidStr) {
+		goto cleanup;
+	}
+	for (iSubKey=0; iSubKey<nSubKeys; iSubKey++) {
+		oidStrLen = maxSubKeyNameLen;
+		if ((rc = RegEnumKeyEx(hConfigKey, iSubKey, oidStr, &oidStrLen,
+				       NULL, NULL, NULL, NULL)) !=
+		    ERROR_SUCCESS) {
+			/* TODO: log registry error */
+			continue;
+		}
+		getRegKeyValue(hConfigKey, oidStr, "OID", &oid, &oidLen);
+		getRegKeyValue(hConfigKey, oidStr, "Shared Library",
+			       &sharedLib, &sharedLibLen);
+		getRegKeyValue(hConfigKey, oidStr, "Kernel Module", &kernMod,
+			       &kernModLen);
+		getRegKeyValue(hConfigKey, oidStr, "Options", &modOptions,
+			       &modOptionsLen);
+		addConfigEntry(oidStr, oid, sharedLib, kernMod, modOptions);
+	}
 cleanup:
-    RegCloseKey(hConfigKey);
-    if (oidStr) {
-        free(oidStr);
-    }
-    if (oid) {
-        free(oid);
-    }
-    if (sharedLib) {
-        free(sharedLib);
-    }
-    if (kernMod) {
-        free(kernMod);
-    }
-    if (modOptions) {
-        free(modOptions);
-    }
+	RegCloseKey(hConfigKey);
+	if (oidStr) {
+		free(oidStr);
+	}
+	if (oid) {
+		free(oid);
+	}
+	if (sharedLib) {
+		free(sharedLib);
+	}
+	if (kernMod) {
+		free(kernMod);
+	}
+	if (modOptions) {
+		free(modOptions);
+	}
 }
 #endif
 
 static void
-addConfigEntry(const char *oidStr, const char *oid, const char *sharedLib, const char *kernMod, const char *modOptions)
+addConfigEntry(const char *oidStr, const char *oid, const char *sharedLib,
+	       const char *kernMod, const char *modOptions)
 {
 #if defined(_WIN32)
-    const char *sharedPath;
+	const char *sharedPath;
 #else
 	char sharedPath[sizeof (MECH_LIB_PREFIX) + BUFSIZ];
 #endif
@@ -1323,9 +1339,9 @@ addConfigEntry(const char *oidStr, const char *oid, const char *sharedLib, const
 	OM_uint32 minor;
 	gss_buffer_desc oidBuf;
 
-    if ((!oid) || (!oidStr)) {
-        return;
-    }
+	if ((!oid) || (!oidStr)) {
+		return;
+	}
 	/*
 	 * check if an entry for this oid already exists
 	 * if it does, and the library is already loaded then
@@ -1339,8 +1355,8 @@ addConfigEntry(const char *oidStr, const char *oid, const char *sharedLib, const
 		(void) syslog(LOG_INFO, "invalid mechanism oid"
 				" [%s] in configuration file", oid);
 #endif
-			return;
-		}
+		return;
+	}
 
 	aMech = searchMechList(mechOid);
 	if (aMech && aMech->mech) {
@@ -1356,13 +1372,13 @@ addConfigEntry(const char *oidStr, const char *oid, const char *sharedLib, const
 		return;
 	}
 #if defined(_WIN32)
-    sharedPath = sharedLib;
+	sharedPath = sharedLib;
 #else
 	if (sharedLib[0] == '/')
 		snprintf(sharedPath, sizeof(sharedPath), "%s", sharedLib);
 	else
 		snprintf(sharedPath, sizeof(sharedPath), "%s%s",
-				MECH_LIB_PREFIX, sharedLib);
+			 MECH_LIB_PREFIX, sharedLib);
 #endif
 	/*
 	 * are we creating a new mechanism entry or

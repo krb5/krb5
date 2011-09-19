@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* prototype/prototype.c */
+/* plugins/preauth/pkinit/pkinit_kdf_constants.c */
 /*
  * Copyright (C) 2011 by the Massachusetts Institute of Technology.
  * All rights reserved.

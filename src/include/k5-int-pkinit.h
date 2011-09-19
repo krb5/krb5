@@ -65,7 +65,7 @@ typedef struct _krb5_subject_pk_info {
     krb5_octet_data             subjectPublicKey; /* BIT STRING */
 } krb5_subject_pk_info;
 
-/** AuthPack  from RFC 4556*/
+/** AuthPack from RFC 4556*/
 typedef struct _krb5_auth_pack {
     krb5_pk_authenticator       pkAuthenticator;
     krb5_subject_pk_info        *clientPublicValue; /* Optional */
@@ -241,10 +241,12 @@ encode_krb5_td_dh_parameters(const krb5_algorithm_identifier **,
                              krb5_data **code);
 
 krb5_error_code
-encode_krb5_sp80056a_other_info(const krb5_sp80056a_other_info *,  krb5_data **);
+encode_krb5_sp80056a_other_info(const krb5_sp80056a_other_info *,
+                                krb5_data **);
 
 krb5_error_code
-encode_krb5_pkinit_supp_pub_info(const krb5_pkinit_supp_pub_info *, krb5_data **);
+encode_krb5_pkinit_supp_pub_info(const krb5_pkinit_supp_pub_info *,
+                                 krb5_data **);
 
 /*************************************************************************
  * Prototypes for pkinit asn.1 decode routines

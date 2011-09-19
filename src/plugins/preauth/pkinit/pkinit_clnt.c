@@ -70,9 +70,9 @@ use_content_info(krb5_context context, pkinit_req_context req,
         return 0;
     if (krb5_principal_compare_any_realm(context, client,
                                          krb5_anonymous_principal()))
-                return 1;
+        return 1;
     return 0;
-    }
+}
 
 static krb5_error_code
 pkinit_as_req_create(krb5_context context, pkinit_context plgctx,
@@ -364,7 +364,7 @@ pkinit_as_req_create(krb5_context context,
             retval = ENOMEM;
             goto cleanup;
         }
-        if (use_content_info(context, reqctx, client))
+        if (use_content_info(context, reqctx, client)) {
             retval = cms_contentinfo_create(context, plgctx->cryptoctx,
                                             reqctx->cryptoctx, reqctx->idctx,
                                             CMS_SIGN_CLIENT, (unsigned char *)
@@ -372,7 +372,7 @@ pkinit_as_req_create(krb5_context context,
                                             coded_auth_pack->length,
                                             &req->signedAuthPack.data,
                                             &req->signedAuthPack.length);
-        else {
+        } else {
             retval = cms_signeddata_create(context, plgctx->cryptoctx,
                                            reqctx->cryptoctx, reqctx->idctx,
                                            CMS_SIGN_CLIENT, 1,
@@ -1030,7 +1030,7 @@ pkinit_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
     case KRB5_PADATA_PKINIT_KX:
         reqctx->rfc6112_kdc = 1;
         return 0;
-            case KRB5_PADATA_PK_AS_REQ:
+    case KRB5_PADATA_PK_AS_REQ:
         pkiDebug("processing KRB5_PADATA_PK_AS_REQ\n");
         processing_request = 1;
         break;

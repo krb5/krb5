@@ -164,8 +164,7 @@ free_krb5_auth_pack(krb5_auth_pack **in)
     if ((*in)->supportedCMSTypes != NULL)
         free_krb5_algorithm_identifiers(&((*in)->supportedCMSTypes));
     if ((*in)->supportedKDFs) {
-        krb5_octet_data **supportedKDFs =
-            (*in)->supportedKDFs;
+        krb5_octet_data **supportedKDFs = (*in)->supportedKDFs;
         unsigned i;
         for (i = 0; supportedKDFs[i]; i++)
             krb5_free_octet_data(NULL, supportedKDFs[i]);

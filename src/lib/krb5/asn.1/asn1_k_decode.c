@@ -1349,8 +1349,7 @@ asn1_decode_sequence_of_trusted_ca(asn1buf *buf, krb5_trusted_ca ***val)
 }
 
 static asn1_error_code
-asn1_decode_kdf_alg_id_ptr( asn1buf *buf,
-                            krb5_octet_data **valptr)
+asn1_decode_kdf_alg_id_ptr(asn1buf *buf, krb5_octet_data **valptr)
 {
     decode_ptr(krb5_octet_data *, asn1_decode_kdf_alg_id);
 }
@@ -1733,8 +1732,8 @@ asn1_decode_typed_data_ptr(asn1buf *buf, krb5_typed_data **valptr)
 asn1_error_code
 asn1_decode_kdf_alg_id( asn1buf *buf, krb5_octet_data *val)
 {
-        setup();
-        val->data = NULL;
+    setup();
+    val->data = NULL;
     { begin_structure();
         get_lenfield(val->length,val->data,0,asn1_decode_oid);
         end_structure();
@@ -1745,7 +1744,7 @@ error_out:
     return retval;
 }
 
- asn1_error_code
+asn1_error_code
 asn1_decode_sequence_of_kdf_alg_id(asn1buf *buf,
                                    krb5_octet_data ***val)
 {

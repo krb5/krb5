@@ -1,5 +1,5 @@
 /* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* prototype/prototype.c */
+/* plugins/preauth/pkinit/pkinit_kdf_test.c */
 /*
  * Copyright (C) 2011 by the Massachusetts Institute of Technology.
  * All rights reserved.
@@ -55,10 +55,10 @@
 int secret_len = 256;
 char twenty_as[10];
 char eighteen_bs[9] ;
-char party_u_name [] = "lha@SU.SE";
-char party_v_name [] = "krbtgt/SU.SE@SU.SE";
+char party_u_name[] = "lha@SU.SE";
+char party_v_name[] = "krbtgt/SU.SE@SU.SE";
 int enctype_value = 18;
-krb5_octet key_hex [] =
+krb5_octet key_hex[] =
 {0xe6, 0xAB, 0x38, 0xC9, 0x41, 0x3E, 0x03, 0x5B,
  0xB0, 0x79, 0x20, 0x1E, 0xD0, 0xB6, 0xB7, 0x3D,
  0x8D, 0x49, 0xA8, 0x14, 0xA7, 0x37, 0xC0, 0x4E,
@@ -66,8 +66,7 @@ krb5_octet key_hex [] =
 const krb5_data lha_data = DATA_FROM_STRING("lha");
 
 int
-main (int argc,
-      char  **argv)
+main(int argc, char **argv)
 {
     /* arguments for calls to pkinit_alg_agility_kdf() */
     krb5_context context = 0;
@@ -87,13 +86,13 @@ main (int argc,
 
     /* initialize variables that get malloc'ed, so cleanup is safe */
     krb5_init_context (&context);
-    memset (&alg_id, 0, sizeof(alg_id));
-    memset (&as_req, 0, sizeof(as_req));
-    memset (&pk_as_rep, 0, sizeof(pk_as_rep));
-    memset (&key_block, 0, sizeof(key_block));
+    memset(&alg_id, 0, sizeof(alg_id));
+    memset(&as_req, 0, sizeof(as_req));
+    memset(&pk_as_rep, 0, sizeof(pk_as_rep));
+    memset(&key_block, 0, sizeof(key_block));
 
     /* set up algorithm id */
-    alg_id.algorithm.data = (unsigned char *) &krb5_pkinit_sha1_oid;
+    alg_id.algorithm.data = (unsigned char *)&krb5_pkinit_sha1_oid;
     alg_id.algorithm.length = krb5_pkinit_sha1_oid_len;
 
     /* set up a 256-byte, ALL-ZEROS secret */
@@ -134,7 +133,8 @@ main (int argc,
     }
 
     /* call pkinit_alg_agility_kdf() with test vector values*/
-    if (0 != (retval = pkinit_alg_agility_kdf(context, &secret, &alg_id.algorithm,
+    if (0 != (retval = pkinit_alg_agility_kdf(context, &secret,
+                                              &alg_id.algorithm,
                                               u_principal, v_principal,
                                               enctype, &as_req, &pk_as_rep,
                                               &key_block))) {
@@ -149,20 +149,16 @@ main (int argc,
         (0 == memcmp(key_block.contents, key_hex, key_block.length))) {
         printf("SUCCESS: Correct key value generated!");
         retval = 0;
-    }
-    else {
+    } else {
         printf("FAILURE: Incorrect key value generated!");
         retval = 1;
     }
 
 cleanup:
     /* release all allocated resources, whether good or bad return */
-    if (secret.data)
-        free(secret.data);
-    if (u_principal)
-        free(u_principal);
-    if (v_principal)
-        free(v_principal);
+    free(secret.data);
+    free(u_principal);
+    free(v_principal);
     krb5_free_keyblock_contents(context, &key_block);
     exit(retval);
 }

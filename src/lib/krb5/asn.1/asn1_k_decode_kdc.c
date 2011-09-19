@@ -240,7 +240,7 @@ asn1_decode_auth_pack(asn1buf *buf, krb5_auth_pack *val)
         }
         opt_lenfield(val->clientDHNonce.length, val->clientDHNonce.data, 3, asn1_decode_octetstring);
         opt_field(val->supportedKDFs, 4, asn1_decode_sequence_of_kdf_alg_id, NULL);
-                end_structure();
+        end_structure();
     }
     return 0;
 error_out:
@@ -258,8 +258,7 @@ error_out:
     }
     free(val->clientDHNonce.data);
     if (val->supportedKDFs) {
-
-        for (i=0; val->supportedKDFs[i]; i++)
+        for (i = 0; val->supportedKDFs[i]; i++)
             krb5_free_octet_data(NULL, val->supportedKDFs[i]);
         free(val->supportedKDFs);
         val->supportedKDFs = NULL;

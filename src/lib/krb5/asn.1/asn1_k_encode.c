@@ -1820,7 +1820,7 @@ asn1_encode_auth_pack(asn1buf *buf, const krb5_auth_pack *val,
     asn1_setup();
 
     if (val->supportedKDFs != NULL)
-        asn1_addfield( val->supportedKDFs, 4, asn1_encode_supported_kdfs);
+        asn1_addfield(val->supportedKDFs, 4, asn1_encode_supported_kdfs);
     if (val->clientDHNonce.length != 0)
         asn1_addlenfield(val->clientDHNonce.length, val->clientDHNonce.data, 3, asn1_encode_octetstring);
     if (val->supportedCMSTypes != NULL)
