@@ -5,6 +5,8 @@ DEFS=
 PROG_LIBPATH=-L$(TOPLIBD)
 PROG_RPATH=$(KRB5_LIBDIR)
 
+##WIN32##LOCALINCLUDES=-I$(BUILDTOP)\util\windows\
+
 SRCS = klist.c
 
 ##WIN32##VERSIONRC = $(BUILDTOP)\windows\version.rc

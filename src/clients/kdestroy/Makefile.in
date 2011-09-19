@@ -2,6 +2,8 @@ mydir=clients$(S)kdestroy
 BUILDTOP=$(REL)..$(S)..
 DEFS=
 
+##WIN32##LOCALINCLUDES=-I$(BUILDTOP)\util\windows\
+
 SRCS=kdestroy.c
 
 PROG_LIBPATH=-L$(TOPLIBD)
