@@ -36,6 +36,7 @@
 #include <dlfcn.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <arpa/inet.h>
 
 #include "k5-platform.h"
 
