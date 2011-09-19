@@ -176,7 +176,7 @@ encode_bytestring_with_tag(asn1buf *buf, unsigned int len,
 }
 
 asn1_error_code
-asn1_encode_oid(asn1buf *buf, unsigned int len, const asn1_octet *val,
+asn1_encode_oid(asn1buf *buf, unsigned int len, const void *val,
                 unsigned int *retlen)
 {
     return encode_bytestring_with_tag(buf, len, val, ASN1_OBJECTIDENTIFIER,

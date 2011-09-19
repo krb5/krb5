@@ -90,7 +90,7 @@ asn1_error_code asn1_encode_octetstring(asn1buf *buf, unsigned int len,
 #define asn1_encode_charstring asn1_encode_octetstring
 
 asn1_error_code asn1_encode_oid(asn1buf *buf, unsigned int len,
-                                const asn1_octet *val, unsigned int *retlen);
+                                const void *val, unsigned int *retlen);
 /*
  * requires  *buf is allocated
  * modifies  *buf, *retlen
