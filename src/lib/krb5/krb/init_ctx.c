@@ -103,7 +103,7 @@ krb5int_init_context_kdc(krb5_context *context)
     return krb5_init_context_profile(NULL, KRB5_INIT_CONTEXT_KDC, context);
 }
 
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5_init_context_profile(profile_t profile, krb5_flags flags,
                           krb5_context *context_out)
 {
