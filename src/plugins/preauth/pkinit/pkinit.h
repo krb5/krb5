@@ -357,7 +357,7 @@ krb5_error_code pkinit_libdefault_integer
 /*
  * debugging functions
  */
-void print_buffer(unsigned char *, unsigned int);
+void print_buffer(const unsigned char *, unsigned int);
 void print_buffer_bin(unsigned char *, unsigned int, char *);
 
 /*

@@ -3944,7 +3944,7 @@ pkinit_get_certs_pkcs12(krb5_context context,
 
         r = snprintf(prompt_string, sizeof(prompt_string), "%s %s",
                      prompt_prefix, idopts->cert_filename);
-        if (r >= sizeof(prompt_string)) {
+        if (r >= (int) sizeof(prompt_string)) {
             pkiDebug("Prompt string, '%s %s', is too long!\n",
                      prompt_prefix, idopts->cert_filename);
             goto cleanup;
@@ -4655,7 +4655,7 @@ X509_NAME_oneline_ex(X509_NAME * a,
 
     out = BIO_new(BIO_s_mem ());
     if (X509_NAME_print_ex(out, a, 0, flag) > 0) {
-        if (buf != NULL && (int)(*size) >  BIO_number_written(out)) {
+        if (buf != NULL && (*size) >  (unsigned int) BIO_number_written(out)) {
             memset(buf, 0, *size);
             BIO_read(out, buf, (int) BIO_number_written(out));
         }
@@ -5663,7 +5663,7 @@ pkcs7_dataDecode(krb5_context context,
     if (EVP_CIPHER_asn1_to_param(evp_ctx,enc_alg->parameter) < 0)
         goto cleanup;
 
-    if ((unsigned) jj != EVP_CIPHER_CTX_key_length(evp_ctx)) {
+    if (jj != (unsigned) EVP_CIPHER_CTX_key_length(evp_ctx)) {
         /* Some S/MIME clients don't use the same key
          * and effective key length. The key length is
          * determined by the size of the decrypted RSA key.

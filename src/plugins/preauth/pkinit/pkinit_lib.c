@@ -422,7 +422,7 @@ pkinit_copy_krb5_octet_data(krb5_octet_data *dst, const krb5_octet_data *src)
 
 /* debugging functions */
 void
-print_buffer(unsigned char *buf, unsigned int len)
+print_buffer(const unsigned char *buf, unsigned int len)
 {
     unsigned  i = 0;
     if (len <= 0)
