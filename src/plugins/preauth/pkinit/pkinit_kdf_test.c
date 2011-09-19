@@ -47,7 +47,7 @@
  * Initialize a krb5_data from @a s, a constant string. Note @a s is evaluated
  * multiple times; this is acceptable for constants.
  */
-#define DATA_FROM_STRING(s) \
+#define DATA_FROM_STRING(s)                     \
     {0, sizeof(s)-1, (char *) s}
 
 
@@ -59,10 +59,10 @@ char party_u_name [] = "lha@SU.SE";
 char party_v_name [] = "krbtgt/SU.SE@SU.SE";
 int enctype_value = 18;
 krb5_octet key_hex [] =
-  {0xe6, 0xAB, 0x38, 0xC9, 0x41, 0x3E, 0x03, 0x5B,
-   0xB0, 0x79, 0x20, 0x1E, 0xD0, 0xB6, 0xB7, 0x3D,
-   0x8D, 0x49, 0xA8, 0x14, 0xA7, 0x37, 0xC0, 0x4E,
-   0xE6, 0x64, 0x96, 0x14, 0x20, 0x6F, 0x73, 0xAD};
+{0xe6, 0xAB, 0x38, 0xC9, 0x41, 0x3E, 0x03, 0x5B,
+ 0xB0, 0x79, 0x20, 0x1E, 0xD0, 0xB6, 0xB7, 0x3D,
+ 0x8D, 0x49, 0xA8, 0x14, 0xA7, 0x37, 0xC0, 0x4E,
+ 0xE6, 0x64, 0x96, 0x14, 0x20, 0x6F, 0x73, 0xAD};
 const krb5_data lha_data = DATA_FROM_STRING("lha");
 
 int
@@ -110,14 +110,14 @@ main (int argc,
                                         &u_principal)))
         (0 != (retval = krb5_parse_name(context, party_v_name,
                                         &v_principal)))) {
-      printf("ERROR in pkinit_kdf_test: Error parsing names, retval = %d",
-             retval);
-      goto cleanup;
+        printf("ERROR in pkinit_kdf_test: Error parsing names, retval = %d",
+               retval);
+        goto cleanup;
     }
 
     /* set-up the as_req and and pk_as_rep data */
     memset(twenty_as, 0xaa, sizeof(twenty_as));
-           memset(eighteen_bs, 0xbb, sizeof(eighteen_bs));
+    memset(eighteen_bs, 0xbb, sizeof(eighteen_bs));
     as_req.length = sizeof(twenty_as);
     as_req.data = (unsigned char *)&twenty_as;
 
@@ -127,11 +127,11 @@ main (int argc,
     /* set-up the key_block */
     if (0 != (retval = krb5_init_keyblock(context, enctype, max_keylen,
                                           &key_block_ptr))) {
-          printf("ERROR in pkinit_kdf_test: can't init keybloc, retval = %d",
-                 retval);
-          goto cleanup;
+        printf("ERROR in pkinit_kdf_test: can't init keybloc, retval = %d",
+               retval);
+        goto cleanup;
 
-        }
+    }
 
     /* call pkinit_alg_agility_kdf() with test vector values*/
     if (0 != (retval = pkinit_alg_agility_kdf(context, &secret, &alg_id.algorithm,
@@ -146,23 +146,23 @@ main (int argc,
     /* compare key to expected key value */
 
     if ((key_block.length == sizeof(key_hex)) &&
-            (0 == memcmp(key_block.contents, key_hex, key_block.length))) {
-            printf("SUCCESS: Correct key value generated!");
-            retval = 0;
-        }
-        else {
-            printf("FAILURE: Incorrect key value generated!");
-            retval = 1;
-        }
+        (0 == memcmp(key_block.contents, key_hex, key_block.length))) {
+        printf("SUCCESS: Correct key value generated!");
+        retval = 0;
+    }
+    else {
+        printf("FAILURE: Incorrect key value generated!");
+        retval = 1;
+    }
 
-    cleanup:
-        /* release all allocated resources, whether good or bad return */
-        if (secret.data)
-          free(secret.data);
-        if (u_principal)
-          free(u_principal);
-        if (v_principal)
-          free(v_principal);
-                krb5_free_keyblock_contents(context, &key_block);
-        exit(retval);
+cleanup:
+    /* release all allocated resources, whether good or bad return */
+    if (secret.data)
+        free(secret.data);
+    if (u_principal)
+        free(u_principal);
+    if (v_principal)
+        free(v_principal);
+    krb5_free_keyblock_contents(context, &key_block);
+    exit(retval);
 }

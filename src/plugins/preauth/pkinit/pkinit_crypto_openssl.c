@@ -956,10 +956,10 @@ cms_signeddata_create(krb5_context context,
         p7si->digest_enc_alg->parameter->type = V_ASN1_NULL;
 
         if (cms_msg_type == CMS_SIGN_DRAFT9){
-                /* don't include signed attributes for pa-type 15 request */
-                abuf = data;
-                alen = data_len;
-            } else {
+            /* don't include signed attributes for pa-type 15 request */
+            abuf = data;
+            alen = data_len;
+        } else {
             /* add signed attributes */
             /* compute sha1 digest over the EncapsulatedContentInfo */
             EVP_MD_CTX_init(&ctx);
@@ -1213,13 +1213,13 @@ cms_signeddata_verify(krb5_context context,
                  __FUNCTION__, ERR_error_string(err, NULL));
         goto cleanup;
     }
-        etype = CMS_get0_eContentType(cms);
+    etype = CMS_get0_eContentType(cms);
 
     /*
      * Prior to 1.10 the MIT client incorrectly omitted the pkinit structure
      * directly in a CMS ContentInfo rather than using SignedData with no
      * signers. Handle that case.
-    */
+     */
     type = CMS_get0_type(cms);
     if (is_signed && !OBJ_cmp(type, oid)) {
         unsigned char *d;
@@ -1271,13 +1271,13 @@ cms_signeddata_verify(krb5_context context,
         /* Not actually signed; anonymous case */
         if (!is_signed)
             goto cleanup;
-                *is_signed = 0;
-                /* We cannot use CMS_dataInit because there may be no digest */
-                octets = pkinit_CMS_get0_content_signed(cms);
-                if (octets)
-                    out = BIO_new_mem_buf((*octets)->data, (*octets)->length);
-                                if (out == NULL)
-                    goto cleanup;
+        *is_signed = 0;
+        /* We cannot use CMS_dataInit because there may be no digest */
+        octets = pkinit_CMS_get0_content_signed(cms);
+        if (octets)
+            out = BIO_new_mem_buf((*octets)->data, (*octets)->length);
+        if (out == NULL)
+            goto cleanup;
     } else {
         pkinit_CMS_SignerInfo_get_cert(cms, si, &x);
         if (x == NULL)
@@ -1413,23 +1413,23 @@ cms_signeddata_verify(krb5_context context,
         if (i <= 0)
             goto cleanup;
         out = BIO_new(BIO_s_mem());
-    if (cms_msg_type == CMS_SIGN_DRAFT9)
-        flags |= CMS_NOATTR;
-    if (CMS_verify(cms, NULL, store, NULL, out, flags) == 0) {
-        unsigned long err = ERR_peek_error();
-        switch(ERR_GET_REASON(err)) {
-        case PKCS7_R_DIGEST_FAILURE:
-            retval = KRB5KDC_ERR_DIGEST_IN_SIGNED_DATA_NOT_ACCEPTED;
-            break;
-        case PKCS7_R_SIGNATURE_FAILURE:
-        default:
-            retval = KRB5KDC_ERR_INVALID_SIG;
+        if (cms_msg_type == CMS_SIGN_DRAFT9)
+            flags |= CMS_NOATTR;
+        if (CMS_verify(cms, NULL, store, NULL, out, flags) == 0) {
+            unsigned long err = ERR_peek_error();
+            switch(ERR_GET_REASON(err)) {
+            case PKCS7_R_DIGEST_FAILURE:
+                retval = KRB5KDC_ERR_DIGEST_IN_SIGNED_DATA_NOT_ACCEPTED;
+                break;
+            case PKCS7_R_SIGNATURE_FAILURE:
+            default:
+                retval = KRB5KDC_ERR_INVALID_SIG;
+            }
+            pkiDebug("CMS Verification failure\n");
+            krb5_set_error_message(context, retval, "%s\n",
+                                   ERR_error_string(err, NULL));
+            goto cleanup;
         }
-        pkiDebug("CMS Verification failure\n");
-        krb5_set_error_message(context, retval, "%s\n",
-                               ERR_error_string(err, NULL));
-        goto cleanup;
-    }
     } /* message was signed */
     if (!OBJ_cmp(etype, oid))
         valid_oid = 1;
@@ -2140,7 +2140,7 @@ pkinit_octetstring2key(krb5_context context,
 
     retval = krb5_c_keylengths(context, etype, &keybytes, &keylength);
     if (retval)
-       goto cleanup;
+        goto cleanup;
 
     key_block->length = keylength;
     key_block->contents = malloc(keylength);
@@ -2185,15 +2185,15 @@ pkinit_alg_values(krb5_context context,
         return 0;
     }
     else if ((alg_id->length == krb5_pkinit_sha256_oid_len) &&
-        (0 == memcmp(alg_id->data, krb5_pkinit_sha256_oid,
-                     krb5_pkinit_sha256_oid_len))) {
+             (0 == memcmp(alg_id->data, krb5_pkinit_sha256_oid,
+                          krb5_pkinit_sha256_oid_len))) {
         *hash_bytes = 32;
         *func = &EVP_sha256;
         return 0;
     }
     else if ((alg_id->length == krb5_pkinit_sha512_oid_len) &&
              (0 == memcmp(alg_id->data, krb5_pkinit_sha512_oid,
-                     krb5_pkinit_sha512_oid_len))) {
+                          krb5_pkinit_sha512_oid_len))) {
         *hash_bytes = 32;
         *func = &EVP_sha512;
         return 0;
@@ -2329,14 +2329,14 @@ pkinit_alg_agility_kdf(krb5_context context,
             (0 == EVP_DigestUpdate(&c, secret->data, secret->length)) ||
             (0 == EVP_DigestUpdate(&c, other_info->data, other_info->length))) {
             krb5_set_error_message(context, KRB5_CRYPTO_INTERNAL,
-                               "Call to OpenSSL EVP_DigestUpdate() returned an error.");
+                                   "Call to OpenSSL EVP_DigestUpdate() returned an error.");
             retval = KRB5_CRYPTO_INTERNAL;
             goto cleanup;
         }
 
         /* 4.  Set key = Hash1 || Hash2 || ... so that length of key is K bytes. */
         if (0 == EVP_DigestFinal(&c, (rand_buf + offset), &s)) {
-        krb5_set_error_message(context, KRB5_CRYPTO_INTERNAL,
+            krb5_set_error_message(context, KRB5_CRYPTO_INTERNAL,
                                    "Call to OpenSSL EVP_DigestUpdate() returned an error.");
             retval = KRB5_CRYPTO_INTERNAL;
             goto cleanup;
@@ -2345,7 +2345,7 @@ pkinit_alg_agility_kdf(krb5_context context,
 
         assert(s == hash_len); /* add a message to this assert? */
 
-    EVP_MD_CTX_cleanup(&c);
+        EVP_MD_CTX_cleanup(&c);
     }
 
     /* Reduce length of random data to key_len to avoid errors. */
