@@ -45,8 +45,8 @@
 #if OPENSSL_VERSION_NUMBER >= 0x10000000L
 /* Use CMS support present in OpenSSL 1.0 and later. */
 #include <openssl/cms.h>
-#define pkinit_CMS_get0_content_signed(_cms) CMS_Get0_Content(_cms)
-#define pkinit_CMS_get0_content_data(_cms) CMS_Get0_Content(_cms)
+#define pkinit_CMS_get0_content_signed(_cms) CMS_get0_content(_cms)
+#define pkinit_CMS_get0_content_data(_cms) CMS_get0_content(_cms)
 #define pkinit_CMS_free1_crls(_sk_x509crl) sk_X509_CRL_free((_sk_x509crl))
 #define pkinit_CMS_free1_certs(_sk_x509) sk_X509_free((_sk_x509))
 #define pkinit_CMS_SignerInfo_get_cert(_cms,_si,_x509_pp)       \
