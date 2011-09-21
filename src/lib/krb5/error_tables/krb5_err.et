@@ -123,7 +123,7 @@ error_code KRB5KDC_ERR_DIGEST_IN_CERT_NOT_ACCEPTED,	"Digest in certificate not a
 error_code KRB5KDC_ERR_PA_CHECKSUM_MUST_BE_INCLUDED,	"Checksum must be included"
 error_code KRB5KDC_ERR_DIGEST_IN_SIGNED_DATA_NOT_ACCEPTED,	"Digest in signed-data not accepted"
 error_code KRB5KDC_ERR_PUBLIC_KEY_ENCRYPTION_NOT_SUPPORTED,	"Public key encryption not supported"
-error_code KRB5PLACEHOLD_82,	"KRB5 error code 82"
+error_code KRB5KDC_ERR_NO_ACCEPTABLE_KDF,		"No acceptable KDF offered"
 error_code KRB5PLACEHOLD_83,	"KRB5 error code 83"
 error_code KRB5PLACEHOLD_84,	"KRB5 error code 84"
 error_code KRB5KRB_AP_ERR_IAKERB_KDC_NOT_FOUND,         "The IAKERB proxy could not find a KDC"

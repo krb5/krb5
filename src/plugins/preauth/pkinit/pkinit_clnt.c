@@ -684,6 +684,7 @@ pkinit_as_rep_parse(krb5_context context,
     unsigned int client_key_len = 0;
     krb5_checksum cksum = {0, 0, 0, NULL};
     krb5_data k5data;
+    krb5_octet_data secret;
     int valid_san = 0;
     int valid_eku = 0;
     int need_eku_checking = 1;
@@ -794,12 +795,35 @@ pkinit_as_rep_parse(krb5_context context,
             goto cleanup;
         }
 
-        retval = pkinit_octetstring2key(context, etype, client_key,
+        /* If we have a KDF algorithm ID, call the algorithm agility KDF... */
+        if (kdc_reply->u.dh_Info.kdfID) {
+            secret.length = client_key_len;
+            secret.data = client_key;
+
+            retval = pkinit_alg_agility_kdf(context, &secret,
+                                            kdc_reply->u.dh_Info.kdfID,
+                                            request->client,
+                                            request->server, etype,
+                                            (krb5_octet_data *)encoded_request,
+                                            (krb5_octet_data *)as_rep,
+                                            key_block);
+
+            if (retval) {
+                pkiDebug("failed to create key pkinit_alg_agility_kdf %s\n",
+                         error_message(retval));
+                goto cleanup;
+            }
+
+        /* ...otherwise, use the older octetstring2key function. */
+        } else {
+
+            retval = pkinit_octetstring2key(context, etype, client_key,
                                         client_key_len, key_block);
-        if (retval) {
-            pkiDebug("failed to create key pkinit_octetstring2key %s\n",
-                     error_message(retval));
-            goto cleanup;
+            if (retval) {
+                pkiDebug("failed to create key pkinit_octetstring2key %s\n",
+                         error_message(retval));
+                goto cleanup;
+            }
         }
 
         break;

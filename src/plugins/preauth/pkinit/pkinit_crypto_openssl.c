@@ -2263,6 +2263,11 @@ pkinit_alg_agility_kdf(krb5_context context,
     }
     memset (key_block->contents, 0, key_block->length);
 
+    /* If this is anonymous pkinit, use the anonymous principle for party_u_info */
+    if (party_u_info && krb5_principal_compare_any_realm(context, party_u_info,
+                                                         krb5_anonymous_principal()))
+        party_u_info = krb5_anonymous_principal();
+
     if (0 != (retval = pkinit_alg_values(context, alg_oid, &hash_len, &EVP_func)))
         goto cleanup;
 

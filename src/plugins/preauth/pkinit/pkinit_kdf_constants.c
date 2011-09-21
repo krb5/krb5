@@ -46,12 +46,27 @@
 #include "pkinit_crypto.h"
 
 /* statically declare OID constants for all three algorithms */
-const krb5_octet krb5_pkinit_sha1_oid[10] =
+const krb5_octet krb5_pkinit_sha1_oid[8] =
 {0x2B,0x06,0x01,0x05,0x02,0x03,0x06,0x01};
 const size_t krb5_pkinit_sha1_oid_len = 8;
-const krb5_octet krb5_pkinit_sha256_oid[10] =
+const krb5_octet krb5_pkinit_sha256_oid[8] =
 {0x2B,0x06,0x01,0x05,0x02,0x03,0x06,0x02};
 const size_t krb5_pkinit_sha256_oid_len = 8;
-const krb5_octet krb5_pkinit_sha512_oid [10] =
+const krb5_octet krb5_pkinit_sha512_oid [8] =
 {0x2B,0x06,0x01,0x05,0x02,0x03,0x06,0x03};
 const size_t krb5_pkinit_sha512_oid_len = 8;
+
+#define oid_as_data(var, oid_base) \
+    const krb5_octet_data var = \
+    {0, sizeof oid_base, (krb5_octet *) oid_base}
+oid_as_data(sha1_id, krb5_pkinit_sha1_oid);
+oid_as_data(sha256_id, krb5_pkinit_sha256_oid);
+oid_as_data(sha512_id, krb5_pkinit_sha512_oid);
+#undef oid_as_data
+
+const krb5_octet_data const *supported_kdf_alg_ids[] = {
+    &sha256_id,
+    &sha1_id,
+    &sha512_id,
+    NULL
+};

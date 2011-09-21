@@ -34,6 +34,7 @@
 #include <errno.h>
 #include <string.h>
 
+#include <k5-int.h>
 #include "pkinit.h"
 
 /* Remove when FAST PKINIT is settled. */
@@ -659,6 +660,46 @@ cleanup:
 }
 
 static krb5_error_code
+pkinit_pick_kdf_alg(krb5_context context,
+                    krb5_octet_data **kdf_list,
+                    krb5_octet_data **alg_oid)
+{
+    krb5_error_code retval = 0;
+    krb5_octet_data *req_oid = NULL;
+    const krb5_octet_data *supp_oid = NULL;
+    krb5_octet_data *tmp_oid = NULL;
+    int i, j = 0;
+
+    *alg_oid = NULL;
+
+    /* for each of the OIDs in the client's request... */
+    for (i = 0; NULL != (req_oid = kdf_list[i]); i++) {
+        /* if the requested OID is supported, use it. */
+        for (j = 0; NULL != (supp_oid = supported_kdf_alg_ids[j]); j++) {
+            if ((req_oid->length == supp_oid->length) &&
+                (0 == memcmp(req_oid->data, supp_oid->data, req_oid->length))) {
+                tmp_oid = k5alloc(sizeof(krb5_octet_data), &retval);
+                if (retval)
+                    goto cleanup;
+                tmp_oid->data = k5alloc(supp_oid->length, &retval);
+                if (retval)
+                    goto cleanup;
+                tmp_oid->length = supp_oid->length;
+                memcpy(tmp_oid->data, supp_oid->data, supp_oid->length);
+                *alg_oid = tmp_oid;
+                tmp_oid = NULL;
+                goto cleanup;
+            }
+        }
+        retval = KRB5KDC_ERR_NO_ACCEPTABLE_KDF;
+    }
+cleanup:
+    if (tmp_oid)
+        krb5_free_octet_data(context, tmp_oid);
+    return retval;
+}
+
+static krb5_error_code
 pkinit_server_return_padata(krb5_context context,
                             krb5_pa_data * padata,
                             struct _krb5_db_entry_new * client,
@@ -688,6 +729,7 @@ pkinit_server_return_padata(krb5_context context,
     krb5_pa_pk_as_rep *rep = NULL;
     krb5_pa_pk_as_rep_draft9 *rep9 = NULL;
     krb5_data *out_data = NULL;
+    krb5_octet_data secret;
 
     krb5_enctype enctype = -1;
 
@@ -975,6 +1017,25 @@ pkinit_server_return_padata(krb5_context context,
 #endif
     }
 
+    if ((rep != NULL && rep->choice == choice_pa_pk_as_rep_dhInfo) &&
+        ((reqctx->rcv_auth_pack != NULL &&
+          reqctx->rcv_auth_pack->supportedKDFs != NULL))) {
+
+        /* If using the alg-agility KDF, put the algorithm in the reply
+         * before encoding it.
+         */
+        if (reqctx->rcv_auth_pack != NULL &&
+            reqctx->rcv_auth_pack->supportedKDFs != NULL) {
+            retval = pkinit_pick_kdf_alg(context, reqctx->rcv_auth_pack->supportedKDFs,
+                                         &(rep->u.dh_Info.kdfID));
+            if (retval) {
+                pkiDebug("pkinit_pick_kdf_alg failed: %s\n",
+                         error_message(retval));
+                goto cleanup;
+            }
+        }
+    }
+
     switch ((int)padata->pa_type) {
     case KRB5_PADATA_PK_AS_REQ:
         retval = k5int_encode_krb5_pa_pk_as_rep(rep, &out_data);
@@ -998,12 +1059,36 @@ pkinit_server_return_padata(krb5_context context,
     if ((rep9 != NULL &&
          rep9->choice == choice_pa_pk_as_rep_draft9_dhSignedData) ||
         (rep != NULL && rep->choice == choice_pa_pk_as_rep_dhInfo)) {
-        retval = pkinit_octetstring2key(context, enctype, server_key,
-                                        server_key_len, encrypting_key);
-        if (retval) {
-            pkiDebug("pkinit_octetstring2key failed: %s\n",
-                     error_message(retval));
-            goto cleanup;
+
+        /* If supported KDFs are specified, use the alg agility KDF */
+        if ((reqctx->rcv_auth_pack != NULL &&
+             reqctx->rcv_auth_pack->supportedKDFs != NULL)) {
+
+            secret.data = server_key;
+            secret.length = server_key_len;
+
+            retval = pkinit_alg_agility_kdf(context, &secret,
+                                            rep->u.dh_Info.kdfID,
+                                            request->client, request->server,
+                                            enctype,
+                                            (krb5_octet_data *)req_pkt,
+                                            (krb5_octet_data *)out_data,
+                                            encrypting_key);
+            if (retval) {
+                pkiDebug("pkinit_alg_agility_kdf failed: %s\n",
+                         error_message(retval));
+                goto cleanup;
+            }
+
+            /* Otherwise, use the older octetstring2key() function */
+        } else {
+            retval = pkinit_octetstring2key(context, enctype, server_key,
+                                            server_key_len, encrypting_key);
+            if (retval) {
+                pkiDebug("pkinit_octetstring2key failed: %s\n",
+                         error_message(retval));
+                goto cleanup;
+            }
         }
     }
 
@@ -1027,7 +1112,6 @@ pkinit_server_return_padata(krb5_context context,
     }
     (*send_pa)->length = out_data->length;
     (*send_pa)->contents = (krb5_octet *) out_data->data;
-
 
 cleanup:
     pkinit_fini_kdc_req_context(context, reqctx);
