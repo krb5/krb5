@@ -147,10 +147,10 @@ main(int argc, char **argv)
 
     if ((key_block.length == sizeof(key_hex)) &&
         (0 == memcmp(key_block.contents, key_hex, key_block.length))) {
-        printf("SUCCESS: Correct key value generated!");
+        printf("SUCCESS: Correct key value generated!\n");
         retval = 0;
     } else {
-        printf("FAILURE: Incorrect key value generated!");
+        printf("FAILURE: Incorrect key value generated!\n");
         retval = 1;
     }
 
