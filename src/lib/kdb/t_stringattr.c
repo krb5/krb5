@@ -46,12 +46,14 @@ main()
     char *val;
     int count;
 
-    assert(krb5_init_context(&context) == 0);
+    assert(krb5int_init_context_kdc(&context) == 0);
 
     /* Start with an empty entry. */
     ent = krb5_db_alloc(context, NULL, sizeof(*ent));
-    if (ent == NULL)
-        return ENOMEM;
+    if (ent == NULL) {
+        fprintf(stderr, "Can't allocate memory for entry.\n");
+        return 1;
+    }
     memset(ent, 0, sizeof(*ent));
 
     /* Check that the entry has no strings to start. */

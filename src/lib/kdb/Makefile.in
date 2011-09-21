@@ -58,9 +58,9 @@ all-unix:: all-liblinks
 install-unix:: install-libs
 clean-unix:: clean-liblinks clean-libs clean-libobjs
 	$(RM) adb_err.c adb_err.h t_stringattr.o t_stringattr
-check-unix:: t_stringattr
-	KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf; export KRB5_CONFIG; \
-	$(RUN_SETUP) $(VALGRIND) ./t_stringattr
+
+check-pytests:: t_stringattr
+	$(RUNPYTEST) $(srcdir)/t_stringattr.py $(PYTESTFLAGS)
 
 generate-files-mac: darwin.exports
 
