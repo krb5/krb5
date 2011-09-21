@@ -162,6 +162,27 @@ krb5_dbe_free_tl_data(krb5_context context, krb5_tl_data *tl_data)
     }
 }
 
+void
+krb5_dbe_free_strings(krb5_context context, krb5_string_attr *strings,
+                      int count)
+{
+    int i;
+
+    if (strings == NULL)
+        return;
+    for (i = 0; i < count; i++) {
+        free(strings[i].key);
+        free(strings[i].value);
+    }
+    free(strings);
+}
+
+void
+krb5_dbe_free_string(krb5_context context, char *string)
+{
+    free(string);
+}
+
 /* Set *section to the appropriate section to use for a database module's
  * profile queries.  The caller must free the result. */
 static krb5_error_code
@@ -1958,6 +1979,163 @@ krb5_dbe_update_last_admin_unlock(krb5_context context, krb5_db_entry *entry,
     tl_data.tl_data_contents = buf;
 
     return (krb5_dbe_update_tl_data(context, entry, &tl_data));
+}
+
+/*
+ * Prepare to iterate over the string attributes of entry.  The returned
+ * pointers are aliases into entry's tl_data (or into an empty string literal)
+ * and remain valid until the entry's tl_data is changed.
+ */
+static krb5_error_code
+begin_attrs(krb5_context context, krb5_db_entry *entry, const char **pos_out,
+            const char **end_out)
+{
+    krb5_error_code code;
+    krb5_tl_data tl_data;
+
+    *pos_out = *end_out = NULL;
+    tl_data.tl_data_type = KRB5_TL_STRING_ATTRS;
+    code = krb5_dbe_lookup_tl_data(context, entry, &tl_data);
+    if (code)
+        return code;
+
+    /* Copy the current mapping to buf, updating key with value if found. */
+    *pos_out = (const char *)tl_data.tl_data_contents;
+    *end_out = *pos_out + tl_data.tl_data_length;
+    return 0;
+}
+
+/* Find the next key and value pair in *pos and update *pos. */
+static krb5_boolean
+next_attr(const char **pos, const char *end, const char **key_out,
+          const char **val_out)
+{
+    const char *key, *key_end, *val, *val_end;
+
+    *key_out = *val_out = NULL;
+    if (*pos == end)
+        return FALSE;
+    key = *pos;
+    key_end = memchr(key, '\0', end - key);
+    if (key_end == NULL)        /* Malformed representation; give up. */
+        return FALSE;
+    val = key_end + 1;
+    val_end = memchr(val, '\0', end - val);
+    if (val_end == NULL)        /* Malformed representation; give up. */
+        return FALSE;
+
+    *key_out = key;
+    *val_out = val;
+    *pos = val_end + 1;
+    return TRUE;
+}
+
+krb5_error_code
+krb5_dbe_get_strings(krb5_context context, krb5_db_entry *entry,
+                     krb5_string_attr **strings_out, int *count_out)
+{
+    krb5_error_code code;
+    const char *pos, *end, *mapkey, *mapval;
+    char *key = NULL, *val = NULL;
+    krb5_string_attr *strings = NULL, *newstrings;
+    int count = 0;
+
+    *strings_out = NULL;
+    *count_out = 0;
+    code = begin_attrs(context, entry, &pos, &end);
+    if (code)
+        return code;
+
+    while (next_attr(&pos, end, &mapkey, &mapval)) {
+        /* Add a copy of mapkey and mapvalue to strings. */
+        key = strdup(mapkey);
+        val = strdup(mapval);
+        newstrings = realloc(strings, (count + 1) * sizeof(*strings));
+        if (key == NULL || val == NULL || newstrings == NULL) {
+            free(key);
+            free(val);
+            krb5_dbe_free_strings(context, strings, count);
+            return ENOMEM;
+        }
+        strings = newstrings;
+        strings[count].key = key;
+        strings[count].value = val;
+        count++;
+    }
+
+    *strings_out = strings;
+    *count_out = count;
+    return 0;
+}
+
+krb5_error_code
+krb5_dbe_get_string(krb5_context context, krb5_db_entry *entry,
+                    const char *key, char **value_out)
+{
+    krb5_error_code code;
+    const char *pos, *end, *mapkey, *mapval;
+
+    *value_out = NULL;
+    code = begin_attrs(context, entry, &pos, &end);
+    if (code)
+        return code;
+    while (next_attr(&pos, end, &mapkey, &mapval)) {
+        if (strcmp(mapkey, key) == 0) {
+            *value_out = strdup(mapval);
+            return (*value_out == NULL) ? ENOMEM : 0;
+        }
+    }
+
+    return 0;
+}
+
+krb5_error_code
+krb5_dbe_set_string(krb5_context context, krb5_db_entry *entry,
+                    const char *key, const char *value)
+{
+    krb5_error_code code;
+    const char *pos, *end, *mapkey, *mapval;
+    struct k5buf buf;
+    krb5_boolean found = FALSE;
+    krb5_tl_data tl_data;
+    ssize_t len;
+
+    /* Copy the current mapping to buf, updating key with value if found. */
+    code = begin_attrs(context, entry, &pos, &end);
+    if (code)
+        return code;
+    krb5int_buf_init_dynamic(&buf);
+    while (next_attr(&pos, end, &mapkey, &mapval)) {
+        if (strcmp(mapkey, key) == 0) {
+            if (value != NULL) {
+                krb5int_buf_add_len(&buf, mapkey, strlen(mapkey) + 1);
+                krb5int_buf_add_len(&buf, value, strlen(value) + 1);
+            }
+            found = TRUE;
+        } else {
+            krb5int_buf_add_len(&buf, mapkey, strlen(mapkey) + 1);
+            krb5int_buf_add_len(&buf, mapval, strlen(mapval) + 1);
+        }
+    }
+
+    /* If key wasn't found in the map, add a new entry for it. */
+    if (!found && value != NULL) {
+        krb5int_buf_add_len(&buf, key, strlen(key) + 1);
+        krb5int_buf_add_len(&buf, value, strlen(value) + 1);
+    }
+
+    len = krb5int_buf_len(&buf);
+    if (len == -1)
+        return ENOMEM;
+    if (len > 65535)
+        return KRB5_KDB_STRINGS_TOOLONG;
+    tl_data.tl_data_type = KRB5_TL_STRING_ATTRS;
+    tl_data.tl_data_contents = (krb5_octet *)krb5int_buf_data(&buf);
+    tl_data.tl_data_length = len;
+
+    code = krb5_dbe_update_tl_data(context, entry, &tl_data);
+    krb5int_free_buf(&buf);
+    return code;
 }
 
 krb5_error_code

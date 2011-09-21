@@ -1,5 +1,6 @@
 mydir=lib$(S)kdb
 BUILDTOP=$(REL)..$(S)..
+RUN_SETUP = @KRB5_RUN_ENV@
 KRB5_RUN_ENV = @KRB5_RUN_ENV@
 KRB5_CONFIG_SETUP = KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf ; export KRB5_CONFIG ;
 PROG_LIBPATH=-L$(TOPLIBD)
@@ -56,11 +57,18 @@ STLIBOBJS= \
 all-unix:: all-liblinks
 install-unix:: install-libs
 clean-unix:: clean-liblinks clean-libs clean-libobjs
-	$(RM) adb_err.c adb_err.h
+	$(RM) adb_err.c adb_err.h t_stringattr.o t_stringattr
+check-unix:: t_stringattr
+	KRB5_CONFIG=$(top_srcdir)/config-files/krb5.conf; export KRB5_CONFIG; \
+	$(RUN_SETUP) $(VALGRIND) ./t_stringattr
 
 generate-files-mac: darwin.exports
 
 depend:: adb_err.h
+
+t_stringattr: t_stringattr.o $(KDB5_DEPLIBS) $(KADM_COMM_DEPLIBS) $(KRB5_BASE_DEPLIBS)
+	$(CC_LINK) -o $@ t_stringattr.o $(KDB5_LIBS) $(KADM_COMM_LIBS) \
+		$(KRB5_BASE_LIBS)
 
 @lib_frag@
 @libobj_frag@
