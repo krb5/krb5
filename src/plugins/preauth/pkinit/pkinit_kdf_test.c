@@ -126,7 +126,7 @@ main(int argc, char **argv)
     /* set-up the key_block */
     if (0 != (retval = krb5_init_keyblock(context, enctype, max_keylen,
                                           &key_block_ptr))) {
-        printf("ERROR in pkinit_kdf_test: can't init keybloc, retval = %d",
+        printf("ERROR in pkinit_kdf_test: can't init keyblock, retval = %d",
                retval);
         goto cleanup;
 
