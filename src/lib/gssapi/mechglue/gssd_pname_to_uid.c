@@ -68,54 +68,56 @@
 
 static OM_uint32
 attr_localname(OM_uint32 *minor,
-                  const gss_mechanism mech,
-                  const gss_name_t mech_name,
-	       gss_buffer_t localname)
+               const gss_mechanism mech,
+               const gss_name_t mech_name,
+               gss_buffer_t localname)
 {
     OM_uint32 major = GSS_S_UNAVAILABLE;
     OM_uint32 tmpMinor;
     int more = -1;
     gss_buffer_desc value;
-	    gss_buffer_desc display_value;
-	    int authenticated = 0, complete = 0;
+    gss_buffer_desc display_value;
+    int authenticated = 0, complete = 0;
 
-	    value.value = NULL;
-	    display_value.value = NULL;
+    value.value = NULL;
+    display_value.value = NULL;
     if (mech->gss_get_name_attribute == NULL)
         return GSS_S_UNAVAILABLE;
 
-        major = mech->gss_get_name_attribute(minor,
-                                             mech_name,
-                                             GSS_C_ATTR_LOCAL_LOGIN_USER,
-                                             &authenticated,
-                                             &complete,
-                                             &value,
-                                             &display_value,
-                                             &more);
-        if (GSS_ERROR(major)) {
-            map_error(minor, mech);
-	    goto cleanup;
-        }
+    major = mech->gss_get_name_attribute(minor,
+                                         mech_name,
+                                         GSS_C_ATTR_LOCAL_LOGIN_USER,
+                                         &authenticated,
+                                         &complete,
+                                         &value,
+                                         &display_value,
+                                         &more);
+    if (GSS_ERROR(major)) {
+        map_error(minor, mech);
+        goto cleanup;
+    }
 
-        if (!authenticated)
-	    major = GSS_S_UNAVAILABLE;
-	else {
-		localname->value = value.value;
-	localname->length = value.length;
-	value.value = NULL;
-	}
+    if (!authenticated)
+        major = GSS_S_UNAVAILABLE;
+    else {
+        localname->value = value.value;
+        localname->length = value.length;
+        value.value = NULL;
+    }
+
 cleanup:
-	if (display_value.value)
-		gss_release_buffer(&tmpMinor, &display_value);
-	if (value.value)
-		gss_release_buffer(&tmpMinor, &value);
+    if (display_value.value)
+        gss_release_buffer(&tmpMinor, &display_value);
+    if (value.value)
+        gss_release_buffer(&tmpMinor, &value);
     return major;
 }
+
 OM_uint32 KRB5_CALLCONV
 gss_localname(OM_uint32 *minor,
-                 const gss_name_t pname,
-	      gss_const_OID mech_type,
-    gss_buffer_t localname)
+              const gss_name_t pname,
+              gss_const_OID mech_type,
+              gss_buffer_t localname)
 {
     OM_uint32 major, tmpMinor;
     gss_mechanism mech;
@@ -179,40 +181,40 @@ gss_localname(OM_uint32 *minor,
 
 #ifndef _WIN32
 OM_uint32 KRB5_CALLCONV
-gss_pname_to_uid
-	(OM_uint32 *minor,
-         const gss_name_t name,
-	 const gss_OID mech_type,
-	 uid_t *uidOut)
+gss_pname_to_uid(OM_uint32 *minor,
+                 const gss_name_t name,
+                 const gss_OID mech_type,
+                 uid_t *uidOut)
 {
-  OM_uint32 major = GSS_S_UNAVAILABLE, tmpminor;
-    #ifndef NO_PASSWORD
+    OM_uint32 major = GSS_S_UNAVAILABLE, tmpminor;
+#ifndef NO_PASSWORD
     gss_buffer_desc localname;
-            char pwbuf[BUFSIZ];
-	    char *localuser = NULL;
-	    struct passwd *pwd = NULL;
-	    struct passwd pw;
-	    int code = 0;
+    char pwbuf[BUFSIZ];
+    char *localuser = NULL;
+    struct passwd *pwd = NULL;
+    struct passwd pw;
+    int code = 0;
 
-	    localname.value = NULL;
-	    major = gss_localname(minor, name, mech_type, &localname);
-	    if (!GSS_ERROR(major) && localname.value) {
-	      localuser = malloc(localname.length + 1);
-	      if (localuser == NULL)
-		code = ENOMEM;
-	      if (code == 0) {
-		  memcpy(localuser, localname.value, localname.length);
-		  localuser[localname.length] = '\0';
-		  code = k5_getpwnam_r(localuser, &pw, pwbuf, sizeof(pwbuf), &pwd);
-	      }
-	      if ((code == 0) && pwd)
-		    *uidOut = pwd->pw_uid;
-		else major = GSS_S_FAILURE;
-	    }
-	    free(localuser);
-	    if (localname.value)
-	      gss_release_buffer(&tmpminor, &localname);
+    localname.value = NULL;
+    major = gss_localname(minor, name, mech_type, &localname);
+    if (!GSS_ERROR(major) && localname.value) {
+        localuser = malloc(localname.length + 1);
+        if (localuser == NULL)
+            code = ENOMEM;
+        if (code == 0) {
+            memcpy(localuser, localname.value, localname.length);
+            localuser[localname.length] = '\0';
+            code = k5_getpwnam_r(localuser, &pw, pwbuf, sizeof(pwbuf), &pwd);
+        }
+        if ((code == 0) && pwd)
+            *uidOut = pwd->pw_uid;
+        else
+            major = GSS_S_FAILURE;
+    }
+    free(localuser);
+    if (localname.value)
+        gss_release_buffer(&tmpminor, &localname);
 #endif /*NO_PASSWORD*/
-	    return major;
+    return major;
 }
 #endif /*_WIN32*/

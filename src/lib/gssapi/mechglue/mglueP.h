@@ -323,7 +323,7 @@ typedef struct gss_config {
 		    OM_uint32,		/* req_output_size */
 		    OM_uint32 *		/* max_input_size */
 	 );
-    OM_uint32	     (* KRB5_CALLCONV gss_localname)
+    OM_uint32	     (KRB5_CALLCONV *gss_localname)
 	(
 		    OM_uint32 *,        /* minor */
 		    const gss_name_t,	/* name */
