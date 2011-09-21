@@ -796,17 +796,15 @@ pkinit_server_return_padata(krb5_context context,
             goto cleanup;
         }
     }
-
     if ((rep9 != NULL &&
          rep9->choice == choice_pa_pk_as_rep_draft9_dhSignedData) ||
         (rep != NULL && rep->choice == choice_pa_pk_as_rep_dhInfo)) {
-        retval = pkinit_octetstring2key(context, enctype, server_key,
-                                        server_key_len, encrypting_key);
-        if (retval) {
-            pkiDebug("pkinit_octetstring2key failed: %s\n",
-                     error_message(retval));
-            goto cleanup;
-        }
+
+        /*
+         * This is DH, so don't generate the key until after we
+         * encode the reply, because the encoded reply is needed
+         * to generate the key in some cases.
+         */
 
         dhkey_info.subjectPublicKey.length = dh_pubkey_len;
         dhkey_info.subjectPublicKey.data = dh_pubkey;
@@ -852,6 +850,7 @@ pkinit_server_return_padata(krb5_context context,
             }
             break;
         }
+
     } else {
         pkiDebug("received RSA key delivery AS REQ\n");
 
@@ -994,6 +993,19 @@ pkinit_server_return_padata(krb5_context context,
         print_buffer_bin((unsigned char *)out_data->data, out_data->length,
                          "/tmp/kdc_as_rep");
 #endif
+
+    /* If this is DH, we haven't computed the key yet, so do it now. */
+    if ((rep9 != NULL &&
+         rep9->choice == choice_pa_pk_as_rep_draft9_dhSignedData) ||
+        (rep != NULL && rep->choice == choice_pa_pk_as_rep_dhInfo)) {
+        retval = pkinit_octetstring2key(context, enctype, server_key,
+                                        server_key_len, encrypting_key);
+        if (retval) {
+            pkiDebug("pkinit_octetstring2key failed: %s\n",
+                     error_message(retval));
+            goto cleanup;
+        }
+    }
 
     *send_pa = malloc(sizeof(krb5_pa_data));
     if (*send_pa == NULL) {
