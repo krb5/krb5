@@ -1421,55 +1421,6 @@ static unsigned int iakerb_finished_optional(const void *p)
 DEFSEQTYPE(iakerb_finished, krb5_iakerb_finished, iakerb_finished_fields,
            iakerb_finished_optional);
 
-DEFFNXTYPE(algorithm_identifier, krb5_algorithm_identifier, asn1_encode_algorithm_identifier);
-DEFFNLENTYPE(object_identifier, asn1_octet *, asn1_encode_oid);
-DEFFIELDTYPE(oid_data, krb5_octet_data,
-             FIELDOF_STRING(krb5_octet_data,object_identifier, data, length, -1));
-DEFPTRTYPE(oid_data_ptr, oid_data);
-
-static const struct field_info kdf_alg_id_fields[] = {
-    FIELDOF_ENCODEAS(krb5_octet_data, oid_data, 0)
-};
-DEFSEQTYPE(kdf_alg_id, krb5_octet_data, kdf_alg_id_fields, NULL);
-DEFPTRTYPE(kdf_alg_id_ptr, kdf_alg_id);
-DEFNONEMPTYNULLTERMSEQOFTYPE(supported_kdfs, kdf_alg_id_ptr);
-DEFPTRTYPE(supported_kdfs_ptr, supported_kdfs);
-MAKE_ENCFN(asn1_encode_supported_kdfs,
-           supported_kdfs);
-MAKE_ENCFN(asn1_encode_kdf_alg_id, kdf_alg_id);
-
-
-/* Krb5PrincipalName is defined in RFC 4556 and is *not* PrincipalName from RFC 4120*/
-static const struct field_info pkinit_krb5_principal_name_fields[] = {
-    FIELDOF_NORM(krb5_principal_data, gstring_data, realm, 0),
-    FIELDOF_ENCODEAS(krb5_principal_data, principal_data, 1)
-};
-
-
-DEFSEQTYPE(pkinit_krb5_principal_name_data, krb5_principal_data, pkinit_krb5_principal_name_fields, NULL);
-DEFPTRTYPE(pkinit_krb5_principal_name, pkinit_krb5_principal_name_data);
-DEFOCTETWRAPTYPE(pkinit_krb5_principal_name_wrapped, pkinit_krb5_principal_name);
-
-
-/* For SP80056A OtherInfo, for pkinit agility */
-static const struct field_info sp80056a_other_info_fields[] = {
-    FIELDOF_NORM(krb5_sp80056a_other_info, algorithm_identifier, algorithm_identifier, -1),
-    FIELDOF_NORM(krb5_sp80056a_other_info, pkinit_krb5_principal_name_wrapped, party_u_info, 0),
-    FIELDOF_NORM(krb5_sp80056a_other_info, pkinit_krb5_principal_name_wrapped, party_v_info, 1),
-    FIELDOF_STRING(krb5_sp80056a_other_info, s_octetstring, supp_pub_info.data, supp_pub_info.length, 2),
-};
-
-DEFSEQTYPE(sp80056a_other_info, krb5_sp80056a_other_info, sp80056a_other_info_fields, NULL);
-
-/* For PkinitSuppPubInfo, for pkinit agility */
-static const struct field_info pkinit_supp_pub_info_fields[] = {
-    FIELDOF_NORM(krb5_pkinit_supp_pub_info, int32, enctype, 0),
-    FIELDOF_STRING(krb5_pkinit_supp_pub_info, octetstring, as_req.data, as_req.length, 1),
-    FIELDOF_STRING(krb5_pkinit_supp_pub_info, octetstring, pk_as_rep.data, pk_as_rep.length, 2),
-};
-
-DEFSEQTYPE(pkinit_supp_pub_info, krb5_pkinit_supp_pub_info, pkinit_supp_pub_info_fields, NULL);
-
 /* Exported complete encoders -- these produce a krb5_data with
    the encoding in the correct byte order.  */
 
@@ -1548,8 +1499,6 @@ MAKE_FULL_ENCODER(encode_krb5_ad_signedpath_data, ad_signedpath_data);
 MAKE_FULL_ENCODER(encode_krb5_ad_signedpath, ad_signedpath);
 MAKE_FULL_ENCODER(encode_krb5_iakerb_header, iakerb_header);
 MAKE_FULL_ENCODER(encode_krb5_iakerb_finished, iakerb_finished);
-MAKE_FULL_ENCODER(encode_krb5_pkinit_supp_pub_info, pkinit_supp_pub_info);
-MAKE_FULL_ENCODER(encode_krb5_sp80056a_other_info, sp80056a_other_info);
 
 /*
  * PKINIT
@@ -1671,6 +1620,58 @@ asn1_error_code asn1_encode_krb5_substructure(asn1buf *buf,
     }
 
 #ifndef DISABLE_PKINIT
+
+DEFFNXTYPE(algorithm_identifier, krb5_algorithm_identifier, asn1_encode_algorithm_identifier);
+DEFFNLENTYPE(object_identifier, asn1_octet *, asn1_encode_oid);
+DEFFIELDTYPE(oid_data, krb5_octet_data,
+             FIELDOF_STRING(krb5_octet_data,object_identifier, data, length, -1));
+DEFPTRTYPE(oid_data_ptr, oid_data);
+
+static const struct field_info kdf_alg_id_fields[] = {
+    FIELDOF_ENCODEAS(krb5_octet_data, oid_data, 0)
+};
+DEFSEQTYPE(kdf_alg_id, krb5_octet_data, kdf_alg_id_fields, NULL);
+DEFPTRTYPE(kdf_alg_id_ptr, kdf_alg_id);
+DEFNONEMPTYNULLTERMSEQOFTYPE(supported_kdfs, kdf_alg_id_ptr);
+DEFPTRTYPE(supported_kdfs_ptr, supported_kdfs);
+MAKE_ENCFN(asn1_encode_supported_kdfs,
+           supported_kdfs);
+MAKE_ENCFN(asn1_encode_kdf_alg_id, kdf_alg_id);
+
+
+/* Krb5PrincipalName is defined in RFC 4556 and is *not* PrincipalName from RFC 4120*/
+static const struct field_info pkinit_krb5_principal_name_fields[] = {
+    FIELDOF_NORM(krb5_principal_data, gstring_data, realm, 0),
+    FIELDOF_ENCODEAS(krb5_principal_data, principal_data, 1)
+};
+
+
+DEFSEQTYPE(pkinit_krb5_principal_name_data, krb5_principal_data, pkinit_krb5_principal_name_fields, NULL);
+DEFPTRTYPE(pkinit_krb5_principal_name, pkinit_krb5_principal_name_data);
+DEFOCTETWRAPTYPE(pkinit_krb5_principal_name_wrapped, pkinit_krb5_principal_name);
+
+
+/* For SP80056A OtherInfo, for pkinit agility */
+static const struct field_info sp80056a_other_info_fields[] = {
+    FIELDOF_NORM(krb5_sp80056a_other_info, algorithm_identifier, algorithm_identifier, -1),
+    FIELDOF_NORM(krb5_sp80056a_other_info, pkinit_krb5_principal_name_wrapped, party_u_info, 0),
+    FIELDOF_NORM(krb5_sp80056a_other_info, pkinit_krb5_principal_name_wrapped, party_v_info, 1),
+    FIELDOF_STRING(krb5_sp80056a_other_info, s_octetstring, supp_pub_info.data, supp_pub_info.length, 2),
+};
+
+DEFSEQTYPE(sp80056a_other_info, krb5_sp80056a_other_info, sp80056a_other_info_fields, NULL);
+
+/* For PkinitSuppPubInfo, for pkinit agility */
+static const struct field_info pkinit_supp_pub_info_fields[] = {
+    FIELDOF_NORM(krb5_pkinit_supp_pub_info, int32, enctype, 0),
+    FIELDOF_STRING(krb5_pkinit_supp_pub_info, octetstring, as_req.data, as_req.length, 1),
+    FIELDOF_STRING(krb5_pkinit_supp_pub_info, octetstring, pk_as_rep.data, pk_as_rep.length, 2),
+};
+
+DEFSEQTYPE(pkinit_supp_pub_info, krb5_pkinit_supp_pub_info, pkinit_supp_pub_info_fields, NULL);
+
+MAKE_FULL_ENCODER(encode_krb5_pkinit_supp_pub_info, pkinit_supp_pub_info);
+MAKE_FULL_ENCODER(encode_krb5_sp80056a_other_info, sp80056a_other_info);
 
 /* Callable encoders for the types defined above, until the PKINIT
    encoders get converted.  */
