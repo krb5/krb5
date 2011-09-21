@@ -341,3 +341,33 @@ purgekeys_2(purgekeys_arg *argp, CLIENT *clnt)
      }
      return (&clnt_res);
 }
+
+gstrings_ret *
+get_strings_2(gstrings_arg *argp, CLIENT *clnt)
+{
+     static gstrings_ret clnt_res;
+
+     memset(&clnt_res, 0, sizeof(clnt_res));
+     if (clnt_call(clnt, GET_STRINGS,
+		   (xdrproc_t) xdr_gstrings_arg, (caddr_t) argp,
+		   (xdrproc_t) xdr_gstrings_ret, (caddr_t) &clnt_res,
+		   TIMEOUT) != RPC_SUCCESS) {
+	  return (NULL);
+     }
+     return (&clnt_res);
+}
+
+generic_ret *
+set_string_2(sstring_arg *argp, CLIENT *clnt)
+{
+     static generic_ret clnt_res;
+
+     memset(&clnt_res, 0, sizeof(clnt_res));
+     if (clnt_call(clnt, SET_STRING,
+		   (xdrproc_t) xdr_sstring_arg, (caddr_t) argp,
+		   (xdrproc_t) xdr_generic_ret, (caddr_t) &clnt_res,
+		   TIMEOUT) != RPC_SUCCESS) {
+	  return (NULL);
+     }
+     return (&clnt_res);
+}

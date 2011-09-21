@@ -746,7 +746,9 @@ void log_badverf(gss_name_t client_name, gss_name_t server_name,
         {19, "CHPASS_PRINCIPAL3"},
         {20, "CHRAND_PRINCIPAL3"},
         {21, "SETKEY_PRINCIPAL3"},
-        {22, "PURGEKEYS"}
+        {22, "PURGEKEYS"},
+        {23, "GET_STRINGS"},
+        {24, "SET_STRING"}
     };
 #define NPROCNAMES (sizeof (proc_names) / sizeof (struct procnames))
     OM_uint32 minor;

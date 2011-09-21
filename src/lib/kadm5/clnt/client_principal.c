@@ -482,3 +482,51 @@ kadm5_purgekeys(void *server_handle,
         eret();
     return r->code;
 }
+
+kadm5_ret_t
+kadm5_get_strings(void *server_handle, krb5_principal principal,
+                  krb5_string_attr **strings_out, int *count_out)
+{
+    gstrings_arg arg;
+    gstrings_ret *r;
+    kadm5_server_handle_t handle = server_handle;
+
+    *strings_out = NULL;
+    *count_out = 0;
+    CHECK_HANDLE(server_handle);
+    if (principal == NULL)
+        return EINVAL;
+
+    arg.princ = principal;
+    arg.api_version = handle->api_version;
+    r = get_strings_2(&arg, handle->clnt);
+    if (r == NULL)
+        eret();
+    if (r->code == 0) {
+        *strings_out = r->strings;
+        *count_out = r->count;
+    }
+    return r->code;
+}
+
+kadm5_ret_t
+kadm5_set_string(void *server_handle, krb5_principal principal,
+                 const char *key, const char *value)
+{
+    sstring_arg arg;
+    generic_ret *r;
+    kadm5_server_handle_t handle = server_handle;
+
+    CHECK_HANDLE(server_handle);
+    if (principal == NULL || key == NULL)
+        return EINVAL;
+
+    arg.princ = principal;
+    arg.key = (char *)key;
+    arg.value = (char *)value;
+    arg.api_version = handle->api_version;
+    r = set_string_2(&arg, handle->clnt);
+    if (r == NULL)
+        eret();
+    return r->code;
+}

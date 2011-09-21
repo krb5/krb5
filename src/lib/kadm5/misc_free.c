@@ -89,3 +89,22 @@ kadm5_free_principal_ent(void *server_handle, kadm5_principal_ent_t val)
     }
     return KADM5_OK;
 }
+
+kadm5_ret_t
+kadm5_free_strings(void *server_handle, krb5_string_attr *strings,
+                   int count)
+{
+    int i;
+
+    _KADM5_CHECK_HANDLE(server_handle);
+
+    if (!strings)
+        return KADM5_OK;
+
+    for (i = 0; i < count; i++) {
+        free(strings[i].key);
+        free(strings[i].value);
+    }
+    free(strings);
+    return KADM5_OK;
+}

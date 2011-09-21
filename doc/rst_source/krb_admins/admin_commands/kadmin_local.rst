@@ -562,6 +562,43 @@ list_principals
 
 .. _list_principals_end:
 
+.. _get_strings:
+
+get_strings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+       **get_strings** *principal*
+              Displays string attributes on *principal*.
+	      String attributes are used to supply per-principal configuration to some KDC plugin modules.
+
+              Alias::
+
+                     getstr
+
+.. _set_string:
+
+set_string
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+       **set_string** *principal* *key* *value*
+              Sets a string attribute on *principal*.
+
+              Alias::
+
+                     setstr
+
+.. _del_string:
+
+del_string
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+       **del_string** *principal* *key*
+              Deletes a string attribute from *principal*.
+
+              Alias::
+
+                     delstr
+
 .. _add_policy:
 
 add_policy

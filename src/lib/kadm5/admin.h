@@ -513,6 +513,20 @@ kadm5_ret_t    kadm5_purgekeys(void *server_handle,
                                krb5_principal principal,
                                int keepkvno);
 
+kadm5_ret_t    kadm5_get_strings(void *server_handle,
+                                 krb5_principal principal,
+                                 krb5_string_attr **strings_out,
+                                 int *count_out);
+
+kadm5_ret_t    kadm5_set_string(void *server_handle,
+                                krb5_principal principal,
+                                const char *key,
+                                const char *value);
+
+kadm5_ret_t    kadm5_free_strings(void *server_handle,
+                                  krb5_string_attr *strings,
+                                  int count);
+
 KADM5INT_END_DECLS
 
 #endif /* __KADM5_ADMIN_H__ */

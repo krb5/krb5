@@ -69,6 +69,7 @@ check-pytests::
 	$(RUNPYTEST) $(srcdir)/t_renew.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_renprinc.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_cccol.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_stringattr.py $(PYTESTFLAGS)
 
 clean::
 	$(RM) kdc.conf

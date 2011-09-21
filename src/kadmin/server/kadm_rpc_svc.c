@@ -213,6 +213,18 @@ void kadm_1(rqstp, transp)
 	  local = (char *(*)()) purgekeys_2_svc;
 	  break;
 
+     case GET_STRINGS:
+	  xdr_argument = xdr_gstrings_arg;
+	  xdr_result = xdr_gstrings_ret;
+	  local = (char *(*)()) get_strings_2_svc;
+	  break;
+
+     case SET_STRING:
+	  xdr_argument = xdr_sstring_arg;
+	  xdr_result = xdr_generic_ret;
+	  local = (char *(*)()) set_string_2_svc;
+	  break;
+
      default:
 	  krb5_klog_syslog(LOG_ERR, "Invalid KADM5 procedure number: %s, %d",
 		 inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr),

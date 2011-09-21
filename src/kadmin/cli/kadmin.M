@@ -672,6 +672,28 @@ kadmin:
 .RE
 .fi
 .TP
+\fBget_strings\fP \fIprincipal\fP
+displays string attributes on
+.IR principal .
+String attributes are used to supply per-principal configuration to
+some KDC plugin modules.  Alias
+.BR getstrs .
+.fi
+.TP
+\fBset_string\fP \fIprincipal\fP \fIkey\fP \fIvalue\fP
+sets a string attribute on
+.IR principal .
+Alias
+.BR setstr .
+.fi
+.TP
+\fBdel_string\fP \fIprincipal\fP \fIkey\fP
+deletes a string attribute from
+.IR principal .
+Alias
+.BR delstr .
+.fi
+.TP
 \fBadd_policy\fP [\fIoptions\fP] \fIpolicy\fP
 adds the named policy to the policy database.  Requires the
 .I add

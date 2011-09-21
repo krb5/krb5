@@ -207,6 +207,28 @@ struct purgekeys_arg {
 };
 typedef struct purgekeys_arg purgekeys_arg;
 
+struct gstrings_arg {
+	krb5_ui_4 api_version;
+	krb5_principal princ;
+};
+typedef struct gstrings_arg gstrings_arg;
+
+struct gstrings_ret {
+	krb5_ui_4 api_version;
+	kadm5_ret_t code;
+	krb5_string_attr *strings;
+	int count;
+};
+typedef struct gstrings_ret gstrings_ret;
+
+struct sstring_arg {
+	krb5_ui_4 api_version;
+	krb5_principal princ;
+	char *key;
+	char *value;
+};
+typedef struct sstring_arg sstring_arg;
+
 #define KADM 2112
 #define KADMVERS 2
 #define CREATE_PRINCIPAL 1
@@ -275,6 +297,12 @@ extern  generic_ret * setkey_principal3_2_svc(setkey3_arg *, struct svc_req *);
 #define PURGEKEYS 22
 extern  generic_ret * purgekeys_2(purgekeys_arg *, CLIENT *);
 extern  generic_ret * purgekeys_2_svc(purgekeys_arg *, struct svc_req *);
+#define GET_STRINGS 23
+extern  gstrings_ret * get_strings_2(gstrings_arg *, CLIENT *);
+extern  gstrings_ret * get_strings_2_svc(gstrings_arg *, struct svc_req *);
+#define SET_STRING 24
+extern  generic_ret * set_string_2(sstring_arg *, CLIENT *);
+extern  generic_ret * set_string_2_svc(sstring_arg *, struct svc_req *);
 
 extern bool_t xdr_cprinc_arg ();
 extern bool_t xdr_cprinc3_arg ();
@@ -312,6 +340,10 @@ extern bool_t xdr_gpols_arg ();
 extern bool_t xdr_gpols_ret ();
 extern bool_t xdr_getprivs_ret ();
 extern bool_t xdr_purgekeys_arg ();
+extern bool_t xdr_gstrings_arg ();
+extern bool_t xdr_gstrings_ret ();
+extern bool_t xdr_sstring_arg ();
+extern bool_t xdr_krb5_string_attr ();
 
 
 #endif /* __KADM_RPC_H__ */

@@ -16,6 +16,7 @@ kadm5_free_key_data
 kadm5_free_name_list
 kadm5_free_policy_ent
 kadm5_free_principal_ent
+kadm5_free_strings
 kadm5_get_admin_service_name
 kadm5_get_config_params
 kadm5_get_policies
@@ -23,6 +24,7 @@ kadm5_get_policy
 kadm5_get_principal
 kadm5_get_principals
 kadm5_get_privs
+kadm5_get_strings
 kadm5_init
 kadm5_init_anonymous
 kadm5_init_krb5_context
@@ -36,6 +38,7 @@ kadm5_purgekeys
 kadm5_randkey_principal
 kadm5_randkey_principal_3
 kadm5_rename_principal
+kadm5_set_string
 kadm5_setkey_principal
 kadm5_setkey_principal_3
 kadm5_setv4key_principal

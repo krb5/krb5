@@ -243,7 +243,7 @@ typedef struct __krb5_key_salt_tuple {
 #define KRB5_TL_MKEY_AUX                0x000a
 
 /* String attributes may not always be represented in tl-data.  kadmin clients
- * must use the modify_strings and get_strings RPCs. */
+ * must use the get_strings and set_string RPCs. */
 #define KRB5_TL_STRING_ATTRS            0x000b
 
 #define KRB5_TL_PAC_LOGON_INFO          0x0100 /* NDR encoded validation info */

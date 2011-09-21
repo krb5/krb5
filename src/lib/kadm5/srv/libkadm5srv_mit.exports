@@ -26,6 +26,7 @@ kadm5_free_key_data
 kadm5_free_name_list
 kadm5_free_policy_ent
 kadm5_free_principal_ent
+kadm5_free_strings
 kadm5_get_config_params
 kadm5_get_policies
 kadm5_get_policy
@@ -33,6 +34,7 @@ kadm5_get_principal
 kadm5_get_principal_keys
 kadm5_get_principals
 kadm5_get_privs
+kadm5_get_strings
 kadm5_init
 kadm5_init_anonymous
 kadm5_init_krb5_context
@@ -47,6 +49,7 @@ kadm5_purgekeys
 kadm5_randkey_principal
 kadm5_randkey_principal_3
 kadm5_rename_principal
+kadm5_set_string
 kadm5_setkey_principal
 kadm5_setkey_principal_3
 kadm5_setv4key_principal
@@ -105,6 +108,8 @@ xdr_gprinc_arg
 xdr_gprinc_ret
 xdr_gprincs_arg
 xdr_gprincs_ret
+xdr_gstrings_arg
+xdr_gstrings_ret
 xdr_kadm5_policy_ent_rec
 xdr_kadm5_principal_ent_rec
 xdr_kadm5_ret_t
@@ -120,6 +125,7 @@ xdr_krb5_kvno
 xdr_krb5_octet
 xdr_krb5_principal
 xdr_krb5_salttype
+xdr_krb5_string_attr
 xdr_krb5_timestamp
 xdr_krb5_tl_data
 xdr_krb5_ui_2
@@ -135,5 +141,6 @@ xdr_rprinc_arg
 xdr_setkey3_arg
 xdr_setkey_arg
 xdr_setv4key_arg
+xdr_sstring_arg
 xdr_ui_4
 kadm5_init_iprop
