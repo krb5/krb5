@@ -2225,8 +2225,8 @@ krb5_error_code
 pkinit_alg_agility_kdf(krb5_context context,
                        krb5_octet_data *secret,
                        krb5_octet_data *alg_oid,
-                       krb5_principal party_u_info,
-                       krb5_principal party_v_info,
+                       krb5_const_principal party_u_info,
+                       krb5_const_principal party_v_info,
                        krb5_enctype enctype,
                        krb5_octet_data *as_req,
                        krb5_octet_data *pk_as_rep,
@@ -2302,8 +2302,8 @@ pkinit_alg_agility_kdf(krb5_context context,
     alg_id.algorithm = *alg_oid; /*alias*/
 
     other_info_fields.algorithm_identifier = alg_id;
-    other_info_fields.party_u_info = party_u_info;
-    other_info_fields.party_v_info = party_v_info;
+    other_info_fields.party_u_info = (krb5_principal) party_u_info;
+    other_info_fields.party_v_info = (krb5_principal) party_v_info;
     other_info_fields.supp_pub_info = *supp_pub_info;
     if (0 != (retval = encode_krb5_sp80056a_other_info(&other_info_fields, &other_info)))
         goto cleanup;
@@ -4885,7 +4885,7 @@ crypto_cert_get_matching_data(krb5_context context,
     pkinit_cert_matching_data *md;
     krb5_principal *pkinit_sans =NULL, *upn_sans = NULL;
     struct _pkinit_cert_data *cd = (struct _pkinit_cert_data *)ch;
-    int i, j;
+    unsigned int i, j;
     char buf[DN_BUF_LEN];
     unsigned int bufsize = sizeof(buf);
 
