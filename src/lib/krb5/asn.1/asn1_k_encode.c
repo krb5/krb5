@@ -2107,7 +2107,25 @@ asn1_encode_td_trusted_certifiers(
     asn1_cleanup();
 }
 
-#endif /* DISABLE_PKINIT */
+#else /* DISABLE_PKINIT */
+
+/* Stubs for exported pkinit encoder functions. */
+
+krb5_error_code
+encode_krb5_sp80056a_other_info(const krb5_sp80056a_other_info *rep,
+                                krb5_data **code)
+{
+    return EINVAL;
+}
+
+krb5_error_code
+encode_krb5_pkinit_supp_pub_info(const krb5_pkinit_supp_pub_info *rep,
+                                 krb5_data **code)
+{
+    return EINVAL;
+}
+
+#endif /* not DISABLE_PKINIT */
 
 asn1_error_code
 asn1_encode_sequence_of_typed_data(asn1buf *buf, const krb5_typed_data **val,
