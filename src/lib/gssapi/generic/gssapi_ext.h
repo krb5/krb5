@@ -34,12 +34,31 @@ extern "C" {
 /*
  * Solaris extensions
  */
+#ifndef _WIN32
 OM_uint32 KRB5_CALLCONV
 gss_pname_to_uid
 	(OM_uint32 *minor,
          const gss_name_t name,
 	 const gss_OID mech_type,
 	 uid_t *uidOut);
+#endif
+
+  /**
+   * Provides a platform-specific name for a GSSAPI name as
+   * interpreted by a given mechanism
+   * @param name The gss name resulting from accept_sec_context
+   * @param mech_type The mechanism that will be asked to map @a name to a local name
+   * @param localname pointer to a buffer_desc allocated by the caller
+   * that will be filled in with the local name on successful completion.
+   */
+OM_uint32 KRB5_CALLCONV
+gss_localname
+	(OM_uint32 *minor,
+         const gss_name_t name,
+	 gss_const_OID mech_type,
+	 gss_buffer_t localname);
+
+
 
 /** Determine whether a mechanism name is authorized to act as a username.
  *

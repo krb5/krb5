@@ -323,12 +323,12 @@ typedef struct gss_config {
 		    OM_uint32,		/* req_output_size */
 		    OM_uint32 *		/* max_input_size */
 	 );
-    OM_uint32	     (KRB5_CALLCONV *gss_pname_to_uid)
+    OM_uint32	     (* KRB5_CALLCONV gss_localname)
 	(
 		    OM_uint32 *,        /* minor */
 		    const gss_name_t,	/* name */
-		    const gss_OID,	/* mech_type */
-		    uid_t *		/* uid */
+		    gss_const_OID,	/* mech_type */
+		    gss_buffer_t /* localname */
 	    );
 	OM_uint32		(KRB5_CALLCONV *gssspi_authorize_localname)
 	(
@@ -641,7 +641,7 @@ int gssint_mechglue_init(void);
 void gssint_mechglue_fini(void);
 #endif
 
-gss_mechanism gssint_get_mechanism (gss_OID);
+gss_mechanism gssint_get_mechanism (gss_const_OID);
 gss_mechanism_ext gssint_get_mechanism_ext(const gss_OID);
 OM_uint32 gssint_get_mech_type (gss_OID, gss_buffer_t);
 char *gssint_get_kmodName(const gss_OID);

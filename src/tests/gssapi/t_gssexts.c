@@ -365,6 +365,7 @@ main(int argc, char *argv[])
     gss_OID_set_desc mechs;
     gss_OID_set actual_mechs = GSS_C_NO_OID_SET;
     gss_buffer_desc buf;
+    uid_t uid;
 
     if (argc < 2 || argc > 5) {
         fprintf(stderr, "Usage: %s [--spnego] [user] "
@@ -385,8 +386,10 @@ main(int argc, char *argv[])
     major = gss_import_name(&minor, &buf,
                             (gss_OID)GSS_KRB5_NT_PRINCIPAL_NAME,
                             &user);
+
+    major = gss_pname_to_uid(&minor, user, NULL, &uid);
     if (GSS_ERROR(major)) {
-        displayStatus("gss_import_name(user)", major, minor);
+        displayStatus("gss_pname_to_uid(user)", major, minor);
         goto out;
     }
 

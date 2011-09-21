@@ -59,8 +59,8 @@
 #endif
 
 /* Local functions */
-static gss_mech_info searchMechList(const gss_OID);
 static void addConfigEntry(const char *oidStr, const char *oid, const char *sharedLib, const char *kernMod, const char *modOptions);
+static gss_mech_info searchMechList(gss_const_OID);
 static void loadConfigFile(const char *);
 #if defined(_WIN32)
 #ifndef MECH_KEY
@@ -796,7 +796,7 @@ build_dynamicMech(void *dl, const gss_OID mech_type)
 	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_inquire_context);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gss_internal_release_oid);
 	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_wrap_size_limit);
-	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_pname_to_uid);
+	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_localname);
 	GSS_ADD_DYNAMIC_METHOD(dl, mech, gssspi_authorize_localname);
 	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_export_name);
 	GSS_ADD_DYNAMIC_METHOD_NOLOOP(dl, mech, gss_duplicate_name);
@@ -896,8 +896,7 @@ freeMechList(void)
  * module if it has not been already loaded.
  */
 gss_mechanism
-gssint_get_mechanism(oid)
-const gss_OID oid;
+gssint_get_mechanism(gss_const_OID oid)
 {
 	gss_mech_info aMech;
 	gss_mechanism (*sym)(const gss_OID);
@@ -1026,8 +1025,7 @@ const gss_OID oid;
  *
  * this needs to be called with g_mechListLock held.
  */
-static gss_mech_info searchMechList(oid)
-const gss_OID oid;
+static gss_mech_info searchMechList(gss_const_OID oid)
 {
 	gss_mech_info aMech = g_mechList;
 
