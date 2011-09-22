@@ -39,7 +39,7 @@ WINLIBS = advapi32.lib user32.lib ws2_32.lib dnsapi.lib
 
 WINDLLFLAGS = /nologo /dll /incremental:no /release $(LOPTS)
 
-DEFINES = -DUNICODE -D_UNICODE
+DEFINES =
 !ifdef NODEBUG
 DEFINES = $(DEFINES)
 !else
