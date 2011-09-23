@@ -54,6 +54,10 @@ krb5_preauth_supply_preauth_data(krb5_context context,
                                  const char *value);
 
 krb5_error_code
+clpreauth_encrypted_challenge_initvt(krb5_context context, int maj_ver,
+                                     int min_ver, krb5_plugin_vtable vtable);
+
+krb5_error_code
 krb5int_construct_matching_creds(krb5_context context, krb5_flags options,
                                  krb5_creds *in_creds, krb5_creds *mcreds,
                                  krb5_flags *fields);

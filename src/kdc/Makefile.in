@@ -20,6 +20,7 @@ SRCS= \
 	$(srcdir)/fast_util.c \
 	$(srcdir)/kdc_util.c \
 	$(srcdir)/kdc_preauth.c \
+	$(srcdir)/kdc_preauth_ec.c \
 	$(srcdir)/main.c \
 	$(srcdir)/policy.c \
 	$(srcdir)/extern.c \
@@ -34,6 +35,7 @@ OBJS= \
 	fast_util.o \
 	kdc_util.o \
 	kdc_preauth.o \
+	kdc_preauth_ec.o \
 	main.o \
 	policy.o \
 	extern.o \

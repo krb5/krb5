@@ -120,11 +120,12 @@ krb5_init_preauth_context(krb5_context kcontext)
     if (kcontext->preauth_context != NULL)
         return;
 
-    /* Auto-register pkinit and encrypted challenge if possible. */
+    /* Auto-register encrypted challenge and (if possible) pkinit. */
     k5_plugin_register_dyn(kcontext, PLUGIN_INTERFACE_CLPREAUTH, "pkinit",
                            "preauth");
-    k5_plugin_register_dyn(kcontext, PLUGIN_INTERFACE_CLPREAUTH,
-                           "encrypted_challenge", "preauth");
+    k5_plugin_register(kcontext, PLUGIN_INTERFACE_CLPREAUTH,
+                       "encrypted_challenge",
+                       clpreauth_encrypted_challenge_initvt);
 
     /* Get all available clpreauth vtables. */
     if (k5_plugin_load_all(kcontext, PLUGIN_INTERFACE_CLPREAUTH, &plugins))

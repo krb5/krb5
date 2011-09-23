@@ -201,6 +201,11 @@ add_pa_data_element (krb5_context context,
                      krb5_pa_data ***out_padata,
                      krb5_boolean copy);
 
+/* kdc_preauth_ec.c */
+krb5_error_code
+kdcpreauth_encrypted_challenge_initvt(krb5_context context, int maj_ver,
+                                      int min_ver, krb5_plugin_vtable vtable);
+
 /* kdc_authdata.c */
 krb5_error_code
 load_authdata_plugins(krb5_context context);
