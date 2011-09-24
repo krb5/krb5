@@ -113,13 +113,6 @@ krb5int_accessor(krb5int_access *internals, krb5_int32 version)
 
             S (encode_krb5_sam_response_2, encode_krb5_sam_response_2),
             S (encode_krb5_enc_sam_response_enc_2, encode_krb5_enc_sam_response_enc_2),
-            S (encode_enc_ts, encode_krb5_pa_enc_ts),
-            S (decode_enc_ts, decode_krb5_pa_enc_ts),
-            S (encode_enc_data, encode_krb5_enc_data),
-            S(decode_enc_data, decode_krb5_enc_data),
-            S(free_enc_ts, krb5_free_pa_enc_ts),
-            S(free_enc_data, krb5_free_enc_data),
-            S(encrypt_helper, krb5_encrypt_helper),
 
 #if DESIGNATED_INITIALIZERS
         };

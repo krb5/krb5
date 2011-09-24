@@ -2127,7 +2127,7 @@ void krb5int_free_srv_dns_data(struct srv_dns_entry *);
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 17
+#define KRB5INT_ACCESS_STRUCT_VERSION 18
 
 #ifndef ANAME_SZ
 struct ktext;                   /* from krb.h, for krb524 support */
@@ -2162,17 +2162,6 @@ typedef struct _krb5int_access {
     krb5_error_code
     (*asn1_ldap_decode_sequence_of_keys)(krb5_data *in,
                                          ldap_seqof_key_data **);
-
-    /* Used for encrypted challenge fast factor*/
-    krb5_error_code (*encode_enc_data)(const krb5_enc_data *, krb5_data **);
-    krb5_error_code (*decode_enc_data)(const krb5_data *, krb5_enc_data **);
-    void (KRB5_CALLCONV *free_enc_data)(krb5_context, krb5_enc_data *);
-    krb5_error_code (*encode_enc_ts)(const krb5_pa_enc_ts *, krb5_data **);
-    krb5_error_code (*decode_enc_ts)(const krb5_data *, krb5_pa_enc_ts **);
-    void (KRB5_CALLCONV *free_enc_ts)(krb5_context, krb5_pa_enc_ts *);
-    krb5_error_code
-    (*encrypt_helper)(krb5_context, const krb5_keyblock *, krb5_keyusage,
-                      const krb5_data *, krb5_enc_data *);
 
     /*
      * pkinit asn.1 encode/decode functions

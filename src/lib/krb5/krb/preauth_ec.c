@@ -56,10 +56,7 @@ process_preauth(krb5_context context, krb5_clpreauth_moddata moddata,
     krb5_enctype enctype = 0;
     krb5_keyblock *challenge_key = NULL, *armor_key = NULL;
     krb5_data *etype_data = NULL;
-    krb5int_access kaccess;
 
-    if (krb5int_accessor(&kaccess, KRB5INT_ACCESS_VERSION) != 0)
-        return 0;
     retval = fast_get_armor_key(context, get_data_proc, rock, &armor_key);
     if (retval || armor_key == NULL)
         return 0;
@@ -82,7 +79,7 @@ process_preauth(krb5_context context, krb5_clpreauth_moddata moddata,
                                       as_key, "challengelongterm",
                                       &challenge_key);
         if (retval == 0)
-            retval =kaccess.decode_enc_data(&scratch, &enc);
+            retval = decode_krb5_enc_data(&scratch, &enc);
         scratch.data = NULL;
         if (retval == 0) {
             scratch.data = malloc(enc->ciphertext.length);
@@ -104,7 +101,7 @@ process_preauth(krb5_context context, krb5_clpreauth_moddata moddata,
         if (retval == 0)
             fast_set_kdc_verified(context, get_data_proc, rock);
         if (enc)
-            kaccess.free_enc_data(context, enc);
+            krb5_free_enc_data(context, enc);
     } else if (retval == 0) { /*No padata; we send*/
         krb5_enc_data enc;
         krb5_pa_data *pa = NULL;
@@ -114,21 +111,21 @@ process_preauth(krb5_context context, krb5_clpreauth_moddata moddata,
         enc.ciphertext.data = NULL;
         retval = krb5_us_timeofday(context, &ts.patimestamp, &ts.pausec);
         if (retval == 0)
-            retval = kaccess.encode_enc_ts(&ts, &encoded_ts);
+            retval = encode_krb5_pa_enc_ts(&ts, &encoded_ts);
         if (retval == 0)
             retval = krb5_c_fx_cf2_simple(context,
                                           armor_key, "clientchallengearmor",
                                           as_key, "challengelongterm",
                                           &challenge_key);
         if (retval == 0)
-            retval = kaccess.encrypt_helper(context, challenge_key,
-                                            KRB5_KEYUSAGE_ENC_CHALLENGE_CLIENT,
-                                            encoded_ts, &enc);
+            retval = krb5_encrypt_helper(context, challenge_key,
+                                         KRB5_KEYUSAGE_ENC_CHALLENGE_CLIENT,
+                                         encoded_ts, &enc);
         if (encoded_ts)
             krb5_free_data(context, encoded_ts);
         encoded_ts = NULL;
         if (retval == 0) {
-            retval = kaccess.encode_enc_data(&enc, &encoded_ts);
+            retval = encode_krb5_enc_data(&enc, &encoded_ts);
             krb5_free_data_contents(context, &enc.ciphertext);
         }
         if (retval == 0) {

@@ -68,7 +68,6 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
     krb5_data scratch, plain;
     krb5_keyblock *armor_key = NULL;
     krb5_pa_enc_ts *ts = NULL;
-    krb5int_access kaccess;
     krb5_keyblock *client_keys = NULL;
     krb5_data *client_data = NULL;
     krb5_keyblock *challenge_key = NULL;
@@ -76,8 +75,6 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
     int i = 0;
 
     plain.data = NULL;
-    if (krb5int_accessor(&kaccess, KRB5INT_ACCESS_VERSION) != 0)
-        return 0;
 
     retval = fast_kdc_get_armor_key(context, get_entry_proc, request, client, &armor_key);
     if (retval == 0 &&armor_key == NULL) {
@@ -87,7 +84,7 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
     scratch.data = (char *) data->contents;
     scratch.length = data->length;
     if (retval == 0)
-        retval = kaccess.decode_enc_data(&scratch, &enc);
+        retval = decode_krb5_enc_data(&scratch, &enc);
     if (retval == 0) {
         plain.data =  malloc(enc->ciphertext.length);
         plain.length = enc->ciphertext.length;
@@ -129,7 +126,7 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
 
     }
     if (retval == 0)
-        retval = kaccess.decode_enc_ts(&plain, &ts);
+        retval = decode_krb5_pa_enc_ts(&plain, &ts);
     if (retval == 0)
         retval = krb5_timeofday(context, &now);
     if (retval == 0) {
@@ -159,9 +156,9 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
     if (plain.data)
         free(plain.data);
     if (enc)
-        kaccess.free_enc_data(context, enc);
+        krb5_free_enc_data(context, enc);
     if (ts)
-        kaccess.free_enc_ts(context, ts);
+        krb5_free_pa_enc_ts(context, ts);
     return retval;
 }
 
@@ -182,23 +179,20 @@ kdc_return_preauth(krb5_context context, krb5_pa_data *padata,
     krb5_enc_data enc;
     krb5_data *encoded = NULL;
     krb5_pa_data *pa = NULL;
-    krb5int_access kaccess;
 
-    if (krb5int_accessor(&kaccess, KRB5INT_ACCESS_VERSION) != 0)
-        return 0;
     if (challenge_key == NULL)
         return 0;
     enc.ciphertext.data = NULL; /* In case of error pass through */
 
     retval = krb5_us_timeofday(context, &ts.patimestamp, &ts.pausec);
     if (retval == 0)
-        retval = kaccess.encode_enc_ts(&ts, &plain);
+        retval = encode_krb5_pa_enc_ts(&ts, &plain);
     if (retval == 0)
-        retval = kaccess.encrypt_helper(context, challenge_key,
-                                        KRB5_KEYUSAGE_ENC_CHALLENGE_KDC,
-                                        plain, &enc);
+        retval = krb5_encrypt_helper(context, challenge_key,
+                                     KRB5_KEYUSAGE_ENC_CHALLENGE_KDC,
+                                     plain, &enc);
     if (retval == 0)
-        retval = kaccess.encode_enc_data(&enc, &encoded);
+        retval = encode_krb5_enc_data(&enc, &encoded);
     if (retval == 0) {
         pa = calloc(1, sizeof(krb5_pa_data));
         if (pa == NULL)
