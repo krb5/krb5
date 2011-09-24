@@ -2048,16 +2048,14 @@ krb5_dbe_get_strings(krb5_context context, krb5_db_entry *entry,
 
     while (next_attr(&pos, end, &mapkey, &mapval)) {
         /* Add a copy of mapkey and mapvalue to strings. */
+        newstrings = realloc(strings, (count + 1) * sizeof(*strings));
+        if (newstrings == NULL)
+            goto oom;
+        strings = newstrings;
         key = strdup(mapkey);
         val = strdup(mapval);
-        newstrings = realloc(strings, (count + 1) * sizeof(*strings));
-        if (key == NULL || val == NULL || newstrings == NULL) {
-            free(key);
-            free(val);
-            krb5_dbe_free_strings(context, strings, count);
-            return ENOMEM;
-        }
-        strings = newstrings;
+        if (key == NULL || val == NULL)
+            goto oom;
         strings[count].key = key;
         strings[count].value = val;
         count++;
@@ -2066,6 +2064,12 @@ krb5_dbe_get_strings(krb5_context context, krb5_db_entry *entry,
     *strings_out = strings;
     *count_out = count;
     return 0;
+
+oom:
+    free(key);
+    free(val);
+    krb5_dbe_free_strings(context, strings, count);
+    return ENOMEM;
 }
 
 krb5_error_code
