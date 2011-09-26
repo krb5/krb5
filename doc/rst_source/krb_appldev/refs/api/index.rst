@@ -135,21 +135,26 @@ Rarely used public interfaces
    krb5_auth_con_setsendsubkey.rst
    krb5_auth_con_setsendsubkey_k.rst
    krb5_auth_con_setuseruserkey.rst
+   krb5_cc_cache_match.rst
    krb5_cc_copy_creds.rst
    krb5_cc_end_seq_get.rst
    krb5_cc_get_config.rst
    krb5_cc_get_flags.rst
+   krb5_cc_get_full_name.rst
    krb5_cc_last_change_time.rst
    krb5_cc_lock.rst
    krb5_cc_move.rst
    krb5_cc_next_cred.rst
    krb5_cc_remove_cred.rst
    krb5_cc_retrieve_cred.rst
+   krb5_cc_select.rst
    krb5_cc_set_config.rst
    krb5_cc_set_default_name.rst
    krb5_cc_set_flags.rst
    krb5_cc_start_seq_get.rst
    krb5_cc_store_cred.rst
+   krb5_cc_support_switch.rst
+   krb5_cc_switch.rst
    krb5_cc_unlock.rst
    krb5_cccol_cursor_free.rst
    krb5_cccol_cursor_new.rst
@@ -184,6 +189,8 @@ Rarely used public interfaces
    krb5_free_keyblock.rst
    krb5_free_keyblock_contents.rst
    krb5_free_keytab_entry_contents.rst
+   krb5_free_octet_data.rst
+   krb5_free_string.rst
    krb5_free_ticket.rst
    krb5_free_unparsed_name.rst
    krb5_get_permitted_enctypes.rst

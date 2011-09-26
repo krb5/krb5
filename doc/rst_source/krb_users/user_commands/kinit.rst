@@ -6,26 +6,26 @@ kinit - obtain and cache Kerberos ticket-granting ticket
 SYNOPSIS
 ~~~~~~~~
 
-kinit      
-          [**-V**]
-          [**-l** *lifetime*]
-          [**-s** *start_time*]
-          [**-r** *renewable_life*]
-          [**-p** | -**P**] 
-          [**-f** | -**F**]
-          [**-a**]
-          [**-A**]
-          [**-C**]
-          [**-E**]
-          [**-v**]
-          [**-R**]
-          [**-k** [-**t** *keytab_file*]]
-          [**-c** *cache_name*]
-          [**-n**]
-          [**-S** *service_name*]
-          [**-T** *armor_ccache*]
-          [**-X** *attribute[=value]*]
-          [*principal*]
+**kinit**      
+    [**-V**]
+    [**-l** *lifetime*]
+    [**-s** *start_time*]
+    [**-r** *renewable_life*]
+    [**-p** | -**P**] 
+    [**-f** | -**F**]
+    [**-a**]
+    [**-A**]
+    [**-C**]
+    [**-E**]
+    [**-v**]
+    [**-R**]
+    [**-k** [-**t** *keytab_file*]]
+    [**-c** *cache_name*]
+    [**-n**]
+    [**-S** *service_name*]
+    [**-T** *armor_ccache*]
+    [**-X** *attribute[=value]*]
+    [*principal*]
 
 
 DESCRIPTION
