@@ -54,7 +54,7 @@ clean-unix:: clean-libs clean-libobjs
 
 clean::
 	$(RM) lib$(LIBBASE)$(SO_EXT)
-	$(RM) pkinit_test_kdf
+	$(RM) pkinit_kdf_test pkinit_kdf_test.o
 
 check-unix:: pkinit_kdf_test
 	$(RUN_SETUP) $(VALGRIND) ./pkinit_kdf_test
