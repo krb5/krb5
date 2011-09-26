@@ -186,7 +186,7 @@ if test -n "$do_libs"; then
 	    -e 's#\$(RPATH_FLAG)#'"$RPATH_FLAG"'#' \
 	    -e 's#\$(LDFLAGS)#'"$LDFLAGS"'#' \
 	    -e 's#\$(PTHREAD_CFLAGS)#'"$PTHREAD_CFLAGS"'#' \
-	    -e 's#\$(CFLAGS)#'"$CFLAGS"'#'`
+	    -e 's#\$(CFLAGS)##'`
 
     if test $library = 'kdb'; then
 	lib_flags="$lib_flags -lkdb5 $KDB5_DB_LIB"
@@ -214,8 +214,12 @@ if test -n "$do_libs"; then
     fi
 
     if test $library = 'krb5'; then
-	lib_flags="$lib_flags -lkrb5 -lk5crypto -lcom_err $GEN_LIB $LIBS $DL_LIB"
+	lib_flags="$lib_flags -lkrb5 -lk5crypto -lcom_err"
     fi
+
+    # If we ever support a flag to generate output suitable for static
+    # linking, we would output "-lkrb5support $GEN_LIB $LIBS $DL_LIB"
+    # here.
 
     echo $lib_flags
 fi
