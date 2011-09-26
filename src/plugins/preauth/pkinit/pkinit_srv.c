@@ -308,7 +308,6 @@ pkinit_server_verify_padata(krb5_context context,
     krb5_auth_pack_draft9 *auth_pack9 = NULL;
     pkinit_kdc_context plgctx = NULL;
     pkinit_kdc_req_context reqctx = NULL;
-    krb5_preauthtype pa_type;
     krb5_checksum cksum = {0, 0, 0, NULL};
     krb5_data *der_req = NULL;
     int valid_eku = 0, valid_san = 0;
@@ -351,7 +350,6 @@ pkinit_server_verify_padata(krb5_context context,
     switch ((int)data->pa_type) {
     case KRB5_PADATA_PK_AS_REQ:
         pkiDebug("processing KRB5_PADATA_PK_AS_REQ\n");
-        pa_type = (int)data->pa_type;
         retval = k5int_decode_krb5_pa_pk_as_req(&k5data, &reqp);
         if (retval) {
             pkiDebug("decode_krb5_pa_pk_as_req failed\n");
@@ -372,7 +370,6 @@ pkinit_server_verify_padata(krb5_context context,
     case KRB5_PADATA_PK_AS_REP_OLD:
     case KRB5_PADATA_PK_AS_REQ_OLD:
         pkiDebug("processing KRB5_PADATA_PK_AS_REQ_OLD\n");
-        pa_type = KRB5_PADATA_PK_AS_REQ_OLD;
         retval = k5int_decode_krb5_pa_pk_as_req_draft9(&k5data, &reqp9);
         if (retval) {
             pkiDebug("decode_krb5_pa_pk_as_req_draft9 failed\n");

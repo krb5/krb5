@@ -378,7 +378,7 @@ parse_rule_set(krb5_context context,
                rule_set **out_rs)
 {
     const char *rule;
-    int remaining, totlen;
+    int remaining;
     krb5_error_code ret, retval;
     rule_component *rc = NULL, *trc;
     rule_set *rs;
@@ -387,7 +387,7 @@ parse_rule_set(krb5_context context,
     if (rule_in == NULL)
         return EINVAL;
     rule = rule_in;
-    totlen = remaining = strlen(rule);
+    remaining = strlen(rule);
 
     rs = calloc(1, sizeof(*rs));
     if (rs == NULL) {

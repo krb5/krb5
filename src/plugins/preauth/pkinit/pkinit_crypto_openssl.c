@@ -5771,7 +5771,6 @@ pkcs7_dataDecode(krb5_context context,
     EVP_CIPHER_CTX *evp_ctx=NULL;
     X509_ALGOR *enc_alg=NULL;
     STACK_OF(PKCS7_RECIP_INFO) *rsk=NULL;
-    X509_ALGOR *xalg=NULL;
     PKCS7_RECIP_INFO *ri=NULL;
     X509 *cert = sk_X509_value(id_cryptoctx->my_certs,
                                id_cryptoctx->cert_index);
@@ -5786,7 +5785,6 @@ pkcs7_dataDecode(krb5_context context,
         PKCS7err(PKCS7_F_PKCS7_DATADECODE,PKCS7_R_UNSUPPORTED_CIPHER_TYPE);
         goto cleanup;
     }
-    xalg=p7->d.enveloped->enc_data->algorithm;
 
     if ((etmp=BIO_new(BIO_f_cipher())) == NULL) {
         PKCS7err(PKCS7_F_PKCS7_DATADECODE,ERR_R_BIO_LIB);
