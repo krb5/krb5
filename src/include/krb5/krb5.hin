@@ -2285,7 +2285,7 @@ typedef struct _krb5_cccol_cursor *krb5_cccol_cursor;
 const char * KRB5_CALLCONV
 krb5_cc_get_name(krb5_context context, krb5_ccache cache);
 
-/*
+/**
  * Retrieve the full name of a credential cache.
  *
  * @param [in]  context         Library context
@@ -4428,8 +4428,8 @@ krb5_cc_switch(krb5_context context, krb5_ccache cache);
  * @param [in] context          Library context
  * @param [in] type             Credential cache type
  *
- * @retval @c TRUE if @a type supports switching
- * @retval @a FALSE if it does not or is not a valid credential cache type.
+ * @retval TRUE if @a type supports switching
+ * @retval FALSE if it does not or is not a valid credential cache type.
  */
 krb5_boolean KRB5_CALLCONV
 krb5_cc_support_switch(krb5_context context, const char *type);
