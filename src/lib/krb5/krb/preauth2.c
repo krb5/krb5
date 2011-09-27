@@ -678,10 +678,8 @@ pa_enc_timestamp(krb5_context context, krb5_kdc_req *request,
 
     krb5_free_data(context, tmp);
 
-    if (ret) {
-        free(enc_data.ciphertext.data);
+    if (ret)
         return(ret);
-    }
 
     ret = encode_krb5_enc_data(&enc_data, &tmp);
 
