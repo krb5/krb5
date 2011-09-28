@@ -200,6 +200,7 @@ KLIB=$(BUILDTOP)\lib\$(OUTPRE)krb5_32.lib
 K4LIB=$(BUILDTOP)\lib\$(OUTPRE)krb4_32.lib
 SLIB=$(BUILDTOP)\lib\$(OUTPRE)k5sprt32.lib
 GLIB=$(BUILDTOP)\lib\$(OUTPRE)gssapi32.lib
+CCLIB=$(BUILDTOP)\ccapi\lib\win\srctmp\ccapi.lib
 WLIB=
 
 !if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
@@ -209,6 +210,7 @@ KLIB=$(BUILDTOP)\lib\$(OUTPRE)krb5_64.lib
 K4LIB=$(BUILDTOP)\lib\$(OUTPRE)krb4_64.lib
 SLIB=$(BUILDTOP)\lib\$(OUTPRE)k5sprt64.lib
 GLIB=$(BUILDTOP)\lib\$(OUTPRE)gssapi64.lib
+CCLIB=$(BUILDTOP)\ccapi\lib\win\srctmp\ccapi.lib
 WLIB=
 
 !endif
