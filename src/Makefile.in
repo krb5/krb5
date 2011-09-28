@@ -552,7 +552,6 @@ install-windows::
 	copy lib\$(OUTPRE)*.lib "$(KRB_INSTALL_DIR)\lib\."
 	copy lib\$(OUTPRE)*.dll "$(KRB_INSTALL_DIR)\bin\."
 	copy windows\cns\$(OUTPRE)krb5.exe "$(KRB_INSTALL_DIR)\bin\."
-	copy windows\gss\$(OUTPRE)gss.exe "$(KRB_INSTALL_DIR)\bin\."
 	copy appl\gss-sample\$(OUTPRE)gss-server.exe "$(KRB_INSTALL_DIR)\bin\."
 	copy appl\gss-sample\$(OUTPRE)gss-client.exe "$(KRB_INSTALL_DIR)\bin\."
 	copy windows\ms2mit\$(OUTPRE)ms2mit.exe "$(KRB_INSTALL_DIR)\bin\."
