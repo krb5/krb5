@@ -56,7 +56,7 @@ static char sccsid[] = "@(#)res_query.c	5.11 (Berkeley) 3/6/91";
 #include <string.h>
 #include <windns.h>
 
-#define MAX_MSG_SIZE 0x2003
+#define MAX_MSG_SIZE 0x8000
 
 #define strcasecmp	stricmp
 
