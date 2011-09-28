@@ -33,9 +33,6 @@
 #include "leash-int.h"
 #include "leashids.h"
 #include <leasherr.h>
-#ifndef NO_KRB4
-#include <krb.h>
-#endif
 #ifndef NO_KRB5
 #include <krb5.h>
 #endif /* NO_KRB5 */
@@ -455,11 +452,7 @@ int lsh_getkeystate(WORD keyid)
 
 LPSTR krb_err_func(int offset, long code)
 {
-#ifdef NO_KRB4
     return(NULL);
-#else
-    return pget_krb_err_txt_entry(offset);
-#endif
 }
 
 /****** End of Added utils from leash.c  ******/
@@ -798,7 +791,6 @@ PasswordProc(
                 {
 		    int next_state = state;
 		    int capslock;
-		    LONG check_time;
 		    char *cp;
 
 		    err_context = "";
@@ -808,26 +800,8 @@ PasswordProc(
                     case LSH_INVPRINCIPAL:
                     case LSH_INVINSTANCE:
                     case LSH_INVREALM:
-#ifndef NO_KRB4
-                    case KRBERR(KDC_PR_UNKNOWN):
-#endif
 			next_state = STATE_PRINCIPAL;
 			break;
-#ifndef NO_KRB4
-                    case KRBERR(RD_AP_TIME):
-                    case KRBERR(KDC_SERVICE_EXP):
-                        check_time = Leash_timesync(1);
-                        if( check_time == 0 ){
-                            next_state = STATE_PRINCIPAL;
-                            SendMessage(hDialog, WM_COMMAND, IDOK, state);
-                            return(TRUE);
-                        } else {
-                            next_state = STATE_PRINCIPAL;
-                            lsh_errno = check_time;
-                            return(TRUE);
-                        }
-                        break;
-#endif
                     }
 		    capslock = lsh_getkeystate(VK_CAPITAL);
                     /* low-order bit means caps lock is
@@ -1015,9 +989,6 @@ GetKrb4ConFile(
     )
 {
     if (hKrb5
-#ifndef NO_KRB4
-         && !hKrb4
-#endif
          )
     { // hold krb.con where krb5.ini is located
         CHAR krbConFile[MAX_PATH]="";
@@ -1049,22 +1020,6 @@ GetKrb4ConFile(
         strncpy(confname, krbConFile, szConfname);
         confname[szConfname-1] = '\0';
     }
-#ifndef NO_KRB4
-    else if (hKrb4)
-    {
-        unsigned int size = szConfname;
-        memset(confname, '\0', szConfname);
-        if (!pkrb_get_krbconf2(confname, &size))
-        { // Error has happened
-            GetWindowsDirectory(confname,szConfname);
-            confname[szConfname-1] = '\0';
-            strncat(confname, "\\",szConfname-strlen(confname));
-            confname[szConfname-1] = '\0';
-            strncat(confname,KRB_FILE,szConfname-strlen(confname));
-            confname[szConfname-1] = '\0';
-        }
-    }
-#endif
     return FALSE;
 }
 
@@ -1075,9 +1030,6 @@ GetKrb4RealmFile(
     )
 {
     if (hKrb5
-#ifndef NO_KRB4
-         && !hKrb4
-#endif
          )
     { // hold krb.con where krb5.ini is located
         CHAR krbRealmConFile[MAX_PATH];
@@ -1109,23 +1061,6 @@ GetKrb4RealmFile(
         strncpy(confname, krbRealmConFile, szConfname);
         confname[szConfname-1] = '\0';
     }
-#ifndef NO_KRB4
-    else if (hKrb4)
-    {
-        unsigned int size = szConfname;
-        memset(confname, '\0', szConfname);
-        if (!pkrb_get_krbrealm2(confname, &size))
-        {
-            GetWindowsDirectory(confname,szConfname);
-            confname[szConfname-1] = '\0';
-            strncat(confname, "\\",szConfname-strlen(confname));
-            confname[szConfname-1] = '\0';
-            strncat(confname,KRBREALM_FILE,szConfname-strlen(confname));
-            confname[szConfname-1] = '\0';
-            return TRUE;
-        }
-    }
-#endif
     return FALSE;
 }
 
@@ -1959,7 +1894,6 @@ AuthenticateProc(
 						);
 		if (lsh_errno != 0)
 		{
-		    LONG check_time;
 #ifdef COMMENT
 		    char gbuf[256];
 		    int capslock;
@@ -1970,9 +1904,6 @@ AuthenticateProc(
 		    {
 		    case LSH_INVPRINCIPAL:
 		    case LSH_INVINSTANCE:
-#ifndef NO_KRB4
-                    case KRBERR(KDC_PR_UNKNOWN):
-#endif
                         CSendDlgItemMessage(hDialog, IDC_EDIT_PRINCIPAL, EM_SETSEL, 0, 256);
                         SetFocus(GetDlgItem(hDialog,IDC_EDIT_PRINCIPAL));
                         break;
@@ -1980,19 +1911,6 @@ AuthenticateProc(
                         CSendDlgItemMessage(hDialog, IDC_COMBO_REALM, EM_SETSEL, 0, 256);
                         SetFocus(GetDlgItem(hDialog,IDC_COMBO_REALM));
 			break;
-#ifndef NO_KRB4
-		    case KRBERR(RD_AP_TIME):
-		    case KRBERR(KDC_SERVICE_EXP):
-			check_time = Leash_timesync(1);
-			if( check_time == 0 ){
-			    SendMessage(hDialog, WM_COMMAND, IDOK, 0);
-			    return(TRUE);
-			} else {
-			    lsh_errno = check_time;
-			    return(TRUE);
-			}
-			break;
-#endif
                     default:
                         CSendDlgItemMessage(hDialog, IDC_EDIT_PASSWORD, EM_SETSEL, 0, 256);
                         SetFocus(GetDlgItem(hDialog,IDC_EDIT_PASSWORD));
@@ -2353,7 +2271,6 @@ NewPasswordProc(
 		    int capslock;
 		    char *cp;
 #endif /* COMMENT */
-		    LONG check_time;
 
 		    err_context = "";
 		    switch(lsh_errno)
@@ -2361,23 +2278,7 @@ NewPasswordProc(
 		    case LSH_INVPRINCIPAL:
 		    case LSH_INVINSTANCE:
 		    case LSH_INVREALM:
-#ifndef NO_KRB4
-		    case KRBERR(KDC_PR_UNKNOWN):
-#endif
 			break;
-#ifndef NO_KRB4
-		    case KRBERR(RD_AP_TIME):
-		    case KRBERR(KDC_SERVICE_EXP):
-			check_time = Leash_timesync(1);
-			if( check_time == 0 ){
-			    SendMessage(hDialog, WM_COMMAND, IDOK, 0);
-			    return(TRUE);
-			} else {
-			    lsh_errno = check_time;
-			    return(TRUE);
-			}
-			break;
-#endif
 		    default:
 			return(TRUE);
 		    }
