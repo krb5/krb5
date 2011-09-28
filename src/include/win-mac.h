@@ -13,7 +13,6 @@
 #define _KRB5_WIN_MAC_H
 
 #ifdef _WIN32
-
 #define ID_READ_PWD_DIALOG  10000
 #define ID_READ_PWD_PROMPT  10001
 #define ID_READ_PWD_PROMPT2 10002
@@ -188,6 +187,7 @@ typedef _W64 int         ssize_t;
 #include <fcntl.h>
 #include <io.h>
 #include <process.h>
+#include <wincrypt.h>
 
 #ifdef NEED_SYSERROR
 /* Only needed by util/et/error_message.c but let's keep the source clean */
