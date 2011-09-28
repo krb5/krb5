@@ -151,7 +151,11 @@ cc_free_NC_info,
 );
 /* End private ccapiv2 headers */
 
+#ifdef _WIN64
+#define CCAPI_DLL   "krbcc64.dll"
+#else
 #define CCAPI_DLL   "krbcc32.dll"
+#endif
 
 
 /* */
