@@ -340,7 +340,7 @@ ren2long:
 #
 ZIP=zip
 FILES= ./* appl/* appl/gss-sample/* \
-    clients/* clients/kdestroy/* clients/kinit/* clients/klist/* \
+	clients/* clients/kdestroy/* clients/kinit/* clients/klist/* \
 	clients/kpasswd/* clients/kvno/* clients/kcpytkt/* clients/kdeltkt/* \
 	config/* include/* \
 	include/krb5/* lib/* lib/crypto/* lib/crypto/krb/* \
@@ -363,11 +363,11 @@ FILES= ./* appl/* appl/gss-sample/* \
 	util/* util/et/* util/profile/* util/support/*
 
 WINFILES= \
-    ccapi/* ccapi/common/* ccapi/common/win/* ccapi/common/win/OldCC/* \
-    ccapi/lib/* ccapi/lib/win/* ccapi/lib/win/OldCC/* \
-    ccapi/server/* ccapi/server/win/* \
-    ccapi/test/* \
-    util/windows/* windows/* windows/wshelper/* windows/lib/* windows/cns/* \
+	ccapi/* ccapi/common/* ccapi/common/win/* ccapi/common/win/OldCC/* \
+	ccapi/lib/* ccapi/lib/win/* ccapi/lib/win/OldCC/* \
+	ccapi/server/* ccapi/server/win/* \
+	ccapi/test/* \
+	util/windows/* windows/* windows/wshelper/* windows/lib/* windows/cns/* \
 	windows/wintel/* windows/gss/* windows/gina/* windows/ms2mit/* \
 	windows/kfwlogon/* windows/leashdll/*
 
@@ -554,10 +554,17 @@ install-windows::
 	copy windows\cns\$(OUTPRE)krb5.exe "$(KRB_INSTALL_DIR)\bin\."
 	copy appl\gss-sample\$(OUTPRE)gss-server.exe "$(KRB_INSTALL_DIR)\bin\."
 	copy appl\gss-sample\$(OUTPRE)gss-client.exe "$(KRB_INSTALL_DIR)\bin\."
-	copy windows\ms2mit\$(OUTPRE)ms2mit.exe "$(KRB_INSTALL_DIR)\bin\."
+	copy windows\ms2mit\$(OUTPRE)*.exe "$(KRB_INSTALL_DIR)\bin\."
+	copy windows\leashdll\$(OUTPRE)*.lib "$(KRB_INSTALL_DIR)\lib\."
+	copy windows\leashdll\$(OUTPRE)*.dll "$(KRB_INSTALL_DIR)\bin\."
+	copy windows\kfwlogon\$(OUTPRE)*.lib "$(KRB_INSTALL_DIR)\lib\."
+	copy windows\kfwlogon\$(OUTPRE)*.exe "$(KRB_INSTALL_DIR)\bin\."
+	copy windows\kfwlogon\$(OUTPRE)*.dll "$(KRB_INSTALL_DIR)\bin\."
+	copy util\windows\$(OUTPRE)*.lib $(KRB_INSTALL_DIR)\lib\."
 	copy util\wshelper\$(OUTPRE)$(DLIB).lib "$(KRB_INSTALL_DIR)\lib\."
 	copy util\wshelper\$(OUTPRE)$(DLIB).dll "$(KRB_INSTALL_DIR)\bin\."
 	copy ccapi\lib\win\srctmp\$(OUTPRE)$(CCLIB).dll "$(KRB_INSTALL_DIR)\bin\."
+	copy ccapi\lib\win\srctmp\$(CCLIB).lib "$(KRB_INSTALL_DIR)\lib\."
 	copy ccapi\server\win\srctmp\$(OUTPRE)ccapiserver.exe "$(KRB_INSTALL_DIR)\bin\."
 	copy clients\kvno\$(OUTPRE)kvno.exe "$(KRB_INSTALL_DIR)\bin\."
 	copy clients\klist\$(OUTPRE)klist.exe "$(KRB_INSTALL_DIR)\bin\."
@@ -566,6 +573,7 @@ install-windows::
 	copy clients\kcpytkt\$(OUTPRE)kcpytkt.exe "$(KRB_INSTALL_DIR)\bin\."
 	copy clients\kdeltkt\$(OUTPRE)kdeltkt.exe "$(KRB_INSTALL_DIR)\bin\."
 	copy clients\kpasswd\$(OUTPRE)kpasswd.exe "$(KRB_INSTALL_DIR)\bin\."
+	copy clients\kswitch\$(OUTPRE)kswitch.exe "$(KRB_INSTALL_DIR)\bin\."
 
 install-unix:: 
 	$(INSTALL_SCRIPT) krb5-config \
