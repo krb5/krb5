@@ -165,6 +165,7 @@ WINMAKEFILES=Makefile \
 	clients\kinit\Makefile clients\klist\Makefile \
 	clients\kpasswd\Makefile clients\kvno\Makefile \
 	clients\kcpytkt\Makefile clients\kdeltkt\Makefile \
+	clients\kswitch\Makefile \
 	include\Makefile \
 	lib\Makefile lib\crypto\Makefile lib\crypto\krb\Makefile \
 	lib\crypto\builtin\Makefile lib\crypto\builtin\aes\Makefile \
@@ -220,6 +221,8 @@ WINMAKEFILES=Makefile \
 ##DOS##clients\klist\Makefile: clients\klist\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##clients\kpasswd\Makefile: clients\kpasswd\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##clients\kswitch\Makefile: clients\kswitch\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##clients\kvno\Makefile: clients\kvno\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
