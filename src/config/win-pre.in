@@ -134,11 +134,8 @@ LOPTS=-nologo -incremental:no
 
 !if  ("$(CPU)" == "IA64" ) || ("$(CPU)" == "AMD64" ) || ("$(CPU)" == "ALPHA64" )
 ENTRYPOINT=_DllMainCRTStartup
-#CCLINKOPTION=/link bufferoverflowu.lib
-#SCLIB=bufferoverflowu.lib
-#DEBUGOPT=/Zi
 !else
-ENTRYPOINT=_DLLMainCRTStartup@12
+ENTRYPOINT=_DllMainCRTStartup@12
 !endif
 CCLINKOPTION=
 SCLIB=

@@ -91,7 +91,7 @@ midl : ccs_request.h ccs_reply.h
 
 # Main program:
 $(OUTPRE)$(CCLIB).dll: $(OBJS) $(CCLIB).def
-	$(LINK) $(LFLAGS) -entry:_DllMainCRTStartup@12 -dll /map:$*.map /out:$@ /DEF:$(CCLIB).def $(OBJS) \
+	$(LINK) $(LFLAGS) -entry:$(ENTRYPOINT) -dll /map:$*.map /out:$@ /DEF:$(CCLIB).def $(OBJS) \
 	    /implib:$(CCLIB).lib $(dllflags) $(LIBS) $(KFWLIB) $(SCLIB) rpcrt4.lib $(conlibsdll) $(conflags)
 
 $(CCLIB).def:
