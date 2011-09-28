@@ -61,4 +61,4 @@ $(OUTPRE)dllmain.$(OBJEXT): pwd.h
 $(OUTPRE)hespwnam.$(OBJEXT): pwd.h
 $(OUTPRE)dllmain.$(OBJEXT): wsh-int.h
 $(OUTPRE)res_init.$(OBJEXT): wsh-int.h
-$(RESFILE): resource.rc ../version.rc ../kerberos.ver
+$(RESFILE): resource.rc  ../../windows/version.rc ../../windows/kerberos.ver

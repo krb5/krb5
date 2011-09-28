@@ -6,7 +6,7 @@ mydir=util
 SUBDIRS=support $(MAYBE_ET_@COM_ERR_VERSION@) $(MAYBE_SS_@SS_VERSION@) \
 	profile send-pr gss-kernel-lib $(MAYBE_VERTO_@VERTO_VERSION@)
 ##WIN32##!endif
-WINSUBDIRS=windows support et profile
+WINSUBDIRS=windows support et profile wshelper
 BUILDTOP=$(REL)..
 
 MAYBE_ET_k5 = et

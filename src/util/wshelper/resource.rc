@@ -40,7 +40,7 @@ END
 
 3 TEXTINCLUDE DISCARDABLE
 BEGIN
-    "#include ""..\\version.rc""\r\n"
+    "#include ""..\\..\\windows\\version.rc""\r\n"
     "#include ""string.rc""\r\n"
     "\0"
 END
@@ -57,7 +57,7 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-#include "..\version.rc"
+#include "..\..\windows\version.rc"
 #include "string.rc"
 
 /////////////////////////////////////////////////////////////////////////////
