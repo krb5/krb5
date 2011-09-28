@@ -120,9 +120,7 @@ DNSFLAGS=
 TIME_T_FLAGS=-D_USE_32BIT_TIME_T
 !endif
 
-!if defined(KRB5_KFW_COMPILE)
 KFWFLAGS=-DUSE_LEASH=1
-!endif
 
 #
 # The name of the C compiler for the target
