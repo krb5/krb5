@@ -24,19 +24,19 @@
         <debug      def="0" abbr="d" />
         <help       def="0" abbr="h|?" />
         <logfile    def="1" abbr="l" value="bkw.pl.log" />
-        <make       def="1" />
+        <make       def="0" />
         <nolog      def="0" />
         <package    def="1" />
         <repository def="A" abbr="r" value="skip" options="skip checkout|co export|ex update|up" />
         <sign       def="0" />
-        <verbose    def="0" abbr="v" />
+        <verbose    def="1" abbr="v" />
         <vverbose   def="0" />
 
         <!-- Directory settings: -->
         <!--    Sources will be checked out of repositories into <src>.  The structure
                 of the repositories will cause pismere/athena to be created under <src>.    -->
-        <src        def="A" abbr="s" value="C:\KfW" />        <!-- Must be absolute path. -->
-        <out        def="A" abbr="o" value="C:\KfW\public" /> <!-- Must be absolute path. -->
+        <src        def="A" abbr="s" value="C:\MinGW\kfw-updates\src" />    <!-- Must be absolute path. -->
+        <out        def="A" abbr="o" value="C:\MinGW\kfw-updates\public" /> <!-- Must be absolute path. -->
 
         <!-- Repository settings: -->
         <cvstag     def="0" abbr="c" value="" />
@@ -114,7 +114,7 @@
         <Package>
             <Config>
                 <Paths>    
-                    <Versions path="pismere/athena/include/kerberos.ver" /> <!-- Relative to <src>. -->
+                    <Versions path="kerberos.ver" /> <!-- Relative to <src>. -->
                     </Paths>
                 </Config>
             <MSI></MSI>

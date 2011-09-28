@@ -132,9 +132,10 @@ sub main {
 
 ##++ Validate required conditions:
 
-    # List of programs which must be in PATH:
-    my @required_list = ('sed', 'awk', 'which', 'cat', 'rm', 'cvs', 'svn', 'doxygen', 
-                         'hhc', 'candle', 'light', 'makensis', 'nmake', 'plink', 'filever');
+    # List of programs which must be in PATH:'
+    # 'cvs', 'svn', 'hhc', 'makensis', 'plink', 'filever'
+    my @required_list = ('sed', 'awk', 'which', 'cat', 'rm', 'doxygen',
+                         'candle', 'light', 'nmake');
     my $requirements_met    = 1;
     my $first_missing       = 0;
     my $error_list          = "";
@@ -190,7 +191,7 @@ sub main {
         # If the switch can be negated, test that, too:
         if ( ! ($val->{def} =~ /A/)) {
             local $nosw = "no".$sw;
-            if (exists $OPT->{$sw}) {         ## -NO<environment variable> ?
+            if (exists $OPT->{$nosw}) {         ## -NO<environment variable> ?
                 if ($val->{env}) {              
                     if (!$val->{def}) {
                         print "Deleting environment variable $sw\n";
@@ -288,7 +289,7 @@ sub main {
         $clean  = $odr->{clean}->{def}    = 0;
         }
 
-    my $wd  = $src."\\pismere";
+    my $wd  = $src;
 
     if (! ($rverb =~ /skip/)) {
         local $len = 0;
@@ -421,7 +422,7 @@ sub main {
     # ** Do this now (after repository update and before first zip) 
     #    because making zip files requires some configuration data be set up.
     local $version_path = $config->{Stages}->{Package}->{Config}->{Paths}->{Versions}->{path};
-    open(DAT, "$src/$version_path")     or die "Could not open $version_path.";
+    open(DAT, "$src/$version_path")     or die "Could not open $src/$version_path.";
     @raw = <DAT>;
     close DAT;
     foreach $line (@raw) {
@@ -562,40 +563,40 @@ sub main {
 
         # The build results are copied to a staging area, where the packager expects to find them.
         #  We put the staging area in the fixed area .../pismere/staging.
-        my $prepackage  = $config->{Stages}->{PrePackage};
-        my $staging     = "$wd\\staging";
-        chdir($wd)                          or die "Fatal -- couldn't chdir to $wd\n";
-        print "Info -- chdir to ".`cd`."\n" if ($verbose);
-        if (-d "staging") {
-            !system("rm -rf $staging/*")        or die "Fatal -- Couldn't clean $staging.";
-            }
-        else {
-            mkdir($staging)                     or die "Fatal -- Couldn't create $staging.";
-            }
+        #my $prepackage  = $config->{Stages}->{PrePackage};
+        #my $staging     = "$wd\\staging";
+        #chdir($wd)                          or die "Fatal -- couldn't chdir to $wd\n";
+        #print "Info -- chdir to ".`cd`."\n" if ($verbose);
+        #if (-d "staging") {
+        #    !system("rm -rf $staging/*")        or die "Fatal -- Couldn't clean $staging.";
+        #    }
+        #else {
+        #    mkdir($staging)                     or die "Fatal -- Couldn't create $staging.";
+        #    }
         
         # Force Where From and To are relative to:
-        $prepackage->{CopyList}->{Config}->{From}->{root}   = "$wd\\athena";
-        $prepackage->{CopyList}->{Config}->{To}->{root}     = "$wd\\staging";
-        copyFiles($prepackage->{CopyList}, $config);        ## Copy any files [this step takes a while]
+        #$prepackage->{CopyList}->{Config}->{From}->{root}   = "$wd\\athena";
+        #$prepackage->{CopyList}->{Config}->{To}->{root}     = "$wd\\staging";
+        #copyFiles($prepackage->{CopyList}, $config);        ## Copy any files [this step takes a while]
 
         # Sign files:
-        chdir($staging) or die "Fatal -- couldn't chdir to $staging\n";
-        print "Info -- chdir to ".`cd`."\n"     if ($verbose);
-        if ($odr->{sign}->{def}) {
-            signFiles($config->{Stages}->{PostPackage}->{Config}->{Signing}, $config);
-            }
+        #chdir($staging) or die "Fatal -- couldn't chdir to $staging\n";
+        #print "Info -- chdir to ".`cd`."\n"     if ($verbose);
+        #if ($odr->{sign}->{def}) {
+        #    signFiles($config->{Stages}->{PostPackage}->{Config}->{Signing}, $config);
+        #    }
             
         # Create working directories for building the installers:
         if (-d "$wd\\buildwix")    {!system("rm -rf $wd\\buildwix/*")               or die "Fatal -- Couldn't clean $wd\\buildwix."}    
-        !system("echo D | xcopy /s $wd\\staging\\install\\wix\\*.* $wd\\buildwix")  or die "Fatal -- Couldn't create $wd\\buildwix.";
-        if (-d "$wd\\buildnsi")    {!system("rm -rf $wd\\buildnsi/*")               or die "Fatal -- Couldn't clean $wd\\buildnsi."}    
-        !system("echo D | xcopy /s $wd\\staging\\install\\nsis\\*.* $wd\\buildnsi") or die "Fatal -- Couldn't create $wd\\buildnsi.";
+        !system("echo D | xcopy /s $wd\\windows\\installer\\wix\\*.* $wd\\buildwix")  or die "Fatal -- Couldn't create $wd\\buildwix.";
+        #if (-d "$wd\\buildnsi")    {!system("rm -rf $wd\\buildnsi/*")               or die "Fatal -- Couldn't clean $wd\\buildnsi."}
+        #!system("echo D | xcopy /s $wd\\staging\\install\\nsis\\*.* $wd\\buildnsi") or die "Fatal -- Couldn't create $wd\\buildnsi.";
 
-        chdir("$staging\\install\\wix") or die "Fatal -- Couldn't cd to $staging\\install\\wix";
+        chdir("$wd\\windows\\installer\\wix") or die "Fatal -- Couldn't cd to $wd\\windows\\installer\\wix";
         print "Info -- chdir to ".`cd`."\n"     if ($verbose);
         # Correct errors in files.wxi:
-        !system("sed 's/WorkingDirectory=\"\\[dirbin\\]\"/WorkingDirectory=\"dirbin\"/g' files.wxi > a.tmp") or die "Fatal -- Couldn't modify files.wxi.";
-        !system("mv a.tmp files.wxi") or die "Fatal -- Couldn't update files.wxi.";
+        #!system("sed 's/WorkingDirectory=\"\\[dirbin\\]\"/WorkingDirectory=\"dirbin\"/g' files.wxi > a.tmp") or die "Fatal -- Couldn't modify files.wxi.";
+        #!system("mv a.tmp files.wxi") or die "Fatal -- Couldn't update files.wxi.";
             
         # Make sed script to run on the site-local configuration files:
         local $tmpfile      = "site-local.sed" ;
@@ -623,41 +624,41 @@ sub main {
         !system("sed -f $tmpfile site-local-tagged.wxi > $wd\\buildwix\\site-local.wxi")   or die "Fatal -- Couldn't modify site-local.wxi.";
 
         # Now update site-local.nsi:
-        chdir "..\\nsis";
-        print "Info -- chdir to ".`cd`."\n"                                 if ($verbose);
-        !system("sed -f ..\\wix\\$tmpfile site-local-tagged.nsi > b.tmp")   or die "Fatal -- Couldn't modify site-local.wxi.";
+        #chdir "..\\nsis";
+        #print "Info -- chdir to ".`cd`."\n"                                 if ($verbose);
+        #!system("sed -f ..\\wix\\$tmpfile site-local-tagged.nsi > b.tmp")   or die "Fatal -- Couldn't modify site-local.wxi.";
         # Add DEBUG or RELEASE:
-        if ($odr->{debug}->{def}) {                    ## debug build
-            !system("echo !define DEBUG >> b.tmp")     or die "Fatal -- Couldn't modify b.tmp.";    
-            }
-        else {                                         ## release build
-            !system("echo !define RELEASE >> b.tmp")   or die "Fatal -- Couldn't modify b.tmp.";
-            }
+        #if ($odr->{debug}->{def}) {                    ## debug build
+        #    !system("echo !define DEBUG >> b.tmp")     or die "Fatal -- Couldn't modify b.tmp.";
+        #    }
+        #else {                                         ## release build
+        #    !system("echo !define RELEASE >> b.tmp")   or die "Fatal -- Couldn't modify b.tmp.";
+        #    }
         # Add BETA if present:
-        if (exists $config->{Versions}->{'BETA_STR'}) {
-            !system("echo !define BETA $config->{Versions}->{'BETA_STR'} >> b.tmp") or die "Fatal -- Couldn't modify b.tmp.";    
-            }
-        !system("mv -f b.tmp $wd\\buildnsi\\site-local.nsi")                        or die "Fatal -- Couldn't replace site-local.nsi.";
+        #if (exists $config->{Versions}->{'BETA_STR'}) {
+        #    !system("echo !define BETA $config->{Versions}->{'BETA_STR'} >> b.tmp") or die "Fatal -- Couldn't modify b.tmp.";
+        #    }
+        #!system("mv -f b.tmp $wd\\buildnsi\\site-local.nsi")                        or die "Fatal -- Couldn't replace site-local.nsi.";
 
         # Run the script on nsi-includes-tagged.nsi:
-        !system("sed -f ..\\wix\\$tmpfile nsi-includes-tagged.nsi > $wd\\buildnsi\\nsi-includes.nsi")  or die "Fatal -- Couldn't modify nsi-includes.nsi.";
-        !system("rm ..\\wix\\$tmpfile")                                     or die "Fatal -- Couldn't remove $tmpfile.";
+        #!system("sed -f ..\\wix\\$tmpfile nsi-includes-tagged.nsi > $wd\\buildnsi\\nsi-includes.nsi")  or die "Fatal -- Couldn't modify nsi-includes.nsi.";
+        #!system("rm ..\\wix\\$tmpfile")                                     or die "Fatal -- Couldn't remove $tmpfile.";
 
-        if ($verbose) {print "Info -- ***   End prepackage.\n";}
+        #if ($verbose) {print "Info -- ***   End prepackage.\n";}
         
-        if ($verbose) {print "Info -- *** Begin package.\n";}
+        #if ($verbose) {print "Info -- *** Begin package.\n";}
         # Make the msi:
         chdir("$wd\\buildwix")                      or die "Fatal -- Couldn't cd to $wd\\buildwix";
         print "Info -- *** Make .msi:\n"            if ($verbose);
         print "Info -- chdir to ".`cd`."\n"         if ($verbose);
         !system("$MAKE")                            or die "Error -- msi installer build failed.";
                 
-        chdir("$wd\\buildnsi")                      or die "Fatal -- Couldn't cd to $wd\\buildnsi";
-        print "Info -- *** Make NSIS:\n"            if ($verbose);
-        print "Info -- chdir to ".`cd`."\n"         if ($verbose);
-        !system("cl.exe killer.cpp advapi32.lib")   or die "Error -- nsis killer.exe not built.";
-        !system("rename killer.exe Killer.exe")     or die "Error -- Couldn't rename killer.exe";
-        !system("makensis kfw.nsi")                 or die "Error -- executable installer build failed.";
+        #chdir("$wd\\buildnsi")                      or die "Fatal -- Couldn't cd to $wd\\buildnsi";
+        #print "Info -- *** Make NSIS:\n"            if ($verbose);
+        #print "Info -- chdir to ".`cd`."\n"         if ($verbose);
+        #!system("cl.exe killer.cpp advapi32.lib")   or die "Error -- nsis killer.exe not built.";
+        #!system("rename killer.exe Killer.exe")     or die "Error -- Couldn't rename killer.exe";
+        #!system("makensis kfw.nsi")                 or die "Error -- executable installer build failed.";
 
 # Begin packaging extra items:
         chdir($wd)                                  or die "Fatal -- Couldn't cd to $wd";

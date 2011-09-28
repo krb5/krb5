@@ -6,40 +6,11 @@
             <!-- Without this, XML::Simple does not make an anonymous array and I can't figure out how to iterate over it. -->
 
         <!-- Build-dependent files (from release or debug build): -->
-          <File name="netidmgr_version.h"   from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr"/>
-          <File name="netidmgr.h"           from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="perfstat.h"           from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr"/>
-          <File name="utils.h"              from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="sync.h"               from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="mstring.h"            from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="kplugin.h"            from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="kmq.h"                from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="kmm.h"                from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="khuidefs.h"           from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="khtracker.h"          from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="khrescache.h"         from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="khremote.h"           from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="khprops.h"            from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="khnewcred.h"          from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="khmsgtypes.h"         from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="khlist.h"             from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="khhtlink.h"           from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="kherror.h"            from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="kherr.h"              from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="khdefs.h"             from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="khconfigui.h"         from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="khalerts.h"           from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="khactiondef.h"        from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="khaction.h"           from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="kcreddb.h"            from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="kconfig.h"            from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
-          <File name="hashtable.h"          from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\inc\"    to="\inc\netidmgr" />
           <File name="nidmgr32.lib"         from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
           <File name="xpprof32.lib"         from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
           <File name="wshelp32.lib"         from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
           <File name="loadfuncs.lib"        from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
           <File name="leashw32.lib"         from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
-          <File name="krbv4w32.lib"         from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
           <File name="krbcc32.lib"          from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
           <File name="krb5_32.lib"          from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
           <File name="krb524.lib"           from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
@@ -48,10 +19,6 @@
           <File name="getopt.lib"           from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
           <File name="delaydlls.lib"        from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
           <File name="comerr32.lib"         from="..\target\lib\i386\%bldtype%\"    to="\lib\i386" />
-          <File name="netidmgr.exe"         from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\w2k\"    to="\bin\i386\w2k" />
-          <File name="nidmgr32.dll"         from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\w2k\"    to="\bin\i386\w2k" />
-          <File name="netidmgr.pdb"         from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\w2k\"    to="\bin\i386\w2k" />
-          <File name="nidmgr32.pdb"         from="auth\krb5\src\windows\identity\obj\i386\%bldtype%\w2k\"    to="\bin\i386\w2k" />
           <File name="kfwcpcc.pdb"          from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="kfwlogon.pdb"         from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
           <File name="netidmgr.pdb"         from="..\target\bin\i386\%bldtype%\"    to="\bin\i386" />
@@ -128,21 +95,6 @@
         <File name="leash_userdoc.pdf"      from="auth\leash\help\"                                         to="\doc" />
         <File name="NetIdMgr.pdf"           from="auth\krb5\src\windows\identity\doc\"                      to="\doc" newname="netidmgr_userdoc.pdf" />
         <File name="msi-deployment-guide.txt" from="auth\krb5\src\windows\installer\wix\"   to="\doc" />
-        <File name="*"                      from="auth\krb5\src\windows\identity\sample\templates\credprov\"            to="\sample\templates\credprov\" />
-        <File name="*"                      from="auth\krb5\src\windows\identity\sample\templates\credprov\images\"     to="\sample\templates\credprov\images" />
-        <File name="*"                      from="auth\krb5\src\windows\identity\sample\templates\credprov\lang\"       to="\sample\templates\credprov\lang" />
-        <File name="*"                      from="auth\krb5\src\windows\identity\sample\templates\credprov\lang\en_us\" to="\sample\templates\credprov\lang\en_us" />
-        <File name="kclient.h"              from="auth\krb4\kclient\include\"    to="\inc\kclient" />
-        <File name="kcmacerr.h"             from="auth\krb4\kclient\include\"    to="\inc\kclient" />
-        <File name="com_err.h"              from="auth\krb4\include\"    to="\inc\krb4" />
-        <File name="conf-pc.h"              from="auth\krb4\include\"    to="\inc\krb4" />
-        <File name="conf.h"                 from="auth\krb4\include\"    to="\inc\krb4" />
-        <File name="des.h"                  from="auth\krb4\include\"    to="\inc\krb4" />
-        <File name="kadm_err.h"             from="auth\krb4\include\"    to="\inc\krb4" />
-        <File name="krb.h"                  from="auth\krb4\include\"    to="\inc\krb4" />
-        <File name="krberr.h"               from="auth\krb4\include\"    to="\inc\krb4" />
-        <File name="mit_copy.h"             from="auth\krb4\include\"    to="\inc\krb4" />
-        <File name="osconf.h"               from="auth\krb4\include\"    to="\inc\krb4" />
         <File name="com_err.h"              from="auth\krb5\src\include\"       to="\inc\krb5" />
         <File name="krb5.h"                 from="auth\krb5\src\include\"       to="\inc\krb5" />
         <File name="profile.h"              from="auth\krb5\src\include\"       to="\inc\krb5" />
@@ -151,11 +103,6 @@
         <File name="gssapi.h"               from="auth\krb5\src\include\gssapi\"    to="\inc\krb5\gssapi" />
         <File name="gssapi_generic.h"       from="auth\krb5\src\include\gssapi\"    to="\inc\krb5\gssapi" />
         <File name="gssapi_krb5.h"          from="auth\krb5\src\include\gssapi\"    to="\inc\krb5\gssapi" />
-        <File name="des.h"                  from="auth\krb5\src\include\KerberosIV\"    to="\inc\krb5\KerberosIV" />
-        <File name="kadm_err.h"             from="auth\krb5\src\include\KerberosIV\"    to="\inc\krb5\KerberosIV" />
-        <File name="krb_err.h"              from="auth\krb5\src\include\KerberosIV\"    to="\inc\krb5\KerberosIV" />
-        <File name="krb.h"                  from="auth\krb5\src\include\KerberosIV\"    to="\inc\krb5\KerberosIV" />
-        <File name="mit-copyright.h"        from="auth\krb5\src\include\KerberosIV\"    to="\inc\krb5\KerberosIV" />
         <File name="cacheapi.h"             from="auth\krbcc\include\"    to="\inc\krbcc" />
         <File name="leasherr.h"             from="auth\leash\include\"    to="\inc\leash" />
         <File name="leashinfo.h"            from="auth\leash\include\"    to="\inc\leash" />
@@ -177,16 +124,6 @@
         <File name="mitwhich.h"             from="wshelper\include\"        to="\inc\wshelper" />
         <File name="resolv.h"               from="wshelper\include\"        to="\inc\wshelper" />
         <File name="wshelper.h"             from="wshelper\include\"        to="\inc\wshelper" />
-        <File name="kfw-fixed.nsi"          from="auth\krb5\src\windows\installer\nsis\"    to="\install\nsis" />
-        <File name="kfw.ico"                from="auth\krb5\src\windows\installer\nsis\"    to="\install\nsis" />
-        <File name="kfw.nsi"                from="auth\krb5\src\windows\installer\nsis\"    to="\install\nsis" />
-        <File name="KfWConfigPage.ini"      from="auth\krb5\src\windows\installer\nsis\"    to="\install\nsis" />
-        <File name="KfWConfigPage2.ini"     from="auth\krb5\src\windows\installer\nsis\"    to="\install\nsis" />
-        <File name="killer.cpp"             from="auth\krb5\src\windows\installer\nsis\"    to="\install\nsis" />
-        <File name="licenses.rtf"           from="auth\krb5\src\windows\installer\nsis\"    to="\install\nsis" />
-        <File name="site-local-tagged.nsi"  from="auth\krb5\src\windows\installer\nsis\"    to="\install\nsis" />
-        <File name="nsi-includes-tagged.nsi" from="auth\krb5\src\windows\installer\nsis\"   to="\install\nsis" />
-        <File name="utils.nsi"              from="auth\krb5\src\windows\installer\nsis\"    to="\install\nsis" />
         <File name="msi-deployment-guide.txt" from="auth\krb5\src\windows\installer\wix\"   to="\install\wix" />
         <File name="config.wxi"             from="auth\krb5\src\windows\installer\wix\"     to="\install\wix" />
         <File name="features.wxi"           from="auth\krb5\src\windows\installer\wix\"     to="\install\wix" />
@@ -216,6 +153,4 @@
         <File name="ui_1033.wxi"            from="auth\krb5\src\windows\installer\wix\lang\"    to="\install\wix\lang" />
         <File name="license.rtf"            from="auth\krb5\src\windows\installer\wix\lang\"    to="\install\wix\lang" />
         <File name="krb5.conf"              from="auth\krb5\src\config-files\"  to="\sample" newname="krb5.ini" />
-        <File name="krb.con"                from="auth\krb4\sample-config\"     to="\sample" />
-        <File name="krbrealm.con"           from="auth\krb4\sample-config\"     to="\sample" />
     </Files>

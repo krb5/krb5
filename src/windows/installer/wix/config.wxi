@@ -30,7 +30,7 @@
     <?include site-local.wxi?>
     
     <!-- Sanity checks -->
-    <?ifndef var.CL1200?>
+    <!-- <?ifndef var.CL1200?>
         <?ifndef var.CL1300?>
             <?ifndef var.CL1310?>
                 <?ifndef var.CL1400?>
@@ -38,24 +38,22 @@
                 <?endif?>
             <?endif?>
         <?endif?>
-    <?endif?>
+    <?endif?> -->
 
     <!-- Build type specifications -->
     <?ifndef env.CPU?>
         <?error CPU is not set ?>
     <?endif?>
+    <?define BinDir="$(env.KRB_INSTALL_DIR)\bin\"?>
+    <?define LibDir="$(env.KRB_INSTALL_DIR)\lib\"?>
     <?if $(env.CPU) = "i386"?>
         <?define InstallerVersion="110"?>
         <?define Platform="Intel"?>
         <?define Win64="no"?>
-        <?define BinDir="$(var.TargetDir)bin\i386\"?>
-        <?define LibDir="$(var.TargetDir)lib\i386\"?>
     <?elseif $(env.CPU) = "AMD64"?>
         <?define InstallerVersion="200"?>
         <?define Platform="x64"?>
         <?define Win64="yes"?>
-        <?define BinDir="$(var.TargetDir)bin\amd64\"?>
-        <?define LibDir="$(var.TargetDir)lib\amd64\"?>
     <?else?>
         <?error Unknown build type?>
     <?endif?>
@@ -63,9 +61,11 @@
     <?define KfwRegRoot="SOFTWARE\MIT\Kerberos"?>
 
     <?define DocDir="$(var.TargetDir)doc\"?>
-    <?define IncDir="$(var.TargetDir)inc\"?>
-    <?define InstallDir="$(var.TargetDir)install\"?>
+    <?define IncDir="$(var.TargetDir)include\"?>
+    <?define SrcDir="$(var.TargetDir)"?>
+    <?define InstallDir="$(var.TargetDir)windows\installer\"?>
     <?define SampleDir="$(var.TargetDir)sample\"?>
+    <?define ConfigDir=".\"?>
     <?define SystemDir="$(env.SystemRoot)\System32\"?>
 
     <?include lang\config_$(var.BuildLang).wxi?>

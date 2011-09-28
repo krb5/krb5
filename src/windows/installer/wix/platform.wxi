@@ -9,10 +9,6 @@
         <?define cmf_kfwlogon_DLL_guid="CFC0B7C9-9A59-4022-89B3-25E0941D0369"?>
         <?define cmf_kfwcpcc_EXE_guid="83F51B6D-F3C6-44cf-AC91-D1D6498FFA44"?>
         <?define cmp_ClientSystemDebug_guid="7B25B1E0-A22A-43c7-BA97-C30FCA3B1230"?>
-        <?define rcm_krb4_1_guid="B3CF770A-2C0F-44c0-8F5B-7B808369D225"?>
-        <?define rcm_krb4_2_guid="0CF5732A-7659-4cf9-8D01-7E75E6DA2639"?>                                        
-        <?define rcm_krb4_3_guid="6A279F11-E441-49cb-80F0-3D807D7230DE"?>
-        <?define rcm_krb4_4_guid="CACB3731-C532-4d28-9E44-FFF35C1376D5"?>
         <?define rcm_krb5_1_guid="21883AD6-1C00-4f1d-9922-477CF63CE6BF"?>
         <?define rcm_krb5_2_guid="88CEA446-4617-46bc-916F-2AAA1E1EACF8"?>
         <?define rcm_krb5_3_guid="28BFF4DB-D09E-4031-AB5D-232F6F707A45"?>
@@ -32,6 +28,7 @@
         <?define cmf_kinit_exe_guid="6855B2B9-D3EB-42ce-B0EA-EFCD5960B635"?>
         <?define cmf_klist_exe_guid="1AE98193-6596-4460-9B42-15C734E28CE8"?>
         <?define cmf_kpasswd_exe_guid="669A2965-413F-4003-9F43-4615CC7C3B1A"?>
+        <?define cmf_kswitch_exe_guid="EFBA642C-D1E8-441b-A31D-8B44715B2EAB"?>
         <?define cmf_kvno_exe_guid="56C95EBA-2A53-4567-AA44-9A0EE01BB390"?>
         <?define cmf_krb5_32_dll_guid="8B7190D6-76BD-442b-893B-1EED4E26EC0A"?>
         <?define cmf_krb5_32_dll_name="krb5_64.dll"?>
@@ -41,8 +38,8 @@
         <?define cmf_krb524_dll_name="krb524.dll"?>
         <?define cmf_krbcc32_dll_guid="56DAD1B9-4A59-46e6-81CA-54E2B6C9D618"?>
         <?define cmf_krbcc32_dll_name="krbcc64.dll"?>
-        <?define cmf_krbcc32s_exe_guid="0192F58B-9129-426d-A271-E18455EDC80E"?>
-        <?define cmf_krbcc32s_exe_name="krbcc64s.exe"?>
+        <?define cmf_ccpaiserver_exe_guid="0192F58B-9129-426d-A271-E18455EDC80E"?>
+        <?define cmf_ccapiserver_exe_name="ccapiserver.exe"?>
         <?define cmf_krbv4w32_dll_guid="D195FADB-A3B0-4023-A824-8895552CDC56"?>
         <?define cmf_krbv4w32_dll_name="krbv4w64.dll"?>
         <?define cmf_leash32_exe_guid="D195FADB-A3B0-4023-A824-8895552CDC56"?>
@@ -88,13 +85,6 @@
         <?define cmf_krb5cred_dll_name="krb5cred.dll"?>
         <?define cmf_krb5cred_en_us_dll_guid="223B7E9D-290F-40b8-89B3-F8337A8E082D"?>
         <?define cmf_krb5cred_en_us_dll_name="krb5cred_en_us.dll"?>
-        <?define cmf_krb4cred_dll_guid="AF3DB848-786B-4e0b-9D8F-F9074D0631F2"?>
-        <?define cmf_krb4cred_dll_name="krb4cred.dll"?>
-        <?define cmf_krb4cred_en_us_dll_guid="4D180CEF-59CD-4c39-872C-F84F58008107"?>
-        <?define cmf_krb4cred_en_us_dll_name="krb4cred_en_us.dll"?>
-        <?define cmf_netidmgr_exe_guid="487545C9-F145-4fb9-8610-5652A6C3FE48"?>
-        <?define cmf_netidmgr_exe_w2k_guid="F9D3A2A1-8BAE-41ff-BB50-2E6923D3368B"?>
-        <?define csc_NetIDMgrStartup_guid="7081976D-E9D5-424a-9564-917E0529E4D0"?>
         <?define cmf_bin_debug_guid="F3432C85-89D9-4bd6-BD82-4ED49A118338"?>
 <?elseif $(var.Platform) = "Intel"?>
         <?define UpgradeCode="61211594-AAA1-4A98-A299-757326763CC7"?>
@@ -104,10 +94,6 @@
         <?define cmf_kfwlogon_DLL_guid="2F104FEB-2D61-458A-BAE3-B153F151E728"?>
         <?define cmf_kfwcpcc_EXE_guid="C3284E7A-3665-45A6-B64E-C909B1D1BAA6"?>
         <?define cmp_ClientSystemDebug_guid="2D13ED48-53C2-4878-B196-2AD7F4100998"?>
-        <?define rcm_krb4_1_guid="34262966-9196-49D6-86C9-AE98D3116DC0"?>
-        <?define rcm_krb4_2_guid="812334C6-EBDF-482C-8CB3-A6398AF9EDFC"?>                                        
-        <?define rcm_krb4_3_guid="5556ECD9-8721-41C2-846C-034C239B48F1"?>
-        <?define rcm_krb4_4_guid="61371A93-7F59-439D-A89C-070E100F465B"?>
         <?define rcm_krb5_1_guid="E190F8B9-51FA-4FB1-884C-C8AFA37F8653"?>
         <?define rcm_krb5_2_guid="AE7D4305-6193-4094-8C82-73862AE01DCE"?>
         <?define rcm_krb5_3_guid="853EE035-99AA-489A-8FB6-74C76624E92A"?>
@@ -127,6 +113,7 @@
         <?define cmf_kinit_exe_guid="80643A09-EF28-4714-BC62-B64FC5B17CAA"?>
         <?define cmf_klist_exe_guid="24FB6003-BC7A-4BF1-9503-82D398EC02D7"?>
         <?define cmf_kpasswd_exe_guid="3FA4AB96-FF12-460A-814E-3380E220787C"?>
+        <?define cmf_kswitch_exe_guid="C1A575D3-DEF3-4fce-861E-9C6BA7F93072"?>
         <?define cmf_kvno_exe_guid="7759D524-1F88-4483-975F-DDD33A511512"?>
         <?define cmf_krb5_32_dll_guid="31E40356-CBAC-4FC6-9A34-C6F6C72A27CA"?>
         <?define cmf_krb5_32_dll_name="krb5_32.dll"?>
@@ -136,8 +123,8 @@
         <?define cmf_krb524_dll_name="krb524.dll"?>
         <?define cmf_krbcc32_dll_guid="A50FA27D-F203-4C19-9047-B7976171FB94"?>
         <?define cmf_krbcc32_dll_name="krbcc32.dll"?>
-        <?define cmf_krbcc32s_exe_guid="7D5F0817-DACF-4B54-BB8D-94DD63626DB5"?>
-        <?define cmf_krbcc32s_exe_name="krbcc32s.exe"?>
+        <?define cmf_ccapiserver_exe_guid="7D5F0817-DACF-4B54-BB8D-94DD63626DB5"?>
+        <?define cmf_ccapiserver_exe_name="ccapiserver.exe"?>
         <?define cmf_krbv4w32_dll_guid="DFA23F6C-5297-4876-AF52-6F7CF2CB34AC"?>
         <?define cmf_krbv4w32_dll_name="krbv4w32.dll"?>
         <?define cmf_leash32_exe_guid="990D5F6B-4CEE-4706-96F4-F7AF12F97DF7"?>
@@ -176,20 +163,10 @@
         <?define cmf_wshelp32_dll_name="wshelp32.dll"?>
         <?define cmf_xpprof32_dll_guid="A7DF8BAF-7188-4C24-89FB-C8EB51571FD2"?>
         <?define cmf_xpprof32_dll_name="xpprof32.dll"?>
-        <?define cmf_nidmgr32_dll_guid="EEBA3A0D-CE3D-42F1-8854-D7F63F597202"?>
-        <?define cmf_nidmgr32_dll_name="nidmgr32.dll"?>
-        <?define cmf_nidmgr32_dll_w2k_guid="33F42D7C-03CE-465F-9E0A-5F486FE64B04"?>
         <?define cmf_krb5cred_dll_guid="27A7723A-F0D9-4F06-892C-54F0AC6014C3"?>
         <?define cmf_krb5cred_dll_name="krb5cred.dll"?>
         <?define cmf_krb5cred_en_us_dll_guid="EA9ABE05-A85B-43BB-8741-50D3C3128632"?>
         <?define cmf_krb5cred_en_us_dll_name="krb5cred_en_us.dll"?>
-        <?define cmf_krb4cred_dll_guid="E3B86954-9D5D-4929-A5E6-B22ED03E6D6C"?>
-        <?define cmf_krb4cred_dll_name="krb4cred.dll"?>
-        <?define cmf_krb4cred_en_us_dll_guid="3FF40A29-E2C3-40F3-B81C-2948494BE4B0"?>
-        <?define cmf_krb4cred_en_us_dll_name="krb4cred_en_us.dll"?>
-        <?define cmf_netidmgr_exe_guid="AEB06D67-B4F3-45B1-AC1E-5C1AFF747756"?>
-        <?define cmf_netidmgr_exe_w2k_guid="0F85D4F3-7897-4FE3-8501-AD0C383CCB4F"?>
-        <?define csc_NetIDMgrStartup_guid="669227E3-0ADC-4173-90C3-631FCFC8EBC3"?>
         <?define cmf_bin_debug_guid="C8468854-8261-4781-8119-A612636841E3"?>
 <?else?>
         <?error Unknown platform?>

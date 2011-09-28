@@ -57,7 +57,6 @@
 	    <?endif?>
 
             <ComponentRef Id="cmf_comerr32_dll" />
-            <ComponentRef Id="cmf_gss_exe" />
             <ComponentRef Id="cmf_gss_client_exe" />
             <ComponentRef Id="cmf_gss_server_exe" />
             <ComponentRef Id="cmf_gssapi32_dll" />
@@ -67,53 +66,26 @@
             <ComponentRef Id="cmf_kinit_exe" />
             <ComponentRef Id="cmf_klist_exe" />
             <ComponentRef Id="cmf_kpasswd_exe" />
+            <ComponentRef Id="cmf_kswitch_exe" />
             <ComponentRef Id="cmf_kvno_exe" />
             <ComponentRef Id="cmf_krb5_32_dll" />
             <ComponentRef Id="cmf_k5sprt32_dll" />
             <ComponentRef Id="cmf_krbcc32_dll" />
-            <ComponentRef Id="cmf_krbcc32s_exe" />
+            <ComponentRef Id="cmf_ccapiserver_exe" />
             <ComponentRef Id="cmf_ms2mit_exe" />
             <ComponentRef Id="cmf_mit2ms_exe" />
             <ComponentRef Id="cmf_wshelp32_dll" />
-            <ComponentRef Id="cmf_xpprof32_dll" />
+<!--            <ComponentRef Id="cmf_xpprof32_dll" /> -->
 
             <ComponentRef Id="cmf_leashw32_dll" />
 
         <?if $(var.Platform) = "Intel" ?>
-            <ComponentRef Id="cmf_leash32_exe" />
-            <ComponentRef Id="csc_leash32_exe" />
-
-            <ComponentRef Id="cmf_k524init_exe" />
-            <ComponentRef Id="cmf_kclnt32_dll" />
-            <ComponentRef Id="cmf_krb524_dll" />
-            <ComponentRef Id="cmf_krbv4w32_dll" />
-        <?endif?>
-            
-            <ComponentRef Id="cmf_nidmgr32_dll" />
-        <?if $(var.Platform) = "Intel" ?>
-            <ComponentRef Id="cmf_nidmgr32_dll_w2k" />
-        <?endif?>
-            <ComponentRef Id="cmf_krb5cred_dll" />
-            <ComponentRef Id="cmf_krb5cred_en_us_dll" />
-        <?if $(var.Platform) = "Intel" ?>
-            <ComponentRef Id="cmf_krb4cred_dll" />
-            <ComponentRef Id="cmf_krb4cred_en_us_dll" />
-        <?endif?>
-            <ComponentRef Id="cmf_netidmgr_exe" />
-        <?if $(var.Platform) = "Intel" ?>
-            <ComponentRef Id="cmf_netidmgr_exe_w2k" />
+<!--            <ComponentRef Id="cmf_leash32_exe" /> -->
+<!--            <ComponentRef Id="csc_leash32_exe" /> -->
         <?endif?>
 	    <ComponentRef Id="cmf_kfwlogon_DLL" />
             <ComponentRef Id="cmf_kfwcpcc_EXE" />
 
-        <?if $(var.Platform) = "Intel" ?>
-            <!-- Kerberos IV options -->
-            <ComponentRef Id="rcm_krb4_1" />
-            <ComponentRef Id="rcm_krb4_2" />
-            <ComponentRef Id="rcm_krb4_3" />
-            <ComponentRef Id="rcm_krb4_4" />
-        <?endif?>
-            
             <!-- Kerberos V options -->
             <ComponentRef Id="rcm_krb5_1" />
             <ComponentRef Id="rcm_krb5_2" />
@@ -127,11 +99,11 @@
             <ComponentRef Id="rcm_leash_5" />
             <ComponentRef Id="rcm_leash_6" />
             
-        <?ifdef OldHelp?>
+<!--        <?ifdef OldHelp?>
             <ComponentRef Id="cmf_leash32_hlp" />
         <?else?>
             <ComponentRef Id="cmf_leash32_chm" />
-        <?endif?>
+        <?endif?> -->
         <?endif?>
             
             <!-- Leash dll options -->
@@ -163,12 +135,11 @@
             
             <Feature Id="feaKfwLeashStartup" AllowAdvertise="no" Display="hidden" Level="130">
                 <Condition Level="30">LEASHAUTOSTART = 1</Condition>
-                <ComponentRef Id="csc_NetIDMgrStartup" />
                 <?if $(var.Platform) = "Intel"?>
-                        <ComponentRef Id="csc_LeashStartup" />
+<!--                        <ComponentRef Id="csc_LeashStartup" /> -->
                 <?endif?>
             </Feature>
-
+            <ComponentRef Id="cmf_remove_folder" />
             <?include runtime.wxi?>
         </Feature> <!-- /feaKfwClient -->
         
@@ -180,32 +151,23 @@
             Level="130" 
             Title="$(loc.KerberosSDKTitle)">
             
-            <ComponentRef Id="cmp_dirdoc_netid" />
         <?if $(var.Platform) = "Intel" ?>
-            <ComponentRef Id="cmp_dirinc_kclient" />
-            <ComponentRef Id="cmp_dirinc_krb4" />
             <ComponentRef Id="cmp_dirlib_i386" />
         <?else?>
             <ComponentRef Id="cmp_dirlib_amd64" />
         <?endif?>
             <ComponentRef Id="cmp_dirinc_krb5_gssapi" />
-            <ComponentRef Id="cmp_dirinc_krb5_KerberosIV" />
             <ComponentRef Id="cmp_dirinc_krb5_krb5" />
             <ComponentRef Id="cmp_dirinc_krb5" />
-            <ComponentRef Id="cmp_dirinc_krbcc" />
+<!--            <ComponentRef Id="cmp_dirinc_krbcc" /> -->
             <ComponentRef Id="cmp_dirinc_leash" />
             <ComponentRef Id="cmp_dirinc_loadfuncs" />
             <ComponentRef Id="cmp_dirinc_wshelper" />
             <ComponentRef Id="cmp_dirinc_wshelper_arpa" />
-	    <ComponentRef Id="cmp_dirinc_netidmgr" />
-            <ComponentRef Id="cmp_dirinstall_nsis" />
             <ComponentRef Id="cmp_dirinstall_wix" />
             <ComponentRef Id="cmp_dirinstall_wix_lang" />
             <ComponentRef Id="cmp_dirinstall_wix_Binary" />
             <ComponentRef Id="cmp_dirinstall_wix_custom" />
-            <ComponentRef Id="cmp_credprov_files" />
-            <ComponentRef Id="cmp_credprov_images_files" />
-            <ComponentRef Id="cmp_credprov_en_us_files" />
             <ComponentRef Id="rcm_common" />
             <ComponentRef Id="rcm_sdk" />
         </Feature> <!-- /feaKfwSDK -->
@@ -218,11 +180,9 @@
             Level="30" 
             Title="$(loc.KerberosDocTitle)">
 
-            <?if $(var.Platform) = "Intel"?>
+<!--            <?if $(var.Platform) = "Intel"?>
                     <ComponentRef Id="efl_leash_userdoc_pdf" />
-            <?endif?>
-            <ComponentRef Id="efl_netidmgr_userdoc_pdf" />
-            <ComponentRef Id="efl_relnotes_html" />
+            <?endif?> -->
             
             <ComponentRef Id="rcm_common" />
             <ComponentRef Id="rcm_docs" />
