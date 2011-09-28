@@ -4,7 +4,7 @@
 mydir=.
 BUILDTOP=$(REL)..$(S)..
 DEFINES = -DNO_KRB4
-LOCALINCLUDES = -I$(BUILDTOP) -I$(BUILDTOP)\include -I$(BUILDTOP)\windows\leashdll\include
+LOCALINCLUDES = -I$(BUILDTOP) -I$(BUILDTOP)\include -I$(BUILDTOP)\windows\include
 PROG_LIBPATH=-L$(TOPLIBD) -L$(KRB5_LIBDIR)
 
 SYSLIBS = kernel32.lib user32.lib advapi32.lib wsock32.lib secur32.lib userenv.lib

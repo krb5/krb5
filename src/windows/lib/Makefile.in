@@ -1,5 +1,7 @@
 BUILDTOP = ..\..
 
+LOCALINCLUDES = -I$(BUILDTOP)\windows\include
+
 lib-windows: $(OUTPRE)libwin.lib
 
 SRCS=	vardlg.c gic.c registry.c loadfuncs.c

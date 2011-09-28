@@ -24,7 +24,7 @@ OBJS=	$(OUTPRE)dllmain.$(OBJEXT) \
 RESFILE = $(OUTPRE)resource.res
 XOBJS	= $(RESFILE)
 
-RCFLAGS = -I$(BUILDTOP)\include -I$(BUILDTOP) -DWSHELPER_LIB
+RCFLAGS = -I$(BUILDTOP)\include -I$(BUILDTOP)\windows\include -I$(BUILDTOP) -DWSHELPER_LIB
 
 ###From another project inside K 1.9:
 ###VERSIONRC = $(BUILDTOP)\windows\version.rc
@@ -33,7 +33,7 @@ RCFLAGS = -I$(BUILDTOP)\include -I$(BUILDTOP) -DWSHELPER_LIB
 
 # Set NODEBUG if building release instead of debug
 
-LOCALINCLUDES = -I$(BUILDTOP)\include
+LOCALINCLUDES = -I$(BUILDTOP)\include -I$(BUILDTOP)\windows\include
 
 WINLIBS = advapi32.lib user32.lib ws2_32.lib dnsapi.lib
 

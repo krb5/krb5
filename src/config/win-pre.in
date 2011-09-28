@@ -91,7 +91,7 @@ top_srcdir = $(srcdir)\$(BUILDTOP)
 KRB5_USE_DNS=1
 KRB5_USE_DNS_KDC=1
 DNS_LIB=$(BUILDTOP)\util\wshelper\$(OUTPRE)$(DLIB).lib
-DNS_INC=$(BUILDTOP)\util\wshelper
+DNS_INC=$(BUILDTOP)\windows\include
 
 !if defined(KRB5_USE_DNS) || defined(KRB5_USE_DNS_KDC) || defined(KRB5_USE_DNS_REALMS)
 !if defined(KRB5_NO_WSHELPER)

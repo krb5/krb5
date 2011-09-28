@@ -47,7 +47,7 @@ RCFLAGS = -I$(BUILDTOP)\include -I$(BUILDTOP) -DLEASHDLL_LIB
 
 # Set NODEBUG if building release instead of debug
 
-LOCALINCLUDES = -I$(BUILDTOP)\include -I.\include -I.\include\krb4 $(AFS_INCLUDES)
+LOCALINCLUDES = -I$(BUILDTOP)\include -I$(BUILDTOP)\windows\include -I.\include -I.\include\krb4 $(AFS_INCLUDES)
 
 WINLIBS = kernel32.lib advapi32.lib user32.lib gdi32.lib Version.lib \
 	  ws2_32.lib dnsapi.lib $(BUILDTOP)\ccapi\lib\win\srctmp\$(CCLIB).lib $(AFS_LIBS)
