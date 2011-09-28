@@ -108,6 +108,16 @@
 #endif
 #endif /* GSSAPI */
 
+#ifdef LEASHDLL_LIB
+#define K5_DESCRIPTION "Leash Helper API - MIT GSS / Kerberos v5 distribution\0"
+#define K5_INTERNAL_NAME "leashw\0"
+#define K5_FILETYPE	VFT_DLL
+#if !defined(_WIN32)
+#define K5_ORIGINAL_NAME "leashw.dll\0"
+#else
+#define K5_ORIGINAL_NAME "leashw32.dll\0"
+#endif
+#endif /* LEASHDLL_LIB */
 
 #ifdef WSHELPER_LIB
 #define K5_DESCRIPTION "Winsock Helper (wshelper) API - MIT GSS / Kerberos v5 distribution\0"

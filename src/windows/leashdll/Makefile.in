@@ -33,10 +33,10 @@ OBJS=	$(OUTPRE)AFSroutines.$(OBJEXT) \
 	$(OUTPRE)loadfuncs.$(OBJEXT)
 
 #TODO: Fix resource compilation
-#RESFILE = $(OUTPRE)lsh_pwd.res
+RESFILE = $(OUTPRE)lsh_pwd.res
 XOBJS	= $(RESFILE)
 
-RCFLAGS = /i $(BUILDTOP)\include
+RCFLAGS = -I$(BUILDTOP)\include -I$(BUILDTOP) -DLEASHDLL_LIB
 
 ###From another project inside K 1.9:
 ###VERSIONRC = $(BUILDTOP)\windows\version.rc
@@ -73,4 +73,5 @@ $(OUTPRE)$(DLL_NAME).dll: $(DEF_FILE) $(OBJS) $(XOBJS)
 
 #TODO: Add dependencies on include files here
 
-#$(RESFILE): resource.rc
+$(RESFILE): lsh_pwd.rc
+
