@@ -50,7 +50,7 @@ RCFLAGS = -I$(BUILDTOP)\include -I$(BUILDTOP) -DLEASHDLL_LIB
 LOCALINCLUDES = -I$(BUILDTOP)\include -I.\include -I.\include\krb4 $(AFS_INCLUDES)
 
 WINLIBS = kernel32.lib advapi32.lib user32.lib gdi32.lib Version.lib \
-	  ws2_32.lib dnsapi.lib $(BUILDTOP)\ccapi\lib\win\srctmp\ccapi.lib $(AFS_LIBS)
+	  ws2_32.lib dnsapi.lib $(BUILDTOP)\ccapi\lib\win\srctmp\$(CCLIB).lib $(AFS_LIBS)
 
 WINDLLFLAGS = /nologo /dll /incremental:no /release $(LOPTS)
 

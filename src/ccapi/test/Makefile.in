@@ -135,7 +135,7 @@ MORE_TESTS =    test_cc_context_release \
 ##### Linker
 LINK	= link
 LIBS    = -lkrb5
-##DOS##LIBS = $(CLIB) $(SLIB) advapi32.lib rpcrt4.lib user32.lib ws2_32.lib ccapi.lib
+##DOS##LIBS = $(CLIB) $(SLIB) advapi32.lib rpcrt4.lib user32.lib ws2_32.lib $(CCLIB).lib
 LFLAGS	= /nologo $(LOPTS)
 
 all-mac::     setup-test-dir pingtest simple_lock_test build-base build-tests link-tests copy-script success-message
@@ -188,7 +188,7 @@ $(COWSRC):
 $(OUTPRE)pingtest.exe: $(OBJECTS) $(PINGOBJS)
 # There doesn't appear to be any way to examine a variable and return a value
 #  indicating whether a string is present in it.  We use a perl script to
-#  check the LIB variable.  If the path to ccapi.lib isn't present, the script
+#  check the LIB variable.  If the path to $(CCLIB).lib isn't present, the script
 #  deletes a.tmp and the following nmake actions correct LIB.
 	echo %%PATH%% > a.tmp
     perl setlib.pl
