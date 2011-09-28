@@ -44,7 +44,6 @@
 #include <verto-module.h>
 
 #ifdef WIN32
-#define pdlmsuffix ".dll"
 #define pdlmtype HMODULE
 #define pdlopenl(filename) LoadLibraryEx(filename, NULL, \
                                          DONT_RESOLVE_DLL_REFERENCES)
@@ -102,7 +101,6 @@ pdladdrmodname(void *addr, char **buf) {
     return true;
 }
 #else
-#define pdlmsuffix ".so"
 #define pdlmtype void *
 #define pdlopenl(filename) dlopen(filename, RTLD_LAZY | RTLD_LOCAL)
 #define pdlclose(module) dlclose((pdlmtype) module)
@@ -185,7 +183,7 @@ struct _verto_ev {
 const verto_module *defmodule;
 
 static int
-_vasprintf(char **strp, const char *fmt, va_list ap) {
+int_vasprintf(char **strp, const char *fmt, va_list ap) {
     va_list apc;
     int size = 0;
 
@@ -200,12 +198,12 @@ _vasprintf(char **strp, const char *fmt, va_list ap) {
 }
 
 static int
-_asprintf(char **strp, const char *fmt, ...) {
+int_asprintf(char **strp, const char *fmt, ...) {
     va_list ap;
     int size = 0;
 
     va_start(ap, fmt);
-    size = _vasprintf(strp, fmt, ap);
+    size = int_vasprintf(strp, fmt, ap);
     va_end(ap);
     return size;
 }
@@ -279,7 +277,7 @@ do_load_dir(const char *dirname, const char *prefix, const char *suffix,
         if (flen < slen || strcmp(ent->d_name + flen - slen, suffix))
             continue;
 
-        if (_asprintf(&tmp, "%s/%s", dirname, ent->d_name) < 0)
+        if (int_asprintf(&tmp, "%s/%s", dirname, ent->d_name) < 0)
             continue;
 
         success = do_load_file(tmp, reqsym, reqtypes, dll, module);
@@ -310,12 +308,21 @@ load_module(const char *impl, verto_ev_type reqtypes, pdlmtype *dll,
      *    impl == glib
      *    suffix == .so.0
      * Put them all together: /usr/lib/libverto-glib.so.0 */
-    suffix = strstr(prefix, pdlmsuffix);
-    if (!suffix || strlen(suffix) < 1 || !(suffix = strdup(suffix))) {
+    tmp = strdup(prefix);
+    if (!tmp) {
         free(prefix);
         return 0;
     }
+
+    suffix = basename(tmp);
+    suffix = strchr(suffix, '.');
+    if (!suffix || strlen(suffix) < 1 || !(suffix = strdup(suffix))) {
+        free(prefix);
+        free(tmp);
+        return 0;
+    }
     strcpy(prefix + strlen(prefix) - strlen(suffix), "-");
+    free(tmp);
 
     if (impl) {
         /* Try to do a load by the path */
@@ -324,7 +331,7 @@ load_module(const char *impl, verto_ev_type reqtypes, pdlmtype *dll,
         if (!success) {
             /* Try to do a load by the name */
             tmp = NULL;
-            if (_asprintf(&tmp, "%s%s%s", prefix, impl, suffix) > 0) {
+            if (int_asprintf(&tmp, "%s%s%s", prefix, impl, suffix) > 0) {
                 success = do_load_file(tmp, 0, reqtypes, dll, module);
                 free(tmp);
             }
