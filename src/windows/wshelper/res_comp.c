@@ -345,22 +345,14 @@ _getlong(u_char *msgp)
 }
 
 void
-#ifdef __STDC__
 __putshort(register u_short s, register u_char *msgp)
-#else
-__putshort(s, msgp)
-    register u_short s;
-    register u_char *msgp;
-#endif
 {
     msgp[1] = LOBYTE(s);
     msgp[0] = HIBYTE(s);
 }
 
 void
-__putlong(l, msgp)
-    register u_long l;
-    register u_char *msgp;
+__putlong(register u_long l, register u_char *msgp)
 {
     msgp[3] = LOBYTE(LOWORD(l));
     msgp[2] = HIBYTE(LOWORD(l));
