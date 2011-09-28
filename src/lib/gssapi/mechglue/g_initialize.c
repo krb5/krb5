@@ -1203,7 +1203,7 @@ getRegKeyModTime(HKEY hBaseKey, const char *keyPath)
 		return 0;
 	}
 	do {
-		int subKeyNameSize=256;
+		int subKeyNameSize=sizeof(subKeyName)/sizeof(subKeyName[0]);
 		if ((rc = RegEnumKeyEx(hConfigKey, iSubKey++, subKeyName,
 				       &subKeyNameSize, NULL, NULL, NULL,
 				       &keyLastWriteTime)) != ERROR_SUCCESS) {
@@ -1253,7 +1253,6 @@ loadConfigFromRegistry(HKEY hBaseKey, const char *keyPath)
 {
 	HKEY hConfigKey;
 	DWORD iSubKey, nSubKeys, maxSubKeyNameLen;
-	DWORD dataBufferSize, dataSizeRequired;
 	char *oidStr = NULL, *oid = NULL, *sharedLib = NULL, *kernMod = NULL;
 	char *modOptions = NULL;
 	DWORD oidStrLen = 0, oidLen = 0, sharedLibLen = 0, kernModLen = 0;
