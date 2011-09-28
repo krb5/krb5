@@ -1,5 +1,8 @@
 BUILDTOP=..\..
 
+##FIX ME: Enable proper compilation with AFS
+NO_AFS=1
+
 !ifndef NO_AFS
 ###AFS_BASE=
 AFS_INCLUDES=-I$(AFS_BASE)\Include
@@ -58,6 +61,10 @@ DEFINES = -DUNICODE -D_UNICODE -DWINSOCK -DWIN32 -DWINDOWS -DNO_KRB4
 DEFINES = $(DEFINES)
 !else
 DEFINES = $(DEFINES) -DDBG
+!endif
+
+!ifdef NO_AFS
+DEFINES = $(DEFINES) -DNO_AFS
 !endif
 
 all-windows::
