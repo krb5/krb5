@@ -313,7 +313,7 @@ krb5_set_trace_callback(krb5_context context, krb5_trace_callback fn,
     return 0;
 }
 
-static void
+static void KRB5_CALLCONV
 file_trace_cb(krb5_context context, const struct krb5_trace_info *info, void *data)
 {
     int *fd = data;

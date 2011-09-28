@@ -1295,7 +1295,7 @@ done:
 }
 #endif /* LEAN_CLIENT */
 
-OM_uint32
+OM_uint32 KRB5_CALLCONV
 krb5_gss_accept_sec_context_ext(
     OM_uint32 *minor_status,
     gss_ctx_id_t *context_handle,

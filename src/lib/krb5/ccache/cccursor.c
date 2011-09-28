@@ -175,7 +175,7 @@ krb5_cccol_last_change_time(krb5_context context,
  * krb5_cccol_lock and krb5_cccol_unlock are defined in ccbase.c
  */
 
-krb5_error_code
+krb5_error_code KRB5_CALLCONV
 krb5_cc_cache_match(krb5_context context, krb5_principal client,
                     krb5_ccache *cache_out)
 {
