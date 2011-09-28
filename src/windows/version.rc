@@ -1,6 +1,6 @@
 #include <windows.h>
 #include <winver.h>
-#include "patchlevel.h"
+#include "kerberos.ver"
 #include "winlevel.h"
 
 /*
@@ -54,7 +54,7 @@
  */
 
 #ifdef SUPPORT_LIB
-#define K5_DESCRIPTION "Kerberos v5 support - internal support code for MIT Kerberos v5 /GSS distribution"
+#define K5_DESCRIPTION "Kerberos v5 support - internal support code for " KRB5_PRODUCTNAME_STR
 #define K5_INTERNAL_NAME "krb5support\0"
 #define K5_FILETYPE	VFT_DLL
 #if !defined(_WIN32)
@@ -65,7 +65,7 @@
 #endif /* support */
 
 #ifdef CE_LIB
-#define K5_DESCRIPTION "COM_ERR - Common Error Handler for MIT Kerberos v5 / GSS distribution\0"
+#define K5_DESCRIPTION "COM_ERR - Common Error Handler for " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "comerr\0"
 #define K5_FILETYPE	VFT_DLL
 #if !defined(_WIN32)
@@ -76,7 +76,7 @@
 #endif /* comerr */
 
 #ifdef PROF_LIB
-#define K5_DESCRIPTION "PROFILE - Profile Library MIT Kerberos v5 / GSS distribution\0"
+#define K5_DESCRIPTION "PROFILE - Profile Library " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "profile\0"
 #define K5_FILETYPE	VFT_DLL
 #if !defined(_WIN32)
@@ -87,7 +87,7 @@
 #endif /* profile */
 
 #ifdef KRB5_LIB
-#define K5_DESCRIPTION "Kerberos v5 - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "Kerberos v5 - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "krb5\0"
 #define K5_FILETYPE	VFT_DLL
 #if !defined(_WIN32)
@@ -108,8 +108,15 @@
 #endif
 #endif /* GSSAPI */
 
+#ifdef LEASH_APP
+#define K5_DESCRIPTION "Leash32 Kerberos Ticket Manager - " KRB5_PRODUCTNAME_STR "\0"
+#define K5_FILETYPE	VFT_APP
+#define K5_INTERNAL_NAME "LEASH\0"
+#define K5_ORIGINAL_NAME "leash32.exe\0"
+#endif
+
 #ifdef LEASHDLL_LIB
-#define K5_DESCRIPTION "Leash Helper API - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "Leash Helper API - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "leashw\0"
 #define K5_FILETYPE	VFT_DLL
 #if !defined(_WIN32)
@@ -120,7 +127,7 @@
 #endif /* LEASHDLL_LIB */
 
 #ifdef WSHELPER_LIB
-#define K5_DESCRIPTION "Winsock Helper (wshelper) API - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "Winsock Helper (wshelper) API - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "wshelper\0"
 #define K5_FILETYPE	VFT_DLL
 #if !defined(_WIN32)
@@ -131,7 +138,7 @@
 #endif /* WSHELPER_LIB */
 
 #ifdef KRB4_LIB
-#define K5_DESCRIPTION "Kerberos v4 - MIT GSS / Kerberos v4 and v5 distribution\0"
+#define K5_DESCRIPTION "Kerberos v4 - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "krb4\0"
 #define K5_FILETYPE	VFT_DLL
 #if !defined(_WIN32)
@@ -142,7 +149,7 @@
 #endif /* KRB4 */
 
 #ifdef SAPKRB_LIB
-#define K5_DESCRIPTION "Kerberos v5 - MIT GSS / Kerberos v5 distribution (for SAP)\0"
+#define K5_DESCRIPTION "Kerberos v5 - " KRB5_PRODUCTNAME_STR " (for SAP)\0"
 #define K5_INTERNAL_NAME "sapkrb5\0"
 #define K5_FILETYPE	VFT_DLL
 #if !defined(_WIN32)
@@ -164,126 +171,126 @@
 #endif /* SAPGSS */
 
 #ifdef KRB5_APP
-#define K5_DESCRIPTION "KRB5 Ticket Manager - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "KRB5 Ticket Manager - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_FILETYPE	VFT_APP
 #define K5_INTERNAL_NAME "KRB5\0"
 #define K5_ORIGINAL_NAME "krb5.exe\0"
 #endif /* KRB5_APP */
 
 #ifdef GSS_APP
-#define K5_DESCRIPTION "GSS - GSS Sample Application for MIT Kerberos v5 / GSS distribution\0"
+#define K5_DESCRIPTION "GSS - GSS Sample Application for " KRB5_PRODUCTNAME_STR "\0"
 #define K5_FILETYPE	VFT_APP
 #define K5_INTERNAL_NAME "GSS\0"
 #define K5_ORIGINAL_NAME "gss.exe\0"
 #endif
 
 #ifdef TELNET_APP
-#define K5_DESCRIPTION "Telnet - Telnet Application for MIT Kerberos v5 / GSS distribution\0"
+#define K5_DESCRIPTION "Telnet - Telnet Application for " KRB5_PRODUCTNAME_STR "\0"
 #define K5_FILETYPE	VFT_APP
 #define K5_INTERNAL_NAME "TELNET\0"
 #define K5_ORIGINAL_NAME "telnet.exe\0"
 #endif
 
 #ifdef KRB524_LIB
-#define K5_DESCRIPTION "Kerberos v5 to v4 - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "Kerberos v5 to v4 - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "krb524\0"
 #define K5_FILETYPE	VFT_DLL
 #define K5_ORIGINAL_NAME "krb524.dll\0"
 #endif /* KRB524_LIB */
 
 #ifdef KRB524_INIT
-#define K5_DESCRIPTION "Kerberos v5 to v4 Application - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "Kerberos v5 to v4 Application - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "krb524_init\0"
 #define K5_FILETYPE	VFT_DLL
 #define K5_ORIGINAL_NAME "krb524_init.exe\0"
 #endif /* KRB524_INIT */
 
 #ifdef MS2MIT_APP
-#define K5_DESCRIPTION "Microsoft LSA to MIT Credential Cache Application - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "Microsoft LSA to MIT Credential Cache Application - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "ms2mit\0"
 #define K5_FILETYPE	VFT_DLL
 #define K5_ORIGINAL_NAME "ms2mit.exe\0"
 #endif /* MS2MIT_APP */
 
 #ifdef MIT2MS_APP
-#define K5_DESCRIPTION "MIT to Microsoft LSA Credential Cache Application - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "MIT to Microsoft LSA Credential Cache Application - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "mit2ms\0"
 #define K5_FILETYPE	VFT_DLL
 #define K5_ORIGINAL_NAME "mit2ms.exe\0"
 #endif /* MIT2MS_APP */
 
 #ifdef KVNO_APP
-#define K5_DESCRIPTION "Key Version Number Application - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "Key Version Number Application - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "kvno\0"
 #define K5_FILETYPE	VFT_DLL
 #define K5_ORIGINAL_NAME "kvno.exe\0"
 #endif /* KVNO_APP */
 
 #ifdef KPASSWD_APP
-#define K5_DESCRIPTION "Kerberos Change Password Application - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "Kerberos Change Password Application - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "kpasswd\0"
 #define K5_FILETYPE	VFT_DLL
 #define K5_ORIGINAL_NAME "kpasswd.exe\0"
 #endif /* KPASSWD_APP */
 
 #ifdef KFWLOGON_LIB
-#define K5_DESCRIPTION "Kerberos Network Provider - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "Kerberos Network Provider - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "kfwlogon\0"
 #define K5_FILETYPE	VFT_DLL
 #define K5_ORIGINAL_NAME "kfwlogon.dll\0"
 #endif /* KFWLOGON_LIB */
 
 #ifdef KFWCPCC_APP
-#define K5_DESCRIPTION "Copy Credential Cache Application - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "Copy Credential Cache Application - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "kfwcpcc\0"
 #define K5_FILETYPE	VFT_DLL
 #define K5_ORIGINAL_NAME "kfwcpcc.exe\0"
 #endif /* KFWCPCC_APP */
 
 #ifdef KCPYTKT_APP
-#define K5_DESCRIPTION "Kerberos Copy Ticket Application - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "Kerberos Copy Ticket Application - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "kcpytkt\0"
 #define K5_FILETYPE	VFT_DLL
 #define K5_ORIGINAL_NAME "kcpytkt.exe\0"
 #endif /* KCPYTKT_APP */
 
 #ifdef KDELTKT_APP
-#define K5_DESCRIPTION "Kerberos Delete Ticket Application - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "Kerberos Delete Ticket Application - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "kdeltkt\0"
 #define K5_FILETYPE	VFT_DLL
 #define K5_ORIGINAL_NAME "kdeltkt.exe\0"
 #endif /* KDELTKT_APP */
 
 #ifdef KDESTROY_APP
-#define K5_DESCRIPTION "Kerberos Destroy Credential Cache Application - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "Kerberos Destroy Credential Cache Application - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "kdestroy\0"
 #define K5_FILETYPE	VFT_DLL
 #define K5_ORIGINAL_NAME "kdestroy.exe\0"
 #endif /* KDESTROY_APP */
 
 #ifdef KINIT_APP
-#define K5_DESCRIPTION "Kerberos Initialize Credential Cache Application - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "Kerberos Initialize Credential Cache Application - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "kinit\0"
 #define K5_FILETYPE	VFT_DLL
 #define K5_ORIGINAL_NAME "kinit.exe\0"
 #endif /* KINIT_APP */
 
 #ifdef KLIST_APP
-#define K5_DESCRIPTION "Kerberos List Credential Cache Application - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "Kerberos List Credential Cache Application - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "klist\0"
 #define K5_FILETYPE	VFT_DLL
 #define K5_ORIGINAL_NAME "klist.exe\0"
 #endif /* KLIST_APP */
 
 #ifdef GSS_CLIENT_APP
-#define K5_DESCRIPTION "GSS Sample Client Application - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "GSS Sample Client Application - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "gss-client\0"
 #define K5_FILETYPE	VFT_DLL
 #define K5_ORIGINAL_NAME "gss-client.exe\0"
 #endif /* GSS_CLIENT_APP */
 
 #ifdef GSS_SERVER_APP
-#define K5_DESCRIPTION "GSS Sample Server Application - MIT GSS / Kerberos v5 distribution\0"
+#define K5_DESCRIPTION "GSS Sample Server Application - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "gss-server\0"
 #define K5_FILETYPE	VFT_DLL
 #define K5_ORIGINAL_NAME "gss-server.exe\0"
