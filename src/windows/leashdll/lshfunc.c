@@ -1553,7 +1553,7 @@ get_profile_file(LPSTR confname, UINT szConfname)
 {
     char **configFile = NULL;
     if (hKrb5) {
-        if (pkrb5_get_default_config_files(&configFile))
+        if (pkrb5_get_default_config_files(&configFile) || !configFile[0])
         {
             GetWindowsDirectory(confname,szConfname);
             confname[szConfname-1] = '\0';
