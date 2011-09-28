@@ -159,7 +159,6 @@ not_an_API_LeashGetTimeServerName(
 LONG Leash_timesync(int MessageP)
 {
     char                tmpstr[2048];
-    char                tmpstr1[2048];
     char                hostname[128];
     int                 Port;
     int                 rc;
@@ -197,6 +196,7 @@ LONG Leash_timesync(int MessageP)
 
     rc = ProcessTimeSync(hostname, Port, tmpstr);
 
+#ifdef USE_MESSAGE_BOX
     if(MessageP != 0)
     {
         if (rc && !*tmpstr)
@@ -204,6 +204,8 @@ LONG Leash_timesync(int MessageP)
             strcpy(tmpstr, "Unable to syncronize time!\n\n");
             if (*hostname)
             {
+                char                tmpstr1[2048];
+
                 memset(tmpstr1, '\0', sizeof(tmpstr1));
                 sprintf(tmpstr1, "Unreachable server: %s\n", hostname);
                 strcat(tmpstr, tmpstr1);
@@ -213,6 +215,7 @@ LONG Leash_timesync(int MessageP)
 	MessageBox(NULL, tmpstr, "Time Server",
                    MB_ICONERROR | MB_OK);
     }
+#endif /* USE_MESSAGE_BOX */
     WSACleanup();
     return(rc);
 }

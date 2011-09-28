@@ -197,7 +197,9 @@ not_an_API_LeashAFSGetToken(
         list->theTicket = (char*) calloc(1, sizeof(Buffer));
         if (!list->theTicket)
         {
+#ifdef USE_MESSAGE_BOX
             MessageBox(NULL, "Memory Error", "Error", MB_OK);
+#endif /* USE_MESSAGE_BOX */
             return ENOMEM;
         }
 
@@ -742,6 +744,7 @@ Leash_afs_error(LONG rc, LPCSTR FailedFunctionName)
 #ifdef NO_AFS
     return;
 #else
+#ifdef USE_MESSAGE_BOX
     char message[256];
     const char *errText;
 
@@ -769,6 +772,7 @@ Leash_afs_error(LONG rc, LPCSTR FailedFunctionName)
 
     sprintf(message, "%s\n(%s failed)", errText, FailedFunctionName);
     MessageBox(NULL, message, "AFS", MB_OK | MB_ICONERROR | MB_TASKMODAL | MB_SETFOREGROUND);
+#endif /* USE_MESSAGE_BOX */
     return;
 
 #endif

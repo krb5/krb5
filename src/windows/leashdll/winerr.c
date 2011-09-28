@@ -81,6 +81,7 @@ LPSTR err_describe(LPSTR buf, long code)
 int _export lsh_com_err_proc (LPSTR whoami, long code,
                               LPSTR fmt, va_list args)
 {
+#ifdef USE_MESSAGE_BOX
     int retval;
     HWND hOldFocus;
     char buf[1024], *cp; /* changed to 512 by jms 8/23/93 */
@@ -118,4 +119,7 @@ int _export lsh_com_err_proc (LPSTR whoami, long code,
                         mbformat | MB_ICONHAND | MB_TASKMODAL);
     SetFocus(hOldFocus);
     return retval;
+#else
+    return IDOK;
+#endif /* USE_MESSAGE_BOX */
 }
