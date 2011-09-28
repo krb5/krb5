@@ -36,7 +36,7 @@ typedef unsigned char CC_UCHAR;
 typedef int CC_INT32;
 typedef unsigned int CC_UINT32;
 
-const long HSIZE = sizeof(void*);
+const long HSIZE = 8;
 
 void ccs_rpc_request(
     [in]                        const long  rpcmsg,         /* Message type */

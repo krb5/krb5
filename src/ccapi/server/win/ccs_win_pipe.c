@@ -33,13 +33,13 @@
 /* Ref:
 struct ccs_win_pipe_t {
     char*   uuid;
-    HANDLE  clientHandle;
+    UINT64  clientHandle;
     }
  */
 
 /* ------------------------------------------------------------------------ */
 
-struct ccs_win_pipe_t* ccs_win_pipe_new (const char* uuid, const HANDLE h) {
+struct ccs_win_pipe_t* ccs_win_pipe_new (const char* uuid, const UINT64 h) {
 
     cc_int32                err         = ccNoError;
     struct ccs_win_pipe_t*  out_pipe    = NULL;
@@ -153,9 +153,9 @@ char* ccs_win_pipe_getUuid    (const WIN_PIPE* in_pipe) {
 
 /* ------------------------------------------------------------------------ */
 
-HANDLE ccs_win_pipe_getHandle  (const WIN_PIPE* in_pipe) {
+UINT64 ccs_win_pipe_getHandle  (const WIN_PIPE* in_pipe) {
 
-    HANDLE result = NULL;
+    UINT64 result = 0;
 
     if (!ccs_win_pipe_valid(in_pipe)) {cci_check_error(ccErrBadParam);}
     else                              {result = in_pipe->clientHandle;}

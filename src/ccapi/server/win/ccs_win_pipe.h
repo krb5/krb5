@@ -44,12 +44,12 @@
 
 struct ccs_win_pipe_t {
     char*   uuid;
-    HANDLE  clientHandle;
+    UINT64  clientHandle;
     };
 
 typedef struct ccs_win_pipe_t WIN_PIPE;
 
-struct ccs_win_pipe_t*  ccs_win_pipe_new(const char* uuid, const HANDLE h);
+struct ccs_win_pipe_t*  ccs_win_pipe_new(const char* uuid, const UINT64 h);
 
 cc_int32    ccs_win_pipe_release    (const WIN_PIPE* io_pipe);
 
@@ -63,6 +63,6 @@ cc_int32    ccs_win_pipe_copy       (WIN_PIPE** out_pipe,
 cc_int32    ccs_win_pipe_valid      (const WIN_PIPE* in_pipe);
 
 char*       ccs_win_pipe_getUuid    (const WIN_PIPE* in_pipe);
-HANDLE      ccs_win_pipe_getHandle  (const WIN_PIPE* in_pipe);
+UINT64      ccs_win_pipe_getHandle  (const WIN_PIPE* in_pipe);
 
 #endif // _ccs_win_pipe_h_

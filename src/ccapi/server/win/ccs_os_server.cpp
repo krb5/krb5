@@ -318,7 +318,7 @@ cc_int32 ccs_os_server_send_reply (ccs_pipe_t   in_pipe,
 
     cc_int32    err     = 0;
     char*       uuid    = ccs_win_pipe_getUuid(in_pipe);
-    HANDLE      h       = ccs_win_pipe_getHandle(in_pipe);
+    UINT64      h       = ccs_win_pipe_getHandle(in_pipe);
 
     if (!err) {
         err = send_init(uuid);      // Sets RPC handle to be used.
@@ -619,7 +619,7 @@ RPC_STATUS send_finish() {
 
 RPC_STATUS send_connection_reply(ccs_pipe_t in_pipe) {
     char*       uuid    = ccs_win_pipe_getUuid  (in_pipe);
-    HANDLE      h       = ccs_win_pipe_getHandle(in_pipe);
+    UINT64      h       = ccs_win_pipe_getHandle(in_pipe);
     RPC_STATUS  status  = send_init(uuid);
 
     RpcTryExcept {

@@ -148,6 +148,7 @@ extern "C" cc_int32 cci_os_ipc_msg( cc_int32        in_launch_server,
     PROCESS_INFORMATION     pi      = { 0 };
     HANDLE          replyEvent      = 0;
     BOOL            bCCAPI_Connected= FALSE;
+    unsigned char tspdata_handle[8] = { 0 };
 
     if (!in_request_stream) { err = cci_check_error (ccErrBadParam); }
     if (!out_reply_stream ) { err = cci_check_error (ccErrBadParam); }
@@ -196,9 +197,11 @@ extern "C" cc_int32 cci_os_ipc_msg( cc_int32        in_launch_server,
             cci_debug_printf("%s calling remote ccs_rpc_request tsp*:0x%X", __FUNCTION__, ptspdata);
             cci_debug_printf("  rpcmsg:%d; UUID[%d]:<%s> SST:%ld", in_msg, lenUUID, uuid, sst);
 #endif
+            /* copy ptr into handle; ptr may be 4 or 8 bytes, depending on platform; handle is always 8 */
+            memcpy(tspdata_handle, &ptspdata, sizeof(ptspdata));
             ccs_rpc_request(                    /* make call with user message: */
                 in_msg,                         /* Message type */
-                (unsigned char*)&ptspdata,      /* Our tspdata* will be sent back to the reply proc. */
+                tspdata_handle,                 /* Our tspdata* will be sent back to the reply proc. */
                 (unsigned char*)uuid,
                 krb5int_ipc_stream_size(in_request_stream),
                 (unsigned char*)krb5int_ipc_stream_data(in_request_stream), /* Data buffer */
@@ -263,6 +266,7 @@ cc_int32 ccapi_connect(const struct tspdata* tsp) {
     HANDLE                  replyEvent  = 0;
     RPC_STATUS              status      = FALSE;
     char*                   uuid        = NULL;
+    unsigned char           tspdata_handle[8] = {0};
 
     /* Start listening to our uuid before establishing the connection,
      *  so that when the server tries to call ccapi_listen, we will be ready.
@@ -338,10 +342,11 @@ cc_int32 ccapi_connect(const struct tspdata* tsp) {
 
     // New code using new RPC procedures for sending the data and receiving a reply:
     if (!status) {
+        memcpy(tspdata_handle, &tsp, sizeof(tsp));
         RpcTryExcept {
             ccs_rpc_connect(                /* make call with user message: */
                 CCMSG_CONNECT,              /* Message type */
-                (unsigned char*)&tsp,       /* Our tspdata* will be sent back to the reply proc. */
+                tspdata_handle,             /* Our tspdata* will be sent back to the reply proc. */
                 (unsigned char*)uuid,
                 (long*)(&status) );         /* Return code */
             }

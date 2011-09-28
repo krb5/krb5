@@ -33,7 +33,7 @@
  */
 
 interface ccs_reply {
-    const long HSIZE = sizeof(void*);
+    const long HSIZE = 8;
 
 /* The reply from the server to a request from the client: */
 void ccs_rpc_request_reply(
