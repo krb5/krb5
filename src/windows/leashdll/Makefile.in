@@ -32,8 +32,7 @@ OBJS=	$(OUTPRE)AFSroutines.$(OBJEXT) \
 	$(OUTPRE)timesync.$(OBJEXT) \
 	$(OUTPRE)winerr.$(OBJEXT) \
 	$(OUTPRE)winutil.$(OBJEXT) \
-	$(OUTPRE)registry.$(OBJEXT) \
-	$(OUTPRE)loadfuncs.$(OBJEXT)
+	$(OUTPRE)registry.$(OBJEXT)
 
 #TODO: Fix resource compilation
 RESFILE = $(OUTPRE)lsh_pwd.res
@@ -75,7 +74,7 @@ clean-windows::
 
 $(OUTPRE)$(DLL_NAME).dll: $(DEF_FILE) $(OBJS) $(XOBJS)
 	link $(WINDLLFLAGS) -def:$(DEF_FILE) -out:$*.dll \
-	$(OBJS) $(XOBJS) $(WINLIBS) $(SCLIB)
+	$(OBJS) $(XOBJS) $(WINLIBS) ../lib/$(OUTPRE)libwin.lib $(SCLIB)
 	$(_VC_MANIFEST_EMBED_DLL)
 
 #TODO: Add dependencies on include files here

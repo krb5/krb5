@@ -188,10 +188,6 @@ DWORD APIENTRY NPPasswordChangeNotify(
 extern "C" {
 #endif
 
-void UnloadFuncs(FUNC_INFO [], HINSTANCE);
-
-int  LoadFuncs(const char*, FUNC_INFO [], HINSTANCE*, int*, int, int, int);
-
 void DebugEvent0(char *a);
 void DebugEvent(char *b,...);
 
