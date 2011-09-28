@@ -20,40 +20,6 @@ HINSTANCE hCcapi = 0;
 
 DWORD     AfsAvailable = 0;
 
-#ifndef NO_KRB4
-// krb4 functions
-DECL_FUNC_PTR(get_krb_err_txt_entry);
-DECL_FUNC_PTR(k_isinst);
-DECL_FUNC_PTR(k_isname);
-DECL_FUNC_PTR(k_isrealm);
-DECL_FUNC_PTR(kadm_change_your_password);
-DECL_FUNC_PTR(kname_parse);
-DECL_FUNC_PTR(krb_get_cred);
-DECL_FUNC_PTR(krb_get_krbhst);
-DECL_FUNC_PTR(krb_get_lrealm);
-DECL_FUNC_PTR(krb_get_pw_in_tkt);
-DECL_FUNC_PTR(krb_get_tf_realm);
-DECL_FUNC_PTR(krb_mk_req);
-DECL_FUNC_PTR(krb_realmofhost);
-DECL_FUNC_PTR(tf_init);
-DECL_FUNC_PTR(tf_close);
-DECL_FUNC_PTR(tf_get_cred);
-DECL_FUNC_PTR(tf_get_pname);
-DECL_FUNC_PTR(tf_get_pinst);
-DECL_FUNC_PTR(LocalHostAddr);
-DECL_FUNC_PTR(tkt_string);
-DECL_FUNC_PTR(krb_set_tkt_string);
-DECL_FUNC_PTR(initialize_krb_error_func);
-DECL_FUNC_PTR(initialize_kadm_error_table);
-DECL_FUNC_PTR(dest_tkt);
-DECL_FUNC_PTR(lsh_LoadKrb4LeashErrorTables); // XXX
-DECL_FUNC_PTR(krb_in_tkt);
-DECL_FUNC_PTR(krb_save_credentials);
-DECL_FUNC_PTR(krb_get_krbconf2);
-DECL_FUNC_PTR(krb_get_krbrealm2);
-DECL_FUNC_PTR(krb_life_to_time);
-#endif
-
 // krb5 functions
 DECL_FUNC_PTR(krb5_change_password);
 DECL_FUNC_PTR(krb5_get_init_creds_opt_init);
@@ -117,12 +83,6 @@ DECL_FUNC_PTR(krb5_free_default_realm);
 DECL_FUNC_PTR(krb5_principal_compare);
 DECL_FUNC_PTR(krb5_string_to_deltat);
 
-#ifndef NO_KRB4
-// Krb524 functions
-DECL_FUNC_PTR(krb524_init_ets);
-DECL_FUNC_PTR(krb524_convert_creds_kdc);
-#endif
-
 // ComErr functions
 DECL_FUNC_PTR(com_err);
 DECL_FUNC_PTR(error_message);
@@ -155,42 +115,6 @@ DECL_FUNC_PTR(cc_initialize);
 DECL_FUNC_PTR(cc_shutdown);
 DECL_FUNC_PTR(cc_get_NC_info);
 DECL_FUNC_PTR(cc_free_NC_info);
-
-#ifndef NO_KRB4
-FUNC_INFO k4_fi[] = {
-    MAKE_FUNC_INFO(get_krb_err_txt_entry),
-    MAKE_FUNC_INFO(k_isinst),
-    MAKE_FUNC_INFO(k_isname),
-    MAKE_FUNC_INFO(k_isrealm),
-    MAKE_FUNC_INFO(kadm_change_your_password),
-    MAKE_FUNC_INFO(kname_parse),
-    MAKE_FUNC_INFO(krb_get_cred),
-    MAKE_FUNC_INFO(krb_get_krbhst),
-    MAKE_FUNC_INFO(krb_get_lrealm),
-    MAKE_FUNC_INFO(krb_get_pw_in_tkt),
-    MAKE_FUNC_INFO(krb_get_tf_realm),
-    MAKE_FUNC_INFO(krb_mk_req),
-    MAKE_FUNC_INFO(krb_realmofhost),
-    MAKE_FUNC_INFO(tf_init),
-    MAKE_FUNC_INFO(tf_close),
-    MAKE_FUNC_INFO(tf_get_cred),
-    MAKE_FUNC_INFO(tf_get_pname),
-    MAKE_FUNC_INFO(tf_get_pinst),
-    MAKE_FUNC_INFO(LocalHostAddr),
-    MAKE_FUNC_INFO(tkt_string),
-    MAKE_FUNC_INFO(krb_set_tkt_string),
-    MAKE_FUNC_INFO(initialize_krb_error_func),
-    MAKE_FUNC_INFO(initialize_kadm_error_table),
-    MAKE_FUNC_INFO(dest_tkt),
-    MAKE_FUNC_INFO(lsh_LoadKrb4LeashErrorTables), // XXX
-    MAKE_FUNC_INFO(krb_in_tkt),
-    MAKE_FUNC_INFO(krb_save_credentials),
-    MAKE_FUNC_INFO(krb_get_krbconf2),
-    MAKE_FUNC_INFO(krb_get_krbrealm2),
-    MAKE_FUNC_INFO(krb_life_to_time),
-    END_FUNC_INFO
-};
-#endif
 
 FUNC_INFO k5_fi[] = {
     MAKE_FUNC_INFO(krb5_change_password),
@@ -256,14 +180,6 @@ FUNC_INFO k5_fi[] = {
     MAKE_FUNC_INFO(krb5_string_to_deltat),
     END_FUNC_INFO
 };
-
-#ifndef NO_KRB4
-FUNC_INFO k524_fi[] = {
-    MAKE_FUNC_INFO(krb524_init_ets),
-    MAKE_FUNC_INFO(krb524_convert_creds_kdc),
-    END_FUNC_INFO
-};
-#endif
 
 FUNC_INFO profile_fi[] = {
     MAKE_FUNC_INFO(profile_init),
@@ -345,16 +261,10 @@ DllMain(
     case DLL_PROCESS_ATTACH:
     {
         OSVERSIONINFO osvi;
-#ifndef NO_KRB4
-        LoadFuncs(KRB4_DLL, k4_fi, &hKrb4, 0, 1, 0, 0);
-#endif
         LoadFuncs(KRB5_DLL, k5_fi, &hKrb5, 0, 1, 0, 0);
         LoadFuncs(COMERR_DLL, ce_fi, &hComErr, 0, 0, 1, 0);
         LoadFuncs(SERVICE_DLL, service_fi, &hService, 0, 1, 0, 0);
         LoadFuncs(SECUR32_DLL, lsa_fi, &hSecur32, 0, 1, 1, 1);
-#ifndef NO_KRB4
-        LoadFuncs(KRB524_DLL, k524_fi, &hKrb524, 0, 1, 1, 1);
-#endif
 	LoadFuncs(PROFILE_DLL, profile_fi, &hProfile, 0, 1, 0, 0);
 	LoadFuncs(CCAPI_DLL, ccapi_fi, &hCcapi, 0, 1, 0, 0);
 
@@ -387,10 +297,6 @@ DllMain(
          * zero any fields we don't explicitly set
          */
         hLeashInst = hinstDLL;
-#ifndef NO_KRB4
-        if (plsh_LoadKrb4LeashErrorTables)
-            plsh_LoadKrb4LeashErrorTables(hLeashInst, 0);
-#endif
 
         Register_MITPasswordEditControl(hLeashInst);
 
@@ -411,10 +317,6 @@ DllMain(
 #ifndef NO_AFS
         afscompat_close();
 #endif
-#ifndef NO_KRB4
-        if (hKrb4)
-            FreeLibrary(hKrb4);
-#endif
         if (hKrb5)
             FreeLibrary(hKrb5);
 	if (hCcapi)
@@ -427,10 +329,6 @@ DllMain(
             FreeLibrary(hService);
         if (hSecur32)
             FreeLibrary(hSecur32);
-#ifndef NO_KRB4
-        if (hKrb524)
-            FreeLibrary(hKrb524);
-#endif
         if (hPsapi)
             FreeLibrary(hPsapi);
         if (hToolHelp32)

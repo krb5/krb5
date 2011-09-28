@@ -529,43 +529,11 @@ Leash_afs_klog(
 #endif /* NO_KRB5 */
     {
       use_krb4:
-#ifndef NO_KRB4
-        rc = (*pkrb_get_cred)(ServiceName, CellName, RealmName, &creds);
-		if (rc == NO_TKT_FIL) {
-			// if the problem is that we have no krb4 tickets
-			// do not attempt to continue
-            return(rc);
-		}
-        if (rc != KSUCCESS)
-            rc = (*pkrb_get_cred)(ServiceName, "", RealmName, &creds);
-#else
 	rc = KFAILURE;
-#endif
     }
     if (rc != KSUCCESS)
     {
-#ifndef NO_KRB4
-        if ((rc = (*pkrb_mk_req)(&ticket, ServiceName, CellName, RealmName, 0)) == KSUCCESS)
-        {
-            if ((rc = (*pkrb_get_cred)(ServiceName, CellName, RealmName, &creds)) != KSUCCESS)
-            {
-                return(rc);
-            }
-        }
-        else if ((rc = (*pkrb_mk_req)(&ticket, ServiceName, "", RealmName, 0)) == KSUCCESS)
-        {
-            if ((rc = (*pkrb_get_cred)(ServiceName, "", RealmName, &creds)) != KSUCCESS)
-            {
-                return(rc);
-            }
-        }
-        else
-        {
-#endif
             return(rc);
-#ifndef NO_KRB4
-        }
-#endif
     }
 
 	memset(&aserver, '\0', sizeof(aserver));
@@ -662,14 +630,6 @@ static char *afs_realm_of_cell(afsconf_cell *cellconfig)
             pkrb5_free_context(ctx);
     }
 #endif /* NO_KRB5 */
-
-#ifndef NO_KRB4
-    if ( !krbrlm[0] ) {
-        strcpy(krbrlm, (char *)(*pkrb_realmofhost)(cellconfig->hostName[0]));
-        if ((*pkrb_get_krbhst)(krbhst, krbrlm, 1) != KSUCCESS)
-            krbrlm[0] = '\0';
-    }
-#endif /* NO_KRB4 */
 
     if ( !krbrlm[0] )
     {

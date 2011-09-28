@@ -20,9 +20,6 @@
 
 #include <mitwhich.h>
 
-#ifndef NO_KRB4
-#include <winkrbid.h>
-#endif
 #include "reminder.h"
 
 static char FAR *err_context;
@@ -32,19 +29,6 @@ char KRB_HelpFile[_MAX_PATH] =	HELPFILE;
 #define LEN     64                /* Maximum Hostname Length */
 
 #define LIFE    DEFAULT_TKT_LIFE  /* lifetime of ticket in 5-minute units */
-
-#ifndef NO_KRB4
-char *
-short_date(dp)
-    long   *dp;
-{
-    register char *cp;
-    cp = ctime(dp) + 4; // skip day of week
-    // cp[15] = '\0';
-    cp[12] = '\0'; // Don't display seconds
-    return (cp);
-}
-#endif
 
 static
 char*
@@ -76,7 +60,6 @@ int
 leash_error_message(
     const char *error,
     int rcL,
-    int rc4,
     int rc5,
     int rcA,
     char* result_string,
@@ -90,7 +73,7 @@ leash_error_message(
 
     // XXX: ignore AFS for now.
 
-    if (!rc5 && !rc4 && !rcL)
+    if (!rc5 && !rcL)
         return 0;
 
     n = _snprintf(p, size, "%s\n\n", error);
@@ -103,16 +86,6 @@ leash_error_message(
                       "Kerberos 5: %s (error %ld)\n",
                       perror_message(rc5),
                       rc5 & 255 // XXX: & 255??!!!
-            );
-        p += n;
-        size -= n;
-    }
-    if (rc4 && !result_string)
-    {
-        char buffer[1024];
-        n = _snprintf(p, size,
-                      "Kerberos 4: %s\n",
-                      err_describe(buffer, rc4)
             );
         p += n;
         size -= n;
@@ -141,7 +114,6 @@ leash_error_message(
                     MB_SETFOREGROUND);
 #endif /* USE_MESSAGE_BOX */
     if (rc5) return rc5;
-    if (rc4) return rc4;
     if (rcL) return rcL;
     return 0;
 }
@@ -187,39 +159,6 @@ make_postfix(
     *rcopy = copy;
     return ret;
 }
-
-#ifndef NO_KRB4
-static
-long
-make_temp_cache_v4(
-    const char * postfix
-    )
-{
-    static char * old_cache = 0;
-
-    if (!pkrb_set_tkt_string || !ptkt_string || !pdest_tkt)
-        return 0; // XXX - is this appropriate?
-
-    if (old_cache) {
-        pdest_tkt();
-        pkrb_set_tkt_string(old_cache);
-        free(old_cache);
-        old_cache = 0;
-    }
-
-    if (postfix)
-    {
-        char * tmp_cache = make_postfix(ptkt_string(), postfix, &old_cache);
-
-        if (!tmp_cache)
-            return KFAILURE;
-
-        pkrb_set_tkt_string(tmp_cache);
-        free(tmp_cache);
-    }
-    return 0;
-}
-#endif
 
 static
 long
@@ -304,9 +243,6 @@ Leash_int_checkpwd(
     long rc = 0;
 	krb5_context ctx = 0;	// statically allocated in make_temp_cache_v5
     // XXX - we ignore errors in make_temp_cache_v?  This is BAD!!!
-#ifndef NO_KRB4
-    make_temp_cache_v4("_checkpwd");
-#endif
     make_temp_cache_v5("_checkpwd", &ctx);
     rc = Leash_int_kinit_ex( ctx, 0,
 							 principal, password, 0, 0, 0, 0,
@@ -314,9 +250,6 @@ Leash_int_checkpwd(
 							 Leash_get_default_publicip(),
                              displayErrors
 							 );
-#ifndef NO_KRB4
-    make_temp_cache_v4(0);
-#endif
     make_temp_cache_v5(0, &ctx);
     return rc;
 }
@@ -428,36 +361,10 @@ Leash_changepwd_v5(
    return rc;
 }
 
-#ifndef NO_KRB4
-static
-long
-Leash_changepwd_v4(
-    char * principal,
-    char * password,
-    char * newpassword,
-    char** error_str
-    )
-{
-    long k_errno;
-
-    if (!pkrb_set_tkt_string || !ptkt_string || !pkadm_change_your_password ||
-        !pdest_tkt)
-        return KFAILURE;
-
-    k_errno = make_temp_cache_v4("_chgpwd");
-    if (k_errno) return k_errno;
-    k_errno = pkadm_change_your_password(principal, password, newpassword,
-                                         error_str);
-    make_temp_cache_v4(0);
-    return k_errno;
-}
-#endif
-
 /*
  * Leash_changepwd
  *
- * Try to change the password using one of krb5 or krb4 -- whichever one
- * works.  We return ok on the first one that works.
+ * Try to change the password using krb5.
  */
 long
 Leash_changepwd(
@@ -480,37 +387,23 @@ Leash_int_changepwd(
     )
 {
     char* v5_error_str = 0;
-    char* v4_error_str = 0;
     char* error_str = 0;
-    int rc4 = 0;
     int rc5 = 0;
     int rc = 0;
     if (hKrb5)
         rc = rc5 = Leash_changepwd_v5(principal, password, newpassword,
                                       &v5_error_str);
-#ifndef NO_KRB4
-    if (hKrb4 &&
-         Leash_get_default_use_krb4() &&
-         (!hKrb5 || rc5))
-        rc = rc4 = Leash_changepwd_v4(principal, password, newpassword,
-                                      &v4_error_str);
-#endif
     if (!rc)
         return 0;
-    if (v5_error_str || v4_error_str) {
+    if (v5_error_str) {
         int len = 0;
         char v5_prefix[] = "Kerberos 5: ";
         char sep[] = "\n";
-        char v4_prefix[] = "Kerberos 4: ";
 
         clean_string(v5_error_str);
-        clean_string(v4_error_str);
 
         if (v5_error_str)
             len += sizeof(sep) + sizeof(v5_prefix) + strlen(v5_error_str) +
-                sizeof(sep);
-        if (v4_error_str)
-            len += sizeof(sep) + sizeof(v4_prefix) + strlen(v4_error_str) +
                 sizeof(sep);
         error_str = malloc(len + 1);
         if (error_str) {
@@ -523,18 +416,12 @@ Leash_int_changepwd(
                 p += n;
                 size -= n;
             }
-            if (v4_error_str) {
-                n = _snprintf(p, size, "%s%s%s%s",
-                              sep, v4_prefix, v4_error_str, sep);
-                p += n;
-                size -= n;
-            }
             if (result_string)
                 *result_string = error_str;
         }
     }
     return leash_error_message("Error while changing password.",
-                               rc4, rc4, rc5, 0, error_str,
+                               0, rc5, 0, error_str,
                                displayErrors
                                );
 }
@@ -614,7 +501,6 @@ Leash_int_kinit_ex(
     char    temp[1024];
     int     count;
     int     i;
-    int rc4 = 0;
     int rc5 = 0;
     int rcA = 0;
     int rcB = 0;
@@ -669,17 +555,6 @@ Leash_int_kinit_ex(
         }
         else
         {
-#ifndef NO_KRB4
-            if (pkname_parse != NULL)
-            {
-                memset(first_part, '\0', sizeof(first_part));
-                memset(second_part, '\0', sizeof(second_part));
-                sscanf(temp, "%[@/0-9a-zA-Z_-].%[@/0-9a-zA-Z_-]", first_part, second_part);
-                strcpy(aname, first_part);
-                strcpy(inst, second_part);
-            }
-            else
-#endif
             {
                 strcpy(aname, temp);
             }
@@ -707,66 +582,8 @@ Leash_int_kinit_ex(
                             addressless,
                             publicip
                             );
-#ifndef NO_KRB4
-    if ( Leash_get_default_use_krb4() ) {
-        rc4 = KSUCCESS;
-
-        if ( !rc5 ) {
-            if (!Leash_convert524(ctx))
-                rc4 = KFAILURE;
-        }
-
-        if (rc4 != KSUCCESS) {
-            if (pkname_parse == NULL)
-            {
-                goto cleanup;
-            }
-
-            err_context = "getting realm";
-            if (!*realm && (rc4  = (int)(*pkrb_get_lrealm)(realm, 1)))
-            {
-                functionName = "krb_get_lrealm()";
-                rcL  = LSH_FAILEDREALM;
-                goto cleanup;
-            }
-
-            err_context = "checking principal";
-            if ((!*aname) || (!(rc4  = (int)(*pk_isname)(aname))))
-            {
-                functionName = "krb_get_lrealm()";
-                rcL = LSH_INVPRINCIPAL;
-                goto cleanup;
-            }
-
-            /* optional instance */
-            if (!(rc4 = (int)(*pk_isinst)(inst)))
-            {
-                functionName = "k_isinst()";
-                rcL = LSH_INVINSTANCE;
-                goto cleanup;
-            }
-
-            if (!(rc4 = (int)(*pk_isrealm)(realm)))
-            {
-                functionName = "k_isrealm()";
-                rcL = LSH_INVREALM;
-                goto cleanup;
-            }
-
-            err_context = "fetching ticket";
-            rc4 = (*pkrb_get_pw_in_tkt)(aname, inst, "", "krbtgt", realm,
-                                         lifetime, password);
-            if (rc4) /* XXX: do we want: && (rc != NO_TKT_FIL) as well? */
-            {
-                functionName = "krb_get_pw_in_tkt()";
-                rcL = KRBERR(rc4);
-                goto cleanup;
-            }
-        }
-    }
-#endif
 #ifndef NO_AFS
-    if ( !rc5 || (Leash_get_default_use_krb4() && !rc4) ) {
+    if ( !rc5 ) {
         char c;
         char *r;
         char *t;
@@ -786,11 +603,6 @@ Leash_int_kinit_ex(
  cleanup:
     return leash_error_message("Ticket initialization failed.",
                                rcL,
-#ifdef NO_KRB4
-                               0,
-#else
-                               (rc5 && rc4)?KRBERR(rc4):0,
-#endif
                                rc5, rcA, 0,
                                displayErrors);
 }
@@ -801,10 +613,6 @@ Leash_renew(void)
     if ( hKrb5 && !LeashKRB5_renew() ) {
         int lifetime;
         lifetime = Leash_get_default_lifetime() / 5;
-#ifndef NO_KRB4
-        if (hKrb4 && Leash_get_default_use_krb4())
-            Leash_convert524(0);
-#endif
 #ifndef NO_AFS
         {
             TicketList * list = NULL, * token;
@@ -982,10 +790,6 @@ Leash_import(void)
     if ( Leash_ms2mit(1) ) {
         int lifetime;
         lifetime = Leash_get_default_lifetime() / 5;
-#ifndef NO_KRB4
-        if (hKrb4 && Leash_get_default_use_krb4())
-            Leash_convert524(0);
-#endif
 #ifndef NO_AFS
         {
             char c;
@@ -1045,59 +849,8 @@ Leash_import(void)
 long
 Leash_kdestroy(void)
 {
-#ifdef NO_KRB4
-    return 0;
-#else
-    int k_errno;
-
-    Leash_afs_unlog();
-    Leash_krb5_kdestroy();
-
-    if (pdest_tkt != NULL)
-    {
-        k_errno = (*pdest_tkt)();
-        if (k_errno && (k_errno != RET_TKFIL))
-            return KRBERR(k_errno);
-    }
-
-    return 0;
-#endif
-}
-
-#ifndef NO_KRB4
-int com_addr(void)
-{
-    long ipAddr;
-    char loc_addr[ADDR_SZ];
-    CREDENTIALS cred;
-    char service[40];
-    char instance[40];
-//    char addr[40];
-    char realm[40];
-    struct in_addr LocAddr;
-    int k_errno;
-
-    if (pkrb_get_cred == NULL)
-        return(KSUCCESS);
-
-    k_errno = (*pkrb_get_cred)(service,instance,realm,&cred);
-    if (k_errno)
-        return KRBERR(k_errno);
-
-
-    while(1) {
-	ipAddr = (*pLocalHostAddr)();
-	LocAddr.s_addr = ipAddr;
-        strcpy(loc_addr,inet_ntoa(LocAddr));
-	if ( strcmp(cred.address,loc_addr) != 0) {
-            Leash_kdestroy ();
-            break;
-	}
-        break;
-    } // while()
     return 0;
 }
-#endif
 
 long FAR
 not_an_API_LeashFreeTicketList(TicketList** ticketList)
@@ -1143,330 +896,12 @@ long
 not_an_API_LeashKRB4GetTickets(TICKETINFO FAR* ticketinfo,
                                TicketList** ticketList)
 {
-#ifdef NO_KRB4
     return(KFAILURE);
-#else
-    // Puts tickets in a returned linklist - Can be used with many
-    // diff. controls
-    char    pname[ANAME_SZ];
-    char    pinst[INST_SZ];
-    char    prealm[REALM_SZ];
-    char    buf[MAX_K_NAME_SZ+40];
-    LPSTR   cp;
-    LPSTR   functionName;
-    long    expdate;
-    int     k_errno;
-    CREDENTIALS c;
-    int newtickets = 0;
-    int open = 0;
-
-    TicketList* list = NULL;
-    if ( ticketinfo ) {
-        ticketinfo->btickets = NO_TICKETS;
-        ticketinfo->principal[0] = '\0';
-    }
-
-    // Since krb_get_tf_realm will return a ticket_file error,
-    // we will call tf_init and tf_close first to filter out
-    // things like no ticket file.  Otherwise, the error that
-    // the user would see would be
-    // klist: can't find realm of ticket file: No ticket file (tf_util)
-    // instead of klist: No ticket file (tf_util)
-    if (ptf_init == NULL)
-        return(KSUCCESS);
-
-    com_addr();
-    err_context = (LPSTR)"tktf1";
-
-    // Open ticket file
-    if ((k_errno = (*ptf_init)((*ptkt_string)(), R_TKT_FIL)))
-    {
-        functionName = "ptf_init()";
-        goto cleanup;
-    }
-    // Close ticket file
-    (void) (*ptf_close)();
-
-    // We must find the realm of the ticket file here before calling
-    // tf_init because since the realm of the ticket file is not
-    // really stored in the principal section of the file, the
-    // routine we use must itself call tf_init and tf_close.
-
-    err_context = "tf realm";
-    if ((k_errno = (*pkrb_get_tf_realm)((*ptkt_string)(), prealm)) != KSUCCESS)
-    {
-        functionName = "pkrb_get_tf_realm()";
-        goto cleanup;
-    }
-
-    // Open ticket file
-    err_context = "tf init";
-    if (k_errno = (*ptf_init)((*ptkt_string)(), R_TKT_FIL))
-    {
-        functionName = "sptf_init()";
-        goto cleanup;
-    }
-
-    open = 1;
-    err_context = "tf pname";
-
-    // Get principal name and instance
-    if ((k_errno = (*ptf_get_pname)(pname)) || (k_errno = (*ptf_get_pinst)(pinst)))
-    {
-        functionName = "ptf_get_pname()";
-        goto cleanup;
-    }
-
-    // You may think that this is the obvious place to get the
-    // realm of the ticket file, but it can't be done here as the
-    // routine to do this must open the ticket file.  This is why
-    // it was done before tf_init.
-    wsprintf((LPSTR)ticketinfo->principal,"%s%s%s%s%s", (LPSTR)pname,
-             (LPSTR)(pinst[0] ? "." : ""), (LPSTR)pinst,
-             (LPSTR)(prealm[0] ? "@" : ""), (LPSTR)prealm);
-
-    newtickets = NO_TICKETS;
-    err_context = "tf cred";
-
-    // Get KRB4 tickets
-    while ((k_errno = (*ptf_get_cred)(&c)) == KSUCCESS)
-    {
-        if (!list)
-        {
-            list = (TicketList*) calloc(1, sizeof(TicketList));
-            (*ticketList) = list;
-        }
-        else
-        {
-            list->next = (struct TicketList*) calloc(1, sizeof(TicketList));
-            list = (TicketList*) list->next;
-        }
-
-        expdate = c.issue_date + c.lifetime * 5L * 60L;
-
-        if (!lstrcmp((LPSTR)c.service, (LPSTR)TICKET_GRANTING_TICKET) && !lstrcmp((LPSTR)c.instance, (LPSTR)prealm))
-        {
-            ticketinfo->issue_date = c.issue_date;
-            ticketinfo->lifetime = c.lifetime * 5L * 60L;
-            ticketinfo->renew_till = 0;
-        }
-
-        _tzset();
-        if ( ticketinfo->issue_date + ticketinfo->lifetime - time(0) <= 0L )
-            newtickets = EXPD_TICKETS;
-        else
-            newtickets = GOOD_TICKETS;
-
-        cp = (LPSTR)buf;
-        cp += wsprintf(cp, "%s     ",
-                       short_date(&c.issue_date));
-        wsprintf(cp, "%s     %s%s%s%s%s",
-                 short_date(&expdate),
-                 c.service,
-                 (c.instance[0] ? "." : ""),
-                 c.instance,
-                 (c.realm[0] ? "@" : ""),
-                 c.realm);
-
-        list->theTicket = (char*) calloc(1, sizeof(buf));
-        if (!list->theTicket)
-        {
-#ifdef USE_MESSAGE_BOX
-            MessageBox(NULL, "Memory Error", "Error", MB_OK);
-#endif /* USE_MESSAGE_BOX */
-            return ENOMEM;
-        }
-
-        strcpy(list->theTicket, buf);
-        list->name = NULL;
-        list->inst = NULL;
-        list->realm = NULL;
-        list->tktEncType = NULL;
-        list->keyEncType = NULL;
-        list->addrCount = 0;
-        list->addrList = NULL;
-
-    } // while
-    functionName = "not_an_API_LeashKRB4GetTickets()";
-
-cleanup:
-    if (ptf_close == NULL)
-        return(KSUCCESS);
-
-    if (open)
-        (*ptf_close)(); //close ticket file
-
-    if (k_errno == EOF)
-        k_errno = 0;
-
-    // XXX the if statement directly below was inserted to eliminate
-    // an error NO_TKT_FIL on Leash startup. The error occurs from an
-    // error number thrown from krb_get_tf_realm.  We believe this
-    // change does not eliminate other errors, but it may.
-
-    if (k_errno == NO_TKT_FIL)
-        k_errno = 0;
-
-    ticketinfo->btickets = newtickets;
-
-#ifdef USE_MESSAGE_BOX
-    if (k_errno)
-    {
-        CHAR message[256];
-        CHAR errBuf[256];
-        LPCSTR errText;
-
-        if (!Lerror_message)
-            return -1;
-
-        errText = err_describe(errBuf, KRBERR(k_errno));
-
-        sprintf(message, "%s\n\n%s failed", errText, functionName);
-        MessageBox(NULL, message, "Kerberos Four",
-                   MB_OK | MB_ICONERROR | MB_TASKMODAL | MB_SETFOREGROUND);
-    }
-#endif /* USE_MESSAGE_BOX */
-    return k_errno;
-#endif
 }
 
 long FAR Leash_klist(HWND hlist, TICKETINFO FAR *ticketinfo)
 {
-#ifdef NO_KRB4
     return(KFAILURE);
-#else
-    // Don't think this function will be used anymore - ADL 5-15-99
-    // Old fucntion to put tickets in a listbox control
-    // Use function  "not_an_API_LeashKRB4GetTickets()" instead!
-    char    pname[ANAME_SZ];
-    char    pinst[INST_SZ];
-    char    prealm[REALM_SZ];
-    char    buf[MAX_K_NAME_SZ+40];
-    LPSTR   cp;
-    long    expdate;
-    int     k_errno;
-    CREDENTIALS c;
-    int newtickets = 0;
-    int open = 0;
-
-    /*
-     * Since krb_get_tf_realm will return a ticket_file error,
-     * we will call tf_init and tf_close first to filter out
-     * things like no ticket file.  Otherwise, the error that
-     * the user would see would be
-     * klist: can't find realm of ticket file: No ticket file (tf_util)
-     * instead of
-     * klist: No ticket file (tf_util)
-     */
-    if (ptf_init == NULL)
-        return(KSUCCESS);
-
-    if (hlist)
-    {
-        SendMessage(hlist, WM_SETREDRAW, FALSE, 0L);
-        SendMessage(hlist, LB_RESETCONTENT, 0, 0L);
-    }
-    com_addr();
-    newtickets = NO_TICKETS;
-
-    err_context = (LPSTR)"tktf1";
-
-    /* Open ticket file */
-    if (k_errno = (*ptf_init)((*ptkt_string)(), R_TKT_FIL))
-    {
-        goto cleanup;
-    }
-    /* Close ticket file */
-    (void) (*ptf_close)();
-    /*
-     * We must find the realm of the ticket file here before calling
-     * tf_init because since the realm of the ticket file is not
-     * really stored in the principal section of the file, the
-     * routine we use must itself call tf_init and tf_close.
-     */
-    err_context = "tf realm";
-    if ((k_errno = (*pkrb_get_tf_realm)((*ptkt_string)(), prealm)) != KSUCCESS)
-    {
-        goto cleanup;
-    }
-    /* Open ticket file */
-    err_context = "tf init";
-    if (k_errno = (*ptf_init)((*ptkt_string)(), R_TKT_FIL))
-    {
-        goto cleanup;
-    }
-
-    open = 1;
-    err_context = "tf pname";
-    /* Get principal name and instance */
-    if ((k_errno = (*ptf_get_pname)(pname)) || (k_errno = (*ptf_get_pinst)(pinst)))
-    {
-        goto cleanup;
-    }
-
-    /*
-     * You may think that this is the obvious place to get the
-     * realm of the ticket file, but it can't be done here as the
-     * routine to do this must open the ticket file.  This is why
-     * it was done before tf_init.
-     */
-
-    wsprintf((LPSTR)ticketinfo->principal,"%s%s%s%s%s", (LPSTR)pname,
-             (LPSTR)(pinst[0] ? "." : ""), (LPSTR)pinst,
-             (LPSTR)(prealm[0] ? "@" : ""), (LPSTR)prealm);
-    newtickets = GOOD_TICKETS;
-
-    err_context = "tf cred";
-    while ((k_errno = (*ptf_get_cred)(&c)) == KSUCCESS)
-    {
-        expdate = c.issue_date + c.lifetime * 5L * 60L;
-
-        if (!lstrcmp((LPSTR)c.service, (LPSTR)TICKET_GRANTING_TICKET) && !lstrcmp((LPSTR)c.instance, (LPSTR)prealm))
-        {
-            ticketinfo->issue_date = c.issue_date;
-            ticketinfo->lifetime = c.lifetime * 5L * 60L;
-            ticketinfo->renew_till = 0;
-        }
-
-        cp = (LPSTR)buf;
-        lstrcpy(cp, (LPSTR)short_date(&c.issue_date));
-        cp += lstrlen(cp);
-        wsprintf(cp,"\t%s\t%s%s%s%s%s",
-                 (LPSTR)short_date(&expdate), (LPSTR)c.service,
-                 (LPSTR)(c.instance[0] ? "." : ""),
-                 (LPSTR)c.instance, (LPSTR)(c.realm[0] ? "@" : ""),
-                 (LPSTR) c.realm);
-        if (hlist)
-            SendMessage(hlist, LB_ADDSTRING, 0, (LONG)(LPSTR)buf);
-    } /* WHILE */
-
-cleanup:
-
-    if (open)
-        (*ptf_close)(); /* close ticket file */
-
-    if (hlist)
-    {
-        SendMessage(hlist, WM_SETREDRAW, TRUE, 0L);
-        InvalidateRect(hlist, NULL, TRUE);
-        UpdateWindow(hlist);
-    }
-    if (k_errno == EOF)
-        k_errno = 0;
-
-    /* XXX the if statement directly below was inserted to eliminate
-       an error 20 on Leash startup. The error occurs from an error
-       number thrown from krb_get_tf_realm.  We believe this change
-       does not eliminate other errors, but it may. */
-
-    if (k_errno == RET_NOTKT)
-        k_errno = 0;
-
-    ticketinfo->btickets = newtickets;
-    if (k_errno != 0)
-        return KRBERR(k_errno);
-    return 0;
-#endif
 }
 
 
@@ -1506,35 +941,6 @@ LPSTR Leash_get_help_file(void)
 {
     return( KRB_HelpFile);
 }
-
-#if 0
-/**************************************/
-/* LeashKrb4ErrorMessage():           */
-/**************************************/
-long
-LeashKrb4ErrorMessage(LONG rc, LPCSTR FailedFunctionName)
-{
-    // At this time the Leashw32.dll. takes care of all error messages. We
-    // may want to add a flag latter on so the .exe can handle it's own
-    // errors.
-
-    CHAR message[256];
-    CHAR errBuf[256];
-    LPCSTR errText;
-
-    if (!Lerror_message)
-      return -1;
-
-    errText = err_describe(errBuf, rc);
-
-    sprintf(message, "%s\n\n%s failed", errText, FailedFunctionName);
-    MessageBox(NULL, message, "Kerberos Four", MB_OK |
-                                               MB_ICONERROR |
-                                               MB_TASKMODAL |
-                                               MB_SETFOREGROUND);
-    return rc;
-}
-#endif
 
 int
 Leash_debug(
@@ -2551,33 +1957,7 @@ DWORD
 Leash_get_default_use_krb4(
     )
 {
-    HMODULE hmLeash;
-    char env[32];
-    DWORD result;
-
-    if(GetEnvironmentVariable("USEKRB4",env,sizeof(env)))
-    {
-        return atoi(env);
-    }
-
-    if (get_default_use_krb4_from_registry(HKEY_CURRENT_USER, &result) ||
-        get_default_use_krb4_from_registry(HKEY_LOCAL_MACHINE, &result))
-    {
-        return result;
-    }
-
-    hmLeash = GetModuleHandle(LEASH_DLL);
-    if (hmLeash)
-    {
-        char use_krb4[80];
-        if (LoadString(hmLeash, LSH_DEFAULT_TICKET_USEKRB4,
-                       use_krb4, sizeof(use_krb4)))
-        {
-            use_krb4[sizeof(use_krb4) - 1] = 0;
-            return atoi(use_krb4);
-        }
-    }
-    return 1;	/* use krb4 unless otherwise specified */
+    return 0;	/* don't use krb4 */
 }
 
 static
