@@ -40,7 +40,7 @@ END
 
 3 TEXTINCLUDE DISCARDABLE
 BEGIN
-    "#include ""version.rc""\r\n"
+    "#include ""..\\version.rc""\r\n"
     "#include ""string.rc""\r\n"
     "\0"
 END
