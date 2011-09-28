@@ -1,8 +1,0 @@
-#ifdef APSTUDIO_INVOKED
-#error this file is not editable by App Studio
-#endif // APSTUDIO_INVOKED
-
-#define VER_FILEDESCRIPTION_STR "Winsock Helper (wshelper) API DLL"
-
-#include <wshelper.ver>
-#include <ver.inc>
