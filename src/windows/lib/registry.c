@@ -4,6 +4,7 @@
  * Author:  Michael Graff
  */
 
+#include <stdlib.h>
 #include <windows.h>
 #include <windowsx.h>
 

@@ -57,7 +57,7 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-#include "version.rc"
+#include "..\version.rc"
 #include "string.rc"
 
 /////////////////////////////////////////////////////////////////////////////

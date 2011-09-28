@@ -1,18 +1,21 @@
 //* Module name: AFSroutines.c
 
 #include <windows.h>
+#include <winsock2.h>
 #include <stdio.h>
 #include <time.h>
 
 /* Private Include files */
 #include <conf.h>
 #include <leasherr.h>
-#include <krb.h>
 #include "leashdll.h"
 #include <leashwin.h>
 
 #ifndef NO_AFS
-#include "afscompat.h"
+#include <afs/stds.h>
+#include <afs/auth.h>
+#include <afs/krb.h>
+#include <afs/cellconfig.h>
 #endif
 #include "leash-int.h"
 
@@ -267,10 +270,12 @@ Leash_afs_klog(
     int LifeTime
     )
 {
-#ifdef NO_AFS
+/////#ifdef NO_AFS
+#if defined(NO_AFS) || defined(NO_KRB4)
     return(0);
 #else
     long	rc;
+////This is defined in krb.h:
     CREDENTIALS	creds;
     KTEXT_ST	ticket;
     struct ktc_principal	aserver;
@@ -348,12 +353,15 @@ Leash_afs_klog(
         try_krb5 = 1;
     }
 #endif /* NO_KRB5 */
+
+#ifndef NO_KRB4
     if ( !try_krb5 || !realm_of_user[0] ) {
         if ((rc = (*pkrb_get_tf_realm)((*ptkt_string)(), realm_of_user)) != KSUCCESS)
         {
             return(rc);
         }
     }
+#endif
     strcpy(realm_of_cell, afs_realm_of_cell(&ak_cellconfig));
 
     if (strlen(service) == 0)
@@ -519,6 +527,7 @@ Leash_afs_klog(
 #endif /* NO_KRB5 */
     {
       use_krb4:
+#ifndef NO_KRB4
         rc = (*pkrb_get_cred)(ServiceName, CellName, RealmName, &creds);
 		if (rc == NO_TKT_FIL) {
 			// if the problem is that we have no krb4 tickets
@@ -527,9 +536,13 @@ Leash_afs_klog(
 		}
         if (rc != KSUCCESS)
             rc = (*pkrb_get_cred)(ServiceName, "", RealmName, &creds);
+#else
+	rc = KFAILURE;
+#endif
     }
     if (rc != KSUCCESS)
     {
+#ifndef NO_KRB4
         if ((rc = (*pkrb_mk_req)(&ticket, ServiceName, CellName, RealmName, 0)) == KSUCCESS)
         {
             if ((rc = (*pkrb_get_cred)(ServiceName, CellName, RealmName, &creds)) != KSUCCESS)
@@ -546,8 +559,11 @@ Leash_afs_klog(
         }
         else
         {
+#endif
             return(rc);
+#ifndef NO_KRB4
         }
+#endif
     }
 
 	memset(&aserver, '\0', sizeof(aserver));
@@ -645,11 +661,13 @@ static char *afs_realm_of_cell(afsconf_cell *cellconfig)
     }
 #endif /* NO_KRB5 */
 
+#ifndef NO_KRB4
     if ( !krbrlm[0] ) {
         strcpy(krbrlm, (char *)(*pkrb_realmofhost)(cellconfig->hostName[0]));
         if ((*pkrb_get_krbhst)(krbhst, krbrlm, 1) != KSUCCESS)
             krbrlm[0] = '\0';
     }
+#endif /* NO_KRB4 */
 
     if ( !krbrlm[0] )
     {

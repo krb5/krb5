@@ -33,6 +33,7 @@
 
 #define index(str, c) strchr(str,c)
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 
 #include <windows.h>

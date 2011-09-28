@@ -3,4 +3,4 @@ NO_OUTPRE=1
 !if "$(KRB5_KFW_COMPILE)"=="1"
 KFWLOGON= kfwlogon
 !endif
-SUBDIRS= lib cns gss gina ms2mit $(KFWLOGON)
+SUBDIRS= wshelper lib leashdll cns gss gina ms2mit $(KFWLOGON)

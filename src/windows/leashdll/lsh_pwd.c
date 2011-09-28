@@ -33,7 +33,9 @@
 #include "leash-int.h"
 #include "leashids.h"
 #include <leasherr.h>
+#ifndef NO_KRB4
 #include <krb.h>
+#endif
 #ifndef NO_KRB5
 #include <krb5.h>
 #endif /* NO_KRB5 */

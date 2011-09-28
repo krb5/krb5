@@ -1,5 +1,4 @@
 #include <windows.h>
-#include <krb.h>
 
 int (*Lcom_err)(LPSTR,long,LPSTR,...);
 LPSTR (*Lerror_message)(long);

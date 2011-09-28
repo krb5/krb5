@@ -21,6 +21,8 @@
 #include <time.h>
 #include <assert.h>
 
+#include <winsock2.h>
+
 /* Private Include files */
 #include "leashdll.h"
 #include <leashwin.h>

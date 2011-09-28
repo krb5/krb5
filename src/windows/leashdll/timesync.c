@@ -8,10 +8,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef NO_KRB4
 #include <winkrbid.h>
+#endif
 
 #ifdef WSHELPER
 #include <wshelper.h>
+#else
+#include <winsock2.h>
 #endif
 
 #include <stdio.h>

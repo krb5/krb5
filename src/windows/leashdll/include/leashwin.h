@@ -1,7 +1,17 @@
 #ifndef __LEASHWIN__
 #define __LEASHWIN__
 
+////Is this sufficient?
+#ifndef NO_KRB4
 #include <krb.h>
+#else
+#define ANAME_SZ	        40
+#define	REALM_SZ	        40
+#define	SNAME_SZ	        40
+#define	INST_SZ		        40
+/* include space for '.' and '@' */
+#define	MAX_K_NAME_SZ	    (ANAME_SZ + INST_SZ + REALM_SZ + 2)
+#endif
 
 #define DLGTYPE_PASSWD   0
 #define DLGTYPE_CHPASSWD 1

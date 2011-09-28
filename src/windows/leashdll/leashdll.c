@@ -1,6 +1,5 @@
 #include <windows.h>
 #include "leashdll.h"
-#include <krb.h>
 #include <leashwin.h>
 #include "leash-int.h"
 

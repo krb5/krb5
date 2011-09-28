@@ -1,10 +1,16 @@
 #include <windows.h>
 #include <stdio.h>
 #include <sys/types.h>
-#include <winsock.h>
+#include <winsock2.h>
 #include "leashdll.h"
+#ifndef NO_KRB4
 #include <KerberosIV/krb.h>
 #include <prot.h>
+#else
+/* General definitions */
+#define         KSUCCESS        0
+#define         KFAILURE        255
+#endif
 #include <time.h>
 
 #include <leashwin.h>
@@ -14,7 +20,9 @@
 
 #include <mitwhich.h>
 
+#ifndef NO_KRB4
 #include <winkrbid.h>
+#endif
 #include "reminder.h"
 
 static char FAR *err_context;

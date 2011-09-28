@@ -108,6 +108,18 @@
 #endif
 #endif /* GSSAPI */
 
+
+#ifdef WSHELPER_LIB
+#define K5_DESCRIPTION "Winsock Helper (wshelper) API - MIT GSS / Kerberos v5 distribution\0"
+#define K5_INTERNAL_NAME "wshelper\0"
+#define K5_FILETYPE	VFT_DLL
+#if !defined(_WIN32)
+#define K5_ORIGINAL_NAME "wshelper.dll\0"
+#else
+#define K5_ORIGINAL_NAME "wshelper32.dll\0"
+#endif
+#endif /* WSHELPER_LIB */
+
 #ifdef KRB4_LIB
 #define K5_DESCRIPTION "Kerberos v4 - MIT GSS / Kerberos v4 and v5 distribution\0"
 #define K5_INTERNAL_NAME "krb4\0"

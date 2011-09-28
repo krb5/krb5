@@ -85,7 +85,6 @@ void initialize_lsh_error_table(struct et_list **__et_list) {
 #endif
 
 #ifdef WINDOWS
-#include <krberr.h>
 
 void Leash_initialize_krb_error_func(err_func func, HANDLE *__et_list)
 {
@@ -93,8 +92,6 @@ void Leash_initialize_krb_error_func(err_func func, HANDLE *__et_list)
     (*pinitialize_krb_error_func)(func,__et_list);
 #endif
 }
-
-#include <kadm_err.h>
 
 void Leash_initialize_kadm_error_table(HANDLE *__et_list)
 {

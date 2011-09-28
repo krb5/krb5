@@ -112,7 +112,8 @@ typedef struct TicketList
 #include <errno.h>
 
 #ifndef NO_AFS
-#include "afscompat.h"
+////Can't find it!
+////#include "afscompat.h"
 #endif
 
 // service definitions

@@ -190,10 +190,10 @@ WINMAKEFILES=Makefile \
 	util\et\Makefile util\profile\Makefile util\profile\testmod\Makefile \
 	util\support\Makefile \
 	util\windows\Makefile \
-	windows\Makefile windows\lib\Makefile \
+	windows\Makefile windows\wshelper\Makefile windows\lib\Makefile \
 	windows\cns\Makefile windows\gina\Makefile \
 	windows\gss\Makefile windows\ms2mit\Makefile \
-	windows\wintel\Makefile windows\kfwlogon\Makefile
+	windows\wintel\Makefile windows\kfwlogon\Makefile windows\leashdll\Makefile
 
 ##DOS##Makefile-windows:: $(MKFDEP) $(WINMAKEFILES)
 
@@ -307,6 +307,8 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\cns\Makefile: windows\cns\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##windows\wshelper\Makefile: windows\wshelper\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\gina\Makefile: windows\gina\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\gss\Makefile: windows\gss\Makefile.in $(MKFDEP)
@@ -316,6 +318,8 @@ WINMAKEFILES=Makefile \
 ##DOS##windows\wintel\Makefile: windows\wintel\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\kfwlogon\Makefile: windows\kfwlogon\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##windows\leashdll\Makefile: windows\leashdll\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 
 clean-windows:: Makefile-windows
@@ -359,9 +363,9 @@ WINFILES= \
     ccapi/lib/* ccapi/lib/win/* ccapi/lib/win/OldCC/* \
     ccapi/server/* ccapi/server/win/* \
     ccapi/test/* \
-    util/windows/* windows/* windows/lib/* windows/cns/* \
+    util/windows/* windows/* windows/wshelper/* windows/lib/* windows/cns/* \
 	windows/wintel/* windows/gss/* windows/gina/* windows/ms2mit/* \
-	windows/kfwlogon/*
+	windows/kfwlogon/* windows/leashdll/*
 
 WINBINARYFILES=	windows/*/*.ico windows/*/*.doc windows/*/*.hlp \
 	windows/*/*.hpj
