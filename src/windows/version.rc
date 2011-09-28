@@ -282,6 +282,13 @@
 #define K5_ORIGINAL_NAME "klist.exe\0"
 #endif /* KLIST_APP */
 
+#ifdef KSWITCH_APP
+#define K5_DESCRIPTION "Kerberos Switch Credential Cache Application - MIT GSS / Kerberos v5 distribution\0"
+#define K5_INTERNAL_NAME "kswitch\0"
+#define K5_FILETYPE	VFT_APP
+#define K5_ORIGINAL_NAME "kswitch.exe\0"
+#endif /* KSWITCH_APP */
+
 #ifdef GSS_CLIENT_APP
 #define K5_DESCRIPTION "GSS Sample Client Application - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "gss-client\0"
