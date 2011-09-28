@@ -1754,4 +1754,25 @@ TYPEDEF_FUNC(
       struct addrlist *addrlist,
       int get_masters, int socktype, int family)
     );
+
+TYPEDEF_FUNC(
+    const char *,
+    KRB5_CALLCONV,
+    krb5_get_error_message,
+    (krb5_context, krb5_error_code)
+    );
+
+TYPEDEF_FUNC(
+    void,
+    KRB5_CALLCONV,
+    krb5_free_error_message,
+    (krb5_context, const char *)
+    );
+
+TYPEDEF_FUNC(
+    void,
+    KRB5_CALLCONV,
+    krb5_clear_error_message,
+    (krb5_context)
+    );
 #endif /* __LOADFUNCS_KRB5_H__ */
