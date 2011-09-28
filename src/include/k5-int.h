@@ -2629,6 +2629,10 @@ krb5_error_code krb5_walk_realm_tree(krb5_context, const krb5_data *,
                                      int);
 
 krb5_error_code
+k5_client_realm_path(krb5_context context, const krb5_data *client,
+                     const krb5_data *server, krb5_data **rpath_out);
+
+krb5_error_code
 krb5_auth_con_set_safe_cksumtype(krb5_context, krb5_auth_context,
                                  krb5_cksumtype);
 

@@ -697,7 +697,7 @@ begin_get_tgt_offpath(krb5_context context, krb5_tkt_creds_context ctx)
 
 /*
  * To obtain a foreign TGT, we first construct a path of realms R1..Rn between
- * the local realm and the target realm, using krb5_walk_realm_tree().  Usually
+ * the local realm and the target realm, using k5_client_realm_path().  Usually
  * this path is based on the domain hierarchy, but it may be altered by
  * configuration.
  *
@@ -775,32 +775,16 @@ static krb5_error_code
 init_realm_path(krb5_context context, krb5_tkt_creds_context ctx)
 {
     krb5_error_code code;
-    krb5_principal *tgt_princ_list = NULL;
     krb5_data *realm_path;
-    size_t nrealms, i;
+    size_t nrealms;
 
-    /* Construct a list of TGT principals from client to server.  We will throw
-     * this away after grabbing the remote realms from each principal. */
-    code = krb5_walk_realm_tree(context, &ctx->client->realm,
-                                &ctx->server->realm,
-                                &tgt_princ_list, KRB5_REALM_BRANCH_CHAR);
+    /* Get the client realm path and count its length. */
+    code = k5_client_realm_path(context, &ctx->client->realm,
+                                &ctx->server->realm, &realm_path);
     if (code != 0)
         return code;
-
-    /* Count the number of principals and allocate the realm path. */
-    for (nrealms = 0; tgt_princ_list[nrealms]; nrealms++);
+    for (nrealms = 0; realm_path[nrealms].data != NULL; nrealms++);
     assert(nrealms > 1);
-    realm_path = k5alloc((nrealms + 1) * sizeof(*realm_path), &code);
-    if (realm_path == NULL)
-        goto cleanup;
-
-    /* Steal the remote realm field from each TGT principal. */
-    for (i = 0; i < nrealms; i++) {
-        assert(tgt_princ_list[i]->length == 2);
-        realm_path[i] = tgt_princ_list[i]->data[1];
-        tgt_princ_list[i]->data[1].data = NULL;
-    }
-    realm_path[nrealms] = empty_data();
 
     /* Initialize the realm path fields in ctx. */
     krb5int_free_data_list(context, ctx->realm_path);
@@ -808,10 +792,6 @@ init_realm_path(krb5_context context, krb5_tkt_creds_context ctx)
     ctx->last_realm = realm_path + nrealms - 1;
     ctx->cur_realm = realm_path;
     ctx->next_realm = ctx->last_realm;
-    realm_path = NULL;
-
-cleanup:
-    krb5_free_realm_tree(context, tgt_princ_list);
     return 0;
 }
 

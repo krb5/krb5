@@ -122,6 +122,50 @@ krb5_walk_realm_tree( krb5_context context,
     return retval;
 }
 
+krb5_error_code
+k5_client_realm_path(krb5_context context, const krb5_data *client,
+                     const krb5_data *server, krb5_data **rpath_out)
+{
+    krb5_error_code retval;
+    char **capvals;
+    size_t i;
+    krb5_data *rpath = NULL, d;
+
+    retval = rtree_capath_vals(context, client, server, &capvals);
+    if (retval)
+        return retval;
+
+    /* Count capaths (if any) and allocate space.  Leave room for the client
+     * realm, server realm, and terminator. */
+    for (i = 0; capvals != NULL && capvals[i] != NULL; i++);
+    rpath = calloc(i + 3, sizeof(*rpath));
+    if (rpath == NULL)
+        return ENOMEM;
+
+    /* Populate rpath with the client realm, capaths, and server realm. */
+    retval = krb5int_copy_data_contents(context, client, &rpath[0]);
+    if (retval)
+        goto cleanup;
+    for (i = 0; capvals != NULL && capvals[i] != NULL; i++) {
+        d = make_data(capvals[i], strcspn(capvals[i], "\t "));
+        retval = krb5int_copy_data_contents(context, &d, &rpath[i + 1]);
+        if (retval)
+            goto cleanup;
+    }
+    retval = krb5int_copy_data_contents(context, server, &rpath[i + 1]);
+    if (retval)
+        goto cleanup;
+
+    /* Terminate rpath and return it. */
+    rpath[i + 2] = empty_data();
+    *rpath_out = rpath;
+    rpath = NULL;
+
+cleanup:
+    krb5int_free_data_list(context, rpath);
+    return retval;
+}
+
 /* ANL - Modified to allow Configurable Authentication Paths.
  * This modification removes the restriction on the choice of realm
  * names, i.e. they nolonger have to be hierarchical. This
