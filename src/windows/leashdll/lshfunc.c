@@ -492,7 +492,6 @@ Leash_int_kinit_ex(
     int displayErrors
     )
 {
-    LPCSTR  functionName;
     char    aname[ANAME_SZ];
     char    inst[INST_SZ];
     char    realm[REALM_SZ];
@@ -600,7 +599,6 @@ Leash_int_kinit_ex(
     }
 #endif /* NO_AFS */
 
- cleanup:
     return leash_error_message("Ticket initialization failed.",
                                rcL,
                                rc5, rcA, 0,
@@ -2698,7 +2696,7 @@ static int
 acquire_tkt_send_msg(krb5_context ctx, const char * title,
 		     const char * ccachename,
 		     krb5_principal desiredKrb5Principal,
-		     const char * out_ccname, int out_cclen)
+		     char * out_ccname, int out_cclen)
 {
     krb5_error_code 	err;
     HWND    	        hNetIdMgr;
@@ -2865,7 +2863,7 @@ acquire_tkt_no_princ(krb5_context context, char * ccname, int cclen)
     GetEnvironmentVariable("KRB5CCNAME", ccachename, sizeof(ccachename));
     gle = GetLastError();
     if ( ((gle == ERROR_ENVVAR_NOT_FOUND) || !ccachename[0]) && context ) {
-        char * ccdef = pkrb5_cc_default_name(ctx);
+        const char * ccdef = pkrb5_cc_default_name(ctx);
 	SetEnvironmentVariable("KRB5CCNAME", ccdef ? ccdef : NULL);
 	GetEnvironmentVariable("KRB5CCNAME", ccachename, sizeof(ccachename));
     }
@@ -2897,7 +2895,7 @@ acquire_tkt_no_princ(krb5_context context, char * ccname, int cclen)
             krb5_principal princ = NULL;
 	    char *mslsa_principal = NULL;
             char ms_realm[128] = "", *def_realm = NULL, *r;
-            int i;
+            size_t i;
 
             if (code = pkrb5_cc_resolve(ctx, "MSLSA:", &mslsa_ccache))
                 goto cleanup;
@@ -2984,7 +2982,7 @@ acquire_tkt_for_princ(krb5_context context, krb5_principal desiredPrincipal,
     GetEnvironmentVariable("KRB5CCNAME", ccachename, sizeof(ccachename));
     gle = GetLastError();
     if ( ((gle == ERROR_ENVVAR_NOT_FOUND) || !ccachename[0]) && context ) {
-        char * ccdef = pkrb5_cc_default_name(ctx);
+        const char * ccdef = pkrb5_cc_default_name(ctx);
 	SetEnvironmentVariable("KRB5CCNAME", ccdef ? ccdef : NULL);
 	GetEnvironmentVariable("KRB5CCNAME", ccachename, sizeof(ccachename));
     }

@@ -1272,7 +1272,8 @@ MultiInputDialog( HINSTANCE hinst, HWND hwndOwner,
     LPWORD lpw;
     LPWSTR lpwsz;
     LRESULT ret;
-    int nchar, i, pwid;
+    int nchar, i;
+    size_t pwid;
 
     hgbl = GlobalAlloc(GMEM_ZEROINIT, 4096);
     if (!hgbl)
@@ -1460,7 +1461,7 @@ static int
 multi_field_dialog(HWND hParent, char * preface, int n, struct textField tb[])
 {
 	extern HINSTANCE hLeashInst;
-    int maxwidth = 0;
+    size_t maxwidth = 0;
     int numlines = 0;
     int len;
     char * plines[16], *p = preface ? preface : "";
