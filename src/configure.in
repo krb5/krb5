@@ -797,7 +797,7 @@ rpcent_define='#define STRUCT_RPCENT_IN_RPC_NETDB_H'],
 rpcent_define='#define STRUCT_RPCENT_IN_RPC_NETDB_H'])
 AC_SUBST(rpcent_define)
 
-AC_CHECK_HEADERS(sys/select.h sys/time.h unistd.h)
+AC_CHECK_HEADERS(sys/select.h sys/time.h unistd.h sys/cdefs.h)
 if test $ac_cv_header_sys_select_h = yes; then
   GSSRPC__SYS_SELECT_H='#include <sys/select.h>'
 else
