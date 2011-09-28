@@ -221,3 +221,5 @@ success-message:
 
 clean::
 	-rm -rf "$(OBJDIR)"
+	-rm -rf $(LIBSRC)
+	-rm -rf $(WINH)
