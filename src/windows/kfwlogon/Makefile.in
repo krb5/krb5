@@ -3,11 +3,8 @@
 
 mydir=.
 BUILDTOP=$(REL)..$(S)..
-DEFINES = 
-LOCALINCLUDES = -I$(BUILDTOP) -I$(PISMERE)\athena\util\loadfuncs \
-	-I$(PISMERE)\athena\auth\krb5\src\include\kerberosIV \
-	-I$(PISMERE)\athena\auth\krb4\include \
-	-I$(PISMERE)\athena\auth\leash\include
+DEFINES = -DNO_KRB4
+LOCALINCLUDES = -I$(BUILDTOP) -I$(BUILDTOP)\include -I$(BUILDTOP)\windows\leashdll\include
 PROG_LIBPATH=-L$(TOPLIBD) -L$(KRB5_LIBDIR)
 
 SYSLIBS = kernel32.lib user32.lib advapi32.lib wsock32.lib secur32.lib userenv.lib
