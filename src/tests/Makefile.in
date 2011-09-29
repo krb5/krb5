@@ -1,7 +1,7 @@
 mydir=tests
 BUILDTOP=$(REL)..
 SUBDIRS = resolve asn.1 create hammer verify gssapi dejagnu shlib \
-	gss-threads misc mkeystash_compat
+	gss-threads misc mkeystash_compat kdc_realm
 
 RUN_SETUP = @KRB5_RUN_ENV@ KRB5_KDC_PROFILE=kdc.conf KRB5_CONFIG=krb5.conf
 KRB5_RUN_ENV= @KRB5_RUN_ENV@
@@ -18,7 +18,13 @@ TEST_PREFIX = "foo bar"
 KADMIN_OPTS= -d $(TEST_DB) -r $(TEST_REALM) -P $(TEST_MKEY)
 KTEST_OPTS= $(KADMIN_OPTS) -p $(TEST_PREFIX) -n $(TEST_NUM) -D $(TEST_DEPTH)
 
-check-unix:: kdb_check
+check-unix:: kdb_check kdc_realm_check
+
+kdc_realm_check:
+	cp -R $(top_srcdir)/tests/kdc_realm kdc_realm_tmp
+	rm -rf kdc_realm
+	cp -R kdc_realm_tmp kdc_realm
+	rm -rf  kdc_realm_tmp
 
 kdc.conf: Makefile
 	rm -rf kdc.conf
