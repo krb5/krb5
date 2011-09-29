@@ -321,7 +321,7 @@ class Launcher:
 
         
 if __name__ == '__main__':
-    src_path = os.environ["PWD"]
+    src_path = "%s/.."  % os.environ["PWD"]
     print "SOURCE PATH ==>" , src_path
     test = None
     try:

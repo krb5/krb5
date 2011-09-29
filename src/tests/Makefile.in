@@ -70,8 +70,10 @@ check-pytests::
 	$(RUNPYTEST) $(srcdir)/t_renprinc.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_cccol.py $(PYTESTFLAGS)
 	$(RUNPYTEST) $(srcdir)/t_stringattr.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/kdc_realm/kdcref.py $(PYTESTFLAGS)
 
 clean::
 	$(RM) kdc.conf
+	$(RM) -rf kdc_realm/sandbox
 
 
