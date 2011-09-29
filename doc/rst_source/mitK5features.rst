@@ -1,6 +1,6 @@
 .. highlight:: rst
 
-.. note:: The list is incomplete.
+.. note:: This is a Draft. The list is incomplete.
 
 MIT Kerberos features
 =======================================
@@ -45,6 +45,12 @@ Quick facts
    |                                 | - GSS naming exts      |
    |                                 | - GSS to store creds   | 
    +---------------------------------+------------------------+
+   | License                         |  .. toctree::          | 
+   |                                 |                        | 
+   |                                 |      mitK5license.rst  |
+   +---------------------------------+------------------------+
+
+
 
 Interoperabiity
 ---------------

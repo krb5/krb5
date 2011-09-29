@@ -11,6 +11,10 @@ Contents
    krb_appldev/index.rst
    krb_admins/index.rst
    krb_users/index.rst
+
+.. toctree::
+   :maxdepth: 1
+
    relay/index.rst
 
 
