@@ -34,7 +34,7 @@ kprop \- propagate a Kerberos V5 principal database to a slave server
 .SH DESCRIPTION
 .I kprop
 is used to propagate a Kerberos V5 database dump file from the master
-Kerberos server to a slave Kerberos server, which is specfied by
+Kerberos server to a slave Kerberos server, which is specified by
 .IR slave_host .  
 This is done by transmitting the dumped database file to the slave
 server over an encrypted, secure channel.  The dump file must be created

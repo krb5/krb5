@@ -168,7 +168,7 @@ running and to allow init scripts to stop the correct process.
 The KDC may service requests for multiple realms (maximum 32 realms).  The
 realms are listed on the command line.  Per-realm options that can be
 specified on the command line pertain for each realm that follows it and are
-superceded by subsequent definitions of the same option.  For example, 
+superseded by subsequent definitions of the same option.  For example,
 .PP
 .B krb5kdc
 .B \-p

@@ -147,12 +147,12 @@ the database will not be changed.
 .TP
 .B \-rev
 dumps in reverse order.  This may recover principals that do not dump
-normally, in cases where database corruption has occured.
+normally, in cases where database corruption has occurred.
 .TP
 .B \-recurse
 causes the dump to walk the database recursively (btree only).  This
 may recover principals that do not dump normally, in cases where
-database corruption has occured.  In cases of such corruption, this
+database corruption has occurred.  In cases of such corruption, this
 option will probably retrieve more principals than the \fB\-rev\fP
 option will.
 .RE

@@ -123,7 +123,7 @@ Contains default values for database specific parameters.
 .IP [dbmodules]
 Contains database specific parameters used by the database library.
 
-.ip [plugins]
+.IP [plugins]
 Contains plugin module registration and filtering parameters.
 .PP 
 Each of these sections will be covered in more details in the following
@@ -230,7 +230,7 @@ Kerberos. Use a value of 1 on DCE 1.0.3a systems, and a value of 2 on
 DCE 1.1 systems.
 
 .IP dns_lookup_kdc
-Indicate whether DNS SRV records shoud be used to locate the KDCs and 
+Indicate whether DNS SRV records should be used to locate the KDCs and
 other servers for a realm, if they are not listed in the information 
 for the realm.  The default is to use these records.
 
@@ -541,7 +541,7 @@ and sent to the device /dev/tty04.
 Cross-realm authentication is typically organized hierarchically.  This
 hierarchy is based on the name of the realm, which thus imposes
 restrictions on the choice of realm names, and on who may participate in
-a cross-realm authentication. A non hierarchical orgization may be used,
+a cross-realm authentication. A non hierarchical organization may be used,
 but requires a database to construct the authentication paths between
 the realms. This section defines that database.
 .PP
@@ -623,11 +623,11 @@ would look like this:
 .sp
 In the above examples, the ordering is not important, except when the
 same subtag name is used more then once. The client will use this to
-determing the path. (It is not important to the server, since the
+determine the path. (It is not important to the server, since the
 transited field is not sorted.)
 .PP
 If this section is not present, or if the client or server cannot find a
-client/server path, then normal hierarchical orginization is assumed.
+client/server path, then normal hierarchical organization is assumed.
 .PP
 This feature is not currently supported by DCE. DCE security servers can
 be used with Kerberized clients and servers, but versions prior to DCE

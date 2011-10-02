@@ -235,7 +235,7 @@ represents the master key's key type.
 .IP max_life
 This
 .B delta time string
-specifes the maximum time period that a ticket may be valid for in
+specifies the maximum time period that a ticket may be valid for in
 this realm.  
 
 .IP max_renewable_life
@@ -259,7 +259,7 @@ incremental propagation.  The maximum value is 2500; default is 1000.
 .IP iprop_slave_poll
 This
 .B delta time string
-specfies how often the slave KDC polls for new updates from the
+specifies how often the slave KDC polls for new updates from the
 master.  Default is "2m" (that is, two minutes).
 
 .IP supported_enctypes

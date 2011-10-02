@@ -21,7 +21,7 @@
 .\"     direct, indirect, or consequential damages with respect to any
 .\"     claim by the user or distributor of the ksu software.
 .\"
-.\" KSU was writen by:  Ari Medvinsky, ari@isi.edu
+.\" KSU was written by:  Ari Medvinsky, ari@isi.edu
 .\" "
 .TH KSU 1
 .SH NAME
@@ -442,7 +442,7 @@ cache, the user will be prompted for a Kerberos
 password.  The password is then used to get a
 ticket granting ticket from the Kerberos server.
 The danger of configuring ksu with this macro is
-if the source user is loged in remotely and does not
+if the source user is logged in remotely and does not
 have a secure channel, the password may get exposed.
 .TP 10
 \fIPRINC_LOOK_AHEAD\fP

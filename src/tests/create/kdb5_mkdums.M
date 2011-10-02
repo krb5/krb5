@@ -87,7 +87,7 @@ have; the default depth is 1.
 The
 .B \-r
 .I realm
-option specifies the realm in which the entreis should be created;
+option specifies the realm in which the entries should be created;
 by default the realm returned by
 .IR krb5_default_local_realm (3)
 is used.

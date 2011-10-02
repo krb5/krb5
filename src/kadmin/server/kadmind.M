@@ -9,7 +9,7 @@ kadmind \- KADM5 administration server
 .SH DESCRIPTION
 This command starts the KADM5 administration server.  If the database is db2, 
 the administration server runs on the master Kerberos server, which stores the KDC
-prinicpal database and the KADM5 policy database. If the database is LDAP,
+principal database and the KADM5 policy database. If the database is LDAP,
 the administration server and the KDC server need not run on the same machine.  
 .B Kadmind
 accepts remote requests to administer the information in these
@@ -25,10 +25,10 @@ requires a number of configuration files to be set up in order
 for it to work:
 .TP "\w'kdc.conf\ \ 'u"
 kdc.conf
-The KDC configuration file contains configuration informatin for the KDC
+The KDC configuration file contains configuration information for the KDC
 and the KADM5 system.  
 .B Kadmind
-understands a number of variable settings in this file, some of whch are
+understands a number of variable settings in this file, some of which are
 mandatory and some of which are optional.  See the CONFIGURATION VALUES
 section below.
 .TP
@@ -192,7 +192,7 @@ asterisk (
 .B *
 ) character.
 .IP operation-mask
-Specifies what operations may or may not be peformed by a principal
+Specifies what operations may or may not be performed by a principal
 matching a particular entry.  This is a string of one or more of the
 following list of characters or their upper-case counterparts.  If the
 character is upper-case, then the operation is disallowed.  If the

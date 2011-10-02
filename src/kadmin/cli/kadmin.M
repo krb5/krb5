@@ -1,7 +1,7 @@
 .TH KADMIN 1
 .SH NAME
 kadmin \- Kerberos V5 database administration program
-.SH SYNOPSYS
+.SH SYNOPSIS
 .TP
 .B kadmin
 .ad l
@@ -286,7 +286,7 @@ maximum ticket life for the principal
 maximum renewable life of tickets for the principal
 .TP
 \fB\-kvno\fP \fIkvno\fP
-explicity set the key version number.
+explicitly set the key version number.
 .TP
 \fB\-policy\fP \fIpolicy\fP
 policy used by this principal.  If no policy is supplied, then if the
@@ -495,7 +495,7 @@ all ACLs before reusing.
 kadmin:
 .TP
 ERRORS:
-KADM5_AUTH_DELETE (reequires "delete" privilege)
+KADM5_AUTH_DELETE (requires "delete" privilege)
 KADM5_UNK_PRINC (principal does not exist)
 .RE
 .fi
@@ -655,7 +655,7 @@ names are printed.  If the expression does not contain an "@" character,
 an "@" character followed by the local realm is appended to the
 expression.  Requires the
 .I list
-priviledge.  Alias
+privilege.  Alias
 .BR listprincs ,
 .BR get_principals ,
 .BR get_princs .
@@ -823,7 +823,7 @@ characters \&?, *, and []'s.  All policy names matching the expression
 are printed.  If no expression is provided, all existing policy names
 are printed.  Requires the
 .I list
-priviledge.  Alias
+privilege.  Alias
 .BR listpols ,
 .BR get_policies ,
 .BR getpols .
@@ -913,7 +913,7 @@ with the highest kvno are removed.  Otherwise, the value specified is
 parsed as an integer, and all entries whose kvno match that integer are
 removed.  If the
 .B \-k
-argument is not specifeid, the default keytab
+argument is not specified, the default keytab
 .I /etc/krb5.keytab
 is used.  If the
 .B \-q
@@ -967,7 +967,7 @@ passwords.
 .SH HISTORY
 The
 .B kadmin
-prorgam was originally written by Tom Yu at MIT, as an interface to the
+program was originally written by Tom Yu at MIT, as an interface to the
 OpenVision Kerberos administration program.
 .SH SEE ALSO
 .IR kerberos (1),
