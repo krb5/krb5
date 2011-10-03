@@ -483,6 +483,8 @@ purgekeys
               Purges previously retained old keys (e.g., from *change_password -keepold*) from *principal*.  
               If **-keepkvno** is specified, then only purges keys with kvnos lower than *oldest_kvno_to_keep*.
 
+.. _purgekeys_end:
+
 .. _get_principal:
 
 get_principal
@@ -867,15 +869,12 @@ ktremove
 FILES
 -----------
 
+.. note::  The first three files are specific to db2 database.
+
 ====================== =================================================
 principal.db            default name for Kerberos principal database
 <dbname>.kadm5          KADM5 administrative database. (This would be "principal.kadm5", if you use the default database name.)  Contains policy information.
 <dbname>.kadm5.lock     Lock file for the KADM5 administrative database.  This file works backwards from most other lock files. I.e., *kadmin* will exit with an error if this file does not exist.
-====================== =================================================
-
-.. note::  The above three files are specific to db2 database.
-
-====================== =================================================
 kadm5.acl               File containing list of principals and their *kadmin* administrative privileges.  See kadmind(8) for a description.
 kadm5.keytab            *keytab* file for *kadmin/admin* principal.
 kadm5.dict              file containing dictionary of strings explicitly disallowed as passwords.
