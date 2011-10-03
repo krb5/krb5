@@ -99,9 +99,9 @@ get_key_exp(krb5_db_entry *entry)
 }
 
 /*ARGSUSED*/
-krb5_error_code
+void
 process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
-               const krb5_fulladdr *from, krb5_data **response)
+               const krb5_fulladdr *from, loop_respond_fn respond, void *arg)
 {
     krb5_db_entry *client = NULL, *server = NULL;
     krb5_kdc_rep reply;
@@ -127,6 +127,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     struct kdc_request_state *state = NULL;
     krb5_data encoded_req_body;
     krb5_keyblock *as_encrypting_key = NULL;
+    krb5_data *response;
 
 
 #if APPLE_PKINIT
@@ -593,7 +594,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     }
 
     errcode = krb5_encode_kdc_rep(kdc_context, KRB5_AS_REP, &reply_encpart,
-                                  0, as_encrypting_key,  &reply, response);
+                                  0, as_encrypting_key,  &reply, &response);
     reply.enc_part.kvno = client_key->key_data_kvno;
     if (errcode) {
         status = "ENCODE_KDC_REP";
@@ -639,11 +640,12 @@ egress:
 
         errcode = prepare_error_as(state, request, errcode, &e_data,
                                    (client != NULL) ? client->princ : NULL,
-                                   response, status);
+                                   &response, status);
         status = 0;
     }
 
-discard: if (emsg)
+discard:
+    if (emsg)
         krb5_free_error_message(kdc_context, emsg);
     if (enc_tkt_reply.authorization_data != NULL)
         krb5_free_authdata(kdc_context, enc_tkt_reply.authorization_data);
@@ -676,7 +678,7 @@ discard: if (emsg)
     krb5_free_kdc_req(kdc_context, request);
     assert(did_log != 0);
 
-    return errcode;
+    (*respond)(arg, errcode, response);
 }
 
 /*

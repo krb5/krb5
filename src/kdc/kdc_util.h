@@ -118,10 +118,10 @@ void
 rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep);
 
 /* do_as_req.c */
-krb5_error_code
+void
 process_as_req (krb5_kdc_req *, krb5_data *,
                 const krb5_fulladdr *,
-                krb5_data ** );
+                loop_respond_fn, void *);
 
 /* do_tgs_req.c */
 krb5_error_code
