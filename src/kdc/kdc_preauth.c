@@ -104,14 +104,14 @@ typedef struct preauth_system_st {
     krb5_kdcpreauth_free_modreq_fn free_modreq;
 } preauth_system;
 
-static krb5_error_code
+static void
 verify_enc_timestamp(krb5_context, krb5_db_entry *client, krb5_data *req_pkt,
                      krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
                      krb5_pa_data *data,
                      krb5_kdcpreauth_get_data_fn get_entry_data,
                      krb5_kdcpreauth_moddata moddata,
-                     krb5_kdcpreauth_modreq *modreq_out, krb5_data **e_data,
-                     krb5_authdata ***authz_data);
+                     krb5_kdcpreauth_verify_respond_fn respond,
+                     void *arg);
 
 static krb5_error_code
 get_enc_ts(krb5_context context, krb5_kdc_req *request,
@@ -933,161 +933,79 @@ add_authorization_data(krb5_enc_tkt_part *enc_tkt_part, krb5_authdata **ad)
     return 0;
 }
 
-/*
- * This routine is called to verify the preauthentication information
- * for a V5 request.
- *
- * Returns 0 if the pre-authentication is valid, non-zero to indicate
- * an error code of some sort.
- */
+struct padata_state {
+    kdc_preauth_respond_fn respond;
+    void *arg;
+    kdc_realm_t *realm;
 
-void
-check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
-              krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
-              void **padata_context, krb5_data *e_data,
-              kdc_preauth_respond_fn respond, void *arg)
-{
-    krb5_error_code retval = 0;
-    krb5_pa_data **padata;
-    preauth_system *pa_sys;
     krb5_kdcpreauth_modreq *modreq_ptr;
-    krb5_data *pa_e_data = NULL, *tmp_e_data = NULL;
-    int pa_ok = 0, pa_found = 0;
-    krb5_error_code saved_retval = 0;
-    int use_saved_retval = 0;
-    const char *emsg;
-    krb5_authdata **tmp_authz_data = NULL;
+    krb5_pa_data **padata;
+    int pa_found;
+    krb5_context context;
+    krb5_db_entry *client;
+    krb5_data *req_pkt;
+    krb5_kdc_req *request;
+    krb5_enc_tkt_part *enc_tkt_reply;
+    void **padata_context;
+    krb5_data *e_data;
 
-    if (request->padata == 0) {
-        (*respond)(arg, 0);
-        return;
-    }
+    preauth_system *pa_sys;
+    krb5_data *pa_e_data;
+    int pa_ok;
+    krb5_error_code saved_code;
+};
 
-    if (make_padata_context(context, padata_context) != 0) {
-        (*respond)(arg, KRB5KRB_ERR_GENERIC);
-        return;
-    }
+static void
+finish_check_padata(struct padata_state *state, krb5_error_code code)
+{
+    kdc_preauth_respond_fn oldrespond;
+    void *oldarg;
 
-#ifdef DEBUG
-    krb5_klog_syslog (LOG_DEBUG, "checking padata");
-#endif
-    for (padata = request->padata; *padata; padata++) {
-#ifdef DEBUG
-        krb5_klog_syslog (LOG_DEBUG, ".. pa_type 0x%x", (*padata)->pa_type);
-#endif
-        if (find_pa_system((*padata)->pa_type, &pa_sys))
-            continue;
-        if (find_modreq(pa_sys, *padata_context, &modreq_ptr))
-            continue;
-#ifdef DEBUG
-        krb5_klog_syslog (LOG_DEBUG, ".. pa_type %s", pa_sys->name);
-#endif
-        if (pa_sys->verify_padata == 0)
-            continue;
-        pa_found++;
-        retval = pa_sys->verify_padata(context, client, req_pkt, request,
-                                       enc_tkt_reply, *padata,
-                                       get_entry_data, pa_sys->moddata,
-                                       modreq_ptr, &tmp_e_data,
-                                       &tmp_authz_data);
-        if (retval) {
-            emsg = krb5_get_error_message (context, retval);
-            krb5_klog_syslog (LOG_INFO, "preauth (%s) verify failure: %s",
-                              pa_sys->name, emsg);
-            krb5_free_error_message (context, emsg);
-            /* Ignore authorization data returned from modules that fail */
-            if (tmp_authz_data != NULL) {
-                krb5_free_authdata(context, tmp_authz_data);
-                tmp_authz_data = NULL;
-            }
-            if (pa_sys->flags & PA_REQUIRED) {
-                /* free up any previous edata we might have been saving */
-                if (pa_e_data != NULL)
-                    krb5_free_data(context, pa_e_data);
-                pa_e_data = tmp_e_data;
-                tmp_e_data = NULL;
-                use_saved_retval = 0; /* Make sure we use the current retval */
-                pa_ok = 0;
-                break;
-            }
-            /*
-             * We'll return edata from either the first PA_REQUIRED module
-             * that fails, or the first non-PA_REQUIRED module that fails.
-             * Hang on to edata from the first non-PA_REQUIRED module.
-             * If we've already got one saved, simply discard this one.
-             */
-            if (tmp_e_data != NULL) {
-                if (pa_e_data == NULL) {
-                    /* save the first error code and e-data */
-                    pa_e_data = tmp_e_data;
-                    tmp_e_data = NULL;
-                    saved_retval = retval;
-                    use_saved_retval = 1;
-                } else {
-                    /* discard this extra e-data from non-PA_REQUIRED module */
-                    krb5_free_data(context, tmp_e_data);
-                    tmp_e_data = NULL;
-                }
-            }
-        } else {
-#ifdef DEBUG
-            krb5_klog_syslog (LOG_DEBUG, ".. .. ok");
-#endif
-            /* Ignore any edata returned on success */
-            if (tmp_e_data != NULL) {
-                krb5_free_data(context, tmp_e_data);
-                tmp_e_data = NULL;
-            }
-            /* Add any authorization data to the ticket */
-            if (tmp_authz_data != NULL) {
-                add_authorization_data(enc_tkt_reply, tmp_authz_data);
-                free(tmp_authz_data);
-                tmp_authz_data = NULL;
-            }
-            pa_ok = 1;
-            if (pa_sys->flags & PA_SUFFICIENT)
-                break;
-        }
-    }
+    assert(state);
+    oldrespond = state->respond;
+    oldarg = state->arg;
 
     /* Don't bother copying and returning e-data on success */
-    if (pa_ok && pa_e_data != NULL) {
-        krb5_free_data(context, pa_e_data);
-        pa_e_data = NULL;
-    }
-    /* Return any e-data from the preauth that caused us to exit the loop */
-    if (pa_e_data != NULL) {
-        e_data->data = malloc(pa_e_data->length);
-        if (e_data->data == NULL) {
-            krb5_free_data(context, pa_e_data);
-            (*respond)(arg, KRB5KRB_ERR_GENERIC);
-            return;
-        }
-        memcpy(e_data->data, pa_e_data->data, pa_e_data->length);
-        e_data->length = pa_e_data->length;
-        krb5_free_data(context, pa_e_data);
-        pa_e_data = NULL;
-        if (use_saved_retval != 0)
-            retval = saved_retval;
+    if (state->pa_ok && state->pa_e_data != NULL) {
+        krb5_free_data(state->context, state->pa_e_data);
+        state->pa_e_data = NULL;
     }
 
-    if (pa_ok) {
-        (*respond)(arg, 0);
+    /* Return any e-data from the preauth that caused us to exit the loop */
+    if (state->pa_e_data != NULL) {
+        state->e_data->data = malloc(state->pa_e_data->length);
+        if (state->e_data->data == NULL) {
+            krb5_free_data(state->context, state->pa_e_data);
+            free(state);
+            (*oldrespond)(oldarg, KRB5KRB_ERR_GENERIC);
+            return;
+        }
+        memcpy(state->e_data->data, state->pa_e_data->data,
+               state->pa_e_data->length);
+        state->e_data->length = state->pa_e_data->length;
+        krb5_free_data(state->context, state->pa_e_data);
+        state->pa_e_data = NULL;
+    }
+
+    if (state->pa_ok) {
+        free(state);
+        (*oldrespond)(oldarg, 0);
         return;
     }
 
     /* pa system was not found; we may return PREAUTH_REQUIRED later,
        but we did not actually fail to verify the pre-auth. */
-    if (!pa_found) {
-        (*respond)(arg, 0);
+    if (!state->pa_found) {
+        free(state);
+        (*oldrespond)(oldarg, 0);
         return;
     }
-
+    free(state);
 
     /* The following switch statement allows us
      * to return some preauth system errors back to the client.
      */
-    switch(retval) {
+    switch(code) {
     case 0: /* in case of PA-PAC-REQUEST with no PA-ENC-TIMESTAMP */
     case KRB5KRB_AP_ERR_BAD_INTEGRITY:
     case KRB5KRB_AP_ERR_SKEW:
@@ -1111,17 +1029,183 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
     case KRB5KDC_ERR_CERTIFICATE_MISMATCH:
     case KRB5KDC_ERR_KDC_NOT_TRUSTED:
     case KRB5KDC_ERR_REVOCATION_STATUS_UNAVAILABLE:
-        /* This value is shared with KRB5KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED. */
+        /* This value is shared with
+         *     KRB5KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED. */
         /* case KRB5KDC_ERR_KEY_TOO_WEAK: */
     case KRB5KDC_ERR_DISCARD:
         /* pkinit alg-agility */
     case KRB5KDC_ERR_NO_ACCEPTABLE_KDF:
-        (*respond)(arg, retval);
+        (*oldrespond)(oldarg, code);
         return;
     default:
-        (*respond)(arg, KRB5KDC_ERR_PREAUTH_FAILED);
+        (*oldrespond)(oldarg, KRB5KDC_ERR_PREAUTH_FAILED);
         return;
     }
+}
+
+static void
+next_padata(struct padata_state *state);
+
+static void
+finish_verify_padata(void *arg, krb5_error_code code,
+                     krb5_kdcpreauth_modreq modreq, krb5_data *e_data,
+                     krb5_authdata **authz_data)
+{
+    struct padata_state *state = arg;
+    const char *emsg;
+
+    assert(state);
+    kdc_active_realm = state->realm; /* Restore the realm. */
+    *state->modreq_ptr = modreq;
+
+    if (code) {
+        emsg = krb5_get_error_message(state->context, code);
+        krb5_klog_syslog(LOG_INFO, "preauth (%s) verify failure: %s",
+                         state->pa_sys->name, emsg);
+        krb5_free_error_message(state->context, emsg);
+
+        /* Ignore authorization data returned from modules that fail */
+        if (authz_data != NULL) {
+            krb5_free_authdata(state->context, authz_data);
+            authz_data = NULL;
+        }
+
+        /*
+         * We'll return edata from either the first PA_REQUIRED module
+         * that fails, or the first non-PA_REQUIRED module that fails.
+         * Hang on to edata from the first non-PA_REQUIRED module.
+         * If we've already got one saved, simply discard this one.
+         */
+        if (state->pa_sys->flags & PA_REQUIRED) {
+            /* free up any previous edata we might have been saving */
+            if (state->pa_e_data != NULL)
+                krb5_free_data(state->context, state->pa_e_data);
+            state->pa_e_data = e_data;
+
+            /* Make sure we use the current retval */
+            state->pa_ok = 0;
+            finish_check_padata(state, code);
+            return;
+        } else if (state->pa_e_data == NULL) {
+            /* save the first error code and e-data */
+            state->pa_e_data = e_data;
+            state->saved_code = code;
+        } else if (e_data != NULL) {
+            /* discard this extra e-data from non-PA_REQUIRED module */
+            krb5_free_data(state->context, e_data);
+        }
+    } else {
+#ifdef DEBUG
+        krb5_klog_syslog (LOG_DEBUG, ".. .. ok");
+#endif
+
+        /* Ignore any edata returned on success */
+        if (e_data != NULL)
+            krb5_free_data(state->context, e_data);
+
+        /* Add any authorization data to the ticket */
+        if (authz_data != NULL) {
+            add_authorization_data(state->enc_tkt_reply, authz_data);
+            free(authz_data);
+        }
+
+        state->pa_ok = 1;
+        if (state->pa_sys->flags & PA_SUFFICIENT) {
+            finish_check_padata(state, state->saved_code);
+            return;
+        }
+    }
+
+    next_padata(state);
+}
+
+static void
+next_padata(struct padata_state *state)
+{
+    assert(state);
+    if (!state->padata)
+        state->padata = state->request->padata;
+    else
+        state->padata++;
+
+    if (!*state->padata) {
+        finish_check_padata(state, state->saved_code);
+        return;
+    }
+
+#ifdef DEBUG
+    krb5_klog_syslog (LOG_DEBUG, ".. pa_type 0x%x", (*state->padata)->pa_type);
+#endif
+    if (find_pa_system((*state->padata)->pa_type, &state->pa_sys))
+        goto next;
+    if (find_modreq(state->pa_sys, *state->padata_context, &state->modreq_ptr))
+        goto next;
+#ifdef DEBUG
+    krb5_klog_syslog (LOG_DEBUG, ".. pa_type %s", state->pa_sys->name);
+#endif
+    if (state->pa_sys->verify_padata == 0)
+        goto next;
+
+    state->pa_found++;
+    state->pa_sys->verify_padata(state->context, state->client,
+                                 state->req_pkt, state->request,
+                                 state->enc_tkt_reply, *state->padata,
+                                 get_entry_data, state->pa_sys->moddata,
+                                 finish_verify_padata, state);
+    return;
+
+next:
+    next_padata(state);
+}
+
+/*
+ * This routine is called to verify the preauthentication information
+ * for a V5 request.
+ *
+ * Returns 0 if the pre-authentication is valid, non-zero to indicate
+ * an error code of some sort.
+ */
+
+void
+check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
+              krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
+              void **padata_context, krb5_data *e_data,
+              kdc_preauth_respond_fn respond, void *arg)
+{
+    struct padata_state *state;
+
+    if (request->padata == 0) {
+        (*respond)(arg, 0);
+        return;
+    }
+
+    if (make_padata_context(context, padata_context) != 0) {
+        (*respond)(arg, KRB5KRB_ERR_GENERIC);
+        return;
+    }
+
+    state = malloc(sizeof(*state));
+    if (!state) {
+        (*respond)(arg, ENOMEM);
+        return;
+    }
+    memset(state, 0, sizeof(*state));
+    state->respond = respond;
+    state->arg = arg;
+    state->context = context;
+    state->client = client;
+    state->req_pkt = req_pkt;
+    state->request = request;
+    state->enc_tkt_reply = enc_tkt_reply;
+    state->padata_context = padata_context;
+    state->e_data = e_data;
+    state->realm = kdc_active_realm;
+
+#ifdef DEBUG
+    krb5_klog_syslog (LOG_DEBUG, "checking padata");
+#endif
+
+    next_padata(state);
 }
 
 /*
@@ -1259,15 +1343,14 @@ get_enc_ts(krb5_context context, krb5_kdc_req *request,
 }
 
 
-static krb5_error_code
+static void
 verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
                      krb5_data *req_pkt, krb5_kdc_req *request,
                      krb5_enc_tkt_part *enc_tkt_reply, krb5_pa_data *pa,
                      krb5_kdcpreauth_get_data_fn ets_get_entry_data,
                      krb5_kdcpreauth_moddata moddata,
-                     krb5_kdcpreauth_modreq *modreq_out,
-                     krb5_data **e_data,
-                     krb5_authdata ***authz_data)
+                     krb5_kdcpreauth_verify_respond_fn respond,
+                     void *arg)
 {
     krb5_pa_enc_ts *            pa_enc = 0;
     krb5_error_code             retval;
@@ -1347,7 +1430,7 @@ cleanup:
     if (retval == KRB5_KDB_NO_MATCHING_KEY && decrypt_err != 0)
         retval = decrypt_err;
 
-    return retval;
+    (*respond)(arg, retval, NULL, NULL, NULL);
 }
 
 static krb5_error_code

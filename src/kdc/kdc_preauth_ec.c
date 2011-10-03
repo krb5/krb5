@@ -53,14 +53,14 @@ kdc_include_padata(krb5_context context, krb5_kdc_req *request,
     return 0;
 }
 
-static krb5_error_code
+static void
 kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
                    krb5_data *req_pkt, krb5_kdc_req *request,
                    krb5_enc_tkt_part *enc_tkt_reply, krb5_pa_data *data,
                    krb5_kdcpreauth_get_data_fn get_entry_proc,
                    krb5_kdcpreauth_moddata moddata,
-                   krb5_kdcpreauth_modreq *modreq_out,
-                   krb5_data **e_data, krb5_authdata ***authz_data)
+                   krb5_kdcpreauth_verify_respond_fn respond,
+                   void *arg)
 {
     krb5_error_code retval = 0;
     krb5_timestamp now;
@@ -72,6 +72,7 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
     krb5_data *client_data = NULL;
     krb5_keyblock *challenge_key = NULL;
     krb5_keyblock *kdc_challenge_key;
+    krb5_kdcpreauth_modreq modreq = NULL;
     int i = 0;
 
     plain.data = NULL;
@@ -141,7 +142,7 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
             if (krb5_c_fx_cf2_simple(context, armor_key, "kdcchallengearmor",
                                      &client_keys[i], "challengelongterm",
                                      &kdc_challenge_key) == 0)
-                *modreq_out = (krb5_kdcpreauth_modreq)kdc_challenge_key;
+                modreq = (krb5_kdcpreauth_modreq)kdc_challenge_key;
         } else { /*skew*/
             retval = KRB5KRB_AP_ERR_SKEW;
         }
@@ -159,7 +160,8 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
         krb5_free_enc_data(context, enc);
     if (ts)
         krb5_free_pa_enc_ts(context, ts);
-    return retval;
+
+    (*respond)(arg, retval, modreq, NULL, NULL);
 }
 
 static krb5_error_code

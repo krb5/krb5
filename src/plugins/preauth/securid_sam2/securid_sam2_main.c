@@ -202,18 +202,18 @@ cleanup:
     return retval;
 }
 
-static krb5_error_code
+static void
 kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
                    krb5_data *req_pkt, krb5_kdc_req *request,
                    krb5_enc_tkt_part *enc_tkt_reply, krb5_pa_data *pa_data,
                    krb5_kdcpreauth_get_data_fn get_entry_proc,
                    krb5_kdcpreauth_moddata moddata,
-                   krb5_kdcpreauth_modreq *modreq_out,
-                   krb5_data **e_data, krb5_authdata ***authz_data)
+                   krb5_kdcpreauth_verify_respond_fn respond,
+                   void *arg)
 {
     krb5_error_code retval, saved_retval = 0;
     krb5_sam_response_2 *sr2 = NULL;
-    krb5_data scratch, *scratch2;
+    krb5_data scratch, *scratch2, *e_data = NULL;
     char *client_name = NULL;
     krb5_sam_challenge_2 *out_sc2 = NULL;
 
@@ -276,7 +276,7 @@ cleanup:
             goto encode_error;
         pa_out.contents = (krb5_octet *) scratch2->data;
         pa_out.length = scratch2->length;
-        retval = encode_krb5_padata_sequence(pa_array, e_data);
+        retval = encode_krb5_padata_sequence(pa_array, &e_data);
         krb5_free_data(context, scratch2);
     }
 encode_error:
@@ -284,7 +284,8 @@ encode_error:
     free(client_name);
     if (retval == 0)
         retval = saved_retval;
-    return retval;
+
+    (*respond)(arg, retval, NULL, NULL, NULL);
 }
 
 

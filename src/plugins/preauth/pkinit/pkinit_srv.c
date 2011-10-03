@@ -287,7 +287,7 @@ out:
     return retval;
 }
 
-static krb5_error_code
+static void
 pkinit_server_verify_padata(krb5_context context,
                             struct _krb5_db_entry_new * client,
                             krb5_data *req_pkt,
@@ -296,9 +296,8 @@ pkinit_server_verify_padata(krb5_context context,
                             krb5_pa_data * data,
                             krb5_kdcpreauth_get_data_fn server_get_entry_data,
                             krb5_kdcpreauth_moddata moddata,
-                            krb5_kdcpreauth_modreq *modreq_out,
-                            krb5_data **e_data,
-                            krb5_authdata ***authz_data)
+                            krb5_kdcpreauth_verify_respond_fn respond,
+                            void *arg)
 {
     krb5_error_code retval = 0;
     krb5_octet_data authp_data = {0, 0, NULL}, krb5_authz = {0, 0, NULL};
@@ -315,10 +314,14 @@ pkinit_server_verify_padata(krb5_context context,
     krb5_data k5data;
     int is_signed = 1;
     krb5_keyblock *armor_key;
+    krb5_data *e_data = NULL;
+    krb5_kdcpreauth_modreq modreq = NULL;
 
     pkiDebug("pkinit_verify_padata: entered!\n");
-    if (data == NULL || data->length <= 0 || data->contents == NULL)
-        return 0;
+    if (data == NULL || data->length <= 0 || data->contents == NULL) {
+        (*respond)(arg, 0, NULL, NULL, NULL);
+        return;
+    }
 
     /* Remove (along with armor_key) when FAST PKINIT is settled. */
     retval = fast_kdc_get_armor_key(context, server_get_entry_data, request,
@@ -326,15 +329,20 @@ pkinit_server_verify_padata(krb5_context context,
     if (retval == 0 && armor_key != NULL) {
         /* Don't allow PKINIT if the client used FAST. */
         krb5_free_keyblock(context, armor_key);
-        return EINVAL;
+        (*respond)(arg, EINVAL, NULL, NULL, NULL);
+        return;
     }
 
-    if (moddata == NULL || e_data == NULL)
-        return EINVAL;
+    if (moddata == NULL) {
+        (*respond)(arg, EINVAL, NULL, NULL, NULL);
+        return;
+    }
 
     plgctx = pkinit_find_realm_context(context, moddata, request->server);
-    if (plgctx == NULL)
-        return 0;
+    if (plgctx == NULL) {
+        (*respond)(arg, 0, NULL, NULL, NULL);
+        return;
+    }
 
 #ifdef DEBUG_ASN1
     print_buffer_bin(data->contents, data->length, "/tmp/kdc_as_req");
@@ -548,26 +556,16 @@ pkinit_server_verify_padata(krb5_context context,
         break;
     }
 
-    /*
-     * This code used to generate ad-initial-verified-cas authorization data.
-     * However that has been removed until the ad-kdc-issued discussion can
-     * happen in the working group.  Dec 2009
-     */
-    /* return authorization data to be included in the ticket */
-    switch ((int)data->pa_type) {
-    default:
-        *authz_data = NULL;
-    }
     /* remember to set the PREAUTH flag in the reply */
     enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
-    *modreq_out = (krb5_kdcpreauth_modreq)reqctx;
+    modreq = (krb5_kdcpreauth_modreq)reqctx;
     reqctx = NULL;
 
 cleanup:
     if (retval && data->pa_type == KRB5_PADATA_PK_AS_REQ) {
         pkiDebug("pkinit_verify_padata failed: creating e-data\n");
         if (pkinit_create_edata(context, plgctx->cryptoctx, reqctx->cryptoctx,
-                                plgctx->idctx, plgctx->opts, retval, e_data))
+                                plgctx->idctx, plgctx->opts, retval, &e_data))
             pkiDebug("pkinit_create_edata failed\n");
     }
 
@@ -593,7 +591,7 @@ cleanup:
     if (auth_pack9 != NULL)
         free_krb5_auth_pack_draft9(context, &auth_pack9);
 
-    return retval;
+    (*respond)(arg, retval, modreq, e_data, NULL);
 }
 static krb5_error_code
 return_pkinit_kx(krb5_context context, krb5_kdc_req *request,

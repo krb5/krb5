@@ -419,7 +419,13 @@ typedef krb5_error_code
  * per-request module data for consumption by the return_fn or free_modreq_fn
  * below.
  */
-typedef krb5_error_code
+typedef void
+(*krb5_kdcpreauth_verify_respond_fn)(void *arg, krb5_error_code code,
+                                     krb5_kdcpreauth_modreq modreq,
+                                     krb5_data *e_data,
+                                     krb5_authdata **authz_data);
+
+typedef void
 (*krb5_kdcpreauth_verify_fn)(krb5_context context,
                              struct _krb5_db_entry_new *client,
                              krb5_data *req_pkt, krb5_kdc_req *request,
@@ -427,9 +433,8 @@ typedef krb5_error_code
                              krb5_pa_data *data,
                              krb5_kdcpreauth_get_data_fn get_data,
                              krb5_kdcpreauth_moddata moddata,
-                             krb5_kdcpreauth_modreq *modreq_out,
-                             krb5_data **e_data_out,
-                             krb5_authdata ***authz_data_out);
+                             krb5_kdcpreauth_verify_respond_fn respond,
+                             void *arg);
 
 /*
  * Optional: generate preauthentication response data to send to the client as
