@@ -417,8 +417,10 @@ krb5_c_random_make_octets(krb5_context context, krb5_data *outdata)
     if (ret)
         return ret;
 
-    if (!have_entropy)
+    if (!have_entropy) {
+        k5_mutex_unlock(&fortuna_lock);
         return KRB5_CRYPTO_INTERNAL;
+    }
 
     if (pid != last_pid) {
         /* We forked; make sure child's PRNG stream differs from parent's. */
