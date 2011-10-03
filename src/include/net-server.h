@@ -64,12 +64,11 @@ void loop_free(verto_ctx *ctx);
  * to send back when the incoming message is bigger than
  * the main loop can accept.
  */
-krb5_error_code dispatch (void *handle,
-                          struct sockaddr *local_addr,
-                          const krb5_fulladdr *remote_addr,
-                          krb5_data *request,
-                          krb5_data **response,
-                          int is_tcp);
+typedef void (*loop_respond_fn)(void *arg, krb5_error_code code,
+                                krb5_data *response);
+void dispatch(void *handle, struct sockaddr *local_addr,
+              const krb5_fulladdr *remote_addr, krb5_data *request,
+              int is_tcp, loop_respond_fn respond, void *arg);
 krb5_error_code make_toolong_error (void *handle, krb5_data **);
 
 /*

@@ -129,13 +129,14 @@ process_tgs_req (krb5_data *,
                  const krb5_fulladdr *,
                  krb5_data ** );
 /* dispatch.c */
-krb5_error_code
+void
 dispatch (void *,
           struct sockaddr *,
           const krb5_fulladdr *,
           krb5_data *,
-          krb5_data **,
-          int);
+          int,
+          loop_respond_fn,
+          void *);
 
 krb5_error_code
 setup_server_realm (krb5_principal);

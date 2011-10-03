@@ -515,32 +515,6 @@ make_event(verto_ctx *ctx, verto_ev_flag flags, verto_callback callback,
 }
 
 static verto_ev *
-convert_event(verto_ctx *ctx, verto_ev *ev, verto_ev_flag flags,
-              verto_callback callback)
-{
-    struct connection *conn;
-    verto_ev *newev;
-    int sock;
-
-    conn = verto_get_private(ev);
-    sock = verto_get_fd(ev);
-    if (sock < 0)
-        return NULL;
-
-    newev = make_event(ctx, flags, callback, sock, conn, 1);
-
-    /* Delete the read event without closing the socket
-     * or freeing the connection struct. */
-    if (newev) {
-        verto_set_private(ev, NULL, NULL); /* Reset the destructor. */
-        remove_event_from_set(ev); /* Remove it from the set. */
-        verto_del(ev);
-    }
-
-    return newev;
-}
-
-static verto_ev *
 add_fd(struct socksetup *data, int sock, enum conn_type conntype,
        verto_ev_flag flags, verto_callback callback, int addevent)
 {
@@ -1550,34 +1524,99 @@ send_to_from(int s, void *buf, size_t len, int flags,
 #endif
 }
 
+struct udp_dispatch_state {
+    void *handle;
+    const char *prog;
+    int port_fd;
+    krb5_address addr;
+    krb5_fulladdr faddr;
+    socklen_t saddr_len;
+    socklen_t daddr_len;
+    struct sockaddr_storage saddr;
+    struct sockaddr_storage daddr;
+    union aux_addressing_info auxaddr;
+    krb5_data request;
+    char pktbuf[MAX_DGRAM_SIZE];
+};
+
+static void
+process_packet_response(void *arg, krb5_error_code code, krb5_data *response)
+{
+    struct udp_dispatch_state *state = arg;
+    int cc;
+
+    if (code)
+        com_err(state->prog ? state->prog : NULL, code,
+                _("while dispatching (udp)"));
+    if (code || response == NULL || state == NULL)
+        goto out;
+
+    cc = send_to_from(state->port_fd, response->data,
+                      (socklen_t) response->length, 0,
+                      (struct sockaddr *)&state->saddr, state->saddr_len,
+                      (struct sockaddr *)&state->daddr, state->daddr_len,
+                      &state->auxaddr);
+    if (cc == -1) {
+        /* Note that the local address (daddr*) has no port number
+         * info associated with it. */
+        char saddrbuf[NI_MAXHOST], sportbuf[NI_MAXSERV];
+        char daddrbuf[NI_MAXHOST];
+        int e = errno;
+
+        if (getnameinfo((struct sockaddr *)&state->daddr, state->daddr_len,
+                        daddrbuf, sizeof(daddrbuf), 0, 0,
+                        NI_NUMERICHOST) != 0) {
+            strlcpy(daddrbuf, "?", sizeof(daddrbuf));
+        }
+
+        if (getnameinfo((struct sockaddr *)&state->saddr, state->saddr_len,
+                        saddrbuf, sizeof(saddrbuf), sportbuf, sizeof(sportbuf),
+                        NI_NUMERICHOST|NI_NUMERICSERV) != 0) {
+            strlcpy(saddrbuf, "?", sizeof(saddrbuf));
+            strlcpy(sportbuf, "?", sizeof(sportbuf));
+        }
+
+        com_err(state->prog, e, _("while sending reply to %s/%s from %s"),
+                saddrbuf, sportbuf, daddrbuf);
+        goto out;
+    }
+    if ((size_t)cc != response->length) {
+        com_err(state->prog, 0, _("short reply write %d vs %d\n"),
+                response->length, cc);
+    }
+
+out:
+    krb5_free_data(get_context(state->handle), response);
+    free(state);
+}
+
 static void
 process_packet(verto_ctx *ctx, verto_ev *ev)
 {
     int cc;
-    socklen_t saddr_len, daddr_len;
-    krb5_fulladdr faddr;
-    krb5_error_code retval;
-    struct sockaddr_storage saddr, daddr;
-    krb5_address addr;
-    krb5_data request;
-    krb5_data *response;
-    char pktbuf[MAX_DGRAM_SIZE];
-    int port_fd;
-    union aux_addressing_info auxaddr;
     struct connection *conn;
+    struct udp_dispatch_state *state;
 
-    port_fd = verto_get_fd(ev);
     conn = verto_get_private(ev);
-    assert(port_fd >= 0);
 
-    response = NULL;
-    saddr_len = sizeof(saddr);
-    daddr_len = sizeof(daddr);
-    memset(&auxaddr, 0, sizeof(auxaddr));
-    cc = recv_from_to(port_fd, pktbuf, sizeof(pktbuf), 0,
-                      (struct sockaddr *)&saddr, &saddr_len,
-                      (struct sockaddr *)&daddr, &daddr_len,
-                      &auxaddr);
+    state = malloc(sizeof(*state));
+    if (!state) {
+        com_err(conn->prog, ENOMEM, _("while dispatching (udp)"));
+        return;
+    }
+
+    state->handle = conn->handle;
+    state->prog = conn->prog;
+    state->port_fd = verto_get_fd(ev);
+    assert(state->port_fd >= 0);
+
+    state->saddr_len = sizeof(state->saddr);
+    state->daddr_len = sizeof(state->daddr);
+    memset(&state->auxaddr, 0, sizeof(state->auxaddr));
+    cc = recv_from_to(state->port_fd, state->pktbuf, sizeof(state->pktbuf), 0,
+                      (struct sockaddr *)&state->saddr, &state->saddr_len,
+                      (struct sockaddr *)&state->daddr, &state->daddr_len,
+                      &state->auxaddr);
     if (cc == -1) {
         if (errno != EINTR && errno != EAGAIN
             /*
@@ -1588,78 +1627,45 @@ process_packet(verto_ctx *ctx, verto_ev *ev)
             && errno != ECONNREFUSED
         )
             com_err(conn->prog, errno, _("while receiving from network"));
+        free(state);
         return;
     }
-    if (!cc)
-        return;         /* zero-length packet? */
+    if (!cc) { /* zero-length packet? */
+        free(state);
+        return;
+    }
 
 #if 0
-    if (daddr_len > 0) {
+    if (state->daddr_len > 0) {
         char addrbuf[100];
-        if (getnameinfo(ss2sa(&daddr), daddr_len, addrbuf, sizeof(addrbuf),
+        if (getnameinfo(ss2sa(&state->daddr), state->daddr_len,
+                        addrbuf, sizeof(addrbuf),
                         0, 0, NI_NUMERICHOST))
             strlcpy(addrbuf, "?", sizeof(addrbuf));
         com_err(conn->prog, 0, _("pktinfo says local addr is %s"), addrbuf);
     }
 #endif
 
-    if (daddr_len == 0 && conn->type == CONN_UDP) {
+    if (state->daddr_len == 0 && conn->type == CONN_UDP) {
         /*
          * If the PKTINFO option isn't set, this socket should be bound to a
          * specific local address.  This info probably should've been saved in
          * our socket data structure at setup time.
          */
-        daddr_len = sizeof(daddr);
-        if (getsockname(port_fd, (struct sockaddr *)&daddr, &daddr_len) != 0)
-            daddr_len = 0;
+            state->daddr_len = sizeof(state->daddr);
+        if (getsockname(state->port_fd, (struct sockaddr *)&state->daddr,
+                        &state->daddr_len) != 0)
+            state->daddr_len = 0;
         /* On failure, keep going anyways. */
     }
 
-    request.length = cc;
-    request.data = pktbuf;
-    faddr.address = &addr;
-    init_addr(&faddr, ss2sa(&saddr));
+    state->request.length = cc;
+    state->request.data = state->pktbuf;
+    state->faddr.address = &state->addr;
+    init_addr(&state->faddr, ss2sa(&state->saddr));
     /* This address is in net order. */
-    retval = dispatch(conn->handle, ss2sa(&daddr),
-                      &faddr, &request, &response, 0);
-    if (retval) {
-        com_err(conn->prog, retval, _("while dispatching (udp)"));
-        return;
-    }
-    if (response == NULL)
-        return;
-    cc = send_to_from(port_fd, response->data, (socklen_t) response->length, 0,
-                      (struct sockaddr *)&saddr, saddr_len,
-                      (struct sockaddr *)&daddr, daddr_len,
-                      &auxaddr);
-    if (cc == -1) {
-        /* Note that the local address (daddr*) has no port number
-         * info associated with it. */
-        char saddrbuf[NI_MAXHOST], sportbuf[NI_MAXSERV];
-        char daddrbuf[NI_MAXHOST];
-        int e = errno;
-        krb5_free_data(get_context(conn->handle), response);
-        if (getnameinfo((struct sockaddr *)&daddr, daddr_len,
-                        daddrbuf, sizeof(daddrbuf), 0, 0,
-                        NI_NUMERICHOST) != 0) {
-            strlcpy(daddrbuf, "?", sizeof(daddrbuf));
-        }
-        if (getnameinfo((struct sockaddr *)&saddr, saddr_len,
-                        saddrbuf, sizeof(saddrbuf), sportbuf, sizeof(sportbuf),
-                        NI_NUMERICHOST|NI_NUMERICSERV) != 0) {
-            strlcpy(saddrbuf, "?", sizeof(saddrbuf));
-            strlcpy(sportbuf, "?", sizeof(sportbuf));
-        }
-        com_err(conn->prog, e, _("while sending reply to %s/%s from %s"),
-                saddrbuf, sportbuf, daddrbuf);
-        return;
-    }
-    if ((size_t)cc != response->length) {
-        com_err(conn->prog, 0, _("short reply write %d vs %d\n"),
-                response->length, cc);
-    }
-    krb5_free_data(get_context(conn->handle), response);
-    return;
+    dispatch(state->handle, ss2sa(&state->daddr), &state->faddr,
+             &state->request, 0, process_packet_response, state);
 }
 
 static int
@@ -1782,16 +1788,77 @@ accept_tcp_connection(verto_ctx *ctx, verto_ev *ev)
     SG_SET(&newconn->sgbuf[1], 0, 0);
 }
 
+struct tcp_dispatch_state {
+    struct sockaddr_storage local_saddr;
+    struct connection *conn;
+    krb5_data request;
+    verto_ctx *ctx;
+    int sock;
+};
+
+static void
+process_tcp_response(void *arg, krb5_error_code code, krb5_data *response)
+{
+    struct tcp_dispatch_state *state = arg;
+    verto_ev *ev;
+
+    assert(state);
+    state->conn->response = response;
+
+    if (code)
+        com_err(state->conn->prog, code, _("while dispatching (tcp)"));
+    if (code || !response)
+        goto kill_tcp_connection;
+
+    /* Queue outgoing response. */
+    store_32_be(response->length, state->conn->lenbuf);
+    SG_SET(&state->conn->sgbuf[1], response->data, response->length);
+    state->conn->sgp = state->conn->sgbuf;
+    state->conn->sgnum = 2;
+
+    ev = make_event(state->ctx, VERTO_EV_FLAG_IO_WRITE | VERTO_EV_FLAG_PERSIST,
+                    process_tcp_connection_write, state->sock, state->conn, 1);
+    if (ev) {
+        free(state);
+        return;
+    }
+
+kill_tcp_connection:
+    tcp_or_rpc_data_counter--;
+    free_connection(state->conn);
+    close(state->sock);
+    free(state);
+}
+
+/* Creates the tcp_dispatch_state and deletes the verto event. */
+static struct tcp_dispatch_state *
+prepare_for_dispatch(verto_ctx *ctx, verto_ev *ev)
+{
+    struct tcp_dispatch_state *state;
+
+    state = malloc(sizeof(*state));
+    if (!state) {
+        krb5_klog_syslog(LOG_ERR, _("error allocating tcp dispatch private!"));
+        return NULL;
+    }
+    state->conn = verto_get_private(ev);
+    state->sock = verto_get_fd(ev);
+    state->ctx = ctx;
+    verto_set_private(ev, NULL, NULL); /* Don't close the fd or free conn! */
+    remove_event_from_set(ev); /* Remove it from the set. */
+    verto_del(ev);
+    return state;
+}
+
 static void
 process_tcp_connection_read(verto_ctx *ctx, verto_ev *ev)
 {
-    struct connection *conn;
+    struct tcp_dispatch_state *state = NULL;
+    struct connection *conn = NULL;
     ssize_t nread;
     size_t len;
-    int sock;
 
     conn = verto_get_private(ev);
-    sock = verto_get_fd(ev);
 
     /*
      * Read message length and data into one big buffer, already allocated
@@ -1800,10 +1867,12 @@ process_tcp_connection_read(verto_ctx *ctx, verto_ev *ev)
      * incomplete message.
      */
     if (conn->offset < 4) {
+        krb5_data *response = NULL;
+
         /* msglen has not been computed.  XXX Doing at least two reads
          * here, letting the kernel worry about buffering. */
         len = 4 - conn->offset;
-        nread = SOCKET_READ(sock,
+        nread = SOCKET_READ(verto_get_fd(ev),
                             conn->buffer + conn->offset, len);
         if (nread < 0) /* error */
             goto kill_tcp_connection;
@@ -1822,26 +1891,27 @@ process_tcp_connection_read(verto_ctx *ctx, verto_ev *ev)
                                  (unsigned long) conn->bufsiz - 4);
                 /* XXX Should return an error.  */
                 err = make_toolong_error (conn->handle,
-                                          &conn->response);
+                                          &response);
                 if (err) {
                     krb5_klog_syslog(LOG_ERR, _("error constructing "
                                      "KRB_ERR_FIELD_TOOLONG error! %s"),
                                      error_message(err));
                     goto kill_tcp_connection;
                 }
-                goto have_response;
+
+                state = prepare_for_dispatch(ctx, ev);
+                if (!state)
+                    goto kill_tcp_connection;
+                process_tcp_response(state, 0, response);
             }
         }
     } else {
         /* msglen known. */
-        krb5_data request;
-        krb5_error_code err;
-        struct sockaddr_storage local_saddr;
-        socklen_t local_saddrlen = sizeof(local_saddr);
+        socklen_t local_saddrlen = sizeof(struct sockaddr_storage);
         struct sockaddr *local_saddrp = NULL;
 
         len = conn->msglen - (conn->offset - 4);
-        nread = SOCKET_READ(sock,
+        nread = SOCKET_READ(verto_get_fd(ev),
                             conn->buffer + conn->offset, len);
         if (nread < 0) /* error */
             goto kill_tcp_connection;
@@ -1850,34 +1920,21 @@ process_tcp_connection_read(verto_ctx *ctx, verto_ev *ev)
         conn->offset += nread;
         if (conn->offset < conn->msglen + 4)
             return;
+
         /* Have a complete message, and exactly one message. */
-        request.length = conn->msglen;
-        request.data = conn->buffer + 4;
+        state = prepare_for_dispatch(ctx, ev);
+        if (!state)
+            goto kill_tcp_connection;
 
-        if (getsockname(sock, ss2sa(&local_saddr),
+        state->request.length = conn->msglen;
+        state->request.data = conn->buffer + 4;
+
+        if (getsockname(verto_get_fd(ev), ss2sa(&state->local_saddr),
                         &local_saddrlen) == 0)
-            local_saddrp = ss2sa(&local_saddr);
+            local_saddrp = ss2sa(&state->local_saddr);
 
-        err = dispatch(conn->handle, local_saddrp, &conn->faddr,
-                       &request, &conn->response, 1);
-        if (err) {
-            com_err(conn->prog, err, _("while dispatching (tcp)"));
-            goto kill_tcp_connection;
-        }
-        if (conn->response == NULL)
-            goto kill_tcp_connection;
-    have_response:
-        /* Queue outgoing response. */
-        store_32_be(conn->response->length, conn->lenbuf);
-        SG_SET(&conn->sgbuf[1], conn->response->data,
-               conn->response->length);
-        conn->sgp = conn->sgbuf;
-        conn->sgnum = 2;
-
-        if (convert_event(ctx, ev,
-                          VERTO_EV_FLAG_IO_WRITE | VERTO_EV_FLAG_PERSIST,
-                          process_tcp_connection_write))
-            return;
+        dispatch(state->conn->handle, local_saddrp, &conn->faddr,
+                 &state->request, 1, process_tcp_response, state);
     }
 
     return;
