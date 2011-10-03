@@ -941,10 +941,11 @@ add_authorization_data(krb5_enc_tkt_part *enc_tkt_part, krb5_authdata **ad)
  * an error code of some sort.
  */
 
-krb5_error_code
+void
 check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
               krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
-              void **padata_context, krb5_data *e_data)
+              void **padata_context, krb5_data *e_data,
+              kdc_preauth_respond_fn respond, void *arg)
 {
     krb5_error_code retval = 0;
     krb5_pa_data **padata;
@@ -957,11 +958,14 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
     const char *emsg;
     krb5_authdata **tmp_authz_data = NULL;
 
-    if (request->padata == 0)
-        return 0;
+    if (request->padata == 0) {
+        (*respond)(arg, 0);
+        return;
+    }
 
     if (make_padata_context(context, padata_context) != 0) {
-        return KRB5KRB_ERR_GENERIC;
+        (*respond)(arg, KRB5KRB_ERR_GENERIC);
+        return;
     }
 
 #ifdef DEBUG
@@ -1056,7 +1060,8 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
         e_data->data = malloc(pa_e_data->length);
         if (e_data->data == NULL) {
             krb5_free_data(context, pa_e_data);
-            return KRB5KRB_ERR_GENERIC;
+            (*respond)(arg, KRB5KRB_ERR_GENERIC);
+            return;
         }
         memcpy(e_data->data, pa_e_data->data, pa_e_data->length);
         e_data->length = pa_e_data->length;
@@ -1066,13 +1071,17 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
             retval = saved_retval;
     }
 
-    if (pa_ok)
-        return 0;
+    if (pa_ok) {
+        (*respond)(arg, 0);
+        return;
+    }
 
     /* pa system was not found; we may return PREAUTH_REQUIRED later,
        but we did not actually fail to verify the pre-auth. */
-    if (!pa_found)
-        return 0;
+    if (!pa_found) {
+        (*respond)(arg, 0);
+        return;
+    }
 
 
     /* The following switch statement allows us
@@ -1107,9 +1116,11 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
     case KRB5KDC_ERR_DISCARD:
         /* pkinit alg-agility */
     case KRB5KDC_ERR_NO_ACCEPTABLE_KDF:
-        return retval;
+        (*respond)(arg, retval);
+        return;
     default:
-        return KRB5KDC_ERR_PREAUTH_FAILED;
+        (*respond)(arg, KRB5KDC_ERR_PREAUTH_FAILED);
+        return;
     }
 }
 

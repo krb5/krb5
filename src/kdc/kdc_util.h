@@ -176,12 +176,15 @@ load_preauth_plugins(krb5_context context);
 void
 unload_preauth_plugins(krb5_context context);
 
-krb5_error_code
+typedef void (*kdc_preauth_respond_fn)(void *arg, krb5_error_code code);
+
+void
 check_padata (krb5_context context,
               krb5_db_entry *client, krb5_data *req_pkt,
               krb5_kdc_req *request,
               krb5_enc_tkt_part *enc_tkt_reply,
-              void **padata_context, krb5_data *e_data);
+              void **padata_context, krb5_data *e_data,
+              kdc_preauth_respond_fn respond, void *state);
 
 krb5_error_code
 return_padata (krb5_context context, krb5_db_entry *client,
