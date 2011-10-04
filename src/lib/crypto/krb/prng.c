@@ -41,7 +41,8 @@ k5_get_os_entropy(unsigned char *buf, size_t len)
     krb5_boolean result;
     HCRYPTPROV provider;
 
-    if (!CryptAcquireContext(&provider, NULL, NULL, PROV_RSA_FULL, 0))
+    if (!CryptAcquireContext(&provider, NULL, NULL, PROV_RSA_FULL,
+                             CRYPT_VERIFYCONTEXT))
         return FALSE;
     result = CryptGenRandom(provider, len, buf);
     (void)CryptReleaseContext(provider, 0);
