@@ -66,7 +66,7 @@ pkinit_create_edata(krb5_context context,
                     pkinit_identity_crypto_context id_cryptoctx,
                     pkinit_plg_opts *opts,
                     krb5_error_code err_code,
-                    krb5_data **e_data)
+                    krb5_pa_data ***e_data_out)
 {
     krb5_error_code retval = KRB5KRB_ERR_GENERIC;
 
@@ -75,16 +75,16 @@ pkinit_create_edata(krb5_context context,
     switch(err_code) {
     case KRB5KDC_ERR_CANT_VERIFY_CERTIFICATE:
         retval = pkinit_create_td_trusted_certifiers(context,
-                                                     plg_cryptoctx, req_cryptoctx, id_cryptoctx, e_data);
+                                                     plg_cryptoctx, req_cryptoctx, id_cryptoctx, e_data_out);
         break;
     case KRB5KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED:
         retval = pkinit_create_td_dh_parameters(context, plg_cryptoctx,
-                                                req_cryptoctx, id_cryptoctx, opts, e_data);
+                                                req_cryptoctx, id_cryptoctx, opts, e_data_out);
         break;
     case KRB5KDC_ERR_INVALID_CERTIFICATE:
     case KRB5KDC_ERR_REVOKED_CERTIFICATE:
         retval = pkinit_create_td_invalid_certificate(context,
-                                                      plg_cryptoctx, req_cryptoctx, id_cryptoctx, e_data);
+                                                      plg_cryptoctx, req_cryptoctx, id_cryptoctx, e_data_out);
         break;
     default:
         pkiDebug("no edata needed for error %d (%s)\n",
@@ -314,7 +314,7 @@ pkinit_server_verify_padata(krb5_context context,
     krb5_data k5data;
     int is_signed = 1;
     krb5_keyblock *armor_key;
-    krb5_data *e_data = NULL;
+    krb5_pa_data **e_data = NULL;
     krb5_kdcpreauth_modreq modreq = NULL;
 
     pkiDebug("pkinit_verify_padata: entered!\n");
@@ -1147,7 +1147,7 @@ pkinit_server_get_flags(krb5_context kcontext, krb5_preauthtype patype)
 {
     if (patype == KRB5_PADATA_PKINIT_KX)
         return PA_INFO;
-    return PA_SUFFICIENT | PA_REPLACES_KEY;
+    return PA_SUFFICIENT | PA_REPLACES_KEY | PA_TYPED_E_DATA;
 }
 
 static krb5_preauthtype supported_server_pa_types[] = {

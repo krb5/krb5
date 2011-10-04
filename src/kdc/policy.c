@@ -57,7 +57,7 @@
 int
 against_local_policy_as(register krb5_kdc_req *request, krb5_db_entry client,
                         krb5_db_entry server, krb5_timestamp kdc_time,
-                        const char **status, krb5_data *e_data)
+                        const char **status, krb5_pa_data ***e_data)
 {
 #if 0
     /* An AS request must include the addresses field */
@@ -76,7 +76,7 @@ against_local_policy_as(register krb5_kdc_req *request, krb5_db_entry client,
 krb5_error_code
 against_local_policy_tgs(register krb5_kdc_req *request, krb5_db_entry server,
                          krb5_ticket *ticket, const char **status,
-                         krb5_data *e_data)
+                         krb5_pa_data ***e_data)
 {
 #if 0
     /*

@@ -171,7 +171,7 @@ kh_db_check_policy_as(krb5_context kcontext,
                       krb5_db_entry *server,
                       krb5_timestamp kdc_time,
                       const char **status,
-                      krb5_data *e_data);
+                      krb5_pa_data ***e_data);
 
 krb5_error_code
 kh_hdb_windc_init(krb5_context context,

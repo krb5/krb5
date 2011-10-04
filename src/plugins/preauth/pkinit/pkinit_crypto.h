@@ -559,7 +559,7 @@ krb5_error_code pkinit_create_td_dh_parameters
 	pkinit_req_crypto_context req_cryptoctx,	/* IN */
 	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
 	pkinit_plg_opts *opts,				/* IN */
-	krb5_data **edata);				/* OUT */
+	krb5_pa_data ***e_data_out);			/* OUT */
 
 /*
  * this function processes edata that contains TD-DH-PARAMETERS.
@@ -584,7 +584,7 @@ krb5_error_code pkinit_create_td_invalid_certificate
 	pkinit_plg_crypto_context plg_cryptoctx,	/* IN */
 	pkinit_req_crypto_context req_cryptoctx,	/* IN */
 	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
-	krb5_data **edata);				/* OUT */
+	krb5_pa_data ***e_data_out);			/* OUT */
 
 /*
  * this function creates edata that contains TD-TRUSTED-CERTIFIERS
@@ -594,7 +594,7 @@ krb5_error_code pkinit_create_td_trusted_certifiers
 	pkinit_plg_crypto_context plg_cryptoctx,	/* IN */
 	pkinit_req_crypto_context req_cryptoctx,	/* IN */
 	pkinit_identity_crypto_context id_cryptoctx,	/* IN */
-	krb5_data **edata);				/* OUT */
+	krb5_pa_data ***e_data_out);			/* OUT */
 
 /*
  * this function processes edata that contains either

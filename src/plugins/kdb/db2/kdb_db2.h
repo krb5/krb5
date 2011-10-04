@@ -135,7 +135,7 @@ krb5_error_code
 krb5_db2_check_policy_as(krb5_context kcontext, krb5_kdc_req *request,
                          krb5_db_entry *client, krb5_db_entry *server,
                          krb5_timestamp kdc_time, const char **status,
-                         krb5_data *e_data);
+                         krb5_pa_data ***e_data);
 
 void
 krb5_db2_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,

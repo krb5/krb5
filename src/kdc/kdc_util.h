@@ -74,7 +74,7 @@ kdc_get_server_key (krb5_ticket *, unsigned int,
 int
 validate_as_request (krb5_kdc_req *, krb5_db_entry,
                      krb5_db_entry, krb5_timestamp,
-                     const char **, krb5_data *);
+                     const char **, krb5_pa_data ***);
 
 int
 validate_forwardable(krb5_kdc_req *, krb5_db_entry,
@@ -84,7 +84,7 @@ validate_forwardable(krb5_kdc_req *, krb5_db_entry,
 int
 validate_tgs_request (krb5_kdc_req *, krb5_db_entry,
                       krb5_ticket *, krb5_timestamp,
-                      const char **, krb5_data *);
+                      const char **, krb5_pa_data ***);
 
 int
 fetch_asn1_field (unsigned char *, unsigned int, unsigned int, krb5_data *);
@@ -151,12 +151,12 @@ kdc_err(krb5_context call_context, errcode_t code, const char *fmt, ...)
 int
 against_local_policy_as (krb5_kdc_req *, krb5_db_entry,
                          krb5_db_entry, krb5_timestamp,
-                         const char **, krb5_data *);
+                         const char **, krb5_pa_data ***);
 
 int
 against_local_policy_tgs (krb5_kdc_req *, krb5_db_entry,
                           krb5_ticket *, const char **,
-                          krb5_data *);
+                          krb5_pa_data ***);
 
 /* kdc_preauth.c */
 krb5_boolean
@@ -170,7 +170,7 @@ void
 get_preauth_hint_list (krb5_kdc_req * request,
                        krb5_db_entry *client,
                        krb5_db_entry *server,
-                       krb5_data *e_data);
+                       krb5_pa_data ***e_data_out);
 void
 load_preauth_plugins(krb5_context context);
 void
@@ -179,12 +179,11 @@ unload_preauth_plugins(krb5_context context);
 typedef void (*kdc_preauth_respond_fn)(void *arg, krb5_error_code code);
 
 void
-check_padata (krb5_context context,
-              krb5_db_entry *client, krb5_data *req_pkt,
-              krb5_kdc_req *request,
-              krb5_enc_tkt_part *enc_tkt_reply,
-              void **padata_context, krb5_data *e_data,
-              kdc_preauth_respond_fn respond, void *state);
+check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
+              krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
+              void **padata_context, krb5_pa_data ***e_data,
+              krb5_boolean *typed_e_data, kdc_preauth_respond_fn respond,
+              void *state);
 
 krb5_error_code
 return_padata (krb5_context context, krb5_db_entry *client,

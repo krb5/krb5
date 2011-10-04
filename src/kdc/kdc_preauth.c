@@ -821,17 +821,14 @@ const char *missing_required_preauth(krb5_db_entry *client,
 
 void
 get_preauth_hint_list(krb5_kdc_req *request, krb5_db_entry *client,
-                      krb5_db_entry *server, krb5_data *e_data)
+                      krb5_db_entry *server, krb5_pa_data ***e_data_out)
 {
     int hw_only;
     preauth_system *ap;
     krb5_pa_data **pa_data, **pa;
-    krb5_data *edat;
     krb5_error_code retval;
 
-    /* Zero these out in case we need to abort */
-    e_data->length = 0;
-    e_data->data = 0;
+    *e_data_out = NULL;
 
     hw_only = isflagset(client->attributes, KRB5_KDB_REQUIRES_HW_AUTH);
     /* Allocate two extra entries for the cookie and the terminator. */
@@ -873,11 +870,9 @@ get_preauth_hint_list(krb5_kdc_req *request, krb5_db_entry *client,
      * still reasonable to continue with the response
      */
     kdc_preauth_get_cookie(request->kdc_state, pa);
-    retval = encode_krb5_padata_sequence(pa_data, &edat);
-    if (retval)
-        goto errout;
-    *e_data = *edat;
-    free(edat);
+
+    *e_data_out = pa_data;
+    pa_data = NULL;
 
 errout:
     krb5_free_pa_data(kdc_context, pa_data);
@@ -947,12 +942,15 @@ struct padata_state {
     krb5_kdc_req *request;
     krb5_enc_tkt_part *enc_tkt_reply;
     void **padata_context;
-    krb5_data *e_data;
 
     preauth_system *pa_sys;
-    krb5_data *pa_e_data;
+    krb5_pa_data **pa_e_data;
+    krb5_boolean typed_e_data_flag;
     int pa_ok;
     krb5_error_code saved_code;
+
+    krb5_pa_data ***e_data_out;
+    krb5_boolean *typed_e_data_out;
 };
 
 static void
@@ -965,27 +963,12 @@ finish_check_padata(struct padata_state *state, krb5_error_code code)
     oldrespond = state->respond;
     oldarg = state->arg;
 
-    /* Don't bother copying and returning e-data on success */
-    if (state->pa_ok && state->pa_e_data != NULL) {
-        krb5_free_data(state->context, state->pa_e_data);
-        state->pa_e_data = NULL;
-    }
-
-    /* Return any e-data from the preauth that caused us to exit the loop */
-    if (state->pa_e_data != NULL) {
-        state->e_data->data = malloc(state->pa_e_data->length);
-        if (state->e_data->data == NULL) {
-            krb5_free_data(state->context, state->pa_e_data);
-            free(state);
-            (*oldrespond)(oldarg, KRB5KRB_ERR_GENERIC);
-            return;
-        }
-        memcpy(state->e_data->data, state->pa_e_data->data,
-               state->pa_e_data->length);
-        state->e_data->length = state->pa_e_data->length;
-        krb5_free_data(state->context, state->pa_e_data);
-        state->pa_e_data = NULL;
-    }
+    if (!state->pa_ok) {
+        /* Return any saved preauth e-data. */
+        *state->e_data_out = state->pa_e_data;
+        *state->typed_e_data_out = state->typed_e_data_flag;
+    } else
+        krb5_free_pa_data(state->context, state->pa_e_data);
 
     if (state->pa_ok) {
         free(state);
@@ -1048,11 +1031,12 @@ next_padata(struct padata_state *state);
 
 static void
 finish_verify_padata(void *arg, krb5_error_code code,
-                     krb5_kdcpreauth_modreq modreq, krb5_data *e_data,
+                     krb5_kdcpreauth_modreq modreq, krb5_pa_data **e_data,
                      krb5_authdata **authz_data)
 {
     struct padata_state *state = arg;
     const char *emsg;
+    krb5_boolean typed_e_data_flag;
 
     assert(state);
     kdc_active_realm = state->realm; /* Restore the realm. */
@@ -1070,6 +1054,8 @@ finish_verify_padata(void *arg, krb5_error_code code,
             authz_data = NULL;
         }
 
+        typed_e_data_flag = ((state->pa_sys->flags & PA_TYPED_E_DATA) != 0);
+
         /*
          * We'll return edata from either the first PA_REQUIRED module
          * that fails, or the first non-PA_REQUIRED module that fails.
@@ -1079,8 +1065,9 @@ finish_verify_padata(void *arg, krb5_error_code code,
         if (state->pa_sys->flags & PA_REQUIRED) {
             /* free up any previous edata we might have been saving */
             if (state->pa_e_data != NULL)
-                krb5_free_data(state->context, state->pa_e_data);
+                krb5_free_pa_data(state->context, state->pa_e_data);
             state->pa_e_data = e_data;
+            state->typed_e_data_flag = typed_e_data_flag;
 
             /* Make sure we use the current retval */
             state->pa_ok = 0;
@@ -1089,10 +1076,11 @@ finish_verify_padata(void *arg, krb5_error_code code,
         } else if (state->pa_e_data == NULL) {
             /* save the first error code and e-data */
             state->pa_e_data = e_data;
+            state->typed_e_data_flag = typed_e_data_flag;
             state->saved_code = code;
         } else if (e_data != NULL) {
             /* discard this extra e-data from non-PA_REQUIRED module */
-            krb5_free_data(state->context, e_data);
+            krb5_free_pa_data(state->context, e_data);
         }
     } else {
 #ifdef DEBUG
@@ -1101,7 +1089,7 @@ finish_verify_padata(void *arg, krb5_error_code code,
 
         /* Ignore any edata returned on success */
         if (e_data != NULL)
-            krb5_free_data(state->context, e_data);
+            krb5_free_pa_data(state->context, e_data);
 
         /* Add any authorization data to the ticket */
         if (authz_data != NULL) {
@@ -1169,8 +1157,9 @@ next:
 void
 check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
               krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
-              void **padata_context, krb5_data *e_data,
-              kdc_preauth_respond_fn respond, void *arg)
+              void **padata_context, krb5_pa_data ***e_data,
+              krb5_boolean *typed_e_data, kdc_preauth_respond_fn respond,
+              void *arg)
 {
     struct padata_state *state;
 
@@ -1198,7 +1187,8 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
     state->request = request;
     state->enc_tkt_reply = enc_tkt_reply;
     state->padata_context = padata_context;
-    state->e_data = e_data;
+    state->e_data_out = e_data;
+    state->typed_e_data_out = typed_e_data;
     state->realm = kdc_active_realm;
 
 #ifdef DEBUG

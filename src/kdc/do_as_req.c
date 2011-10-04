@@ -84,8 +84,8 @@
 
 static krb5_error_code
 prepare_error_as(struct kdc_request_state *, krb5_kdc_req *,
-                 int, krb5_data *, krb5_principal, krb5_data **,
-                 const char *);
+                 int, krb5_pa_data **, krb5_boolean, krb5_principal,
+                 krb5_data **, const char *);
 
 /* Determine the key-expiration value according to RFC 4120 section 5.4.2. */
 static krb5_timestamp
@@ -111,7 +111,8 @@ struct as_req_state {
     krb5_db_entry *server;
     krb5_kdc_req *request;
     const char *status;
-    krb5_data e_data;
+    krb5_pa_data **e_data;
+    krb5_boolean typed_e_data;
     krb5_kdc_rep reply;
     krb5_timestamp kdc_time;
     krb5_timestamp authtime;
@@ -368,7 +369,8 @@ egress:
                 errcode = KRB_ERR_GENERIC;
 
             errcode = prepare_error_as(state->rstate, state->request,
-                                       errcode, &state->e_data,
+                                       errcode, state->e_data,
+                                       state->typed_e_data,
                                        (state->client != NULL) ?
                                                state->client->princ :
                                                NULL,
@@ -405,7 +407,7 @@ egress:
         free(state->ticket_reply.enc_part.ciphertext.data);
     }
 
-    krb5_free_data_contents(kdc_context, &state->e_data);
+    krb5_free_pa_data(kdc_context, state->e_data);
     kdc_free_rstate(state->rstate);
     state->request->kdc_state = NULL;
     krb5_free_kdc_req(kdc_context, state->request);
@@ -464,7 +466,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     state->client = NULL;
     state->server = NULL;
     state->request = request;
-    state->e_data = empty_data();
+    state->e_data = NULL;
     state->authtime = 0;
     state->req_pkt = req_pkt;
     state->rstate = NULL;
@@ -752,7 +754,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     if (state->request->padata) {
         check_padata(kdc_context, state->client, state->req_pkt,
                      state->request, &state->enc_tkt_reply, &state->pa_context,
-                     &state->e_data, finish_preauth, state);
+                     &state->e_data, &state->typed_e_data, finish_preauth,
+                     state);
         return;
     }
 
@@ -760,71 +763,15 @@ errout:
     finish_process_as_req(state, errcode);
 }
 
-/*
- * If e_data contains a padata or typed data sequence, produce a padata
- * sequence for FAST in *pa_out.  If e_data contains neither, set *pa_out to
- * NULL and return successfully.
- */
-static krb5_error_code
-get_error_padata(const krb5_data *e_data, krb5_pa_data ***pa_out)
-{
-    krb5_error_code retval;
-    krb5_pa_data **pa = NULL, *pad;
-    krb5_typed_data **td = NULL;
-    size_t size, i;
-
-    *pa_out = NULL;
-
-    /* Try decoding e_data as padata. */
-    retval = decode_krb5_padata_sequence(e_data, &pa);
-    if (retval == 0) {
-        *pa_out = pa;
-        return 0;
-    }
-
-    /* Try decoding e_data as typed data.  If it doesn't decode, assume there
-     * is no error padata. */
-    retval = decode_krb5_typed_data(e_data, &td);
-    if (retval == ENOMEM)
-        return retval;
-    else if (retval != 0)
-        return 0;
-
-    /* Convert the typed data to padata. */
-    for (size = 0; td[size]; size++);
-    pa = k5alloc((size + 1) * sizeof(*pa), &retval);
-    if (pa == NULL)
-        goto cleanup;
-    for (i = 0; i < size; i++) {
-        pad = k5alloc(sizeof(*pad), &retval);
-        if (pad == NULL)
-            goto cleanup;
-        pad->pa_type = td[i]->type;
-        pad->contents = td[i]->data;
-        pad->length = td[i]->length;
-        pa[i] = pad;
-        td[i]->data = NULL;
-    }
-
-    *pa_out = pa;
-    pa = NULL;
-
-cleanup:
-    krb5_free_typed_data(kdc_context, td);
-    krb5_free_pa_data(kdc_context, pa);
-    return retval;
-}
-
 static krb5_error_code
 prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request,
-                  int error, krb5_data *e_data,
+                  int error, krb5_pa_data **e_data, krb5_boolean typed_e_data,
                   krb5_principal canon_client, krb5_data **response,
                   const char *status)
 {
     krb5_error errpkt;
     krb5_error_code retval;
-    krb5_data *scratch = NULL, *fast_edata = NULL;
-    krb5_pa_data **pa = NULL;
+    krb5_data *scratch = NULL, *e_data_asn1 = NULL, *fast_edata = NULL;
 
     errpkt.ctime = request->nonce;
     errpkt.cusec = 0;
@@ -836,18 +783,27 @@ prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request,
     errpkt.server = request->server;
     errpkt.client = (error == KRB5KDC_ERR_WRONG_REALM) ? canon_client :
         request->client;
-    errpkt.e_data = *e_data;
     errpkt.text = string2data((char *)status);
 
-    retval = get_error_padata(e_data, &pa);
-    if (retval)
-        goto cleanup;
-    retval = kdc_fast_handle_error(kdc_context, rstate, request, pa, &errpkt,
-                                   &fast_edata);
+    if (e_data != NULL) {
+        if (typed_e_data) {
+            retval = encode_krb5_typed_data((const krb5_typed_data **)e_data,
+                                            &e_data_asn1);
+        } else
+            retval = encode_krb5_padata_sequence(e_data, &e_data_asn1);
+        if (retval)
+            goto cleanup;
+        errpkt.e_data = *e_data_asn1;
+    } else
+        errpkt.e_data = empty_data();
+
+    retval = kdc_fast_handle_error(kdc_context, rstate, request, e_data,
+                                   &errpkt, &fast_edata);
     if (retval)
         goto cleanup;
     if (fast_edata != NULL)
         errpkt.e_data = *fast_edata;
+
     scratch = k5alloc(sizeof(*scratch), &retval);
     if (scratch == NULL)
         goto cleanup;
@@ -859,8 +815,8 @@ prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request,
     scratch = NULL;
 
 cleanup:
-    krb5_free_pa_data(kdc_context, pa);
     krb5_free_data(kdc_context, fast_edata);
+    krb5_free_data(kdc_context, e_data_asn1);
     free(scratch);
     return retval;
 }

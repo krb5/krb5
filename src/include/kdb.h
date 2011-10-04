@@ -69,7 +69,7 @@
 
 /* This version will be incremented when incompatible changes are made to the
  * KDB API, and will be kept in sync with the libkdb major version. */
-#define KRB5_KDB_API_VERSION 5
+#define KRB5_KDB_API_VERSION 6
 
 /* Salt types */
 #define KRB5_KDB_SALTTYPE_NORMAL        0
@@ -640,14 +640,14 @@ krb5_error_code krb5_db_check_policy_as(krb5_context kcontext,
                                         krb5_db_entry *server,
                                         krb5_timestamp kdc_time,
                                         const char **status,
-                                        krb5_data *e_data);
+                                        krb5_pa_data ***e_data);
 
 krb5_error_code krb5_db_check_policy_tgs(krb5_context kcontext,
                                          krb5_kdc_req *request,
                                          krb5_db_entry *server,
                                          krb5_ticket *ticket,
                                          const char **status,
-                                         krb5_data *e_data);
+                                         krb5_pa_data ***e_data);
 
 void krb5_db_audit_as_req(krb5_context kcontext, krb5_kdc_req *request,
                           krb5_db_entry *client, krb5_db_entry *server,
@@ -796,7 +796,7 @@ krb5_dbe_free_string(krb5_context, char *);
  * This number indicates the date of the last incompatible change to the DAL.
  * The maj_ver field of the module's vtable structure must match this version.
  */
-#define KRB5_KDB_DAL_MAJOR_VERSION 2
+#define KRB5_KDB_DAL_MAJOR_VERSION 3
 
 /*
  * A krb5_context can hold one database object.  Modules should use
@@ -1269,7 +1269,7 @@ typedef struct _kdb_vftabl {
                                        krb5_db_entry *server,
                                        krb5_timestamp kdc_time,
                                        const char **status,
-                                       krb5_data *e_data);
+                                       krb5_pa_data ***e_data);
 
     /*
      * Optional: Perform a policy check on a TGS request, in addition to the
@@ -1286,7 +1286,7 @@ typedef struct _kdb_vftabl {
                                         krb5_db_entry *server,
                                         krb5_ticket *ticket,
                                         const char **status,
-                                        krb5_data *e_data);
+                                        krb5_pa_data ***e_data);
 
     /*
      * Optional: This method informs the module of a successful or unsuccessful

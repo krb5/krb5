@@ -392,16 +392,6 @@ init_krb5_pa_pk_as_rep_draft9(krb5_pa_pk_as_rep_draft9 **in)
 }
 
 void
-init_krb5_typed_data(krb5_typed_data **in)
-{
-    (*in) = malloc(sizeof(krb5_typed_data));
-    if ((*in) == NULL) return;
-    (*in)->type = 0;
-    (*in)->length = 0;
-    (*in)->data = NULL;
-}
-
-void
 init_krb5_subject_pk_info(krb5_subject_pk_info **in)
 {
     (*in) = malloc(sizeof(krb5_subject_pk_info));

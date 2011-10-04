@@ -495,10 +495,12 @@ kh_db_check_policy_as(krb5_context context,
                       krb5_db_entry *server,
                       krb5_timestamp kdc_time,
                       const char **status,
-                      krb5_data *e_data)
+                      krb5_pa_data ***e_data_out)
 {
     kh_db_context *kh = KH_DB_CONTEXT(context);
     krb5_error_code code;
+    krb5_data d;
+    krb5_pa_data **e_data;
     heim_octet_string he_data;
     KDC_REQ hkdcreq;
     Principal *hclient = NULL;
@@ -552,8 +554,14 @@ kh_db_check_policy_as(krb5_context context,
                                   KH_DB_ENTRY(client),
                                   &hkdcreq, &he_data);
 
-    e_data->data   = he_data.data;
-    e_data->length = he_data.length;
+    if (he_data.data != NULL) {
+        d = make_data(he_data.data, he_data.length);
+        code = decode_krb5_padata_sequence(&d, &e_data);
+        if (code == 0)
+            *e_data_out = e_data;
+        free(he_data.data);
+        code = 0;
+    }
 
 cleanup:
     kh_free_HostAddresses(context, hkdcreq.req_body.addresses);

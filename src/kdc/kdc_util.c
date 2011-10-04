@@ -865,7 +865,7 @@ check_anon(krb5_context context, krb5_principal client, krb5_principal server)
 int
 validate_as_request(register krb5_kdc_req *request, krb5_db_entry client,
                     krb5_db_entry server, krb5_timestamp kdc_time,
-                    const char **status, krb5_data *e_data)
+                    const char **status, krb5_pa_data ***e_data)
 {
     int errcode;
     krb5_error_code ret;
@@ -1168,7 +1168,7 @@ fetch_asn1_field(unsigned char *astream, unsigned int level,
 int
 validate_tgs_request(register krb5_kdc_req *request, krb5_db_entry server,
                      krb5_ticket *ticket, krb5_timestamp kdc_time,
-                     const char **status, krb5_data *e_data)
+                     const char **status, krb5_pa_data ***e_data)
 {
     int errcode;
     int st_idx = 0;
@@ -2083,9 +2083,8 @@ kdc_process_s4u2self_req(krb5_context context,
      */
     if (is_local_principal((*s4u_x509_user)->user_id.user)) {
         krb5_db_entry no_server;
-        krb5_data e_data;
+        krb5_pa_data **e_data = NULL;
 
-        e_data.data = NULL;
         code = krb5_db_get_principal(context, (*s4u_x509_user)->user_id.user,
                                      KRB5_KDB_FLAG_INCLUDE_PAC, &princ);
         if (code == KRB5_KDB_NOENTRY) {
@@ -2102,7 +2101,7 @@ kdc_process_s4u2self_req(krb5_context context,
                                    no_server, kdc_time, status, &e_data);
         if (code) {
             krb5_db_free_principal(context, princ);
-            krb5_free_data_contents(context, &e_data);
+            krb5_free_pa_data(context, e_data);
             return code;
         }
 

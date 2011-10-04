@@ -11,7 +11,7 @@ DEFS=
 
 # Keep LIBMAJOR in sync with KRB5_KDB_API_VERSION in include/kdb.h.
 LIBBASE=kdb5
-LIBMAJOR=5
+LIBMAJOR=6
 LIBMINOR=0
 LIBINITFUNC=kdb_init_lock_list
 LIBFINIFUNC=kdb_fini_lock_list

@@ -126,6 +126,11 @@
  */
 #define PA_PSEUDO       0x00000080
 
+/*
+ * For kdcpreauth mechanisms, indicates that e_data in non-FAST errors should
+ * be encoded as typed data instead of padata.
+ */
+#define PA_TYPED_E_DATA 0x00000100
 
 /*
  * clpreauth plugin interface definition.
@@ -413,18 +418,27 @@ typedef krb5_error_code
                             krb5_pa_data *pa_out);
 
 /*
- * Optional: verify preauthentication data sent by the client, setting the
- * TKT_FLG_PRE_AUTH or TKT_FLG_HW_AUTH flag in the enc_tkt_reply's "flags"
- * field as appropriate, and returning nonzero on failure.  Can create
- * per-request module data for consumption by the return_fn or free_modreq_fn
- * below.
+ * Responder for krb5_kdcpreauth_verify_fn.  Invoke with the arg parameter
+ * supplied to verify, the error code (0 for success), an optional module
+ * request state object to be consumed by return_fn or free_modreq_fn, optional
+ * e_data to be passed to the caller if code is nonzero, and optional
+ * authorization data to be included in the ticket.  In non-FAST replies,
+ * e_data will be encoded as typed-data if the module sets the PA_TYPED_E_DATA
+ * flag, and as pa-data otherwise.  e_data and authz_data will be freed by the
+ * KDC.
  */
 typedef void
 (*krb5_kdcpreauth_verify_respond_fn)(void *arg, krb5_error_code code,
                                      krb5_kdcpreauth_modreq modreq,
-                                     krb5_data *e_data,
+                                     krb5_pa_data **e_data,
                                      krb5_authdata **authz_data);
 
+/*
+ * Optional: verify preauthentication data sent by the client, setting the
+ * TKT_FLG_PRE_AUTH or TKT_FLG_HW_AUTH flag in the enc_tkt_reply's "flags"
+ * field as appropriate.  The implementation must invoke the respond function
+ * when complete, whether successful or not.
+ */
 typedef void
 (*krb5_kdcpreauth_verify_fn)(krb5_context context,
                              struct _krb5_db_entry_new *client,

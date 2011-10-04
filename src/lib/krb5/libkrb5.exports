@@ -96,6 +96,7 @@ encode_krb5_sp80056a_other_info
 encode_krb5_tgs_rep
 encode_krb5_tgs_req
 encode_krb5_ticket
+encode_krb5_typed_data
 et_asn1_error_table
 et_k524_error_table
 et_kdb5_error_table

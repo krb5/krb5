@@ -73,7 +73,7 @@ find_alternate_tgs(krb5_kdc_req *,krb5_db_entry **);
 
 static krb5_error_code
 prepare_error_tgs(struct kdc_request_state *, krb5_kdc_req *,krb5_ticket *,int,
-                  krb5_principal,krb5_data **,const char *, krb5_data *);
+                  krb5_principal,krb5_data **,const char *, krb5_pa_data **);
 
 static krb5_int32
 prep_reprocess_req(krb5_kdc_req *,krb5_principal *);
@@ -123,12 +123,11 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     struct kdc_request_state *state = NULL;
     krb5_pa_data *pa_tgs_req; /*points into request*/
     krb5_data scratch;
-    krb5_data e_data = empty_data(); /* backend-provided error data */
+    krb5_pa_data **e_data = NULL;
 
     reply.padata = 0; /* For cleanup handler */
     reply_encpart.enc_padata = 0;
     enc_tkt_reply.authorization_data = NULL;
-    e_data.data = NULL;
 
     session_key.contents = NULL;
 
@@ -929,7 +928,7 @@ cleanup:
 
         retval = prepare_error_tgs(state, request, header_ticket, errcode,
                                    (server != NULL) ? server->princ : NULL,
-                                   response, status, &e_data);
+                                   response, status, e_data);
         if (got_err) {
             krb5_free_error_message (kdc_context, status);
             status = 0;
@@ -969,7 +968,7 @@ cleanup:
         krb5_free_pa_data(kdc_context, reply_encpart.enc_padata);
     if (enc_tkt_reply.authorization_data != NULL)
         krb5_free_authdata(kdc_context, enc_tkt_reply.authorization_data);
-    krb5_free_data_contents(kdc_context, &e_data);
+    krb5_free_pa_data(kdc_context, e_data);
 
     return retval;
 }
@@ -979,11 +978,11 @@ prepare_error_tgs (struct kdc_request_state *state,
                    krb5_kdc_req *request, krb5_ticket *ticket, int error,
                    krb5_principal canon_server,
                    krb5_data **response, const char *status,
-                   krb5_data *e_data)
+                   krb5_pa_data **e_data)
 {
     krb5_error errpkt;
     krb5_error_code retval = 0;
-    krb5_data *scratch, *fast_edata = NULL;
+    krb5_data *scratch, *e_data_asn1 = NULL, *fast_edata = NULL;
 
     errpkt.ctime = request->nonce;
     errpkt.cusec = 0;
@@ -1005,20 +1004,33 @@ prepare_error_tgs (struct kdc_request_state *state,
         free(errpkt.text.data);
         return ENOMEM;
     }
-    errpkt.e_data = *e_data;
+
+    if (e_data != NULL) {
+        retval = encode_krb5_padata_sequence(e_data, &e_data_asn1);
+        if (retval) {
+            free(scratch);
+            free(errpkt.text.data);
+            return retval;
+        }
+        errpkt.e_data = *e_data_asn1;
+    } else
+        errpkt.e_data = empty_data();
+
     if (state) {
-        retval = kdc_fast_handle_error(kdc_context, state, request, NULL,
+        retval = kdc_fast_handle_error(kdc_context, state, request, e_data,
                                        &errpkt, &fast_edata);
     }
     if (retval) {
         free(scratch);
         free(errpkt.text.data);
+        krb5_free_data(kdc_context, e_data_asn1);
         return retval;
     }
     if (fast_edata)
         errpkt.e_data = *fast_edata;
     retval = krb5_mk_error(kdc_context, &errpkt, scratch);
     free(errpkt.text.data);
+    krb5_free_data(kdc_context, e_data_asn1);
     krb5_free_data(kdc_context, fast_edata);
     if (retval)
         free(scratch);
