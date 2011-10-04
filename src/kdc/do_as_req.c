@@ -131,7 +131,7 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
     krb5_key_data *server_key;
     krb5_key_data *client_key;
     krb5_keyblock *as_encrypting_key = NULL;
-    krb5_data *response;
+    krb5_data *response = NULL;
     const char *emsg = 0;
     int did_log = 0;
     register int i;
@@ -468,6 +468,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     state->request = request;
     state->e_data = NULL;
     state->authtime = 0;
+    state->c_flags = 0;
     state->req_pkt = req_pkt;
     state->rstate = NULL;
     state->sname = 0;

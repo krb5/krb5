@@ -1548,7 +1548,7 @@ process_packet_response(void *arg, krb5_error_code code, krb5_data *response)
     if (code)
         com_err(state->prog ? state->prog : NULL, code,
                 _("while dispatching (udp)"));
-    if (code || response == NULL || state == NULL)
+    if (code || response == NULL)
         goto out;
 
     cc = send_to_from(state->port_fd, response->data,
@@ -1900,8 +1900,10 @@ process_tcp_connection_read(verto_ctx *ctx, verto_ev *ev)
                 }
 
                 state = prepare_for_dispatch(ctx, ev);
-                if (!state)
+                if (!state) {
+                    krb5_free_data(get_context(conn->handle), response);
                     goto kill_tcp_connection;
+                }
                 process_tcp_response(state, 0, response);
             }
         }
