@@ -169,4 +169,4 @@ EXPORTS
 	gss_nt_exported_name				@136	DATA
 	gss_nt_service_name_v2				@137	DATA
 ; Added in 1.10
-	gss_pname_to_uid				@138
+	gss_localname					@138
