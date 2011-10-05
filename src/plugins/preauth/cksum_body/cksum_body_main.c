@@ -272,13 +272,9 @@ server_fini(krb5_context kcontext, krb5_kdcpreauth_moddata moddata)
 /* Obtain and return any preauthentication data (which is destined for the
  * client) which matches type data->pa_type. */
 static krb5_error_code
-server_get_edata(krb5_context kcontext,
-                 krb5_kdc_req *request,
-                 struct _krb5_db_entry_new *client,
-                 struct _krb5_db_entry_new *server,
-                 krb5_kdcpreauth_get_data_fn server_get_entry_data,
-                 krb5_kdcpreauth_moddata moddata,
-                 krb5_pa_data *data)
+server_get_edata(krb5_context kcontext, krb5_kdc_req *request,
+                 krb5_kdcpreauth_get_data_fn get, krb5_kdcpreauth_rock rock,
+                 krb5_kdcpreauth_moddata moddata, krb5_pa_data *data)
 {
     krb5_data *key_data;
     krb5_keyblock *keys, *key;
@@ -287,8 +283,7 @@ server_get_edata(krb5_context kcontext,
 
     /* Retrieve the client's keys. */
     key_data = NULL;
-    if ((*server_get_entry_data)(kcontext, request, client,
-                                 krb5_kdcpreauth_keys, &key_data) != 0) {
+    if ((*get)(kcontext, rock, krb5_kdcpreauth_keys, &key_data) != 0) {
 #ifdef DEBUG
         fprintf(stderr, "Error retrieving client keys.\n");
 #endif
@@ -331,12 +326,12 @@ server_get_edata(krb5_context kcontext,
 /* Verify a request from a client. */
 static void
 server_verify(krb5_context kcontext,
-              struct _krb5_db_entry_new *client,
               krb5_data *req_pkt,
               krb5_kdc_req *request,
               krb5_enc_tkt_part *enc_tkt_reply,
               krb5_pa_data *data,
-              krb5_kdcpreauth_get_data_fn server_get_entry_data,
+              krb5_kdcpreauth_get_data_fn get,
+              krb5_kdcpreauth_rock rock,
               krb5_kdcpreauth_moddata moddata,
               krb5_kdcpreauth_verify_respond_fn respond,
               void *arg)
@@ -394,8 +389,7 @@ server_verify(krb5_context kcontext,
 
     /* Pull up the client's keys. */
     key_data = NULL;
-    if ((*server_get_entry_data)(kcontext, request, client,
-                                 krb5_kdcpreauth_keys, &key_data) != 0) {
+    if ((*get)(kcontext, rock, krb5_kdcpreauth_keys, &key_data) != 0) {
 #ifdef DEBUG
         fprintf(stderr, "Error retrieving client keys.\n");
 #endif
@@ -454,9 +448,7 @@ server_verify(krb5_context kcontext,
      * extract the structure directly from the req_pkt structure.  This
      * will probably work if it's us on both ends, though. */
     req_body = NULL;
-    if ((*server_get_entry_data)(kcontext, request, client,
-                                 krb5_kdcpreauth_request_body,
-                                 &req_body) != 0) {
+    if ((*get)(kcontext, rock, krb5_kdcpreauth_request_body, &req_body) != 0) {
         krb5_free_keyblock(kcontext, key);
         stats->failures++;
         (*respond)(arg, KRB5KDC_ERR_PREAUTH_FAILED, NULL, NULL, NULL);
@@ -593,14 +585,13 @@ server_verify(krb5_context kcontext,
 static krb5_error_code
 server_return(krb5_context kcontext,
               krb5_pa_data *padata,
-              struct _krb5_db_entry_new *client,
               krb5_data *req_pkt,
               krb5_kdc_req *request,
               krb5_kdc_rep *reply,
-              struct _krb5_key_data *client_key,
               krb5_keyblock *encrypting_key,
               krb5_pa_data **send_pa,
-              krb5_kdcpreauth_get_data_fn server_get_entry_data,
+              krb5_kdcpreauth_get_data_fn get,
+              krb5_kdcpreauth_rock rock,
               krb5_kdcpreauth_moddata moddata,
               krb5_kdcpreauth_modreq modreq)
 {

@@ -36,15 +36,12 @@
 
 static krb5_error_code
 kdc_include_padata(krb5_context context, krb5_kdc_req *request,
-                   struct _krb5_db_entry_new *client,
-                   struct _krb5_db_entry_new *server,
-                   krb5_kdcpreauth_get_data_fn get_data_proc,
+                   krb5_kdcpreauth_get_data_fn get, krb5_kdcpreauth_rock rock,
                    krb5_kdcpreauth_moddata moddata, krb5_pa_data *data)
 {
     krb5_error_code retval = 0;
     krb5_keyblock *armor_key = NULL;
-    retval = fast_kdc_get_armor_key(context, get_data_proc, request, client,
-                                    &armor_key);
+    retval = fast_kdc_get_armor_key(context, get, rock, &armor_key);
     if (retval)
         return retval;
     if (armor_key == 0)
@@ -54,11 +51,10 @@ kdc_include_padata(krb5_context context, krb5_kdc_req *request,
 }
 
 static void
-kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
-                   krb5_data *req_pkt, krb5_kdc_req *request,
-                   krb5_enc_tkt_part *enc_tkt_reply, krb5_pa_data *data,
-                   krb5_kdcpreauth_get_data_fn get_entry_proc,
-                   krb5_kdcpreauth_moddata moddata,
+kdc_verify_preauth(krb5_context context, krb5_data *req_pkt,
+                   krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
+                   krb5_pa_data *data, krb5_kdcpreauth_get_data_fn get,
+                   krb5_kdcpreauth_rock rock, krb5_kdcpreauth_moddata moddata,
                    krb5_kdcpreauth_verify_respond_fn respond,
                    void *arg)
 {
@@ -77,7 +73,7 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
 
     plain.data = NULL;
 
-    retval = fast_kdc_get_armor_key(context, get_entry_proc, request, client, &armor_key);
+    retval = fast_kdc_get_armor_key(context, get, rock, &armor_key);
     if (retval == 0 &&armor_key == NULL) {
         retval = ENOENT;
         krb5_set_error_message(context, ENOENT, "Encrypted Challenge used outside of FAST tunnel");
@@ -93,8 +89,7 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
             retval = ENOMEM;
     }
     if (retval == 0)
-        retval = get_entry_proc(context, request, client,
-                                krb5_kdcpreauth_keys, &client_data);
+        retval = (*get)(context, rock, krb5_kdcpreauth_keys, &client_data);
     if (retval == 0) {
         client_keys = (krb5_keyblock *) client_data->data;
         for (i = 0; client_keys[i].enctype&& (retval == 0); i++ ) {
@@ -138,7 +133,7 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
              * may cause the client to fail, but at this point the KDC has
              * considered this a success, so the return value is ignored.
              */
-            fast_kdc_replace_reply_key(context, get_entry_proc, request);
+            fast_kdc_replace_reply_key(context, get, rock);
             if (krb5_c_fx_cf2_simple(context, armor_key, "kdcchallengearmor",
                                      &client_keys[i], "challengelongterm",
                                      &kdc_challenge_key) == 0)
@@ -166,12 +161,10 @@ kdc_verify_preauth(krb5_context context, struct _krb5_db_entry_new *client,
 
 static krb5_error_code
 kdc_return_preauth(krb5_context context, krb5_pa_data *padata,
-                   struct _krb5_db_entry_new *client, krb5_data *req_pkt,
-                   krb5_kdc_req *request, krb5_kdc_rep *reply,
-                   struct _krb5_key_data *client_keys,
-                   krb5_keyblock *encrypting_key, krb5_pa_data **send_pa,
-                   krb5_kdcpreauth_get_data_fn get_entry_proc,
-                   krb5_kdcpreauth_moddata moddata,
+                   krb5_data *req_pkt, krb5_kdc_req *request,
+                   krb5_kdc_rep *reply, krb5_keyblock *encrypting_key,
+                   krb5_pa_data **send_pa, krb5_kdcpreauth_get_data_fn get,
+                   krb5_kdcpreauth_rock rock, krb5_kdcpreauth_moddata moddata,
                    krb5_kdcpreauth_modreq modreq)
 {
     krb5_error_code retval = 0;

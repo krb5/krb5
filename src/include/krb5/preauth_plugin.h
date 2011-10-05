@@ -324,10 +324,8 @@ typedef struct krb5_clpreauth_vtable_st {
  * kdcpreauth plugin interface definition.
  */
 
-/* While arguments of these types are passed in, they are opaque to kdcpreauth
- * modules. */
-struct _krb5_db_entry_new;
-struct _krb5_key_data;
+/* Abstract type for a KDC callback data handle. */
+typedef struct krb5_kdcpreauth_rock_st *krb5_kdcpreauth_rock;
 
 /* Abstract type for module data and per-request module data. */
 typedef struct krb5_kdcpreauth_moddata_st *krb5_kdcpreauth_moddata;
@@ -346,8 +344,9 @@ enum krb5_kdcpreauth_request_type {
     krb5_kdcpreauth_max_time_skew = 2,
     /*
      * The returned krb5_data_item holds an array of krb5_keyblock structures,
-     * terminated by an entry with key type = 0.  Each keyblock should have its
-     * contents freed in turn, and then the data item itself should be freed.
+     * containing the client keys, terminated by an entry with key type = 0.
+     * Each keyblock should have its contents freed in turn, and then the data
+     * item itself should be freed.
      */
     krb5_kdcpreauth_keys = 3,
     /*
@@ -368,13 +367,16 @@ enum krb5_kdcpreauth_request_type {
      * the keyblock using krb5_free_keyblock; in that case, this function
      * simply frees the data.
      */
-    krb5_kdcpreauth_free_fast_armor = 6
+    krb5_kdcpreauth_free_fast_armor = 6,
+    /*
+     * The returned krb5_data contains a pointer to the client DB entry.  The
+     * pointer is an alias and should not be freed.
+     */
+    krb5_kdcpreauth_get_client = 7
 };
 typedef krb5_error_code
-(*krb5_kdcpreauth_get_data_fn)(krb5_context context, krb5_kdc_req *request,
-                               struct _krb5_db_entry_new *entry,
-                               krb5_int32 request_type,
-                               krb5_data **);
+(*krb5_kdcpreauth_get_data_fn)(krb5_context context, krb5_kdcpreauth_rock rock,
+                               krb5_int32 request_type, krb5_data **);
 
 /* Optional: preauth plugin initialization function. */
 typedef krb5_error_code
@@ -411,9 +413,8 @@ typedef int
  */
 typedef krb5_error_code
 (*krb5_kdcpreauth_edata_fn)(krb5_context context, krb5_kdc_req *request,
-                            struct _krb5_db_entry_new *client,
-                            struct _krb5_db_entry_new *server,
                             krb5_kdcpreauth_get_data_fn get_data,
+                            krb5_kdcpreauth_rock rock,
                             krb5_kdcpreauth_moddata moddata,
                             krb5_pa_data *pa_out);
 
@@ -441,11 +442,11 @@ typedef void
  */
 typedef void
 (*krb5_kdcpreauth_verify_fn)(krb5_context context,
-                             struct _krb5_db_entry_new *client,
                              krb5_data *req_pkt, krb5_kdc_req *request,
                              krb5_enc_tkt_part *enc_tkt_reply,
                              krb5_pa_data *data,
                              krb5_kdcpreauth_get_data_fn get_data,
+                             krb5_kdcpreauth_rock rock,
                              krb5_kdcpreauth_moddata moddata,
                              krb5_kdcpreauth_verify_respond_fn respond,
                              void *arg);
@@ -458,14 +459,13 @@ typedef void
 typedef krb5_error_code
 (*krb5_kdcpreauth_return_fn)(krb5_context context,
                              krb5_pa_data *padata,
-                             struct _krb5_db_entry_new *client,
                              krb5_data *req_pkt,
                              krb5_kdc_req *request,
                              krb5_kdc_rep *reply,
-                             struct _krb5_key_data *client_keys,
                              krb5_keyblock *encrypting_key,
                              krb5_pa_data **send_pa_out,
                              krb5_kdcpreauth_get_data_fn get_data,
+                             krb5_kdcpreauth_rock rock,
                              krb5_kdcpreauth_moddata moddata,
                              krb5_kdcpreauth_modreq modreq);
 

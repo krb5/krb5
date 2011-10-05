@@ -41,7 +41,6 @@ decode_krb5_as_req(const krb5_data *code, krb5_kdc_req **repptr)
     clear_field(rep,authorization_data.ciphertext.data);
     clear_field(rep,unenc_authdata);
     clear_field(rep,second_ticket);
-    clear_field(rep, kdc_state);
 
     check_apptag(10);
     retval = asn1_decode_kdc_req(&buf,rep);
@@ -69,7 +68,6 @@ decode_krb5_tgs_req(const krb5_data *code, krb5_kdc_req **repptr)
     clear_field(rep,authorization_data.ciphertext.data);
     clear_field(rep,unenc_authdata);
     clear_field(rep,second_ticket);
-    clear_field(rep, kdc_state);
 
     check_apptag(12);
     retval = asn1_decode_kdc_req(&buf,rep);

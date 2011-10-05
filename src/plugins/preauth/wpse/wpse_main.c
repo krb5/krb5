@@ -246,9 +246,8 @@ server_free_modreq(krb5_context kcontext,
 static krb5_error_code
 server_get_edata(krb5_context kcontext,
                  krb5_kdc_req *request,
-                 struct _krb5_db_entry_new *client,
-                 struct _krb5_db_entry_new *server,
-                 krb5_kdcpreauth_get_data_fn server_get_entry_data,
+                 krb5_kdcpreauth_get_data_fn get,
+                 krb5_kdcpreauth_rock rock,
                  krb5_kdcpreauth_moddata moddata,
                  krb5_pa_data *data)
 {
@@ -261,12 +260,12 @@ server_get_edata(krb5_context kcontext,
 /* Verify a request from a client. */
 static void
 server_verify(krb5_context kcontext,
-              struct _krb5_db_entry_new *client,
               krb5_data *req_pkt,
               krb5_kdc_req *request,
               krb5_enc_tkt_part *enc_tkt_reply,
               krb5_pa_data *data,
-              krb5_kdcpreauth_get_data_fn server_get_entry_data,
+              krb5_kdcpreauth_get_data_fn get,
+              krb5_kdcpreauth_rock rock,
               krb5_kdcpreauth_moddata moddata,
               krb5_kdcpreauth_verify_respond_fn respond,
               void *arg)
@@ -370,14 +369,13 @@ server_verify(krb5_context kcontext,
 static krb5_error_code
 server_return(krb5_context kcontext,
               krb5_pa_data *padata,
-              struct _krb5_db_entry_new *client,
               krb5_data *req_pkt,
               krb5_kdc_req *request,
               krb5_kdc_rep *reply,
-              struct _krb5_key_data *client_key,
               krb5_keyblock *encrypting_key,
               krb5_pa_data **send_pa,
-              krb5_kdcpreauth_get_data_fn server_get_entry_data,
+              krb5_kdcpreauth_get_data_fn get,
+              krb5_kdcpreauth_rock rock,
               krb5_kdcpreauth_moddata moddata, krb5_kdcpreauth_modreq modreq)
 {
     /* This module does a couple of dumb things.  It tags its reply with

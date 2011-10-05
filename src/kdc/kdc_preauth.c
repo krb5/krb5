@@ -105,30 +105,26 @@ typedef struct preauth_system_st {
 } preauth_system;
 
 static void
-verify_enc_timestamp(krb5_context, krb5_db_entry *client, krb5_data *req_pkt,
-                     krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
-                     krb5_pa_data *data,
-                     krb5_kdcpreauth_get_data_fn get_entry_data,
+verify_enc_timestamp(krb5_context, krb5_data *req_pkt, krb5_kdc_req *request,
+                     krb5_enc_tkt_part *enc_tkt_reply, krb5_pa_data *data,
+                     krb5_kdcpreauth_get_data_fn get,
+                     krb5_kdcpreauth_rock rock,
                      krb5_kdcpreauth_moddata moddata,
-                     krb5_kdcpreauth_verify_respond_fn respond,
-                     void *arg);
+                     krb5_kdcpreauth_verify_respond_fn respond, void *arg);
 
 static krb5_error_code
 get_enc_ts(krb5_context context, krb5_kdc_req *request,
-           krb5_db_entry *client, krb5_db_entry *server,
-           krb5_kdcpreauth_get_data_fn get_entry_data,
+           krb5_kdcpreauth_get_data_fn get, krb5_kdcpreauth_rock rock,
            krb5_kdcpreauth_moddata modata, krb5_pa_data *data);
 
 static krb5_error_code
 get_etype_info(krb5_context context, krb5_kdc_req *request,
-               krb5_db_entry *client, krb5_db_entry *server,
-               krb5_kdcpreauth_get_data_fn get_entry_data,
+               krb5_kdcpreauth_get_data_fn get, krb5_kdcpreauth_rock rock,
                krb5_kdcpreauth_moddata moddata, krb5_pa_data *data);
 
 static krb5_error_code
 get_etype_info2(krb5_context context, krb5_kdc_req *request,
-                krb5_db_entry *client, krb5_db_entry *server,
-                krb5_kdcpreauth_get_data_fn get_entry_data,
+                krb5_kdcpreauth_get_data_fn get, krb5_kdcpreauth_rock rock,
                 krb5_kdcpreauth_moddata moddata, krb5_pa_data *pa_data);
 
 static krb5_error_code
@@ -141,31 +137,27 @@ etype_info_as_rep_helper(krb5_context context, krb5_pa_data * padata,
                          int etype_info2);
 
 static krb5_error_code
-return_etype_info(krb5_context, krb5_pa_data *padata, krb5_db_entry *client,
+return_etype_info(krb5_context, krb5_pa_data *padata,
                   krb5_data *req_pkt, krb5_kdc_req *request,
-                  krb5_kdc_rep *reply, krb5_key_data *client_key,
-                  krb5_keyblock *encrypting_key, krb5_pa_data **send_pa,
-                  krb5_kdcpreauth_get_data_fn get_entry_data,
-                  krb5_kdcpreauth_moddata moddata,
+                  krb5_kdc_rep *reply, krb5_keyblock *encrypting_key,
+                  krb5_pa_data **send_pa, krb5_kdcpreauth_get_data_fn get,
+                  krb5_kdcpreauth_rock rock, krb5_kdcpreauth_moddata moddata,
                   krb5_kdcpreauth_modreq modreq);
 
 static krb5_error_code
-return_etype_info2(krb5_context, krb5_pa_data *padata, krb5_db_entry *client,
+return_etype_info2(krb5_context, krb5_pa_data *padata,
                    krb5_data *req_pkt, krb5_kdc_req *request,
-                   krb5_kdc_rep *reply, krb5_key_data *client_key,
-                   krb5_keyblock *encrypting_key, krb5_pa_data **send_pa,
-                   krb5_kdcpreauth_get_data_fn get_entry_data,
-                   krb5_kdcpreauth_moddata moddata,
+                   krb5_kdc_rep *reply, krb5_keyblock *encrypting_key,
+                   krb5_pa_data **send_pa, krb5_kdcpreauth_get_data_fn get,
+                   krb5_kdcpreauth_rock rock, krb5_kdcpreauth_moddata moddata,
                    krb5_kdcpreauth_modreq modreq);
 
 static krb5_error_code
-return_pw_salt(krb5_context, krb5_pa_data *padata, krb5_db_entry *client,
+return_pw_salt(krb5_context, krb5_pa_data *padata,
                krb5_data *req_pkt, krb5_kdc_req *request, krb5_kdc_rep *reply,
-               krb5_key_data *client_key, krb5_keyblock *encrypting_key,
-               krb5_pa_data **send_pa,
-               krb5_kdcpreauth_get_data_fn get_entry_data,
-               krb5_kdcpreauth_moddata moddata,
-               krb5_kdcpreauth_modreq modreq);
+               krb5_keyblock *encrypting_key, krb5_pa_data **send_pa,
+               krb5_kdcpreauth_get_data_fn get, krb5_kdcpreauth_rock rock,
+               krb5_kdcpreauth_moddata moddata, krb5_kdcpreauth_modreq modreq);
 
 
 #if APPLE_PKINIT
@@ -547,7 +539,7 @@ get_entry_tl_data(krb5_context context, krb5_db_entry *entry,
 }
 
 /*
- * Retrieve a specific piece of information pertaining to the entry or the
+ * Retrieve a specific piece of information pertaining to the client entry or
  * request and return it in a new krb5_data item which the caller must free.
  *
  * This may require massaging data into a contrived format, but it will
@@ -555,8 +547,8 @@ get_entry_tl_data(krb5_context context, krb5_db_entry *entry,
  * modules.
  */
 static krb5_error_code
-get_entry_data(krb5_context context, krb5_kdc_req *request,
-               krb5_db_entry *entry, krb5_int32 type, krb5_data **result)
+get_data(krb5_context context, krb5_kdcpreauth_rock rock, krb5_int32 type,
+         krb5_data **result)
 {
     int i, k;
     krb5_data *ret;
@@ -564,12 +556,14 @@ get_entry_data(krb5_context context, krb5_kdc_req *request,
     krb5_keyblock *keys;
     krb5_key_data *entry_key;
     krb5_error_code error;
-    struct kdc_request_state *state = request->kdc_state;
+    krb5_kdc_req *request = rock->request;
+    struct kdc_request_state *state = rock->rstate;
+    krb5_db_entry *client = rock->client;
 
     switch (type) {
     case krb5_kdcpreauth_request_certificate:
-        return get_entry_tl_data(context, entry,
-                                 KRB5_TL_USER_CERTIFICATE, result);
+        return get_entry_tl_data(context, client, KRB5_TL_USER_CERTIFICATE,
+                                 result);
         break;
     case krb5_kdcpreauth_max_time_skew:
         ret = malloc(sizeof(krb5_data));
@@ -601,7 +595,7 @@ get_entry_data(krb5_context context, krb5_kdc_req *request,
         k = 0;
         for (i = 0; i < request->nktypes; i++) {
             entry_key = NULL;
-            if (krb5_dbe_find_enctype(context, entry, request->ktype[i],
+            if (krb5_dbe_find_enctype(context, client, request->ktype[i],
                                       -1, 0, &entry_key) != 0)
                 continue;
             if (krb5_dbe_decrypt_key_data(context, NULL, entry_key,
@@ -653,6 +647,14 @@ get_entry_data(krb5_context context, krb5_kdc_req *request,
             krb5_free_keyblock(context, keys);
         }
         free(*result);
+        return 0;
+    case krb5_kdcpreauth_get_client:
+        ret = malloc(sizeof(krb5_data));
+        if (ret == NULL)
+            return ENOMEM;
+        ret->data = (char *)&rock->client;
+        ret->length = sizeof(rock->client);
+        *result = ret;
         return 0;
     default:
         break;
@@ -820,8 +822,8 @@ const char *missing_required_preauth(krb5_db_entry *client,
 }
 
 void
-get_preauth_hint_list(krb5_kdc_req *request, krb5_db_entry *client,
-                      krb5_db_entry *server, krb5_pa_data ***e_data_out)
+get_preauth_hint_list(krb5_kdc_req *request, krb5_kdcpreauth_rock rock,
+                      krb5_pa_data ***e_data_out)
 {
     int hw_only;
     preauth_system *ap;
@@ -830,7 +832,7 @@ get_preauth_hint_list(krb5_kdc_req *request, krb5_db_entry *client,
 
     *e_data_out = NULL;
 
-    hw_only = isflagset(client->attributes, KRB5_KDB_REQUIRES_HW_AUTH);
+    hw_only = isflagset(rock->client->attributes, KRB5_KDB_REQUIRES_HW_AUTH);
     /* Allocate two extra entries for the cookie and the terminator. */
     pa_data = calloc(n_preauth_systems + 2, sizeof(krb5_pa_data *));
     if (pa_data == 0)
@@ -849,8 +851,8 @@ get_preauth_hint_list(krb5_kdc_req *request, krb5_db_entry *client,
         (*pa)->magic = KV5M_PA_DATA;
         (*pa)->pa_type = ap->type;
         if (ap->get_edata) {
-            retval = ap->get_edata(kdc_context, request, client, server,
-                                   get_entry_data, ap->moddata, *pa);
+            retval = ap->get_edata(kdc_context, request, get_data, rock,
+                                   ap->moddata, *pa);
             if (retval) {
                 /* just failed on this type, continue */
                 free(*pa);
@@ -869,7 +871,7 @@ get_preauth_hint_list(krb5_kdc_req *request, krb5_db_entry *client,
      * If we fail to get the cookie it is probably
      * still reasonable to continue with the response
      */
-    kdc_preauth_get_cookie(request->kdc_state, pa);
+    kdc_preauth_get_cookie(rock->rstate, pa);
 
     *e_data_out = pa_data;
     pa_data = NULL;
@@ -937,7 +939,7 @@ struct padata_state {
     krb5_pa_data **padata;
     int pa_found;
     krb5_context context;
-    krb5_db_entry *client;
+    krb5_kdcpreauth_rock rock;
     krb5_data *req_pkt;
     krb5_kdc_req *request;
     krb5_enc_tkt_part *enc_tkt_reply;
@@ -1135,11 +1137,11 @@ next_padata(struct padata_state *state)
         goto next;
 
     state->pa_found++;
-    state->pa_sys->verify_padata(state->context, state->client,
-                                 state->req_pkt, state->request,
-                                 state->enc_tkt_reply, *state->padata,
-                                 get_entry_data, state->pa_sys->moddata,
-                                 finish_verify_padata, state);
+    state->pa_sys->verify_padata(state->context, state->req_pkt,
+                                 state->request, state->enc_tkt_reply,
+                                 *state->padata, get_data, state->rock,
+                                 state->pa_sys->moddata, finish_verify_padata,
+                                 state);
     return;
 
 next:
@@ -1155,11 +1157,11 @@ next:
  */
 
 void
-check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
-              krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
-              void **padata_context, krb5_pa_data ***e_data,
-              krb5_boolean *typed_e_data, kdc_preauth_respond_fn respond,
-              void *arg)
+check_padata(krb5_context context, krb5_kdcpreauth_rock rock,
+             krb5_data *req_pkt, krb5_kdc_req *request,
+             krb5_enc_tkt_part *enc_tkt_reply, void **padata_context,
+             krb5_pa_data ***e_data, krb5_boolean *typed_e_data,
+             kdc_preauth_respond_fn respond, void *arg)
 {
     struct padata_state *state;
 
@@ -1182,7 +1184,7 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
     state->respond = respond;
     state->arg = arg;
     state->context = context;
-    state->client = client;
+    state->rock = rock;
     state->req_pkt = req_pkt;
     state->request = request;
     state->enc_tkt_reply = enc_tkt_reply;
@@ -1203,10 +1205,9 @@ check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
  * structures which should be returned by the KDC to the client
  */
 krb5_error_code
-return_padata(krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
-              krb5_kdc_req *request, krb5_kdc_rep *reply,
-              krb5_key_data *client_key, krb5_keyblock *encrypting_key,
-              void **padata_context)
+return_padata(krb5_context context, krb5_kdcpreauth_rock rock,
+              krb5_data *req_pkt, krb5_kdc_req *request, krb5_kdc_rep *reply,
+              krb5_keyblock *encrypting_key, void **padata_context)
 {
     krb5_error_code             retval;
     krb5_pa_data **             padata;
@@ -1280,13 +1281,11 @@ return_padata(krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
                 }
             }
         }
-        if ((retval = ap->return_padata(context, pa, client, req_pkt,
-                                        request, reply,
-                                        client_key, encrypting_key, send_pa,
-                                        get_entry_data, ap->moddata,
-                                        *modreq_ptr))) {
+        retval = ap->return_padata(context, pa, req_pkt, request, reply,
+                                   encrypting_key, send_pa, get_data, rock,
+                                   ap->moddata, *modreq_ptr);
+        if (retval)
             goto cleanup;
-        }
 
         if (*send_pa)
             send_pa++;
@@ -1322,22 +1321,20 @@ request_contains_enctype(krb5_context context,  const krb5_kdc_req *request,
 
 static krb5_error_code
 get_enc_ts(krb5_context context, krb5_kdc_req *request,
-           krb5_db_entry *client, krb5_db_entry *server,
-           krb5_kdcpreauth_get_data_fn get_entry_data_proc,
+           krb5_kdcpreauth_get_data_fn get, krb5_kdcpreauth_rock rock,
            krb5_kdcpreauth_moddata moddata, krb5_pa_data *data)
 {
-    struct kdc_request_state *state = request->kdc_state;
-    if (state->armor_key)
+    if (rock->rstate->armor_key != NULL)
         return ENOENT;
     return 0;
 }
 
 
 static void
-verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
-                     krb5_data *req_pkt, krb5_kdc_req *request,
-                     krb5_enc_tkt_part *enc_tkt_reply, krb5_pa_data *pa,
-                     krb5_kdcpreauth_get_data_fn ets_get_entry_data,
+verify_enc_timestamp(krb5_context context, krb5_data *req_pkt,
+                     krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
+                     krb5_pa_data *pa, krb5_kdcpreauth_get_data_fn get,
+                     krb5_kdcpreauth_rock rock,
                      krb5_kdcpreauth_moddata moddata,
                      krb5_kdcpreauth_verify_respond_fn respond,
                      void *arg)
@@ -1368,7 +1365,7 @@ verify_enc_timestamp(krb5_context context, krb5_db_entry *client,
     start = 0;
     decrypt_err = 0;
     while (1) {
-        if ((retval = krb5_dbe_search_enctype(context, client,
+        if ((retval = krb5_dbe_search_enctype(context, rock->client,
                                               &start, enc_data->enctype,
                                               -1, 0, &client_key)))
             goto cleanup;
@@ -1492,8 +1489,8 @@ fail:
  */
 static krb5_error_code
 etype_info_helper(krb5_context context, krb5_kdc_req *request,
-                  krb5_db_entry *client, krb5_db_entry *server,
-                  krb5_pa_data *pa_data, int etype_info2)
+                  krb5_db_entry *client, krb5_pa_data *pa_data,
+                  int etype_info2)
 {
     krb5_etype_info_entry **    entry = 0;
     krb5_key_data               *client_key;
@@ -1579,8 +1576,7 @@ cleanup:
 
 static krb5_error_code
 get_etype_info(krb5_context context, krb5_kdc_req *request,
-               krb5_db_entry *client, krb5_db_entry *server,
-               krb5_kdcpreauth_get_data_fn etype_get_entry_data,
+               krb5_kdcpreauth_get_data_fn get, krb5_kdcpreauth_rock rock,
                krb5_kdcpreauth_moddata moddata, krb5_pa_data *pa_data)
 {
     int i;
@@ -1590,16 +1586,15 @@ get_etype_info(krb5_context context, krb5_kdc_req *request,
                                                         * skip this
                                                         * type*/
     }
-    return etype_info_helper(context, request, client, server, pa_data, 0);
+    return etype_info_helper(context, request, rock->client, pa_data, 0);
 }
 
 static krb5_error_code
 get_etype_info2(krb5_context context, krb5_kdc_req *request,
-                krb5_db_entry *client, krb5_db_entry *server,
-                krb5_kdcpreauth_get_data_fn etype_get_entry_data,
+                krb5_kdcpreauth_get_data_fn get, krb5_kdcpreauth_rock rock,
                 krb5_kdcpreauth_moddata moddata, krb5_pa_data *pa_data)
 {
-    return etype_info_helper( context, request, client, server, pa_data, 1);
+    return etype_info_helper(context, request, rock->client, pa_data, 1);
 }
 
 static krb5_error_code
@@ -1681,51 +1676,43 @@ cleanup:
 
 static krb5_error_code
 return_etype_info2(krb5_context context, krb5_pa_data * padata,
-                   krb5_db_entry *client,
-                   krb5_data *req_pkt,
-                   krb5_kdc_req *request, krb5_kdc_rep *reply,
-                   krb5_key_data *client_key,
-                   krb5_keyblock *encrypting_key,
-                   krb5_pa_data **send_pa,
-                   krb5_kdcpreauth_get_data_fn etype_get_entry_data,
-                   krb5_kdcpreauth_moddata moddata,
+                   krb5_data *req_pkt, krb5_kdc_req *request,
+                   krb5_kdc_rep *reply, krb5_keyblock *encrypting_key,
+                   krb5_pa_data **send_pa, krb5_kdcpreauth_get_data_fn get,
+                   krb5_kdcpreauth_rock rock, krb5_kdcpreauth_moddata moddata,
                    krb5_kdcpreauth_modreq modreq)
 {
-    return etype_info_as_rep_helper(context, padata, client, request, reply,
-                                    client_key, encrypting_key, send_pa, 1);
+    return etype_info_as_rep_helper(context, padata, rock->client, request,
+                                    reply, rock->client_key, encrypting_key,
+                                    send_pa, 1);
 }
 
 
 static krb5_error_code
-return_etype_info(krb5_context context, krb5_pa_data * padata,
-                  krb5_db_entry *client,
-                  krb5_data *req_pkt,
-                  krb5_kdc_req *request, krb5_kdc_rep *reply,
-                  krb5_key_data *client_key,
-                  krb5_keyblock *encrypting_key,
-                  krb5_pa_data **send_pa,
-                  krb5_kdcpreauth_get_data_fn etypeget_entry_data,
-                  krb5_kdcpreauth_moddata moddata,
+return_etype_info(krb5_context context, krb5_pa_data *padata,
+                  krb5_data *req_pkt, krb5_kdc_req *request,
+                  krb5_kdc_rep *reply, krb5_keyblock *encrypting_key,
+                  krb5_pa_data **send_pa, krb5_kdcpreauth_get_data_fn get,
+                  krb5_kdcpreauth_rock rock, krb5_kdcpreauth_moddata moddata,
                   krb5_kdcpreauth_modreq modreq)
 {
-    return etype_info_as_rep_helper(context, padata, client, request, reply,
-                                    client_key, encrypting_key, send_pa, 0);
+    return etype_info_as_rep_helper(context, padata, rock->client, request,
+                                    reply, rock->client_key, encrypting_key,
+                                    send_pa, 0);
 }
 
 static krb5_error_code
 return_pw_salt(krb5_context context, krb5_pa_data *in_padata,
-               krb5_db_entry *client, krb5_data *req_pkt,
-               krb5_kdc_req *request, krb5_kdc_rep *reply,
-               krb5_key_data *client_key, krb5_keyblock *encrypting_key,
-               krb5_pa_data **send_pa,
-               krb5_kdcpreauth_get_data_fn etype_get_entry_data,
-               krb5_kdcpreauth_moddata moddata,
-               krb5_kdcpreauth_modreq modreq)
+               krb5_data *req_pkt, krb5_kdc_req *request, krb5_kdc_rep *reply,
+               krb5_keyblock *encrypting_key, krb5_pa_data **send_pa,
+               krb5_kdcpreauth_get_data_fn get, krb5_kdcpreauth_rock rock,
+               krb5_kdcpreauth_moddata moddata, krb5_kdcpreauth_modreq modreq)
 {
     krb5_error_code     retval;
     krb5_pa_data *      padata;
     krb5_data *         scratch;
     krb5_data           salt_data;
+    krb5_key_data *     client_key = rock->client_key;
     int i;
 
     for (i = 0; i < request->nktypes; i++) {

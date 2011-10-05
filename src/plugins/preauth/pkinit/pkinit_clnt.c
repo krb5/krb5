@@ -42,7 +42,7 @@
 #include "pkinit.h"
 
 /* Remove when FAST PKINIT is settled. */
-#include "../fast_factor.h"
+#include "fast_factor.h"
 
 /*
  * It is anticipated that all the special checks currently

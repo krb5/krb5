@@ -110,6 +110,7 @@ struct as_req_state {
     krb5_db_entry *client;
     krb5_db_entry *server;
     krb5_kdc_req *request;
+    struct krb5_kdcpreauth_rock_st rock;
     const char *status;
     krb5_pa_data **e_data;
     krb5_boolean typed_e_data;
@@ -156,8 +157,7 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
                                             &state->enc_tkt_reply);
     if (state->status) {
         errcode = KRB5KDC_ERR_PREAUTH_REQUIRED;
-        get_preauth_hint_list(state->request, state->client,
-                              state->server, &state->e_data);
+        get_preauth_hint_list(state->request, &state->rock, &state->e_data);
         goto egress;
     }
 
@@ -216,6 +216,7 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
         errcode = KRB5KDC_ERR_ETYPE_NOSUPP;
         goto egress;
     }
+    state->rock.client_key = client_key;
 
     /* convert client.key_data into a real key */
     if ((errcode = krb5_dbe_decrypt_key_data(kdc_context, NULL,
@@ -254,8 +255,8 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
     /* Fetch the padata info to be returned (do this before
      *  authdata to handle possible replacement of reply key
      */
-    errcode = return_padata(kdc_context, state->client, state->req_pkt,
-                            state->request, &state->reply, client_key,
+    errcode = return_padata(kdc_context, &state->rock, state->req_pkt,
+                            state->request, &state->reply,
                             &state->client_keyblock, &state->pa_context);
     if (errcode) {
         state->status = "KDC_RETURN_PADATA";
@@ -409,7 +410,6 @@ egress:
 
     krb5_free_pa_data(kdc_context, state->e_data);
     kdc_free_rstate(state->rstate);
-    state->request->kdc_state = NULL;
     krb5_free_kdc_req(kdc_context, state->request);
     assert(did_log != 0);
 
@@ -424,8 +424,8 @@ finish_preauth(void *arg, krb5_error_code errcode)
 
     if (errcode) {
         if (errcode == KRB5KDC_ERR_PREAUTH_FAILED)
-            get_preauth_hint_list(state->request, state->client,
-                                  state->server, &state->e_data);
+            get_preauth_hint_list(state->request, &state->rock,
+                                  &state->e_data);
 
         state->status = "PREAUTH_FAILED";
         if (vague_errors)
@@ -475,6 +475,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     state->cname = 0;
     state->pa_context = NULL;
     state->from = from;
+    memset(&state->rock, 0, sizeof(state->rock));
 
 #if APPLE_PKINIT
     asReqDebug("process_as_req top realm %s name %s\n",
@@ -503,7 +504,8 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         state->status = "error decoding FAST";
         goto errout;
     }
-    state->request->kdc_state = state->rstate;
+    state->rock.request = state->request;
+    state->rock.rstate = state->rstate;
     if (!state->request->client) {
         state->status = "NULL_CLIENT";
         errcode = KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;
@@ -560,6 +562,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         state->status = "LOOKING_UP_CLIENT";
         goto errout;
     }
+    state->rock.client = state->client;
 
     /*
      * If the backend returned a principal that is not in the local
@@ -749,11 +752,12 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         state->enc_tkt_reply.client = state->request->client;
         setflag(state->client->attributes, KRB5_KDB_REQUIRES_PRE_AUTH);
     }
+
     /*
      * Check the preauthentication if it is there.
      */
     if (state->request->padata) {
-        check_padata(kdc_context, state->client, state->req_pkt,
+        check_padata(kdc_context, &state->rock, state->req_pkt,
                      state->request, &state->enc_tkt_reply, &state->pa_context,
                      &state->e_data, &state->typed_e_data, finish_preauth,
                      state);

@@ -167,10 +167,8 @@ missing_required_preauth (krb5_db_entry *client,
                           krb5_db_entry *server,
                           krb5_enc_tkt_part *enc_tkt_reply);
 void
-get_preauth_hint_list (krb5_kdc_req * request,
-                       krb5_db_entry *client,
-                       krb5_db_entry *server,
-                       krb5_pa_data ***e_data_out);
+get_preauth_hint_list(krb5_kdc_req *request, krb5_kdcpreauth_rock rock,
+                      krb5_pa_data ***e_data_out);
 void
 load_preauth_plugins(krb5_context context);
 void
@@ -179,18 +177,16 @@ unload_preauth_plugins(krb5_context context);
 typedef void (*kdc_preauth_respond_fn)(void *arg, krb5_error_code code);
 
 void
-check_padata (krb5_context context, krb5_db_entry *client, krb5_data *req_pkt,
-              krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
-              void **padata_context, krb5_pa_data ***e_data,
-              krb5_boolean *typed_e_data, kdc_preauth_respond_fn respond,
-              void *state);
+check_padata(krb5_context context, krb5_kdcpreauth_rock rock,
+             krb5_data *req_pkt, krb5_kdc_req *request,
+             krb5_enc_tkt_part *enc_tkt_reply, void **padata_context,
+             krb5_pa_data ***e_data, krb5_boolean *typed_e_data,
+             kdc_preauth_respond_fn respond, void *state);
 
 krb5_error_code
-return_padata (krb5_context context, krb5_db_entry *client,
-               krb5_data *req_pkt, krb5_kdc_req *request,
-               krb5_kdc_rep *reply,
-               krb5_key_data *client_key, krb5_keyblock *encrypting_key,
-               void **padata_context);
+return_padata(krb5_context context, krb5_kdcpreauth_rock rock,
+              krb5_data *req_pkt, krb5_kdc_req *request, krb5_kdc_rep *reply,
+              krb5_keyblock *encrypting_key, void **padata_context);
 
 void
 free_padata_context(krb5_context context, void *padata_context);
@@ -380,6 +376,13 @@ krb5_error_code
 krb5int_get_domain_realm_mapping(krb5_context context,
                                  const char *host, char ***realmsp);
 
+/* Information handle for kdcpreauth callbacks.  All pointers are aliases. */
+struct krb5_kdcpreauth_rock_st {
+    krb5_kdc_req *request;
+    krb5_db_entry *client;
+    krb5_key_data *client_key;
+    struct kdc_request_state *rstate;
+};
 
 #define isflagset(flagfield, flag) (flagfield & (flag))
 #define setflag(flagfield, flag) (flagfield |= (flag))

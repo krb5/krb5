@@ -38,7 +38,7 @@
 #include "pkinit.h"
 
 /* Remove when FAST PKINIT is settled. */
-#include "../fast_factor.h"
+#include "fast_factor.h"
 
 static krb5_error_code
 pkinit_init_kdc_req_context(krb5_context, pkinit_kdc_req_context *blob);
@@ -101,9 +101,8 @@ cleanup:
 static krb5_error_code
 pkinit_server_get_edata(krb5_context context,
                         krb5_kdc_req *request,
-                        struct _krb5_db_entry_new *client,
-                        struct _krb5_db_entry_new *server,
-                        krb5_kdcpreauth_get_data_fn server_get_entry_data,
+                        krb5_kdcpreauth_get_data_fn get,
+                        krb5_kdcpreauth_rock rock,
                         krb5_kdcpreauth_moddata moddata,
                         krb5_pa_data *data)
 {
@@ -114,8 +113,7 @@ pkinit_server_get_edata(krb5_context context,
     pkiDebug("pkinit_server_get_edata: entered!\n");
 
     /* Remove (along with armor_key) when FAST PKINIT is settled. */
-    retval = fast_kdc_get_armor_key(context, server_get_entry_data, request,
-                                    client, &armor_key);
+    retval = fast_kdc_get_armor_key(context, get, rock, &armor_key);
     if (retval == 0 && armor_key != NULL) {
         /* Don't advertise PKINIT if the client used FAST. */
         krb5_free_keyblock(context, armor_key);
@@ -289,12 +287,12 @@ out:
 
 static void
 pkinit_server_verify_padata(krb5_context context,
-                            struct _krb5_db_entry_new * client,
                             krb5_data *req_pkt,
                             krb5_kdc_req * request,
                             krb5_enc_tkt_part * enc_tkt_reply,
                             krb5_pa_data * data,
-                            krb5_kdcpreauth_get_data_fn server_get_entry_data,
+                            krb5_kdcpreauth_get_data_fn get,
+                            krb5_kdcpreauth_rock rock,
                             krb5_kdcpreauth_moddata moddata,
                             krb5_kdcpreauth_verify_respond_fn respond,
                             void *arg)
@@ -324,8 +322,7 @@ pkinit_server_verify_padata(krb5_context context,
     }
 
     /* Remove (along with armor_key) when FAST PKINIT is settled. */
-    retval = fast_kdc_get_armor_key(context, server_get_entry_data, request,
-                                    client, &armor_key);
+    retval = fast_kdc_get_armor_key(context, get, rock, &armor_key);
     if (retval == 0 && armor_key != NULL) {
         /* Don't allow PKINIT if the client used FAST. */
         krb5_free_keyblock(context, armor_key);
@@ -697,14 +694,13 @@ cleanup:
 static krb5_error_code
 pkinit_server_return_padata(krb5_context context,
                             krb5_pa_data * padata,
-                            struct _krb5_db_entry_new * client,
                             krb5_data *req_pkt,
                             krb5_kdc_req * request,
                             krb5_kdc_rep * reply,
-                            struct _krb5_key_data * client_key,
                             krb5_keyblock * encrypting_key,
                             krb5_pa_data ** send_pa,
-                            krb5_kdcpreauth_get_data_fn server_get_entry_data,
+                            krb5_kdcpreauth_get_data_fn get,
+                            krb5_kdcpreauth_rock rock,
                             krb5_kdcpreauth_moddata moddata,
                             krb5_kdcpreauth_modreq modreq)
 {
