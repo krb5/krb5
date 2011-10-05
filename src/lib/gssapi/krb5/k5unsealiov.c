@@ -502,10 +502,14 @@ kg_unseal_stream_iov(OM_uint32 *minor_status,
     case KG2_TOK_WRAP_MSG:
     case KG2_TOK_DEL_CTX: {
         size_t ec, rrc;
-        krb5_enctype enctype = ctx->enc->keyblock.enctype;
+        krb5_enctype enctype;
         unsigned int k5_headerlen = 0;
         unsigned int k5_trailerlen = 0;
 
+        if (ctx->have_acceptor_subkey)
+            enctype = ctx->acceptor_subkey->keyblock.enctype;
+        else
+            enctype = ctx->subkey->keyblock.enctype;
         conf_req_flag = ((ptr[0] & FLAG_WRAP_CONFIDENTIAL) != 0);
         ec = conf_req_flag ? load_16_be(ptr + 2) : 0;
         rrc = load_16_be(ptr + 4);
