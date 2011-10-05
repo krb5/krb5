@@ -662,6 +662,7 @@ pkinit_pick_kdf_alg(krb5_context context,
     krb5_octet_data *tmp_oid = NULL;
     int i, j = 0;
 
+    /* if we don't find a match, return NULL value */
     *alg_oid = NULL;
 
     /* for each of the OIDs that the server supports... */
@@ -677,14 +678,13 @@ pkinit_pick_kdf_alg(krb5_context context,
                 if (retval)
                     goto cleanup;
                 tmp_oid->length = supp_oid->length;
-                memcpy(tmp_oid->data, supp_oid->data, supp_oid->length);
+                memcpy(tmp_oid->data, supp_oid->data, tmp_oid->length);
                 *alg_oid = tmp_oid;
                 /* don't free the OID in clean-up if we are returning it */
                 tmp_oid = NULL;
                 goto cleanup;
             }
         }
-        retval = KRB5KDC_ERR_NO_ACCEPTABLE_KDF;
     }
 cleanup:
     if (tmp_oid)
@@ -1052,10 +1052,8 @@ pkinit_server_return_padata(krb5_context context,
          rep9->choice == choice_pa_pk_as_rep_draft9_dhSignedData) ||
         (rep != NULL && rep->choice == choice_pa_pk_as_rep_dhInfo)) {
 
-        /* If supported KDFs are specified, use the alg agility KDF */
-        if ((reqctx->rcv_auth_pack != NULL &&
-             reqctx->rcv_auth_pack->supportedKDFs != NULL)) {
-
+        /* If mutually supported KDFs were found, use the alg agility KDF */
+        if (rep->u.dh_Info.kdfID) {
             secret.data = server_key;
             secret.length = server_key_len;
 
@@ -1072,7 +1070,7 @@ pkinit_server_return_padata(krb5_context context,
                 goto cleanup;
             }
 
-            /* Otherwise, use the older octetstring2key() function */
+        /* Otherwise, use the older octetstring2key() function */
         } else {
             retval = pkinit_octetstring2key(context, enctype, server_key,
                                             server_key_len, encrypting_key);
