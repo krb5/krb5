@@ -664,10 +664,10 @@ pkinit_pick_kdf_alg(krb5_context context,
 
     *alg_oid = NULL;
 
-    /* for each of the OIDs in the client's request... */
-    for (i = 0; NULL != (req_oid = kdf_list[i]); i++) {
-        /* if the requested OID is supported, use it. */
-        for (j = 0; NULL != (supp_oid = supported_kdf_alg_ids[j]); j++) {
+    /* for each of the OIDs that the server supports... */
+    for (i = 0; NULL != (supp_oid = supported_kdf_alg_ids[i]); i++) {
+        /* if the requested OID is in the client's list, use it. */
+        for (j = 0; NULL != (req_oid = kdf_list[j]); j++) {
             if ((req_oid->length == supp_oid->length) &&
                 (0 == memcmp(req_oid->data, supp_oid->data, req_oid->length))) {
                 tmp_oid = k5alloc(sizeof(krb5_octet_data), &retval);
@@ -679,6 +679,7 @@ pkinit_pick_kdf_alg(krb5_context context,
                 tmp_oid->length = supp_oid->length;
                 memcpy(tmp_oid->data, supp_oid->data, supp_oid->length);
                 *alg_oid = tmp_oid;
+                /* don't free the OID in clean-up if we are returning it */
                 tmp_oid = NULL;
                 goto cleanup;
             }
