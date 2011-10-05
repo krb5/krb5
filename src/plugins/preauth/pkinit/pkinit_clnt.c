@@ -282,6 +282,7 @@ pkinit_as_req_create(krb5_context context,
         auth_pack->pkAuthenticator.paChecksum = *cksum;
         auth_pack->clientDHNonce.length = 0;
         auth_pack->clientPublicValue = info;
+        auth_pack->supportedKDFs = (krb5_octet_data **) supported_kdf_alg_ids;
 
         /* add List of CMS algorithms */
         retval = create_krb5_supportedCMSTypes(context, plgctx->cryptoctx,
@@ -454,6 +455,7 @@ pkinit_as_req_create(krb5_context context,
 cleanup:
     switch((int)reqctx->pa_type) {
     case KRB5_PADATA_PK_AS_REQ:
+        auth_pack->supportedKDFs = NULL; /*alias to global constant*/
         free_krb5_auth_pack(&auth_pack);
         free_krb5_pa_pk_as_req(&req);
         break;
