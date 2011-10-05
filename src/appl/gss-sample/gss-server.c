@@ -884,13 +884,13 @@ static OM_uint32
 showLocalIdentity(OM_uint32 *minor, gss_name_t name)
 {
     OM_uint32 major;
-    uid_t uid;
+    gss_buffer_desc localname;
 
-    major = gss_pname_to_uid(minor, name, GSS_C_NO_OID, &uid);
+    major = gss_localname(minor, name, GSS_C_NO_OID, &localname);
     if (major == GSS_S_COMPLETE)
-        printf("UID: %lu\n", (unsigned long)uid);
+        printf("localname: %-*s\n", localname.length, localname.value);
     else if (major != GSS_S_UNAVAILABLE)
-        display_status("gss_pname_to_uid", major, *minor);
-
+        display_status("gss_localname", major, *minor);
+    gss_release_buffer(minor, &localname);
     return major;
 }
