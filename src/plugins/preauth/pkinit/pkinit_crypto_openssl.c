@@ -2326,7 +2326,7 @@ pkinit_alg_values(krb5_context context,
     } else if ((alg_id->length == krb5_pkinit_sha512_oid_len) &&
                (0 == memcmp(alg_id->data, krb5_pkinit_sha512_oid,
                             krb5_pkinit_sha512_oid_len))) {
-        *hash_bytes = 32;
+        *hash_bytes = 64;
         *func = &EVP_sha512;
         return 0;
     } else {
@@ -2371,6 +2371,8 @@ pkinit_alg_agility_kdf(krb5_context context,
     uint32_t counter = 1;       /* Does this type work on Windows? */
     size_t offset = 0;
     size_t hash_len = 0;
+    size_t rand_len = 0;
+    size_t key_len = 0;
     krb5_data random_data;
     krb5_sp80056a_other_info other_info_fields;
     krb5_pkinit_supp_pub_info supp_pub_info_fields;
@@ -2386,14 +2388,18 @@ pkinit_alg_agility_kdf(krb5_context context,
     /* allocate and initialize the key block */
     key_block->magic = 0;
     key_block->enctype = enctype;
-    if (0 != (retval = krb5_c_keylengths(context, enctype,
-                                         (size_t *)&(random_data.length),
-                                         (size_t *)&(key_block->length))))
+    if (0 != (retval = krb5_c_keylengths(context, enctype, &rand_len,
+                                         &key_len)))
         goto cleanup;
+
+    random_data.length = rand_len;
+    key_block->length = key_len;
+
     if (NULL == (key_block->contents = malloc(key_block->length))) {
         retval = ENOMEM;
         goto cleanup;
     }
+
     memset (key_block->contents, 0, key_block->length);
 
     /* If this is anonymous pkinit, use the anonymous principle for party_u_info */
