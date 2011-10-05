@@ -23,6 +23,11 @@ LIBMINOR=1
 LIBINITFUNC=krb5int_thread_support_init
 LIBFINIFUNC=krb5int_thread_support_fini
 
+GETTIMEOFDAY_ST_OBJ= @GETTIMEOFDAY_ST_OBJ@
+GETTIMEOFDAY_OBJ= @GETTIMEOFDAY_OBJ@
+##DOS##GETTIMEOFDAY_ST_OBJ= gettimeofday.o
+##DOS##GETTIMEOFDAY_OBJ= $(OUTPRE)gettimeofday.$(OBJEXT)
+
 MKSTEMP_ST_OBJ= @MKSTEMP_ST_OBJ@
 MKSTEMP_OBJ= @MKSTEMP_OBJ@
 ##DOS##MKSTEMP_ST_OBJ= mkstemp.o
@@ -69,6 +74,7 @@ STLIBOBJS= \
 	utf8_conv.o \
 	zap.o \
 	path.o \
+	$(GETTIMEOFDAY_ST_OBJ) \
 	$(IPC_ST_OBJ) \
 	$(STRLCPY_ST_OBJ) \
 	$(FNMATCH_ST_OBJ) \
@@ -87,6 +93,7 @@ LIBOBJS= \
 	$(OUTPRE)utf8_conv.$(OBJEXT) \
 	$(OUTPRE)zap.$(OBJEXT) \
 	$(OUTPRE)path.$(OBJEXT) \
+	$(GETTIMEOFDAY_OBJ) \
 	$(IPC_OBJ) \
 	$(STRLCPY_OBJ) \
 	$(FNMATCH_OBJ) \
@@ -108,6 +115,7 @@ SRCS=\
 	$(srcdir)/fake-addrinfo.c \
 	$(srcdir)/utf8.c \
 	$(srcdir)/utf8_conv.c \
+	$(srcdir)/gettimeofday.c \
 	$(srcdir)/strlcpy.c \
 	$(srcdir)/fnmatch.c \
 	$(srcdir)/printf.c \
@@ -145,7 +153,7 @@ SHLIB_EXPORT_FILE=libkrb5support.exports
 
 EXTRA_SUPPORT_SYMS= @EXTRA_SUPPORT_SYMS@
 ##DOS##EXTRA_SUPPORT_SYMS= krb5int_mkstemp krb5int_strlcpy krb5int_strlcat \
-##DOS##		krb5int_vasprintf krb5int_asprintf $(IPC_SYMS)
+##DOS##		krb5int_vasprintf krb5int_asprintf krb5int_gettimeofday $(IPC_SYMS)
 
 ##DOS##!if 0
 libkrb5support.exports: $(srcdir)/libkrb5support-fixed.exports Makefile

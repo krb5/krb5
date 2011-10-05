@@ -1031,6 +1031,11 @@ extern int krb5int_mkstemp(char *);
 #define mkstemp krb5int_mkstemp
 #endif
 
+#ifndef HAVE_GETTIMEOFDAY
+extern int krb5int_gettimeofday(struct timeval *tp, void *ignore);
+#define gettimeofday krb5int_gettimeofday
+#endif
+
 extern void krb5int_zap(void *ptr, size_t len);
 
 /*
