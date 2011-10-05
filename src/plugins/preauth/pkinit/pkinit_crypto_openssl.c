@@ -2371,7 +2371,6 @@ pkinit_alg_agility_kdf(krb5_context context,
     uint32_t counter = 1;       /* Does this type work on Windows? */
     size_t offset = 0;
     size_t hash_len = 0;
-    unsigned char *rand_buf = NULL;
     krb5_data random_data;
     krb5_sp80056a_other_info other_info_fields;
     krb5_pkinit_supp_pub_info supp_pub_info_fields;
@@ -2387,7 +2386,8 @@ pkinit_alg_agility_kdf(krb5_context context,
     /* allocate and initialize the key block */
     key_block->magic = 0;
     key_block->enctype = enctype;
-    if (0 != (retval = krb5_c_keylengths(context, enctype, (size_t *)NULL,
+    if (0 != (retval = krb5_c_keylengths(context, enctype,
+                                         (size_t *)&(random_data.length),
                                          (size_t *)&(key_block->length))))
         goto cleanup;
     if (NULL == (key_block->contents = malloc(key_block->length))) {
@@ -2399,7 +2399,7 @@ pkinit_alg_agility_kdf(krb5_context context,
     /* If this is anonymous pkinit, use the anonymous principle for party_u_info */
     if (party_u_info && krb5_principal_compare_any_realm(context, party_u_info,
                                                          krb5_anonymous_principal()))
-        party_u_info = krb5_anonymous_principal();
+        party_u_info = (krb5_principal)krb5_anonymous_principal();
 
     if (0 != (retval = pkinit_alg_values(context, alg_oid, &hash_len, &EVP_func)))
         goto cleanup;
@@ -2413,14 +2413,10 @@ pkinit_alg_agility_kdf(krb5_context context,
 
     /* Allocate enough space in the random data buffer to hash directly into
      * it, even if the last hash will make it bigger than the key length. */
-    if (NULL == (rand_buf = malloc(reps * hash_len))) {
+    if (NULL == (random_data.data = malloc(reps * hash_len))) {
         retval = ENOMEM;
         goto cleanup;
     }
-    memset(rand_buf, 0, reps * hash_len);
-
-    random_data.length = reps * hash_len;
-    random_data.data = (char *)rand_buf;
 
     /* Encode the ASN.1 octet string for "SuppPubInfo" */
     supp_pub_info_fields.enctype = enctype;
@@ -2446,7 +2442,7 @@ pkinit_alg_agility_kdf(krb5_context context,
      *     -   Compute Hashi = H(counter || Z || OtherInfo).
      *     -   Increment counter (modulo 2^32)
      */
-    for (counter = 1, offset = 0; ((counter <= reps) && (offset <= key_block->length)); counter++) {
+    for (counter = 1; counter <= reps; counter++) {
         EVP_MD_CTX c;
         uint s = 0;
         uint32_t be_counter = htonl(counter);
@@ -2471,21 +2467,18 @@ pkinit_alg_agility_kdf(krb5_context context,
         }
 
         /* 4.  Set key = Hash1 || Hash2 || ... so that length of key is K bytes. */
-        if (0 == EVP_DigestFinal(&c, (rand_buf + offset), &s)) {
+        if (0 == EVP_DigestFinal(&c, (unsigned char *)(random_data.data + offset), &s)) {
             krb5_set_error_message(context, KRB5_CRYPTO_INTERNAL,
                                    "Call to OpenSSL EVP_DigestUpdate() returned an error.");
             retval = KRB5_CRYPTO_INTERNAL;
             goto cleanup;
         }
         offset += s;
-
-        assert(s == hash_len); /* add a message to this assert? */
+        assert(s == hash_len);
 
         EVP_MD_CTX_cleanup(&c);
     }
 
-    /* Reduce length of random data to key_len to avoid errors. */
-    random_data.length = key_block->length;
     retval = krb5_c_random_to_key(context, enctype, &random_data,
                                   key_block);
 
@@ -2496,8 +2489,8 @@ cleanup:
     }
 
     /* free other allocated resources, either way */
-    if (rand_buf)
-        free(rand_buf);
+    if (random_data.data)
+        free(random_data.data);
     krb5_free_data(context, other_info);
     krb5_free_data(context, supp_pub_info);
 
