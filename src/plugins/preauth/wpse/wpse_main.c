@@ -271,7 +271,6 @@ server_verify(krb5_context kcontext,
               void *arg)
 {
     krb5_int32 nnonce;
-    krb5_data *test_edata;
     krb5_authdata **my_authz_data;
     krb5_kdcpreauth_modreq modreq;
 
@@ -349,20 +348,7 @@ server_verify(krb5_context kcontext,
 #endif
     }
 
-    /* Return edata to exercise code that handles edata... */
-    test_edata = malloc(sizeof(*test_edata));
-    if (test_edata != NULL) {
-        test_edata->data = malloc(20);
-        if (test_edata->data == NULL) {
-            free(test_edata);
-            test_edata = NULL;
-        } else {
-            test_edata->length = 20;
-            memset(test_edata->data, '#', 20); /* fill it with junk */
-        }
-    }
-
-    (*respond)(arg, 0, modreq, test_edata, my_authz_data);
+    (*respond)(arg, 0, modreq, NULL, my_authz_data);
 }
 
 /* Create the response for a client. */

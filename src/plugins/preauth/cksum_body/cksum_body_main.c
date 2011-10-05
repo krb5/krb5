@@ -347,7 +347,6 @@ server_verify(krb5_context kcontext,
     krb5_cksumtype *cksumtypes;
     krb5_error_code status;
     struct server_stats *stats;
-    krb5_data *test_edata;
     test_svr_req_ctx *svr_req_ctx;
     krb5_authdata **my_authz_data = NULL;
 
@@ -480,20 +479,8 @@ server_verify(krb5_context kcontext,
             fprintf(stderr, "Checksum mismatch.\n");
         }
 #endif
-        /* Return edata to exercise code that handles edata... */
-        test_edata = malloc(sizeof(*test_edata));
-        if (test_edata != NULL) {
-            test_edata->data = malloc(20);
-            if (test_edata->data == NULL) {
-                free(test_edata);
-                test_edata = NULL;
-            } else {
-                test_edata->length = 20;
-                memset(test_edata->data, 'F', 20); /* fill it with junk */
-            }
-        }
         stats->failures++;
-        (*respond)(arg, KRB5KDC_ERR_PREAUTH_FAILED, NULL, test_edata, NULL);
+        (*respond)(arg, KRB5KDC_ERR_PREAUTH_FAILED, NULL, NULL, NULL);
         return;
     }
 
@@ -550,19 +537,6 @@ server_verify(krb5_context kcontext,
 #endif
     }
 
-    /* Return edata to exercise code that handles edata... */
-    test_edata = malloc(sizeof(*test_edata));
-    if (test_edata != NULL) {
-        test_edata->data = malloc(20);
-        if (test_edata->data == NULL) {
-            free(test_edata);
-            test_edata = NULL;
-        } else {
-            test_edata->length = 20;
-            memset(test_edata->data, 'S', 20); /* fill it with junk */
-        }
-    }
-
     /* Return a request context to exercise code that handles it */
     svr_req_ctx = malloc(sizeof(*svr_req_ctx));
     if (svr_req_ctx != NULL) {
@@ -577,8 +551,7 @@ server_verify(krb5_context kcontext,
     /* Note that preauthentication succeeded. */
     enc_tkt_reply->flags |= TKT_FLG_PRE_AUTH;
     stats->successes++;
-    (*respond)(arg, 0, (krb5_kdcpreauth_modreq)svr_req_ctx, test_edata,
-               my_authz_data);
+    (*respond)(arg, 0, (krb5_kdcpreauth_modreq)svr_req_ctx, NULL, my_authz_data);
 }
 
 /* Create the response for a client. */
