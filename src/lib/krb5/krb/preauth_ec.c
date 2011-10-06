@@ -43,7 +43,7 @@ preauth_flags(krb5_context context, krb5_preauthtype pa_type)
 static krb5_error_code
 process_preauth(krb5_context context, krb5_clpreauth_moddata moddata,
                 krb5_clpreauth_modreq modreq, krb5_get_init_creds_opt *opt,
-                krb5_clpreauth_get_data_fn get_data_proc,
+                krb5_clpreauth_callbacks cb,
                 krb5_clpreauth_rock rock, krb5_kdc_req *request,
                 krb5_data *encoded_request_body,
                 krb5_data *encoded_previous_request, krb5_pa_data *padata,
@@ -53,22 +53,16 @@ process_preauth(krb5_context context, krb5_clpreauth_moddata moddata,
                 krb5_pa_data ***out_padata)
 {
     krb5_error_code retval = 0;
-    krb5_enctype enctype = 0;
-    krb5_keyblock *challenge_key = NULL, *armor_key = NULL;
-    krb5_data *etype_data = NULL;
+    krb5_enctype enctype;
+    krb5_keyblock *challenge_key = NULL, *armor_key;
 
-    retval = fast_get_armor_key(context, get_data_proc, rock, &armor_key);
-    if (retval || armor_key == NULL)
-        return 0;
-    retval = get_data_proc(context, rock, krb5_clpreauth_get_etype,
-                           &etype_data);
-    if (retval == 0) {
-        enctype = *((krb5_enctype *)etype_data->data);
-        if (as_key->length == 0 ||as_key->enctype != enctype)
-            retval = gak_fct(context, request->client,
-                             enctype, prompter, prompter_data,
-                             salt, s2kparams,
-                             as_key, gak_data);
+    armor_key = cb->fast_armor(context, rock);
+    enctype = cb->get_etype(context, rock);
+    if (as_key->length == 0 ||as_key->enctype != enctype) {
+        retval = gak_fct(context, request->client,
+                         enctype, prompter, prompter_data,
+                         salt, s2kparams,
+                         as_key, gak_data);
     }
     if (retval == 0 && padata->length) {
         krb5_enc_data *enc = NULL;
@@ -99,7 +93,7 @@ process_preauth(krb5_context context, krb5_clpreauth_moddata moddata,
         if (scratch.data)
             krb5_free_data_contents(context, &scratch);
         if (retval == 0)
-            fast_set_kdc_verified(context, get_data_proc, rock);
+            fast_set_kdc_verified(context, cb, rock);
         if (enc)
             krb5_free_enc_data(context, enc);
     } else if (retval == 0) { /*No padata; we send*/
@@ -158,10 +152,6 @@ process_preauth(krb5_context context, krb5_clpreauth_moddata moddata,
     }
     if (challenge_key)
         krb5_free_keyblock(context, challenge_key);
-    if (armor_key)
-        krb5_free_keyblock(context, armor_key);
-    if (etype_data != NULL)
-        get_data_proc(context, rock, krb5_clpreauth_free_etype, &etype_data);
     return retval;
 }
 

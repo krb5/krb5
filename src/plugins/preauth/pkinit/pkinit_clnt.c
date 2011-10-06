@@ -1020,9 +1020,8 @@ static krb5_error_code
 pkinit_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
                       krb5_clpreauth_modreq modreq,
                       krb5_get_init_creds_opt *gic_opt,
-                      krb5_clpreauth_get_data_fn get_data_proc,
-                      krb5_clpreauth_rock rock, krb5_kdc_req *request,
-                      krb5_data *encoded_request_body,
+                      krb5_clpreauth_callbacks cb, krb5_clpreauth_rock rock,
+                      krb5_kdc_req *request, krb5_data *encoded_request_body,
                       krb5_data *encoded_previous_request,
                       krb5_pa_data *in_padata,
                       krb5_prompter_fct prompter, void *prompter_data,
@@ -1032,22 +1031,18 @@ pkinit_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
 {
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
     krb5_enctype enctype = -1;
-    krb5_data *cdata = NULL;
     int processing_request = 0;
     pkinit_context plgctx = (pkinit_context)moddata;
     pkinit_req_context reqctx = (pkinit_req_context)modreq;
-    krb5_keyblock *armor_key = NULL;
+    krb5_keyblock *armor_key = cb->fast_armor(context, rock);
 
     pkiDebug("pkinit_client_process %p %p %p %p\n",
              context, plgctx, reqctx, request);
 
     /* Remove (along with armor_key) when FAST PKINIT is settled. */
-    retval = fast_get_armor_key(context, get_data_proc, rock, &armor_key);
-    if (retval == 0 && armor_key != NULL) {
-        /* Don't use PKINIT if also using FAST. */
-        krb5_free_keyblock(context, armor_key);
+    /* Don't use PKINIT if also using FAST. */
+    if (armor_key != NULL)
         return EINVAL;
-    }
 
     if (plgctx == NULL || reqctx == NULL)
         return EINVAL;
@@ -1100,15 +1095,7 @@ pkinit_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
         /*
          * Get the enctype of the reply.
          */
-        retval = (*get_data_proc)(context, rock, krb5_clpreauth_get_etype,
-                                  &cdata);
-        if (retval) {
-            pkiDebug("get_data_proc returned %d (%s)\n",
-                     retval, error_message(retval));
-            return retval;
-        }
-        enctype = *((krb5_enctype *)cdata->data);
-        (*get_data_proc)(context, rock, krb5_clpreauth_free_etype, &cdata);
+        enctype = cb->get_etype(context, rock);
         retval = pa_pkinit_parse_rep(context, plgctx, reqctx, request,
                                      in_padata, enctype, as_key,
                                      encoded_previous_request);
@@ -1123,9 +1110,8 @@ static krb5_error_code
 pkinit_client_tryagain(krb5_context context, krb5_clpreauth_moddata moddata,
                        krb5_clpreauth_modreq modreq,
                        krb5_get_init_creds_opt *gic_opt,
-                       krb5_clpreauth_get_data_fn get_data_proc,
-                       krb5_clpreauth_rock rock, krb5_kdc_req *request,
-                       krb5_data *encoded_request_body,
+                       krb5_clpreauth_callbacks cb, krb5_clpreauth_rock rock,
+                       krb5_kdc_req *request, krb5_data *encoded_request_body,
                        krb5_data *encoded_previous_request,
                        krb5_pa_data *in_padata, krb5_error *err_reply,
                        krb5_prompter_fct prompter, void *prompter_data,

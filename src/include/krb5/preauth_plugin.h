@@ -161,40 +161,26 @@ typedef krb5_error_code
                                 krb5_keyblock *as_key,
                                 void *gak_data);
 
-/*
- * Provided by krb5: a client module's callback functions are allowed to
- * request various information to enable it to process a request.
- */
-enum krb5_clpreauth_request_type {
-    /*
-     * The returned krb5_data item holds the enctype expected to be used to
-     * encrypt the encrypted portion of the AS_REP packet. When handling a
-     * PREAUTH_REQUIRED error, this typically comes from etype-info2.  When
-     * handling an AS reply, it is initialized from the AS reply itself.
-     */
-    krb5_clpreauth_get_etype = 1,
-
-    /* Free the data returned from krb5plugin_clpreauth_req_get_etype */
-    krb5_clpreauth_free_etype = 2,
+/* Before using a callback after version 1, modules must check the vers
+ * field of the callback structure. */
+typedef struct krb5_clpreauth_callbacks_st {
+    int vers;
 
     /*
-     * The returned krb5_data contains the FAST armor key in a krb5_keyblock.
-     * Returns success with a NULL data item in the krb5_data if the client
-     * library supports FAST but is not using it.
+     * Get the enctype expected to be used to encrypt the encrypted portion of
+     * the AS_REP packet.  When handling a PREAUTH_REQUIRED error, this
+     * typically comes from etype-info2.  When handling an AS reply, it is
+     * initialized from the AS reply itself.
      */
-    krb5_clpreauth_fast_armor = 3,
+    krb5_enctype (*get_etype)(krb5_context context, krb5_clpreauth_rock rock);
 
-    /*
-     * Frees return from KRB5PLUGIN_CLPREAUTH_FAST_ARMOR.  It is
-     * acceptable to set data->data to NULL and free the keyblock using
-     * krb5_free_keyblock; in that case, this frees the krb5_data only.
-     */
-    krb5_clpreauth_free_fast_armor = 4
-};
-typedef krb5_error_code
-(*krb5_clpreauth_get_data_fn)(krb5_context context,
-                              krb5_clpreauth_rock rock,
-                              krb5_int32 request_type, krb5_data **data);
+    /* Get a pointer to the FAST armor key, or NULL if the client is not using
+     * FAST.  The returned pointer is an alias and should not be freed. */
+    krb5_keyblock *(*fast_armor)(krb5_context context,
+                                 krb5_clpreauth_rock rock);
+
+    /* End of version 1 clpreauth callbacks. */
+} *krb5_clpreauth_callbacks;
 
 /*
  * Optional: per-plugin initialization/cleanup.  The init function is called by
@@ -247,7 +233,7 @@ typedef krb5_error_code
                              krb5_clpreauth_moddata moddata,
                              krb5_clpreauth_modreq modreq,
                              krb5_get_init_creds_opt *opt,
-                             krb5_clpreauth_get_data_fn get_data,
+                             krb5_clpreauth_callbacks cb,
                              krb5_clpreauth_rock rock,
                              krb5_kdc_req *request,
                              krb5_data *encoded_request_body,
@@ -271,7 +257,7 @@ typedef krb5_error_code
                               krb5_clpreauth_moddata moddata,
                               krb5_clpreauth_modreq modreq,
                               krb5_get_init_creds_opt *opt,
-                              krb5_clpreauth_get_data_fn get_data,
+                              krb5_clpreauth_callbacks cb,
                               krb5_clpreauth_rock rock,
                               krb5_kdc_req *request,
                               krb5_data *encoded_request_body,
@@ -331,52 +317,50 @@ typedef struct krb5_kdcpreauth_rock_st *krb5_kdcpreauth_rock;
 typedef struct krb5_kdcpreauth_moddata_st *krb5_kdcpreauth_moddata;
 typedef struct krb5_kdcpreauth_modreq_st *krb5_kdcpreauth_modreq;
 
-/*
- * Provided by krb5: a kdcpreauth module's callback functions are allowed to
- * request specific types of information about the given client or server
- * record or request, even though the database records themselves are opaque to
- * the module.
- */
-enum krb5_kdcpreauth_request_type {
-    /* The returned krb5_data item holds a DER-encoded X.509 certificate. */
-    krb5_kdcpreauth_request_certificate = 1,
-    /* The returned krb5_data_item holds a krb5_deltat. */
-    krb5_kdcpreauth_max_time_skew = 2,
+/* Before using a callback after version 1, modules must check the vers
+ * field of the callback structure. */
+typedef struct krb5_kdcpreauth_callbacks_st {
+    int vers;
+
+    krb5_deltat (*max_time_skew)(krb5_context context,
+                                 krb5_kdcpreauth_rock rock);
+
     /*
-     * The returned krb5_data_item holds an array of krb5_keyblock structures,
-     * containing the client keys, terminated by an entry with key type = 0.
-     * Each keyblock should have its contents freed in turn, and then the data
-     * item itself should be freed.
+     * Get an array of krb5_keyblock structures containing the client keys
+     * matching the request enctypes, terminated by an entry with key type = 0.
+     * Returns ENOENT if no keys are available for the request enctypes.  Free
+     * the resulting object with the free_keys callback.
      */
-    krb5_kdcpreauth_keys = 3,
+    krb5_error_code (*client_keys)(krb5_context context,
+                                   krb5_kdcpreauth_rock rock,
+                                   krb5_keyblock **keys_out);
+
+    /* Free the result of client_keys. */
+    void (*free_keys)(krb5_context context, krb5_kdcpreauth_rock rock,
+                      krb5_keyblock *keys);
+
     /*
-     * The returned krb5_data_item holds the request structure, re-encoded
-     * using DER.  Unless the client implementation is the same as the server
-     * implementation, there's a good chance that the result will not match
-     * what the client sent, so don't create any fatal errors if it doesn't
-     * match up.
+     * Get the request structure, re-encoded using DER.  Unless the client
+     * implementation is the same as the server implementation, there's a good
+     * chance that the result will not match what the client sent, so don't
+     * create any fatal errors if it doesn't match up.  Free the resulting data
+     * object with krb5_free_data.
      */
-    krb5_kdcpreauth_request_body = 4,
-    /*
-     * The returned krb5_data contains a krb5_keyblock with the FAST armor key.
-     * The data member is NULL if this method is not part of a FAST tunnel.
-     */
-    krb5_kdcpreauth_fast_armor = 5,
-    /*
-     * Frees a fast armor key. It is acceptable to set data to NULL and free
-     * the keyblock using krb5_free_keyblock; in that case, this function
-     * simply frees the data.
-     */
-    krb5_kdcpreauth_free_fast_armor = 6,
-    /*
-     * The returned krb5_data contains a pointer to the client DB entry.  The
-     * pointer is an alias and should not be freed.
-     */
-    krb5_kdcpreauth_get_client = 7
-};
-typedef krb5_error_code
-(*krb5_kdcpreauth_get_data_fn)(krb5_context context, krb5_kdcpreauth_rock rock,
-                               krb5_int32 request_type, krb5_data **);
+    krb5_error_code (*request_body)(krb5_context context,
+                                    krb5_kdcpreauth_rock rock,
+                                    krb5_data **body_out);
+
+    /* Get a pointer to the FAST armor key, or NULL if the request did not use
+     * FAST.  The returned pointer is an alias and should not be freed. */
+    krb5_keyblock *(*fast_armor)(krb5_context context,
+                                 krb5_kdcpreauth_rock rock);
+
+    /* Get a pointer to the client DB entry (returned as a void pointer to
+     * avoid a dependency on a libkdb5 type). */
+    void *(*client_entry)(krb5_context context, krb5_kdcpreauth_rock rock);
+
+    /* End of version 1 kdcpreauth callbacks. */
+} *krb5_kdcpreauth_callbacks;
 
 /* Optional: preauth plugin initialization function. */
 typedef krb5_error_code
@@ -413,7 +397,7 @@ typedef int
  */
 typedef krb5_error_code
 (*krb5_kdcpreauth_edata_fn)(krb5_context context, krb5_kdc_req *request,
-                            krb5_kdcpreauth_get_data_fn get_data,
+                            krb5_kdcpreauth_callbacks cb,
                             krb5_kdcpreauth_rock rock,
                             krb5_kdcpreauth_moddata moddata,
                             krb5_pa_data *pa_out);
@@ -445,7 +429,7 @@ typedef void
                              krb5_data *req_pkt, krb5_kdc_req *request,
                              krb5_enc_tkt_part *enc_tkt_reply,
                              krb5_pa_data *data,
-                             krb5_kdcpreauth_get_data_fn get_data,
+                             krb5_kdcpreauth_callbacks cb,
                              krb5_kdcpreauth_rock rock,
                              krb5_kdcpreauth_moddata moddata,
                              krb5_kdcpreauth_verify_respond_fn respond,
@@ -464,7 +448,7 @@ typedef krb5_error_code
                              krb5_kdc_rep *reply,
                              krb5_keyblock *encrypting_key,
                              krb5_pa_data **send_pa_out,
-                             krb5_kdcpreauth_get_data_fn get_data,
+                             krb5_kdcpreauth_callbacks cb,
                              krb5_kdcpreauth_rock rock,
                              krb5_kdcpreauth_moddata moddata,
                              krb5_kdcpreauth_modreq modreq);

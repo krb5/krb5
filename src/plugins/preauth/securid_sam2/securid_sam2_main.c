@@ -50,19 +50,6 @@ static struct {
     { 0, 0 },
 };
 
-static krb5_db_entry *
-get_client_entry(krb5_context context, krb5_kdcpreauth_get_data_fn get,
-                 krb5_kdcpreauth_rock rock)
-{
-    krb5_data *data;
-    krb5_db_entry *client;
-
-    (*get)(context, rock, krb5_kdcpreauth_get_client, &data);
-    client = *(krb5_db_entry **)data->data;
-    free(data);
-    return client;
-}
-
 krb5_error_code
 sam_get_db_entry(krb5_context context, krb5_principal client,
                  int *sam_type, struct _krb5_db_entry_new **db_entry)
@@ -127,11 +114,10 @@ cleanup:
 
 static krb5_error_code
 kdc_include_padata(krb5_context context, krb5_kdc_req *request,
-                   krb5_kdcpreauth_get_data_fn get, krb5_kdcpreauth_rock rock,
+                   krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
                    krb5_kdcpreauth_moddata moddata, krb5_pa_data *pa_data)
 {
     krb5_error_code retval;
-    krb5_data *client_keys_data = NULL;
     krb5_keyblock *client_key = NULL;
     krb5_sam_challenge_2 sc2;
     krb5_sam_challenge_2_body sc2b;
@@ -144,15 +130,14 @@ kdc_include_padata(krb5_context context, krb5_kdc_req *request,
     sc2b.magic = KV5M_SAM_CHALLENGE_2;
     sc2b.sam_type = sam_type;
 
-    client = get_client_entry(context, get, rock);
+    client = cb->client_entry(context, rock);
     retval = sam_get_db_entry(context, client->princ, &sam_type,
                               &sam_db_entry);
     if (retval)
         return retval;
-    retval = (*get)(context, rock, krb5_kdcpreauth_keys, &client_keys_data);
+    retval = cb->client_keys(context, rock, &client_key);
     if (retval)
         goto cleanup;
-    client_key = (krb5_keyblock *) client_keys_data->data;
     if (client_key->enctype == 0) {
         retval = KRB5KDC_ERR_ETYPE_NOSUPP;
         com_err("krb5kdc", retval,
@@ -203,20 +188,14 @@ cleanup:
     krb5_free_data(context, encoded_challenge);
     if (sam_db_entry)
         krb5_db_free_principal(context, sam_db_entry);
-    if (client_keys_data) {
-        while (client_key->enctype) {
-            krb5_free_keyblock_contents(context, client_key);
-            client_key++;
-        }
-        krb5_free_data(context, client_keys_data);
-    }
+    cb->free_keys(context, rock, client_key);
     return retval;
 }
 
 static void
 kdc_verify_preauth(krb5_context context, krb5_data *req_pkt,
                    krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
-                   krb5_pa_data *pa_data, krb5_kdcpreauth_get_data_fn get,
+                   krb5_pa_data *pa_data, krb5_kdcpreauth_callbacks cb,
                    krb5_kdcpreauth_rock rock, krb5_kdcpreauth_moddata moddata,
                    krb5_kdcpreauth_verify_respond_fn respond, void *arg)
 {
@@ -225,7 +204,7 @@ kdc_verify_preauth(krb5_context context, krb5_data *req_pkt,
     krb5_data scratch, *scratch2, *e_data = NULL;
     char *client_name = NULL;
     krb5_sam_challenge_2 *out_sc2 = NULL;
-    krb5_db_entry *client = get_client_entry(context, get, rock);
+    krb5_db_entry *client = cb->client_entry(context, rock);
 
     scratch.data = (char *) pa_data->contents;
     scratch.length = pa_data->length;

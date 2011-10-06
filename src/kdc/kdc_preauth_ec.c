@@ -36,24 +36,18 @@
 
 static krb5_error_code
 kdc_include_padata(krb5_context context, krb5_kdc_req *request,
-                   krb5_kdcpreauth_get_data_fn get, krb5_kdcpreauth_rock rock,
+                   krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
                    krb5_kdcpreauth_moddata moddata, krb5_pa_data *data)
 {
-    krb5_error_code retval = 0;
-    krb5_keyblock *armor_key = NULL;
-    retval = fast_kdc_get_armor_key(context, get, rock, &armor_key);
-    if (retval)
-        return retval;
-    if (armor_key == 0)
-        return ENOENT;
-    krb5_free_keyblock(context, armor_key);
-    return 0;
+    krb5_keyblock *armor_key = cb->fast_armor(context, rock);
+
+    return (armor_key == NULL) ? ENOENT : 0;
 }
 
 static void
 kdc_verify_preauth(krb5_context context, krb5_data *req_pkt,
                    krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
-                   krb5_pa_data *data, krb5_kdcpreauth_get_data_fn get,
+                   krb5_pa_data *data, krb5_kdcpreauth_callbacks cb,
                    krb5_kdcpreauth_rock rock, krb5_kdcpreauth_moddata moddata,
                    krb5_kdcpreauth_verify_respond_fn respond,
                    void *arg)
@@ -62,10 +56,9 @@ kdc_verify_preauth(krb5_context context, krb5_data *req_pkt,
     krb5_timestamp now;
     krb5_enc_data *enc = NULL;
     krb5_data scratch, plain;
-    krb5_keyblock *armor_key = NULL;
+    krb5_keyblock *armor_key = cb->fast_armor(context, rock);
     krb5_pa_enc_ts *ts = NULL;
     krb5_keyblock *client_keys = NULL;
-    krb5_data *client_data = NULL;
     krb5_keyblock *challenge_key = NULL;
     krb5_keyblock *kdc_challenge_key;
     krb5_kdcpreauth_modreq modreq = NULL;
@@ -73,8 +66,7 @@ kdc_verify_preauth(krb5_context context, krb5_data *req_pkt,
 
     plain.data = NULL;
 
-    retval = fast_kdc_get_armor_key(context, get, rock, &armor_key);
-    if (retval == 0 &&armor_key == NULL) {
+    if (armor_key == NULL) {
         retval = ENOENT;
         krb5_set_error_message(context, ENOENT, "Encrypted Challenge used outside of FAST tunnel");
     }
@@ -89,9 +81,8 @@ kdc_verify_preauth(krb5_context context, krb5_data *req_pkt,
             retval = ENOMEM;
     }
     if (retval == 0)
-        retval = (*get)(context, rock, krb5_kdcpreauth_keys, &client_data);
+        retval = cb->client_keys(context, rock, &client_keys);
     if (retval == 0) {
-        client_keys = (krb5_keyblock *) client_data->data;
         for (i = 0; client_keys[i].enctype&& (retval == 0); i++ ) {
             retval = krb5_c_fx_cf2_simple(context,
                                           armor_key, "clientchallengearmor",
@@ -108,18 +99,11 @@ kdc_verify_preauth(krb5_context context, krb5_data *req_pkt,
                 break;
             /*We failed to decrypt. Try next key*/
             retval = 0;
-            krb5_free_keyblock_contents(context, &client_keys[i]);
         }
         if (client_keys[i].enctype == 0) {
             retval = KRB5KDC_ERR_PREAUTH_FAILED;
             krb5_set_error_message(context, retval, "Incorrect password  in encrypted challenge");
-        } else { /*not run out of keys*/
-            int j;
-            assert (retval == 0);
-            for (j = i+1; client_keys[j].enctype; j++)
-                krb5_free_keyblock_contents(context, &client_keys[j]);
         }
-
     }
     if (retval == 0)
         retval = decode_krb5_pa_enc_ts(&plain, &ts);
@@ -133,7 +117,7 @@ kdc_verify_preauth(krb5_context context, krb5_data *req_pkt,
              * may cause the client to fail, but at this point the KDC has
              * considered this a success, so the return value is ignored.
              */
-            fast_kdc_replace_reply_key(context, get, rock);
+            fast_kdc_replace_reply_key(context, cb, rock);
             if (krb5_c_fx_cf2_simple(context, armor_key, "kdcchallengearmor",
                                      &client_keys[i], "challengelongterm",
                                      &kdc_challenge_key) == 0)
@@ -142,13 +126,7 @@ kdc_verify_preauth(krb5_context context, krb5_data *req_pkt,
             retval = KRB5KRB_AP_ERR_SKEW;
         }
     }
-    if (client_keys) {
-        if (client_keys[i].enctype)
-            krb5_free_keyblock_contents(context, &client_keys[i]);
-        krb5_free_data(context, client_data);
-    }
-    if (armor_key)
-        krb5_free_keyblock(context, armor_key);
+    cb->free_keys(context, rock, client_keys);
     if (plain.data)
         free(plain.data);
     if (enc)
@@ -163,7 +141,7 @@ static krb5_error_code
 kdc_return_preauth(krb5_context context, krb5_pa_data *padata,
                    krb5_data *req_pkt, krb5_kdc_req *request,
                    krb5_kdc_rep *reply, krb5_keyblock *encrypting_key,
-                   krb5_pa_data **send_pa, krb5_kdcpreauth_get_data_fn get,
+                   krb5_pa_data **send_pa, krb5_kdcpreauth_callbacks cb,
                    krb5_kdcpreauth_rock rock, krb5_kdcpreauth_moddata moddata,
                    krb5_kdcpreauth_modreq modreq)
 {

@@ -372,93 +372,23 @@ grow_pa_list(krb5_pa_data ***out_pa_list, int *out_pa_list_size,
     return 0;
 }
 
-/*
- * Retrieve a specific piece of information required by the plugin and
- * return it in a new krb5_data item.  There are separate request_types
- * to obtain the data and free it.
- *
- * This may require massaging data into a contrived format, but it will
- * hopefully keep us from having to reveal library-internal functions
- * or data to the plugin modules.
- */
-
-static krb5_error_code
-client_data_proc(krb5_context kcontext, krb5_clpreauth_rock rock,
-                 krb5_int32 request_type, krb5_data **retdata)
+static krb5_enctype
+get_etype(krb5_context context, krb5_clpreauth_rock rock)
 {
-    krb5_data *ret;
-    krb5_error_code retval;
-    char *data;
-
-    if (rock->magic != CLIENT_ROCK_MAGIC)
-        return EINVAL;
-    if (retdata == NULL)
-        return EINVAL;
-
-    switch (request_type) {
-    case krb5_clpreauth_get_etype:
-    {
-        krb5_enctype *eptr;
-        ret = malloc(sizeof(krb5_data));
-        if (ret == NULL)
-            return ENOMEM;
-        data = malloc(sizeof(krb5_enctype));
-        if (data == NULL) {
-            free(ret);
-            return ENOMEM;
-        }
-        ret->data = data;
-        ret->length = sizeof(krb5_enctype);
-        eptr = (krb5_enctype *)data;
-        *eptr = *rock->etype;
-        *retdata = ret;
-        return 0;
-    }
-    break;
-    case krb5_clpreauth_free_etype:
-        ret = *retdata;
-        if (ret == NULL)
-            return 0;
-        if (ret->data)
-            free(ret->data);
-        free(ret);
-        return 0;
-        break;
-    case krb5_clpreauth_fast_armor: {
-        krb5_keyblock *key = NULL;
-        ret = calloc(1, sizeof(krb5_data));
-        if (ret == NULL)
-            return ENOMEM;
-        retval = 0;
-        if (rock->fast_state->armor_key)
-            retval = krb5_copy_keyblock(kcontext, rock->fast_state->armor_key,
-                                        &key);
-        if (retval == 0) {
-            ret->data = (char *) key;
-            ret->length = key?sizeof(krb5_keyblock):0;
-            key = NULL;
-        }
-        if (retval == 0) {
-            *retdata = ret;
-            ret = NULL;
-        }
-        if (ret)
-            free(ret);
-        return retval;
-    }
-    case krb5_clpreauth_free_fast_armor:
-        ret = *retdata;
-        if (ret) {
-            if (ret->data)
-                krb5_free_keyblock(kcontext, (krb5_keyblock *) ret->data);
-            free(ret);
-            *retdata = NULL;
-        }
-        return 0;
-    default:
-        return EINVAL;
-    }
+    return *rock->etype;
 }
+
+static krb5_keyblock *
+fast_armor(krb5_context context, krb5_clpreauth_rock rock)
+{
+    return rock->fast_state->armor_key;
+}
+
+static struct krb5_clpreauth_callbacks_st callbacks = {
+    1,
+    get_etype,
+    fast_armor
+};
 
 /* Tweak the request body, for now adding any enctypes which the module claims
  * to add support for to the list, but in the future perhaps doing more
@@ -545,7 +475,7 @@ run_preauth_plugins(krb5_context kcontext,
         ret = module->client_process(kcontext, module->moddata,
                                      *module->modreq_p,
                                      (krb5_get_init_creds_opt *)opte,
-                                     client_data_proc, preauth_rock,
+                                     &callbacks, preauth_rock,
                                      request, encoded_request_body,
                                      encoded_previous_request, in_padata,
                                      prompter, prompter_data, gak_fct,
@@ -1535,8 +1465,7 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
             if ((*module->client_tryagain)(kcontext, module->moddata,
                                            *module->modreq_p,
                                            (krb5_get_init_creds_opt *)opte,
-                                           client_data_proc,
-                                           preauth_rock,
+                                           &callbacks, preauth_rock,
                                            request,
                                            encoded_request_body,
                                            encoded_previous_request,

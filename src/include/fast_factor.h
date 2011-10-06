@@ -26,47 +26,9 @@
 
 #ifndef FAST_FACTOR_H
 
-/*
- * Returns success with a null armor_key if FAST is available but not in use.
- * Returns failure if the client library does not support FAST.
- */
-static inline krb5_error_code
-fast_get_armor_key(krb5_context context, krb5_clpreauth_get_data_fn get_data,
-                   krb5_clpreauth_rock rock, krb5_keyblock **armor_key)
-{
-    krb5_error_code retval = 0;
-    krb5_data *data;
-    retval = get_data(context, rock, krb5_clpreauth_fast_armor, &data);
-    if (retval == 0) {
-        *armor_key = (krb5_keyblock *) data->data;
-        data->data = NULL;
-        get_data(context, rock, krb5_clpreauth_free_fast_armor, &data);
-    }
-    return retval;
-}
-
-static inline krb5_error_code
-fast_kdc_get_armor_key(krb5_context context,
-                       krb5_kdcpreauth_get_data_fn get_data,
-                       krb5_kdcpreauth_rock rock,
-                       krb5_keyblock **armor_key)
-{
-    krb5_error_code retval;
-    krb5_data *data;
-    retval = (*get_data)(context, rock, krb5_kdcpreauth_fast_armor, &data);
-    if (retval == 0) {
-        *armor_key = (krb5_keyblock *) data->data;
-        data->data = NULL;
-        (*get_data)(context, rock, krb5_kdcpreauth_free_fast_armor, &data);
-    }
-    return retval;
-}
-
-
-
 static inline krb5_error_code
 fast_kdc_replace_reply_key(krb5_context context,
-                           krb5_kdcpreauth_get_data_fn get,
+                           krb5_kdcpreauth_callbacks cb,
                            krb5_kdcpreauth_rock rock)
 {
     return 0;
@@ -74,7 +36,7 @@ fast_kdc_replace_reply_key(krb5_context context,
 
 static inline krb5_error_code
 fast_set_kdc_verified(krb5_context context,
-                      krb5_clpreauth_get_data_fn get_data,
+                      krb5_clpreauth_callbacks cb,
                       krb5_clpreauth_rock rock)
 {
     return 0;
