@@ -124,10 +124,11 @@ gss_localname(OM_uint32 *minor,
     gss_union_name_t unionName;
     gss_name_t mechName = GSS_C_NO_NAME, mechNameP;
 
-    /*
-     * find the appropriate mechanism specific pname_to_uid procedure and
-     * call it.
-     */
+    if (localname != GSS_C_NO_BUFFER) {
+	localname->length = 0;
+	localname->value = NULL;
+    }
+
     if (minor == NULL)
         return GSS_S_CALL_INACCESSIBLE_WRITE;
 
