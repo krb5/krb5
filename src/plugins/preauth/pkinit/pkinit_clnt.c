@@ -41,9 +41,6 @@
 
 #include "pkinit.h"
 
-/* Remove when FAST PKINIT is settled. */
-#include "fast_factor.h"
-
 /*
  * It is anticipated that all the special checks currently
  * required when talking to a Longhorn server will go away

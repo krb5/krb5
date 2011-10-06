@@ -31,7 +31,6 @@
 
 #include <k5-int.h>
 #include <krb5/preauth_plugin.h>
-#include "fast_factor.h"
 #include "kdc_util.h"
 
 static krb5_error_code
@@ -117,7 +116,6 @@ kdc_verify_preauth(krb5_context context, krb5_data *req_pkt,
              * may cause the client to fail, but at this point the KDC has
              * considered this a success, so the return value is ignored.
              */
-            fast_kdc_replace_reply_key(context, cb, rock);
             if (krb5_c_fx_cf2_simple(context, armor_key, "kdcchallengearmor",
                                      &client_keys[i], "challengelongterm",
                                      &kdc_challenge_key) == 0)

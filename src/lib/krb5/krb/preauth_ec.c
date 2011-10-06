@@ -31,7 +31,6 @@
 
 #include <k5-int.h>
 #include <krb5/preauth_plugin.h>
-#include "fast_factor.h"
 #include "int-proto.h"
 
 static int
@@ -92,8 +91,8 @@ process_preauth(krb5_context context, krb5_clpreauth_moddata moddata,
          */
         if (scratch.data)
             krb5_free_data_contents(context, &scratch);
-        if (retval == 0)
-            fast_set_kdc_verified(context, cb, rock);
+        /* If we had a callback to assert that the KDC is verified, we would
+         * call it here. */
         if (enc)
             krb5_free_enc_data(context, enc);
     } else if (retval == 0) { /*No padata; we send*/

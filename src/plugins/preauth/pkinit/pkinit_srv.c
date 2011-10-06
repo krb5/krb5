@@ -37,9 +37,6 @@
 #include <k5-int.h>
 #include "pkinit.h"
 
-/* Remove when FAST PKINIT is settled. */
-#include "fast_factor.h"
-
 static krb5_error_code
 pkinit_init_kdc_req_context(krb5_context, pkinit_kdc_req_context *blob);
 
