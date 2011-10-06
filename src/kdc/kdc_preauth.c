@@ -574,6 +574,19 @@ fast_armor(krb5_context context, krb5_kdcpreauth_rock rock)
     return rock->rstate->armor_key;
 }
 
+static krb5_error_code
+get_string(krb5_context context, krb5_kdcpreauth_rock rock, const char *key,
+           char **value_out)
+{
+    return krb5_dbe_get_string(context, rock->client, key, value_out);
+}
+
+static void
+free_string(krb5_context context, krb5_kdcpreauth_rock rock, char *string)
+{
+    krb5_dbe_free_string(context, string);
+}
+
 static void *
 client_entry(krb5_context context, krb5_kdcpreauth_rock rock)
 {
@@ -587,6 +600,8 @@ static struct krb5_kdcpreauth_callbacks_st callbacks = {
     free_keys,
     request_body,
     fast_armor,
+    get_string,
+    free_string,
     client_entry
 };
 
