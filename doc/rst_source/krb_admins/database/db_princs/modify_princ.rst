@@ -51,11 +51,10 @@ If you want to associate a ticket policy to a principal, all you need to do is::
      Principal "david@ATHENA.MIT.EDU" modified.
      kadmin:
      
-If, on the other hand, you want to set up an account that expires on January 1, 2000, that uses a policy called "stduser", with a temporary password (which you want the user to change immediately), you would type the following. (Note: each line beginning with => is a continuation of the previous line.)::
+If, on the other hand, you want to set up an account that expires on January 1, 2000, that uses a policy called "stduser", with a temporary password (which you want the user to change immediately), you would type the following::
 
      
-     kadmin: addprinc david -expire "1/1/2000 12:01am EST" -policy stduser
-     =>  +needchange
+     kadmin: addprinc david -expire "1/1/2000 12:01am EST" -policy stduser +needchange
      Enter password for principal david@ATHENA.MIT.EDU:  <= Type the password.
      Re-enter password for principal
      david@ATHENA.MIT.EDU:  <= Type it again.

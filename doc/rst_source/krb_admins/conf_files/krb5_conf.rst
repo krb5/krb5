@@ -282,13 +282,14 @@ The [domain_realm] section provides a translation from a domain name or hostname
 If no translation entry applies, the host's realm is considered to be the hostname's domain portion converted to upper case. For example, the following [domain_realm] section::
 
      [domain_realm]
+         crash.mit.edu = TEST.ATHENA.MIT.EDU
          .mit.edu = ATHENA.MIT.EDU
          mit.edu = ATHENA.MIT.EDU
-         crash.mit.edu = TEST.ATHENA.MIT.EDU
          example.com = EXAMPLE.COM
      
 
-maps *crash.mit.edu* into the *TEST.ATHENA.MIT.EDU* realm. All other hosts in the *mit.edu* domain will map by default to the *ATHENA.MIT.EDU* realm, and all hosts in the example.com domain will map by default into the *EXAMPLE.COM* realm. Note the entries for the hosts *mit.edu* and *example.com*. Without these entries, these hosts would be mapped into the Kerberos realms EDU and ORG, respectively.
+maps the host with the *exact* name *crash.mit.edu* into the TEST.ATHENA.MIT.EDU realm. The period prefix in *.mit.edu* denotes that *all* systems in the *mit.edu* domain belong to  ATHENA.MIT.EDU realm.
+Note the entries for the hosts *mit.edu* and *example.com*. Without these entries, these hosts would be mapped into the Kerberos realms EDU and COM, respectively.
 
 .. _logging:
 
