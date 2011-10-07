@@ -1221,6 +1221,9 @@ This module implements the PKINIT preauthentication mechanism.
 
 @itemx encrypted_challenge
 This module implements the encrypted challenge FAST factor.
+
+@itemx encrypted_timestamp
+This module implements the encrypted timestamp mechanism.
 @end table
 
 @node pkinit client options, Sample krb5.conf File, plugins, krb5.conf

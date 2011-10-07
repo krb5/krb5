@@ -804,6 +804,9 @@ This module implements the PKINIT preauthentication mechanism.
 .IP encrypted_challenge
 This module implements the encrypted challenge FAST factor.
 
+.IP encrypted_timestamp
+This module implements the encrypted timestamp mechanism.
+
 .SH FILES 
 /etc/krb5.conf
 .SH SEE ALSO

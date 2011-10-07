@@ -567,6 +567,9 @@ The **clpreauth** and **kdcpreauth** interfaces allow plugin modules to provide 
 **encrypted_challenge**
     This module implements the encrypted challenge FAST factor.
 
+**encrypted_timestamp**
+    This module implements the encrypted timestamp mechanism.
+
 PKINIT options
 -----------------
 

@@ -205,6 +205,11 @@ krb5_error_code
 kdcpreauth_encrypted_challenge_initvt(krb5_context context, int maj_ver,
                                       int min_ver, krb5_plugin_vtable vtable);
 
+/* kdc_preauth_enctsc.c */
+krb5_error_code
+kdcpreauth_encrypted_timestamp_initvt(krb5_context context, int maj_ver,
+                                      int min_ver, krb5_plugin_vtable vtable);
+
 /* kdc_authdata.c */
 krb5_error_code
 load_authdata_plugins(krb5_context context);
