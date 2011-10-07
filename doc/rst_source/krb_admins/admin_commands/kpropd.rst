@@ -36,28 +36,27 @@ This is done for debugging purposes, or if for some reason the system administra
 
 When the slave periodically requests incremental updates, *kpropd* updates its *principal.ulog* file with any updates from the master.  
 :ref:`kproplog(8)` can be used to view a summary of the update entry log on the slave KDC.  
-Incremental propagation is not enabled by default; it can be enabled using the *iprop_enable* and *iprop_slave_poll* settings in :ref:`kdc.conf`).  
-The principal "kiprop/slavehostname@REALM" (where "slavehostname" is the name of the slave KDC host, 
+Incremental propagation is not enabled by default; it can be enabled using the *iprop_enable* and *iprop_slave_poll* settings in :ref:`kdc.conf`.  
+The principal "kiprop/slavehostname\@REALM" (where "slavehostname" is the name of the slave KDC host, 
 and "REALM" is the name of the Kerberos realm) must be present in the slave's keytab file.
 
 OPTIONS
 --------
 
        **-r** *realm*
-              Specifies the realm of the master server; by default the realm returned by krb5_default_local_realm(3) is used.
+              Specifies the realm of the master server.
 
        **-f** *file*
-              Specifies the filename where the dumped principal database file is to be stored; by default the dumped database file is *KPROPD_DEFAULT_FILE*
-              (normally /usr/local/var/krb5kdc/from_master).
+              Specifies the filename where the dumped principal database file is to be stored; by default the dumped database file
+              /usr/local/var/krb5kdc/from_master.
 
        **-p**
-              Allows the user to specify the pathname to the :ref:`kdb5_util(8)` program; by default the pathname used is *KPROPD_DEFAULT_KDB5_UTIL*
-              (normally /usr/local/sbin/kdb5_util).
+              Allows the user to specify the pathname to the :ref:`kdb5_util(8)` program; by default the pathname used is /usr/local/sbin/kdb5_util.
 
        **-S**     
               Turn on standalone mode.  Normally, *kpropd* is invoked out of inetd(8) so it expects a network connection to be passed to it from inetd(8).
-              If the *-S* option is specified, *kpropd* will put itself into the background, and wait for connections to the  *KPROP_SERVICE* port  
-              (normally *krb5_prop*).
+              If the *-S* option is specified, *kpropd* will put itself into the background, 
+              and wait for connections to the *krb5_prop* port specified in  /etc/services.  
 
        **-d**     
               Turn on debug mode.  In this mode, if the *-S* option is selected, *kpropd* will not detach itself from the current job
@@ -67,14 +66,13 @@ OPTIONS
                Allow for an alternate port number for *kpropd* to listen on. This is only useful if the program is run in standalone mode.
 
        **-a**     
-              Allows the user to specify the path to the *kpropd.acl* file; by default the path used is *KPROPD_ACL_FILE*   
-              (normally /usr/local/var/krb5kdc/kpropd.acl).
+              Allows the user to specify the path to the *kpropd.acl* file; by default the path used is /usr/local/var/krb5kdc/kpropd.acl.
 
 FILES
 ---------
 
 *kpropd.acl*  
-            Access file for *kpropd*; the default location is KPROPD_ACL_FILE (normally /usr/local/var/krb5kdc/kpropd.acl).  
+            Access file for *kpropd*; the default location is /usr/local/var/krb5kdc/kpropd.acl.  
             Each entry is a line containing the principal of a host from which the local machine will allow Kerberos database propagation via :ref:`kprop(8)`.
 
 SEE ALSO

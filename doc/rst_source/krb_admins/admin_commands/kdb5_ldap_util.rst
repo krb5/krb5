@@ -84,7 +84,7 @@ create
               Specifies the master database password. This option is not recommended.
 
    **-r** *realm* 
-               Specifies the Kerberos realm of the database; by default the realm returned by krb5_default_local_realm (3) is used.
+               Specifies the Kerberos realm of the database.
 
    **-sf** *stashfilename*
               Specifies the stash file of the master database password.
@@ -231,7 +231,7 @@ modify
               Specifies the DN of the container object in which the principals of a realm will be created.
  
    **-r** *realm*
-              Specifies the Kerberos realm of the database; by default the realm returned by krb5_default_local_realm(3) is used.
+              Specifies the Kerberos realm of the database.
 
    **-maxtktlife** *max_ticket_life*
               Specifies maximum ticket life for principals in this realm.
@@ -351,7 +351,7 @@ view
        Displays the attributes of a realm.  Options:
 
    **-r** *realm*
-              Specifies the Kerberos realm of the database; by default the realm returned by krb5_default_local_realm(3) is used.
+              Specifies the Kerberos realm of the database.
 
 EXAMPLE::
 
@@ -379,7 +379,7 @@ destroy
               If specified, will not prompt the user for confirmation.
 
    **-r** *realm*
-              Specifies the Kerberos realm of the database; by default the realm returned by krb5_default_local_realm(3) is used.
+              Specifies the Kerberos realm of the database.
 
 EXAMPLE::
 
@@ -444,7 +444,7 @@ create_policy
        Creates a ticket policy in directory. Options:
 
    **-r** *realm*
-       Specifies the Kerberos realm of the database; by default the realm returned by krb5_default_local_realm(3) is used.
+       Specifies the Kerberos realm of the database.
 
    **-maxtktlife** *max_ticket_life*
        Specifies maximum ticket life for principals.
@@ -542,7 +542,7 @@ modify_policy
        Modifies the attributes of a ticket policy. Options are same as create_policy.
 
    **-r** *realm*
-       Specifies the Kerberos realm of the database; by default the realm returned by krb5_default_local_realm(3) is used.
+       Specifies the Kerberos realm of the database.
 
 EXAMPLE::
 
@@ -586,7 +586,7 @@ destroy_policy
        Destroys an existing ticket policy. Options:
 
    **-r** *realm*
-       Specifies the Kerberos realm of the database; by default the realm returned by krb5_default_local_realm(3) is used.
+       Specifies the Kerberos realm of the database.
 
    **-force** 
        Forces  the  deletion  of the policy object. If not specified, will be prompted for confirmation while deleting the policy. 
@@ -614,7 +614,7 @@ list_policy
        Lists the ticket policies in realm if specified or in the default realm.  Options:
 
    **-r** *realm*
-       Specifies the Kerberos realm of the database; by default the realm returned by krb5_default_local_realm(3) is used.
+       Specifies the Kerberos realm of the database.
 
 EXAMPLE::
 

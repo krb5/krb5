@@ -39,7 +39,7 @@ COMMAND-LINE OPTIONS
 .. _kdb5_util_options:
 
        **-r** *realm*
-              specifies the Kerberos realm of the database; by default the realm returned by krb5_default_local_realm(3) is used.
+              specifies the Kerberos realm of the database.
 
        **-d** *dbname*
               specifies the name under which the principal database is stored; by default the database is that listed in :ref:`kdc.conf`.   
@@ -177,25 +177,25 @@ COMMANDS
               Adds a random key.
 
        **add_mkey** [**-e** *etype*] [**-s**]
-              Adds a new master key to the K/M (master key) principal.  Existing master keys will remain.
+              Adds a new master key to the *K/M* (master key) principal.  Existing master keys will remain.
               The *-e etype* option allows specification of the enctype of the new master key.
               The *-s* option stashes the new master key in a local stash file which will be created if it doesn't already exist.
 
        **use_mkey** *mkeyVNO* [*time*]
-              Sets the activation time of the master key specified by mkeyVNO.
+              Sets the activation time of the master key specified by *mkeyVNO*.
               Once a master key is active (i.e. its activation time has been reached) it will then be used to encrypt principal keys either when
-              the principal keys change, are newly created or when the update_princ_encryption command is run.
+              the principal keys change, are newly created or when the *update_princ_encryption* command is run.
               If the time argument is provided then that will be the activation time otherwise the current time is used by default.
-              The format of the optional time argument is that specified in the Time Formats section of the kadmin man page.
+              The format of the optional time argument is that specified in the *Time Formats* section of the kadmin man page.
 
        **list_mkeys**
-              List all master keys from most recent to earliest in K/M principal.
-              The output will show the KVNO, enctype and salt for each mkey similar to kadmin getprinc output.
+              List all master keys from most recent to earliest in *K/M* principal.
+              The output will show the kvno, enctype and salt for each mkey similar to kadmin getprinc output.
               A \* following an mkey denotes the currently active master key.
 
        **purge_mkeys** [**-f**] [**-n**] [**-v**]
-              Delete master keys from the K/M principal that are not used to protect any principals.
-              This command can be used to remove old master keys from a K/M principal once all principal keys are protected by a newer master key.
+              Delete master keys from the *K/M* principal that are not used to protect any principals.
+              This command can be used to remove old master keys from a *K/M* principal once all principal keys are protected by a newer master key.
 
               **-f**     
                      does not prompt user.

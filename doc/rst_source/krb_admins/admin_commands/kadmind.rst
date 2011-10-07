@@ -140,45 +140,40 @@ Ordering  is important.  The first matching entry is the one which will control 
                   x    Short for admcil.
                   *    Same as x.
        
-Some examples of valid entries here are:
+              Some examples of valid entries here are:
 
-*user/instance@realm adm*
-              A standard fully qualified name.  The *operation-mask* only applies to this principal and specifies that [s]he may add, delete  or
-              modify principals and policies, but not change anybody else's password.
 
-*user/instance@realm cim service/instance@realm*
-              A  standard fully qualified name and a standard fully qualified target.  The *operation-mask* only applies to this principal oper‐
-              ating on this target and specifies that [s]he may change the target's password, request information about the target and  modify
-              it.
+              *user/instance@realm adm*
+                  A standard fully qualified name.  
+                  The *operation-mask* only applies to this principal and specifies that [s]he may add, 
+                  delete  or modify principals and policies, but not change anybody else's password.
 
-*user/\*@realm ac*
-              A  wildcarded name.  The *operation-mask* applies to all principals in realm "realm" whose first component is "user" and specifies
-              that [s]he may add principals and change anybody's password.
+              *user/instance@realm cim service/instance@realm*
+                  A  standard fully qualified name and a standard fully qualified target.  
+                  The *operation-mask* only applies to this principal operating on this target and specifies 
+                  that [s]he may change the target's password, request information about the target and  modify it.
 
-*user/\*@realm i \*/instance@realm*
-              A wildcarded name and target.  The *operation-mask* applies to all principals in realm "realm" whose first component is "user" and
-              specifies that [s]he may perform inquiries on principals whose second component is "instance" and realm is "realm".
+              *user/\*@realm ac*
+                  A  wildcarded name.  The *operation-mask* applies to all principals in realm "realm" whose first component is "user" and specifies
+                  that [s]he may add principals and change anybody's password.
+
+              *user/\*@realm i \*/instance@realm*
+                  A wildcarded name and target.  The *operation-mask* applies to all principals in realm "realm" whose first component is "user" and
+                  specifies that [s]he may perform inquiries on principals whose second component is "instance" and realm is "realm".
 
 FILES
 -----------
 
-=================== ===================================================================
-principal.db        default name for Kerberos principal database
+Note: The first three files are specific to db2 database.
 
-<dbname>.kadm5      KADM5  administrative database.  (This would be "principal.kadm5", if you use the default database name.)  Contains policy information.
-
-<dbname>.kadm5.lock lock file for the KADM5 administrative database.  This file works backwards from most other lock files.  I.e., kadmin will exit with an error if this file does not exist.
-=================== ===================================================================
-
-Note: The above three files are specific to db2 database.
-
-=================== ===================================================================
-kadm5.acl           file containing list of principals and their kadmin administrative privileges.  See above for a description.
-
-kadm5.keytab        keytab file for *kadmin/admin* principal.
-
-kadm5.dict          file containing dictionary of strings explicitly disallowed as passwords.
-=================== ===================================================================
+==================== ===================================================================
+principal.db          default name for Kerberos principal database
+<dbname>.kadm5        KADM5  administrative database.  (This would be "principal.kadm5", if you use the default database name.)  Contains policy information.
+<dbname>.kadm5.lock   lock file for the KADM5 administrative database.  This file works backwards from most other lock files.  I.e., kadmin will exit with an error if this file does not exist.
+kadm5.acl             file containing list of principals and their kadmin administrative privileges.  See above for a description.
+kadm5.keytab          keytab file for *kadmin/admin* principal.
+kadm5.dict            file containing dictionary of strings explicitly disallowed as passwords.
+==================== ===================================================================
 
 SEE ALSO
 -----------

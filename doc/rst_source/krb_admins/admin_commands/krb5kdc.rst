@@ -44,27 +44,28 @@ The **-x** *db_args* option specifies the database specific arguments.
                Specifies the password for the above mentioned binddn. It is recommended not to use this option. Instead, the password can be
                stashed using the stashsrvpw command of kdb5_ldap_util.
 
-The **-r** *realm* option specifies the realm for which the server should provide service;  
-by default the realm returned by krb5_default_local_realm(3) is used.
+The **-r** *realm* option specifies the realm for which the server should provide service.
 
-The **-d** *dbname* option specifies the name under which the principal database can be found;  
-by default the database is in DEFAULT_DBM_FILE. This option does not apply to the LDAP database.
+The **-d** *dbname* option specifies the name under which the principal database can be found.
+This option does not apply to the LDAP database.
 
 The **-k** *keytype* option specifies the key type of the master key to be entered manually as a password when **-m** is given;  
 the default is "des-cbc-crc".
 
-The **-M** *mkeyname* option specifies the principal name for the master key in the database; 
-the default is KRB5_KDB_M_NAME (usually "K/M" in the KDC's realm).
-
-The **-p** *portnum* option specifies the default UDP port number which the KDC should listen on for Kerberos version 5 requests.  
-This value is used when no port is specified in the KDC profile and when no port is specified in the Kerberos configuration file.  
-If no value is available, then the value in */etc/services* for service "kerberos" is used.
+The **-M** *mkeyname* option specifies the principal name for the master key in the database (usually "K/M" in the KDC's realm).
 
 The **-m** option specifies that the master database password should be fetched from the keyboard rather than from a file on disk.
 
 The **-n** option specifies that the KDC does not put itself in the background and does not disassociate itself from the terminal.  
 In normal operation, you should always allow the KDC to place itself in the background.
        
+The **-P** *pid_file* option tells the KDC to write its PID (followed by a newline) into *pid_file* after it starts up.  
+This can be used to identify whether the KDC is still running and to allow init scripts to stop the correct process.
+
+The **-p** *portnum* option specifies the default UDP port number which the KDC should listen on for Kerberos version 5 requests.  
+This value is used when no port is specified in the KDC profile and when no port is specified in the Kerberos configuration file.  
+If no value is available, then the value in */etc/services* for service "kerberos" is used.
+
 The **-w** *numworkers* option tells the KDC to fork *numworkers* processes to listen to the KDC ports and process requests in parallel.  
 The top level KDC process (whose pid is recorded in the pid file if the **-P** option is also given) acts as a supervisor.  
 The supervisor will relay SIGHUP signals to the worker subprocesses, and will terminate the worker subprocess if the it is itself terminated or 
@@ -72,8 +73,8 @@ if any other worker process exits.
 
 .. note:: on operating systems which do not have *pktinfo* support, using worker processes will prevent the KDC from listening for UDP packets on network interfaces created after the KDC starts.
 
-The **-P** *pid_file* option tells the KDC to write its PID (followed by a newline) into *pid_file* after it starts up.  
-This can be used to identify whether the KDC is still running and to allow init scripts to stop the correct process.
+
+EXAMPLE
 
 The KDC may service requests for multiple realms (maximum 32 realms).  
 The realms are listed on the command line.  Per-realm options that can be specified on the command line pertain for each realm
@@ -84,18 +85,12 @@ For example::
 
 specifies that the KDC listen on port 2001 for REALM1 and on port 2002 for REALM2 and REALM3.  
 Additionally, per-realm parameters may be specified in the :ref:`kdc.conf` file.  
-The location of this file may be specified by the KRB5_KDC_PROFILE environment variable.  
+The location of this file may be specified by the *KRB5_KDC_PROFILE* environment variable.  
 Parameters specified in this file take precedence over options specified on the command line.  
-See the kdc.conf(5) description for further details.
+See the :ref:`kdc.conf` description for further details.
 
 SEE ALSO
 -----------
 
 krb5(3), kdb5_util(8), kdc.conf(5), kdb5_ldap_util(8)
-
-BUGS
------------
-
-It should fork and go into the background when it finishes reading the master password from the terminal.
-
 
