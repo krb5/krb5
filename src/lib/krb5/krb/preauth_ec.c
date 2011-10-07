@@ -34,22 +34,22 @@
 #include "int-proto.h"
 
 static int
-preauth_flags(krb5_context context, krb5_preauthtype pa_type)
+ec_flags(krb5_context context, krb5_preauthtype pa_type)
 {
     return PA_REAL;
 }
 
 static krb5_error_code
-process_preauth(krb5_context context, krb5_clpreauth_moddata moddata,
-                krb5_clpreauth_modreq modreq, krb5_get_init_creds_opt *opt,
-                krb5_clpreauth_callbacks cb,
-                krb5_clpreauth_rock rock, krb5_kdc_req *request,
-                krb5_data *encoded_request_body,
-                krb5_data *encoded_previous_request, krb5_pa_data *padata,
-                krb5_prompter_fct prompter, void *prompter_data,
-                krb5_clpreauth_get_as_key_fn gak_fct, void *gak_data,
-                krb5_data *salt, krb5_data *s2kparams, krb5_keyblock *as_key,
-                krb5_pa_data ***out_padata)
+ec_process(krb5_context context, krb5_clpreauth_moddata moddata,
+           krb5_clpreauth_modreq modreq, krb5_get_init_creds_opt *opt,
+           krb5_clpreauth_callbacks cb,
+           krb5_clpreauth_rock rock, krb5_kdc_req *request,
+           krb5_data *encoded_request_body,
+           krb5_data *encoded_previous_request, krb5_pa_data *padata,
+           krb5_prompter_fct prompter, void *prompter_data,
+           krb5_clpreauth_get_as_key_fn gak_fct, void *gak_data,
+           krb5_data *salt, krb5_data *s2kparams, krb5_keyblock *as_key,
+           krb5_pa_data ***out_padata)
 {
     krb5_error_code retval = 0;
     krb5_enctype enctype;
@@ -97,8 +97,7 @@ process_preauth(krb5_context context, krb5_clpreauth_moddata moddata,
             krb5_free_enc_data(context, enc);
     } else if (retval == 0) { /*No padata; we send*/
         krb5_enc_data enc;
-        krb5_pa_data *pa = NULL;
-        krb5_pa_data **pa_array = NULL;
+        krb5_pa_data **pa = NULL;
         krb5_data *encoded_ts = NULL;
         krb5_pa_enc_ts ts;
         enc.ciphertext.data = NULL;
@@ -122,32 +121,25 @@ process_preauth(krb5_context context, krb5_clpreauth_moddata moddata,
             krb5_free_data_contents(context, &enc.ciphertext);
         }
         if (retval == 0) {
-            pa = calloc(1, sizeof(krb5_pa_data));
+            pa = calloc(2, sizeof(krb5_pa_data *));
             if (pa == NULL)
                 retval = ENOMEM;
         }
         if (retval == 0) {
-            pa_array = calloc(2, sizeof(krb5_pa_data *));
-            if (pa_array == NULL)
+            pa[0] = calloc(1, sizeof(krb5_pa_data));
+            if (pa[0] == NULL)
                 retval = ENOMEM;
         }
         if (retval == 0) {
-            pa->length = encoded_ts->length;
-            pa->contents = (unsigned char *) encoded_ts->data;
-            pa->pa_type = KRB5_PADATA_ENCRYPTED_CHALLENGE;
-            free(encoded_ts);
-            encoded_ts = NULL;
-            pa_array[0] = pa;
+            pa[0]->length = encoded_ts->length;
+            pa[0]->contents = (unsigned char *) encoded_ts->data;
+            pa[0]->pa_type = KRB5_PADATA_ENCRYPTED_CHALLENGE;
+            encoded_ts->data = NULL;
+            *out_padata = pa;
             pa = NULL;
-            *out_padata = pa_array;
-            pa_array = NULL;
         }
-        if (pa)
-            free(pa);
-        if (encoded_ts)
-            krb5_free_data(context, encoded_ts);
-        if (pa_array)
-            free(pa_array);
+        free(pa);
+        krb5_free_data(context, encoded_ts);
     }
     if (challenge_key)
         krb5_free_keyblock(context, challenge_key);
@@ -155,7 +147,7 @@ process_preauth(krb5_context context, krb5_clpreauth_moddata moddata,
 }
 
 
-krb5_preauthtype supported_pa_types[] = {
+static krb5_preauthtype ec_types[] = {
     KRB5_PADATA_ENCRYPTED_CHALLENGE, 0};
 
 krb5_error_code
@@ -168,8 +160,8 @@ clpreauth_encrypted_challenge_initvt(krb5_context context, int maj_ver,
         return KRB5_PLUGIN_VER_NOTSUPP;
     vt = (krb5_clpreauth_vtable)vtable;
     vt->name = "encrypted_challenge";
-    vt->pa_type_list = supported_pa_types;
-    vt->flags = preauth_flags;
-    vt->process = process_preauth;
+    vt->pa_type_list = ec_types;
+    vt->flags = ec_flags;
+    vt->process = ec_process;
     return 0;
 }

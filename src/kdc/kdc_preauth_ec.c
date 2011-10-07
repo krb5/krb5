@@ -34,9 +34,9 @@
 #include "kdc_util.h"
 
 static krb5_error_code
-kdc_include_padata(krb5_context context, krb5_kdc_req *request,
-                   krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
-                   krb5_kdcpreauth_moddata moddata, krb5_pa_data *data)
+ec_edata(krb5_context context, krb5_kdc_req *request,
+         krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
+         krb5_kdcpreauth_moddata moddata, krb5_pa_data *data)
 {
     krb5_keyblock *armor_key = cb->fast_armor(context, rock);
 
@@ -44,12 +44,11 @@ kdc_include_padata(krb5_context context, krb5_kdc_req *request,
 }
 
 static void
-kdc_verify_preauth(krb5_context context, krb5_data *req_pkt,
-                   krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
-                   krb5_pa_data *data, krb5_kdcpreauth_callbacks cb,
-                   krb5_kdcpreauth_rock rock, krb5_kdcpreauth_moddata moddata,
-                   krb5_kdcpreauth_verify_respond_fn respond,
-                   void *arg)
+ec_verify(krb5_context context, krb5_data *req_pkt, krb5_kdc_req *request,
+          krb5_enc_tkt_part *enc_tkt_reply, krb5_pa_data *data,
+          krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
+          krb5_kdcpreauth_moddata moddata,
+          krb5_kdcpreauth_verify_respond_fn respond, void *arg)
 {
     krb5_error_code retval = 0;
     krb5_timestamp now;
@@ -67,7 +66,9 @@ kdc_verify_preauth(krb5_context context, krb5_data *req_pkt,
 
     if (armor_key == NULL) {
         retval = ENOENT;
-        krb5_set_error_message(context, ENOENT, "Encrypted Challenge used outside of FAST tunnel");
+        krb5_set_error_message(context, ENOENT,
+                               _("Encrypted Challenge used outside of FAST "
+                                 "tunnel"));
     }
     scratch.data = (char *) data->contents;
     scratch.length = data->length;
@@ -101,7 +102,9 @@ kdc_verify_preauth(krb5_context context, krb5_data *req_pkt,
         }
         if (client_keys[i].enctype == 0) {
             retval = KRB5KDC_ERR_PREAUTH_FAILED;
-            krb5_set_error_message(context, retval, "Incorrect password  in encrypted challenge");
+            krb5_set_error_message(context, retval,
+                                   _("Incorrect password in encrypted "
+                                     "challenge"));
         }
     }
     if (retval == 0)
@@ -136,12 +139,11 @@ kdc_verify_preauth(krb5_context context, krb5_data *req_pkt,
 }
 
 static krb5_error_code
-kdc_return_preauth(krb5_context context, krb5_pa_data *padata,
-                   krb5_data *req_pkt, krb5_kdc_req *request,
-                   krb5_kdc_rep *reply, krb5_keyblock *encrypting_key,
-                   krb5_pa_data **send_pa, krb5_kdcpreauth_callbacks cb,
-                   krb5_kdcpreauth_rock rock, krb5_kdcpreauth_moddata moddata,
-                   krb5_kdcpreauth_modreq modreq)
+ec_return(krb5_context context, krb5_pa_data *padata, krb5_data *req_pkt,
+          krb5_kdc_req *request, krb5_kdc_rep *reply,
+          krb5_keyblock *encrypting_key, krb5_pa_data **send_pa,
+          krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
+          krb5_kdcpreauth_moddata moddata, krb5_kdcpreauth_modreq modreq)
 {
     krb5_error_code retval = 0;
     krb5_keyblock *challenge_key = (krb5_keyblock *)modreq;
@@ -188,7 +190,7 @@ kdc_return_preauth(krb5_context context, krb5_pa_data *padata,
     return retval;
 }
 
-krb5_preauthtype supported_pa_types[] = {
+static krb5_preauthtype ec_types[] = {
     KRB5_PADATA_ENCRYPTED_CHALLENGE, 0};
 
 krb5_error_code
@@ -201,9 +203,9 @@ kdcpreauth_encrypted_challenge_initvt(krb5_context context, int maj_ver,
         return KRB5_PLUGIN_VER_NOTSUPP;
     vt = (krb5_kdcpreauth_vtable)vtable;
     vt->name = "encrypted_challenge";
-    vt->pa_type_list = supported_pa_types;
-    vt->edata = kdc_include_padata;
-    vt->verify = kdc_verify_preauth;
-    vt->return_padata = kdc_return_preauth;
+    vt->pa_type_list = ec_types;
+    vt->edata = ec_edata;
+    vt->verify = ec_verify;
+    vt->return_padata = ec_return;
     return 0;
 }
