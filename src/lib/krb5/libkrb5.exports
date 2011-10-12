@@ -465,6 +465,7 @@ krb5_pac_get_buffer
 krb5_pac_get_types
 krb5_pac_init
 krb5_pac_parse
+krb5_pac_sign
 krb5_pac_verify
 krb5_parse_name
 krb5_parse_name_flags
@@ -617,7 +618,6 @@ krb5int_get_authdata_containee_types
 krb5int_init_context_kdc
 krb5int_init_trace
 krb5int_initialize_library
-krb5int_pac_sign
 krb5int_sendtokdc_debug_handler
 krb5int_trace
 profile_abandon

@@ -180,13 +180,9 @@ k5_pac_encode_header(krb5_context context, krb5_pac pac)
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5int_pac_sign(krb5_context context,
-                 krb5_pac pac,
-                 krb5_timestamp authtime,
-                 krb5_const_principal principal,
-                 const krb5_keyblock *server_key,
-                 const krb5_keyblock *privsvr_key,
-                 krb5_data *data)
+krb5_pac_sign(krb5_context context, krb5_pac pac, krb5_timestamp authtime,
+              krb5_const_principal principal, const krb5_keyblock *server_key,
+              const krb5_keyblock *privsvr_key, krb5_data *data)
 {
     krb5_error_code ret;
     krb5_data server_cksum, privsvr_cksum;
