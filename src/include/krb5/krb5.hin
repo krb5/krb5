@@ -7501,14 +7501,14 @@ krb5_pac_verify(krb5_context context, const krb5_pac pac,
  * @param [in]  pac             PAC handle
  * @param [in]  authtime        Expected timestamp
  * @param [in]  principal       Expected principal name (or NULL)
- * @param [in]  server          Key for server checksum
- * @param [in]  privsvr         Key for KDC checksum
+ * @param [in]  server_key      Key for server checksum
+ * @param [in]  privsvr_key     Key for KDC checksum
  * @param [out] data            Signed PAC encoding
  *
- * This function signs @a pac using the keys @a server and @a privsvr and
- * returns the signed encoding in @a data.  @a pac is modified to include the
- * server and KDC checksum buffers.  Use krb5_free_data_contents() to free @a
- * data when it is no longer needed.
+ * This function signs @a pac using the keys @a server_key and @a privsvr_key
+ * and returns the signed encoding in @a data.  @a pac is modified to include
+ * the server and KDC checksum buffers.  Use krb5_free_data_contents() to free
+ * @a data when it is no longer needed.
  */
 krb5_error_code KRB5_CALLCONV
 krb5_pac_sign(krb5_context context, krb5_pac pac, krb5_timestamp authtime,
