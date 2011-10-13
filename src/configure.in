@@ -190,6 +190,48 @@ if test "$PRNG_ALG" = fortuna; then
 	AC_DEFINE(FORTUNA,1,[Define if Fortuna PRNG is selected])
 fi
 
+# WITH_PKINIT_CRYPTO_IMPL
+
+PKINIT_CRYPTO_IMPL="$CRYPTO_IMPL"
+AC_ARG_WITH([pkinit-crypto-impl],
+AC_HELP_STRING([--with-pkinit-crypto-impl=IMPL], [use specified pkinit crypto implementation @<:@openssl@:>@]),
+[PKINIT_CRYPTO_IMPL=$withval
+AC_MSG_RESULT("pkinit will use \'$withval\'")
+], withval=$PKINIT_CRYPTO_IMPL)
+case "$withval" in
+builtin|openssl)
+  AC_CHECK_LIB(crypto, PKCS7_get_signer_info)
+  PKINIT_CRYPTO_IMPL=openssl
+  ;;
+nss)
+  if test "${PKINIT_CRYPTO_IMPL_CFLAGS+set}" != set; then
+    PKINIT_CRYPTO_IMPL_CFLAGS=`pkg-config --cflags nss`
+  fi
+  if test "${PKINIT_CRYPTO_IMPL_LIBS+set}" != set; then
+    PKINIT_CRYPTO_IMPL_LIBS=`pkg-config --libs nss`
+  fi
+  AC_DEFINE(PKINIT_CRYPTO_IMPL_NSS,1,[Define if pkinit crypto implementation is NSS])
+  save_CFLAGS=$CFLAGS
+  CFLAGS="$CFLAGS $PKINIT_CRYPTO_IMPL_CFLAGS"
+  AC_COMPILE_IFELSE([
+#include <nss.h>
+#if NSS_VMAJOR < 3 || (NSS_VMAJOR == 3 && NSS_VMINOR < 12)
+#error
+#elif NSS_VMAJOR == 3 && NSS_VMINOR == 12 && NSS_VPATCH < 11
+#error
+#endif
+  ], [], [AC_MSG_ERROR([NSS version 3.12.11 or later required.])])
+  CFLAGS=$save_CFLAGS
+  ;;
+*)
+  AC_MSG_ERROR([Unknown crypto implementation $withval])
+  ;;
+esac
+AC_CONFIG_COMMANDS(PKINIT_CRYPTO_IMPL,,PKINIT_CRYPTO_IMPL=$PKINIT_CRYPTO_IMPL)
+AC_SUBST(PKINIT_CRYPTO_IMPL)
+AC_SUBST(PKINIT_CRYPTO_IMPL_CFLAGS)
+AC_SUBST(PKINIT_CRYPTO_IMPL_LIBS)
+
 # --with-kdc-kdb-update makes the KDC update the database with last request
 # information and failure information.
 

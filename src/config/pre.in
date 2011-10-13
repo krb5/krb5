@@ -439,6 +439,11 @@ TCL_INCLUDES	= @TCL_INCLUDES@
 CRYPTO_IMPL	= @CRYPTO_IMPL@
 PRNG_ALG	= @PRNG_ALG@
 
+# Crypto back-end selection and flags for PKINIT
+PKINIT_CRYPTO_IMPL		= @PKINIT_CRYPTO_IMPL@
+PKINIT_CRYPTO_IMPL_CFLAGS	= @PKINIT_CRYPTO_IMPL_CFLAGS@
+PKINIT_CRYPTO_IMPL_LIBS		= @PKINIT_CRYPTO_IMPL_LIBS@
+
 # error table rules
 #
 ### /* these are invoked as $(...) foo.et, which works, but could be better */

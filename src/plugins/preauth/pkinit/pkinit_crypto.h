@@ -59,6 +59,9 @@ enum cms_msg_types {
 #define IDTYPE_PKCS11   3
 #define IDTYPE_ENVVAR   4
 #define IDTYPE_PKCS12   5
+#ifdef PKINIT_CRYPTO_IMPL_NSS
+#define IDTYPE_NSS      6
+#endif
 
 /*
  * ca/crl types
