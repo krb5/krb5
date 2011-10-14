@@ -136,4 +136,4 @@ clean-windows::
 ##WIN32##profile.lib: $(PLIB)
 
 ##WIN32##all-windows:: all-recurse lib-windows
-##WIN32##lib-windows:: krb5.lib gssapi.lib
+##WIN32##lib-windows:: krb5.lib gssapi.lib profile.lib
