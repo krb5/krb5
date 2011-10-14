@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* To the extent possible under law, Painless Security, LLC has waived
  * all copyright and related or neighboring rights to GSS-API Memory
  * Management Header. This work is published from: United States.
@@ -60,7 +61,7 @@ gssalloc_strdup(const char *str)
     char *copy = gssalloc_malloc(size);
     if (copy) {
         memcpy(copy, str, size);
-	copy[size-1] = '\0';
+        copy[size-1] = '\0';
     }
     return copy;
 }
