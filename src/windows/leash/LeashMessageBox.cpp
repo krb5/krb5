@@ -61,7 +61,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CLeashMessageBox message handlers
 
-void CALLBACK CLeashMessageBox::MessageBoxTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD dwTime)
+void CALLBACK CLeashMessageBox::MessageBoxTimer(HWND hwnd, UINT uiMsg, UINT_PTR idEvent, DWORD dwTime)
 {
 	::KillTimer(hwnd, 2);
 	::SendMessage(hwnd, WM_CLOSE, 0, 0);
@@ -76,7 +76,7 @@ void CLeashMessageBox::OnOK()
 BOOL CLeashMessageBox::OnInitDialog()
 {
 	CDialog::OnInitDialog();
-	UINT idTimer = SetTimer(2, m_dwTime, (TIMERPROC)MessageBoxTimer);
+	UINT_PTR idTimer = SetTimer(2, m_dwTime, &MessageBoxTimer);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE

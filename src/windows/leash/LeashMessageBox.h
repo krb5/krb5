@@ -31,7 +31,7 @@ class CLeashMessageBox : public CDialog
 {
 private:
 	static DWORD m_dwTime;
-	static void CALLBACK MessageBoxTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD dwTime);
+	static void CALLBACK MessageBoxTimer(HWND hwnd, UINT uiMsg, UINT_PTR idEvent, DWORD dwTime);
 
 	// Construction
 public:

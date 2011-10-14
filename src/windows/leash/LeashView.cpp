@@ -96,7 +96,7 @@ BEGIN_MESSAGE_MAP(CLeashView, CFormView)
 END_MESSAGE_MAP()
 
 
-LONG CLeashView::m_ticketTimeLeft = 0;  // # of seconds left before tickets expire
+time_t CLeashView::m_ticketTimeLeft = 0;  // # of seconds left before tickets expire
 INT  CLeashView::m_forwardableTicket = 0;
 INT  CLeashView::m_proxiableTicket = 0;
 INT  CLeashView::m_renewableTicket = 0;
@@ -242,7 +242,7 @@ VOID CLeashView::OnClose(void)
     printf("OnClose\n");
 }
 
-LONG CLeashView::LeashTime()
+time_t CLeashView::LeashTime()
 {
     _tzset();
     return time(0);
@@ -285,7 +285,7 @@ VOID CLeashView::UpdateTicketTime(TICKETINFO& ti)
 
 
 VOID CALLBACK EXPORT CLeashView::TimerProc(HWND hWnd, UINT nMsg,
-                                           UINT nIDEvent, DWORD dwTime)
+                                           UINT_PTR nIDEvent, DWORD dwTime)
 {
     // All of the work is being done in the PreTranslateMessage method
     // in order to have access to the object

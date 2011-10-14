@@ -114,8 +114,8 @@ private:
     static INT			m_warningOfTicketTimeLeftLockKrb5;
     static INT			m_updateDisplayCount;
     static INT	        m_alreadyPlayedDisplayCount;
-    static LONG			m_ticketTimeLeft;
-	static BOOL			m_lowTicketAlarmSound;
+    static time_t		m_ticketTimeLeft;
+    static BOOL			m_lowTicketAlarmSound;
     static LONG         m_timerMsgNotInProgress;
 
 	VOID ResetTreeNodes();
@@ -130,19 +130,19 @@ private:
     //void   GetRowWidthHeight(CDC* pDC, LPCSTR theString, int& nRowWidth,
     //                         int& nRowHeight, int& nCharWidth);
     static VOID	AlarmBeep();
-	static VOID	CALLBACK EXPORT TimerProc(HWND hWnd, UINT nMsg, UINT nIDEvent,
-                                          DWORD dwTime);
-	static VOID	UpdateTicketTime(TICKETINFO& ticketinfo);
-	static INT	GetLowTicketStatus(int);
-	static LONG	LeashTime();
+    static VOID	CALLBACK EXPORT TimerProc(HWND hWnd, UINT nMsg, UINT_PTR nIDEvent,
+					  DWORD dwTime);
+    static VOID	UpdateTicketTime(TICKETINFO& ticketinfo);
+    static INT	GetLowTicketStatus(int);
+    static time_t	LeashTime();
 
     void   SetTrayIcon(int nim, int state=0);
     void   SetTrayText(int nim, CString tip);
 
     BOOL   UpdateDisplay();
     static UINT InitTicket(void *);
-	static UINT RenewTicket(void *);
-	static UINT ImportTicket(void *);
+    static UINT RenewTicket(void *);
+    static UINT ImportTicket(void *);
 
 protected: // create from serialization only
 	DECLARE_DYNCREATE(CLeashView)

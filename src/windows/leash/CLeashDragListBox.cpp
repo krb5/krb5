@@ -66,7 +66,7 @@ void CLeashDragListBox::Dropped(int nSrcIndex, CPoint pt)
 	if (nDestIndex == nSrcIndex || nDestIndex == nSrcIndex+1)
 		return; //didn't move
 	CString str1, str2;
-	DWORD dwData;
+	DWORD_PTR dwData;
 	GetText(nSrcIndex, str1);
 	GetText(nDestIndex, str2);
 	dwData = GetItemData(nSrcIndex);

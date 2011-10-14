@@ -37,6 +37,8 @@
 
 #include <errno.h>
 
+#include <afxwin.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -191,9 +193,9 @@ BOOL CLeashApp::InitInstance()
                 0 == stricmp(optionParam+1, "i"))
             {
                 LSH_DLGINFO_EX ldi;
-				char username[64]="";
-				char realm[192]="";
-				int i=0, j=0;
+		char username[64]="";
+		char realm[192]="";
+		int i=0, j=0;
                 TicketList* ticketList = NULL;
                 if (WaitForSingleObject( ticketinfo.lockObj, INFINITE ) != WAIT_OBJECT_0)
                     throw("Unable to lock ticketinfo");
@@ -947,7 +949,7 @@ CLeashApp::ValidateConfigFiles()
                 }
 
                 char realmkey[256]="SYSTEM\\CurrentControlSet\\Control\\Lsa\\Kerberos\\Domains\\";
-                int  keylen = strlen(realmkey)-1;
+                size_t  keylen = strlen(realmkey)-1;
 
                 if ( domain[0] ) {
                     strncpy(realm,domain,256);
