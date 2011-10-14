@@ -768,7 +768,7 @@ krb5_gss_localname(OM_uint32 *minor,
 
 
     krb5_free_context(context);
-    localname->value = strdup(lname);
+    localname->value = gssalloc_strdup(lname);
     localname->length = strlen(lname);
 
     return (code == 0) ? GSS_S_COMPLETE : GSS_S_FAILURE;

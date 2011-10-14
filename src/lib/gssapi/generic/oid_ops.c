@@ -129,7 +129,7 @@ generic_gss_create_empty_oid_set(OM_uint32 *minor_status, gss_OID_set *oid_set)
 {
     *minor_status = 0;
 
-    if ((*oid_set = (gss_OID_set) malloc(sizeof(gss_OID_set_desc)))) {
+    if ((*oid_set = (gss_OID_set) gssalloc_malloc(sizeof(gss_OID_set_desc)))) {
         memset(*oid_set, 0, sizeof(gss_OID_set_desc));
         return(GSS_S_COMPLETE);
     }
@@ -155,7 +155,7 @@ generic_gss_add_oid_set_member(OM_uint32 *minor_status,
 
     elist = (*oid_set)->elements;
     /* Get an enlarged copy of the array */
-    if (((*oid_set)->elements = (gss_OID) malloc(((*oid_set)->count+1) *
+    if (((*oid_set)->elements = (gss_OID) gssalloc_malloc(((*oid_set)->count+1) *
                                                  sizeof(gss_OID_desc)))) {
         /* Copy in the old junk */
         if (elist)
@@ -166,7 +166,7 @@ generic_gss_add_oid_set_member(OM_uint32 *minor_status,
         /* Duplicate the input element */
         lastel = &(*oid_set)->elements[(*oid_set)->count];
         if ((lastel->elements =
-             (void *) malloc((size_t) member_oid->length))) {
+             (void *) gssalloc_malloc((size_t) member_oid->length))) {
             /* Success - copy elements */
             memcpy(lastel->elements, member_oid->elements,
                    (size_t) member_oid->length);
@@ -176,12 +176,12 @@ generic_gss_add_oid_set_member(OM_uint32 *minor_status,
             /* Update count */
             (*oid_set)->count++;
             if (elist)
-                free(elist);
+                gssalloc_free(elist);
             *minor_status = 0;
             return(GSS_S_COMPLETE);
         }
         else
-            free((*oid_set)->elements);
+            gssalloc_free((*oid_set)->elements);
     }
     /* Failure - restore old contents of list */
     (*oid_set)->elements = elist;
@@ -270,9 +270,7 @@ generic_gss_oid_to_str(OM_uint32 *minor_status,
         *minor_status = ENOMEM;
         return(GSS_S_FAILURE);
     }
-    oid_str->length = krb5int_buf_len(&buf)+1;
-    oid_str->value = (void *) bp;
-    return(GSS_S_COMPLETE);
+    return k5buf_to_gss(minor_status, &buf, oid_str);
 }
 
 OM_uint32
@@ -517,13 +515,13 @@ generic_gss_copy_oid_set(OM_uint32 *minor_status,
     if (new_oidset == NULL)
         return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
-    if ((copy = (gss_OID_set_desc *) calloc(1, sizeof (*copy))) == NULL) {
+    if ((copy = (gss_OID_set_desc *) gssalloc_calloc(1, sizeof (*copy))) == NULL) {
         major = GSS_S_FAILURE;
         goto done;
     }
 
     if ((copy->elements = (gss_OID_desc *)
-         calloc(oidset->count, sizeof (*copy->elements))) == NULL) {
+         gssalloc_calloc(oidset->count, sizeof (*copy->elements))) == NULL) {
         major = GSS_S_FAILURE;
         goto done;
     }
@@ -533,7 +531,7 @@ generic_gss_copy_oid_set(OM_uint32 *minor_status,
         gss_OID_desc *out = &copy->elements[i];
         gss_OID_desc *in = &oidset->elements[i];
 
-        if ((out->elements = (void *) malloc(in->length)) == NULL) {
+        if ((out->elements = (void *) gssalloc_malloc(in->length)) == NULL) {
             major = GSS_S_FAILURE;
             goto done;
         }

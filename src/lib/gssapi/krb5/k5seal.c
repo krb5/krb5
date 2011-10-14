@@ -112,7 +112,7 @@ make_seal_token_v1 (krb5_context context,
     }
     tlen = g_token_size((gss_OID) oid, 14+cksum_size+tmsglen);
 
-    if ((t = (unsigned char *) xmalloc(tlen)) == NULL)
+    if ((t = (unsigned char *) gssalloc_malloc(tlen)) == NULL)
         return(ENOMEM);
 
     /*** fill in the token */
@@ -159,14 +159,14 @@ make_seal_token_v1 (krb5_context context,
 
     code = krb5_c_checksum_length(context, md5cksum.checksum_type, &sumlen);
     if (code) {
-        xfree(t);
+        gssalloc_free(t);
         return(code);
     }
     md5cksum.length = sumlen;
 
 
     if ((plain = (unsigned char *) xmalloc(msglen ? msglen : 1)) == NULL) {
-        xfree(t);
+        gssalloc_free(t);
         return(ENOMEM);
     }
 
@@ -174,7 +174,7 @@ make_seal_token_v1 (krb5_context context,
         if ((code = kg_make_confounder(context, enc->keyblock.enctype,
                                        plain))) {
             xfree(plain);
-            xfree(t);
+            gssalloc_free(t);
             return(code);
         }
     }
@@ -188,7 +188,7 @@ make_seal_token_v1 (krb5_context context,
     if (! (data_ptr =
            (char *) xmalloc(8 + (bigend ? text->length : msglen)))) {
         xfree(plain);
-        xfree(t);
+        gssalloc_free(t);
         return(ENOMEM);
     }
     (void) memcpy(data_ptr, ptr-2, 8);
@@ -204,7 +204,7 @@ make_seal_token_v1 (krb5_context context,
 
     if (code) {
         xfree(plain);
-        xfree(t);
+        gssalloc_free(t);
         return(code);
     }
     switch(signalg) {
@@ -218,7 +218,7 @@ make_seal_token_v1 (krb5_context context,
         if (code) {
             krb5_free_checksum_contents(context, &md5cksum);
             xfree (plain);
-            xfree(t);
+            gssalloc_free(t);
             return code;
         }
 
@@ -249,7 +249,7 @@ make_seal_token_v1 (krb5_context context,
     if ((code = kg_make_seq_num(context, seq, direction?0:0xff,
                                 (krb5_ui_4)*seqnum, ptr+14, ptr+6))) {
         xfree (plain);
-        xfree(t);
+        gssalloc_free(t);
         return(code);
     }
 
@@ -265,7 +265,7 @@ make_seal_token_v1 (krb5_context context,
             if (code)
             {
                 xfree(plain);
-                xfree(t);
+                gssalloc_free(t);
                 return(code);
             }
             assert (enc_key->length == 16);
@@ -279,7 +279,7 @@ make_seal_token_v1 (krb5_context context,
             if (code)
             {
                 xfree(plain);
-                xfree(t);
+                gssalloc_free(t);
                 return(code);
             }
         }
@@ -290,7 +290,7 @@ make_seal_token_v1 (krb5_context context,
                                    (krb5_pointer) (ptr+cksum_size+14),
                                    tmsglen))) {
                 xfree(plain);
-                xfree(t);
+                gssalloc_free(t);
                 return(code);
             }
         }

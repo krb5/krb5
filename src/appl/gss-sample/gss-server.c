@@ -415,13 +415,14 @@ test_import_export_context(gss_ctx_id_t *context)
 static int
 sign_server(int s, gss_cred_id_t server_creds, int export)
 {
-    gss_buffer_desc client_name, xmit_buf, msg_buf;
+    gss_buffer_desc client_name, recv_buf, unwrap_buf, mic_buf, *msg_buf, *send_buf;
     gss_ctx_id_t context;
     OM_uint32 maj_stat, min_stat;
     int     i, conf_state;
     OM_uint32 ret_flags;
     char   *cp;
     int     token_flags;
+    int     send_flags;
 
     /* Establish a context with the client */
     if (server_establish_context(s, server_creds, &context,
@@ -444,22 +445,22 @@ sign_server(int s, gss_cred_id_t server_creds, int export)
 
     do {
         /* Receive the message token */
-        if (recv_token(s, &token_flags, &xmit_buf) < 0)
+        if (recv_token(s, &token_flags, &recv_buf) < 0)
             return (-1);
 
         if (token_flags & TOKEN_NOOP) {
             if (logfile)
                 fprintf(logfile, "NOOP token\n");
-            if (xmit_buf.value) {
-                free(xmit_buf.value);
-                xmit_buf.value = 0;
+            if (recv_buf.value) {
+                free(recv_buf.value);
+                recv_buf.value = 0;
             }
             break;
         }
 
         if (verbose && logfile) {
             fprintf(logfile, "Message token (flags=%d):\n", token_flags);
-            print_token(&xmit_buf);
+            print_token(&recv_buf);
         }
 
         if ((context == GSS_C_NO_CONTEXT) &&
@@ -468,77 +469,81 @@ sign_server(int s, gss_cred_id_t server_creds, int export)
             if (logfile)
                 fprintf(logfile,
                         "Unauthenticated client requested authenticated services!\n");
-            if (xmit_buf.value) {
-                free(xmit_buf.value);
-                xmit_buf.value = 0;
+            if (recv_buf.value) {
+                free(recv_buf.value);
+                recv_buf.value = 0;
             }
             return (-1);
         }
 
         if (token_flags & TOKEN_WRAPPED) {
-            maj_stat = gss_unwrap(&min_stat, context, &xmit_buf, &msg_buf,
+            maj_stat = gss_unwrap(&min_stat, context, &recv_buf, &unwrap_buf,
                                   &conf_state, (gss_qop_t *) NULL);
             if (maj_stat != GSS_S_COMPLETE) {
                 display_status("unsealing message", maj_stat, min_stat);
-                if (xmit_buf.value) {
-                    free(xmit_buf.value);
-                    xmit_buf.value = 0;
+                if (recv_buf.value) {
+                    free(recv_buf.value);
+                    recv_buf.value = 0;
                 }
                 return (-1);
             } else if (!conf_state && (token_flags & TOKEN_ENCRYPTED)) {
                 fprintf(stderr, "Warning!  Message not encrypted.\n");
             }
 
-            if (xmit_buf.value) {
-                free(xmit_buf.value);
-                xmit_buf.value = 0;
+            if (recv_buf.value) {
+                free(recv_buf.value);
+                recv_buf.value = 0;
             }
+            msg_buf = &unwrap_buf;
         } else {
-            msg_buf = xmit_buf;
+            unwrap_buf.value = NULL;
+            unwrap_buf.length = 0;
+            msg_buf = &recv_buf;
         }
 
         if (logfile) {
             fprintf(logfile, "Received message: ");
-            cp = msg_buf.value;
+            cp = msg_buf->value;
             if ((isprint((int) cp[0]) || isspace((int) cp[0])) &&
                 (isprint((int) cp[1]) || isspace((int) cp[1]))) {
-                fprintf(logfile, "\"%.*s\"\n", (int) msg_buf.length,
-                        (char *) msg_buf.value);
+                fprintf(logfile, "\"%.*s\"\n", (int) msg_buf->length,
+                        (char *) msg_buf->value);
             } else {
                 fprintf(logfile, "\n");
-                print_token(&msg_buf);
+                print_token(msg_buf);
             }
         }
 
         if (token_flags & TOKEN_SEND_MIC) {
             /* Produce a signature block for the message */
             maj_stat = gss_get_mic(&min_stat, context, GSS_C_QOP_DEFAULT,
-                                   &msg_buf, &xmit_buf);
+                                   msg_buf, &mic_buf);
             if (maj_stat != GSS_S_COMPLETE) {
                 display_status("signing message", maj_stat, min_stat);
                 return (-1);
             }
-
-            if (msg_buf.value) {
-                free(msg_buf.value);
-                msg_buf.value = 0;
-            }
-
-            /* Send the signature block to the client */
-            if (send_token(s, TOKEN_MIC, &xmit_buf) < 0)
-                return (-1);
-
-            if (xmit_buf.value) {
-                free(xmit_buf.value);
-                xmit_buf.value = 0;
-            }
+            send_flags = TOKEN_MIC;
+            send_buf = &mic_buf;
         } else {
-            if (msg_buf.value) {
-                free(msg_buf.value);
-                msg_buf.value = 0;
-            }
-            if (send_token(s, TOKEN_NOOP, empty_token) < 0)
-                return (-1);
+            mic_buf.value = NULL;
+            mic_buf.length = 0;
+            send_flags = TOKEN_NOOP;
+            send_buf = empty_token;
+        }
+        if (recv_buf.value) {
+            free(recv_buf.value);
+            recv_buf.value = NULL;
+        }
+        if (unwrap_buf.value) {
+            gss_release_buffer(&min_stat, &unwrap_buf);
+        }
+
+        /* Send the signature block or NOOP to the client */
+        if (send_token(s, send_flags, send_buf) < 0)
+            return (-1);
+
+        if (mic_buf.value) {
+            gss_release_buffer(&min_stat, &mic_buf);
         }
     } while (1 /* loop will break if NOOP received */ );
 

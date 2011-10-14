@@ -125,7 +125,7 @@ gssint_wrap_aead_iov_shim(gss_mechanism mech,
 	output_message_buffer->length += iov[i].buffer.length;
     }
 
-    output_message_buffer->value = malloc(output_message_buffer->length);
+    output_message_buffer->value = gssalloc_malloc(output_message_buffer->length);
     if (output_message_buffer->value == NULL) {
 	*minor_status = ENOMEM;
 	return GSS_S_FAILURE;

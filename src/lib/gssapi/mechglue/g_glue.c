@@ -724,7 +724,7 @@ gssint_create_copy_buffer(srcBuf, destBuf, addNullChar)
     else
 	len = srcBuf->length;
 
-    if (!(aBuf->value = (void*)malloc(len))) {
+    if (!(aBuf->value = (void*)gssalloc_malloc(len))) {
 	free(aBuf);
 	return (GSS_S_FAILURE);
     }

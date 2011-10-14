@@ -49,7 +49,7 @@ gss_buffer_t		buffer;
 
     if ((buffer->length) &&
 	(buffer->value)) {
-	    free(buffer->value);
+	    gssalloc_free(buffer->value);
 	    buffer->length = 0;
 	    buffer->value = NULL;
     }

@@ -84,7 +84,7 @@ gss_buffer_t		status_string;
        mapped to a flat numbering space.  Look up the value we got
        passed.  If it's not found, complain.  */
     if (status_value == 0) {
-	status_string->value = strdup("Unknown error");
+	status_string->value = gssalloc_strdup("Unknown error");
 	if (status_string->value == NULL) {
 	    *minor_status = ENOMEM;
 	    map_errcode(minor_status);
@@ -353,7 +353,7 @@ gss_buffer_t outStr;
 
 	/* now copy the status code and return to caller */
 	outStr->length = strlen(errStr);
-	outStr->value = strdup(errStr);
+	outStr->value = gssalloc_strdup(errStr);
 	if (outStr->value == NULL) {
 		outStr->length = 0;
 		return (GSS_S_FAILURE);

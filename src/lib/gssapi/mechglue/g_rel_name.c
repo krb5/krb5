@@ -70,7 +70,7 @@ gss_name_t *		input_name;
 
     if (union_name->external_name != GSS_C_NO_BUFFER) {
 	if (union_name->external_name->value != NULL)
-	    free(union_name->external_name->value);
+	    gssalloc_free(union_name->external_name->value);
 	free(union_name->external_name);
     }
 

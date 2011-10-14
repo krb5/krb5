@@ -661,7 +661,7 @@ kg_release_iov(gss_iov_buffer_desc *iov, int iov_count)
 
     for (i = 0; i < iov_count; i++) {
         if (iov[i].type & GSS_IOV_BUFFER_FLAG_ALLOCATED) {
-            free(iov[i].buffer.value);
+            gssalloc_free(iov[i].buffer.value);
             iov[i].buffer.length = 0;
             iov[i].buffer.value = NULL;
             iov[i].type &= ~(GSS_IOV_BUFFER_FLAG_ALLOCATED);
@@ -761,7 +761,7 @@ kg_allocate_iov(gss_iov_buffer_t iov, size_t size)
     assert(iov->type & GSS_IOV_BUFFER_FLAG_ALLOCATE);
 
     iov->buffer.length = size;
-    iov->buffer.value = xmalloc(size);
+    iov->buffer.value = gssalloc_malloc(size);
     if (iov->buffer.value == NULL) {
         iov->buffer.length = 0;
         return ENOMEM;

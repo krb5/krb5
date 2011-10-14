@@ -136,7 +136,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
         /* Get size of ciphertext.  */
         bufsize = 16 + krb5_encrypt_size (plain.length, key->keyblock.enctype);
         /* Allocate space for header plus encrypted data.  */
-        outbuf = malloc(bufsize);
+        outbuf = gssalloc_malloc(bufsize);
         if (outbuf == NULL) {
             free(plain.data);
             return ENOMEM;
@@ -204,7 +204,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
         assert(cksumsize <= 0xffff);
 
         bufsize = 16 + message2->length + cksumsize;
-        outbuf = malloc(bufsize);
+        outbuf = gssalloc_malloc(bufsize);
         if (outbuf == NULL) {
             free(plain.data);
             plain.data = 0;
@@ -290,7 +290,7 @@ gss_krb5int_make_seal_token_v3 (krb5_context context,
     return 0;
 
 error:
-    free(outbuf);
+    gssalloc_free(outbuf);
     token->value = NULL;
     token->length = 0;
     return err;
@@ -401,13 +401,13 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
             cipher.ciphertext.length = bodysize - 16;
             cipher.ciphertext.data = (char *)ptr + 16;
             plain.length = bodysize - 16;
-            plain.data = malloc(plain.length);
+            plain.data = gssalloc_malloc(plain.length);
             if (plain.data == NULL)
                 goto no_mem;
             err = krb5_k_decrypt(context, key, key_usage, 0,
                                  &cipher, &plain);
             if (err) {
-                free(plain.data);
+                gssalloc_free(plain.data);
                 goto error;
             }
             /* Don't use bodysize here!  Use the fact that
@@ -424,7 +424,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
             message_buffer->value = plain.data;
             message_buffer->length = plain.length - ec - 16;
             if(message_buffer->length == 0) {
-                free(message_buffer->value);
+                gssalloc_free(message_buffer->value);
                 message_buffer->value = NULL;
             }
         } else {
@@ -467,7 +467,7 @@ gss_krb5int_unseal_token_v3(krb5_context *contextptr,
                 return GSS_S_BAD_SIG;
             }
             message_buffer->length = plain.length - 16;
-            message_buffer->value = malloc(message_buffer->length);
+            message_buffer->value = gssalloc_malloc(message_buffer->length);
             if (message_buffer->value == NULL)
                 goto no_mem;
             memcpy(message_buffer->value, plain.data, message_buffer->length);

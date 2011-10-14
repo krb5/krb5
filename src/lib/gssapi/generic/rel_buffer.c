@@ -48,7 +48,7 @@ generic_gss_release_buffer(
         return(GSS_S_COMPLETE);
 
     if (buffer->value) {
-        free(buffer->value);
+        gssalloc_free(buffer->value);
         buffer->length = 0;
         buffer->value = NULL;
     }
