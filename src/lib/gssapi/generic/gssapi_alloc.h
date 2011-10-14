@@ -10,11 +10,6 @@
 #include "winbase.h"
 #endif
 #include <string.h>
-/*
- * Note that we'll need to do something else if we decide to install
- * this header for mechanisms.
- */
-#include <k5-platform.h>
 
 static inline void
 gssalloc_free(void * value)
@@ -61,10 +56,11 @@ gssalloc_realloc(void *value, size_t size)
 static inline char *
 gssalloc_strdup(const char *str)
 {
-    int size = strlen(str)+1;
+    size_t size = strlen(str)+1;
     char *copy = gssalloc_malloc(size);
     if (copy) {
-        strlcpy(copy, str, size);
+        memcpy(copy, str, size);
+	copy[size-1] = '\0';
     }
     return copy;
 }
