@@ -79,5 +79,5 @@ $(OUTPRE)$(DLL_NAME).dll: $(DEF_FILE) $(OBJS) $(XOBJS)
 
 #TODO: Add dependencies on include files here
 
-$(RESFILE): lsh_pwd.rc
+$(RESFILE): lsh_pwd.rc ../version.rc ../kerberos.ver
 
