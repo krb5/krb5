@@ -50,6 +50,7 @@ OBJS= \
 HEADERS= \
 	gssapi/gssapi.h \
 	gssapi/gssapi_krb5.h \
+	gssapi/gssapi_alloc.h \
 	gssapi/gssapi_ext.h \
 	gssapi.h \
 	gssapiP_krb5.h \
@@ -150,6 +151,8 @@ gssapi/gssapi.h: gssapi $(GSS_GENERIC_BUILD)/gssapi.h
 	$(CP) $(GSS_GENERIC_BUILD)/gssapi.h $@
 gssapi/gssapi_krb5.h: gssapi $(GSS_KRB5_BUILD)/gssapi_krb5.h
 	$(CP) $(GSS_KRB5_BUILD)/gssapi_krb5.h $@
+gssapi/gssapi_alloc.h: gssapi $(GSS_GENERIC)/gssapi_alloc.h
+	$(CP) $(GSS_GENERIC)/gssapi_alloc.h $@
 gssapi/gssapi_ext.h: gssapi $(GSS_GENERIC)/gssapi_ext.h
 	$(CP) $(GSS_GENERIC)/gssapi_ext.h $@
 gssapiP_krb5.h: $(GSS_KRB5)/gssapiP_krb5.h

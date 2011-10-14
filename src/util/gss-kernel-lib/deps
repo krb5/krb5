@@ -3,7 +3,7 @@
 #
 $(OUTPRE)k5seal.$(OBJEXT): autoconf.h com_err.h gssapi/gssapi.h \
   gssapi/gssapi_ext.h gssapi/gssapi_krb5.h gssapiP_generic.h \
-  gssapiP_krb5.h gssapi_err_generic.h gssapi_err_krb5.h \
+  gssapiP_krb5.h gssapi_err_generic.h gssapi_err_krb5.h  gssapi/gssapi_alloc.h\
   gssapi_generic.h k5-buf.h k5-err.h k5-gmt_mktime.h \
   k5-int-pkinit.h k5-int.h k5-platform.h k5-plugin.h \
   k5-thread.h k5-trace.h k5seal.c krb5.h krb5/authdata_plugin.h \
@@ -94,7 +94,7 @@ $(OUTPRE)util_ordering.$(OBJEXT): autoconf.h com_err.h \
   gssapi_err_generic.h gssapi_generic.h k5-buf.h k5-platform.h \
   k5-thread.h util_ordering.c
 $(OUTPRE)kernel_gss.$(OBJEXT): autoconf.h com_err.h \
-  gssapi/gssapi.h gssapi/gssapi_ext.h gssapi/gssapi_krb5.h \
+  gssapi/gssapi.h gssapi/gssapi_ext.h gssapi/gssapi_krb5.h  gssapi/gssapi_alloc.h\
   gssapiP_generic.h gssapiP_krb5.h gssapi_err_generic.h \
   gssapi_err_krb5.h gssapi_generic.h k5-buf.h k5-err.h \
   k5-gmt_mktime.h k5-int-pkinit.h k5-int.h k5-platform.h \

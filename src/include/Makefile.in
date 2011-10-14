@@ -123,7 +123,7 @@ clean-unix::
 clean-windows::
 	$(RM) com_err.h profile.h
 	$(RM) gssapi\gssapi.h gssapi\gssapi_generic.h gssapi\gssapi_krb5.h
-	$(RM) gssapi\gssapi_ext.h gssapi\timestamp
+	$(RM) gssapi\gssapi_alloc.h gssapi\gssapi_ext.h gssapi\timestamp
 	if exist gssapi\nul rmdir /s /q gssapi
 	$(RM) osconf.h autoconf.h autoconf.stamp
 	@echo Making clean in include

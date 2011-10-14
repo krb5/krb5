@@ -547,6 +547,7 @@ install-windows::
 	copy include\profile.h "$(KRB_INSTALL_DIR)\include\."
 	copy include\com_err.h "$(KRB_INSTALL_DIR)\include\."
 	copy include\gssapi\gssapi.h "$(KRB_INSTALL_DIR)\include\gssapi\."
+	copy include\gssapi\gssapi_alloc.h "$(KRB_INSTALL_DIR)\include\gssapi\."
 	copy include\gssapi\gssapi_krb5.h "$(KRB_INSTALL_DIR)\include\gssapi\."
 	copy include\gssapi\gssapi_ext.h "$(KRB_INSTALL_DIR)\include\gssapi\."
 	copy lib\$(OUTPRE)*.lib "$(KRB_INSTALL_DIR)\lib\."
