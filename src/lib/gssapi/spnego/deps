@@ -3,9 +3,9 @@
 #
 spnego_mech.so spnego_mech.po $(OUTPRE)spnego_mech.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/gssapi/gssapi.h \
-  $(BUILDTOP)/include/gssapi/gssapi_ext.h $(BUILDTOP)/include/krb5/krb5.h \
-  $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
-  $(COM_ERR_DEPS) $(srcdir)/../generic/gssapiP_generic.h \
+  $(BUILDTOP)/include/gssapi/gssapi_alloc.h $(BUILDTOP)/include/gssapi/gssapi_ext.h \
+  $(BUILDTOP)/include/krb5/krb5.h $(BUILDTOP)/include/osconf.h \
+  $(BUILDTOP)/include/profile.h $(COM_ERR_DEPS) $(srcdir)/../generic/gssapiP_generic.h \
   $(srcdir)/../generic/gssapi_ext.h $(srcdir)/../generic/gssapi_generic.h \
   $(srcdir)/../mechglue/mechglue.h $(srcdir)/../mechglue/mglueP.h \
   $(top_srcdir)/include/k5-buf.h $(top_srcdir)/include/k5-err.h \

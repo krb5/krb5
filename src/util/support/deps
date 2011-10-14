@@ -32,6 +32,9 @@ utf8_conv.so utf8_conv.po $(OUTPRE)utf8_conv.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(top_srcdir)/include/k5-platform.h \
   $(top_srcdir)/include/k5-thread.h $(top_srcdir)/include/k5-utf8.h \
   supp-int.h utf8_conv.c
+gettimeofday.so gettimeofday.po $(OUTPRE)gettimeofday.$(OBJEXT): \
+  $(BUILDTOP)/include/autoconf.h $(top_srcdir)/include/k5-platform.h \
+  $(top_srcdir)/include/k5-thread.h gettimeofday.c
 strlcpy.so strlcpy.po $(OUTPRE)strlcpy.$(OBJEXT): $(BUILDTOP)/include/autoconf.h \
   $(top_srcdir)/include/k5-platform.h $(top_srcdir)/include/k5-thread.h \
   strlcpy.c
