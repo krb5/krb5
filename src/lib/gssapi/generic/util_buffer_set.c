@@ -38,7 +38,7 @@ generic_gss_create_empty_buffer_set(OM_uint32 * minor_status,
 {
     gss_buffer_set_t set;
 
-    set = (gss_buffer_set_desc *) malloc(sizeof(*set));
+    set = (gss_buffer_set_desc *) gssalloc_malloc(sizeof(*set));
     if (set == GSS_C_NO_BUFFER_SET) {
         *minor_status = ENOMEM;
         return GSS_S_FAILURE;
@@ -71,7 +71,7 @@ generic_gss_add_buffer_set_member(OM_uint32 * minor_status,
     }
 
     set = *buffer_set;
-    set->elements = (gss_buffer_desc *)realloc(set->elements,
+    set->elements = (gss_buffer_desc *)gssalloc_realloc(set->elements,
                                                (set->count + 1) *
                                                sizeof(gss_buffer_desc));
     if (set->elements == NULL) {
@@ -81,7 +81,7 @@ generic_gss_add_buffer_set_member(OM_uint32 * minor_status,
 
     p = &set->elements[set->count];
 
-    p->value = malloc(member_buffer->length);
+    p->value = gssalloc_malloc(member_buffer->length);
     if (p->value == NULL) {
         *minor_status = ENOMEM;
         return GSS_S_FAILURE;
@@ -113,13 +113,13 @@ generic_gss_release_buffer_set(OM_uint32 * minor_status,
     }
 
     if ((*buffer_set)->elements != NULL) {
-        free((*buffer_set)->elements);
+        gssalloc_free((*buffer_set)->elements);
         (*buffer_set)->elements = NULL;
     }
 
     (*buffer_set)->count = 0;
 
-    free(*buffer_set);
+    gssalloc_free(*buffer_set);
     *buffer_set = GSS_C_NO_BUFFER_SET;
 
     return GSS_S_COMPLETE;

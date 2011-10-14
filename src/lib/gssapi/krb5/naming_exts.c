@@ -231,15 +231,22 @@ kg_data_list_to_buffer_set_nocopy(krb5_data **pdata,
         ;
 
     set->count = i;
-    set->elements = calloc(i, sizeof(gss_buffer_desc));
+    set->elements = gssalloc_calloc(i, sizeof(gss_buffer_desc));
     if (set->elements == NULL) {
         gss_release_buffer_set(&minor_status, &set);
         return ENOMEM;
     }
 
-    for (i = 0; i < set->count; i++) {
-        set->elements[i].length = data[i].length;
-        set->elements[i].value = data[i].data;
+    /*
+     * Copy last element first so data remains properly
+     * NULL-terminated in case of allocation failure
+     * in data_to_gss() on windows.
+     */
+    for (i = set->count-1; i >= 0; i--) {
+        if (data_to_gss(&data[i], &set->elements[i])) {
+            gss_release_buffer_set(&minor_status, &set);
+            return ENOMEM;
+        }
     }
 
     free(data);

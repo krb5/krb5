@@ -48,6 +48,16 @@ gssalloc_calloc(size_t count, size_t size)
 #endif
 }
 
+static inline void *
+gssalloc_realloc(void *value, size_t size)
+{
+#if _WIN32
+    return HeapReAlloc(GetProcessHeap(), 0, value, size);
+#else
+    return realloc(value, size);
+#endif
+}
+
 static inline char *
 gssalloc_strdup(const char *str)
 {
