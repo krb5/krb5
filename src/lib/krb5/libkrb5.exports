@@ -440,7 +440,6 @@ krb5_make_authdata_kdc_issued
 krb5_make_full_ipaddr
 krb5_make_fulladdr
 krb5_max_dgram_size
-krb5_max_skdc_timeout
 krb5_mcc_ops
 krb5_merge_authdata
 krb5_mk_1cred
@@ -570,8 +569,6 @@ krb5_set_principal_realm
 krb5_set_real_time
 krb5_set_time_offsets
 krb5_size_opaque
-krb5_skdc_timeout_1
-krb5_skdc_timeout_shift
 krb5_sname_match
 krb5_sname_to_principal
 krb5_string_to_deltat

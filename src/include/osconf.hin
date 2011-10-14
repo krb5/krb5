@@ -42,7 +42,6 @@
 
 #if defined(_WIN32)
 #define DEFAULT_PROFILE_FILENAME "krb5.ini"
-#define DEFAULT_LNAME_FILENAME  "/aname"
 #define DEFAULT_KEYTAB_NAME     "FILE:%s\\krb5kt"
 #else /* !_WINDOWS */
 #if TARGET_OS_MAC
@@ -56,7 +55,6 @@
 #define DEFAULT_PROFILE_PATH        DEFAULT_SECURE_PROFILE_PATH
 #endif
 #define DEFAULT_KEYTAB_NAME     "FILE:/etc/krb5.keytab"
-#define DEFAULT_LNAME_FILENAME  "@PREFIX/lib/krb5.aname"
 #endif /* _WINDOWS  */
 
 #define DEFAULT_PLUGIN_BASE_DIR "@LIBDIR/krb5/plugins"
@@ -90,7 +88,6 @@
 #define KRB5_DEFAULT_SEC_PORT   750
 
 #define DEFAULT_KPASSWD_PORT    464
-#define KPASSWD_PORTNAME "kpasswd"
 
 #define DEFAULT_KDC_UDP_PORTLIST "88,750"
 #define DEFAULT_KDC_TCP_PORTLIST ""
@@ -108,9 +105,6 @@
     "des3-cbc-sha1:normal arcfour-hmac-md5:normal"
 
 #define MAX_DGRAM_SIZE  4096
-#define MAX_SKDC_TIMEOUT 30
-#define SKDC_TIMEOUT_SHIFT 2            /* left shift of timeout for backoff */
-#define SKDC_TIMEOUT_1 1                /* seconds for first timeout */
 
 #define RCTMPDIR        "@KRB5RCTMPDIR" /* directory to store replay caches */
 
@@ -127,7 +121,6 @@
 #define KPROP_DEFAULT_FILE "@LOCALSTATEDIR/krb5kdc/slave_datatrans"
 #define KPROPD_DEFAULT_FILE "@LOCALSTATEDIR/krb5kdc/from_master"
 #define KPROPD_DEFAULT_KDB5_UTIL "@SBINDIR/kdb5_util"
-#define KPROPD_DEFAULT_KDB5_EDIT "@SBINDIR/kdb5_edit"
 #define KPROPD_DEFAULT_KPROP "@SBINDIR/kprop"
 #define KPROPD_DEFAULT_KRB_DB DEFAULT_KDB_FILE
 #define KPROPD_ACL_FILE "@LOCALSTATEDIR/krb5kdc/kpropd.acl"
