@@ -825,6 +825,8 @@ main(argc, argv)
                 usage();
             max_threads = atoi(*argv);
 #endif
+        } else if (strcmp(*argv, "-dce") == 0) {
+            gss_flags |= GSS_C_DCE_STYLE;
         } else if (strcmp(*argv, "-d") == 0) {
             gss_flags |= GSS_C_DELEG_FLAG;
         } else if (strcmp(*argv, "-seq") == 0) {

@@ -72,9 +72,13 @@ for realm in multipass_realms():
     tgs_test(realm, ['-krb5'])
     tgs_test(realm, ['-spnego'])
     tgs_test(realm, ['-iakerb'])
+    # test default (i.e., krb5) mechanism with GSS_C_DCE_STYLE
+    tgs_test(realm, ['-dce'])
 
     as_test(realm, ['-krb5'])
     as_test(realm, ['-spnego'])
     as_test(realm, ['-iakerb'])
+    # test default (i.e., krb5) mechanism with GSS_C_DCE_STYLE
+    as_test(realm, ['-dce'])
 
 success('GSS sample application')
