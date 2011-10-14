@@ -116,7 +116,7 @@ registry_string_set(HKEY hkey, char *sub, char *x)
 {
 	DWORD   err;
 
-	err = RegSetValueEx(hkey, sub, 0, REG_SZ, (BYTE *)x, strlen(x) + 1);
+	err = RegSetValueEx(hkey, sub, 0, REG_SZ, (BYTE *)x, (DWORD)strlen(x) + 1);
 	if (err != ERROR_SUCCESS)
 		return -1;
 

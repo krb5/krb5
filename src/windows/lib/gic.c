@@ -103,7 +103,7 @@ gic_dialog_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
 	for (n = 0 ; n < gd->num_prompts ; n++) {
 		Edit_GetText(GetDlgItem(hwnd, id), gd->prompts[n].reply->data,
 			gd->prompts[n].reply->length);
-		gd->prompts[n].reply->length = strlen(gd->prompts[n].reply->data);
+		gd->prompts[n].reply->length = (unsigned)strlen(gd->prompts[n].reply->data);
 		id += 2;
 	}
 
@@ -113,7 +113,7 @@ gic_dialog_command(HWND hwnd, int cid, HWND hwndCtl, UINT codeNotify)
 /*
  * The dialog callback.
  */
-static BOOL CALLBACK
+static INT_PTR CALLBACK
 gic_dialog(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message) {
