@@ -82,6 +82,7 @@ static char far * near parse_str(char far*buffer,char far*result)
         return buffer;
 }
 
+#ifndef NO_KRB4
 int krb_get_krbhst(char* h, char* r, int n)
 {
 	char lbstorage[BUFSIZ];
@@ -139,6 +140,7 @@ int krb_get_krbhst(char* h, char* r, int n)
     (void) fclose(cnffile);
     return(KSUCCESS);
 }
+#endif
 
 BOOL CKrbConfigOptions::OnInitDialog()
 {
@@ -152,6 +154,7 @@ BOOL CKrbConfigOptions::OnInitDialog()
 
     CPropertyPage::OnInitDialog();
 
+#ifndef NO_KRB4
 	if (CLeashApp::m_hKrb4DLL && !CLeashApp::m_hKrb5DLL)
 	{  // Krb4 NOT krb5
 		// Fill in all edit boxes
@@ -200,7 +203,7 @@ BOOL CKrbConfigOptions::OnInitDialog()
 
 					m_hostServer = krbhst;
 
-					// New suff to put realms in Combo Box
+					// New stuff to put realms in Combo Box
 					CStdioFile krbCon;
 					if (!krbCon.Open(CKrbProperties::m_krbPath, CFile::modeRead))
 					{
@@ -262,7 +265,9 @@ BOOL CKrbConfigOptions::OnInitDialog()
 			} // end of 'Check for Host' else statement
 		} // end of 'place krbRealm in Edit box' else
 	}
-	else if (CLeashApp::m_hKrb5DLL)
+	else
+#endif
+	if (CLeashApp::m_hKrb5DLL)
 	{ // Krb5 OR krb5 AND krb4
 		char *realm = NULL;
 		pkrb5_get_default_realm(CLeashApp::m_krbv5_context, &realm);
@@ -472,6 +477,7 @@ void CKrbConfigOptions::OnSelchangeEditDefaultRealm()
 					SetDlgItemText(IDC_EDIT_REALM_HOSTNAME, "No KDC information available");
 			}
 		}
+#ifndef NO_KRB4
 		else
 		{
 			CHAR krbhst[MAX_HSTNM + 1];
@@ -496,6 +502,7 @@ void CKrbConfigOptions::OnSelchangeEditDefaultRealm()
 			if (strlen(krbhst))
 			  SetDlgItemText(IDC_EDIT_REALM_HOSTNAME, m_hostServer);
 		}
+#endif
 	}
 }
 

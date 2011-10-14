@@ -81,8 +81,8 @@ void CLeashDebugWindow::OnCancel()
 		pApp = AfxGetApp();
 		pApp->WriteProfileInt("Settings", "DebugWindow", FALSE_FLAG);
 		m_pView->PostMessage(WM_GOODBYE, IDCANCEL);	// modeless case
-        pset_krb_debug(OFF);
-	    pset_krb_ap_req_debug(OFF);
+////        pset_krb_debug(OFF);
+////	    pset_krb_ap_req_debug(OFF);
     }
 	else
 	{
@@ -109,8 +109,8 @@ BOOL CLeashDebugWindow::OnInitDialog()
 	CDialog::OnInitDialog();
 
 	// Set Debug flags
-	pset_krb_debug(ON); //(int)m_debugListBox.GetSafeHwnd()
-    pset_krb_ap_req_debug(ON);
+////	pset_krb_debug(ON); //(int)m_debugListBox.GetSafeHwnd()
+////    pset_krb_ap_req_debug(ON);
 
 	if (*m_debugFilePath != 0)
 	  SetDlgItemText(IDC_LOG_FILE_LOCATION_TEXT, m_debugFilePath);

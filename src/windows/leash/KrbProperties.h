@@ -25,8 +25,10 @@
 #include "KrbConfigOptions.h"
 #include "KrbRealmHostMaintenance.h"
 #include "KrbDomainRealmMaintenance.h"
+#ifndef NO_KRB4
 #include "Krb4DomainRealmMaintenance.h"
 #include "Krb4RealmHostMaintenance.h"
+#endif
 #include "KrbMiscConfigOpt.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -40,9 +42,13 @@ private:
 public:
 	//CKrbConfigFileLocation m_fileLocation;
 	CKrbConfigOptions m_configOptions;
+#ifndef NO_KRB4
 	CKrb4RealmHostMaintenance m_krb4RealmHostMaintenance;
+#endif
 	CKrbRealmHostMaintenance m_realmHostMaintenance;
+#ifndef NO_KRB4
 	CKrb4DomainRealmMaintenance m_krb4DomainRealmMaintenance;
+#endif
 	CKrbDomainRealmMaintenance m_domainRealmMaintenance;
     CKrbMiscConfigOpt m_miscConfigOpt;
 

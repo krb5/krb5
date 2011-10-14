@@ -195,7 +195,8 @@ WINMAKEFILES=Makefile \
 	windows\Makefile windows\lib\Makefile \
 	windows\cns\Makefile windows\gina\Makefile \
 	windows\ms2mit\Makefile \
-	windows\wintel\Makefile windows\kfwlogon\Makefile windows\leashdll\Makefile
+	windows\wintel\Makefile windows\kfwlogon\Makefile \
+	windows\leashdll\Makefile windows\leash\Makefile
 
 ##DOS##Makefile-windows:: $(MKFDEP) $(WINMAKEFILES)
 
@@ -323,6 +324,8 @@ WINMAKEFILES=Makefile \
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\leashdll\Makefile: windows\leashdll\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##windows\leash\Makefile: windows\leash\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
 
 clean-windows:: Makefile-windows
 
@@ -367,7 +370,7 @@ WINFILES= \
 	ccapi/test/* \
 	util/windows/* windows/* windows/wshelper/* windows/lib/* windows/cns/* \
 	windows/wintel/* windows/gina/* windows/ms2mit/* \
-	windows/kfwlogon/* windows/leashdll/*
+	windows/kfwlogon/* windows/leashdll/* windows/leash/*
 
 WINBINARYFILES=	windows/*/*.ico windows/*/*.doc windows/*/*.hlp \
 	windows/*/*.hpj

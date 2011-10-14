@@ -18,7 +18,7 @@
 
 #include <tlhelp32.h>
 #include <loadfuncs-krb5.h>
-#include <loadfuncs-krb.h>
+////#include <loadfuncs-krb.h>
 #include <loadfuncs-profile.h>
 #include <loadfuncs-leash.h>
 
@@ -151,22 +151,12 @@ extern DECL_FUNC_PTR(Leash_importable);
 extern DECL_FUNC_PTR(Leash_renew);
 extern DECL_FUNC_PTR(Leash_reset_defaults);
 
+////Do we still need this one?
 #define pLeashKRB4GetTickets     pnot_an_API_LeashKRB4GetTickets
 #define pLeashKRB5GetTickets     pnot_an_API_LeashKRB5GetTickets
 #define pLeashAFSGetToken        pnot_an_API_LeashAFSGetToken
 #define pLeashFreeTicketList     pnot_an_API_LeashFreeTicketList
 #define pLeashGetTimeServerName  pnot_an_API_LeashGetTimeServerName
-
-// krb4 functions
-extern DECL_FUNC_PTR(set_krb_debug);
-extern DECL_FUNC_PTR(set_krb_ap_req_debug);
-extern DECL_FUNC_PTR(krb_get_krbconf2);
-extern DECL_FUNC_PTR(krb_get_krbrealm2);
-extern DECL_FUNC_PTR(tkt_string);
-extern DECL_FUNC_PTR(krb_set_tkt_string);
-extern DECL_FUNC_PTR(krb_realmofhost);
-extern DECL_FUNC_PTR(krb_get_lrealm);
-extern DECL_FUNC_PTR(krb_get_krbhst);
 
 // psapi functions
 extern DECL_FUNC_PTR(GetModuleFileNameExA);
@@ -235,6 +225,7 @@ extern DECL_FUNC_PTR(profile_release_string);
 #define KRB_FILE		"KRB.CON"
 #define KRBREALM_FILE	"KRBREALM.CON"
 #define TICKET_FILE		"TICKET.KRB"
+////Wow. Why?
 #define WIN95_AUTOEXEC  "C:\\AUTOEXEC.BAT"
 
 #define LEASH_HELP_FILE "leash32.chm"
@@ -263,6 +254,7 @@ public:
 class TicketInfoWrapper {
   public:
     HANDLE     lockObj;
+////Can this be commented out?
     TICKETINFO Krb4;
     TICKETINFO Krb5;
     TICKETINFO Afs;

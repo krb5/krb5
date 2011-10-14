@@ -59,19 +59,23 @@ CKrbProperties::CKrbProperties(LPCTSTR pszCaption, CWnd* pParentWnd,
 	}
 #endif /* COMMENT */
 
+#ifndef NO_KRB4
     CLeashApp::GetKrb4ConFile(m_krbPath,sizeof(m_krbPath));
     CLeashApp::GetKrb4RealmFile(m_krbrealmPath,sizeof(m_krbrealmPath));
-
+#endif
 
 	AddPage(&m_configOptions);
 	AddPage(&m_miscConfigOpt);
 
+#ifndef NO_KRB4
 	if (CLeashApp::m_hKrb4DLL && !CLeashApp::m_hKrb5DLL)
 	{
 		AddPage(&m_krb4RealmHostMaintenance);
 		AddPage(&m_krb4DomainRealmMaintenance);
 	}
-	else if (CLeashApp::m_hKrb5DLL)
+	else
+#endif
+	if (CLeashApp::m_hKrb5DLL)
 	{
 		AddPage(&m_realmHostMaintenance);
 		AddPage(&m_domainRealmMaintenance);

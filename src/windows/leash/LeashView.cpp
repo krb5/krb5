@@ -130,7 +130,10 @@ extern HANDLE m_tgsReqMutex;
 CLeashView::CLeashView():
 CFormView(CLeashView::IDD)
 {
+////@#+Need removing as well!
+#ifndef NO_KRB4
     m_listKrb4 = NULL;
+#endif
     m_listKrb5 = NULL;
     m_listAfs = NULL;
     m_startup = TRUE;
@@ -343,8 +346,14 @@ VOID CLeashView::OnShowWindow(BOOL bShow, UINT nStatus)
 
     SetTimer(1, ONE_SECOND, TimerProc);
 
-    if (!CLeashApp::m_hKrb4DLL && !CLeashApp::m_hKrb5DLL && !CLeashApp::m_hAfsDLL)
+    if (
+////
+#ifndef NO_KRB4
+	!CLeashApp::m_hKrb4DLL &&
+#endif
+	!CLeashApp::m_hKrb5DLL && !CLeashApp::m_hAfsDLL)
     {
+////Update not to mention K4
         AfxMessageBox("Neither Kerberos Four, Kerberos Five nor AFS is loaded!!!"
                    "\r\nYou will not be able to retrieve tickets and/or "
                    "tokens.",
@@ -540,7 +549,12 @@ UINT CLeashView::ImportTicket(void * hWnd)
 #ifndef KRB5_TC_NOTICKET
             ReleaseMutex(m_tgsReqMutex);
 #endif
-            if (!CLeashApp::m_hAfsDLL || !CLeashApp::m_hKrb4DLL)
+            if (!CLeashApp::m_hAfsDLL
+////@#+Need to rework this logic. I am confused what !m_hKrb4DLL means in this case!
+#ifndef NO_KRB4
+		|| !CLeashApp::m_hKrb4DLL
+#endif
+		)
                 whatToDo = AfxMessageBox("You are about to replace your existing ticket(s)\n"
                                           "with a ticket imported from the Windows credential cache!",
                                           MB_OKCANCEL, 0);
@@ -829,9 +843,11 @@ VOID CLeashView::OnUpdateDisplay()
 
     TV_INSERTSTRUCT m_tvinsert;
 
+#ifndef NO_KRB4
     INT ticketIconStatusKrb4;
     INT ticketIconStatus_SelectedKrb4;
     INT iconStatusKrb4;
+#endif
 
     INT ticketIconStatusKrb5;
     INT ticketIconStatus_SelectedKrb5;
@@ -841,15 +857,19 @@ VOID CLeashView::OnUpdateDisplay()
     INT ticketIconStatus_SelectedAfs;
     INT iconStatusAfs;
 
+#ifndef NO_KRB4
     LONG krb4Error;
+#endif
     LONG krb5Error;
     LONG afsError;
 
     if (WaitForSingleObject( ticketinfo.lockObj, 100 ) != WAIT_OBJECT_0)
         throw("Unable to lock ticketinfo");
 
+#ifndef NO_KRB4
     // Get Kerb 4 tickets in list
     krb4Error = pLeashKRB4GetTickets(&ticketinfo.Krb4, &m_listKrb4);
+#endif
 
     // Get Kerb 5 tickets in list
     krb5Error = pLeashKRB5GetTickets(&ticketinfo.Krb5, &m_listKrb5,
@@ -889,6 +909,8 @@ VOID CLeashView::OnUpdateDisplay()
      * to select the appropriate Icon for the Parent Node
      */
 
+////Might need to delete dependent stuff as well!!!
+#ifndef NO_KRB4
     /* Krb4 */
     UpdateTicketTime(ticketinfo.Krb4);
     m_ticketStatusKrb4 = GetLowTicketStatus(4);
@@ -918,6 +940,8 @@ VOID CLeashView::OnUpdateDisplay()
         ticketIconStatus_SelectedKrb4 = EXPIRED_CLOCK;
         iconStatusKrb4 = TICKET_NOT_INSTALLED;
     }
+#endif
+
 
     /* Krb5 */
     UpdateTicketTime(ticketinfo.Krb5);
@@ -1005,6 +1029,8 @@ VOID CLeashView::OnUpdateDisplay()
             m_tvinsert.item.iSelectedImage = EXPIRED_PARENT_NODE;
             break;
         }
+////
+#ifndef NO_KRB4
     } else if (CLeashApp::m_hKrb4DLL && m_listKrb4) {
         m_tvinsert.item.pszText = ticketinfo.Krb4.principal;
         switch ( iconStatusKrb4 ) {
@@ -1018,6 +1044,7 @@ VOID CLeashView::OnUpdateDisplay()
             m_tvinsert.item.iSelectedImage = EXPIRED_PARENT_NODE;
             break;
         }
+#endif
     } else {
         m_tvinsert.item.iSelectedImage = NONE_PARENT_NODE;
     }
@@ -1094,6 +1121,7 @@ VOID CLeashView::OnUpdateDisplay()
     // Krb4
     m_tvinsert.hParent = m_hPrincipal;
 
+#ifndef NO_KRB4
     if (CLeashApp::m_hKrb4DLL)
     {
         m_tvinsert.item.pszText = "Kerberos Four Tickets";
@@ -1102,12 +1130,17 @@ VOID CLeashView::OnUpdateDisplay()
     }
     else
     {
+#endif
+////Can this be removed altogether?
         ticketinfo.Krb4.btickets = NO_TICKETS;
         m_tvinsert.item.pszText = "Kerberos Four Tickets (Not Available)";
         m_tvinsert.item.iImage = TICKET_NOT_INSTALLED;
         m_tvinsert.item.iSelectedImage = TICKET_NOT_INSTALLED;
+#ifndef NO_KRB4
     }
+#endif
 
+#ifndef NO_KRB4
     m_hKerb4 = m_pTree ->InsertItem(&m_tvinsert);
 
     if (m_hPrincipalState == NODE_IS_EXPANDED)
@@ -1117,6 +1150,8 @@ VOID CLeashView::OnUpdateDisplay()
     m_tvinsert.item.iImage = ticketIconStatusKrb4;
     m_tvinsert.item.iSelectedImage = ticketIconStatus_SelectedKrb4;
 
+
+////What does the original do?
     tempList = m_listKrb4, *killList;
     while (tempList)
     {
@@ -1129,7 +1164,7 @@ VOID CLeashView::OnUpdateDisplay()
 
     if (m_hKerb4State == NODE_IS_EXPANDED)
         m_pTree->Expand(m_hKerb4, TVE_EXPAND);
-
+#endif
 
     // AFS
     m_tvinsert.hParent = m_hPrincipal;
@@ -1369,10 +1404,13 @@ VOID CLeashView::OnActivateView(BOOL bActivate, CView* pActivateView,
     CFormView::OnActivateView(bActivate, pActivateView, pDeactiveView);
 }
 
+////@#+Is this KRB4 only?
 VOID CLeashView::OnDebugMode()
 {
+#ifndef NO_KRB4
     if (!pset_krb_debug)
         return;
+#endif
 
     if (!m_pDebugWindow)
     {
@@ -1422,8 +1460,11 @@ VOID CLeashView::OnDebugMode()
 
         m_pApp->WriteProfileInt("Settings", "DebugWindow", FALSE_FLAG);
         m_pDebugWindow->DestroyWindow();
+////
+#ifndef NO_KRB4
         pset_krb_debug(OFF);
         pset_krb_ap_req_debug(OFF);
+#endif
         return;
     }
     else
@@ -1616,7 +1657,9 @@ VOID CLeashView::OnUppercaseRealm()
 VOID CLeashView::ResetTreeNodes()
 {
     m_hPrincipalState = 0;
+#ifndef NO_KRB4
     m_hKerb4State = 0;
+#endif
     m_hKerb5State = 0;
     m_hAFSState = 0;
 }
@@ -1666,7 +1709,12 @@ VOID CLeashView::OnUpdateInitTicket(CCmdUI* pCmdUI)
     else
         pCmdUI->SetText("&Get Ticket(s)/Token(s)\tCtrl+T");
 
-    if (!CLeashApp::m_hKrb4DLL && !CLeashApp::m_hKrb5DLL &&
+    if (
+////Is this logic correct?
+#ifndef NO_KRB4
+	!CLeashApp::m_hKrb4DLL &&
+#endif
+	!CLeashApp::m_hKrb5DLL &&
         !CLeashApp::m_hAfsDLL)
         pCmdUI->Enable(FALSE);
     else
@@ -1682,8 +1730,16 @@ VOID CLeashView::OnUpdateRenewTicket(CCmdUI* pCmdUI)
 
     if (WaitForSingleObject( ticketinfo.lockObj, INFINITE ) != WAIT_OBJECT_0)
         throw("Unable to lock ticketinfo");
-    BOOL b_enable = !(ticketinfo.Krb4.btickets || ticketinfo.Krb5.btickets) ||
-                    !CLeashApp::m_hKrb4DLL && !CLeashApp::m_hKrb5DLL && !CLeashApp::m_hAfsDLL;
+    BOOL b_enable = !(
+#ifndef NO_KRB4
+	ticketinfo.Krb4.btickets ||
+#endif
+	ticketinfo.Krb5.btickets) ||
+////Not sure about the boolean logic here
+#ifndef NO_KRB4
+                    !CLeashApp::m_hKrb4DLL &&
+#endif
+		    !CLeashApp::m_hKrb5DLL && !CLeashApp::m_hAfsDLL;
     ReleaseMutex(ticketinfo.lockObj);
 
     if (b_enable)
@@ -1768,8 +1824,16 @@ LRESULT CLeashView::OnTrayIcon(WPARAM wParam, LPARAM lParam)
 #endif
             if (WaitForSingleObject( ticketinfo.lockObj, INFINITE ) != WAIT_OBJECT_0)
                 throw("Unable to lock ticketinfo");
-            if (!(ticketinfo.Krb4.btickets || ticketinfo.Krb5.btickets) ||
-                 !CLeashApp::m_hKrb4DLL && !CLeashApp::m_hKrb5DLL &&
+            if (!(
+#ifndef NO_KRB4
+		ticketinfo.Krb4.btickets ||
+#endif
+		ticketinfo.Krb5.btickets) ||
+////Not entirely sure about the logic
+#ifndef NO_KRB4
+                 !CLeashApp::m_hKrb4DLL &&
+#endif
+		 !CLeashApp::m_hKrb5DLL &&
                  !CLeashApp::m_hAfsDLL)
                 nFlags = MF_STRING | MF_GRAYED;
             else
@@ -1850,8 +1914,10 @@ VOID CLeashView::OnItemexpandedTreeview(NMHDR* pNMHDR, LRESULT* pResult)
 
     if (m_hPrincipal == pNMTreeView->itemNew.hItem)
         m_hPrincipalState = pNMTreeView->action;
+#ifndef NO_KRB4
     else if (m_hKerb4 == pNMTreeView->itemNew.hItem)
         m_hKerb4State = pNMTreeView->action;
+#endif
     else if (m_hKerb5 == pNMTreeView->itemNew.hItem)
         m_hKerb5State = pNMTreeView->action;
     else if (m_hAFS ==  pNMTreeView->itemNew.hItem)
@@ -1863,18 +1929,30 @@ VOID CLeashView::OnItemexpandedTreeview(NMHDR* pNMHDR, LRESULT* pResult)
 
 VOID CLeashView::OnUpdateDebugMode(CCmdUI* pCmdUI)
 {
+////
+#ifndef NO_KRB4
     if (!pset_krb_debug)
+#endif
         pCmdUI->Enable(FALSE);
+////
+#ifndef NO_KRB4
     else
         pCmdUI->Enable(TRUE);
+#endif
 }
 
 VOID CLeashView::OnUpdateCfgFiles(CCmdUI* pCmdUI)
 {
+////
+#ifndef NO_KRB4
     if (!pkrb_get_krbconf2)
+#endif
         pCmdUI->Enable(FALSE);
+////
+#ifndef NO_KRB4
     else
         pCmdUI->Enable(TRUE);
+#endif
 }
 
 VOID CLeashView::OnLeashProperties()
@@ -1891,8 +1969,10 @@ VOID CLeashView::OnKrbProperties()
 
 VOID CLeashView::OnKrb4Properties()
 {
+#ifndef NO_KRB4
     CKrb4Properties krb4Properties("Kerberos Four Properties");
     krb4Properties.DoModal();
+#endif
 }
 
 VOID CLeashView::OnKrb5Properties()
@@ -2102,6 +2182,7 @@ BOOL CLeashView::PreTranslateMessage(MSG* pMsg)
             }
             //KRB5
 
+#ifndef NO_KRB4
             if (CLeashApp::m_hKrb4DLL)
             {
                 // KRB4
@@ -2196,6 +2277,8 @@ BOOL CLeashView::PreTranslateMessage(MSG* pMsg)
             }
             else
             {
+#endif
+////Should this be removed altogether?
                 // not installed
                 ticketStatusKrb4.Format("Kerb-4: Not Available");
 
@@ -2204,8 +2287,10 @@ BOOL CLeashView::PreTranslateMessage(MSG* pMsg)
                     CMainFrame::m_wndStatusBar.SetPaneInfo(2, 111111, SBPS_NORMAL, 130);
                     CMainFrame::m_wndStatusBar.SetPaneText(2, ticketStatusKrb4, SBT_POPOUT);
                 }
+#ifndef NO_KRB4
             }
             // KRB4
+#endif
 
             if (CLeashApp::m_hAfsDLL)
             {
@@ -2707,7 +2792,11 @@ VOID CLeashView::AlarmBeep()
 
 VOID CLeashView::OnUpdateProperties(CCmdUI* pCmdUI)
 {
-    if (CLeashApp::m_hKrb5DLL || CLeashApp::m_hKrb4DLL)
+    if (CLeashApp::m_hKrb5DLL
+#ifndef NO_KRB4
+	|| CLeashApp::m_hKrb4DLL
+#endif
+	)
         pCmdUI->Enable();
     else
         pCmdUI->Enable(FALSE);
@@ -2715,9 +2804,11 @@ VOID CLeashView::OnUpdateProperties(CCmdUI* pCmdUI)
 
 VOID CLeashView::OnUpdateKrb4Properties(CCmdUI* pCmdUI)
 {
+#ifndef NO_KRB4
     if (CLeashApp::m_hKrb4DLL)
         pCmdUI->Enable();
     else
+#endif
         pCmdUI->Enable(FALSE);
 }
 
@@ -2731,10 +2822,13 @@ VOID CLeashView::OnUpdateKrb5Properties(CCmdUI* pCmdUI)
 
 VOID CLeashView::OnUpdateAfsControlPanel(CCmdUI* pCmdUI)
 {
+////Is the comment even correct?
+#ifndef NO_KRB4
     // need Krb 4 to get AFS tokens
     if (CLeashApp::m_hAfsDLL && CLeashApp::m_hKrb4DLL)
         pCmdUI->Enable();
     else
+#endif
         pCmdUI->m_pMenu->DeleteMenu(pCmdUI->m_nID, MF_BYCOMMAND);
 }
 

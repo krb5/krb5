@@ -42,8 +42,12 @@ CKrb4EditDomainRealmList::CKrb4EditDomainRealmList(LPSTR editItem, CWnd* pParent
 	  *findSpace = 0;
 	else
 	{
+////@#+This hack doesn't seem right
+#ifndef NO_KRB4
+
 		 LeashErrorBox("This is a defective entry in file",
 					   CKrb4ConfigFileLocation::m_newKrbrealmFile);
+#endif
 		 ASSERT(0);
 		 m_initDomainHost = m_newDomainHost = editItem;
 		 m_initRealm = m_newRealm = _T("");

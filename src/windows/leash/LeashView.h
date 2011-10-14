@@ -70,7 +70,10 @@ class CLeashDebugWindow;
 class CLeashView : public CFormView
 {
 private:
+////@#+Remove
+#ifndef NO_KRB4
     TicketList*         m_listKrb4;
+#endif
     TicketList*         m_listKrb5;
     TicketList*         m_listAfs;
     CLeashDebugWindow*	m_pDebugWindow;
@@ -79,7 +82,10 @@ private:
     CTreeCtrl*			m_pTree;
 	CWinApp*			m_pApp;
 	HTREEITEM			m_hPrincipal;
+////@#+Remove
+#ifndef NO_KRB4
 	HTREEITEM			m_hKerb4;
+#endif
 	HTREEITEM			m_hKerb5;
     HTREEITEM           m_hk5tkt;
 	HTREEITEM			m_hAFS;
@@ -95,7 +101,9 @@ private:
 	INT					m_largeIcons;
 	INT					m_lowTicketAlarm;
 	INT					m_hPrincipalState;
+#ifndef NO_KRB4
 	INT					m_hKerb4State;
+#endif
 	INT					m_hKerb5State;
 	INT					m_hAFSState;
     BOOL                m_bIconAdded;
@@ -103,13 +111,16 @@ private:
 
     static INT		   	m_autoRenewTickets;
     static INT          m_ticketStatusAfs;
+////Remove as well?
     static INT          m_ticketStatusKrb4;
     static INT          m_ticketStatusKrb5;
     static INT          m_autoRenewalAttempted;
 	static INT			m_warningOfTicketTimeLeftAfs;
+////Remove as well?
 	static INT			m_warningOfTicketTimeLeftKrb4;
 	static INT			m_warningOfTicketTimeLeftKrb5;
     static INT			m_warningOfTicketTimeLeftLockAfs;
+////Remove as well?
     static INT			m_warningOfTicketTimeLeftLockKrb4;
     static INT			m_warningOfTicketTimeLeftLockKrb5;
     static INT			m_updateDisplayCount;

@@ -282,14 +282,20 @@ BOOL CKrbMiscConfigOpt::OnInitDialog()
         GetDlgItem(IDC_EDIT_RENEW_MAX_M)->EnableWindow(FALSE);
     }
 
-
+#ifndef NO_KRB4
     m_initUseKrb4 = m_newUseKrb4 = (CLeashApp::m_hKrb4DLL ? pLeash_get_default_use_krb4() : 0);
-	CheckDlgButton(IDC_CHECK_REQUEST_KRB4, m_initUseKrb4);
+    CheckDlgButton(IDC_CHECK_REQUEST_KRB4, m_initUseKrb4);
     if ( !CLeashApp::m_hKrb4DLL )
         GetDlgItem(IDC_CHECK_REQUEST_KRB4)->EnableWindow(FALSE);
+#else
+////Or remove these completely?
+    m_initUseKrb4 = m_newUseKrb4 = 0;
+    CheckDlgButton(IDC_CHECK_REQUEST_KRB4, 0);
+    GetDlgItem(IDC_CHECK_REQUEST_KRB4)->EnableWindow(FALSE);
+#endif
 
     m_initKinitPreserve = m_newKinitPreserve = pLeash_get_default_preserve_kinit_settings();
-	CheckDlgButton(IDC_CHECK_PRESERVE_KINIT_OPTIONS, m_initKinitPreserve);
+    CheckDlgButton(IDC_CHECK_PRESERVE_KINIT_OPTIONS, m_initKinitPreserve);
 
     return(TRUE);
 }
@@ -402,9 +408,11 @@ BOOL CKrbMiscConfigOpt::OnApply()
                    "Leash", MB_OK);
     }
 
+#ifndef NO_KRB4
 	if ( m_initUseKrb4 != m_newUseKrb4 ) {
 		pLeash_set_default_use_krb4(m_newUseKrb4);
 	}
+#endif
 
 	if ( m_initKinitPreserve != m_newKinitPreserve ) {
 		pLeash_set_default_preserve_kinit_settings(m_newKinitPreserve);
