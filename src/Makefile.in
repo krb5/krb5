@@ -721,15 +721,21 @@ OTHEREXCLUDES = \
 	util/profile/prof_int.h \
 	util/profile/profile.hin \
 	util/profile/profile_tcl.c \
+	util/support/fnmatch.c \
 	util/verto \
 	util/k5ev
 
 EXCLUDES = `for i in $(BSDFILES) $(OTHEREXCLUDES); do echo $$i; done | $(AWK) '{ print "-path", $$1, "-o" }'` -path /dev/null
 
+FIND_REINDENT = cd $(top_srcdir) && \
+	$(FIND) $(INDENTDIRS) \( $(EXCLUDES) \) -prune -o \
+	\( -name '*.[ch]' -o -name '*.hin' -o -name '*.[ch].in' \)
+
+show-reindentfiles::
+	($(FIND_REINDENT) -print)
+
 reindent::
-	(cd $(top_srcdir) && \
-	$(FIND) . \
-	\( -name '*.[ch]' -o -name '*.hin' -o -name '*.[ch].in' \) \
+	($(FIND_REINDENT) \
 	-print0 | $(XARGS) -0 $(EMACS) -q -batch \
 	-l util/krb5-c-style.el \
 	-l util/krb5-batch-reindent.el)
@@ -758,4 +764,3 @@ doxygen::
 	else \
 		echo "Doxygen is not installed or incorrect PATH"; \
 	fi
-
