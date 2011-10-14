@@ -1186,6 +1186,34 @@ iakerb_verify_finished(krb5_context context,
                        const krb5_data *conv,
                        const krb5_data *finished);
 
+/*
+ * Transfer contents of a krb5_data to a gss_buffer and invalidate the source
+ * On unix, this is a simple pointer copy
+ * On windows, memory is reallocated and copied.
+ */
+static inline krb5_error_code
+data_to_gss(krb5_data *input_k5data, gss_buffer_t output_buffer)
+{
+    krb5_error_code code = 0;
+    output_buffer->length = input_k5data->length;
+#ifdef _WIN32
+    if (output_buffer->length > 0) {
+        output_buffer->value = gssalloc_malloc(output_buffer->length);
+        if (output_buffer->value)
+            memcpy(output_buffer->value, input_k5data->data, output_buffer->length);
+        else
+            code = ENOMEM;
+    } else {
+        output_buffer->value = NULL;
+    }
+    free(input_k5data->data);
+#else
+    output_buffer->value = input_k5data->data;
+#endif
+    *input_k5data = empty_data();
+    return code;
+}
+
 #define KRB5_GSS_EXTS_IAKERB_FINISHED 1
 
 #endif /* _GSSAPIP_KRB5_H_ */

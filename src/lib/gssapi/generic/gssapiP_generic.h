@@ -41,6 +41,7 @@
 
 #include "gssapi_generic.h"
 #include "gssapi_ext.h"
+#include <gssapi/gssapi_alloc.h>
 #include "gssapi_err_generic.h"
 #include <errno.h>
 
@@ -264,6 +265,42 @@ int gssint_mecherrmap_get(OM_uint32 minor, gss_OID mech_oid,
                           OM_uint32 *mech_minor);
 OM_uint32 gssint_mecherrmap_map_errcode(OM_uint32 errcode);
 
+/*
+ * Transfer contents of a k5buf to a gss_buffer and invalidate the source
+ * On unix, this is a simple pointer copy
+ * On windows, memory is reallocated and copied.
+ */
+static inline OM_uint32
+k5buf_to_gss(OM_uint32 *minor,
+             struct k5buf *input_k5buf,
+             gss_buffer_t output_buffer)
+{
+    OM_uint32 status = GSS_S_COMPLETE;
+    char *bp = krb5int_buf_data(input_k5buf);
+    output_buffer->length = krb5int_buf_len(input_k5buf)+1;
+#ifdef _WIN32
+    if (output_buffer->length > 0) {
+        output_buffer->value = gssalloc_malloc(output_buffer->length);
+        if (output_buffer->value) {
+            memcpy(output_buffer->value, bp, output_buffer->length);
+        } else {
+            status = GSS_S_FAILURE;
+            *minor = ENOMEM;
+        }
+    } else {
+        output_buffer->value = NULL;
+    }
+    krb5int_free_buf(input_k5buf);
+#else
+    output_buffer->value = bp;
+    /*
+     * it would be nice to invalidate input_k5buf here
+     * but there is no api for that currently...
+     */
+#endif
+    return status;
+}
+
 OM_uint32 generic_gss_create_empty_buffer_set
 (OM_uint32 * /*minor_status*/,
             gss_buffer_set_t * /*buffer_set*/);
@@ -279,7 +316,7 @@ OM_uint32 generic_gss_release_buffer_set
 
 OM_uint32 generic_gss_copy_oid_set
 (OM_uint32 *, /* minor_status */
-            const gss_OID_set_desc *, /* const oidset*/
+            const gss_OID_set_desc * const /*oidset*/,
             gss_OID_set * /*new_oidset*/);
 
 extern gss_OID_set gss_ma_known_attrs;
