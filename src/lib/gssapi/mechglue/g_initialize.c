@@ -212,9 +212,7 @@ gss_OID_set *mechSet_out;
 {
 	char *fileName;
 	struct stat fileInfo;
-	unsigned int i, j;
-	gss_OID curItem;
-	gss_OID_set mechSet;
+	OM_uint32 status;
 
 	/* Initialize outputs. */
 
@@ -246,64 +244,17 @@ gss_OID_set *mechSet_out;
 		return GSS_S_FAILURE;
 
 	/*
-	 * the mech set is created and it is up to date
-	 * so just copy it to caller
-	 */
-	if ((mechSet =
-		(gss_OID_set) malloc(sizeof (gss_OID_set_desc))) == NULL)
-	{
-		return (GSS_S_FAILURE);
-	}
-
-	/*
 	 * need to lock the g_mechSet in case someone tries to update it while
 	 * I'm copying it.
 	 */
 	*minorStatus = k5_mutex_lock(&g_mechSetLock);
 	if (*minorStatus) {
-		free(mechSet);
 		return GSS_S_FAILURE;
 	}
 
-	/* allocate space for the oid structures */
-	if ((mechSet->elements =
-		(void*) calloc(g_mechSet.count, sizeof (gss_OID_desc)))
-		== NULL)
-	{
-		(void) k5_mutex_unlock(&g_mechSetLock);
-		free(mechSet);
-		return (GSS_S_FAILURE);
-	}
-
-	/* now copy the oid structures */
-	(void) memcpy(mechSet->elements, g_mechSet.elements,
-		g_mechSet.count * sizeof (gss_OID_desc));
-
-	mechSet->count = g_mechSet.count;
-
-	/* still need to copy each of the oid elements arrays */
-	for (i = 0; i < mechSet->count; i++) {
-		curItem = &(mechSet->elements[i]);
-		curItem->elements =
-			(void *) malloc(g_mechSet.elements[i].length);
-		if (curItem->elements == NULL) {
-			(void) k5_mutex_unlock(&g_mechSetLock);
-			/*
-			 * must still free the allocated elements for
-			 * each allocated gss_OID_desc
-			 */
-			for (j = 0; j < i; j++) {
-				free(mechSet->elements[j].elements);
-			}
-			free(mechSet->elements);
-			free(mechSet);
-			return (GSS_S_FAILURE);
-		}
-		g_OID_copy(curItem, &g_mechSet.elements[i]);
-	}
+	status = generic_gss_copy_oid_set(minorStatus, &g_mechSet, mechSet_out);
 	(void) k5_mutex_unlock(&g_mechSetLock);
-	*mechSet_out = mechSet;
-	return (GSS_S_COMPLETE);
+	return (status);
 } /* gss_indicate_mechs */
 
 
