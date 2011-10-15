@@ -7355,13 +7355,13 @@ krb5_verify_authdata_kdc_issued(krb5_context context,
  */
 
 /* Microsoft defined types of data */
-#define PAC_LOGON_INFO        1  /**< Logon information */
-#define PAC_CREDENTIALS_INFO  2  /**< Credentials information */
-#define PAC_SERVER_CHECKSUM   6  /**< Server checksum */
-#define PAC_PRIVSVR_CHECKSUM  7  /**< KDC checksum */
-#define PAC_CLIENT_INFO       10 /**< Client name and ticket information */
-#define PAC_DELEGATION_INFO   11 /**< Constrained delegation information */
-#define PAC_UPN_DNS_INFO      12 /**< User principal name and DNS information */
+#define KRB5_PAC_LOGON_INFO        1  /**< Logon information */
+#define KRB5_PAC_CREDENTIALS_INFO  2  /**< Credentials information */
+#define KRB5_PAC_SERVER_CHECKSUM   6  /**< Server checksum */
+#define KRB5_PAC_PRIVSVR_CHECKSUM  7  /**< KDC checksum */
+#define KRB5_PAC_CLIENT_INFO       10 /**< Client name and ticket info */
+#define KRB5_PAC_DELEGATION_INFO   11 /**< Constrained delegation info */
+#define KRB5_PAC_UPN_DNS_INFO      12 /**< User principal name and DNS info */
 
 struct krb5_pac_data;
 /** PAC data structure to convey authorization information */
