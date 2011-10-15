@@ -146,11 +146,12 @@ krb5_rd_safe(krb5_context context, krb5_auth_context auth_context,
         return KRB5_RC_REQUIRED;
 
     if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) &&
+        (auth_context->remote_addr == NULL))
+        return KRB5_REMOTE_ADDR_REQUIRED;
+
+    if ((auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) &&
         (auth_context->rcache == NULL))
         return KRB5_RC_REQUIRED;
-
-    if (!auth_context->remote_addr)
-        return KRB5_REMOTE_ADDR_REQUIRED;
 
     /* Get key */
     if ((key = auth_context->recv_subkey) == NULL)

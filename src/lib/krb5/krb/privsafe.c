@@ -208,14 +208,17 @@ k5_privsafe_check_addrs(krb5_context context, krb5_auth_context ac,
     local_fulladdr.contents = remote_fulladdr.contents = NULL;
 
     /* Determine the remote comparison address. */
-    if (ac->remote_port != NULL) {
-        ret = krb5_make_fulladdr(context, ac->remote_addr, ac->remote_port,
-                                 &remote_fulladdr);
-        if (ret)
-            goto cleanup;
-        remote_addr = &remote_fulladdr;
+    if (ac->remote_addr != NULL) {
+        if (ac->remote_port != NULL) {
+            ret = krb5_make_fulladdr(context, ac->remote_addr, ac->remote_port,
+                                     &remote_fulladdr);
+            if (ret)
+                goto cleanup;
+            remote_addr = &remote_fulladdr;
+        } else
+            remote_addr = ac->remote_addr;
     } else
-        remote_addr = ac->remote_addr;
+        remote_addr = NULL;
 
     /* Determine the local comparison address (possibly NULL). */
     if (ac->local_addr != NULL) {
@@ -231,7 +234,8 @@ k5_privsafe_check_addrs(krb5_context context, krb5_auth_context ac,
         local_addr = NULL;
 
     /* Check the remote address against the message's sender address. */
-    if (!krb5_address_compare(context, remote_addr, msg_s_addr)) {
+    if (remote_addr != NULL &&
+        !krb5_address_compare(context, remote_addr, msg_s_addr)) {
         ret = KRB5KRB_AP_ERR_BADADDR;
         goto cleanup;
     }
