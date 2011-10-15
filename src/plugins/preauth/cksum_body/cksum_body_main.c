@@ -271,13 +271,15 @@ server_fini(krb5_context kcontext, krb5_kdcpreauth_moddata moddata)
 
 /* Obtain and return any preauthentication data (which is destined for the
  * client) which matches type data->pa_type. */
-static krb5_error_code
+static void
 server_get_edata(krb5_context kcontext, krb5_kdc_req *request,
                  krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
-                 krb5_kdcpreauth_moddata moddata, krb5_pa_data *data)
+                 krb5_kdcpreauth_moddata moddata, krb5_preauthtype pa_type,
+                 krb5_kdcpreauth_edata_respond_fn respond, void *arg)
 {
     krb5_keyblock *keys;
     krb5_int32 *enctypes, enctype;
+    krb5_pa_data *data;
     int i;
 
     /* Retrieve the client's keys. */
@@ -285,7 +287,8 @@ server_get_edata(krb5_context kcontext, krb5_kdc_req *request,
 #ifdef DEBUG
         fprintf(stderr, "Error retrieving client keys.\n");
 #endif
-        return KRB5KDC_ERR_PADATA_TYPE_NOSUPP;
+        (*respond)(arg, KRB5KDC_ERR_PADATA_TYPE_NOSUPP, NULL);
+        return;
     }
 
     /* Count which types of keys we've got. */
@@ -295,7 +298,8 @@ server_get_edata(krb5_context kcontext, krb5_kdc_req *request,
     enctypes = malloc((unsigned)i * 4);
     if (enctypes == NULL) {
         cb->free_keys(kcontext, rock, keys);
-        return ENOMEM;
+        (*respond)(arg, ENOMEM, NULL);
+        return;
     }
 #ifdef DEBUG
     fprintf(stderr, "Supported enctypes = {");
@@ -310,11 +314,17 @@ server_get_edata(krb5_context kcontext, krb5_kdc_req *request,
 #ifdef DEBUG
     fprintf(stderr, "}.\n");
 #endif
+    cb->free_keys(kcontext, rock, keys);
+    data = malloc(sizeof(*data));
+    if (data == NULL) {
+        free(enctypes);
+        (*respond)(arg, ENOMEM, NULL);
+    }
+    data->magic = KV5M_PA_DATA;
     data->pa_type = KRB5_PADATA_CKSUM_BODY_REQ;
     data->length = (i * 4);
     data->contents = (unsigned char *) enctypes;
-    cb->free_keys(kcontext, rock, keys);
-    return 0;
+    (*respond)(arg, 0, data);
 }
 
 /* Verify a request from a client. */

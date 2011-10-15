@@ -418,21 +418,31 @@ typedef int
 (*krb5_kdcpreauth_flags_fn)(krb5_context context, krb5_preauthtype pa_type);
 
 /*
- * Optional: fill in pa_out->length and pa_out->contents with data to send to
- * the client as part of the "you need to use preauthentication" error.  If
- * this function returns non-zero, the padata type will not be included in the
- * list; if this function is not provided or returns zero without changing
- * pa_out, the padata type will be included in the list with an empty value.
- * This function not allowed to create a context because we have no guarantee
- * that the client will ever call again (or that it will hit this server if it
- * does), in which case a context might otherwise hang around forever.
+ * Responder for krb5_kdcpreauth_edata_fn.  If invoked with a non-zero code, pa
+ * will be ignored and the padata type will not be included in the hint list.
+ * If invoked with a zero code and a null pa value, the padata type will be
+ * included in the list with an empty value.  If invoked with a zero code and a
+ * non-null pa value, pa will be included in the hint list and will later be
+ * freed by the KDC.
  */
-typedef krb5_error_code
+typedef void
+(*krb5_kdcpreauth_edata_respond_fn)(void *arg, krb5_error_code code,
+                                    krb5_pa_data *pa);
+
+/*
+ * Optional: provide pa_data to send to the client as part of the "you need to
+ * use preauthentication" error.  This function is not allowed to create a
+ * modreq object because we have no guarantee that the client will ever make a
+ * follow-up request, or that it will hit this KDC if it does.
+ */
+typedef void
 (*krb5_kdcpreauth_edata_fn)(krb5_context context, krb5_kdc_req *request,
                             krb5_kdcpreauth_callbacks cb,
                             krb5_kdcpreauth_rock rock,
                             krb5_kdcpreauth_moddata moddata,
-                            krb5_pa_data *pa_out);
+                            krb5_preauthtype pa_type,
+                            krb5_kdcpreauth_edata_respond_fn respond,
+                            void *arg);
 
 /*
  * Responder for krb5_kdcpreauth_verify_fn.  Invoke with the arg parameter

@@ -243,18 +243,17 @@ server_free_modreq(krb5_context kcontext,
 
 /* Obtain and return any preauthentication data (which is destined for the
  * client) which matches type data->pa_type. */
-static krb5_error_code
+static void
 server_get_edata(krb5_context kcontext,
                  krb5_kdc_req *request,
                  krb5_kdcpreauth_callbacks cb,
                  krb5_kdcpreauth_rock rock,
                  krb5_kdcpreauth_moddata moddata,
-                 krb5_pa_data *data)
+                 krb5_preauthtype pa_type,
+                 krb5_kdcpreauth_edata_respond_fn respond,
+                 void *arg)
 {
-    /* Return zero bytes of data. */
-    data->length = 0;
-    data->contents = NULL;
-    return 0;
+    (*respond)(arg, 0, NULL);
 }
 
 /* Verify a request from a client. */

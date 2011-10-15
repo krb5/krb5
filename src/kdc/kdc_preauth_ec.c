@@ -33,14 +33,14 @@
 #include <krb5/preauth_plugin.h>
 #include "kdc_util.h"
 
-static krb5_error_code
+static void
 ec_edata(krb5_context context, krb5_kdc_req *request,
          krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
-         krb5_kdcpreauth_moddata moddata, krb5_pa_data *data)
+         krb5_kdcpreauth_moddata moddata, krb5_preauthtype pa_type,
+         krb5_kdcpreauth_edata_respond_fn respond, void *arg)
 {
     krb5_keyblock *armor_key = cb->fast_armor(context, rock);
-
-    return (armor_key == NULL) ? ENOENT : 0;
+    (*respond)(arg, (armor_key == NULL) ? ENOENT : 0, NULL);
 }
 
 static void

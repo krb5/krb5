@@ -95,13 +95,15 @@ cleanup:
     return retval;
 }
 
-static krb5_error_code
+static void
 pkinit_server_get_edata(krb5_context context,
                         krb5_kdc_req *request,
                         krb5_kdcpreauth_callbacks cb,
                         krb5_kdcpreauth_rock rock,
                         krb5_kdcpreauth_moddata moddata,
-                        krb5_pa_data *data)
+                        krb5_preauthtype pa_type,
+                        krb5_kdcpreauth_edata_respond_fn respond,
+                        void *arg)
 {
     krb5_error_code retval = 0;
     pkinit_kdc_context plgctx = NULL;
@@ -111,8 +113,10 @@ pkinit_server_get_edata(krb5_context context,
 
     /* Remove (along with armor_key) when FAST PKINIT is settled. */
     /* Don't advertise PKINIT if the client used FAST. */
-    if (armor_key != NULL)
-        return EINVAL;
+    if (armor_key != NULL) {
+        (*respond)(arg, EINVAL, NULL);
+        return;
+    }
 
     /*
      * If we don't have a realm context for the given realm,
@@ -122,7 +126,7 @@ pkinit_server_get_edata(krb5_context context,
     if (plgctx == NULL)
         retval = EINVAL;
 
-    return retval;
+    (*respond)(arg, retval, NULL);
 }
 
 static krb5_error_code
