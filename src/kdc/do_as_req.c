@@ -124,6 +124,8 @@ struct as_req_state {
     char *sname, *cname;
     void *pa_context;
     const krb5_fulladdr *from;
+
+    krb5_error_code preauth_err;
 };
 
 static void
@@ -146,20 +148,6 @@ finish_process_as_req(struct as_req_state *state, krb5_error_code errcode)
 
     if (errcode)
         goto egress;
-
-    /*
-     * Final check before handing out ticket: If the client requires
-     * preauthentication, verify that the proper kind of
-     * preauthentication was carried out.
-     */
-    state->status = missing_required_preauth(state->client,
-                                            state->server,
-                                            &state->enc_tkt_reply);
-    if (state->status) {
-        errcode = KRB5KDC_ERR_PREAUTH_REQUIRED;
-        get_preauth_hint_list(state->request, &state->rock, &state->e_data);
-        goto egress;
-    }
 
     if ((errcode = validate_forwardable(state->request, *state->client,
                                         *state->server, state->kdc_time,
@@ -418,21 +406,46 @@ egress:
 }
 
 static void
-finish_preauth(void *arg, krb5_error_code errcode)
+finish_missing_required_preauth(void *arg)
+{
+    struct as_req_state *state = (struct as_req_state *)arg;
+
+    finish_process_as_req(state, state->preauth_err);
+}
+
+static void
+finish_preauth(void *arg, krb5_error_code code)
 {
     struct as_req_state *state = arg;
+    krb5_error_code real_code = code;
 
-    if (errcode) {
-        if (errcode == KRB5KDC_ERR_PREAUTH_FAILED)
-            get_preauth_hint_list(state->request, &state->rock,
-                                  &state->e_data);
-
-        state->status = "PREAUTH_FAILED";
+    if (code) {
         if (vague_errors)
-            errcode = KRB5KRB_ERR_GENERIC;
+            code = KRB5KRB_ERR_GENERIC;
+        state->status = "PREAUTH_FAILED";
+        if (real_code == KRB5KDC_ERR_PREAUTH_FAILED) {
+            state->preauth_err = code;
+            get_preauth_hint_list(state->request, &state->rock, &state->e_data,
+                                  finish_missing_required_preauth, state);
+            return;
+        }
+    } else {
+        /*
+         * Final check before handing out ticket: If the client requires
+         * preauthentication, verify that the proper kind of
+         * preauthentication was carried out.
+         */
+        state->status = missing_required_preauth(state->client, state->server,
+                                                 &state->enc_tkt_reply);
+        if (state->status) {
+            state->preauth_err = KRB5KDC_ERR_PREAUTH_REQUIRED;
+            get_preauth_hint_list(state->request, &state->rock, &state->e_data,
+                                  finish_missing_required_preauth, state);
+            return;
+        }
     }
 
-    finish_process_as_req(state, errcode);
+    finish_process_as_req(state, code);
 }
 
 /*ARGSUSED*/
@@ -761,8 +774,9 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
                      state->request, &state->enc_tkt_reply, &state->pa_context,
                      &state->e_data, &state->typed_e_data, finish_preauth,
                      state);
-        return;
-    }
+    } else
+        finish_preauth(state, 0);
+    return;
 
 errout:
     finish_process_as_req(state, errcode);

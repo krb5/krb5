@@ -746,7 +746,8 @@ const char *missing_required_preauth(krb5_db_entry *client,
 
 void
 get_preauth_hint_list(krb5_kdc_req *request, krb5_kdcpreauth_rock rock,
-                      krb5_pa_data ***e_data_out)
+                      krb5_pa_data ***e_data_out, kdc_hint_respond_fn respond,
+                      void *arg)
 {
     int hw_only;
     preauth_system *ap;
@@ -758,8 +759,10 @@ get_preauth_hint_list(krb5_kdc_req *request, krb5_kdcpreauth_rock rock,
     hw_only = isflagset(rock->client->attributes, KRB5_KDB_REQUIRES_HW_AUTH);
     /* Allocate two extra entries for the cookie and the terminator. */
     pa_data = calloc(n_preauth_systems + 2, sizeof(krb5_pa_data *));
-    if (pa_data == 0)
+    if (pa_data == 0) {
+        (*respond)(arg);
         return;
+    }
     pa = pa_data;
 
     for (ap = preauth_systems; ap->type != -1; ap++) {
@@ -801,7 +804,7 @@ get_preauth_hint_list(krb5_kdc_req *request, krb5_kdcpreauth_rock rock,
 
 errout:
     krb5_free_pa_data(kdc_context, pa_data);
-    return;
+    (*respond)(arg);
 }
 
 /*
