@@ -104,18 +104,6 @@ typedef struct preauth_system_st {
     krb5_kdcpreauth_free_modreq_fn free_modreq;
 } preauth_system;
 
-static void
-verify_enc_timestamp(krb5_context, krb5_data *req_pkt, krb5_kdc_req *request,
-                     krb5_enc_tkt_part *enc_tkt_reply, krb5_pa_data *data,
-                     krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
-                     krb5_kdcpreauth_moddata moddata,
-                     krb5_kdcpreauth_verify_respond_fn respond, void *arg);
-
-static krb5_error_code
-get_enc_ts(krb5_context context, krb5_kdc_req *request,
-           krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
-           krb5_kdcpreauth_moddata modata, krb5_pa_data *data);
-
 static krb5_error_code
 get_etype_info(krb5_context context, krb5_kdc_req *request,
                krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
@@ -211,17 +199,6 @@ static preauth_system static_preauth_systems[] = {
         NULL                    /* free_modreq */
     },
 #endif /* APPLE_PKINIT */
-    {
-        "timestamp",
-        KRB5_PADATA_ENC_TIMESTAMP,
-        0,
-        NULL,
-        NULL,
-        NULL,
-        get_enc_ts,
-        verify_enc_timestamp,
-        0
-    },
     {
         "FAST",
         KRB5_PADATA_FX_FAST,
@@ -1263,107 +1240,6 @@ request_contains_enctype(krb5_context context,  const krb5_kdc_req *request,
         if (request->ktype[i] == enctype)
             return 1;
     return 0;
-}
-
-static krb5_error_code
-get_enc_ts(krb5_context context, krb5_kdc_req *request,
-           krb5_kdcpreauth_callbacks cb, krb5_kdcpreauth_rock rock,
-           krb5_kdcpreauth_moddata moddata, krb5_pa_data *data)
-{
-    if (rock->rstate->armor_key != NULL)
-        return ENOENT;
-    return 0;
-}
-
-
-static void
-verify_enc_timestamp(krb5_context context, krb5_data *req_pkt,
-                     krb5_kdc_req *request, krb5_enc_tkt_part *enc_tkt_reply,
-                     krb5_pa_data *pa, krb5_kdcpreauth_callbacks cb,
-                     krb5_kdcpreauth_rock rock,
-                     krb5_kdcpreauth_moddata moddata,
-                     krb5_kdcpreauth_verify_respond_fn respond,
-                     void *arg)
-{
-    krb5_pa_enc_ts *            pa_enc = 0;
-    krb5_error_code             retval;
-    krb5_data                   scratch;
-    krb5_data                   enc_ts_data;
-    krb5_enc_data               *enc_data = 0;
-    krb5_keyblock               key;
-    krb5_key_data *             client_key;
-    krb5_int32                  start;
-    krb5_timestamp              timenow;
-    krb5_error_code             decrypt_err = 0;
-
-    scratch.data = (char *)pa->contents;
-    scratch.length = pa->length;
-
-    enc_ts_data.data = 0;
-
-    if ((retval = decode_krb5_enc_data(&scratch, &enc_data)) != 0)
-        goto cleanup;
-
-    enc_ts_data.length = enc_data->ciphertext.length;
-    if ((enc_ts_data.data = (char *) malloc(enc_ts_data.length)) == NULL)
-        goto cleanup;
-
-    start = 0;
-    decrypt_err = 0;
-    while (1) {
-        if ((retval = krb5_dbe_search_enctype(context, rock->client,
-                                              &start, enc_data->enctype,
-                                              -1, 0, &client_key)))
-            goto cleanup;
-
-        if ((retval = krb5_dbe_decrypt_key_data(context, NULL, client_key,
-                                                &key, NULL)))
-            goto cleanup;
-
-        key.enctype = enc_data->enctype;
-
-        retval = krb5_c_decrypt(context, &key, KRB5_KEYUSAGE_AS_REQ_PA_ENC_TS,
-                                0, enc_data, &enc_ts_data);
-        krb5_free_keyblock_contents(context, &key);
-        if (retval == 0)
-            break;
-        else
-            decrypt_err = retval;
-    }
-
-    if ((retval = decode_krb5_pa_enc_ts(&enc_ts_data, &pa_enc)) != 0)
-        goto cleanup;
-
-    if ((retval = krb5_timeofday(context, &timenow)) != 0)
-        goto cleanup;
-
-    if (labs(timenow - pa_enc->patimestamp) > context->clockskew) {
-        retval = KRB5KRB_AP_ERR_SKEW;
-        goto cleanup;
-    }
-
-    setflag(enc_tkt_reply->flags, TKT_FLG_PRE_AUTH);
-
-    retval = 0;
-
-cleanup:
-    if (enc_data) {
-        krb5_free_data_contents(context, &enc_data->ciphertext);
-        free(enc_data);
-    }
-    krb5_free_data_contents(context, &enc_ts_data);
-    if (pa_enc)
-        free(pa_enc);
-    /*
-     * If we get NO_MATCHING_KEY and decryption previously failed, and
-     * we failed to find any other keys of the correct enctype after
-     * that failed decryption, it probably means that the password was
-     * incorrect.
-     */
-    if (retval == KRB5_KDB_NO_MATCHING_KEY && decrypt_err != 0)
-        retval = decrypt_err;
-
-    (*respond)(arg, retval, NULL, NULL, NULL);
 }
 
 static krb5_error_code
