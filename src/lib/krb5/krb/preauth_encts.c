@@ -42,8 +42,6 @@ encts_process(krb5_context context, krb5_clpreauth_moddata moddata,
               krb5_kdc_req *request, krb5_data *encoded_request_body,
               krb5_data *encoded_previous_request, krb5_pa_data *padata,
               krb5_prompter_fct prompter, void *prompter_data,
-              krb5_clpreauth_get_as_key_fn gak_fct, void *gak_data,
-              krb5_data *salt, krb5_data *s2kparams, krb5_keyblock *as_key,
               krb5_pa_data ***out_padata)
 {
     krb5_error_code ret;
@@ -51,25 +49,14 @@ encts_process(krb5_context context, krb5_clpreauth_moddata moddata,
     krb5_data *ts = NULL, *enc_ts = NULL;
     krb5_enc_data enc_data;
     krb5_pa_data **pa = NULL;
-    krb5_enctype etype = cb->get_etype(context, rock);
+    krb5_keyblock *as_key;
 
     enc_data.ciphertext = empty_data();
 
-    if (as_key->length == 0) {
-#ifdef DEBUG
-        fprintf (stderr, "%s:%d: salt len=%d", __FILE__, __LINE__,
-                 salt->length);
-        if ((int) salt->length > 0)
-            fprintf (stderr, " '%.*s'", salt->length, salt->data);
-        fprintf (stderr, "; *etype=%d request->ktype[0]=%d\n",
-                 etype, request->ktype[0]);
-#endif
-        ret = (*gak_fct)(context, request->client, etype, prompter,
-                         prompter_data, salt, s2kparams, as_key, gak_data);
-        if (ret)
-            goto cleanup;
-        TRACE_PREAUTH_ENC_TS_KEY_GAK(context, as_key);
-    }
+    ret = cb->get_as_key(context, rock, &as_key);
+    if (ret)
+        goto cleanup;
+    TRACE_PREAUTH_ENC_TS_KEY_GAK(context, as_key);
 
     /* now get the time of day, and encrypt it accordingly */
     ret = krb5_us_timeofday(context, &pa_enc.patimestamp, &pa_enc.pausec);

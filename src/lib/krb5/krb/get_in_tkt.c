@@ -839,6 +839,14 @@ krb5_init_creds_init(krb5_context context,
 
     ctx->preauth_rock.magic = CLIENT_ROCK_MAGIC;
     ctx->preauth_rock.etype = &ctx->etype;
+    ctx->preauth_rock.as_key = &ctx->as_key;
+    ctx->preauth_rock.gak_fct = &ctx->gak_fct;
+    ctx->preauth_rock.gak_data = &ctx->gak_data;
+    ctx->preauth_rock.salt = &ctx->salt;
+    ctx->preauth_rock.s2kparams = &ctx->s2kparams;
+    ctx->preauth_rock.client = client;
+    ctx->preauth_rock.prompter = prompter;
+    ctx->preauth_rock.prompter_data = data;
 
     /* Initialise request parameters as per krb5_get_init_creds() */
     ctx->request->kdc_options = context->kdc_default_options;
@@ -1108,14 +1116,8 @@ init_creds_step_request(krb5_context context,
                                ctx->encoded_previous_request,
                                ctx->preauth_to_use,
                                &ctx->request->padata,
-                               &ctx->salt,
-                               &ctx->s2kparams,
-                               &ctx->etype,
-                               &ctx->as_key,
                                ctx->prompter,
                                ctx->prompter_data,
-                               ctx->gak_fct,
-                               ctx->gak_data,
                                &ctx->preauth_rock,
                                ctx->opte);
         if (code != 0)
@@ -1133,14 +1135,8 @@ init_creds_step_request(krb5_context context,
                                             ctx->preauth_to_use,
                                             &ctx->request->padata,
                                             ctx->err_reply,
-                                            &ctx->salt,
-                                            &ctx->s2kparams,
-                                            &ctx->etype,
-                                            &ctx->as_key,
                                             ctx->prompter,
                                             ctx->prompter_data,
-                                            ctx->gak_fct,
-                                            ctx->gak_data,
                                             &ctx->preauth_rock,
                                             ctx->opte);
         } else {
@@ -1365,14 +1361,8 @@ init_creds_step_reply(krb5_context context,
                            ctx->encoded_previous_request,
                            ctx->reply->padata,
                            &kdc_padata,
-                           &ctx->salt,
-                           &ctx->s2kparams,
-                           &ctx->etype,
-                           &ctx->as_key,
                            ctx->prompter,
                            ctx->prompter_data,
-                           ctx->gak_fct,
-                           ctx->gak_data,
                            &ctx->preauth_rock,
                            ctx->opte);
     if (code != 0)

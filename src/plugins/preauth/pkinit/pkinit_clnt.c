@@ -1022,16 +1022,14 @@ pkinit_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
                       krb5_data *encoded_previous_request,
                       krb5_pa_data *in_padata,
                       krb5_prompter_fct prompter, void *prompter_data,
-                      krb5_clpreauth_get_as_key_fn gak_fct, void *gak_data,
-                      krb5_data *salt, krb5_data *s2kparams,
-                      krb5_keyblock *as_key, krb5_pa_data ***out_padata)
+                      krb5_pa_data ***out_padata)
 {
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
     krb5_enctype enctype = -1;
     int processing_request = 0;
     pkinit_context plgctx = (pkinit_context)moddata;
     pkinit_req_context reqctx = (pkinit_req_context)modreq;
-    krb5_keyblock *armor_key = cb->fast_armor(context, rock);
+    krb5_keyblock *armor_key = cb->fast_armor(context, rock), as_key;
 
     pkiDebug("pkinit_client_process %p %p %p %p\n",
              context, plgctx, reqctx, request);
@@ -1094,8 +1092,10 @@ pkinit_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
          */
         enctype = cb->get_etype(context, rock);
         retval = pa_pkinit_parse_rep(context, plgctx, reqctx, request,
-                                     in_padata, enctype, as_key,
+                                     in_padata, enctype, &as_key,
                                      encoded_previous_request);
+        if (retval == 0)
+            retval = cb->set_as_key(context, rock, &as_key);
     }
 
     pkiDebug("pkinit_client_process: returning %d (%s)\n",
@@ -1112,9 +1112,7 @@ pkinit_client_tryagain(krb5_context context, krb5_clpreauth_moddata moddata,
                        krb5_data *encoded_previous_request,
                        krb5_pa_data *in_padata, krb5_error *err_reply,
                        krb5_prompter_fct prompter, void *prompter_data,
-                       krb5_clpreauth_get_as_key_fn gak_fct, void *gak_data,
-                       krb5_data *salt, krb5_data *s2kparams,
-                       krb5_keyblock *as_key, krb5_pa_data ***out_padata)
+                       krb5_pa_data ***out_padata)
 {
     krb5_error_code retval = KRB5KDC_ERR_PREAUTH_FAILED;
     pkinit_context plgctx = (pkinit_context)moddata;

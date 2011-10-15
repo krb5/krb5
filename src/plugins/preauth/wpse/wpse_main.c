@@ -98,10 +98,6 @@ client_process(krb5_context kcontext,
                krb5_pa_data *pa_data,
                krb5_prompter_fct prompter,
                void *prompter_data,
-               krb5_clpreauth_get_as_key_fn gak_fct,
-               void *gak_data,
-               krb5_data *salt, krb5_data *s2kparams,
-               krb5_keyblock *as_key,
                krb5_pa_data ***out_pa_data)
 {
     krb5_pa_data **send_pa;
@@ -159,7 +155,7 @@ client_process(krb5_context kcontext,
             fprintf(stderr, "Recovered key type=%d, length=%d.\n",
                     kb->enctype, kb->length);
 #endif
-            status = krb5_copy_keyblock_contents(kcontext, kb, as_key);
+            status = cb->set_as_key(kcontext, rock, kb);
             krb5_free_keyblock(kcontext, kb);
             return status;
         }

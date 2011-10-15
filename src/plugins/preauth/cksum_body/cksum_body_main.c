@@ -91,21 +91,17 @@ client_process(krb5_context kcontext,
                krb5_pa_data *pa_data,
                krb5_prompter_fct prompter,
                void *prompter_data,
-               krb5_clpreauth_get_as_key_fn gak_fct,
-               void *gak_data,
-               krb5_data *salt, krb5_data *s2kparams,
-               krb5_keyblock *as_key,
                krb5_pa_data ***out_pa_data)
 {
     krb5_pa_data **send_pa;
     krb5_checksum checksum;
-    krb5_enctype enctype;
     krb5_cksumtype *cksumtypes;
     krb5_error_code status = 0;
-    krb5_int32 cksumtype, *enctypes;
-    unsigned int i, n_enctypes, cksumtype_count;
+    krb5_int32 cksumtype;
+    unsigned int i, cksumtype_count;
     int num_gic_info = 0;
     krb5_gic_opt_pa_data *gic_info;
+    krb5_keyblock *as_key;
 
     status = krb5_get_init_creds_opt_get_pa(kcontext, opt,
                                             &num_gic_info, &gic_info);
@@ -128,37 +124,9 @@ client_process(krb5_context kcontext,
 
     memset(&checksum, 0, sizeof(checksum));
 
-    /* Get the user's long-term key if we haven't asked for it yet.  Try
-     * all of the encryption types which the server supports. */
-    if (as_key->length == 0) {
-        if ((pa_data != NULL) && (pa_data->length >= 4)) {
-#ifdef DEBUG
-            fprintf(stderr, "%d bytes of preauth data.\n", pa_data->length);
-#endif
-            n_enctypes = pa_data->length / 4;
-            enctypes = (krb5_int32*) pa_data->contents;
-        } else {
-            n_enctypes = request->nktypes;
-        }
-        for (i = 0; i < n_enctypes; i++) {
-            if ((pa_data != NULL) && (pa_data->length >= 4)) {
-                memcpy(&enctype, pa_data->contents + 4 * i, 4);
-                enctype = ntohl(enctype);
-            } else {
-                enctype = request->ktype[i];
-            }
-#ifdef DEBUG
-            fprintf(stderr, "Asking for AS key (type = %d).\n", enctype);
-#endif
-            status = (*gak_fct)(kcontext, request->client, enctype,
-                                prompter, prompter_data,
-                                salt, s2kparams, as_key, gak_data);
-            if (status == 0)
-                break;
-        }
-        if (status != 0)
-            return status;
-    }
+    status = cb->get_as_key(kcontext, rock, &as_key);
+    if (status != 0)
+        return status;
 #ifdef DEBUG
     fprintf(stderr, "Got AS key (type = %d).\n", as_key->enctype);
 #endif

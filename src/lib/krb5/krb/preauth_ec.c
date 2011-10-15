@@ -47,22 +47,13 @@ ec_process(krb5_context context, krb5_clpreauth_moddata moddata,
            krb5_data *encoded_request_body,
            krb5_data *encoded_previous_request, krb5_pa_data *padata,
            krb5_prompter_fct prompter, void *prompter_data,
-           krb5_clpreauth_get_as_key_fn gak_fct, void *gak_data,
-           krb5_data *salt, krb5_data *s2kparams, krb5_keyblock *as_key,
            krb5_pa_data ***out_padata)
 {
     krb5_error_code retval = 0;
-    krb5_enctype enctype;
-    krb5_keyblock *challenge_key = NULL, *armor_key;
+    krb5_keyblock *challenge_key = NULL, *armor_key, *as_key;
 
     armor_key = cb->fast_armor(context, rock);
-    enctype = cb->get_etype(context, rock);
-    if (as_key->length == 0 ||as_key->enctype != enctype) {
-        retval = gak_fct(context, request->client,
-                         enctype, prompter, prompter_data,
-                         salt, s2kparams,
-                         as_key, gak_data);
-    }
+    retval = cb->get_as_key(context, rock, &as_key);
     if (retval == 0 && padata->length) {
         krb5_enc_data *enc = NULL;
         krb5_data scratch;

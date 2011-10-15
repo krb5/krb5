@@ -387,10 +387,37 @@ fast_armor(krb5_context context, krb5_clpreauth_rock rock)
     return rock->fast_state->armor_key;
 }
 
+static krb5_error_code
+get_as_key(krb5_context context, krb5_clpreauth_rock rock,
+           krb5_keyblock **keyblock)
+{
+    krb5_error_code ret;
+
+    if (rock->as_key->length == 0) {
+        ret = (*rock->gak_fct)(context, rock->client, *rock->etype,
+                               rock->prompter, rock->prompter_data, rock->salt,
+                               rock->s2kparams, rock->as_key, *rock->gak_data);
+        if (ret)
+            return ret;
+    }
+    *keyblock = rock->as_key;
+    return 0;
+}
+
+static krb5_error_code
+set_as_key(krb5_context context, krb5_clpreauth_rock rock,
+           const krb5_keyblock *keyblock)
+{
+    krb5_free_keyblock_contents(context, rock->as_key);
+    return krb5_copy_keyblock_contents(context, keyblock, rock->as_key);
+}
+
 static struct krb5_clpreauth_callbacks_st callbacks = {
     1,
     get_etype,
-    fast_armor
+    fast_armor,
+    get_as_key,
+    set_as_key
 };
 
 /* Tweak the request body, for now adding any enctypes which the module claims
@@ -432,12 +459,7 @@ run_preauth_plugins(krb5_context kcontext,
                     krb5_pa_data *in_padata,
                     krb5_prompter_fct prompter,
                     void *prompter_data,
-                    krb5_clpreauth_get_as_key_fn gak_fct,
-                    krb5_data *salt,
-                    krb5_data *s2kparams,
-                    void *gak_data,
                     krb5_clpreauth_rock preauth_rock,
-                    krb5_keyblock *as_key,
                     krb5_pa_data ***out_pa_list,
                     int *out_pa_list_size,
                     int *module_ret,
@@ -481,9 +503,7 @@ run_preauth_plugins(krb5_context kcontext,
                                      &callbacks, preauth_rock,
                                      request, encoded_request_body,
                                      encoded_previous_request, in_padata,
-                                     prompter, prompter_data, gak_fct,
-                                     gak_data, salt, s2kparams, as_key,
-                                     &out_pa_data);
+                                     prompter, prompter_data, &out_pa_data);
         TRACE_PREAUTH_PROCESS(kcontext, module->name, module->pa_type,
                               module->flags, ret);
         /* Make note of the module's flags and status. */
@@ -1350,11 +1370,7 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
                          krb5_pa_data **padata,
                          krb5_pa_data ***return_padata,
                          krb5_error *err_reply,
-                         krb5_data *salt, krb5_data *s2kparams,
-                         krb5_enctype *etype,
-                         krb5_keyblock *as_key,
                          krb5_prompter_fct prompter, void *prompter_data,
-                         krb5_gic_get_as_key_fct gak_fct, void *gak_data,
                          krb5_clpreauth_rock preauth_rock,
                          krb5_gic_opt_ext *opte)
 {
@@ -1396,8 +1412,6 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
                                            padata[i],
                                            err_reply,
                                            prompter, prompter_data,
-                                           gak_fct, gak_data, salt, s2kparams,
-                                           as_key,
                                            &out_padata) == 0) {
                 if (out_padata != NULL) {
                     int k;
@@ -1415,17 +1429,12 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
 }
 
 krb5_error_code KRB5_CALLCONV
-krb5_do_preauth(krb5_context context,
-                krb5_kdc_req *request,
+krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
                 krb5_data *encoded_request_body,
                 krb5_data *encoded_previous_request,
                 krb5_pa_data **in_padata, krb5_pa_data ***out_padata,
-                krb5_data *salt, krb5_data *s2kparams,
-                krb5_enctype *etype,
-                krb5_keyblock *as_key,
                 krb5_prompter_fct prompter, void *prompter_data,
-                krb5_gic_get_as_key_fct gak_fct, void *gak_data,
-                krb5_clpreauth_rock preauth_rock, krb5_gic_opt_ext *opte)
+                krb5_clpreauth_rock rock, krb5_gic_opt_ext *opte)
 {
     unsigned int h;
     int i, j, out_pa_list_size;
@@ -1525,19 +1534,24 @@ krb5_do_preauth(krb5_context context,
                 }
                 scratch.data = (char *) etype_info[l]->salt;
                 scratch.length = etype_info[l]->length;
-                krb5_free_data_contents(context, salt);
+                krb5_free_data_contents(context, rock->salt);
                 if (scratch.length == KRB5_ETYPE_NO_SALT)
-                    salt->data = NULL;
-                else
-                    if ((ret = krb5int_copy_data_contents( context, &scratch, salt)) != 0)
+                    rock->salt->data = NULL;
+                else {
+                    ret = krb5int_copy_data_contents(context, &scratch,
+                                                     rock->salt);
+                    if (ret)
                         goto cleanup;
-                *etype = etype_info[l]->etype;
-                krb5_free_data_contents(context, s2kparams);
-                if ((ret = krb5int_copy_data_contents(context,
-                                                      &etype_info[l]->s2kparams,
-                                                      s2kparams)) != 0)
+                }
+                *rock->etype = etype_info[l]->etype;
+                krb5_free_data_contents(context, rock->s2kparams);
+                ret = krb5int_copy_data_contents(context,
+                                                 &etype_info[l]->s2kparams,
+                                                 rock->s2kparams);
+                if (ret)
                     goto cleanup;
-                TRACE_PREAUTH_ETYPE_INFO(context, *etype, salt, s2kparams);
+                TRACE_PREAUTH_ETYPE_INFO(context, *rock->etype, rock->salt,
+                                         rock->s2kparams);
                 break;
             }
             case KRB5_PADATA_PW_SALT:
@@ -1558,11 +1572,13 @@ krb5_do_preauth(krb5_context context,
 #endif
                         out_pa = NULL;
 
-                        if ((ret = ((*pa_types[j].fct)(context, request,
-                                                       in_padata[i], &out_pa,
-                                                       salt, s2kparams, etype, as_key,
-                                                       prompter, prompter_data,
-                                                       gak_fct, gak_data)))) {
+                        ret = pa_types[j].fct(context, request, in_padata[i],
+                                              &out_pa, rock->salt,
+                                              rock->s2kparams, rock->etype,
+                                              rock->as_key, prompter,
+                                              prompter_data, *rock->gak_fct,
+                                              *rock->gak_data);
+                        if (ret) {
                             if (paorder[h] == PA_INFO) {
                                 TRACE_PREAUTH_INFO_FAIL(context,
                                                         in_padata[i]->pa_type,
@@ -1601,11 +1617,7 @@ krb5_do_preauth(krb5_context context,
                                               in_padata[i],
                                               prompter,
                                               prompter_data,
-                                              gak_fct,
-                                              salt, s2kparams,
-                                              gak_data,
-                                              preauth_rock,
-                                              as_key,
+                                              rock,
                                               &out_pa_list,
                                               &out_pa_list_size,
                                               &module_ret,

@@ -802,17 +802,39 @@ error(MIT_DES_KEYSIZE does not equal KRB5_MIT_DES_KEYSIZE)
 
 #include <krb5/preauth_plugin.h>
 
+typedef krb5_error_code
+(*krb5_gic_get_as_key_fct)(krb5_context, krb5_principal, krb5_enctype,
+                           krb5_prompter_fct, void *prompter_data,
+                           krb5_data *salt, krb5_data *s2kparams,
+                           krb5_keyblock *as_key, void *gak_data);
+
 #define CLIENT_ROCK_MAGIC 0x4352434b
-/* This structure is passed into the client preauth functions and passed
- * back to the "get_data_proc" function so that it can locate the
- * requested information.  It is opaque to the plugin code and can be
- * expanded in the future as new types of requests are defined which
- * may require other things to be passed through. */
+/*
+ * This structure is passed into the clpreauth methods and passed back to
+ * clpreauth callbacks so that they can locate the requested information.  It
+ * is opaque to the plugin code and can be expanded in the future as new types
+ * of requests are defined which may require other things to be passed through.
+ * All pointer fields are aliases and should not be freed.
+ */
 struct krb5int_fast_request_state;
 struct krb5_clpreauth_rock_st {
     krb5_magic magic;
     krb5_enctype *etype;
     struct krb5int_fast_request_state *fast_state;
+
+    /*
+     * These fields allow gak_fct to be called via the rock.  The
+     * gak_fct and gak_data fields have an extra level of indirection
+     * since they can change in the init_creds context.
+     */
+    krb5_keyblock *as_key;
+    krb5_gic_get_as_key_fct *gak_fct;
+    void **gak_data;
+    krb5_data *salt;
+    krb5_data *s2kparams;
+    krb5_principal client;
+    krb5_prompter_fct prompter;
+    void *prompter_data;
 };
 
 typedef struct _krb5_pa_enc_ts {
@@ -1055,12 +1077,6 @@ krb5int_copy_data_contents_add0(krb5_context, const krb5_data *, krb5_data *);
 krb5_error_code
 krb5int_copy_creds_contents(krb5_context, const krb5_creds *, krb5_creds *);
 
-typedef krb5_error_code
-(*krb5_gic_get_as_key_fct)(krb5_context, krb5_principal, krb5_enctype,
-                           krb5_prompter_fct, void *prompter_data,
-                           krb5_data *salt, krb5_data *s2kparams,
-                           krb5_keyblock *as_key, void *gak_data);
-
 krb5_error_code KRB5_CALLCONV
 krb5int_get_init_creds(krb5_context context, krb5_creds *creds,
                        krb5_principal client, krb5_prompter_fct prompter,
@@ -1080,11 +1096,8 @@ krb5_error_code KRB5_CALLCONV
 krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
                 krb5_data *encoded_request_body,
                 krb5_data *encoded_previous_request, krb5_pa_data **in_padata,
-                krb5_pa_data ***out_padata, krb5_data *salt,
-                krb5_data *s2kparams, krb5_enctype *etype,
-                krb5_keyblock *as_key, krb5_prompter_fct prompter,
-                void *prompter_data, krb5_gic_get_as_key_fct gak_fct,
-                void *gak_data, krb5_clpreauth_rock preauth_rock,
+                krb5_pa_data ***out_padata, krb5_prompter_fct prompter,
+                void *prompter_data, krb5_clpreauth_rock preauth_rock,
                 krb5_gic_opt_ext *opte);
 
 krb5_error_code KRB5_CALLCONV
@@ -1092,12 +1105,8 @@ krb5_do_preauth_tryagain(krb5_context context, krb5_kdc_req *request,
                          krb5_data *encoded_request_body,
                          krb5_data *encoded_previous_request,
                          krb5_pa_data **in_padata, krb5_pa_data ***out_padata,
-                         krb5_error *err_reply,
-                         krb5_data *salt, krb5_data *s2kparams,
-                         krb5_enctype *etype, krb5_keyblock *as_key,
-                         krb5_prompter_fct prompter, void *prompter_data,
-                         krb5_gic_get_as_key_fct gak_fct, void *gak_data,
-                         krb5_clpreauth_rock preauth_rock,
+                         krb5_error *err_reply, krb5_prompter_fct prompter,
+                         void *prompter_data, krb5_clpreauth_rock preauth_rock,
                          krb5_gic_opt_ext *opte);
 
 void KRB5_CALLCONV krb5_init_preauth_context(krb5_context);

@@ -143,23 +143,6 @@ typedef struct krb5_clpreauth_rock_st *krb5_clpreauth_rock;
 typedef struct krb5_clpreauth_moddata_st *krb5_clpreauth_moddata;
 typedef struct krb5_clpreauth_modreq_st *krb5_clpreauth_modreq;
 
-/*
- * Provided by krb5: a callback which will obtain the user's long-term AS key
- * by prompting the user for the password and converting it to a key using the
- * provided salt and s2kparams.  The resulting key will be placed in
- * as_key_out, which should be initialized to empty prior to the call.
- */
-typedef krb5_error_code
-(*krb5_clpreauth_get_as_key_fn)(krb5_context context,
-                                krb5_principal princ,
-                                krb5_enctype enctype,
-                                krb5_prompter_fct prompter,
-                                void *prompter_data,
-                                krb5_data *salt,
-                                krb5_data *s2kparams,
-                                krb5_keyblock *as_key_out,
-                                void *gak_data);
-
 /* Before using a callback after version 1, modules must check the vers
  * field of the callback structure. */
 typedef struct krb5_clpreauth_callbacks_st {
@@ -177,6 +160,20 @@ typedef struct krb5_clpreauth_callbacks_st {
      * FAST.  The returned pointer is an alias and should not be freed. */
     krb5_keyblock *(*fast_armor)(krb5_context context,
                                  krb5_clpreauth_rock rock);
+
+    /*
+     * Get a pointer to the client-supplied reply key, possibly invoking the
+     * prompter to ask for a password if this has not already been done.  The
+     * returned pointer is an alias and should not be freed.
+     */
+    krb5_error_code (*get_as_key)(krb5_context context,
+                                  krb5_clpreauth_rock rock,
+                                  krb5_keyblock **keyblock);
+
+    /* Replace the reply key to be used to decrypt the AS response. */
+    krb5_error_code (*set_as_key)(krb5_context context,
+                                  krb5_clpreauth_rock rock,
+                                  const krb5_keyblock *keyblock);
 
     /* End of version 1 clpreauth callbacks. */
 } *krb5_clpreauth_callbacks;
@@ -242,10 +239,6 @@ typedef krb5_error_code
                              krb5_data *encoded_previous_request,
                              krb5_pa_data *pa_data,
                              krb5_prompter_fct prompter, void *prompter_data,
-                             krb5_clpreauth_get_as_key_fn gak_fct,
-                             void *gak_data,
-                             krb5_data *salt, krb5_data *s2kparams,
-                             krb5_keyblock *as_key,
                              krb5_pa_data ***pa_data_out);
 
 /*
@@ -267,10 +260,6 @@ typedef krb5_error_code
                               krb5_pa_data *pa_data_in,
                               krb5_error *error,
                               krb5_prompter_fct prompter, void *prompter_data,
-                              krb5_clpreauth_get_as_key_fn gak_fct,
-                              void *gak_data,
-                              krb5_data *salt, krb5_data *s2kparams,
-                              krb5_keyblock *as_key,
                               krb5_pa_data ***pa_data_out);
 
 /*
