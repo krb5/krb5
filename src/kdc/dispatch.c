@@ -54,6 +54,11 @@ finish_dispatch(void *arg, krb5_error_code code, krb5_data *response)
     oldrespond = state->respond;
     oldarg = state->arg;
 
+#ifndef NOCACHE
+    /* Remove our NULL cache entry to indicate request completion. */
+    kdc_remove_lookaside(kdc_context, state->request);
+#endif
+
     if (state->is_tcp == 0 && response &&
         response->length > max_dgram_reply_size) {
         krb5_free_data(kdc_context, response);
@@ -67,7 +72,7 @@ finish_dispatch(void *arg, krb5_error_code code, krb5_data *response)
 
 #ifndef NOCACHE
     /* put the response into the lookaside buffer */
-    else if (!code)
+    else if (!code && response)
         kdc_insert_lookaside(state->request, response);
 #endif
 
@@ -104,20 +109,30 @@ dispatch(void *cb, struct sockaddr *local_saddr, const krb5_fulladdr *from,
         const char *name = 0;
         char buf[46];
 
-        if (is_tcp != 0 || response->length <= max_dgram_reply_size) {
+        if (!response || is_tcp != 0 ||
+            response->length <= max_dgram_reply_size) {
             name = inet_ntop (ADDRTYPE2FAMILY (from->address->addrtype),
                               from->address->contents, buf, sizeof (buf));
             if (name == 0)
                 name = "[unknown address type]";
-            krb5_klog_syslog(LOG_INFO,
-                             "DISPATCH: repeated (retransmitted?) request "
-                             "from %s, resending previous response",
-                             name);
+            if (response)
+                krb5_klog_syslog(LOG_INFO,
+                                 "DISPATCH: repeated (retransmitted?) request "
+                                 "from %s, resending previous response", name);
+            else
+                krb5_klog_syslog(LOG_INFO,
+                                 "DISPATCH: repeated (retransmitted?) request "
+                                 "from %s during request processing, dropping "
+                                 "repeated request", name);
         }
 
-        finish_dispatch(state, 0, response);
+        finish_dispatch(state, response ? 0 : KRB5KDC_ERR_DISCARD, response);
         return;
     }
+
+    /* Insert a NULL entry into the lookaside to indicate that this request
+     * is currently being processed. */
+    kdc_insert_lookaside(pkt, NULL);
 #endif
 
     retval = krb5_crypto_us_timeofday(&now, &now_usec);

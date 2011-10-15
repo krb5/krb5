@@ -236,6 +236,7 @@ handle_authdata (krb5_context context,
 /* replay.c */
 krb5_boolean kdc_check_lookaside (krb5_data *, krb5_data **);
 void kdc_insert_lookaside (krb5_data *, krb5_data *);
+void kdc_remove_lookaside (krb5_context kcontext, krb5_data *);
 void kdc_free_lookaside(krb5_context);
 
 /* kdc_util.c */

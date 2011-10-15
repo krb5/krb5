@@ -55,6 +55,29 @@ static int num_entries = 0;
    Todo:  quench the size of the queue...
 */
 
+/* Removes the most recent cache entry for a given packet. */
+void
+kdc_remove_lookaside(krb5_context kcontext, krb5_data *inpkt)
+{
+    register krb5_kdc_replay_ent *eptr, *last;
+
+    if (!root_ptr.next)
+        return;
+
+    for (last = &root_ptr, eptr = root_ptr.next;
+         eptr;
+         last = eptr, eptr = eptr->next) {
+        if (!MATCH(eptr))
+            continue;
+
+        last->next = eptr->next;
+        krb5_free_data(kcontext, eptr->req_packet);
+        krb5_free_data(kcontext, eptr->reply_packet);
+        free(eptr);
+        return;
+    }
+}
+
 /* return TRUE if outpkt is filled in with a packet to reply with,
    FALSE if the caller should do the work */
 
