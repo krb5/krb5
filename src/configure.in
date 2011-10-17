@@ -213,14 +213,14 @@ nss)
   AC_DEFINE(PKINIT_CRYPTO_IMPL_NSS,1,[Define if pkinit crypto implementation is NSS])
   save_CFLAGS=$CFLAGS
   CFLAGS="$CFLAGS $PKINIT_CRYPTO_IMPL_CFLAGS"
-  AC_COMPILE_IFELSE([
+  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
 #include <nss.h>
 #if NSS_VMAJOR < 3 || (NSS_VMAJOR == 3 && NSS_VMINOR < 12)
 #error
 #elif NSS_VMAJOR == 3 && NSS_VMINOR == 12 && NSS_VPATCH < 11
 #error
 #endif
-  ], [], [AC_MSG_ERROR([NSS version 3.12.11 or later required.])])
+  ])], [], [AC_MSG_ERROR([NSS version 3.12.11 or later required.])])
   CFLAGS=$save_CFLAGS
   ;;
 *)
