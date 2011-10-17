@@ -32,6 +32,8 @@ Remote requests are sent, for example, by kadmin(8) and the kpasswd(1) command, 
             *kadmind*'s *ACL* (access control list) tells it which principals are allowed to perform KADM5 administration actions.
             The  path of  the *ACL* file is specified via the acl_file configuration variable (see CONFIGURATION VALUES).
             The syntax of the *ACL* file is specified in the *ACL* FILE SYNTAX section below.
+            
+            If the *kadmind*'s ACL file is modified, the *kadmind* daemon needs to be restarted for changes to take effect.
 
 After the server begins running, it puts itself in the background and disassociates itself from its controlling terminal.
 
