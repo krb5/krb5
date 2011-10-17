@@ -109,17 +109,16 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
             err = getaddrinfo(hostname, 0, &hints, &ai);
             if (err) {
 #ifdef DEBUG_REFERRALS
-                printf("sname_to_princ: probably punting due to bad hostname of %s\n",hostname);
+                printf("sname_to_princ: failed to canonicalize %s; using as-is", hostname);
 #endif
-                return KRB5_ERR_BAD_HOSTNAME;
             }
-            remote_host = strdup(ai->ai_canonname ? ai->ai_canonname : hostname);
+            remote_host = strdup((ai && ai->ai_canonname) ? ai->ai_canonname : hostname);
             if (!remote_host) {
                 freeaddrinfo(ai);
                 return ENOMEM;
             }
 
-            if (maybe_use_reverse_dns(context, DEFAULT_RDNS_LOOKUP)) {
+            if ((!err) && maybe_use_reverse_dns(context, DEFAULT_RDNS_LOOKUP)) {
                 /*
                  * Do a reverse resolution to get the full name, just in
                  * case there's some funny business going on.  If there
