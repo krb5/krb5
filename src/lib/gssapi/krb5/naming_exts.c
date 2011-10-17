@@ -204,27 +204,26 @@ kg_map_name_error(OM_uint32 *minor_status, krb5_error_code code)
 
 /* Owns data on success */
 static krb5_error_code
-kg_data_list_to_buffer_set_nocopy(krb5_data **pdata,
-                                  gss_buffer_set_t *buffer_set)
+data_list_to_buffer_set(krb5_context context,
+                        krb5_data *data,
+                        gss_buffer_set_t *buffer_set)
 {
-    gss_buffer_set_t set;
+    gss_buffer_set_t set = GSS_C_NO_BUFFER_SET;
     OM_uint32 minor_status;
-    unsigned int i;
-    krb5_data *data;
+    int i;
+    krb5_error_code code = 0;
 
-    data = *pdata;
+    if (data == NULL)
+        goto cleanup;
 
-    if (data == NULL) {
-        if (buffer_set != NULL)
-            *buffer_set = GSS_C_NO_BUFFER_SET;
-        return 0;
-    } else if (buffer_set == NULL)
-        return EINVAL;
+    if (buffer_set == NULL)
+        goto cleanup;
 
     if (GSS_ERROR(gss_create_empty_buffer_set(&minor_status,
                                               &set))) {
         assert(minor_status != 0);
-        return minor_status;
+        code = minor_status;
+        goto cleanup;
     }
 
     for (i = 0; data[i].data != NULL; i++)
@@ -234,7 +233,8 @@ kg_data_list_to_buffer_set_nocopy(krb5_data **pdata,
     set->elements = gssalloc_calloc(i, sizeof(gss_buffer_desc));
     if (set->elements == NULL) {
         gss_release_buffer_set(&minor_status, &set);
-        return ENOMEM;
+        code = ENOMEM;
+        goto cleanup;
     }
 
     /*
@@ -245,16 +245,17 @@ kg_data_list_to_buffer_set_nocopy(krb5_data **pdata,
     for (i = set->count-1; i >= 0; i--) {
         if (data_to_gss(&data[i], &set->elements[i])) {
             gss_release_buffer_set(&minor_status, &set);
-            return ENOMEM;
+            code = ENOMEM;
+            goto cleanup;
         }
     }
+cleanup:
+    krb5int_free_data_list(context, data);
 
-    free(data);
-    *pdata = NULL;
+    if (buffer_set != NULL)
+        *buffer_set = set;
 
-    *buffer_set = set;
-
-    return 0;
+    return code;
 }
 
 OM_uint32 KRB5_CALLCONV
@@ -301,7 +302,8 @@ krb5_gss_inquire_name(OM_uint32 *minor_status,
     if (code != 0)
         goto cleanup;
 
-    code = kg_data_list_to_buffer_set_nocopy(&kattrs, attrs);
+    code = data_list_to_buffer_set(context, kattrs, attrs);
+    kattrs = NULL;
     if (code != 0)
         goto cleanup;
 
@@ -376,19 +378,20 @@ krb5_gss_get_name_attribute(OM_uint32 *minor_status,
                                        display_value ? &kdisplay_value : NULL,
                                        more);
     if (code == 0) {
-        if (value != NULL) {
-            value->value = kvalue.data;
-            value->length = kvalue.length;
-        }
+        if (value != NULL)
+            code = data_to_gss(&kvalue, value);
 
         if (authenticated != NULL)
             *authenticated = kauthenticated;
         if (complete != NULL)
             *complete = kcomplete;
 
-        if (display_value != NULL) {
-            display_value->value = kdisplay_value.data;
-            display_value->length = kdisplay_value.length;
+        if (display_value != NULL)
+        {
+            if (code != 0)
+                code = data_to_gss(&kdisplay_value, display_value);
+            else
+                free(kdisplay_value.data);
         }
     }
 
