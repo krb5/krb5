@@ -91,12 +91,12 @@ krb5int_gettimeofday (struct timeval *tp, void *ignore)
 int
 krb5int_gettimeofday (struct timeval *tp, void *ignore)
 {
-     time_t t;
+    time_t t;
 
-     t = time(NULL);
-     tp->tv_sec  = (long) t;
-     tp->tv_usec = 0;
-     return 0;
+    t = time(NULL);
+    tp->tv_sec  = (long) t;
+    tp->tv_usec = 0;
+    return 0;
 }
 
 #endif  /* !_WIN32 */

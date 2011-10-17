@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* tests/gssapi/t_imp_cred.c - krb5_gss_import_cred test harness */
 /*
  * Copyright 2011 by the Massachusetts Institute of Technology.
@@ -58,15 +58,15 @@ display_status(const char *m, OM_uint32 code, int type)
 
         if (!msg_ctx)
             break;
-     }
+    }
 }
 
 static void
 exit_gsserr(const char *msg, OM_uint32 maj_stat, OM_uint32 min_stat)
 {
-     display_status(msg, maj_stat, GSS_C_GSS_CODE);
-     display_status(msg, min_stat, GSS_C_MECH_CODE);
-     exit(1);
+    display_status(msg, maj_stat, GSS_C_GSS_CODE);
+    display_status(msg, min_stat, GSS_C_MECH_CODE);
+    exit(1);
 }
 
 static void

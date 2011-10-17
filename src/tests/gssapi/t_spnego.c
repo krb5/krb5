@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2010  by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -42,34 +42,34 @@
 static gss_OID_desc spnego_mech = { 6, "\053\006\001\005\005\002" };
 
 static void displayStatus_1(m, code, type)
-     char *m;
-     OM_uint32 code;
-     int type;
+    char *m;
+    OM_uint32 code;
+    int type;
 {
-     OM_uint32 maj_stat, min_stat;
-     gss_buffer_desc msg;
-     OM_uint32 msg_ctx;
+    OM_uint32 maj_stat, min_stat;
+    gss_buffer_desc msg;
+    OM_uint32 msg_ctx;
 
-     msg_ctx = 0;
-     while (1) {
-          maj_stat = gss_display_status(&min_stat, code,
-                                       type, GSS_C_NULL_OID,
-                                       &msg_ctx, &msg);
-          fprintf(stderr, "%s: %s\n", m, (char *)msg.value);
-          (void) gss_release_buffer(&min_stat, &msg);
+    msg_ctx = 0;
+    while (1) {
+        maj_stat = gss_display_status(&min_stat, code,
+                                      type, GSS_C_NULL_OID,
+                                      &msg_ctx, &msg);
+        fprintf(stderr, "%s: %s\n", m, (char *)msg.value);
+        (void) gss_release_buffer(&min_stat, &msg);
 
-          if (!msg_ctx)
-               break;
-     }
+        if (!msg_ctx)
+            break;
+    }
 }
 
 static void displayStatus(msg, maj_stat, min_stat)
-     char *msg;
-     OM_uint32 maj_stat;
-     OM_uint32 min_stat;
+    char *msg;
+    OM_uint32 maj_stat;
+    OM_uint32 min_stat;
 {
-     displayStatus_1(msg, maj_stat, GSS_C_GSS_CODE);
-     displayStatus_1(msg, min_stat, GSS_C_MECH_CODE);
+    displayStatus_1(msg, maj_stat, GSS_C_GSS_CODE);
+    displayStatus_1(msg, min_stat, GSS_C_MECH_CODE);
 }
 
 static OM_uint32

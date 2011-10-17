@@ -100,7 +100,7 @@ head_tail_test(struct fortuna_state *st)
             c = c >> 1;
         }
     }
-    
+
     for (bit = 0; bit < 8; bit++) {
         res = ((double)abs(len - bits[bit] * 2)) / (double)len;
         if (res > 0.005){

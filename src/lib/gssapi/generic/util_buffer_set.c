@@ -72,8 +72,8 @@ generic_gss_add_buffer_set_member(OM_uint32 * minor_status,
 
     set = *buffer_set;
     set->elements = (gss_buffer_desc *)gssalloc_realloc(set->elements,
-                                               (set->count + 1) *
-                                               sizeof(gss_buffer_desc));
+                                                        (set->count + 1) *
+                                                        sizeof(gss_buffer_desc));
     if (set->elements == NULL) {
         *minor_status = ENOMEM;
         return GSS_S_FAILURE;

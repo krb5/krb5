@@ -853,7 +853,7 @@ get_preauth_hint_list(krb5_kdc_req *request, krb5_kdcpreauth_rock rock,
         return;
     }
     state->hw_only = isflagset(rock->client->attributes,
-                                  KRB5_KDB_REQUIRES_HW_AUTH);
+                               KRB5_KDB_REQUIRES_HW_AUTH);
     state->respond = respond;
     state->arg = arg;
     state->request = request;

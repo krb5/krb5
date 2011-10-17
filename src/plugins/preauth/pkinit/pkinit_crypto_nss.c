@@ -1,23 +1,24 @@
-/* 
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
+/*
  *  Copyright (c) 2006,2007,2010,2011 Red Hat, Inc.
  *  All Rights Reserved.
- * 
+ *
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
  *  are met:
- * 
+ *
  *  * Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 
+ *
  *  * Redistributions in binary form must reproduce the above
  *    copyright notice, this list of conditions and the following
  *    disclaimer in the documentation and/or other materials provided
  *    with the distribution.
- * 
+ *
  *  * Neither the name of Red Hat, Inc., nor the names of its
  *    contributors may be used to endorse or promote products derived
  *    from this software without specific prior written permission.
- * 
+ *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
  *  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
  *  TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
@@ -153,28 +154,28 @@ struct dh_parameters {
 };
 static const SEC_ASN1Template dh_parameters_template[] = {
     {
-     SEC_ASN1_SEQUENCE,
-     0,
-     NULL,
-     sizeof(struct dh_parameters),
+        SEC_ASN1_SEQUENCE,
+        0,
+        NULL,
+        sizeof(struct dh_parameters),
     },
     {
-     SEC_ASN1_INTEGER,
-     offsetof(struct dh_parameters, p),
-     &SEC_IntegerTemplate,
-     sizeof(SECItem),
+        SEC_ASN1_INTEGER,
+        offsetof(struct dh_parameters, p),
+        &SEC_IntegerTemplate,
+        sizeof(SECItem),
     },
     {
-     SEC_ASN1_INTEGER,
-     offsetof(struct dh_parameters, g),
-     &SEC_IntegerTemplate,
-     sizeof(SECItem),
+        SEC_ASN1_INTEGER,
+        offsetof(struct dh_parameters, g),
+        &SEC_IntegerTemplate,
+        sizeof(SECItem),
     },
     {
-     SEC_ASN1_INTEGER | SEC_ASN1_OPTIONAL,
-     offsetof(struct dh_parameters, private_value_length),
-     &SEC_IntegerTemplate,
-     sizeof(SECItem),
+        SEC_ASN1_INTEGER | SEC_ASN1_OPTIONAL,
+        offsetof(struct dh_parameters, private_value_length),
+        &SEC_IntegerTemplate,
+        sizeof(SECItem),
     },
     {0, 0, NULL, 0}
 };
@@ -185,22 +186,22 @@ struct validation_parms {
 };
 static const SEC_ASN1Template validation_parms_template[] = {
     {
-     SEC_ASN1_SEQUENCE,
-     0,
-     NULL,
-     sizeof(struct validation_parms),
+        SEC_ASN1_SEQUENCE,
+        0,
+        NULL,
+        sizeof(struct validation_parms),
     },
     {
-     SEC_ASN1_BIT_STRING,
-     offsetof(struct validation_parms, seed),
-     &SEC_BitStringTemplate,
-     sizeof(SECItem),
+        SEC_ASN1_BIT_STRING,
+        offsetof(struct validation_parms, seed),
+        &SEC_BitStringTemplate,
+        sizeof(SECItem),
     },
     {
-     SEC_ASN1_INTEGER,
-     offsetof(struct validation_parms, pgen_counter),
-     &SEC_IntegerTemplate,
-     sizeof(SECItem),
+        SEC_ASN1_INTEGER,
+        offsetof(struct validation_parms, pgen_counter),
+        &SEC_IntegerTemplate,
+        sizeof(SECItem),
     },
     {0, 0, NULL, 0}
 };
@@ -209,40 +210,40 @@ static const SEC_ASN1Template validation_parms_template[] = {
 struct domain_parameters;
 static const SEC_ASN1Template domain_parameters_template[] = {
     {
-     SEC_ASN1_SEQUENCE,
-     0,
-     NULL,
-     sizeof(struct domain_parameters),
+        SEC_ASN1_SEQUENCE,
+        0,
+        NULL,
+        sizeof(struct domain_parameters),
     },
     {
-     SEC_ASN1_INTEGER,
-     offsetof(struct domain_parameters, p),
-     &SEC_IntegerTemplate,
-     sizeof(SECItem),
+        SEC_ASN1_INTEGER,
+        offsetof(struct domain_parameters, p),
+        &SEC_IntegerTemplate,
+        sizeof(SECItem),
     },
     {
-     SEC_ASN1_INTEGER,
-     offsetof(struct domain_parameters, g),
-     &SEC_IntegerTemplate,
-     sizeof(SECItem),
+        SEC_ASN1_INTEGER,
+        offsetof(struct domain_parameters, g),
+        &SEC_IntegerTemplate,
+        sizeof(SECItem),
     },
     {
-     SEC_ASN1_INTEGER,
-     offsetof(struct domain_parameters, q),
-     &SEC_IntegerTemplate,
-     sizeof(SECItem),
+        SEC_ASN1_INTEGER,
+        offsetof(struct domain_parameters, q),
+        &SEC_IntegerTemplate,
+        sizeof(SECItem),
     },
     {
-     SEC_ASN1_INTEGER | SEC_ASN1_OPTIONAL,
-     offsetof(struct domain_parameters, j),
-     &SEC_IntegerTemplate,
-     sizeof(SECItem),
+        SEC_ASN1_INTEGER | SEC_ASN1_OPTIONAL,
+        offsetof(struct domain_parameters, j),
+        &SEC_IntegerTemplate,
+        sizeof(SECItem),
     },
     {
-     SEC_ASN1_INLINE | SEC_ASN1_POINTER | SEC_ASN1_OPTIONAL,
-     offsetof(struct domain_parameters, validation_parms),
-     &validation_parms_template,
-     sizeof(struct validation_parms *),
+        SEC_ASN1_INLINE | SEC_ASN1_POINTER | SEC_ASN1_OPTIONAL,
+        offsetof(struct domain_parameters, validation_parms),
+        &validation_parms_template,
+        sizeof(struct validation_parms *),
     },
     {0, 0, NULL, 0}
 };
@@ -254,22 +255,22 @@ struct issuer_and_serial_number {
 };
 static const SEC_ASN1Template issuer_and_serial_number_template[] = {
     {
-     SEC_ASN1_SEQUENCE,
-     0,
-     NULL,
-     sizeof(struct issuer_and_serial_number),
+        SEC_ASN1_SEQUENCE,
+        0,
+        NULL,
+        sizeof(struct issuer_and_serial_number),
     },
     {
-     SEC_ASN1_ANY,
-     offsetof(struct issuer_and_serial_number, issuer),
-     &SEC_AnyTemplate,
-     sizeof(SECItem),
+        SEC_ASN1_ANY,
+        offsetof(struct issuer_and_serial_number, issuer),
+        &SEC_AnyTemplate,
+        sizeof(SECItem),
     },
     {
-     SEC_ASN1_INTEGER,
-     offsetof(struct issuer_and_serial_number, serial),
-     &SEC_IntegerTemplate,
-     sizeof(SECItem),
+        SEC_ASN1_INTEGER,
+        offsetof(struct issuer_and_serial_number, serial),
+        &SEC_IntegerTemplate,
+        sizeof(SECItem),
     },
     {0, 0, NULL, 0}
 };
@@ -277,10 +278,10 @@ static const SEC_ASN1Template issuer_and_serial_number_template[] = {
 /* KerberosString: RFC 4120, 5.2.1. */
 static const SEC_ASN1Template kerberos_string_template[] = {
     {
-     SEC_ASN1_GENERAL_STRING,
-     0,
-     NULL,
-     sizeof(SECItem),
+        SEC_ASN1_GENERAL_STRING,
+        0,
+        NULL,
+        sizeof(SECItem),
     }
 };
 
@@ -290,20 +291,20 @@ struct realm {
 };
 static const SEC_ASN1Template realm_template[] = {
     {
-     SEC_ASN1_GENERAL_STRING,
-     0,
-     NULL,
-     sizeof(SECItem),
+        SEC_ASN1_GENERAL_STRING,
+        0,
+        NULL,
+        sizeof(SECItem),
     }
 };
 
 /* PrincipalName: RFC 4120, 5.2.2. */
 static const SEC_ASN1Template sequence_of_kerberos_string_template[] = {
     {
-     SEC_ASN1_SEQUENCE_OF,
-     0,
-     &kerberos_string_template,
-     0,
+        SEC_ASN1_SEQUENCE_OF,
+        0,
+        &kerberos_string_template,
+        0,
     }
 };
 
@@ -313,22 +314,22 @@ struct principal_name {
 };
 static const SEC_ASN1Template principal_name_template[] = {
     {
-     SEC_ASN1_SEQUENCE,
-     0,
-     NULL,
-     sizeof(struct principal_name),
+        SEC_ASN1_SEQUENCE,
+        0,
+        NULL,
+        sizeof(struct principal_name),
     },
     {
-     SEC_ASN1_CONTEXT_SPECIFIC | 0 | SEC_ASN1_CONSTRUCTED | SEC_ASN1_EXPLICIT,
-     offsetof(struct principal_name, name_type),
-     &SEC_IntegerTemplate,
-     sizeof(SECItem),
+        SEC_ASN1_CONTEXT_SPECIFIC | 0 | SEC_ASN1_CONSTRUCTED | SEC_ASN1_EXPLICIT,
+        offsetof(struct principal_name, name_type),
+        &SEC_IntegerTemplate,
+        sizeof(SECItem),
     },
     {
-     SEC_ASN1_CONTEXT_SPECIFIC | 1 | SEC_ASN1_CONSTRUCTED | SEC_ASN1_EXPLICIT,
-     offsetof(struct principal_name, name_string),
-     sequence_of_kerberos_string_template,
-     sizeof(struct SECItem **),
+        SEC_ASN1_CONTEXT_SPECIFIC | 1 | SEC_ASN1_CONSTRUCTED | SEC_ASN1_EXPLICIT,
+        offsetof(struct principal_name, name_string),
+        sequence_of_kerberos_string_template,
+        sizeof(struct SECItem **),
     },
     {0, 0, NULL, 0},
 };
@@ -340,22 +341,22 @@ struct kerberos_principal_name {
 };
 static const SEC_ASN1Template kerberos_principal_name_template[] = {
     {
-     SEC_ASN1_SEQUENCE,
-     0,
-     NULL,
-     sizeof(struct kerberos_principal_name),
+        SEC_ASN1_SEQUENCE,
+        0,
+        NULL,
+        sizeof(struct kerberos_principal_name),
     },
     {
-     SEC_ASN1_CONTEXT_SPECIFIC | 0 | SEC_ASN1_CONSTRUCTED | SEC_ASN1_EXPLICIT,
-     offsetof(struct kerberos_principal_name, realm),
-     &realm_template,
-     sizeof(struct realm),
+        SEC_ASN1_CONTEXT_SPECIFIC | 0 | SEC_ASN1_CONSTRUCTED | SEC_ASN1_EXPLICIT,
+        offsetof(struct kerberos_principal_name, realm),
+        &realm_template,
+        sizeof(struct realm),
     },
     {
-     SEC_ASN1_CONTEXT_SPECIFIC | 1 | SEC_ASN1_CONSTRUCTED | SEC_ASN1_EXPLICIT,
-     offsetof(struct kerberos_principal_name, principal_name),
-     &principal_name_template,
-     sizeof(struct principal_name),
+        SEC_ASN1_CONTEXT_SPECIFIC | 1 | SEC_ASN1_CONSTRUCTED | SEC_ASN1_EXPLICIT,
+        offsetof(struct kerberos_principal_name, principal_name),
+        &principal_name_template,
+        sizeof(struct principal_name),
     },
     {0, 0, NULL, 0}
 };
@@ -366,57 +367,62 @@ struct content_info {
 };
 static const SEC_ASN1Template content_info_template[] = {
     {
-     SEC_ASN1_SEQUENCE,
-     0,
-     NULL,
-     sizeof(struct content_info),
+        SEC_ASN1_SEQUENCE,
+        0,
+        NULL,
+        sizeof(struct content_info),
     },
     {
-     SEC_ASN1_OBJECT_ID,
-     offsetof(struct content_info, content_type),
-     &SEC_ObjectIDTemplate,
-     sizeof(SECItem),
+        SEC_ASN1_OBJECT_ID,
+        offsetof(struct content_info, content_type),
+        &SEC_ObjectIDTemplate,
+        sizeof(SECItem),
     },
     {
-     SEC_ASN1_CONTEXT_SPECIFIC | 0 | SEC_ASN1_CONSTRUCTED | SEC_ASN1_EXPLICIT,
-     offsetof(struct content_info, content),
-     &SEC_OctetStringTemplate,
-     sizeof(SECItem),
+        SEC_ASN1_CONTEXT_SPECIFIC | 0 | SEC_ASN1_CONSTRUCTED | SEC_ASN1_EXPLICIT,
+        offsetof(struct content_info, content),
+        &SEC_OctetStringTemplate,
+        sizeof(SECItem),
     },
     {0, 0, NULL, 0}
 };
 
 /* OIDs. */
-static unsigned char oid_pkinit_key_purpose_client_bytes[] =
-    { 0x2b, 0x06, 0x01, 0x05, 0x02, 0x03, 0x04 };
+static unsigned char oid_pkinit_key_purpose_client_bytes[] = {
+    0x2b, 0x06, 0x01, 0x05, 0x02, 0x03, 0x04
+};
 static SECItem pkinit_kp_client = {
     siDEROID,
     oid_pkinit_key_purpose_client_bytes,
     7,
 };
-static unsigned char oid_pkinit_key_purpose_kdc_bytes[] =
-    { 0x2b, 0x06, 0x01, 0x05, 0x02, 0x03, 0x05 };
+static unsigned char oid_pkinit_key_purpose_kdc_bytes[] = {
+    0x2b, 0x06, 0x01, 0x05, 0x02, 0x03, 0x05
+};
 static SECItem pkinit_kp_kdc = {
     siDEROID,
     oid_pkinit_key_purpose_kdc_bytes,
     7,
 };
-static unsigned char oid_ms_sc_login_key_purpose_bytes[] =
-    { 0x2b, 0x06, 0x01, 0x04, 0x01, 0x82, 0x37, 0x14, 0x02, 0x02 };
+static unsigned char oid_ms_sc_login_key_purpose_bytes[] = {
+    0x2b, 0x06, 0x01, 0x04, 0x01, 0x82, 0x37, 0x14, 0x02, 0x02
+};
 static SECItem pkinit_kp_mssclogin = {
     siDEROID,
     oid_ms_sc_login_key_purpose_bytes,
     10,
 };
-static unsigned char oid_pkinit_name_type_principal_bytes[] =
-    { 0x2b, 0x06, 0x01, 0x05, 0x02, 0x02 };
+static unsigned char oid_pkinit_name_type_principal_bytes[] = {
+    0x2b, 0x06, 0x01, 0x05, 0x02, 0x02
+};
 static SECItem pkinit_nt_principal = {
     siDEROID,
     oid_pkinit_name_type_principal_bytes,
     6,
 };
-static unsigned char oid_pkinit_name_type_upn_bytes[] =
-    { 0x2b, 0x06, 0x01, 0x04, 0x01, 0x82, 0x37, 0x14, 0x02, 0x03 };
+static unsigned char oid_pkinit_name_type_upn_bytes[] = {
+    0x2b, 0x06, 0x01, 0x04, 0x01, 0x82, 0x37, 0x14, 0x02, 0x03
+};
 static SECItem pkinit_nt_upn = {
     siDEROID,
     oid_pkinit_name_type_upn_bytes,
@@ -426,8 +432,9 @@ static SECItem pkinit_nt_upn = {
 static SECOidTag
 get_pkinit_data_auth_data_tag(void)
 {
-    static unsigned char oid_pkinit_auth_data_bytes[] =
-        { 0x2b, 0x06, 0x01, 0x05, 0x02, 0x03, 0x01 };
+    static unsigned char oid_pkinit_auth_data_bytes[] = {
+        0x2b, 0x06, 0x01, 0x05, 0x02, 0x03, 0x01
+    };
     static SECOidData oid_pkinit_auth_data = {
         {
             siDEROID,
@@ -468,8 +475,9 @@ get_pkinit_data_auth_data9_tag(void)
 static SECOidTag
 get_pkinit_data_rkey_data_tag(void)
 {
-    static unsigned char oid_pkinit_rkey_data_bytes[] =
-        { 0x2b, 0x06, 0x01, 0x05, 0x02, 0x03, 0x03 };
+    static unsigned char oid_pkinit_rkey_data_bytes[] = {
+        0x2b, 0x06, 0x01, 0x05, 0x02, 0x03, 0x03
+    };
     static SECOidData oid_pkinit_rkey_data = {
         {
             siDEROID,
@@ -489,8 +497,9 @@ get_pkinit_data_rkey_data_tag(void)
 static SECOidTag
 get_pkinit_data_dhkey_data_tag(void)
 {
-    static unsigned char oid_pkinit_dhkey_data_bytes[] =
-        { 0x2b, 0x06, 0x01, 0x05, 0x02, 0x03, 0x02 };
+    static unsigned char oid_pkinit_dhkey_data_bytes[] = {
+        0x2b, 0x06, 0x01, 0x05, 0x02, 0x03, 0x02
+    };
     static SECOidData oid_pkinit_dhkey_data = {
         {
             siDEROID,
@@ -692,7 +701,7 @@ crypto_get_p12_slot(struct _pkinit_identity_crypto_context *id)
         }
 #endif
         spec_size = strlen("configDir='' flags=readOnly") +
-                    strlen(configdir) + 1;
+            strlen(configdir) + 1;
         spec = PORT_ArenaZAlloc(id->pool, spec_size);
         if (spec != NULL) {
             if (strcmp(configdir, DEFAULT_CONFIGDIR) != 0)
@@ -1056,168 +1065,168 @@ static struct oakley_group
                                  * ((p-1)/2) */
 } oakley_groups[] = {
     {
-    1, 768,
-    "Oakley MODP Group 1",
-    "FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
-    "29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
-    "EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245"
-    "E485B576 625E7EC6 F44C42E9 A63A3620 FFFFFFFF FFFFFFFF",
-    2,
-    "7FFFFFFF FFFFFFFF E487ED51 10B4611A 62633145 C06E0E68"
-    "94812704 4533E63A 0105DF53 1D89CD91 28A5043C C71A026E"
-    "F7CA8CD9 E69D218D 98158536 F92F8A1B A7F09AB6 B6A8E122"
-    "F242DABB 312F3F63 7A262174 D31D1B10 7FFFFFFF FFFFFFFF",
+        1, 768,
+        "Oakley MODP Group 1",
+        "FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
+        "29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
+        "EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245"
+        "E485B576 625E7EC6 F44C42E9 A63A3620 FFFFFFFF FFFFFFFF",
+        2,
+        "7FFFFFFF FFFFFFFF E487ED51 10B4611A 62633145 C06E0E68"
+        "94812704 4533E63A 0105DF53 1D89CD91 28A5043C C71A026E"
+        "F7CA8CD9 E69D218D 98158536 F92F8A1B A7F09AB6 B6A8E122"
+        "F242DABB 312F3F63 7A262174 D31D1B10 7FFFFFFF FFFFFFFF",
     },
     {
-    2, 1024,
-    "Oakley MODP Group 2",
-    "FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
-    "29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
-    "EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245"
-    "E485B576 625E7EC6 F44C42E9 A637ED6B 0BFF5CB6 F406B7ED"
-    "EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE65381"
-    "FFFFFFFF FFFFFFFF",
-    2,
-    "7FFFFFFF FFFFFFFF E487ED51 10B4611A 62633145 C06E0E68"
-    "94812704 4533E63A 0105DF53 1D89CD91 28A5043C C71A026E"
-    "F7CA8CD9 E69D218D 98158536 F92F8A1B A7F09AB6 B6A8E122"
-    "F242DABB 312F3F63 7A262174 D31BF6B5 85FFAE5B 7A035BF6"
-    "F71C35FD AD44CFD2 D74F9208 BE258FF3 24943328 F67329C0"
-    "FFFFFFFF FFFFFFFF",
+        2, 1024,
+        "Oakley MODP Group 2",
+        "FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
+        "29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
+        "EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245"
+        "E485B576 625E7EC6 F44C42E9 A637ED6B 0BFF5CB6 F406B7ED"
+        "EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE65381"
+        "FFFFFFFF FFFFFFFF",
+        2,
+        "7FFFFFFF FFFFFFFF E487ED51 10B4611A 62633145 C06E0E68"
+        "94812704 4533E63A 0105DF53 1D89CD91 28A5043C C71A026E"
+        "F7CA8CD9 E69D218D 98158536 F92F8A1B A7F09AB6 B6A8E122"
+        "F242DABB 312F3F63 7A262174 D31BF6B5 85FFAE5B 7A035BF6"
+        "F71C35FD AD44CFD2 D74F9208 BE258FF3 24943328 F67329C0"
+        "FFFFFFFF FFFFFFFF",
     },
     {
-    5, 1536,
-    "Oakley MODP Group 5",
-    "FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
-    "29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
-    "EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245"
-    "E485B576 625E7EC6 F44C42E9 A637ED6B 0BFF5CB6 F406B7ED"
-    "EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE45B3D"
-    "C2007CB8 A163BF05 98DA4836 1C55D39A 69163FA8 FD24CF5F"
-    "83655D23 DCA3AD96 1C62F356 208552BB 9ED52907 7096966D"
-    "670C354E 4ABC9804 F1746C08 CA237327 FFFFFFFF FFFFFFFF",
-    2,
-    "7FFFFFFF FFFFFFFF E487ED51 10B4611A 62633145 C06E0E68"
-    "94812704 4533E63A 0105DF53 1D89CD91 28A5043C C71A026E"
-    "F7CA8CD9 E69D218D 98158536 F92F8A1B A7F09AB6 B6A8E122"
-    "F242DABB 312F3F63 7A262174 D31BF6B5 85FFAE5B 7A035BF6"
-    "F71C35FD AD44CFD2 D74F9208 BE258FF3 24943328 F6722D9E"
-    "E1003E5C 50B1DF82 CC6D241B 0E2AE9CD 348B1FD4 7E9267AF"
-    "C1B2AE91 EE51D6CB 0E3179AB 1042A95D CF6A9483 B84B4B36"
-    "B3861AA7 255E4C02 78BA3604 6511B993 FFFFFFFF FFFFFFFF",
+        5, 1536,
+        "Oakley MODP Group 5",
+        "FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
+        "29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
+        "EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245"
+        "E485B576 625E7EC6 F44C42E9 A637ED6B 0BFF5CB6 F406B7ED"
+        "EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE45B3D"
+        "C2007CB8 A163BF05 98DA4836 1C55D39A 69163FA8 FD24CF5F"
+        "83655D23 DCA3AD96 1C62F356 208552BB 9ED52907 7096966D"
+        "670C354E 4ABC9804 F1746C08 CA237327 FFFFFFFF FFFFFFFF",
+        2,
+        "7FFFFFFF FFFFFFFF E487ED51 10B4611A 62633145 C06E0E68"
+        "94812704 4533E63A 0105DF53 1D89CD91 28A5043C C71A026E"
+        "F7CA8CD9 E69D218D 98158536 F92F8A1B A7F09AB6 B6A8E122"
+        "F242DABB 312F3F63 7A262174 D31BF6B5 85FFAE5B 7A035BF6"
+        "F71C35FD AD44CFD2 D74F9208 BE258FF3 24943328 F6722D9E"
+        "E1003E5C 50B1DF82 CC6D241B 0E2AE9CD 348B1FD4 7E9267AF"
+        "C1B2AE91 EE51D6CB 0E3179AB 1042A95D CF6A9483 B84B4B36"
+        "B3861AA7 255E4C02 78BA3604 6511B993 FFFFFFFF FFFFFFFF",
     },
     {
-    14, 2048,
-    "Oakley MODP Group 14",
-    "FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
-    "29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
-    "EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245"
-    "E485B576 625E7EC6 F44C42E9 A637ED6B 0BFF5CB6 F406B7ED"
-    "EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE45B3D"
-    "C2007CB8 A163BF05 98DA4836 1C55D39A 69163FA8 FD24CF5F"
-    "83655D23 DCA3AD96 1C62F356 208552BB 9ED52907 7096966D"
-    "670C354E 4ABC9804 F1746C08 CA18217C 32905E46 2E36CE3B"
-    "E39E772C 180E8603 9B2783A2 EC07A28F B5C55DF0 6F4C52C9"
-    "DE2BCBF6 95581718 3995497C EA956AE5 15D22618 98FA0510"
-    "15728E5A 8AACAA68 FFFFFFFF FFFFFFFF",
-    2,
-    "7FFFFFFF FFFFFFFF E487ED51 10B4611A 62633145 C06E0E68"
-    "94812704 4533E63A 0105DF53 1D89CD91 28A5043C C71A026E"
-    "F7CA8CD9 E69D218D 98158536 F92F8A1B A7F09AB6 B6A8E122"
-    "F242DABB 312F3F63 7A262174 D31BF6B5 85FFAE5B 7A035BF6"
-    "F71C35FD AD44CFD2 D74F9208 BE258FF3 24943328 F6722D9E"
-    "E1003E5C 50B1DF82 CC6D241B 0E2AE9CD 348B1FD4 7E9267AF"
-    "C1B2AE91 EE51D6CB 0E3179AB 1042A95D CF6A9483 B84B4B36"
-    "B3861AA7 255E4C02 78BA3604 650C10BE 19482F23 171B671D"
-    "F1CF3B96 0C074301 CD93C1D1 7603D147 DAE2AEF8 37A62964"
-    "EF15E5FB 4AAC0B8C 1CCAA4BE 754AB572 8AE9130C 4C7D0288"
-    "0AB9472D 45565534 7FFFFFFF FFFFFFFF",
+        14, 2048,
+        "Oakley MODP Group 14",
+        "FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
+        "29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
+        "EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245"
+        "E485B576 625E7EC6 F44C42E9 A637ED6B 0BFF5CB6 F406B7ED"
+        "EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE45B3D"
+        "C2007CB8 A163BF05 98DA4836 1C55D39A 69163FA8 FD24CF5F"
+        "83655D23 DCA3AD96 1C62F356 208552BB 9ED52907 7096966D"
+        "670C354E 4ABC9804 F1746C08 CA18217C 32905E46 2E36CE3B"
+        "E39E772C 180E8603 9B2783A2 EC07A28F B5C55DF0 6F4C52C9"
+        "DE2BCBF6 95581718 3995497C EA956AE5 15D22618 98FA0510"
+        "15728E5A 8AACAA68 FFFFFFFF FFFFFFFF",
+        2,
+        "7FFFFFFF FFFFFFFF E487ED51 10B4611A 62633145 C06E0E68"
+        "94812704 4533E63A 0105DF53 1D89CD91 28A5043C C71A026E"
+        "F7CA8CD9 E69D218D 98158536 F92F8A1B A7F09AB6 B6A8E122"
+        "F242DABB 312F3F63 7A262174 D31BF6B5 85FFAE5B 7A035BF6"
+        "F71C35FD AD44CFD2 D74F9208 BE258FF3 24943328 F6722D9E"
+        "E1003E5C 50B1DF82 CC6D241B 0E2AE9CD 348B1FD4 7E9267AF"
+        "C1B2AE91 EE51D6CB 0E3179AB 1042A95D CF6A9483 B84B4B36"
+        "B3861AA7 255E4C02 78BA3604 650C10BE 19482F23 171B671D"
+        "F1CF3B96 0C074301 CD93C1D1 7603D147 DAE2AEF8 37A62964"
+        "EF15E5FB 4AAC0B8C 1CCAA4BE 754AB572 8AE9130C 4C7D0288"
+        "0AB9472D 45565534 7FFFFFFF FFFFFFFF",
     },
     {
-    15, 3072,
-    "Oakley MODP Group 15",
-    "FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
-    "29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
-    "EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245"
-    "E485B576 625E7EC6 F44C42E9 A637ED6B 0BFF5CB6 F406B7ED"
-    "EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE45B3D"
-    "C2007CB8 A163BF05 98DA4836 1C55D39A 69163FA8 FD24CF5F"
-    "83655D23 DCA3AD96 1C62F356 208552BB 9ED52907 7096966D"
-    "670C354E 4ABC9804 F1746C08 CA18217C 32905E46 2E36CE3B"
-    "E39E772C 180E8603 9B2783A2 EC07A28F B5C55DF0 6F4C52C9"
-    "DE2BCBF6 95581718 3995497C EA956AE5 15D22618 98FA0510"
-    "15728E5A 8AAAC42D AD33170D 04507A33 A85521AB DF1CBA64"
-    "ECFB8504 58DBEF0A 8AEA7157 5D060C7D B3970F85 A6E1E4C7"
-    "ABF5AE8C DB0933D7 1E8C94E0 4A25619D CEE3D226 1AD2EE6B"
-    "F12FFA06 D98A0864 D8760273 3EC86A64 521F2B18 177B200C"
-    "BBE11757 7A615D6C 770988C0 BAD946E2 08E24FA0 74E5AB31"
-    "43DB5BFC E0FD108E 4B82D120 A93AD2CA FFFFFFFF FFFFFFFF",
-    2,
-    "7FFFFFFF FFFFFFFF E487ED51 10B4611A 62633145 C06E0E68"
-    "94812704 4533E63A 0105DF53 1D89CD91 28A5043C C71A026E"
-    "F7CA8CD9 E69D218D 98158536 F92F8A1B A7F09AB6 B6A8E122"
-    "F242DABB 312F3F63 7A262174 D31BF6B5 85FFAE5B 7A035BF6"
-    "F71C35FD AD44CFD2 D74F9208 BE258FF3 24943328 F6722D9E"
-    "E1003E5C 50B1DF82 CC6D241B 0E2AE9CD 348B1FD4 7E9267AF"
-    "C1B2AE91 EE51D6CB 0E3179AB 1042A95D CF6A9483 B84B4B36"
-    "B3861AA7 255E4C02 78BA3604 650C10BE 19482F23 171B671D"
-    "F1CF3B96 0C074301 CD93C1D1 7603D147 DAE2AEF8 37A62964"
-    "EF15E5FB 4AAC0B8C 1CCAA4BE 754AB572 8AE9130C 4C7D0288"
-    "0AB9472D 45556216 D6998B86 82283D19 D42A90D5 EF8E5D32"
-    "767DC282 2C6DF785 457538AB AE83063E D9CB87C2 D370F263"
-    "D5FAD746 6D8499EB 8F464A70 2512B0CE E771E913 0D697735"
-    "F897FD03 6CC50432 6C3B0139 9F643532 290F958C 0BBD9006"
-    "5DF08BAB BD30AEB6 3B84C460 5D6CA371 047127D0 3A72D598"
-    "A1EDADFE 707E8847 25C16890 549D6965 7FFFFFFF FFFFFFFF",
+        15, 3072,
+        "Oakley MODP Group 15",
+        "FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
+        "29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
+        "EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245"
+        "E485B576 625E7EC6 F44C42E9 A637ED6B 0BFF5CB6 F406B7ED"
+        "EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE45B3D"
+        "C2007CB8 A163BF05 98DA4836 1C55D39A 69163FA8 FD24CF5F"
+        "83655D23 DCA3AD96 1C62F356 208552BB 9ED52907 7096966D"
+        "670C354E 4ABC9804 F1746C08 CA18217C 32905E46 2E36CE3B"
+        "E39E772C 180E8603 9B2783A2 EC07A28F B5C55DF0 6F4C52C9"
+        "DE2BCBF6 95581718 3995497C EA956AE5 15D22618 98FA0510"
+        "15728E5A 8AAAC42D AD33170D 04507A33 A85521AB DF1CBA64"
+        "ECFB8504 58DBEF0A 8AEA7157 5D060C7D B3970F85 A6E1E4C7"
+        "ABF5AE8C DB0933D7 1E8C94E0 4A25619D CEE3D226 1AD2EE6B"
+        "F12FFA06 D98A0864 D8760273 3EC86A64 521F2B18 177B200C"
+        "BBE11757 7A615D6C 770988C0 BAD946E2 08E24FA0 74E5AB31"
+        "43DB5BFC E0FD108E 4B82D120 A93AD2CA FFFFFFFF FFFFFFFF",
+        2,
+        "7FFFFFFF FFFFFFFF E487ED51 10B4611A 62633145 C06E0E68"
+        "94812704 4533E63A 0105DF53 1D89CD91 28A5043C C71A026E"
+        "F7CA8CD9 E69D218D 98158536 F92F8A1B A7F09AB6 B6A8E122"
+        "F242DABB 312F3F63 7A262174 D31BF6B5 85FFAE5B 7A035BF6"
+        "F71C35FD AD44CFD2 D74F9208 BE258FF3 24943328 F6722D9E"
+        "E1003E5C 50B1DF82 CC6D241B 0E2AE9CD 348B1FD4 7E9267AF"
+        "C1B2AE91 EE51D6CB 0E3179AB 1042A95D CF6A9483 B84B4B36"
+        "B3861AA7 255E4C02 78BA3604 650C10BE 19482F23 171B671D"
+        "F1CF3B96 0C074301 CD93C1D1 7603D147 DAE2AEF8 37A62964"
+        "EF15E5FB 4AAC0B8C 1CCAA4BE 754AB572 8AE9130C 4C7D0288"
+        "0AB9472D 45556216 D6998B86 82283D19 D42A90D5 EF8E5D32"
+        "767DC282 2C6DF785 457538AB AE83063E D9CB87C2 D370F263"
+        "D5FAD746 6D8499EB 8F464A70 2512B0CE E771E913 0D697735"
+        "F897FD03 6CC50432 6C3B0139 9F643532 290F958C 0BBD9006"
+        "5DF08BAB BD30AEB6 3B84C460 5D6CA371 047127D0 3A72D598"
+        "A1EDADFE 707E8847 25C16890 549D6965 7FFFFFFF FFFFFFFF",
     },
     {
-    16, 4096,
-    "Oakley MODP Group 16",
-    "FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
-    "29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
-    "EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245"
-    "E485B576 625E7EC6 F44C42E9 A637ED6B 0BFF5CB6 F406B7ED"
-    "EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE45B3D"
-    "C2007CB8 A163BF05 98DA4836 1C55D39A 69163FA8 FD24CF5F"
-    "83655D23 DCA3AD96 1C62F356 208552BB 9ED52907 7096966D"
-    "670C354E 4ABC9804 F1746C08 CA18217C 32905E46 2E36CE3B"
-    "E39E772C 180E8603 9B2783A2 EC07A28F B5C55DF0 6F4C52C9"
-    "DE2BCBF6 95581718 3995497C EA956AE5 15D22618 98FA0510"
-    "15728E5A 8AAAC42D AD33170D 04507A33 A85521AB DF1CBA64"
-    "ECFB8504 58DBEF0A 8AEA7157 5D060C7D B3970F85 A6E1E4C7"
-    "ABF5AE8C DB0933D7 1E8C94E0 4A25619D CEE3D226 1AD2EE6B"
-    "F12FFA06 D98A0864 D8760273 3EC86A64 521F2B18 177B200C"
-    "BBE11757 7A615D6C 770988C0 BAD946E2 08E24FA0 74E5AB31"
-    "43DB5BFC E0FD108E 4B82D120 A9210801 1A723C12 A787E6D7"
-    "88719A10 BDBA5B26 99C32718 6AF4E23C 1A946834 B6150BDA"
-    "2583E9CA 2AD44CE8 DBBBC2DB 04DE8EF9 2E8EFC14 1FBECAA6"
-    "287C5947 4E6BC05D 99B2964F A090C3A2 233BA186 515BE7ED"
-    "1F612970 CEE2D7AF B81BDD76 2170481C D0069127 D5B05AA9"
-    "93B4EA98 8D8FDDC1 86FFB7DC 90A6C08F 4DF435C9 34063199"
-    "FFFFFFFF FFFFFFFF",
-    2,
-    "7FFFFFFF FFFFFFFF E487ED51 10B4611A 62633145 C06E0E68"
-    "94812704 4533E63A 0105DF53 1D89CD91 28A5043C C71A026E"
-    "F7CA8CD9 E69D218D 98158536 F92F8A1B A7F09AB6 B6A8E122"
-    "F242DABB 312F3F63 7A262174 D31BF6B5 85FFAE5B 7A035BF6"
-    "F71C35FD AD44CFD2 D74F9208 BE258FF3 24943328 F6722D9E"
-    "E1003E5C 50B1DF82 CC6D241B 0E2AE9CD 348B1FD4 7E9267AF"
-    "C1B2AE91 EE51D6CB 0E3179AB 1042A95D CF6A9483 B84B4B36"
-    "B3861AA7 255E4C02 78BA3604 650C10BE 19482F23 171B671D"
-    "F1CF3B96 0C074301 CD93C1D1 7603D147 DAE2AEF8 37A62964"
-    "EF15E5FB 4AAC0B8C 1CCAA4BE 754AB572 8AE9130C 4C7D0288"
-    "0AB9472D 45556216 D6998B86 82283D19 D42A90D5 EF8E5D32"
-    "767DC282 2C6DF785 457538AB AE83063E D9CB87C2 D370F263"
-    "D5FAD746 6D8499EB 8F464A70 2512B0CE E771E913 0D697735"
-    "F897FD03 6CC50432 6C3B0139 9F643532 290F958C 0BBD9006"
-    "5DF08BAB BD30AEB6 3B84C460 5D6CA371 047127D0 3A72D598"
-    "A1EDADFE 707E8847 25C16890 54908400 8D391E09 53C3F36B"
-    "C438CD08 5EDD2D93 4CE1938C 357A711E 0D4A341A 5B0A85ED"
-    "12C1F4E5 156A2674 6DDDE16D 826F477C 97477E0A 0FDF6553"
-    "143E2CA3 A735E02E CCD94B27 D04861D1 119DD0C3 28ADF3F6"
-    "8FB094B8 67716BD7 DC0DEEBB 10B8240E 68034893 EAD82D54"
-    "C9DA754C 46C7EEE0 C37FDBEE 48536047 A6FA1AE4 9A0318CC"
-    "FFFFFFFF FFFFFFFF",
+        16, 4096,
+        "Oakley MODP Group 16",
+        "FFFFFFFF FFFFFFFF C90FDAA2 2168C234 C4C6628B 80DC1CD1"
+        "29024E08 8A67CC74 020BBEA6 3B139B22 514A0879 8E3404DD"
+        "EF9519B3 CD3A431B 302B0A6D F25F1437 4FE1356D 6D51C245"
+        "E485B576 625E7EC6 F44C42E9 A637ED6B 0BFF5CB6 F406B7ED"
+        "EE386BFB 5A899FA5 AE9F2411 7C4B1FE6 49286651 ECE45B3D"
+        "C2007CB8 A163BF05 98DA4836 1C55D39A 69163FA8 FD24CF5F"
+        "83655D23 DCA3AD96 1C62F356 208552BB 9ED52907 7096966D"
+        "670C354E 4ABC9804 F1746C08 CA18217C 32905E46 2E36CE3B"
+        "E39E772C 180E8603 9B2783A2 EC07A28F B5C55DF0 6F4C52C9"
+        "DE2BCBF6 95581718 3995497C EA956AE5 15D22618 98FA0510"
+        "15728E5A 8AAAC42D AD33170D 04507A33 A85521AB DF1CBA64"
+        "ECFB8504 58DBEF0A 8AEA7157 5D060C7D B3970F85 A6E1E4C7"
+        "ABF5AE8C DB0933D7 1E8C94E0 4A25619D CEE3D226 1AD2EE6B"
+        "F12FFA06 D98A0864 D8760273 3EC86A64 521F2B18 177B200C"
+        "BBE11757 7A615D6C 770988C0 BAD946E2 08E24FA0 74E5AB31"
+        "43DB5BFC E0FD108E 4B82D120 A9210801 1A723C12 A787E6D7"
+        "88719A10 BDBA5B26 99C32718 6AF4E23C 1A946834 B6150BDA"
+        "2583E9CA 2AD44CE8 DBBBC2DB 04DE8EF9 2E8EFC14 1FBECAA6"
+        "287C5947 4E6BC05D 99B2964F A090C3A2 233BA186 515BE7ED"
+        "1F612970 CEE2D7AF B81BDD76 2170481C D0069127 D5B05AA9"
+        "93B4EA98 8D8FDDC1 86FFB7DC 90A6C08F 4DF435C9 34063199"
+        "FFFFFFFF FFFFFFFF",
+        2,
+        "7FFFFFFF FFFFFFFF E487ED51 10B4611A 62633145 C06E0E68"
+        "94812704 4533E63A 0105DF53 1D89CD91 28A5043C C71A026E"
+        "F7CA8CD9 E69D218D 98158536 F92F8A1B A7F09AB6 B6A8E122"
+        "F242DABB 312F3F63 7A262174 D31BF6B5 85FFAE5B 7A035BF6"
+        "F71C35FD AD44CFD2 D74F9208 BE258FF3 24943328 F6722D9E"
+        "E1003E5C 50B1DF82 CC6D241B 0E2AE9CD 348B1FD4 7E9267AF"
+        "C1B2AE91 EE51D6CB 0E3179AB 1042A95D CF6A9483 B84B4B36"
+        "B3861AA7 255E4C02 78BA3604 650C10BE 19482F23 171B671D"
+        "F1CF3B96 0C074301 CD93C1D1 7603D147 DAE2AEF8 37A62964"
+        "EF15E5FB 4AAC0B8C 1CCAA4BE 754AB572 8AE9130C 4C7D0288"
+        "0AB9472D 45556216 D6998B86 82283D19 D42A90D5 EF8E5D32"
+        "767DC282 2C6DF785 457538AB AE83063E D9CB87C2 D370F263"
+        "D5FAD746 6D8499EB 8F464A70 2512B0CE E771E913 0D697735"
+        "F897FD03 6CC50432 6C3B0139 9F643532 290F958C 0BBD9006"
+        "5DF08BAB BD30AEB6 3B84C460 5D6CA371 047127D0 3A72D598"
+        "A1EDADFE 707E8847 25C16890 54908400 8D391E09 53C3F36B"
+        "C438CD08 5EDD2D93 4CE1938C 357A711E 0D4A341A 5B0A85ED"
+        "12C1F4E5 156A2674 6DDDE16D 826F477C 97477E0A 0FDF6553"
+        "143E2CA3 A735E02E CCD94B27 D04861D1 119DD0C3 28ADF3F6"
+        "8FB094B8 67716BD7 DC0DEEBB 10B8240E 68034893 EAD82D54"
+        "C9DA754C 46C7EEE0 C37FDBEE 48536047 A6FA1AE4 9A0318CC"
+        "FFFFFFFF FFFFFFFF",
     }
 };
 
@@ -1806,8 +1815,8 @@ create_krb5_trustedCertifiers(krb5_context context,
     if (!CERT_LIST_EMPTY(id_cryptoctx->ca_certs)) {
         for (n = 0, node = CERT_LIST_HEAD(id_cryptoctx->ca_certs);
              (node != NULL) &&
-             (node->cert != NULL) &&
-             !CERT_LIST_END(node, id_cryptoctx->ca_certs);
+                 (node->cert != NULL) &&
+                 !CERT_LIST_END(node, id_cryptoctx->ca_certs);
              node = CERT_LIST_NEXT(node)) {
             n++;
         }
@@ -1861,8 +1870,8 @@ cert_maybe_add_to_list(CERTCertList *list, CERTCertificate *cert)
 
     for (node = CERT_LIST_HEAD(list);
          (node != NULL) &&
-         (node->cert != NULL) &&
-         !CERT_LIST_END(node, list);
+             (node->cert != NULL) &&
+             !CERT_LIST_END(node, list);
          node = CERT_LIST_NEXT(node)) {
         if (SECITEM_ItemsAreEqual(&node->cert->derCert, &cert->derCert)) {
             /* Don't add the duplicate. */
@@ -1915,8 +1924,8 @@ cert_load_ca_certs_from_slot(krb5_context context,
     status = SECSuccess;
     for (node = CERT_LIST_HEAD(list);
          (node != NULL) &&
-         (node->cert != NULL) &&
-         !CERT_LIST_END(node, list);
+             (node->cert != NULL) &&
+             !CERT_LIST_END(node, list);
          node = CERT_LIST_NEXT(node)) {
 #if 0
         /* Skip it if it's not a root. */
@@ -1988,8 +1997,8 @@ cert_load_certs_with_keys_from_slot(krb5_context context,
     status = 0;
     for (cnode = CERT_LIST_HEAD(clist);
          (cnode != NULL) &&
-         (cnode->cert != NULL) &&
-         !CERT_LIST_END(cnode, clist);
+             (cnode->cert != NULL) &&
+             !CERT_LIST_END(cnode, clist);
          cnode = CERT_LIST_NEXT(cnode)) {
         if (cnode->cert->nickname != NULL) {
             if ((label != NULL) && (id != NULL)) {
@@ -2220,12 +2229,12 @@ crypto_nickname_c_cb(SECItem *old_nickname, PRBool *cancel, void *arg)
             i = (p ? atoi(p + 1) : 0) + 1;
             old_name = leaf->subjectName;
             new_name_size = strlen(PKCS12_PREFIX ":  #") +
-                            strlen(old_name) + 3 * sizeof(i) + 1;
+                strlen(old_name) + 3 * sizeof(i) + 1;
             new_name = PR_Malloc(new_name_size);
         } else {
             old_name = leaf->subjectName;
             new_name_size = strlen(PKCS12_PREFIX ":  #1") +
-                            strlen(old_name) + 1;
+                strlen(old_name) + 1;
             new_name = PR_Malloc(new_name_size);
             i = 1;
         }
@@ -2516,16 +2525,16 @@ crypto_load_files(krb5_context context,
         if (after != NULL) {
             for (anode = CERT_LIST_HEAD(after);
                  (anode != NULL) &&
-                 (anode->cert != NULL) &&
-                 !CERT_LIST_END(anode, after);
+                     (anode->cert != NULL) &&
+                     !CERT_LIST_END(anode, after);
                  anode = CERT_LIST_NEXT(anode)) {
                 match = PR_FALSE;
                 a = anode->cert->derCert;
                 if (before != NULL) {
                     for (bnode = CERT_LIST_HEAD(before);
                          (bnode != NULL) &&
-                         (bnode->cert != NULL) &&
-                         !CERT_LIST_END(bnode, before);
+                             (bnode->cert != NULL) &&
+                             !CERT_LIST_END(bnode, before);
                          bnode = CERT_LIST_NEXT(bnode)) {
                         b = bnode->cert->derCert;
                         if (SECITEM_ItemsAreEqual(&a, &b)) {
@@ -2692,7 +2701,7 @@ crypto_load_nssdb(krb5_context context,
 
     /* Build the spec. */
     spec_size = strlen("configDir='' flags=readOnly") +
-                strlen(configdir) * 2 + 1;
+        strlen(configdir) * 2 + 1;
     p = PORT_ArenaZAlloc(id_cryptoctx->pool, spec_size);
     if (p == NULL)
         return ENOMEM;
@@ -2848,8 +2857,8 @@ crypto_cert_get_count(krb5_context context,
     if (!CERT_LIST_EMPTY(id_cryptoctx->id_certs))
         for (node = CERT_LIST_HEAD(id_cryptoctx->id_certs);
              (node != NULL) &&
-             (node->cert != NULL) &&
-             !CERT_LIST_END(node, id_cryptoctx->id_certs);
+                 (node->cert != NULL) &&
+                 !CERT_LIST_END(node, id_cryptoctx->id_certs);
              node = CERT_LIST_NEXT(node))
             (*cert_count)++;
     pkiDebug("%s: %d candidate key/certificate pairs found\n",
@@ -3103,8 +3112,8 @@ crypto_cert_select_default(krb5_context context,
         cert = NULL;
         for (node = CERT_LIST_HEAD(id_cryptoctx->id_certs);
              (node != NULL) &&
-             (node->cert != NULL) &&
-             !CERT_LIST_END(node, id_cryptoctx->id_certs);
+                 (node->cert != NULL) &&
+                 !CERT_LIST_END(node, id_cryptoctx->id_certs);
              node = CERT_LIST_NEXT(node)) {
             sans = NULL;
             pkiDebug("%s: checking candidate certificate \"%s\"\n",
@@ -3514,8 +3523,8 @@ pkinit_create_td_trusted_certifiers(krb5_context context,
          * root, add it to the list. */
         for (node = CERT_LIST_HEAD(sclist);
              (node != NULL) &&
-             (node->cert != NULL) &&
-             !CERT_LIST_END(node, sclist);
+                 (node->cert != NULL) &&
+                 !CERT_LIST_END(node, sclist);
              node = CERT_LIST_NEXT(node)) {
             /* If we have no trust for it, we can't trust it. */
             if (cert->trust == NULL)
@@ -3552,8 +3561,8 @@ pkinit_create_td_trusted_certifiers(krb5_context context,
     i = 0;
     for (node = CERT_LIST_HEAD(clist);
          (node != NULL) &&
-         (node->cert != NULL) &&
-         !CERT_LIST_END(node, clist);
+             (node->cert != NULL) &&
+             !CERT_LIST_END(node, clist);
          node = CERT_LIST_NEXT(node)) {
         if (node->cert->keyIDGenerated) {
             isn.issuer = node->cert->derIssuer;
@@ -4128,19 +4137,19 @@ cert_retrieve_cert_sans(krb5_context context,
                     n_upn_sans = n_pkinit_sans;
             } else
                 /* possibly a user principal name */
-            if (SECITEM_ItemsAreEqual(&name.name.OthName.oid,
-                                      &pkinit_nt_upn)) {
-                /* Add it to the list. */
-                if ((upn_sans_out != NULL) &&
-                    (cert_add_upn(pool, context, &name.name.OthName.name,
-                                  upn_sans_out, &n_upn_sans) != 0)) {
-                    PORT_FreeArena(pool, PR_TRUE);
-                    return ENOMEM;
+                if (SECITEM_ItemsAreEqual(&name.name.OthName.oid,
+                                          &pkinit_nt_upn)) {
+                    /* Add it to the list. */
+                    if ((upn_sans_out != NULL) &&
+                        (cert_add_upn(pool, context, &name.name.OthName.name,
+                                      upn_sans_out, &n_upn_sans) != 0)) {
+                        PORT_FreeArena(pool, PR_TRUE);
+                        return ENOMEM;
+                    }
+                    /* If both lists are the same, fix the count. */
+                    if (upn_sans_out == pkinit_sans_out)
+                        n_pkinit_sans = n_upn_sans;
                 }
-                /* If both lists are the same, fix the count. */
-                if (upn_sans_out == pkinit_sans_out)
-                    n_pkinit_sans = n_upn_sans;
-            }
             break;
         default:
             break;
@@ -4795,8 +4804,8 @@ crypto_signeddata_common_verify(krb5_context context,
                 return ENOMEM;
             }
             ocsp_failure_mode = require_crl_checking ?
-                                ocspMode_FailureIsVerificationFailure :
-                                ocspMode_FailureIsNotAVerificationFailure;
+                ocspMode_FailureIsVerificationFailure :
+                ocspMode_FailureIsNotAVerificationFailure;
             status = CERT_SetOCSPFailureMode(ocsp_failure_mode);
             if (status != SECSuccess) {
                 pkiDebug("%s: error setting OCSP failure mode: %s\n",

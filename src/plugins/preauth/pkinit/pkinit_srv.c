@@ -1066,7 +1066,7 @@ pkinit_server_return_padata(krb5_context context,
                 goto cleanup;
             }
 
-        /* Otherwise, use the older octetstring2key() function */
+            /* Otherwise, use the older octetstring2key() function */
         } else {
             retval = pkinit_octetstring2key(context, enctype, server_key,
                                             server_key_len, encrypting_key);

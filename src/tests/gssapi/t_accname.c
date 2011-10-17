@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2011 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -59,14 +59,14 @@ display_status_1(const char *m, OM_uint32 code, int type)
 
         if (!msg_ctx)
             break;
-     }
+    }
 }
 
 static void
 display_status(const char *msg, OM_uint32 maj_stat, OM_uint32 min_stat)
 {
-     display_status_1(msg, maj_stat, GSS_C_GSS_CODE);
-     display_status_1(msg, min_stat, GSS_C_MECH_CODE);
+    display_status_1(msg, maj_stat, GSS_C_GSS_CODE);
+    display_status_1(msg, min_stat, GSS_C_MECH_CODE);
 }
 
 int

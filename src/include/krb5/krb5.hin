@@ -463,9 +463,9 @@ typedef struct _krb5_crypto_iov {
 #define CKSUMTYPE_NIST_SHA      0x0009
 #define CKSUMTYPE_HMAC_SHA1_DES3      0x000c
 #define CKSUMTYPE_HMAC_SHA1_96_AES128 0x000f /**< RFC 3962. Used with
-                                                  ENCTYPE_AES128_CTS_HMAC_SHA1_96 */
+                                                ENCTYPE_AES128_CTS_HMAC_SHA1_96 */
 #define CKSUMTYPE_HMAC_SHA1_96_AES256 0x0010 /**< RFC 3962. Used with
-                                                  ENCTYPE_AES256_CTS_HMAC_SHA1_96 */
+                                                ENCTYPE_AES256_CTS_HMAC_SHA1_96 */
 #define CKSUMTYPE_MD5_HMAC_ARCFOUR -137 /*Microsoft netlogon cksumtype*/
 #define CKSUMTYPE_HMAC_MD5_ARCFOUR -138 /*Microsoft md5 hmac cksumtype*/
 
@@ -1043,8 +1043,8 @@ krb5_c_is_keyed_cksum(krb5_cksumtype ctype);
 #define KRB5_CRYPTO_TYPE_TRAILER    5   /**< [out] checksum for encrypt */
 #define KRB5_CRYPTO_TYPE_CHECKSUM   6   /**< [out] checksum for MIC */
 #define KRB5_CRYPTO_TYPE_STREAM     7   /**< [in] entire message without
-                                             decomposing the structure into
-                                             header, data and trailer buffers */
+                                           decomposing the structure into
+                                           header, data and trailer buffers */
 /** @} */ /* end of KRB5_CRYPTO_TYPE group */
 
 /**
@@ -1655,12 +1655,12 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 #define AP_OPTS_RESERVED           0x80000000
 #define AP_OPTS_USE_SESSION_KEY    0x40000000 /**< Use session key */
 #define AP_OPTS_MUTUAL_REQUIRED    0x20000000 /**< Perform a mutual
-                                                   authentication exchange */
+                                                 authentication exchange */
 #define AP_OPTS_ETYPE_NEGOTIATION  0x00000002
 #define AP_OPTS_USE_SUBKEY         0x00000001 /**< Generate a subsession key
-                                                   from the current session key
-                                                   obtained from the
-                                                   credentials */
+                                                 from the current session key
+                                                 obtained from the
+                                                 credentials */
 /* #define      AP_OPTS_RESERVED        0x10000000 */
 /* #define      AP_OPTS_RESERVED        0x08000000 */
 /* #define      AP_OPTS_RESERVED        0x04000000 */
@@ -1873,8 +1873,8 @@ krb5_verify_checksum(krb5_context context, krb5_cksumtype ctype,
 /** Ticket start time, end time, and renewal duration. */
 typedef struct _krb5_ticket_times {
     krb5_timestamp authtime;    /**< Time at which KDC issued the initial ticket that corresponds to this ticket */
-                                  /* XXX ? should ktime in KDC_REP == authtime
-                                  in ticket? otherwise client can't get this */
+    /* XXX ? should ktime in KDC_REP == authtime
+       in ticket? otherwise client can't get this */
     krb5_timestamp starttime;   /**< optional in ticket, if not present, use @a authtime */
     krb5_timestamp endtime;     /**< Ticket expiration time */
     krb5_timestamp renew_till;  /**< Latest time at which renewal of ticket can be valid */
@@ -1895,7 +1895,7 @@ typedef struct _krb5_transited {
     krb5_data tr_contents;  /**< Contents */
 } krb5_transited;
 
- /** Encrypted part of ticket. */
+/** Encrypted part of ticket. */
 typedef struct _krb5_enc_tkt_part {
     krb5_magic magic;
     /* to-be-encrypted portion */
@@ -3425,7 +3425,7 @@ krb5_parse_name(krb5_context context, const char *name, krb5_principal *nprincip
 #define KRB5_PRINCIPAL_PARSE_NO_REALM      0x1 /**< Error if realm is present */
 #define KRB5_PRINCIPAL_PARSE_REQUIRE_REALM 0x2 /**< Error if realm is not present */
 #define KRB5_PRINCIPAL_PARSE_ENTERPRISE    0x4 /**< Create single-component
-                                                    enterprise principle */
+                                                  enterprise principle */
 
 /**
  * Convert a string principal name to a krb5_principal with flags
@@ -7211,7 +7211,7 @@ krb5_set_error_message(krb5_context ctx, krb5_error_code code, const char *fmt, 
  */
 void KRB5_CALLCONV
 krb5_vset_error_message(krb5_context  ctx, krb5_error_code code,
-                         const char *fmt, va_list args)
+                        const char *fmt, va_list args)
 #if !defined(__cplusplus) && (__GNUC__ > 2)
     __attribute__((__format__(__printf__, 3, 0)))
 #endif
@@ -7588,4 +7588,3 @@ KRB5INT_END_DECLS
 #undef KRB5_ATTR_DEPRECATED
 
 #endif /* KRB5_GENERAL__ */
-

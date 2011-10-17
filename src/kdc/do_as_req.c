@@ -360,9 +360,8 @@ egress:
             errcode = prepare_error_as(state->rstate, state->request,
                                        errcode, state->e_data,
                                        state->typed_e_data,
-                                       (state->client != NULL) ?
-                                               state->client->princ :
-                                               NULL,
+                                       ((state->client != NULL) ?
+                                        state->client->princ : NULL),
                                        &response, state->status);
             state->status = 0;
         }
@@ -657,9 +656,9 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     if (isflagset(s_flags, KRB5_KDB_FLAG_CANONICALIZE) &&
         krb5_is_tgs_principal(state->request->server) &&
         krb5_is_tgs_principal(state->server->princ)) {
-            state->ticket_reply.server = state->server->princ;
+        state->ticket_reply.server = state->server->princ;
     } else {
-            state->ticket_reply.server = state->request->server;
+        state->ticket_reply.server = state->request->server;
     }
 
     state->enc_tkt_reply.flags = 0;
@@ -751,7 +750,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
                                               krb5_anonymous_principal())) {
             errcode = KRB5KDC_ERR_BADOPTION;
             state->status = "Anonymous requested but anonymous "
-                              "principal not used.";
+                "principal not used.";
             goto errout;
         }
         setflag(state->enc_tkt_reply.flags, TKT_FLG_ANONYMOUS);

@@ -72,4 +72,3 @@ k5_nss_gen_hash(HASH_HashType hashType, const krb5_crypto_iov *data,
 
     return 0;
 }
-

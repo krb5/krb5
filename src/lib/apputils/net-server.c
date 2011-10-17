@@ -465,24 +465,24 @@ free_socket(verto_ctx *ctx, verto_ev *ev)
     /* Free the connection struct. */
     if (conn) {
         switch (conn->type) {
-            case CONN_RPC:
-                if (conn->rpc_force_close) {
-                    FD_ZERO(&fds);
-                    FD_SET(fd, &fds);
-                    svc_getreqset(&fds);
-                    if (FD_ISSET(fd, &svc_fdset)) {
-                        krb5_klog_syslog(LOG_ERR,
-                                         _("descriptor %d closed but still "
-                                           "in svc_fdset"),
-                                         fd);
-                    }
+        case CONN_RPC:
+            if (conn->rpc_force_close) {
+                FD_ZERO(&fds);
+                FD_SET(fd, &fds);
+                svc_getreqset(&fds);
+                if (FD_ISSET(fd, &svc_fdset)) {
+                    krb5_klog_syslog(LOG_ERR,
+                                     _("descriptor %d closed but still "
+                                       "in svc_fdset"),
+                                     fd);
                 }
-                /* Fall through. */
-            case CONN_TCP:
-                tcp_or_rpc_data_counter--;
-                break;
-            default:
-                break;
+            }
+            /* Fall through. */
+        case CONN_TCP:
+            tcp_or_rpc_data_counter--;
+            break;
+        default:
+            break;
         }
 
         free_connection(conn);
@@ -873,7 +873,7 @@ setup_rpc_listener_ports(struct socksetup *data)
     return 0;
 }
 
-#if defined(CMSG_SPACE) && defined(HAVE_STRUCT_CMSGHDR) && \
+#if defined(CMSG_SPACE) && defined(HAVE_STRUCT_CMSGHDR) &&      \
     (defined(IP_PKTINFO) || defined(IPV6_PKTINFO))
 union pktinfo {
 #ifdef HAVE_STRUCT_IN6_PKTINFO
@@ -944,7 +944,7 @@ setup_udp_port_1(struct socksetup *data, struct sockaddr *addr,
             return 1;
         setnbio(sock);
 
-#if !(defined(CMSG_SPACE) && defined(HAVE_STRUCT_CMSGHDR) && \
+#if !(defined(CMSG_SPACE) && defined(HAVE_STRUCT_CMSGHDR) &&    \
       (defined(IP_PKTINFO) || defined(IPV6_PKTINFO)))
         assert(pktinfo == 0);
 #endif
@@ -1652,7 +1652,7 @@ process_packet(verto_ctx *ctx, verto_ev *ev)
          * specific local address.  This info probably should've been saved in
          * our socket data structure at setup time.
          */
-            state->daddr_len = sizeof(state->daddr);
+        state->daddr_len = sizeof(state->daddr);
         if (getsockname(state->port_fd, (struct sockaddr *)&state->daddr,
                         &state->daddr_len) != 0)
             state->daddr_len = 0;
@@ -1886,7 +1886,7 @@ process_tcp_connection_read(verto_ctx *ctx, verto_ev *ev)
                 krb5_error_code err;
                 /* Message too big. */
                 krb5_klog_syslog(LOG_ERR, _("TCP client %s wants %lu bytes, "
-                                 "cap is %lu"), conn->addrbuf,
+                                            "cap is %lu"), conn->addrbuf,
                                  (unsigned long) conn->msglen,
                                  (unsigned long) conn->bufsiz - 4);
                 /* XXX Should return an error.  */
@@ -1894,7 +1894,7 @@ process_tcp_connection_read(verto_ctx *ctx, verto_ev *ev)
                                           &response);
                 if (err) {
                     krb5_klog_syslog(LOG_ERR, _("error constructing "
-                                     "KRB_ERR_FIELD_TOOLONG error! %s"),
+                                                "KRB_ERR_FIELD_TOOLONG error! %s"),
                                      error_message(err));
                     goto kill_tcp_connection;
                 }
@@ -2073,7 +2073,7 @@ accept_rpc_connection(verto_ctx *ctx, verto_ev *ev)
         }
 #if 0
         krb5_klog_syslog(LOG_INFO, _("accepted RPC connection on socket %d "
-                         "from %s"), s, newconn->addrbuf);
+                                     "from %s"), s, newconn->addrbuf);
 #endif
 
         newconn->addr_s = addr_s;

@@ -299,7 +299,7 @@ struct atype_info {
     const struct field_info *field;
     /* atype_tagged_thing */
     unsigned int tagval : 8, tagtype : 8, construction:8;
-        /* atype_[u]int */
+    /* atype_[u]int */
     asn1_intmax (*loadint)(const void *);
     asn1_uintmax (*loaduint)(const void *);
 };
@@ -411,16 +411,16 @@ struct atype_info {
         atype_int, sizeof(CTYPENAME), 0, 0, 0, 0, 0, 0, 0, 0, 0,        \
         loadint_##DESCNAME, 0,                                          \
     }
-#define DEFUINTTYPE(DESCNAME, CTYPENAME)                         \
-    typedef CTYPENAME aux_typedefname_##DESCNAME;                \
-    static asn1_uintmax loaduint_##DESCNAME(const void *p)       \
-    {                                                            \
-        assert(sizeof(CTYPENAME) <= sizeof(asn1_uintmax));       \
-        return *(const aux_typedefname_##DESCNAME *)p;           \
-    }                                                            \
-    const struct atype_info krb5int_asn1type_##DESCNAME = {      \
-        atype_uint, sizeof(CTYPENAME), 0, 0, 0, 0, 0, 0, 0, 0,   \
-        0, 0, loaduint_##DESCNAME,                               \
+#define DEFUINTTYPE(DESCNAME, CTYPENAME)                        \
+    typedef CTYPENAME aux_typedefname_##DESCNAME;               \
+    static asn1_uintmax loaduint_##DESCNAME(const void *p)      \
+    {                                                           \
+        assert(sizeof(CTYPENAME) <= sizeof(asn1_uintmax));      \
+        return *(const aux_typedefname_##DESCNAME *)p;          \
+    }                                                           \
+    const struct atype_info krb5int_asn1type_##DESCNAME = {     \
+        atype_uint, sizeof(CTYPENAME), 0, 0, 0, 0, 0, 0, 0, 0,  \
+        0, 0, loaduint_##DESCNAME,                              \
     }
 /* Pointers to other types, to be encoded as those other types.  */
 #ifdef POINTERS_ARE_ALL_THE_SAME

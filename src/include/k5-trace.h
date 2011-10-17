@@ -134,14 +134,14 @@
 #define TRACE_CCSELECT_MODFAIL(c, name, ret, server)                    \
     TRACE(c, (c, "ccselect module {str} yielded error {kerr} for server " \
               "principal {princ}", name, ret, server))
-#define TRACE_CCSELECT_NOTFOUND(c, server)                           \
-    TRACE(c, (c, "ccselect can't find appropriate cache for server " \
+#define TRACE_CCSELECT_NOTFOUND(c, server)                              \
+    TRACE(c, (c, "ccselect can't find appropriate cache for server "    \
               "principal {princ}", server))
 #define TRACE_CCSELECT_DEFAULT(c, cache, server)                        \
     TRACE(c, (c, "ccselect choosing default cache {ccache} for server " \
               "principal {princ}", cache, server))
 
-#define TRACE_FAST_ARMOR_CCACHE(c, ccache_name) \
+#define TRACE_FAST_ARMOR_CCACHE(c, ccache_name)                 \
     TRACE(c, (c, "FAST armor ccache: {str}", ccache_name))
 #define TRACE_FAST_ARMOR_CCACHE_KEY(c, keyblock)                        \
     TRACE(c, (c, "Armor ccache sesion key: {keyblock}", keyblock))

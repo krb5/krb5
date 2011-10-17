@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* lib/krb5/os/trace.c - k5trace implementation */
 /*
  * Copyright 2009 by the Massachusetts Institute of Technology.

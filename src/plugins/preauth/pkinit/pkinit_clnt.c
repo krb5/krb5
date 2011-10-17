@@ -813,11 +813,11 @@ pkinit_as_rep_parse(krb5_context context,
                 goto cleanup;
             }
 
-        /* ...otherwise, use the older octetstring2key function. */
+            /* ...otherwise, use the older octetstring2key function. */
         } else {
 
             retval = pkinit_octetstring2key(context, etype, client_key,
-                                        client_key_len, key_block);
+                                            client_key_len, key_block);
             if (retval) {
                 pkiDebug("failed to create key pkinit_octetstring2key %s\n",
                          error_message(retval));

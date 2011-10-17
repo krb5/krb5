@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* tests/gssapi/t_ccselect.c - Test program for GSSAPI cred selection */
 /*
  * Copyright 2011 by the Massachusetts Institute of Technology.
@@ -60,15 +60,15 @@ display_status_1(const char *m, OM_uint32 code, int type)
 
         if (!msg_ctx)
             break;
-     }
+    }
 }
 
 static void
 gsserr(const char *msg, OM_uint32 maj_stat, OM_uint32 min_stat)
 {
-     display_status_1(msg, maj_stat, GSS_C_GSS_CODE);
-     display_status_1(msg, min_stat, GSS_C_MECH_CODE);
-     exit(1);
+    display_status_1(msg, maj_stat, GSS_C_GSS_CODE);
+    display_status_1(msg, min_stat, GSS_C_MECH_CODE);
+    exit(1);
 }
 
 int

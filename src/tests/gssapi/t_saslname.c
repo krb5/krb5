@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2009  by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -33,28 +33,28 @@
 static void
 displayStatus_1(char *m, OM_uint32 code, int type)
 {
-     OM_uint32 maj_stat, min_stat;
-     gss_buffer_desc msg;
-     OM_uint32 msg_ctx;
+    OM_uint32 maj_stat, min_stat;
+    gss_buffer_desc msg;
+    OM_uint32 msg_ctx;
 
-     msg_ctx = 0;
-     while (1) {
-          maj_stat = gss_display_status(&min_stat, code,
-                                       type, GSS_C_NULL_OID,
-                                       &msg_ctx, &msg);
-          fprintf(stderr, "%s: %s\n", m, (char *)msg.value);
-          (void) gss_release_buffer(&min_stat, &msg);
+    msg_ctx = 0;
+    while (1) {
+        maj_stat = gss_display_status(&min_stat, code,
+                                      type, GSS_C_NULL_OID,
+                                      &msg_ctx, &msg);
+        fprintf(stderr, "%s: %s\n", m, (char *)msg.value);
+        (void) gss_release_buffer(&min_stat, &msg);
 
-          if (!msg_ctx)
-               break;
-     }
+        if (!msg_ctx)
+            break;
+    }
 }
 
 static void
 displayStatus(char *msg, OM_uint32 maj_stat, OM_uint32 min_stat)
 {
-     displayStatus_1(msg, maj_stat, GSS_C_GSS_CODE);
-     displayStatus_1(msg, min_stat, GSS_C_MECH_CODE);
+    displayStatus_1(msg, maj_stat, GSS_C_GSS_CODE);
+    displayStatus_1(msg, min_stat, GSS_C_MECH_CODE);
 }
 
 static
@@ -166,9 +166,9 @@ int main(int argc, char *argv[])
                                                     &oid))) {
             displayStatus("gss_inquire_mech_for_saslname", major, minor);
         } else if (oid == GSS_C_NO_OID ||
-            (oid->length != mechs->elements[i].length &&
-             memcmp(oid->elements, mechs->elements[i].elements,
-                    oid->length) != 0)) {
+                   (oid->length != mechs->elements[i].length &&
+                    memcmp(oid->elements, mechs->elements[i].elements,
+                           oid->length) != 0)) {
             gss_release_buffer(&minor, &oidstr);
             (void) gss_oid_to_str(&minor, oid, &oidstr);
             fprintf(stderr, "Got different OID %.*s for mechanism %.*s\n",

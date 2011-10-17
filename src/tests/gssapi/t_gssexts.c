@@ -1,4 +1,4 @@
-/* -*- mode: c; indent-tabs-mode: nil -*- */
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /*
  * Copyright 2009  by the Massachusetts Institute of Technology.
  * All Rights Reserved.
@@ -63,28 +63,28 @@ static int use_spnego = 0;
 static void
 displayStatus_1(char *m, OM_uint32 code, int type)
 {
-     OM_uint32 maj_stat, min_stat;
-     gss_buffer_desc msg;
-     OM_uint32 msg_ctx;
+    OM_uint32 maj_stat, min_stat;
+    gss_buffer_desc msg;
+    OM_uint32 msg_ctx;
 
-     msg_ctx = 0;
-     while (1) {
-          maj_stat = gss_display_status(&min_stat, code,
-                                       type, GSS_C_NULL_OID,
-                                       &msg_ctx, &msg);
-          fprintf(stderr, "%s: %s\n", m, (char *)msg.value);
-          (void) gss_release_buffer(&min_stat, &msg);
+    msg_ctx = 0;
+    while (1) {
+        maj_stat = gss_display_status(&min_stat, code,
+                                      type, GSS_C_NULL_OID,
+                                      &msg_ctx, &msg);
+        fprintf(stderr, "%s: %s\n", m, (char *)msg.value);
+        (void) gss_release_buffer(&min_stat, &msg);
 
-          if (!msg_ctx)
-               break;
-     }
+        if (!msg_ctx)
+            break;
+    }
 }
 
 static void
 displayStatus(char *msg, OM_uint32 maj_stat, OM_uint32 min_stat)
 {
-     displayStatus_1(msg, maj_stat, GSS_C_GSS_CODE);
-     displayStatus_1(msg, min_stat, GSS_C_MECH_CODE);
+    displayStatus_1(msg, maj_stat, GSS_C_GSS_CODE);
+    displayStatus_1(msg, min_stat, GSS_C_MECH_CODE);
 }
 
 static OM_uint32
@@ -159,7 +159,7 @@ testPrf(OM_uint32 *minor, gss_ctx_id_t initiatorContext,
     }
 
     printf("%s\n", flags == GSS_C_PRF_KEY_FULL ?
-        "PRF_KEY_FULL" : "PRF_KEY_PARTIAL");
+           "PRF_KEY_FULL" : "PRF_KEY_PARTIAL");
 
     printf("Initiator PRF: ");
     for (i = 0; i < initiatorPrf.length; i++) {
@@ -334,7 +334,7 @@ getDefaultCred(OM_uint32 *minor, const char *keytab_name, gss_OID_set mechs,
         krb5_cc_close(context, ccache);
         krb5_kt_close(context, keytab);
         krb5_free_context(context);
-     } else {
+    } else {
         gss_OID_set actual_mechs = GSS_C_NO_OID_SET;
 
         major = gss_acquire_cred(minor,
@@ -369,7 +369,7 @@ main(int argc, char *argv[])
 
     if (argc < 2 || argc > 5) {
         fprintf(stderr, "Usage: %s [--spnego] [user] "
-                        "[proxy-target] [keytab]\n", argv[0]);
+                "[proxy-target] [keytab]\n", argv[0]);
         fprintf(stderr, "       proxy-target and keytab are optional\n");
         exit(1);
     }
@@ -409,7 +409,7 @@ main(int argc, char *argv[])
     }
 
     mechs.elements = use_spnego ? (gss_OID)&spnego_mech :
-                                  (gss_OID)gss_mech_krb5;
+        (gss_OID)gss_mech_krb5;
     mechs.count = 1;
 
     major = getDefaultCred(&minor,

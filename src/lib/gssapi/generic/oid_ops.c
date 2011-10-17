@@ -156,7 +156,7 @@ generic_gss_add_oid_set_member(OM_uint32 *minor_status,
     elist = (*oid_set)->elements;
     /* Get an enlarged copy of the array */
     if (((*oid_set)->elements = (gss_OID) gssalloc_malloc(((*oid_set)->count+1) *
-                                                 sizeof(gss_OID_desc)))) {
+                                                          sizeof(gss_OID_desc)))) {
         /* Copy in the old junk */
         if (elist)
             memcpy((*oid_set)->elements,

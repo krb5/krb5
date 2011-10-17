@@ -53,13 +53,13 @@ static krb5_error_code
 k5_des3_decrypt_iov(krb5_key key, const krb5_data *ivec,
                     krb5_crypto_iov *data, size_t num_data)
 {
-   krb5_error_code ret;
+    krb5_error_code ret;
 
-   ret = k5_nss_gen_import(key, CKM_DES3_CBC, CKA_DECRYPT);
-   if (ret != 0)
-       return ret;
-   return k5_nss_gen_block_iov(key, CKM_DES3_CBC, CKA_DECRYPT,
-                               ivec, data, num_data);
+    ret = k5_nss_gen_import(key, CKM_DES3_CBC, CKA_DECRYPT);
+    if (ret != 0)
+        return ret;
+    return k5_nss_gen_block_iov(key, CKM_DES3_CBC, CKA_DECRYPT,
+                                ivec, data, num_data);
 }
 
 const struct krb5_enc_provider krb5int_enc_des3 = {

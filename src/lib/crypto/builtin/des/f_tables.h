@@ -101,17 +101,17 @@ extern const unsigned DES_INT32 des_SP_table[8][64];
  * a time and swapping left and right in the code we can avoid the
  * swaps altogether.
  */
-#define DES_SP_ENCRYPT_ROUND(left, right, temp, kp) do {                \
-        (temp) = (((right) >> 11) | ((right) << 21)) ^ *(kp)++;         \
-        (left) ^= SP[0][((temp) >> 24) & 0x3f]                          \
-            | SP[1][((temp) >> 16) & 0x3f]                              \
-            | SP[2][((temp) >>  8) & 0x3f]                              \
-            | SP[3][((temp)      ) & 0x3f];                             \
-        (temp) = (((right) >> 23) | ((right) << 9)) ^ *(kp)++;          \
-        (left) ^= SP[4][((temp) >> 24) & 0x3f]                          \
-            | SP[5][((temp) >> 16) & 0x3f]                              \
-            | SP[6][((temp) >>  8) & 0x3f]                              \
-            | SP[7][((temp)      ) & 0x3f];                             \
+#define DES_SP_ENCRYPT_ROUND(left, right, temp, kp) do {        \
+        (temp) = (((right) >> 11) | ((right) << 21)) ^ *(kp)++; \
+        (left) ^= SP[0][((temp) >> 24) & 0x3f]                  \
+            | SP[1][((temp) >> 16) & 0x3f]                      \
+            | SP[2][((temp) >>  8) & 0x3f]                      \
+            | SP[3][((temp)      ) & 0x3f];                     \
+        (temp) = (((right) >> 23) | ((right) << 9)) ^ *(kp)++;  \
+        (left) ^= SP[4][((temp) >> 24) & 0x3f]                  \
+            | SP[5][((temp) >> 16) & 0x3f]                      \
+            | SP[6][((temp) >>  8) & 0x3f]                      \
+            | SP[7][((temp)      ) & 0x3f];                     \
     } while(0);
 
 #define DES_SP_DECRYPT_ROUND(left, right, temp, kp) do {                \

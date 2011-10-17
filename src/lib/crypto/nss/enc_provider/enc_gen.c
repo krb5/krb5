@@ -515,7 +515,7 @@ k5_nss_gen_cts_iov(krb5_key krb_key, CK_MECHANISM_TYPE mech,
         if (operation == CKA_DECRYPT) {
             /* block1 now has p'n xor cn-1 */
             xor(block1, recover1, blocksize);
-           /* block 1 now has pn-1 */
+            /* block 1 now has pn-1 */
         } else {
             if (ivec && ivec->data) {
                 memcpy(ivec->data, block1, blocksize);

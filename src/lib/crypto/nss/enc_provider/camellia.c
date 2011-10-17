@@ -83,7 +83,7 @@ krb5int_camellia_cbc_mac(krb5_key key, const krb5_crypto_iov *data,
  */
 static krb5_error_code
 camellia_init_state(const krb5_keyblock *key, krb5_keyusage usage,
-               krb5_data *state)
+                    krb5_data *state)
 {
     state->length = 16;
     state->data = (void *) malloc(16);

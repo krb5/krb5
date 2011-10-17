@@ -51,9 +51,9 @@ k5_des_encrypt_iov(krb5_key key, const krb5_data *ivec,
 
 static krb5_error_code
 k5_des_decrypt_iov(krb5_key key,
-           const krb5_data *ivec,
-           krb5_crypto_iov *data,
-           size_t num_data)
+                   const krb5_data *ivec,
+                   krb5_crypto_iov *data,
+                   size_t num_data)
 {
     krb5_error_code ret;
 

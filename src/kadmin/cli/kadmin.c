@@ -1142,7 +1142,7 @@ kadmin_addprinc_usage()
               "\t\t[-kvno kvno] [-policy policy] [-clearpolicy] [-randkey]\n"
               "\t\t[-pw password] [-maxrenewlife maxrenewlife]\n"
               "\t\t[-e keysaltlist]\n\t\t[{+|-}attribute]\n")
-        );
+    );
     fprintf(stderr, _("\tattributes are:\n"));
     fprintf(stderr,
             _("\t\tallow_postdated allow_forwardable allow_tgs_req "

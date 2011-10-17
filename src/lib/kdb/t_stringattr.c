@@ -33,7 +33,7 @@
  *
  * - The APIs will work on a DB entry initialized to all zeros (because it has
  *   an empty tl_data list).
- * 
+ *
  * - Attribute order in krb5_dbe_get_strings matches attribute insertion order.
  */
 

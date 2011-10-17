@@ -451,7 +451,7 @@ dcc_retrieve(krb5_context context, krb5_ccache cache, krb5_flags flags,
     dcc_data *data = cache->data;
 
     return krb5_fcc_ops.retrieve(context, data->fcc, flags, mcreds,
-                                      creds);
+                                 creds);
 }
 
 static krb5_error_code KRB5_CALLCONV
