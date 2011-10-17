@@ -723,7 +723,8 @@ OTHEREXCLUDES = \
 	util/profile/profile_tcl.c \
 	util/support/fnmatch.c \
 	util/verto \
-	util/k5ev
+	util/k5ev \
+	util/wshelper
 
 EXCLUDES = `for i in $(BSDFILES) $(OTHEREXCLUDES); do echo $$i; done | $(AWK) '{ print "-path", $$1, "-o" }'` -path /dev/null
 
