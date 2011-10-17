@@ -19,8 +19,8 @@
 @set RANDOMUSER johndoe
 @set RANDOMUSER1 jennifer
 @set RANDOMUSER2 david
-@set RELEASE 1.9
-@set PREVRELEASE 1.8
+@set RELEASE 1.10
+@set PREVRELEASE 1.9
 @set INSTALLDIR /usr/@value{LCPRODUCT}
 @set PREVINSTALLDIR @value{INSTALLDIR}
 @set ROOTDIR /usr/local
