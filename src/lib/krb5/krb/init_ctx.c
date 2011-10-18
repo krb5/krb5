@@ -57,10 +57,7 @@
 #include "int-proto.h"
 #include <ctype.h>
 #include "brand.c"
-/* There has to be a better way for windows... */
-#if defined(unix) || TARGET_OS_MAC
 #include "../krb5_libinit.h"
-#endif
 
 /* The des-mdX entries are last for now, because it's easy to
    configure KDCs to issue TGTs with des-mdX keys and then not accept
