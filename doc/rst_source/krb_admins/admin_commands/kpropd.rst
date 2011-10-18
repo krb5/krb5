@@ -9,12 +9,13 @@ SYNOPSIS
 
 **kpropd**
           [ **-r** *realm* ] 
+          [ **-a** *acl_file* ] 
           [ **-f** *slave_dumpfile* ] 
           [ **-F** *principal_database* ] 
           [ **-p** *kdb5_util_prog* ] 
+          [ **-P** *port* ]
           [ **-d** ] 
           [ **-S** ] 
-          [ **-P** *port* ]
 
 DESCRIPTION
 -------------
@@ -22,9 +23,9 @@ DESCRIPTION
 The *kpropd* command runs on the slave KDC server.  
 It listens for update requests made by the :ref:`kprop(8)` program, and periodically requests incremental updates from the master KDC.
 
-When the slave receives a kprop request from the master, *kpropd* accepts the dumped KDC database and places it in a file, 
+When the slave receives a *kprop* request from the master, *kpropd* accepts the dumped KDC database and places it in a file, 
 and then runs :ref:`kdb5_util(8)` to load the dumped database into the active database which is used by :ref:`krb5kdc(8)`.  
-Thus, the master Kerberos server can use :ref:`kprop(8)` to propagate its database to the slave slavers.  
+Thus, the master Kerberos server can use :ref:`kprop(8)` to propagate its database to the slave servers.
 Upon a successful download of the KDC database file, the slave Kerberos server will have an up-to-date KDC database.
 
 Normally, *kpropd* is invoked out of inetd(8).  This is done by adding a line to the *inetd.conf* file which looks like this::
@@ -65,7 +66,7 @@ OPTIONS
        **-P**     
                Allow for an alternate port number for *kpropd* to listen on. This is only useful if the program is run in standalone mode.
 
-       **-a**     
+       **-a**  *acl_file*   
               Allows the user to specify the path to the *kpropd.acl* file; by default the path used is /usr/local/var/krb5kdc/kpropd.acl.
 
 FILES
@@ -73,7 +74,7 @@ FILES
 
 *kpropd.acl*  
             Access file for *kpropd*; the default location is /usr/local/var/krb5kdc/kpropd.acl.  
-            Each entry is a line containing the principal of a host from which the local machine will allow Kerberos database propagation via :ref:`kprop(8)`.
+            Each entry is a line containing the principal of a *host* from which the local machine will allow Kerberos database propagation via :ref:`kprop(8)`.
 
 SEE ALSO
 ----------
