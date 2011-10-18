@@ -296,7 +296,7 @@ make_request_for_tgt(krb5_context context, krb5_tkt_creds_context ctx,
     /* Construct the principal krbtgt/<realm>@<cur-tgt-realm>. */
     krb5_free_principal(context, ctx->tgt_princ);
     ctx->tgt_princ = NULL;
-    code = krb5int_tgtname(context, realm, &ctx->cur_tgt->server->realm,
+    code = krb5int_tgtname(context, realm, &ctx->cur_tgt->server->data[1],
                            &ctx->tgt_princ);
     if (code != 0)
         return code;
