@@ -317,6 +317,7 @@ make_gss_checksum (krb5_context context, krb5_auth_context auth_context,
         /* Turn KRB5_AUTH_CONTEXT_DO_TIME back on and reset the send subkey. */
         krb5_auth_con_setflags(context, auth_context, con_flags);
         krb5_auth_con_setsendsubkey_k(context, auth_context, send_subkey);
+        krb5_k_free_key(context, send_subkey);
 
         if (code) {
             /* don't fail here; just don't accept/do the delegation
