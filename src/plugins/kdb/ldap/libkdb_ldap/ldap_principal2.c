@@ -104,6 +104,7 @@ krb5_ldap_get_principal(krb5_context context, krb5_const_principal searchfor,
     CHECK_LDAP_HANDLE(ldap_context);
 
     if (is_principal_in_realm(ldap_context, searchfor) != 0) {
+        st = KRB5_KDB_NOENTRY;
         krb5_set_error_message(context, st,
                                _("Principal does not belong to realm"));
         goto cleanup;
