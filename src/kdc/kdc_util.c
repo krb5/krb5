@@ -249,6 +249,10 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
     if ((retval = krb5_auth_con_init(kdc_context, &auth_context)))
         goto cleanup;
 
+    /* Don't use a replay cache. */
+    if ((retval = krb5_auth_con_setflags(kdc_context, auth_context, 0)))
+        goto cleanup;
+
     if ((retval = krb5_auth_con_setaddrs(kdc_context, auth_context, NULL,
                                          from->address)) )
         goto cleanup_auth_context;
