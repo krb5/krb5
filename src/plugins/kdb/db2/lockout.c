@@ -158,13 +158,23 @@ krb5_db2_lockout_audit(krb5_context context,
         return 0;
     }
 
+    if (entry == NULL)
+        return 0;
+
     code = lookup_lockout_policy(context, entry, &max_fail,
                                  &failcnt_interval,
                                  &lockout_duration);
     if (code != 0)
         return code;
 
-    assert (!locked_check_p(context, stamp, max_fail, lockout_duration, entry));
+    /*
+     * Don't continue to modify the DB for an already locked account.
+     * (In most cases, status will be KRB5KDC_ERR_CLIENT_REVOKED, and
+     * this check is unneeded, but in rare cases, we can fail with an
+     * integrity error or preauth failure before a policy check.)
+     */
+    if (locked_check_p(context, stamp, max_fail, lockout_duration, entry))
+        return 0;
 
     if (status == 0 && (entry->attributes & KRB5_KDB_REQUIRES_PRE_AUTH)) {
         /*
