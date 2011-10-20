@@ -161,6 +161,9 @@ krb5_ldap_lockout_audit(krb5_context context,
         return 0;
     }
 
+    if (entry == NULL)
+        return 0;
+
     if (!ldap_context->disable_lockout) {
         code = lookup_lockout_policy(context, entry, &max_fail,
                                      &failcnt_interval,
@@ -169,9 +172,16 @@ krb5_ldap_lockout_audit(krb5_context context,
             return code;
     }
 
-    entry->mask = 0;
+    /*
+     * Don't continue to modify the DB for an already locked account.
+     * (In most cases, status will be KRB5KDC_ERR_CLIENT_REVOKED, and
+     * this check is unneeded, but in rare cases, we can fail with an
+     * integrity error or preauth failure before a policy check.)
+     */
+    if (locked_check_p(context, stamp, max_fail, lockout_duration, entry))
+        return 0;
 
-    assert (!locked_check_p(context, stamp, max_fail, lockout_duration, entry));
+    entry->mask = 0;
 
     /* Only mark the authentication as successful if the entry
      * required preauthentication, otherwise we have no idea. */
