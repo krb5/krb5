@@ -6,10 +6,19 @@
 Copyright and Other Notices
 ---------------------------
 
-Copyright (C) 1985-2010 by the Massachusetts Institute of Technology
+Copyright (C) 1985-2011 by the Massachusetts Institute of Technology
 and its contributors.  All rights reserved.
 
 Please see the file named NOTICE for additional notices.
+
+MIT Kerberos is a project of the MIT Kerberos Consortium.  For more
+information about the Kerberos Consortium, see http://kerberos.org/
+
+For more information about the MIT Kerberos software, see
+    http://web.mit.edu/kerberos/
+
+People interested in participating in the MIT Kerberos development
+effort should visit http://k5wiki.kerberos.org/
 
 Building and Installing Kerberos 5
 ----------------------------------
@@ -42,9 +51,13 @@ If you are not able to use krb5-send-pr because you haven't been able
 compile and install Kerberos V5 on any platform, you may send mail to
 krb5-bugs@mit.edu.
 
+Please keep in mind that unencrypted e-mail is not secure. If you need
+to report a security vulnerability, or send sensitive information,
+please PGP-encrypt it to krbcore-security@mit.edu.
+
 You may view bug reports by visiting
 
-http://krbdev.mit.edu/rt/
+    http://krbdev.mit.edu/rt/
 
 and logging in as "guest" with password "guest".
 
@@ -60,8 +73,156 @@ beginning with krb5-1.8.
 Major changes in 1.10
 ---------------------
 
+Additional background information on these changes may be found at
+
+    http://k5wiki.kerberos.org/wiki/Release_1.10
+
+and
+
+    http://k5wiki.kerberos.org/wiki/Category:Release_1.10_projects
+
+Code quality:
+
+* Fix MITKRB5-SA-2011-006 KDC denial of service vulnerabilities
+  [CVE-2011-1527 CVE-2011-1528 CVE-2011-1529].
+
+* Update the Fortuna implementation to more accurately implement the
+  description in _Cryptography Engineering_, and make it the default
+  PRNG.
+
+* Add an alternative PRNG that relies on the OS native PRNG.
+
+Developer experience:
+
+* Add the ability for GSSAPI servers to use any keytab key for a
+  specified service, if the server specifies a host-based name with no
+  hostname component.
+
+* In the build system, identify the source files needed for
+  per-message processing within a kernel and ensure that they remain
+  independent.
+
+* Allow rd_safe and rd_priv to ignore the remote address.
+
+* Rework KDC and kadmind networking code to use an event loop
+  architecture.
+
+Administrator experience:
+
+* Add more complete support for renaming principals.
+
+* Add the profile variable ignore_acceptor_hostname in libdefaults. If
+  set, GSSAPI will ignore the hostname component of acceptor names
+  supplied by the server, allowing any keytab key matching the service
+  to be used.
+
+* Add support for string attributes on principal entries.
+
+* Allow password changes to work over NATs.
+
+End-user experience:
+
+* Add the DIR credential cache type, which can hold a collection of
+  credential caches.
+
+* Enhance kinit, klist, and kdestroy to support credential cache
+  collections if the cache type supports it.
+
+* Add the kswitch command, which changes the selected default cache
+  within a collection.
+
+* Add heuristic support for choosing client credentials based on the
+  service realm.
+
+* Add support for $HOME/.k5identity, which allows credential choice
+  based on configured rules.
+
+* Add support for localization. (No translations are provided in this
+  release, but the infrastructure is present for redistributors to
+  supply them.)
+
 krb5-1.10 changes by ticket ID
 ------------------------------
+
+6118    rename principals
+6323    kadmin: rename support
+6617    uninitialized values used in mkey-migration code
+6732    checks for openpty() aren't made using -lutil
+6770    kg_unseal leads to overlap of source and desitination in memcpy...
+6813    memory leak in gss_accept_sec_context
+6814    Improve kdb5_util load locking and recovery
+6816    potential memory leak in spnego
+6817    potential null dereference in gss mechglue
+6835    accept_sec_context RFC4121 support bug in 1.8.3
+6851    pkinit can't parse some valid cms messages
+6854    kadmin's ktremove can remove wrong entries when removing kvno 0
+6855    Improve acceptor name flexibility
+6857    missing ifdefs around IPv6 code
+6858    Assume ELF on FreeBSD if objformat doesn't exist
+6863    memory leak on SPNEGO error path
+6868    Defer hostname lookups in krb5_sendto_kdc
+6872    Fix memory leak in t_expire_warn
+6874    Fortuna as default PRNG
+6878    Add test script for user2user programs
+6887    Use first principal in keytab when verifying creds
+6889    ftpd parses ftpusers entries that use "restrict" incorrectly
+6890    Implement draft-josefsson-gss-capsulate
+6891    Add gss_userok and gss_pname_to_uid
+6892    Prevent bleed-through of mechglue symbols into loaded mechs
+6893    error codes from error responses can be discarded when there's e-data
+6894    More sensical mech selection for gss_acquire_cred/accept_sec_context
+6895    gss_duplicate_name SPI for SPNEGO
+6896    Allow anonymous name to be imported with empty name buffer
+6897    Default principal name in the acceptor cred corresponds to
+        first entry in associated keytab.
+6898    Set correct minor_status value in call to gss_display_status.
+6902    S4U impersonated credential KRB5_CC_NOT_FOUND
+6904    Install k5login(5) as well as .k5login(5)
+6905    support poll() in sendto_kdc.c
+6909    Kernel subset
+6910    Account lockout policy parameters not documented
+6911    Account lockout policy options time format
+6914    krb5-1.9.1 static compile error +preliminary patch (fwd)
+6915    klist -s trips over referral entries
+6918    Localize user interface strings using gettext
+6921    Convert preauth_plugin.h to new plugin framework
+6922    Work around glibc getaddrinfo PTR lookups
+6923    Use AI_ADDRCONFIG for more efficient getaddrinfo
+6924    Fix multiple libkdb_ldap memory leaks
+6927    chpass_util.c improvements
+6928    use timegm() for krb5int_gmt_mktime() when available
+6929    Pluggable configuration
+6931    Add libedit/readline support to ss.
+6933    blocking recv caused our server to hang
+6934    don't require a default realm
+6944    gss_acquire_cred erroneous failure and potential segfault for caller
+6945    spnego_gss_acquire_cred_impersonate_name incorrect usage of
+        impersonator_cred_handle
+6951    assertion failure when connections fail in service_fds()
+6953    Add the DIR ccache type
+6954    Add new cache collection APIs
+6955    Remove unneeded cccol behaviors
+6956    Add ccache collection support to tools
+6957    Add krb5_cc_select() API and pluggable interface
+6958    Make gss-krb5 use cache collection
+6961    Support pkinit: SignedData with no signers (KDC)
+6962    pkinit: client: Use SignedData for anonymous
+6964    Support special salt type in default krb5_dbe_cpw.
+6965    Remove CFLAGS and external deps from krb5-config --libs
+6966    Eliminate domain-based client realm walk
+6968    [PATCH] Man page fixes
+6969    Create e_data as pa_data in KDC interfaces.
+6971    Use type-safe callbacks in preauth interface
+6974    Make krb5_pac_sign public
+6975    Add PKINIT NSS support
+6976    Hide gak_fct interface and arguments in clpreauth
+6977    Install krb5/preauth_plugin.h
+6978    Allow rd_priv/rd_safe without remote address
+6979    Allow password changes over NATs
+6980    Ensure termination in Windows vsnprintf wrapper
+6981    SA-2011-006 KDC denial of service [CVE-2011-1527 CVE-2011-1528 CVE-2011-1529]
+6987    Fix krb5_cc_set_config
+6988    Fix handling of null edata method in KDC preauth
 
 Acknowledgements
 ----------------
@@ -74,6 +235,7 @@ Past and present Sponsors of the MIT Kerberos Consortium:
     Columbia University
     Cornell University
     The Department of Defense of the United States of America (DoD)
+    Fidelity Investments
     Google
     Iowa State University
     MIT
@@ -108,6 +270,7 @@ Past and present members of the Kerberos Team at MIT:
     Mark Colan
     Don Davis
     Alexandra Ellwood
+    Carlos Garay
     Dan Geer
     Nancy Gilman
     Matt Hancher
@@ -122,6 +285,7 @@ Past and present members of the Kerberos Team at MIT:
     Kevin Koch
     John Kohl
     HaoQi Li
+    Jonathan Lin
     Peter Litwack
     Scott McGuire
     Steve Miller
@@ -209,6 +373,7 @@ reports, suggestions, and valuable resources:
     Paul Moore
     Zbysek Mraz
     Edward Murrell
+    Nathaniel McCallum
     Nikos Nikoleris
     Dmitri Pal
     Javier Palacios
