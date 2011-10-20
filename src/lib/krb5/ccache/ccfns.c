@@ -281,16 +281,14 @@ krb5_cc_set_config(krb5_context context, krb5_ccache id,
     if (ret)
         goto out;
 
-    /* Remove old configuration */
-    ret = krb5_cc_remove_cred(context, id, 0, &cred);
-    if (ret && ret != KRB5_CC_NOTFOUND)
-        goto out;
-
-    if (data) {
+    if (data == NULL) {
+        ret = krb5_cc_remove_cred(context, id, 0, &cred);
+    } else {
         cred.ticket.data = malloc(data->length);
         if (cred.ticket.data == NULL) {
-            krb5_set_error_message(context, ENOMEM, "malloc: out of memory");
-            return ENOMEM;
+            ret = ENOMEM;
+            krb5_set_error_message(context, ret, "malloc: out of memory");
+            goto out;
         }
         cred.ticket.length = data->length;
         memcpy(cred.ticket.data, data->data, data->length);
