@@ -829,7 +829,7 @@ hint_list_next(struct hint_state *state)
         ap->get_edata(kdc_context, state->request, &callbacks, state->rock,
                       ap->moddata, ap->type, finish_get_edata, state);
     } else
-        finish_get_edata(state, ap->type, NULL);
+        finish_get_edata(state, 0, NULL);
     return;
 
 next:
