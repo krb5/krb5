@@ -5,6 +5,7 @@ dodoc=t
 dosrc=t
 checkout=t
 multitar=nil
+: ${TAR=tar}
 while test $# -gt 2; do
 	case $1 in
 	--srconly)
@@ -207,22 +208,22 @@ if test $multitar = t; then
 		then notice=$reldir/NOTICE
 	fi
 	if test $dosrc = t; then
-		gtar --exclude $reldir/src/lib/crypto \
+		$TAR --exclude $reldir/src/lib/crypto \
 			--exclude $reldir/src/lib/des425 \
 			--exclude $reldir/doc \
 			-zcf ${reldir}.src.tar.gz $reldir
 
-		gtar zcf ${reldir}.crypto.tar.gz \
+		$TAR zcf ${reldir}.crypto.tar.gz \
 			$reldir/src/lib/crypto \
 			$des425
 	fi
 	if test $dodoc = t; then
-		gtar zcf ${reldir}.doc.tar.gz $reldir/doc $reldir/README $notice
+		$TAR zcf ${reldir}.doc.tar.gz $reldir/doc $reldir/README $notice
 	fi
 	ls -l ${reldir}.*.tar.gz
 fi
 
-gtar zcf ${reldir}.tar.gz $reldir
+$TAR zcf ${reldir}.tar.gz $reldir
 ls -l ${reldir}.tar.gz
 
 echo "Done."
