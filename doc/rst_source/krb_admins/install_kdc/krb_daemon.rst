@@ -1,15 +1,21 @@
-Start the Kerberos daemons on the Master KDC
+Start the Kerberos daemons on the master KDC
 ===============================================
 
-At this point, you are ready to start the Kerberos daemons on the Master KDC. To do so, type::
+At this point, you are ready to start the Kerberos KDC and administrative daemons on the Master KDC. To do so, type::
 
      shell% /usr/local/sbin/krb5kdc
      shell% /usr/local/sbin/kadmind
      
 
-Each daemon will fork and run in the background. Assuming you want these daemons to start up automatically at boot time, you can add them to the KDC's */etc/rc* or */etc/inittab* file. You need to have a stash file in order to do this.
+Each server daemon will fork and run in the background. 
 
-You can verify that they started properly by checking for their startup messages in the logging locations you defined in */etc/krb5.conf*. (See :ref:`logging`) For example::
+.. note:: Assuming you want these daemons to start up automatically at boot time, 
+          you can add them to the KDC's */etc/rc* or */etc/inittab* file. 
+          You need to have a :ref:`stash_definition` in order to do this.
+
+You can verify that they started properly by checking for their startup messages in the logging locations 
+you defined in */etc/krb5.conf*. (See :ref:`logging`).
+For example::
 
      shell% tail /var/log/krb5kdc.log
      Dec 02 12:35:47 beeblebrox krb5kdc[3187](info): commencing operation
@@ -18,6 +24,13 @@ You can verify that they started properly by checking for their startup messages
      
 
 Any errors the daemons encounter while starting will also be listed in the logging output. 
+
+You are now ready to start configuring the slave KDCs. 
+
+.. note:: Assuming you are setting the KDCs up so that you can easily switch the master KDC with one of the slaves, 
+          you should perform each of these steps on the master KDC as well as the slave KDCs, 
+          unless these instructions specify otherwise.
+
 
 ------------
 

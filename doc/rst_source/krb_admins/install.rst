@@ -4,11 +4,6 @@ Installation guide
 .. note:: This document was copied from **Kerberos V5 Installation Guide** with minor changes. Currently it is under review. Please, send your feedback, corrections and additions to krb5-bugs@mit.edu. Your contribution is greatly appreciated.
 
 
-The sections of this chapter describe procedures for installing Kerberos V5 on:
-
-#. The KDCs
-#. UNIX client machines
-#. UNIX Application Servers 
 
 Contents
 ---------
@@ -27,6 +22,7 @@ Additional references
 
 
 #. Debian Setting up of Kerberos <http://techpubs.spinlocksolutions.com/dklar/kerberos.html>_
+#. Solaris Configuring the Kerberos Service <http://download.oracle.com/docs/cd/E19253-01/816-4557/6maosrjv2/index.html >_
 
 ------------------
 
