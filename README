@@ -223,6 +223,7 @@ krb5-1.10 changes by ticket ID
 6981    SA-2011-006 KDC denial of service [CVE-2011-1527 CVE-2011-1528 CVE-2011-1529]
 6987    Fix krb5_cc_set_config
 6988    Fix handling of null edata method in KDC preauth
+6989    fix tar invocation in mkrel
 
 Acknowledgements
 ----------------
