@@ -10,45 +10,39 @@ http://web.mit.edu/kerberos
 Quick facts
 -----------------------
 
-   +---------------------------------+------------------------+
-   |                                 |       MIT              |
-   +=================================+========================+
-   | Latest stable  version          | 1.9.1                  |
-   +---------------------------------+------------------------+
-   | Supported versions              | 1.7.2, 1.8.4, 1.9.1    |
-   +---------------------------------+------------------------+
-   | Release cycle                   | 9 - 12 months          |
-   +---------------------------------+------------------------+
-   | Supported platforms/            | - Solaris              | 
-   | OS distributions                |    - SPARC             |
-   |                                 |    - x86_64/x86        |
-   |                                 | - GNU/Linux            | 
-   |                                 |    - Debian x86_64/x86 | 
-   |                                 |    - Ubuntu x86_64/x86 | 
-   |                                 |    - RedHat x86_64/x86 | 
-   |                                 | - BSD                  | 
-   |                                 |    - NetBSD x86_64/x86 | 
-   +---------------------------------+------------------------+
-   | Crypto backends                 | - OSSL 1.0+            |
-   |                                 | - builtin              |
-   |                                 | - NSS 3.12.9+          |
-   +---------------------------------+------------------------+
-   | Database backends               | - LDAP                 |
-   |                                 | - DB2                  | 
-   +---------------------------------+------------------------+
-   | krb4 support                    |  < 1.8                 |
-   +---------------------------------+------------------------+
-   | DES support                     |  configurable          |
-   +---------------------------------+------------------------+
-   | Extensions (1.8+)               | - S4U2Self             |
-   |                                 | - S4U2Proxy            |
-   |                                 | - GSS naming exts      |
-   |                                 | - GSS to store creds   | 
-   +---------------------------------+------------------------+
-   | License                         |  .. toctree::          | 
-   |                                 |                        | 
-   |                                 |      mitK5license.rst  |
-   +---------------------------------+------------------------+
+
+   ====================================================== ======================================= =============================================================================
+    Latest stable  version                                 1.9.1                  
+    Supported versions                                     1.7.2, 1.8.4, 1.9.1    
+    Release cycle                                          9 - 12 months          
+    Supported platforms/OS distributions                   Solaris               
+                                                               - SPARC             
+                                                               - x86_64/x86                                               
+                                                           GNU/Linux                                                                 
+                                                               - Debian       x86_64/x86                                         
+                                                               - Ubuntu       x86_64/x86                                        
+                                                               - RedHat       x86_64/x86                                                        
+                                                           BSD                   
+                                                               - NetBSD x86_64/x86  
+    Crypto backends                                        - OpenSSL 1.0\+                          - http://www.openssl.org       
+                                                           - builtin                                - MIT Kerberos native crypto library  
+                                                           - NSS 3.12.9\+                           - Mozilla's Network Security Services. 
+                                                                                                      http://www.mozilla.org/projects/security/pki/nss
+    Database backends                                      - LDAP                                                                  
+                                                           - DB2                  
+    krb4 support                                           < 1.8                 
+    DES support                                            configurable                             http://k5wiki.kerberos.org/wiki/Projects/Disable_DES
+    GSS-API S4U extensions                                 1.8+                                     http://msdn.microsoft.com/en-us/library/cc246071
+                                                               - S4U2Proxy                         
+                                                               - S4U2Proxy 
+    GSS-API naming extensions                              1.8+                                     http://tools.ietf.org/html/draft-ietf-kitten-gssapi-naming-exts-11
+                                                                                                    
+    GSS-API extensions for storing delegated credentials   1.8+                                     :rfc:`5588`
+
+    License                                                :ref:`mitK5license`
+    Defaults                                               :ref:`mitK5defaults`
+   ====================================================== ======================================= =============================================================================
+
 
 
 
@@ -87,85 +81,52 @@ Heimdal
 * Support for reading Heimdal database  starting from version 1.8
 
 
-Feature list
---------------------------
+Feature list 
+~~~~~~~~~~~~~~~
 
+   =============================================== =========== ============================================
+    \                                              Available    Additional information        
+   =============================================== =========== ============================================
+    Credentials delegation                         1.7          :rfc:`5896` 
+    Cross-realm authentication and referrals       1.7          http://tools.ietf.org/html/draft-ietf-krb-wg-kerberos-referrals-12
+    Master key migration                           1.7          http://k5wiki.kerberos.org/wiki/Projects/Master_Key_Migration
+    PKINIT                                         1.7          :rfc:`4556`       
+    Anonymous PKINIT                               1.8          :rfc:`6112` http://k5wiki.kerberos.org/wiki/Projects/Anonymous_pkinit
+    Constrained delegation                         1.8          http://k5wiki.kerberos.org/wiki/Projects/ConstrainedDelegation                 
+    IAKERB                                         1.8          http://tools.ietf.org/html/draft-ietf-krb-wg-iakerb-02                
+    Heimdal bridge plugin for KDC backend          1.8                          
+    Advance warning on password expiry             1.9                          
+    Camellia encryption (CTS-CMAC mode)            1.9          experimental http://tools.ietf.org/html/draft-ietf-krb-wg-camellia-cts-00      
+    KDC support for SecurID preauthentication      1.9          http://k5wiki.kerberos.org/wiki/Projects/SecurID_SAM_support
+    kadmin over IPv6                               1.9                         
+    Trace logging                                  1.9          http://k5wiki.kerberos.org/wiki/Projects/Trace_logging                 
+    GSSAPI/KRB5 multi-realm support                                            
+    Plugins to test password quality               1.9          http://k5wiki.kerberos.org/wiki/Projects/Password_quality_pluggable_interface
+    Plugins to synchronize password changes        1.9          
+    Parallel KDC                                   1.9
+    GS2                                            1.9          :rfc:`5801` :rfc:`5587` http://k5wiki.kerberos.org/wiki/Projects/GS2                 
+    Purging old keys                               1.9                          
+    Naming extensions for delegation chain         1.9                          
+    Password expiration API                        1.9                          
+    Windows client support   (build-only)          1.9                          
+    pre-auth mechanisms:                                                      
+     - PW-SALT                                                  :rfc:`4120#section-5.2.7.3`     
+     - ENC-TIMESTAMP                                            :rfc:`4120#section-5.2.7.2`
+     - SAM-2                                                                  
+     - FAST negotiation framework                  1.8          :rfc:`6113`     
+     - PKINIT                                                   :rfc:`4556`     
+     - FX-COOKIE                                                :rfc:`6113#section-5.2`              
+     - S4U-X509-USER                               1.8          http://msdn.microsoft.com/en-us/library/cc246091              
+                                                                                
+    PRNG                                                                       
+      - modularity:                                   1.9                        
+      - Yarrow PRNG                                   < 1.10                     
+      - Fortuna PRNG                                  1.9                        
+      - OS PRNG                                       1.10                       
+    Zero configuration                                                          
+    IPv6 support in iprop                                                       
+   =============================================== =========== ============================================
 
-   +-----------------------------------------------+-----------+-------------------+
-   |                                               | Available | Additional        | 
-   |                                               |           | information       | 
-   +===============================================+===========+===================+
-   | PKINIT                                        | 1.7       |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | Anonymous PKINIT                              | 1.8       |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | IPv6 support in iprop                         |           |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | kadmin over IPv6                              |  1.9      |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | Trace logging                                 |  1.9      |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | IAKERB                                        |  1.8      |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | GSSAPI/KRB5  multi-realm support              |           |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | Plugins to test password quality              | 1.9       |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | Plugins to synchronize password changes       | 1.9       |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | Parallel KDC                                  |           |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | Credentials delegation                        | 1.7       |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | Constrained delegation                        | 1.8       |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | Cross-realm auth and referrals                |  1.7      |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | GS2                                           | 1.9       |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | Purging old keys                              | 1.9       |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | Naming extensions for delegation chain        | 1.9       |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | Password expiration API                       | 1.9       |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | Windows client support   (build-only)         | 1.9       |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | pre-auth mechanisms:                          | |         | |                 |
-   |                                               | |         | |                 |
-   |  - PW-SALT                                    | |         | | :rfc:`4120`     |
-   |  - ENC-TIMESTAMP                              | |         | | :rfc:`4120`     |
-   |  - SAM-2                                      | |         | |                 |
-   |  - FAST negotiation framework                 | | 1.8     | |                 |
-   |  - PKINIT                                     | |         | |                 |
-   |  - FX-COOKIE                                  | |         | |                 |
-   |  - S4U-X509-USER                              | |         | |                 |
-   |                                               |           |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | KDC support for SecurID preauthentication     | 1.9       | SAM-2 protocol    |
-   +-----------------------------------------------+-----------+-------------------+
-   | Account lockout on bad login attempts         | 1.8       |                   | 
-   +-----------------------------------------------+-----------+-------------------+
-   | Camellia encryption (CTS-MAC mode)            | 1.9       | experimental      |
-   |                                               |           |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | PRNG                                          | |         |                   |
-   |                                               | |         |                   |
-   | - modularity:                                 | | 1.9     |                   |
-   | - Yarrow PRNG                                 | | < 1.10  |                   |
-   | - Fortuna PRNG                                | | 1.9     |                   |
-   | - OS PRNG                                     | | 1.10    |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | Advance warning on password expiry            | 1.9       |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | Heimdal bridge plugin for KDC backend         | 1.8       |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | Zero configuration                            |           |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   | Master key migration                          | 1.7       |                   |
-   +-----------------------------------------------+-----------+-------------------+
-   |  						   |           |                   |
-   +-----------------------------------------------+-----------+-------------------+
 
 
 
