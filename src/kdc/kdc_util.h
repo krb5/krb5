@@ -105,10 +105,6 @@ select_session_keytype (krb5_context context,
                         int nktypes,
                         krb5_enctype *ktypes);
 
-krb5_error_code
-get_salt_from_key (krb5_context, krb5_principal,
-                   krb5_key_data *, krb5_data *);
-
 void limit_string (char *name);
 
 void

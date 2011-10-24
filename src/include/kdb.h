@@ -576,6 +576,12 @@ krb5_dbe_update_tl_data( krb5_context          context,
                          krb5_db_entry       * entry,
                          krb5_tl_data        * new_tl_data);
 
+/* Compute the salt for a key data entry given the corresponding principal. */
+krb5_error_code
+krb5_dbe_compute_salt(krb5_context context, const krb5_key_data *key,
+                      krb5_const_principal princ, krb5_int16 *salttype_out,
+                      krb5_data **salt_out);
+
 krb5_error_code
 krb5_dbe_cpw( krb5_context        kcontext,
               krb5_keyblock       * master_key,

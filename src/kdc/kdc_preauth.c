@@ -1315,62 +1315,54 @@ request_contains_enctype(krb5_context context,  const krb5_kdc_req *request,
 static krb5_error_code
 _make_etype_info_entry(krb5_context context,
                        krb5_principal client_princ, krb5_key_data *client_key,
-                       krb5_enctype etype, krb5_etype_info_entry **entry,
+                       krb5_enctype etype, krb5_etype_info_entry **entry_out,
                        int etype_info2)
 {
-    krb5_data                   salt;
-    krb5_etype_info_entry *     tmp_entry;
-    krb5_error_code             retval;
+    krb5_error_code retval;
+    krb5_int16 salttype;
+    krb5_data *salt = NULL;
+    krb5_etype_info_entry *entry = NULL;
 
-    if ((tmp_entry = malloc(sizeof(krb5_etype_info_entry))) == NULL)
+    *entry_out = NULL;
+    entry = malloc(sizeof(*entry));
+    if (entry == NULL)
         return ENOMEM;
 
-    salt.data = 0;
-
-    tmp_entry->magic = KV5M_ETYPE_INFO_ENTRY;
-    tmp_entry->etype = etype;
-    tmp_entry->length = KRB5_ETYPE_NO_SALT;
-    tmp_entry->salt = 0;
-    tmp_entry->s2kparams.data = NULL;
-    tmp_entry->s2kparams.length = 0;
-    retval = get_salt_from_key(context, client_princ, client_key, &salt);
+    entry->magic = KV5M_ETYPE_INFO_ENTRY;
+    entry->etype = etype;
+    entry->length = KRB5_ETYPE_NO_SALT;
+    entry->salt = NULL;
+    entry->s2kparams = empty_data();
+    retval = krb5_dbe_compute_salt(context, client_key, client_princ,
+                                   &salttype, &salt);
     if (retval)
-        goto fail;
-    if (etype_info2 && client_key->key_data_ver > 1 &&
-        client_key->key_data_type[1] == KRB5_KDB_SALTTYPE_AFS3) {
+        goto cleanup;
+    if (etype_info2 && salttype == KRB5_KDB_SALTTYPE_AFS3) {
         switch (etype) {
         case ENCTYPE_DES_CBC_CRC:
         case ENCTYPE_DES_CBC_MD4:
         case ENCTYPE_DES_CBC_MD5:
-            tmp_entry->s2kparams.data = malloc(1);
-            if (tmp_entry->s2kparams.data == NULL) {
-                retval = ENOMEM;
-                goto fail;
-            }
-            tmp_entry->s2kparams.length = 1;
-            tmp_entry->s2kparams.data[0] = 1;
+            retval = alloc_data(&entry->s2kparams, 1);
+            if (retval)
+                goto cleanup;
+            entry->s2kparams.data[0] = 1;
             break;
         default:
             break;
         }
     }
 
-    if (salt.length >= 0) {
-        tmp_entry->length = salt.length;
-        tmp_entry->salt = (unsigned char *) salt.data;
-        salt.data = 0;
-    }
-    *entry = tmp_entry;
-    return 0;
+    entry->length = salt->length;
+    entry->salt = (unsigned char *)salt->data;
+    salt->data = NULL;
+    *entry_out = entry;
+    entry = NULL;
 
-fail:
-    if (tmp_entry) {
-        if (tmp_entry->s2kparams.data)
-            free(tmp_entry->s2kparams.data);
-        free(tmp_entry);
-    }
-    if (salt.data)
-        free(salt.data);
+cleanup:
+    if (entry != NULL)
+        krb5_free_data_contents(context, &entry->s2kparams);
+    free(entry);
+    krb5_free_data(context, salt);
     return retval;
 }
 
@@ -1606,8 +1598,8 @@ return_pw_salt(krb5_context context, krb5_pa_data *in_padata,
 {
     krb5_error_code     retval;
     krb5_pa_data *      padata;
-    krb5_data *         scratch;
-    krb5_data           salt_data;
+    krb5_data *         salt = NULL;
+    krb5_int16          salttype;
     krb5_key_data *     client_key = rock->client_key;
     int i;
 
@@ -1615,74 +1607,37 @@ return_pw_salt(krb5_context context, krb5_pa_data *in_padata,
         if (enctype_requires_etype_info_2(request->ktype[i]))
             return 0;
     }
-    if (client_key->key_data_ver == 1 ||
-        client_key->key_data_type[1] == KRB5_KDB_SALTTYPE_NORMAL)
+    retval = krb5_dbe_compute_salt(context, client_key, request->client,
+                                   &salttype, &salt);
+    if (retval)
         return 0;
 
-    if ((padata = malloc(sizeof(krb5_pa_data))) == NULL)
-        return ENOMEM;
+    padata = k5alloc(sizeof(*padata), &retval);
+    if (padata == NULL)
+        goto cleanup;
     padata->magic = KV5M_PA_DATA;
-    padata->pa_type = KRB5_PADATA_PW_SALT;
 
-    switch (client_key->key_data_type[1]) {
-    case KRB5_KDB_SALTTYPE_V4:
-        /* send an empty (V4) salt */
-        padata->contents = 0;
-        padata->length = 0;
-        break;
-    case KRB5_KDB_SALTTYPE_NOREALM:
-        if ((retval = krb5_principal2salt_norealm(kdc_context,
-                                                  request->client,
-                                                  &salt_data)))
+    if (salttype == KRB5_KDB_SALTTYPE_AFS3) {
+        padata->contents = k5alloc(salt->length + 1, &retval);
+        if (padata->contents == NULL)
             goto cleanup;
-        padata->contents = (krb5_octet *)salt_data.data;
-        padata->length = salt_data.length;
-        break;
-    case KRB5_KDB_SALTTYPE_AFS3:
-        /* send an AFS style realm-based salt */
-        /* for now, just pass the realm back and let the client
-           do the work. In the future, add a kdc configuration
-           variable that specifies the old cell name. */
+        memcpy(padata->contents, salt->data, salt->length);
         padata->pa_type = KRB5_PADATA_AFS3_SALT;
-        /* it would be just like ONLYREALM, but we need to pass the 0 */
-        scratch = krb5_princ_realm(kdc_context, request->client);
-        if ((padata->contents = malloc(scratch->length+1)) == NULL) {
-            retval = ENOMEM;
-            goto cleanup;
-        }
-        memcpy(padata->contents, scratch->data, scratch->length);
-        padata->length = scratch->length+1;
-        padata->contents[scratch->length] = 0;
-        break;
-    case KRB5_KDB_SALTTYPE_ONLYREALM:
-        scratch = krb5_princ_realm(kdc_context, request->client);
-        if ((padata->contents = malloc(scratch->length)) == NULL) {
-            retval = ENOMEM;
-            goto cleanup;
-        }
-        memcpy(padata->contents, scratch->data, scratch->length);
-        padata->length = scratch->length;
-        break;
-    case KRB5_KDB_SALTTYPE_SPECIAL:
-        if ((padata->contents = malloc(client_key->key_data_length[1]))
-            == NULL) {
-            retval = ENOMEM;
-            goto cleanup;
-        }
-        memcpy(padata->contents, client_key->key_data_contents[1],
-               client_key->key_data_length[1]);
-        padata->length = client_key->key_data_length[1];
-        break;
-    default:
-        free(padata);
-        return 0;
+        padata->contents[salt->length] = '\0';
+        padata->length = salt->length + 1;
+    } else {
+        padata->pa_type = KRB5_PADATA_PW_SALT;
+        padata->length = salt->length;
+        padata->contents = (krb5_octet *)salt->data;
+        salt->data = NULL;
     }
 
     *send_pa = padata;
-    return 0;
+    padata = NULL;
 
 cleanup:
     free(padata);
+    krb5_free_data(context, salt);
     return retval;
 }
 

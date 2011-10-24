@@ -725,10 +725,10 @@ kadm5_rename_principal(void *server_handle,
 {
     krb5_db_entry *kdb;
     osa_princ_ent_rec adb;
-    int ret, i;
+    krb5_error_code ret;
     kadm5_server_handle_t handle = server_handle;
-    krb5_int32 stype;
-    krb5_data sdata;
+    krb5_int16 stype, i;
+    krb5_data *salt = NULL;
 
     CHECK_HANDLE(server_handle);
 
@@ -747,52 +747,19 @@ kadm5_rename_principal(void *server_handle,
 
     /* Transform salts as necessary. */
     for (i = 0; i < kdb->n_key_data; i++) {
-        sdata = empty_data();
-        if (kdb->key_data[i].key_data_ver > 1)
-            stype = kdb->key_data[i].key_data_type[1];
-        else
-            stype = KRB5_KDB_SALTTYPE_NORMAL;
-
-        /* For salt types which compute a salt from the principal name, compute
-         * the salt based on the old principal name into sdata. */
-        switch (stype) {
-        case KRB5_KDB_SALTTYPE_NORMAL:
-            ret = krb5_principal2salt(handle->context, kdb->princ, &sdata);
-            if (ret)
-                goto done;
-            break;
-        case KRB5_KDB_SALTTYPE_NOREALM:
-            ret = krb5_principal2salt_norealm(handle->context, kdb->princ,
-                                              &sdata);
-            if (ret)
-                goto done;
-            break;
-        case KRB5_KDB_SALTTYPE_ONLYREALM:
-            ret = alloc_data(&sdata, kdb->princ->realm.length);
-            if (ret)
-                goto done;
-            memcpy(sdata.data, kdb->princ->realm.data,
-                   kdb->princ->realm.length);
-            break;
-        case KRB5_KDB_SALTTYPE_SPECIAL:
-        case KRB5_KDB_SALTTYPE_V4:
-        case KRB5_KDB_SALTTYPE_AFS3:
-            /* Don't compute a new salt.  Assume the realm doesn't change for
-             * V4 and AFS3. */
-            break;
-        default:
-            /* We don't recognize this salt type.  Be conservative. */
+        ret = krb5_dbe_compute_salt(handle->context, &kdb->key_data[i],
+                                    kdb->princ, &stype, &salt);
+        if (ret == KRB5_KDB_BAD_SALTTYPE)
             ret = KADM5_NO_RENAME_SALT;
+        if (ret)
             goto done;
-        }
-        /* If we computed a salt, store it as an explicit salt. */
-        if (sdata.data != NULL) {
-            kdb->key_data[i].key_data_type[1] = KRB5_KDB_SALTTYPE_SPECIAL;
-            free(kdb->key_data[i].key_data_contents[1]);
-            kdb->key_data[i].key_data_contents[1] = (krb5_octet *)sdata.data;
-            kdb->key_data[i].key_data_length[1] = sdata.length;
-            kdb->key_data[i].key_data_ver = 2;
-        }
+        kdb->key_data[i].key_data_type[1] = KRB5_KDB_SALTTYPE_SPECIAL;
+        free(kdb->key_data[i].key_data_contents[1]);
+        kdb->key_data[i].key_data_contents[1] = (krb5_octet *)salt->data;
+        kdb->key_data[i].key_data_length[1] = salt->length;
+        kdb->key_data[i].key_data_ver = 2;
+        free(salt);
+        salt = NULL;
     }
 
     kadm5_free_principal(handle->context, kdb->princ);
@@ -808,6 +775,7 @@ kadm5_rename_principal(void *server_handle,
     ret = kdb_delete_entry(handle, source);
 
 done:
+    krb5_free_data(handle->context, salt);
     kdb_free_entry(handle, kdb, &adb);
     return ret;
 }

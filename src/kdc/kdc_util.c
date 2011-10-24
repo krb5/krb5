@@ -1502,62 +1502,6 @@ select_session_keytype(krb5_context context, krb5_db_entry *server,
 }
 
 /*
- * This function returns salt information for a particular client_key
- */
-krb5_error_code
-get_salt_from_key(krb5_context context, krb5_principal client,
-                  krb5_key_data *client_key, krb5_data *salt)
-{
-    krb5_error_code             retval;
-    krb5_data *                 realm;
-
-    salt->data = 0;
-    salt->length = SALT_TYPE_NO_LENGTH;
-
-    if (client_key->key_data_ver == 1)
-        return 0;
-
-    switch (client_key->key_data_type[1]) {
-    case KRB5_KDB_SALTTYPE_NORMAL:
-        /*
-         * The client could infer the salt from the principal, but
-         * might use the wrong principal name if this is an alias.  So
-         * it's more reliable to send an explicit salt.
-         */
-        if ((retval = krb5_principal2salt(context, client, salt)))
-            return retval;
-        break;
-    case KRB5_KDB_SALTTYPE_V4:
-        /* send an empty (V4) salt */
-        salt->data = 0;
-        salt->length = 0;
-        break;
-    case KRB5_KDB_SALTTYPE_NOREALM:
-        if ((retval = krb5_principal2salt_norealm(context, client, salt)))
-            return retval;
-        break;
-    case KRB5_KDB_SALTTYPE_AFS3:
-        /* send the same salt as with onlyrealm - but with no type info,
-           we just hope they figure it out on the other end. */
-        /* fall through to onlyrealm: */
-    case KRB5_KDB_SALTTYPE_ONLYREALM:
-        realm = krb5_princ_realm(context, client);
-        salt->length = realm->length;
-        if ((salt->data = malloc(realm->length)) == NULL)
-            return ENOMEM;
-        memcpy(salt->data, realm->data, realm->length);
-        break;
-    case KRB5_KDB_SALTTYPE_SPECIAL:
-        salt->length = client_key->key_data_length[1];
-        if ((salt->data = malloc(salt->length)) == NULL)
-            return ENOMEM;
-        memcpy(salt->data, client_key->key_data_contents[1], salt->length);
-        break;
-    }
-    return 0;
-}
-
-/*
  * Limit strings to a "reasonable" length to prevent crowding out of
  * other useful information in the log entry
  */
