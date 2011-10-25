@@ -87,6 +87,24 @@ Major changes in 1.8.4
 
 This is primarily a bugfix release.
 
+* Fix MITKRB5-SA-2011-006 KDC denial of service vulnerabilities
+  [CVE-2011-1528 CVE-2011-1529 CVE-2011-4151].
+
+krb5-1.8.4 changes by ticket ID
+-------------------------------
+
+6925    Memory leak in save_error_string_nocopy()
+6926    work around Dejagnu failure on modern Tcl
+6983    SA-2011-006 KDC denial of service [CVE-2011-1527 CVE-2011-1528
+        CVE-2011-1529]
+6984    modernize doc/Makefile somewhat
+6991    fix tar invocation in mkrel
+
+Major changes in 1.8.4
+----------------------
+
+This is primarily a bugfix release.
+
 * Fix vulnerabilities:
   ** KDC uninitialized pointer crash [MITKRB5-SA-2010-006 CVE-2010-1322]
   ** kpropd denial of service [MITKRB5-SA-2011-001 CVE-2010-4022]
@@ -397,6 +415,7 @@ Past and present Sponsors of the MIT Kerberos Consortium:
     Columbia University
     Cornell University
     The Department of Defense of the United States of America (DoD)
+    Fidelity Investments
     Google
     Iowa State University
     MIT
@@ -431,6 +450,7 @@ Past and present members of the Kerberos Team at MIT:
     Mark Colan
     Don Davis
     Alexandra Ellwood
+    Carlos Garay
     Dan Geer
     Nancy Gilman
     Matt Hancher
@@ -445,6 +465,7 @@ Past and present members of the Kerberos Team at MIT:
     Kevin Koch
     John Kohl
     HaoQi Li
+    Jonathan Lin
     Peter Litwack
     Scott McGuire
     Steve Miller
@@ -530,6 +551,7 @@ reports, suggestions, and valuable resources:
     Jan iankko Lieskovsky
     Kevin Longfellow
     Ryan Lynch
+    Nathaniel McCallum
     Cameron Meadors
     Franklyn Mendez
     Markus Moeller
