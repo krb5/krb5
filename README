@@ -70,6 +70,45 @@ from using single-DES cryptosystems.  Among these is a configuration
 variable that enables "weak" enctypes, which defaults to "false"
 beginning with krb5-1.8.
 
+Major changes in 1.9.2
+----------------------
+
+This is primarily a bugfix release.
+
+* Improve KDC performance by fully its disabling replay cache.
+
+* Fix MITKRB5-SA-2011-006 KDC denial of service vulnerabilities
+  [CVE-2011-1527 CVE-2011-1528 CVE-2011-1529].
+
+krb5-1.9.1 changes by ticket ID
+-------------------------------
+
+6844    Memory leak in save_error_string_nocopy()
+6884    KDC memory leak in FAST error path
+6885    KDC memory leak of reply padata for FAST replies
+6886    rc4-hmac weak key checks break interoperability
+6888    No explanation of failed passwd entry if REQUIRES_PWCHANGE is set
+6906    modernize doc/Makefile somewhat
+6907    setpw response parsing fails for lengths above 255
+6908    Delete sec context properly in gss_krb5_export_lucid_sec_context
+6912    Use hmac-md5 checksum for PA-FOR-USER padata
+6913    Fix multiple tl-data updates over iprop
+6916    Restore krb5_get_credentials caching for referral requests
+6917    Restore fallback non-referral TGS request to same realm
+6920    Fix old-style GSSRPC authentication
+6932    Fix gss_set_cred_option cred creation with no name
+6939    Legacy checksum APIs usually fail
+6941    Fix accidental KDC use of replay cache
+6943    incorrect reference in spnego_gss_set_cred_option
+6949    TCP connection leak with 1.9.1, with connect_to_server()
+6952    Fix cross-realm traversal TGT requests
+6960    always include krb5_libinit.h in init_ctx.c
+6970    gss_unwrap_iov crashes with stream buffers for 3des, des, rc4
+6972    memory leak in version 1.9.1
+6982    SA-2011-006 KDC denial of service [CVE-2011-1527 CVE-2011-1528
+        CVE-2011-1529]
+6990    fix tar invocation in mkrel
+
 Major changes in 1.9.1
 ----------------------
 
@@ -278,6 +317,7 @@ Past and present Sponsors of the MIT Kerberos Consortium:
     Columbia University
     Cornell University
     The Department of Defense of the United States of America (DoD)
+    Fidelity Investments
     Google
     Iowa State University
     MIT
@@ -312,6 +352,7 @@ Past and present members of the Kerberos Team at MIT:
     Mark Colan
     Don Davis
     Alexandra Ellwood
+    Carlos Garay
     Dan Geer
     Nancy Gilman
     Matt Hancher
@@ -326,6 +367,7 @@ Past and present members of the Kerberos Team at MIT:
     Kevin Koch
     John Kohl
     HaoQi Li
+    Jonathan Lin
     Peter Litwack
     Scott McGuire
     Steve Miller
@@ -411,6 +453,7 @@ reports, suggestions, and valuable resources:
     Jan iankko Lieskovsky
     Kevin Longfellow
     Ryan Lynch
+    Nathaniel McCallum
     Cameron Meadors
     Franklyn Mendez
     Markus Moeller

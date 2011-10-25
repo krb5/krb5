@@ -52,7 +52,7 @@
  */
 #define KRB5_MAJOR_RELEASE 1
 #define KRB5_MINOR_RELEASE 9
-#define KRB5_PATCHLEVEL 1
-#define KRB5_RELTAIL "postrelease"
+#define KRB5_PATCHLEVEL 2
+#define KRB5_RELTAIL "beta1"
 /* #undef KRB5_RELDATE */
-#define KRB5_RELTAG "branches/krb5-1-9"
+#define KRB5_RELTAG "tags/krb5-1-9-2-beta1"
