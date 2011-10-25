@@ -284,10 +284,10 @@ kdc_process_tgs_req(krb5_kdc_req *request, const krb5_fulladdr *from,
                                                  &authenticator)))
         goto cleanup_auth_context;
 
-    retval = krb5int_find_authdata(kdc_context,
-                                   (*ticket)->enc_part2->authorization_data,
-                                   authenticator->authorization_data,
-                                   KRB5_AUTHDATA_FX_ARMOR, &authdata);
+    retval = krb5_find_authdata(kdc_context,
+                                (*ticket)->enc_part2->authorization_data,
+                                authenticator->authorization_data,
+                                KRB5_AUTHDATA_FX_ARMOR, &authdata);
     if (retval != 0)
         goto cleanup_authenticator;
     if (authdata&& authdata[0]) {

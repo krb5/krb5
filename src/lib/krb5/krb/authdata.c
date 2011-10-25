@@ -514,11 +514,8 @@ k5_get_kdc_issued_authdata(krb5_context kcontext,
 
     ticket_authdata = ap_req->ticket->enc_part2->authorization_data;
 
-    code = krb5int_find_authdata(kcontext,
-                                 ticket_authdata,
-                                 NULL,
-                                 KRB5_AUTHDATA_KDC_ISSUED,
-                                 &authdata);
+    code = krb5_find_authdata(kcontext, ticket_authdata, NULL,
+                              KRB5_AUTHDATA_KDC_ISSUED, &authdata);
     if (code != 0 || authdata == NULL)
         return code;
 
@@ -573,11 +570,8 @@ krb5int_authdata_verify(krb5_context kcontext,
 
         if (kdc_issued_authdata != NULL &&
             (module->flags & AD_USAGE_KDC_ISSUED)) {
-            code = krb5int_find_authdata(kcontext,
-                                         kdc_issued_authdata,
-                                         NULL,
-                                         module->ad_type,
-                                         &authdata);
+            code = krb5_find_authdata(kcontext, kdc_issued_authdata, NULL,
+                                      module->ad_type, &authdata);
             if (code != 0)
                 break;
 
@@ -599,11 +593,10 @@ krb5int_authdata_verify(krb5_context kcontext,
             if (module->flags & AD_USAGE_AP_REQ)
                 authen_usage = TRUE;
 
-            code = krb5int_find_authdata(kcontext,
-                                         ticket_usage ? ticket_authdata : NULL,
-                                         authen_usage ? authen_authdata : NULL,
-                                         module->ad_type,
-                                         &authdata);
+            code = krb5_find_authdata(kcontext,
+                                      ticket_usage ? ticket_authdata : NULL,
+                                      authen_usage ? authen_authdata : NULL,
+                                      module->ad_type, &authdata);
             if (code != 0)
                 break;
         }

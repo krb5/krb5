@@ -902,11 +902,8 @@ verify_ad_signedpath(krb5_context context,
     *pdelegated = NULL;
     *path_is_signed = FALSE;
 
-    code = krb5int_find_authdata(context,
-                                 enc_tkt_part->authorization_data,
-                                 NULL,
-                                 KRB5_AUTHDATA_SIGNTICKET,
-                                 &sp_authdata);
+    code = krb5_find_authdata(context, enc_tkt_part->authorization_data, NULL,
+                              KRB5_AUTHDATA_SIGNTICKET, &sp_authdata);
     if (code != 0)
         goto cleanup;
 

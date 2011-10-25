@@ -2615,12 +2615,6 @@ krb5_error_code KRB5_CALLCONV krb5_get_default_config_files(char ***filenames);
 
 void KRB5_CALLCONV krb5_free_config_files(char **filenames);
 
-krb5_error_code krb5int_find_authdata(krb5_context context,
-                                      krb5_authdata *const *ticket_authdata,
-                                      krb5_authdata *const *ap_req_authdata,
-                                      krb5_authdatatype ad_type,
-                                      krb5_authdata ***results);
-
 krb5_error_code krb5_rd_req_decoded(krb5_context, krb5_auth_context *,
                                     const krb5_ap_req *, krb5_const_principal,
                                     krb5_keytab, krb5_flags *, krb5_ticket **);

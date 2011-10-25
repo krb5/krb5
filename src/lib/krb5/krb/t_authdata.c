@@ -47,9 +47,8 @@ krb5_authdata ad3= {
     3,
     (unsigned char *) "ab"
 };
-/* we want three results in the return from krb5int_find_authdata so
-   it has to grow its list.
-*/
+/* We want three results in the return from krb5_find_authdata so it has to
+ * grow its list.  */
 krb5_authdata ad4 = {
     KV5M_AUTHDATA,
     22,
@@ -94,8 +93,8 @@ main()
     container[0] = &ad3;
     container[1] = NULL;
     assert(krb5_encode_authdata_container( context, KRB5_AUTHDATA_IF_RELEVANT, container, &container_out) == 0);
-    assert(krb5int_find_authdata(context,
-                                 adseq1, container_out, 22, &results) == 0);
+    assert(krb5_find_authdata(context, adseq1, container_out, 22,
+                              &results) == 0);
     compare_authdata(&ad1, results[0]);
     compare_authdata( results[1], &ad4);
     compare_authdata( results[2], &ad3);

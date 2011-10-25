@@ -270,11 +270,8 @@ kh_db_sign_auth_data(krb5_context context,
 
     if (!is_as_req) {
         /* find the existing PAC, if present */
-        code = krb5int_find_authdata(context,
-                                     tgt_auth_data,
-                                     NULL,
-                                     KRB5_AUTHDATA_WIN2K_PAC,
-                                     &authdata);
+        code = krb5_find_authdata(context, tgt_auth_data, NULL,
+                                  KRB5_AUTHDATA_WIN2K_PAC, &authdata);
         if (code != 0)
             goto cleanup;
     }

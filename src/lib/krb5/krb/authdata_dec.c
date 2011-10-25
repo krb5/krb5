@@ -154,11 +154,11 @@ find_authdata_1(krb5_context context, krb5_authdata *const *in_authdat,
     return retval;
 }
 
-krb5_error_code
-krb5int_find_authdata(krb5_context context,
-                      krb5_authdata *const *ticket_authdata,
-                      krb5_authdata *const *ap_req_authdata,
-                      krb5_authdatatype ad_type, krb5_authdata ***results)
+krb5_error_code KRB5_CALLCONV
+krb5_find_authdata(krb5_context context,
+                   krb5_authdata *const *ticket_authdata,
+                   krb5_authdata *const *ap_req_authdata,
+                   krb5_authdatatype ad_type, krb5_authdata ***results)
 {
     krb5_error_code retval = 0;
     struct find_authdata_context fctx;
