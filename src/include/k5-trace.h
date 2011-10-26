@@ -200,7 +200,7 @@
 #define TRACE_INIT_CREDS_SALT_PRINC(c, salt)                    \
     TRACE(c, (c, "Salt derived from principal: {data}", salt))
 #define TRACE_INIT_CREDS_SERVICE(c, service)                            \
-    TRACE(c, (c, "Setting initial creds service to {string}", service))
+    TRACE(c, (c, "Setting initial creds service to {str}", service))
 
 #define TRACE_KT_GET_ENTRY(c, keytab, princ, vno, enctype, err)         \
     TRACE(c, (c, "Retrieving {princ} from {keytab} (vno {int}, "        \
