@@ -9,6 +9,9 @@
 
 #ifdef _WIN32
 #include "winbase.h"
+#define USE_HEAPALLOC 1
+#else
+#define USE_HEAPALLOC 0
 #endif
 #include <string.h>
 
@@ -16,7 +19,7 @@ static inline void
 gssalloc_free(void * value)
 {
     if (value) {
-#if _WIN32
+#if USE_HEAPALLOC
         HeapFree(GetProcessHeap(), 0, value);
 #else
         free(value);
@@ -27,7 +30,7 @@ gssalloc_free(void * value)
 static inline void *
 gssalloc_malloc(size_t size)
 {
-#if _WIN32
+#if USE_HEAPALLOC
     return HeapAlloc(GetProcessHeap(), 0, size);
 #else
     return malloc(size);
@@ -37,7 +40,7 @@ gssalloc_malloc(size_t size)
 static inline void *
 gssalloc_calloc(size_t count, size_t size)
 {
-#if _WIN32
+#if USE_HEAPALLOC
     return HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, count * size);
 #else
     return calloc(count, size);
@@ -47,7 +50,7 @@ gssalloc_calloc(size_t count, size_t size)
 static inline void *
 gssalloc_realloc(void *value, size_t size)
 {
-#if _WIN32
+#if USE_HEAPALLOC
     return HeapReAlloc(GetProcessHeap(), 0, value, size);
 #else
     return realloc(value, size);
