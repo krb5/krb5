@@ -90,9 +90,9 @@ dispatch(void *cb, struct sockaddr *local_saddr, const krb5_fulladdr *from,
     krb5_data *response = NULL;
     struct dispatch_state *state;
 
-    state = malloc(sizeof(*state));
-    if (!state) {
-        (*respond)(arg, ENOMEM, NULL);
+    state = k5alloc(sizeof(*state), &retval);
+    if (state == NULL) {
+        (*respond)(arg, retval, NULL);
         return;
     }
     state->respond = respond;

@@ -847,8 +847,8 @@ get_preauth_hint_list(krb5_kdc_req *request, krb5_kdcpreauth_rock rock,
     *e_data_out = NULL;
 
     /* Allocate our state. */
-    state = malloc(sizeof(*state));
-    if (!state) {
+    state = calloc(1, sizeof(*state));
+    if (state == NULL) {
         (*respond)(arg);
         return;
     }
@@ -1168,12 +1168,11 @@ check_padata(krb5_context context, krb5_kdcpreauth_rock rock,
         return;
     }
 
-    state = malloc(sizeof(*state));
-    if (!state) {
+    state = calloc(1, sizeof(*state));
+    if (state == NULL) {
         (*respond)(arg, ENOMEM);
         return;
     }
-    memset(state, 0, sizeof(*state));
     state->respond = respond;
     state->arg = arg;
     state->context = context;

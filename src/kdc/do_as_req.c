@@ -460,35 +460,16 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     krb5_enctype useenctype;
     struct as_req_state *state;
 
-    state = malloc(sizeof(*state));
-    if (!state) {
-        (*respond)(arg, ENOMEM, NULL);
+    state = k5alloc(sizeof(*state), &errcode);
+    if (state == NULL) {
+        (*respond)(arg, errcode, NULL);
         return;
     }
-    state->session_key.contents = 0;
-    state->enc_tkt_reply.authorization_data = NULL;
-    state->reply.padata = 0;
-    memset(&state->reply, 0, sizeof(state->reply));
     state->respond = respond;
     state->arg = arg;
-    state->ticket_reply.enc_part.ciphertext.data = 0;
-    state->server_keyblock.contents = NULL;
-    state->client_keyblock.contents = NULL;
-    state->reply_encpart.enc_padata = 0;
-    state->client = NULL;
-    state->server = NULL;
     state->request = request;
-    state->e_data = NULL;
-    state->typed_e_data = FALSE;
-    state->authtime = 0;
-    state->c_flags = 0;
     state->req_pkt = req_pkt;
-    state->rstate = NULL;
-    state->sname = 0;
-    state->cname = 0;
-    state->pa_context = NULL;
     state->from = from;
-    memset(&state->rock, 0, sizeof(state->rock));
 
 #if APPLE_PKINIT
     asReqDebug("process_as_req top realm %s name %s\n",
