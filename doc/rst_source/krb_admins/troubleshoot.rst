@@ -61,6 +61,12 @@ Seen in:  ssh
 
 --------------------------------------------------------------------------------------------
 
+
+.. error:: Unable to find requested database type - while initializing database for realm X.Y
+
+Set *db_module_dir* in :ref:`dbmodules` to the absolute path to the location of the database plugin
+
+--------------------------------------------------------------------------------------------
 ..
 
 ------------------
