@@ -1,9 +1,10 @@
 .. highlight:: rst
 
-.. note:: This is a Draft. The list is incomplete.
+.. _mitK5features:
 
 MIT Kerberos features
 =======================================
+
 
 http://web.mit.edu/kerberos
 
@@ -121,8 +122,8 @@ Feature list
     PRNG                                                                       
       - modularity:                                   1.9                        
       - Yarrow PRNG                                   < 1.10                     
-      - Fortuna PRNG                                  1.9                        
-      - OS PRNG                                       1.10                       
+      - Fortuna PRNG                                  1.9       http://www.schneier.com/book-practical.html
+      - OS PRNG                                       1.10      OS's native PRNG
     Zero configuration                                                          
     IPv6 support in iprop                                                       
    =============================================== =========== ============================================
