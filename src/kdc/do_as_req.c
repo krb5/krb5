@@ -479,6 +479,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     state->server = NULL;
     state->request = request;
     state->e_data = NULL;
+    state->typed_e_data = FALSE;
     state->authtime = 0;
     state->c_flags = 0;
     state->req_pkt = req_pkt;
