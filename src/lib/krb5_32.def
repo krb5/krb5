@@ -420,3 +420,4 @@ EXPORTS
 	krb5_cc_select					@394
 	krb5_pac_sign					@395
 	krb5_find_authdata				@396
+	krb5_check_clockskew				@397

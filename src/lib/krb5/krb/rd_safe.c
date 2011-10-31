@@ -166,7 +166,7 @@ krb5_rd_safe(krb5_context context, krb5_auth_context auth_context,
     if (auth_context->auth_context_flags & KRB5_AUTH_CONTEXT_DO_TIME) {
         krb5_donot_replay replay;
 
-        if ((retval = krb5int_check_clockskew(context, replaydata.timestamp)))
+        if ((retval = krb5_check_clockskew(context, replaydata.timestamp)))
             goto error;
 
         if ((retval = krb5_gen_replay_name(context, auth_context->remote_addr,

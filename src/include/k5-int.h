@@ -2693,7 +2693,6 @@ krb5_error_code krb5_set_debugging_time(krb5_context, krb5_timestamp,
 krb5_error_code krb5_use_natural_time(krb5_context);
 krb5_error_code krb5_set_time_offsets(krb5_context, krb5_timestamp,
                                       krb5_int32);
-krb5_error_code krb5int_check_clockskew(krb5_context, krb5_timestamp);
 /*
  * The realm iterator functions
  */

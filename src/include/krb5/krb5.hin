@@ -4750,6 +4750,21 @@ krb5_error_code KRB5_CALLCONV
 krb5_timeofday(krb5_context context, register krb5_timestamp *timeret);
 
 /**
+ * Check if a timestamp is within the allowed clock skew of the current time.
+ *
+ * @param [in]     context      Library context
+ * @param [in]     date         Timestamp to check
+ *
+ * This function checks if @a date is close enough to the current time
+ * according to the configured allowable clock skew.
+ *
+ * @retval 0 Success
+ * @retval KRB5KRB_AP_ERR_SKEW @a date is not within allowable clock skew
+ */
+krb5_error_code KRB5_CALLCONV
+krb5_check_clockskew(krb5_context context, krb5_timestamp date);
+
+/**
  * Return all interface addresses for this host.
  *
  * @param [in]  context         Library context
