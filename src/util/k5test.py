@@ -23,7 +23,7 @@
 """A module for krb5 test scripts
 
 To run test scripts during "make check" (if Python 2.4 or later is
-available), add rules like the following to Makeflie.in:
+available), add rules like the following to Makefile.in:
 
     check-pytests::
 	$(RUNPYTEST) $(srcdir)/t_testname.py $(PYTESTFLAGS)
@@ -77,8 +77,8 @@ keyword arguments:
   top level keys of the dictionary should be 'all' to apply to all
   four krb5.conf files, and/or 'client'/'server'/'master'/'slave' to
   apply to a particular one.  A key may be mapped to None to delete a
-  setting from the defaults.  A key may be maped to a list in order to
-  create multpile settings for the same variable name.  Keys and
+  setting from the defaults.  A key may be mapped to a list in order
+  to create multiple settings for the same variable name.  Keys and
   values undergo the following template substitutions:
 
     - $type:     The configuration type (client/server/master/slave)
