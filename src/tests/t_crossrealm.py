@@ -68,6 +68,7 @@ r1, r2, r3, r4 = cross_realms(4, xtgts=((0,1), (1,2), (2,3)),
                                      'krb5_conf': {'master': capaths}}),
                               start_kadmind=False)
 test_kvno(r1, r4.host_princ, 'client capaths')
+stop(r1, r2, r3, r4)
 
 # Test KDC capaths.  The KDCs for A and B have appropriate capaths
 # settings to determine intermediate TGTs to return, but the client
@@ -81,6 +82,7 @@ r1, r2, r3, r4 = cross_realms(4, xtgts=((0,1), (1,2), (2,3)),
                                     {'realm': 'D', 'krb5_conf': conf}),
                               start_kadmind=False)
 test_kvno(r1, r4.host_princ, 'KDC capaths')
+stop(r1, r2, r3, r4)
 
 # Test transited error.  The KDC for C does not recognize B as an
 # intermediate realm for A->C, so it refuses to issue a service
@@ -94,6 +96,7 @@ r1, r2, r3 = cross_realms(3, xtgts=((0,1), (1,2)),
 output = r1.run_as_client([kvno, r3.host_princ], expected_code=1)
 if 'KDC policy rejects request' not in output:
     fail('transited 1: Expected error message not in output')
+stop(r1, r2, r3)
 
 # Test a different kind of transited error.  The KDC for D does not
 # recognize B as an intermediate realm for A->C, so it refuses to
@@ -109,5 +112,6 @@ r1, r2, r3, r4 = cross_realms(4, xtgts=((0,1), (1,2), (2,3)),
 output = r1.run_as_client([kvno, r4.host_princ], expected_code=1)
 if 'Illegal cross-realm ticket' not in output:
     fail('transited 2: Expected error message not in output')
+stop(r1, r2, r3, r4)
 
 success('Cross-realm tests.')
