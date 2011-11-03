@@ -154,6 +154,19 @@ Scripts may use the following functions and variables:
   honored.  If keywords contains krb5_conf and/or kdc_conf fragments,
   they will be merged with the default and per-pass specifications.
 
+* cross_realms(num, xtgts=None, args=None, **keywords): This function
+  returns a list of num realms, where each realm's configuration knows
+  how to contact all of the realms.  By default, each realm will
+  contain cross TGTs in both directions for all other realms; this
+  default may be overridden by specifying a collection of tuples in
+  the xtgts parameter, where each tuple is a pair of zero-based realm
+  indexes, indicating that the first realm can authenticate to the
+  second (i.e. krbtgt/secondrealm@firstrealm exists in both realm's
+  databases).  If args is given, it should be a list of keyword
+  arguments specific to each realm; these will be merged with the
+  global keyword arguments passed to cross_realms, with specific
+  arguments taking priority.
+
 * buildtop: The top of the build directory (absolute path).
 
 * srctop: The top of the source directory (absolute path).
@@ -301,6 +314,7 @@ command-line flags.  These are documented in the --help output.
 """
 
 import atexit
+import itertools
 import optparse
 import os
 import shlex
@@ -932,6 +946,70 @@ def multipass_realms(**keywords):
         yield realm
         realm.stop()
         _current_pass = None
+
+
+def cross_realms(num, xtgts=None, args=None, **keywords):
+    # Build keyword args for each realm.
+    realm_args = []
+    for i in range(num):
+        realmnumber = i + 1
+        # Start with any global keyword arguments to this function.
+        a = keywords.copy()
+        if args and args[i]:
+            # Merge in specific arguments for this realm.  Use
+            # _cfg_merge for config fragments.
+            a.update(args[i])
+            for cf in ('krb5_conf', 'kdc_conf'):
+                if cf in keywords and cf in args[i]:
+                    a[cf] = _cfg_merge(keywords[cf], args[i][cf])
+        # Set defaults for the realm name, testdir, and portbase.
+        if not 'realm' in a:
+            a['realm'] = 'KRBTEST%d.COM' % realmnumber
+        if not 'testdir' in a:
+            a['testdir'] = os.path.join('testdir', str(realmnumber))
+        if not 'portbase' in a:
+            a['portbase'] = 61000 + 10 * realmnumber
+        realm_args.append(a)
+        
+    # Build a [realms] config fragment containing all of the realms.
+    realmsection = { '$realm' : None }
+    for a in realm_args:
+        name = a['realm']
+        portbase = a['portbase']
+        realmsection[name] = {
+            'kdc' : '$hostname:%d' % portbase,
+            'admin_server' : '$hostname:%d' % (portbase + 1),
+            'kpasswd_server' : '$hostname:%d' % (portbase + 2)
+            }
+    realmscfg = { 'all' : { 'realms' : realmsection } }
+
+    # Set realmsection in each realm's krb5_conf keyword argument.
+    for a in realm_args:
+        a['krb5_conf'] = _cfg_merge(realmscfg, a.get('krb5_conf'))
+
+    if xtgts is None:
+        # Default to cross tgts for every pair of realms.
+        xtgts = frozenset(itertools.permutations(range(num), 2))
+
+    # Create the realms.
+    realms = []
+    for i in range(num):
+        r = K5Realm(**realm_args[i])
+        # Create specified cross TGTs in this realm's db.
+        for j in range(num):
+            if j == i:
+                continue
+            iname = r.realm
+            jname = realm_args[j]['realm']
+            if (i, j) in xtgts:
+                # This realm can authenticate to realm j.
+                r.addprinc('krbtgt/%s' % jname, password('cr-%d-%d-' % (i, j)))
+            if (j, i) in xtgts:
+                # Realm j can authenticate to this realm.
+                r.addprinc('krbtgt/%s@%s' % (iname, jname),
+                           password('cr-%d-%d-' % (j, i)))
+        realms.append(r)
+    return realms
 
 
 _default_krb5_conf = {
