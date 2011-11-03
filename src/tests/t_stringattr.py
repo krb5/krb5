@@ -53,4 +53,4 @@ if 'attr2: value2' not in output or 'attr3: value3' not in output or \
         'attr1:' in output:
     fail('Final attribute query')
 
-success('KDB string attributes.')
+success('KDB string attributes')

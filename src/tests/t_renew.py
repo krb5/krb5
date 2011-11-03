@@ -13,4 +13,4 @@ realm.kinit(realm.user_princ, flags=['-R'])
 realm.kinit(realm.user_princ, flags=['-R'])
 realm.klist(realm.user_princ)
 
-success('Renewing credentials.')
+success('Renewing credentials')

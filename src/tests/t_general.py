@@ -50,4 +50,4 @@ for realm in multipass_realms(create_host=False):
     if 'Key: vno 258,' not in output:
         fail('Expected vno not seen in kadmin.local output')
 
-success('Dump/load, FAST kinit, kdestroy, kvno wrapping.')
+success('Dump/load, FAST kinit, kdestroy, kvno wrapping')

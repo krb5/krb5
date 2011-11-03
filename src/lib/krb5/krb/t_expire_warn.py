@@ -60,4 +60,4 @@ if 'password_expiration = ' not in output or \
         'password_expiration = 0\n' in output:
     fail('Expected non-zero password expiration not seen for days')
 
-success('Password expiration warning tests.')
+success('Password expiration warning tests')

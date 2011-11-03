@@ -43,4 +43,4 @@ for st in salttypes:
 realm.run_kadminl('renprinc -force newnormal newnormal2')
 realm.kinit('newnormal2', password('normal'))
 
-success('Principal renaming tests.')
+success('Principal renaming tests')

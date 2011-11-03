@@ -15,4 +15,4 @@ for realm in multipass_realms():
         fail('Message not echoed back.')
 
 
-success('User-2-user test programs.')
+success('User-2-user test programs')

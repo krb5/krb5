@@ -114,4 +114,4 @@ if 'Illegal cross-realm ticket' not in output:
     fail('transited 2: Expected error message not in output')
 stop(r1, r2, r3, r4)
 
-success('Cross-realm tests.')
+success('Cross-realm tests')

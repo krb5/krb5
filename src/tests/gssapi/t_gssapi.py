@@ -92,4 +92,4 @@ output = realm.run_as_client(['./t_accname', 'host/-nomatch-',
 if 'host/-nomatch-' not in output:
     fail('Expected host/-nomatch- in t_accname output')
 
-success('GSSAPI tests.')
+success('GSSAPI tests')

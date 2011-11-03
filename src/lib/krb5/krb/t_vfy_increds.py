@@ -51,4 +51,4 @@ realm = K5Realm(start_kadmind=False, krb5_conf=conf)
 os.remove(realm.keytab)
 realm.run_as_server(['./t_vfy_increds'], expected_code=1)
 
-success('krb5_verify_init_creds tests.')
+success('krb5_verify_init_creds tests')

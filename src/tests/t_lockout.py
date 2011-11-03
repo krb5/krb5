@@ -48,5 +48,5 @@ if 'Clients credentials have been revoked while getting initial credentials' \
 output = realm.run_kadminl('modprinc -unlock user')
 realm.kinit(realm.user_princ, password('user'))
 
-success('Account lockout.')
+success('Account lockout')
 

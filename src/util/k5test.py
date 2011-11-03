@@ -42,7 +42,7 @@ A sample test script:
     realm.run_as_client(['./clientprog', realm.host_princ])
 
     # Inform framework that tests completed successfully.
-    success('World peace and cure for cancer.')
+    success('World peace and cure for cancer')
 
 By default, the realm will have:
 

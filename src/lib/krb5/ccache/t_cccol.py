@@ -41,4 +41,4 @@ cursor_test('dirmem', [dccname, mfoo], [duser, dalice, dbob, mfoo])
 realm.run_as_client([kdestroy])
 cursor_test('noexist', [], [])
 
-success('Renewing credentials.')
+success('Renewing credentials')

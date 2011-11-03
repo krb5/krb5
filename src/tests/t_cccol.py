@@ -74,4 +74,4 @@ output = realm.run_as_client([klist, '-l'], expected_code=1)
 if not output.endswith('---\n') or output.count('\n') != 2:
     fail('kdestroy -a failed to empty cache collection.')
 
-success('Credential cache collection tests.')
+success('Credential cache collection tests')

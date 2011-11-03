@@ -119,4 +119,4 @@ output = r1.run_as_client(['./t_ccselect', 'gss:bogus@' + hostname],
 if 'does not match desired' not in output:
     fail('Expected error not seen when k5identity selects bad principal.')
 
-success('GSSAPI credential selection tests.')
+success('GSSAPI credential selection tests')
