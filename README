@@ -82,7 +82,7 @@ additional measures include:
   crypto
 * easier kadmin history key changes
 
-Major changes in 1.8.4
+Major changes in 1.8.5
 ----------------------
 
 This is primarily a bugfix release.
@@ -90,13 +90,13 @@ This is primarily a bugfix release.
 * Fix MITKRB5-SA-2011-006 KDC denial of service vulnerabilities
   [CVE-2011-1528 CVE-2011-1529 CVE-2011-4151].
 
-krb5-1.8.4 changes by ticket ID
+krb5-1.8.5 changes by ticket ID
 -------------------------------
 
 6925    Memory leak in save_error_string_nocopy()
 6926    work around Dejagnu failure on modern Tcl
-6983    SA-2011-006 KDC denial of service [CVE-2011-1527 CVE-2011-1528
-        CVE-2011-1529]
+6983    SA-2011-006 KDC denial of service [CVE-2011-1528 CVE-2011-1529
+        CVE-2011-4151]
 6984    modernize doc/Makefile somewhat
 6991    fix tar invocation in mkrel
 
@@ -496,6 +496,7 @@ reports, suggestions, and valuable resources:
     Russell Allbery
     Brian Almeida
     Michael B Allen
+    Heinz-Ado Arnolds
     Derek Atkins
     David Bantz
     Alex Baule
@@ -516,12 +517,14 @@ reports, suggestions, and valuable resources:
     Sylvain Cortes
     Nalin Dahyabhai
     Dennis Davis
+    Mark Deneen
     Roland Dowdeswell
     Jason Edgecombe
     Mark Eichin
     Shawn M. Emery
     Douglas E. Engert
     Peter Eriksson
+    Juha Erkkilä
     Ronni Feldt
     Bill Fellows
     JC Ferguson
@@ -552,20 +555,24 @@ reports, suggestions, and valuable resources:
     Kevin Longfellow
     Ryan Lynch
     Nathaniel McCallum
+    Greg McClement
     Cameron Meadors
     Franklyn Mendez
     Markus Moeller
+    Kyle Moffett
     Paul Moore
     Keiichi Mori
     Zbysek Mraz
     Edward Murrell
     Nikos Nikoleris
     Felipe Ortega
+    Andrej Ota
     Dmitri Pal
     Javier Palacios
     Ezra Peisach
     W. Michael Petullo
     Mark Phalan
+    Jonathan Reams
     Robert Relyea
     Martin Rex
     Jason Rogers
