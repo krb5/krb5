@@ -592,8 +592,11 @@ check-unix:: krb5-config
 check-prerecurse: fake-install
 
 # Create a test realm and spawn a shell in an environment pointing to it.
+# If CROSSNUM is set, create that many fully connected test realms and
+# point the shell at the first one.
 testrealm: fake-install
-	PYTHONPATH=$(BUILDTOP):$(top_srcdir)/util $(PYTHON) $(srcdir)/util/testrealm.py
+	PYTHONPATH=$(top_srcdir)/util $(PYTHON) $(srcdir)/util/testrealm.py \
+		$(CROSSNUM)
 
 # environment variable settings to propagate to Python-based tests
 
