@@ -11,7 +11,7 @@ You need to create the kadmin keytab with entries for the principals *kadmin/adm
 (These principals are placed in the Kerberos database automatically when you create it.) 
 To create the *kadmin* keytab, run *kadmin.local* and use the :ref:`ktadd` command, as in the following example::
 
-     shell% /usr/local/sbin/admin.local
+     shell% /usr/local/sbin/kadmin.local
 
      kadmin.local: ktadd -k /usr/local/var/krb5kdc/kadm5.keytab kadmin/admin kadmin/changepw
       Entry for principal kadmin/admin with kvno 5, encryption

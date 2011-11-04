@@ -1,3 +1,5 @@
+About this project
+======================
 
 .. toctree::
    :maxdepth: 1

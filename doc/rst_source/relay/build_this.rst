@@ -96,7 +96,7 @@ Part A:    Transforming Doxygen XML output into reStructuredText (rst)  without 
 
 6.    Rebuild Sphinx source. From the *trunk/doc/rst_source*  run::
 
-      sphinx-build .  output_dir
+         sphinx-build .  output_dir
 
 
 .. _Part_B:

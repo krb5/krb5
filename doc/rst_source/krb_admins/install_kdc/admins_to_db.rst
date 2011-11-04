@@ -1,3 +1,5 @@
+.. _addadmin_kdb:
+
 Add administrators to the Kerberos database
 ===============================================
 
@@ -19,7 +21,7 @@ In the following example, the administrative principal *admin/admin* is created:
 
      kadmin.local: addprinc admin/admin@ATHENA.MIT.EDU
 
-     NOTICE: no policy specified for "admin/admin@ATHENA.MIT.EDU";
+     WARNING: no policy specified for "admin/admin@ATHENA.MIT.EDU";
      assigning "default".
      Enter password for principal admin/admin@ATHENA.MIT.EDU:  <= Enter a password.
      Re-enter password for principal admin/admin@ATHENA.MIT.EDU:  <= Type it again.

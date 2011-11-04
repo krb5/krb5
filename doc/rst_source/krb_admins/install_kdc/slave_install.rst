@@ -16,7 +16,7 @@ On the master KDC connect to administrative interface and create the  new princi
 For example, if the master KDC were called *kerberos.mit.edu*, and you had slave KDC named *kerberos-1.mit.edu*, 
 you would type the following::
 
-     shell% /usr/local/sbin/kadmin
+     shell% /usr/local/bin/kadmin
      kadmin: addprinc -randkey host/kerberos.mit.edu
      NOTICE: no policy specified for "host/kerberos.mit.edu@ATHENA.MIT.EDU"; assigning "default"
      Principal "host/kerberos.mit.edu@ATHENA.MIT.EDU" created.
@@ -73,10 +73,11 @@ Connect to the slave, *kerberos-1.mit.edu*. Move the copied files into their app
 
 You will now initialize the slave database::
 
-      kdb5_util create
+      shell%  /usr/local/sbin/kdb5_util create
 
-Caution: you will use :ref:`kdb5_util(8)` but without exporting the stash file (-s argument), i
-thus avoiding the obliteration of the one you just copied from the master.
+.. caution:: You will use :ref:`kdb5_util(8)` but without exporting the stash file (-s argument), i
+             thus avoiding the obliteration of the one you just copied from the master.
+
 When asking for the database Master Password, type in anything you want. 
 The whole dummy database will be erased upon the first propagation from master.
 
@@ -96,6 +97,8 @@ Since in our case the updates should only come from *kerberos.mit.edu* server,  
 Then, add the following line to */etc/inetd.conf* file on each KDC (Adjust the path to *kpropd*)::
 
      krb5_prop stream tcp nowait root /usr/local/sbin/kpropd kpropd
+     eklogin stream tcp nowait root  /usr/local/sbin/klogind klogind -5 -c -e
+
      
 
 You also need to add the following lines to */etc/services* on each KDC (assuming that default ports are used)::
@@ -105,10 +108,20 @@ You also need to add the following lines to */etc/services* on each KDC (assumin
      krb5_prop       754/tcp               # Kerberos slave propagation
      kerberos-adm    749/tcp               # Kerberos 5 admin/changepw (tcp)
      kerberos-adm    749/udp               # Kerberos 5 admin/changepw (udp)
-     
-.. note:: Do not start slave KDC -  you still do not have a copy of the master's database.
+
+Restart *inetd* daemon.
+
+
+Alternatively, start :ref:`kpropd(8)` as a stand-alone daemon "kpropd -S" or,
+if the default locations must be overridden,::
+
+    shell% /usr/local/sbin/kpropd -S -a path-to-kpropd.acl -r ATHENA.MIT.EDU -f /var/krb5kdc/from_master
+
+    waiting for a kprop connection
 
 Now that the slave KDC is able to accept database propagation, you’ll need to propagate the database from the master server.
+
+NOTE: Do not start slave KDC -  you still do not have a copy of the master's database.
 
 
 ------------

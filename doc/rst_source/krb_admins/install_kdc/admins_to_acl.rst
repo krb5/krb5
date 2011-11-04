@@ -78,6 +78,8 @@ Any principal in the realm *ATHENA.MIT.EDU* (except for *joeadmin\@ATHENA.MIT.ED
 Finally, any principal with an *admin* instance in *EXAMPLE.COM* has *all* permissions, 
 but any principal that they create or modify will not be able to get *postdateable* tickets or tickets with a life of longer than 9 hours. 
 
+.. warning:: If the *kadmind*'s ACL file is modified, the *kadmind* daemon needs to be restarted for changes to take effect.
+
 ------------
 
 Feedback:

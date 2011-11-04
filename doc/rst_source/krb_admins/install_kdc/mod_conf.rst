@@ -10,6 +10,14 @@ There are some tags in the *krb5.conf* file whose values must be specified,
 and this section will explain those. 
 For more information on Kerberos V5 configuration files see :ref:`krb5.conf` and :ref:`kdc.conf`.
 
+If the locations for these configuration files differs from the default ones,
+set *KRB5_CONFIG* and *KRB5_KDC_PROFILE* environment variables to point to the 
+*krb5.conf* and *kdc.conf* respectively.
+For example::
+
+   export KRB5_CONFIG=/yourdir/krb5.conf
+   export KRB5_KDC_PROFILE=/yourdir/kdc.conf
+
 *krb5.conf*
 -------------
 
@@ -26,6 +34,9 @@ An example krb5.conf file::
 
      [libdefaults]
          default_realm = ATHENA.MIT.EDU
+         # if the default location does not suit your setup,
+         # explicitly configure the keytab location:
+         #    default_keytab_name = FILE:/var/krb5kdc/krb5.keytab
      
      [realms]
          ATHENA.MIT.EDU = {
@@ -53,10 +64,22 @@ An example kdc.conf file::
              max_renewable_life = 7d 0h 0m 0s
              master_key_type = des3-hmac-sha1
              supported_enctypes = des3-hmac-sha1:normal aes128-cts-hmac-sha1-96:normal
+             # if the default location does not suit your setup,
+             # explicitly configure the following four values:
+             #    database_name = /var/krb5kdc/principal             
+             #    key_stash_file = /var/krb5kdc/.k5.ATHENA.MIT.EDU
+             #    admin_keytab = FILE:/var/krb5kdc/kadm5.keytab
+             #    acl_file = /var/krb5kdc/kadm5.acl
          }
      
 
-Replace *ATHENA.MIT.EDU* and *kerberos.mit.edu*  with the name of your Kerberos realm and server respectively.
+Replace *ATHENA.MIT.EDU* and *kerberos.mit.edu*  with the name of your Kerberos *realm* and *server* respectively.
+
+.. note:: You have to have write permission on the target directories 
+          (these directories must exist) used by
+          *database_name, key_stash_file, admin_keytab* and *acl_file*
+
+
 
 ------------
 
