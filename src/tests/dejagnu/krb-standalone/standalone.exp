@@ -139,7 +139,6 @@ proc doit { } {
     global portbase
     global mode
     global tmppwd
-    global MODULE_DIR
 
     setup_kerberos_env kdc
 
@@ -235,7 +234,7 @@ proc doit { } {
     }
 
     # If we have anonymous  then test it
-    if [file exists "$tmppwd/../../../util/fakedest$MODULE_DIR/preauth/pkinit.so" ] {
+    if [file exists "$tmppwd/../../../plugins/preauth/pkinit.so" ] {
 	kinit_anonymous "WELLKNOWN/ANONYMOUS"
     }
 

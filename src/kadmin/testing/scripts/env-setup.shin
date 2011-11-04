@@ -26,8 +26,6 @@ PROG_LIBPATH=-L@RBUILD@/lib
 BUILDTOP=@RBUILD@
 # XXX kludge!
 PROG_RPATH=@RBUILD@/lib
-# XXX more kludge!
-FAKEDEST=@RBUILD@/util/fakedest
 # This converts $(TOPLIBD) to $TOPLIBD
 cat > /tmp/env_setup$$ <<\EOF
 @KRB5_RUN_ENV@

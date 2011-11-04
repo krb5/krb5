@@ -50,7 +50,7 @@ SRCS= \
 
 all-unix:: all-liblinks
 install-unix:: install-libs
-clean-unix:: clean-libs clean-libobjs
+clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 clean::
 	$(RM) lib$(LIBBASE)$(SO_EXT)

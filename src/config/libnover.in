@@ -91,9 +91,18 @@ libkrb5_$(LIBBASE)$(PFLIBEXT): $(PFOBJLISTS)
 	set -x; objlist=`$(PARSE_OBJLISTS) $(PFOBJLISTS)` && $(AR) cq $@ $$objlist
 	$(RANLIB) $@
 
+# For static builds, we make a symlink in the main library directory,
+# allowing the plugin library to be a dependency of the core libraries
+# which use it.
 $(TOPLIBD)/libkrb5_$(LIBBASE)$(STLIBEXT):
 	$(RM) $@
 	(cd $(TOPLIBD) && $(LN_S) $(RELDIR)/libkrb5_$(LIBBASE)$(STLIBEXT) .)
+
+# For shared builds, we make a symlink in the parent directory, allowing
+# tests to point plugin_base_dir at $(BUILDTOP)/plugins.
+../$(LIBBASE)$(DYNOBJEXT):
+	$(RM) $@
+	(cd .. && $(LN_S) `basename $(mydir)`/$(LIBBASE)$(DYNOBJEXT) .)
 
 all-liblinks: all-libs $(PLUGINLINK)
 all-libs: $(PLUGIN)
@@ -101,6 +110,9 @@ all-libs: $(PLUGIN)
 clean-libs:
 	$(RM) $(LIBBASE)$(DYNOBJEXT)
 	$(RM) binutils.versions osf1.exports darwin.exports hpux10.exports
+
+clean-liblinks:
+	$(RM) $(PLUGINLINK)
 
 install-libs: $(PLUGININST)
 install-static:

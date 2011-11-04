@@ -28,7 +28,7 @@ STLIBOBJS=securid_sam2_main.o securid2.o
 
 SRCS= $(srcdir)/securid_sam2_main.c $(srcdir)/securid2.c 2
 
-all-unix:: all-liblinks
+all-unix:: all-libs
 install-unix:: install-libs
 clean-unix:: clean-libs clean-libobjs
 

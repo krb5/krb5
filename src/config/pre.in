@@ -142,10 +142,6 @@ top_srcdir = @top_srcdir@
 VPATH = @srcdir@
 CONFIG_RELTOPDIR = @CONFIG_RELTOPDIR@
 
-FAKEDEST=$(BUILDTOP)/util/fakedest
-FAKEPREFIX=$(FAKEDEST)/$(prefix)
-FAKELIBDIR=$(FAKEPREFIX)/lib
-
 # DEFS		set by configure
 # DEFINES	set by local Makefile.in
 # LOCALINCLUDES	set by local Makefile.in

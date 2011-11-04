@@ -19,9 +19,6 @@ MAYBE_VERTO_k5 = verto k5ev
 
 all-recurse:
 
-clean-unix::
-	$(RM) -r $(FAKEPREFIX)
-
 NO_OUTDIR=1
 
 install::

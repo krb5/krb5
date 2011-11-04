@@ -86,7 +86,7 @@ keyword arguments:
     - $testdir:  The realm storage directory (absolute path)
     - $buildtop: The root of the build directory
     - $srctop:   The root of the source directory
-    - $plugins:  The plugin directory under $buildtop/util/fakedest
+    - $plugins:  The plugin directory in the build tree
     - $hostname: The FQDN of the host
     - $port0:    The first listener port (portbase)
     - ...
@@ -171,7 +171,7 @@ Scripts may use the following functions and variables:
 
 * srctop: The top of the source directory (absolute path).
 
-* plugins: The plugin directory under <buildtop>/util/fakedest.
+* plugins: The plugin directory in the build tree (absolute path).
 
 * hostname: This machine's fully-qualified domain name.
 
@@ -417,16 +417,6 @@ def _find_srctop():
         fail('Cannot find root of krb5 source directory.')
     return os.path.abspath(root)
 
-
-def _find_plugins():
-    global buildtop
-    fakeroot = os.path.join(buildtop, 'util', 'fakedest')
-    if not os.path.exists(fakeroot):
-        fail('You must run "make fake-install" in %s first.' % buildtop)
-    for dir, subdirs, files in os.walk(fakeroot):
-        if os.path.basename(dir) == 'plugins' and 'kdb' in subdirs:
-            return dir
-    fail('Cannot locate plugins; run "make fake-install" at %s.' % buildtop)
 
 # Return the local hostname as it will be canonicalized by
 # krb5_sname_to_principal.  We can't simply use socket.getfqdn()
@@ -1145,7 +1135,7 @@ _outfile = open('testlog', 'w')
 _cmd_index = 1
 buildtop = _find_buildtop()
 srctop = _find_srctop()
-plugins = _find_plugins()
+plugins = os.path.join(buildtop, 'plugins')
 _runenv = _import_runenv()
 hostname = _get_hostname()
 null_input = open(os.devnull, 'r')

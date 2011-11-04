@@ -24,7 +24,7 @@ STLIBOBJS= greet_auth.o
 
 SRCS=	greet_auth.c
 
-all-unix:: all-liblinks
+all-unix:: all-libs
 install-unix:: install-libs
 clean-unix:: clean-libs clean-libobjs
 

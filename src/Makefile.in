@@ -80,27 +80,12 @@ install-headers-prerecurse: install-headers-mkdirs
 # install::
 #	$(MAKE) $(MFLAGS) install.man
 
-fake-install: runenv.py
-	$(RM) -r $(FAKEPREFIX)
-	@for i in $(INSTALLMKDIRS); do \
-		$(srcdir)/config/mkinstalldirs util/fakedest$$i; \
-	done
-	(w=`pwd`; cd util && $(MAKE) install DESTDIR="$$w/util/fakedest")
-	(w=`pwd`; cd lib && $(MAKE) install DESTDIR="$$w/util/fakedest")
-	(w=`pwd`; cd plugins/kdb/db2 && $(MAKE) install DESTDIR="$$w/util/fakedest")
-	if test -r plugins/preauth/pkinit/Makefile; then \
-	  (w=`pwd`; cd plugins/preauth/pkinit && $(MAKE) install DESTDIR="$$w/util/fakedest"); \
-	fi
-
-#	(w=`pwd`; cd plugins/locate/python && $(MAKE) install DESTDIR="$$w/util/fakedest")
-
 TAGS: $(SRCS)
 	etags $(SRCS)
 
 clean-:: clean-windows
 clean-unix::
 	$(RM) *.o core krb5-config
-	$(RM) -r util/fakedest
 
 mostlyclean: clean
 
@@ -589,12 +574,12 @@ krb5-config: $(srcdir)/krb5-config.in config.status
 # $(PURE) or $(LDFLAGS) in case someone changes config/shlib.conf
 check-unix:: krb5-config
 	$(SHELL) $(srcdir)/t_krbconf
-check-prerecurse: fake-install
+check-prerecurse: runenv.py
 
 # Create a test realm and spawn a shell in an environment pointing to it.
 # If CROSSNUM is set, create that many fully connected test realms and
 # point the shell at the first one.
-testrealm: fake-install
+testrealm: runenv.py
 	PYTHONPATH=$(top_srcdir)/util $(PYTHON) $(srcdir)/util/testrealm.py \
 		$(CROSSNUM)
 

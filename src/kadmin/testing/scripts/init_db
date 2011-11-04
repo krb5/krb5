@@ -27,7 +27,7 @@ IROOT=$TOP/..
 ADMIN=$TOP/dbutil
 BIN=$IROOT/bin
 ETC=$IROOT/etc
-MODDIR=$TOP/../util/fakedest$libdir/krb5/plugins/kdb
+MODDIR=$TOP/../plugins/kdb
 SBIN=$TOP/keytab:$TOP/server
 DUMMY=${REALM=SECURE-TEST.OV.COM}; export REALM
 

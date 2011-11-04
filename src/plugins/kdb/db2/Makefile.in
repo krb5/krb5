@@ -70,7 +70,7 @@ STLIBOBJS= \
 
 all-unix:: all-liblinks
 install-unix:: install-libs
-clean-unix:: clean-libs clean-libobjs
+clean-unix:: clean-liblinks clean-libs clean-libobjs
 
 $(DB_DEPS) $(DBOBJLISTS-k5) $(DBSHOBJLISTS): all-recurse
 

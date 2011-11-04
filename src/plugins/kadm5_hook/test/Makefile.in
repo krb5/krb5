@@ -26,7 +26,7 @@ STLIBOBJS=main.o
 
 SRCS= $(srcdir)/main.c
 
-all-unix:: all-liblinks
+all-unix:: all-libs
 install-unix::
 clean-unix:: clean-libs clean-libobjs
 
