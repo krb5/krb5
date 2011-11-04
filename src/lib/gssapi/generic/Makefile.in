@@ -144,7 +144,7 @@ win-create-ehdrdir:
 
 clean-unix:: clean-libobjs
 	$(RM) $(ETHDRS) $(ETSRCS) $(HDRS) $(EXPORTED_BUILT_HEADERS) \
-		$(EHDRDIR)$(S)timestamp
+		$(EHDRDIR)$(S)timestamp errmap.h
 
 clean-windows::
 	$(RM) $(HDRS)

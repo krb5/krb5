@@ -141,7 +141,8 @@ profile_tcl: profile_tcl.o $(PROF_DEPLIB) $(COM_ERR_DEPLIB) $(SUPPORT_DEPLIB)
 clean-unix:: clean-libs clean-libobjs
 	$(RM) $(PROGS) *.o *~ core prof_err.h profile.h prof_err.c
 	$(RM) test_load test_parse test_profile test_vtable profile_tcl
-	$(RM) modtest.conf
+	$(RM) modtest.conf testinc.ini testinc2.ini
+	$(RM) -r test_include_dir
 
 clean-windows::
 	$(RM) $(PROFILE_HDR)

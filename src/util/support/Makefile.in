@@ -198,7 +198,8 @@ check-unix:: $(TEST_PROGS)
 	./t_unal
 
 clean::
-	$(RM) t_k5buf.o t_k5buf t_unal.o t_unal path_win.o path_win t_path_win.o t_path_win  t_path.o t_path
+	$(RM) t_k5buf.o t_k5buf t_unal.o t_unal path_win.o path_win
+	$(RM) t_path_win.o t_path_win t_path.o t_path libkrb5support.exports
 
 @lib_frag@
 @libobj_frag@

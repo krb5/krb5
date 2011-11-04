@@ -139,8 +139,9 @@ check-pytests::
 clean:: clean-$(WHAT)
 
 clean-unix::
-	$(RM) $(OBJS) $(DEPTARGETS_CLEAN) $(EXTRA_FILES) et-[ch]-*.et et-[ch]-*.[ch]
-	-$(RM) -r $(top_srcdir)/autom4te.cache
+	$(RM) $(OBJS) $(DEPTARGETS_CLEAN) $(EXTRA_FILES)
+	$(RM) et-[ch]-*.et et-[ch]-*.[ch] testlog
+	-$(RM) -r $(top_srcdir)/autom4te.cache testdir
 
 clean-windows::
 	$(RM) *.$(OBJEXT)

@@ -29,4 +29,4 @@ install::
 	$(INSTALL_DATA) $(srcdir)/$(PROG).M ${DESTDIR}$(ADMIN_MANDIR)/$(PROG).8
 
 clean::
-	$(RM) $(PROG) $(OBJS) 
+	$(RM) $(PROG) $(OBJS) getdate.c

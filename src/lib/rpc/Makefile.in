@@ -229,7 +229,7 @@ types.stamp: $(top_srcdir)/include/gssrpc/types.hin $(BUILDTOP)/config.status
 	touch types.stamp
 
 clean-unix::
-	$(RM) types.stamp
+	$(RM) types.stamp $(BUILDTOP)/include/gssrpc/types.h
 clean-windows::
 	$(RM) types.stamp
 

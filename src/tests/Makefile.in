@@ -74,5 +74,5 @@ check-pytests::
 #	$(RUNPYTEST) $(srcdir)/kdc_realm/kdcref.py $(PYTESTFLAGS)
 
 clean::
-	$(RM) kdc.conf
+	$(RM) krb5.conf kdc.conf
 	$(RM) -rf kdc_realm/sandbox

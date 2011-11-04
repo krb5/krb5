@@ -596,7 +596,7 @@ runenv.py: pyrunenv.vals
 	cat pyrunenv.vals >> $@
 
 clean-unix::
-	$(RM) runenv.py pyrunenv.vals
+	$(RM) runenv.py runenv.pyc pyrunenv.vals
 
 COV_BUILD=	cov-build
 COV_ANALYZE=	cov-analyze
