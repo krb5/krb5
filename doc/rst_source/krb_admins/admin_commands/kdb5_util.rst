@@ -126,11 +126,11 @@ COMMANDS
                      The key data in the database will not be changed.
 
               **-rev**
-                     dumps in reverse order.  This may recover principals that do not dump normally, in cases where database corruption has occured.
+                     dumps in reverse order.  This may recover principals that do not dump normally, in cases where database corruption has occurred.
 
               **-recurse**
                      causes the dump to walk the database recursively (btree only).  This may recover principals that do not dump normally,
-                     in cases where database corruption has occured.
+                     in cases where database corruption has occurred.
                      In  cases  of such corruption, this option will probably retrieve more principals than the *-rev* option will.
 
 .. _kdb5_util_dump_end:

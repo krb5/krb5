@@ -30,7 +30,7 @@ The following relation is defined in the [kdcdefaults] section:
 **host_based_services**
     This relation lists the services that will get host-based referral processing even if the server principal is not marked as host-based by the client.
 **kdc_max_dgram_reply_size**
-    Specifes the maximum packet size that can be sent over UDP. The default value is 4096 bytes.
+    Specifies the maximum packet size that can be sent over UDP. The default value is 4096 bytes.
 **kdc_ports**
     This relation lists the ports on which the Kerberos server should listen for UDP requests by default. This list is a comma separated list of integers. If this relation is not specified, the compiled-in default is 88,750, the first being the assigned Kerberos port and the second which was used by Kerberos V4. 
 **kdc_tcp_ports**
@@ -123,7 +123,7 @@ For each realm, the following tags may be specified in the [realms] subsection:
 **master_key_type**
     (Key type string.) Specifies the master key's key type. The default value for this is des3-cbc-sha1. For a list of all possible values, see :ref:`Supported_Encryption_Types_and_Salts`. 
 **max_life**
-    (Delta time string.) Specifes the maximum time period for which a ticket may be valid in this realm. The default value is 24 hours. 
+    (Delta time string.) Specifies the maximum time period for which a ticket may be valid in this realm. The default value is 24 hours. 
 **max_renewable_life**
     (Delta time string.) Specifies the maximum time period during which a valid ticket may be renewed in this realm. The default value is 0. 
 **no_host_referral**

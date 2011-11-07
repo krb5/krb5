@@ -6,7 +6,7 @@ kadmin, kadmin.local
 ===========================
 
 
-SYNOPSYS
+SYNOPSIS
 --------------
 
 .. _kadmin_synopsys:
@@ -242,7 +242,7 @@ add_principal
                      maximum renewable life of tickets for the principal
 
               **-kvno** *kvno*
-                     explicity set the key version number.
+                     explicitly set the key version number.
 
               **-policy** *policy*
                      policy used by this principal.  
@@ -417,7 +417,7 @@ delete_principal
 
               ERRORS::
 
-                     KADM5_AUTH_DELETE (reequires "delete" privilege)
+                     KADM5_AUTH_DELETE (requires "delete" privilege)
                      KADM5_UNK_PRINC (principal does not exist)
 
 .. _delete_principal_end:
@@ -547,7 +547,7 @@ list_principals
               If no expression is provided, all principal names are printed.  
               If the expression does not contain an "@" character, an "@" character followed by the local realm is appended  to  the expression.  
               
-                 .. note:: Requires the *list* priviledge.  
+                 .. note:: Requires the *list* privilege.  
 
               Aliases::
                 
@@ -762,7 +762,7 @@ list_policies
               All policy names matching the expression are printed.  
               If no expression is provided, all existing policy names are printed.  
 
-                 .. note:: Requires the *list* priviledge.  
+                 .. note:: Requires the *list* privilege.  
 
               Alias::
 
@@ -884,7 +884,7 @@ kadm5.dict              file containing dictionary of strings explicitly disallo
 HISTORY
 -------------
 
-The *kadmin* prorgam was originally written by Tom Yu at MIT, as an interface to the OpenVision Kerberos administration program.
+The *kadmin* program was originally written by Tom Yu at MIT, as an interface to the OpenVision Kerberos administration program.
 
 
 SEE ALSO

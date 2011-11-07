@@ -12,15 +12,15 @@ DESCRIPTION
 -----------
 
 This command starts the KADM5 administration server. If the database is db2, the administration server runs on the master Kerberos server, 
-which stores the KDC prinicpal database and the KADM5 policy database. If the database is LDAP, the administration server and
+which stores the KDC principal database and the KADM5 policy database. If the database is LDAP, the administration server and
 the KDC server need not run on the same machine.  *kadmind* accepts remote requests to administer the information in these databases.
 Remote requests are sent, for example, by kadmin(8) and the kpasswd(1) command, both of which are clients of *kadmind*.
 
 *kadmind* requires a number of configuration files to be set up in order for it to work:
 
 :ref:`kdc.conf`  
-            The KDC configuration file contains configuration informatin for the KDC and the KADM5 system.  *kadmind* understands a number
-            of  variable  settings in this file, some of whch are mandatory and some of which are optional.
+            The KDC configuration file contains configuration information for the KDC and the KADM5 system.  *kadmind* understands a number
+            of  variable  settings in this file, some of which are mandatory and some of which are optional.
             See the CONFIGURATION VALUES section below.
 
 *keytab*    
@@ -126,7 +126,7 @@ Ordering  is important.  The first matching entry is the one which will control 
               wildcarded using the asterisk ( \* ) character.
 
        **operation-mask**
-              Specifies what operations may or may not be peformed by a principal matching a particular entry.  This is a string of one or
+              Specifies what operations may or may not be performed by a principal matching a particular entry.  This is a string of one or
               more of the following list of characters or their upper-case counterparts.  If the character is upper-case, then the operation
               is disallowed.  If the character is lower-case, then the operation is permitted.
 

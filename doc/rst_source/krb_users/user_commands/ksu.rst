@@ -252,7 +252,7 @@ INSTALLATION INSTRUCTIONS
 *ksu* can be compiled with the following 4 flags (see the Imakefile):
 
        **GET_TGT_VIA_PASSWD**
-                 In case no appropriate tickets are found in the source cache, the user will be prompted for a Kerberos password. The password is then used to get a ticket granting ticket from the Kerberos server. The danger of configuring *ksu* with this macro is if the source user is loged in remotely and does not have a secure channel, the password may get exposed.
+                 In case no appropriate tickets are found in the source cache, the user will be prompted for a Kerberos password. The password is then used to get a ticket granting ticket from the Kerberos server. The danger of configuring *ksu* with this macro is if the source user is logged in remotely and does not have a secure channel, the password may get exposed.
 
        **PRINC_LOOK_AHEAD**
                  During the resolution of the default principal name, *PRINC_LOOK_AHEAD* enables *ksu* to find principal names in the *.k5users* file as described in the *OPTIONS* section (see *-n* option).
