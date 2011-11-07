@@ -51,8 +51,8 @@ krb5_timeofday(krb5_context context, register krb5_timestamp *timeret)
     return 0;
 }
 
-krb5_error_code
-krb5int_check_clockskew(krb5_context context, krb5_timestamp date)
+krb5_error_code KRB5_CALLCONV
+krb5_check_clockskew(krb5_context context, krb5_timestamp date)
 {
     krb5_timestamp currenttime;
     krb5_error_code retval;

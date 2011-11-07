@@ -414,7 +414,7 @@ rd_req_decoded_opt(krb5_context context, krb5_auth_context *auth_context,
     if (retval != 0)
         goto cleanup;
 
-    if ((retval = krb5int_check_clockskew(context, (*auth_context)->authentp->ctime)))
+    if ((retval = krb5_check_clockskew(context, (*auth_context)->authentp->ctime)))
         goto cleanup;
 
     if (check_valid_flag) {
