@@ -59,7 +59,7 @@ krb5_error_code krb5int_hmacmd5_checksum(const struct krb5_cksumtypes *ctp,
         ret = krb5int_hmac(ctp->hash, key, &iov, 1, &ds);
         if (ret)
             goto cleanup;
-        ks.length = key->keyblock.length;
+        ks.length = ds.length;
         ks.contents = (krb5_octet *) ds.data;
         keyblock = &ks;
     } else  /* For md5-hmac, just use the key. */
