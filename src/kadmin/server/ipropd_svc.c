@@ -380,7 +380,7 @@ ipropx_resync(uint32_t vers, struct svc_req *rqstp)
 			     _("%s: pclose(popen) failed: %s"),
 			     whoami,
 			     error_message(errno));
-	    goto out;
+	    _exit(1);
 	}
 
 	DPRINT(("%s: exec `kprop -f %s %s' ...\n",
@@ -401,7 +401,7 @@ ipropx_resync(uint32_t vers, struct svc_req *rqstp)
 			     _("%s: exec failed: %s"),
 			     whoami,
 			     error_message(errno));
-	    goto out;
+	    _exit(1);
 	}
 
     default: /* parent */
