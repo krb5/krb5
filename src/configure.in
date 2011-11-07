@@ -66,12 +66,16 @@ LIBUTIL=-lutil
 ])
 AC_SUBST(LIBUTIL)
 
-po=
 AC_CHECK_HEADER(libintl.h, [
 	AC_SEARCH_LIBS(dgettext, intl, [
-		po=po
 		AC_DEFINE(ENABLE_NLS, 1,
 			[Define if translation functions should be used.])])])
+
+AC_CHECK_PROG(MSGFMT,msgfmt,msgfmt)
+po=
+if test x"$MSGFMT" != x; then
+	po=po
+fi
 AC_SUBST(po)
 
 # for kdc
