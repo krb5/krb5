@@ -2190,7 +2190,7 @@ crypto_get_pem_slot(struct _pkinit_identity_crypto_context *id)
 /* Resolve any ambiguities from having a duplicate nickname in the PKCS12
  * bundle and in the database, or the bag not providing a nickname.  Note: you
  * might expect "arg" to be a wincx, but it's actually a certificate!  (Mozilla
- * bug #321584) */
+ * bug #321584, fixed in 3.12, documented by #586163, in 3.13.) */
 static SECItem *
 crypto_nickname_c_cb(SECItem *old_nickname, PRBool *cancel, void *arg)
 {
@@ -3527,10 +3527,10 @@ pkinit_create_td_trusted_certifiers(krb5_context context,
                  !CERT_LIST_END(node, sclist);
              node = CERT_LIST_NEXT(node)) {
             /* If we have no trust for it, we can't trust it. */
-            if (cert->trust == NULL)
+            if (node->cert->trust == NULL)
                 continue;
             /* We need to trust it to issue client certs. */
-            trustf = SEC_GET_TRUST_FLAGS(cert->trust, trustSSL);
+            trustf = SEC_GET_TRUST_FLAGS(node->cert->trust, trustSSL);
             if (!(trustf & CERTDB_TRUSTED_CLIENT_CA))
                 continue;
             /* DestroyCertList frees all of the certs in the list,

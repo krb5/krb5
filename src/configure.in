@@ -162,12 +162,10 @@ nss)
   CFLAGS="$CFLAGS $CRYPTO_IMPL_CFLAGS"
   AC_COMPILE_IFELSE([AC_LANG_SOURCE([
 #include <nss.h>
-#if NSS_VMAJOR < 3 || (NSS_VMAJOR == 3 && NSS_VMINOR < 12)
-#error
-#elif NSS_VMAJOR == 3 && NSS_VMINOR == 12 && NSS_VPATCH < 9
+#if NSS_VMAJOR < 3 || (NSS_VMAJOR == 3 && NSS_VMINOR < 13)
 #error
 #endif
-  ])], [], [AC_MSG_ERROR([NSS version 3.12.9 or later required.])])
+  ])], [], [AC_MSG_ERROR([NSS version 3.13 or later required.])])
   CFLAGS=$save_CFLAGS
   ;;
 *)
