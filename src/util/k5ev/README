@@ -25,3 +25,7 @@ had support for making its API symbols static, but it currently does
 not.)  The source file verto-k5ev.c wraps ev.c with appropriate
 embedding defines, and then defines the libverto module functions
 using the slightly modified contents of libverto's verto-ev.c.
+
+The libev upstream project page is at:
+
+  http://software.schmorp.de/pkg/libev.html

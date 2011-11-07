@@ -1,0 +1,6 @@
+This directory builds a verto library with only a private back-end
+module, for use when the system has no installed verto library.
+
+The libverto upstream project page is at:
+
+  https://fedorahosted.org/libverto/
