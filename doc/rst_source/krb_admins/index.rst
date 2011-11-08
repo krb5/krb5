@@ -23,6 +23,8 @@ Contents:
    :maxdepth: 1
 
    admin_commands/index.rst
+   ../mitK5defaults.rst
+   env_variables.rst
    troubleshoot.rst
    advanced/index.rst
    various_envs.rst

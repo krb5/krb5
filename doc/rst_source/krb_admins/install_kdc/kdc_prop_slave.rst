@@ -15,6 +15,7 @@ Finally, manually propagate the database to each slave KDC, as in the following 
 
 Just in case you need an additional confirmation of the successful propagation, 
 do the following on the slave:
+
     - make sure that only this slave's *kdc* is listed in the *krb5.conf* file, then
     - start *krb5kdc* on the slave server and
     - run "kinit  admin/admin\@ATHENA.MIT.EDU" which should succeed once the correct password 

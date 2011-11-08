@@ -13,8 +13,8 @@ Quick facts
 
 
    ====================================================== ======================================= =============================================================================
-    Latest stable  version                                 1.9.1                  
-    Supported versions                                     1.7.2, 1.8.4, 1.9.1    
+    Latest stable  version                                 1.9.2                  
+    Supported versions                                     1.7.3, 1.8.5, 1.9.2
     Release cycle                                          9 - 12 months          
     Supported platforms/OS distributions                   Solaris               
                                                                - SPARC             
@@ -41,7 +41,6 @@ Quick facts
     GSS-API extensions for storing delegated credentials   1.8+                                     :rfc:`5588`
 
     License                                                :ref:`mitK5license`
-    Defaults                                               :ref:`mitK5defaults`
    ====================================================== ======================================= =============================================================================
 
 
