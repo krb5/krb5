@@ -2770,7 +2770,7 @@ krb5_kt_get_type(krb5_context context, krb5_keytab keytab);
  * @param [out] name            Key table name
  * @param [in]  namelen         Maximum length to fill in name
  *
- * Fills in @a with the name of @a keytab including the type and delimiter.
+ * Fills in @a name with the name of @a keytab including the type and delimiter.
  *
  * @sa MAX_KEYTAB_NAME_LEN
  *
@@ -4301,7 +4301,7 @@ krb5_cc_dup(krb5_context context, krb5_ccache in, krb5_ccache *out);
  *
  * @param [in] context          Library context
  *
- * Try the environment variable KRB5CCNAME first then, if it is not set,
+ * Try the environment variable @a KRB5CCNAME first then, if it is not set,
  * fall back on the default ccache name for the OS.
  *
  * @return
@@ -7590,6 +7590,9 @@ typedef void
  * second argument so it can clean up @a cb_data.  Supply a NULL value for @a
  * fn to disable trace callbacks within @a context.
  *
+ * @note This function overrides the information passed through the
+ * @a KRB5_TRACE environment variable.
+ *
  * @return Returns KRB5_TRACE_NOSUPP if tracing is not supported in the library
  * (unless @a fn is NULL).
  */
@@ -7605,6 +7608,9 @@ krb5_set_trace_callback(krb5_context context, krb5_trace_callback fn,
  *
  * Open @a filename for appending (creating it, if necessary) and set up a
  * callback to write trace events to it.
+ *
+ * @note This function overrides the information passed through the
+ * @a KRB5_TRACE environment variable.
  *
  * @retval KRB5_TRACE_NOSUPP Tracing is not supported in the library.
  */
