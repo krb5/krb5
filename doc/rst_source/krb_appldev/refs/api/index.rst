@@ -163,6 +163,7 @@ Rarely used public interfaces
    krb5_cccol_lock.rst
    krb5_cccol_unlock.rst
    krb5_clear_error_message.rst
+   krb5_check_clockskew.rst
    krb5_copy_addresses.rst
    krb5_copy_authdata.rst
    krb5_copy_authenticator.rst
@@ -175,6 +176,7 @@ Rarely used public interfaces
    krb5_copy_keyblock_contents.rst
    krb5_copy_principal.rst
    krb5_copy_ticket.rst
+   krb5_find_authdata.rst
    krb5_free_addresses.rst
    krb5_free_ap_rep_enc_part.rst
    krb5_free_authdata.rst

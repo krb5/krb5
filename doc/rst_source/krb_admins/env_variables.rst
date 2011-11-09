@@ -40,8 +40,8 @@ The following environment variables can be used during runtime:
 
            E.g. *KRB5_TRACE=/dev/stdout kinit*
 
-           This environment variable overrides the tracing behavior 
-           set by the application using either of the following API:
+           The setting of this environment variable can be overridden by 
+           the tracing behavior set by the application using either of the following API:
 
                -  :c:func:`krb5_set_trace_callback()` or
                -  :c:func:`krb5_set_trace_filename()`
