@@ -1098,7 +1098,7 @@ krb5_do_preauth(krb5_context context, krb5_kdc_req *request,
                 krb5_data *encoded_previous_request, krb5_pa_data **in_padata,
                 krb5_pa_data ***out_padata, krb5_prompter_fct prompter,
                 void *prompter_data, krb5_clpreauth_rock preauth_rock,
-                krb5_gic_opt_ext *opte);
+                krb5_gic_opt_ext *opte, krb5_boolean *got_real_out);
 
 krb5_error_code KRB5_CALLCONV
 krb5_do_preauth_tryagain(krb5_context context, krb5_kdc_req *request,
