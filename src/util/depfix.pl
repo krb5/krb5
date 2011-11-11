@@ -143,6 +143,10 @@ sub do_subs_2 {
     s;\$\(BUILDTOP\)/include/db-config.h \$\(BUILDTOP\)/include/db.h ;\$(DB_DEPS) ;g;
     s;\$\(BUILDTOP\)/include/verto-k5ev.h ;\$(VERTO_K5EV_DEPS) ;g;
     s;\$\(BUILDTOP\)/include/verto.h ;\$(VERTO_DEPS) ;g;
+    if ($thisdir eq "util/gss-kernel-lib") {
+	# Here com_err.h is used from the current directory.
+	s;com_err.h ;\$(COM_ERR_DEPS) ;g;
+    }
 
     $_ = &uniquify($_);
 

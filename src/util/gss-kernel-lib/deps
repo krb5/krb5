@@ -1,15 +1,16 @@
 # 
 # Generated makefile dependencies follow.
 #
-$(OUTPRE)k5seal.$(OBJEXT): autoconf.h com_err.h gssapi/gssapi.h \
-  gssapi/gssapi_alloc.h gssapi/gssapi_ext.h gssapi/gssapi_krb5.h \
-  gssapiP_generic.h gssapiP_krb5.h gssapi_err_generic.h \
-  gssapi_err_krb5.h gssapi_generic.h k5-buf.h k5-err.h \
-  k5-gmt_mktime.h k5-int-pkinit.h k5-int.h k5-platform.h \
-  k5-plugin.h k5-thread.h k5-trace.h k5seal.c krb5.h \
-  krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h krb5/preauth_plugin.h \
-  osconf.h port-sockets.h profile.h socket-utils.h
-$(OUTPRE)k5sealiov.$(OBJEXT): autoconf.h com_err.h \
+$(OUTPRE)k5seal.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
+  gssapi/gssapi.h gssapi/gssapi_alloc.h gssapi/gssapi_ext.h \
+  gssapi/gssapi_krb5.h gssapiP_generic.h gssapiP_krb5.h \
+  gssapi_err_generic.h gssapi_err_krb5.h gssapi_generic.h \
+  k5-buf.h k5-err.h k5-gmt_mktime.h k5-int-pkinit.h k5-int.h \
+  k5-platform.h k5-plugin.h k5-thread.h k5-trace.h k5seal.c \
+  krb5.h krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h \
+  krb5/preauth_plugin.h osconf.h port-sockets.h profile.h \
+  socket-utils.h
+$(OUTPRE)k5sealiov.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
   gssapi/gssapi.h gssapi/gssapi_alloc.h gssapi/gssapi_ext.h \
   gssapi/gssapi_krb5.h gssapiP_generic.h gssapiP_krb5.h \
   gssapi_err_generic.h gssapi_err_krb5.h gssapi_generic.h \
@@ -18,15 +19,16 @@ $(OUTPRE)k5sealiov.$(OBJEXT): autoconf.h com_err.h \
   krb5.h krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h \
   krb5/preauth_plugin.h osconf.h port-sockets.h profile.h \
   socket-utils.h
-$(OUTPRE)k5unseal.$(OBJEXT): autoconf.h com_err.h gssapi/gssapi.h \
-  gssapi/gssapi_alloc.h gssapi/gssapi_ext.h gssapi/gssapi_krb5.h \
-  gssapiP_generic.h gssapiP_krb5.h gssapi_err_generic.h \
-  gssapi_err_krb5.h gssapi_generic.h k5-buf.h k5-err.h \
-  k5-gmt_mktime.h k5-int-pkinit.h k5-int.h k5-platform.h \
-  k5-plugin.h k5-thread.h k5-trace.h k5unseal.c krb5.h \
-  krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h krb5/preauth_plugin.h \
-  osconf.h port-sockets.h profile.h socket-utils.h
-$(OUTPRE)k5unsealiov.$(OBJEXT): autoconf.h com_err.h \
+$(OUTPRE)k5unseal.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
+  gssapi/gssapi.h gssapi/gssapi_alloc.h gssapi/gssapi_ext.h \
+  gssapi/gssapi_krb5.h gssapiP_generic.h gssapiP_krb5.h \
+  gssapi_err_generic.h gssapi_err_krb5.h gssapi_generic.h \
+  k5-buf.h k5-err.h k5-gmt_mktime.h k5-int-pkinit.h k5-int.h \
+  k5-platform.h k5-plugin.h k5-thread.h k5-trace.h k5unseal.c \
+  krb5.h krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h \
+  krb5/preauth_plugin.h osconf.h port-sockets.h profile.h \
+  socket-utils.h
+$(OUTPRE)k5unsealiov.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
   gssapi/gssapi.h gssapi/gssapi_alloc.h gssapi/gssapi_ext.h \
   gssapi/gssapi_krb5.h gssapiP_generic.h gssapiP_krb5.h \
   gssapi_err_generic.h gssapi_err_krb5.h gssapi_generic.h \
@@ -35,15 +37,16 @@ $(OUTPRE)k5unsealiov.$(OBJEXT): autoconf.h com_err.h \
   krb5.h krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h \
   krb5/preauth_plugin.h osconf.h port-sockets.h profile.h \
   socket-utils.h
-$(OUTPRE)k5sealv3.$(OBJEXT): autoconf.h com_err.h gssapi/gssapi.h \
-  gssapi/gssapi_alloc.h gssapi/gssapi_ext.h gssapi/gssapi_krb5.h \
-  gssapiP_generic.h gssapiP_krb5.h gssapi_err_generic.h \
-  gssapi_err_krb5.h gssapi_generic.h k5-buf.h k5-err.h \
-  k5-gmt_mktime.h k5-int-pkinit.h k5-int.h k5-platform.h \
-  k5-plugin.h k5-thread.h k5-trace.h k5sealv3.c krb5.h \
-  krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h krb5/preauth_plugin.h \
-  osconf.h port-sockets.h profile.h socket-utils.h
-$(OUTPRE)k5sealv3iov.$(OBJEXT): autoconf.h com_err.h \
+$(OUTPRE)k5sealv3.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
+  gssapi/gssapi.h gssapi/gssapi_alloc.h gssapi/gssapi_ext.h \
+  gssapi/gssapi_krb5.h gssapiP_generic.h gssapiP_krb5.h \
+  gssapi_err_generic.h gssapi_err_krb5.h gssapi_generic.h \
+  k5-buf.h k5-err.h k5-gmt_mktime.h k5-int-pkinit.h k5-int.h \
+  k5-platform.h k5-plugin.h k5-thread.h k5-trace.h k5sealv3.c \
+  krb5.h krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h \
+  krb5/preauth_plugin.h osconf.h port-sockets.h profile.h \
+  socket-utils.h
+$(OUTPRE)k5sealv3iov.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
   gssapi/gssapi.h gssapi/gssapi_alloc.h gssapi/gssapi_ext.h \
   gssapi/gssapi_krb5.h gssapiP_generic.h gssapiP_krb5.h \
   gssapi_err_generic.h gssapi_err_krb5.h gssapi_generic.h \
@@ -52,7 +55,7 @@ $(OUTPRE)k5sealv3iov.$(OBJEXT): autoconf.h com_err.h \
   krb5.h krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h \
   krb5/preauth_plugin.h osconf.h port-sockets.h profile.h \
   socket-utils.h
-$(OUTPRE)util_cksum.$(OBJEXT): autoconf.h com_err.h \
+$(OUTPRE)util_cksum.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
   gssapi/gssapi.h gssapi/gssapi_alloc.h gssapi/gssapi_ext.h \
   gssapi/gssapi_krb5.h gssapiP_generic.h gssapiP_krb5.h \
   gssapi_err_generic.h gssapi_err_krb5.h gssapi_generic.h \
@@ -60,7 +63,7 @@ $(OUTPRE)util_cksum.$(OBJEXT): autoconf.h com_err.h \
   k5-platform.h k5-plugin.h k5-thread.h k5-trace.h krb5.h \
   krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h krb5/preauth_plugin.h \
   osconf.h port-sockets.h profile.h socket-utils.h util_cksum.c
-$(OUTPRE)util_crypt.$(OBJEXT): autoconf.h com_err.h \
+$(OUTPRE)util_crypt.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
   gssapi/gssapi.h gssapi/gssapi_alloc.h gssapi/gssapi_ext.h \
   gssapi/gssapi_krb5.h gssapiP_generic.h gssapiP_krb5.h \
   gssapi_err_generic.h gssapi_err_krb5.h gssapi_generic.h \
@@ -68,7 +71,7 @@ $(OUTPRE)util_crypt.$(OBJEXT): autoconf.h com_err.h \
   k5-platform.h k5-plugin.h k5-thread.h k5-trace.h krb5.h \
   krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h krb5/preauth_plugin.h \
   osconf.h port-sockets.h profile.h socket-utils.h util_crypt.c
-$(OUTPRE)util_seqnum.$(OBJEXT): autoconf.h com_err.h \
+$(OUTPRE)util_seqnum.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
   gssapi/gssapi.h gssapi/gssapi_alloc.h gssapi/gssapi_ext.h \
   gssapi/gssapi_krb5.h gssapiP_generic.h gssapiP_krb5.h \
   gssapi_err_generic.h gssapi_err_krb5.h gssapi_generic.h \
@@ -76,7 +79,7 @@ $(OUTPRE)util_seqnum.$(OBJEXT): autoconf.h com_err.h \
   k5-platform.h k5-plugin.h k5-thread.h k5-trace.h krb5.h \
   krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h krb5/preauth_plugin.h \
   osconf.h port-sockets.h profile.h socket-utils.h util_seqnum.c
-$(OUTPRE)util_seed.$(OBJEXT): autoconf.h com_err.h \
+$(OUTPRE)util_seed.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
   gssapi/gssapi.h gssapi/gssapi_alloc.h gssapi/gssapi_ext.h \
   gssapi/gssapi_krb5.h gssapiP_generic.h gssapiP_krb5.h \
   gssapi_err_generic.h gssapi_err_krb5.h gssapi_generic.h \
@@ -84,19 +87,19 @@ $(OUTPRE)util_seed.$(OBJEXT): autoconf.h com_err.h \
   k5-platform.h k5-plugin.h k5-thread.h k5-trace.h krb5.h \
   krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h krb5/preauth_plugin.h \
   osconf.h port-sockets.h profile.h socket-utils.h util_seed.c
-$(OUTPRE)util_token.$(OBJEXT): autoconf.h com_err.h \
+$(OUTPRE)util_token.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
   gssapi/gssapi.h gssapi/gssapi_alloc.h gssapi/gssapi_ext.h \
   gssapiP_generic.h gssapi_err_generic.h gssapi_generic.h \
   k5-buf.h k5-platform.h k5-thread.h util_token.c
-$(OUTPRE)util_set.$(OBJEXT): autoconf.h com_err.h gssapi/gssapi.h \
-  gssapi/gssapi_alloc.h gssapi/gssapi_ext.h gssapiP_generic.h \
-  gssapi_err_generic.h gssapi_generic.h k5-buf.h k5-platform.h \
-  k5-thread.h util_set.c
-$(OUTPRE)util_ordering.$(OBJEXT): autoconf.h com_err.h \
+$(OUTPRE)util_set.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
+  gssapi/gssapi.h gssapi/gssapi_alloc.h gssapi/gssapi_ext.h \
+  gssapiP_generic.h gssapi_err_generic.h gssapi_generic.h \
+  k5-buf.h k5-platform.h k5-thread.h util_set.c
+$(OUTPRE)util_ordering.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
   gssapi/gssapi.h gssapi/gssapi_alloc.h gssapi/gssapi_ext.h \
   gssapiP_generic.h gssapi_err_generic.h gssapi_generic.h \
   k5-buf.h k5-platform.h k5-thread.h util_ordering.c
-$(OUTPRE)kernel_gss.$(OBJEXT): autoconf.h com_err.h \
+$(OUTPRE)kernel_gss.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
   gssapi/gssapi.h gssapi/gssapi_alloc.h gssapi/gssapi_ext.h \
   gssapi/gssapi_krb5.h gssapiP_generic.h gssapiP_krb5.h \
   gssapi_err_generic.h gssapi_err_krb5.h gssapi_generic.h \
@@ -105,21 +108,21 @@ $(OUTPRE)kernel_gss.$(OBJEXT): autoconf.h com_err.h \
   kernel_gss.h krb5.h krb5/authdata_plugin.h krb5/krb5.h \
   krb5/plugin.h krb5/preauth_plugin.h osconf.h port-sockets.h \
   profile.h socket-utils.h
-$(OUTPRE)t_kgss_common.$(OBJEXT): autoconf.h com_err.h \
+$(OUTPRE)t_kgss_common.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
   gssapi/gssapi.h gssapi/gssapi_ext.h gssapi/gssapi_krb5.h \
   k5-buf.h k5-err.h k5-gmt_mktime.h k5-int-pkinit.h k5-int.h \
   k5-platform.h k5-plugin.h k5-thread.h k5-trace.h krb5.h \
   krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h krb5/preauth_plugin.h \
   osconf.h port-sockets.h profile.h socket-utils.h t_kgss_common.c \
   t_kgss_common.h
-$(OUTPRE)t_kgss_user.$(OBJEXT): autoconf.h com_err.h \
+$(OUTPRE)t_kgss_user.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
   gssapi/gssapi.h gssapi/gssapi_ext.h gssapi/gssapi_krb5.h \
   k5-buf.h k5-err.h k5-gmt_mktime.h k5-int-pkinit.h k5-int.h \
   k5-platform.h k5-plugin.h k5-thread.h k5-trace.h krb5.h \
   krb5/authdata_plugin.h krb5/krb5.h krb5/plugin.h krb5/preauth_plugin.h \
   osconf.h port-sockets.h profile.h socket-utils.h t_kgss_common.h \
   t_kgss_user.c
-$(OUTPRE)t_kgss_kernel.$(OBJEXT): autoconf.h com_err.h \
+$(OUTPRE)t_kgss_kernel.$(OBJEXT): $(COM_ERR_DEPS) autoconf.h \
   gssapi/gssapi.h gssapi/gssapi_alloc.h gssapi/gssapi_ext.h \
   gssapi/gssapi_krb5.h gssapiP_generic.h gssapiP_krb5.h \
   gssapi_err_generic.h gssapi_err_krb5.h gssapi_generic.h \
