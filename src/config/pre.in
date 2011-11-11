@@ -597,7 +597,7 @@ VALGRIND=
 # Need absolute paths here because under kshd or ftpd we may run programs
 # while in other directories.
 VALGRIND_LOGDIR = `cd $(BUILDTOP)&&pwd`
-VALGRIND1 = valgrind --tool=memcheck --log-file=$(VALGRIND_LOGDIR)/vg.%p --trace-children=yes -v --leak-check=yes --suppressions=`cd $(top_srcdir)&&pwd`/util/valgrind-suppressions
+VALGRIND1 = valgrind --tool=memcheck --log-file=$(VALGRIND_LOGDIR)/vg.%p --trace-children=yes --leak-check=yes --suppressions=`cd $(top_srcdir)&&pwd`/util/valgrind-suppressions
 
 # Set OFFLINE=yes to disable tests that assume network connectivity.
 # (Specifically, this concerns the ability to fetch DNS data for
