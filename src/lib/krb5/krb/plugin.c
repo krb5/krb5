@@ -26,7 +26,7 @@
 
 #include "k5-int.h"
 
-const char *interface_names[PLUGIN_NUM_INTERFACES] = {
+const char *interface_names[] = {
     "pwqual",
     "kadm5_hook",
     "clpreauth",
@@ -249,6 +249,10 @@ configure_interface(krb5_context context, int id)
 
     if (interface->configured)
         return 0;
+
+    /* Detect consistency errors when plugin interfaces are added. */
+    assert(sizeof(interface_names) / sizeof(*interface_names) ==
+           PLUGIN_NUM_INTERFACES);
 
     /* Read the configuration variables for this interface. */
     path[0] = KRB5_CONF_PLUGINS;

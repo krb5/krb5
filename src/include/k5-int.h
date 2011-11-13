@@ -1382,7 +1382,8 @@ struct plugin_interface {
 };
 
 /* A list of plugin interface IDs.  Make sure to increment
- * PLUGIN_NUM_INTERFACES when a new interface is added. */
+ * PLUGIN_NUM_INTERFACES when a new interface is added, and add an entry to the
+ * interface_names table in lib/krb5/krb/plugin.c. */
 #define PLUGIN_INTERFACE_PWQUAL      0
 #define PLUGIN_INTERFACE_KADM5_HOOK  1
 #define PLUGIN_INTERFACE_CLPREAUTH   2
