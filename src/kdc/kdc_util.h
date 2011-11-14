@@ -348,10 +348,19 @@ enum krb5_fast_kdc_flags {
     KRB5_FAST_REPLY_KEY_REPLACED = 0x02
 };
 
+/*
+ * If *requestptr contains FX_FAST padata, compute the armor key, verify the
+ * checksum over checksummed_data, decode the FAST request, and substitute
+ * *requestptr with the inner request.  Set the armor_key, cookie, and
+ * fast_options fields in state.  state->cookie will be set for a non-FAST
+ * request if it contains FX_COOKIE padata.  If inner_body_out is non-NULL, set
+ * *inner_body_out to a copy of the encoded inner body, or to NULL if the
+ * request is not a FAST request.
+ */
 krb5_error_code
 kdc_find_fast (krb5_kdc_req **requestptr,  krb5_data *checksummed_data,
                krb5_keyblock *tgs_subkey, krb5_keyblock *tgs_session,
-               struct kdc_request_state *state);
+               struct kdc_request_state *state, krb5_data **inner_body_out);
 
 krb5_error_code
 kdc_fast_response_handle_padata (struct kdc_request_state *state,
@@ -383,6 +392,7 @@ krb5int_get_domain_realm_mapping(krb5_context context,
 /* Information handle for kdcpreauth callbacks.  All pointers are aliases. */
 struct krb5_kdcpreauth_rock_st {
     krb5_kdc_req *request;
+    krb5_data *inner_body;
     krb5_db_entry *client;
     krb5_key_data *client_key;
     struct kdc_request_state *rstate;

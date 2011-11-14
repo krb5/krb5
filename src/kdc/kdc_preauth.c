@@ -543,11 +543,10 @@ static void free_keys(krb5_context context, krb5_kdcpreauth_rock rock,
     free(keys);
 }
 
-static krb5_error_code
-request_body(krb5_context context, krb5_kdcpreauth_rock rock,
-             krb5_data **body_out)
+static krb5_data *
+request_body(krb5_context context, krb5_kdcpreauth_rock rock)
 {
-    return encode_krb5_kdc_req_body(rock->request, body_out);
+    return rock->inner_body;
 }
 
 static krb5_keyblock *

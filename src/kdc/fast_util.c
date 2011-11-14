@@ -126,11 +126,12 @@ kdc_find_fast(krb5_kdc_req **requestptr,
               krb5_data *checksummed_data,
               krb5_keyblock *tgs_subkey,
               krb5_keyblock *tgs_session,
-              struct kdc_request_state *state)
+              struct kdc_request_state *state,
+              krb5_data **inner_body_out)
 {
     krb5_error_code retval = 0;
     krb5_pa_data *fast_padata, *cookie_padata = NULL;
-    krb5_data scratch;
+    krb5_data scratch, *inner_body = NULL;
     krb5_fast_req * fast_req = NULL;
     krb5_kdc_req *request = *requestptr;
     krb5_fast_armored_req *fast_armored_req = NULL;
@@ -138,6 +139,8 @@ kdc_find_fast(krb5_kdc_req **requestptr,
     krb5_boolean cksum_valid;
     krb5_keyblock empty_keyblock;
 
+    if (inner_body_out != NULL)
+        *inner_body_out = NULL;
     scratch.data = NULL;
     krb5_clear_error_message(kdc_context);
     memset(&empty_keyblock, 0, sizeof(krb5_keyblock));
@@ -192,6 +195,14 @@ kdc_find_fast(krb5_kdc_req **requestptr,
                                     &plaintext);
             if (retval == 0)
                 retval = decode_krb5_fast_req(&plaintext, &fast_req);
+            if (retval == 0 && inner_body_out != NULL) {
+                retval = fetch_asn1_field((unsigned char *)plaintext.data,
+                                          1, 2, &scratch);
+                if (retval == 0) {
+                    retval = krb5_copy_data(kdc_context, &scratch,
+                                            &inner_body);
+                }
+            }
             if (plaintext.data)
                 free(plaintext.data);
         }
@@ -247,6 +258,11 @@ kdc_find_fast(krb5_kdc_req **requestptr,
             }
         }
     }
+    if (retval == 0 && inner_body_out != NULL) {
+        *inner_body_out = inner_body;
+        inner_body = NULL;
+    }
+    krb5_free_data(kdc_context, inner_body);
     if (fast_req)
         krb5_free_fast_req( kdc_context, fast_req);
     if (fast_armored_req)

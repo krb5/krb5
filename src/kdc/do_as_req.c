@@ -120,6 +120,7 @@ struct as_req_state {
     krb5_keyblock session_key;
     unsigned int c_flags;
     krb5_data *req_pkt;
+    krb5_data *inner_body;
     struct kdc_request_state *rstate;
     char *sname, *cname;
     void *pa_context;
@@ -396,6 +397,7 @@ egress:
     }
 
     krb5_free_pa_data(kdc_context, state->e_data);
+    krb5_free_data(kdc_context, state->inner_body);
     kdc_free_rstate(state->rstate);
     krb5_free_kdc_req(kdc_context, state->request);
     assert(did_log != 0);
@@ -492,13 +494,23 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
         state->status = "Finding req_body";
         goto errout;
     }
-    errcode = kdc_find_fast(&state->request, &encoded_req_body,
-                            NULL /*TGS key*/, NULL, state->rstate);
+    errcode = kdc_find_fast(&state->request, &encoded_req_body, NULL, NULL,
+                            state->rstate, &state->inner_body);
     if (errcode) {
         state->status = "error decoding FAST";
         goto errout;
     }
+    if (state->inner_body == NULL) {
+        /* Not a FAST request; copy the encoded request body. */
+        errcode = krb5_copy_data(kdc_context, &encoded_req_body,
+                                 &state->inner_body);
+        if (errcode) {
+            state->status = "storing req body";
+            goto errout;
+        }
+    }
     state->rock.request = state->request;
+    state->rock.inner_body = state->inner_body;
     state->rock.rstate = state->rstate;
     if (!state->request->client) {
         state->status = "NULL_CLIENT";

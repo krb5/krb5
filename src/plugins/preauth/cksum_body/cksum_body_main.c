@@ -403,17 +403,7 @@ server_verify(krb5_context kcontext,
     }
     cb->free_keys(kcontext, rock, keys);
 
-    /* Rebuild a copy of the client's request-body.  If we were serious
-     * about doing this with any chance of working interoperability, we'd
-     * extract the structure directly from the req_pkt structure.  This
-     * will probably work if it's us on both ends, though. */
-    req_body = NULL;
-    if (cb->request_body(kcontext, rock, &req_body) != 0) {
-        krb5_free_keyblock(kcontext, key);
-        stats->failures++;
-        (*respond)(arg, KRB5KDC_ERR_PREAUTH_FAILED, NULL, NULL, NULL);
-        return;
-    }
+    req_body = cb->request_body(kcontext, rock);
 
 #ifdef DEBUG
     fprintf(stderr, "AS key type %d, checksum type %d, %d bytes.\n",
@@ -428,7 +418,6 @@ server_verify(krb5_context kcontext,
                                     req_body, &checksum, &valid);
 
     /* Clean up. */
-    krb5_free_data(kcontext, req_body);
     krb5_free_keyblock(kcontext, key);
 
     /* Evaluate our results. */

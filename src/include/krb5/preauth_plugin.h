@@ -351,15 +351,12 @@ typedef struct krb5_kdcpreauth_callbacks_st {
                       krb5_keyblock *keys);
 
     /*
-     * Get the request structure, re-encoded using DER.  Unless the client
-     * implementation is the same as the server implementation, there's a good
-     * chance that the result will not match what the client sent, so don't
-     * create any fatal errors if it doesn't match up.  Free the resulting data
-     * object with krb5_free_data.
+     * Get the encoded request body, which is sometimes needed for checksums.
+     * For a FAST request this is the encoded inner request body.  The returned
+     * pointer is an alias and should not be freed.
      */
-    krb5_error_code (*request_body)(krb5_context context,
-                                    krb5_kdcpreauth_rock rock,
-                                    krb5_data **body_out);
+    krb5_data *(*request_body)(krb5_context context,
+                               krb5_kdcpreauth_rock rock);
 
     /* Get a pointer to the FAST armor key, or NULL if the request did not use
      * FAST.  The returned pointer is an alias and should not be freed. */
