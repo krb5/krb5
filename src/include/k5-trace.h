@@ -357,6 +357,9 @@
     TRACE(c, (c, "TGS request result: {kerr}", code))
 #define TRACE_TKT_CREDS_RETRY_TCP(c)                                    \
     TRACE(c, (c, "Request or response is too big for UDP; retrying with TCP"))
+#define TRACE_TKT_CREDS_SAME_REALM_TGT(c, realm)                        \
+    TRACE(c, (c, "Received TGT referral back to same realm ({data}); trying " \
+              "again without referrals", realm))
 #define TRACE_TKT_CREDS_SERVICE_REQ(c, princ, referral)                 \
     TRACE(c, (c, "Requesting tickets for {princ}, referrals {str}", princ, \
               (referral) ? "on" : "off"))
