@@ -377,6 +377,11 @@ typedef struct krb5_kdcpreauth_callbacks_st {
      * avoid a dependency on a libkdb5 type). */
     void *(*client_entry)(krb5_context context, krb5_kdcpreauth_rock rock);
 
+    /* Get a pointer to the verto context an asynchronous plugin should
+     * use to create events in the edata or verify method. */
+    struct verto_ctx *(*event_context)(krb5_context context,
+                                       krb5_kdcpreauth_rock rock);
+
     /* End of version 1 kdcpreauth callbacks. */
 } *krb5_kdcpreauth_callbacks;
 

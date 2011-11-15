@@ -452,7 +452,8 @@ finish_preauth(void *arg, krb5_error_code code)
 /*ARGSUSED*/
 void
 process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
-               const krb5_fulladdr *from, loop_respond_fn respond, void *arg)
+               const krb5_fulladdr *from, verto_ctx *vctx,
+               loop_respond_fn respond, void *arg)
 {
     krb5_error_code errcode;
     krb5_timestamp rtime;
@@ -512,6 +513,7 @@ process_as_req(krb5_kdc_req *request, krb5_data *req_pkt,
     state->rock.request = state->request;
     state->rock.inner_body = state->inner_body;
     state->rock.rstate = state->rstate;
+    state->rock.vctx = vctx;
     if (!state->request->client) {
         state->status = "NULL_CLIENT";
         errcode = KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN;

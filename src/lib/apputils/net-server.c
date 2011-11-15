@@ -1665,7 +1665,7 @@ process_packet(verto_ctx *ctx, verto_ev *ev)
     init_addr(&state->faddr, ss2sa(&state->saddr));
     /* This address is in net order. */
     dispatch(state->handle, ss2sa(&state->daddr), &state->faddr,
-             &state->request, 0, process_packet_response, state);
+             &state->request, 0, ctx, process_packet_response, state);
 }
 
 static int
@@ -1936,7 +1936,7 @@ process_tcp_connection_read(verto_ctx *ctx, verto_ev *ev)
             local_saddrp = ss2sa(&state->local_saddr);
 
         dispatch(state->conn->handle, local_saddrp, &conn->faddr,
-                 &state->request, 1, process_tcp_response, state);
+                 &state->request, 1, ctx, process_tcp_response, state);
     }
 
     return;

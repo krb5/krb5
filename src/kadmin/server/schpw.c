@@ -442,7 +442,7 @@ bailout:
 void
 dispatch(void *handle, struct sockaddr *local_saddr,
          const krb5_fulladdr *remote_faddr, krb5_data *request, int is_tcp,
-         loop_respond_fn respond, void *arg)
+         verto_ctx *vctx, loop_respond_fn respond, void *arg)
 {
     krb5_error_code ret;
     krb5_keytab kt = NULL;

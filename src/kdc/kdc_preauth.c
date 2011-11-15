@@ -574,6 +574,12 @@ client_entry(krb5_context context, krb5_kdcpreauth_rock rock)
     return rock->client;
 }
 
+static verto_ctx *
+event_context(krb5_context context, krb5_kdcpreauth_rock rock)
+{
+    return rock->vctx;
+}
+
 static struct krb5_kdcpreauth_callbacks_st callbacks = {
     1,
     max_time_skew,
@@ -583,7 +589,8 @@ static struct krb5_kdcpreauth_callbacks_st callbacks = {
     fast_armor,
     get_string,
     free_string,
-    client_entry
+    client_entry,
+    event_context
 };
 
 static krb5_error_code
