@@ -29,10 +29,18 @@
 
 #include <verto.h>
 
-#define VERTO_MODULE_VERSION 1
-#define VERTO_MODULE_TABLE verto_module_table
+#ifndef VERTO_MODULE_TYPES
+#define VERTO_MODULE_TYPES
+typedef void verto_mod_ctx;
+typedef void verto_mod_ev;
+#endif
+
+#define VERTO_MODULE_VERSION 2
+#define VERTO_MODULE_TABLE(name) verto_module_table_ ## name
 #define VERTO_MODULE(name, symb, types) \
     static verto_ctx_funcs name ## _funcs = { \
+        name ## _ctx_new, \
+        name ## _ctx_default, \
         name ## _ctx_free, \
         name ## _ctx_run, \
         name ## _ctx_run_once, \
@@ -41,69 +49,93 @@
         name ## _ctx_add, \
         name ## _ctx_del \
     }; \
-    verto_module VERTO_MODULE_TABLE = { \
+    verto_module VERTO_MODULE_TABLE(name) = { \
         VERTO_MODULE_VERSION, \
         # name, \
         # symb, \
         types, \
-        verto_new_ ## name, \
-        verto_default_ ## name, \
-    };
+        &name ## _funcs, \
+    }; \
+    verto_ctx * \
+    verto_new_ ## name() \
+    { \
+        return verto_convert(name, 0, NULL); \
+    } \
+    verto_ctx * \
+    verto_default_ ## name() \
+    { \
+        return verto_convert(name, 1, NULL); \
+    }
 
-typedef verto_ctx *(*verto_ctx_constructor)();
+typedef struct {
+    /* Required */ verto_mod_ctx *(*ctx_new)();
+    /* Optional */ verto_mod_ctx *(*ctx_default)();
+    /* Required */ void (*ctx_free)(verto_mod_ctx *ctx);
+    /* Optional */ void (*ctx_run)(verto_mod_ctx *ctx);
+    /* Required */ void (*ctx_run_once)(verto_mod_ctx *ctx);
+    /* Optional */ void (*ctx_break)(verto_mod_ctx *ctx);
+    /* Optional */ void (*ctx_reinitialize)(verto_mod_ctx *ctx);
+    /* Required */ verto_mod_ev *(*ctx_add)(verto_mod_ctx *ctx,
+                                            const verto_ev *ev,
+                                            verto_ev_flag *flags);
+    /* Required */ void (*ctx_del)(verto_mod_ctx *ctx,
+                                   const verto_ev *ev,
+                                   verto_mod_ev *modev);
+} verto_ctx_funcs;
 
 typedef struct {
     unsigned int vers;
     const char *name;
     const char *symb;
     verto_ev_type types;
-    verto_ctx_constructor new_ctx;
-    verto_ctx_constructor def_ctx;
+    verto_ctx_funcs *funcs;
 } verto_module;
 
-typedef struct {
-    void  (*ctx_free)(void *ctx);
-    void  (*ctx_run)(void *ctx);
-    void  (*ctx_run_once)(void *ctx);
-    void  (*ctx_break)(void *ctx);
-    void  (*ctx_reinitialize)(void *ctx);
-    void *(*ctx_add)(void *ctx, const verto_ev *ev, verto_ev_flag *flags);
-    void  (*ctx_del)(void *ctx, const verto_ev *ev, void *evpriv);
-} verto_ctx_funcs;
-
 /**
  * Converts an existing implementation specific loop to a verto_ctx.
  *
  * This function also sets the internal default implementation so that future
  * calls to verto_new(NULL) or verto_default(NULL) will use this specific
- * implementation.
+ * implementation if it was not already set.
  *
  * @param name The name of the module (unquoted)
- * @param priv The context private to store
- * @return A new _ev_ctx, or NULL on error. Call verto_free() when done.
+ * @param deflt Whether the ctx is the default context or not
+ * @param ctx The context to store
+ * @return A new verto_ctx, or NULL on error. Call verto_free() when done.
  */
-#define verto_convert(name, priv) \
-        verto_convert_funcs(&name ## _funcs, &VERTO_MODULE_TABLE, priv)
+#define verto_convert(name, deflt, ctx) \
+        verto_convert_module(&VERTO_MODULE_TABLE(name), deflt, ctx)
 
 /**
  * Converts an existing implementation specific loop to a verto_ctx.
- *
- * This function also sets the internal default implementation so that future
- * calls to verto_new(NULL) or verto_default(NULL) will use this specific
- * implementation.
  *
  * If you are a module implementation, you probably want the macro above.  This
  * function is generally used directly only when an application is attempting
  * to expose a home-grown event loop to verto.
  *
+ * If deflt is non-zero and a default ctx was already defined for this module
+ * and ctx is not NULL, than ctx will be free'd and the previously defined
+ * default will be returned.
+ *
+ * If ctx is non-NULL, than the pre-existing verto_mod_ctx will be converted to
+ * to a verto_ctx; if deflt is non-zero than this verto_mod_ctx will also be
+ * marked as the default loop for this process. If ctx is NULL, than the
+ * appropriate constructor will be called: either module->ctx_new() or
+ * module->ctx_default() depending on the boolean value of deflt. If
+ * module->ctx_default is NULL and deflt is non-zero, than module->ctx_new()
+ * will be called and the resulting verto_mod_ctx will be utilized as the
+ * default.
+ *
+ * This function also sets the internal default implementation so that future
+ * calls to verto_new(NULL) or verto_default(NULL) will use this specific
+ * implementation if it was not already set.
+ *
  * @param name The name of the module (unquoted)
- * @param priv The context private to store
- * @return A new _ev_ctx, or NULL on error. Call verto_free() when done.
+ * @param ctx The context private to store
+ * @return A new verto_ctx, or NULL on error. Call verto_free() when done.
  */
 verto_ctx *
-verto_convert_funcs(const verto_ctx_funcs *funcs,
-                    const verto_module *module,
-                    void *priv);
+verto_convert_module(const verto_module *module, int deflt, verto_mod_ctx *ctx);
 
 /**
  * Calls the callback of the verto_ev and then frees it via verto_del().

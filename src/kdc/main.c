@@ -572,7 +572,11 @@ create_workers(verto_ctx *ctx, int num)
     for (i = 0; i < num; i++) {
         pid = fork();
         if (pid == 0) {
-            verto_reinitialize(ctx);
+            if (!verto_reinitialize(ctx)) {
+                krb5_klog_syslog(LOG_ERR,
+                                 _("Unable to reinitialize main loop"));
+                return ENOMEM;
+            }
             retval = loop_setup_signals(ctx, NULL, reset_for_hangup);
             if (retval) {
                 krb5_klog_syslog(LOG_ERR, _("Unable to initialize signal "

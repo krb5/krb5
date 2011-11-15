@@ -12,9 +12,9 @@ DEFINES=-DDEFAULT_LIBRARY=\"k5ev\"
 # Turn off extra warnings since we're not going to clean up libverto's code.
 WARN_CFLAGS=
 
-STLIBOBJS=verto.o
-LIBOBJS=$(OUTPRE)verto.$(OBJEXT)
-SRCS=verto.c
+STLIBOBJS=verto.o module.o
+LIBOBJS=$(OUTPRE)verto.$(OBJEXT) $(OUTPRE)module.$(OBJEXT)
+SRCS=verto.c module.c
 
 STOBJLISTS=OBJS.ST
 SHLIB_EXPLIBS= $(DL_LIB)
