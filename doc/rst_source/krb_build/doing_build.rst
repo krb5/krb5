@@ -120,9 +120,14 @@ However, there are several prerequisites that must be satisfied first:
 
     * Configure and build Kerberos with Tcl support. Tcl is used to drive the test suite. 
       This often means passing *--with-tcl* to configure to tell it the location of the Tcl configuration script. (See :ref:`options2configure`.)
-    * You have to run *make install* before running *make check*, or the test suite will often pick up the installed version of Kerberos 
-      rather than the newly built one. You can install into a prefix that isn't in the system library search path, though. 
-      Alternatively, you can run *make fake-install* ( need more info).
+    * On some operating systems, you have to run *make install* before
+      running *make check*, or the test suite will pick up installed
+      versions of Kerberos libraries rather than the newly built ones.
+      You can install into a prefix that isn't in the system library
+      search path, though. Alternatively, you can configure with
+      *--disable-rpath*, which renders the build tree less suitable
+      for installation, but allows testing without interference from
+      previously installed libraries.
     * In order to test the RPC layer, the local system has to be running the *portmap* daemon and 
       it has to be listening to the regular network interface (not just localhost). 
 
