@@ -512,7 +512,7 @@ def _import_runenv():
     global buildtop
     runenv_py = os.path.join(buildtop, 'runenv.py')
     if not os.path.exists(runenv_py):
-        fail('You must run "make fake-install" in %s first.' % buildtop)
+        fail('You must run "make runenv.py" in %s first.' % buildtop)
     module = imp.load_source('runenv', runenv_py)
     return module.env
 
