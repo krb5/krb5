@@ -90,6 +90,24 @@ Most commonly used options
     (We are not updating this version at this time because of licensing issues 
     with newer versions that we haven't investigated sufficiently yet.)
 
+ --with-system-verto
+
+    Use an installed version of libverto.  If the libverto header and
+    library are not in default locations, you may wish to specify
+    *CPPFLAGS=-I/some/dir* and *LDFLAGS=-L/some/other/dir* options at
+    configuration time as well.
+
+    If this option is not given, the build system will try to detect
+    an installed version of libverto and use it if it is found.
+    Otherwise, a version supplied with the Kerberos sources will be
+    built and installed.  The built-in version does not contain the
+    full set of back-end modules and is not a suitable general
+    replacement for the upstream version, but will work for the
+    purposes of Kerberos.
+
+    Specifying *--without-system-verto* will cause the built-in
+    version of libverto to be used unconditionally.
+
 
 Environment variables
 ----------------------------------------
