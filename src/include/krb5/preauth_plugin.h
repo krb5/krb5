@@ -328,6 +328,10 @@ typedef struct krb5_kdcpreauth_rock_st *krb5_kdcpreauth_rock;
 typedef struct krb5_kdcpreauth_moddata_st *krb5_kdcpreauth_moddata;
 typedef struct krb5_kdcpreauth_modreq_st *krb5_kdcpreauth_modreq;
 
+/* The verto context structure type (typedef is in verto.h; we want to avoid a
+ * header dependency for the moment). */
+struct verto_context;
+
 /* Before using a callback after version 1, modules must check the vers
  * field of the callback structure. */
 typedef struct krb5_kdcpreauth_callbacks_st {
@@ -377,8 +381,8 @@ typedef struct krb5_kdcpreauth_callbacks_st {
      * avoid a dependency on a libkdb5 type). */
     void *(*client_entry)(krb5_context context, krb5_kdcpreauth_rock rock);
 
-    /* Get a pointer to the verto context an asynchronous plugin should
-     * use to create events in the edata or verify method. */
+    /* Get a pointer to the verto context which should be used by an
+     * asynchronous edata or verify method. */
     struct verto_ctx *(*event_context)(krb5_context context,
                                        krb5_kdcpreauth_rock rock);
 
@@ -422,9 +426,13 @@ typedef void
 
 /*
  * Optional: provide pa_data to send to the client as part of the "you need to
- * use preauthentication" error.  This function is not allowed to create a
- * modreq object because we have no guarantee that the client will ever make a
- * follow-up request, or that it will hit this KDC if it does.
+ * use preauthentication" error.  The implementation must invoke the respond
+ * when complete, whether successful or not, either before returning or
+ * asynchronously using the verto context returned by cb->event_context().
+ *
+ * This function is not allowed to create a modreq object because we have no
+ * guarantee that the client will ever make a follow-up request, or that it
+ * will hit this KDC if it does.
  */
 typedef void
 (*krb5_kdcpreauth_edata_fn)(krb5_context context, krb5_kdc_req *request,
@@ -455,7 +463,8 @@ typedef void
  * Optional: verify preauthentication data sent by the client, setting the
  * TKT_FLG_PRE_AUTH or TKT_FLG_HW_AUTH flag in the enc_tkt_reply's "flags"
  * field as appropriate.  The implementation must invoke the respond function
- * when complete, whether successful or not.
+ * when complete, whether successful or not, either before returning or
+ * asynchronously using the verto context returned by cb->event_context().
  */
 typedef void
 (*krb5_kdcpreauth_verify_fn)(krb5_context context,
