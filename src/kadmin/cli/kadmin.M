@@ -726,12 +726,13 @@ principals which require preauthentication.
 sets the allowable time between authentication failures.  If an
 authentication failure happens after \fIfailuretime\fP has elapsed
 since the previous failure, the number of authentication failures is
-reset to 1.
+reset to 1.  A failure count interval of 0 means forever.
 .TP
 \fB\-lockoutduration\fP \fIlockouttime\fP
 sets the duration for which the principal is locked from
 authenticating if too many authentication failures occur without the
-specified failure count interval elapsing.
+specified failure count interval elapsing.  A duration of 0 means
+forever.
 .sp
 .nf
 .TP
