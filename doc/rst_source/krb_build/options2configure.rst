@@ -24,20 +24,20 @@ Most commonly used options
     This option allows one to separate the architecture independent programs
     from the host-dependent files (configuration files, manual pages).
     Use this option to install architecture-dependent programs in *EXECPREFIX*.
-    The default location is the value of specified by * --prefix* option.
+    The default location is the value of specified by *prefix* option.
 
  --localstatedir=LOCALSTATEDIR
  
    This option sets the directory for locally modifiable single-machine data. 
-    In Kerberos, this mostly is useful for setting a location for the KDC data files, 
-    as they will be installed in *LOCALSTATEDIR/krb5kdc*, which is by default *PREFIX/var/krb5kdc*.
+   In Kerberos, this mostly is useful for setting a location for the KDC data files, 
+   as they will be installed in *LOCALSTATEDIR/krb5kdc*, which is by default *PREFIX/var/krb5kdc*.
 
  --with-netlib[=libs]
 
     Allows for suppression of or replacement of network libraries. 
     By default, Kerberos V5 configuration will look for *-lnsl* and *-lsocket*. 
     If your operating system has a broken resolver library 
-    or fails to pass the tests in src/tests/resolv you will need to use this option.
+    or fails to pass the tests in 'src/tests/resolv' you will need to use this option.
 
  --with-tcl=TCLPATH
 
@@ -68,7 +68,7 @@ Most commonly used options
  --with-system-ss
 
     Use an installed version of the subsystem command-line interface software, 
-    the *mk_cmds* program, the ss/ss.h header file and the ss library. 
+    the *mk_cmds* program, the ss/ss.h header file and the *ss* library. 
     If these are not in the default locations, you may wish to specify 
     *CPPFLAGS=-I/some/dir* and *LDFLAGS=-L/some/other/dir* options 
     at configuration time as well. See also the *SS_LIB* option.
@@ -89,24 +89,6 @@ Most commonly used options
     will be built and installed. 
     (We are not updating this version at this time because of licensing issues 
     with newer versions that we haven't investigated sufficiently yet.)
-
- --with-system-verto
-
-    Use an installed version of libverto.  If the libverto header and
-    library are not in default locations, you may wish to specify
-    *CPPFLAGS=-I/some/dir* and *LDFLAGS=-L/some/other/dir* options at
-    configuration time as well.
-
-    If this option is not given, the build system will try to detect
-    an installed version of libverto and use it if it is found.
-    Otherwise, a version supplied with the Kerberos sources will be
-    built and installed.  The built-in version does not contain the
-    full set of back-end modules and is not a suitable general
-    replacement for the upstream version, but will work for the
-    purposes of Kerberos.
-
-    Specifying *--without-system-verto* will cause the built-in
-    version of libverto to be used unconditionally.
 
 
 Environment variables
@@ -150,7 +132,7 @@ SS_LIB=libs...
     Some variants of this library are around which allow for Emacs-like line editing, 
     but different versions require different support libraries to be explicitly specified.
 
-    This option is ignored if \-\-with-system-ss is not specified.
+    This option is ignored if 'with-system-ss' is not specified.
 
 CXX     
      C++ compiler command
@@ -167,119 +149,98 @@ YFLAGS
      This script will default YFLAGS to the empty string to avoid a
      default value of '-d' given by some make applications.
 
-
-Examples
-----------
-
-For example, in order to configure Kerberos on a Solaris machine 
-
-using the *suncc* compiler with the optimizer *turned on*, 
-run the configure script with the following options::
-
-     % ./configure CC=suncc CFLAGS=-O
-     
-
-For a slightly more complicated example, consider a system 
-where several packages to be used by Kerberos are installed in /usr/foobar,
-including Berkeley DB 3.3, and an ss library that needs to link against the curses library. 
-The configuration of Kerberos might be done thus::
-
-      ./configure CPPFLAGS=-I/usr/foobar/include LDFLAGS=-L/usr/foobar/lib \-\-with-system-et \-\-with-system-ss \-\-with-system-db  SS_LIB='-lss -lcurses'  DB_HEADER=db3/db_185.h DB_LIB=-ldb-3.3
-     
-
-
 Fine tuning of the installation directories
 ----------------------------------------------
 
- --bindir=DIR    
+ ---bindir=DIR    
 
      User executables. 
-     Defaults to  *EXECPREFIX/bin*, where *EXECPREFIX* is the path specified by "--exec-prefix" configuration option.
+     Defaults to  *EXECPREFIX/bin*, where *EXECPREFIX* is the path specified by "exec-prefix" configuration option.
 
  --sbindir=DIR    
 
      System admin executables.
-     Defaults to  *EXECPREFIX/sbin*, where *EXECPREFIX* is the path specified by "--exec-prefix" configuration option.
+     Defaults to  *EXECPREFIX/sbin*, where *EXECPREFIX* is the path specified by "exec-prefix" configuration option.
 
  --libexecdir=DIR 
 
      Program executables.
-     Defaults to  *EXECPREFIX/libexec*, where *EXECPREFIX* is the path specified by "--exec-prefix" configuration option.
+     Defaults to  *EXECPREFIX/libexec*, where *EXECPREFIX* is the path specified by "exec-prefix" configuration option.
 
  --sysconfdir=DIR 
 
      Read-only single-machine data.
-     Defaults to  *PREFIX/etc*, where *PREFIX* is the path specified by "--prefix" configuration option.
+     Defaults to  *PREFIX/etc*, where *PREFIX* is the path specified by "prefix" configuration option.
 
  --sharedstatedir=DIR
 
      Modifiable architecture-independent data.
-     Defaults to  *PREFIX/com*, where *PREFIX* is the path specified by "--prefix" configuration option.
+     Defaults to  *PREFIX/com*, where *PREFIX* is the path specified by "prefix" configuration option.
 
  --libdir=DIR    
 
      Object code libraries [EXECPREFIX/lib]
-     Defaults to  *EXECPREFIX/lib*, where *EXECPREFIX* is the path specified by "--exec-prefix" configuration option.
+     Defaults to  *EXECPREFIX/lib*, where *EXECPREFIX* is the path specified by "exec-prefix" configuration option.
 
  --includedir=DIR  
 
      C header files.
-     Defaults to  *PREFIX/include*, where *PREFIX* is the path specified by "--prefix" configuration option.
+     Defaults to  *PREFIX/include*, where *PREFIX* is the path specified by "prefix" configuration option.
 
  --oldincludedir=DIR 
 
-     C header files for non-gcc. Default to  /usr/include
+     C header files for non-gcc. Default to  '/usr/include'
   
  --datarootdir=DATAROOTDIR 
 
      Read-only architecture-independent data root.
-     Defaults to  *PREFIX/sharee*, where *PREFIX* is the path specified by "--prefix" configuration option.
+     Defaults to  *PREFIX/sharee*, where *PREFIX* is the path specified by "prefix" configuration option.
   
 
  --datadir=DIR    
 
      Read-only architecture-independent data. 
-     Defaults to  *DATAROOTDIR* by "--datarootdir" configuration option.
+     Defaults to  *DATAROOTDIR* by "datarootdir" configuration option.
   
  --infodir=DIR   
 
      Info documentation.
-     Defaults to  *DATAROOTDIR/info*, where *DATAROOTDIR* is the path specified by "--datarootdir" configuration option.
+     Defaults to  *DATAROOTDIR/info*, where *DATAROOTDIR* is the path specified by "datarootdir" configuration option.
 
  --localedir=DIR  
 
      Locale-dependent data.
-     Defaults to  *DATAROOTDIR/locate*, where *DATAROOTDIR* is the path specified by "--datarootdir" configuration option.
+     Defaults to  *DATAROOTDIR/locate*, where *DATAROOTDIR* is the path specified by "datarootdir" configuration option.
  
  --mandir=DIR     
 
      Man documentation.
-     Defaults to  *DATAROOTDIR/man*, where *DATAROOTDIR* is the path specified by "--datarootdir" configuration option.
+     Defaults to  *DATAROOTDIR/man*, where *DATAROOTDIR* is the path specified by "datarootdir" configuration option.
   
  --docdir=DOCDIR    
 
      Documentation root.
-     Defaults to  *DATAROOTDIR/doc/krb5*, where *DATAROOTDIR* is the path specified by "--datarootdir" configuration option.
+     Defaults to  *DATAROOTDIR/doc/krb5*, where *DATAROOTDIR* is the path specified by "datarootdir" configuration option.
   
  --htmldir=DIR    
 
-     html documentation.
-     Defaults to  *DOCDIR*  path specified by "--docdir" configuration option.
+     *html* documentation.
+     Defaults to  *DOCDIR*  path specified by "docdir" configuration option.
   
  --dvidir=DIR    
 
-     dvi documentation.
-     Defaults to  *DOCDIR*  path specified by "--docdir" configuration option.
+     *dvi* documentation.
+     Defaults to  *DOCDIR*  path specified by "docdir" configuration option.
   
  --pdfdir=DIR      
 
-     pdf documentation.
-     Defaults to  *DOCDIR*  path specified by "--docdir" configuration option.
+     *pdf* documentation.
+     Defaults to  *DOCDIR*  path specified by "docdir" configuration option.
   
  --psdir=DIR     
 
-     ps documentation.
-     Defaults to  *DOCDIR*  path specified by "--docdir" configuration option.
+     *ps* documentation.
+     Defaults to  *DOCDIR*  path specified by "docdir" configuration option.
 
 
 Program names
@@ -288,13 +249,13 @@ Program names
  ---program-prefix=PREFIX      
 
      Prepend *PREFIX* to the names of the programs when installing them. For example, specifying 
-     '\-\-program-prefix=mit-' at the configure time will cause the program named *abc* to be installed 
+     'program-prefix=mit-' at the configure time will cause the program named *abc* to be installed 
      as *mit-abc*.
   
  --program-suffix=SUFFIX        
 
      Append *SUFFIX*  to the names of the programs when installing them. For example, specifying 
-     '\-\-program-suffix=-mit' at the configure time will cause the program named *abc* to be installed 
+     'program-suffix=-mit' at the configure time will cause the program named *abc* to be installed 
      as *abc-mit*.
   
  --program-transform-name=PROGRAM
@@ -312,7 +273,7 @@ System types
  --host=HOST  
 
      Cross-compile to build programs to run on *HOST*  (e.g. --host=x86_64-linux-gnu). 
-     By default, Kerberos V5 configuration will look for "\-\-build" option).
+     By default, Kerberos V5 configuration will look for "build" option).
 
 
 Optional features
@@ -404,17 +365,17 @@ Optional packages
   
  --with-crypto-impl=IMPL
 
-     Use specified crypto implementation (e.g.* --with-crypto=openssl*). 
+     Use specified crypto implementation (e.g. --with-crypto=openssl). 
      Default is a native MIT Kerberos implementation *builtin*
      The other currently implemented crypto backends are *openssl* and *nss*.
      (See :ref:`mitK5features`)
 
  --with-prng-alg=ALG
 
-     Use specified PRNG algorithm (e.g. * --with-prng-alg=os*).
+     Use specified PRNG algorithm (e.g. --with-prng-alg=os).
 
      Default is the *fortuna* PRNG algorithm. For the *nss* crypto backend use one must explicitly
-     specify * --with-prng-alg=nss*. 
+     specify --with-prng-alg=nss. 
      (See :ref:`mitK5features`)
 
  --with-kdc-kdb-update 
@@ -428,7 +389,40 @@ Optional packages
   
  --with-system-verto
 
-     Always use system *verto* library
+     Use an installed version of libverto.  If the libverto header and
+     library are not in default locations, you may wish to specify
+     *CPPFLAGS=-I/some/dir* and *LDFLAGS=-L/some/other/dir* options at
+     configuration time as well.
+
+     If this option is not given, the build system will try to detect
+     an installed version of libverto and use it if it is found.
+     Otherwise, a version supplied with the Kerberos sources will be
+     built and installed.  The built-in version does not contain the
+     full set of back-end modules and is not a suitable general
+     replacement for the upstream version, but will work for the
+     purposes of Kerberos.
+
+     Specifying *--without-system-verto* will cause the built-in
+     version of libverto to be used unconditionally.
 
 
+
+Examples
+----------
+
+For example, in order to configure Kerberos on a Solaris machine 
+
+using the *suncc* compiler with the optimizer *turned on*, 
+run the configure script with the following options::
+
+     % ./configure CC=suncc CFLAGS=-O
+     
+
+For a slightly more complicated example, consider a system 
+where several packages to be used by Kerberos are installed in /usr/foobar,
+including Berkeley DB 3.3, and an ss library that needs to link against the curses library. 
+The configuration of Kerberos might be done thus::
+
+      ./configure CPPFLAGS=-I/usr/foobar/include LDFLAGS=-L/usr/foobar/lib --with-system-et --with-system-ss --with-system-db  SS_LIB='-lss -lcurses'  DB_HEADER=db3/db_185.h DB_LIB=-ldb-3.3
+     
 

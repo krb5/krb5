@@ -617,33 +617,33 @@ add_policy
 
               The following options are available:
 
-              **-maxlife time**
+              **-maxlife** *time*
                      sets the maximum lifetime of a password
 
-              **-minlife time**
+              **-minlife** *time*
                      sets the minimum lifetime of a password
 
-              **-minlength length**
+              **-minlength** *length*
                      sets the minimum length of a password
 
-              **-minclasses number**
+              **-minclasses** *number*
                      sets the minimum number of character classes allowed in a password
 
-              **-history number**
+              **-history** *number*
                      sets the number of past keys kept for a principal. This option is not supported for LDAP database
 
-              **-maxfailure maxnumber**
+              **-maxfailure** *maxnumber*
                      sets the maximum number of authentication failures before the principal is  locked.
                      Authentication failures are only tracked for principals which require preauthentication.
 
-              **-failurecountinterval failuretime**
+              **-failurecountinterval** *failuretime*
                      sets  the  allowable  time  between  authentication failures.  
                      If an authentication failure happens after *failuretime* has elapsed since the previous failure, 
                      the number of authentication failures is reset to 1.
 
-              **-lockoutduration lockouttime**
+              **-lockoutduration** *lockouttime*
                      sets the duration for which the principal is locked from authenticating if too many authentication failures occur without
-                     the specified failure count interval elapsing.
+                     the specified failure count interval elapsing. A duration of 0 means forever.
 
 
               EXAMPLES::
