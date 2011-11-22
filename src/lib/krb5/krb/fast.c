@@ -433,7 +433,6 @@ krb5int_fast_process_error(krb5_context context,
                 *out_padata = (krb5_pa_data **)tdata;
             retval = 0;
         }
-        *out_padata = padata;
     }
     return retval;
 }
