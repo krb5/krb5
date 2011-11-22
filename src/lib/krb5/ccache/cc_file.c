@@ -1449,9 +1449,9 @@ krb5_fcc_initialize(krb5_context context, krb5_ccache id, krb5_principal princ)
 #if defined(HAVE_FCHMOD) || defined(HAVE_CHMOD)
     {
 #ifdef HAVE_FCHMOD
-        reti = fchmod(((krb5_fcc_data *) id->data)->file, S_IREAD | S_IWRITE);
+        reti = fchmod(((krb5_fcc_data *)id->data)->file, S_IRUSR | S_IWUSR);
 #else
-        reti = chmod(((krb5_fcc_data *) id->data)->filename, S_IREAD | S_IWRITE);
+        reti = chmod(((krb5_fcc_data *)id->data)->filename, S_IRUSR | S_IWUSR);
 #endif
         if (reti == -1) {
             kret = krb5_fcc_interpret(context, errno);
