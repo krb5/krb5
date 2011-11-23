@@ -33,7 +33,6 @@
 #include "int-proto.h"
 #include "fast.h"
 
-
 static krb5_error_code
 kdcrep2creds(krb5_context context, krb5_kdc_rep *pkdcrep, krb5_address *const *address,
              krb5_data *psectkt, krb5_creds **ppcreds)
@@ -217,7 +216,8 @@ krb5int_make_tgs_request(krb5_context context,
         enctypes[1] = 0;
     }
 
-    retval = krb5int_make_tgs_request_ext(context, fast_state, kdcoptions, &in_cred->times,
+    retval = krb5int_make_tgs_request_ext(context, fast_state, kdcoptions,
+                                          &in_cred->times,
                                           enctypes, in_cred->server, address,
                                           in_cred->authdata, in_padata,
                                           second_tkt ?
@@ -300,9 +300,7 @@ krb5int_process_tgs_reply(krb5_context context,
 
     /* Unfortunately, Heimdal at least up through 1.2  encrypts using
        the session key not the subsession key.  So we try both. */
-    retval = krb5int_decode_tgs_rep(context, fast_state,
-                                    response_data,
-                                    subkey,
+    retval = krb5int_decode_tgs_rep(context, fast_state, response_data, subkey,
                                     KRB5_KEYUSAGE_TGS_REP_ENCPART_SUBKEY,
                                     &dec_rep);
     if (retval) {

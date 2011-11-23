@@ -214,7 +214,7 @@ krb5int_make_tgs_request_ext(krb5_context context,
                                     &in_cred->keyblock, NULL, NULL);
     if (retval)
         goto cleanup;
-        if (authorization_data) {
+    if (authorization_data) {
         /* need to encrypt it in the request */
 
         if ((retval = encode_krb5_authdata(authorization_data, &scratch)))
@@ -255,7 +255,9 @@ krb5int_make_tgs_request_ext(krb5_context context,
         tgsreq.second_ticket = 0;
 
     /* encode the body; then checksum it */
-    if ((retval = krb5int_fast_prep_req_body(context, fast_state, &tgsreq, &scratch)))
+    retval = krb5int_fast_prep_req_body(context, fast_state, &tgsreq,
+                                        &scratch);
+    if (retval)
         goto cleanup;
 
     /*
@@ -326,9 +328,9 @@ krb5int_make_tgs_request_ext(krb5_context context,
             goto cleanup;
     }
     /* the TGS_REQ is assembled in tgsreq, so encode it */
-    if ((retval = krb5int_fast_prep_req(context, fast_state, &tgsreq,
-                                        &scratch2, encode_krb5_tgs_req,
-                                        &scratch)))
+    retval = krb5int_fast_prep_req(context, fast_state, &tgsreq, &scratch2,
+                                   encode_krb5_tgs_req, &scratch);
+    if (retval)
         goto cleanup;
 
     *request_data = *scratch;

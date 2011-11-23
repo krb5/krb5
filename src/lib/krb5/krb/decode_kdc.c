@@ -44,14 +44,14 @@
 krb5_error_code
 krb5int_decode_tgs_rep(krb5_context context,
                        struct krb5int_fast_request_state *fast_state,
-krb5_data *enc_rep, const krb5_keyblock *key,
+                       krb5_data *enc_rep, const krb5_keyblock *key,
                        krb5_keyusage usage, krb5_kdc_rep **dec_rep)
 {
     krb5_error_code retval;
     krb5_kdc_rep *local_dec_rep;
     krb5_keyblock *strengthen_key = NULL, tgs_key;
-        tgs_key.contents = NULL;
 
+    tgs_key.contents = NULL;
     if (krb5_is_as_rep(enc_rep)) {
         retval = decode_krb5_as_rep(enc_rep, &local_dec_rep);
     } else if (krb5_is_tgs_rep(enc_rep)) {
@@ -63,13 +63,13 @@ krb5_data *enc_rep, const krb5_keyblock *key,
     if (retval)
         return retval;
 
-     retval = krb5int_fast_process_response(context, fast_state,
-                                            local_dec_rep, &strengthen_key);
-     if (retval == KRB5_ERR_FAST_REQUIRED)
-             retval = 0;
-         else if (retval)
-             goto cleanup;
-     retval = krb5int_fast_reply_key(context, strengthen_key, key, &tgs_key);
+    retval = krb5int_fast_process_response(context, fast_state,
+                                           local_dec_rep, &strengthen_key);
+    if (retval == KRB5_ERR_FAST_REQUIRED)
+        retval = 0;
+    else if (retval)
+        goto cleanup;
+    retval = krb5int_fast_reply_key(context, strengthen_key, key, &tgs_key);
     if (retval)
         goto cleanup;
 
@@ -82,4 +82,4 @@ cleanup:
     krb5_free_keyblock(context, strengthen_key);
     krb5_free_keyblock_contents(context, &tgs_key);
     return (retval);
-    }
+}
