@@ -1029,15 +1029,11 @@ pkinit_client_process(krb5_context context, krb5_clpreauth_moddata moddata,
     int processing_request = 0;
     pkinit_context plgctx = (pkinit_context)moddata;
     pkinit_req_context reqctx = (pkinit_req_context)modreq;
-    krb5_keyblock *armor_key = cb->fast_armor(context, rock), as_key;
+    krb5_keyblock as_key;
 
     pkiDebug("pkinit_client_process %p %p %p %p\n",
              context, plgctx, reqctx, request);
 
-    /* Remove (along with armor_key) when FAST PKINIT is settled. */
-    /* Don't use PKINIT if also using FAST. */
-    if (armor_key != NULL)
-        return EINVAL;
 
     if (plgctx == NULL || reqctx == NULL)
         return EINVAL;

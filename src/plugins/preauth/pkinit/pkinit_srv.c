@@ -107,16 +107,9 @@ pkinit_server_get_edata(krb5_context context,
 {
     krb5_error_code retval = 0;
     pkinit_kdc_context plgctx = NULL;
-    krb5_keyblock *armor_key = cb->fast_armor(context, rock);
 
     pkiDebug("pkinit_server_get_edata: entered!\n");
 
-    /* Remove (along with armor_key) when FAST PKINIT is settled. */
-    /* Don't advertise PKINIT if the client used FAST. */
-    if (armor_key != NULL) {
-        (*respond)(arg, EINVAL, NULL);
-        return;
-    }
 
     /*
      * If we don't have a realm context for the given realm,
@@ -309,7 +302,6 @@ pkinit_server_verify_padata(krb5_context context,
     krb5_kdc_req *tmp_as_req = NULL;
     krb5_data k5data;
     int is_signed = 1;
-    krb5_keyblock *armor_key = cb->fast_armor(context, rock);
     krb5_pa_data **e_data = NULL;
     krb5_kdcpreauth_modreq modreq = NULL;
 
@@ -319,12 +311,6 @@ pkinit_server_verify_padata(krb5_context context,
         return;
     }
 
-    /* Remove (along with armor_key) when FAST PKINIT is settled. */
-    /* Don't allow PKINIT if the client used FAST. */
-    if (armor_key != NULL) {
-        (*respond)(arg, EINVAL, NULL, NULL, NULL);
-        return;
-    }
 
     if (moddata == NULL) {
         (*respond)(arg, EINVAL, NULL, NULL, NULL);
@@ -462,23 +448,7 @@ pkinit_server_verify_padata(krb5_context context,
                                      "value not supported."));
             goto cleanup;
         }
-        /*
-         * The KDC may have modified the request after decoding it.
-         * We need to compute the checksum on the data that
-         * came from the client.  Therefore, we use the original
-         * packet contents.
-         */
-        retval = k5int_decode_krb5_as_req(req_pkt, &tmp_as_req);
-        if (retval) {
-            pkiDebug("decode_krb5_as_req returned %d\n", (int)retval);
-            goto cleanup;
-        }
-
-        retval = k5int_encode_krb5_kdc_req_body(tmp_as_req, &der_req);
-        if (retval) {
-            pkiDebug("encode_krb5_kdc_req_body returned %d\n", (int) retval);
-            goto cleanup;
-        }
+        der_req = cb->request_body(context, rock);
         retval = krb5_c_make_checksum(context, CKSUMTYPE_NIST_SHA, NULL,
                                       0, der_req, &cksum);
         if (retval) {
@@ -566,8 +536,6 @@ cleanup:
     case KRB5_PADATA_PK_AS_REQ:
         free_krb5_pa_pk_as_req(&reqp);
         free(cksum.contents);
-        if (der_req != NULL)
-            krb5_free_data(context, der_req);
         break;
     case KRB5_PADATA_PK_AS_REP_OLD:
     case KRB5_PADATA_PK_AS_REQ_OLD:
