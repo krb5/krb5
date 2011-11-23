@@ -45,26 +45,24 @@ krb5_error_code
 krb5int_decode_tgs_rep(krb5_context context,
                        struct krb5int_fast_request_state *fast_state,
                        krb5_data *enc_rep, const krb5_keyblock *key,
-                       krb5_keyusage usage, krb5_kdc_rep **dec_rep)
+                       krb5_keyusage usage, krb5_kdc_rep **dec_rep_out)
 {
     krb5_error_code retval;
-    krb5_kdc_rep *local_dec_rep;
+    krb5_kdc_rep *dec_rep = NULL;
     krb5_keyblock *strengthen_key = NULL, tgs_key;
 
     tgs_key.contents = NULL;
-    if (krb5_is_as_rep(enc_rep)) {
-        retval = decode_krb5_as_rep(enc_rep, &local_dec_rep);
-    } else if (krb5_is_tgs_rep(enc_rep)) {
-        retval = decode_krb5_tgs_rep(enc_rep, &local_dec_rep);
-    } else {
-        return KRB5KRB_AP_ERR_MSG_TYPE;
-    }
-
+    if (krb5_is_as_rep(enc_rep))
+        retval = decode_krb5_as_rep(enc_rep, &dec_rep);
+    else if (krb5_is_tgs_rep(enc_rep))
+        retval = decode_krb5_tgs_rep(enc_rep, &dec_rep);
+    else
+        retval = KRB5KRB_AP_ERR_MSG_TYPE;
     if (retval)
-        return retval;
+        goto cleanup;
 
-    retval = krb5int_fast_process_response(context, fast_state,
-                                           local_dec_rep, &strengthen_key);
+    retval = krb5int_fast_process_response(context, fast_state, dec_rep,
+                                           &strengthen_key);
     if (retval == KRB5_ERR_FAST_REQUIRED)
         retval = 0;
     else if (retval)
@@ -73,13 +71,16 @@ krb5int_decode_tgs_rep(krb5_context context,
     if (retval)
         goto cleanup;
 
-    if ((retval = krb5_kdc_rep_decrypt_proc(context, &tgs_key, &usage,
-                                            local_dec_rep)))
-        krb5_free_kdc_rep(context, local_dec_rep);
-    else
-        *dec_rep = local_dec_rep;
+    retval = krb5_kdc_rep_decrypt_proc(context, &tgs_key, &usage, dec_rep);
+    if (retval)
+        goto cleanup;
+
+    *dec_rep_out = dec_rep;
+    dec_rep = NULL;
+
 cleanup:
+    krb5_free_kdc_rep(context, dec_rep);
     krb5_free_keyblock(context, strengthen_key);
     krb5_free_keyblock_contents(context, &tgs_key);
-    return (retval);
+    return retval;
 }
