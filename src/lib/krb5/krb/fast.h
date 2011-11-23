@@ -87,8 +87,8 @@ krb5int_fast_as_armor(krb5_context context,
 
 krb5_error_code
 krb5int_fast_reply_key(krb5_context context,
-                       krb5_keyblock *strengthen_key,
-                       krb5_keyblock *existing_key, krb5_keyblock *output_key);
+                       const krb5_keyblock *strengthen_key,
+                       const krb5_keyblock *existing_key, krb5_keyblock *output_key);
 
 
 krb5_error_code

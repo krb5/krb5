@@ -353,16 +353,20 @@ krb5int_fast_process_error(krb5_context context,
 {
     krb5_error_code retval = 0;
     krb5_error *err_reply = *err_replyptr;
-
-    *out_padata = NULL;
-    *retry = 0;
-    if (state->armor_key) {
         krb5_pa_data *fx_error_pa;
-        krb5_pa_data **result = NULL;
-        krb5_data scratch;
+            krb5_pa_data **result = NULL;
+            krb5_data scratch;
         krb5_error *fx_error = NULL;
         krb5_fast_response *fast_response = NULL;
+        scratch.data = NULL;
 
+    if (out_padata)
+        *out_padata = NULL;
+    if (retry)
+        *retry = 0;
+
+
+    if (state->armor_key) {
         retval = decode_krb5_padata_sequence(&err_reply->e_data, &result);
         if (retval == 0)
             retval = decrypt_fast_reply(context, state, result,
@@ -373,12 +377,12 @@ krb5int_fast_process_error(krb5_context context,
              * expect that, but treating it as the fatal error indicated by the
              * KDC seems reasonable.
              */
+            if (retry != NULL)
             *retry = 0;
             krb5_free_pa_data(context, result);
+            result = NULL;
             return 0;
         }
-        krb5_free_pa_data(context, result);
-        result = NULL;
         if (retval == 0) {
             fx_error_pa = krb5int_find_pa_data(context, fast_response->padata,
                                                KRB5_PADATA_FX_ERROR);
@@ -398,26 +402,29 @@ krb5int_fast_process_error(krb5_context context,
             krb5_free_error(context, err_reply);
             *err_replyptr = fx_error;
             fx_error = NULL;
+            if (out_padata) {
             *out_padata = fast_response->padata;
             fast_response->padata = NULL;
+            }
             /*
              * If there is more than the fx_error padata, then we want
              * to retry the error if a cookie is present
              */
-            *retry = (*out_padata)[1] != NULL;
-            if (krb5int_find_pa_data(context, *out_padata,
-                                     KRB5_PADATA_FX_COOKIE) == NULL)
-                *retry = 0;
+            if (retry != NULL) {
+                *retry = (*out_padata)[1] != NULL;
+                if (krb5int_find_pa_data(context, *out_padata,
+                                         KRB5_PADATA_FX_COOKIE) == NULL)
+                    *retry = 0;
+            }
         }
-        if (fx_error)
-            krb5_free_error(context, fx_error);
-        krb5_free_fast_response(context, fast_response);
     } else { /*not FAST*/
         /* Possibly retry if there's any e_data to process. */
+        if (retry)
         *retry = (err_reply->e_data.length > 0);
         /* Try to decode e_data as pa-data or typed-data for out_padata. */
-        retval = decode_krb5_padata_sequence(&err_reply->e_data, out_padata);
-        if (retval != 0) {
+        if (out_padata)
+            retval = decode_krb5_padata_sequence(&err_reply->e_data, out_padata);
+        if ((out_padata != NULL) && (retval != 0)) {
             krb5_typed_data **tdata;
             /* krb5_typed data and krb5_pa_data are compatible structures. */
             if (decode_krb5_typed_data(&err_reply->e_data, &tdata) == 0)
@@ -425,6 +432,10 @@ krb5int_fast_process_error(krb5_context context,
             retval = 0;
         }
     }
+                    krb5_free_pa_data(context, result);
+                    krb5_free_fast_response(context, fast_response);
+if (fx_error)
+            krb5_free_error(context, fx_error);
     return retval;
 }
 
@@ -486,16 +497,16 @@ krb5int_fast_process_response(krb5_context context,
 
 krb5_error_code
 krb5int_fast_reply_key(krb5_context context,
-                       krb5_keyblock *strengthen_key,
-                       krb5_keyblock *existing_key,
+                       const krb5_keyblock *strengthen_key,
+                       const krb5_keyblock *existing_key,
                        krb5_keyblock *out_key)
 {
     krb5_keyblock *key = NULL;
     krb5_error_code retval = 0;
     krb5_free_keyblock_contents(context, out_key);
     if (strengthen_key) {
-        retval = krb5_c_fx_cf2_simple(context, strengthen_key,
-                                      "strengthenkey", existing_key,
+        retval = krb5_c_fx_cf2_simple(context, (krb5_keyblock *) strengthen_key,
+                                      "strengthenkey", (krb5_keyblock *) existing_key,
                                       "replykey", &key);
         if (retval == 0) {
             TRACE_FAST_REPLY_KEY(context, key);
