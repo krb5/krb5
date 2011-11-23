@@ -26,6 +26,7 @@
 
 #include "k5-int.h"
 #include "int-proto.h"
+#include "fast.h"
 
 /*
   Constructs a TGS request
@@ -147,6 +148,7 @@ cleanup:
 
 krb5_error_code
 krb5int_make_tgs_request_ext(krb5_context context,
+                             struct krb5int_fast_request_state *fast_state,
                              krb5_flags kdcoptions,
                              const krb5_ticket_times *timestruct,
                              const krb5_enctype *ktypes,
@@ -208,7 +210,11 @@ krb5int_make_tgs_request_ext(krb5_context context,
         return retval;
     TRACE_SEND_TGS_SUBKEY(context, local_subkey);
 
-    if (authorization_data) {
+    retval = krb5int_fast_tgs_armor(context, fast_state, local_subkey,
+                                    &in_cred->keyblock, NULL, NULL);
+    if (retval)
+        goto cleanup;
+        if (authorization_data) {
         /* need to encrypt it in the request */
 
         if ((retval = encode_krb5_authdata(authorization_data, &scratch)))
@@ -249,7 +255,7 @@ krb5int_make_tgs_request_ext(krb5_context context,
         tgsreq.second_ticket = 0;
 
     /* encode the body; then checksum it */
-    if ((retval = encode_krb5_kdc_req_body(&tgsreq, &scratch)))
+    if ((retval = krb5int_fast_prep_req_body(context, fast_state, &tgsreq, &scratch)))
         goto cleanup;
 
     /*
@@ -320,7 +326,9 @@ krb5int_make_tgs_request_ext(krb5_context context,
             goto cleanup;
     }
     /* the TGS_REQ is assembled in tgsreq, so encode it */
-    if ((retval = encode_krb5_tgs_req(&tgsreq, &scratch)))
+    if ((retval = krb5int_fast_prep_req(context, fast_state, &tgsreq,
+                                        &scratch2, encode_krb5_tgs_req,
+                                        &scratch)))
         goto cleanup;
 
     *request_data = *scratch;

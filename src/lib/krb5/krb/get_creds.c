@@ -39,6 +39,7 @@
 
 #include "k5-int.h"
 #include "int-proto.h"
+#include "fast.h"
 
 /*
  * Set *mcreds and *fields to a matching credential and field set for
@@ -151,6 +152,7 @@ struct _krb5_tkt_creds_context {
     krb5_flags req_options;     /* Caller-requested KRB5_GC_* options */
     krb5_flags req_kdcopt;      /* Caller-requested options as KDC options */
     krb5_authdata **authdata;   /* Caller-requested authdata */
+    struct krb5int_fast_request_state *fast_state;
 
     /* The following fields are used in multiple steps. */
     krb5_creds *cur_tgt;        /* TGT to be used for next query */
@@ -266,7 +268,8 @@ make_request(krb5_context context, krb5_tkt_creds_context ctx,
     if (!krb5_c_valid_enctype(ctx->cur_tgt->keyblock.enctype))
         return KRB5_PROG_ETYPE_NOSUPP;
 
-    code = krb5int_make_tgs_request(context, ctx->cur_tgt, ctx->kdcopt,
+    code = krb5int_make_tgs_request(context, ctx->fast_state,
+                                    ctx->cur_tgt, ctx->kdcopt,
                                     ctx->cur_tgt->addresses, NULL,
                                     ctx->tgs_in_creds, NULL, NULL, &request,
                                     &ctx->timestamp, &ctx->nonce,
@@ -354,7 +357,8 @@ get_creds_from_tgs_reply(krb5_context context, krb5_tkt_creds_context ctx,
 
     krb5_free_creds(context, ctx->reply_creds);
     ctx->reply_creds = NULL;
-    code = krb5int_process_tgs_reply(context, reply, ctx->cur_tgt, ctx->kdcopt,
+    code = krb5int_process_tgs_reply(context, ctx->fast_state,
+                                     reply, ctx->cur_tgt, ctx->kdcopt,
                                      ctx->cur_tgt->addresses, NULL,
                                      ctx->tgs_in_creds, ctx->timestamp,
                                      ctx->nonce, ctx->subkey, NULL, NULL,
@@ -1043,6 +1047,9 @@ krb5_tkt_creds_init(krb5_context context, krb5_ccache ccache,
     ctx = k5alloc(sizeof(*ctx), &code);
     if (ctx == NULL)
         goto cleanup;
+    code = krb5int_fast_make_state(context, &ctx->fast_state);
+    if (code)
+        goto cleanup;
 
     ctx->req_options = options;
     ctx->req_kdcopt = 0;
@@ -1110,6 +1117,7 @@ krb5_tkt_creds_free(krb5_context context, krb5_tkt_creds_context ctx)
 {
     if (ctx == NULL)
         return;
+    krb5int_fast_free_state(context, ctx->fast_state);
     krb5_free_creds(context, ctx->in_creds);
     krb5_cc_close(context, ctx->ccache);
     krb5_free_principal(context, ctx->req_server);

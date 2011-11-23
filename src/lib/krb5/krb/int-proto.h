@@ -27,6 +27,8 @@
 #ifndef KRB5_INT_FUNC_PROTO__
 #define KRB5_INT_FUNC_PROTO__
 
+struct krb5int_fast_request_state;
+
 krb5_error_code
 krb5int_tgtname(krb5_context context, const krb5_data *, const krb5_data *,
                 krb5_principal *);
@@ -89,6 +91,7 @@ krb5_get_cred_via_tkt_ext (krb5_context context, krb5_creds *tkt,
 
 krb5_error_code
 krb5int_make_tgs_request_ext(krb5_context context,
+                             struct krb5int_fast_request_state *,
                              krb5_flags kdcoptions,
                              const krb5_ticket_times *timestruct,
                              const krb5_enctype *ktypes,
@@ -110,6 +113,7 @@ krb5int_make_tgs_request_ext(krb5_context context,
 
 krb5_error_code
 krb5int_make_tgs_request(krb5_context context,
+                         struct krb5int_fast_request_state *,
                          krb5_creds *tkt,
                          krb5_flags kdcoptions,
                          krb5_address *const *address,
@@ -127,6 +131,7 @@ krb5int_make_tgs_request(krb5_context context,
 
 krb5_error_code
 krb5int_process_tgs_reply(krb5_context context,
+                          struct krb5int_fast_request_state *,
                           krb5_data *response_data,
                           krb5_creds *tkt,
                           krb5_flags kdcoptions,
@@ -145,7 +150,9 @@ krb5int_process_tgs_reply(krb5_context context,
  * in with the subkey needed to decrypt the TGS
  * response. Otherwise it will be set to null.
  */
-krb5_error_code krb5int_decode_tgs_rep(krb5_context, krb5_data *,
+krb5_error_code krb5int_decode_tgs_rep(krb5_context,
+                                       struct krb5int_fast_request_state *,
+                                       krb5_data *,
                                        const krb5_keyblock *, krb5_keyusage,
                                        krb5_kdc_rep ** );
 
