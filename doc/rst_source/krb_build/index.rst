@@ -46,6 +46,7 @@ Contents:
    doing_build.rst
    options2configure.rst
    osconf.rst
+   test_cov.rst
 
 
 
