@@ -97,7 +97,7 @@ krb5_mk_ncred_basic(krb5_context context,
      * structure and copy the ticket into the ticket list.
      */
     for (i = 0; i < nppcreds; i++) {
-        credenc.ticket_info[i] = malloc(sizeof(krb5_cred_info));
+        credenc.ticket_info[i] = calloc(1, sizeof(krb5_cred_info));
         if (credenc.ticket_info[i] == NULL) {
             retval = ENOMEM;
             goto cleanup;
