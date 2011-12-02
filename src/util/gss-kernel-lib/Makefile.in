@@ -47,6 +47,12 @@ OBJS= \
 	util_set.o \
 	util_ordering.o
 
+# COM_ERR_DEPS is COM_ERR_DEPS-k5 when we use the bundled com_err, and
+# empty otherwise.  Normally COM_ERR_DEPS-k5 is from the central
+# include directory in the build tree, but here we only take headers
+# from the current directory, so we need to redefine it.
+COM_ERR_DEPS-k5	= com_err.h
+
 HEADERS= \
 	gssapi/gssapi.h \
 	gssapi/gssapi_krb5.h \
@@ -77,11 +83,7 @@ HEADERS= \
 	krb5/preauth_plugin.h \
 	krb5/authdata_plugin.h \
 	profile.h \
-	$(MAYBE_COMERR_@COM_ERR_VERSION@)
-
-MAYBE_COMERR_k5 = com_err.h
-MAYBE_COMERR_sys =
-MAYBE_COMERR_intlsys =
+	$(COM_ERR_DEPS)
 
 check-pytests:: t_kgss_user t_kgss_kernel
 	$(RUNPYTEST) $(srcdir)/t_kgss.py $(PYTESTFLAGS)
