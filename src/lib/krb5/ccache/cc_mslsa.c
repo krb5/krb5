@@ -2648,6 +2648,15 @@ krb5_lcc_store(krb5_context context, krb5_ccache id, krb5_creds *creds)
     if (!is_windows_2000())
         return KRB5_FCC_NOFILE;
 
+    if (krb5_is_config_principal(context, creds->server)) {
+        /* mslsa cannot store config creds, so we have to bail.
+         * The 'right' thing to do would be to return an appropriate error,
+         * but that would require modifying the calling code to check
+         * for that error and ignore it.
+         */
+        return KRB5_OK;
+    }
+
 #ifdef KERB_SUBMIT_TICKET
     /* we can use the new KerbSubmitTicketMessage to store the ticket */
     if (KerbSubmitTicket( data->LogonHandle, data->PackageId, context, creds ))
