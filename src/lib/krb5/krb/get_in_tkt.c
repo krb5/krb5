@@ -1102,6 +1102,7 @@ init_creds_step_request(krb5_context context,
                         krb5_data *out)
 {
     krb5_error_code code;
+    krb5_boolean got_real;
 
     if (ctx->loopcount >= MAX_IN_TKT_LOOPS) {
         code = KRB5_GET_IN_TKT_LOOP;
@@ -1119,7 +1120,10 @@ init_creds_step_request(krb5_context context,
                                ctx->prompter,
                                ctx->prompter_data,
                                &ctx->preauth_rock,
-                               ctx->opte);
+                               ctx->opte,
+                               &got_real);
+        if (code == 0 && !got_real && ctx->preauth_required)
+            code = KRB5_PREAUTH_FAILED;
         if (code != 0)
             goto cleanup;
     } else {
@@ -1257,7 +1261,7 @@ init_creds_step_reply(krb5_context context,
     int canon_flag = 0;
     krb5_keyblock *strengthen_key = NULL;
     krb5_keyblock encrypting_key;
-    krb5_boolean fast_avail;
+    krb5_boolean fast_avail, got_real;
 
     encrypting_key.length = 0;
     encrypting_key.contents = NULL;
@@ -1296,6 +1300,7 @@ init_creds_step_reply(krb5_context context,
             code = sort_krb5_padata_sequence(context,
                                              &ctx->request->client->realm,
                                              ctx->preauth_to_use);
+            ctx->preauth_required = TRUE;
 
         } else if (canon_flag && ctx->err_reply->error == KDC_ERR_WRONG_REALM) {
             if (ctx->err_reply->client == NULL ||
@@ -1364,7 +1369,8 @@ init_creds_step_reply(krb5_context context,
                            ctx->prompter,
                            ctx->prompter_data,
                            &ctx->preauth_rock,
-                           ctx->opte);
+                           ctx->opte,
+                           &got_real);
     if (code != 0)
         goto cleanup;
 
