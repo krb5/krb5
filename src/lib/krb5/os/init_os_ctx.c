@@ -36,6 +36,7 @@
 
 #if defined(_WIN32)
 #include <winsock.h>
+#include <Shlobj.h>
 
 static krb5_error_code
 get_from_windows_dir(
@@ -113,14 +114,8 @@ get_from_registry(
     const char *key_path = "Software\\MIT\\Kerberos5";
     const char *value_name = "config";
 
-    /* a wannabe assertion */
-    if (!pbuffer) {
-        /*
-         * We have a programming error!  For now, we segfault :)
-         * There is no good mechanism to deal.
-         */
-    }
-    *pbuffer = 0;
+    assert(pbuffer != NULL);
+    *pbuffer = NULL;
 
     if ((rc = RegOpenKeyEx(hBaseKey, key_path, 0, KEY_QUERY_VALUE,
                            &hKey)) != ERROR_SUCCESS) {
@@ -150,6 +145,69 @@ get_from_registry(
 cleanup:
     if (hKey)
         RegCloseKey(hKey);
+    if (retval && *pbuffer) {
+        free(*pbuffer);
+        /* Let's say we did not find anything: */
+        *pbuffer = 0;
+    }
+    return retval;
+}
+
+/*
+ * get_from_known_folder
+ *
+ * This will find a profile in the specified known folder (e.g. CSIDL_APPDATA).
+ * *pbuffer != 0 if we found something.  Make sure to free(*pbuffer) when done.
+ * It will return an error code if there is an error the user should know
+ * about.  We maintain the invariant: return value != 0 =>
+ * *pbuffer == 0.
+ */
+static krb5_error_code
+get_from_known_folder(
+    int folderId,
+    char** pbuffer
+)
+{
+    char szPath[MAX_PATH];
+    const char * software_suffix = "\\MIT\\Kerberos5";
+    krb5_error_code retval = 0;
+    size_t size;
+    struct _stat s;
+
+    assert(pbuffer);
+    *pbuffer = NULL;
+
+    if (SUCCEEDED(SHGetFolderPath(NULL,
+                                  folderId /*|CSIDL_FLAG_CREATE*/,
+                                  NULL,
+                                  SHGFP_TYPE_CURRENT,
+                                  szPath))) {
+        size = strlen(software_suffix) + strlen("\\" DEFAULT_PROFILE_FILENAME) + strlen(szPath);
+        if ((size + 1) >= sizeof(szPath)) {
+            goto cleanup;
+        }
+        strlcat(szPath, software_suffix, sizeof(szPath));
+        strlcat(szPath, "\\", sizeof(szPath));
+        strlcat(szPath, DEFAULT_PROFILE_FILENAME, sizeof(szPath));
+    } else {
+        /* Might want to deliberate a bit better why we failed.
+            But for the time being this is not an error */
+        goto cleanup;
+    }
+
+    if (_stat(szPath, &s)) {
+        goto cleanup;
+    }
+
+    *pbuffer = malloc(size + 1);
+    if (!*pbuffer) {
+        retval = ENOMEM;
+        goto cleanup;
+    }
+
+    strlcpy (*pbuffer, szPath, size + 1);
+
+cleanup:
     if (retval && *pbuffer) {
         free(*pbuffer);
         /* Let's say we did not find anything: */
@@ -200,6 +258,17 @@ os_get_default_config_files(profile_filespec_t **pfiles, krb5_boolean secure)
         retval = get_from_registry(&name, HKEY_LOCAL_MACHINE);
         if (retval) return retval;
     }
+
+    if (!name && !secure) {
+        retval = get_from_known_folder(CSIDL_APPDATA, &name);
+        if (retval) return retval;
+    }
+
+    if (!name) {
+        retval = get_from_known_folder(CSIDL_COMMON_APPDATA, &name);
+        if (retval) return retval;
+    }
+
     if (!name && !secure) {
         /* module dir */
         retval = get_from_module_dir(&name);
