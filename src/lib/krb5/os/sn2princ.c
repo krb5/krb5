@@ -90,7 +90,7 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
         /* copy the hostname into non-volatile storage */
 
         if (type == KRB5_NT_SRV_HST) {
-            struct addrinfo *ai, hints;
+            struct addrinfo *ai = NULL, hints;
             int err;
             char hnamebuf[NI_MAXHOST];
 
@@ -114,7 +114,8 @@ krb5_sname_to_principal(krb5_context context, const char *hostname, const char *
             }
             remote_host = strdup((ai && ai->ai_canonname) ? ai->ai_canonname : hostname);
             if (!remote_host) {
-                freeaddrinfo(ai);
+                if(ai)
+                    freeaddrinfo(ai);
                 return ENOMEM;
             }
 
