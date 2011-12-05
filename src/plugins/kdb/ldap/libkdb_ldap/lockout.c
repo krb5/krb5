@@ -127,7 +127,7 @@ krb5_ldap_lockout_check_policy(krb5_context context,
     code = lookup_lockout_policy(context, entry, &max_fail,
                                  &failcnt_interval,
                                  &lockout_duration);
-    if (code != 0 || failcnt_interval == 0)
+    if (code != 0)
         return code;
 
     if (locked_check_p(context, stamp, max_fail, lockout_duration, entry))
