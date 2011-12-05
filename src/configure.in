@@ -1224,7 +1224,7 @@ if test "x$with_system_verto" != xno; then
     VERTO_LIBS=`pkg-config --libs libverto`
     VERTO_VERSION=sys
   else
-    AC_CHECK_LIB([verto], [verto_run], [VERTO_VERSION=sys],
+    AC_CHECK_LIB([verto], [verto_run], [VERTO_VERSION=sys; VERTO_LIBS=-lverto],
       [if test "x$with_system_verto" = xyes; then
         AC_MSG_ERROR([cannot detect system libverto])
       fi])
