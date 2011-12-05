@@ -121,7 +121,7 @@ rep_etypes2str(char *s, size_t len, krb5_kdc_rep *rep);
 void
 process_as_req (krb5_kdc_req *, krb5_data *,
                 const krb5_fulladdr *,
-                loop_respond_fn, void *);
+                verto_ctx *, loop_respond_fn, void *);
 
 /* do_tgs_req.c */
 krb5_error_code
@@ -135,6 +135,7 @@ dispatch (void *,
           const krb5_fulladdr *,
           krb5_data *,
           int,
+          verto_ctx *,
           loop_respond_fn,
           void *);
 
@@ -168,9 +169,9 @@ missing_required_preauth (krb5_db_entry *client,
                           krb5_enc_tkt_part *enc_tkt_reply);
 typedef void (*kdc_hint_respond_fn)(void *arg);
 void
-get_preauth_hint_list(krb5_kdc_req *request, krb5_kdcpreauth_rock rock,
-                      krb5_pa_data ***e_data_out, kdc_hint_respond_fn respond,
-                      void *arg);
+get_preauth_hint_list(krb5_kdc_req *request,
+                      krb5_kdcpreauth_rock rock, krb5_pa_data ***e_data_out,
+                      kdc_hint_respond_fn respond, void *arg);
 void
 load_preauth_plugins(krb5_context context);
 void
@@ -400,6 +401,7 @@ struct krb5_kdcpreauth_rock_st {
     krb5_db_entry *client;
     krb5_key_data *client_key;
     struct kdc_request_state *rstate;
+    verto_ctx *vctx;
 };
 
 #define isflagset(flagfield, flag) (flagfield & (flag))

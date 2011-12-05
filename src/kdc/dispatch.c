@@ -81,8 +81,9 @@ finish_dispatch(void *arg, krb5_error_code code, krb5_data *response)
 }
 
 void
-dispatch(void *cb, struct sockaddr *local_saddr, const krb5_fulladdr *from,
-         krb5_data *pkt, int is_tcp, loop_respond_fn respond, void *arg)
+dispatch(void *cb, struct sockaddr *local_saddr,
+         const krb5_fulladdr *from, krb5_data *pkt, int is_tcp,
+         verto_ctx *vctx, loop_respond_fn respond, void *arg)
 {
     krb5_error_code retval;
     krb5_kdc_req *as_req;
@@ -166,7 +167,8 @@ dispatch(void *cb, struct sockaddr *local_saddr, const krb5_fulladdr *from,
              * process_as_req frees the request if it is called
              */
             if (!(retval = setup_server_realm(as_req->server))) {
-                process_as_req(as_req, pkt, from, finish_dispatch, state);
+                process_as_req(as_req, pkt, from, vctx, finish_dispatch,
+                               state);
                 return;
             }
             else
