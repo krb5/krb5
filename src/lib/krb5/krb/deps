@@ -292,7 +292,8 @@ decode_kdc.so decode_kdc.po $(OUTPRE)decode_kdc.$(OBJEXT): \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h decode_kdc.c int-proto.h
+  $(top_srcdir)/include/socket-utils.h decode_kdc.c fast.h \
+  int-proto.h
 decrypt_tk.so decrypt_tk.po $(OUTPRE)decrypt_tk.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -402,7 +403,8 @@ gc_via_tkt.so gc_via_tkt.po $(OUTPRE)gc_via_tkt.$(OBJEXT): \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h gc_via_tkt.c int-proto.h
+  $(top_srcdir)/include/socket-utils.h fast.h gc_via_tkt.c \
+  int-proto.h
 gen_seqnum.so gen_seqnum.po $(OUTPRE)gen_seqnum.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -446,7 +448,8 @@ get_creds.so get_creds.po $(OUTPRE)get_creds.$(OBJEXT): \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h get_creds.c int-proto.h
+  $(top_srcdir)/include/socket-utils.h fast.h get_creds.c \
+  int-proto.h
 get_in_tkt.so get_in_tkt.po $(OUTPRE)get_in_tkt.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
@@ -920,7 +923,8 @@ send_tgs.so send_tgs.po $(OUTPRE)send_tgs.$(OBJEXT): \
   $(top_srcdir)/include/k5-trace.h $(top_srcdir)/include/krb5.h \
   $(top_srcdir)/include/krb5/authdata_plugin.h $(top_srcdir)/include/krb5/plugin.h \
   $(top_srcdir)/include/krb5/preauth_plugin.h $(top_srcdir)/include/port-sockets.h \
-  $(top_srcdir)/include/socket-utils.h int-proto.h send_tgs.c
+  $(top_srcdir)/include/socket-utils.h fast.h int-proto.h \
+  send_tgs.c
 ser_actx.so ser_actx.po $(OUTPRE)ser_actx.$(OBJEXT): \
   $(BUILDTOP)/include/autoconf.h $(BUILDTOP)/include/krb5/krb5.h \
   $(BUILDTOP)/include/osconf.h $(BUILDTOP)/include/profile.h \
