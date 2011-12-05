@@ -31,6 +31,9 @@ SHLIB_RDIRS=$(KRB5_LIBDIR)
 
 SRCS= 	$(srcdir)/ldap_exp.c
 
+$(TOPLIBD)/libkdb_ldap$(SHLIBEXT) : all-recurse
+
+
 STOBJLISTS=OBJS.ST
 STLIBOBJS= ldap_exp.o
 
