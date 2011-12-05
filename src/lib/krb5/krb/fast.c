@@ -207,8 +207,6 @@ krb5int_fast_prep_req(krb5_context context,
     krb5_data *encoded_fast_req = NULL;
     krb5_data *encoded_armored_req = NULL;
     krb5_data *local_encoded_result = NULL;
-    krb5_data random_data;
-    char random_buf[4];
 
     assert(state != NULL);
     assert(state->fast_outer_request.padata == NULL);
@@ -218,14 +216,7 @@ krb5int_fast_prep_req(krb5_context context,
     }
 
     TRACE_FAST_ENCODE(context);
-    /* Fill in a fresh random nonce for each inner request*/
-    random_data.length = 4;
-    random_data.data = (char *)random_buf;
-    retval = krb5_c_random_make_octets(context, &random_data);
-    if (retval == 0) {
-        request->nonce = 0x7fffffff & load_32_n(random_buf);
-        state->nonce = request->nonce;
-    }
+    state->nonce = request->nonce;
     fast_req.req_body =  request;
     if (fast_req.req_body->padata == NULL) {
         fast_req.req_body->padata = calloc(1, sizeof(krb5_pa_data *));

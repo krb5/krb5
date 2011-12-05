@@ -42,6 +42,8 @@ realm = K5Realm(krb5_conf=pkinit_krb5_conf, kdc_conf=restrictive_kdc_conf,
                 create_user=False)
 realm.addprinc('WELLKNOWN/ANONYMOUS')
 realm.kinit('@%s' % realm.realm, flags=['-n'])
+# now try FAST
+realm.kinit('@%s' % realm.realm, flags=['-n', '-T', realm.ccache])
 realm.run_as_client([kvno, realm.host_princ], expected_code=1)
 
 success('Anonymous PKINIT.')
