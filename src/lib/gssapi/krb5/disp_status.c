@@ -168,7 +168,8 @@ krb5_gss_display_status(minor_status, status_value, status_type,
 
     if ((mech_type != GSS_C_NULL_OID) &&
         !g_OID_equal(gss_mech_krb5, mech_type) &&
-        !g_OID_equal(gss_mech_krb5_old, mech_type)) {
+        !g_OID_equal(gss_mech_krb5_old, mech_type) &&
+        !g_OID_equal(gss_mech_iakerb, mech_type)) {
         *minor_status = 0;
         return(GSS_S_BAD_MECH);
     }
