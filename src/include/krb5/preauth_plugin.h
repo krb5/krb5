@@ -242,10 +242,14 @@ typedef krb5_error_code
                              krb5_pa_data ***pa_data_out);
 
 /*
- * Optional: Attempt to use e-data in the error response to try to recover from
- * the given error.  If this function is provided, and it stores data in
- * pa_data_out which is different data from the contents of pa_data_in, then
- * the client library will retransmit the request.
+ * Optional: Attempt to use error and error_padata to try to recover from the
+ * given error.  To work with both FAST and non-FAST errors, an implementation
+ * should generally consult error_padata rather than decoding error->e_data.
+ * For non-FAST errors, it contains the e_data decoded as either pa-data or
+ * typed-data.
+ *
+ * If this function is provided, and it returns 0 and stores data in
+ * pa_data_out, then the client library will retransmit the request.
  */
 typedef krb5_error_code
 (*krb5_clpreauth_tryagain_fn)(krb5_context context,
@@ -257,8 +261,9 @@ typedef krb5_error_code
                               krb5_kdc_req *request,
                               krb5_data *encoded_request_body,
                               krb5_data *encoded_previous_request,
-                              krb5_pa_data *pa_data_in,
+                              krb5_preauthtype pa_type,
                               krb5_error *error,
+                              krb5_pa_data **error_padata,
                               krb5_prompter_fct prompter, void *prompter_data,
                               krb5_pa_data ***pa_data_out);
 

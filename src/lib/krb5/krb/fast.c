@@ -346,17 +346,12 @@ decrypt_fast_reply(krb5_context context,
 }
 
 /*
- * FAST separates two concepts: the set of padata we're using to
- * decide what pre-auth mechanisms to use and the set of padata we're
- * making available to mechanisms in order for them to respond to an
- * error.  The plugin interface in March 2009 does not permit
- * separating these concepts for the plugins.  This function makes
- * both available for future revisions to the plugin interface.  It
- * also re-encodes the padata from the current error as a encoded
- * typed-data and puts that in the e_data field.  That will allow
- * existing plugins with the old interface to find the error data.
- * The output parameter out_padata contains the padata from the error
- * whenever padata  is available (all the time with fast).
+ * If state contains an armor key and *err_replyptr contains a FAST error,
+ * decode it and set *err_replyptr to the inner error and *out_padata to the
+ * padata in the FAST response.  Otherwise, leave *err_replyptr alone and set
+ * *out_padata to the error e_data decoded as pa-data or typed-data, or to NULL
+ * if it doesn't decode as either.  In either case, set *retry to indicate
+ * whether the client should try to make a follow-up request.
  */
 krb5_error_code
 krb5int_fast_process_error(krb5_context context,
@@ -373,7 +368,7 @@ krb5int_fast_process_error(krb5_context context,
     if (state->armor_key) {
         krb5_pa_data *fx_error_pa;
         krb5_pa_data **result = NULL;
-        krb5_data scratch, *encoded_td = NULL;
+        krb5_data scratch;
         krb5_error *fx_error = NULL;
         krb5_fast_response *fast_response = NULL;
 
@@ -408,20 +403,7 @@ krb5int_fast_process_error(krb5_context context,
             scratch.length = fx_error_pa->length;
             retval = decode_krb5_error(&scratch, &fx_error);
         }
-        /*
-         * krb5_pa_data and krb5_typed_data are safe to cast between:
-         * they have the same type fields in the same order.
-         * (krb5_preauthtype is a krb5_int32).  If krb5_typed_data is
-         * ever changed then this will need to be a copy not a cast.
-         */
-        if (retval == 0)
-            retval = encode_krb5_typed_data((const krb5_typed_data **)
-                                            fast_response->padata,
-                                            &encoded_td);
         if (retval == 0) {
-            fx_error->e_data = *encoded_td;
-            free(encoded_td); /*contents owned by fx_error*/
-            encoded_td = NULL;
             krb5_free_error(context, err_reply);
             *err_replyptr = fx_error;
             fx_error = NULL;
@@ -440,20 +422,16 @@ krb5int_fast_process_error(krb5_context context,
             krb5_free_error(context, fx_error);
         krb5_free_fast_response(context, fast_response);
     } else { /*not FAST*/
+        /* Possibly retry if there's any e_data to process. */
         *retry = (err_reply->e_data.length > 0);
-        if ((err_reply->error == KDC_ERR_PREAUTH_REQUIRED ||
-             err_reply->error == KDC_ERR_PREAUTH_FAILED) &&
-            err_reply->e_data.length) {
-            krb5_pa_data **result = NULL;
-            retval = decode_krb5_padata_sequence(&err_reply->e_data, &result);
-            if (retval == 0) {
-                *out_padata = result;
-                return 0;
-            }
-            krb5_free_pa_data(context, result);
-            krb5_set_error_message(context, retval,
-                                   _("Error decoding padata in error reply"));
-            return retval;
+        /* Try to decode e_data as pa-data or typed-data for out_padata. */
+        retval = decode_krb5_padata_sequence(&err_reply->e_data, out_padata);
+        if (retval != 0) {
+            krb5_typed_data **tdata;
+            /* krb5_typed data and krb5_pa_data are compatible structures. */
+            if (decode_krb5_typed_data(&err_reply->e_data, &tdata) == 0)
+                *out_padata = (krb5_pa_data **)tdata;
+            retval = 0;
         }
     }
     return retval;

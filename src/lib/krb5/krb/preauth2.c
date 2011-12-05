@@ -1370,6 +1370,7 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
                          krb5_pa_data **padata,
                          krb5_pa_data ***return_padata,
                          krb5_error *err_reply,
+                         krb5_pa_data **err_padata,
                          krb5_prompter_fct prompter, void *prompter_data,
                          krb5_clpreauth_rock preauth_rock,
                          krb5_gic_opt_ext *opte)
@@ -1409,8 +1410,8 @@ krb5_do_preauth_tryagain(krb5_context kcontext,
                                            request,
                                            encoded_request_body,
                                            encoded_previous_request,
-                                           padata[i],
-                                           err_reply,
+                                           padata[i]->pa_type,
+                                           err_reply, err_padata,
                                            prompter, prompter_data,
                                            &out_padata) == 0) {
                 if (out_padata != NULL) {

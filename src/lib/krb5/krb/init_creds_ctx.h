@@ -18,6 +18,7 @@ struct _krb5_init_creds_context {
     unsigned int loopcount;
     krb5_data password;
     krb5_error *err_reply;
+    krb5_pa_data **err_padata;
     krb5_creds cred;
     krb5_kdc_req *request;
     krb5_kdc_rep *reply;
