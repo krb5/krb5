@@ -176,7 +176,7 @@ process_tgs_req(krb5_data *pkt, const krb5_fulladdr *from,
     scratch.length = pa_tgs_req->length;
     scratch.data = (char *) pa_tgs_req->contents;
     errcode = kdc_find_fast(&request, &scratch, subkey,
-                            header_ticket->enc_part2->session, state);
+                            header_ticket->enc_part2->session, state, NULL);
     if (errcode !=0) {
         status = "kdc_find_fast";
         goto cleanup;
