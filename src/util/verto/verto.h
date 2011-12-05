@@ -39,8 +39,8 @@ typedef int verto_proc_status;
 
 #define VERTO_SIG_IGN ((verto_callback *) 1)
 
-typedef struct _verto_ctx verto_ctx;
-typedef struct _verto_ev verto_ev;
+typedef struct verto_ctx verto_ctx;
+typedef struct verto_ev verto_ev;
 
 typedef enum {
     VERTO_EV_TYPE_NONE = 0,
@@ -119,7 +119,7 @@ typedef void (verto_callback)(verto_ctx *ctx, verto_ev *ev);
  * @see verto_set_default()
  * @param impl The implementation to use, or NULL.
  * @param reqtypes A bitwise or'd list of required event type features.
- * @return A new _ev_ctx, or NULL on error.  Call verto_free() when done.
+ * @return A new verto_ctx, or NULL on error.  Call verto_free() when done.
  */
 verto_ctx *
 verto_new(const char *impl, verto_ev_type reqtypes);
@@ -141,7 +141,7 @@ verto_new(const char *impl, verto_ev_type reqtypes);
  * @see verto_free()
  * @param impl The implementation to use, or NULL.
  * @param reqtypes A bitwise or'd list of required event type features.
- * @return The default _ev_ctx, or NULL on error.  Call verto_free() when done.
+ * @return The default verto_ctx, or NULL on error.  Call verto_free() when done.
  */
 verto_ctx *
 verto_default(const char *impl, verto_ev_type reqtypes);
@@ -165,7 +165,7 @@ verto_default(const char *impl, verto_ev_type reqtypes);
  * @see verto_default()
  * @param impl The implementation to use.
  * @param reqtypes A bitwise or'd list of required event type features.
- * @return The default _ev_ctx, or NULL on error.  Call verto_free() when done.
+ * @return The default verto_ctx, or NULL on error.  Call verto_free() when done.
  */
 int
 verto_set_default(const char *impl, verto_ev_type reqtypes);
@@ -217,11 +217,15 @@ verto_break(verto_ctx *ctx);
  * VERTO_EV_FLAG_REINITIABLE flag. If you fork(), you MUST call this in the
  * child process after the fork!
  *
+ * If this function fails it indicates that at least one
+ * VERTO_EV_FLAG_REINITIABLE event was not rearmed or that ctx was NULL.
+ *
  * @see verto_new()
  * @see verto_default()
  * @param ctx The verto_ctx to re-initialize.
+ * @return Non-zero on success, 0 on error.
  */
-void
+int
 verto_reinitialize(verto_ctx *ctx);
 
 /**
@@ -306,7 +310,7 @@ verto_add_idle(verto_ctx *ctx, verto_ev_flag flags,
  * NOTE: SIGCHLD is expressly not supported. If you want this notification,
  * please use verto_add_child().
  *
- * WARNNIG: Signal events can only be reliably received in the default _ev_ctx
+ * WARNNIG: Signal events can only be reliably received in the default verto_ctx
  * in some implementations.  Attempting to receive signal events in non-default
  * loops may result in assert() failures.
  *

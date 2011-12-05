@@ -22,70 +22,55 @@
  * SOFTWARE.
  */
 
-/*
- * An edited version of verto-libev.c, using an embedded libev with renamed
- * symbols.  The corresponding version of verto-libev.c is stored in this
- * directory for reference, although it is not built here.
- */
-
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 
-#include "verto-k5ev.h"
+#include <verto-libev.h>
+#define VERTO_MODULE_TYPES
+typedef struct ev_loop verto_mod_ctx;
+typedef ev_watcher verto_mod_ev;
 #include <verto-module.h>
-#include "rename.h"
-#include "autoconf.h"
-#define EV_STANDALONE 1
-/* Avoids using clock_gettime; we probably shouldn't have to do this. */
-#define EV_USE_REALTIME 0
-#define EV_FEATURES 0x5f        /* Everything but back ends */
-#ifdef HAVE_POLL_H
-#define EV_USE_POLL 1
-#endif
-/* ev.c explicitly disables poll() on Mac or FreeBSD; fall back to select(). */
-#define EV_USE_SELECT 1
-#include "ev.c"
 
 static verto_mod_ctx *
-k5ev_ctx_new(void)
+libev_ctx_new(void)
 {
     return ev_loop_new(EVFLAG_AUTO);
 }
 
 static verto_mod_ctx *
-k5ev_ctx_default(void)
+libev_ctx_default(void)
 {
     return ev_default_loop(EVFLAG_AUTO);
 }
 
 static void
-k5ev_ctx_free(verto_mod_ctx *ctx)
+libev_ctx_free(verto_mod_ctx *ctx)
 {
     if (ctx != EV_DEFAULT)
         ev_loop_destroy(ctx);
 }
 
 static void
-k5ev_ctx_run(verto_mod_ctx *ctx)
+libev_ctx_run(verto_mod_ctx *ctx)
 {
     ev_run(ctx, 0);
 }
 
 static void
-k5ev_ctx_run_once(verto_mod_ctx *ctx)
+libev_ctx_run_once(verto_mod_ctx *ctx)
 {
     ev_run(ctx, EVRUN_ONCE);
 }
 
 static void
-k5ev_ctx_break(verto_mod_ctx *ctx)
+libev_ctx_break(verto_mod_ctx *ctx)
 {
     ev_break(ctx, EVBREAK_ONE);
 }
 
 static void
-k5ev_ctx_reinitialize(verto_mod_ctx *ctx)
+libev_ctx_reinitialize(verto_mod_ctx *ctx)
 {
     ev_loop_fork(ctx);
 }
@@ -108,7 +93,7 @@ libev_callback(EV_P_ ev_watcher *w, int revents)
     break
 
 static verto_mod_ev *
-k5ev_ctx_add(verto_mod_ctx *ctx, const verto_ev *ev, verto_ev_flag *flags)
+libev_ctx_add(verto_mod_ctx *ctx, const verto_ev *ev, verto_ev_flag *flags)
 {
     union {
        ev_watcher *watcher;
@@ -150,7 +135,7 @@ k5ev_ctx_add(verto_mod_ctx *ctx, const verto_ev *ev, verto_ev_flag *flags)
 }
 
 static void
-k5ev_ctx_del(verto_mod_ctx *ctx, const verto_ev *ev, verto_mod_ev *evpriv)
+libev_ctx_del(verto_mod_ctx *ctx, const verto_ev *ev, verto_mod_ev *evpriv)
 {
     switch (verto_get_type(ev)) {
         case VERTO_EV_TYPE_IO:
@@ -175,7 +160,7 @@ k5ev_ctx_del(verto_mod_ctx *ctx, const verto_ev *ev, verto_mod_ev *evpriv)
     free(evpriv);
 }
 
-VERTO_MODULE(k5ev, NULL,
+VERTO_MODULE(libev, ev_loop_new,
              VERTO_EV_TYPE_IO |
              VERTO_EV_TYPE_TIMEOUT |
              VERTO_EV_TYPE_IDLE |
@@ -183,7 +168,7 @@ VERTO_MODULE(k5ev, NULL,
              VERTO_EV_TYPE_CHILD);
 
 verto_ctx *
-verto_convert_k5ev(struct ev_loop* loop)
+verto_convert_libev(struct ev_loop* loop)
 {
-    return verto_convert(k5ev, 0, loop);
+    return verto_convert(libev, 0, loop);
 }
