@@ -71,6 +71,7 @@ check-unix:: rtest
 
 check-pytests::
 	$(RUNPYTEST) $(srcdir)/t_workers.py $(PYTESTFLAGS)
+	$(RUNPYTEST) $(srcdir)/t_emptytgt.py $(PYTESTFLAGS)
 
 install::
 	$(INSTALL_PROGRAM) krb5kdc ${DESTDIR}$(SERVER_BINDIR)/krb5kdc
