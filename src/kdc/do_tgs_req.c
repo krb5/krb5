@@ -243,7 +243,8 @@ tgt_again:
                     if (!tgs_1 || !data_eq(*server_1, *tgs_1)) {
                         errcode = find_alternate_tgs(request, &server);
                         firstpass = 0;
-                        goto tgt_again;
+                        if (errcode == 0)
+                            goto tgt_again;
                     }
                 }
                 status = "UNKNOWN_SERVER";
