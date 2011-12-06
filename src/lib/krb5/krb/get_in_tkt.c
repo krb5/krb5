@@ -938,6 +938,14 @@ krb5_init_creds_init(krb5_context context,
         goto cleanup;
     }
 
+    /*
+     * Set a default enctype for optimistic preauth.  If we're not doing
+     * optimistic preauth, this should ordinarily get overwritten when we
+     * process the etype-info2 of the preauth-required error.
+     */
+    if (ctx->request->nktypes > 0)
+        ctx->etype = ctx->request->ktype[0];
+
     /* addresess */
     if (opte->flags & KRB5_GET_INIT_CREDS_OPT_ADDRESS_LIST) {
         code = krb5_copy_addresses(context, opte->address_list,
