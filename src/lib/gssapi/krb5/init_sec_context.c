@@ -148,9 +148,7 @@ static krb5_error_code get_credentials(context, cred, server, now,
         !krb5_principal_compare(context, cred->impersonator, server->princ)) {
         krb5_creds mcreds;
 
-        flags |= KRB5_GC_CANONICALIZE |
-            KRB5_GC_NO_STORE |
-            KRB5_GC_CONSTRAINED_DELEGATION;
+        flags |= KRB5_GC_CANONICALIZE | KRB5_GC_CONSTRAINED_DELEGATION;
 
         memset(&mcreds, 0, sizeof(mcreds));
 
