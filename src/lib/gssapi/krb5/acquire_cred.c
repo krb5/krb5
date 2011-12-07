@@ -417,6 +417,34 @@ prep_ccache(krb5_context context, krb5_gss_cred_id_rec *cred,
     return 0;
 }
 
+/* If an impersonator config entry exists in ccache, set *impersonator_out to
+ * the parsed principal.  Otherwise set *impersonator_out to NULL. */
+static krb5_error_code
+get_impersonator(krb5_context context, krb5_ccache ccache,
+                 krb5_principal *impersonator_out)
+{
+    krb5_error_code code;
+    krb5_data data = empty_data(), data0 = empty_data();
+
+    *impersonator_out = NULL;
+
+    code = krb5_cc_get_config(context, ccache, NULL,
+                              KRB5_CONF_PROXY_IMPERSONATOR, &data);
+    if (code)
+        return (code == KRB5_CC_NOTFOUND) ? 0 : code;
+
+    code = krb5int_copy_data_contents_add0(context, &data, &data0);
+    if (code)
+        goto cleanup;
+
+    code = krb5_parse_name(context, data0.data, impersonator_out);
+
+cleanup:
+    krb5_free_data_contents(context, &data);
+    krb5_free_data_contents(context, &data0);
+    return code;
+}
+
 /* Check ccache and scan it for its expiry time.  On success, cred takes
  * ownership of ccache. */
 static krb5_error_code
@@ -492,6 +520,10 @@ scan_ccache(krb5_context context, krb5_gss_cred_id_rec *cred,
         code = KG_EMPTY_CCACHE;
         goto cleanup;
     }
+
+    code = get_impersonator(context, ccache, &cred->impersonator);
+    if (code)
+        goto cleanup;
 
     (void)krb5_cc_set_flags(context, ccache, KRB5_TC_OPENCLOSE);
     cred->ccache = ccache;
@@ -622,6 +654,7 @@ acquire_cred(OM_uint32 *minor_status,
 
     cred->usage = args->cred_usage;
     cred->name = NULL;
+    cred->impersonator = NULL;
     cred->iakerb_mech = args->iakerb;
     cred->default_identity = (name == NULL);
 #ifndef LEAN_CLIENT

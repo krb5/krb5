@@ -129,7 +129,6 @@ static krb5_error_code get_credentials(context, cred, server, now,
     krb5_error_code     code;
     krb5_creds          in_creds, evidence_creds, *result_creds = NULL;
     krb5_flags          flags = 0;
-    krb5_principal      cc_princ = NULL;
 
     *out_creds = NULL;
 
@@ -140,16 +139,13 @@ static krb5_error_code get_credentials(context, cred, server, now,
 
     assert(cred->name != NULL);
 
-    if ((code = krb5_cc_get_principal(context, cred->ccache, &cc_princ)))
-        goto cleanup;
-
     /*
      * Do constrained delegation if we have proxy credentials and
      * we're not trying to get a ticket to ourselves (in which case
      * we can just use the S4U2Self or evidence ticket directly).
      */
-    if (cred->proxy_cred &&
-        !krb5_principal_compare(context, cc_princ, server->princ)) {
+    if (cred->impersonator &&
+        !krb5_principal_compare(context, cred->impersonator, server->princ)) {
         krb5_creds mcreds;
 
         flags |= KRB5_GC_CANONICALIZE |
@@ -159,20 +155,18 @@ static krb5_error_code get_credentials(context, cred, server, now,
         memset(&mcreds, 0, sizeof(mcreds));
 
         mcreds.magic = KV5M_CREDS;
-        mcreds.times.endtime = cred->tgt_expire;
-        mcreds.server = cc_princ;
+        mcreds.server = cred->impersonator;
         mcreds.client = cred->name->princ;
 
         code = krb5_cc_retrieve_cred(context, cred->ccache,
-                                     KRB5_TC_MATCH_TIMES | KRB5_TC_MATCH_AUTHDATA,
-                                     &mcreds,
+                                     KRB5_TC_MATCH_AUTHDATA, &mcreds,
                                      &evidence_creds);
         if (code)
             goto cleanup;
 
         assert(evidence_creds.ticket_flags & TKT_FLG_FORWARDABLE);
 
-        in_creds.client = cc_princ;
+        in_creds.client = cred->impersonator;
         in_creds.second_ticket = evidence_creds.ticket;
     } else {
         in_creds.client = cred->name->princ;
@@ -255,7 +249,6 @@ static krb5_error_code get_credentials(context, cred, server, now,
 
 cleanup:
     krb5_free_authdata(context, in_creds.authdata);
-    krb5_free_principal(context, cc_princ);
     krb5_free_cred_contents(context, &evidence_creds);
     krb5_free_creds(context, result_creds);
 

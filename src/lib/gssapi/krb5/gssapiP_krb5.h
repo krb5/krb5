@@ -172,7 +172,7 @@ typedef struct _krb5_gss_cred_id_rec {
     /* name/type of credential */
     gss_cred_usage_t usage;
     krb5_gss_name_t name;
-    unsigned int proxy_cred : 1;
+    krb5_principal impersonator;
     unsigned int default_identity : 1;
     unsigned int iakerb_mech : 1;
     unsigned int destroy_ccache : 1;

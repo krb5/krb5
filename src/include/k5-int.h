@@ -273,7 +273,10 @@ typedef INT64_TYPE krb5_int64;
 #define KRB5_CONF_V4_INSTANCE_CONVERT         "v4_instance_convert"
 #define KRB5_CONF_V4_REALM                    "v4_realm"
 #define KRB5_CONF_ASTERISK                    "*"
+
+/* Cache configuration variables */
 #define KRB5_CONF_FAST_AVAIL                  "fast_avail"
+#define KRB5_CONF_PROXY_IMPERSONATOR          "proxy_impersonator"
 
 /* Error codes used in KRB_ERROR protocol messages.
    Return values of library routines are based on a different error table

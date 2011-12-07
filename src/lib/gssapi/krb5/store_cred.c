@@ -91,7 +91,7 @@ copy_initiator_creds(OM_uint32 *minor_status,
 
     kcred = (krb5_gss_cred_id_t)input_cred_handle;
 
-    if (kcred->ccache == NULL || kcred->proxy_cred) {
+    if (kcred->ccache == NULL) {
         *minor_status = KG_CCACHE_NOMATCH;
         major_status = GSS_S_DEFECTIVE_CREDENTIAL;
         goto cleanup;
