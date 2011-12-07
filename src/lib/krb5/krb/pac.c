@@ -637,9 +637,11 @@ krb5_pac_verify(krb5_context context,
     if (server == NULL)
         return EINVAL;
 
-    ret = k5_pac_verify_server_checksum(context, pac, server);
-    if (ret != 0)
-        return ret;
+    if (server != NULL) {
+        ret = k5_pac_verify_server_checksum(context, pac, server);
+        if (ret != 0)
+            return ret;
+    }
 
     if (privsvr != NULL) {
         ret = k5_pac_verify_kdc_checksum(context, pac, privsvr);

@@ -7506,13 +7506,13 @@ krb5_pac_parse(krb5_context context, const void *ptr, size_t len,
  * @param [in] pac              PAC handle
  * @param [in] authtime         Expected timestamp
  * @param [in] principal        Expected principal name (or NULL)
- * @param [in] server           Key to validate server checksum
+ * @param [in] server           Key to validate server checksum (or NULL)
  * @param [in] privsvr          Key to validate KDC checksum (or NULL)
  *
  * This function validates @a pac against the supplied @a server, @a privsvr,
  * @a principal and @a authtime.  If @a principal is NULL, the principal and
- * authtime are not verified.  If @a privsvr is NULL, the KDC checksum is not
- * verified.
+ * authtime are not verified.  If @a server or @a privsvr is NULL, the
+ * corresponding checksum is not verified.
  *
  * If successful, @a pac is marked as verified.
  *
