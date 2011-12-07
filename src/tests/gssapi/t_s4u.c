@@ -74,7 +74,7 @@ static void displayStatus_1(m, code, type)
         maj_stat = gss_display_status(&min_stat, code,
                                       type, GSS_C_NULL_OID,
                                       &msg_ctx, &msg);
-        fprintf(stderr, "%s: %s\n", m, (char *)msg.value);
+        printf("%s: %s\n", m, (char *)msg.value);
         (void) gss_release_buffer(&min_stat, &msg);
 
         if (!msg_ctx)
