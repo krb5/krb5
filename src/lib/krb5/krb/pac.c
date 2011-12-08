@@ -634,9 +634,6 @@ krb5_pac_verify(krb5_context context,
 {
     krb5_error_code ret;
 
-    if (server == NULL)
-        return EINVAL;
-
     if (server != NULL) {
         ret = k5_pac_verify_server_checksum(context, pac, server);
         if (ret != 0)
