@@ -152,7 +152,6 @@ struct _krb5_tkt_creds_context {
     krb5_flags req_options;     /* Caller-requested KRB5_GC_* options */
     krb5_flags req_kdcopt;      /* Caller-requested options as KDC options */
     krb5_authdata **authdata;   /* Caller-requested authdata */
-    struct krb5int_fast_request_state *fast_state;
 
     /* The following fields are used in multiple steps. */
     krb5_creds *cur_tgt;        /* TGT to be used for next query */
@@ -168,6 +167,7 @@ struct _krb5_tkt_creds_context {
     int kdcopt;                 /* KDC options of request */
     krb5_keyblock *subkey;      /* subkey of request */
     krb5_data previous_request; /* Encoded request (for TCP retransmission) */
+    struct krb5int_fast_request_state *fast_state;
 
     /* The following fields are used when acquiring foreign TGTs. */
     krb5_data *realm_path;      /* Path from client to server realm */
@@ -267,6 +267,13 @@ make_request(krb5_context context, krb5_tkt_creds_context ctx,
     /* XXX This check belongs in gc_via_tgt.c or nowhere. */
     if (!krb5_c_valid_enctype(ctx->cur_tgt->keyblock.enctype))
         return KRB5_PROG_ETYPE_NOSUPP;
+
+    /* Create a new FAST state structure to store this request's armor key. */
+    krb5int_fast_free_state(context, ctx->fast_state);
+    ctx->fast_state = NULL;
+    code = krb5int_fast_make_state(context, &ctx->fast_state);
+    if (code)
+        return code;
 
     code = krb5int_make_tgs_request(context, ctx->fast_state,
                                     ctx->cur_tgt, ctx->kdcopt,
@@ -1046,9 +1053,6 @@ krb5_tkt_creds_init(krb5_context context, krb5_ccache ccache,
     TRACE_TKT_CREDS(context, in_creds, ccache);
     ctx = k5alloc(sizeof(*ctx), &code);
     if (ctx == NULL)
-        goto cleanup;
-    code = krb5int_fast_make_state(context, &ctx->fast_state);
-    if (code)
         goto cleanup;
 
     ctx->req_options = options;

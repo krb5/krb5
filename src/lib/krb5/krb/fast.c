@@ -320,6 +320,10 @@ krb5int_fast_prep_req(krb5_context context,
         krb5_free_data(context, encoded_fast_req);
     if (local_encoded_result)
         krb5_free_data(context, local_encoded_result);
+    if (tgs) {
+        free(tgs->contents);
+        free(tgs);
+    }
     state->fast_outer_request.padata = NULL;
     return retval;
 }
