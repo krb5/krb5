@@ -498,6 +498,7 @@ Leash_int_kinit_ex(
     char    first_part[256];
     char    second_part[256];
     char    temp[1024];
+    char*   custom_msg;
     int     count;
     int     i;
     int rc5 = 0;
@@ -598,10 +599,9 @@ Leash_int_kinit_ex(
             rcA = rcB;
     }
 #endif /* NO_AFS */
-
+    custom_msg = (rc5 == KRB5KRB_AP_ERR_BAD_INTEGRITY) ? "Password incorrect" : NULL;
     return leash_error_message("Ticket initialization failed.",
-                               rcL,
-                               rc5, rcA, 0,
+                               rcL, rc5, rcA, custom_msg,
                                displayErrors);
 }
 
