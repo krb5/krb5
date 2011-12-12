@@ -1010,7 +1010,7 @@ VOID CLeashView::OnUpdateDisplay()
 
     m_tvinsert.hParent = NULL;
     m_tvinsert.hInsertAfter = TVI_LAST;
-    m_tvinsert.item.mask = TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_TEXT;
+    m_tvinsert.item.mask = TVIF_IMAGE | TVIF_SELECTEDIMAGE;
     m_tvinsert.item.hItem = NULL;
     m_tvinsert.item.state = 0;
     m_tvinsert.item.stateMask = 0; //TVIS_EXPANDED;
@@ -1018,6 +1018,7 @@ VOID CLeashView::OnUpdateDisplay()
 
     if (CLeashApp::m_hKrb5DLL && m_listKrb5) {
         m_tvinsert.item.pszText = ticketinfo.Krb5.principal;
+        m_tvinsert.item.mask |= TVIF_TEXT;
         switch ( iconStatusKrb5 ) {
         case ACTIVE_TICKET:
             m_tvinsert.item.iSelectedImage = ACTIVE_PARENT_NODE;
@@ -1033,6 +1034,7 @@ VOID CLeashView::OnUpdateDisplay()
 #ifndef NO_KRB4
     } else if (CLeashApp::m_hKrb4DLL && m_listKrb4) {
         m_tvinsert.item.pszText = ticketinfo.Krb4.principal;
+        m_tvinsert.item.mask |= TVIF_TEXT;
         switch ( iconStatusKrb4 ) {
         case ACTIVE_TICKET:
             m_tvinsert.item.iSelectedImage = ACTIVE_PARENT_NODE;
@@ -1047,6 +1049,7 @@ VOID CLeashView::OnUpdateDisplay()
 #endif
     } else {
         m_tvinsert.item.iSelectedImage = NONE_PARENT_NODE;
+        m_tvinsert.item.pszText = NULL;
     }
     m_tvinsert.item.iImage = m_tvinsert.item.iSelectedImage;
     m_tvinsert.item.cChildren = 0;
