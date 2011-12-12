@@ -286,9 +286,9 @@
                     <Component Win64="$(var.Win64)" Id="cmf_wshelp32_dll" Guid="$(var.cmf_wshelp32_dll_guid)" DiskId="1">
 	                    <File Id="fil_wshelp32_dll" Name="$(var.cmf_wshelp32_dll_name)" KeyPath="yes" />
                     </Component>
-<!--                    <Component Win64="$(var.Win64)" Id="cmf_xpprof32_dll" Guid="$(var.cmf_xpprof32_dll_guid)" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmf_xpprof32_dll" Guid="$(var.cmf_xpprof32_dll_guid)" DiskId="1">
 	                    <File Id="fil_xpprof32_dll" Name="$(var.cmf_xpprof32_dll_name)" KeyPath="yes" />
-                    </Component> -->
+                    </Component>
                     
                     <!-- Debug symbols -->
                 <?ifdef DebugSyms?>
@@ -594,7 +594,7 @@
                             <File Id="fil_krbcc32_lib" Name="krbcc32.lib" />
                             <File Id="fil_leashw32_lib" Name="leashw32.lib" />
                             <File Id="fil_wshelp32_lib" Name="wshelp32.lib" />
-<!--                            <File Id="fil_xpprof32_lib" Name="xpprof32.lib" /> -->
+                            <File Id="fil_xpprof32_lib" Name="xpprof32.lib" />
                         </Component>
                     </Directory>
                     <?endif?>

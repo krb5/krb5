@@ -75,7 +75,7 @@
             <ComponentRef Id="cmf_ms2mit_exe" />
             <ComponentRef Id="cmf_mit2ms_exe" />
             <ComponentRef Id="cmf_wshelp32_dll" />
-<!--            <ComponentRef Id="cmf_xpprof32_dll" /> -->
+            <ComponentRef Id="cmf_xpprof32_dll" />
 
             <ComponentRef Id="cmf_leashw32_dll" />
 
