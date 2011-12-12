@@ -25,7 +25,9 @@
   
   -->
 <Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
-<Directory Id="TARGETDIR" Name="SourceDir">
+  <Property Id="DISABLEADVTSHORTCUTS" Value="1" />
+  <Directory Id="TARGETDIR" Name="SourceDir">
+    <Directory Id="DesktopFolder" Name="Desktop"/>
     <Directory Id="$(var.PISystemFolder)" SourceName="System">
         <Component Win64="$(var.Win64)" Id="cmf_kfwlogon_DLL" Guid="$(var.cmf_kfwlogon_DLL_guid)">
             <File Id="filekfwlogon_DLL" Name="kfwlogon.dll" KeyPath="yes" DiskId="1" Source="$(var.BinDir)kfwlogon.dll" />
@@ -145,13 +147,16 @@
                     </Component>
         <?if $(var.Platform) = "Intel" ?>
                     <Component Win64="$(var.Win64)" Id="cmf_leash32_exe" Guid="$(var.cmf_leash32_exe_guid)" DiskId="1">
-	                    <File Id="fil_leash32_exe" Name="leash32.exe" KeyPath="yes" />
-	                    <Registry Id="reg_ts_leash32_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Action="createKeyAndRemoveKeyOnUninstall" />
+                      <File Id="fil_leash32_exe" Name="leash32.exe" KeyPath="yes">
+                        <Shortcut Id="sc_leash32_exe" Advertise="yes" Directory="dirShortcut" Name="Leash Kerberos Ticket Manager.lnk" Arguments="[LEASHAUTOINIT]" />
+                        <Shortcut Id="sc_leash32_desktop_exe" Advertise="yes" Directory="DesktopFolder" Name="Leash Kerberos Ticket Manager.lnk" Arguments="[LEASHAUTOINIT]" />
+                      </File>
+                      <Registry Id="reg_ts_leash32_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_leash32_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Name="Flags" Type="integer" Value="1032" />
                     </Component>
 
 <!--                    <Component Win64="$(var.Win64)" Id="csc_leash32_exe" Guid="$(var.csc_leash32_exe_guid)" DiskId="1">
-                        <Shortcut Id="sc_leash32_exe" Advertise="no" Directory="dirShortcut" Name="Leash Kerberos Ticket Manager.lnk" Arguments="[LEASHAUTOINIT]" Target="[!fil_leash32_exe]" />
+                        <CreateFolder Directory="dirShortcut" />
                         <Condition>USELEASH</Condition>
                     </Component> -->
 
@@ -414,7 +419,7 @@
                             <File Id="fil_krbcc64_lib" Name="krbcc64.lib" />
                             <File Id="fil_leashw64_lib" Name="leashw64.lib" />
                             <File Id="fil_wshelp64_lib" Name="wshelp64.lib" />
-<!--                            <File Id="fil_xpprof64_lib" Name="xpprof64.lib" /> -->
+                            <File Id="fil_xpprof64_lib" Name="xpprof64.lib" />
                         </Component>
                     </Directory>
                     <?endif?>
