@@ -26,6 +26,12 @@
   -->
 <Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
   <Property Id="DISABLEADVTSHORTCUTS" Value="1" />
+  <Property Id="SYSTEMKRB5INI">
+    <DirectorySearch Id="WindowsFolder" Path="[WindowsFolder]">
+      <FileSearch Name="krb5.ini"/>
+    </DirectorySearch>
+  </Property>
+
   <Directory Id="TARGETDIR" Name="SourceDir">
     <Directory Id="DesktopFolder" Name="Desktop"/>
     <Directory Id="$(var.PISystemFolder)" SourceName="System">
@@ -437,16 +443,16 @@
             </Directory> <!-- /Kerberos -->
         </Directory> <!-- /MIT -->
     </Directory> <!-- /Program Files -->
-    <Directory Id="WindowsFolder">
-        <Component Win64="$(var.Win64)" Id="cmf_krb5_ini" Guid="C1AF0670-BBF1-4AA6-B2A6-6C8B1584A1F4" NeverOverwrite="yes" Permanent="yes" DiskId="1">
-	        <File Id="fil_krb5_ini" Name="krb5.ini" src="$(var.ConfigDir)krb5.ini" KeyPath="yes" />
-        </Component>
-        <Component Win64="$(var.Win64)" Id="cmf_krb_con" Guid="5E91A051-CF14-45FF-BF64-CEE78A7A90C2" NeverOverwrite="yes" Permanent="yes" DiskId="1">
-	        <File Id="fil_krb_con" Name="krb.con" src="$(var.ConfigDir)krb.con" KeyPath="yes" />
-        </Component>
-        <Component Win64="$(var.Win64)" Id="cmf_krbrealm_con" Guid="D667B54F-1C98-43FB-87C6-0F0517623B90" NeverOverwrite="yes" Permanent="yes" DiskId="1">
-	        <File Id="fil_krbrealm_con" Name="krbrealm.con" src="$(var.ConfigDir)krbrealm.con" KeyPath="yes" />
-        </Component>
+    <Directory Id="CommonAppDataFolder" Name="CommonAppDataFolder">
+      <Directory Id="APPDATAMITDIR" Name="MIT">
+        <Directory Id="APPDATAKERBEROS5DIR" Name="Kerberos5">
+          <Component Win64="$(var.Win64)" Id="cmf_krb5_ini" Guid="C1AF0670-BBF1-4AA6-B2A6-6C8B1584A1F4" NeverOverwrite="yes" Permanent="yes" DiskId="1">
+            <Condition>NOT SYSTEMKRB5INI</Condition>
+            <File Id="fil_krb5_ini" Name="krb5.ini" src="$(var.ConfigDir)krb5.ini" KeyPath="yes" />
+            <CreateFolder/>
+          </Component>
+        </Directory>
+      </Directory>
     </Directory>
     
     <Directory Id="ProgramMenuFolder">
