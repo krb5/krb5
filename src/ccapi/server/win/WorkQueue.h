@@ -29,9 +29,16 @@
 #include "windows.h"
 #include "ccs_pipe.h"
 
+EXTERN_C    int worklist_initialize();
+
+EXTERN_C    int worklist_cleanup();
+
+/* Wait for work to be added to the list (via worklist_add) from another thread */
+EXTERN_C    void worklist_wait();
+
 EXTERN_C    BOOL worklist_isEmpty();
 
-EXTERN_C    void worklist_add(  const long          rpcmsg,
+EXTERN_C    int worklist_add(  const long          rpcmsg,
                                 const ccs_pipe_t    pipe,
                                 const k5_ipc_stream stream,
                                 const time_t        serverStartTime);
