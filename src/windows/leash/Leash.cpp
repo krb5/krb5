@@ -241,7 +241,7 @@ BOOL CLeashApp::InitInstance()
                 }
                 ReleaseMutex(ticketinfo.lockObj);
 
-				ldi.size = sizeof(ldi);
+				ldi.size = LSH_DLGINFO_EX_V1_SZ;
 				ldi.dlgtype = DLGTYPE_PASSWD;
                 ldi.title = "Initialize Ticket";
                 ldi.username = username;
@@ -1466,7 +1466,7 @@ CLeashApp::ObtainTicketsViaUserIfNeeded(HWND hWnd)
             ReleaseMutex(m_tgsReqMutex);
 #endif
             LSH_DLGINFO_EX ldi;
-            ldi.size = sizeof(ldi);
+            ldi.size = LSH_DLGINFO_EX_V1_SZ;
             ldi.dlgtype = DLGTYPE_PASSWD;
             ldi.title = "Initialize Ticket";
             ldi.username = NULL;
@@ -1499,7 +1499,7 @@ CLeashApp::ObtainTicketsViaUserIfNeeded(HWND hWnd)
             ReleaseMutex(m_tgsReqMutex);
 #endif
             LSH_DLGINFO_EX ldi;
-            ldi.size = sizeof(ldi);
+            ldi.size = LSH_DLGINFO_EX_V1_SZ;
             ldi.dlgtype = DLGTYPE_PASSWD;
             ldi.title = "Initialize Ticket";
             ldi.username = NULL;
@@ -1525,7 +1525,7 @@ CLeashApp::ObtainTicketsViaUserIfNeeded(HWND hWnd)
             ReleaseMutex(m_tgsReqMutex);
 #endif
             LSH_DLGINFO_EX ldi;
-            ldi.size = sizeof(ldi);
+            ldi.size = LSH_DLGINFO_EX_V1_SZ;
             ldi.dlgtype = DLGTYPE_PASSWD;
             ldi.title = "Initialize Ticket";
             ldi.username = NULL;
@@ -1623,7 +1623,7 @@ CLeashApp::InitWorker(void * hWnd)
 #endif
     if ( ProbeKDC() ) {
         LSH_DLGINFO_EX ldi;
-        ldi.size = sizeof(ldi);
+        ldi.size = LSH_DLGINFO_EX_V1_SZ;
         ldi.dlgtype = DLGTYPE_PASSWD;
         ldi.title = "Initialize Ticket";
         ldi.username = NULL;
