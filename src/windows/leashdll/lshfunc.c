@@ -847,6 +847,9 @@ Leash_import(void)
 long
 Leash_kdestroy(void)
 {
+    Leash_afs_unlog();
+    Leash_krb5_kdestroy();
+
     return 0;
 }
 
