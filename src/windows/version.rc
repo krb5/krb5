@@ -57,8 +57,8 @@
 #define K5_DESCRIPTION "Kerberos v5 support - internal support code for " KRB5_PRODUCTNAME_STR
 #define K5_INTERNAL_NAME "krb5support\0"
 #define K5_FILETYPE	VFT_DLL
-#if !defined(_WIN32)
-#error not win32??
+#if defined(_WIN64)
+#define K5_ORIGINAL_NAME "k5sprt64.dll\0"
 #else
 #define K5_ORIGINAL_NAME "k5sprt32.dll\0"
 #endif
@@ -68,8 +68,8 @@
 #define K5_DESCRIPTION "COM_ERR - Common Error Handler for " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "comerr\0"
 #define K5_FILETYPE	VFT_DLL
-#if !defined(_WIN32)
-#define K5_ORIGINAL_NAME "comerr16.dll\0"
+#if defined(_WIN64)
+#define K5_ORIGINAL_NAME "comerr64.dll\0"
 #else
 #define K5_ORIGINAL_NAME "comerr32.dll\0"
 #endif
@@ -79,8 +79,8 @@
 #define K5_DESCRIPTION "PROFILE - Profile Library " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "profile\0"
 #define K5_FILETYPE	VFT_DLL
-#if !defined(_WIN32)
-#define K5_ORIGINAL_NAME "xpprof16.dll\0"
+#if defined(_WIN64)
+#define K5_ORIGINAL_NAME "xpprof64.dll\0"
 #else
 #define K5_ORIGINAL_NAME "xpprof32.dll\0"
 #endif
@@ -90,8 +90,8 @@
 #define K5_DESCRIPTION "Kerberos v5 - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "krb5\0"
 #define K5_FILETYPE	VFT_DLL
-#if !defined(_WIN32)
-#define K5_ORIGINAL_NAME "krb5_16.dll\0"
+#if defined(_WIN64)
+#define K5_ORIGINAL_NAME "krb5_64.dll\0"
 #else
 #define K5_ORIGINAL_NAME "krb5_32.dll\0"
 #endif
@@ -101,8 +101,8 @@
 #define K5_DESCRIPTION "GSSAPI - GSS API implementation for Kerberos 5 mechanism\0"
 #define K5_INTERNAL_NAME "gssapi\0"
 #define K5_FILETYPE	VFT_DLL
-#if !defined(_WIN32)
-#define K5_ORIGINAL_NAME "gssapi.dll\0"
+#if defined(_WIN64)
+#define K5_ORIGINAL_NAME "gssapi64.dll\0"
 #else
 #define K5_ORIGINAL_NAME "gssapi32.dll\0"
 #endif
@@ -119,8 +119,8 @@
 #define K5_DESCRIPTION "Leash Helper API - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "leashw\0"
 #define K5_FILETYPE	VFT_DLL
-#if !defined(_WIN32)
-#define K5_ORIGINAL_NAME "leashw.dll\0"
+#if defined(_WIN64)
+#define K5_ORIGINAL_NAME "leashw64.dll\0"
 #else
 #define K5_ORIGINAL_NAME "leashw32.dll\0"
 #endif
@@ -130,8 +130,8 @@
 #define K5_DESCRIPTION "Winsock Helper (wshelper) API - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_INTERNAL_NAME "wshelper\0"
 #define K5_FILETYPE	VFT_DLL
-#if !defined(_WIN32)
-#define K5_ORIGINAL_NAME "wshelper.dll\0"
+#if defined(_WIN64)
+#define K5_ORIGINAL_NAME "wshelper64.dll\0"
 #else
 #define K5_ORIGINAL_NAME "wshelper32.dll\0"
 #endif
