@@ -55,7 +55,7 @@ WINLIBS = kernel32.lib advapi32.lib user32.lib gdi32.lib Version.lib \
 WINDLLFLAGS = /nologo /dll /incremental:no /release $(LOPTS)
 
 
-DEFINES = -DWINSOCK -DWIN32 -DWINDOWS -DNO_KRB4
+DEFINES = -DWINSOCK -DWIN32 -DWINDOWS -DNO_KRB4 -DUSE_MESSAGE_BOX
 !ifdef NODEBUG
 DEFINES = $(DEFINES)
 !else
