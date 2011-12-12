@@ -42,7 +42,8 @@ static enum ccapiMsgType {
     CCMSG_REQUEST_REPLY,
     CCMSG_DISCONNECT,
     CCMSG_LISTEN,
-    CCMSG_PING
+    CCMSG_PING,
+    CCMSG_QUIT
     };
 
 char*                   clientEndpoint(const char* UUID);
