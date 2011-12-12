@@ -221,6 +221,7 @@ extern DECL_FUNC_PTR(krb5_c_random_make_octets);
 extern DECL_FUNC_PTR(krb5_free_default_realm);
 extern DECL_FUNC_PTR(krb5_principal_compare);
 extern DECL_FUNC_PTR(krb5_string_to_deltat);
+extern DECL_FUNC_PTR(krb5_is_config_principal);
 
 #ifndef NO_KRB4
 // Krb524 functions

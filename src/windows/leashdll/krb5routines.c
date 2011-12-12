@@ -450,6 +450,11 @@ not_an_API_LeashKRB5GetTickets(
 
     while (!(code = pkrb5_cc_next_cred(ctx, cache, &KRBv5Cursor, &KRBv5Credentials)))
     {
+        if ((*pkrb5_is_config_principal)(ctx, KRBv5Credentials.server))
+        { /* skip configuration credentials */
+            (*pkrb5_free_cred_contents)(ctx, &KRBv5Credentials);
+            continue;
+        }
         if (!list)
         {
             list = (TicketList*) calloc(1, sizeof(TicketList));
