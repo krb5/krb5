@@ -68,7 +68,7 @@ leash_error_message(
 {
     char message[2048];
     char *p = message;
-    int size = sizeof(message);
+    int size = sizeof(message) - 1; /* -1 to leave room for NULL terminator */
     int n;
 
     // XXX: ignore AFS for now.
@@ -85,7 +85,7 @@ leash_error_message(
         n = _snprintf(p, size,
                       "Kerberos 5: %s (error %ld)\n",
                       perror_message(rc5),
-                      rc5 & 255 // XXX: & 255??!!!
+                      rc5
             );
         p += n;
         size -= n;
@@ -109,6 +109,7 @@ leash_error_message(
         size -= n;
     }
 #ifdef USE_MESSAGE_BOX
+    *p = 0; /* ensure NULL termination of message */
     if ( displayMB )
         MessageBox(NULL, message, "Leash", MB_OK | MB_ICONERROR | MB_TASKMODAL |
                     MB_SETFOREGROUND);
