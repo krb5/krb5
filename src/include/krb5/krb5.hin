@@ -239,33 +239,24 @@ typedef krb5_principal_data * krb5_principal;
  * Per V5 spec on definition of principal types
  */
 
-/* Name type not known */
-#define KRB5_NT_UNKNOWN                 0
-/* Just the name of the principal as in DCE, or for users */
-#define KRB5_NT_PRINCIPAL               1
-/* Service and other unique instance (krbtgt) */
-#define KRB5_NT_SRV_INST                2
-/* Service with host name as instance (telnet, rcommands) */
-#define KRB5_NT_SRV_HST                 3
-/* Service with host as remaining components */
-#define KRB5_NT_SRV_XHST                4
-/* Unique ID */
-#define KRB5_NT_UID                     5
-/* PKINIT */
-#define KRB5_NT_X500_PRINCIPAL          6
-/* Name in form of SMTP email name */
-#define KRB5_NT_SMTP_NAME               7
-/* Windows 2000 UPN */
-#define KRB5_NT_ENTERPRISE_PRINCIPAL    10
-#define KRB5_NT_WELLKNOWN               11
-/* First component of NT_WELLKNOWN principals */
-#define KRB5_WELLKNOWN_NAMESTR          "WELLKNOWN"
-/* Windows 2000 UPN and SID */
-#define KRB5_NT_MS_PRINCIPAL            -128
-/* NT 4 style name */
-#define KRB5_NT_MS_PRINCIPAL_AND_ID     -129
-/* NT 4 style name and SID */
-#define KRB5_NT_ENT_PRINCIPAL_AND_ID    -130
+#define KRB5_NT_UNKNOWN        0 /**<  Name type not known */
+#define KRB5_NT_PRINCIPAL      1 /**< Just the name of the principal
+                                      as in DCE, or for users */
+#define KRB5_NT_SRV_INST       2 /**< Service and other unique instance (krbtgt) */
+#define KRB5_NT_SRV_HST        3 /**< Service with host name as instance
+                                      (telnet, rcommands) */
+#define KRB5_NT_SRV_XHST       4 /**< Service with host as remaining components */
+#define KRB5_NT_UID            5 /**< Unique ID */
+#define KRB5_NT_X500_PRINCIPAL 6 /**< PKINIT */
+#define KRB5_NT_SMTP_NAME      7 /**< Name in form of SMTP email name */
+#define KRB5_NT_ENTERPRISE_PRINCIPAL  10        /**< Windows 2000 UPN */
+#define KRB5_NT_WELLKNOWN      11 /**< well known principal
+                                       (anonymous Kerberos) */
+#define KRB5_WELLKNOWN_NAMESTR "WELLKNOWN" /**< First component of
+                                                NT_WELLKNOWN principals */
+#define KRB5_NT_MS_PRINCIPAL         -128 /**< Windows 2000 UPN and SID */
+#define KRB5_NT_MS_PRINCIPAL_AND_ID  -129 /**< NT 4 style name */
+#define KRB5_NT_ENT_PRINCIPAL_AND_ID -130 /**< NT 4 style name and SID */
 
 /** Constant version of krb5_principal_data */
 typedef const krb5_principal_data *krb5_const_principal;
@@ -314,13 +305,13 @@ krb5_anonymous_realm(void);
  *
  * This function returns constant storage that must not be freed.
  *
- * @sa KRB5_ANONYMOUS_PRINCSTR
+ * @sa #KRB5_ANONYMOUS_PRINCSTR
  */
 krb5_const_principal KRB5_CALLCONV
 krb5_anonymous_principal(void);
 
 #define KRB5_ANONYMOUS_REALMSTR "WELLKNOWN:ANONYMOUS"
-#define KRB5_ANONYMOUS_PRINCSTR "ANONYMOUS" /* wellknown name type */
+#define KRB5_ANONYMOUS_PRINCSTR "ANONYMOUS" /**< WELLKNOWN name type */
 /*
  * end "base-defs.h"
  */
@@ -4838,7 +4829,7 @@ krb5_free_default_realm(krb5_context context, char *lrealm);
  *
  * The @a type can be one of the following:
  *
- * @li #KRB5_NT_SRV_HOST canonicalizes the host name before looking up the
+ * @li #KRB5_NT_SRV_HST canonicalizes the host name before looking up the
  * realm and generating the principal.
  *
  * @li #KRB5_NT_UNKNOWN accepts the hostname as given, and does not
