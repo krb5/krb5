@@ -195,12 +195,13 @@ DWORD find_server(Init::InitInfo& info, LPSTR endpoint) {
                                        psa,         // SA
                                        FALSE, 
                                        CREATE_NEW_PROCESS_GROUP | 
-                                       CREATE_NEW_CONSOLE |
                                        NORMAL_PRIORITY_CLASS |
-                                       // CREATE_NO_WINDOW |
-                                       // DETACHED_PROCESS |    /* KPK TODO: was set - restore */
-                                       0
-                                       ,
+#ifdef CCAPI_LAUNCH_SERVER_WITH_CONSOLE
+                                       CREATE_NEW_CONSOLE |
+#else
+                                       DETACHED_PROCESS |
+#endif
+                                       0,
                                        NULL,        // environment
                                        szDir,       // current dir
                                        &si,
