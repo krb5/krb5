@@ -68,8 +68,7 @@
 #define HID_KERBEROS_PROPERTIES_EDITHOST 131271
 #define HID_KERBEROS_PROPERTIES_LISTDOM 131279
 
-////@#+This might be problematic with the latest Platform SDK...
-////#define USE_HTMLHELP
+#define USE_HTMLHELP
 
 #ifdef USE_HTMLHELP
 #if _MSC_VER >= 1300
