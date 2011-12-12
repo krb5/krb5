@@ -303,8 +303,6 @@
                 <?ifdef DebugSyms?>
                     <Component Win64="$(var.Win64)" Id="cmf_bin_debug" Guid="$(var.cmf_bin_debug_guid)" DiskId="1">
                         <?if $(var.Platform) = "Intel" ?>
-	                    <File Id="fil_leash32_pdb" Name="leash32.pdb" />
-
 	                    <File Id="fil_comerr32_pdb" Name="comerr32.pdb" />
 	                    <File Id="fil_gssapi32_pdb" Name="gssapi32.pdb" />
 	                    <File Id="fil_krb5_32_pdb" Name="krb5_32.pdb" KeyPath="yes" />
@@ -323,6 +321,7 @@
 	                    <File Id="fil_wshelp64_pdb" Name="wshelp64.pdb" />
 	                    <File Id="fil_xpprof64_pdb" Name="xpprof64.pdb" />
                         <?endif?>
+                      <File Id="fil_leash_pdb" Name="leash.pdb" />
                       <File Id="fil_ccapiserver_pdb" Name="ccapiserver.pdb" />
                       <File Id="fil_gss_client_pdb" Name="gss-client.pdb" />
 	                    <File Id="fil_gss_server_pdb" Name="gss-server.pdb" />
