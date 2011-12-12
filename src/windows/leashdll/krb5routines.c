@@ -1468,7 +1468,7 @@ multi_field_dialog(HWND hParent, char * preface, int n, struct textField tb[])
 	extern HINSTANCE hLeashInst;
     size_t maxwidth = 0;
     int numlines = 0;
-    int len;
+    size_t len;
     char * plines[16], *p = preface ? preface : "";
     int i;
 
