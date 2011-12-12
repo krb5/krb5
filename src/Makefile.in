@@ -584,6 +584,7 @@ install-windows::
 	copy clients\kdeltkt\$(OUTPRE)kdeltkt.pdb "$(KRB_INSTALL_DIR)\bin\."
 	copy clients\kpasswd\$(OUTPRE)kpasswd.pdb "$(KRB_INSTALL_DIR)\bin\."
 	copy clients\kswitch\$(OUTPRE)kswitch.pdb "$(KRB_INSTALL_DIR)\bin\."
+	copy windows\leash\htmlhelp\*.chm "$(KRB_INSTALL_DIR)\bin\."
 
 install-unix:: 
 	$(INSTALL_SCRIPT) krb5-config \
