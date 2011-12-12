@@ -181,7 +181,8 @@ WINMAKEFILES=Makefile \
 	windows\cns\Makefile windows\gina\Makefile \
 	windows\ms2mit\Makefile \
 	windows\wintel\Makefile windows\kfwlogon\Makefile \
-	windows\leashdll\Makefile windows\leash\Makefile
+	windows\leashdll\Makefile windows\leash\Makefile \
+	windows\leash\htmlhelp\Makefile
 
 ##DOS##Makefile-windows:: $(MKFDEP) $(WINMAKEFILES)
 
@@ -310,6 +311,8 @@ WINMAKEFILES=Makefile \
 ##DOS##windows\leashdll\Makefile: windows\leashdll\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 ##DOS##windows\leash\Makefile: windows\leash\Makefile.in $(MKFDEP)
+##DOS##	$(WCONFIG) config < $@.in > $@
+##DOS##windows\leash\htmlhelp\Makefile: windows\leash\htmlhelp\Makefile.in $(MKFDEP)
 ##DOS##	$(WCONFIG) config < $@.in > $@
 
 clean-windows:: Makefile-windows

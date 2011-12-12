@@ -22,6 +22,8 @@ WSHELPER=wshelp32
 WSHELPER=wshelp64
 !endif
 
+SUBDIRS= htmlhelp
+
 OBJS=   \
 	$(OUTPRE)Krb4EditDomainRealmList.obj \
 	$(OUTPRE)CLeashDragListBox.obj \
