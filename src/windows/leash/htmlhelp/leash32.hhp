@@ -107,6 +107,8 @@ HID_DESTROY_TICKETS_COMMAND = html\leash_command_destroy_tickets.htm
 HID_DESTROY_TICKETS_ON_EXIT = html\leash_option_destroy_tickets_on_exit.htm
 HID_EXIT_COMMAND = html\leash_file_exit.htm
 HID_GET_TICKETS_COMMAND = html\leash_command_get_tickets.htm
+HID_RENEW_TICKETS_COMMAND = html\leash_command_renew_tickets.htm
+HID_IMPORT_TICKETS_COMMAND = html\leash_command_import_tickets.htm
 HID_HELP_CONTENTS = html\leash_topic_leash_help_topics.htm
 HID_KERBEROS_PROPERTIES_ADDDOM = html\leash_option_kerberos_properties.htm
 HID_KERBEROS_PROPERTIES_ADDHOST = html\leash_option_kerberos_properties.htm
@@ -172,7 +174,9 @@ hid_sc_restore = html\hid_sc_restore.htm
 #define HID_DESTROY_TICKETS_COMMAND     98313
 #define HID_DESTROY_TICKETS_ON_EXIT		98321
 #define HID_EXIT_COMMAND                123201
-#define HID_GET_TICKETS_COMMAND			98312
+#define HID_GET_TICKETS_COMMAND			98343
+#define HID_RENEW_TICKETS_COMMAND       98312
+#define HID_IMPORT_TICKETS_COMMAND      98342
 #define HID_HELP_CONTENTS				98340
 #define HID_KERBEROS_PROPERTIES_ADDDOM  131255
 #define HID_KERBEROS_PROPERTIES_ADDHOST 131254
