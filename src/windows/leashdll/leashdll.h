@@ -160,6 +160,8 @@ extern DECL_FUNC_PTR(krb_life_to_time);
 
 // krb5 functions
 extern DECL_FUNC_PTR(krb5_change_password);
+extern DECL_FUNC_PTR(krb5_get_init_creds_opt_alloc);
+extern DECL_FUNC_PTR(krb5_get_init_creds_opt_free);
 extern DECL_FUNC_PTR(krb5_get_init_creds_opt_init);
 extern DECL_FUNC_PTR(krb5_get_init_creds_opt_set_tkt_life);
 extern DECL_FUNC_PTR(krb5_get_init_creds_opt_set_renew_life);
@@ -167,6 +169,7 @@ extern DECL_FUNC_PTR(krb5_get_init_creds_opt_set_forwardable);
 extern DECL_FUNC_PTR(krb5_get_init_creds_opt_set_proxiable);
 extern DECL_FUNC_PTR(krb5_get_init_creds_opt_set_renew_life);
 extern DECL_FUNC_PTR(krb5_get_init_creds_opt_set_address_list);
+extern DECL_FUNC_PTR(krb5_get_init_creds_opt_set_out_ccache);
 extern DECL_FUNC_PTR(krb5_get_init_creds_password);
 extern DECL_FUNC_PTR(krb5_build_principal_ext);
 extern DECL_FUNC_PTR(krb5_cc_resolve);
