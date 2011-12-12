@@ -2829,7 +2829,8 @@ acquire_tkt_send_msg(krb5_context ctx, const char * title,
 		strs++;
 
 		GlobalUnlock( hData );
-		SendMessage(hLeash, 32810, 0, (LPARAM) hData);
+		/* 32809 = ID_OBTAIN_TGT_WITH_LPARAM in src/windows/leash/resource.h */
+		SendMessage(hLeash, 32809, 0, (LPARAM) hData);
 	    }
 	}
 	GlobalFree( hData );
