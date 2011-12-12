@@ -164,10 +164,6 @@
             <ComponentRef Id="cmp_dirinc_loadfuncs" />
             <ComponentRef Id="cmp_dirinc_wshelper" />
             <ComponentRef Id="cmp_dirinc_wshelper_arpa" />
-            <ComponentRef Id="cmp_dirinstall_wix" />
-            <ComponentRef Id="cmp_dirinstall_wix_lang" />
-            <ComponentRef Id="cmp_dirinstall_wix_Binary" />
-            <ComponentRef Id="cmp_dirinstall_wix_custom" />
             <ComponentRef Id="rcm_common" />
             <ComponentRef Id="rcm_sdk" />
         </Feature> <!-- /feaKfwSDK -->

@@ -420,48 +420,6 @@
                     <?endif?>
                 </Directory>
                 
-                <Directory Id="dirinstall" Name="install" src="$(var.InstallDir)">
-                    <Directory Id="dirinstall_wix" Name="wix" src="$(var.InstallDir)wix\">
-                        <Component Win64="$(var.Win64)" Id="cmp_dirinstall_wix" Guid="14DD16AB-6920-4ee1-8B78-623F39DB70BB" DiskId="1">
-                            <File Id="fil_config_wxi" Name="config.wxi" />
-                            <File Id="fil_features_wxi" Name="features.wxi" />
-                            <File Id="fil_files_wxi" Name="files.wxi" />
-                            <File Id="fil_kfw_wxs" Name="kfw.wxs" KeyPath="yes" />
-                            <File Id="fil_Makefile_" Name="Makefile" />
-                            <File Id="fil_property_wxi" Name="property.wxi" />
-                            <File Id="fil_site_local_wxi" Name="site-local-tagged.wxi" />
-                        </Component>
-                        <Directory Id="dirinstall_wix_lang" Name="lang" src="$(var.InstallDir)wix\lang\">
-                            <Component Win64="$(var.Win64)" Id="cmp_dirinstall_wix_lang" Guid="70741A69-1103-4B54-B146-2E14C271945D" DiskId="1">
-                                <File Id="fil_config_1033_wxi" Name="config_1033.wxi" KeyPath="yes" />
-                                <File Id="fil_strings_1033_wxl" Name="strings_1033.wxl"  />
-                                <File Id="fil_ui_1033_wxi" Name="ui_1033.wxi" />
-                            </Component>
-                        </Directory>
-                        <Directory Id="dirinstall_wix_Binary" Name="Binary" src="$(var.InstallDir)wix\Binary\">
-                            <Component Win64="$(var.Win64)" Id="cmp_dirinstall_wix_Binary" Guid="5F021D71-A398-41FD-8F9C-9C0665C18660" DiskId="1">
-                                <File Id="fil_bannrbmp_bmp" Name="bannrbmp.bmp" />
-                                <File Id="fil_completi_ico" Name="completi.ico" />
-                                <File Id="fil_custicon_ico" Name="custicon.ico" />
-                                <File Id="fil_dlgbmp_bmp" Name="dlgbmp.bmp" />
-                                <File Id="fil_exclamic_ico" Name="exclamic.ico" />
-                                <File Id="fil_info_bmp" Name="info.bmp" />
-                                <File Id="fil_insticon_ico" Name="insticon.ico" />
-                                <File Id="fil_new_bmp" Name="new.bmp" />
-                                <File Id="fil_removico_ico" Name="removico.ico" />
-                                <File Id="fil_repairic_ico" Name="repairic.ico" />
-                                <File Id="fil_up_bmp" Name="up.bmp" />
-                            </Component>
-                        </Directory>
-                        <Directory Id="dirinstall_wix_custom" Name="custom" src="$(var.InstallDir)wix\custom\">
-                            <Component Win64="$(var.Win64)" Id="cmp_dirinstall_wix_custom" Guid="872AA948-39B0-4CDC-B764-7EB69F280E50" DiskId="1">
-                                <File Id="fil_custom_cpp" Name="custom.cpp" KeyPath="yes" />
-                                <File Id="fil_custom_h" Name="custom.h" />
-                            </Component>
-                        </Directory>
-                    </Directory>
-                </Directory>
-                
 <!--                <Directory Id="dirdoc" Name="doc" src="$(var.DocDir)">
                 <?if $(var.Platform) = "Intel" ?>
                     <Component Win64="$(var.Win64)" Id="efl_leash_userdoc_pdf" Guid="68FB24DD-5EC2-4db1-AD42-5B9DDEC247C5" DiskId="1">
