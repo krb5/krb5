@@ -199,7 +199,7 @@ cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]) {
 
     ParseOpts::Opts opts         = { 0 };
     ParseOpts       PO;
-    BOOL            bQuit = FALSE;
+    BOOL            bQuitIfNoClients = FALSE;
 
     opts.cMinCalls  = 1;
     opts.cMaxCalls  = 20;
@@ -231,7 +231,7 @@ cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]) {
     threadStatus    = _beginthread(receiveLoop, 0, (void*)&rpcargs);
 
     /* We handle the queue entries here.  Work loop: */
-    while (!bQuit) {
+    while (ccs_server_client_count() > 0 || !bQuitIfNoClients) {
         worklist_wait();
         while (!worklist_isEmpty()) {
             k5_ipc_stream    buf             = NULL;
@@ -244,10 +244,6 @@ cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]) {
             ccs_pipe_t     pipe2            = NULL;
 
             if (worklist_remove(&rpcmsg, &pipe, &buf, &serverStartTime)) {
-                if (rpcmsg == CCMSG_QUIT) {
-                    bQuit = TRUE;
-                    break;
-                    }
                 uuid = ccs_win_pipe_getUuid(pipe);
 #if 0
                 cci_debug_printf("%s: processing WorkItem msg:%ld pipeUUID:<%s> pipeHandle:0x%X SST:%ld",
@@ -289,6 +285,9 @@ cc_int32 ccs_os_server_listen_loop (int argc, const char *argv[]) {
                             err = krb5int_ipc_stream_new  (&stream);
                             err = krb5int_ipc_stream_write(stream, "This is a test of the emergency broadcasting system", 52);
                             err = ccs_os_server_send_reply(pipe, stream);
+                            break;
+                        case CCMSG_QUIT:
+                            bQuitIfNoClients = TRUE;
                             break;
                         default:
                             cci_debug_printf("Huh?  Received invalid message type %ld from UUID:<%s>",
