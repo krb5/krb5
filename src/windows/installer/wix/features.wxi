@@ -80,7 +80,7 @@
             <ComponentRef Id="cmf_leashw32_dll" />
 
         <?if $(var.Platform) = "Intel" ?>
-<!--            <ComponentRef Id="cmf_leash32_exe" /> -->
+            <ComponentRef Id="cmf_leash32_exe" />
 <!--            <ComponentRef Id="csc_leash32_exe" /> -->
         <?endif?>
 	    <ComponentRef Id="cmf_kfwlogon_DLL" />

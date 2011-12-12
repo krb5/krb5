@@ -144,11 +144,11 @@
 	                    <Registry Id="reg_ts_krbcc32s_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\ccapiserver" Name="Flags" Type="integer" Value="1032" />
                     </Component>
         <?if $(var.Platform) = "Intel" ?>
-                  <!--                    <Component Win64="$(var.Win64)" Id="cmf_leash32_exe" Guid="$(var.cmf_leash32_exe_guid)" DiskId="1">
+                    <Component Win64="$(var.Win64)" Id="cmf_leash32_exe" Guid="$(var.cmf_leash32_exe_guid)" DiskId="1">
 	                    <File Id="fil_leash32_exe" Name="leash32.exe" KeyPath="yes" />
-	                    <Registry Id="reg_ts_leash32_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Action="createKeyAndRemoveKeyOnUninstall" KeyPath="yes"/>
+	                    <Registry Id="reg_ts_leash32_0" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Action="createKeyAndRemoveKeyOnUninstall" />
 	                    <Registry Id="reg_ts_leash32_1" Root="HKLM" Key="Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Compatibility\Applications\leash32" Name="Flags" Type="integer" Value="1032" />
-                    </Component> -->
+                    </Component>
 
 <!--                    <Component Win64="$(var.Win64)" Id="csc_leash32_exe" Guid="$(var.csc_leash32_exe_guid)" DiskId="1">
                         <Shortcut Id="sc_leash32_exe" Advertise="no" Directory="dirShortcut" Name="Leash Kerberos Ticket Manager.lnk" Arguments="[LEASHAUTOINIT]" Target="[!fil_leash32_exe]" />
