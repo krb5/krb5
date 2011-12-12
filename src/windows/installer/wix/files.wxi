@@ -786,47 +786,35 @@
         <Registry Id="reg_docs20" Root="HKLM" Key="$(var.KfwRegRoot)\Documentation\$(var.VersionString)" Name="PatchLevel" Type="integer" Value="$(var.VersionPatch)" />
     </Component>
 
-    <!-- Shared assembly runtime for VS 2005 -->
-    <?ifdef CL1400?>
-    	<?ifdef env.CommonProgramFiles6432?>
-    	  <?define CPF="$(env.CommonProgramFiles(x86)"?>
-    	<?else?>
-    	  <?define CPF="$(env.CommonProgramFiles)"?>
-    	<?endif?>
-
-    	<?if $(var.Platform) = "x64" ?>
-    		<?ifndef Debug?>
-    			<Merge Id="MSVCRT8MEM" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_CRT_x86_x64.msm"/>
-    			<Merge Id="MSVCRT8POL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_CRT_x86_x64.msm"/>
-    			<Merge Id="MSVCRT8MFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_MFC_x86_x64.msm"/>
-    			<Merge Id="MSVCRT8PFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_MFC_x86_x64.msm"/>
-    			<Merge Id="MSVCRT8MFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_MFCLOC_x86_x64.msm"/>
-    			<Merge Id="MSVCRT8PFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_MFCLOC_x86_x64.msm"/>
-    		<?else?>
-    			<Merge Id="MSVCRT8MEM" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_DebugCRT_x86_x64.msm"/>
-    			<Merge Id="MSVCRT8POL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_DebugCRT_x86_x64.msm"/>
-    			<Merge Id="MSVCRT8MFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_DebugMFC_x86_x64.msm"/>
-    			<Merge Id="MSVCRT8PFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_DebugMFC_x86_x64.msm"/>
-    			<Merge Id="MSVCRT8MFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_MFCLOC_x86_x64.msm"/>
-    			<Merge Id="MSVCRT8PFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_MFCLOC_x86_x64.msm"/>
-    		<?endif?>
-    	<?else?>
-    		<?ifndef Debug?>
-    			<Merge Id="MSVCRT8MEM" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_CRT_x86.msm"/>
-    			<Merge Id="MSVCRT8POL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_CRT_x86.msm"/>
-    			<Merge Id="MSVCRT8MFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_MFC_x86.msm"/>
-    			<Merge Id="MSVCRT8PFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_MFC_x86.msm"/>
-    			<Merge Id="MSVCRT8MFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_MFCLOC_x86.msm"/>
-    			<Merge Id="MSVCRT8PFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_MFCLOC_x86.msm"/>
-    		<?else?>
-    			<Merge Id="MSVCRT8MEM" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_DebugCRT_x86.msm"/>
-    			<Merge Id="MSVCRT8POL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_DebugCRT_x86.msm"/>
-    			<Merge Id="MSVCRT8MFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_DebugMFC_x86.msm"/>
-    			<Merge Id="MSVCRT8PFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_DebugMFC_x86.msm"/>
-    			<Merge Id="MSVCRT8MFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC80_MFCLOC_x86.msm"/>
-    			<Merge Id="MSVCRT8PFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\policy_8_0_Microsoft_VC80_MFCLOC_x86.msm"/>
-    		<?endif?>
-    	<?endif?>
+    <!-- Shared assembly runtime for VS 2010 -->
+    <!-- Note that these cause numerous LGHT1055 and ICE82 warnings.  They are unavoidable but innocuous.  -->
+    <?ifdef CL1600?>
+      <?ifdef env.CommonProgramFiles6432?>
+        <?define CPF="$(env.CommonProgramFiles(x86)"?>
+      <?else?>
+        <?define CPF="$(env.CommonProgramFiles)"?>
+      <?endif?>
+      <?if $(var.Platform) = "x64" ?>
+        <?ifndef Debug?>
+          <Merge Id="MSVCRT100MEM" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC100_CRT_x64.msm"/>
+          <Merge Id="MSVCRT100MFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC100_MFC_x64.msm"/>
+          <Merge Id="MSVCRT100MFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC100_MFCLOC_x64.msm"/>
+        <?else?>
+          <Merge Id="MSVCRT100MEM" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC100_DebugCRT_x64.msm"/>
+          <Merge Id="MSVCRT100MFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC100_DebugMFC_x64.msm"/>
+          <Merge Id="MSVCRT100MFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC100_MFCLOC_x64.msm"/>
+        <?endif?>
+      <?else?>
+        <?ifndef Debug?>
+          <Merge Id="MSVCRT100MEM" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC100_CRT_x86.msm"/>
+          <Merge Id="MSVCRT100MFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC100_MFC_x86.msm"/>
+          <Merge Id="MSVCRT100MFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC100_MFCLOC_x86.msm"/>
+        <?else?>
+          <Merge Id="MSVCRT100MEM" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC100_DebugCRT_x86.msm"/>
+          <Merge Id="MSVCRT100MFC" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC100_DebugMFC_x86.msm"/>
+          <Merge Id="MSVCRT100MFL" DiskId="1" Language="0" src="$(var.CPF)\Merge Modules\Microsoft_VC100_MFCLOC_x86.msm"/>
+        <?endif?>
+      <?endif?>
     <?endif?>
 
 </Directory>
