@@ -45,6 +45,7 @@ OBJS=   \
 	$(OUTPRE)LeashView.obj \
 	$(OUTPRE)lglobals.obj \
 	$(OUTPRE)MainFrm.obj \
+	$(OUTPRE)out2con.obj \
 	$(OUTPRE)StdAfx.obj \
 	$(OUTPRE)AfsProperties.obj \
 	$(OUTPRE)VSroutines.obj \

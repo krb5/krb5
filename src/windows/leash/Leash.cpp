@@ -26,6 +26,7 @@
 #include "mitwhich.h"
 #include <leasherr.h>
 #include "lglobals.h"
+#include "out2con.h"
 #include <krb5.h>
 #include <com_err.h>
 
@@ -305,6 +306,11 @@ BOOL CLeashApp::InitInstance()
             {
                 autoInit = TRUE;
             }
+            else if (0 == stricmp(optionParam+1, "console") ||
+                     0 == stricmp(optionParam+1, "c"))
+            {
+                CreateConsoleEcho();
+            }
             else
             {
                 MessageBox(hMsg,
@@ -312,6 +318,7 @@ BOOL CLeashApp::InitInstance()
                             "'-renew' or '-r' to perform ticket renewal (and exit)\n"
                             "'-destroy' or '-d' to perform ticket destruction (and exit)\n"
                             "'-autoinit' or '-a' to perform automatic ticket initialization\n"
+                            "'-console' or '-c' to attach a console for debugging\n"
                             "'-ms2mit' or '-import' or '-m' to perform ticket importation (and exit)",
                            "Leash Error", MB_OK);
                 return FALSE;
