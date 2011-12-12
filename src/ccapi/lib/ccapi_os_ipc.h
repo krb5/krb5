@@ -28,6 +28,8 @@
 
 #include "cci_common.h"
 
+cc_int32 cci_os_ipc_process_init (void);
+
 cc_int32 cci_os_ipc_thread_init (void);
 
 cc_int32 cci_os_ipc (cc_int32      in_launch_server,

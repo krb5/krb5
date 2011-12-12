@@ -32,9 +32,10 @@ extern "C" {
 #include "tls.h"
 #include "cci_debugging.h"
 #include "ccapi_context.h"
+#include "ccapi_ipc.h"
 #include "client.h"
 
-void cci_thread_init__auxinit();
+void cci_process_init__auxinit();
     }
 
 
@@ -91,10 +92,8 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,     // DLL module handle
 
             // Allocate a TLS index:
             if ((dwTlsIndex = TlsAlloc()) == TLS_OUT_OF_INDEXES) return FALSE; 
- 
-            // Initialize CCAPI once per DLL load:
-            firstThreadID = GetCurrentThreadId();
 
+            cci_process_init__auxinit();
             // Don't break; fallthrough: Initialize the TLS index for first thread.
  
         // The attached process creates a new thread:
@@ -107,8 +106,8 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,     // DLL module handle
 
             memset(ptspdata, 0, sizeof(struct tspdata));
 
-            // Initialize CCAPI once per DLL load:
-            if (GetCurrentThreadId() == firstThreadID) cci_thread_init__auxinit();
+            // Initialize CCAPI thread data:
+            cci_ipc_thread_init();
 
             break; 
  

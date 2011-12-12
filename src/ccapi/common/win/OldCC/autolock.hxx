@@ -35,10 +35,8 @@ public:
     ~CcOsLock()     {DeleteCriticalSection(&cs);       valid = false;}
     void lock()     {if (valid) EnterCriticalSection(&cs);}
     void unlock()   {if (valid) LeaveCriticalSection(&cs);}
-#if 0
     bool trylock()  {return valid ? (TryEnterCriticalSection(&cs) ? true : false)
                                   : false; }
-#endif
 };
 
 class CcAutoLock {
@@ -48,6 +46,15 @@ public:
     static void Stop (CcAutoLock*& a) { delete a; a = 0; };
     CcAutoLock(CcOsLock& lock):m_lock(lock) { m_lock.lock(); }
     ~CcAutoLock() { m_lock.unlock(); }
+};
+
+class CcAutoTryLock {
+    CcOsLock& m_lock;
+    bool m_locked;
+public:
+    CcAutoTryLock(CcOsLock& lock):m_lock(lock) { m_locked = m_lock.trylock(); }
+    ~CcAutoTryLock() { if (m_locked) m_lock.unlock(); m_locked = false; }
+    bool IsLocked() const { return m_locked; }
 };
 
 #endif /* __AUTOLOCK_HXX */

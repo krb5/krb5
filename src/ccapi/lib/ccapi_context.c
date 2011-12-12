@@ -79,12 +79,12 @@ static cc_int32 cci_context_sync (cci_context_t in_context,
 #pragma mark -
 #endif
 
-MAKE_INIT_FUNCTION(cci_thread_init);
-MAKE_FINI_FUNCTION(cci_thread_fini);
+MAKE_INIT_FUNCTION(cci_process_init);
+MAKE_FINI_FUNCTION(cci_process_fini);
 
 /* ------------------------------------------------------------------------ */
 
-static int cci_thread_init (void)
+static int cci_process_init (void)
 {
     cc_int32 err = ccNoError;
 
@@ -93,7 +93,7 @@ static int cci_thread_init (void)
     }
 
     if (!err) {
-        err = cci_ipc_thread_init ();
+        err = cci_ipc_process_init ();
     }
 
     if (!err) {
@@ -105,9 +105,9 @@ static int cci_thread_init (void)
 
 /* ------------------------------------------------------------------------ */
 
-static void cci_thread_fini (void)
+static void cci_process_fini (void)
 {
-    if (!INITIALIZER_RAN (cci_thread_init) || PROGRAM_EXITING ()) {
+    if (!INITIALIZER_RAN (cci_process_init) || PROGRAM_EXITING ()) {
 	return;
     }
 
@@ -134,7 +134,7 @@ cc_int32 cc_initialize (cc_context_t  *out_context,
     if (!out_context) { err = cci_check_error (ccErrBadParam); }
 
     if (!err) {
-        err = CALL_INIT_FUNCTION (cci_thread_init);
+        err = CALL_INIT_FUNCTION (cci_process_init);
     }
 
     if (!err) {

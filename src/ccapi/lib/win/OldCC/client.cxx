@@ -395,10 +395,11 @@ Client::Connect(char* ep OPTIONAL) {
     }
 
 DWORD Client::Initialize(char* ep OPTIONAL) {
-    CcAutoLock AL(Client::sLock);
+    CcAutoTryLock AL(Client::sLock);
+    if (!AL.IsLocked() || s_init)
+        return 0;
     SecureClient s;
     ccs_request_IfHandle  = NULL;
-    if (s_init) return 0;
     DWORD status = Client::Connect(ep);
     if (!status) s_init = true;
     return status;
