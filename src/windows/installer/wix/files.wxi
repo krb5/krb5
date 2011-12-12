@@ -197,15 +197,9 @@
                         <Condition>USELEASH</Condition>
                     </Component> -->
 
-<!--                <?ifdef OldHelp?>
-                    <Component Win64="$(var.Win64)" Id="cmf_leash32_hlp" Guid="$(var.cmf_leash32_hlp_guid)" DiskId="1">
-	                    <File Id="fil_leash32_hlp" Name="leash32.hlp" KeyPath="yes" />
-                    </Component>
-                <?else?>
                     <Component Win64="$(var.Win64)" Id="cmf_leash32_chm" Guid="$(var.cmf_leash32_chm_guid)" DiskId="1">
-	                    <File Id="fil_leash32_chm" Name="leash32.chm" KeyPath="yes" />
+	                    <File Id="fil_leash32_chm" Name="leash.chm" KeyPath="yes" />
                     </Component>
-                <?endif?> -->
                     
                     <Component Win64="$(var.Win64)" Id="cmf_leashw32_dll" Guid="$(var.cmf_leashw32_dll_guid)" DiskId="1">
 	                    <File Id="fil_leashw32_dll" Name="$(var.cmf_leashw32_dll_name)" KeyPath="yes" />

@@ -96,11 +96,7 @@
             <ComponentRef Id="rcm_leash_5" />
             <ComponentRef Id="rcm_leash_6" />
             
-<!--        <?ifdef OldHelp?>
-            <ComponentRef Id="cmf_leash32_hlp" />
-        <?else?>
             <ComponentRef Id="cmf_leash32_chm" />
-        <?endif?> -->
             
             <!-- Leash dll options -->
             <ComponentRef Id="rcm_leashdll_1" />
