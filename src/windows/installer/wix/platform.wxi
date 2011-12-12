@@ -38,12 +38,12 @@
         <?define cmf_krb524_dll_name="krb524.dll"?>
         <?define cmf_krbcc32_dll_guid="56DAD1B9-4A59-46e6-81CA-54E2B6C9D618"?>
         <?define cmf_krbcc32_dll_name="krbcc64.dll"?>
-        <?define cmf_ccpaiserver_exe_guid="0192F58B-9129-426d-A271-E18455EDC80E"?>
+        <?define cmf_ccapiserver_exe_guid="0192F58B-9129-426d-A271-E18455EDC80E"?>
         <?define cmf_ccapiserver_exe_name="ccapiserver.exe"?>
         <?define cmf_krbv4w32_dll_guid="D195FADB-A3B0-4023-A824-8895552CDC56"?>
         <?define cmf_krbv4w32_dll_name="krbv4w64.dll"?>
-        <?define cmf_leash32_exe_guid="D195FADB-A3B0-4023-A824-8895552CDC56"?>
-        <?define csc_leash32_exe_guid="9D43350A-A8AE-4405-AB82-64E90E5A1A70"?>
+        <?define cmf_leash_exe_guid="D195FADB-A3B0-4023-A824-8895552CDC56"?>
+        <?define csc_leash_exe_guid="9D43350A-A8AE-4405-AB82-64E90E5A1A70"?>
         <?define rcm_leash_1_guid="7E5517FF-FB76-431f-A92B-2895C9BE7E98"?>
         <?define rcm_leash_2_guid="008208AC-46BE-4ca4-BEA7-8FCAAD8BA7C3"?>
         <?define rcm_leash_3_guid="66D97178-E735-499b-961F-C7B8B8074E1A"?>
@@ -127,8 +127,8 @@
         <?define cmf_ccapiserver_exe_name="ccapiserver.exe"?>
         <?define cmf_krbv4w32_dll_guid="DFA23F6C-5297-4876-AF52-6F7CF2CB34AC"?>
         <?define cmf_krbv4w32_dll_name="krbv4w32.dll"?>
-        <?define cmf_leash32_exe_guid="990D5F6B-4CEE-4706-96F4-F7AF12F97DF7"?>
-        <?define csc_leash32_exe_guid="8A096700-47B1-4A0B-B7B5-44F75086DEAE"?>
+        <?define cmf_leash_exe_guid="990D5F6B-4CEE-4706-96F4-F7AF12F97DF7"?>
+        <?define csc_leash_exe_guid="8A096700-47B1-4A0B-B7B5-44F75086DEAE"?>
         <?define rcm_leash_1_guid="B91648A0-26F7-43BB-A954-202FF3811E3C"?>
         <?define rcm_leash_2_guid="0D8DCC52-F855-4C46-86A1-198E6EE0CB8A"?>
         <?define rcm_leash_3_guid="9610A7E3-251F-4286-B776-1C3AF5DE7815"?>

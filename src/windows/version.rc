@@ -112,7 +112,7 @@
 #define K5_DESCRIPTION "Leash32 Kerberos Ticket Manager - " KRB5_PRODUCTNAME_STR "\0"
 #define K5_FILETYPE	VFT_APP
 #define K5_INTERNAL_NAME "LEASH\0"
-#define K5_ORIGINAL_NAME "leash32.exe\0"
+#define K5_ORIGINAL_NAME "leash.exe\0"
 #endif
 
 #ifdef LEASHDLL_LIB

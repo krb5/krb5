@@ -15,11 +15,10 @@ AFS_LIBS=
 !endif
 
 MFCLIB=MFC100D.LIB
-EXE_NAME=leash32
+EXE_NAME=leash
 WSHELPER=wshelp32
 
 !if ("$(CPU)" == "IA64") || ("$(CPU)" == "AMD64") || ("$(CPU)" == "ALPHA64")
-EXE_NAME=leash64
 WSHELPER=wshelp64
 !endif
 

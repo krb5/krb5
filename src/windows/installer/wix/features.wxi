@@ -79,10 +79,8 @@
 
             <ComponentRef Id="cmf_leashw32_dll" />
 
-        <?if $(var.Platform) = "Intel" ?>
-            <ComponentRef Id="cmf_leash32_exe" />
+            <ComponentRef Id="cmf_leash_exe" />
 <!--            <ComponentRef Id="csc_leash32_exe" /> -->
-        <?endif?>
 	    <ComponentRef Id="cmf_kfwlogon_DLL" />
             <ComponentRef Id="cmf_kfwcpcc_EXE" />
 
@@ -91,7 +89,6 @@
             <ComponentRef Id="rcm_krb5_2" />
             <ComponentRef Id="rcm_krb5_3" />
 
-        <?if $(var.Platform) = "Intel" ?>
             <!-- Leash config options -->
             <ComponentRef Id="rcm_leash_1" />
             <ComponentRef Id="rcm_leash_2" />
@@ -104,7 +101,6 @@
         <?else?>
             <ComponentRef Id="cmf_leash32_chm" />
         <?endif?> -->
-        <?endif?>
             
             <!-- Leash dll options -->
             <ComponentRef Id="rcm_leashdll_1" />

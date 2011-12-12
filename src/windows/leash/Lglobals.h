@@ -230,7 +230,7 @@ extern DECL_FUNC_PTR(profile_release_string);
 #define KRBREALM_FILE	"KRBREALM.CON"
 #define TICKET_FILE		"TICKET.KRB"
 
-#define LEASH_HELP_FILE "leash32.chm"
+#define LEASH_HELP_FILE "leash.chm"
 
 extern int  config_boolean_to_int(const char *);
 extern BOOL SetRegistryVariable(const CString& regVariable,
