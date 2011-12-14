@@ -36,9 +36,13 @@ class WorkList {
 private:
     std::list <WorkItem*>   wl;
     CRITICAL_SECTION        cs;
+    HANDLE                  hEvent;
 public:
     WorkList();
     ~WorkList();
+    int initialize();
+    int cleanup();
+    void wait();
     int add(WorkItem*);
     int remove(WorkItem**);
     bool isEmpty() {return wl.empty();}

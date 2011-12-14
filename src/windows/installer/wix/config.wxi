@@ -30,15 +30,9 @@
     <?include site-local.wxi?>
     
     <!-- Sanity checks -->
-    <!-- <?ifndef var.CL1200?>
-        <?ifndef var.CL1300?>
-            <?ifndef var.CL1310?>
-                <?ifndef var.CL1400?>
-                    <?error Must define one of CL1200, CL1300, CL1310 or CL1400?>
-                <?endif?>
-            <?endif?>
-        <?endif?>
-    <?endif?> -->
+    <?ifndef var.CL1600?>
+        <?error Must define CL1600 (MSVC10.0)?>
+    <?endif?>
 
     <!-- Build type specifications -->
     <?ifndef env.CPU?>
@@ -46,12 +40,11 @@
     <?endif?>
     <?define BinDir="$(env.KRB_INSTALL_DIR)\bin\"?>
     <?define LibDir="$(env.KRB_INSTALL_DIR)\lib\"?>
+    <?define InstallerVersion="300"?>
     <?if $(env.CPU) = "i386"?>
-        <?define InstallerVersion="110"?>
         <?define Platform="Intel"?>
         <?define Win64="no"?>
     <?elseif $(env.CPU) = "AMD64"?>
-        <?define InstallerVersion="200"?>
         <?define Platform="x64"?>
         <?define Win64="yes"?>
     <?else?>

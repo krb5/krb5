@@ -44,6 +44,7 @@ IMPLEMENT_DYNCREATE(CLeashView, CFormView)
 
 BEGIN_MESSAGE_MAP(CLeashView, CFormView)
 	//{{AFX_MSG_MAP(CLeashView)
+    ON_MESSAGE(WM_WARNINGPOPUP, OnWarningPopup)
 	ON_MESSAGE(WM_GOODBYE, OnGoodbye)
     ON_MESSAGE(WM_TRAYICON, OnTrayIcon)
     ON_NOTIFY(TVN_ITEMEXPANDED, IDC_TREEVIEW, OnItemexpandedTreeview)
@@ -172,7 +173,7 @@ CFormView(CLeashView::IDD)
     m_publicIPAddress = 0;
     m_autoRenewTickets = 0;
     m_autoRenewalAttempted = 0;
-
+    m_pWarningMessage = NULL;
     m_bIconAdded = FALSE;
     m_bIconDeleted = FALSE;
 #ifndef KRB5_TC_NOTICKET
@@ -1010,7 +1011,7 @@ VOID CLeashView::OnUpdateDisplay()
 
     m_tvinsert.hParent = NULL;
     m_tvinsert.hInsertAfter = TVI_LAST;
-    m_tvinsert.item.mask = TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_TEXT;
+    m_tvinsert.item.mask = TVIF_IMAGE | TVIF_SELECTEDIMAGE;
     m_tvinsert.item.hItem = NULL;
     m_tvinsert.item.state = 0;
     m_tvinsert.item.stateMask = 0; //TVIS_EXPANDED;
@@ -1018,6 +1019,7 @@ VOID CLeashView::OnUpdateDisplay()
 
     if (CLeashApp::m_hKrb5DLL && m_listKrb5) {
         m_tvinsert.item.pszText = ticketinfo.Krb5.principal;
+        m_tvinsert.item.mask |= TVIF_TEXT;
         switch ( iconStatusKrb5 ) {
         case ACTIVE_TICKET:
             m_tvinsert.item.iSelectedImage = ACTIVE_PARENT_NODE;
@@ -1033,6 +1035,7 @@ VOID CLeashView::OnUpdateDisplay()
 #ifndef NO_KRB4
     } else if (CLeashApp::m_hKrb4DLL && m_listKrb4) {
         m_tvinsert.item.pszText = ticketinfo.Krb4.principal;
+        m_tvinsert.item.mask |= TVIF_TEXT;
         switch ( iconStatusKrb4 ) {
         case ACTIVE_TICKET:
             m_tvinsert.item.iSelectedImage = ACTIVE_PARENT_NODE;
@@ -1047,6 +1050,7 @@ VOID CLeashView::OnUpdateDisplay()
 #endif
     } else {
         m_tvinsert.item.iSelectedImage = NONE_PARENT_NODE;
+        m_tvinsert.item.pszText = NULL;
     }
     m_tvinsert.item.iImage = m_tvinsert.item.iSelectedImage;
     m_tvinsert.item.cChildren = 0;
@@ -2070,6 +2074,27 @@ void CLeashView::SetTrayIcon(int nim, int state)
         m_bIconDeleted = TRUE;
 }
 
+BOOL CLeashView::PostWarningMessage(const CString& message)
+{
+    if (m_pWarningMessage)
+    {
+        return FALSE; // can't post more than one warning at a time
+    }
+    m_pWarningMessage = new CString(message);
+    PostMessage(WM_WARNINGPOPUP);
+    return TRUE;
+}
+
+LRESULT CLeashView::OnWarningPopup(WPARAM wParam, LPARAM lParam)
+{
+    CLeashMessageBox leashMessageBox(CMainFrame::m_isMinimum ? GetDesktopWindow() : NULL,
+                                        *m_pWarningMessage, 100000);
+    leashMessageBox.DoModal();
+    delete m_pWarningMessage;
+    m_pWarningMessage = NULL;
+    return 0L;
+}
+
 BOOL CLeashView::PreTranslateMessage(MSG* pMsg)
 {
 	if ( pMsg->message == ID_OBTAIN_TGT_WITH_LPARAM )
@@ -2461,9 +2486,7 @@ BOOL CLeashView::PreTranslateMessage(MSG* pMsg)
 
                 ReleaseMutex(ticketinfo.lockObj);
                 AlarmBeep();
-                CLeashMessageBox leashMessageBox(!CMainFrame::m_isMinimum ? GetDesktopWindow() : NULL,
-                                                  lowTicketWarning, 100000);
-                leashMessageBox.DoModal();
+                PostWarningMessage(lowTicketWarning);
                 if (WaitForSingleObject( ticketinfo.lockObj, 100 ) != WAIT_OBJECT_0)
                     throw("Unable to lock ticketinfo");
             }

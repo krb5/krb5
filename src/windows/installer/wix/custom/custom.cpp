@@ -87,9 +87,6 @@ SOFTWARE.
 // linker stuff
 #pragma comment(lib, "msi")
 #pragma comment(lib, "advapi32")
-#if defined(_M_IA64) || defined(_M_AMD64)
-#pragma comment(lib, "bufferoverflowu")
-#endif
 
 
 void ShowMsiError( MSIHANDLE hInstall, DWORD errcode, DWORD param ){

@@ -28,6 +28,8 @@
 
 #include "cci_common.h"
 
+cc_int32 cci_ipc_process_init (void);
+
 cc_int32 cci_ipc_thread_init (void);
 
 cc_int32 cci_ipc_send (enum cci_msg_id_t  in_request_name,

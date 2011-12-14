@@ -1384,6 +1384,22 @@ TYPEDEF_FUNC(
     );
 
 TYPEDEF_FUNC(
+    krb5_error_code,
+    KRB5_CALLCONV,
+    krb5_get_init_creds_opt_alloc,
+    (krb5_context ctx,
+     krb5_get_init_creds_opt **opt)
+    );
+
+TYPEDEF_FUNC(
+    void,
+    KRB5_CALLCONV,
+    krb5_get_init_creds_opt_free,
+    (krb5_context ctx,
+     krb5_get_init_creds_opt *opt)
+    );
+
+TYPEDEF_FUNC(
     void,
     KRB5_CALLCONV,
     krb5_get_init_creds_opt_init,
@@ -1463,6 +1479,15 @@ TYPEDEF_FUNC(
     krb5_get_init_creds_opt_set_change_password_prompt,
     (krb5_get_init_creds_opt *opt,
      int prompt)
+    );
+
+TYPEDEF_FUNC(
+    krb5_error_code,
+    KRB5_CALLCONV,
+    krb5_get_init_creds_opt_set_out_ccache,
+    (krb5_context context,
+     krb5_get_init_creds_opt *opt,
+     krb5_ccache ccache)
     );
 
 TYPEDEF_FUNC(
@@ -1774,5 +1799,12 @@ TYPEDEF_FUNC(
     KRB5_CALLCONV,
     krb5_clear_error_message,
     (krb5_context)
+    );
+
+TYPEDEF_FUNC(
+    krb5_boolean,
+    KRB5_CALLCONV,
+    krb5_is_config_principal,
+    (krb5_context, krb5_const_principal)
     );
 #endif /* __LOADFUNCS_KRB5_H__ */

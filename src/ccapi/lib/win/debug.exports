@@ -8,3 +8,4 @@
     krb5int_ipc_stream_new
 
     ccs_authenticate
+    cci_os_ipc_process_init

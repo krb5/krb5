@@ -28,6 +28,13 @@
 
 /* ------------------------------------------------------------------------ */
 
+cc_int32 cci_ipc_process_init (void)
+{
+    return cci_os_ipc_process_init ();
+}
+
+/* ------------------------------------------------------------------------ */
+
 cc_int32 cci_ipc_thread_init (void)
 {
     return cci_os_ipc_thread_init ();

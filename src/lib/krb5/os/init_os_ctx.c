@@ -72,7 +72,11 @@ get_from_module_dir(
     if (!name)
         return ENOMEM;
 
+#ifdef _WIN64
+    if (!GetModuleFileName(GetModuleHandle("krb5_64"), name, size))
+#else
     if (!GetModuleFileName(GetModuleHandle("krb5_32"), name, size))
+#endif
         goto cleanup;
 
     p = name + strlen(name);

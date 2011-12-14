@@ -759,10 +759,10 @@ this_module()
     if (!hModWSHelp)
     {
         // Note: these must match the DEF file entries
-#if defined (_WIN32)
-        hModWSHelp = GetModuleHandle("WSHELP32");
+#if defined(_WIN64)
+        hModWSHelp = GetModuleHandle( "WSHELP64" );
 #else
-        hModWSHelp = GetModuleHandle("WSHELPER");
+        hModWSHelp = GetModuleHandle( "WSHELP32" );
 #endif
     }
     return hModWSHelp;

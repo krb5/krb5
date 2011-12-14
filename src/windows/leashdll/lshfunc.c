@@ -68,7 +68,7 @@ leash_error_message(
 {
     char message[2048];
     char *p = message;
-    int size = sizeof(message);
+    int size = sizeof(message) - 1; /* -1 to leave room for NULL terminator */
     int n;
 
     // XXX: ignore AFS for now.
@@ -85,7 +85,7 @@ leash_error_message(
         n = _snprintf(p, size,
                       "Kerberos 5: %s (error %ld)\n",
                       perror_message(rc5),
-                      rc5 & 255 // XXX: & 255??!!!
+                      rc5
             );
         p += n;
         size -= n;
@@ -109,6 +109,7 @@ leash_error_message(
         size -= n;
     }
 #ifdef USE_MESSAGE_BOX
+    *p = 0; /* ensure NULL termination of message */
     if ( displayMB )
         MessageBox(NULL, message, "Leash", MB_OK | MB_ICONERROR | MB_TASKMODAL |
                     MB_SETFOREGROUND);
@@ -498,6 +499,7 @@ Leash_int_kinit_ex(
     char    first_part[256];
     char    second_part[256];
     char    temp[1024];
+    char*   custom_msg;
     int     count;
     int     i;
     int rc5 = 0;
@@ -598,10 +600,9 @@ Leash_int_kinit_ex(
             rcA = rcB;
     }
 #endif /* NO_AFS */
-
+    custom_msg = (rc5 == KRB5KRB_AP_ERR_BAD_INTEGRITY) ? "Password incorrect" : NULL;
     return leash_error_message("Ticket initialization failed.",
-                               rcL,
-                               rc5, rcA, 0,
+                               rcL, rc5, rcA, custom_msg,
                                displayErrors);
 }
 
@@ -847,6 +848,9 @@ Leash_import(void)
 long
 Leash_kdestroy(void)
 {
+    Leash_afs_unlog();
+    Leash_krb5_kdestroy();
+
     return 0;
 }
 
@@ -2829,7 +2833,8 @@ acquire_tkt_send_msg(krb5_context ctx, const char * title,
 		strs++;
 
 		GlobalUnlock( hData );
-		SendMessage(hLeash, 32810, 0, (LPARAM) hData);
+		/* 32809 = ID_OBTAIN_TGT_WITH_LPARAM in src/windows/leash/resource.h */
+		SendMessage(hLeash, 32809, 0, (LPARAM) hData);
 	    }
 	}
 	GlobalFree( hData );

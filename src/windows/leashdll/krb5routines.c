@@ -450,6 +450,11 @@ not_an_API_LeashKRB5GetTickets(
 
     while (!(code = pkrb5_cc_next_cred(ctx, cache, &KRBv5Cursor, &KRBv5Credentials)))
     {
+        if ((*pkrb5_is_config_principal)(ctx, KRBv5Credentials.server))
+        { /* skip configuration credentials */
+            (*pkrb5_free_cred_contents)(ctx, &KRBv5Credentials);
+            continue;
+        }
         if (!list)
         {
             list = (TicketList*) calloc(1, sizeof(TicketList));
@@ -830,14 +835,13 @@ DWORD                       publicIP
     krb5_principal		        me = 0;
     char*                       name = 0;
     krb5_creds			        my_creds;
-    krb5_get_init_creds_opt     options;
+    krb5_get_init_creds_opt *   options = NULL;
     krb5_address **             addrs = NULL;
     int                         i = 0, addr_count = 0;
 
     if (!pkrb5_init_context)
         return 0;
 
-    pkrb5_get_init_creds_opt_init(&options);
     memset(&my_creds, 0, sizeof(my_creds));
 
     if (alt_ctx)
@@ -849,6 +853,9 @@ DWORD                       publicIP
         code = pkrb5_init_context(&ctx);
         if (code) goto cleanup;
     }
+
+    code = pkrb5_get_init_creds_opt_alloc(ctx, &options);
+    if (code) goto cleanup;
 
     code = pkrb5_cc_default(ctx, &cc);
     if (code) goto cleanup;
@@ -868,15 +875,15 @@ DWORD                       publicIP
 		renew_life *= 5*60;
 
     if (lifetime)
-        pkrb5_get_init_creds_opt_set_tkt_life(&options, lifetime);
-	pkrb5_get_init_creds_opt_set_forwardable(&options,
-                                                 forwardable ? 1 : 0);
-	pkrb5_get_init_creds_opt_set_proxiable(&options,
-                                               proxiable ? 1 : 0);
-	pkrb5_get_init_creds_opt_set_renew_life(&options,
-                                               renew_life);
+        pkrb5_get_init_creds_opt_set_tkt_life(options, lifetime);
+	pkrb5_get_init_creds_opt_set_forwardable(options,
+                                             forwardable ? 1 : 0);
+	pkrb5_get_init_creds_opt_set_proxiable(options,
+                                           proxiable ? 1 : 0);
+	pkrb5_get_init_creds_opt_set_renew_life(options,
+                                            renew_life);
     if (addressless)
-        pkrb5_get_init_creds_opt_set_address_list(&options,NULL);
+        pkrb5_get_init_creds_opt_set_address_list(options,NULL);
     else {
 		if (publicIP)
         {
@@ -932,10 +939,14 @@ DWORD                       publicIP
             netIPAddr = htonl(publicIP);
             memcpy(addrs[i]->contents,&netIPAddr,4);
 
-            pkrb5_get_init_creds_opt_set_address_list(&options,addrs);
+            pkrb5_get_init_creds_opt_set_address_list(options,addrs);
 
         }
     }
+
+    code = pkrb5_get_init_creds_opt_set_out_ccache(ctx, options, cc);
+    if (code)
+        goto cleanup;
 
     code = pkrb5_get_init_creds_password(ctx,
                                        &my_creds,
@@ -945,15 +956,7 @@ DWORD                       publicIP
                                        hParent, // prompter data
                                        0, // start time
                                        0, // service name
-                                       &options);
-    if (code) goto cleanup;
-
-    code = pkrb5_cc_initialize(ctx, cc, me);
-    if (code) goto cleanup;
-
-    code = pkrb5_cc_store_cred(ctx, cc, &my_creds);
-    if (code) goto cleanup;
-
+                                       options);
  cleanup:
     if ( addrs ) {
         for ( i=0;i<addr_count;i++ ) {
@@ -973,6 +976,8 @@ DWORD                       publicIP
 	pkrb5_free_principal(ctx, me);
     if (cc)
 	pkrb5_cc_close(ctx, cc);
+    if (options)
+        pkrb5_get_init_creds_opt_free(ctx, options);
     if (ctx && (ctx != alt_ctx))
 	pkrb5_free_context(ctx);
     return(code);
@@ -1463,7 +1468,7 @@ multi_field_dialog(HWND hParent, char * preface, int n, struct textField tb[])
 	extern HINSTANCE hLeashInst;
     size_t maxwidth = 0;
     int numlines = 0;
-    int len;
+    size_t len;
     char * plines[16], *p = preface ? preface : "";
     int i;
 

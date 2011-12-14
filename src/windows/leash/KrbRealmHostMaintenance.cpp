@@ -231,7 +231,7 @@ BOOL CKrbRealmHostMaintenance::OnApply()
 				   "Leash", MB_OK);
 	}
 
-
+#ifndef NO_KRB4
     // Save to Kerberos Four config. file "Krb.con"
     CStdioFile krbCon;
 	if (!krbCon.Open(CKrbProperties::m_krbPath, CFile::modeCreate |
@@ -325,6 +325,7 @@ BOOL CKrbRealmHostMaintenance::OnApply()
         krbCon.WriteString(".KERBEROS.OPTION. dns\n");
 
     krbCon. Close();
+#endif // NO_KRB4
     return TRUE;
 }
 

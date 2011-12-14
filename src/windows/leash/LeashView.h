@@ -59,6 +59,7 @@
 #endif
 
 #define WM_TRAYICON (WM_USER+100)
+#define WM_WARNINGPOPUP (WM_USER+101)
 
 enum ticketTimeLeft{NO_TICKETS, ZERO_MINUTES_LEFT, FIVE_MINUTES_LEFT, TEN_MINUTES_LEFT,
 					FIFTEEN_MINUTES_LEFT, TWENTY_MINUTES_LEFT, PLENTY_OF_TIME,
@@ -106,6 +107,7 @@ private:
 #endif
 	INT					m_hKerb5State;
 	INT					m_hAFSState;
+    CString*            m_pWarningMessage;
     BOOL                m_bIconAdded;
     BOOL                m_bIconDeleted;
 
@@ -154,6 +156,12 @@ private:
     static UINT InitTicket(void *);
     static UINT RenewTicket(void *);
     static UINT ImportTicket(void *);
+    // Queue a warning popup message.
+    // This is a workaround to the MFC deficiency that you cannot safely create
+    // a modal dialog while processing messages within AfxPreTranslateMessage()
+    // returns TRUE if message is queued successfully.
+    BOOL PostWarningMessage(const CString& message);
+    afx_msg LRESULT OnWarningPopup(WPARAM wParam, LPARAM lParam);
 
 protected: // create from serialization only
 	DECLARE_DYNCREATE(CLeashView)

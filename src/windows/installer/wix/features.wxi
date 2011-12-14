@@ -75,14 +75,12 @@
             <ComponentRef Id="cmf_ms2mit_exe" />
             <ComponentRef Id="cmf_mit2ms_exe" />
             <ComponentRef Id="cmf_wshelp32_dll" />
-<!--            <ComponentRef Id="cmf_xpprof32_dll" /> -->
+            <ComponentRef Id="cmf_xpprof32_dll" />
 
             <ComponentRef Id="cmf_leashw32_dll" />
 
-        <?if $(var.Platform) = "Intel" ?>
-<!--            <ComponentRef Id="cmf_leash32_exe" /> -->
+            <ComponentRef Id="cmf_leash_exe" />
 <!--            <ComponentRef Id="csc_leash32_exe" /> -->
-        <?endif?>
 	    <ComponentRef Id="cmf_kfwlogon_DLL" />
             <ComponentRef Id="cmf_kfwcpcc_EXE" />
 
@@ -91,7 +89,6 @@
             <ComponentRef Id="rcm_krb5_2" />
             <ComponentRef Id="rcm_krb5_3" />
 
-        <?if $(var.Platform) = "Intel" ?>
             <!-- Leash config options -->
             <ComponentRef Id="rcm_leash_1" />
             <ComponentRef Id="rcm_leash_2" />
@@ -99,12 +96,7 @@
             <ComponentRef Id="rcm_leash_5" />
             <ComponentRef Id="rcm_leash_6" />
             
-<!--        <?ifdef OldHelp?>
-            <ComponentRef Id="cmf_leash32_hlp" />
-        <?else?>
             <ComponentRef Id="cmf_leash32_chm" />
-        <?endif?> -->
-        <?endif?>
             
             <!-- Leash dll options -->
             <ComponentRef Id="rcm_leashdll_1" />
@@ -127,8 +119,6 @@
             <ComponentRef Id="cmf_psapi_dll" />
             
             <ComponentRef Id="cmf_krb5_ini" />
-            <ComponentRef Id="cmf_krb_con" />
-            <ComponentRef Id="cmf_krbrealm_con" />
             
             <ComponentRef Id="rcm_common" />
             <ComponentRef Id="rcm_client" />
@@ -164,10 +154,6 @@
             <ComponentRef Id="cmp_dirinc_loadfuncs" />
             <ComponentRef Id="cmp_dirinc_wshelper" />
             <ComponentRef Id="cmp_dirinc_wshelper_arpa" />
-            <ComponentRef Id="cmp_dirinstall_wix" />
-            <ComponentRef Id="cmp_dirinstall_wix_lang" />
-            <ComponentRef Id="cmp_dirinstall_wix_Binary" />
-            <ComponentRef Id="cmp_dirinstall_wix_custom" />
             <ComponentRef Id="rcm_common" />
             <ComponentRef Id="rcm_sdk" />
         </Feature> <!-- /feaKfwSDK -->

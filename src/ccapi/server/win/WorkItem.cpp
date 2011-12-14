@@ -103,10 +103,26 @@ char* WorkItem::print(char* buf) {
     return buf;
     }
 
+int WorkList::initialize() {
+    hEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+    return 0;
+    }
+
+int WorkList::cleanup() {
+    CloseHandle(hEvent);
+    hEvent = INVALID_HANDLE_VALUE;
+    return 0;
+    }
+
+void WorkList::wait() {
+    WaitForSingleObject(hEvent, INFINITE);
+    }
+
 int WorkList::add(WorkItem* item) {
     EnterCriticalSection(&cs);
         wl.push_front(item);
     LeaveCriticalSection(&cs);
+    SetEvent(hEvent);
     return 1;
     }
 

@@ -216,19 +216,21 @@ extern DECL_FUNC_PTR(profile_release_string);
 #define OFF 0
 #define TRUE_FLAG		1
 #define FALSE_FLAG		0
+#ifdef _WIN64
+#define LEASHDLL "leashw64.dll"
+#define KERB5DLL "krb5_64.dll"
+#define KERB5_PPROFILE_DLL "xpprof64.dll"
+#else
 #define LEASHDLL "leashw32.dll"
-#define KERB4DLL "krbv4w32.dll"
 #define KERB5DLL "krb5_32.dll"
 #define KERB5_PPROFILE_DLL "xpprof32.dll"
+#endif
 #define SECUR32DLL "secur32.dll"
-
 #define KRB_FILE		"KRB.CON"
 #define KRBREALM_FILE	"KRBREALM.CON"
 #define TICKET_FILE		"TICKET.KRB"
-////Wow. Why?
-#define WIN95_AUTOEXEC  "C:\\AUTOEXEC.BAT"
 
-#define LEASH_HELP_FILE "leash32.chm"
+#define LEASH_HELP_FILE "leash.chm"
 
 extern int  config_boolean_to_int(const char *);
 extern BOOL SetRegistryVariable(const CString& regVariable,

@@ -26,14 +26,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-////Some unknown Platform SDK/VC uglines
-#if defined(__HTMLHELP_H__)
-#ifdef HtmlHelp
-#undef HtmlHelp
-#endif
-#endif
-
-
 /////////////////////////////////////////////////////////////////////////////
 // CLeashProperties dialog
 

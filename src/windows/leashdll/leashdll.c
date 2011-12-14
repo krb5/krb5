@@ -22,12 +22,15 @@ DWORD     AfsAvailable = 0;
 
 // krb5 functions
 DECL_FUNC_PTR(krb5_change_password);
+DECL_FUNC_PTR(krb5_get_init_creds_opt_alloc);
+DECL_FUNC_PTR(krb5_get_init_creds_opt_free);
 DECL_FUNC_PTR(krb5_get_init_creds_opt_init);
 DECL_FUNC_PTR(krb5_get_init_creds_opt_set_tkt_life);
 DECL_FUNC_PTR(krb5_get_init_creds_opt_set_renew_life);
 DECL_FUNC_PTR(krb5_get_init_creds_opt_set_forwardable);
 DECL_FUNC_PTR(krb5_get_init_creds_opt_set_proxiable);
 DECL_FUNC_PTR(krb5_get_init_creds_opt_set_address_list);
+DECL_FUNC_PTR(krb5_get_init_creds_opt_set_out_ccache);
 DECL_FUNC_PTR(krb5_get_init_creds_password);
 DECL_FUNC_PTR(krb5_build_principal_ext);
 DECL_FUNC_PTR(krb5_cc_resolve);
@@ -82,6 +85,7 @@ DECL_FUNC_PTR(krb5_free_addresses);
 DECL_FUNC_PTR(krb5_free_default_realm);
 DECL_FUNC_PTR(krb5_principal_compare);
 DECL_FUNC_PTR(krb5_string_to_deltat);
+DECL_FUNC_PTR(krb5_is_config_principal);
 
 // ComErr functions
 DECL_FUNC_PTR(com_err);
@@ -118,12 +122,15 @@ DECL_FUNC_PTR(cc_free_NC_info);
 
 FUNC_INFO k5_fi[] = {
     MAKE_FUNC_INFO(krb5_change_password),
+    MAKE_FUNC_INFO(krb5_get_init_creds_opt_alloc),
+    MAKE_FUNC_INFO(krb5_get_init_creds_opt_free),
     MAKE_FUNC_INFO(krb5_get_init_creds_opt_init),
     MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_tkt_life),
     MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_renew_life),
     MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_forwardable),
     MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_proxiable),
     MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_address_list),
+    MAKE_FUNC_INFO(krb5_get_init_creds_opt_set_out_ccache),
     MAKE_FUNC_INFO(krb5_get_init_creds_password),
     MAKE_FUNC_INFO(krb5_build_principal_ext),
     MAKE_FUNC_INFO(krb5_cc_resolve),
@@ -178,6 +185,7 @@ FUNC_INFO k5_fi[] = {
     MAKE_FUNC_INFO(krb5_free_default_realm),
     MAKE_FUNC_INFO(krb5_principal_compare),
     MAKE_FUNC_INFO(krb5_string_to_deltat),
+    MAKE_FUNC_INFO(krb5_is_config_principal),
     END_FUNC_INFO
 };
 

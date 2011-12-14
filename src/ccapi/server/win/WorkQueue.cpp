@@ -24,6 +24,7 @@
  * or implied warranty.
  */
 
+#include "WorkQueue.h"
 extern "C" {
     #include "cci_debugging.h"
     }
@@ -32,9 +33,21 @@ extern "C" {
 
 WorkList    worklist;
 
+EXTERN_C    int worklist_initialize() {
+        return worklist.initialize();
+        }
+
+EXTERN_C    int worklist_cleanup() {
+        return worklist.cleanup();
+        }
+
+EXTERN_C    void worklist_wait() {
+        worklist.wait();
+        }
+
 /* C interfaces: */
-EXTERN_C    bool worklist_isEmpty() {
-        return worklist.isEmpty();
+EXTERN_C    BOOL worklist_isEmpty() {
+        return worklist.isEmpty() ? TRUE : FALSE;
         }
 
 EXTERN_C    int worklist_add(   const long          rpcmsg,
