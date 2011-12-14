@@ -80,7 +80,7 @@ This is primarily a bugfix release.
 * Fix MITKRB5-SA-2011-006 KDC denial of service vulnerabilities
   [CVE-2011-1527 CVE-2011-1528 CVE-2011-1529].
 
-krb5-1.9.1 changes by ticket ID
+krb5-1.9.2 changes by ticket ID
 -------------------------------
 
 6844    Memory leak in save_error_string_nocopy()
