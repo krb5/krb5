@@ -273,6 +273,8 @@ make_request(krb5_context context, krb5_tkt_creds_context ctx,
     if (!krb5_c_valid_enctype(ctx->cur_tgt->keyblock.enctype))
         return KRB5_PROG_ETYPE_NOSUPP;
 
+    krb5_free_keyblock(context, ctx->subkey);
+    ctx->subkey = NULL;
     code = krb5int_make_tgs_request(context, ctx->cur_tgt, ctx->kdcopt,
                                     ctx->cur_tgt->addresses, NULL,
                                     ctx->tgs_in_creds, NULL, NULL, &request,
