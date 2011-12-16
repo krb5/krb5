@@ -91,7 +91,8 @@ typedef struct {
 typedef struct {
 	OM_uint32	magic_num;
 	gss_buffer_desc DER_mechTypes;
-	gss_OID internal_mech;
+	gss_OID_set mech_set;
+	gss_OID internal_mech;  /* alias into mech_set->elements */
 	gss_ctx_id_t ctx_handle;
 	char  *optionStr;
 	gss_cred_id_t default_cred;
