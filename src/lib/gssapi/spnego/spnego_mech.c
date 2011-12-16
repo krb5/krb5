@@ -821,7 +821,7 @@ init_ctx_call_init(OM_uint32 *minor_status,
 		   OM_uint32 *negState,
 		   send_token_flag *send_token)
 {
-	OM_uint32 ret;
+	OM_uint32 ret, tmpret, tmpmin;
 	gss_cred_id_t mcred;
 
 	mcred = (spcred == NULL) ? GSS_C_NO_CREDENTIAL : spcred->mcred;
@@ -862,15 +862,44 @@ init_ctx_call_init(OM_uint32 *minor_status,
 			*negState = ACCEPT_INCOMPLETE;
 			ret = GSS_S_CONTINUE_NEEDED;
 		}
-	} else if (ret != GSS_S_CONTINUE_NEEDED) {
-		if (*send_token == INIT_TOKEN_SEND) {
-			/* Don't output token on error if first call. */
-			*send_token = NO_TOKEN_SEND;
-		} else {
-			*send_token = ERROR_TOKEN_SEND;
-		}
-		*negState = REJECT;
+		return ret;
 	}
+
+	if (ret == GSS_S_CONTINUE_NEEDED)
+		return ret;
+
+	if (*send_token != INIT_TOKEN_SEND) {
+		*send_token = ERROR_TOKEN_SEND;
+		*negState = REJECT;
+		return ret;
+	}
+
+	/*
+	 * Since this is the first token, we can fall back to later mechanisms
+	 * in the list.  Since the mechanism list is expected to be short, we
+	 * can do this with recursion.  If all mechanisms produce errors, the
+	 * caller should get the error from the first mech in the list.
+	 */
+	memmove(sc->mech_set->elements, sc->mech_set->elements + 1,
+		--sc->mech_set->count * sizeof(*sc->mech_set->elements));
+	if (sc->mech_set->count == 0)
+		goto fail;
+	gss_release_buffer(&tmpmin, &sc->DER_mechTypes);
+	if (put_mech_set(sc->mech_set, &sc->DER_mechTypes) < 0)
+		goto fail;
+	tmpret = init_ctx_call_init(&tmpmin, sc, spcred, target_name,
+				    req_flags, time_req, mechtok_in,
+				    actual_mech, mechtok_out, ret_flags,
+				    time_rec, negState, send_token);
+	if (HARD_ERROR(tmpret))
+		goto fail;
+	*minor_status = tmpmin;
+	return tmpret;
+
+fail:
+	/* Don't output token on error from first call. */
+	*send_token = NO_TOKEN_SEND;
+	*negState = REJECT;
 	return ret;
 }
 
