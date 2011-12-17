@@ -314,7 +314,6 @@ command-line flags.  These are documented in the --help output.
 """
 
 import atexit
-import itertools
 import optparse
 import os
 import shlex
@@ -979,7 +978,8 @@ def cross_realms(num, xtgts=None, args=None, **keywords):
 
     if xtgts is None:
         # Default to cross tgts for every pair of realms.
-        xtgts = frozenset(itertools.permutations(range(num), 2))
+        # (itertools.permutations would work here but is new in 2.6.)
+        xtgts = [(x,y) for x in range(num) for y in range(num) if x != y]
 
     # Create the realms.
     realms = []
