@@ -208,6 +208,21 @@ profile.h: $(INCLUDE_BUILD)/profile.h
 com_err.h: $(INCLUDE_BUILD)/com_err.h
 	$(CP) $(INCLUDE_BUILD)/com_err.h $@
 
+# Rules to generate dependency headers if they don't already exist,
+# for "make depend" from an unbuilt directory.
+$(GSS_GENERIC_BUILD)/gssapi.h:
+	(cd $(GSS_GENERIC_BUILD) && $(MAKE) gssapi.h)
+$(GSS_GENERIC_BUILD)/gssapi_err_generic.h:
+	(cd $(GSS_GENERIC_BUILD) && $(MAKE) gssapi_err_generic.h)
+$(GSS_KRB5_BUILD)/gssapi_krb5.h:
+	(cd $(GSS_KRB5_BUILD) && $(MAKE) gssapi_krb5.h)
+$(GSS_KRB5_BUILD)/gssapi_err_krb5.h:
+	(cd $(GSS_KRB5_BUILD) && $(MAKE) gssapi_err_krb5.h)
+$(INCLUDE_BUILD)/osconf.h:
+	(cd $(INCLUDE_BUILD) && $(MAKE) osconf.h)
+$(INCLUDE_BUILD)/krb5/krb5.h:
+	(cd $(INCLUDE_BUILD) && $(MAKE) krb5/krb5.h)
+
 gssapi:
 	test -d gssapi || mkdir gssapi
 krb5:

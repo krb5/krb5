@@ -31,6 +31,7 @@ clean-unix:: clean-liblinks clean-libs clean-libobjs
 	$(RM) $(VERTO_HDR)
 
 includes:: $(VERTO_HDR)
+depend:: $(VERTO_HDR)
 
 $(VERTO_HDR): $(srcdir)/verto.h
 	$(RM) $@

@@ -33,6 +33,7 @@ clean-unix:: clean-liblinks clean-libs clean-libobjs
 	$(RM) $(VERTO_K5EV_HDR)
 
 includes:: $(VERTO_K5EV_HDR)
+depend:: $(VERTO_K5EV_HDR)
 
 $(VERTO_K5EV_HDR): $(srcdir)/verto-k5ev.h
 	$(RM) $@
