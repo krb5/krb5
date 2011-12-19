@@ -16,8 +16,8 @@ Most commonly used options
 
  --prefix=PREFIX
 
-    By default, Kerberos will install the package's files rooted at '/usr/local'
-    If you desire to place the binaries into the directory *PREFIX*, use this option 
+    By default, Kerberos will install the package's files rooted at '/usr/local'.
+    If you desire to place the binaries into the directory *PREFIX*, use this option.
 
  --exec-prefix=EXECPREFIX
 
@@ -30,21 +30,22 @@ Most commonly used options
  
    This option sets the directory for locally modifiable single-machine data. 
    In Kerberos, this mostly is useful for setting a location for the KDC data files, 
-   as they will be installed in *LOCALSTATEDIR/krb5kdc*, which is by default *PREFIX/var/krb5kdc*.
+   as they will be installed in *LOCALSTATEDIR/krb5kdc*, 
+   which is by default *PREFIX/var/krb5kdc*.
 
  --with-netlib[=libs]
 
     Allows for suppression of or replacement of network libraries. 
     By default, Kerberos V5 configuration will look for *-lnsl* and *-lsocket*. 
     If your operating system has a broken resolver library 
-    or fails to pass the tests in 'src/tests/resolv' you will need to use this option.
+    or fails to pass the tests in 'src/tests/resolv', you will need to use this option.
 
  --with-tcl=TCLPATH
 
     Some of the unit-tests in the build tree rely upon using a program in Tcl. 
     The directory specified by *TCLPATH* specifies where the Tcl header file 
     (TCLPATH/include/tcl.h) 
-    as well as where the Tcl library should be found (TCLPATH/lib).
+    as well as where the Tcl library (TCLPATH/lib)  should be found.
 
  --enable-dns-for-realm
 
@@ -106,9 +107,9 @@ CPPFLAGS=CPPOPTS
     for use with the operating system's include files.
 
 CPP=CPP  
-     C preprocessor to use. (e,g, CPP='gcc -E')
+     C preprocessor to use. (e.g. CPP='gcc -E')
 
-DB_HEADER=headername.h
+DB_HEADER=headername
     If db.h is not the correct header file to include to compile against the Berkeley DB 1.85 API, 
     specify the correct header file name with this option. For example, DB_HEADER=db3/db_185.h.
 
@@ -132,7 +133,7 @@ SS_LIB=libs...
     Some variants of this library are around which allow for Emacs-like line editing, 
     but different versions require different support libraries to be explicitly specified.
 
-    This option is ignored if 'with-system-ss' is not specified.
+    This option is ignored if "with-system-ss" is not specified.
 
 CXX     
      C++ compiler command
@@ -179,7 +180,7 @@ Fine tuning of the installation directories
 
  --libdir=DIR    
 
-     Object code libraries [EXECPREFIX/lib]
+     Object code libraries.
      Defaults to  *EXECPREFIX/lib*, where *EXECPREFIX* is the path specified by "exec-prefix" configuration option.
 
  --includedir=DIR  
@@ -189,12 +190,12 @@ Fine tuning of the installation directories
 
  --oldincludedir=DIR 
 
-     C header files for non-gcc. Default to  '/usr/include'
+     C header files for non-gcc. Default to  '/usr/include'.
   
  --datarootdir=DATAROOTDIR 
 
      Read-only architecture-independent data root.
-     Defaults to  *PREFIX/sharee*, where *PREFIX* is the path specified by "prefix" configuration option.
+     Defaults to  *PREFIX/share*, where *PREFIX* is the path specified by "prefix" configuration option.
   
 
  --datadir=DIR    
@@ -210,7 +211,7 @@ Fine tuning of the installation directories
  --localedir=DIR  
 
      Locale-dependent data.
-     Defaults to  *DATAROOTDIR/locate*, where *DATAROOTDIR* is the path specified by "datarootdir" configuration option.
+     Defaults to  *DATAROOTDIR/locale*, where *DATAROOTDIR* is the path specified by "datarootdir" configuration option.
  
  --mandir=DIR     
 
@@ -249,13 +250,13 @@ Program names
  ---program-prefix=PREFIX      
 
      Prepend *PREFIX* to the names of the programs when installing them. For example, specifying 
-     'program-prefix=mit-' at the configure time will cause the program named *abc* to be installed 
+     --program-prefix=mit- at the configure time will cause the program named *abc* to be installed 
      as *mit-abc*.
   
  --program-suffix=SUFFIX        
 
      Append *SUFFIX*  to the names of the programs when installing them. For example, specifying 
-     'program-suffix=-mit' at the configure time will cause the program named *abc* to be installed 
+     --program-suffix=-mit at the configure time will cause the program named *abc* to be installed 
      as *abc-mit*.
   
  --program-transform-name=PROGRAM
@@ -273,7 +274,7 @@ System types
  --host=HOST  
 
      Cross-compile to build programs to run on *HOST*  (e.g. --host=x86_64-linux-gnu). 
-     By default, Kerberos V5 configuration will look for "build" option).
+     By default, Kerberos V5 configuration will look for "build" option.
 
 
 Optional features
@@ -281,51 +282,52 @@ Optional features
 
  ---disable-FEATURE   
 
-     Do not include FEATURE (same as  --enable-FEATURE=no)
+     Do not include FEATURE (same as  --enable-FEATURE=no).
   
  --disable-option-checking
 
-     Ignore unrecognized --enable/--with options
+     Ignore unrecognized --enable/--with options.
   
  --enable-FEATURE[=ARG]  
 
-     Include FEATURE [ARG=yes]
+     Include FEATURE [ARG=yes].
   
  --enable-dns-for-realm
 
-     Enable DNS lookups of Kerberos realm names
+     Enable DNS lookups of Kerberos realm names.
   
  --enable-maintainer-mode
 
-     Enable rebuilding of source files, Makefiles, etc
+     Enable rebuilding of source files, Makefiles, etc.
   
  --disable-delayed-initialization
 
-     Initialize library code when loaded [delay until first use]
+     Initialize library code when loaded.
+     Defaults to delay until first use.
   
  --disable-thread-support
 
-     Don't enable thread support [enabled]
+     Don't enable thread support. Defaults to enabled.
 
  --disable-rpath   
 
-     Suppress run path flags in link lines
+     Suppress run path flags in link lines.
   
  --enable-athena   
 
-     Build with MIT Project Athena configuration
+     Build with MIT Project Athena configuration.
   
  --enable-fortuna-test
 
-     Build to test Fortuna PRNG
+     Build to test Fortuna PRNG.
   
  --disable-kdc-lookaside-cache
 
-     Disable the cache which detects client retransmits
+     Disable the cache which detects client retransmits.
 
  --disable-pkinit    
 
-     Disable PKINIT plugin support
+     Disable PKINIT plugin support.
 
 
 Optional packages
@@ -339,11 +341,11 @@ Optional packages
 
  --without-*PACKAGE* 
 
-     Do not use *PACKAGE* (same as \-\-with-PACKAGE=no) (e.g. --without-libedit)
+     Do not use *PACKAGE* (same as \-\-with-PACKAGE=no) (e.g. --without-libedit).
 
  --with-size-optimizations
 
-     Enable a few optimizations to reduce code size possibly at some run-time cost
+     Enable a few optimizations to reduce code size possibly at some run-time cost.
   
  --with-hesiod=path
 
@@ -352,11 +354,11 @@ Optional packages
   
  --with-ldap   
 
-     Compile OpenLDAP database backend module
+     Compile OpenLDAP database backend module.
   
  --with-edirectory 
 
-     Compile eDirectory database backend module
+     Compile eDirectory database backend module.
   
  --with-vague-errors 
 
@@ -365,27 +367,29 @@ Optional packages
   
  --with-crypto-impl=IMPL
 
-     Use specified crypto implementation (e.g. --with-crypto=openssl). 
-     Default is a native MIT Kerberos implementation *builtin*
+     Use specified crypto implementation (e.g. *--with-crypto=openssl*). 
+     Default is a native MIT Kerberos implementation *builtin*.
      The other currently implemented crypto backends are *openssl* and *nss*.
      (See :ref:`mitK5features`)
 
  --with-prng-alg=ALG
 
-     Use specified PRNG algorithm (e.g. --with-prng-alg=os).
+     Use specified PRNG algorithm. 
+     For example, to use the OS native prng specify *--with-prng-alg=os*.
 
-     Default is the *fortuna* PRNG algorithm. For the *nss* crypto backend use one must explicitly
-     specify --with-prng-alg=nss. 
+     Default is the *fortuna* PRNG algorithm. 
+     For the *nss* crypto backend use one must explicitly specify *--with-prng-alg=nss*. 
      (See :ref:`mitK5features`)
 
  --with-kdc-kdb-update 
 
      Update the KDC database with the information about 
-     - the last successful authentication;
-     - the last failed authentication attempt;
-     - the number of the failed authentication attempts.
+ 
+         - the last successful authentication;
+         - the last failed authentication attempt;
+         - the number of the failed authentication attempts.
 
-     By default the kdb is not updated with this information..
+     By default the kdb is not updated with this information.
   
  --with-system-verto
 
@@ -411,7 +415,6 @@ Examples
 ----------
 
 For example, in order to configure Kerberos on a Solaris machine 
-
 using the *suncc* compiler with the optimizer *turned on*, 
 run the configure script with the following options::
 
