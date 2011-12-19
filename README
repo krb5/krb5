@@ -146,6 +146,7 @@ krb5-1.10 changes by ticket ID
 
 6118    rename principals
 6323    kadmin: rename support
+6430    Avoid looping when preauth can't be generated
 6617    uninitialized values used in mkey-migration code
 6732    checks for openpty() aren't made using -lutil
 6770    kg_unseal leads to overlap of source and desitination in memcpy...
@@ -224,6 +225,37 @@ krb5-1.10 changes by ticket ID
 6987    Fix krb5_cc_set_config
 6988    Fix handling of null edata method in KDC preauth
 6989    fix tar invocation in mkrel
+6992    Make krb5_find_authdata public
+6994    Fix intermediate key length in hmac-md5 checksum
+6995    Initialize typed_e_data in as_req_state
+6996    Make krb5_check_clockskew public
+6997    don't build po/ if msgfmt is missing
+6999    compile warnings, mininum version check for pkinit (NSS code paths)
+7000    Exit on error in kadmind kprop child
+7002    verto sshould have a pointer to upstream sources and be in NOTICE
+7003    Fix month/year units in getdate
+7006    Fix format string for TRACE_INIT_CREDS_SERVICE
+7014    Fix com_err.h dependencies in gss-kernel-lib
+7015    Add plugin interface_names entry for ccselect
+7017    Simplify and fix kdcpreauth request_body callback
+7018    Update verto to 0.2.2 release
+7019    Make verto context available to kdcpreauth modules
+7020    reading minor error message doesn't work for the IAKERB mech
+7021    Fix failure interval of 0 in LDAP lockout code
+7023    Clean up client-side preauth error data handling
+7027    FAST PKINIT
+7029    Fix --with-system-verto without pkg-config
+7030    Ldap dependency for parallel builds
+7033    krb5 1.10 KRB5_PADATA_ENC_TIMESTAMP isn't working
+7034    mk_cred: memory management
+7035    krb5_lcc_store() now ignores config credentials
+7036    Fix free ofuninitialized memory in sname_to_princ
+7037    Use LsaDeregisterLogonProcess(), not CloseHandle()
+7038    Added support for loading of Krb5.ini from Windows APPDATA
+7039    Handle TGS referrals to the same realm
+7042    SA-2011-007 KDC null pointer deref in TGS handling [CVE-2011-1530]
+7049    Fix subkey memory leak in krb5_get_credentials
+7050    KfW changes for krb5-1.10
 
 Acknowledgements
 ----------------
