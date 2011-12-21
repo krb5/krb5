@@ -53,7 +53,6 @@ DEF_EXT_FUNC_PTRS(krb5_pa_pk_as_req);
 DEF_EXT_FUNC_PTRS(krb5_pa_pk_as_req_draft9);
 DEF_EXT_FUNC_PTRS(krb5_reply_key_pack);
 DEF_EXT_FUNC_PTRS(krb5_reply_key_pack_draft9);
-DEF_EXT_FUNC_PTRS_ARRAY(krb5_typed_data);
 
 /* special cases... */
 extern krb5_error_code (*k5int_decode_krb5_principal_name)

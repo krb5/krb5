@@ -2128,7 +2128,8 @@ encode_krb5_pkinit_supp_pub_info(const krb5_pkinit_supp_pub_info *rep,
 #endif /* not DISABLE_PKINIT */
 
 asn1_error_code
-asn1_encode_sequence_of_typed_data(asn1buf *buf, const krb5_typed_data **val,
+asn1_encode_sequence_of_typed_data(asn1buf *buf,
+                                   const krb5_pa_data *const *val,
                                    unsigned int *retlen)
 {
     asn1_setup();
@@ -2150,12 +2151,12 @@ asn1_encode_sequence_of_typed_data(asn1buf *buf, const krb5_typed_data **val,
 }
 
 asn1_error_code
-asn1_encode_typed_data(asn1buf *buf, const krb5_typed_data *val,
+asn1_encode_typed_data(asn1buf *buf, const krb5_pa_data *val,
                        unsigned int *retlen)
 {
     asn1_setup();
-    asn1_addlenfield(val->length, val->data, 1, asn1_encode_octetstring);
-    asn1_addfield(val->type, 0, asn1_encode_integer);
+    asn1_addlenfield(val->length, val->contents, 1, asn1_encode_octetstring);
+    asn1_addfield(val->pa_type, 0, asn1_encode_integer);
     asn1_makeseq();
     asn1_cleanup();
 }

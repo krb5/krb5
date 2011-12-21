@@ -150,11 +150,10 @@ asn1_error_code asn1_encode_td_trusted_certifiers(
     unsigned int *retlen);
 
 asn1_error_code asn1_encode_typed_data(asn1buf *buf,
-                                       const krb5_typed_data *val,
+                                       const krb5_pa_data *val,
                                        unsigned int *retlen);
 
-asn1_error_code asn1_encode_sequence_of_typed_data(asn1buf *buf,
-                                                   const krb5_typed_data **val,
-                                                   unsigned int *retlen);
+asn1_error_code asn1_encode_sequence_of_typed_data(
+    asn1buf *buf, const krb5_pa_data *const *val, unsigned int *retlen);
 
 #endif

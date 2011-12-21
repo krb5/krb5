@@ -1077,9 +1077,9 @@ decode_krb5_td_dh_parameters(const krb5_data *code,
 #endif /* DISABLE_PKINIT */
 
 krb5_error_code
-decode_krb5_typed_data(const krb5_data *code, krb5_typed_data ***repptr)
+decode_krb5_typed_data(const krb5_data *code, krb5_pa_data ***repptr)
 {
-    setup_buf_only(krb5_typed_data **);
+    setup_buf_only(krb5_pa_data **);
     retval = asn1_decode_sequence_of_typed_data(&buf, &rep);
     if (retval) clean_return(retval);
 

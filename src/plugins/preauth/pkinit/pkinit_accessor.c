@@ -49,7 +49,6 @@ DEF_FUNC_PTRS(krb5_pa_pk_as_req);
 DEF_FUNC_PTRS(krb5_pa_pk_as_req_draft9);
 DEF_FUNC_PTRS(krb5_reply_key_pack);
 DEF_FUNC_PTRS(krb5_reply_key_pack_draft9);
-DEF_FUNC_PTRS_ARRAY(krb5_typed_data);
 
 /* special cases... */
 krb5_error_code
@@ -116,7 +115,6 @@ pkinit_accessor_init(void)
     SET_PTRS(krb5_reply_key_pack_draft9);
     SET_PTRS(krb5_td_dh_parameters);
     SET_PTRS(krb5_td_trusted_certifiers);
-    SET_PTRS(krb5_typed_data);
 
     /* special cases... */
     k5int_decode_krb5_principal_name = k5int.decode_krb5_principal_name;

@@ -858,20 +858,6 @@ krb5_free_fast_finished(krb5_context context, krb5_fast_finished *val)
     free(val);
 }
 
-void
-krb5_free_typed_data(krb5_context context, krb5_typed_data **in)
-{
-    int i = 0;
-    if (in == NULL) return;
-    while (in[i] != NULL) {
-        if (in[i]->data != NULL)
-            free(in[i]->data);
-        free(in[i]);
-        i++;
-    }
-    free(in);
-}
-
 void KRB5_CALLCONV
 krb5_free_fast_armored_req(krb5_context context, krb5_fast_armored_req *val)
 {

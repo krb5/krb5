@@ -205,10 +205,10 @@ asn1_error_code
 asn1_decode_reply_key_pack_draft9(asn1buf *buf,
                                   krb5_reply_key_pack_draft9 *val);
 asn1_error_code
-asn1_decode_sequence_of_typed_data(asn1buf *buf, krb5_typed_data ***val);
-asn1_error_code asn1_decode_typed_data(asn1buf *buf, krb5_typed_data *val);
+asn1_decode_sequence_of_typed_data(asn1buf *buf, krb5_pa_data ***val);
+asn1_error_code asn1_decode_typed_data(asn1buf *buf, krb5_pa_data *val);
 asn1_error_code asn1_decode_typed_data_ptr(asn1buf *buf,
-                                           krb5_typed_data **valptr);
+                                           krb5_pa_data **valptr);
 
 /* arrays */
 asn1_error_code asn1_decode_authorization_data(asn1buf *buf,

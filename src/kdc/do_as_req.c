@@ -800,10 +800,9 @@ prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request,
     errpkt.text = string2data((char *)status);
 
     if (e_data != NULL) {
-        if (typed_e_data) {
-            retval = encode_krb5_typed_data((const krb5_typed_data **)e_data,
-                                            &e_data_asn1);
-        } else
+        if (typed_e_data)
+            retval = encode_krb5_typed_data(e_data, &e_data_asn1);
+        else
             retval = encode_krb5_padata_sequence(e_data, &e_data_asn1);
         if (retval)
             goto cleanup;

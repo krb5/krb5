@@ -169,7 +169,7 @@ encode_krb5_td_dh_parameters(const krb5_algorithm_identifier **rep,
 #endif /* DISABLE_PKINIT */
 
 krb5_error_code
-encode_krb5_typed_data(const krb5_typed_data **rep, krb5_data **code)
+encode_krb5_typed_data(const krb5_pa_data *const *rep, krb5_data **code)
 {
     krb5_setup();
     retval = asn1_encode_sequence_of_typed_data(buf,rep,&length);

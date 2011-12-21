@@ -478,10 +478,7 @@ krb5int_fast_process_error(krb5_context context,
             retval = decode_krb5_padata_sequence(&err_reply->e_data,
                                                  out_padata);
             if (retval != 0) {
-                krb5_typed_data **tdata;
-                /* krb5_typed data and krb5_pa_data are compatible. */
-                if (decode_krb5_typed_data(&err_reply->e_data, &tdata) == 0)
-                    *out_padata = (krb5_pa_data **)tdata;
+                (void)decode_krb5_typed_data(&err_reply->e_data, out_padata);
                 retval = 0;
             }
         }

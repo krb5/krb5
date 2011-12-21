@@ -247,19 +247,6 @@ free_krb5_trusted_ca(krb5_trusted_ca ***in)
 }
 
 void
-free_krb5_typed_data(krb5_typed_data ***in)
-{
-    int i = 0;
-    if (*in == NULL) return;
-    while ((*in)[i] != NULL) {
-        free((*in)[i]->data);
-        free((*in)[i]);
-        i++;
-    }
-    free(*in);
-}
-
-void
 free_krb5_algorithm_identifier(krb5_algorithm_identifier *in)
 {
     if (in == NULL)

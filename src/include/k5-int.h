@@ -1677,6 +1677,9 @@ krb5_error_code
 encode_krb5_padata_sequence(krb5_pa_data *const *rep, krb5_data **code);
 
 krb5_error_code
+encode_krb5_typed_data(const krb5_pa_data *const *rep, krb5_data **code);
+
+krb5_error_code
 encode_krb5_alt_method(const krb5_alt_method *, krb5_data **code);
 
 krb5_error_code
@@ -1902,6 +1905,9 @@ decode_krb5_pwd_data(const krb5_data *output, krb5_pwd_data **rep);
 
 krb5_error_code
 decode_krb5_padata_sequence(const krb5_data *output, krb5_pa_data ***rep);
+
+krb5_error_code
+decode_krb5_typed_data(const krb5_data *, krb5_pa_data ***);
 
 krb5_error_code
 decode_krb5_alt_method(const krb5_data *output, krb5_alt_method **rep);
@@ -2141,7 +2147,7 @@ void krb5int_free_srv_dns_data(struct srv_dns_entry *);
 /* To keep happy libraries which are (for now) accessing internal stuff */
 
 /* Make sure to increment by one when changing the struct */
-#define KRB5INT_ACCESS_STRUCT_VERSION 18
+#define KRB5INT_ACCESS_STRUCT_VERSION 19
 
 #ifndef ANAME_SZ
 struct ktext;                   /* from krb.h, for krb524 support */
@@ -2225,9 +2231,6 @@ typedef struct _krb5int_access {
                                          krb5_data **code);
 
     krb5_error_code
-    (*encode_krb5_typed_data)(const krb5_typed_data **, krb5_data **code);
-
-    krb5_error_code
     (*decode_krb5_auth_pack)(const krb5_data *, krb5_auth_pack **);
 
     krb5_error_code
@@ -2269,9 +2272,6 @@ typedef struct _krb5int_access {
     (*decode_krb5_td_trusted_certifiers)(const krb5_data *,
                                          krb5_external_principal_identifier
                                          ***);
-
-    krb5_error_code
-    (*decode_krb5_typed_data)(const krb5_data *, krb5_typed_data ***);
 
     krb5_error_code
     (*decode_krb5_as_req)(const krb5_data *output, krb5_kdc_req **rep);

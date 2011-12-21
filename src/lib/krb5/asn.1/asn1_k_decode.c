@@ -1725,38 +1725,32 @@ asn1_decode_sequence_of_kdf_alg_id(asn1buf *buf, krb5_data ***val)
 
 #endif /* DISABLE_PKINIT */
 
-static void free_typed_data(void *dummy, krb5_typed_data *val)
+asn1_error_code
+asn1_decode_sequence_of_typed_data(asn1buf *buf, krb5_pa_data ***val)
 {
-    free(val->data);
-    free(val);
+    decode_array_body(krb5_pa_data,asn1_decode_typed_data_ptr,
+                      free_pa_data);
 }
 
 asn1_error_code
-asn1_decode_sequence_of_typed_data(asn1buf *buf, krb5_typed_data ***val)
-{
-    decode_array_body(krb5_typed_data,asn1_decode_typed_data_ptr,
-                      free_typed_data);
-}
-
-asn1_error_code
-asn1_decode_typed_data(asn1buf *buf, krb5_typed_data *val)
+asn1_decode_typed_data(asn1buf *buf, krb5_pa_data *val)
 {
     setup();
-    val->data = NULL;
+    val->contents = NULL;
     { begin_structure();
-        get_field(val->type,0,asn1_decode_int32);
-        get_lenfield(val->length,val->data,1,asn1_decode_octetstring);
+        get_field(val->pa_type,0,asn1_decode_int32);
+        get_lenfield(val->length,val->contents,1,asn1_decode_octetstring);
         end_structure();
     }
     return 0;
 error_out:
-    free(val->data);
-    val->data = NULL;
+    free(val->contents);
+    val->contents = NULL;
     return retval;
 }
 
 asn1_error_code
-asn1_decode_typed_data_ptr(asn1buf *buf, krb5_typed_data **valptr)
+asn1_decode_typed_data_ptr(asn1buf *buf, krb5_pa_data **valptr)
 {
-    decode_ptr(krb5_typed_data *, asn1_decode_typed_data);
+    decode_ptr(krb5_pa_data *, asn1_decode_typed_data);
 }
