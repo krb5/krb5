@@ -43,8 +43,7 @@
 
 #define FAKECERT
 
-const krb5_octet_data
-dh_oid = { 0, 7, (unsigned char *)"\x2A\x86\x48\xce\x3e\x02\x01" };
+const krb5_data dh_oid = { 0, 7, "\x2A\x86\x48\xce\x3e\x02\x01" };
 
 
 krb5_error_code
@@ -164,10 +163,10 @@ free_krb5_auth_pack(krb5_auth_pack **in)
     if ((*in)->supportedCMSTypes != NULL)
         free_krb5_algorithm_identifiers(&((*in)->supportedCMSTypes));
     if ((*in)->supportedKDFs) {
-        krb5_octet_data **supportedKDFs = (*in)->supportedKDFs;
+        krb5_data **supportedKDFs = (*in)->supportedKDFs;
         unsigned i;
         for (i = 0; supportedKDFs[i]; i++)
-            krb5_free_octet_data(NULL, supportedKDFs[i]);
+            krb5_free_data(NULL, supportedKDFs[i]);
         free(supportedKDFs);
     }
     free(*in);
@@ -188,7 +187,7 @@ free_krb5_pa_pk_as_rep(krb5_pa_pk_as_rep **in)
     if (*in == NULL) return;
     switch ((*in)->choice) {
     case choice_pa_pk_as_rep_dhInfo:
-        krb5_free_octet_data(NULL, (*in)->u.dh_Info.kdfID);
+        krb5_free_data(NULL, (*in)->u.dh_Info.kdfID);
         free((*in)->u.dh_Info.dhSignedData.data);
         break;
     case choice_pa_pk_as_rep_encKeyPack:
@@ -403,7 +402,7 @@ init_krb5_subject_pk_info(krb5_subject_pk_info **in)
 }
 
 krb5_error_code
-pkinit_copy_krb5_octet_data(krb5_octet_data *dst, const krb5_octet_data *src)
+pkinit_copy_krb5_data(krb5_data *dst, const krb5_data *src)
 {
     if (dst == NULL || src == NULL)
         return EINVAL;

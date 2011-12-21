@@ -83,10 +83,10 @@ main(int argc, char **argv)
 {
     /* arguments for calls to pkinit_alg_agility_kdf() */
     krb5_context context = 0;
-    krb5_octet_data secret;
+    krb5_data secret;
     krb5_algorithm_identifier alg_id;
-    krb5_octet_data as_req;
-    krb5_octet_data pk_as_rep;
+    krb5_data as_req;
+    krb5_data pk_as_rep;
     krb5_keyblock key_block;
 
     /* other local variables */
@@ -127,14 +127,14 @@ main(int argc, char **argv)
     memset(twenty_as, 0xaa, sizeof(twenty_as));
     memset(eighteen_bs, 0xbb, sizeof(eighteen_bs));
     as_req.length = sizeof(twenty_as);
-    as_req.data = (unsigned char *)&twenty_as;
+    as_req.data = twenty_as;
 
     pk_as_rep.length = sizeof(eighteen_bs);
-    pk_as_rep.data = (unsigned char *)&eighteen_bs;
+    pk_as_rep.data = eighteen_bs;
 
     /* TEST 1:  SHA-1/AES */
     /* set up algorithm id */
-    alg_id.algorithm.data = (unsigned char *)&krb5_pkinit_sha1_oid;
+    alg_id.algorithm.data = (char *)krb5_pkinit_sha1_oid;
     alg_id.algorithm.length = krb5_pkinit_sha1_oid_len;
 
     enctype = enctype_aes;
@@ -175,7 +175,7 @@ main(int argc, char **argv)
 
     /* TEST 2: SHA-256/AES */
     /* set up algorithm id */
-    alg_id.algorithm.data = (unsigned char *)&krb5_pkinit_sha256_oid;
+    alg_id.algorithm.data = (char *)krb5_pkinit_sha256_oid;
     alg_id.algorithm.length = krb5_pkinit_sha256_oid_len;
 
     enctype = enctype_aes;
@@ -216,7 +216,7 @@ main(int argc, char **argv)
 
     /* TEST 3: SHA-512/DES3 */
     /* set up algorithm id */
-    alg_id.algorithm.data = (unsigned char *)&krb5_pkinit_sha512_oid;
+    alg_id.algorithm.data = (char *)krb5_pkinit_sha512_oid;
     alg_id.algorithm.length = krb5_pkinit_sha512_oid_len;
 
     enctype = enctype_des3;

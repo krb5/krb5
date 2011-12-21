@@ -1187,9 +1187,12 @@ asn1_decode_external_principal_identifier(
     val->subjectKeyIdentifier.data = NULL;
     {
         begin_structure();
-        opt_implicit_octet_string(val->subjectName.length, val->subjectName.data, 0);
-        opt_implicit_octet_string(val->issuerAndSerialNumber.length, val->issuerAndSerialNumber.data, 1);
-        opt_implicit_octet_string(val->subjectKeyIdentifier.length, val->subjectKeyIdentifier.data, 2);
+        opt_implicit_charstring(val->subjectName.length, val->subjectName.data,
+                                0);
+        opt_implicit_charstring(val->issuerAndSerialNumber.length,
+                                val->issuerAndSerialNumber.data, 1);
+        opt_implicit_charstring(val->subjectKeyIdentifier.length,
+                                val->subjectKeyIdentifier.data, 2);
         end_structure();
     }
     return 0;
@@ -1305,12 +1308,14 @@ asn1_decode_trusted_ca(asn1buf *buf, krb5_trusted_ca *val)
         } else if (tagnum == choice_trusted_cas_caName) {
             val->choice = choice_trusted_cas_caName;
             val->u.caName.data = NULL;
-            get_implicit_octet_string(val->u.caName.length, val->u.caName.data, choice_trusted_cas_caName);
+            get_implicit_charstring(val->u.caName.length, val->u.caName.data,
+                                    choice_trusted_cas_caName);
         } else if (tagnum == choice_trusted_cas_issuerAndSerial) {
             val->choice = choice_trusted_cas_issuerAndSerial;
             val->u.issuerAndSerial.data = NULL;
-            get_implicit_octet_string(val->u.issuerAndSerial.length, val->u.issuerAndSerial.data,
-                                      choice_trusted_cas_issuerAndSerial);
+            get_implicit_charstring(val->u.issuerAndSerial.length,
+                                    val->u.issuerAndSerial.data,
+                                    choice_trusted_cas_issuerAndSerial);
         } else clean_return(ASN1_BAD_ID);
         end_choice();
     }
@@ -1349,9 +1354,9 @@ asn1_decode_sequence_of_trusted_ca(asn1buf *buf, krb5_trusted_ca ***val)
 }
 
 static asn1_error_code
-asn1_decode_kdf_alg_id_ptr(asn1buf *buf, krb5_octet_data **valptr)
+asn1_decode_kdf_alg_id_ptr(asn1buf *buf, krb5_data **valptr)
 {
-    decode_ptr(krb5_octet_data *, asn1_decode_kdf_alg_id);
+    decode_ptr(krb5_data *, asn1_decode_kdf_alg_id);
 }
 
 asn1_error_code
@@ -1362,9 +1367,11 @@ asn1_decode_dh_rep_info(asn1buf *buf, krb5_dh_rep_info *val)
     val->serverDHNonce.data = NULL;
     val->kdfID = NULL;
     { begin_structure();
-        get_implicit_octet_string(val->dhSignedData.length, val->dhSignedData.data, 0);
+        get_implicit_charstring(val->dhSignedData.length,
+                                val->dhSignedData.data, 0);
 
-        opt_lenfield(val->serverDHNonce.length, val->serverDHNonce.data, 1, asn1_decode_octetstring);
+        opt_lenfield(val->serverDHNonce.length, val->serverDHNonce.data, 1,
+                     asn1_decode_charstring);
         opt_field(val->kdfID, 2, asn1_decode_kdf_alg_id_ptr, NULL);
         end_structure();
     }
@@ -1372,7 +1379,7 @@ asn1_decode_dh_rep_info(asn1buf *buf, krb5_dh_rep_info *val)
 error_out:
     free(val->dhSignedData.data);
     free(val->serverDHNonce.data);
-    krb5_free_octet_data(NULL, val->kdfID);
+    krb5_free_data(NULL, val->kdfID);
     val->kdfID = NULL;
     val->dhSignedData.data = NULL;
     val->serverDHNonce.data = NULL;
@@ -1451,8 +1458,8 @@ asn1_decode_algorithm_identifier(asn1buf *buf, krb5_algorithm_identifier *val)
         assert(subbuf.next >= subbuf.base);
         if (length > (size_t)(subbuf.next - subbuf.base)) {
             unsigned int size = length - (subbuf.next - subbuf.base);
-            retval = asn1buf_remove_octetstring(&subbuf, size,
-                                                &val->parameters.data);
+            retval = asn1buf_remove_charstring(&subbuf, size,
+                                               &val->parameters.data);
             if (retval) clean_return(retval);
             val->parameters.length = size;
         }
@@ -1504,8 +1511,8 @@ asn1_decode_subject_pk_info(asn1buf *buf, krb5_subject_pk_info *val)
 
         val->subjectPublicKey.length = 0;
         val->subjectPublicKey.data = NULL;
-        retval = asn1buf_remove_octetstring(&subbuf, taglen,
-                                            &val->subjectPublicKey.data);
+        retval = asn1buf_remove_charstring(&subbuf, taglen,
+                                           &val->subjectPublicKey.data);
         if (retval) clean_return(retval);
         val->subjectPublicKey.length = taglen;
         /*
@@ -1549,7 +1556,8 @@ asn1_decode_kdc_dh_key_info(asn1buf *buf, krb5_kdc_dh_key_info *val)
     setup();
     val->subjectPublicKey.data = NULL;
     { begin_structure();
-        retval = asn1buf_remove_octetstring(&subbuf, taglen, &val->subjectPublicKey.data);
+        retval = asn1buf_remove_charstring(&subbuf, taglen,
+                                           &val->subjectPublicKey.data);
         if (retval) clean_return(retval);
         val->subjectPublicKey.length = taglen;
         next_tag();
@@ -1641,8 +1649,9 @@ asn1_decode_pa_pk_as_rep(asn1buf *buf, krb5_pa_pk_as_rep *val)
         } else if (tagnum == choice_pa_pk_as_rep_encKeyPack) {
             val->choice = choice_pa_pk_as_rep_encKeyPack;
             val->u.encKeyPack.data = NULL;
-            get_implicit_octet_string(val->u.encKeyPack.length, val->u.encKeyPack.data,
-                                      choice_pa_pk_as_rep_encKeyPack);
+            get_implicit_charstring(val->u.encKeyPack.length,
+                                    val->u.encKeyPack.data,
+                                    choice_pa_pk_as_rep_encKeyPack);
         } else {
             val->choice = choice_pa_pk_as_rep_UNKNOWN;
         }
@@ -1670,12 +1679,14 @@ asn1_decode_pa_pk_as_rep_draft9(asn1buf *buf, krb5_pa_pk_as_rep_draft9 *val)
             val->choice = choice_pa_pk_as_rep_draft9_dhSignedData;
             val->u.dhSignedData.data = NULL;
             get_lenfield(val->u.dhSignedData.length, val->u.dhSignedData.data,
-                         choice_pa_pk_as_rep_draft9_dhSignedData, asn1_decode_octetstring);
+                         choice_pa_pk_as_rep_draft9_dhSignedData,
+                         asn1_decode_charstring);
         } else if (tagnum == choice_pa_pk_as_rep_draft9_encKeyPack) {
             val->choice = choice_pa_pk_as_rep_draft9_encKeyPack;
             val->u.encKeyPack.data = NULL;
             get_lenfield(val->u.encKeyPack.length, val->u.encKeyPack.data,
-                         choice_pa_pk_as_rep_draft9_encKeyPack, asn1_decode_octetstring);
+                         choice_pa_pk_as_rep_draft9_encKeyPack,
+                         asn1_decode_charstring);
         } else {
             val->choice = choice_pa_pk_as_rep_draft9_UNKNOWN;
         }
@@ -1692,7 +1703,7 @@ error_out:
 }
 
 asn1_error_code
-asn1_decode_kdf_alg_id( asn1buf *buf, krb5_octet_data *val)
+asn1_decode_kdf_alg_id( asn1buf *buf, krb5_data *val)
 {
     setup();
     val->data = NULL;
@@ -1707,11 +1718,9 @@ error_out:
 }
 
 asn1_error_code
-asn1_decode_sequence_of_kdf_alg_id(asn1buf *buf,
-                                   krb5_octet_data ***val)
+asn1_decode_sequence_of_kdf_alg_id(asn1buf *buf, krb5_data ***val)
 {
-    decode_array_body(krb5_octet_data, asn1_decode_kdf_alg_id_ptr,
-                      krb5_free_octet_data);
+    decode_array_body(krb5_data, asn1_decode_kdf_alg_id_ptr, krb5_free_data);
 }
 
 #endif /* DISABLE_PKINIT */

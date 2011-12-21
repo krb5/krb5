@@ -115,7 +115,7 @@ static inline void pkiDebug (const char *fmt, ...) { }
 #define OCTETDATA_TO_KRB5DATA(octd, k5d) \
     (k5d)->length = (octd)->length; (k5d)->data = (char *)(octd)->data;
 
-extern const krb5_octet_data dh_oid;
+extern const krb5_data dh_oid;
 
 /*
  * notes about crypto contexts:
@@ -322,7 +322,7 @@ void free_krb5_algorithm_identifiers(krb5_algorithm_identifier ***in);
 void free_krb5_algorithm_identifier(krb5_algorithm_identifier *in);
 void free_krb5_kdc_dh_key_info(krb5_kdc_dh_key_info **in);
 void free_krb5_subject_pk_info(krb5_subject_pk_info **in);
-krb5_error_code pkinit_copy_krb5_octet_data(krb5_octet_data *dst, const krb5_octet_data *src);
+krb5_error_code pkinit_copy_krb5_data(krb5_data *dst, const krb5_data *src);
 
 
 /*

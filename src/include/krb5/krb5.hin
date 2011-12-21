@@ -207,6 +207,7 @@ typedef struct _krb5_data {
     char *data;
 } krb5_data;
 
+/* Originally introduced for PKINIT; now unused.  Do not use this. */
 typedef struct _krb5_octet_data {
     krb5_magic magic;
     unsigned int length;
@@ -4651,15 +4652,7 @@ krb5_free_ap_rep_enc_part(krb5_context context, krb5_ap_rep_enc_part *val);
 void KRB5_CALLCONV
 krb5_free_data(krb5_context context, krb5_data *val);
 
-/**
- * Free storage associated with a @c krb5_octet_data structure and its pointer.
- *
- * @param [in] context          Context structure
- * @param [in] val              Data structure to be freed
- *
- * @return
- * None
- */
+/* Free a krb5_octet_data structure (should be unused). */
 void KRB5_CALLCONV
 krb5_free_octet_data(krb5_context context, krb5_octet_data *val);
 

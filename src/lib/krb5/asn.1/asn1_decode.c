@@ -153,11 +153,11 @@ asn1_decode_maybe_unsigned(asn1buf *buf, unsigned long *val)
 }
 
 asn1_error_code
-asn1_decode_oid(asn1buf *buf, unsigned int *retlen, asn1_octet **val)
+asn1_decode_oid(asn1buf *buf, unsigned int *retlen, char **val)
 {
     setup();
     tag(ASN1_OBJECTIDENTIFIER);
-    retval = asn1buf_remove_octetstring(buf, length, val);
+    retval = asn1buf_remove_charstring(buf, length, val);
     if (retval) return retval;
     *retlen = length;
     cleanup();

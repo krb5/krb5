@@ -1531,7 +1531,7 @@ server_check_dh(krb5_context context,
                 pkinit_plg_crypto_context plg_cryptoctx,
                 pkinit_req_crypto_context req_cryptoctx,
                 pkinit_identity_crypto_context id_cryptoctx,
-                krb5_octet_data *dh_params, int minbits)
+                krb5_data *dh_params, int minbits)
 {
     PLArenaPool *pool;
     SECItem item;
@@ -1540,7 +1540,7 @@ server_check_dh(krb5_context context,
     if (pool == NULL)
         return ENOMEM;
 
-    item.data = dh_params->data;
+    item.data = (unsigned char *)dh_params->data;
     item.len = dh_params->length;
     memset(&req_cryptoctx->client_dh_params, 0,
            sizeof(req_cryptoctx->client_dh_params));
@@ -1757,7 +1757,8 @@ create_krb5_supportedCMSTypes(krb5_context context,
         memset(id, 0, sizeof(*id));
         ids[i] = id;
         oid = SECOID_FindOIDByTag(oids[i]);
-        if (secitem_to_buf_len(&oid->oid, &id->algorithm.data,
+        if (secitem_to_buf_len(&oid->oid,
+                               (unsigned char **)&id->algorithm.data,
                                &id->algorithm.length) != 0) {
             free(ids[i]);
             free_n_algorithm_identifiers(ids, i - 1);
@@ -1841,9 +1842,11 @@ create_krb5_trustedCertifiers(krb5_context context,
              * of the pkinit module. */
             if ((node->cert->keyIDGenerated ?
                  secitem_to_buf_len(&node->cert->derSubject,
+                                    (unsigned char **)
                                     &id->subjectName.data,
                                     &id->subjectName.length) :
                  secitem_to_buf_len(&node->cert->subjectKeyID,
+                                    (unsigned char **)
                                     &id->subjectKeyIdentifier.data,
                                     &id->subjectKeyIdentifier.length)) != 0) {
                 /* Free the earlier items. */
@@ -3313,9 +3316,9 @@ pkinit_create_td_dh_parameters(krb5_context context,
             continue;
         /* Add it to the list. */
         memset(&id[j], 0, sizeof(id[j]));
-        id[j].algorithm.data = oid->data;
+        id[j].algorithm.data = (char *)oid->data;
         id[j].algorithm.length = oid->len;
-        id[j].parameters.data = tmp.data;
+        id[j].parameters.data = (char *)tmp.data;
         id[j].parameters.length = tmp.len;
         ids[j] = &id[j];
         j++;
@@ -3368,7 +3371,7 @@ pkinit_process_td_dh_params(krb5_context context,
     for (i = 0; (algId != NULL) && (algId[i] != NULL); i++) {
         /* Decode the domain parameters. */
         item.len = algId[i]->parameters.length;
-        item.data = algId[i]->parameters.data;
+        item.data = (unsigned char *)algId[i]->parameters.data;
         memset(&params, 0, sizeof(params));
         if (SEC_ASN1DecodeItem(req_cryptoctx->pool, &params,
                                domain_parameters_template,
@@ -3418,11 +3421,11 @@ pkinit_create_td_invalid_certificate(krb5_context context,
         if (SEC_ASN1EncodeItem(req_cryptoctx->pool, &item, &isn,
                                issuer_and_serial_number_template) != &item)
             return ENOMEM;
-        id.issuerAndSerialNumber.data = item.data;
+        id.issuerAndSerialNumber.data = (char *)item.data;
         id.issuerAndSerialNumber.length = item.len;
     } else {
         item = invalid->subjectKeyID;
-        id.subjectKeyIdentifier.data = item.data;
+        id.subjectKeyIdentifier.data = (char *)item.data;
         id.subjectKeyIdentifier.length = item.len;
     }
     ids[0] = &id;
@@ -3573,11 +3576,11 @@ pkinit_create_td_trusted_certifiers(krb5_context context,
                 CERT_DestroyCertList(clist);
                 return ENOMEM;
             }
-            id[i].issuerAndSerialNumber.data = item.data;
+            id[i].issuerAndSerialNumber.data = (char *)item.data;
             id[i].issuerAndSerialNumber.length = item.len;
         } else {
             item = node->cert->subjectKeyID;
-            id[i].subjectKeyIdentifier.data = item.data;
+            id[i].subjectKeyIdentifier.data = (char *)item.data;
             id[i].subjectKeyIdentifier.length = item.len;
         }
         ids[i] = &id[i];
@@ -3810,22 +3813,22 @@ pkinit_octetstring2key(krb5_context context,
 /* Return TRUE if the item and the "algorithm" part of the algorithm identifier
  * are the same. */
 static PRBool
-octet_data_and_data_and_length_equal(const krb5_octet_data *octets,
-                                     const void *data, size_t len)
+data_and_ptr_and_length_equal(const krb5_data *data,
+                              const void *ptr, size_t len)
 {
-    return (octets->length == len) && (memcmp(octets->data, data, len) == 0);
+    return (data->length == len) && (memcmp(data->data, ptr, len) == 0);
 }
 
 /* Encode the other info used by the agility KDF.  Taken almost verbatim from
  * parts of the agility KDF in pkinit_crypto_openssl.c */
 static krb5_error_code
 encode_agility_kdf_other_info(krb5_context context,
-                              krb5_octet_data *alg_oid,
+                              krb5_data *alg_oid,
                               krb5_const_principal party_u_info,
                               krb5_const_principal party_v_info,
                               krb5_enctype enctype,
-                              krb5_octet_data *as_req,
-                              krb5_octet_data *pk_as_rep,
+                              krb5_data *as_req,
+                              krb5_data *pk_as_rep,
                               krb5_data **other_info)
 {
     krb5_error_code retval = 0;
@@ -3873,13 +3876,13 @@ cleanup:
  * one that we support. */
 krb5_error_code
 pkinit_alg_agility_kdf(krb5_context context,
-                       krb5_octet_data *secret,
-                       krb5_octet_data *alg_oid,
+                       krb5_data *secret,
+                       krb5_data *alg_oid,
                        krb5_const_principal party_u_info,
                        krb5_const_principal party_v_info,
                        krb5_enctype enctype,
-                       krb5_octet_data *as_req,
-                       krb5_octet_data *pk_as_rep,
+                       krb5_data *as_req,
+                       krb5_data *pk_as_rep,
                        krb5_keyblock *key_block)
 {
     krb5_data *other_info = NULL;
@@ -3894,30 +3897,27 @@ pkinit_alg_agility_kdf(krb5_context context,
     if (retval != 0)
         return retval;
 
-    if (octet_data_and_data_and_length_equal(alg_oid,
-                                             krb5_pkinit_sha512_oid,
-                                             krb5_pkinit_sha512_oid_len))
+    if (data_and_ptr_and_length_equal(alg_oid, krb5_pkinit_sha512_oid,
+                                      krb5_pkinit_sha512_oid_len))
         retval = pkinit_octetstring_hkdf(context,
                                          SEC_OID_SHA512, 1, 4, enctype,
-                                         secret->data, secret->length,
-                                         other_info->data, other_info->length,
-                                         key_block);
-    else if (octet_data_and_data_and_length_equal(alg_oid,
-                                                  krb5_pkinit_sha256_oid,
-                                                  krb5_pkinit_sha256_oid_len))
+                                         (unsigned char *)secret->data,
+                                         secret->length, other_info->data,
+                                         other_info->length, key_block);
+    else if (data_and_ptr_and_length_equal(alg_oid, krb5_pkinit_sha256_oid,
+                                           krb5_pkinit_sha256_oid_len))
         retval = pkinit_octetstring_hkdf(context,
                                          SEC_OID_SHA256, 1, 4, enctype,
-                                         secret->data, secret->length,
-                                         other_info->data, other_info->length,
-                                         key_block);
-    else if (octet_data_and_data_and_length_equal(alg_oid,
-                                                  krb5_pkinit_sha1_oid,
-                                                  krb5_pkinit_sha1_oid_len))
+                                         (unsigned char *)secret->data,
+                                         secret->length, other_info->data,
+                                         other_info->length, key_block);
+    else if (data_and_ptr_and_length_equal(alg_oid, krb5_pkinit_sha1_oid,
+                                           krb5_pkinit_sha1_oid_len))
         retval = pkinit_octetstring_hkdf(context,
                                          SEC_OID_SHA1, 1, 4, enctype,
-                                         secret->data, secret->length,
-                                         other_info->data, other_info->length,
-                                         key_block);
+                                         (unsigned char *)secret->data,
+                                         secret->length, other_info->data,
+                                         other_info->length, key_block);
     else
         retval = KRB5KDC_ERR_NO_ACCEPTABLE_KDF;
 

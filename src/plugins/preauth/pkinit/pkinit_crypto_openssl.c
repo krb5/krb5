@@ -2305,7 +2305,7 @@ cleanup:
  */
 static krb5_error_code
 pkinit_alg_values(krb5_context context,
-                  const krb5_octet_data *alg_id,
+                  const krb5_data *alg_id,
                   size_t *hash_bytes,
                   const EVP_MD *(**func)(void))
 {
@@ -2356,13 +2356,13 @@ pkinit_alg_values(krb5_context context,
  */
 krb5_error_code
 pkinit_alg_agility_kdf(krb5_context context,
-                       krb5_octet_data *secret,
-                       krb5_octet_data *alg_oid,
+                       krb5_data *secret,
+                       krb5_data *alg_oid,
                        krb5_const_principal party_u_info,
                        krb5_const_principal party_v_info,
                        krb5_enctype enctype,
-                       krb5_octet_data *as_req,
-                       krb5_octet_data *pk_as_rep,
+                       krb5_data *as_req,
+                       krb5_data *pk_as_rep,
                        krb5_keyblock *key_block)
 {
     krb5_error_code retval = 0;
@@ -2703,7 +2703,7 @@ server_check_dh(krb5_context context,
                 pkinit_plg_crypto_context cryptoctx,
                 pkinit_req_crypto_context req_cryptoctx,
                 pkinit_identity_crypto_context id_cryptoctx,
-                krb5_octet_data *dh_params,
+                krb5_data *dh_params,
                 int minbits)
 {
     DH *dh = NULL;
@@ -2711,7 +2711,7 @@ server_check_dh(krb5_context context,
     int dh_prime_bits;
     krb5_error_code retval = KRB5KDC_ERR_DH_KEY_PARAMETERS_NOT_ACCEPTED;
 
-    tmp = dh_params->data;
+    tmp = (unsigned char *)dh_params->data;
     dh = DH_new();
     dh = pkinit_decode_dh_params(&dh, &tmp, dh_params->length);
     if (dh == NULL) {
@@ -3309,7 +3309,7 @@ pkinit_process_td_dh_params(krb5_context context,
             memcmp(algId[i]->algorithm.data, dh_oid.data, dh_oid.length))
             goto cleanup;
 
-        tmp = algId[i]->parameters.data;
+        tmp = (unsigned char *)algId[i]->parameters.data;
         dh = DH_new();
         dh = pkinit_decode_dh_params(&dh, &tmp, algId[i]->parameters.length);
         dh_prime_bits = BN_num_bits(dh->p);
@@ -5447,8 +5447,9 @@ create_identifiers_from_stack(STACK_OF(X509) *sk,
 
         xn = X509_get_subject_name(x);
         len = i2d_X509_NAME(xn, NULL);
-        if ((p = krb5_cas[i]->subjectName.data = malloc((size_t) len)) == NULL)
+        if ((p = malloc((size_t) len)) == NULL)
             goto cleanup;
+        krb5_cas[i]->subjectName.data = (char *)p;
         i2d_X509_NAME(xn, &p);
         krb5_cas[i]->subjectName.length = len;
 
@@ -5465,9 +5466,9 @@ create_identifiers_from_stack(STACK_OF(X509) *sk,
             M_ASN1_INTEGER_free(is->serial);
             is->serial = M_ASN1_INTEGER_dup(X509_get_serialNumber(x));
             len = i2d_PKCS7_ISSUER_AND_SERIAL(is, NULL);
-            if ((p = krb5_cas[i]->issuerAndSerialNumber.data =
-                 malloc((size_t) len)) == NULL)
+            if ((p = malloc((size_t) len)) == NULL)
                 goto cleanup;
+            krb5_cas[i]->issuerAndSerialNumber.data = (char *)p;
             i2d_PKCS7_ISSUER_AND_SERIAL(is, &p);
             krb5_cas[i]->issuerAndSerialNumber.length = len;
 #ifdef LONGHORN_BETA_COMPAT
@@ -5489,9 +5490,9 @@ create_identifiers_from_stack(STACK_OF(X509) *sk,
                 if ((ikeyid = X509_get_ext_d2i(x, NID_subject_key_identifier, NULL,
                                                NULL))) {
                     len = i2d_ASN1_OCTET_STRING(ikeyid, NULL);
-                    if ((p = krb5_cas[i]->subjectKeyIdentifier.data =
-                         malloc((size_t) len)) == NULL)
+                    if ((p = malloc((size_t) len)) == NULL)
                         goto cleanup;
+                    krb5_cas[i]->subjectKeyIdentifier.data = (char *)p;
                     i2d_ASN1_OCTET_STRING(ikeyid, &p);
                     krb5_cas[i]->subjectKeyIdentifier.length = len;
                 }
@@ -5558,7 +5559,7 @@ create_krb5_supportedCMSTypes(krb5_context context,
 
     krb5_error_code retval = ENOMEM;
     krb5_algorithm_identifier **loids = NULL;
-    krb5_octet_data des3oid = {0, 8, (unsigned char *)"\x2A\x86\x48\x86\xF7\x0D\x03\x07" };
+    krb5_data des3oid = {0, 8, "\x2A\x86\x48\x86\xF7\x0D\x03\x07" };
 
     *oids = NULL;
     loids = malloc(2 * sizeof(krb5_algorithm_identifier *));
@@ -5570,7 +5571,7 @@ create_krb5_supportedCMSTypes(krb5_context context,
         free(loids);
         goto cleanup;
     }
-    retval = pkinit_copy_krb5_octet_data(&loids[0]->algorithm, &des3oid);
+    retval = pkinit_copy_krb5_data(&loids[0]->algorithm, &des3oid);
     if (retval) {
         free(loids[0]);
         free(loids);
@@ -5652,9 +5653,9 @@ create_krb5_trustedCas(krb5_context context,
             krb5_cas[i]->u.caName.length = 0;
             xn = X509_get_subject_name(x);
             len = i2d_X509_NAME(xn, NULL);
-            if ((p = krb5_cas[i]->u.caName.data =
-                 malloc((size_t) len)) == NULL)
+            if ((p = malloc((size_t) len)) == NULL)
                 goto cleanup;
+            krb5_cas[i]->u.caName.data = (char *)p;
             i2d_X509_NAME(xn, &p);
             krb5_cas[i]->u.caName.length = len;
             break;
@@ -5667,9 +5668,9 @@ create_krb5_trustedCas(krb5_context context,
             M_ASN1_INTEGER_free(is->serial);
             is->serial = M_ASN1_INTEGER_dup(X509_get_serialNumber(x));
             len = i2d_PKCS7_ISSUER_AND_SERIAL(is, NULL);
-            if ((p = krb5_cas[i]->u.issuerAndSerial.data =
-                 malloc((size_t) len)) == NULL)
+            if ((p = malloc((size_t) len)) == NULL)
                 goto cleanup;
+            krb5_cas[i]->u.issuerAndSerial.data = (char *)p;
             i2d_PKCS7_ISSUER_AND_SERIAL(is, &p);
             krb5_cas[i]->u.issuerAndSerial.length = len;
             if (is != NULL) {
@@ -5789,7 +5790,7 @@ pkinit_process_td_trusted_certifiers(
     sk_xn = sk_X509_NAME_new_null();
     while(krb5_trusted_certifiers[i] != NULL) {
         if (krb5_trusted_certifiers[i]->subjectName.data != NULL) {
-            p = krb5_trusted_certifiers[i]->subjectName.data;
+            p = (unsigned char *)krb5_trusted_certifiers[i]->subjectName.data;
             xn = d2i_X509_NAME(NULL, &p,
                                (int)krb5_trusted_certifiers[i]->subjectName.length);
             if (xn == NULL)
@@ -5803,7 +5804,8 @@ pkinit_process_td_trusted_certifiers(
         }
 
         if (krb5_trusted_certifiers[i]->issuerAndSerialNumber.data != NULL) {
-            p = krb5_trusted_certifiers[i]->issuerAndSerialNumber.data;
+            p = (unsigned char *)
+                krb5_trusted_certifiers[i]->issuerAndSerialNumber.data;
             is = d2i_PKCS7_ISSUER_AND_SERIAL(NULL, &p,
                                              (int)krb5_trusted_certifiers[i]->issuerAndSerialNumber.length);
             if (is == NULL)
@@ -5819,7 +5821,8 @@ pkinit_process_td_trusted_certifiers(
         }
 
         if (krb5_trusted_certifiers[i]->subjectKeyIdentifier.data != NULL) {
-            p = krb5_trusted_certifiers[i]->subjectKeyIdentifier.data;
+            p = (unsigned char *)
+                krb5_trusted_certifiers[i]->subjectKeyIdentifier.data;
             id = d2i_ASN1_OCTET_STRING(NULL, &p,
                                        (int)krb5_trusted_certifiers[i]->subjectKeyIdentifier.length);
             if (id == NULL)

@@ -131,9 +131,9 @@ asn1_decode_pa_pk_as_req(asn1buf *buf, krb5_pa_pk_as_req *val)
     val->kdcPkId.data = NULL;
     {
         begin_structure();
-        get_implicit_octet_string(val->signedAuthPack.length, val->signedAuthPack.data, 0);
+        get_implicit_charstring(val->signedAuthPack.length, val->signedAuthPack.data, 0);
         opt_field(val->trustedCertifiers, 1, asn1_decode_sequence_of_external_principal_identifier, NULL);
-        opt_implicit_octet_string(val->kdcPkId.length, val->kdcPkId.data, 2);
+        opt_implicit_charstring(val->kdcPkId.length, val->kdcPkId.data, 2);
         end_structure();
     }
     return 0;
@@ -167,10 +167,10 @@ asn1_decode_pa_pk_as_req_draft9(asn1buf *buf, krb5_pa_pk_as_req_draft9 *val)
     val->encryptionCert.data = NULL;
     val->trustedCertifiers = NULL;
     { begin_structure();
-        get_implicit_octet_string(val->signedAuthPack.length, val->signedAuthPack.data, 0);
+        get_implicit_charstring(val->signedAuthPack.length, val->signedAuthPack.data, 0);
         opt_field(val->trustedCertifiers, 1, asn1_decode_sequence_of_trusted_ca, NULL);
-        opt_lenfield(val->kdcCert.length, val->kdcCert.data, 2, asn1_decode_octetstring);
-        opt_lenfield(val->encryptionCert.length, val->encryptionCert.data, 2, asn1_decode_octetstring);
+        opt_lenfield(val->kdcCert.length, val->kdcCert.data, 2, asn1_decode_charstring);
+        opt_lenfield(val->encryptionCert.length, val->encryptionCert.data, 2, asn1_decode_charstring);
         end_structure();
     }
     return 0;
@@ -238,7 +238,7 @@ asn1_decode_auth_pack(asn1buf *buf, krb5_auth_pack *val)
                 next_tag();
             } else val->supportedCMSTypes = NULL;
         }
-        opt_lenfield(val->clientDHNonce.length, val->clientDHNonce.data, 3, asn1_decode_octetstring);
+        opt_lenfield(val->clientDHNonce.length, val->clientDHNonce.data, 3, asn1_decode_charstring);
         opt_field(val->supportedKDFs, 4, asn1_decode_sequence_of_kdf_alg_id, NULL);
         end_structure();
     }
@@ -259,7 +259,7 @@ error_out:
     free(val->clientDHNonce.data);
     if (val->supportedKDFs) {
         for (i = 0; val->supportedKDFs[i]; i++)
-            krb5_free_octet_data(NULL, val->supportedKDFs[i]);
+            krb5_free_data(NULL, val->supportedKDFs[i]);
         free(val->supportedKDFs);
         val->supportedKDFs = NULL;
     }

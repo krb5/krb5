@@ -202,20 +202,20 @@ asn1_get_eoc_tag (asn1buf *buf)
 /*
  * Deal with implicitly tagged fields
  */
-#define get_implicit_octet_string(len, var, tagexpect)                  \
+#define get_implicit_charstring(len, var, tagexpect)                    \
     if (tagnum != (tagexpect)) clean_return(ASN1_MISSING_FIELD);        \
     if (asn1class != CONTEXT_SPECIFIC || construction != PRIMITIVE)     \
         clean_return(ASN1_BAD_ID);                                      \
-    retval = asn1buf_remove_octetstring(&subbuf, taglen, &(var));       \
+    retval = asn1buf_remove_charstring(&subbuf, taglen, &(var));        \
     if (retval) clean_return(retval);                                   \
     (len) = taglen;                                                     \
     next_tag()
 
-#define opt_implicit_octet_string(len, var, tagexpect)                  \
+#define opt_implicit_charstring(len, var, tagexpect)                    \
     if (tagnum == (tagexpect)) {                                        \
         if (asn1class != CONTEXT_SPECIFIC || construction != PRIMITIVE) \
             clean_return(ASN1_BAD_ID);                                  \
-        retval = asn1buf_remove_octetstring(&subbuf, taglen, &(var));   \
+        retval = asn1buf_remove_charstring(&subbuf, taglen, &(var));    \
         if (retval) clean_return(retval);                               \
         (len) = taglen;                                                 \
         next_tag();                                                     \
