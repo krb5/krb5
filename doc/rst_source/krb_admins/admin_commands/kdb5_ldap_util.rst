@@ -493,7 +493,7 @@ create_policy
            (Sets the KRB5_KDB_DISALLOW_SVR flag.)  *+allow_svr* clears this flag.
 
        {-\|+}allow_tgs_req
-           *-allow_tgs_req*  specifies  that  a Ticket-Granting Service (TGS) request i
+           *-allow_tgs_req*  specifies  that  a Ticket-Granting Service (TGS) request
            for a service ticket for principals is not permitted.  
            This option is useless for most things.  
            *+allow_tgs_req* clears this flag.  The default is *+allow_tgs_req*.  

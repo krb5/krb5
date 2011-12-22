@@ -40,7 +40,7 @@ After the server begins running, it puts itself in the background and disassocia
 *kadmind* can be configured for incremental database propagation.  Incremental propagation allows slave KDC servers to receive  principal
 and  policy  updates  incrementally instead of receiving full dumps of the database.  This facility can be enabled in the :ref:`kdc.conf` file
 with the *iprop_enable* option.  See the :ref:`kdc.conf` documentation for other options for tuning incremental propagation parameters.
-Incremental propagation requires the principal "kiprop/MASTER\@REALM" i
+Incremental propagation requires the principal "kiprop/MASTER\@REALM"
 (where MASTER is the master KDC's canonical host name, and REALM the realm name) to be registered in the database.
 
 

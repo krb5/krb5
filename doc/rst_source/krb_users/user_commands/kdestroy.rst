@@ -27,7 +27,8 @@ OPTIONS
         available.
 
      **-q**
-        Run quietly. Normally *kdestroy* beeps if it fails to destroy the user's tickets. The *-q* flag suppresses this behavior.
+        Run quietly. Normally *kdestroy* beeps if it fails to destroy the user's tickets. 
+        The *-q* flag suppresses this behavior.
 
      **-c** *cache_name*
         Use *cache_name* as the credentials (ticket) cache name and location;
@@ -48,7 +49,7 @@ so that your tickets are destroyed automatically when you log out.
 ENVIRONMENT
 ~~~~~~~~~~~~~
 
-*kdestroy* uses the following environment variables:
+*kdestroy* uses the following environment variable:
 
      **KRB5CCNAME**
           Location of the default Kerberos 5 credentials (ticket)
@@ -63,13 +64,13 @@ ENVIRONMENT
 FILES
 ~~~~~~~~~~~~~
 
-/tmp/krb5cc_[uid]  - Default location of Kerberos 5 credentials cache ([*uid*] is the decimal UID of the user).
+/tmp/krb5cc_[uid] - Default location of Kerberos 5 credentials cache ([*uid*] is the decimal UID of the user).
 
 
 SEE ALSO
 ~~~~~~~~~
 
-kinit(1), klist(1), krb5(3)
+kinit(1), klist(1)
 
 
 BUGS

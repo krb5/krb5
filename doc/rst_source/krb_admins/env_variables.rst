@@ -17,7 +17,10 @@ The following environment variables can be used during runtime:
            (See :ref:`mitK5defaults` for the default name)
 
 **KRB5CCNAME** 
-           Default name for the credentials cache file.
+           Default name for the credentials cache file, in the form *type:residual*. 
+           The type of the default cache may determine the availability of a cache collection.
+           For instance, a default cache of type DIR causes caches within the directory 
+           to be present in the global cache collection.
 
 **KRB5RCACHETYPE**
            Default replay cache type. Defaults to "dfl".

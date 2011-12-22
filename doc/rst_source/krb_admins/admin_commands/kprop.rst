@@ -19,8 +19,10 @@ SYNOPSIS
 DESCRIPTION
 -------------
 
-*kprop*  is used to propagate a Kerberos V5 database dump file from the master Kerberos server to a slave Kerberos server, 
-which is specified by *slave_host*.  This is done by transmitting the dumped database file to the slave server over an encrypted, secure channel.   
+*kprop*  is used to propagate a Kerberos V5 database dump file from the master 
+Kerberos server to a slave Kerberos server, which is specified by *slave_host*.  
+This is done by transmitting the dumped database file to the slave server over 
+an encrypted, secure channel.   
 The dump file must be created by :ref:`kdb5_util(8)`.
 
 OPTIONS
@@ -30,8 +32,9 @@ OPTIONS
               Specifies the realm of the master server.
 
        **-f** *file*
-              Specifies the filename where the dumped principal database file is to be found; by default the dumped database file is
-              normally /usr/local/var/krb5kdc/slave_datatrans.
+              Specifies the filename where the dumped principal database file is to be found; 
+              by default the dumped database file is normally
+              */usr/local/var/krb5kdc/slave_datatrans*.
 
        **-P** *port*
               Specifies the port to use to contact the :ref:`kpropd(8)` server on the remote host.
@@ -42,6 +45,12 @@ OPTIONS
        **-s** *keytab*
               Specifies the location of the keytab file.
 
+ENVIRONMENT
+--------------
+
+*kprop* uses the following environment variable:
+
+      - **KRB5_CONFIG**
 
 SEE ALSO
 -------------

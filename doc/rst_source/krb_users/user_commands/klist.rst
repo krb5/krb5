@@ -85,7 +85,7 @@ OPTIONS
 ENVIRONMENT
 ~~~~~~~~~~~~~
 
-*klist* uses the following environment variables:
+*klist* uses the following environment variable:
 
      **KRB5CCNAME**
           Location of the default Kerberos 5 credentials (ticket)
@@ -108,6 +108,6 @@ FILES
 SEE ALSO
 ~~~~~~~~~
 
-kinit(1), kdestroy(1), krb5(3)
+kinit(1), kdestroy(1)
 
 
