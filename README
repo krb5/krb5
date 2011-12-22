@@ -83,8 +83,9 @@ and
 
 Code quality:
 
-* Fix MITKRB5-SA-2011-006 KDC denial of service vulnerabilities
-  [CVE-2011-1527 CVE-2011-1528 CVE-2011-1529].
+* Fix MITKRB5-SA-2011-006 and MITKRB5SA-2011-007 KDC denial of service
+  vulnerabilities [CVE-2011-1527 CVE-2011-1528 CVE-2011-1529
+  CVE-2011-1530].
 
 * Update the Fortuna implementation to more accurately implement the
   description in _Cryptography Engineering_, and make it the default
@@ -106,6 +107,8 @@ Developer experience:
 
 * Rework KDC and kadmind networking code to use an event loop
   architecture.
+
+* Add a plugin interface for providing configuration information.
 
 Administrator experience:
 
@@ -141,6 +144,10 @@ End-user experience:
   release, but the infrastructure is present for redistributors to
   supply them.)
 
+Protocol evolution:
+
+* Make PKINIT work with FAST in the client library.
+
 krb5-1.10 changes by ticket ID
 ------------------------------
 
@@ -166,7 +173,6 @@ krb5-1.10 changes by ticket ID
 6874    Fortuna as default PRNG
 6878    Add test script for user2user programs
 6887    Use first principal in keytab when verifying creds
-6889    ftpd parses ftpusers entries that use "restrict" incorrectly
 6890    Implement draft-josefsson-gss-capsulate
 6891    Add gss_userok and gss_pname_to_uid
 6892    Prevent bleed-through of mechglue symbols into loaded mechs
@@ -351,6 +357,7 @@ reports, suggestions, and valuable resources:
     Michael B Allen
     Heinz-Ado Arnolds
     Derek Atkins
+    Mark Bannister
     David Bantz
     Alex Baule
     Arlene Berry
@@ -390,7 +397,9 @@ reports, suggestions, and valuable resources:
     Philip Guenther
     Dominic Hargreaves
     Jakob Haufe
+    Paul B. Henson
     Jeff Hodges
+    Christopher Hogan
     Love Hörnquist Åstrand
     Ken Hornstein
     Henry B. Hotz
@@ -410,6 +419,7 @@ reports, suggestions, and valuable resources:
     Nathaniel McCallum
     Greg McClement
     Cameron Meadors
+    Alexey Melnikov
     Franklyn Mendez
     Markus Moeller
     Kyle Moffett
@@ -422,6 +432,7 @@ reports, suggestions, and valuable resources:
     Andrej Ota
     Dmitri Pal
     Javier Palacios
+    Tom Parker
     Ezra Peisach
     W. Michael Petullo
     Mark Phalan
@@ -441,6 +452,8 @@ reports, suggestions, and valuable resources:
     Jorgen Wahlsten
     Max (Weijun) Wang
     John Washington
+    Kevin Wasserman
+    Margaret Wasserman
     Marcus Watts
     Simon Wilkinson
     Nicolas Williams
