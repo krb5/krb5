@@ -589,7 +589,7 @@ init_ctx_new(OM_uint32 *minor_status,
 	ret = get_negotiable_mechs(minor_status, spcred, GSS_C_INITIATE,
 				   &sc->mech_set);
 	if (ret != GSS_S_COMPLETE)
-		return ret;
+		goto cleanup;
 
 	/* Set an initial internal mech to make the first context token. */
 	sc->internal_mech = &sc->mech_set->elements[0];
