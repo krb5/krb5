@@ -321,7 +321,6 @@ krb5_free_priv
 krb5_free_priv_enc_part
 krb5_free_pwd_data
 krb5_free_pwd_sequences
-krb5_free_realm_string
 krb5_free_realm_tree
 krb5_free_safe
 krb5_free_sam_challenge
@@ -528,9 +527,6 @@ krb5_rd_safe
 krb5_read_message
 krb5_read_password
 krb5_realm_compare
-krb5_realm_iterator
-krb5_realm_iterator_create
-krb5_realm_iterator_free
 krb5_recvauth
 krb5_recvauth_version
 krb5_register_serializer

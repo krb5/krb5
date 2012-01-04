@@ -2698,20 +2698,6 @@ krb5_error_code krb5_set_debugging_time(krb5_context, krb5_timestamp,
 krb5_error_code krb5_use_natural_time(krb5_context);
 krb5_error_code krb5_set_time_offsets(krb5_context, krb5_timestamp,
                                       krb5_int32);
-/*
- * The realm iterator functions
- */
-
-krb5_error_code KRB5_CALLCONV
-krb5_realm_iterator_create(krb5_context context, void **iter_p);
-
-krb5_error_code KRB5_CALLCONV
-krb5_realm_iterator(krb5_context context, void **iter_p, char **ret_realm);
-
-void KRB5_CALLCONV
-krb5_realm_iterator_free(krb5_context context, void **iter_p);
-
-void KRB5_CALLCONV krb5_free_realm_string(krb5_context context, char *str);
 
 /* Internal principal function used by KIM to avoid code duplication */
 krb5_error_code KRB5_CALLCONV
