@@ -504,6 +504,24 @@ encode_a_field(asn1buf *buf, const void *val, const struct field_info *field,
             assert(omit_tag == NULL && !field->tag_implicit);
         break;
     }
+    case field_choice:
+    {
+        const void *dataptr = (const char *)val + field->dataoff;
+        unsigned int choice;
+        const struct seq_info *seq;
+
+        assert(omit_tag == NULL);
+        assert(field->atype->type == atype_choice);
+        seq = field->atype->tinfo;
+        retval = get_field_len(val, field, &choice);
+        if (retval)
+            return retval;
+        if (choice > seq->n_fields)
+            return ASN1_MISSING_FIELD;
+        retval = encode_a_field(buf, dataptr, &seq->fields[choice], &length,
+                                NULL);
+        break;
+    }
     default:
         assert(field->ftype > field_min);
         assert(field->ftype < field_max);

@@ -194,6 +194,12 @@ enum atype_type {
     /* Sequence.  tinfo is a struct seq_info *. */
     atype_sequence,
     /*
+     * Choice.  tinfo is a struct seq_info *, with the optional field ignored.
+     * Only usable with the field_choice field type.  Cannot be used with an
+     * implicit context tag.
+     */
+    atype_choice,
+    /*
      * Sequence-of, with pointer to base type descriptor, represented
      * as a null-terminated array of pointers (and thus the "base"
      * type descriptor is actually an atype_ptr node).  tinfo is a
@@ -382,6 +388,15 @@ struct uint_info {
     };                                                                  \
     const struct atype_info krb5int_asn1type_##DESCNAME = {             \
         atype_sequence, sizeof(CTYPENAME), &aux_seqinfo_##DESCNAME      \
+    }
+/* A choice, selected from the indicated series of fields. */
+#define DEFCHOICETYPE(DESCNAME, CTYPENAME, FIELDS)                      \
+    typedef CTYPENAME aux_typedefname_##DESCNAME;                       \
+    static const struct seq_info aux_seqinfo_##DESCNAME = {             \
+        NULL, FIELDS, sizeof(FIELDS)/sizeof(FIELDS[0])                  \
+    };                                                                  \
+    const struct atype_info krb5int_asn1type_##DESCNAME = {             \
+        atype_choice, sizeof(CTYPENAME), &aux_seqinfo_##DESCNAME        \
     }
 /* Integer types.  */
 #define DEFINTTYPE(DESCNAME, CTYPENAME)                                 \
@@ -574,6 +589,12 @@ enum field_type {
      * described by ATYPE.
      */
     field_sequenceof_len,
+    /*
+     * LENOFF indicates a distinguisher and DATAOFF indicates a union base
+     * address.  ATYPE is an atype_choice type pointing to a seq_info
+     * containing a field type for each choice element.
+     */
+    field_choice,
     /* Unused except for range checking.  */
     field_max
 };
@@ -710,6 +731,17 @@ struct field_info {
             }
 #define FIELDOF_SEQOF_INT32(STYPE,DESC,PTRFIELD,LENFIELD,TAG,IMPLICIT)  \
     FIELDOF_SEQOF_LEN(STYPE,DESC,PTRFIELD,LENFIELD,int32,TAG,IMPLICIT)
+
+#define FIELDOF_OPTCHOICE(STYPE,DESC,PTRFIELD,CHOICEFIELD,LENTYPE,TAG,OPT) \
+    { \
+        field_choice,                                                   \
+            OFFOF(STYPE, PTRFIELD, aux_typedefname_##DESC),             \
+            OFFOF(STYPE, CHOICEFIELD, aux_typedefname_##LENTYPE),       \
+            TAG, 0, OPT,                                                \
+            &krb5int_asn1type_##DESC, &krb5int_asn1type_##LENTYPE       \
+            }
+#define FIELDOF_CHOICE(STYPE,DESC,PTRFIELD,CHOICEFIELD,LENTYPE,TAG)     \
+    FIELDOF_OPTCHOICE(STYPE,DESC,PTRFIELD,CHOICEFIELD,LENTYPE,TAG,-1)
 
 struct seq_info {
     /*
