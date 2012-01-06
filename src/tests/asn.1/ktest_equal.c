@@ -520,6 +520,38 @@ ktest_equal_sam_challenge(krb5_sam_challenge *ref, krb5_sam_challenge *var)
 }
 
 int
+ktest_equal_sam_challenge_2_body(krb5_sam_challenge_2_body *ref,
+                                 krb5_sam_challenge_2_body *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && scalar_equal(sam_type);
+    p = p && scalar_equal(sam_flags);
+    p = p && equal_str(sam_type_name);
+    p = p && equal_str(sam_track_id);
+    p = p && equal_str(sam_challenge_label);
+    p = p && equal_str(sam_challenge);
+    p = p && equal_str(sam_response_prompt);
+    p = p && equal_str(sam_pk_for_sad);
+    p = p && scalar_equal(sam_nonce);
+    p = p && scalar_equal(sam_etype);
+    return p;
+}
+
+int
+ktest_equal_sam_challenge_2(krb5_sam_challenge_2 *ref,
+                            krb5_sam_challenge_2 *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && equal_str(sam_challenge_2_body);
+    p = p && ptr_equal(sam_cksum,ktest_equal_sequence_of_checksum);
+    return p;
+}
+
+int
 ktest_equal_sam_response(krb5_sam_response *ref, krb5_sam_response *var)
 {
     int p = TRUE;
@@ -532,6 +564,18 @@ ktest_equal_sam_response(krb5_sam_response *ref, krb5_sam_response *var)
     p = p && struct_equal(sam_enc_nonce_or_ts,ktest_equal_enc_data);
     p = p && scalar_equal(sam_nonce);
     p = p && scalar_equal(sam_patimestamp);
+    return p;
+}
+
+int
+ktest_equal_pa_for_user(krb5_pa_for_user *ref, krb5_pa_for_user *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && ptr_equal(user, ktest_equal_principal_data);
+    p = p && struct_equal(cksum, ktest_equal_checksum);
+    p = p && equal_str(auth_package);
     return p;
 }
 
@@ -609,6 +653,32 @@ ktest_equal_iakerb_finished(krb5_iakerb_finished *ref,
     if (ref == var) return TRUE;
     else if (ref == NULL || var == NULL) return FALSE;
     p = p && struct_equal(checksum,ktest_equal_checksum);
+    return p;
+}
+
+static int
+ktest_equal_fast_finished(krb5_fast_finished *ref, krb5_fast_finished *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && scalar_equal(timestamp);
+    p = p && scalar_equal(usec);
+    p = p && ptr_equal(client, ktest_equal_principal_data);
+    p = p && struct_equal(ticket_checksum, ktest_equal_checksum);
+    return p;
+}
+
+int
+ktest_equal_fast_response(krb5_fast_response *ref, krb5_fast_response *var)
+{
+    int p = TRUE;
+    if (ref == var) return TRUE;
+    else if (ref == NULL || var == NULL) return FALSE;
+    p = p && ptr_equal(padata, ktest_equal_sequence_of_pa_data);
+    p = p && ptr_equal(strengthen_key, ktest_equal_keyblock);
+    p = p && ptr_equal(finished, ktest_equal_fast_finished);
+    p = p && scalar_equal(nonce);
     return p;
 }
 
@@ -768,4 +838,10 @@ int
 ktest_equal_etype_info(krb5_etype_info_entry **ref, krb5_etype_info_entry **var)
 {
     array_compare(ktest_equal_krb5_etype_info_entry);
+}
+
+int
+ktest_equal_sequence_of_checksum(krb5_checksum **ref, krb5_checksum **var)
+{
+    array_compare(ktest_equal_checksum);
 }

@@ -81,18 +81,22 @@ void ktest_make_sample_etype_info(krb5_etype_info_entry ***p);
 void ktest_make_sample_etype_info2(krb5_etype_info_entry ***p);
 void ktest_make_sample_pa_enc_ts(krb5_pa_enc_ts *am);
 void ktest_make_sample_sam_challenge(krb5_sam_challenge *p);
+void ktest_make_sample_sam_challenge_2(krb5_sam_challenge_2 *p);
+void ktest_make_sample_sam_challenge_2_body(krb5_sam_challenge_2_body *p);
 void ktest_make_sample_sam_response(krb5_sam_response *p);
 void ktest_make_sample_sam_response_2(krb5_sam_response_2 *p);
 void ktest_make_sample_sam_key(krb5_sam_key *p);
 void ktest_make_sample_enc_sam_response_enc(krb5_enc_sam_response_enc *p);
 void ktest_make_sample_predicted_sam_response(krb5_predicted_sam_response *p);
 void ktest_make_sample_enc_sam_response_enc_2(krb5_enc_sam_response_enc_2 *p);
+void ktest_make_sample_pa_for_user(krb5_pa_for_user *p);
 void ktest_make_sample_pa_s4u_x509_user(krb5_pa_s4u_x509_user *p);
 void ktest_make_sample_ad_kdcissued(krb5_ad_kdcissued *p);
 void ktest_make_sample_ad_signedpath_data(krb5_ad_signedpath_data *p);
 void ktest_make_sample_ad_signedpath(krb5_ad_signedpath *p);
 void ktest_make_sample_iakerb_header(krb5_iakerb_header *p);
 void ktest_make_sample_iakerb_finished(krb5_iakerb_finished *p);
+void ktest_make_sample_fast_response(krb5_fast_response *p);
 
 #ifndef DISABLE_PKINIT
 void ktest_make_sample_pa_pk_as_req(krb5_pa_pk_as_req *p);
@@ -166,18 +170,22 @@ void ktest_empty_passwd_phrase_element(passwd_phrase_element *ppe);
 void ktest_empty_pwd_data(krb5_pwd_data *pd);
 void ktest_empty_alt_method(krb5_alt_method *am);
 void ktest_empty_sam_challenge(krb5_sam_challenge *p);
+void ktest_empty_sam_challenge_2(krb5_sam_challenge_2 *p);
+void ktest_empty_sam_challenge_2_body(krb5_sam_challenge_2_body *p);
 void ktest_empty_sam_response(krb5_sam_response *p);
 void ktest_empty_sam_key(krb5_sam_key *p);
 void ktest_empty_enc_sam_response_enc(krb5_enc_sam_response_enc *p);
 void ktest_empty_predicted_sam_response(krb5_predicted_sam_response *p);
 void ktest_empty_sam_response_2(krb5_sam_response_2 *p);
 void ktest_empty_enc_sam_response_enc_2(krb5_enc_sam_response_enc_2 *p);
+void ktest_empty_pa_for_user(krb5_pa_for_user *p);
 void ktest_empty_pa_s4u_x509_user(krb5_pa_s4u_x509_user *p);
 void ktest_empty_ad_kdcissued(krb5_ad_kdcissued *p);
 void ktest_empty_ad_signedpath_data(krb5_ad_signedpath_data *p);
 void ktest_empty_ad_signedpath(krb5_ad_signedpath *p);
 void ktest_empty_iakerb_header(krb5_iakerb_header *p);
 void ktest_empty_iakerb_finished(krb5_iakerb_finished *p);
+void ktest_empty_fast_response(krb5_fast_response *p);
 
 #ifndef DISABLE_PKINIT
 void ktest_empty_pa_pk_as_req(krb5_pa_pk_as_req *p);

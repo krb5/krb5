@@ -85,6 +85,8 @@ generic(ktest_equal_krb5_alt_method,krb5_alt_method);
 generic(ktest_equal_krb5_pa_enc_ts,krb5_pa_enc_ts);
 
 generic(ktest_equal_sam_challenge,krb5_sam_challenge);
+generic(ktest_equal_sam_challenge_2,krb5_sam_challenge_2);
+generic(ktest_equal_sam_challenge_2_body,krb5_sam_challenge_2_body);
 generic(ktest_equal_sam_response,krb5_sam_response);
 
 int ktest_equal_last_req(krb5_last_req_entry **ref, krb5_last_req_entry **var);
@@ -94,6 +96,7 @@ int ktest_equal_sequence_of_cred_info(krb5_cred_info **ref,
                                       krb5_cred_info **var);
 int ktest_equal_sequence_of_principal(krb5_principal *ref,
                                       krb5_principal *var);
+int ktest_equal_sequence_of_checksum(krb5_checksum **ref, krb5_checksum **var);
 
 len_array(ktest_equal_array_of_enctype,krb5_enctype);
 len_array(ktest_equal_array_of_data,krb5_data);
@@ -110,6 +113,7 @@ int ktest_equal_etype_info(krb5_etype_info_entry **ref,
 
 int ktest_equal_krb5_etype_info_entry(krb5_etype_info_entry *ref,
                                       krb5_etype_info_entry *var);
+int ktest_equal_pa_for_user(krb5_pa_for_user *ref, krb5_pa_for_user *var);
 int ktest_equal_pa_s4u_x509_user(krb5_pa_s4u_x509_user *ref,
                                  krb5_pa_s4u_x509_user *var);
 int ktest_equal_ad_kdcissued(krb5_ad_kdcissued *ref, krb5_ad_kdcissued *var);
@@ -121,6 +125,8 @@ int ktest_equal_iakerb_header(krb5_iakerb_header *ref,
                               krb5_iakerb_header *var);
 int ktest_equal_iakerb_finished(krb5_iakerb_finished *ref,
                                 krb5_iakerb_finished *var);
+int ktest_equal_fast_response(krb5_fast_response *ref,
+                              krb5_fast_response *var);
 
 int ktest_equal_ldap_sequence_of_keys(ldap_seqof_key_data *ref,
                                       ldap_seqof_key_data *var);

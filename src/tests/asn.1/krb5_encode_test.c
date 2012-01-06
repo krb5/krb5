@@ -503,7 +503,7 @@ main(argc, argv)
     }
 
     /****************************************************************/
-    /* encode_padata_sequence */
+    /* encode_padata_sequence and encode_krb5_typed_data */
     {
         krb5_pa_data **pa;
 
@@ -514,6 +514,12 @@ main(argc, argv)
             exit(1);
         }
         encoder_print_results(code, "padata_sequence", "");
+        retval = encode_krb5_typed_data(pa, &code);
+        if (retval) {
+            com_err("encoding typed_data", retval, "");
+            exit(1);
+        }
+        encoder_print_results(code, "typed_data", "");
 
         ktest_destroy_pa_data_array(&pa);
     }
@@ -638,6 +644,24 @@ main(argc, argv)
         ktest_empty_sam_challenge(&sam_ch);
     }
     /****************************************************************/
+    /* encode_krb5_sam_challenge_2 */
+    {
+        krb5_sam_challenge_2 sam_ch2;
+        ktest_make_sample_sam_challenge_2(&sam_ch2);
+        encode_run(sam_ch2,krb5_sam_challenge_2,"sam_challenge_2","",
+                   encode_krb5_sam_challenge_2);
+        ktest_empty_sam_challenge_2(&sam_ch2);
+    }
+    /****************************************************************/
+    /* encode_krb5_sam_challenge_2_body */
+    {
+        krb5_sam_challenge_2_body body;
+        ktest_make_sample_sam_challenge_2_body(&body);
+        encode_run(body,krb5_sam_challenge_2_body,"sam_challenge_2_body","",
+                   encode_krb5_sam_challenge_2_body);
+        ktest_empty_sam_challenge_2_body(&body);
+    }
+    /****************************************************************/
     /* encode_krb5_sam_response */
     {
         krb5_sam_response sam_ch;
@@ -691,6 +715,15 @@ main(argc, argv)
                    "enc_sam_response_enc_2","",
                    acc.encode_krb5_enc_sam_response_enc_2);
         ktest_empty_enc_sam_response_enc_2(&sam_ch2);
+    }
+    /****************************************************************/
+    /* encode_krb5_pa_for_user */
+    {
+        krb5_pa_for_user s4u;
+        ktest_make_sample_pa_for_user(&s4u);
+        encode_run(s4u, krb5_pa_for_user, "pa_for_user", "",
+                   encode_krb5_pa_for_user);
+        ktest_empty_pa_for_user(&s4u);
     }
     /****************************************************************/
     /* encode_krb5_pa_s4u_x509_user */
@@ -751,6 +784,24 @@ main(argc, argv)
                    "iakerb_finished","",
                    encode_krb5_iakerb_finished);
         ktest_empty_iakerb_finished(&ih);
+    }
+    /****************************************************************/
+    /* encode_krb5_fast_response */
+    {
+        krb5_fast_response fr;
+        ktest_make_sample_fast_response(&fr);
+        encode_run(fr, krb5_fast_response, "fast_response", "",
+                   encode_krb5_fast_response);
+        ktest_empty_fast_response(&fr);
+    }
+    /****************************************************************/
+    /* encode_krb5_pa_fx_fast_reply */
+    {
+        krb5_enc_data enc_data;
+        ktest_make_sample_enc_data(&enc_data);
+        encode_run(enc_data, krb5_enc_data, "pa_fx_fast_reply", "",
+                   encode_krb5_pa_fx_fast_reply);
+        ktest_destroy_enc_data(&enc_data);
     }
 #ifndef DISABLE_PKINIT
     /****************************************************************/

@@ -505,13 +505,15 @@ main(int argc, char **argv)
     }
 
     /****************************************************************/
-    /* encode_padata_sequence */
+    /* encode_padata_sequence and encode_typed_data */
     {
         krb5_pa_data **pa, **tmp;
 
         ktest_make_sample_pa_data_array(&pa);
         leak_test(*pa, encode_krb5_padata_sequence,
                   decode_krb5_padata_sequence, krb5_free_pa_data);
+        leak_test(*pa, encode_krb5_typed_data,
+                  decode_krb5_typed_data, krb5_free_pa_data);
         ktest_destroy_pa_data_array(&pa);
     }
 
@@ -614,6 +616,27 @@ main(int argc, char **argv)
         ktest_empty_sam_challenge(&sam_ch);
     }
     /****************************************************************/
+    /* encode_krb5_sam_challenge_2 */
+    {
+        krb5_sam_challenge_2 sam_ch2, *tmp;
+
+        ktest_make_sample_sam_challenge_2(&sam_ch2);
+        leak_test(sam_ch2, encode_krb5_sam_challenge_2,
+                  decode_krb5_sam_challenge_2, krb5_free_sam_challenge_2);
+        ktest_empty_sam_challenge_2(&sam_ch2);
+    }
+    /****************************************************************/
+    /* encode_krb5_sam_challenge_2 */
+    {
+        krb5_sam_challenge_2_body body, *tmp;
+
+        ktest_make_sample_sam_challenge_2_body(&body);
+        leak_test(body, encode_krb5_sam_challenge_2_body,
+                  decode_krb5_sam_challenge_2_body,
+                  krb5_free_sam_challenge_2_body);
+        ktest_empty_sam_challenge_2_body(&body);
+    }
+    /****************************************************************/
     /* encode_krb5_sam_response */
     {
         krb5_sam_response sam_ch, *tmp;
@@ -665,6 +688,15 @@ main(int argc, char **argv)
                   decode_krb5_enc_sam_response_enc_2,
                   krb5_free_enc_sam_response_enc_2);
         ktest_empty_enc_sam_response_enc_2(&sam_ch2);
+    }
+    /****************************************************************/
+    /* encode_krb5_pa_for_user */
+    {
+        krb5_pa_for_user foru, *tmp;
+        ktest_make_sample_pa_for_user(&foru);
+        leak_test(foru, encode_krb5_pa_for_user, decode_krb5_pa_for_user,
+                  krb5_free_pa_for_user);
+        ktest_empty_pa_for_user(&foru);
     }
     /****************************************************************/
     /* encode_krb5_pa_s4u_x509_user */
@@ -727,6 +759,24 @@ main(int argc, char **argv)
                   decode_krb5_iakerb_finished,
                   krb5_free_iakerb_finished);
         ktest_empty_iakerb_finished(&ih);
+    }
+    /****************************************************************/
+    /* encode_krb5_fast_response */
+    {
+        krb5_fast_response fr, *tmp;
+        ktest_make_sample_fast_response(&fr);
+        leak_test(fr, encode_krb5_fast_response, decode_krb5_fast_response,
+                  krb5_free_fast_response);
+        ktest_empty_fast_response(&fr);
+    }
+    /****************************************************************/
+    /* encode_krb5_pa_fx_fast_reply */
+    {
+        krb5_enc_data enc, *tmp;
+        ktest_make_sample_enc_data(&enc);
+        leak_test(enc, encode_krb5_pa_fx_fast_reply,
+                  decode_krb5_pa_fx_fast_reply, krb5_free_enc_data);
+        ktest_destroy_enc_data(&enc);
     }
     krb5_free_context(test_context);
     return 0;

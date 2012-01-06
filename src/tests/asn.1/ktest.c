@@ -531,6 +531,33 @@ ktest_make_sample_sam_challenge(krb5_sam_challenge *p)
 }
 
 void
+ktest_make_sample_sam_challenge_2(krb5_sam_challenge_2 *p)
+{
+    /* Need a valid DER sequence encoding here; this one contains the OCTET
+     * STRING "challenge". */
+    krb5_data_parse(&p->sam_challenge_2_body, "\x30\x0B\x04\x09" "challenge");
+    p->sam_cksum = ealloc(2 * sizeof(krb5_checksum *));
+    p->sam_cksum[0] = ealloc(sizeof(krb5_checksum));
+    ktest_make_sample_checksum(p->sam_cksum[0]);
+    p->sam_cksum[1] = NULL;
+}
+
+void
+ktest_make_sample_sam_challenge_2_body(krb5_sam_challenge_2_body *p)
+{
+    p->sam_type = 42;
+    p->sam_flags = KRB5_SAM_USE_SAD_AS_KEY;
+    krb5_data_parse(&p->sam_type_name, "type name");
+    p->sam_track_id = empty_data();
+    krb5_data_parse(&p->sam_challenge_label, "challenge label");
+    krb5_data_parse(&p->sam_challenge, "challenge ipse");
+    krb5_data_parse(&p->sam_response_prompt, "response_prompt ipse");
+    p->sam_pk_for_sad = empty_data();
+    p->sam_nonce = 0x543210;
+    p->sam_etype = ENCTYPE_DES_CBC_CRC;
+}
+
+void
 ktest_make_sample_sam_response(krb5_sam_response *p)
 {
     p->magic = KV5M_SAM_RESPONSE;
@@ -583,6 +610,14 @@ ktest_make_sample_enc_sam_response_enc_2(krb5_enc_sam_response_enc_2 *p)
     p->magic = 83;
     p->sam_nonce = 88;
     krb5_data_parse(&p->sam_sad, "enc_sam_response_enc_2");
+}
+
+void
+ktest_make_sample_pa_for_user(krb5_pa_for_user *p)
+{
+    ktest_make_sample_principal(&p->user);
+    ktest_make_sample_checksum(&p->cksum);
+    ktest_make_sample_data(&p->auth_package);
 }
 
 void
@@ -639,6 +674,26 @@ void
 ktest_make_sample_iakerb_finished(krb5_iakerb_finished *ih)
 {
     ktest_make_sample_checksum(&ih->checksum);
+}
+
+static void
+ktest_make_sample_fast_finished(krb5_fast_finished *p)
+{
+    p->timestamp = SAMPLE_TIME;
+    p->usec = SAMPLE_USEC;
+    ktest_make_sample_principal(&p->client);
+    ktest_make_sample_checksum(&p->ticket_checksum);
+}
+
+void
+ktest_make_sample_fast_response(krb5_fast_response *p)
+{
+    ktest_make_sample_pa_data_array(&p->padata);
+    p->strengthen_key = ealloc(sizeof(krb5_keyblock));
+    ktest_make_sample_keyblock(p->strengthen_key);
+    p->finished = ealloc(sizeof(krb5_fast_finished));
+    ktest_make_sample_fast_finished(p->finished);
+    p->nonce = SAMPLE_NONCE;
 }
 
 #ifndef DISABLE_PKINIT
@@ -1383,6 +1438,31 @@ ktest_empty_sam_challenge(krb5_sam_challenge *p)
 }
 
 void
+ktest_empty_sam_challenge_2(krb5_sam_challenge_2 *p)
+{
+    krb5_checksum **ck;
+
+    ktest_empty_data(&p->sam_challenge_2_body);
+    if (p->sam_cksum != NULL) {
+        for (ck = p->sam_cksum; *ck != NULL; ck++)
+            ktest_destroy_checksum(ck);
+        free(p->sam_cksum);
+        p->sam_cksum = NULL;
+    }
+}
+
+void
+ktest_empty_sam_challenge_2_body(krb5_sam_challenge_2_body *p)
+{
+    ktest_empty_data(&p->sam_type_name);
+    ktest_empty_data(&p->sam_track_id);
+    ktest_empty_data(&p->sam_challenge_label);
+    ktest_empty_data(&p->sam_challenge);
+    ktest_empty_data(&p->sam_response_prompt);
+    ktest_empty_data(&p->sam_pk_for_sad);
+}
+
+void
 ktest_empty_sam_response(krb5_sam_response *p)
 {
     ktest_empty_data(&p->sam_track_id);
@@ -1421,6 +1501,14 @@ void
 ktest_empty_enc_sam_response_enc_2(krb5_enc_sam_response_enc_2 *p)
 {
     ktest_empty_data(&p->sam_sad);
+}
+
+void
+ktest_empty_pa_for_user(krb5_pa_for_user *p)
+{
+    ktest_destroy_principal(&p->user);
+    ktest_empty_checksum(&p->cksum);
+    ktest_empty_data(&p->auth_package);
 }
 
 void
@@ -1483,6 +1571,25 @@ void
 ktest_empty_iakerb_finished(krb5_iakerb_finished *p)
 {
     krb5_free_checksum_contents(NULL, &p->checksum);
+}
+
+static void
+ktest_empty_fast_finished(krb5_fast_finished *p)
+{
+    ktest_destroy_principal(&p->client);
+    ktest_empty_checksum(&p->ticket_checksum);
+}
+
+void
+ktest_empty_fast_response(krb5_fast_response *p)
+{
+    ktest_destroy_pa_data_array(&p->padata);
+    ktest_destroy_keyblock(&p->strengthen_key);
+    if (p->finished != NULL) {
+        ktest_empty_fast_finished(p->finished);
+        free(p->finished);
+        p->finished = NULL;
+    }
 }
 
 #ifndef DISABLE_PKINIT

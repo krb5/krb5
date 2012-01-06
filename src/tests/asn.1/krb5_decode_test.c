@@ -747,7 +747,7 @@ int main(argc, argv)
     }
 
     /****************************************************************/
-    /* decode_krb5_padata_sequence */
+    /* decode_krb5_padata_sequence and decode_krb5_typed_data */
     {
         krb5_pa_data **ref, **var;
         ktest_make_sample_pa_data_array(&ref);
@@ -759,6 +759,16 @@ int main(argc, argv)
         retval = decode_krb5_padata_sequence(&code,&var);
         if (retval) com_err("decoding padata_sequence",retval,"");
         test(ktest_equal_sequence_of_pa_data(ref,var),"pa_data\n");
+        krb5_free_pa_data(test_context, var);
+        krb5_free_data_contents(test_context, &code);
+        retval = krb5_data_hex_parse(&code,"30 24 30 10 A0 03 02 01 0D A1 09 04 07 70 61 2D 64 61 74 61 30 10 A0 03 02 01 0D A1 09 04 07 70 61 2D 64 61 74 61");
+        if (retval) {
+            com_err("parsing padata_sequence",retval,"");
+            exit(1);
+        }
+        retval = decode_krb5_typed_data(&code,&var);
+        if (retval) com_err("decoding typed_data",retval,"");
+        test(ktest_equal_sequence_of_pa_data(ref,var),"typed_data\n");
         krb5_free_pa_data(test_context, var);
         krb5_free_data_contents(test_context, &code);
         ktest_destroy_pa_data_array(&ref);
@@ -884,12 +894,38 @@ int main(argc, argv)
     }
 
     /****************************************************************/
+    /* decode_sam_challenge_2 */
+    {
+        setup(krb5_sam_challenge_2,ktest_make_sample_sam_challenge_2);
+        decode_run("sam_challenge_2","","30 22 A0 0D 30 0B 04 09 63 68 61 6C 6C 65 6E 67 65 A1 11 30 0F 30 0D A0 03 02 01 01 A1 06 04 04 31 32 33 34",decode_krb5_sam_challenge_2,ktest_equal_sam_challenge_2,krb5_free_sam_challenge_2);
+        ktest_empty_sam_challenge_2(&ref);
+
+    }
+
+    /****************************************************************/
+    /* decode_sam_challenge_2_body */
+    {
+        setup(krb5_sam_challenge_2_body,ktest_make_sample_sam_challenge_2_body);
+        decode_run("sam_challenge_2_body","","30 64 A0 03 02 01 2A A1 07 03 05 00 80 00 00 00 A2 0B 04 09 74 79 70 65 20 6E 61 6D 65 A4 11 04 0F 63 68 61 6C 6C 65 6E 67 65 20 6C 61 62 65 6C A5 10 04 0E 63 68 61 6C 6C 65 6E 67 65 20 69 70 73 65 A6 16 04 14 72 65 73 70 6F 6E 73 65 5F 70 72 6F 6D 70 74 20 69 70 73 65 A8 05 02 03 54 32 10 A9 03 02 01 01",decode_krb5_sam_challenge_2_body,ktest_equal_sam_challenge_2_body,krb5_free_sam_challenge_2_body);
+        ktest_empty_sam_challenge_2_body(&ref);
+
+    }
+
+    /****************************************************************/
     /* decode_sam_response */
     {
         setup(krb5_sam_response,ktest_make_sample_sam_response);
         decode_run("sam_response","","30 6A A0 03 02 01 2A A1 07 03 05 00 80 00 00 00 A2 0C 04 0A 74 72 61 63 6B 20 64 61 74 61 A3 14 30 12 A0 03 02 01 01 A1 04 02 02 07 96 A2 05 04 03 6B 65 79 A4 1C 30 1A A0 03 02 01 01 A1 04 02 02 0D 36 A2 0D 04 0B 6E 6F 6E 63 65 20 6F 72 20 74 73 A5 05 02 03 54 32 10 A6 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A",decode_krb5_sam_response,ktest_equal_sam_response,krb5_free_sam_response);
 
         ktest_empty_sam_response(&ref);
+    }
+
+    /****************************************************************/
+    /* decode_pa_for_user */
+    {
+        setup(krb5_pa_for_user,ktest_make_sample_pa_for_user);
+        decode_run("pa_for_user","","30 4B A0 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A1 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A2 0F 30 0D A0 03 02 01 01 A1 06 04 04 31 32 33 34 A3 0A 1B 08 6B 72 62 35 64 61 74 61",decode_krb5_pa_for_user,ktest_equal_pa_for_user,krb5_free_pa_for_user);
+        ktest_empty_pa_for_user(&ref);
     }
 
     /****************************************************************/
@@ -930,6 +966,22 @@ int main(argc, argv)
         setup(krb5_iakerb_finished,ktest_make_sample_iakerb_finished);
         decode_run("iakerb_finished","","30 11 A1 0F 30 0D A0 03 02 01 01 A1 06 04 04 31 32 33 34",decode_krb5_iakerb_finished,ktest_equal_iakerb_finished,krb5_free_iakerb_finished);
         ktest_empty_iakerb_finished(&ref);
+    }
+
+    /****************************************************************/
+    /* decode_fast_response */
+    {
+        setup(krb5_fast_response,ktest_make_sample_fast_response);
+        decode_run("fast_response","","30 81 9F A0 26 30 24 30 10 A1 03 02 01 0D A2 09 04 07 70 61 2D 64 61 74 61 30 10 A1 03 02 01 0D A2 09 04 07 70 61 2D 64 61 74 61 A1 13 30 11 A0 03 02 01 01 A1 0A 04 08 31 32 33 34 35 36 37 38 A2 5B 30 59 A0 11 18 0F 31 39 39 34 30 36 31 30 30 36 30 33 31 37 5A A1 05 02 03 01 E2 40 A2 10 1B 0E 41 54 48 45 4E 41 2E 4D 49 54 2E 45 44 55 A3 1A 30 18 A0 03 02 01 01 A1 11 30 0F 1B 06 68 66 74 73 61 69 1B 05 65 78 74 72 61 A4 0F 30 0D A0 03 02 01 01 A1 06 04 04 31 32 33 34 A3 03 02 01 2A",decode_krb5_fast_response,ktest_equal_fast_response,krb5_free_fast_response);
+        ktest_empty_fast_response(&ref);
+    }
+
+    /****************************************************************/
+    /* decode_pa_fx_fast_reply */
+    {
+        setup(krb5_enc_data,ktest_make_sample_enc_data);
+        decode_run("pa_fx_fast_reply","","A0 29 30 27 A0 25 30 23 A0 03 02 01 00 A1 03 02 01 05 A2 17 04 15 6B 72 62 41 53 4E 2E 31 20 74 65 73 74 20 6D 65 73 73 61 67 65",decode_krb5_pa_fx_fast_reply,ktest_equal_enc_data,krb5_free_enc_data);
+        ktest_destroy_enc_data(&ref);
     }
 
 #ifdef ENABLE_LDAP
