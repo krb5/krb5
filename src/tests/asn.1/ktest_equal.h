@@ -1,3 +1,4 @@
+/* -*- mode: c; c-basic-offset: 4; indent-tabs-mode: nil -*- */
 /* tests/asn.1/ktest_equal.h */
 /*
  * Copyright (C) 1994 by the Massachusetts Institute of Technology.
@@ -32,16 +33,16 @@
 /* int ktest_equal_structure(krb5_structure *ref, *var) */
 /* effects  Returns true (non-zero) if ref and var are
              semantically equivalent (i.e. have the same values,
-	     but aren't necessarily the same object).
-	    Returns false (zero) if ref and var differ. */
+             but aren't necessarily the same object).
+            Returns false (zero) if ref and var differ. */
 
 #define generic(funcname,type)\
 int funcname (type *ref, type *var)
 
 #define len_array(funcname,type)\
-int funcname (const int length, type *ref, type *var)
+int funcname (int length, type *ref, type *var)
 #define len_unsigned_array(funcname,type)\
-int funcname (const unsigned int length, type *ref, type *var)
+int funcname (unsigned int length, type *ref, type *var)
 
 generic(ktest_equal_authenticator,krb5_authenticator);
 generic(ktest_equal_principal_data,krb5_principal_data);
@@ -86,58 +87,41 @@ generic(ktest_equal_krb5_pa_enc_ts,krb5_pa_enc_ts);
 generic(ktest_equal_sam_challenge,krb5_sam_challenge);
 generic(ktest_equal_sam_response,krb5_sam_response);
 
-int ktest_equal_last_req
-	(krb5_last_req_entry **ref, krb5_last_req_entry **var);
-int ktest_equal_sequence_of_ticket
-	(krb5_ticket **ref, krb5_ticket **var);
-int ktest_equal_sequence_of_pa_data
-	(krb5_pa_data **ref, krb5_pa_data **var);
-int ktest_equal_sequence_of_cred_info
-	(krb5_cred_info **ref, krb5_cred_info **var);
-int ktest_equal_sequence_of_principal
-	(krb5_principal *ref, krb5_principal *var);
+int ktest_equal_last_req(krb5_last_req_entry **ref, krb5_last_req_entry **var);
+int ktest_equal_sequence_of_ticket(krb5_ticket **ref, krb5_ticket **var);
+int ktest_equal_sequence_of_pa_data(krb5_pa_data **ref, krb5_pa_data **var);
+int ktest_equal_sequence_of_cred_info(krb5_cred_info **ref,
+                                      krb5_cred_info **var);
+int ktest_equal_sequence_of_principal(krb5_principal *ref,
+                                      krb5_principal *var);
 
 len_array(ktest_equal_array_of_enctype,krb5_enctype);
 len_array(ktest_equal_array_of_data,krb5_data);
 len_unsigned_array(ktest_equal_array_of_octet,krb5_octet);
 
-int ktest_equal_array_of_passwd_phrase_element
-	(passwd_phrase_element **ref, passwd_phrase_element **var);
-int ktest_equal_authorization_data
-	(krb5_authdata **ref, krb5_authdata **var);
-int ktest_equal_addresses
-	(krb5_address **ref, krb5_address **var);
-int ktest_equal_array_of_char
-	(const unsigned int length, char *ref, char *var);
+int ktest_equal_array_of_passwd_phrase_element(passwd_phrase_element **ref,
+                                               passwd_phrase_element **var);
+int ktest_equal_authorization_data(krb5_authdata **ref, krb5_authdata **var);
+int ktest_equal_addresses(krb5_address **ref, krb5_address **var);
+int ktest_equal_array_of_char(const unsigned int length, char *ref, char *var);
 
-int ktest_equal_etype_info
-    (krb5_etype_info_entry ** ref,
-		    krb5_etype_info_entry ** var);
+int ktest_equal_etype_info(krb5_etype_info_entry **ref,
+                           krb5_etype_info_entry **var);
 
-int ktest_equal_krb5_etype_info_entry
-    (krb5_etype_info_entry * ref,
-		    krb5_etype_info_entry * var);
-
-int ktest_equal_pa_s4u_x509_user
-    (krb5_pa_s4u_x509_user *ref,
-		    krb5_pa_s4u_x509_user *var);
-
-int ktest_equal_ad_kdcissued
-    (krb5_ad_kdcissued *ref,
-		    krb5_ad_kdcissued *var);
-int ktest_equal_ad_signedpath_data
-    (krb5_ad_signedpath_data *ref,
-		    krb5_ad_signedpath_data *var);
-int ktest_equal_ad_signedpath
-    (krb5_ad_signedpath *ref,
-		    krb5_ad_signedpath *var);
-int ktest_equal_iakerb_header
-    (krb5_iakerb_header *ref,
-		    krb5_iakerb_header *var);
-int ktest_equal_iakerb_finished
-    (krb5_iakerb_finished *ref,
-		    krb5_iakerb_finished *var);
+int ktest_equal_krb5_etype_info_entry(krb5_etype_info_entry *ref,
+                                      krb5_etype_info_entry *var);
+int ktest_equal_pa_s4u_x509_user(krb5_pa_s4u_x509_user *ref,
+                                 krb5_pa_s4u_x509_user *var);
+int ktest_equal_ad_kdcissued(krb5_ad_kdcissued *ref, krb5_ad_kdcissued *var);
+int ktest_equal_ad_signedpath_data(krb5_ad_signedpath_data *ref,
+                                   krb5_ad_signedpath_data *var);
+int ktest_equal_ad_signedpath(krb5_ad_signedpath *ref,
+                              krb5_ad_signedpath *var);
+int ktest_equal_iakerb_header(krb5_iakerb_header *ref,
+                              krb5_iakerb_header *var);
+int ktest_equal_iakerb_finished(krb5_iakerb_finished *ref,
+                                krb5_iakerb_finished *var);
 
 int ktest_equal_ldap_sequence_of_keys(ldap_seqof_key_data *ref,
-				      ldap_seqof_key_data *var);
+                                      ldap_seqof_key_data *var);
 #endif

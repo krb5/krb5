@@ -34,23 +34,39 @@ krb5int_access acc;
 
 char hexchar (const unsigned int digit);
 
-asn1_error_code asn1_krb5_data_unparse(code, s)
-    const krb5_data * code;
-    char ** s;
+void *
+ealloc(size_t size)
+{
+    void *ptr = calloc(1, size);
+
+    if (ptr == NULL)
+        abort();
+    return ptr;
+}
+
+char *
+estrdup(const char *str)
+{
+    char *newstr = strdup(str);
+
+    if (newstr == NULL)
+        abort();
+    return newstr;
+}
+
+void
+asn1_krb5_data_unparse(const krb5_data *code, char **s)
 {
     if (*s != NULL) free(*s);
 
     if (code==NULL) {
-        *s = strdup("<NULL>");
-        if (*s == NULL) return ENOMEM;
+        *s = estrdup("<NULL>");
     } else if (code->data == NULL || ((int) code->length) <= 0) {
-        *s = strdup("<EMPTY>");
-        if (*s==NULL) return ENOMEM;
+        *s = estrdup("<EMPTY>");
     } else {
         unsigned int i;
 
-        *s = (char*)calloc((size_t) 3*(code->length), sizeof(char));
-        if (*s == NULL) return ENOMEM;
+        *s = ealloc(3 * code->length);
         for (i = 0; i < code->length; i++) {
             (*s)[3*i] = hexchar((unsigned char) (((code->data)[i]&0xF0)>>4));
             (*s)[3*i+1] = hexchar((unsigned char) ((code->data)[i]&0x0F));
@@ -58,11 +74,10 @@ asn1_error_code asn1_krb5_data_unparse(code, s)
         }
         (*s)[3*(code->length)-1] = '\0';
     }
-    return 0;
 }
 
-char hexchar(digit)
-    const unsigned int digit;
+char
+hexchar(const unsigned int digit)
 {
     if (digit<=9)
         return '0'+digit;
@@ -72,22 +87,16 @@ char hexchar(digit)
         return 'X';
 }
 
-krb5_error_code krb5_data_parse(d, s)
-    krb5_data * d;
-    const char * s;
+void
+krb5_data_parse(krb5_data *d, const char *s)
 {
-    /*if (d->data != NULL) {
-      free(d->data);
-      d->length = 0;
-      }*/
-    d->data = (char*)calloc(strlen(s),sizeof(char));
-    if (d->data == NULL) return ENOMEM;
     d->length = strlen(s);
-    memcpy(d->data,s,strlen(s));
-    return 0;
+    d->data = ealloc(d->length);
+    memcpy(d->data, s, d->length);
 }
 
-krb5_error_code krb5_data_hex_parse(krb5_data *d, const char *s)
+asn1_error_code
+krb5_data_hex_parse(krb5_data *d, const char *s)
 {
     int lo;
     long v;
@@ -95,9 +104,7 @@ krb5_error_code krb5_data_hex_parse(krb5_data *d, const char *s)
     char *dp;
     char buf[2];
 
-    d->data = calloc((strlen(s) / 2 + 1), 1);
-    if (d->data == NULL)
-        return ENOMEM;
+    d->data = ealloc(strlen(s) / 2 + 1);
     d->length = 0;
     buf[1] = '\0';
     for (lo = 0, dp = d->data, cp = s; *cp; cp++) {
@@ -124,8 +131,8 @@ krb5_error_code krb5_data_hex_parse(krb5_data *d, const char *s)
 }
 
 #if 0
-void asn1buf_print(buf)
-    const asn1buf * buf;
+void
+asn1buf_print(const asn1buf *buf)
 {
     asn1buf bufcopy;
     char *s=NULL;
@@ -150,7 +157,8 @@ void asn1buf_print(buf)
 }
 #endif
 
-void init_access(const char *progname)
+void
+init_access(const char *progname)
 {
     krb5_error_code ret;
     ret = krb5int_accessor(&acc, KRB5INT_ACCESS_VERSION);
