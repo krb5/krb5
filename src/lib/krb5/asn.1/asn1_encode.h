@@ -43,11 +43,9 @@
  *   asn1_encode_boolean
  *   asn1_encode_integer
  *   asn1_encode_unsigned_integer
- *   asn1_encode_octetstring
+ *   asn1_encode_bytestring
  *   asn1_encode_generaltime
- *   asn1_encode_generalstring
  *   asn1_encode_bitstring
- *   asn1_encode_oid
  */
 
 asn1_error_code asn1_encode_boolean(asn1buf *buf, asn1_intmax val,
@@ -63,9 +61,6 @@ asn1_error_code asn1_encode_integer(asn1buf *buf, asn1_intmax val,
  *            to expand the buffer.
  */
 
-asn1_error_code asn1_encode_enumerated(asn1buf *buf, long val,
-                                       unsigned int *retlen);
-
 asn1_error_code asn1_encode_unsigned_integer(asn1buf *buf, asn1_uintmax val,
                                              unsigned int *retlen);
 /*
@@ -77,24 +72,8 @@ asn1_error_code asn1_encode_unsigned_integer(asn1buf *buf, asn1_uintmax val,
  *            to expand the buffer.
  */
 
-asn1_error_code asn1_encode_octetstring(asn1buf *buf, unsigned int len,
-                                        const void *val, unsigned int *retlen);
-/*
- * requires  *buf is allocated
- * modifies  *buf, *retlen
- * effects   Inserts the encoding of val into *buf and returns
- *            the length of the encoding in *retlen.
- *           Returns ENOMEM to signal an unsuccesful attempt
- *            to expand the buffer.
- */
-#define asn1_encode_charstring asn1_encode_octetstring
-
-/**
- * Encode @a val, an object identifier in compressed DER form without a tag or
- * length. This function adds the OID tag and length.
- */
-asn1_error_code asn1_encode_oid(asn1buf *buf, unsigned int len,
-                                const void *val, unsigned int *retlen);
+asn1_error_code asn1_encode_bytestring(asn1buf *buf, unsigned int len,
+                                       const void *val, unsigned int *retlen);
 /*
  * requires  *buf is allocated
  * modifies  *buf, *retlen
@@ -114,28 +93,6 @@ asn1_error_code asn1_encode_null(asn1buf *buf, int *retlen);
  *            to expand the buffer.
  */
 
-asn1_error_code asn1_encode_printablestring(asn1buf *buf, unsigned int len,
-                                            const char *val, int *retlen);
-/*
- * requires  *buf is allocated
- * modifies  *buf, *retlen
- * effects   Inserts the encoding of val into *buf and returns
- *            the length of the encoding in *retlen.
- *           Returns ENOMEM to signal an unsuccesful attempt
- *            to expand the buffer.
- */
-
-asn1_error_code asn1_encode_ia5string(asn1buf *buf, unsigned int len,
-                                      const char *val, int *retlen);
-/*
- * requires  *buf is allocated
- * modifies  *buf, *retlen
- * effects   Inserts the encoding of val into *buf and returns
- *            the length of the encoding in *retlen.
- *           Returns ENOMEM to signal an unsuccesful attempt
- *            to expand the buffer.
- */
-
 asn1_error_code asn1_encode_generaltime(asn1buf *buf, time_t val,
                                         unsigned int *retlen);
 /*
@@ -148,33 +105,9 @@ asn1_error_code asn1_encode_generaltime(asn1buf *buf, time_t val,
  * Note: The encoding of GeneralizedTime is YYYYMMDDhhmmZ
  */
 
-asn1_error_code asn1_encode_generalstring(asn1buf *buf,
-                                          unsigned int len, const void *val,
-                                          unsigned int *retlen);
-/*
- * requires  *buf is allocated,  val has a length of len characters
- * modifies  *buf, *retlen
- * effects   Inserts the encoding of val into *buf and returns
- *            the length of the encoding in *retlen.
- *           Returns ENOMEM to signal an unsuccesful attempt
- *            to expand the buffer.
- */
-
 asn1_error_code asn1_encode_bitstring(asn1buf *buf, unsigned int len,
                                       const void *val,
                                       unsigned int *retlen);
-/*
- * requires  *buf is allocated,  val has a length of len characters
- * modifies  *buf, *retlen
- * effects   Inserts the encoding of val into *buf and returns
- *            the length of the encoding in *retlen.
- *           Returns ENOMEM to signal an unsuccesful attempt
- *            to expand the buffer.
- */
-
-asn1_error_code asn1_encode_opaque(asn1buf *buf, unsigned int len,
-                                   const void *val,
-                                   unsigned int *retlen);
 /*
  * requires  *buf is allocated,  val has a length of len characters
  * modifies  *buf, *retlen
@@ -226,14 +159,25 @@ enum atype_type {
      * invalid.
      */
     atype_min = 1,
-    /* Encoder function to be called with address of <thing>.  tinfo is a
-     * struct fn_info *. */
+    /* Encoder function (contents-only) to be called with address of <thing>
+     * and wrapped with a universal primitive tag.  tinfo is a struct
+     * primitive_info *. */
+    atype_primitive,
+    /* Encoder function (with tag) to be called with address of <thing>.  tinfo
+     * is a struct primitive_info * with tagval ignored. */
     atype_fn,
     /*
-     * Encoder function to be called with address of <thing> and a
-     * length (unsigned int).  tinfo is a struct fn_len_info *.
+     * Encoder function (contents only) to be called with address of <thing>
+     * and a length (unsigned int), and wrapped with a universal primitive tag.
+     * tinfo is a struct string_info *.  Only usable with the field_string
+     * field type.
      */
-    atype_fn_len,
+    atype_string,
+    /*
+     * As above, but the encoder function produces the tag as well as the
+     * contents.
+     */
+    atype_opaque,
     /*
      * Pointer to actual thing to be encoded.  tinfo is a struct ptr_info *.
      *
@@ -282,14 +226,16 @@ struct atype_info {
     const void *tinfo;          /* Points to type-specific structure */
 };
 
-struct fn_info {
+struct primitive_info {
     asn1_error_code (*enc)(asn1buf *, const void *, unsigned int *);
+    unsigned int tagval;
 };
 
-struct fn_len_info {
+struct string_info {
     asn1_error_code (*enclen)(asn1buf *, unsigned int, const void *,
                               unsigned int *);
     const void *(*loadptr)(const void *);
+    unsigned int tagval;
 };
 
 struct ptr_info {
@@ -331,26 +277,15 @@ struct uint_info {
  */
 
 /*
- * Define a type for which we must use an explicit encoder function.
- * The DEFFNTYPE variant uses a function taking a void*, the
- * DEFFNXTYPE form wants a function taking a pointer to the actual C
- * type to be encoded; you should use the latter unless you've already
- * got the void* function supplied elsewhere.
+ * Define a type using a primitive (content-only) encoder function.
  *
- * Of course, we need a single, consistent type for the descriptor
- * structure field, so we use the function pointer type that uses
- * void*, and create a wrapper function in DEFFNXTYPE.  However, in
- * all our cases so far, the supplied function is static and not used
- * otherwise, so the compiler can merge it with the wrapper function
- * if the optimizer is good enough.
+ * Because we need a single, consistent type for the descriptor structure
+ * field, we use the function pointer type that uses void*, and create a
+ * wrapper function in DEFFNXTYPE.  The supplied function is static and not
+ * used otherwise, so the compiler can merge it with the wrapper function if
+ * the optimizer is good enough.
  */
-#define DEFFNTYPE(DESCNAME, CTYPENAME, ENCFN)                           \
-    typedef CTYPENAME aux_typedefname_##DESCNAME;                       \
-    static const struct fn_info aux_info_##DESCNAME = { ENCFN };        \
-    const struct atype_info krb5int_asn1type_##DESCNAME = {             \
-        atype_fn, sizeof(CTYPENAME), &aux_info_##DESCNAME               \
-    }
-#define DEFFNXTYPE(DESCNAME, CTYPENAME, ENCFN)                          \
+#define DEFPRIMITIVETYPE(DESCNAME, CTYPENAME, ENCFN, TAG)               \
     typedef CTYPENAME aux_typedefname_##DESCNAME;                       \
     static asn1_error_code                                              \
     aux_encfn_##DESCNAME(asn1buf *buf, const void *val,                 \
@@ -360,7 +295,24 @@ struct uint_info {
                      (const aux_typedefname_##DESCNAME *)val,           \
                      retlen);                                           \
     }                                                                   \
-    static const struct fn_info aux_info_##DESCNAME = {                 \
+    static const struct primitive_info aux_info_##DESCNAME = {          \
+        aux_encfn_##DESCNAME, TAG                                       \
+    };                                                                  \
+    const struct atype_info krb5int_asn1type_##DESCNAME = {             \
+        atype_primitive, sizeof(CTYPENAME), &aux_info_##DESCNAME        \
+    }
+/* Define a type using an explicit (with tag) encoder function. */
+#define DEFFNTYPE(DESCNAME, CTYPENAME, ENCFN)                           \
+    typedef CTYPENAME aux_typedefname_##DESCNAME;                       \
+    static asn1_error_code                                              \
+    aux_encfn_##DESCNAME(asn1buf *buf, const void *val,                 \
+                         unsigned int *retlen)                          \
+    {                                                                   \
+        return ENCFN(buf,                                               \
+                     (const aux_typedefname_##DESCNAME *)val,           \
+                     retlen);                                           \
+    }                                                                   \
+    static const struct primitive_info aux_info_##DESCNAME = {          \
         aux_encfn_##DESCNAME                                            \
     };                                                                  \
     const struct atype_info krb5int_asn1type_##DESCNAME = {             \
@@ -381,29 +333,43 @@ struct uint_info {
  * string-encoding primitives work.  So be it.
  */
 #ifdef POINTERS_ARE_ALL_THE_SAME
-#define DEFFNLENTYPE(DESCNAME, CTYPENAME, ENCFN)                \
+#define DEFSTRINGTYPE(DESCNAME, CTYPENAME, ENCFN, TAGVAL)       \
     typedef CTYPENAME aux_typedefname_##DESCNAME;               \
-    static const struct fn_len_info aux_info_##DESCNAME = {     \
-        ENCFN, NULL                                             \
+    static const struct string_info aux_info_##DESCNAME = {     \
+        ENCFN, NULL, TAGVAL                                     \
     }                                                           \
     const struct atype_info krb5int_asn1type_##DESCNAME = {     \
-        atype_fn_len, 0, &aux_info_##DESCNAME                   \
+        atype_string, 0, &aux_info_##DESCNAME                   \
     }
 #else
-#define DEFFNLENTYPE(DESCNAME, CTYPENAME, ENCFN)                \
+#define DEFSTRINGTYPE(DESCNAME, CTYPENAME, ENCFN, TAGVAL)       \
     typedef CTYPENAME aux_typedefname_##DESCNAME;               \
     static const void *loadptr_for_##DESCNAME(const void *pv)   \
     {                                                           \
         const aux_typedefname_##DESCNAME *p = pv;               \
         return *p;                                              \
     }                                                           \
-    static const struct fn_len_info aux_info_##DESCNAME = {     \
+    static const struct string_info aux_info_##DESCNAME = {     \
+        ENCFN, loadptr_for_##DESCNAME, TAGVAL                   \
+    };                                                          \
+    const struct atype_info krb5int_asn1type_##DESCNAME = {     \
+        atype_string, 0, &aux_info_##DESCNAME                   \
+    }
+#endif
+/* Not used enough to justify a POINTERS_ARE_ALL_THE_SAME version. */
+#define DEFOPAQUETYPE(DESCNAME, CTYPENAME, ENCFN)               \
+    typedef CTYPENAME aux_typedefname_##DESCNAME;               \
+    static const void *loadptr_for_##DESCNAME(const void *pv)   \
+    {                                                           \
+        const aux_typedefname_##DESCNAME *p = pv;               \
+        return *p;                                              \
+    }                                                           \
+    static const struct string_info aux_info_##DESCNAME = {     \
         ENCFN, loadptr_for_##DESCNAME                           \
     };                                                          \
     const struct atype_info krb5int_asn1type_##DESCNAME = {     \
-        atype_fn_len, 0, &aux_info_##DESCNAME                   \
+        atype_opaque, 0, &aux_info_##DESCNAME                   \
     }
-#endif
 /*
  * A sequence, defined by the indicated series of fields, and an
  * optional function indicating which fields are present.
