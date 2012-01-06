@@ -59,9 +59,9 @@ DEFINTTYPE(int16, krb5_int16);
 DEFINTTYPE(ui_2, krb5_ui_2);
 
 static const struct field_info krbsalt_fields[] = {
-    FIELDOF_NORM(krb5_key_data, int16, key_data_type[1], 0),
+    FIELDOF_NORM(krb5_key_data, int16, key_data_type[1], 0, 0),
     FIELDOF_OPTSTRINGL(krb5_key_data, octetstring, key_data_contents[1],
-                       ui_2, key_data_length[1], 1, 1),
+                       ui_2, key_data_length[1], 1, 0, 1),
 };
 static unsigned int
 optional_krbsalt (const void *p)
@@ -76,15 +76,15 @@ optional_krbsalt (const void *p)
 }
 DEFSEQTYPE(krbsalt, krb5_key_data, krbsalt_fields, optional_krbsalt);
 static const struct field_info encryptionkey_fields[] = {
-    FIELDOF_NORM(krb5_key_data, int16, key_data_type[0], 0),
+    FIELDOF_NORM(krb5_key_data, int16, key_data_type[0], 0, 0),
     FIELDOF_STRINGL(krb5_key_data, octetstring, key_data_contents[0],
-                    ui_2, key_data_length[0], 1),
+                    ui_2, key_data_length[0], 1, 0),
 };
 DEFSEQTYPE(encryptionkey, krb5_key_data, encryptionkey_fields, 0);
 
 static const struct field_info key_data_fields[] = {
-    FIELDOF_ENCODEAS(krb5_key_data, krbsalt, 0),
-    FIELDOF_ENCODEAS(krb5_key_data, encryptionkey, 1),
+    FIELDOF_ENCODEAS(krb5_key_data, krbsalt, 0, 0),
+    FIELDOF_ENCODEAS(krb5_key_data, encryptionkey, 1, 0),
 #if 0 /* We don't support this field currently.  */
     FIELDOF_blah(krb5_key_data, s2kparams, ...),
 #endif
@@ -93,16 +93,16 @@ DEFSEQTYPE(key_data, krb5_key_data, key_data_fields, 0);
 DEFPTRTYPE(ptr_key_data, key_data);
 
 DEFFIELDTYPE(key_data_kvno, krb5_key_data,
-             FIELDOF_NORM(krb5_key_data, int16, key_data_kvno, -1));
+             FIELDOF_NORM(krb5_key_data, int16, key_data_kvno, -1, 0));
 DEFPTRTYPE(ptr_key_data_kvno, key_data_kvno);
 
 static const struct field_info ldap_key_seq_fields[] = {
-    FIELD_INT_IMM(1, 0),
-    FIELD_INT_IMM(1, 1),
-    FIELDOF_NORM(ldap_seqof_key_data, ptr_key_data_kvno, key_data, 2),
-    FIELDOF_NORM(ldap_seqof_key_data, int32, mkvno, 3), /* mkvno */
+    FIELD_INT_IMM(1, 0, 0),
+    FIELD_INT_IMM(1, 1, 0),
+    FIELDOF_NORM(ldap_seqof_key_data, ptr_key_data_kvno, key_data, 2, 0),
+    FIELDOF_NORM(ldap_seqof_key_data, int32, mkvno, 3, 0), /* mkvno */
     FIELDOF_SEQOF_LEN(ldap_seqof_key_data, ptr_key_data, key_data, n_key_data,
-                      int16, 4),
+                      int16, 4, 0),
 };
 DEFSEQTYPE(ldap_key_seq, ldap_seqof_key_data, ldap_key_seq_fields, 0);
 

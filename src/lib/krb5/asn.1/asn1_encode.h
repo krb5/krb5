@@ -164,7 +164,8 @@ enum atype_type {
      * primitive_info *. */
     atype_primitive,
     /* Encoder function (with tag) to be called with address of <thing>.  tinfo
-     * is a struct primitive_info * with tagval ignored. */
+     * is a struct primitive_info * with tagval ignored.  Cannot be used
+     * with an implicit tag. */
     atype_fn,
     /*
      * Encoder function (contents only) to be called with address of <thing>
@@ -175,7 +176,7 @@ enum atype_type {
     atype_string,
     /*
      * As above, but the encoder function produces the tag as well as the
-     * contents.
+     * contents.  Cannot be used with an implicit context tag.
      */
     atype_opaque,
     /*
@@ -201,9 +202,9 @@ enum atype_type {
     atype_nullterm_sequence_of,
     atype_nonempty_nullterm_sequence_of,
     /*
-     * Encode this object using a single field descriptor.  tinfo is a
-     * struct field_info *.  This may mean the atype/field breakdown
-     * needs revision....
+     * Encode this object using a single field descriptor.  tinfo is a struct
+     * field_info *.  Cannot be used with an implicit tag.  The presence of
+     * this type may mean the atype/field breakdown needs revision....
      *
      * Main expected uses: Encode realm component of principal as a
      * GENERALSTRING.  Pluck data and length fields out of a structure
@@ -244,7 +245,7 @@ struct ptr_info {
 };
 
 struct tagged_info {
-    unsigned int tagval : 16, tagtype : 8, construction : 8;
+    unsigned int tagval : 16, tagtype : 8, construction : 6, implicit : 1;
     const struct atype_info *basetype;
 };
 
@@ -475,16 +476,20 @@ struct uint_info {
     const struct atype_info krb5int_asn1type_##DESCNAME = {             \
         atype_field, sizeof(CTYPENAME), &aux_fieldinfo_##DESCNAME       \
     }
-/* Objects with an APPLICATION tag added.  */
-#define DEFAPPTAGGEDTYPE(DESCNAME, TAG, BASEDESC)                       \
+/* Objects with an explicit or implicit tag.  (Implicit tags will ignore the
+ * construction field.) */
+#define DEFTAGGEDTYPE(DESCNAME, CLASS, CONSTRUCTION, TAG, IMPLICIT, BASEDESC) \
     typedef aux_typedefname_##BASEDESC aux_typedefname_##DESCNAME;      \
     static const struct tagged_info aux_info_##DESCNAME = {             \
-        TAG, APPLICATION, CONSTRUCTED, &krb5int_asn1type_##BASEDESC     \
+        TAG, CLASS, CONSTRUCTION, IMPLICIT, &krb5int_asn1type_##BASEDESC \
     };                                                                  \
     const struct atype_info krb5int_asn1type_##DESCNAME = {             \
         atype_tagged_thing, sizeof(aux_typedefname_##DESCNAME),         \
         &aux_info_##DESCNAME                                            \
     }
+/* Objects with an explicit APPLICATION tag added.  */
+#define DEFAPPTAGGEDTYPE(DESCNAME, TAG, BASEDESC)                       \
+        DEFTAGGEDTYPE(DESCNAME, APPLICATION, CONSTRUCTED, TAG, 0, BASEDESC)
 
 /**
  * An encoding wrapped in an octet string
@@ -492,7 +497,8 @@ struct uint_info {
 #define DEFOCTETWRAPTYPE(DESCNAME, BASEDESC)                            \
     typedef aux_typedefname_##BASEDESC aux_typedefname_##DESCNAME;      \
     static const struct tagged_info aux_info_##DESCNAME = {             \
-        ASN1_OCTETSTRING, UNIVERSAL, PRIMITIVE, &krb5int_asn1type_##BASEDESC \
+        ASN1_OCTETSTRING, UNIVERSAL, PRIMITIVE, 0,                      \
+        &krb5int_asn1type_##BASEDESC                                    \
     };                                                                  \
     const struct atype_info krb5int_asn1type_##DESCNAME = {             \
         atype_tagged_thing, sizeof(aux_typedefname_##DESCNAME),         \
@@ -588,7 +594,8 @@ struct field_info {
      * to the encoding of the thing.  (XXX This would encode more
      * compactly as an unsigned bitfield value tagnum+1, with 0=no
      * tag.)  The tag is omitted for optional fields that are not
-     * present.
+     * present.  If tag_implicit is set, then the context tag replaces
+     * the outer tag of the field.
      *
      * It's a bit illogical to combine the tag and other field info,
      * since really a sequence field could have zero or several
@@ -599,6 +606,7 @@ struct field_info {
      * means skip tagging).
      */
     signed int tag : 5;
+    unsigned int tag_implicit : 1;
 
     /*
      * If OPT is non-negative and the sequence header structure has a
@@ -645,13 +653,13 @@ struct field_info {
  * Normal or optional sequence fields at a particular offset, encoded
  * as indicated by the listed DESCRiptor.
  */
-#define FIELDOF_OPT(TYPE,DESCR,FIELDNAME,TAG,OPT)                       \
+#define FIELDOF_OPT(TYPE,DESCR,FIELDNAME,TAG,IMPLICIT,OPT)              \
     {                                                                   \
         field_normal, OFFOF(TYPE, FIELDNAME, aux_typedefname_##DESCR),  \
-            0, TAG, OPT, &krb5int_asn1type_##DESCR                      \
+            0, TAG, IMPLICIT, OPT, &krb5int_asn1type_##DESCR            \
             }
-#define FIELDOF_NORM(TYPE,DESCR,FIELDNAME,TAG)  \
-    FIELDOF_OPT(TYPE,DESCR,FIELDNAME,TAG,-1)
+#define FIELDOF_NORM(TYPE,DESCR,FIELDNAME,TAG,IMPLICIT) \
+    FIELDOF_OPT(TYPE,DESCR,FIELDNAME,TAG,IMPLICIT,-1)
 /*
  * If encoding a subset of the fields of the current structure (for
  * example, a flat structure describing data that gets encoded as a
@@ -659,47 +667,49 @@ struct field_info {
  * field name(s), and the indicated type descriptor must support the
  * current struct type.
  */
-#define FIELDOF_ENCODEAS(TYPE,DESCR,TAG)        \
-    FIELDOF_ENCODEAS_OPT(TYPE,DESCR,TAG,-1)
-#define FIELDOF_ENCODEAS_OPT(TYPE,DESCR,TAG,OPT)                        \
+#define FIELDOF_ENCODEAS(TYPE,DESCR,TAG,IMPLICIT)       \
+    FIELDOF_ENCODEAS_OPT(TYPE,DESCR,TAG,IMPLICIT,-1)
+#define FIELDOF_ENCODEAS_OPT(TYPE,DESCR,TAG,IMPLICIT,OPT)               \
     {                                                                   \
         field_normal,                                                   \
             0 * sizeof(0 ? (TYPE *)0 : (aux_typedefname_##DESCR *) 0),  \
-            0, TAG, OPT, &krb5int_asn1type_##DESCR                      \
+            0, TAG, IMPLICIT, OPT, &krb5int_asn1type_##DESCR            \
             }
 
 /*
  * Reinterpret some subset of the structure itself as something
  * else.
  */
-#define FIELD_SELF(DESCR, TAG)                                  \
-    { field_normal, 0, 0, TAG, -1, &krb5int_asn1type_##DESCR }
+#define FIELD_SELF(DESCR, TAG, IMPLICIT)                        \
+    { field_normal, 0, 0, TAG, IMPLICIT, -1, &krb5int_asn1type_##DESCR }
 
-#define FIELDOF_OPTSTRINGL(STYPE,DESC,PTRFIELD,LENDESC,LENFIELD,TAG,OPT) \
+#define FIELDOF_OPTSTRINGL(STYPE,DESC,PTRFIELD,LENDESC,LENFIELD,TAG,IMP,OPT) \
     {                                                                   \
         field_string,                                                   \
             OFFOF(STYPE, PTRFIELD, aux_typedefname_##DESC),             \
             OFFOF(STYPE, LENFIELD, aux_typedefname_##LENDESC),          \
-            TAG, OPT, &krb5int_asn1type_##DESC, &krb5int_asn1type_##LENDESC \
+            TAG, IMP, OPT,                                              \
+            &krb5int_asn1type_##DESC, &krb5int_asn1type_##LENDESC       \
             }
-#define FIELDOF_OPTSTRING(STYPE,DESC,PTRFIELD,LENFIELD,TAG,OPT)         \
-    FIELDOF_OPTSTRINGL(STYPE,DESC,PTRFIELD,uint,LENFIELD,TAG,OPT)
-#define FIELDOF_STRINGL(STYPE,DESC,PTRFIELD,LENDESC,LENFIELD,TAG)       \
-    FIELDOF_OPTSTRINGL(STYPE,DESC,PTRFIELD,LENDESC,LENFIELD,TAG,-1)
-#define FIELDOF_STRING(STYPE,DESC,PTRFIELD,LENFIELD,TAG)        \
-    FIELDOF_OPTSTRING(STYPE,DESC,PTRFIELD,LENFIELD,TAG,-1)
-#define FIELD_INT_IMM(VALUE,TAG)                \
-    { field_immediate, VALUE, 0, TAG, -1, 0, }
+#define FIELDOF_OPTSTRING(STYPE,DESC,PTRFIELD,LENFIELD,TAG,IMPLICIT,OPT) \
+    FIELDOF_OPTSTRINGL(STYPE,DESC,PTRFIELD,uint,LENFIELD,TAG,IMPLICIT,OPT)
+#define FIELDOF_STRINGL(STYPE,DESC,PTRFIELD,LENDESC,LENFIELD,TAG,IMPLICIT) \
+    FIELDOF_OPTSTRINGL(STYPE,DESC,PTRFIELD,LENDESC,LENFIELD,TAG,IMPLICIT,-1)
+#define FIELDOF_STRING(STYPE,DESC,PTRFIELD,LENFIELD,TAG,IMPLICIT)       \
+    FIELDOF_OPTSTRING(STYPE,DESC,PTRFIELD,LENFIELD,TAG,IMPLICIT,-1)
+#define FIELD_INT_IMM(VALUE,TAG,IMPLICIT)                       \
+    { field_immediate, VALUE, 0, TAG, IMPLICIT, -1, 0, }
 
-#define FIELDOF_SEQOF_LEN(STYPE,DESC,PTRFIELD,LENFIELD,LENTYPE,TAG)     \
+#define FIELDOF_SEQOF_LEN(STYPE,DESC,PTRFIELD,LENFIELD,LENTYPE,TAG,IMPLICIT) \
     {                                                                   \
         field_sequenceof_len,                                           \
             OFFOF(STYPE, PTRFIELD, aux_typedefname_##DESC),             \
             OFFOF(STYPE, LENFIELD, aux_typedefname_##LENTYPE),          \
-            TAG, -1, &krb5int_asn1type_##DESC, &krb5int_asn1type_##LENTYPE \
+            TAG, IMPLICIT, -1,                                          \
+            &krb5int_asn1type_##DESC, &krb5int_asn1type_##LENTYPE       \
             }
-#define FIELDOF_SEQOF_INT32(STYPE,DESC,PTRFIELD,LENFIELD,TAG)   \
-    FIELDOF_SEQOF_LEN(STYPE,DESC,PTRFIELD,LENFIELD,int32,TAG)
+#define FIELDOF_SEQOF_INT32(STYPE,DESC,PTRFIELD,LENFIELD,TAG,IMPLICIT)  \
+    FIELDOF_SEQOF_LEN(STYPE,DESC,PTRFIELD,LENFIELD,int32,TAG,IMPLICIT)
 
 struct seq_info {
     /*

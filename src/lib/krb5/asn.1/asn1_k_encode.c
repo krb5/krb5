@@ -88,23 +88,24 @@ DEFSTRINGTYPE(u_generalstring, unsigned char *, asn1_encode_bytestring,
 DEFOPAQUETYPE(opaque, char *, asn1_encode_bytestring);
 
 DEFFIELDTYPE(gstring_data, krb5_data,
-             FIELDOF_STRING(krb5_data, generalstring, data, length, -1));
+             FIELDOF_STRING(krb5_data, generalstring, data, length, -1, 0));
 DEFPTRTYPE(gstring_data_ptr,gstring_data);
 
 DEFFIELDTYPE(ostring_data, krb5_data,
-             FIELDOF_STRING(krb5_data, s_octetstring, data, length, -1));
+             FIELDOF_STRING(krb5_data, s_octetstring, data, length, -1, 0));
 DEFPTRTYPE(ostring_data_ptr,ostring_data);
 
 DEFFIELDTYPE(opaque_data, krb5_data,
-             FIELDOF_STRING(krb5_data, opaque, data, length, -1));
+             FIELDOF_STRING(krb5_data, opaque, data, length, -1, 0));
 
 DEFFIELDTYPE(realm_of_principal_data, krb5_principal_data,
-             FIELDOF_NORM(krb5_principal_data, gstring_data, realm, -1));
+             FIELDOF_NORM(krb5_principal_data, gstring_data, realm, -1, 0));
 DEFPTRTYPE(realm_of_principal, realm_of_principal_data);
 
 static const struct field_info princname_fields[] = {
-    FIELDOF_NORM(krb5_principal_data, int32, type, 0),
-    FIELDOF_SEQOF_INT32(krb5_principal_data, gstring_data_ptr, data, length, 1),
+    FIELDOF_NORM(krb5_principal_data, int32, type, 0, 0),
+    FIELDOF_SEQOF_INT32(krb5_principal_data, gstring_data_ptr, data, length,
+                        1, 0),
 };
 /*
  * krb5_principal is a typedef for krb5_principal_data*, so this is
@@ -125,8 +126,8 @@ DEFPRIMITIVETYPE(kerberos_time, krb5_timestamp, asn1_encode_kerberos_time_at,
                  ASN1_GENERALTIME);
 
 const static struct field_info address_fields[] = {
-    FIELDOF_NORM(krb5_address, int32, addrtype, 0),
-    FIELDOF_STRING(krb5_address, octetstring, contents, length, 1),
+    FIELDOF_NORM(krb5_address, int32, addrtype, 0, 0),
+    FIELDOF_STRING(krb5_address, octetstring, contents, length, 1, 0),
 };
 DEFSEQTYPE(address, krb5_address, address_fields, 0);
 DEFPTRTYPE(address_ptr, address);
@@ -147,9 +148,9 @@ optional_encrypted_data (const void *vptr)
 }
 
 static const struct field_info encrypted_data_fields[] = {
-    FIELDOF_NORM(krb5_enc_data, int32, enctype, 0),
-    FIELDOF_OPT(krb5_enc_data, uint, kvno, 1, 1),
-    FIELDOF_NORM(krb5_enc_data, ostring_data, ciphertext, 2),
+    FIELDOF_NORM(krb5_enc_data, int32, enctype, 0, 0),
+    FIELDOF_OPT(krb5_enc_data, uint, kvno, 1, 0, 1),
+    FIELDOF_NORM(krb5_enc_data, ostring_data, ciphertext, 2, 0),
 };
 DEFSEQTYPE(encrypted_data, krb5_enc_data, encrypted_data_fields,
            optional_encrypted_data);
@@ -172,9 +173,9 @@ DEFPRIMITIVETYPE(krb5_flags, krb5_flags, asn1_encode_krb5_flags_at,
 
 const static struct field_info authdata_elt_fields[] = {
     /* ad-type[0]               INTEGER */
-    FIELDOF_NORM(krb5_authdata, int32, ad_type, 0),
+    FIELDOF_NORM(krb5_authdata, int32, ad_type, 0, 0),
     /* ad-data[1]               OCTET STRING */
-    FIELDOF_STRING(krb5_authdata, octetstring, contents, length, 1),
+    FIELDOF_STRING(krb5_authdata, octetstring, contents, length, 1, 0),
 };
 DEFSEQTYPE(authdata_elt, krb5_authdata, authdata_elt_fields, 0);
 DEFPTRTYPE(authdata_elt_ptr, authdata_elt);
@@ -182,15 +183,15 @@ DEFNONEMPTYNULLTERMSEQOFTYPE(auth_data, authdata_elt_ptr);
 DEFPTRTYPE(auth_data_ptr, auth_data);
 
 static const struct field_info encryption_key_fields[] = {
-    FIELDOF_NORM(krb5_keyblock, int32, enctype, 0),
-    FIELDOF_STRING(krb5_keyblock, octetstring, contents, length, 1),
+    FIELDOF_NORM(krb5_keyblock, int32, enctype, 0, 0),
+    FIELDOF_STRING(krb5_keyblock, octetstring, contents, length, 1, 0),
 };
 DEFSEQTYPE(encryption_key, krb5_keyblock, encryption_key_fields, 0);
 DEFPTRTYPE(ptr_encryption_key, encryption_key);
 
 static const struct field_info checksum_fields[] = {
-    FIELDOF_NORM(krb5_checksum, int32, checksum_type, 0),
-    FIELDOF_STRING(krb5_checksum, octetstring, contents, length, 1),
+    FIELDOF_NORM(krb5_checksum, int32, checksum_type, 0, 0),
+    FIELDOF_STRING(krb5_checksum, octetstring, contents, length, 1, 0),
 };
 DEFSEQTYPE(checksum, krb5_checksum, checksum_fields, 0);
 DEFPTRTYPE(checksum_ptr, checksum);
@@ -198,8 +199,8 @@ DEFNULLTERMSEQOFTYPE(seq_of_checksum, checksum_ptr);
 DEFPTRTYPE(ptr_seqof_checksum, seq_of_checksum);
 
 static const struct field_info lr_fields[] = {
-    FIELDOF_NORM(krb5_last_req_entry, int32, lr_type, 0),
-    FIELDOF_NORM(krb5_last_req_entry, kerberos_time, value, 1),
+    FIELDOF_NORM(krb5_last_req_entry, int32, lr_type, 0, 0),
+    FIELDOF_NORM(krb5_last_req_entry, kerberos_time, value, 1, 0),
 };
 DEFSEQTYPE(last_req_ent, krb5_last_req_entry, lr_fields, 0);
 
@@ -208,17 +209,17 @@ DEFNONEMPTYNULLTERMSEQOFTYPE(last_req, last_req_ent_ptr);
 DEFPTRTYPE(last_req_ptr, last_req);
 
 static const struct field_info ticket_fields[] = {
-    FIELD_INT_IMM(KVNO, 0),
-    FIELDOF_NORM(krb5_ticket, realm_of_principal, server, 1),
-    FIELDOF_NORM(krb5_ticket, principal, server, 2),
-    FIELDOF_NORM(krb5_ticket, encrypted_data, enc_part, 3),
+    FIELD_INT_IMM(KVNO, 0, 0),
+    FIELDOF_NORM(krb5_ticket, realm_of_principal, server, 1, 0),
+    FIELDOF_NORM(krb5_ticket, principal, server, 2, 0),
+    FIELDOF_NORM(krb5_ticket, encrypted_data, enc_part, 3, 0),
 };
 DEFSEQTYPE(untagged_ticket, krb5_ticket, ticket_fields, 0);
 DEFAPPTAGGEDTYPE(ticket, 1, untagged_ticket);
 
 static const struct field_info pa_data_fields[] = {
-    FIELDOF_NORM(krb5_pa_data, int32, pa_type, 1),
-    FIELDOF_STRING(krb5_pa_data, octetstring, contents, length, 2),
+    FIELDOF_NORM(krb5_pa_data, int32, pa_type, 1, 0),
+    FIELDOF_STRING(krb5_pa_data, octetstring, contents, length, 2, 0),
 };
 DEFSEQTYPE(pa_data, krb5_pa_data, pa_data_fields, 0);
 DEFPTRTYPE(pa_data_ptr, pa_data);
@@ -233,32 +234,35 @@ DEFPTRTYPE(ptr_seqof_ticket, seq_of_ticket);
 /* EncKDCRepPart ::= SEQUENCE */
 static const struct field_info enc_kdc_rep_part_fields[] = {
     /* key[0]           EncryptionKey */
-    FIELDOF_NORM(krb5_enc_kdc_rep_part, ptr_encryption_key, session, 0),
+    FIELDOF_NORM(krb5_enc_kdc_rep_part, ptr_encryption_key, session, 0, 0),
     /* last-req[1]      LastReq */
-    FIELDOF_NORM(krb5_enc_kdc_rep_part, last_req_ptr, last_req, 1),
+    FIELDOF_NORM(krb5_enc_kdc_rep_part, last_req_ptr, last_req, 1, 0),
     /* nonce[2]         INTEGER */
-    FIELDOF_NORM(krb5_enc_kdc_rep_part, int32, nonce, 2),
+    FIELDOF_NORM(krb5_enc_kdc_rep_part, int32, nonce, 2, 0),
     /* key-expiration[3]        KerberosTime OPTIONAL */
-    FIELDOF_OPT(krb5_enc_kdc_rep_part, kerberos_time, key_exp, 3, 3),
+    FIELDOF_OPT(krb5_enc_kdc_rep_part, kerberos_time, key_exp, 3, 0, 3),
     /* flags[4]         TicketFlags */
-    FIELDOF_NORM(krb5_enc_kdc_rep_part, krb5_flags, flags, 4),
+    FIELDOF_NORM(krb5_enc_kdc_rep_part, krb5_flags, flags, 4, 0),
     /* authtime[5]      KerberosTime */
-    FIELDOF_NORM(krb5_enc_kdc_rep_part, kerberos_time, times.authtime, 5),
+    FIELDOF_NORM(krb5_enc_kdc_rep_part, kerberos_time, times.authtime, 5, 0),
     /* starttime[6]     KerberosTime OPTIONAL */
-    FIELDOF_OPT(krb5_enc_kdc_rep_part, kerberos_time, times.starttime, 6, 6),
+    FIELDOF_OPT(krb5_enc_kdc_rep_part, kerberos_time, times.starttime,
+                6, 0, 6),
     /* endtime[7]               KerberosTime */
-    FIELDOF_NORM(krb5_enc_kdc_rep_part, kerberos_time, times.endtime, 7),
+    FIELDOF_NORM(krb5_enc_kdc_rep_part, kerberos_time, times.endtime, 7, 0),
     /* renew-till[8]    KerberosTime OPTIONAL */
-    FIELDOF_OPT(krb5_enc_kdc_rep_part, kerberos_time, times.renew_till, 8, 8),
+    FIELDOF_OPT(krb5_enc_kdc_rep_part, kerberos_time, times.renew_till,
+                8, 0, 8),
     /* srealm[9]                Realm */
-    FIELDOF_NORM(krb5_enc_kdc_rep_part, realm_of_principal, server, 9),
+    FIELDOF_NORM(krb5_enc_kdc_rep_part, realm_of_principal, server, 9, 0),
     /* sname[10]                PrincipalName */
-    FIELDOF_NORM(krb5_enc_kdc_rep_part, principal, server, 10),
+    FIELDOF_NORM(krb5_enc_kdc_rep_part, principal, server, 10, 0),
     /* caddr[11]                HostAddresses OPTIONAL */
     FIELDOF_OPT(krb5_enc_kdc_rep_part, ptr_seqof_host_addresses, caddrs,
-                11, 11),
+                11, 0, 11),
     /* encrypted-pa-data[12]    SEQUENCE OF PA-DATA OPTIONAL */
-    FIELDOF_OPT(krb5_enc_kdc_rep_part, ptr_seqof_pa_data, enc_padata, 12, 12),
+    FIELDOF_OPT(krb5_enc_kdc_rep_part, ptr_seqof_pa_data, enc_padata,
+                12, 0, 12),
 };
 static unsigned int
 optional_enc_kdc_rep_part(const void *p)
@@ -293,18 +297,22 @@ struct kdc_req_hack {
     krb5_data *server_realm;
 };
 static const struct field_info kdc_req_hack_fields[] = {
-    FIELDOF_NORM(struct kdc_req_hack, krb5_flags, v.kdc_options, 0),
-    FIELDOF_OPT(struct kdc_req_hack, principal, v.client, 1, 1),
-    FIELDOF_NORM(struct kdc_req_hack, gstring_data_ptr, server_realm, 2),
-    FIELDOF_OPT(struct kdc_req_hack, principal, v.server, 3, 3),
-    FIELDOF_OPT(struct kdc_req_hack, kerberos_time, v.from, 4, 4),
-    FIELDOF_NORM(struct kdc_req_hack, kerberos_time, v.till, 5),
-    FIELDOF_OPT(struct kdc_req_hack, kerberos_time, v.rtime, 6, 6),
-    FIELDOF_NORM(struct kdc_req_hack, int32, v.nonce, 7),
-    FIELDOF_SEQOF_INT32(struct kdc_req_hack, int32_ptr, v.ktype, v.nktypes, 8),
-    FIELDOF_OPT(struct kdc_req_hack, ptr_seqof_host_addresses, v.addresses, 9, 9),
-    FIELDOF_OPT(struct kdc_req_hack, encrypted_data, v.authorization_data, 10, 10),
-    FIELDOF_OPT(struct kdc_req_hack, ptr_seqof_ticket, v.second_ticket, 11, 11),
+    FIELDOF_NORM(struct kdc_req_hack, krb5_flags, v.kdc_options, 0, 0),
+    FIELDOF_OPT(struct kdc_req_hack, principal, v.client, 1, 0, 1),
+    FIELDOF_NORM(struct kdc_req_hack, gstring_data_ptr, server_realm, 2, 0),
+    FIELDOF_OPT(struct kdc_req_hack, principal, v.server, 3, 0, 3),
+    FIELDOF_OPT(struct kdc_req_hack, kerberos_time, v.from, 4, 0, 4),
+    FIELDOF_NORM(struct kdc_req_hack, kerberos_time, v.till, 5, 0),
+    FIELDOF_OPT(struct kdc_req_hack, kerberos_time, v.rtime, 6, 0, 6),
+    FIELDOF_NORM(struct kdc_req_hack, int32, v.nonce, 7, 0),
+    FIELDOF_SEQOF_INT32(struct kdc_req_hack, int32_ptr, v.ktype, v.nktypes,
+                        8, 0),
+    FIELDOF_OPT(struct kdc_req_hack, ptr_seqof_host_addresses, v.addresses,
+                9, 0, 9),
+    FIELDOF_OPT(struct kdc_req_hack, encrypted_data, v.authorization_data,
+                10, 0, 10),
+    FIELDOF_OPT(struct kdc_req_hack, ptr_seqof_ticket, v.second_ticket,
+                11, 0, 11),
 };
 static unsigned int
 optional_kdc_req_hack(const void *p)
@@ -357,18 +365,18 @@ DEFFNTYPE(kdc_req_body, krb5_kdc_req, asn1_encode_kdc_req_body);
 DEFPTRTYPE(ptr_kdc_req_body,kdc_req_body);
 
 static const struct field_info transited_fields[] = {
-    FIELDOF_NORM(krb5_transited, octet, tr_type, 0),
-    FIELDOF_NORM(krb5_transited, ostring_data, tr_contents, 1),
+    FIELDOF_NORM(krb5_transited, octet, tr_type, 0, 0),
+    FIELDOF_NORM(krb5_transited, ostring_data, tr_contents, 1, 0),
 };
 DEFSEQTYPE(transited, krb5_transited, transited_fields, 0);
 
 static const struct field_info krb_safe_body_fields[] = {
-    FIELDOF_NORM(krb5_safe, ostring_data, user_data, 0),
-    FIELDOF_OPT(krb5_safe, kerberos_time, timestamp, 1, 1),
-    FIELDOF_OPT(krb5_safe, int32, usec, 2, 2),
-    FIELDOF_OPT(krb5_safe, uint, seq_number, 3, 3),
-    FIELDOF_NORM(krb5_safe, address_ptr, s_address, 4),
-    FIELDOF_OPT(krb5_safe, address_ptr, r_address, 5, 5),
+    FIELDOF_NORM(krb5_safe, ostring_data, user_data, 0, 0),
+    FIELDOF_OPT(krb5_safe, kerberos_time, timestamp, 1, 0, 1),
+    FIELDOF_OPT(krb5_safe, int32, usec, 2, 0, 2),
+    FIELDOF_OPT(krb5_safe, uint, seq_number, 3, 0, 3),
+    FIELDOF_NORM(krb5_safe, address_ptr, s_address, 4, 0),
+    FIELDOF_OPT(krb5_safe, address_ptr, r_address, 5, 0, 5),
 };
 static unsigned int
 optional_krb_safe_body(const void *p)
@@ -391,17 +399,17 @@ DEFSEQTYPE(krb_safe_body, krb5_safe, krb_safe_body_fields,
            optional_krb_safe_body);
 
 static const struct field_info krb_cred_info_fields[] = {
-    FIELDOF_NORM(krb5_cred_info, ptr_encryption_key, session, 0),
-    FIELDOF_OPT(krb5_cred_info, realm_of_principal, client, 1, 1),
-    FIELDOF_OPT(krb5_cred_info, principal, client, 2, 2),
-    FIELDOF_OPT(krb5_cred_info, krb5_flags, flags, 3, 3),
-    FIELDOF_OPT(krb5_cred_info, kerberos_time, times.authtime, 4, 4),
-    FIELDOF_OPT(krb5_cred_info, kerberos_time, times.starttime, 5, 5),
-    FIELDOF_OPT(krb5_cred_info, kerberos_time, times.endtime, 6, 6),
-    FIELDOF_OPT(krb5_cred_info, kerberos_time, times.renew_till, 7, 7),
-    FIELDOF_OPT(krb5_cred_info, realm_of_principal, server, 8, 8),
-    FIELDOF_OPT(krb5_cred_info, principal, server, 9, 9),
-    FIELDOF_OPT(krb5_cred_info, ptr_seqof_host_addresses, caddrs, 10, 10),
+    FIELDOF_NORM(krb5_cred_info, ptr_encryption_key, session, 0, 0),
+    FIELDOF_OPT(krb5_cred_info, realm_of_principal, client, 1, 0, 1),
+    FIELDOF_OPT(krb5_cred_info, principal, client, 2, 0, 2),
+    FIELDOF_OPT(krb5_cred_info, krb5_flags, flags, 3, 0, 3),
+    FIELDOF_OPT(krb5_cred_info, kerberos_time, times.authtime, 4, 0, 4),
+    FIELDOF_OPT(krb5_cred_info, kerberos_time, times.starttime, 5, 0, 5),
+    FIELDOF_OPT(krb5_cred_info, kerberos_time, times.endtime, 6, 0, 6),
+    FIELDOF_OPT(krb5_cred_info, kerberos_time, times.renew_till, 7, 0, 7),
+    FIELDOF_OPT(krb5_cred_info, realm_of_principal, server, 8, 0, 8),
+    FIELDOF_OPT(krb5_cred_info, principal, server, 9, 0, 9),
+    FIELDOF_OPT(krb5_cred_info, ptr_seqof_host_addresses, caddrs, 10, 0, 10),
 };
 static unsigned int
 optional_krb_cred_info(const void *p)
@@ -453,8 +461,9 @@ optional_etype_info_entry(const void *vptr)
     return optional;
 }
 static const struct field_info etype_info_entry_fields[] = {
-    FIELDOF_NORM(krb5_etype_info_entry, int32, etype, 0),
-    FIELDOF_OPTSTRING(krb5_etype_info_entry, octetstring, salt, length, 1, 1),
+    FIELDOF_NORM(krb5_etype_info_entry, int32, etype, 0, 0),
+    FIELDOF_OPTSTRING(krb5_etype_info_entry, octetstring, salt, length,
+                      1, 0, 1),
 };
 DEFSEQTYPE(etype_info_entry, krb5_etype_info_entry, etype_info_entry_fields,
            optional_etype_info_entry);
@@ -474,10 +483,10 @@ optional_etype_info2_entry(const void *vptr)
 }
 
 static const struct field_info etype_info2_entry_fields[] = {
-    FIELDOF_NORM(krb5_etype_info_entry, int32, etype, 0),
+    FIELDOF_NORM(krb5_etype_info_entry, int32, etype, 0, 0),
     FIELDOF_OPTSTRING(krb5_etype_info_entry, u_generalstring, salt, length,
-                      1, 1),
-    FIELDOF_OPT(krb5_etype_info_entry, ostring_data, s2kparams, 2, 2),
+                      1, 0, 1),
+    FIELDOF_OPT(krb5_etype_info_entry, ostring_data, s2kparams, 2, 0, 2),
 };
 DEFSEQTYPE(etype_info2_entry, krb5_etype_info_entry, etype_info2_entry_fields,
            optional_etype_info2_entry);
@@ -489,8 +498,8 @@ DEFPTRTYPE(etype_info2_entry_ptr, etype_info2_entry);
 DEFNULLTERMSEQOFTYPE(etype_info2, etype_info2_entry_ptr);
 
 static const struct field_info passwdsequence_fields[] = {
-    FIELDOF_NORM(passwd_phrase_element, ostring_data_ptr, passwd, 0),
-    FIELDOF_NORM(passwd_phrase_element, ostring_data_ptr, phrase, 1),
+    FIELDOF_NORM(passwd_phrase_element, ostring_data_ptr, passwd, 0, 0),
+    FIELDOF_NORM(passwd_phrase_element, ostring_data_ptr, phrase, 1, 0),
 };
 DEFSEQTYPE(passwdsequence, passwd_phrase_element, passwdsequence_fields, 0);
 
@@ -500,16 +509,18 @@ DEFPTRTYPE(ptr_seqof_passwdsequence, seqof_passwdsequence);
 
 
 static const struct field_info sam_challenge_fields[] = {
-    FIELDOF_NORM(krb5_sam_challenge, int32, sam_type, 0),
-    FIELDOF_NORM(krb5_sam_challenge, krb5_flags, sam_flags, 1),
-    FIELDOF_OPT(krb5_sam_challenge, ostring_data, sam_type_name, 2, 2),
-    FIELDOF_OPT(krb5_sam_challenge, ostring_data, sam_track_id,3, 3),
-    FIELDOF_OPT(krb5_sam_challenge, ostring_data, sam_challenge_label,4, 4),
-    FIELDOF_OPT(krb5_sam_challenge, ostring_data, sam_challenge,5, 5),
-    FIELDOF_OPT(krb5_sam_challenge, ostring_data, sam_response_prompt,6, 6),
-    FIELDOF_OPT(krb5_sam_challenge, ostring_data, sam_pk_for_sad,7, 7),
-    FIELDOF_OPT(krb5_sam_challenge, int32, sam_nonce, 8, 8),
-    FIELDOF_OPT(krb5_sam_challenge, checksum, sam_cksum, 9, 9),
+    FIELDOF_NORM(krb5_sam_challenge, int32, sam_type, 0, 0),
+    FIELDOF_NORM(krb5_sam_challenge, krb5_flags, sam_flags, 1, 0),
+    FIELDOF_OPT(krb5_sam_challenge, ostring_data, sam_type_name, 2, 0, 2),
+    FIELDOF_OPT(krb5_sam_challenge, ostring_data, sam_track_id, 3, 0, 3),
+    FIELDOF_OPT(krb5_sam_challenge, ostring_data, sam_challenge_label,
+                4, 0, 4),
+    FIELDOF_OPT(krb5_sam_challenge, ostring_data, sam_challenge, 5, 0, 5),
+    FIELDOF_OPT(krb5_sam_challenge, ostring_data, sam_response_prompt,
+                6, 0, 6),
+    FIELDOF_OPT(krb5_sam_challenge, ostring_data, sam_pk_for_sad, 7, 0, 7),
+    FIELDOF_OPT(krb5_sam_challenge, int32, sam_nonce, 8, 0, 8),
+    FIELDOF_OPT(krb5_sam_challenge, checksum, sam_cksum, 9, 0, 9),
 };
 static unsigned int
 optional_sam_challenge(const void *p)
@@ -569,16 +580,22 @@ asn1_encode_sam_challenge_2(asn1buf *buf, const krb5_sam_challenge_2 *val,
 DEFFNTYPE(sam_challenge_2, krb5_sam_challenge_2, asn1_encode_sam_challenge_2);
 
 static const struct field_info sam_challenge_2_body_fields[] = {
-    FIELDOF_NORM(krb5_sam_challenge_2_body, int32, sam_type, 0),
-    FIELDOF_NORM(krb5_sam_challenge_2_body, krb5_flags, sam_flags, 1),
-    FIELDOF_OPT(krb5_sam_challenge_2_body, ostring_data, sam_type_name, 2, 2),
-    FIELDOF_OPT(krb5_sam_challenge_2_body, ostring_data, sam_track_id,3, 3),
-    FIELDOF_OPT(krb5_sam_challenge_2_body, ostring_data, sam_challenge_label,4, 4),
-    FIELDOF_OPT(krb5_sam_challenge_2_body, ostring_data, sam_challenge,5, 5),
-    FIELDOF_OPT(krb5_sam_challenge_2_body, ostring_data, sam_response_prompt,6, 6),
-    FIELDOF_OPT(krb5_sam_challenge_2_body, ostring_data, sam_pk_for_sad,7, 7),
-    FIELDOF_NORM(krb5_sam_challenge_2_body, int32, sam_nonce, 8),
-    FIELDOF_NORM(krb5_sam_challenge_2_body, int32, sam_etype, 9),
+    FIELDOF_NORM(krb5_sam_challenge_2_body, int32, sam_type, 0, 0),
+    FIELDOF_NORM(krb5_sam_challenge_2_body, krb5_flags, sam_flags, 1, 0),
+    FIELDOF_OPT(krb5_sam_challenge_2_body, ostring_data, sam_type_name,
+                2, 0, 2),
+    FIELDOF_OPT(krb5_sam_challenge_2_body, ostring_data, sam_track_id,
+                3, 0, 3),
+    FIELDOF_OPT(krb5_sam_challenge_2_body, ostring_data, sam_challenge_label,
+                4, 0, 4),
+    FIELDOF_OPT(krb5_sam_challenge_2_body, ostring_data, sam_challenge,
+                5, 0, 5),
+    FIELDOF_OPT(krb5_sam_challenge_2_body, ostring_data, sam_response_prompt,
+                6, 0, 6),
+    FIELDOF_OPT(krb5_sam_challenge_2_body, ostring_data, sam_pk_for_sad,
+                7, 0, 7),
+    FIELDOF_NORM(krb5_sam_challenge_2_body, int32, sam_nonce, 8, 0),
+    FIELDOF_NORM(krb5_sam_challenge_2_body, int32, sam_etype, 9, 0),
 };
 static unsigned int
 optional_sam_challenge_2_body(const void *p)
@@ -600,15 +617,16 @@ DEFSEQTYPE(sam_challenge_2_body,krb5_sam_challenge_2_body,sam_challenge_2_body_f
 
 
 static const struct field_info sam_key_fields[] = {
-    FIELDOF_NORM(krb5_sam_key, encryption_key, sam_key, 0),
+    FIELDOF_NORM(krb5_sam_key, encryption_key, sam_key, 0, 0),
 };
 DEFSEQTYPE(sam_key, krb5_sam_key, sam_key_fields, 0);
 
 static const struct field_info enc_sam_response_enc_fields[] = {
-    FIELDOF_NORM(krb5_enc_sam_response_enc, int32, sam_nonce, 0),
-    FIELDOF_NORM(krb5_enc_sam_response_enc, kerberos_time, sam_timestamp, 1),
-    FIELDOF_NORM(krb5_enc_sam_response_enc, int32, sam_usec, 2),
-    FIELDOF_OPT(krb5_enc_sam_response_enc, ostring_data, sam_sad, 3, 3),
+    FIELDOF_NORM(krb5_enc_sam_response_enc, int32, sam_nonce, 0, 0),
+    FIELDOF_NORM(krb5_enc_sam_response_enc, kerberos_time, sam_timestamp,
+                 1, 0),
+    FIELDOF_NORM(krb5_enc_sam_response_enc, int32, sam_usec, 2, 0),
+    FIELDOF_OPT(krb5_enc_sam_response_enc, ostring_data, sam_sad, 3, 0, 3),
 };
 static unsigned int
 optional_enc_sam_response_enc(const void *p)
@@ -624,8 +642,8 @@ DEFSEQTYPE(enc_sam_response_enc, krb5_enc_sam_response_enc,
            enc_sam_response_enc_fields, optional_enc_sam_response_enc);
 
 static const struct field_info enc_sam_response_enc_2_fields[] = {
-    FIELDOF_NORM(krb5_enc_sam_response_enc_2, int32, sam_nonce, 0),
-    FIELDOF_OPT(krb5_enc_sam_response_enc_2, ostring_data, sam_sad, 1, 1),
+    FIELDOF_NORM(krb5_enc_sam_response_enc_2, int32, sam_nonce, 0, 0),
+    FIELDOF_OPT(krb5_enc_sam_response_enc_2, ostring_data, sam_sad, 1, 0, 1),
 };
 static unsigned int
 optional_enc_sam_response_enc_2(const void *p)
@@ -641,13 +659,13 @@ DEFSEQTYPE(enc_sam_response_enc_2, krb5_enc_sam_response_enc_2,
            enc_sam_response_enc_2_fields, optional_enc_sam_response_enc_2);
 
 static const struct field_info sam_response_fields[] = {
-    FIELDOF_NORM(krb5_sam_response, int32, sam_type, 0),
-    FIELDOF_NORM(krb5_sam_response, krb5_flags, sam_flags, 1),
-    FIELDOF_OPT(krb5_sam_response, ostring_data, sam_track_id, 2, 2),
-    FIELDOF_OPT(krb5_sam_response, encrypted_data, sam_enc_key, 3, 3),
-    FIELDOF_NORM(krb5_sam_response, encrypted_data, sam_enc_nonce_or_ts, 4),
-    FIELDOF_OPT(krb5_sam_response, int32, sam_nonce, 5, 5),
-    FIELDOF_OPT(krb5_sam_response, kerberos_time, sam_patimestamp, 6, 6),
+    FIELDOF_NORM(krb5_sam_response, int32, sam_type, 0, 0),
+    FIELDOF_NORM(krb5_sam_response, krb5_flags, sam_flags, 1, 0),
+    FIELDOF_OPT(krb5_sam_response, ostring_data, sam_track_id, 2, 0, 2),
+    FIELDOF_OPT(krb5_sam_response, encrypted_data, sam_enc_key, 3, 0, 3),
+    FIELDOF_NORM(krb5_sam_response, encrypted_data, sam_enc_nonce_or_ts, 4, 0),
+    FIELDOF_OPT(krb5_sam_response, int32, sam_nonce, 5, 0, 5),
+    FIELDOF_OPT(krb5_sam_response, kerberos_time, sam_patimestamp, 6, 0, 6),
 };
 static unsigned int
 optional_sam_response(const void *p)
@@ -669,11 +687,12 @@ DEFSEQTYPE(sam_response, krb5_sam_response, sam_response_fields,
            optional_sam_response);
 
 static const struct field_info sam_response_2_fields[] = {
-    FIELDOF_NORM(krb5_sam_response_2, int32, sam_type, 0),
-    FIELDOF_NORM(krb5_sam_response_2, krb5_flags, sam_flags, 1),
-    FIELDOF_OPT(krb5_sam_response_2, ostring_data, sam_track_id, 2, 2),
-    FIELDOF_NORM(krb5_sam_response_2, encrypted_data, sam_enc_nonce_or_sad, 3),
-    FIELDOF_NORM(krb5_sam_response_2, int32, sam_nonce, 4),
+    FIELDOF_NORM(krb5_sam_response_2, int32, sam_type, 0, 0),
+    FIELDOF_NORM(krb5_sam_response_2, krb5_flags, sam_flags, 1, 0),
+    FIELDOF_OPT(krb5_sam_response_2, ostring_data, sam_track_id, 2, 0, 2),
+    FIELDOF_NORM(krb5_sam_response_2, encrypted_data, sam_enc_nonce_or_sad,
+                 3, 0),
+    FIELDOF_NORM(krb5_sam_response_2, int32, sam_nonce, 4, 0),
 };
 static unsigned int
 optional_sam_response_2(const void *p)
@@ -689,13 +708,14 @@ DEFSEQTYPE(sam_response_2, krb5_sam_response_2, sam_response_2_fields,
            optional_sam_response_2);
 
 static const struct field_info predicted_sam_response_fields[] = {
-    FIELDOF_NORM(krb5_predicted_sam_response, encryption_key, sam_key, 0),
-    FIELDOF_NORM(krb5_predicted_sam_response, krb5_flags, sam_flags, 1),
-    FIELDOF_NORM(krb5_predicted_sam_response, kerberos_time, stime, 2),
-    FIELDOF_NORM(krb5_predicted_sam_response, int32, susec, 3),
-    FIELDOF_NORM(krb5_predicted_sam_response, realm_of_principal, client, 4),
-    FIELDOF_NORM(krb5_predicted_sam_response, principal, client, 5),
-    FIELDOF_OPT(krb5_predicted_sam_response, ostring_data, msd, 6, 6),
+    FIELDOF_NORM(krb5_predicted_sam_response, encryption_key, sam_key, 0, 0),
+    FIELDOF_NORM(krb5_predicted_sam_response, krb5_flags, sam_flags, 1, 0),
+    FIELDOF_NORM(krb5_predicted_sam_response, kerberos_time, stime, 2, 0),
+    FIELDOF_NORM(krb5_predicted_sam_response, int32, susec, 3, 0),
+    FIELDOF_NORM(krb5_predicted_sam_response, realm_of_principal, client,
+                 4, 0),
+    FIELDOF_NORM(krb5_predicted_sam_response, principal, client, 5, 0),
+    FIELDOF_OPT(krb5_predicted_sam_response, ostring_data, msd, 6, 0, 6),
 };
 static unsigned int
 optional_predicted_sam_response(const void *p)
@@ -714,23 +734,24 @@ DEFSEQTYPE(predicted_sam_response, krb5_predicted_sam_response,
 static const struct field_info krb5_authenticator_fields[] = {
     /* Authenticator ::= [APPLICATION 2] SEQUENCE */
     /* authenticator-vno[0]     INTEGER */
-    FIELD_INT_IMM(KVNO, 0),
+    FIELD_INT_IMM(KVNO, 0, 0),
     /* crealm[1]                        Realm */
-    FIELDOF_NORM(krb5_authenticator, realm_of_principal, client, 1),
+    FIELDOF_NORM(krb5_authenticator, realm_of_principal, client, 1, 0),
     /* cname[2]                 PrincipalName */
-    FIELDOF_NORM(krb5_authenticator, principal, client, 2),
+    FIELDOF_NORM(krb5_authenticator, principal, client, 2, 0),
     /* cksum[3]                 Checksum OPTIONAL */
-    FIELDOF_OPT(krb5_authenticator, checksum_ptr, checksum, 3, 3),
+    FIELDOF_OPT(krb5_authenticator, checksum_ptr, checksum, 3, 0, 3),
     /* cusec[4]                 INTEGER */
-    FIELDOF_NORM(krb5_authenticator, int32, cusec, 4),
+    FIELDOF_NORM(krb5_authenticator, int32, cusec, 4, 0),
     /* ctime[5]                 KerberosTime */
-    FIELDOF_NORM(krb5_authenticator, kerberos_time, ctime, 5),
+    FIELDOF_NORM(krb5_authenticator, kerberos_time, ctime, 5, 0),
     /* subkey[6]                        EncryptionKey OPTIONAL */
-    FIELDOF_OPT(krb5_authenticator, ptr_encryption_key, subkey, 6, 6),
+    FIELDOF_OPT(krb5_authenticator, ptr_encryption_key, subkey, 6, 0, 6),
     /* seq-number[7]            INTEGER OPTIONAL */
-    FIELDOF_OPT(krb5_authenticator, uint, seq_number, 7, 7),
+    FIELDOF_OPT(krb5_authenticator, uint, seq_number, 7, 0, 7),
     /* authorization-data[8]    AuthorizationData OPTIONAL */
-    FIELDOF_OPT(krb5_authenticator, auth_data_ptr, authorization_data, 8, 8),
+    FIELDOF_OPT(krb5_authenticator, auth_data_ptr, authorization_data,
+                8, 0, 8),
 };
 static unsigned int
 optional_krb5_authenticator(const void *p)
@@ -759,27 +780,28 @@ DEFAPPTAGGEDTYPE(krb5_authenticator, 2, untagged_krb5_authenticator);
 static const struct field_info enc_tkt_part_fields[] = {
     /* EncTicketPart ::= [APPLICATION 3] SEQUENCE */
     /* flags[0]                 TicketFlags */
-    FIELDOF_NORM(krb5_enc_tkt_part, krb5_flags, flags, 0),
+    FIELDOF_NORM(krb5_enc_tkt_part, krb5_flags, flags, 0, 0),
     /* key[1]                   EncryptionKey */
-    FIELDOF_NORM(krb5_enc_tkt_part, ptr_encryption_key, session, 1),
+    FIELDOF_NORM(krb5_enc_tkt_part, ptr_encryption_key, session, 1, 0),
     /* crealm[2]                        Realm */
-    FIELDOF_NORM(krb5_enc_tkt_part, realm_of_principal, client, 2),
+    FIELDOF_NORM(krb5_enc_tkt_part, realm_of_principal, client, 2, 0),
     /* cname[3]                 PrincipalName */
-    FIELDOF_NORM(krb5_enc_tkt_part, principal, client, 3),
+    FIELDOF_NORM(krb5_enc_tkt_part, principal, client, 3, 0),
     /* transited[4]             TransitedEncoding */
-    FIELDOF_NORM(krb5_enc_tkt_part, transited, transited, 4),
+    FIELDOF_NORM(krb5_enc_tkt_part, transited, transited, 4, 0),
     /* authtime[5]              KerberosTime */
-    FIELDOF_NORM(krb5_enc_tkt_part, kerberos_time, times.authtime, 5),
+    FIELDOF_NORM(krb5_enc_tkt_part, kerberos_time, times.authtime, 5, 0),
     /* starttime[6]             KerberosTime OPTIONAL */
-    FIELDOF_OPT(krb5_enc_tkt_part, kerberos_time, times.starttime, 6, 6),
+    FIELDOF_OPT(krb5_enc_tkt_part, kerberos_time, times.starttime, 6, 0, 6),
     /* endtime[7]                       KerberosTime */
-    FIELDOF_NORM(krb5_enc_tkt_part, kerberos_time, times.endtime, 7),
+    FIELDOF_NORM(krb5_enc_tkt_part, kerberos_time, times.endtime, 7, 0),
     /* renew-till[8]            KerberosTime OPTIONAL */
-    FIELDOF_OPT(krb5_enc_tkt_part, kerberos_time, times.renew_till, 8, 8),
+    FIELDOF_OPT(krb5_enc_tkt_part, kerberos_time, times.renew_till, 8, 0, 8),
     /* caddr[9]                 HostAddresses OPTIONAL */
-    FIELDOF_OPT(krb5_enc_tkt_part, ptr_seqof_host_addresses, caddrs, 9, 9),
+    FIELDOF_OPT(krb5_enc_tkt_part, ptr_seqof_host_addresses, caddrs, 9, 0, 9),
     /* authorization-data[10]   AuthorizationData OPTIONAL */
-    FIELDOF_OPT(krb5_enc_tkt_part, auth_data_ptr, authorization_data, 10, 10),
+    FIELDOF_OPT(krb5_enc_tkt_part, auth_data_ptr, authorization_data,
+                10, 0, 10),
 };
 static unsigned int
 optional_enc_tkt_part(const void *p)
@@ -808,13 +830,13 @@ static const struct field_info as_rep_fields[] = {
     /* AS-REP ::= [APPLICATION 11] KDC-REP */
     /* But KDC-REP needs to know what type it's being encapsulated
        in, so expand each version.  */
-    FIELD_INT_IMM(KVNO, 0),
-    FIELD_INT_IMM(KRB5_AS_REP, 1),
-    FIELDOF_OPT(krb5_kdc_rep, ptr_seqof_pa_data, padata, 2, 2),
-    FIELDOF_NORM(krb5_kdc_rep, realm_of_principal, client, 3),
-    FIELDOF_NORM(krb5_kdc_rep, principal, client, 4),
-    FIELDOF_NORM(krb5_kdc_rep, ticket_ptr, ticket, 5),
-    FIELDOF_NORM(krb5_kdc_rep, encrypted_data, enc_part, 6),
+    FIELD_INT_IMM(KVNO, 0, 0),
+    FIELD_INT_IMM(KRB5_AS_REP, 1, 0),
+    FIELDOF_OPT(krb5_kdc_rep, ptr_seqof_pa_data, padata, 2, 0, 2),
+    FIELDOF_NORM(krb5_kdc_rep, realm_of_principal, client, 3, 0),
+    FIELDOF_NORM(krb5_kdc_rep, principal, client, 4, 0),
+    FIELDOF_NORM(krb5_kdc_rep, ticket_ptr, ticket, 5, 0),
+    FIELDOF_NORM(krb5_kdc_rep, encrypted_data, enc_part, 6, 0),
 };
 static unsigned int
 optional_as_rep(const void *p)
@@ -834,13 +856,13 @@ static const struct field_info tgs_rep_fields[] = {
     /* TGS-REP ::= [APPLICATION 13] KDC-REP */
     /* But KDC-REP needs to know what type it's being encapsulated
        in, so expand each version.  */
-    FIELD_INT_IMM(KVNO, 0),
-    FIELD_INT_IMM(KRB5_TGS_REP, 1),
-    FIELDOF_OPT(krb5_kdc_rep, ptr_seqof_pa_data, padata, 2, 2),
-    FIELDOF_NORM(krb5_kdc_rep, realm_of_principal, client, 3),
-    FIELDOF_NORM(krb5_kdc_rep, principal, client, 4),
-    FIELDOF_NORM(krb5_kdc_rep, ticket_ptr, ticket, 5),
-    FIELDOF_NORM(krb5_kdc_rep, encrypted_data, enc_part, 6),
+    FIELD_INT_IMM(KVNO, 0, 0),
+    FIELD_INT_IMM(KRB5_TGS_REP, 1, 0),
+    FIELDOF_OPT(krb5_kdc_rep, ptr_seqof_pa_data, padata, 2, 0, 2),
+    FIELDOF_NORM(krb5_kdc_rep, realm_of_principal, client, 3, 0),
+    FIELDOF_NORM(krb5_kdc_rep, principal, client, 4, 0),
+    FIELDOF_NORM(krb5_kdc_rep, ticket_ptr, ticket, 5, 0),
+    FIELDOF_NORM(krb5_kdc_rep, encrypted_data, enc_part, 6, 0),
 };
 static unsigned int
 optional_tgs_rep(const void *p)
@@ -859,15 +881,15 @@ DEFAPPTAGGEDTYPE(tgs_rep, 13, untagged_tgs_rep);
 static const struct field_info ap_req_fields[] = {
     /* AP-REQ ::=       [APPLICATION 14] SEQUENCE */
     /* pvno[0]          INTEGER */
-    FIELD_INT_IMM(KVNO, 0),
+    FIELD_INT_IMM(KVNO, 0, 0),
     /* msg-type[1]      INTEGER */
-    FIELD_INT_IMM(ASN1_KRB_AP_REQ, 1),
+    FIELD_INT_IMM(ASN1_KRB_AP_REQ, 1, 0),
     /* ap-options[2]    APOptions */
-    FIELDOF_NORM(krb5_ap_req, krb5_flags, ap_options, 2),
+    FIELDOF_NORM(krb5_ap_req, krb5_flags, ap_options, 2, 0),
     /* ticket[3]                Ticket */
-    FIELDOF_NORM(krb5_ap_req, ticket_ptr, ticket, 3),
+    FIELDOF_NORM(krb5_ap_req, ticket_ptr, ticket, 3, 0),
     /* authenticator[4] EncryptedData */
-    FIELDOF_NORM(krb5_ap_req, encrypted_data, authenticator, 4),
+    FIELDOF_NORM(krb5_ap_req, encrypted_data, authenticator, 4, 0),
 };
 DEFSEQTYPE(untagged_ap_req, krb5_ap_req, ap_req_fields, 0);
 DEFAPPTAGGEDTYPE(ap_req, 14, untagged_ap_req);
@@ -875,11 +897,11 @@ DEFAPPTAGGEDTYPE(ap_req, 14, untagged_ap_req);
 static const struct field_info ap_rep_fields[] = {
     /* AP-REP ::=       [APPLICATION 15] SEQUENCE */
     /* pvno[0]          INTEGER */
-    FIELD_INT_IMM(KVNO, 0),
+    FIELD_INT_IMM(KVNO, 0, 0),
     /* msg-type[1]      INTEGER */
-    FIELD_INT_IMM(ASN1_KRB_AP_REP, 1),
+    FIELD_INT_IMM(ASN1_KRB_AP_REP, 1, 0),
     /* enc-part[2]      EncryptedData */
-    FIELDOF_NORM(krb5_ap_rep, encrypted_data, enc_part, 2),
+    FIELDOF_NORM(krb5_ap_rep, encrypted_data, enc_part, 2, 0),
 };
 DEFSEQTYPE(untagged_ap_rep, krb5_ap_rep, ap_rep_fields, 0);
 DEFAPPTAGGEDTYPE(ap_rep, 15, untagged_ap_rep);
@@ -887,13 +909,13 @@ DEFAPPTAGGEDTYPE(ap_rep, 15, untagged_ap_rep);
 static const struct field_info ap_rep_enc_part_fields[] = {
     /* EncAPRepPart ::= [APPLICATION 27] SEQUENCE */
     /* ctime[0]         KerberosTime */
-    FIELDOF_NORM(krb5_ap_rep_enc_part, kerberos_time, ctime, 0),
+    FIELDOF_NORM(krb5_ap_rep_enc_part, kerberos_time, ctime, 0, 0),
     /* cusec[1]         INTEGER */
-    FIELDOF_NORM(krb5_ap_rep_enc_part, int32, cusec, 1),
+    FIELDOF_NORM(krb5_ap_rep_enc_part, int32, cusec, 1, 0),
     /* subkey[2]                EncryptionKey OPTIONAL */
-    FIELDOF_OPT(krb5_ap_rep_enc_part, ptr_encryption_key, subkey, 2, 2),
+    FIELDOF_OPT(krb5_ap_rep_enc_part, ptr_encryption_key, subkey, 2, 0, 2),
     /* seq-number[3]    INTEGER OPTIONAL */
-    FIELDOF_OPT(krb5_ap_rep_enc_part, uint, seq_number, 3, 3),
+    FIELDOF_OPT(krb5_ap_rep_enc_part, uint, seq_number, 3, 0, 3),
 };
 static unsigned int
 optional_ap_rep_enc_part(const void *p)
@@ -914,10 +936,10 @@ DEFAPPTAGGEDTYPE(ap_rep_enc_part, 27, untagged_ap_rep_enc_part);
 
 static const struct field_info as_req_fields[] = {
     /* AS-REQ ::= [APPLICATION 10] KDC-REQ */
-    FIELD_INT_IMM(KVNO, 1),
-    FIELD_INT_IMM(KRB5_AS_REQ, 2),
-    FIELDOF_OPT(krb5_kdc_req, ptr_seqof_pa_data, padata, 3, 3),
-    FIELDOF_ENCODEAS(krb5_kdc_req, kdc_req_body, 4),
+    FIELD_INT_IMM(KVNO, 1, 0),
+    FIELD_INT_IMM(KRB5_AS_REQ, 2, 0),
+    FIELDOF_OPT(krb5_kdc_req, ptr_seqof_pa_data, padata, 3, 0, 3),
+    FIELDOF_ENCODEAS(krb5_kdc_req, kdc_req_body, 4, 0),
 };
 static unsigned int
 optional_as_req(const void *p)
@@ -935,10 +957,10 @@ DEFAPPTAGGEDTYPE(as_req, 10, untagged_as_req);
 
 static const struct field_info tgs_req_fields[] = {
     /* TGS-REQ ::= [APPLICATION 12] KDC-REQ */
-    FIELD_INT_IMM(KVNO, 1),
-    FIELD_INT_IMM(KRB5_TGS_REQ, 2),
-    FIELDOF_OPT(krb5_kdc_req, ptr_seqof_pa_data, padata, 3, 3),
-    FIELDOF_ENCODEAS(krb5_kdc_req, kdc_req_body, 4),
+    FIELD_INT_IMM(KVNO, 1, 0),
+    FIELD_INT_IMM(KRB5_TGS_REQ, 2, 0),
+    FIELDOF_OPT(krb5_kdc_req, ptr_seqof_pa_data, padata, 3, 0, 3),
+    FIELDOF_ENCODEAS(krb5_kdc_req, kdc_req_body, 4, 0),
 };
 static unsigned int
 optional_tgs_req(const void *p)
@@ -956,43 +978,45 @@ DEFSEQTYPE(untagged_tgs_req, krb5_kdc_req, tgs_req_fields,
 DEFAPPTAGGEDTYPE(tgs_req, 12, untagged_tgs_req);
 
 static const struct field_info krb5_safe_fields[] = {
-    FIELD_INT_IMM(KVNO, 0),
-    FIELD_INT_IMM(ASN1_KRB_SAFE,1),
-    FIELD_SELF(krb_safe_body, 2),
-    FIELDOF_NORM(krb5_safe, checksum_ptr, checksum, 3),
+    FIELD_INT_IMM(KVNO, 0, 0),
+    FIELD_INT_IMM(ASN1_KRB_SAFE, 1, 0),
+    FIELD_SELF(krb_safe_body, 2, 0),
+    FIELDOF_NORM(krb5_safe, checksum_ptr, checksum, 3, 0),
 };
 DEFSEQTYPE(untagged_krb5_safe, krb5_safe, krb5_safe_fields, 0);
 DEFAPPTAGGEDTYPE(krb5_safe, 20, untagged_krb5_safe);
 
 DEFPTRTYPE(krb_saved_safe_body_ptr, opaque_data);
 DEFFIELDTYPE(krb5_safe_checksum_only, krb5_safe,
-             FIELDOF_NORM(krb5_safe, checksum_ptr, checksum, -1));
+             FIELDOF_NORM(krb5_safe, checksum_ptr, checksum, -1, 0));
 DEFPTRTYPE(krb5_safe_checksum_only_ptr, krb5_safe_checksum_only);
 static const struct field_info krb5_safe_with_body_fields[] = {
-    FIELD_INT_IMM(KVNO, 0),
-    FIELD_INT_IMM(ASN1_KRB_SAFE,1),
-    FIELDOF_NORM(struct krb5_safe_with_body, krb_saved_safe_body_ptr, body, 2),
-    FIELDOF_NORM(struct krb5_safe_with_body, krb5_safe_checksum_only_ptr, safe, 3),
+    FIELD_INT_IMM(KVNO, 0, 0),
+    FIELD_INT_IMM(ASN1_KRB_SAFE, 1, 0),
+    FIELDOF_NORM(struct krb5_safe_with_body, krb_saved_safe_body_ptr, body,
+                 2, 0),
+    FIELDOF_NORM(struct krb5_safe_with_body, krb5_safe_checksum_only_ptr,
+                 safe, 3, 0),
 };
 DEFSEQTYPE(untagged_krb5_safe_with_body, struct krb5_safe_with_body,
            krb5_safe_with_body_fields, 0);
 DEFAPPTAGGEDTYPE(krb5_safe_with_body, 20, untagged_krb5_safe_with_body);
 
 static const struct field_info priv_fields[] = {
-    FIELD_INT_IMM(KVNO, 0),
-    FIELD_INT_IMM(ASN1_KRB_PRIV, 1),
-    FIELDOF_NORM(krb5_priv, encrypted_data, enc_part, 3),
+    FIELD_INT_IMM(KVNO, 0, 0),
+    FIELD_INT_IMM(ASN1_KRB_PRIV, 1, 0),
+    FIELDOF_NORM(krb5_priv, encrypted_data, enc_part, 3, 0),
 };
 DEFSEQTYPE(untagged_priv, krb5_priv, priv_fields, 0);
 DEFAPPTAGGEDTYPE(krb5_priv, 21, untagged_priv);
 
 static const struct field_info priv_enc_part_fields[] = {
-    FIELDOF_NORM(krb5_priv_enc_part, ostring_data, user_data, 0),
-    FIELDOF_OPT(krb5_priv_enc_part, kerberos_time, timestamp, 1, 1),
-    FIELDOF_OPT(krb5_priv_enc_part, int32, usec, 2, 2),
-    FIELDOF_OPT(krb5_priv_enc_part, uint, seq_number, 3, 3),
-    FIELDOF_NORM(krb5_priv_enc_part, address_ptr, s_address, 4),
-    FIELDOF_OPT(krb5_priv_enc_part, address_ptr, r_address, 5, 5),
+    FIELDOF_NORM(krb5_priv_enc_part, ostring_data, user_data, 0, 0),
+    FIELDOF_OPT(krb5_priv_enc_part, kerberos_time, timestamp, 1, 0, 1),
+    FIELDOF_OPT(krb5_priv_enc_part, int32, usec, 2, 0, 2),
+    FIELDOF_OPT(krb5_priv_enc_part, uint, seq_number, 3, 0, 3),
+    FIELDOF_NORM(krb5_priv_enc_part, address_ptr, s_address, 4, 0),
+    FIELDOF_OPT(krb5_priv_enc_part, address_ptr, r_address, 5, 0, 5),
 };
 static unsigned int
 optional_priv_enc_part(const void *p)
@@ -1018,13 +1042,13 @@ DEFAPPTAGGEDTYPE(priv_enc_part, 28, untagged_priv_enc_part);
 static const struct field_info cred_fields[] = {
     /* KRB-CRED ::= [APPLICATION 22] SEQUENCE */
     /* pvno[0]          INTEGER */
-    FIELD_INT_IMM(KVNO, 0),
+    FIELD_INT_IMM(KVNO, 0, 0),
     /* msg-type[1]      INTEGER, -- KRB_CRED */
-    FIELD_INT_IMM(ASN1_KRB_CRED, 1),
+    FIELD_INT_IMM(ASN1_KRB_CRED, 1, 0),
     /* tickets[2]       SEQUENCE OF Ticket */
-    FIELDOF_NORM(krb5_cred, ptr_seqof_ticket, tickets, 2),
+    FIELDOF_NORM(krb5_cred, ptr_seqof_ticket, tickets, 2, 0),
     /* enc-part[3]      EncryptedData */
-    FIELDOF_NORM(krb5_cred, encrypted_data, enc_part, 3),
+    FIELDOF_NORM(krb5_cred, encrypted_data, enc_part, 3, 0),
 };
 DEFSEQTYPE(untagged_cred, krb5_cred, cred_fields, 0);
 DEFAPPTAGGEDTYPE(krb5_cred, 22, untagged_cred);
@@ -1032,17 +1056,17 @@ DEFAPPTAGGEDTYPE(krb5_cred, 22, untagged_cred);
 static const struct field_info enc_cred_part_fields[] = {
     /* EncKrbCredPart ::= [APPLICATION 29] SEQUENCE */
     /* ticket-info[0]   SEQUENCE OF KrbCredInfo */
-    FIELDOF_NORM(krb5_cred_enc_part, ptrseqof_cred_info, ticket_info, 0),
+    FIELDOF_NORM(krb5_cred_enc_part, ptrseqof_cred_info, ticket_info, 0, 0),
     /* nonce[1]         INTEGER OPTIONAL */
-    FIELDOF_OPT(krb5_cred_enc_part, int32, nonce, 1, 1),
+    FIELDOF_OPT(krb5_cred_enc_part, int32, nonce, 1, 0, 1),
     /* timestamp[2]     KerberosTime OPTIONAL */
-    FIELDOF_OPT(krb5_cred_enc_part, kerberos_time, timestamp, 2, 2),
+    FIELDOF_OPT(krb5_cred_enc_part, kerberos_time, timestamp, 2, 0, 2),
     /* usec[3]          INTEGER OPTIONAL */
-    FIELDOF_OPT(krb5_cred_enc_part, int32, usec, 3, 3),
+    FIELDOF_OPT(krb5_cred_enc_part, int32, usec, 3, 0, 3),
     /* s-address[4]     HostAddress OPTIONAL */
-    FIELDOF_OPT(krb5_cred_enc_part, address_ptr, s_address, 4, 4),
+    FIELDOF_OPT(krb5_cred_enc_part, address_ptr, s_address, 4, 0, 4),
     /* r-address[5]     HostAddress OPTIONAL */
-    FIELDOF_OPT(krb5_cred_enc_part, address_ptr, r_address, 5, 5),
+    FIELDOF_OPT(krb5_cred_enc_part, address_ptr, r_address, 5, 0, 5),
 };
 static unsigned int
 optional_enc_cred_part(const void *p)
@@ -1073,31 +1097,31 @@ DEFAPPTAGGEDTYPE(enc_cred_part, 29, untagged_enc_cred_part);
 static const struct field_info error_fields[] = {
     /* KRB-ERROR ::= [APPLICATION 30] SEQUENCE */
     /* pvno[0]          INTEGER */
-    FIELD_INT_IMM(KVNO, 0),
+    FIELD_INT_IMM(KVNO, 0, 0),
     /* msg-type[1]      INTEGER */
-    FIELD_INT_IMM(ASN1_KRB_ERROR, 1),
+    FIELD_INT_IMM(ASN1_KRB_ERROR, 1, 0),
     /* ctime[2]         KerberosTime OPTIONAL */
-    FIELDOF_OPT(krb5_error, kerberos_time, ctime, 2, 2),
+    FIELDOF_OPT(krb5_error, kerberos_time, ctime, 2, 0, 2),
     /* cusec[3]         INTEGER OPTIONAL */
-    FIELDOF_OPT(krb5_error, int32, cusec, 3, 3),
+    FIELDOF_OPT(krb5_error, int32, cusec, 3, 0, 3),
     /* stime[4]         KerberosTime */
-    FIELDOF_NORM(krb5_error, kerberos_time, stime, 4),
+    FIELDOF_NORM(krb5_error, kerberos_time, stime, 4, 0),
     /* susec[5]         INTEGER */
-    FIELDOF_NORM(krb5_error, int32, susec, 5),
+    FIELDOF_NORM(krb5_error, int32, susec, 5, 0),
     /* error-code[6]    INTEGER */
-    FIELDOF_NORM(krb5_error, ui_4, error, 6),
+    FIELDOF_NORM(krb5_error, ui_4, error, 6, 0),
     /* crealm[7]        Realm OPTIONAL */
-    FIELDOF_OPT(krb5_error, realm_of_principal, client, 7, 7),
+    FIELDOF_OPT(krb5_error, realm_of_principal, client, 7, 0, 7),
     /* cname[8]         PrincipalName OPTIONAL */
-    FIELDOF_OPT(krb5_error, principal, client, 8, 8),
+    FIELDOF_OPT(krb5_error, principal, client, 8, 0, 8),
     /* realm[9]         Realm -- Correct realm */
-    FIELDOF_NORM(krb5_error, realm_of_principal, server, 9),
+    FIELDOF_NORM(krb5_error, realm_of_principal, server, 9, 0),
     /* sname[10]        PrincipalName -- Correct name */
-    FIELDOF_NORM(krb5_error, principal, server, 10),
+    FIELDOF_NORM(krb5_error, principal, server, 10, 0),
     /* e-text[11]       GeneralString OPTIONAL */
-    FIELDOF_OPT(krb5_error, gstring_data, text, 11, 11),
+    FIELDOF_OPT(krb5_error, gstring_data, text, 11, 0, 11),
     /* e-data[12]       OCTET STRING OPTIONAL */
-    FIELDOF_OPT(krb5_error, ostring_data, e_data, 12, 12),
+    FIELDOF_OPT(krb5_error, ostring_data, e_data, 12, 0, 12),
 };
 static unsigned int
 optional_error(const void *p)
@@ -1124,8 +1148,8 @@ DEFSEQTYPE(untagged_krb5_error, krb5_error, error_fields, optional_error);
 DEFAPPTAGGEDTYPE(krb5_error, 30, untagged_krb5_error);
 
 static const struct field_info alt_method_fields[] = {
-    FIELDOF_NORM(krb5_alt_method, int32, method, 0),
-    FIELDOF_OPTSTRING(krb5_alt_method, octetstring, data, length, 1, 1),
+    FIELDOF_NORM(krb5_alt_method, int32, method, 0, 0),
+    FIELDOF_OPTSTRING(krb5_alt_method, octetstring, data, length, 1, 0, 1),
 };
 static unsigned int
 optional_alt_method(const void *p)
@@ -1141,8 +1165,8 @@ optional_alt_method(const void *p)
 DEFSEQTYPE(alt_method, krb5_alt_method, alt_method_fields, optional_alt_method);
 
 static const struct field_info pa_enc_ts_fields[] = {
-    FIELDOF_NORM(krb5_pa_enc_ts, kerberos_time, patimestamp, 0),
-    FIELDOF_OPT(krb5_pa_enc_ts, int32, pausec, 1, 1),
+    FIELDOF_NORM(krb5_pa_enc_ts, kerberos_time, patimestamp, 0, 0),
+    FIELDOF_OPT(krb5_pa_enc_ts, int32, pausec, 1, 0, 1),
 };
 static unsigned int
 optional_pa_enc_ts(const void *p)
@@ -1158,36 +1182,36 @@ optional_pa_enc_ts(const void *p)
 DEFSEQTYPE(pa_enc_ts, krb5_pa_enc_ts, pa_enc_ts_fields, optional_pa_enc_ts);
 
 static const struct field_info pwd_data_fields[] = {
-    FIELDOF_NORM(krb5_pwd_data, int32, sequence_count, 0),
-    FIELDOF_NORM(krb5_pwd_data, ptr_seqof_passwdsequence, element, 1),
+    FIELDOF_NORM(krb5_pwd_data, int32, sequence_count, 0, 0),
+    FIELDOF_NORM(krb5_pwd_data, ptr_seqof_passwdsequence, element, 1, 0),
 };
 DEFSEQTYPE(pwd_data, krb5_pwd_data, pwd_data_fields, 0);
 
 static const struct field_info setpw_req_fields[] = {
-    FIELDOF_NORM(struct krb5_setpw_req, ostring_data, password, 0),
-    FIELDOF_NORM(struct krb5_setpw_req, principal, target, 1),
-    FIELDOF_NORM(struct krb5_setpw_req, realm_of_principal, target, 2),
+    FIELDOF_NORM(struct krb5_setpw_req, ostring_data, password, 0, 0),
+    FIELDOF_NORM(struct krb5_setpw_req, principal, target, 1, 0),
+    FIELDOF_NORM(struct krb5_setpw_req, realm_of_principal, target, 2, 0),
 };
 
 DEFSEQTYPE(setpw_req, struct krb5_setpw_req, setpw_req_fields, 0);
 
 /* [MS-SFU] Section 2.2.1. */
 static const struct field_info pa_for_user_fields[] = {
-    FIELDOF_NORM(krb5_pa_for_user, principal, user, 0),
-    FIELDOF_NORM(krb5_pa_for_user, realm_of_principal, user, 1),
-    FIELDOF_NORM(krb5_pa_for_user, checksum, cksum, 2),
-    FIELDOF_NORM(krb5_pa_for_user, gstring_data, auth_package, 3),
+    FIELDOF_NORM(krb5_pa_for_user, principal, user, 0, 0),
+    FIELDOF_NORM(krb5_pa_for_user, realm_of_principal, user, 1, 0),
+    FIELDOF_NORM(krb5_pa_for_user, checksum, cksum, 2, 0),
+    FIELDOF_NORM(krb5_pa_for_user, gstring_data, auth_package, 3, 0),
 };
 
 DEFSEQTYPE(pa_for_user, krb5_pa_for_user, pa_for_user_fields, 0);
 
 /* [MS-SFU] Section 2.2.2. */
 static const struct field_info s4u_userid_fields[] = {
-    FIELDOF_NORM(krb5_s4u_userid, int32, nonce, 0),
-    FIELDOF_OPT(krb5_s4u_userid, principal, user, 1, 1),
-    FIELDOF_NORM(krb5_s4u_userid, realm_of_principal, user, 2),
-    FIELDOF_OPT(krb5_s4u_userid, ostring_data, subject_cert, 3, 3),
-    FIELDOF_OPT(krb5_s4u_userid, krb5_flags, options, 4, 4),
+    FIELDOF_NORM(krb5_s4u_userid, int32, nonce, 0, 0),
+    FIELDOF_OPT(krb5_s4u_userid, principal, user, 1, 0, 1),
+    FIELDOF_NORM(krb5_s4u_userid, realm_of_principal, user, 2, 0),
+    FIELDOF_OPT(krb5_s4u_userid, ostring_data, subject_cert, 3, 0, 3),
+    FIELDOF_OPT(krb5_s4u_userid, krb5_flags, options, 4, 0, 4),
 };
 
 static unsigned int s4u_userid_optional (const void *p) {
@@ -1205,27 +1229,32 @@ static unsigned int s4u_userid_optional (const void *p) {
 DEFSEQTYPE(s4u_userid, krb5_s4u_userid, s4u_userid_fields, s4u_userid_optional);
 
 static const struct field_info pa_s4u_x509_user_fields[] = {
-    FIELDOF_NORM(krb5_pa_s4u_x509_user, s4u_userid, user_id, 0),
-    FIELDOF_NORM(krb5_pa_s4u_x509_user, checksum, cksum, 1),
+    FIELDOF_NORM(krb5_pa_s4u_x509_user, s4u_userid, user_id, 0, 0),
+    FIELDOF_NORM(krb5_pa_s4u_x509_user, checksum, cksum, 1, 0),
 };
 
 DEFSEQTYPE(pa_s4u_x509_user, krb5_pa_s4u_x509_user, pa_s4u_x509_user_fields, 0);
 
 /* draft-ietf-krb-wg-kerberos-referrals Appendix A. */
 static const struct field_info pa_svr_referral_data_fields[] = {
-    FIELDOF_NORM(krb5_pa_svr_referral_data, realm_of_principal, principal, 0),
-    FIELDOF_OPT(krb5_pa_svr_referral_data, principal, principal, 1, 1),
+    FIELDOF_NORM(krb5_pa_svr_referral_data, realm_of_principal, principal,
+                 0, 0),
+    FIELDOF_OPT(krb5_pa_svr_referral_data, principal, principal, 1, 0, 1),
 };
 
 DEFSEQTYPE(pa_svr_referral_data, krb5_pa_svr_referral_data, pa_svr_referral_data_fields, 0);
 
 /* draft-ietf-krb-wg-kerberos-referrals Section 8. */
 static const struct field_info pa_server_referral_data_fields[] = {
-    FIELDOF_OPT(krb5_pa_server_referral_data, gstring_data_ptr, referred_realm, 0, 0),
-    FIELDOF_OPT(krb5_pa_server_referral_data, principal, true_principal_name, 1, 1),
-    FIELDOF_OPT(krb5_pa_server_referral_data, principal, requested_principal_name, 2, 2),
-    FIELDOF_OPT(krb5_pa_server_referral_data, kerberos_time, referral_valid_until, 3, 3),
-    FIELDOF_NORM(krb5_pa_server_referral_data, checksum, rep_cksum, 4),
+    FIELDOF_OPT(krb5_pa_server_referral_data, gstring_data_ptr, referred_realm,
+                0, 0, 0),
+    FIELDOF_OPT(krb5_pa_server_referral_data, principal, true_principal_name,
+                1, 0, 1),
+    FIELDOF_OPT(krb5_pa_server_referral_data, principal,
+                requested_principal_name, 2, 0, 2),
+    FIELDOF_OPT(krb5_pa_server_referral_data, kerberos_time,
+                referral_valid_until, 3, 0, 3),
+    FIELDOF_NORM(krb5_pa_server_referral_data, checksum, rep_cksum, 4, 0),
 };
 
 DEFSEQTYPE(pa_server_referral_data, krb5_pa_server_referral_data, pa_server_referral_data_fields, 0);
@@ -1233,7 +1262,7 @@ DEFSEQTYPE(pa_server_referral_data, krb5_pa_server_referral_data, pa_server_refe
 #if 0
 /* draft-brezak-win2k-krb-authz Section 6. */
 static const struct field_info pa_pac_request_fields[] = {
-    FIELDOF_NORM(krb5_pa_pac_req, boolean, include_pac, 0),
+    FIELDOF_NORM(krb5_pa_pac_req, boolean, include_pac, 0, 0),
 };
 
 DEFSEQTYPE(pa_pac_request, krb5_pa_pac_req, pa_pac_request_fields, 0);
@@ -1241,21 +1270,22 @@ DEFSEQTYPE(pa_pac_request, krb5_pa_pac_req, pa_pac_request_fields, 0);
 
 /* RFC 4537 */
 DEFFIELDTYPE(etype_list, krb5_etype_list,
-             FIELDOF_SEQOF_INT32(krb5_etype_list, int32_ptr, etypes, length, -1));
+             FIELDOF_SEQOF_INT32(krb5_etype_list, int32_ptr, etypes, length,
+                                 -1, 0));
 
 /* draft-ietf-krb-wg-preauth-framework-09 */
 static const struct field_info fast_armor_fields[] = {
-    FIELDOF_NORM(krb5_fast_armor, int32, armor_type, 0),
-    FIELDOF_NORM( krb5_fast_armor, ostring_data, armor_value, 1),
+    FIELDOF_NORM(krb5_fast_armor, int32, armor_type, 0, 0),
+    FIELDOF_NORM(krb5_fast_armor, ostring_data, armor_value, 1, 0),
 };
 
 DEFSEQTYPE( fast_armor, krb5_fast_armor, fast_armor_fields, 0);
 DEFPTRTYPE( ptr_fast_armor, fast_armor);
 
 static const struct field_info fast_armored_req_fields[] = {
-    FIELDOF_OPT( krb5_fast_armored_req, ptr_fast_armor, armor, 0, 0),
-    FIELDOF_NORM( krb5_fast_armored_req, checksum, req_checksum, 1),
-    FIELDOF_NORM( krb5_fast_armored_req, encrypted_data, enc_part, 2),
+    FIELDOF_OPT(krb5_fast_armored_req, ptr_fast_armor, armor, 0, 0, 0),
+    FIELDOF_NORM(krb5_fast_armored_req, checksum, req_checksum, 1, 0),
+    FIELDOF_NORM(krb5_fast_armored_req, encrypted_data, enc_part, 2, 0),
 };
 
 static unsigned int fast_armored_req_optional (const void *p) {
@@ -1267,28 +1297,28 @@ static unsigned int fast_armored_req_optional (const void *p) {
 }
 
 DEFSEQTYPE( fast_armored_req, krb5_fast_armored_req, fast_armored_req_fields, fast_armored_req_optional);
-DEFFIELDTYPE( pa_fx_fast_request, krb5_fast_armored_req,
-              FIELDOF_ENCODEAS( krb5_fast_armored_req, fast_armored_req, 0));
+DEFFIELDTYPE(pa_fx_fast_request, krb5_fast_armored_req,
+             FIELDOF_ENCODEAS(krb5_fast_armored_req, fast_armored_req, 0, 0));
 
 DEFFIELDTYPE(fast_req_padata, krb5_kdc_req,
-             FIELDOF_NORM(krb5_kdc_req, ptr_seqof_pa_data, padata, -1));
+             FIELDOF_NORM(krb5_kdc_req, ptr_seqof_pa_data, padata, -1, 0));
 DEFPTRTYPE(ptr_fast_req_padata, fast_req_padata);
 
 static const struct field_info fast_req_fields[] = {
-    FIELDOF_NORM(krb5_fast_req, krb5_flags, fast_options, 0),
-    FIELDOF_NORM( krb5_fast_req, ptr_fast_req_padata, req_body, 1),
-    FIELDOF_NORM( krb5_fast_req, ptr_kdc_req_body, req_body, 2),
+    FIELDOF_NORM(krb5_fast_req, krb5_flags, fast_options, 0, 0),
+    FIELDOF_NORM( krb5_fast_req, ptr_fast_req_padata, req_body, 1, 0),
+    FIELDOF_NORM( krb5_fast_req, ptr_kdc_req_body, req_body, 2, 0),
 };
 
 DEFSEQTYPE(fast_req, krb5_fast_req, fast_req_fields, 0);
 
 
 static const struct field_info fast_finished_fields[] = {
-    FIELDOF_NORM( krb5_fast_finished, kerberos_time, timestamp, 0),
-    FIELDOF_NORM( krb5_fast_finished, int32, usec, 1),
-    FIELDOF_NORM( krb5_fast_finished, realm_of_principal, client, 2),
-    FIELDOF_NORM(krb5_fast_finished, principal, client, 3),
-    FIELDOF_NORM( krb5_fast_finished, checksum, ticket_checksum, 4),
+    FIELDOF_NORM( krb5_fast_finished, kerberos_time, timestamp, 0, 0),
+    FIELDOF_NORM( krb5_fast_finished, int32, usec, 1, 0),
+    FIELDOF_NORM( krb5_fast_finished, realm_of_principal, client, 2, 0),
+    FIELDOF_NORM(krb5_fast_finished, principal, client, 3, 0),
+    FIELDOF_NORM( krb5_fast_finished, checksum, ticket_checksum, 4, 0),
 };
 
 DEFSEQTYPE( fast_finished, krb5_fast_finished, fast_finished_fields, 0);
@@ -1296,10 +1326,11 @@ DEFSEQTYPE( fast_finished, krb5_fast_finished, fast_finished_fields, 0);
 DEFPTRTYPE( ptr_fast_finished, fast_finished);
 
 static const struct field_info fast_response_fields[] = {
-    FIELDOF_NORM(krb5_fast_response, ptr_seqof_pa_data, padata, 0),
-    FIELDOF_OPT( krb5_fast_response, ptr_encryption_key, strengthen_key, 1, 1),
-    FIELDOF_OPT( krb5_fast_response, ptr_fast_finished, finished, 2, 2),
-    FIELDOF_NORM(krb5_fast_response, int32, nonce, 3),
+    FIELDOF_NORM(krb5_fast_response, ptr_seqof_pa_data, padata, 0, 0),
+    FIELDOF_OPT(krb5_fast_response, ptr_encryption_key, strengthen_key,
+                1, 0, 1),
+    FIELDOF_OPT(krb5_fast_response, ptr_fast_finished, finished, 2, 0, 2),
+    FIELDOF_NORM(krb5_fast_response, int32, nonce, 3, 0),
 };
 
 static unsigned int
@@ -1316,18 +1347,18 @@ fast_response_optional (const void *p)
 DEFSEQTYPE( fast_response, krb5_fast_response, fast_response_fields, fast_response_optional);
 
 static const struct field_info fast_rep_fields[] = {
-    FIELDOF_ENCODEAS(krb5_enc_data, encrypted_data, 0),
+    FIELDOF_ENCODEAS(krb5_enc_data, encrypted_data, 0, 0),
 };
 DEFSEQTYPE(fast_rep, krb5_enc_data, fast_rep_fields, 0);
 
 DEFFIELDTYPE(pa_fx_fast_reply, krb5_enc_data,
-             FIELDOF_ENCODEAS(krb5_enc_data, fast_rep, 0));
+             FIELDOF_ENCODEAS(krb5_enc_data, fast_rep, 0, 0));
 
 static const struct field_info ad_kdcissued_fields[] = {
-    FIELDOF_NORM(krb5_ad_kdcissued, checksum, ad_checksum, 0),
-    FIELDOF_OPT(krb5_ad_kdcissued, realm_of_principal, i_principal, 1, 1),
-    FIELDOF_OPT(krb5_ad_kdcissued, principal, i_principal, 2, 1),
-    FIELDOF_NORM(krb5_ad_kdcissued, auth_data_ptr, elements, 3),
+    FIELDOF_NORM(krb5_ad_kdcissued, checksum, ad_checksum, 0, 0),
+    FIELDOF_OPT(krb5_ad_kdcissued, realm_of_principal, i_principal, 1, 0, 1),
+    FIELDOF_OPT(krb5_ad_kdcissued, principal, i_principal, 2, 0, 1),
+    FIELDOF_NORM(krb5_ad_kdcissued, auth_data_ptr, elements, 3, 0),
 };
 
 static unsigned int
@@ -1343,8 +1374,8 @@ ad_kdcissued_optional(const void *p)
 DEFSEQTYPE(ad_kdc_issued, krb5_ad_kdcissued, ad_kdcissued_fields, ad_kdcissued_optional);
 
 static const struct field_info princ_plus_realm_fields[] = {
-    FIELDOF_ENCODEAS(krb5_principal_data, principal_data, 0),
-    FIELDOF_ENCODEAS(krb5_principal_data, realm_of_principal_data, 1),
+    FIELDOF_ENCODEAS(krb5_principal_data, principal_data, 0, 0),
+    FIELDOF_ENCODEAS(krb5_principal_data, realm_of_principal_data, 1, 0),
 };
 
 DEFSEQTYPE(princ_plus_realm_data, krb5_principal_data, princ_plus_realm_fields, 0);
@@ -1354,11 +1385,14 @@ DEFNULLTERMSEQOFTYPE(seq_of_princ_plus_realm, princ_plus_realm);
 DEFPTRTYPE(ptr_seq_of_princ_plus_realm, seq_of_princ_plus_realm);
 
 static const struct field_info ad_signedpath_data_fields[] = {
-    FIELDOF_NORM(krb5_ad_signedpath_data, princ_plus_realm, client, 0),
-    FIELDOF_NORM(krb5_ad_signedpath_data, kerberos_time, authtime, 1),
-    FIELDOF_OPT(krb5_ad_signedpath_data, ptr_seq_of_princ_plus_realm, delegated, 2, 2),
-    FIELDOF_OPT(krb5_ad_signedpath_data, ptr_seqof_pa_data, method_data, 3, 3),
-    FIELDOF_OPT(krb5_ad_signedpath_data, auth_data_ptr, authorization_data, 4, 4),
+    FIELDOF_NORM(krb5_ad_signedpath_data, princ_plus_realm, client, 0, 0),
+    FIELDOF_NORM(krb5_ad_signedpath_data, kerberos_time, authtime, 1, 0),
+    FIELDOF_OPT(krb5_ad_signedpath_data, ptr_seq_of_princ_plus_realm,
+                delegated, 2, 0, 2),
+    FIELDOF_OPT(krb5_ad_signedpath_data, ptr_seqof_pa_data, method_data,
+                3, 0, 3),
+    FIELDOF_OPT(krb5_ad_signedpath_data, auth_data_ptr, authorization_data,
+                4, 0, 4),
 };
 
 static unsigned int ad_signedpath_data_optional(const void *p)
@@ -1377,10 +1411,11 @@ static unsigned int ad_signedpath_data_optional(const void *p)
 DEFSEQTYPE(ad_signedpath_data, krb5_ad_signedpath_data, ad_signedpath_data_fields, ad_signedpath_data_optional);
 
 static const struct field_info ad_signedpath_fields[] = {
-    FIELDOF_NORM(krb5_ad_signedpath, int32, enctype, 0),
-    FIELDOF_NORM(krb5_ad_signedpath, checksum, checksum, 1),
-    FIELDOF_OPT(krb5_ad_signedpath, ptr_seq_of_princ_plus_realm, delegated, 2, 2),
-    FIELDOF_OPT(krb5_ad_signedpath, ptr_seqof_pa_data, method_data, 3, 3),
+    FIELDOF_NORM(krb5_ad_signedpath, int32, enctype, 0, 0),
+    FIELDOF_NORM(krb5_ad_signedpath, checksum, checksum, 1, 0),
+    FIELDOF_OPT(krb5_ad_signedpath, ptr_seq_of_princ_plus_realm, delegated,
+                2, 0, 2),
+    FIELDOF_OPT(krb5_ad_signedpath, ptr_seqof_pa_data, method_data, 3, 0, 3),
 };
 
 static unsigned int ad_signedpath_optional(const void *p)
@@ -1397,8 +1432,8 @@ static unsigned int ad_signedpath_optional(const void *p)
 DEFSEQTYPE(ad_signedpath, krb5_ad_signedpath, ad_signedpath_fields, ad_signedpath_optional);
 
 static const struct field_info iakerb_header_fields[] = {
-    FIELDOF_NORM(krb5_iakerb_header, ostring_data, target_realm, 1),
-    FIELDOF_OPT(krb5_iakerb_header, ostring_data_ptr, cookie, 2, 2),
+    FIELDOF_NORM(krb5_iakerb_header, ostring_data, target_realm, 1, 0),
+    FIELDOF_OPT(krb5_iakerb_header, ostring_data_ptr, cookie, 2, 0, 2),
 };
 
 static unsigned int iakerb_header_optional(const void *p)
@@ -1413,7 +1448,7 @@ static unsigned int iakerb_header_optional(const void *p)
 DEFSEQTYPE(iakerb_header, krb5_iakerb_header, iakerb_header_fields, iakerb_header_optional);
 
 static const struct field_info iakerb_finished_fields[] = {
-    FIELDOF_NORM(krb5_iakerb_finished, checksum, checksum, 1),
+    FIELDOF_NORM(krb5_iakerb_finished, checksum, checksum, 1, 0),
 };
 
 static unsigned int iakerb_finished_optional(const void *p)
@@ -1656,11 +1691,12 @@ DEFFNTYPE(algorithm_identifier, krb5_algorithm_identifier, asn1_encode_algorithm
 DEFSTRINGTYPE(object_identifier, char *, asn1_encode_bytestring,
               ASN1_OBJECTIDENTIFIER);
 DEFFIELDTYPE(oid_data, krb5_data,
-             FIELDOF_STRING(krb5_data, object_identifier, data, length, -1));
+             FIELDOF_STRING(krb5_data, object_identifier, data, length,
+                            -1, 0));
 DEFPTRTYPE(oid_data_ptr, oid_data);
 
 static const struct field_info kdf_alg_id_fields[] = {
-    FIELDOF_ENCODEAS(krb5_data, oid_data, 0)
+    FIELDOF_ENCODEAS(krb5_data, oid_data, 0, 0)
 };
 DEFSEQTYPE(kdf_alg_id, krb5_data, kdf_alg_id_fields, NULL);
 DEFPTRTYPE(kdf_alg_id_ptr, kdf_alg_id);
@@ -1673,8 +1709,8 @@ MAKE_ENCFN(asn1_encode_kdf_alg_id, kdf_alg_id);
 
 /* Krb5PrincipalName is defined in RFC 4556 and is *not* PrincipalName from RFC 4120*/
 static const struct field_info pkinit_krb5_principal_name_fields[] = {
-    FIELDOF_NORM(krb5_principal_data, gstring_data, realm, 0),
-    FIELDOF_ENCODEAS(krb5_principal_data, principal_data, 1)
+    FIELDOF_NORM(krb5_principal_data, gstring_data, realm, 0, 0),
+    FIELDOF_ENCODEAS(krb5_principal_data, principal_data, 1, 0)
 };
 
 
@@ -1685,21 +1721,25 @@ DEFOCTETWRAPTYPE(pkinit_krb5_principal_name_wrapped, pkinit_krb5_principal_name)
 
 /* For SP80056A OtherInfo, for pkinit agility */
 static const struct field_info sp80056a_other_info_fields[] = {
-    FIELDOF_NORM(krb5_sp80056a_other_info, algorithm_identifier, algorithm_identifier, -1),
-    FIELDOF_NORM(krb5_sp80056a_other_info, pkinit_krb5_principal_name_wrapped, party_u_info, 0),
-    FIELDOF_NORM(krb5_sp80056a_other_info, pkinit_krb5_principal_name_wrapped, party_v_info, 1),
-    FIELDOF_STRING(krb5_sp80056a_other_info, s_octetstring, supp_pub_info.data, supp_pub_info.length, 2),
+    FIELDOF_NORM(krb5_sp80056a_other_info, algorithm_identifier,
+                 algorithm_identifier, -1, 0),
+    FIELDOF_NORM(krb5_sp80056a_other_info, pkinit_krb5_principal_name_wrapped,
+                 party_u_info, 0, 0),
+    FIELDOF_NORM(krb5_sp80056a_other_info, pkinit_krb5_principal_name_wrapped,
+                 party_v_info, 1, 0),
+    FIELDOF_STRING(krb5_sp80056a_other_info, s_octetstring,
+                   supp_pub_info.data, supp_pub_info.length, 2, 0),
 };
 
 DEFSEQTYPE(sp80056a_other_info, krb5_sp80056a_other_info, sp80056a_other_info_fields, NULL);
 
 /* For PkinitSuppPubInfo, for pkinit agility */
 static const struct field_info pkinit_supp_pub_info_fields[] = {
-    FIELDOF_NORM(krb5_pkinit_supp_pub_info, int32, enctype, 0),
+    FIELDOF_NORM(krb5_pkinit_supp_pub_info, int32, enctype, 0, 0),
     FIELDOF_STRING(krb5_pkinit_supp_pub_info, s_octetstring, as_req.data,
-                   as_req.length, 1),
+                   as_req.length, 1, 0),
     FIELDOF_STRING(krb5_pkinit_supp_pub_info, s_octetstring, pk_as_rep.data,
-                   pk_as_rep.length, 2),
+                   pk_as_rep.length, 2, 0),
 };
 
 DEFSEQTYPE(pkinit_supp_pub_info, krb5_pkinit_supp_pub_info, pkinit_supp_pub_info_fields, NULL);

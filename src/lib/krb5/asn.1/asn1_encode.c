@@ -304,11 +304,14 @@ encode_type(asn1buf *buf, const void *val, const struct atype_info *a,
     case atype_tagged_thing:
     {
         const struct tagged_info *tag = a->tinfo;
-        retval = encode_type(buf, val, tag->basetype, &length, NULL);
-        if (retval)
-            return retval;
+        if (tag->implicit) {
+            retval = encode_type(buf, val, tag->basetype, &length,
+                                 &construction);
+        } else {
+            retval = encode_type(buf, val, tag->basetype, &length, NULL);
+            construction = tag->construction;
+        }
         tagclass = tag->tagtype;
-        construction = tag->construction;
         tagnum = tag->tagval;
         break;
     }
@@ -380,6 +383,7 @@ encode_a_field(asn1buf *buf, const void *val, const struct field_info *field,
 
     if (val == NULL) return ASN1_MISSING_FIELD;
     assert(omit_tag == NULL || field->tag < 0);
+    assert(!(field->tag_implicit && field->tag < 0));
 
     /*
      * In the switch statement, either (1) encode the contents of the field and
@@ -454,7 +458,11 @@ encode_a_field(asn1buf *buf, const void *val, const struct field_info *field,
         const void *dataptr = (const char *)val + field->dataoff;
         if (omit_tag != NULL)
             return encode_type(buf, dataptr, field->atype, retlen, omit_tag);
-        retval = encode_type(buf, dataptr, field->atype, &length, NULL);
+        if (field->tag_implicit) {
+            retval = encode_type(buf, dataptr, field->atype, &length,
+                                 &construction);
+        } else
+            retval = encode_type(buf, dataptr, field->atype, &length, NULL);
         if (retval)
             return retval;
         break;
@@ -471,6 +479,7 @@ encode_a_field(asn1buf *buf, const void *val, const struct field_info *field,
 
         a = field->atype;
         assert(a->type == atype_string || a->type == atype_opaque);
+        assert(!(a->type == atype_opaque && field->tag_implicit));
         assert(field->lentype != 0);
         assert(field->lentype->type == atype_int || field->lentype->type == atype_uint);
         assert(sizeof(int) <= sizeof(asn1_intmax));
@@ -508,7 +517,7 @@ encode_a_field(asn1buf *buf, const void *val, const struct field_info *field,
         if (a->type == atype_string)
             tagnum = string->tagval;
         else
-            assert(omit_tag == NULL);
+            assert(omit_tag == NULL && !field->tag_implicit);
         break;
     }
     default:
@@ -519,7 +528,7 @@ encode_a_field(asn1buf *buf, const void *val, const struct field_info *field,
     }
 
     sum += length;
-    if (omit_tag == NULL && tagnum >= 0) {
+    if (tagnum >= 0 && omit_tag == NULL && !field->tag_implicit) {
         /* We have not yet encoded the field's outer tag and should do so. */
         retval = asn1_make_tag(buf, tagclass, construction, tagnum, sum,
                                &length);
@@ -531,12 +540,15 @@ encode_a_field(asn1buf *buf, const void *val, const struct field_info *field,
         *omit_tag = construction;
     }
 
+    /* Maybe add a context tag.  Explicit tags are always constructed; implicit
+     * tags are primitive if the replaced outer tag would have been. */
     if (field->tag >= 0) {
-        retval = asn1_make_etag(buf, CONTEXT_SPECIFIC, field->tag, sum,
-                                &length);
-        if (retval) {
+        if (!field->tag_implicit)
+            construction = CONSTRUCTED;
+        retval = asn1_make_tag(buf, CONTEXT_SPECIFIC, construction, field->tag,
+                               sum, &length);
+        if (retval)
             return retval;
-        }
         sum += length;
     }
     *retlen = sum;
