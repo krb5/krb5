@@ -1762,13 +1762,15 @@ asn1_encode_subject_pk_info(asn1buf *buf, const krb5_subject_pk_info *val,
     }
 
     if (val->algorithm.parameters.length != 0) {
-        unsigned int length;
-
         retval = asn1buf_insert_octetstring(buf, val->algorithm.parameters.length,
                                             val->algorithm.parameters.data);
         if (retval)
             return retval;
         sum += val->algorithm.parameters.length;
+    }
+
+    {
+        unsigned int length;
 
         retval = asn1_encode_oid(buf, val->algorithm.algorithm.length,
                                  val->algorithm.algorithm.data,
