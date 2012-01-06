@@ -327,8 +327,8 @@ asn1_encode_opaque(asn1buf *buf, unsigned int len, const void *val,
 #define LOADPTR(PTR,TYPE)                       \
     (*(const void *const *)(PTR))
 #else
-#define LOADPTR(PTR,TYPE)                                       \
-    (assert((TYPE)->loadptr != NULL), (TYPE)->loadptr(PTR))
+#define LOADPTR(PTR,PTRINFO)                                            \
+    (assert((PTRINFO)->loadptr != NULL), (PTRINFO)->loadptr(PTR))
 #endif
 
 static int
@@ -336,16 +336,18 @@ get_nullterm_sequence_len(const void *valp, const struct atype_info *seq)
 {
     int i;
     const struct atype_info *a;
+    const struct ptr_info *ptr;
     const void *elt, *eltptr;
 
     a = seq;
     i = 0;
     assert(a->type == atype_ptr);
     assert(seq->size != 0);
+    ptr = a->tinfo;
 
     while (1) {
         eltptr = (const char *) valp + i * seq->size;
-        elt = LOADPTR(eltptr, a);
+        elt = LOADPTR(eltptr, ptr);
         if (elt == NULL)
             break;
         i++;
@@ -383,43 +385,57 @@ krb5int_asn1_encode_a_thing(asn1buf *buf, const void *val,
 {
     switch (a->type) {
     case atype_fn:
-        assert(a->enc != NULL);
-        return a->enc(buf, val, retlen);
+    {
+        const struct fn_info *fn = a->tinfo;
+        assert(fn->enc != NULL);
+        return fn->enc(buf, val, retlen);
+    }
     case atype_sequence:
-        assert(a->seq != NULL);
-        return just_encode_sequence(buf, val, a->seq, retlen);
+        assert(a->tinfo != NULL);
+        return just_encode_sequence(buf, val, a->tinfo, retlen);
     case atype_ptr:
-        assert(a->basetype != NULL);
-        return krb5int_asn1_encode_a_thing(buf, LOADPTR(val, a),
-                                           a->basetype, retlen);
+    {
+        const struct ptr_info *ptr = a->tinfo;
+        assert(ptr->basetype != NULL);
+        return krb5int_asn1_encode_a_thing(buf, LOADPTR(val, ptr),
+                                           ptr->basetype, retlen);
+    }
     case atype_field:
-        assert(a->field != NULL);
-        return encode_a_field(buf, val, a->field, retlen);
+        assert(a->tinfo != NULL);
+        return encode_a_field(buf, val, a->tinfo, retlen);
     case atype_nullterm_sequence_of:
     case atype_nonempty_nullterm_sequence_of:
-        assert(a->basetype != NULL);
-        return encode_nullterm_sequence_of(buf, val, a->basetype,
+        assert(a->tinfo != NULL);
+        return encode_nullterm_sequence_of(buf, val, a->tinfo,
                                            a->type == atype_nullterm_sequence_of,
                                            retlen);
     case atype_tagged_thing:
     {
         asn1_error_code retval;
         unsigned int length, sum = 0;
-        retval = krb5int_asn1_encode_a_thing(buf, val, a->basetype, &length);
+        const struct tagged_info *tag = a->tinfo;
+        retval = krb5int_asn1_encode_a_thing(buf, val, tag->basetype, &length);
         if (retval) return retval;
         sum = length;
-        retval = asn1_make_tag(buf, a->tagtype, a->construction, a->tagval, sum, &length);
+        retval = asn1_make_tag(buf, tag->tagtype, tag->construction,
+                               tag->tagval, sum, &length);
         if (retval) return retval;
         sum += length;
         *retlen = sum;
         return 0;
     }
     case atype_int:
-        assert(a->loadint != NULL);
-        return asn1_encode_integer(buf, a->loadint(val), retlen);
+    {
+        const struct int_info *tinfo = a->tinfo;
+        assert(tinfo->loadint != NULL);
+        return asn1_encode_integer(buf, tinfo->loadint(val), retlen);
+    }
     case atype_uint:
-        assert(a->loaduint != NULL);
-        return asn1_encode_unsigned_integer(buf, a->loaduint(val), retlen);
+    {
+        const struct uint_info *tinfo = a->tinfo;
+        assert(tinfo->loaduint != NULL);
+        return asn1_encode_unsigned_integer(buf, tinfo->loaduint(val), retlen);
+    }
     case atype_min:
     case atype_max:
     case atype_fn_len:
@@ -458,6 +474,7 @@ encode_a_field(asn1buf *buf, const void *val,
         int slen;
         unsigned int length;
         const struct atype_info *a;
+        const struct ptr_info *ptrinfo;
 
         /*
          * The field holds a pointer to the array of objects.  So the
@@ -467,14 +484,16 @@ encode_a_field(asn1buf *buf, const void *val,
         dataptr = (const char *)val + field->dataoff;
         lenptr = (const char *)val + field->lenoff;
         assert(field->atype->type == atype_ptr);
-        dataptr = LOADPTR(dataptr, field->atype);
-        a = field->atype->basetype;
+        ptrinfo = field->atype->tinfo;
+        dataptr = LOADPTR(dataptr, ptrinfo);
+        a = ptrinfo->basetype;
         assert(field->lentype != 0);
         assert(field->lentype->type == atype_int || field->lentype->type == atype_uint);
         assert(sizeof(int) <= sizeof(asn1_intmax));
         assert(sizeof(unsigned int) <= sizeof(asn1_uintmax));
         if (field->lentype->type == atype_int) {
-            asn1_intmax xlen = field->lentype->loadint(lenptr);
+            const struct int_info *tinfo = field->lentype->tinfo;
+            asn1_intmax xlen = tinfo->loadint(lenptr);
             if (xlen < 0)
                 return EINVAL;
             if ((unsigned int) xlen != (asn1_uintmax) xlen)
@@ -483,7 +502,8 @@ encode_a_field(asn1buf *buf, const void *val,
                 return EINVAL;
             slen = (int) xlen;
         } else {
-            asn1_uintmax xlen = field->lentype->loaduint(lenptr);
+            const struct uint_info *tinfo = field->lentype->tinfo;
+            asn1_uintmax xlen = tinfo->loaduint(lenptr);
             if ((unsigned int) xlen != xlen)
                 return EINVAL;
             if (xlen > INT_MAX)
@@ -500,17 +520,13 @@ encode_a_field(asn1buf *buf, const void *val,
     case field_normal:
     {
         const void *dataptr;
-        const struct atype_info *a;
         unsigned int length;
 
         dataptr = (const char *)val + field->dataoff;
-
-        a = field->atype;
-        assert(a->type != atype_fn_len);
-        retval = krb5int_asn1_encode_a_thing(buf, dataptr, a, &length);
-        if (retval) {
+        retval = krb5int_asn1_encode_a_thing(buf, dataptr, field->atype,
+                                             &length);
+        if (retval)
             return retval;
-        }
         sum += length;
         break;
     }
@@ -520,6 +536,7 @@ encode_a_field(asn1buf *buf, const void *val,
         const struct atype_info *a;
         size_t slen;
         unsigned int length;
+        const struct fn_len_info *fnlen;
 
         dataptr = (const char *)val + field->dataoff;
         lenptr = (const char *)val + field->lenoff;
@@ -531,20 +548,23 @@ encode_a_field(asn1buf *buf, const void *val,
         assert(sizeof(int) <= sizeof(asn1_intmax));
         assert(sizeof(unsigned int) <= sizeof(asn1_uintmax));
         if (field->lentype->type == atype_int) {
-            asn1_intmax xlen = field->lentype->loadint(lenptr);
+            const struct int_info *tinfo = field->lentype->tinfo;
+            asn1_intmax xlen = tinfo->loadint(lenptr);
             if (xlen < 0)
                 return EINVAL;
             if ((size_t) xlen != (asn1_uintmax) xlen)
                 return EINVAL;
             slen = (size_t) xlen;
         } else {
-            asn1_uintmax xlen = field->lentype->loaduint(lenptr);
+            const struct uint_info *tinfo = field->lentype->tinfo;
+            asn1_uintmax xlen = tinfo->loaduint(lenptr);
             if ((size_t) xlen != xlen)
                 return EINVAL;
             slen = (size_t) xlen;
         }
 
-        dataptr = LOADPTR(dataptr, a);
+        fnlen = a->tinfo;
+        dataptr = LOADPTR(dataptr, fnlen);
         if (slen == SIZE_MAX)
             /* Error - negative or out of size_t range.  */
             return EINVAL;
@@ -556,8 +576,8 @@ encode_a_field(asn1buf *buf, const void *val,
          */
         if (slen != (unsigned int) slen)
             return EINVAL;
-        assert(a->enclen != NULL);
-        retval = a->enclen(buf, (unsigned int) slen, dataptr, &length);
+        assert(fnlen->enclen != NULL);
+        retval = fnlen->enclen(buf, (unsigned int) slen, dataptr, &length);
         if (retval) {
             return retval;
         }
