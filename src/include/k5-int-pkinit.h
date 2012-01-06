@@ -89,13 +89,13 @@ typedef struct _krb5_external_principal_identifier {
 
 /* TrustedCas */
 typedef struct _krb5_trusted_ca {
-    enum {
+    enum krb5_trusted_ca_selection {
         choice_trusted_cas_UNKNOWN = -1,
         choice_trusted_cas_principalName = 0,
         choice_trusted_cas_caName = 1,
         choice_trusted_cas_issuerAndSerial = 2
     } choice;
-    union {
+    union krb5_trusted_ca_choices {
         krb5_principal  principalName;
         krb5_data caName; /* fully-qualified X.500 "Name" as defined by X.509 (der-encoded) */
         krb5_data issuerAndSerial; /* Optional -- IssuerAndSerialNumber (der-encoded) */
@@ -151,12 +151,12 @@ typedef struct _krb5_reply_key_pack_draft9 {
 
 /* PA-PK-AS-REP (Draft 9 -- PA TYPE 15) */
 typedef struct _krb5_pa_pk_as_rep_draft9 {
-    enum {
+    enum krb5_pa_pk_as_rep_draft9_selection {
         choice_pa_pk_as_rep_draft9_UNKNOWN = -1,
         choice_pa_pk_as_rep_draft9_dhSignedData = 0,
         choice_pa_pk_as_rep_draft9_encKeyPack = 1
     } choice;
-    union {
+    union krb5_pa_pk_as_rep_draft9_choices {
         krb5_data dhSignedData;
         krb5_data encKeyPack;
     } u;
@@ -164,12 +164,12 @@ typedef struct _krb5_pa_pk_as_rep_draft9 {
 
 /* PA-PK-AS-REP (rfc4556 -- PA TYPE 17) */
 typedef struct _krb5_pa_pk_as_rep {
-    enum {
+    enum krb5_pa_pk_as_rep_selection {
         choice_pa_pk_as_rep_UNKNOWN = -1,
         choice_pa_pk_as_rep_dhInfo = 0,
         choice_pa_pk_as_rep_encKeyPack = 1
     } choice;
-    union {
+    union krb5_pa_pk_as_rep_choices {
         krb5_dh_rep_info    dh_Info;
         krb5_data           encKeyPack;
     } u;
@@ -230,11 +230,11 @@ encode_krb5_reply_key_pack_draft9(const krb5_reply_key_pack_draft9 *,
                                   krb5_data **code);
 
 krb5_error_code
-encode_krb5_td_trusted_certifiers(const krb5_external_principal_identifier **,
+encode_krb5_td_trusted_certifiers(krb5_external_principal_identifier *const *,
                                   krb5_data **code);
 
 krb5_error_code
-encode_krb5_td_dh_parameters(const krb5_algorithm_identifier **,
+encode_krb5_td_dh_parameters(krb5_algorithm_identifier *const *,
                              krb5_data **code);
 
 krb5_error_code

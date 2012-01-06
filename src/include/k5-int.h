@@ -1677,7 +1677,7 @@ krb5_error_code
 encode_krb5_padata_sequence(krb5_pa_data *const *rep, krb5_data **code);
 
 krb5_error_code
-encode_krb5_typed_data(const krb5_pa_data *const *rep, krb5_data **code);
+encode_krb5_typed_data(krb5_pa_data *const *rep, krb5_data **code);
 
 krb5_error_code
 encode_krb5_alt_method(const krb5_alt_method *, krb5_data **code);

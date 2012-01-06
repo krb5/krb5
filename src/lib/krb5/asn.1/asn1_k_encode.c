@@ -24,52 +24,9 @@
  * or implied warranty.
  */
 
-#include "asn1_k_encode.h"
 #include "asn1_make.h"
 #include "asn1_encode.h"
 #include <assert.h>
-
-/*
- * helper macros
- *
- * These are mostly only needed for PKINIT, but there are three
- * basic-krb5 encoders not converted yet.
- */
-
-/*
- * setup() -- create and initialize bookkeeping variables
- *   retval: stores error codes returned from subroutines
- *   length: length of the most-recently produced encoding
- *   sum: cumulative length of the entire encoding
- */
-#define asn1_setup()                            \
-    asn1_error_code retval;                     \
-    unsigned int sum=0
-
-/* form a sequence (by adding a sequence header to the current encoding) */
-#define asn1_makeseq()                                  \
-    { unsigned int length;                              \
-        retval = asn1_make_sequence(buf,sum,&length);   \
-        if (retval) {                                   \
-            return retval; }                            \
-        sum += length; }
-
-/* produce the final output and clean up the workspace */
-#define asn1_cleanup()                          \
-    *retlen = sum;                              \
-    return 0
-
-/* asn1_addfield -- add a field, or component, to the encoding */
-#define asn1_addfield(value,tag,encoder)                                \
-    { unsigned int length;                                              \
-        retval = encoder(buf,value,&length);                            \
-        if (retval) {                                                   \
-            return retval; }                                            \
-        sum += length;                                                  \
-        retval = asn1_make_etag(buf,CONTEXT_SPECIFIC,tag,length,&length); \
-        if (retval) {                                                   \
-            return retval; }                                            \
-        sum += length; }
 
 DEFINTTYPE(int32, krb5_int32);
 DEFPTRTYPE(int32_ptr, int32);
@@ -546,38 +503,12 @@ optional_sam_challenge(const void *p)
 DEFSEQTYPE(sam_challenge,krb5_sam_challenge,sam_challenge_fields,
            optional_sam_challenge);
 
-MAKE_ENCFN(asn1_encode_sequence_of_checksum, seq_of_checksum);
-static asn1_error_code
-asn1_encode_sam_challenge_2(asn1buf *buf, const krb5_sam_challenge_2 *val,
-                            unsigned int *retlen)
-{
-    asn1_setup();
-    if ( (!val) || (!val->sam_cksum) || (!val->sam_cksum[0]))
-        return ASN1_MISSING_FIELD;
-
-    asn1_addfield(val->sam_cksum, 1, asn1_encode_sequence_of_checksum);
-
-    {
-        unsigned int length;
-
-        retval = asn1buf_insert_octetstring(buf, val->sam_challenge_2_body.length,
-                                            (unsigned char *)val->sam_challenge_2_body.data);
-        if (retval) {
-            return retval;
-        }
-        sum += val->sam_challenge_2_body.length;
-        retval = asn1_make_etag(buf, CONTEXT_SPECIFIC, 0,
-                                val->sam_challenge_2_body.length, &length);
-        if (retval) {
-            return retval;
-        }
-        sum += length;
-    }
-
-    asn1_makeseq();
-    asn1_cleanup();
-}
-DEFFNTYPE(sam_challenge_2, krb5_sam_challenge_2, asn1_encode_sam_challenge_2);
+static const struct field_info sam_challenge_2_fields[] = {
+    FIELDOF_NORM(krb5_sam_challenge_2, opaque_data, sam_challenge_2_body,
+                 0, 0),
+    FIELDOF_NORM(krb5_sam_challenge_2, ptr_seqof_checksum, sam_cksum, 1, 0),
+};
+DEFSEQTYPE(sam_challenge_2, krb5_sam_challenge_2, sam_challenge_2_fields, 0);
 
 static const struct field_info sam_challenge_2_body_fields[] = {
     FIELDOF_NORM(krb5_sam_challenge_2_body, int32, sam_type, 0, 0),
@@ -1543,157 +1474,32 @@ MAKE_FULL_ENCODER(encode_krb5_iakerb_finished, iakerb_finished);
  * PKINIT
  */
 
-/*
- * This code hasn't been converted to use the above framework yet,
- * because we currently have no test cases to validate the new
- * version.  It *also* appears that some of the encodings may disagree
- * with the specifications, but that's a separate problem.
- */
-
-/**** asn1 macros ****/
-#if 0
-How to write an asn1 encoder function using these macros:
-
-asn1_error_code asn1_encode_krb5_substructure(asn1buf *buf,
-                                              const krb5_type *val,
-                                              int *retlen)
-{
-    asn1_setup();
-
-    asn1_addfield(val->last_field, n, asn1_type);
-    asn1_addfield(rep->next_to_last_field, n-1, asn1_type);
-    ...
-
-        /* for OPTIONAL fields */
-        if (rep->field_i == should_not_be_omitted)
-            asn1_addfield(rep->field_i, i, asn1_type);
-
-        /*
-         * for string fields (these encoders take an additional argument,
-         * the length of the string)
-         */
-        addlenfield(rep->field_length, rep->field, i-1, asn1_type);
-
-        /* if you really have to do things yourself... */
-        retval = asn1_encode_asn1_type(buf,rep->field,&length);
-        if (retval) return retval;
-        sum += length;
-        retval = asn1_make_etag(buf, CONTEXT_SPECIFIC, tag_number, length,
-                                &length);
-        if (retval) return retval;
-        sum += length;
-
-        ...
-            asn1_addfield(rep->second_field, 1, asn1_type);
-            asn1_addfield(rep->first_field, 0, asn1_type);
-            asn1_makeseq();
-
-            asn1_cleanup();
-}
-#endif
-
-/*
- * asn1_addprimitive -- add a primitive field and universal primitive tag to
- * the encoding, wrapped in a context tag.  encoder must encode only the
- * contents, not the tag.
- */
-#define asn1_addprimitive(value,tag,encoder,ptag)                       \
-    { unsigned int enclen, tlen;                                        \
-        retval = encoder(buf, value, &enclen);                          \
-        if (retval) {                                                   \
-            return retval; }                                            \
-        retval = asn1_make_tag(buf, UNIVERSAL, PRIMITIVE, ptag,         \
-                               enclen, &tlen);                          \
-        sum += enclen + tlen;                                           \
-        retval = asn1_make_etag(buf, CONTEXT_SPECIFIC, tag,             \
-                                enclen + tlen, &tlen);                  \
-        if (retval) {                                                   \
-            return retval; }                                            \
-        sum += tlen; }
-
-#define asn1_addinteger(value, tag) \
-    asn1_addprimitive(value, tag, asn1_encode_integer, ASN1_INTEGER)
-
-/* asn1_addstring -- add a string field whose length must be separately
- * specified, wrapped in a universal primitive tag. */
-#define asn1_addstring(len, value, tag, ptag)                           \
-    {                                                                   \
-        unsigned int enclen, tlen;                                      \
-        retval = asn1_encode_bytestring(buf, len, value, &enclen);      \
-        if (retval) {                                                   \
-            return retval; }                                            \
-        retval = asn1_make_tag(buf, UNIVERSAL, PRIMITIVE, ptag,         \
-                               enclen, &tlen);                          \
-        if (retval) {                                                   \
-            return retval; }                                            \
-        sum += enclen + tlen;                                           \
-        retval = asn1_make_etag(buf, CONTEXT_SPECIFIC, tag,             \
-                                enclen + tlen, &tlen);                  \
-        if (retval) {                                                   \
-            return retval; }                                            \
-        sum += tlen;                                                    \
-    }
-
-/*
- * asn1_addfield_implicit -- add an implicitly tagged field, or component,
- * to the encoding
- */
-#define asn1_addfield_implicit(value,tag,encoder)               \
-    { unsigned int length;                                      \
-        retval = encoder(buf,value,&length);                    \
-        if (retval) {                                           \
-            return retval; }                                    \
-        sum += length;                                          \
-        retval = asn1_make_tag(buf, CONTEXT_SPECIFIC,PRIMITIVE, \
-                               tag, length, &length);           \
-        if (retval) {                                           \
-            return retval; }                                    \
-        sum += length; }
-
-/*
- * asn1_insert_implicit_octetstring -- add an octet string with implicit
- * tagging
- */
-#define asn1_insert_implicit_octetstring(len,value,tag)                 \
-    { unsigned int length;                                              \
-        retval = asn1buf_insert_octetstring(buf,len,value);             \
-        if (retval) {                                                   \
-            return retval; }                                            \
-        sum += len;                                                     \
-        retval = asn1_make_tag(buf, CONTEXT_SPECIFIC, PRIMITIVE,        \
-                               tag, len, &length);                      \
-        if (retval) {                                                   \
-            return retval; }                                            \
-        sum += length; }
-
-/* asn1_insert_implicit_bitstring -- add a bitstring with implicit tagging */
-/* needs "length" declared in enclosing context */
-#define asn1_insert_implicit_bitstring(len, value, tag)         \
-    {                                                           \
-        retval = asn1buf_insert_octetstring(buf, len, value);   \
-        if (retval) {                                           \
-            return retval; }                                    \
-        sum += len;                                             \
-        retval = asn1buf_insert_octet(buf, 0);                  \
-        if (retval) {                                           \
-            return retval; }                                    \
-        sum++;                                                  \
-        retval = asn1_make_tag(buf, UNIVERSAL, PRIMITIVE,       \
-                               tag, len + 1, &length);          \
-        if (retval) {                                           \
-            return retval; }                                    \
-        sum += length;                                          \
-    }
-
 #ifndef DISABLE_PKINIT
 
-DEFFNTYPE(algorithm_identifier, krb5_algorithm_identifier, asn1_encode_algorithm_identifier);
 DEFSTRINGTYPE(object_identifier, char *, asn1_encode_bytestring,
               ASN1_OBJECTIDENTIFIER);
 DEFFIELDTYPE(oid_data, krb5_data,
              FIELDOF_STRING(krb5_data, object_identifier, data, length,
                             -1, 0));
 DEFPTRTYPE(oid_data_ptr, oid_data);
+
+static unsigned int
+algorithm_identifier_optional(const void *p)
+{
+    unsigned int optional = 0;
+    const krb5_algorithm_identifier *val = p;
+    if (val->parameters.length > 0)
+        optional |= (1u << 1);
+    return optional;
+}
+
+static const struct field_info algorithm_identifier_fields[] = {
+    FIELDOF_NORM(krb5_algorithm_identifier, oid_data, algorithm, -1, 0),
+    FIELDOF_OPT(krb5_algorithm_identifier, opaque_data, parameters, -1, 0, 1),
+};
+DEFSEQTYPE(algorithm_identifier, krb5_algorithm_identifier,
+           algorithm_identifier_fields, algorithm_identifier_optional);
+DEFPTRTYPE(algorithm_identifier_ptr, algorithm_identifier);
 
 static const struct field_info kdf_alg_id_fields[] = {
     FIELDOF_ENCODEAS(krb5_data, oid_data, 0, 0)
@@ -1702,10 +1508,6 @@ DEFSEQTYPE(kdf_alg_id, krb5_data, kdf_alg_id_fields, NULL);
 DEFPTRTYPE(kdf_alg_id_ptr, kdf_alg_id);
 DEFNONEMPTYNULLTERMSEQOFTYPE(supported_kdfs, kdf_alg_id_ptr);
 DEFPTRTYPE(supported_kdfs_ptr, supported_kdfs);
-MAKE_ENCFN(asn1_encode_supported_kdfs,
-           supported_kdfs);
-MAKE_ENCFN(asn1_encode_kdf_alg_id, kdf_alg_id);
-
 
 /* Krb5PrincipalName is defined in RFC 4556 and is *not* PrincipalName from RFC 4120*/
 static const struct field_info pkinit_krb5_principal_name_fields[] = {
@@ -1747,449 +1549,311 @@ DEFSEQTYPE(pkinit_supp_pub_info, krb5_pkinit_supp_pub_info, pkinit_supp_pub_info
 MAKE_FULL_ENCODER(encode_krb5_pkinit_supp_pub_info, pkinit_supp_pub_info);
 MAKE_FULL_ENCODER(encode_krb5_sp80056a_other_info, sp80056a_other_info);
 
-/* Callable encoders for the types defined above, until the PKINIT
-   encoders get converted.  */
-MAKE_ENCFN(asn1_encode_realm, realm_of_principal_data);
-MAKE_ENCFN(asn1_encode_principal_name, principal_data);
-MAKE_ENCFN(asn1_encode_encryption_key, encryption_key);
-MAKE_ENCFN(asn1_encode_checksum, checksum);
+/* A krb5_checksum encoded as an OCTET STRING, for PKAuthenticator. */
+DEFFIELDTYPE(ostring_checksum, krb5_checksum,
+             FIELDOF_STRING(krb5_checksum, octetstring, contents, length,
+                            -1, 0));
 
-static asn1_error_code
-asn1_encode_kerberos_time(asn1buf *buf, const krb5_timestamp val,
-                          unsigned int *retlen)
+static const struct field_info pk_authenticator_fields[] = {
+    FIELDOF_NORM(krb5_pk_authenticator, int32, cusec, 0, 0),
+    FIELDOF_NORM(krb5_pk_authenticator, kerberos_time, ctime, 1, 0),
+    FIELDOF_NORM(krb5_pk_authenticator, int32, nonce, 2, 0),
+    FIELDOF_NORM(krb5_pk_authenticator, ostring_checksum, paChecksum, 3, 0),
+};
+DEFSEQTYPE(pk_authenticator, krb5_pk_authenticator, pk_authenticator_fields,
+           0);
+
+static const struct field_info pk_authenticator_draft9_fields[] = {
+    FIELDOF_NORM(krb5_pk_authenticator_draft9, principal, kdcName, 0, 0),
+    FIELDOF_NORM(krb5_pk_authenticator_draft9, realm_of_principal, kdcName,
+                 1, 0),
+    FIELDOF_NORM(krb5_pk_authenticator_draft9, int32, cusec, 2, 0),
+    FIELDOF_NORM(krb5_pk_authenticator_draft9, kerberos_time, ctime, 3, 0),
+    FIELDOF_NORM(krb5_pk_authenticator_draft9, int32, nonce, 4, 0),
+};
+DEFSEQTYPE(pk_authenticator_draft9, krb5_pk_authenticator_draft9,
+           pk_authenticator_draft9_fields, 0);
+
+DEFSTRINGTYPE(s_bitstring, char *, asn1_encode_bitstring, ASN1_BITSTRING);
+DEFFIELDTYPE(bitstring_data, krb5_data,
+             FIELDOF_STRING(krb5_data, s_bitstring, data, length, -1, 0));
+
+static const struct field_info subject_pk_info_fields[] = {
+    FIELDOF_NORM(krb5_subject_pk_info, algorithm_identifier, algorithm, -1, 0),
+    FIELDOF_NORM(krb5_subject_pk_info, bitstring_data, subjectPublicKey, -1, 0)
+};
+DEFSEQTYPE(subject_pk_info, krb5_subject_pk_info, subject_pk_info_fields, 0);
+DEFPTRTYPE(subject_pk_info_ptr, subject_pk_info);
+
+DEFNULLTERMSEQOFTYPE(seq_of_algorithm_identifier, algorithm_identifier_ptr);
+DEFPTRTYPE(ptr_seqof_algorithm_identifier, seq_of_algorithm_identifier);
+
+static unsigned int
+auth_pack_optional(const void *p)
 {
-    return asn1_encode_kerberos_time_at(buf,&val,retlen);
-}
-
-/* Now the real PKINIT encoder functions.  */
-asn1_error_code
-asn1_encode_pk_authenticator(asn1buf *buf, const krb5_pk_authenticator *val,
-                             unsigned int *retlen)
-{
-    asn1_setup();
-    asn1_addstring(val->paChecksum.length, val->paChecksum.contents, 3,
-                   ASN1_OCTETSTRING);
-    asn1_addinteger(val->nonce, 2);
-    asn1_addprimitive(val->ctime, 1, asn1_encode_kerberos_time,
-                      ASN1_GENERALTIME);
-    asn1_addinteger(val->cusec, 0);
-
-    asn1_makeseq();
-    asn1_cleanup();
-}
-
-asn1_error_code
-asn1_encode_pk_authenticator_draft9(asn1buf *buf,
-                                    const krb5_pk_authenticator_draft9 *val,
-                                    unsigned int *retlen)
-{
-    asn1_setup();
-
-    asn1_addinteger(val->nonce, 4);
-    asn1_addprimitive(val->ctime, 3, asn1_encode_kerberos_time,
-                      ASN1_GENERALTIME);
-    asn1_addinteger(val->cusec, 2);
-    asn1_addfield(val->kdcName, 1, asn1_encode_realm);
-    asn1_addfield(val->kdcName, 0, asn1_encode_principal_name);
-
-    asn1_makeseq();
-    asn1_cleanup();
-}
-
-
-asn1_error_code
-asn1_encode_algorithm_identifier(asn1buf *buf,
-                                 const krb5_algorithm_identifier *val,
-                                 unsigned int *retlen)
-{
-    asn1_setup();
-
-    if (val->parameters.length != 0) {
-        retval = asn1buf_insert_octetstring(buf, val->parameters.length,
-                                            val->parameters.data);
-        if (retval)
-            return retval;
-        sum += val->parameters.length;
-    }
-
-    {
-        unsigned int length;
-        retval = asn1_encode_bytestring(buf, val->algorithm.length,
-                                        val->algorithm.data, &length);
-
-        if (retval)
-            return retval;
-        sum += length;
-        retval = asn1_make_tag(buf, UNIVERSAL, PRIMITIVE,
-                               ASN1_OBJECTIDENTIFIER, length, &length);
-        if (retval)
-            return retval;
-        sum += length;
-    }
-
-    asn1_makeseq();
-    asn1_cleanup();
-}
-
-asn1_error_code
-asn1_encode_subject_pk_info(asn1buf *buf, const krb5_subject_pk_info *val,
-                            unsigned int *retlen)
-{
-    asn1_setup();
-    unsigned int len, alen = 0;
-
-    {
-        unsigned int length;
-
-        asn1_insert_implicit_bitstring(val->subjectPublicKey.length,val->subjectPublicKey.data,ASN1_BITSTRING);
-    }
-
-    if (val->algorithm.parameters.length != 0) {
-        retval = asn1buf_insert_octetstring(buf, val->algorithm.parameters.length,
-                                            val->algorithm.parameters.data);
-        if (retval)
-            return retval;
-        alen += val->algorithm.parameters.length;
-    }
-
-    retval = asn1_encode_bytestring(buf, val->algorithm.algorithm.length,
-                                    val->algorithm.algorithm.data, &len);
-    if (retval)
-        return retval;
-    alen += len;
-
-    retval = asn1_make_tag(buf, UNIVERSAL, PRIMITIVE,
-                           ASN1_OBJECTIDENTIFIER, len, &len);
-    if (retval)
-        return retval;
-    alen += len;
-
-    retval = asn1_make_etag(buf, UNIVERSAL, ASN1_SEQUENCE, alen, &len);
-    if (retval)
-        return retval;
-    sum += alen + len;
-
-    asn1_makeseq();
-    asn1_cleanup();
-}
-
-asn1_error_code
-asn1_encode_sequence_of_algorithm_identifier(
-    asn1buf *buf, const krb5_algorithm_identifier **val,
-    unsigned int *retlen)
-{
-    asn1_setup();
-    int i;
-
-    if (val == NULL || val[0] == NULL) return ASN1_MISSING_FIELD;
-
-    for (i=0; val[i] != NULL; i++);
-    for (i--; i>=0; i--) {
-        unsigned int length;
-        retval = asn1_encode_algorithm_identifier(buf,val[i],&length);
-        if (retval) return retval;
-        sum += length;
-    }
-    asn1_makeseq();
-
-    asn1_cleanup();
-}
-
-asn1_error_code
-asn1_encode_auth_pack(asn1buf *buf, const krb5_auth_pack *val,
-                      unsigned int *retlen)
-{
-    asn1_setup();
-
-    if (val->supportedKDFs != NULL)
-        asn1_addfield(val->supportedKDFs, 4, asn1_encode_supported_kdfs);
-    if (val->clientDHNonce.length != 0)
-        asn1_addstring(val->clientDHNonce.length, val->clientDHNonce.data, 3,
-                       ASN1_OCTETSTRING);
+    unsigned int optional = 0;
+    const krb5_auth_pack *val = p;
+    if (val->clientPublicValue != NULL)
+        optional |= (1u << 1);
     if (val->supportedCMSTypes != NULL)
-        asn1_addfield((const krb5_algorithm_identifier **)val->supportedCMSTypes,2,asn1_encode_sequence_of_algorithm_identifier);
+        optional |= (1u << 2);
+    if (val->clientDHNonce.length != 0)
+        optional |= (1u << 3);
+    if (val->supportedKDFs != NULL)
+        optional |= (1u << 4);
+    return optional;
+}
+
+static const struct field_info auth_pack_fields[] = {
+    FIELDOF_NORM(krb5_auth_pack, pk_authenticator, pkAuthenticator, 0, 0),
+    FIELDOF_OPT(krb5_auth_pack, subject_pk_info_ptr, clientPublicValue,
+                1, 0, 1),
+    FIELDOF_OPT(krb5_auth_pack, ptr_seqof_algorithm_identifier,
+                supportedCMSTypes, 2, 0, 2),
+    FIELDOF_OPT(krb5_auth_pack, ostring_data, clientDHNonce, 3, 0, 3),
+    FIELDOF_OPT(krb5_auth_pack, supported_kdfs_ptr, supportedKDFs, 4, 0, 4),
+};
+DEFSEQTYPE(auth_pack, krb5_auth_pack, auth_pack_fields, auth_pack_optional);
+
+static unsigned int
+auth_pack_draft9_optional(const void *p)
+{
+    unsigned int optional = 0;
+    const krb5_auth_pack *val = p;
     if (val->clientPublicValue != NULL)
-        asn1_addfield(val->clientPublicValue,1,asn1_encode_subject_pk_info);
-    asn1_addfield(&(val->pkAuthenticator),0,asn1_encode_pk_authenticator);
-
-    asn1_makeseq();
-    asn1_cleanup();
+        optional |= (1u << 1);
+    return optional;
 }
 
-asn1_error_code
-asn1_encode_auth_pack_draft9(asn1buf *buf, const krb5_auth_pack_draft9 *val,
-                             unsigned int *retlen)
+static const struct field_info auth_pack_draft9_fields[] = {
+    FIELDOF_NORM(krb5_auth_pack_draft9, pk_authenticator_draft9,
+                 pkAuthenticator, 0, 0),
+    FIELDOF_OPT(krb5_auth_pack_draft9, subject_pk_info_ptr,
+                clientPublicValue, 1, 0, 1),
+};
+DEFSEQTYPE(auth_pack_draft9, krb5_auth_pack_draft9, auth_pack_draft9_fields,
+           auth_pack_draft9_optional);
+
+static unsigned int
+external_principal_identifier_optional(const void *p)
 {
-    asn1_setup();
-
-    if (val->clientPublicValue != NULL)
-        asn1_addfield(val->clientPublicValue, 1, asn1_encode_subject_pk_info);
-    asn1_addfield(&(val->pkAuthenticator), 0, asn1_encode_pk_authenticator_draft9);
-
-    asn1_makeseq();
-    asn1_cleanup();
+    unsigned int optional = 0;
+    const krb5_external_principal_identifier *val = p;
+    if (val->subjectName.length > 0)
+        optional |= (1u << 0);
+    if (val->issuerAndSerialNumber.length > 0)
+        optional |= (1u << 1);
+    if (val->subjectKeyIdentifier.length > 0)
+        optional |= (1u << 2);
+    return optional;
 }
 
-asn1_error_code
-asn1_encode_external_principal_identifier(
-    asn1buf *buf, const krb5_external_principal_identifier *val,
-    unsigned int *retlen)
+static const struct field_info external_principal_identifier_fields[] = {
+    FIELDOF_OPT(krb5_external_principal_identifier, ostring_data, subjectName,
+                0, 1, 0),
+    FIELDOF_OPT(krb5_external_principal_identifier, ostring_data,
+                issuerAndSerialNumber, 1, 1, 1),
+    FIELDOF_OPT(krb5_external_principal_identifier, ostring_data,
+                subjectKeyIdentifier, 2, 1, 2),
+};
+DEFSEQTYPE(external_principal_identifier, krb5_external_principal_identifier,
+           external_principal_identifier_fields,
+           external_principal_identifier_optional);
+DEFPTRTYPE(external_principal_identifier_ptr, external_principal_identifier);
+
+DEFNULLTERMSEQOFTYPE(seq_of_external_principal_identifier,
+                     external_principal_identifier_ptr);
+DEFPTRTYPE(ptr_seqof_external_principal_identifier,
+           seq_of_external_principal_identifier);
+
+static unsigned int
+pa_pk_as_req_optional(const void *p)
 {
-    asn1_setup();
-
-    /* Verify there is something to encode */
-    if (val->subjectKeyIdentifier.length == 0 && val->issuerAndSerialNumber.length == 0 && val->subjectName.length == 0)
-        return ASN1_MISSING_FIELD;
-
-    if (val->subjectKeyIdentifier.length != 0)
-        asn1_insert_implicit_octetstring(val->subjectKeyIdentifier.length,val->subjectKeyIdentifier.data,2);
-
-    if (val->issuerAndSerialNumber.length != 0)
-        asn1_insert_implicit_octetstring(val->issuerAndSerialNumber.length,val->issuerAndSerialNumber.data,1);
-
-    if (val->subjectName.length != 0)
-        asn1_insert_implicit_octetstring(val->subjectName.length,val->subjectName.data,0);
-
-    asn1_makeseq();
-    asn1_cleanup();
-}
-
-asn1_error_code
-asn1_encode_sequence_of_external_principal_identifier(
-    asn1buf *buf,
-    const krb5_external_principal_identifier **val,
-    unsigned int *retlen)
-{
-    asn1_setup();
-    int i;
-
-    if (val == NULL || val[0] == NULL) return ASN1_MISSING_FIELD;
-
-    for (i=0; val[i] != NULL; i++);
-    for (i--; i>=0; i--) {
-        unsigned int length;
-        retval = asn1_encode_external_principal_identifier(buf,val[i],&length);
-        if (retval) return retval;
-        sum += length;
-    }
-    asn1_makeseq();
-
-    asn1_cleanup();
-}
-
-asn1_error_code
-asn1_encode_pa_pk_as_req(asn1buf *buf, const krb5_pa_pk_as_req *val,
-                         unsigned int *retlen)
-{
-    asn1_setup();
-
-    if (val->kdcPkId.length != 0)
-        asn1_insert_implicit_octetstring(val->kdcPkId.length,val->kdcPkId.data,2);
-
+    unsigned int optional = 0;
+    const krb5_pa_pk_as_req *val = p;
     if (val->trustedCertifiers != NULL)
-        asn1_addfield((const krb5_external_principal_identifier **)val->trustedCertifiers,1,asn1_encode_sequence_of_external_principal_identifier);
-
-    asn1_insert_implicit_octetstring(val->signedAuthPack.length,val->signedAuthPack.data,0);
-
-    asn1_makeseq();
-    asn1_cleanup();
+        optional |= (1u << 1);
+    if (val->kdcPkId.length > 0)
+        optional |= (1u << 2);
+    return optional;
 }
 
-asn1_error_code
-asn1_encode_trusted_ca(asn1buf *buf, const krb5_trusted_ca *val,
-                       unsigned int *retlen)
+static const struct field_info pa_pk_as_req_fields[] = {
+    FIELDOF_NORM(krb5_pa_pk_as_req, ostring_data, signedAuthPack, 0, 1),
+    FIELDOF_OPT(krb5_pa_pk_as_req, ptr_seqof_external_principal_identifier,
+                trustedCertifiers, 1, 0, 1),
+    FIELDOF_OPT(krb5_pa_pk_as_req, ostring_data, kdcPkId, 2, 1, 2),
+};
+DEFSEQTYPE(pa_pk_as_req, krb5_pa_pk_as_req, pa_pk_as_req_fields,
+           pa_pk_as_req_optional);
+
+/*
+ * draft-ietf-cat-kerberos-pk-init-09 specifies these fields as explicitly
+ * tagged KerberosName, Name, and IssuerAndSerialNumber respectively, which
+ * means they should have constructed context tags.  However, our historical
+ * behavior is to use primitive context-specific tags, and we don't want to
+ * change that behavior without interop testing.  For the principal name, which
+ * we encode ourselves, use a DEFTAGGEDTYPE to wrap the principal encoding in a
+ * primitive [0] tag.  For the other two types, we have the encoding in a
+ * krb5_data object; pretend that they are wrapped in IMPLICIT OCTET STRING in
+ * order to wrap them in primitive [1] and [2] tags.
+ */
+DEFTAGGEDTYPE(princ_0_primitive, CONTEXT_SPECIFIC, PRIMITIVE, 0, 0, principal);
+typedef union krb5_trusted_ca_choices krb5_trusted_ca_choices;
+typedef enum krb5_trusted_ca_selection krb5_trusted_ca_selection;
+static const struct field_info trusted_ca_alternatives[] = {
+    FIELDOF_NORM(krb5_trusted_ca_choices, princ_0_primitive, principalName,
+                 -1, 0),
+    FIELDOF_NORM(krb5_trusted_ca_choices, ostring_data, caName, 1, 1),
+    FIELDOF_NORM(krb5_trusted_ca_choices, ostring_data, issuerAndSerial, 2, 1),
+};
+DEFCHOICETYPE(trusted_ca_choice, krb5_trusted_ca_choices,
+              trusted_ca_alternatives);
+DEFINTTYPE(trusted_ca_selection, krb5_trusted_ca_selection);
+DEFFIELDTYPE(trusted_ca, krb5_trusted_ca,
+             FIELDOF_CHOICE(krb5_trusted_ca, trusted_ca_choice, u, choice,
+                            trusted_ca_selection, -1));
+DEFPTRTYPE(trusted_ca_ptr, trusted_ca);
+
+DEFNULLTERMSEQOFTYPE(seq_of_trusted_ca, trusted_ca_ptr);
+DEFPTRTYPE(ptr_seqof_trusted_ca, seq_of_trusted_ca);
+
+static unsigned int
+pa_pk_as_req_draft9_optional(const void *p)
 {
-    asn1_setup();
-
-    switch (val->choice) {
-    case choice_trusted_cas_issuerAndSerial:
-        asn1_insert_implicit_octetstring(val->u.issuerAndSerial.length,val->u.issuerAndSerial.data,2);
-        break;
-    case choice_trusted_cas_caName:
-        asn1_insert_implicit_octetstring(val->u.caName.length,val->u.caName.data,1);
-        break;
-    case choice_trusted_cas_principalName:
-        asn1_addfield_implicit(val->u.principalName,0,asn1_encode_principal_name);
-        break;
-    default:
-        return ASN1_MISSING_FIELD;
-    }
-
-    asn1_cleanup();
-}
-
-asn1_error_code
-asn1_encode_sequence_of_trusted_ca(asn1buf *buf, const krb5_trusted_ca **val,
-                                   unsigned int *retlen)
-{
-    asn1_setup();
-    int i;
-
-    if (val == NULL || val[0] == NULL) return ASN1_MISSING_FIELD;
-
-    for (i=0; val[i] != NULL; i++);
-    for (i--; i>=0; i--) {
-        unsigned int length;
-        retval = asn1_encode_trusted_ca(buf,val[i],&length);
-        if (retval) return retval;
-        sum += length;
-    }
-    asn1_makeseq();
-    asn1_cleanup();
-}
-
-asn1_error_code
-asn1_encode_pa_pk_as_req_draft9(asn1buf *buf,
-                                const krb5_pa_pk_as_req_draft9 *val,
-                                unsigned int *retlen)
-{
-    asn1_setup();
-
-    if (val->encryptionCert.length != 0)
-        asn1_insert_implicit_octetstring(val->encryptionCert.length,val->encryptionCert.data,3);
-
-    if (val->kdcCert.length != 0)
-        asn1_insert_implicit_octetstring(val->kdcCert.length,val->kdcCert.data,2);
-
+    unsigned int optional = 0;
+    const krb5_pa_pk_as_req_draft9 *val = p;
     if (val->trustedCertifiers != NULL)
-        asn1_addfield((const krb5_trusted_ca **)val->trustedCertifiers,1,asn1_encode_sequence_of_trusted_ca);
-
-    asn1_insert_implicit_octetstring(val->signedAuthPack.length,val->signedAuthPack.data,0);
-
-    asn1_makeseq();
-    asn1_cleanup();
+        optional |= (1u << 1);
+    if (val->kdcCert.length > 0)
+        optional |= (1u << 2);
+    if (val->encryptionCert.length > 0)
+        optional |= (1u << 3);
+    return optional;
 }
 
-asn1_error_code
-asn1_encode_dh_rep_info(asn1buf *buf, const krb5_dh_rep_info *val,
-                        unsigned int *retlen)
+/*
+ * draft-ietf-cat-kerberos-pk-init-09 specifies signedAuthPack, kdcCert, and
+ * EncryptionCert as explictly tagged SignedData, IssuerAndSerialNumber, and
+ * IssuerAndSerialNumber, which means they should have constructed context
+ * tags.  However, our historical behavior is to use a primitive context tag,
+ * and we don't want to change that without interop testing.  We have the DER
+ * encodings of these fields in krb5_data objects; pretend that they are
+ * wrapped in IMPLICIT OCTET STRING in order to generate primitive context
+ * tags.
+ */
+static const struct field_info pa_pk_as_req_draft9_fields[] = {
+    FIELDOF_NORM(krb5_pa_pk_as_req_draft9, ostring_data, signedAuthPack, 0, 1),
+    FIELDOF_OPT(krb5_pa_pk_as_req_draft9, ptr_seqof_trusted_ca,
+                trustedCertifiers, 1, 0, 1),
+    FIELDOF_OPT(krb5_pa_pk_as_req_draft9, ostring_data, kdcCert, 2, 1, 2),
+    FIELDOF_OPT(krb5_pa_pk_as_req_draft9, ostring_data, encryptionCert,
+                3, 1, 3),
+};
+DEFSEQTYPE(pa_pk_as_req_draft9, krb5_pa_pk_as_req_draft9,
+           pa_pk_as_req_draft9_fields, pa_pk_as_req_draft9_optional);
+
+static unsigned int
+dh_rep_info_optional(const void *p)
 {
-    asn1_setup();
-
-    if (val->kdfID)
-        asn1_addfield(val->kdfID, 2, asn1_encode_kdf_alg_id);
-    if (val->serverDHNonce.length != 0)
-        asn1_insert_implicit_octetstring(val->serverDHNonce.length,val->serverDHNonce.data,1);
-
-    asn1_insert_implicit_octetstring(val->dhSignedData.length,val->dhSignedData.data,0);
-
-    asn1_makeseq();
-    asn1_cleanup();
+    unsigned int optional = 0;
+    const krb5_dh_rep_info *val = p;
+    if (val->serverDHNonce.length > 0)
+        optional |= (1u << 1);
+    if (val->kdfID != NULL)
+        optional |= (1u << 2);
+    return optional;
 }
 
-asn1_error_code
-asn1_encode_kdc_dh_key_info(asn1buf *buf, const krb5_kdc_dh_key_info *val,
-                            unsigned int *retlen)
+/*
+ * RFC 4556 specifies serverDHNonce as an explicitly tagged octet string.
+ * Historically we encode it as an implicitly tagged octet string.  This may be
+ * harmless (and fixable) since we don't appear to include a serverDHNonce in
+ * our PKINIT server code, but we would want to change this carefully.
+ */
+static const struct field_info dh_rep_info_fields[] = {
+    FIELDOF_NORM(krb5_dh_rep_info, ostring_data, dhSignedData, 0, 1),
+    FIELDOF_OPT(krb5_dh_rep_info, ostring_data, serverDHNonce, 1, 1, 1),
+    FIELDOF_OPT(krb5_dh_rep_info, kdf_alg_id_ptr, kdfID, 2, 0, 2),
+};
+DEFSEQTYPE(dh_rep_info, krb5_dh_rep_info,
+           dh_rep_info_fields, dh_rep_info_optional);
+
+static unsigned int
+kdc_dh_key_info_optional(const void *p)
 {
-    asn1_setup();
-
-    if (val->dhKeyExpiration != 0) {
-        asn1_addprimitive(val->dhKeyExpiration, 2, asn1_encode_kerberos_time,
-                          ASN1_GENERALTIME);
-    }
-    asn1_addinteger(val->nonce, 1);
-
-    {
-        unsigned int length;
-
-        asn1_insert_implicit_bitstring(val->subjectPublicKey.length,val->subjectPublicKey.data,3);
-        retval = asn1_make_etag(buf, CONTEXT_SPECIFIC, 0,
-                                val->subjectPublicKey.length + 1 + length,
-                                &length);
-        if (retval)
-            return retval;
-        sum += length;
-    }
-
-    asn1_makeseq();
-    asn1_cleanup();
+    unsigned int optional = 0;
+    const krb5_kdc_dh_key_info *val = p;
+    if (val->dhKeyExpiration != 0)
+        optional |= (1u << 2);
+    return optional;
 }
 
-asn1_error_code
-asn1_encode_reply_key_pack(asn1buf *buf, const krb5_reply_key_pack *val,
-                           unsigned int *retlen)
-{
-    asn1_setup();
+static const struct field_info kdc_dh_key_info_fields[] = {
+    FIELDOF_NORM(krb5_kdc_dh_key_info, bitstring_data, subjectPublicKey, 0, 0),
+    FIELDOF_NORM(krb5_kdc_dh_key_info, int32, nonce, 1, 0),
+    FIELDOF_OPT(krb5_kdc_dh_key_info, kerberos_time, dhKeyExpiration, 2, 0, 2),
+};
+DEFSEQTYPE(kdc_dh_key_info, krb5_kdc_dh_key_info, kdc_dh_key_info_fields,
+           kdc_dh_key_info_optional);
 
-    asn1_addfield(&(val->asChecksum), 1, asn1_encode_checksum);
-    asn1_addfield(&(val->replyKey), 0, asn1_encode_encryption_key);
 
-    asn1_makeseq();
-    asn1_cleanup();
-}
+static const struct field_info reply_key_pack_fields[] = {
+    FIELDOF_NORM(krb5_reply_key_pack, encryption_key, replyKey, 0, 0),
+    FIELDOF_NORM(krb5_reply_key_pack, checksum, asChecksum, 1, 0),
+};
+DEFSEQTYPE(reply_key_pack, krb5_reply_key_pack, reply_key_pack_fields, 0);
 
-asn1_error_code
-asn1_encode_reply_key_pack_draft9(asn1buf *buf,
-                                  const krb5_reply_key_pack_draft9 *val,
-                                  unsigned int *retlen)
-{
-    asn1_setup();
+static const struct field_info reply_key_pack_draft9_fields[] = {
+    FIELDOF_NORM(krb5_reply_key_pack_draft9, encryption_key, replyKey, 0, 0),
+    FIELDOF_NORM(krb5_reply_key_pack_draft9, int32, nonce, 1, 0),
+};
+DEFSEQTYPE(reply_key_pack_draft9, krb5_reply_key_pack_draft9,
+           reply_key_pack_draft9_fields, 0);
 
-    asn1_addinteger(val->nonce, 1);
-    asn1_addfield(&(val->replyKey), 0, asn1_encode_encryption_key);
+typedef union krb5_pa_pk_as_rep_choices krb5_pa_pk_as_rep_choices;
+typedef enum krb5_pa_pk_as_rep_selection krb5_pa_pk_as_rep_selection;
+static const struct field_info pa_pk_as_rep_alternatives[] = {
+    FIELDOF_NORM(krb5_pa_pk_as_rep_choices, dh_rep_info, dh_Info, 0, 0),
+    FIELDOF_NORM(krb5_pa_pk_as_rep_choices, ostring_data, encKeyPack, 1, 1),
+};
+DEFCHOICETYPE(pa_pk_as_rep_choice, krb5_pa_pk_as_rep_choices,
+              pa_pk_as_rep_alternatives);
+DEFINTTYPE(pa_pk_as_rep_selection, krb5_pa_pk_as_rep_selection);
+DEFFIELDTYPE(pa_pk_as_rep, krb5_pa_pk_as_rep,
+             FIELDOF_CHOICE(krb5_pa_pk_as_rep, pa_pk_as_rep_choice, u, choice,
+                            pa_pk_as_rep_selection, -1));
 
-    asn1_makeseq();
-    asn1_cleanup();
-}
+typedef union krb5_pa_pk_as_rep_draft9_choices
+krb5_pa_pk_as_rep_draft9_choices;
+typedef enum krb5_pa_pk_as_rep_draft9_selection
+krb5_pa_pk_as_rep_draft9_selection;
+static const struct field_info pa_pk_as_rep_draft9_alternatives[] = {
+    FIELDOF_NORM(krb5_pa_pk_as_rep_draft9_choices, ostring_data, dhSignedData,
+                 0, 1),
+    FIELDOF_NORM(krb5_pa_pk_as_rep_draft9_choices, ostring_data, encKeyPack,
+                 1, 1),
+};
+DEFCHOICETYPE(pa_pk_as_rep_draft9_choice, krb5_pa_pk_as_rep_draft9_choices,
+              pa_pk_as_rep_draft9_alternatives);
+DEFINTTYPE(pa_pk_as_rep_draft9_selection, krb5_pa_pk_as_rep_draft9_selection);
+DEFFIELDTYPE(pa_pk_as_rep_draft9, krb5_pa_pk_as_rep_draft9,
+             FIELDOF_CHOICE(krb5_pa_pk_as_rep_draft9,
+                            pa_pk_as_rep_draft9_choice, u, choice,
+                            pa_pk_as_rep_draft9_selection, -1));
 
-asn1_error_code
-asn1_encode_pa_pk_as_rep(asn1buf *buf, const krb5_pa_pk_as_rep *val,
-                         unsigned int *retlen)
-{
-    asn1_setup();
-
-    switch (val->choice)
-    {
-    case choice_pa_pk_as_rep_dhInfo:
-        asn1_addfield(&(val->u.dh_Info), choice_pa_pk_as_rep_dhInfo, asn1_encode_dh_rep_info);
-        break;
-    case choice_pa_pk_as_rep_encKeyPack:
-        asn1_insert_implicit_octetstring(val->u.encKeyPack.length,val->u.encKeyPack.data,1);
-        break;
-    default:
-        return ASN1_MISSING_FIELD;
-    }
-
-    asn1_cleanup();
-}
-
-asn1_error_code
-asn1_encode_pa_pk_as_rep_draft9(asn1buf *buf,
-                                const krb5_pa_pk_as_rep_draft9 *val,
-                                unsigned int *retlen)
-{
-    asn1_setup();
-
-    switch (val->choice)
-    {
-    case choice_pa_pk_as_rep_draft9_dhSignedData:
-        asn1_insert_implicit_octetstring(val->u.dhSignedData.length,val->u.dhSignedData.data,0);
-        break;
-    case choice_pa_pk_as_rep_encKeyPack:
-        asn1_insert_implicit_octetstring(val->u.encKeyPack.length,val->u.encKeyPack.data,1);
-        break;
-    default:
-        return ASN1_MISSING_FIELD;
-    }
-
-    asn1_cleanup();
-}
-
-asn1_error_code
-asn1_encode_td_trusted_certifiers(
-    asn1buf *buf, const krb5_external_principal_identifier **val,
-    unsigned int *retlen)
-{
-    asn1_setup();
-    {
-        unsigned int length;
-        retval = asn1_encode_sequence_of_external_principal_identifier(buf, val, &length);
-        if (retval)
-            return retval;
-        /* length set but ignored?  sum not updated?  */
-    }
-    asn1_cleanup();
-}
+MAKE_FULL_ENCODER(encode_krb5_pa_pk_as_req, pa_pk_as_req);
+MAKE_FULL_ENCODER(encode_krb5_pa_pk_as_req_draft9, pa_pk_as_req_draft9);
+MAKE_FULL_ENCODER(encode_krb5_pa_pk_as_rep, pa_pk_as_rep);
+MAKE_FULL_ENCODER(encode_krb5_pa_pk_as_rep_draft9, pa_pk_as_rep_draft9);
+MAKE_FULL_ENCODER(encode_krb5_auth_pack, auth_pack);
+MAKE_FULL_ENCODER(encode_krb5_auth_pack_draft9, auth_pack_draft9);
+MAKE_FULL_ENCODER(encode_krb5_kdc_dh_key_info, kdc_dh_key_info);
+MAKE_FULL_ENCODER(encode_krb5_reply_key_pack, reply_key_pack);
+MAKE_FULL_ENCODER(encode_krb5_reply_key_pack_draft9, reply_key_pack_draft9);
+MAKE_FULL_ENCODER(encode_krb5_td_trusted_certifiers,
+                  seq_of_external_principal_identifier);
+MAKE_FULL_ENCODER(encode_krb5_td_dh_parameters, seq_of_algorithm_identifier);
 
 #else /* DISABLE_PKINIT */
 
@@ -2211,36 +1875,12 @@ encode_krb5_pkinit_supp_pub_info(const krb5_pkinit_supp_pub_info *rep,
 
 #endif /* not DISABLE_PKINIT */
 
-asn1_error_code
-asn1_encode_sequence_of_typed_data(asn1buf *buf,
-                                   const krb5_pa_data *const *val,
-                                   unsigned int *retlen)
-{
-    asn1_setup();
-    int i;
+static const struct field_info typed_data_fields[] = {
+    FIELDOF_NORM(krb5_pa_data, int32, pa_type, 0, 0),
+    FIELDOF_STRING(krb5_pa_data, octetstring, contents, length, 1, 0),
+};
+DEFSEQTYPE(typed_data, krb5_pa_data, typed_data_fields, 0);
+DEFPTRTYPE(typed_data_ptr, typed_data);
 
-    if (val == NULL || val[0] == NULL) return ASN1_MISSING_FIELD;
-
-    for (i=0; val[i] != NULL; i++);
-    for (i--; i>=0; i--) {
-        unsigned int length;
-
-        retval = asn1_encode_typed_data(buf,val[i],&length);
-        if (retval) return retval;
-        sum += length;
-    }
-    asn1_makeseq();
-
-    asn1_cleanup();
-}
-
-asn1_error_code
-asn1_encode_typed_data(asn1buf *buf, const krb5_pa_data *val,
-                       unsigned int *retlen)
-{
-    asn1_setup();
-    asn1_addstring(val->length, val->contents, 1, ASN1_OCTETSTRING);
-    asn1_addinteger(val->pa_type, 0);
-    asn1_makeseq();
-    asn1_cleanup();
-}
+DEFNULLTERMSEQOFTYPE(seq_of_typed_data, typed_data_ptr);
+MAKE_FULL_ENCODER(encode_krb5_typed_data, seq_of_typed_data);

@@ -40,7 +40,6 @@
 #include "asn1_decode.h"
 #include "asn1_make.h"
 #include "asn1_get.h"
-#include "asn1_k_encode.h"
 
 #ifdef ENABLE_LDAP
 

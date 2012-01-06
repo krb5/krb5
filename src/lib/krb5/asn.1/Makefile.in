@@ -20,7 +20,6 @@ STLIBOBJS= \
 	asn1buf.o\
 	krb5_decode.o\
 	krb5_decode_kdc.o\
-	krb5_encode.o\
 	asn1_k_encode.o\
 	ldap_key_seq.o\
 	asn1_misc.o
@@ -37,7 +36,6 @@ SRCS= \
 	$(srcdir)/asn1buf.c\
 	$(srcdir)/krb5_decode.c\
 	$(srcdir)/krb5_decode_kdc.c\
-	$(srcdir)/krb5_encode.c\
 	$(srcdir)/asn1_k_encode.c\
 	$(srcdir)/ldap_key_seq.c\
 	$(srcdir)/asn1_misc.c
@@ -54,7 +52,6 @@ OBJS= \
 	$(OUTPRE)asn1buf.$(OBJEXT)\
 	$(OUTPRE)krb5_decode.$(OBJEXT)\
 	$(OUTPRE)krb5_decode_kdc.$(OBJEXT)\
-	$(OUTPRE)krb5_encode.$(OBJEXT)\
 	$(OUTPRE)asn1_k_encode.$(OBJEXT)\
 	$(OUTPRE)ldap_key_seq.$(OBJEXT)\
 	$(OUTPRE)asn1_misc.$(OBJEXT)
